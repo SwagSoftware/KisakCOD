@@ -55,52 +55,35 @@ const listColumnInfo_t columnInfoWithPing[9] =
 
 void __cdecl UpdateScores(int localClientNum)
 {
-    if (localClientNum)
-        MyAssertHandler(
-            "c:\\trees\\cod3\\src\\cgame_mp\\cg_local_mp.h",
-            1071,
-            0,
-            "%s\n\t(localClientNum) = %i",
-            "(localClientNum == 0)",
-            localClientNum);
-    if (cgArray[0].scoresRequestTime + 2000 < cgArray[0].time)
+    cg_s *cgameGlob;
+
+    cgameGlob = CG_GetLocalClientGlobals(localClientNum);
+
+    if (cgameGlob->scoresRequestTime + 2000 < cgameGlob->time)
     {
-        cgArray[0].scoresRequestTime = cgArray[0].time;
+        cgameGlob->scoresRequestTime = cgameGlob->time;
         CL_AddReliableCommand(localClientNum, "score");
     }
 }
 
 const score_t *__cdecl UI_GetOurClientScore(int localClientNum)
 {
-    if (localClientNum)
-        MyAssertHandler(
-            "c:\\trees\\cod3\\src\\cgame_mp\\cg_local_mp.h",
-            1071,
-            0,
-            "%s\n\t(localClientNum) = %i",
-            "(localClientNum == 0)",
-            localClientNum);
-    return GetClientScore(localClientNum, cgArray[0].clientNum);
+    return GetClientScore(localClientNum, CG_GetLocalClientGlobals(localClientNum)->clientNum);
 }
 
 const score_t *__cdecl GetClientScore(int localClientNum, int clientNum)
 {
     int scoreNum; // [esp+4h] [ebp-8h]
+    cg_s *cgameGlob;
 
-    if (localClientNum)
-        MyAssertHandler(
-            "c:\\trees\\cod3\\src\\cgame_mp\\cg_local_mp.h",
-            1071,
-            0,
-            "%s\n\t(localClientNum) = %i",
-            "(localClientNum == 0)",
-            localClientNum);
-    for (scoreNum = 0; scoreNum < cgArray[0].numScores; ++scoreNum)
+    cgameGlob = CG_GetLocalClientGlobals(localClientNum);
+
+    for (scoreNum = 0; scoreNum < cgameGlob->numScores; ++scoreNum)
     {
-        if (cgArray[0].bgs.clientinfo[cgArray[0].scores[scoreNum].client].infoValid
-            && cgArray[0].scores[scoreNum].client == clientNum)
+        if (cgameGlob->bgs.clientinfo[cgameGlob->scores[scoreNum].client].infoValid
+            && cgameGlob->scores[scoreNum].client == clientNum)
         {
-            return &cgArray[0].scores[scoreNum];
+            return &cgameGlob->scores[scoreNum];
         }
     }
     return 0;
@@ -108,61 +91,44 @@ const score_t *__cdecl GetClientScore(int localClientNum, int clientNum)
 
 const score_t *__cdecl UI_GetScoreAtRank(int localClientNum, int rank)
 {
-    if (localClientNum)
-        MyAssertHandler(
-            "c:\\trees\\cod3\\src\\cgame_mp\\cg_local_mp.h",
-            1071,
-            0,
-            "%s\n\t(localClientNum) = %i",
-            "(localClientNum == 0)",
-            localClientNum);
-    if (rank < 1 || rank > cgArray[0].numScores)
+    cg_s *cgameGlob;
+
+    cgameGlob = CG_GetLocalClientGlobals(localClientNum);
+
+    if (rank < 1 || rank > cgameGlob->numScores)
         return 0;
-    if (cgArray[0].bgs.clientinfo[cgArray[0].teamScores[10 * rank + 2]].infoValid)
-        return (const score_t *)&cgArray[0].teamScores[10 * rank + 2];
+
+    if (cgameGlob->bgs.clientinfo[cgameGlob->teamScores[10 * rank + 2]].infoValid)
+        return (const score_t *)&cgameGlob->teamScores[10 * rank + 2];
+
     return 0;
 }
 
 char *__cdecl CG_GetGametypeDescription(int localClientNum)
 {
-    if (localClientNum)
-        MyAssertHandler(
-            "c:\\trees\\cod3\\src\\cgame_mp\\cg_local_mp.h",
-            1071,
-            0,
-            "%s\n\t(localClientNum) = %i",
-            "(localClientNum == 0)",
-            localClientNum);
-    return SEH_LocalizeTextMessage(cgArray[0].objectiveText, "game objective display", LOCMSG_SAFE);
+    return SEH_LocalizeTextMessage(CG_GetLocalClientGlobals(localClientNum)->objectiveText, "game objective display", LOCMSG_SAFE);
 }
 
 char __cdecl CG_DrawScoreboard_GetTeamColorIndex(int team, int localClientNum)
 {
-    if (localClientNum)
-        MyAssertHandler(
-            "c:\\trees\\cod3\\src\\cgame_mp\\cg_local_mp.h",
-            1071,
-            0,
-            "%s\n\t(localClientNum) = %i",
-            "(localClientNum == 0)",
-            localClientNum);
-    if (cgArray[0].clientNum >= 0x40u)
-        MyAssertHandler(
-            ".\\cgame_mp\\cg_scoreboard_mp.cpp",
-            613,
-            0,
-            "cgameGlob->clientNum doesn't index MAX_CLIENTS\n\t%i not in [0, %i)",
-            cgArray[0].clientNum,
-            64);
+    cg_s *cgameGlob;
+
+    cgameGlob = CG_GetLocalClientGlobals(localClientNum);
+
+    bcassert(cgameGlob->clientNum, MAX_CLIENTS);
+
     if (team != 2 && team != 1)
         return 55;
-    if (cgArray[0].bgs.clientinfo[cgArray[0].clientNum].team != TEAM_ALLIES
-        && cgArray[0].bgs.clientinfo[cgArray[0].clientNum].team != TEAM_AXIS)
+
+    if (cgameGlob->bgs.clientinfo[cgameGlob->clientNum].team != TEAM_ALLIES
+        && cgameGlob->bgs.clientinfo[cgameGlob->clientNum].team != TEAM_AXIS)
     {
         return 55;
     }
-    if (cgArray[0].bgs.clientinfo[cgArray[0].clientNum].team == team)
+
+    if (cgameGlob->bgs.clientinfo[cgameGlob->clientNum].team == team)
         return 56;
+
     return 57;
 }
 
@@ -170,33 +136,28 @@ int __cdecl CG_DrawScoreboard(int localClientNum)
 {
     const float *fadeColor; // [esp+4h] [ebp-Ch]
     float fade; // [esp+8h] [ebp-8h]
+    cg_s *cgameGlob;
 
     if (cg_paused->current.integer)
         return 0;
-    if (localClientNum)
-        MyAssertHandler(
-            "c:\\trees\\cod3\\src\\cgame_mp\\cg_local_mp.h",
-            1071,
-            0,
-            "%s\n\t(localClientNum) = %i",
-            "(localClientNum == 0)",
-            localClientNum);
+
+    cgameGlob = CG_GetLocalClientGlobals(localClientNum);
+
     if (CG_IsScoreboardDisplayed(localClientNum))
     {
         fade = 1.0;
     }
     else
     {
-        fadeColor = CG_FadeColor(cgArray[0].time, cgArray[0].scoreFadeTime, 100, 100);
+        fadeColor = CG_FadeColor(cgameGlob->time, cgameGlob->scoreFadeTime, 100, 100);
         if (!fadeColor)
             return 0;
         fade = fadeColor[3];
     }
     UpdateScores(localClientNum);
-    if (cgArray[0].scoresTop <= 0)
+    if (cgameGlob->scoresTop <= 0)
         CenterViewOnClient(localClientNum);
-    if (cgArray[0].scoresTop <= 0)
-        MyAssertHandler(".\\cgame_mp\\cg_scoreboard_mp.cpp", 1316, 0, "%s", "cgameGlob->scoresTop > 0");
+    iassert(cgameGlob->scoresTop > 0);
     CG_DrawScoreboard_Backdrop(localClientNum, fade);
     CG_DrawScoreboard_ScoresList(localClientNum, fade);
     return 1;
@@ -346,26 +307,14 @@ void __cdecl CG_DrawScoreboard_ScoresList(int localClientNum, float alpha)
     float yf; // [esp+48h] [ebp-1Ch]
     float color[5]; // [esp+4Ch] [ebp-18h] BYREF
     int drawLine; // [esp+60h] [ebp-4h] BYREF
+    cg_s *cgameGlob;
 
-    if (localClientNum)
-        MyAssertHandler(
-            "c:\\trees\\cod3\\src\\cgame_mp\\cg_local_mp.h",
-            1071,
-            0,
-            "%s\n\t(localClientNum) = %i",
-            "(localClientNum == 0)",
-            localClientNum);
-    if (cgArray[0].numScores)
+    cgameGlob = CG_GetLocalClientGlobals(localClientNum);
+
+    if (cgameGlob->numScores)
     {
-        if (cgArray[0].scoresTop > CG_ScoreboardTotalLines(localClientNum))
-            MyAssertHandler(
-                ".\\cgame_mp\\cg_scoreboard_mp.cpp",
-                1172,
-                0,
-                "%s\n\t(cgameGlob->scoresTop) = %i",
-                "(cgameGlob->scoresTop <= CG_ScoreboardTotalLines( localClientNum ))",
-                cgArray[0].scoresTop);
-        cgArray[0].scoresOffBottom = 0;
+        iassert(cgameGlob->scoresTop <= CG_ScoreboardTotalLines(localClientNum));
+        cgameGlob->scoresOffBottom = 0;
         yb = CG_BackdropTop() + 3.0 + 2.0 + 24.0 + 1.0;
         color[0] = 1.0;
         color[1] = 1.0;
@@ -377,7 +326,7 @@ void __cdecl CG_DrawScoreboard_ScoresList(int localClientNum, float alpha)
         y = yc + 15.0;
         v6 = (double)cg_scoreboardBannerHeight->current.integer;
         scrollbarTop = CG_BannerScoreboardScaleMultiplier() * v6 + y;
-        if (cgArray[0].scoresTop <= 1)
+        if (cgameGlob->scoresTop <= 1)
         {
             v3 = (double)cg_scoreboardBannerHeight->current.integer;
             v2 = CG_BannerScoreboardScaleMultiplier() * v3;
@@ -391,9 +340,9 @@ void __cdecl CG_DrawScoreboard_ScoresList(int localClientNum, float alpha)
         }
         color[4] = y;
         drawLine = 1;
-        if (cgArray[0].teamPlayers[1] || cgArray[0].teamPlayers[2])
+        if (cgameGlob->teamPlayers[1] || cgameGlob->teamPlayers[2])
         {
-            team = cgArray[0].bgs.clientinfo[cgArray[0].clientNum].team;
+            team = cgameGlob->bgs.clientinfo[cgameGlob->clientNum].team;
             if (team != TEAM_AXIS && team != TEAM_ALLIES)
                 team = TEAM_ALLIES;
             ya = CG_DrawTeamOfClientScore(localClientNum, color, y, team, listWidth, &drawLine);
@@ -405,14 +354,14 @@ void __cdecl CG_DrawScoreboard_ScoresList(int localClientNum, float alpha)
             ye = CG_DrawTeamOfClientScore(localClientNum, color, yd, teama, listWidth, &drawLine);
             y = ye + 4.0;
         }
-        if (cgArray[0].teamPlayers[0])
+        if (cgameGlob->teamPlayers[0])
         {
             yf = CG_DrawTeamOfClientScore(localClientNum, color, y, 0, listWidth, &drawLine);
             y = yf + 4.0;
         }
-        if (cgArray[0].teamPlayers[3])
+        if (cgameGlob->teamPlayers[3])
             CG_DrawTeamOfClientScore(localClientNum, color, y, 3, listWidth, &drawLine);
-        cgArray[0].scoresBottom = drawLine - 1;
+        cgameGlob->scoresBottom = drawLine - 1;
         CG_DrawScrollbar(localClientNum, color, scrollbarTop);
     }
 }
@@ -479,23 +428,18 @@ void __cdecl CG_GetScoreboardInfo(const listColumnInfo_t **colInfo, int *numFiel
 int __cdecl CG_ScoreboardTotalLines(int localClientNum)
 {
     int total; // [esp+4h] [ebp-4h]
+    cg_s *cgameGlob;
 
-    if (localClientNum)
-        MyAssertHandler(
-            "c:\\trees\\cod3\\src\\cgame_mp\\cg_local_mp.h",
-            1071,
-            0,
-            "%s\n\t(localClientNum) = %i",
-            "(localClientNum == 0)",
-            localClientNum);
-    total = cgArray[0].numScores;
-    if (cgArray[0].teamPlayers[0])
+    cgameGlob = CG_GetLocalClientGlobals(localClientNum);
+
+    total = cgameGlob->numScores;
+    if (cgameGlob->teamPlayers[0])
         ++total;
-    if (cgArray[0].teamPlayers[1])
+    if (cgameGlob->teamPlayers[1])
         ++total;
-    if (cgArray[0].teamPlayers[2])
+    if (cgameGlob->teamPlayers[2])
         ++total;
-    if (cgArray[0].teamPlayers[3])
+    if (cgameGlob->teamPlayers[3])
         ++total;
     return total;
 }
@@ -518,20 +462,16 @@ double __cdecl CG_DrawTeamOfClientScore(
     float ya; // [esp+5Ch] [ebp+10h]
     float yb; // [esp+5Ch] [ebp+10h]
 
-    if (localClientNum)
-        MyAssertHandler(
-            "c:\\trees\\cod3\\src\\cgame_mp\\cg_local_mp.h",
-            1071,
-            0,
-            "%s\n\t(localClientNum) = %i",
-            "(localClientNum == 0)",
-            localClientNum);
-    score = cgArray[0].scores;
+    cg_s *cgameGlob;
+
+    cgameGlob = CG_GetLocalClientGlobals(localClientNum);
+
+    score = cgameGlob->scores;
     integer = (double)cg_scoreboardBannerHeight->current.integer;
     h = CG_BannerScoreboardScaleMultiplier() * integer;
     ya = CG_DrawScoreboard_ListBanner(localClientNum, color, y, listWidth, h, team, drawLine);
     i = 0;
-    while (i < cgArray[0].numScores)
+    while (i < cgameGlob->numScores)
     {
         if (score->client >= 0x40u)
             MyAssertHandler(
@@ -541,7 +481,7 @@ double __cdecl CG_DrawTeamOfClientScore(
                 "score->client doesn't index MAX_CLIENTS\n\t%i not in [0, %i)",
                 score->client,
                 64);
-        if (cgArray[0].bgs.clientinfo[score->client].infoValid && score->team == team)
+        if (cgameGlob->bgs.clientinfo[score->client].infoValid && score->team == team)
         {
             v8 = (double)cg_scoreboardItemHeight->current.integer;
             lineHeight = CG_BannerScoreboardScaleMultiplier() * v8;
@@ -563,17 +503,14 @@ int __cdecl CG_CheckDrawScoreboardLine(int localClientNum, int *drawLine, float 
 {
     float value; // [esp+8h] [ebp-8h]
 
-    if (localClientNum)
-        MyAssertHandler(
-            "c:\\trees\\cod3\\src\\cgame_mp\\cg_local_mp.h",
-            1071,
-            0,
-            "%s\n\t(localClientNum) = %i",
-            "(localClientNum == 0)",
-            localClientNum);
-    if (cgArray[0].scoresOffBottom)
+    cg_s *cgameGlob;
+
+    cgameGlob = CG_GetLocalClientGlobals(localClientNum);
+
+    if (cgameGlob->scoresOffBottom)
         return 0;
-    if (*drawLine >= cgArray[0].scoresTop)
+
+    if (*drawLine >= cgameGlob->scoresTop)
     {
         value = cg_scoreboardHeight->current.value;
         if (CG_BackdropTop() + value - 3.0 - 2.0 - 14.0 - 1.0 >= y + lineHeight)
@@ -583,7 +520,7 @@ int __cdecl CG_CheckDrawScoreboardLine(int localClientNum, int *drawLine, float 
         }
         else
         {
-            cgArray[0].scoresOffBottom = 1;
+            cgameGlob->scoresOffBottom = 1;
             return 0;
         }
     }
@@ -685,7 +622,7 @@ double __cdecl CG_DrawScoreboard_ListBanner(
     UI_DrawText(scrPlace, displayString, 0x7FFFFFFF, bannerFont, x, v14, 1, 0, scale, color, 3);
     v13 = CG_BannerScoreboardScaleMultiplier() * 0.3499999940395355;
     xa = (double)(UI_TextWidth(displayString, 0x7FFFFFFF, bannerFont, v13) + 8) + x;
-    displayStringa = va("( %i )", cgArray[0].teamPlayers[team]);
+    displayStringa = va("( %i )", CG_GetLocalClientGlobals(localClientNum)->teamPlayers[team]);
     v12 = CG_BannerScoreboardScaleMultiplier() * 0.3499999940395355;
     UI_DrawText(scrPlace, displayStringa, 0x7FFFFFFF, bannerFont, xa, v14, 1, 0, v12, color, 3);
     return (float)(y + h + 4.0);
@@ -755,23 +692,10 @@ double __cdecl CG_DrawClientScore(
     int fieldCount; // [esp+134h] [ebp-8h] BYREF
     float w; // [esp+138h] [ebp-4h]
 
-    if (localClientNum)
-        MyAssertHandler(
-            "c:\\trees\\cod3\\src\\cgame_mp\\cg_local_mp.h",
-            1071,
-            0,
-            "%s\n\t(localClientNum) = %i",
-            "(localClientNum == 0)",
-            localClientNum);
-    cgameGlob = cgArray;
-    if (score->client >= 0x40u)
-        MyAssertHandler(
-            ".\\cgame_mp\\cg_scoreboard_mp.cpp",
-            808,
-            0,
-            "score->client doesn't index MAX_CLIENTS\n\t%i not in [0, %i)",
-            score->client,
-            64);
+    cgameGlob = CG_GetLocalClientGlobals(localClientNum);
+
+    bcassert(score->client, MAX_CLIENTS);
+
     ci = &cgameGlob->bgs.clientinfo[score->client];
     if (!ci->infoValid)
         return y;
@@ -1085,16 +1009,11 @@ void __cdecl CG_DrawScrollbar(int localClientNum, const float *color, float top)
     float y; // [esp+60h] [ebp-Ch]
     float h; // [esp+64h] [ebp-8h]
     float w; // [esp+68h] [ebp-4h]
+    cg_s *cgameGlob;
 
-    if (localClientNum)
-        MyAssertHandler(
-            "c:\\trees\\cod3\\src\\cgame_mp\\cg_local_mp.h",
-            1071,
-            0,
-            "%s\n\t(localClientNum) = %i",
-            "(localClientNum == 0)",
-            localClientNum);
-    if (cgArray[0].scoresTop > 1 || cgArray[0].scoresOffBottom)
+    cgameGlob = CG_GetLocalClientGlobals(localClientNum);
+
+    if (cgameGlob->scoresTop > 1 || cgameGlob->scoresOffBottom)
     {
         totalLines = CG_ScoreboardTotalLines(localClientNum);
         scrPlace = &scrPlaceView[localClientNum];
@@ -1122,14 +1041,14 @@ void __cdecl CG_DrawScrollbar(int localClientNum, const float *color, float top)
         h = h - 2.0;
         if (totalLines)
         {
-            y = (double)(cgArray[0].scoresTop - 1) / (double)totalLines * h + y;
-            h = (double)(cgArray[0].scoresBottom - cgArray[0].scoresTop + 1) / (double)totalLines * h;
+            y = (double)(cgameGlob->scoresTop - 1) / (double)totalLines * h + y;
+            h = (double)(cgameGlob->scoresBottom - cgameGlob->scoresTop + 1) / (double)totalLines * h;
         }
         materiala = Material_RegisterHandle("white", 7);
         barColor[3] = color[3] * 0.25;
         UI_DrawHandlePic(scrPlace, x, y, w, h, 1, 0, barColor, materiala);
         barColor[3] = color[3];
-        if (cgArray[0].scoresTop > 1)
+        if (cgameGlob->scoresTop > 1)
         {
             materialb = Material_RegisterHandle("hudscoreboardscroll_uparrow", 7);
             v5 = cg_scoreboardWidth->current.value;
@@ -1154,7 +1073,7 @@ void __cdecl CG_DrawScrollbar(int localClientNum, const float *color, float top)
             h = 16.0;
             UI_DrawHandlePic(scrPlace, x, y, 16.0, 16.0, 1, 0, barColor, materialc);
         }
-        if (cgArray[0].scoresOffBottom)
+        if (cgameGlob->scoresOffBottom)
         {
             materiald = Material_RegisterHandle("hudscoreboardscroll_downarrow", 7);
             v4 = cg_scoreboardWidth->current.value;
@@ -1197,15 +1116,10 @@ void __cdecl CenterViewOnClient(int localClientNum)
     team_t team; // [esp+40h] [ebp-14h]
     int viewmax; // [esp+48h] [ebp-Ch]
     int i; // [esp+4Ch] [ebp-8h]
+    cg_s *cgameGlob;
 
-    if (localClientNum)
-        MyAssertHandler(
-            "c:\\trees\\cod3\\src\\cgame_mp\\cg_local_mp.h",
-            1071,
-            0,
-            "%s\n\t(localClientNum) = %i",
-            "(localClientNum == 0)",
-            localClientNum);
+    cgameGlob = CG_GetLocalClientGlobals(localClientNum);
+
     value = cg_scoreboardHeight->current.value;
     v7 = CG_BackdropTop() + value - 3.0 - 2.0 - 14.0;
     v6 = v7 - (CG_BackdropTop() + 3.0 + 2.0 + 24.0 + 1.0) - 1.0;
@@ -1215,41 +1129,33 @@ void __cdecl CenterViewOnClient(int localClientNum)
     v2 = v4 - CG_BannerScoreboardScaleMultiplier() * v3 - 4.0;
     v1 = (double)cg_scoreboardItemHeight->current.integer;
     viewmax = (int)(v2 / (CG_BannerScoreboardScaleMultiplier() * v1 + 4.0));
-    team = cgArray[0].bgs.clientinfo[cgArray[0].clientNum].team;
+    team = cgameGlob->bgs.clientinfo[cgameGlob->clientNum].team;
     clientLine = 1;
     if (team == TEAM_SPECTATOR)
     {
-        cgArray[0].scoresTop = 1;
+        cgameGlob->scoresTop = 1;
     }
     else
     {
-        for (i = 0; i < cgArray[0].numScores; ++i)
+        for (i = 0; i < cgameGlob->numScores; ++i)
         {
-            if (cgArray[0].scores[i].team == team)
+            if (cgameGlob->scores[i].team == team)
             {
-                if (cgArray[0].scores[i].client == cgArray[0].clientNum)
+                if (cgameGlob->scores[i].client == cgameGlob->clientNum)
                     break;
                 ++clientLine;
             }
         }
         if (clientLine > viewmax)
-            cgArray[0].scoresTop = clientLine - viewmax / 2 + 1;
+            cgameGlob->scoresTop = clientLine - viewmax / 2 + 1;
         else
-            cgArray[0].scoresTop = 1;
+            cgameGlob->scoresTop = 1;
     }
 }
 
 int __cdecl CG_IsScoreboardDisplayed(int localClientNum)
 {
-    if (localClientNum)
-        MyAssertHandler(
-            "c:\\trees\\cod3\\src\\cgame_mp\\cg_local_mp.h",
-            1071,
-            0,
-            "%s\n\t(localClientNum) = %i",
-            "(localClientNum == 0)",
-            localClientNum);
-    return cgArray[0].showScores;
+    return CG_GetLocalClientGlobals(localClientNum)->showScores;
 }
 
 void __cdecl CG_ScrollScoreboardUp(cg_s *cgameGlob)
@@ -1414,26 +1320,20 @@ bool __cdecl Scoreboard_HandleInput(int localClientNum, int key)
 {
     bool result; // al
 
-    if (localClientNum)
-        MyAssertHandler(
-            "c:\\trees\\cod3\\src\\cgame_mp\\cg_local_mp.h",
-            1071,
-            0,
-            "%s\n\t(localClientNum) = %i",
-            "(localClientNum == 0)",
-            localClientNum);
+    cg_s *cgameGlob = CG_GetLocalClientGlobals(localClientNum);
+    
     switch (key)
     {
     case 163:
     case 190:
     case 205:
-        CG_ScrollScoreboardDown(cgArray);
+        CG_ScrollScoreboardDown(cgameGlob);
         result = 1;
         break;
     case 164:
     case 184:
     case 206:
-        CG_ScrollScoreboardUp(cgArray);
+        CG_ScrollScoreboardUp(cgameGlob);
         result = 1;
         break;
     default:

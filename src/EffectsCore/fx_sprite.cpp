@@ -73,44 +73,22 @@ void __cdecl FX_BuildSpriteCodeMeshVerts(
     float left[3]; // [esp+1Ch] [ebp-24h] BYREF
     float worldOrigin[3]; // [esp+28h] [ebp-18h] BYREF
     float up[3]; // [esp+34h] [ebp-Ch] BYREF
+    cg_s *cgameGlob;
 
     worldOrigin[0] = *pos;
     worldOrigin[1] = pos[1];
     worldOrigin[2] = pos[2];
     if ((spriteFlags & 1) != 0)
         worldOrigin[2] = worldOrigin[2] + worldRadius;
-    LocalClientNum = R_GetLocalClientNum();
-    if (LocalClientNum)
-        MyAssertHandler(
-            "c:\\trees\\cod3\\src\\effectscore\\../cgame_mp/cg_local_mp.h",
-            1071,
-            0,
-            "%s\n\t(localClientNum) = %i",
-            "(localClientNum == 0)",
-            LocalClientNum);
-    Vec3Scale(cgArray[0].refdef.viewaxis[1], worldRadius, left);
-    v6 = R_GetLocalClientNum();
-    if (v6)
-        MyAssertHandler(
-            "c:\\trees\\cod3\\src\\effectscore\\../cgame_mp/cg_local_mp.h",
-            1071,
-            0,
-            "%s\n\t(localClientNum) = %i",
-            "(localClientNum == 0)",
-            v6);
-    Vec3Scale(cgArray[0].refdef.viewaxis[2], worldRadius, up);
-    v5 = R_GetLocalClientNum();
-    if (v5)
-        MyAssertHandler(
-            "c:\\trees\\cod3\\src\\effectscore\\../cgame_mp/cg_local_mp.h",
-            1071,
-            0,
-            "%s\n\t(localClientNum) = %i",
-            "(localClientNum == 0)",
-            v5);
+
+    cgameGlob = CG_GetLocalClientGlobals(R_GetLocalClientNum());
+
+    Vec3Scale(cgameGlob->refdef.viewaxis[1], worldRadius, left);
+    Vec3Scale(cgameGlob->refdef.viewaxis[2], worldRadius, up);
+
     FX_BuildQuadStampCodeMeshVerts(
         material,
-        cgArray[0].refdef.viewaxis[0],
+        cgameGlob->refdef.viewaxis[0],
         worldOrigin,
         left,
         up,
@@ -305,39 +283,20 @@ char __cdecl FX_HeightScreenToWorld(
     unsigned int LocalClientNum; // [esp+8h] [ebp-Ch]
     float clipSpaceW; // [esp+Ch] [ebp-8h]
     float clipSpaceHeight; // [esp+10h] [ebp-4h]
+    cg_s *cgameGlob;
 
-    if (screenHeight <= 0.0)
-        MyAssertHandler(
-            ".\\EffectsCore\\fx_sprite.cpp",
-            158,
-            0,
-            "%s\n\t(screenHeight) = %g",
-            "(screenHeight > 0)",
-            screenHeight);
-    if (!cmd)
-        MyAssertHandler(".\\EffectsCore\\fx_sprite.cpp", 159, 0, "%s", "cmd");
+    iassert(screenHeight > 0);
+    iassert(cmd);
+
     clipSpaceW = FX_GetClipSpaceW(worldOrigin, cmd->vieworg, cmd->viewaxis);
-    if (clipSpaceW < 0.000001)
+    if (clipSpaceW < 0.000001f)
         return 0;
-    LocalClientNum = R_GetLocalClientNum();
-    if (LocalClientNum)
-        MyAssertHandler(
-            "c:\\trees\\cod3\\src\\effectscore\\../cgame_mp/cg_local_mp.h",
-            1071,
-            0,
-            "%s\n\t(localClientNum) = %i",
-            "(localClientNum == 0)",
-            LocalClientNum);
+
+    cgameGlob = CG_GetLocalClientGlobals(R_GetLocalClientNum());
     clipSpaceHeight = screenHeight * clipSpaceW + screenHeight * clipSpaceW;
-    *worldHeight = clipSpaceHeight * cgArray[0].refdef.tanHalfFovY;
-    if (*worldHeight <= 0.0)
-        MyAssertHandler(
-            ".\\EffectsCore\\fx_sprite.cpp",
-            168,
-            1,
-            "%s\n\t(*worldHeight) = %g",
-            "(*worldHeight > 0.0f)",
-            *worldHeight);
+    *worldHeight = clipSpaceHeight * cgameGlob->refdef.tanHalfFovY;
+    iassert(*worldHeight > 0.0f);
+
     return 1;
 }
 
@@ -393,39 +352,21 @@ char __cdecl FX_HeightWorldToScreen(
     unsigned int LocalClientNum; // [esp+8h] [ebp-Ch]
     float clipSpaceW; // [esp+Ch] [ebp-8h]
     float clipSpaceHeight; // [esp+10h] [ebp-4h]
+    cg_s *cgameGlob;
 
-    if (worldHeight <= 0.0)
-        MyAssertHandler(
-            ".\\EffectsCore\\fx_sprite.cpp",
-            179,
-            0,
-            "%s\n\t(worldHeight) = %g",
-            "(worldHeight > 0)",
-            worldHeight);
-    if (!cmd)
-        MyAssertHandler(".\\EffectsCore\\fx_sprite.cpp", 180, 0, "%s", "cmd");
+    iassert(worldHeight > 0);
+    iassert(cmd);
+    
     clipSpaceW = FX_GetClipSpaceW(worldOrigin, cmd->vieworg, cmd->viewaxis);
-    if (clipSpaceW < 0.000001)
+    if (clipSpaceW < 0.000001f)
         return 0;
-    LocalClientNum = R_GetLocalClientNum();
-    if (LocalClientNum)
-        MyAssertHandler(
-            "c:\\trees\\cod3\\src\\effectscore\\../cgame_mp/cg_local_mp.h",
-            1071,
-            0,
-            "%s\n\t(localClientNum) = %i",
-            "(localClientNum == 0)",
-            LocalClientNum);
-    clipSpaceHeight = worldHeight / cgArray[0].refdef.tanHalfFovY;
+
+    cgameGlob = CG_GetLocalClientGlobals(R_GetLocalClientNum());
+    clipSpaceHeight = worldHeight / cgameGlob->refdef.tanHalfFovY;
     *screenHeight = clipSpaceHeight / (clipSpaceW + clipSpaceW);
-    if (*screenHeight <= 0.0)
-        MyAssertHandler(
-            ".\\EffectsCore\\fx_sprite.cpp",
-            189,
-            1,
-            "%s\n\t(*screenHeight) = %g",
-            "(*screenHeight > 0.0f)",
-            *screenHeight);
+
+    iassert(*screenHeight > 0.0f);
+
     return 1;
 }
 

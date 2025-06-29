@@ -1292,19 +1292,14 @@ void __cdecl CL_LookupColor(int localClientNum, unsigned __int8 c, float *color)
     float *v5; // [esp+Ch] [ebp-10h]
     team_t team; // [esp+10h] [ebp-Ch]
     unsigned int index; // [esp+18h] [ebp-4h]
+    cg_s *cgameGlob;
+
+    cgameGlob = CG_GetLocalClientGlobals(localClientNum);
 
     index = ColorIndex(c);
     if (index >= 8)
     {
-        if (localClientNum)
-            MyAssertHandler(
-                "c:\\trees\\cod3\\src\\client_mp\\../cgame_mp/cg_local_mp.h",
-                1071,
-                0,
-                "%s\n\t(localClientNum) = %i",
-                "(localClientNum == 0)",
-                localClientNum);
-        team = cgArray[0].bgs.clientinfo[cgArray[0].clientNum].team;
+        team = cgameGlob->bgs.clientinfo[cgameGlob->clientNum].team;
         if (team != TEAM_AXIS && team != TEAM_ALLIES)
             team = TEAM_ALLIES;
         if (c == 56)
@@ -1350,6 +1345,7 @@ void __cdecl CL_LookupColor(int localClientNum, unsigned __int8 c, float *color)
 void __cdecl CL_UpdateColor(int localClientNum)
 {
     team_t team; // [esp+0h] [ebp-8h]
+    cg_s *cgameGlob;
 
     if (localClientNum)
         MyAssertHandler(
@@ -1361,17 +1357,10 @@ void __cdecl CL_UpdateColor(int localClientNum)
             localClientNum);
     if (clientUIActives[0].connectionState >= CA_CONNECTED)
     {
-        if (localClientNum)
-            MyAssertHandler(
-                "c:\\trees\\cod3\\src\\client_mp\\../cgame_mp/cg_local_mp.h",
-                1071,
-                0,
-                "%s\n\t(localClientNum) = %i",
-                "(localClientNum == 0)",
-                localClientNum);
-        if (cgArray)
+        cgameGlob = CG_GetLocalClientGlobals(localClientNum);
+        if (cgameGlob)
         {
-            team = cgArray[0].bgs.clientinfo[cgArray[0].clientNum].team;
+            team = cgameGlob->bgs.clientinfo[cgameGlob->clientNum].team;
             if (team != TEAM_AXIS && team != TEAM_ALLIES)
                 team = TEAM_ALLIES;
             CL_UpdateColorInternal("g_TeamColor_Allies", color_allies);

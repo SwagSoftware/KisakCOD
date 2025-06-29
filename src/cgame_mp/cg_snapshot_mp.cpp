@@ -56,24 +56,17 @@ void __cdecl CG_SetInitialSnapshot(int localClientNum, snapshot_s *snap)
     float clientViewAxis[3][3]; // [esp+10h] [ebp-34h] BYREF
     float clientViewOrigin[3]; // [esp+34h] [ebp-10h] BYREF
     int i; // [esp+40h] [ebp-4h]
+    cg_s *cgameGlob;
 
     R_InitSceneData(localClientNum);
-    if (localClientNum)
-        MyAssertHandler(
-            "c:\\trees\\cod3\\src\\cgame_mp\\cg_local_mp.h",
-            1071,
-            0,
-            "%s\n\t(localClientNum) = %i",
-            "(localClientNum == 0)",
-            localClientNum);
+    cgameGlob = CG_GetLocalClientGlobals(localClientNum);
     CG_SetNextSnap(localClientNum, 0);
-    if (cgArray[0].nextSnap)
-        MyAssertHandler(".\\cgame_mp\\cg_snapshot_mp.cpp", 248, 0, "%s", "!cgameGlob->nextSnap");
-    cgArray[0].snap = snap;
-    cgArray[0].nextSnap = snap;
-    cgArray[0].time = snap->serverTime;
-    cgArray[0].bgs.time = cgArray[0].time;
-    cgArray[0].oldTime = cgArray[0].time;
+    iassert(!cgameGlob->nextSnap);
+    cgameGlob->snap = snap;
+    cgameGlob->nextSnap = snap;
+    cgameGlob->time = snap->serverTime;
+    cgameGlob->bgs.time = cgameGlob->time;
+    cgameGlob->oldTime = cgameGlob->time;
     clientViewOrigin[0] = snap->ps.origin[0];
     clientViewOrigin[1] = snap->ps.origin[1];
     clientViewOrigin[2] = snap->ps.origin[2];
@@ -82,15 +75,14 @@ void __cdecl CG_SetInitialSnapshot(int localClientNum, snapshot_s *snap)
     SND_SetListener(localClientNum, snap->ps.clientNum, clientViewOrigin, clientViewAxis);
     for (i = 0; i < 1024; ++i)
     {
-        if (CG_GetEntity(localClientNum, i)->nextValid)
-            MyAssertHandler(".\\cgame_mp\\cg_snapshot_mp.cpp", 265, 0, "%s", "!CG_GetEntity( localClientNum, i )->nextValid");
+        iassert(!CG_GetEntity(localClientNum, i)->nextValid);
     }
     SND_FadeAllSounds(1.0, 0);
     CG_Respawn(localClientNum);
     CG_RestartSmokeGrenades(localClientNum);
     CG_ClearEntityCollWorld(localClientNum);
     CG_InitView(localClientNum);
-    cgArray[0].nextSnap = 0;
+    cgameGlob->nextSnap = 0;
 }
 
 void __cdecl CG_ExtractTransPlayerState(const playerState_s *ps, transPlayerState_t *transPs)
@@ -129,24 +121,15 @@ void __cdecl CG_SetNextSnap(int localClientNum, snapshot_s *snap)
     int i; // [esp+224h] [ebp-4h]
 
     memset((unsigned __int8 *)centInPrevSnapshot, 0, sizeof(centInPrevSnapshot));
-    if (localClientNum)
-        MyAssertHandler(
-            "c:\\trees\\cod3\\src\\cgame_mp\\cg_local_mp.h",
-            1071,
-            0,
-            "%s\n\t(localClientNum) = %i",
-            "(localClientNum == 0)",
-            localClientNum);
-    cgameGlob = cgArray;
-    if (cgArray[0].nextSnap)
+    cgameGlob = CG_GetLocalClientGlobals(localClientNum);
+    if (cgameGlob->nextSnap)
     {
         for (num = 0; num < cgameGlob->nextSnap->numEntities; ++num)
         {
             v17 = &cgameGlob->nextSnap->entities[num];
             entnum = v17->number;
             cent = CG_GetEntity(localClientNum, entnum);
-            if (!cent->nextValid)
-                MyAssertHandler(".\\cgame_mp\\cg_snapshot_mp.cpp", 445, 0, "%s", "cent->nextValid");
+            iassert(cent->nextValid);
             cent->nextValid = 0;
             centInPrevSnapshot[entnum >> 5] |= 0x80000000 >> (entnum & 0x1F);
         }
@@ -161,8 +144,7 @@ void __cdecl CG_SetNextSnap(int localClientNum, snapshot_s *snap)
     cgameGlob->nextSnap = snap;
     if (snap)
     {
-        if (!cgameGlob->snap)
-            MyAssertHandler(".\\cgame_mp\\cg_snapshot_mp.cpp", 479, 0, "%s", "cgameGlob->snap");
+        iassert(cgameGlob->snap);
         CG_UpdateViewOffset(localClientNum);
         CG_SetFrameInterpolation(localClientNum);
         CG_ExecuteNewServerCommands(localClientNum, snap->serverCommandSequence);
@@ -171,17 +153,9 @@ void __cdecl CG_SetNextSnap(int localClientNum, snapshot_s *snap)
         for (num = 0; num < snap->numClients; ++num)
         {
             clientState = &snap->clients[num];
-            if (clientIndex[clientState->clientIndex])
-                MyAssertHandler(".\\cgame_mp\\cg_snapshot_mp.cpp", 499, 0, "%s", "!clientIndex[clientState->clientIndex]");
+            iassert(!clientIndex[clientState->clientIndex]);
             clientIndex[clientState->clientIndex] = 1;
-            if (clientState->clientIndex >= 0x40u)
-                MyAssertHandler(
-                    ".\\cgame_mp\\cg_snapshot_mp.cpp",
-                    502,
-                    0,
-                    "clientState->clientIndex doesn't index MAX_CLIENTS\n\t%i not in [0, %i)",
-                    clientState->clientIndex,
-                    64);
+            bcassert(clientState->clientIndex, MAX_CLIENTS);
             ci = &cgameGlob->bgs.clientinfo[clientState->clientIndex];
             if (ci->infoValid)
                 team = ci->team;
@@ -202,9 +176,7 @@ void __cdecl CG_SetNextSnap(int localClientNum, snapshot_s *snap)
                 if (ci->name[0])
                 {
                     name = clientState->name;
-                    v2 = UI_SafeTranslateString("CGAME_PLAYERRENAMES");
-                    v3 = va("%s^7 %s %s", ci->name, v2, name);
-                    CG_GameMessage(localClientNum, v3);
+                    CG_GameMessage(localClientNum, va("%s^7 %s %s", ci->name, UI_SafeTranslateString("CGAME_PLAYERRENAMES"), name));
                 }
                 I_strncpyz(ci->name, clientState->name, 16);
             }
@@ -416,6 +388,9 @@ void __cdecl CG_ResetEntity(int localClientNum, centity_s *cent, int newEntity)
     int i; // [esp+34h] [ebp-8h]
     clientInfo_t *corpseInfo; // [esp+38h] [ebp-4h]
     int savedregs; // [esp+3Ch] [ebp+0h] BYREF
+    cg_s *cgameGlob;
+
+    cgameGlob = CG_GetLocalClientGlobals(localClientNum);
 
     cent->lightingOrigin[0] = 0.0;
     cent->lightingOrigin[1] = 0.0;
@@ -434,8 +409,8 @@ void __cdecl CG_ResetEntity(int localClientNum, centity_s *cent, int newEntity)
             "%s\n\t(localClientNum) = %i",
             "(localClientNum == 0)",
             localClientNum);
-    BG_EvaluateTrajectory(&cent->nextState.lerp.pos, cgArray[0].time, cent->pose.origin);
-    BG_EvaluateTrajectory(&cent->nextState.lerp.apos, cgArray[0].time, cent->pose.angles);
+    BG_EvaluateTrajectory(&cent->nextState.lerp.pos, cgameGlob->time, cent->pose.origin);
+    BG_EvaluateTrajectory(&cent->nextState.lerp.apos, cgameGlob->time, cent->pose.angles);
     if (cent->pose.localClientNum != localClientNum)
         MyAssertHandler(".\\cgame_mp\\cg_snapshot_mp.cpp", 120, 0, "%s", "cent->pose.localClientNum == localClientNum");
     cent->pose.eType = cent->nextState.eType;
@@ -447,7 +422,7 @@ void __cdecl CG_ResetEntity(int localClientNum, centity_s *cent, int newEntity)
     case 0:
     case 4:
         if ((cent->nextState.lerp.eFlags & 0x10000) != 0
-            && cgArray[0].time - cent->nextState.lerp.u.missile.launchTime > 200)
+            && cgameGlob->time - cent->nextState.lerp.u.missile.launchTime > 200)
         {
             cent->previousEventSequence = cent->nextState.eventSequence;
         }
@@ -460,15 +435,8 @@ void __cdecl CG_ResetEntity(int localClientNum, centity_s *cent, int newEntity)
         for (i = 0; i < 6; ++i)
             cent->pose.player.tag[i] = -2;
         cent->previousEventSequence = cent->nextState.eventSequence;
-        if (cent->nextState.clientNum >= 0x40u)
-            MyAssertHandler(
-                ".\\cgame_mp\\cg_snapshot_mp.cpp",
-                144,
-                0,
-                "cent->nextState.clientNum doesn't index MAX_CLIENTS\n\t%i not in [0, %i)",
-                cent->nextState.clientNum,
-                64);
-        cia = &cgArray[0].bgs.clientinfo[cent->nextState.clientNum];
+        bcassert(cent->nextState.clientNum, MAX_CLIENTS);
+        cia = &cgameGlob->bgs.clientinfo[cent->nextState.clientNum];
         cia->lerpMoveDir = (float)cent->nextState.lerp.u.loopFx.period;
         cia->lerpLean = cent->nextState.lerp.u.turret.gunAngles[0];
         cia->playerAngles[0] = cent->pose.angles[0];
@@ -476,22 +444,15 @@ void __cdecl CG_ResetEntity(int localClientNum, centity_s *cent, int newEntity)
         cia->playerAngles[2] = cent->pose.angles[2];
         cent->pose.angles[0] = 0.0;
         cent->pose.angles[2] = 0.0;
-        CG_ResetPlayerEntity(localClientNum, cgArray, cent, newEntity);
+        CG_ResetPlayerEntity(localClientNum, cgameGlob, cent, newEntity);
         obj = Com_GetClientDObj(cent->nextState.number, localClientNum);
         if (obj)
             CG_Player_PreControllers(obj, cent);
         goto LABEL_43;
     case 2:
         corpseIndex = cent->nextState.number - 64;
-        if (cent->nextState.clientNum >= 0x40u)
-            MyAssertHandler(
-                ".\\cgame_mp\\cg_snapshot_mp.cpp",
-                160,
-                0,
-                "cent->nextState.clientNum doesn't index MAX_CLIENTS\n\t%i not in [0, %i)",
-                cent->nextState.clientNum,
-                64);
-        ci = &cgArray[0].bgs.clientinfo[cent->nextState.clientNum];
+        bcassert(cent->nextState.clientNum, MAX_CLIENTS);
+        ci = &cgameGlob->bgs.clientinfo[cent->nextState.clientNum];
         if (localClientNum)
             MyAssertHandler(
                 "c:\\trees\\cod3\\src\\cgame_mp\\cg_local_mp.h",
@@ -584,48 +545,30 @@ void __cdecl CG_TransitionKillcam(int localClientNum)
     int anim; // [esp+20h] [ebp-10h]
     int i; // [esp+24h] [ebp-Ch]
     XAnim_s *anims; // [esp+28h] [ebp-8h]
+    cg_s *cgameGlob;
+    cgs_t *cgs;
 
-    if (localClientNum)
-        MyAssertHandler(
-            "c:\\trees\\cod3\\src\\cgame_mp\\cg_local_mp.h",
-            1071,
-            0,
-            "%s\n\t(localClientNum) = %i",
-            "(localClientNum == 0)",
-            localClientNum);
-    if (!cgArray[0].inKillCam && cgArray[0].nextSnap->ps.deltaTime)
+    cgameGlob = CG_GetLocalClientGlobals(localClientNum);
+    cgs = CG_GetLocalClientStaticGlobals(localClientNum);
+
+    if (!cgameGlob->inKillCam && cgameGlob->nextSnap->ps.deltaTime)
     {
-        cgArray[0].inKillCam = 1;
+        cgameGlob->inKillCam = 1;
         CG_SetEquippedOffHand(localClientNum, 0);
         CG_RestartSmokeGrenades(localClientNum);
     }
-    if (cgArray[0].inKillCam && !cgArray[0].nextSnap->ps.deltaTime)
+    if (cgameGlob->inKillCam && !cgameGlob->nextSnap->ps.deltaTime)
     {
-        cgArray[0].inKillCam = 0;
-        if (localClientNum)
-            MyAssertHandler(
-                "c:\\trees\\cod3\\src\\cgame_mp\\cg_local_mp.h",
-                1083,
-                0,
-                "%s\n\t(localClientNum) = %i",
-                "(localClientNum == 0)",
-                localClientNum);
+        cgameGlob->inKillCam = 0;
         CG_RestartSmokeGrenades(localClientNum);
-        for (i = 0; i < cgArray[0].nextSnap->numEntities; ++i)
+        for (i = 0; i < cgameGlob->nextSnap->numEntities; ++i)
         {
-            cent = CG_GetEntity(localClientNum, cgArray[0].nextSnap->entities[i].number);
+            cent = CG_GetEntity(localClientNum, cgameGlob->nextSnap->entities[i].number);
             CG_ResetEntity(localClientNum, cent, 1);
             if (cent->nextState.eType == 2)
             {
                 corpseIndex = cent->nextState.number - 64;
-                if (corpseIndex >= 8)
-                    MyAssertHandler(
-                        ".\\cgame_mp\\cg_snapshot_mp.cpp",
-                        327,
-                        0,
-                        "corpseIndex doesn't index MAX_CLIENT_CORPSES\n\t%i not in [0, %i)",
-                        corpseIndex,
-                        8);
+                bcassert(corpseIndex, MAX_CLIENT_CORPSES);
                 pXAnimTree = cgsArray[0].corpseinfo[corpseIndex].pXAnimTree;
                 anim = cgsArray[0].corpseinfo[corpseIndex].legs.animationNumber & 0xFFFFFDFF;
                 anims = XAnimGetAnims(pXAnimTree);
@@ -641,26 +584,21 @@ void __cdecl CG_ProcessSnapshots(int localClientNum)
     snapshot_s *snap; // [esp+34h] [ebp-8h]
     snapshot_s *snapa; // [esp+34h] [ebp-8h]
     int n; // [esp+38h] [ebp-4h] BYREF
+    cg_s *cgameGlob;
 
     KISAK_NULLSUB();
     PROF_SCOPED("CG_ProcessSnapshots");
-    if (localClientNum)
-        MyAssertHandler(
-            "c:\\trees\\cod3\\src\\cgame_mp\\cg_local_mp.h",
-            1071,
-            0,
-            "%s\n\t(localClientNum) = %i",
-            "(localClientNum == 0)",
-            localClientNum);
-    CL_GetCurrentSnapshotNumber(localClientNum, &n, &cgArray[0].latestSnapshotTime);
-    if (n != cgArray[0].latestSnapshotNum)
+
+    cgameGlob = CG_GetLocalClientGlobals(localClientNum);
+    CL_GetCurrentSnapshotNumber(localClientNum, &n, &cgameGlob->latestSnapshotTime);
+    if (n != cgameGlob->latestSnapshotNum)
     {
-        if (n < cgArray[0].latestSnapshotNum)
+        if (n < cgameGlob->latestSnapshotNum)
             Com_Error(ERR_DROP, "G_ProcessSnapshots: n < cgameGlob->latestSnapshotNum");
-        cgArray[0].latestSnapshotNum = n;
+        cgameGlob->latestSnapshotNum = n;
     }
-    cgArray[0].bgs.latestSnapshotTime = cgArray[0].latestSnapshotTime;
-    while (!cgArray[0].snap)
+    cgameGlob->bgs.latestSnapshotTime = cgameGlob->latestSnapshotTime;
+    while (!cgameGlob->snap)
     {
         snap = CG_ReadNextSnapshot(localClientNum);
         if (!snap)
@@ -680,46 +618,37 @@ void __cdecl CG_ProcessSnapshots(int localClientNum)
     {
         while (1)
         {
-            if (cgArray[0].nextSnap != cgArray[0].snap && cgArray[0].cubemapShot == CUBEMAPSHOT_NONE)
+            if (cgameGlob->nextSnap != cgameGlob->snap && cgameGlob->cubemapShot == CUBEMAPSHOT_NONE)
                 goto LABEL_25;
             snapa = CG_ReadNextSnapshot(localClientNum);
             if (!snapa)
                 goto LABEL_28;
-            if (!cgArray[0].nextSnap)
-                MyAssertHandler(".\\cgame_mp\\cg_snapshot_mp.cpp", 865, 0, "%s", "cgameGlob->nextSnap");
-            if (((cgArray[0].nextSnap->snapFlags ^ snapa->snapFlags) & 4) == 0)
+            iassert(cgameGlob->nextSnap);
+            if (((cgameGlob->nextSnap->snapFlags ^ snapa->snapFlags) & 4) == 0)
                 break;
             CG_SetInitialSnapshot(localClientNum, snapa);
             CG_SetNextSnap(localClientNum, snapa);
             CG_TransitionSnapshot(localClientNum);
         }
-        if (snapa->serverTime - cgArray[0].nextSnap->serverTime < 0)
+        if (snapa->serverTime - cgameGlob->nextSnap->serverTime < 0)
             Com_Error(ERR_DROP, "CG_ProcessSnapshots: Server time went backwards");
         CG_SetNextSnap(localClientNum, snapa);
     LABEL_25:
-        if (cgArray[0].time - cgArray[0].snap->serverTime >= 0 && cgArray[0].time - cgArray[0].nextSnap->serverTime < 0)
+        if (cgameGlob->time - cgameGlob->snap->serverTime >= 0 && cgameGlob->time - cgameGlob->nextSnap->serverTime < 0)
             break;
         CG_TransitionSnapshot(localClientNum);
     }
 LABEL_28:
     if (CG_ItemListLocalClientNum() != localClientNum)
-        CG_BuildItemList(localClientNum, cgArray[0].nextSnap);
-    if (!cgArray[0].snap)
-        MyAssertHandler(".\\cgame_mp\\cg_snapshot_mp.cpp", 892, 0, "%s", "cgameGlob->snap");
-    if (cgArray[0].time - cgArray[0].snap->serverTime < 0)
+        CG_BuildItemList(localClientNum, cgameGlob->nextSnap);
+    iassert(cgameGlob->snap);
+    if (cgameGlob->time - cgameGlob->snap->serverTime < 0)
     {
-        cgArray[0].time = cgArray[0].snap->serverTime;
-        cgArray[0].bgs.time = cgArray[0].time;
+        cgameGlob->time = cgameGlob->snap->serverTime;
+        cgameGlob->bgs.time = cgameGlob->time;
     }
-    if (!cgArray[0].nextSnap)
-        MyAssertHandler(".\\cgame_mp\\cg_snapshot_mp.cpp", 900, 0, "%s", "cgameGlob->nextSnap");
-    if (cgArray[0].nextSnap != cgArray[0].snap && cgArray[0].nextSnap->serverTime - cgArray[0].time <= 0)
-        MyAssertHandler(
-            ".\\cgame_mp\\cg_snapshot_mp.cpp",
-            901,
-            0,
-            "%s",
-            "cgameGlob->nextSnap == cgameGlob->snap || cgameGlob->nextSnap->serverTime - cgameGlob->time > 0");
+    iassert(cgameGlob->nextSnap);
+    iassert(cgameGlob->nextSnap == cgameGlob->snap || cgameGlob->nextSnap->serverTime - cgameGlob->time > 0);
 }
 
 void __cdecl CG_TransitionSnapshot(int localClientNum)
@@ -732,38 +661,25 @@ void __cdecl CG_TransitionSnapshot(int localClientNum)
     int i; // [esp+1Ch] [ebp-8h]
     signed int ia; // [esp+1Ch] [ebp-8h]
     int ib; // [esp+1Ch] [ebp-8h]
+    cg_s *cgameGlob;
 
-    if (localClientNum)
-        MyAssertHandler(
-            "c:\\trees\\cod3\\src\\cgame_mp\\cg_local_mp.h",
-            1071,
-            0,
-            "%s\n\t(localClientNum) = %i",
-            "(localClientNum == 0)",
-            localClientNum);
-    if (!cgArray[0].snap)
-        MyAssertHandler(".\\cgame_mp\\cg_snapshot_mp.cpp", 360, 0, "%s", "cgameGlob->snap");
-    if (!cgArray[0].nextSnap)
-        MyAssertHandler(".\\cgame_mp\\cg_snapshot_mp.cpp", 361, 0, "%s", "cgameGlob->nextSnap");
-    for (i = 0; i < cgArray[0].snap->numClients; ++i)
+    cgameGlob = CG_GetLocalClientGlobals(localClientNum);
+
+    iassert(cgameGlob->snap);
+    iassert(cgameGlob->nextSnap);
+
+    for (i = 0; i < cgameGlob->snap->numClients; ++i)
     {
-        clientState = &cgArray[0].snap->clients[i];
-        if (clientState->clientIndex >= 0x40u)
-            MyAssertHandler(
-                ".\\cgame_mp\\cg_snapshot_mp.cpp",
-                366,
-                0,
-                "clientState->clientIndex doesn't index MAX_CLIENTS\n\t%i not in [0, %i)",
-                clientState->clientIndex,
-                64);
-        ci = &cgArray[0].bgs.clientinfo[clientState->clientIndex];
-        if (cgArray[0].bgs.clientinfo[clientState->clientIndex].nextValid)
+        clientState = &cgameGlob->snap->clients[i];
+        bcassert(clientState->clientIndex, MAX_CLIENTS);
+        ci = &cgameGlob->bgs.clientinfo[clientState->clientIndex];
+        if (cgameGlob->bgs.clientinfo[clientState->clientIndex].nextValid)
         {
-            cgArray[0].bgs.clientinfo[clientState->clientIndex].nextValid = 0;
+            cgameGlob->bgs.clientinfo[clientState->clientIndex].nextValid = 0;
         }
         else
         {
-            pXAnimTree = cgArray[0].bgs.clientinfo[clientState->clientIndex].pXAnimTree;
+            pXAnimTree = cgameGlob->bgs.clientinfo[clientState->clientIndex].pXAnimTree;
             memset((unsigned __int8 *)ci, 0, sizeof(clientInfo_t));
             ci->pXAnimTree = pXAnimTree;
             XAnimClearTree(ci->pXAnimTree);
@@ -772,18 +688,17 @@ void __cdecl CG_TransitionSnapshot(int localClientNum)
     }
     for (ia = 0; ia < 64; ++ia)
     {
-        if (!cgArray[0].bgs.clientinfo[ia].infoValid && Com_GetClientDObj(ia, localClientNum))
-            MyAssertHandler(".\\cgame_mp\\cg_snapshot_mp.cpp", 386, 0, "%s", "!Com_GetClientDObj( i, localClientNum )");
+        iassert(!(!cgArray[0].bgs.clientinfo[ia].infoValid && Com_GetClientDObj(ia, localClientNum)));
     }
-    cgArray[0].snap = cgArray[0].nextSnap;
-    if ((cgArray[0].nextSnap->ps.otherFlags & 6) != 0)
+    cgameGlob->snap = cgameGlob->nextSnap;
+    if ((cgameGlob->nextSnap->ps.otherFlags & 6) != 0)
     {
-        cent = CG_GetEntity(localClientNum, cgArray[0].nextSnap->ps.clientNum);
+        cent = CG_GetEntity(localClientNum, cgameGlob->nextSnap->ps.clientNum);
         qmemcpy(&cent->currentState, &cent->nextState.lerp, sizeof(cent->currentState));
     }
-    for (ib = 0; ib < cgArray[0].nextSnap->numEntities; ++ib)
+    for (ib = 0; ib < cgameGlob->nextSnap->numEntities; ++ib)
     {
-        centa = CG_GetEntity(localClientNum, cgArray[0].nextSnap->entities[ib].number);
+        centa = CG_GetEntity(localClientNum, cgameGlob->nextSnap->entities[ib].number);
         qmemcpy(&centa->currentState, &centa->nextState.lerp, sizeof(centa->currentState));
     }
 }
@@ -791,34 +706,22 @@ void __cdecl CG_TransitionSnapshot(int localClientNum)
 snapshot_s *__cdecl CG_ReadNextSnapshot(int localClientNum)
 {
     snapshot_s *dest; // [esp+Ch] [ebp-4h]
+    cg_s *cgameGlob;
+    cgs_t *cgs;
 
-    if (localClientNum)
-    {
-        MyAssertHandler(
-            "c:\\trees\\cod3\\src\\cgame_mp\\cg_local_mp.h",
-            1071,
-            0,
-            "%s\n\t(localClientNum) = %i",
-            "(localClientNum == 0)",
-            localClientNum);
-        MyAssertHandler(
-            "c:\\trees\\cod3\\src\\cgame_mp\\cg_local_mp.h",
-            1083,
-            0,
-            "%s\n\t(localClientNum) = %i",
-            "(localClientNum == 0)",
-            localClientNum);
-    }
-    if (cgArray[0].latestSnapshotNum > cgsArray[0].processedSnapshotNum + 1000)
+    cgameGlob = CG_GetLocalClientGlobals(localClientNum);
+    cgs = CG_GetLocalClientStaticGlobals(localClientNum);
+
+    if (cgameGlob->latestSnapshotNum > cgs->processedSnapshotNum + 1000)
         Com_PrintWarning(
             14,
             "WARNING: CG_ReadNextSnapshot: way out of range, %i > %i\n",
-            cgArray[0].latestSnapshotNum,
-            cgsArray[0].processedSnapshotNum);
-    while (cgsArray[0].processedSnapshotNum < cgArray[0].latestSnapshotNum)
+            cgameGlob->latestSnapshotNum,
+            cgs->processedSnapshotNum);
+    while (cgs->processedSnapshotNum < cgameGlob->latestSnapshotNum)
     {
-        dest = &cgArray[0].activeSnapshots[cgArray[0].snap == cgArray[0].activeSnapshots];
-        if (CL_GetSnapshot(localClientNum, ++cgsArray[0].processedSnapshotNum, dest))
+        dest = &cgameGlob->activeSnapshots[cgameGlob->snap == cgameGlob->activeSnapshots];
+        if (CL_GetSnapshot(localClientNum, ++cgs->processedSnapshotNum, dest))
         {
             CG_AddLagometerSnapshotInfo(dest);
             return dest;

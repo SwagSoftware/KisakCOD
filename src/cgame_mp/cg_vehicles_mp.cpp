@@ -277,19 +277,13 @@ double __cdecl Veh_GetTurretBarrelRoll(int localClientNum, centity_s *cent)
     int entityNum; // [esp+0h] [ebp-10h]
     vehicleEffects *vehFx; // [esp+8h] [ebp-8h]
     int msecs; // [esp+Ch] [ebp-4h]
+    cg_s *cgameGlob;
 
     entityNum = CG_GetEntityIndex(localClientNum, cent);
     vehFx = VehicleGetFxInfo(localClientNum, entityNum);
-    if (localClientNum)
-        MyAssertHandler(
-            "c:\\trees\\cod3\\src\\cgame_mp\\cg_local_mp.h",
-            1071,
-            0,
-            "%s\n\t(localClientNum) = %i",
-            "(localClientNum == 0)",
-            localClientNum);
-    msecs = cgArray[0].time - vehFx->lastBarrelUpdateTime;
-    vehFx->lastBarrelUpdateTime = cgArray[0].time;
+    cgameGlob = CG_GetLocalClientGlobals(localClientNum);
+    msecs = cgameGlob->time - vehFx->lastBarrelUpdateTime;
+    vehFx->lastBarrelUpdateTime = cgameGlob->time;
     vehFx->barrelPos = (double)msecs / 1000.0 * vehFx->barrelVelocity + vehFx->barrelPos;
     if (vehFx->barrelPos > 360.0)
         vehFx->barrelPos = vehFx->barrelPos - 360.0;
@@ -301,14 +295,7 @@ double __cdecl Veh_GetTurretBarrelRoll(int localClientNum, centity_s *cent)
 
 int __cdecl CG_GetEntityIndex(int localClientNum, const centity_s *cent)
 {
-    if (cent->nextState.number != (cent - cg_entitiesArray[localClientNum]) % 1024)
-        MyAssertHandler(
-            "c:\\trees\\cod3\\src\\cgame_mp\\cg_local_mp.h",
-            1125,
-            0,
-            "cent->nextState.number == (cent - &cg_entitiesArray[localClientNum][0]) % MAX_GENTITIES\n\t%i, %i",
-            cent->nextState.number,
-            (cent - cg_entitiesArray[localClientNum]) % 1024);
+    iassert(cent->nextState.number == (cent - &cg_entitiesArray[localClientNum][0]) % MAX_GENTITIES);
     return cent->nextState.number;
 }
 
@@ -341,20 +328,13 @@ void __cdecl CG_VehProcessEntity(int localClientNum, centity_s *cent)
     float lightingOrigin[3]; // [esp+74h] [ebp-14h] BYREF
     float materialTime; // [esp+80h] [ebp-8h]
     entityState_s *ns; // [esp+84h] [ebp-4h]
+    cg_s *cgameGlob;
 
     p_currentState = &cent->currentState;
     ns = &cent->nextState;
     if ((cent->nextState.lerp.eFlags & 0x20) == 0 && cent->nextValid)
     {
-        if (localClientNum)
-            MyAssertHandler(
-                "c:\\trees\\cod3\\src\\cgame_mp\\cg_local_mp.h",
-                1083,
-                0,
-                "%s\n\t(localClientNum) = %i",
-                "(localClientNum == 0)",
-                localClientNum);
-        cgs = cgsArray;
+        cgs = CG_GetLocalClientStaticGlobals(localClientNum);
         obj = GetVehicleEntDObj(localClientNum, cent);
         if (obj)
         {
@@ -364,14 +344,8 @@ void __cdecl CG_VehProcessEntity(int localClientNum, centity_s *cent)
             lightingOrigin[1] = cent->pose.origin[1];
             lightingOrigin[2] = cent->pose.origin[2];
             lightingOrigin[2] = lightingOrigin[2] + 32.0;
-            if (localClientNum)
-                MyAssertHandler(
-                    "c:\\trees\\cod3\\src\\cgame_mp\\cg_local_mp.h",
-                    1071,
-                    0,
-                    "%s\n\t(localClientNum) = %i",
-                    "(localClientNum == 0)",
-                    localClientNum);
+            cgameGlob = CG_GetLocalClientGlobals(localClientNum);
+            
             if (p_currentState->u.vehicle.materialTime < 0)
             {
                 materialTime = 0.0;
@@ -380,8 +354,8 @@ void __cdecl CG_VehProcessEntity(int localClientNum, centity_s *cent)
             {
                 time = p_currentState->u.vehicle.materialTime
                     + (int)((double)(ns->lerp.u.vehicle.materialTime - p_currentState->u.vehicle.materialTime)
-                        * cgArray[0].frameInterpolation);
-                materialTime = (double)(cgArray[0].time - time) * EQUAL_EPSILON;
+                        * cgameGlob->frameInterpolation);
+                materialTime = (double)(cgameGlob->time - time) * EQUAL_EPSILON;
             }
             R_AddDObjToScene(obj, &cent->pose, ns->number, 4u, lightingOrigin, materialTime);
         }
@@ -453,24 +427,13 @@ void __cdecl SetupPoseControllers(int localClientNum, DObj_s *obj, centity_s *ce
     const entityState_s *ns; // [esp+1CCh] [ebp-1Ch]
     float traceStart[3]; // [esp+1D0h] [ebp-18h] BYREF
     float traceEnd[3]; // [esp+1DCh] [ebp-Ch] BYREF
+    cg_s *cgameGlob;
 
-    if (!obj)
-        MyAssertHandler(".\\cgame_mp\\cg_vehicles_mp.cpp", 421, 0, "%s", "obj");
-    if (cent->nextState.eType != 14 && cent->nextState.eType != 12)
-        MyAssertHandler(
-            ".\\cgame_mp\\cg_vehicles_mp.cpp",
-            422,
-            0,
-            "%s",
-            "cent->nextState.eType == ET_VEHICLE || cent->nextState.eType == ET_HELICOPTER");
-    if (localClientNum)
-        MyAssertHandler(
-            "c:\\trees\\cod3\\src\\cgame_mp\\cg_local_mp.h",
-            1071,
-            0,
-            "%s\n\t(localClientNum) = %i",
-            "(localClientNum == 0)",
-            localClientNum);
+    iassert(obj);
+    iassert(cent->nextState.eType == ET_VEHICLE || cent->nextState.eType == ET_HELICOPTER);
+
+    cgameGlob = CG_GetLocalClientGlobals(localClientNum);
+    
     p_currentState = &cent->currentState;
     ns = &cent->nextState;
     fxInfo->soundEnabled = 0;
@@ -480,7 +443,7 @@ void __cdecl SetupPoseControllers(int localClientNum, DObj_s *obj, centity_s *ce
     v41 = ns->lerp.u.turret.gunAngles[0] - v55;
     v56 = v41 * 0.002777777845039964;
     v40 = v56 + 0.5;
-    frameInterpolation = cgArray[0].frameInterpolation;
+    frameInterpolation = cgameGlob->frameInterpolation;
     v38 = floor(v40);
     v37 = (v56 - v38) * 360.0;
     v54 = v37 * frameInterpolation + v55;
@@ -491,7 +454,7 @@ void __cdecl SetupPoseControllers(int localClientNum, DObj_s *obj, centity_s *ce
     v34 = ns->lerp.u.turret.gunAngles[1] - v52;
     v53 = v34 * 0.002777777845039964;
     v33 = v53 + 0.5;
-    v32 = cgArray[0].frameInterpolation;
+    v32 = cgameGlob->frameInterpolation;
     v31 = floor(v33);
     v30 = (v53 - v31) * 360.0;
     v51 = v30 * v32 + v52;
@@ -502,7 +465,7 @@ void __cdecl SetupPoseControllers(int localClientNum, DObj_s *obj, centity_s *ce
     v27 = ns->lerp.u.primaryLight.cosHalfFovInner - cosHalfFovInner;
     v50 = v27 * 0.002777777845039964;
     v26 = v50 + 0.5;
-    v25 = cgArray[0].frameInterpolation;
+    v25 = cgameGlob->frameInterpolation;
     v24 = floor(v26);
     v23 = (v50 - v24) * 360.0;
     v48 = v23 * v25 + cosHalfFovInner;
@@ -513,7 +476,7 @@ void __cdecl SetupPoseControllers(int localClientNum, DObj_s *obj, centity_s *ce
     v20 = ns->lerp.u.vehicle.gunYaw - gunYaw;
     v47 = v20 * 0.002777777845039964;
     v19 = v47 + 0.5;
-    v18 = cgArray[0].frameInterpolation;
+    v18 = cgameGlob->frameInterpolation;
     v17 = floor(v19);
     v16 = (v47 - v17) * 360.0;
     v45 = v16 * v18 + gunYaw;
@@ -525,7 +488,7 @@ void __cdecl SetupPoseControllers(int localClientNum, DObj_s *obj, centity_s *ce
     v13 = ns->lerp.u.turret.gunAngles[2] - v43;
     v44 = v13 * 0.002777777845039964;
     v12 = v44 + 0.5;
-    v11 = cgArray[0].frameInterpolation;
+    v11 = cgameGlob->frameInterpolation;
     v10 = floor(v12);
     v9 = (v44 - v10) * 360.0;
     v42 = v9 * v11 + v43;
@@ -572,7 +535,7 @@ void __cdecl SetupPoseControllers(int localClientNum, DObj_s *obj, centity_s *ce
                 CG_TraceCapsule(&trace, traceStart, (float *)vec3_origin, (float *)vec3_origin, traceEnd, ns->number, 529);
                 v5 = CompressUnit(trace.fraction);
                 cent->pose.vehicle.wheelFraction[tireIdx] = v5;
-                if (tireIdx == cgArray[0].vehicleFrame % 4)
+                if (tireIdx == cgameGlob->vehicleFrame % 4)
                 {
                     fxInfo->tireActive[tireIdx] = 1;
                     Vec3Lerp(traceStart, traceEnd, trace.fraction, fxInfo->tireGroundPoint[tireIdx]);
@@ -629,18 +592,9 @@ void __cdecl VehicleFXTest(int localClientNum, const DObj_s *obj, centity_s *cen
     int tag; // [esp+11Ch] [ebp-8h]
     const entityState_s *ns; // [esp+120h] [ebp-4h]
 
-    if (!fxInfo)
-        MyAssertHandler(".\\cgame_mp\\cg_vehicles_mp.cpp", 545, 0, "%s", "fxInfo");
+    iassert(fxInfo);
     ns = &cent->nextState;
-    if (localClientNum)
-        MyAssertHandler(
-            "c:\\trees\\cod3\\src\\cgame_mp\\cg_local_mp.h",
-            1071,
-            0,
-            "%s\n\t(localClientNum) = %i",
-            "(localClientNum == 0)",
-            localClientNum);
-    cgameGlob = cgArray;
+    cgameGlob = CG_GetLocalClientGlobals(localClientNum);
     speed = GetSpeed(localClientNum, cent);
     if (cent->nextState.eType == 14)
     {
@@ -654,16 +608,8 @@ void __cdecl VehicleFXTest(int localClientNum, const DObj_s *obj, centity_s *cen
                 {
                     fx = cgMedia.fxVehicleTireDust;
                     MatrixIdentity33(axis);
-                    if (localClientNum)
-                        MyAssertHandler(
-                            "c:\\trees\\cod3\\src\\cgame_mp\\cg_local_mp.h",
-                            1071,
-                            0,
-                            "%s\n\t(localClientNum) = %i",
-                            "(localClientNum == 0)",
-                            localClientNum);
-                    startMsec = cgArray[0].time;
-                    FX_PlayOrientedEffect(localClientNum, fx, cgArray[0].time, fxInfo->tireGroundPoint[tireIdx], axis);
+                    startMsec = cgameGlob->time;
+                    FX_PlayOrientedEffect(localClientNum, fx, cgameGlob->time, fxInfo->tireGroundPoint[tireIdx], axis);
                     if (vehDebugClient->current.enabled)
                     {
                         v4 = va("#%i", fxInfo->tireGroundSurfType[tireIdx]);
@@ -761,15 +707,7 @@ void __cdecl VehicleFXTest(int localClientNum, const DObj_s *obj, centity_s *cen
                         fx = cgMedia.heliWaterEffect;
                     else
                         fx = cgMedia.heliDustEffect;
-                    if (localClientNum)
-                        MyAssertHandler(
-                            "c:\\trees\\cod3\\src\\cgame_mp\\cg_local_mp.h",
-                            1071,
-                            0,
-                            "%s\n\t(localClientNum) = %i",
-                            "(localClientNum == 0)",
-                            localClientNum);
-                    FX_PlayOrientedEffect(localClientNum, fx, cgArray[0].time, groundpos, axis);
+                    FX_PlayOrientedEffect(localClientNum, fx, CG_GetLocalClientGlobals(localClientNum)->time, groundpos, axis);
                 }
             }
             vehFx->nextDustFx = nextDustInc + Sys_Milliseconds();
@@ -797,22 +735,13 @@ void __cdecl VehicleFXTest(int localClientNum, const DObj_s *obj, centity_s *cen
                 DObjGetBoneIndex(obj, scr_const.tag_engine_right, &vehFx->tag_engine_right);
                 boneIndex = vehFx->tag_engine_right;
             LABEL_59:
-                if (localClientNum)
-                    MyAssertHandler(
-                        "c:\\trees\\cod3\\src\\cgame_mp\\cg_local_mp.h",
-                        1071,
-                        0,
-                        "%s\n\t(localClientNum) = %i",
-                        "(localClientNum == 0)",
-                        localClientNum);
-                FX_PlayBoltedEffect(localClientNum, fx, cgArray[0].time, cent->nextState.number, boneIndex);
+                FX_PlayBoltedEffect(localClientNum, fx, CG_GetLocalClientGlobals(localClientNum)->time, cent->nextState.number, boneIndex);
                 vehFx->nextSmokeFx = Sys_Milliseconds() + 50;
                 return;
             }
             if (!alwaysfails)
             {
-                v5 = va("Unhandled helicopter stage %i", cent->nextState.un1.scale);
-                MyAssertHandler(".\\cgame_mp\\cg_vehicles_mp.cpp", 698, 0, v5);
+                MyAssertHandler(".\\cgame_mp\\cg_vehicles_mp.cpp", 698, 0, va("Unhandled helicopter stage %i", cent->nextState.un1.scale));
             }
         }
     }

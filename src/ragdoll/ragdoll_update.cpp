@@ -1614,26 +1614,18 @@ char __cdecl Ragdoll_GetDObjWorldBoneOriginQuat(
 {
     DObjAnimMat *mat; // [esp+4h] [ebp-4h]
 
-    if (!obj)
-        MyAssertHandler(".\\ragdoll\\ragdoll_update.cpp", 69, 0, "%s", "obj");
-    if (!pose)
-        MyAssertHandler(".\\ragdoll\\ragdoll_update.cpp", 70, 0, "%s", "pose");
+    iassert(obj);
+    iassert(pose);
+    
     mat = Ragdoll_GetDObjLocalBoneMatrix(pose, obj, boneIndex);
     if (!mat)
         return 0;
-    *quat = mat->quat[0];
+    quat[0] = mat->quat[0];
     quat[1] = mat->quat[1];
     quat[2] = mat->quat[2];
     quat[3] = mat->quat[3];
-    if (localClientNum)
-        MyAssertHandler(
-            "c:\\trees\\cod3\\src\\ragdoll\\../cgame_mp/cg_local_mp.h",
-            1071,
-            0,
-            "%s\n\t(localClientNum) = %i",
-            "(localClientNum == 0)",
-            localClientNum);
-    Vec3Add(mat->trans, cgArray[0].refdef.viewOffset, origin);
+
+    Vec3Add(mat->trans, CG_GetLocalClientGlobals(localClientNum)->refdef.viewOffset, origin);
     return 1;
 }
 

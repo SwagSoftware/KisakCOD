@@ -333,30 +333,13 @@ void __cdecl FX_Beam_GenerateVerts(FxGenerateVertsCmd *cmd)
 void __cdecl CreateClipMatrix(float4x4* clipMtx, const float* vieworg, const mat3x3& viewaxis)
 {
     unsigned int v3; // [esp+Ch] [ebp-90h]
-    unsigned int LocalClientNum; // [esp+10h] [ebp-8Ch]
     float4x4 viewMtx; // [esp+14h] [ebp-88h] BYREF
     float4x4 projMtx; // [esp+54h] [ebp-48h] BYREF
+    cg_s *cgameGlob;
 
     Float4x4ForViewer(&viewMtx, vieworg, viewaxis);
-    LocalClientNum = R_GetLocalClientNum();
-    if (LocalClientNum)
-        MyAssertHandler(
-            "c:\\trees\\cod3\\src\\effectscore\\../cgame_mp/cg_local_mp.h",
-            1071,
-            0,
-            "%s\n\t(localClientNum) = %i",
-            "(localClientNum == 0)",
-            LocalClientNum);
-    v3 = R_GetLocalClientNum();
-    if (v3)
-        MyAssertHandler(
-            "c:\\trees\\cod3\\src\\effectscore\\../cgame_mp/cg_local_mp.h",
-            1071,
-            0,
-            "%s\n\t(localClientNum) = %i",
-            "(localClientNum == 0)",
-            v3);
-    Float4x4InfinitePerspectiveMatrix(&projMtx, cgArray[0].refdef.tanHalfFovX, cgArray[0].refdef.tanHalfFovY, 1.0);
+    cgameGlob = CG_GetLocalClientGlobals(R_GetLocalClientNum());
+    Float4x4InfinitePerspectiveMatrix(&projMtx, cgameGlob->refdef.tanHalfFovX, cgameGlob->refdef.tanHalfFovY, 1.0);
     clipMtx->x.v[0] = viewMtx.x.v[0] * projMtx.x.v[0]
         + viewMtx.x.v[1] * projMtx.y.v[0]
         + viewMtx.x.v[2] * projMtx.z.v[0]

@@ -278,6 +278,7 @@ void __cdecl CG_DoBaseOriginController(const cpose_t *pose, const DObj_s *obj, i
     DObjAnimMat *mat; // [esp+E8h] [ebp-24h]
     unsigned int highIndex; // [esp+ECh] [ebp-20h]
     int partBits[7];
+    cg_s *cgameGlob;
 
     rootBoneCount = DObjGetRootBoneCount(obj);
     iassert(rootBoneCount);
@@ -303,10 +304,10 @@ notSet:
         partBits[5] = 0;
         partBits[6] = 0;
         localClientNum = R_GetLocalClientNum();
-        iassert(localClientNum == 0);
-        viewOffset[0] = cgArray[0].refdef.viewOffset[0];
-        viewOffset[1] = cgArray[0].refdef.viewOffset[1];
-        viewOffset[2] = cgArray[0].refdef.viewOffset[2];
+        cgameGlob = CG_GetLocalClientGlobals(localClientNum);
+        viewOffset[0] = cgameGlob->refdef.viewOffset[0];
+        viewOffset[1] = cgameGlob->refdef.viewOffset[1];
+        viewOffset[2] = cgameGlob->refdef.viewOffset[2];
         partIndex = 0;
         while (partIndex <= rootBoneCount)
         {

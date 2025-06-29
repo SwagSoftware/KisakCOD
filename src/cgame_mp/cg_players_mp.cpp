@@ -737,28 +737,12 @@ void __cdecl CG_UpdateWeaponVisibility(int localClientNum, centity_s *cent)
     float axis[3][3]; // [esp+30h] [ebp-28h] BYREF
     WeaponDef *weapDef; // [esp+54h] [ebp-4h]
 
-    if (localClientNum >= 1)
-        MyAssertHandler(".\\cgame_mp\\cg_players_mp.cpp", 1078, 0, "%s", "localClientNum < MAX_LOCAL_CLIENTS");
-    if (!cent)
-        MyAssertHandler(".\\cgame_mp\\cg_players_mp.cpp", 1079, 0, "%s", "cent");
-    if (localClientNum)
-        MyAssertHandler(
-            "c:\\trees\\cod3\\src\\cgame_mp\\cg_local_mp.h",
-            1071,
-            0,
-            "%s\n\t(localClientNum) = %i",
-            "(localClientNum == 0)",
-            localClientNum);
-    cgameGlob = cgArray;
+    iassert(localClientNum < MAX_LOCAL_CLIENTS);
+    iassert(cent);
+    
+    cgameGlob = CG_GetLocalClientGlobals(localClientNum);
     p_nextState = &cent->nextState;
-    if (cent->nextState.clientNum >= 0x40u)
-        MyAssertHandler(
-            ".\\cgame_mp\\cg_players_mp.cpp",
-            1085,
-            0,
-            "es->clientNum doesn't index MAX_CLIENTS\n\t%i not in [0, %i)",
-            p_nextState->clientNum,
-            64);
+    bcassert(cent->nextState.clientNum, MAX_CLIENTS);
     ci = &cgameGlob->bgs.clientinfo[p_nextState->clientNum];
     if (ci->iDObjWeapon)
     {

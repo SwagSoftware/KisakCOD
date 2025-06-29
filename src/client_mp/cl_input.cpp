@@ -816,31 +816,25 @@ char __cdecl CG_HandleLocationSelectionInput(int localClientNum, usercmd_s *cmd)
     float frametime; // [esp+50h] [ebp-8h]
     LocSelInputState locSelInputState; // [esp+54h] [ebp-4h]
 
-    if (localClientNum)
-        MyAssertHandler(
-            "c:\\trees\\cod3\\src\\client_mp\\../cgame_mp/cg_local_mp.h",
-            1071,
-            0,
-            "%s\n\t(localClientNum) = %i",
-            "(localClientNum == 0)",
-            localClientNum);
-    if (cgArray[0].predictedPlayerState.locationSelectionInfo)
+    cg_s *cgameGlob = CG_GetLocalClientGlobals(localClientNum);
+
+    if (cgameGlob->predictedPlayerState.locationSelectionInfo)
     {
         CL_AddCurrentStanceToCmd(localClientNum, cmd);
         cmd->buttons |= 0x100000u;
-        frametime = (double)cgArray[0].frametime * EQUAL_EPSILON;
-        mapAspectRatio = cgArray[0].compassMapWorldSize[0] / cgArray[0].compassMapWorldSize[1];
+        frametime = (double)cgameGlob->frametime * EQUAL_EPSILON;
+        mapAspectRatio = cgameGlob->compassMapWorldSize[0] / cgameGlob->compassMapWorldSize[1];
         LocalClientGlobals = CL_GetLocalClientGlobals(localClientNum);
         CL_GetMouseMovement(LocalClientGlobals, &mx, &my);
-        cgArray[0].selectedLocation[0] = mx * cg_mapLocationSelectionCursorSpeed->current.value * frametime * (float)0.1
-            + cgArray[0].selectedLocation[0];
-        cgArray[0].selectedLocation[1] = my
+        cgameGlob->selectedLocation[0] = mx * cg_mapLocationSelectionCursorSpeed->current.value * frametime * (float)0.1
+            + cgameGlob->selectedLocation[0];
+        cgameGlob->selectedLocation[1] = my
             * mapAspectRatio
             * cg_mapLocationSelectionCursorSpeed->current.value
             * frametime
             * (float)0.1
-            + cgArray[0].selectedLocation[1];
-        v8 = cgArray[0].selectedLocation[0];
+            + cgameGlob->selectedLocation[1];
+        v8 = cgameGlob->selectedLocation[0];
         if (0.0 >= 1.0)
             MyAssertHandler("c:\\trees\\cod3\\src\\universal\\com_math.h", 533, 0, "%s", "min < max");
         if (v8 >= 0.0)
@@ -854,8 +848,8 @@ char __cdecl CG_HandleLocationSelectionInput(int localClientNum, usercmd_s *cmd)
         {
             v7 = 0.0;
         }
-        cgArray[0].selectedLocation[0] = v7;
-        v6 = cgArray[0].selectedLocation[1];
+        cgameGlob->selectedLocation[0] = v7;
+        v6 = cgameGlob->selectedLocation[1];
         if (0.0 >= 1.0)
             MyAssertHandler("c:\\trees\\cod3\\src\\universal\\com_math.h", 533, 0, "%s", "min < max");
         if (v6 >= 0.0)
@@ -869,13 +863,13 @@ char __cdecl CG_HandleLocationSelectionInput(int localClientNum, usercmd_s *cmd)
         {
             v5 = 0.0;
         }
-        cgArray[0].selectedLocation[1] = v5;
+        cgameGlob->selectedLocation[1] = v5;
         locSelInputState = playerKeys[localClientNum].locSelInputState;
         if (locSelInputState == LOC_SEL_INPUT_CONFIRM)
         {
             cmd->buttons |= 0x10000u;
-            cmd->selectedLocation[0] = (int)(cgArray[0].selectedLocation[0] * 255.0f) + 0x80;
-            cmd->selectedLocation[1] = (int)(cgArray[0].selectedLocation[1] * 255.0f) + 0x80;
+            cmd->selectedLocation[0] = (int)(cgameGlob->selectedLocation[0] * 255.0f) + 0x80;
+            cmd->selectedLocation[1] = (int)(cgameGlob->selectedLocation[1] * 255.0f) + 0x80;
         }
         else if (locSelInputState == LOC_SEL_INPUT_CANCEL)
         {

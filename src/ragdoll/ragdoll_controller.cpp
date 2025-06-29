@@ -85,18 +85,11 @@ void __cdecl Ragdoll_DoControllers(const cpose_t *pose, DObj_s *obj, int *partBi
             skel = DObjGetRotTransArray(obj);
             if (skel)
             {
-                LocalClientNum = R_GetLocalClientNum();
-                if (LocalClientNum)
-                    MyAssertHandler(
-                        "c:\\trees\\cod3\\src\\ragdoll\\../cgame_mp/cg_local_mp.h",
-                        1071,
-                        0,
-                        "%s\n\t(localClientNum) = %i",
-                        "(localClientNum == 0)",
-                        LocalClientNum);
-                viewOffset[0] = cgArray[0].refdef.viewOffset[0];
-                viewOffset[1] = cgArray[0].refdef.viewOffset[1];
-                viewOffset[2] = cgArray[0].refdef.viewOffset[2];
+                cg_s *cgameGlob = CG_GetLocalClientGlobals(R_GetLocalClientNum());
+                
+                viewOffset[0] = cgameGlob->refdef.viewOffset[0];
+                viewOffset[1] = cgameGlob->refdef.viewOffset[1];
+                viewOffset[2] = cgameGlob->refdef.viewOffset[2];
                 bone = body->bones;
                 boneOrientation = Ragdoll_BodyBoneOrientations(body);
                 i = 0;

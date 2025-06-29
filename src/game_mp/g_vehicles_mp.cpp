@@ -105,23 +105,13 @@ void __cdecl CG_VehRegisterDvars();
 
 clientInfo_t *__cdecl ClientInfoForLocalClient(int localClientNum)
 {
-    if (localClientNum)
-        MyAssertHandler(
-            "c:\\trees\\cod3\\src\\cgame_mp\\cg_local_mp.h",
-            1071,
-            0,
-            "%s\n\t(localClientNum) = %i",
-            "(localClientNum == 0)",
-            localClientNum);
-    if (cgArray[0].predictedPlayerState.clientNum >= 0x40u)
-        MyAssertHandler(
-            ".\\cgame_mp\\cg_vehicles_mp.cpp",
-            71,
-            0,
-            "ps->clientNum doesn't index MAX_CLIENTS\n\t%i not in [0, %i)",
-            cgArray[0].predictedPlayerState.clientNum,
-            64);
-    return &cgArray[0].bgs.clientinfo[cgArray[0].predictedPlayerState.clientNum];
+    cg_s *cgameGlob;
+
+    cgameGlob = CG_GetLocalClientGlobals(localClientNum);
+    
+    bcassert(cgameGlob->predictedPlayerState.clientNum, MAX_CLIENTS);
+
+    return &cgameGlob->bgs.clientinfo[cgameGlob->predictedPlayerState.clientNum];
 }
 
 vehicleEffects *__cdecl VehicleGetFxInfo(int localClientNum, int entityNum)
@@ -208,18 +198,12 @@ double __cdecl GetSpeed(int localClientNum, centity_s *cent)
     float len; // [esp+1Ch] [ebp-Ch]
     LerpEntityState *p_currentState; // [esp+20h] [ebp-8h]
     entityState_s *ns; // [esp+24h] [ebp-4h]
+    cg_s *cgameGlob;
 
-    if (localClientNum)
-        MyAssertHandler(
-            "c:\\trees\\cod3\\src\\cgame_mp\\cg_local_mp.h",
-            1071,
-            0,
-            "%s\n\t(localClientNum) = %i",
-            "(localClientNum == 0)",
-            localClientNum);
+    cgameGlob = CG_GetLocalClientGlobals(localClientNum);
     p_currentState = &cent->currentState;
     ns = &cent->nextState;
-    serverTimeDelta = cgArray[0].nextSnap->serverTime - cgArray[0].snap->serverTime;
+    serverTimeDelta = cgameGlob->nextSnap->serverTime - cgameGlob->snap->serverTime;
     Vec3Sub(cent->nextState.lerp.pos.trBase, cent->currentState.pos.trBase, posDelta);
     len = Vec3Length(posDelta);
     if (serverTimeDelta <= 0.0)

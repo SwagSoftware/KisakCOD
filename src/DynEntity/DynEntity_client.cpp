@@ -437,15 +437,8 @@ void __cdecl DynEntCl_ProcessEntities(int localClientNum)
     {
         KISAK_NULLSUB();
         PROF_SCOPED("DynEntCl_ProcessEntities");
-        if (localClientNum)
-            MyAssertHandler(
-                "c:\\trees\\cod3\\src\\dynentity\\../cgame_mp/cg_local_mp.h",
-                1071,
-                0,
-                "%s\n\t(localClientNum) = %i",
-                "(localClientNum == 0)",
-                localClientNum);
-        cgameGlob = cgArray;
+
+        cgameGlob = CG_GetLocalClientGlobals(localClientNum);
         dynEntCount = DynEnt_GetEntityCount(DYNENT_COLL_CLIENT_FIRST);
         for (dynEntId = 0; dynEntId < (int)dynEntCount; ++dynEntId)
         {
@@ -1088,34 +1081,22 @@ void __cdecl DynEntCl_PlayEventFx(const FxEffectDef *def, const float *origin, c
     {
         if (CL_IsLocalClientActive(clientIndex))
         {
-            if (clientIndex)
-                MyAssertHandler(
-                    "c:\\trees\\cod3\\src\\dynentity\\../cgame_mp/cg_local_mp.h",
-                    1071,
-                    0,
-                    "%s\n\t(localClientNum) = %i",
-                    "(localClientNum == 0)",
-                    clientIndex);
-            FX_PlayOrientedEffect(clientIndex, def, cgArray[0].time, origin, axis);
+            FX_PlayOrientedEffect(clientIndex, def, CG_GetLocalClientGlobals(clientIndex)->time, origin, axis);
         }
     }
 }
 
 char __cdecl DynEntCl_EventNeedsProcessed(int localClientNum, int sourceEntityNum)
 {
+    snapshot_s *nextSnap;
+
     if (!dynEnt_active->current.enabled)
         return 0;
+
     if (CG_GetLocalClientGlobalsForEnt(localClientNum, sourceEntityNum))
     {
-        if (localClientNum)
-            MyAssertHandler(
-                "c:\\trees\\cod3\\src\\dynentity\\../cgame_mp/cg_local_mp.h",
-                1071,
-                0,
-                "%s\n\t(localClientNum) = %i",
-                "(localClientNum == 0)",
-                localClientNum);
-        if ((cgArray[0].nextSnap->ps.otherFlags & 6) == 0 || sourceEntityNum != cgArray[0].nextSnap->ps.clientNum)
+        nextSnap = CG_GetLocalClientGlobals(localClientNum)->nextSnap;
+        if ((nextSnap->ps.otherFlags & 6) == 0 || sourceEntityNum != nextSnap->ps.clientNum)
             return 0;
     }
     else if (localClientNum != RETURN_ZERO32())

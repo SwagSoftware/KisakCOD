@@ -448,7 +448,10 @@ void __cdecl R_ProcessWorkerCmdInternal(int type, void *data)
         break;
     default:
         if (!alwaysfails)
-            MyAssertHandler(".\\r_workercmds.cpp", 635, 0, "unhandled case");
+        {
+            iassert(0);
+            //MyAssertHandler(".\\r_workercmds.cpp", 635, 0, "unhandled case");
+        }
         break;
     }
 }

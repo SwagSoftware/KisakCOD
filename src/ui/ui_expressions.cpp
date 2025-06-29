@@ -604,15 +604,7 @@ char __cdecl GetOperandList(OperandStack *dataStack, OperandList *list)
 
 BOOL __cdecl CG_IsIntermission(int localClientNum)
 {
-    if (localClientNum)
-        MyAssertHandler(
-            "c:\\trees\\cod3\\src\\cgame_mp\\cg_local_mp.h",
-            1071,
-            0,
-            "%s\n\t(localClientNum) = %i",
-            "(localClientNum == 0)",
-            localClientNum);
-    return cgArray[0].nextSnap->ps.pm_type == 5;
+    return CG_GetLocalClientGlobals(localClientNum)->nextSnap->ps.pm_type == 5;
 }
 
 void __cdecl GetIsIntermission(int localClientNum, Operand *result)
@@ -1397,17 +1389,12 @@ void __cdecl GetPlayerField(int localClientNum, Operand *source, Operand *result
 void __cdecl GetOtherTeamField(int localClientNum, Operand *fieldName, Operand *result)
 {
     team_t team; // [esp+8h] [ebp-8h]
+    cg_s *cgameGlob;
 
-    if (localClientNum)
-        MyAssertHandler(
-            "c:\\trees\\cod3\\src\\ui\\../cgame_mp/cg_local_mp.h",
-            1071,
-            0,
-            "%s\n\t(localClientNum) = %i",
-            "(localClientNum == 0)",
-            localClientNum);
-    if (cgArray[0].bgs.clientinfo[cgArray[0].clientNum].infoValid)
-        team = cgArray[0].bgs.clientinfo[cgArray[0].clientNum].team;
+    cgameGlob = CG_GetLocalClientGlobals(localClientNum);
+
+    if (cgameGlob->bgs.clientinfo[cgameGlob->clientNum].infoValid)
+        team = cgameGlob->bgs.clientinfo[cgameGlob->clientNum].team;
     else
         team = TEAM_FREE;
     switch (team)
@@ -1430,15 +1417,8 @@ void __cdecl GetOtherTeamField(int localClientNum, Operand *fieldName, Operand *
 void __cdecl GetFieldForTeam(int localClientNum, team_t team, Operand *fieldName, Operand *result)
 {
     const char *NameForValueType; // eax
+    cg_s *cgameGlob = CG_GetLocalClientGlobals(localClientNum);
 
-    if (localClientNum)
-        MyAssertHandler(
-            "c:\\trees\\cod3\\src\\ui\\../cgame_mp/cg_local_mp.h",
-            1071,
-            0,
-            "%s\n\t(localClientNum) = %i",
-            "(localClientNum == 0)",
-            localClientNum);
     if (fieldName->dataType == VAL_STRING)
     {
         if (I_stricmp(fieldName->internals.string, "score"))
@@ -1460,7 +1440,7 @@ void __cdecl GetFieldForTeam(int localClientNum, team_t team, Operand *fieldName
         else
         {
             result->dataType = VAL_INT;
-            result->internals.intVal = cgArray[0].teamScores[team];
+            result->internals.intVal = cgameGlob->teamScores[team];
             if (uiscript_debug->current.integer)
                 Com_Printf(13, "team(%i)( %s ) = %i\n", team, fieldName->internals.string, result->internals.intVal);
         }
@@ -1476,16 +1456,10 @@ void __cdecl GetFieldForTeam(int localClientNum, team_t team, Operand *fieldName
 
 void __cdecl GetTeamField(int localClientNum, Operand *fieldName, Operand *result)
 {
-    if (localClientNum)
-        MyAssertHandler(
-            "c:\\trees\\cod3\\src\\ui\\../cgame_mp/cg_local_mp.h",
-            1071,
-            0,
-            "%s\n\t(localClientNum) = %i",
-            "(localClientNum == 0)",
-            localClientNum);
-    if (cgArray[0].bgs.clientinfo[cgArray[0].clientNum].infoValid)
-        GetFieldForTeam(localClientNum, cgArray[0].bgs.clientinfo[cgArray[0].clientNum].team, fieldName, result);
+    cg_s *cgameGlob = CG_GetLocalClientGlobals(localClientNum);
+
+    if (cgameGlob->bgs.clientinfo[cgameGlob->clientNum].infoValid)
+        GetFieldForTeam(localClientNum, cgameGlob->bgs.clientinfo[cgameGlob->clientNum].team, fieldName, result);
     else
         GetFieldForTeam(localClientNum, TEAM_FREE, fieldName, result);
 }
@@ -1527,15 +1501,8 @@ void __cdecl GetScoped(int localClientNum, Operand *result)
 void __cdecl InKillcam(int localClientNum, Operand *result)
 {
     result->dataType = VAL_INT;
-    if (localClientNum)
-        MyAssertHandler(
-            "c:\\trees\\cod3\\src\\ui\\../cgame_mp/cg_local_mp.h",
-            1071,
-            0,
-            "%s\n\t(localClientNum) = %i",
-            "(localClientNum == 0)",
-            localClientNum);
-    result->internals.intVal = cgArray[0].inKillCam;
+    cg_s *cgameGlob = CG_GetLocalClientGlobals(localClientNum);
+    result->internals.intVal = cgameGlob->inKillCam;
     if (uiscript_debug->current.integer)
         Com_Printf(13, "InKillcam() = %i\n", result->internals.intVal);
 }
@@ -2084,21 +2051,15 @@ void __cdecl GetTimeLeft(int localClientNum, Operand *result)
     {
         MyAssertHandler(
             "c:\\trees\\cod3\\src\\ui\\../cgame_mp/cg_local_mp.h",
-            1071,
-            0,
-            "%s\n\t(localClientNum) = %i",
-            "(localClientNum == 0)",
-            localClientNum);
-        MyAssertHandler(
-            "c:\\trees\\cod3\\src\\ui\\../cgame_mp/cg_local_mp.h",
             1083,
             0,
             "%s\n\t(localClientNum) = %i",
             "(localClientNum == 0)",
             localClientNum);
     }
-    if (cgArray[0].nextSnap)
-        timeLeft.intVal = (cgsArray[0].gameEndTime - cgArray[0].nextSnap->serverTime) / 1000;
+    cg_s *cgameGlob = CG_GetLocalClientGlobals(localClientNum);
+    if (cgameGlob->nextSnap)
+        timeLeft.intVal = (cgsArray[0].gameEndTime - cgameGlob->nextSnap->serverTime) / 1000;
     else
         timeLeft.intVal = 0;
     result->dataType = VAL_INT;
@@ -2248,15 +2209,8 @@ void __cdecl GetFollowing(int localClientNum, Operand *result)
 {
     result->dataType = VAL_INT;
     result->internals.intVal = 0;
-    if (localClientNum)
-        MyAssertHandler(
-            "c:\\trees\\cod3\\src\\ui\\../cgame_mp/cg_local_mp.h",
-            1071,
-            0,
-            "%s\n\t(localClientNum) = %i",
-            "(localClientNum == 0)",
-            localClientNum);
-    if ((cgArray[0].predictedPlayerState.otherFlags & 2) != 0)
+    cg_s *cgameGlob = CG_GetLocalClientGlobals(localClientNum);
+    if ((cgameGlob->predictedPlayerState.otherFlags & 2) != 0)
         result->internals.intVal = 1;
 }
 

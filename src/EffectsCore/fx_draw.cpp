@@ -1618,36 +1618,22 @@ void __cdecl FX_FillGenerateVertsCmd(int localClientNum, FxGenerateVertsCmd* cmd
 {
     unsigned int v2; // [esp+0h] [ebp-10h]
     unsigned int v3; // [esp+Ch] [ebp-4h]
+    cg_s *cgameGlob;
 
-    if (!cmd)
-        MyAssertHandler(".\\EffectsCore\\fx_draw.cpp", 1642, 0, "%s", "cmd");
+    iassert(cmd);
     cmd->system = FX_GetSystem(localClientNum);
     cmd->beamInfo = FX_Beam_GetInfo();
     cmd->postLightInfo = FX_PostLight_GetInfo();
     cmd->spriteInfo = FX_SpriteGetInfo();
     cmd->localClientNum = localClientNum;
-    v3 = R_GetLocalClientNum();
-    if (v3)
-        MyAssertHandler(
-            "c:\\trees\\cod3\\src\\effectscore\\../cgame_mp/cg_local_mp.h",
-            1071,
-            0,
-            "%s\n\t(localClientNum) = %i",
-            "(localClientNum == 0)",
-            v3);
-    cmd->vieworg[0] = cgArray[0].refdef.vieworg[0];
-    cmd->vieworg[1] = cgArray[0].refdef.vieworg[1];
-    cmd->vieworg[2] = cgArray[0].refdef.vieworg[2];
-    v2 = R_GetLocalClientNum();
-    if (v2)
-        MyAssertHandler(
-            "c:\\trees\\cod3\\src\\effectscore\\../cgame_mp/cg_local_mp.h",
-            1071,
-            0,
-            "%s\n\t(localClientNum) = %i",
-            "(localClientNum == 0)",
-            v2);
-    AxisCopy(cgArray[0].refdef.viewaxis, cmd->viewaxis);
+
+    cgameGlob = CG_GetLocalClientGlobals(R_GetLocalClientNum());
+
+    cmd->vieworg[0] = cgameGlob->refdef.vieworg[0];
+    cmd->vieworg[1] = cgameGlob->refdef.vieworg[1];
+    cmd->vieworg[2] = cgameGlob->refdef.vieworg[2];
+
+    AxisCopy(cgameGlob->refdef.viewaxis, cmd->viewaxis);
 }
 
 void __cdecl FX_EvaluateDistanceFade(FxDrawState *draw)

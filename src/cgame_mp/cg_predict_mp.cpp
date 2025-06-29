@@ -60,51 +60,45 @@ void __cdecl CG_PredictPlayerState(int localClientNum)
     float fCos; // [esp+40h] [ebp-Ch]
     playerState_s* ps; // [esp+44h] [ebp-8h]
     float fSin; // [esp+48h] [ebp-4h]
+    cg_s *cgameGlob;
 
-    if (localClientNum)
-        MyAssertHandler(
-            "c:\\trees\\cod3\\src\\cgame_mp\\cg_local_mp.h",
-            1071,
-            0,
-            "%s\n\t(localClientNum) = %i",
-            "(localClientNum == 0)",
-            localClientNum);
-    ps = &cgArray[0].predictedPlayerState;
-    cgArray[0].lastFrame.aimSpreadScale = cgArray[0].predictedPlayerState.aimSpreadScale;
+    cgameGlob = CG_GetLocalClientGlobals(localClientNum);
+    ps = &cgameGlob->predictedPlayerState;
+    cgameGlob->lastFrame.aimSpreadScale = cgameGlob->predictedPlayerState.aimSpreadScale;
     CG_PredictPlayerState_Internal(localClientNum);
     Entity = CG_GetEntity(localClientNum, ps->clientNum);
     origin = ps->origin;
     Entity->pose.origin[0] = ps->origin[0];
     Entity->pose.origin[1] = origin[1];
     Entity->pose.origin[2] = origin[2];
-    BG_EvaluateTrajectory(&Entity->currentState.apos, cgArray[0].time, Entity->pose.angles);
+    BG_EvaluateTrajectory(&Entity->currentState.apos, cgameGlob->time, Entity->pose.angles);
     weapDef = BG_GetWeaponDef(ps->weapon);
-    if ((cgArray[0].nextSnap->ps.otherFlags & 4) != 0 && CG_GetWeapReticleZoom(cgArray, &fZoom))
+    if ((cgameGlob->nextSnap->ps.otherFlags & 4) != 0 && CG_GetWeapReticleZoom(cgameGlob, &fZoom))
     {
-        if (weapDef->adsViewErrorMax != 0.0 && !cgArray[0].adsViewErrorDone)
+        if (weapDef->adsViewErrorMax != 0.0 && !cgameGlob->adsViewErrorDone)
         {
-            cgArray[0].adsViewErrorDone = 1;
+            cgameGlob->adsViewErrorDone = 1;
             size = flrand(weapDef->adsViewErrorMin, weapDef->adsViewErrorMax);
             v2 = random();
             angle = (v2 + v2) * 3.141592741012573;
             fCos = cos(angle);
             fSin = sin(angle);
-            v4 = fSin * size + cgArray[0].offsetAngles[0];
-            cgArray[0].offsetAngles[0] = AngleNormalize360(v4);
-            v3 = fCos * size + cgArray[0].offsetAngles[1];
-            cgArray[0].offsetAngles[1] = AngleNormalize360(v3);
+            v4 = fSin * size + cgameGlob->offsetAngles[0];
+            cgameGlob->offsetAngles[0] = AngleNormalize360(v4);
+            v3 = fCos * size + cgameGlob->offsetAngles[1];
+            cgameGlob->offsetAngles[1] = AngleNormalize360(v3);
         }
     }
     else
     {
-        cgArray[0].adsViewErrorDone = 0;
+        cgameGlob->adsViewErrorDone = 0;
     }
-    cgArray[0].predictedPlayerEntity.nextState.number = LOWORD(ps->clientNum);
-    BG_PlayerStateToEntityState(ps, &cgArray[0].predictedPlayerEntity.nextState, 0, 0);
+    cgameGlob->predictedPlayerEntity.nextState.number = LOWORD(ps->clientNum);
+    BG_PlayerStateToEntityState(ps, &cgameGlob->predictedPlayerEntity.nextState, 0, 0);
     memcpy(
-        &cgArray[0].predictedPlayerEntity.currentState,
-        &cgArray[0].predictedPlayerEntity.nextState.lerp,
-        sizeof(cgArray[0].predictedPlayerEntity.currentState));
+        &cgameGlob->predictedPlayerEntity.currentState,
+        &cgameGlob->predictedPlayerEntity.nextState.lerp,
+        sizeof(cgameGlob->predictedPlayerEntity.currentState));
     CL_SetUserCmdOrigin(localClientNum, ps->origin, ps->velocity, ps->viewangles, ps->bobCycle, ps->movementDir);
     CL_SendCmd(localClientNum);
 }
@@ -147,17 +141,11 @@ void __cdecl CG_PredictPlayerState_Internal(int localClientNum)
     int current; // [esp+194h] [ebp-4h]
 
     PROF_SCOPED("CG_PredictPlayerState");
-    if (localClientNum)
-        MyAssertHandler(
-            "c:\\trees\\cod3\\src\\cgame_mp\\cg_local_mp.h",
-            1071,
-            0,
-            "%s\n\t(localClientNum) = %i",
-            "(localClientNum == 0)",
-            localClientNum);
-    cgameGlob = cgArray;
-    if (!cgArray[0].nextSnap)
-        MyAssertHandler(".\\cgame_mp\\cg_predict_mp.cpp", 280, 0, "%s", "cgameGlob->nextSnap");
+
+    cgameGlob = CG_GetLocalClientGlobals(localClientNum);
+
+    iassert(cgameGlob->nextSnap);
+
     ps = &cgameGlob->nextSnap->ps;
     if (cgameGlob->demoType || (ps->otherFlags & 2) != 0)
     {
@@ -363,23 +351,17 @@ void __cdecl CG_TouchItemPrediction(int localClientNum)
 {
     centity_s *cent; // [esp+4h] [ebp-8h]
     int entIndex; // [esp+8h] [ebp-4h]
+    cg_s *cgameGlob;
 
-    if (localClientNum)
-        MyAssertHandler(
-            "c:\\trees\\cod3\\src\\cgame_mp\\cg_local_mp.h",
-            1071,
-            0,
-            "%s\n\t(localClientNum) = %i",
-            "(localClientNum == 0)",
-            localClientNum);
-    if (cgArray[0].predictedPlayerState.pm_type <= 1u)
+    cgameGlob = CG_GetLocalClientGlobals(localClientNum);
+
+    if (cgameGlob->predictedPlayerState.pm_type <= 1u)
     {
         for (entIndex = 0; entIndex < cg_itemEntityCount; ++entIndex)
         {
             cent = cg_itemEntities[entIndex];
-            if (cent->nextState.eType != 3)
-                MyAssertHandler(".\\cgame_mp\\cg_predict_mp.cpp", 145, 0, "%s", "cent->nextState.eType == ET_ITEM");
-            CG_TouchItem(cgArray, cent);
+            iassert(cent->nextState.eType == ET_ITEM);
+            CG_TouchItem(cgameGlob, cent);
         }
     }
 }
@@ -388,17 +370,14 @@ void __cdecl CG_TouchItem(cg_s *cgameGlob, centity_s *cent)
 {
     int bitNum; // [esp+0h] [ebp-8h]
 
-    if (!cgameGlob)
-        MyAssertHandler(".\\cgame_mp\\cg_predict_mp.cpp", 96, 0, "%s", "cgameGlob");
-    if (!cent)
-        MyAssertHandler(".\\cgame_mp\\cg_predict_mp.cpp", 97, 0, "%s", "cent");
+    iassert(cgameGlob);
+    iassert(cent);
+
     if (cg_predictItems->current.enabled
         && BG_PlayerTouchesItem(&cgameGlob->predictedPlayerState, &cent->nextState, cgameGlob->time)
         && cent->miscTime != cgameGlob->time)
     {
         bitNum = cent->nextState.index.brushmodel % 128;
-        if (cgameGlob == (cg_s *)-287036)
-            MyAssertHandler("c:\\trees\\cod3\\src\\bgame\\../bgame/bg_weapons.h", 229, 0, "%s", "ps");
         if (Com_BitCheckAssert(cgameGlob->predictedPlayerState.weapons, bitNum, 16)
             && BG_CanItemBeGrabbed(&cent->nextState, &cgameGlob->predictedPlayerState, 1))
         {
@@ -438,22 +417,14 @@ void __cdecl CG_InterpolatePlayerState(int localClientNum, int grabAngles)
     float f; // [esp+80h] [ebp-8h]
     int i; // [esp+84h] [ebp-4h]
 
-    if (localClientNum)
-        MyAssertHandler(
-            "c:\\trees\\cod3\\src\\cgame_mp\\cg_local_mp.h",
-            1071,
-            0,
-            "%s\n\t(localClientNum) = %i",
-            "(localClientNum == 0)",
-            localClientNum);
-    cgameGlob = cgArray;
-    out = &cgArray[0].predictedPlayerState;
-    prevSnap = cgArray[0].snap;
-    nextSnap = cgArray[0].nextSnap;
-    if (!prevSnap)
-        MyAssertHandler(".\\cgame_mp\\cg_predict_mp.cpp", 173, 0, "%s", "prevSnap");
-    if (!nextSnap)
-        MyAssertHandler(".\\cgame_mp\\cg_predict_mp.cpp", 174, 0, "%s", "nextSnap");
+    cgameGlob = CG_GetLocalClientGlobals(localClientNum);
+    out = &cgameGlob->predictedPlayerState;
+    prevSnap = cgameGlob->snap;
+    nextSnap = cgameGlob->nextSnap;
+
+    iassert(prevSnap);
+    iassert(nextSnap);
+
     memcpy((unsigned __int8*)out, (unsigned __int8*)&nextSnap->ps, sizeof(playerState_s));
     if (grabAngles)
     {
