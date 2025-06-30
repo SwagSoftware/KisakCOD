@@ -389,6 +389,7 @@ void __cdecl CG_ResetEntity(int localClientNum, centity_s *cent, int newEntity)
     clientInfo_t *corpseInfo; // [esp+38h] [ebp-4h]
     int savedregs; // [esp+3Ch] [ebp+0h] BYREF
     cg_s *cgameGlob;
+    cgs_t *cgs;
 
     cgameGlob = CG_GetLocalClientGlobals(localClientNum);
 
@@ -453,42 +454,28 @@ void __cdecl CG_ResetEntity(int localClientNum, centity_s *cent, int newEntity)
         corpseIndex = cent->nextState.number - 64;
         bcassert(cent->nextState.clientNum, MAX_CLIENTS);
         ci = &cgameGlob->bgs.clientinfo[cent->nextState.clientNum];
-        if (localClientNum)
-            MyAssertHandler(
-                "c:\\trees\\cod3\\src\\cgame_mp\\cg_local_mp.h",
-                1083,
-                0,
-                "%s\n\t(localClientNum) = %i",
-                "(localClientNum == 0)",
-                localClientNum);
-        if (corpseIndex >= 8)
-            MyAssertHandler(
-                ".\\cgame_mp\\cg_snapshot_mp.cpp",
-                163,
-                0,
-                "corpseIndex doesn't index MAX_CLIENT_CORPSES\n\t%i not in [0, %i)",
-                corpseIndex,
-                8);
-        corpseInfo = &cgsArray[0].corpseinfo[corpseIndex];
-        pXAnimTree = cgsArray[0].corpseinfo[corpseIndex].pXAnimTree;
+        cgs = CG_GetLocalClientStaticGlobals(localClientNum);
+        bcassert(corpseIndex, MAX_CLIENT_CORPSES);
+        corpseInfo = &cgs->corpseinfo[corpseIndex];
+        pXAnimTree = cgs->corpseinfo[corpseIndex].pXAnimTree;
         if ((cent->nextState.lerp.eFlags & 0x80000) != 0)
         {
             CG_CopyCorpseInfo(corpseInfo, ci);
-            cgsArray[0].corpseinfo[corpseIndex].pXAnimTree = pXAnimTree;
+            cgs->corpseinfo[corpseIndex].pXAnimTree = pXAnimTree;
             XAnimCloneAnimTree(ci->pXAnimTree, pXAnimTree);
             cent->previousEventSequence = 0;
         }
         else
         {
-            if (!cgsArray[0].corpseinfo[corpseIndex].model[0]
-                || cgsArray[0].corpseinfo[corpseIndex].clientNum != ci->clientNum)
+            if (!cgs->corpseinfo[corpseIndex].model[0]
+                || cgs->corpseinfo[corpseIndex].clientNum != ci->clientNum)
             {
                 CG_CopyCorpseInfo(corpseInfo, ci);
-                cgsArray[0].corpseinfo[corpseIndex].pXAnimTree = pXAnimTree;
+                cgs->corpseinfo[corpseIndex].pXAnimTree = pXAnimTree;
             }
             cent->previousEventSequence = cent->nextState.eventSequence;
         }
-        cgsArray[0].corpseinfo[corpseIndex].dobjDirty = 1;
+        cgs->corpseinfo[corpseIndex].dobjDirty = 1;
         goto LABEL_43;
     case 6:
     case 0xD:
@@ -569,8 +556,8 @@ void __cdecl CG_TransitionKillcam(int localClientNum)
             {
                 corpseIndex = cent->nextState.number - 64;
                 bcassert(corpseIndex, MAX_CLIENT_CORPSES);
-                pXAnimTree = cgsArray[0].corpseinfo[corpseIndex].pXAnimTree;
-                anim = cgsArray[0].corpseinfo[corpseIndex].legs.animationNumber & 0xFFFFFDFF;
+                pXAnimTree = cgs->corpseinfo[corpseIndex].pXAnimTree;
+                anim = cgs->corpseinfo[corpseIndex].legs.animationNumber & 0xFFFFFDFF;
                 anims = XAnimGetAnims(pXAnimTree);
                 if (anim && !XAnimIsLooped(anims, anim) && !XAnimGetNumChildren(anims, anim))
                     XAnimSetTime(pXAnimTree, anim, 1.0);

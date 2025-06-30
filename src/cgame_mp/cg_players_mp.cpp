@@ -454,6 +454,7 @@ void __cdecl CG_Corpse(int localClientNum, centity_s *cent)
     clientInfo_t *ci; // [esp+18h] [ebp-11Ch]
     FxMarkDObjUpdateContext markUpdateContext; // [esp+1Ch] [ebp-118h] BYREF
     float lightingOrigin[3]; // [esp+128h] [ebp-Ch] BYREF
+    cgs_t *cgs;
 
     p_nextState = &cent->nextState;
     if ((cent->nextState.lerp.eFlags & 0x20000) == 0)
@@ -461,17 +462,12 @@ void __cdecl CG_Corpse(int localClientNum, centity_s *cent)
     if ((cent->nextState.lerp.eFlags & 0x20) == 0)
     {
         corpseIndex = p_nextState->number - 64;
-        if (corpseIndex >= 8)
-            MyAssertHandler(".\\cgame_mp\\cg_players_mp.cpp", 533, 0, "%s", "(unsigned)corpseIndex < MAX_CLIENT_CORPSES");
-        if (localClientNum)
-            MyAssertHandler(
-                "c:\\trees\\cod3\\src\\cgame_mp\\cg_local_mp.h",
-                1083,
-                0,
-                "%s\n\t(localClientNum) = %i",
-                "(localClientNum == 0)",
-                localClientNum);
-        ci = &cgsArray[0].corpseinfo[corpseIndex];
+
+        iassert((unsigned)corpseIndex < MAX_CLIENT_CORPSES);
+
+        cgs = CG_GetLocalClientStaticGlobals(localClientNum);
+        
+        ci = &cgs->corpseinfo[corpseIndex];
         obja = Com_GetClientDObj(p_nextState->number, localClientNum);
         FX_MarkEntUpdateBegin(&markUpdateContext, obja, 0, 0);
         BG_UpdatePlayerDObj(localClientNum, obja, p_nextState, ci, 0);

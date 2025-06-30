@@ -29,39 +29,20 @@ $59835072FC2CD3936CE4A4C9F556010B cg_waitingScriptMenu[1];
 
 void __cdecl CG_ParseServerInfo(int localClientNum)
 {
-    const char *v1; // eax
-    const char *v2; // eax
-    const char *v3; // eax
     char *info; // [esp+0h] [ebp-Ch]
     const char *mapname; // [esp+8h] [ebp-4h]
-
+    cgs_t *cgs;
     info = CL_GetConfigString(localClientNum, 0);
-    if (localClientNum)
-        MyAssertHandler(
-            "c:\\trees\\cod3\\src\\cgame_mp\\cg_local_mp.h",
-            1083,
-            0,
-            "%s\n\t(localClientNum) = %i",
-            "(localClientNum == 0)",
-            localClientNum);
-    v1 = Info_ValueForKey(info, "sv_hostname");
-    strncpy(cgsArray[0].szHostName, v1, 0x100u);
-    v2 = Info_ValueForKey(info, "g_gametype");
-    strncpy(cgsArray[0].gametype, v2, 0x20u);
-    if (!cgsArray[0].localServer)
-        Dvar_SetStringByName("g_gametype", cgsArray[0].gametype);
-    v3 = Info_ValueForKey(info, "sv_maxclients");
-    cgsArray[0].maxclients = atoi(v3);
-    if (cgsArray[0].maxclients < 1 || cgsArray[0].maxclients > 64)
-        MyAssertHandler(
-            ".\\cgame_mp\\cg_servercmds_mp.cpp",
-            316,
-            0,
-            "%s\n\t(cgs->maxclients) = %i",
-            "(cgs->maxclients >= 1 && cgs->maxclients <= 64)",
-            cgsArray[0].maxclients);
+
+    cgs = CG_GetLocalClientStaticGlobals(localClientNum);
+    strncpy(cgs->szHostName, Info_ValueForKey(info, "sv_hostname"), 0x100u);
+    strncpy(cgs->gametype, Info_ValueForKey(info, "g_gametype"), 0x20u);
+    if (!cgs->localServer)
+        Dvar_SetStringByName("g_gametype", cgs->gametype);
+    cgs->maxclients = atoi(Info_ValueForKey(info, "sv_maxclients"));
+    iassert((cgs->maxclients >= 1 && cgs->maxclients <= 64));
     mapname = Info_ValueForKey(info, "mapname");
-    Com_GetBspFilename(cgsArray[0].mapname, 0x40u, mapname);
+    Com_GetBspFilename(cgs->mapname, 0x40u, mapname);
 }
 
 void __cdecl CG_ParseCodInfo(int localClientNum)
@@ -69,16 +50,11 @@ void __cdecl CG_ParseCodInfo(int localClientNum)
     char *key; // [esp+4h] [ebp-Ch]
     int i; // [esp+8h] [ebp-8h]
     char *value; // [esp+Ch] [ebp-4h]
+    cgs_t *cgs;
 
-    if (localClientNum)
-        MyAssertHandler(
-            "c:\\trees\\cod3\\src\\cgame_mp\\cg_local_mp.h",
-            1083,
-            0,
-            "%s\n\t(localClientNum) = %i",
-            "(localClientNum == 0)",
-            localClientNum);
-    if (!cgsArray[0].localServer)
+    cgs = CG_GetLocalClientStaticGlobals(localClientNum);
+    
+    if (!cgs->localServer)
     {
         for (i = 0; i < 128; ++i)
         {
@@ -195,16 +171,8 @@ void __cdecl CG_ParseGameEndTime(int localClientNum)
 {
     char *ConfigString; // eax
 
-    if (localClientNum)
-        MyAssertHandler(
-            "c:\\trees\\cod3\\src\\cgame_mp\\cg_local_mp.h",
-            1083,
-            0,
-            "%s\n\t(localClientNum) = %i",
-            "(localClientNum == 0)",
-            localClientNum);
     ConfigString = CL_GetConfigString(localClientNum, 0xBu);
-    cgsArray[0].gameEndTime = atoi(ConfigString);
+    CG_GetLocalClientStaticGlobals(localClientNum)->gameEndTime = atoi(ConfigString);
 }
 
 void __cdecl CG_PrecacheScriptMenu(int localClientNum, int configStringIndex)
@@ -1457,11 +1425,11 @@ void __cdecl CG_ExecuteNewServerCommands(int localClientNum, int latestSequence)
     nesting = cmd_args.nesting;
     cgs = CG_GetLocalClientStaticGlobals(localClientNum);
 
-    while (cgsArray[0].serverCommandSequence < latestSequence)
+    while (cgs->serverCommandSequence < latestSequence)
     {
         iassert(CG_GetLocalClientGlobals(localClientNum)->nextSnap);
 
-        if (CL_CGameNeedsServerCommand(localClientNum, ++cgsArray[0].serverCommandSequence))
+        if (CL_CGameNeedsServerCommand(localClientNum, ++cgs->serverCommandSequence))
             CG_ServerCommand(localClientNum);
 
         iassert(nesting == cmd_args.nesting);

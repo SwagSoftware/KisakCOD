@@ -701,17 +701,11 @@ void __cdecl CG_DrawPingAnalysis(int localClientNum)
     float lineColor[6]; // [esp+70h] [ebp-20h] BYREF
     float x; // [esp+88h] [ebp-8h]
     float y; // [esp+8Ch] [ebp-4h]
+    cgs_t *cgs;
 
-    if (localClientNum)
-        MyAssertHandler(
-            "c:\\trees\\cod3\\src\\cgame_mp\\cg_local_mp.h",
-            1083,
-            0,
-            "%s\n\t(localClientNum) = %i",
-            "(localClientNum == 0)",
-            localClientNum);
-    lineColor[5] = 1.4025731e-38f;
-    if (cgsArray[0].localServer)
+    cgs = CG_GetLocalClientStaticGlobals(localClientNum);
+
+    if (cgs->localServer)
     {
         if (net_showprofile->current.integer)
         {
@@ -834,16 +828,11 @@ void __cdecl CG_DrawLagometer(int localClientNum)
     float vb; // [esp+8Ch] [ebp-8h]
     float vc; // [esp+8Ch] [ebp-8h]
     float mid; // [esp+90h] [ebp-4h]
+    cgs_t *cgs;
 
-    if (localClientNum)
-        MyAssertHandler(
-            "c:\\trees\\cod3\\src\\cgame_mp\\cg_local_mp.h",
-            1083,
-            0,
-            "%s\n\t(localClientNum) = %i",
-            "(localClientNum == 0)",
-            localClientNum);
-    if (cg_drawLagometer->current.enabled && !cgsArray[0].localServer)
+    cgs = CG_GetLocalClientStaticGlobals(localClientNum);
+
+    if (cg_drawLagometer->current.enabled && !cgs->localServer)
     {
         scrPlace = &scrPlaceView[localClientNum];
         UI_DrawHandlePic(scrPlace, -55.0f, -140.0f, 48.0f, 48.0f, 3, 3, 0, cgMedia.lagometerMaterial);

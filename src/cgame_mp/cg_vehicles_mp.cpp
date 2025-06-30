@@ -68,21 +68,17 @@ void __cdecl CG_VehRegisterDvars()
 
 DObj_s *__cdecl GetVehicleEntDObj(int localClientNum, centity_s *centVeh)
 {
-    if (!centVeh->nextValid)
-        MyAssertHandler(".\\cgame_mp\\cg_vehicles_mp.cpp", 99, 0, "%s", "centVeh->nextValid");
-    if (localClientNum)
-        MyAssertHandler(
-            "c:\\trees\\cod3\\src\\cgame_mp\\cg_local_mp.h",
-            1083,
-            0,
-            "%s\n\t(localClientNum) = %i",
-            "(localClientNum == 0)",
-            localClientNum);
+    cgs_t *cgs;
+
+    iassert(centVeh->nextValid);
+
+    cgs = CG_GetLocalClientStaticGlobals(localClientNum);
+
     return CG_PreProcess_GetDObj(
         localClientNum,
         centVeh->nextState.number,
         centVeh->nextState.eType,
-        cgsArray[0].gameModels[centVeh->nextState.un2.hintString]);
+        cgs->gameModels[centVeh->nextState.un2.hintString]);
 }
 
 void __cdecl CG_VehGunnerPOV(int localClientNum, float *resultOrigin, float *resultAngles)

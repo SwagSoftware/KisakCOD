@@ -1022,30 +1022,20 @@ void __cdecl CG_InterpolateEntityPosition(cg_s *cgameGlob, centity_s *cent)
 
 void __cdecl CG_CalcEntityPhysicsPositions(int localClientNum, centity_s *cent)
 {
-    if (!cent)
-        MyAssertHandler(".\\cgame_mp\\cg_ents_mp.cpp", 1318, 0, "%s", "cent");
-    if (cent->currentState.pos.trType != TR_PHYSICS || cent->currentState.apos.trType != TR_PHYSICS)
-        MyAssertHandler(
-            ".\\cgame_mp\\cg_ents_mp.cpp",
-            1319,
-            0,
-            "%s",
-            "cent->currentState.pos.trType == TR_PHYSICS && cent->currentState.apos.trType == TR_PHYSICS");
+    cgs_t *cgs;
+
+    iassert(cent);
+    iassert(cent->currentState.pos.trType == TR_PHYSICS && cent->currentState.apos.trType == TR_PHYSICS);
+
     if (cent->nextValid && (cent->nextState.lerp.eFlags & 0x20) == 0 && cent->nextState.solid != 0xFFFFFF)
     {
-        if (localClientNum)
-            MyAssertHandler(
-                "c:\\trees\\cod3\\src\\cgame_mp\\cg_local_mp.h",
-                1083,
-                0,
-                "%s\n\t(localClientNum) = %i",
-                "(localClientNum == 0)",
-                localClientNum);
+        cgs = CG_GetLocalClientStaticGlobals(localClientNum);
+        
         if (CG_PreProcess_GetDObj(
             localClientNum,
             cent->nextState.number,
             cent->nextState.eType,
-            cgsArray[0].gameModels[cent->nextState.index.brushmodel])
+            cgs->gameModels[cent->nextState.index.brushmodel])
             && !CG_ExpiredLaunch(localClientNum, cent))
         {
             if (!cent->pose.physObjId)
@@ -1467,22 +1457,17 @@ void __cdecl CG_General(int localClientNum, centity_s *cent)
 {
     DObj_s *obj; // [esp+4h] [ebp-18h]
     float lightingOrigin[3]; // [esp+10h] [ebp-Ch] BYREF
+    cgs_t *cgs;
 
     if ((cent->nextState.lerp.eFlags & 0x20) == 0)
     {
-        if (localClientNum)
-            MyAssertHandler(
-                "c:\\trees\\cod3\\src\\cgame_mp\\cg_local_mp.h",
-                1083,
-                0,
-                "%s\n\t(localClientNum) = %i",
-                "(localClientNum == 0)",
-                localClientNum);
+        cgs = CG_GetLocalClientStaticGlobals(localClientNum);
+
         obj = CG_PreProcess_GetDObj(
             localClientNum,
             cent->nextState.number,
             cent->nextState.eType,
-            cgsArray[0].gameModels[cent->nextState.index.brushmodel]);
+            cgs->gameModels[cent->nextState.index.brushmodel]);
         if (obj)
         {
             CG_LockLightingOrigin(cent, lightingOrigin);
@@ -1672,18 +1657,13 @@ void __cdecl CG_ScriptMover(int localClientNum, centity_s *cent)
     DObj_s *obj; // [esp+4h] [ebp-18h]
     entityState_s *s1; // [esp+8h] [ebp-14h]
     float lightingOrigin[3]; // [esp+10h] [ebp-Ch] BYREF
+    cgs_t *cgs;
 
     s1 = &cent->nextState;
     if ((cent->nextState.lerp.eFlags & 0x20) == 0)
     {
-        if (localClientNum)
-            MyAssertHandler(
-                "c:\\trees\\cod3\\src\\cgame_mp\\cg_local_mp.h",
-                1083,
-                0,
-                "%s\n\t(localClientNum) = %i",
-                "(localClientNum == 0)",
-                localClientNum);
+        cgs = CG_GetLocalClientStaticGlobals(localClientNum);
+        
         if (cent->nextState.solid == 0xFFFFFF)
         {
             if (cent->nextValid && (cent->nextState.lerp.eFlags & 0x800) != 0)
@@ -1698,7 +1678,7 @@ void __cdecl CG_ScriptMover(int localClientNum, centity_s *cent)
                 localClientNum,
                 cent->nextState.number,
                 cent->nextState.eType,
-                cgsArray[0].gameModels[cent->nextState.index.brushmodel]);
+                cgs->gameModels[cent->nextState.index.brushmodel]);
             if (obj)
             {
                 CG_LockLightingOrigin(cent, lightingOrigin);
@@ -1771,6 +1751,7 @@ FxEffect *__cdecl CG_StartFx(int localClientNum, centity_s *cent, int startAtTim
     const FxEffectDef *fxDef; // [esp+0h] [ebp-30h]
     int fxId; // [esp+8h] [ebp-28h]
     float axis[3][3]; // [esp+Ch] [ebp-24h] BYREF
+    cgs_t *cgs;
 
     AnglesToAxis(cent->nextState.lerp.apos.trBase, axis);
     fxId = cent->nextState.un1.scale;
@@ -1783,17 +1764,9 @@ FxEffect *__cdecl CG_StartFx(int localClientNum, centity_s *cent, int startAtTim
             fxId,
             1,
             99);
-    if (localClientNum)
-        MyAssertHandler(
-            "c:\\trees\\cod3\\src\\cgame_mp\\cg_local_mp.h",
-            1083,
-            0,
-            "%s\n\t(localClientNum) = %i",
-            "(localClientNum == 0)",
-            localClientNum);
-    fxDef = cgsArray[0].fxs[fxId];
-    if (!fxDef)
-        MyAssertHandler(".\\cgame_mp\\cg_ents_mp.cpp", 1027, 0, "%s", "fxDef");
+    cgs = CG_GetLocalClientStaticGlobals(localClientNum);
+    fxDef = cgs->fxs[fxId];
+    iassert(fxDef);
     return FX_SpawnOrientedEffect(localClientNum, fxDef, startAtTime, cent->pose.origin, axis, 0x3FFu);
 }
 

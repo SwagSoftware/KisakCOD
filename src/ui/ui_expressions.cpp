@@ -2033,6 +2033,8 @@ void __cdecl SecondsToCountdownDisplay(int localClientNum, int seconds, Operand 
 void __cdecl GetTimeLeft(int localClientNum, Operand *result)
 {
     operandInternalDataUnion timeLeft; // [esp+0h] [ebp-Ch]
+    cgs_t *cgs;
+    cg_s *cgameGlob;
 
     if (localClientNum)
         MyAssertHandler(
@@ -2047,19 +2049,10 @@ void __cdecl GetTimeLeft(int localClientNum, Operand *result)
         result->dataType = VAL_INT;
         result->internals.intVal = 0;
     }
-    if (localClientNum)
-    {
-        MyAssertHandler(
-            "c:\\trees\\cod3\\src\\ui\\../cgame_mp/cg_local_mp.h",
-            1083,
-            0,
-            "%s\n\t(localClientNum) = %i",
-            "(localClientNum == 0)",
-            localClientNum);
-    }
-    cg_s *cgameGlob = CG_GetLocalClientGlobals(localClientNum);
+    cgs = CG_GetLocalClientStaticGlobals(localClientNum);
+    cgameGlob = CG_GetLocalClientGlobals(localClientNum);
     if (cgameGlob->nextSnap)
-        timeLeft.intVal = (cgsArray[0].gameEndTime - cgameGlob->nextSnap->serverTime) / 1000;
+        timeLeft.intVal = (cgs->gameEndTime - cgameGlob->nextSnap->serverTime) / 1000;
     else
         timeLeft.intVal = 0;
     result->dataType = VAL_INT;
@@ -2099,6 +2092,8 @@ void __cdecl GetGametypeObjective(int localClientNum, Operand *result)
 
 void __cdecl GetGametypeName(int localClientNum, Operand *result)
 {
+    cgs_t *cgs;
+
     result->dataType = VAL_STRING;
     if (localClientNum)
         MyAssertHandler(
@@ -2110,15 +2105,8 @@ void __cdecl GetGametypeName(int localClientNum, Operand *result)
             localClientNum);
     if (clientUIActives[0].connectionState >= CA_LOADING)
     {
-        if (localClientNum)
-            MyAssertHandler(
-                "c:\\trees\\cod3\\src\\ui\\../cgame_mp/cg_local_mp.h",
-                1083,
-                0,
-                "%s\n\t(localClientNum) = %i",
-                "(localClientNum == 0)",
-                localClientNum);
-        result->internals.intVal = (int)UI_GetGameTypeDisplayName(cgsArray[0].gametype);
+        cgs = CG_GetLocalClientStaticGlobals(localClientNum);
+        result->internals.intVal = (int)UI_GetGameTypeDisplayName(cgs->gametype);
     }
     else if (g_gametype)
     {
@@ -2134,23 +2122,8 @@ void __cdecl GetGametypeName(int localClientNum, Operand *result)
 
 void __cdecl GetGametypeInternal(int localClientNum, Operand *result)
 {
-    if (localClientNum)
-    {
-        MyAssertHandler(
-            "c:\\trees\\cod3\\src\\ui\\../cgame_mp/cg_local_mp.h",
-            1071,
-            0,
-            "%s\n\t(localClientNum) = %i",
-            "(localClientNum == 0)",
-            localClientNum);
-        MyAssertHandler(
-            "c:\\trees\\cod3\\src\\ui\\../cgame_mp/cg_local_mp.h",
-            1083,
-            0,
-            "%s\n\t(localClientNum) = %i",
-            "(localClientNum == 0)",
-            localClientNum);
-    }
+    cgs_t *cgs = CG_GetLocalClientStaticGlobals(localClientNum);
+
     result->dataType = VAL_STRING;
     if (localClientNum)
         MyAssertHandler(
@@ -2161,7 +2134,7 @@ void __cdecl GetGametypeInternal(int localClientNum, Operand *result)
             "(localClientNum == 0)",
             localClientNum);
     if (clientUIActives[0].connectionState >= CA_LOADING)
-        result->internals.intVal = (int)cgsArray[0].gametype;
+        result->internals.intVal = (int)cgs->gametype;
     else
         result->internals.intVal = g_gametype->current.integer;
     if (!result->internals.intVal)

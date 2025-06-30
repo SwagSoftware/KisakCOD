@@ -1510,7 +1510,7 @@ void __cdecl CG_SubtitlePrint(int msec, const snd_alias_t *alias)
 
     if (msec && alias->subtitle)
     {
-        if (cgsArray[0].viewAspect <= 1.333333373069763)
+        if (CG_GetLocalClientStaticGlobals(0)->viewAspect <= 1.333333373069763)
             integer = cg_subtitleWidthStandard->current.integer;
         else
             integer = cg_subtitleWidthWidescreen->current.integer;
@@ -1657,27 +1657,21 @@ void __cdecl CG_InitVote(int localClientNum)
     clientActive_t *LocalClientGlobals; // [esp+0h] [ebp-10h]
     int time; // [esp+8h] [ebp-8h] BYREF
     int serverId; // [esp+Ch] [ebp-4h] BYREF
+    cgs_t *cgs;
 
     LocalClientGlobals = CL_GetLocalClientGlobals(localClientNum);
-    if (localClientNum)
-        MyAssertHandler(
-            "c:\\trees\\cod3\\src\\cgame_mp\\cg_local_mp.h",
-            1083,
-            0,
-            "%s\n\t(localClientNum) = %i",
-            "(localClientNum == 0)",
-            localClientNum);
-    cgsArray[0].voteTime = 0;
+    cgs = CG_GetLocalClientStaticGlobals(localClientNum);
+    cgs->voteTime = 0;
     ConfigString = CL_GetConfigString(localClientNum, 0xDu);
     if (sscanf(ConfigString, "%d %d", &time, &serverId) == 2 && serverId == LocalClientGlobals->serverId)
-        cgsArray[0].voteTime = time;
+        cgs->voteTime = time;
     v2 = CL_GetConfigString(localClientNum, 0xFu);
-    cgsArray[0].voteYes = atoi(v2);
+    cgs->voteYes = atoi(v2);
     v3 = CL_GetConfigString(localClientNum, 0x10u);
-    cgsArray[0].voteNo = atoi(v3);
+    cgs->voteNo = atoi(v3);
     v4 = CL_GetConfigString(localClientNum, 0xEu);
     v5 = SEH_LocalizeTextMessage(v4, "vote string", LOCMSG_SAFE);
-    I_strncpyz(cgsArray[0].voteString, v5, 256);
+    I_strncpyz(cgs->voteString, v5, 256);
 }
 
 unsigned __int16 __cdecl CG_GetWeaponAttachBone(clientInfo_t *ci, weapType_t weapType)
@@ -1882,6 +1876,7 @@ void __cdecl CG_RegisterGraphics(int localClientNum, const char *mapname)
     int i; // [esp+10h] [ebp-4h]
     int ia; // [esp+10h] [ebp-4h]
     signed int ib; // [esp+10h] [ebp-4h]
+    cgs_t *cgs;
 
     SCR_UpdateLoadScreen();
     CG_LoadingString(localClientNum, " - textures");
@@ -1932,14 +1927,9 @@ void __cdecl CG_RegisterGraphics(int localClientNum, const char *mapname)
     CG_LoadingString(localClientNum, " - items");
     CG_RegisterItems(localClientNum);
     CG_LoadingString(localClientNum, " - inline models");
-    if (localClientNum)
-        MyAssertHandler(
-            "c:\\trees\\cod3\\src\\cgame_mp\\cg_local_mp.h",
-            1083,
-            0,
-            "%s\n\t(localClientNum) = %i",
-            "(localClientNum == 0)",
-            localClientNum);
+
+    cgs = CG_GetLocalClientStaticGlobals(localClientNum);
+    
     CG_LoadingString(localClientNum, " - server models");
     for (i = 1; i < 512; ++i)
     {
@@ -1947,22 +1937,20 @@ void __cdecl CG_RegisterGraphics(int localClientNum, const char *mapname)
         if (*modelName)
         {
             SCR_UpdateLoadScreen();
-            cgsArray[0].gameModels[i] = R_RegisterModel(modelName);
+            cgs->gameModels[i] = R_RegisterModel(modelName);
         }
     }
-    for (ia = 1; ia < 100; ++ia)
+    for (i = 1; i < 100; ++i)
     {
-        effectname = CL_GetConfigString(localClientNum, ia + 1598);
+        effectname = CL_GetConfigString(localClientNum, i + 1598);
         if (*effectname)
         {
-            cgsArray[0].fxs[ia] = FX_Register(effectname);
-            if (!cgsArray[0].fxs[ia])
-                MyAssertHandler(".\\cgame_mp\\cg_main_mp.cpp", 1196, 0, "%s", "cgs->fxs[i]");
+            cgs->fxs[i] = FX_Register(effectname);
+            iassert(cgs->fxs[i]);
         }
     }
-    cgsArray[0].smokeGrenadeFx = FX_Register("props/american_smoke_grenade_mp");
-    if (!cgsArray[0].smokeGrenadeFx)
-        MyAssertHandler(".\\cgame_mp\\cg_main_mp.cpp", 1200, 0, "%s", "cgs->smokeGrenadeFx");
+    cgs->smokeGrenadeFx = FX_Register("props/american_smoke_grenade_mp");
+    iassert(cgs->smokeGrenadeFx);
     for (ib = 1; ib < 16; ++ib)
     {
         shellshock = CL_GetConfigString(localClientNum, ib + 1954);
@@ -1976,7 +1964,7 @@ void __cdecl CG_RegisterGraphics(int localClientNum, const char *mapname)
     }
     if (!BG_LoadShellShockDvars("hold_breath"))
         Com_Error(ERR_DROP, "Couldn't find shock file [hold_breath.shock]\n");
-    BG_SetShellShockParmsFromDvars(&cgsArray[0].holdBreathParams);
+    BG_SetShellShockParmsFromDvars(&cgs->holdBreathParams);
     cgMedia.fx = CG_RegisterImpactEffects(mapname);
     if (!cgMedia.fx)
         Com_Error(ERR_DROP, "Error reading CSV files in the fx directory to identify impact effects");
@@ -2002,6 +1990,7 @@ void __cdecl CG_LoadHudMenu(int localClientNum)
 {
     menuDef_t *menu; // [esp+4h] [ebp-Ch]
     MenuList *menuList; // [esp+8h] [ebp-8h]
+    cgs_t *cgs;
 
     menuList = UI_LoadMenus((char*)"ui_mp/hud.txt", 7);
     UI_AddMenuList(&cgDC[localClientNum], menuList);
@@ -2011,17 +2000,10 @@ void __cdecl CG_LoadHudMenu(int localClientNum)
         menu = Menus_FindByName(&cgDC[localClientNum], "Compass_mp");
     if (menu)
     {
-        if (localClientNum)
-            MyAssertHandler(
-                "c:\\trees\\cod3\\src\\cgame_mp\\cg_local_mp.h",
-                1083,
-                0,
-                "%s\n\t(localClientNum) = %i",
-                "(localClientNum == 0)",
-                localClientNum);
-        cgsArray[0].compassWidth = menu->window.rect.w;
-        cgsArray[0].compassHeight = menu->window.rect.h;
-        cgsArray[0].compassY = menu->window.rect.y;
+        cgs = CG_GetLocalClientStaticGlobals(localClientNum);
+        cgs->compassWidth = menu->window.rect.w;
+        cgs->compassHeight = menu->window.rect.h;
+        cgs->compassY = menu->window.rect.y;
     }
 }
 
@@ -2082,21 +2064,18 @@ void __cdecl CG_LoadAnimTreeInstances(int localClientNum)
     int i; // [esp+Ch] [ebp-4h]
     int ia; // [esp+Ch] [ebp-4h]
     cg_s *cgameGlob;
+    cgs_t *cgs;
 
     cgameGlob = CG_GetLocalClientGlobals(localClientNum);
     generic_human = cgameGlob->bgs.generic_human.tree.anims;
+
     for (i = 0; i < 64; ++i)
         cgameGlob->bgs.clientinfo[i].pXAnimTree = XAnimCreateTree(generic_human, Hunk_AllocXAnimClient);
-    if (localClientNum)
-        MyAssertHandler(
-            "c:\\trees\\cod3\\src\\cgame_mp\\cg_local_mp.h",
-            1083,
-            0,
-            "%s\n\t(localClientNum) = %i",
-            "(localClientNum == 0)",
-            localClientNum);
+
+    cgs = CG_GetLocalClientStaticGlobals(localClientNum);
+    
     for (ia = 0; ia < 8; ++ia)
-        cgsArray[0].corpseinfo[ia].pXAnimTree = XAnimCreateTree(generic_human, Hunk_AllocXAnimClient);
+        cgs->corpseinfo[ia].pXAnimTree = XAnimCreateTree(generic_human, Hunk_AllocXAnimClient);
 }
 
 void __cdecl CG_InitEntities(int localClientNum)
@@ -2116,40 +2095,16 @@ void __cdecl CG_InitEntities(int localClientNum)
 
 void __cdecl CG_InitViewDimensions(int localClientNum)
 {
-    if (localClientNum)
-        MyAssertHandler(
-            "c:\\trees\\cod3\\src\\cgame_mp\\cg_local_mp.h",
-            1083,
-            0,
-            "%s\n\t(localClientNum) = %i",
-            "(localClientNum == 0)",
-            localClientNum);
-    cgsArray[0].viewX = 0;
-    CL_GetScreenDimensions(&cgsArray[0].viewWidth, &cgsArray[0].viewHeight, &cgsArray[0].viewAspect);
-    if (cgsArray[0].viewWidth <= 0)
-        MyAssertHandler(
-            ".\\cgame_mp\\cg_main_mp.cpp",
-            1838,
-            1,
-            "%s\n\t(cgs->viewWidth) = %i",
-            "(cgs->viewWidth > 0)",
-            cgsArray[0].viewWidth);
-    if (cgsArray[0].viewHeight <= 0)
-        MyAssertHandler(
-            ".\\cgame_mp\\cg_main_mp.cpp",
-            1839,
-            1,
-            "%s\n\t(cgs->viewHeight) = %i",
-            "(cgs->viewHeight > 0)",
-            cgsArray[0].viewHeight);
-    if (cgsArray[0].viewAspect <= 0.0)
-        MyAssertHandler(
-            ".\\cgame_mp\\cg_main_mp.cpp",
-            1840,
-            1,
-            "%s\n\t(cgs->viewAspect) = %g",
-            "(cgs->viewAspect > 0)",
-            cgsArray[0].viewAspect);
+    cgs_t *cgs;
+
+    cgs = CG_GetLocalClientStaticGlobals(localClientNum);
+    
+    cgs->viewX = 0;
+    CL_GetScreenDimensions(&cgs->viewWidth, &cgs->viewHeight, &cgs->viewAspect);
+
+    iassert(cgs->viewWidth > 0);
+    iassert(cgs->viewHeight > 0);
+    iassert(cgs->viewAspect > 0);
 }
 
 void __cdecl CG_InitDof(GfxDepthOfField *dof)

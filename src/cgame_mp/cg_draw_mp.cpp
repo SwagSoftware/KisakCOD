@@ -294,12 +294,12 @@ void __cdecl CG_DrawChatMessages(int localClientNum)
                 }
                 v1 = i % chatHeight;
                 msg = cgamestaticGlob->teamChatMsgs[v1];
-                if ((cgs_t *)((char *)cgsArray + v1 * 160) == (cgs_t *)-3728
-                    || *msg != 94
+                if ((cgs_t *)((char *)cgsArray + v1 * 160) == (cgs_t *)-3728 // KISAKTODO: something to do with cgs->teamChatMsgs
+                    || *msg != '^'
                     || !cgamestaticGlob->teamChatMsgs[v1][1]
-                    || cgamestaticGlob->teamChatMsgs[v1][1] == 94
-                    || cgamestaticGlob->teamChatMsgs[v1][1] < 48
-                    || cgamestaticGlob->teamChatMsgs[v1][1] > 57)
+                    || cgamestaticGlob->teamChatMsgs[v1][1] == '^'
+                    || cgamestaticGlob->teamChatMsgs[v1][1] < '0'
+                    || cgamestaticGlob->teamChatMsgs[v1][1] > '9')
                 {
                     color[0] = 1.0;
                     color[1] = 1.0;
@@ -828,13 +828,12 @@ const char *__cdecl CG_GetBoundSpectatorCommand(int localClientNum, const char *
 
     for (i = 0; i < choiceCount; ++i)
     {
-        if (!choices[i])
-            MyAssertHandler(".\\cgame_mp\\cg_draw_mp.cpp", 1228, 0, "%s", "choices[i]");
+        iassert(choices[i]);
         if (UI_GetKeyBindingLocalizedString(localClientNum, choices[i], binding))
             return choices[i];
     }
-    if (choiceCount <= 0)
-        MyAssertHandler(".\\cgame_mp\\cg_draw_mp.cpp", 1233, 0, "%s", "choiceCount > 0");
+    iassert(choiceCount > 0);
+
     return *choices;
 }
 

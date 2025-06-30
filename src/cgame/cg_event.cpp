@@ -1168,11 +1168,6 @@ void __cdecl CG_PlayFx(int localClientNum, centity_s *cent, const float *angles)
 void __cdecl CG_PlayFxOnTag(int localClientNum, centity_s *cent, int eventParm)
 {
     unsigned int ConfigstringConst; // eax
-    char *v4; // eax
-    const char *v5; // eax
-    unsigned int v6; // eax
-    char *v7; // eax
-    const char *v8; // eax
     unsigned __int16 tagName; // [esp+0h] [ebp-1Ch] BYREF
     int dobjHandle; // [esp+4h] [ebp-18h]
     const char *tagAndEffect; // [esp+8h] [ebp-14h]
@@ -1183,35 +1178,15 @@ void __cdecl CG_PlayFxOnTag(int localClientNum, centity_s *cent, int eventParm)
 
     csIndex = eventParm + 1698;
     tagAndEffect = CL_GetConfigString(localClientNum, eventParm + 1698);
-    if (!*tagAndEffect)
-    {
-        ConfigstringConst = SV_GetConfigstringConst(csIndex);
-        v4 = SL_ConvertToString(ConfigstringConst);
-        v5 = va("tagAndEffect: '%s', server: '%s'", tagAndEffect, v4);
-        MyAssertHandler(".\\cgame\\cg_event.cpp", 387, 0, "%s\n\t%s", "tagAndEffect[0]", v5);
-    }
-    if (!tagAndEffect[1])
-    {
-        v6 = SV_GetConfigstringConst(csIndex);
-        v7 = SL_ConvertToString(v6);
-        v8 = va("tagAndEffect: '%s', server: '%s'", tagAndEffect, v7);
-        MyAssertHandler(".\\cgame\\cg_event.cpp", 388, 0, "%s\n\t%s", "tagAndEffect[1]", v8);
-    }
+
+    iassert(tagAndEffect[0]);
+    iassert(tagAndEffect[1]);
+
     fxId = 10 * (*tagAndEffect - 48) + tagAndEffect[1] - 48;
-    if (fxId <= 0 || fxId >= 100)
-        MyAssertHandler(".\\cgame\\cg_event.cpp", 390, 0, "%s", "fxId > 0 && fxId < MAX_EFFECT_NAMES");
-    if (localClientNum)
-        MyAssertHandler(
-            "c:\\trees\\cod3\\src\\cgame\\../cgame_mp/cg_local_mp.h",
-            1083,
-            0,
-            "%s\n\t(localClientNum) = %i",
-            "(localClientNum == 0)",
-            localClientNum);
-    cgs = cgsArray;
-    fxDef = cgsArray[0].fxs[fxId];
-    if (!fxDef)
-        MyAssertHandler(".\\cgame\\cg_event.cpp", 393, 0, "%s", "fxDef");
+    iassert(fxId > 0 && fxId < MAX_EFFECT_NAMES);
+    cgs = CG_GetLocalClientStaticGlobals(localClientNum);
+    fxDef = cgs->fxs[fxId];
+    iassert(fxDef);
     dobjHandle = cent->nextState.number;
     tagName = SL_GetString((char *)tagAndEffect + 2, 0);
     CG_PlayBoltedEffect(localClientNum, fxDef, dobjHandle, tagName);

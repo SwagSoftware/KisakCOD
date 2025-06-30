@@ -690,6 +690,7 @@ void __cdecl HoldBreathSoundLerp(int localClientNum, float lerp)
 {
     int channelIndex; // [esp+0h] [ebp-10Ch]
     float channelVolumes[64]; // [esp+Ch] [ebp-100h] BYREF
+    cgs_t *cgs;
 
     if (lerp == 0.0)
     {
@@ -697,16 +698,9 @@ void __cdecl HoldBreathSoundLerp(int localClientNum, float lerp)
     }
     else
     {
-        if (localClientNum)
-            MyAssertHandler(
-                "c:\\trees\\cod3\\src\\cgame\\../cgame_mp/cg_local_mp.h",
-                1083,
-                0,
-                "%s\n\t(localClientNum) = %i",
-                "(localClientNum == 0)",
-                localClientNum);
+        cgs = CG_GetLocalClientStaticGlobals(localClientNum);
         for (channelIndex = 0; channelIndex < SND_GetEntChannelCount(); ++channelIndex)
-            channelVolumes[channelIndex] = (cgsArray[0].holdBreathParams.sound.channelvolume[channelIndex] - 1.0) * lerp + 1.0;
+            channelVolumes[channelIndex] = (cgs->holdBreathParams.sound.channelvolume[channelIndex] - 1.0) * lerp + 1.0;
         SND_SetChannelVolumes(1, channelVolumes, 0);
     }
 }

@@ -207,20 +207,15 @@ void __cdecl CG_DrawBackdropServerInfo(int localClientNum, float alpha)
     float y; // [esp+60h] [ebp-18h]
     float color[4]; // [esp+64h] [ebp-14h] BYREF
     float fontScale; // [esp+74h] [ebp-4h]
+    cgs_t *cgs;
 
-    color[0] = 1.0;
-    color[1] = 1.0;
-    color[2] = 1.0;
+    color[0] = 1.0f;
+    color[1] = 1.0f;
+    color[2] = 1.0f;
     color[3] = alpha;
-    if (localClientNum)
-        MyAssertHandler(
-            "c:\\trees\\cod3\\src\\cgame_mp\\cg_local_mp.h",
-            1083,
-            0,
-            "%s\n\t(localClientNum) = %i",
-            "(localClientNum == 0)",
-            localClientNum);
-    serverName = cgsArray[0].szHostName;
+
+    cgs = CG_GetLocalClientStaticGlobals(localClientNum);
+    serverName = cgs->szHostName;
     serverIP = CL_GetServerIPAddress();
     if (!I_stricmp(serverIP, "0.0.0.0:0"))
         serverIP = UI_SafeTranslateString("CGAME_LISTENSERVER");

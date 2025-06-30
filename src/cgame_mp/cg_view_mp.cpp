@@ -737,10 +737,10 @@ void __cdecl CG_CalcVrect(int localClientNum)
     cgameGlob = CG_GetLocalClientGlobals(localClientNum);
     cgs = CG_GetLocalClientStaticGlobals(localClientNum);
     
-    cgameGlob->refdef.x = cgsArray[0].viewX;
-    cgameGlob->refdef.y = cgsArray[0].viewY;
-    cgameGlob->refdef.width = cgsArray[0].viewWidth;
-    cgameGlob->refdef.height = cgsArray[0].viewHeight;
+    cgameGlob->refdef.x = cgs->viewX;
+    cgameGlob->refdef.y = cgs->viewY;
+    cgameGlob->refdef.width = cgs->viewWidth;
+    cgameGlob->refdef.height = cgs->viewHeight;
     cgameGlob->refdef.useScissorViewport = 0;
 }
 
@@ -1343,15 +1343,7 @@ int __cdecl CG_DrawActiveFrame(
                 FX_SetNextUpdateTime(localClientNum, cgameGlob->time);
                 FX_FillUpdateCmd(localClientNum, &fxUpdateCmd);
                 R_UpdateNonDependentEffects(&fxUpdateCmd);
-                if (localClientNum)
-                    MyAssertHandler(
-                        "c:\\trees\\cod3\\src\\cgame_mp\\cg_local_mp.h",
-                        1083,
-                        0,
-                        "%s\n\t(localClientNum) = %i",
-                        "(localClientNum == 0)",
-                        localClientNum);
-                cgs = cgsArray;
+                cgs = CG_GetLocalClientStaticGlobals(localClientNum);
                 if (cgameGlob->snap->ps.shellshockIndex)
                 {
                     zfar = cgameGlob->snap->ps.shellshockDuration;

@@ -12,6 +12,8 @@ struct Font_s;
 struct Material;
 struct ScreenPlacement;
 
+#define MAX_EFFECT_NAMES 100
+
 #define ACTIONSLOTS_NUM 3
 
 #define ENTITYNUM_NONE 1023
