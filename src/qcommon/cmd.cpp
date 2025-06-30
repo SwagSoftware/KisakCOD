@@ -188,6 +188,7 @@ void Cmd_Vstr_f(void) {
 	}
 }
 
+// avail add
 #include <universal/com_files.h>
 #include <format>
 #include <filesystem>
@@ -213,7 +214,7 @@ void Cmd_Dumpraw_f(void)
 			std::filesystem::create_directories(rawDir / dir);
 
 			FILE* f;
-			fopen_s(&f, std::format("{}\\{}", rawDir, file.rawfile->name).c_str(), "w");
+			fopen_s(&f, std::format("{}\\{}", rawDir, file.rawfile->name).c_str(), "wb");
 			fwrite(file.rawfile->buffer, file.rawfile->len, 1, f);
 			fflush(f);
 			fclose(f);
@@ -223,6 +224,7 @@ void Cmd_Dumpraw_f(void)
     DumpFileType(ASSET_TYPE_RAWFILE);
     //DumpFileType(ASSET_TYPE_MENU);
 }
+// avail end
 
 void Cmd_Init()
 {
@@ -232,7 +234,9 @@ void Cmd_Init()
 	Cmd_AddCommandInternal("exec", Cmd_Exec_f, &Cmd_Exec_f_VAR);
 	Cmd_AddCommandInternal("vstr", Cmd_Vstr_f, &Cmd_Vstr_f_VAR);
 	Cmd_AddCommandInternal("wait", Cmd_Wait_f, &Cmd_Wait_f_VAR);
+    // avail add
     Cmd_AddCommandInternal("dumpraw", Cmd_Dumpraw_f, &Cmd_Dumpraw_f_VAR);
+    // avail end
 }
 
 void Cmd_AddCommandInternal(const char* cmdName, void(__cdecl* function)(), cmd_function_s* allocedCmd)
