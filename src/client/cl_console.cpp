@@ -389,11 +389,11 @@ void __cdecl Con_Init()
 {
     int i; // [esp+0h] [ebp-4h]
 
-    con_restricted = Dvar_RegisterBool("monkeytoy", 1, 1/*DVAR_FLAG_SAVED*/, "Restrict console access"); // KISAK: just enable console by default
+    con_restricted = Dvar_RegisterBool("monkeytoy", 1, DVAR_ARCHIVE, "Restrict console access"); // KISAK: just enable console by default
     con_matchPrefixOnly = Dvar_RegisterBool(
         "con_matchPrefixOnly",
         1,
-        1u,
+        DVAR_ARCHIVE,
         "Only match the prefix when listing matching Dvars");
     Field_Clear(&g_consoleField);
     g_consoleField.widthInPixels = g_console_field_width;
@@ -601,7 +601,7 @@ void Con_OneTimeInit()
         0.2f,
         1.0f,
         min,
-        1u,
+        DVAR_ARCHIVE,
         "Color of the console input box");
     mina.value.max = 1.0f;
     mina.value.min = 0.0f;
@@ -612,7 +612,7 @@ void Con_OneTimeInit()
         0.34999999f,
         1.0f,
         mina,
-        1u,
+        DVAR_ARCHIVE,
         "Color of the console input hint box");
     minb.value.max = 1.0f;
     minb.value.min = 0.0f;
@@ -623,7 +623,7 @@ void Con_OneTimeInit()
         0.94999999f,
         0.60000002f,
         minb,
-        1u,
+        DVAR_ARCHIVE,
         "Color of the console output slider bar");
     minc.value.max = 1.0f;
     minc.value.min = 0.0f;
@@ -634,7 +634,7 @@ void Con_OneTimeInit()
         0.1f,
         0.60000002f,
         minc,
-        1u,
+        DVAR_ARCHIVE,
         "Color of the console slider");
     mind.value.max = 1.0f;
     mind.value.min = 0.0f;
@@ -645,7 +645,7 @@ void Con_OneTimeInit()
         0.30000001f,
         0.75f,
         mind,
-        1u,
+        DVAR_ARCHIVE,
         "Color of the console output");
     for (gameWindowIndex = 0; gameWindowIndex < 4; ++gameWindowIndex)
     {
@@ -672,7 +672,7 @@ void Con_OneTimeInit()
             con_gameMsgWindowNMsgTime_Names[gameWindowIndex],
             defaultGameMessageTimes[gameWindowIndex],
             mine,
-            1u,
+            DVAR_ARCHIVE,
             dvarDesc);
         dvarDesca = con_gameMsgWindowNLineCount_Descs[gameWindowIndex];
         sprintf(con_gameMsgWindowNLineCount_Names[gameWindowIndex], "con_gameMsgWindow%dLineCount", gameWindowIndex);
@@ -695,7 +695,7 @@ void Con_OneTimeInit()
             con_gameMsgWindowNLineCount_Names[gameWindowIndex],
             defaultGameMessageWindowLineCounts[gameWindowIndex],
             (DvarLimits)0x900000001LL,
-            1u,
+            DVAR_ARCHIVE,
             dvarDesca);
         dvarDescb = con_gameMsgWindowNScrollTime_Descs[gameWindowIndex];
         sprintf(con_gameMsgWindowNScrollTime_Names[gameWindowIndex], "con_gameMsgWindow%dScrollTime", gameWindowIndex);
@@ -723,7 +723,7 @@ void Con_OneTimeInit()
             con_gameMsgWindowNScrollTime_Names[gameWindowIndex],
             0.25f,
             minf,
-            1u,
+            DVAR_ARCHIVE,
             dvarDescb);
         dvarDescc = con_gameMsgWindowNFadeInTime_Descs[gameWindowIndex];
         sprintf(con_gameMsgWindowNFadeInTime_Names[gameWindowIndex], "con_gameMsgWindow%dFadeInTime", gameWindowIndex);
@@ -752,7 +752,7 @@ void Con_OneTimeInit()
             con_gameMsgWindowNFadeInTime_Names[gameWindowIndex],
             v18,
             ming,
-            1u,
+            DVAR_ARCHIVE,
             dvarDescc);
         dvarDescd = con_gameMsgWindowNFadeOutTime_Descs[gameWindowIndex];
         sprintf(con_gameMsgWindowNFadeOutTime_Names[gameWindowIndex], "con_gameMsgWindow%dFadeOutTime", gameWindowIndex);
@@ -781,7 +781,7 @@ void Con_OneTimeInit()
             con_gameMsgWindowNFadeOutTime_Names[gameWindowIndex],
             v17,
             minh,
-            1u,
+            DVAR_ARCHIVE,
             dvarDescd);
         dvarDesce = con_gameMsgWindowNSplitscreenScale_Descs[gameWindowIndex];
         sprintf(
@@ -809,7 +809,7 @@ void Con_OneTimeInit()
             con_gameMsgWindowNSplitscreenScale_Names[gameWindowIndex],
             1.5f,
             mini,
-            1u,
+            DVAR_ARCHIVE,
             dvarDesce);
     }
     minj.value.max = FLT_MAX;
@@ -818,7 +818,7 @@ void Con_OneTimeInit()
         "con_errormessagetime",
         8.0f,
         minj,
-        1u,
+        DVAR_ARCHIVE,
         "Onscreen time for error messages in seconds");
     mink.value.max = FLT_MAX;
     mink.value.min = 0.0f;
@@ -826,31 +826,31 @@ void Con_OneTimeInit()
         "con_minicontime",
         4.0f,
         mink,
-        1u,
+        DVAR_ARCHIVE,
         "Onscreen time for minicon messages in seconds");
     con_miniconlines = Dvar_RegisterInt(
         "con_miniconlines",
         5,
         (DvarLimits)0x6400000000LL,
-        1u,
+        DVAR_ARCHIVE,
         "Number of lines in the minicon message window");
     con_typewriterPrintSpeed = Dvar_RegisterInt(
         "con_typewriterPrintSpeed",
         50,
         (DvarLimits)0x7FFFFFFF00000000LL,
-        1u,
+        DVAR_ARCHIVE,
         "Time (in milliseconds) to print each letter in the line.");
     con_typewriterDecayStartTime = Dvar_RegisterInt(
         "con_typewriterDecayStartTime",
         6000,
         (DvarLimits)0x7FFFFFFF00000000LL,
-        1u,
+        DVAR_ARCHIVE,
         "Time (in milliseconds) to spend between the build and disolve phases.");
     con_typewriterDecayDuration = Dvar_RegisterInt(
         "con_typewriterDecayDuration",
         700,
         (DvarLimits)0x7FFFFFFF00000000LL,
-        1u,
+        DVAR_ARCHIVE,
         "Time (in milliseconds) to spend disolving the line away.");
     minl.value.max = 1.0f;
     minl.value.min = 0.0f;
@@ -860,7 +860,7 @@ void Con_OneTimeInit()
         1.0f,
         1.0f,
         minl,
-        0x1000u,
+        DVAR_SAVED,
         "Base color of typewritten objective text.");
     minm.value.max = 1.0f;
     minm.value.min = 0.0f;
@@ -871,7 +871,7 @@ void Con_OneTimeInit()
         0.18000001f,
         1.0f,
         minm,
-        1u,
+        DVAR_ARCHIVE,
         "Color of typewritten objective text.");
     minn.value.max = 1.0f;
     minn.value.min = 0.0f;
@@ -882,7 +882,7 @@ void Con_OneTimeInit()
         0.80000001f,
         1.0f,
         minn,
-        1u,
+        DVAR_ARCHIVE,
         "Color of typewritten objective text.");
     mino.value.max = 1.0f;
     mino.value.min = 0.0f;
@@ -893,7 +893,7 @@ void Con_OneTimeInit()
         0.0f,
         1.0f,
         mino,
-        1u,
+        DVAR_ARCHIVE,
         "Color of typewritten objective text.");
     minp.value.max = 1.0f;
     minp.value.min = 0.0f;
@@ -904,7 +904,7 @@ void Con_OneTimeInit()
         0.60000002f,
         1.0f,
         minp,
-        1u,
+        DVAR_ARCHIVE,
         "Color of typewritten objective text.");
     Con_InitMessageWindow(
         &con.consoleWindow,

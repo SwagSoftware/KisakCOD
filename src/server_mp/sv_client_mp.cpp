@@ -67,7 +67,7 @@ void __cdecl SV_AuthorizeRequest(netadr_t from, int challenge, const char *cdkey
     if (svs.authorizeAddress.type != NA_BAD)
     {
         game[0] = 0;
-        v8 = Dvar_RegisterString("fs_game", "", 0x1Cu, "File sysytem base game name");
+        v8 = Dvar_RegisterString("fs_game", "", DVAR_SERVERINFO | DVAR_SYSTEMINFO | DVAR_INIT, "File sysytem base game name");
         if (v8 && v8->current.integer)
         {
             integer = (char*)v8->current.integer;

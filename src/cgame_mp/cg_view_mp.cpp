@@ -229,7 +229,7 @@ void __cdecl CG_ViewRegisterDvars()
         "cg_heliKillCamDist",
         1000.0,
         min,
-        0x80u,
+        DVAR_CHEAT,
         "Helicopter kill camera distance from helicopter.");
     mina.value.max = 160.0f;
     mina.value.min = 0.1f;
@@ -237,7 +237,7 @@ void __cdecl CG_ViewRegisterDvars()
         "cg_heliKillCamFov",
         15.0f,
         mina,
-        0x80u,
+        DVAR_CHEAT,
         "Helicopter kill camera field of view.");
     minb.value.max = FLT_MAX;
     minb.value.min = 0.0f;
@@ -245,7 +245,7 @@ void __cdecl CG_ViewRegisterDvars()
         "cg_heliKillCamZDist",
         50.0f,
         minb,
-        0x80u,
+        DVAR_CHEAT,
         "Helicopter kill camera distance above the helicopter.");
     minc.value.max = 10.0f;
     minc.value.min = 4.0f;
@@ -253,7 +253,7 @@ void __cdecl CG_ViewRegisterDvars()
         "cg_heliKillCamNearBlur",
         4.0f,
         minc,
-        0x80u,
+        DVAR_CHEAT,
         "Sets the radius of the gaussian blur used by depth of field, in pixels at 640x480");
     mind.value.max = 10.0f;
     mind.value.min = 0.0f;
@@ -261,7 +261,7 @@ void __cdecl CG_ViewRegisterDvars()
         "cg_heliKillCamFarBlur",
         2.0f,
         mind,
-        0x80u,
+        DVAR_CHEAT,
         "Sets the radius of the gaussian blur used by depth of field, in pixels at 640x480");
     mine.value.max = FLT_MAX;
     mine.value.min = 0.0f;
@@ -269,7 +269,7 @@ void __cdecl CG_ViewRegisterDvars()
         "cg_heliKillCamFarBlurStart",
         100.0f,
         mine,
-        0x80u,
+        DVAR_CHEAT,
         "Helicopter kill camera distance above the helicopter.");
     minf.value.max = FLT_MAX;
     minf.value.min = 0.0f;
@@ -277,7 +277,7 @@ void __cdecl CG_ViewRegisterDvars()
         "cg_heliKillCamFarBlurDist",
         300.0f,
         minf,
-        0x80u,
+        DVAR_CHEAT,
         "Helicopter kill camera distance above the helicopter.");
     ming.value.max = FLT_MAX;
     ming.value.min = 0.0f;
@@ -285,7 +285,7 @@ void __cdecl CG_ViewRegisterDvars()
         "cg_heliKillCamNearBlurStart",
         0.0f,
         ming,
-        0x80u,
+        DVAR_CHEAT,
         "Helicopter kill camera distance above the helicopter.");
     minh.value.max = 10000.0f;
     minh.value.min = 0.0f;
@@ -293,7 +293,7 @@ void __cdecl CG_ViewRegisterDvars()
         "cg_heliKillCamNearBlurEnd",
         100.0f,
         minh,
-        0x80u,
+        DVAR_CHEAT,
         "Helicopter kill camera distance above the helicopter.");
     mini.value.max = 160.0f;
     mini.value.min = 0.1f;
@@ -301,7 +301,7 @@ void __cdecl CG_ViewRegisterDvars()
         "cg_airstrikeKillCamFov",
         80.0f,
         mini,
-        0x80u,
+        DVAR_CHEAT,
         "Airstrike kill camera field of view.");
     minj.value.max = FLT_MAX;
     minj.value.min = 0.0f;
@@ -309,7 +309,7 @@ void __cdecl CG_ViewRegisterDvars()
         "cg_airstrikeKillCamDist",
         200.0f,
         minj,
-        0x80u,
+        DVAR_CHEAT,
         "Airstrike kill camera distance.");
     mink.value.max = FLT_MAX;
     mink.value.min = 0.0f;
@@ -317,7 +317,7 @@ void __cdecl CG_ViewRegisterDvars()
         "cg_airstrikeKillCamCloseXYDist",
         24.0f,
         mink,
-        0x80u,
+        DVAR_CHEAT,
         "Airstrike kill camera closest distance in front of the bomb.");
     minl.value.max = FLT_MAX;
     minl.value.min = 0.0f;
@@ -325,7 +325,7 @@ void __cdecl CG_ViewRegisterDvars()
         "cg_airstrikeKillCamCloseZDist",
         24.0f,
         minl,
-        0x80u,
+        DVAR_CHEAT,
         "Airstrike kill camera closest distance above the target.");
     minm.value.max = 10.0f;
     minm.value.min = 4.0f;
@@ -333,7 +333,7 @@ void __cdecl CG_ViewRegisterDvars()
         "cg_airstrikeKillCamNearBlur",
         4.0f,
         minm,
-        0x80u,
+        DVAR_CHEAT,
         "Sets the radius of the gaussian blur used by depth of field, in pixels at 640x480");
     minn.value.max = 10.0f;
     minn.value.min = 0.0f;
@@ -341,7 +341,7 @@ void __cdecl CG_ViewRegisterDvars()
         "cg_airstrikeKillCamFarBlur",
         2.0f,
         minn,
-        0x80u,
+        DVAR_CHEAT,
         "Sets the radius of the gaussian blur used by depth of field, in pixels at 640x480");
     mino.value.max = FLT_MAX;
     mino.value.min = 0.0f;
@@ -349,7 +349,7 @@ void __cdecl CG_ViewRegisterDvars()
         "cg_airstrikeKillCamFarBlurStart",
         100.0f,
         mino,
-        0x80u,
+        DVAR_CHEAT,
         "Airstrike kill camera distance above the airplane.");
     minp.value.max = FLT_MAX;
     minp.value.min = 0.0f;
@@ -357,7 +357,7 @@ void __cdecl CG_ViewRegisterDvars()
         "cg_airstrikeKillCamFarBlurDist",
         300.0f,
         minp,
-        0x80u,
+        DVAR_CHEAT,
         "Airstrike kill camera distance above the airplane.");
     minq.value.max = FLT_MAX;
     minq.value.min = 0.0f;
@@ -365,7 +365,7 @@ void __cdecl CG_ViewRegisterDvars()
         "cg_airstrikeKillCamNearBlurStart",
         0.0f,
         minq,
-        0x80u,
+        DVAR_CHEAT,
         "Airstrike kill camera distance above the airplane.");
     minr.value.max = 10000.0f;
     minr.value.min = 0.0f;
@@ -373,7 +373,7 @@ void __cdecl CG_ViewRegisterDvars()
         "cg_airstrikeKillCamNearBlurEnd",
         100.0f,
         minr,
-        0x80u,
+        DVAR_CHEAT,
         "Airstrike kill camera distance above the airplane.");
 }
 

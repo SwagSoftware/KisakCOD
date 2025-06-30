@@ -772,9 +772,9 @@ void __cdecl CL_Vid_Restart_f()
         cls.rendererStarted = 0;
         CL_ResetPureClientAtServer(localClientNum);
         Com_Restart();
-        Dvar_RegisterInt("loc_language", 0, (DvarLimits)0xE00000000LL, 0x21u, "The current language locale");
-        Dvar_RegisterBool("loc_translate", 1, 0x20u, "Turn on string translation");
-        Dvar_RegisterBool("fs_ignoreLocalized", 0, 0xA0u, "Ignore localized assets");
+        Dvar_RegisterInt("loc_language", 0, (DvarLimits)0xE00000000LL, DVAR_ARCHIVE | DVAR_LATCH, "The current language locale");
+        Dvar_RegisterBool("loc_translate", true, DVAR_LATCH, "Turn on string translation");
+        Dvar_RegisterBool("fs_ignoreLocalized", false, DVAR_LATCH | DVAR_CHEAT, "Ignore localized assets");
         v2 = FS_ConditionalRestart(localClientNum, clc->checksumFeed) || cls.gameDirChanged;
         fileSystemRestarted = v2;
         SEH_UpdateLanguageInfo();
@@ -3592,153 +3592,153 @@ void __cdecl CL_InitOnceForAllClients()
     srand(v0);
     Con_Init();
     CL_InitInput();
-    cl_noprint = Dvar_RegisterBool("cl_noprint", 0, 0, "Print nothing to the console");
+    cl_noprint = Dvar_RegisterBool("cl_noprint", false, DVAR_NOFLAG, "Print nothing to the console");
     for (i = 0; i < 5; ++i)
         customclass[i] = Dvar_RegisterString(customClassDvars[i], "", 1u, "Custom class name");
     onlinegame = Dvar_RegisterBool(
         "onlinegame",
-        1,
-        0x80u,
+        true,
+        DVAR_CHEAT,
         "Current game is an online game with stats, custom classes, unlocks");
     Dvar_SetBool(onlinegame, 1);
-    cl_hudDrawsBehindUI = Dvar_RegisterBool("cl_hudDrawsBehindUI", 1, 0, "Should the HUD draw when the UI is up?");
-    cl_voice = Dvar_RegisterBool("cl_voice", 1, 3u, "Use voice communications");
+    cl_hudDrawsBehindUI = Dvar_RegisterBool("cl_hudDrawsBehindUI", true, DVAR_NOFLAG, "Should the HUD draw when the UI is up?");
+    cl_voice = Dvar_RegisterBool("cl_voice", true, DVAR_ARCHIVE | DVAR_USERINFO, "Use voice communications");
     min.value.max = 3600.0;
     min.value.min = 0.0;
-    cl_timeout = Dvar_RegisterFloat("cl_timeout", 40.0, min, 0, "Seconds with no received packets until a timeout occurs");
+    cl_timeout = Dvar_RegisterFloat("cl_timeout", 40.0, min, DVAR_NOFLAG, "Seconds with no received packets until a timeout occurs");
     mina.value.max = 3600.0;
     mina.value.min = 0.0;
     cl_connectTimeout = Dvar_RegisterFloat(
         "cl_connectTimeout",
         200.0,
         mina,
-        0,
+        DVAR_NOFLAG,
         "Timeout time in seconds while connecting to a server");
     cl_connectionAttempts = Dvar_RegisterInt(
         "cl_connectionAttempts",
         10,
         (DvarLimits)0x7FFFFFFF00000000LL,
-        0,
+        DVAR_NOFLAG,
         "Maximum number of connection attempts before aborting");
-    cl_shownet = Dvar_RegisterInt("cl_shownet", 0, (DvarLimits)0x4FFFFFFFELL, 0, "Display network debugging information");
-    cl_shownuments = Dvar_RegisterBool("cl_shownuments", 0, 0, "Show the number of entities");
+    cl_shownet = Dvar_RegisterInt("cl_shownet", 0, (DvarLimits)0x4FFFFFFFELL, DVAR_NOFLAG, "Display network debugging information");
+    cl_shownuments = Dvar_RegisterBool("cl_shownuments", false, DVAR_NOFLAG, "Show the number of entities");
     cl_showServerCommands = Dvar_RegisterBool(
         "cl_showServerCommands",
         0,
-        0,
+        DVAR_NOFLAG,
         "Enable debugging information for server commands");
-    cl_showSend = Dvar_RegisterBool("cl_showSend", 0, 0, "Enable debugging information for sent commands");
-    cl_showTimeDelta = Dvar_RegisterBool("cl_showTimeDelta", 0, 0, "Enable debugging information for time delta");
+    cl_showSend = Dvar_RegisterBool("cl_showSend", false, DVAR_NOFLAG, "Enable debugging information for sent commands");
+    cl_showTimeDelta = Dvar_RegisterBool("cl_showTimeDelta", false, DVAR_NOFLAG, "Enable debugging information for time delta");
     cl_freezeDemo = Dvar_RegisterBool(
         "cl_freezeDemo",
-        0,
-        0,
+        false, 
+        DVAR_NOFLAG,
         "cl_freezeDemo is used to lock a demo in place for single frame advances");
-    cl_activeAction = Dvar_RegisterString("activeAction", "", 0, "Action to execute in first frame");
-    cl_avidemo = Dvar_RegisterInt("cl_avidemo", 0, (DvarLimits)0x7FFFFFFF00000000LL, 0, "AVI demo frames per second");
-    cl_forceavidemo = Dvar_RegisterBool("cl_forceavidemo", 0, 0, "Record AVI demo even if client is not active");
+    cl_activeAction = Dvar_RegisterString("activeAction", "", DVAR_NOFLAG, "Action to execute in first frame");
+    cl_avidemo = Dvar_RegisterInt("cl_avidemo", 0, (DvarLimits)0x7FFFFFFF00000000LL, DVAR_NOFLAG, "AVI demo frames per second");
+    cl_forceavidemo = Dvar_RegisterBool("cl_forceavidemo", false, DVAR_NOFLAG, "Record AVI demo even if client is not active");
     minb.value.max = FLT_MAX;
     minb.value.min = -FLT_MAX;
-    cl_yawspeed = Dvar_RegisterFloat("cl_yawspeed", 140.0, minb, 1u, "Max yaw speed in degrees for game pad and keyboard");
+    cl_yawspeed = Dvar_RegisterFloat("cl_yawspeed", 140.0, minb, DVAR_ARCHIVE, "Max yaw speed in degrees for game pad and keyboard");
     minc.value.max = FLT_MAX;
     minc.value.min = -FLT_MAX;
-    cl_pitchspeed = Dvar_RegisterFloat("cl_pitchspeed", 140.0, minc, 1u, "Max pitch speed in degrees for game pad");
+    cl_pitchspeed = Dvar_RegisterFloat("cl_pitchspeed", 140.0, minc, DVAR_ARCHIVE, "Max pitch speed in degrees for game pad");
     mind.value.max = FLT_MAX;
     mind.value.min = 0.0;
     cl_anglespeedkey = Dvar_RegisterFloat(
         "cl_anglespeedkey",
         1.5,
         mind,
-        0,
+        DVAR_NOFLAG,
         "Multiplier for max angle speed for game pad and keyboard");
     cl_maxpackets = Dvar_RegisterInt(
         "cl_maxpackets",
         30,
         (DvarLimits)0x640000000FLL,
-        1u,
+        DVAR_ARCHIVE,
         "Maximum number of packets sent per frame");
-    cl_packetdup = Dvar_RegisterInt("cl_packetdup", 1, (DvarLimits)0x500000000LL, 1u, "Enable packet duplication");
+    cl_packetdup = Dvar_RegisterInt("cl_packetdup", 1, (DvarLimits)0x500000000LL, DVAR_ARCHIVE, "Enable packet duplication");
     mine.value.max = 100.0f;
     mine.value.min = 0.0099999998f;
-    cl_sensitivity = Dvar_RegisterFloat("sensitivity", 5.0f, mine, 1u, "Mouse sensitivity");
+    cl_sensitivity = Dvar_RegisterFloat("sensitivity", 5.0f, mine, DVAR_ARCHIVE, "Mouse sensitivity");
     minf.value.max = 100.0f;
     minf.value.min = 0.0f;
-    cl_mouseAccel = Dvar_RegisterFloat("cl_mouseAccel", 0.0f, minf, 1u, "Mouse acceleration");
-    cl_freelook = Dvar_RegisterBool("cl_freelook", 1, 1u, "Enable looking with mouse");
+    cl_mouseAccel = Dvar_RegisterFloat("cl_mouseAccel", 0.0f, minf, DVAR_ARCHIVE, "Mouse acceleration");
+    cl_freelook = Dvar_RegisterBool("cl_freelook", true, DVAR_ARCHIVE, "Enable looking with mouse");
     cl_showMouseRate = Dvar_RegisterBool(
         "cl_showmouserate",
-        0,
-        0,
+        false,
+        DVAR_NOFLAG,
         "Print mouse rate debugging information to the console");
-    cl_allowDownload = Dvar_RegisterBool("cl_allowDownload", 1, 1u, "Allow client downloads from the server");
-    cl_wwwDownload = Dvar_RegisterBool("cl_wwwDownload", 1, 3u, "Download files via HTTP");
-    cl_talking = Dvar_RegisterBool("cl_talking", 0, 0, "Client is talking");
-    cl_inGameVideo = Dvar_RegisterBool("r_inGameVideo", 1, 1u, "Allow in game cinematics");
+    cl_allowDownload = Dvar_RegisterBool("cl_allowDownload", true, DVAR_ARCHIVE, "Allow client downloads from the server");
+    cl_wwwDownload = Dvar_RegisterBool("cl_wwwDownload", true, DVAR_ARCHIVE | DVAR_USERINFO, "Download files via HTTP");
+    cl_talking = Dvar_RegisterBool("cl_talking", false, DVAR_NOFLAG, "Client is talking");
+    cl_inGameVideo = Dvar_RegisterBool("r_inGameVideo", true, DVAR_ARCHIVE, "Allow in game cinematics");
     cl_serverStatusResendTime = Dvar_RegisterInt(
         "cl_serverStatusResendTime",
         750,
         (DvarLimits)0xE1000000000LL,
-        0,
+        DVAR_NOFLAG,
         "Time in milliseconds to resend a server status message");
     cl_bypassMouseInput = Dvar_RegisterBool(
         "cl_bypassMouseInput",
         0,
-        0,
+        DVAR_NOFLAG,
         "Bypass UI mouse input and send directly to the game");
     ming.value.max = 1.0f;
     ming.value.min = -1.0f;
-    m_pitch = Dvar_RegisterFloat("m_pitch", 0.022f, ming, 1u, "Default pitch");
+    m_pitch = Dvar_RegisterFloat("m_pitch", 0.022f, ming, DVAR_ARCHIVE, "Default pitch");
     minh.value.max = 1.0f;
     minh.value.min = -1.0f;
-    m_yaw = Dvar_RegisterFloat("m_yaw", 0.022f, minh, 1u, "Default yaw");
+    m_yaw = Dvar_RegisterFloat("m_yaw", 0.022f, minh, DVAR_ARCHIVE, "Default yaw");
     mini.value.max = 1.0f;
     mini.value.min = -1.0f;
-    m_forward = Dvar_RegisterFloat("m_forward", 0.25f, mini, 1u, "Forward speed in units per second");
+    m_forward = Dvar_RegisterFloat("m_forward", 0.25f, mini, DVAR_ARCHIVE, "Forward speed in units per second");
     minj.value.max = 1.0f;
     minj.value.min = -1.0f;
-    m_side = Dvar_RegisterFloat("m_side", 0.25f, minj, 1u, "Sideways motion in units per second");
-    m_filter = Dvar_RegisterBool("m_filter", 0, 1u, "Allow mouse movement smoothing");
-    cl_motdString = Dvar_RegisterString("cl_motdString", "", 0x40u, "Message of the day");
-    cl_ingame = Dvar_RegisterBool("cl_ingame", 0, 0x40u, "True if the game is active");
-    Dvar_RegisterInt("cl_maxPing", 800, (DvarLimits)0x7D000000014LL, 1u, "Maximum ping for the client");
+    m_side = Dvar_RegisterFloat("m_side", 0.25f, minj, DVAR_ARCHIVE, "Sideways motion in units per second");
+    m_filter = Dvar_RegisterBool("m_filter", false, DVAR_ARCHIVE, "Allow mouse movement smoothing");
+    cl_motdString = Dvar_RegisterString("cl_motdString", "", DVAR_ROM, "Message of the day");
+    cl_ingame = Dvar_RegisterBool("cl_ingame", 0, DVAR_ROM, "True if the game is active");
+    Dvar_RegisterInt("cl_maxPing", 800, (DvarLimits)0x7D000000014LL, DVAR_ARCHIVE, "Maximum ping for the client");
     cl_profileTextHeight = Dvar_RegisterInt(
         "cl_profileTextHeight",
         19,
         (DvarLimits)0x6400000001LL,
-        0,
+        DVAR_NOFLAG,
         "Text size to draw the network profile data");
     cl_profileTextY = Dvar_RegisterInt(
         "cl_profileTextY",
         110,
         (DvarLimits)0x32000000000LL,
-        0,
+        DVAR_NOFLAG,
         "Y position to draw the profile data");
     name = Dvar_RegisterString("name", "", 3u, "Player name");
-    Dvar_RegisterInt("rate", 25000, (DvarLimits)0x61A8000003E8LL, 3u, "Player's preferred baud rate");
-    Dvar_RegisterInt("snaps", 20, (DvarLimits)0x1E00000001LL, 3u, "Snapshot rate");
-    Dvar_RegisterBool("cl_punkbuster", 1, 0x13u, "Determines whether PunkBuster is enabled");
-    Dvar_RegisterString("password", "", 2u, "password");
-    nextdemo = Dvar_RegisterString("nextdemo", "", 0, "The next demo to play");
-    Dvar_RegisterBool("hud_enable", 1, 1u, "Enable the HUD display");
-    Dvar_RegisterBool("cg_blood", 1, 1u, "Show blood");
-    cl_updateavailable = Dvar_RegisterBool("cl_updateavailable", 0, 0x40u, "True if there is an available update");
-    cl_updatefiles = Dvar_RegisterString("cl_updatefiles", "", 0x40u, "The file that is being updated");
-    cl_updateoldversion = Dvar_RegisterString("cl_updateoldversion", "", 0x40u, "The version before update");
-    cl_updateversion = Dvar_RegisterString("cl_updateversion", "", 0x40u, "The updated version");
-    cl_debugMessageKey = Dvar_RegisterBool("cl_debugMessageKey", 0, 0, "Enable message key debugging information");
+    Dvar_RegisterInt("rate", 25000, (DvarLimits)0x61A8000003E8LL, DVAR_ARCHIVE | DVAR_USERINFO, "Player's preferred baud rate");
+    Dvar_RegisterInt("snaps", 20, (DvarLimits)0x1E00000001LL, DVAR_ARCHIVE | DVAR_USERINFO, "Snapshot rate");
+    Dvar_RegisterBool("cl_punkbuster", 1, DVAR_ARCHIVE | DVAR_USERINFO | DVAR_INIT, "Determines whether PunkBuster is enabled");
+    Dvar_RegisterString("password", "", DVAR_USERINFO, "password");
+    nextdemo = Dvar_RegisterString("nextdemo", "", DVAR_NOFLAG, "The next demo to play");
+    Dvar_RegisterBool("hud_enable", 1, DVAR_ARCHIVE, "Enable the HUD display");
+    Dvar_RegisterBool("cg_blood", 1, DVAR_ARCHIVE, "Show blood");
+    cl_updateavailable = Dvar_RegisterBool("cl_updateavailable", false, DVAR_ROM, "True if there is an available update");
+    cl_updatefiles = Dvar_RegisterString("cl_updatefiles", "", DVAR_ROM, "The file that is being updated");
+    cl_updateoldversion = Dvar_RegisterString("cl_updateoldversion", "", DVAR_ROM, "The version before update");
+    cl_updateversion = Dvar_RegisterString("cl_updateversion", "", DVAR_ROM, "The updated version");
+    cl_debugMessageKey = Dvar_RegisterBool("cl_debugMessageKey", false, DVAR_NOFLAG, "Enable message key debugging information");
     I_strncpyz(cls.autoupdateServerNames[0], "cod2update.activision.com", 64);
     I_strncpyz(cls.autoupdateServerNames[1], "cod2update2.activision.com", 64);
     I_strncpyz(cls.autoupdateServerNames[2], "cod2update3.activision.com", 64);
     I_strncpyz(cls.autoupdateServerNames[3], "cod2update4.activision.com", 64);
     I_strncpyz(cls.autoupdateServerNames[4], "cod2update5.activision.com", 64);
-    motd = Dvar_RegisterString("motd", "", 0, "Message of the day");
+    motd = Dvar_RegisterString("motd", "", DVAR_NOFLAG, "Message of the day");
     mink.value.max = 80.0f;
     mink.value.min = -80.0f;
     vehDriverViewHeightMin = Dvar_RegisterFloat(
         "vehDriverViewHeightMin",
         -15.0f,
         mink,
-        1u,
+        DVAR_ARCHIVE,
         "Min orbit altitude for driver's view");
     minl.value.max = 80.0f;
     minl.value.min = -80.0f;
@@ -3746,7 +3746,7 @@ void __cdecl CL_InitOnceForAllClients()
         "vehDriverViewHeightMax",
         50.0f,
         minl,
-        1u,
+        DVAR_ARCHIVE,
         "Max orbit altitude for driver's view");
     Cmd_AddCommandInternal("cmd", CL_ForwardToServer_f, &CL_ForwardToServer_f_VAR);
     Cmd_AddCommandInternal("configstrings", CL_Configstrings_f, &CL_Configstrings_f_VAR);
@@ -4354,7 +4354,7 @@ void __cdecl CL_InitDedicated()
         onlinegame = Dvar_RegisterBool(
             "onlinegame",
             1,
-            0x80u,
+            DVAR_CHEAT,
             "Current game is an online game with stats, custom classes, unlocks");
     SetupGfxConfig(&config);
     CL_SetFastFileNames(&config, 1);

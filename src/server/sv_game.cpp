@@ -662,7 +662,7 @@ void __cdecl SV_SetGametype()
     char gametype[64]; // [esp+0h] [ebp-48h] BYREF
     char *s; // [esp+44h] [ebp-4h]
 
-    Dvar_RegisterString("g_gametype", "war", 0x24u, "Game Type");
+    Dvar_RegisterString("g_gametype", "war", DVAR_SERVERINFO | DVAR_LATCH, "Game Type");
     if (com_sv_running->current.enabled && G_GetSavePersist())
         I_strncpyz(gametype, sv.gametype, 64);
     else

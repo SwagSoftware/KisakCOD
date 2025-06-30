@@ -423,7 +423,7 @@ int GScr_LoadLevelScript()
     char filename[64]; // [esp+0h] [ebp-48h] BYREF
     const dvar_s *mapname; // [esp+44h] [ebp-4h]
 
-    mapname = Dvar_RegisterString("mapname", (char *)"", 0x44u, "The current map name");
+    mapname = Dvar_RegisterString("mapname", (char *)"", DVAR_SERVERINFO | DVAR_ROM, "The current map name");
     Com_sprintf(filename, 0x40u, "maps/mp/%s", mapname->current.string);
     result = GScr_LoadScriptAndLabel(filename, "main", 0);
     g_scr_data.levelscript = result;
@@ -5579,7 +5579,7 @@ void GScr_MakeDvarServerInfo()
             ++pCh;
         }
         *pCh = 0;
-        Dvar_RegisterString(dvarName, (char *)dvarValue, 0x4100u, "Script defined user info dvar");
+        Dvar_RegisterString(dvarName, (char *)dvarValue, DVAR_TEMP | DVAR_EXTERNAL, "Script defined user info dvar");
     }
 }
 

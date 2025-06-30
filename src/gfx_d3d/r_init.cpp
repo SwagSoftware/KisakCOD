@@ -3197,7 +3197,7 @@ void __cdecl R_EnumDisplayModes(unsigned int adapterIndex)
         "r_mode",
         dx.resolutionNameTable,
         defaultResolutionIndex,
-        0x21u,
+        DVAR_ARCHIVE | DVAR_LATCH,
         "Direct X resolution mode");
     qsort(availableRefreshRates, refreshRateCount, 4u, (int(__cdecl *)(const void *, const void *))R_CompareRefreshRates);
     defaultRefreshRateIndex = 0;
@@ -3214,10 +3214,10 @@ void __cdecl R_EnumDisplayModes(unsigned int adapterIndex)
         "r_displayRefresh",
         dx.refreshRateNameTable,
         defaultRefreshRateIndex,
-        0x221u,
+        DVAR_ARCHIVE | DVAR_LATCH | DVAR_AUTOEXEC,
         "Refresh rate");
 
-    r_noborder = Dvar_RegisterBool("r_noborder", false, 0x1 /*DVAR_FLAG_SAVED*/, "Do not use a border in windowed mode");
+    r_noborder = Dvar_RegisterBool("r_noborder", false, DVAR_ARCHIVE, "Do not use a border in windowed mode");
 }
 
 char __cdecl R_PreCreateWindow()

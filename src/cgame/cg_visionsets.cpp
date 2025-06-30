@@ -49,7 +49,7 @@ void __cdecl CG_RegisterVisionSetsDvars()
         "nightVisionFadeInOutTime",
         0.1f,
         min,
-        0x1000u,
+        DVAR_SAVED,
         "How long the fade to/from black lasts when putting on or removing night vision goggles.");
     mina.value.max = 10000.0f;
     mina.value.min = 0.0f;
@@ -57,9 +57,9 @@ void __cdecl CG_RegisterVisionSetsDvars()
         "nightVisionPowerOnTime",
         0.30000001f,
         mina,
-        0x1000u,
+        DVAR_SAVED,
         "How long the black-to-nightvision fade lasts when turning on the goggles.");
-    nightVisionDisableEffects = Dvar_RegisterBool("nightVisionDisableEffects", 0, 0x1000u, "");
+    nightVisionDisableEffects = Dvar_RegisterBool("nightVisionDisableEffects", 0, DVAR_SAVED, "");
 }
 
 void __cdecl CG_InitVisionSetsMenu()

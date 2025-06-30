@@ -68,7 +68,7 @@ void __cdecl ProfLoad_EndTrackedValueTicks(MapProfileElement *value, unsigned __
 
 void __cdecl ProfLoad_Init()
 {
-    com_profileLoading = Dvar_RegisterBool("profile_show_loading", 0, 0, "Show map load profiler");
+    com_profileLoading = Dvar_RegisterBool("profile_show_loading", 0, DVAR_NOFLAG, "Show map load profiler");
     mapLoadProfile.isLoading = 0;
 }
 

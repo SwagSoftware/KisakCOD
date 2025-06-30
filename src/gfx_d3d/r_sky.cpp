@@ -57,15 +57,15 @@ void __cdecl R_RegisterSunDvars()
     r_sunsprite_shader = Dvar_RegisterString(
         "r_sunsprite_shader",
         "sun",
-        0,
+        DVAR_NOFLAG,
         "name for static sprite; can be any material");
     min.value.max = 1000.0;
     min.value.min = 1.0;
-    r_sunsprite_size = Dvar_RegisterFloat("r_sunsprite_size", 16.0, min, 0, "diameter in pixels at 640x480 and 80 fov");
+    r_sunsprite_size = Dvar_RegisterFloat("r_sunsprite_size", 16.0, min, DVAR_NOFLAG, "diameter in pixels at 640x480 and 80 fov");
     r_sunflare_shader = Dvar_RegisterString(
         "r_sunflare_shader",
         "sun_flare",
-        0,
+        DVAR_NOFLAG,
         "name for flare effect; can be any material");
     mina.value.max = 10000.0;
     mina.value.min = 0.0;
@@ -73,7 +73,7 @@ void __cdecl R_RegisterSunDvars()
         "r_sunflare_min_size",
         0.0,
         mina,
-        0,
+        DVAR_NOFLAG,
         "smallest size of flare effect in pixels at 640x480");
     minb.value.max = 90.0;
     minb.value.min = 0.0;
@@ -81,7 +81,7 @@ void __cdecl R_RegisterSunDvars()
         "r_sunflare_min_angle",
         45.0,
         minb,
-        0,
+        DVAR_NOFLAG,
         "angle from sun in degrees outside which effect is 0");
     minc.value.max = 10000.0;
     minc.value.min = 0.0;
@@ -89,7 +89,7 @@ void __cdecl R_RegisterSunDvars()
         "r_sunflare_max_size",
         2500.0,
         minc,
-        0,
+        DVAR_NOFLAG,
         "largest size of flare effect in pixels at 640x480");
     mind.value.max = 90.0;
     mind.value.min = 0.0;
@@ -97,7 +97,7 @@ void __cdecl R_RegisterSunDvars()
         "r_sunflare_max_angle",
         2.0,
         mind,
-        0,
+        DVAR_NOFLAG,
         "angle from sun in degrees inside which effect is max");
     mine.value.max = 1.0;
     mine.value.min = 0.0;
@@ -105,7 +105,7 @@ void __cdecl R_RegisterSunDvars()
         "r_sunflare_max_alpha",
         1.0,
         mine,
-        0,
+        DVAR_NOFLAG,
         "0-1 vertex color and alpha of sun at max effect");
     minf.value.max = 60.0;
     minf.value.min = 0.0;
@@ -113,7 +113,7 @@ void __cdecl R_RegisterSunDvars()
         "r_sunflare_fadein",
         1.0,
         minf,
-        0,
+        DVAR_NOFLAG,
         "time in seconds to fade alpha from 0% to 100%");
     ming.value.max = 60.0;
     ming.value.min = 0.0;
@@ -121,7 +121,7 @@ void __cdecl R_RegisterSunDvars()
         "r_sunflare_fadeout",
         1.0,
         ming,
-        0,
+        DVAR_NOFLAG,
         "time in seconds to fade alpha from 100% to 0%");
     minh.value.max = 90.0;
     minh.value.min = 0.0;
@@ -129,7 +129,7 @@ void __cdecl R_RegisterSunDvars()
         "r_sunblind_min_angle",
         30.0,
         minh,
-        0,
+        DVAR_NOFLAG,
         "angle from sun in degrees outside which blinding is 0");
     mini.value.max = 90.0;
     mini.value.min = 0.0;
@@ -137,7 +137,7 @@ void __cdecl R_RegisterSunDvars()
         "r_sunblind_max_angle",
         5.0,
         mini,
-        0,
+        DVAR_NOFLAG,
         "angle from sun in degrees inside which blinding is max");
     minj.value.max = 1.0;
     minj.value.min = 0.0;
@@ -145,7 +145,7 @@ void __cdecl R_RegisterSunDvars()
         "r_sunblind_max_darken",
         0.75,
         minj,
-        0,
+        DVAR_NOFLAG,
         "0-1 fraction for how black the world is at max blind");
     mink.value.max = 60.0;
     mink.value.min = 0.0;
@@ -153,7 +153,7 @@ void __cdecl R_RegisterSunDvars()
         "r_sunblind_fadein",
         0.5,
         mink,
-        0,
+        DVAR_NOFLAG,
         "time in seconds to fade blind from 0% to 100%");
     minl.value.max = 60.0;
     minl.value.min = 0.0;
@@ -161,7 +161,7 @@ void __cdecl R_RegisterSunDvars()
         "r_sunblind_fadeout",
         3.0,
         minl,
-        0,
+        DVAR_NOFLAG,
         "time in seconds to fade blind from 100% to 0%");
     minm.value.max = 90.0;
     minm.value.min = 0.0;
@@ -169,7 +169,7 @@ void __cdecl R_RegisterSunDvars()
         "r_sunglare_min_angle",
         30.0,
         minm,
-        0,
+        DVAR_NOFLAG,
         "angle from sun in degrees inside which glare is maximum");
     minn.value.max = 90.0;
     minn.value.min = 0.0;
@@ -177,7 +177,7 @@ void __cdecl R_RegisterSunDvars()
         "r_sunglare_max_angle",
         5.0,
         minn,
-        0,
+        DVAR_NOFLAG,
         "angle from sun in degrees inside which glare is minimum");
     mino.value.max = 1.0;
     mino.value.min = 0.0;
@@ -185,7 +185,7 @@ void __cdecl R_RegisterSunDvars()
         "r_sunglare_max_lighten",
         0.75,
         mino,
-        0,
+        DVAR_NOFLAG,
         "0-1 fraction for how white the world is at max glare");
     minp.value.max = 60.0;
     minp.value.min = 0.0;
@@ -193,7 +193,7 @@ void __cdecl R_RegisterSunDvars()
         "r_sunglare_fadein",
         0.5,
         minp,
-        0,
+        DVAR_NOFLAG,
         "time in seconds to fade glare from 0% to 100%");
     minq.value.max = 60.0;
     minq.value.min = 0.0;
@@ -201,7 +201,7 @@ void __cdecl R_RegisterSunDvars()
         "r_sunglare_fadeout",
         3.0,
         minq,
-        0,
+        DVAR_NOFLAG,
         "time in seconds to fade glare from 100% to 0%");
     minr.value.max = 360.0;
     minr.value.min = -360.0;
@@ -211,7 +211,7 @@ void __cdecl R_RegisterSunDvars()
         0.0,
         0.0,
         minr,
-        0,
+        DVAR_NOFLAG,
         "Position in degrees of the sun effect");
 }
 

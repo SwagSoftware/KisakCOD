@@ -469,7 +469,7 @@ IN_Init
 */
 void __cdecl IN_Init()
 {
-	in_mouse = Dvar_RegisterBool("in_mouse", 1, 0x21u, "Initialize the mouse drivers");
+	in_mouse = Dvar_RegisterBool("in_mouse", 1, DVAR_ARCHIVE | DVAR_LATCH, "Initialize the mouse drivers");
 	IN_Startup();
 }
 

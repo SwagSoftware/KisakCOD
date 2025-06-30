@@ -22,7 +22,7 @@ void __cdecl CG_OffhandRegisterDvars()
         "hud_flash_time_offhand",
         2.0,
         min,
-        1u,
+        DVAR_ARCHIVE,
         "Offhand weapons flash duration on changing weapon");
     mina.value.max = 30.0;
     mina.value.min = 0.0;
@@ -30,7 +30,7 @@ void __cdecl CG_OffhandRegisterDvars()
         "hud_flash_period_offhand",
         0.5,
         mina,
-        1u,
+        DVAR_ARCHIVE,
         "Offhand weapons flash period on changing weapon");
 }
 

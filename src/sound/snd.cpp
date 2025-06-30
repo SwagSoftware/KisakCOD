@@ -3602,28 +3602,28 @@ void __cdecl SND_Init()
     int ia; // [esp+1Ch] [ebp-8h]
 
     Com_Printf(9, "\n------- sound system initialization -------\n");
-    snd_errorOnMissing = Dvar_RegisterBool("snd_errorOnMissing", 0, 1u, "Cause a Com_Error if a sound file is missing.");
+    snd_errorOnMissing = Dvar_RegisterBool("snd_errorOnMissing", 0, DVAR_ARCHIVE, "Cause a Com_Error if a sound file is missing.");
     min.value.max = 1.0f;
     min.value.min = 0.0f;
-    snd_volume = Dvar_RegisterFloat("snd_volume", 0.80000001f, min, 1u, "Game sound master volume");
+    snd_volume = Dvar_RegisterFloat("snd_volume", 0.80000001f, min, DVAR_ARCHIVE, "Game sound master volume");
     snd_slaveFadeTime = Dvar_RegisterInt(
         "snd_slaveFadeTime",
         500,
         (DvarLimits)0x138800000000LL,
-        0x81u,
+        DVAR_CHEAT | DVAR_ARCHIVE,
         "The amount of time in milliseconds for a 'slave' sound\n"
         "to fade its volumes when a master sound starts or stops");
-    snd_enable2D = Dvar_RegisterBool("snd_enable2D", 1, 0x80u, "Enable 2D sounds");
-    snd_enable3D = Dvar_RegisterBool("snd_enable3D", 1, 0x80u, "Enable 3D sounds");
-    snd_enableStream = Dvar_RegisterBool("snd_enableStream", 1, 0x80u, "Enable streamed sounds");
-    snd_enableReverb = Dvar_RegisterBool("snd_enableReverb", 1, 0x80u, "Enable sound reverberation");
-    snd_enableEq = Dvar_RegisterBool("snd_enableEq", 1, 1u, "Enable equalization filter");
-    snd_draw3D = Dvar_RegisterEnum("snd_draw3D", snd_draw3DNames, 0, 0x80u, "Draw the position and info of world sounds");
+    snd_enable2D = Dvar_RegisterBool("snd_enable2D", 1, DVAR_CHEAT, "Enable 2D sounds");
+    snd_enable3D = Dvar_RegisterBool("snd_enable3D", 1, DVAR_CHEAT, "Enable 3D sounds");
+    snd_enableStream = Dvar_RegisterBool("snd_enableStream", 1, DVAR_CHEAT, "Enable streamed sounds");
+    snd_enableReverb = Dvar_RegisterBool("snd_enableReverb", 1, DVAR_CHEAT, "Enable sound reverberation");
+    snd_enableEq = Dvar_RegisterBool("snd_enableEq", 1, DVAR_ARCHIVE, "Enable equalization filter");
+    snd_draw3D = Dvar_RegisterEnum("snd_draw3D", snd_draw3DNames, 0, DVAR_CHEAT, "Draw the position and info of world sounds");
     snd_levelFadeTime = Dvar_RegisterInt(
         "snd_levelFadeTime",
         250,
         (DvarLimits)0x138800000000LL,
-        0x81u,
+        DVAR_CHEAT | DVAR_ARCHIVE,
         "The amout of time in milliseconds for all audio to fade in at the start of a level");
     mina.value.max = 1.0f;
     mina.value.min = 0.0f;
@@ -3631,28 +3631,28 @@ void __cdecl SND_Init()
         "snd_cinematicVolumeScale",
         0.85000002f,
         mina,
-        1u,
+        DVAR_ARCHIVE,
         "Scales the volume of Bink videos.");
     snd_drawEqEnts = Dvar_RegisterBool(
         "snd_drawEqEnts",
         0,
-        0x81u,
+        DVAR_CHEAT | DVAR_ARCHIVE,
         "Show which ents can have EQ turned on/off, which ones are on (green) and off (magenta)");
     snd_drawEqChannels = Dvar_RegisterBool("snd_drawEqChannels", 0, 0x81u, "Draw overlay of EQ settings for each channel");
     snd_debugReplace = Dvar_RegisterBool(
         "snd_debugReplace",
         0,
-        0x81u,
+        DVAR_CHEAT | DVAR_ARCHIVE,
         "Print out information about when we stop a playing sound to play another");
     snd_debugAlias = Dvar_RegisterString(
         "snd_debugAlias",
         (char *)"",
-        0x80u,
+        DVAR_CHEAT,
         "Print out tracking information about a particular alias");
     snd_touchStreamFilesOnLoad = Dvar_RegisterBool(
         "snd_touchStreamFilesOnLoad",
         0,
-        1u,
+        DVAR_ARCHIVE,
         "Check whether stream sound files exist while loading");
     g_snd.effect = g_snd.envEffects;
     g_snd.envEffects[0].roomtype = 0;

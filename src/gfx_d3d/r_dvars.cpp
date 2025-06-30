@@ -419,18 +419,18 @@
  {
      r_reflectionProbeGenerate = Dvar_RegisterBool(
          "r_reflectionProbeGenerate",
-         0,
-         0,
+         false,
+         DVAR_NOFLAG,
          "Generate cube maps for reflection probes.");
      r_reflectionProbeRegenerateAll = Dvar_RegisterBool(
          "r_reflectionProbeRegenerateAll",
-         0,
-         0,
+         false,
+         DVAR_NOFLAG,
          "Regenerate cube maps for all reflection probes.");
      r_reflectionProbeGenerateExit = Dvar_RegisterBool(
          "r_reflectionProbeGenerateExit",
-         0,
-         0,
+         false,
+         DVAR_NOFLAG,
          "Exit when done generating reflection cubes.");
      if (r_reflectionProbeGenerate->current.enabled)
          Material_PreventOverrideTechniqueGeneration();
@@ -446,7 +446,7 @@
          "r_warningRepeatDelay",
          5.0,
          min,
-         0,
+         DVAR_NOFLAG,
          "Number of seconds after displaying a \"per-frame\" warning before it will display again");
  }
 
@@ -529,61 +529,60 @@
      DvarLimits mincv; // [esp+Ch] [ebp-10h]
 
      R_RegisterSunDvars();
-     r_ignore = Dvar_RegisterInt("r_ignore", 0, (DvarLimits)0x7FFFFFFF80000000LL, 0, "used for debugging anything");
-     vid_xpos = Dvar_RegisterInt("vid_xpos", 3, (DvarLimits)0x1000FFFFF000LL, 1u, "Game window horizontal position");
-     vid_ypos = Dvar_RegisterInt("vid_ypos", 22, (DvarLimits)0x1000FFFFF000LL, 1u, "game window vertical position");
-     //r_fullscreen = Dvar_RegisterBool("r_fullscreen", 1, 0x21u, "Display game full screen");
-     r_fullscreen = Dvar_RegisterBool("r_fullscreen", 0, 0x21u, "Display game full screen");
+     r_ignore = Dvar_RegisterInt("r_ignore", 0, (DvarLimits)0x7FFFFFFF80000000LL, DVAR_NOFLAG, "used for debugging anything");
+     vid_xpos = Dvar_RegisterInt("vid_xpos", 3, (DvarLimits)0x1000FFFFF000LL, DVAR_ARCHIVE, "Game window horizontal position");
+     vid_ypos = Dvar_RegisterInt("vid_ypos", 22, (DvarLimits)0x1000FFFFF000LL, DVAR_ARCHIVE, "game window vertical position");
+     r_fullscreen = Dvar_RegisterBool("r_fullscreen", 0, DVAR_LATCH | DVAR_ARCHIVE, "Display game full screen");
      min.value.max = 3.0;
      min.value.min = 0.5;
-     r_gamma = Dvar_RegisterFloat("r_gamma", 0.80000001f, min, 1u, "Gamma value");
-     r_ignoreHwGamma = Dvar_RegisterBool("r_ignorehwgamma", 0, 0x21u, "Ignore hardware gamma");
+     r_gamma = Dvar_RegisterFloat("r_gamma", 0.80000001f, min, DVAR_ARCHIVE, "Gamma value");
+     r_ignoreHwGamma = Dvar_RegisterBool("r_ignorehwgamma", 0, DVAR_LATCH | DVAR_ARCHIVE, "Ignore hardware gamma");
      r_texFilterAnisoMax = Dvar_RegisterInt(
          "r_texFilterAnisoMax",
          16,
          (DvarLimits)0x1000000001LL,
-         1u,
+         DVAR_ARCHIVE,
          "Maximum anisotropy to use for texture filtering");
      r_texFilterDisable = Dvar_RegisterBool(
          "r_texFilterDisable",
          0,
-         0x80u,
+         DVAR_CHEAT,
          "Disables all texture filtering (uses nearest only.)");
      r_texFilterAnisoMin = Dvar_RegisterInt(
          "r_texFilterAnisoMin",
          1,
          (DvarLimits)0x1000000001LL,
-         1u,
+         DVAR_ARCHIVE,
          "Minimum anisotropy to use for texture filtering (overridden by max)");
      r_texFilterMipMode = Dvar_RegisterEnum(
          "r_texFilterMipMode",
          mipFilterNames,
          0,
-         1u,
+         DVAR_ARCHIVE,
          "Forces all mipmaps to use a particular blend between levels (or disables mipping.)");
      mina.value.max = 15.99f;
      mina.value.min = -16.0f;
-     r_texFilterMipBias = Dvar_RegisterFloat("r_texFilterMipBias", 0.0f, mina, 0x80u, "Change the mipmap bias");
-     r_fullbright = Dvar_RegisterBool("r_fullbright", 0, 0x80u, "Toggles rendering without lighting");
-     r_debugShader = Dvar_RegisterEnum("r_debugShader", debugShaderNames, 0, 0x80u, "Enable shader debugging information");
+     r_texFilterMipBias = Dvar_RegisterFloat("r_texFilterMipBias", 0.0f, mina, DVAR_CHEAT, "Change the mipmap bias");
+     r_fullbright = Dvar_RegisterBool("r_fullbright", 0, DVAR_CHEAT, "Toggles rendering without lighting");
+     r_debugShader = Dvar_RegisterEnum("r_debugShader", debugShaderNames, 0, DVAR_CHEAT, "Enable shader debugging information");
      r_gpuSync = Dvar_RegisterEnum(
          "r_gpuSync",
          gpuSyncNames,
          1,
-         0,
+         DVAR_NOFLAG,
          "GPU synchronization type (used to improve mouse responsiveness)");
-     r_multiGpu = Dvar_RegisterBool("r_multiGpu", 0, 1u, "Use multiple GPUs");
-     r_skinCache = Dvar_RegisterBool("r_skinCache", 1, 0, "Enable cache for vertices of animated models");
-     r_fastSkin = Dvar_RegisterBool("r_fastSkin", 0, 1u, "Enable fast model skinning");
-     r_smc_enable = Dvar_RegisterBool("r_smc_enable", 1, 0, "Enable static model cache");
-     r_pretess = Dvar_RegisterBool("r_pretess", 1, 0, "Batch surfaces to reduce primitive count");
+     r_multiGpu = Dvar_RegisterBool("r_multiGpu", false, DVAR_ARCHIVE, "Use multiple GPUs");
+     r_skinCache = Dvar_RegisterBool("r_skinCache", true, DVAR_NOFLAG, "Enable cache for vertices of animated models");
+     r_fastSkin = Dvar_RegisterBool("r_fastSkin", false, DVAR_ARCHIVE, "Enable fast model skinning");
+     r_smc_enable = Dvar_RegisterBool("r_smc_enable", true, DVAR_NOFLAG, "Enable static model cache");
+     r_pretess = Dvar_RegisterBool("r_pretess", true, DVAR_NOFLAG, "Batch surfaces to reduce primitive count");
      minb.value.max = FLT_MAX;
      minb.value.min = 0.0f;
      r_lodScaleRigid = Dvar_RegisterFloat(
          "r_lodScaleRigid",
          1.0f,
          minb,
-         1u,
+         DVAR_ARCHIVE,
          "Scale the level of detail distance for rigid models (larger reduces detail)");
      minc.value.max = FLT_MAX;
      minc.value.min = -FLT_MAX;
@@ -591,7 +590,7 @@
          "r_lodBiasRigid",
          0.0f,
          minc,
-         1u,
+         DVAR_ARCHIVE,
          "Bias the level of detail distance for rigid models (negative increases detail)");
      mind.value.max = FLT_MAX;
      mind.value.min = 0.0f;
@@ -599,7 +598,7 @@
          "r_lodScaleSkinned",
          1.0f,
          mind,
-         1u,
+         DVAR_ARCHIVE,
          "Scale the level of detail distance for skinned models (larger reduces detail)");
      mine.value.max = FLT_MAX;
      mine.value.min = -FLT_MAX;
@@ -607,7 +606,7 @@
          "r_lodBiasSkinned",
          0.0f,
          mine,
-         1u,
+         DVAR_ARCHIVE,
          "Bias the level of detail distance for skinned models (negative increases detail)");
      minf.value.max = 10000.0f;
      minf.value.min = 0.001f;
@@ -615,27 +614,27 @@
          "r_znear",
          4.0f,
          minf,
-         0x80u,
+         DVAR_CHEAT,
          "Things closer than this aren't drawn.  Reducing this increases z-fighting in the distance.");
      ming.value.max = 16.0f;
      ming.value.min = 0.001f;
-     r_znear_depthhack = Dvar_RegisterFloat("r_znear_depthhack", 0.1f, ming, 0x80u, "Viewmodel near clip plane");
+     r_znear_depthhack = Dvar_RegisterFloat("r_znear_depthhack", 0.1f, ming, DVAR_CHEAT, "Viewmodel near clip plane");
      minh.value.max = FLT_MAX;
      minh.value.min = 0.0f;
      r_zfar = Dvar_RegisterFloat(
          "r_zfar",
          0.0f,
          minh,
-         0x80u,
+         DVAR_CHEAT,
          "Change the distance at which culling fog reaches 100% opacity; 0 is off");
-     r_fog = Dvar_RegisterBool("r_fog", 1, 0x80u, "Set to 0 to disable fog");
+     r_fog = Dvar_RegisterBool("r_fog", 1, DVAR_CHEAT, "Set to 0 to disable fog");
      mini.value.max = 0.0f;
      mini.value.min = -4.0f;
      r_polygonOffsetScale = Dvar_RegisterFloat(
          "r_polygonOffsetScale",
          -1.0f,
          mini,
-         1u,
+         DVAR_ARCHIVE,
          "Offset scale for decal polygons; bigger values z-fight less but poke through walls more");
      minj.value.max = 0.0f;
      minj.value.min = -16.0f;
@@ -643,64 +642,64 @@
          "r_polygonOffsetBias",
          -1.0f,
          minj,
-         1u,
+         DVAR_ARCHIVE,
          "Offset bias for decal polygons; bigger values z-fight less but poke through walls more");
      r_picmip_manual = Dvar_RegisterBool(
          "r_picmip_manual",
          0,
-         1u,
+         DVAR_ARCHIVE,
          "If 0, picmip is set automatically.  If 1, picmip is set based on the other r_picmip dvars.");
      r_picmip = Dvar_RegisterInt(
          "r_picmip",
          0,
          (DvarLimits)0x300000000LL,
-         1u,
+         DVAR_ARCHIVE,
          "Picmip level of color maps.  If r_picmip_manual is 0, this is read-only.");
      r_picmip_bump = Dvar_RegisterInt(
          "r_picmip_bump",
          0,
          (DvarLimits)0x300000000LL,
-         1u,
+         DVAR_ARCHIVE,
          "Picmip level of normal maps.  If r_picmip_manual is 0, this is read-only.");
      r_picmip_spec = Dvar_RegisterInt(
          "r_picmip_spec",
          0,
          (DvarLimits)0x300000000LL,
-         1u,
+         DVAR_ARCHIVE,
          "Picmip level of specular maps.  If r_picmip_manual is 0, this is read-only.");
      r_picmip_water = Dvar_RegisterInt(
          "r_picmip_water",
          0,
          (DvarLimits)0x100000000LL,
-         0x21u,
+         DVAR_LATCH | DVAR_ARCHIVE,
          "Picmip level of water maps.");
-     r_detail = Dvar_RegisterBool("r_detail", 1, 0, "Allows shaders to use detail textures");
-     r_normal = Dvar_RegisterBool("r_normal", 1, 0, "Allows shaders to use normal maps");
-     r_specular = Dvar_RegisterBool("r_specular", 1, 0, "Allows shaders to use phong specular lighting");
-     r_envMapSpecular = Dvar_RegisterBool("r_envMapSpecular", 1, 0, "Enables environment map specular lighting");
+     r_detail = Dvar_RegisterBool("r_detail", true, DVAR_NOFLAG, "Allows shaders to use detail textures");
+     r_normal = Dvar_RegisterBool("r_normal", true, DVAR_NOFLAG, "Allows shaders to use normal maps");
+     r_specular = Dvar_RegisterBool("r_specular", true, DVAR_NOFLAG, "Allows shaders to use phong specular lighting");
+     r_envMapSpecular = Dvar_RegisterBool("r_envMapSpecular", true, DVAR_NOFLAG, "Enables environment map specular lighting");
      r_lightMap = Dvar_RegisterEnum(
          "r_lightMap",
          colorMapNames,
          1,
-         0x80u,
+         DVAR_CHEAT,
          "Replace all lightmaps with pure black or pure white");
      r_colorMap = Dvar_RegisterEnum(
          "r_colorMap",
          colorMapNames,
          1,
-         0x80u,
+         DVAR_CHEAT,
          "Replace all color maps with pure black or pure white");
      r_normalMap = Dvar_RegisterEnum(
          "r_normalMap",
          normalMapNames,
          1,
-         0x80u,
+         DVAR_CHEAT,
          "Replace all normal maps with a flat normal map");
      r_specularMap = Dvar_RegisterEnum(
          "r_specularMap",
          colorMapNames,
          1,
-         0x80u,
+         DVAR_CHEAT,
          "Replace all specular maps with pure black (off) or pure white (super shiny)");
      mink.value.max = 100.0f;
      mink.value.min = 0.0f;
@@ -708,7 +707,7 @@
          "r_specularColorScale",
          1.0f,
          mink,
-         0x1080u,
+         DVAR_SAVED | DVAR_CHEAT,
          "Set greater than 1 to brighten specular highlights");
      minl.value.max = 100.0f;
      minl.value.min = 0.0f;
@@ -716,95 +715,95 @@
          "r_diffuseColorScale",
          1.0f,
          minl,
-         0x1080u,
+         DVAR_SAVED | DVAR_CHEAT,
          "Globally scale the diffuse color of all point lights");
      r_useLayeredMaterials = Dvar_RegisterBool(
          "r_useLayeredMaterials",
          0,
-         0x20u,
+         DVAR_LATCH,
          "Set to true to use layered materials on shader model 3 hardware");
      r_loadForRenderer = Dvar_RegisterBool(
          "r_loadForRenderer",
          1,
-         0x20u,
+         DVAR_LATCH,
          "Set to false to disable dx allocations (for dedicated server mode)");
-     r_showTris = Dvar_RegisterInt("r_showTris", 0, (DvarLimits)0x200000000LL, 0x80u, "Show triangle outlines");
-     r_showTriCounts = Dvar_RegisterBool("r_showTriCounts", 0, 0x80u, "Triangle count for each rendered entity");
-     r_showSurfCounts = Dvar_RegisterBool("r_showSurfCounts", 0, 0x80u, "Surface count for each rendered entity");
-     r_showVertCounts = Dvar_RegisterBool("r_showVertCounts", 0, 0x80u, "Vertex count for each entity");
+     r_showTris = Dvar_RegisterInt("r_showTris", 0, (DvarLimits)0x200000000LL, DVAR_CHEAT, "Show triangle outlines");
+     r_showTriCounts = Dvar_RegisterBool("r_showTriCounts", 0, DVAR_CHEAT, "Triangle count for each rendered entity");
+     r_showSurfCounts = Dvar_RegisterBool("r_showSurfCounts", 0, DVAR_CHEAT, "Surface count for each rendered entity");
+     r_showVertCounts = Dvar_RegisterBool("r_showVertCounts", 0, DVAR_CHEAT, "Vertex count for each entity");
      r_resampleScene = Dvar_RegisterBool(
          "r_resampleScene",
          1,
-         0x80u,
+         DVAR_CHEAT,
          "Upscale the frame buffer with sharpen filter and color correction.");
      r_showPixelCost = Dvar_RegisterEnum(
          "r_showPixelCost",
          showPixelCostNames,
          0,
-         0x80u,
+         DVAR_CHEAT,
          "Shows how expensive it is to draw every pixel on the screen");
-     r_xdebug = Dvar_RegisterEnum("r_xdebug", xdebugNames, 0, 0x80u, "xmodel/xanim debug rendering");
+     r_xdebug = Dvar_RegisterEnum("r_xdebug", xdebugNames, 0, DVAR_CHEAT, "xmodel/xanim debug rendering");
      minm.value.max = 16.0f;
      minm.value.min = 0.0f;
-     r_debugLineWidth = Dvar_RegisterFloat("r_debugLineWidth", 1.0, minm, 1u, "Width of server side debug lines");
+     r_debugLineWidth = Dvar_RegisterFloat("r_debugLineWidth", 1.0, minm, DVAR_ARCHIVE, "Width of server side debug lines");
      r_vc_makelog = Dvar_RegisterInt(
          "r_vc_makelog",
          0,
          (DvarLimits)0x200000000LL,
-         0x20u,
+         DVAR_LATCH,
          "Enable logging of light grid points for the vis cache.  1 starts from scratch, 2 appends.");
      r_vc_showlog = Dvar_RegisterInt(
          "r_vc_showlog",
          0,
          (DvarLimits)0x40000000000LL,
-         0,
+         DVAR_NOFLAG,
          "Show this many rows of light grid points for the vis cache");
-     r_showLightGrid = Dvar_RegisterBool("r_showLightGrid", 0, 0x80u, "Show light grid debugging information");
+     r_showLightGrid = Dvar_RegisterBool("r_showLightGrid", 0, DVAR_CHEAT, "Show light grid debugging information");
      r_showMissingLightGrid = Dvar_RegisterBool(
          "r_showMissingLightGrid",
-         1,
-         0,
+         true,
+         DVAR_NOFLAG,
          "Use rainbow colors for entities that are outside the light grid");
      r_cacheSModelLighting = Dvar_RegisterBool(
          "r_cacheSModelLighting",
-         1,
-         0,
+         true,
+         DVAR_NOFLAG,
          "Speed up static model lighting by caching previous results");
      r_cacheModelLighting = Dvar_RegisterBool(
          "r_cacheModelLighting",
-         1,
-         0,
+         true,
+         DVAR_NOFLAG,
          "Speed up model lighting by caching previous results");
      minn.value.max = 4.0f;
      minn.value.min = 0.0f;
-     r_lightTweakAmbient = Dvar_RegisterFloat("r_lightTweakAmbient", 0.1f, minn, 0x240u, "Ambient light strength");
+     r_lightTweakAmbient = Dvar_RegisterFloat("r_lightTweakAmbient", 0.1f, minn, DVAR_ROM | DVAR_AUTOEXEC, "Ambient light strength");
      mino.value.max = 1.0f;
      mino.value.min = 0.0f;
      r_lightTweakDiffuseFraction = Dvar_RegisterFloat(
          "r_lightTweakDiffuseFraction",
          0.5f,
          mino,
-         0x240u,
+         DVAR_ROM | DVAR_AUTOEXEC,
          "diffuse light fraction");
      minp.value.max = 4.0f;
      minp.value.min = 0.0f;
-     r_lightTweakSunLight = Dvar_RegisterFloat("r_lightTweakSunLight", 1.0f, minp, 0x280u, "Sunlight strength");
+     r_lightTweakSunLight = Dvar_RegisterFloat("r_lightTweakSunLight", 1.0f, minp, DVAR_CHEAT | DVAR_AUTOEXEC, "Sunlight strength");
      r_lightTweakAmbientColor = Dvar_RegisterColor(
          "r_lightTweakAmbientColor",
          1.0f,
          0.0f,
          0.0f,
          1.0f,
-         0x240u,
+         DVAR_ROM | DVAR_AUTOEXEC,
          "Light ambient color");
-     r_lightTweakSunColor = Dvar_RegisterColor("r_lightTweakSunColor", 0.0f, 1.0f, 0.0f, 1.0f, 0x280u, "Sun color");
+     r_lightTweakSunColor = Dvar_RegisterColor("r_lightTweakSunColor", 0.0f, 1.0f, 0.0f, 1.0f, DVAR_CHEAT | DVAR_AUTOEXEC, "Sun color");
      r_lightTweakSunDiffuseColor = Dvar_RegisterColor(
          "r_lightTweakSunDiffuseColor",
          0.0f,
          0.0f,
          1.0f,
          1.0f,
-         0x240u,
+         DVAR_ROM | DVAR_AUTOEXEC,
          "Sun diffuse color");
      minq.value.max = 360.0f;
      minq.value.min = -360.0f;
@@ -814,16 +813,16 @@
          0.0f,
          0.0f,
          minq,
-         0x1280u,
+         DVAR_CHEAT | DVAR_AUTOEXEC | DVAR_SAVED,
          "Sun direction in degrees");
-     r_envMapOverride = Dvar_RegisterBool("r_envMapOverride", 0, 0, "Min reflection intensity based on glancing angle.");
+     r_envMapOverride = Dvar_RegisterBool("r_envMapOverride", false, DVAR_NOFLAG, "Min reflection intensity based on glancing angle.");
      minr.value.max = 2.0f;
      minr.value.min = 0.0f;
      r_envMapMinIntensity = Dvar_RegisterFloat(
          "r_envMapMinIntensity",
          0.2f,
          minr,
-         0,
+         DVAR_NOFLAG,
          "Min reflection intensity based on glancing angle.");
      mins.value.max = 2.0f;
      mins.value.min = 0.0099999998f;
@@ -831,63 +830,63 @@
          "r_envMapMaxIntensity",
          0.5f,
          mins,
-         0,
+         DVAR_NOFLAG,
          "Max reflection intensity based on glancing angle.");
      mint.value.max = 20.0f;
      mint.value.min = 0.050000001f;
-     r_envMapExponent = Dvar_RegisterFloat("r_envMapExponent", 5.0f, mint, 0, "Reflection exponent.");
+     r_envMapExponent = Dvar_RegisterFloat("r_envMapExponent", 5.0f, mint, DVAR_NOFLAG, "Reflection exponent.");
      minu.value.max = 4.0f;
      minu.value.min = 0.0f;
      r_envMapSunIntensity = Dvar_RegisterFloat(
          "r_envMapSunIntensity",
          2.0f,
          minu,
-         0,
+         DVAR_NOFLAG,
          "Max sun specular intensity intensity with env map materials.");
      r_drawPrimHistogram = Dvar_RegisterBool(
          "r_drawPrimHistogram",
          0,
-         0x80u,
+         DVAR_CHEAT,
          "Draws a histogram of the sizes of each primitive batch");
      r_logFile = Dvar_RegisterInt(
          "r_logFile",
          0,
          (DvarLimits)0x7FFFFFFF00000000LL,
-         0,
+         DVAR_NOFLAG,
          "Write all graphics hardware calls for this many frames to a logfile");
-     r_norefresh = Dvar_RegisterBool("r_norefresh", 0, 0x80u, "Skips all rendering.  Useful for benchmarking.");
+     r_norefresh = Dvar_RegisterBool("r_norefresh", 0, DVAR_CHEAT, "Skips all rendering.  Useful for benchmarking.");
      minv.value.max = 1.0f;
      minv.value.min = 0.0f;
      r_scaleViewport = Dvar_RegisterFloat(
          "r_scaleViewport",
          1.0f,
          minv,
-         0x80u,
+         DVAR_CHEAT,
          "Scale 3D viewports by this fraction.  Use this to see if framerate is pixel shader bound.");
-     r_smp_backend = Dvar_RegisterBool("r_smp_backend", 1, 0, "Process renderer back end in a separate thread");
-     r_smp_worker = Dvar_RegisterBool("r_smp_worker", 1, 0, "Process renderer front end in a separate thread");
+     r_smp_backend = Dvar_RegisterBool("r_smp_backend", true, DVAR_NOFLAG, "Process renderer back end in a separate thread");
+     r_smp_worker = Dvar_RegisterBool("r_smp_worker", true, DVAR_NOFLAG, "Process renderer front end in a separate thread");
      r_smp_worker_thread[0] = R_RegisterWorkerThreadDvar("r_smp_worker_thread0", 0);
      r_smp_worker_thread[1] = R_RegisterWorkerThreadDvar("r_smp_worker_thread1", 1u);
-     r_aaAlpha = Dvar_RegisterEnum("r_aaAlpha", s_aaAlphaNames, 1, 1u, "Transparency anti-aliasing method");
+     r_aaAlpha = Dvar_RegisterEnum("r_aaAlpha", s_aaAlphaNames, 1, DVAR_ARCHIVE, "Transparency anti-aliasing method");
      r_aaSamples = Dvar_RegisterInt(
          "r_aaSamples",
          1,
          (DvarLimits)0x1000000001LL,
-         0x21u,
+         DVAR_ARCHIVE | DVAR_LATCH,
          "Anti-aliasing sample count; 1 disables anti-aliasing");
      r_vsync = Dvar_RegisterBool(
          "r_vsync",
          1,
-         0x21u,
+         DVAR_ARCHIVE | DVAR_LATCH,
          "Enable v-sync before drawing the next frame to avoid 'tearing' artifacts.");
-     r_clear = Dvar_RegisterEnum("r_clear", r_clearNames, 1, 0, "Controls how the color buffer is cleared");
+     r_clear = Dvar_RegisterEnum("r_clear", r_clearNames, 1, DVAR_NOFLAG, "Controls how the color buffer is cleared");
      r_clearColor = Dvar_RegisterColor(
          "r_clearColor",
          0.5f,
          0.75f,
          1.0f,
          1.0f,
-         0,
+         DVAR_NOFLAG,
          "Color to clear the screen to when clearing the frame buffer");
      r_clearColor2 = Dvar_RegisterColor(
          "r_clearColor2",
@@ -895,22 +894,22 @@
          0.5f,
          0.0f,
          1.0f,
-         0,
+         DVAR_NOFLAG,
          "Color to clear every second frame to (for use during development)");
-     r_drawSun = Dvar_RegisterBool("r_drawSun", 1, 1u, "Enable sun effects");
-     r_drawDecals = Dvar_RegisterBool("r_drawDecals", 1, 1u, "Enable world decal rendering");
-     r_drawWorld = Dvar_RegisterBool("r_drawWorld", 1, 0x80u, "Enable world rendering");
-     r_drawEntities = Dvar_RegisterBool("r_drawEntities", 1, 0x80u, "Enable entity rendering");
-     r_drawPoly = Dvar_RegisterBool("r_drawPoly", 1, 0x80u, "Enable poly rendering");
-     r_drawDynEnts = Dvar_RegisterBool("r_drawDynEnts", 1, 0x80u, "Enable dynamic entity rendering");
-     r_drawBModels = Dvar_RegisterBool("r_drawBModels", 1, 0x80u, "Enable brush model rendering");
-     r_drawSModels = Dvar_RegisterBool("r_drawSModels", 1, 0x80u, "Enable static model rendering");
-     r_drawXModels = Dvar_RegisterBool("r_drawXModels", 1, 0x80u, "Enable xmodel rendering");
+     r_drawSun = Dvar_RegisterBool("r_drawSun", true, DVAR_ARCHIVE, "Enable sun effects");
+     r_drawDecals = Dvar_RegisterBool("r_drawDecals", true, DVAR_ARCHIVE, "Enable world decal rendering");
+     r_drawWorld = Dvar_RegisterBool("r_drawWorld", true, DVAR_CHEAT, "Enable world rendering");
+     r_drawEntities = Dvar_RegisterBool("r_drawEntities", true, DVAR_CHEAT, "Enable entity rendering");
+     r_drawPoly = Dvar_RegisterBool("r_drawPoly", true, DVAR_CHEAT, "Enable poly rendering");
+     r_drawDynEnts = Dvar_RegisterBool("r_drawDynEnts", true, DVAR_CHEAT, "Enable dynamic entity rendering");
+     r_drawBModels = Dvar_RegisterBool("r_drawBModels", true, DVAR_CHEAT, "Enable brush model rendering");
+     r_drawSModels = Dvar_RegisterBool("r_drawSModels", true, DVAR_CHEAT, "Enable static model rendering");
+     r_drawXModels = Dvar_RegisterBool("r_drawXModels", true, DVAR_CHEAT, "Enable xmodel rendering");
      r_dlightLimit = Dvar_RegisterInt(
          "r_dlightLimit",
          4,
          (DvarLimits)0x400000000LL,
-         0,
+         DVAR_NOFLAG,
          "Maximum number of dynamic lights drawn simultaneously");
      minw.value.max = 0.99000001f;
      minw.value.min = 0.0f;
@@ -918,7 +917,7 @@
          "r_spotLightFovInnerFraction",
          0.69999999f,
          minw,
-         0x80u,
+         DVAR_CHEAT,
          "Relative Inner FOV angle for the dynamic spot light. 0 is full fade 0.99 is almost no fade.");
      minx.value.max = 1200.0f;
      minx.value.min = 0.0f;
@@ -926,7 +925,7 @@
          "r_spotLightStartRadius",
          36.0f,
          minx,
-         0x1080u,
+         DVAR_CHEAT | DVAR_SAVED,
          "Radius of the circle at the start of the spot light in inches.");
      miny.value.max = 1200.0f;
      miny.value.min = 1.0f;
@@ -934,18 +933,18 @@
          "r_spotLightEndRadius",
          196.0f,
          miny,
-         0x1080u,
+         DVAR_CHEAT | DVAR_SAVED,
          "Radius of the circle at the end of the spot light in inches.");
-     r_spotLightShadows = Dvar_RegisterBool("r_spotLightShadows", 1, 0x80u, "Enable shadows for spot lights.");
+     r_spotLightShadows = Dvar_RegisterBool("r_spotLightShadows", 1, DVAR_CHEAT, "Enable shadows for spot lights.");
      r_spotLightSModelShadows = Dvar_RegisterBool(
          "r_spotLightSModelShadows",
          1,
-         0x80u,
+         DVAR_CHEAT,
          "Enable static model shadows for spot lights.");
      r_spotLightEntityShadows = Dvar_RegisterBool(
          "r_spotLightEntityShadows",
          1,
-         0x80u,
+         DVAR_CHEAT,
          "Enable entity shadows for spot lights.");
      minz.value.max = 16.0f;
      minz.value.min = 0.0f;
@@ -953,31 +952,31 @@
          "r_spotLightBrightness",
          14.0f,
          minz,
-         0x1080u,
+         DVAR_CHEAT | DVAR_SAVED,
          "Brightness scale for spot light to get overbrightness from the 0-1 particle color range.");
      r_drawPrimCap = Dvar_RegisterInt(
          "r_drawPrimCap",
          0,
          (DvarLimits)0x2710FFFFFFFFLL,
-         0x80u,
+         DVAR_CHEAT,
          "Only draw primitive batches with less than this many triangles");
      r_drawPrimFloor = Dvar_RegisterInt(
          "r_drawPrimFloor",
          0,
          (DvarLimits)0x271000000000LL,
-         0x80u,
+         DVAR_CHEAT,
          "Only draw primitive batches with more than this many triangles");
-     r_skipDrawTris = Dvar_RegisterBool("r_skipDrawTris", 0, 0x80u, "Skip drawing primitive tris.");
-     r_drawWater = Dvar_RegisterBool("r_drawWater", 1, 1u, "Enable water animation");
+     r_skipDrawTris = Dvar_RegisterBool("r_skipDrawTris", false, DVAR_CHEAT, "Skip drawing primitive tris.");
+     r_drawWater = Dvar_RegisterBool("r_drawWater", true, DVAR_ARCHIVE, "Enable water animation");
      r_lockPvs = Dvar_RegisterBool(
          "r_lockPvs",
-         0,
-         0x80u,
+         false,
+         DVAR_CHEAT,
          "Lock the viewpoint used for determining what is visible to the current position and direction");
      r_skipPvs = Dvar_RegisterBool(
          "r_skipPvs",
-         0,
-         0x80u,
+         false,
+         DVAR_CHEAT,
          "Skipt the determination of what is in the potentially visible set (disables most drawing)");
      minba.value.max = 1.0f;
      minba.value.min = 0.0f;
@@ -985,24 +984,24 @@
          "r_portalBevels",
          0.69999999f,
          minba,
-         1u,
+         DVAR_ARCHIVE,
          "Helps cull geometry by angles of portals that are acute when projected onto the screen, value is th"
          "e cosine of the angle");
      r_portalBevelsOnly = Dvar_RegisterBool(
          "r_portalBevelsOnly",
-         0,
-         0,
+         false,
+         DVAR_NOFLAG,
          "Use screen-space bounding box of portals rather than the actual shape of the portal projected onto the screen");
      r_singleCell = Dvar_RegisterBool(
          "r_singleCell",
-         0,
-         0x80u,
+         false,
+         DVAR_CHEAT,
          "Only draw things in the same cell as the camera.  Most useful for seeing how big the current cell is.");
      r_portalWalkLimit = Dvar_RegisterInt(
          "r_portalWalkLimit",
          0,
          (DvarLimits)0x6400000000LL,
-         0x80u,
+         DVAR_CHEAT,
          "Stop portal recursion after this many iterations.  Useful for debugging portal errors.");
      minbb.value.max = 1.0f;
      minbb.value.min = 0.0f;
@@ -1010,59 +1009,59 @@
          "r_portalMinClipArea",
          0.02f,
          minbb,
-         0,
+         DVAR_NOFLAG,
          "Don't clip child portals by a parent portal smaller than this fraction of the screen area.");
      r_portalMinRecurseDepth = Dvar_RegisterInt(
          "r_portalMinRecurseDepth",
          2,
          (DvarLimits)0x6400000000LL,
-         0x80u,
+         DVAR_CHEAT,
          "Ignore r_portalMinClipArea for portals with fewer than this many parent portals.");
-     r_showPortals = Dvar_RegisterInt("r_showPortals", 0, (DvarLimits)0x300000000LL, 0x80u, "Show portals for debugging");
+     r_showPortals = Dvar_RegisterInt("r_showPortals", 0, (DvarLimits)0x300000000LL, DVAR_CHEAT, "Show portals for debugging");
      r_showAabbTrees = Dvar_RegisterInt(
          "r_showAabbTrees",
          0,
          (DvarLimits)0x200000000LL,
-         0x80u,
+         DVAR_CHEAT,
          "Show axis-aligned bounding box trees used in potentially visibility set determination");
-     r_showSModelNames = Dvar_RegisterBool("r_showSModelNames", 0, 0x80u, "Show static model names");
-     r_showTess = Dvar_RegisterEnum("r_showTess", r_showTessNames, 0, 0x80u, "Show details for each surface");
-     r_showCullBModels = Dvar_RegisterBool("r_showCullBModels", 0, 0x80u, "Show culled brush models");
-     r_showCullSModels = Dvar_RegisterBool("r_showCullSModels", 0, 0x80u, "Show culled static models");
-     r_showCullXModels = Dvar_RegisterBool("r_showCullXModels", 0, 0x80u, "Show culled xmodels");
+     r_showSModelNames = Dvar_RegisterBool("r_showSModelNames", false, DVAR_CHEAT, "Show static model names");
+     r_showTess = Dvar_RegisterEnum("r_showTess", r_showTessNames, false, DVAR_CHEAT, "Show details for each surface");
+     r_showCullBModels = Dvar_RegisterBool("r_showCullBModels", false, DVAR_CHEAT, "Show culled brush models");
+     r_showCullSModels = Dvar_RegisterBool("r_showCullSModels", false, DVAR_CHEAT, "Show culled static models");
+     r_showCullXModels = Dvar_RegisterBool("r_showCullXModels", false, DVAR_CHEAT, "Show culled xmodels");
      r_showFbColorDebug = Dvar_RegisterEnum(
          "r_showFbColorDebug",
          fbColorDebugNames,
          0,
-         0x80u,
+         DVAR_CHEAT,
          "Show front buffer color debugging information");
      r_showFloatZDebug = Dvar_RegisterBool(
          "r_showFloatZDebug",
-         0,
-         0x80u,
+         false,
+         DVAR_CHEAT,
          "Show float z buffer used to eliminate hard edges on particles near geometry");
      r_showCollision = Dvar_RegisterEnum(
          "r_showCollision",
          showCollisionNames,
          0,
-         0x80u,
+         DVAR_CHEAT,
          "Show the collision surfaces for the selected mask types");
      r_showCollisionGroups = Dvar_RegisterEnum(
          "r_showCollisionGroups",
          showCollisionGroupsNames,
          0,
-         0x80u,
+         DVAR_CHEAT,
          "Select whether to show the terrain, brush or all collision surface groups");
      r_showCollisionPolyType = Dvar_RegisterEnum(
          "r_showCollisionPolyType",
          showCollisionPolyTypeNames,
          0,
-         0x80u,
+         DVAR_CHEAT,
          "Select whether to display the collision surfaces as wireframe, poly interiors, or both");
      r_showCollisionDepthTest = Dvar_RegisterBool(
          "r_showCollisionDepthTest",
-         1,
-         0x80u,
+         true,
+         DVAR_CHEAT,
          "Select whether to use depth test in collision surfaces display");
      minbc.value.max = FLT_MAX;
      minbc.value.min = 1.0f;
@@ -1070,67 +1069,67 @@
          "r_showCollisionDist",
          500.0f,
          minbc,
-         0x80u,
+         DVAR_CHEAT,
          "Maximum distance to show collision surfaces");
      r_floatz = Dvar_RegisterBool(
          "r_floatz",
          1,
-         0x20u,
+         DVAR_LATCH,
          "Allocate a float z buffer (required for effects such as floatz, dof, and laser light)");
-     r_zFeather = Dvar_RegisterBool("r_zFeather", 1, 1u, "Enable z feathering (fixes particles clipping into geometry)");
-     r_depthPrepass = Dvar_RegisterBool("r_depthPrepass", 0, 1u, "Enable depth prepass (usually improves performance)");
+     r_zFeather = Dvar_RegisterBool("r_zFeather", true, DVAR_ARCHIVE, "Enable z feathering (fixes particles clipping into geometry)");
+     r_depthPrepass = Dvar_RegisterBool("r_depthPrepass", false, DVAR_ARCHIVE, "Enable depth prepass (usually improves performance)");
      minbd.value.max = FLT_MAX;
      minbd.value.min = -1.0f;
-     r_highLodDist = Dvar_RegisterFloat("r_highLodDist", -1.0f, minbd, 0x80u, "Distance for high level of detail");
+     r_highLodDist = Dvar_RegisterFloat("r_highLodDist", -1.0f, minbd, DVAR_CHEAT, "Distance for high level of detail");
      minbe.value.max = FLT_MAX;
      minbe.value.min = -1.0f;
-     r_mediumLodDist = Dvar_RegisterFloat("r_mediumLodDist", -1.0f, minbe, 0x80u, "Distance for medium level of detail");
+     r_mediumLodDist = Dvar_RegisterFloat("r_mediumLodDist", -1.0f, minbe, DVAR_CHEAT, "Distance for medium level of detail");
      minbf.value.max = FLT_MAX;
      minbf.value.min = -1.0f;
-     r_lowLodDist = Dvar_RegisterFloat("r_lowLodDist", -1.0f, minbf, 0x80u, "Distance for low level of detail");
+     r_lowLodDist = Dvar_RegisterFloat("r_lowLodDist", -1.0f, minbf, DVAR_CHEAT, "Distance for low level of detail");
      minbg.value.max = FLT_MAX;
      minbg.value.min = -1.0f;
-     r_lowestLodDist = Dvar_RegisterFloat("r_lowestLodDist", -1.0f, minbg, 0x80u, "Distance for lowest level of detail");
-     r_forceLod = Dvar_RegisterEnum("r_forceLod", r_forceLodNames, 4, 0x80u, "Force all level of detail to this level");
+     r_lowestLodDist = Dvar_RegisterFloat("r_lowestLodDist", -1.0f, minbg, DVAR_CHEAT, "Distance for lowest level of detail");
+     r_forceLod = Dvar_RegisterEnum("r_forceLod", r_forceLodNames, 4, DVAR_CHEAT, "Force all level of detail to this level");
      r_modelVertColor = Dvar_RegisterBool(
          "r_modelVertColor",
          1,
          0xA0u,
          "Set to 0 to replace all model vertex colors with white when loaded");
-     sc_enable = Dvar_RegisterBool("sc_enable", 0, 0, "Enable shadow cookies");
-     sc_blur = Dvar_RegisterInt("sc_blur", 2, (DvarLimits)0x400000000LL, 0x80u, "Enable shadow cookie blur");
-     sc_count = Dvar_RegisterInt("sc_count", 24, (DvarLimits)0x1800000000LL, 0x80u, "Number of shadow cookies");
+     sc_enable = Dvar_RegisterBool("sc_enable", false, DVAR_NOFLAG, "Enable shadow cookies");
+     sc_blur = Dvar_RegisterInt("sc_blur", 2, (DvarLimits)0x400000000LL, DVAR_CHEAT, "Enable shadow cookie blur");
+     sc_count = Dvar_RegisterInt("sc_count", 24, (DvarLimits)0x1800000000LL, DVAR_CHEAT, "Number of shadow cookies");
      sc_debugCasterCount = Dvar_RegisterInt(
          "sc_debugCasterCount",
          24,
          (DvarLimits)0x1800000000LL,
-         0x80u,
+         DVAR_CHEAT,
          "Show debugging information for the shadow cookie caster count");
      sc_debugReceiverCount = Dvar_RegisterInt(
          "sc_debugReceiverCount",
          24,
          (DvarLimits)0x1800000000LL,
-         0x80u,
+         DVAR_CHEAT,
          "Show debugging information for the shadow cookie receiver count");
-     sc_showOverlay = Dvar_RegisterBool("sc_showOverlay", 0, 0x80u, "Show shadow overlay for shadow cookies");
-     sc_showDebug = Dvar_RegisterBool("sc_showDebug", 0, 0x80u, "Show debug information for shadow cookies");
-     sc_wantCount = Dvar_RegisterInt("sc_wantCount", 12, (DvarLimits)0x1800000000LL, 0x80u, "Number of desired shadows");
+     sc_showOverlay = Dvar_RegisterBool("sc_showOverlay", false, DVAR_CHEAT, "Show shadow overlay for shadow cookies");
+     sc_showDebug = Dvar_RegisterBool("sc_showDebug", false, DVAR_CHEAT, "Show debug information for shadow cookies");
+     sc_wantCount = Dvar_RegisterInt("sc_wantCount", 12, (DvarLimits)0x1800000000LL, DVAR_CHEAT, "Number of desired shadows");
      sc_wantCountMargin = Dvar_RegisterInt(
          "sc_wantCountMargin",
          1,
          (DvarLimits)0x1800000000LL,
-         0x80u,
+         DVAR_CHEAT,
          "Margin of error on number of desired shadows");
      minbh.value.max = 1.0f;
      minbh.value.min = 0.0f;
-     sc_fadeRange = Dvar_RegisterFloat("sc_fadeRange", 0.25, minbh, 0x80u, "Shadow cookie fade range");
+     sc_fadeRange = Dvar_RegisterFloat("sc_fadeRange", 0.25, minbh, DVAR_CHEAT, "Shadow cookie fade range");
      minbi.value.max = 20.0f;
      minbi.value.min = 0.0f;
      sc_shadowInRate = Dvar_RegisterFloat(
          "sc_shadowInRate",
          2.0f,
          minbi,
-         0x80u,
+         DVAR_CHEAT,
          "Rate at which the shadow cookie horizon moves inwards");
      minbj.value.max = 20.0f;
      minbj.value.min = 0.0f;
@@ -1138,18 +1137,18 @@
          "sc_shadowOutRate",
          5.0f,
          minbj,
-         0x80u,
+         DVAR_CHEAT,
          "Rate at which the shadow cookie horizon moves outwards");
      minbk.value.max = 2000.0f;
      minbk.value.min = 1.0f;
-     sc_length = Dvar_RegisterFloat("sc_length", 400.0f, minbk, 0x80u, "Shadow cookie length");
+     sc_length = Dvar_RegisterFloat("sc_length", 400.0f, minbk, DVAR_CHEAT, "Shadow cookie length");
      minbl.value.max = FLT_MAX;
      minbl.value.min = -FLT_MAX;
      sc_offscreenCasterLodBias = Dvar_RegisterFloat(
          "sc_offscreenCasterLodBias",
          0.0f,
          minbl,
-         0x80u,
+         DVAR_CHEAT,
          "Shadow cookie off-screen caster level of detail bias");
      minbm.value.max = FLT_MAX;
      minbm.value.min = 0.0f;
@@ -1157,16 +1156,16 @@
          "sc_offscreenCasterLodScale",
          20.0f,
          minbm,
-         0x80u,
+         DVAR_CHEAT,
          "Shadow cookie off-screen caster level of detail scale");
      sm_enable = Dvar_RegisterBool("sm_enable", 1, 1u, "Enable shadow mapping");
-     sm_sunEnable = Dvar_RegisterBool("sm_sunEnable", 1, 0x1080u, "Enable sun shadow mapping from script");
-     sm_spotEnable = Dvar_RegisterBool("sm_spotEnable", 1, 0x1080u, "Enable spot shadow mapping from script");
+     sm_sunEnable = Dvar_RegisterBool("sm_sunEnable", 1, DVAR_SAVED | DVAR_CHEAT, "Enable sun shadow mapping from script");
+     sm_spotEnable = Dvar_RegisterBool("sm_spotEnable", 1, DVAR_SAVED | DVAR_CHEAT, "Enable spot shadow mapping from script");
      sm_maxLights = Dvar_RegisterInt(
          "sm_maxLights",
          4,
          (DvarLimits)0x400000000LL,
-         1u,
+         DVAR_ARCHIVE,
          "Limits how many primary lights can have shadow maps");
      minbn.value.max = 5.0f;
      minbn.value.min = 0.0099999998f;
@@ -1174,7 +1173,7 @@
          "sm_spotShadowFadeTime",
          1.0f,
          minbn,
-         0,
+         DVAR_NOFLAG,
          "How many seconds it takes for a primary light shadow map to fade in or out");
      minbo.value.max = 1024.0f;
      minbo.value.min = 0.0f;
@@ -1182,7 +1181,7 @@
          "sm_lightScore_eyeProjectDist",
          64.0f,
          minbo,
-         0,
+         DVAR_NOFLAG,
          "When picking shadows for primary lights, measure distance from a point this far in fr"
          "ont of the camera.");
      minbp.value.max = 1.0f;
@@ -1191,10 +1190,10 @@
          "sm_lightScore_spotProjectFrac",
          0.125f,
          minbp,
-         0,
+         DVAR_NOFLAG,
          "When picking shadows for primary lights, measure distance to a point this fraction o"
          "f the light's radius along it's shadow direction.");
-     sm_showOverlay = Dvar_RegisterEnum("sm_showOverlay", sm_showOverlayNames, 0, 0x80u, "Show shadow map overlay");
+     sm_showOverlay = Dvar_RegisterEnum("sm_showOverlay", sm_showOverlayNames, 0, DVAR_CHEAT, "Show shadow map overlay");
      minbq.value.max = 1.0f;
      minbq.value.min = 0.0f;
      sm_showOverlayDepthBounds = Dvar_RegisterVec2(
@@ -1202,17 +1201,17 @@
          0.25f,
          0.75f,
          minbq,
-         0x80u,
+         DVAR_CHEAT,
          "Near and far depth values for the shadow map overlay");
      minbr.value.max = 8.0f;
      minbr.value.min = 0.0f;
-     sm_polygonOffsetScale = Dvar_RegisterFloat("sm_polygonOffsetScale", 2.0f, minbr, 0, "Shadow map offset scale");
+     sm_polygonOffsetScale = Dvar_RegisterFloat("sm_polygonOffsetScale", 2.0f, minbr, DVAR_NOFLAG, "Shadow map offset scale");
      minbs.value.max = 32.0f;
      minbs.value.min = 0.0f;
-     sm_polygonOffsetBias = Dvar_RegisterFloat("sm_polygonOffsetBias", 0.5f, minbs, 0, "Shadow map offset bias");
+     sm_polygonOffsetBias = Dvar_RegisterFloat("sm_polygonOffsetBias", 0.5f, minbs, DVAR_NOFLAG, "Shadow map offset bias");
      minbt.value.max = 32.0f;
      minbt.value.min = 0.0625f;
-     sm_sunSampleSizeNear = Dvar_RegisterFloat("sm_sunSampleSizeNear", 0.25f, minbt, 0x1080u, "Shadow sample size");
+     sm_sunSampleSizeNear = Dvar_RegisterFloat("sm_sunSampleSizeNear", 0.25f, minbt, DVAR_SAVED | DVAR_CHEAT, "Shadow sample size");
      minbu.value.max = FLT_MAX;
      minbu.value.min = -FLT_MAX;
      sm_sunShadowCenter = Dvar_RegisterVec3(
@@ -1221,35 +1220,35 @@
          0.0f,
          0.0f,
          minbu,
-         0x1080u,
+         DVAR_SAVED | DVAR_CHEAT,
          "Sun shadow center, 0 0 0 means don't override");
      minbv.value.max = 1.0f;
      minbv.value.min = 0.25f;
-     sm_sunShadowScale = Dvar_RegisterFloat("sm_sunShadowScale", 1.0f, minbv, 0x1080u, "Sun shadow scale optimization");
-     sm_strictCull = Dvar_RegisterBool("sm_strictCull", 1, 0x80u, "Strict shadow map cull");
-     sm_fastSunShadow = Dvar_RegisterBool("sm_fastSunShadow", 1, 0x80u, "Fast sun shadow");
-     sm_qualitySpotShadow = Dvar_RegisterBool("sm_qualitySpotShadow", 1, 0x80u, "Fast spot shadow");
-     sm_debugFastSunShadow = Dvar_RegisterBool("sm_debugFastSunShadow", 0, 0x80u, "Debug fast sun shadow");
+     sm_sunShadowScale = Dvar_RegisterFloat("sm_sunShadowScale", 1.0f, minbv, DVAR_SAVED | DVAR_CHEAT, "Sun shadow scale optimization");
+     sm_strictCull = Dvar_RegisterBool("sm_strictCull", 1, DVAR_CHEAT, "Strict shadow map cull");
+     sm_fastSunShadow = Dvar_RegisterBool("sm_fastSunShadow", 1, DVAR_CHEAT, "Fast sun shadow");
+     sm_qualitySpotShadow = Dvar_RegisterBool("sm_qualitySpotShadow", 1, DVAR_CHEAT, "Fast spot shadow");
+     sm_debugFastSunShadow = Dvar_RegisterBool("sm_debugFastSunShadow", 0, DVAR_CHEAT, "Debug fast sun shadow");
      minbw.value.max = 32.0f;
      minbw.value.min = 0.0f;
-     r_blur = Dvar_RegisterFloat("r_blur", 0.0f, minbw, 0x80u, "Dev tweak to blur the screen");
-     r_distortion = Dvar_RegisterBool("r_distortion", 1, 1u, "Enable distortion");
-     r_glow_allowed = Dvar_RegisterBool("r_glow_allowed", 1, 1u, "Allow glow.");
+     r_blur = Dvar_RegisterFloat("r_blur", 0.0f, minbw, DVAR_CHEAT, "Dev tweak to blur the screen");
+     r_distortion = Dvar_RegisterBool("r_distortion", true, DVAR_ARCHIVE, "Enable distortion");
+     r_glow_allowed = Dvar_RegisterBool("r_glow_allowed", true, DVAR_ARCHIVE, "Allow glow.");
      r_glow_allowed_script_forced = Dvar_RegisterBool(
          "r_glow_allowed_script_forced",
-         0,
-         0x1000u,
+         false,
+         DVAR_SAVED,
          "Force 'allow glow' to be treated as true, by script.");
-     r_glow = Dvar_RegisterBool("r_glow", 1, 0x80u, "Enable glow.");
-     r_glowUseTweaks = Dvar_RegisterBool("r_glowUseTweaks", 0, 0x80u, "Overide glow with tweak dvar values.");
-     r_glowTweakEnable = Dvar_RegisterBool("r_glowTweakEnable", 0, 0x80u, "Tweak dev var; Enable glow");
+     r_glow = Dvar_RegisterBool("r_glow", 1, DVAR_CHEAT, "Enable glow.");
+     r_glowUseTweaks = Dvar_RegisterBool("r_glowUseTweaks", 0, DVAR_CHEAT, "Overide glow with tweak dvar values.");
+     r_glowTweakEnable = Dvar_RegisterBool("r_glowTweakEnable", 0, DVAR_CHEAT, "Tweak dev var; Enable glow");
      minbx.value.max = 32.0f;
      minbx.value.min = 0.0f;
      r_glowTweakRadius = Dvar_RegisterFloat(
          "r_glowTweakRadius0",
          5.0,
          minbx,
-         0x80u,
+         DVAR_CHEAT,
          "Tweak dev var; Glow radius in pixels at 640x480");
      minby.value.max = 20.0f;
      minby.value.min = 0.0f;
@@ -1257,7 +1256,7 @@
          "r_glowTweakBloomIntensity0",
          1.0,
          minby,
-         0x80u,
+         DVAR_CHEAT,
          "Tweak dev var; Glow bloom intensity");
      minbz.value.max = 1.0f;
      minbz.value.min = 0.0f;
@@ -1265,7 +1264,7 @@
          "r_glowTweakBloomCutoff",
          0.5,
          minbz,
-         0x80u,
+         DVAR_CHEAT,
          "Tweak dev var; Glow bloom cut off fraction");
      minca.value.max = 1.0f;
      minca.value.min = 0.0f;
@@ -1273,34 +1272,34 @@
          "r_glowTweakBloomDesaturation",
          0.0f,
          minca,
-         0x80u,
+         DVAR_CHEAT,
          "Tweak dev var; Glow bloom desaturation");
-     r_filmUseTweaks = Dvar_RegisterBool("r_filmUseTweaks", 0, 0x80u, "Overide film effects with tweak dvar values.");
-     r_filmTweakEnable = Dvar_RegisterBool("r_filmTweakEnable", 0, 0x1000u, "Tweak dev var; enable film color effects");
+     r_filmUseTweaks = Dvar_RegisterBool("r_filmUseTweaks", 0, DVAR_CHEAT, "Overide film effects with tweak dvar values.");
+     r_filmTweakEnable = Dvar_RegisterBool("r_filmTweakEnable", 0, DVAR_SAVED, "Tweak dev var; enable film color effects");
      mincb.value.max = 4.0f;
      mincb.value.min = 0.0f;
      r_filmTweakContrast = Dvar_RegisterFloat(
          "r_filmTweakContrast",
          1.4f,
          mincb,
-         0x1000u,
+         DVAR_SAVED,
          "Tweak dev var; film color contrast");
      mincc.value.max = 4.0f;
      mincc.value.min = 0.0f;
-     r_contrast = Dvar_RegisterFloat("r_contrast", 1.0f, mincc, 0x80u, "Contrast adjustment");
+     r_contrast = Dvar_RegisterFloat("r_contrast", 1.0f, mincc, DVAR_CHEAT, "Contrast adjustment");
      mincd.value.max = 1.0f;
      mincd.value.min = -1.0f;
-     r_brightness = Dvar_RegisterFloat("r_brightness", 0.0f, mincd, 0x80u, "Brightness adjustment");
+     r_brightness = Dvar_RegisterFloat("r_brightness", 0.0f, mincd, DVAR_CHEAT, "Brightness adjustment");
      mince.value.max = 4.0f;
      mince.value.min = 0.0f;
-     r_desaturation = Dvar_RegisterFloat("r_desaturation", 1.0f, mince, 0x80u, "Desaturation adjustment");
+     r_desaturation = Dvar_RegisterFloat("r_desaturation", 1.0f, mince, DVAR_CHEAT, "Desaturation adjustment");
      mincf.value.max = 1.0f;
      mincf.value.min = -1.0f;
      r_filmTweakBrightness = Dvar_RegisterFloat(
          "r_filmTweakBrightness",
          0.0f,
          mincf,
-         0x1000u,
+         DVAR_SAVED,
          "Tweak dev var; film color brightness");
      mincg.value.max = 1.0f;
      mincg.value.min = 0.0f;
@@ -1308,9 +1307,9 @@
          "r_filmTweakDesaturation",
          0.2f,
          mincg,
-         0x1000u,
+         DVAR_SAVED,
          "Tweak dev var; Desaturation applied after all 3D drawing");
-     r_filmTweakInvert = Dvar_RegisterBool("r_filmTweakInvert", 0, 0x1000u, "Tweak dev var; enable inverted video");
+     r_filmTweakInvert = Dvar_RegisterBool("r_filmTweakInvert", 0, DVAR_SAVED, "Tweak dev var; enable inverted video");
      minch.value.max = 2.0f;
      minch.value.min = 0.0f;
      r_filmTweakDarkTint = Dvar_RegisterVec3(
@@ -1319,7 +1318,7 @@
          0.85000002f,
          1.0f,
          minch,
-         0x1000u,
+         DVAR_SAVED,
          "Tweak dev var; film color dark tint color");
      minci.value.max = 2.0f;
      minci.value.min = 0.0f;
@@ -1329,13 +1328,13 @@
          1.05f,
          0.85000002f,
          minci,
-         0x1000u,
+         DVAR_SAVED,
          "Tweak dev var; film color light tint color");
-     r_dof_enable = Dvar_RegisterBool("r_dof_enable", 1, 1u, "Enable the depth of field effect");
+     r_dof_enable = Dvar_RegisterBool("r_dof_enable", true, DVAR_ARCHIVE, "Enable the depth of field effect");
      r_dof_tweak = Dvar_RegisterBool(
          "r_dof_tweak",
-         0,
-         0x80u,
+         false,
+         DVAR_CHEAT,
          "Use dvars to set the depth of field effect; overrides r_dof_enable");
      mincj.value.max = 10.0f;
      mincj.value.min = 4.0f;
@@ -1343,7 +1342,7 @@
          "r_dof_nearBlur",
          6.0f,
          mincj,
-         0x80u,
+         DVAR_CHEAT,
          "Sets the radius of the gaussian blur used by depth of field, in pixels at 640x480");
      minck.value.max = 10.0f;
      minck.value.min = 0.0f;
@@ -1351,7 +1350,7 @@
          "r_dof_farBlur",
          1.8f,
          minck,
-         0x80u,
+         DVAR_CHEAT,
          "Sets the radius of the gaussian blur used by depth of field, in pixels at 640x480");
      mincl.value.max = 128.0f;
      mincl.value.min = 0.0f;
@@ -1359,7 +1358,7 @@
          "r_dof_viewModelStart",
          2.0f,
          mincl,
-         0x80u,
+         DVAR_CHEAT,
          "Depth of field viewmodel start distance, in inches");
      mincm.value.max = 128.0f;
      mincm.value.min = 0.0f;
@@ -1367,7 +1366,7 @@
          "r_dof_viewModelEnd",
          8.0f,
          mincm,
-         0x80u,
+         DVAR_CHEAT,
          "Depth of field viewmodel end distance, in inches");
      mincn.value.max = 1000.0f;
      mincn.value.min = 0.0f;
@@ -1375,38 +1374,38 @@
          "r_dof_nearStart",
          10.0f,
          mincn,
-         0x80u,
+         DVAR_CHEAT,
          "Depth of field near start distance, in inches");
      minco.value.max = 1000.0f;
      minco.value.min = 0.0f;
-     r_dof_nearEnd = Dvar_RegisterFloat("r_dof_nearEnd", 60.0, minco, 0x80u, "Depth of field near end distance, in inches");
+     r_dof_nearEnd = Dvar_RegisterFloat("r_dof_nearEnd", 60.0, minco, DVAR_CHEAT, "Depth of field near end distance, in inches");
      mincp.value.max = 20000.0f;
      mincp.value.min = 0.0f;
      r_dof_farStart = Dvar_RegisterFloat(
          "r_dof_farStart",
          1000.0f,
          mincp,
-         0x80u,
+         DVAR_CHEAT,
          "Depth of field far start distance, in inches");
      mincq.value.max = 20000.0f;
      mincq.value.min = 0.0f;
-     r_dof_farEnd = Dvar_RegisterFloat("r_dof_farEnd", 7000.0, mincq, 0x80u, "Depth of field far end distance, in inches");
+     r_dof_farEnd = Dvar_RegisterFloat("r_dof_farEnd", 7000.0, mincq, DVAR_CHEAT, "Depth of field far end distance, in inches");
      mincr.value.max = 3.0f;
      mincr.value.min = 0.1f;
      r_dof_bias = Dvar_RegisterFloat(
          "r_dof_bias",
          0.5f,
          mincr,
-         0x80u,
+         DVAR_CHEAT,
          "Depth of field bias as a power function (like gamma); less than 1 is sharper");
-     r_outdoor = Dvar_RegisterBool("r_outdoor", 1, 0x1000u, "Prevents snow from going indoors");
+     r_outdoor = Dvar_RegisterBool("r_outdoor", 1, DVAR_SAVED, "Prevents snow from going indoors");
      mincs.value.max = FLT_MAX;
      mincs.value.min = -FLT_MAX;
      r_outdoorAwayBias = Dvar_RegisterFloat(
          "r_outdoorAwayBias",
          32.0f,
          mincs,
-         0x1000u,
+         DVAR_SAVED,
          "Affects the height map lookup for making sure snow doesn't go indoors");
      minct.value.max = FLT_MAX;
      minct.value.min = -FLT_MAX;
@@ -1414,77 +1413,77 @@
          "r_outdoorDownBias",
          0.0f,
          minct,
-         0x1000u,
+         DVAR_SAVED,
          "Affects the height map lookup for making sure snow doesn't go indoors");
      mincu.value.max = FLT_MAX;
      mincu.value.min = -FLT_MAX;
-     r_outdoorFeather = Dvar_RegisterFloat("r_outdoorFeather", 8.0f, mincu, 0x1000u, "Outdoor z-feathering value");
+     r_outdoorFeather = Dvar_RegisterFloat("r_outdoorFeather", 8.0f, mincu, DVAR_SAVED, "Outdoor z-feathering value");
      Dvar_SetModified((dvar_s*)r_outdoorFeather);
      r_sun_from_dvars = Dvar_RegisterBool(
          "r_sun_from_dvars",
-         0,
-         0x80u,
+         false,
+         DVAR_CHEAT,
          "Set sun flare values from dvars rather than the level");
-     developer = Dvar_RegisterInt("developer", 0, (DvarLimits)0x200000000LL, 0, "Enable development options");
-     sv_cheats = Dvar_RegisterBool("sv_cheats", 1, 0x48u, "Allow server side cheats");
-     com_statmon = Dvar_RegisterBool("com_statmon", 0, 0, "Draw stats monitor");
-     r_sse_skinning = Dvar_RegisterBool("r_sse_skinning", 1, 0, "Use Streaming SIMD Extensions for skinning");
+     developer = Dvar_RegisterInt("developer", 0, (DvarLimits)0x200000000LL, DVAR_NOFLAG, "Enable development options");
+     sv_cheats = Dvar_RegisterBool("sv_cheats", 1, DVAR_SYSTEMINFO | DVAR_ROM, "Allow server side cheats");
+     com_statmon = Dvar_RegisterBool("com_statmon", false, DVAR_NOFLAG, "Draw stats monitor");
+     r_sse_skinning = Dvar_RegisterBool("r_sse_skinning", true, DVAR_NOFLAG, "Use Streaming SIMD Extensions for skinning");
      r_monitor = Dvar_RegisterInt(
          "r_monitor",
          0,
          (DvarLimits)0x800000000LL,
-         0x21u,
+         DVAR_ARCHIVE | DVAR_LATCH,
          "Index of the monitor to use in a multi monitor system; 0 picks automatically.");
      r_rendererPreference = Dvar_RegisterEnum(
          "r_rendererPreference",
          s_rendererNames,
          2,
-         0x21u,
+         DVAR_ARCHIVE | DVAR_LATCH,
          "Preferred renderer; unsupported renderers will never be used.");
-     r_rendererInUse = Dvar_RegisterEnum("r_rendererInUse", s_rendererNames, 2, 0x40u, "The renderer currently used");
+     r_rendererInUse = Dvar_RegisterEnum("r_rendererInUse", s_rendererNames, 2, DVAR_ROM, "The renderer currently used");
      r_aspectRatio = Dvar_RegisterEnum(
          "r_aspectRatio",
          s_aspectRatioNames,
          0,
-         0x21u,
+         DVAR_ARCHIVE | DVAR_LATCH,
          "Screen aspect ratio.  Most widescreen monitors are 16:10 instead of 16:9.");
      r_customMode = Dvar_RegisterString(
          "r_customMode",
          (char *)"",
-         0x21u,
+         DVAR_ARCHIVE | DVAR_LATCH,
          "Special resolution mode for the remote debugger");
      R_WarnInitDvars();
-     prof_probe[0] = Dvar_RegisterEnum("prof_probe0", prof_enumNames, 0, 0, "Profile probe");
-     prof_probe[1] = Dvar_RegisterEnum("prof_probe1", prof_enumNames, 0, 0, "Profile probe");
-     prof_probe[2] = Dvar_RegisterEnum("prof_probe2", prof_enumNames, 0, 0, "Profile probe");
-     prof_probe[3] = Dvar_RegisterEnum("prof_probe3", prof_enumNames, 0, 0, "Profile probe");
-     prof_probe[4] = Dvar_RegisterEnum("prof_probe4", prof_enumNames, 0, 0, "Profile probe");
+     prof_probe[0] = Dvar_RegisterEnum("prof_probe0", prof_enumNames, 0, DVAR_NOFLAG, "Profile probe");
+     prof_probe[1] = Dvar_RegisterEnum("prof_probe1", prof_enumNames, 0, DVAR_NOFLAG, "Profile probe");
+     prof_probe[2] = Dvar_RegisterEnum("prof_probe2", prof_enumNames, 0, DVAR_NOFLAG, "Profile probe");
+     prof_probe[3] = Dvar_RegisterEnum("prof_probe3", prof_enumNames, 0, DVAR_NOFLAG, "Profile probe");
+     prof_probe[4] = Dvar_RegisterEnum("prof_probe4", prof_enumNames, 0, DVAR_NOFLAG, "Profile probe");
      prof_probeMaxMsec = Dvar_RegisterInt(
          "prof_probeMaxMsec",
          30,
          (DvarLimits)0x3E800000001LL,
-         0,
+         DVAR_NOFLAG,
          "Height of each profile probe graph, in milliseconds");
      mincv.value.max = 1000.0f;
      mincv.value.min = 0.1f;
-     prof_sortTime = Dvar_RegisterFloat("prof_sortTime", 2.0f, mincv, 0, "Time in seconds between resort profiles");
-     profile_mode = Dvar_RegisterEnum("profile_mode", g_profile_mode_values, 0, 0, "Profiler mode");
-     profile_script = Dvar_RegisterBool("profile_script", 0, 0, "Enable profile scripts");
-     profile_script_by_file = Dvar_RegisterBool("profile_script_by_file", 0, 0, "Enable profile scripts by source file");
+     prof_sortTime = Dvar_RegisterFloat("prof_sortTime", 2.0f, mincv, DVAR_NOFLAG, "Time in seconds between resort profiles");
+     profile_mode = Dvar_RegisterEnum("profile_mode", g_profile_mode_values, 0, DVAR_NOFLAG, "Profiler mode");
+     profile_script = Dvar_RegisterBool("profile_script", false, DVAR_NOFLAG, "Enable profile scripts");
+     profile_script_by_file = Dvar_RegisterBool("profile_script_by_file", false, DVAR_NOFLAG, "Enable profile scripts by source file");
      r_staticModelDumpLodInfo = Dvar_RegisterBool(
          "r_staticModelDumpLodInfo",
-         0,
-         0,
+         false,
+         DVAR_NOFLAG,
          "Dump static model info for the next frame.");
      r_altModelLightingUpdate = Dvar_RegisterBool(
          "r_altModelLightingUpdate",
-         1,
-         0x21u,
+         true,
+         DVAR_ARCHIVE | DVAR_LATCH,
          "Use alternate model lighting update technique");
      r_preloadShaders = Dvar_RegisterBool(
          "r_preloadShaders",
-         0,
-         0x21u,
+         false,
+         DVAR_ARCHIVE | DVAR_LATCH,
          "Force D3D to draw dummy geometry with all shaders during level load; may fix long pauses at level start.");
      R_ReflectionProbeRegisterDvars();
  }

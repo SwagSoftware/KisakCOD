@@ -426,7 +426,7 @@ LRESULT WINAPI MainWndProc(
 		r_autopriority = Dvar_RegisterBool(
 			"r_autopriority",
 			0,
-			1u,
+			DVAR_ARCHIVE,
 			"Automatically set the priority of the windows process when the game is minimized");
 		MSH_MOUSEWHEEL = RegisterWindowMessageA("MSWHEEL_ROLLMSG");
 		return DefWindowProcA(hWnd, uMsg, wParam, lParam);

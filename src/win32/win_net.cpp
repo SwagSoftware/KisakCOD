@@ -831,8 +831,8 @@ void __cdecl NET_OpenIP()
 	int i; // [esp+4h] [ebp-8h]
 	const dvar_s *port; // [esp+8h] [ebp-4h]
 
-	v0 = Dvar_RegisterString("net_ip", "localhost", 0x20u, "Network IP Address");
-	port = Dvar_RegisterInt("net_port", 28960, 0xFFFF00000000LL, 0x20u, "Network port");
+	v0 = Dvar_RegisterString("net_ip", "localhost", DVAR_LATCH, "Network IP Address");
+	port = Dvar_RegisterInt("net_port", 28960, 0xFFFF00000000LL, DVAR_LATCH, "Network port");
 	for (i = 0; ; ++i)
 	{
 		if (i >= 10)
@@ -921,7 +921,7 @@ NET_OpenIPX
 void NET_OpenIPX( void ) {
 	const dvar_s *v0; // eax
 
-	v0 = Dvar_RegisterInt("net_port", 28960, 0xFFFF00000000LL, 0x20u, "Network Port");
+	v0 = Dvar_RegisterInt("net_port", 28960, 0xFFFF00000000LL, DVAR_LATCH, "Network Port");
 	ipx_socket = NET_IPXSocket(v0->current.integer);
 }
 
@@ -937,25 +937,25 @@ BOOL __cdecl NET_GetDvars()
 	modified = 0;
 	if (net_noudp)
 		modified = net_noudp->modified;
-	net_noudp = Dvar_RegisterBool("net_noudp", 0, 0x21u, "Disable UDP");
+	net_noudp = Dvar_RegisterBool("net_noudp", 0, DVAR_ARCHIVE | DVAR_LATCH, "Disable UDP");
 	if (net_noipx && net_noipx->modified)
 		modified = 1;
-	net_noipx = Dvar_RegisterBool("net_noipx", 0, 0x21u, "Disable IPX");
+	net_noipx = Dvar_RegisterBool("net_noipx", 0, DVAR_ARCHIVE | DVAR_LATCH, "Disable IPX");
 	if (net_socksEnabled && net_socksEnabled->modified)
 		modified = 1;
-	net_socksEnabled = Dvar_RegisterBool("net_socksEnabled", 0, 0x21u, "Enable network sockets");
+	net_socksEnabled = Dvar_RegisterBool("net_socksEnabled", 0, DVAR_ARCHIVE | DVAR_LATCH, "Enable network sockets");
 	if (net_socksServer && net_socksServer->modified)
 		modified = 1;
-	net_socksServer = Dvar_RegisterString("net_socksServer", "", 0x21u, "Network socket server");
+	net_socksServer = Dvar_RegisterString("net_socksServer", "", DVAR_ARCHIVE | DVAR_LATCH, "Network socket server");
 	if (net_socksPort && net_socksPort->modified)
 		modified = 1;
-	net_socksPort = Dvar_RegisterInt("net_socksPort", 1080, 0xFFFF00000000LL, 0x21u, "Network socket port");
+	net_socksPort = Dvar_RegisterInt("net_socksPort", 1080, 0xFFFF00000000LL, DVAR_ARCHIVE | DVAR_LATCH, "Network socket port");
 	if (net_socksUsername && net_socksUsername->modified)
 		modified = 1;
-	net_socksUsername = Dvar_RegisterString("net_socksUsername", "", 0x21u, "Network socket username");
+	net_socksUsername = Dvar_RegisterString("net_socksUsername", "", DVAR_ARCHIVE | DVAR_LATCH, "Network socket username");
 	if (net_socksPassword && net_socksPassword->modified)
 		modified = 1;
-	net_socksPassword = Dvar_RegisterString("net_socksPassword", "", 0x21u, "Network socket password");
+	net_socksPassword = Dvar_RegisterString("net_socksPassword", "", DVAR_ARCHIVE | DVAR_LATCH, "Network socket password");
 	return modified;
 }
 

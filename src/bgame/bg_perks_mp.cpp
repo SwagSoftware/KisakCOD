@@ -64,7 +64,7 @@ void __cdecl Perks_RegisterDvars()
         "perk_weapSpreadMultiplier",
         0.64999998f,
         min,
-        0x80u,
+        DVAR_CHEAT,
         "Percentage of weapon spread to use");
     mina.value.max = 1.0f;
     mina.value.min = 0.0f;
@@ -72,7 +72,7 @@ void __cdecl Perks_RegisterDvars()
         "perk_weapReloadMultiplier",
         0.5f,
         mina,
-        0x80u,
+        DVAR_CHEAT,
         "Percentage of weapon reload time to use");
     minb.value.max = 1.0f;
     minb.value.min = 0.0f;
@@ -80,7 +80,7 @@ void __cdecl Perks_RegisterDvars()
         "perk_weapRateMultiplier",
         0.75f,
         minb,
-        0x80u,
+        DVAR_CHEAT,
         "Percentage of weapon firing rate to use");
     minc.value.max = FLT_MAX;
     minc.value.min = 0.0f;
@@ -88,7 +88,7 @@ void __cdecl Perks_RegisterDvars()
         "perk_extraBreath",
         5.0f,
         minc,
-        0x80u,
+        DVAR_CHEAT,
         "Number of extra seconds a player can hold his breath");
     mind.value.max = 30.0f;
     mind.value.min = 0.0f;
@@ -96,12 +96,12 @@ void __cdecl Perks_RegisterDvars()
         "perk_bulletPenetrationMultiplier",
         2.0f,
         mind,
-        0x80u,
+        DVAR_CHEAT,
         "Multiplier for extra bullet penetration");
     perk_grenadeDeath = Dvar_RegisterString(
         "perk_grenadeDeath",
         "frag_grenade_short_mp",
-        0x80u,
+        DVAR_CHEAT,
         "Name of the grenade weapon to drop");
     mine.value.max = FLT_MAX;
     mine.value.min = 0.0f;
@@ -109,7 +109,7 @@ void __cdecl Perks_RegisterDvars()
         "perk_parabolicRadius",
         400.0f,
         mine,
-        0x80u,
+        DVAR_CHEAT,
         "Eavesdrop perk's effective radius");
     minf.value.max = 180.0f;
     minf.value.min = 0.0f;
@@ -117,12 +117,12 @@ void __cdecl Perks_RegisterDvars()
         "perk_parabolicAngle",
         180.0f,
         minf,
-        0x80u,
+        DVAR_CHEAT,
         "Eavesdrop perk's effective FOV angle");
     perk_parabolicIcon = Dvar_RegisterString(
         "perk_parabolicIcon",
         "specialty_parabolic",
-        0x80u,
+        DVAR_CHEAT,
         "Eavesdrop icon to use when displaying eavesdropped voice chats");
     ming.value.max = FLT_MAX;
     ming.value.min = 0.0f;
@@ -130,7 +130,7 @@ void __cdecl Perks_RegisterDvars()
         "perk_sprintMultiplier",
         2.0f,
         ming,
-        0x80u,
+        DVAR_CHEAT,
         "Multiplier for player_sprinttime");
 }
 

@@ -4734,7 +4734,7 @@ void __cdecl UI_Init(int localClientNum)
             "sharedUiInfo.numGameTypes <= ARRAY_COUNT( sharedUiInfo.gameTypes )");
     v2.integer.max = sharedUiInfo.numGameTypes - 1;
     v2.enumeration.stringCount = 0;
-    ui_netGameType = Dvar_RegisterInt("ui_netGametype", 0, v2, 1u, "Game type");
+    ui_netGameType = Dvar_RegisterInt("ui_netGametype", 0, v2, DVAR_ARCHIVE, "Game type");
     UI_LoadArenas();
     if (useFastFile->current.enabled)
     {
@@ -4773,12 +4773,12 @@ void __cdecl UI_Init(int localClientNum)
             "zeof( sharedUiInfo.gameTypes[0] ) * (sizeof( sharedUiInfo.gameTypes ) != 4 || sizeof( sharedUiInfo.gameTypes[0] ) <= 4))))",
             ui_netGameType->current.integer);
     Dvar_SetString((dvar_s *)ui_netGameTypeName, (char *)sharedUiInfo.gameTypes[ui_netGameType->current.integer].gameType);
-    Dvar_RegisterBool("ui_multiplayer", 1, 0x40u, "True if the game is multiplayer");
+    Dvar_RegisterBool("ui_multiplayer", 1, DVAR_ROM, "True if the game is multiplayer");
     uiscript_debug = Dvar_RegisterInt(
         "uiscript_debug",
         0,
         (DvarLimits)0x200000000LL,
-        0,
+        DVAR_NOFLAG,
         "spam debug info for the ui script");
 }
 
@@ -4793,139 +4793,139 @@ const dvar_s *UI_RegisterDvars()
     DvarLimits mine; // [esp+10h] [ebp-10h]
     DvarLimits minf; // [esp+10h] [ebp-10h]
 
-    ui_customModeName = Dvar_RegisterString("ui_customModeName", (char *)"", 0, "Custom game mode name");
+    ui_customModeName = Dvar_RegisterString("ui_customModeName", (char *)"", DVAR_NOFLAG, "Custom game mode name");
     ui_customModeEditName = Dvar_RegisterString(
         "ui_customModeEditName",
         (char *)"",
-        0,
+        DVAR_NOFLAG,
         "Name to give the currently edited custom game mode when editing is complete");
-    ui_customClassName = Dvar_RegisterString("ui_customClassName", (char *)"", 0, "Custom Class name");
-    Dvar_RegisterBool("g_allowvote", 1, 1u, 0);
-    Dvar_RegisterBool("cg_brass", 1, 1u, 0);
-    Dvar_RegisterBool("fx_marks", 1, 1u, 0);
-    Dvar_RegisterString("server1", (char *)"", 1u, "Server display");
-    Dvar_RegisterString("server2", (char *)"", 1u, "Server display");
-    Dvar_RegisterString("server3", (char *)"", 1u, "Server display");
-    Dvar_RegisterString("server4", (char *)"", 1u, "Server display");
-    Dvar_RegisterString("server5", (char *)"", 1u, "Server display");
-    Dvar_RegisterString("server6", (char *)"", 1u, "Server display");
-    Dvar_RegisterString("server7", (char *)"", 1u, "Server display");
-    Dvar_RegisterString("server8", (char *)"", 1u, "Server display");
-    Dvar_RegisterString("server9", (char *)"", 1u, "Server display");
-    Dvar_RegisterString("server10", (char *)"", 1u, "Server display");
-    Dvar_RegisterString("server11", (char *)"", 1u, "Server display");
-    Dvar_RegisterString("server12", (char *)"", 1u, "Server display");
-    Dvar_RegisterString("server13", (char *)"", 1u, "Server display");
-    Dvar_RegisterString("server14", (char *)"", 1u, "Server display");
-    Dvar_RegisterString("server15", (char *)"", 1u, "Server display");
-    Dvar_RegisterString("server16", (char *)"", 1u, "Server display");
+    ui_customClassName = Dvar_RegisterString("ui_customClassName", (char *)"", DVAR_NOFLAG, "Custom Class name");
+    Dvar_RegisterBool("g_allowvote", 1, DVAR_ARCHIVE, 0);
+    Dvar_RegisterBool("cg_brass", 1, DVAR_ARCHIVE, 0);
+    Dvar_RegisterBool("fx_marks", 1, DVAR_ARCHIVE, 0);
+    Dvar_RegisterString("server1", (char *)"", DVAR_ARCHIVE, "Server display");
+    Dvar_RegisterString("server2", (char *)"", DVAR_ARCHIVE, "Server display");
+    Dvar_RegisterString("server3", (char *)"", DVAR_ARCHIVE, "Server display");
+    Dvar_RegisterString("server4", (char*)"", DVAR_ARCHIVE, "Server display");
+    Dvar_RegisterString("server5", (char*)"", DVAR_ARCHIVE, "Server display");
+    Dvar_RegisterString("server6", (char*)"", DVAR_ARCHIVE, "Server display");
+    Dvar_RegisterString("server7", (char*)"", DVAR_ARCHIVE, "Server display");
+    Dvar_RegisterString("server8", (char*)"", DVAR_ARCHIVE, "Server display");
+    Dvar_RegisterString("server9", (char*)"", DVAR_ARCHIVE, "Server display");
+    Dvar_RegisterString("server10", (char*)"", DVAR_ARCHIVE, "Server display");
+    Dvar_RegisterString("server11", (char*)"", DVAR_ARCHIVE, "Server display");
+    Dvar_RegisterString("server12", (char*)"", DVAR_ARCHIVE, "Server display");
+    Dvar_RegisterString("server13", (char*)"", DVAR_ARCHIVE, "Server display");
+    Dvar_RegisterString("server14", (char*)"", DVAR_ARCHIVE, "Server display");
+    Dvar_RegisterString("server15", (char*)"", DVAR_ARCHIVE, "Server display");
+    Dvar_RegisterString("server16", (char*)"", DVAR_ARCHIVE, "Server display");
     ui_netSource = Dvar_RegisterInt(
         "ui_netSource",
         1,
         (DvarLimits)0x200000000LL,
-        1u,
+        DVAR_ARCHIVE,
         "The network source where:\n  0:Local\n  1:Internet\n  2:Favourites");
     min.value.max = 1.0f;
     min.value.min = 0.0f;
-    ui_smallFont = Dvar_RegisterFloat("ui_smallFont", 0.25f, min, 1u, "Small font scale");
+    ui_smallFont = Dvar_RegisterFloat("ui_smallFont", 0.25f, min, DVAR_ARCHIVE, "Small font scale");
     mina.value.max = 1.0f;
     mina.value.min = 0.0f;
-    ui_bigFont = Dvar_RegisterFloat("ui_bigFont", 0.40000001f, mina, 1u, "Big font scale");
+    ui_bigFont = Dvar_RegisterFloat("ui_bigFont", 0.40000001f, mina, DVAR_ARCHIVE, "Big font scale");
     minb.value.max = 1.0f;
     minb.value.min = 0.0f;
-    ui_extraBigFont = Dvar_RegisterFloat("ui_extraBigFont", 0.55000001f, minb, 1u, "Extra big font scale");
-    ui_currentMap = Dvar_RegisterInt("ui_currentMap", 0, (DvarLimits)0x7FFFFFFF00000000LL, 1u, "Current map index");
-    ui_gametype = Dvar_RegisterInt("ui_gametype", 3, (DvarLimits)0x7FFFFFFF00000000LL, 1u, "Game type");
-    ui_joinGameType = Dvar_RegisterInt("ui_joinGametype", 0, (DvarLimits)0x7FFFFFFF00000000LL, 1u, "Game join type");
-    ui_netGameTypeName = Dvar_RegisterString("ui_netGametypeName", (char *)"", 1u, "Displayed game type name");
+    ui_extraBigFont = Dvar_RegisterFloat("ui_extraBigFont", 0.55000001f, minb, DVAR_ARCHIVE, "Extra big font scale");
+    ui_currentMap = Dvar_RegisterInt("ui_currentMap", 0, (DvarLimits)0x7FFFFFFF00000000LL, DVAR_ARCHIVE, "Current map index");
+    ui_gametype = Dvar_RegisterInt("ui_gametype", 3, (DvarLimits)0x7FFFFFFF00000000LL, DVAR_ARCHIVE, "Game type");
+    ui_joinGameType = Dvar_RegisterInt("ui_joinGametype", 0, (DvarLimits)0x7FFFFFFF00000000LL, DVAR_ARCHIVE, "Game join type");
+    ui_netGameTypeName = Dvar_RegisterString("ui_netGametypeName", (char *)"", DVAR_ARCHIVE, "Displayed game type name");
     ui_dedicated = Dvar_RegisterInt(
         "ui_dedicated",
         0,
         (DvarLimits)0x200000000LL,
-        1u,
+        DVAR_ARCHIVE,
         "True if this is a dedicated server");
     ui_currentNetMap = Dvar_RegisterInt(
         "ui_currentNetMap",
         0,
         (DvarLimits)0x7FFFFFFF00000000LL,
-        1u,
+        DVAR_ARCHIVE,
         "Currently running map");
-    ui_browserShowFull = Dvar_RegisterBool("ui_browserShowFull", 1, 1u, "Show full servers");
-    ui_browserShowEmpty = Dvar_RegisterBool("ui_browserShowEmpty", 1, 1u, "Show empty servers");
+    ui_browserShowFull = Dvar_RegisterBool("ui_browserShowFull", 1, DVAR_ARCHIVE, "Show full servers");
+    ui_browserShowEmpty = Dvar_RegisterBool("ui_browserShowEmpty", 1, DVAR_ARCHIVE, "Show empty servers");
     ui_browserShowPassword = Dvar_RegisterInt(
         "ui_browserShowPassword",
         -1,
         (DvarLimits)0x1FFFFFFFFLL,
-        1u,
+        DVAR_ARCHIVE,
         "Show servers that are password protected");
-    ui_browserShowPure = Dvar_RegisterBool("ui_browserShowPure", 1, 1u, "Show pure servers only");
-    ui_browserMod = Dvar_RegisterInt("ui_browserMod", 0, (DvarLimits)0x1FFFFFFFFLL, 1u, "UI Mod value");
-    ui_browserShowDedicated = Dvar_RegisterBool("ui_browserShowDedicated", 0, 1u, "Show dedicated servers only");
+    ui_browserShowPure = Dvar_RegisterBool("ui_browserShowPure", 1, DVAR_ARCHIVE, "Show pure servers only");
+    ui_browserMod = Dvar_RegisterInt("ui_browserMod", 0, (DvarLimits)0x1FFFFFFFFLL, DVAR_ARCHIVE, "UI Mod value");
+    ui_browserShowDedicated = Dvar_RegisterBool("ui_browserShowDedicated", 0, DVAR_ARCHIVE, "Show dedicated servers only");
     ui_browserFriendlyfire = Dvar_RegisterInt(
         "ui_browserFriendlyfire",
         -1,
         (DvarLimits)0x7FFFFFFF80000000LL,
-        1u,
+        DVAR_ARCHIVE,
         "Friendly fire is active");
     ui_browserKillcam = Dvar_RegisterInt(
         "ui_browserKillcam",
         -1,
         (DvarLimits)0x7FFFFFFF80000000LL,
-        1u,
+        DVAR_ARCHIVE,
         "Kill cam is active");
     ui_serverStatusTimeOut = Dvar_RegisterInt(
         "ui_serverStatusTimeOut",
         7000,
         (DvarLimits)0x7FFFFFFF00000000LL,
-        1u,
+        DVAR_ARCHIVE,
         "Time in milliseconds before a server status request times out");
     ui_browserShowPunkBuster = Dvar_RegisterInt(
         "ui_browserShowPunkBuster",
         -1,
         (DvarLimits)0x7FFFFFFF80000000LL,
-        1u,
+        DVAR_ARCHIVE,
         "Only show PunkBuster servers?");
     ui_playerProfileCount = Dvar_RegisterInt(
         "ui_playerProfileCount",
         0,
         (DvarLimits)0x7FFFFFFF80000000LL,
-        0x40u,
+        DVAR_ROM,
         "Number of player profiles");
     ui_playerProfileSelected = Dvar_RegisterString(
         "ui_playerProfileSelected",
         (char *)"",
-        0x40u,
+        DVAR_ROM,
         "Selected player profile name");
     ui_playerProfileNameNew = Dvar_RegisterString(
         "ui_playerProfileNameNew",
         (char *)"",
-        0,
+        DVAR_NOFLAG,
         "New player profile name");
     minc.value.max = 10000.0f;
     minc.value.min = -10000.0f;
-    ui_buildLocation = Dvar_RegisterVec2("ui_buildLocation", -100.0f, 52.0f, minc, 0, "Where to draw the build number");
+    ui_buildLocation = Dvar_RegisterVec2("ui_buildLocation", -100.0f, 52.0f, minc, DVAR_NOFLAG, "Where to draw the build number");
     mind.value.max = 1.0f;
     mind.value.min = 0.0f;
-    ui_buildSize = Dvar_RegisterFloat("ui_buildSize", 0.30000001f, mind, 0, "Font size to use for the build number");
-    ui_showList = Dvar_RegisterBool("ui_showList", 0, 0x80u, "Show onscreen list of currently visible menus");
+    ui_buildSize = Dvar_RegisterFloat("ui_buildSize", 0.30000001f, mind, DVAR_NOFLAG, "Font size to use for the build number");
+    ui_showList = Dvar_RegisterBool("ui_showList", 0, DVAR_CHEAT, "Show onscreen list of currently visible menus");
     ui_showMenuOnly = Dvar_RegisterString(
         "ui_showMenuOnly",
         (char *)"",
-        0,
+        DVAR_NOFLAG,
         "If set, only menus using this name will draw.");
-    ui_showEndOfGame = Dvar_RegisterBool("ui_showEndOfGame", 0, 0, "Currently showing the end of game menu.");
+    ui_showEndOfGame = Dvar_RegisterBool("ui_showEndOfGame", 0, DVAR_NOFLAG, "Currently showing the end of game menu.");
     mine.value.max = 1.0f;
     mine.value.min = 0.0f;
     ui_borderLowLightScale = Dvar_RegisterFloat(
         "ui_borderLowLightScale",
         0.60000002f,
         mine,
-        0,
+        DVAR_NOFLAG,
         "Scales the border color for the lowlight color on certain UI borders");
     ui_cinematicsTimestamp = Dvar_RegisterBool(
         "ui_cinematicsTimestamp",
         0,
-        0,
+        DVAR_NOFLAG,
         "Shows cinematics timestamp on subtitle UI elements.");
     minf.value.max = 1.0;
     minf.value.min = 0.0;
@@ -4936,23 +4936,23 @@ const dvar_s *UI_RegisterDvars()
         0.30000001f,
         1.0f,
         minf,
-        0,
+        DVAR_NOFLAG,
         "Glow color applied to the mode and map name strings on the connect screen.");
     ui_drawCrosshair = Dvar_RegisterBool("ui_drawCrosshair", 1, 1u, "Whether to draw crosshairs.");
     ui_hud_hardcore = Dvar_RegisterBool(
         "ui_hud_hardcore",
         0,
-        0x80u,
+        DVAR_CHEAT,
         "Whether the HUD should be suppressed for hardcore mode");
-    ui_uav_allies = Dvar_RegisterBool("ui_uav_allies", 0, 0x80u, "Whether the UI should show UAV to allies");
-    ui_uav_axis = Dvar_RegisterBool("ui_uav_axis", 0, 0x80u, "Whether the UI should show UAV to axis");
-    ui_uav_client = Dvar_RegisterBool("ui_uav_client", 0, 0x80u, "Whether the UI should show UAV to this client");
+    ui_uav_allies = Dvar_RegisterBool("ui_uav_allies", 0, DVAR_CHEAT, "Whether the UI should show UAV to allies");
+    ui_uav_axis = Dvar_RegisterBool("ui_uav_axis", 0, DVAR_CHEAT, "Whether the UI should show UAV to axis");
+    ui_uav_client = Dvar_RegisterBool("ui_uav_client", 0, DVAR_CHEAT, "Whether the UI should show UAV to this client");
     ui_allow_classchange = Dvar_RegisterBool(
         "ui_allow_classchange",
         0,
-        0x80u,
+        DVAR_CHEAT,
         "Whether the UI should allow changing class");
-    result = Dvar_RegisterBool("ui_allow_teamchange", 0, 0x80u, "Whether the UI should allow changing team");
+    result = Dvar_RegisterBool("ui_allow_teamchange", 0, DVAR_CHEAT, "Whether the UI should allow changing team");
     ui_allow_teamchange = result;
     return result;
 }

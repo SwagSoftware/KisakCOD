@@ -532,9 +532,9 @@ void Profile_Init()
                 v0);
         }
     }
-    profile = Dvar_RegisterEnum("profile", prof_pageNames, 0, 0, "Type of profiling");
-    profile_thread = Dvar_RegisterEnum("profile_thread", g_profile_thread_values, 7, 0, "Thread being profiled");
-    profile_rowcount = Dvar_RegisterInt("profile_rowcount", 20, (DvarLimits)0x2800000000LL, 0, "Profile row count");
+    profile = Dvar_RegisterEnum("profile", prof_pageNames, 0, DVAR_NOFLAG, "Type of profiling");
+    profile_thread = Dvar_RegisterEnum("profile_thread", g_profile_thread_values, 7, DVAR_NOFLAG, "Thread being profiled");
+    profile_rowcount = Dvar_RegisterInt("profile_rowcount", 20, (DvarLimits)0x2800000000LL, DVAR_NOFLAG, "Profile row count");
 }
 
 #ifndef TRACY_ENABLE

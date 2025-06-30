@@ -533,7 +533,7 @@ void __cdecl Dvar_RegisterBool_f()
         dvar = Dvar_FindVar(dvarName);
         if (!dvar || dvar->type == 7 && (dvar->flags & 0x4000) != 0)
         {
-            Dvar_RegisterBool(dvarName, value, 0x4000u, "External Dvar");
+            Dvar_RegisterBool(dvarName, value, DVAR_EXTERNAL, "External Dvar");
         }
         else if (dvar->type)
         {
@@ -576,7 +576,7 @@ void __cdecl Dvar_RegisterInt_f()
                 DvarLimits dLimits;
                 dLimits.integer.max = max;
                 dLimits.integer.min = min;
-                Dvar_RegisterInt(dvarName, value, dLimits, 0x4000u, "External Dvar");
+                Dvar_RegisterInt(dvarName, value, dLimits, DVAR_EXTERNAL, "External Dvar");
             }
             else if (dvar->type != 5 && dvar->type != 6)
             {
@@ -624,7 +624,7 @@ void __cdecl Dvar_RegisterFloat_f()
             {
                 v4.value.max = max;
                 v4.value.min = min;
-                Dvar_RegisterFloat(dvarName, value, v4, 0x4000u, "External Dvar");
+                Dvar_RegisterFloat(dvarName, value, v4, DVAR_EXTERNAL, "External Dvar");
             }
             else if (dvar->type != 1)
             {

@@ -140,35 +140,35 @@ void __cdecl Phys_Init()
             "phys_cfm",
             0.000099999997f,
             min,
-            0,
+            DVAR_NOFLAG,
             "Physics constraint force mixing magic parameter.");
         mina.value.max = 1.0f;
         mina.value.min = 0.0f;
-        phys_erp = Dvar_RegisterFloat("phys_erp", 0.80000001f, mina, 0, "Physics error reduction magic parameter.");
+        phys_erp = Dvar_RegisterFloat("phys_erp", 0.80000001f, mina, DVAR_NOFLAG, "Physics error reduction magic parameter.");
         minb.value.max = FLT_MAX;
         minb.value.min = -FLT_MAX;
-        phys_mcv = Dvar_RegisterFloat("phys_mcv", 20.0f, minb, 0, "Physics maximum correcting velocity magic parameter.");
+        phys_mcv = Dvar_RegisterFloat("phys_mcv", 20.0f, minb, DVAR_NOFLAG, "Physics maximum correcting velocity magic parameter.");
         minc.value.max = FLT_MAX;
         minc.value.min = -FLT_MAX;
         phys_mcv_ragdoll = Dvar_RegisterFloat(
             "phys_mcv_ragdoll",
             1000.0f,
             minc,
-            0,
+            DVAR_NOFLAG,
             "Physics maximum correcting velocity magic parameter (for ragdoll).");
         mind.value.max = FLT_MAX;
         mind.value.min = -FLT_MAX;
-        phys_csl = Dvar_RegisterFloat("phys_csl", 1.0f, mind, 0, "Physics contact surface level magic parameter.");
+        phys_csl = Dvar_RegisterFloat("phys_csl", 1.0f, mind, DVAR_NOFLAG, "Physics contact surface level magic parameter.");
         mine.value.max = FLT_MAX;
         mine.value.min = -FLT_MAX;
-        phys_gravity = Dvar_RegisterFloat("phys_gravity", -800.0f, mine, 0, "Physics gravity in units/sec^2.");
+        phys_gravity = Dvar_RegisterFloat("phys_gravity", -800.0f, mine, DVAR_NOFLAG, "Physics gravity in units/sec^2.");
         minf.value.max = 2.0f;
         minf.value.min = 0.0f;
         phys_bulletUpBias = Dvar_RegisterFloat(
             "phys_bulletUpBias",
             0.5f,
             minf,
-            0,
+            DVAR_NOFLAG,
             "Up Bias for the direction of the bullet impact.");
         ming.value.max = 100.0f;
         ming.value.min = -1.0f;
@@ -176,53 +176,53 @@ void __cdecl Phys_Init()
             "phys_bulletSpinScale",
             3.0f,
             ming,
-            0x1000u,
+            DVAR_SAVED,
             "Scale of the effective offset from the center of mass for the bullet impacts.");
         phys_dumpcontacts = Dvar_RegisterBool(
             "phys_dumpcontacts",
             0,
-            0,
+            DVAR_NOFLAG,
             "Set to true to dump all constraints in next physics frame.");
         phys_qsi = Dvar_RegisterInt(
             "phys_qsi",
             15,
             (DvarLimits)0x7FFFFFFF00000001LL,
-            0,
+            DVAR_NOFLAG,
             "Number of iterations that QuickStep performs per step.");
         phys_drawcontacts = Dvar_RegisterBool("phys_drawcontacts", 0, 0, "Debug draw contact points");
         phys_drawCollisionWorld = Dvar_RegisterBool(
             "phys_drawCollisionWorld",
             0,
-            0,
+            DVAR_NOFLAG,
             "Debug draw collision brushes and terrain triangles");
         phys_drawCollisionObj = Dvar_RegisterBool(
             "phys_drawCollisionObj",
             0,
-            0,
+            DVAR_NOFLAG,
             "Debug draw collision geometry for each physics object");
-        phys_drawAwake = Dvar_RegisterBool("phys_drawAwake", 0, 0, "Debug draw a box indicating which bodies are disabled");
+        phys_drawAwake = Dvar_RegisterBool("phys_drawAwake", 0, DVAR_NOFLAG, "Debug draw a box indicating which bodies are disabled");
         phys_drawAwakeTooLong = Dvar_RegisterBool(
             "phys_drawAwakeTooLong",
             0,
-            0,
+            DVAR_NOFLAG,
             "Draw an indicator showing where the objects are that have been awake too long.");
-        phys_drawDebugInfo = Dvar_RegisterBool("phys_drawDebugInfo", 0, 0, "Print info about the physics objects");
-        phys_visibleTris = Dvar_RegisterBool("phys_visibleTris", 0, 0, "Visible triangles are used for collision");
-        phys_reorderConst = Dvar_RegisterBool("phys_reorderConst", 1, 0, "ODE solver reorder constraints");
+        phys_drawDebugInfo = Dvar_RegisterBool("phys_drawDebugInfo", 0, DVAR_NOFLAG, "Print info about the physics objects");
+        phys_visibleTris = Dvar_RegisterBool("phys_visibleTris", 0, DVAR_NOFLAG, "Visible triangles are used for collision");
+        phys_reorderConst = Dvar_RegisterBool("phys_reorderConst", 1, DVAR_NOFLAG, "ODE solver reorder constraints");
         phys_noIslands = Dvar_RegisterBool(
             "phys_noIslands",
             0,
-            0,
+            DVAR_NOFLAG,
             "Make all contacts joints between an object and the world: no object-object contacts");
         phys_interBodyCollision = Dvar_RegisterBool(
             "phys_interBodyCollision",
             0,
-            0,
+            DVAR_NOFLAG,
             "Disable to turn off all inter-body collisions");
         phys_collUseEntities = Dvar_RegisterBool(
             "phys_collUseEntities",
             0,
-            0,
+            DVAR_NOFLAG,
             "Disable to turn off testing for collision against entities");
         minh.value.max = FLT_MAX;
         minh.value.min = 0.0f;
@@ -230,7 +230,7 @@ void __cdecl Phys_Init()
             "phys_autoDisableLinear",
             20.0f,
             minh,
-            0,
+            DVAR_NOFLAG,
             "A body must have linear velocity less than this to be considered idle.");
         mini.value.max = FLT_MAX;
         mini.value.min = 0.0f;
@@ -238,7 +238,7 @@ void __cdecl Phys_Init()
             "phys_autoDisableAngular",
             1.0f,
             mini,
-            0,
+            DVAR_NOFLAG,
             "A body must have angular velocity less than this to be considered idle.");
         minj.value.max = FLT_MAX;
         minj.value.min = 0.0f;
@@ -246,7 +246,7 @@ void __cdecl Phys_Init()
             "phys_autoDisableTime",
             0.89999998f,
             minj,
-            0,
+            DVAR_NOFLAG,
             "The amount of time a body must be idle for it to go to sleep.");
         mink.value.max = 1.0f;
         mink.value.min = 0.0f;
@@ -254,7 +254,7 @@ void __cdecl Phys_Init()
             "phys_contact_cfm",
             0.0000099999997f,
             mink,
-            0,
+            DVAR_NOFLAG,
             "Physics constraint force mixing magic parameter for contacts.");
         minl.value.max = 1.0f;
         minl.value.min = 0.0f;
@@ -262,7 +262,7 @@ void __cdecl Phys_Init()
             "phys_contact_erp",
             0.80000001f,
             minl,
-            0,
+            DVAR_NOFLAG,
             "Physics error reduction magic parameter for contacts.");
         minm.value.max = 1.0f;
         minm.value.min = 0.0f;
@@ -270,7 +270,7 @@ void __cdecl Phys_Init()
             "phys_contact_cfm_ragdoll",
             0.001f,
             minm,
-            0,
+            DVAR_NOFLAG,
             "Physics constraint force mixing magic parameter for contacts.");
         minn.value.max = 1.0f;
         minn.value.min = 0.0f;
@@ -278,7 +278,7 @@ void __cdecl Phys_Init()
             "phys_contact_erp_ragdoll",
             0.30000001f,
             minn,
-            0,
+            DVAR_NOFLAG,
             "Physics error reduction magic parameter for contacts.");
         mino.value.max = 1.0f;
         mino.value.min = 0.0f;
@@ -286,7 +286,7 @@ void __cdecl Phys_Init()
             "phys_joint_cfm",
             0.000099999997f,
             mino,
-            0,
+            DVAR_NOFLAG,
             "Physics constraint force mixing magic parameter for joints.");
         minp.value.max = 1.0f;
         minp.value.min = 0.0f;
@@ -294,7 +294,7 @@ void __cdecl Phys_Init()
             "phys_joint_stop_cfm",
             0.000099999997f,
             minp,
-            0,
+            DVAR_NOFLAG,
             "Physics constraint force mixing magic parameter for joints at their limits.");
         minq.value.max = 1.0f;
         minq.value.min = 0.0f;
@@ -302,7 +302,7 @@ void __cdecl Phys_Init()
             "phys_joint_stop_erp",
             0.80000001f,
             minq,
-            0,
+            DVAR_NOFLAG,
             "Physics error reduction magic parameter for joints at their limits.");
         minr.value.max = FLT_MAX;
         minr.value.min = 0.0f;
@@ -310,7 +310,7 @@ void __cdecl Phys_Init()
             "phys_frictionScale",
             1.0f,
             minr,
-            0,
+            DVAR_NOFLAG,
             "Scales the amount of physics friction globally.");
         mins.value.max = FLT_MAX;
         mins.value.min = 0.0f;
@@ -318,7 +318,7 @@ void __cdecl Phys_Init()
             "phys_dragLinear",
             0.029999999f,
             mins,
-            0,
+            DVAR_NOFLAG,
             "The amount of linear drag, applied globally");
         mint.value.max = FLT_MAX;
         mint.value.min = 0.0f;
@@ -326,7 +326,7 @@ void __cdecl Phys_Init()
             "phys_dragAngular",
             0.5f,
             mint,
-            0,
+            DVAR_NOFLAG,
             "The amount of angular drag, applied globally");
         minu.value.max = FLT_MAX;
         minu.value.min = 0.0f;
@@ -334,7 +334,7 @@ void __cdecl Phys_Init()
             "phys_minImpactMomentum",
             250.0f,
             minu,
-            0,
+            DVAR_NOFLAG,
             "The minimum momentum required to trigger impact sounds");
         minv.value.max = FLT_MAX;
         minv.value.min = 0.1f;
@@ -342,7 +342,7 @@ void __cdecl Phys_Init()
             "phys_jitterMaxMass",
             200.0f,
             minv,
-            0,
+            DVAR_NOFLAG,
             "Maximum mass to jitter - jitter will fall off up to this mass");
         minw.value.max = FLT_MAX;
         minw.value.min = 0.0f;
@@ -350,7 +350,7 @@ void __cdecl Phys_Init()
             "phys_gravityChangeWakeupRadius",
             120.0f,
             minw,
-            0x1000u,
+            DVAR_SAVED,
             "The radius around the player within which objects get awakened when gravity changes");
         minx.value.max = FLT_MAX;
         minx.value.min = 0.0f;
@@ -358,7 +358,7 @@ void __cdecl Phys_Init()
             "phys_narrowObjMaxLength",
             4.0f,
             minx,
-            0,
+            DVAR_NOFLAG,
             "If a geom has a dimension less than this, then extra work will be done to prevent it fro"
             "m falling into cracks (like between the wall and the floor)");
         Cmd_AddCommandInternal("phys_stop", Phys_Stop_f, &Phys_Stop_f_VAR);

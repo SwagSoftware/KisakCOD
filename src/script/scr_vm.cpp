@@ -431,7 +431,7 @@ const dvar_s* Scr_VM_Init()
     scrVarPub.ext_threadcount = 0;
     scrVarPub.numScriptThreads = 0;
     scrVarPub.varUsagePos = 0;
-    result = Dvar_RegisterBool("logScriptTimes", 0, 0, "Log times for every print called from script");
+    result = Dvar_RegisterBool("logScriptTimes", 0, DVAR_NOFLAG, "Log times for every print called from script");
     logScriptTimes = result;
     return result;
 }

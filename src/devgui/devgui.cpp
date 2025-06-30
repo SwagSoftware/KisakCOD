@@ -1212,16 +1212,16 @@ const dvar_s *DevGui_RegisterDvars()
         0.40000001f,
         0.0f,
         0.75f,
-        0,
+        DVAR_NOFLAG,
         "Color background for the devgui");
-    devgui_colorText = Dvar_RegisterColor("devgui_colorText", 1.0f, 1.0f, 1.0f, 1.0f, 0, "Text color for the devgui");
+    devgui_colorText = Dvar_RegisterColor("devgui_colorText", 1.0f, 1.0f, 1.0f, 1.0f, DVAR_NOFLAG, "Text color for the devgui");
     devgui_colorBgndSel = Dvar_RegisterColor(
         "devgui_colorBgndSel",
         0.0f,
         0.69999999f,
         0.0f,
         0.75f,
-        0,
+        DVAR_NOFLAG,
         "Selection background color for the devgui");
     devgui_colorTextSel = Dvar_RegisterColor(
         "devgui_colorTextSel",
@@ -1229,7 +1229,7 @@ const dvar_s *DevGui_RegisterDvars()
         1.0f,
         0.0f,
         1.0f,
-        0,
+        DVAR_NOFLAG,
         "Selection text color for the devgui");
     devgui_colorBgndGray = Dvar_RegisterColor(
         "devgui_colorBgndGray",
@@ -1237,7 +1237,7 @@ const dvar_s *DevGui_RegisterDvars()
         0.2f,
         0.2f,
         0.89999998f,
-        0,
+        DVAR_NOFLAG,
         "Grayed out background color for the devgui");
     devgui_colorTextGray = Dvar_RegisterColor(
         "devgui_colorTextGray",
@@ -1245,7 +1245,7 @@ const dvar_s *DevGui_RegisterDvars()
         0.69999999f,
         0.69999999f,
         1.0f,
-        0,
+        DVAR_NOFLAG,
         "Greyed out text color for the devgui");
     devgui_colorBgndGraySel = Dvar_RegisterColor(
         "devgui_colorBgndGraySel",
@@ -1253,7 +1253,7 @@ const dvar_s *DevGui_RegisterDvars()
         0.40000001f,
         0.40000001f,
         0.89999998f,
-        0,
+        DVAR_NOFLAG,
         "Greyed out, selected background color for the devgui");
     devgui_colorTextGraySel = Dvar_RegisterColor(
         "devgui_colorTextGraySel",
@@ -1261,7 +1261,7 @@ const dvar_s *DevGui_RegisterDvars()
         1.0f,
         0.0f,
         1.0f,
-        0,
+        DVAR_NOFLAG,
         "Greyed out, selected text color for the devgui");
     devgui_colorSliderBgnd = Dvar_RegisterColor(
         "devgui_colorSliderBgnd",
@@ -1269,7 +1269,7 @@ const dvar_s *DevGui_RegisterDvars()
         1.0f,
         1.0f,
         0.75f,
-        0,
+        DVAR_NOFLAG,
         "Color slider background for the devgui");
     devgui_colorSliderKnob = Dvar_RegisterColor(
         "devgui_colorSliderKnob",
@@ -1277,7 +1277,7 @@ const dvar_s *DevGui_RegisterDvars()
         1.0f,
         1.0f,
         1.0f,
-        0,
+        DVAR_NOFLAG,
         "Knob color for the devgui");
     devgui_colorSliderKnobSel = Dvar_RegisterColor(
         "devgui_colorSliderKnobSel",
@@ -1285,18 +1285,18 @@ const dvar_s *DevGui_RegisterDvars()
         1.0f,
         0.0f,
         1.0f,
-        0,
+        DVAR_NOFLAG,
         "Selected knob color for the devgui");
     b.value.max = 1.0f;
     b.value.min = 0.0f;
-    devgui_bevelShade = Dvar_RegisterFloat("devgui_bevelShade", 0.69999999f, b, 0, "Bevel shade for the devgui");
+    devgui_bevelShade = Dvar_RegisterFloat("devgui_bevelShade", 0.69999999f, b, DVAR_NOFLAG, "Bevel shade for the devgui");
     devgui_colorGraphKnotNormal = Dvar_RegisterColor(
         "devgui_colorGraphKnotNormal",
         0.0f,
         1.0f,
         1.0f,
         0.69999999f,
-        0,
+        DVAR_NOFLAG,
         "Devgiu Color graph knot normal color");
     devgui_colorGraphKnotSelected = Dvar_RegisterColor(
         "devgui_colorGraphKnotSelected",
@@ -1304,7 +1304,7 @@ const dvar_s *DevGui_RegisterDvars()
         0.0f,
         0.0f,
         0.69999999f,
-        0,
+        DVAR_NOFLAG,
         "Devgui color graph knot selected color");
     result = Dvar_RegisterColor(
         "devgui_colorGraphKnotEditing",
@@ -1312,7 +1312,7 @@ const dvar_s *DevGui_RegisterDvars()
         0.0f,
         1.0f,
         1.0f,
-        0,
+        DVAR_NOFLAG,
         "Devgui color graph knot editing color");
     devgui_colorGraphKnotEditing = result;
     return result;

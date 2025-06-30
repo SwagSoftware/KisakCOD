@@ -218,24 +218,24 @@ void __cdecl G_VehRegisterDvars()
     DvarLimits minb; // [esp+4h] [ebp-10h]
     DvarLimits minc; // [esp+4h] [ebp-10h]
 
-    vehDebugServer = Dvar_RegisterBool("vehDebugServer", 0, 0x80u, "Turn on debug information for vehicles");
+    vehDebugServer = Dvar_RegisterBool("vehDebugServer", 0, DVAR_CHEAT, "Turn on debug information for vehicles");
     min.value.max = FLT_MAX;
     min.value.min = 0.0;
     vehTextureScrollScale = Dvar_RegisterFloat(
         "vehTextureScrollScale",
         0.0,
         min,
-        0x80u,
+        DVAR_CHEAT,
         "Scale vehicle texture scroll scale by this amount (debug only)");
     mina.value.max = FLT_MAX;
     mina.value.min = 0.0;
-    vehTestHorsepower = Dvar_RegisterFloat("vehTestHorsepower", 200.0, mina, 0x80u, "");
+    vehTestHorsepower = Dvar_RegisterFloat("vehTestHorsepower", 200.0, mina, DVAR_CHEAT, "");
     minb.value.max = FLT_MAX;
     minb.value.min = 0.0;
-    vehTestWeight = Dvar_RegisterFloat("vehTestWeight", 5200.0, minb, 0x80u, "lbs");
+    vehTestWeight = Dvar_RegisterFloat("vehTestWeight", 5200.0, minb, DVAR_CHEAT, "lbs");
     minc.value.max = FLT_MAX;
     minc.value.min = 0.0;
-    vehTestMaxMPH = Dvar_RegisterFloat("vehTestMaxMPH", 40.0, minc, 0x80u, "");
+    vehTestMaxMPH = Dvar_RegisterFloat("vehTestMaxMPH", 40.0, minc, DVAR_CHEAT, "");
 }
 
 vehicle_info_t *__cdecl VEH_GetVehicleInfo(__int16 index)

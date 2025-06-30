@@ -502,7 +502,7 @@ void __cdecl CG_LoadClientEffectMapping_FastFile(const char *filename)
 
 void __cdecl CG_ClientSideEffectsRegisterDvars()
 {
-    cg_clientSideEffects = Dvar_RegisterBool("clientSideEffects", 1, 0x80u, "Enable loading _fx.gsc files on the client");
+    cg_clientSideEffects = Dvar_RegisterBool("clientSideEffects", 1, DVAR_CHEAT, "Enable loading _fx.gsc files on the client");
 }
 
 void __cdecl CG_AddClientSideSounds(int localClientNum)

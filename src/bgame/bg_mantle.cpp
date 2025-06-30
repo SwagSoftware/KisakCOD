@@ -46,15 +46,15 @@ void __cdecl Mantle_RegisterDvars()
     DvarLimits minb; // [esp+4h] [ebp-14h]
     DvarLimits minc; // [esp+4h] [ebp-14h]
 
-    mantle_enable = Dvar_RegisterBool("mantle_enable", 1, 0x180u, "Enable player mantling");
-    mantle_debug = Dvar_RegisterBool("mantle_debug", 0, 0x180u, "Show debug information for mantling");
+    mantle_enable = Dvar_RegisterBool("mantle_enable", 1, DVAR_CHEAT | DVAR_TEMP, "Enable player mantling");
+    mantle_debug = Dvar_RegisterBool("mantle_debug", 0, DVAR_CHEAT | DVAR_TEMP, "Show debug information for mantling");
     min.value.max = 128.0f;
     min.value.min = 0.0f;
     mantle_check_range = Dvar_RegisterFloat(
         "mantle_check_range",
         20.0f,
         min,
-        0x180u,
+        DVAR_CHEAT | DVAR_TEMP,
         "The minimum distance from a player to a mantle surface to allow a mantle");
     mina.value.max = 15.0f;
     mina.value.min = 0.0f;
@@ -62,7 +62,7 @@ void __cdecl Mantle_RegisterDvars()
         "mantle_check_radius",
         0.1f,
         mina,
-        0x180u,
+        DVAR_CHEAT | DVAR_TEMP,
         "The player radius to test against while mantling");
     minb.value.max = 180.0f;
     minb.value.min = 0.0f;
@@ -70,7 +70,7 @@ void __cdecl Mantle_RegisterDvars()
         "mantle_check_angle",
         60.0f,
         minb,
-        0x180u,
+        DVAR_CHEAT | DVAR_TEMP,
         "The minimum angle from the player to a mantle surface to allow a mantle");
     minc.value.max = 180.0f;
     minc.value.min = 0.0f;
@@ -78,7 +78,7 @@ void __cdecl Mantle_RegisterDvars()
         "mantle_view_yawcap",
         60.0f,
         minc,
-        0x180u,
+        DVAR_CHEAT | DVAR_TEMP,
         "The angle at which to restrict a sideways turn while mantling");
 }
 

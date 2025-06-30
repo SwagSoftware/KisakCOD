@@ -711,8 +711,8 @@ void __cdecl LiveStorage_Init()
     Cmd_AddCommandInternal("uploadStats", LiveStorage_UploadStatsCmd, &LiveStorage_UploadStatsCmd_VAR);
     Cmd_AddCommandInternal("readStats", LiveStorage_ReadStatsCmd, &LiveStorage_ReadStatsCmd_VAR);
     Cmd_AddCommandInternal("statGet", LiveStorage_StatGetCmd, &LiveStorage_StatGetCmd_VAR);
-    debugStats = Dvar_RegisterBool("debugStats", 0, 0, "Print messages showing when persistent stats are set");
-    stat_version = Dvar_RegisterInt("stat_version", 10, (DvarLimits)0xFF00000000LL, 0, "Stats version number");
+    debugStats = Dvar_RegisterBool("debugStats", 0, DVAR_NOFLAG, "Print messages showing when persistent stats are set");
+    stat_version = Dvar_RegisterInt("stat_version", 10, (DvarLimits)0xFF00000000LL, DVAR_NOFLAG, "Stats version number");
 }
 
 void __cdecl LiveStorage_StatSetCmd()

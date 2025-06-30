@@ -27,17 +27,17 @@ void __cdecl DynEntCl_RegisterDvars()
     DvarLimits minc; // [esp+4h] [ebp-10h]
     DvarLimits mind; // [esp+4h] [ebp-10h]
 
-    dynEnt_active = Dvar_RegisterBool("dynEnt_active", 1, 1u, "Disable/enable dynent reactions");
+    dynEnt_active = Dvar_RegisterBool("dynEnt_active", 1, DVAR_ARCHIVE, "Disable/enable dynent reactions");
     min.value.max = 1000000.0;
     min.value.min = 0.0;
-    dynEnt_bulletForce = Dvar_RegisterFloat("dynEnt_bulletForce", 1000.0, min, 0x80u, "Force applied from bullet hit");
+    dynEnt_bulletForce = Dvar_RegisterFloat("dynEnt_bulletForce", 1000.0, min, DVAR_CHEAT, "Force applied from bullet hit");
     mina.value.max = 1000000.0;
     mina.value.min = 0.0;
     dynEnt_explodeForce = Dvar_RegisterFloat(
         "dynEnt_explodeForce",
         12500.0,
         mina,
-        0x80u,
+        DVAR_CHEAT,
         "Force applied from explosion hit");
     minb.value.max = 2.0;
     minb.value.min = 0.0;
@@ -45,7 +45,7 @@ void __cdecl DynEntCl_RegisterDvars()
         "dynEnt_explodeUpbias",
         0.5,
         minb,
-        0x80u,
+        DVAR_CHEAT,
         "Upward bias applied to force directions from explosion hits");
     minc.value.max = 100.0;
     minc.value.min = 0.0;
@@ -53,7 +53,7 @@ void __cdecl DynEntCl_RegisterDvars()
         "dynEnt_explodeSpinScale",
         3.0,
         minc,
-        0x80u,
+        DVAR_CHEAT,
         "Scale of the random offset from the center of mass for explosion forces.");
     mind.value.max = FLT_MAX;
     mind.value.min = 0.0;
@@ -61,13 +61,13 @@ void __cdecl DynEntCl_RegisterDvars()
         "dynEnt_explodeMinForce",
         40.0,
         mind,
-        0x80u,
+        DVAR_CHEAT,
         "Force below which dynents won't even bother waking up");
     dynEnt_explodeMaxEnts = Dvar_RegisterInt(
         "dynEnt_explodeMaxEnts",
         20,
         (DvarLimits)0x100000000000LL,
-        0x80u,
+        DVAR_CHEAT,
         "The maximum number of dynents that can be awakened by one explosion");
     DynEntPieces_RegisterDvars();
 }

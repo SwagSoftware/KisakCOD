@@ -372,96 +372,96 @@ const dvar_s *G_RegisterDvars()
     DvarLimits mino; // [esp+8h] [ebp-14h]
     DvarLimits minp; // [esp+8h] [ebp-14h]
 
-    g_cheats = Dvar_RegisterBool("sv_cheats", 1, 0, "Enable cheats");
-    Dvar_RegisterString("gamename", "KisakCoD4", 0x44u, "The name of the game");
-    Dvar_RegisterString("gamedate", __DATE__, 0x40u, "The date compiled");
-    Dvar_RegisterString("sv_mapname", (char *)"", 0x44u, "The current map name");
-    g_gametype = Dvar_RegisterString("g_gametype", "war", 0x24u, "The current campaign");
+    g_cheats = Dvar_RegisterBool("sv_cheats", true, DVAR_NOFLAG, "Enable cheats");
+    Dvar_RegisterString("gamename", "KisakCoD4", DVAR_SERVERINFO | DVAR_ROM, "The name of the game");
+    Dvar_RegisterString("gamedate", __DATE__, DVAR_ROM, "The date compiled");
+    Dvar_RegisterString("sv_mapname", (char *)"", DVAR_SERVERINFO | DVAR_ROM, "The current map name");
+    g_gametype = Dvar_RegisterString("g_gametype", "war", DVAR_SERVERINFO | DVAR_LATCH, "The current campaign");
     min.integer.max = Dvar_RegisterInt(
         "ui_maxclients",
         32,
         (DvarLimits)0x4000000001LL,
-        0x25u,
+        DVAR_ARCHIVE | DVAR_SERVERINFO | DVAR_LATCH,
         "The maximum number of clients that can connect to a server")->current.integer;
     min.enumeration.stringCount = 1;
     g_maxclients = Dvar_RegisterInt(
         "sv_maxclients",
         32,
         min,
-        0x25u,
+        DVAR_ARCHIVE | DVAR_SERVERINFO | DVAR_LATCH,
         "The maximum number of clients that can connect to a server");
     g_synchronousClients = Dvar_RegisterBool(
         "g_synchronousClients",
         0,
-        8u,
+        DVAR_SYSTEMINFO,
         "Call 'client think' exactly once for each server frame to make smooth demos");
-    g_log = Dvar_RegisterString("g_log", "games_mp.log", 1u, "Log file name");
-    g_logSync = Dvar_RegisterBool("g_logSync", 0, 1u, "Enable synchronous logging");
-    g_password = Dvar_RegisterString("g_password", (char *)"", 0, "Password");
-    g_banIPs = Dvar_RegisterString("g_banIPs", (char *)"", 1u, "IP addresses to ban from playing");
+    g_log = Dvar_RegisterString("g_log", "games_mp.log", DVAR_ARCHIVE, "Log file name");
+    g_logSync = Dvar_RegisterBool("g_logSync", false, DVAR_ARCHIVE, "Enable synchronous logging");
+    g_password = Dvar_RegisterString("g_password", (char *)"", DVAR_NOFLAG, "Password");
+    g_banIPs = Dvar_RegisterString("g_banIPs", (char *)"", DVAR_ARCHIVE, "IP addresses to ban from playing");
 #if defined(DEDICATED) || defined(KISAK_DEDICATED)
-    g_dedicated = Dvar_RegisterEnum("dedicated", g_dedicatedEnumNames, 2, 0x20u, "Dedicated server");
+    g_dedicated = Dvar_RegisterEnum("dedicated", g_dedicatedEnumNames, 2, DVAR_LATCH, "Dedicated server");
 #else
-    g_dedicated = Dvar_RegisterEnum("dedicated", g_dedicatedEnumNames, 0, 0x20u, "Dedicated server");
+    g_dedicated = Dvar_RegisterEnum("dedicated", g_dedicatedEnumNames, 0, DVAR_LATCH, "Dedicated server");
     if (g_dedicated->current.integer)
-        Dvar_RegisterEnum("dedicated", g_dedicatedEnumNames, 0, 0x40u, "Dedicated server");
+        Dvar_RegisterEnum("dedicated", g_dedicatedEnumNames, 0, DVAR_ROM, "Dedicated server");
 #endif
 
-    g_speed = Dvar_RegisterInt("g_speed", 190, (DvarLimits)0x7FFFFFFF80000000LL, 0, "Player speed");
+    g_speed = Dvar_RegisterInt("g_speed", 190, (DvarLimits)0x7FFFFFFF80000000LL, DVAR_NOFLAG, "Player speed");
     mina.value.max = FLT_MAX;
     mina.value.min = 1.0;
-    g_gravity = Dvar_RegisterFloat("g_gravity", 800.0, mina, 0, "Game gravity in inches per second per second");
+    g_gravity = Dvar_RegisterFloat("g_gravity", 800.0, mina, DVAR_NOFLAG, "Game gravity in inches per second per second");
     minb.value.max = FLT_MAX;
     minb.value.min = -FLT_MAX;
-    g_knockback = Dvar_RegisterFloat("g_knockback", 1000.0, minb, 0, "Maximum knockback");
+    g_knockback = Dvar_RegisterFloat("g_knockback", 1000.0, minb, DVAR_NOFLAG, "Maximum knockback");
     g_maxDroppedWeapons = Dvar_RegisterInt(
         "g_maxDroppedWeapons",
         16,
         (DvarLimits)0x2000000002LL,
-        0,
+        DVAR_NOFLAG,
         "Maximum number of dropped weapons");
     g_inactivity = Dvar_RegisterInt(
         "g_inactivity",
         0,
         (DvarLimits)0x7FFFFFFF00000000LL,
-        0,
+        DVAR_NOFLAG,
         "Time delay before player is kicked for inactivity");
-    g_debugDamage = Dvar_RegisterBool("g_debugDamage", 0, 0x80u, "Show debug information for damage");
+    g_debugDamage = Dvar_RegisterBool("g_debugDamage", 0, DVAR_CHEAT, "Show debug information for damage");
     g_debugBullets = Dvar_RegisterInt(
         "g_debugBullets",
         0,
         (DvarLimits)0x6FFFFFFFDLL,
-        0x80u,
+        DVAR_CHEAT,
         "Show debug information for bullets");
     bullet_penetrationEnabled = Dvar_RegisterBool(
         "bullet_penetrationEnabled",
         1,
-        0x80u,
+        DVAR_CHEAT,
         "Enable/Disable bullet penetration.");
-    g_entinfo = Dvar_RegisterEnum("g_entinfo", g_entinfoNames, 0, 0x80u, "Display entity information");
+    g_entinfo = Dvar_RegisterEnum("g_entinfo", g_entinfoNames, 0, DVAR_CHEAT, "Display entity information");
     g_debugPlayerAnimScript = Dvar_RegisterInt(
         "g_debugPlayerAnimScript",
         -1,
         (DvarLimits)0x40FFFFFFFFLL,
-        0,
+        DVAR_NOFLAG,
         "Show debug information for playeranim.script");
     g_motd = Dvar_RegisterString("g_motd", (char *)"", 0, "The message of the day");
     g_playerCollisionEjectSpeed = Dvar_RegisterInt(
         "g_playerCollisionEjectSpeed",
         25,
         (DvarLimits)0x7D0000000000LL,
-        1u,
+        DVAR_ARCHIVE,
         "Speed at which to push intersecting players away from each other");
     minc.value.max = 1000.0;
     minc.value.min = 0.0;
-    g_dropForwardSpeed = Dvar_RegisterFloat("g_dropForwardSpeed", 10.0, minc, 1u, "Forward speed of a dropped item");
+    g_dropForwardSpeed = Dvar_RegisterFloat("g_dropForwardSpeed", 10.0, minc, DVAR_ARCHIVE, "Forward speed of a dropped item");
     mind.value.max = 1000.0;
     mind.value.min = 0.0;
     g_dropUpSpeedBase = Dvar_RegisterFloat(
         "g_dropUpSpeedBase",
         10.0,
         mind,
-        1u,
+        DVAR_ARCHIVE,
         "Base component of the initial vertical speed of a dropped item");
     mine.value.max = 1000.0;
     mine.value.min = 0.0;
@@ -469,7 +469,7 @@ const dvar_s *G_RegisterDvars()
         "g_dropUpSpeedRand",
         5.0,
         mine,
-        1u,
+        DVAR_ARCHIVE,
         "Random component of the initial vertical speed of a dropped item");
     minf.value.max = 1000.0;
     minf.value.min = 0.0;
@@ -477,7 +477,7 @@ const dvar_s *G_RegisterDvars()
         "g_dropHorzSpeedRand",
         100.0,
         minf,
-        1u,
+        DVAR_ARCHIVE,
         "Random component of the initial horizontal speed of a dropped item");
     ming.value.max = FLT_MAX;
     ming.value.min = 0.0;
@@ -485,40 +485,40 @@ const dvar_s *G_RegisterDvars()
         "g_clonePlayerMaxVelocity",
         80.0,
         ming,
-        1u,
+        DVAR_ARCHIVE,
         "Maximum velocity in each axis of a cloned player\n(for death animations)");
-    voice_global = Dvar_RegisterBool("voice_global", 0, 1u, "Send voice messages to everybody");
-    voice_localEcho = Dvar_RegisterBool("voice_localEcho", 0, 1u, "Echo voice chat back to the player");
-    voice_deadChat = Dvar_RegisterBool("voice_deadChat", 0, 1u, "Allow dead players to talk to living players");
-    g_allowVote = Dvar_RegisterBool("g_allowVote", 1, 0, "Enable voting on this server");
-    g_listEntity = Dvar_RegisterBool("g_listEntity", 0, 0, "List the entities");
-    g_deadChat = Dvar_RegisterBool("g_deadChat", 0, 1u, "Allow dead players to chat with living players");
+    voice_global = Dvar_RegisterBool("voice_global", false, DVAR_ARCHIVE, "Send voice messages to everybody");
+    voice_localEcho = Dvar_RegisterBool("voice_localEcho", false, DVAR_ARCHIVE, "Echo voice chat back to the player");
+    voice_deadChat = Dvar_RegisterBool("voice_deadChat", false, DVAR_ARCHIVE, "Allow dead players to talk to living players");
+    g_allowVote = Dvar_RegisterBool("g_allowVote", true, DVAR_NOFLAG, "Enable voting on this server");
+    g_listEntity = Dvar_RegisterBool("g_listEntity", false, DVAR_NOFLAG, "List the entities");
+    g_deadChat = Dvar_RegisterBool("g_deadChat", false, DVAR_ARCHIVE, "Allow dead players to chat with living players");
     g_voiceChatTalkingDuration = Dvar_RegisterInt(
         "g_voiceChatTalkingDuration",
         500,
         (DvarLimits)0x271000000000LL,
-        1u,
+        DVAR_ARCHIVE,
         "Time after the last talk packet was received that the player is considered by the\n"
         "server to still be talking in milliseconds");
     g_TeamIcon_Allies = Dvar_RegisterString(
         "g_TeamIcon_Allies",
         "faction_128_usmc",
-        0x100u,
+        DVAR_TEMP,
         "Shader name for the allied scores banner");
     g_TeamIcon_Axis = Dvar_RegisterString(
         "g_TeamIcon_Axis",
         "faction_128_arab",
-        0x100u,
+        DVAR_TEMP,
         "Shader name for the axis scores banner");
     g_TeamIcon_Free = Dvar_RegisterString(
         "g_TeamIcon_Free",
         (char *)"",
-        0x100u,
+        DVAR_TEMP,
         "Shader name for the scores of players with no team");
     g_TeamIcon_Spectator = Dvar_RegisterString(
         "g_TeamIcon_Spectator",
         (char *)"",
-        0x100u,
+        DVAR_TEMP,
         "Shader name for the scores of players who are spectators");
     g_ScoresColor_MyTeam = Dvar_RegisterColor(
         "g_ScoresColor_MyTeam",
@@ -526,7 +526,7 @@ const dvar_s *G_RegisterDvars()
         0.72000003f,
         0.25f,
         1.0f,
-        0x100u,
+        DVAR_TEMP,
         "Player team color on scoreboard");
     g_ScoresColor_EnemyTeam = Dvar_RegisterColor(
         "g_ScoresColor_EnemyTeam",
@@ -534,7 +534,7 @@ const dvar_s *G_RegisterDvars()
         0.07f,
         0.050000001f,
         1.0f,
-        0x100u,
+        DVAR_TEMP,
         "Enemy team color on scoreboard");
     g_ScoresColor_Spectator = Dvar_RegisterColor(
         "g_ScoresColor_Spectator",
@@ -542,7 +542,7 @@ const dvar_s *G_RegisterDvars()
         0.25f,
         0.25f,
         1.0f,
-        0x100u,
+        DVAR_TEMP,
         "Spectator team color on scoreboard");
     g_ScoresColor_Free = Dvar_RegisterColor(
         "g_ScoresColor_Free",
@@ -550,7 +550,7 @@ const dvar_s *G_RegisterDvars()
         0.77999997f,
         0.1f,
         1.0f,
-        0x100u,
+        DVAR_TEMP,
         "Free Team color on scoreboard");
     g_ScoresColor_Allies = Dvar_RegisterColor(
         "g_ScoresColor_Allies",
@@ -558,7 +558,7 @@ const dvar_s *G_RegisterDvars()
         0.46000001f,
         0.07f,
         1.0f,
-        0x100u,
+        DVAR_TEMP,
         "Allies team color on scoreboard");
     g_ScoresColor_Axis = Dvar_RegisterColor(
         "g_ScoresColor_Axis",
@@ -566,17 +566,17 @@ const dvar_s *G_RegisterDvars()
         0.07f,
         0.050000001f,
         1.0f,
-        0x100u,
+        DVAR_TEMP,
         "Axis team color on scoreboard");
-    g_TeamName_Allies = Dvar_RegisterString("g_TeamName_Allies", "GAME_ALLIES", 0x100u, "Allied team name");
-    g_TeamName_Axis = Dvar_RegisterString("g_TeamName_Axis", "GAME_AXIS", 0x100u, "Axis team name");
+    g_TeamName_Allies = Dvar_RegisterString("g_TeamName_Allies", "GAME_ALLIES", DVAR_TEMP, "Allied team name");
+    g_TeamName_Axis = Dvar_RegisterString("g_TeamName_Axis", "GAME_AXIS", DVAR_TEMP, "Axis team name");
     g_TeamColor_Allies = Dvar_RegisterColor(
         "g_TeamColor_Allies",
         0.60000002f,
         0.63999999f,
         0.69f,
         1.0f,
-        0x100u,
+        DVAR_TEMP,
         "Allies team color");
     g_TeamColor_Axis = Dvar_RegisterColor(
         "g_TeamColor_Axis",
@@ -584,7 +584,7 @@ const dvar_s *G_RegisterDvars()
         0.56999999f,
         0.41f,
         1.0f,
-        0x100u,
+        DVAR_TEMP,
         "Axis team color");
     g_TeamColor_MyTeam = Dvar_RegisterColor(
         "g_TeamColor_MyTeam",
@@ -592,34 +592,34 @@ const dvar_s *G_RegisterDvars()
         0.60000002f,
         0.85000002f,
         1.0f,
-        0x100u,
+        DVAR_TEMP,
         "Player team color");
-    g_TeamColor_EnemyTeam = Dvar_RegisterColor("g_TeamColor_EnemyTeam", 0.75f, 0.25f, 0.25f, 1.0f, 0x100u, "Enemy team color");
+    g_TeamColor_EnemyTeam = Dvar_RegisterColor("g_TeamColor_EnemyTeam", 0.75f, 0.25f, 0.25f, 1.0f, DVAR_TEMP, "Enemy team color");
     g_TeamColor_Spectator = Dvar_RegisterColor(
         "g_TeamColor_Spectator",
         0.25f,
         0.25f,
         0.25f,
         1.0f,
-        0x100u,
+        DVAR_TEMP,
         "Spectator team color");
-    g_TeamColor_Free = Dvar_RegisterColor("g_TeamColor_Free", 0.75f, 0.25f, 0.25f, 1.0f, 0x100u, "Free Team color");
-    g_smoothClients = Dvar_RegisterBool("g_smoothClients", 1, 0, "Enable extrapolation between client states");
-    g_antilag = Dvar_RegisterBool("g_antilag", 1, 5u, "Turn on antilag checks for weapon hits");
-    g_oldVoting = Dvar_RegisterBool("g_oldVoting", 1, 1u, "Use old voting method");
+    g_TeamColor_Free = Dvar_RegisterColor("g_TeamColor_Free", 0.75f, 0.25f, 0.25f, 1.0f, DVAR_TEMP, "Free Team color");
+    g_smoothClients = Dvar_RegisterBool("g_smoothClients", true, DVAR_NOFLAG, "Enable extrapolation between client states");
+    g_antilag = Dvar_RegisterBool("g_antilag", true, DVAR_ARCHIVE | DVAR_SERVERINFO, "Turn on antilag checks for weapon hits");
+    g_oldVoting = Dvar_RegisterBool("g_oldVoting", true, DVAR_ARCHIVE, "Use old voting method");
     minh.value.max = 1.0f;
     minh.value.min = 0.0f;
     g_voteAbstainWeight = Dvar_RegisterFloat(
         "g_voteAbstainWeight",
         0.5f,
         minh,
-        1u,
+        DVAR_ARCHIVE,
         "How much an abstained vote counts as a 'no' vote");
     g_NoScriptSpam = Dvar_RegisterBool("g_no_script_spam", 0, 0, "Turn off script debugging info");
     g_debugLocDamage = Dvar_RegisterBool(
         "g_debugLocDamage",
         0,
-        0x80u,
+        DVAR_CHEAT,
         "Turn on debugging information for locational damage");
     mini.value.max = 15000.0f;
     mini.value.min = 0.0f;
@@ -635,13 +635,13 @@ const dvar_s *G_RegisterDvars()
         "g_friendlyNameDist",
         15000.0f,
         minj,
-        0x80u,
+        DVAR_CHEAT,
         "Maximum range for seeing a friendly's name");
-    melee_debug = Dvar_RegisterBool("melee_debug", 0, 0x80u, "Turn on debug lines for melee traces");
+    melee_debug = Dvar_RegisterBool("melee_debug", 0, DVAR_CHEAT, "Turn on debug lines for melee traces");
     radius_damage_debug = Dvar_RegisterBool(
         "radius_damage_debug",
         0,
-        0x80u,
+        DVAR_CHEAT,
         "Turn on debug lines for radius damage traces");
     mink.value.max = FLT_MAX;
     mink.value.min = 0.0f;
@@ -649,7 +649,7 @@ const dvar_s *G_RegisterDvars()
         "player_throwbackInnerRadius",
         90.0f,
         mink,
-        0x80u,
+        DVAR_CHEAT,
         "The radius to a live grenade player must be within initially to do a throwback");
     minl.value.max = FLT_MAX;
     minl.value.min = 0.0f;
@@ -657,7 +657,7 @@ const dvar_s *G_RegisterDvars()
         "player_throwbackOuterRadius",
         160.0f,
         minl,
-        0x80u,
+        DVAR_CHEAT,
         "The radius player is allow to throwback a grenade once the player has been in the inner radius");
     minm.value.max = FLT_MAX;
     minm.value.min = 0.0f;
@@ -665,7 +665,7 @@ const dvar_s *G_RegisterDvars()
         "player_MGUseRadius",
         128.0f,
         minm,
-        0x80u,
+        DVAR_CHEAT,
         "The radius within which a player can mount a machine gun");
     minn.value.max = FLT_MAX;
     minn.value.min = 0.0f;
@@ -673,23 +673,23 @@ const dvar_s *G_RegisterDvars()
         "g_minGrenadeDamageSpeed",
         400.0f,
         minn,
-        0x80u,
+        DVAR_CHEAT,
         "Minimum speed at which getting hit be a grenade will do damage (not the grenade explosion damage)");
     g_compassShowEnemies = Dvar_RegisterBool(
         "g_compassShowEnemies",
         0,
-        0x84u,
+        DVAR_SERVERINFO | DVAR_CHEAT,
         "Whether enemies are visible on the compass at all times");
     pickupPrints = Dvar_RegisterBool(
         "pickupPrints",
         0,
-        0x80u,
+        DVAR_CHEAT,
         "Print a message to the game window when picking up ammo, etc.");
     g_dumpAnims = Dvar_RegisterInt(
         "g_dumpAnims",
         -1,
         (DvarLimits)0x3FFFFFFFFFFLL,
-        0x80u,
+        DVAR_CHEAT,
         "Animation debugging info for the given character number");
     g_useholdtime = Dvar_RegisterInt(
         "g_useholdtime",
@@ -701,16 +701,16 @@ const dvar_s *G_RegisterDvars()
         "g_useholdspawndelay",
         MY_DEFAULT_USEHOLDSPAWNDELAY,
         (DvarLimits)0x3E800000000LL,
-        0x81u,
+        DVAR_CHEAT | DVAR_ARCHIVE,
         "Time in milliseconds that the player is unable to 'use' after spawning");
-    g_redCrosshairs = Dvar_RegisterBool("g_redCrosshairs", 1, 0x21u, "Whether red crosshairs are enabled");
+    g_redCrosshairs = Dvar_RegisterBool("g_redCrosshairs", 1, DVAR_LATCH | DVAR_ARCHIVE, "Whether red crosshairs are enabled");
     g_mantleBlockTimeBuffer = Dvar_RegisterInt(
         "g_mantleBlockTimeBuffer",
         500,
         (DvarLimits)0xEA6000000000LL,
-        0x80u,
+        DVAR_CHEAT,
         "Time that the client think is delayed after mantling");
-    anim_deltas_debug = Dvar_RegisterBool("anim_deltas_debug", 0, 0, "Enable animation debug data");
+    anim_deltas_debug = Dvar_RegisterBool("anim_deltas_debug", false, DVAR_NOFLAG, "Enable animation debug data");
     Helicopter_RegisterDvars();
     G_VehRegisterDvars();
     G_RegisterMissileDvars();
@@ -722,7 +722,7 @@ const dvar_s *G_RegisterDvars()
         0.0f,
         0.0f,
         1.0f,
-        0x10C0u,
+        DVAR_ROM | DVAR_CHEAT | DVAR_TEMP | DVAR_SAVED,
         "Fog color that was set in the most recent call to \"setexpfog\"");
     mino.value.max = FLT_MAX;
     mino.value.min = 0.0f;
@@ -730,7 +730,7 @@ const dvar_s *G_RegisterDvars()
         "g_fogStartDistReadOnly",
         0.0f,
         mino,
-        0x10C0u,
+        DVAR_ROM | DVAR_CHEAT | DVAR_TEMP | DVAR_SAVED,
         "Fog start distance that was set in the most recent call to \"setexpfog\"");
     minp.value.max = FLT_MAX;
     minp.value.min = 0.0f;
@@ -738,7 +738,7 @@ const dvar_s *G_RegisterDvars()
         "g_fogHalfDistReadOnly",
         0.1f,
         minp,
-        0x10C0u,
+        DVAR_ROM | DVAR_CHEAT | DVAR_TEMP | DVAR_SAVED,
         "Fog start distance that was set in the most recent call to \"setexpfog\"");
     g_fogHalfDistReadOnly = result;
     return result;

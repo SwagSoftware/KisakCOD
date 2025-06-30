@@ -903,7 +903,7 @@ void __cdecl Cmd_CallVote_f(gentity_s *ent)
         SV_Cmd_ArgvBuffer(3, arg3, 256);
         if (!useFastFile->current.enabled && !SV_MapExists(arg3))
             goto LABEL_36;
-        mapname = Dvar_RegisterString("mapname", (char *)"", 0x44u, "Current map name");
+        mapname = Dvar_RegisterString("mapname", (char *)"", DVAR_SERVERINFO | DVAR_ROM, "Current map name");
         if (!I_stricmp(arg3, mapname->current.string))
             arg3[0] = 0;
         if (!arg2[0] && !arg3[0])

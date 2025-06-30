@@ -479,11 +479,11 @@ void __cdecl Com_SetLocalizedErrorMessage(char* localizedErrorMessage, const cha
 {
     char* translation; // [esp+0h] [ebp-4h]
 
-    ui_errorMessage = Dvar_RegisterString("com_errorMessage", (char*)"", 0x40u, "Most recent error message");
+    ui_errorMessage = Dvar_RegisterString("com_errorMessage", (char*)"", DVAR_ROM, "Most recent error message");
     ui_errorTitle = Dvar_RegisterString(
         "com_errorTitle",
         (char*)"",
-        0x40u,
+        DVAR_ROM,
         "Title of the most recent error message");
     translation = SEH_LocalizeTextMessage(titleToken, "error message", LOCMSG_NOERR);
     if (translation)
@@ -1144,7 +1144,7 @@ void __cdecl Com_Init_Try_Block_Function(char* commandLine)
     Cbuf_Execute(0, v1);
     if ((dvar_modifiedFlags & 0x20) != 0)
         Com_InitDvars();
-    com_recommendedSet = Dvar_RegisterBool("com_recommendedSet", 0, 1u, "Use recommended settings");
+    com_recommendedSet = Dvar_RegisterBool("com_recommendedSet", 0, DVAR_ARCHIVE, "Use recommended settings");
     Com_CheckSetRecommended(0);
     Com_StartupVariable(0);
     if (!useFastFile->current.enabled)
@@ -1168,9 +1168,9 @@ void __cdecl Com_Init_Try_Block_Function(char* commandLine)
     Cmd_AddCommandInternal("writedefaults", Com_WriteDefaults_f, &Com_WriteDefaults_f_VAR);
     BuildNumber = getBuildNumber();
     s = va("%s %s build %s %s", "CoD4 MP", "1.0", BuildNumber, "win-x86");
-    version = Dvar_RegisterString("version", "", 0x40u, "Game version");
+    version = Dvar_RegisterString("version", "", DVAR_ROM, "Game version");
     Dvar_SetString(version, s);
-    shortversion = Dvar_RegisterString("shortversion", "1.0", 0x44u, "Short game version");
+    shortversion = Dvar_RegisterString("shortversion", "1.0", DVAR_ROM | DVAR_SERVERINFO, "Short game version");
     Sys_Init();
     Netchan_Init(__rdtsc());
     Scr_InitVariables();
@@ -1300,78 +1300,78 @@ const char *s_lockThreadNames[4] = { "none", "minimal", "all" };
 void Com_InitDvars()
 {
 #if !defined(DEDICATED) && !defined(KISAK_DEDICATED)
-    com_dedicated = Dvar_RegisterEnum("dedicated", g_dedicatedEnumNames, 0, 0x20u, "True if this is a dedicated server");
+    com_dedicated = Dvar_RegisterEnum("dedicated", g_dedicatedEnumNames, 0, DVAR_LATCH, "True if this is a dedicated server");
 #else
-    com_dedicated = Dvar_RegisterEnum("dedicated", g_dedicatedEnumNames, 2, 0x20u, "True if this is a dedicated server");
+    com_dedicated = Dvar_RegisterEnum("dedicated", g_dedicatedEnumNames, 2, DVAR_LATCH, "True if this is a dedicated server");
 #endif
 
 #if !defined(DEDICATED) && !defined(KISAK_DEDICATED)
     if (com_dedicated->current.integer)
-        Dvar_RegisterEnum("dedicated", g_dedicatedEnumNames, 0, 0x40u, "True if this is a dedicated server");
+        Dvar_RegisterEnum("dedicated", g_dedicatedEnumNames, 0, DVAR_ROM, "True if this is a dedicated server");
 #endif
 
-    com_maxfps = Dvar_RegisterInt("com_maxfps", 85, 0, 1000, 1u, "Cap frames per second");
+    com_maxfps = Dvar_RegisterInt("com_maxfps", 85, 0, 1000, DVAR_ARCHIVE, "Cap frames per second");
     useFastFile = Dvar_RegisterBool(
         "useFastFile",
         1,
-        0x10u,
+        DVAR_INIT,
         "Enables loading data from fast files. Only tools can run without fast files.");
     sys_lockThreads = Dvar_RegisterEnum(
         "sys_lockThreads",
         s_lockThreadNames,
         0,
-        0,
+        DVAR_NOFLAG,
         "Prevents specified threads from changing CPUs; improves profiling and may fix some bugs, but can hurt performance");
 
-    sys_smp_allowed = Dvar_RegisterBool("sys_smp_allowed", Sys_GetCpuCount() > 1u, 0x10u, "Allow multi-threading");
+    sys_smp_allowed = Dvar_RegisterBool("sys_smp_allowed", Sys_GetCpuCount() > 1u, DVAR_INIT, "Allow multi-threading");
     com_masterServerName = Dvar_RegisterString(
         "masterServerName",
         "cod4master.activision.com",
-        0x80u,
+        DVAR_CHEAT,
         "Master server name for listing public inet games");
     com_authServerName = Dvar_RegisterString(
         "authServerName",
         "cod4master.activision.com",
-        0x80u,
+        DVAR_CHEAT,
         "Authentication server name for listing public inet games");
-    com_masterPort = Dvar_RegisterInt("masterPort", 20810, 0, 0xFFFF, 0x80u, "Master server port");
-    com_authPort = Dvar_RegisterInt("authPort", 20800, 0, 0xFFFF, 0x80u, "Auth server port");
-    com_developer = Dvar_RegisterInt("developer", 0, 0, 2, 0, "Enable development options");
-    com_developer_script = Dvar_RegisterBool("developer_script", 0, 0, "Enable developer script comments");
+    com_masterPort = Dvar_RegisterInt("masterPort", 20810, 0, 0xFFFF, DVAR_CHEAT, "Master server port");
+    com_authPort = Dvar_RegisterInt("authPort", 20800, 0, 0xFFFF, DVAR_CHEAT, "Auth server port");
+    com_developer = Dvar_RegisterInt("developer", 0, 0, 2, DVAR_NOFLAG, "Enable development options");
+    com_developer_script = Dvar_RegisterBool("developer_script", 0, DVAR_NOFLAG, "Enable developer script comments");
     com_logfile = Dvar_RegisterInt(
         "logfile",
         1,
         0,
         2,
-        0,
+        DVAR_NOFLAG,
         "Write to log file - 0 = disabled, 1 = async file write, 2 = Sync every write");
     com_statmon = Dvar_RegisterBool("com_statmon", 0, 0, "Draw stats monitor");
-    com_timescale = Dvar_RegisterFloat("com_timescale", 1.0, 0.001f, 1000.0f, 0x10C8u, "Scale time of each frame");
-    dev_timescale = Dvar_RegisterFloat("timescale", 1.0, 0.001f, 1000.0f, 0x88u, "Scale time of each frame");
+    com_timescale = Dvar_RegisterFloat("com_timescale", 1.0, 0.001f, 1000.0f, DVAR_SYSTEMINFO | DVAR_ROM | DVAR_CHEAT | DVAR_TEMP | DVAR_SAVED, "Scale time of each frame");
+    dev_timescale = Dvar_RegisterFloat("timescale", 1.0, 0.001f, 1000.0f, DVAR_CHEAT | DVAR_SYSTEMINFO, "Scale time of each frame");
     com_fixedtime = Dvar_RegisterInt("fixedtime", 0, 0, 1000, 0x80u, "Use a fixed time rate for each frame");
     com_maxFrameTime = Dvar_RegisterInt(
         "com_maxFrameTime",
         100,
         50,
         5000,
-        0,
+        DVAR_NOFLAG,
         "Time slows down if a frame takes longer than this many milliseconds");
-    sv_paused = Dvar_RegisterInt("sv_paused", 0, 0, 2, 0x40u, "Pause the server");
-    cl_paused = Dvar_RegisterInt("cl_paused", 0, 0, 2, 0x40u, "Pause the client");
+    sv_paused = Dvar_RegisterInt("sv_paused", 0, 0, 2, DVAR_ROM, "Pause the server");
+    cl_paused = Dvar_RegisterInt("cl_paused", 0, 0, 2, DVAR_ROM, "Pause the client");
     cl_paused_simple = Dvar_RegisterBool(
         "cl_paused_simple",
         0,
-        0,
+        DVAR_NOFLAG,
         "Toggling pause won't do any additional special processing if true.");
-    com_sv_running = Dvar_RegisterBool("sv_running", 0, 0x40u, "Server is running");
-    com_filter_output = Dvar_RegisterBool("com_filter_output", 0, 0, "Use console filters for filtering output.");
-    com_introPlayed = Dvar_RegisterBool("com_introPlayed", 0, 1u, "Intro movie has been played");
-    com_animCheck = Dvar_RegisterBool("com_animCheck", 0, 0, "Check anim tree");
-    com_hiDef = Dvar_RegisterBool("hiDef", 1, 0x40u, "True if the game video is running in high-def.");
+    com_sv_running = Dvar_RegisterBool("sv_running", 0, DVAR_ROM, "Server is running");
+    com_filter_output = Dvar_RegisterBool("com_filter_output", 0, DVAR_NOFLAG, "Use console filters for filtering output.");
+    com_introPlayed = Dvar_RegisterBool("com_introPlayed", 0, DVAR_ARCHIVE, "Intro movie has been played");
+    com_animCheck = Dvar_RegisterBool("com_animCheck", 0, DVAR_NOFLAG, "Check anim tree");
+    com_hiDef = Dvar_RegisterBool("hiDef", 1, DVAR_ROM, "True if the game video is running in high-def.");
     com_wideScreen = Dvar_RegisterBool(
         "wideScreen",
         1,
-        0x40u,
+        DVAR_ROM,
         "True if the game video is running in 16x9 aspect, false if 4x3.");
 }
 
@@ -1491,10 +1491,10 @@ void Com_DedicatedModified()
                 "dedicated",
                 g_dedicatedEnumNames,
                 0,
-                0x20u,
+                DVAR_LATCH,
                 "True if this is a dedicated server");
             if (com_dedicated->current.integer)
-                Dvar_RegisterEnum("dedicated", g_dedicatedEnumNames, 0, 0x40u, "True if this is a dedicated server");
+                Dvar_RegisterEnum("dedicated", g_dedicatedEnumNames, 0, DVAR_ROM, "True if this is a dedicated server");
             if (!com_dedicated->current.integer)
                 MyAssertHandler(
                     ".\\qcommon\\common.cpp",

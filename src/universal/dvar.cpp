@@ -2631,11 +2631,11 @@ void __cdecl Dvar_SetBoolByName(const char *dvarName, bool value)
     }
     else if (value)
     {
-        Dvar_RegisterString(dvarName, "1", 0x4000u, "External Dvar");
+        Dvar_RegisterString(dvarName, "1", DVAR_EXTERNAL, "External Dvar");
     }
     else
     {
-        Dvar_RegisterString(dvarName, "0", 0x4000u, "External Dvar");
+        Dvar_RegisterString(dvarName, "0", DVAR_EXTERNAL, "External Dvar");
     }
 }
 
@@ -2652,7 +2652,7 @@ void __cdecl Dvar_SetIntByName(const char *dvarName, int value)
     else
     {
         Com_sprintf(string, 0x20u, "%i", value);
-        Dvar_RegisterString(dvarName, string, 0x4000u, "External Dvar");
+        Dvar_RegisterString(dvarName, string, DVAR_EXTERNAL, "External Dvar");
     }
 }
 
@@ -2669,7 +2669,7 @@ void __cdecl Dvar_SetFloatByName(const char *dvarName, float value)
     else
     {
         v2 = va("%g", value);
-        Dvar_RegisterString(dvarName, v2, 0x4000u, "External Dvar");
+        Dvar_RegisterString(dvarName, v2, DVAR_EXTERNAL, "External Dvar");
     }
 }
 
@@ -2686,7 +2686,7 @@ void __cdecl Dvar_SetVec3ByName(const char *dvarName, float x, float y, float z)
     else
     {
         v4 = va("%g %g %g", x, y, z);
-        Dvar_RegisterString(dvarName, v4, 0x4000u, "External Dvar");
+        Dvar_RegisterString(dvarName, v4, DVAR_EXTERNAL, "External Dvar");
     }
 }
 
@@ -2698,7 +2698,7 @@ void __cdecl Dvar_SetStringByName(const char *dvarName, char *value)
     if (dvar)
         Dvar_SetString(dvar, value);
     else
-        Dvar_RegisterString(dvarName, value, 0x4000u, "External Dvar");
+        Dvar_RegisterString(dvarName, value, DVAR_EXTERNAL, "External Dvar");
 }
 
 const dvar_s *__cdecl Dvar_SetFromStringByNameFromSource(const char *dvarName, const char *string, DvarSetSource source)
@@ -2707,7 +2707,7 @@ const dvar_s *__cdecl Dvar_SetFromStringByNameFromSource(const char *dvarName, c
 
     dvar = (dvar_s *)Dvar_FindVar(dvarName);
     if (!dvar)
-        return Dvar_RegisterString(dvarName, string, 0x4000u, "External Dvar");
+        return Dvar_RegisterString(dvarName, string, DVAR_EXTERNAL, "External Dvar");
     Dvar_SetFromStringFromSource(dvar, (char*)string, source);
     return dvar;
 }
@@ -2806,7 +2806,7 @@ void __cdecl Dvar_SetCheatState()
 void __cdecl Dvar_Init()
 {
     isDvarSystemActive = 1;
-    dvar_cheats = Dvar_RegisterBool("sv_cheats", 1, 0x18u, "External Dvar");
+    dvar_cheats = Dvar_RegisterBool("sv_cheats", 1, DVAR_SYSTEMINFO | DVAR_INIT, "External Dvar");
     Dvar_AddCommands();
 }
 

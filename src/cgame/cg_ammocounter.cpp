@@ -55,15 +55,15 @@ void __cdecl CG_AmmoCounterRegisterDvars()
     DvarLimits ba; // [esp+8h] [ebp-10h]
     DvarLimits bb; // [esp+8h] [ebp-10h]
 
-    ammoCounterHide = Dvar_RegisterBool("ammoCounterHide", 0, 0x1000u, "Hide the Ammo Counter");
-    actionSlotsHide = Dvar_RegisterBool("actionSlotsHide", 0, 0x1000u, "Hide the actionslots.");
+    ammoCounterHide = Dvar_RegisterBool("ammoCounterHide", 0, DVAR_SAVED, "Hide the Ammo Counter");
+    actionSlotsHide = Dvar_RegisterBool("actionSlotsHide", 0, DVAR_SAVED, "Hide the actionslots.");
     lowAmmoWarningColor1 = Dvar_RegisterColor(
         "lowAmmoWarningColor1",
         0.89999998f,
         0.89999998f,
         0.89999998f,
         0.80000001f,
-        0,
+        DVAR_NOFLAG,
         "Color 1 of 2 to oscilate between");
     lowAmmoWarningColor2 = Dvar_RegisterColor(
         "lowAmmoWarningColor2",
@@ -71,7 +71,7 @@ void __cdecl CG_AmmoCounterRegisterDvars()
         1.0f,
         1.0f,
         1.0f,
-        0,
+        DVAR_NOFLAG,
         "Color 2 of 2 to oscilate between");
     b.value.max = FLT_MAX;
     b.value.min = 0.0f;
@@ -79,7 +79,7 @@ void __cdecl CG_AmmoCounterRegisterDvars()
         "lowAmmoWarningPulseFreq",
         1.7f,
         b,
-        0,
+        DVAR_NOFLAG,
         "Frequency of the pulse (oscilation between the 2 colors)");
     ba.value.max = FLT_MAX;
     ba.value.min = 0.0f;
@@ -87,7 +87,7 @@ void __cdecl CG_AmmoCounterRegisterDvars()
         "lowAmmoWarningPulseMax",
         1.5f,
         ba,
-        0,
+        DVAR_NOFLAG,
         "Min of oscilation range: 0 is color1 and 1.0 is color2.  Can be < 0, and the wave will clip at 0.");
     bb.value.max = 1.0f;
     bb.value.min = -FLT_MAX;
@@ -95,7 +95,7 @@ void __cdecl CG_AmmoCounterRegisterDvars()
         "lowAmmoWarningPulseMin",
         0.0f,
         bb,
-        0,
+        DVAR_NOFLAG,
         "Max of oscilation range: 0 is color1 and 1.0 is color2.  Can be > 1.0, and the wave will clip at 1.0.");
     lowAmmoWarningNoReloadColor1 = Dvar_RegisterColor(
         "lowAmmoWarningNoReloadColor1",
@@ -103,7 +103,7 @@ void __cdecl CG_AmmoCounterRegisterDvars()
         0.69999999f,
         0.0f,
         0.80000001f,
-        0,
+        DVAR_NOFLAG,
         "Like lowAmmoWarningColor1, but when no ammo to reload with.");
     lowAmmoWarningNoReloadColor2 = Dvar_RegisterColor(
         "lowAmmoWarningNoReloadColor2",
@@ -111,7 +111,7 @@ void __cdecl CG_AmmoCounterRegisterDvars()
         1.0f,
         0.0f,
         1.0f,
-        0,
+        DVAR_NOFLAG,
         "lowAmmoWarningColor2, but when no ammo to reload with.");
     lowAmmoWarningNoAmmoColor1 = Dvar_RegisterColor(
         "lowAmmoWarningNoAmmoColor1",
@@ -119,7 +119,7 @@ void __cdecl CG_AmmoCounterRegisterDvars()
         0.0f,
         0.0f,
         0.80000001f,
-        0,
+        DVAR_NOFLAG,
         "Like lowAmmoWarningColor1, but when no ammo.");
     lowAmmoWarningNoAmmoColor2 = Dvar_RegisterColor(
         "lowAmmoWarningNoAmmoColor2",
@@ -127,7 +127,7 @@ void __cdecl CG_AmmoCounterRegisterDvars()
         0.0f,
         0.0f,
         1.0f,
-        0,
+        DVAR_NOFLAG,
         "lowAmmoWarningColor2, but when no ammo.");
 }
 

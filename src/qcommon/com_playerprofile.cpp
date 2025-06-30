@@ -191,10 +191,10 @@ void __cdecl Com_InitPlayerProfiles(int localClientNum)
         "ui_playerProfileAlreadyChosen",
         0,
         (DvarLimits)0x100000000LL,
-        0x200u,
+        DVAR_AUTOEXEC,
         "true if player profile has been selected.");
     Dvar_ChangeResetValue((dvar_t*)ui_playerProfileAlreadyChosen, 1);
-    com_playerProfile = Dvar_RegisterString("com_playerProfile", (char *)"", 0x40u, "Player profile");
+    com_playerProfile = Dvar_RegisterString("com_playerProfile", (char *)"", DVAR_ROM, "Player profile");
     if (!Com_SetInitialPlayerProfile(localClientNum))
         Com_ExecStartupConfigs(localClientNum, 0);
 }
@@ -505,17 +505,17 @@ void Sys_RegisterInfoDvars()
         "sys_configureGHz",
         0.0,
         min,
-        0x11u,
+        DVAR_INIT | DVAR_ARCHIVE,
         "Normalized total CPU power, based on cpu type, count, and speed; used in autoconfigure");
-    sys_sysMB = Dvar_RegisterInt("sys_sysMB", 0, 0x7FFFFFFF80000000LL, 0x11u, "Physical memory in the system");
-    sys_gpu = Dvar_RegisterString("sys_gpu", "", 0x11u, "GPU description");
-    sys_configSum = Dvar_RegisterInt("sys_configSum", 0, 0x7FFFFFFF80000000LL, 0x11u, "Configuration checksum");
-    sys_SSE = Dvar_RegisterBool("sys_SSE", sys_info.SSE, 0x40u, "Operating system allows Streaming SIMD Extensions");
+    sys_sysMB = Dvar_RegisterInt("sys_sysMB", 0, 0x7FFFFFFF80000000LL, DVAR_INIT | DVAR_ARCHIVE, "Physical memory in the system");
+    sys_gpu = Dvar_RegisterString("sys_gpu", "", DVAR_INIT | DVAR_ARCHIVE, "GPU description");
+    sys_configSum = Dvar_RegisterInt("sys_configSum", 0, 0x7FFFFFFF80000000LL, DVAR_INIT | DVAR_ARCHIVE, "Configuration checksum");
+    sys_SSE = Dvar_RegisterBool("sys_SSE", sys_info.SSE, DVAR_ROM, "Operating system allows Streaming SIMD Extensions");
     mina.value.max = FLT_MAX;
     mina.value.min = -FLT_MAX;
     value = sys_info.cpuGHz;
-    Dvar_RegisterFloat("sys_cpuGHz", value, mina, 0x40u, "Measured CPU speed");
-    Dvar_RegisterString("sys_cpuName", sys_info.cpuName, 0x40u, "CPU name description");
+    Dvar_RegisterFloat("sys_cpuGHz", value, mina, DVAR_ROM, "Measured CPU speed");
+    Dvar_RegisterString("sys_cpuName", sys_info.cpuName, DVAR_ROM, "CPU name description");
 }
 
 void __cdecl Sys_ArchiveInfo(int checksum)

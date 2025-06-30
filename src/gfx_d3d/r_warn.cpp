@@ -74,7 +74,7 @@ void __cdecl R_WarnInitDvars()
         "r_warningRepeatDelay",
         5.0,
         min,
-        0,
+        DVAR_NOFLAG,
         "Number of seconds after displaying a \"per-frame\" warning before it will display again");
 }
 

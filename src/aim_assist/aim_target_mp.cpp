@@ -34,7 +34,7 @@ const dvar_s *AimTarget_RegisterDvars()
         "aim_target_sentient_radius",
         10.0,
         min,
-        0x80u,
+        DVAR_CHEAT,
         "The radius used to calculate target bounds for a sentient(actor or player)");
     aim_target_sentient_radius = result;
     return result;

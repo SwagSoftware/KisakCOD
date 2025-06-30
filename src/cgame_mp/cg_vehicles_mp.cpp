@@ -33,14 +33,14 @@ void __cdecl CG_VehRegisterDvars()
     DvarLimits minc; // [esp+4h] [ebp-10h]
     DvarLimits mind; // [esp+4h] [ebp-10h]
 
-    vehDebugClient = Dvar_RegisterBool("vehDebugClient", 0, 0x80u, "Turn on debug information for vehicles");
+    vehDebugClient = Dvar_RegisterBool("vehDebugClient", 0, DVAR_CHEAT, "Turn on debug information for vehicles");
     min.value.max = 1000.0;
     min.value.min = 1.0;
     vehDriverViewDist = Dvar_RegisterFloat(
         "vehDriverViewDist",
         300.0,
         min,
-        0x80u,
+        DVAR_CHEAT,
         "How far away the driver's view is from the focus point");
     mina.value.max = 1000.0;
     mina.value.min = 0.0;
@@ -48,7 +48,7 @@ void __cdecl CG_VehRegisterDvars()
         "vehDriverViewFocusRange",
         50.0,
         mina,
-        0x80u,
+        DVAR_CHEAT,
         "How far the driver's view focus will travel vertically");
     minb.value.max = 360.0;
     minb.value.min = -360.0;
@@ -56,14 +56,14 @@ void __cdecl CG_VehRegisterDvars()
         "heli_barrelRotation",
         70.0,
         minb,
-        0,
+        DVAR_NOFLAG,
         "How much to rotate the turret barrel when a helicopter fires");
     minc.value.max = FLT_MAX;
     minc.value.min = -360.0;
-    heli_barrelMaxVelocity = Dvar_RegisterFloat("heli_barrelMaxVelocity", 1250.0, minc, 0, "");
+    heli_barrelMaxVelocity = Dvar_RegisterFloat("heli_barrelMaxVelocity", 1250.0, minc, DVAR_NOFLAG, "");
     mind.value.max = FLT_MAX;
     mind.value.min = -360.0;
-    heli_barrelSlowdown = Dvar_RegisterFloat("heli_barrelSlowdown", 360.0, mind, 0, "");
+    heli_barrelSlowdown = Dvar_RegisterFloat("heli_barrelSlowdown", 360.0, mind, DVAR_NOFLAG, "");
 }
 
 DObj_s *__cdecl GetVehicleEntDObj(int localClientNum, centity_s *centVeh)

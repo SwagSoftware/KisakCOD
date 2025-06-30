@@ -66,20 +66,20 @@ void __cdecl CG_HudElemRegisterDvars()
     DvarLimits mint; // [esp+4h] [ebp-10h]
     DvarLimits minu; // [esp+4h] [ebp-10h]
 
-    waypointDebugDraw = Dvar_RegisterBool("waypointDebugDraw", 0, 0, "");
+    waypointDebugDraw = Dvar_RegisterBool("waypointDebugDraw", 0, DVAR_NOFLAG, "");
     min.value.max = FLT_MAX;
     min.value.min = 1.1754944e-38f;
-    waypointIconWidth = Dvar_RegisterFloat("waypointIconWidth", 36.0f, min, 0, "Width of the offscreen pointer.");
+    waypointIconWidth = Dvar_RegisterFloat("waypointIconWidth", 36.0f, min, DVAR_NOFLAG, "Width of the offscreen pointer.");
     mina.value.max = FLT_MAX;
     mina.value.min = 1.1754944e-38f;
-    waypointIconHeight = Dvar_RegisterFloat("waypointIconHeight", 36.0f, mina, 0, "Height of the offscreen pointer.");
+    waypointIconHeight = Dvar_RegisterFloat("waypointIconHeight", 36.0f, mina, DVAR_NOFLAG, "Height of the offscreen pointer.");
     minb.value.max = FLT_MAX;
     minb.value.min = 1.1754944e-38f;
     waypointOffscreenPointerWidth = Dvar_RegisterFloat(
         "waypointOffscreenPointerWidth",
         25.0f,
         minb,
-        0,
+        DVAR_NOFLAG,
         "Width of the offscreen pointer.");
     minc.value.max = FLT_MAX;
     minc.value.min = 1.1754944e-38f;
@@ -87,7 +87,7 @@ void __cdecl CG_HudElemRegisterDvars()
         "waypointOffscreenPointerHeight",
         12.0f,
         minc,
-        0,
+        DVAR_NOFLAG,
         "Height of the offscreen pointer.");
     mind.value.max = FLT_MAX;
     mind.value.min = 1.1754944e-38f;
@@ -95,7 +95,7 @@ void __cdecl CG_HudElemRegisterDvars()
         "waypointOffscreenPointerDistance",
         30.0f,
         mind,
-        0,
+        DVAR_NOFLAG,
         "Distance from the center of the offscreen objective icon to the center its arrow.");
     mine.value.max = FLT_MAX;
     mine.value.min = 0.0f;
@@ -103,24 +103,24 @@ void __cdecl CG_HudElemRegisterDvars()
         "waypointOffscreenDistanceThresholdAlpha",
         30.0f,
         mine,
-        0,
+        DVAR_NOFLAG,
         "Distance from the threshold over which offscreen objective icons lerp their alpha.");
     minf.value.max = FLT_MAX;
     minf.value.min = 0.0f;
-    waypointOffscreenPadLeft = Dvar_RegisterFloat("waypointOffscreenPadLeft", 103.0f, minf, 0, "Offset from the edge.");
+    waypointOffscreenPadLeft = Dvar_RegisterFloat("waypointOffscreenPadLeft", 103.0f, minf, DVAR_NOFLAG, "Offset from the edge.");
     ming.value.max = FLT_MAX;
     ming.value.min = 0.0f;
-    waypointOffscreenPadRight = Dvar_RegisterFloat("waypointOffscreenPadRight", 0.0f, ming, 0, "Offset from the edge.");
+    waypointOffscreenPadRight = Dvar_RegisterFloat("waypointOffscreenPadRight", 0.0f, ming, DVAR_NOFLAG, "Offset from the edge.");
     minh.value.max = FLT_MAX;
     minh.value.min = 0.0f;
-    waypointOffscreenPadTop = Dvar_RegisterFloat("waypointOffscreenPadTop", 0.0f, minh, 0, "Offset from the edge.");
+    waypointOffscreenPadTop = Dvar_RegisterFloat("waypointOffscreenPadTop", 0.0f, minh, DVAR_NOFLAG, "Offset from the edge.");
     mini.value.max = FLT_MAX;
     mini.value.min = 0.0f;
-    waypointOffscreenPadBottom = Dvar_RegisterFloat("waypointOffscreenPadBottom", 30.0f, mini, 0, "Offset from the edge.");
+    waypointOffscreenPadBottom = Dvar_RegisterFloat("waypointOffscreenPadBottom", 30.0f, mini, DVAR_NOFLAG, "Offset from the edge.");
     waypointOffscreenRoundedCorners = Dvar_RegisterBool(
         "waypointOffscreenRoundedCorners",
         1,
-        0,
+        DVAR_NOFLAG,
         "Off-screen icons take rounded corners when true.  90-degree corners when false.");
     minj.value.max = FLT_MAX;
     minj.value.min = 0.0f;
@@ -128,7 +128,7 @@ void __cdecl CG_HudElemRegisterDvars()
         "waypointOffscreenCornerRadius",
         105.0f,
         minj,
-        0,
+        DVAR_NOFLAG,
         "Size of the rounded corners.");
     mink.value.max = FLT_MAX;
     mink.value.min = 1.1754944e-38f;
@@ -136,7 +136,7 @@ void __cdecl CG_HudElemRegisterDvars()
         "waypointOffscreenScaleLength",
         500.0f,
         mink,
-        0,
+        DVAR_NOFLAG,
         "How far the offscreen icon scale travels from full to smallest scale.");
     minl.value.max = FLT_MAX;
     minl.value.min = 0.0f;
@@ -144,7 +144,7 @@ void __cdecl CG_HudElemRegisterDvars()
         "waypointOffscreenScaleSmallest",
         1.0f,
         minl,
-        0,
+        DVAR_NOFLAG,
         "Smallest scale that the offscreen effect uses.");
     minm.value.max = FLT_MAX;
     minm.value.min = 0.0f;
@@ -152,7 +152,7 @@ void __cdecl CG_HudElemRegisterDvars()
         "waypointDistScaleRangeMin",
         1000.0f,
         minm,
-        0,
+        DVAR_NOFLAG,
         "Distance from player that icon distance scaling starts.");
     minn.value.max = FLT_MAX;
     minn.value.min = 0.0f;
@@ -160,7 +160,7 @@ void __cdecl CG_HudElemRegisterDvars()
         "waypointDistScaleRangeMax",
         3000.0f,
         minn,
-        0,
+        DVAR_NOFLAG,
         "Distance from player that icon distance scaling ends.");
     mino.value.max = FLT_MAX;
     mino.value.min = 0.0f;
@@ -168,7 +168,7 @@ void __cdecl CG_HudElemRegisterDvars()
         "waypointDistScaleSmallest",
         0.80000001f,
         mino,
-        0,
+        DVAR_NOFLAG,
         "Smallest scale that the distance effect uses.");
     minp.value.max = FLT_MAX;
     minp.value.min = 0.1f;
@@ -176,7 +176,7 @@ void __cdecl CG_HudElemRegisterDvars()
         "waypointSplitscreenScale",
         1.8f,
         minp,
-        0,
+        DVAR_NOFLAG,
         "Scale applied to waypoint icons in splitscreen views.");
     minq.value.max = FLT_MAX;
     minq.value.min = -FLT_MAX;
@@ -187,7 +187,7 @@ void __cdecl CG_HudElemRegisterDvars()
         "hudElemPausedBrightness",
         0.40000001f,
         minr,
-        0x80u,
+        DVAR_CHEAT,
         "Brightness of the hudelems when the game is paused.");
     mins.value.max = FLT_MAX;
     mins.value.min = 0.0f;
@@ -195,7 +195,7 @@ void __cdecl CG_HudElemRegisterDvars()
         "waypointPlayerOffsetProne",
         30.0f,
         mins,
-        0x80u,
+        DVAR_CHEAT,
         "For waypoints pointing to players, how high to offset off of their origin when they are prone.");
     mint.value.max = FLT_MAX;
     mint.value.min = 0.0f;
@@ -203,7 +203,7 @@ void __cdecl CG_HudElemRegisterDvars()
         "waypointPlayerOffsetCrouch",
         56.0f,
         mint,
-        0x80u,
+        DVAR_CHEAT,
         "For waypoints pointing to players, how high to offset off of their origin when they are crouching.");
     minu.value.max = FLT_MAX;
     minu.value.min = 0.0f;
@@ -211,7 +211,7 @@ void __cdecl CG_HudElemRegisterDvars()
         "waypointPlayerOffsetStand",
         74.0f,
         minu,
-        0x80u,
+        DVAR_CHEAT,
         "For waypoints pointing to players, how high to offset off of their origin when they are standing.");
 }
 

@@ -368,30 +368,30 @@ void __cdecl Ragdoll_InitDvars()
     DvarLimits mine; // [esp+4h] [ebp-10h]
     DvarLimits minf; // [esp+4h] [ebp-10h]
 
-    ragdoll_enable = Dvar_RegisterBool("ragdoll_enable", 1, 1u, "Turn on ragdoll death animations");
+    ragdoll_enable = Dvar_RegisterBool("ragdoll_enable", 1, DVAR_ARCHIVE, "Turn on ragdoll death animations");
     ragdoll_debug = Dvar_RegisterInt(
         "ragdoll_debug",
         0,
         (DvarLimits)0x7FFFFFFF00000000LL,
-        0x80u,
+        DVAR_CHEAT,
         "Draw ragdoll debug info (bitflags)");
     ragdoll_fps = Dvar_RegisterInt(
         "ragdoll_fps",
         20,
         (DvarLimits)0x6400000000LL,
-        0x80u,
+        DVAR_CHEAT,
         "Ragdoll update frames per second");
     ragdoll_max_life = Dvar_RegisterInt(
         "ragdoll_max_life",
         4500,
         (DvarLimits)0x7FFFFFFF00000000LL,
-        0x80u,
+        DVAR_CHEAT,
         "Max lifetime of a ragdoll system in msec");
     ragdoll_max_simulating = Dvar_RegisterInt(
         "ragdoll_max_simulating",
         16,
         (DvarLimits)0x2000000000LL,
-        1u,
+        DVAR_ARCHIVE,
         "Max number of simultaneous active ragdolls");
     min.value.max = 60000.0f;
     min.value.min = 0.0f;
@@ -399,7 +399,7 @@ void __cdecl Ragdoll_InitDvars()
         "ragdoll_explode_force",
         18000.0f,
         min,
-        0x80u,
+        DVAR_CHEAT,
         "Explosive force applied to ragdolls");
     mina.value.max = 2.0f;
     mina.value.min = 0.0f;
@@ -407,7 +407,7 @@ void __cdecl Ragdoll_InitDvars()
         "ragdoll_explode_upbias",
         0.80000001f,
         mina,
-        0x80u,
+        DVAR_CHEAT,
         "Upwards bias applied to ragdoll explosion effects");
     minb.value.max = 10000.0f;
     minb.value.min = 0.0f;
@@ -415,7 +415,7 @@ void __cdecl Ragdoll_InitDvars()
         "ragdoll_bullet_force",
         500.0f,
         minb,
-        0x80u,
+        DVAR_CHEAT,
         "Bullet force applied to ragdolls");
     minc.value.max = 10000.0f;
     minc.value.min = 0.0f;
@@ -423,19 +423,19 @@ void __cdecl Ragdoll_InitDvars()
         "ragdoll_bullet_upbias",
         0.5,
         minc,
-        0x80u,
+        DVAR_CHEAT,
         "Upward bias applied to ragdoll bullet effects");
     ragdoll_baselerp_time = Dvar_RegisterInt(
         "ragdoll_baselerp_time",
         1000,
         (DvarLimits)0x177000000064LL,
-        0x80u,
+        DVAR_CHEAT,
         "Default time ragdoll baselerp bones take to reach the base pose");
     ragdoll_jointlerp_time = Dvar_RegisterInt(
         "ragdoll_jointlerp_time",
         3000,
         (DvarLimits)0x177000000064LL,
-        0x80u,
+        DVAR_CHEAT,
         "Default time taken to lerp down ragdoll joint friction");
     mind.value.max = 2000.0f;
     mind.value.min = 0.0f;
@@ -443,7 +443,7 @@ void __cdecl Ragdoll_InitDvars()
         "ragdoll_rotvel_scale",
         1.0f,
         mind,
-        0x80u,
+        DVAR_CHEAT,
         "Ragdoll rotational velocity estimate scale");
     mine.value.max = 10.0f;
     mine.value.min = 0.0f;
@@ -451,7 +451,7 @@ void __cdecl Ragdoll_InitDvars()
         "ragdoll_jitter_scale",
         1.0f,
         mine,
-        0x80u,
+        DVAR_CHEAT,
         "Scale up or down the effect of physics jitter on ragdolls");
     minf.value.max = 10.0f;
     minf.value.min = 0.1f;
@@ -459,9 +459,9 @@ void __cdecl Ragdoll_InitDvars()
         "ragdoll_self_collision_scale",
         1.2f,
         minf,
-        0x80u,
+        DVAR_CHEAT,
         "Scale the size of the collision capsules used to prevent ragdoll limbs from interpenetrating");
-    ragdoll_dump_anims = Dvar_RegisterBool("ragdoll_dump_anims", 0, 0, "Dump animation data when ragdoll fails");
+    ragdoll_dump_anims = Dvar_RegisterBool("ragdoll_dump_anims", 0, DVAR_NOFLAG, "Dump animation data when ragdoll fails");
 }
 
 bool ragdollFirstInit = false;

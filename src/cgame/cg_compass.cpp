@@ -105,17 +105,17 @@ void __cdecl CG_CompassRegisterDvars()
     DvarLimits minbn; // [esp+Ch] [ebp-10h]
     DvarLimits minbo; // [esp+Ch] [ebp-10h]
 
-    compass = Dvar_RegisterBool("compass", 1, 0x1000u, "Display Compass");
+    compass = Dvar_RegisterBool("compass", 1, DVAR_SAVED, "Display Compass");
     min.value.max = FLT_MAX;
     min.value.min = 0.0f;
-    compassSize = Dvar_RegisterFloat("compassSize", 1.0f, min, 1u, "Scale the compass");
+    compassSize = Dvar_RegisterFloat("compassSize", 1.0f, min, DVAR_ARCHIVE, "Scale the compass");
     mina.value.max = FLT_MAX;
     mina.value.min = 0.000099999997f;
     compassMaxRange = Dvar_RegisterFloat(
         "compassMaxRange",
         2500.0f,
         mina,
-        0x1081u,
+        DVAR_ARCHIVE | DVAR_CHEAT | DVAR_SAVED,
         "The maximum range from the player in world space that objects will be shown on the compass");
     minb.value.max = FLT_MAX;
     minb.value.min = 0.000099999997f;
@@ -123,7 +123,7 @@ void __cdecl CG_CompassRegisterDvars()
         "compassMinRange",
         0.000099999997f,
         minb,
-        1u,
+        DVAR_ARCHIVE,
         "The minimum range from the player in world space that objects will appear on the compass");
     minc.value.max = FLT_MAX;
     minc.value.min = 0.000099999997f;
@@ -131,7 +131,7 @@ void __cdecl CG_CompassRegisterDvars()
         "compassMinRadius",
         0.000099999997f,
         minc,
-        1u,
+        DVAR_ARCHIVE,
         "The minimum radius from the center of the compass that objects will appear.");
     mind.value.max = 10.0f;
     mind.value.min = 0.0f;
@@ -139,12 +139,12 @@ void __cdecl CG_CompassRegisterDvars()
         "compassSoundPingFadeTime",
         2.0f,
         mind,
-        0x81u,
+        DVAR_CHEAT | DVAR_ARCHIVE,
         "The time in seconds for the sound overlay on the compass to fade");
     compassClampIcons = Dvar_RegisterBool(
         "compassClampIcons",
         1,
-        0x81u,
+        DVAR_CHEAT | DVAR_ARCHIVE,
         "If true, friendlies and enemy pings clamp to the edge of the radar.  If false, they disappear off the edge.");
     mine.value.max = FLT_MAX;
     mine.value.min = 0.0f;
@@ -152,7 +152,7 @@ void __cdecl CG_CompassRegisterDvars()
         "compassFriendlyWidth",
         18.75f,
         mine,
-        1u,
+        DVAR_ARCHIVE,
         "The size of the friendly icon on the compass");
     minf.value.max = FLT_MAX;
     minf.value.min = 0.0f;
@@ -160,7 +160,7 @@ void __cdecl CG_CompassRegisterDvars()
         "compassFriendlyHeight",
         18.75f,
         minf,
-        1u,
+        DVAR_ARCHIVE,
         "The size of the friendly icon on the compass");
     ming.value.max = FLT_MAX;
     ming.value.min = 0.0f;
@@ -168,7 +168,7 @@ void __cdecl CG_CompassRegisterDvars()
         "compassPlayerWidth",
         18.75f,
         ming,
-        1u,
+        DVAR_ARCHIVE,
         "The size of the player's icon on the compass");
     minh.value.max = FLT_MAX;
     minh.value.min = 0.0f;
@@ -176,7 +176,7 @@ void __cdecl CG_CompassRegisterDvars()
         "compassPlayerHeight",
         18.75f,
         minh,
-        1u,
+        DVAR_ARCHIVE,
         "The size of the player's icon on the compass");
     mini.value.max = FLT_MAX;
     mini.value.min = 0.0f;
@@ -186,7 +186,7 @@ void __cdecl CG_CompassRegisterDvars()
         3590.0f,
         400.0f,
         mini,
-        1u,
+        DVAR_ARCHIVE,
         "x = North-South coord base value, \n"
         "y = East-West coord base value, \n"
         "z = scale (game units per coord unit)");
@@ -196,16 +196,16 @@ void __cdecl CG_CompassRegisterDvars()
         "compassECoordCutoff",
         37.0f,
         minj,
-        1u,
+        DVAR_ARCHIVE,
         "Left cutoff for the scrolling east-west coords");
-    compassRotation = Dvar_RegisterBool("compassRotation", 1, 1u, "Style of compass");
+    compassRotation = Dvar_RegisterBool("compassRotation", 1, DVAR_ARCHIVE, "Style of compass");
     mink.value.max = 1.0f;
     mink.value.min = 0.0099999998f;
     compassTickertapeStretch = Dvar_RegisterFloat(
         "compassTickertapeStretch",
         0.5f,
         mink,
-        1u,
+        DVAR_ARCHIVE,
         "How far the tickertape should stretch from its center.");
     minl.value.max = 60.0f;
     minl.value.min = 0.0099999998f;
@@ -213,7 +213,7 @@ void __cdecl CG_CompassRegisterDvars()
         "compassRadarPingFadeTime",
         4.0f,
         minl,
-        0x81u,
+        DVAR_CHEAT | DVAR_ARCHIVE,
         "How long an enemy is visible on the compass after it is detected by radar");
     minm.value.max = 60.0f;
     minm.value.min = 0.0099999998f;
@@ -224,7 +224,7 @@ void __cdecl CG_CompassRegisterDvars()
         "compassRadarLineThickness",
         0.40000001f,
         minn,
-        0x81u,
+        DVAR_CHEAT | DVAR_ARCHIVE,
         "Thickness, relative to the compass size, of the radar texture that sweeps across the map");
     mino.value.max = FLT_MAX;
     mino.value.min = 0.0f;
@@ -232,7 +232,7 @@ void __cdecl CG_CompassRegisterDvars()
         "compassObjectiveWidth",
         20.0f,
         mino,
-        1u,
+        DVAR_ARCHIVE,
         "The size of the objective on the compass");
     minp.value.max = FLT_MAX;
     minp.value.min = 0.0f;
@@ -240,7 +240,7 @@ void __cdecl CG_CompassRegisterDvars()
         "compassObjectiveHeight",
         20.0f,
         minp,
-        1u,
+        DVAR_ARCHIVE,
         "The size of the objective on the compass");
     minq.value.max = FLT_MAX;
     minq.value.min = 0.0f;
@@ -248,7 +248,7 @@ void __cdecl CG_CompassRegisterDvars()
         "compassObjectiveArrowWidth",
         20.0f,
         minq,
-        1u,
+        DVAR_ARCHIVE,
         "The size of the objective arrow on the compass");
     minr.value.max = FLT_MAX;
     minr.value.min = 0.0f;
@@ -256,7 +256,7 @@ void __cdecl CG_CompassRegisterDvars()
         "compassObjectiveArrowHeight",
         20.0f,
         minr,
-        1u,
+        DVAR_ARCHIVE,
         "The size of the objective arrow on the compass");
     mins.value.max = FLT_MAX;
     mins.value.min = 0.0f;
@@ -264,7 +264,7 @@ void __cdecl CG_CompassRegisterDvars()
         "compassObjectiveArrowOffset",
         2.0f,
         mins,
-        1u,
+        DVAR_ARCHIVE,
         "The offset of the objective arrow inward from the edge of the compass map");
     mint.value.max = FLT_MAX;
     mint.value.min = 0.0f;
@@ -272,7 +272,7 @@ void __cdecl CG_CompassRegisterDvars()
         "compassObjectiveArrowRotateDist",
         5.0,
         mint,
-        1u,
+        DVAR_ARCHIVE,
         "Distance from the corner of the compass map at which the objective arrow rotates to 45 degrees");
     minu.value.max = FLT_MAX;
     minu.value.min = 0.0f;
@@ -280,7 +280,7 @@ void __cdecl CG_CompassRegisterDvars()
         "compassObjectiveMaxRange",
         2048.0f,
         minu,
-        1u,
+        DVAR_ARCHIVE,
         "The maximum range at which an objective is visible on the compass");
     minv.value.max = 1.0f;
     minv.value.min = 0.0f;
@@ -288,19 +288,19 @@ void __cdecl CG_CompassRegisterDvars()
         "compassObjectiveMinAlpha",
         1.0f,
         minv,
-        1u,
+        DVAR_ARCHIVE,
         "The minimum alpha for an objective at the edge of the compass");
     compassObjectiveNumRings = Dvar_RegisterInt(
         "compassObjectiveNumRings",
         10,
         (DvarLimits)0x1400000000LL,
-        1u,
+        DVAR_ARCHIVE,
         "The number of rings when a new objective appears");
     compassObjectiveRingTime = Dvar_RegisterInt(
         "compassObjectiveRingTime",
         10000,
         (DvarLimits)0x7FFFFFFF00000000LL,
-        1u,
+        DVAR_ARCHIVE,
         "The amount of time between each ring when an objective appears");
     minw.value.max = FLT_MAX;
     minw.value.min = 0.0f;
@@ -308,7 +308,7 @@ void __cdecl CG_CompassRegisterDvars()
         "compassObjectiveRingSize",
         80.0f,
         minw,
-        1u,
+        DVAR_ARCHIVE,
         "The maximum objective ring sige when a new objective appears on the compass");
     minx.value.max = FLT_MAX;
     minx.value.min = 0.0000099999997f;
@@ -316,7 +316,7 @@ void __cdecl CG_CompassRegisterDvars()
         "compassObjectiveTextScale",
         0.30000001f,
         minx,
-        1u,
+        DVAR_ARCHIVE,
         "Scale to apply to hud objectives");
     miny.value.max = FLT_MAX;
     miny.value.min = 0.0000099999997f;
@@ -324,7 +324,7 @@ void __cdecl CG_CompassRegisterDvars()
     compassObjectiveDrawLines = Dvar_RegisterBool(
         "compassObjectiveDrawLines",
         1,
-        1u,
+        DVAR_ARCHIVE,
         "Draw horizontal and vertical lines to the active target, if it is within the minimap boundries");
     minz.value.max = FLT_MAX;
     minz.value.min = 0.0f;
@@ -332,7 +332,7 @@ void __cdecl CG_CompassRegisterDvars()
         "compassObjectiveIconWidth",
         16.0f,
         minz,
-        1u,
+        DVAR_ARCHIVE,
         "The size of the objective on the full map");
     minba.value.max = FLT_MAX;
     minba.value.min = 0.0f;
@@ -340,7 +340,7 @@ void __cdecl CG_CompassRegisterDvars()
         "compassObjectiveIconHeight",
         16.0f,
         minba,
-        1u,
+        DVAR_ARCHIVE,
         "The size of the objective on the full map");
     minbb.value.max = FLT_MAX;
     minbb.value.min = 0.0099999998f;
@@ -348,7 +348,7 @@ void __cdecl CG_CompassRegisterDvars()
         "compassObjectiveNearbyDist",
         4.0f,
         minbb,
-        0x1000u,
+        DVAR_SAVED,
         "When an objective is closer than this distance (in meters), an \"Objective Nearby\" typ"
         "e of indicator is shown.");
     minbc.value.max = FLT_MAX;
@@ -357,7 +357,7 @@ void __cdecl CG_CompassRegisterDvars()
         "compassObjectiveMinDistRange",
         1.0f,
         minbc,
-        0x1000u,
+        DVAR_SAVED,
         "The distance that objective transition effects play over, centered on compassObjectiveNearbyDist.");
     minbd.value.max = FLT_MAX;
     minbd.value.min = 0.0099999998f;
@@ -365,7 +365,7 @@ void __cdecl CG_CompassRegisterDvars()
         "compassObjectiveDetailDist",
         10.0f,
         minbd,
-        0x1000u,
+        DVAR_SAVED,
         "When an objective is closer than this distance (in meters), the icon will not be drawn "
         "on the tickertape.");
     minbe.value.max = 0.0f;
@@ -374,7 +374,7 @@ void __cdecl CG_CompassRegisterDvars()
         "compassObjectiveMinHeight",
         -70.0f,
         minbe,
-        0x1000u,
+        DVAR_SAVED,
         "The minimum height that an objective is considered to be on this level");
     minbf.value.max = FLT_MAX;
     minbf.value.min = 0.0f;
@@ -382,7 +382,7 @@ void __cdecl CG_CompassRegisterDvars()
         "compassObjectiveMaxHeight",
         70.0f,
         minbf,
-        0x1000u,
+        DVAR_SAVED,
         "The maximum height that an objective is considered to be on this level");
     minbg.value.max = FLT_MAX;
     minbg.value.min = 0.0f;
@@ -390,7 +390,7 @@ void __cdecl CG_CompassRegisterDvars()
         "compassEnemyFootstepMaxRange",
         500.0f,
         minbg,
-        0x80u,
+        DVAR_CHEAT,
         "The maximum distance at which an enemy may appear on the compass due to 'footsteps'");
     minbh.value.max = FLT_MAX;
     minbh.value.min = 0.0f;
@@ -398,7 +398,7 @@ void __cdecl CG_CompassRegisterDvars()
         "compassEnemyFootstepMaxZ",
         100.0f,
         minbh,
-        0x80u,
+        DVAR_CHEAT,
         "The maximum vertical distance enemy may be from the player and appear on the compass due to 'footsteps'");
     minbi.value.max = FLT_MAX;
     minbi.value.min = 0.0f;
@@ -406,12 +406,12 @@ void __cdecl CG_CompassRegisterDvars()
         "compassEnemyFootstepMinSpeed",
         140.0f,
         minbi,
-        0x80u,
+        DVAR_CHEAT,
         "The minimum speed an enemy must be moving to appear on the compass due to 'footsteps'");
     compassEnemyFootstepEnabled = Dvar_RegisterBool(
         "compassEnemyFootstepEnabled",
         0,
-        0x80u,
+        DVAR_CHEAT,
         "Enables enemies showing on the compass because of moving rapidly nearby.");
     compassDebug = Dvar_RegisterBool("compassDebug", 0, 1u, "Compass Debugging Mode");
     minbj.value.max = 10.0f;
@@ -420,7 +420,7 @@ void __cdecl CG_CompassRegisterDvars()
         "cg_hudMapRadarLineThickness",
         0.15000001f,
         minbj,
-        0x81u,
+        DVAR_CHEAT | DVAR_ARCHIVE,
         "Thickness, relative to the map width, of the radar texture that sweeps across the full screen map");
     minbk.value.max = FLT_MAX;
     minbk.value.min = 0.0f;
@@ -428,7 +428,7 @@ void __cdecl CG_CompassRegisterDvars()
         "cg_hudMapFriendlyWidth",
         15.0f,
         minbk,
-        1u,
+        DVAR_ARCHIVE,
         "The size of the friendly icon on the full map");
     minbl.value.max = FLT_MAX;
     minbl.value.min = 0.0f;
@@ -436,7 +436,7 @@ void __cdecl CG_CompassRegisterDvars()
         "cg_hudMapFriendlyHeight",
         15.0f,
         minbl,
-        1u,
+        DVAR_ARCHIVE,
         "The size of the friendly icon on the full map");
     minbm.value.max = FLT_MAX;
     minbm.value.min = 0.0f;
@@ -444,7 +444,7 @@ void __cdecl CG_CompassRegisterDvars()
         "cg_hudMapPlayerWidth",
         20.0f,
         minbm,
-        1u,
+        DVAR_ARCHIVE,
         "The size of the player's icon on the full map");
     minbn.value.max = FLT_MAX;
     minbn.value.min = 0.0f;
@@ -452,7 +452,7 @@ void __cdecl CG_CompassRegisterDvars()
         "cg_hudMapPlayerHeight",
         20.0f,
         minbn,
-        1u,
+        DVAR_ARCHIVE,
         "The size of the player's icon on the full map");
     minbo.value.max = FLT_MAX;
     minbo.value.min = 0.0f;
@@ -460,7 +460,7 @@ void __cdecl CG_CompassRegisterDvars()
         "cg_hudMapBorderWidth",
         2.0f,
         minbo,
-        1u,
+        DVAR_ARCHIVE,
         "The size of the full map's border, filled by the CG_PLAYER_FULLMAP_BORDER ownerdraw");
 }
 

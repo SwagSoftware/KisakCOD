@@ -249,14 +249,14 @@ void __cdecl SV_BoundMaxClients(int minimum)
         "ui_maxclients",
         32,
         (DvarLimits)0x4000000001LL,
-        0x25u,
+        DVAR_ARCHIVE | DVAR_SERVERINFO | DVAR_LATCH,
         "The maximum number of clients that can connect to a server")->current.integer;
     v1.enumeration.stringCount = 1;
     sv_maxclients = Dvar_RegisterInt(
         "sv_maxclients",
         32,
         v1,
-        0x25u,
+        DVAR_ARCHIVE | DVAR_SERVERINFO | DVAR_LATCH,
         "The maximum number of clients that can connect to a server");
     Dvar_ClearModified((dvar_s*)sv_maxclients);
     if (sv_maxclients->current.integer < minimum)
@@ -645,34 +645,34 @@ void __cdecl SV_Init()
     DvarLimits mina; // [esp+4h] [ebp-18h]
 
     SV_AddOperatorCommands();
-    sv_gametype = Dvar_RegisterString("g_gametype", "war", 0x24u, "Current game type");
-    Dvar_RegisterString("sv_keywords", (char *)"", 4u, "Server keywords");
-    Dvar_RegisterInt("protocol", 1, (DvarLimits)0x100000001LL, 0x44u, "Protocol version");
-    sv_mapname = Dvar_RegisterString("mapname", (char *)"", 0x44u, "Current map name");
+    sv_gametype = Dvar_RegisterString("g_gametype", "war", DVAR_SERVERINFO | DVAR_LATCH, "Current game type");
+    Dvar_RegisterString("sv_keywords", (char *)"", DVAR_SERVERINFO, "Server keywords");
+    Dvar_RegisterInt("protocol", 1, (DvarLimits)0x100000001LL, DVAR_SERVERINFO | DVAR_ROM, "Protocol version");
+    sv_mapname = Dvar_RegisterString("mapname", (char *)"", DVAR_SERVERINFO | DVAR_ROM, "Current map name");
     sv_privateClients = Dvar_RegisterInt(
         "sv_privateClients",
         0,
         (DvarLimits)0x4000000000LL,
-        4u,
+        DVAR_SERVERINFO,
         "Maximum number of private clients allowed on the server");
     min.integer.max = Dvar_RegisterInt(
         "ui_maxclients",
         32,
         (DvarLimits)0x4000000001LL,
-        0x25u,
+        DVAR_ARCHIVE | DVAR_SERVERINFO | DVAR_LATCH,
         "The maximum number of clients that can connect to a server")->current.integer;
     min.enumeration.stringCount = 1;
     sv_maxclients = Dvar_RegisterInt(
         "sv_maxclients",
         32,
         min,
-        37u,
+        DVAR_ARCHIVE | DVAR_SERVERINFO | DVAR_LATCH,
         "The maximum number of clients that can connect to a server");
     sv_hostname = Dvar_RegisterString("sv_hostname", "CoD4Host", 5u, "Host name of the server");
     sv_clientSideBullets = Dvar_RegisterBool(
         "sv_clientSideBullets",
         1,
-        8u,
+        DVAR_SYSTEMINFO,
         "If true, clients will synthesize tracers and bullet impacts");
     sv_punkbuster = Dvar_RegisterBool("sv_punkbuster", 1, 0x15u, "Enable PunkBuster on this server");
     sv_maxRate = Dvar_RegisterInt("sv_maxRate", 5000, (DvarLimits)0x61A800000000LL, 5u, "Maximum bit rate");
@@ -681,132 +681,132 @@ void __cdecl SV_Init()
     sv_floodProtect = Dvar_RegisterBool(
         "sv_floodProtect",
         1,
-        5u,
+        DVAR_SERVERINFO | DVAR_ARCHIVE,
         "Prevent malicious lagging by flooding the server with commands");
     sv_showCommands = Dvar_RegisterBool("sv_showCommands", 0, 0, "Print client commands in the log file");
     sv_allowAnonymous = Dvar_RegisterBool("sv_allowAnonymous", 0, 4u, "Allow anonymous access");
     sv_disableClientConsole = Dvar_RegisterBool(
         "sv_disableClientConsole",
         0,
-        4u,
+        DVAR_SERVERINFO,
         "Disallow remote clients from accessing the console");
     sv_privatePassword = Dvar_RegisterString(
         "sv_privatePassword",
         (char *)"",
-        0,
+        DVAR_NOFLAG,
         "password for the privateClient slots");
-    sv_allowDownload = Dvar_RegisterBool("sv_allowDownload", 1, 1u, "Allow auto download of files");
-    sv_iwds = Dvar_RegisterString("sv_iwds", (char *)"", 0x48u, "IWD server checksums");
-    sv_iwdNames = Dvar_RegisterString("sv_iwdNames", (char *)"", 0x48u, "Names of IWD files used by the server");
+    sv_allowDownload = Dvar_RegisterBool("sv_allowDownload", 1, DVAR_ARCHIVE, "Allow auto download of files");
+    sv_iwds = Dvar_RegisterString("sv_iwds", (char *)"", DVAR_SYSTEMINFO | DVAR_ROM, "IWD server checksums");
+    sv_iwdNames = Dvar_RegisterString("sv_iwdNames", (char *)"", DVAR_SYSTEMINFO | DVAR_ROM, "Names of IWD files used by the server");
     sv_referencedIwds = Dvar_RegisterString(
         "sv_referencedIwds",
         (char *)"",
-        0x48u,
+        DVAR_SYSTEMINFO | DVAR_ROM,
         "Checksum of all referenced IWD files");
     sv_referencedIwdNames = Dvar_RegisterString(
         "sv_referencedIwdNames",
         (char *)"",
-        0x48u,
+        DVAR_SYSTEMINFO | DVAR_ROM,
         "Names of all referenced IWD files");
-    sv_FFCheckSums = Dvar_RegisterString("sv_FFCheckSums", (char *)"", 0x48u, "Fast File server checksums");
-    sv_FFNames = Dvar_RegisterString("sv_FFNames", (char *)"", 0x48u, "Names of Fast Files used by the server");
+    sv_FFCheckSums = Dvar_RegisterString("sv_FFCheckSums", (char *)"", DVAR_SYSTEMINFO | DVAR_ROM, "Fast File server checksums");
+    sv_FFNames = Dvar_RegisterString("sv_FFNames", (char *)"", DVAR_SYSTEMINFO | DVAR_ROM, "Names of Fast Files used by the server");
     sv_referencedFFCheckSums = Dvar_RegisterString(
         "sv_referencedFFCheckSums",
         (char *)"",
-        0x48u,
+        DVAR_SYSTEMINFO | DVAR_ROM,
         "Checksum of all referenced Fast Files");
     sv_referencedFFNames = Dvar_RegisterString(
         "sv_referencedFFNames",
         (char *)"",
-        0x48u,
+        DVAR_SYSTEMINFO | DVAR_ROM,
         "Names of all referenced Fast Files");
-    sv_voice = Dvar_RegisterBool("sv_voice", 0, 0xDu, "Use server side voice communications");
-    sv_voiceQuality = Dvar_RegisterInt("sv_voiceQuality", 3, (DvarLimits)0x900000000LL, 8u, "Voice quality");
-    sv_cheats = Dvar_RegisterBool("sv_cheats", 1, 0x18u, "Enable cheats on the server");
-    sv_serverid = Dvar_RegisterInt("sv_serverid", 0, (DvarLimits)0x7FFFFFFF80000000LL, 0x48u, "Server identification");
-    sv_pure = Dvar_RegisterBool("sv_pure", 0, 0xCu, "Cannot use modified IWD files");
-    rcon_password = Dvar_RegisterString("rcon_password", (char *)"", 0, "Password for the rcon command");
-    sv_fps = Dvar_RegisterInt("sv_fps", 20, (DvarLimits)0x3E80000000ALL, 0, "Server frames per second");
-    sv_timeout = Dvar_RegisterInt("sv_timeout", 240, (DvarLimits)0x70800000000LL, 0, "seconds without any message");
+    sv_voice = Dvar_RegisterBool("sv_voice", 0, DVAR_ARCHIVE | DVAR_SERVERINFO | DVAR_SYSTEMINFO, "Use server side voice communications");
+    sv_voiceQuality = Dvar_RegisterInt("sv_voiceQuality", 3, (DvarLimits)0x900000000LL, DVAR_SYSTEMINFO, "Voice quality");
+    sv_cheats = Dvar_RegisterBool("sv_cheats", 1, DVAR_SYSTEMINFO | DVAR_INIT, "Enable cheats on the server");
+    sv_serverid = Dvar_RegisterInt("sv_serverid", 0, (DvarLimits)0x7FFFFFFF80000000LL, DVAR_SYSTEMINFO | DVAR_ROM, "Server identification");
+    sv_pure = Dvar_RegisterBool("sv_pure", 0, DVAR_SERVERINFO | DVAR_SYSTEMINFO, "Cannot use modified IWD files");
+    rcon_password = Dvar_RegisterString("rcon_password", (char *)"", DVAR_NOFLAG, "Password for the rcon command");
+    sv_fps = Dvar_RegisterInt("sv_fps", 20, (DvarLimits)0x3E80000000ALL, DVAR_NOFLAG, "Server frames per second");
+    sv_timeout = Dvar_RegisterInt("sv_timeout", 240, (DvarLimits)0x70800000000LL, DVAR_NOFLAG, "seconds without any message");
     sv_connectTimeout = Dvar_RegisterInt(
         "sv_connectTimeout",
         45,
         (DvarLimits)0x70800000000LL,
-        0,
+        DVAR_NOFLAG,
         "seconds without any message when a client is loading");
     sv_zombietime = Dvar_RegisterInt(
         "sv_zombietime",
         2,
         (DvarLimits)0x70800000000LL,
-        0,
+        DVAR_NOFLAG,
         "seconds to sync messages after disconnect");
     sv_reconnectlimit = Dvar_RegisterInt(
         "sv_reconnectlimit",
         3,
         (DvarLimits)0x70800000000LL,
-        1u,
+        DVAR_ARCHIVE,
         "minimum seconds between connect messages");
-    sv_padPackets = Dvar_RegisterInt("sv_padPackets", 0, (DvarLimits)0x7FFFFFFF00000000LL, 0, "add nop bytes to messages");
-    sv_allowedClan1 = Dvar_RegisterString("sv_allowedClan1", (char *)"", 0, "Allow this clan to join the server");
-    sv_allowedClan2 = Dvar_RegisterString("sv_allowedClan2", (char *)"", 0, "Allow this clan to join the server");
-    sv_packet_info = Dvar_RegisterBool("sv_packet_info", 0, 0, "Enable packet info debugging information");
-    sv_showAverageBPS = Dvar_RegisterBool("sv_showAverageBPS", 0, 0, "Show average bytes per second for net debugging");
+    sv_padPackets = Dvar_RegisterInt("sv_padPackets", 0, (DvarLimits)0x7FFFFFFF00000000LL, DVAR_NOFLAG, "add nop bytes to messages");
+    sv_allowedClan1 = Dvar_RegisterString("sv_allowedClan1", (char *)"", DVAR_NOFLAG, "Allow this clan to join the server");
+    sv_allowedClan2 = Dvar_RegisterString("sv_allowedClan2", (char *)"", DVAR_NOFLAG, "Allow this clan to join the server");
+    sv_packet_info = Dvar_RegisterBool("sv_packet_info", 0, DVAR_NOFLAG, "Enable packet info debugging information");
+    sv_showAverageBPS = Dvar_RegisterBool("sv_showAverageBPS", 0, DVAR_NOFLAG, "Show average bytes per second for net debugging");
     mina.value.max = 3600.0;
     mina.value.min = 0.0;
     sv_kickBanTime = Dvar_RegisterFloat(
         "sv_kickBanTime",
         300.0,
         mina,
-        0,
+        DVAR_NOFLAG,
         "Time in seconds for a player to be banned from the server after being kicked");
-    sv_botsPressAttackBtn = Dvar_RegisterBool("sv_botsPressAttackBtn", 1, 0, "Allow testclients to press attack button");
-    sv_debugMessageKey = Dvar_RegisterBool("sv_debugMessageKey", 0, 0, "net message key generation debugging");
+    sv_botsPressAttackBtn = Dvar_RegisterBool("sv_botsPressAttackBtn", 1, DVAR_NOFLAG, "Allow testclients to press attack button");
+    sv_debugMessageKey = Dvar_RegisterBool("sv_debugMessageKey", 0, DVAR_NOFLAG, "net message key generation debugging");
     sv_debugPacketContents = Dvar_RegisterBool(
         "sv_debugPacketContents",
         0,
-        0,
+        DVAR_NOFLAG,
         "print out the contents of every snapshot (VERY SLOW)");
     sv_debugPacketContentsForClientThisFrame = Dvar_RegisterBool(
         "sv_debugPacketContentsForClientThisFrame",
         0,
-        0,
+        DVAR_NOFLAG,
         "set to true to get the next snapshot for this client");
     sv_mapRotation = Dvar_RegisterString("sv_mapRotation", (char *)"", 0, "List of maps for the server to play");
     sv_mapRotationCurrent = Dvar_RegisterString(
         "sv_mapRotationCurrent",
         (char *)"",
-        0,
+        DVAR_NOFLAG,
         "Current map in the map rotation");
     sv_debugRate = Dvar_RegisterBool("sv_debugRate", 0, 0, "Enable snapshot rate debugging info");
     sv_debugReliableCmds = Dvar_RegisterBool(
         "sv_debugReliableCmds",
         0,
-        0,
+        DVAR_NOFLAG,
         "Enable debugging information for 'reliable' commands");
-    nextmap = Dvar_RegisterString("nextmap", (char *)"", 0, "Next map to play");
-    sv_wwwDownload = Dvar_RegisterBool("sv_wwwDownload", 0, 1u, "Enable http downloads");
+    nextmap = Dvar_RegisterString("nextmap", (char *)"", DVAR_NOFLAG, "Next map to play");
+    sv_wwwDownload = Dvar_RegisterBool("sv_wwwDownload", 0, DVAR_ARCHIVE, "Enable http downloads");
     sv_wwwBaseURL = Dvar_RegisterString(
         "sv_wwwBaseURL",
         (char *)"",
-        1u,
+        DVAR_ARCHIVE,
         "The base url for files downloaded via http");
     sv_wwwDlDisconnected = Dvar_RegisterBool(
         "sv_wwwDlDisconnected",
         0,
-        1u,
+        DVAR_ARCHIVE,
         "Should clients stay connected while downloading?");
     sv_loadMyChanges = Dvar_RegisterBool("sv_loadMyChanges", 0, 0, "Load my changes fast file on devmap.");
     sv_debugPlayerstate = Dvar_RegisterBool(
         "sv_debugPlayerstate",
         0,
-        0,
+        DVAR_NOFLAG,
         "Print out what fields are changing in the playerstate");
     sv_clientArchive = Dvar_RegisterBool(
         "sv_clientArchive",
         1,
-        0,
+        DVAR_NOFLAG,
         "Have the clients archive data to save bandwidth on the server");
-    Dvar_RegisterBool("clientSideEffects", 1, 0x80u, "Enable loading _fx.gsc files on the client");
+    Dvar_RegisterBool("clientSideEffects", 1, DVAR_CHEAT, "Enable loading _fx.gsc files on the client");
 }
 
 void __cdecl SV_DropAllClients()

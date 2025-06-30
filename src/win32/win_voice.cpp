@@ -587,14 +587,14 @@ bool __cdecl Voice_Init()
     HWND__ *handle; // [esp+2Ch] [ebp-8h]
     int client; // [esp+30h] [ebp-4h]
 
-    winvoice_mic_mute = Dvar_RegisterBool("winvoice_mic_mute", 1, 1u, "Mute the microphone");
+    winvoice_mic_mute = Dvar_RegisterBool("winvoice_mic_mute", 1, DVAR_ARCHIVE, "Mute the microphone");
     min.value.max = 65535.0;
     min.value.min = 0.0;
-    winvoice_mic_reclevel = Dvar_RegisterFloat("winvoice_mic_reclevel", 65535.0, min, 1u, "Microphone recording level");
-    winvoice_save_voice = Dvar_RegisterBool("winvoice_save_voice", 0, 1u, "Write voice data to a file");
+    winvoice_mic_reclevel = Dvar_RegisterFloat("winvoice_mic_reclevel", 65535.0, min, DVAR_ARCHIVE, "Microphone recording level");
+    winvoice_save_voice = Dvar_RegisterBool("winvoice_save_voice", 0, DVAR_ARCHIVE, "Write voice data to a file");
     mina.value.max = 2.0;
     mina.value.min = 0.25;
-    winvoice_mic_scaler = Dvar_RegisterFloat("winvoice_mic_scaler", 1.0, mina, 1u, "Microphone scaler value");
+    winvoice_mic_scaler = Dvar_RegisterFloat("winvoice_mic_scaler", 1.0, mina, DVAR_ARCHIVE, "Microphone scaler value");
     mixerGetRecordSource(old_rec_source);
     mixerSetRecordSource((char*)"Mic");
     mic_old_reclevel = mixerGetRecordLevel((char*)"Mic");

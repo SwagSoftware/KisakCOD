@@ -57,12 +57,12 @@ int __cdecl SEH_GetCurrentLanguage()
 
 void __cdecl SEH_InitLanguage()
 {
-    loc_language = Dvar_RegisterInt("loc_language", 0, (DvarLimits)0xE00000000LL, 0x21u, "Language");
-    loc_forceEnglish = Dvar_RegisterBool("loc_forceEnglish", 0, 0x21u, "Force english localized strings");
-    loc_translate = Dvar_RegisterBool("loc_translate", 1, 0x20u, "Enable translations");
-    loc_warnings = Dvar_RegisterBool("loc_warnings", 1, 0, "Enable localization warnings");
-    //loc_warningsAsErrors = Dvar_RegisterBool("loc_warningsAsErrors", 1, 0, "Throw an error for any unlocalized string");
-    loc_warningsAsErrors = Dvar_RegisterBool("loc_warningsAsErrors", 0, 0, "Throw an error for any unlocalized string");
+    loc_language = Dvar_RegisterInt("loc_language", 0, (DvarLimits)0xE00000000LL, DVAR_ARCHIVE | DVAR_LATCH, "Language");
+    loc_forceEnglish = Dvar_RegisterBool("loc_forceEnglish", 0, DVAR_ARCHIVE | DVAR_LATCH, "Force english localized strings");
+    loc_translate = Dvar_RegisterBool("loc_translate", 1, DVAR_LATCH, "Enable translations");
+    loc_warnings = Dvar_RegisterBool("loc_warnings", 1, DVAR_NOFLAG, "Enable localization warnings");
+    //loc_warningsAsErrors = Dvar_RegisterBool("loc_warningsAsErrors", 1, DVAR_NOFLAG, "Throw an error for any unlocalized string"); // KISAK EDIT
+    loc_warningsAsErrors = Dvar_RegisterBool("loc_warningsAsErrors", 0, DVAR_NOFLAG, "Throw an error for any unlocalized string");
     SEH_UpdateCurrentLanguage();
 }
 
@@ -566,8 +566,8 @@ void __cdecl SEH_UpdateLanguageInfo()
 
     if (!loc_language)
         MyAssertHandler(".\\stringed\\stringed_hooks.cpp", 172, 0, "%s", "loc_language");
-    Dvar_RegisterInt(loc_language->name, 0, 0xE00000000LL, 0x21u, "Language");
-    Dvar_RegisterBool(loc_forceEnglish->name, 0, 0x21u, "Force english language");
+    Dvar_RegisterInt(loc_language->name, 0, 0xE00000000LL, DVAR_ARCHIVE | DVAR_LATCH, "Language");
+    Dvar_RegisterBool(loc_forceEnglish->name, 0, DVAR_ARCHIVE | DVAR_LATCH, "Force english language");
     SEH_UpdateCurrentLanguage();
     iNumLanguages = 0;
     for (i = 0; i < 15; ++i)

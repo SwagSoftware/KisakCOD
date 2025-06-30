@@ -103,13 +103,13 @@ void AimAssist_RegisterDvars()
     DvarLimits mint; // [esp+4h] [ebp-14h]
     DvarLimits minu; // [esp+4h] [ebp-14h]
 
-    aim_input_graph_enabled = Dvar_RegisterBool("aim_input_graph_enabled", 1, 0x80u, "Use graph for adjusting view input");
-    aim_input_graph_debug = Dvar_RegisterBool("aim_input_graph_debug", 0, 0x80u, "Debug the view input graphs");
+    aim_input_graph_enabled = Dvar_RegisterBool("aim_input_graph_enabled", 1, DVAR_CHEAT, "Use graph for adjusting view input");
+    aim_input_graph_debug = Dvar_RegisterBool("aim_input_graph_debug", 0, DVAR_CHEAT, "Debug the view input graphs");
     aim_input_graph_index = Dvar_RegisterInt(
         "aim_input_graph_index",
         3,
         (DvarLimits)0x300000000LL,
-        0x80u,
+        DVAR_CHEAT,
         "Which input graph to use");
     min.value.max = 1080.0f;
     min.value.min = 0.0f;
@@ -117,7 +117,7 @@ void AimAssist_RegisterDvars()
         "aim_turnrate_pitch",
         90.0f,
         min,
-        0x80u,
+        DVAR_CHEAT,
         "The vertical turn rate for aim assist when firing from the hip");
     mina.value.max = 1080.0f;
     mina.value.min = 0.0f;
@@ -125,7 +125,7 @@ void AimAssist_RegisterDvars()
         "aim_turnrate_pitch_ads",
         55.0f,
         mina,
-        0x80u,
+        DVAR_CHEAT,
         "The turn rate up and down for aim assist when aiming down the sight");
     minb.value.max = 1080.0f;
     minb.value.min = 0.0f;
@@ -133,7 +133,7 @@ void AimAssist_RegisterDvars()
         "aim_turnrate_yaw",
         260.0f,
         minb,
-        0x80u,
+        DVAR_CHEAT,
         "The horizontal turn rate for aim assist when firing from the hip");
     minc.value.max = 1080.0f;
     minc.value.min = 0.0f;
@@ -141,17 +141,17 @@ void AimAssist_RegisterDvars()
         "aim_turnrate_yaw_ads",
         90.0f,
         minc,
-        0x80u,
+        DVAR_CHEAT,
         "The horizontal turn rate for aim assist when aiming down the sight");
     aim_accel_turnrate_enabled = Dvar_RegisterBool(
         "aim_accel_turnrate_enabled",
         1,
-        0x80u,
+        DVAR_CHEAT,
         "Enable/disable acceleration of the turnrates");
     aim_accel_turnrate_debug = Dvar_RegisterBool(
         "aim_accel_turnrate_debug",
         0,
-        0x80u,
+        DVAR_CHEAT,
         "Turn on debugging info for the acceleration");
     mind.value.max = 4000.0f;
     mind.value.min = 0.0f;
@@ -159,12 +159,12 @@ void AimAssist_RegisterDvars()
         "aim_accel_turnrate_lerp",
         1200.0f,
         mind,
-        0x80u,
+        DVAR_CHEAT,
         "The acceleration of the turnrates");
     aim_slowdown_enabled = Dvar_RegisterBool(
         "aim_slowdown_enabled",
         1,
-        0x80u,
+        DVAR_CHEAT,
         "Slowdown the turn rate when the cross hair passes over a target");
     aim_slowdown_debug = Dvar_RegisterBool("aim_slowdown_debug", 0, 0x80u, "Turn on debugging info for aim slowdown");
     mine.value.max = 640.0f;
@@ -173,7 +173,7 @@ void AimAssist_RegisterDvars()
         "aim_slowdown_region_width",
         90.0f,
         mine,
-        0x80u,
+        DVAR_CHEAT,
         "The screen width of the aim slowdown region");
     minf.value.max = 480.0f;
     minf.value.min = 0.0f;
@@ -181,7 +181,7 @@ void AimAssist_RegisterDvars()
         "aim_slowdown_region_height",
         90.0f,
         minf,
-        0x80u,
+        DVAR_CHEAT,
         "The screen height of the aim assist slowdown region");
     ming.value.max = 1.0f;
     ming.value.min = 0.0f;
@@ -189,7 +189,7 @@ void AimAssist_RegisterDvars()
         "aim_slowdown_pitch_scale",
         0.40000001f,
         ming,
-        0x80u,
+        DVAR_CHEAT,
         "The vertical aim assist slowdown ratio from the hip");
     minh.value.max = 1.0f;
     minh.value.min = 0.0f;
@@ -197,7 +197,7 @@ void AimAssist_RegisterDvars()
         "aim_slowdown_pitch_scale_ads",
         0.5f,
         minh,
-        0x80u,
+        DVAR_CHEAT,
         "The vertical aim assist slowdown ratio when aiming down the sight");
     mini.value.max = 1.0f;
     mini.value.min = 0.0f;
@@ -205,7 +205,7 @@ void AimAssist_RegisterDvars()
         "aim_slowdown_yaw_scale",
         0.40000001f,
         mini,
-        0x80u,
+        DVAR_CHEAT,
         "The horizontal aim assist slowdown ratio from the hip");
     minj.value.max = 1.0f;
     minj.value.min = 0.0f;
@@ -213,7 +213,7 @@ void AimAssist_RegisterDvars()
         "aim_slowdown_yaw_scale_ads",
         0.5f,
         minj,
-        0x80u,
+        DVAR_CHEAT,
         "The horizontal aim assist slowdown ratio when aiming down the sight");
     aim_autoaim_enabled = Dvar_RegisterBool("aim_autoaim_enabled", 0, 0x80u, "Turn on auto aim");
     aim_autoaim_debug = Dvar_RegisterBool("aim_autoaim_debug", 0, 0x80u, "Turn on auto aim debugging");
@@ -223,7 +223,7 @@ void AimAssist_RegisterDvars()
         "aim_autoaim_lerp",
         40.0f,
         mink,
-        0x80u,
+        DVAR_CHEAT,
         "The rate in degrees per second that the auto aim will converge to its target");
     minl.value.max = 640.0f;
     minl.value.min = 0.0f;
@@ -231,7 +231,7 @@ void AimAssist_RegisterDvars()
         "aim_autoaim_region_width",
         160.0f,
         minl,
-        0x80u,
+        DVAR_CHEAT,
         "The width of the auto aim region in virtual screen coordinates (0 - 640)");
     minm.value.max = 480.0f;
     minm.value.min = 0.0f;
@@ -239,7 +239,7 @@ void AimAssist_RegisterDvars()
         "aim_autoaim_region_height",
         120.0f,
         minm,
-        0x80u,
+        DVAR_CHEAT,
         "The height of the auto aim region in virtual screen coordinates (0 - 480)");
     aim_automelee_enabled = Dvar_RegisterBool("aim_automelee_enabled", 1, 0x80u, "Turn on auto melee");
     aim_automelee_debug = Dvar_RegisterBool("aim_automelee_debug", 0, 0x80u, "Turn on auto melee debugging");
@@ -249,7 +249,7 @@ void AimAssist_RegisterDvars()
         "aim_automelee_lerp",
         40.0f,
         minn,
-        0x80u,
+        DVAR_CHEAT,
         "The rate in degrees per second that the auto melee will converge to its target");
     mino.value.max = 640.0f;
     mino.value.min = 0.0f;
@@ -257,7 +257,7 @@ void AimAssist_RegisterDvars()
         "aim_automelee_region_width",
         320.0f,
         mino,
-        0x80u,
+        DVAR_CHEAT,
         "The width of the auto melee region in virtual screen coordinates (0 - 640)");
     minp.value.max = 480.0f;
     minp.value.min = 0.0f;
@@ -265,7 +265,7 @@ void AimAssist_RegisterDvars()
         "aim_automelee_region_height",
         240.0f,
         minp,
-        0x80u,
+        DVAR_CHEAT,
         "The height of the auto melee region in virtual screen coordinates (0 - 480)");
     minq.value.max = 255.0f;
     minq.value.min = 0.0f;
@@ -273,7 +273,7 @@ void AimAssist_RegisterDvars()
     aim_lockon_enabled = Dvar_RegisterBool(
         "aim_lockon_enabled",
         1,
-        0x80u,
+        DVAR_CHEAT,
         "Aim lock on helps the player to stay on target");
     aim_lockon_debug = Dvar_RegisterBool("aim_lockon_debug", 0, 0x80u, "Turn on debugging info for aim lock on");
     minr.value.max = 1.0f;
@@ -282,7 +282,7 @@ void AimAssist_RegisterDvars()
         "aim_lockon_deflection",
         0.050000001f,
         minr,
-        0x80u,
+        DVAR_CHEAT,
         "The amount of stick deflection for the lockon to activate");
     mins.value.max = 1.0f;
     mins.value.min = 0.0f;
@@ -290,7 +290,7 @@ void AimAssist_RegisterDvars()
         "aim_lockon_strength",
         0.60000002f,
         mins,
-        0x80u,
+        DVAR_CHEAT,
         "The amount of aim assistance given by the target lock on");
     mint.value.max = 640.0f;
     mint.value.min = 0.0f;
@@ -298,7 +298,7 @@ void AimAssist_RegisterDvars()
         "aim_lockon_region_width",
         90.0f,
         mint,
-        0x80u,
+        DVAR_CHEAT,
         "The width of the auto aim region in virtual screen coordinates(0-640)");
     minu.value.max = 480.0f;
     minu.value.min = 0.0f;
@@ -306,12 +306,12 @@ void AimAssist_RegisterDvars()
         "aim_lockon_region_height",
         90.0f,
         minu,
-        0x80u,
+        DVAR_CHEAT,
         "The height of the auto aim region in virtual screen coordinates(0-480)");
     aim_scale_view_axis = Dvar_RegisterBool(
         "aim_scale_view_axis",
         1,
-        0x80u,
+        DVAR_CHEAT,
         "Scale the influence of each input axis so that the major axis has more influence on the control");
 }
 

@@ -156,7 +156,7 @@ void __cdecl Con_InitGameMsgChannels()
         con_gameMsgWindowNFilter[gameWindowIndex] = Dvar_RegisterString(
             con_gameMsgWindowNFilter_Names[gameWindowIndex],
             (char *)defaultGameWindowFilters[gameWindowIndex],
-            0x29u,
+            DVAR_ARCHIVE | DVAR_SYSTEMINFO | DVAR_LATCH,
             dvarDesc);
     }
     for (gameWindowIndexa = 0; gameWindowIndexa < 4; ++gameWindowIndexa)
@@ -280,7 +280,7 @@ void __cdecl Con_InitChannels()
     con_default_console_filter = Dvar_RegisterString(
         "con_default_console_filter",
         "*",
-        0,
+        DVAR_NOFLAG,
         "Default channel filter for the console destination.");
     Con_FilterShowChannel(CON_DEST_CONSOLE, con_default_console_filter->current.string, 1);
     Con_FilterShowChannel(CON_DEST_MINICON, "std", 1);

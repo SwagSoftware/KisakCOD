@@ -72,7 +72,7 @@ void __cdecl G_RegisterMissileDvars()
         "missileHellfireMaxSlope",
         0.5,
         min,
-        0x80u,
+        DVAR_CHEAT,
         "This limits how steeply the hellfire missile can turn upward when climbing");
     mina.value.max = FLT_MAX;
     mina.value.min = 0.1f;
@@ -80,7 +80,7 @@ void __cdecl G_RegisterMissileDvars()
         "missileHellfireUpAccel",
         1000.0f,
         mina,
-        0x80u,
+        DVAR_CHEAT,
         "The rate at which the hellfire missile curves upward");
     minb.value.max = FLT_MAX;
     minb.value.min = 0.0f;
@@ -88,7 +88,7 @@ void __cdecl G_RegisterMissileDvars()
         "missileJavClimbHeightDirect",
         10000.0f,
         minb,
-        0x80u,
+        DVAR_CHEAT,
         "In direct-fire mode, how far above the target the rocket will aim for when climbing.");
     minc.value.max = FLT_MAX;
     minc.value.min = 0.0f;
@@ -96,7 +96,7 @@ void __cdecl G_RegisterMissileDvars()
         "missileJavClimbHeightTop",
         15000.0f,
         minc,
-        0x80u,
+        DVAR_CHEAT,
         "In top-fire mode, how far above the target the rocket will aim for when climbing.");
     mind.value.max = FLT_MAX;
     mind.value.min = 0.0f;
@@ -104,7 +104,7 @@ void __cdecl G_RegisterMissileDvars()
         "missileJavClimbAngleDirect",
         85.0f,
         mind,
-        0x80u,
+        DVAR_CHEAT,
         "In direct-fire mode, the minimum angle between the rocket and target until the rocket s"
         "tops climbing.  Smaller angles make for higher climbs.");
     mine.value.max = FLT_MAX;
@@ -113,7 +113,7 @@ void __cdecl G_RegisterMissileDvars()
         "missileJavClimbAngleTop",
         50.0f,
         mine,
-        0x80u,
+        DVAR_CHEAT,
         "In top-fire mode, the minimum angle between the rocket and target until the rocket stops c"
         "limbing.  Smaller angles make for higher climbs.");
     minf.value.max = FLT_MAX;
@@ -122,7 +122,7 @@ void __cdecl G_RegisterMissileDvars()
         "missileJavClimbCeilingDirect",
         0.0f,
         minf,
-        0x80u,
+        DVAR_CHEAT,
         "In direct-fire mode, how high the missile needs to reach before it descends.");
     ming.value.max = FLT_MAX;
     ming.value.min = 0.0f;
@@ -130,7 +130,7 @@ void __cdecl G_RegisterMissileDvars()
         "missileJavClimbCeilingTop",
         3000.0f,
         ming,
-        0x80u,
+        DVAR_CHEAT,
         "In top-fire mode, how high the missile needs to reach before it descends.");
     minh.value.max = FLT_MAX;
     minh.value.min = 0.0f;
@@ -138,7 +138,7 @@ void __cdecl G_RegisterMissileDvars()
         "missileJavTurnRateDirect",
         60.0f,
         minh,
-        0x80u,
+        DVAR_CHEAT,
         "In direct-fire mode, how sharp the rocket can turn, in angles/sec.");
     mini.value.max = FLT_MAX;
     mini.value.min = 0.0f;
@@ -146,7 +146,7 @@ void __cdecl G_RegisterMissileDvars()
         "missileJavTurnRateTop",
         100.0f,
         mini,
-        0x80u,
+        DVAR_CHEAT,
         "In top-fire mode, how sharp the rocket can turn, in angles/sec.");
     minj.value.max = FLT_MAX;
     minj.value.min = 0.0f;
@@ -154,7 +154,7 @@ void __cdecl G_RegisterMissileDvars()
         "missileJavAccelClimb",
         300.0f,
         minj,
-        0x80u,
+        DVAR_CHEAT,
         "Rocket acceleration when climbing.");
     mink.value.max = FLT_MAX;
     mink.value.min = 0.0f;
@@ -162,7 +162,7 @@ void __cdecl G_RegisterMissileDvars()
         "missileJavAccelDescend",
         3000.0f,
         mink,
-        0x80u,
+        DVAR_CHEAT,
         "Rocket acceleration when descending towards target.");
     minl.value.max = FLT_MAX;
     minl.value.min = 0.0f;
@@ -170,7 +170,7 @@ void __cdecl G_RegisterMissileDvars()
         "missileJavSpeedLimitClimb",
         1000.0f,
         minl,
-        0x80u,
+        DVAR_CHEAT,
         "Rocket's speed limit when climbing.");
     minm.value.max = FLT_MAX;
     minm.value.min = 0.0f;
@@ -178,32 +178,32 @@ void __cdecl G_RegisterMissileDvars()
         "missileJavSpeedLimitDescend",
         6000.0f,
         minm,
-        0x80u,
+        DVAR_CHEAT,
         "Rocket's speed limit when descending towards target.");
     minn.value.max = 1.0f;
     minn.value.min = 0.0f;
-    missileJavTurnDecel = Dvar_RegisterFloat("missileJavTurnDecel", 0.050000001f, minn, 0x80u, "");
+    missileJavTurnDecel = Dvar_RegisterFloat("missileJavTurnDecel", 0.050000001f, minn, DVAR_CHEAT, "");
     mino.value.max = FLT_MAX;
     mino.value.min = 0.0f;
-    missileJavClimbToOwner = Dvar_RegisterFloat("missileJavClimbToOwner", 700.0f, mino, 0x80u, "");
+    missileJavClimbToOwner = Dvar_RegisterFloat("missileJavClimbToOwner", 700.0f, mino, DVAR_CHEAT, "");
     minp.value.max = FLT_MAX;
     minp.value.min = 0.0f;
     missileWaterMaxDepth = Dvar_RegisterFloat(
         "missileWaterMaxDepth",
         60.0f,
         minp,
-        0x80u,
+        DVAR_CHEAT,
         "If a missile explodes deeper under water than this, they explosion effect/sound will not play.");
 }
 
 void __cdecl G_RegisterMissileDebugDvars()
 {
-    missileDebugDraw = Dvar_RegisterBool("missileDebugDraw", 0, 0, "Draw guided missile trajectories.");
-    missileDebugText = Dvar_RegisterBool("missileDebugText", 0, 0, "Print debug missile info to console.");
+    missileDebugDraw = Dvar_RegisterBool("missileDebugDraw", false, DVAR_NOFLAG, "Draw guided missile trajectories.");
+    missileDebugText = Dvar_RegisterBool("missileDebugText", false, DVAR_NOFLAG, "Print debug missile info to console.");
     missileDebugAttractors = Dvar_RegisterBool(
         "missileDebugAttractors",
-        0,
-        0,
+        false,
+        DVAR_NOFLAG,
         "Draw the attractors and repulsors.  Attractors are green, and repulsors are yellow.");
 }
 

@@ -1262,25 +1262,25 @@ void FS_RegisterDvars()
     const dvar_s *result; // eax
     char *homePath; // [esp+0h] [ebp-4h]
 
-    fs_debug = Dvar_RegisterInt("fs_debug", 0, (DvarLimits)0x200000000LL, 0, "Enable file system debugging information");
-    fs_copyfiles = Dvar_RegisterBool("fs_copyfiles", 0, 0x10u, "Copy all used files to another location");
+    fs_debug = Dvar_RegisterInt("fs_debug", 0, (DvarLimits)0x200000000LL, DVAR_NOFLAG, "Enable file system debugging information");
+    fs_copyfiles = Dvar_RegisterBool("fs_copyfiles", 0, DVAR_INIT, "Copy all used files to another location");
     v1 = (char *)Sys_DefaultCDPath();
-    fs_cdpath = Dvar_RegisterString("fs_cdpath", v1, 0x10u, "CD path");
+    fs_cdpath = Dvar_RegisterString("fs_cdpath", v1, DVAR_INIT, "CD path");
     v2 = Sys_Cwd();
-    fs_basepath = Dvar_RegisterString("fs_basepath", v2, 0x210u, "Base game path");
-    fs_basegame = Dvar_RegisterString("fs_basegame", (char *)"", 0x10u, "Base game name");
+    fs_basepath = Dvar_RegisterString("fs_basepath", v2, DVAR_INIT | DVAR_AUTOEXEC, "Base game path");
+    fs_basegame = Dvar_RegisterString("fs_basegame", (char *)"", DVAR_INIT, "Base game name");
     fs_gameDirVar = Dvar_RegisterString(
         "fs_game",
         (char *)"",
-        0x1Cu,
+        DVAR_SERVERINFO | DVAR_SYSTEMINFO | DVAR_INIT,
         "Game data directory. Must be \"\" or a sub directory of 'mods/'.");
     Dvar_SetDomainFunc((dvar_s *)fs_gameDirVar, FS_GameDirDomainFunc);
-    fs_ignoreLocalized = Dvar_RegisterBool("fs_ignoreLocalized", 0, 0xA0u, "Ignore localized files");
+    fs_ignoreLocalized = Dvar_RegisterBool("fs_ignoreLocalized", 0, DVAR_LATCH | DVAR_CHEAT, "Ignore localized files");
     homePath = (char *)RETURN_ZERO32();
     if (!homePath || !*homePath)
         homePath = (char *)fs_basepath->reset.integer;
-    fs_homepath = Dvar_RegisterString("fs_homepath", homePath, 0x210u, "Game home path");
-    fs_restrict = Dvar_RegisterBool("fs_restrict", 0, 0x10u, "Restrict file access for demos etc.");
+    fs_homepath = Dvar_RegisterString("fs_homepath", homePath, DVAR_INIT | DVAR_AUTOEXEC, "Game home path");
+    fs_restrict = Dvar_RegisterBool("fs_restrict", 0, DVAR_INIT, "Restrict file access for demos etc.");
 }
 
 void __cdecl FS_AddSearchPath(searchpath_s *search)

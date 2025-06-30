@@ -24,7 +24,7 @@ void __cdecl DynEntPieces_RegisterDvars()
         0.0,
         0.0,
         min,
-        0x80u,
+        DVAR_CHEAT,
         "Initial breakable pieces velocity");
     mina.value.max = 180.0;
     mina.value.min = -180.0;
@@ -34,7 +34,7 @@ void __cdecl DynEntPieces_RegisterDvars()
         0.0,
         0.0,
         mina,
-        0x80u,
+        DVAR_CHEAT,
         "Initial breakable pieces angular velocity");
     minb.value.max = 1000000.0;
     minb.value.min = 0.0;
@@ -42,7 +42,7 @@ void __cdecl DynEntPieces_RegisterDvars()
         "dynEntPieces_impactForce",
         1000.0,
         minb,
-        0x80u,
+        DVAR_CHEAT,
         "Force applied when breakable is destroyed");
 }
 

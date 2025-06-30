@@ -26,14 +26,14 @@ bool __cdecl SND_IsMultiChannel()
 
 char __cdecl SND_InitDriver()
 {
-    snd_khz = Dvar_RegisterInt("snd_khz", 44, (DvarLimits)0x2C0000000BLL, 0x21u, "The game sound frequency.");
+    snd_khz = Dvar_RegisterInt("snd_khz", 44, (DvarLimits)0x2C0000000BLL, DVAR_ARCHIVE | DVAR_LATCH, "The game sound frequency.");
     AIL_set_file_callbacks(MSS_FileOpenCallback, MSS_FileCloseCallback, MSS_FileSeekCallback, MSS_FileReadCallback);
     AIL_set_redist_directory("miles");
     snd_outputConfiguration = Dvar_RegisterEnum(
         "snd_outputConfiguration",
         snd_outputConfigurationStrings,
         0,
-        0x21u,
+        DVAR_ARCHIVE | DVAR_LATCH,
         "Sound output configuration");
     if (MSS_Startup())
     {

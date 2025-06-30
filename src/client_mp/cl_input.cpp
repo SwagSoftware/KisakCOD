@@ -1072,15 +1072,15 @@ void __cdecl CL_InitInput()
         "cl_analog_attack_threshold",
         0.80000001f,
         min,
-        0,
+        DVAR_NOFLAG,
         "The threshold before firing");
     cl_stanceHoldTime = Dvar_RegisterInt(
         "cl_stanceHoldTime",
         300,
         (DvarLimits)0x3E800000000LL,
-        0,
+        DVAR_NOFLAG,
         "The time to hold the stance button before the player goes prone");
-    cl_nodelta = Dvar_RegisterBool("cl_nodelta", 0, 0, "The server does not send snapshot deltas");
+    cl_nodelta = Dvar_RegisterBool("cl_nodelta", false, DVAR_NOFLAG, "The server does not send snapshot deltas");
 }
 
 void __cdecl IN_MLookDown()

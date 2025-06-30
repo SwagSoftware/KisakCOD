@@ -18,23 +18,23 @@ void __cdecl Jump_RegisterDvars()
 
     min.value.max = 1000.0;
     min.value.min = 0.0;
-    jump_height = Dvar_RegisterFloat("jump_height", 39.0, min, 0x180u, "The maximum height of a player's jump");
+    jump_height = Dvar_RegisterFloat("jump_height", 39.0, min, DVAR_CHEAT | DVAR_TEMP, "The maximum height of a player's jump");
     mina.value.max = 64.0;
     mina.value.min = 0.0;
     jump_stepSize = Dvar_RegisterFloat(
         "jump_stepSize",
         18.0,
         mina,
-        0x180u,
+        DVAR_CHEAT | DVAR_TEMP,
         "The maximum step up to the top of a jump arc");
-    jump_slowdownEnable = Dvar_RegisterBool("jump_slowdownEnable", 1, 0x180u, "Slow player movement after jumping");
+    jump_slowdownEnable = Dvar_RegisterBool("jump_slowdownEnable", 1, DVAR_CHEAT | DVAR_TEMP, "Slow player movement after jumping");
     minb.value.max = 1024.0;
     minb.value.min = 0.0;
     jump_ladderPushVel = Dvar_RegisterFloat(
         "jump_ladderPushVel",
         128.0,
         minb,
-        0x180u,
+        DVAR_CHEAT | DVAR_TEMP,
         "The velocity of a jump off of a ladder");
     minc.value.max = 512.0;
     minc.value.min = 0.0;
@@ -42,7 +42,7 @@ void __cdecl Jump_RegisterDvars()
         "jump_spreadAdd",
         64.0,
         minc,
-        0x180u,
+        DVAR_CHEAT | DVAR_TEMP,
         "The amount of spread scale to add as a side effect of jumping");
 }
 

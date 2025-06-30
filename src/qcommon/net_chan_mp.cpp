@@ -660,49 +660,49 @@ void __cdecl Netchan_Init(__int16 port)
 {
     DvarLimits min; // [esp+4h] [ebp-10h]
 
-    showpackets = Dvar_RegisterInt("showpackets", 0, (DvarLimits)0x200000000LL, 0, "Show packets");
-    showdrop = Dvar_RegisterBool("showdrop", 0, 0, "Show dropped packets");
-    packetDebug = Dvar_RegisterBool("packetDebug", 0, 0, "Enable packet debugging information");
+    showpackets = Dvar_RegisterInt("showpackets", 0, (DvarLimits)0x200000000LL, DVAR_NOFLAG, "Show packets");
+    showdrop = Dvar_RegisterBool("showdrop", 0, DVAR_NOFLAG, "Show dropped packets");
+    packetDebug = Dvar_RegisterBool("packetDebug", 0, DVAR_NOFLAG, "Enable packet debugging information");
     g_qport = port;
-    net_profile = Dvar_RegisterInt("net_profile", 0, (DvarLimits)0x200000000LL, 0, "Profile network performance");
+    net_profile = Dvar_RegisterInt("net_profile", 0, (DvarLimits)0x200000000LL, DVAR_NOFLAG, "Profile network performance");
     net_showprofile = Dvar_RegisterInt(
         "net_showprofile",
         0,
         (DvarLimits)0x300000000LL,
-        0,
+        DVAR_NOFLAG,
         "Show network profiling display");
-    net_lanauthorize = Dvar_RegisterBool("net_lanauthorize", 0, 0, "Authorise CD keys when using a LAN");
-    msg_printEntityNums = Dvar_RegisterBool("msg_printEntityNums", 0, 0, "Print entity numbers");
-    msg_dumpEnts = Dvar_RegisterBool("msg_dumpEnts", 0, 0, "Print snapshot entity info");
-    msg_hudelemspew = Dvar_RegisterBool("msg_hudelemspew", 0, 0, "Debug hudelem fields changing");
-    fakelag_current = Dvar_RegisterInt("fakelag_current", 0, (DvarLimits)0x3E700000000LL, 0, "Current fake lag value");
+    net_lanauthorize = Dvar_RegisterBool("net_lanauthorize", 0, DVAR_NOFLAG, "Authorise CD keys when using a LAN");
+    msg_printEntityNums = Dvar_RegisterBool("msg_printEntityNums", 0, DVAR_NOFLAG, "Print entity numbers");
+    msg_dumpEnts = Dvar_RegisterBool("msg_dumpEnts", 0, DVAR_NOFLAG, "Print snapshot entity info");
+    msg_hudelemspew = Dvar_RegisterBool("msg_hudelemspew", 0, DVAR_NOFLAG, "Debug hudelem fields changing");
+    fakelag_current = Dvar_RegisterInt("fakelag_current", 0, (DvarLimits)0x3E700000000LL, DVAR_NOFLAG, "Current fake lag value");
     fakelag_target = Dvar_RegisterInt(
         "fakelag_target",
         0,
         (DvarLimits)0x3E700000000LL,
-        0,
+        DVAR_NOFLAG,
         "Target value for lag debugging");
     fakelag_currentjitter = Dvar_RegisterInt(
         "fakelag_currentjitter",
         0,
         (DvarLimits)0x3E700000000LL,
-        0,
+        DVAR_NOFLAG,
         "Current jitter amount for lag debugging");
     fakelag_jitter = Dvar_RegisterInt(
         "fakelag_jitter",
         0,
         (DvarLimits)0x3E700000000LL,
-        0,
+        DVAR_NOFLAG,
         "Amount of jitter for lag debugging");
     fakelag_jitterinterval = Dvar_RegisterInt(
         "fakelag_jitterinterval",
         2000,
         (DvarLimits)0xEA6000000000LL,
-        0,
+        DVAR_NOFLAG,
         "jitter interval for lag debugging");
     min.value.max = 1.0;
     min.value.min = 0.0;
-    fakelag_packetloss = Dvar_RegisterFloat("fakelag_packetloss", 0.0, min, 0, "Packet loss for lag debugging");
+    fakelag_packetloss = Dvar_RegisterFloat("fakelag_packetloss", 0.0, min, DVAR_NOFLAG, "Packet loss for lag debugging");
     FakeLag_Init();
     Cmd_AddCommandInternal("net_dumpprofile", Net_DumpProfile_f, &Net_DumpProfile_f_VAR);
         Cmd_AddCommandInternal("net_dumpnetfieldchanges", MSG_DumpNetFieldChanges_f, &MSG_DumpNetFieldChanges_f_VAR);

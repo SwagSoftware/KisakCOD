@@ -2797,7 +2797,7 @@ int __cdecl DB_TryLoadXFileInternal(char *zoneName, int zoneFlags)
             zone_reorder = Dvar_RegisterString(
                 "zone_reorder",
                 "",
-                0,
+                DVAR_NOFLAG,
                 "Set to the name of the fast file you want to reorder");
         }
         if (!_stricmp(zone_reorder->current.string, zoneName))
