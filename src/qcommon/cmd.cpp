@@ -21,6 +21,7 @@ static cmd_function_s Cmd_Wait_f_VAR;
 static cmd_function_s Cmd_List_f_VAR;
 static cmd_function_s Cmd_Exec_f_VAR;
 static cmd_function_s Cmd_Vstr_f_VAR;
+static cmd_function_s Cmd_Dumpraw_f_VAR;
 
 static void Cmd_ResetArgs(CmdArgs* args, CmdArgsPrivate* argsPriv)
 {
@@ -187,6 +188,42 @@ void Cmd_Vstr_f(void) {
 	}
 }
 
+#include <universal/com_files.h>
+#include <format>
+#include <filesystem>
+
+void Cmd_Dumpraw_f(void)
+{
+    auto DumpFileType = [](XAssetType type) -> void
+    {
+		auto rawDir = std::format("{}\\raw\\", (char*)fs_basepath->current.integer);
+
+		XAssetHeader files[1000];
+		auto read = DB_GetAllXAssetOfType_FastFile(type, files, 1000);
+		for (auto file : files)
+		{
+			if (!file.rawfile)
+			{
+				continue;
+			}
+
+			std::filesystem::path p(file.rawfile->name);
+
+			auto dir = p.parent_path();
+			std::filesystem::create_directories(rawDir / dir);
+
+			FILE* f;
+			fopen_s(&f, std::format("{}\\{}", rawDir, file.rawfile->name).c_str(), "w");
+			fwrite(file.rawfile->buffer, file.rawfile->len, 1, f);
+			fflush(f);
+			fclose(f);
+		}
+    }; 
+
+    DumpFileType(ASSET_TYPE_RAWFILE);
+    //DumpFileType(ASSET_TYPE_MENU);
+}
+
 void Cmd_Init()
 {
 	Cmd_ResetArgs(&cmd_args, &cmd_argsPrivate);
@@ -195,6 +232,7 @@ void Cmd_Init()
 	Cmd_AddCommandInternal("exec", Cmd_Exec_f, &Cmd_Exec_f_VAR);
 	Cmd_AddCommandInternal("vstr", Cmd_Vstr_f, &Cmd_Vstr_f_VAR);
 	Cmd_AddCommandInternal("wait", Cmd_Wait_f, &Cmd_Wait_f_VAR);
+    Cmd_AddCommandInternal("dumpraw", Cmd_Dumpraw_f, &Cmd_Dumpraw_f_VAR);
 }
 
 void Cmd_AddCommandInternal(const char* cmdName, void(__cdecl* function)(), cmd_function_s* allocedCmd)
