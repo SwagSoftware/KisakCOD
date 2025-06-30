@@ -5,6 +5,8 @@
 #include "r_init.h"
 #include "r_rendercmds.h"
 
+#define GFX_MAX_CLIENT_VIEWS 4
+
 struct GfxSceneParms // sizeof=0xA0
 {                                       // ...
     int localClientNum;
@@ -289,7 +291,7 @@ void __cdecl R_GenerateSortedDrawSurfs(
     const GfxViewParms *viewParmsDpvs,
     const GfxViewParms *viewParmsDraw);
 bool __cdecl R_GetAllowShadowMaps();
-int __cdecl R_DynamicShadowType();
+ShadowType __cdecl R_DynamicShadowType();
 void __cdecl R_SetDepthOfField(GfxViewInfo *viewInfo, const GfxSceneParms *sceneParms);
 void __cdecl R_SetFilmInfo(GfxViewInfo *viewInfo, const GfxSceneParms *sceneParms);
 void __cdecl R_UpdateColorManipulation(GfxViewInfo *viewInfo);

@@ -267,8 +267,7 @@ const BuiltInMaterialTable s_builtInMaterials[50] =
 };
 
 
-
-bool g_generateOverrideTechniques;
+bool g_generateOverrideTechniques = true;
 bool g_alwaysUseDefaultMaterial;
 
 void __cdecl TRACK_r_material()

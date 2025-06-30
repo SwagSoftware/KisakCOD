@@ -153,3 +153,8 @@ void __cdecl Com_ShutdownWorld();
 void __cdecl Com_SaveLump(LumpType type, const void *newLump, unsigned int size, ComSaveLumpBehavior behavior);
 
 extern ComWorld comWorld;
+
+inline unsigned int Com_GetPrimaryLightCount()
+{
+    return comWorld.primaryLightCount;
+}

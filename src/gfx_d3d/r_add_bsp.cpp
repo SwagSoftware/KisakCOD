@@ -287,17 +287,11 @@ void __cdecl R_AddAllBspDrawSurfacesCameraNonlit(
 
 void __cdecl R_AddAllBspDrawSurfacesSunShadow()
 {
-    if (rgp.world->dpvs.litSurfsEnd != rgp.world->dpvs.decalSurfsBegin)
-        MyAssertHandler(".\\r_add_bsp.cpp", 593, 0, "%s", "rgp.world->dpvs.litSurfsEnd == rgp.world->dpvs.decalSurfsBegin");
-    if (rgp.world->dpvs.decalSurfsEnd != rgp.world->dpvs.emissiveSurfsBegin)
-        MyAssertHandler(
-            ".\\r_add_bsp.cpp",
-            594,
-            0,
-            "%s",
-            "rgp.world->dpvs.decalSurfsEnd == rgp.world->dpvs.emissiveSurfsBegin");
-    R_AddAllBspDrawSurfacesRangeSunShadow(0, rgp.world->dpvs.litSurfsBegin, rgp.world->dpvs.emissiveSurfsEnd, 0x1000u);
-    R_AddAllBspDrawSurfacesRangeSunShadow(1u, rgp.world->dpvs.litSurfsBegin, rgp.world->dpvs.emissiveSurfsEnd, 0x2000u);
+    iassert(rgp.world->dpvs.litSurfsEnd == rgp.world->dpvs.decalSurfsBegin);
+    iassert(rgp.world->dpvs.decalSurfsEnd == rgp.world->dpvs.emissiveSurfsBegin);
+
+    R_AddAllBspDrawSurfacesRangeSunShadow(0, rgp.world->dpvs.litSurfsBegin, rgp.world->dpvs.emissiveSurfsEnd, 0x1000);
+    R_AddAllBspDrawSurfacesRangeSunShadow(1, rgp.world->dpvs.litSurfsBegin, rgp.world->dpvs.emissiveSurfsEnd, 0x2000);
 }
 
 void __cdecl R_AddAllBspDrawSurfacesRangeSunShadow(

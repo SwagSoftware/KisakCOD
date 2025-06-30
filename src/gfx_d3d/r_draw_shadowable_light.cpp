@@ -236,11 +236,6 @@ void __cdecl R_SetDrawSurfsShadowableLight(GfxCmdBufSourceState *source, const G
     }
 }
 
-unsigned int Com_GetPrimaryLightCount()
-{
-    return comWorld.primaryLightCount;
-}
-
 unsigned int __cdecl R_GetShadowableLightIndex(
     const GfxBackEndData *data,
     const GfxViewInfo *viewInfo,

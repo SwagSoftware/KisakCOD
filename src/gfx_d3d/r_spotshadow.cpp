@@ -293,26 +293,20 @@ void __cdecl R_GenerateSortedPrimarySpotShadowDrawSurfs(
     unsigned int spotShadowIndex,
     unsigned int shadowableLightIndex)
 {
-    if (!comWorld.isInUse)
-        MyAssertHandler("c:\\trees\\cod3\\src\\gfx_d3d\\../qcommon/com_bsp_api.h", 23, 0, "%s", "comWorld.isInUse");
-    if (shadowableLightIndex >= comWorld.primaryLightCount)
+    bcassert(shadowableLightIndex, Com_GetPrimaryLightCount());
+
     {
-        if (!comWorld.isInUse)
-            MyAssertHandler("c:\\trees\\cod3\\src\\gfx_d3d\\../qcommon/com_bsp_api.h", 23, 0, "%s", "comWorld.isInUse");
-        MyAssertHandler(
-            ".\\r_spotshadow.cpp",
-            258,
-            0,
-            "shadowableLightIndex doesn't index Com_GetPrimaryLightCount()\n\t%i not in [0, %i)",
-            shadowableLightIndex,
-            comWorld.primaryLightCount);
+        PROF_SCOPED("bsp surfaces");
+        R_AddAllBspDrawSurfacesSpotShadow(spotShadowIndex, shadowableLightIndex);
     }
-    KISAK_NULLSUB();
-    R_AddAllBspDrawSurfacesSpotShadow(spotShadowIndex, shadowableLightIndex);
-    KISAK_NULLSUB();
-    R_AddAllStaticModelSurfacesSpotShadow(spotShadowIndex, shadowableLightIndex);
-    KISAK_NULLSUB();
-    R_AddAllSceneEntSurfacesSpotShadow(viewInfo, spotShadowIndex, shadowableLightIndex);
+    {
+        PROF_SCOPED("static model surfaces");
+        R_AddAllStaticModelSurfacesSpotShadow(spotShadowIndex, shadowableLightIndex);
+    }
+    {
+        PROF_SCOPED("scene ent surfaces");
+        R_AddAllSceneEntSurfacesSpotShadow(viewInfo, spotShadowIndex, shadowableLightIndex);
+    }
 }
 
 void __cdecl R_EmitSpotShadowMapSurfs(GfxViewInfo *viewInfo)

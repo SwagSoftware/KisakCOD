@@ -1580,18 +1580,10 @@ void __cdecl R_GenerateSortedDrawSurfs(
     SceneEntCmd sceneEntCmd; // [esp+170h] [ebp-8h] BYREF
     int visibleLightCount; // [esp+174h] [ebp-4h]
 
-    if (frontEndDataOut->viewInfoCount != rg.viewInfoCount)
-        MyAssertHandler(".\\r_scene.cpp", 1783, 0, "%s", "frontEndDataOut->viewInfoCount == rg.viewInfoCount");
+    iassert(frontEndDataOut->viewInfoCount == rg.viewInfoCount);
     viewInfoIndex = rg.viewInfoCount++;
     frontEndDataOut->viewInfoCount = rg.viewInfoCount;
-    if ((unsigned int)viewInfoIndex >= 4)
-        MyAssertHandler(
-            ".\\r_scene.cpp",
-            1789,
-            1,
-            "viewInfoIndex doesn't index GFX_MAX_CLIENT_VIEWS\n\t%i not in [0, %i)",
-            viewInfoIndex,
-            4);
+    bcassert(viewInfoIndex, GFX_MAX_CLIENT_VIEWS);
     frontEndDataOut->viewInfoIndex = viewInfoIndex;
     viewInfo = &frontEndDataOut->viewInfo[viewInfoIndex];
     dynamicShadowType = (ShadowType)R_DynamicShadowType();
@@ -1601,41 +1593,37 @@ void __cdecl R_GenerateSortedDrawSurfs(
         rg.sunShadowmapScale = sm_sunShadowScale->current.value;
         bestDen = 1;
         bestNum = 1;
-        bestError = 1.0;
+        bestError = 1.0f;
+
         for (den = 1; den <= 10; ++den)
         {
-            v17 = (double)den * rg.sunShadowmapScale + 0.5;
-            v9 = floor(v17);
-            num = (__int64)v9;
-            v16 = (double)num / (double)den - rg.sunShadowmapScale;
-            v8 = fabs(v16);
-            error = v8;
-            if (bestError > (double)v8)
+            num = (unsigned int)floor((float)den * rg.sunShadowmapScale + 0.5f);
+            error = fabs((float)num / (float)den - rg.sunShadowmapScale);
+            if (error < bestError)
             {
                 bestError = error;
                 bestDen = den;
                 bestNum = num;
             }
         }
-        rg.sunShadowmapScale = (double)bestNum / (double)bestDen;
+
+        rg.sunShadowmapScale = (float)bestNum / (float)bestDen;
         rg.sunShadowmapScaleNum = (float)bestNum;
-        v15 = rg.sunShadowmapScale * 1024.0;
-        v7 = ceil(v15);
-        rg.sunShadowSize = (__int64)v7;
-        rg.sunShadowPartitionRatio = 4.0 / rg.sunShadowmapScale;
+        rg.sunShadowSize = (unsigned int)ceilf(rg.sunShadowmapScale * 1024.0f);
+        rg.sunShadowPartitionRatio = 4.0f / rg.sunShadowmapScale;
     }
     else
     {
         rg.sunShadowSize = 1024;
-        rg.sunShadowmapScale = 1.0;
-        rg.sunShadowmapScaleNum = 1.0;
-        rg.sunShadowPartitionRatio = 4.0;
+        rg.sunShadowmapScale = 1.0f;
+        rg.sunShadowmapScaleNum = 1.0f;
+        rg.sunShadowPartitionRatio = 4.0f;
     }
     rg.drawSunShadow = 0;
-    if (!rg.lodParms.valid)
-        MyAssertHandler(".\\r_scene.cpp", 1843, 0, "%s", "rg.lodParms.valid");
-    if (!rg.correctedLodParms.valid)
-        MyAssertHandler(".\\r_scene.cpp", 1844, 0, "%s", "rg.correctedLodParms.valid");
+
+    iassert(rg.lodParms.valid);
+    iassert(rg.correctedLodParms.valid);
+
     memcpy(&viewInfo->input, &gfxCmdBufInput, sizeof(viewInfo->input));
     viewInfo->input.data = frontEndDataOut;
     viewInfo->sceneDef = scene.def;
@@ -1674,13 +1662,11 @@ void __cdecl R_GenerateSortedDrawSurfs(
     cameraCellIndex = R_CellForPoint(viewParmsDpvs->origin);
     KISAK_NULLSUB();
     R_FilterEntitiesIntoCells(cameraCellIndex);
-    KISAK_NULLSUB();
     {
         PROF_SCOPED("R_AddWorldSurfacesDpvs");
         R_AddWorldSurfacesDpvs(viewParmsDpvs, cameraCellIndex);
     }
     R_BeginAllStaticModelLighting();
-    KISAK_NULLSUB();
     {
         PROF_SCOPED("WaitFX");
         R_WaitWorkerCmdsOfType(0);
@@ -1690,47 +1676,67 @@ void __cdecl R_GenerateSortedDrawSurfs(
     if (usePreTess)
         R_BeginPreTess();
     R_WaitWorkerCmdsOfType(3);
-    KISAK_NULLSUB();
-    if (gfxDrawMethod.drawScene == GFX_DRAW_SCENE_STANDARD)
     {
-        R_AddAllBspDrawSurfacesCamera();
-        if (!sm_sunEnable->current.enabled && rgp.world->sunPrimaryLightIndex)
-            Com_BitClearAssert(scene.shadowableLightIsUsed, rgp.world->sunPrimaryLightIndex, 128);
-        Com_Memset(frontEndDataOut->shadowableLightHasShadowMap, 0, 32);
-        if (R_GetAllowShadowMaps())
-            R_ChooseShadowedLights(viewInfo);
-        R_UpdateDrawMethod(frontEndDataOut, viewInfo);
-        if (dynamicShadowType == SHADOW_MAP
-            && Com_BitCheckAssert(frontEndDataOut->shadowableLightHasShadowMap, rgp.world->sunPrimaryLightIndex, 32))
+        PROF_SCOPED("bsp surfaces");
+        if (gfxDrawMethod.drawScene == GFX_DRAW_SCENE_STANDARD)
         {
-            rg.drawSunShadow = 1;
-            R_SetupSunShadowMaps(viewParmsDpvs, &viewInfo->sunShadow);
-            R_SetSunShadowConstants(&viewInfo->input, &viewInfo->sunShadow.sunProj);
-            R_SunShadowMaps();
+            R_AddAllBspDrawSurfacesCamera();
+            if (!sm_sunEnable->current.enabled && rgp.world->sunPrimaryLightIndex)
+                Com_BitClearAssert(scene.shadowableLightIsUsed, rgp.world->sunPrimaryLightIndex, 128);
+            Com_Memset(frontEndDataOut->shadowableLightHasShadowMap, 0, 32);
+            if (R_GetAllowShadowMaps())
+                R_ChooseShadowedLights(viewInfo);
+            R_UpdateDrawMethod(frontEndDataOut, viewInfo);
+            if (dynamicShadowType == SHADOW_MAP
+                && Com_BitCheckAssert(frontEndDataOut->shadowableLightHasShadowMap, rgp.world->sunPrimaryLightIndex, 32))
+            {
+                rg.drawSunShadow = 1;
+                R_SetupSunShadowMaps(viewParmsDpvs, &viewInfo->sunShadow);
+                R_SetSunShadowConstants(&viewInfo->input, &viewInfo->sunShadow.sunProj);
+                R_SunShadowMaps();
+            }
         }
+        else
+        {
+            R_AddAllBspDrawSurfacesCameraNonlit(rgp.world->dpvs.litSurfsBegin, rgp.world->dpvs.litSurfsEnd, 0);
+            R_AddAllBspDrawSurfacesCameraNonlit(rgp.world->dpvs.decalSurfsBegin, rgp.world->dpvs.decalSurfsEnd, 3u);
+        }
+        R_AddAllBspDrawSurfacesCameraNonlit(rgp.world->dpvs.emissiveSurfsBegin, rgp.world->dpvs.emissiveSurfsEnd, 9u);
     }
-    else
-    {
-        R_AddAllBspDrawSurfacesCameraNonlit(rgp.world->dpvs.litSurfsBegin, rgp.world->dpvs.litSurfsEnd, 0);
-        R_AddAllBspDrawSurfacesCameraNonlit(rgp.world->dpvs.decalSurfsBegin, rgp.world->dpvs.decalSurfsEnd, 3u);
-    }
-    R_AddAllBspDrawSurfacesCameraNonlit(rgp.world->dpvs.emissiveSurfsBegin, rgp.world->dpvs.emissiveSurfsEnd, 9u);
     R_AddAllStaticModelSurfacesCamera();
-    KISAK_NULLSUB();
-    DynEntPieces_AddDrawSurfs();
-    R_WaitWorkerCmdsOfType(5);
-    R_WaitWorkerCmdsOfType(6);
-    KISAK_NULLSUB();
-    R_DrawAllDynEnt(viewInfo);
+    {
+        PROF_SCOPED("DynEntPieces_AddDrawSurfs");
+        DynEntPieces_AddDrawSurfs();
+    }
+    {
+        PROF_SCOPED("wait for r_dpvs_dynmodel");
+        R_WaitWorkerCmdsOfType(5);
+    }
+    {
+        PROF_SCOPED("wait for r_dpvs_dynbrush");
+        R_WaitWorkerCmdsOfType(6);
+    }
+    {
+        PROF_SCOPED("R_DrawAllDynEnt");
+        R_DrawAllDynEnt(viewInfo);
+    }
+    
     if (gfxDrawMethod.drawScene == GFX_DRAW_SCENE_STANDARD
         && dynamicShadowType == SHADOW_MAP
         && Com_BitCheckAssert(frontEndDataOut->shadowableLightHasShadowMap, rgp.world->sunPrimaryLightIndex, 32))
     {
-        R_WaitWorkerCmdsOfType(3);
-        KISAK_NULLSUB();
-        R_AddAllBspDrawSurfacesSunShadow();
-        KISAK_NULLSUB();
-        R_AddAllStaticModelSurfacesSunShadow();
+        {
+            PROF_SCOPED("wait for more r_dpvs_static");
+            R_WaitWorkerCmdsOfType(3);
+        }
+        {
+            PROF_SCOPED("R_AddAllBspDrawSurfacesSunShadow");
+            R_AddAllBspDrawSurfacesSunShadow();
+        }
+        {
+            PROF_SCOPED("R_AddAllStaticModelSurfacesSunShadow");
+            R_AddAllStaticModelSurfacesSunShadow();
+        }
     }
     KISAK_NULLSUB();
     {
@@ -1865,18 +1871,20 @@ void __cdecl R_GenerateSortedDrawSurfs(
     R_ShowCull();
 }
 
-bool g_allowShadowMaps; // KISAKTODO: value here?
+// LWSS: not sure why this variable was here, guess from initial development. (no xref's)
+//static bool g_allowShadowMaps = true;
 bool __cdecl R_GetAllowShadowMaps()
 {
-    return sm_enable->current.enabled && g_allowShadowMaps;
+    //return sm_enable->current.enabled && g_allowShadowMaps;
+    return sm_enable->current.enabled;
 }
 
-int __cdecl R_DynamicShadowType()
+ShadowType __cdecl R_DynamicShadowType()
 {
     if (R_GetAllowShadowMaps())
-        return 2;
+        return SHADOW_MAP;
     else
-        return sc_enable->current.enabled;
+        return sc_enable->current.enabled ? SHADOW_COOKIE : SHADOW_NONE;
 }
 
 void __cdecl R_SetDepthOfField(GfxViewInfo *viewInfo, const GfxSceneParms *sceneParms)

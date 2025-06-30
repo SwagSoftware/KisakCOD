@@ -45,7 +45,7 @@ void __cdecl R_GetSunAxes(float (*sunAxis)[3])
     (*sunAxis)[1] = -dir[1];
     (*sunAxis)[2] = -dir[2];
     v1 = (*sunAxis)[1] * (*sunAxis)[1] + (*sunAxis)[0] * (*sunAxis)[0];
-    if (v1 >= 0.1000000014901161)
+    if (v1 >= 0.1f)
     {
         (*sunAxis)[6] = 0.0;
         (*sunAxis)[7] = 0.0;
@@ -86,7 +86,6 @@ void __cdecl R_SunShadowMapBoundingPoly(
 
 void __cdecl R_SetupSunShadowMaps(const GfxViewParms *viewParms, GfxSunShadow *sunShadow)
 {
-    float *origin; // [esp+18h] [ebp-138h]
     float sunOrigin[3]; // [esp+50h] [ebp-100h] BYREF
     unsigned int planeCount; // [esp+5Ch] [ebp-F4h]
     const GfxSunShadowProjection *sunProj; // [esp+60h] [ebp-F0h]
@@ -94,7 +93,6 @@ void __cdecl R_SetupSunShadowMaps(const GfxViewParms *viewParms, GfxSunShadow *s
     float snappedViewOrgInClipSpace[2][2]; // [esp+68h] [ebp-E8h] BYREF
     float partitionFraction[4]; // [esp+78h] [ebp-D8h] BYREF
     float nearClip; // [esp+88h] [ebp-C8h] BYREF
-    int partitionIndex; // [esp+8Ch] [ebp-C4h]
     float boundingPolyClipSpacePlanes[9][4]; // [esp+90h] [ebp-C0h] BYREF
     float sunAxis[3][3]; // [esp+120h] [ebp-30h] BYREF
     float farClip; // [esp+144h] [ebp-Ch] BYREF
@@ -112,18 +110,19 @@ void __cdecl R_SetupSunShadowMaps(const GfxViewParms *viewParms, GfxSunShadow *s
         R_GetSceneExtentsAlongDir(sunOrigin, sunAxis[0], &nearClip, &farClip);
     }
     sunProj = &sunShadow->sunProj;
-    for (partitionIndex = 0; partitionIndex < 2; ++partitionIndex)
+    for (int partitionIndex = 0; partitionIndex < 2; ++partitionIndex)
     {
         partition = &sunShadow->partition[partitionIndex];
         shadowViewParms = &partition->shadowViewParms;
-        memset((unsigned __int8 *)partition, 0xB0u, 0x140u);
-        origin = shadowViewParms->origin;
+        memset(shadowViewParms, 0xB0u, sizeof(GfxViewParms));
+
         shadowViewParms->origin[0] = -sunAxis[0][0];
-        origin[1] = -sunAxis[0][1];
-        origin[2] = -sunAxis[0][2];
-        shadowViewParms->origin[3] = 0.0;
+        shadowViewParms->origin[1] = -sunAxis[0][1];
+        shadowViewParms->origin[2] = -sunAxis[0][2];
+        shadowViewParms->origin[3] = 0.0f;
+
         AxisCopy(sunAxis, shadowViewParms->axis);
-        memcpy(shadowViewParms, sunProj, 0x40u);
+        memcpy(&shadowViewParms->viewMatrix, sunProj->viewMatrix, sizeof(GfxMatrix));
         R_SunShadowMapProjectionMatrix(
             snappedViewOrgInClipSpace[partitionIndex],
             shadowSampleSize,
@@ -808,14 +807,10 @@ void __cdecl R_SunShadowMaps()
 
     iassert(rgp.world);
 
-    //KISAK_NULLSUB();
-
     PROF_SCOPED("R_SunShadowMaps");
 
     oldViewIndex = R_SetVisData(0);
-    shadowGlob.defaultShadowCasterTechnique = Material_GetTechnique(
-        rgp.depthPrepassMaterial,
-        gfxMetrics.shadowmapBuildTechType);
+    shadowGlob.defaultShadowCasterTechnique = Material_GetTechnique(rgp.depthPrepassMaterial, gfxMetrics.shadowmapBuildTechType);
 
     for (partitionIndex = 0; partitionIndex < 2; ++partitionIndex)
     {
@@ -842,8 +837,6 @@ void __cdecl R_MergeAndEmitSunShadowMapsSurfs(GfxViewInfo *viewInfo)
 
     PROF_SCOPED("EmitSunShadow");
 
-    //KISAK_NULLSUB();
-
     iassert(frontEndDataOut->sunLight.type == GFX_LIGHT_TYPE_DIR);
 
     for (partitionIndex = 0; partitionIndex < 2; ++partitionIndex)
@@ -857,8 +850,7 @@ void __cdecl R_MergeAndEmitSunShadowMapsSurfs(GfxViewInfo *viewInfo)
         info->viewOrigin[1] = dir[1];
         info->viewOrigin[2] = dir[2];
         info->viewOrigin[3] = 0.0;
-        if (sunShadow->partition[partitionIndex].info.cameraView)
-            MyAssertHandler(".\\r_sunshadow.cpp", 723, 0, "%s", "!info->cameraView");
+        iassert(!info->cameraView);
         firstDrawSurf = frontEndDataOut->drawSurfCount;
         R_MergeAndEmitDrawSurfLists(3 * partitionIndex + 15, 1u);
         R_MergeAndEmitDrawSurfLists(3 * partitionIndex + 16, 2u);

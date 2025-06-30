@@ -1802,8 +1802,6 @@ void __cdecl CG_LoopFx(int localClientNum, centity_s *cent)
     }
 }
 
-unsigned int Com_GetPrimaryLightCount();
-
 void __cdecl CG_PrimaryLight(int localClientNum, centity_s *cent)
 {
     const char *v2; // eax
