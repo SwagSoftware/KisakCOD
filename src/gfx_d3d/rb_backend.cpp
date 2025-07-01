@@ -62,15 +62,8 @@ void(__cdecl *const RB_RenderCommandTable[22])(GfxRenderCommandExecState *) =
   &RB_ProjectionSetCmd
 }; // idb
 
-//
-// struct GfxBackEndData const *const backEndData 85b28f60     gfx_d3d : rb_backend.obj
-// int marker_rb_backend    85b28f64     gfx_d3d : rb_backend.obj
-// struct materialCommands_t tess 85b28f70     gfx_d3d : rb_backend.obj
-// struct r_backEndGlobals_t backEnd 85b3a790     gfx_d3d : rb_backend.obj
-
 GfxBackEndData *backEndData;
-//GfxRenderTarget gfxRenderTargets[15];
-GfxRenderTarget gfxRenderTargets[17]; // LWSS: changed to 17 to please ASAN. May not be correct.
+GfxRenderTarget gfxRenderTargets[17]; // LWSS: changed to 17 to please ASAN.
 
 r_backEndGlobals_t backEnd;
 materialCommands_t tess;

@@ -534,7 +534,7 @@ void __cdecl CG_DrawTurretCrossHair(int localClientNum)
     {
         cgameGlob = CG_GetLocalClientGlobals(localClientNum);
 
-        iassert(cgameGlob->predictedPlayerState.viewlocked_entNum == 1023);
+        iassert(cgameGlob->predictedPlayerState.viewlocked_entNum != ENTITYNUM_NONE);
 
         cent = CG_GetEntity(localClientNum, cgameGlob->predictedPlayerState.viewlocked_entNum);
         iassert(cent->nextState.eType == ET_MG42);

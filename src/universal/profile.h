@@ -1443,6 +1443,7 @@ int __cdecl Profile_EndInternal(long double *duration);
 
 #define PROF_SCOPED(name) // Disable Profiling without Tracy
 #define ZoneText(str, len)
+#define ZoneTextF(fmt, ...)
 
 // LWSS: The profiler blocks were changed from the decomp to be Scoped blocks. This seems to be more accurate as well.
 // The old profiler isn't implemented now. You could re-implement it with some sort of RAII wrapper if you really wanted.

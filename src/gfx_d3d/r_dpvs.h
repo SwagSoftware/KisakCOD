@@ -292,6 +292,11 @@ int __cdecl R_CellForPoint(const GfxWorld *world, const float *origin);
 
 void __cdecl R_FreeHullPoints(GfxHullPointsPool *hullPoints);
 
+// LWSS: from blops (inlined in COD4)
+void __cdecl R_SetDpvsPlaneSides(DpvsPlane *plane);
+float __cdecl R_DpvsPlaneMinSignedDistToBox(const DpvsPlane *plane, float forward);
+float __cdecl R_DpvsPlaneMaxSignedDistToBox(const DpvsPlane *plane, float forward);
+
 
 
 // r_dpvs_entity

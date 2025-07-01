@@ -169,12 +169,10 @@ GfxImage *__cdecl Image_AllocProg(int imageProgType, unsigned __int8 category, u
     const char *name; // [esp+4h] [ebp-8h]
 
     image = &g_imageProgs[imageProgType];
-    if (!image)
-        MyAssertHandler(".\\r_image.cpp", 363, 1, "%s", "image");
+    iassert(image);
     name = g_imageProgNames[imageProgType];
     image->name = name;
-    if (!category)
-        MyAssertHandler(".\\r_image.cpp", 368, 0, "%s", "category != IMG_CATEGORY_UNKNOWN");
+    iassert(category != IMG_CATEGORY_UNKNOWN);
     image->category = category;
     image->semantic = semantic;
     image->track = 0;
@@ -229,10 +227,8 @@ void __cdecl Image_SetupRenderTarget(
     unsigned __int16 height,
     _D3DFORMAT imageFormat)
 {
-    if (!image)
-        MyAssertHandler(".\\r_image.cpp", 629, 0, "%s", "image");
-    if (image->semantic)
-        MyAssertHandler(".\\r_image.cpp", 630, 0, "%s", "image->semantic == TS_2D");
+    iassert(image);
+    iassert(image->semantic == TS_2D);
     Image_SetupAndLoad(image, width, height, 1, 131075, imageFormat);
 }
 
@@ -1609,5 +1605,108 @@ void __cdecl Image_UpdatePicmip(GfxImage *image)
         Image_GetPicmip(image, &picmip);
         if (image->picmip.platform[0] != picmip.platform[0])
             Image_Reload(image);
+    }
+}
+
+void __cdecl Image_Create2DTexture_PC(
+    GfxImage *image,
+    unsigned __int16 width,
+    unsigned __int16 height,
+    unsigned int mipmapCount,
+    int imageFlags,
+    _D3DFORMAT imageFormat)
+{
+    HRESULT v6; // eax
+    const char *v7; // eax
+    const char *v8; // eax
+    const char *v9; // eax
+    HRESULT hr; // [esp+0h] [ebp-Ch]
+    unsigned int usage; // [esp+4h] [ebp-8h]
+
+    if (!image)
+        MyAssertHandler(".\\r_image.cpp", 544, 0, "%s", "image");
+    if (image->texture.basemap)
+        MyAssertHandler(".\\r_image.cpp", 545, 0, "%s", "!image->texture.basemap");
+    image->width = width;
+    image->height = height;
+    image->depth = 1;
+    image->mapType = MAPTYPE_2D;
+    usage = Image_GetUsage(imageFlags, imageFormat);
+    if ((imageFlags & 0x40000) != 0)
+        v6 = dx.device->CreateTexture(
+            width,
+            height,
+            mipmapCount,
+            usage,
+            imageFormat,
+            D3DPOOL_SYSTEMMEM,
+            (IDirect3DTexture9 **)&image->texture,
+            0);
+    else
+        v6 = dx.device->CreateTexture(
+            width,
+            height,
+            mipmapCount,
+            usage,
+            imageFormat,
+            (_D3DPOOL)(usage == 0),
+            (IDirect3DTexture9 **)&image->texture,
+            0);
+    hr = v6;
+    if (v6 < 0)
+    {
+        v7 = R_ErrorDescription(v6);
+        Com_Error(
+            ERR_DROP,
+            "Create2DTexture( %s, %i, %i, %i, %i ) failed: %08x = %s",
+            image->name,
+            image->width,
+            image->height,
+            0,
+            imageFormat,
+            hr,
+            v7);
+    }
+    if (hr != -2005530520 && !image->texture.basemap)
+    {
+        v8 = R_ErrorDescription(hr);
+        v9 = va(
+            "DirectX succeeded without creating texture for %s: size %ix%i, type %08x, hr %08x = %s",
+            image->name,
+            image->width,
+            image->height,
+            imageFormat,
+            hr,
+            v8);
+        MyAssertHandler(".\\r_image.cpp", 562, 0, "%s\n\t%s", "hr == D3DERR_DEVICELOST || image->texture.map", v9);
+    }
+}
+
+void __cdecl Image_Setup(GfxImage *image, int width, int height, int depth, int imageFlags, _D3DFORMAT imageFormat)
+{
+    unsigned int mipmapCount; // [esp+0h] [ebp-4h]
+
+    iassert(image);
+    image->width = width;
+    image->height = height;
+    image->depth = depth;
+    iassert(!image->cardMemory.platform[PICMIP_PLATFORM_USED]);
+    mipmapCount = (imageFlags & IMG_FLAG_NOMIPMAPS) != 0;
+    if (r_loadForRenderer->current.enabled)
+    {
+        if ((imageFlags & IMG_FLAG_CUBEMAP) != 0)
+        {
+            Image_CreateCubeTexture_PC(image, image->width, mipmapCount, imageFormat);
+        }
+        else if ((imageFlags & IMG_FLAG_VOLMAP) != 0)
+        {
+            Image_Create3DTexture_PC(image, image->width, image->height, image->depth, mipmapCount, imageFlags, imageFormat);
+        }
+        else
+        {
+            Image_Create2DTexture_PC(image, image->width, image->height, mipmapCount, imageFlags, imageFormat);
+        }
+        Image_TrackTexture(image, imageFlags, imageFormat, width, height, depth);
+        iassert(!image->delayLoadPixels);
     }
 }

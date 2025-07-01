@@ -1627,7 +1627,7 @@ void __cdecl R_GenerateSortedDrawSurfs(
     memcpy(&viewInfo->input, &gfxCmdBufInput, sizeof(viewInfo->input));
     viewInfo->input.data = frontEndDataOut;
     viewInfo->sceneDef = scene.def;
-    memcpy((void *)viewInfo, viewParmsDraw, 0x140u);
+    memcpy(&viewInfo->viewParms, viewParmsDraw, sizeof(viewInfo->viewParms));
     viewInfo->sceneViewport = sceneParms->sceneViewport;
     viewInfo->displayViewport = sceneParms->displayViewport;
     viewInfo->scissorViewport = sceneParms->scissorViewport;
@@ -1687,8 +1687,7 @@ void __cdecl R_GenerateSortedDrawSurfs(
             if (R_GetAllowShadowMaps())
                 R_ChooseShadowedLights(viewInfo);
             R_UpdateDrawMethod(frontEndDataOut, viewInfo);
-            if (dynamicShadowType == SHADOW_MAP
-                && Com_BitCheckAssert(frontEndDataOut->shadowableLightHasShadowMap, rgp.world->sunPrimaryLightIndex, 32))
+            if (dynamicShadowType == SHADOW_MAP && Com_BitCheckAssert(frontEndDataOut->shadowableLightHasShadowMap, rgp.world->sunPrimaryLightIndex, 32))
             {
                 rg.drawSunShadow = 1;
                 R_SetupSunShadowMaps(viewParmsDpvs, &viewInfo->sunShadow);

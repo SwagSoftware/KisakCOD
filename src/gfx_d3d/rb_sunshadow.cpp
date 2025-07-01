@@ -9,6 +9,7 @@
 #include "rb_shade.h"
 #include "r_sunshadow.h"
 #include "rb_postfx.h"
+#include <universal/profile.h>
 
 GfxPointVertex g_overlayPoints[36];
 
@@ -20,40 +21,40 @@ void __cdecl TRACK_rb_sunshadow()
 void __cdecl RB_SunShadowMaps(const GfxBackEndData *data, const GfxViewInfo *viewInfo)
 {
     GfxCmdBuf cmdBuf; // [esp+0h] [ebp-8h] BYREF
-    int partitionIndex; // [esp+4h] [ebp-4h]
     int savedregs; // [esp+8h] [ebp+0h] BYREF
 
     if (pixelCostMode == GFX_PIXEL_COST_MODE_OFF)
     {
-        if (!data)
-            MyAssertHandler(".\\rb_sunshadow.cpp", 44, 0, "%s", "data");
+        iassert(data);
+
         R_InitContext(data, &cmdBuf);
-        KISAK_NULLSUB();
-        for (partitionIndex = 0; partitionIndex < 2; ++partitionIndex)
+
+        PROF_SCOPED("Sun Shadow Maps");
+
+        for (int partitionIndex = 0; partitionIndex < 2; ++partitionIndex)
+        {
+            ZoneTextF("Sun Shadow Map %d", partitionIndex);
             R_DrawSunShadowMap(viewInfo, partitionIndex, &cmdBuf);
+        }
     }
 }
 
 void __cdecl RB_GetShadowOverlayDepthBounds(float *nearDepth, float *farDepth)
 {
-    float v2; // [esp+0h] [ebp-8h]
-    float v3; // [esp+4h] [ebp-4h]
-
-    *nearDepth = sm_showOverlayDepthBounds->current.value;
+    *nearDepth = sm_showOverlayDepthBounds->current.vector[0];
     *farDepth = sm_showOverlayDepthBounds->current.vector[1];
-    v3 = *farDepth - *nearDepth;
-    v2 = fabs(v3);
-    if (v2 < 0.009999999776482582)
+
+    if (fabs(*farDepth - *nearDepth) < 0.01f)
     {
-        if (*farDepth <= (double)*nearDepth)
+        if (*farDepth <= *nearDepth)
         {
-            *farDepth = (*nearDepth + *farDepth) * 0.5 - 0.004999999888241291;
-            *nearDepth = *farDepth + 0.009999999776482582;
+            *farDepth = (*nearDepth + *farDepth) * 0.5 - 0.005f;
+            *nearDepth = *farDepth + 0.01f;
         }
         else
         {
-            *nearDepth = (*nearDepth + *farDepth) * 0.5 - 0.004999999888241291;
-            *farDepth = *nearDepth + 0.009999999776482582;
+            *nearDepth = (*nearDepth + *farDepth) * 0.5 - 0.005f;
+            *farDepth = *nearDepth + 0.01f;
         }
     }
 }
@@ -79,23 +80,22 @@ void __cdecl RB_DrawSunShadowOverlay()
     const GfxSunShadowPartition *partition; // [esp+E4h] [ebp-8h]
     float w; // [esp+E8h] [ebp-4h]
 
-    if (!backEndData->viewInfoCount)
-        MyAssertHandler(".\\rb_sunshadow.cpp", 163, 0, "%s", "backEndData->viewInfoCount > 0");
+    iassert(backEndData->viewInfoCount > 0);
     viewInfo = backEndData->viewInfo;
     sunShadow = &viewInfo->sunShadow;
-    x0 = 4.0;
-    y0 = 4.0;
-    h = (double)vidConfig.displayHeight * 0.5;
+    x0 = 4.0f;
+    y0 = 4.0f;
+    h = (float)vidConfig.displayHeight * 0.5f;
     w = h;
     RB_SetSunShadowOverlayScaleAndBias();
     gfxCmdBufSourceState.input.codeImageSamplerStates[9] = 97;
-    R_SetCodeImageTexture(&gfxCmdBufSourceState, 9u, gfxRenderTargets[13].image);
+    R_SetCodeImageTexture(&gfxCmdBufSourceState, 9, gfxRenderTargets[13].image);
     for (partitionIndex = 0; partitionIndex < 2; ++partitionIndex)
     {
-        t0 = (double)partitionIndex * 0.5;
-        t1 = t0 + 0.5;
-        v0 = (double)partitionIndex * w + x0;
-        RB_DrawStretchPic(rgp.shadowOverlayMaterial, v0, y0, w, h, 0.0, t0, 1.0, t1, 0xFFFFFFFF, GFX_PRIM_STATS_HUD);
+        t0 = (float)partitionIndex * 0.5f;
+        t1 = t0 + 0.5f;
+        v0 = (float)partitionIndex * w + x0;
+        RB_DrawStretchPic(rgp.shadowOverlayMaterial, v0, y0, w, h, 0.0f, t0, 1.0f, t1, 0xFFFFFFFF, GFX_PRIM_STATS_HUD);
     }
     RB_EndTessSurface();
     gfxCmdBufSourceState.input.codeImageSamplerStates[9] = 98;
@@ -109,7 +109,7 @@ void __cdecl RB_DrawSunShadowOverlay()
         R_SunShadowMapBoundingPoly(
             &sunShadow->partition[partitionIndex].boundingPoly,
             shadowSampleSize,
-            clipSpacePoints,
+            &clipSpacePoints,
             pointIsNear);
         for (pointIndexSrc = 0; pointIndexSrc < partition->boundingPoly.pointCount; ++pointIndexSrc)
         {
@@ -142,9 +142,9 @@ void __cdecl RB_DrawSunShadowOverlay()
 
 void __cdecl RB_SunShadowOverlayPoint(const float *xy, float x0, float y0, float w, float h, float *point)
 {
-    *point = (*xy * 0.5 + 0.5) * w + x0;
-    point[1] = (0.5 - xy[1] * 0.5) * h + y0;
-    point[2] = 0.0;
+    point[0] = ((xy[0] * 0.5f) + 0.5f) * w + x0;
+    point[1] = (0.5f - (xy[1] * 0.5f)) * h + y0;
+    point[2] = 0.0f;
 }
 
 void RB_SetSunShadowOverlayScaleAndBias()
@@ -155,8 +155,8 @@ void RB_SetSunShadowOverlayScaleAndBias()
     float farDepth; // [esp+24h] [ebp-4h] BYREF
 
     RB_GetShadowOverlayDepthBounds(&nearDepth, &farDepth);
-    scale = 1.0 / (farDepth - nearDepth);
+    scale = 1.0f / (farDepth - nearDepth);
     bias = -scale * nearDepth;
-    R_UpdateCodeConstant(&gfxCmdBufSourceState, 0x15u, scale, bias, 1.0, 1.0);
+    R_UpdateCodeConstant(&gfxCmdBufSourceState, 0x15u, scale, bias, 1.0f, 1.0f);
 }
 

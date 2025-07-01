@@ -11,7 +11,9 @@ struct ShadowGlobals // sizeof=0x4
     const MaterialTechnique *defaultShadowCasterTechnique; // ...
 };
 
-const float g_shadowFrustumBound[5][2] =
+static ShadowGlobals shadowGlob;
+
+static const float g_shadowFrustumBound[5][2] =
 {
     { -1.0f, -1.0f },
     { -1.0f, 1.0f },
@@ -20,7 +22,7 @@ const float g_shadowFrustumBound[5][2] =
     {-1.0f, -1.0f }
 };
 
-const float g_clipSpacePoints[4][3] =
+static const float g_clipSpacePoints[4][3] =
 {
     { -1.0f, -1.0f, 0.0f },
     { 1.0f, -1.0f, 0.0f },
@@ -28,60 +30,104 @@ const float g_clipSpacePoints[4][3] =
     {-1.0f, 1.0f, 0.0f }
 };
 
-
-ShadowGlobals shadowGlob;
-
-void __cdecl R_GetSunAxes(float (*sunAxis)[3])
+// LWSS: separate from the one in r_shadowcookie
+static void __cdecl R_GetSunAxes(float (*sunAxis)[3][3])
 {
     float v1; // [esp+0h] [ebp-1Ch]
     float *dir; // [esp+18h] [ebp-4h]
 
-    if (!frontEndDataOut)
-        MyAssertHandler(".\\r_shadowcookie.cpp", 62, 0, "%s", "frontEndDataOut");
-    if (frontEndDataOut->sunLight.type != 1)
-        MyAssertHandler(".\\r_shadowcookie.cpp", 63, 0, "%s", "frontEndDataOut->sunLight.type == GFX_LIGHT_TYPE_DIR");
+    iassert(frontEndDataOut);
+    iassert(frontEndDataOut->sunLight.type == GFX_LIGHT_TYPE_DIR);
+
     dir = frontEndDataOut->sunLight.dir;
-    (*sunAxis)[0] = -frontEndDataOut->sunLight.dir[0];
-    (*sunAxis)[1] = -dir[1];
-    (*sunAxis)[2] = -dir[2];
-    v1 = (*sunAxis)[1] * (*sunAxis)[1] + (*sunAxis)[0] * (*sunAxis)[0];
+    (*sunAxis)[0][0] = -frontEndDataOut->sunLight.dir[0];
+    (*sunAxis)[0][1] = -dir[1];
+    (*sunAxis)[0][2] = -dir[2];
+    v1 = (*sunAxis)[0][1] * (*sunAxis)[0][1] + (*sunAxis)[0][0] * (*sunAxis)[0][0];
     if (v1 >= 0.1f)
     {
-        (*sunAxis)[6] = 0.0;
-        (*sunAxis)[7] = 0.0;
-        (*sunAxis)[8] = 1.0;
+        (*sunAxis)[2][0] = 0.0f;
+        (*sunAxis)[2][1] = 0.0f;
+        (*sunAxis)[2][2] = 1.0f;
     }
     else
     {
-        (*sunAxis)[6] = 1.0;
-        (*sunAxis)[7] = 0.0;
-        (*sunAxis)[8] = 0.0;
+        (*sunAxis)[2][0] = 1.0f;
+        (*sunAxis)[2][1] = 0.0f;
+        (*sunAxis)[2][2] = 0.0f;
     }
-    Vec3Cross(&(*sunAxis)[6], (const float *)sunAxis, &(*sunAxis)[3]);
-    Vec3Normalize(&(*sunAxis)[3]);
-    Vec3Cross((const float *)sunAxis, &(*sunAxis)[3], &(*sunAxis)[6]);
+    Vec3Cross((*sunAxis)[2], (const float *)sunAxis, (*sunAxis)[1]);
+    Vec3Normalize((*sunAxis)[1]);
+    Vec3Cross((const float *)sunAxis, (*sunAxis)[1], (*sunAxis)[2]);
 }
 
 void __cdecl R_SunShadowMapBoundingPoly(
     const GfxSunShadowBoundingPoly *boundingPoly,
     float sampleSize,
-    float (*polyInClipSpace)[2],
+    float (*polyInClipSpace)[9][2],
     int *pointIsNear)
 {
-    float v4; // [esp+Ch] [ebp-10h]
-    float viewOrgOffset; // [esp+10h] [ebp-Ch]
-    float viewOrgOffset_4; // [esp+14h] [ebp-8h]
+    float viewOrgOffset[2]; // [esp+10h] [ebp-Ch]
     int pointIndex; // [esp+18h] [ebp-4h]
 
-    v4 = 2.0 / (sampleSize * 1024.0);
-    viewOrgOffset = v4 * boundingPoly->snapDelta[0];
-    viewOrgOffset_4 = v4 * boundingPoly->snapDelta[1];
+    viewOrgOffset[0] = 2.0f / (sampleSize * 1024.0f) * boundingPoly->snapDelta[0];
+    viewOrgOffset[1] = 2.0f / (sampleSize * 1024.0f) * boundingPoly->snapDelta[1];
+
     for (pointIndex = 0; pointIndex < boundingPoly->pointCount; ++pointIndex)
     {
-        (*polyInClipSpace)[2 * pointIndex] = boundingPoly->points[pointIndex][0] + viewOrgOffset;
-        (*polyInClipSpace)[2 * pointIndex + 1] = boundingPoly->points[pointIndex][1] + viewOrgOffset_4;
+        (*polyInClipSpace)[pointIndex][0] = boundingPoly->points[pointIndex][0] + viewOrgOffset[0];
+        (*polyInClipSpace)[pointIndex][1] = boundingPoly->points[pointIndex][1] + viewOrgOffset[1];
         pointIsNear[pointIndex] = boundingPoly->pointIsNear[pointIndex];
     }
+}
+
+static unsigned int __cdecl R_SunShadowMapClipSpaceClipPlanes(
+    const GfxSunShadowBoundingPoly *boundingPoly,
+    int partitionIndex,
+    float sampleSize,
+    float (*boundingPolyClipSpacePlanes)[9][4])
+{
+    float v5; // [esp+Ch] [ebp-A4h]
+    float v8; // [esp+18h] [ebp-98h]
+    unsigned int planeCount; // [esp+30h] [ebp-80h]
+    int pointIsNear[10]; // [esp+34h] [ebp-7Ch] BYREF
+    //float frustumBoundPolyInClipSpace[10][2]; // [esp+60h] [ebp-50h] BYREF
+    float frustumBoundPolyInClipSpace[9][2]; // [esp+60h] [ebp-50h] BYREF
+
+    R_SunShadowMapBoundingPoly(boundingPoly, sampleSize, &frustumBoundPolyInClipSpace, pointIsNear);
+    frustumBoundPolyInClipSpace[boundingPoly->pointCount][0] = frustumBoundPolyInClipSpace[0][0];
+    frustumBoundPolyInClipSpace[boundingPoly->pointCount][1] = frustumBoundPolyInClipSpace[0][1];
+    pointIsNear[boundingPoly->pointCount] = pointIsNear[0];
+    planeCount = 0;
+
+    for (int pointIndex = 0; pointIndex < boundingPoly->pointCount; ++pointIndex)
+    {
+        if (!partitionIndex || !rg.sunShadowFull || pointIsNear[pointIndex] || pointIsNear[pointIndex + 1])
+        {
+            (*boundingPolyClipSpacePlanes)[planeCount][0] = frustumBoundPolyInClipSpace[pointIndex + 1][1] - frustumBoundPolyInClipSpace[pointIndex][1];
+            (*boundingPolyClipSpacePlanes)[planeCount][1] = frustumBoundPolyInClipSpace[pointIndex][0] - frustumBoundPolyInClipSpace[pointIndex + 1][0];
+            (*boundingPolyClipSpacePlanes)[planeCount][2] = 0.0f;
+            v8 = (*boundingPolyClipSpacePlanes)[planeCount][1] * frustumBoundPolyInClipSpace[pointIndex][1] + (*boundingPolyClipSpacePlanes)[planeCount][0] * frustumBoundPolyInClipSpace[pointIndex][0];
+            (*boundingPolyClipSpacePlanes)[planeCount][3] = -v8;
+            planeCount++;
+        }
+    }
+    if (partitionIndex && rg.sunShadowFull)
+    {
+        iassert(planeCount <= 9 - 4);
+
+        for (int pointIndex = 0; pointIndex < 4; ++pointIndex)
+        {
+            (*boundingPolyClipSpacePlanes)[planeCount][0] = (g_shadowFrustumBound[pointIndex + 1][1] - g_shadowFrustumBound[pointIndex][1]) * rg.sunShadowmapScale;
+            (*boundingPolyClipSpacePlanes)[planeCount][1] = (g_shadowFrustumBound[pointIndex][0] - g_shadowFrustumBound[pointIndex + 1][0]) * rg.sunShadowmapScale;;
+            (*boundingPolyClipSpacePlanes)[planeCount][2] = 0.0;
+            v5 = (*boundingPolyClipSpacePlanes)[planeCount][1] * g_shadowFrustumBound[pointIndex][1] + (*boundingPolyClipSpacePlanes)[planeCount][0] * g_shadowFrustumBound[pointIndex][0];
+            (*boundingPolyClipSpacePlanes)[planeCount][3] = -v5 * rg.sunShadowmapScale;
+            planeCount++;
+        }
+    }
+
+    return planeCount;
 }
 
 void __cdecl R_SetupSunShadowMaps(const GfxViewParms *viewParms, GfxSunShadow *sunShadow)
@@ -99,8 +145,8 @@ void __cdecl R_SetupSunShadowMaps(const GfxViewParms *viewParms, GfxSunShadow *s
     GfxViewParms *shadowViewParms; // [esp+148h] [ebp-8h]
     GfxSunShadowPartition *partition; // [esp+14Ch] [ebp-4h]
 
-    R_GetSunAxes(sunAxis);
-    R_SetupSunShadowMapProjection(viewParms, sunAxis, sunShadow, snappedViewOrgInClipSpace, partitionFraction);
+    R_GetSunAxes(&sunAxis);
+    R_SetupSunShadowMapProjection(viewParms, &sunAxis, sunShadow, &snappedViewOrgInClipSpace, partitionFraction);
     sunOrigin[0] = -sunShadow->sunProj.viewMatrix[3][0];
     sunOrigin[1] = -sunShadow->sunProj.viewMatrix[3][1];
     sunOrigin[2] = -sunShadow->sunProj.viewMatrix[3][2];
@@ -133,7 +179,7 @@ void __cdecl R_SetupSunShadowMaps(const GfxViewParms *viewParms, GfxSunShadow *s
             &partition->boundingPoly,
             partitionIndex,
             shadowSampleSize,
-            boundingPolyClipSpacePlanes);
+            &boundingPolyClipSpacePlanes);
         R_SetupShadowSurfacesDpvs(shadowViewParms, boundingPolyClipSpacePlanes, planeCount, partitionIndex);
         shadowSampleSize = shadowSampleSize * rg.sunShadowPartitionRatio;
     }
@@ -147,92 +193,25 @@ void __cdecl R_SetupSunShadowMaps(const GfxViewParms *viewParms, GfxSunShadow *s
 
 void __cdecl R_GetSceneExtentsAlongDir(const float *origin, const float *forward, float *nearCap, float *farCap)
 {
-    float v4; // [esp+8h] [ebp-24h]
-    float nearPlane; // [esp+Ch] [ebp-20h]
-    float nearPlane_4; // [esp+10h] [ebp-1Ch]
-    float nearPlane_12; // [esp+18h] [ebp-14h]
-    unsigned __int8 nearPlane_16; // [esp+1Ch] [ebp-10h]
-    unsigned __int8 nearPlane_17; // [esp+1Dh] [ebp-Fh]
-    unsigned __int8 nearPlane_18; // [esp+1Eh] [ebp-Eh]
-    float distMin; // [esp+24h] [ebp-8h]
-    float distMax; // [esp+28h] [ebp-4h]
+    DpvsPlane nearPlane;
+    float distMin;
+    float distMax;
 
-    nearPlane = *forward;
-    nearPlane_4 = forward[1];
-    nearPlane_12 = -origin[2];
-    nearPlane_16 = SLODWORD(nearPlane) <= 0 ? 0 : 0xC;
-    nearPlane_17 = SLODWORD(nearPlane_4) <= 0 ? 4 : 16;
-    v4 = forward[2];
-    nearPlane_18 = SLODWORD(v4) <= 0 ? 8 : 20;
-    distMin = *(float *)((char *)&rgp.world->materialMemoryCount - nearPlane_18) * v4
-        + *(float *)((char *)&rgp.world->maxs[2] - nearPlane_17) * nearPlane_4
-        + *(float *)((char *)rgp.world->maxs - nearPlane_16) * nearPlane
-        + nearPlane_12;
-    distMax = *(float *)((char *)rgp.world->mins + nearPlane_18) * v4
-        + *(float *)((char *)rgp.world->mins + nearPlane_17) * nearPlane_4
-        + *(float *)((char *)rgp.world->mins + nearPlane_16) * nearPlane
-        + nearPlane_12;
-    if (distMax <= (double)distMin)
-        MyAssertHandler(".\\r_sunshadow.cpp", 61, 0, "%s", "distMin < distMax");
+    nearPlane.coeffs[0] = forward[0];
+    nearPlane.coeffs[1] = forward[1];
+    nearPlane.coeffs[3] = -origin[2];
+
+    R_SetDpvsPlaneSides(&nearPlane);
+
+    nearPlane.side[2] = SLODWORD(forward[2]) <= 0 ? 8 : 20; // LWSS: Fixup ^^
+
+    distMin = R_DpvsPlaneMinSignedDistToBox(&nearPlane, forward[2]);
+    distMax = R_DpvsPlaneMaxSignedDistToBox(&nearPlane, forward[2]);
+
+    iassert(distMin < distMax);
+    
     *nearCap = distMin;
     *farCap = distMax;
-}
-
-unsigned int __cdecl R_SunShadowMapClipSpaceClipPlanes(
-    const GfxSunShadowBoundingPoly *boundingPoly,
-    int partitionIndex,
-    float sampleSize,
-    float (*boundingPolyClipSpacePlanes)[4])
-{
-    float v5; // [esp+Ch] [ebp-A4h]
-    float v6; // [esp+10h] [ebp-A0h]
-    float v7; // [esp+14h] [ebp-9Ch]
-    float v8; // [esp+18h] [ebp-98h]
-    float *v9; // [esp+2Ch] [ebp-84h]
-    unsigned int planeCount; // [esp+30h] [ebp-80h]
-    int pointIsNear[10]; // [esp+34h] [ebp-7Ch] BYREF
-    int pointIndex; // [esp+5Ch] [ebp-54h]
-    float frustumBoundPolyInClipSpace[10][2]; // [esp+60h] [ebp-50h] BYREF
-
-    R_SunShadowMapBoundingPoly(boundingPoly, sampleSize, frustumBoundPolyInClipSpace, pointIsNear);
-    v9 = frustumBoundPolyInClipSpace[boundingPoly->pointCount];
-    *v9 = frustumBoundPolyInClipSpace[0][0];
-    v9[1] = frustumBoundPolyInClipSpace[0][1];
-    pointIsNear[boundingPoly->pointCount] = pointIsNear[0];
-    planeCount = 0;
-    for (pointIndex = 0; pointIndex < boundingPoly->pointCount; ++pointIndex)
-    {
-        if (!partitionIndex || !rg.sunShadowFull || pointIsNear[pointIndex] || pointIsNear[pointIndex + 1])
-        {
-            (*boundingPolyClipSpacePlanes)[4 * planeCount] = frustumBoundPolyInClipSpace[pointIndex + 1][1]
-                - frustumBoundPolyInClipSpace[pointIndex][1];
-            (*boundingPolyClipSpacePlanes)[4 * planeCount + 1] = frustumBoundPolyInClipSpace[pointIndex][0]
-                - frustumBoundPolyInClipSpace[pointIndex + 1][0];
-            (*boundingPolyClipSpacePlanes)[4 * planeCount + 2] = 0.0;
-            v8 = (*boundingPolyClipSpacePlanes)[4 * planeCount + 1] * frustumBoundPolyInClipSpace[pointIndex][1]
-                + (*boundingPolyClipSpacePlanes)[4 * planeCount] * frustumBoundPolyInClipSpace[pointIndex][0];
-            (*boundingPolyClipSpacePlanes)[4 * planeCount++ + 3] = -v8;
-        }
-    }
-    if (partitionIndex && rg.sunShadowFull)
-    {
-        if (planeCount > 5)
-            MyAssertHandler(".\\r_sunshadow.cpp", 186, 0, "%s\n\t(planeCount) = %i", "(planeCount <= 9 - 4)", planeCount);
-        for (pointIndex = 0; pointIndex < 4; ++pointIndex)
-        {
-            v7 = ((float)g_shadowFrustumBound[pointIndex + 1][1] - (float)g_shadowFrustumBound[pointIndex][1])
-                * rg.sunShadowmapScale;
-            (*boundingPolyClipSpacePlanes)[4 * planeCount] = v7;
-            v6 = ((float)g_shadowFrustumBound[pointIndex][0] - (float)g_shadowFrustumBound[pointIndex + 1][0])
-                * rg.sunShadowmapScale;
-            (*boundingPolyClipSpacePlanes)[4 * planeCount + 1] = v6;
-            (*boundingPolyClipSpacePlanes)[4 * planeCount + 2] = 0.0;
-            v5 = (*boundingPolyClipSpacePlanes)[4 * planeCount + 1] * (float)g_shadowFrustumBound[pointIndex][1]
-                + (*boundingPolyClipSpacePlanes)[4 * planeCount] * (float)g_shadowFrustumBound[pointIndex][0];
-            (*boundingPolyClipSpacePlanes)[4 * planeCount++ + 3] = -v5 * rg.sunShadowmapScale;
-        }
-    }
-    return planeCount;
 }
 
 void __cdecl R_SunShadowMapProjectionMatrix(
@@ -244,26 +223,32 @@ void __cdecl R_SunShadowMapProjectionMatrix(
 {
     float shadowSampleExtents; // [esp+0h] [ebp-4h]
 
-    if (shadowSampleSize == 0.0)
-        MyAssertHandler(".\\r_sunshadow.cpp", 230, 0, "%s", "shadowSampleSize");
-    memset((unsigned __int8 *)&shadowViewParms->projectionMatrix, 0, sizeof(shadowViewParms->projectionMatrix));
-    shadowSampleExtents = shadowSampleSize * 1024.0;
-    shadowViewParms->projectionMatrix.m[0][0] = 2.0 / shadowSampleExtents;
+    iassert(shadowSampleSize);
+
+    memset(&shadowViewParms->projectionMatrix, 0, sizeof(shadowViewParms->projectionMatrix));
+    shadowSampleExtents = shadowSampleSize * 1024.0f;
+    shadowViewParms->projectionMatrix.m[0][0] = 2.0f / shadowSampleExtents;
     shadowViewParms->projectionMatrix.m[3][0] = *snappedViewOrgInClipSpace;
     shadowViewParms->projectionMatrix.m[1][1] = shadowViewParms->projectionMatrix.m[0][0];
     shadowViewParms->projectionMatrix.m[3][1] = snappedViewOrgInClipSpace[1];
-    shadowViewParms->projectionMatrix.m[2][2] = 1.0 / (farClip - nearClip + 2.0);
+    shadowViewParms->projectionMatrix.m[2][2] = 1.0f / (farClip - nearClip + 2.0f);
     shadowViewParms->projectionMatrix.m[3][2] = -(nearClip - 1.0) * shadowViewParms->projectionMatrix.m[2][2];
-    shadowViewParms->projectionMatrix.m[3][3] = 1.0;
+    shadowViewParms->projectionMatrix.m[3][3] = 1.0f;
     shadowViewParms->depthHackNearClip = shadowViewParms->projectionMatrix.m[3][2];
     R_SetupViewProjectionMatrices(shadowViewParms);
 }
 
+
+static void __cdecl R_GetFrustumNearClipPoints(const GfxMatrix *invViewProjMtx, float (*frustumPoints)[4][3])
+{
+    R_ClipSpaceToWorldSpace(invViewProjMtx, &g_clipSpacePoints, 4, frustumPoints);
+}
+
 void __cdecl R_SetupSunShadowMapProjection(
     const GfxViewParms *viewParms,
-    const float (*sunAxis)[3],
+    const float (*sunAxis)[3][3],
     GfxSunShadow *sunShadow,
-    float (*snappedViewOrgInClipSpace)[2],
+    float (*snappedViewOrgInClipSpace)[2][2],
     float *partitionFraction)
 {
     double v5; // st7
@@ -282,7 +267,6 @@ void __cdecl R_SetupSunShadowMapProjection(
     float v18; // [esp+C4h] [ebp-1F0h]
     float v19; // [esp+C8h] [ebp-1ECh]
     float v20; // [esp+CCh] [ebp-1E8h]
-    float v21; // [esp+D0h] [ebp-1E4h]
     float *shadowmapScale; // [esp+D4h] [ebp-1E0h]
     float v23; // [esp+D8h] [ebp-1DCh]
     float v24; // [esp+DCh] [ebp-1D8h]
@@ -325,22 +309,20 @@ void __cdecl R_SetupSunShadowMapProjection(
     float viewOrgInPixels[2][2]; // [esp+29Ch] [ebp-18h] BYREF
     float snappedViewOrgInSunProj[2]; // [esp+2ACh] [ebp-8h] BYREF
 
-    viewOrgInSunProj[0] = -Vec3Dot(viewParms->origin, &(*sunAxis)[3]);
-    viewOrgInSunProj[1] = Vec3Dot(viewParms->origin, &(*sunAxis)[6]);
+    viewOrgInSunProj[0] = -Vec3Dot(viewParms->origin, (*sunAxis)[1]);
+    viewOrgInSunProj[1] = Vec3Dot(viewParms->origin, (*sunAxis)[2]);
     minsInSunProj[0][0] = FLT_MAX;
     minsInSunProj[0][1] = FLT_MAX;
     maxsInSunProj[0][0] = -FLT_MAX;
     maxsInSunProj[0][1] = -FLT_MAX;
-    R_GetFrustumNearClipPoints(&viewParms->inverseViewProjectionMatrix, frustumPoints);
+    R_GetFrustumNearClipPoints(&viewParms->inverseViewProjectionMatrix, &frustumPoints);
     for (pointIndex = 0; pointIndex < 4; ++pointIndex)
     {
         frustumPoint[0] = frustumPoints[pointIndex][0];
         frustumPoint[1] = frustumPoints[pointIndex][1];
         frustumPoint[2] = frustumPoints[pointIndex][2];
-        v5 = Vec3Dot(frustumPoints[pointIndex], &(*sunAxis)[3]);
-        frustumPointsInSunProj[0][pointIndex][0] = -v5;
-        v6 = Vec3Dot(frustumPoints[pointIndex], &(*sunAxis)[6]);
-        frustumPointsInSunProj[0][pointIndex][1] = v6;
+        frustumPointsInSunProj[0][pointIndex][0] = -Vec3Dot(frustumPoints[pointIndex], (*sunAxis)[1]);
+        frustumPointsInSunProj[0][pointIndex][1] = Vec3Dot(frustumPoints[pointIndex], (*sunAxis)[2]);
         AddPointToBounds2D(frustumPointsInSunProj[0][pointIndex], minsInSunProj[0], maxsInSunProj[0]);
     }
     frustumPointsInSunProj[0][4][0] = viewOrgInSunProj[0];
@@ -355,16 +337,15 @@ void __cdecl R_SetupSunShadowMapProjection(
         offset[0] = frustumPointsInSunProj[1][pointIndex][0] - viewOrgInSunProj[0];
         offset[1] = frustumPointsInSunProj[1][pointIndex][1] - viewOrgInSunProj[1];
         v33 = frustumPointsInSunProj[1][pointIndex + 4];
-        v34 = 0.75 / rg.sunShadowPartitionRatio;
-        *v33 = v34 * offset[0] + viewOrgInSunProj[0];
+        v34 = 0.75f / rg.sunShadowPartitionRatio;
+        v33[0] = v34 * offset[0] + viewOrgInSunProj[0];
         v33[1] = v34 * offset[1] + viewOrgInSunProj[1];
         AddPointToBounds2D(frustumPointsInSunProj[1][pointIndex + 4], minsInSunProj[1], maxsInSunProj[1]);
     }
     AddPointToBounds2D(viewOrgInSunProj, minsInSunProj[0], maxsInSunProj[0]);
     sizeInSunProj[0] = maxsInSunProj[0][0] - minsInSunProj[0][0];
     sizeInSunProj[1] = maxsInSunProj[0][1] - minsInSunProj[0][1];
-    v21 = sizeInSunProj[0] - sizeInSunProj[1];
-    if (v21 < 0.0)
+    if (sizeInSunProj[0] - sizeInSunProj[1] < 0.0)
         v20 = sizeInSunProj[1];
     else
         v20 = sizeInSunProj[0];
@@ -372,37 +353,31 @@ void __cdecl R_SetupSunShadowMapProjection(
     sampleSizeNear = sm_sunSampleSizeNear->current.value;
     sampleSizeFar = sampleSizeNear * rg.sunShadowPartitionRatio;
     scale = sampleSizeFar * rg.sunShadowmapScaleNum;
-    v32 = viewOrgInSunProj[0] / scale;
-    v19 = floor(v32);
-    snappedViewOrgInTicks[0] = (int)v19;
-    v31 = viewOrgInSunProj[1] / scale;
-    v18 = floor(v31);
-    snappedViewOrgInTicks[1] = (int)v18;
-    snappedViewOrgInSunProj[0] = (double)snappedViewOrgInTicks[0] * scale;
-    snappedViewOrgInSunProj[1] = (double)snappedViewOrgInTicks[1] * scale;
-    scaleToFitUsable = 1023.0 / maxSizeInSunProj;
+    snappedViewOrgInTicks[0] = (int)floor(viewOrgInSunProj[0] / scale);
+    snappedViewOrgInTicks[1] = (int)floor(viewOrgInSunProj[1] / scale);
+    snappedViewOrgInSunProj[0] = (float)snappedViewOrgInTicks[0] * scale;
+    snappedViewOrgInSunProj[1] = (float)snappedViewOrgInTicks[1] * scale;
+    scaleToFitUsable = 1023.0f / maxSizeInSunProj;
     farShadowBegin = (1024 - rg.sunShadowSize) >> 1;
     farShadowEnd = 1024 - farShadowBegin;
     farShadowMiddle = 512;
-    farShadowSizeRatio = (double)rg.sunShadowSize / 1024.0;
-    partitionNear = sunShadow->partition;
+    farShadowSizeRatio = (float)rg.sunShadowSize / 1024.0f;
+    partitionNear = &sunShadow->partition[0];
     partitionFar = &sunShadow->partition[1];
-    shadowOrg[0] = sm_sunShadowCenter->current.value;
+    shadowOrg[0] = sm_sunShadowCenter->current.vector[0];
     shadowOrg[1] = sm_sunShadowCenter->current.vector[1];
     shadowOrg[2] = sm_sunShadowCenter->current.vector[2];
     v17 = 0.0 == shadowOrg[0] && 0.0 == shadowOrg[1] && 0.0 == shadowOrg[2];
     useShadowOffset = !v17;
-    shadowOrgInSunProj[0] = -Vec3Dot(shadowOrg, &(*sunAxis)[3]);
-    shadowOrgInSunProj[1] = Vec3Dot(shadowOrg, &(*sunAxis)[6]);
-    v30 = 1024.0 / maxSizeInSunProj * sizeInSunProj[0] - EQUAL_EPSILON;
-    v16 = ceil(v30);
+    shadowOrgInSunProj[0] = -Vec3Dot(shadowOrg, (*sunAxis)[1]);
+    shadowOrgInSunProj[1] = Vec3Dot(shadowOrg, (*sunAxis)[2]);
+    v16 = ceil(1024.0f / maxSizeInSunProj * sizeInSunProj[0] - EQUAL_EPSILON);
     partitionNear->viewport.width = (unsigned __int16)(int)v16;
-    v29 = 1024.0 / maxSizeInSunProj * sizeInSunProj[1] - EQUAL_EPSILON;
-    v15 = ceil(v29);
+    v15 = ceil(1024.0f / maxSizeInSunProj * sizeInSunProj[1] - EQUAL_EPSILON);
     partitionNear->viewport.height = (unsigned __int16)(int)v15;
-    if (viewOrgInSunProj[0] < (minsInSunProj[0][0] + maxsInSunProj[0][0]) * 0.5)
+    if (viewOrgInSunProj[0] < (minsInSunProj[0][0] + maxsInSunProj[0][0]) * 0.5f)
     {
-        viewOrgInPixels[0][0] = (viewOrgInSunProj[0] - minsInSunProj[0][0]) * scaleToFitUsable + 1.0;
+        viewOrgInPixels[0][0] = (viewOrgInSunProj[0] - minsInSunProj[0][0]) * scaleToFitUsable + 1.0f;
         if (useShadowOffset)
         {
             viewOrgInPixels[1][0] = (double)farShadowMiddle + (viewOrgInSunProj[0] - shadowOrgInSunProj[0]) / sampleSizeFar;
@@ -471,7 +446,7 @@ void __cdecl R_SetupSunShadowMapProjection(
     }
     else
     {
-        viewOrgInPixels[0][1] = 1023.0 - (viewOrgInSunProj[1] - minsInSunProj[0][1]) * scaleToFitUsable;
+        viewOrgInPixels[0][1] = 1023.0f - (viewOrgInSunProj[1] - minsInSunProj[0][1]) * scaleToFitUsable;
         if (useShadowOffset)
         {
             viewOrgInPixels[1][1] = (double)farShadowMiddle - (viewOrgInSunProj[1] - shadowOrgInSunProj[1]) / sampleSizeFar;
@@ -507,76 +482,66 @@ void __cdecl R_SetupSunShadowMapProjection(
         sampleSizeFar,
         viewOrgInTexSpace[1]);
     sunProj = &sunShadow->sunProj;
-    sunShadow->sunProj.switchPartition[3] = 1.0 / rg.sunShadowPartitionRatio;
+    sunShadow->sunProj.switchPartition[3] = 1.0f / rg.sunShadowPartitionRatio;
     sunProj->switchPartition[0] = viewOrgInTexSpace[1][0] - viewOrgInTexSpace[0][0] * sunProj->switchPartition[3];
-    sunProj->switchPartition[1] = (viewOrgInTexSpace[1][1] - viewOrgInTexSpace[0][1] * sunProj->switchPartition[3] + 1.0)
-        * 0.5;
-    sunProj->switchPartition[2] = 0.0;
+    sunProj->switchPartition[1] = (viewOrgInTexSpace[1][1] - viewOrgInTexSpace[0][1] * sunProj->switchPartition[3] + 1.0f) * 0.5f;
+    sunProj->switchPartition[2] = 0.0f;
     shadowmapScale = sunProj->shadowmapScale;
-    v23 = 16.0 / rg.sunShadowmapScale;
-    v24 = 32.0 / rg.sunShadowmapScale;
-    sunProj->shadowmapScale[0] = v23;
-    shadowmapScale[1] = v24;
-    shadowmapScale[2] = 0.0;
-    shadowmapScale[3] = 0.0;
-    (*snappedViewOrgInClipSpace)[0] = viewOrgInTexSpace[0][0] + viewOrgInTexSpace[0][0] - 1.0;
-    (*snappedViewOrgInClipSpace)[1] = 1.0 - (viewOrgInTexSpace[0][1] + viewOrgInTexSpace[0][1]);
-    (*snappedViewOrgInClipSpace)[2] = viewOrgInTexSpace[1][0] + viewOrgInTexSpace[1][0] - 1.0;
-    (*snappedViewOrgInClipSpace)[3] = 1.0 - (viewOrgInTexSpace[1][1] + viewOrgInTexSpace[1][1]);
+    sunProj->shadowmapScale[0] = 16.0f / rg.sunShadowmapScale;
+    shadowmapScale[1] = 32.0f / rg.sunShadowmapScale;
+    shadowmapScale[2] = 0.0f;
+    shadowmapScale[3] = 0.0f;
+    (*snappedViewOrgInClipSpace)[0][0] = viewOrgInTexSpace[0][0] + viewOrgInTexSpace[0][0] - 1.0f;
+    (*snappedViewOrgInClipSpace)[0][1] = 1.0f - (viewOrgInTexSpace[0][1] + viewOrgInTexSpace[0][1]);
+    (*snappedViewOrgInClipSpace)[1][0] = viewOrgInTexSpace[1][0] + viewOrgInTexSpace[1][0] - 1.0f;
+    (*snappedViewOrgInClipSpace)[1][1] = 1.0f - (viewOrgInTexSpace[1][1] + viewOrgInTexSpace[1][1]);
     R_SetupSunShadowMapViewMatrix(snappedViewOrgInSunProj, sunAxis, sunProj);
     R_SetupSunShadowBoundingPoly(
         frustumPointsInSunProj[0],
         viewOrgInSunProj,
         snappedViewOrgInSunProj,
         maxSizeInSunProj,
-        (const float *)snappedViewOrgInClipSpace,
+        (*snappedViewOrgInClipSpace)[0],
         &partitionNear->boundingPoly,
-        5u);
+        5);
     R_SetupSunShadowBoundingPoly(
         frustumPointsInSunProj[1],
         viewOrgInSunProj,
         snappedViewOrgInSunProj,
         maxSizeInSunProj,
-        &(*snappedViewOrgInClipSpace)[2],
+        (*snappedViewOrgInClipSpace)[1],
         &partitionFar->boundingPoly,
-        8u);
+        8);
     R_SetupSunShadowMapPartitionFraction(viewParms, scaleToFitUsable, sunProj, partitionFraction);
     R_SetupNearRegionPlane(partitionFraction);
 }
 
-void __cdecl R_GetFrustumNearClipPoints(const GfxMatrix *invViewProjMtx, float (*frustumPoints)[3])
-{
-    R_ClipSpaceToWorldSpace(invViewProjMtx, g_clipSpacePoints, 4, frustumPoints);
-}
-
 void __cdecl R_ClipSpaceToWorldSpace(
     const GfxMatrix *invViewProjMtx,
-    const float (*clipSpacePoints)[3],
+    const float (*clipSpacePoints)[4][3],
     int pointCount,
-    float (*worldSpacePoints)[3])
+    float (*worldSpacePoints)[4][3])
 {
-    float xyz; // [esp+Ch] [ebp-28h]
-    float xyz_4; // [esp+10h] [ebp-24h]
-    float xyz_8; // [esp+14h] [ebp-20h]
+    float xyz[3]; // [esp+Ch] [ebp-28h]
     float homogenousPoint[4]; // [esp+18h] [ebp-1Ch] BYREF
-    int pointIndex; // [esp+28h] [ebp-Ch]
-    int term; // [esp+2Ch] [ebp-8h]
-    float scale; // [esp+30h] [ebp-4h]
 
-    for (pointIndex = 0; pointIndex < pointCount; ++pointIndex)
+    for (int pointIndex = 0; pointIndex < pointCount; ++pointIndex)
     {
-        xyz = (*clipSpacePoints)[3 * pointIndex];
-        xyz_4 = (*clipSpacePoints)[3 * pointIndex + 1];
-        xyz_8 = (*clipSpacePoints)[3 * pointIndex + 2];
-        for (term = 0; term < 4; ++term)
-            homogenousPoint[term] = xyz * invViewProjMtx->m[0][term]
-            + xyz_4 * invViewProjMtx->m[1][term]
-                + xyz_8 * invViewProjMtx->m[2][term]
-                    + invViewProjMtx->m[3][term];
-                    if (homogenousPoint[3] <= 0.0)
-                        MyAssertHandler(".\\r_sunshadow.cpp", 97, 0, "%s", "homogenousPoint[3] > 0");
-                    scale = 1.0 / homogenousPoint[3];
-                    Vec3Scale(homogenousPoint, scale, &(*worldSpacePoints)[3 * pointIndex]);
+        xyz[0] = (*clipSpacePoints)[pointIndex][0];
+        xyz[1] = (*clipSpacePoints)[pointIndex][1];
+        xyz[2] = (*clipSpacePoints)[pointIndex][2];
+
+        for (int term = 0; term < 4; ++term)
+        {
+            homogenousPoint[term] = xyz[0] * invViewProjMtx->m[0][term] 
+                                  + xyz[1] * invViewProjMtx->m[1][term] 
+                                  + xyz[2] * invViewProjMtx->m[2][term] 
+                                  + invViewProjMtx->m[3][term];
+        }
+
+        iassert(homogenousPoint[3] > 0.0f);
+        float scale = 1.0f / homogenousPoint[3];
+        Vec3Scale(homogenousPoint, scale, (*worldSpacePoints)[pointIndex]);
     }
 }
 
@@ -595,26 +560,14 @@ void __cdecl R_SetupSunShadowBoundingPoly(
     float tempFrustumPointsInSunProj[8][2]; // [esp+18h] [ebp-88h] BYREF
     float frustumBoundingPolyInSunProj[9][2]; // [esp+58h] [ebp-48h] BYREF
 
-    memcpy((unsigned __int8 *)tempFrustumPointsInSunProj, (unsigned __int8 *)frustumPointsInSunProj, 8 * pointCount);
+    memcpy(tempFrustumPointsInSunProj, frustumPointsInSunProj, 8 * pointCount);
     boundingPoly->pointCount = Com_ConvexHull(tempFrustumPointsInSunProj, pointCount, frustumBoundingPolyInSunProj);
-    if (boundingPoly->pointCount < 3 || boundingPoly->pointCount > 9)
-        MyAssertHandler(
-            ".\\r_sunshadow.cpp",
-            121,
-            1,
-            "boundingPoly->pointCount not in [3, R_SUNSHADOW_SIDE_PLANES_MAX]\n\t%i not in [%i, %i]",
-            boundingPoly->pointCount,
-            3,
-            9);
+    iassert(boundingPoly->pointCount >= 3 && boundingPoly->pointCount <= 9);
     scaleToClipSpace = 2.0 / maxSizeInSunProj;
     for (pointIndex = 0; pointIndex < boundingPoly->pointCount; ++pointIndex)
     {
-        boundingPoly->points[pointIndex][0] = (frustumBoundingPolyInSunProj[pointIndex][0] - *viewOrgInSunProj)
-            * scaleToClipSpace
-            + *snappedViewOrgInClipSpace;
-        boundingPoly->points[pointIndex][1] = (frustumBoundingPolyInSunProj[pointIndex][1] - viewOrgInSunProj[1])
-            * scaleToClipSpace
-            + snappedViewOrgInClipSpace[1];
+        boundingPoly->points[pointIndex][0] = (frustumBoundingPolyInSunProj[pointIndex][0] - *viewOrgInSunProj) * scaleToClipSpace + *snappedViewOrgInClipSpace;
+        boundingPoly->points[pointIndex][1] = (frustumBoundingPolyInSunProj[pointIndex][1] - viewOrgInSunProj[1]) * scaleToClipSpace + snappedViewOrgInClipSpace[1];
         boundingPoly->pointIsNear[pointIndex] = 0;
         for (nearPointIndex = 4; nearPointIndex < pointCount; ++nearPointIndex)
         {
@@ -632,20 +585,20 @@ void __cdecl R_SetupSunShadowBoundingPoly(
 
 void __cdecl R_SetupSunShadowMapViewMatrix(
     const float *snappedViewOrgInSunProj,
-    const float (*sunAxis)[3],
+    const float (*sunAxis)[3][3],
     GfxSunShadowProjection *sunProj)
 {
-    sunProj->viewMatrix[0][0] = -(*sunAxis)[3];
-    sunProj->viewMatrix[1][0] = -(*sunAxis)[4];
-    sunProj->viewMatrix[2][0] = -(*sunAxis)[5];
+    sunProj->viewMatrix[0][0] = -(*sunAxis)[1][0];
+    sunProj->viewMatrix[1][0] = -(*sunAxis)[1][1];
+    sunProj->viewMatrix[2][0] = -(*sunAxis)[1][2];
     sunProj->viewMatrix[3][0] = -*snappedViewOrgInSunProj;
-    sunProj->viewMatrix[0][1] = (*sunAxis)[6];
-    sunProj->viewMatrix[1][1] = (*sunAxis)[7];
-    sunProj->viewMatrix[2][1] = (*sunAxis)[8];
+    sunProj->viewMatrix[0][1] = (*sunAxis)[2][0];
+    sunProj->viewMatrix[1][1] = (*sunAxis)[2][1];
+    sunProj->viewMatrix[2][1] = (*sunAxis)[2][2];
     sunProj->viewMatrix[3][1] = -snappedViewOrgInSunProj[1];
-    sunProj->viewMatrix[0][2] = (*sunAxis)[0];
-    sunProj->viewMatrix[1][2] = (*sunAxis)[1];
-    sunProj->viewMatrix[2][2] = (*sunAxis)[2];
+    sunProj->viewMatrix[0][2] = (*sunAxis)[0][0];
+    sunProj->viewMatrix[1][2] = (*sunAxis)[0][1];
+    sunProj->viewMatrix[2][2] = (*sunAxis)[0][2];
     sunProj->viewMatrix[3][2] = 0.0;
     sunProj->viewMatrix[0][3] = 0.0;
     sunProj->viewMatrix[1][3] = 0.0;
@@ -688,7 +641,7 @@ void __cdecl R_GetSunShadowMapPartitionViewOrgInTextureSpace(
     snappedViewOrgInPixels_4 = viewOrgInPixels[1] - (snappedViewOrgInSunProj[1] - viewOrgInSunProj[1]) / sampleSize;
     v6 = floor(snappedViewOrgInPixels);
     v5 = floor(snappedViewOrgInPixels_4);
-    *viewOrgInTexSpace = v6 * 0.0009765625;
+    viewOrgInTexSpace[0] = v6 * 0.0009765625;
     viewOrgInTexSpace[1] = v5 * 0.0009765625;
 }
 
@@ -698,54 +651,43 @@ void __cdecl R_SetupNearRegionPlane(const float *partitionFraction)
     DpvsPlane *shadowFarPlane; // [esp+28h] [ebp-10h]
     unsigned int partitionIndex; // [esp+2Ch] [ebp-Ch]
     float scale; // [esp+30h] [ebp-8h]
-    float scalea; // [esp+30h] [ebp-8h]
-    float scaleb; // [esp+30h] [ebp-8h]
     float length; // [esp+34h] [ebp-4h]
-    float lengtha; // [esp+34h] [ebp-4h]
-    float lengthb; // [esp+34h] [ebp-4h]
 
-    scene.shadowNearPlane[0].coeffs[0] = *partitionFraction;
+    scene.shadowNearPlane[0].coeffs[0] = partitionFraction[0];
     scene.shadowNearPlane[0].coeffs[1] = partitionFraction[1];
     scene.shadowNearPlane[0].coeffs[2] = partitionFraction[2];
     scene.shadowNearPlane[0].coeffs[3] = partitionFraction[3];
     length = Vec3Length(scene.shadowNearPlane[0].coeffs);
-    if (length <= 0.0)
-        MyAssertHandler(".\\r_sunshadow.cpp", 306, 0, "%s", "length > 0");
-    scale = 1.0 / length;
+    iassert(length > 0);
+    scale = 1.0f / length;
     Vec4Scale(scene.shadowNearPlane[0].coeffs, scale, scene.shadowNearPlane[0].coeffs);
-    scene.shadowNearPlane[0].side[0] = SLODWORD(scene.shadowNearPlane[0].coeffs[0]) <= 0 ? 0 : 0xC;
-    scene.shadowNearPlane[0].side[1] = COERCE_INT(scene.shadowNearPlane[0].coeffs[1]) <= 0 ? 4 : 16;
-    scene.shadowNearPlane[0].side[2] = COERCE_INT(scene.shadowNearPlane[0].coeffs[2]) <= 0 ? 8 : 20;
-    scene.shadowNearPlane[1].coeffs[0] = *partitionFraction;
+    R_SetDpvsPlaneSides(&scene.shadowNearPlane[0]);
+
+    scene.shadowNearPlane[1].coeffs[0] = partitionFraction[0];
     scene.shadowNearPlane[1].coeffs[1] = partitionFraction[1];
     scene.shadowNearPlane[1].coeffs[2] = partitionFraction[2];
     scene.shadowNearPlane[1].coeffs[3] = partitionFraction[3];
-    scene.shadowNearPlane[1].coeffs[3] = scene.shadowNearPlane[1].coeffs[3] - 0.75;
-    lengtha = Vec3Length(scene.shadowNearPlane[1].coeffs);
-    if (lengtha <= 0.0)
-        MyAssertHandler(".\\r_sunshadow.cpp", 316, 0, "%s", "length > 0");
-    scalea = 1.0 / lengtha;
-    Vec4Scale(scene.shadowNearPlane[1].coeffs, scalea, scene.shadowNearPlane[1].coeffs);
-    scene.shadowNearPlane[1].side[0] = SLODWORD(scene.shadowNearPlane[1].coeffs[0]) <= 0 ? 0 : 0xC;
-    scene.shadowNearPlane[1].side[1] = COERCE_INT(scene.shadowNearPlane[1].coeffs[1]) <= 0 ? 4 : 16;
-    scene.shadowNearPlane[1].side[2] = COERCE_INT(scene.shadowNearPlane[1].coeffs[2]) <= 0 ? 8 : 20;
-    size = 1.0;
+    scene.shadowNearPlane[1].coeffs[3] = scene.shadowNearPlane[1].coeffs[3] - 0.75f;
+    length = Vec3Length(scene.shadowNearPlane[1].coeffs);
+    iassert(length > 0);
+    scale = 1.0f / length;
+    Vec4Scale(scene.shadowNearPlane[1].coeffs, scale, scene.shadowNearPlane[1].coeffs);
+    R_SetDpvsPlaneSides(&scene.shadowNearPlane[1]);
+
+    size = 1.0f;
     for (partitionIndex = 0; partitionIndex < 2; ++partitionIndex)
     {
         shadowFarPlane = &scene.shadowFarPlane[partitionIndex];
-        shadowFarPlane->coeffs[0] = *partitionFraction;
+        shadowFarPlane->coeffs[0] = partitionFraction[0];
         shadowFarPlane->coeffs[1] = partitionFraction[1];
         shadowFarPlane->coeffs[2] = partitionFraction[2];
         shadowFarPlane->coeffs[3] = partitionFraction[3];
         shadowFarPlane->coeffs[3] = shadowFarPlane->coeffs[3] - size;
-        lengthb = Vec3Length(shadowFarPlane->coeffs);
-        if (lengthb <= 0.0)
-            MyAssertHandler(".\\r_sunshadow.cpp", 329, 0, "%s", "length > 0");
-        scaleb = -1.0 / lengthb;
-        Vec4Scale(shadowFarPlane->coeffs, scaleb, shadowFarPlane->coeffs);
-        shadowFarPlane->side[0] = COERCE_INT(shadowFarPlane->coeffs[0]) <= 0 ? 0 : 0xC;
-        shadowFarPlane->side[1] = COERCE_INT(shadowFarPlane->coeffs[1]) <= 0 ? 4 : 16;
-        shadowFarPlane->side[2] = COERCE_INT(shadowFarPlane->coeffs[2]) <= 0 ? 8 : 20;
+        length = Vec3Length(shadowFarPlane->coeffs);
+        iassert(length > 0);
+        scale = -1.0f / length;
+        Vec4Scale(shadowFarPlane->coeffs, scale, shadowFarPlane->coeffs);
+        R_SetDpvsPlaneSides(shadowFarPlane);
         size = size * rg.sunShadowPartitionRatio;
     }
 }
@@ -852,8 +794,8 @@ void __cdecl R_MergeAndEmitSunShadowMapsSurfs(GfxViewInfo *viewInfo)
         info->viewOrigin[3] = 0.0;
         iassert(!info->cameraView);
         firstDrawSurf = frontEndDataOut->drawSurfCount;
-        R_MergeAndEmitDrawSurfLists(3 * partitionIndex + 15, 1u);
-        R_MergeAndEmitDrawSurfLists(3 * partitionIndex + 16, 2u);
+        R_MergeAndEmitDrawSurfLists(3 * partitionIndex + 15, 1);
+        R_MergeAndEmitDrawSurfLists(3 * partitionIndex + 16, 2);
         sunShadow->partition[partitionIndex].info.drawSurfs = &frontEndDataOut->drawSurfs[firstDrawSurf];
         sunShadow->partition[partitionIndex].info.drawSurfCount = frontEndDataOut->drawSurfCount - firstDrawSurf;
         sunShadow->partition[partitionIndex].partitionIndex = partitionIndex;

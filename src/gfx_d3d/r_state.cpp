@@ -2316,10 +2316,9 @@ void __cdecl R_SetRenderTargetSize(GfxCmdBufSourceState *source, GfxRenderTarget
 {
     GfxRenderTargetId actualTargetId; // [esp+0h] [ebp-4h]
 
-    if (!source)
-        MyAssertHandler(".\\r_state.cpp", 1326, 0, "%s", "source");
-    if (!gfxRenderTargets)
-        MyAssertHandler(".\\r_state.cpp", 1327, 0, "%s", "gfxRenderTargets");
+    iassert(source);
+    iassert(gfxRenderTargets);
+
     g_renderTargetIsOverridden = 0;
     if (pixelCostMode > GFX_PIXEL_COST_MODE_MEASURE_MSEC)
     {
@@ -2327,34 +2326,12 @@ void __cdecl R_SetRenderTargetSize(GfxCmdBufSourceState *source, GfxRenderTarget
         g_renderTargetIsOverridden = newTargetId != actualTargetId;
         newTargetId = actualTargetId;
     }
-    if ((unsigned int)newTargetId > R_RENDERTARGET_SHADOWMAP_SPOT)
-        MyAssertHandler(
-            ".\\r_state.cpp",
-            1341,
-            0,
-            "newTargetId not in [0, R_RENDERTARGET_COUNT - 1]\n\t%i not in [%i, %i]",
-            newTargetId,
-            0,
-            14);
+    bcassert(newTargetId, R_RENDERTARGET_COUNT);
     source->viewportBehavior = R_ViewportBehaviorForRenderTarget(newTargetId);
     source->renderTargetWidth = gfxRenderTargets[newTargetId].width;
     source->renderTargetHeight = gfxRenderTargets[newTargetId].height;
-    if (source->renderTargetWidth <= 0)
-        MyAssertHandler(
-            ".\\r_state.cpp",
-            1353,
-            0,
-            "%s\n\t(source->renderTargetWidth) = %i",
-            "(source->renderTargetWidth > 0)",
-            source->renderTargetWidth);
-    if (source->renderTargetHeight <= 0)
-        MyAssertHandler(
-            ".\\r_state.cpp",
-            1354,
-            0,
-            "%s\n\t(source->renderTargetHeight) = %i",
-            "(source->renderTargetHeight > 0)",
-            source->renderTargetHeight);
+    iassert(source->renderTargetWidth > 0);
+    iassert(source->renderTargetHeight > 0);
 }
 
 const GfxViewportBehavior s_viewportBehaviorForRenderTarget[15] =
@@ -2378,17 +2355,9 @@ const GfxViewportBehavior s_viewportBehaviorForRenderTarget[15] =
 
 GfxViewportBehavior __cdecl R_ViewportBehaviorForRenderTarget(GfxRenderTargetId renderTargetId)
 {
-    if (!s_viewportBehaviorForRenderTarget)
-        MyAssertHandler(".\\r_state.cpp", 1291, 0, "%s", "s_viewportBehaviorForRenderTarget");
-    if ((unsigned int)renderTargetId > R_RENDERTARGET_SHADOWMAP_SPOT)
-        MyAssertHandler(
-            ".\\r_state.cpp",
-            1292,
-            0,
-            "renderTargetId not in [0, R_RENDERTARGET_COUNT - 1]\n\t%i not in [%i, %i]",
-            renderTargetId,
-            0,
-            14);
+    iassert(s_viewportBehaviorForRenderTarget);
+    bcassert(renderTargetId, R_RENDERTARGET_COUNT);
+
     return s_viewportBehaviorForRenderTarget[renderTargetId];
 }
 

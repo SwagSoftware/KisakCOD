@@ -604,5 +604,4 @@ void __cdecl RB_TouchAllImages();
 extern r_backEndGlobals_t backEnd;
 extern materialCommands_t tess;
 extern GfxBackEndData *backEndData;
-//extern GfxRenderTarget gfxRenderTargets[15];
-extern GfxRenderTarget gfxRenderTargets[17];// LWSS: changed to 17 to please ASAN. May not be correct.
+extern GfxRenderTarget gfxRenderTargets[17];// LWSS: changed to 17 to please ASAN.

@@ -430,6 +430,42 @@ void __cdecl R_AddShadowCookie(
     }
 }
 
+static void __cdecl R_GetSunAxes(float (*sunAxis)[3][3])
+{
+    float v1; // [esp+0h] [ebp-1Ch]
+    float *dir; // [esp+18h] [ebp-4h]
+
+    if (!frontEndDataOut)
+        MyAssertHandler((char *)".\\r_shadowcookie.cpp", 62, 0, "%s", "frontEndDataOut");
+    if (frontEndDataOut->sunLight.type != 1)
+        MyAssertHandler(
+            (char *)".\\r_shadowcookie.cpp",
+            63,
+            0,
+            "%s",
+            "frontEndDataOut->sunLight.type == GFX_LIGHT_TYPE_DIR");
+    dir = frontEndDataOut->sunLight.dir;
+    (*sunAxis)[0][0] = -frontEndDataOut->sunLight.dir[0];
+    (*sunAxis)[0][1] = -dir[1];
+    (*sunAxis)[0][2] = -dir[2];
+    v1 = (*sunAxis)[0][1] * (*sunAxis)[0][1] + (*sunAxis)[0][0] * (*sunAxis)[0][0];
+    if (v1 >= 0.1000000014901161)
+    {
+        (*sunAxis)[2][0] = 0.0;
+        (*sunAxis)[2][1] = 0.0;
+        (*sunAxis)[2][2] = 1.0;
+    }
+    else
+    {
+        (*sunAxis)[2][0] = 1.0;
+        (*sunAxis)[2][1] = 0.0;
+        (*sunAxis)[2][2] = 0.0;
+    }
+    Vec3Cross((*sunAxis)[2], (const float *)sunAxis, (*sunAxis)[1]);
+    Vec3Normalize((*sunAxis)[1]);
+    Vec3Cross((const float *)sunAxis, (*sunAxis)[1], (*sunAxis)[2]);
+}
+
 void __cdecl R_GenerateShadowCookieViewParms(float *modelMin, float *modelMax, GfxViewParms *shadowViewParms)
 {
     float width; // [esp+10h] [ebp-90h]
@@ -455,7 +491,7 @@ void __cdecl R_GenerateShadowCookieViewParms(float *modelMin, float *modelMax, G
         MyAssertHandler(".\\r_shadowcookie.cpp", 93, 0, "%s", "modelMax");
     if (!shadowViewParms)
         MyAssertHandler(".\\r_shadowcookie.cpp", 94, 0, "%s", "shadowViewParms");
-    R_GetSunAxes(sunAxes);
+    R_GetSunAxes(&sunAxes);
     sunAxes[1][0] = -sunAxes[1][0];
     sunAxes[1][1] = -sunAxes[1][1];
     sunAxes[1][2] = -sunAxes[1][2];

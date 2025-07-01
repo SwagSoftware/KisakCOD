@@ -3630,56 +3630,39 @@ void __cdecl R_SetupShadowSurfacesDpvs(
     DpvsView *dpvsView; // [esp+0h] [ebp-8h]
     unsigned int planeIndex; // [esp+4h] [ebp-4h]
 
-    if (!Sys_IsMainThread())
-        MyAssertHandler(".\\r_dpvs.cpp", 3384, 0, "%s", "Sys_IsMainThread()");
-    if (!rgp.world)
-        MyAssertHandler(".\\r_dpvs.cpp", 3385, 0, "%s", "rgp.world");
-    if (!viewParms)
-        MyAssertHandler(".\\r_dpvs.cpp", 3386, 0, "%s", "viewParms");
+    iassert(Sys_IsMainThread());
+    iassert(rgp.world);
+    iassert(viewParms);
+
     dpvsView = &dpvsGlob.views[scene.dpvs.localClientNum][partitionIndex + 1];
     dpvsView->renderFxFlagsCull = 1;
-    if (sidePlaneCount > 0xE)
-        MyAssertHandler(
-            ".\\r_dpvs.cpp",
-            3392,
-            0,
-            "%s\n\t(sidePlaneCount) = %i",
-            "(sidePlaneCount <= (sizeof( dpvsView->frustumPlanes ) / (sizeof( dpvsView->frustumPlanes[0] ) * (sizeof( dpvsView-"
-            ">frustumPlanes ) != 4 || sizeof( dpvsView->frustumPlanes[0] ) <= 4))))",
-            sidePlaneCount);
+
+    iassert((sidePlaneCount <= (sizeof(dpvsView->frustumPlanes) / (sizeof(dpvsView->frustumPlanes[0]) * (sizeof(dpvsView->frustumPlanes) != 4 || sizeof(dpvsView->frustumPlanes[0]) <= 4)))));
+
     R_FrustumClipPlanes(&viewParms->viewProjectionMatrix, sidePlanes, sidePlaneCount, dpvsView->frustumPlanes);
+
     if (Vec3Dot(viewParms->axis[0], scene.shadowNearPlane[partitionIndex].coeffs) < 0.0)
     {
-        if (sidePlaneCount >= 0xE)
-            MyAssertHandler(
-                ".\\r_dpvs.cpp",
-                3397,
-                0,
-                "%s\n\t(sidePlaneCount) = %i",
-                "(sidePlaneCount < (sizeof( dpvsView->frustumPlanes ) / (sizeof( dpvsView->frustumPlanes[0] ) * (sizeof( dpvsView"
-                "->frustumPlanes ) != 4 || sizeof( dpvsView->frustumPlanes[0] ) <= 4))))",
-                sidePlaneCount);
+        iassert((sidePlaneCount < (sizeof(dpvsView->frustumPlanes) / (sizeof(dpvsView->frustumPlanes[0]) * (sizeof(dpvsView->frustumPlanes) != 4 || sizeof(dpvsView->frustumPlanes[0]) <= 4)))));
+
         v4 = &scene.shadowNearPlane[partitionIndex];
         v5 = &dpvsView->frustumPlanes[sidePlaneCount];
         v5->coeffs[0] = v4->coeffs[0];
         v5->coeffs[1] = v4->coeffs[1];
         v5->coeffs[2] = v4->coeffs[2];
         v5->coeffs[3] = v4->coeffs[3];
-        *(unsigned int *)v5->side = *(unsigned int *)v4->side;
+        v5->side[0] = v4->side[0];
+        v5->side[1] = v4->side[1];
+        v5->side[2] = v4->side[2];
+        v5->pad = v5->pad;
+
         ++sidePlaneCount;
     }
     if ((!partitionIndex || !rg.sunShadowFull)
         && Vec3Dot(viewParms->axis[0], scene.shadowFarPlane[partitionIndex].coeffs) < 0.0)
     {
-        if (sidePlaneCount >= 0xE)
-            MyAssertHandler(
-                ".\\r_dpvs.cpp",
-                3406,
-                0,
-                "%s\n\t(sidePlaneCount) = %i",
-                "(sidePlaneCount < (sizeof( dpvsView->frustumPlanes ) / (sizeof( dpvsView->frustumPlanes[0] ) * (sizeof( dpvsView"
-                "->frustumPlanes ) != 4 || sizeof( dpvsView->frustumPlanes[0] ) <= 4))))",
-                sidePlaneCount);
+        iassert((sidePlaneCount < (sizeof(dpvsView->frustumPlanes) / (sizeof(dpvsView->frustumPlanes[0]) * (sizeof(dpvsView->frustumPlanes) != 4 || sizeof(dpvsView->frustumPlanes[0]) <= 4)))));
+
         v6 = &scene.shadowFarPlane[partitionIndex];
         v7 = &dpvsView->frustumPlanes[sidePlaneCount];
         v7->coeffs[0] = v6->coeffs[0];
@@ -3693,15 +3676,8 @@ void __cdecl R_SetupShadowSurfacesDpvs(
     {
         if (Vec3Dot(viewParms->axis[0], dpvsGlob.sideFrustumPlanes[planeIndex].coeffs) < 0.0)
         {
-            if (sidePlaneCount >= 0xE)
-                MyAssertHandler(
-                    ".\\r_dpvs.cpp",
-                    3416,
-                    0,
-                    "%s\n\t(sidePlaneCount) = %i",
-                    "(sidePlaneCount < (sizeof( dpvsView->frustumPlanes ) / (sizeof( dpvsView->frustumPlanes[0] ) * (sizeof( dpvsVi"
-                    "ew->frustumPlanes ) != 4 || sizeof( dpvsView->frustumPlanes[0] ) <= 4))))",
-                    sidePlaneCount);
+            iassert((sidePlaneCount < (sizeof(dpvsView->frustumPlanes) / (sizeof(dpvsView->frustumPlanes[0]) * (sizeof(dpvsView->frustumPlanes) != 4 || sizeof(dpvsView->frustumPlanes[0]) <= 4)))));
+
             v8 = &dpvsGlob.sideFrustumPlanes[planeIndex];
             v9 = &dpvsView->frustumPlanes[sidePlaneCount];
             v9->coeffs[0] = v8->coeffs[0];
@@ -3771,3 +3747,27 @@ void __cdecl R_FreeHullPoints(GfxHullPointsPool *hullPoints)
     dpvsGlob.nextFreeHullPoints = hullPoints;
 }
 
+// LWSS: this is NOT the blops version
+float __cdecl R_DpvsPlaneMaxSignedDistToBox(const DpvsPlane *plane, float forward)
+{
+    return *(float *)((char *)rgp.world->mins + plane->side[2]) * forward
+        + *(float *)((char *)rgp.world->mins + plane->side[1]) * plane->coeffs[1]
+        + *(float *)((char *)rgp.world->mins + plane->side[0]) * plane->coeffs[0]
+        + plane->coeffs[3];
+}
+
+// LWSS: this is NOT the blops version
+float __cdecl R_DpvsPlaneMinSignedDistToBox(const DpvsPlane *plane, float forward)
+{
+    return *(float *)((char *)&rgp.world->materialMemoryCount - plane->side[2]) * forward
+        + *(float *)((char *)&rgp.world->maxs[2] - plane->side[1]) * plane->coeffs[1]
+        + *(float *)((char *)rgp.world->maxs - plane->side[0]) * plane->coeffs[0]
+        + plane->coeffs[3];
+}
+
+void __cdecl R_SetDpvsPlaneSides(DpvsPlane *plane)
+{
+    plane->side[0] = SLODWORD(plane->coeffs[0]) <= 0 ? 0 : 12;
+    plane->side[1] = SLODWORD(plane->coeffs[1]) <= 0 ? 4 : 16;
+    plane->side[2] = SLODWORD(plane->coeffs[2]) <= 0 ? 8 : 20;
+}

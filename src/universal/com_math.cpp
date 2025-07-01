@@ -1818,10 +1818,10 @@ void __cdecl AddPointToBounds(const float *v, float *mins, float *maxs)
 
 void __cdecl AddPointToBounds2D(const float *v, float *mins, float *maxs)
 {
-    if (*mins > *v)
-        *mins = *v;
-    if (*maxs < *v)
-        *maxs = *v;
+    if (mins[0] > v[0])
+        mins[0] = v[0];
+    if (maxs[0] < v[0])
+        maxs[0] = v[0];
     if (mins[1] > v[1])
         mins[1] = v[1];
     if (maxs[1] < v[1])
@@ -2867,13 +2867,11 @@ void __cdecl Vec4MadMad(
 
 void __cdecl Vec3Cross(const vec3r v0, const vec3r v1, vec3r cross)
 {
-    if (v0 == cross)
-        MyAssertHandler("c:\\trees\\cod3\\src\\universal\\com_vector.h", 401, 0, "%s", "v0 != cross");
-    if (v1 == cross)
-        MyAssertHandler("c:\\trees\\cod3\\src\\universal\\com_vector.h", 402, 0, "%s", "v1 != cross");
-    *cross = v0[1] * v1[2] - v0[2] * v1[1];
-    cross[1] = v0[2] * *v1 - *v0 * v1[2];
-    cross[2] = *v0 * v1[1] - v0[1] * *v1;
+    iassert(v0 != cross);
+    iassert(v1 != cross);
+    cross[0] = v0[1] * v1[2] - v0[2] * v1[1];
+    cross[1] = v0[2] * v1[0] - v0[0] * v1[2];
+    cross[2] = v0[0] * v1[1] - v0[1] * v1[0];
 }
 
 void __cdecl Vec3Copy(const vec3r from, vec3r to)
