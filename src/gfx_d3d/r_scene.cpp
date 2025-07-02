@@ -2211,12 +2211,18 @@ void __cdecl R_GetLightSurfs(int visibleLightCount, const GfxLight **visibleLigh
     if (visibleLightCount)
     {
         PROF_SCOPED("R_GetLightSurfs");
-        KISAK_NULLSUB();
-        R_GetBspLightSurfs(visibleLights, visibleLightCount);
-        KISAK_NULLSUB();
-        R_GetStaticModelLightSurfs(visibleLights, visibleLightCount);
-        KISAK_NULLSUB();
-        R_GetSceneEntLightSurfs(visibleLights, visibleLightCount);
+        {
+            PROF_SCOPED("light surfs bsp");
+            R_GetBspLightSurfs(visibleLights, visibleLightCount);
+        }
+        {
+            PROF_SCOPED("light surfs smodel");
+            R_GetStaticModelLightSurfs(visibleLights, visibleLightCount);
+        }
+        {
+            PROF_SCOPED("light surfs scene ent");
+            R_GetSceneEntLightSurfs(visibleLights, visibleLightCount);
+        }
     }
 }
 

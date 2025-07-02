@@ -3,6 +3,8 @@
 #include <xanim/dobj.h>
 #include "r_rendercmds.h"
 
+#define MAX_VISIBLE_SHADOWABLE_DLIGHTS 1
+
 struct AnnotatedLightGridPoint // sizeof=0xA
 {                                       // ...
     unsigned __int16 pos[3];            // ...
@@ -115,3 +117,4 @@ void R_LoadLightGridRowData();
 unsigned __int8 *R_LoadLightGridEntries();
 void R_LoadLightGridHeader();
 void __cdecl R_LoadLightGridPoints_Version15(unsigned int bspVersion);
+GfxLightDef *__cdecl R_LoadLightDef(const char *name);

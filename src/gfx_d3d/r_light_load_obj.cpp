@@ -3,6 +3,8 @@
 #include "r_bsp.h"
 
 #include <algorithm>
+#include <universal/com_files.h>
+#include "r_image.h"
 
 const float s_lightGridRotAxis[3][3] =
 {
@@ -17,6 +19,8 @@ const float standardFrustumSidePlanes[4][4] =
   { 0.0f, -1.0f, 0.0f, 1.0f },
   { 0.0f, 1.0f, 0.0f, 1.0f }
 }; // idb
+
+int s_lmapPixelsUsedForFalloff;
 
 void __cdecl R_ModernizeLegacyLightGridColors(const unsigned __int8 *legacyColors, GfxLightGridColors *modernColors)
 {
@@ -845,5 +849,83 @@ void __cdecl R_LoadLightGridPoints_Version15(unsigned int bspVersion)
     else
     {
         R_InitEmptyLightGrid();
+    }
+}
+
+void __cdecl R_AllocateFalloffSpaceInLightmaps(GfxLightDef *def)
+{
+    int pixelsNeeded; // [esp+0h] [ebp-4h]
+
+    if (!def)
+        MyAssertHandler(".\\r_light_load_obj.cpp", 66, 0, "%s", "def");
+    if (!def->attenuation.image)
+        MyAssertHandler(".\\r_light_load_obj.cpp", 67, 0, "%s", "def->attenuation.image");
+    pixelsNeeded = def->attenuation.image->width + 2;
+    if (pixelsNeeded + s_lmapPixelsUsedForFalloff > 512)
+        Com_Error(
+            ERR_DROP,
+            "Total pixel width of all attenuation textures plus 2 border pixels is %i > %i",
+            pixelsNeeded + s_lmapPixelsUsedForFalloff,
+            512);
+    def->lmapLookupStart = s_lmapPixelsUsedForFalloff + 1;
+    s_lmapPixelsUsedForFalloff += pixelsNeeded;
+}
+
+unsigned __int8 *__cdecl R_LoadLightImage(unsigned __int8 *readPos, GfxLightImage *lightImage)
+{
+    unsigned int v3; // [esp+0h] [ebp-18h]
+    unsigned __int8 *readPosa; // [esp+20h] [ebp+8h]
+
+    lightImage->samplerState = *readPos;
+    readPosa = readPos + 1;
+    v3 = strlen((const char *)readPosa);
+    if (v3)
+        lightImage->image = Image_Register((char *)readPosa, 1u, 5);
+    else
+        lightImage->image = 0;
+    return &readPosa[v3 + 1];
+}
+
+GfxLightDef *__cdecl R_LoadLightDef(const char *name)
+{
+    char v2; // [esp+3h] [ebp-31h]
+    char *v3; // [esp+8h] [ebp-2Ch]
+    const char *v4; // [esp+Ch] [ebp-28h]
+    char *filename; // [esp+20h] [ebp-14h]
+    GfxLightDef *def; // [esp+24h] [ebp-10h]
+    unsigned __int8 *file; // [esp+28h] [ebp-Ch] BYREF
+    int fileSize; // [esp+2Ch] [ebp-8h]
+    const unsigned __int8 *readPos; // [esp+30h] [ebp-4h]
+
+    if (!name)
+        MyAssertHandler(".\\r_light_load_obj.cpp", 88, 0, "%s", "name");
+    filename = va("lights/%s", name);
+    fileSize = FS_ReadFile(filename, (void **)&file);
+    if (fileSize < 0)
+        return 0;
+    if (fileSize)
+    {
+        def = (GfxLightDef *)Hunk_Alloc(0x10u, "R_RegisterLightDef", 20);
+        def->name = (const char *)Hunk_Alloc(strlen(name) + 1, "R_RegisterLightDef", 20);
+        if (!def)
+            MyAssertHandler(".\\r_light_load_obj.cpp", 103, 0, "%s", "def");
+        readPos = file;
+        readPos = R_LoadLightImage(file, &def->attenuation);
+        v4 = name;
+        v3 = (char *)def->name;
+        do
+        {
+            v2 = *v4;
+            *v3++ = *v4++;
+        } while (v2);
+        I_strlwr((char *)def->name);
+        FS_FreeFile((char *)file);
+        R_AllocateFalloffSpaceInLightmaps(def);
+        return def;
+    }
+    else
+    {
+        FS_FreeFile((char *)file);
+        return 0;
     }
 }

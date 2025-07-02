@@ -335,12 +335,12 @@ void __cdecl R_InitCmdBufSourceState(GfxCmdBufSourceState *source, const GfxCmdB
 {
     float *v3; // [esp+8h] [ebp-8h]
 
-    if (!source)
-        MyAssertHandler(".\\r_state_utils.cpp", 27, 0, "%s", "source");
-    if (!input)
-        MyAssertHandler(".\\r_state_utils.cpp", 28, 0, "%s", "input");
+    iassert(source);
+    iassert(input);
+
     memset((unsigned __int8 *)source, 0, sizeof(GfxCmdBufSourceState));
     qmemcpy(&source->input, input, sizeof(source->input));
+
     for (unsigned int constant = 0; constant < 0x3A; ++constant)
     {
         if (input == &gfxCmdBufInput || s_codeConstUpdateFreq[constant] != 2 || constant < 0x20)
@@ -349,22 +349,18 @@ void __cdecl R_InitCmdBufSourceState(GfxCmdBufSourceState *source, const GfxCmdB
             v3[0] = FLT_MAX;
             v3[1] = FLT_MAX;
             v3[2] = FLT_MAX;
-            v3[3] = 0.0;
+            v3[3] = 0.0f;
         }
         else
         {
             source->constVersions[constant] = 1;
         }
     }
-    if (source->shadowableLightForShadowLookupMatrix)
-        MyAssertHandler(
-            ".\\r_state_utils.cpp",
-            57,
-            1,
-            "%s",
-            "source->shadowableLightForShadowLookupMatrix == PRIMARY_LIGHT_NONE");
-    source->skinnedPlacement.base.quat[3] = 1.0;
-    source->skinnedPlacement.scale = 1.0;
+
+    iassert(source->shadowableLightForShadowLookupMatrix == PRIMARY_LIGHT_NONE);
+
+    source->skinnedPlacement.base.quat[3] = 1.0f;
+    source->skinnedPlacement.scale = 1.0f;
     source->cameraView = cameraView;
 }
 

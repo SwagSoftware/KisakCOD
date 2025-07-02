@@ -150,6 +150,7 @@ unsigned int __cdecl R_TessCodeMeshList(const GfxDrawSurfListArgs *listArgs, Gfx
     R_TrackPrims(context.state, GFX_PRIM_STATS_FX);
     argCount = 0;
     drawSurfIndex = 0;
+
     do
     {
         codeMesh = &data->codeMeshes[drawSurf.fields.objectId];
@@ -197,6 +198,7 @@ unsigned int __cdecl R_TessCodeMeshList(const GfxDrawSurfListArgs *listArgs, Gfx
             break;
         drawSurf.fields = drawSurfList[drawSurfIndex].fields;
     } while ((drawSurf.packed & 0xFFFFFFFFE0000000uLL) == drawSurfKey);
+
     if (args.triCount)
     {
         args.baseIndex = R_SetIndexData(&context.state->prim, indices, args.triCount);
@@ -1301,8 +1303,7 @@ unsigned int __cdecl R_TessXModelRigidSkinnedDrawSurfList(
     baseTechType = info->baseTechType;
     if (r_logFile->current.integer)
     {
-        v2 = va("--- R_TessXModelRigidSkinnedDrawSurfList( %s ) ---\n", context.state->material->info.name);
-        RB_LogPrint(v2);
+        RB_LogPrint(va("--- R_TessXModelRigidSkinnedDrawSurfList( %s ) ---\n", context.state->material->info.name));
     }
     drawSurfCount = info->drawSurfCount - listArgs->firstDrawSurfIndex;
     drawSurfList = &info->drawSurfs[listArgs->firstDrawSurfIndex];
@@ -1377,56 +1378,6 @@ unsigned int __cdecl R_TessXModelRigidSkinnedDrawSurfList(
     } while (drawSurfIndex != drawSurfCount && ((drawSurf.packed & DRAWSURF_KEY_MASK) == drawSurfKey));
     RB_EndTrackImmediatePrims();
     return drawSurfIndex;
-}
-
-void __cdecl R_DrawBspDrawSurfsLitPreTess(const unsigned int *primDrawSurfPos, GfxCmdBufContext context)
-{
-    unsigned int baseIndex; // [esp+4h] [ebp-28h] BYREF
-    unsigned int surfIndex; // [esp+8h] [ebp-24h]
-    GfxReadCmdBuf cmdBuf; // [esp+Ch] [ebp-20h] BYREF
-    const srfTriangles_t *tris; // [esp+10h] [ebp-1Ch]
-    const GfxBspPreTessDrawSurf *list; // [esp+14h] [ebp-18h] BYREF
-    unsigned int reflectionProbeIndex; // [esp+18h] [ebp-14h]
-    const GfxSurface *bspSurf; // [esp+1Ch] [ebp-10h]
-    unsigned int index; // [esp+20h] [ebp-Ch]
-    unsigned int lightmapIndex; // [esp+24h] [ebp-8h]
-    unsigned int count; // [esp+28h] [ebp-4h] BYREF
-
-    if (sc_enable->current.enabled)
-        R_SetCodeImageTexture(context.source, 0x10u, gfxRenderTargets[6].image);
-    else
-        R_SetCodeImageTexture(context.source, 0x10u, rgp.whiteImage);
-    cmdBuf.primDrawSurfPos = primDrawSurfPos;
-    while (R_ReadBspPreTessDrawSurfs(&cmdBuf, &list, &count, &baseIndex))
-    {
-        reflectionProbeIndex = 255;
-        lightmapIndex = 31;
-        for (index = 0; index < count; ++index)
-        {
-            surfIndex = list[index].baseSurfIndex;
-            if (surfIndex >= rgp.world->surfaceCount)
-                MyAssertHandler(
-                    ".\\r_draw_bsp.cpp",
-                    623,
-                    0,
-                    "surfIndex doesn't index rgp.world->surfaceCount\n\t%i not in [0, %i)",
-                    surfIndex,
-                    rgp.world->surfaceCount);
-            bspSurf = &rgp.world->dpvs.surfaces[surfIndex];
-            tris = &bspSurf->tris;
-            if (reflectionProbeIndex != bspSurf->reflectionProbeIndex || lightmapIndex != bspSurf->lightmapIndex)
-            {
-                reflectionProbeIndex = bspSurf->reflectionProbeIndex;
-                lightmapIndex = bspSurf->lightmapIndex;
-                R_SetReflectionProbe(context, reflectionProbeIndex);
-                R_SetLightmap(context, lightmapIndex);
-                R_SetupPassPerObjectArgs(context);
-                R_SetupPassPerPrimArgs(context);
-            }
-            R_DrawPreTessTris(&context.state->prim, tris, baseIndex, list[index].totalTriCount);
-            baseIndex += 3 * list[index].totalTriCount;
-        }
-    }
 }
 
 unsigned int __cdecl R_TessTrianglesPreTessList(const GfxDrawSurfListArgs *listArgs, GfxCmdBufContext prepassContext)

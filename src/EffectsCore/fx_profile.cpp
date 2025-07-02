@@ -204,13 +204,13 @@ double __cdecl FX_GetProfileEntryCost(const FxProfileEntry *entry)
     float costEffect; // [esp+Ch] [ebp-8h]
     float costElem; // [esp+10h] [ebp-4h]
 
-    costEffect = (double)entry->effectCount * 0.0009765625;
+    costEffect = (double)entry->effectCount * (1.0f / 1024.0f);
     costElem = (double)(entry->pendingElemCount + entry->activeElemCount) * 0.00048828125;
     v3 = costEffect - costElem;
     if (v3 < 0.0)
         return (float)((double)(entry->pendingElemCount + entry->activeElemCount) * 0.00048828125);
     else
-        return (float)((double)entry->effectCount * 0.0009765625);
+        return (float)((double)entry->effectCount * (1.0f / 1024.0f));
 }
 void __cdecl FX_DrawMarkProfile(int clientIndex, void(__cdecl* drawFunc)(const char*, float*), float* profilePos)
 {

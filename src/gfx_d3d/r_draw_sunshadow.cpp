@@ -47,6 +47,7 @@ void R_DrawSunShadowMap(
 
     R_InitCmdBufSourceState(&state, &viewInfo->input, 0);
     R_SetRenderTargetSize(&state, R_RENDERTARGET_SHADOWMAP_SUN);
+
     if (r_rendererInUse->current.integer || gfxMetrics.shadowmapBuildTechType != TECHNIQUE_BUILD_SHADOWMAP_COLOR)
     {
         x = sm_polygonOffsetBias->current.value * 0.25f * viewInfo->sunShadow.partition[partitionIndex].shadowViewParms.projectionMatrix.m[2][2];
@@ -57,6 +58,7 @@ void R_DrawSunShadowMap(
         x = sm_polygonOffsetBias->current.value * 4.0f * viewInfo->sunShadow.partition[partitionIndex].shadowViewParms.projectionMatrix.m[2][2];
         R_UpdateCodeConstant(&state, 9, x, 0.0f, 0.0f, 0.0f);
     }
+
     R_SetViewportValues(&state, 0, partitionIndex * 1024, 1024, 1024);
     R_DrawCall(
         R_DrawSunShadowMapCallback,

@@ -500,7 +500,7 @@ void __cdecl Com_LoadedSoundList(snd_alias_system_t system)
                 {
                     fileMem = SND_GetSoundFileSize((unsigned int*)&aliases[i].soundFile->u.loadSnd->sound.info.format);
                     totalMem += fileMem;
-                    Com_Printf(9, "%-64s %7.1f KB\n", filename, fileMem * 0.0009765625);
+                    Com_Printf(9, "%-64s %7.1f KB\n", filename, fileMem * (1.0f / 1024.0f));
                 }
                 else
                 {

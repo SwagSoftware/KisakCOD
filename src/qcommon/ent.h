@@ -1,37 +1,6 @@
 #pragma once
 
-enum trType_t : __int32
-{                                       // XREF: trajectory_t/r
-    TR_STATIONARY = 0x0,
-    TR_INTERPOLATE = 0x1,
-    TR_LINEAR = 0x2,
-    TR_LINEAR_STOP = 0x3,
-    TR_SINE = 0x4,
-    TR_GRAVITY = 0x5,
-    TR_ACCELERATE = 0x6,
-    TR_DECELERATE = 0x7,
-    TR_PHYSICS = 0x8,
-    TR_FIRST_RAGDOLL = 0x9,
-    TR_RAGDOLL = 0x9,
-    TR_RAGDOLL_GRAVITY = 0xA,
-    TR_RAGDOLL_INTERPOLATE = 0xB,
-    TR_LAST_RAGDOLL = 0xB,
-};
-
-struct trajectory_t // sizeof=0x24
-{                                       // XREF: LerpEntityState/r
-                                        // LerpEntityState/r ...
-    trType_t trType;                    // XREF: ScriptMover_SetupMoveSpeed+563/w
-    // .data:00946420/o
-    int trTime;                         // XREF: ScriptMover_SetupMoveSpeed+570/w
-    // VEH_TouchEntities+1DB/o ...
-    int trDuration;                     // XREF: ScriptMover_SetupMoveSpeed+583/w
-    // ScriptMover_SetupMoveSpeed+642/r ...
-    float trBase[3];                    // XREF: Mantle_FindMantleSurface+244/o
-    // FX_UpdateElementPosition+5B/o ...
-    float trDelta[3];                   // XREF: CountBitsEnabled(uint)+1B/o
-    // CountBitsEnabled(uint)+77/o ...
-};
+#include <universal/q_shared.h>
 
 struct LerpEntityStateTurret // sizeof=0xC
 {                                       // XREF: LerpEntityStateTypeUnion/r

@@ -2161,24 +2161,10 @@ void __cdecl R_SetViewport(GfxCmdBufState *state, const GfxViewport *viewport)
 
 void __cdecl R_SetViewportStruct(GfxCmdBufSourceState *source, const GfxViewport *viewport)
 {
-    if (viewport->width <= 0)
-        MyAssertHandler(".\\r_state.cpp", 1213, 0, "%s\n\t(viewport->width) = %i", "(viewport->width > 0)", viewport->width);
-    if (viewport->height <= 0)
-        MyAssertHandler(
-            ".\\r_state.cpp",
-            1214,
-            0,
-            "%s\n\t(viewport->height) = %i",
-            "(viewport->height > 0)",
-            viewport->height);
-    if (source->viewportBehavior)
-        MyAssertHandler(
-            ".\\r_state.cpp",
-            1216,
-            0,
-            "%s\n\t(source->viewportBehavior) = %i",
-            "(source->viewportBehavior == GFX_USE_VIEWPORT_FOR_VIEW)",
-            source->viewportBehavior);
+    iassert(viewport->width > 0);
+    iassert(viewport->height > 0);
+    iassert(source->viewportBehavior == GFX_USE_VIEWPORT_FOR_VIEW);
+
     source->sceneViewport = *viewport;
     source->viewMode = VIEW_MODE_NONE;
     source->viewportIsDirty = 1;
@@ -2363,77 +2349,43 @@ GfxViewportBehavior __cdecl R_ViewportBehaviorForRenderTarget(GfxRenderTargetId 
 
 void __cdecl R_SetRenderTarget(GfxCmdBufContext context, GfxRenderTargetId newTargetId)
 {
-    const char *v2; // eax
-    const char *v3; // eax
-
     if (pixelCostMode > GFX_PIXEL_COST_MODE_MEASURE_MSEC)
         newTargetId = RB_PixelCost_OverrideRenderTarget(newTargetId);
+
     if (newTargetId != context.state->renderTargetId)
     {
         if (r_logFile->current.integer)
         {
-            v2 = R_RenderTargetName(newTargetId);
-            v3 = va("\n========== R_SetRenderTarget( %s ) ==========\n\n", v2);
-            RB_LogPrint(v3);
+            RB_LogPrint(va("\n========== R_SetRenderTarget( %s ) ==========\n\n", R_RenderTargetName(newTargetId)));
         }
         R_UpdateStatsTarget(newTargetId);
+
         if (gfxRenderTargets[newTargetId].image)
             R_UnbindImage(context.state, gfxRenderTargets[newTargetId].image);
-        if (context.source->viewportBehavior != R_ViewportBehaviorForRenderTarget(newTargetId))
-            MyAssertHandler(
-                ".\\r_state.cpp",
-                1380,
-                0,
-                "%s",
-                "context.source->viewportBehavior == R_ViewportBehaviorForRenderTarget( newTargetId )");
-        if (context.source->renderTargetHeight != gfxRenderTargets[newTargetId].height)
-            MyAssertHandler(
-                ".\\r_state.cpp",
-                1381,
-                0,
-                "%s",
-                "context.source->renderTargetHeight == (int)gfxRenderTargets[newTargetId].height");
-        if (context.source->renderTargetWidth <= 0)
-            MyAssertHandler(
-                ".\\r_state.cpp",
-                1382,
-                0,
-                "%s\n\t(context.source->renderTargetWidth) = %i",
-                "(context.source->renderTargetWidth > 0)",
-                context.source->renderTargetWidth);
-        if (context.source->renderTargetHeight <= 0)
-            MyAssertHandler(
-                ".\\r_state.cpp",
-                1383,
-                0,
-                "%s\n\t(context.source->renderTargetHeight) = %i",
-                "(context.source->renderTargetHeight > 0)",
-                context.source->renderTargetHeight);
+
+        iassert(context.source->viewportBehavior == R_ViewportBehaviorForRenderTarget(newTargetId));
+        iassert(context.source->renderTargetHeight == (int)gfxRenderTargets[newTargetId].height);
+        iassert(context.source->renderTargetWidth > 0);
+        iassert(context.source->renderTargetHeight > 0);
+
         R_HW_SetRenderTarget(context.state, newTargetId);
         context.state->renderTargetId = newTargetId;
         context.source->viewMode = VIEW_MODE_NONE;
         context.source->viewportIsDirty = 1;
-        if (context.source->renderTargetWidth != gfxRenderTargets[newTargetId].width)
-            MyAssertHandler(
-                ".\\r_state.cpp",
-                1404,
-                0,
-                "%s",
-                "context.source->renderTargetWidth == (int)gfxRenderTargets[newTargetId].width");
+
+        iassert(context.source->renderTargetWidth == (int)gfxRenderTargets[newTargetId].width);
     }
 }
 
 void __cdecl R_HW_SetRenderTarget(GfxCmdBufState *state, GfxRenderTargetId newTargetId)
 {
-    const char *v2; // eax
     const char *v3; // eax
     int v4; // [esp+0h] [ebp-Ch]
     int hr; // [esp+4h] [ebp-8h]
     IDirect3DDevice9 *device; // [esp+8h] [ebp-4h]
 
     device = state->prim.device;
-    if (!device)
-        MyAssertHandler("c:\\trees\\cod3\\src\\gfx_d3d\\r_state.h", 888, 0, "%s", "device");
+    iassert(device);
     if (gfxRenderTargets[state->renderTargetId].surface.color != gfxRenderTargets[newTargetId].surface.color)
     {
         do
@@ -2446,16 +2398,16 @@ void __cdecl R_HW_SetRenderTarget(GfxCmdBufState *state, GfxRenderTargetId newTa
                 do
                 {
                     ++g_disableRendering;
-                    v2 = R_ErrorDescription(hr);
                     Com_Error(
                         ERR_FATAL,
                         "c:\\trees\\cod3\\src\\gfx_d3d\\r_state.h (%i) device->SetRenderTarget( 0, gfxRenderTargets[newTargetId].surf"
                         "ace.color ) failed: %s\n",
                         892,
-                        v2);
+                        R_ErrorDescription(hr));
                 } while (alwaysfails);
             }
         } while (alwaysfails);
+
         state->viewport.x = 0;
         state->viewport.y = 0;
         state->viewport.width = gfxRenderTargets[newTargetId].width;
@@ -2470,19 +2422,17 @@ void __cdecl R_HW_SetRenderTarget(GfxCmdBufState *state, GfxRenderTargetId newTa
         {
             if (r_logFile && r_logFile->current.integer)
                 RB_LogPrint("device->SetDepthStencilSurface( gfxRenderTargets[newTargetId].surface.depthStencil )\n");
-            v4 = device->SetDepthStencilSurface(gfxRenderTargets[newTargetId].surface.depthStencil);
-            if (v4 < 0)
+            if (device->SetDepthStencilSurface(gfxRenderTargets[newTargetId].surface.depthStencil) < 0)
             {
                 do
                 {
                     ++g_disableRendering;
-                    v3 = R_ErrorDescription(v4);
                     Com_Error(
                         ERR_FATAL,
                         "c:\\trees\\cod3\\src\\gfx_d3d\\r_state.h (%i) device->SetDepthStencilSurface( gfxRenderTargets[newTargetId]."
                         "surface.depthStencil ) failed: %s\n",
                         905,
-                        v3);
+                        R_ErrorDescription(v4));
                 } while (alwaysfails);
             }
         } while (alwaysfails);

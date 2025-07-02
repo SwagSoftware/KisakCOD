@@ -323,18 +323,7 @@ void __cdecl R_ForceSetPolygonOffset(IDirect3DDevice9 *device, char stateBits1);
 void __cdecl R_HW_SetPolygonOffset(IDirect3DDevice9 *device, float scale, float bias);
 void __cdecl R_SetMeshStream(GfxCmdBufState *state, GfxMeshData *mesh);
 void __cdecl R_SetCompleteState(IDirect3DDevice9 *device, unsigned int *stateBits);
-#if 0
-// bad sp value at call has been detected, the output may be wrong!
-void  R_DrawCall(
-    void(__cdecl* callback)(const void*, GfxCmdBufSourceState*, GfxCmdBufState*, GfxCmdBufSourceState*, GfxCmdBufState*),
-    const void *userData,
-    GfxCmdBufSourceState *source,
-    const GfxViewInfo *viewInfo,
-    const GfxDrawSurfListInfo *info,
-    const GfxViewParms *viewParms,
-    GfxCmdBuf *cmdBuf,
-    GfxCmdBuf *prepassCmdBuf);
-#else
+
 typedef void (__cdecl*DrawCallCallback)(const void*, GfxCmdBufContext, GfxCmdBufContext);
 void R_DrawCall(
     DrawCallCallback callback,
@@ -345,6 +334,6 @@ void R_DrawCall(
     const GfxViewParms* viewParms,
     GfxCmdBuf* cmdBufEA,
     GfxCmdBuf* prepassCmdBufEA);
-#endif
+
 void __cdecl R_SetCodeConstant(GfxCmdBufSourceState *source, unsigned int constant, float x, float y, float z, float w);
 void __cdecl R_SetAlphaAntiAliasingState(IDirect3DDevice9 *device, __int16 stateBits0);

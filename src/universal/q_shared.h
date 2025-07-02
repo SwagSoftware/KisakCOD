@@ -685,6 +685,64 @@ int __cdecl Com_RealTime(qtime_s *qtime);
 //void __cdecl Com_Memcpy(char *dest, char *src, int count);
 //void __cdecl Com_Memset(unsigned int *dest, int val, int count);
 
+inline bool __cdecl Com_BitCheckAssert(const unsigned int *array, int bitNum, int size)
+{
+	iassert(array);
+	iassert(bitNum < (8 * size));
+	
+	return (array[bitNum >> 5] & (1 << (bitNum & 0x1F))) != 0;
+}
+
+inline void __cdecl Com_BitClearAssert(unsigned int *array, int bitNum, int size)
+{
+	iassert(array);
+	iassert(bitNum < (8 * size));
+
+	array[bitNum >> 5] &= ~(1 << (bitNum & 0x1F));
+}
+
+inline void __cdecl Com_BitSetAssert(unsigned int *array, int bitNum, int size)
+{
+	iassert(array);
+	iassert(bitNum < (8 * size));
+	
+	array[bitNum >> 5] |= 1 << (bitNum & 0x1F);
+}
+
+enum trType_t : __int32
+{                                       // XREF: trajectory_t/r
+	TR_STATIONARY = 0x0,
+	TR_INTERPOLATE = 0x1,
+	TR_LINEAR = 0x2,
+	TR_LINEAR_STOP = 0x3,
+	TR_SINE = 0x4,
+	TR_GRAVITY = 0x5,
+	TR_ACCELERATE = 0x6,
+	TR_DECELERATE = 0x7,
+	TR_PHYSICS = 0x8,
+	TR_FIRST_RAGDOLL = 0x9,
+	TR_RAGDOLL = 0x9,
+	TR_RAGDOLL_GRAVITY = 0xA,
+	TR_RAGDOLL_INTERPOLATE = 0xB,
+	TR_LAST_RAGDOLL = 0xB,
+};
+
+struct trajectory_t // sizeof=0x24
+{                                       // XREF: LerpEntityState/r
+	trType_t trType;                    // XREF: ScriptMover_SetupMoveSpeed+563/w
+	int trTime;                         // XREF: ScriptMover_SetupMoveSpeed+570/w
+	int trDuration;                     // XREF: ScriptMover_SetupMoveSpeed+583/w
+	float trBase[3];                    // XREF: Mantle_FindMantleSurface+244/o
+	float trDelta[3];                   // XREF: CountBitsEnabled(uint)+1B/o
+};
+
+inline bool __cdecl Com_IsRagdollTrajectory(const trajectory_t *trajectory)
+{
+	iassert(trajectory);
+	
+	return trajectory->trType >= TR_FIRST_RAGDOLL && trajectory->trType <= TR_RAGDOLL_INTERPOLATE;
+}
+
 
 // com_stringtable
 struct StringTable // sizeof=0x10

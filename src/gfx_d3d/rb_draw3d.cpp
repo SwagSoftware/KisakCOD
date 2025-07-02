@@ -422,8 +422,7 @@ void __cdecl RB_StandardDrawCommands(const GfxViewInfo *viewInfo)
     R_DrawDecal(viewInfo, &cmdBuf, 0);
     KISAK_NULLSUB();
     KISAK_NULLSUB();
-    if (viewInfo->isRenderingFullScreen != isRenderingFullScreen)
-        MyAssertHandler(".\\rb_draw3d.cpp", 1170, 0, "%s", "viewInfo->isRenderingFullScreen == isRenderingFullScreen");
+    iassert(viewInfo->isRenderingFullScreen == isRenderingFullScreen);
     R_InitCmdBufSourceState(&gfxCmdBufSourceState, &viewInfo->input, 0);
     memcpy(&gfxCmdBufState, &gfxCmdBufState, sizeof(gfxCmdBufState));
     memset((unsigned __int8 *)gfxCmdBufState.vertexShaderConstState, 0, sizeof(gfxCmdBufState.vertexShaderConstState));
@@ -440,7 +439,6 @@ void __cdecl RB_StandardDrawCommands(const GfxViewInfo *viewInfo)
     if (rg.distortion)
     {
         PROF_SCOPED("RB_ApplyPostEffects");
-        KISAK_NULLSUB();
         R_SetRenderTargetSize(&gfxCmdBufSourceState, R_RENDERTARGET_SCENE);
         R_SetRenderTarget(gfxCmdBufContext, R_RENDERTARGET_SCENE);
         R_Resolve(gfxCmdBufContext, gfxRenderTargets[3].image);
@@ -625,10 +623,11 @@ void __cdecl R_DrawPointLitSurfsCallback(const void *userData, GfxCmdBufContext 
     unsigned int w; // [esp+8h] [ebp-24h]
     unsigned int y; // [esp+Ch] [ebp-20h]
     IDirect3DDevice9 *device; // [esp+14h] [ebp-18h]
-    tagRECT v6; // [esp+18h] [ebp-14h] BYREF
+    tagRECT rect; // [esp+18h] [ebp-14h] BYREF
     const GfxPointLitSurfsInfo *info; // [esp+28h] [ebp-4h]
 
     info = (const GfxPointLitSurfsInfo * )userData;
+
     R_SetRenderTarget(context, R_RENDERTARGET_SCENE);
     R_Set2D(context.source);
     R_DrawQuadMesh(context, rgp.clearAlphaStencilMaterial, info->clearQuadMesh);
@@ -637,14 +636,17 @@ void __cdecl R_DrawPointLitSurfsCallback(const void *userData, GfxCmdBufContext 
     w = info->w;
     y = info->y;
     device = context.state->prim.device;
-    v6.left = info->x;
-    v6.top = y;
-    v6.right = w + v6.left;
-    v6.bottom = h + y;
+
+    rect.left = info->x;
+    rect.top = y;
+    rect.right = w + rect.left;
+    rect.bottom = h + y;
+
     device->SetRenderState(D3DRS_SCISSORTESTENABLE, 1u);
-    //((void(__thiscall *)(IDirect3DDevice9 *, IDirect3DDevice9 *, unsigned int *))device->SetScissorRect)(device, device, v6);
-    device->SetScissorRect(&v6);
+    device->SetScissorRect(&rect);
+
     R_DrawSurfs(context, 0, info->drawSurfInfo);
+
     context.state->prim.device->SetRenderState(D3DRS_SCISSORTESTENABLE, 0);
 }
 
@@ -737,14 +739,8 @@ GfxCmdBufSourceState *RB_DebugShaderDrawCommandsCommon()
         R_InitCmdBufSourceState(gfxCmdBufContext.source, &gfxCmdBufInput, 0);
         gfxCmdBufContext.source->input.data = data;
         memcpy(gfxCmdBufContext.state, &gfxCmdBufState, sizeof(GfxCmdBufState));
-        memset(
-            (unsigned __int8 *)gfxCmdBufContext.state->vertexShaderConstState,
-            0,
-            sizeof(gfxCmdBufContext.state->vertexShaderConstState));
-        memset(
-            (unsigned __int8 *)gfxCmdBufContext.state->pixelShaderConstState,
-            0,
-            sizeof(gfxCmdBufContext.state->pixelShaderConstState));
+        memset(gfxCmdBufContext.state->vertexShaderConstState, 0, sizeof(gfxCmdBufContext.state->vertexShaderConstState));
+        memset(gfxCmdBufContext.state->pixelShaderConstState, 0, sizeof(gfxCmdBufContext.state->pixelShaderConstState));
         R_SetResolvedScene(gfxCmdBufContext);
         R_BeginView(gfxCmdBufContext.source, &viewInfo->sceneDef, &viewInfo->viewParms);
         R_SetViewportStruct(gfxCmdBufContext.source, &viewInfo->displayViewport);
@@ -774,8 +770,8 @@ void RB_StandardDrawCommandsCommon()
             viewInfo->input.data = data;
             R_InitCmdBufSourceState(&gfxCmdBufSourceState, &viewInfo->input, 0);
             memcpy(&gfxCmdBufState, &gfxCmdBufState, sizeof(gfxCmdBufState));
-            memset((unsigned __int8 *)gfxCmdBufState.vertexShaderConstState, 0, sizeof(gfxCmdBufState.vertexShaderConstState));
-            memset((unsigned __int8 *)gfxCmdBufState.pixelShaderConstState, 0, sizeof(gfxCmdBufState.pixelShaderConstState));
+            memset(gfxCmdBufState.vertexShaderConstState, 0, sizeof(gfxCmdBufState.vertexShaderConstState));
+            memset(gfxCmdBufState.pixelShaderConstState, 0, sizeof(gfxCmdBufState.pixelShaderConstState));
             R_SetResolvedScene(gfxCmdBufContext);
             R_BeginView(&gfxCmdBufSourceState, &viewInfo->sceneDef, &viewInfo->viewParms);
             R_SetViewportStruct(&gfxCmdBufSourceState, &viewInfo->displayViewport);
@@ -796,8 +792,8 @@ void RB_StandardDrawCommandsCommon()
             R_InitCmdBufSourceState(&gfxCmdBufSourceState, &gfxCmdBufInput, 0);
             gfxCmdBufSourceState.input.data = backEndData;
             memcpy(&gfxCmdBufState, &gfxCmdBufState, sizeof(gfxCmdBufState));
-            memset((unsigned __int8 *)gfxCmdBufState.vertexShaderConstState, 0, sizeof(gfxCmdBufState.vertexShaderConstState));
-            memset((unsigned __int8 *)gfxCmdBufState.pixelShaderConstState, 0, sizeof(gfxCmdBufState.pixelShaderConstState));
+            memset(gfxCmdBufState.vertexShaderConstState, 0, sizeof(gfxCmdBufState.vertexShaderConstState));
+            memset(gfxCmdBufState.pixelShaderConstState, 0, sizeof(gfxCmdBufState.pixelShaderConstState));
             R_SetRenderTargetSize(&gfxCmdBufSourceState, R_RENDERTARGET_FRAME_BUFFER);
             R_SetRenderTarget(gfxCmdBufContext, R_RENDERTARGET_FRAME_BUFFER);
             R_BeginView(&gfxCmdBufSourceState, &viewInfo->sceneDef, &viewInfo->viewParms);
@@ -814,21 +810,15 @@ void RB_StandardDrawCommandsCommon()
         R_SetViewportStruct(&gfxCmdBufSourceState, &viewInfoa->displayViewport);
         R_Set2D(&gfxCmdBufSourceState);
         memcpy(&gfxCmdBufState, &gfxCmdBufState, sizeof(gfxCmdBufState));
-        memset((unsigned __int8 *)gfxCmdBufState.vertexShaderConstState, 0, sizeof(gfxCmdBufState.vertexShaderConstState));
-        memset((unsigned __int8 *)gfxCmdBufState.pixelShaderConstState, 0, sizeof(gfxCmdBufState.pixelShaderConstState));
+        memset(gfxCmdBufState.vertexShaderConstState, 0, sizeof(gfxCmdBufState.vertexShaderConstState));
+        memset(gfxCmdBufState.pixelShaderConstState, 0, sizeof(gfxCmdBufState.pixelShaderConstState));
         if (viewInfoa->dynamicShadowType == SHADOW_COOKIE && sc_showOverlay->current.enabled)
             RB_ShadowCookieOverlay();
         if (viewInfoa->dynamicShadowType == SHADOW_MAP && sm_showOverlay->current.integer)
         {
-            if (sm_showOverlay->current.integer != 1 && sm_showOverlay->current.integer != 2)
-                MyAssertHandler(
-                    ".\\rb_draw3d.cpp",
-                    1432,
-                    0,
-                    "%s\n\t(sm_showOverlay->current.integer) = %i",
-                    "(sm_showOverlay->current.integer == GFX_SM_OVERLAY_SUN || sm_showOverlay->current.integer == GFX_SM_OVERLAY_SPOT)",
-                    sm_showOverlay->current.integer);
-            if (sm_showOverlay->current.integer == 1)
+            iassert(sm_showOverlay->current.integer == GFX_SM_OVERLAY_SUN || sm_showOverlay->current.integer == GFX_SM_OVERLAY_SPOT);
+
+            if (sm_showOverlay->current.integer == GFX_SM_OVERLAY_SUN)
                 RB_DrawSunShadowOverlay();
             else
                 RB_DrawSpotShadowOverlay();

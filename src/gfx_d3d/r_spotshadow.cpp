@@ -67,25 +67,12 @@ char __cdecl R_AddSpotShadowsForLight(
     unsigned int tileCount; // [esp+18h] [ebp-Ch]
     unsigned int spotShadowIndex; // [esp+20h] [ebp-4h]
 
-    if (!light)
-        MyAssertHandler(".\\r_spotshadow.cpp", 189, 0, "%s", "light");
-    if (light->type != 2 && light->type != 3)
-        MyAssertHandler(
-            ".\\r_spotshadow.cpp",
-            190,
-            0,
-            "%s\n\t(light->type) = %i",
-            "(light->type == GFX_LIGHT_TYPE_SPOT || light->type == GFX_LIGHT_TYPE_OMNI)",
-            light->type);
+    iassert(light);
+    iassert(light->type == GFX_LIGHT_TYPE_SPOT || light->type == GFX_LIGHT_TYPE_OMNI);
+
     spotShadowIndex = viewInfo->spotShadowCount;
-    if (spotShadowIndex >= 4)
-        MyAssertHandler(
-            ".\\r_spotshadow.cpp",
-            193,
-            0,
-            "spotShadowIndex doesn't index R_SPOTSHADOW_TILE_COUNT\n\t%i not in [0, %i)",
-            spotShadowIndex,
-            4);
+    bcassert(spotShadowIndex, R_SPOTSHADOW_TILE_COUNT);
+
     ++viewInfo->spotShadowCount;
     light->spotShadowIndex = spotShadowIndex;
     if (shadowableLightIndex != (unsigned __int8)shadowableLightIndex)
@@ -99,8 +86,7 @@ char __cdecl R_AddSpotShadowsForLight(
     viewInfo->spotShadows[spotShadowIndex].shadowableLightIndex = shadowableLightIndex;
     viewInfo->spotShadows[spotShadowIndex].light = light;
     viewInfo->spotShadows[spotShadowIndex].fade = spotShadowFade;
-    v6 = sm_qualitySpotShadow->current.enabled
-        && !Com_BitCheckAssert(frontEndDataOut->shadowableLightHasShadowMap, rgp.world->sunPrimaryLightIndex, 32);
+    v6 = sm_qualitySpotShadow->current.enabled && !Com_BitCheckAssert(frontEndDataOut->shadowableLightHasShadowMap, rgp.world->sunPrimaryLightIndex, 32);
     if (v6 && spotShadowIndex < 2)
     {
         viewInfo->spotShadows[spotShadowIndex].viewport.x = 0;
@@ -127,7 +113,7 @@ char __cdecl R_AddSpotShadowsForLight(
         viewInfo->spotShadows[spotShadowIndex].renderTargetId = R_RENDERTARGET_SHADOWMAP_SPOT;
         viewInfo->spotShadows[spotShadowIndex].pixelAdjust[0] = 0.00048828125f;
         viewInfo->spotShadows[spotShadowIndex].pixelAdjust[1] = 0.00024414062f;
-        viewInfo->spotShadows[spotShadowIndex].pixelAdjust[2] = 0.0009765625f;
+        viewInfo->spotShadows[spotShadowIndex].pixelAdjust[2] = (1.0f / 1024.0f);
         viewInfo->spotShadows[spotShadowIndex].pixelAdjust[3] = -0.00012207031f;
         if (v6)
             viewInfo->spotShadows[spotShadowIndex].clearScreen = spotShadowIndex == 2;
@@ -423,12 +409,17 @@ void __cdecl R_DrawSpotShadowMapCallback(
     GfxCmdBufContext context,
     GfxCmdBufContext prepassContext)
 {
-    R_SetRenderTarget(context, *((GfxRenderTargetId*)userData + 114));
-    if (*((_DWORD*)userData + 119))
+    GfxSpotShadow *shadow = (GfxSpotShadow *)userData;
+
+    R_SetRenderTarget(context, shadow->renderTargetId);
+
+    if (shadow->clearScreen)
         R_ClearScreen(context.state->prim.device, 3u, shadowmapClearColor, 1.0, 0, 0);
+
     if (!gfxMetrics.hasHardwareShadowmap)
-        R_DrawQuadMesh(context, rgp.shadowClearMaterial, *((GfxMeshData**)userData + 120));
-    R_DrawSurfs(context, 0, (const GfxDrawSurfListInfo*)((char*)userData + 396));
+        R_DrawQuadMesh(context, rgp.shadowClearMaterial, shadow->clearMesh);
+
+    R_DrawSurfs(context, 0, &shadow->info);
 }
 void __fastcall R_DrawSpotShadowMapArray(const GfxViewInfo *viewInfo, GfxCmdBuf *cmdBuf)
 {

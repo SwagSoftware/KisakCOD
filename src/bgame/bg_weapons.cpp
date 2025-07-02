@@ -579,21 +579,6 @@ int __cdecl BG_TakePlayerWeapon(playerState_s *ps, unsigned int weaponIndex, int
     return 1;
 }
 
-void __cdecl Com_BitClearAssert(unsigned int *array, int bitNum, int size)
-{
-    if (!array)
-        MyAssertHandler("c:\\trees\\cod3\\src\\bgame\\../universal/q_shared.h", 718, 0, "%s", "array");
-    if (bitNum >= (unsigned int)(8 * size))
-        MyAssertHandler(
-            "c:\\trees\\cod3\\src\\bgame\\../universal/q_shared.h",
-            719,
-            0,
-            "bitNum doesn't index size * 8\n\t%i not in [0, %i)",
-            bitNum,
-            8 * size);
-    array[bitNum >> 5] &= ~(1 << (bitNum & 0x1F));
-}
-
 int __cdecl AmmoAfterWeaponRemoved(const playerState_s *ps, unsigned int weaponIndex)
 {
     int result; // [esp+4h] [ebp-8h]

@@ -10,18 +10,12 @@
 
 void __cdecl AssertUninitializedRenderTarget(const GfxRenderTarget *renderTarget)
 {
-    if (!renderTarget)
-        MyAssertHandler(".\\r_rendertarget.cpp", 140, 0, "%s", "renderTarget");
-    if (renderTarget->image)
-        MyAssertHandler(".\\r_rendertarget.cpp", 141, 0, "%s", "renderTarget->image == NULL");
-    if (renderTarget->surface.color)
-        MyAssertHandler(".\\r_rendertarget.cpp", 143, 0, "%s", "renderTarget->surface.color == NULL");
-    if (renderTarget->surface.depthStencil)
-        MyAssertHandler(".\\r_rendertarget.cpp", 144, 0, "%s", "renderTarget->surface.depthStencil == NULL");
-    if (renderTarget->width)
-        MyAssertHandler(".\\r_rendertarget.cpp", 146, 0, "%s", "renderTarget->width == 0");
-    if (renderTarget->height)
-        MyAssertHandler(".\\r_rendertarget.cpp", 147, 0, "%s", "renderTarget->height == 0");
+    iassert(renderTarget);
+    iassert(renderTarget->image == NULL);
+    iassert(renderTarget->surface.color == NULL);
+    iassert(renderTarget->surface.depthStencil == NULL);
+    iassert(renderTarget->width == 0);
+    iassert(renderTarget->height == 0);
 }
 
 bool __cdecl R_IsDepthStencilFormatOk(_D3DFORMAT renderTargetFormat, _D3DFORMAT depthStencilFormat)

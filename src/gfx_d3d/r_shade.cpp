@@ -48,20 +48,21 @@ int __cdecl R_SetIndexData(GfxCmdBufPrimState *state, unsigned __int8 *indices, 
     baseIndex = R_ReserveIndexData(state, triCount);
     indexDataSize = 6 * triCount;
     ib = gfxBuf.dynamicIndexBuffer->buffer;
-    if (!ib)
-        MyAssertHandler(".\\r_shade.cpp", 633, 0, "%s", "ib");
+    iassert(ib);
+
     if (gfxBuf.dynamicIndexBuffer->used)
     {
         PROF_SCOPED("LockIndexBufferNoOverwrite");
-        lockFlags = 4096;
+        lockFlags = D3DLOCK_NOOVERWRITE;
         bufferData = (unsigned __int8 *)R_LockIndexBuffer(ib, 2 * gfxBuf.dynamicIndexBuffer->used, indexDataSize, lockFlags);
     }
     else
     {
         PROF_SCOPED("LockIndexBufferDiscard");
-        lockFlags = 0x2000;
+        lockFlags = D3DLOCK_DISCARD;
         bufferData = (unsigned __int8 *)R_LockIndexBuffer(ib, 2 * gfxBuf.dynamicIndexBuffer->used, indexDataSize, lockFlags);
     }
+
     memcpy(bufferData, indices, indexDataSize);
     R_UnlockIndexBuffer(ib);
     if (state->indexBuffer != ib)
@@ -137,23 +138,13 @@ void __cdecl R_SetVertexShaderConstantFromCode(GfxCmdBufContext context, const M
 
 GfxCmdBufInput *__cdecl R_GetCodeConstant(GfxCmdBufContext context, unsigned int constant)
 {
-    const char *v2; // eax
+    iassert(context.state);
+    iassert(context.source);
+    bcassert(constant, CONST_SRC_CODE_COUNT_FLOAT4);
 
-    if (!context.state)
-        MyAssertHandler(".\\r_shade.cpp", 25, 0, "%s", "context.state");
-    if (!context.source)
-        MyAssertHandler(".\\r_shade.cpp", 26, 0, "%s", "context.source");
-    if (constant >= 0x3A)
-        MyAssertHandler(
-            ".\\r_shade.cpp",
-            27,
-            0,
-            "constant doesn't index CONST_SRC_CODE_COUNT_FLOAT4\n\t%i not in [0, %i)",
-            constant,
-            58);
     if (!context.source->constVersions[constant])
     {
-        v2 = va(
+        const char * v2 = va(
             "const %i mtl %s tech %s vs %s ps %s",
             constant,
             context.state->material->info.name,
@@ -162,6 +153,7 @@ GfxCmdBufInput *__cdecl R_GetCodeConstant(GfxCmdBufContext context, unsigned int
             context.state->pass->pixelShader->name);
         MyAssertHandler(".\\r_shade.cpp", 29, 0, "%s\n\t%s", "context.source->constVersions[constant]", v2);
     }
+
     return (GfxCmdBufInput *)((char *)&context.source->input + 16 * constant);
 }
 

@@ -1270,7 +1270,6 @@ void __cdecl BG_InitWeaponString(int index, const char *name);
 void __cdecl BG_InitWeaponStrings();
 void __cdecl BG_ParseCommands(const char **input, animScriptItem_t *scriptItem, animScriptData_t *scriptData);
 int __cdecl GetValueForBitfield(unsigned int bitfield);
-bool __cdecl Com_BitCheckAssert(const unsigned int *array, int bitNum, int size);
 int __cdecl BG_PlayAnim(
     playerState_s *ps,
     int animNum,
@@ -1295,7 +1294,6 @@ int __cdecl BG_AnimScriptEvent(playerState_s *ps, scriptAnimEventTypes_t event, 
 void __cdecl BG_SetConditionValue(unsigned int client, unsigned int condition, unsigned __int64 value);
 const char *__cdecl BG_GetConditionString(int condition, unsigned int value);
 void __cdecl BG_SetConditionBit(unsigned int client, int condition, int value);
-void __cdecl Com_BitSetAssert(unsigned int *array, int bitNum, int size);
 unsigned int __cdecl BG_GetConditionBit(const clientInfo_t *ci, unsigned int condition);
 animScriptData_t *__cdecl BG_GetAnimationForIndex(int client, unsigned int index);
 void __cdecl BG_AnimUpdatePlayerStateConditions(pmove_t *pmove);
@@ -1800,7 +1798,6 @@ bool __cdecl BG_ValidateWeaponNumber(unsigned int weaponIndex);
 bool __cdecl BG_IsWeaponValid(const playerState_s *ps, unsigned int weaponIndex);
 bool __cdecl BG_WeaponBlocksProne(unsigned int weapIndex);
 int __cdecl BG_TakePlayerWeapon(playerState_s *ps, unsigned int weaponIndex, int takeAwayAmmo);
-void __cdecl Com_BitClearAssert(unsigned int *array, int bitNum, int size);
 int __cdecl AmmoAfterWeaponRemoved(const playerState_s *ps, unsigned int weaponIndex);
 int __cdecl BG_GetAmmoPlayerMax(const playerState_s *ps, unsigned int weaponIndex, unsigned int weaponIndexToSkip);
 int __cdecl BG_GetMaxPickupableAmmo(const playerState_s *ps, unsigned int weaponIndex);

@@ -47,3 +47,4 @@ void __cdecl R_DrawPreTessTris(
     unsigned int triCount);
 
 void __cdecl R_DrawBspDrawSurfsPreTess(const unsigned int *primDrawSurfPos, GfxCmdBufContext context);
+void __cdecl R_DrawBspDrawSurfsLitPreTess(const unsigned int *primDrawSurfPos, GfxCmdBufContext context);

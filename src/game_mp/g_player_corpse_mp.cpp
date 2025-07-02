@@ -78,7 +78,6 @@ void __cdecl G_RunCorpseMove(gentity_s *ent)
     int passEntityNum; // [esp+14h] [ebp-E0h]
     bool v5; // [esp+18h] [ebp-DCh]
     bool v6; // [esp+1Ch] [ebp-D8h]
-    trajectory_t *p_pos; // [esp+54h] [ebp-A0h]
     float deltaChange[3]; // [esp+60h] [ebp-94h] BYREF
     bool isRagdoll; // [esp+6Fh] [ebp-85h]
     float origin[3]; // [esp+70h] [ebp-84h] BYREF
@@ -93,13 +92,8 @@ void __cdecl G_RunCorpseMove(gentity_s *ent)
     int mask; // [esp+ECh] [ebp-8h]
     corpseInfo_t *corpseInfo; // [esp+F0h] [ebp-4h]
 
-    p_pos = &ent->s.lerp.pos;
-    if (ent == (gentity_s *)-12)
-        MyAssertHandler("c:\\trees\\cod3\\src\\game_mp\\../universal/q_shared.h", 1957, 0, "%s", "trajectory");
-    v6 = p_pos->trType >= TR_FIRST_RAGDOLL && p_pos->trType <= TR_RAGDOLL_INTERPOLATE;
-    isRagdoll = v6;
-    if (ent->s.eType != 2)
-        MyAssertHandler(".\\game_mp\\g_player_corpse_mp.cpp", 217, 0, "%s", "ent->s.eType == ET_PLAYER_CORPSE");
+    isRagdoll = Com_IsRagdollTrajectory(&ent->s.lerp.pos);
+    iassert(ent->s.eType == ET_PLAYER_CORPSE);
     corpseIndex = G_GetPlayerCorpseIndex(ent);
     corpseInfo = &g_scr_data.playerCorpseInfo[corpseIndex];
     haveDelta = G_GetAnimDeltaForCorpse(ent, deltaChange);
@@ -244,16 +238,11 @@ void __cdecl G_RunCorpseMove(gentity_s *ent)
 void __cdecl G_BounceCorpse(gentity_s *ent, corpseInfo_t *corpseInfo, trace_t *trace, float *endpos)
 {
     bool v4; // [esp+0h] [ebp-58h]
-    trajectory_t *p_pos; // [esp+20h] [ebp-38h]
     float vAngles[3]; // [esp+24h] [ebp-34h] BYREF
     float vAxis[3][3]; // [esp+30h] [ebp-28h] BYREF
     bool isRagdoll; // [esp+57h] [ebp-1h]
 
-    p_pos = &ent->s.lerp.pos;
-    if (ent == (gentity_s *)-12)
-        MyAssertHandler("c:\\trees\\cod3\\src\\game_mp\\../universal/q_shared.h", 1957, 0, "%s", "trajectory");
-    v4 = p_pos->trType >= TR_FIRST_RAGDOLL && p_pos->trType <= TR_RAGDOLL_INTERPOLATE;
-    isRagdoll = v4;
+    isRagdoll = Com_IsRagdollTrajectory(&ent->s.lerp.pos);
     ent->s.lerp.pos.trDelta[0] = 0.0;
     ent->s.lerp.pos.trDelta[1] = 0.0;
     ent->s.lerp.pos.trDelta[2] = 0.0;

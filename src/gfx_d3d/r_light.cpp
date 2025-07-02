@@ -29,8 +29,6 @@ struct StaticModelLightCallback // sizeof=0x74
 };
 
 LightGlobals lightGlob;
-int s_lmapPixelsUsedForFalloff;
-
 StaticModelLightCallback g_staticModelLightCallback;
 
 int(__cdecl *allowSurf_0[1])(int, void *) = { R_AllowBspOmniLight };
@@ -47,84 +45,6 @@ void __cdecl R_EnumLightDefs(void(__cdecl *func)(GfxLightDef *, void *), void *d
         if (!header)
             MyAssertHandler(".\\r_light.cpp", 118, 0, "%s", "header.lightDef");
         func(header, data);
-    }
-}
-
-unsigned __int8 *__cdecl R_LoadLightImage(unsigned __int8 *readPos, GfxLightImage *lightImage)
-{
-    unsigned int v3; // [esp+0h] [ebp-18h]
-    unsigned __int8 *readPosa; // [esp+20h] [ebp+8h]
-
-    lightImage->samplerState = *readPos;
-    readPosa = readPos + 1;
-    v3 = strlen((const char *)readPosa);
-    if (v3)
-        lightImage->image = Image_Register((char *)readPosa, 1u, 5);
-    else
-        lightImage->image = 0;
-    return &readPosa[v3 + 1];
-}
-
-void __cdecl R_AllocateFalloffSpaceInLightmaps(GfxLightDef *def)
-{
-    int pixelsNeeded; // [esp+0h] [ebp-4h]
-
-    if (!def)
-        MyAssertHandler(".\\r_light_load_obj.cpp", 66, 0, "%s", "def");
-    if (!def->attenuation.image)
-        MyAssertHandler(".\\r_light_load_obj.cpp", 67, 0, "%s", "def->attenuation.image");
-    pixelsNeeded = def->attenuation.image->width + 2;
-    if (pixelsNeeded + s_lmapPixelsUsedForFalloff > 512)
-        Com_Error(
-            ERR_DROP,
-            "Total pixel width of all attenuation textures plus 2 border pixels is %i > %i",
-            pixelsNeeded + s_lmapPixelsUsedForFalloff,
-            512);
-    def->lmapLookupStart = s_lmapPixelsUsedForFalloff + 1;
-    s_lmapPixelsUsedForFalloff += pixelsNeeded;
-}
-
-GfxLightDef *__cdecl R_LoadLightDef(const char *name)
-{
-    char v2; // [esp+3h] [ebp-31h]
-    char *v3; // [esp+8h] [ebp-2Ch]
-    const char *v4; // [esp+Ch] [ebp-28h]
-    char *filename; // [esp+20h] [ebp-14h]
-    GfxLightDef *def; // [esp+24h] [ebp-10h]
-    unsigned __int8 *file; // [esp+28h] [ebp-Ch] BYREF
-    int fileSize; // [esp+2Ch] [ebp-8h]
-    const unsigned __int8 *readPos; // [esp+30h] [ebp-4h]
-
-    if (!name)
-        MyAssertHandler(".\\r_light_load_obj.cpp", 88, 0, "%s", "name");
-    filename = va("lights/%s", name);
-    fileSize = FS_ReadFile(filename, (void **)&file);
-    if (fileSize < 0)
-        return 0;
-    if (fileSize)
-    {
-        def = (GfxLightDef *)Hunk_Alloc(0x10u, "R_RegisterLightDef", 20);
-        def->name = (const char *)Hunk_Alloc(strlen(name) + 1, "R_RegisterLightDef", 20);
-        if (!def)
-            MyAssertHandler(".\\r_light_load_obj.cpp", 103, 0, "%s", "def");
-        readPos = file;
-        readPos = R_LoadLightImage(file, &def->attenuation);
-        v4 = name;
-        v3 = (char *)def->name;
-        do
-        {
-            v2 = *v4;
-            *v3++ = *v4++;
-        } while (v2);
-        I_strlwr((char *)def->name);
-        FS_FreeFile((char *)file);
-        R_AllocateFalloffSpaceInLightmaps(def);
-        return def;
-    }
-    else
-    {
-        FS_FreeFile((char *)file);
-        return 0;
     }
 }
 
@@ -333,27 +253,20 @@ bool __cdecl R_LightImportanceGreaterEqual(const GfxLight *light0, const GfxLigh
 
 void __cdecl R_GetBspLightSurfs(const GfxLight **visibleLights, int visibleCount)
 {
-    const GfxLight *light; // [esp+0h] [ebp-3Ch]
-    GfxBspDrawSurfData surfData[2]; // [esp+4h] [ebp-38h] BYREF
-    int lightIndex; // [esp+38h] [ebp-4h]
+    GfxBspDrawSurfData surfData[2];
 
-    if (!visibleCount)
-        MyAssertHandler(".\\r_light.cpp", 611, 0, "%s", "visibleCount");
-    if (!rgp.world)
-        MyAssertHandler(".\\r_light.cpp", 612, 0, "%s", "rgp.world");
-    R_InitBspDrawSurf(surfData);
+    iassert(visibleCount);
+    iassert(rgp.world);
+
+    R_InitBspDrawSurf(&surfData[0]);
     R_InitBspDrawSurf(&surfData[1]);
-    for (lightIndex = 0; lightIndex < visibleCount; ++lightIndex)
+
+    for (int lightIndex = 0; lightIndex < visibleCount; ++lightIndex)
     {
-        light = visibleLights[lightIndex];
-        if (light->type != 3 && light->type != 2)
-            MyAssertHandler(
-                ".\\r_light.cpp",
-                621,
-                0,
-                "%s",
-                "light->type == GFX_LIGHT_TYPE_OMNI || light->type == GFX_LIGHT_TYPE_SPOT");
-        if (light->type == 3)
+        const GfxLight *light = visibleLights[lightIndex];
+        iassert(light->type == GFX_LIGHT_TYPE_OMNI || light->type == GFX_LIGHT_TYPE_SPOT);
+
+        if (light->type == GFX_LIGHT_TYPE_OMNI)
             R_GetBspOmniLightSurfs(light, lightIndex, surfData);
         else
             R_GetBspSpotLightSurfs(light, lightIndex, surfData);
@@ -460,18 +373,20 @@ void __cdecl R_GetBspSpotLightSurfs(const GfxLight *light, int lightIndex, GfxBs
     GfxDrawSurf *surfaceMaterials; // [esp+250h] [ebp-10h]
     unsigned int listSurfIndex; // [esp+254h] [ebp-Ch]
     unsigned int surfCounts[2]; // [esp+258h] [ebp-8h] BYREF
-    //int savedregs; // [esp+260h] [ebp+0h] BYREF
 
-    if (lightIndex >= 1)
-        MyAssertHandler(".\\r_light.cpp", 520, 0, "%s", "lightIndex < MAX_VISIBLE_SHADOWABLE_DLIGHTS");
+    iassert(lightIndex < MAX_VISIBLE_SHADOWABLE_DLIGHTS);
+
     surfaceVisData = rgp.world->dpvs.surfaceVisData[0];
     surfaceMaterials = rgp.world->dpvs.surfaceMaterials;
+
     mins[0] = light->origin[0] - light->radius;
     mins[1] = light->origin[1] - light->radius;
     mins[2] = light->origin[2] - light->radius;
+
     maxs[0] = light->origin[0] + light->radius;
     maxs[1] = light->origin[1] + light->radius;
     maxs[2] = light->origin[2] + light->radius;
+
     drawSurfs[0] = scene.visLight[lightIndex].drawSurfs;
     surfaces[0] = (GfxSurface **)&drawSurfs[0][512];
     drawSurfs[1] = scene.visLightShadow[lightIndex].drawSurfs;

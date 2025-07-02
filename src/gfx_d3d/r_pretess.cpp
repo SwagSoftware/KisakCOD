@@ -3,6 +3,7 @@
 #include <universal/q_shared.h>
 #include "r_scene.h"
 #include "r_buffers.h"
+#include "r_drawsurf.h"
 #include "rb_tess.h"
 #include "r_draw_staticmodel.h"
 #include <universal/profile.h>
@@ -10,20 +11,20 @@
 
 void __cdecl R_InitDrawSurfListInfo(GfxDrawSurfListInfo *info)
 {
-    if (!Sys_IsMainThread())
-        MyAssertHandler(".\\r_pretess.cpp", 74, 0, "%s", "Sys_IsMainThread()");
+    iassert(Sys_IsMainThread());
+
     info->drawSurfs = 0;
     info->drawSurfCount = 0;
     info->baseTechType = TECHNIQUE_DEPTH_PREPASS;
     info->viewInfo = 0;
-    info->viewOrigin[0] = 0.0;
-    info->viewOrigin[1] = 0.0;
-    info->viewOrigin[2] = 0.0;
-    info->viewOrigin[3] = 0.0;
+    info->viewOrigin[0] = 0.0f;
+    info->viewOrigin[1] = 0.0f;
+    info->viewOrigin[2] = 0.0f;
+    info->viewOrigin[3] = 0.0f;
     info->light = 0;
     info->cameraView = 0;
-    if (info->light)
-        MyAssertHandler(".\\r_pretess.cpp", 77, 0, "%s", "!info->light");
+
+    iassert(!info->light);
 }
 
 void __cdecl R_EmitDrawSurfList(GfxDrawSurf *drawSurfs, unsigned int drawSurfCount)
@@ -34,14 +35,18 @@ void __cdecl R_EmitDrawSurfList(GfxDrawSurf *drawSurfs, unsigned int drawSurfCou
 
     iassert(drawSurfs);
 
+    // LWSS ADD from blops
+    if (!drawSurfCount)
+    {
+        return;
+    }
+    // LWSS END
+
     newDrawSurfCount = drawSurfCount + frontEndDataOut->drawSurfCount;
 
     if (newDrawSurfCount <= 0x8000)
     {
-        Com_Memcpy(
-            (char *)&frontEndDataOut->drawSurfs[frontEndDataOut->drawSurfCount],
-            (char *)drawSurfs,
-            8 * drawSurfCount);
+        Com_Memcpy(&frontEndDataOut->drawSurfs[frontEndDataOut->drawSurfCount], drawSurfs, 8 * drawSurfCount);
         frontEndDataOut->drawSurfCount = newDrawSurfCount;
     }
     else
@@ -64,16 +69,9 @@ void __cdecl R_MergeAndEmitDrawSurfLists(unsigned int firstStage, unsigned int s
     unsigned int dstStageIndex; // [esp+D8h] [ebp-8Ch]
     unsigned int drawSurfCount[34]; // [esp+DCh] [ebp-88h]
     unsigned int stageCounta; // [esp+170h] [ebp+Ch]
+    
+    iassert(stageCount >= 1 && stageCount <= DRAW_SURF_TYPE_COUNT);
 
-    if (!stageCount || stageCount > 0x22)
-        MyAssertHandler(
-            ".\\r_pretess.cpp",
-            214,
-            0,
-            "stageCount not in [1, DRAW_SURF_TYPE_COUNT]\n\t%i not in [%i, %i]",
-            stageCount,
-            1,
-            34);
     freeDrawSurfCount = 0x8000 - frontEndDataOut->drawSurfCount;
     if (freeDrawSurfCount > 0)
     {
@@ -98,20 +96,12 @@ void __cdecl R_MergeAndEmitDrawSurfLists(unsigned int firstStage, unsigned int s
             stageCounta = dstStageIndex;
             if (dstStageIndex == 1)
             {
-                {
-                    PROF_SCOPED("R_EmitDrawSurfList");
-                    Com_Memcpy(
-                        (char *)&frontEndDataOut->drawSurfs[frontEndDataOut->drawSurfCount],
-                        (char *)drawSurfs[0],
-                        8 * drawSurfCount[0]);
-                    frontEndDataOut->drawSurfCount += drawSurfCount[0];
-                }
+                R_EmitDrawSurfList(drawSurfs[0], drawSurfCount[0]);
                 return;
             }
             primarySortKey = drawSurfs[0]->fields.primarySortKey;
             for (stageIndexa = 1; stageIndexa < dstStageIndex; ++stageIndexa)
             {
-                //if ((int)((drawSurfs[stageIndexa]->packed >> 54) & 0x3F) < primarySortKey)
                 if (drawSurfs[stageIndexa]->fields.primarySortKey < primarySortKey)
                     v3 = drawSurfs[stageIndexa]->fields.primarySortKey;
                 else
@@ -122,7 +112,7 @@ void __cdecl R_MergeAndEmitDrawSurfLists(unsigned int firstStage, unsigned int s
             dstStageIndex = 0;
             for (srcStageIndexa = 0; srcStageIndexa < stageCounta; ++srcStageIndexa)
             {
-                v2 = R_EmitDrawSurfListForKey(drawSurfs[srcStageIndexa], drawSurfCount[srcStageIndexa], primarySortKey);
+                v2 = R_EmitDrawSurfListForKey(drawSurfs[srcStageIndexa], drawSurfCount[srcStageIndexa], primarySortKey); // KISAKTODO: change to blops style
                 drawSurfs[dstStageIndex] = &drawSurfs[srcStageIndexa][v2];
                 drawSurfCount[dstStageIndex] = drawSurfCount[srcStageIndexa] - v2;
                 dstStageIndex += drawSurfCount[dstStageIndex] != 0;
@@ -142,12 +132,10 @@ unsigned int __cdecl R_EmitDrawSurfListForKey(
 
     PROF_SCOPED("R_EmitDrawSurfList");
 
-    if (!drawSurfs)
-        MyAssertHandler(".\\r_pretess.cpp", 138, 0, "%s", "drawSurfs");
-    if (!drawSurfCount)
-        MyAssertHandler(".\\r_pretess.cpp", 139, 0, "%s", "drawSurfCount");
-    if (drawSurfCount + frontEndDataOut->drawSurfCount > 0x8000)
-        MyAssertHandler(".\\r_pretess.cpp", 140, 0, "%s", "frontEndDataOut->drawSurfCount + drawSurfCount <= MAX_DRAWSURFS");
+    iassert(drawSurfs);
+    iassert(drawSurfCount);
+    iassert(frontEndDataOut->drawSurfCount + drawSurfCount <= MAX_DRAWSURFS);
+
     outDrawSurf = &frontEndDataOut->drawSurfs[frontEndDataOut->drawSurfCount];
     usedCount = 0;
     do
@@ -155,7 +143,8 @@ unsigned int __cdecl R_EmitDrawSurfListForKey(
         drawSurf = drawSurfs[usedCount];
         if (drawSurf.fields.primarySortKey != primarySortKey)
             break;
-        outDrawSurf[usedCount++] = drawSurf;
+        outDrawSurf[usedCount] = drawSurf;
+        usedCount++;
     } while (usedCount < drawSurfCount);
 
     frontEndDataOut->drawSurfCount += usedCount;

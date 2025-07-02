@@ -2,6 +2,8 @@
 #include "r_rendercmds.h"
 #include "r_scene.h"
 
+#define R_SPOTSHADOW_TILE_COUNT 4
+
 struct GfxSpotShadowEntCmd // sizeof=0x8
 {                                       // ...
     GfxSceneEntity *sceneEnt;           // ...

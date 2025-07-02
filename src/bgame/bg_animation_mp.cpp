@@ -505,21 +505,6 @@ int __cdecl GetValueForBitfield(unsigned int bitfield)
     return 0;
 }
 
-bool __cdecl Com_BitCheckAssert(const unsigned int *array, int bitNum, int size)
-{
-    if (!array)
-        MyAssertHandler("c:\\trees\\cod3\\src\\bgame\\../universal/q_shared.h", 704, 0, "%s", "array");
-    if (bitNum >= (unsigned int)(8 * size))
-        MyAssertHandler(
-            "c:\\trees\\cod3\\src\\bgame\\../universal/q_shared.h",
-            705,
-            0,
-            "bitNum doesn't index size * 8\n\t%i not in [0, %i)",
-            bitNum,
-            8 * size);
-    return (array[bitNum >> 5] & (1 << (bitNum & 0x1F))) != 0;
-}
-
 int __cdecl BG_PlayAnim(
     playerState_s *ps,
     int animNum,
@@ -1246,21 +1231,6 @@ void __cdecl BG_SetConditionBit(unsigned int client, int condition, int value)
     bgs->clientinfo[client].clientConditions[condition][0] = 0;
     bgs->clientinfo[client].clientConditions[condition][1] = 0;
     Com_BitSetAssert(bgs->clientinfo[client].clientConditions[condition], value, 8);
-}
-
-void __cdecl Com_BitSetAssert(unsigned int *array, int bitNum, int size)
-{
-    if (!array)
-        MyAssertHandler("c:\\trees\\cod3\\src\\bgame\\../universal/q_shared.h", 711, 0, "%s", "array");
-    if (bitNum >= (unsigned int)(8 * size))
-        MyAssertHandler(
-            "c:\\trees\\cod3\\src\\bgame\\../universal/q_shared.h",
-            712,
-            0,
-            "bitNum doesn't index size * 8\n\t%i not in [0, %i)",
-            bitNum,
-            8 * size);
-    array[bitNum >> 5] |= 1 << (bitNum & 0x1F);
 }
 
 unsigned int __cdecl BG_GetConditionBit(const clientInfo_t *ci, unsigned int condition)

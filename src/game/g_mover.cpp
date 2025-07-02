@@ -248,10 +248,7 @@ void __cdecl G_MoverTeam(gentity_s *ent)
 
     if (ent->s.lerp.pos.trType != TR_PHYSICS)
     {
-        p_pos = &ent->s.lerp.pos;
-        if (ent == (gentity_s *)-12)
-            MyAssertHandler("c:\\trees\\cod3\\src\\game_mp\\../universal/q_shared.h", 1957, 0, "%s", "trajectory");
-        if (p_pos->trType < TR_FIRST_RAGDOLL || p_pos->trType > TR_RAGDOLL_INTERPOLATE)
+        if (!Com_IsRagdollTrajectory(&ent->s.lerp.pos))
         {
             obstacle = 0;
             pushed_p = pushed;

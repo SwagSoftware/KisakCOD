@@ -876,8 +876,7 @@ void __cdecl R_AddAllStaticModelSurfacesSpotShadow(unsigned int spotShadowIndex,
 
     smodelCount = rgp.world->dpvs.smodelCount;
     smodelDrawInsts = rgp.world->dpvs.smodelDrawInsts;
-    if (!rg.lodParms.valid)
-        MyAssertHandler(".\\r_add_staticmodel.cpp", 1266, 0, "%s", "rg.lodParms.valid");
+    iassert(rg.lodParms.valid);
     scale = rg.lodParms.ramp[0].scale;
     bias = rg.lodParms.ramp[0].bias;
     a[0] = rg.lodParms.origin[0];

@@ -2,6 +2,14 @@
 #include <d3d9.h>
 #include "rb_backend.h"
 
+enum $F8BAC180992631E19A574A0F352E600A : __int32
+{
+    GFX_SM_OVERLAY_OFF = 0x0,
+    GFX_SM_OVERLAY_SUN = 0x1,
+    GFX_SM_OVERLAY_SPOT = 0x2,
+    GFX_SM_OVERLAY_COUNT = 0x3,
+};
+
 struct GfxPointLitSurfsInfo // sizeof=0x1C
 {                                       // ...
     const GfxViewInfo *viewInfo;        // ...

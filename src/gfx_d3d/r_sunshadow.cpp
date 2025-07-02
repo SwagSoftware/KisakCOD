@@ -183,7 +183,7 @@ void __cdecl R_SetupSunShadowMaps(const GfxViewParms *viewParms, GfxSunShadow *s
         R_SetupShadowSurfacesDpvs(shadowViewParms, boundingPolyClipSpacePlanes, planeCount, partitionIndex);
         shadowSampleSize = shadowSampleSize * rg.sunShadowPartitionRatio;
     }
-    partition = sunShadow->partition;
+    //partition = sunShadow->partition;
     R_GetSunShadowLookupMatrix(
         &sunShadow->partition[0].shadowViewParms,
         sunProj,
@@ -311,11 +311,15 @@ void __cdecl R_SetupSunShadowMapProjection(
 
     viewOrgInSunProj[0] = -Vec3Dot(viewParms->origin, (*sunAxis)[1]);
     viewOrgInSunProj[1] = Vec3Dot(viewParms->origin, (*sunAxis)[2]);
+
     minsInSunProj[0][0] = FLT_MAX;
     minsInSunProj[0][1] = FLT_MAX;
+
     maxsInSunProj[0][0] = -FLT_MAX;
     maxsInSunProj[0][1] = -FLT_MAX;
+
     R_GetFrustumNearClipPoints(&viewParms->inverseViewProjectionMatrix, &frustumPoints);
+
     for (pointIndex = 0; pointIndex < 4; ++pointIndex)
     {
         frustumPoint[0] = frustumPoints[pointIndex][0];
@@ -325,27 +329,34 @@ void __cdecl R_SetupSunShadowMapProjection(
         frustumPointsInSunProj[0][pointIndex][1] = Vec3Dot(frustumPoints[pointIndex], (*sunAxis)[2]);
         AddPointToBounds2D(frustumPointsInSunProj[0][pointIndex], minsInSunProj[0], maxsInSunProj[0]);
     }
+
     frustumPointsInSunProj[0][4][0] = viewOrgInSunProj[0];
     frustumPointsInSunProj[0][4][1] = viewOrgInSunProj[1];
+
     minsInSunProj[1][0] = minsInSunProj[0][0];
     minsInSunProj[1][1] = minsInSunProj[0][1];
+
     maxsInSunProj[1][0] = maxsInSunProj[0][0];
     maxsInSunProj[1][1] = maxsInSunProj[0][1];
+
     memcpy(frustumPointsInSunProj[1], frustumPointsInSunProj, 0x20u);
+
     for (pointIndex = 0; pointIndex < 4; ++pointIndex)
     {
         offset[0] = frustumPointsInSunProj[1][pointIndex][0] - viewOrgInSunProj[0];
         offset[1] = frustumPointsInSunProj[1][pointIndex][1] - viewOrgInSunProj[1];
+
         v33 = frustumPointsInSunProj[1][pointIndex + 4];
+
         v34 = 0.75f / rg.sunShadowPartitionRatio;
-        v33[0] = v34 * offset[0] + viewOrgInSunProj[0];
-        v33[1] = v34 * offset[1] + viewOrgInSunProj[1];
+        v33[0] = (v34 * offset[0]) + viewOrgInSunProj[0];
+        v33[1] = (v34 * offset[1]) + viewOrgInSunProj[1];
         AddPointToBounds2D(frustumPointsInSunProj[1][pointIndex + 4], minsInSunProj[1], maxsInSunProj[1]);
     }
     AddPointToBounds2D(viewOrgInSunProj, minsInSunProj[0], maxsInSunProj[0]);
     sizeInSunProj[0] = maxsInSunProj[0][0] - minsInSunProj[0][0];
     sizeInSunProj[1] = maxsInSunProj[0][1] - minsInSunProj[0][1];
-    if (sizeInSunProj[0] - sizeInSunProj[1] < 0.0)
+    if (sizeInSunProj[0] - sizeInSunProj[1] < 0.0f)
         v20 = sizeInSunProj[1];
     else
         v20 = sizeInSunProj[0];
@@ -634,15 +645,15 @@ void __cdecl R_GetSunShadowMapPartitionViewOrgInTextureSpace(
 {
     float v5; // [esp+8h] [ebp-18h]
     float v6; // [esp+Ch] [ebp-14h]
-    float snappedViewOrgInPixels; // [esp+10h] [ebp-10h]
-    float snappedViewOrgInPixels_4; // [esp+14h] [ebp-Ch]
+    float snappedViewOrgInPixels[2]; // [esp+10h] [ebp-10h]
 
-    snappedViewOrgInPixels = (*snappedViewOrgInSunProj - *viewOrgInSunProj) / sampleSize + *viewOrgInPixels;
-    snappedViewOrgInPixels_4 = viewOrgInPixels[1] - (snappedViewOrgInSunProj[1] - viewOrgInSunProj[1]) / sampleSize;
-    v6 = floor(snappedViewOrgInPixels);
-    v5 = floor(snappedViewOrgInPixels_4);
-    viewOrgInTexSpace[0] = v6 * 0.0009765625;
-    viewOrgInTexSpace[1] = v5 * 0.0009765625;
+    snappedViewOrgInPixels[0] = (snappedViewOrgInSunProj[0] - viewOrgInSunProj[0]) / sampleSize + viewOrgInPixels[0];
+    snappedViewOrgInPixels[1] = viewOrgInPixels[1] - (snappedViewOrgInSunProj[1] - viewOrgInSunProj[1]) / sampleSize;
+    v6 = floor(snappedViewOrgInPixels[0]);
+    v5 = floor(snappedViewOrgInPixels[1]);
+
+    viewOrgInTexSpace[0] = v6 * (1.0f / 1024.0f);
+    viewOrgInTexSpace[1] = v5 * (1.0f / 1024.0f);
 }
 
 void __cdecl R_SetupNearRegionPlane(const float *partitionFraction)

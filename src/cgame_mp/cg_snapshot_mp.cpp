@@ -13,16 +13,8 @@
 
 void __cdecl CG_ShutdownEntity(int localClientNum, centity_s *cent)
 {
-    trajectory_t *p_pos; // [esp+4h] [ebp-4h]
-
-    if (cent->pose.isRagdoll)
-        goto LABEL_9;
-    p_pos = &cent->currentState.pos;
-    if (cent == (centity_s *)-104)
-        MyAssertHandler("c:\\trees\\cod3\\src\\cgame_mp\\../universal/q_shared.h", 1957, 0, "%s", "trajectory");
-    if (p_pos->trType >= TR_FIRST_RAGDOLL && p_pos->trType <= TR_RAGDOLL_INTERPOLATE)
+    if (cent->pose.isRagdoll || Com_IsRagdollTrajectory(&cent->currentState.pos))
     {
-    LABEL_9:
         cent->pose.isRagdoll = 0;
         if (cent->pose.ragdollHandle)
         {

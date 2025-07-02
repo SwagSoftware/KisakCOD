@@ -6401,16 +6401,12 @@ void __cdecl GScr_StartRagdoll(scr_entref_t entref)
 
 void __cdecl GScr_IsRagdoll(scr_entref_t entref)
 {
-    bool v1; // [esp+0h] [ebp-Ch]
-    int *p_pos; // [esp+4h] [ebp-8h]
+    bool isRagdoll; // [esp+0h] [ebp-Ch]
     gentity_s *ent; // [esp+8h] [ebp-4h]
 
     ent = GetEntity(entref);
-    p_pos = (int *)&ent->s.lerp.pos;
-    if (ent == (gentity_s *)-12)
-        MyAssertHandler("c:\\trees\\cod3\\src\\game_mp\\../universal/q_shared.h", 1957, 0, "%s", "trajectory");
-    v1 = *p_pos >= 9 && *p_pos <= 11;
-    Scr_AddInt(v1);
+    isRagdoll = Com_IsRagdollTrajectory(&ent->s.lerp.pos);
+    Scr_AddInt(isRagdoll);
 }
 
 void __cdecl GScr_GetCorpseAnim(scr_entref_t entref)

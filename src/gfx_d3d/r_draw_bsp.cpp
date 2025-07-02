@@ -458,3 +458,53 @@ void __cdecl R_DrawBspDrawSurfsPreTess(const unsigned int *primDrawSurfPos, GfxC
         R_DrawPreTessTris(&context.state->prim, prevTris, baseIndex, triCount);
     }
 }
+
+void __cdecl R_DrawBspDrawSurfsLitPreTess(const unsigned int *primDrawSurfPos, GfxCmdBufContext context)
+{
+    unsigned int baseIndex; // [esp+4h] [ebp-28h] BYREF
+    unsigned int surfIndex; // [esp+8h] [ebp-24h]
+    GfxReadCmdBuf cmdBuf; // [esp+Ch] [ebp-20h] BYREF
+    const srfTriangles_t *tris; // [esp+10h] [ebp-1Ch]
+    const GfxBspPreTessDrawSurf *list; // [esp+14h] [ebp-18h] BYREF
+    unsigned int reflectionProbeIndex; // [esp+18h] [ebp-14h]
+    const GfxSurface *bspSurf; // [esp+1Ch] [ebp-10h]
+    unsigned int index; // [esp+20h] [ebp-Ch]
+    unsigned int lightmapIndex; // [esp+24h] [ebp-8h]
+    unsigned int count; // [esp+28h] [ebp-4h] BYREF
+
+    if (sc_enable->current.enabled)
+        R_SetCodeImageTexture(context.source, 0x10u, gfxRenderTargets[6].image);
+    else
+        R_SetCodeImageTexture(context.source, 0x10u, rgp.whiteImage);
+    cmdBuf.primDrawSurfPos = primDrawSurfPos;
+    while (R_ReadBspPreTessDrawSurfs(&cmdBuf, &list, &count, &baseIndex))
+    {
+        reflectionProbeIndex = 255;
+        lightmapIndex = 31;
+        for (index = 0; index < count; ++index)
+        {
+            surfIndex = list[index].baseSurfIndex;
+            if (surfIndex >= rgp.world->surfaceCount)
+                MyAssertHandler(
+                    ".\\r_draw_bsp.cpp",
+                    623,
+                    0,
+                    "surfIndex doesn't index rgp.world->surfaceCount\n\t%i not in [0, %i)",
+                    surfIndex,
+                    rgp.world->surfaceCount);
+            bspSurf = &rgp.world->dpvs.surfaces[surfIndex];
+            tris = &bspSurf->tris;
+            if (reflectionProbeIndex != bspSurf->reflectionProbeIndex || lightmapIndex != bspSurf->lightmapIndex)
+            {
+                reflectionProbeIndex = bspSurf->reflectionProbeIndex;
+                lightmapIndex = bspSurf->lightmapIndex;
+                R_SetReflectionProbe(context, reflectionProbeIndex);
+                R_SetLightmap(context, lightmapIndex);
+                R_SetupPassPerObjectArgs(context);
+                R_SetupPassPerPrimArgs(context);
+            }
+            R_DrawPreTessTris(&context.state->prim, tris, baseIndex, list[index].totalTriCount);
+            baseIndex += 3 * list[index].totalTriCount;
+        }
+    }
+}
