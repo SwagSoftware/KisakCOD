@@ -1,3 +1,7 @@
+#ifndef KISAK_MP
+#error This File is MultiPlayer Only
+#endif
+
 #include "ui_mp.h"
 #include <ui/ui.h>
 #include <qcommon/cmd.h>
@@ -17,7 +21,7 @@
 #include <qcommon/com_playerprofile.h>
 #include <cgame/cg_local.h>
 #include <cgame_mp/cg_local_mp.h>
-#include <server_mp/server.h>
+#include <server_mp/server_mp.h>
 #include <win32/win_input.h>
 #include <universal/timing.h>
 #include <universal/profile.h>

@@ -3,7 +3,7 @@
 #include <script/scr_vm.h>
 #include <game_mp/g_utils_mp.h>
 #include <game_mp/g_public_mp.h>
-#include <server_mp/server.h>
+#include <server_mp/server_mp.h>
 #include <server/sv_game.h>
 
 const char *g_he_font[6] = { "default", "bigfixed", "smallfixed", "objective", "big", "small" }; // idb

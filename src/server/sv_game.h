@@ -1,6 +1,6 @@
 #pragma once
 #include <cgame_mp/cg_local_mp.h>
-#include <server_mp/server.h>
+#include <server_mp/server_mp.h>
 
 
 void __cdecl TRACK_sv_game();

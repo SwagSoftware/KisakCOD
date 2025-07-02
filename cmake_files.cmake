@@ -666,7 +666,7 @@ set(SERVER
 source_group("server" FILES ${SERVER})
 
 set(SERVER_MP
-    "${SRC_DIR}/server_mp/server.h"
+    "${SRC_DIR}/server_mp/server_mp.h"
     "${SRC_DIR}/server_mp/sv_archive_mp.cpp"
     "${SRC_DIR}/server_mp/sv_ccmds_mp.cpp"
     "${SRC_DIR}/server_mp/sv_client_mp.cpp"

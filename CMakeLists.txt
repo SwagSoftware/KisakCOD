@@ -148,6 +148,8 @@ target_link_libraries(${BIN_NAME} PUBLIC $<$<CONFIG:Debug>:TracyClient>) # Enabl
 target_compile_definitions(${BIN_NAME} PUBLIC _CONSOLE)
 target_compile_definitions(${BIN_NAME} PUBLIC _MBCS)
 
+target_compile_definitions(${BIN_NAME} PUBLIC KISAK_MP)
+
 target_include_directories(${BIN_NAME} PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/src")
 target_include_directories(${BIN_NAME} PUBLIC ${DEPS_DIR})
 

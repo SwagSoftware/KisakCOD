@@ -1,6 +1,10 @@
+#ifndef KISAK_MP
+#error This File is MultiPlayer Only
+#endif
+
 #include "g_public_mp.h"
 #include "g_utils_mp.h"
-#include <server_mp/server.h>
+#include <server_mp/server_mp.h>
 #include <server/sv_game.h>
 #include <server/sv_world.h>
 #include <script/scr_vm.h>

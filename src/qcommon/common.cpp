@@ -15,7 +15,7 @@
 #include <universal/com_files.h>
 #include <stringed/stringed_hooks.h>
 #include "files.h"
-#include <server_mp/server.h>
+#include <server_mp/server_mp.h>
 #include <gfx_d3d/r_rendercmds.h>
 #include <script/scr_vm.h>
 #include <gfx_d3d/r_init.h>
@@ -544,6 +544,7 @@ void Com_Error(errorParm_t code, const char* fmt, ...)
     jmp_buf * Value; // eax
     va_list va; // [esp+18h] [ebp+10h] BYREF
 
+    iassert(0);
     va_start(va, fmt);
     Sys_EnterCriticalSection(CRITSECT_COM_ERROR);
     if ((unsigned int)code <= ERR_DROP)

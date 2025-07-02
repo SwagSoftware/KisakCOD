@@ -11,7 +11,7 @@
 #include <universal/com_files.h>
 #include <cgame_mp/cg_local_mp.h>
 #include <devgui/devgui.h>
-#include <server_mp/server.h>
+#include <server_mp/server_mp.h>
 #include <script/scr_debugger.h>
 
 keyname_t keynames[96] =

@@ -1,3 +1,7 @@
+#ifndef KISAK_MP
+#error This File is MultiPlayer Only
+#endif
+
 #include "g_public_mp.h"
 #include <gfx_d3d/r_scene.h>
 #include <EffectsCore/fx_system.h>

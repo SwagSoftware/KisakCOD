@@ -1,3 +1,7 @@
+#ifndef KISAK_MP
+#error This File is MultiPlayer Only
+#endif
+
 #include "g_public_mp.h"
 
 #include <game_mp/g_utils_mp.h>

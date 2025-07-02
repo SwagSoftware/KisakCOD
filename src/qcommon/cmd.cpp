@@ -11,7 +11,7 @@
 #include <universal/com_files.h>
 #include <script/scr_debugger.h>
 #include <server/sv_game.h>
-#include <server_mp/server.h>
+#include <server_mp/server_mp.h>
 #include <universal/profile.h>
 
 static cmd_function_s* cmd_functions = NULL;
@@ -192,15 +192,56 @@ void Cmd_Vstr_f(void) {
 #include <universal/com_files.h>
 #include <format>
 #include <filesystem>
+#include <vector>
 
+static void LoadXAssets()
+{
+
+
+
+#if 0
+    zoneInfo[0].name = gfxCfg.codeFastFileName;
+    zoneInfo[0].allocFlags = 2;
+    zoneInfo[0].freeFlags = 0;
+    zoneCount = 1;
+    if (gfxCfg.localizedCodeFastFileName)
+    {
+        zoneInfo[zoneCount].name = gfxCfg.localizedCodeFastFileName;
+        zoneInfo[zoneCount].allocFlags = 0;
+        zoneInfo[zoneCount++].freeFlags = 0;
+    }
+    if (gfxCfg.uiFastFileName)
+    {
+        zoneInfo[zoneCount].name = gfxCfg.uiFastFileName;
+        zoneInfo[zoneCount].allocFlags = 8;
+        zoneInfo[zoneCount++].freeFlags = 0;
+    }
+    zoneInfo[zoneCount].name = gfxCfg.commonFastFileName;
+    zoneInfo[zoneCount].allocFlags = 4;
+    zoneInfo[zoneCount++].freeFlags = 0;
+    if (gfxCfg.localizedCommonFastFileName)
+    {
+        zoneInfo[zoneCount].name = gfxCfg.localizedCommonFastFileName;
+        zoneInfo[zoneCount].allocFlags = 1;
+        zoneInfo[zoneCount++].freeFlags = 0;
+    }
+    if (gfxCfg.modFastFileName)
+    {
+        zoneInfo[zoneCount].name = gfxCfg.modFastFileName;
+        zoneInfo[zoneCount].allocFlags = 16;
+        zoneInfo[zoneCount++].freeFlags = 0;
+    }
+    DB_LoadXAssets(zoneInfo, zoneCount, 0);
+#endif
+}
 void Cmd_Dumpraw_f(void)
 {
     auto DumpFileType = [](XAssetType type) -> void
     {
 		auto rawDir = std::format("{}\\raw\\", (char*)fs_basepath->current.integer);
 
-		XAssetHeader files[1000];
-		auto read = DB_GetAllXAssetOfType_FastFile(type, files, 1000);
+        XAssetHeader files[10000]{ 0 };
+		auto read = DB_GetAllXAssetOfType_FastFile(type, files, 10000);
 		for (auto file : files)
 		{
 			if (!file.rawfile)
@@ -221,7 +262,37 @@ void Cmd_Dumpraw_f(void)
 		}
     }; 
 
-    DumpFileType(ASSET_TYPE_RAWFILE);
+    auto zoneDir = std::format("{}\\zone\\english\\", (char *)fs_basepath->current.integer);
+
+    for (const auto &entry : std::filesystem::directory_iterator(zoneDir))
+    {
+        DB_ResetZoneSize(0);
+
+        XZoneInfo zinfo;
+
+        std::string tmp = entry.path().filename().generic_string();
+        size_t ext = tmp.find(".ff");
+        if (ext == std::string::npos)
+        {
+            continue;
+        }
+        if (tmp.find("mp_") == std::string::npos)
+        {
+            continue;
+        }
+        tmp = tmp.substr(0, ext);
+        zinfo.name = tmp.c_str();
+        zinfo.allocFlags = 64;
+        zinfo.freeFlags = 0;
+
+        Com_SyncThreads();
+
+        DB_LoadXAssets(&zinfo, 1, 0);
+        DB_SyncXAssets();
+        DumpFileType(ASSET_TYPE_RAWFILE);
+    }
+
+    //DumpFileType(ASSET_TYPE_RAWFILE);
     //DumpFileType(ASSET_TYPE_MENU);
 }
 // avail end

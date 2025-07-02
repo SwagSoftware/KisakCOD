@@ -1,3 +1,7 @@
+#ifndef KISAK_MP
+#error This File is MultiPlayer Only
+#endif
+
 #include "client_mp.h"
 #include <qcommon/mem_track.h>
 #include <qcommon/msg_mp.h>

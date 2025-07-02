@@ -1,8 +1,12 @@
+#ifndef KISAK_MP
+#error This File is MultiPlayer Only
+#endif
+
 #include "client_mp.h"
 #include <qcommon/cmd.h>
 #include <qcommon/com_playerprofile.h>
 #include <sound/snd_public.h>
-#include <server_mp/server.h>
+#include <server_mp/server_mp.h>
 #include <client/client.h>
 #include <cgame_mp/cg_local_mp.h>
 

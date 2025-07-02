@@ -1,5 +1,5 @@
 #include "game_public.h"
-#include <server_mp/server.h>
+#include <server_mp/server_mp.h>
 #include <server/sv_world.h>
 #include <game_mp/g_utils_mp.h>
 #include <DynEntity/DynEntity_client.h>

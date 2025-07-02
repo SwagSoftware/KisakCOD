@@ -1,4 +1,8 @@
 #pragma once
+#ifndef KISAK_MP
+#error This File is MultiPlayer Only
+#endif
+
 #include <qcommon/ent.h>
 #include <qcommon/net_chan_mp.h>
 #include <qcommon/sv_msg_write_mp.h>

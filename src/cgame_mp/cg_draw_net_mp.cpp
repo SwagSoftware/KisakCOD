@@ -1,10 +1,14 @@
+#ifndef KISAK_MP
+#error This File is MultiPlayer Only
+#endif
+
 #include "cg_local_mp.h"
 #include "cg_public_mp.h"
 
 #include <client/client.h>
 
 #include <ui/ui.h>
-#include <server_mp/server.h>
+#include <server_mp/server_mp.h>
 
 // struct lagometer_t lagometer 82829b60     cg_draw_net_mp.obj
 

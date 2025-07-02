@@ -1,5 +1,5 @@
 #include "win_local.h"
-#include <server_mp/server.h>
+#include <server_mp/server_mp.h>
 #include <groupvoice/directsound.h>
 
 const dvar_t *winvoice_mic_mute;

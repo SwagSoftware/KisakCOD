@@ -4,7 +4,7 @@
 #include <Windows.h>
 #include <bgame/bg_local.h>
 #include "sv_msg_write_mp.h"
-#include <server_mp/server.h>
+#include <server_mp/server_mp.h>
 #include <client_mp/client_mp.h>
 
 #define NETF_OBJ(x) NETF_BASE(objective_t, x)

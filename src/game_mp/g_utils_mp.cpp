@@ -1,8 +1,12 @@
+#ifndef KISAK_MP
+#error This File is MultiPlayer Only
+#endif
+
 #include "g_utils_mp.h"
 #include <qcommon/mem_track.h>
 #include <universal/com_constantconfigstrings.h>
 #include <client_mp/client_mp.h>
-#include <server_mp/server.h>
+#include <server_mp/server_mp.h>
 
 #include <xanim/dobj.h>
 #include <xanim/dobj_utils.h>

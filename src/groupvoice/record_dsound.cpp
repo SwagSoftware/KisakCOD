@@ -1,3 +1,7 @@
+#ifndef KISAK_MP
+#error This File is MultiPlayer Only
+#endif
+
 #include "directsound.h"
 #include <qcommon/qcommon.h>
 

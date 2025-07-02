@@ -18,7 +18,7 @@
 #include <atomic>
 #include <mutex>
 #include <vector>
-#include <server_mp/server.h>
+#include <server_mp/server_mp.h>
 #include <qcommon/cmd.h>
 
 #include <functional>

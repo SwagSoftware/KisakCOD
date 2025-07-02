@@ -1,4 +1,8 @@
-#include "server.h"
+#ifndef KISAK_MP
+#error This File is MultiPlayer Only
+#endif
+
+#include "server_mp.h"
 #include <game_mp/g_public_mp.h>
 #include <server/sv_game.h>
 #include <win32/win_local.h>

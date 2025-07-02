@@ -5,7 +5,7 @@
 #include "huffman.h"
 
 #include "net_chan_mp.h"
-#include <server_mp/server.h>
+#include <server_mp/server_mp.h>
 #include <universal/profile.h>
 
 netFieldOrderInfo_t orderInfo;

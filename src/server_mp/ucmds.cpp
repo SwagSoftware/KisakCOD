@@ -1,6 +1,6 @@
 // KISAK original file
 // These are the Server->Client commands for the `ucmds` array in sv_client_mp.cpp
-#include "server.h"
+#include "server_mp.h"
 #include <qcommon/cmd.h>
 #include <universal/com_files.h>
 

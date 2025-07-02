@@ -4,7 +4,7 @@
 #include <universal/physicalmemory.h>
 #include <physics/phys_local.h>
 #include <gfx_d3d/r_init.h>
-#include <server_mp/server.h>
+#include <server_mp/server_mp.h>
 
 #include <qcommon/mem_track.h>
 #include <client/client.h>

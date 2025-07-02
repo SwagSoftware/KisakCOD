@@ -5,7 +5,7 @@
 #include <cgame/cg_local.h>
 #include <cgame_mp/cg_local_mp.h>
 #include <EffectsCore/fx_system.h>
-#include <server_mp/server.h>
+#include <server_mp/server_mp.h>
 #include <gfx_d3d/r_shadowcookie.h>
 #include <universal/profile.h>
 

@@ -1,3 +1,7 @@
+#ifndef KISAK_MP
+#error This File is MultiPlayer Only
+#endif
+
 #include "client_mp.h"
 
 #include <xanim/xanim.h>
@@ -26,7 +30,7 @@
 #include <gfx_d3d/r_init.h>
 #include <ui/ui.h>
 #include <qcommon/dl_main.h>
-#include <server_mp/server.h>
+#include <server_mp/server_mp.h>
 #include <universal/profile.h>
 #include <qcommon/com_bsp.h>
 
@@ -2441,8 +2445,8 @@ int __cdecl CL_ScaledMilliseconds()
 
 void __cdecl CL_SetFastFileNames(GfxConfiguration *config, bool dedicatedServer)
 {
-    if (!config)
-        MyAssertHandler(".\\client_mp\\cl_main_mp.cpp", 4468, 0, "%s", "config");
+    iassert(config);
+
     config->codeFastFileName = "code_post_gfx_mp";
     config->uiFastFileName = !dedicatedServer ? "ui_mp" : 0;
     config->commonFastFileName = "common_mp";

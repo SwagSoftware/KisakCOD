@@ -11,7 +11,7 @@
 #include <DynEntity/DynEntity_client.h>
 #include <ragdoll/ragdoll.h>
 #include <client/client.h>
-#include <server_mp/server.h>
+#include <server_mp/server_mp.h>
 
 
 int __cdecl CG_GetBoneIndex(

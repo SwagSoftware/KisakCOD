@@ -1,4 +1,8 @@
-#include "server.h"
+#ifndef KISAK_MP
+#error This File is MultiPlayer Only
+#endif
+
+#include "server_mp.h"
 #include <qcommon/files.h>
 #include <qcommon/cmd.h>
 #include <win32/win_net_debug.h>

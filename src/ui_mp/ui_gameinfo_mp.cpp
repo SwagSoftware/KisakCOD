@@ -1,3 +1,7 @@
+#ifndef KISAK_MP
+#error This File is MultiPlayer Only
+#endif
+
 #include "ui_mp.h"
 #include <ui/ui.h>
 #include <universal/q_parse.h>

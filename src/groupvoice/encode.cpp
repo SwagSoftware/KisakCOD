@@ -1,8 +1,12 @@
+#ifndef KISAK_MP
+#error This File is MultiPlayer Only
+#endif
+
 #include "directsound.h"
 
 #include <speex/speex.h>
 #include <qcommon/qcommon.h>
-#include <server_mp/server.h>
+#include <server_mp/server_mp.h>
 
 void *g_encoder;
 SpeexBits encodeBits;

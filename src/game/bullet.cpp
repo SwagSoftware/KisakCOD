@@ -5,7 +5,7 @@
 #include "game_public.h"
 #include <game_mp/g_public_mp.h>
 #include <client/client.h>
-#include <server_mp/server.h>
+#include <server_mp/server_mp.h>
 #include <game_mp/g_utils_mp.h>
 
 char __cdecl Bullet_Trace(

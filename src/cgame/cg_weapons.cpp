@@ -14,7 +14,7 @@
 #include <gfx_d3d/r_scene.h>
 #include <sound/snd_public.h>
 #include <qcommon/cmd.h>
-#include <server_mp/server.h>
+#include <server_mp/server_mp.h>
 #include <EffectsCore/fx_system.h>
 #include <game/bullet.h>
 #include <game_mp/g_main_mp.h>

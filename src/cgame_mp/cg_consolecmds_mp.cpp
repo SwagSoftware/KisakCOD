@@ -1,3 +1,7 @@
+#ifndef KISAK_MP
+#error This File is MultiPlayer Only
+#endif
+
 #include "cg_local_mp.h"
 #include "cg_public_mp.h"
 #include <qcommon/cmd.h>

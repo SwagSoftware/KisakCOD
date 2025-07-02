@@ -3,7 +3,7 @@
 #include <qcommon/cmd.h>
 #include "com_files.h"
 
-#include <server_mp/server.h>
+#include <server_mp/server_mp.h>
 #include <client_mp/client_mp.h>
 
 #include <stringed/stringed_hooks.h>
