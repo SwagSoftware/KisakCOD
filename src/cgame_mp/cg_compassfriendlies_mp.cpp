@@ -6,7 +6,6 @@
 #include "cg_public_mp.h"
 #include <qcommon/mem_track.h>
 #include <cgame/cg_public.h>
-#include <ui/ui.h>
 #include <client/client.h>
 #include <universal/profile.h>
 

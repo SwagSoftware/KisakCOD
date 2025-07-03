@@ -1,4 +1,4 @@
-#include "ui.h"
+#include "ui_shared.h"
 #include <universal/com_memory.h>
 
 void __cdecl UILocalVar_Init(UILocalVarContext *context)

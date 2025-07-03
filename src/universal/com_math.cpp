@@ -3019,7 +3019,7 @@ void __cdecl QuatMultiplyReverseEquals(const float *in, float *inout)
     inout[3] = temp[2];
 }
 
-void __fastcall QuatMultiplyInverse(const float *in1, const float *in2, float *out)
+void __cdecl QuatMultiplyInverse(const float *in1, const float *in2, float *out)
 {
     out[0] = -in1[0] * in2[3]
         + in1[3] * in2[0]
@@ -3042,7 +3042,7 @@ void __fastcall QuatMultiplyInverse(const float *in1, const float *in2, float *o
         + in1[2] * in2[2];
 }
 
-void __fastcall R_TransformSkelMat(const float *origin, const DObjSkelMat *mat, float *out)
+void __cdecl R_TransformSkelMat(const float *origin, const DObjSkelMat *mat, float *out)
 {
     *out = (float)((float)(*origin * mat->axis[0][0])
         + (float)((float)(mat->axis[2][0] * origin[2]) + (float)(mat->axis[1][0] * origin[1])))

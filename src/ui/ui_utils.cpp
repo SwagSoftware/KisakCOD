@@ -1,4 +1,4 @@
-#include "ui.h"
+#include "ui_shared.h"
 #include <qcommon/mem_track.h>
 #include <qcommon/threads.h>
 #include <universal/q_parse.h>

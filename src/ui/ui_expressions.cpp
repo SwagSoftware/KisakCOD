@@ -1,6 +1,6 @@
 #include <qcommon/qcommon.h>
 
-#include "ui.h"
+#include "ui_shared.h"
 #include <cgame_mp/cg_local_mp.h>
 #include <client/client.h>
 #include <stringed/stringed_hooks.h>

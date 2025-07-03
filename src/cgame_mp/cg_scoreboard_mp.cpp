@@ -9,7 +9,6 @@
 #include <ui_mp/ui_mp.h>
 #include <stringed/stringed_hooks.h>
 #include <client/client.h>
-#include <ui/ui.h>
 
 
 const dvar_t *cg_scoreboardMyColor;

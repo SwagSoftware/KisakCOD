@@ -3,7 +3,6 @@
 #endif
 
 #include "ui_mp.h"
-#include <ui/ui.h>
 #include <universal/q_parse.h>
 #include <database/database.h>
 #include <universal/com_files.h>

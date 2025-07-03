@@ -5,7 +5,6 @@
 #include <client/client.h>
 #include <client_mp/client_mp.h>
 #include <database/database.h>
-#include <ui/ui.h>
 
 const dvar_t *compassObjectiveArrowWidth;
 const dvar_t *compassObjectiveTextScale;

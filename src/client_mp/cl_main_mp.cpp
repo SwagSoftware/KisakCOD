@@ -28,7 +28,6 @@
 #include <sound/snd_local.h>
 #include <stringed/stringed_hooks.h>
 #include <gfx_d3d/r_init.h>
-#include <ui/ui.h>
 #include <qcommon/dl_main.h>
 #include <server_mp/server_mp.h>
 #include <universal/profile.h>

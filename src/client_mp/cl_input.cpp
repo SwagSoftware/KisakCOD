@@ -12,8 +12,6 @@
 #include <cgame_mp/cg_local_mp.h>
 #include <devgui/devgui.h>
 
-#include <ui/ui.h>
-
 
 const dvar_t *cl_stanceHoldTime;
 const dvar_t *cl_analog_attack_threshold;

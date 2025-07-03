@@ -9,7 +9,6 @@
 #include <qcommon/mem_track.h>
 #include <client/client.h>
 #include <aim_assist/aim_assist.h>
-#include <ui/ui.h>
 #include <gfx_d3d/r_utils.h>
 #include <sound/snd_public.h>
 #include <EffectsCore/fx_system.h>

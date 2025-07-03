@@ -5,7 +5,6 @@
 #include "cg_local_mp.h"
 #include "cg_public_mp.h"
 #include <universal/surfaceflags.h>
-#include <ui/ui.h>
 #include <ui_mp/ui_mp.h>
 #include <qcommon/mem_track.h>
 #include <DynEntity/DynEntity_client.h>

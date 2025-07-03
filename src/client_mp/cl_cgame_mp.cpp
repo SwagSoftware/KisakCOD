@@ -23,7 +23,6 @@
 #include <database/database.h>
 #include <universal/com_files.h>
 #include <universal/q_parse.h>
-#include <ui/ui.h>
 #include <EffectsCore/fx_system.h>
 #include <gfx_d3d/r_fog.h>
 

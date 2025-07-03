@@ -1,7 +1,9 @@
-#include "ui.h"
+#include "ui_shared.h"
 #include <universal/com_files.h>
 #include <universal/q_parse.h>
 #include <universal/com_sndalias.h>
+
+#include <universal/q_shared.h> // LOBYTE()
 
 $F99A9AECA2B60514CA5C8024B8EAC369 g_load_0;
 char menuBuf1[4096];
@@ -381,7 +383,8 @@ int __cdecl PS_ReadEscapeCharacter(script_s *script, char *ch)
         if (vala > 255)
         {
             ScriptWarning(script, "too large value in escape character");
-            LOBYTE(vala) = -1;
+            //LOBYTE(vala) = -1;
+            vala = -1;
         }
         c = vala;
         goto LABEL_38;
@@ -411,7 +414,8 @@ int __cdecl PS_ReadEscapeCharacter(script_s *script, char *ch)
     if (val > 255)
     {
         ScriptWarning(script, "too large value in escape character");
-        LOBYTE(val) = -1;
+        //LOBYTE(val) = -1;
+        val = -1;
     }
     c = val;
 LABEL_38:

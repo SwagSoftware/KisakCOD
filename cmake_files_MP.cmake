@@ -716,6 +716,7 @@ source_group("stringed" FILES ${STRINGED})
 set(UI
     "${SRC_DIR}/ui/keycodes.h"
     "${SRC_DIR}/ui/ui.h"
+    "${SRC_DIR}/ui/ui_shared.h"
     "${SRC_DIR}/ui/ui_atoms.cpp"
     "${SRC_DIR}/ui/ui_component.cpp"
     "${SRC_DIR}/ui/ui_expressions.cpp"

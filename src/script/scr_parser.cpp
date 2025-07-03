@@ -10,7 +10,6 @@
 #include <universal/profile.h>
 #include <qcommon/threads.h>
 #include "scr_vm.h"
-#include <ui/ui.h>
 #include "scr_compiler.h"
 
 #include <algorithm>

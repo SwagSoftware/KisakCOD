@@ -2,7 +2,6 @@
 #include "cg_public.h"
 
 #include <cgame_mp/cg_local_mp.h>
-#include <ui/ui.h>
 #include <client/client.h>
 #include <script/scr_const.h>
 

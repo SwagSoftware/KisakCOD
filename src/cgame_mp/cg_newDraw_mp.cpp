@@ -9,7 +9,6 @@
 
 #include <client/client.h>
 
-#include <ui/ui.h>
 #include <cgame/cg_public.h>
 #include <stringed/stringed_hooks.h>
 

@@ -5,8 +5,6 @@
 #include <client_mp/client_mp.h>
 #include <cgame_mp/cg_local_mp.h>
 
-#include <ui_mp/ui_mp.h>
-
 #include <gfx_d3d/r_rendercmds.h>
 #include <universal/q_parse.h>
 

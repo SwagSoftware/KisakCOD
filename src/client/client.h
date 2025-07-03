@@ -1,6 +1,7 @@
 #pragma once
 #include <qcommon/qcommon.h>
-#include <ui_mp/ui_mp.h>
+
+#include <ui/ui_shared.h>
 
 enum msgwnd_mode_t : __int32
 {                                       // ...

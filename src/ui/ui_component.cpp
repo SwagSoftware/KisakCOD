@@ -1,4 +1,4 @@
-#include "ui.h"
+#include "ui_shared.h"
 #include <client_mp/client_mp.h>
 #include <win32/win_net_debug.h>
 #include <script/scr_parser.h>
@@ -9,6 +9,8 @@
 #include <script/scr_vm.h>
 #include <universal/com_files.h>
 #include <client/client.h>
+
+#undef DrawText
 
 UI_Component_data_t UI_Component::g;
 UI_Component* UI_Component::selectionComp = NULL;

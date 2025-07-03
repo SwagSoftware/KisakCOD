@@ -3,7 +3,6 @@
 #endif
 
 #include "ui_mp.h"
-#include <ui/ui.h>
 #include <qcommon/cmd.h>
 #include <qcommon/mem_track.h>
 #include <client_mp/client_mp.h>
@@ -220,10 +219,10 @@ const dvar_t *ui_netGameType;
 
 LegacyHacks legacyHacks;
 
-char g_mapname[64];
-char g_gametype[64];
-int ui_serverFilterType;
-bool g_ingameMenusLoaded[1];
+static char g_mapname[64];
+static char g_gametype[64];
+static int ui_serverFilterType;
+static bool g_ingameMenusLoaded[1];
 
 uiInfo_s uiInfoArray; // On PC this array is just [1].
 sharedUiInfo_t sharedUiInfo;
@@ -1499,10 +1498,6 @@ int __cdecl UI_GetTalkerClientNum(int localClientNum, int num)
     }
     return -1;
 }
-
-const float PROFLOAD_FONT_SCALE = 0.36f;
-const float PROFLOAD_TEXT_COLOR[4] = { 0.0f, 1.0f, 0.0f, 1.0f };
-const float PROFLOAD_BACKGROUND_COLOR[4] = { 0.0f, 0.0f, 0.0f, 0.8f };
 
 char __cdecl UI_DrawRecordLevel(int localClientNum, rectDef_s *rect)
 {
@@ -5872,7 +5867,7 @@ char *__cdecl UI_SafeTranslateString(const char *reference)
     return (char *)translation;
 }
 
-BOOL __cdecl UI_AnyMenuVisible(int localClientNum)
+bool __cdecl UI_AnyMenuVisible(int localClientNum)
 {
     if (localClientNum)
         MyAssertHandler(

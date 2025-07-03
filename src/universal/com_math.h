@@ -490,14 +490,14 @@ struct DObjSkelMat;
 
 void __cdecl ConvertQuatToSkelMat(const DObjAnimMat *const mat, DObjSkelMat *skelMat);
 void __cdecl ConvertQuatToInverseSkelMat(const DObjAnimMat *const mat, DObjSkelMat *skelMat);
-void __fastcall QuatMultiplyInverse(const float *in1, const float *in2, float *out);
+void __cdecl QuatMultiplyInverse(const float *in1, const float *in2, float *out);
 void __cdecl QuatMultiplyReverseInverse(const float *in1, const float *in2, float *out);
 void __cdecl QuatMultiplyReverseEquals(const float *in, float *inout);
 void __cdecl ConvertQuatToMat(const struct DObjAnimMat *mat, float (*axis)[3]);
 void __cdecl ConvertQuatToInverseMat(const DObjAnimMat *mat, float (*axis)[3]);
 void __cdecl QuatMultiplyEquals(const float *in, float *inout);
 void __cdecl MatrixTransformVectorQuatTransEquals(const struct DObjAnimMat *in, float *inout);
-void __fastcall R_TransformSkelMat(const float *origin, const DObjSkelMat *mat, float *out);
+void __cdecl R_TransformSkelMat(const float *origin, const DObjSkelMat *mat, float *out);
 
 /*
 ===========================================================================

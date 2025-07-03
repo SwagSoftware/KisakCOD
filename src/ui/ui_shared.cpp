@@ -1,4 +1,4 @@
-#include "ui.h"
+#include "ui_shared.h"
 #include <universal/q_parse.h>
 #include <client_mp/client_mp.h>
 #include <client/client.h>

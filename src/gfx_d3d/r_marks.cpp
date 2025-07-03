@@ -2156,7 +2156,7 @@ bool __cdecl R_MarkModelCoreCallback_0_(
             clipPoints) != 0;
 }
 
-void __fastcall DObjSkelMatToMatrix43(const DObjSkelMat *inSkelMat, float (*outMatrix)[3])
+void __cdecl DObjSkelMatToMatrix43(const DObjSkelMat *inSkelMat, float (*outMatrix)[3])
 {
     float *v2; // r10
     const float *v3; // r11

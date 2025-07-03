@@ -1,7 +1,6 @@
 #include "cg_local.h"
 #include <sound/snd_public.h>
 #include <cgame_mp/cg_local_mp.h>
-#include <ui/ui.h>
 #include <client/client.h>
 #include <database/database.h>
 #include <client_mp/client_mp.h>

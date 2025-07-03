@@ -4,7 +4,6 @@
 #include <stringed/stringed_hooks.h>
 
 #include <string.h>
-#include <ui/ui.h>
 #include <client_mp/client_mp.h>
 #include <client/client.h>
 #include <cgame_mp/cg_local_mp.h>

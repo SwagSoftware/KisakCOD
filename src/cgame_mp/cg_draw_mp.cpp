@@ -6,7 +6,6 @@
 #include "cg_public_mp.h"
 #include <qcommon/mem_track.h>
 #include <client/client.h>
-#include <ui/ui.h>
 #include <xanim/xmodel.h>
 
 #include <EffectsCore/fx_system.h>

@@ -2,15 +2,19 @@
 #include "mem_track.h"
 #include "threads.h"
 #include <universal/timing.h>
-#include <ui_mp/ui_mp.h>
 #include <client/client.h>
-#include <ui/ui.h>
+
+#include <universal/com_math.h>
 
 #include <algorithm>
 
 mapLoadProfile_t mapLoadProfile;
 
 const dvar_t *com_profileLoading;
+
+static const float PROFLOAD_FONT_SCALE = 0.36f;
+static const float PROFLOAD_TEXT_COLOR[4] = { 0.0f, 1.0f, 0.0f, 1.0f };
+static const float PROFLOAD_BACKGROUND_COLOR[4] = { 0.0f, 0.0f, 0.0f, 0.8f };
 
 void __cdecl TRACK_com_profilemapload()
 {
@@ -386,10 +390,6 @@ void __cdecl ProfLoad_End()
         mapLoadProfile.currentEntry = entry->parent;
     }
 }
-
-const float PROFLOAD_FONT_SCALE = 0.36f;
-const float PROFLOAD_TEXT_COLOR[4] = { 0.0f, 1.0f, 0.0f, 1.0f };
-const float PROFLOAD_BACKGROUND_COLOR[4] = { 0.0f, 0.0f, 0.0f, 0.8f };
 
 void __cdecl ProfLoad_DrawOverlay(rectDef_s *rect)
 {

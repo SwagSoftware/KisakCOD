@@ -15,7 +15,6 @@
 #include <universal/com_memory.h>
 #include <universal/com_files.h>
 #include <win32/win_net_debug.h>
-#include <ui/ui.h>
 #include <win32/win_input.h>
 #include <client/client.h>
 #include <qcommon/mem_track.h>

@@ -657,7 +657,7 @@ const char *__cdecl Dvar_DomainToString_Internal(
     return (const char *)outBuffer;
 }
 
-const char *__fastcall Dvar_DomainToString(
+const char *__cdecl Dvar_DomainToString(
     unsigned __int8 type,
     DvarLimits *domain,
     char *outBuffer,

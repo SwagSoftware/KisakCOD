@@ -1,7 +1,6 @@
-#include "ui.h"
+#include "ui_shared.h"
 #include <client_mp/client_mp.h>
 
-#include <ui_mp/ui_mp.h>
 #include <database/database.h>
 #include <universal/profile.h>
 

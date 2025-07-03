@@ -2,7 +2,6 @@
 #include "cg_public.h"
 
 #include <cgame_mp/cg_local_mp.h>
-#include <ui/ui.h>
 #include <client/client.h>
 #include <client_mp/client_mp.h>
 #include <gfx_d3d/r_rendercmds.h>

@@ -421,7 +421,7 @@ void __cdecl R_DrawSpotShadowMapCallback(
 
     R_DrawSurfs(context, 0, &shadow->info);
 }
-void __fastcall R_DrawSpotShadowMapArray(const GfxViewInfo *viewInfo, GfxCmdBuf *cmdBuf)
+void __cdecl R_DrawSpotShadowMapArray(const GfxViewInfo *viewInfo, GfxCmdBuf *cmdBuf)
 {
     unsigned int v4; // r30
     GfxSpotShadow *spotShadows; // r31

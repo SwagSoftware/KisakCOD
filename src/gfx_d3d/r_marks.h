@@ -16,7 +16,7 @@ struct FxModelMarkPoint // sizeof=0x18
     float vertWeights[3];               // ...
 };
 
-void __fastcall DObjSkelMatToMatrix43(const DObjSkelMat *inSkelMat, float (*outMatrix)[3]);
+void __cdecl DObjSkelMatToMatrix43(const DObjSkelMat *inSkelMat, float (*outMatrix)[3]);
 void  R_BoxSurfaces(
     const float *mins,
     const float *maxs,

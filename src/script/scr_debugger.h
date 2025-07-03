@@ -3,7 +3,7 @@
 #include "scr_parser.h"
 #include "scr_yacc.h"
 
-#include <ui/ui.h>
+#include <ui/ui_shared.h>
 
 struct debugger_sval_s // sizeof=0x4
 {

@@ -16,7 +16,6 @@
 #include <universal/com_memory.h>
 
 #include <win32/win_net_debug.h>
-#include <ui/ui.h>
 #include "scr_evaluate.h"
 #include <client/client.h>
 #include <win32/win_input.h>

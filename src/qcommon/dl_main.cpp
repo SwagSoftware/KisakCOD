@@ -6,7 +6,6 @@
 //#include <HTReqMan.h>
 
 #include <universal/com_files.h>
-#include <ui_mp/ui_mp.h>
 
 int __cdecl DL_VPrintf(const char *fmt, char *argptr)
 {

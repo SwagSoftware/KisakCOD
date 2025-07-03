@@ -15,7 +15,6 @@
 #include <qcommon/com_bsp.h>
 #include <universal/com_sndalias.h>
 #include <qcommon/cmd.h>
-#include <ui/ui.h>
 #include <stringed/stringed_hooks.h>
 #include <client/client.h>
 

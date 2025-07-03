@@ -13,7 +13,6 @@
 #include <EffectsCore/fx_system.h>
 #include <DynEntity/DynEntity_client.h>
 #include <gfx_d3d/r_bsp.h>
-#include <ui/ui.h>
 #include <stringed/stringed_hooks.h>
 #include <win32/win_storage.h>
 #include <qcommon/cmd.h>

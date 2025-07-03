@@ -33,7 +33,6 @@
 #include <gfx_d3d/r_scene.h>
 #include <ragdoll/ragdoll.h>
 #include <devgui/devgui.h>
-#include <ui/ui.h>
 #include <server/sv_game.h>
 #include <gfx_d3d/r_workercmds.h>
 #include <universal/com_convexhull.h>

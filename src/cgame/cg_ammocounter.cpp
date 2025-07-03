@@ -7,7 +7,6 @@
 #include <client_mp/client_mp.h>
 
 #include <stringed/stringed_hooks.h>
-#include <ui/ui.h>
 
 const dvar_t *lowAmmoWarningPulseMin;
 const dvar_t *actionSlotsHide;
