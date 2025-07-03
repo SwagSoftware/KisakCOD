@@ -9,9 +9,9 @@ if "%~1"=="" (
 
 if exist CMakeLists.txt (
     pushd
-    mkdir build
-    cd build
-    cmake -G "Visual Studio 17 2022" -A Win32 -DCMAKE_BUILD_TYPE=%BUILD_TYPE% ..
+    mkdir build-sp
+    cd build-sp
+    cmake -G "Visual Studio 17 2022" -A Win32 -DKISAK_SP=1 -DCMAKE_BUILD_TYPE=%BUILD_TYPE% ..
     popd
 ) else (
     echo You must run this from the ROOT directory

@@ -1,5 +1,10 @@
 // KISAK original file
 // These are the Server->Client commands for the `ucmds` array in sv_client_mp.cpp
+
+#ifndef KISAK_MP
+#error This File is MultiPlayer Only
+#endif
+
 #include "server_mp.h"
 #include <qcommon/cmd.h>
 #include <universal/com_files.h>

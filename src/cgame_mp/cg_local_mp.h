@@ -1,5 +1,9 @@
 #pragma once
 
+#ifndef KISAK_MP
+#error This File is MultiPlayer Only
+#endif
+
 #include "cg_public_mp.h"
 
 #include <cgame/cg_local.h>

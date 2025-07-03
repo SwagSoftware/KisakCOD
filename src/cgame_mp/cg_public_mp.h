@@ -1,5 +1,9 @@
 #pragma once
 
+#ifndef KISAK_MP
+#error This File is MultiPlayer Only
+#endif
+
 #include <universal/q_shared.h> // dvar_t
 
 extern const dvar_t *hud_fade_sprint;

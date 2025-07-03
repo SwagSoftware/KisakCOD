@@ -20,16 +20,16 @@ Learn about the Development of KisakCOD here: [https://lwss.github.io/Duty-Of-Ki
 
 ## How to build
 1) Install the above requirements and Clone repo
-2) Open a terminal and run `scripts/mksln.bat` or `scripts/mksln_dedi.bat` for the dedicated server
-3) Open .sln projects that are generated in `build/` and `build-dedi/` respectively ^^ 
-4) Copy COD4 Game files to `bin/*` (Don't try to cherry-pick them, small files like localization.txt are needed)
-5) Copy `deps/binklib/binkw32.dll` to `/bin`
-6) Copy all files in `deps/msslib/dlls/*` to `/bin`
-7) Copy `deps/steamsdk/steam_api.dll` to `/bin`
+2) Open a terminal and run `generate-project.bat`
+3) Open .sln projects that are generated in `build-sp`, `build-mp`, and `build-dedi` respectively. 
+4) Copy COD4 Game files to `bin/(BUILD_TYPE)/*` (Don't try to cherry-pick them, small files like localization.txt are needed)
+5) Copy `deps/binklib/binkw32.dll` as well ^^
+6) Copy all files in `deps/msslib/dlls/*` ^^ 
+7) Copy `deps/steamsdk/steam_api.dll`  ^^
 8) Run the game via Visual Studio play button or just the .exe
 
 
-```angular2html
+```
 Keep in Mind: This is a ~20 year old game with some known exploits. We will try to fix these as we become aware of them.
 However, there is a non-zero chance of some type of binary exploitation when playing online. Use a sandbox (Sandboxie?) for peace of mind. 
 ```

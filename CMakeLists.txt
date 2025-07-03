@@ -2,9 +2,11 @@ cmake_minimum_required(VERSION 3.16)
 include(FetchContent)
 
 if (DEDICATED)
-  project(KisakCOD-Dedi)
-else()
-  project(KisakCOD)
+  project(KCOD-Dedi)
+elseif(KISAK_SP)
+  project(KCOD-sp)
+elseif(KISAK_MP)
+  project(KCOD-MP)
 endif()
 
 set(CMAKE_CXX_STANDARD 20)
@@ -52,7 +54,6 @@ set(BIN_DIR "${CMAKE_CURRENT_SOURCE_DIR}/bin")
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${BIN_DIR})
 
 # === Increment Build ===
-
 if (WIN32)
   set(SCRIPT_EXT .cmd)
 else()
@@ -76,47 +77,33 @@ add_custom_target(
 
 if (DEDICATED)
   message("===== KisakCOD Dedicated =====")
-  set(BIN_NAME "KisakCOD-Dedi")
-  #include(cmake_files_dedicated.cmake)
-  #target_compile_definitions(${BIN_NAME} PUBLIC DEDICATED) # LWSS: true headless DEDICATED is disabled for now. It doesn't fully work.
-  include(cmake_files.cmake)
+  set(BIN_NAME "KCOD-Dedi")
+  include(cmake_files_MP.cmake)
   target_compile_definitions(${BIN_NAME} PUBLIC KISAK_DEDICATED) # this is a cope DEBUG mode that basically just does `+set dedicated 2`
-else()
-  message("----- KisakCOD Client -----")
-  set(BIN_NAME "KisakCOD")
-  include(cmake_files.cmake)
-endif()
-
-# Feature flag for gate more drastic changes to the code, or experimental
-if (DEFINED KISAK_EXTENDED)
-  message("Building KisakCOD with enhancement extensions!")
-  target_compile_definitions(${BIN_NAME} KISAK_EXTENDED)
+  target_compile_definitions(${BIN_NAME} PUBLIC KISAK_MP)
+elseif(KISAK_MP)
+  message("----- KisakCOD Client(MP) -----")
+  set(BIN_NAME "KisakCOD-MP")
+  include(cmake_files_MP.cmake)
+  target_compile_definitions(${BIN_NAME} PUBLIC KISAK_MP)
+elseif(KISAK_SP)
+  message("***** KisakCOD Client(SP) *****")
+  set(BIN_NAME "KisakCOD-SP")
+  include(cmake_files_SP.cmake)
+  target_compile_definitions(${BIN_NAME} PUBLIC KISAK_SP)
 endif()
 
 # We want to update the build number before building
 add_dependencies(${BIN_NAME} update_build_number)
 
-# Copy over MILES dependency
-add_custom_command(
-  TARGET ${BIN_NAME} POST_BUILD
-  COMMAND ${CMAKE_COMMAND} -E copy_directory
-          ${DEPS_DIR}/msslib/dlls
-          ${BIN_DIR}/${CMAKE_BUILD_TYPE}
-  COMMENT "COPYING MILES DEPENDENCIES"
-)
-
-# Copy over steam depdendency
-add_custom_command(
-  TARGET ${BIN_NAME} POST_BUILD
-  COMMAND ${CMAKE_COMMAND} -E copy_if_different
-          ${DEPS_DIR}/steamsdk/steam_api.dll
-          ${BIN_DIR}/${CMAKE_BUILD_TYPE}
-  COMMENT "COPYING STEAM DEPENDENCIES"
-)
-
 set_target_properties(${BIN_NAME} PROPERTIES
     VS_DEBUGGER_WORKING_DIRECTORY "${BIN_DIR}/$<CONFIG>"
 )
+
+# Feature flag for gate more drastic changes to the code, or experimental
+if (DEFINED KISAK_EXTENDED)
+  target_compile_definitions(${BIN_NAME} KISAK_EXTENDED)
+endif()
 
 target_compile_definitions(${BIN_NAME} PUBLIC WIN32)
 
@@ -138,7 +125,6 @@ FetchContent_Declare (
 )
 FetchContent_MakeAvailable ( tracy )
 
-message( ${CMAKE_BINARY_DIR}/_deps/tracy-src/public)
 target_include_directories(${BIN_NAME} PUBLIC ${CMAKE_BINARY_DIR}/_deps/tracy-src/public)
 target_compile_definitions(${BIN_NAME} PUBLIC $<$<CONFIG:Debug>:TRACY_ENABLE>)
 target_compile_definitions(${BIN_NAME} PUBLIC $<$<CONFIG:Debug>:TRACY_ON_DEMAND>)
@@ -147,8 +133,6 @@ target_link_libraries(${BIN_NAME} PUBLIC $<$<CONFIG:Debug>:TracyClient>) # Enabl
 
 target_compile_definitions(${BIN_NAME} PUBLIC _CONSOLE)
 target_compile_definitions(${BIN_NAME} PUBLIC _MBCS)
-
-target_compile_definitions(${BIN_NAME} PUBLIC KISAK_MP)
 
 target_include_directories(${BIN_NAME} PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/src")
 target_include_directories(${BIN_NAME} PUBLIC ${DEPS_DIR})
@@ -167,7 +151,30 @@ set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} /MTd /Od /MP /W3 /Zi ${MSVC_
 set_property(TARGET ${BIN_NAME} PROPERTY MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
 
 # fixme: copied from sln, check whats not needed
-target_link_libraries(${BIN_NAME} PUBLIC mss32.lib dsound.lib ${D3DX_LIB} d3d9.lib ddraw.lib ws2_32.lib winmm.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib binkw32.lib steam_api.lib dxguid.lib )
+target_link_libraries(${BIN_NAME} PUBLIC
+        mss32.lib
+        dsound.lib
+        ${D3DX_LIB}
+        d3d9.lib
+        ddraw.lib
+        ws2_32.lib
+        winmm.lib
+        kernel32.lib
+        user32.lib
+        gdi32.lib
+        winspool.lib
+        comdlg32.lib
+        advapi32.lib
+        shell32.lib
+        ole32.lib
+        oleaut32.lib
+        uuid.lib
+        odbc32.lib
+        odbccp32.lib
+        binkw32.lib
+        steam_api.lib
+        dxguid.lib
+)
 
 get_target_property(LIBS_OUT ${BIN_NAME} LINK_LIBRARIES)
 message("LIBS: ${LIBS_OUT}")
@@ -181,3 +188,20 @@ set_property( DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} PROPERTY VS_STARTUP_PROJECT 
 target_link_options(${BIN_NAME} PRIVATE "$<$<CONFIG:Release>:/DEBUG>")
 target_link_options(${BIN_NAME} PRIVATE "$<$<CONFIG:Release>:/OPT:REF>")
 target_link_options(${BIN_NAME} PRIVATE "$<$<CONFIG:Release>:/OPT:ICF>")
+
+# [POST_BUILD] Copy over MILES dependency
+add_custom_command(
+        TARGET ${BIN_NAME} POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E copy_directory
+        ${DEPS_DIR}/msslib/dlls
+        ${BIN_DIR}/${CMAKE_BUILD_TYPE}
+        COMMENT "COPYING MILES DEPENDENCIES"
+)
+# [POST_BUILD] Copy over steam depdendency
+add_custom_command(
+        TARGET ${BIN_NAME} POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E copy_if_different
+        ${DEPS_DIR}/steamsdk/steam_api.dll
+        ${BIN_DIR}/${CMAKE_BUILD_TYPE}
+        COMMENT "COPYING STEAM DEPENDENCIES"
+)
