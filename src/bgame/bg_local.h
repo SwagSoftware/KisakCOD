@@ -187,6 +187,7 @@ struct loadAnim_t // sizeof=0x48
     int iNameHash;
     char szAnimName[64];
 };
+static_assert((sizeof(loadAnim_t) * 512) == 36864);
 
 struct pml_t // sizeof=0x80
 {                                       // ...

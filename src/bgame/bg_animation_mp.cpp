@@ -2319,8 +2319,6 @@ void __cdecl BG_UpdatePlayerDObj(
 
 void __cdecl BG_LoadAnim()
 {
-    static_assert((sizeof(loadAnim_t) * 512) == 36864);
-
     LargeLocal playerAnims_large_local(sizeof(loadAnim_t) * 512); // [esp+0h] [ebp-10h] BYREF
     unsigned int iNumPlayerAnims; // [esp+8h] [ebp-8h] BYREF
     loadAnim_t *playerAnims; // [esp+Ch] [ebp-4h]

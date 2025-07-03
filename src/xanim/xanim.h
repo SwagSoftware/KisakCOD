@@ -164,6 +164,7 @@ struct XAnimParts // sizeof=0x58
     XAnimNotifyInfo *notify;
     XAnimDeltaPart *deltaPart;
 };
+static_assert(sizeof(XAnimParts) == 88);
 
 struct XModelNameMap // sizeof=0x4
 {                                       // ...
@@ -432,6 +433,8 @@ struct pathlink_s // sizeof=0xC
     unsigned __int8 negotiationLink;
     unsigned __int8 ubBadPlaceCount[4];
 };
+static_assert(sizeof(pathlink_s) == 12);
+
 struct pathnode_constant_t // sizeof=0x44
 {                                       // ...
     nodeType type;
@@ -454,6 +457,8 @@ struct pathnode_constant_t // sizeof=0x44
     unsigned __int16 totalLinkCount;
     pathlink_s* Links;
 };
+static_assert(sizeof(pathnode_constant_t) == 68);
+
 struct pathnode_dynamic_t // sizeof=0x20
 {                                       // ...
     void* pOwner;
@@ -476,23 +481,28 @@ struct pathnode_transient_t // sizeof=0x1C
     float fHeuristic;
     float costFactor;
 };
+
 struct pathnode_t // sizeof=0x80
 {
     pathnode_constant_t constant;
     pathnode_dynamic_t dynamic;
     pathnode_transient_t transient;
 };
+static_assert(sizeof(pathnode_t) == 128);
+
 struct pathbasenode_t // sizeof=0x10
 {
     float vOrigin[3];
     unsigned int type;
 };
+static_assert(sizeof(pathbasenode_t) == 16);
 
 struct pathnode_tree_nodes_t // sizeof=0x8
 {                                       // ...
     int nodeCount;
     unsigned __int16* nodes;
 };
+static_assert(sizeof(pathnode_tree_nodes_t) == 8);
 
 struct pathnode_tree_t;
 union pathnode_tree_info_t // sizeof=0x8
@@ -737,6 +747,7 @@ struct itemDef_s // sizeof=0x174
     statement_s rectHExp;
     statement_s forecolorAExp;
 };
+
 struct menuDef_t // sizeof=0x11C
 {                                       // ...
     windowDef_t window;
@@ -764,6 +775,8 @@ struct menuDef_t // sizeof=0x11C
     statement_s rectYExp;
     itemDef_s** items;
 };
+static_assert(sizeof(menuDef_t) == 284);
+
 struct MenuList // sizeof=0xC
 {                                       // ...
     const char* name;
@@ -1143,6 +1156,7 @@ struct WeaponDef // sizeof=0x878
     float adsDofStart;
     float adsDofEnd;
 };
+static_assert(sizeof(WeaponDef) == 2168);
 
 struct SndDriverGlobals // sizeof=0x4
 {                                       // ...
@@ -1155,6 +1169,7 @@ struct RawFile // sizeof=0xC
     int len;
     const char* buffer;
 };
+static_assert(sizeof(RawFile) == 12);
 
 struct PhysPreset // sizeof=0x2C
 {                                       // ...
@@ -1272,6 +1287,7 @@ struct XAsset // sizeof=0x8
     XAssetType type;                    // ...
     XAssetHeader header;                // ...
 };
+static_assert(sizeof(XAsset) == 8);
 
 union XAssetSize // sizeof=0x878
 {                                       // ...
@@ -1382,6 +1398,7 @@ struct ScriptStringList // sizeof=0x8
     int count;
     const char **strings;
 };
+static_assert(sizeof(ScriptStringList) == 8);
 
 struct XAssetList // sizeof=0x10
 {                                       // ...
@@ -1389,6 +1406,7 @@ struct XAssetList // sizeof=0x10
     int assetCount;
     XAsset *assets;
 };
+static_assert(sizeof(XAssetList) == 16);
 
 struct XFile // sizeof=0x2C
 {                                       // ...
@@ -1396,6 +1414,7 @@ struct XFile // sizeof=0x2C
     unsigned int externalSize;          // ...
     unsigned int blockSize[9];          // ...
 };
+static_assert(sizeof(XFile) == 44);
 
 struct XSurfaceCollisionAabb // sizeof=0xC
 {                                       // ...
@@ -1438,6 +1457,7 @@ struct XSurfaceVertexInfo // sizeof=0xC
     __int16 vertCount[4];
     unsigned __int16 *vertsBlend;
 };
+static_assert(sizeof(XSurfaceVertexInfo) == 12);
 
 struct XSurface // sizeof=0x38
 {
@@ -1456,6 +1476,7 @@ struct XSurface // sizeof=0x38
     XRigidVertList *vertList;
     int partBits[4];
 };
+static_assert(sizeof(XSurface) == 56);
 
 struct DObj_s;
 

@@ -48,6 +48,7 @@ struct GfxPackedVertex // sizeof=0x20
     PackedUnitVec normal;
     PackedUnitVec tangent;
 };
+static_assert(sizeof(GfxPackedVertex) == 32);
 
 struct GfxPackedVertexNormal // sizeof=0x8
 {                                       // ...
@@ -224,6 +225,7 @@ struct GfxImage // sizeof=0x24
     bool delayLoadPixels;
     const char* name;
 };
+static_assert(sizeof(GfxImage) == 36);
 
 struct GfxCodeMatrices // sizeof=0x800
 {                                       // ...
@@ -651,6 +653,7 @@ struct GfxPixelShaderLoadDef // sizeof=0x8
     unsigned __int16 programSize;
     unsigned __int16 loadForRenderer;
 };
+static_assert(sizeof(GfxPixelShaderLoadDef) == 8);
 
 struct GfxDepthOfField // sizeof=0x20
 {                                       // ...

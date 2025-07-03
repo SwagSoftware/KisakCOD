@@ -265,7 +265,7 @@ void __cdecl DB_LoadXFileInternal()
         DB_CancelLoadXFile();
         Com_Error(ERR_DROP, "Fastfile for zone '%s' could not be loaded (%s)", g_load.filename, failureReason);
     }
-    static_assert(sizeof(XFile) == 44);
+    
     DB_LoadXFileData((unsigned __int8 *)&file, sizeof(XFile));
     if (g_trackLoadProgress)
     {
@@ -308,7 +308,7 @@ bool __cdecl DB_IsMinimumFastFileLoaded()
 void Load_XAssetListCustom()
 {
     varXAssetList = &g_varXAssetList;
-    static_assert(sizeof(XAssetList) == 16);
+    
     DB_LoadXFileData((unsigned __int8 *)&g_varXAssetList, sizeof(XAssetList));
     DB_PushStreamPos(4u);
     varScriptStringList = &varXAssetList->stringList;
@@ -321,7 +321,6 @@ void __cdecl Load_XAssetArrayCustom(int count)
     XAsset *var; // [esp+0h] [ebp-8h]
     int i; // [esp+4h] [ebp-4h]
 
-    static_assert(sizeof(XAsset) == 8);
     Load_Stream(1, (unsigned __int8 *)varXAsset, 8 * count);
     var = varXAsset;
     for (i = 0; i < count; ++i)

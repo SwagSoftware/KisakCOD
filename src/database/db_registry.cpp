@@ -411,7 +411,6 @@ void __cdecl Hunk_OverrideDataForFile(int type, const char *name, void *data)
 
 void __cdecl DB_InitPool_RawFile_(void *arg, int size)
 {
-    static_assert(sizeof(RawFile) == 12);
     XAssetPool<RawFile, 69> *pool = (XAssetPool<RawFile, 69>*)arg;
     pool->freeHead = &pool->entries[0];
     for (int i = 0; i < size - 1; i++)
@@ -423,7 +422,6 @@ void __cdecl DB_InitPool_RawFile_(void *arg, int size)
 
 void __cdecl DB_InitPool_LoadedSound_(void *arg, int size)
 {
-    static_assert(sizeof(LoadedSound) == 44);
     XAssetPool<LoadedSound, 69> *pool = (XAssetPool<LoadedSound, 69>*)arg;
     pool->freeHead = &pool->entries[0];
     for (int i = 0; i < size - 1; i++)
@@ -435,7 +433,6 @@ void __cdecl DB_InitPool_LoadedSound_(void *arg, int size)
 
 void __cdecl DB_InitPool_XAnimParts_(void *arg, int size)
 {
-    static_assert(sizeof(XAnimParts) == 88);
     XAssetPool<XAnimParts, 69> *pool = (XAssetPool<XAnimParts, 69>*)arg;
     pool->freeHead = &pool->entries[0];
     for (int i = 0; i < size - 1; i++)
@@ -447,7 +444,6 @@ void __cdecl DB_InitPool_XAnimParts_(void *arg, int size)
 
 void __cdecl DB_InitPool_XModel_(void *arg, int size)
 {
-    static_assert(sizeof(XModel) == 220);
     XAssetPool<XModel, 69> *pool = (XAssetPool<XModel, 69>*)arg;
     pool->freeHead = &pool->entries[0];
     for (int i = 0; i < size - 1; i++)
@@ -459,7 +455,6 @@ void __cdecl DB_InitPool_XModel_(void *arg, int size)
 
 void __cdecl DB_InitPool_Material_(void *arg, int size)
 {
-    static_assert(sizeof(Material) == 80);
     XAssetPool<Material, 69> *pool = (XAssetPool<Material, 69>*)arg;
     pool->freeHead = &pool->entries[0];
     for (int i = 0; i < size - 1; i++)
@@ -471,7 +466,6 @@ void __cdecl DB_InitPool_Material_(void *arg, int size)
 
 void __cdecl DB_InitPool_MaterialTechniqueSet_(void *arg, int size)
 {
-    static_assert(sizeof(MaterialTechniqueSet) == 148);
     XAssetPool<MaterialTechniqueSet, 69> *pool = (XAssetPool<MaterialTechniqueSet, 69>*)arg;
     pool->freeHead = &pool->entries[0];
     for (int i = 0; i < size - 1; i++)
@@ -483,7 +477,6 @@ void __cdecl DB_InitPool_MaterialTechniqueSet_(void *arg, int size)
 
 void __cdecl DB_InitPool_GfxImage_(void *arg, int size)
 {
-    static_assert(sizeof(GfxImage) == 36);
     XAssetPool<GfxImage, 69> *pool = (XAssetPool<GfxImage, 69>*)arg;
     pool->freeHead = &pool->entries[0];
     for (int i = 0; i < size - 1; i++)
@@ -495,7 +488,6 @@ void __cdecl DB_InitPool_GfxImage_(void *arg, int size)
 
 void __cdecl DB_InitPool_SndCurve_(void *arg, int size)
 {
-    static_assert(sizeof(SndCurve) == 72);
     XAssetPool<SndCurve, 69> *pool = (XAssetPool<SndCurve, 69>*)arg;
     pool->freeHead = &pool->entries[0];
     for (int i = 0; i < size - 1; i++)
@@ -507,7 +499,6 @@ void __cdecl DB_InitPool_SndCurve_(void *arg, int size)
 
 void __cdecl DB_InitPool_StringTable_(void *arg, int size)
 {
-    static_assert(sizeof(StringTable) == 16);
     XAssetPool<StringTable, 69> *pool = (XAssetPool<StringTable, 69>*)arg;
     pool->freeHead = &pool->entries[0];
     for (int i = 0; i < size - 1; i++)
@@ -519,7 +510,6 @@ void __cdecl DB_InitPool_StringTable_(void *arg, int size)
 
 void __cdecl DB_InitPool_Font_s_(void *arg, int size)
 {
-    static_assert(sizeof(Font_s) == 24);
     XAssetPool<Font_s, 69> *pool = (XAssetPool<Font_s, 69>*)arg;
     pool->freeHead = &pool->entries[0];
     for (int i = 0; i < size - 1; i++)
@@ -531,7 +521,6 @@ void __cdecl DB_InitPool_Font_s_(void *arg, int size)
 
 void __cdecl DB_InitPool_menuDef_t_(void *arg, int size)
 {
-    static_assert(sizeof(menuDef_t) == 284);
     XAssetPool<menuDef_t, 640> *pool = (XAssetPool<menuDef_t, 640>*)arg;
 
     pool->freeHead = &pool->entries[0];
@@ -544,7 +533,6 @@ void __cdecl DB_InitPool_menuDef_t_(void *arg, int size)
 
 void __cdecl DB_InitPool_FxImpactTable_(void *arg, int size)
 {
-    static_assert(sizeof(FxImpactTable) == 8);
     XAssetPool<FxImpactTable, 69> *pool = (XAssetPool<FxImpactTable, 69>*)arg;
     pool->freeHead = &pool->entries[0];
     for (int i = 0; i < size - 1; i++)
@@ -556,7 +544,6 @@ void __cdecl DB_InitPool_FxImpactTable_(void *arg, int size)
 
 void __cdecl DB_InitPool_WeaponDef_(void *arg, int size)
 {
-    static_assert(sizeof(WeaponDef) == 2168);
     XAssetPool<WeaponDef, 69> *pool = (XAssetPool<WeaponDef, 69>*)arg;
     pool->freeHead = &pool->entries[0];
     for (int i = 0; i < size - 1; i++)
@@ -568,7 +555,6 @@ void __cdecl DB_InitPool_WeaponDef_(void *arg, int size)
 
 void __cdecl DB_InitPool_FxEffectDef_(void *arg, int size)
 {
-    static_assert(sizeof(FxEffectDef) == 32);
     XAssetPool<FxEffectDef, 69> *pool = (XAssetPool<FxEffectDef, 69>*)arg;
     pool->freeHead = &pool->entries[0];
     for (int i = 0; i < size - 1; i++)

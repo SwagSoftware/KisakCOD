@@ -27,6 +27,8 @@ struct scr_block_s // sizeof=0x218
     unsigned __int8 localVarsInitBits[8];
     scr_localVar_t localVars[LOCAL_VAR_STACK_SIZE];
 };
+static_assert(sizeof(scr_block_s) == 536);
+
 union sval_u // sizeof=0x4
 {                                       // ...
     sval_u& operator=(const sval_u &other)
