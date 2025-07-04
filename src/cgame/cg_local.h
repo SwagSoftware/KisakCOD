@@ -6,6 +6,8 @@
 #include <gfx_d3d/r_gfx.h>
 #include <gfx_d3d/r_material.h>
 
+#include <cstdint>
+
 struct cg_s;
 
 struct Font_s;
@@ -105,8 +107,8 @@ void __cdecl CG_DrawRotatedPic(
     float y,
     float width,
     float height,
-    int horzAlign,
-    int vertAlign,
+    int32_t horzAlign,
+    int32_t vertAlign,
     float angle,
     const float *color,
     Material *material);
@@ -124,8 +126,8 @@ void __cdecl CG_DrawVLine(
     float top,
     float lineWidth,
     float height,
-    int horzAlign,
-    int vertAlign,
+    int32_t horzAlign,
+    int32_t vertAlign,
     const float *color,
     Material *material);
 void __cdecl CG_DrawStringExt(
@@ -134,10 +136,10 @@ void __cdecl CG_DrawStringExt(
     float y,
     char *string,
     const float *setColor,
-    int forceColor,
-    int shadow,
+    int32_t forceColor,
+    int32_t shadow,
     float charHeight);
-int __cdecl CG_DrawDevString(
+int32_t __cdecl CG_DrawDevString(
     const ScreenPlacement *scrPlace,
     float x,
     float y,
@@ -147,59 +149,59 @@ int __cdecl CG_DrawDevString(
     const float *color,
     char align,
     Font_s *font);
-int __cdecl CG_DrawBigDevString(const ScreenPlacement *scrPlace, float x, float y, char *s, float alpha, char align);
-int __cdecl CG_DrawBigDevStringColor(
+int32_t __cdecl CG_DrawBigDevString(const ScreenPlacement *scrPlace, float x, float y, char *s, float alpha, char align);
+int32_t __cdecl CG_DrawBigDevStringColor(
     const ScreenPlacement *scrPlace,
     float x,
     float y,
     char *s,
     const float *color,
     char align);
-int __cdecl CG_DrawSmallDevStringColor(
+int32_t __cdecl CG_DrawSmallDevStringColor(
     const ScreenPlacement *scrPlace,
     float x,
     float y,
     char *s,
     const float *color,
     char align);
-double __cdecl CG_FadeAlpha(int timeNow, int startMsec, int totalMsec, int fadeMsec);
-float *__cdecl CG_FadeColor(int timeNow, int startMsec, int totalMsec, int fadeMsec);
-void __cdecl CG_MiniMapChanged(int localClientNum);
-void __cdecl CG_NorthDirectionChanged(int localClientNum);
-void __cdecl CG_DebugLine(const float *start, const float *end, const float *color, int depthTest, int duration);
-void __cdecl CG_DebugStar(const float *point, const float *color, int duration);
+double __cdecl CG_FadeAlpha(int32_t timeNow, int32_t startMsec, int32_t totalMsec, int32_t fadeMsec);
+float *__cdecl CG_FadeColor(int32_t timeNow, int32_t startMsec, int32_t totalMsec, int32_t fadeMsec);
+void __cdecl CG_MiniMapChanged(int32_t localClientNum);
+void __cdecl CG_NorthDirectionChanged(int32_t localClientNum);
+void __cdecl CG_DebugLine(const float *start, const float *end, const float *color, int32_t depthTest, int32_t duration);
+void __cdecl CG_DebugStar(const float *point, const float *color, int32_t duration);
 void __cdecl CG_DebugStarWithText(
     const float *point,
     const float *starColor,
     const float *textColor,
     char *string,
     float fontsize,
-    int duration);
+    int32_t duration);
 void __cdecl CG_DebugBox(
     const float *origin,
     const float *mins,
     const float *maxs,
     float yaw,
     const float *color,
-    int depthTest,
-    int duration);
+    int32_t depthTest,
+    int32_t duration);
 void __cdecl CG_DebugBoxOriented(
     const float *origin,
     const float *mins,
     const float *maxs,
     const mat3x3 &rotation,
     const float *color,
-    int depthTest,
-    int duration);
+    int32_t depthTest,
+    int32_t duration);
 void __cdecl CG_DebugCircle(
     const float *center,
     float radius,
     const float *dir,
     const float *color,
-    int depthTest,
-    int duration);
-void __cdecl CG_TeamColor(int team, const char *prefix, float *color);
-void __cdecl CG_RelativeTeamColor(int clientNum, const char *prefix, float *color, int localClientNum);
+    int32_t depthTest,
+    int32_t duration);
+void __cdecl CG_TeamColor(int32_t team, const char *prefix, float *color);
+void __cdecl CG_RelativeTeamColor(int32_t clientNum, const char *prefix, float *color, int32_t localClientNum);
 
 
 
@@ -218,70 +220,70 @@ struct cg_hudelem_t // sizeof=0x238
     float fontScale;
     float fontHeight;
     float color[4];                     // ...
-    int timeNow;                        // ...
+    int32_t timeNow;                        // ...
 };
 void __cdecl CG_HudElemRegisterDvars();
 void __cdecl CG_TranslateHudElemMessage(
-    int localClientNum,
+    int32_t localClientNum,
     const char *message,
     const char *messageType,
     char *hudElemString);
-char __cdecl ReplaceDirective(int localClientNum, unsigned int *searchPos, unsigned int *dstLen, char *dstString);
-void __cdecl GetHudelemDirective(int localClientNum, char *directive, char *result);
-void __cdecl DirectiveFakeIntroSeconds(int localClientNum, const char *arg0, char *result);
+char __cdecl ReplaceDirective(int32_t localClientNum, uint32_t *searchPos, uint32_t *dstLen, char *dstString);
+void __cdecl GetHudelemDirective(int32_t localClientNum, char *directive, char *result);
+void __cdecl DirectiveFakeIntroSeconds(int32_t localClientNum, const char *arg0, char *result);
 void __cdecl ParseDirective(char *directive, char *resultName, char *resultArg0);
-void __cdecl CG_Draw2dHudElems(int localClientNum, int foreground);
-void __cdecl DrawSingleHudElem2d(int localClientNum, const hudelem_s *elem);
-void __cdecl GetHudElemInfo(int localClientNum, const hudelem_s *elem, cg_hudelem_t *cghe, char *hudElemString);
-void __cdecl SafeTranslateHudElemString(int localClientNum, int index, char *hudElemString);
+void __cdecl CG_Draw2dHudElems(int32_t localClientNum, int32_t foreground);
+void __cdecl DrawSingleHudElem2d(int32_t localClientNum, const hudelem_s *elem);
+void __cdecl GetHudElemInfo(int32_t localClientNum, const hudelem_s *elem, cg_hudelem_t *cghe, char *hudElemString);
+void __cdecl SafeTranslateHudElemString(int32_t localClientNum, int32_t index, char *hudElemString);
 double __cdecl HudElemStringWidth(const char *string, const cg_hudelem_t *cghe);
-char *__cdecl HudElemTimerString(const hudelem_s *elem, int timeNow);
-int __cdecl GetHudElemTime(const hudelem_s *elem, int timeNow);
-char *__cdecl HudElemTenthsTimerString(const hudelem_s *elem, int timeNow);
+char *__cdecl HudElemTimerString(const hudelem_s *elem, int32_t timeNow);
+int32_t __cdecl GetHudElemTime(const hudelem_s *elem, int32_t timeNow);
+char *__cdecl HudElemTenthsTimerString(const hudelem_s *elem, int32_t timeNow);
 double __cdecl HudElemWidth(const ScreenPlacement *scrPlace, const hudelem_s *elem, const cg_hudelem_t *cghe);
 double __cdecl HudElemMaterialWidth(const ScreenPlacement *scrPlace, const hudelem_s *elem, const cg_hudelem_t *cghe);
 double __cdecl HudElemMaterialSpecifiedWidth(
     const ScreenPlacement *scrPlace,
     char alignScreen,
-    int sizeVirtual,
+    int32_t sizeVirtual,
     const cg_hudelem_t *cghe);
 double __cdecl HudElemHeight(const ScreenPlacement *scrPlace, const hudelem_s *elem, const cg_hudelem_t *cghe);
 double __cdecl HudElemMaterialHeight(const ScreenPlacement *scrPlace, const hudelem_s *elem, const cg_hudelem_t *cghe);
 double __cdecl HudElemMaterialSpecifiedHeight(
     const ScreenPlacement *scrPlace,
     char alignScreen,
-    int sizeVirtual,
+    int32_t sizeVirtual,
     const cg_hudelem_t *cghe);
 void __cdecl SetHudElemPos(const ScreenPlacement *scrPlace, const hudelem_s *elem, cg_hudelem_t *cghe);
 void __cdecl GetHudElemOrg(
     const ScreenPlacement *scrPlace,
-    int alignOrg,
-    int alignScreen,
+    int32_t alignOrg,
+    int32_t alignScreen,
     float xVirtual,
     float yVirtual,
     float width,
     float height,
     float *orgX,
     float *orgY);
-double __cdecl AlignHudElemX(int alignOrg, float x, float width);
-double __cdecl AlignHudElemY(int alignOrg, float y, float height);
-double __cdecl HudElemMovementFrac(const hudelem_s *elem, int timeNow);
+double __cdecl AlignHudElemX(int32_t alignOrg, float x, float width);
+double __cdecl AlignHudElemY(int32_t alignOrg, float y, float height);
+double __cdecl HudElemMovementFrac(const hudelem_s *elem, int32_t timeNow);
 void __cdecl ConsolidateHudElemText(cg_hudelem_t *cghe, char *hudElemString);
 void __cdecl CopyStringToHudElemString(char *string, char *hudElemString);
 void __cdecl HudElemColorToVec4(const hudelem_color_t *hudElemColor, float *resultColor);
 void __cdecl DrawHudElemString(
-    unsigned int localClientNum,
+    uint32_t localClientNum,
     const ScreenPlacement *scrPlace,
     char *text,
     const hudelem_s *elem,
     cg_hudelem_t *cghe);
 double __cdecl OffsetHudElemY(const hudelem_s *elem, const cg_hudelem_t *cghe, float offsetY);
-void __cdecl DrawHudElemClock(int localClientNum, const hudelem_s *elem, const cg_hudelem_t *cghe);
-void __cdecl DrawHudElemMaterial(int localClientNum, const hudelem_s *elem, cg_hudelem_t *cghe);
-void __cdecl DrawOffscreenViewableWaypoint(int localClientNum, const hudelem_s *elem);
-char __cdecl WorldPosToScreenPos(int localClientNum, const float *worldPos, float *outScreenPos);
+void __cdecl DrawHudElemClock(int32_t localClientNum, const hudelem_s *elem, const cg_hudelem_t *cghe);
+void __cdecl DrawHudElemMaterial(int32_t localClientNum, const hudelem_s *elem, cg_hudelem_t *cghe);
+void __cdecl DrawOffscreenViewableWaypoint(int32_t localClientNum, const hudelem_s *elem);
+char __cdecl WorldPosToScreenPos(int32_t localClientNum, const float *worldPos, float *outScreenPos);
 bool __cdecl ClampScreenPosToEdges(
-    int localClientNum,
+    int32_t localClientNum,
     float *point,
     float padLeft,
     float padRight,
@@ -289,13 +291,13 @@ bool __cdecl ClampScreenPosToEdges(
     float padBottom,
     float *resultNormal,
     float *resultDist);
-float __cdecl GetScaleForDistance(int localClientNum, const float *worldPos);
-int __cdecl GetSortedHudElems(int localClientNum, hudelem_s **elems);
-void __cdecl CopyInUseHudElems(hudelem_s **elems, int *elemCount, hudelem_s *elemSrcArray, int elemSrcArrayCount);
-int __cdecl compare_hudelems(const void *pe0, const void *pe1);
-void __cdecl CG_AddDrawSurfsFor3dHudElems(int localClientNum);
-void  AddDrawSurfForHudElemWaypoint(int localClientNum, const hudelem_s *elem);
-float __cdecl HudElemWaypointHeight(int localClientNum, const hudelem_s *elem);
+float __cdecl GetScaleForDistance(int32_t localClientNum, const float *worldPos);
+int32_t __cdecl GetSortedHudElems(int32_t localClientNum, hudelem_s **elems);
+void __cdecl CopyInUseHudElems(hudelem_s **elems, int32_t *elemCount, hudelem_s *elemSrcArray, int32_t elemSrcArrayCount);
+int32_t __cdecl compare_hudelems(const void *pe0, const void *pe1);
+void __cdecl CG_AddDrawSurfsFor3dHudElems(int32_t localClientNum);
+void  AddDrawSurfForHudElemWaypoint(int32_t localClientNum, const hudelem_s *elem);
+float __cdecl HudElemWaypointHeight(int32_t localClientNum, const hudelem_s *elem);
 
 
 // cg_weapons
@@ -307,83 +309,83 @@ struct weaponInfo_s // sizeof=0x44
     XModel *gogglesModel;
     XModel *rocketModel;
     XModel *knifeModel;
-    unsigned __int8 weapModelIdx;
+    uint8_t weapModelIdx;
     // padding byte
     // padding byte
     // padding byte
-    unsigned int partBits[4];
-    int iPrevAnim;
+    uint32_t partBits[4];
+    int32_t iPrevAnim;
     XAnimTree_s *tree;
-    int registered;
+    int32_t registered;
     const gitem_s *item;
     const char *translatedDisplayName;
     const char *translatedModename;
     const char *translatedAIOverlayDescription;
 };
-bool __cdecl CG_JavelinADS(int localClientNum);
-int __cdecl CG_WeaponDObjHandle(int weaponNum);
-void __cdecl CG_RegisterWeapon(int localClientNum, unsigned int weaponNum);
+bool __cdecl CG_JavelinADS(int32_t localClientNum);
+int32_t __cdecl CG_WeaponDObjHandle(int32_t weaponNum);
+void __cdecl CG_RegisterWeapon(int32_t localClientNum, uint32_t weaponNum);
 XAnimTree_s *__cdecl CG_CreateWeaponViewModelXAnim(WeaponDef *weapDef);
-void __cdecl CG_UpdateWeaponViewmodels(int localClientNum);
+void __cdecl CG_UpdateWeaponViewmodels(int32_t localClientNum);
 void __cdecl ChangeViewmodelDobj(
-    int localClientNum,
-    unsigned int weaponNum,
-    unsigned __int8 weaponModel,
+    int32_t localClientNum,
+    uint32_t weaponNum,
+    uint8_t weaponModel,
     XModel *newHands,
     XModel *newGoggles,
     XModel *newRocket,
     XModel *newKnife,
     bool updateClientInfo);
-void __cdecl CG_UpdateHandViewmodels(int localClientNum, XModel *handModel);
-void __cdecl CG_RegisterItemVisuals(int localClientNum, unsigned int weapIdx);
-void __cdecl CG_RegisterItems(int localClientNum);
+void __cdecl CG_UpdateHandViewmodels(int32_t localClientNum, XModel *handModel);
+void __cdecl CG_RegisterItemVisuals(int32_t localClientNum, uint32_t weapIdx);
+void __cdecl CG_RegisterItems(int32_t localClientNum);
 void __cdecl CG_HoldBreathInit(cg_s *cgameGlob);
-void __cdecl CG_UpdateViewModelPose(const DObj_s *obj, int localClientNum);
+void __cdecl CG_UpdateViewModelPose(const DObj_s *obj, int32_t localClientNum);
 bool __cdecl CG_IsPlayerCrouching(clientInfo_t *ci, const centity_s *cent);
 bool __cdecl CG_IsPlayerProne(clientInfo_t *ci, const centity_s *cent);
 bool __cdecl CG_IsPlayerADS(clientInfo_t *ci, const centity_s *cent);
 void __cdecl CG_GuessSpreadForWeapon(
-    int localClientNum,
+    int32_t localClientNum,
     const centity_s *cent,
     const WeaponDef *weapDef,
     float *minSpread,
     float *maxSpread);
-void __cdecl CG_GetPlayerViewOrigin(int localClientNum, const playerState_s *ps, float *origin);
+void __cdecl CG_GetPlayerViewOrigin(int32_t localClientNum, const playerState_s *ps, float *origin);
 void __cdecl CG_AddPlayerWeapon(
-    int localClientNum,
+    int32_t localClientNum,
     const GfxScaledPlacement *placement,
     const playerState_s *ps,
     centity_s *cent,
-    int bDrawGun);
+    int32_t bDrawGun);
 void __cdecl WeaponFlash(
-    int localClientNum,
-    unsigned int dobjHandle,
-    unsigned int weaponNum,
-    int bViewFlash,
-    unsigned int flashTag);
-void __cdecl HoldBreathUpdate(int localClientNum);
-void __cdecl HoldBreathSoundLerp(int localClientNum, float lerp);
-void __cdecl CG_UpdateViewWeaponAnim(int localClientNum);
-void __cdecl WeaponRunXModelAnims(int localClientNum, const playerState_s *ps, weaponInfo_s *weapInfo);
+    int32_t localClientNum,
+    uint32_t dobjHandle,
+    uint32_t weaponNum,
+    int32_t bViewFlash,
+    uint32_t flashTag);
+void __cdecl HoldBreathUpdate(int32_t localClientNum);
+void __cdecl HoldBreathSoundLerp(int32_t localClientNum, float lerp);
+void __cdecl CG_UpdateViewWeaponAnim(int32_t localClientNum);
+void __cdecl WeaponRunXModelAnims(int32_t localClientNum, const playerState_s *ps, weaponInfo_s *weapInfo);
 void __cdecl StartWeaponAnim(
-    int localClientNum,
-    unsigned int weaponNum,
+    int32_t localClientNum,
+    uint32_t weaponNum,
     DObj_s *obj,
-    int animIndex,
+    int32_t animIndex,
     float transitionTime);
-double __cdecl GetWeaponAnimRate(WeaponDef *weapDef, XAnim_s *anims, unsigned int animIndex);
-void __cdecl PlayADSAnim(float weaponPosFrac, int weaponNum, DObj_s *obj, int animIndex);
-void __cdecl ResetWeaponAnimTrees(int localClientNum, const playerState_s *ps);
+double __cdecl GetWeaponAnimRate(WeaponDef *weapDef, XAnim_s *anims, uint32_t animIndex);
+void __cdecl PlayADSAnim(float weaponPosFrac, int32_t weaponNum, DObj_s *obj, int32_t animIndex);
+void __cdecl ResetWeaponAnimTrees(int32_t localClientNum, const playerState_s *ps);
 char __cdecl UpdateViewmodelAttachments(
-    int localClientNum,
-    unsigned int weaponNum,
-    unsigned __int8 weaponModel,
+    int32_t localClientNum,
+    uint32_t weaponNum,
+    uint8_t weaponModel,
     weaponInfo_s *weapInfo);
-bool __cdecl ViewmodelRocketShouldBeAttached(int localClientNum, WeaponDef *weapDef);
-bool __cdecl ViewmodelKnifeShouldBeAttached(int localClientNum, WeaponDef *weapDef);
-void __cdecl ProcessWeaponNoteTracks(int localClientNum, const playerState_s *predictedPlayerState);
-void __cdecl PlayNoteMappedSoundAliases(int localClientNum, const char *noteName, const WeaponDef *weapDef);
-void __cdecl CG_AddViewWeapon(int localClientNum);
+bool __cdecl ViewmodelRocketShouldBeAttached(int32_t localClientNum, WeaponDef *weapDef);
+bool __cdecl ViewmodelKnifeShouldBeAttached(int32_t localClientNum, WeaponDef *weapDef);
+void __cdecl ProcessWeaponNoteTracks(int32_t localClientNum, const playerState_s *predictedPlayerState);
+void __cdecl PlayNoteMappedSoundAliases(int32_t localClientNum, const char *noteName, const WeaponDef *weapDef);
+void __cdecl CG_AddViewWeapon(int32_t localClientNum);
 void __cdecl CalculateWeaponPosition_Sway(cg_s *cgameGlob);
 void __cdecl CalculateWeaponPosition(cg_s *cgameGlob, float *origin);
 void __cdecl CalculateWeaponPosition_SwayMovement(const cg_s *cgameGlob, float *origin);
@@ -395,55 +397,55 @@ void __cdecl CalculateWeaponPostion_PositionToADS(cg_s *cgameGlob, playerState_s
 void __cdecl CG_NextWeapon_f();
 bool __cdecl WeaponCycleAllowed(cg_s *cgameGlob);
 void __cdecl CG_PrevWeapon_f();
-void __cdecl CG_OutOfAmmoChange(int localClientNum);
-char __cdecl VerifyPlayerAltModeWeapon(int localClientNum, const WeaponDef *weapDef);
-char __cdecl CycleWeapPrimary(int localClientNum, int cycleForward, int bIgnoreEmpty);
-unsigned int __cdecl CG_AltWeaponToggleIndex(int localClientNum, const cg_s *cgameGlob);
-int __cdecl NextWeapInCycle(
-    int localClientNum,
+void __cdecl CG_OutOfAmmoChange(int32_t localClientNum);
+char __cdecl VerifyPlayerAltModeWeapon(int32_t localClientNum, const WeaponDef *weapDef);
+char __cdecl CycleWeapPrimary(int32_t localClientNum, int32_t cycleForward, int32_t bIgnoreEmpty);
+uint32_t __cdecl CG_AltWeaponToggleIndex(int32_t localClientNum, const cg_s *cgameGlob);
+int32_t __cdecl NextWeapInCycle(
+    int32_t localClientNum,
     const playerState_s *ps,
     weapInventoryType_t type,
-    unsigned int startWeaponIndex,
+    uint32_t startWeaponIndex,
     bool cycleForward,
     bool skipEmpties,
     bool skipHaveNoAlts);
 void __cdecl CG_ActionSlotDown_f();
-char __cdecl ToggleWeaponAltMode(int localClientNum);
+char __cdecl ToggleWeaponAltMode(int32_t localClientNum);
 bool __cdecl ActionSlotUsageAllowed(cg_s *cgameGlob);
-char __cdecl ActionParms(int *slotResult);
+char __cdecl ActionParms(int32_t *slotResult);
 void __cdecl CG_ActionSlotUp_f();
-void __cdecl CG_EjectWeaponBrass(int localClientNum, const entityState_s *ent, int event);
+void __cdecl CG_EjectWeaponBrass(int32_t localClientNum, const entityState_s *ent, int32_t event);
 void __cdecl CG_FireWeapon(
-    int localClientNum,
+    int32_t localClientNum,
     centity_s *cent,
-    int event,
-    unsigned __int16 tagName,
-    unsigned int weapon,
+    int32_t event,
+    uint16_t tagName,
+    uint32_t weapon,
     const playerState_s *ps);
 void __cdecl DrawBulletImpacts(
-    int localClientNum,
+    int32_t localClientNum,
     const centity_s *ent,
     const WeaponDef *weaponDef,
-    unsigned __int16 boneName,
+    uint16_t boneName,
     const playerState_s *ps);
 void __cdecl FireBulletPenetrate(
-    int localClientNum,
+    int32_t localClientNum,
     BulletFireParams *bp,
     const WeaponDef *weapDef,
     const centity_s *attacker,
     float *tracerStart,
     bool drawTracer);
 char __cdecl BulletTrace(
-    int localClientNum,
+    int32_t localClientNum,
     const BulletFireParams *bp,
     const WeaponDef *weapDef,
     const centity_s *attacker,
     BulletTraceResults *br,
-    unsigned int lastSurfaceType);
-bool __cdecl ShouldIgnoreHitEntity(int attackerNum, int hitEntNum);
-bool __cdecl IsEntityAPlayer(int localClientNum, unsigned int entityNum);
+    uint32_t lastSurfaceType);
+bool __cdecl ShouldIgnoreHitEntity(int32_t attackerNum, int32_t hitEntNum);
+bool __cdecl IsEntityAPlayer(int32_t localClientNum, uint32_t entityNum);
 void __cdecl CG_BulletEndpos(
-    int randSeed,
+    int32_t randSeed,
     float spread,
     const float *start,
     float *end,
@@ -452,9 +454,9 @@ void __cdecl CG_BulletEndpos(
     const float *rightDir,
     const float *upDir,
     float maxRange);
-void __cdecl RandomBulletDir(int randSeed, float *x, float *y);
-void __cdecl TakeClipOnlyWeaponIfEmpty(int localClientNum, playerState_s *ps);
-void __cdecl CG_SpawnTracer(int localClientNum, const float *pstart, const float *pend);
+void __cdecl RandomBulletDir(int32_t randSeed, float *x, float *y);
+void __cdecl TakeClipOnlyWeaponIfEmpty(int32_t localClientNum, playerState_s *ps);
+void __cdecl CG_SpawnTracer(int32_t localClientNum, const float *pstart, const float *pend);
 void __cdecl CG_DrawTracer(const float *start, const float *finish, const refdef_s *refdef);
 void __cdecl ScaleTracer(
     const float *start,
@@ -463,76 +465,76 @@ void __cdecl ScaleTracer(
     float *startWidth,
     float *finishWidth);
 double __cdecl CalcTracerFinalScale(float tracerScaleDistRange, float dist, float tracerScale);
-cg_s *__cdecl CG_GetLocalClientGlobalsForEnt(int localClientNum, int entityNum);
-void __cdecl CG_GetViewDirection(int localClientNum, int entityNum, float *forward, float *right, float *up);
-void __cdecl CG_CalcEyePoint(int localClientNum, int entityNum, float *eyePos);
+cg_s *__cdecl CG_GetLocalClientGlobalsForEnt(int32_t localClientNum, int32_t entityNum);
+void __cdecl CG_GetViewDirection(int32_t localClientNum, int32_t entityNum, float *forward, float *right, float *up);
+void __cdecl CG_CalcEyePoint(int32_t localClientNum, int32_t entityNum, float *eyePos);
 void __cdecl CG_RandomEffectAxis(const float *forward, float *left, float *up);
 void __cdecl CG_ImpactEffectForWeapon(
-    unsigned int weaponIndex,
-    unsigned int surfType,
+    uint32_t weaponIndex,
+    uint32_t surfType,
     char impactFlags,
     const FxEffectDef **outFx,
     snd_alias_list_t **outSnd);
 void __cdecl CG_BulletHitEvent(
-    int localClientNum,
-    int sourceEntityNum,
-    unsigned int targetEntityNum,
-    unsigned int weaponIndex,
+    int32_t localClientNum,
+    int32_t sourceEntityNum,
+    uint32_t targetEntityNum,
+    uint32_t weaponIndex,
     float *startPos,
     float *position,
     const float *normal,
-    unsigned int surfType,
-    int event,
-    unsigned __int8 eventParam,
-    int damage,
+    uint32_t surfType,
+    int32_t event,
+    uint8_t eventParam,
+    int32_t damage,
     __int16 hitContents);
-int __cdecl CalcMuzzlePoint(int localClientNum, int entityNum, float *muzzle, unsigned int flashTag);
+int32_t __cdecl CalcMuzzlePoint(int32_t localClientNum, int32_t entityNum, float *muzzle, uint32_t flashTag);
 void __cdecl CG_BulletHitEvent_Internal(
-    int localClientNum,
-    int sourceEntityNum,
-    unsigned int targetEntityNum,
-    unsigned int weaponIndex,
+    int32_t localClientNum,
+    int32_t sourceEntityNum,
+    uint32_t targetEntityNum,
+    uint32_t weaponIndex,
     float *startPos,
     float *position,
     const float *normal,
-    unsigned int surfType,
-    int event,
-    unsigned __int8 eventParam,
-    int damage,
+    uint32_t surfType,
+    int32_t event,
+    uint8_t eventParam,
+    int32_t damage,
     __int16 hitContents);
 void __cdecl BulletTrajectoryEffects(
-    int localClientNum,
-    int sourceEntityNum,
+    int32_t localClientNum,
+    int32_t sourceEntityNum,
     float *startPos,
     float *position,
-    int surfType,
-    unsigned int flashTag,
-    unsigned __int8 impactFlags,
-    int damage);
-void __cdecl WhizbySound(int localClientNum, const float *start, const float *end);
-bool __cdecl ShouldSpawnTracer(int localClientNum, int sourceEntityNum);
+    int32_t surfType,
+    uint32_t flashTag,
+    uint8_t impactFlags,
+    int32_t damage);
+void __cdecl WhizbySound(int32_t localClientNum, const float *start, const float *end);
+bool __cdecl ShouldSpawnTracer(int32_t localClientNum, int32_t sourceEntityNum);
 void __cdecl CG_BulletHitClientEvent(
-    int localClientNum,
-    int sourceEntityNum,
+    int32_t localClientNum,
+    int32_t sourceEntityNum,
     float *startPos,
     float *position,
-    unsigned int surfType,
-    int event,
-    int damage);
-void __cdecl CG_MeleeBloodEvent(int localClientNum, const centity_s *cent);
-void __cdecl CG_SetupWeaponDef(int localClientNum);
-void __cdecl ParseWeaponDefFiles(const char **ppszFiles, int iNumFiles);
-unsigned int __cdecl ValidLatestPrimaryWeapIdx(unsigned int weaponIndex);
-void __cdecl CG_SelectWeaponIndex(int localClientNum, unsigned int weaponIndex);
-char __cdecl CG_ScopeIsOverlayed(int localClientNum);
-int __cdecl CG_PlayerTurretWeaponIdx(int localClientNum);
-bool __cdecl CG_PlayerUsingScopedTurret(int localClientNum);
+    uint32_t surfType,
+    int32_t event,
+    int32_t damage);
+void __cdecl CG_MeleeBloodEvent(int32_t localClientNum, const centity_s *cent);
+void __cdecl CG_SetupWeaponDef(int32_t localClientNum);
+void __cdecl ParseWeaponDefFiles(const char **ppszFiles, int32_t iNumFiles);
+uint32_t __cdecl ValidLatestPrimaryWeapIdx(uint32_t weaponIndex);
+void __cdecl CG_SelectWeaponIndex(int32_t localClientNum, uint32_t weaponIndex);
+char __cdecl CG_ScopeIsOverlayed(int32_t localClientNum);
+int32_t __cdecl CG_PlayerTurretWeaponIdx(int32_t localClientNum);
+bool __cdecl CG_PlayerUsingScopedTurret(int32_t localClientNum);
 char __cdecl Bullet_Trace(
     const BulletFireParams *bp,
     const WeaponDef *weapDef,
     gentity_s *attacker,
     BulletTraceResults *br,
-    unsigned int lastSurfaceType);
+    uint32_t lastSurfaceType);
 
 
 
@@ -546,17 +548,17 @@ struct localEntity_s // sizeof=0x50
     localEntity_s *prev;
     localEntity_s *next;                // ...
     leType_t leType;
-    int endTime;
+    int32_t endTime;
     trajectory_t pos;
     float color[4];
     float tracerClipDist;
     GfxEntity refEntity;
 };
 void __cdecl TRACK_cg_localents();
-void __cdecl CG_InitLocalEntities(int localClientNum);
-localEntity_s *__cdecl CG_AllocLocalEntity(int localClientNum);
-void __cdecl CG_FreeLocalEntity(int localClientNum, localEntity_s *le);
-void __cdecl CG_AddLocalEntityTracerBeams(int localClientNum);
+void __cdecl CG_InitLocalEntities(int32_t localClientNum);
+localEntity_s *__cdecl CG_AllocLocalEntity(int32_t localClientNum);
+void __cdecl CG_FreeLocalEntity(int32_t localClientNum, localEntity_s *le);
+void __cdecl CG_AddLocalEntityTracerBeams(int32_t localClientNum);
 void __cdecl CG_AddMovingTracer(const cg_s *cgameGlob, localEntity_s *le, const refdef_s *refdef);
 
 
@@ -564,97 +566,97 @@ void __cdecl CG_AddMovingTracer(const cg_s *cgameGlob, localEntity_s *le, const 
 // offhandweapons
 void __cdecl CG_OffhandRegisterDvars();
 void __cdecl CG_DrawOffHandIcon(
-    int localClientNum,
+    int32_t localClientNum,
     const rectDef_s *rect,
     float scale,
     const float *color,
     Material *material,
     OffhandClass weaponType);
-int __cdecl GetBestOffhand(const playerState_s *predictedPlayerState, int offhandClass);
+int32_t __cdecl GetBestOffhand(const playerState_s *predictedPlayerState, int32_t offhandClass);
 bool __cdecl IsOffHandDisplayVisible(const cg_s *cgameGlob);
 void __cdecl CG_DrawOffHandHighlight(
-    int localClientNum,
+    int32_t localClientNum,
     const rectDef_s *rect,
     float scale,
     const float *color,
     Material *material,
     OffhandClass weaponType);
 void __cdecl OffHandFlash(const cg_s *cgameGlob, const float *base_color, float *out_color);
-int __cdecl CalcOffHandAmmo(const playerState_s *predictedPlayerState, int weaponType);
+int32_t __cdecl CalcOffHandAmmo(const playerState_s *predictedPlayerState, int32_t weaponType);
 void __cdecl CG_DrawOffHandAmmo(
-    int localClientNum,
+    int32_t localClientNum,
     const rectDef_s *rect,
     Font_s *font,
     float scale,
     const float *color,
-    int textStyle,
+    int32_t textStyle,
     OffhandClass weaponType);
 void __cdecl CG_DrawOffHandName(
-    int localClientNum,
+    int32_t localClientNum,
     const rectDef_s *rect,
     Font_s *font,
     float scale,
     const float *color,
-    int textStyle,
+    int32_t textStyle,
     OffhandClass weaponType);
-void __cdecl CG_SwitchOffHandCmd(int localClientNum);
-void __cdecl CG_PrepOffHand(int localClientNum, const entityState_s *ent, unsigned int weaponIndex);
-void __cdecl CG_UseOffHand(int localClientNum, const centity_s *cent, unsigned int weaponIndex);
-void __cdecl CG_SetEquippedOffHand(int localClientNum, unsigned int offHandIndex);
+void __cdecl CG_SwitchOffHandCmd(int32_t localClientNum);
+void __cdecl CG_PrepOffHand(int32_t localClientNum, const entityState_s *ent, uint32_t weaponIndex);
+void __cdecl CG_UseOffHand(int32_t localClientNum, const centity_s *cent, uint32_t weaponIndex);
+void __cdecl CG_SetEquippedOffHand(int32_t localClientNum, uint32_t offHandIndex);
 
 
 
 // cg_world
-bool __cdecl CG_IsEntityLinked(int localClientNum, unsigned int entIndex);
-bool __cdecl CG_EntityNeedsLinked(int localClientNum, unsigned int entIndex);
-DObj_s *__cdecl CG_LocationalTraceDObj(int localClientNum, unsigned int entIndex);
-void __cdecl CG_UnlinkEntity(int localClientNum, unsigned int entIndex);
-void __cdecl CG_LinkEntity(int localClientNum, unsigned int entIndex);
+bool __cdecl CG_IsEntityLinked(int32_t localClientNum, uint32_t entIndex);
+bool __cdecl CG_EntityNeedsLinked(int32_t localClientNum, uint32_t entIndex);
+DObj_s *__cdecl CG_LocationalTraceDObj(int32_t localClientNum, uint32_t entIndex);
+void __cdecl CG_UnlinkEntity(int32_t localClientNum, uint32_t entIndex);
+void __cdecl CG_LinkEntity(int32_t localClientNum, uint32_t entIndex);
 void __cdecl CG_GetEntityBModelBounds(const centity_s *cent, float *mins, float *maxs, float *absMins, float *absMaxs);
 void __cdecl CG_GetEntityDobjBounds(const centity_s *cent, const DObj_s *dobj, float *absMins, float *absMaxs);
-void __cdecl CG_LocationalTrace(trace_t *results, float *start, float *end, int passEntityNum, int contentMask);
+void __cdecl CG_LocationalTrace(trace_t *results, float *start, float *end, int32_t passEntityNum, int32_t contentMask);
 void __cdecl CG_Trace(
     trace_t *results,
     float *start,
     float *mins,
     float *maxs,
     float *end,
-    int passEntityNum,
-    int contentMask,
+    int32_t passEntityNum,
+    int32_t contentMask,
     bool locational,
     bool staticModels);
 void __cdecl CG_ClipMoveToEntities(const moveclip_t *clip, trace_t *results);
 void __cdecl CG_ClipMoveToEntities_r(
     const moveclip_t *clip,
-    unsigned __int16 sectorIndex,
+    uint16_t sectorIndex,
     const float *p1,
     const float *p2,
     trace_t *results);
-void __cdecl CG_ClipMoveToEntity(const moveclip_t *clip, unsigned int entIndex, trace_t *results);
-int __cdecl CG_GetEntityBModelContents(const centity_s *cent);
+void __cdecl CG_ClipMoveToEntity(const moveclip_t *clip, uint32_t entIndex, trace_t *results);
+int32_t __cdecl CG_GetEntityBModelContents(const centity_s *cent);
 void __cdecl CG_PointTraceToEntities(const pointtrace_t *clip, trace_t *results);
 void __cdecl CG_PointTraceToEntities_r(
     const pointtrace_t *clip,
-    unsigned __int16 sectorIndex,
+    uint16_t sectorIndex,
     const float *p1,
     const float *p2,
     trace_t *results);
-void __cdecl CG_PointTraceToEntity(const pointtrace_t *clip, unsigned int entIndex, trace_t *results);
-void __cdecl CG_LocationTraceDobjCalcPose(const DObj_s *dobj, const cpose_t *pose, int *partBits);
+void __cdecl CG_PointTraceToEntity(const pointtrace_t *clip, uint32_t entIndex, trace_t *results);
+void __cdecl CG_LocationTraceDobjCalcPose(const DObj_s *dobj, const cpose_t *pose, int32_t *partBits);
 void __cdecl CG_LocationalTraceEntitiesOnly(
     trace_t *results,
     float *start,
     float *end,
-    int passEntityNum,
-    int contentMask);
+    int32_t passEntityNum,
+    int32_t contentMask);
 void __cdecl CG_TraceCapsule(
     trace_t *results,
     const float *start,
     const float *mins,
     const float *maxs,
     const float *end,
-    int passEntityNum,
-    int contentMask);
+    int32_t passEntityNum,
+    int32_t contentMask);
 
 
 
@@ -676,8 +678,8 @@ enum visionSetLerpStyle_t : __int32
 };
 struct visionSetLerpData_t // sizeof=0xC
 {                                       // ...
-    int timeStart;
-    int timeDuration;
+    int32_t timeStart;
+    int32_t timeDuration;
     visionSetLerpStyle_t style;
 };
 struct visionSetVars_t // sizeof=0x50
@@ -711,9 +713,9 @@ struct visionSetVars_t // sizeof=0x50
 void __cdecl CG_RegisterVisionSetsDvars();
 void __cdecl CG_InitVisionSetsMenu();
 void __cdecl CG_AddVisionSetMenuItem(XAssetHeader header);
-void __cdecl CG_VisionSetsUpdate(int localClientNum);
+void __cdecl CG_VisionSetsUpdate(int32_t localClientNum);
 void __cdecl UpdateVarsLerp(
-    int time,
+    int32_t time,
     const visionSetVars_t *from,
     const visionSetVars_t *to,
     visionSetLerpData_t *lerpData,
@@ -722,57 +724,57 @@ bool __cdecl LerpBool(bool from, bool to, float fraction, visionSetLerpStyle_t s
 double __cdecl LerpFloat(float from, float to, float fraction, visionSetLerpStyle_t style);
 void __cdecl LerpVec3(float *from, float *to, float fraction, visionSetLerpStyle_t style, float *result);
 char __cdecl CG_VisionSetStartLerp_To(
-    int localClientNum,
+    int32_t localClientNum,
     visionSetMode_t mode,
     visionSetLerpStyle_t style,
     char *nameTo,
-    int duration);
-char __cdecl GetVisionSet(int localClientNum, char *name, visionSetVars_t *resultSettings);
+    int32_t duration);
+char __cdecl GetVisionSet(int32_t localClientNum, char *name, visionSetVars_t *resultSettings);
 char __cdecl LoadVisionFile(const char *name, visionSetVars_t *resultSettings);
 char *__cdecl RawBufferOpen(const char *name, const char *formatFullPath);
 char __cdecl LoadVisionSettingsFromBuffer(const char *buffer, const char *filename, visionSetVars_t *settings);
-char __cdecl ApplyTokenToField(unsigned int fieldNum, const char *token, visionSetVars_t *settings);
-char __cdecl VisionSetCurrent(int localClientNum, visionSetMode_t mode, char *name);
-void __cdecl SetDefaultVision(int localClientNum);
-void __cdecl CG_VisionSetConfigString_Naked(int localClientNum);
-void __cdecl CG_VisionSetConfigString_Night(int localClientNum);
+char __cdecl ApplyTokenToField(uint32_t fieldNum, const char *token, visionSetVars_t *settings);
+char __cdecl VisionSetCurrent(int32_t localClientNum, visionSetMode_t mode, char *name);
+void __cdecl SetDefaultVision(int32_t localClientNum);
+void __cdecl CG_VisionSetConfigString_Naked(int32_t localClientNum);
+void __cdecl CG_VisionSetConfigString_Night(int32_t localClientNum);
 void __cdecl CG_VisionSetMyChanges();
 void __cdecl CG_VisionSetUpdateTweaksFromFile_Glow();
 bool __cdecl LoadVisionFileForTweaks(visionSetVars_t *setVars);
 void __cdecl CG_VisionSetUpdateTweaksFromFile_Film();
-char __cdecl CG_LookingThroughNightVision(int localClientNum);
-void __cdecl CG_VisionSetApplyToRefdef(int localClientNum);
-double __cdecl VisionFadeValue(int localClientNum);
+char __cdecl CG_LookingThroughNightVision(int32_t localClientNum);
+void __cdecl CG_VisionSetApplyToRefdef(int32_t localClientNum);
+double __cdecl VisionFadeValue(int32_t localClientNum);
 void __cdecl FadeRefDef(refdef_s *rd, float brightness);
 
 
 
 // cg_shellshock
 void __cdecl CG_PerturbCamera(cg_s *cgameGlob);
-int __cdecl CG_DrawShellShockSavedScreenBlendBlurred(
-    int localClientNum,
+int32_t __cdecl CG_DrawShellShockSavedScreenBlendBlurred(
+    int32_t localClientNum,
     const shellshock_parms_t *parms,
-    int start,
-    int duration);
-void __cdecl SaveScreenToBuffer(int localClientNum);
-int __cdecl CG_DrawShellShockSavedScreenBlendFlashed(
-    int localClientNum,
+    int32_t start,
+    int32_t duration);
+void __cdecl SaveScreenToBuffer(int32_t localClientNum);
+int32_t __cdecl CG_DrawShellShockSavedScreenBlendFlashed(
+    int32_t localClientNum,
     const shellshock_parms_t *parms,
-    int start,
-    int duration);
+    int32_t start,
+    int32_t duration);
 double __cdecl BlendSmooth(float percent);
-void __cdecl CG_UpdateShellShock(int localClientNum, const shellshock_parms_t *parms, int start, int duration);
-void __cdecl EndShellShock(int localClientNum);
-void __cdecl EndShellShockSound(int localClientNum);
-void __cdecl EndShellShockLookControl(int localClientNum);
-void __cdecl EndShellShockCamera(int localClientNum);
-void __cdecl EndShellShockScreen(int localClientNum);
-void __cdecl UpdateShellShockSound(int localClientNum, const shellshock_parms_t *parms, int time, int duration);
-void __cdecl UpdateShellShockLookControl(int localClientNum, const shellshock_parms_t *parms, int time, int duration);
-void __cdecl UpdateShellShockCamera(int localClientNum, const shellshock_parms_t *parms, int time, int duration);
+void __cdecl CG_UpdateShellShock(int32_t localClientNum, const shellshock_parms_t *parms, int32_t start, int32_t duration);
+void __cdecl EndShellShock(int32_t localClientNum);
+void __cdecl EndShellShockSound(int32_t localClientNum);
+void __cdecl EndShellShockLookControl(int32_t localClientNum);
+void __cdecl EndShellShockCamera(int32_t localClientNum);
+void __cdecl EndShellShockScreen(int32_t localClientNum);
+void __cdecl UpdateShellShockSound(int32_t localClientNum, const shellshock_parms_t *parms, int32_t time, int32_t duration);
+void __cdecl UpdateShellShockLookControl(int32_t localClientNum, const shellshock_parms_t *parms, int32_t time, int32_t duration);
+void __cdecl UpdateShellShockCamera(int32_t localClientNum, const shellshock_parms_t *parms, int32_t time, int32_t duration);
 double __cdecl CubicInterpolate(float t, float x0, float x1, float x2, float x3);
-void __cdecl CG_StartShellShock(cg_s *cgameGlob, const shellshock_parms_t *parms, int start, int duration);
-bool __cdecl CG_Flashbanged(int localClientNum);
+void __cdecl CG_StartShellShock(cg_s *cgameGlob, const shellshock_parms_t *parms, int32_t start, int32_t duration);
+bool __cdecl CG_Flashbanged(int32_t localClientNum);
 
 
 
@@ -785,14 +787,14 @@ void __cdecl CG_CullIn(cpose_t *pose);
 // cg_playerstate
 struct transPlayerState_t // sizeof=0x18
 {                                       // ...
-    int damageEvent;
-    int eventSequence;
-    int events[4];
+    int32_t damageEvent;
+    int32_t eventSequence;
+    int32_t events[4];
 };
-void __cdecl CG_Respawn(int localClientNum);
-int __cdecl CG_TransitionPlayerState(int localClientNum, playerState_s *ps, const transPlayerState_t *ops);
-void __cdecl CG_DamageFeedback(int localClientNum, int yawByte, int pitchByte, int damage);
-int __cdecl CG_CheckPlayerstateEvents(int localClientNum, playerState_s *ps, const transPlayerState_t *ops);
+void __cdecl CG_Respawn(int32_t localClientNum);
+int32_t __cdecl CG_TransitionPlayerState(int32_t localClientNum, playerState_s *ps, const transPlayerState_t *ops);
+void __cdecl CG_DamageFeedback(int32_t localClientNum, int32_t yawByte, int32_t pitchByte, int32_t damage);
+int32_t __cdecl CG_CheckPlayerstateEvents(int32_t localClientNum, playerState_s *ps, const transPlayerState_t *ops);
 
 
 
@@ -842,40 +844,40 @@ enum InvalidCmdHintType : __int32
     INVALID_CMD_NOT_ENOUGH_CLEARANCE = 0x9,
 };
 
-int __cdecl CG_GetBoneIndex(
-    int localClientNum,
-    unsigned int dobjHandle,
-    unsigned int boneName,
-    unsigned __int8 *boneIndex);
+int32_t __cdecl CG_GetBoneIndex(
+    int32_t localClientNum,
+    uint32_t dobjHandle,
+    uint32_t boneName,
+    uint8_t *boneIndex);
 void __cdecl CG_PlayBoltedEffect(
-    int localClientNum,
+    int32_t localClientNum,
     const FxEffectDef *fxDef,
-    unsigned int dobjHandle,
-    unsigned int boneName);
-void __cdecl CG_EntityEvent(int localClientNum, centity_s *cent, int event);
-void __cdecl CG_Obituary(int localClientNum, const entityState_s *ent);
-void __cdecl CG_ItemPickup(int localClientNum, int weapIndex);
-void __cdecl CG_EquipmentSound(int localClientNum, int entNum, bool isPlayerView, EquipmentSound_t type);
-void __cdecl CG_PlayFx(int localClientNum, centity_s *cent, const float *angles);
-void __cdecl CG_PlayFxOnTag(int localClientNum, centity_s *cent, int eventParm);
+    uint32_t dobjHandle,
+    uint32_t boneName);
+void __cdecl CG_EntityEvent(int32_t localClientNum, centity_s *cent, int32_t event);
+void __cdecl CG_Obituary(int32_t localClientNum, const entityState_s *ent);
+void __cdecl CG_ItemPickup(int32_t localClientNum, int32_t weapIndex);
+void __cdecl CG_EquipmentSound(int32_t localClientNum, int32_t entNum, bool isPlayerView, EquipmentSound_t type);
+void __cdecl CG_PlayFx(int32_t localClientNum, centity_s *cent, const float *angles);
+void __cdecl CG_PlayFxOnTag(int32_t localClientNum, centity_s *cent, int32_t eventParm);
 void __cdecl CG_SetInvalidCmdHint(cg_s *cgameGlob, InvalidCmdHintType hintType);
 void __cdecl CG_StopWeaponSound(
-    int localClientNum,
+    int32_t localClientNum,
     bool isPlayerView,
     const WeaponDef *weaponDef,
-    int entitynum,
+    int32_t entitynum,
     weaponstate_t weaponstate);
-void __cdecl CG_CheckEvents(int localClientNum, centity_s *cent);
+void __cdecl CG_CheckEvents(int32_t localClientNum, centity_s *cent);
 
 
 
 // cg_draw_reticles
 void __cdecl CG_CalcCrosshairPosition(const cg_s *cgameGlob, float *x, float *y);
 char __cdecl CG_GetWeapReticleZoom(const cg_s *cgameGlob, float *zoom);
-void __cdecl CG_DrawNightVisionOverlay(int localClientNum);
-void __cdecl CG_DrawCrosshair(int localClientNum);
+void __cdecl CG_DrawNightVisionOverlay(int32_t localClientNum);
+void __cdecl CG_DrawCrosshair(int32_t localClientNum);
 void __cdecl CG_DrawAdsOverlay(
-    int localClientNum,
+    int32_t localClientNum,
     const WeaponDef *weapDef,
     const float *color,
     const float *crosshairPos);
@@ -886,15 +888,15 @@ void __cdecl CG_DrawFrameOverlay(
     float innerBottom,
     const float *color,
     Material *material);
-bool __cdecl CG_UsingLowResViewPort(int localClientNum);
+bool __cdecl CG_UsingLowResViewPort(int32_t localClientNum);
 void __cdecl CG_UpdateScissorViewport(refdef_s *refdef, float *drawPos, float *drawSize);
-double __cdecl CG_DrawWeapReticle(int localClientNum);
-void __cdecl CG_CalcCrosshairColor(int localClientNum, float alpha, float *color);
-void __cdecl CG_DrawTurretCrossHair(int localClientNum);
-char __cdecl AllowedToDrawCrosshair(int localClientNum, const playerState_s *predictedPlayerState);
+double __cdecl CG_DrawWeapReticle(int32_t localClientNum);
+void __cdecl CG_CalcCrosshairColor(int32_t localClientNum, float alpha, float *color);
+void __cdecl CG_DrawTurretCrossHair(int32_t localClientNum);
+char __cdecl AllowedToDrawCrosshair(int32_t localClientNum, const playerState_s *predictedPlayerState);
 bool __cdecl CG_IsReticleTurnedOff();
 void __cdecl CG_DrawAdsAimIndicator(
-    int localClientNum,
+    int32_t localClientNum,
     const WeaponDef *weapDef,
     const float *color,
     float centerX,
@@ -907,14 +909,14 @@ void __cdecl CG_TransitionToAds(
     float *transScale,
     float *transShift);
 void __cdecl CG_DrawReticleCenter(
-    int localClientNum,
+    int32_t localClientNum,
     const WeaponDef *weapDef,
     const float *color,
     float centerX,
     float centerY,
     float transScale);
 void __cdecl CG_DrawReticleSides(
-    int localClientNum,
+    int32_t localClientNum,
     const WeaponDef *weapDef,
     const float *baseColor,
     float centerX,
@@ -937,19 +939,19 @@ struct HudGrenade // sizeof=0x10
     Material *material;                 // ...
 };
 void __cdecl CG_DrawFlashDamage(const cg_s *cgameGlob);
-void __cdecl CG_DrawDamageDirectionIndicators(int localClientNum);
+void __cdecl CG_DrawDamageDirectionIndicators(int32_t localClientNum);
 void __cdecl CG_ClearHudGrenades();
 char __cdecl CG_AddHudGrenade_PositionCheck(const cg_s *cgameGlob, const centity_s *grenadeEnt, WeaponDef *weapDef);
 void __cdecl CG_AddHudGrenade(const cg_s *cgameGlob, const centity_s *grenadeEnt);
-void __cdecl CG_DrawGrenadeIndicators(int localClientNum);
+void __cdecl CG_DrawGrenadeIndicators(int32_t localClientNum);
 void __cdecl CG_DrawGrenadePointer(
-    int localClientNum,
+    int32_t localClientNum,
     float centerX,
     float centerY,
     const float *grenadeOffset,
     const float *color);
 void __cdecl CG_DrawGrenadeIcon(
-    int localClientNum,
+    int32_t localClientNum,
     float centerX,
     float centerY,
     const float *grenadeOffset,
@@ -962,7 +964,7 @@ void __cdecl CG_DrawGrenadeIcon(
 struct meminfo_t;
 void __cdecl CG_CalculateFPS();
 double __cdecl CG_DrawFPS(const ScreenPlacement *scrPlace, float y, meminfo_t *meminfo);
-bool __cdecl CG_Flash(int timeMs);
+bool __cdecl CG_Flash(int32_t timeMs);
 double __cdecl CG_CornerDebugPrint(
     const ScreenPlacement *sP,
     float posX,
@@ -978,21 +980,21 @@ double __cdecl CG_CornerDebugPrintCaption(
     float labelWidth,
     char *text,
     const float *color);
-void __cdecl CG_DrawUpperRightDebugInfo(int localClientNum);
-double __cdecl CG_DrawSnapshot(int localClientNum, float posY);
+void __cdecl CG_DrawUpperRightDebugInfo(int32_t localClientNum);
+double __cdecl CG_DrawSnapshot(int32_t localClientNum, float posY);
 double __cdecl CG_DrawStatmon(const ScreenPlacement *scrPlace, float y, meminfo_t *meminfo);
 void __cdecl CG_DrawPerformanceWarnings();
-void __cdecl CG_DrawDebugOverlays(int localClientNum);
-void __cdecl CG_DrawMaterial(int localClientNum, unsigned int drawMaterialType);
-void __cdecl CG_DrawDebugPlayerHealth(int localClientNum);
-void __cdecl CG_DrawFullScreenDebugOverlays(int localClientNum);
+void __cdecl CG_DrawDebugOverlays(int32_t localClientNum);
+void __cdecl CG_DrawMaterial(int32_t localClientNum, uint32_t drawMaterialType);
+void __cdecl CG_DrawDebugPlayerHealth(int32_t localClientNum);
+void __cdecl CG_DrawFullScreenDebugOverlays(int32_t localClientNum);
 void __cdecl CG_DrawScriptUsage(const ScreenPlacement *scrPlace);
 void CG_DrawVersion();
-void __cdecl CG_DrawSoundEqOverlay(int localClientNum);
+void __cdecl CG_DrawSoundEqOverlay(int32_t localClientNum);
 void __cdecl CG_DrawSoundOverlay(const ScreenPlacement *scrPlace);
-void __cdecl CG_DrawFxProfile(int localClientNum);
+void __cdecl CG_DrawFxProfile(int32_t localClientNum);
 void __cdecl CG_DrawFxText(char *text, float *profilePos);
-void __cdecl CG_DrawFxMarkProfile(int localClientNum);
+void __cdecl CG_DrawFxMarkProfile(int32_t localClientNum);
 void __cdecl Vec4Set(float *v, float x, float y, float z, float w);
 
 
@@ -1005,7 +1007,7 @@ enum CompassType : __int32
 };
 
 void __cdecl CG_CompassRegisterDvars();
-bool __cdecl CG_IsSelectingLocation(int localClientNum);
+bool __cdecl CG_IsSelectingLocation(int32_t localClientNum);
 bool __cdecl CG_WorldPosToCompass(
     CompassType compassType,
     const cg_s *cgameGlob,
@@ -1024,73 +1026,73 @@ void __cdecl CG_CompassCalcDimensions(
     float *y,
     float *w,
     float *h);
-double __cdecl CG_FadeCompass(int localClientNum, int displayStartTime, CompassType compassType);
+double __cdecl CG_FadeCompass(int32_t localClientNum, int32_t displayStartTime, CompassType compassType);
 void __cdecl CG_CompassDrawPlayerBack(
-    int localClientNum,
+    int32_t localClientNum,
     CompassType compassType,
     const rectDef_s *parentRect,
     const rectDef_s *rect,
     Material *material,
     float *color);
 void __cdecl CG_CompassDrawPlayerNorthCoord(
-    int localClientNum,
+    int32_t localClientNum,
     CompassType compassType,
     const rectDef_s *parentRect,
     const rectDef_s *rect,
     Font_s *font,
     Material *material,
     float *const color,
-    int style);
+    int32_t style);
 void __cdecl CG_CompassDrawPlayerEastCoord(
-    int localClientNum,
+    int32_t localClientNum,
     CompassType compassType,
     const rectDef_s *parentRect,
     const rectDef_s *rect,
     Font_s *font,
     Material *material,
     float *const color,
-    int style);
+    int32_t style);
 void __cdecl CG_CompassDrawPlayerNCoordScroll(
-    int localClientNum,
+    int32_t localClientNum,
     CompassType compassType,
     const rectDef_s *parentRect,
     const rectDef_s *rect,
     Font_s *font,
     Material *material,
     float *color,
-    int textStyle);
+    int32_t textStyle);
 void __cdecl CG_CompassDrawPlayerECoordScroll(
-    int localClientNum,
+    int32_t localClientNum,
     CompassType compassType,
     const rectDef_s *parentRect,
     const rectDef_s *rect,
     Font_s *font,
     Material *material,
     float *color,
-    int textStyle);
+    int32_t textStyle);
 void __cdecl CG_CompassDrawPlayerMap(
-    int localClientNum,
+    int32_t localClientNum,
     CompassType compassType,
     const rectDef_s *parentRect,
     const rectDef_s *rect,
     Material *material,
     float *color);
 void __cdecl CG_CompassDrawPlayerMapLocationSelector(
-    int localClientNum,
+    int32_t localClientNum,
     CompassType compassType,
     const rectDef_s *parentRect,
     const rectDef_s *rect,
     Material *material,
     float *color);
 void __cdecl CG_CompassDrawPlayer(
-    int localClientNum,
+    int32_t localClientNum,
     CompassType compassType,
     const rectDef_s *parentRect,
     rectDef_s *rect,
     Material *material,
     float *color);
 void __cdecl CG_CompassDrawBorder(
-    int localClientNum,
+    int32_t localClientNum,
     CompassType compassType,
     const rectDef_s *parentRect,
     rectDef_s *rect,
@@ -1098,7 +1100,7 @@ void __cdecl CG_CompassDrawBorder(
     float *color);
 void __cdecl CG_CompassUpYawVector(const cg_s *cgameGlob, float *result);
 void __cdecl CG_CompassDrawTickertape(
-    int localClientNum,
+    int32_t localClientNum,
     CompassType compassType,
     const rectDef_s *parentRect,
     const rectDef_s *rect,
@@ -1106,11 +1108,11 @@ void __cdecl CG_CompassDrawTickertape(
     const float *color,
     Font_s *textFont,
     float textScale,
-    int textStyle,
+    int32_t textStyle,
     bool drawObjectives);
 void __cdecl CalcCompassPointerSize(CompassType compassType, float *w, float *h);
 void __cdecl DrawIconDistanceText(
-    int localClientNum,
+    int32_t localClientNum,
     float distance,
     float iconX,
     float iconY,
@@ -1119,12 +1121,12 @@ void __cdecl DrawIconDistanceText(
     const float *color,
     Font_s *textFont,
     float textScale,
-    int textStyle);
+    int32_t textStyle);
 double __cdecl CutFloat(float original);
-double __cdecl CG_GetHudAlphaCompass(int localClientNum);
+double __cdecl CG_GetHudAlphaCompass(int32_t localClientNum);
 void __cdecl CalcCompassFriendlySize(CompassType compassType, float *w, float *h);
 void __cdecl CG_CompassDrawPlayerPointers_MP(
-    int localClientNum,
+    int32_t localClientNum,
     CompassType compassType,
     const rectDef_s *parentRect,
     const rectDef_s *rect,
@@ -1137,27 +1139,27 @@ double __cdecl GetObjectiveFade(const rectDef_s *clipRect, float x, float y, flo
 // cg_colltree
 struct CgEntCollNode // sizeof=0x14
 {                                       // ...
-    unsigned __int16 sector;
-    unsigned __int16 nextEntInSector;
+    uint16_t sector;
+    uint16_t nextEntInSector;
     float linkMins[2];
     float linkMaxs[2];
 };
 union CgEntCollTree_u // sizeof=0x2
 {                                       // ...
-    unsigned __int16 parent;
-    unsigned __int16 nextFree;
+    uint16_t parent;
+    uint16_t nextFree;
 };
 struct CgEntCollTree // sizeof=0xC
 {                                       // ...
     float dist;
-    unsigned __int16 axis;
+    uint16_t axis;
     CgEntCollTree_u u;
-    unsigned __int16 child[2];
+    uint16_t child[2];
 };
 struct CgEntCollSector // sizeof=0x10
 {                                       // ...
     CgEntCollTree tree;
-    unsigned __int16 entListHead;
+    uint16_t entListHead;
     // padding byte
     // padding byte
 };
@@ -1165,34 +1167,34 @@ struct CgEntCollWorld // sizeof=0x401C
 {                                       // ...
     float mins[3];
     float maxs[3];
-    unsigned __int16 freeHead;
+    uint16_t freeHead;
     // padding byte
     // padding byte
     CgEntCollSector sectors[1024];
 };
 void __cdecl TRACK_CG_CollWorld();
-void __cdecl CG_SetCollWorldLocalClientNum(int localClientNum);
-int __cdecl CG_GetCollWorldLocalClientNum();
-void __cdecl CG_ClearEntityCollWorld(int localClientNum);
-const CgEntCollSector *__cdecl CG_GetEntityCollSector(int localClientNum, unsigned __int16 sectorIndex);
-const CgEntCollNode *__cdecl CG_GetEntityCollNode(int localClientNum, unsigned int entIndex);
-CgEntCollNode *__cdecl CG_GetCollNode(int localClientNum, unsigned int entIndex);
-void __cdecl CG_UnlinkEntityColl(int localClientNum, unsigned int entIndex);
-void __cdecl CG_LinkEntityColl(int localClientNum, unsigned int entIndex, const float *absMins, const float *absMaxs);
-void __cdecl CG_AddEntityToCollSector(int localClientNum, unsigned int entIndex, unsigned __int16 sectorIndex);
+void __cdecl CG_SetCollWorldLocalClientNum(int32_t localClientNum);
+int32_t __cdecl CG_GetCollWorldLocalClientNum();
+void __cdecl CG_ClearEntityCollWorld(int32_t localClientNum);
+const CgEntCollSector *__cdecl CG_GetEntityCollSector(int32_t localClientNum, uint16_t sectorIndex);
+const CgEntCollNode *__cdecl CG_GetEntityCollNode(int32_t localClientNum, uint32_t entIndex);
+CgEntCollNode *__cdecl CG_GetCollNode(int32_t localClientNum, uint32_t entIndex);
+void __cdecl CG_UnlinkEntityColl(int32_t localClientNum, uint32_t entIndex);
+void __cdecl CG_LinkEntityColl(int32_t localClientNum, uint32_t entIndex, const float *absMins, const float *absMaxs);
+void __cdecl CG_AddEntityToCollSector(int32_t localClientNum, uint32_t entIndex, uint16_t sectorIndex);
 void __cdecl CG_SortEntityCollSector(
-    int localClientNum,
-    unsigned __int16 sectorIndex,
+    int32_t localClientNum,
+    uint16_t sectorIndex,
     const float *mins,
     const float *maxs);
-unsigned __int16 __cdecl CG_AllocEntityCollSector(int localClientNum, const float *mins, const float *maxs);
+uint16_t __cdecl CG_AllocEntityCollSector(int32_t localClientNum, const float *mins, const float *maxs);
 
 
 
 // cg_camerashake
 struct CameraShake // sizeof=0x24
 {                                       // ...
-    int time;                           // ...
+    int32_t time;                           // ...
     float scale;                        // ...
     float length;                       // ...
     float radius;                       // ...
@@ -1207,93 +1209,93 @@ struct CameraShakeSet // sizeof=0x94
 };
 
 void __cdecl TRACK_cg_camerashake();
-void __cdecl CG_StartShakeCamera(int localClientNum, float p, int duration, float *src, float radius);
-int __cdecl CG_UpdateCameraShake(const cg_s *cgameGlob, CameraShake *shake);
-void __cdecl CG_ShakeCamera(int localClientNum);
-void __cdecl CG_ClearCameraShakes(int localClientNum);
+void __cdecl CG_StartShakeCamera(int32_t localClientNum, float p, int32_t duration, float *src, float radius);
+int32_t __cdecl CG_UpdateCameraShake(const cg_s *cgameGlob, CameraShake *shake);
+void __cdecl CG_ShakeCamera(int32_t localClientNum);
+void __cdecl CG_ClearCameraShakes(int32_t localClientNum);
 
 
 
 // cg_ammocounter
 void __cdecl CG_AmmoCounterRegisterDvars();
 void __cdecl CG_DrawPlayerWeaponAmmoStock(
-    int localClientNum,
+    int32_t localClientNum,
     const rectDef_s *rect,
     Font_s *font,
     float scale,
     float *color,
     Material *material,
-    int textStyle);
-unsigned int __cdecl ClipCounterWeapIdx(const cg_s *cgameGlob, unsigned int weapIndex);
-unsigned int __cdecl GetWeaponAltIndex(const cg_s *cgameGlob, const WeaponDef *weapDef);
-double __cdecl AmmoCounterFadeAlpha(int localClientNum, cg_s *cgameGlob);
-double __cdecl CG_GetHudAlphaDPad(int localClientNum);
-double __cdecl DpadFadeAlpha(int localClientNum, cg_s *cgameGlob);
-bool __cdecl ActionSlotIsActive(int localClientNum, unsigned int slotIdx);
-double __cdecl CG_GetHudAlphaAmmoCounter(int localClientNum);
-bool __cdecl CG_ActionSlotIsUsable(int localClientNum, unsigned int slotIdx);
+    int32_t textStyle);
+uint32_t __cdecl ClipCounterWeapIdx(const cg_s *cgameGlob, uint32_t weapIndex);
+uint32_t __cdecl GetWeaponAltIndex(const cg_s *cgameGlob, const WeaponDef *weapDef);
+double __cdecl AmmoCounterFadeAlpha(int32_t localClientNum, cg_s *cgameGlob);
+double __cdecl CG_GetHudAlphaDPad(int32_t localClientNum);
+double __cdecl DpadFadeAlpha(int32_t localClientNum, cg_s *cgameGlob);
+bool __cdecl ActionSlotIsActive(int32_t localClientNum, uint32_t slotIdx);
+double __cdecl CG_GetHudAlphaAmmoCounter(int32_t localClientNum);
+bool __cdecl CG_ActionSlotIsUsable(int32_t localClientNum, uint32_t slotIdx);
 void __cdecl CG_DrawPlayerActionSlotDpad(
-    int localClientNum,
+    int32_t localClientNum,
     const rectDef_s *rect,
     const float *color,
     Material *material);
 void __cdecl CG_DrawPlayerActionSlot(
-    int localClientNum,
+    int32_t localClientNum,
     const rectDef_s *rect,
-    unsigned int slotIdx,
+    uint32_t slotIdx,
     float *color,
     Font_s *textFont,
     float textScale,
-    int textStyle);
+    int32_t textStyle);
 void __cdecl DpadIconDims(
     const rectDef_s *rect,
-    unsigned int slotIdx,
+    uint32_t slotIdx,
     WeaponDef *weapDef,
     float *x,
     float *y,
     float *w,
     float *h);
-void __cdecl DpadTextPos(const rectDef_s *rect, unsigned int slotIdx, WeaponDef *weapDef, float *x, float *y);
+void __cdecl DpadTextPos(const rectDef_s *rect, uint32_t slotIdx, WeaponDef *weapDef, float *x, float *y);
 void __cdecl CG_DrawPlayerWeaponBackground(
-    int localClientNum,
+    int32_t localClientNum,
     const rectDef_s *rect,
     const float *color,
     Material *material);
-void __cdecl CG_DrawPlayerWeaponAmmoClipGraphic(int localClientNum, const rectDef_s *rect, const float *color);
-void __cdecl GetBaseRectPos(int localClientNum, const rectDef_s *rect, float *base);
-void __cdecl DrawClipAmmo(cg_s *cgameGlob, float *base, unsigned int weapIdx, const WeaponDef *weapDef, float *color);
+void __cdecl CG_DrawPlayerWeaponAmmoClipGraphic(int32_t localClientNum, const rectDef_s *rect, const float *color);
+void __cdecl GetBaseRectPos(int32_t localClientNum, const rectDef_s *rect, float *base);
+void __cdecl DrawClipAmmo(cg_s *cgameGlob, float *base, uint32_t weapIdx, const WeaponDef *weapDef, float *color);
 void __cdecl DrawClipAmmoMagazine(
     cg_s *cgameGlob,
     const float *base,
-    unsigned int weapIdx,
+    uint32_t weapIdx,
     const WeaponDef *weapDef,
     float *color);
-void __cdecl AmmoColor(cg_s *cgameGlob, float *color, unsigned int weapIndex);
+void __cdecl AmmoColor(cg_s *cgameGlob, float *color, uint32_t weapIndex);
 void __cdecl DrawClipAmmoShortMagazine(
     cg_s *cgameGlob,
     const float *base,
-    unsigned int weapIdx,
+    uint32_t weapIdx,
     const WeaponDef *weapDef,
     float *color);
 void __cdecl DrawClipAmmoShotgunShells(
     cg_s *cgameGlob,
     const float *base,
-    unsigned int weapIdx,
+    uint32_t weapIdx,
     const WeaponDef *weapDef,
     float *color);
 void __cdecl DrawClipAmmoRockets(
     cg_s *cgameGlob,
     const float *base,
-    unsigned int weapIdx,
+    uint32_t weapIdx,
     const WeaponDef *weapDef,
     float *color);
 void __cdecl DrawClipAmmoBeltfed(
     cg_s *cgameGlob,
     float *base,
-    unsigned int weapIdx,
+    uint32_t weapIdx,
     const WeaponDef *weapDef,
     float *color);
-void __cdecl CG_DrawPlayerWeaponIcon(int localClientNum, const rectDef_s *rect, const float *color);
+void __cdecl CG_DrawPlayerWeaponIcon(int32_t localClientNum, const rectDef_s *rect, const float *color);
 void __cdecl DrawStretchPicGun(
     const ScreenPlacement *scrPlace,
     const rectDef_s *rect,
@@ -1301,16 +1303,16 @@ void __cdecl DrawStretchPicGun(
     Material *material,
     weaponIconRatioType_t ratio);
 void __cdecl CG_DrawPlayerWeaponLowAmmoWarning(
-    int localClientNum,
+    int32_t localClientNum,
     const rectDef_s *rect,
     Font_s *font,
     float textScale,
-    int textStyle,
+    int32_t textStyle,
     float text_x,
     float text_y,
     char textAlignMode,
     Material *material);
-unsigned int __cdecl GetWeaponIndex(const cg_s *cgameGlob);
+uint32_t __cdecl GetWeaponIndex(const cg_s *cgameGlob);
 void __cdecl Vec4Copy(const float *from, float *to);
 
 
@@ -1326,8 +1328,8 @@ FxImpactTable *__cdecl CG_RegisterImpactEffects_LoadObj(const char *mapname);
 
 
 // cg_info
-void __cdecl CG_LoadingString(int localClientNum, const char *s);
-void __cdecl CG_DrawInformation(int localClientNum);
+void __cdecl CG_LoadingString(int32_t localClientNum, const char *s);
+void __cdecl CG_DrawInformation(int32_t localClientNum);
 bool __cdecl CG_IsShowingProgress_FastFile();
 
 

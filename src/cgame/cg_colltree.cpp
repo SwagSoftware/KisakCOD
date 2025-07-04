@@ -6,7 +6,7 @@
 
 CgEntCollWorld cgEntCollWorld[1];
 CgEntCollNode cgEntCollNodes[1][1024];
-int cgCollWorldLocalClientNum;
+int32_t cgCollWorldLocalClientNum;
 
 void __cdecl TRACK_CG_CollWorld()
 {
@@ -14,25 +14,25 @@ void __cdecl TRACK_CG_CollWorld()
     track_static_alloc_internal(cgEntCollNodes, 20480, "cgEntCollNodes", 25);
 }
 
-void __cdecl CG_SetCollWorldLocalClientNum(int localClientNum)
+void __cdecl CG_SetCollWorldLocalClientNum(int32_t localClientNum)
 {
     if (!Sys_IsMainThread())
         MyAssertHandler(".\\cgame\\cg_colltree.cpp", 61, 0, "%s", "Sys_IsMainThread()");
     cgCollWorldLocalClientNum = localClientNum;
 }
 
-int __cdecl CG_GetCollWorldLocalClientNum()
+int32_t __cdecl CG_GetCollWorldLocalClientNum()
 {
     if (!Sys_IsMainThread())
         MyAssertHandler(".\\cgame\\cg_colltree.cpp", 71, 0, "%s", "Sys_IsMainThread()");
     return cgCollWorldLocalClientNum;
 }
 
-void __cdecl CG_ClearEntityCollWorld(int localClientNum)
+void __cdecl CG_ClearEntityCollWorld(int32_t localClientNum)
 {
     float worldSize; // [esp+8h] [ebp-14h]
     float worldSize_4; // [esp+Ch] [ebp-10h]
-    unsigned __int16 sectorIndex; // [esp+14h] [ebp-8h]
+    uint16_t sectorIndex; // [esp+14h] [ebp-8h]
     CgEntCollWorld *world; // [esp+18h] [ebp-4h]
 
     if (localClientNum)
@@ -43,8 +43,8 @@ void __cdecl CG_ClearEntityCollWorld(int localClientNum)
             "localClientNum doesn't index STATIC_MAX_LOCAL_CLIENTS\n\t%i not in [0, %i)",
             localClientNum,
             1);
-    memset((unsigned __int8 *)&cgEntCollWorld[localClientNum], 0, sizeof(CgEntCollWorld));
-    memset((unsigned __int8 *)cgEntCollNodes[localClientNum], 0, sizeof(CgEntCollNode[1024]));
+    memset((uint8_t *)&cgEntCollWorld[localClientNum], 0, sizeof(CgEntCollWorld));
+    memset((uint8_t *)cgEntCollNodes[localClientNum], 0, sizeof(CgEntCollNode[1024]));
     world = &cgEntCollWorld[localClientNum];
     CM_ModelBounds(0, world->mins, world->maxs);
     world->freeHead = 2;
@@ -57,7 +57,7 @@ void __cdecl CG_ClearEntityCollWorld(int localClientNum)
         * 0.5;
 }
 
-const CgEntCollSector *__cdecl CG_GetEntityCollSector(int localClientNum, unsigned __int16 sectorIndex)
+const CgEntCollSector *__cdecl CG_GetEntityCollSector(int32_t localClientNum, uint16_t sectorIndex)
 {
     if (localClientNum)
         MyAssertHandler(
@@ -80,12 +80,12 @@ const CgEntCollSector *__cdecl CG_GetEntityCollSector(int localClientNum, unsign
     return &cgEntCollWorld[localClientNum].sectors[sectorIndex];
 }
 
-const CgEntCollNode *__cdecl CG_GetEntityCollNode(int localClientNum, unsigned int entIndex)
+const CgEntCollNode *__cdecl CG_GetEntityCollNode(int32_t localClientNum, uint32_t entIndex)
 {
     return CG_GetCollNode(localClientNum, entIndex);
 }
 
-CgEntCollNode *__cdecl CG_GetCollNode(int localClientNum, unsigned int entIndex)
+CgEntCollNode *__cdecl CG_GetCollNode(int32_t localClientNum, uint32_t entIndex)
 {
     if (localClientNum)
         MyAssertHandler(
@@ -106,15 +106,15 @@ CgEntCollNode *__cdecl CG_GetCollNode(int localClientNum, unsigned int entIndex)
     return &cgEntCollNodes[localClientNum][entIndex];
 }
 
-void __cdecl CG_UnlinkEntityColl(int localClientNum, unsigned int entIndex)
+void __cdecl CG_UnlinkEntityColl(int32_t localClientNum, uint32_t entIndex)
 {
     CgEntCollNode *node; // [esp+0h] [ebp-1Ch]
     CgEntCollSector *sector; // [esp+4h] [ebp-18h]
     CgEntCollNode *scan; // [esp+8h] [ebp-14h]
-    unsigned __int16 parentSectorIndex; // [esp+Ch] [ebp-10h]
-    unsigned __int16 parentSectorIndexa; // [esp+Ch] [ebp-10h]
+    uint16_t parentSectorIndex; // [esp+Ch] [ebp-10h]
+    uint16_t parentSectorIndexa; // [esp+Ch] [ebp-10h]
     CgEntCollNode *next; // [esp+10h] [ebp-Ch]
-    unsigned __int16 sectorIndex; // [esp+14h] [ebp-8h]
+    uint16_t sectorIndex; // [esp+14h] [ebp-8h]
     CgEntCollWorld *world; // [esp+18h] [ebp-4h]
 
     if (localClientNum)
@@ -192,16 +192,16 @@ void __cdecl CG_UnlinkEntityColl(int localClientNum, unsigned int entIndex)
     }
 }
 
-void __cdecl CG_LinkEntityColl(int localClientNum, unsigned int entIndex, const float *absMins, const float *absMaxs)
+void __cdecl CG_LinkEntityColl(int32_t localClientNum, uint32_t entIndex, const float *absMins, const float *absMaxs)
 {
     CgEntCollNode *node; // [esp+14h] [ebp-28h]
     CgEntCollSector *sector; // [esp+18h] [ebp-24h]
     float dist; // [esp+1Ch] [ebp-20h]
     float mins[2]; // [esp+20h] [ebp-1Ch] BYREF
-    unsigned __int16 sectorIndex; // [esp+28h] [ebp-14h]
+    uint16_t sectorIndex; // [esp+28h] [ebp-14h]
     float maxs[2]; // [esp+2Ch] [ebp-10h] BYREF
     CgEntCollWorld *world; // [esp+34h] [ebp-8h]
-    int axis; // [esp+38h] [ebp-4h]
+    int32_t axis; // [esp+38h] [ebp-4h]
 
     if (localClientNum)
         MyAssertHandler(
@@ -275,10 +275,10 @@ LABEL_26:
     CG_SortEntityCollSector(localClientNum, sectorIndex, mins, maxs);
 }
 
-void __cdecl CG_AddEntityToCollSector(int localClientNum, unsigned int entIndex, unsigned __int16 sectorIndex)
+void __cdecl CG_AddEntityToCollSector(int32_t localClientNum, uint32_t entIndex, uint16_t sectorIndex)
 {
     CgEntCollNode *node; // [esp+0h] [ebp-18h]
-    unsigned __int16 *prevListIndex; // [esp+Ch] [ebp-Ch]
+    uint16_t *prevListIndex; // [esp+Ch] [ebp-Ch]
 
     if (localClientNum)
         MyAssertHandler(
@@ -308,7 +308,7 @@ void __cdecl CG_AddEntityToCollSector(int localClientNum, unsigned int entIndex,
             sectorIndex);
     node = CG_GetCollNode(localClientNum, entIndex);
     for (prevListIndex = &cgEntCollWorld[localClientNum].sectors[sectorIndex].entListHead;
-        (unsigned int)*prevListIndex - 1 <= entIndex;
+        (uint32_t)*prevListIndex - 1 <= entIndex;
         prevListIndex = &CG_GetCollNode(localClientNum, *prevListIndex - 1)->nextEntInSector)
     {
         ;
@@ -319,19 +319,19 @@ void __cdecl CG_AddEntityToCollSector(int localClientNum, unsigned int entIndex,
 }
 
 void __cdecl CG_SortEntityCollSector(
-    int localClientNum,
-    unsigned __int16 sectorIndex,
+    int32_t localClientNum,
+    uint16_t sectorIndex,
     const float *mins,
     const float *maxs)
 {
     CgEntCollNode *node; // [esp+0h] [ebp-24h]
-    unsigned __int16 listIndex; // [esp+8h] [ebp-1Ch]
+    uint16_t listIndex; // [esp+8h] [ebp-1Ch]
     float dist; // [esp+Ch] [ebp-18h]
     CgEntCollNode *prevNode; // [esp+10h] [ebp-14h]
     CgEntCollWorld *world; // [esp+14h] [ebp-10h]
-    unsigned int entIndex; // [esp+18h] [ebp-Ch]
-    int axis; // [esp+1Ch] [ebp-8h]
-    unsigned __int16 childSectorIndex; // [esp+20h] [ebp-4h]
+    uint32_t entIndex; // [esp+18h] [ebp-Ch]
+    int32_t axis; // [esp+1Ch] [ebp-8h]
+    uint16_t childSectorIndex; // [esp+20h] [ebp-4h]
 
     if (localClientNum)
         MyAssertHandler(
@@ -425,13 +425,13 @@ void __cdecl CG_SortEntityCollSector(
     }
 }
 
-unsigned __int16 __cdecl CG_AllocEntityCollSector(int localClientNum, const float *mins, const float *maxs)
+uint16_t __cdecl CG_AllocEntityCollSector(int32_t localClientNum, const float *mins, const float *maxs)
 {
     CgEntCollSector *sector; // [esp+4h] [ebp-18h]
     float size[2]; // [esp+8h] [ebp-14h]
-    unsigned __int16 sectorIndex; // [esp+10h] [ebp-Ch]
+    uint16_t sectorIndex; // [esp+10h] [ebp-Ch]
     CgEntCollWorld *world; // [esp+14h] [ebp-8h]
-    unsigned __int16 axis; // [esp+18h] [ebp-4h]
+    uint16_t axis; // [esp+18h] [ebp-4h]
 
     if (localClientNum)
         MyAssertHandler(

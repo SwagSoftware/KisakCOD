@@ -42,7 +42,7 @@ void __cdecl CG_CalcCrosshairPosition(const cg_s *cgameGlob, float *x, float *y)
 
 char __cdecl CG_GetWeapReticleZoom(const cg_s *cgameGlob, float *zoom)
 {
-    int weapIndex; // [esp+0h] [ebp-Ch]
+    int32_t weapIndex; // [esp+0h] [ebp-Ch]
     float fPosLerp; // [esp+4h] [ebp-8h]
     WeaponDef *weapDef; // [esp+8h] [ebp-4h]
 
@@ -75,7 +75,7 @@ char __cdecl CG_GetWeapReticleZoom(const cg_s *cgameGlob, float *zoom)
     return 1;
 }
 
-void __cdecl CG_DrawNightVisionOverlay(int localClientNum)
+void __cdecl CG_DrawNightVisionOverlay(int32_t localClientNum)
 {
     if (localClientNum)
         MyAssertHandler(
@@ -107,14 +107,14 @@ void __cdecl CG_DrawNightVisionOverlay(int localClientNum)
     }
 }
 
-void __cdecl CG_DrawCrosshair(int localClientNum)
+void __cdecl CG_DrawCrosshair(int32_t localClientNum)
 {
     WeaponDef *weapDefTurret; // [esp+Ch] [ebp-44h]
     float posLerp; // [esp+10h] [ebp-40h]
     bool drawHud; // [esp+1Bh] [ebp-35h]
     float reticleAlpha; // [esp+20h] [ebp-30h]
     float centerY; // [esp+24h] [ebp-2Ch] BYREF
-    int weapIndex; // [esp+28h] [ebp-28h]
+    int32_t weapIndex; // [esp+28h] [ebp-28h]
     const playerState_s *ps; // [esp+2Ch] [ebp-24h]
     WeaponDef *weapDef; // [esp+30h] [ebp-20h]
     float color[4]; // [esp+34h] [ebp-1Ch] BYREF
@@ -196,7 +196,7 @@ void __cdecl CG_DrawCrosshair(int localClientNum)
 }
 
 void __cdecl CG_DrawAdsOverlay(
-    int localClientNum,
+    int32_t localClientNum,
     const WeaponDef *weapDef,
     const float *color,
     const float *crosshairPos)
@@ -209,9 +209,9 @@ void __cdecl CG_DrawAdsOverlay(
     float drawPos[2]; // [esp+44h] [ebp-20h] BYREF
     Material *material; // [esp+4Ch] [ebp-18h]
     cg_s *cgameGlob; // [esp+50h] [ebp-14h]
-    int vertAlign; // [esp+54h] [ebp-10h]
+    int32_t vertAlign; // [esp+54h] [ebp-10h]
     float drawSize[2]; // [esp+58h] [ebp-Ch] BYREF
-    int horzAlign; // [esp+60h] [ebp-4h]
+    int32_t horzAlign; // [esp+60h] [ebp-4h]
 
     iassert(weapDef);
 
@@ -346,9 +346,9 @@ void __cdecl CG_DrawFrameOverlay(
     float v8; // [esp+30h] [ebp-1Ch]
     float w; // [esp+34h] [ebp-18h]
     float screenWidth; // [esp+38h] [ebp-14h]
-    int displayHeight; // [esp+3Ch] [ebp-10h] BYREF
+    int32_t displayHeight; // [esp+3Ch] [ebp-10h] BYREF
     float displayAspect; // [esp+40h] [ebp-Ch] BYREF
-    int displayWidth; // [esp+44h] [ebp-8h] BYREF
+    int32_t displayWidth; // [esp+44h] [ebp-8h] BYREF
     float screenHeight; // [esp+48h] [ebp-4h]
 
     CL_GetScreenDimensions(&displayWidth, &displayHeight, &displayAspect);
@@ -374,66 +374,66 @@ void __cdecl CG_DrawFrameOverlay(
     }
 }
 
-bool __cdecl CG_UsingLowResViewPort(int localClientNum)
+bool __cdecl CG_UsingLowResViewPort(int32_t localClientNum)
 {
     return scrPlaceView[localClientNum].realViewportSize[1] <= 480.0;
 }
 
 void __cdecl CG_UpdateScissorViewport(refdef_s *refdef, float *drawPos, float *drawSize)
 {
-    unsigned int v3; // [esp+0h] [ebp-54h]
-    unsigned int v4; // [esp+4h] [ebp-50h]
-    unsigned int v5; // [esp+8h] [ebp-4Ch]
-    unsigned int v6; // [esp+Ch] [ebp-48h]
-    signed int v7; // [esp+18h] [ebp-3Ch]
-    signed int v8; // [esp+24h] [ebp-30h]
-    int y; // [esp+34h] [ebp-20h]
-    int x; // [esp+44h] [ebp-10h]
-    int x1; // [esp+48h] [ebp-Ch]
-    int y1; // [esp+4Ch] [ebp-8h]
+    uint32_t v3; // [esp+0h] [ebp-54h]
+    uint32_t v4; // [esp+4h] [ebp-50h]
+    uint32_t v5; // [esp+8h] [ebp-4Ch]
+    uint32_t v6; // [esp+Ch] [ebp-48h]
+    int32_t v7; // [esp+18h] [ebp-3Ch]
+    int32_t v8; // [esp+24h] [ebp-30h]
+    int32_t y; // [esp+34h] [ebp-20h]
+    int32_t x; // [esp+44h] [ebp-10h]
+    int32_t x1; // [esp+48h] [ebp-Ch]
+    int32_t y1; // [esp+4Ch] [ebp-8h]
 
     if (!refdef)
         MyAssertHandler(".\\cgame\\cg_draw_reticles.cpp", 161, 0, "%s", "refdef");
     if (refdef->useScissorViewport)
         MyAssertHandler(".\\cgame\\cg_draw_reticles.cpp", 162, 0, "%s", "!refdef->useScissorViewport");
     refdef->useScissorViewport = 1;
-    refdef->scissorViewport.x = refdef->x + (int)*drawPos;
-    refdef->scissorViewport.y = refdef->y + (int)drawPos[1];
-    refdef->scissorViewport.width = (int)*drawSize;
-    refdef->scissorViewport.height = (int)drawSize[1];
+    refdef->scissorViewport.x = refdef->x + (int32_t)*drawPos;
+    refdef->scissorViewport.y = refdef->y + (int32_t)drawPos[1];
+    refdef->scissorViewport.width = (int32_t)*drawSize;
+    refdef->scissorViewport.height = (int32_t)drawSize[1];
     x1 = refdef->scissorViewport.width + refdef->scissorViewport.x;
     y1 = refdef->scissorViewport.height + refdef->scissorViewport.y;
-    if (refdef->scissorViewport.x < (signed int)(refdef->width + refdef->x))
+    if (refdef->scissorViewport.x < (int32_t)(refdef->width + refdef->x))
         x = refdef->scissorViewport.x;
     else
         x = refdef->width + refdef->x;
-    if ((signed int)refdef->x < x)
+    if ((int32_t)refdef->x < x)
         v6 = x;
     else
         v6 = refdef->x;
     refdef->scissorViewport.x = v6;
-    if (refdef->scissorViewport.y < (signed int)(refdef->height + refdef->y))
+    if (refdef->scissorViewport.y < (int32_t)(refdef->height + refdef->y))
         y = refdef->scissorViewport.y;
     else
         y = refdef->height + refdef->y;
-    if ((signed int)refdef->y < y)
+    if ((int32_t)refdef->y < y)
         v5 = y;
     else
         v5 = refdef->y;
     refdef->scissorViewport.y = v5;
-    if (x1 < (signed int)(refdef->width + refdef->x))
+    if (x1 < (int32_t)(refdef->width + refdef->x))
         v8 = x1;
     else
         v8 = refdef->width + refdef->x;
-    if ((signed int)refdef->x < v8)
+    if ((int32_t)refdef->x < v8)
         v4 = v8;
     else
         v4 = refdef->x;
-    if (y1 < (signed int)(refdef->height + refdef->y))
+    if (y1 < (int32_t)(refdef->height + refdef->y))
         v7 = y1;
     else
         v7 = refdef->height + refdef->y;
-    if ((signed int)refdef->y < v7)
+    if ((int32_t)refdef->y < v7)
         v3 = v7;
     else
         v3 = refdef->y;
@@ -441,9 +441,9 @@ void __cdecl CG_UpdateScissorViewport(refdef_s *refdef, float *drawPos, float *d
     refdef->scissorViewport.height = v3 - refdef->scissorViewport.y;
 }
 
-double __cdecl CG_DrawWeapReticle(int localClientNum)
+double __cdecl CG_DrawWeapReticle(int32_t localClientNum)
 {
-    int weapIndex; // [esp+14h] [ebp-28h]
+    int32_t weapIndex; // [esp+14h] [ebp-28h]
     float crossHairAlpha; // [esp+18h] [ebp-24h]
     WeaponDef *weapDef; // [esp+1Ch] [ebp-20h]
     float color[4]; // [esp+20h] [ebp-1Ch] BYREF
@@ -474,7 +474,7 @@ double __cdecl CG_DrawWeapReticle(int localClientNum)
     return crossHairAlpha;
 }
 
-void __cdecl CG_CalcCrosshairColor(int localClientNum, float alpha, float *color)
+void __cdecl CG_CalcCrosshairColor(int32_t localClientNum, float alpha, float *color)
 {
     WeaponDef *weapDef; // [esp+14h] [ebp-4h]
     cg_s *cgameGlob;
@@ -515,11 +515,11 @@ LABEL_22:
     color[3] = alpha * cg_crosshairAlpha->current.value;
 }
 
-void __cdecl CG_DrawTurretCrossHair(int localClientNum)
+void __cdecl CG_DrawTurretCrossHair(int32_t localClientNum)
 {
     centity_s *cent; // [esp+38h] [ebp-38h]
     float drawSize; // [esp+44h] [ebp-2Ch]
-    unsigned int weapIndex; // [esp+50h] [ebp-20h]
+    uint32_t weapIndex; // [esp+50h] [ebp-20h]
     WeaponDef *weapDef; // [esp+54h] [ebp-1Ch]
     float reticleColor[4]; // [esp+58h] [ebp-18h] BYREF
     float x; // [esp+68h] [ebp-8h]
@@ -570,7 +570,7 @@ void __cdecl CG_DrawTurretCrossHair(int localClientNum)
     }
 }
 
-char __cdecl AllowedToDrawCrosshair(int localClientNum, const playerState_s *predictedPlayerState)
+char __cdecl AllowedToDrawCrosshair(int32_t localClientNum, const playerState_s *predictedPlayerState)
 {
     if (!predictedPlayerState)
         MyAssertHandler(".\\cgame\\cg_draw_reticles.cpp", 487, 0, "%s", "predictedPlayerState");
@@ -603,7 +603,7 @@ bool __cdecl CG_IsReticleTurnedOff()
 }
 
 void __cdecl CG_DrawAdsAimIndicator(
-    int localClientNum,
+    int32_t localClientNum,
     const WeaponDef *weapDef,
     const float *color,
     float centerX,
@@ -700,7 +700,7 @@ void __cdecl CG_TransitionToAds(
 }
 
 void __cdecl CG_DrawReticleCenter(
-    int localClientNum,
+    int32_t localClientNum,
     const WeaponDef *weapDef,
     const float *color,
     float centerX,
@@ -712,7 +712,7 @@ void __cdecl CG_DrawReticleCenter(
     float drawSizea; // [esp+40h] [ebp-14h]
     float x; // [esp+4Ch] [ebp-8h]
     float y; // [esp+50h] [ebp-4h]
-    int grenadeTimeLeft;
+    int32_t grenadeTimeLeft;
 
     iassert(weapDef);
 
@@ -749,7 +749,7 @@ void __cdecl CG_DrawReticleCenter(
 }
 
 void __cdecl CG_DrawReticleSides(
-    int localClientNum,
+    int32_t localClientNum,
     const WeaponDef *weapDef,
     const float *baseColor,
     float centerX,
@@ -761,11 +761,11 @@ void __cdecl CG_DrawReticleSides(
     const cg_s *cgameGlob; // [esp+30h] [ebp-3Ch]
     Material *material; // [esp+34h] [ebp-38h]
     float drawPos[2]; // [esp+38h] [ebp-34h]
-    int vertAlign; // [esp+40h] [ebp-2Ch]
+    int32_t vertAlign; // [esp+40h] [ebp-2Ch]
     float imageTexelOffset[2]; // [esp+44h] [ebp-28h] BYREF
     float reticleAlpha; // [esp+4Ch] [ebp-20h]
     float drawSize[2]; // [esp+50h] [ebp-1Ch] BYREF
-    int horzAlign; // [esp+58h] [ebp-14h]
+    int32_t horzAlign; // [esp+58h] [ebp-14h]
     float reticleColor[4]; // [esp+5Ch] [ebp-10h] BYREF
 
     iassert(weapDef);

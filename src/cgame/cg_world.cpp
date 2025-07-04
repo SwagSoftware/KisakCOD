@@ -10,7 +10,7 @@
 #include <xanim/dobj_utils.h>
 #include <universal/profile.h>
 
-bool __cdecl CG_IsEntityLinked(int localClientNum, unsigned int entIndex)
+bool __cdecl CG_IsEntityLinked(int32_t localClientNum, uint32_t entIndex)
 {
     if (localClientNum)
         MyAssertHandler(
@@ -31,7 +31,7 @@ bool __cdecl CG_IsEntityLinked(int localClientNum, unsigned int entIndex)
     return CG_GetEntityCollNode(localClientNum, entIndex)->sector != 0;
 }
 
-bool __cdecl CG_EntityNeedsLinked(int localClientNum, unsigned int entIndex)
+bool __cdecl CG_EntityNeedsLinked(int32_t localClientNum, uint32_t entIndex)
 {
     if (localClientNum)
         MyAssertHandler(
@@ -53,7 +53,7 @@ bool __cdecl CG_EntityNeedsLinked(int localClientNum, unsigned int entIndex)
         || CG_LocationalTraceDObj(localClientNum, entIndex) != 0;
 }
 
-DObj_s *__cdecl CG_LocationalTraceDObj(int localClientNum, unsigned int entIndex)
+DObj_s *__cdecl CG_LocationalTraceDObj(int32_t localClientNum, uint32_t entIndex)
 {
     centity_s *cent; // [esp+0h] [ebp-8h]
 
@@ -81,13 +81,13 @@ DObj_s *__cdecl CG_LocationalTraceDObj(int localClientNum, unsigned int entIndex
     return 0;
 }
 
-void __cdecl CG_UnlinkEntity(int localClientNum, unsigned int entIndex)
+void __cdecl CG_UnlinkEntity(int32_t localClientNum, uint32_t entIndex)
 {
     PROF_SCOPED("CG_UnlinkEntity");
     CG_UnlinkEntityColl(localClientNum, entIndex);
 }
 
-void __cdecl CG_LinkEntity(int localClientNum, unsigned int entIndex)
+void __cdecl CG_LinkEntity(int32_t localClientNum, uint32_t entIndex)
 {
     float mins[3]; // [esp+4Ch] [ebp-3Ch] BYREF
     float maxs[3]; // [esp+58h] [ebp-30h] BYREF
@@ -136,10 +136,10 @@ void __cdecl CG_LinkEntity(int localClientNum, unsigned int entIndex)
 
 void __cdecl CG_GetEntityBModelBounds(const centity_s *cent, float *mins, float *maxs, float *absMins, float *absMaxs)
 {
-    int zd; // [esp+0h] [ebp-14h]
-    int zu; // [esp+4h] [ebp-10h]
+    int32_t zd; // [esp+0h] [ebp-14h]
+    int32_t zu; // [esp+4h] [ebp-10h]
     float radius; // [esp+8h] [ebp-Ch]
-    int x; // [esp+10h] [ebp-4h]
+    int32_t x; // [esp+10h] [ebp-4h]
 
     if (!cent)
         MyAssertHandler(".\\cgame\\cg_world.cpp", 63, 0, "%s", "cent");
@@ -159,9 +159,9 @@ void __cdecl CG_GetEntityBModelBounds(const centity_s *cent, float *mins, float 
     }
     else
     {
-        x = (unsigned __int8)cent->nextState.solid;
-        zd = (unsigned __int8)BYTE1(cent->nextState.solid) - 1;
-        zu = (unsigned __int8)BYTE2(cent->nextState.solid) - 32;
+        x = (uint8_t)cent->nextState.solid;
+        zd = (uint8_t)BYTE1(cent->nextState.solid) - 1;
+        zu = (uint8_t)BYTE2(cent->nextState.solid) - 32;
         mins[1] = 1.0 - (double)x;
         *mins = mins[1];
         maxs[1] = (double)x - 1.0;
@@ -213,7 +213,7 @@ void __cdecl CG_GetEntityDobjBounds(const centity_s *cent, const DObj_s *dobj, f
     absMaxs[2] = v6;
 }
 
-void __cdecl CG_LocationalTrace(trace_t *results, float *start, float *end, int passEntityNum, int contentMask)
+void __cdecl CG_LocationalTrace(trace_t *results, float *start, float *end, int32_t passEntityNum, int32_t contentMask)
 {
     if (!results)
         MyAssertHandler(".\\cgame\\cg_world.cpp", 843, 0, "%s", "results");
@@ -234,8 +234,8 @@ void __cdecl CG_Trace(
     float *mins,
     float *maxs,
     float *end,
-    int passEntityNum,
-    int contentMask,
+    int32_t passEntityNum,
+    int32_t contentMask,
     bool locational,
     bool staticModels)
 {
@@ -427,7 +427,7 @@ void __cdecl CG_ClipMoveToEntities(const moveclip_t *clip, trace_t *results)
 
 void __cdecl CG_ClipMoveToEntities_r(
     const moveclip_t *clip,
-    unsigned __int16 sectorIndex,
+    uint16_t sectorIndex,
     const float *p1,
     const float *p2,
     trace_t *results)
@@ -446,10 +446,10 @@ void __cdecl CG_ClipMoveToEntities_r(
     bool side; // [esp+4Ch] [ebp-54h]
     float diff; // [esp+50h] [ebp-50h]
     const CgEntCollSector *sector; // [esp+58h] [ebp-48h]
-    unsigned __int16 listIndex; // [esp+5Ch] [ebp-44h]
+    uint16_t listIndex; // [esp+5Ch] [ebp-44h]
     float t1; // [esp+60h] [ebp-40h]
     float frac; // [esp+64h] [ebp-3Ch]
-    int localClientNum; // [esp+68h] [ebp-38h]
+    int32_t localClientNum; // [esp+68h] [ebp-38h]
     float offset; // [esp+6Ch] [ebp-34h]
     float t2; // [esp+70h] [ebp-30h]
     float frac2; // [esp+74h] [ebp-2Ch]
@@ -568,19 +568,19 @@ void __cdecl CG_ClipMoveToEntities_r(
     }
 }
 
-void __cdecl CG_ClipMoveToEntity(const moveclip_t *clip, unsigned int entIndex, trace_t *results)
+void __cdecl CG_ClipMoveToEntity(const moveclip_t *clip, uint32_t entIndex, trace_t *results)
 {
-    __int64 v3; // [esp-Ch] [ebp-6Ch]
-    unsigned __int16 number; // [esp+6h] [ebp-5Ah]
-    int contents; // [esp+Ch] [ebp-54h]
+    int64_t v3; // [esp-Ch] [ebp-6Ch]
+    uint16_t number; // [esp+6h] [ebp-5Ah]
+    int32_t contents; // [esp+Ch] [ebp-54h]
     float mins[3]; // [esp+10h] [ebp-50h] BYREF
     float absMaxs[3]; // [esp+1Ch] [ebp-44h] BYREF
     const centity_s *cent; // [esp+28h] [ebp-38h]
-    int localClientNum; // [esp+2Ch] [ebp-34h]
+    int32_t localClientNum; // [esp+2Ch] [ebp-34h]
     const entityState_s *p_nextState; // [esp+30h] [ebp-30h]
     float angles[3]; // [esp+34h] [ebp-2Ch] BYREF
     float maxs[3]; // [esp+40h] [ebp-20h] BYREF
-    unsigned int cmodel; // [esp+4Ch] [ebp-14h]
+    uint32_t cmodel; // [esp+4Ch] [ebp-14h]
     float oldFraction; // [esp+50h] [ebp-10h]
     float absMins[3]; // [esp+54h] [ebp-Ch] BYREF
 
@@ -653,7 +653,7 @@ void __cdecl CG_ClipMoveToEntity(const moveclip_t *clip, unsigned int entIndex, 
     }
 }
 
-int __cdecl CG_GetEntityBModelContents(const centity_s *cent)
+int32_t __cdecl CG_GetEntityBModelContents(const centity_s *cent)
 {
     if (!cent)
         MyAssertHandler(".\\cgame\\cg_world.cpp", 25, 0, "%s", "cent");
@@ -707,7 +707,7 @@ void __cdecl CG_PointTraceToEntities(const pointtrace_t *clip, trace_t *results)
 
 void __cdecl CG_PointTraceToEntities_r(
     const pointtrace_t *clip,
-    unsigned __int16 sectorIndex,
+    uint16_t sectorIndex,
     const float *p1,
     const float *p2,
     trace_t *results)
@@ -716,10 +716,10 @@ void __cdecl CG_PointTraceToEntities_r(
     float v6; // [esp+14h] [ebp-58h]
     const CgEntCollNode *node; // [esp+2Ch] [ebp-40h]
     const CgEntCollSector *sector; // [esp+34h] [ebp-38h]
-    unsigned __int16 listIndex; // [esp+38h] [ebp-34h]
+    uint16_t listIndex; // [esp+38h] [ebp-34h]
     float t1; // [esp+3Ch] [ebp-30h]
     float frac; // [esp+40h] [ebp-2Ch]
-    int localClientNum; // [esp+44h] [ebp-28h]
+    int32_t localClientNum; // [esp+44h] [ebp-28h]
     float t2; // [esp+48h] [ebp-24h]
     float p[4]; // [esp+4Ch] [ebp-20h] BYREF
     float mid[4]; // [esp+5Ch] [ebp-10h] BYREF
@@ -797,27 +797,27 @@ void __cdecl CG_PointTraceToEntities_r(
     }
 }
 
-void __cdecl CG_PointTraceToEntity(const pointtrace_t *clip, unsigned int entIndex, trace_t *results)
+void __cdecl CG_PointTraceToEntity(const pointtrace_t *clip, uint32_t entIndex, trace_t *results)
 {
-    __int64 v3; // [esp-Ch] [ebp-C4h]
+    int64_t v3; // [esp-Ch] [ebp-C4h]
     DObj_s *v4; // [esp+8h] [ebp-B0h]
-    unsigned __int16 number; // [esp+Eh] [ebp-AAh]
+    uint16_t number; // [esp+Eh] [ebp-AAh]
     float mins[3]; // [esp+18h] [ebp-A0h] BYREF
     float angles[3]; // [esp+24h] [ebp-94h] BYREF
     float maxs[3]; // [esp+30h] [ebp-88h] BYREF
-    unsigned int cmodel; // [esp+3Ch] [ebp-7Ch]
+    uint32_t cmodel; // [esp+3Ch] [ebp-7Ch]
     float oldFraction; // [esp+40h] [ebp-78h]
     float localStart[3]; // [esp+44h] [ebp-74h] BYREF
     cg_s *cgameGlob; // [esp+50h] [ebp-68h]
     DObjTrace_s objTrace; // [esp+54h] [ebp-64h] BYREF
     float localEnd[3]; // [esp+70h] [ebp-48h] BYREF
-    int contents; // [esp+7Ch] [ebp-3Ch]
+    int32_t contents; // [esp+7Ch] [ebp-3Ch]
     DObj_s *dobj; // [esp+80h] [ebp-38h]
     float absMaxs[3]; // [esp+84h] [ebp-34h] BYREF
     const centity_s *cent; // [esp+90h] [ebp-28h]
-    int localClientNum; // [esp+94h] [ebp-24h]
+    int32_t localClientNum; // [esp+94h] [ebp-24h]
     const entityState_s *p_nextState; // [esp+98h] [ebp-20h]
-    int partBits[4]; // [esp+9Ch] [ebp-1Ch] BYREF
+    int32_t partBits[4]; // [esp+9Ch] [ebp-1Ch] BYREF
     float absMins[3]; // [esp+ACh] [ebp-Ch] BYREF
 
     if (!clip)
@@ -937,7 +937,7 @@ void __cdecl CG_PointTraceToEntity(const pointtrace_t *clip, unsigned int entInd
     }
 }
 
-void __cdecl CG_LocationTraceDobjCalcPose(const DObj_s *dobj, const cpose_t *pose, int *partBits)
+void __cdecl CG_LocationTraceDobjCalcPose(const DObj_s *dobj, const cpose_t *pose, int32_t *partBits)
 {
     if (!dobj)
         MyAssertHandler(".\\cgame\\cg_world.cpp", 159, 0, "%s", "dobj");
@@ -954,8 +954,8 @@ void __cdecl CG_LocationalTraceEntitiesOnly(
     trace_t *results,
     float *start,
     float *end,
-    int passEntityNum,
-    int contentMask)
+    int32_t passEntityNum,
+    int32_t contentMask)
 {
     pointtrace_t clip; // [esp+48h] [ebp-40h] BYREF
     IgnoreEntParams ignoreEntParams; // [esp+7Ch] [ebp-Ch] BYREF
@@ -1020,8 +1020,8 @@ void __cdecl CG_TraceCapsule(
     const float *mins,
     const float *maxs,
     const float *end,
-    int passEntityNum,
-    int contentMask)
+    int32_t passEntityNum,
+    int32_t contentMask)
 {
     if (!results)
         MyAssertHandler(".\\cgame\\cg_world.cpp", 904, 0, "%s", "results");

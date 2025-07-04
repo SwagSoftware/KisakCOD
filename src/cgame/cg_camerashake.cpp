@@ -12,11 +12,11 @@ void __cdecl TRACK_cg_camerashake()
     track_static_alloc_internal(s_cameraShakeSet, 148, "s_cameraShakeSet", 9);
 }
 
-void __cdecl CG_StartShakeCamera(int localClientNum, float p, int duration, float *src, float radius)
+void __cdecl CG_StartShakeCamera(int32_t localClientNum, float p, int32_t duration, float *src, float radius)
 {
-    int j; // [esp+8h] [ebp-38h]
+    int32_t j; // [esp+8h] [ebp-38h]
     float minsize; // [esp+10h] [ebp-30h]
-    int i; // [esp+14h] [ebp-2Ch]
+    int32_t i; // [esp+14h] [ebp-2Ch]
     CameraShakeSet *cameraShakeArray; // [esp+18h] [ebp-28h]
     CameraShake buildShake; // [esp+1Ch] [ebp-24h] BYREF
     const cg_s *cgameGlob;
@@ -62,14 +62,14 @@ void __cdecl CG_StartShakeCamera(int localClientNum, float p, int duration, floa
     memcpy(&cameraShakeArray->shakes[i], &buildShake, sizeof(cameraShakeArray->shakes[i]));
 }
 
-int __cdecl CG_UpdateCameraShake(const cg_s *cgameGlob, CameraShake *shake)
+int32_t __cdecl CG_UpdateCameraShake(const cg_s *cgameGlob, CameraShake *shake)
 {
     double v3; // st7
     float diff[3]; // [esp+Ch] [ebp-2Ch] BYREF
     float scale; // [esp+18h] [ebp-20h]
     float radius; // [esp+1Ch] [ebp-1Ch]
     float length; // [esp+20h] [ebp-18h]
-    int dtime; // [esp+24h] [ebp-14h]
+    int32_t dtime; // [esp+24h] [ebp-14h]
     float dist; // [esp+28h] [ebp-10h]
     float val; // [esp+2Ch] [ebp-Ch]
     float timePercent; // [esp+30h] [ebp-8h]
@@ -136,7 +136,7 @@ int __cdecl CG_UpdateCameraShake(const cg_s *cgameGlob, CameraShake *shake)
     return 1;
 }
 
-void __cdecl CG_ShakeCamera(int localClientNum)
+void __cdecl CG_ShakeCamera(int32_t localClientNum)
 {
     float v1; // [esp+0h] [ebp-38h]
     float v2; // [esp+4h] [ebp-34h]
@@ -151,7 +151,7 @@ void __cdecl CG_ShakeCamera(int localClientNum)
     float valb; // [esp+24h] [ebp-14h]
     float rumbleScale; // [esp+28h] [ebp-10h]
     float scale; // [esp+2Ch] [ebp-Ch]
-    int i; // [esp+30h] [ebp-8h]
+    int32_t i; // [esp+30h] [ebp-8h]
     float sx; // [esp+34h] [ebp-4h]
     cg_s *cgameGlob;
 
@@ -201,8 +201,8 @@ void __cdecl CG_ShakeCamera(int localClientNum)
     }
 }
 
-void __cdecl CG_ClearCameraShakes(int localClientNum)
+void __cdecl CG_ClearCameraShakes(int32_t localClientNum)
 {
-    memset((unsigned __int8 *)&s_cameraShakeSet[localClientNum], 0, 0x90u);
+    memset((uint8_t *)&s_cameraShakeSet[localClientNum], 0, 0x90u);
 }
 

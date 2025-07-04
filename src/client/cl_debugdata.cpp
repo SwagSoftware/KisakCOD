@@ -1,6 +1,7 @@
 #include "client.h"
 
 #include <gfx_d3d/r_debug.h>
+#include <client_mp/client_mp.h>
 
 void __cdecl CL_AddDebugString(
     const float *xyz,

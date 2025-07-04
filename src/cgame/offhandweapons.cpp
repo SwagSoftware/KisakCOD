@@ -34,7 +34,7 @@ void __cdecl CG_OffhandRegisterDvars()
 }
 
 void __cdecl CG_DrawOffHandIcon(
-    int localClientNum,
+    int32_t localClientNum,
     const rectDef_s *rect,
     float scale,
     const float *color,
@@ -43,7 +43,7 @@ void __cdecl CG_DrawOffHandIcon(
 {
     float v6; // [esp+24h] [ebp-30h]
     float drawColor[4]; // [esp+38h] [ebp-1Ch] BYREF
-    int weapIndex; // [esp+48h] [ebp-Ch]
+    int32_t weapIndex; // [esp+48h] [ebp-Ch]
     const WeaponDef *weapDef; // [esp+4Ch] [ebp-8h]
     const WeaponDef *equippedWeapDef; // [esp+50h] [ebp-4h]
     const cg_s *cgameGlob;
@@ -98,9 +98,9 @@ void __cdecl CG_DrawOffHandIcon(
     }
 }
 
-int __cdecl GetBestOffhand(const playerState_s *predictedPlayerState, int offhandClass)
+int32_t __cdecl GetBestOffhand(const playerState_s *predictedPlayerState, int32_t offhandClass)
 {
-    int newOffhand; // [esp+0h] [ebp-4h]
+    int32_t newOffhand; // [esp+0h] [ebp-4h]
 
     newOffhand = BG_GetFirstAvailableOffhand(predictedPlayerState, offhandClass);
     if (!newOffhand)
@@ -114,7 +114,7 @@ bool __cdecl IsOffHandDisplayVisible(const cg_s *cgameGlob)
 }
 
 void __cdecl CG_DrawOffHandHighlight(
-    int localClientNum,
+    int32_t localClientNum,
     const rectDef_s *rect,
     float scale,
     const float *color,
@@ -212,11 +212,11 @@ void __cdecl OffHandFlash(const cg_s *cgameGlob, const float *base_color, float 
     }
 }
 
-int __cdecl CalcOffHandAmmo(const playerState_s *predictedPlayerState, int weaponType)
+int32_t __cdecl CalcOffHandAmmo(const playerState_s *predictedPlayerState, int32_t weaponType)
 {
-    int ammoCount; // [esp+0h] [ebp-10h]
-    unsigned int weapCount; // [esp+4h] [ebp-Ch]
-    unsigned int weapIndex; // [esp+8h] [ebp-8h]
+    int32_t ammoCount; // [esp+0h] [ebp-10h]
+    uint32_t weapCount; // [esp+4h] [ebp-Ch]
+    uint32_t weapIndex; // [esp+8h] [ebp-8h]
     WeaponDef *weapDef; // [esp+Ch] [ebp-4h]
 
     ammoCount = 0;
@@ -238,16 +238,16 @@ int __cdecl CalcOffHandAmmo(const playerState_s *predictedPlayerState, int weapo
 }
 
 void __cdecl CG_DrawOffHandAmmo(
-    int localClientNum,
+    int32_t localClientNum,
     const rectDef_s *rect,
     Font_s *font,
     float scale,
     const float *color,
-    int textStyle,
+    int32_t textStyle,
     OffhandClass weaponType)
 {
     float v7; // [esp+20h] [ebp-2Ch]
-    int ammoCount; // [esp+30h] [ebp-1Ch]
+    int32_t ammoCount; // [esp+30h] [ebp-1Ch]
     float drawColor[4]; // [esp+38h] [ebp-14h] BYREF
     const char *ammoCountString; // [esp+48h] [ebp-4h]
     cg_s *cgameGlob;
@@ -303,12 +303,12 @@ void __cdecl CG_DrawOffHandAmmo(
 }
 
 void __cdecl CG_DrawOffHandName(
-    int localClientNum,
+    int32_t localClientNum,
     const rectDef_s *rect,
     Font_s *font,
     float scale,
     const float *color,
-    int textStyle,
+    int32_t textStyle,
     OffhandClass weaponType)
 {
     float v7; // [esp+20h] [ebp-28h]
@@ -352,9 +352,9 @@ void __cdecl CG_DrawOffHandName(
     }
 }
 
-void __cdecl CG_SwitchOffHandCmd(int localClientNum)
+void __cdecl CG_SwitchOffHandCmd(int32_t localClientNum)
 {
-    unsigned int newOffhand; // [esp+4h] [ebp-8h]
+    uint32_t newOffhand; // [esp+4h] [ebp-8h]
     WeaponDef* weapDef; // [esp+8h] [ebp-4h]
     const cg_s *cgameGlob;
 
@@ -370,7 +370,7 @@ void __cdecl CG_SwitchOffHandCmd(int localClientNum)
     }
 }
 
-void __cdecl CG_PrepOffHand(int localClientNum, const entityState_s *ent, unsigned int weaponIndex)
+void __cdecl CG_PrepOffHand(int32_t localClientNum, const entityState_s *ent, uint32_t weaponIndex)
 {
     WeaponDef *weapDef; // [esp+0h] [ebp-4h]
 
@@ -389,7 +389,7 @@ void __cdecl CG_PrepOffHand(int localClientNum, const entityState_s *ent, unsign
         CG_PlayEntitySoundAlias(localClientNum, ent->number, weapDef->pullbackSound);
 }
 
-void __cdecl CG_UseOffHand(int localClientNum, const centity_s *cent, unsigned int weaponIndex)
+void __cdecl CG_UseOffHand(int32_t localClientNum, const centity_s *cent, uint32_t weaponIndex)
 {
     const weaponInfo_s *weapInfo; // [esp+0h] [ebp-1Ch]
     DObj_s *obj; // [esp+4h] [ebp-18h]
@@ -431,7 +431,7 @@ void __cdecl CG_UseOffHand(int localClientNum, const centity_s *cent, unsigned i
     }
 }
 
-void __cdecl CG_SetEquippedOffHand(int localClientNum, unsigned int offHandIndex)
+void __cdecl CG_SetEquippedOffHand(int32_t localClientNum, uint32_t offHandIndex)
 {
     WeaponDef *WeaponDef; // eax
 
