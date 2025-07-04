@@ -29,12 +29,6 @@ struct NetField // sizeof=0x10
     // padding byte
 };
 
-struct NetFieldList // sizeof=0x8
-{                                       // ...
-    const NetField* array;
-    unsigned int count;
-};
-
 #define	NETF_BASE(s, x) #x,(size_t)&((s*)0)->x
 
 struct hudelem_s;

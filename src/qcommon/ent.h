@@ -11,6 +11,14 @@ struct LerpEntityStateLoopFx // sizeof=0x8
     float cullDist;
     int period;
 };
+#ifdef KISAK_SP
+struct __declspec(align(4)) LerpEntityStateActor
+{
+    float visionFov;
+    float visionDist;
+    unsigned __int8 species;
+};
+#endif
 struct LerpEntityStatePrimaryLight // sizeof=0x14
 {                                       // XREF: LerpEntityStateTypeUnion/r
     unsigned __int8 colorAndExp[4];
@@ -22,7 +30,9 @@ struct LerpEntityStatePrimaryLight // sizeof=0x14
 struct LerpEntityStatePlayer // sizeof=0x8
 {                                       // XREF: LerpEntityStateTypeUnion/r
     float leanf;
+#ifdef KISAK_MP
     int movementDir;
+#endif
 };
 struct LerpEntityStateVehicle // sizeof=0x1C
 {                                       // XREF: LerpEntityStateTypeUnion/r
@@ -32,7 +42,9 @@ struct LerpEntityStateVehicle // sizeof=0x1C
     int materialTime;
     float gunPitch;
     float gunYaw;
+#ifdef KISAK_MP
     int teamAndOwnerIndex;
+#endif
 };
 struct LerpEntityStateMissile // sizeof=0x4
 {                                       // XREF: LerpEntityStateTypeUnion/r
@@ -41,7 +53,16 @@ struct LerpEntityStateMissile // sizeof=0x4
 struct LerpEntityStateSoundBlend // sizeof=0x4
 {                                       // XREF: LerpEntityStateTypeUnion/r
     float lerp;
+#ifdef KISAK_SP
+    float volumeScale;
+#endif
 };
+#ifdef KISAK_SP
+struct LerpEntityStateBulletTracer
+{
+    float end[3];
+};
+#endif
 struct LerpEntityStateBulletHit // sizeof=0xC
 {                                       // XREF: LerpEntityStateTypeUnion/r
     float start[3];
@@ -72,39 +93,51 @@ struct LerpEntityStatePhysicsJitter // sizeof=0xC
     float minDisplacement;
     float maxDisplacement;
 };
+#ifdef KISAK_MP
 struct LerpEntityStateAnonymous // sizeof=0x1C
 {                                       // XREF: LerpEntityStateTypeUnion/r
     int data[7];
 };
+#endif
 union LerpEntityStateTypeUnion // sizeof=0x1C
 {                                       // XREF: LerpEntityState/r
     LerpEntityStateTurret turret;
     LerpEntityStateLoopFx loopFx;
+#ifdef KISAK_SP
+    LerpEntityStateActor actor;
+#endif
     LerpEntityStatePrimaryLight primaryLight;
     LerpEntityStatePlayer player;
     LerpEntityStateVehicle vehicle;
     LerpEntityStateMissile missile;
     LerpEntityStateSoundBlend soundBlend;
+#ifdef KISAK_SP
+    LerpEntityStateBulletTracer bulletTracer;
+#endif
     LerpEntityStateBulletHit bulletHit;
     LerpEntityStateEarthquake earthquake;
     LerpEntityStateCustomExplode customExplode;
     LerpEntityStateExplosion explosion;
     LerpEntityStateExplosionJolt explosionJolt;
     LerpEntityStatePhysicsJitter physicsJitter;
+#ifdef KISAK_MP
     LerpEntityStateAnonymous anonymous;
+#endif
 };
 
 struct LerpEntityState // sizeof=0x68
 {                                       // XREF: entityState_s/r
-                                        // centity_s/r
     int eFlags;                         // XREF: ClientEndFrame(gentity_s *)+5D9/r
     trajectory_t pos;                   // XREF: Mantle_FindMantleSurface+244/o
-    // FX_UpdateElementPosition+5B/o ...
     trajectory_t apos;                  // XREF: CountBitsEnabled(uint)+1B/o
-    // CountBitsEnabled(uint)+77/o ...
     LerpEntityStateTypeUnion u;
+#ifdef KISAK_SP
+    int useCount;
+#endif
 };
 
+
+#ifdef KISAK_MP
 union entityState_s_type_index // sizeof=0x4
 {                                       // XREF: PM_UpdateLean(playerState_s *,float,usercmd_s *,void (*)(trace_t *,float const * const,float const * const,float const * const,float const * const,int,int))+2AC/o
     int brushmodel;
@@ -112,7 +145,6 @@ union entityState_s_type_index // sizeof=0x4
     int xmodel;
     int primaryLight;
 };
-
 union entityState_s_un1 // sizeof=0x4
 {                                       // XREF: IsValidArrayIndex(uint)+B/o
                                         // entityState_s/r
@@ -124,7 +156,6 @@ union entityState_s_un1 // sizeof=0x4
     int eventParm2;
     int helicopterStage;
 };
-
 union entityState_s_un2 // sizeof=0x4
 {                                       // XREF: entityState_s/r
     int hintString;
@@ -169,7 +200,6 @@ struct entityState_s // sizeof=0xF4
     unsigned int partBits[4];           // XREF: Fire_Lead:loc_5189EC/o
     // turret_think(gentity_s *):loc_518D27/o ...
 };
-
 struct archivedEntityShared_t // sizeof=0x24
 {                                       // ...
     int svFlags;                        // ...
@@ -183,3 +213,35 @@ struct archivedEntity_s // sizeof=0x118
     entityState_s s;                    // ...
     archivedEntityShared_t r;           // ...
 };
+#endif
+
+#ifdef KISAK_SP
+union entityState_s_tag
+{
+    unsigned __int8 scale;
+    unsigned __int8 eventParm2;
+    unsigned __int8 vehicleCompassType;
+};
+
+struct entityState_s
+{
+    unsigned __int8 eType;
+    unsigned __int8 surfType;
+    unsigned __int8 weapon;
+    unsigned __int8 weaponModel;
+    entityState_s_tag un1;
+    LerpEntityState lerp;
+    unsigned int eventParm;
+    unsigned __int16 loopSound;
+    unsigned __int16 number;
+    unsigned __int16 otherEntityNum;
+    unsigned __int16 groundEntityNum;
+    _BYTE index[2];
+    int time2;
+    int solid;
+    int eventSequence;
+    unsigned __int8 events[4];
+    unsigned int eventParms[4];
+    _BYTE un2[4];
+};
+#endif

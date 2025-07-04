@@ -2,6 +2,7 @@
 #include <qcommon/qcommon.h>
 
 #include <ui/ui_shared.h>
+#include <qcommon/msg_mp.h>
 
 enum msgwnd_mode_t : __int32
 {                                       // ...
@@ -628,3 +629,666 @@ extern float g_console_char_height;
 extern field_t historyEditLines[32];
 
 extern int dvar_modifiedFlags;
+
+
+#ifdef KISAK_SP
+
+enum connstate_t : __int32
+{
+    CA_DISCONNECTED = 0x0,
+    CA_CINEMATIC = 0x1,
+    CA_LOGO = 0x2,
+    CA_LOADING = 0x3,
+    CA_ACTIVE = 0x4,
+    CA_MAP_RESTART = 0x5,
+};
+
+enum SaveBufferState : __int32
+{
+    MEMCLEAR = 0x0,
+    MEMALLOCATING = 0x1,
+    MEMALLOCATED = 0x2,
+    SAVING = 0x3,
+    AWAITING_COMMIT = 0x4,
+    COMMITTED = 0x5,
+    LOADING = 0x6,
+};
+struct SaveHeader
+{
+    int saveVersion;
+    int gameCheckSum;
+    int saveCheckSum;
+    int saveId;
+    bool isUsingScriptChecksum;
+    int scrCheckSum[3];
+    char mapName[256];
+    char buildNumber[128];
+    char campaign[256];
+    char screenShotName[64];
+    char description[256];
+    char filename[64];
+    int health;
+    int skill;
+    bool internalSave;
+    bool demoPlayback;
+    qtime_s time;
+    int bodySize;
+};
+struct SaveGame
+{
+    MemoryFile memFile;
+    SaveBufferState saveState;
+    SaveHeader header;
+    bool isUsingGlobalBuffer;
+    bool isDirectWriteActive;
+    bool isWrittenToDevice;
+    bool suppressPlayerNotify;
+};
+struct snapshot_s
+{
+    int snapFlags;
+    int serverTime;
+    playerState_s ps;
+    int numEntities;
+    int entityNums[2048];
+    int serverCommandSequence;
+};
+
+struct clientUIActive_t
+{
+    bool isRunning;
+    bool cgameInitialized;
+    bool cgameInitCalled;
+    bool isLoadComplete;
+    int keyCatchers;
+    bool displayHUDWithKeycatchUI;
+    connstate_t connectionState;
+    int nextScrollTime;
+};
+
+struct clientLogo_t
+{
+    int startTime;
+    int duration;
+    int fadein;
+    int fadeout;
+    Material *material[2];
+};
+
+struct __declspec(align(4)) vidConfig_t
+{
+    unsigned int sceneWidth;
+    unsigned int sceneHeight;
+    unsigned int displayWidth;
+    unsigned int displayHeight;
+    float displayFrequency;
+    int isWideScreen;
+    int isHiDef;
+    int isFullscreen;
+    float aspectRatioWindow;
+    float aspectRatioScenePixel;
+    float aspectRatioDisplayPixel;
+    unsigned int maxTextureSize;
+    unsigned int maxTextureMaps;
+    bool deviceSupportsGamma;
+};
+
+struct clientStatic_t
+{
+    int quit;
+    char servername[256];
+    int rendererStarted;
+    int soundStarted;
+    int uiStarted;
+    volatile int scriptError;
+    int devGuiStarted;
+    int frametime;
+    int animFrametime;
+    int realtime;
+    int realFrametime;
+    clientLogo_t logo;
+    Font_s *consoleFont;
+    bool demoplaying;
+    bool demoPending;
+    bool demorecording;
+    bool isTimeDemo;
+    char demoName[64];
+    void *demofile;
+    void *demobuf;
+    void *timeDemoLog;
+    int timeDemoFrames;
+    int timeDemoStart;
+    int timeDemoPrev;
+    int timeDemoBaseTime;
+    vidConfig_t vidConfig;
+    Material *whiteMaterial;
+    Material *consoleMaterial;
+    clientDebug_t debug;
+    float renderForward[3];
+    float renderPos[3];
+};
+
+struct clSnapshot_t
+{
+    int valid;
+    int snapFlags;
+    int serverTime;
+    int messageNum;
+    int cmdNum;
+    playerState_s ps;
+    int numEntities;
+    int parseEntitiesNum;
+    int serverCommandNum;
+};
+
+enum StanceState : __int32
+{
+    CL_STANCE_STAND = 0x0,
+    CL_STANCE_CROUCH = 0x1,
+    CL_STANCE_PRONE = 0x2,
+};
+
+struct clientActive_t
+{
+    clSnapshot_t snap;
+    int serverTime;
+    unsigned __int16 configstrings[2815];
+    char mapname[64];
+    bool usingAds;
+    int parseEntitiesNum;
+    int mouseDx[2];
+    int mouseDy[2];
+    int mouseIndex;
+    bool stanceHeld;
+    StanceState stance;
+    StanceState stancePosition;
+    int stanceTime;
+    int cgameUserCmdWeapon;
+    int cgameUserCmdOffHandIndex;
+    float cgameUserCmdGunPitch;
+    float cgameUserCmdGunYaw;
+    float cgameUserCmdGunXOfs;
+    float cgameUserCmdGunYOfs;
+    float cgameUserCmdGunZOfs;
+    float cgameFOVSensitivityScale;
+    float cgameMaxPitchSpeed;
+    float cgameMaxYawSpeed;
+    int cgameExtraButtons;
+    float viewangles[3];
+    usercmd_s cmds[64];
+    int cmdNumber;
+    int cmdNumberAcknowledge;
+    int bCmdForceValues;
+    int iForceButtons;
+    int iForceWeapon;
+    int forceOffhand;
+    int skelTimeStamp;
+    volatile int skelMemPos;
+    char skelMemory[524288];
+    char *skelMemoryStart;
+    bool allowedAllocSkel;
+    clSnapshot_t snapshots[1];
+    int parseEntityNums[2048];
+};
+
+struct serverCommandsHeader_t
+{
+    int rover;
+    int sequence;
+    int sent;
+};
+
+struct serverCommands_s
+{
+    serverCommandsHeader_t header;
+    char buf[8192];
+    int commands[256];
+};
+
+struct clientConnection_t
+{
+    int lastPacketTime;
+    int challenge;
+    int reliableSequence;
+    int reliableAcknowledge;
+    char reliableCommands[256][1024];
+    int serverMessageSequence;
+    serverCommands_s serverCommands;
+};
+
+void __fastcall CL_SetLocalClientConnectionState(int localClientNum, connstate_t connstate);
+void __fastcall TRACK_cl_cgame();
+void __fastcall CL_GetScreenDimensions(unsigned int *width, unsigned int *height, float *aspect);
+float __fastcall CL_GetScreenAspectRatioDisplayPixel();
+int __fastcall CL_GetUserCmd(int localClientNum, int cmdNumber, usercmd_s *ucmd);
+int __fastcall CL_GetCurrentCmdNumber(int localClientNum);
+void __fastcall CL_GetCurrentSnapshotNumber(int localClientNum, int *snapshotNumber, int *serverTime);
+int __fastcall CL_GetSnapshot(int localClientNum, snapshot_s *snapshot);
+void __fastcall CL_SetUserCmdWeapons(int localClientNum, int weapon, int offHandIndex);
+void __fastcall CL_SetUserCmdAimValues(
+    int localClientNum,
+    double gunPitch,
+    double gunYaw,
+    double gunXOfs,
+    double gunYOfs,
+    double gunZOfs);
+void __fastcall CL_SetFOVSensitivityScale(int localClientNum, double scale);
+void __fastcall CL_SetExtraButtons(int localClientNum, int buttons);
+void CL_ConfigstringModified();
+void __fastcall CL_Restart();
+int __fastcall CL_PreprocessServerCommand(const char *s);
+int __fastcall CL_CGameNeedsServerCommand(int localClientNum, int serverCommandNumber);
+void __fastcall CL_ArchiveServerCommands(MemoryFile *memFile);
+void __fastcall CL_LoadServerCommands(SaveGame *save);
+void __fastcall CL_ShutdownCGame();
+int __fastcall CL_DObjCreateSkelForBone(DObj_s *obj, int boneIndex);
+void __fastcall LoadWorld(const char *name, int savegame);
+void __fastcall CL_SubtitlePrint(int localClientNum, const char *text, int duration, int pixelWidth);
+const char *__fastcall CL_GetConfigString(int localClientNum, unsigned int configStringIndex);
+snd_alias_t *__fastcall CL_PickSoundAlias(const char *aliasname);
+void __fastcall CL_FinishLoadingModels();
+void __fastcall CL_GetViewForward(float *forward);
+void __fastcall CL_GetViewPos(float *pos);
+void __fastcall CL_RenderScene(const refdef_s *fd);
+void __fastcall CL_SetFullScreenViewport();
+void __fastcall CL_SetViewport(int x, int y, int width, int height);
+void __fastcall CL_DrawStretchPicPhysical(
+    double x,
+    double y,
+    double w,
+    double h,
+    double s1,
+    double t1,
+    double s2,
+    double t2,
+    const float *color,
+    Material *material);
+void __fastcall CL_DrawStretchPicPhysicalFlipST(
+    double x,
+    double y,
+    double w,
+    double h,
+    double s1,
+    double t1,
+    double s2,
+    double t2,
+    const float *color,
+    Material *material);
+void __fastcall CL_DrawStretchPic(
+    const ScreenPlacement *scrPlace,
+    double x,
+    double y,
+    double w,
+    double h,
+    int horzAlign,
+    int vertAlign,
+    double s1,
+    double t1,
+    double s2,
+    double t2,
+    const float *color,
+    Material *material,
+    int a14,
+    int a15,
+    float a16,
+    float a17,
+    float a18,
+    float a19,
+    float a20,
+    float a21,
+    float a22,
+    float a23,
+    float a24,
+    float a25,
+    float a26,
+    float a27);
+void __fastcall CL_DrawStretchPicPhysicalRotateXY(
+    double x,
+    double y,
+    double w,
+    double h,
+    double s1,
+    double t1,
+    double s2,
+    double t2,
+    const float *color,
+    Material *material,
+    float angle);
+void __fastcall CL_DrawStretchPicFlipST(
+    const ScreenPlacement *scrPlace,
+    double x,
+    double y,
+    double w,
+    double h,
+    int horzAlign,
+    int vertAlign,
+    double s1,
+    double t1,
+    double s2,
+    double t2,
+    const float *color,
+    Material *material,
+    int a14,
+    int a15,
+    float a16,
+    float a17,
+    float a18,
+    float a19,
+    float a20,
+    float a21,
+    float a22,
+    float a23,
+    float a24,
+    float a25,
+    float a26,
+    float a27);
+void __fastcall CL_DrawStretchPicRotatedST(
+    const ScreenPlacement *scrPlace,
+    double x,
+    double y,
+    double w,
+    double h,
+    int horzAlign,
+    int vertAlign,
+    double centerS,
+    double centerT,
+    double radiusST,
+    double scaleFinalS,
+    const float *color,
+    Material *material,
+    int a14,
+    int a15,
+    float scaleFinalT,
+    float a17,
+    float angle,
+    float a19,
+    float a20,
+    float a21,
+    float a22,
+    float a23,
+    float a24,
+    float a25,
+    float a26,
+    float a27);
+void __fastcall CL_ProjectionSet2D();
+void __fastcall CL_ProjectionSet3D();
+void __fastcall CL_CapTurnRate(int localClientNum, double maxPitchSpeed, double maxYawSpeed);
+void __fastcall CL_SetViewAngles(int localClientNum, float *angles);
+void __fastcall CL_StartLoading(const char *mapname);
+void __fastcall CL_InitCGame(int localClientNum, int savegame);
+void __fastcall CL_FirstSnapshot();
+void __fastcall CL_SetActive();
+void __fastcall CL_CreateNextSnap();
+char *__fastcall CL_TimeDemoLogBaseName(const char *mapname);
+void CL_UpdateTimeDemo();
+void __fastcall CL_SetCGameTime(int localClientNum);
+void __fastcall CL_SetADS(int localClientNum, bool ads);
+void __fastcall CL_ArchiveClientState(MemoryFile *memFile, int segmentIndex);
+void __fastcall CL_LookupColor(unsigned __int8 c, float *color);
+bool __fastcall CL_IsCgameInitialized(int localClientNum);
+
+
+
+// cl_main
+void __fastcall TRACK_cl_main();
+int __fastcall CL_GetLocalClientActiveCount();
+int __fastcall CL_GetFirstActiveLocalClient();
+bool __fastcall CL_IsLocalClientActive(int clientNum);
+void __fastcall CL_SetLocalClientActive(int clientNum, bool active);
+int __fastcall CL_LocalClientNumFromControllerIndex(unsigned int controllerIndex);
+int __fastcall CL_ControllerIndexFromClientNum(int clientIndex);
+int __fastcall CL_GetFirstActiveControllerIndex();
+int __fastcall CL_AllLocalClientsInactive();
+void __fastcall CL_RunOncePerClientFrame(int localClientNum, int msec);
+void __fastcall CL_DumpReliableCommand(int cmdIndex, const char *cmd);
+void __fastcall CL_DumpReliableCommands(clientConnection_t *clc);
+void __fastcall CL_AddReliableCommand(int localClientNum, const char *cmd);
+void __fastcall CL_ShutdownDevGui();
+void __fastcall CL_ShutdownHunkUsers();
+void __fastcall CL_ShutdownDemo();
+void __fastcall CL_SaveSettings(MemoryFile *memFile);
+void __fastcall CL_RestoreSettings(MemoryFile *memFile);
+void __fastcall CL_MapLoading_CalcMovieToPlay(
+    const char *buffer,
+    const char *inMapName,
+    char *outMovieName,
+    int a4,
+    int a5,
+    int a6,
+    int a7,
+    int a8,
+    int a9,
+    int a10,
+    int a11,
+    const char *a12,
+    int a13,
+    const char *a14,
+    int a15,
+    char *a16);
+void __fastcall CL_MapLoading_CalcMovieToPlay_FastFile(const char *inMapName, char *outMovieName, const char *a3);
+void __fastcall CL_MapLoading_StartCinematic(const char *mapname, double volume, int a3, const char *a4);
+void __fastcall CL_MapLoading(const char *mapname);
+void __fastcall CL_ResetSkeletonCache();
+void __fastcall CL_ClearState(int a1, int a2);
+void __fastcall CL_Disconnect(int localClientNum);
+void __fastcall CL_ForwardCommandToServer(int localClientNum, const char *string);
+void __fastcall CL_ForwardToServer_f();
+void __fastcall CL_ConnectResponse();
+void __fastcall CL_InitLoad(const char *mapname);
+void __fastcall CL_PacketEvent(msg_t *msg, int serverMessageSequence);
+void __fastcall CL_SetFrametime(int frametime, int animFrametime);
+void __fastcall CheckForConsoleGuidePause(int localClientNum);
+void __fastcall CL_Frame(
+    int localClientNum,
+    int msec,
+    int a3,
+    int a4,
+    int a5,
+    int a6,
+    int a7,
+    int a8,
+    int a9,
+    int a10,
+    int a11,
+    int a12,
+    int a13,
+    int a14);
+bool __fastcall CL_IsLocalClientInGame(int localClientNum);
+bool __fastcall CL_IsUIActive(const int localClientNum);
+void __fastcall CL_InitRenderer();
+void __fastcall CL_ShutdownRenderer(int destroyWindow);
+void CL_DevGuiDvar_f();
+void CL_DevGuiCmd_f();
+void CL_DevGuiOpen_f();
+void CL_InitDevGui();
+void __fastcall CL_StartHunkUsers();
+int __fastcall CL_ScaledMilliseconds();
+void __fastcall CL_InitRef();
+void __fastcall CL_VoidCommand();
+void __fastcall CL_startMultiplayer_f();
+void __fastcall CL_ShellExecute_URL_f();
+void __fastcall CL_IncAnimWeight_f(int a1, int a2, int a3, int a4, int a5, int a6, __int64 a7);
+void __fastcall CL_DecAnimWeight_f(int a1, int a2, int a3, int a4, int a5, int a6, __int64 a7);
+void __fastcall CL_StopLogo(int localClientNum);
+void __fastcall CL_PlayLogo_f();
+void __fastcall CL_StopLogoOrCinematic(int localClientNum);
+void __fastcall CL_InitOnceForAllClients();
+void __fastcall CL_StopControllerRumbles();
+void CL_Pause_f();
+void __fastcall CL_Shutdown(int localClientNum);
+void __fastcall CL_DrawTextPhysical(
+    const char *text,
+    int maxChars,
+    Font_s *font,
+    double x,
+    double y,
+    double xScale,
+    double yScale,
+    const float *color,
+    int style);
+void __fastcall CL_DrawTextPhysicalWithEffects(
+    const char *text,
+    int maxChars,
+    Font_s *font,
+    double x,
+    double y,
+    double xScale,
+    double yScale,
+    const float *color,
+    int style,
+    const float *glowColor,
+    Material *fxMaterial,
+    Material *fxMaterialGlow,
+    int fxBirthTime,
+    int fxLetterTime,
+    int fxDecayStartTime,
+    int fxDecayDuration);
+void __fastcall CL_DrawText(
+    const ScreenPlacement *scrPlace,
+    const char *text,
+    int maxChars,
+    Font_s *font,
+    double x,
+    double y,
+    int horzAlign,
+    int vertAlign,
+    double xScale,
+    double yScale,
+    const float *color,
+    int style,
+    double a13,
+    double a14,
+    double a15,
+    double a16,
+    float a17,
+    float a18,
+    float a19,
+    float a20,
+    float a21,
+    float a22,
+    float a23,
+    float a24,
+    float a25,
+    float a26,
+    float a27,
+    float a28,
+    float a29,
+    float a30,
+    float a31,
+    float a32,
+    float a33,
+    float a34,
+    float a35,
+    float a36,
+    float a37,
+    float a38);
+void __fastcall CL_DrawTextRotate(
+    const ScreenPlacement *scrPlace,
+    const char *text,
+    int maxChars,
+    Font_s *font,
+    double x,
+    double y,
+    double rotation,
+    int horzAlign,
+    int vertAlign,
+    double xScale,
+    double yScale,
+    const float *color,
+    int style,
+    double a14,
+    double a15,
+    double a16,
+    float a17,
+    float a18,
+    float a19,
+    float a20,
+    float a21,
+    float a22,
+    float a23,
+    float a24,
+    float a25,
+    float a26,
+    float a27,
+    float a28,
+    float a29,
+    float a30,
+    float a31,
+    float a32,
+    float a33,
+    float a34,
+    float a35,
+    int a36,
+    float a37,
+    float a38,
+    float a39,
+    float a40);
+void __fastcall CL_DrawTextPhysicalWithCursor(
+    const char *text,
+    int maxChars,
+    Font_s *font,
+    double x,
+    double y,
+    double xScale,
+    double yScale,
+    const float *color,
+    int style,
+    int cursorPos,
+    char cursor);
+void __fastcall CL_DrawTextWithCursor(
+    const ScreenPlacement *scrPlace,
+    const char *text,
+    int maxChars,
+    Font_s *font,
+    double x,
+    double y,
+    int horzAlign,
+    int vertAlign,
+    double xScale,
+    double yScale,
+    const float *color,
+    int style,
+    double a13,
+    double a14,
+    double a15,
+    double a16,
+    int cursorPos,
+    char cursor,
+    int a19,
+    int a20,
+    int a21,
+    int a22,
+    int a23,
+    int a24,
+    int a25,
+    int a26,
+    int a27,
+    float a28,
+    int a29,
+    float a30,
+    int a31,
+    int a32,
+    int a33,
+    int a34,
+    int a35,
+    float a36,
+    int a37,
+    float a38);
+Font_s *__fastcall CL_RegisterFont(const char *fontName, int imageTrack);
+void __fastcall CL_SetSkipRendering(bool skip);
+bool __fastcall CL_SkipRendering();
+void __fastcall CL_UpdateSound();
+void __fastcall CL_ShutdownAll();
+void __fastcall CL_DisconnectLocalClient();
+void __fastcall CL_Disconnect_f();
+void __fastcall CL_ShutdownRef();
+void __fastcall CL_DrawLogo(const float *a1, Material *a2);
+void __fastcall CL_Init(int localClientNum);
+
+
+extern clientConnection_t clientConnections[1];
+extern clientUIActive_t clientUIActives[1];
+extern clientActive_t clients[1];
+extern clientStatic_t cls;
+
+#endif

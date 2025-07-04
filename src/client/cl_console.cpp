@@ -1,7 +1,6 @@
 #include "client.h"
 #include <qcommon/mem_track.h>
 
-#include <client_mp/client_mp.h>
 #include <qcommon/cmd.h>
 #include <stringed/stringed_hooks.h>
 #include <win32/win_local.h>

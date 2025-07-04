@@ -91,6 +91,11 @@ struct SnapshotInfo_s // sizeof=0x18
     PacketEntityType packetEntityType;  // ...
 };
 
+struct NetFieldList // sizeof=0x8
+{                                       // ...
+    const NetField *array;
+    unsigned int count;
+};
 
 void __cdecl TRACK_msg();
 const NetFieldList* __cdecl MSG_GetStateFieldListForEntityType(int eType);

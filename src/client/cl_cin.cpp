@@ -1,7 +1,6 @@
 #include "client.h"
 #include <sound/snd_public.h>
 #include <gfx_d3d/r_cinematic.h>
-#include <client_mp/client_mp.h>
 #include <qcommon/cmd.h>
 
 bool cin_skippable;

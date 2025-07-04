@@ -471,8 +471,6 @@ enum connstate_t : __int32
     CA_LOADING = 0x7,
     CA_PRIMED = 0x8,
     CA_ACTIVE = 0x9,
-
-
 };
 
 struct clientUIActive_t // sizeof=0x10

@@ -1,7 +1,5 @@
 #include "client.h"
 
-#include <client_mp/client_mp.h>
-
 #include <gfx_d3d/r_debug.h>
 
 void __cdecl CL_AddDebugString(
