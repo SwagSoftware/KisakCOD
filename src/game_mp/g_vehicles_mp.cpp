@@ -16,7 +16,7 @@
 
 
 //    unsigned short **s_wheelTags      827b6864     g_vehicles_mp.obj
-//    int marker_bg_vehicles_mp 828006fc     bg_vehicles_mp.obj
+//    int32_t marker_bg_vehicles_mp 828006fc     bg_vehicles_mp.obj
 //    struct dvar_s const *const vehDebugClient 8284e648     cg_vehicles_mp.obj
 //    struct dvar_s const *const heli_barrelSlowdown 8284e64c     cg_vehicles_mp.obj
 //    struct vehicleEffects(*)[8] vehEffects 8284e650     cg_vehicles_mp.obj
@@ -24,13 +24,13 @@
 //    struct dvar_s const *const heli_barrelMaxVelocity 8284eb54     cg_vehicles_mp.obj
 //    struct dvar_s const *const vehDriverViewDist 8284eb58     cg_vehicles_mp.obj
 //    struct dvar_s const *const heli_barrelRotation 8284eb5c     cg_vehicles_mp.obj
-//    int marker_cg_vehicles_mp 8284eb60     cg_vehicles_mp.obj
+//    int32_t marker_cg_vehicles_mp 8284eb60     cg_vehicles_mp.obj
 //    struct dvar_s const *const vehTestHorsepower 82e9080c     g_vehicles_mp.obj
 //    struct dvar_s const *const vehDebugServer 82e909c8     g_vehicles_mp.obj
 //    struct dvar_s const *const vehTestMaxMPH 82e909cc     g_vehicles_mp.obj
 //    struct vehicle_info_t *s_vehicleInfos 82e909d0     g_vehicles_mp.obj
 //    struct scr_vehicle_s *s_vehicles 82e957d0     g_vehicles_mp.obj
-//    int marker_g_vehicles_mp 82e97270     g_vehicles_mp.obj
+//    int32_t marker_g_vehicles_mp 82e97270     g_vehicles_mp.obj
 //    struct dvar_s const *const vehTestWeight 82e97274     g_vehicles_mp.obj
 //    struct dvar_s const *const vehTextureScrollScale 82e97278     g_vehicles_mp.obj
 //    short s_numVehicleInfos    82e9727c     g_vehicles_mp.obj
@@ -39,7 +39,7 @@ const dvar_t *heli_barrelMaxVelocity;
 
 vehicleEffects vehEffects[1][8];
 
-unsigned __int16 *s_wheelTags[4] =
+uint16_t *s_wheelTags[4] =
 {
     &scr_const.tag_wheel_front_left,
     &scr_const.tag_wheel_front_right,
@@ -47,7 +47,7 @@ unsigned __int16 *s_wheelTags[4] =
     &scr_const.tag_wheel_back_right
 };
 
-unsigned __int16 *s_flashTags[] =
+uint16_t *s_flashTags[] =
 {
     &scr_const.tag_flash,
     &scr_const.tag_flash_11,
@@ -107,7 +107,7 @@ const dvar_t *vehTestMaxMPH;
 
 void __cdecl CG_VehRegisterDvars();
 
-clientInfo_t *__cdecl ClientInfoForLocalClient(int localClientNum)
+clientInfo_t *__cdecl ClientInfoForLocalClient(int32_t localClientNum)
 {
     cg_s *cgameGlob;
 
@@ -118,13 +118,13 @@ clientInfo_t *__cdecl ClientInfoForLocalClient(int localClientNum)
     return &cgameGlob->bgs.clientinfo[cgameGlob->predictedPlayerState.clientNum];
 }
 
-vehicleEffects *__cdecl VehicleGetFxInfo(int localClientNum, int entityNum)
+vehicleEffects *__cdecl VehicleGetFxInfo(int32_t localClientNum, int32_t entityNum)
 {
     vehicleEffects *v3; // edx
-    int veh; // [esp+4h] [ebp-8h]
-    int veha; // [esp+4h] [ebp-8h]
-    int vehb; // [esp+4h] [ebp-8h]
-    int oldest; // [esp+8h] [ebp-4h]
+    int32_t veh; // [esp+4h] [ebp-8h]
+    int32_t veha; // [esp+4h] [ebp-8h]
+    int32_t vehb; // [esp+4h] [ebp-8h]
+    int32_t oldest; // [esp+8h] [ebp-4h]
 
     for (veh = 0; veh < 8 && vehEffects[localClientNum][veh].active; ++veh)
     {
@@ -163,7 +163,7 @@ vehicleEffects *__cdecl VehicleGetFxInfo(int localClientNum, int entityNum)
     return &vehEffects[localClientNum][veha];
 }
 
-void __cdecl Veh_IncTurretBarrelRoll(int localClientNum, int entityNum, float rotation)
+void __cdecl Veh_IncTurretBarrelRoll(int32_t localClientNum, int32_t entityNum, float rotation)
 {
     float v3; // [esp+0h] [ebp-14h]
     float v4; // [esp+4h] [ebp-10h]
@@ -182,7 +182,7 @@ void __cdecl Veh_IncTurretBarrelRoll(int localClientNum, int entityNum, float ro
     vehFx->barrelVelocity = v3;
 }
 
-unsigned __int16 __cdecl CompressUnit(float unit)
+uint16_t __cdecl CompressUnit(float unit)
 {
     if (unit < 0.0 || unit > 1.0)
         MyAssertHandler(
@@ -195,9 +195,9 @@ unsigned __int16 __cdecl CompressUnit(float unit)
     return (int)(unit * 65535.0 + 0.5);
 }
 
-double __cdecl GetSpeed(int localClientNum, centity_s *cent)
+double __cdecl GetSpeed(int32_t localClientNum, centity_s *cent)
 {
-    int serverTimeDelta; // [esp+Ch] [ebp-1Ch]
+    int32_t serverTimeDelta; // [esp+Ch] [ebp-1Ch]
     float posDelta[3]; // [esp+10h] [ebp-18h] BYREF
     float len; // [esp+1Ch] [ebp-Ch]
     LerpEntityState *p_currentState; // [esp+20h] [ebp-8h]
@@ -251,9 +251,9 @@ vehicle_info_t *__cdecl VEH_GetVehicleInfo(__int16 index)
     return &s_vehicleInfos[index];
 }
 
-int __cdecl G_VehPlayerRideSlot(gentity_s *vehicle, int playerEntNum)
+int32_t __cdecl G_VehPlayerRideSlot(gentity_s *vehicle, int32_t playerEntNum)
 {
-    int i; // [esp+0h] [ebp-8h]
+    int32_t i; // [esp+0h] [ebp-8h]
 
     if (!vehicle->scr_vehicle)
         MyAssertHandler(".\\game_mp\\g_vehicles_mp.cpp", 328, 0, "%s", "vehicle->scr_vehicle");
@@ -285,9 +285,9 @@ void __cdecl VEH_DebugCapsule(float *pos, float rad, float height, float r, floa
 
 void __cdecl VEH_SetPosition(gentity_s *ent, const float *origin, const float *vel, const float *angles)
 {
-    int v4; // [esp+0h] [ebp-20h]
-    int v5; // [esp+4h] [ebp-1Ch]
-    int v6; // [esp+8h] [ebp-18h]
+    int32_t v4; // [esp+0h] [ebp-20h]
+    int32_t v5; // [esp+4h] [ebp-1Ch]
+    int32_t v6; // [esp+8h] [ebp-18h]
     bool v7; // [esp+Ch] [ebp-14h]
 
     v7 = *origin == ent->r.currentOrigin[0]
@@ -323,9 +323,9 @@ void __cdecl VEH_SetPosition(gentity_s *ent, const float *origin, const float *v
 
 void __cdecl VEH_SetPosition(gentity_s *ent, const float *origin, const float *angles)
 {
-    int v3; // [esp+0h] [ebp-20h]
-    int v4; // [esp+4h] [ebp-1Ch]
-    int v5; // [esp+8h] [ebp-18h]
+    int32_t v3; // [esp+0h] [ebp-20h]
+    int32_t v4; // [esp+4h] [ebp-1Ch]
+    int32_t v5; // [esp+8h] [ebp-18h]
     bool v6; // [esp+Ch] [ebp-14h]
 
     v6 = *origin == ent->r.currentOrigin[0]
@@ -434,9 +434,9 @@ void __cdecl G_VehUnlinkPlayer(gentity_s *ent, gentity_s *player)
     client->ps.viewlocked_entNum = 1023;
 }
 
-void __cdecl VehicleClearRideSlotForPlayer(gentity_s *ent, int playerEntNum)
+void __cdecl VehicleClearRideSlotForPlayer(gentity_s *ent, int32_t playerEntNum)
 {
-    int i; // [esp+0h] [ebp-8h]
+    int32_t i; // [esp+0h] [ebp-8h]
 
     if (!ent->scr_vehicle)
         MyAssertHandler(".\\game_mp\\g_vehicles_mp.cpp", 306, 0, "%s", "ent->scr_vehicle");
@@ -451,7 +451,7 @@ void __cdecl VehicleClearRideSlotForPlayer(gentity_s *ent, int playerEntNum)
     Com_Error(ERR_DROP, "VehicleClearRideSlotForPlayer(): player ent #%i was not using vehicle.", playerEntNum);
 }
 
-void __cdecl G_VehiclesInit(int restarting)
+void __cdecl G_VehiclesInit(int32_t restarting)
 {
     __int16 i; // [esp+0h] [ebp-4h]
 
@@ -461,10 +461,10 @@ void __cdecl G_VehiclesInit(int restarting)
     level.vehicles = s_vehicles;
 }
 
-void __cdecl InitInfos(int restarting)
+void __cdecl InitInfos(int32_t restarting)
 {
-    int vehIndex; // [esp+0h] [ebp-Ch]
-    int sndIndex; // [esp+4h] [ebp-8h]
+    int32_t vehIndex; // [esp+0h] [ebp-Ch]
+    int32_t sndIndex; // [esp+4h] [ebp-8h]
     vehicle_info_t *vehInfo; // [esp+8h] [ebp-4h]
 
     if (restarting)
@@ -506,11 +506,11 @@ void __cdecl G_VehiclesSetupSpawnedEnts()
 
 void __cdecl SetupCollisionMap(gentity_s *ent)
 {
-    unsigned int v1; // eax
+    uint32_t v1; // eax
     char *v2; // eax
-    unsigned int v3; // eax
+    uint32_t v3; // eax
     char *v4; // eax
-    unsigned int v5; // eax
+    uint32_t v5; // eax
     char *v6; // eax
     gentity_s *cmEnt; // [esp+0h] [ebp-4h]
 
@@ -546,7 +546,7 @@ gentity_s *__cdecl GetCollisionMap(const char *modelname)
 {
     char *targetname; // [esp+0h] [ebp-Ch]
     gentity_s *ent; // [esp+4h] [ebp-8h]
-    int i; // [esp+8h] [ebp-4h]
+    int32_t i; // [esp+8h] [ebp-4h]
 
     for (i = 0; i < level.num_entities; ++i)
     {
@@ -565,12 +565,12 @@ gentity_s *__cdecl GetCollisionMap(const char *modelname)
 
 void __cdecl SpawnVehicle(gentity_s *ent, const char *typeName)
 {
-    unsigned int WeaponIndexForName; // eax
+    uint32_t WeaponIndexForName; // eax
     const char *v3; // eax
     vehicle_info_t *info; // [esp+0h] [ebp-10h]
     scr_vehicle_s *veh; // [esp+4h] [ebp-Ch]
-    int infoIdx; // [esp+8h] [ebp-8h] BYREF
-    int i; // [esp+Ch] [ebp-4h]
+    int32_t infoIdx; // [esp+8h] [ebp-8h] BYREF
+    int32_t i; // [esp+Ch] [ebp-4h]
 
     veh = 0;
     for (i = 0; i < 8; ++i)
@@ -602,12 +602,12 @@ void __cdecl SpawnVehicle(gentity_s *ent, const char *typeName)
     InitVehicleTags(ent);
 }
 
-int __cdecl VEH_GetVehicleInfoFromName(const char *name)
+int32_t __cdecl VEH_GetVehicleInfoFromName(const char *name)
 {
-    int i; // [esp+4h] [ebp-4h]
-    int ia; // [esp+4h] [ebp-4h]
-    int ib; // [esp+4h] [ebp-4h]
-    int ic; // [esp+4h] [ebp-4h]
+    int32_t i; // [esp+4h] [ebp-4h]
+    int32_t ia; // [esp+4h] [ebp-4h]
+    int32_t ib; // [esp+4h] [ebp-4h]
+    int32_t ic; // [esp+4h] [ebp-4h]
 
     if (!name || !*name)
         return -1;
@@ -632,18 +632,18 @@ int __cdecl VEH_GetVehicleInfoFromName(const char *name)
     return -1;
 }
 
-int __cdecl G_LoadVehicle(const char *name)
+int32_t __cdecl G_LoadVehicle(const char *name)
 {
     unsigned __int8 v2; // al
     char v3; // [esp+3h] [ebp-2065h]
     unsigned __int8 *v4; // [esp+8h] [ebp-2060h]
     const char *v5; // [esp+Ch] [ebp-205Ch]
     char string[68]; // [esp+10h] [ebp-2058h] BYREF
-    int i; // [esp+54h] [ebp-2014h]
+    int32_t i; // [esp+54h] [ebp-2014h]
     char *pszBuffer; // [esp+58h] [ebp-2010h]
     unsigned __int8 *dst; // [esp+5Ch] [ebp-200Ch]
     char loadBuffer[8192]; // [esp+60h] [ebp-2008h] BYREF
-    int v11; // [esp+2064h] [ebp-4h]
+    int32_t v11; // [esp+2064h] [ebp-4h]
 
     if (!name)
         MyAssertHandler(".\\game_mp\\g_vehicles_mp.cpp", 434, 0, "%s", "name");
@@ -688,10 +688,10 @@ int __cdecl G_LoadVehicle(const char *name)
     return v11;
 }
 
-int __cdecl VEH_ParseSpecificField(unsigned __int8 *pStruct, const char *pValue, int fieldType)
+int32_t __cdecl VEH_ParseSpecificField(unsigned __int8 *pStruct, const char *pValue, int32_t fieldType)
 {
     const char *v3; // eax
-    int i; // [esp+4h] [ebp-4h]
+    int32_t i; // [esp+4h] [ebp-4h]
 
     if (fieldType == 12)
     {
@@ -719,11 +719,11 @@ int __cdecl VEH_ParseSpecificField(unsigned __int8 *pStruct, const char *pValue,
     }
 }
 
-void __cdecl VEH_InitModelAndValidateTags(gentity_s *ent, int *infoIdx)
+void __cdecl VEH_InitModelAndValidateTags(gentity_s *ent, int32_t *infoIdx)
 {
-    unsigned int v2; // eax
+    uint32_t v2; // eax
     char *v3; // eax
-    int defaultInfoIdx; // [esp+0h] [ebp-8h]
+    int32_t defaultInfoIdx; // [esp+0h] [ebp-8h]
     bool isDefault; // [esp+7h] [ebp-1h]
 
     defaultInfoIdx = VEH_GetVehicleInfoFromName("defaultvehicle_mp");
@@ -759,11 +759,11 @@ void __cdecl VEH_InitModelAndValidateTags(gentity_s *ent, int *infoIdx)
     }
 }
 
-char __cdecl VEH_DObjHasRequiredTags(gentity_s *ent, int infoIdx)
+char __cdecl VEH_DObjHasRequiredTags(gentity_s *ent, int32_t infoIdx)
 {
     vehicle_info_t *info; // [esp+0h] [ebp-Ch]
-    int numWheels; // [esp+4h] [ebp-8h]
-    int i; // [esp+8h] [ebp-4h]
+    int32_t numWheels; // [esp+4h] [ebp-8h]
+    int32_t i; // [esp+8h] [ebp-4h]
 
     info = &s_vehicleInfos[infoIdx];
     if (!info->type || info->type == 1)
@@ -782,9 +782,9 @@ void __cdecl InitVehicleTags(gentity_s *ent)
 {
     VehicleRideSlot_t *ridetag; // [esp+0h] [ebp-Ch]
     scr_vehicle_s *veh; // [esp+4h] [ebp-8h]
-    int i; // [esp+8h] [ebp-4h]
-    int ia; // [esp+8h] [ebp-4h]
-    int ib; // [esp+8h] [ebp-4h]
+    int32_t i; // [esp+8h] [ebp-4h]
+    int32_t ia; // [esp+8h] [ebp-4h]
+    int32_t ib; // [esp+8h] [ebp-4h]
 
     if (!ent)
         MyAssertHandler(".\\game_mp\\g_vehicles_mp.cpp", 2764, 0, "%s", "ent");
@@ -812,7 +812,7 @@ void __cdecl InitVehicleTags(gentity_s *ent)
 void __cdecl VEH_InitPhysics_0(gentity_s *ent)
 {
     vehicle_physic_t *phys; // [esp+34h] [ebp-Ch]
-    int i; // [esp+3Ch] [ebp-4h]
+    int32_t i; // [esp+3Ch] [ebp-4h]
 
     phys = &ent->scr_vehicle->phys;
     phys->origin[0] = ent->r.currentOrigin[0];
@@ -867,7 +867,7 @@ void __cdecl InitEntityVehicleVars(gentity_s *ent, scr_vehicle_s *veh, __int16 i
     veh->turret.fireTime = 0;
     veh->turret.fireBarrel = 0;
     veh->turret.turretState = VEH_TURRET_STOPPED;
-    Com_Memset((unsigned int *)&veh->jitter, 0, 60);
+    Com_Memset((uint32_t *)&veh->jitter, 0, 60);
     veh->drawOnCompass = 0;
     veh->lookAtText0 = 0;
     veh->lookAtText1 = 0;
@@ -888,7 +888,7 @@ void __cdecl InitEntityVehicleVars(gentity_s *ent, scr_vehicle_s *veh, __int16 i
     VEH_SetPosition(ent, ent->r.currentOrigin, ent->r.currentAngles);
 }
 
-void __cdecl InitEntityVars(gentity_s *ent, scr_vehicle_s *veh, int infoIdx)
+void __cdecl InitEntityVars(gentity_s *ent, scr_vehicle_s *veh, int32_t infoIdx)
 {
     ent->handler = 22;
     ent->r.svFlags = 4;
@@ -968,7 +968,7 @@ bool __cdecl G_VehUsable(gentity_s *vehicle, gentity_s *player)
 
 char __cdecl VehicleHasSeatFree(gentity_s *ent)
 {
-    int i; // [esp+0h] [ebp-8h]
+    int32_t i; // [esp+0h] [ebp-8h]
 
     if (!ent->scr_vehicle)
         MyAssertHandler(".\\game_mp\\g_vehicles_mp.cpp", 266, 0, "%s", "ent->scr_vehicle");
@@ -983,7 +983,7 @@ char __cdecl VehicleHasSeatFree(gentity_s *ent)
     return 0;
 }
 
-bool __cdecl G_VehImmuneToDamage(gentity_s *ent, int mod, char damageFlags, unsigned int weapon)
+bool __cdecl G_VehImmuneToDamage(gentity_s *ent, int32_t mod, char damageFlags, uint32_t weapon)
 {
     bool result; // eax
     vehicle_info_t *info; // [esp+4h] [ebp-Ch]
@@ -1166,8 +1166,8 @@ void __cdecl VEH_TouchEntities_0(gentity_s *ent, float frameTime)
     float v8[3]; // [esp+48h] [ebp-109Ch] BYREF
     float result[3]; // [esp+54h] [ebp-1090h] BYREF
     float *origin; // [esp+60h] [ebp-1084h]
-    int contentmask; // [esp+64h] [ebp-1080h]
-    int v12; // [esp+68h] [ebp-107Ch]
+    int32_t contentmask; // [esp+64h] [ebp-1080h]
+    int32_t v12; // [esp+68h] [ebp-107Ch]
     float *a; // [esp+6Ch] [ebp-1078h]
     vehicle_info_t *v14; // [esp+70h] [ebp-1074h]
     float maxs[3]; // [esp+74h] [ebp-1070h] BYREF
@@ -1180,8 +1180,8 @@ void __cdecl VEH_TouchEntities_0(gentity_s *ent, float frameTime)
     float v3[3]; // [esp+A8h] [ebp-103Ch] BYREF
     float sum[3]; // [esp+B4h] [ebp-1030h] BYREF
     void(__cdecl * v24)(gentity_s *, gentity_s *, int); // [esp+C0h] [ebp-1024h]
-    int entityList[1025]; // [esp+C4h] [ebp-1020h] BYREF
-    int i; // [esp+10C8h] [ebp-1Ch]
+    int32_t entityList[1025]; // [esp+C4h] [ebp-1020h] BYREF
+    int32_t i; // [esp+10C8h] [ebp-1Ch]
     float mins[3]; // [esp+10CCh] [ebp-18h] BYREF
     float diff[3]; // [esp+10D8h] [ebp-Ch] BYREF
 
@@ -1357,8 +1357,8 @@ VehicleTags *__cdecl RideTagFirst(gentity_s *ent)
 VehicleTags *__cdecl RideTagNext(gentity_s *ent, VehicleRideSlot_t *inTag)
 {
     scr_vehicle_s *veh; // [esp+4h] [ebp-8h]
-    int i; // [esp+8h] [ebp-4h]
-    int ia; // [esp+8h] [ebp-4h]
+    int32_t i; // [esp+8h] [ebp-4h]
+    int32_t ia; // [esp+8h] [ebp-4h]
 
     if (!ent)
         MyAssertHandler(".\\game_mp\\g_vehicles_mp.cpp", 235, 0, "%s", "ent");
@@ -1406,9 +1406,9 @@ void __cdecl VEH_DebugBox(float *pos, float width, float r, float g, float b)
     G_DebugBox(pos, mins, maxs, 0.0, color, 1, 1);
 }
 
-void __cdecl InflictDamage(gentity_s *vehEnt, gentity_s *target, float *dir, int damage)
+void __cdecl InflictDamage(gentity_s *vehEnt, gentity_s *target, float *dir, int32_t damage)
 {
-    int attackerNum; // [esp+4h] [ebp-4h]
+    int32_t attackerNum; // [esp+4h] [ebp-4h]
 
     if (!vehEnt)
         MyAssertHandler(".\\game_mp\\g_vehicles_mp.cpp", 1327, 0, "%s", "vehEnt");
@@ -1438,7 +1438,7 @@ void __cdecl InflictDamage(gentity_s *vehEnt, gentity_s *target, float *dir, int
         0);
 }
 
-int __cdecl VehicleEntDriver(gentity_s *ent)
+int32_t __cdecl VehicleEntDriver(gentity_s *ent)
 {
     if (!ent->scr_vehicle)
         MyAssertHandler(".\\game_mp\\g_vehicles_mp.cpp", 282, 0, "%s", "ent->scr_vehicle");
@@ -1447,7 +1447,7 @@ int __cdecl VehicleEntDriver(gentity_s *ent)
 
 void __cdecl UpdateTurret(gentity_s *ent)
 {
-    int playerEntNum; // [esp+0h] [ebp-8h]
+    int32_t playerEntNum; // [esp+0h] [ebp-8h]
     gentity_s *player; // [esp+4h] [ebp-4h]
 
     playerEntNum = VehicleEntGunner(ent);
@@ -1466,7 +1466,7 @@ void __cdecl UpdateTurret(gentity_s *ent)
     }
 }
 
-int __cdecl VehicleEntGunner(gentity_s *ent)
+int32_t __cdecl VehicleEntGunner(gentity_s *ent)
 {
     if (!ent->scr_vehicle)
         MyAssertHandler(".\\game_mp\\g_vehicles_mp.cpp", 296, 0, "%s", "ent->scr_vehicle");
@@ -1556,7 +1556,7 @@ void __cdecl VEH_UpdateWeapon(gentity_s *ent)
 {
     gclient_s *client; // [esp+0h] [ebp-10h]
     scr_vehicle_s *veh; // [esp+4h] [ebp-Ch]
-    int playerEntNum; // [esp+8h] [ebp-8h]
+    int32_t playerEntNum; // [esp+8h] [ebp-8h]
 
     if (!ent)
         MyAssertHandler(".\\game_mp\\g_vehicles_mp.cpp", 1777, 0, "%s", "ent");
@@ -1642,7 +1642,7 @@ void __cdecl VEH_UpdateClientPassenger(gentity_s *ent)
     VehicleEntPassenger(ent);
 }
 
-int __cdecl VehicleEntPassenger(gentity_s *ent)
+int32_t __cdecl VehicleEntPassenger(gentity_s *ent)
 {
     if (!ent->scr_vehicle)
         MyAssertHandler(".\\game_mp\\g_vehicles_mp.cpp", 289, 0, "%s", "ent->scr_vehicle");
@@ -1660,7 +1660,7 @@ void __cdecl VEH_UpdateClientDriver(gentity_s *ent)
     char accela; // [esp+Bh] [ebp-15h]
     char accel; // [esp+Bh] [ebp-15h]
     scr_vehicle_s *veh; // [esp+14h] [ebp-Ch]
-    int playerEntNum; // [esp+18h] [ebp-8h]
+    int32_t playerEntNum; // [esp+18h] [ebp-8h]
     gentity_s *player; // [esp+1Ch] [ebp-4h]
 
     if (!ent)
@@ -1988,7 +1988,7 @@ void __cdecl VEH_GroundMove(gentity_s *ent, float frameTime)
         VEH_StepSlideMove(ent, 0, frameTime);
 }
 
-void __cdecl VEH_StepSlideMove(gentity_s *ent, int gravity, float frameTime)
+void __cdecl VEH_StepSlideMove(gentity_s *ent, int32_t gravity, float frameTime)
 {
     vehicle_physic_t *phys; // [esp+10h] [ebp-70h]
     scr_vehicle_s *veh; // [esp+14h] [ebp-6Ch]
@@ -2043,24 +2043,24 @@ void __cdecl VEH_StepSlideMove(gentity_s *ent, int gravity, float frameTime)
     }
 }
 
-bool __cdecl VEH_SlideMove(gentity_s *ent, int gravity, float frameTime)
+bool __cdecl VEH_SlideMove(gentity_s *ent, int32_t gravity, float frameTime)
 {
     float *v4; // [esp+30h] [ebp-D4h]
     float timeLeft; // [esp+3Ch] [ebp-C8h]
-    int j; // [esp+40h] [ebp-C4h]
+    int32_t j; // [esp+40h] [ebp-C4h]
     vehicle_physic_t *phys; // [esp+44h] [ebp-C0h]
     float dir[3]; // [esp+48h] [ebp-BCh] BYREF
-    int bumpCount; // [esp+54h] [ebp-B0h]
+    int32_t bumpCount; // [esp+54h] [ebp-B0h]
     scr_vehicle_s *veh; // [esp+58h] [ebp-ACh]
-    int k; // [esp+5Ch] [ebp-A8h]
+    int32_t k; // [esp+5Ch] [ebp-A8h]
     float planes[5][3]; // [esp+60h] [ebp-A4h] BYREF
     float clipVel[3]; // [esp+9Ch] [ebp-68h] BYREF
     float end[3]; // [esp+A8h] [ebp-5Ch] BYREF
     float endVel[3]; // [esp+B4h] [ebp-50h] BYREF
-    int numPlanes; // [esp+C0h] [ebp-44h]
+    int32_t numPlanes; // [esp+C0h] [ebp-44h]
     trace_t trace; // [esp+C4h] [ebp-40h] BYREF
     float endClipVel[3]; // [esp+F0h] [ebp-14h] BYREF
-    int i; // [esp+FCh] [ebp-8h]
+    int32_t i; // [esp+FCh] [ebp-8h]
     float dot; // [esp+100h] [ebp-4h]
 
     veh = ent->scr_vehicle;
@@ -2179,14 +2179,14 @@ bool __cdecl VEH_SlideMove(gentity_s *ent, int gravity, float frameTime)
     return bumpCount != 0;
 }
 
-void __cdecl VEH_AirMove(gentity_s *ent, int gravity, float frameTime)
+void __cdecl VEH_AirMove(gentity_s *ent, int32_t gravity, float frameTime)
 {
     if (s_phys_0.hasGround)
         VEH_ClipVelocity(ent->scr_vehicle->phys.vel, s_phys_0.groundTrace.normal, ent->scr_vehicle->phys.vel);
     VEH_StepSlideMove(ent, gravity, frameTime);
 }
 
-void __cdecl VEH_GroundPlant(gentity_s *ent, int gravity, float frameTime)
+void __cdecl VEH_GroundPlant(gentity_s *ent, int32_t gravity, float frameTime)
 {
     double v3; // st7
     double v4; // st7
@@ -2208,13 +2208,13 @@ void __cdecl VEH_GroundPlant(gentity_s *ent, int gravity, float frameTime)
     float v20; // [esp+7Ch] [ebp-15Ch]
     float v21; // [esp+80h] [ebp-158h]
     float proj[4][3]; // [esp+84h] [ebp-154h] BYREF
-    int contents; // [esp+B4h] [ebp-124h]
+    int32_t contents; // [esp+B4h] [ebp-124h]
     float pt1[3]; // [esp+B8h] [ebp-120h] BYREF
     float plane[4]; // [esp+C4h] [ebp-114h] BYREF
     vehicle_physic_t *phys; // [esp+D4h] [ebp-104h]
     vehicle_info_t *info; // [esp+D8h] [ebp-100h]
     scr_vehicle_s *veh; // [esp+DCh] [ebp-FCh]
-    int numWheels; // [esp+E0h] [ebp-F8h]
+    int32_t numWheels; // [esp+E0h] [ebp-F8h]
     float right[3]; // [esp+E4h] [ebp-F4h] BYREF
     float forward[3]; // [esp+F0h] [ebp-E8h] BYREF
     float angles[3]; // [esp+FCh] [ebp-DCh] BYREF
@@ -2223,7 +2223,7 @@ void __cdecl VEH_GroundPlant(gentity_s *ent, int gravity, float frameTime)
     float temp[3]; // [esp+140h] [ebp-98h] BYREF
     float pt2[3]; // [esp+14Ch] [ebp-8Ch] BYREF
     float wheelPos[4][3]; // [esp+158h] [ebp-80h] BYREF
-    int i; // [esp+188h] [ebp-50h]
+    int32_t i; // [esp+188h] [ebp-50h]
     float axis[4][3]; // [esp+18Ch] [ebp-4Ch] BYREF
     float dot; // [esp+1BCh] [ebp-1Ch]
     float traceStart[3]; // [esp+1C0h] [ebp-18h] BYREF
@@ -2395,7 +2395,7 @@ void __cdecl VEH_DebugLine(float *start, float *end, float r, float g, float b)
     G_DebugLineWithDuration(start, end, color, 1, 1);
 }
 
-void __cdecl VEH_GetWheelOrigin(gentity_s *ent, int idx, float *origin)
+void __cdecl VEH_GetWheelOrigin(gentity_s *ent, int32_t idx, float *origin)
 {
     char *v3; // eax
     char *v4; // [esp+4h] [ebp-28h]
@@ -2495,7 +2495,7 @@ void __cdecl InitFirstThink(gentity_s *pSelf)
     vehicle_info_t *info; // [esp+50h] [ebp-10h]
     scr_vehicle_s *veh; // [esp+54h] [ebp-Ch]
     float radius; // [esp+58h] [ebp-8h]
-    int wheelIndex; // [esp+5Ch] [ebp-4h]
+    int32_t wheelIndex; // [esp+5Ch] [ebp-4h]
 
     veh = pSelf->scr_vehicle;
     phys = &veh->phys;
@@ -2546,9 +2546,9 @@ void __cdecl InitFirstThink(gentity_s *pSelf)
     veh->flags |= 8u;
 }
 
-void __cdecl G_VehEntHandler_Touch(gentity_s *pSelf, gentity_s *pOther, int bTouched)
+void __cdecl G_VehEntHandler_Touch(gentity_s *pSelf, gentity_s *pOther, int32_t bTouched)
 {
-    int damage; // [esp+8h] [ebp-30h]
+    int32_t damage; // [esp+8h] [ebp-30h]
     float moveLen; // [esp+Ch] [ebp-2Ch]
     vehicle_info_t *info; // [esp+14h] [ebp-24h]
     float hitDir[2]; // [esp+18h] [ebp-20h] BYREF
@@ -2632,7 +2632,7 @@ void __cdecl LinkPlayerToVehicle(gentity_s *ent, gentity_s *player)
     scr_vehicle_s *veh; // [esp+48h] [ebp-40h]
     float bestRiderDist; // [esp+4Ch] [ebp-3Ch]
     VehicleRideSlot_t *bestRiderTag; // [esp+50h] [ebp-38h]
-    int i; // [esp+54h] [ebp-34h]
+    int32_t i; // [esp+54h] [ebp-34h]
     float playerMtx[4][3]; // [esp+58h] [ebp-30h] BYREF
 
     veh = ent->scr_vehicle;
@@ -2695,12 +2695,12 @@ void __cdecl G_VehEntHandler_Die(
     gentity_s *pSelf,
     gentity_s *pInflictor,
     gentity_s *pAttacker,
-    const int damage,
-    const int mod,
-    const int weapon,
+    const int32_t damage,
+    const int32_t mod,
+    const int32_t weapon,
     const float *dir,
     const hitLocation_t hitLoc,
-    int psTimeOffset)
+    int32_t psTimeOffset)
 {
     WeaponDef *weapDef; // [esp+Ch] [ebp-8h]
     VehicleTags *rideTag; // [esp+10h] [ebp-4h]
@@ -2721,7 +2721,7 @@ void __cdecl G_VehEntHandler_Die(
     }
 }
 
-void __cdecl G_VehEntHandler_Controller(const gentity_s *pSelf, int *partBits)
+void __cdecl G_VehEntHandler_Controller(const gentity_s *pSelf, int32_t *partBits)
 {
     float gunYaw; // [esp+4h] [ebp-38h]
     float v3; // [esp+Ch] [ebp-30h]

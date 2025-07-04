@@ -16,9 +16,9 @@
 #include <xanim/xmodel.h>
 #include <xanim/dobj.h>
 
-void __cdecl CG_AddAllPlayerSpriteDrawSurfs(int localClientNum)
+void __cdecl CG_AddAllPlayerSpriteDrawSurfs(int32_t localClientNum)
 {
-    int entityIndex; // [esp+0h] [ebp-14h]
+    int32_t entityIndex; // [esp+0h] [ebp-14h]
     centity_s *cent; // [esp+8h] [ebp-Ch]
     snapshot_s *nextSnap; // [esp+Ch] [ebp-8h]
 
@@ -31,15 +31,15 @@ void __cdecl CG_AddAllPlayerSpriteDrawSurfs(int localClientNum)
     }
 }
 
-void __cdecl CG_AddPlayerSpriteDrawSurfs(int localClientNum, const centity_s *cent)
+void __cdecl CG_AddPlayerSpriteDrawSurfs(int32_t localClientNum, const centity_s *cent)
 {
     team_t iClientTeam; // [esp+10h] [ebp-18h]
-    int secondaryHeight; // [esp+14h] [ebp-14h]
+    int32_t secondaryHeight; // [esp+14h] [ebp-14h]
     Material *hMaterial; // [esp+18h] [ebp-10h]
     team_t iTeam; // [esp+1Ch] [ebp-Ch]
     playerState_s *ps; // [esp+20h] [ebp-8h]
     char *pszIcon; // [esp+24h] [ebp-4h]
-    int savedregs; // [esp+28h] [ebp+0h] BYREF
+    int32_t savedregs; // [esp+28h] [ebp+0h] BYREF
     cg_s *cgameGlob;
 
     cgameGlob = CG_GetLocalClientGlobals(localClientNum);
@@ -109,14 +109,14 @@ void __cdecl CG_AddPlayerSpriteDrawSurfs(int localClientNum, const centity_s *ce
 }
 
 void  CG_AddPlayerSpriteDrawSurf(
-    int localClientNum,
+    int32_t localClientNum,
     const centity_s *cent,
     Material *material,
     float additionalRadiusSize,
-    int height,
+    int32_t height,
     bool fixedScreenSize)
 {
-    int flags;
+    int32_t flags;
     float radius;
     float position[3];
 
@@ -175,7 +175,7 @@ void  CG_AddPlayerSpriteDrawSurf(
     }
 }
 
-void __cdecl CG_Player(int localClientNum, centity_s *cent)
+void __cdecl CG_Player(int32_t localClientNum, centity_s *cent)
 {
     double v2; // st7
     bool v3; // [esp+4h] [ebp-50h]
@@ -183,7 +183,7 @@ void __cdecl CG_Player(int localClientNum, centity_s *cent)
     GfxScaledPlacement placement; // [esp+14h] [ebp-40h] BYREF
     DObj_s *obj; // [esp+34h] [ebp-20h]
     cg_s *cgameGlob; // [esp+38h] [ebp-1Ch]
-    int iClientNum; // [esp+3Ch] [ebp-18h]
+    int32_t iClientNum; // [esp+3Ch] [ebp-18h]
     entityState_s *p_nextState; // [esp+40h] [ebp-14h]
     clientInfo_t *ci; // [esp+44h] [ebp-10h]
     float lightingOrigin[3]; // [esp+48h] [ebp-Ch] BYREF
@@ -240,20 +240,20 @@ void __cdecl CG_Player(int localClientNum, centity_s *cent)
         }
     }
 }
-void __cdecl CG_PlayerTurretPositionAndBlend(int localClientNum, centity_s *cent)
+void __cdecl CG_PlayerTurretPositionAndBlend(int32_t localClientNum, centity_s *cent)
 {
     char *AnimDebugName; // eax
     char *v3; // eax
-    int v4; // eax
+    int32_t v4; // eax
     double v5; // st7
     float v6; // [esp+18h] [ebp-1ACh]
     float v7; // [esp+1Ch] [ebp-1A8h]
     float goalWeight; // [esp+20h] [ebp-1A4h]
     float fHeightRatio; // [esp+4Ch] [ebp-178h]
-    unsigned int iPrevBlend; // [esp+50h] [ebp-174h]
+    uint32_t iPrevBlend; // [esp+50h] [ebp-174h]
     float fPrevTransZ; // [esp+54h] [ebp-170h]
     DObj_s *obj; // [esp+58h] [ebp-16Ch]
-    int numVertChildren; // [esp+5Ch] [ebp-168h]
+    int32_t numVertChildren; // [esp+5Ch] [ebp-168h]
     DObj_s *turretObj; // [esp+60h] [ebp-164h]
     float trans2[3]; // [esp+68h] [ebp-15Ch] BYREF
     float yaw; // [esp+74h] [ebp-150h]
@@ -261,21 +261,21 @@ void __cdecl CG_PlayerTurretPositionAndBlend(int localClientNum, centity_s *cent
     float tagOrigin[3]; // [esp+84h] [ebp-140h] BYREF
     float start[3]; // [esp+90h] [ebp-134h] BYREF
     float end[3]; // [esp+9Ch] [ebp-128h] BYREF
-    int iBlend; // [esp+A8h] [ebp-11Ch]
-    unsigned int heightAnim; // [esp+ACh] [ebp-118h]
+    int32_t iBlend; // [esp+A8h] [ebp-11Ch]
+    uint32_t heightAnim; // [esp+ACh] [ebp-118h]
     float fDelta; // [esp+B0h] [ebp-114h]
     float fPrevBlend; // [esp+B4h] [ebp-110h]
     float rot[2]; // [esp+B8h] [ebp-10Ch] BYREF
     float tagAxis[3][3]; // [esp+C0h] [ebp-104h] BYREF
-    unsigned int leafAnim1; // [esp+E4h] [ebp-E0h]
+    uint32_t leafAnim1; // [esp+E4h] [ebp-E0h]
     trace_t trace; // [esp+E8h] [ebp-DCh] BYREF
     float endpos[3]; // [esp+114h] [ebp-B0h] BYREF
-    int numHorChildren; // [esp+120h] [ebp-A4h]
+    int32_t numHorChildren; // [esp+120h] [ebp-A4h]
     const clientInfo_t *ci; // [esp+124h] [ebp-A0h]
     float tagHeight; // [esp+128h] [ebp-9Ch]
-    int i; // [esp+12Ch] [ebp-98h]
-    unsigned int baseAnim; // [esp+130h] [ebp-94h]
-    int clientNum; // [esp+134h] [ebp-90h]
+    int32_t i; // [esp+12Ch] [ebp-98h]
+    uint32_t baseAnim; // [esp+130h] [ebp-94h]
+    int32_t clientNum; // [esp+134h] [ebp-90h]
     const centity_s *pTurretCEnt; // [esp+138h] [ebp-8Ch]
     const lerpFrame_t *pLerpAnim; // [esp+13Ch] [ebp-88h]
     const WeaponDef *weapDef; // [esp+140h] [ebp-84h]
@@ -283,7 +283,7 @@ void __cdecl CG_PlayerTurretPositionAndBlend(int localClientNum, centity_s *cent
     float axis[4][3]; // [esp+148h] [ebp-7Ch] BYREF
     XAnimTree_s *pAnimTree; // [esp+178h] [ebp-4Ch]
     XAnim_s *pXAnims; // [esp+17Ch] [ebp-48h]
-    unsigned int leafAnim2; // [esp+180h] [ebp-44h]
+    uint32_t leafAnim2; // [esp+180h] [ebp-44h]
     float localYaw; // [esp+184h] [ebp-40h]
     float turretAxis[4][3]; // [esp+188h] [ebp-3Ch] BYREF
     float vDelta[3]; // [esp+1B8h] [ebp-Ch] BYREF
@@ -448,13 +448,13 @@ void __cdecl CG_PlayerTurretPositionAndBlend(int localClientNum, centity_s *cent
     }
 }
 
-void __cdecl CG_Corpse(int localClientNum, centity_s *cent)
+void __cdecl CG_Corpse(int32_t localClientNum, centity_s *cent)
 {
     double v2; // st7
     DObj_s *obja; // [esp+8h] [ebp-12Ch]
     DObj_s *obj; // [esp+8h] [ebp-12Ch]
     entityState_s *p_nextState; // [esp+10h] [ebp-124h]
-    unsigned int corpseIndex; // [esp+14h] [ebp-120h]
+    uint32_t corpseIndex; // [esp+14h] [ebp-120h]
     clientInfo_t *ci; // [esp+18h] [ebp-11Ch]
     FxMarkDObjUpdateContext markUpdateContext; // [esp+1Ch] [ebp-118h] BYREF
     float lightingOrigin[3]; // [esp+128h] [ebp-Ch] BYREF
@@ -500,7 +500,7 @@ void __cdecl CG_Corpse(int localClientNum, centity_s *cent)
     }
 }
 
-void __cdecl CG_UpdatePlayerDObj(int localClientNum, centity_s *cent)
+void __cdecl CG_UpdatePlayerDObj(int32_t localClientNum, centity_s *cent)
 {
     DObj_s *dobj; // [esp+0h] [ebp-114h]
     DObj_s *dobja; // [esp+0h] [ebp-114h]
@@ -525,7 +525,7 @@ void __cdecl CG_UpdatePlayerDObj(int localClientNum, centity_s *cent)
     }
 }
 
-void __cdecl CG_ResetPlayerEntity(int localClientNum, cg_s *cgameGlob, centity_s *cent, int resetAnimation)
+void __cdecl CG_ResetPlayerEntity(int32_t localClientNum, cg_s *cgameGlob, centity_s *cent, int32_t resetAnimation)
 {
     XAnimTree_s *pAnimTree; // [esp+18h] [ebp-10h]
     DObj_s *obj; // [esp+1Ch] [ebp-Ch]
@@ -573,7 +573,7 @@ void __cdecl CG_ResetPlayerEntity(int localClientNum, cg_s *cgameGlob, centity_s
             17,
             "%i ResetPlayerEntity yaw=%i\n",
             cent->nextState.number,
-            (unsigned int)(ci->torso.yawAngle));
+            (uint32_t)(ci->torso.yawAngle));
 }
 
 const char *__cdecl CG_GetTeamName(team_t team)
@@ -636,7 +636,7 @@ const char *__cdecl CG_GetOpposingTeamName(team_t team)
     return result;
 }
 
-const char *__cdecl CG_GetPlayerTeamName(int localClientNum)
+const char *__cdecl CG_GetPlayerTeamName(int32_t localClientNum)
 {
     cg_s *cgameGlob;
 
@@ -661,7 +661,7 @@ const char *__cdecl CG_GetPlayerTeamName(int localClientNum)
         return CG_GetTeamName(TEAM_FREE);
 }
 
-const char *__cdecl CG_GetPlayerOpposingTeamName(int localClientNum)
+const char *__cdecl CG_GetPlayerOpposingTeamName(int32_t localClientNum)
 {
     cg_s *cgameGlob;
 
@@ -686,7 +686,7 @@ const char *__cdecl CG_GetPlayerOpposingTeamName(int localClientNum)
         return CG_GetOpposingTeamName(TEAM_FREE);
 }
 
-bool __cdecl CG_IsPlayerDead(int localClientNum)
+bool __cdecl CG_IsPlayerDead(int32_t localClientNum)
 {
     cg_s *cgameGlob;
 
@@ -712,7 +712,7 @@ bool __cdecl CG_IsPlayerDead(int localClientNum)
         || (cgameGlob->nextSnap->ps.otherFlags & 2) != 0;
 }
 
-int __cdecl CG_GetPlayerClipAmmoCount(int localClientNum)
+int32_t __cdecl CG_GetPlayerClipAmmoCount(int32_t localClientNum)
 {
     playerState_s *ps; // [esp+8h] [ebp-4h]
     cg_s *cgameGlob;
@@ -722,16 +722,16 @@ int __cdecl CG_GetPlayerClipAmmoCount(int localClientNum)
     return ps->ammoclip[BG_ClipForWeapon(cgameGlob->nextSnap->ps.weapon)];
 }
 
-void __cdecl CG_UpdateWeaponVisibility(int localClientNum, centity_s *cent)
+void __cdecl CG_UpdateWeaponVisibility(int32_t localClientNum, centity_s *cent)
 {
     bool IsKnifeMeleeAnim; // [esp+0h] [ebp-58h]
     unsigned __int8 boneIndex; // [esp+7h] [ebp-51h] BYREF
     DObj_s *obj; // [esp+8h] [ebp-50h]
     float origin[3]; // [esp+Ch] [ebp-4Ch] BYREF
     cg_s *cgameGlob; // [esp+18h] [ebp-40h]
-    int addKnife; // [esp+1Ch] [ebp-3Ch]
+    int32_t addKnife; // [esp+1Ch] [ebp-3Ch]
     entityState_s *p_nextState; // [esp+20h] [ebp-38h]
-    unsigned int boneHandle; // [esp+24h] [ebp-34h]
+    uint32_t boneHandle; // [esp+24h] [ebp-34h]
     clientInfo_t *ci; // [esp+28h] [ebp-30h]
     XModel *weapModel; // [esp+2Ch] [ebp-2Ch]
     float axis[3][3]; // [esp+30h] [ebp-28h] BYREF
@@ -794,7 +794,7 @@ void __cdecl CG_UpdateWeaponVisibility(int localClientNum, centity_s *cent)
     }
 }
 
-bool __cdecl CG_IsWeaponVisible(int localClientNum, centity_s *cent, XModel *weapModel, float *origin, float *forward)
+bool __cdecl CG_IsWeaponVisible(int32_t localClientNum, centity_s *cent, XModel *weapModel, float *origin, float *forward)
 {
     float stock[3]; // [esp+Ch] [ebp-58h] BYREF
     float end[3]; // [esp+1Ch] [ebp-48h] BYREF

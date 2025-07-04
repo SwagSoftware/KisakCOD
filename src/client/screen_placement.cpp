@@ -17,7 +17,7 @@ void __cdecl ScrPlace_SetupFloatViewport(
     float adjustedRealWidth; // [esp+74h] [ebp-8h]
     float horzAspectPixelDiff; // [esp+78h] [ebp-4h]
 
-    memset((unsigned __int8 *)scrPlace, 0xB0u, sizeof(ScreenPlacement));
+    memset((uint8_t *)scrPlace, 0xB0u, sizeof(ScreenPlacement));
     scrPlace->realViewportSize[0] = viewportWidth;
     scrPlace->realViewportSize[1] = viewportHeight;
     adjustedRealWidth = viewportHeight * 1.333333373069763 / cls.vidConfig.aspectRatioDisplayPixel;
@@ -198,10 +198,10 @@ void __cdecl ScrPlace_CalcSafeAreaOffsets(
 
 void __cdecl ScrPlace_SetupViewport(
     ScreenPlacement *scrPlace,
-    int viewportX,
-    int viewportY,
-    int viewportWidth,
-    int viewportHeight)
+    int32_t viewportX,
+    int32_t viewportY,
+    int32_t viewportWidth,
+    int32_t viewportHeight)
 {
     float v5; // [esp+0h] [ebp-10h]
     float v6; // [esp+4h] [ebp-Ch]
@@ -217,10 +217,10 @@ void __cdecl ScrPlace_SetupViewport(
 
 void __cdecl ScrPlace_SetupUnsafeViewport(
     ScreenPlacement *scrPlace,
-    int viewportX,
-    int viewportY,
-    int viewportWidth,
-    int viewportHeight)
+    int32_t viewportX,
+    int32_t viewportY,
+    int32_t viewportWidth,
+    int32_t viewportHeight)
 {
     float v5; // [esp+0h] [ebp-18h]
     float v6; // [esp+4h] [ebp-14h]
@@ -234,7 +234,7 @@ void __cdecl ScrPlace_SetupUnsafeViewport(
     ScrPlace_SetupFloatViewport(scrPlace, v5, v6, v7, v8);
 }
 
-double __cdecl ScrPlace_ApplyX(const ScreenPlacement *scrPlace, float x, int horzAlign)
+double __cdecl ScrPlace_ApplyX(const ScreenPlacement *scrPlace, float x, int32_t horzAlign)
 {
     double result; // st7
     float v4; // [esp+0h] [ebp-20h]
@@ -290,7 +290,7 @@ double __cdecl ScrPlace_ApplyX(const ScreenPlacement *scrPlace, float x, int hor
     return result;
 }
 
-double __cdecl ScrPlace_ApplyY(const ScreenPlacement *scrPlace, float y, int vertAlign)
+double __cdecl ScrPlace_ApplyY(const ScreenPlacement *scrPlace, float y, int32_t vertAlign)
 {
     double result; // st7
     float v4; // [esp+0h] [ebp-20h]
@@ -352,8 +352,8 @@ void __cdecl ScrPlace_ApplyRect(
     float *y,
     float *w,
     float *h,
-    int horzAlign,
-    int vertAlign)
+    int32_t horzAlign,
+    int32_t vertAlign)
 {
     if (!x)
         MyAssertHandler(".\\client\\screen_placement.cpp", 244, 0, "%s", "x");

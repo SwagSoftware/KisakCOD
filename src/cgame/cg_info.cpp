@@ -5,7 +5,7 @@
 #include <database/database.h>
 #include <client_mp/client_mp.h>
 
-void __cdecl CG_LoadingString(int localClientNum, const char *s)
+void __cdecl CG_LoadingString(int32_t localClientNum, const char *s)
 {
     CG_GetLocalClientGlobals(localClientNum)->isLoading = *s != 0;
     if (s && *s)
@@ -20,10 +20,10 @@ BOOL __cdecl CG_IsShowingProgress_LoadObj()
     return com_expectedHunkUsage > 0;
 }
 
-void __cdecl CG_DrawInformation(int localClientNum)
+void __cdecl CG_DrawInformation(int32_t localClientNum)
 {
-    int v1; // [esp+20h] [ebp-30h]
-    unsigned __int8 (*v2)(void); // [esp+24h] [ebp-2Ch]
+    int32_t v1; // [esp+20h] [ebp-30h]
+    uint8_t (*v2)(void); // [esp+24h] [ebp-2Ch]
     bool serverLoading; // [esp+2Bh] [ebp-25h]
     Font_s *font; // [esp+30h] [ebp-20h]
     float width; // [esp+34h] [ebp-1Ch]
@@ -52,9 +52,9 @@ void __cdecl CG_DrawInformation(int localClientNum)
     CL_GetConfigString(localClientNum, 0);
     UI_DrawMapLevelshot(localClientNum);
     if (useFastFile->current.enabled)
-        v2 = (unsigned __int8 (*)(void))CG_IsShowingProgress_FastFile;
+        v2 = (uint8_t (*)(void))CG_IsShowingProgress_FastFile;
     else
-        v2 = (unsigned __int8 (*)(void))CG_IsShowingProgress_LoadObj;
+        v2 = (uint8_t (*)(void))CG_IsShowingProgress_LoadObj;
     if (!v2() && serverLoading && g_waitingForServer)
     {
         font = UI_GetFontHandle(&scrPlaceFull, 0, fontScale);
