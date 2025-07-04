@@ -82,7 +82,7 @@ void __cdecl Mantle_RegisterDvars()
         "The angle at which to restrict a sideways turn while mantling");
 }
 
-void __cdecl Mantle_CreateAnims(void *(__cdecl *xanimAlloc)(int))
+void __cdecl Mantle_CreateAnims(void *(__cdecl *xanimAlloc)(int32_t))
 {
     float v1; // [esp+10h] [ebp-50h]
     float v2; // [esp+14h] [ebp-4Ch]
@@ -95,8 +95,8 @@ void __cdecl Mantle_CreateAnims(void *(__cdecl *xanimAlloc)(int))
     float v9; // [esp+34h] [ebp-2Ch]
     float v10; // [esp+3Ch] [ebp-24h]
     float delta[3]; // [esp+40h] [ebp-20h] BYREF
-    int animIndex; // [esp+4Ch] [ebp-14h]
-    int transIndex; // [esp+50h] [ebp-10h]
+    int32_t animIndex; // [esp+4Ch] [ebp-14h]
+    int32_t transIndex; // [esp+50h] [ebp-10h]
     float rot[3]; // [esp+54h] [ebp-Ch] BYREF
 
     if (!s_mantleAnims)
@@ -422,16 +422,16 @@ int __cdecl Mantle_GetOverLength(MantleState *mstate)
         return 0;
 }
 
-void __cdecl Mantle_GetAnimDelta(MantleState *mstate, int time, float *delta)
+void __cdecl Mantle_GetAnimDelta(MantleState *mstate, int32_t time, float *delta)
 {
     const char *v3; // eax
     float frac; // [esp+8h] [ebp-24h]
     float fraca; // [esp+8h] [ebp-24h]
-    int upTime; // [esp+Ch] [ebp-20h]
+    int32_t upTime; // [esp+Ch] [ebp-20h]
     float trans[3]; // [esp+10h] [ebp-1Ch] BYREF
-    int animIndex; // [esp+1Ch] [ebp-10h]
+    int32_t animIndex; // [esp+1Ch] [ebp-10h]
     float rot[2]; // [esp+20h] [ebp-Ch] BYREF
-    int overTime; // [esp+28h] [ebp-4h]
+    int32_t overTime; // [esp+28h] [ebp-4h]
 
     upTime = Mantle_GetUpLength(mstate);
     overTime = Mantle_GetOverLength(mstate);

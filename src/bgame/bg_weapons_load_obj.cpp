@@ -591,7 +591,7 @@ char *g_playerAnimTypeNames[64];
 
 WeaponDef bg_defaultWeaponDefs;
 
-char *__cdecl BG_GetPlayerAnimTypeName(int index)
+char *__cdecl BG_GetPlayerAnimTypeName(int32_t index)
 {
     return g_playerAnimTypeNames[index];
 }

@@ -2,7 +2,7 @@
 #include "bg_local.h"
 #include <aim_assist/aim_assist.h>
 
-void __cdecl PM_StepSlideMove(pmove_t *pm, pml_t *pml, int gravity)
+void __cdecl PM_StepSlideMove(pmove_t *pm, pml_t *pml, int32_t gravity)
 {
     float v3; // [esp+8h] [ebp-140h]
     float v4; // [esp+Ch] [ebp-13Ch]
@@ -22,11 +22,11 @@ void __cdecl PM_StepSlideMove(pmove_t *pm, pml_t *pml, int gravity)
     float *origin; // [esp+64h] [ebp-E4h]
     float v19; // [esp+6Ch] [ebp-DCh]
     float v20; // [esp+70h] [ebp-D8h]
-    int old; // [esp+84h] [ebp-C4h]
+    int32_t old; // [esp+84h] [ebp-C4h]
     float bobmove; // [esp+88h] [ebp-C0h]
     float fSpeedScale; // [esp+90h] [ebp-B8h]
-    int iDelta; // [esp+98h] [ebp-B0h]
-    int iDeltaa; // [esp+98h] [ebp-B0h]
+    int32_t iDelta; // [esp+98h] [ebp-B0h]
+    int32_t iDeltaa; // [esp+98h] [ebp-B0h]
     float flatDelta; // [esp+9Ch] [ebp-ACh]
     float flatDelta_4; // [esp+A0h] [ebp-A8h]
     float stepDelta; // [esp+A4h] [ebp-A4h]
@@ -34,7 +34,7 @@ void __cdecl PM_StepSlideMove(pmove_t *pm, pml_t *pml, int gravity)
     float down_v; // [esp+ACh] [ebp-9Ch]
     float down_v_4; // [esp+B0h] [ebp-98h]
     float down_v_8; // [esp+B4h] [ebp-94h]
-    int jumping; // [esp+B8h] [ebp-90h]
+    int32_t jumping; // [esp+B8h] [ebp-90h]
     bool iBumps; // [esp+C0h] [ebp-88h]
     float start_o[3]; // [esp+C4h] [ebp-84h] BYREF
     trace_t trace; // [esp+D0h] [ebp-78h] BYREF
@@ -283,32 +283,32 @@ int __cdecl PM_VerifyPronePosition(pmove_t *pm, float *vFallbackOrg, float *vFal
     return (unsigned __int8)result;
 }
 
-bool __cdecl PM_SlideMove(pmove_t *pm, pml_t *pml, int gravity)
+bool __cdecl PM_SlideMove(pmove_t *pm, pml_t *pml, int32_t gravity)
 {
-    unsigned __int16 EntityHitId; // ax
+    uint16_t EntityHitId; // ax
     float *v5; // [esp+Ch] [ebp-150h]
     float *v6; // [esp+10h] [ebp-14Ch]
     float *v7; // [esp+14h] [ebp-148h]
     float *v8; // [esp+18h] [ebp-144h]
     float *v9; // [esp+28h] [ebp-134h]
     float *velocity; // [esp+2Ch] [ebp-130h]
-    int j; // [esp+3Ch] [ebp-120h]
+    int32_t j; // [esp+3Ch] [ebp-120h]
     float dir[3]; // [esp+40h] [ebp-11Ch] BYREF
     float d; // [esp+4Ch] [ebp-110h]
-    int numbumps; // [esp+50h] [ebp-10Ch]
+    int32_t numbumps; // [esp+50h] [ebp-10Ch]
     float endClipVelocity[3]; // [esp+54h] [ebp-108h] BYREF
-    int k; // [esp+60h] [ebp-FCh]
+    int32_t k; // [esp+60h] [ebp-FCh]
     float planes[8][3]; // [esp+64h] [ebp-F8h] BYREF
-    int permutation[8]; // [esp+C8h] [ebp-94h] BYREF
+    int32_t permutation[8]; // [esp+C8h] [ebp-94h] BYREF
     float time_left; // [esp+E8h] [ebp-74h]
     float end[3]; // [esp+ECh] [ebp-70h] BYREF
-    int numplanes; // [esp+F8h] [ebp-64h]
-    int bumpcount; // [esp+FCh] [ebp-60h]
+    int32_t numplanes; // [esp+F8h] [ebp-64h]
+    int32_t bumpcount; // [esp+FCh] [ebp-60h]
     float primal_velocity[3]; // [esp+100h] [ebp-5Ch]
     trace_t trace; // [esp+10Ch] [ebp-50h] BYREF
     float endVelocity[3]; // [esp+138h] [ebp-24h] BYREF
     float clipVelocity[3]; // [esp+144h] [ebp-18h] BYREF
-    int i; // [esp+150h] [ebp-Ch]
+    int32_t i; // [esp+150h] [ebp-Ch]
     playerState_s *ps; // [esp+154h] [ebp-8h]
     float into; // [esp+158h] [ebp-4h]
 
@@ -446,14 +446,14 @@ bool __cdecl PM_SlideMove(pmove_t *pm, pml_t *pml, int gravity)
 
 double __cdecl PM_PermuteRestrictiveClipPlanes(
     const float *velocity,
-    int planeCount,
+    int32_t planeCount,
     const float (*planes)[3],
-    int *permutation)
+    int32_t*permutation)
 {
     double v4; // st7
-    int permutedIndex; // [esp+4h] [ebp-28h]
+    int32_t permutedIndex; // [esp+4h] [ebp-28h]
     float parallel[8]; // [esp+8h] [ebp-24h]
-    int planeIndex; // [esp+28h] [ebp-4h]
+    int32_t planeIndex; // [esp+28h] [ebp-4h]
 
     if (!velocity)
         MyAssertHandler(".\\bgame\\bg_slidemove.cpp", 57, 0, "%s", "velocity");
