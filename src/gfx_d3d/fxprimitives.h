@@ -52,11 +52,13 @@ struct FxBoltAndSortOrder // sizeof=0x4
     unsigned __int32 boneIndex : 11;
     unsigned __int32 sortOrder : 8;
 };
+
 struct FxSpatialFrame // sizeof=0x1C
 {                                       // ...
     float quat[4];
     float origin[3];                    // ...
 };
+
 struct FxEffectDef // sizeof=0x20
 {                                       // ...
     const char *name;
@@ -68,6 +70,8 @@ struct FxEffectDef // sizeof=0x20
     int elemDefCountEmission;
     const FxElemDef *elemDefs;
 };
+static_assert(sizeof(FxEffectDef) == 32);
+
 struct FxEffect // sizeof=0x80
 {                                       // ...
     const FxEffectDef *def;
@@ -478,11 +482,14 @@ struct FxImpactEntry // sizeof=0x84
     const FxEffectDef *nonflesh[29];
     const FxEffectDef *flesh[4];
 };
+
 struct FxImpactTable // sizeof=0x8
 {                                       // ...
     const char *name;
     FxImpactEntry *table;
 };
+static_assert(sizeof(FxImpactTable) == 8);
+
 struct FxSystemBuffers // sizeof=0x47480
 {                                       // ...
     FxEffect effects[MAX_EFFECTS];

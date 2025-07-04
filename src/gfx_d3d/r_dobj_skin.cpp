@@ -262,7 +262,6 @@ int  R_SkinSceneDObjModels(
                 rigidSurf = (GfxModelRigidSurface *)surfPos2;
                 if (surfPos2->skinnedCachedOffset == -2)
                 {
-                    static_assert(sizeof(GfxModelRigidSurface) == 56);
                     surfPos2 = (GfxModelSkinnedSurface *)((char *)surfPos2 + sizeof(GfxModelRigidSurface));
                 }
                 else if (surfPos2->skinnedCachedOffset == -3)
@@ -282,7 +281,6 @@ int  R_SkinSceneDObjModels(
         }
         else
         {
-            static_assert(sizeof(GfxPackedVertex) == 32);
             unsigned int vertsSize = sizeof(GfxPackedVertex) * numSkinnedVerts;
             iassert(frontEndDataOut->tempSkinBuf);
             unsigned long firstSurf = InterlockedExchangeAdd(&frontEndDataOut->tempSkinPos, vertsSize);
@@ -298,7 +296,6 @@ int  R_SkinSceneDObjModels(
                 GfxModelRigidSurface *rigidSurf2_ = (GfxModelRigidSurface *)surfPos2;
                 if (surfPos2->skinnedCachedOffset == -2)
                 {
-                    static_assert(sizeof(GfxModelRigidSurface) == 56);
                     surfPos2 = (GfxModelSkinnedSurface *)((char *)surfPos2 + sizeof(GfxModelRigidSurface));
                 }
                 else if (surfPos2->skinnedCachedOffset == -3)

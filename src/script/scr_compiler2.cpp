@@ -4384,8 +4384,6 @@ Scr_CalcLocalVarsThread
 */
 void Scr_CalcLocalVarsThread(sval_u exprlist, sval_u stmtlist, sval_u *stmttblock)
 {
-	static_assert(sizeof(scr_block_s) == 536);
-
 	scrCompileGlob.forceNotCreate = false;
 
 	//stmttblock->block = (scr_block_s *)Hunk_AllocateTempMemoryHighInternal(sizeof(*stmttblock->block));

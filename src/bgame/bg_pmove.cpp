@@ -136,8 +136,8 @@ void __cdecl PM_trace(
     const float *mins,
     const float *maxs,
     const float *end,
-    int passEntityNum,
-    int contentMask)
+    int32_t passEntityNum,
+    int32_t contentMask)
 {
     pmoveHandlers[pm->handler].trace(results, start, mins, maxs, end, passEntityNum, contentMask);
 }
@@ -149,10 +149,10 @@ void __cdecl PM_playerTrace(
     const float *mins,
     const float *maxs,
     const float *end,
-    int passEntityNum,
-    int contentMask)
+    int32_t passEntityNum,
+    int32_t contentMask)
 {
-    unsigned __int16 EntityHitId; // ax
+    uint16_t EntityHitId; // ax
 
     pmoveHandlers[pm->handler].trace(results, start, mins, maxs, end, passEntityNum, contentMask);
     if (results->startsolid && (results->contents & 0x2000000) != 0)
@@ -164,14 +164,14 @@ void __cdecl PM_playerTrace(
     }
 }
 
-void __cdecl PM_AddEvent(playerState_s *ps, unsigned int newEvent)
+void __cdecl PM_AddEvent(playerState_s *ps, uint32_t newEvent)
 {
     BG_AddPredictableEventToPlayerstate(newEvent, 0, ps);
 }
 
-void __cdecl PM_AddTouchEnt(pmove_t *pm, int entityNum)
+void __cdecl PM_AddTouchEnt(pmove_t *pm, int32_t entityNum)
 {
-    int i; // [esp+0h] [ebp-4h]
+    int32_t i; // [esp+0h] [ebp-4h]
 
     if (entityNum != 1022)
     {
@@ -243,7 +243,7 @@ void __cdecl PM_ProjectVelocity(const float *velIn, const float *normal, float *
     }
 }
 
-int __cdecl PM_GetEffectiveStance(const playerState_s *ps)
+int32_t __cdecl PM_GetEffectiveStance(const playerState_s *ps)
 {
     if (ps->viewHeightTarget == 22)
         return 2;
@@ -252,11 +252,11 @@ int __cdecl PM_GetEffectiveStance(const playerState_s *ps)
     return ps->viewHeightTarget == 11;
 }
 
-int __cdecl PM_GetSprintLeft(const playerState_s *ps, int gametime)
+int32_t __cdecl PM_GetSprintLeft(const playerState_s *ps, int32_t gametime)
 {
-    int v4; // [esp+8h] [ebp-10h]
-    int sprintLeft; // [esp+10h] [ebp-8h]
-    int maxSprintTime; // [esp+14h] [ebp-4h]
+    int32_t v4; // [esp+8h] [ebp-10h]
+    int32_t sprintLeft; // [esp+10h] [ebp-8h]
+    int32_t maxSprintTime; // [esp+14h] [ebp-4h]
 
     maxSprintTime = BG_GetMaxSprintTime(ps);
     if (ps->sprintState.lastSprintStart)
@@ -319,7 +319,7 @@ bool __cdecl PM_IsSprinting(const playerState_s *ps)
     return ps->sprintState.lastSprintStart && ps->sprintState.lastSprintStart > ps->sprintState.lastSprintEnd;
 }
 
-double __cdecl PM_DamageScale_Walk(int damage_timer)
+double __cdecl PM_DamageScale_Walk(int32_t damage_timer)
 {
     float timer_gradiant; // [esp+0h] [ebp-10h]
     float timer_max; // [esp+4h] [ebp-Ch]
@@ -347,7 +347,7 @@ unsigned int __cdecl PM_GroundSurfaceType(pml_t *pml)
     return iSurfType;
 }
 
-int __cdecl PM_GetViewHeightLerpTime(const playerState_s *ps, int iTarget, int bDown)
+int32_t __cdecl PM_GetViewHeightLerpTime(const playerState_s *ps, int32_t iTarget, int32_t bDown)
 {
     if (iTarget == 11)
         return 400;
@@ -388,17 +388,17 @@ bool __cdecl PlayerProneAllowed(pmove_t *pm)
             50.0);
 }
 
-void __cdecl PM_FootstepEvent(pmove_t *pm, pml_t *pml, char iOldBobCycle, char iNewBobCycle, int bFootStep)
+void __cdecl PM_FootstepEvent(pmove_t *pm, pml_t *pml, char iOldBobCycle, char iNewBobCycle, int32_t bFootStep)
 {
-    unsigned int v5; // eax
-    unsigned int v6; // [esp+4h] [ebp-70h]
+    uint32_t v5; // eax
+    uint32_t v6; // [esp+4h] [ebp-70h]
     float mins[3]; // [esp+14h] [ebp-60h] BYREF
     float vEnd[3]; // [esp+20h] [ebp-54h] BYREF
-    int iClipMask; // [esp+2Ch] [ebp-48h]
+    int32_t iClipMask; // [esp+2Ch] [ebp-48h]
     float fTraceDist; // [esp+30h] [ebp-44h]
     float maxs[3]; // [esp+34h] [ebp-40h] BYREF
     trace_t trace; // [esp+40h] [ebp-34h] BYREF
-    int iSurfaceType; // [esp+6Ch] [ebp-8h]
+    int32_t iSurfaceType; // [esp+6Ch] [ebp-8h]
     playerState_s *ps; // [esp+70h] [ebp-4h]
 
     ps = pm->ps;
@@ -494,7 +494,7 @@ void __cdecl PM_UpdateLean(
     playerState_s *ps,
     float msec,
     usercmd_s *cmd,
-    void(__cdecl *capsuleTrace)(trace_t *, float *, float *, float *, float *, int))
+    void(__cdecl *capsuleTrace)(trace_t *, float *, float *, float *, float *, int32_t))
 {
     float v4; // [esp+10h] [ebp-84h]
     float v5; // [esp+14h] [ebp-80h]
@@ -507,7 +507,7 @@ void __cdecl PM_UpdateLean(
     trace_t trace; // [esp+4Ch] [ebp-48h] BYREF
     float tmins[3]; // [esp+78h] [ebp-1Ch] BYREF
     float tmaxs[3]; // [esp+84h] [ebp-10h] BYREF
-    int leaning; // [esp+90h] [ebp-4h]
+    int32_t leaning; // [esp+90h] [ebp-4h]
 
     leaning = 0;
     leanofs = 0.0;
@@ -591,7 +591,7 @@ void __cdecl PM_UpdateLean(
     }
 }
 
-void __cdecl PM_UpdateViewAngles(playerState_s *ps, float msec, usercmd_s *cmd, unsigned __int8 handler)
+void __cdecl PM_UpdateViewAngles(playerState_s *ps, float msec, usercmd_s *cmd, uint8_t handler)
 {
     float angle; // [esp+10h] [ebp-10h]
     float temp; // [esp+14h] [ebp-Ch]
@@ -770,14 +770,14 @@ void __cdecl PM_UpdateViewAngles_Prone(
     playerState_s *ps,
     float msec,
     usercmd_s *cmd,
-    unsigned __int8 handler,
+    uint8_t handler,
     float oldViewYaw)
 {
     double v5; // st7
-    int i; // eax
-    unsigned __int8 v7; // al
-    unsigned __int8 v8; // al
-    unsigned __int8 v9; // al
+    int32_t i; // eax
+    uint8_t v7; // al
+    uint8_t v8; // al
+    uint8_t v9; // al
     float v10; // [esp+2Ch] [ebp-54h]
     float v11; // [esp+30h] [ebp-50h]
     float v12; // [esp+38h] [ebp-48h]
@@ -795,11 +795,11 @@ void __cdecl PM_UpdateViewAngles_Prone(
     float newViewYaw; // [esp+64h] [ebp-1Ch]
     float newProneYaw; // [esp+68h] [ebp-18h]
     float newProneYawa; // [esp+68h] [ebp-18h]
-    int bProneOK; // [esp+74h] [ebp-Ch]
-    int bProneOKa; // [esp+74h] [ebp-Ch]
+    int32_t bProneOK; // [esp+74h] [ebp-Ch]
+    int32_t bProneOKa; // [esp+74h] [ebp-Ch]
     bool bRetry; // [esp+78h] [ebp-8h]
     bool bRetrya; // [esp+78h] [ebp-8h]
-    int proneBlocked; // [esp+7Ch] [ebp-4h]
+    int32_t proneBlocked; // [esp+7Ch] [ebp-4h]
 
     newViewYaw = ps->viewangles[1];
     proneBlocked = 0;
@@ -947,7 +947,7 @@ LABEL_46:
     PM_UpdateViewAngles_PronePitchClamp(ps);
 }
 
-int __cdecl BG_CheckProneTurned(playerState_s *ps, float newProneYaw, unsigned __int8 handler)
+int32_t __cdecl BG_CheckProneTurned(playerState_s *ps, float newProneYaw, uint8_t handler)
 {
     float v4; // [esp+2Ch] [ebp-18h]
     float v5; // [esp+30h] [ebp-14h]
@@ -962,7 +962,7 @@ int __cdecl BG_CheckProneTurned(playerState_s *ps, float newProneYaw, unsigned _
     v4 = newProneYaw - (1.0 - fraction) * delta;
     testYaw = AngleNormalize360(v4);
     prone_feet_dist = fraction * 45.0 + (1.0 - fraction) * 50.0;
-    return (unsigned __int8)BG_CheckProne(
+    return (uint8_t)BG_CheckProne(
         ps->clientNum,
         ps->origin,
         15.0,
@@ -981,7 +981,7 @@ int __cdecl BG_CheckProneTurned(playerState_s *ps, float newProneYaw, unsigned _
 void __cdecl PM_UpdateViewAngles_ProneYawClamp(
     playerState_s *ps,
     float delta,
-    int proneBlocked,
+    int32_t proneBlocked,
     float oldViewYaw,
     float newViewYaw)
 {
@@ -1688,7 +1688,7 @@ void __cdecl PM_UpdateSprint(pmove_t *pm, const pml_t *pml)
     }
 }
 
-void __cdecl PM_StartSprint(playerState_s *ps, pmove_t *pm, const pml_t *pml, int sprintLeft)
+void __cdecl PM_StartSprint(playerState_s *ps, pmove_t *pm, const pml_t *pml, int32_t sprintLeft)
 {
     if (ps->sprintState.lastSprintEnd && ps->sprintState.lastSprintEnd < ps->sprintState.lastSprintStart)
         MyAssertHandler(
@@ -1714,7 +1714,7 @@ void __cdecl PM_EndSprint(playerState_s *ps, pmove_t *pm)
     }
 }
 
-bool __cdecl PM_SprintStartInterferingButtons(const playerState_s *ps, int forwardSpeed, __int16 buttons)
+bool __cdecl PM_SprintStartInterferingButtons(const playerState_s *ps, int32_t forwardSpeed, int16_t buttons)
 {
     if ((ps->pm_flags & 8) != 0)
         return 1;
@@ -1734,7 +1734,7 @@ bool __cdecl PM_SprintStartInterferingButtons(const playerState_s *ps, int forwa
         || ps->weaponstate >= 15 && ps->weaponstate <= 20;
 }
 
-bool __cdecl PM_SprintEndingButtons(const playerState_s *ps, int forwardSpeed, __int16 buttons)
+bool __cdecl PM_SprintEndingButtons(const playerState_s *ps, int32_t forwardSpeed, int16_t buttons)
 {
     if ((ps->pm_flags & 0x10018) != 0)
         return 1;
@@ -2899,7 +2899,7 @@ void __cdecl PM_GroundTraceMissed(pmove_t *pm, pml_t *pml)
     pml->walking = 0;
 }
 
-double __cdecl PM_GetViewHeightLerp(const pmove_t *pm, int iFromHeight, int iToHeight)
+double __cdecl PM_GetViewHeightLerp(const pmove_t *pm, int32_t iFromHeight, int32_t iToHeight)
 {
     float fLerpFrac; // [esp+8h] [ebp-8h]
     playerState_s *ps; // [esp+Ch] [ebp-4h]
@@ -3472,11 +3472,11 @@ void __cdecl PM_ViewHeightAdjust(pmove_t *pm, pml_t *pml)
     }
 }
 
-double __cdecl PM_ViewHeightTableLerp(int iFrac, viewLerpWaypoint_s *pTable, float *pfPosOfs)
+double __cdecl PM_ViewHeightTableLerp(int32_t iFrac, viewLerpWaypoint_s *pTable, float *pfPosOfs)
 {
     float fEntryFrac; // [esp+10h] [ebp-10h]
     viewLerpWaypoint_s *pCurr; // [esp+14h] [ebp-Ch]
-    int i; // [esp+18h] [ebp-8h]
+    int32_t i; // [esp+18h] [ebp-8h]
     viewLerpWaypoint_s *pPrev; // [esp+1Ch] [ebp-4h]
 
     if (iFrac)
@@ -3601,7 +3601,7 @@ void __cdecl PM_Footsteps(pmove_t *pm, pml_t *pml)
     }
 }
 
-int __cdecl PM_GetStanceEx(int stance, int backward)
+int32_t __cdecl PM_GetStanceEx(int32_t stance, int32_t backward)
 {
     if (stance >= 3)
         MyAssertHandler(".\\bgame\\bg_pmove.cpp", 388, 0, "%s", "stance < PM_STANCE_BACKWARD_FIRST");
@@ -3638,12 +3638,12 @@ void __cdecl PM_Footstep_LadderMove(pmove_t *pm, pml_t *pml)
     }
 }
 
-void __cdecl PM_Footsteps_NotMoving(pmove_t *pm, int stance)
+void __cdecl PM_Footsteps_NotMoving(pmove_t *pm, int32_t stance)
 {
-    int EffectiveStance; // eax
+    int32_t EffectiveStance; // eax
     scriptAnimMoveTypes_t flinch_anim; // [esp+0h] [ebp-18h]
-    int turnAdjust; // [esp+4h] [ebp-14h]
-    int animResult; // [esp+8h] [ebp-10h]
+    int32_t turnAdjust; // [esp+4h] [ebp-14h]
+    int32_t animResult; // [esp+8h] [ebp-10h]
     clientInfo_t *ci; // [esp+Ch] [ebp-Ch]
     scriptAnimMoveTypes_t anim; // [esp+10h] [ebp-8h]
     playerState_s *ps; // [esp+14h] [ebp-4h]
@@ -3699,7 +3699,7 @@ void __cdecl PM_Footsteps_NotMoving(pmove_t *pm, int stance)
     }
 }
 
-unsigned int __cdecl PM_GetFlinchAnim(unsigned int flinchAnimDir)
+uint32_t __cdecl PM_GetFlinchAnim(uint32_t flinchAnimDir)
 {
     if (flinchAnimDir >= 4)
         MyAssertHandler(
@@ -3752,9 +3752,9 @@ int __cdecl PM_Footsteps_TurnAnim(clientInfo_t *ci)
     return turnAdjust;
 }
 
-scriptAnimMoveTypes_t __cdecl PM_GetNotMovingAnim(int stance, int turnAdjust)
+scriptAnimMoveTypes_t __cdecl PM_GetNotMovingAnim(int32_t stance, int32_t turnAdjust)
 {
-    int turn; // [esp+0h] [ebp-4h]
+    int32_t turn; // [esp+0h] [ebp-4h]
 
     if (turnAdjust)
         turn = (turnAdjust != 14) + 1;
@@ -3773,7 +3773,7 @@ bool __cdecl PM_ShouldFlinch(playerState_s *ps)
     return ps->damageTimer > flinch_end_time;
 }
 
-double __cdecl PM_GetMaxSpeed(pmove_t *pm, int walking, int sprinting)
+double __cdecl PM_GetMaxSpeed(pmove_t *pm, int32_t walking, int32_t sprinting)
 {
     double v3; // st7
     float fMaxSpeed; // [esp+0h] [ebp-8h]
@@ -3830,7 +3830,7 @@ double __cdecl PM_GetMaxSpeed(pmove_t *pm, int walking, int sprinting)
     return (float)(PM_CmdScaleForStance(pm) * fMaxSpeeda);
 }
 
-double __cdecl PM_GetBobMove(PmStanceFrontBack stance, float xyspeed, float fMaxSpeed, int walking, int sprinting)
+double __cdecl PM_GetBobMove(PmStanceFrontBack stance, float xyspeed, float fMaxSpeed, int32_t walking, int32_t sprinting)
 {
     float bobFactor; // [esp+4h] [ebp-4h]
 
@@ -3850,10 +3850,10 @@ int __cdecl PM_GetStanceIdleAnim(char stanceFlag)
     return 1;
 }
 
-int __cdecl PM_GetMoveAnim(playerState_s *ps, PmStanceFrontBack stance, int walking, int sprinting)
+int32_t __cdecl PM_GetMoveAnim(playerState_s *ps, PmStanceFrontBack stance, int32_t walking, int32_t sprinting)
 {
     scriptAnimMoveTypes_t moveAnim; // [esp+0h] [ebp-Ch]
-    int stumble_end_time; // [esp+4h] [ebp-8h]
+    int32_t stumble_end_time; // [esp+4h] [ebp-8h]
 
     stumble_end_time = ps->damageDuration - player_dmgtimer_stumbleTime->current.integer;
     if (stumble_end_time < 0)
@@ -4388,7 +4388,7 @@ void __cdecl TurretNVGTrigger(pmove_t *pm)
     }
 }
 
-double __cdecl BG_GetSpeed(const playerState_s *ps, int time)
+double __cdecl BG_GetSpeed(const playerState_s *ps, int32_t time)
 {
     if ((ps->pm_flags & 8) == 0)
         return Vec2Length(ps->velocity);

@@ -37,6 +37,7 @@ struct XBoneInfo // sizeof=0x28
     float offset[3];
     float radiusSquared;
 };
+static_assert(sizeof(XBoneInfo) == 40);
 
 struct XModelCollSurf_s // sizeof=0x2C
 {
@@ -90,12 +91,14 @@ struct XModel // sizeof=0xDC
     struct PhysPreset* physPreset;
     struct PhysGeomList* physGeoms;
 };
+static_assert(sizeof(XModel) == 220);
 
 struct XModelPiece // sizeof=0x10
 {
     XModel *model;
     float offset[3];
 };
+static_assert(sizeof(XModelPiece) == 16);
 
 struct XModelPieces // sizeof=0xC
 {                                       // ...
@@ -103,6 +106,7 @@ struct XModelPieces // sizeof=0xC
     int numpieces;
     XModelPiece *pieces;
 };
+static_assert(sizeof(XModelPieces) == 12);
 
 struct QueueElement // sizeof=0x8
 {                                       // ...

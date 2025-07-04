@@ -639,7 +639,6 @@ void __cdecl Load_XStringPtr(bool atStreamStart)
 
 void __cdecl Load_ScriptStringList(bool atStreamStart)
 {
-    static_assert(sizeof(ScriptStringList) == 8);
     Load_Stream(atStreamStart, (unsigned __int8 *)varScriptStringList, 8);
     DB_PushStreamPos(4u);
     if (varScriptStringList->strings)
@@ -918,7 +917,6 @@ void __cdecl Load_XAnimNotifyInfoArray(bool atStreamStart, int count)
 
 void __cdecl Load_XAnimParts(bool atStreamStart)
 {
-    static_assert(sizeof(XAnimParts) == 88);
     Load_Stream(atStreamStart, (unsigned __int8 *)varXAnimParts, 88);
     DB_PushStreamPos(4u);
     varXString = &varXAnimParts->name;
@@ -1059,13 +1057,11 @@ void __cdecl Mark_XAnimPartsPtr()
 
 void __cdecl Load_XBoneInfoArray(bool atStreamStart, int count)
 {
-    static_assert(sizeof(XBoneInfo) == 40);
     Load_Stream(atStreamStart, (unsigned __int8 *)varXBoneInfo, 40 * count);
 }
 
 void __cdecl Load_DObjAnimMatArray(bool atStreamStart, int count)
 {
-    static_assert(sizeof(DObjAnimMat) == 32);
     Load_Stream(atStreamStart, (unsigned __int8 *)varDObjAnimMat, 32 * count);
 }
 
@@ -1246,7 +1242,6 @@ void __cdecl Load_SpeakerMap(bool atStreamStart)
 
 void __cdecl Load_snd_alias_t(bool atStreamStart)
 {
-    static_assert(sizeof(snd_alias_t) == 92);
     Load_Stream(atStreamStart, (unsigned __int8 *)varsnd_alias_t, 92);
     varXString = &varsnd_alias_t->aliasName;
     Load_XString(0);
@@ -1303,7 +1298,6 @@ void __cdecl Load_snd_alias_tArray(bool atStreamStart, int count)
 
 void __cdecl Load_snd_alias_list_t(bool atStreamStart)
 {
-    static_assert(sizeof(snd_alias_list_t) == 12);
     Load_Stream(atStreamStart, (unsigned __int8 *)varsnd_alias_list_t, 12);
     DB_PushStreamPos(4u);
     varXString = &varsnd_alias_list_t->aliasName;
@@ -1583,7 +1577,6 @@ void __cdecl Load_XBlendInfoArray(bool atStreamStart, int count)
 
 void __cdecl Load_XSurfaceVertexInfo(bool atStreamStart)
 {
-    static_assert(sizeof(XSurfaceVertexInfo) == 12);
     Load_Stream(atStreamStart, (unsigned __int8 *)varXSurfaceVertexInfo, 12);
     if (varXSurfaceVertexInfo->vertsBlend)
     {
@@ -1625,7 +1618,6 @@ void __cdecl Load_XZoneHandle(bool atStreamStart)
 
 void __cdecl Load_XSurface(bool atStreamStart)
 {
-    static_assert(sizeof(XSurface) == 56);
     Load_Stream(atStreamStart, (unsigned char*)varXSurface, 56);
     varXZoneHandle = &varXSurface->zoneHandle;
     Load_XZoneHandle(0);
@@ -1839,7 +1831,6 @@ void __cdecl Load_GfxVertexShaderLoadDef(bool atStreamStart)
 
 void __cdecl Load_GfxPixelShaderLoadDef(bool atStreamStart)
 {
-    static_assert(sizeof(GfxPixelShaderLoadDef) == 8); 
     Load_Stream(atStreamStart, (unsigned __int8 *)varGfxPixelShaderLoadDef, 8);
     if (varGfxPixelShaderLoadDef->program)
     {
@@ -1859,7 +1850,6 @@ void __cdecl Load_MaterialVertexShaderProgram(bool atStreamStart)
 
 void __cdecl Load_MaterialPixelShaderProgram(bool atStreamStart)
 {
-    static_assert(sizeof(MaterialPixelShaderProgram) == 12);
     Load_Stream(atStreamStart, (unsigned __int8 *)varMaterialPixelShaderProgram, 12);
     varGfxPixelShaderLoadDef = &varMaterialPixelShaderProgram->loadDef;
     Load_GfxPixelShaderLoadDef(0);
@@ -2759,7 +2749,6 @@ void __cdecl Load_PhysGeomList(bool atStreamStart)
 
 void __cdecl Load_XModel(bool atStreamStart)
 {
-    static_assert(sizeof(XModel) == 220);
     Load_Stream(atStreamStart, (unsigned __int8 *)varXModel, 220);
     DB_PushStreamPos(4u);
     varXString = &varXModel->name;
@@ -2932,7 +2921,6 @@ void __cdecl Load_XModelPtrArray(bool atStreamStart, int count)
 
 void __cdecl Load_XModelPiece(bool atStreamStart)
 {
-    static_assert(sizeof(XModelPiece) == 16);
     Load_Stream(atStreamStart, (unsigned __int8 *)varXModelPiece, 16);
     varXModelPtr = &varXModelPiece->model;
     Load_XModelPtr(0);
@@ -2943,7 +2931,6 @@ void __cdecl Load_XModelPieceArray(bool atStreamStart, int count)
     XModelPiece *var; // [esp+0h] [ebp-8h]
     int i; // [esp+4h] [ebp-4h]
 
-    static_assert(sizeof(XModelPiece) == 16);
     Load_Stream(atStreamStart, (unsigned __int8 *)varXModelPiece, 16 * count);
     var = varXModelPiece;
     for (i = 0; i < count; ++i)
@@ -2956,7 +2943,6 @@ void __cdecl Load_XModelPieceArray(bool atStreamStart, int count)
 
 void __cdecl Load_XModelPieces(bool atStreamStart)
 {
-    static_assert(sizeof(XModelPieces) == 12);
     Load_Stream(atStreamStart, (unsigned __int8 *)varXModelPieces, 12);
     varXString = &varXModelPieces->name;
     Load_XString(0);
@@ -3066,13 +3052,11 @@ void __cdecl Mark_XModelPiecesPtr()
 
 void __cdecl Load_pathlink_tArray(bool atStreamStart, int count)
 {
-    static_assert(sizeof(pathlink_s) == 12);
     Load_Stream(atStreamStart, (unsigned __int8 *)varpathlink_t, 12 * count);
 }
 
 void __cdecl Load_pathnode_constant_t(bool atStreamStart)
 {
-    static_assert(sizeof(pathnode_constant_t) == 68);
     Load_Stream(atStreamStart, (unsigned __int8 *)varpathnode_constant_t, 68);
     varScriptString = &varpathnode_constant_t->targetname;
     Load_ScriptString(0);
@@ -3094,7 +3078,6 @@ void __cdecl Load_pathnode_constant_t(bool atStreamStart)
 
 void __cdecl Load_pathnode_t(bool atStreamStart)
 {
-    static_assert(sizeof(pathnode_t) == 128);
     Load_Stream(atStreamStart, (unsigned __int8 *)varpathnode_t, 128);
     varpathnode_constant_t = &varpathnode_t->constant;
     Load_pathnode_constant_t(0);
@@ -3105,7 +3088,6 @@ void __cdecl Load_pathnode_tArray(bool atStreamStart, int count)
     pathnode_t *var; // [esp+0h] [ebp-8h]
     int i; // [esp+4h] [ebp-4h]
 
-    static_assert(sizeof(pathnode_t) == 128);
     Load_Stream(atStreamStart, (unsigned __int8 *)varpathnode_t, count * 128);
     var = varpathnode_t;
     for (i = 0; i < count; ++i)
@@ -3118,13 +3100,11 @@ void __cdecl Load_pathnode_tArray(bool atStreamStart, int count)
 
 void __cdecl Load_pathbasenode_tArray(bool atStreamStart, int count)
 {
-    static_assert(sizeof(pathbasenode_t) == 16);
     Load_Stream(atStreamStart, (unsigned __int8 *)varpathbasenode_t, 16 * count);
 }
 
 void __cdecl Load_pathnode_tree_nodes_t(bool atStreamStart)
 {
-    static_assert(sizeof(pathnode_tree_nodes_t) == 8);
     Load_Stream(atStreamStart, (unsigned __int8 *)varpathnode_tree_nodes_t, 8);
     if (varpathnode_tree_nodes_t->nodes)
     {

@@ -95,6 +95,8 @@ struct LoadedSound // sizeof=0x2C
     const char *name;
     MssSoundCOD4 sound;
 };
+static_assert(sizeof(LoadedSound) == 44);
+
 struct StreamFileNameRaw // sizeof=0x8
 {                                       // ...
     const char *dir;
@@ -125,12 +127,15 @@ struct SoundFile // sizeof=0xC
     // padding byte
     SoundFileRef u;
 };
+
 struct SndCurve // sizeof=0x48
 {                                       // ...
     const char *filename;               // ...
     int knotCount;                      // ...
     float knots[8][2];                  // ...
 };
+static_assert(sizeof(SndCurve) == 72);
+
 struct MSSSpeakerLevels // sizeof=0x10
 {                                       // ...
     int speaker;
@@ -182,12 +187,16 @@ const struct snd_alias_t // sizeof=0x5C
     float envelopPercentage;
     SpeakerMap *speakerMap;
 };
+static_assert(sizeof(snd_alias_t) == 92);
+
 struct snd_alias_list_t // sizeof=0xC
 {                                       // ...
     const char *aliasName;              // ...
     snd_alias_t *head;                  // ...
     int count;                          // ...
 };
+static_assert(sizeof(snd_alias_list_t) == 12);
+
 struct snd_entchannel_info_t // sizeof=0x50
 {                                       // ...
     char name[64];

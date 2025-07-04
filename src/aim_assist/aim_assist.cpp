@@ -58,12 +58,12 @@ void __cdecl TRACK_aim_assist()
     TRACK_STATIC_ARR(aaInputGraph, 10);
 }
 
-void __cdecl AimAssist_Init(int localClientNum)
+void __cdecl AimAssist_Init(int32_t localClientNum)
 {
     char graphName[128]; // [esp+4h] [ebp-88h] BYREF
     int graphIndex; // [esp+88h] [ebp-4h]
 
-    memset((unsigned __int8 *)&aaGlobArray[localClientNum], 0, sizeof(AimAssistGlobals));
+    memset((uint8_t*)&aaGlobArray[localClientNum], 0, sizeof(AimAssistGlobals));
     AimAssist_RegisterDvars();
     for (graphIndex = 0; graphIndex < 4; ++graphIndex)
     {
@@ -315,12 +315,12 @@ void AimAssist_RegisterDvars()
         "Scale the influence of each input axis so that the major axis has more influence on the control");
 }
 
-void __cdecl AimAssist_Setup(int localClientNum)
+void __cdecl AimAssist_Setup(int32_t localClientNum)
 {
     AimAssistGlobals *aaGlob; // [esp+0h] [ebp-4h]
 
     aaGlob = &aaGlobArray[localClientNum];
-    memset((unsigned __int8 *)aaGlob, 0, sizeof(AimAssistGlobals));
+    memset((uint8_t*)aaGlob, 0, sizeof(AimAssistGlobals));
     aaGlob->initialized = 1;
     aaGlob->fovTurnRateScale = 1.0;
     aaGlob->fovScaleInv = 1.0;
@@ -332,7 +332,7 @@ void __cdecl AimAssist_Setup(int localClientNum)
 }
 
 void __cdecl AimAssist_UpdateScreenTargets(
-    int localClientNum,
+    int32_t localClientNum,
     const float *viewOrg,
     const float *viewAngles,
     float tanHalfFovX,
@@ -666,7 +666,7 @@ void __cdecl AimAssist_AddToTargetList(AimAssistGlobals *aaGlob, const AimScreen
     }
 }
 
-int __cdecl AimAssist_CompareTargets(const AimScreenTarget *screenTargetA, const AimScreenTarget *screenTargetB)
+int32_t __cdecl AimAssist_CompareTargets(const AimScreenTarget *screenTargetA, const AimScreenTarget *screenTargetB)
 {
     if (!screenTargetA)
         MyAssertHandler(".\\aim_assist\\aim_assist.cpp", 586, 0, "%s", "screenTargetA");
@@ -679,8 +679,8 @@ int __cdecl AimAssist_CompareTargets(const AimScreenTarget *screenTargetA, const
     return -1;
 }
 
-int __cdecl AimAssist_CalcAimPos(
-    int localClientNum,
+int32_t __cdecl AimAssist_CalcAimPos(
+    int32_t localClientNum,
     const centity_s *targetEnt,
     const AimTarget *target,
     float *aimPos)
@@ -700,7 +700,7 @@ int __cdecl AimAssist_CalcAimPos(
     return 1;
 }
 
-int __cdecl AimTarget_GetTagPos(int localClientNum, const centity_s *cent, unsigned int tagName, float *pos)
+int32_t __cdecl AimTarget_GetTagPos(int32_t localClientNum, const centity_s *cent, uint32_t tagName, float *pos)
 {
     char *v5; // eax
     DObj_s *dobj; // [esp+0h] [ebp-4h]
@@ -720,12 +720,12 @@ int __cdecl AimTarget_GetTagPos(int localClientNum, const centity_s *cent, unsig
     return 1;
 }
 
-int __cdecl AimAssist_GetScreenTargetCount(int localClientNum)
+int32_t __cdecl AimAssist_GetScreenTargetCount(int32_t localClientNum)
 {
     return aaGlobArray[localClientNum].screenTargetCount;
 }
 
-int __cdecl AimAssist_GetScreenTargetEntity(int localClientNum, unsigned int targetIndex)
+int32_t __cdecl AimAssist_GetScreenTargetEntity(int32_t localClientNum, uint32_t targetIndex)
 {
     const AimAssistGlobals *aaGlob; // [esp+0h] [ebp-4h]
 
@@ -741,7 +741,7 @@ int __cdecl AimAssist_GetScreenTargetEntity(int localClientNum, unsigned int tar
     return aaGlob->screenTargets[targetIndex].entIndex;
 }
 
-void __cdecl AimAssist_ClearEntityReference(int localClientNum, int entIndex)
+void __cdecl AimAssist_ClearEntityReference(int32_t localClientNum, int32_t entIndex)
 {
     AimAssistGlobals *aaGlob; // [esp+0h] [ebp-4h]
 
@@ -823,10 +823,10 @@ void __cdecl AimAssist_UpdateAdsLerp(const AimInput *input)
         aaGlob->adsLerp = 1.0;
 }
 
-unsigned int __cdecl AimAssist_GetWeaponIndex(int localClientNum, const playerState_s *ps)
+uint32_t __cdecl AimAssist_GetWeaponIndex(int32_t localClientNum, const playerState_s *ps)
 {
-    unsigned int NumWeapons; // eax
-    unsigned int weapIndex; // [esp+0h] [ebp-8h]
+    uint32_t NumWeapons; // eax
+    uint32_t weapIndex; // [esp+0h] [ebp-8h]
 
     if ((ps->eFlags & 0x300) != 0)
     {
@@ -907,9 +907,9 @@ bool __cdecl AimAssist_DoBoundsIntersectCenterBox(
     return v7 && v6;
 }
 
-const AimScreenTarget *__cdecl AimAssist_GetTargetFromEntity(const AimAssistGlobals *aaGlob, int entIndex)
+const AimScreenTarget *__cdecl AimAssist_GetTargetFromEntity(const AimAssistGlobals *aaGlob, int32_t entIndex)
 {
-    int targetIndex; // [esp+4h] [ebp-4h]
+    int32_t targetIndex; // [esp+4h] [ebp-4h]
 
     if (!aaGlob)
         MyAssertHandler(".\\aim_assist\\aim_assist.cpp", 818, 0, "%s", "aaGlob");
@@ -1097,7 +1097,7 @@ void __cdecl AimAssist_UpdateMouseInput(const AimInput *input, AimOutput *output
     }
 }
 
-void __cdecl AimAssist_DrawDebugOverlay(unsigned int localClientNum)
+void __cdecl AimAssist_DrawDebugOverlay(uint32_t localClientNum)
 {
     float green[4]; // [esp+Ch] [ebp-2Ch] BYREF
     float red[4]; // [esp+1Ch] [ebp-1Ch] BYREF
@@ -1164,7 +1164,7 @@ void __cdecl AimAssist_DrawCenterBox(
     CL_DrawStretchPicPhysical(x, y, width, height, 0.0, 0.0, 1.0, 1.0, color, cgMedia.whiteMaterial);
 }
 
-void __cdecl AimAssist_DrawTargets(__int64 localClientNum, const float *color)
+void __cdecl AimAssist_DrawTargets(int64_t localClientNum, const float *color)
 {
     char *v2; // eax
     char *v3; // eax

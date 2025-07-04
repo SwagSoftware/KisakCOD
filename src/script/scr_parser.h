@@ -11,6 +11,7 @@ struct OpcodeLookup // sizeof=0x18
     int profileBuiltInTime;
     int profileUsage;
 };
+static_assert(sizeof(OpcodeLookup) == 24);
 
 struct Scr_SourcePos_t // sizeof=0xC
 {                                       // ...
@@ -36,12 +37,14 @@ struct SourceBufferInfo // sizeof=0x2C
     float totalTime;
     float totalBuiltIn;
 };
+static_assert(sizeof(SourceBufferInfo) == 44);
 
 struct SourceLookup // sizeof=0x8
 {
     unsigned int sourcePos;
     int type;
 };
+static_assert(sizeof(SourceLookup) == 8);
 
 struct SaveSourceBufferInfo // sizeof=0x8
 {

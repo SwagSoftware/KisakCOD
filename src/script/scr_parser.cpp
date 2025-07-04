@@ -36,10 +36,6 @@ void __cdecl Scr_InitOpcodeLookup()
 
     if (scrVarPub.developer)
     {
-        static_assert(sizeof(OpcodeLookup) == 24);
-        static_assert(sizeof(SourceLookup) == 8);
-        static_assert(sizeof(SourceBufferInfo) == 44);
-
         scrParserGlob.delayedSourceIndex = -1;
         scrParserGlob.opcodeLookupMaxLen = 0x40000;
         scrParserGlob.opcodeLookupLen = 0;

@@ -752,6 +752,8 @@ struct StringTable // sizeof=0x10
 	int rowCount;
 	const char **values;
 };
+static_assert(sizeof(StringTable) == 16);
+
 const char *__cdecl StringTable_GetColumnValueForRow(const StringTable *table, int row, int column);
 const char *__cdecl StringTable_Lookup(
 	const StringTable *table,
