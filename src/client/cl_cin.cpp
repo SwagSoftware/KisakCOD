@@ -6,7 +6,7 @@
 
 bool cin_skippable;
 
-int __cdecl CIN_PlayCinematic(int localClientNum, char *arg)
+int32_t __cdecl CIN_PlayCinematic(int32_t localClientNum, char *arg)
 {
     float volume; // [esp+4h] [ebp-4h]
 
@@ -48,7 +48,7 @@ void __cdecl CL_PlayUnskippableCinematic_f()
     cin_skippable = 0;
 }
 
-void __cdecl SCR_DrawCinematic(int localClientNum)
+void __cdecl SCR_DrawCinematic(int32_t localClientNum)
 {
     if (R_Cinematic_IsNextReady())
         R_Cinematic_StartNextPlayback();
@@ -58,7 +58,7 @@ void __cdecl SCR_DrawCinematic(int localClientNum)
         R_Cinematic_DrawStretchPic_Letterboxed();
 }
 
-void __cdecl SCR_StopCinematic(int localClientNum)
+void __cdecl SCR_StopCinematic(int32_t localClientNum)
 {
     const char *v1; // eax
 

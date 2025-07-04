@@ -11,7 +11,7 @@ struct PrintChannel // sizeof=0x21
 struct PrintChannelGlob // sizeof=0x21E0
 {                                       // ...
     PrintChannel openChannels[256];     // ...
-    unsigned int filters[7][8];         // ...
+    uint32_t filters[7][8];         // ...
 };
 
 // char const **defaultGameWindowFilters 827b3bcc     con_channels.obj
@@ -23,7 +23,7 @@ PrintChannelGlob pcGlob;
 
 char __cdecl Con_OpenChannel(char *name, bool allowScript)
 {
-    int index; // [esp+0h] [ebp-8h]
+    int32_t index; // [esp+0h] [ebp-8h]
     bool alreadyExists; // [esp+7h] [ebp-1h]
 
     alreadyExists = 0;
@@ -45,7 +45,7 @@ char __cdecl Con_OpenChannel(char *name, bool allowScript)
     return 1;
 }
 
-bool __cdecl Con_ScriptHasPermission(unsigned int channel)
+bool __cdecl Con_ScriptHasPermission(uint32_t channel)
 {
     if (channel >= 0x100)
         return 0;
@@ -54,9 +54,9 @@ bool __cdecl Con_ScriptHasPermission(unsigned int channel)
     return 0;
 }
 
-bool __cdecl Con_GetChannel(const char *name, int *channel_result)
+bool __cdecl Con_GetChannel(const char *name, int32_t *channel_result)
 {
-    int channel; // [esp+0h] [ebp-4h]
+    int32_t channel; // [esp+0h] [ebp-4h]
 
     for (channel = 0; channel < 256; ++channel)
     {
@@ -69,14 +69,14 @@ bool __cdecl Con_GetChannel(const char *name, int *channel_result)
     return channel < 256;
 }
 
-bool __cdecl Con_IsChannelOpen(unsigned int channel)
+bool __cdecl Con_IsChannelOpen(uint32_t channel)
 {
     return channel < 0x100 && pcGlob.openChannels[channel].name[0] != 0;
 }
 
-bool __cdecl Con_IsChannelVisible(print_msg_dest_t dest, unsigned int channel, int errorflags)
+bool __cdecl Con_IsChannelVisible(print_msg_dest_t dest, uint32_t channel, int32_t errorflags)
 {
-    int error; // [esp+4h] [ebp-4h]
+    int32_t error; // [esp+4h] [ebp-4h]
 
     if (channel >= 0x100)
         MyAssertHandler(
@@ -102,9 +102,9 @@ bool __cdecl Con_IsChannelVisible(print_msg_dest_t dest, unsigned int channel, i
     return (error == 3 || error == 2) && Com_BitCheckAssert(pcGlob.filters[dest], 1, 32);
 }
 
-void __cdecl Con_WriteFilterConfigString(int f)
+void __cdecl Con_WriteFilterConfigString(int32_t f)
 {
-    signed int channel; // [esp+0h] [ebp-4h]
+    int32_t channel; // [esp+0h] [ebp-4h]
 
     FS_Printf(f, "con_hidechannel *; con_showchannel");
     for (channel = 0; channel < 256; ++channel)
@@ -127,8 +127,8 @@ const char *defaultGameWindowFilters[4] =
 };
 void __cdecl Con_InitGameMsgChannels()
 {
-    unsigned int gameWindowIndex; // [esp+24h] [ebp-8h]
-    unsigned int gameWindowIndexa; // [esp+24h] [ebp-8h]
+    uint32_t gameWindowIndex; // [esp+24h] [ebp-8h]
+    uint32_t gameWindowIndexa; // [esp+24h] [ebp-8h]
     char *dvarDesc; // [esp+28h] [ebp-4h]
 
     for (gameWindowIndex = 0; gameWindowIndex < 4; ++gameWindowIndex)
@@ -168,11 +168,11 @@ void __cdecl Con_InitGameMsgChannels()
 void __cdecl Con_InitChannelsForDestFromList(print_msg_dest_t dest, const char *channelNames)
 {
     char channelName[256]; // [esp+10h] [ebp-118h] BYREF
-    unsigned int channelNamesLen; // [esp+114h] [ebp-14h]
-    unsigned int charIndex; // [esp+118h] [ebp-10h]
-    unsigned int channelNameLength; // [esp+11Ch] [ebp-Ch]
+    uint32_t channelNamesLen; // [esp+114h] [ebp-14h]
+    uint32_t charIndex; // [esp+118h] [ebp-10h]
+    uint32_t channelNameLength; // [esp+11Ch] [ebp-Ch]
     bool foundChannelName; // [esp+123h] [ebp-5h]
-    unsigned int channelNameStart; // [esp+124h] [ebp-4h]
+    uint32_t channelNameStart; // [esp+124h] [ebp-4h]
 
     if (!channelNames)
         MyAssertHandler(".\\client\\con_channels.cpp", 319, 0, "%s", "channelNames");
@@ -189,7 +189,7 @@ void __cdecl Con_InitChannelsForDestFromList(print_msg_dest_t dest, const char *
                 channelNameLength = charIndex - channelNameStart;
                 if (charIndex - channelNameStart + 1 > 0x100)
                     Com_Error(ERR_DROP, "Channel name too long in specified list: \"%s\"\n", channelNames);
-                memcpy((unsigned __int8 *)channelName, (unsigned __int8 *)&channelNames[channelNameStart], channelNameLength);
+                memcpy((uint8_t *)channelName, (uint8_t *)&channelNames[channelNameStart], channelNameLength);
                 channelName[channelNameLength] = 0;
                 Con_FilterShowChannel(dest, channelName, 1);
                 foundChannelName = 0;
@@ -205,8 +205,8 @@ void __cdecl Con_InitChannelsForDestFromList(print_msg_dest_t dest, const char *
 
 void __cdecl Con_FilterShowChannel(print_msg_dest_t dest, const char *channelName, bool show)
 {
-    int channel; // [esp+0h] [ebp-8h]
-    int count; // [esp+4h] [ebp-4h]
+    int32_t channel; // [esp+0h] [ebp-8h]
+    int32_t count; // [esp+4h] [ebp-4h]
 
     count = 0;
     for (channel = 1; channel < 256; ++channel)
@@ -271,9 +271,9 @@ cmd_function_s Con_FilterList_f_VAR;
 const dvar_t *con_default_console_filter;
 void __cdecl Con_InitChannels()
 {
-    unsigned int channel; // [esp+0h] [ebp-4h]
+    uint32_t channel; // [esp+0h] [ebp-4h]
 
-    memset((unsigned __int8 *)&pcGlob, 0, 0x2100u);
+    memset((uint8_t *)&pcGlob, 0, 0x2100u);
     for (channel = 0; channel < 0x19; ++channel)
         Con_OpenChannel((char *)builtinChannels[channel], 0);
     pcGlob.openChannels[24].allowScript = 1;
@@ -295,7 +295,7 @@ void __cdecl Con_InitChannels()
 
 void __cdecl Con_ChannelList_f()
 {
-    int channel; // [esp+0h] [ebp-4h]
+    int32_t channel; // [esp+0h] [ebp-4h]
 
     for (channel = 0; channel < 256; ++channel)
     {
@@ -316,8 +316,8 @@ void __cdecl Con_FilterAdd(bool show)
 {
     const char *v1; // eax
     const char *v2; // eax
-    int arg; // [esp+0h] [ebp-8h]
-    int argc; // [esp+4h] [ebp-4h]
+    int32_t arg; // [esp+0h] [ebp-8h]
+    int32_t argc; // [esp+4h] [ebp-4h]
 
     argc = Cmd_Argc();
     if (argc >= 2)
@@ -343,7 +343,7 @@ void __cdecl Con_FilterRemove_f()
 
 void __cdecl Con_FilterList_f()
 {
-    signed int channel; // [esp+0h] [ebp-4h]
+    int32_t channel; // [esp+0h] [ebp-4h]
 
     for (channel = 0; channel < 256; ++channel)
     {
@@ -357,15 +357,15 @@ void __cdecl Con_FilterList_f()
 
 void __cdecl Con_ShutdownChannels()
 {
-    signed int channel; // [esp+0h] [ebp-4h]
+    int32_t channel; // [esp+0h] [ebp-4h]
 
     for (channel = 0; channel < 256; ++channel)
         Con_CloseChannelInternal(channel);
 }
 
-void __cdecl Con_CloseChannelInternal(unsigned int channel)
+void __cdecl Con_CloseChannelInternal(uint32_t channel)
 {
-    unsigned int filter; // [esp+0h] [ebp-4h]
+    uint32_t filter; // [esp+0h] [ebp-4h]
 
     if (channel >= 0x100)
         MyAssertHandler(

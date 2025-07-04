@@ -48,7 +48,7 @@ void __cdecl TRACK_cl_cgame()
     track_static_alloc_internal((void *)g_color_table, 128, "g_color_table", 10);
 }
 
-void __cdecl CL_GetScreenDimensions(int *width, int *height, float *aspect)
+void __cdecl CL_GetScreenDimensions(int32_t *width, int32_t *height, float *aspect)
 {
     if (!width)
         MyAssertHandler(".\\client_mp\\cl_cgame_mp.cpp", 93, 0, "%s", "width");
@@ -66,7 +66,7 @@ double __cdecl CL_GetScreenAspectRatioDisplayPixel()
     return cls.vidConfig.aspectRatioDisplayPixel;
 }
 
-int __cdecl CL_GetUserCmd(int localClientNum, int cmdNumber, usercmd_s *ucmd)
+int32_t __cdecl CL_GetUserCmd(int32_t localClientNum, int32_t cmdNumber, usercmd_s *ucmd)
 {
     clientActive_t *LocalClientGlobals; // [esp+8h] [ebp-4h]
 
@@ -79,12 +79,12 @@ int __cdecl CL_GetUserCmd(int localClientNum, int cmdNumber, usercmd_s *ucmd)
     return 1;
 }
 
-int __cdecl CL_GetCurrentCmdNumber(int localClientNum)
+int32_t __cdecl CL_GetCurrentCmdNumber(int32_t localClientNum)
 {
     return CL_GetLocalClientGlobals(localClientNum)->cmdNumber;
 }
 
-void __cdecl CL_GetCurrentSnapshotNumber(int localClientNum, int *snapshotNumber, int *serverTime)
+void __cdecl CL_GetCurrentSnapshotNumber(int32_t localClientNum, int32_t *snapshotNumber, int32_t *serverTime)
 {
     clientActive_t *LocalClientGlobals; // eax
 
@@ -93,15 +93,15 @@ void __cdecl CL_GetCurrentSnapshotNumber(int localClientNum, int *snapshotNumber
     *serverTime = LocalClientGlobals->snap.serverTime;
 }
 
-int __cdecl CL_GetSnapshot(int localClientNum, int snapshotNumber, snapshot_s *snapshot)
+int32_t __cdecl CL_GetSnapshot(int32_t localClientNum, int32_t snapshotNumber, snapshot_s *snapshot)
 {
     const char *v4; // eax
-    unsigned int number; // [esp+8h] [ebp-418h]
+    uint32_t number; // [esp+8h] [ebp-418h]
     clientActive_t *LocalClientGlobals; // [esp+Ch] [ebp-414h]
     bool entityFound[1024]; // [esp+10h] [ebp-410h] BYREF
     const clSnapshot_t *clSnap; // [esp+414h] [ebp-Ch]
-    int i; // [esp+418h] [ebp-8h]
-    int count; // [esp+41Ch] [ebp-4h]
+    int32_t i; // [esp+418h] [ebp-8h]
+    int32_t count; // [esp+41Ch] [ebp-4h]
 
     LocalClientGlobals = CL_GetLocalClientGlobals(localClientNum);
     if (snapshotNumber > LocalClientGlobals->snap.messageNum)
@@ -119,7 +119,7 @@ int __cdecl CL_GetSnapshot(int localClientNum, int snapshotNumber, snapshot_s *s
     snapshot->serverCommandSequence = clSnap->serverCommandNum;
     snapshot->ping = clSnap->ping;
     snapshot->serverTime = clSnap->serverTime;
-    memcpy((unsigned __int8 *)&snapshot->ps, (unsigned __int8 *)&clSnap->ps, sizeof(snapshot->ps));
+    memcpy((uint8_t *)&snapshot->ps, (uint8_t *)&clSnap->ps, sizeof(snapshot->ps));
     count = clSnap->numEntities;
     if (count > 512)
     {
@@ -130,12 +130,12 @@ int __cdecl CL_GetSnapshot(int localClientNum, int snapshotNumber, snapshot_s *s
         count = 512;
     }
     snapshot->numEntities = count;
-    memset((unsigned __int8 *)entityFound, 0, sizeof(entityFound));
+    memset((uint8_t *)entityFound, 0, sizeof(entityFound));
     for (i = 0; i < count; ++i)
     {
         memcpy(
             &snapshot->entities[i],
-            &LocalClientGlobals->parseEntities[((_WORD)i + (unsigned __int16)clSnap->parseEntitiesNum) & 0x7FF],
+            &LocalClientGlobals->parseEntities[((_WORD)i + (uint16_t)clSnap->parseEntitiesNum) & 0x7FF],
             sizeof(snapshot->entities[i]));
         number = snapshot->entities[i].number;
         if (number >= 0x400)
@@ -156,17 +156,17 @@ int __cdecl CL_GetSnapshot(int localClientNum, int snapshotNumber, snapshot_s *s
     count = clSnap->numClients;
     if (count > 64)
         count = 64;
-    memset((unsigned __int8 *)snapshot->clients, 0xAAu, sizeof(snapshot->clients));
+    memset((uint8_t *)snapshot->clients, 0xAAu, sizeof(snapshot->clients));
     snapshot->numClients = count;
     for (i = 0; i < count; ++i)
         memcpy(
             &snapshot->clients[i],
-            &LocalClientGlobals->parseClients[((_WORD)i + (unsigned __int16)clSnap->parseClientsNum) & 0x7FF],
+            &LocalClientGlobals->parseClients[((_WORD)i + (uint16_t)clSnap->parseClientsNum) & 0x7FF],
             sizeof(snapshot->clients[i]));
     return 1;
 }
 
-void __cdecl CL_SetUserCmdWeapons(int localClientNum, int weapon, int offHandIndex)
+void __cdecl CL_SetUserCmdWeapons(int32_t localClientNum, int32_t weapon, int32_t offHandIndex)
 {
     clientActive_t *LocalClientGlobals; // [esp+0h] [ebp-4h]
 
@@ -175,7 +175,7 @@ void __cdecl CL_SetUserCmdWeapons(int localClientNum, int weapon, int offHandInd
     LocalClientGlobals->cgameUserCmdOffHandIndex = offHandIndex;
 }
 
-void __cdecl CL_SetUserCmdAimValues(int localClientNum, const float *kickAngles)
+void __cdecl CL_SetUserCmdAimValues(int32_t localClientNum, const float *kickAngles)
 {
     clientActive_t *LocalClientGlobals; // [esp+4h] [ebp-4h]
 
@@ -186,12 +186,12 @@ void __cdecl CL_SetUserCmdAimValues(int localClientNum, const float *kickAngles)
 }
 
 void __cdecl CL_SetUserCmdOrigin(
-    int localClientNum,
+    int32_t localClientNum,
     const float *origin,
     const float *velocity,
     const float *viewangles,
-    int bobCycle,
-    int movementDir)
+    int32_t bobCycle,
+    int32_t movementDir)
 {
     clientActive_t *LocalClientGlobals; // eax
 
@@ -210,12 +210,12 @@ void __cdecl CL_SetUserCmdOrigin(
     LocalClientGlobals->cgameViewangles[2] = viewangles[2];
 }
 
-void __cdecl CL_SetFOVSensitivityScale(int localClientNum, float scale)
+void __cdecl CL_SetFOVSensitivityScale(int32_t localClientNum, float scale)
 {
     CL_GetLocalClientGlobals(localClientNum)->cgameFOVSensitivityScale = scale;
 }
 
-void __cdecl CL_SetExtraButtons(int localClientNum, int buttons)
+void __cdecl CL_SetExtraButtons(int32_t localClientNum, int32_t buttons)
 {
     clientActive_t *LocalClientGlobals; // [esp+0h] [ebp-4h]
 
@@ -223,19 +223,19 @@ void __cdecl CL_SetExtraButtons(int localClientNum, int buttons)
     LocalClientGlobals->cgameExtraButtons |= buttons;
 }
 
-void __cdecl CL_DumpReliableCommands(int localClientNum)
+void __cdecl CL_DumpReliableCommands(int32_t localClientNum)
 {
     clientConnection_t *clc; // [esp+0h] [ebp-8h]
-    int i; // [esp+4h] [ebp-4h]
+    int32_t i; // [esp+4h] [ebp-4h]
 
     clc = CL_GetLocalClientConnection(localClientNum);
     for (i = 0; i < 128; ++i)
         Com_PrintError(1, "cmd %5d: '%s'\n", i, clc->serverCommands[i]);
 }
 
-int __cdecl CL_CGameNeedsServerCommand(int localClientNum, int serverCommandNumber)
+int32_t __cdecl CL_CGameNeedsServerCommand(int32_t localClientNum, int32_t serverCommandNumber)
 {
-    int result; // eax
+    int32_t result; // eax
     const char *v3; // eax
     char *v4; // eax
     char *v5; // eax
@@ -250,7 +250,7 @@ int __cdecl CL_CGameNeedsServerCommand(int localClientNum, int serverCommandNumb
     const char *sa; // [esp+8Ch] [ebp-Ch]
     const char *sb; // [esp+8Ch] [ebp-Ch]
     const char *cmd; // [esp+90h] [ebp-8h]
-    int argc; // [esp+94h] [ebp-4h]
+    int32_t argc; // [esp+94h] [ebp-4h]
 
     clc = CL_GetLocalClientConnection(localClientNum);
     if (serverCommandNumber <= clc->serverCommandSequence - 128)
@@ -279,7 +279,7 @@ int __cdecl CL_CGameNeedsServerCommand(int localClientNum, int serverCommandNumb
         case 'n':
             Con_ClearNotify(localClientNum);
             LocalClientGlobals = CL_GetLocalClientGlobals(localClientNum);
-            memset((unsigned __int8 *)LocalClientGlobals->cmds, 0, sizeof(LocalClientGlobals->cmds));
+            memset((uint8_t *)LocalClientGlobals->cmds, 0, sizeof(LocalClientGlobals->cmds));
             return 1;
         case 'd':
             Cmd_EndTokenizedString();
@@ -343,16 +343,16 @@ int __cdecl CL_CGameNeedsServerCommand(int localClientNum, int serverCommandNumb
     }
 }
 
-void __cdecl CL_ConfigstringModified(int localClientNum)
+void __cdecl CL_ConfigstringModified(int32_t localClientNum)
 {
     const char *v1; // eax
-    unsigned int v2; // [esp+0h] [ebp-4Ch]
+    uint32_t v2; // [esp+0h] [ebp-4Ch]
     clientActive_t *LocalClientGlobals; // [esp+24h] [ebp-28h]
-    unsigned __int8 *oldGs; // [esp+28h] [ebp-24h]
+    uint8_t *oldGs; // [esp+28h] [ebp-24h]
     char *dup; // [esp+2Ch] [ebp-20h]
-    int index; // [esp+3Ch] [ebp-10h]
+    int32_t index; // [esp+3Ch] [ebp-10h]
     const char *s; // [esp+40h] [ebp-Ch]
-    int i; // [esp+44h] [ebp-8h]
+    int32_t i; // [esp+44h] [ebp-8h]
     const char *old; // [esp+48h] [ebp-4h]
 
     LargeLocal oldGs_large_local(0x2262C);
@@ -361,22 +361,22 @@ void __cdecl CL_ConfigstringModified(int localClientNum)
     oldGs = oldGs_large_local.GetBuf();
     v1 = Cmd_Argv(1);
     index = atoi(v1);
-    if ((unsigned int)index >= 2442)
+    if ((uint32_t)index >= 2442)
         Com_Error(ERR_DROP, "configstring > MAX_CONFIGSTRINGS");
     s = Cmd_Argv(2);
     LocalClientGlobals = CL_GetLocalClientGlobals(localClientNum);
     old = &LocalClientGlobals->gameState.stringData[LocalClientGlobals->gameState.stringOffsets[index]];
     if (strcmp(old, s))
     {
-        memcpy(oldGs, (unsigned __int8 *)&LocalClientGlobals->gameState, 0x2262Cu);
-        memset((unsigned __int8 *)&LocalClientGlobals->gameState, 0, sizeof(LocalClientGlobals->gameState));
+        memcpy(oldGs, (uint8_t *)&LocalClientGlobals->gameState, 0x2262Cu);
+        memset((uint8_t *)&LocalClientGlobals->gameState, 0, sizeof(LocalClientGlobals->gameState));
         LocalClientGlobals->gameState.dataCount = 1;
         for (i = 0; i < 2442; ++i)
         {
             if (i == index)
                 dup = (char *)s;
             else
-                dup = (char *)&oldGs[*(unsigned int *)&oldGs[4 * i] + 9768];
+                dup = (char *)&oldGs[*(uint32_t *)&oldGs[4 * i] + 9768];
             if (*dup)
             {
                 v2 = strlen(dup);
@@ -384,8 +384,8 @@ void __cdecl CL_ConfigstringModified(int localClientNum)
                     Com_Error(ERR_DROP, "MAX_GAMESTATE_CHARS exceeded");
                 LocalClientGlobals->gameState.stringOffsets[i] = LocalClientGlobals->gameState.dataCount;
                 memcpy(
-                    (unsigned __int8 *)&LocalClientGlobals->gameState.stringData[LocalClientGlobals->gameState.dataCount],
-                    (unsigned __int8 *)dup,
+                    (uint8_t *)&LocalClientGlobals->gameState.stringData[LocalClientGlobals->gameState.dataCount],
+                    (uint8_t *)dup,
                     v2 + 1);
                 LocalClientGlobals->gameState.dataCount += v2 + 1;
             }
@@ -398,7 +398,7 @@ void __cdecl CL_ConfigstringModified(int localClientNum)
 
 void __cdecl CL_CM_LoadMap(char *mapname)
 {
-    int checksum; // [esp+0h] [ebp-4h] BYREF
+    int32_t checksum; // [esp+0h] [ebp-4h] BYREF
 
     if (!useFastFile->current.enabled)
         Com_LoadBsp(mapname);
@@ -410,7 +410,7 @@ void __cdecl CL_CM_LoadMap(char *mapname)
     }
 }
 
-void __cdecl CL_ShutdownCGame(int localClientNum)
+void __cdecl CL_ShutdownCGame(int32_t localClientNum)
 {
     Com_UnloadSoundAliases(SASYS_CGAME);
     if (localClientNum)
@@ -434,12 +434,12 @@ void __cdecl CL_ShutdownCGame(int localClientNum)
     }
 }
 
-int warnCount;
-bool __cdecl CL_DObjCreateSkelForBone(DObj_s *obj, int boneIndex)
+int32_t warnCount;
+bool __cdecl CL_DObjCreateSkelForBone(DObj_s *obj, int32_t boneIndex)
 {
     char *buf; // [esp+0h] [ebp-Ch]
-    unsigned int len; // [esp+4h] [ebp-8h]
-    int timeStamp; // [esp+8h] [ebp-4h]
+    uint32_t len; // [esp+4h] [ebp-8h]
+    int32_t timeStamp; // [esp+8h] [ebp-4h]
 
     if (!obj)
         MyAssertHandler(".\\client_mp\\cl_cgame_mp.cpp", 628, 0, "%s", "obj");
@@ -464,7 +464,7 @@ bool __cdecl CL_DObjCreateSkelForBone(DObj_s *obj, int boneIndex)
     }
 }
 
-void __cdecl CL_SubtitlePrint(int localClientNum, const char *text, int duration, int lineWidth)
+void __cdecl CL_SubtitlePrint(int32_t localClientNum, const char *text, int32_t duration, int32_t lineWidth)
 {
     const char *translation; // [esp+0h] [ebp-4h]
     char *translationa; // [esp+0h] [ebp-4h]
@@ -487,7 +487,7 @@ void __cdecl CL_SubtitlePrint(int localClientNum, const char *text, int duration
     CL_ConsolePrint(localClientNum, 4, translationa, duration, lineWidth, 0);
 }
 
-char *__cdecl CL_GetConfigString(int localClientNum, unsigned int configStringIndex)
+char *__cdecl CL_GetConfigString(int32_t localClientNum, uint32_t configStringIndex)
 {
     clientActive_t *LocalClientGlobals; // [esp+0h] [ebp-4h]
 
@@ -570,8 +570,8 @@ void __cdecl CL_DrawStretchPic(
     float y,
     float w,
     float h,
-    int horzAlign,
-    int vertAlign,
+    int32_t horzAlign,
+    int32_t vertAlign,
     float s1,
     float t1,
     float s2,
@@ -589,8 +589,8 @@ void __cdecl CL_DrawStretchPicFlipST(
     float y,
     float w,
     float h,
-    int horzAlign,
-    int vertAlign,
+    int32_t horzAlign,
+    int32_t vertAlign,
     float s1,
     float t1,
     float s2,
@@ -608,8 +608,8 @@ void __cdecl CL_DrawStretchPicRotatedST(
     float y,
     float w,
     float h,
-    int horzAlign,
-    int vertAlign,
+    int32_t horzAlign,
+    int32_t vertAlign,
     float centerS,
     float centerT,
     float radiusST,
@@ -635,7 +635,7 @@ void __cdecl CL_DrawStretchPicRotatedST(
         material);
 }
 
-void __cdecl CL_CapTurnRate(int localClientNum, float maxPitchSpeed, float maxYawSpeed)
+void __cdecl CL_CapTurnRate(int32_t localClientNum, float maxPitchSpeed, float maxYawSpeed)
 {
     clientActive_t *LocalClientGlobals; // eax
 
@@ -644,7 +644,7 @@ void __cdecl CL_CapTurnRate(int localClientNum, float maxPitchSpeed, float maxYa
     LocalClientGlobals->cgameMaxYawSpeed = maxYawSpeed;
 }
 
-void __cdecl CL_SyncTimes(int localClientNum)
+void __cdecl CL_SyncTimes(int32_t localClientNum)
 {
     if (localClientNum)
         MyAssertHandler(
@@ -658,9 +658,9 @@ void __cdecl CL_SyncTimes(int localClientNum)
         CL_FirstSnapshot(localClientNum);
 }
 
-int __cdecl LoadWorld(char *mapname)
+int32_t __cdecl LoadWorld(char *mapname)
 {
-    int checksum; // [esp+0h] [ebp-4h] BYREF
+    int32_t checksum; // [esp+0h] [ebp-4h] BYREF
 
     R_LoadWorld(mapname, &checksum, 0);
     if (!useFastFile->current.enabled)
@@ -680,9 +680,9 @@ void __cdecl CL_StartLoading()
 
 void __cdecl CL_SetExpectedHunkUsage(const char *mapname)
 {
-    int handle[2]; // [esp+0h] [ebp-18h] BYREF
+    int32_t handle[2]; // [esp+0h] [ebp-18h] BYREF
     char *buf; // [esp+8h] [ebp-10h]
-    int len; // [esp+Ch] [ebp-Ch]
+    int32_t len; // [esp+Ch] [ebp-Ch]
     const char *token; // [esp+10h] [ebp-8h]
     const char *buftrav; // [esp+14h] [ebp-4h] BYREF
 
@@ -691,8 +691,8 @@ void __cdecl CL_SetExpectedHunkUsage(const char *mapname)
     if (len >= 0)
     {
         buf = (char *)Z_Malloc(len + 1, "CL_SetExpectedHunkUsage", 10);
-        memset((unsigned __int8 *)buf, 0, len + 1);
-        FS_Read((unsigned __int8 *)buf, len, handle[0]);
+        memset((uint8_t *)buf, 0, len + 1);
+        FS_Read((uint8_t *)buf, len, handle[0]);
         FS_FCloseFile(handle[0]);
         buftrav = buf;
         while (1)
@@ -721,17 +721,17 @@ void __cdecl CL_SetExpectedHunkUsage(const char *mapname)
     com_expectedHunkUsage = 0;
 }
 
-void __cdecl CL_InitCGame(int localClientNum)
+void __cdecl CL_InitCGame(int32_t localClientNum)
 {
     const char *v1; // eax
-    int v2; // eax
+    int32_t v2; // eax
     XZoneInfo zoneInfo; // [esp+10h] [ebp-70h] BYREF
     clientUIActive_t *clientUIActive; // [esp+20h] [ebp-60h]
     clientActive_t *LocalClientGlobals; // [esp+24h] [ebp-5Ch]
     const char *info; // [esp+28h] [ebp-58h]
-    int t1; // [esp+2Ch] [ebp-54h]
+    int32_t t1; // [esp+2Ch] [ebp-54h]
     clientConnection_t *clc; // [esp+30h] [ebp-50h]
-    int t2; // [esp+34h] [ebp-4Ch]
+    int32_t t2; // [esp+34h] [ebp-4Ch]
     char mapname[68]; // [esp+38h] [ebp-48h] BYREF
 
     t1 = Sys_Milliseconds();
@@ -809,7 +809,7 @@ void __cdecl CL_InitCGame(int localClientNum)
         DB_SyncXAssets();
 }
 
-void __cdecl CL_FirstSnapshot(int localClientNum)
+void __cdecl CL_FirstSnapshot(int32_t localClientNum)
 {
     clientActive_t *LocalClientGlobals; // [esp+0h] [ebp-8h]
     clientConnection_t *clc; // [esp+4h] [ebp-4h]
@@ -872,11 +872,11 @@ char *__cdecl CL_TimeDemoLogBaseName(const char *mapname)
     return result;
 }
 
-void __cdecl CL_UpdateTimeDemo(int localClientNum)
+void __cdecl CL_UpdateTimeDemo(int32_t localClientNum)
 {
     char *v1; // eax
     char *v2; // eax
-    int Int; // [esp-4h] [ebp-10h]
+    int32_t Int; // [esp-4h] [ebp-10h]
     clientActive_t *LocalClientGlobals; // [esp+0h] [ebp-Ch]
     clientConnection_t *clc; // [esp+4h] [ebp-8h]
     DWORD currentTime; // [esp+8h] [ebp-4h]
@@ -905,7 +905,7 @@ void __cdecl CL_UpdateTimeDemo(int localClientNum)
     LocalClientGlobals->serverTime = clc->timeDemoBaseTime + 50 * clc->timeDemoFrames;
 }
 
-void __cdecl CL_NextDemo(int localClientNum)
+void __cdecl CL_NextDemo(int32_t localClientNum)
 {
     char v[1028]; // [esp+0h] [ebp-408h] BYREF
 
@@ -924,9 +924,9 @@ void __cdecl CL_NextDemo(int localClientNum)
     }
 }
 
-void __cdecl CL_DemoCompleted(int localClientNum)
+void __cdecl CL_DemoCompleted(int32_t localClientNum)
 {
-    int time; // [esp+10h] [ebp-8h]
+    int32_t time; // [esp+10h] [ebp-8h]
     clientConnection_t *clc; // [esp+14h] [ebp-4h]
 
     clc = CL_GetLocalClientConnection(localClientNum);
@@ -950,21 +950,21 @@ void __cdecl CL_DemoCompleted(int localClientNum)
     CL_NextDemo(0);
 }
 
-void __cdecl CL_ReadDemoClientArchive(int localClientNum)
+void __cdecl CL_ReadDemoClientArchive(int32_t localClientNum)
 {
     clientActive_t *LocalClientGlobals; // [esp+0h] [ebp-14h]
-    unsigned __int8 *archive; // [esp+8h] [ebp-Ch]
+    uint8_t *archive; // [esp+8h] [ebp-Ch]
     clientConnection_t *clc; // [esp+Ch] [ebp-8h]
-    int index; // [esp+10h] [ebp-4h] BYREF
+    int32_t index; // [esp+10h] [ebp-4h] BYREF
 
     clc = CL_GetLocalClientConnection(localClientNum);
     LocalClientGlobals = CL_GetLocalClientGlobals(localClientNum);
-    if (FS_Read((unsigned __int8 *)&index, 4u, clc->demofile) == 4)
+    if (FS_Read((uint8_t *)&index, 4u, clc->demofile) == 4)
     {
-        if ((unsigned int)index < 0x100)
+        if ((uint32_t)index < 0x100)
         {
-            archive = (unsigned __int8 *)&LocalClientGlobals->clientArchive[index];
-            FS_Read((unsigned __int8 *)LocalClientGlobals->clientArchive[index].origin, 0xCu, clc->demofile);
+            archive = (uint8_t *)&LocalClientGlobals->clientArchive[index];
+            FS_Read((uint8_t *)LocalClientGlobals->clientArchive[index].origin, 0xCu, clc->demofile);
             FS_Read(archive + 16, 0xCu, clc->demofile);
             FS_Read(archive + 32, 4u, clc->demofile);
             FS_Read(archive + 28, 4u, clc->demofile);
@@ -984,25 +984,25 @@ void __cdecl CL_ReadDemoClientArchive(int localClientNum)
     }
 }
 
-void __cdecl CL_ReadDemoNetworkPacket(int localClientNum)
+void __cdecl CL_ReadDemoNetworkPacket(int32_t localClientNum)
 {
-    unsigned int v1; // edx
-    int v2; // eax
-    unsigned __int8 *bufData; // [esp+4h] [ebp-3Ch]
+    uint32_t v1; // edx
+    int32_t v2; // eax
+    uint8_t *bufData; // [esp+4h] [ebp-3Ch]
     msg_t buf; // [esp+8h] [ebp-38h] BYREF
     clientConnection_t *clc; // [esp+30h] [ebp-10h]
-    int s; // [esp+3Ch] [ebp-4h] BYREF
+    int32_t s; // [esp+3Ch] [ebp-4h] BYREF
 
     LargeLocal bufData_large_local(0x20000);
     //LargeLocal::LargeLocal(&bufData_large_local, 0x20000);
     //bufData = LargeLocal::GetBuf(&bufData_large_local);
     bufData = bufData_large_local.GetBuf();
     clc = CL_GetLocalClientConnection(localClientNum);
-    if (FS_Read((unsigned __int8 *)&s, 4u, clc->demofile) == 4)
+    if (FS_Read((uint8_t *)&s, 4u, clc->demofile) == 4)
     {
         clc->serverMessageSequence = s;
         MSG_Init(&buf, bufData, 0x20000);
-        if (FS_Read((unsigned __int8 *)&buf.cursize, 4u, clc->demofile) != 4 || buf.cursize == -1)
+        if (FS_Read((uint8_t *)&buf.cursize, 4u, clc->demofile) != 4 || buf.cursize == -1)
         {
             CL_DemoCompleted(localClientNum);
         }
@@ -1035,10 +1035,10 @@ void __cdecl CL_ReadDemoNetworkPacket(int localClientNum)
     }
 }
 
-void __cdecl CL_ReadDemoMessage(int localClientNum)
+void __cdecl CL_ReadDemoMessage(int32_t localClientNum)
 {
     clientConnection_t *clc; // [esp+8h] [ebp-8h]
-    unsigned __int8 s; // [esp+Fh] [ebp-1h] BYREF
+    uint8_t s; // [esp+Fh] [ebp-1h] BYREF
 
     clc = CL_GetLocalClientConnection(localClientNum);
     if (clc->demofile)
@@ -1163,13 +1163,13 @@ void __cdecl CL_SetCGameTime(netsrc_t localClientNum)
         goto LABEL_16;
 }
 
-void __cdecl CL_AdjustTimeDelta(int localClientNum)
+void __cdecl CL_AdjustTimeDelta(int32_t localClientNum)
 {
     clientActive_t *LocalClientGlobals; // [esp+4h] [ebp-14h]
-    int idealDelta; // [esp+8h] [ebp-10h]
-    unsigned int snapInterval; // [esp+Ch] [ebp-Ch]
-    int deltaCorrectionMagnitude; // [esp+10h] [ebp-8h]
-    int oldDelta; // [esp+14h] [ebp-4h]
+    int32_t idealDelta; // [esp+8h] [ebp-10h]
+    uint32_t snapInterval; // [esp+Ch] [ebp-Ch]
+    int32_t deltaCorrectionMagnitude; // [esp+10h] [ebp-8h]
+    int32_t oldDelta; // [esp+14h] [ebp-4h]
 
     LocalClientGlobals = CL_GetLocalClientGlobals(localClientNum);
     LocalClientGlobals->newSnapshots = 0;
@@ -1250,12 +1250,12 @@ void __cdecl CL_AdjustTimeDelta(int localClientNum)
     }
 }
 
-void __cdecl CL_SetADS(int localClientNum, bool ads)
+void __cdecl CL_SetADS(int32_t localClientNum, bool ads)
 {
     CL_GetLocalClientGlobals(localClientNum)->usingAds = ads;
 }
 
-void __cdecl CL_DrawString(int x, int y, char *pszString, int bShadow, int iCharHeight)
+void __cdecl CL_DrawString(int32_t x, int32_t y, char *pszString, int32_t bShadow, int32_t iCharHeight)
 {
     float v5; // [esp+0h] [ebp-20h]
     float v6; // [esp+4h] [ebp-1Ch]
@@ -1267,7 +1267,7 @@ void __cdecl CL_DrawString(int x, int y, char *pszString, int bShadow, int iChar
     CG_DrawStringExt(&scrPlaceFull, v5, v6, pszString, 0, 0, bShadow, charHeight);
 }
 
-void __cdecl CL_DrawRect(int x, int y, int width, int height, const float *color)
+void __cdecl CL_DrawRect(int32_t x, int32_t y, int32_t width, int32_t height, const float *color)
 {
     float v5; // [esp+0h] [ebp-30h]
     float v6; // [esp+4h] [ebp-2Ch]
@@ -1281,20 +1281,20 @@ void __cdecl CL_DrawRect(int x, int y, int width, int height, const float *color
     CL_DrawStretchPic(&scrPlaceFull, v5, v6, w, h, 1, 1, 0.0, 0.0, 0.0, 0.0, color, cls.whiteMaterial);
 }
 
-void __cdecl CL_ArchiveClientState(int localClientNum, MemoryFile *memFile)
+void __cdecl CL_ArchiveClientState(int32_t localClientNum, MemoryFile *memFile)
 {
     CG_ArchiveState(localClientNum, memFile);
     FX_Archive(localClientNum, memFile);
     R_ArchiveFogState(memFile);
 }
 
-void __cdecl CL_LookupColor(int localClientNum, unsigned __int8 c, float *color)
+void __cdecl CL_LookupColor(int32_t localClientNum, uint8_t c, float *color)
 {
     float *v3; // [esp+4h] [ebp-18h]
     float *v4; // [esp+8h] [ebp-14h]
     float *v5; // [esp+Ch] [ebp-10h]
     team_t team; // [esp+10h] [ebp-Ch]
-    unsigned int index; // [esp+18h] [ebp-4h]
+    uint32_t index; // [esp+18h] [ebp-4h]
     cg_s *cgameGlob;
 
     cgameGlob = CG_GetLocalClientGlobals(localClientNum);
@@ -1345,7 +1345,7 @@ void __cdecl CL_LookupColor(int localClientNum, unsigned __int8 c, float *color)
     }
 }
 
-void __cdecl CL_UpdateColor(int localClientNum)
+void __cdecl CL_UpdateColor(int32_t localClientNum)
 {
     team_t team; // [esp+0h] [ebp-8h]
     cg_s *cgameGlob;
@@ -1379,7 +1379,7 @@ void __cdecl CL_UpdateColorInternal(const char *var_name, float *color)
     color[3] = 1.0;
 }
 
-BOOL __cdecl CL_IsCgameInitialized(int localClientNum)
+BOOL __cdecl CL_IsCgameInitialized(int32_t localClientNum)
 {
     if (localClientNum)
         MyAssertHandler(

@@ -10,8 +10,8 @@
 #include <universal/com_files.h>
 #include <buildnumber_mp.h>
 
-//int con_inputMaxMatchesShown 827b26dc     cl_console.obj
-//int g_console_field_width 827b26e0     cl_console.obj
+//int32_t con_inputMaxMatchesShown 827b26dc     cl_console.obj
+//int32_t g_console_field_width 827b26e0     cl_console.obj
 //float g_console_char_height 827b26e4     cl_console.obj
 //char (*)[29] con_gameMsgWindowNFadeInTime_Names 82850d78     cl_console.obj
 //char (*)[55] con_gameMsgWindowNFadeOutTime_Descs 82850df0     cl_console.obj
@@ -51,10 +51,10 @@ const dvar_t *con_outputWindowColor;
 
 Console con;
 
-int g_console_field_width = 620;
+int32_t g_console_field_width = 620;
 float g_console_char_height = 16.0f;
 
-int callDepth;
+int32_t callDepth;
 
 char con_gameMsgWindowNMsgTime_Descs[4][69];
 char con_gameMsgWindowNMsgTime_Names[4][26];
@@ -63,7 +63,7 @@ const float defaultGameMessageTimes[4] = { 5.0f, 8.0f, 5.0f, 5.0f };
 char con_gameMsgWindowNLineCount_Descs[4][73];
 char con_gameMsgWindowNLineCount_Names[4][28];
 const dvar_s *con_gameMsgWindowNLineCount[4];
-const int defaultGameMessageWindowLineCounts[4] = { 4, 5, 7, 5 };
+const int32_t defaultGameMessageWindowLineCounts[4] = { 4, 5, 7, 5 };
 char con_gameMsgWindowNScrollTime_Descs[4][84];
 char con_gameMsgWindowNScrollTime_Names[4][29];
 const dvar_s *con_gameMsgWindowNScrollTime[4];
@@ -79,7 +79,7 @@ const dvar_s *con_gameMsgWindowNSplitscreenScale[4];
 
 ConDrawInputGlob conDrawInputGlob;
 bool con_ignoreMatchPrefixOnly;
-int con_inputMaxMatchesShown = 24;
+int32_t con_inputMaxMatchesShown = 24;
 
 const float con_versionColor[4] = { 1.0f, 1.0f, 0.0f, 1.0f };
 const float con_screenPadding = 4.0f;
@@ -102,7 +102,7 @@ void __cdecl TRACK_cl_console()
 
 void __cdecl Con_ToggleConsole()
 {
-    int localClientNum; // [esp+0h] [ebp-4h]
+    int32_t localClientNum; // [esp+0h] [ebp-4h]
 
     Field_Clear(&g_consoleField);
     Con_CancelAutoComplete();
@@ -114,29 +114,29 @@ void __cdecl Con_ToggleConsole()
         clientUIActives[localClientNum].keyCatchers ^= 1u;
 }
 
-void __cdecl Con_OpenConsole(int localClientNum)
+void __cdecl Con_OpenConsole(int32_t localClientNum)
 {
     if (!Key_IsCatcherActive(localClientNum, 1))
         Con_ToggleConsole();
 }
 
-void __cdecl Con_OpenConsoleOutput(int localClientNum)
+void __cdecl Con_OpenConsoleOutput(int32_t localClientNum)
 {
     if (Key_IsCatcherActive(localClientNum, 1))
         con.outputVisible = 1;
 }
 
-void __cdecl Con_CloseConsole(int localClientNum)
+void __cdecl Con_CloseConsole(int32_t localClientNum)
 {
     if (Key_IsCatcherActive(localClientNum, 1))
         Con_ToggleConsole();
 }
 
-void __cdecl Con_GetTextCopy(char *text, int maxSize)
+void __cdecl Con_GetTextCopy(char *text, int32_t maxSize)
 {
-    unsigned int end; // [esp+0h] [ebp-Ch]
-    int begin; // [esp+4h] [ebp-8h]
-    int totalSize; // [esp+8h] [ebp-4h]
+    uint32_t end; // [esp+0h] [ebp-Ch]
+    int32_t begin; // [esp+4h] [ebp-8h]
+    int32_t totalSize; // [esp+8h] [ebp-4h]
 
     if (con.consoleWindow.activeLineCount)
     {
@@ -155,19 +155,19 @@ void __cdecl Con_GetTextCopy(char *text, int maxSize)
         if (begin >= con.consoleWindow.textBufPos)
         {
             memcpy(
-                (unsigned __int8 *)text,
-                (unsigned __int8 *)&con.consoleWindow.circularTextBuffer[begin],
+                (uint8_t *)text,
+                (uint8_t *)&con.consoleWindow.circularTextBuffer[begin],
                 con.consoleWindow.textBufSize - begin);
             memcpy(
-                (unsigned __int8 *)&text[con.consoleWindow.textBufSize - begin],
-                (unsigned __int8 *)con.consoleWindow.circularTextBuffer,
+                (uint8_t *)&text[con.consoleWindow.textBufSize - begin],
+                (uint8_t *)con.consoleWindow.circularTextBuffer,
                 end);
         }
         else
         {
             memcpy(
-                (unsigned __int8 *)text,
-                (unsigned __int8 *)&con.consoleWindow.circularTextBuffer[begin],
+                (uint8_t *)text,
+                (uint8_t *)&con.consoleWindow.circularTextBuffer[begin],
                 con.consoleWindow.textBufPos - begin);
         }
         text[totalSize] = 0;
@@ -178,9 +178,9 @@ void __cdecl Con_GetTextCopy(char *text, int maxSize)
     }
 }
 
-void __cdecl Con_TimeJumped(int localClientNum, int serverTime)
+void __cdecl Con_TimeJumped(int32_t localClientNum, int32_t serverTime)
 {
-    unsigned int gameWindowIndex; // [esp+0h] [ebp-4h]
+    uint32_t gameWindowIndex; // [esp+0h] [ebp-4h]
 
     Con_ResetMessageWindowTimes(&con.consoleWindow, serverTime);
     for (gameWindowIndex = 0; gameWindowIndex < 4; ++gameWindowIndex)
@@ -191,13 +191,13 @@ void __cdecl Con_TimeJumped(int localClientNum, int serverTime)
     Con_ResetMessageWindowTimes((MessageWindow *)&con.color[4630 * localClientNum - 53], serverTime);
 }
 
-void __cdecl Con_ResetMessageWindowTimes(MessageWindow *msgwnd, int serverTime)
+void __cdecl Con_ResetMessageWindowTimes(MessageWindow *msgwnd, int32_t serverTime)
 {
-    int duration; // [esp+0h] [ebp-14h]
+    int32_t duration; // [esp+0h] [ebp-14h]
     Message *message; // [esp+4h] [ebp-10h]
-    int lineOffset; // [esp+8h] [ebp-Ch]
+    int32_t lineOffset; // [esp+8h] [ebp-Ch]
     MessageLine *line; // [esp+Ch] [ebp-8h]
-    unsigned int lineIndex; // [esp+10h] [ebp-4h]
+    uint32_t lineIndex; // [esp+10h] [ebp-4h]
 
     for (lineOffset = 0; lineOffset < msgwnd->activeLineCount; ++lineOffset)
     {
@@ -219,7 +219,7 @@ void __cdecl Con_ResetMessageWindowTimes(MessageWindow *msgwnd, int serverTime)
                 lineIndex,
                 msgwnd->lineCount);
         line = &msgwnd->lines[lineIndex];
-        if (line->messageIndex >= (unsigned int)msgwnd->lineCount)
+        if (line->messageIndex >= (uint32_t)msgwnd->lineCount)
             MyAssertHandler(
                 ".\\client\\cl_console.cpp",
                 429,
@@ -234,10 +234,10 @@ void __cdecl Con_ResetMessageWindowTimes(MessageWindow *msgwnd, int serverTime)
     }
 }
 
-void __cdecl Con_TimeNudged(int localClientNum, int serverTimeNudge)
+void __cdecl Con_TimeNudged(int32_t localClientNum, int32_t serverTimeNudge)
 {
-    unsigned int gameWindowIndex; // [esp+0h] [ebp-8h]
-    int serverTime; // [esp+4h] [ebp-4h]
+    uint32_t gameWindowIndex; // [esp+0h] [ebp-8h]
+    int32_t serverTime; // [esp+4h] [ebp-4h]
 
     serverTime = CL_GetLocalClientGlobals(localClientNum)->serverTime;
     Con_NudgeMessageWindowTimes(&con.consoleWindow, serverTimeNudge, serverTime);
@@ -250,14 +250,14 @@ void __cdecl Con_TimeNudged(int localClientNum, int serverTimeNudge)
     Con_NudgeMessageWindowTimes((MessageWindow *)&con.color[4630 * localClientNum - 53], serverTimeNudge, serverTime);
 }
 
-void __cdecl Con_NudgeMessageWindowTimes(MessageWindow *msgwnd, int serverTimeNudge, int serverTime)
+void __cdecl Con_NudgeMessageWindowTimes(MessageWindow *msgwnd, int32_t serverTimeNudge, int32_t serverTime)
 {
-    int duration; // [esp+0h] [ebp-18h]
+    int32_t duration; // [esp+0h] [ebp-18h]
     Message *message; // [esp+4h] [ebp-14h]
-    int lineOffset; // [esp+8h] [ebp-10h]
-    int lastMessageIndex; // [esp+Ch] [ebp-Ch]
+    int32_t lineOffset; // [esp+8h] [ebp-10h]
+    int32_t lastMessageIndex; // [esp+Ch] [ebp-Ch]
     MessageLine *line; // [esp+10h] [ebp-8h]
-    unsigned int lineIndex; // [esp+14h] [ebp-4h]
+    uint32_t lineIndex; // [esp+14h] [ebp-4h]
 
     lastMessageIndex = -1;
     for (lineOffset = 0; lineOffset < msgwnd->activeLineCount; ++lineOffset)
@@ -280,7 +280,7 @@ void __cdecl Con_NudgeMessageWindowTimes(MessageWindow *msgwnd, int serverTimeNu
                 lineIndex,
                 msgwnd->lineCount);
         line = &msgwnd->lines[lineIndex];
-        if (line->messageIndex >= (unsigned int)msgwnd->lineCount)
+        if (line->messageIndex >= (uint32_t)msgwnd->lineCount)
             MyAssertHandler(
                 ".\\client\\cl_console.cpp",
                 469,
@@ -309,9 +309,9 @@ void __cdecl Con_NudgeMessageWindowTimes(MessageWindow *msgwnd, int serverTimeNu
     }
 }
 
-void __cdecl Con_ClearNotify(int localClientNum)
+void __cdecl Con_ClearNotify(int32_t localClientNum)
 {
-    unsigned int gameWindowIndex; // [esp+0h] [ebp-4h]
+    uint32_t gameWindowIndex; // [esp+0h] [ebp-4h]
 
     for (gameWindowIndex = 0; gameWindowIndex < 4; ++gameWindowIndex)
         Con_ClearMessageWindow((MessageWindow *)&con.color[4630 * localClientNum - 2582 + 13 * gameWindowIndex]);
@@ -331,7 +331,7 @@ void __cdecl Con_ClearMessageWindow(MessageWindow *msgwnd)
     msgwnd->activeLineCount = 0;
 }
 
-void __cdecl Con_ClearErrors(int localClientNum)
+void __cdecl Con_ClearErrors(int32_t localClientNum)
 {
     Con_ClearMessageWindow((MessageWindow *)&con.color[4630 * localClientNum - 53]);
 }
@@ -386,7 +386,7 @@ cmd_function_s Con_Clear_f_VAR;
 
 void __cdecl Con_Init()
 {
-    int i; // [esp+0h] [ebp-4h]
+    int32_t i; // [esp+0h] [ebp-4h]
 
     con_restricted = Dvar_RegisterBool("monkeytoy", 1, DVAR_ARCHIVE, "Restrict console access"); // KISAK: just enable console by default
     con_matchPrefixOnly = Dvar_RegisterBool(
@@ -411,11 +411,11 @@ void __cdecl Con_Init()
     Cmd_AddCommandInternal("clear", Con_Clear_f, &Con_Clear_f_VAR);
 }
 
-void __cdecl SetupChatField(int localClientNum, int teamChat, int widthInPixels)
+void __cdecl SetupChatField(int32_t localClientNum, int32_t teamChat, int32_t widthInPixels)
 {
     PlayerKeyState *chatField; // [esp+4h] [ebp-10h]
-    int width; // [esp+8h] [ebp-Ch] BYREF
-    int height; // [esp+Ch] [ebp-8h] BYREF
+    int32_t width; // [esp+8h] [ebp-Ch] BYREF
+    int32_t height; // [esp+Ch] [ebp-8h] BYREF
     float aspect; // [esp+10h] [ebp-4h] BYREF
 
     CL_GetScreenDimensions(&width, &height, &aspect);
@@ -463,9 +463,9 @@ void __cdecl Con_InitClientAssets()
 
 void __cdecl Con_InitMessageBuffer()
 {
-    int localClientNum; // [esp+38h] [ebp-14h]
+    int32_t localClientNum; // [esp+38h] [ebp-14h]
     MessageBuffer *msgBuf; // [esp+40h] [ebp-Ch]
-    unsigned int gameWindowIndex; // [esp+48h] [ebp-4h]
+    uint32_t gameWindowIndex; // [esp+48h] [ebp-4h]
 
     for (localClientNum = 0; localClientNum < 1; ++localClientNum)
     {
@@ -514,12 +514,12 @@ void __cdecl Con_InitMessageWindow(
     Message *messages,
     MessageLine *lines,
     char *text,
-    int lineCount,
-    int padding,
-    int textPoolSize,
-    int scrollTime,
-    int fadeIn,
-    int fadeOut)
+    int32_t lineCount,
+    int32_t padding,
+    int32_t textPoolSize,
+    int32_t scrollTime,
+    int32_t fadeIn,
+    int32_t fadeOut)
 {
     if (!msgwnd)
         MyAssertHandler(".\\client\\cl_console.cpp", 569, 0, "%s", "msgwnd");
@@ -544,7 +544,7 @@ void __cdecl Con_InitMessageWindow(
     msgwnd->fadeOut = fadeOut;
 }
 
-void __cdecl CL_ConsolePrint(int localClientNum, int channel, const char *txt, int duration, int pixelWidth, int flags)
+void __cdecl CL_ConsolePrint(int32_t localClientNum, int32_t channel, const char *txt, int32_t duration, int32_t pixelWidth, int32_t flags)
 {
     if (!txt)
         MyAssertHandler(".\\client\\cl_console.cpp", 1323, 0, "%s", "txt");
@@ -583,7 +583,7 @@ void Con_OneTimeInit()
     DvarLimits minp; // [esp+10h] [ebp-E4h]
     float v17; // [esp+40h] [ebp-B4h]
     float v18; // [esp+64h] [ebp-90h]
-    unsigned int gameWindowIndex; // [esp+ECh] [ebp-8h]
+    uint32_t gameWindowIndex; // [esp+ECh] [ebp-8h]
     char *dvarDesc; // [esp+F0h] [ebp-4h]
     char *dvarDesca; // [esp+F0h] [ebp-4h]
     char *dvarDescb; // [esp+F0h] [ebp-4h]
@@ -926,13 +926,13 @@ void Con_OneTimeInit()
 }
 
 char __cdecl CL_ConsolePrint_AddLine(
-    int localClientNum,
-    int channel,
+    int32_t localClientNum,
+    int32_t channel,
     const char *txt,
-    int duration,
-    int pixelWidth,
+    int32_t duration,
+    int32_t pixelWidth,
     char color,
-    int flags)
+    int32_t flags)
 {
     const char *v8; // eax
     char *v9; // edx
@@ -941,8 +941,8 @@ char __cdecl CL_ConsolePrint_AddLine(
     const char *v14; // [esp+1Ch] [ebp-40h]
     const char *v15; // [esp+28h] [ebp-34h]
     const char *v16; // [esp+34h] [ebp-28h]
-    int c; // [esp+38h] [ebp-24h]
-    int atStartOfBrokenLine; // [esp+3Ch] [ebp-20h]
+    int32_t c; // [esp+38h] [ebp-24h]
+    int32_t atStartOfBrokenLine; // [esp+3Ch] [ebp-20h]
     Font_s *font; // [esp+40h] [ebp-1Ch]
     float xScale; // [esp+44h] [ebp-18h]
     const char *wrapPosition; // [esp+50h] [ebp-Ch]
@@ -1039,7 +1039,7 @@ char __cdecl CL_ConsolePrint_AddLine(
                                     con.lineOffset,
                                     512);
                             con.textTempLine[con.lineOffset++] = BYTE1(c);
-                            c = (unsigned __int8)c;
+                            c = (uint8_t)c;
                             if (con.lineOffset >= 0x201)
                                 MyAssertHandler(
                                     ".\\client\\cl_console.cpp",
@@ -1088,7 +1088,7 @@ char __cdecl CL_ConsolePrint_AddLine(
                 con.textTempLine[con.lineOffset++] = 94;
                 v9 = &con.textTempLine[con.lineOffset];
                 v10 = text;
-                *(unsigned int *)v9 = *(unsigned int *)text;
+                *(uint32_t *)v9 = *(uint32_t *)text;
                 *((_WORD *)v9 + 2) = *((_WORD *)v10 + 2);
                 v9[6] = v10[6];
                 con.lineOffset += 7;
@@ -1192,14 +1192,14 @@ char __cdecl CL_ConsolePrint_AddLine(
     return color;
 }
 
-void __cdecl Con_UpdateNotifyMessage(int localClientNum, unsigned int channel, int duration, int flags)
+void __cdecl Con_UpdateNotifyMessage(int32_t localClientNum, uint32_t channel, int32_t duration, int32_t flags)
 {
     print_msg_dest_t dest; // [esp+0h] [ebp-4h]
 
     if (!Con_IsChannelOpen(channel))
         MyAssertHandler(".\\client\\cl_console.cpp", 976, 0, "%s", "Con_IsChannelOpen(channel)");
     Con_UpdateNotifyMessageWindow(localClientNum, channel, duration, flags, CON_DEST_MINICON);
-    for (dest = CON_DEST_GAME_FIRST; (unsigned int)dest <= CON_DEST_GAME4; ++dest)
+    for (dest = CON_DEST_GAME_FIRST; (uint32_t)dest <= CON_DEST_GAME4; ++dest)
         Con_UpdateNotifyMessageWindow(localClientNum, channel, duration, flags, dest);
     if (!com_developer)
         MyAssertHandler(".\\client\\cl_console.cpp", 982, 0, "%s", "com_developer");
@@ -1208,10 +1208,10 @@ void __cdecl Con_UpdateNotifyMessage(int localClientNum, unsigned int channel, i
 }
 
 void __cdecl Con_UpdateNotifyMessageWindow(
-    int localClientNum,
-    unsigned int channel,
-    int duration,
-    int flags,
+    int32_t localClientNum,
+    uint32_t channel,
+    int32_t duration,
+    int32_t flags,
     print_msg_dest_t dest)
 {
     MessageWindow *DestWindow; // eax
@@ -1227,7 +1227,7 @@ void __cdecl Con_UpdateNotifyMessageWindow(
     }
 }
 
-int __cdecl Con_GetDefaultMsgDuration(print_msg_dest_t dest)
+int32_t __cdecl Con_GetDefaultMsgDuration(print_msg_dest_t dest)
 {
     float v2; // [esp+8h] [ebp-38h]
     float v3; // [esp+1Ch] [ebp-24h]
@@ -1254,13 +1254,13 @@ int __cdecl Con_GetDefaultMsgDuration(print_msg_dest_t dest)
     }
 }
 
-void __cdecl Con_UpdateMessage(int localClientNum, MessageWindow *msgwnd, int duration)
+void __cdecl Con_UpdateMessage(int32_t localClientNum, MessageWindow *msgwnd, int32_t duration)
 {
     Message *message; // [esp+0h] [ebp-4h]
 
     if (!msgwnd)
         MyAssertHandler(".\\client\\cl_console.cpp", 678, 0, "%s", "msgwnd");
-    if (msgwnd->messageIndex >= (unsigned int)msgwnd->lineCount)
+    if (msgwnd->messageIndex >= (uint32_t)msgwnd->lineCount)
         MyAssertHandler(
             ".\\client\\cl_console.cpp",
             679,
@@ -1279,7 +1279,7 @@ void __cdecl Con_UpdateMessage(int localClientNum, MessageWindow *msgwnd, int du
     message->endTime = duration + message->startTime;
 }
 
-MessageWindow *__cdecl Con_GetDestWindow(int localClientNum, print_msg_dest_t dest)
+MessageWindow *__cdecl Con_GetDestWindow(int32_t localClientNum, print_msg_dest_t dest)
 {
     switch (dest)
     {
@@ -1300,7 +1300,7 @@ MessageWindow *__cdecl Con_GetDestWindow(int localClientNum, print_msg_dest_t de
     return (MessageWindow *)&con.color[4630 * localClientNum - 2621 + 13 * dest];
 }
 
-void __cdecl Con_UpdateNotifyLine(int localClientNum, unsigned int channel, bool lineFeed, int flags)
+void __cdecl Con_UpdateNotifyLine(int32_t localClientNum, uint32_t channel, bool lineFeed, int32_t flags)
 {
     print_msg_dest_t dest; // [esp+0h] [ebp-4h]
 
@@ -1308,7 +1308,7 @@ void __cdecl Con_UpdateNotifyLine(int localClientNum, unsigned int channel, bool
         MyAssertHandler(".\\client\\cl_console.cpp", 1001, 0, "%s", "Con_IsChannelOpen(channel)");
     Con_UpdateNotifyLineWindow(localClientNum, channel, lineFeed, flags, CON_DEST_CONSOLE);
     Con_UpdateNotifyLineWindow(localClientNum, channel, lineFeed, flags, CON_DEST_MINICON);
-    for (dest = CON_DEST_GAME_FIRST; (unsigned int)dest <= CON_DEST_GAME4; ++dest)
+    for (dest = CON_DEST_GAME_FIRST; (uint32_t)dest <= CON_DEST_GAME4; ++dest)
         Con_UpdateNotifyLineWindow(localClientNum, channel, lineFeed, flags, dest);
     if (!com_developer)
         MyAssertHandler(".\\client\\cl_console.cpp", 1008, 0, "%s", "com_developer");
@@ -1317,10 +1317,10 @@ void __cdecl Con_UpdateNotifyLine(int localClientNum, unsigned int channel, bool
 }
 
 void __cdecl Con_UpdateNotifyLineWindow(
-    int localClientNum,
-    unsigned int channel,
+    int32_t localClientNum,
+    uint32_t channel,
     bool lineFeed,
-    int flags,
+    int32_t flags,
     print_msg_dest_t dest)
 {
     MessageWindow *DestWindow; // eax
@@ -1332,18 +1332,18 @@ void __cdecl Con_UpdateNotifyLineWindow(
     }
 }
 
-void __cdecl Con_UpdateMessageWindowLine(int localClientNum, MessageWindow *msgwnd, int linefeed, int flags)
+void __cdecl Con_UpdateMessageWindowLine(int32_t localClientNum, MessageWindow *msgwnd, int32_t linefeed, int32_t flags)
 {
-    int newPadLineOffset; // [esp+0h] [ebp-14h]
+    int32_t newPadLineOffset; // [esp+0h] [ebp-14h]
     Message *message; // [esp+4h] [ebp-10h]
-    unsigned int imod; // [esp+8h] [ebp-Ch]
+    uint32_t imod; // [esp+8h] [ebp-Ch]
     MessageLine *line; // [esp+Ch] [ebp-8h]
     MessageLine *linea; // [esp+Ch] [ebp-8h]
-    int serverTime; // [esp+10h] [ebp-4h]
+    int32_t serverTime; // [esp+10h] [ebp-4h]
 
     if (!msgwnd)
         MyAssertHandler(".\\client\\cl_console.cpp", 893, 0, "%s", "msgwnd");
-    if (msgwnd->firstLineIndex >= (unsigned int)msgwnd->lineCount)
+    if (msgwnd->firstLineIndex >= (uint32_t)msgwnd->lineCount)
         MyAssertHandler(
             ".\\client\\cl_console.cpp",
             894,
@@ -1351,7 +1351,7 @@ void __cdecl Con_UpdateMessageWindowLine(int localClientNum, MessageWindow *msgw
             "msgwnd->firstLineIndex doesn't index msgwnd->lineCount\n\t%i not in [0, %i)",
             msgwnd->firstLineIndex,
             msgwnd->lineCount);
-    if (msgwnd->messageIndex >= (unsigned int)msgwnd->lineCount)
+    if (msgwnd->messageIndex >= (uint32_t)msgwnd->lineCount)
         MyAssertHandler(
             ".\\client\\cl_console.cpp",
             895,
@@ -1389,7 +1389,7 @@ void __cdecl Con_UpdateMessageWindowLine(int localClientNum, MessageWindow *msgw
                     imod,
                     msgwnd->lineCount);
             linea = &msgwnd->lines[imod];
-            if (linea->messageIndex >= (unsigned int)msgwnd->lineCount)
+            if (linea->messageIndex >= (uint32_t)msgwnd->lineCount)
                 MyAssertHandler(
                     ".\\client\\cl_console.cpp",
                     927,
@@ -1416,7 +1416,7 @@ void __cdecl Con_UpdateMessageWindowLine(int localClientNum, MessageWindow *msgw
 
 void __cdecl Con_FreeFirstMessageWindowLine(MessageWindow *msgwnd)
 {
-    int activeLineCount; // [esp+0h] [ebp-4h]
+    int32_t activeLineCount; // [esp+0h] [ebp-4h]
 
     if (msgwnd->activeLineCount <= 0)
         MyAssertHandler(".\\client\\cl_console.cpp", 696, 0, "%s", "msgwnd->activeLineCount > 0");
@@ -1435,7 +1435,7 @@ void __cdecl Con_FreeFirstMessageWindowLine(MessageWindow *msgwnd)
 
 void __cdecl Con_CopyCurrentConsoleLineText(MessageWindow *msgwnd, MessageLine *msgLine)
 {
-    unsigned int poolRemaining; // [esp+0h] [ebp-4h]
+    uint32_t poolRemaining; // [esp+0h] [ebp-4h]
 
     if (!msgLine)
         MyAssertHandler(".\\client\\cl_console.cpp", 736, 0, "%s", "msgLine");
@@ -1445,19 +1445,19 @@ void __cdecl Con_CopyCurrentConsoleLineText(MessageWindow *msgwnd, MessageLine *
     if (con.lineOffset > poolRemaining)
     {
         memcpy(
-            (unsigned __int8 *)&msgwnd->circularTextBuffer[msgwnd->textBufPos],
-            (unsigned __int8 *)con.textTempLine,
+            (uint8_t *)&msgwnd->circularTextBuffer[msgwnd->textBufPos],
+            (uint8_t *)con.textTempLine,
             poolRemaining);
         memcpy(
-            (unsigned __int8 *)msgwnd->circularTextBuffer,
-            (unsigned __int8 *)&con.textTempLine[poolRemaining],
+            (uint8_t *)msgwnd->circularTextBuffer,
+            (uint8_t *)&con.textTempLine[poolRemaining],
             con.lineOffset - poolRemaining);
     }
     else
     {
         memcpy(
-            (unsigned __int8 *)&msgwnd->circularTextBuffer[msgwnd->textBufPos],
-            (unsigned __int8 *)con.textTempLine,
+            (uint8_t *)&msgwnd->circularTextBuffer[msgwnd->textBufPos],
+            (uint8_t *)con.textTempLine,
             con.lineOffset);
     }
     msgLine->textBufPos = msgwnd->textBufPos;
@@ -1469,9 +1469,9 @@ void __cdecl Con_CopyCurrentConsoleLineText(MessageWindow *msgwnd, MessageLine *
     msgwnd->textBufPos = (msgwnd->textBufSize - 1) & (msgwnd->textBufPos + 1);
 }
 
-bool __cdecl Con_NeedToFreeMessageWindowLine(MessageWindow *msgwnd, int charCount)
+bool __cdecl Con_NeedToFreeMessageWindowLine(MessageWindow *msgwnd, int32_t charCount)
 {
-    int pastLastChar; // [esp+8h] [ebp-8h]
+    int32_t pastLastChar; // [esp+8h] [ebp-8h]
     MessageLine *line; // [esp+Ch] [ebp-4h]
 
     if (!msgwnd->activeLineCount)
@@ -1488,9 +1488,9 @@ bool __cdecl Con_NeedToFreeMessageWindowLine(MessageWindow *msgwnd, int charCoun
         return line->textBufPos >= msgwnd->textBufPos && line->textBufPos < pastLastChar;
 }
 
-int __cdecl PrintTimeTotal(MessageWindow *msgwnd, MessageLine *line)
+int32_t __cdecl PrintTimeTotal(MessageWindow *msgwnd, MessageLine *line)
 {
-    int time; // [esp+4h] [ebp-4h]
+    int32_t time; // [esp+4h] [ebp-4h]
 
     if ((line->flags & 1) == 0)
         return 0;
@@ -1500,14 +1500,14 @@ int __cdecl PrintTimeTotal(MessageWindow *msgwnd, MessageLine *line)
     return con_typewriterDecayDuration->current.integer + time;
 }
 
-int __cdecl PrintableCharsCount(const MessageWindow *msgwnd, MessageLine *line)
+int32_t __cdecl PrintableCharsCount(const MessageWindow *msgwnd, MessageLine *line)
 {
     bool v3; // [esp+0h] [ebp-18h]
-    int usedCharCnt; // [esp+4h] [ebp-14h] BYREF
+    int32_t usedCharCnt; // [esp+4h] [ebp-14h] BYREF
     char c[4]; // [esp+8h] [ebp-10h] BYREF
-    int letter; // [esp+Ch] [ebp-Ch]
-    int printedCnt; // [esp+10h] [ebp-8h]
-    int idx; // [esp+14h] [ebp-4h]
+    int32_t letter; // [esp+Ch] [ebp-Ch]
+    int32_t printedCnt; // [esp+10h] [ebp-8h]
+    int32_t idx; // [esp+14h] [ebp-4h]
 
     if (line->textBufSize)
         v3 = (msgwnd->textBufSize & (msgwnd->textBufSize - 1)) == 0;
@@ -1542,12 +1542,12 @@ int __cdecl PrintableCharsCount(const MessageWindow *msgwnd, MessageLine *line)
     return printedCnt;
 }
 
-int __cdecl GetNextValidPrintTimeForLine(int localClientNum, MessageWindow *msgwnd, char flags)
+int32_t __cdecl GetNextValidPrintTimeForLine(int32_t localClientNum, MessageWindow *msgwnd, char flags)
 {
-    int nextPrintTime; // [esp+0h] [ebp-10h]
+    int32_t nextPrintTime; // [esp+0h] [ebp-10h]
     MessageLine *line; // [esp+4h] [ebp-Ch]
-    int lineIdx; // [esp+8h] [ebp-8h]
-    int serverTime; // [esp+Ch] [ebp-4h]
+    int32_t lineIdx; // [esp+8h] [ebp-8h]
+    int32_t serverTime; // [esp+Ch] [ebp-4h]
 
     if ((flags & 1) == 0)
         return 0;
@@ -1563,9 +1563,9 @@ int __cdecl GetNextValidPrintTimeForLine(int localClientNum, MessageWindow *msgw
         return serverTime + 250;
 }
 
-int __cdecl LatestActiveTypewrittenLineIdx(MessageWindow *msgwnd)
+int32_t __cdecl LatestActiveTypewrittenLineIdx(MessageWindow *msgwnd)
 {
-    int idx; // [esp+8h] [ebp-4h]
+    int32_t idx; // [esp+8h] [ebp-4h]
 
     if (!msgwnd->activeLineCount)
         return -1;
@@ -1577,7 +1577,7 @@ int __cdecl LatestActiveTypewrittenLineIdx(MessageWindow *msgwnd)
     return -1;
 }
 
-int __cdecl PrintTimeWriteOut(MessageWindow *msgwnd, MessageLine *line)
+int32_t __cdecl PrintTimeWriteOut(MessageWindow *msgwnd, MessageLine *line)
 {
     if ((line->flags & 1) != 0)
         return con_typewriterPrintSpeed->current.integer * PrintableCharsCount(msgwnd, line);
@@ -1585,7 +1585,7 @@ int __cdecl PrintTimeWriteOut(MessageWindow *msgwnd, MessageLine *line)
         return 0;
 }
 
-void __cdecl Con_Linefeed(int localClientNum, unsigned int channel, int flags)
+void __cdecl Con_Linefeed(int32_t localClientNum, uint32_t channel, int32_t flags)
 {
     Con_UpdateNotifyLine(localClientNum, channel, 1, flags);
     con.lineOffset = 0;
@@ -1600,7 +1600,7 @@ void __cdecl CL_ConsoleFixPosition()
 }
 
 void __cdecl CL_DeathMessagePrint(
-    int localClientNum,
+    int32_t localClientNum,
     char *attackerName,
     char attackerColorIndex,
     char *victimName,
@@ -1610,17 +1610,17 @@ void __cdecl CL_DeathMessagePrint(
     float iconHeight,
     bool horzFlipIcon)
 {
-    unsigned int deathMsgLen; // [esp+10h] [ebp-410h]
-    unsigned int deathMsgLena; // [esp+10h] [ebp-410h]
-    unsigned int deathMsgLenb; // [esp+10h] [ebp-410h]
-    unsigned int deathMsgLenc; // [esp+10h] [ebp-410h]
-    unsigned int deathMsgLend; // [esp+10h] [ebp-410h]
-    unsigned int deathMsgLene; // [esp+10h] [ebp-410h]
-    unsigned int deathMsgLenf; // [esp+10h] [ebp-410h]
-    unsigned int deathMsgLeng; // [esp+10h] [ebp-410h]
-    unsigned int deathMsgLenh; // [esp+10h] [ebp-410h]
+    uint32_t deathMsgLen; // [esp+10h] [ebp-410h]
+    uint32_t deathMsgLena; // [esp+10h] [ebp-410h]
+    uint32_t deathMsgLenb; // [esp+10h] [ebp-410h]
+    uint32_t deathMsgLenc; // [esp+10h] [ebp-410h]
+    uint32_t deathMsgLend; // [esp+10h] [ebp-410h]
+    uint32_t deathMsgLene; // [esp+10h] [ebp-410h]
+    uint32_t deathMsgLenf; // [esp+10h] [ebp-410h]
+    uint32_t deathMsgLeng; // [esp+10h] [ebp-410h]
+    uint32_t deathMsgLenh; // [esp+10h] [ebp-410h]
     char deathMsg[1024]; // [esp+18h] [ebp-408h] BYREF
-    int color; // [esp+41Ch] [ebp-4h]
+    int32_t color; // [esp+41Ch] [ebp-4h]
 
     if (!attackerName)
         MyAssertHandler(".\\client\\cl_console.cpp", 1468, 0, "%s", "attackerName != NULL");
@@ -1719,10 +1719,10 @@ void __cdecl CL_DeathMessagePrint(
     }
 }
 
-unsigned int __cdecl CL_AddDeathMessageString(
+uint32_t __cdecl CL_AddDeathMessageString(
     char *deathMsg,
-    unsigned int deathMsgLen,
-    unsigned int deathMsgMaxLen,
+    uint32_t deathMsgLen,
+    uint32_t deathMsgMaxLen,
     char *string)
 {
     char v5; // [esp+3h] [ebp-1h]
@@ -1738,10 +1738,10 @@ unsigned int __cdecl CL_AddDeathMessageString(
     return deathMsgLen;
 }
 
-unsigned int __cdecl CL_AddDeathMessageIcon(
+uint32_t __cdecl CL_AddDeathMessageIcon(
     char *deathMsg,
-    unsigned int deathMsgLen,
-    unsigned int deathMsgMaxLen,
+    uint32_t deathMsgLen,
+    uint32_t deathMsgMaxLen,
     Material *iconShader,
     float iconWidth,
     float iconHeight,
@@ -1749,11 +1749,11 @@ unsigned int __cdecl CL_AddDeathMessageIcon(
 {
     char v8; // [esp+7h] [ebp-41h]
     char v9; // [esp+23h] [ebp-25h]
-    unsigned int deathMsgLena; // [esp+54h] [ebp+Ch]
-    unsigned int deathMsgLenb; // [esp+54h] [ebp+Ch]
-    unsigned int deathMsgLenc; // [esp+54h] [ebp+Ch]
-    unsigned int deathMsgLend; // [esp+54h] [ebp+Ch]
-    unsigned int deathMsgLene; // [esp+54h] [ebp+Ch]
+    uint32_t deathMsgLena; // [esp+54h] [ebp+Ch]
+    uint32_t deathMsgLenb; // [esp+54h] [ebp+Ch]
+    uint32_t deathMsgLenc; // [esp+54h] [ebp+Ch]
+    uint32_t deathMsgLend; // [esp+54h] [ebp+Ch]
+    uint32_t deathMsgLene; // [esp+54h] [ebp+Ch]
 
     if (iconWidth <= 0.0)
         MyAssertHandler(".\\client\\cl_console.cpp", 1432, 0, "%s", "iconWidth > 0");
@@ -1787,7 +1787,7 @@ unsigned int __cdecl CL_AddDeathMessageIcon(
     deathMsgLend = deathMsgLenc + 1;
     if (deathMsgLend + 4 > deathMsgMaxLen)
         MyAssertHandler(".\\client\\cl_console.cpp", 1449, 0, "%s", "deathMsgLen + sizeof( iconShader ) <= deathMsgMaxLen");
-    *(unsigned int *)&deathMsg[deathMsgLend] = (unsigned int)iconShader;
+    *(uint32_t *)&deathMsg[deathMsgLend] = (uint32_t)iconShader;
     deathMsgLene = deathMsgLend + 4;
     if (deathMsgLene - deathMsgLen != 8)
         MyAssertHandler(
@@ -1799,10 +1799,10 @@ unsigned int __cdecl CL_AddDeathMessageIcon(
     return deathMsgLene;
 }
 
-int __cdecl CL_DeathMessageIconDimension(float size)
+int32_t __cdecl CL_DeathMessageIconDimension(float size)
 {
-    int v2; // [esp+0h] [ebp-1Ch]
-    int v3; // [esp+4h] [ebp-18h]
+    int32_t v2; // [esp+0h] [ebp-1Ch]
+    int32_t v3; // [esp+4h] [ebp-18h]
     float v4; // [esp+Ch] [ebp-10h]
 
     if ((int)(size * 32.0f) < 127)
@@ -1818,15 +1818,15 @@ int __cdecl CL_DeathMessageIconDimension(float size)
 
 void __cdecl Con_AutoCompleteFromList(
     const char **strings,
-    unsigned int stringCount,
+    uint32_t stringCount,
     const char *prefix,
     char *completed,
-    unsigned int sizeofCompleted)
+    uint32_t sizeofCompleted)
 {
-    int v5; // [esp+0h] [ebp-20h]
+    int32_t v5; // [esp+0h] [ebp-20h]
     char *string; // [esp+10h] [ebp-10h]
-    unsigned int charIndex; // [esp+14h] [ebp-Ch]
-    unsigned int stringIndex; // [esp+1Ch] [ebp-4h]
+    uint32_t charIndex; // [esp+14h] [ebp-Ch]
+    uint32_t stringIndex; // [esp+1Ch] [ebp-4h]
 
     v5 = strlen(prefix);
     *completed = 0;
@@ -1864,7 +1864,7 @@ const char *__cdecl Con_TokenizeInput()
 
 char __cdecl Con_AnySpaceAfterCommand()
 {
-    int charIndex; // [esp+0h] [ebp-4h]
+    int32_t charIndex; // [esp+0h] [ebp-4h]
 
     for (charIndex = 0; isspace(g_consoleField.buffer[charIndex]); ++charIndex)
         ;
@@ -1877,10 +1877,10 @@ char __cdecl Con_AnySpaceAfterCommand()
     return 0;
 }
 
-bool __cdecl Con_IsAutoCompleteMatch(const char *query, const char *matchToText, int matchTextLen)
+bool __cdecl Con_IsAutoCompleteMatch(const char *query, const char *matchToText, int32_t matchTextLen)
 {
-    int matchLetter; // [esp+0h] [ebp-Ch]
-    int matchTextPos; // [esp+4h] [ebp-8h]
+    int32_t matchLetter; // [esp+0h] [ebp-Ch]
+    int32_t matchTextPos; // [esp+4h] [ebp-8h]
     const char *queryPos; // [esp+8h] [ebp-4h]
 
     if (!query)
@@ -1933,7 +1933,7 @@ bool __cdecl Con_IsDvarCommand(const char *cmd)
     return 1;
 }
 
-char __cdecl Con_CycleAutoComplete(int step)
+char __cdecl Con_CycleAutoComplete(int32_t step)
 {
     if (!conDrawInputGlob.mayAutoComplete
         || conDrawInputGlob.matchCount <= 1
@@ -2010,16 +2010,16 @@ void __cdecl Con_AllowAutoCompleteCycling(bool isAllowed)
 }
 
 void __cdecl Con_DrawGameMessageWindow(
-    int localClientNum,
-    unsigned int windowIndex,
-    int xPos,
-    int yPos,
-    int horzAlign,
-    int vertAlign,
+    int32_t localClientNum,
+    uint32_t windowIndex,
+    int32_t xPos,
+    int32_t yPos,
+    int32_t horzAlign,
+    int32_t vertAlign,
     Font_s *font,
     float fontScale,
     float *color,
-    int textStyle,
+    int32_t textStyle,
     char textAlignMode,
     msgwnd_mode_t mode)
 {
@@ -2053,16 +2053,16 @@ void __cdecl Con_DrawGameMessageWindow(
 }
 
 void __cdecl Con_DrawMessageWindow(
-    int localClientNum,
+    int32_t localClientNum,
     MessageWindow *msgwnd,
-    int x,
-    int y,
-    int charHeight,
-    int horzAlign,
-    int vertAlign,
+    int32_t x,
+    int32_t y,
+    int32_t charHeight,
+    int32_t horzAlign,
+    int32_t vertAlign,
     Font_s *font,
     float *color,
-    int textStyle,
+    int32_t textStyle,
     float msgwndScale,
     msgwnd_mode_t mode,
     char textAlignMode)
@@ -2116,17 +2116,17 @@ void __cdecl Con_DrawMessageWindow(
 }
 
 void __cdecl Con_DrawMessageWindowNewToOld(
-    int localClientNum,
+    int32_t localClientNum,
     MessageWindow *msgwnd,
-    int x,
-    int y,
-    int hudCharHeight,
-    int horzAlign,
-    int vertAlign,
+    int32_t x,
+    int32_t y,
+    int32_t hudCharHeight,
+    int32_t horzAlign,
+    int32_t vertAlign,
     bool up,
     Font_s *font,
     float *color,
-    int textStyle,
+    int32_t textStyle,
     float msgwndScale,
     char textAlignMode)
 {
@@ -2139,12 +2139,12 @@ void __cdecl Con_DrawMessageWindowNewToOld(
     float finalColor[4]; // [esp+40h] [ebp-30h] BYREF
     Message *message; // [esp+50h] [ebp-20h]
     float lerpFactor; // [esp+54h] [ebp-1Ch]
-    int lineOffset; // [esp+58h] [ebp-18h]
-    int imod; // [esp+5Ch] [ebp-14h]
-    int time; // [esp+60h] [ebp-10h]
+    int32_t lineOffset; // [esp+58h] [ebp-18h]
+    int32_t imod; // [esp+5Ch] [ebp-14h]
+    int32_t time; // [esp+60h] [ebp-10h]
     MessageLine *line; // [esp+64h] [ebp-Ch]
-    int charHeight; // [esp+68h] [ebp-8h]
-    int serverTime; // [esp+6Ch] [ebp-4h]
+    int32_t charHeight; // [esp+68h] [ebp-8h]
+    int32_t serverTime; // [esp+6Ch] [ebp-4h]
 
     if (!msgwnd)
         MyAssertHandler(".\\client\\cl_console.cpp", 2543, 0, "%s", "msgwnd");
@@ -2158,7 +2158,7 @@ void __cdecl Con_DrawMessageWindowNewToOld(
         if (msgwnd->lineCount <= 0)
             MyAssertHandler(".\\client\\cl_console.cpp", 2554, 0, "%s", "msgwnd->lineCount > 0");
         imod = (lineOffset + msgwnd->firstLineIndex) % msgwnd->lineCount;
-        if ((unsigned int)imod >= msgwnd->lineCount)
+        if ((uint32_t)imod >= msgwnd->lineCount)
             MyAssertHandler(
                 ".\\client\\cl_console.cpp",
                 2556,
@@ -2167,7 +2167,7 @@ void __cdecl Con_DrawMessageWindowNewToOld(
                 imod,
                 msgwnd->lineCount);
         line = &msgwnd->lines[imod];
-        if (line->messageIndex >= (unsigned int)msgwnd->lineCount)
+        if (line->messageIndex >= (uint32_t)msgwnd->lineCount)
             MyAssertHandler(
                 ".\\client\\cl_console.cpp",
                 2558,
@@ -2217,7 +2217,7 @@ void __cdecl Con_DrawMessageWindowNewToOld(
     for (lineOffset = msgwnd->activeLineCount - 1; lineOffset >= 0; --lineOffset)
     {
         imod = (lineOffset + msgwnd->firstLineIndex) % msgwnd->lineCount;
-        if ((unsigned int)imod >= msgwnd->lineCount)
+        if ((uint32_t)imod >= msgwnd->lineCount)
             MyAssertHandler(
                 ".\\client\\cl_console.cpp",
                 2581,
@@ -2226,7 +2226,7 @@ void __cdecl Con_DrawMessageWindowNewToOld(
                 imod,
                 msgwnd->lineCount);
         line = &msgwnd->lines[imod];
-        if (line->messageIndex >= (unsigned int)msgwnd->lineCount)
+        if (line->messageIndex >= (uint32_t)msgwnd->lineCount)
             MyAssertHandler(
                 ".\\client\\cl_console.cpp",
                 2584,
@@ -2264,30 +2264,30 @@ void __cdecl Con_DrawMessageWindowNewToOld(
 float MY_GLOWCOLOR[4] = { 0.0f, 0.3f, 0.0f, 1.0f };
 
 void __cdecl Con_DrawMessageLineOnHUD(
-    int localClientNum,
+    int32_t localClientNum,
     const ScreenPlacement *scrPlace,
-    int x,
-    int y,
-    int charHeight,
-    int horzAlign,
-    int vertAlign,
+    int32_t x,
+    int32_t y,
+    int32_t charHeight,
+    int32_t horzAlign,
+    int32_t vertAlign,
     Font_s *font,
     const MessageWindow *msgwnd,
-    int lineIdx,
+    int32_t lineIdx,
     float *color,
-    int textStyle,
+    int32_t textStyle,
     float msgwndScale,
     char textAlignMode)
 {
-    int v14; // [esp+3Ch] [ebp-44h]
-    int v15; // [esp+48h] [ebp-38h]
+    int32_t v14; // [esp+3Ch] [ebp-44h]
+    int32_t v15; // [esp+48h] [ebp-38h]
     float scale; // [esp+4Ch] [ebp-34h]
     DvarValue *glowColor; // [esp+50h] [ebp-30h]
     float typewriterColor[4]; // [esp+54h] [ebp-2Ch] BYREF
     float xScale; // [esp+64h] [ebp-1Ch] BYREF
     float yAdj; // [esp+68h] [ebp-18h] BYREF
     float xAdj; // [esp+6Ch] [ebp-14h] BYREF
-    int time; // [esp+70h] [ebp-10h]
+    int32_t time; // [esp+70h] [ebp-10h]
     MessageLine *line; // [esp+74h] [ebp-Ch]
     float fontScale; // [esp+78h] [ebp-8h]
     float yScale; // [esp+7Ch] [ebp-4h] BYREF
@@ -2413,17 +2413,17 @@ void __cdecl Con_DrawMessageLineOnHUD(
     }
 }
 
-bool __cdecl LineVisible(const MessageWindow *msgwnd, int lineIdx, int time)
+bool __cdecl LineVisible(const MessageWindow *msgwnd, int32_t lineIdx, int32_t time)
 {
     if (!msgwnd)
         MyAssertHandler(".\\client\\cl_console.cpp", 2361, 0, "%s", "msgwnd");
     return time >= msgwnd->lines[lineIdx].typingStartTime;
 }
 
-void __cdecl TypewriterSounds(int localClientNum, const MessageWindow *msgwnd, MessageLine *line)
+void __cdecl TypewriterSounds(int32_t localClientNum, const MessageWindow *msgwnd, MessageLine *line)
 {
     clientActive_t *LocalClientGlobals; // [esp+0h] [ebp-8h]
-    int strLength; // [esp+4h] [ebp-4h]
+    int32_t strLength; // [esp+4h] [ebp-4h]
 
     LocalClientGlobals = CL_GetLocalClientGlobals(localClientNum);
     strLength = PrintableCharsCount(msgwnd, line);
@@ -2437,7 +2437,7 @@ void __cdecl TypewriterSounds(int localClientNum, const MessageWindow *msgwnd, M
         &line->lastTypingSoundTime);
 }
 
-void __cdecl Con_CullFinishedLines(int serverTime, MessageWindow *msgwnd)
+void __cdecl Con_CullFinishedLines(int32_t serverTime, MessageWindow *msgwnd)
 {
     const MessageLine *line; // [esp+4h] [ebp-4h]
 
@@ -2448,7 +2448,7 @@ void __cdecl Con_CullFinishedLines(int serverTime, MessageWindow *msgwnd)
     while (msgwnd->activeLineCount)
     {
         line = &msgwnd->lines[msgwnd->firstLineIndex];
-        if (line->messageIndex >= (unsigned int)msgwnd->lineCount)
+        if (line->messageIndex >= (uint32_t)msgwnd->lineCount)
             MyAssertHandler(
                 ".\\client\\cl_console.cpp",
                 2479,
@@ -2462,7 +2462,7 @@ void __cdecl Con_CullFinishedLines(int serverTime, MessageWindow *msgwnd)
     }
 }
 
-double __cdecl Con_GetMessageAlpha(Message *message, MessageWindow *msgwnd, int serverTime, bool scrollsIntoPlace)
+double __cdecl Con_GetMessageAlpha(Message *message, MessageWindow *msgwnd, int32_t serverTime, bool scrollsIntoPlace)
 {
     float v6; // [esp+4h] [ebp-14h]
     float curalpha; // [esp+14h] [ebp-4h]
@@ -2515,17 +2515,17 @@ double __cdecl Con_GetMessageAlpha(Message *message, MessageWindow *msgwnd, int 
 }
 
 void __cdecl Con_DrawMessageWindowOldToNew(
-    int localClientNum,
+    int32_t localClientNum,
     MessageWindow *msgwnd,
-    int x,
-    int y,
-    int charHeight,
-    int horzAlign,
-    int vertAlign,
+    int32_t x,
+    int32_t y,
+    int32_t charHeight,
+    int32_t horzAlign,
+    int32_t vertAlign,
     bool up,
     Font_s *font,
     float *color,
-    int textStyle,
+    int32_t textStyle,
     float msgwndScale,
     char textAlignMode)
 {
@@ -2534,13 +2534,13 @@ void __cdecl Con_DrawMessageWindowOldToNew(
     clientActive_t *LocalClientGlobals; // [esp+30h] [ebp-34h]
     float finalColor[4]; // [esp+34h] [ebp-30h] BYREF
     Message *message; // [esp+44h] [ebp-20h]
-    int lineOffset; // [esp+48h] [ebp-1Ch]
-    int imod; // [esp+4Ch] [ebp-18h]
-    int time; // [esp+50h] [ebp-14h]
+    int32_t lineOffset; // [esp+48h] [ebp-1Ch]
+    int32_t imod; // [esp+4Ch] [ebp-18h]
+    int32_t time; // [esp+50h] [ebp-14h]
     MessageLine *line; // [esp+54h] [ebp-10h]
-    int v; // [esp+58h] [ebp-Ch]
-    int groupsize; // [esp+5Ch] [ebp-8h]
-    int serverTime; // [esp+60h] [ebp-4h]
+    int32_t v; // [esp+58h] [ebp-Ch]
+    int32_t groupsize; // [esp+5Ch] [ebp-8h]
+    int32_t serverTime; // [esp+60h] [ebp-4h]
 
     if (!msgwnd)
         MyAssertHandler(".\\client\\cl_console.cpp", 2616, 0, "%s", "msgwnd");
@@ -2560,7 +2560,7 @@ void __cdecl Con_DrawMessageWindowOldToNew(
         if (msgwnd->lineCount <= 0)
             MyAssertHandler(".\\client\\cl_console.cpp", 2632, 0, "%s", "msgwnd->lineCount > 0");
         imod = (lineOffset + msgwnd->firstLineIndex) % msgwnd->lineCount;
-        if ((unsigned int)imod >= msgwnd->lineCount)
+        if ((uint32_t)imod >= msgwnd->lineCount)
             MyAssertHandler(
                 ".\\client\\cl_console.cpp",
                 2634,
@@ -2569,7 +2569,7 @@ void __cdecl Con_DrawMessageWindowOldToNew(
                 imod,
                 msgwnd->lineCount);
         line = &msgwnd->lines[imod];
-        if (line->messageIndex >= (unsigned int)msgwnd->lineCount)
+        if (line->messageIndex >= (uint32_t)msgwnd->lineCount)
             MyAssertHandler(
                 ".\\client\\cl_console.cpp",
                 2636,
@@ -2636,12 +2636,12 @@ void __cdecl Con_DrawMessageWindowOldToNew(
     }
 }
 
-bool __cdecl CL_ShouldntDrawMessageWindow(int localClientNum)
+bool __cdecl CL_ShouldntDrawMessageWindow(int32_t localClientNum)
 {
     return CL_GetLocalClientGlobals(localClientNum)->snap.ps.pm_type != 5 && !CL_ShouldDisplayHud(localClientNum);
 }
 
-void __cdecl Con_DrawMiniConsole(int localClientNum, int xPos, int yPos, float alpha)
+void __cdecl Con_DrawMiniConsole(int32_t localClientNum, int32_t xPos, int32_t yPos, float alpha)
 {
     Font_s *font; // [esp+Ch] [ebp-18h]
     float color[4]; // [esp+14h] [ebp-10h] BYREF
@@ -2680,12 +2680,12 @@ void __cdecl Con_DrawMiniConsole(int localClientNum, int xPos, int yPos, float a
         4);
 }
 
-void __cdecl Con_ClearMiniConsole(int localClientNum)
+void __cdecl Con_ClearMiniConsole(int32_t localClientNum)
 {
     Con_ClearMessageWindow((MessageWindow *)&con.color[4630 * localClientNum - 1122]);
 }
 
-void __cdecl Con_DrawErrors(int localClientNum, int xPos, int yPos, float alpha)
+void __cdecl Con_DrawErrors(int32_t localClientNum, int32_t xPos, int32_t yPos, float alpha)
 {
     Font_s *font; // [esp+Ch] [ebp-14h]
     float color[4]; // [esp+10h] [ebp-10h] BYREF
@@ -2711,12 +2711,12 @@ void __cdecl Con_DrawErrors(int localClientNum, int xPos, int yPos, float alpha)
         4);
 }
 
-bool __cdecl Con_IsValidGameMessageWindow(unsigned int windowIndex)
+bool __cdecl Con_IsValidGameMessageWindow(uint32_t windowIndex)
 {
     return windowIndex < 4;
 }
 
-bool __cdecl Con_IsGameMessageWindowActive(int localClientNum, unsigned int windowIndex)
+bool __cdecl Con_IsGameMessageWindowActive(int32_t localClientNum, uint32_t windowIndex)
 {
     if (windowIndex >= 4)
         MyAssertHandler(
@@ -2729,10 +2729,10 @@ bool __cdecl Con_IsGameMessageWindowActive(int localClientNum, unsigned int wind
     return SLODWORD(con.color[4630 * localClientNum - 2571 + 13 * windowIndex]) > 0;
 }
 
-void __cdecl Con_DrawSay(int localClientNum, int x, int y)
+void __cdecl Con_DrawSay(int32_t localClientNum, int32_t x, int32_t y)
 {
     char *v3; // eax
-    int v4; // eax
+    int32_t v4; // eax
     float textY; // [esp+2Ch] [ebp-1Ch]
     float textX; // [esp+30h] [ebp-18h]
     Font_s *font; // [esp+34h] [ebp-14h]
@@ -2775,14 +2775,14 @@ void __cdecl Con_ToggleConsoleOutput()
     con.outputVisible = !con.outputVisible;
 }
 
-void __cdecl Con_DrawConsole(int localClientNum)
+void __cdecl Con_DrawConsole(int32_t localClientNum)
 {
     Con_CheckResize();
     if (Key_IsCatcherActive(localClientNum, 1))
         Con_DrawSolidConsole(localClientNum);
 }
 
-void __cdecl Con_DrawSolidConsole(int localClientNum)
+void __cdecl Con_DrawSolidConsole(int32_t localClientNum)
 {
     Sys_EnterCriticalSection(CRITSECT_CONSOLE);
     if (con.lineOffset)
@@ -2796,12 +2796,12 @@ void __cdecl Con_DrawSolidConsole(int localClientNum)
 }
 
 
-void __cdecl Con_DrawInput(int localClientNum)
+void __cdecl Con_DrawInput(int32_t localClientNum)
 {
     bool v1; // [esp+10h] [ebp-3Ch]
-    int matchCount; // [esp+34h] [ebp-18h]
+    int32_t matchCount; // [esp+34h] [ebp-18h]
     char *tooManyMatchesStr; // [esp+38h] [ebp-14h]
-    int inputTextLenPrev; // [esp+3Ch] [ebp-10h]
+    int32_t inputTextLenPrev; // [esp+3Ch] [ebp-10h]
     char *promptString; // [esp+40h] [ebp-Ch]
     const char *originalCommand; // [esp+48h] [ebp-4h]
 
@@ -2939,14 +2939,14 @@ void __cdecl ConDrawInput_TextAndOver(char *str, const float *color)
     conDrawInputGlob.x = (double)ConDrawInput_TextWidth(str) + conDrawInputGlob.x;
 }
 
-int __cdecl ConDrawInput_TextWidth(const char *text)
+int32_t __cdecl ConDrawInput_TextWidth(const char *text)
 {
     if (!text)
         MyAssertHandler(".\\client\\cl_console.cpp", 1638, 0, "%s", "text");
     return R_TextWidth(text, 0, cls.consoleFont);
 }
 
-void __cdecl ConDrawInput_Box(int lines, const float *color)
+void __cdecl ConDrawInput_Box(int32_t lines, const float *color)
 {
     float x; // [esp+14h] [ebp-10h]
     float y; // [esp+18h] [ebp-Ch]
@@ -3006,7 +3006,7 @@ void __cdecl ConDrawInput_DvarMatch(char *str)
     }
 }
 
-void __cdecl ConDrawInput_TextLimitChars(char *str, int maxChars, const float *color)
+void __cdecl ConDrawInput_TextLimitChars(char *str, int32_t maxChars, const float *color)
 {
     float y; // [esp+1Ch] [ebp-4h]
 
@@ -3023,11 +3023,11 @@ void __cdecl ConDrawInput_DetailedDvarMatch(char *str)
     char *v3; // eax
     __int64 v4; // [esp-Ch] [ebp-428h]
     bool hasLatchedValue; // [esp+7h] [ebp-415h]
-    int infoLineCount; // [esp+8h] [ebp-414h] BYREF
+    int32_t infoLineCount; // [esp+8h] [ebp-414h] BYREF
     char dvarInfo[1024]; // [esp+Ch] [ebp-410h] BYREF
-    int descriptionLineCount; // [esp+410h] [ebp-Ch]
+    int32_t descriptionLineCount; // [esp+410h] [ebp-Ch]
     const dvar_s *dvar; // [esp+414h] [ebp-8h]
-    int lineIndex; // [esp+418h] [ebp-4h]
+    int32_t lineIndex; // [esp+418h] [ebp-4h]
 
     if (!str)
         MyAssertHandler(".\\client\\cl_console.cpp", 1999, 0, "%s", "str");
@@ -3087,20 +3087,20 @@ void __cdecl ConDrawInput_DetailedDvarMatch(char *str)
     }
 }
 
-void __cdecl ConDrawInput_AutoCompleteArg(const char **stringList, int stringCount)
+void __cdecl ConDrawInput_AutoCompleteArg(const char **stringList, int32_t stringCount)
 {
-    int ArgChar; // eax
+    int32_t ArgChar; // eax
     Font_s *consoleFont; // [esp+10h] [ebp-4B0h]
-    int matchIndex; // [esp+48h] [ebp-478h]
-    signed int matchCount; // [esp+4Ch] [ebp-474h]
+    int32_t matchIndex; // [esp+48h] [ebp-478h]
+    int32_t matchCount; // [esp+4Ch] [ebp-474h]
     char matchBuffer[1024]; // [esp+50h] [ebp-470h] BYREF
-    int prefixLen; // [esp+458h] [ebp-68h]
-    int matchLenMax; // [esp+45Ch] [ebp-64h]
-    int matchLen; // [esp+460h] [ebp-60h]
+    int32_t prefixLen; // [esp+458h] [ebp-68h]
+    int32_t matchLenMax; // [esp+45Ch] [ebp-64h]
+    int32_t matchLen; // [esp+460h] [ebp-60h]
     const char *prefix; // [esp+464h] [ebp-5Ch]
     char *matches[16]; // [esp+468h] [ebp-58h] BYREF
-    int matchBufferUsed; // [esp+4A8h] [ebp-18h]
-    int stringIndex; // [esp+4ACh] [ebp-14h]
+    int32_t matchBufferUsed; // [esp+4A8h] [ebp-18h]
+    int32_t stringIndex; // [esp+4ACh] [ebp-14h]
     float x; // [esp+4B0h] [ebp-10h]
     float y; // [esp+4B4h] [ebp-Ch]
     float h; // [esp+4B8h] [ebp-8h]
@@ -3151,14 +3151,14 @@ void __cdecl ConDrawInput_AutoCompleteArg(const char **stringList, int stringCou
     }
 }
 
-int __cdecl ConDrawInput_CompareStrings(const char **e0, const char **e1)
+int32_t __cdecl ConDrawInput_CompareStrings(const char **e0, const char **e1)
 {
     return I_stricmp(*e0, *e1);
 }
 
-int __cdecl ConDrawInput_TextFieldFirstArgChar()
+int32_t __cdecl ConDrawInput_TextFieldFirstArgChar()
 {
-    int charIndex; // [esp+0h] [ebp-4h]
+    int32_t charIndex; // [esp+0h] [ebp-4h]
 
     for (charIndex = 0; isspace(g_consoleField.buffer[charIndex]); ++charIndex)
         ;
@@ -3169,11 +3169,11 @@ int __cdecl ConDrawInput_TextFieldFirstArgChar()
     return charIndex;
 }
 
-int __cdecl ConDrawInput_GetDvarDescriptionLines(const dvar_s *dvar)
+int32_t __cdecl ConDrawInput_GetDvarDescriptionLines(const dvar_s *dvar)
 {
-    signed int v1; // kr00_4
-    int linecount; // [esp+10h] [ebp-Ch]
-    int index; // [esp+14h] [ebp-8h]
+    int32_t v1; // kr00_4
+    int32_t linecount; // [esp+10h] [ebp-Ch]
+    int32_t index; // [esp+14h] [ebp-8h]
 
     if (!dvar->description)
         MyAssertHandler(".\\client\\cl_console.cpp", 1978, 0, "%s", "dvar->description");
@@ -3189,7 +3189,7 @@ int __cdecl ConDrawInput_GetDvarDescriptionLines(const dvar_s *dvar)
 
 void __cdecl ConDrawInput_DetailedCmdMatch(char *str)
 {
-    int fileCount; // [esp+0h] [ebp-8h] BYREF
+    int32_t fileCount; // [esp+0h] [ebp-8h] BYREF
     const char **files; // [esp+4h] [ebp-4h]
 
     if (!str)
@@ -3225,13 +3225,13 @@ void __cdecl ConDrawInput_CmdMatch(char *str)
     }
 }
 
-void __cdecl Con_DrawAutoCompleteChoice(int localClientNum, bool isDvarCommand, const char *originalCommand)
+void __cdecl Con_DrawAutoCompleteChoice(int32_t localClientNum, bool isDvarCommand, const char *originalCommand)
 {
-    int drawLen; // [esp+10h] [ebp-114h]
+    int32_t drawLen; // [esp+10h] [ebp-114h]
     char colorCodedLine[256]; // [esp+14h] [ebp-110h] BYREF
-    int cursorPos; // [esp+118h] [ebp-Ch]
-    int x; // [esp+11Ch] [ebp-8h]
-    int y; // [esp+120h] [ebp-4h]
+    int32_t cursorPos; // [esp+118h] [ebp-Ch]
+    int32_t x; // [esp+11Ch] [ebp-8h]
+    int32_t y; // [esp+120h] [ebp-4h]
 
     cursorPos = Con_GetAutoCompleteColorCodedString(
         conDrawInputGlob.autoCompleteChoice,
@@ -3256,15 +3256,15 @@ void __cdecl Con_DrawAutoCompleteChoice(int localClientNum, bool isDvarCommand, 
     Field_DrawTextOverride(localClientNum, &g_consoleField, x, y, 5, 5, colorCodedLine, drawLen, cursorPos);
 }
 
-unsigned int __cdecl Con_GetAutoCompleteColorCodedString(
+uint32_t __cdecl Con_GetAutoCompleteColorCodedString(
     char *query,
     const char *matchToText,
-    int matchTextLen,
+    int32_t matchTextLen,
     bool isDvarCommand,
     const char *originalCommand,
     char *colorCoded)
 {
-    unsigned int prefixLen; // [esp+0h] [ebp-4h]
+    uint32_t prefixLen; // [esp+0h] [ebp-4h]
 
     if (isDvarCommand)
         prefixLen = sprintf(colorCoded, "^2%s ", originalCommand);
@@ -3278,23 +3278,23 @@ unsigned int __cdecl Con_GetAutoCompleteColorCodedString(
         + Con_GetAutoCompleteColorCodedStringDiscontiguous(query, matchToText, matchTextLen, &colorCoded[prefixLen]);
 }
 
-int __cdecl Con_GetAutoCompleteColorCodedStringDiscontiguous(
+int32_t __cdecl Con_GetAutoCompleteColorCodedStringDiscontiguous(
     const char *query,
     const char *matchToText,
-    int matchTextLen,
+    int32_t matchTextLen,
     char *colorCoded)
 {
-    int v4; // eax
+    int32_t v4; // eax
     char v6; // [esp+13h] [ebp-29h]
     char *v7; // [esp+18h] [ebp-24h]
     const char *v8; // [esp+1Ch] [ebp-20h]
     const char *v9; // [esp+20h] [ebp-1Ch]
-    int matchLetter; // [esp+24h] [ebp-18h]
-    int colorCodedPos; // [esp+28h] [ebp-14h]
-    int colorCodedPosb; // [esp+28h] [ebp-14h]
-    int colorCodedPosa; // [esp+28h] [ebp-14h]
+    int32_t matchLetter; // [esp+24h] [ebp-18h]
+    int32_t colorCodedPos; // [esp+28h] [ebp-14h]
+    int32_t colorCodedPosb; // [esp+28h] [ebp-14h]
+    int32_t colorCodedPosa; // [esp+28h] [ebp-14h]
     char wasMatching; // [esp+2Fh] [ebp-Dh]
-    int matchTextPos; // [esp+30h] [ebp-Ch]
+    int32_t matchTextPos; // [esp+30h] [ebp-Ch]
     const char *queryPos; // [esp+34h] [ebp-8h]
     char isMatching; // [esp+3Bh] [ebp-1h]
 
@@ -3342,10 +3342,10 @@ int __cdecl Con_GetAutoCompleteColorCodedStringDiscontiguous(
     return colorCodedPosa;
 }
 
-int __cdecl Con_GetAutoCompleteColorCodedStringContiguous(
+int32_t __cdecl Con_GetAutoCompleteColorCodedStringContiguous(
     char *query,
     const char *matchToText,
-    int matchTextLen,
+    int32_t matchTextLen,
     char *colorCoded)
 {
     char v5; // [esp+13h] [ebp-59h]
@@ -3354,12 +3354,12 @@ int __cdecl Con_GetAutoCompleteColorCodedStringContiguous(
     char v8; // [esp+43h] [ebp-29h]
     char *v9; // [esp+48h] [ebp-24h]
     char *v10; // [esp+4Ch] [ebp-20h]
-    unsigned int v11; // [esp+50h] [ebp-1Ch]
-    int colorCodedPos; // [esp+60h] [ebp-Ch]
-    int colorCodedPosb; // [esp+60h] [ebp-Ch]
-    int colorCodedPosc; // [esp+60h] [ebp-Ch]
-    int colorCodedPosa; // [esp+60h] [ebp-Ch]
-    int colorCodedPosd; // [esp+60h] [ebp-Ch]
+    uint32_t v11; // [esp+50h] [ebp-1Ch]
+    int32_t colorCodedPos; // [esp+60h] [ebp-Ch]
+    int32_t colorCodedPosb; // [esp+60h] [ebp-Ch]
+    int32_t colorCodedPosc; // [esp+60h] [ebp-Ch]
+    int32_t colorCodedPosa; // [esp+60h] [ebp-Ch]
+    int32_t colorCodedPosd; // [esp+60h] [ebp-Ch]
     char *queryPos; // [esp+64h] [ebp-8h]
 
     if (!query)
@@ -3409,7 +3409,7 @@ int __cdecl Con_GetAutoCompleteColorCodedStringContiguous(
     return colorCodedPos;
 }
 
-void __cdecl Con_DrawInputPrompt(int localClientNum)
+void __cdecl Con_DrawInputPrompt(int32_t localClientNum)
 {
     Field_Draw(localClientNum, &g_consoleField, (int)conDrawInputGlob.x, (int)conDrawInputGlob.y, 5, 5);
 }
@@ -3490,11 +3490,11 @@ void __cdecl Con_DrawOutputScrollBar(float x, float y, float width, float height
 
 void __cdecl Con_DrawOutputText(float x, float y)
 {
-    int rowCount; // [esp+1Ch] [ebp-24h]
-    int firstRow; // [esp+20h] [ebp-20h]
+    int32_t rowCount; // [esp+1Ch] [ebp-24h]
+    int32_t firstRow; // [esp+20h] [ebp-20h]
     float color[4]; // [esp+28h] [ebp-18h] BYREF
-    int lineIndex; // [esp+38h] [ebp-8h]
-    int rowIndex; // [esp+3Ch] [ebp-4h]
+    int32_t lineIndex; // [esp+38h] [ebp-8h]
+    int32_t rowIndex; // [esp+3Ch] [ebp-4h]
 
     CL_LookupColor(0, 0x37u, color);
     if (!con.fontHeight)
@@ -3546,7 +3546,7 @@ char *__cdecl Con_GetVersionString()
 
 void __cdecl Con_PageUp()
 {
-    int activeLineCount; // [esp+0h] [ebp-4h]
+    int32_t activeLineCount; // [esp+0h] [ebp-4h]
 
     con.displayLineOffset -= 2;
     if (con.displayLineOffset < con.visibleLineCount)
@@ -3561,7 +3561,7 @@ void __cdecl Con_PageUp()
 
 void __cdecl Con_PageDown()
 {
-    int activeLineCount; // [esp+0h] [ebp-8h]
+    int32_t activeLineCount; // [esp+0h] [ebp-8h]
 
     if (con.displayLineOffset + 2 < con.consoleWindow.activeLineCount)
         activeLineCount = con.displayLineOffset + 2;
@@ -3572,7 +3572,7 @@ void __cdecl Con_PageDown()
 
 void __cdecl Con_Top()
 {
-    int activeLineCount; // [esp+0h] [ebp-4h]
+    int32_t activeLineCount; // [esp+0h] [ebp-4h]
 
     if (con.consoleWindow.activeLineCount < con.visibleLineCount)
         activeLineCount = con.consoleWindow.activeLineCount;
@@ -3586,9 +3586,9 @@ void __cdecl Con_Bottom()
     con.displayLineOffset = con.consoleWindow.activeLineCount;
 }
 
-void __cdecl Con_Close(int localClientNum)
+void __cdecl Con_Close(int32_t localClientNum)
 {
-    int client; // [esp+0h] [ebp-4h]
+    int32_t client; // [esp+0h] [ebp-4h]
 
     if (localClientNum)
         MyAssertHandler(
@@ -3610,23 +3610,23 @@ void __cdecl Con_Close(int localClientNum)
     }
 }
 
-bool __cdecl Con_IsActive(int localClientNum)
+bool __cdecl Con_IsActive(int32_t localClientNum)
 {
     return Key_IsCatcherActive(localClientNum, 1);
 }
 
 void __cdecl CL_PlayTextFXPulseSounds(
-    unsigned int localClientNum,
-    int currentTime,
-    int strLength,
-    int fxBirthTime,
-    int fxLetterTime,
-    int fxDecayStartTime,
-    int *soundTimeKeeper)
+    uint32_t localClientNum,
+    int32_t currentTime,
+    int32_t strLength,
+    int32_t fxBirthTime,
+    int32_t fxLetterTime,
+    int32_t fxDecayStartTime,
+    int32_t *soundTimeKeeper)
 {
-    int timeElapsed; // [esp+8h] [ebp-Ch]
-    int lastSoundTime; // [esp+Ch] [ebp-8h]
-    int decayStartTime; // [esp+10h] [ebp-4h]
+    int32_t timeElapsed; // [esp+8h] [ebp-Ch]
+    int32_t lastSoundTime; // [esp+Ch] [ebp-8h]
+    int32_t decayStartTime; // [esp+10h] [ebp-4h]
 
     timeElapsed = currentTime - fxBirthTime;
     lastSoundTime = *soundTimeKeeper - fxBirthTime;

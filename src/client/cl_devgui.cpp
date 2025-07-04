@@ -12,7 +12,7 @@ struct ClGuiGlob // $1629A71A7F425F55F16AD3AC356BC9AE // sizeof=0x248
     // padding byte
     // padding byte
     // padding byte
-    int mapDirCount;                    // ...
+    int32_t mapDirCount;                    // ...
     char mapDirs[8][64];                // ...
     const char **mapNames[8];           // ...
     const dvar_s *mapEnumDvar[8];       // ...
@@ -22,10 +22,10 @@ struct ClGuiGlob // $1629A71A7F425F55F16AD3AC356BC9AE // sizeof=0x248
 
 ClGuiGlob clGuiGlob;
 
-void __cdecl CL_DevGuiFrame(int localClientNum)
+void __cdecl CL_DevGuiFrame(int32_t localClientNum)
 {
-    int v1; // eax
-    int dvarIndex; // [esp+0h] [ebp-14h]
+    int32_t v1; // eax
+    int32_t dvarIndex; // [esp+0h] [ebp-14h]
     const char *name; // [esp+8h] [ebp-Ch]
     const dvar_s *dvar; // [esp+Ch] [ebp-8h]
     char *cmd; // [esp+10h] [ebp-4h]
@@ -64,10 +64,10 @@ const dvar_s *CL_RegisterDevGuiDvars()
     return result;
 }
 
-int CL_UnregisterDevGuiDvars()
+int32_t CL_UnregisterDevGuiDvars()
 {
-    int result; // eax
-    int dvarIndex; // [esp+0h] [ebp-4h]
+    int32_t result; // eax
+    int32_t dvarIndex; // [esp+0h] [ebp-4h]
 
     for (dvarIndex = 0; dvarIndex < 8; ++dvarIndex)
     {
@@ -77,14 +77,14 @@ int CL_UnregisterDevGuiDvars()
     return result;
 }
 
-void __cdecl CL_AddMapDirSlider(char *dir, int locationFlags, const char *locationName)
+void __cdecl CL_AddMapDirSlider(char *dir, int32_t locationFlags, const char *locationName)
 {
     char *devguiPath; // [esp+0h] [ebp-18h]
     char *fullDir; // [esp+4h] [ebp-14h]
-    int fileIndex; // [esp+8h] [ebp-10h]
+    int32_t fileIndex; // [esp+8h] [ebp-10h]
     const char **fileList; // [esp+Ch] [ebp-Ch]
     const dvar_s *dvar; // [esp+10h] [ebp-8h]
-    int fileCount; // [esp+14h] [ebp-4h] BYREF
+    int32_t fileCount; // [esp+14h] [ebp-4h] BYREF
 
     fullDir = va("maps/%s", dir);
     fileList = FS_ListFilesInLocation(fullDir, "d3dbsp", FS_LIST_PURE_ONLY, &fileCount, locationFlags);
@@ -109,11 +109,11 @@ void __cdecl CL_AddMapDirSlider(char *dir, int locationFlags, const char *locati
     }
 }
 
-void __cdecl CL_CreateMapMenuEntriesForLocation(int locationFlags, const char *locationName)
+void __cdecl CL_CreateMapMenuEntriesForLocation(int32_t locationFlags, const char *locationName)
 {
-    int dirCount; // [esp+0h] [ebp-Ch] BYREF
+    int32_t dirCount; // [esp+0h] [ebp-Ch] BYREF
     const char **dirList; // [esp+4h] [ebp-8h]
-    int dirIndex; // [esp+8h] [ebp-4h]
+    int32_t dirIndex; // [esp+8h] [ebp-4h]
 
     CL_AddMapDirSlider((char*)"", locationFlags, locationName);
     dirList = FS_ListFiles("maps", "/", FS_LIST_PURE_ONLY, &dirCount);
@@ -147,7 +147,7 @@ void __cdecl CL_CreateDevGui()
 
 void __cdecl CL_DestroyDevGui()
 {
-    int dvarIndex; // [esp+0h] [ebp-4h]
+    int32_t dvarIndex; // [esp+0h] [ebp-4h]
 
     if (!clGuiGlob.inited)
         MyAssertHandler(".\\client\\cl_devgui.cpp", 219, 0, "%s", "clGuiGlob.inited");
