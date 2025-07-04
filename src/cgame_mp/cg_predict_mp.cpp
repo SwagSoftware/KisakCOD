@@ -12,8 +12,8 @@
 
 static pmove_t cg_pmove[1];
 static centity_s* cg_itemEntities[512];
-static int cg_itemEntityCount;
-static int cg_itemLocalClientNum;
+static int32_t cg_itemEntityCount;
+static int32_t cg_itemLocalClientNum;
 
 void __cdecl TRACK_cg_predict()
 {
@@ -21,7 +21,7 @@ void __cdecl TRACK_cg_predict()
     track_static_alloc_internal(cg_itemEntities, 2048, "cg_itemEntities", 9);
 }
 
-int __cdecl CG_ItemListLocalClientNum()
+int32_t __cdecl CG_ItemListLocalClientNum()
 {
     return cg_itemLocalClientNum;
 }
@@ -31,10 +31,10 @@ void __cdecl CG_ClearItemList()
     cg_itemEntityCount = 0;
 }
 
-void __cdecl CG_BuildItemList(int localClientNum, const snapshot_s *nextSnap)
+void __cdecl CG_BuildItemList(int32_t localClientNum, const snapshot_s *nextSnap)
 {
     centity_s *cent; // [esp+0h] [ebp-Ch]
-    int entIndex; // [esp+4h] [ebp-8h]
+    int32_t entIndex; // [esp+4h] [ebp-8h]
 
     if (!nextSnap)
         MyAssertHandler(".\\cgame_mp\\cg_predict_mp.cpp", 70, 0, "%s", "nextSnap");
@@ -50,7 +50,7 @@ void __cdecl CG_BuildItemList(int localClientNum, const snapshot_s *nextSnap)
     }
 }
 
-void __cdecl CG_PredictPlayerState(int localClientNum)
+void __cdecl CG_PredictPlayerState(int32_t localClientNum)
 {
     centity_s* Entity; // eax
     double v2; // st7
@@ -107,7 +107,7 @@ void __cdecl CG_PredictPlayerState(int localClientNum)
     CL_SendCmd(localClientNum);
 }
 
-void __cdecl CG_PredictPlayerState_Internal(int localClientNum)
+void __cdecl CG_PredictPlayerState_Internal(int32_t localClientNum)
 {
     float v1; // [esp+10h] [ebp-188h]
     float v2; // [esp+14h] [ebp-184h]
@@ -120,8 +120,8 @@ void __cdecl CG_PredictPlayerState_Internal(int localClientNum)
     float v10; // [esp+54h] [ebp-144h]
     float* viewangles; // [esp+58h] [ebp-140h]
     float* predictedError; // [esp+8Ch] [ebp-10Ch]
-    int timeSinceStart; // [esp+B8h] [ebp-E0h]
-    int smoothingDuration; // [esp+BCh] [ebp-DCh]
+    int32_t timeSinceStart; // [esp+B8h] [ebp-E0h]
+    int32_t smoothingDuration; // [esp+BCh] [ebp-DCh]
     float lerp; // [esp+C0h] [ebp-D8h]
     float diff; // [esp+C4h] [ebp-D4h]
     float stepRemaining; // [esp+C8h] [ebp-D0h]
@@ -131,18 +131,18 @@ void __cdecl CG_PredictPlayerState_Internal(int localClientNum)
     float len; // [esp+F0h] [ebp-A8h]
     transPlayerState_t oldTransPlayerState; // [esp+F4h] [ebp-A4h] BYREF
     cg_s* cgameGlob; // [esp+10Ch] [ebp-8Ch]
-    int bPredictionRun; // [esp+110h] [ebp-88h]
+    int32_t bPredictionRun; // [esp+110h] [ebp-88h]
     usercmd_s latestCmd; // [esp+114h] [ebp-84h] BYREF
     float oldViewangles[3]; // [esp+134h] [ebp-64h]
     float deltaAngles[3]; // [esp+140h] [ebp-58h] BYREF
-    int cmdNum; // [esp+14Ch] [ebp-4Ch]
+    int32_t cmdNum; // [esp+14Ch] [ebp-4Ch]
     const playerState_s* oldPlayerState; // [esp+150h] [ebp-48h]
     float oldOrigin[3]; // [esp+154h] [ebp-44h] BYREF
     usercmd_s oldestCmd; // [esp+160h] [ebp-38h] BYREF
-    int oldCommandTime; // [esp+184h] [ebp-14h]
+    int32_t oldCommandTime; // [esp+184h] [ebp-14h]
     const playerState_s* ps; // [esp+188h] [ebp-10h]
     float oldVelocity[2]; // [esp+18Ch] [ebp-Ch]
-    int current; // [esp+194h] [ebp-4h]
+    int32_t current; // [esp+194h] [ebp-4h]
 
     PROF_SCOPED("CG_PredictPlayerState");
 
@@ -188,8 +188,8 @@ void __cdecl CG_PredictPlayerState_Internal(int localClientNum)
             CG_ExtractTransPlayerState(&cgameGlob->predictedPlayerState, &oldTransPlayerState);
             CL_GetUserCmd(localClientNum, current, &latestCmd);
             memcpy(
-                (unsigned __int8*)&cgameGlob->predictedPlayerState,
-                (unsigned __int8*)ps,
+                (uint8_t*)&cgameGlob->predictedPlayerState,
+                (uint8_t*)ps,
                 sizeof(cgameGlob->predictedPlayerState));
             cgameGlob->physicsTime = cgameGlob->nextSnap->serverTime;
             //*(_QWORD*)cgameGlob->predictedPlayerState.oldVelocity = oldVelocity;
@@ -351,10 +351,10 @@ void __cdecl CG_PredictPlayerState_Internal(int localClientNum)
     }
 }
 
-void __cdecl CG_TouchItemPrediction(int localClientNum)
+void __cdecl CG_TouchItemPrediction(int32_t localClientNum)
 {
     centity_s *cent; // [esp+4h] [ebp-8h]
-    int entIndex; // [esp+8h] [ebp-4h]
+    int32_t entIndex; // [esp+8h] [ebp-4h]
     cg_s *cgameGlob;
 
     cgameGlob = CG_GetLocalClientGlobals(localClientNum);
@@ -372,7 +372,7 @@ void __cdecl CG_TouchItemPrediction(int localClientNum)
 
 void __cdecl CG_TouchItem(cg_s *cgameGlob, centity_s *cent)
 {
-    int bitNum; // [esp+0h] [ebp-8h]
+    int32_t bitNum; // [esp+0h] [ebp-8h]
 
     iassert(cgameGlob);
     iassert(cent);
@@ -398,7 +398,7 @@ void __cdecl CG_TouchItem(cg_s *cgameGlob, centity_s *cent)
     }
 }
 
-void __cdecl CG_InterpolatePlayerState(int localClientNum, int grabAngles)
+void __cdecl CG_InterpolatePlayerState(int32_t localClientNum, int32_t grabAngles)
 {
     float v2; // [esp+Ch] [ebp-7Ch]
     float v3; // [esp+10h] [ebp-78h]
@@ -412,14 +412,14 @@ void __cdecl CG_InterpolatePlayerState(int localClientNum, int grabAngles)
     float v11; // [esp+38h] [ebp-50h]
     float v12; // [esp+3Ch] [ebp-4Ch]
     float v13; // [esp+44h] [ebp-44h]
-    int cmdNum; // [esp+48h] [ebp-40h]
+    int32_t cmdNum; // [esp+48h] [ebp-40h]
     usercmd_s cmd; // [esp+4Ch] [ebp-3Ch] BYREF
     playerState_s* out; // [esp+70h] [ebp-18h]
     cg_s* cgameGlob; // [esp+74h] [ebp-14h]
     const snapshot_s* prevSnap; // [esp+78h] [ebp-10h]
     const snapshot_s* nextSnap; // [esp+7Ch] [ebp-Ch]
     float f; // [esp+80h] [ebp-8h]
-    int i; // [esp+84h] [ebp-4h]
+    int32_t i; // [esp+84h] [ebp-4h]
 
     cgameGlob = CG_GetLocalClientGlobals(localClientNum);
     out = &cgameGlob->predictedPlayerState;
@@ -429,7 +429,7 @@ void __cdecl CG_InterpolatePlayerState(int localClientNum, int grabAngles)
     iassert(prevSnap);
     iassert(nextSnap);
 
-    memcpy((unsigned __int8*)out, (unsigned __int8*)&nextSnap->ps, sizeof(playerState_s));
+    memcpy((uint8_t*)out, (uint8_t*)&nextSnap->ps, sizeof(playerState_s));
     if (grabAngles)
     {
         cmdNum = CL_GetCurrentCmdNumber(localClientNum);

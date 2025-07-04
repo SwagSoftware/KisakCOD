@@ -11,17 +11,17 @@
 
 // struct lagometer_t lagometer 82829b60     cg_draw_net_mp.obj
 
-unsigned __int8 *s_clientAnalysisData;
-int s_sampleNum;
-int s_entitySamples[10][18];
+uint8_t *s_clientAnalysisData;
+int32_t s_sampleNum;
+int32_t s_entitySamples[10][18];
 
 struct lagometer_t // sizeof=0x608
 {                                       // ...
-    int frameSamples[128];              // ...
-    int frameCount;                     // ...
-    int snapshotFlags[128];             // ...
-    int snapshotSamples[128];           // ...
-    int snapshotCount;                  // ...
+    int32_t frameSamples[128];              // ...
+    int32_t frameCount;                     // ...
+    int32_t snapshotFlags[128];             // ...
+    int32_t snapshotSamples[128];           // ...
+    int32_t snapshotCount;                  // ...
 };
 
 lagometer_t lagometer;
@@ -46,9 +46,9 @@ void __cdecl CG_AddLagometerSnapshotInfo(snapshot_s *snap)
     ++lagometer.snapshotCount;
 }
 
-void __cdecl CG_DrawSnapshotAnalysis(int localClientNum)
+void __cdecl CG_DrawSnapshotAnalysis(int32_t localClientNum)
 {
-    int v1; // eax
+    int32_t v1; // eax
     float v2; // [esp+Ch] [ebp-D8h]
     double v3; // [esp+2Ch] [ebp-B8h]
     float v4; // [esp+34h] [ebp-B0h]
@@ -58,30 +58,30 @@ void __cdecl CG_DrawSnapshotAnalysis(int localClientNum)
     float v8; // [esp+50h] [ebp-94h]
     float v9; // [esp+54h] [ebp-90h]
     float v10; // [esp+58h] [ebp-8Ch]
-    int client; // [esp+68h] [ebp-7Ch]
-    int frame; // [esp+6Ch] [ebp-78h]
-    int arrayFrame; // [esp+70h] [ebp-74h]
-    int arrayFramea; // [esp+70h] [ebp-74h]
-    int arrayFrameb; // [esp+70h] [ebp-74h]
-    int bitsUsed; // [esp+74h] [ebp-70h]
-    int field; // [esp+78h] [ebp-6Ch]
-    int fielda; // [esp+78h] [ebp-6Ch]
-    unsigned int fieldb; // [esp+78h] [ebp-6Ch]
-    int fieldc; // [esp+78h] [ebp-6Ch]
-    int sortedSamples[13]; // [esp+7Ch] [ebp-68h] BYREF
+    int32_t client; // [esp+68h] [ebp-7Ch]
+    int32_t frame; // [esp+6Ch] [ebp-78h]
+    int32_t arrayFrame; // [esp+70h] [ebp-74h]
+    int32_t arrayFramea; // [esp+70h] [ebp-74h]
+    int32_t arrayFrameb; // [esp+70h] [ebp-74h]
+    int32_t bitsUsed; // [esp+74h] [ebp-70h]
+    int32_t field; // [esp+78h] [ebp-6Ch]
+    int32_t fielda; // [esp+78h] [ebp-6Ch]
+    uint32_t fieldb; // [esp+78h] [ebp-6Ch]
+    int32_t fieldc; // [esp+78h] [ebp-6Ch]
+    int32_t sortedSamples[13]; // [esp+7Ch] [ebp-68h] BYREF
     const char *string; // [esp+B0h] [ebp-34h]
     cg_s *cgameGlob; // [esp+B4h] [ebp-30h]
     float height; // [esp+B8h] [ebp-2Ch]
     float width; // [esp+BCh] [ebp-28h]
     cgs_t *cgs; // [esp+C0h] [ebp-24h]
-    int entity; // [esp+C4h] [ebp-20h]
-    int column; // [esp+C8h] [ebp-1Ch]
+    int32_t entity; // [esp+C4h] [ebp-20h]
+    int32_t column; // [esp+C8h] [ebp-1Ch]
     float x; // [esp+CCh] [ebp-18h]
     float y; // [esp+D0h] [ebp-14h]
     const float (*color)[4]; // [esp+D4h] [ebp-10h]
-    int fieldCount; // [esp+D8h] [ebp-Ch]
-    int v; // [esp+DCh] [ebp-8h]
-    int eType; // [esp+E0h] [ebp-4h]
+    int32_t fieldCount; // [esp+D8h] [ebp-Ch]
+    int32_t v; // [esp+DCh] [ebp-8h]
+    int32_t eType; // [esp+E0h] [ebp-4h]
 
     fieldCount = 13;
 
@@ -115,10 +115,10 @@ void __cdecl CG_DrawSnapshotAnalysis(int localClientNum)
                         }
                     }
                     arrayFramea = cgameGlob->packetAnalysisFrameCount % 10;
-                    memset((unsigned __int8 *)cgameGlob->entBitsUsed[arrayFramea], 0, sizeof(cgameGlob->entBitsUsed[arrayFramea]));
-                    memset((unsigned __int8 *)cgameGlob->numEntsSent[arrayFramea], 0, sizeof(cgameGlob->numEntsSent[arrayFramea]));
+                    memset((uint8_t *)cgameGlob->entBitsUsed[arrayFramea], 0, sizeof(cgameGlob->entBitsUsed[arrayFramea]));
+                    memset((uint8_t *)cgameGlob->numEntsSent[arrayFramea], 0, sizeof(cgameGlob->numEntsSent[arrayFramea]));
                     memset(
-                        (unsigned __int8 *)cgameGlob->numEntFields[arrayFramea],
+                        (uint8_t *)cgameGlob->numEntFields[arrayFramea],
                         0,
                         sizeof(cgameGlob->numEntFields[arrayFramea]));
                     for (entity = 0; entity < 1024; ++entity)
@@ -345,10 +345,10 @@ void __cdecl CG_DrawSnapshotAnalysis(int localClientNum)
     }
 }
 
-int __cdecl CG_ComparePacketAnalysisSamples(int *a, int *b)
+int32_t __cdecl CG_ComparePacketAnalysisSamples(int32_t *a, int32_t *b)
 {
-    int field0; // [esp+0h] [ebp-8h]
-    int field1; // [esp+4h] [ebp-4h]
+    int32_t field0; // [esp+0h] [ebp-8h]
+    int32_t field1; // [esp+4h] [ebp-4h]
 
     field0 = *a;
     field1 = *b;
@@ -357,7 +357,7 @@ int __cdecl CG_ComparePacketAnalysisSamples(int *a, int *b)
     return s_clientAnalysisData[field1] - s_clientAnalysisData[field0];
 }
 
-void __cdecl CG_DrawSnapshotEntityAnalysis(int localClientNum)
+void __cdecl CG_DrawSnapshotEntityAnalysis(int32_t localClientNum)
 {
     const dvar_s *v2; // kr00_4
     const char *v3; // eax
@@ -378,29 +378,29 @@ void __cdecl CG_DrawSnapshotEntityAnalysis(int localClientNum)
     float v18; // [esp+8Ch] [ebp-B0h]
     float graphx; // [esp+94h] [ebp-A8h]
     float lineHeight; // [esp+9Ch] [ebp-A0h]
-    int field; // [esp+A0h] [ebp-9Ch]
-    int fielda; // [esp+A0h] [ebp-9Ch]
-    int entsSentWhenMax; // [esp+A4h] [ebp-98h]
-    int maxEntsSent; // [esp+A8h] [ebp-94h]
-    int totalBitsUsed; // [esp+ACh] [ebp-90h]
+    int32_t field; // [esp+A0h] [ebp-9Ch]
+    int32_t fielda; // [esp+A0h] [ebp-9Ch]
+    int32_t entsSentWhenMax; // [esp+A4h] [ebp-98h]
+    int32_t maxEntsSent; // [esp+A8h] [ebp-94h]
+    int32_t totalBitsUsed; // [esp+ACh] [ebp-90h]
     const char *string; // [esp+B0h] [ebp-8Ch]
-    int sortedSamples[18]; // [esp+B4h] [ebp-88h] BYREF
+    int32_t sortedSamples[18]; // [esp+B4h] [ebp-88h] BYREF
     cg_s *cgameGlob; // [esp+FCh] [ebp-40h]
     float graphy; // [esp+100h] [ebp-3Ch]
     float height; // [esp+104h] [ebp-38h]
     float width; // [esp+108h] [ebp-34h]
-    int totalEntFields; // [esp+10Ch] [ebp-30h]
-    int maxBitsUsed; // [esp+110h] [ebp-2Ch]
+    int32_t totalEntFields; // [esp+10Ch] [ebp-30h]
+    int32_t maxBitsUsed; // [esp+110h] [ebp-2Ch]
     cgs_t *cgs; // [esp+114h] [ebp-28h]
-    int stat; // [esp+118h] [ebp-24h]
+    int32_t stat; // [esp+118h] [ebp-24h]
     float x; // [esp+11Ch] [ebp-20h]
     float y; // [esp+120h] [ebp-1Ch]
     const float (*color)[4]; // [esp+124h] [ebp-18h]
-    int sample; // [esp+128h] [ebp-14h]
-    int count; // [esp+12Ch] [ebp-10h]
-    int eType; // [esp+130h] [ebp-Ch]
-    int totalEntsSent; // [esp+134h] [ebp-8h]
-    int maxEntFields; // [esp+138h] [ebp-4h]
+    int32_t sample; // [esp+128h] [ebp-14h]
+    int32_t count; // [esp+12Ch] [ebp-10h]
+    int32_t eType; // [esp+130h] [ebp-Ch]
+    int32_t totalEntsSent; // [esp+134h] [ebp-8h]
+    int32_t maxEntFields; // [esp+138h] [ebp-4h]
 
     cgs = CG_GetLocalClientStaticGlobals(localClientNum);
 
@@ -683,12 +683,12 @@ void __cdecl CG_DrawSnapshotEntityAnalysis(int localClientNum)
     }
 }
 
-int __cdecl CG_CompareEntityAnalysisSamples(unsigned int *a, unsigned int *b)
+int32_t __cdecl CG_CompareEntityAnalysisSamples(uint32_t *a, uint32_t *b)
 {
     return s_entitySamples[s_sampleNum][*b] - s_entitySamples[s_sampleNum][*a];
 }
 
-void __cdecl CG_DrawPingAnalysis(int localClientNum)
+void __cdecl CG_DrawPingAnalysis(int32_t localClientNum)
 {
     float v1; // [esp+30h] [ebp-60h]
     float v2; // [esp+38h] [ebp-58h]
@@ -697,9 +697,9 @@ void __cdecl CG_DrawPingAnalysis(int localClientNum)
     float v5; // [esp+50h] [ebp-40h]
     float v6; // [esp+54h] [ebp-3Ch]
     float v7; // [esp+58h] [ebp-38h]
-    int client; // [esp+5Ch] [ebp-34h]
-    int frame; // [esp+60h] [ebp-30h]
-    int ping; // [esp+64h] [ebp-2Ch]
+    int32_t client; // [esp+5Ch] [ebp-34h]
+    int32_t frame; // [esp+60h] [ebp-30h]
+    int32_t ping; // [esp+64h] [ebp-2Ch]
     float height; // [esp+6Ch] [ebp-24h]
     float lineColor[6]; // [esp+70h] [ebp-20h] BYREF
     float x; // [esp+88h] [ebp-8h]
@@ -802,7 +802,7 @@ void __cdecl CG_DrawPingAnalysis(int localClientNum)
     }
 }
 
-void __cdecl CG_DrawLagometer(int localClientNum)
+void __cdecl CG_DrawLagometer(int32_t localClientNum)
 {
     float v1; // [esp+30h] [ebp-64h]
     float v2; // [esp+34h] [ebp-60h]
@@ -822,8 +822,8 @@ void __cdecl CG_DrawLagometer(int localClientNum)
     float v16; // [esp+64h] [ebp-30h]
     float v17; // [esp+6Ch] [ebp-28h]
     float ay; // [esp+74h] [ebp-20h]
-    int a; // [esp+78h] [ebp-1Ch]
-    int aa; // [esp+78h] [ebp-1Ch]
+    int32_t a; // [esp+78h] [ebp-1Ch]
+    int32_t aa; // [esp+78h] [ebp-1Ch]
     float aw; // [esp+84h] [ebp-10h]
     float vd; // [esp+8Ch] [ebp-8h]
     float v; // [esp+8Ch] [ebp-8h]
@@ -908,21 +908,21 @@ void __cdecl CG_DrawLagometer(int localClientNum)
     CG_DrawDisconnect(localClientNum);
 }
 
-bool __cdecl CL_IsServerRestarting(int localClientNum)
+bool __cdecl CL_IsServerRestarting(int32_t localClientNum)
 {
     return CL_GetLocalClientConnection(localClientNum)->isServerRestarting;
 
 }
-void __cdecl CG_DrawDisconnect(int localClientNum)
+void __cdecl CG_DrawDisconnect(int32_t localClientNum)
 {
     Material *disconnectMaterial; // [esp+24h] [ebp-48h]
     Font_s *font; // [esp+28h] [ebp-44h]
     ScreenPlacement *scrPlace; // [esp+2Ch] [ebp-40h]
-    int cmdNum; // [esp+34h] [ebp-38h]
+    int32_t cmdNum; // [esp+34h] [ebp-38h]
     char *s; // [esp+38h] [ebp-34h]
     float x; // [esp+3Ch] [ebp-30h]
     usercmd_s cmd; // [esp+44h] [ebp-28h] BYREF
-    int w; // [esp+68h] [ebp-4h]
+    int32_t w; // [esp+68h] [ebp-4h]
     cg_s *cgameGlob;
 
     if (!CL_IsServerRestarting(localClientNum))

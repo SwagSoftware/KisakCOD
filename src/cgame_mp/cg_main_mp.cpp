@@ -1170,7 +1170,7 @@ void __cdecl TRACK_cg_main()
     track_static_alloc_internal(cg_entityOriginArray, 12288, "cg_entityOriginArray", 9);
 }
 
-void __cdecl CG_GetDObjOrientation(int localClientNum, signed int dobjHandle, mat3x3 &axis, float *origin)
+void __cdecl CG_GetDObjOrientation(int32_t localClientNum, int32_t dobjHandle, mat3x3 &axis, float *origin)
 {
     centity_s *cent; // [esp+Ch] [ebp-4h]
     const cg_s *cgameGlob;
@@ -1208,7 +1208,7 @@ void __cdecl CG_GetSoundEntityOrientation(SndEntHandle sndEnt, float *origin_out
         CG_CopyClientSideSoundEntityOrientation(sndEnt.field.entIndex - 1024, origin_out, axis_out);
 }
 
-void __cdecl CG_CopyEntityOrientation(int localClientNum, int entIndex, float *origin_out, float (*axis_out)[3])
+void __cdecl CG_CopyEntityOrientation(int32_t localClientNum, int32_t entIndex, float *origin_out, float (*axis_out)[3])
 {
     centity_s *Entity; // eax
 
@@ -1223,17 +1223,17 @@ void __cdecl CG_CopyEntityOrientation(int localClientNum, int entIndex, float *o
     AnglesToAxis(Entity->pose.angles, axis_out);
 }
 
-const playerState_s *__cdecl CG_GetPredictedPlayerState(int localClientNum)
+const playerState_s *__cdecl CG_GetPredictedPlayerState(int32_t localClientNum)
 {
     return &CG_GetLocalClientGlobals(localClientNum)->predictedPlayerState;
 }
 
-void __cdecl CG_GameMessage(int localClientNum, const char *msg)
+void __cdecl CG_GameMessage(int32_t localClientNum, const char *msg)
 {
     CL_ConsolePrint(localClientNum, 2, msg, 0, cg_gameMessageWidth->current.integer, 0);
 }
 
-void __cdecl CG_BoldGameMessage(int localClientNum, const char *msg)
+void __cdecl CG_BoldGameMessage(int32_t localClientNum, const char *msg)
 {
     CL_ConsolePrint(localClientNum, 3, msg, 0, cg_gameBoldMessageWidth->current.integer, 0);
 }
@@ -1305,8 +1305,8 @@ void __cdecl CG_RegisterSurfaceTypeSounds(const char *pszType, snd_alias_list_t 
     const char *v2; // eax
     snd_alias_list_t *defaultAliasList; // [esp+0h] [ebp-110h]
     snd_alias_list_t *defaultAliasLista; // [esp+0h] [ebp-110h]
-    int i; // [esp+4h] [ebp-10Ch]
-    int ia; // [esp+4h] [ebp-10Ch]
+    int32_t i; // [esp+4h] [ebp-10Ch]
+    int32_t ia; // [esp+4h] [ebp-10Ch]
     char szAliasName[260]; // [esp+8h] [ebp-108h] BYREF
 
     if (!pszType)
@@ -1337,10 +1337,10 @@ void CG_RegisterPhysicsSounds_LoadObj()
 {
     char classes[50][64]; // [esp+0h] [ebp-C98h] BYREF
     PhysPreset *physPreset; // [esp+C84h] [ebp-14h]
-    int nclasses; // [esp+C88h] [ebp-10h] BYREF
+    int32_t nclasses; // [esp+C88h] [ebp-10h] BYREF
     const char **physicsFiles; // [esp+C8Ch] [ebp-Ch]
-    int i; // [esp+C90h] [ebp-8h]
-    int physPresetCount; // [esp+C94h] [ebp-4h] BYREF
+    int32_t i; // [esp+C90h] [ebp-8h]
+    int32_t physPresetCount; // [esp+C94h] [ebp-4h] BYREF
 
     nclasses = 0;
     physicsFiles = FS_ListFilesInLocation("physic", "", FS_LIST_PURE_ONLY, &physPresetCount, 59);
@@ -1374,9 +1374,9 @@ void CG_RegisterPhysicsSounds_FastFile()
 {
     char classes[50][64]; // [esp+0h] [ebp-D60h] BYREF
     PhysPreset *physPreset; // [esp+C88h] [ebp-D8h]
-    int nclasses; // [esp+C8Ch] [ebp-D4h] BYREF
-    int i; // [esp+C90h] [ebp-D0h]
-    int physPresetCount; // [esp+C94h] [ebp-CCh]
+    int32_t nclasses; // [esp+C8Ch] [ebp-D4h] BYREF
+    int32_t i; // [esp+C90h] [ebp-D0h]
+    int32_t physPresetCount; // [esp+C94h] [ebp-CCh]
     XAssetHeader assets[50]; // [esp+C98h] [ebp-C8h] BYREF
 
     nclasses = 0;
@@ -1388,9 +1388,9 @@ void CG_RegisterPhysicsSounds_FastFile()
     }
 }
 
-void __cdecl CG_AddAudioPhysicsClass(PhysPreset *physPreset, char (*classes)[64], int *nclasses)
+void __cdecl CG_AddAudioPhysicsClass(PhysPreset *physPreset, char (*classes)[64], int32_t *nclasses)
 {
-    int i; // [esp+0h] [ebp-4h]
+    int32_t i; // [esp+0h] [ebp-4h]
 
     if (!physPreset)
         MyAssertHandler(".\\cgame_mp\\cg_main_mp.cpp", 900, 0, "%s", "physPreset");
@@ -1414,13 +1414,13 @@ void __cdecl CG_AddAudioPhysicsClass(PhysPreset *physPreset, char (*classes)[64]
     ++*nclasses;
 }
 
-void __cdecl CG_StartAmbient(int localClientNum)
+void __cdecl CG_StartAmbient(int32_t localClientNum)
 {
-    int fadetime; // [esp+10h] [ebp-18h]
+    int32_t fadetime; // [esp+10h] [ebp-18h]
     char *pszInfoString; // [esp+14h] [ebp-14h]
     const char *pszFadeTime; // [esp+18h] [ebp-10h]
     const char *aliasName; // [esp+1Ch] [ebp-Ch]
-    int time; // [esp+20h] [ebp-8h]
+    int32_t time; // [esp+20h] [ebp-8h]
     snd_alias_t *alias; // [esp+24h] [ebp-4h]
     const cg_s *cgameGlob;
 
@@ -1443,7 +1443,7 @@ void __cdecl CG_StartAmbient(int localClientNum)
     }
 }
 
-int __cdecl CG_PlayClientSoundAlias(int localClientNum, snd_alias_list_t *aliasList)
+int32_t __cdecl CG_PlayClientSoundAlias(int32_t localClientNum, snd_alias_list_t *aliasList)
 {
     const cg_s *cgameGlob;
     cgameGlob = CG_GetLocalClientGlobals(localClientNum);
@@ -1451,7 +1451,7 @@ int __cdecl CG_PlayClientSoundAlias(int localClientNum, snd_alias_list_t *aliasL
     return CG_PlaySoundAlias(localClientNum, cgameGlob->nextSnap->ps.clientNum, cgameGlob->nextSnap->ps.origin, aliasList);
 }
 
-int __cdecl CG_PlayClientSoundAliasByName(int localClientNum, const char *aliasname)
+int32_t __cdecl CG_PlayClientSoundAliasByName(int32_t localClientNum, const char *aliasname)
 {
     const cg_s *cgameGlob;
     cgameGlob = CG_GetLocalClientGlobals(localClientNum);
@@ -1463,7 +1463,7 @@ int __cdecl CG_PlayClientSoundAliasByName(int localClientNum, const char *aliasn
         aliasname);
 }
 
-int __cdecl CG_PlayEntitySoundAlias(int localClientNum, int entitynum, snd_alias_list_t *aliasList)
+int32_t __cdecl CG_PlayEntitySoundAlias(int32_t localClientNum, int32_t entitynum, snd_alias_list_t *aliasList)
 {
     centity_s *Entity; // eax
 
@@ -1471,7 +1471,7 @@ int __cdecl CG_PlayEntitySoundAlias(int localClientNum, int entitynum, snd_alias
     return CG_PlaySoundAlias(localClientNum, entitynum, Entity->nextState.lerp.pos.trBase, aliasList);
 }
 
-void __cdecl CG_StopSoundAlias(int localClientNum, int entitynum, snd_alias_list_t *aliasList)
+void __cdecl CG_StopSoundAlias(int32_t localClientNum, int32_t entitynum, snd_alias_list_t *aliasList)
 {
     if (aliasList)
     {
@@ -1480,30 +1480,30 @@ void __cdecl CG_StopSoundAlias(int localClientNum, int entitynum, snd_alias_list
     }
 }
 
-void __cdecl CG_StopSoundsOnEnt(int localClientNum, int entitynum)
+void __cdecl CG_StopSoundsOnEnt(int32_t localClientNum, int32_t entitynum)
 {
     SND_StopSoundsOnEnt((SndEntHandle)entitynum);
 }
 
-void __cdecl CG_StopSoundAliasByName(int localClientNum, int entityNum, const char *aliasName)
+void __cdecl CG_StopSoundAliasByName(int32_t localClientNum, int32_t entityNum, const char *aliasName)
 {
     SND_StopSoundAliasOnEnt((SndEntHandle)entityNum, aliasName);
 }
 
-void __cdecl CG_StopClientSoundAliasByName(int localClientNum, const char *aliasName)
+void __cdecl CG_StopClientSoundAliasByName(int32_t localClientNum, const char *aliasName)
 {
     CG_StopSoundAliasByName(localClientNum, CG_GetLocalClientGlobals(localClientNum)->nextSnap->ps.clientNum, aliasName);
 }
 
-void __cdecl CG_SubtitleSndLengthNotify(int msec, const snd_alias_t *lengthNotifyData)
+void __cdecl CG_SubtitleSndLengthNotify(int32_t msec, const snd_alias_t *lengthNotifyData)
 {
     CG_SubtitlePrint(msec, lengthNotifyData);
 }
 
-void __cdecl CG_SubtitlePrint(int msec, const snd_alias_t *alias)
+void __cdecl CG_SubtitlePrint(int32_t msec, const snd_alias_t *alias)
 {
-    int integer; // [esp+4h] [ebp-20h]
-    int v3; // [esp+8h] [ebp-1Ch]
+    int32_t integer; // [esp+4h] [ebp-20h]
+    int32_t v3; // [esp+8h] [ebp-1Ch]
     float v4; // [esp+Ch] [ebp-18h]
 
     iassert(alias);
@@ -1525,7 +1525,7 @@ void __cdecl CG_SubtitlePrint(int msec, const snd_alias_t *alias)
     }
 }
 
-void __cdecl CG_AddFXSoundAlias(int localClientNum, const float *origin, snd_alias_list_t *aliasList)
+void __cdecl CG_AddFXSoundAlias(int32_t localClientNum, const float *origin, snd_alias_list_t *aliasList)
 {
     snd_alias_t *alias; // [esp+Ch] [ebp-4h]
 
@@ -1537,9 +1537,9 @@ void __cdecl CG_AddFXSoundAlias(int localClientNum, const float *origin, snd_ali
     }
 }
 
-int __cdecl CG_PlaySoundAlias(int localClientNum, int entitynum, const float *origin, snd_alias_list_t *aliasList)
+int32_t __cdecl CG_PlaySoundAlias(int32_t localClientNum, int32_t entitynum, const float *origin, snd_alias_list_t *aliasList)
 {
-    int playbackId; // [esp+8h] [ebp-Ch]
+    int32_t playbackId; // [esp+8h] [ebp-Ch]
     snd_alias_t *alias; // [esp+10h] [ebp-4h]
 
     if (!aliasList || !aliasList->aliasName || !CG_ShouldPlaySoundOnLocalClient())
@@ -1552,9 +1552,9 @@ int __cdecl CG_PlaySoundAlias(int localClientNum, int entitynum, const float *or
     return playbackId;
 }
 
-int __cdecl CG_PlaySoundAliasByName(int localClientNum, int entitynum, const float *origin, const char *aliasname)
+int32_t __cdecl CG_PlaySoundAliasByName(int32_t localClientNum, int32_t entitynum, const float *origin, const char *aliasname)
 {
-    int playbackId; // [esp+8h] [ebp-Ch]
+    int32_t playbackId; // [esp+8h] [ebp-Ch]
     snd_alias_t *alias; // [esp+10h] [ebp-4h]
 
     if (!aliasname || !CG_ShouldPlaySoundOnLocalClient())
@@ -1567,13 +1567,13 @@ int __cdecl CG_PlaySoundAliasByName(int localClientNum, int entitynum, const flo
     return playbackId;
 }
 
-int __cdecl CG_PlaySoundAliasAsMasterByName(
-    int localClientNum,
-    int entitynum,
+int32_t __cdecl CG_PlaySoundAliasAsMasterByName(
+    int32_t localClientNum,
+    int32_t entitynum,
     const float *origin,
     const char *aliasname)
 {
-    int playbackId; // [esp+8h] [ebp-Ch]
+    int32_t playbackId; // [esp+8h] [ebp-Ch]
     snd_alias_t *alias; // [esp+10h] [ebp-4h]
 
     if (!aliasname || !CG_ShouldPlaySoundOnLocalClient())
@@ -1586,12 +1586,12 @@ int __cdecl CG_PlaySoundAliasAsMasterByName(
     return playbackId;
 }
 
-void __cdecl CG_RestartSmokeGrenades(int localClientNum)
+void __cdecl CG_RestartSmokeGrenades(int32_t localClientNum)
 {
-    int eventIndex; // [esp+18h] [ebp-3Ch]
+    int32_t eventIndex; // [esp+18h] [ebp-3Ch]
     snapshot_s *nextSnap; // [esp+20h] [ebp-34h]
-    int v3; // [esp+24h] [ebp-30h]
-    int i; // [esp+2Ch] [ebp-28h]
+    int32_t v3; // [esp+24h] [ebp-30h]
+    int32_t i; // [esp+2Ch] [ebp-28h]
     float axis[3][3]; // [esp+30h] [ebp-24h] BYREF
     const cg_s *cgameGlob;
     const cgs_t *cgs;
@@ -1620,8 +1620,8 @@ void __cdecl CG_RestartSmokeGrenades(int localClientNum)
                         "%s\n\t(es->eType) = %i",
                         "(es->eType == ET_GENERAL)",
                         nextSnap->entities[i].eType);
-                eventIndex = ((unsigned __int8)nextSnap->entities[i].eventSequence - 1) & 3;
-                if (*(int *)(v3 + 4 * eventIndex + 164) < 45 || *(int *)(v3 + 4 * eventIndex + 164) > 50)
+                eventIndex = ((uint8_t)nextSnap->entities[i].eventSequence - 1) & 3;
+                if (*(int32_t *)(v3 + 4 * eventIndex + 164) < 45 || *(int32_t *)(v3 + 4 * eventIndex + 164) > 50)
                     MyAssertHandler(
                         ".\\cgame_mp\\cg_main_mp.cpp",
                         1586,
@@ -1650,7 +1650,7 @@ void __cdecl CG_RestartSmokeGrenades(int localClientNum)
     }
 }
 
-void __cdecl CG_InitVote(int localClientNum)
+void __cdecl CG_InitVote(int32_t localClientNum)
 {
     char *ConfigString; // eax
     char *v2; // eax
@@ -1658,8 +1658,8 @@ void __cdecl CG_InitVote(int localClientNum)
     char *v4; // eax
     char *v5; // eax
     clientActive_t *LocalClientGlobals; // [esp+0h] [ebp-10h]
-    int time; // [esp+8h] [ebp-8h] BYREF
-    int serverId; // [esp+Ch] [ebp-4h] BYREF
+    int32_t time; // [esp+8h] [ebp-8h] BYREF
+    int32_t serverId; // [esp+Ch] [ebp-4h] BYREF
     cgs_t *cgs;
 
     LocalClientGlobals = CL_GetLocalClientGlobals(localClientNum);
@@ -1677,7 +1677,7 @@ void __cdecl CG_InitVote(int localClientNum)
     I_strncpyz(cgs->voteString, v5, 256);
 }
 
-unsigned __int16 __cdecl CG_GetWeaponAttachBone(clientInfo_t *ci, weapType_t weapType)
+uint16_t __cdecl CG_GetWeaponAttachBone(clientInfo_t *ci, weapType_t weapType)
 {
     if (weapType == WEAPTYPE_GRENADE)
         return scr_const.tag_inhand;
@@ -1686,7 +1686,7 @@ unsigned __int16 __cdecl CG_GetWeaponAttachBone(clientInfo_t *ci, weapType_t wea
     return SL_FindString(cg_weaponrightbone->current.string);
 }
 
-int __cdecl CG_GetClientNum(int localClientNum)
+int32_t __cdecl CG_GetClientNum(int32_t localClientNum)
 {
     return CG_GetLocalClientGlobals(localClientNum)->clientNum;
 }
@@ -1696,7 +1696,7 @@ void __cdecl CL_LoadSoundAliases(const char *loadspec)
     Com_LoadSoundAliases(loadspec, "all_mp", SASYS_CGAME);
 }
 
-void __cdecl CG_Init(int localClientNum, int serverMessageNum, int serverCommandSequence, int clientNum)
+void __cdecl CG_Init(int32_t localClientNum, int32_t serverMessageNum, int32_t serverCommandSequence, int32_t clientNum)
 {
     char *s; // [esp+24h] [ebp-4Ch]
     char mapname[68]; // [esp+28h] [ebp-48h] BYREF
@@ -1728,7 +1728,7 @@ void __cdecl CG_Init(int localClientNum, int serverMessageNum, int serverCommand
     cgameGlob->bgs.animScriptData.soundAlias = Com_FindSoundAlias;
     cgameGlob->bgs.animScriptData.playSoundAlias = CG_PlayAnimScriptSoundAlias;
     cgameGlob->bgs.GetXModel = FX_RegisterModel;
-    cgameGlob->bgs.CreateDObj = (void(__cdecl *)(DObjModel_s *, unsigned __int16, XAnimTree_s *, int, int, clientInfo_t *))CG_CreateDObj;
+    cgameGlob->bgs.CreateDObj = (void(__cdecl *)(DObjModel_s *, uint16_t, XAnimTree_s *, int, int, clientInfo_t *))CG_CreateDObj;
     cgameGlob->bgs.AttachWeapon = CG_AttachWeapon;
     cgameGlob->bgs.GetDObj = CG_GetDObj;
     cgameGlob->bgs.SafeDObjFree = Com_SafeClientDObjFree;
@@ -1855,7 +1855,7 @@ void __cdecl CG_Init(int localClientNum, int serverMessageNum, int serverCommand
     R_EndRemoteScreenUpdate();
 }
 
-clientConnection_t *__cdecl CL_GetLocalClientConnection(int localClientNum)
+clientConnection_t *__cdecl CL_GetLocalClientConnection(int32_t localClientNum)
 {
     if (!clientConnections)
         MyAssertHandler("c:\\trees\\cod3\\src\\cgame_mp\\../client_mp/client_mp.h", 1095, 0, "%s", "clientConnections");
@@ -1870,15 +1870,15 @@ clientConnection_t *__cdecl CL_GetLocalClientConnection(int localClientNum)
     return clientConnections;
 }
 
-void __cdecl CG_RegisterGraphics(int localClientNum, const char *mapname)
+void __cdecl CG_RegisterGraphics(int32_t localClientNum, const char *mapname)
 {
     shellshock_parms_t *ShellshockParms; // eax
     char *shellshock; // [esp+0h] [ebp-14h]
     char *effectname; // [esp+4h] [ebp-10h]
     char *modelName; // [esp+8h] [ebp-Ch]
-    int i; // [esp+10h] [ebp-4h]
-    int ia; // [esp+10h] [ebp-4h]
-    signed int ib; // [esp+10h] [ebp-4h]
+    int32_t i; // [esp+10h] [ebp-4h]
+    int32_t ia; // [esp+10h] [ebp-4h]
+    int32_t ib; // [esp+10h] [ebp-4h]
     cgs_t *cgs;
 
     SCR_UpdateLoadScreen();
@@ -1984,12 +1984,12 @@ void __cdecl CG_RegisterGraphics(int localClientNum, const char *mapname)
     CG_LoadingString(localClientNum, " - game media done");
 }
 
-int __cdecl CG_PlayAnimScriptSoundAlias(int clientIndex, snd_alias_list_t *aliasList)
+int32_t __cdecl CG_PlayAnimScriptSoundAlias(int32_t clientIndex, snd_alias_list_t *aliasList)
 {
     return CG_PlayClientSoundAlias(clientIndex, aliasList);
 }
 
-void __cdecl CG_LoadHudMenu(int localClientNum)
+void __cdecl CG_LoadHudMenu(int32_t localClientNum)
 {
     menuDef_t *menu; // [esp+4h] [ebp-Ch]
     MenuList *menuList; // [esp+8h] [ebp-8h]
@@ -2010,9 +2010,9 @@ void __cdecl CG_LoadHudMenu(int localClientNum)
     }
 }
 
-unsigned __int16 __cdecl CG_AttachWeapon(DObjModel_s *dobjModels, unsigned __int16 numModels, clientInfo_t *ci)
+uint16_t __cdecl CG_AttachWeapon(DObjModel_s *dobjModels, uint16_t numModels, clientInfo_t *ci)
 {
-    unsigned __int8 weaponModel; // [esp+7h] [ebp-5h]
+    uint8_t weaponModel; // [esp+7h] [ebp-5h]
     WeaponDef *weapDef; // [esp+8h] [ebp-4h]
 
     if (ci->iDObjWeapon)
@@ -2041,10 +2041,10 @@ unsigned __int16 __cdecl CG_AttachWeapon(DObjModel_s *dobjModels, unsigned __int
 
 void __cdecl CG_CreateDObj(
     DObjModel_s *dobjModels,
-    unsigned __int16 numModels,
+    uint16_t numModels,
     XAnimTree_s *tree,
-    unsigned int handle,
-    int localClientNum,
+    uint32_t handle,
+    int32_t localClientNum,
     clientInfo_t *ci)
 {
     float *v6; // eax
@@ -2056,16 +2056,16 @@ void __cdecl CG_CreateDObj(
     v6[2] = 131072.0;
 }
 
-DObj_s *__cdecl CG_GetDObj(unsigned int handle, int localClientNum)
+DObj_s *__cdecl CG_GetDObj(uint32_t handle, int32_t localClientNum)
 {
     return Com_GetClientDObj(handle, localClientNum);
 }
 
-void __cdecl CG_LoadAnimTreeInstances(int localClientNum)
+void __cdecl CG_LoadAnimTreeInstances(int32_t localClientNum)
 {
     XAnim_s *generic_human; // [esp+0h] [ebp-10h]
-    int i; // [esp+Ch] [ebp-4h]
-    int ia; // [esp+Ch] [ebp-4h]
+    int32_t i; // [esp+Ch] [ebp-4h]
+    int32_t ia; // [esp+Ch] [ebp-4h]
     cg_s *cgameGlob;
     cgs_t *cgs;
 
@@ -2081,9 +2081,9 @@ void __cdecl CG_LoadAnimTreeInstances(int localClientNum)
         cgs->corpseinfo[ia].pXAnimTree = XAnimCreateTree(generic_human, Hunk_AllocXAnimClient);
 }
 
-void __cdecl CG_InitEntities(int localClientNum)
+void __cdecl CG_InitEntities(int32_t localClientNum)
 {
-    signed int entityIndex; // [esp+0h] [ebp-Ch]
+    int32_t entityIndex; // [esp+0h] [ebp-Ch]
     centity_s *cent; // [esp+8h] [ebp-4h]
 
     for (entityIndex = 0; entityIndex < 1024; ++entityIndex)
@@ -2096,7 +2096,7 @@ void __cdecl CG_InitEntities(int localClientNum)
     CG_GetLocalClientGlobals(localClientNum)->predictedPlayerEntity.pose.localClientNum = localClientNum;
 }
 
-void __cdecl CG_InitViewDimensions(int localClientNum)
+void __cdecl CG_InitViewDimensions(int32_t localClientNum)
 {
     cgs_t *cgs;
 
@@ -2120,11 +2120,11 @@ void __cdecl CG_InitDof(GfxDepthOfField *dof)
     dof->farBlur = 0.0;
 }
 
-void __cdecl CG_FreeWeapons(int localClientNum)
+void __cdecl CG_FreeWeapons(int32_t localClientNum)
 {
-    unsigned int v1; // eax
+    uint32_t v1; // eax
     weaponInfo_s *weapInfo; // [esp+0h] [ebp-8h]
-    unsigned int weapIndex; // [esp+4h] [ebp-4h]
+    uint32_t weapIndex; // [esp+4h] [ebp-4h]
 
     for (weapIndex = 1; weapIndex < BG_GetNumWeapons(); ++weapIndex)
     {
@@ -2145,13 +2145,13 @@ void __cdecl CG_FreeWeapons(int localClientNum)
             weapInfo->tree = 0;
         }
     }
-    memset((unsigned __int8 *)cg_weaponsArray[localClientNum], 0, sizeof(weaponInfo_s[128]));
+    memset((uint8_t *)cg_weaponsArray[localClientNum], 0, sizeof(weaponInfo_s[128]));
 }
 
-void __cdecl CG_Shutdown(int localClientNum)
+void __cdecl CG_Shutdown(int32_t localClientNum)
 {
     centity_s *cent; // [esp+Ch] [ebp-Ch]
-    signed int entnum; // [esp+14h] [ebp-4h]
+    int32_t entnum; // [esp+14h] [ebp-4h]
 
     cg_s *cgameGlob = CG_GetLocalClientGlobals(localClientNum);
 
@@ -2200,10 +2200,10 @@ void __cdecl CG_Shutdown(int localClientNum)
     CG_ShutdownConsoleCommands();
 }
 
-void __cdecl CG_FreeAnimTreeInstances(int localClientNum)
+void __cdecl CG_FreeAnimTreeInstances(int32_t localClientNum)
 {
-    int i; // [esp+8h] [ebp-4h]
-    int ia; // [esp+8h] [ebp-4h]
+    int32_t i; // [esp+8h] [ebp-4h]
+    int32_t ia; // [esp+8h] [ebp-4h]
     cg_s *cgameGlob;
     cgs_t *cgs;
 
@@ -2228,12 +2228,12 @@ void __cdecl CG_FreeAnimTreeInstances(int localClientNum)
     }
 }
 
-void *__cdecl Hunk_AllocXAnimClient(int size)
+void *__cdecl Hunk_AllocXAnimClient(int32_t size)
 {
     return Hunk_Alloc(size, "Hunk_AllocXAnimClient", 11);
 }
 
-unsigned __int8 __cdecl CG_ShouldPlaySoundOnLocalClient()
+uint8_t __cdecl CG_ShouldPlaySoundOnLocalClient()
 {
     return 1;
 }
