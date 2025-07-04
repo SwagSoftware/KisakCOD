@@ -2,11 +2,13 @@ cmake_minimum_required(VERSION 3.16)
 include(FetchContent)
 
 if (DEDICATED)
-  project(KCOD-Dedi)
+  project(KisakCOD-Dedi)
 elseif(KISAK_SP)
-  project(KCOD-sp)
+  project(KisakCOD-sp)
 elseif(KISAK_MP)
-  project(KCOD-MP)
+  project(KisakCOD-MP)
+else()
+  message(FATAL_ERROR "No configuration specified ")
 endif()
 
 set(CMAKE_CXX_STANDARD 20)
@@ -77,7 +79,7 @@ add_custom_target(
 
 if (DEDICATED)
   message("===== KisakCOD Dedicated =====")
-  set(BIN_NAME "KCOD-Dedi")
+  set(BIN_NAME "KisakCOD-Dedi")
   include(cmake_files_MP.cmake)
   target_compile_definitions(${BIN_NAME} PUBLIC KISAK_DEDICATED) # this is a cope DEBUG mode that basically just does `+set dedicated 2`
   target_compile_definitions(${BIN_NAME} PUBLIC KISAK_MP)
