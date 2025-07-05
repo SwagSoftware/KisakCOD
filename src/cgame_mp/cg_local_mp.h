@@ -15,7 +15,6 @@
 #include <sound/snd_public.h>
 #include <script/scr_const.h>
 
-#define MAX_GENTITIES 0x400
 #define MAX_CLIENT_CORPSES 8
 
 #define STATIC_MAX_LOCAL_CLIENTS 1
@@ -1494,4 +1493,10 @@ inline cgs_t *CG_GetLocalClientStaticGlobals(int32_t localClientNum)
     iassert(localClientNum == 0);
 
     return &cgsArray[localClientNum];
+}
+
+inline weaponInfo_s *__fastcall CG_GetLocalClientWeaponInfo(int localClientNum, int weaponIndex)
+{
+    iassert(localClientNum == 0);
+    return &cg_weaponsArray[localClientNum][weaponIndex];
 }

@@ -919,13 +919,18 @@ struct centity_s // sizeof=0x1DC
     bool nextValid;
     bool bMuzzleFlash;
     bool bTrailMade;
+#ifdef KISAK_MP
     // padding byte
     int32_t previousEventSequence;
     int32_t miscTime;
     float lightingOrigin[3];
     XAnimTree_s* tree;
+#else
+    unsigned __int8 oldEType;
+    int previousEventSequence;
+    float lightingOrigin[3];
+#endif
 };
-static_assert(sizeof(centity_s) == 0x1DC);
 
 enum CubemapShot : __int32
 {                                       // ...

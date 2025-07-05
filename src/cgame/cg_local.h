@@ -315,6 +315,9 @@ struct weaponInfo_s // sizeof=0x44
     // padding byte
     uint32_t partBits[4];
     int32_t iPrevAnim;
+#ifdef KISAK_SP
+    int32_t hasAnimTree;
+#endif
     XAnimTree_s *tree;
     int32_t registered;
     const gitem_s *item;

@@ -141,6 +141,12 @@ typedef int		clipHandle_t;
 
 #define	MAX_NAME_LENGTH		32		// max length of a client name
 
+#ifdef KISAK_SP
+#define	MAX_GENTITIES		(2176)
+#elif KISAK_MP
+#define	MAX_GENTITIES		(1024)
+#endif
+
 // paramters for command buffer stuffing
 typedef enum {
 	EXEC_NOW,			// don't return until completed, a VM should NEVER use this,
@@ -727,7 +733,7 @@ enum trType_t : __int32
 	TR_LAST_RAGDOLL = 0xB,
 };
 
-struct trajectory_t // sizeof=0x24
+struct trajectory_t // sizeof=0x24 // (SP/MP same)
 {                                       // XREF: LerpEntityState/r
 	trType_t trType;                    // XREF: ScriptMover_SetupMoveSpeed+563/w
 	int trTime;                         // XREF: ScriptMover_SetupMoveSpeed+570/w

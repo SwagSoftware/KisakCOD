@@ -55,7 +55,7 @@ union GfxSceneEntityInfo // sizeof=0x4
     cpose_t *pose;
     unsigned __int16 *cachedLightingHandle;
 };
-struct GfxSceneEntity // sizeof=0x7C
+struct GfxSceneEntity // sizeof=0x7C // (SP/MP same)
 {                                       // ...
     float lightingOrigin[3];
     GfxScaledPlacement placement;

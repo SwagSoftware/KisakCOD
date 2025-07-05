@@ -16,7 +16,7 @@ struct Glyph // sizeof=0x18
     float t1;
 };
 
-struct Font_s // sizeof=0x18
+struct Font_s // sizeof=0x18 // (SP/MP same)
 {                                       // ...
     const char *fontName;
     int pixelHeight;
