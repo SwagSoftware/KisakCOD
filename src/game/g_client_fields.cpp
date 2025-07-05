@@ -78,7 +78,7 @@ void __cdecl ClientScr_SetSessionTeam(gclient_s *pSelf, const client_fields_s *p
 {
     char *v1; // eax
     const char *v2; // eax
-    unsigned __int16 newTeam; // [esp+0h] [ebp-4h]
+    uint16_t newTeam; // [esp+0h] [ebp-4h]
 
     if (!pSelf)
         MyAssertHandler(".\\game\\g_client_fields.cpp", 34, 0, "%s", "pSelf");
@@ -146,7 +146,7 @@ void __cdecl ClientScr_SetSessionState(gclient_s *pSelf, const client_fields_s *
 {
     char *v1; // eax
     const char *v2; // eax
-    unsigned __int16 newState; // [esp+0h] [ebp-4h]
+    uint16_t newState; // [esp+0h] [ebp-4h]
 
     if (!pSelf)
         MyAssertHandler(".\\game\\g_client_fields.cpp", 110, 0, "%s", "pSelf");
@@ -224,7 +224,7 @@ void __cdecl ClientScr_SetScore(gclient_s *pSelf, const client_fields_s *pField)
 
 void __cdecl ClientScr_SetSpectatorClient(gclient_s *pSelf, const client_fields_s *pField)
 {
-    int iNewSpectatorClient; // [esp+0h] [ebp-4h]
+    int32_t iNewSpectatorClient; // [esp+0h] [ebp-4h]
 
     if (!pSelf)
         MyAssertHandler(".\\game\\g_client_fields.cpp", 215, 0, "%s", "pSelf");
@@ -236,7 +236,7 @@ void __cdecl ClientScr_SetSpectatorClient(gclient_s *pSelf, const client_fields_
 
 void __cdecl ClientScr_SetKillCamEntity(gclient_s *pSelf, const client_fields_s *pField)
 {
-    int iNewKillCamEntity; // [esp+0h] [ebp-4h]
+    int32_t iNewKillCamEntity; // [esp+0h] [ebp-4h]
 
     if (!pSelf)
         MyAssertHandler(".\\game\\g_client_fields.cpp", 236, 0, "%s", "pSelf");
@@ -319,7 +319,7 @@ void __cdecl ClientScr_SetHeadIconTeam(gclient_s *pSelf, const client_fields_s *
     char *v1; // eax
     const char *v2; // eax
     gentity_s *pEnt; // [esp+0h] [ebp-8h]
-    unsigned __int16 sTeam; // [esp+4h] [ebp-4h]
+    uint16_t sTeam; // [esp+4h] [ebp-4h]
 
     if (!pSelf)
         MyAssertHandler(".\\game\\g_client_fields.cpp", 343, 0, "%s", "pSelf");
@@ -351,7 +351,7 @@ void __cdecl ClientScr_SetHeadIconTeam(gclient_s *pSelf, const client_fields_s *
 
 void __cdecl ClientScr_GetHeadIconTeam(gclient_s *pSelf, const client_fields_s *pField)
 {
-    int iHeadIconTeam; // [esp+0h] [ebp-8h]
+    int32_t iHeadIconTeam; // [esp+0h] [ebp-8h]
 
     if (!pSelf)
         MyAssertHandler(".\\game\\g_client_fields.cpp", 370, 0, "%s", "pSelf");
@@ -405,25 +405,25 @@ void __cdecl GScr_AddFieldsForClient()
     {
         if (((f - fields) & 0xC000) != 0)
             MyAssertHandler(".\\game\\g_client_fields.cpp", 478, 0, "%s", "!((f - fields) & ENTFIELD_MASK)");
-        if (f - fields != (unsigned __int16)(f - fields))
+        if (f - fields != (uint16_t)(f - fields))
             MyAssertHandler(".\\game\\g_client_fields.cpp", 479, 0, "%s", "(f - fields) == (unsigned short)( f - fields )");
-        Scr_AddClassField(0, (char *)f->name, (unsigned __int16)(f - fields) | 0xC000);
+        Scr_AddClassField(0, (char *)f->name, (uint16_t)(f - fields) | 0xC000);
     }
 }
 
-void __cdecl Scr_SetClientField(gclient_s *client, int offset)
+void __cdecl Scr_SetClientField(gclient_s *client, int32_t offset)
 {
     const client_fields_s *f; // [esp+0h] [ebp-4h]
 
     if (!client)
         MyAssertHandler(".\\game\\g_client_fields.cpp", 494, 0, "%s", "client");
-    if ((unsigned int)offset >= 0x11)
+    if ((uint32_t)offset >= 0x11)
         MyAssertHandler(
             ".\\game\\g_client_fields.cpp",
             495,
             0,
             "%s",
-            "static_cast<unsigned int>( offset ) < ARRAY_COUNT( fields ) - 1");
+            "static_cast<uint32_t>( offset ) < ARRAY_COUNT( fields ) - 1");
     if (offset < 0)
         MyAssertHandler(".\\game\\g_client_fields.cpp", 496, 0, "%s", "offset >= 0");
     f = &fields[offset];
@@ -439,19 +439,19 @@ void __cdecl Scr_SetClientField(gclient_s *client, int offset)
     }
 }
 
-void __cdecl Scr_GetClientField(gclient_s *client, int offset)
+void __cdecl Scr_GetClientField(gclient_s *client, int32_t offset)
 {
     const client_fields_s *f; // [esp+0h] [ebp-4h]
 
     if (!client)
         MyAssertHandler(".\\game\\g_client_fields.cpp", 520, 0, "%s", "client");
-    if ((unsigned int)offset >= 0x11)
+    if ((uint32_t)offset >= 0x11)
         MyAssertHandler(
             ".\\game\\g_client_fields.cpp",
             521,
             0,
             "%s",
-            "static_cast<unsigned int>( offset ) < ARRAY_COUNT( fields ) - 1");
+            "static_cast<uint32_t>( offset ) < ARRAY_COUNT( fields ) - 1");
     if (offset < 0)
         MyAssertHandler(".\\game\\g_client_fields.cpp", 522, 0, "%s", "offset >= 0");
     f = &fields[offset];

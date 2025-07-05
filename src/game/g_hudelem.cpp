@@ -87,9 +87,9 @@ void __cdecl TRACK_g_hudelem()
     track_static_alloc_internal(g_hudelems, 176128, "g_hudelems", 10);
 }
 
-game_hudelem_s *__cdecl HudElem_Alloc(int clientNum, int teamNum)
+game_hudelem_s *__cdecl HudElem_Alloc(int32_t clientNum, int32_t teamNum)
 {
-    unsigned int i; // [esp+0h] [ebp-4h]
+    uint32_t i; // [esp+0h] [ebp-4h]
 
     for (i = 0; i < 0x400; ++i)
     {
@@ -108,7 +108,7 @@ void __cdecl HudElem_SetDefaults(game_hudelem_s *hud)
 {
     if (!hud)
         MyAssertHandler(".\\game\\g_hudelem.cpp", 181, 0, "%s", "hud");
-    if ((unsigned int)(hud - g_hudelems) >= 0x400)
+    if ((uint32_t)(hud - g_hudelems) >= 0x400)
         MyAssertHandler(
             ".\\game\\g_hudelem.cpp",
             182,
@@ -167,7 +167,7 @@ void __cdecl HudElem_Free(game_hudelem_s *hud)
 {
     if (!hud)
         MyAssertHandler(".\\game\\g_hudelem.cpp", 264, 0, "%s", "hud");
-    if ((unsigned int)(hud - g_hudelems) >= 0x400)
+    if ((uint32_t)(hud - g_hudelems) >= 0x400)
         MyAssertHandler(
             ".\\game\\g_hudelem.cpp",
             265,
@@ -189,7 +189,7 @@ void __cdecl HudElem_Free(game_hudelem_s *hud)
 
 void __cdecl HudElem_ClientDisconnect(gentity_s *ent)
 {
-    unsigned int i; // [esp+0h] [ebp-4h]
+    uint32_t i; // [esp+0h] [ebp-4h]
 
     for (i = 0; i < 0x400; ++i)
     {
@@ -203,17 +203,17 @@ void __cdecl HudElem_ClientDisconnect(gentity_s *ent)
 
 void __cdecl HudElem_DestroyAll()
 {
-    unsigned int i; // [esp+0h] [ebp-4h]
+    uint32_t i; // [esp+0h] [ebp-4h]
 
     for (i = 0; i < 0x400; ++i)
     {
         if (g_hudelems[i].elem.type)
             HudElem_Free(&g_hudelems[i]);
     }
-    memset((unsigned __int8 *)g_hudelems, 0, sizeof(g_hudelems));
+    memset((uint8_t *)g_hudelems, 0, sizeof(g_hudelems));
 }
 
-void __cdecl HudElem_SetLocalizedString(game_hudelem_s *hud, int offset)
+void __cdecl HudElem_SetLocalizedString(game_hudelem_s *hud, int32_t offset)
 {
     char *string; // [esp+0h] [ebp-8h]
 
@@ -221,12 +221,12 @@ void __cdecl HudElem_SetLocalizedString(game_hudelem_s *hud, int offset)
     *(he_type_t *)((char *)&hud->elem.type + fields_0[offset].ofs) = (he_type_t)G_LocalizedStringIndex(string);
 }
 
-void __cdecl HudElem_SetFlagForeground(game_hudelem_s *hud, int offset)
+void __cdecl HudElem_SetFlagForeground(game_hudelem_s *hud, int32_t offset)
 {
-    unsigned int v2; // ecx
-    int *flags; // [esp+4h] [ebp-8h]
+    uint32_t v2; // ecx
+    int32_t *flags; // [esp+4h] [ebp-8h]
 
-    flags = (int *)((char *)hud + fields_0[offset].ofs);
+    flags = (int32_t *)((char *)hud + fields_0[offset].ofs);
     if (Scr_GetInt(0))
         v2 = *flags | 1;
     else
@@ -234,7 +234,7 @@ void __cdecl HudElem_SetFlagForeground(game_hudelem_s *hud, int offset)
     *flags = v2;
 }
 
-void __cdecl HudElem_GetFlagForeground(game_hudelem_s *hud, int offset)
+void __cdecl HudElem_GetFlagForeground(game_hudelem_s *hud, int32_t offset)
 {
     if (fields_0[offset].ofs != 156)
         MyAssertHandler(".\\game\\g_hudelem.cpp", 411, 0, "%s", "fields[offset].ofs == HEOFS( elem.flags )");
@@ -244,12 +244,12 @@ void __cdecl HudElem_GetFlagForeground(game_hudelem_s *hud, int offset)
         Scr_AddBool(0);
 }
 
-void __cdecl HudElem_SetFlagHideWhenDead(game_hudelem_s *hud, int offset)
+void __cdecl HudElem_SetFlagHideWhenDead(game_hudelem_s *hud, int32_t offset)
 {
-    unsigned int v2; // ecx
-    int *flags; // [esp+4h] [ebp-8h]
+    uint32_t v2; // ecx
+    int32_t *flags; // [esp+4h] [ebp-8h]
 
-    flags = (int *)((char *)hud + fields_0[offset].ofs);
+    flags = (int32_t *)((char *)hud + fields_0[offset].ofs);
     if (Scr_GetInt(0))
         v2 = *flags | 2;
     else
@@ -257,7 +257,7 @@ void __cdecl HudElem_SetFlagHideWhenDead(game_hudelem_s *hud, int offset)
     *flags = v2;
 }
 
-void __cdecl HudElem_GetFlagHideWhenDead(game_hudelem_s *hud, int offset)
+void __cdecl HudElem_GetFlagHideWhenDead(game_hudelem_s *hud, int32_t offset)
 {
     if (fields_0[offset].ofs != 156)
         MyAssertHandler(".\\game\\g_hudelem.cpp", 439, 0, "%s", "fields[offset].ofs == HEOFS( elem.flags )");
@@ -267,12 +267,12 @@ void __cdecl HudElem_GetFlagHideWhenDead(game_hudelem_s *hud, int offset)
         Scr_AddBool(0);
 }
 
-void __cdecl HudElem_SetFlagHideWhenInMenu(game_hudelem_s *hud, int offset)
+void __cdecl HudElem_SetFlagHideWhenInMenu(game_hudelem_s *hud, int32_t offset)
 {
-    unsigned int v2; // ecx
-    int *flags; // [esp+4h] [ebp-8h]
+    uint32_t v2; // ecx
+    int32_t *flags; // [esp+4h] [ebp-8h]
 
-    flags = (int *)((char *)hud + fields_0[offset].ofs);
+    flags = (int32_t *)((char *)hud + fields_0[offset].ofs);
     if (Scr_GetInt(0))
         v2 = *flags | 4;
     else
@@ -280,7 +280,7 @@ void __cdecl HudElem_SetFlagHideWhenInMenu(game_hudelem_s *hud, int offset)
     *flags = v2;
 }
 
-void __cdecl HudElem_GetFlagHideWhenInMenu(game_hudelem_s *hud, int offset)
+void __cdecl HudElem_GetFlagHideWhenInMenu(game_hudelem_s *hud, int32_t offset)
 {
     if (fields_0[offset].ofs != 156)
         MyAssertHandler(".\\game\\g_hudelem.cpp", 467, 0, "%s", "fields[offset].ofs == HEOFS( elem.flags )");
@@ -290,12 +290,12 @@ void __cdecl HudElem_GetFlagHideWhenInMenu(game_hudelem_s *hud, int offset)
         Scr_AddBool(0);
 }
 
-void __cdecl HudElem_SetBoolean(game_hudelem_s *hud, int offset)
+void __cdecl HudElem_SetBoolean(game_hudelem_s *hud, int32_t offset)
 {
     *(VariableUnion *)((char *)&hud->elem.type + fields_0[offset].ofs) = Scr_GetInt(0);
 }
 
-void __cdecl HudElem_SetColor(game_hudelem_s *hud, int offset)
+void __cdecl HudElem_SetColor(game_hudelem_s *hud, int32_t offset)
 {
     float color[3]; // [esp+6Ch] [ebp-Ch] BYREF
 
@@ -312,7 +312,7 @@ void __cdecl HudElem_SetColor(game_hudelem_s *hud, int offset)
     hud->elem.color.b = (int)(clampedB);
 }
 
-void __cdecl HudElem_GetColor(game_hudelem_s *hud, int offset)
+void __cdecl HudElem_GetColor(game_hudelem_s *hud, int32_t offset)
 {
     float color[3]; // [esp+Ch] [ebp-Ch] BYREF
 
@@ -324,7 +324,7 @@ void __cdecl HudElem_GetColor(game_hudelem_s *hud, int offset)
     Scr_AddVector(color);
 }
 
-void __cdecl HudElem_SetAlpha(game_hudelem_s *hud, int offset)
+void __cdecl HudElem_SetAlpha(game_hudelem_s *hud, int32_t offset)
 {
     float alpha; // [esp+24h] [ebp-4h]
 
@@ -337,13 +337,13 @@ void __cdecl HudElem_SetAlpha(game_hudelem_s *hud, int offset)
     hud->elem.color.a = (int)(clampedAlpha);
 }
 
-void __cdecl HudElem_GetAlpha(game_hudelem_s *hud, int offset)
+void __cdecl HudElem_GetAlpha(game_hudelem_s *hud, int32_t offset)
 {
     iassert(fields_0[offset].ofs == 36 /*HEOFS(elem.color)*/);
     Scr_AddFloat(hud->elem.color.a * 0.003921568859368563);
 }
 
-void __cdecl HudElem_SetGlowColor(game_hudelem_s *hud, int offset)
+void __cdecl HudElem_SetGlowColor(game_hudelem_s *hud, int32_t offset)
 {
     float glowColor[3]; // [esp+6Ch] [ebp-Ch] BYREF
 
@@ -361,7 +361,7 @@ void __cdecl HudElem_SetGlowColor(game_hudelem_s *hud, int offset)
     hud->elem.glowColor.b = (int)(clampedB);
 }
 
-void __cdecl HudElem_GetGlowColor(game_hudelem_s *hud, int offset)
+void __cdecl HudElem_GetGlowColor(game_hudelem_s *hud, int32_t offset)
 {
     float glowColor[3]; // [esp+Ch] [ebp-Ch] BYREF
 
@@ -373,7 +373,7 @@ void __cdecl HudElem_GetGlowColor(game_hudelem_s *hud, int offset)
     Scr_AddVector(glowColor);
 }
 
-void __cdecl HudElem_SetGlowAlpha(game_hudelem_s *hud, int offset)
+void __cdecl HudElem_SetGlowAlpha(game_hudelem_s *hud, int32_t offset)
 {
     float glowAlpha; // [esp+24h] [ebp-4h]
 
@@ -386,14 +386,14 @@ void __cdecl HudElem_SetGlowAlpha(game_hudelem_s *hud, int offset)
     hud->elem.glowColor.a = (int)(clampedGlowAlpha);
 }
 
-void __cdecl HudElem_GetGlowAlpha(game_hudelem_s *hud, int offset)
+void __cdecl HudElem_GetGlowAlpha(game_hudelem_s *hud, int32_t offset)
 {
     iassert(fields_0[offset].ofs == 36 /*HEOFS(elem.color)*/);
 
     Scr_AddFloat(hud->elem.glowColor.a * 0.003921568859368563);
 }
 
-void __cdecl HudElem_SetFontScale(game_hudelem_s *hud, int offset)
+void __cdecl HudElem_SetFontScale(game_hudelem_s *hud, int32_t offset)
 {
     const char *v2; // eax
     const char *v3; // eax
@@ -424,7 +424,7 @@ void __cdecl HudElem_SetFontScale(game_hudelem_s *hud, int offset)
     hud->elem.fontScale = scale;
 }
 
-void __cdecl HudElem_SetFont(game_hudelem_s *hud, int offset)
+void __cdecl HudElem_SetFont(game_hudelem_s *hud, int32_t offset)
 {
     HudElem_SetEnumString(hud, &fields_0[offset], g_he_font, 6);
 }
@@ -433,13 +433,13 @@ void __cdecl HudElem_SetEnumString(
     game_hudelem_s *hud,
     const game_hudelem_field_t *f,
     const char **names,
-    int nameCount)
+    int32_t nameCount)
 {
     const char *v4; // eax
     char *selectedName; // [esp+0h] [ebp-814h]
     char errormsg[2052]; // [esp+4h] [ebp-810h] BYREF
-    int nameIndex; // [esp+80Ch] [ebp-8h]
-    int *value; // [esp+810h] [ebp-4h]
+    int32_t nameIndex; // [esp+80Ch] [ebp-8h]
+    int32_t *value; // [esp+810h] [ebp-4h]
 
     if (!hud)
         MyAssertHandler(".\\game\\g_hudelem.cpp", 321, 0, "%s", "hud");
@@ -449,7 +449,7 @@ void __cdecl HudElem_SetEnumString(
         MyAssertHandler(".\\game\\g_hudelem.cpp", 323, 0, "%s", "names");
     if (nameCount <= 0)
         MyAssertHandler(".\\game\\g_hudelem.cpp", 324, 0, "%s\n\t(nameCount) = %i", "(nameCount > 0)", nameCount);
-    value = (int *)((char *)hud + f->ofs);
+    value = (int32_t *)((char *)hud + f->ofs);
     selectedName = Scr_GetString(0);
     for (nameIndex = 0; nameIndex < nameCount; ++nameIndex)
     {
@@ -470,7 +470,7 @@ void __cdecl HudElem_SetEnumString(
     Scr_Error(errormsg);
 }
 
-void __cdecl HudElem_GetFont(game_hudelem_s *hud, int offset)
+void __cdecl HudElem_GetFont(game_hudelem_s *hud, int32_t offset)
 {
     HudElem_GetEnumString(hud, &fields_0[offset], g_he_font, 6);
 }
@@ -479,9 +479,9 @@ void __cdecl HudElem_GetEnumString(
     game_hudelem_s *hud,
     const game_hudelem_field_t *f,
     const char **names,
-    int nameCount)
+    int32_t nameCount)
 {
-    int index; // [esp+0h] [ebp-8h]
+    int32_t index; // [esp+0h] [ebp-8h]
 
     if (!hud)
         MyAssertHandler(".\\game\\g_hudelem.cpp", 353, 0, "%s", "hud");
@@ -491,53 +491,53 @@ void __cdecl HudElem_GetEnumString(
         MyAssertHandler(".\\game\\g_hudelem.cpp", 355, 0, "%s", "names");
     if (nameCount <= 0)
         MyAssertHandler(".\\game\\g_hudelem.cpp", 356, 0, "%s\n\t(nameCount) = %i", "(nameCount > 0)", nameCount);
-    index = f->mask & (*(int *)((char *)&hud->elem.type + f->ofs) >> f->shift);
+    index = f->mask & (*(int32_t *)((char *)&hud->elem.type + f->ofs) >> f->shift);
     if (index < 0 || index >= nameCount)
         MyAssertHandler(".\\game\\g_hudelem.cpp", 360, 0, "%s\n\t(index) = %i", "(index >= 0 && index < nameCount)", index);
     Scr_AddString((char *)names[index]);
 }
 
-void __cdecl HudElem_SetAlignX(game_hudelem_s *hud, int offset)
+void __cdecl HudElem_SetAlignX(game_hudelem_s *hud, int32_t offset)
 {
     HudElem_SetEnumString(hud, &fields_0[offset], g_he_alignx, 3);
 }
 
-void __cdecl HudElem_GetAlignX(game_hudelem_s *hud, int offset)
+void __cdecl HudElem_GetAlignX(game_hudelem_s *hud, int32_t offset)
 {
     HudElem_GetEnumString(hud, &fields_0[offset], g_he_alignx, 3);
 }
 
-void __cdecl HudElem_SetAlignY(game_hudelem_s *hud, int offset)
+void __cdecl HudElem_SetAlignY(game_hudelem_s *hud, int32_t offset)
 {
     HudElem_SetEnumString(hud, &fields_0[offset], g_he_aligny, 3);
 }
 
-void __cdecl HudElem_GetAlignY(game_hudelem_s *hud, int offset)
+void __cdecl HudElem_GetAlignY(game_hudelem_s *hud, int32_t offset)
 {
     HudElem_GetEnumString(hud, &fields_0[offset], g_he_aligny, 3);
 }
 
-void __cdecl HudElem_SetHorzAlign(game_hudelem_s *hud, int offset)
+void __cdecl HudElem_SetHorzAlign(game_hudelem_s *hud, int32_t offset)
 {
     HudElem_SetEnumString(hud, &fields_0[offset], g_he_horzalign, 8);
 }
 
-void __cdecl HudElem_GetHorzAlign(game_hudelem_s *hud, int offset)
+void __cdecl HudElem_GetHorzAlign(game_hudelem_s *hud, int32_t offset)
 {
     HudElem_GetEnumString(hud, &fields_0[offset], g_he_horzalign, 8);
 }
 
-void __cdecl HudElem_SetVertAlign(game_hudelem_s *hud, int offset)
+void __cdecl HudElem_SetVertAlign(game_hudelem_s *hud, int32_t offset)
 {
     HudElem_SetEnumString(hud, &fields_0[offset], g_he_vertalign, 8);
 }
 
-void __cdecl HudElem_GetVertAlign(game_hudelem_s *hud, int offset)
+void __cdecl HudElem_GetVertAlign(game_hudelem_s *hud, int32_t offset)
 {
     HudElem_GetEnumString(hud, &fields_0[offset], g_he_vertalign, 8);
 }
 
-void __cdecl Scr_GetHudElemField(unsigned int entnum, unsigned int offset)
+void __cdecl Scr_GetHudElemField(uint32_t entnum, uint32_t offset)
 {
     game_hudelem_s *hud; // [esp+0h] [ebp-8h]
     const game_hudelem_field_t *f; // [esp+4h] [ebp-4h]
@@ -551,10 +551,10 @@ void __cdecl Scr_GetHudElemField(unsigned int entnum, unsigned int offset)
     if (f->getter)
         f->getter(hud, offset);
     else
-        Scr_GetGenericField((unsigned __int8 *)hud, f->type, f->ofs);
+        Scr_GetGenericField((uint8_t *)hud, f->type, f->ofs);
 }
 
-void __cdecl Scr_SetHudElemField(unsigned int entnum, unsigned int offset)
+void __cdecl Scr_SetHudElemField(uint32_t entnum, uint32_t offset)
 {
     game_hudelem_s *hud; // [esp+0h] [ebp-8h]
     const game_hudelem_field_t *f; // [esp+4h] [ebp-4h]
@@ -568,7 +568,7 @@ void __cdecl Scr_SetHudElemField(unsigned int entnum, unsigned int offset)
     if (f->setter)
         f->setter(hud, offset);
     else
-        Scr_SetGenericField((unsigned __int8 *)hud, f->type, f->ofs);
+        Scr_SetGenericField((uint8_t *)hud, f->type, f->ofs);
 }
 
 void __cdecl Scr_FreeHudElemConstStrings(game_hudelem_s *hud)
@@ -578,7 +578,7 @@ void __cdecl Scr_FreeHudElemConstStrings(game_hudelem_s *hud)
     for (f = fields_0; f->name; ++f)
     {
         if (f->type == F_STRING)
-            Scr_SetString((unsigned __int16 *)((char *)hud + f->ofs), 0);
+            Scr_SetString((uint16_t *)((char *)hud + f->ofs), 0);
     }
 }
 
@@ -615,7 +615,7 @@ void __cdecl GScr_NewTeamHudElem()
     game_hudelem_s *v0; // eax
     char *String; // eax
     const char *v2; // eax
-    unsigned __int16 teamName; // [esp+0h] [ebp-Ch]
+    uint16_t teamName; // [esp+0h] [ebp-Ch]
     game_hudelem_s *hud; // [esp+8h] [ebp-4h]
 
     teamName = Scr_GetConstString(0);
@@ -652,15 +652,15 @@ void __cdecl GScr_AddFieldsForHudElems()
     {
         if (((f - fields_0) & 0xC000) != 0)
             MyAssertHandler(".\\game\\g_hudelem.cpp", 821, 0, "%s", "((f - fields) & ENTFIELD_MASK) == ENTFIELD_ENTITY");
-        if (f - fields_0 != (unsigned __int16)(f - fields_0))
+        if (f - fields_0 != (uint16_t)(f - fields_0))
             MyAssertHandler(".\\game\\g_hudelem.cpp", 822, 0, "%s", "(f - fields) == (unsigned short)( f - fields )");
-        Scr_AddClassField(1u, (char *)f->name, (unsigned __int16)(f - fields_0));
+        Scr_AddClassField(1u, (char *)f->name, (uint16_t)(f - fields_0));
     }
 }
 
 void __cdecl HECmd_SetText(scr_entref_t entref)
 {
-    int v1; // eax
+    int32_t v1; // eax
     char string[1024]; // [esp+0h] [ebp-408h] BYREF
     game_hudelem_s *hud; // [esp+404h] [ebp-4h]
 
@@ -689,7 +689,7 @@ game_hudelem_s *__cdecl HECmd_GetHudElem(scr_entref_t entref)
 
 void __cdecl HECmd_ClearAllTextAfterHudElem(scr_entref_t entref)
 {
-    int configStringIndex; // [esp+0h] [ebp-8h]
+    int32_t configStringIndex; // [esp+0h] [ebp-8h]
     game_hudelem_s *hud; // [esp+4h] [ebp-4h]
 
     hud = HECmd_GetHudElem(entref);
@@ -704,10 +704,10 @@ void __cdecl HECmd_SetMaterial(scr_entref_t entref)
     char *String; // eax
     const char *v2; // eax
     const char *v3; // eax
-    int width; // [esp+0h] [ebp-14h]
-    int height; // [esp+4h] [ebp-10h]
-    int materialIndex; // [esp+8h] [ebp-Ch]
-    int numParam; // [esp+Ch] [ebp-8h]
+    int32_t width; // [esp+0h] [ebp-14h]
+    int32_t height; // [esp+4h] [ebp-10h]
+    int32_t materialIndex; // [esp+8h] [ebp-Ch]
+    int32_t numParam; // [esp+Ch] [ebp-8h]
     game_hudelem_s *hud; // [esp+10h] [ebp-4h]
 
     hud = HECmd_GetHudElem(entref);
@@ -771,7 +771,7 @@ void __cdecl HECmd_SetTimer_Internal(scr_entref_t entref, he_type_t type, const 
     const char *v4; // eax
     float v5; // [esp+8h] [ebp-18h]
     game_hudelem_s *hud; // [esp+18h] [ebp-8h]
-    int time; // [esp+1Ch] [ebp-4h]
+    int32_t time; // [esp+1Ch] [ebp-4h]
 
     hud = HECmd_GetHudElem(entref);
     if (type != HE_TYPE_TIMER_DOWN
@@ -834,13 +834,13 @@ void __cdecl HECmd_SetClock_Internal(scr_entref_t entref, he_type_t type, const 
     const char *v8; // eax
     float v9; // [esp+8h] [ebp-3Ch]
     float v10; // [esp+18h] [ebp-2Ch]
-    int duration; // [esp+28h] [ebp-1Ch]
-    int materialIndex; // [esp+2Ch] [ebp-18h]
-    int width; // [esp+30h] [ebp-14h]
-    int height; // [esp+34h] [ebp-10h]
-    int numParam; // [esp+38h] [ebp-Ch]
+    int32_t duration; // [esp+28h] [ebp-1Ch]
+    int32_t materialIndex; // [esp+2Ch] [ebp-18h]
+    int32_t width; // [esp+30h] [ebp-14h]
+    int32_t height; // [esp+34h] [ebp-10h]
+    int32_t numParam; // [esp+38h] [ebp-Ch]
     game_hudelem_s *hud; // [esp+3Ch] [ebp-8h]
-    int time; // [esp+40h] [ebp-4h]
+    int32_t time; // [esp+40h] [ebp-4h]
 
     hud = HECmd_GetHudElem(entref);
     if (type != HE_TYPE_CLOCK_DOWN && type != HE_TYPE_CLOCK_UP)
@@ -925,7 +925,7 @@ void __cdecl HECmd_SetWaypoint(scr_entref_t entref)
 {
     VariableUnion v1; // eax
     char *String; // eax
-    int numParam; // [esp+4h] [ebp-8h]
+    int32_t numParam; // [esp+4h] [ebp-8h]
     game_hudelem_s *hud; // [esp+8h] [ebp-4h]
 
     hud = HECmd_GetHudElem(entref);
@@ -972,8 +972,8 @@ void __cdecl HECmd_ScaleOverTime(scr_entref_t entref)
     const char *v1; // eax
     const char *v2; // eax
     float v3; // [esp+Ch] [ebp-20h]
-    int width; // [esp+1Ch] [ebp-10h]
-    int height; // [esp+20h] [ebp-Ch]
+    int32_t width; // [esp+1Ch] [ebp-10h]
+    int32_t height; // [esp+20h] [ebp-Ch]
     game_hudelem_s *hud; // [esp+24h] [ebp-8h]
     float scaleTime; // [esp+28h] [ebp-4h]
 
@@ -1150,10 +1150,10 @@ void __cdecl HECmd_SetPulseFX(scr_entref_t entref)
     hud[38].intValue = ps->ps.hudElemLastAssignedSoundID;
 }
 
-VariableUnion __cdecl GetIntGTZero(unsigned int index)
+VariableUnion __cdecl GetIntGTZero(uint32_t index)
 {
     const char *v1; // eax
-    int number; // [esp+0h] [ebp-4h]
+    int32_t number; // [esp+0h] [ebp-4h]
 
     number = Scr_GetInt(index);
     if (number < 0)
@@ -1192,7 +1192,7 @@ const BuiltinMethodDef methods_0[22] =
 
 void(__cdecl *__cdecl HudElem_GetMethod(const char **pName))(scr_entref_t)
 {
-    unsigned int i; // [esp+18h] [ebp-4h]
+    uint32_t i; // [esp+18h] [ebp-4h]
 
     for (i = 0; i < 0x16; ++i)
     {
@@ -1206,12 +1206,12 @@ void(__cdecl *__cdecl HudElem_GetMethod(const char **pName))(scr_entref_t)
 }
 
 hudelem_s g_dummyHudCurrent_0;
-void __cdecl HudElem_UpdateClient(gclient_s *client, int clientNum, hudelem_update_t which)
+void __cdecl HudElem_UpdateClient(gclient_s *client, int32_t clientNum, hudelem_update_t which)
 {
-    int archivalCount; // [esp+8h] [ebp-14h]
-    int currentCount; // [esp+Ch] [ebp-10h]
+    int32_t archivalCount; // [esp+8h] [ebp-14h]
+    int32_t currentCount; // [esp+Ch] [ebp-10h]
     game_hudelem_s *hud; // [esp+10h] [ebp-Ch]
-    unsigned int i; // [esp+14h] [ebp-8h]
+    uint32_t i; // [esp+14h] [ebp-8h]
     hudelem_s *elem; // [esp+18h] [ebp-4h]
 
     if (clientNum < 0 || clientNum >= level.maxclients)
@@ -1265,7 +1265,7 @@ void __cdecl HudElem_UpdateClient(gclient_s *client, int clientNum, hudelem_upda
         while (archivalCount < 31 && client->ps.hud.archival[archivalCount].type)
         {
             memset(
-                (unsigned __int8 *)&client->ps.hud.archival[archivalCount],
+                (uint8_t *)&client->ps.hud.archival[archivalCount],
                 0,
                 sizeof(client->ps.hud.archival[archivalCount]));
             if (client->ps.hud.archival[archivalCount].type)
@@ -1293,7 +1293,7 @@ void __cdecl HudElem_UpdateClient(gclient_s *client, int clientNum, hudelem_upda
     {
         while (currentCount < 31 && client->ps.hud.current[currentCount].type)
         {
-            memset((unsigned __int8 *)&client->ps.hud.current[currentCount], 0, sizeof(client->ps.hud.current[currentCount]));
+            memset((uint8_t *)&client->ps.hud.current[currentCount], 0, sizeof(client->ps.hud.current[currentCount]));
             if (client->ps.hud.current[currentCount].type)
                 MyAssertHandler(
                     ".\\game\\g_hudelem.cpp",
