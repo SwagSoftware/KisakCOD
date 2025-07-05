@@ -217,7 +217,7 @@ void __cdecl PlayerCmd_getCurrentWeapon(scr_entref_t entref)
 {
     const char *v1; // eax
     gentity_s *pSelf; // [esp+0h] [ebp-10h]
-    signed int32_t weapon; // [esp+4h] [ebp-Ch]
+    int32_t weapon; // [esp+4h] [ebp-Ch]
     WeaponDef *weapDef; // [esp+8h] [ebp-8h]
 
     if (entref.classnum)

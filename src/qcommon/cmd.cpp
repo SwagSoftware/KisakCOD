@@ -449,7 +449,7 @@ void __cdecl Cbuf_InsertText(int32_t  localClientNum, const char *text)
     cmd_text = &cmd_textArray[localClientNum];
     v2 = strlen(text);
     length = v2 + 1;
-    if ((signed int32_t )(cmd_text->cmdsize + v2 + 1) <= cmd_text->maxsize)
+    if ((int32_t )(cmd_text->cmdsize + v2 + 1) <= cmd_text->maxsize)
     {
         for (i = cmd_text->cmdsize - 1; i >= 0; --i)
             cmd_text->data[length + i] = cmd_text->data[i];
@@ -570,7 +570,7 @@ void __cdecl Cmd_AddServerCommandInternal(const char *cmdName, void(__cdecl *fun
 void __cdecl Cbuf_ExecuteBuffer(int32_t  localClientNum, int32_t  controllerIndex, const char *buffer)
 {
     char v3; // [esp+10h] [ebp-1018h]
-    signed int32_t  v4; // [esp+14h] [ebp-1014h]
+    int32_t  v4; // [esp+14h] [ebp-1014h]
     char dst[4100]; // [esp+18h] [ebp-1010h] BYREF
     uint32_t count; // [esp+1020h] [ebp-8h]
     uint8_t *src; // [esp+1024h] [ebp-4h]

@@ -342,7 +342,7 @@ int32_t __cdecl Player_GetUseList(gentity_s *ent, useList_t *useList, int32_t pr
     float v[3]; // [esp+10B0h] [ebp-2Ch] BYREF
     int32_t v31; // [esp+10BCh] [ebp-20h]
     int32_t v32; // [esp+10C0h] [ebp-1Ch]
-    signed int32_t i; // [esp+10C4h] [ebp-18h]
+    int32_t i; // [esp+10C4h] [ebp-18h]
     playerState_s *ps; // [esp+10C8h] [ebp-14h]
     float v35; // [esp+10CCh] [ebp-10h]
     float sum[3]; // [esp+10D0h] [ebp-Ch] BYREF
