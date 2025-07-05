@@ -11,18 +11,18 @@
 
 void __cdecl SendScoreboard(gentity_s *ent)
 {
-    int v1; // eax
-    int ping; // [esp+0h] [ebp-B3Ch]
+    int32_t v1; // eax
+    int32_t ping; // [esp+0h] [ebp-B3Ch]
     gclient_s *v3; // [esp+4h] [ebp-B38h]
-    int msgLen; // [esp+8h] [ebp-B34h]
+    int32_t msgLen; // [esp+8h] [ebp-B34h]
     char entry[1432]; // [esp+Ch] [ebp-B30h] BYREF
-    int entryLen; // [esp+5A4h] [ebp-598h]
-    int scoreLimit; // [esp+5A8h] [ebp-594h]
+    int32_t entryLen; // [esp+5A4h] [ebp-598h]
+    int32_t scoreLimit; // [esp+5A8h] [ebp-594h]
     char msg[1404]; // [esp+5ACh] [ebp-590h] BYREF
-    int numSorted; // [esp+B2Ch] [ebp-10h]
+    int32_t numSorted; // [esp+B2Ch] [ebp-10h]
     clientState_s *clientState; // [esp+B30h] [ebp-Ch]
-    int i; // [esp+B34h] [ebp-8h]
-    int clientNum; // [esp+B38h] [ebp-4h]
+    int32_t i; // [esp+B34h] [ebp-8h]
+    int32_t clientNum; // [esp+B38h] [ebp-4h]
 
     msg[0] = 0;
     msgLen = 0;
@@ -106,7 +106,7 @@ void __cdecl Cmd_Score_f(gentity_s *ent)
     SendScoreboard(ent);
 }
 
-int __cdecl CheatsOk(gentity_s *ent)
+int32_t __cdecl CheatsOk(gentity_s *ent)
 {
     const char *v1; // eax
     const char *v3; // eax
@@ -133,11 +133,11 @@ int __cdecl CheatsOk(gentity_s *ent)
 }
 
 char line[1024];
-char *__cdecl ConcatArgs(int start)
+char *__cdecl ConcatArgs(int32_t start)
 {
-    unsigned int v1; // kr00_4
-    int c; // [esp+10h] [ebp-418h]
-    int len; // [esp+14h] [ebp-414h]
+    uint32_t v1; // kr00_4
+    int32_t c; // [esp+10h] [ebp-418h]
+    int32_t len; // [esp+14h] [ebp-414h]
     char arg[1028]; // [esp+20h] [ebp-408h] BYREF
 
     len = 0;
@@ -148,7 +148,7 @@ char *__cdecl ConcatArgs(int start)
         v1 = strlen(arg);
         if ((int)(v1 + len) >= 1023)
             break;
-        memcpy((unsigned __int8 *)&line[len], (unsigned __int8 *)arg, v1);
+        memcpy((uint8_t *)&line[len], (uint8_t *)arg, v1);
         len += v1;
         if (start != c - 1)
             line[len++] = 32;
@@ -164,7 +164,7 @@ void __cdecl G_setfog(const char *fogstring)
     float clr[3]; // [esp+4h] [ebp-18h] BYREF
     float fFar; // [esp+10h] [ebp-Ch] BYREF
     float fNear; // [esp+14h] [ebp-8h] BYREF
-    int time; // [esp+18h] [ebp-4h] BYREF
+    int32_t time; // [esp+18h] [ebp-4h] BYREF
 
     SV_SetConfigstring(9, (char*)fogstring);
     level.fFogOpaqueDist = FLT_MAX;
@@ -184,10 +184,10 @@ void __cdecl Cmd_Give_f(gentity_s *ent)
     char *name; // [esp+20h] [ebp-18h]
     bool give_all; // [esp+24h] [ebp-14h]
     char *amt; // [esp+28h] [ebp-10h]
-    int amount; // [esp+2Ch] [ebp-Ch]
-    unsigned int weapIndex; // [esp+30h] [ebp-8h]
-    unsigned int weapIndexa; // [esp+30h] [ebp-8h]
-    unsigned int weapIndexb; // [esp+30h] [ebp-8h]
+    int32_t amount; // [esp+2Ch] [ebp-Ch]
+    uint32_t weapIndex; // [esp+30h] [ebp-8h]
+    uint32_t weapIndexa; // [esp+30h] [ebp-8h]
+    uint32_t weapIndexb; // [esp+30h] [ebp-8h]
     const gitem_s *it; // [esp+34h] [ebp-4h]
 
     if (CheatsOk(ent))
@@ -287,7 +287,7 @@ void __cdecl Cmd_Give_f(gentity_s *ent)
 void __cdecl Cmd_Take_f(gentity_s *ent)
 {
     gclient_s *client; // esi
-    int v2; // eax
+    int32_t v2; // eax
     gclient_s *v3; // esi
     gclient_s *v4; // esi
     gclient_s *v5; // esi
@@ -297,22 +297,22 @@ void __cdecl Cmd_Take_f(gentity_s *ent)
     gclient_s *v9; // esi
     gclient_s *v10; // esi
     gclient_s *v11; // esi
-    int v12; // eax
+    int32_t v12; // eax
     gclient_s *v13; // esi
     gclient_s *v14; // esi
     gclient_s *v15; // esi
     gclient_s *v16; // esi
     gclient_s *v17; // esi
     gclient_s *v18; // esi
-    int *v19; // [esp+4h] [ebp-34h]
-    int *v20; // [esp+Ch] [ebp-2Ch]
+    int32_t *v19; // [esp+4h] [ebp-34h]
+    int32_t *v20; // [esp+Ch] [ebp-2Ch]
     char *name; // [esp+24h] [ebp-14h]
     char *amt; // [esp+28h] [ebp-10h]
-    int amount; // [esp+2Ch] [ebp-Ch]
-    unsigned int weapIndex; // [esp+30h] [ebp-8h]
-    unsigned int weapIndexa; // [esp+30h] [ebp-8h]
-    unsigned int weapIndexb; // [esp+30h] [ebp-8h]
-    unsigned int weapIndexc; // [esp+30h] [ebp-8h]
+    int32_t amount; // [esp+2Ch] [ebp-Ch]
+    uint32_t weapIndex; // [esp+30h] [ebp-8h]
+    uint32_t weapIndexa; // [esp+30h] [ebp-8h]
+    uint32_t weapIndexb; // [esp+30h] [ebp-8h]
+    uint32_t weapIndexc; // [esp+30h] [ebp-8h]
     bool take_all; // [esp+34h] [ebp-4h]
 
     if (CheatsOk(ent))
@@ -590,10 +590,10 @@ void __cdecl StopFollowing(gentity_s *ent)
     }
 }
 
-int __cdecl Cmd_FollowCycle_f(gentity_s *ent, int dir)
+int32_t __cdecl Cmd_FollowCycle_f(gentity_s *ent, int32_t dir)
 {
-    int v3; // [esp+0h] [ebp-2FE0h]
-    int clientNum; // [esp+4h] [ebp-2FDCh]
+    int32_t v3; // [esp+0h] [ebp-2FE0h]
+    int32_t clientNum; // [esp+4h] [ebp-2FDCh]
     clientState_s v5; // [esp+8h] [ebp-2FD8h] BYREF
     playerState_s ps; // [esp+70h] [ebp-2F70h] BYREF
 
@@ -640,17 +640,17 @@ bool __cdecl G_IsPlaying(gentity_s *ent)
     return ent->client->sess.sessionState == SESS_STATE_PLAYING;
 }
 
-void __cdecl G_Say(gentity_s *ent, gentity_s *target, int mode, char *chatText)
+void __cdecl G_Say(gentity_s *ent, gentity_s *target, int32_t mode, char *chatText)
 {
     char *v4; // eax
     char *Guid; // eax
-    int v6; // [esp-Ch] [ebp-104h]
-    int number; // [esp-Ch] [ebp-104h]
-    int j; // [esp+4h] [ebp-F4h]
+    int32_t v6; // [esp-Ch] [ebp-104h]
+    int32_t number; // [esp-Ch] [ebp-104h]
+    int32_t j; // [esp+4h] [ebp-F4h]
     char cleanname[68]; // [esp+8h] [ebp-F0h] BYREF
     gentity_s *other; // [esp+4Ch] [ebp-ACh]
     const char *pszTeamString; // [esp+50h] [ebp-A8h]
-    int color; // [esp+54h] [ebp-A4h]
+    int32_t color; // [esp+54h] [ebp-A4h]
     char text[156]; // [esp+58h] [ebp-A0h] BYREF
 
     pszTeamString = "";
@@ -707,8 +707,8 @@ void __cdecl G_Say(gentity_s *ent, gentity_s *target, int mode, char *chatText)
 void __cdecl G_SayTo(
     gentity_s *ent,
     gentity_s *other,
-    int mode,
-    int color,
+    int32_t mode,
+    int32_t color,
     const char *teamString,
     const char *cleanname,
     const char *message)
@@ -786,9 +786,9 @@ void __cdecl Cmd_CallVote_f(gentity_s *ent)
     const char *v3; // eax
     const char *v4; // eax
     const char *v5; // eax
-    int v6; // eax
-    int v7; // eax
-    int v8; // eax
+    int32_t v6; // eax
+    int32_t v7; // eax
+    int32_t v8; // eax
     const char *v9; // eax
     const char *v10; // eax
     const char *v11; // eax
@@ -801,17 +801,17 @@ void __cdecl Cmd_CallVote_f(gentity_s *ent)
     char *v18; // eax
     const char *v19; // eax
     const char *v20; // eax
-    int Int; // eax
+    int32_t Int; // eax
     char *v22; // eax
     char *v23; // eax
     char *v24; // eax
-    int j; // [esp+4h] [ebp-35Ch]
-    unsigned int kicknum; // [esp+8h] [ebp-358h]
+    int32_t j; // [esp+4h] [ebp-35Ch]
+    uint32_t kicknum; // [esp+8h] [ebp-358h]
     const dvar_s *mapname; // [esp+Ch] [ebp-354h]
     char arg1[256]; // [esp+10h] [ebp-350h] BYREF
     char arg2[256]; // [esp+110h] [ebp-250h] BYREF
     char cleanName[68]; // [esp+210h] [ebp-150h] BYREF
-    int i; // [esp+254h] [ebp-10Ch]
+    int32_t i; // [esp+254h] [ebp-10Ch]
     char arg3[260]; // [esp+258h] [ebp-108h] BYREF
 
     const char aCGameCalledavo[] = "%c \"GAME_CALLEDAVOTE"; // idb
@@ -1107,11 +1107,11 @@ void __cdecl Cmd_SetViewpos_f(gentity_s *ent)
     const char *v1; // eax
     const char *v2; // eax
     long double v3; // st7
-    int v4; // [esp+0h] [ebp-424h]
+    int32_t v4; // [esp+0h] [ebp-424h]
     char buffer[1024]; // [esp+4h] [ebp-420h] BYREF
     float origin[3]; // [esp+408h] [ebp-1Ch] BYREF
     float angles[3]; // [esp+414h] [ebp-10h] BYREF
-    int i; // [esp+420h] [ebp-4h]
+    int32_t i; // [esp+420h] [ebp-4h]
 
     if (!ent)
         MyAssertHandler(".\\game_mp\\g_cmds_mp.cpp", 1372, 0, "%s", "ent");
@@ -1161,10 +1161,10 @@ void __cdecl Cmd_EntityCount_f()
 
 void __cdecl Cmd_MenuResponse_f(gentity_s *pEnt)
 {
-    int v1; // esi
+    int32_t v1; // esi
     char szServerId[1024]; // [esp+4h] [ebp-C10h] BYREF
     char szMenuName[1028]; // [esp+404h] [ebp-810h] BYREF
-    int iMenuIndex; // [esp+808h] [ebp-40Ch]
+    int32_t iMenuIndex; // [esp+808h] [ebp-40Ch]
     char szResponse[1028]; // [esp+80Ch] [ebp-408h] BYREF
 
     iMenuIndex = -1;
@@ -1176,7 +1176,7 @@ void __cdecl Cmd_MenuResponse_f(gentity_s *pEnt)
             return;
         SV_Cmd_ArgvBuffer(2, szMenuName, 1024);
         iMenuIndex = atoi(szMenuName);
-        if ((unsigned int)iMenuIndex < 0x20)
+        if ((uint32_t)iMenuIndex < 0x20)
             SV_GetConfigstring(iMenuIndex + 1970, szMenuName, 1024);
         SV_Cmd_ArgvBuffer(3, szResponse, 1024);
     }
@@ -1192,7 +1192,7 @@ void __cdecl Cmd_MenuResponse_f(gentity_s *pEnt)
 
 const char aCGameUnknowncl[] = "%c \"GAME_UNKNOWNCLIENTCOMMAND"; // idb
 
-void __cdecl ClientCommand(int clientNum)
+void __cdecl ClientCommand(int32_t clientNum)
 {
     const char *v1; // eax
     gentity_s *ent; // [esp+0h] [ebp-40Ch]
@@ -1364,7 +1364,7 @@ void __cdecl ClientCommand(int clientNum)
     }
 }
 
-void __cdecl Cmd_Say_f(gentity_s *ent, int mode, int arg0)
+void __cdecl Cmd_Say_f(gentity_s *ent, int32_t mode, int32_t arg0)
 {
     char *p; // [esp+0h] [ebp-4h]
 
@@ -1389,9 +1389,9 @@ void Cmd_VisionSetNaked_f()
     const char *v1; // eax
     char *v2; // eax
     float v3; // [esp+0h] [ebp-1Ch]
-    int v4; // [esp+4h] [ebp-18h]
+    int32_t v4; // [esp+4h] [ebp-18h]
     float v5; // [esp+8h] [ebp-14h]
-    int duration; // [esp+18h] [ebp-4h]
+    int32_t duration; // [esp+18h] [ebp-4h]
 
     duration = 1000;
     v4 = SV_Cmd_Argc();
@@ -1417,9 +1417,9 @@ void Cmd_VisionSetNight_f()
     const char *v1; // eax
     char *v2; // eax
     float v3; // [esp+0h] [ebp-1Ch]
-    int v4; // [esp+4h] [ebp-18h]
+    int32_t v4; // [esp+4h] [ebp-18h]
     float v5; // [esp+8h] [ebp-14h]
-    int duration; // [esp+18h] [ebp-4h]
+    int32_t duration; // [esp+18h] [ebp-4h]
 
     duration = 1000;
     v4 = SV_Cmd_Argc();

@@ -136,12 +136,12 @@ void __cdecl TRACK_g_main()
     track_static_alloc_internal(g_entinfoNames, 12, "g_entinfoNames", 0);
 }
 
-int __cdecl G_GetSavePersist()
+int32_t __cdecl G_GetSavePersist()
 {
     return level.savepersist;
 }
 
-void __cdecl G_SetSavePersist(int savepersist)
+void __cdecl G_SetSavePersist(int32_t savepersist)
 {
     level.savepersist = savepersist;
 }
@@ -151,32 +151,32 @@ double __cdecl G_GetFogOpaqueDistSqrd()
     return level.fFogOpaqueDistSqrd;
 }
 
-int __cdecl G_GetClientScore(int clientNum)
+int32_t __cdecl G_GetClientScore(int32_t clientNum)
 {
     return level.clients[clientNum].sess.score;
 }
 
-int __cdecl G_GetClientArchiveTime(int clientNum)
+int32_t __cdecl G_GetClientArchiveTime(int32_t clientNum)
 {
     return level.clients[clientNum].sess.archiveTime;
 }
 
-void __cdecl G_SetClientArchiveTime(int clientNum, int time)
+void __cdecl G_SetClientArchiveTime(int32_t clientNum, int32_t time)
 {
     level.clients[clientNum].sess.archiveTime = time;
 }
 
-clientState_s *__cdecl G_GetClientState(int clientNum)
+clientState_s *__cdecl G_GetClientState(int32_t clientNum)
 {
     return &level.clients[clientNum].sess.cs;
 }
 
-gclient_s *__cdecl G_GetPlayerState(int clientNum)
+gclient_s *__cdecl G_GetPlayerState(int32_t clientNum)
 {
     return &level.clients[clientNum];
 }
 
-int __cdecl G_GetClientSize()
+int32_t __cdecl G_GetClientSize()
 {
     return 12676;
 }
@@ -184,8 +184,8 @@ int __cdecl G_GetClientSize()
 void __cdecl G_FreeEntities()
 {
     gentity_s *e; // [esp+0h] [ebp-8h]
-    int i; // [esp+4h] [ebp-4h]
-    int ia; // [esp+4h] [ebp-4h]
+    int32_t i; // [esp+4h] [ebp-4h]
+    int32_t ia; // [esp+4h] [ebp-4h]
 
     e = g_entities;
     for (i = 0; i < level.num_entities; ++i)
@@ -213,7 +213,7 @@ bool __cdecl G_ExitAfterConnectPaths()
     return 0;
 }
 
-int __cdecl G_IsServerGameSystem(int clientNum)
+int32_t __cdecl G_IsServerGameSystem(int32_t clientNum)
 {
     if (!g_debugPlayerAnimScript)
         return 0;
@@ -225,13 +225,13 @@ int __cdecl G_IsServerGameSystem(int clientNum)
     return 1;
 }
 
-void __cdecl G_InitGame(int levelTime, int randomSeed, int restart, int savepersist)
+void __cdecl G_InitGame(int32_t levelTime, int32_t randomSeed, int32_t restart, int32_t savepersist)
 {
     com_parse_mark_t *v4; // edx
     char serverinfo[1028]; // [esp+4h] [ebp-810h] BYREF
-    int file; // [esp+408h] [ebp-40Ch]
+    int32_t file; // [esp+408h] [ebp-40Ch]
     char buffer[1024]; // [esp+40Ch] [ebp-408h] BYREF
-    int i; // [esp+810h] [ebp-4h]
+    int32_t i; // [esp+810h] [ebp-4h]
 
     if (!Sys_IsMainThread())
         MyAssertHandler(".\\game_mp\\g_main_mp.cpp", 992, 0, "%s", "Sys_IsMainThread()");
@@ -240,7 +240,7 @@ void __cdecl G_InitGame(int levelTime, int randomSeed, int restart, int savepers
     Com_Printf(15, "gamedate: %s\n", __DATE__);
     Swap_Init();
     EntHandle::Init();
-    memset((unsigned __int8 *)&level, 0, sizeof(level));
+    memset((uint8_t *)&level, 0, sizeof(level));
     level.initializing = 1;
     level.time = levelTime;
     level.startTime = levelTime;
@@ -256,7 +256,7 @@ void __cdecl G_InitGame(int levelTime, int randomSeed, int restart, int savepers
         Dvar_SetCheatState();
     G_ProcessIPBans();
     level_bgs.GetXModel = (XModel * (__cdecl *)(const char *))SV_XModelGet;
-    level_bgs.CreateDObj = (void(__cdecl *)(DObjModel_s *, unsigned __int16, XAnimTree_s *, int, int, clientInfo_t *))G_CreateDObj;
+    level_bgs.CreateDObj = (void(__cdecl *)(DObjModel_s *, uint16_t, XAnimTree_s *, int, int, clientInfo_t *))G_CreateDObj;
     level_bgs.AttachWeapon = 0;
     level_bgs.GetDObj = G_GetDObj;
     level_bgs.SafeDObjFree = G_SafeDObjFree;
@@ -353,7 +353,7 @@ void __cdecl G_InitGame(int levelTime, int randomSeed, int restart, int savepers
     SaveRegisteredItems();
 }
 
-int MY_DEFAULT_USEHOLDSPAWNDELAY = 500;
+int32_t MY_DEFAULT_USEHOLDSPAWNDELAY = 500;
 
 const dvar_s *G_RegisterDvars()
 {
@@ -750,10 +750,10 @@ const dvar_s *G_RegisterDvars()
 
 void __cdecl G_CreateDObj(
     DObjModel_s *dobjModels,
-    unsigned __int16 numModels,
+    uint16_t numModels,
     XAnimTree_s *tree,
-    unsigned int handle,
-    int unusedLocalClientNum)
+    uint32_t handle,
+    int32_t unusedLocalClientNum)
 {
     if (unusedLocalClientNum != -1)
         MyAssertHandler(
@@ -766,7 +766,7 @@ void __cdecl G_CreateDObj(
     Com_ServerDObjCreate(dobjModels, numModels, tree, handle);
 }
 
-DObj_s *__cdecl G_GetDObj(unsigned int handle, int unusedLocalClientNum)
+DObj_s *__cdecl G_GetDObj(uint32_t handle, int32_t unusedLocalClientNum)
 {
     if (unusedLocalClientNum != -1)
         MyAssertHandler(
@@ -783,8 +783,8 @@ XAnimTree_s *G_LoadAnimTreeInstances()
 {
     XAnimTree_s *result; // eax
     XAnim_s *generic_human; // [esp+0h] [ebp-8h]
-    int i; // [esp+4h] [ebp-4h]
-    int ia; // [esp+4h] [ebp-4h]
+    int32_t i; // [esp+4h] [ebp-4h]
+    int32_t ia; // [esp+4h] [ebp-4h]
 
     result = (XAnimTree_s *)level_bgs.generic_human.tree.anims;
     generic_human = level_bgs.generic_human.tree.anims;
@@ -826,9 +826,9 @@ void __cdecl G_PrintFastFileErrors(const char *fastfile)
     }
 }
 
-void __cdecl G_ShutdownGame(int freeScripts)
+void __cdecl G_ShutdownGame(int32_t freeScripts)
 {
-    int file; // [esp+0h] [ebp-4h]
+    int32_t file; // [esp+0h] [ebp-4h]
 
     Com_Printf(15, "==== ShutdownGame (%d) ====\n", freeScripts);
     if (level.logFile)
@@ -865,11 +865,11 @@ void __cdecl G_ShutdownGame(int freeScripts)
     SV_track_shutdown();
 }
 
-int G_FreeAnimTreeInstances()
+int32_t G_FreeAnimTreeInstances()
 {
-    int result; // eax
-    int i; // [esp+0h] [ebp-4h]
-    int ia; // [esp+0h] [ebp-4h]
+    int32_t result; // eax
+    int32_t i; // [esp+0h] [ebp-4h]
+    int32_t ia; // [esp+0h] [ebp-4h]
 
     for (i = 0; i < 64; ++i)
     {
@@ -895,7 +895,7 @@ int G_FreeAnimTreeInstances()
 
 void __cdecl SendScoreboardMessageToAllIntermissionClients()
 {
-    int i; // [esp+4h] [ebp-4h]
+    int32_t i; // [esp+4h] [ebp-4h]
 
     if (level.bUpdateScoresForIntermission)
     {
@@ -910,7 +910,7 @@ void __cdecl SendScoreboardMessageToAllIntermissionClients()
 
 void __cdecl CalculateRanks()
 {
-    int i; // [esp+0h] [ebp-4h]
+    int32_t i; // [esp+0h] [ebp-4h]
 
     level.numConnectedClients = 0;
     level.numVotingClients = 0;
@@ -927,7 +927,7 @@ void __cdecl CalculateRanks()
     level.bUpdateScoresForIntermission = 1;
 }
 
-int __cdecl SortRanks(unsigned int *a, unsigned int *b)
+int32_t __cdecl SortRanks(uint32_t *a, uint32_t *b)
 {
     gclient_s *cb; // [esp+0h] [ebp-8h]
     gclient_s *ca; // [esp+4h] [ebp-4h]
@@ -975,8 +975,8 @@ int __cdecl SortRanks(unsigned int *a, unsigned int *b)
 
 void __cdecl ExitLevel()
 {
-    int i; // [esp+4h] [ebp-4h]
-    int ia; // [esp+4h] [ebp-4h]
+    int32_t i; // [esp+4h] [ebp-4h]
+    int32_t ia; // [esp+4h] [ebp-4h]
 
     Cbuf_AddText(0, "map_rotate\n");
     level.teamScores[1] = 0;
@@ -998,10 +998,10 @@ void G_LogPrintf(const char *fmt, ...)
 {
     char string[1024]; // [esp+10h] [ebp-818h] BYREF
     char *argptr; // [esp+410h] [ebp-418h]
-    int tens; // [esp+414h] [ebp-414h]
+    int32_t tens; // [esp+414h] [ebp-414h]
     char string2[1028]; // [esp+418h] [ebp-410h] BYREF
-    int min; // [esp+820h] [ebp-8h]
-    int sec; // [esp+824h] [ebp-4h]
+    int32_t min; // [esp+820h] [ebp-8h]
+    int32_t sec; // [esp+824h] [ebp-4h]
     va_list va; // [esp+834h] [ebp+Ch] BYREF
 
     va_start(va, fmt);
@@ -1023,7 +1023,7 @@ void __cdecl CheckVote()
     const char *v1; // eax
     const char *v2; // eax
     float v3; // [esp+8h] [ebp-20h]
-    int passCount; // [esp+24h] [ebp-4h]
+    int32_t passCount; // [esp+24h] [ebp-4h]
 
     if (level.voteExecuteTime)
     {
@@ -1066,10 +1066,10 @@ void __cdecl CheckVote()
 void __cdecl G_UpdateObjectiveToClients()
 {
     objective_t *obj; // [esp+8h] [ebp-18h]
-    int team; // [esp+Ch] [ebp-14h]
+    int32_t team; // [esp+Ch] [ebp-14h]
     gentity_s *ent; // [esp+10h] [ebp-10h]
-    int clientNum; // [esp+14h] [ebp-Ch]
-    int objNum; // [esp+18h] [ebp-8h]
+    int32_t clientNum; // [esp+14h] [ebp-Ch]
+    int32_t objNum; // [esp+18h] [ebp-8h]
     playerState_s *ps; // [esp+1Ch] [ebp-4h]
 
     for (clientNum = 0; clientNum < level.maxclients; ++clientNum)
@@ -1096,7 +1096,7 @@ void __cdecl G_UpdateObjectiveToClients()
 void __cdecl G_UpdateHudElemsToClients()
 {
     gentity_s *ent; // [esp+0h] [ebp-8h]
-    int clientNum; // [esp+4h] [ebp-4h]
+    int32_t clientNum; // [esp+4h] [ebp-4h]
 
     for (clientNum = 0; clientNum < level.maxclients; ++clientNum)
     {
@@ -1113,7 +1113,7 @@ void __cdecl G_UpdateHudElemsToClients()
 void __cdecl G_RunThink(gentity_s *ent)
 {
     void(__cdecl * think)(gentity_s *); // [esp+0h] [ebp-8h]
-    int thinktime; // [esp+4h] [ebp-4h]
+    int32_t thinktime; // [esp+4h] [ebp-4h]
 
     thinktime = ent->nextthink;
     if (thinktime > 0 && thinktime <= level.time)
@@ -1150,7 +1150,7 @@ void __cdecl TeamplayInfoMessage(gentity_s *ent)
 void __cdecl CheckTeamStatus()
 {
     gentity_s *ent; // [esp+0h] [ebp-8h]
-    int i; // [esp+4h] [ebp-4h]
+    int32_t i; // [esp+4h] [ebp-4h]
 
     if (level.time - level.lastTeammateHealthTime > 0)
     {
@@ -1167,19 +1167,19 @@ void __cdecl CheckTeamStatus()
     }
 }
 
-void __cdecl G_RunFrame(int levelTime)
+void __cdecl G_RunFrame(int32_t levelTime)
 {
     trigger_info_t *v1; // ecx
     char *v2; // eax
     float dtime; // [esp+4h] [ebp-530h]
     gentity_s *other; // [esp+110h] [ebp-424h]
     trigger_info_t *trigger_info; // [esp+114h] [ebp-420h]
-    unsigned __int8 index; // [esp+11Bh] [ebp-419h]
-    unsigned __int8 entIndex[1028]; // [esp+11Ch] [ebp-418h] BYREF
+    uint8_t index; // [esp+11Bh] [ebp-419h]
+    uint8_t entIndex[1028]; // [esp+11Ch] [ebp-418h] BYREF
     gentity_s *ent; // [esp+524h] [ebp-10h]
-    int bMoreTriggered; // [esp+528h] [ebp-Ch]
-    int i; // [esp+52Ch] [ebp-8h]
-    int entnum; // [esp+530h] [ebp-4h]
+    int32_t bMoreTriggered; // [esp+528h] [ebp-Ch]
+    int32_t i; // [esp+52Ch] [ebp-8h]
+    int32_t entnum; // [esp+530h] [ebp-4h]
 
     PROF_SCOPED("G_RunFrame");
     SV_CheckThread();
@@ -1266,7 +1266,7 @@ void __cdecl G_RunFrame(int levelTime)
                 --level.currentTriggerListSize;
                 --i;
                 v1 = &level.currentTriggerList[level.currentTriggerListSize];
-                *(unsigned int *)&trigger_info->entnum = *(unsigned int *)&v1->entnum;
+                *(uint32_t *)&trigger_info->entnum = *(uint32_t *)&v1->entnum;
                 trigger_info->useCount = v1->useCount;
                 trigger_info->otherUseCount = v1->otherUseCount;
             }
@@ -1334,7 +1334,7 @@ void __cdecl G_RunFrame(int levelTime)
         {
             if (ent->r.inuse)
             {
-                if ((unsigned int)i >= 0x40)
+                if ((uint32_t)i >= 0x40)
                     MyAssertHandler(".\\game_mp\\g_main_mp.cpp", 2012, 0, "i doesn't index MAX_CLIENTS\n\t%i not in [0, %i)", i, 64);
                 if (!level_bgs.clientinfo[i].infoValid)
                     MyAssertHandler(".\\game_mp\\g_main_mp.cpp", 2013, 0, "%s", "level_bgs.clientinfo[i].infoValid");
@@ -1382,8 +1382,8 @@ void __cdecl G_ClientDoPerFrameNotifies(gentity_s *ent)
     bool v2; // al
     bool IsSprinting; // al
     bool previouslySprinting; // [esp-Ch] [ebp-14h]
-    unsigned __int16 sprint_begin; // [esp-8h] [ebp-10h]
-    unsigned __int16 sprint_end; // [esp-4h] [ebp-Ch]
+    uint16_t sprint_begin; // [esp-8h] [ebp-10h]
+    uint16_t sprint_end; // [esp-4h] [ebp-Ch]
     gclient_s *client; // [esp+4h] [ebp-4h]
 
     if (!ent)
@@ -1422,8 +1422,8 @@ bool __cdecl DoPerFrameNotify(
     gentity_s *ent,
     bool isCurrently,
     bool wasPreviously,
-    unsigned __int16 begin,
-    unsigned __int16 end)
+    uint16_t begin,
+    uint16_t end)
 {
     if (isCurrently == wasPreviously)
         return wasPreviously;
@@ -1442,7 +1442,7 @@ const dvar_s *ShowEntityInfo()
     float origin[3]; // [esp+14h] [ebp-18h] BYREF
     const char *text; // [esp+20h] [ebp-Ch]
     gentity_s *ent; // [esp+24h] [ebp-8h]
-    int i; // [esp+28h] [ebp-4h]
+    int32_t i; // [esp+28h] [ebp-4h]
 
     result = g_entinfo;
     if (g_entinfo->current.integer)
@@ -1488,7 +1488,7 @@ void __cdecl ShowEntityInfo_Items(gentity_s *ent)
     WeaponDef *weapDef; // [esp+14h] [ebp-18h]
     char *text; // [esp+18h] [ebp-14h]
     float origin[3]; // [esp+1Ch] [ebp-10h] BYREF
-    int idx; // [esp+28h] [ebp-4h]
+    int32_t idx; // [esp+28h] [ebp-4h]
 
     if (!ent)
         MyAssertHandler(".\\game_mp\\g_main_mp.cpp", 1678, 0, "%s", "ent");
@@ -1639,8 +1639,8 @@ void __cdecl G_TraceCapsule(
     const float *mins,
     const float *maxs,
     const float *end,
-    int passEntityNum,
-    int contentmask)
+    int32_t passEntityNum,
+    int32_t contentmask)
 {
     IgnoreEntParams ignoreEntParams; // [esp+0h] [ebp-Ch] BYREF
 
@@ -1648,13 +1648,13 @@ void __cdecl G_TraceCapsule(
     SV_Trace(results, (float*)start, (float *)mins, (float *)maxs, (float *)end, &ignoreEntParams, contentmask, 0, 0, 0);
 }
 
-int __cdecl G_TraceCapsuleComplete(
+int32_t __cdecl G_TraceCapsuleComplete(
     float *start,
     float *mins,
     float *maxs,
     float *end,
-    int passEntityNum,
-    int contentmask)
+    int32_t passEntityNum,
+    int32_t contentmask)
 {
     return SV_TracePassed(start, mins, maxs, end, passEntityNum, 1023, contentmask, 0, 0, 0);
 }
@@ -1663,9 +1663,9 @@ void __cdecl G_LocationalTrace(
     trace_t *results,
     float *start,
     float *end,
-    int passEntityNum,
-    int contentmask,
-    unsigned __int8 *priorityMap)
+    int32_t passEntityNum,
+    int32_t contentmask,
+    uint8_t *priorityMap)
 {
     IgnoreEntParams ignoreEntParams; // [esp+0h] [ebp-Ch] BYREF
 
@@ -1687,9 +1687,9 @@ void __cdecl G_LocationalTraceAllowChildren(
     trace_t *results,
     float *start,
     float *end,
-    int passEntityNum,
-    int contentmask,
-    unsigned __int8 *priorityMap)
+    int32_t passEntityNum,
+    int32_t contentmask,
+    uint8_t *priorityMap)
 {
     IgnoreEntParams ignoreEntParams; // [esp+0h] [ebp-Ch] BYREF
 
@@ -1708,13 +1708,13 @@ void __cdecl G_LocationalTraceAllowChildren(
         1);
 }
 
-int __cdecl G_LocationalTracePassed(
+int32_t __cdecl G_LocationalTracePassed(
     float *start,
     float *end,
-    int passEntityNum,
-    int passEntityNum1,
-    int contentmask,
-    unsigned __int8 *priorityMap)
+    int32_t passEntityNum,
+    int32_t passEntityNum1,
+    int32_t contentmask,
+    uint8_t *priorityMap)
 {
     return SV_TracePassed(
         start,
@@ -1729,12 +1729,12 @@ int __cdecl G_LocationalTracePassed(
         1);
 }
 
-void __cdecl G_SightTrace(int *hitNum, float *start, float *end, int passEntityNum, int contentmask)
+void __cdecl G_SightTrace(int32_t *hitNum, float *start, float *end, int32_t passEntityNum, int32_t contentmask)
 {
     SV_SightTrace(hitNum, start, (float *)vec3_origin, (float *)vec3_origin, end, passEntityNum, 1023, contentmask);
 }
 
-void __cdecl G_AddDebugString(const float *xyz, const float *color, float scale, const char *text, int duration)
+void __cdecl G_AddDebugString(const float *xyz, const float *color, float scale, const char *text, int32_t duration)
 {
     CL_AddDebugString(xyz, color, scale, text, 1, duration);
 }

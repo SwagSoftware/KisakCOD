@@ -12,7 +12,7 @@
 #include <server/sv_game.h>
 #include <server/sv_world.h>
 
-int __cdecl compare_use(float *pe1, float *pe2)
+int32_t __cdecl compare_use(float *pe1, float *pe2)
 {
     return (int)(pe1[1] - pe2[1]);
 }
@@ -112,7 +112,7 @@ char __cdecl Player_ActivateCmd(gentity_s *ent)
 
 void __cdecl Player_ActivateHoldCmd(gentity_s *ent)
 {
-    int v1; // eax
+    int32_t v1; // eax
     gentity_s *useEnt; // [esp+0h] [ebp-4h]
 
     if (!ent)
@@ -183,13 +183,13 @@ void __cdecl Player_UseEntity(gentity_s *playerEnt, gentity_s *useEnt)
 
 void __cdecl Player_UpdateCursorHints(gentity_s *ent)
 {
-    int piIndex; // [esp+4h] [ebp-2020h] BYREF
-    int scale; // [esp+8h] [ebp-201Ch]
-    int ItemCursorHint; // [esp+Ch] [ebp-2018h]
-    int hintString; // [esp+10h] [ebp-2014h]
+    int32_t piIndex; // [esp+4h] [ebp-2020h] BYREF
+    int32_t scale; // [esp+8h] [ebp-201Ch]
+    int32_t ItemCursorHint; // [esp+Ch] [ebp-2018h]
+    int32_t hintString; // [esp+10h] [ebp-2014h]
     useList_t useList[1024]; // [esp+14h] [ebp-2010h] BYREF
-    int v6; // [esp+2014h] [ebp-10h]
-    int v7; // [esp+2018h] [ebp-Ch]
+    int32_t v6; // [esp+2014h] [ebp-10h]
+    int32_t v7; // [esp+2018h] [ebp-Ch]
     playerState_s *ps; // [esp+201Ch] [ebp-8h]
     gentity_s *self; // [esp+2020h] [ebp-4h]
 
@@ -311,10 +311,10 @@ void __cdecl Player_UpdateCursorHints(gentity_s *ent)
     }
 }
 
-int __cdecl Player_GetUseList(gentity_s *ent, useList_t *useList, int prevHintEntIndex)
+int32_t __cdecl Player_GetUseList(gentity_s *ent, useList_t *useList, int32_t prevHintEntIndex)
 {
     double v3; // st7
-    int eType; // [esp+8h] [ebp-10D4h]
+    int32_t eType; // [esp+8h] [ebp-10D4h]
     float v6; // [esp+Ch] [ebp-10D0h]
     float v7; // [esp+10h] [ebp-10CCh]
     float v8; // [esp+14h] [ebp-10C8h]
@@ -325,7 +325,7 @@ int __cdecl Player_GetUseList(gentity_s *ent, useList_t *useList, int prevHintEn
     float v13; // [esp+34h] [ebp-10A8h]
     float v14; // [esp+3Ch] [ebp-10A0h]
     float a[3]; // [esp+40h] [ebp-109Ch] BYREF
-    int entityList[1024]; // [esp+4Ch] [ebp-1090h] BYREF
+    int32_t entityList[1024]; // [esp+4Ch] [ebp-1090h] BYREF
     float origin[3]; // [esp+104Ch] [ebp-90h] BYREF
     float v18[3]; // [esp+1058h] [ebp-84h] BYREF
     float v19; // [esp+1064h] [ebp-78h]
@@ -336,13 +336,13 @@ int __cdecl Player_GetUseList(gentity_s *ent, useList_t *useList, int prevHintEn
     gentity_s *gEnt; // [esp+1088h] [ebp-54h]
     float forward[3]; // [esp+108Ch] [ebp-50h] BYREF
     float v26; // [esp+1098h] [ebp-44h]
-    unsigned int num; // [esp+109Ch] [ebp-40h]
-    int v28; // [esp+10A0h] [ebp-3Ch]
+    uint32_t num; // [esp+109Ch] [ebp-40h]
+    int32_t v28; // [esp+10A0h] [ebp-3Ch]
     float maxs[3]; // [esp+10A4h] [ebp-38h] BYREF
     float v[3]; // [esp+10B0h] [ebp-2Ch] BYREF
-    int v31; // [esp+10BCh] [ebp-20h]
-    int v32; // [esp+10C0h] [ebp-1Ch]
-    signed int i; // [esp+10C4h] [ebp-18h]
+    int32_t v31; // [esp+10BCh] [ebp-20h]
+    int32_t v32; // [esp+10C0h] [ebp-1Ch]
+    signed int32_t i; // [esp+10C4h] [ebp-18h]
     playerState_s *ps; // [esp+10C8h] [ebp-14h]
     float v35; // [esp+10CCh] [ebp-10h]
     float sum[3]; // [esp+10D0h] [ebp-Ch] BYREF
@@ -462,19 +462,19 @@ int __cdecl Player_GetUseList(gentity_s *ent, useList_t *useList, int prevHintEn
     return num - v28;
 }
 
-int __cdecl Player_GetItemCursorHint(const gclient_s *client, const gentity_s *traceEnt)
+int32_t __cdecl Player_GetItemCursorHint(const gclient_s *client, const gentity_s *traceEnt)
 {
     WeaponDef *weapDefItem; // [esp+0h] [ebp-14h]
     WeaponDef *weapDefPlayer; // [esp+8h] [ebp-Ch]
-    int index; // [esp+Ch] [ebp-8h]
-    int weapIndex; // [esp+10h] [ebp-4h]
+    int32_t index; // [esp+Ch] [ebp-8h]
+    int32_t weapIndex; // [esp+10h] [ebp-4h]
 
     if (!traceEnt)
         MyAssertHandler(".\\game_mp\\player_use_mp.cpp", 436, 0, "%s", "traceEnt");
     if (!client)
         MyAssertHandler(".\\game_mp\\player_use_mp.cpp", 437, 0, "%s", "client");
     index = traceEnt->s.index.brushmodel;
-    if ((unsigned int)index >= 0x800)
+    if ((uint32_t)index >= 0x800)
         MyAssertHandler(
             ".\\game_mp\\player_use_mp.cpp",
             441,
