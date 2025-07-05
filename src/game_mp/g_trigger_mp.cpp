@@ -83,7 +83,7 @@ void __cdecl multi_trigger(gentity_s *ent)
         G_FreeEntityDelay(ent);
 }
 
-void __cdecl Touch_Multi(gentity_s *self, gentity_s *other, int extra)
+void __cdecl Touch_Multi(gentity_s *self, gentity_s *other, int32_t extra)
 {
     G_Trigger(self, other);
     multi_trigger(self);
@@ -100,7 +100,7 @@ void __cdecl SP_trigger_multiple(gentity_s *ent)
     }
 }
 
-void __cdecl InitTriggerWait(gentity_s *ent, int spawnflag)
+void __cdecl InitTriggerWait(gentity_s *ent, int32_t spawnflag)
 {
     float wait; // [esp+0h] [ebp-4h] BYREF
 
@@ -184,7 +184,7 @@ void __cdecl SP_trigger_disk(gentity_s *ent)
     SV_LinkEntity(ent);
 }
 
-void __cdecl hurt_touch(gentity_s *self, gentity_s *other, int extra)
+void __cdecl hurt_touch(gentity_s *self, gentity_s *other, int32_t extra)
 {
     if (other->takedamage && self->item[0].index <= level.time)
     {
@@ -242,7 +242,7 @@ void __cdecl SP_trigger_once(gentity_s *ent)
     }
 }
 
-bool __cdecl Respond_trigger_damage(gentity_s *pEnt, int iMOD)
+bool __cdecl Respond_trigger_damage(gentity_s *pEnt, int32_t iMOD)
 {
     if ((pEnt->spawnflags & 1) != 0 && iMOD == 1)
         return 0;
@@ -259,7 +259,7 @@ bool __cdecl Respond_trigger_damage(gentity_s *pEnt, int iMOD)
     return (pEnt->spawnflags & 0x100) == 0 || iMOD && (iMOD <= 8 || iMOD > 13);
 }
 
-void __cdecl Activate_trigger_damage(gentity_s *pEnt, gentity_s *pOther, int iDamage, int iMOD)
+void __cdecl Activate_trigger_damage(gentity_s *pEnt, gentity_s *pOther, int32_t iDamage, int32_t iMOD)
 {
     if ((pEnt->item[0].ammoCount <= 0 || iDamage >= pEnt->item[0].ammoCount)
         && Respond_trigger_damage(pEnt, iMOD)
@@ -278,7 +278,7 @@ void __cdecl Use_trigger_damage(gentity_s *pEnt, gentity_s *pOther, gentity_s *t
     Activate_trigger_damage(pEnt, pOther, pEnt->item[0].clipAmmoCount + 1, -1);
 }
 
-void __cdecl Pain_trigger_damage(gentity_s *pSelf, gentity_s *pAttacker, int iDamage, const float *vPoint, int iMod, const float* idk, hitLocation_t hit, int swag)
+void __cdecl Pain_trigger_damage(gentity_s *pSelf, gentity_s *pAttacker, int32_t iDamage, const float *vPoint, int32_t iMod, const float* idk, hitLocation_t hit, int32_t swag)
 {
     Activate_trigger_damage(pSelf, pAttacker, iDamage, iMod);
     if (!pSelf->item[0].clipAmmoCount)
@@ -289,12 +289,12 @@ void Die_trigger_damage(
     gentity_s *pSelf,
     gentity_s *pInflictor,
     gentity_s *pAttacker,
-    int iDamage,
-    int iMod,
-    int iWeapon,
+    int32_t iDamage,
+    int32_t iMod,
+    int32_t iWeapon,
     const float *vDir,
     const hitLocation_t hitLoc,
-    int timeOffset)
+    int32_t timeOffset)
 {
     Activate_trigger_damage(pSelf, pAttacker, iDamage, iMod);
     if (!pSelf->item[0].clipAmmoCount)
@@ -304,7 +304,7 @@ void Die_trigger_damage(
 void __cdecl SP_trigger_damage(gentity_s *pSelf)
 {
     G_SpawnInt("accumulate", "0", &pSelf->item[0].clipAmmoCount);
-    //G_SpawnInt("threshold", "0", (int *)&pSelf->436);
+    //G_SpawnInt("threshold", "0", (int32_t *)&pSelf->436);
     G_SpawnInt("threshold", "0", &pSelf->item[0].ammoCount);
     pSelf->health = 32000;
     pSelf->takedamage = 1;
@@ -314,13 +314,13 @@ void __cdecl SP_trigger_damage(gentity_s *pSelf)
         SV_LinkEntity(pSelf);
 }
 
-void __cdecl G_CheckHitTriggerDamage(gentity_s *pActivator, float *vStart, float *vEnd, int iDamage, unsigned int iMOD)
+void __cdecl G_CheckHitTriggerDamage(gentity_s *pActivator, float *vStart, float *vEnd, int32_t iDamage, uint32_t  iMOD)
 {
-    int v5; // [esp+Ch] [ebp-1034h]
-    int entityList[1025]; // [esp+10h] [ebp-1030h] BYREF
+    int32_t v5; // [esp+Ch] [ebp-1034h]
+    int32_t entityList[1025]; // [esp+10h] [ebp-1030h] BYREF
     float diff[3]; // [esp+1014h] [ebp-2Ch] BYREF
     float mins[3]; // [esp+1020h] [ebp-20h] BYREF
-    int i; // [esp+102Ch] [ebp-14h]
+    int32_t i; // [esp+102Ch] [ebp-14h]
     gentity_s *pEnt; // [esp+1030h] [ebp-10h]
     float maxs[3]; // [esp+1034h] [ebp-Ch] BYREF
 
@@ -361,13 +361,13 @@ void __cdecl G_CheckHitTriggerDamage(gentity_s *pActivator, float *vStart, float
     }
 }
 
-void __cdecl G_GrenadeTouchTriggerDamage(gentity_s *pActivator, float *vStart, float *vEnd, int iDamage, int iMOD)
+void __cdecl G_GrenadeTouchTriggerDamage(gentity_s *pActivator, float *vStart, float *vEnd, int32_t iDamage, int32_t iMOD)
 {
-    int v5; // [esp+Ch] [ebp-1034h]
-    int entityList[1025]; // [esp+10h] [ebp-1030h] BYREF
+    int32_t v5; // [esp+Ch] [ebp-1034h]
+    int32_t entityList[1025]; // [esp+10h] [ebp-1030h] BYREF
     float diff[3]; // [esp+1014h] [ebp-2Ch] BYREF
     float mins[3]; // [esp+1020h] [ebp-20h] BYREF
-    int i; // [esp+102Ch] [ebp-14h]
+    int32_t i; // [esp+102Ch] [ebp-14h]
     gentity_s *pEnt; // [esp+1030h] [ebp-10h]
     float maxs[3]; // [esp+1034h] [ebp-Ch] BYREF
 

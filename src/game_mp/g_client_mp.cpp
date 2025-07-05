@@ -43,7 +43,7 @@ void __cdecl SetClientViewAngle(gentity_s *ent, const float *angle)
     float fDeltaa; // [esp+70h] [ebp-14h]
     float fDeltae; // [esp+70h] [ebp-14h]
     float newAngle[3]; // [esp+74h] [ebp-10h]
-    int i; // [esp+80h] [ebp-4h]
+    int32_t i; // [esp+80h] [ebp-4h]
 
     newAngle[0] = *angle;
     newAngle[1] = angle[1];
@@ -140,7 +140,7 @@ void __cdecl G_GetPlayerViewOrigin(const playerState_s *ps, float *origin)
     }
 }
 
-void __cdecl ClientUserinfoChanged(unsigned int clientNum)
+void __cdecl ClientUserinfoChanged(uint32_t clientNum)
 {
     gclient_s *client; // [esp+0h] [ebp-814h]
     char oldname[1024]; // [esp+4h] [ebp-810h] BYREF
@@ -196,14 +196,14 @@ void __cdecl ClientUserinfoChanged(unsigned int clientNum)
     ci->team = client->sess.cs.team;
 }
 
-void __cdecl ClientCleanName(const char *in, char *out, int outSize)
+void __cdecl ClientCleanName(const char *in, char *out, int32_t outSize)
 {
     char v3; // [esp+3h] [ebp-11h]
-    int len; // [esp+4h] [ebp-10h]
-    int colorlessLen; // [esp+8h] [ebp-Ch]
+    int32_t len; // [esp+4h] [ebp-10h]
+    int32_t colorlessLen; // [esp+8h] [ebp-Ch]
     char *p; // [esp+Ch] [ebp-8h]
-    int spaces; // [esp+10h] [ebp-4h]
-    int outSizea; // [esp+24h] [ebp+10h]
+    int32_t spaces; // [esp+10h] [ebp-4h]
+    int32_t outSizea; // [esp+24h] [ebp+10h]
 
     outSizea = outSize - 1;
     len = 0;
@@ -246,7 +246,7 @@ void __cdecl ClientCleanName(const char *in, char *out, int outSize)
         I_strncpyz(p, "UnnamedPlayer", outSizea);
 }
 
-char *__cdecl ClientConnect(unsigned int clientNum, unsigned __int16 scriptPersId)
+char *__cdecl ClientConnect(uint32_t clientNum, uint16_t scriptPersId)
 {
     gclient_s *client; // [esp+14h] [ebp-418h]
     XAnimTree_s *pXAnimTree; // [esp+18h] [ebp-414h]
@@ -260,7 +260,7 @@ char *__cdecl ClientConnect(unsigned int clientNum, unsigned __int16 scriptPersI
     ent = &g_entities[clientNum];
     client = &level.clients[clientNum];
     ClientClearFields(client);
-    memset((unsigned __int8 *)client, 0, sizeof(gclient_s));
+    memset((uint8_t *)client, 0, sizeof(gclient_s));
     if (clientNum >= 0x40)
         MyAssertHandler(
             ".\\game_mp\\g_client_mp.cpp",
@@ -271,7 +271,7 @@ char *__cdecl ClientConnect(unsigned int clientNum, unsigned __int16 scriptPersI
             64);
     ci = &level_bgs.clientinfo[clientNum];
     pXAnimTree = ci->pXAnimTree;
-    memset((unsigned __int8 *)ci, 0, sizeof(clientInfo_t));
+    memset((uint8_t *)ci, 0, sizeof(clientInfo_t));
     ci->pXAnimTree = pXAnimTree;
     ci->infoValid = 1;
     ci->nextValid = 1;
@@ -317,7 +317,7 @@ void __cdecl ClientClearFields(gclient_s *client)
     EntHandle::setEnt(&client->useHoldEntity, 0);
 }
 
-void __cdecl ClientBegin(int clientNum)
+void __cdecl ClientBegin(int32_t clientNum)
 {
     gclient_s *client; // [esp+0h] [ebp-4h]
 
@@ -331,11 +331,11 @@ void __cdecl ClientBegin(int clientNum)
 void __cdecl ClientSpawn(gentity_s *ent, const float *spawn_origin, const float *spawn_angles)
 {
     gclient_s *client; // [esp+14h] [ebp-12Ch]
-    int index; // [esp+18h] [ebp-128h]
-    int iFlags; // [esp+1Ch] [ebp-124h]
+    int32_t index; // [esp+18h] [ebp-128h]
+    int32_t iFlags; // [esp+1Ch] [ebp-124h]
     clientSession_t savedSess; // [esp+20h] [ebp-120h] BYREF
-    int savedSpawnCount; // [esp+138h] [ebp-8h]
-    int savedServerTime; // [esp+13Ch] [ebp-4h]
+    int32_t savedSpawnCount; // [esp+138h] [ebp-8h]
+    int32_t savedServerTime; // [esp+13Ch] [ebp-4h]
 
     index = ent - g_entities;
     client = ent->client;
@@ -387,7 +387,7 @@ void __cdecl ClientSpawn(gentity_s *ent, const float *spawn_origin, const float 
     savedSpawnCount = client->ps.stats[4];
     savedServerTime = client->lastServerTime;
     ClientClearFields(client);
-    memset((unsigned __int8 *)client, 0, sizeof(gclient_s));
+    memset((uint8_t *)client, 0, sizeof(gclient_s));
     memcpy(&client->sess, &savedSess, sizeof(client->sess));
     client->lastServerTime = savedServerTime;
     client->spectatorClient = -1;
@@ -431,11 +431,11 @@ void __cdecl ClientSpawn(gentity_s *ent, const float *spawn_origin, const float 
     BG_PlayerStateToEntityState(&client->ps, &ent->s, 1, 1u);
 }
 
-void __cdecl ClientDisconnect(int clientNum)
+void __cdecl ClientDisconnect(int32_t clientNum)
 {
     gclient_s *client; // [esp+0h] [ebp-Ch]
     gentity_s *ent; // [esp+4h] [ebp-8h]
-    int i; // [esp+8h] [ebp-4h]
+    int32_t i; // [esp+8h] [ebp-4h]
 
     client = &level.clients[clientNum];
     ent = &g_entities[clientNum];
@@ -465,25 +465,25 @@ void __cdecl ClientDisconnect(int clientNum)
     ent->client = client;
     ClientClearFields(client);
     client->sess.connected = CON_DISCONNECTED;
-    memset((unsigned __int8 *)&client->sess.cs, 0, sizeof(client->sess.cs));
+    memset((uint8_t *)&client->sess.cs, 0, sizeof(client->sess.cs));
     CalculateRanks();
     if (ent->client != client)
         MyAssertHandler(".\\game_mp\\g_client_mp.cpp", 612, 0, "%s", "ent->client == client");
 }
 
-unsigned int __cdecl G_GetNonPVSPlayerInfo(gentity_s *pSelf, float *vPosition, int iLastUpdateEnt)
+uint32_t __cdecl G_GetNonPVSPlayerInfo(gentity_s *pSelf, float *vPosition, int32_t iLastUpdateEnt)
 {
     bool v4; // [esp+4h] [ebp-3Ch]
     team_t team; // [esp+14h] [ebp-2Ch]
     float fScale; // [esp+1Ch] [ebp-24h]
     float fScale_4; // [esp+20h] [ebp-20h]
-    int iPos; // [esp+24h] [ebp-1Ch]
-    int iPos_4; // [esp+28h] [ebp-18h]
-    int iEntCount; // [esp+2Ch] [ebp-14h]
+    int32_t iPos; // [esp+24h] [ebp-1Ch]
+    int32_t iPos_4; // [esp+28h] [ebp-18h]
+    int32_t iEntCount; // [esp+2Ch] [ebp-14h]
     gentity_s *pEnt; // [esp+30h] [ebp-10h]
     float vOfs; // [esp+34h] [ebp-Ch]
     float vOfs_4; // [esp+38h] [ebp-8h]
-    int iBaseEnt; // [esp+3Ch] [ebp-4h]
+    int32_t iBaseEnt; // [esp+3Ch] [ebp-4h]
 
     team = pSelf->client->sess.cs.team;
     if (team == TEAM_SPECTATOR)

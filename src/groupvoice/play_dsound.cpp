@@ -10,18 +10,18 @@ bool dsoundplay_initialized;
 
 LPDIRECTSOUND8 lpds;
 
-int __cdecl DSound_GetBytesLeft(dsound_sample_t *sample)
+int32_t __cdecl DSound_GetBytesLeft(dsound_sample_t *sample)
 {
     return sample->bytesBuffered;
 }
 
-unsigned int __cdecl DSound_UpdateSample(dsound_sample_t *sample, char *data, signed int data_len)
+uint32_t __cdecl DSound_UpdateSample(dsound_sample_t *sample, char *data, int32_t data_len)
 {
-    signed int v4; // [esp+8h] [ebp-2Ch]
+    int32_t v4; // [esp+8h] [ebp-2Ch]
     HRESULT hr; // [esp+10h] [ebp-24h]
     HRESULT hra; // [esp+10h] [ebp-24h]
-    unsigned int dataOffset; // [esp+18h] [ebp-1Ch]
-    int bytesLeft; // [esp+20h] [ebp-14h]
+    uint32_t dataOffset; // [esp+18h] [ebp-1Ch]
+    int32_t bytesLeft; // [esp+20h] [ebp-14h]
     void *pLock1; // [esp+24h] [ebp-10h] BYREF
     DWORD dwLockLen2; // [esp+28h] [ebp-Ch] BYREF
     void *pLock2; // [esp+2Ch] [ebp-8h] BYREF
@@ -131,9 +131,9 @@ unsigned int __cdecl DSound_UpdateSample(dsound_sample_t *sample, char *data, si
     }
 }
 
-void __cdecl DSound_AdjustSamplePlayback(dsound_sample_t *sample, int bytesLeft)
+void __cdecl DSound_AdjustSamplePlayback(dsound_sample_t *sample, int32_t bytesLeft)
 {
-    unsigned __int8 playMode; // [esp+20h] [ebp-8h]
+    uint8_t playMode; // [esp+20h] [ebp-8h]
 
     if (bytesLeft <= 0)
         MyAssertHandler(".\\groupvoice\\play_dsound.cpp", 207, 0, "%s", "bytesLeft > 0");
@@ -197,9 +197,9 @@ void __cdecl DSound_SampleFrame(dsound_sample_t *sample)
 {
     DWORD dwWritePos; // [esp+4h] [ebp-14h] BYREF
     HRESULT hr; // [esp+8h] [ebp-10h]
-    int bytesLeft; // [esp+Ch] [ebp-Ch]
+    int32_t bytesLeft; // [esp+Ch] [ebp-Ch]
     DWORD dwPlayPos; // [esp+10h] [ebp-8h] BYREF
-    int bytesPlayed; // [esp+14h] [ebp-4h]
+    int32_t bytesPlayed; // [esp+14h] [ebp-4h]
 
     bytesLeft = DSound_GetBytesLeft(sample);
     if (!sample->playing && bytesLeft >= COMFORTABLE_BUFFER_AMOUNT)
@@ -258,9 +258,9 @@ void __cdecl DSound_SampleFrame(dsound_sample_t *sample)
 HRESULT __cdecl CreateBasicBuffer(
     IDirectSound8 *lpDirectSound,
     IDirectSoundBuffer **ppDsb,
-    unsigned int sampleRate,
-    unsigned __int16 channels,
-    unsigned int bufferSize)
+    uint32_t sampleRate,
+    uint16_t channels,
+    uint32_t bufferSize)
 {
     HRESULT hr; // [esp+0h] [ebp-40h]
     _DSBUFFERDESC dsbdesc; // [esp+4h] [ebp-3Ch] BYREF
@@ -317,7 +317,7 @@ char __cdecl DSound_StopSample(dsound_sample_t *sample)
     return 1;
 }
 
-int __cdecl DSound_Init(bool callDsoundInit, HWND__ *handle)
+int32_t __cdecl DSound_Init(bool callDsoundInit, HWND__ *handle)
 {
     if (dsoundplay_initialized)
         return 1;

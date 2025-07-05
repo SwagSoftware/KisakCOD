@@ -596,7 +596,7 @@ void __cdecl SpawnVehicle(gentity_s *ent, const char *typeName)
             Scr_Error(v3);
         }
     }
-    memset((unsigned __int8 *)veh, 0, sizeof(scr_vehicle_s));
+    memset((uint8_t *)veh, 0, sizeof(scr_vehicle_s));
     InitEntityVars(ent, veh, infoIdx);
     InitEntityVehicleVars(ent, veh, infoIdx);
     InitVehicleTags(ent);
@@ -634,14 +634,14 @@ int32_t __cdecl VEH_GetVehicleInfoFromName(const char *name)
 
 int32_t __cdecl G_LoadVehicle(const char *name)
 {
-    unsigned __int8 v2; // al
+    uint8_t v2; // al
     char v3; // [esp+3h] [ebp-2065h]
-    unsigned __int8 *v4; // [esp+8h] [ebp-2060h]
+    uint8_t *v4; // [esp+8h] [ebp-2060h]
     const char *v5; // [esp+Ch] [ebp-205Ch]
     char string[68]; // [esp+10h] [ebp-2058h] BYREF
     int32_t i; // [esp+54h] [ebp-2014h]
     char *pszBuffer; // [esp+58h] [ebp-2010h]
-    unsigned __int8 *dst; // [esp+5Ch] [ebp-200Ch]
+    uint8_t *dst; // [esp+5Ch] [ebp-200Ch]
     char loadBuffer[8192]; // [esp+60h] [ebp-2008h] BYREF
     int32_t v11; // [esp+2064h] [ebp-4h]
 
@@ -650,7 +650,7 @@ int32_t __cdecl G_LoadVehicle(const char *name)
     sprintf(string, "vehicles/%s", name);
     pszBuffer = Com_LoadInfoString(string, "vehicle file", "VEHICLEFILE", loadBuffer);
     v11 = s_numVehicleInfos;
-    dst = (unsigned __int8 *)&s_vehicleInfos[s_numVehicleInfos];
+    dst = (uint8_t *)&s_vehicleInfos[s_numVehicleInfos];
     memset(dst, 0, 0x270u);
     v5 = name;
     v4 = dst;
@@ -665,7 +665,7 @@ int32_t __cdecl G_LoadVehicle(const char *name)
         33,
         pszBuffer,
         13,
-        (int(__cdecl *)(unsigned __int8 *, const char *, const int))VEH_ParseSpecificField,
+        (int(__cdecl *)(uint8_t *, const char *, const int))VEH_ParseSpecificField,
         BG_StringCopy))
         return -1;
     *((float *)dst + 28) = *((float *)dst + 28) * 17.6;
@@ -688,7 +688,7 @@ int32_t __cdecl G_LoadVehicle(const char *name)
     return v11;
 }
 
-int32_t __cdecl VEH_ParseSpecificField(unsigned __int8 *pStruct, const char *pValue, int32_t fieldType)
+int32_t __cdecl VEH_ParseSpecificField(uint8_t *pStruct, const char *pValue, int32_t fieldType)
 {
     const char *v3; // eax
     int32_t i; // [esp+4h] [ebp-4h]
@@ -1317,7 +1317,7 @@ void __cdecl G_VehEntHandler_Think(gentity_s *pSelf)
     if ((veh->flags & 8) != 0)
     {
         VEH_BackupPosition_0(pSelf);
-        memset((unsigned __int8 *)&s_phys_0, 0, sizeof(s_phys_0));
+        memset((uint8_t *)&s_phys_0, 0, sizeof(s_phys_0));
         for (rideTag = RideTagFirst(pSelf); rideTag; rideTag = RideTagNext(pSelf, rideTag->riderSlots))
         {
             if (rideTag->riderSlots[0].entNum != 1023 && g_entities[rideTag->riderSlots[0].entNum].health <= 0)

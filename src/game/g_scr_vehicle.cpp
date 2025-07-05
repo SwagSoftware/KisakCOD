@@ -32,7 +32,7 @@ gentity_s *__cdecl GScr_GetVehicle(scr_entref_t entref)
     return 0;
 }
 
-gentity_s *__cdecl VEH_GetVehicle(int entNum)
+gentity_s *__cdecl VEH_GetVehicle(int32_t entNum)
 {
     const char *v1; // eax
     const char *v2; // eax
@@ -52,7 +52,7 @@ gentity_s *__cdecl VEH_GetVehicle(int entNum)
     return &g_entities[entNum];
 }
 
-void __cdecl VEH_InitEntity(gentity_s *ent, scr_vehicle_s *veh, int infoIdx)
+void __cdecl VEH_InitEntity(gentity_s *ent, scr_vehicle_s *veh, int32_t infoIdx)
 {
     ent->handler = 23;
     ent->r.svFlags = 4;
@@ -63,7 +63,7 @@ void __cdecl VEH_InitEntity(gentity_s *ent, scr_vehicle_s *veh, int infoIdx)
     ent->s.lerp.u.vehicle.materialTime = 0;
     ent->s.time2 = 0;
     ent->s.loopSound = 0;
-    ent->s.weapon = (unsigned __int8)G_GetWeaponIndexForName(s_vehicleInfos[infoIdx].turretWeapon);
+    ent->s.weapon = (uint8_t)G_GetWeaponIndexForName(s_vehicleInfos[infoIdx].turretWeapon);
     ent->s.weaponModel = 0;
     ent->s.lerp.u.turret.gunAngles[2] = 0.0;
     ent->s.lerp.u.turret.gunAngles[0] = 0.0;
@@ -92,7 +92,7 @@ void __cdecl VEH_InitVehicle(gentity_s *ent, scr_vehicle_s *veh, __int16 infoIdx
     veh->turret.turretState = VEH_TURRET_STOPPED;
     veh->turret.barrelOffset = 0.0f;
     veh->turret.barrelBlocked = 0;
-    Com_Memset((unsigned int *)&veh->jitter, 0, 60);
+    Com_Memset((uint32_t *)&veh->jitter, 0, 60);
     veh->drawOnCompass = 0;
     veh->lookAtText0 = 0;
     veh->lookAtText1 = 0;
@@ -142,7 +142,7 @@ void __cdecl VEH_InitVehicle(gentity_s *ent, scr_vehicle_s *veh, __int16 infoIdx
 void __cdecl VEH_InitPhysics(gentity_s *ent)
 {
     vehicle_physic_t *phys; // [esp+38h] [ebp-Ch]
-    int i; // [esp+40h] [ebp-4h]
+    int32_t i; // [esp+40h] [ebp-4h]
 
     phys = &ent->scr_vehicle->phys;
     phys->origin[0] = ent->r.currentOrigin[0];
@@ -222,10 +222,10 @@ const float s_correctSolidDeltas[26][3] =
   { 1.0f, 1.0f, -1.0f },
   { -1.0f, 1.0f, -1.0f }
 }; // idb
-int __cdecl VEH_CorrectAllSolid(gentity_s *ent, trace_t *trace)
+int32_t __cdecl VEH_CorrectAllSolid(gentity_s *ent, trace_t *trace)
 {
     vehicle_physic_t *phys; // [esp+10h] [ebp-18h]
-    unsigned int i; // [esp+18h] [ebp-10h]
+    uint32_t i; // [esp+18h] [ebp-10h]
     float point[3]; // [esp+1Ch] [ebp-Ch] BYREF
 
     phys = &ent->scr_vehicle->phys;
@@ -255,24 +255,24 @@ void __cdecl VEH_ClearGround()
     s_phys.hasGround = 0;
 }
 
-bool __cdecl VEH_SlideMove(gentity_s *ent, int gravity)
+bool __cdecl VEH_SlideMove(gentity_s *ent, int32_t gravity)
 {
     float *v3; // [esp+24h] [ebp-D4h]
     float timeLeft; // [esp+30h] [ebp-C8h]
-    int j; // [esp+34h] [ebp-C4h]
+    int32_t j; // [esp+34h] [ebp-C4h]
     vehicle_physic_t *phys; // [esp+38h] [ebp-C0h]
     float dir[3]; // [esp+3Ch] [ebp-BCh] BYREF
-    int bumpCount; // [esp+48h] [ebp-B0h]
+    int32_t bumpCount; // [esp+48h] [ebp-B0h]
     scr_vehicle_s *veh; // [esp+4Ch] [ebp-ACh]
-    int k; // [esp+50h] [ebp-A8h]
+    int32_t k; // [esp+50h] [ebp-A8h]
     float planes[5][3]; // [esp+54h] [ebp-A4h] BYREF
     float clipVel[3]; // [esp+90h] [ebp-68h] BYREF
     float end[3]; // [esp+9Ch] [ebp-5Ch] BYREF
     float endVel[3]; // [esp+A8h] [ebp-50h] BYREF
-    int numPlanes; // [esp+B4h] [ebp-44h]
+    int32_t numPlanes; // [esp+B4h] [ebp-44h]
     trace_t trace; // [esp+B8h] [ebp-40h] BYREF
     float endClipVel[3]; // [esp+E4h] [ebp-14h] BYREF
-    int i; // [esp+F0h] [ebp-8h]
+    int32_t i; // [esp+F0h] [ebp-8h]
     float dot; // [esp+F4h] [ebp-4h]
 
     veh = ent->scr_vehicle;
@@ -393,7 +393,7 @@ void __cdecl VEH_ClipVelocity(float *in, float *normal, float *out)
 {
     double v3; // st7
     float change; // [esp+0h] [ebp-Ch]
-    int i; // [esp+4h] [ebp-8h]
+    int32_t i; // [esp+4h] [ebp-8h]
     float backoff; // [esp+8h] [ebp-4h]
     float backoffa; // [esp+8h] [ebp-4h]
 
@@ -431,7 +431,7 @@ void __cdecl Scr_Vehicle_Think(gentity_s *pSelf)
     veh = pSelf->scr_vehicle;
     info = &s_vehicleInfos[veh->infoIdx];
     VEH_BackupPosition(pSelf);
-    memset((unsigned __int8 *)&s_phys, 0, sizeof(s_phys));
+    memset((uint8_t *)&s_phys, 0, sizeof(s_phys));
     if (info->type != 4)
     {
         if ((veh->flags & 2) != 0)
@@ -458,10 +458,10 @@ void __cdecl Scr_Vehicle_Think(gentity_s *pSelf)
 void __cdecl VEH_MoveTrace(gentity_s *ent)
 {
     float diff[3]; // [esp+8h] [ebp-5Ch] BYREF
-    int contents; // [esp+14h] [ebp-50h]
+    int32_t contents; // [esp+14h] [ebp-50h]
     vehicle_physic_t *phys; // [esp+18h] [ebp-4Ch]
     float size[3]; // [esp+1Ch] [ebp-48h] BYREF
-    int dimIndex; // [esp+28h] [ebp-3Ch]
+    int32_t dimIndex; // [esp+28h] [ebp-3Ch]
     trace_t trace; // [esp+2Ch] [ebp-38h] BYREF
     float maxs[3]; // [esp+58h] [ebp-Ch] BYREF
 
@@ -510,7 +510,7 @@ void __cdecl VEH_BackupPosition(gentity_s *ent)
 
 void __cdecl VEH_TouchEntities(gentity_s *ent)
 {
-    int v1; // [esp+Ch] [ebp-1080h]
+    int32_t v1; // [esp+Ch] [ebp-1080h]
     float maxs[3]; // [esp+18h] [ebp-1074h] BYREF
     DObj_s *obj; // [esp+24h] [ebp-1068h]
     scr_vehicle_s *scr_vehicle; // [esp+28h] [ebp-1064h]
@@ -522,8 +522,8 @@ void __cdecl VEH_TouchEntities(gentity_s *ent)
     float v3[3]; // [esp+50h] [ebp-103Ch] BYREF
     float sum[3]; // [esp+5Ch] [ebp-1030h] BYREF
     void(__cdecl * v12)(gentity_s *, gentity_s *, int); // [esp+68h] [ebp-1024h]
-    int entityList[1025]; // [esp+6Ch] [ebp-1020h] BYREF
-    int i; // [esp+1070h] [ebp-1Ch]
+    int32_t entityList[1025]; // [esp+6Ch] [ebp-1020h] BYREF
+    int32_t i; // [esp+1070h] [ebp-1Ch]
     float mins[3]; // [esp+1074h] [ebp-18h] BYREF
     float diff[3]; // [esp+1080h] [ebp-Ch] BYREF
 
@@ -916,7 +916,7 @@ void __cdecl VEH_UpdateMoveToGoal(gentity_s *ent, const float *goalPos)
     scr_vehicle_s *veh; // [esp+B0h] [ebp-18h]
     float vecToGoal[3]; // [esp+B4h] [ebp-14h] BYREF
     float distToGoal; // [esp+C0h] [ebp-8h]
-    int hovering; // [esp+C4h] [ebp-4h]
+    int32_t hovering; // [esp+C4h] [ebp-4h]
 
     if (!ent)
         MyAssertHandler(".\\game\\g_scr_vehicle.cpp", 3294, 0, "%s", "ent");
@@ -1091,7 +1091,7 @@ void __cdecl VEH_UpdateMoveOrientation(gentity_s *ent, float *desiredDir)
 }
 
 void __cdecl VEH_UpdateAngleAndAngularVel(
-    int index,
+    int32_t index,
     float desiredAngle,
     float accel,
     float decel,
@@ -1243,7 +1243,7 @@ float __cdecl VEH_UpdateMove_GetDesiredYaw(scr_vehicle_s *veh, float *desiredDir
     }
 }
 
-float __cdecl VEH_CalcAccelFraction(float accel, int infoIdx)
+float __cdecl VEH_CalcAccelFraction(float accel, int32_t infoIdx)
 {
     float v4; // [esp+4h] [ebp-1Ch]
     float v5; // [esp+8h] [ebp-18h]
@@ -1570,7 +1570,7 @@ void __cdecl VEH_CheckVerticalVelocityToGoal(scr_vehicle_s *veh, float verticalD
     }
 }
 
-int __cdecl VEH_UpdateMove_CheckGoalReached(gentity_s *ent, float distToGoal)
+int32_t __cdecl VEH_UpdateMove_CheckGoalReached(gentity_s *ent, float distToGoal)
 {
     bool v3; // [esp+0h] [ebp-1Ch]
     bool v4; // [esp+4h] [ebp-18h]
@@ -1680,7 +1680,7 @@ void __cdecl VEH_UpdateMove_CheckNearGoal(gentity_s *ent, float distToGoal)
         Scr_Notify(ent, scr_const.near_goal, 0);
 }
 
-void __cdecl VEH_GetNewSpeedAndAccel(scr_vehicle_s *veh, float dt, int hovering, float *newSpeed, float *accelMax)
+void __cdecl VEH_GetNewSpeedAndAccel(scr_vehicle_s *veh, float dt, int32_t hovering, float *newSpeed, float *accelMax)
 {
     float decel; // [esp+10h] [ebp-Ch]
     float speed; // [esp+14h] [ebp-8h]
@@ -1741,7 +1741,7 @@ void __cdecl VEH_UpdateHover(gentity_s *ent)
 void __cdecl VEH_SetHoverGoal(gentity_s *ent)
 {
     float min; // [esp+4h] [ebp-20h]
-    int i; // [esp+10h] [ebp-14h]
+    int32_t i; // [esp+10h] [ebp-14h]
     scr_vehicle_s *veh; // [esp+14h] [ebp-10h]
     float randomOffset[3]; // [esp+18h] [ebp-Ch] BYREF
 
@@ -2027,7 +2027,7 @@ void __cdecl CMD_VEH_SetTurretTargetEnt(scr_entref_t entref)
 {
     gentity_s *Vehicle; // ecx
     const char *v2; // eax
-    int number; // [esp+0h] [ebp-18h]
+    int32_t number; // [esp+0h] [ebp-18h]
     scr_vehicle_s *veh; // [esp+Ch] [ebp-Ch]
     gentity_s *tgtEnt; // [esp+10h] [ebp-8h]
 
@@ -2123,7 +2123,7 @@ void __cdecl CMD_VEH_SetWeapon(scr_entref_t entref)
 
     ent = GScr_GetVehicle(entref);
     String = Scr_GetString(0);
-    ent->s.weapon = (unsigned __int8)BG_FindWeaponIndexForName(String);
+    ent->s.weapon = (uint8_t)BG_FindWeaponIndexForName(String);
     ent->s.weaponModel = 0;
 }
 
@@ -2150,23 +2150,23 @@ void __cdecl CMD_VEH_FireWeapon(scr_entref_t entref)
     float aimPadding; // [esp+4Ch] [ebp-124h]
     float v20; // [esp+50h] [ebp-120h]
     float joltDir[3]; // [esp+60h] [ebp-110h] BYREF
-    int numBarrels; // [esp+6Ch] [ebp-104h]
-    int boneIndex; // [esp+70h] [ebp-100h]
+    int32_t numBarrels; // [esp+6Ch] [ebp-104h]
+    int32_t boneIndex; // [esp+70h] [ebp-100h]
     vehicle_info_t *info; // [esp+74h] [ebp-FCh]
     scr_vehicle_s *veh; // [esp+78h] [ebp-F8h]
     float diffAngles[3]; // [esp+7Ch] [ebp-F4h] BYREF
-    int event; // [esp+88h] [ebp-E8h]
+    int32_t event; // [esp+88h] [ebp-E8h]
     gentity_s *target; // [esp+8Ch] [ebp-E4h]
-    int startBarrel; // [esp+90h] [ebp-E0h]
+    int32_t startBarrel; // [esp+90h] [ebp-E0h]
     float gunAngles[3]; // [esp+94h] [ebp-DCh] BYREF
     weaponParms wp; // [esp+A0h] [ebp-D0h] BYREF
     gentity_s *missile; // [esp+E4h] [ebp-8Ch]
     float targetOffset[3]; // [esp+E8h] [ebp-88h] BYREF
     gentity_s *ent; // [esp+F4h] [ebp-7Ch]
     float bulletAngles[3]; // [esp+F8h] [ebp-78h] BYREF
-    int i; // [esp+104h] [ebp-6Ch]
+    int32_t i; // [esp+104h] [ebp-6Ch]
     float barrelMtx[4][3]; // [esp+108h] [ebp-68h] BYREF
-    int barrel; // [esp+138h] [ebp-38h]
+    int32_t barrel; // [esp+138h] [ebp-38h]
     gentity_s *player; // [esp+13Ch] [ebp-34h]
     float flashMtx[4][3]; // [esp+140h] [ebp-30h] BYREF
 
@@ -2332,10 +2332,10 @@ void __cdecl CMD_VEH_FireWeapon(scr_entref_t entref)
     veh->turret.fireBarrel = veh->turret.fireBarrel == 0;
 }
 
-int __cdecl VEH_GetTagBoneIndex(gentity_s *ent, int barrel)
+int32_t __cdecl VEH_GetTagBoneIndex(gentity_s *ent, int32_t barrel)
 {
     char *boneName; // [esp+0h] [ebp-Ch]
-    int boneIndex; // [esp+4h] [ebp-8h]
+    int32_t boneIndex; // [esp+4h] [ebp-8h]
     scr_vehicle_s *veh; // [esp+8h] [ebp-4h]
 
     boneIndex = -1;

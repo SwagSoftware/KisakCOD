@@ -20,7 +20,7 @@ void __cdecl SP_light(gentity_s *self)
 {
     float radius; // [esp+8h] [ebp-C4h]
     float v2; // [esp+14h] [ebp-B8h]
-    int primaryLightIndex; // [esp+A0h] [ebp-2Ch] BYREF
+    int32_t primaryLightIndex; // [esp+A0h] [ebp-2Ch] BYREF
     const ComPrimaryLight *light; // [esp+A4h] [ebp-28h]
     float facingDir[3]; // [esp+A8h] [ebp-24h] BYREF
     float facingAngles[3]; // [esp+B4h] [ebp-18h] BYREF
@@ -31,7 +31,7 @@ void __cdecl SP_light(gentity_s *self)
     if (G_SpawnInt("pl#", "0", &primaryLightIndex))
     {
         light = Com_GetPrimaryLight(primaryLightIndex);
-        self->s.index.brushmodel = (unsigned __int16)primaryLightIndex;
+        self->s.index.brushmodel = (uint16_t)primaryLightIndex;
         if (self->s.index.brushmodel != primaryLightIndex)
             MyAssertHandler(
                 ".\\game_mp\\g_misc_mp.cpp",
@@ -41,7 +41,7 @@ void __cdecl SP_light(gentity_s *self)
                 self->s.index.brushmodel,
                 primaryLightIndex);
         self->s.lerp.u.turret.gunAngles[1] = ColorNormalize((float*)light->color, normalizedColor);
-        Byte4PackRgba(normalizedColor, (unsigned __int8 *)&self->s.lerp.u);
+        Byte4PackRgba(normalizedColor, (uint8_t *)&self->s.lerp.u);
         self->s.lerp.u.primaryLight.colorAndExp[3] = light->exponent;
         self->s.lerp.u.turret.gunAngles[2] = light->radius;
         self->s.lerp.u.primaryLight.cosHalfFovOuter = light->cosHalfFovOuter;
@@ -76,7 +76,7 @@ void __cdecl TeleportPlayer(gentity_s *player, float *origin, float *angles)
 {
     float *v3; // [esp+4h] [ebp-Ch]
     float *v4; // [esp+8h] [ebp-8h]
-    int linked; // [esp+Ch] [ebp-4h]
+    int32_t linked; // [esp+Ch] [ebp-4h]
 
     if (!player->client)
         MyAssertHandler(".\\game_mp\\g_misc_mp.cpp", 75, 0, "%s", "player->client");
@@ -106,7 +106,7 @@ turretInfo_s turretInfo[32];
 
 void __cdecl G_InitTurrets()
 {
-    int i; // [esp+0h] [ebp-4h]
+    int32_t i; // [esp+0h] [ebp-4h]
 
     for (i = 0; i < 32; ++i)
         turretInfo[i].inuse = 0;
@@ -229,7 +229,7 @@ void __cdecl G_PlayerTurretPositionAndBlend(gentity_s *ent, gentity_s *pTurretEn
 {
     char *AnimDebugName; // eax
     char *v3; // eax
-    int v4; // eax
+    int32_t v4; // eax
     double v5; // st7
     gclient_s *client; // edx
     float v7; // [esp+18h] [ebp-214h]
@@ -249,39 +249,39 @@ void __cdecl G_PlayerTurretPositionAndBlend(gentity_s *ent, gentity_s *pTurretEn
     float v21; // [esp+90h] [ebp-19Ch]
     float v22; // [esp+94h] [ebp-198h]
     float fHeightRatio; // [esp+98h] [ebp-194h]
-    int iPrevBlend; // [esp+9Ch] [ebp-190h]
+    int32_t iPrevBlend; // [esp+9Ch] [ebp-190h]
     float fPrevTransZ; // [esp+A0h] [ebp-18Ch]
     DObj_s *obj; // [esp+A4h] [ebp-188h]
-    int numVertChildren; // [esp+A8h] [ebp-184h]
+    int32_t numVertChildren; // [esp+A8h] [ebp-184h]
     float trans2[3]; // [esp+ACh] [ebp-180h] BYREF
     float yaw; // [esp+B8h] [ebp-174h]
     float trans[3]; // [esp+BCh] [ebp-170h] BYREF
     float start[3]; // [esp+C8h] [ebp-164h] BYREF
     float end[3]; // [esp+D4h] [ebp-158h] BYREF
-    int iBlend; // [esp+E0h] [ebp-14Ch]
+    int32_t iBlend; // [esp+E0h] [ebp-14Ch]
     DObjAnimMat *tagMat; // [esp+E4h] [ebp-148h]
-    unsigned int heightAnim; // [esp+E8h] [ebp-144h]
+    uint32_t heightAnim; // [esp+E8h] [ebp-144h]
     float fDelta; // [esp+ECh] [ebp-140h]
     float fPrevBlend; // [esp+F0h] [ebp-13Ch]
     float rot[2]; // [esp+F4h] [ebp-138h] BYREF
     float tagAxis[3][3]; // [esp+FCh] [ebp-130h] BYREF
     float localAxis[4][3]; // [esp+120h] [ebp-10Ch] BYREF
-    unsigned int leafAnim1; // [esp+150h] [ebp-DCh]
+    uint32_t leafAnim1; // [esp+150h] [ebp-DCh]
     trace_t trace; // [esp+154h] [ebp-D8h] BYREF
     float endpos[3]; // [esp+180h] [ebp-ACh] BYREF
-    int numHorChildren; // [esp+18Ch] [ebp-A0h]
+    int32_t numHorChildren; // [esp+18Ch] [ebp-A0h]
     clientInfo_t *ci; // [esp+190h] [ebp-9Ch]
     float tagHeight; // [esp+194h] [ebp-98h]
-    int i; // [esp+198h] [ebp-94h]
-    unsigned int baseAnim; // [esp+19Ch] [ebp-90h]
-    int clientNum; // [esp+1A0h] [ebp-8Ch]
+    int32_t i; // [esp+198h] [ebp-94h]
+    uint32_t baseAnim; // [esp+19Ch] [ebp-90h]
+    int32_t clientNum; // [esp+1A0h] [ebp-8Ch]
     lerpFrame_t *pLerpAnim; // [esp+1A4h] [ebp-88h]
     WeaponDef *weapDef; // [esp+1A8h] [ebp-84h]
     float fBlend; // [esp+1ACh] [ebp-80h]
     float axis[4][3]; // [esp+1B0h] [ebp-7Ch] BYREF
     XAnimTree_s *pAnimTree; // [esp+1E0h] [ebp-4Ch]
     XAnim_s *pXAnims; // [esp+1E4h] [ebp-48h]
-    unsigned int leafAnim2; // [esp+1E8h] [ebp-44h]
+    uint32_t leafAnim2; // [esp+1E8h] [ebp-44h]
     float localYaw; // [esp+1ECh] [ebp-40h]
     float turretAxis[4][3]; // [esp+1F0h] [ebp-3Ch] BYREF
     float vDelta[3]; // [esp+220h] [ebp-Ch] BYREF
@@ -662,7 +662,7 @@ void __cdecl turret_think(gentity_s *self)
     }
 }
 
-int __cdecl turret_ReturnToDefaultPos(gentity_s *self, int bManned)
+int32_t __cdecl turret_ReturnToDefaultPos(gentity_s *self, int32_t bManned)
 {
     float dropPitch; // [esp+0h] [ebp-10h]
     float desiredAngles[2]; // [esp+4h] [ebp-Ch] BYREF
@@ -680,17 +680,17 @@ int __cdecl turret_ReturnToDefaultPos(gentity_s *self, int bManned)
     return turret_UpdateTargetAngles(self, desiredAngles, bManned);
 }
 
-int __cdecl turret_UpdateTargetAngles(gentity_s *self, float *desiredAngles, int bManned)
+int32_t __cdecl turret_UpdateTargetAngles(gentity_s *self, float *desiredAngles, int32_t bManned)
 {
     double v3; // st7
     float desiredPitch; // [esp+10h] [ebp-20h]
     float fDelta; // [esp+14h] [ebp-1Ch]
     float fDeltaa; // [esp+14h] [ebp-1Ch]
     turretInfo_s *pTurretInfo; // [esp+18h] [ebp-18h]
-    int bComplete; // [esp+1Ch] [ebp-14h]
+    int32_t bComplete; // [esp+1Ch] [ebp-14h]
     float pitch; // [esp+20h] [ebp-10h]
     float fSpeed[2]; // [esp+24h] [ebp-Ch]
-    int i; // [esp+2Ch] [ebp-4h]
+    int32_t i; // [esp+2Ch] [ebp-4h]
 
     if (self->s.eType != 11)
         MyAssertHandler(".\\game_mp\\g_misc_mp.cpp", 629, 0, "%s", "self->s.eType == ET_MG42");
@@ -788,8 +788,8 @@ void __cdecl turret_think_init(gentity_s *self)
     float angles[3]; // [esp+68h] [ebp-70h] BYREF
     float baseMtx[4][3]; // [esp+74h] [ebp-64h] BYREF
     trace_t trace; // [esp+A4h] [ebp-34h] BYREF
-    int i; // [esp+D0h] [ebp-8h]
-    int numSteps; // [esp+D4h] [ebp-4h]
+    int32_t i; // [esp+D0h] [ebp-8h]
+    int32_t numSteps; // [esp+D4h] [ebp-4h]
 
     numSteps = 30;
     pTurretInfo = self->pTurretInfo;
@@ -836,9 +836,9 @@ void __cdecl turret_think_init(gentity_s *self)
     }
 }
 
-void __cdecl turret_controller(const gentity_s *self, int *partBits)
+void __cdecl turret_controller(const gentity_s *self, int32_t *partBits)
 {
-    unsigned __int8 boneIndex; // [esp+3h] [ebp-11h] BYREF
+    uint8_t boneIndex; // [esp+3h] [ebp-11h] BYREF
     DObj_s *obj; // [esp+4h] [ebp-10h]
     float angles[3]; // [esp+8h] [ebp-Ch] BYREF
 
@@ -946,7 +946,7 @@ bool __cdecl turret_behind(gentity_s *self, gentity_s *other)
 
 void __cdecl turret_use(gentity_s *self, gentity_s *owner, gentity_s* activator)
 {
-    unsigned int v2; // ecx
+    uint32_t v2; // ecx
     float v3; // [esp+8h] [ebp-60h]
     float v4; // [esp+Ch] [ebp-5Ch]
     float v5; // [esp+10h] [ebp-58h]
@@ -1062,7 +1062,7 @@ void __cdecl G_SpawnTurret(gentity_s *self, const char *weaponinfoname)
     const char *v2; // eax
     const char *v3; // eax
     turretInfo_s *pTurretInfo; // [esp+Ch] [ebp-Ch]
-    int i; // [esp+10h] [ebp-8h]
+    int32_t i; // [esp+10h] [ebp-8h]
     WeaponDef *weapDef; // [esp+14h] [ebp-4h]
 
     pTurretInfo = 0;
@@ -1074,7 +1074,7 @@ void __cdecl G_SpawnTurret(gentity_s *self, const char *weaponinfoname)
     }
     if (i == 32)
         Com_Error(ERR_DROP, "G_SpawnTurret: max number of turrets (%d) exceeded", 32);
-    memset((unsigned __int8 *)pTurretInfo, 0, sizeof(turretInfo_s));
+    memset((uint8_t *)pTurretInfo, 0, sizeof(turretInfo_s));
     self->pTurretInfo = pTurretInfo;
     pTurretInfo->inuse = 1;
     self->s.weapon = G_GetWeaponIndexForName(weaponinfoname);

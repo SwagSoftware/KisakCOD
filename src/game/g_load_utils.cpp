@@ -27,7 +27,7 @@ void __cdecl G_SetEntityParsePoint(const char *beginParsePoint)
     g_entityEndParsePoint = beginParsePoint;
 }
 
-int __cdecl G_GetEntityToken(char *buffer, int bufferSize)
+int32_t __cdecl G_GetEntityToken(char *buffer, int32_t bufferSize)
 {
     parseInfo_t *v2; // eax
 
@@ -39,7 +39,7 @@ int __cdecl G_GetEntityToken(char *buffer, int bufferSize)
     return 1;
 }
 
-int __cdecl G_ParseSpawnVars(SpawnVar *spawnVar)
+int32_t __cdecl G_ParseSpawnVars(SpawnVar *spawnVar)
 {
     char com_token[1024]; // [esp+0h] [ebp-808h] BYREF
     char keyname[1028]; // [esp+400h] [ebp-408h] BYREF
@@ -72,21 +72,21 @@ int __cdecl G_ParseSpawnVars(SpawnVar *spawnVar)
 
 char *__cdecl G_AddSpawnVarToken(char *string, SpawnVar *spawnVar)
 {
-    unsigned int v3; // [esp+0h] [ebp-18h]
+    uint32_t v3; // [esp+0h] [ebp-18h]
     char *dest; // [esp+14h] [ebp-4h]
 
     v3 = strlen(string);
     if ((int)(spawnVar->numSpawnVarChars + v3 + 1) > 2048)
         Com_Error(ERR_DROP, "G_AddSpawnVarToken: MAX_SPAWN_VARS");
     dest = &spawnVar->spawnVarChars[spawnVar->numSpawnVarChars];
-    memcpy((unsigned __int8 *)dest, (unsigned __int8 *)string, v3 + 1);
+    memcpy((uint8_t *)dest, (uint8_t *)string, v3 + 1);
     spawnVar->numSpawnVarChars += v3 + 1;
     return dest;
 }
 
-int __cdecl G_SpawnString(const SpawnVar *spawnVar, const char *key, const char *defaultString, const char **out)
+int32_t __cdecl G_SpawnString(const SpawnVar *spawnVar, const char *key, const char *defaultString, const char **out)
 {
-    int i; // [esp+0h] [ebp-4h]
+    int32_t i; // [esp+0h] [ebp-4h]
 
     if (!spawnVar->spawnVarsValid)
         MyAssertHandler(".\\game\\g_load_utils.cpp", 161, 0, "%s", "spawnVar->spawnVarsValid");
@@ -105,9 +105,9 @@ int __cdecl G_SpawnString(const SpawnVar *spawnVar, const char *key, const char 
 HashEntry_unnamed_type_u __cdecl G_NewString(const char *string)
 {
     char str[0x4000]; // [esp+10h] [ebp-4010h] BYREF
-    unsigned int v3; // [esp+4014h] [ebp-Ch]
+    uint32_t v3; // [esp+4014h] [ebp-Ch]
     char *v4; // [esp+4018h] [ebp-8h]
-    unsigned int i; // [esp+401Ch] [ebp-4h]
+    uint32_t i; // [esp+401Ch] [ebp-4h]
 
     v3 = strlen(string) + 1;
     if (v3 > 0x4000)
@@ -132,7 +132,7 @@ HashEntry_unnamed_type_u __cdecl G_NewString(const char *string)
 }
 
 char str[8][32];
-int index;
+int32_t index;
 char *__cdecl vtos(const float *v)
 {
     char *s; // [esp+0h] [ebp-4h]

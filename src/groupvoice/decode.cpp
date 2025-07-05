@@ -7,12 +7,12 @@
 #include <qcommon/qcommon.h>
 
 void *g_decoder;
-int g_current_decode_bandwidth_setting;
+int32_t g_current_decode_bandwidth_setting;
 SpeexBits decodeBits;
-int g_decode_frame_size;
+int32_t g_decode_frame_size;
 
 
-char __cdecl Decode_Init(int bandwidthEnum)
+char __cdecl Decode_Init(int32_t bandwidthEnum)
 {
     const SpeexMode *mode; // [esp+8h] [ebp-4h]
 
@@ -37,7 +37,7 @@ char __cdecl Decode_Init(int bandwidthEnum)
         mode = &speex_nb_mode;
     }
     g_decoder = speex_decoder_init(mode);
-    int tmp = 1;
+    int32_t tmp = 1;
     speex_decoder_ctl(g_decoder, SPEEX_SET_ENH, &tmp);
     Decode_SetOptions();
     speex_decoder_ctl(g_decoder, SPEEX_GET_FRAME_SIZE, &g_decode_frame_size);
@@ -61,11 +61,11 @@ void __cdecl Decode_Shutdown()
     g_decoder = 0;
 }
 
-int __cdecl Decode_Sample(char *buffer, int maxLength, __int16 *out, int frame_size)
+int32_t __cdecl Decode_Sample(char *buffer, int32_t maxLength, int16_t *out, int32_t frame_size)
 {
-    int v5; // [esp+0h] [ebp-400Ch]
+    int32_t v5; // [esp+0h] [ebp-400Ch]
     float v6[4097]; // [esp+4h] [ebp-4008h]
-    int i; // [esp+4008h] [ebp-4h]
+    int32_t i; // [esp+4008h] [ebp-4h]
 
     if (maxLength > 4096)
         MyAssertHandler(".\\groupvoice\\decode.cpp", 100, 0, "%s", "maxLength <= 4096");

@@ -294,7 +294,7 @@ void __cdecl DSOUNDRecord_Shutdown()
         Com_PrintError(9, "Error releasing direct sound instance!  %s\n", hr);
 }
 
-void __cdecl Record_SetRecordingCallback(int(__cdecl *new_audioCallback)(audioSample_t *))
+void __cdecl Record_SetRecordingCallback(int32_t(__cdecl *new_audioCallback)(audioSample_t *))
 {
     current_audioCallback = new_audioCallback;
 }
