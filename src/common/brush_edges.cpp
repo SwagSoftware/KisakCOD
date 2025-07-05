@@ -7,32 +7,32 @@
 
 adjacencyWinding_t *__cdecl BuildBrushdAdjacencyWindingForSide(
     float *sideNormal,
-    int basePlaneIndex,
+    int32_t basePlaneIndex,
     const SimplePlaneIntersection *InPts,
-    int InPtCount,
+    int32_t InPtCount,
     adjacencyWinding_t *optionalOutWinding,
-    int optionalOutWindingCount)
+    int32_t optionalOutWindingCount)
 {
     const SimplePlaneIntersection *v7; // eax
     float *v8; // [esp+10h] [ebp-6054h]
     const SimplePlaneIntersection *v9; // [esp+14h] [ebp-6050h]
     adjacencyWinding_t *w; // [esp+1Ch] [ebp-6048h]
-    int i2; // [esp+20h] [ebp-6044h] BYREF
+    int32_t i2; // [esp+20h] [ebp-6044h] BYREF
     float perimiter1; // [esp+24h] [ebp-6040h]
     float plane[4]; // [esp+28h] [ebp-603Ch] BYREF
-    int ptsCount; // [esp+38h] [ebp-602Ch]
+    int32_t ptsCount; // [esp+38h] [ebp-602Ch]
     float v0[3073]; // [esp+3Ch] [ebp-6028h] BYREF
     const SimplePlaneIntersection *xyz[1024]; // [esp+3044h] [ebp-3020h] BYREF
     const SimplePlaneIntersection *point[1024]; // [esp+4044h] [ebp-2020h] BYREF
     const SimplePlaneIntersection *v19[1024]; // [esp+5044h] [ebp-1020h] BYREF
-    int i0; // [esp+6044h] [ebp-20h] BYREF
+    int32_t i0; // [esp+6044h] [ebp-20h] BYREF
     char v21; // [esp+6048h] [ebp-1Ch]
     char v22; // [esp+6049h] [ebp-1Bh]
-    int v23; // [esp+604Ch] [ebp-18h]
-    unsigned int v24[2]; // [esp+6050h] [ebp-14h]
-    int i1; // [esp+6058h] [ebp-Ch] BYREF
+    int32_t v23; // [esp+604Ch] [ebp-18h]
+    uint32_t v24[2]; // [esp+6050h] [ebp-14h]
+    int32_t i1; // [esp+6058h] [ebp-Ch] BYREF
     float perimiter2; // [esp+605Ch] [ebp-8h]
-    int plane2; // [esp+6060h] [ebp-4h]
+    int32_t plane2; // [esp+6060h] [ebp-4h]
 
     ptsCount = GetPointListAllowDupes(basePlaneIndex, InPts, InPtCount, xyz, 1024);
     if (ptsCount < 3)
@@ -131,9 +131,9 @@ adjacencyWinding_t *__cdecl BuildBrushdAdjacencyWindingForSide(
 
 void __cdecl ReverseAdjacencyWinding(adjacencyWinding_t *w)
 {
-    int swapTemp; // [esp+0h] [ebp-Ch]
-    int *start; // [esp+4h] [ebp-8h]
-    int *end; // [esp+8h] [ebp-4h]
+    int32_t swapTemp; // [esp+0h] [ebp-Ch]
+    int32_t *start; // [esp+4h] [ebp-8h]
+    int32_t *end; // [esp+8h] [ebp-4h]
 
     start = w->sides;
     for (end = &w->numsides + w->numsides; start < end; --end)
@@ -147,21 +147,21 @@ void __cdecl ReverseAdjacencyWinding(adjacencyWinding_t *w)
 
 double __cdecl RepresentativeTriangleFromWinding(
     const float (*xyz)[3],
-    int pointCount,
+    int32_t pointCount,
     const float *normal,
-    int *i0,
-    int *i1,
-    int *i2)
+    int32_t *i0,
+    int32_t *i1,
+    int32_t *i2)
 {
     float v7; // [esp+0h] [ebp-40h]
     float v8; // [esp+4h] [ebp-3Ch]
-    int j; // [esp+8h] [ebp-38h]
+    int32_t j; // [esp+8h] [ebp-38h]
     float areaBest; // [esp+Ch] [ebp-34h]
     float vb[3]; // [esp+14h] [ebp-2Ch] BYREF
-    int k; // [esp+20h] [ebp-20h]
+    int32_t k; // [esp+20h] [ebp-20h]
     float vc[3]; // [esp+24h] [ebp-1Ch] BYREF
     float va[3]; // [esp+30h] [ebp-10h] BYREF
-    int i; // [esp+3Ch] [ebp-4h]
+    int32_t i; // [esp+3Ch] [ebp-4h]
 
     *i0 = 0;
     *i1 = 1;
@@ -191,15 +191,15 @@ double __cdecl RepresentativeTriangleFromWinding(
     return areaBest;
 }
 
-int __cdecl GetPointListAllowDupes(
-    int planeIndex,
+int32_t __cdecl GetPointListAllowDupes(
+    int32_t planeIndex,
     const SimplePlaneIntersection *pts,
-    int ptCount,
+    int32_t ptCount,
     const SimplePlaneIntersection **xyz,
-    int xyzLimit)
+    int32_t xyzLimit)
 {
-    int xyzCount; // [esp+0h] [ebp-8h]
-    int ptIndex; // [esp+4h] [ebp-4h]
+    int32_t xyzCount; // [esp+0h] [ebp-8h]
+    int32_t ptIndex; // [esp+4h] [ebp-4h]
 
     xyzCount = 0;
     for (ptIndex = 0; ptIndex < ptCount; ++ptIndex)
@@ -216,7 +216,7 @@ int __cdecl GetPointListAllowDupes(
     return xyzCount;
 }
 
-bool __cdecl IsPtFormedByThisPlane(int plane, const SimplePlaneIntersection *pt)
+bool __cdecl IsPtFormedByThisPlane(int32_t plane, const SimplePlaneIntersection *pt)
 {
     if (pt->planeIndex[0] == plane)
         return 1;
@@ -228,11 +228,11 @@ bool __cdecl IsPtFormedByThisPlane(int plane, const SimplePlaneIntersection *pt)
 char __cdecl PlaneInCommonExcluding(
     const SimplePlaneIntersection *pt1,
     const SimplePlaneIntersection *pt2,
-    int excludePlane,
-    int *result)
+    int32_t excludePlane,
+    int32_t *result)
 {
-    int j; // [esp+4h] [ebp-8h]
-    int i; // [esp+8h] [ebp-4h]
+    int32_t j; // [esp+4h] [ebp-8h]
+    int32_t i; // [esp+8h] [ebp-4h]
 
     for (i = 0; i < 3; ++i)
     {
@@ -248,9 +248,9 @@ char __cdecl PlaneInCommonExcluding(
     return 0;
 }
 
-int __cdecl SecondPlane(const SimplePlaneIntersection *point, int plane)
+int32_t __cdecl SecondPlane(const SimplePlaneIntersection *point, int32_t plane)
 {
-    int planeIndex; // [esp+0h] [ebp-4h]
+    int32_t planeIndex; // [esp+0h] [ebp-4h]
 
     for (planeIndex = 0; planeIndex < 3; ++planeIndex)
     {
@@ -262,9 +262,9 @@ int __cdecl SecondPlane(const SimplePlaneIntersection *point, int plane)
     return -1;
 }
 
-int __cdecl ThirdPlane(const SimplePlaneIntersection *point, int plane1, int plane2)
+int32_t __cdecl ThirdPlane(const SimplePlaneIntersection *point, int32_t plane1, int32_t plane2)
 {
-    int planeIndex; // [esp+0h] [ebp-4h]
+    int32_t planeIndex; // [esp+0h] [ebp-4h]
 
     for (planeIndex = 0; planeIndex < 3; ++planeIndex)
     {
@@ -277,7 +277,7 @@ int __cdecl ThirdPlane(const SimplePlaneIntersection *point, int plane1, int pla
 }
 
 const SimplePlaneIntersection *__cdecl RemoveNextPointFormedByThisPlane(
-    int planeIndex,
+    int32_t planeIndex,
     const SimplePlaneIntersection **begin,
     const SimplePlaneIntersection **end)
 {
@@ -293,7 +293,7 @@ const SimplePlaneIntersection *__cdecl RemoveNextPointFormedByThisPlane(
 }
 
 const SimplePlaneIntersection **__cdecl NextPointFormedByThisPlane(
-    int planeIndex,
+    int32_t planeIndex,
     const SimplePlaneIntersection **begin,
     const SimplePlaneIntersection **end)
 {
@@ -302,7 +302,7 @@ const SimplePlaneIntersection **__cdecl NextPointFormedByThisPlane(
     return begin;
 }
 
-double __cdecl CyclePerimiter(const SimplePlaneIntersection **pts, int ptsCount)
+double __cdecl CyclePerimiter(const SimplePlaneIntersection **pts, int32_t ptsCount)
 {
     double v3; // [esp+0h] [ebp-40h]
     float v[3]; // [esp+14h] [ebp-2Ch] BYREF
@@ -310,7 +310,7 @@ double __cdecl CyclePerimiter(const SimplePlaneIntersection **pts, int ptsCount)
     float *b; // [esp+24h] [ebp-1Ch]
     float diff[3]; // [esp+2Ch] [ebp-14h] BYREF
     float perimiter; // [esp+38h] [ebp-8h]
-    int ptsIndex; // [esp+3Ch] [ebp-4h]
+    int32_t ptsIndex; // [esp+3Ch] [ebp-4h]
 
     if (ptsCount <= 2)
         MyAssertHandler("..\\common\\brush_edges.cpp", 403, 0, "%s", "ptsCount > 2");
@@ -327,14 +327,14 @@ double __cdecl CyclePerimiter(const SimplePlaneIntersection **pts, int ptsCount)
     return perimiter;
 }
 
-char __cdecl TestConvexWithoutNearPoints(const SimplePlaneIntersection **pts, unsigned int ptCount)
+char __cdecl TestConvexWithoutNearPoints(const SimplePlaneIntersection **pts, uint32_t ptCount)
 {
     float v[3]; // [esp+0h] [ebp-3028h] BYREF
     float diff[3]; // [esp+Ch] [ebp-301Ch] BYREF
     float *v5; // [esp+18h] [ebp-3010h]
     const SimplePlaneIntersection *v6; // [esp+1Ch] [ebp-300Ch]
     float a[3073]; // [esp+20h] [ebp-3008h] BYREF
-    unsigned int i; // [esp+3024h] [ebp-4h]
+    uint32_t i; // [esp+3024h] [ebp-4h]
 
     for (i = 0; i < ptCount; ++i)
     {
@@ -367,15 +367,15 @@ char __cdecl TestConvexWithoutNearPoints(const SimplePlaneIntersection **pts, un
         return 0;
 }
 
-char __cdecl IsConvex(const float (*pts)[3], unsigned int ptCount)
+char __cdecl IsConvex(const float (*pts)[3], uint32_t ptCount)
 {
-    unsigned int ptIndex3; // [esp+18h] [ebp-40h]
-    unsigned int ptIndex3a; // [esp+18h] [ebp-40h]
+    uint32_t ptIndex3; // [esp+18h] [ebp-40h]
+    uint32_t ptIndex3a; // [esp+18h] [ebp-40h]
     float edge1[3]; // [esp+1Ch] [ebp-3Ch] BYREF
     float edge2[3]; // [esp+28h] [ebp-30h] BYREF
     float normal[3]; // [esp+34h] [ebp-24h] BYREF
-    unsigned int ptIndex2; // [esp+40h] [ebp-18h]
-    unsigned int ptIndex1; // [esp+44h] [ebp-14h]
+    uint32_t ptIndex2; // [esp+40h] [ebp-18h]
+    uint32_t ptIndex1; // [esp+44h] [ebp-14h]
     float normal2[3]; // [esp+48h] [ebp-10h] BYREF
     float normalMag; // [esp+54h] [ebp-4h]
 
@@ -432,8 +432,8 @@ bool __cdecl CycleLess(
     bool isConvex2,
     float perimiter1,
     float perimiter2,
-    int nodeCount1,
-    int nodeCount2)
+    int32_t nodeCount1,
+    int32_t nodeCount2)
 {
     if (isConvex1)
     {
@@ -447,33 +447,33 @@ bool __cdecl CycleLess(
     return perimiter1 < perimiter2 - 1.0 || perimiter2 >= perimiter1 - 1.0 && nodeCount1 > nodeCount2;
 }
 
-int __cdecl ReduceToACycle(int basePlane, const SimplePlaneIntersection **pts, int ptsCount)
+int32_t __cdecl ReduceToACycle(int32_t basePlane, const SimplePlaneIntersection **pts, int32_t ptsCount)
 {
-    int v4; // eax
-    int v5; // eax
-    int partition[1024]; // [esp+10h] [ebp-5040h] BYREF
-    int v7; // [esp+1010h] [ebp-4040h]
-    int listCount; // [esp+1014h] [ebp-403Ch]
+    int32_t v4; // eax
+    int32_t v5; // eax
+    int32_t partition[1024]; // [esp+10h] [ebp-5040h] BYREF
+    int32_t v7; // [esp+1010h] [ebp-4040h]
+    int32_t listCount; // [esp+1014h] [ebp-403Ch]
     char CycleBFS; // [esp+1018h] [ebp-4038h]
     char v10; // [esp+1019h] [ebp-4037h]
-    int v11; // [esp+101Ch] [ebp-4034h]
+    int32_t v11; // [esp+101Ch] [ebp-4034h]
     const SimplePlaneIntersection *resultCycle[1024]; // [esp+1020h] [ebp-4030h] BYREF
     const SimplePlaneIntersection *v13[1024]; // [esp+2020h] [ebp-3030h] BYREF
-    int list[1024]; // [esp+3020h] [ebp-2030h] BYREF
-    int v15; // [esp+4020h] [ebp-1030h]
+    int32_t list[1024]; // [esp+3020h] [ebp-2030h] BYREF
+    int32_t v15; // [esp+4020h] [ebp-1030h]
     char v16; // [esp+4024h] [ebp-102Ch]
     char v17; // [esp+4025h] [ebp-102Bh]
-    int i; // [esp+4028h] [ebp-1028h]
-    int v19; // [esp+402Ch] [ebp-1024h]
-    int edgeCount; // [esp+4030h] [ebp-1020h]
-    int k; // [esp+4034h] [ebp-101Ch]
-    int resultCycleCount; // [esp+4038h] [ebp-1018h] BYREF
-    int ptCount; // [esp+403Ch] [ebp-1014h] BYREF
+    int32_t i; // [esp+4028h] [ebp-1028h]
+    int32_t v19; // [esp+402Ch] [ebp-1024h]
+    int32_t edgeCount; // [esp+4030h] [ebp-1020h]
+    int32_t k; // [esp+4034h] [ebp-101Ch]
+    int32_t resultCycleCount; // [esp+4038h] [ebp-1018h] BYREF
+    int32_t ptCount; // [esp+403Ch] [ebp-1014h] BYREF
     float perimiter1; // [esp+4040h] [ebp-1010h]
     float perimiter2; // [esp+4044h] [ebp-100Ch]
     const SimplePlaneIntersection *points[4]; // [esp+4048h] [ebp-1008h] BYREF
-    int j; // [esp+504Ch] [ebp-4h]
-    int ptsCounta; // [esp+5060h] [ebp+10h]
+    int32_t j; // [esp+504Ch] [ebp-4h]
+    int32_t ptsCounta; // [esp+5060h] [ebp+10h]
 
     ptsCounta = RemovePtsWithPlanesThatOccurLessThanTwice(pts, ptsCount);
     if (ptsCounta < 3)
@@ -566,9 +566,9 @@ int __cdecl ReduceToACycle(int basePlane, const SimplePlaneIntersection **pts, i
     return ptsCounta;
 }
 
-char __cdecl IntAlreadyInList(const int *list, int listCount, int value)
+char __cdecl IntAlreadyInList(const int32_t *list, int32_t listCount, int32_t value)
 {
-    int listIndex; // [esp+0h] [ebp-4h]
+    int32_t listIndex; // [esp+0h] [ebp-4h]
 
     for (listIndex = 0; listIndex < listCount; ++listIndex)
     {
@@ -579,28 +579,28 @@ char __cdecl IntAlreadyInList(const int *list, int listCount, int value)
 }
 
 char __cdecl FindCycleBFS(
-    int basePlane,
+    int32_t basePlane,
     const SimplePlaneIntersection **pts,
-    int ptsCount,
+    int32_t ptsCount,
     const SimplePlaneIntersection *start,
     const SimplePlaneIntersection *end,
-    int connectingPlane,
+    int32_t connectingPlane,
     const SimplePlaneIntersection **resultCycle,
-    int *resultCycleCount)
+    int32_t *resultCycleCount)
 {
     const SimplePlaneIntersection **v9; // [esp+0h] [ebp-4028h]
     const SimplePlaneIntersection **enda; // [esp+4h] [ebp-4024h]
     const SimplePlaneIntersection *v11; // [esp+8h] [ebp-4020h] BYREF
-    int planeIndex; // [esp+Ch] [ebp-401Ch]
-    int v13; // [esp+10h] [ebp-4018h]
-    unsigned int v14[4094]; // [esp+14h] [ebp-4014h]
-    int v15; // [esp+400Ch] [ebp-1Ch]
+    int32_t planeIndex; // [esp+Ch] [ebp-401Ch]
+    int32_t v13; // [esp+10h] [ebp-4018h]
+    uint32_t v14[4094]; // [esp+14h] [ebp-4014h]
+    int32_t v15; // [esp+400Ch] [ebp-1Ch]
     const SimplePlaneIntersection *v16; // [esp+4010h] [ebp-18h]
     const SimplePlaneIntersection **i; // [esp+4014h] [ebp-14h]
-    signed int j; // [esp+4018h] [ebp-10h]
-    int v19; // [esp+401Ch] [ebp-Ch]
-    signed int v20; // [esp+4020h] [ebp-8h]
-    signed int v21; // [esp+4024h] [ebp-4h]
+    int32_t j; // [esp+4018h] [ebp-10h]
+    int32_t v19; // [esp+401Ch] [ebp-Ch]
+    int32_t v20; // [esp+4020h] [ebp-8h]
+    int32_t v21; // [esp+4024h] [ebp-4h]
 
     if (!IsPtFormedByThisPlane(connectingPlane, start))
         MyAssertHandler("..\\common\\brush_edges.cpp", 266, 0, "%s", "IsPtFormedByThisPlane( connectingPlane, start )");
@@ -649,7 +649,7 @@ LABEL_6:
                     *(&v11 + 4 * v21) = *i;
                     *(&planeIndex + 4 * v21) = v15;
                     v14[4 * v21 - 1] = v14[4 * v20 - 1] + 1;
-                    v14[4 * v21++] = (unsigned int)&v11 + 4 * v20; // KISAKTODO: sus cast
+                    v14[4 * v21++] = (uint32_t)&v11 + 4 * v20; // KISAKTODO: sus cast
                     if (v15 == v19)
                         break;
                 }
@@ -662,7 +662,7 @@ LABEL_6:
         v16 = v9[2];
         while (v9)
         {
-            resultCycle[(unsigned int)v16] = *v9;
+            resultCycle[(uint32_t)v16] = *v9;
             v16 = (v16 - 1);
             v9 = &v9[3];
         }
@@ -673,9 +673,9 @@ LABEL_6:
     }
 }
 
-int __cdecl RemovePtsWithPlanesThatOccurLessThanTwice(const SimplePlaneIntersection **pts, int ptsCount)
+int32_t __cdecl RemovePtsWithPlanesThatOccurLessThanTwice(const SimplePlaneIntersection **pts, int32_t ptsCount)
 {
-    int ptsIndex; // [esp+0h] [ebp-4h]
+    int32_t ptsIndex; // [esp+0h] [ebp-4h]
 
     ptsIndex = 0;
     while (ptsIndex < ptsCount)
@@ -696,10 +696,10 @@ int __cdecl RemovePtsWithPlanesThatOccurLessThanTwice(const SimplePlaneIntersect
     return ptsIndex;
 }
 
-int __cdecl NumberOfOccurancesOfPlane(int planeIndex, const SimplePlaneIntersection **pts, int ptCount)
+int32_t __cdecl NumberOfOccurancesOfPlane(int32_t planeIndex, const SimplePlaneIntersection **pts, int32_t ptCount)
 {
     const SimplePlaneIntersection **end; // [esp+0h] [ebp-8h]
-    int occurances; // [esp+4h] [ebp-4h]
+    int32_t occurances; // [esp+4h] [ebp-4h]
     const SimplePlaneIntersection **ptsa; // [esp+14h] [ebp+Ch]
 
     if (!pts)
@@ -717,15 +717,15 @@ int __cdecl NumberOfOccurancesOfPlane(int planeIndex, const SimplePlaneIntersect
     return occurances;
 }
 
-int __cdecl GetPtsFormedByPlane(
-    int planeIndex,
+int32_t __cdecl GetPtsFormedByPlane(
+    int32_t planeIndex,
     const SimplePlaneIntersection **pts,
-    int ptCount,
+    int32_t ptCount,
     const SimplePlaneIntersection **result,
-    int maxResults)
+    int32_t maxResults)
 {
     const SimplePlaneIntersection **end; // [esp+0h] [ebp-8h]
-    int occurances; // [esp+4h] [ebp-4h]
+    int32_t occurances; // [esp+4h] [ebp-4h]
     const SimplePlaneIntersection **ptsa; // [esp+14h] [ebp+Ch]
 
     if (!pts)
@@ -747,26 +747,26 @@ int __cdecl GetPtsFormedByPlane(
     return occurances;
 }
 
-int __cdecl ChooseEdgeToRemove(
-    int basePlane,
-    int connectingPlane,
+int32_t __cdecl ChooseEdgeToRemove(
+    int32_t basePlane,
+    int32_t connectingPlane,
     const SimplePlaneIntersection **pts,
-    int ptsCount,
+    int32_t ptsCount,
     const SimplePlaneIntersection **edges)
 {
     char CycleBFS; // [esp+10h] [ebp-302Ch]
     char v7; // [esp+11h] [ebp-302Bh]
     char v8; // [esp+12h] [ebp-302Ah]
-    int v9; // [esp+14h] [ebp-3028h]
+    int32_t v9; // [esp+14h] [ebp-3028h]
     const SimplePlaneIntersection *resultCycle[1024]; // [esp+1Ch] [ebp-3020h] BYREF
     const SimplePlaneIntersection *v11[1024]; // [esp+101Ch] [ebp-2020h] BYREF
     const SimplePlaneIntersection *v12[1025]; // [esp+201Ch] [ebp-1020h] BYREF
     char v13; // [esp+3020h] [ebp-1Ch]
     char v14; // [esp+3021h] [ebp-1Bh]
     char v15; // [esp+3022h] [ebp-1Ah]
-    int resultCycleCount; // [esp+3024h] [ebp-18h] BYREF
-    int ptCount; // [esp+3028h] [ebp-14h] BYREF
-    int v18; // [esp+302Ch] [ebp-10h] BYREF
+    int32_t resultCycleCount; // [esp+3024h] [ebp-18h] BYREF
+    int32_t ptCount; // [esp+3028h] [ebp-14h] BYREF
+    int32_t v18; // [esp+302Ch] [ebp-10h] BYREF
     float perimiter1; // [esp+3030h] [ebp-Ch]
     float perimiter2; // [esp+3034h] [ebp-8h]
     float v21; // [esp+3038h] [ebp-4h]
@@ -788,22 +788,22 @@ int __cdecl ChooseEdgeToRemove(
     return 2 - v9;
 }
 
-int __cdecl PartitionEdges(
-    int basePlane,
-    int connectingPlane,
+int32_t __cdecl PartitionEdges(
+    int32_t basePlane,
+    int32_t connectingPlane,
     const SimplePlaneIntersection **pts,
-    int ptsCount,
+    int32_t ptsCount,
     const SimplePlaneIntersection **edges,
-    int edgeCount,
-    int *partition)
+    int32_t edgeCount,
+    int32_t *partition)
 {
     const SimplePlaneIntersection *v8; // [esp+0h] [ebp-1020h]
     const SimplePlaneIntersection *resultCycle; // [esp+8h] [ebp-1018h] BYREF
-    int v10; // [esp+100Ch] [ebp-14h]
-    int i; // [esp+1010h] [ebp-10h]
-    int resultCycleCount; // [esp+1014h] [ebp-Ch] BYREF
-    int j; // [esp+1018h] [ebp-8h]
-    int v14; // [esp+101Ch] [ebp-4h]
+    int32_t v10; // [esp+100Ch] [ebp-14h]
+    int32_t i; // [esp+1010h] [ebp-10h]
+    int32_t resultCycleCount; // [esp+1014h] [ebp-Ch] BYREF
+    int32_t j; // [esp+1018h] [ebp-8h]
+    int32_t v14; // [esp+101Ch] [ebp-4h]
 
     v10 = 1;
     *partition = 1;
@@ -839,10 +839,10 @@ int __cdecl PartitionEdges(
     return v10;
 }
 
-int __cdecl Remove(const SimplePlaneIntersection **pts, int ptsCount, const SimplePlaneIntersection *removePoint)
+int32_t __cdecl Remove(const SimplePlaneIntersection **pts, int32_t ptsCount, const SimplePlaneIntersection *removePoint)
 {
-    int ptsIndex; // [esp+0h] [ebp-4h]
-    int ptsCounta; // [esp+10h] [ebp+Ch]
+    int32_t ptsIndex; // [esp+0h] [ebp-4h]
+    int32_t ptsCounta; // [esp+10h] [ebp+Ch]
 
     for (ptsIndex = 0; ptsIndex < ptsCount && pts[ptsIndex] != removePoint; ++ptsIndex)
         ;
@@ -856,12 +856,12 @@ int __cdecl Remove(const SimplePlaneIntersection **pts, int ptsCount, const Simp
         return ptsCounta;
 }
 
-int __cdecl NumberOfUniquePoints(const SimplePlaneIntersection **pts, int ptsCount)
+int32_t __cdecl NumberOfUniquePoints(const SimplePlaneIntersection **pts, int32_t ptsCount)
 {
-    unsigned int v3[1025]; // [esp+10h] [ebp-1010h]
-    int v4; // [esp+1014h] [ebp-Ch]
-    int j; // [esp+1018h] [ebp-8h]
-    int i; // [esp+101Ch] [ebp-4h]
+    uint32_t v3[1025]; // [esp+10h] [ebp-1010h]
+    int32_t v4; // [esp+1014h] [ebp-Ch]
+    int32_t j; // [esp+1018h] [ebp-8h]
+    int32_t i; // [esp+101Ch] [ebp-4h]
 
     if (!pts)
         MyAssertHandler("..\\common\\brush_edges.cpp", 763, 0, "%s", "pts");
@@ -873,7 +873,7 @@ int __cdecl NumberOfUniquePoints(const SimplePlaneIntersection **pts, int ptsCou
         for (j = 0; j < v4 && !VecNCompareCustomEpsilon(pts[i]->xyz, (const float*)v3[j], 0.0099999998f, 3); ++j) // KISAKTODO: more sus casts
             ;
         if (j == v4)
-            v3[v4++] = (unsigned int)pts[i];
+            v3[v4++] = (uint32_t)pts[i];
     }
     return v4;
 }

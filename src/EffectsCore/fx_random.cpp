@@ -7,7 +7,7 @@ void __cdecl TRACK_fx_random()
 	track_static_alloc_internal((void *)fx_randomTable, 2028, "fx_randomTable", 8);
 }
 
-void __cdecl FX_RandomDir(int seed, float* dir)
+void __cdecl FX_RandomDir(int32_t seed, float* dir)
 {
     const char* v2; // eax
     double v3; // [esp+18h] [ebp-3Ch]
@@ -43,7 +43,7 @@ void __cdecl FX_RandomDir(int seed, float* dir)
     }
 }
 
-void __cdecl FX_RandomlyRotateAxis(const float (*axisIn)[3], int randomSeed, mat3x3 &axisOut)
+void __cdecl FX_RandomlyRotateAxis(const float (*axisIn)[3], int32_t randomSeed, mat3x3 &axisOut)
 {
     const char* v3; // eax
     const char* v4; // eax

@@ -1,7 +1,7 @@
 #include "database.h"
 
 
-void __cdecl Load_Stream(bool atStreamStart, unsigned __int8 *ptr, int size)
+void __cdecl Load_Stream(bool atStreamStart, uint8_t *ptr, int32_t size)
 {
     iassert(atStreamStart == (ptr == DB_GetStreamPos()));
     if (atStreamStart && size)
@@ -36,39 +36,39 @@ void __cdecl Load_Stream(bool atStreamStart, unsigned __int8 *ptr, int size)
 
 void __cdecl Load_DelayStream()
 {
-    unsigned int index; // [esp+4h] [ebp-8h]
+    uint32_t index; // [esp+4h] [ebp-8h]
 
     for (index = 0; index < g_streamDelayIndex; ++index)
         DB_LoadXFileData((unsigned char*)g_streamDelayArray[index].ptr, g_streamDelayArray[index].size);
 }
 
-void __cdecl DB_ConvertOffsetToAlias(unsigned int *data)
+void __cdecl DB_ConvertOffsetToAlias(uint32_t *data)
 {
-    unsigned int offset; // [esp+0h] [ebp-8h]
+    uint32_t offset; // [esp+0h] [ebp-8h]
 
     offset = *data;
     iassert((offset && (offset != -1) && (offset != -2)));
-    *data = *(unsigned int *)&g_streamZoneMem->blocks[(offset - 1) >> 28].data[(offset - 1) & 0xFFFFFFF];
+    *data = *(uint32_t *)&g_streamZoneMem->blocks[(offset - 1) >> 28].data[(offset - 1) & 0xFFFFFFF];
 }
 
-void __cdecl DB_ConvertOffsetToPointer(unsigned int *data)
+void __cdecl DB_ConvertOffsetToPointer(uint32_t *data)
 {
-    *data = (unsigned int)&g_streamZoneMem->blocks[(unsigned int)(*data - 1) >> 28].data[(*data - 1) & 0xFFFFFFF];
+    *data = (uint32_t)&g_streamZoneMem->blocks[(uint32_t)(*data - 1) >> 28].data[(*data - 1) & 0xFFFFFFF];
 }
 
 void __cdecl Load_XStringCustom(char **str)
 {
-    unsigned __int8 *pos; // [esp+0h] [ebp-8h]
+    uint8_t *pos; // [esp+0h] [ebp-8h]
     char *s; // [esp+4h] [ebp-4h]
 
     s = *str;
-    for (pos = (unsigned __int8 *)*str; ; ++pos)
+    for (pos = (uint8_t *)*str; ; ++pos)
     {
         DB_LoadXFileData(pos, 1u);
         if (!*pos)
             break;
     }
-    DB_IncStreamPos(pos - (unsigned __int8 *)s + 1);
+    DB_IncStreamPos(pos - (uint8_t *)s + 1);
 }
 
 void __cdecl Load_TempStringCustom(char **str)

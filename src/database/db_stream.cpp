@@ -1,19 +1,19 @@
 #include "database.h"
 
-unsigned int g_streamDelayIndex;
+uint32_t g_streamDelayIndex;
 XBlock * g_streamBlocks;
-unsigned __int8 *g_streamPosArray[9];
+uint8_t *g_streamPosArray[9];
 StreamDelayInfo g_streamDelayArray[4096];
-unsigned int g_streamPosIndex;
+uint32_t g_streamPosIndex;
 XZoneMemory *g_streamZoneMem;
-unsigned __int8 *g_streamPos;
+uint8_t *g_streamPos;
 
 StreamPosInfo g_streamPosStack[64];
-unsigned int g_streamPosStackIndex;
+uint32_t g_streamPosStackIndex;
 
 void __cdecl DB_InitStreams(XZoneMemory *zoneMem)
 {
-    int i; // [esp+0h] [ebp-4h]
+    int32_t i; // [esp+0h] [ebp-4h]
 
     g_streamZoneMem = zoneMem;
     g_streamPos = zoneMem->blocks[0].data;
@@ -24,7 +24,7 @@ void __cdecl DB_InitStreams(XZoneMemory *zoneMem)
         g_streamPosArray[i] = zoneMem->blocks[i].data;
 }
 
-void __cdecl DB_PushStreamPos(unsigned int index)
+void __cdecl DB_PushStreamPos(uint32_t index)
 {
     if (index >= 9)
         MyAssertHandler(".\\database\\db_stream.cpp", 82, 0, "%s", "index < ARRAY_COUNT( g_streamPosArray )");
@@ -45,7 +45,7 @@ void __cdecl DB_PushStreamPos(unsigned int index)
     g_streamPosStack[g_streamPosStackIndex++].pos = g_streamPos;
 }
 
-void __cdecl DB_CloneStreamData(unsigned __int8 *destStart)
+void __cdecl DB_CloneStreamData(uint8_t *destStart)
 {
     if (destStart)
         memcpy(
@@ -54,7 +54,7 @@ void __cdecl DB_CloneStreamData(unsigned __int8 *destStart)
             g_streamPos - g_streamPosArray[g_streamPosIndex]);
 }
 
-void __cdecl DB_SetStreamIndex(unsigned int index)
+void __cdecl DB_SetStreamIndex(uint32_t index)
 {
     if (index != g_streamPosIndex)
     {
@@ -82,19 +82,19 @@ void __cdecl DB_PopStreamPos()
     DB_SetStreamIndex(g_streamPosStack[g_streamPosStackIndex].index);
 }
 
-unsigned __int8 *__cdecl DB_GetStreamPos()
+uint8_t *__cdecl DB_GetStreamPos()
 {
     return g_streamPos;
 }
 
-unsigned __int8 *__cdecl DB_AllocStreamPos(int alignment)
+uint8_t *__cdecl DB_AllocStreamPos(int32_t alignment)
 {
     iassert(g_streamPos);
-    g_streamPos = (unsigned __int8 *)(~alignment & (unsigned int)&g_streamPos[alignment]);
+    g_streamPos = (uint8_t *)(~alignment & (uint32_t)&g_streamPos[alignment]);
     return g_streamPos;
 }
 
-void __cdecl DB_IncStreamPos(int size)
+void __cdecl DB_IncStreamPos(int32_t size)
 {
     iassert(g_streamPos);
     if (&g_streamPos[size] > &g_streamZoneMem->blocks[g_streamPosIndex].data[g_streamZoneMem->blocks[g_streamPosIndex].size])

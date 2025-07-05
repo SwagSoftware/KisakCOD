@@ -1,16 +1,16 @@
 #include "fx_system.h"
 
-int warnCount_1;
+int32_t warnCount_1;
 
 void __cdecl FX_OffsetSpawnOrigin(
     const FxSpatialFrame* effectFrame,
     const FxElemDef* elemDef,
-    int randomSeed,
+    int32_t randomSeed,
     float* spawnOrigin)
 {
     float scale0; // [esp+14h] [ebp-74h]
     float v5; // [esp+18h] [ebp-70h]
-    int v6; // [esp+1Ch] [ebp-6Ch]
+    int32_t v6; // [esp+1Ch] [ebp-6Ch]
     float dir[3]; // [esp+44h] [ebp-44h] BYREF
     float height; // [esp+50h] [ebp-38h]
     float yaw; // [esp+54h] [ebp-34h]
@@ -56,7 +56,7 @@ void __cdecl FX_GetOriginForTrailElem(
     FxEffect *effect,
     const FxElemDef *elemDef,
     const FxSpatialFrame *effectFrameWhenPlayed,
-    int randomSeed,
+    int32_t randomSeed,
     float *outOrigin,
     float *outRight,
     float *outUp)
@@ -87,7 +87,7 @@ void __cdecl FX_GetOriginForTrailElem(
 void __cdecl FX_GetSpawnOrigin(
     const FxSpatialFrame *effectFrame,
     const FxElemDef *elemDef,
-    int randomSeed,
+    int32_t randomSeed,
     float *spawnOrigin)
 {
     float offset[3]; // [esp+18h] [ebp-Ch] BYREF
@@ -132,14 +132,14 @@ void __cdecl FX_GetOrientation(
     const FxElemDef* elemDef,
     const FxSpatialFrame* frameAtSpawn,
     const FxSpatialFrame* frameNow,
-    int randomSeed,
+    int32_t randomSeed,
     orientation_t* orient)
 {
     const char* v5; // eax
     const char* v6; // eax
     float v7; // [esp+20h] [ebp-4Ch]
     float up[3]; // [esp+5Ch] [ebp-10h] BYREF
-    int runFlags; // [esp+68h] [ebp-4h]
+    int32_t runFlags; // [esp+68h] [ebp-4h]
 
     if (!Vec4IsNormalized(frameAtSpawn->quat))
     {
@@ -249,7 +249,7 @@ void __cdecl FX_GetOrientation(
 
 void __cdecl FX_GetVelocityAtTime(
     const FxElemDef* elemDef,
-    int randomSeed,
+    int32_t randomSeed,
     float msecLifeSpan,
     float msecElapsed,
     const orientation_t* orient,
@@ -257,7 +257,7 @@ void __cdecl FX_GetVelocityAtTime(
     float* velocity)
 {
     const char* v7; // eax
-    int v8; // eax
+    int32_t v8; // eax
     char* v9; // eax
     double v10; // [esp+18h] [ebp-58h]
     float v11; // [esp+20h] [ebp-50h]
@@ -266,9 +266,9 @@ void __cdecl FX_GetVelocityAtTime(
     float sampleTime; // [esp+34h] [ebp-3Ch]
     float samplePoint; // [esp+38h] [ebp-38h]
     float velocityScale; // [esp+3Ch] [ebp-34h]
-    int sampleIndex; // [esp+40h] [ebp-30h]
+    int32_t sampleIndex; // [esp+40h] [ebp-30h]
     const FxElemVelStateSample* samples; // [esp+44h] [ebp-2Ch]
-    int intervalCount; // [esp+48h] [ebp-28h]
+    int32_t intervalCount; // [esp+48h] [ebp-28h]
     float velocityLocal[3]; // [esp+4Ch] [ebp-24h] BYREF
     float weight[2]; // [esp+58h] [ebp-18h] BYREF
     float rangeLerp[3]; // [esp+60h] [ebp-10h] BYREF
@@ -389,7 +389,7 @@ void __cdecl FX_OrientationPosFromWorldPos(const orientation_t *orient, const fl
 void __cdecl FX_AddVisBlocker(FxSystem *system, const float *posWorld, float radius, float opacity)
 {
     FxVisState *visState; // [esp+1Ch] [ebp-Ch]
-    int blockerIndex; // [esp+20h] [ebp-8h]
+    int32_t blockerIndex; // [esp+20h] [ebp-8h]
     FxVisBlocker *localVisBlocker; // [esp+24h] [ebp-4h]
 
     visState = system->visStateBufferWrite;
@@ -438,13 +438,13 @@ void __cdecl FX_ToggleVisBlockerFrame(FxSystem *system)
     fx_serverVisClient = system->localClientNum;
 }
 
-char __cdecl FX_CullSphere(const FxCamera *camera, unsigned int frustumPlaneCount, const float *posWorld, float radius)
+char __cdecl FX_CullSphere(const FxCamera *camera, uint32_t frustumPlaneCount, const float *posWorld, float radius)
 {
     const char *v4; // eax
     const char *v5; // eax
     double v7; // [esp+18h] [ebp-18h]
     float pointToPlaneDist; // [esp+28h] [ebp-8h]
-    unsigned int planeIndex; // [esp+2Ch] [ebp-4h]
+    uint32_t planeIndex; // [esp+2Ch] [ebp-4h]
 
     if (!camera->isValid)
         MyAssertHandler(".\\EffectsCore\\fx_update_util.cpp", 439, 0, "%s", "camera->isValid");
@@ -487,7 +487,7 @@ char __cdecl FX_CullSphere(const FxCamera *camera, unsigned int frustumPlaneCoun
 
 void __cdecl FX_GetElemAxis(
     const FxElemDef* elemDef,
-    int randomSeed,
+    int32_t randomSeed,
     const orientation_t* orient,
     float msecElapsed,
     mat3x3 &axis)

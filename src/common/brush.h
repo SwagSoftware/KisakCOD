@@ -1,96 +1,99 @@
 #pragma once
+#include <cstdint>
 
 struct adjacencyWinding_t // sizeof=0x34
 {                                       // ...
-    int numsides;                       // ...
-    int sides[12];
+    int32_t numsides;                       // ...
+    int32_t sides[12];
 };
+static_assert(sizeof(adjacencyWinding_t) == 0x34);
 
 struct SimplePlaneIntersection // sizeof=0x18
 {                                       // ...
     float xyz[3];                       // ...
-    int planeIndex[3];
+    int32_t planeIndex[3];
 };
+static_assert(sizeof(SimplePlaneIntersection) == 0x18);
 
 adjacencyWinding_t *__cdecl BuildBrushdAdjacencyWindingForSide(
     float *sideNormal,
-    int basePlaneIndex,
+    int32_t basePlaneIndex,
     const SimplePlaneIntersection *InPts,
-    int InPtCount,
+    int32_t InPtCount,
     adjacencyWinding_t *optionalOutWinding,
-    int optionalOutWindingCount);
+    int32_t optionalOutWindingCount);
 void __cdecl ReverseAdjacencyWinding(adjacencyWinding_t *w);
 double __cdecl RepresentativeTriangleFromWinding(
     const float (*xyz)[3],
-    int pointCount,
+    int32_t pointCount,
     const float *normal,
-    int *i0,
-    int *i1,
-    int *i2);
-int __cdecl GetPointListAllowDupes(
-    int planeIndex,
+    int32_t *i0,
+    int32_t *i1,
+    int32_t *i2);
+int32_t __cdecl GetPointListAllowDupes(
+    int32_t planeIndex,
     const SimplePlaneIntersection *pts,
-    int ptCount,
+    int32_t ptCount,
     const SimplePlaneIntersection **xyz,
-    int xyzLimit);
-bool __cdecl IsPtFormedByThisPlane(int plane, const SimplePlaneIntersection *pt);
+    int32_t xyzLimit);
+bool __cdecl IsPtFormedByThisPlane(int32_t plane, const SimplePlaneIntersection *pt);
 char __cdecl PlaneInCommonExcluding(
     const SimplePlaneIntersection *pt1,
     const SimplePlaneIntersection *pt2,
-    int excludePlane,
-    int *result);
-int __cdecl SecondPlane(const SimplePlaneIntersection *point, int plane);
-int __cdecl ThirdPlane(const SimplePlaneIntersection *point, int plane1, int plane2);
+    int32_t excludePlane,
+    int32_t *result);
+int32_t __cdecl SecondPlane(const SimplePlaneIntersection *point, int32_t plane);
+int32_t __cdecl ThirdPlane(const SimplePlaneIntersection *point, int32_t plane1, int32_t plane2);
 const SimplePlaneIntersection *__cdecl RemoveNextPointFormedByThisPlane(
-    int planeIndex,
+    int32_t planeIndex,
     const SimplePlaneIntersection **begin,
     const SimplePlaneIntersection **end);
 const SimplePlaneIntersection **__cdecl NextPointFormedByThisPlane(
-    int planeIndex,
+    int32_t planeIndex,
     const SimplePlaneIntersection **begin,
     const SimplePlaneIntersection **end);
-double __cdecl CyclePerimiter(const SimplePlaneIntersection **pts, int ptsCount);
-char __cdecl TestConvexWithoutNearPoints(const SimplePlaneIntersection **pts, unsigned int ptCount);
-char __cdecl IsConvex(const float (*pts)[3], unsigned int ptCount);
+double __cdecl CyclePerimiter(const SimplePlaneIntersection **pts, int32_t ptsCount);
+char __cdecl TestConvexWithoutNearPoints(const SimplePlaneIntersection **pts, uint32_t ptCount);
+char __cdecl IsConvex(const float (*pts)[3], uint32_t ptCount);
 bool __cdecl CycleLess(
     bool isConvex1,
     bool isConvex2,
     float perimiter1,
     float perimiter2,
-    int nodeCount1,
-    int nodeCount2);
-int __cdecl ReduceToACycle(int basePlane, const SimplePlaneIntersection **pts, int ptsCount);
-char __cdecl IntAlreadyInList(const int *list, int listCount, int value);
+    int32_t nodeCount1,
+    int32_t nodeCount2);
+int32_t __cdecl ReduceToACycle(int32_t basePlane, const SimplePlaneIntersection **pts, int32_t ptsCount);
+char __cdecl IntAlreadyInList(const int32_t *list, int32_t listCount, int32_t value);
 char __cdecl FindCycleBFS(
-    int basePlane,
+    int32_t basePlane,
     const SimplePlaneIntersection **pts,
-    int ptsCount,
+    int32_t ptsCount,
     const SimplePlaneIntersection *start,
     const SimplePlaneIntersection *end,
-    int connectingPlane,
+    int32_t connectingPlane,
     const SimplePlaneIntersection **resultCycle,
-    int *resultCycleCount);
-int __cdecl RemovePtsWithPlanesThatOccurLessThanTwice(const SimplePlaneIntersection **pts, int ptsCount);
-int __cdecl NumberOfOccurancesOfPlane(int planeIndex, const SimplePlaneIntersection **pts, int ptCount);
-int __cdecl GetPtsFormedByPlane(
-    int planeIndex,
+    int32_t *resultCycleCount);
+int32_t __cdecl RemovePtsWithPlanesThatOccurLessThanTwice(const SimplePlaneIntersection **pts, int32_t ptsCount);
+int32_t __cdecl NumberOfOccurancesOfPlane(int32_t planeIndex, const SimplePlaneIntersection **pts, int32_t ptCount);
+int32_t __cdecl GetPtsFormedByPlane(
+    int32_t planeIndex,
     const SimplePlaneIntersection **pts,
-    int ptCount,
+    int32_t ptCount,
     const SimplePlaneIntersection **result,
-    int maxResults);
-int __cdecl ChooseEdgeToRemove(
-    int basePlane,
-    int connectingPlane,
+    int32_t maxResults);
+int32_t __cdecl ChooseEdgeToRemove(
+    int32_t basePlane,
+    int32_t connectingPlane,
     const SimplePlaneIntersection **pts,
-    int ptsCount,
+    int32_t ptsCount,
     const SimplePlaneIntersection **edges);
-int __cdecl PartitionEdges(
-    int basePlane,
-    int connectingPlane,
+int32_t __cdecl PartitionEdges(
+    int32_t basePlane,
+    int32_t connectingPlane,
     const SimplePlaneIntersection **pts,
-    int ptsCount,
+    int32_t ptsCount,
     const SimplePlaneIntersection **edges,
-    int edgeCount,
-    int *partition);
-int __cdecl Remove(const SimplePlaneIntersection **pts, int ptsCount, const SimplePlaneIntersection *removePoint);
-int __cdecl NumberOfUniquePoints(const SimplePlaneIntersection **pts, int ptsCount);
+    int32_t edgeCount,
+    int32_t *partition);
+int32_t __cdecl Remove(const SimplePlaneIntersection **pts, int32_t ptsCount, const SimplePlaneIntersection *removePoint);
+int32_t __cdecl NumberOfUniquePoints(const SimplePlaneIntersection **pts, int32_t ptsCount);

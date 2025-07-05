@@ -3,7 +3,7 @@
 
 bool __cdecl FX_ElemUsesMaterial(const FxEditorElemDef *edElemDef)
 {
-    unsigned __int8 elemType; // [esp+0h] [ebp-4h]
+    uint8_t elemType; // [esp+0h] [ebp-4h]
 
     elemType = edElemDef->elemType;
     return elemType < 5u || elemType > 8u && elemType != 10;
@@ -25,7 +25,7 @@ char __cdecl FX_ValidateAtlasSettings(const FxEditorEffectDef *editorEffect, con
 {
     MaterialInfo mtlInfoRef; // [esp+0h] [ebp-38h] BYREF
     MaterialInfo mtlInfo; // [esp+18h] [ebp-20h] BYREF
-    int visualIndex; // [esp+34h] [ebp-4h]
+    int32_t visualIndex; // [esp+34h] [ebp-4h]
 
     if (!edElemDef)
         MyAssertHandler(".\\EffectsCore\\fx_convert.cpp", 627, 0, "%s", "edElemDef");
@@ -109,7 +109,7 @@ char __cdecl FX_ValidateColor(const FxEditorEffectDef *editorEffect, const FxEdi
 
 char __cdecl FX_ValidateVisuals(const FxEditorEffectDef *editorEffect, const FxEditorElemDef *edElemDef)
 {
-    int indIter; // [esp+0h] [ebp-4h]
+    int32_t indIter; // [esp+0h] [ebp-4h]
 
     if ((edElemDef->elemType == 9 || edElemDef->elemType == 10) && !edElemDef->visualCount)
     {
@@ -218,7 +218,7 @@ bool __cdecl FX_Validate(const FxEditorEffectDef *editorEffect, const FxEditorEl
 
 void __cdecl FX_GetVisualSampleRouting(const FxEditorElemDef *edElem, FxSampleChannel *routing)
 {
-    int v2; // [esp+0h] [ebp-8h]
+    int32_t v2; // [esp+0h] [ebp-8h]
 
     switch (edElem->elemType)
     {
@@ -278,9 +278,9 @@ void __cdecl FX_GetVisualSampleRouting(const FxEditorElemDef *edElem, FxSampleCh
     }
 }
 
-int __cdecl FX_DecideIntervalLimit(const FxEditorElemDef *edElemDef)
+int32_t __cdecl FX_DecideIntervalLimit(const FxEditorElemDef *edElemDef)
 {
-    int intervalLimit; // [esp+0h] [ebp-8h]
+    int32_t intervalLimit; // [esp+0h] [ebp-8h]
 
     intervalLimit = (edElemDef->lifeSpanMsec.base + edElemDef->lifeSpanMsec.amplitude / 2) / 100;
     if (intervalLimit > 80)
@@ -289,7 +289,7 @@ int __cdecl FX_DecideIntervalLimit(const FxEditorElemDef *edElemDef)
 }
 
 void __cdecl FX_InterpolateSamples(
-    int dimensions,
+    int32_t dimensions,
     float time0,
     const float *samples0,
     float time1,
@@ -298,7 +298,7 @@ void __cdecl FX_InterpolateSamples(
     float *result)
 {
     float lerp; // [esp+18h] [ebp-8h]
-    int dimIndex; // [esp+1Ch] [ebp-4h]
+    int32_t dimIndex; // [esp+1Ch] [ebp-4h]
 
     if (dimensions <= 0)
         MyAssertHandler(".\\EffectsCore\\fx_convert.cpp", 44, 0, "%s\n\t(dimensions) = %i", "(dimensions > 0)", dimensions);
@@ -327,10 +327,10 @@ void __cdecl FX_InterpolateSamples(
 }
 
 double __cdecl FX_MaxErrorForIntervalCount(
-    int dimensions,
-    int sampleCount,
+    int32_t dimensions,
+    int32_t sampleCount,
     const float *samples,
-    int intervalCount,
+    int32_t intervalCount,
     float errorCutoff)
 {
     float v6; // [esp+18h] [ebp-5Ch]
@@ -339,15 +339,15 @@ double __cdecl FX_MaxErrorForIntervalCount(
     float lerpedValueIter[3]; // [esp+24h] [ebp-50h] BYREF
     float timePrev; // [esp+30h] [ebp-44h]
     const float *samplesTo; // [esp+34h] [ebp-40h]
-    int componentIndex; // [esp+38h] [ebp-3Ch]
-    int intervalIndex; // [esp+3Ch] [ebp-38h]
-    int sampleIndexPrev; // [esp+40h] [ebp-34h]
-    int sampleIndexIter; // [esp+44h] [ebp-30h]
+    int32_t componentIndex; // [esp+38h] [ebp-3Ch]
+    int32_t intervalIndex; // [esp+3Ch] [ebp-38h]
+    int32_t sampleIndexPrev; // [esp+40h] [ebp-34h]
+    int32_t sampleIndexIter; // [esp+44h] [ebp-30h]
     float error; // [esp+48h] [ebp-2Ch]
     float errorMax; // [esp+4Ch] [ebp-28h]
-    int sampleIndexNext; // [esp+50h] [ebp-24h]
+    int32_t sampleIndexNext; // [esp+50h] [ebp-24h]
     float lerpedValueNext[3]; // [esp+54h] [ebp-20h] BYREF
-    int componentCount; // [esp+60h] [ebp-14h]
+    int32_t componentCount; // [esp+60h] [ebp-14h]
     float lerpedValuePrev[3]; // [esp+64h] [ebp-10h] BYREF
     const float *samplesFrom; // [esp+70h] [ebp-4h]
 
@@ -419,13 +419,13 @@ double __cdecl FX_MaxErrorForIntervalCount(
     return errorMax;
 }
 
-int __cdecl FX_DecideSampleCount(int curveCount, const FxCurve **curves, int intervalLimit)
+int32_t __cdecl FX_DecideSampleCount(int32_t curveCount, const FxCurve **curves, int32_t intervalLimit)
 {
-    int intervalCountBest; // [esp+4h] [ebp-18h]
+    int32_t intervalCountBest; // [esp+4h] [ebp-18h]
     float errorBest; // [esp+8h] [ebp-14h]
     float error; // [esp+Ch] [ebp-10h]
-    int intervalCount; // [esp+10h] [ebp-Ch]
-    int curveIndex; // [esp+14h] [ebp-8h]
+    int32_t intervalCount; // [esp+10h] [ebp-Ch]
+    int32_t curveIndex; // [esp+14h] [ebp-8h]
     float errorCumulative; // [esp+18h] [ebp-4h]
 
     errorBest = FLT_MAX;
@@ -459,7 +459,7 @@ int __cdecl FX_DecideSampleCount(int curveCount, const FxCurve **curves, int int
     return intervalCountBest + 1;
 }
 
-int __cdecl FX_DecideVelocitySampleCount(const FxEditorElemDef *edElem, int intervalLimit)
+int32_t __cdecl FX_DecideVelocitySampleCount(const FxEditorElemDef *edElem, int32_t intervalLimit)
 {
     const FxCurve *curves[12]; // [esp+0h] [ebp-30h] BYREF
 
@@ -472,15 +472,15 @@ int __cdecl FX_DecideVelocitySampleCount(const FxEditorElemDef *edElem, int inte
     return FX_DecideSampleCount(12, curves, intervalLimit);
 }
 
-int __cdecl FX_DecideVisualSampleCount(
+int32_t __cdecl FX_DecideVisualSampleCount(
     const FxEditorElemDef *edElem,
     const FxSampleChannel *routing,
-    int intervalLimit)
+    int32_t intervalLimit)
 {
-    unsigned int curveCount; // [esp+4h] [ebp-38h]
-    unsigned int curveCounta; // [esp+4h] [ebp-38h]
+    uint32_t curveCount; // [esp+4h] [ebp-38h]
+    uint32_t curveCounta; // [esp+4h] [ebp-38h]
     const FxCurve *curves[12]; // [esp+8h] [ebp-34h] BYREF
-    unsigned int chanIndex; // [esp+38h] [ebp-4h]
+    uint32_t chanIndex; // [esp+38h] [ebp-4h]
 
     curveCount = 0;
     for (chanIndex = 0; chanIndex < 5; ++chanIndex)
@@ -538,13 +538,13 @@ int __cdecl FX_DecideVisualSampleCount(
         return 0;
 }
 
-int __cdecl FX_AdditionalBytesNeededForElemDef(
-    unsigned __int8 elemType,
-    int velStateSampleCount,
-    int visStateSampleCount,
-    int visualCount)
+int32_t __cdecl FX_AdditionalBytesNeededForElemDef(
+    uint8_t elemType,
+    int32_t velStateSampleCount,
+    int32_t visStateSampleCount,
+    int32_t visualCount)
 {
-    int bytesNeeded; // [esp+0h] [ebp-4h]
+    int32_t bytesNeeded; // [esp+0h] [ebp-4h]
 
     bytesNeeded = 96 * velStateSampleCount + 48 * visStateSampleCount;
     if (elemType == 9)
@@ -558,7 +558,7 @@ int __cdecl FX_AdditionalBytesNeededForElemDef(
     return bytesNeeded;
 }
 
-int __cdecl FX_AdditionalBytesNeededForGeomTrail(const FxEditorElemDef *elemDef)
+int32_t __cdecl FX_AdditionalBytesNeededForGeomTrail(const FxEditorElemDef *elemDef)
 {
     if (elemDef->elemType == 3)
         return 22 * elemDef->trailDef.indCount + 28;
@@ -566,9 +566,9 @@ int __cdecl FX_AdditionalBytesNeededForGeomTrail(const FxEditorElemDef *elemDef)
         return 0;
 }
 
-int __cdecl FX_FindEmission(const FxEffectDef *emission, const FxEditorEffectDef *editorEffect)
+int32_t __cdecl FX_FindEmission(const FxEffectDef *emission, const FxEditorEffectDef *editorEffect)
 {
-    int elemIndex; // [esp+0h] [ebp-4h]
+    int32_t elemIndex; // [esp+0h] [ebp-4h]
 
     if (!editorEffect)
         MyAssertHandler(".\\EffectsCore\\fx_convert.cpp", 1109, 0, "%s", "editorEffect");
@@ -591,13 +591,13 @@ void __cdecl FX_ConvertEffectDefRef(FxEffectDefRef *ref, const FxEffectDef *effe
     ref->handle = effectDef;
 }
 
-int __cdecl FX_AdditionalBytesNeededForEmission(const FxEffectDef *emission)
+int32_t __cdecl FX_AdditionalBytesNeededForEmission(const FxEffectDef *emission)
 {
-    int v2; // [esp+0h] [ebp-1Ch]
+    int32_t v2; // [esp+0h] [ebp-1Ch]
     const FxElemDef *elemDef; // [esp+8h] [ebp-14h]
-    int bytesNeeded; // [esp+Ch] [ebp-10h]
-    int elemDefStop; // [esp+14h] [ebp-8h]
-    int elemDefIndex; // [esp+18h] [ebp-4h]
+    int32_t bytesNeeded; // [esp+Ch] [ebp-10h]
+    int32_t elemDefStop; // [esp+14h] [ebp-8h]
+    int32_t elemDefIndex; // [esp+18h] [ebp-4h]
 
     if (!emission)
         MyAssertHandler(".\\EffectsCore\\fx_convert.cpp", 1239, 0, "%s", "emission");
@@ -716,7 +716,7 @@ void __cdecl FX_ConvertAtlas(FxElemDef *elemDef, const FxEditorElemDef *edElemDe
     }
 }
 
-void __cdecl FX_ReserveElemDefMemory(FxElemDef *elemDef, unsigned __int8 **memPool)
+void __cdecl FX_ReserveElemDefMemory(FxElemDef *elemDef, uint8_t **memPool)
 {
     if (!elemDef)
         MyAssertHandler(".\\EffectsCore\\fx_convert.cpp", 703, 0, "%s", "elemDef");
@@ -764,8 +764,8 @@ void __cdecl FX_SampleVelocityInFrame(
     FxElemDef *elemDef,
     const float (*velScale)[3],
     FxElemVelStateInFrame *velState,
-    int velStateStride,
-    int useGraphBit,
+    int32_t velStateStride,
+    int32_t useGraphBit,
     const FxEditorElemDef *edElemDef)
 {
     bool v6; // [esp+Ch] [ebp-4Ch]
@@ -777,7 +777,7 @@ void __cdecl FX_SampleVelocityInFrame(
     bool useVelocityRand[4]; // [esp+2Ch] [ebp-2Ch]
     float deltaInSegment[3]; // [esp+30h] [ebp-28h] BYREF
     float velocitySample[3]; // [esp+3Ch] [ebp-1Ch] BYREF
-    int sampleIndex; // [esp+48h] [ebp-10h]
+    int32_t sampleIndex; // [esp+48h] [ebp-10h]
     bool brokenCompatibilityMode; // [esp+4Fh] [ebp-9h]
     FxElemVelStateInFrame *velStatePrev; // [esp+50h] [ebp-8h]
     bool useVelocity[4]; // [esp+54h] [ebp-4h]
@@ -881,7 +881,7 @@ void __cdecl FX_SampleVelocity(FxElemDef *elemDef, const FxEditorElemDef *edElem
     float scale; // [esp+10h] [ebp-28h]
     float velScale[2][3]; // [esp+18h] [ebp-20h] BYREF
     FxElemVelStateSample *velStateRange; // [esp+30h] [ebp-8h]
-    int velStateStride; // [esp+34h] [ebp-4h]
+    int32_t velStateStride; // [esp+34h] [ebp-4h]
 
     scale = 1.0 / ((double)elemDef->velIntervalCount * 1000.0);
     Vec3Scale(edElemDef->velScale[0], scale, velScale[0]);
@@ -975,9 +975,9 @@ void __cdecl FX_SampleVisualState(FxElemDef *elemDef, const FxEditorElemDef *edE
     float sampleTime; // [esp+11Ch] [ebp-3Ch]
     BOOL secondAlphaSrc; // [esp+120h] [ebp-38h]
     float rotationScale; // [esp+124h] [ebp-34h]
-    int sampleIndex; // [esp+128h] [ebp-30h]
+    int32_t sampleIndex; // [esp+128h] [ebp-30h]
     float rgba[4]; // [esp+12Ch] [ebp-2Ch] BYREF
-    int secondColorSrc; // [esp+13Ch] [ebp-1Ch]
+    int32_t secondColorSrc; // [esp+13Ch] [ebp-1Ch]
     FxElemVisStateSample *visStateRange; // [esp+140h] [ebp-18h]
     FxSampleChannel routing[5]; // [esp+144h] [ebp-14h] BYREF
 
@@ -1078,12 +1078,12 @@ void __cdecl FX_SampleVisualState(FxElemDef *elemDef, const FxEditorElemDef *edE
 
 void __cdecl FX_CopyMarkVisuals(const FxEditorElemDef *edElemDef, FxElemMarkVisuals *markVisualsArray)
 {
-    memcpy((unsigned __int8 *)markVisualsArray, (unsigned __int8 *)&edElemDef->visualunion, 8 * edElemDef->visualCount);
+    memcpy((uint8_t *)markVisualsArray, (uint8_t *)&edElemDef->visualunion, 8 * edElemDef->visualCount);
 }
 
 void __cdecl FX_CopyVisuals(const FxEditorElemDef *edElemDef, FxElemVisuals *visualsArray)
 {
-    memcpy((unsigned __int8 *)visualsArray, (unsigned __int8 *)&edElemDef->visualunion, 4 * edElemDef->visualCount);
+    memcpy((uint8_t *)visualsArray, (uint8_t *)&edElemDef->visualunion, 4 * edElemDef->visualCount);
 }
 
 void __cdecl FX_ConvertTrail_CalcNormForSegment(const float *vert0, const float *vert1, float *outNormal)
@@ -1096,7 +1096,7 @@ void __cdecl FX_ConvertTrail_CalcNormForSegment(const float *vert0, const float 
 void __cdecl FX_ConvertTrail_CompileVertices(
     const FxEditorElemDef *edElemDef,
     FxTrailDef *outTrailDef,
-    unsigned __int8 **mempool)
+    uint8_t **mempool)
 {
     double v3; // st7
     double v4; // st7
@@ -1112,24 +1112,24 @@ void __cdecl FX_ConvertTrail_CompileVertices(
     float secondaryEdgeNorm[2]; // [esp+2Ch] [ebp-64h] BYREF
     float primaryEdgeNorm[2]; // [esp+34h] [ebp-5Ch] BYREF
     __int64 accumNorm; // [esp+3Ch] [ebp-54h] BYREF
-    int edgeIter; // [esp+44h] [ebp-4Ch]
-    unsigned __int16 *emittedIndPtrBegin; // [esp+48h] [ebp-48h]
-    int indCount; // [esp+4Ch] [ebp-44h]
+    int32_t edgeIter; // [esp+44h] [ebp-4Ch]
+    uint16_t *emittedIndPtrBegin; // [esp+48h] [ebp-48h]
+    int32_t indCount; // [esp+4Ch] [ebp-44h]
     FxTrailVertex *outVertPtrBegin; // [esp+50h] [ebp-40h]
-    const unsigned __int16 *primaryEdgeIndPtr; // [esp+54h] [ebp-3Ch]
-    const unsigned __int16 *indPtrEnd; // [esp+58h] [ebp-38h]
+    const uint16_t *primaryEdgeIndPtr; // [esp+54h] [ebp-3Ch]
+    const uint16_t *indPtrEnd; // [esp+58h] [ebp-38h]
     const FxEditorTrailDef *trailDef; // [esp+5Ch] [ebp-34h]
-    int vertBytes; // [esp+60h] [ebp-30h]
+    int32_t vertBytes; // [esp+60h] [ebp-30h]
     float SNAP_TOLERANCE_POS; // [esp+64h] [ebp-2Ch]
     FxTrailVertex *emittedVertPtrBegin; // [esp+68h] [ebp-28h]
     FxTrailVertex *outVertPtrIter; // [esp+6Ch] [ebp-24h]
     float SMOOTH_THRESHOLD; // [esp+70h] [ebp-20h]
-    unsigned __int16 *emittedIndPtrEnd; // [esp+74h] [ebp-1Ch]
-    const unsigned __int16 *secondaryEdgeIndPtr; // [esp+78h] [ebp-18h]
+    uint16_t *emittedIndPtrEnd; // [esp+74h] [ebp-1Ch]
+    const uint16_t *secondaryEdgeIndPtr; // [esp+78h] [ebp-18h]
     float SNAP_TOLERANCE_NORM; // [esp+7Ch] [ebp-14h]
     FxTrailVertex *emittedVertPtrEnd; // [esp+80h] [ebp-10h]
     float SNAP_TOLERANCE_TEXCOORD; // [esp+84h] [ebp-Ch]
-    int indBytes; // [esp+88h] [ebp-8h]
+    int32_t indBytes; // [esp+88h] [ebp-8h]
     FxTrailVertex *outVertPtrEnd; // [esp+8Ch] [ebp-4h]
 
     SNAP_TOLERANCE_POS = 0.0099999998f;
@@ -1196,7 +1196,7 @@ void __cdecl FX_ConvertTrail_CompileVertices(
     emittedVertPtrBegin = outVertPtrBegin;
     emittedVertPtrEnd = outVertPtrBegin;
     indBytes = 2 * indCount;
-    emittedIndPtrBegin = (unsigned __int16 *)*mempool;
+    emittedIndPtrBegin = (uint16_t *)*mempool;
     *mempool += 2 * indCount;
     emittedIndPtrEnd = emittedIndPtrBegin;
     for (outVertPtrIter = outVertPtrBegin; outVertPtrIter != outVertPtrEnd; ++outVertPtrIter)
@@ -1236,7 +1236,7 @@ void __cdecl FX_ConvertTrail_CompileVertices(
     }
     outTrailDef->verts = emittedVertPtrBegin;
     outTrailDef->vertCount = emittedVertPtrEnd - emittedVertPtrBegin;
-    if (20 * outTrailDef->vertCount > (unsigned int)vertBytes)
+    if (20 * outTrailDef->vertCount > (uint32_t)vertBytes)
         MyAssertHandler(
             ".\\EffectsCore\\fx_convert.cpp",
             949,
@@ -1245,7 +1245,7 @@ void __cdecl FX_ConvertTrail_CompileVertices(
             "outTrailDef->vertCount * sizeof( FxTrailVertex ) <= static_cast< size_t >( vertBytes )");
     outTrailDef->inds = emittedIndPtrBegin;
     outTrailDef->indCount = emittedIndPtrEnd - emittedIndPtrBegin;
-    if (2 * outTrailDef->indCount > (unsigned int)indBytes)
+    if (2 * outTrailDef->indCount > (uint32_t)indBytes)
         MyAssertHandler(
             ".\\EffectsCore\\fx_convert.cpp",
             952,
@@ -1254,7 +1254,7 @@ void __cdecl FX_ConvertTrail_CompileVertices(
             "outTrailDef->indCount * sizeof( ushort ) <= static_cast< size_t >( indBytes )");
 }
 
-void __cdecl FX_ConvertTrail(FxTrailDef **outTrailDef, const FxEditorElemDef *edElemDef, unsigned __int8 **mempool)
+void __cdecl FX_ConvertTrail(FxTrailDef **outTrailDef, const FxEditorElemDef *edElemDef, uint8_t **mempool)
 {
     if (edElemDef->elemType == 3)
     {
@@ -1278,16 +1278,16 @@ void __cdecl FX_ConvertTrail(FxTrailDef **outTrailDef, const FxEditorElemDef *ed
 void __cdecl FX_ConvertElemDef(
     FxElemDef *elemDef,
     const FxEditorElemDef *edElemDef,
-    int velStateCount,
-    int visStateCount,
-    int emitIndex,
-    unsigned __int8 **memPool)
+    int32_t velStateCount,
+    int32_t visStateCount,
+    int32_t emitIndex,
+    uint8_t **memPool)
 {
-    int count; // edx
-    int amplitude; // ecx
-    unsigned __int8 v8; // [esp+8h] [ebp-54h]
-    unsigned __int8 v9; // [esp+28h] [ebp-34h]
-    int sortOrder; // [esp+30h] [ebp-2Ch]
+    int32_t count; // edx
+    int32_t amplitude; // ecx
+    uint8_t v8; // [esp+8h] [ebp-54h]
+    uint8_t v9; // [esp+28h] [ebp-34h]
+    int32_t sortOrder; // [esp+30h] [ebp-2Ch]
     float v11; // [esp+40h] [ebp-1Ch]
     float v12; // [esp+44h] [ebp-18h]
     float v13; // [esp+48h] [ebp-14h]
@@ -1405,7 +1405,7 @@ void __cdecl FX_ConvertElemDef(
             1076,
             0,
             "%s\n\t(edElemDef->lightingFrac) = %g",
-            "(static_cast< int >( edElemDef->lightingFrac * 255.0f ) < 256)",
+            "(static_cast< int32_t >( edElemDef->lightingFrac * 255.0f ) < 256)",
             edElemDef->lightingFrac);
     elemDef->lightingFrac = (int)(edElemDef->lightingFrac * 255.0f);
     elemDef->useItemClip = (edElemDef->editorFlags & 0x20000) != 0;
@@ -1459,18 +1459,18 @@ void __cdecl FX_ConvertElemDef(
     elemDef->sortOrder = v8;
 }
 
-int __cdecl FX_ConvertElemDefsOfType(
+int32_t __cdecl FX_ConvertElemDefsOfType(
     FxElemDef *elemDefArray,
     const FxEditorEffectDef *editorEffect,
-    unsigned int loopingFlagState,
-    const int *velStateCount,
-    const int *visStateCount,
-    const int *emitIndex,
-    unsigned __int8 **memPool)
+    uint32_t loopingFlagState,
+    const int32_t *velStateCount,
+    const int32_t *visStateCount,
+    const int32_t *emitIndex,
+    uint8_t **memPool)
 {
     FxElemDef *elemDef; // [esp+0h] [ebp-Ch]
-    int elemIndex; // [esp+4h] [ebp-8h]
-    int elemCount; // [esp+8h] [ebp-4h]
+    int32_t elemIndex; // [esp+4h] [ebp-8h]
+    int32_t elemCount; // [esp+8h] [ebp-4h]
 
     if (!elemDefArray)
         MyAssertHandler(".\\EffectsCore\\fx_convert.cpp", 1135, 0, "%s", "elemDefArray");
@@ -1506,18 +1506,18 @@ int __cdecl FX_ConvertElemDefsOfType(
     return elemCount;
 }
 
-int __cdecl FX_CopyEmittedElemDefs(
+int32_t __cdecl FX_CopyEmittedElemDefs(
     FxElemDef *elemDefArray,
     const FxEditorEffectDef *editorEffect,
-    unsigned __int8 **memPool)
+    uint8_t **memPool)
 {
-    unsigned __int8 **elemDefEmit; // [esp+8h] [ebp-20h]
+    uint8_t **elemDefEmit; // [esp+8h] [ebp-20h]
     const FxEffectDef *emission; // [esp+Ch] [ebp-1Ch]
-    int elemIndexEmit; // [esp+10h] [ebp-18h]
+    int32_t elemIndexEmit; // [esp+10h] [ebp-18h]
     FxElemDef *elemDef; // [esp+14h] [ebp-14h]
-    int elemIndex; // [esp+1Ch] [ebp-Ch]
-    int elemIndexStop; // [esp+20h] [ebp-8h]
-    int elemCount; // [esp+24h] [ebp-4h]
+    int32_t elemIndex; // [esp+1Ch] [ebp-Ch]
+    int32_t elemIndexStop; // [esp+20h] [ebp-8h]
+    int32_t elemCount; // [esp+24h] [ebp-4h]
 
     if (!editorEffect)
         MyAssertHandler(".\\EffectsCore\\fx_convert.cpp", 1167, 0, "%s", "editorEffect");
@@ -1531,7 +1531,7 @@ int __cdecl FX_CopyEmittedElemDefs(
             for (elemIndexEmit = emission->elemDefCountLooping; elemIndexEmit != elemIndexStop; ++elemIndexEmit)
             {
                 elemDef = &elemDefArray[elemCount++];
-                elemDefEmit = (unsigned __int8 **)&emission->elemDefs[elemIndexEmit];
+                elemDefEmit = (uint8_t **)&emission->elemDefs[elemIndexEmit];
                 memcpy((void *)elemDef, elemDefEmit, sizeof(FxElemDef));
                 if ((elemDef->flags & 0xC0) == 0x40)
                 {
@@ -1539,22 +1539,22 @@ int __cdecl FX_CopyEmittedElemDefs(
                     elemDef->flags = elemDef->flags;
                 }
                 FX_ReserveElemDefMemory(elemDef, memPool);
-                memcpy((unsigned __int8 *)elemDef->velSamples, elemDefEmit[45], 96 * (elemDef->velIntervalCount + 1));
+                memcpy((uint8_t *)elemDef->velSamples, elemDefEmit[45], 96 * (elemDef->velIntervalCount + 1));
                 if (elemDef->visSamples)
                     memcpy(elemDef->visSamples->base.color, elemDefEmit[46], 48 * (elemDef->visStateIntervalCount + 1));
                 if (elemDef->visualCount > 1u)
-                    memcpy((unsigned __int8 *)elemDef->visuals.markArray, elemDefEmit[47], 4 * elemDef->visualCount);
+                    memcpy((uint8_t *)elemDef->visuals.markArray, elemDefEmit[47], 4 * elemDef->visualCount);
             }
         }
     }
     return elemCount;
 }
 
-int __cdecl FX_GetLoopingLife(const FxEffectDef *effectDef)
+int32_t __cdecl FX_GetLoopingLife(const FxEffectDef *effectDef)
 {
     const FxElemDef *elemDef; // [esp+4h] [ebp-Ch]
-    int elemIndex; // [esp+8h] [ebp-8h]
-    int msecLoopingLifeMax; // [esp+Ch] [ebp-4h]
+    int32_t elemIndex; // [esp+8h] [ebp-8h]
+    int32_t msecLoopingLifeMax; // [esp+Ch] [ebp-4h]
 
     msecLoopingLifeMax = 0;
     for (elemIndex = 0; elemIndex < effectDef->elemDefCountLooping; ++elemIndex)
@@ -1568,39 +1568,39 @@ int __cdecl FX_GetLoopingLife(const FxEffectDef *effectDef)
     return msecLoopingLifeMax;
 }
 
-const FxEffectDef *__cdecl FX_Convert(const FxEditorEffectDef *editorEffect, void *(*Alloc)(unsigned int))
+const FxEffectDef *__cdecl FX_Convert(const FxEditorEffectDef *editorEffect, void *(*Alloc)(uint32_t))
 {
     PhysPreset *v2; // eax
-    int v4; // eax
-    int v5; // eax
-    int v6; // eax
-    int v7; // eax
-    int v8; // eax
-    int v9; // eax
-    int v10; // eax
-    int v11; // eax
-    int LoopingLife; // eax
+    int32_t v4; // eax
+    int32_t v5; // eax
+    int32_t v6; // eax
+    int32_t v7; // eax
+    int32_t v8; // eax
+    int32_t v9; // eax
+    int32_t v10; // eax
+    int32_t v11; // eax
+    int32_t LoopingLife; // eax
     char v13; // [esp+13h] [ebp-1E1h]
     char *name; // [esp+18h] [ebp-1DCh]
     const FxEditorEffectDef *v15; // [esp+1Ch] [ebp-1D8h]
-    int intervalLimit; // [esp+34h] [ebp-1C0h]
-    int elemCountTotal; // [esp+38h] [ebp-1BCh]
-    int velStateCount[32]; // [esp+3Ch] [ebp-1B8h] BYREF
+    int32_t intervalLimit; // [esp+34h] [ebp-1C0h]
+    int32_t elemCountTotal; // [esp+38h] [ebp-1BCh]
+    int32_t velStateCount[32]; // [esp+3Ch] [ebp-1B8h] BYREF
     FxEffectDef *effect; // [esp+BCh] [ebp-138h]
-    int visualIndex; // [esp+C0h] [ebp-134h]
-    int emitIndex[32]; // [esp+C4h] [ebp-130h] BYREF
-    int firstEmitted; // [esp+144h] [ebp-B0h]
-    int totalBytesNeeded; // [esp+148h] [ebp-ACh]
-    int visStateCount[33]; // [esp+14Ch] [ebp-A8h] BYREF
+    int32_t visualIndex; // [esp+C0h] [ebp-134h]
+    int32_t emitIndex[32]; // [esp+C4h] [ebp-130h] BYREF
+    int32_t firstEmitted; // [esp+144h] [ebp-B0h]
+    int32_t totalBytesNeeded; // [esp+148h] [ebp-ACh]
+    int32_t visStateCount[33]; // [esp+14Ch] [ebp-A8h] BYREF
     const FxEditorElemDef *edElemDef; // [esp+1D0h] [ebp-24h]
-    int elemIndex; // [esp+1D4h] [ebp-20h]
-    unsigned __int8 *memPool; // [esp+1D8h] [ebp-1Ch] BYREF
+    int32_t elemIndex; // [esp+1D4h] [ebp-20h]
+    uint8_t *memPool; // [esp+1D8h] [ebp-1Ch] BYREF
     FxSampleChannel routing[5]; // [esp+1DCh] [ebp-18h] BYREF
     const FxElemVisuals *elemVisual; // [esp+1F0h] [ebp-4h]
 
     if (!editorEffect)
         MyAssertHandler(".\\EffectsCore\\fx_convert.cpp", 1429, 0, "%s", "editorEffect");
-    memset((unsigned __int8 *)emitIndex, 0xFFu, sizeof(emitIndex));
+    memset((uint8_t *)emitIndex, 0xFFu, sizeof(emitIndex));
     totalBytesNeeded = 252 * editorEffect->elemCount + 32;
     elemCountTotal = editorEffect->elemCount;
     for (elemIndex = 0; elemIndex < editorEffect->elemCount; ++elemIndex)
@@ -1663,7 +1663,7 @@ const FxEffectDef *__cdecl FX_Convert(const FxEditorEffectDef *editorEffect, voi
     }
     totalBytesNeeded += strlen(editorEffect->name) + 1;
     effect = (FxEffectDef *)Alloc(totalBytesNeeded);
-    memPool = (unsigned __int8 *)&effect[1];
+    memPool = (uint8_t *)&effect[1];
     effect->elemDefs = (const FxElemDef *)&effect[1];
     memPool += 252 * elemCountTotal;
     v9 = FX_ConvertElemDefsOfType((FxElemDef*)effect->elemDefs, editorEffect, 1u, velStateCount, visStateCount, emitIndex, &memPool);
@@ -1714,13 +1714,13 @@ const FxEffectDef *__cdecl FX_Convert(const FxEditorEffectDef *editorEffect, voi
         ++name;
     } while (v13);
     memPool += &effect->name[strlen(effect->name) + 1] - effect->name;
-    if (memPool - (unsigned __int8 *)effect != effect->totalSize)
+    if (memPool - (uint8_t *)effect != effect->totalSize)
         MyAssertHandler(
             ".\\EffectsCore\\fx_convert.cpp",
             1536,
             1,
             "memPool - reinterpret_cast< byte * >( effect ) == effect->totalSize\n\t%i, %i",
-            memPool - (unsigned __int8 *)effect,
+            memPool - (uint8_t *)effect,
             effect->totalSize);
     return effect;
 }

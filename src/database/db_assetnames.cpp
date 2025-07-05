@@ -1,6 +1,6 @@
 #include "database.h"
 
-//int marker_db_assetnames 828ddeec     db_assetnames.obj
+//int32_t marker_db_assetnames 828ddeec     db_assetnames.obj
 
 const char *(__cdecl *DB_XAssetGetNameHandler[33])(const XAssetHeader *) =
 {
@@ -77,67 +77,67 @@ void(__cdecl *DB_XAssetSetNameHandler[33])(XAssetHeader *, const char *) =
 };
 
 // KISAKTODO: make these non-fixed
-int __cdecl DB_SizeofXAsset_RawFile_()
+int32_t __cdecl DB_SizeofXAsset_RawFile_()
 {
     return sizeof(RawFile);
 }
-int __cdecl DB_SizeofXAsset_GameWorldSp_()
+int32_t __cdecl DB_SizeofXAsset_GameWorldSp_()
 {
     return sizeof(GameWorldSp);
 }
-int __cdecl DB_SizeofXAsset_XAnimParts_()
+int32_t __cdecl DB_SizeofXAsset_XAnimParts_()
 {
     return sizeof(XAnimParts);
 }
-int __cdecl DB_SizeofXAsset_XModel_()
+int32_t __cdecl DB_SizeofXAsset_XModel_()
 {
     return sizeof(XModel);
 }
-int __cdecl DB_SizeofXAsset_Material_()
+int32_t __cdecl DB_SizeofXAsset_Material_()
 {
     return sizeof(Material);
 }
-int __cdecl DB_SizeofXAsset_MaterialTechniqueSet_()
+int32_t __cdecl DB_SizeofXAsset_MaterialTechniqueSet_()
 {
     return sizeof(MaterialTechniqueSet);
 }
-int __cdecl DB_SizeofXAsset_GfxImage_()
+int32_t __cdecl DB_SizeofXAsset_GfxImage_()
 {
     return sizeof(GfxImage);
 }
-int __cdecl DB_SizeofXAsset_SndCurve_()
+int32_t __cdecl DB_SizeofXAsset_SndCurve_()
 {
     return sizeof(SndCurve);
 }
-int __cdecl DB_SizeofXAsset_menuDef_t_()
+int32_t __cdecl DB_SizeofXAsset_menuDef_t_()
 {
     return sizeof(menuDef_t);
 }
-int __cdecl DB_SizeofXAsset_StringTable_()
+int32_t __cdecl DB_SizeofXAsset_StringTable_()
 {
     return sizeof(StringTable);
 }
-int __cdecl DB_SizeofXAsset_GameWorldMp_()
+int32_t __cdecl DB_SizeofXAsset_GameWorldMp_()
 {
     return sizeof(GameWorldMp);
 }
-int __cdecl DB_SizeofXAsset_GfxWorld_()
+int32_t __cdecl DB_SizeofXAsset_GfxWorld_()
 {
     return sizeof(GfxWorld);
 }
-int __cdecl DB_SizeofXAsset_Font_s_()
+int32_t __cdecl DB_SizeofXAsset_Font_s_()
 {
     return sizeof(Font_s);
 }
-int __cdecl DB_SizeofXAsset_FxImpactTable_()
+int32_t __cdecl DB_SizeofXAsset_FxImpactTable_()
 {
     return sizeof(FxImpactTable);
 }
-int __cdecl DB_SizeofXAsset_WeaponDef_()
+int32_t __cdecl DB_SizeofXAsset_WeaponDef_()
 {
     return sizeof(WeaponDef);
 }
-int __cdecl DB_SizeofXAsset_FxEffectDef_()
+int32_t __cdecl DB_SizeofXAsset_FxEffectDef_()
 {
     return sizeof(FxEffectDef);
 }
@@ -212,7 +212,7 @@ void __cdecl DB_LocalizeEntrySetName(XAssetHeader *header, const char *name)
     header->localize->name = name;
 }
 
-const char *__cdecl DB_GetXAssetHeaderName(int type, const XAssetHeader *header)
+const char *__cdecl DB_GetXAssetHeaderName(int32_t type, const XAssetHeader *header)
 {
     const char *v2; // eax
     const char *name; // [esp+0h] [ebp-4h]
@@ -245,14 +245,14 @@ void __cdecl DB_SetXAssetName(XAsset *asset, const char *name)
     DB_XAssetSetNameHandler[asset->type](&asset->header, name);
 }
 
-int __cdecl DB_GetXAssetTypeSize(int type)
+int32_t __cdecl DB_GetXAssetTypeSize(int32_t type)
 {
     if (!DB_GetXAssetSizeHandler[type])
         MyAssertHandler(".\\database\\db_assetnames.cpp", 615, 0, "%s", "DB_GetXAssetSizeHandler[type]");
     return DB_GetXAssetSizeHandler[type]();
 }
 
-const char *__cdecl DB_GetXAssetTypeName(unsigned int type)
+const char *__cdecl DB_GetXAssetTypeName(uint32_t type)
 {
     if (type > 0x20)
         MyAssertHandler(".\\database\\db_assetnames.cpp", 621, 0, "%s", "type >= 0 && type < ASSET_TYPE_COUNT");
