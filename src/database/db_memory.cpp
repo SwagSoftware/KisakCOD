@@ -4,7 +4,7 @@
 #include <qcommon/qcommon.h>
 #include <gfx_d3d/r_buffers.h>
 
-int g_block_mem_type[9] =
+int32_t g_block_mem_type[9] =
 { 0, 1, 1, 2, 1, 1, 2, 2, 2 };
 
 const char *g_block_mem_name[9] =
@@ -22,14 +22,14 @@ const char *g_block_mem_name[9] =
 
 void __cdecl DB_RecoverGeometryBuffers(XZoneMemory *zoneMem)
 {
-    unsigned __int8 *lockedData; // [esp+4h] [ebp-4h]
-    unsigned __int8 *lockedDataa; // [esp+4h] [ebp-4h]
+    uint8_t *lockedData; // [esp+4h] [ebp-4h]
+    uint8_t *lockedDataa; // [esp+4h] [ebp-4h]
 
     if (zoneMem->blocks[7].size)
     {
         iassert(zoneMem->blocks[7].data);
         iassert(zoneMem->vertexBuffer == NULL);
-        lockedData = (unsigned __int8 *)R_AllocStaticVertexBuffer((IDirect3DVertexBuffer9 **)&zoneMem->vertexBuffer, zoneMem->blocks[7].size);
+        lockedData = (uint8_t *)R_AllocStaticVertexBuffer((IDirect3DVertexBuffer9 **)&zoneMem->vertexBuffer, zoneMem->blocks[7].size);
         memcpy(lockedData, zoneMem->blocks[7].data, zoneMem->blocks[7].size);
         if (zoneMem->lockedVertexData)
             zoneMem->lockedVertexData = lockedData;
@@ -40,7 +40,7 @@ void __cdecl DB_RecoverGeometryBuffers(XZoneMemory *zoneMem)
     {
         iassert(zoneMem->blocks[8].data);
         iassert(zoneMem->indexBuffer == NULL);
-        lockedDataa = (unsigned __int8 *)R_AllocStaticIndexBuffer((IDirect3DIndexBuffer9 **)&zoneMem->indexBuffer, zoneMem->blocks[8].size);
+        lockedDataa = (uint8_t *)R_AllocStaticIndexBuffer((IDirect3DIndexBuffer9 **)&zoneMem->indexBuffer, zoneMem->blocks[8].size);
         memcpy(lockedDataa, zoneMem->blocks[8].data, zoneMem->blocks[8].size);
         if (zoneMem->lockedIndexData)
             zoneMem->lockedIndexData = lockedDataa;
@@ -73,15 +73,15 @@ void __cdecl DB_ReleaseGeometryBuffers(XZoneMemory *zoneMem)
 }
 
 void __cdecl DB_AllocXZoneMemory(
-    unsigned int *blockSize,
+    uint32_t *blockSize,
     const char *filename,
     XZoneMemory *zoneMem,
-    unsigned int allocType)
+    uint32_t allocType)
 {
-    int OverAllocatedSize; // [esp+20h] [ebp-14h]
-    unsigned int blockIndex; // [esp+28h] [ebp-Ch]
-    unsigned __int8 *buf; // [esp+2Ch] [ebp-8h]
-    unsigned int size; // [esp+30h] [ebp-4h]
+    int32_t OverAllocatedSize; // [esp+20h] [ebp-14h]
+    uint32_t blockIndex; // [esp+28h] [ebp-Ch]
+    uint8_t *buf; // [esp+2Ch] [ebp-8h]
+    uint32_t size; // [esp+30h] [ebp-4h]
 
     for (blockIndex = 0; blockIndex < 9; ++blockIndex)
     {
@@ -110,16 +110,16 @@ void __cdecl DB_AllocXZoneMemory(
     if (zoneMem->lockedVertexData)
         MyAssertHandler(".\\database\\db_memory.cpp", 105, 0, "%s", "zoneMem->lockedVertexData == NULL");
     if (zoneMem->blocks[7].size)
-        zoneMem->lockedVertexData = (unsigned __int8 *)R_AllocStaticVertexBuffer((IDirect3DVertexBuffer9 **)&zoneMem->vertexBuffer, zoneMem->blocks[7].size);
+        zoneMem->lockedVertexData = (uint8_t *)R_AllocStaticVertexBuffer((IDirect3DVertexBuffer9 **)&zoneMem->vertexBuffer, zoneMem->blocks[7].size);
     if (zoneMem->indexBuffer)
         MyAssertHandler(".\\database\\db_memory.cpp", 110, 0, "%s", "zoneMem->indexBuffer == NULL");
     if (zoneMem->lockedIndexData)
         MyAssertHandler(".\\database\\db_memory.cpp", 111, 0, "%s", "zoneMem->lockedIndexData == NULL");
     if (zoneMem->blocks[8].size)
-        zoneMem->lockedIndexData = (unsigned __int8 *)R_AllocStaticIndexBuffer((IDirect3DIndexBuffer9 **)&zoneMem->indexBuffer, zoneMem->blocks[8].size);
+        zoneMem->lockedIndexData = (uint8_t *)R_AllocStaticIndexBuffer((IDirect3DIndexBuffer9 **)&zoneMem->indexBuffer, zoneMem->blocks[8].size);
 }
 
-unsigned __int8 *__cdecl DB_MemAlloc(unsigned int size, unsigned int type, unsigned int allocType)
+uint8_t *__cdecl DB_MemAlloc(uint32_t size, uint32_t type, uint32_t allocType)
 {
     if (type <= 1)
         return PMem_Alloc(size + 15, 0x1000u, 4, allocType);

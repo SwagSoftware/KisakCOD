@@ -597,10 +597,10 @@ char __cdecl FindCycleBFS(
     int32_t v15; // [esp+400Ch] [ebp-1Ch]
     const SimplePlaneIntersection *v16; // [esp+4010h] [ebp-18h]
     const SimplePlaneIntersection **i; // [esp+4014h] [ebp-14h]
-    signed int32_t j; // [esp+4018h] [ebp-10h]
+    int32_t j; // [esp+4018h] [ebp-10h]
     int32_t v19; // [esp+401Ch] [ebp-Ch]
-    signed int32_t v20; // [esp+4020h] [ebp-8h]
-    signed int32_t v21; // [esp+4024h] [ebp-4h]
+    int32_t v20; // [esp+4020h] [ebp-8h]
+    int32_t v21; // [esp+4024h] [ebp-4h]
 
     if (!IsPtFormedByThisPlane(connectingPlane, start))
         MyAssertHandler("..\\common\\brush_edges.cpp", 266, 0, "%s", "IsPtFormedByThisPlane( connectingPlane, start )");
