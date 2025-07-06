@@ -1,3 +1,997 @@
 #ifndef KISAK_SP 
 #error This file is for SinglePlayer only 
 #endif
+
+#include "actor_physics.h"
+
+void __fastcall TRACK_actor_physics()
+{
+    track_static_alloc_internal(&g_apl, 92, "g_apl", 5);
+}
+
+void __fastcall AIPhys_AddTouchEnt(int entityNum)
+{
+    actor_physics_t *v1; // r11
+    int iNumTouch; // r8
+    int v3; // r9
+    int *iTouchEnts; // r10
+
+    if (entityNum != 2174)
+    {
+        v1 = g_pPhys;
+        iNumTouch = g_pPhys->iNumTouch;
+        if (iNumTouch != 32)
+        {
+            v3 = 0;
+            if (iNumTouch <= 0)
+            {
+            LABEL_7:
+                g_pPhys->iTouchEnts[iNumTouch] = entityNum;
+                ++v1->iNumTouch;
+            }
+            else
+            {
+                iTouchEnts = g_pPhys->iTouchEnts;
+                while (*iTouchEnts != entityNum)
+                {
+                    ++v3;
+                    ++iTouchEnts;
+                    if (v3 >= g_pPhys->iNumTouch)
+                        goto LABEL_7;
+                }
+            }
+        }
+    }
+}
+
+void __fastcall AIPhys_ClipVelocity(
+    const float *in,
+    const float *normal,
+    bool isWalkable,
+    float *out,
+    double overbounce)
+{
+    double v5; // fp0
+
+    if (isWalkable && (float)((float)(*in * *in) + (float)(in[1] * in[1])) >= (double)(float)(in[2] * in[2]))
+    {
+        out[2] = -(float)((float)(normal[1] * in[1]) - (float)-(float)(*normal * *in));
+        *out = *in * normal[2];
+        out[1] = in[1] * normal[2];
+    }
+    else
+    {
+        if ((float)((float)(in[1] * normal[1]) + (float)((float)(*normal * *in) + (float)(in[2] * normal[2]))) >= 0.0)
+            v5 = (float)((float)((float)(in[1] * normal[1]) + (float)((float)(*normal * *in) + (float)(in[2] * normal[2])))
+                / (float)overbounce);
+        else
+            v5 = (float)((float)((float)(in[1] * normal[1]) + (float)((float)(*normal * *in) + (float)(in[2] * normal[2])))
+                * (float)overbounce);
+        *out = -(float)((float)(*normal * (float)v5) - *in);
+        out[1] = -(float)((float)(normal[1] * (float)v5) - in[1]);
+        out[2] = -(float)((float)((float)v5 * normal[2]) - in[2]);
+    }
+}
+
+SlideMoveResult __fastcall AIPhys_SlideMove(int gravity, int zonly)
+{
+    float *vVelocity; // r3
+    double v4; // fp26
+    double v5; // fp25
+    double v6; // fp27
+    bool v7; // zf
+    double v8; // fp0
+    double fFrameTime; // fp20
+    int v10; // r31
+    actor_physics_t *v11; // r11
+    int v12; // r27
+    bool *v13; // r23
+    float *v14; // r24
+    unsigned int v15; // r22
+    double fraction; // fp12
+    double v17; // fp13
+    double v18; // fp11
+    SlideMoveResult result; // r3
+    unsigned __int16 EntityHitId; // r3
+    actor_physics_t *v21; // r11
+    double v22; // fp0
+    unsigned __int16 v23; // r3
+    double v24; // fp13
+    int v25; // r31
+    double v26; // fp0
+    float *v27; // r11
+    unsigned __int16 v28; // r3
+    double v29; // fp0
+    bool walkable; // r10
+    double v31; // fp0
+    int v32; // r28
+    float *v33; // r10
+    double v34; // fp0
+    double v35; // fp0
+    bool v36; // r5
+    const float *v37; // r4
+    double v38; // fp1
+    double v39; // fp28
+    double v40; // fp29
+    int v41; // r29
+    double v42; // fp30
+    float *v43; // r30
+    bool v44; // r5
+    const float *v45; // r4
+    double v46; // fp1
+    const float *v47; // r4
+    double v48; // fp7
+    double v51; // fp0
+    double v52; // fp12
+    double v53; // fp13
+    double v54; // fp11
+    double v55; // fp0
+    double v56; // fp0
+    int v57; // r11
+    float *v58; // r10
+    double v61; // fp0
+    double v62; // fp13
+    double v63; // fp0
+    double v64; // fp27
+    double v65; // fp26
+    unsigned __int16 v66; // r3
+    double v67; // fp0
+    actor_physics_t *v68; // r11
+    unsigned __int16 v69; // r3
+    actor_physics_t *v70; // r11
+    double v71; // fp0
+    actor_physics_t *v72; // r11
+    float v73; // [sp+50h] [-1A0h] BYREF
+    float v74; // [sp+54h] [-19Ch]
+    float v75; // [sp+58h] [-198h]
+    _BYTE v76[12]; // [sp+5Ch] [-194h] BYREF
+    float v77; // [sp+68h] [-188h] BYREF
+    float v78; // [sp+6Ch] [-184h]
+    float v79; // [sp+70h] [-180h]
+    float v80; // [sp+78h] [-178h] BYREF
+    float v81; // [sp+7Ch] [-174h]
+    float v82; // [sp+80h] [-170h]
+    float v83; // [sp+88h] [-168h] BYREF
+    float v84; // [sp+8Ch] [-164h]
+    float v85; // [sp+90h] [-160h]
+    trace_t v86; // [sp+A0h] [-150h] BYREF
+    float v87; // [sp+D0h] [-120h] BYREF
+    float v88; // [sp+D4h] [-11Ch]
+    float v89; // [sp+D8h] [-118h]
+    float v90; // [sp+E0h] [-110h] BYREF
+    float v91; // [sp+E4h] [-10Ch] BYREF
+    float v92[40]; // [sp+E8h] [-108h] BYREF
+
+    v4 = g_pPhys->vVelocity[0];
+    v5 = g_pPhys->vVelocity[1];
+    v6 = g_pPhys->vVelocity[2];
+    v83 = g_pPhys->vVelocity[0];
+    v84 = v5;
+    v85 = v6;
+    v7 = gravity == 0;
+    vVelocity = g_pPhys->vVelocity;
+    if (!v7)
+    {
+        v6 = (float)-(float)((float)(g_pPhys->fGravity * g_apl.fFrameTime) - (float)v6);
+        v8 = (float)((float)(g_pPhys->vVelocity[2] + (float)v6) * (float)0.5);
+        v85 = v6;
+        g_pPhys->vVelocity[2] = v8;
+        if (g_apl.bGroundPlane)
+        {
+            if (!zonly)
+                AIPhys_ClipVelocity(vVelocity, g_apl.groundTrace.normal, g_apl.groundTrace.walkable, vVelocity, 1.001);
+        }
+    }
+    fFrameTime = g_apl.fFrameTime;
+    if (g_apl.bGroundPlane)
+    {
+        v90 = g_apl.groundTrace.normal[0];
+        v10 = 1;
+        v91 = g_apl.groundTrace.normal[1];
+        v92[0] = g_apl.groundTrace.normal[2];
+        v76[0] = g_apl.groundTrace.walkable;
+    }
+    else
+    {
+        v10 = 0;
+    }
+    Vec3NormalizeTo(vVelocity, &v90 + 3 * v10);
+    v11 = g_pPhys;
+    v12 = v10 + 1;
+    v13 = &v76[v10 + 1];
+    v76[v10] = g_pPhys->vVelocity[2] > 0.69999999;
+    v14 = &v92[3 * v10 + 3];
+    v15 = 0;
+    while (1)
+    {
+        v87 = (float)(v11->vVelocity[0] * (float)fFrameTime) + v11->vOrigin[0];
+        v88 = (float)(v11->vVelocity[1] * (float)fFrameTime) + v11->vOrigin[1];
+        v89 = (float)(v11->vVelocity[2] * (float)fFrameTime) + v11->vOrigin[2];
+        //Profile_Begin(226);
+        G_TraceCapsule(&v86, g_pPhys->vOrigin, g_pPhys->vMins, g_pPhys->vMaxs, &v87, g_pPhys->iEntNum, g_apl.iTraceMask);
+        //Profile_EndInternal(0);
+        fraction = v86.fraction;
+        v11 = g_pPhys;
+        if (v86.fraction <= 0.0)
+            break;
+        v17 = g_pPhys->vOrigin[1];
+        v18 = g_pPhys->vOrigin[2];
+        g_pPhys->vOrigin[0] = (float)((float)(v87 - g_pPhys->vOrigin[0]) * v86.fraction) + g_pPhys->vOrigin[0];
+        v11->vOrigin[1] = (float)((float)(v88 - (float)v17) * (float)fraction) + (float)v17;
+        v11->vOrigin[2] = (float)((float)(v89 - (float)v18) * (float)fraction) + (float)v18;
+        if (v86.fraction == 1.0)
+            goto LABEL_11;
+    LABEL_15:
+        v11->bDeflected = 1;
+        if (!v86.walkable && v11->iHitEntnum == 2175 && (v86.normal[0] != 0.0 || v86.normal[1] != 0.0))
+        {
+            EntityHitId = Trace_GetEntityHitId(&v86);
+            v21 = g_pPhys;
+            v22 = g_pPhys->vOrigin[0];
+            g_pPhys->iHitEntnum = EntityHitId;
+            v21->vHitOrigin[0] = v22;
+            v21->vHitOrigin[1] = v21->vOrigin[1];
+            *(_QWORD *)v21->vHitNormal = *(_QWORD *)v86.normal;
+            v21->bStuck = 0;
+        }
+        v23 = Trace_GetEntityHitId(&v86);
+        AIPhys_AddTouchEnt(v23);
+        fFrameTime = (float)-(float)((float)(v86.fraction * (float)fFrameTime) - (float)fFrameTime);
+        if (v12 >= 5)
+            goto LABEL_61;
+        v24 = v86.normal[1];
+        v25 = 0;
+        v26 = v86.normal[0];
+        if (v12 <= 0)
+        {
+        LABEL_25:
+            v11 = g_pPhys;
+            goto LABEL_33;
+        }
+        v27 = &v91;
+        while ((float)((float)(*v27 * v86.normal[1])
+            + (float)((float)(v27[1] * v86.normal[2]) + (float)(*(v27 - 1) * v86.normal[0]))) <= 0.99)
+        {
+            ++v25;
+            v27 += 3;
+            if (v25 >= v12)
+                goto LABEL_25;
+        }
+        v11 = g_pPhys;
+        if (v86.fraction == 0.0 && g_pPhys->iHitEntnum == 2175 && (v26 != 0.0 || v24 != 0.0))
+        {
+            v28 = Trace_GetEntityHitId(&v86);
+            v11 = g_pPhys;
+            v29 = g_pPhys->vOrigin[0];
+            g_pPhys->iHitEntnum = v28;
+            v11->vHitOrigin[0] = v29;
+            v11->vHitOrigin[1] = v11->vOrigin[1];
+            *(_QWORD *)v11->vHitNormal = *(_QWORD *)v86.normal;
+            v11->bStuck = 0;
+            v26 = v86.normal[0];
+        }
+        v11->vVelocity[0] = v11->vVelocity[0] + (float)v26;
+        v11->vVelocity[1] = v11->vVelocity[1] + v86.normal[1];
+        v11->vVelocity[2] = v11->vVelocity[2] + v86.normal[2];
+        if (v25 >= v12)
+        {
+            v24 = v86.normal[1];
+            v26 = v86.normal[0];
+        LABEL_33:
+            walkable = v86.walkable;
+            *(v14 - 2) = v26;
+            ++v12;
+            v31 = v86.normal[2];
+            *(v14 - 1) = v24;
+            v32 = 0;
+            *v14 = v31;
+            v14 += 3;
+            *v13++ = walkable;
+            if (v12 > 0)
+            {
+                v33 = &v91;
+                while (1)
+                {
+                    v34 = (float)((float)(v11->vVelocity[1] * *v33)
+                        + (float)((float)(*(v33 - 1) * v11->vVelocity[0]) + (float)(v33[1] * v11->vVelocity[2])));
+                    if (v34 < 0.1)
+                        break;
+                    ++v32;
+                    v33 += 3;
+                    if (v32 >= v12)
+                        goto LABEL_53;
+                }
+                v35 = -v34;
+                if (v35 > g_apl.fImpactSpeed)
+                    g_apl.fImpactSpeed = v35;
+                AIPhys_ClipVelocity(v11->vVelocity, &v90 + 3 * v32, v76[v32], &v77, 1.001);
+                AIPhys_ClipVelocity(&v83, v37, v36, &v80, v38);
+                v39 = v79;
+                v40 = v78;
+                v41 = 0;
+                v42 = v77;
+                v43 = &v90;
+                while (1)
+                {
+                    if (v41 != v32
+                        && (float)((float)((float)v39 * v43[2]) + (float)((float)(v43[1] * (float)v40) + (float)(*v43 * (float)v42))) < 0.1)
+                    {
+                        AIPhys_ClipVelocity(&v77, v43, v76[v41], &v77, 1.001);
+                        AIPhys_ClipVelocity(&v80, v45, v44, &v80, v46);
+                        v39 = v79;
+                        v40 = v78;
+                        v42 = v77;
+                        if ((float)((float)(*(&v90 + 3 * v32) * v77)
+                            + (float)((float)(*(&v90 + 3 * v32 + 1) * v78) + (float)(*(&v90 + 3 * v32 + 2) * v79))) < 0.0)
+                            break;
+                    }
+                LABEL_49:
+                    ++v41;
+                    v43 += 3;
+                    if (v41 >= v12)
+                    {
+                        v11 = g_pPhys;
+                        if (g_pPhys->iHitEntnum == 2175)
+                        {
+                            v64 = (float)((float)v42 - g_pPhys->vVelocity[0]);
+                            v65 = (float)((float)v40 - g_pPhys->vVelocity[1]);
+                            v73 = (float)v42 - g_pPhys->vVelocity[0];
+                            v74 = v65;
+                            v66 = Trace_GetEntityHitId(&v86);
+                            v11 = g_pPhys;
+                            v67 = g_pPhys->vOrigin[0];
+                            g_pPhys->iHitEntnum = v66;
+                            v11->vHitOrigin[0] = v67;
+                            v11->vHitOrigin[1] = v11->vOrigin[1];
+                            v11->vHitNormal[0] = v64;
+                            v11->vHitNormal[1] = v65;
+                            v11->bStuck = 0;
+                        }
+                        v4 = v80;
+                        v5 = v81;
+                        v6 = v82;
+                        v83 = v80;
+                        v84 = v81;
+                        v85 = v82;
+                        v11->vVelocity[0] = v42;
+                        v11->vVelocity[1] = v40;
+                        v11->vVelocity[2] = v39;
+                        goto LABEL_53;
+                    }
+                }
+                Vec3Cross(&v90 + 3 * v32, v47, &v73);
+                v48 = g_pPhys->vVelocity[0];
+                _FP10 = -__fsqrts((float)((float)(v73 * v73) + (float)((float)(v75 * v75) + (float)(v74 * v74))));
+                __asm { fsel      f0, f10, f31, f0 }
+                v51 = (float)((float)1.0 / (float)_FP0);
+                v52 = (float)(v74 * (float)v51);
+                v53 = (float)(v75 * (float)v51);
+                v54 = (float)(v73 * (float)v51);
+                v55 = (float)((float)(g_pPhys->vVelocity[2] * (float)(v75 * (float)v51))
+                    + (float)(g_pPhys->vVelocity[1] * (float)(v74 * (float)v51)));
+                v73 = v54;
+                v75 = v53;
+                v74 = v52;
+                v56 = (float)((float)((float)v48 * (float)v54) + (float)v55);
+                v42 = (float)((float)v54 * (float)v56);
+                v77 = (float)v54 * (float)v56;
+                v40 = (float)((float)v52 * (float)v56);
+                v78 = (float)v52 * (float)v56;
+                v39 = (float)((float)v53 * (float)v56);
+                v79 = (float)v53 * (float)v56;
+                Vec3Cross(&v90 + 3 * v32, v43, &v73);
+                v57 = 0;
+                v58 = v92;
+                _FP10 = -__fsqrts((float)((float)(v73 * v73) + (float)((float)(v75 * v75) + (float)(v74 * v74))));
+                __asm { fsel      f0, f10, f31, f0 }
+                v61 = (float)((float)1.0 / (float)_FP0);
+                v73 = (float)v61 * v73;
+                v74 = v74 * (float)v61;
+                v62 = (float)(v75 * (float)v61);
+                v63 = (float)((float)((float)(v75 * (float)v61) * (float)v6)
+                    + (float)((float)(v74 * (float)v5) + (float)(v73 * (float)v4)));
+                v75 = v62;
+                v80 = v73 * (float)v63;
+                v81 = v74 * (float)v63;
+                v82 = (float)v62 * (float)v63;
+                while (v57 == v32
+                    || v57 == v41
+                    || (float)((float)(*v58 * (float)v39)
+                        + (float)((float)(*(v58 - 2) * (float)v42) + (float)(*(v58 - 1) * (float)v40))) >= 0.1)
+                {
+                    ++v57;
+                    v58 += 3;
+                    if (v57 >= v12)
+                        goto LABEL_49;
+                }
+            LABEL_61:
+                v72 = g_pPhys;
+                result = SLIDEMOVE_CLIPPED;
+                g_pPhys->vVelocity[0] = 0.0;
+                v72->vVelocity[1] = 0.0;
+                v72->vVelocity[2] = 0.0;
+                return result;
+            }
+        }
+    LABEL_53:
+        if ((int)++v15 >= 4)
+        {
+        LABEL_11:
+            if (gravity)
+            {
+                v11->vVelocity[0] = v4;
+                v11->vVelocity[1] = v5;
+                v11->vVelocity[2] = v6;
+            }
+            return (_cntlzw(v15) & 0x20) == 0;
+        }
+    }
+    if (!v86.startsolid)
+        goto LABEL_15;
+    v68 = g_pPhys;
+    g_pPhys->vVelocity[2] = 0.0;
+    if (!v15 && g_apl.groundTrace.startsolid)
+        return 2;
+    if (v68->iHitEntnum == 2175)
+    {
+        v69 = Trace_GetEntityHitId(&v86);
+        v70 = g_pPhys;
+        v71 = g_pPhys->vOrigin[0];
+        g_pPhys->iHitEntnum = v69;
+        v70->vHitOrigin[0] = v71;
+        v70->vHitOrigin[1] = v70->vOrigin[1];
+        v70->bStuck = 1;
+    }
+    return 1;
+}
+
+int __fastcall AIPhys_StepSlideMove(int gravity, int zonly)
+{
+    double v4; // fp30
+    double v5; // fp29
+    double v6; // fp28
+    SlideMoveResult v7; // r3
+    double stepheight; // fp31
+    int result; // r3
+    actor_physics_t *v10; // r30
+    double v11; // fp13
+    double v12; // fp11
+    double v13; // fp10
+    double v14; // fp8
+    double fraction; // fp0
+    double v16; // fp31
+    actor_physics_t *v17; // r10
+    double v18; // fp12
+    double v19; // fp13
+    double v20; // fp11
+    int v21; // r10
+    float v24; // [sp+50h] [-230h] BYREF
+    float v25; // [sp+54h] [-22Ch]
+    float v26; // [sp+58h] [-228h]
+    float v27; // [sp+60h] [-220h] BYREF
+    float v28; // [sp+64h] [-21Ch]
+    float v29; // [sp+68h] [-218h]
+    float v30; // [sp+70h] [-210h] BYREF
+    float v31; // [sp+74h] [-20Ch]
+    float v32; // [sp+78h] [-208h]
+    trace_t v33; // [sp+80h] [-200h] BYREF
+    _BYTE v34[92]; // [sp+B0h] [-1D0h] BYREF
+    float v35[67]; // [sp+110h] [-170h] BYREF
+
+    v24 = g_pPhys->vOrigin[0];
+    v25 = g_pPhys->vOrigin[1];
+    v4 = g_pPhys->vVelocity[0];
+    v5 = g_pPhys->vVelocity[1];
+    v6 = g_pPhys->vVelocity[2];
+    v26 = g_pPhys->vOrigin[2];
+    v7 = AIPhys_SlideMove(gravity, zonly);
+    if (v7)
+    {
+        if (v7 == SLIDEMOVE_FAIL)
+            return 0;
+        if (v7 != SLIDEMOVE_CLIPPED)
+            MyAssertHandler(
+                "c:\\trees\\cod3\\cod3src\\src\\game\\actor_physics.cpp",
+                443,
+                0,
+                "%s",
+                "moveResult == SLIDEMOVE_CLIPPED");
+        stepheight = g_apl.stepheight;
+        if (g_pPhys->vVelocity[2] <= 0.0
+            || g_apl.bIsWalking
+            || (v27 = v24,
+                v28 = v25,
+                v29 = v26 - g_apl.stepheight,
+                //Profile_Begin(226),
+                G_TraceCapsule(&v33, &v24, g_pPhys->vMins, g_pPhys->vMaxs, &v27, g_pPhys->iEntNum, g_apl.iTraceMask),
+                //Profile_EndInternal(0),
+                v33.fraction != 1.0)
+            && v33.walkable)
+        {
+            v30 = v24;
+            v31 = v25;
+            v32 = v26 + (float)stepheight;
+            //Profile_Begin(226);
+            G_TraceCapsule(&v33, &v24, g_pPhys->vMins, g_pPhys->vMaxs, &v30, g_pPhys->iEntNum, g_apl.iTraceMask);
+            //Profile_EndInternal(0);
+            if (v33.allsolid)
+            {
+                result = 1;
+                if (v33.fraction != 0.0)
+                    return result;
+                return 0;
+            }
+            v10 = g_pPhys;
+            memcpy(v35, g_pPhys, sizeof(v35));
+            memcpy(v34, &g_apl, sizeof(v34));
+            g_pPhys->iHitEntnum = 2175;
+            g_apl.bGroundPlane = 0;
+            v11 = v24;
+            v13 = (float)(v30 - v24);
+            v14 = (float)(v32 - v26);
+            fraction = v33.fraction;
+            v12 = v26;
+            v10->vOrigin[1] = (float)((float)(v31 - v25) * v33.fraction) + v25;
+            v10->vOrigin[0] = (float)((float)v13 * (float)fraction) + (float)v11;
+            v16 = (float)((float)((float)v14 * (float)fraction) + (float)v12);
+            v10->vOrigin[2] = (float)((float)v14 * (float)fraction) + (float)v12;
+            v10->vVelocity[0] = v4;
+            v10->vVelocity[1] = v5;
+            v10->vVelocity[2] = v6;
+            if (AIPhys_SlideMove(gravity, zonly) == SLIDEMOVE_FAIL)
+            {
+                memcpy(g_pPhys, v35, sizeof(actor_physics_t));
+                memcpy(&g_apl, v34, sizeof(g_apl));
+                return 1;
+            }
+            v27 = g_pPhys->vOrigin[0];
+            v28 = g_pPhys->vOrigin[1];
+            v29 = (float)(v26 - (float)v16) + g_pPhys->vOrigin[2];
+            //Profile_Begin(226);
+            G_TraceCapsule(&v33, g_pPhys->vOrigin, g_pPhys->vMins, g_pPhys->vMaxs, &v27, g_pPhys->iEntNum, g_apl.iTraceMask);
+            //Profile_EndInternal(0);
+            v17 = g_pPhys;
+            if (!v33.startsolid)
+            {
+                v18 = v33.fraction;
+                v19 = g_pPhys->vOrigin[1];
+                v20 = g_pPhys->vOrigin[2];
+                g_pPhys->vOrigin[0] = (float)((float)(v27 - g_pPhys->vOrigin[0]) * v33.fraction) + g_pPhys->vOrigin[0];
+                v17->vOrigin[1] = (float)((float)(v28 - (float)v19) * (float)v18) + (float)v19;
+                v17->vOrigin[2] = (float)((float)(v29 - (float)v20) * (float)v18) + (float)v20;
+            }
+            if (v33.fraction < 1.0)
+            {
+                if (v33.normal[2] < 0.30000001)
+                {
+                    memcpy(v17, v35, sizeof(actor_physics_t));
+                    memcpy(&g_apl, v34, sizeof(g_apl));
+                    return 1;
+                }
+                AIPhys_ClipVelocity(v17->vVelocity, v33.normal, v33.walkable, v17->vVelocity, 1.001);
+                _FP12 = (float)(v26 - v35[2]);
+                __asm { fsel      f13, f12, f0, f13 }
+                if (*(float *)(v21 + 8) > (double)(float)((float)_FP13 + (float)0.1))
+                    *(unsigned int *)(v21 + 244) = 2175;
+            }
+        }
+    }
+    return 1;
+}
+
+int __fastcall AIPhys_AirMove()
+{
+    if (g_apl.bGroundPlane)
+        AIPhys_ClipVelocity(
+            g_pPhys->vVelocity,
+            g_apl.groundTrace.normal,
+            g_apl.groundTrace.walkable,
+            g_pPhys->vVelocity,
+            1.001);
+    return AIPhys_StepSlideMove(1, 0);
+}
+
+int __fastcall AIPhys_WalkMove()
+{
+    actor_physics_t *v0; // r9
+    double v1; // fp0
+    float *vVelocity; // r3
+    int v3; // r10
+    int v4; // r9
+    float *v5; // r6
+    double v6; // fp9
+    double v7; // fp8
+    double v8; // fp7
+    double v9; // fp6
+    double v10; // fp13
+    double v11; // fp5
+    double v12; // fp12
+    double v15; // fp11
+
+    v0 = g_pPhys;
+    v1 = (float)((float)1.0 / g_apl.fFrameTime);
+    vVelocity = g_pPhys->vVelocity;
+    g_pPhys->vVelocity[0] = g_pPhys->vWishDelta[0] * (float)((float)1.0 / g_apl.fFrameTime);
+    vVelocity[1] = v0->vWishDelta[1] * (float)v1;
+    v0->vVelocity[2] = 0.0;
+    AIPhys_ClipVelocity(vVelocity, g_apl.groundTrace.normal, g_apl.groundTrace.walkable, vVelocity, 1.001);
+    v10 = v5[1];
+    if ((float)((float)(v5[1] * (float)v11) + (float)(*v5 * (float)v9)) > v8)
+    {
+        v12 = v5[2];
+        _FP10 = -__fsqrts((float)((float)(v5[2] * v5[2]) + (float)((float)(*v5 * *v5) + (float)(v5[1] * v5[1]))));
+        __asm { fsel      f11, f10, f9, f11 }
+        v15 = (float)((float)v6 / (float)_FP11);
+        *v5 = *v5 * (float)v15;
+        v5[1] = (float)v10 * (float)v15;
+        v5[2] = (float)v12 * (float)v15;
+        *v5 = *v5 * (float)v7;
+        v5[1] = v5[1] * (float)v7;
+        v5[2] = v5[2] * (float)v7;
+    }
+    if (*v5 == v8 && *(float *)(v4 + 16) == v8 && *(unsigned int *)(v3 + 8))
+        return 1;
+    else
+        return AIPhys_StepSlideMove(0, 0);
+}
+
+int __fastcall AIPhys_ZOnlyPhysicsMove()
+{
+    actor_physics_t *v0; // r11
+    double v1; // fp0
+
+    v0 = g_pPhys;
+    v1 = (float)((float)1.0 / g_apl.fFrameTime);
+    g_pPhys->vVelocity[0] = g_pPhys->vWishDelta[0] * (float)((float)1.0 / g_apl.fFrameTime);
+    v0->vVelocity[1] = v0->vWishDelta[1] * (float)v1;
+    v0->vVelocity[2] = 0.0;
+    return AIPhys_StepSlideMove(1, 1);
+}
+
+void AIPhys_NoClipMove()
+{
+    actor_physics_t *v0; // r11
+
+    v0 = g_pPhys;
+    g_pPhys->vOrigin[0] = g_pPhys->vWishDelta[0] + g_pPhys->vOrigin[0];
+    v0->vOrigin[1] = v0->vWishDelta[1] + v0->vOrigin[1];
+    v0->vOrigin[2] = v0->vWishDelta[2] + v0->vOrigin[2];
+}
+
+SlideMoveResult AIPhys_NoGravityMove()
+{
+    actor_physics_t *v0; // r11
+    double v1; // fp0
+
+    v0 = g_pPhys;
+    v1 = (float)((float)1.0 / g_apl.fFrameTime);
+    g_pPhys->vVelocity[0] = g_pPhys->vWishDelta[0] * (float)((float)1.0 / g_apl.fFrameTime);
+    v0->vVelocity[1] = v0->vWishDelta[1] * (float)v1;
+    v0->vVelocity[2] = v0->vWishDelta[2] * (float)v1;
+    return AIPhys_SlideMove(0, 1);
+}
+
+void AIPhys_GroundTrace()
+{
+    double v0; // fp12
+    double stepheight; // fp0
+    double v2; // fp11
+    unsigned __int16 EntityHitId; // r3
+    actor_physics_t *v4; // r11
+    unsigned __int16 v5; // r3
+    actor_physics_t *v6; // r11
+    double v7; // fp0
+    unsigned __int16 v8; // r3
+    float v9; // [sp+50h] [-70h] BYREF
+    float v10; // [sp+54h] [-6Ch]
+    float v11; // [sp+58h] [-68h]
+    float v12[2]; // [sp+60h] [-60h] BYREF
+    float v13; // [sp+68h] [-58h]
+    trace_t v14; // [sp+70h] [-50h] BYREF
+
+    v9 = g_pPhys->vOrigin[0];
+    v12[0] = v9;
+    v0 = g_pPhys->vOrigin[2];
+    stepheight = 0.25;
+    v2 = g_pPhys->vVelocity[2];
+    v10 = g_pPhys->vOrigin[1];
+    v12[1] = v10;
+    v11 = (float)v0 + (float)0.25;
+    if (v2 <= 0.0 && g_pPhys->groundEntNum != 2175)
+        stepheight = g_apl.stepheight;
+    v13 = (float)v0 - (float)stepheight;
+    //Profile_Begin(226);
+    G_TraceCapsule(&v14, &v9, g_pPhys->vMins, g_pPhys->vMaxs, v12, g_pPhys->iEntNum, g_apl.iTraceMask);
+    //Profile_EndInternal(0);
+    memcpy(&g_apl.groundTrace, &v14, sizeof(g_apl.groundTrace));
+    if (!v14.startsolid)
+        goto LABEL_10;
+    if ((v14.contents & 0x2000000) != 0)
+    {
+        EntityHitId = Trace_GetEntityHitId(&v14);
+        AIPhys_AddTouchEnt(EntityHitId);
+        g_apl.iTraceMask &= ~0x2000000u;
+        //Profile_Begin(226);
+        G_TraceCapsule(&v14, &v9, g_pPhys->vMins, g_pPhys->vMaxs, v12, g_pPhys->iEntNum, g_apl.iTraceMask);
+        //Profile_EndInternal(0);
+        memcpy(&g_apl.groundTrace, &v14, sizeof(g_apl.groundTrace));
+    }
+    if (v14.startsolid
+        && (v9 = g_pPhys->vOrigin[0],
+            v10 = g_pPhys->vOrigin[1],
+            v11 = g_pPhys->vOrigin[2],
+            //Profile_Begin(226),
+            G_TraceCapsule(&v14, &v9, g_pPhys->vMins, g_pPhys->vMaxs, v12, g_pPhys->iEntNum, g_apl.iTraceMask),
+            //Profile_EndInternal(0),
+            memcpy(&g_apl.groundTrace, &v14, sizeof(g_apl.groundTrace)),
+            v14.startsolid))
+    {
+        g_pPhys->groundEntNum = Trace_GetEntityHitId(&v14);
+        g_apl.bGroundPlane = 0;
+        g_apl.bIsWalking = 1;
+    }
+    else
+    {
+    LABEL_10:
+        v4 = g_pPhys;
+        if (v14.fraction == 1.0
+            || g_pPhys->vVelocity[2] > 0.0
+            && (float)((float)(v14.normal[0] * g_pPhys->vVelocity[0])
+                + (float)((float)(g_pPhys->vVelocity[2] * v14.normal[2]) + (float)(g_pPhys->vVelocity[1] * v14.normal[1]))) > 10.0)
+        {
+            g_pPhys->groundEntNum = 2175;
+            g_apl.bGroundPlane = 0;
+            g_apl.bIsWalking = 0;
+        }
+        else if (v14.walkable)
+        {
+            if ((float)((float)((float)(v13 - v11) * v14.fraction) + v11) < (double)g_pPhys->vOrigin[2]
+                || g_pPhys->ePhysicsType == AIPHYS_ZONLY_PHYSICS_RELATIVE)
+            {
+                g_pPhys->vOrigin[2] = (float)((float)(v13 - v11) * v14.fraction) + v11;
+            }
+            g_apl.bGroundPlane = 1;
+            g_apl.bIsWalking = 1;
+            v8 = Trace_GetEntityHitId(&v14);
+            g_pPhys->groundEntNum = v8;
+            AIPhys_AddTouchEnt(v8);
+        }
+        else
+        {
+            g_pPhys->groundEntNum = 2175;
+            g_apl.bGroundPlane = 1;
+            g_apl.bIsWalking = 0;
+            if (v4->iHitEntnum == 2175 && (v14.normal[0] != 0.0 || v14.normal[1] != 0.0))
+            {
+                v5 = Trace_GetEntityHitId(&v14);
+                v6 = g_pPhys;
+                v7 = g_pPhys->vOrigin[0];
+                g_pPhys->iHitEntnum = v5;
+                v6->vHitOrigin[0] = v7;
+                v6->vHitOrigin[1] = v6->vOrigin[1];
+                *(_QWORD *)v6->vHitNormal = *(_QWORD *)v14.normal;
+                v6->bStuck = 0;
+            }
+        }
+    }
+}
+
+void AIPhys_Footsteps()
+{
+    actor_physics_t *v0; // r11
+    int groundEntNum; // r8
+    int iFootstepTimer; // r9
+    aiphys_t ePhysicsType; // r10
+    int v4; // r10
+    gentity_s *v5; // r31
+    char v6; // r3
+
+    v0 = g_pPhys;
+    groundEntNum = g_pPhys->groundEntNum;
+    iFootstepTimer = g_pPhys->iFootstepTimer;
+    g_pPhys->iFootstepTimer = 0;
+    if (groundEntNum != 2175)
+    {
+        ePhysicsType = v0->ePhysicsType;
+        if (ePhysicsType == AIPHYS_NORMAL_ABSOLUTE
+            || ePhysicsType == AIPHYS_NORMAL_RELATIVE
+            || ePhysicsType == AIPHYS_ZONLY_PHYSICS_RELATIVE)
+        {
+            v4 = v0->iMsec + iFootstepTimer;
+            v0->iFootstepTimer = v4;
+            if (v4 >= 500)
+            {
+                v5 = &level.gentities[v0->iEntNum];
+                if (!v5->r.inuse)
+                    MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\actor_physics.cpp", 766, 0, "%s", "ent->r.inuse");
+                if (!v5->actor)
+                    MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\actor_physics.cpp", 767, 0, "%s", "ent->actor");
+                if (!v5->sentient)
+                    MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\actor_physics.cpp", 768, 0, "%s", "ent->sentient");
+                v6 = Sentient_EnemyTeam(v5->sentient->eTeam);
+                Actor_BroadcastPointEvent(v5, 2, 1 << v6, g_pPhys->vOrigin, 0.0);
+                g_pPhys->iFootstepTimer %= 500;
+            }
+        }
+    }
+}
+
+void __fastcall AIPhys_FoliageSounds()
+{
+    actor_physics_t *v0; // r7
+    const dvar_s *v1; // r10
+    double v2; // fp31
+    const dvar_s *v3; // r11
+    double v4; // fp0
+    __int64 v5; // r9
+    __int64 v6; // r11
+    unsigned int v7[2]; // [sp+50h] [-90h] BYREF
+    __int64 v8; // [sp+58h] [-88h]
+    float v9[2]; // [sp+60h] [-80h] BYREF
+    float v10; // [sp+68h] [-78h]
+    float v11[4]; // [sp+70h] [-70h] BYREF
+    trace_t v12; // [sp+80h] [-60h] BYREF
+
+    v0 = g_pPhys;
+    v1 = bg_foliagesnd_minspeed;
+    v2 = __fsqrts((float)((float)(g_pPhys->vVelocity[0] * g_pPhys->vVelocity[0])
+        + (float)(g_pPhys->vVelocity[1] * g_pPhys->vVelocity[1])));
+    if (v2 >= bg_foliagesnd_minspeed->current.value)
+    {
+        v3 = bg_foliagesnd_maxspeed;
+        if ((float)(bg_foliagesnd_maxspeed->current.value - bg_foliagesnd_minspeed->current.value) <= 0.0)
+        {
+            MyAssertHandler(
+                "c:\\trees\\cod3\\cod3src\\src\\game\\actor_physics.cpp",
+                808,
+                1,
+                "%s",
+                "bg_foliagesnd_maxspeed->current.value - bg_foliagesnd_minspeed->current.value > 0");
+            v0 = g_pPhys;
+            v1 = bg_foliagesnd_minspeed;
+            v3 = bg_foliagesnd_maxspeed;
+        }
+        v4 = (float)((float)((float)v2 - v1->current.value) / (float)(v3->current.value - v1->current.value));
+        if (v4 > 1.0)
+            v4 = 1.0;
+        HIDWORD(v5) = v7;
+        LODWORD(v6) = bg_foliagesnd_slowinterval->current.integer;
+        HIDWORD(v6) = v0->foliageSoundTime;
+        LODWORD(v5) = bg_foliagesnd_fastinterval->current.integer - v6;
+        v7[1] = v6;
+        v8 = v5;
+        v7[0] = (int)(float)((float)((float)v5 * (float)v4) + (float)v6);
+        if (v7[0] + HIDWORD(v6) < level.time)
+        {
+            v11[0] = v0->vMins[0] * (float)0.75;
+            v11[1] = v0->vMins[1] * (float)0.75;
+            v11[2] = v0->vMins[2] * (float)0.75;
+            v9[0] = v0->vMaxs[0] * (float)0.75;
+            v9[1] = v0->vMaxs[1] * (float)0.75;
+            v10 = v0->vMaxs[2] * (float)0.75;
+            v10 = v0->vMaxs[2] * (float)0.89999998;
+            G_TraceCapsule(&v12, v0->vOrigin, v11, v9, v0->vOrigin, v0->iEntNum, 2);
+            if (v12.startsolid)
+            {
+                G_AddEvent(&g_entities[g_pPhys->iEntNum], 1, 0);
+                g_pPhys->foliageSoundTime = level.time;
+            }
+        }
+    }
+    else if (bg_foliagesnd_resetinterval->current.integer + g_pPhys->foliageSoundTime < level.time)
+    {
+        g_pPhys->foliageSoundTime = 0;
+    }
+}
+
+int __fastcall Actor_Physics(actor_physics_t *pPhys)
+{
+    int groundEntNum; // r9
+    actor_physics_t *v3; // r29
+    __int64 v5; // r11
+    double v6; // fp0
+    aiphys_t ePhysicsType; // r11
+    int v8; // r3
+    int v9; // r31
+    actor_physics_t *v10; // r11
+
+    //Profile_Begin(225);
+    groundEntNum = pPhys->groundEntNum;
+    v3 = pPhys;
+    pPhys->iNumTouch = 0;
+    pPhys->bDeflected = 0;
+    pPhys->iHitEntnum = 2175;
+    g_pPhys = pPhys;
+    if (groundEntNum == 2174 && pPhys->vWishDelta[0] == 0.0 && pPhys->vWishDelta[1] == 0.0 && pPhys->vWishDelta[2] == 0.0)
+    {
+        pPhys->vVelocity[0] = 0.0;
+        pPhys->vVelocity[1] = 0.0;
+        pPhys->vVelocity[2] = 0.0;
+        //Profile_EndInternal(0);
+        return 1;
+    }
+    else
+    {
+        memset(&g_apl, 0, sizeof(g_apl));
+        g_apl.iTraceMask = pPhys->iTraceMask;
+        g_apl.vPrevOrigin[0] = pPhys->vOrigin[0];
+        g_apl.vPrevOrigin[1] = pPhys->vOrigin[1];
+        g_apl.vPrevOrigin[2] = pPhys->vOrigin[2];
+        g_apl.vPrevVelocity[0] = pPhys->vVelocity[0];
+        g_apl.vPrevVelocity[1] = pPhys->vVelocity[1];
+        g_apl.vPrevVelocity[2] = pPhys->vVelocity[2];
+        LODWORD(v5) = pPhys->iMsec;
+        g_apl.fFrameTime = (float)v5 * (float)0.001;
+        if (pPhys->iMsec <= 0)
+        {
+            MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\actor_physics.cpp", 876, 0, "%s", "g_pPhys->iMsec > 0");
+            v3 = g_pPhys;
+        }
+        if (pPhys->prone)
+            v6 = 10.0;
+        else
+            v6 = 18.0;
+        g_apl.stepheight = v6;
+        ePhysicsType = v3->ePhysicsType;
+        v3->groundplaneSlope = 0.0;
+        v3->bHasGroundPlane = 0;
+        if (ePhysicsType == AIPHYS_NOCLIP)
+        {
+            v3->vOrigin[0] = v3->vOrigin[0] + v3->vWishDelta[0];
+            v3->vOrigin[1] = v3->vWishDelta[1] + v3->vOrigin[1];
+            v3->vOrigin[2] = v3->vWishDelta[2] + v3->vOrigin[2];
+            //Profile_EndInternal(0);
+            return 1;
+        }
+        else if (ePhysicsType == AIPHYS_NOGRAVITY)
+        {
+            AIPhys_NoGravityMove();
+            //Profile_EndInternal(0);
+            return 1;
+        }
+        else
+        {
+            AIPhys_GroundTrace();
+            if (g_pPhys->ePhysicsType == AIPHYS_ZONLY_PHYSICS_RELATIVE)
+            {
+                v8 = AIPhys_ZOnlyPhysicsMove();
+            }
+            else if (g_apl.bIsWalking)
+            {
+                v8 = AIPhys_WalkMove();
+            }
+            else
+            {
+                v8 = AIPhys_AirMove();
+            }
+            v9 = v8;
+            if (g_apl.bGroundPlane && g_apl.groundTrace.normal[2] >= 0.30000001)
+            {
+                v10 = g_pPhys;
+                g_pPhys->bHasGroundPlane = 1;
+                v10->groundplaneSlope = g_apl.groundTrace.normal[2];
+                v10->iSurfaceType = (g_apl.groundTrace.surfaceFlags >> 20) & 0x1F;
+            }
+            else
+            {
+                g_pPhys->iSurfaceType = 0;
+            }
+            //Profile_EndInternal(0);
+            return v9;
+        }
+    }
+}
+
+void __fastcall Actor_PostPhysics(actor_physics_t *pPhys)
+{
+    int bIsAlive; // r10
+
+    //Profile_Begin(225);
+    bIsAlive = pPhys->bIsAlive;
+    g_pPhys = pPhys;
+    if (bIsAlive)
+        AIPhys_Footsteps();
+    AIPhys_FoliageSounds();
+    //Profile_EndInternal(0);
+}
+

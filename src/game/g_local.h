@@ -3,3 +3,834 @@
 #ifndef KISAK_SP 
 #error This file is for SinglePlayer only 
 #endif
+
+// g_active
+void __fastcall P_DamageFeedback(gentity_s *player);
+void __fastcall G_SetClientSound(gentity_s *ent);
+void __fastcall G_TouchEnts(gentity_s *ent, int numtouch, int *touchents);
+void __fastcall ClientImpacts(gentity_s *ent, pmove_t *pm);
+void __fastcall G_DoTouchTriggers(gentity_s *ent);
+void __fastcall NotifyGrenadePullback(gentity_s *ent, unsigned int weaponIndex);
+bool __fastcall IsLiveGrenade(gentity_s *ent);
+void __fastcall AttemptLiveGrenadePickup(gentity_s *clientEnt);
+void __fastcall ClientEvents(gentity_s *ent, int oldEventSequence);
+void __fastcall Client_ClaimNode(gentity_s *ent);
+void __fastcall G_PlayerStateToEntityStateExtrapolate(playerState_s *ps, entityState_s *s, int time, int snap);
+// local variable allocation has failed, the output may be wrong!
+void __fastcall ClientThink_real(gentity_s *ent, long double a2);
+void __fastcall ClientThink(int clientNum);
+void __fastcall ClientEndFrame(gentity_s *ent);
+gentity_s *__fastcall G_GetPlayer();
+void __fastcall G_UpdatePlayer(gentity_s *ent);
+void __fastcall G_UpdatePlayerTriggers(gentity_s *ent);
+
+
+
+// g_animscripted
+void __fastcall LocalToWorldOriginAndAngles(
+    const float (*matrix)[3],
+    const float *trans,
+    const float *rot,
+    float *origin,
+    float *angles);
+void __fastcall CalcDeltaOriginAndAngles(
+    DObj_s *obj,
+    unsigned int anim,
+    const float (*matrix)[3],
+    float *origin,
+    float *angles);
+void __fastcall GetDeltaOriginAndAngles(
+    const XAnim_s *anims,
+    unsigned int anim,
+    const float (*matrix)[3],
+    float *trans,
+    float *origin,
+    float *angles);
+void __fastcall G_Animscripted_DeathPlant(
+    gentity_s *ent,
+    const XAnim_s *anims,
+    unsigned int anim,
+    float *origin,
+    const float *angles);
+void __fastcall G_AnimScripted_ClearAnimWeights(
+    DObj_s *obj,
+    XAnimTree_s *pAnimTree,
+    unsigned int root,
+    actor_s *pActor);
+void __fastcall G_Animscripted(
+    gentity_s *ent,
+    float *origin,
+    const float *angles,
+    unsigned int anim,
+    unsigned int root,
+    unsigned int notifyName,
+    unsigned __int8 animMode);
+void __fastcall G_ReduceOriginError(float *origin, float *originError, double maxChange);
+void __fastcall G_ReduceAnglesError(float *angles, float *anglesError, double maxChange);
+void __fastcall G_AnimScripted_Think_DeathPlant(gentity_s *ent, XAnimTree_s *tree, float *origin, float *angles);
+void __fastcall G_AnimScripted_UpdateEntityOriginAndAngles(gentity_s *ent, float *origin, const float *angles);
+void __fastcall G_Animscripted_Think(gentity_s *ent);
+void __fastcall GScr_GetStartOrigin();
+void __fastcall GScr_GetStartAngles();
+void __fastcall GScr_GetCycleOriginOffset();
+
+
+// g_client
+void __fastcall G_FinishSetupSpawnPoint(gentity_s *ent);
+void __fastcall G_SetupSpawnPoint(gentity_s *ent);
+void __fastcall SP_info_player_start(gentity_s *ent);
+int __fastcall SpotWouldTelefrag(gentity_s *spot);
+gentity_s *__fastcall SelectNearestDeathmatchSpawnPoint(const float *from);
+gentity_s *__fastcall SelectRandomDeathmatchSpawnPoint();
+gentity_s *__fastcall SelectSpawnPoint(const float *avoidPoint, float *origin, float *angles);
+gentity_s *__fastcall SelectInitialSpawnPoint(float *origin, float *angles);
+void __fastcall SetClientOrigin(gentity_s *ent, float *origin);
+void __fastcall InitClientDeltaAngles(gclient_s *client, long double a2);
+void __fastcall SetClientViewAngle(gentity_s *ent, const float *angle, long double a3);
+void __fastcall G_GetPlayerViewOrigin(const playerState_s *ps, float *origin);
+void __fastcall G_GetPlayerViewDirection(const gentity_s *ent, float *forward, float *right, float *up);
+int __fastcall Client_GetPushed(gentity_s *pSelf, gentity_s *pOther);
+void __fastcall Client_Touch(gentity_s *pSelf, gentity_s *pOther, int bTouched);
+void __fastcall respawn(gentity_s *ent);
+char *__fastcall ClientConnect(int clientNum);
+void __fastcall ClientSpawn(gentity_s *ent);
+void __fastcall HeadHitEnt_Pain(
+    gentity_s *pSelf,
+    gentity_s *pAttacker,
+    int iDamage,
+    const float *vPoint,
+    int iMod,
+    const float *vDir,
+    const hitLocation_t hitLoc,
+    const int weaponIdx);
+void __fastcall HeadHitEnt_Die(
+    gentity_s *self,
+    gentity_s *inflictor,
+    gentity_s *attacker,
+    int damage,
+    int meansOfDeath,
+    int iWeapon,
+    const float *vDir,
+    hitLocation_t hitLoc);
+void __fastcall G_UpdateHeadHitEnt(gentity_s *pSelf);
+void __fastcall G_RemoveHeadHitEnt(gentity_s *pSelf);
+void __fastcall ClientBegin(int clientNum);
+
+
+// g_main
+const dvar_s *G_RegisterServerDemoDvars();
+void G_RegisterDebugDvars();
+void __fastcall TRACK_g_main();
+int __fastcall G_GetServerSnapTime();
+int __fastcall G_GetTime();
+int __fastcall G_GetSpecialIndex(int entnum);
+void G_RegisterDvars();
+void G_InitDvars();
+void __fastcall G_FreeEntities();
+void *__fastcall Hunk_AllocActorXAnimServer(int size);
+void *G_LoadAnimTreeInstances();
+void G_FreeAnimTreeInstances();
+void __fastcall G_ClearLowHunk();
+bool __fastcall G_DemoPlaying();
+void *__fastcall Hunk_AllocXAnimServer(int size);
+int __fastcall G_ExitAfterConnectPaths();
+void *GScr_LoadScriptsAndAnims();
+void ScriptIOFilesInit();
+void ScriptIOFilesShutdown();
+void __fastcall G_PrintFastFileErrors(const char *fastfile, int a2, const char *a3);
+void __fastcall G_PrintAllFastFileErrors(int a1, int a2, const char *a3);
+void __fastcall G_InitGame(
+    unsigned int randomSeed,
+    int restart,
+    int checksum,
+    int loadScripts,
+    int savegame,
+    SaveGame **save,
+    int a7,
+    int a8,
+    int a9,
+    int a10,
+    int a11,
+    unsigned int a12);
+void __fastcall G_ShutdownGame(int clearScripts);
+void G_ChangeLevel();
+bool __fastcall G_IsNextMapWaiting();
+void __fastcall G_SetNextMap(const char *mapname);
+void __fastcall G_LoadNextMap();
+void __fastcall G_CheckReloadStatus();
+void __fastcall G_ApplyEntityEq(gentity_s *ent);
+void __fastcall G_RunThink(gentity_s *ent);
+void __fastcall G_DrawEntityBBoxes(int a1, int a2, int a3, const float *a4);
+void DebugDumpAnims();
+void DebugDumpAIEventListeners();
+void __fastcall G_CheckLoadGame(int checksum, SaveGame *save);
+void __fastcall G_XAnimUpdateEnt(gentity_s *ent);
+void __fastcall G_ClientDoPerFrameNotifies(gentity_s *ent);
+void __fastcall G_RunFrameForEntityInternal(gentity_s *ent);
+void __fastcall G_RunFrameForEntity(gentity_s *ent);
+void __fastcall G_RunPreFrame();
+int __fastcall G_GetFramePos();
+int __fastcall NotifyTriggers();
+void __fastcall G_SendClientMessages();
+void __fastcall G_ArchiveSpecialEntityInfo(const entityState_s *es, MemoryFile *memFile);
+void __fastcall G_TraceCapsule(
+    trace_t *results,
+    const float *start,
+    const float *mins,
+    const float *maxs,
+    const float *end,
+    int passEntityNum,
+    int contentmask);
+int __fastcall G_TraceCapsuleComplete(
+    const float *start,
+    const float *mins,
+    const float *maxs,
+    const float *end,
+    int passEntityNum,
+    int contentmask);
+void __fastcall G_LocationalTrace(
+    trace_t *results,
+    const float *start,
+    const float *end,
+    int passEntityNum,
+    int contentmask,
+    unsigned __int8 *priorityMap);
+void __fastcall G_LocationalTraceAllowChildren(
+    trace_t *results,
+    const float *start,
+    const float *end,
+    int passEntityNum,
+    int contentmask,
+    unsigned __int8 *priorityMap);
+int __fastcall G_LocationalTracePassed(
+    const float *start,
+    const float *end,
+    int passEntityNum,
+    int passEntityNum1,
+    int contentmask,
+    unsigned __int8 *priorityMap);
+void __fastcall G_SightTrace(int *hitNum, const float *start, const float *end, int passEntityNum, int contentmask);
+void __fastcall G_AddDebugString(const float *xyz, const float *color, double scale, const char *pszText, int a5);
+void __fastcall G_AddDebugStringWithDuration(
+    const float *xyz,
+    const float *color,
+    double scale,
+    const char *pszText,
+    int duration);
+void __fastcall ShowEntityInfo();
+int __fastcall G_RunFrame(ServerFrameExtent extent, int timeCap);
+void __fastcall G_LoadLevel();
+
+
+// g_misc
+float __fastcall G_GetEntInfoScale();
+void __fastcall SP_info_notnull(gentity_s *self);
+void __fastcall SP_light(gentity_s *self);
+void __fastcall SP_info_volume(gentity_s *self);
+void __fastcall TeleportPlayer(gentity_s *player, float *origin, const float *angles);
+void __fastcall SP_sound_blend(gentity_s *self);
+gentity_s *__fastcall G_SpawnSoundBlend();
+void __fastcall G_SetSoundBlend(gentity_s *ent, unsigned __int16 alias0, unsigned __int16 alias1, double lerp);
+void __fastcall G_SetSoundBlendVolumeScale(gentity_s *ent, double scale);
+float __fastcall G_GetSoundBlendVolumeScale(gentity_s *ent);
+void __fastcall EntinfoPosAndScale(gentity_s *self, float *source, float *pos, float *textScale, float *dist);
+void __fastcall misc_EntInfo(gentity_s *self, float *source);
+void __fastcall EntInfo_Item(gentity_s *self, float *source);
+
+
+// g_client_script_cmd
+int __fastcall G_GetNeededStartAmmo(gentity_s *pSelf, WeaponDef *weapDef);
+void __fastcall InitializeAmmo(gentity_s *pSelf, int weaponIndex, unsigned __int8 weaponModel, int hadWeapon);
+void __fastcall PlayerCmd_giveWeapon(scr_entref_t *entref);
+void __fastcall PlayerCmd_takeWeapon(scr_entref_t *entref);
+void __fastcall PlayerCmd_takeAllWeapons(scr_entref_t *entref);
+void __fastcall PlayerCmd_getCurrentWeapon(scr_entref_t *entref);
+void __fastcall PlayerCmd_getCurrentWeaponClipAmmo(scr_entref_t *entref);
+void __fastcall PlayerCmd_getCurrentOffhand(scr_entref_t *entref);
+void __fastcall PlayerCmd_setOffhandSecondaryClass(scr_entref_t *entref);
+void __fastcall PlayerCmd_getOffhandSecondaryClass(scr_entref_t *entref);
+void __fastcall PlayerCmd_hasWeapon(scr_entref_t *entref);
+void __fastcall PlayerCmd_switchToWeapon(scr_entref_t *entref);
+void __fastcall PlayerCmd_switchToOffhand(scr_entref_t *entref);
+void __fastcall PlayerCmd_giveStartAmmo(scr_entref_t *entref);
+void __fastcall PlayerCmd_giveMaxAmmo(scr_entref_t *entref);
+// local variable allocation has failed, the output may be wrong!
+void __fastcall PlayerCmd_getFractionStartAmmo(scr_entref_t *entref);
+// local variable allocation has failed, the output may be wrong!
+void __fastcall PlayerCmd_getFractionMaxAmmo(scr_entref_t *entref);
+void __fastcall PlayerCmd_setOrigin(scr_entref_t *entref);
+void __fastcall PlayerCmd_SetVelocity(scr_entref_t *entref);
+void __fastcall PlayerCmd_GetVelocity(scr_entref_t *entref);
+void __fastcall PlayerCmd_setAngles(scr_entref_t *entref);
+void __fastcall PlayerCmd_getAngles(scr_entref_t *entref);
+void __fastcall PlayerCmd_getViewHeight(scr_entref_t *entref);
+void __fastcall PlayerCmd_getNormalizedMovement(scr_entref_t *entref);
+void __fastcall PlayerCmd_useButtonPressed(scr_entref_t *entref);
+void __fastcall PlayerCmd_attackButtonPressed(scr_entref_t *entref);
+void __fastcall PlayerCmd_adsButtonPressed(scr_entref_t *entref);
+void __fastcall PlayerCmd_meleeButtonPressed(scr_entref_t *entref);
+int __fastcall PlayerCmd_CheckButtonPressed();
+void __fastcall PlayerCmd_buttonPressed(scr_entref_t *entref);
+void __fastcall G_FlushCommandNotifies();
+void __fastcall G_ProcessCommandNotifies();
+void __fastcall PlayerCmd_notifyOnCommand(scr_entref_t *entref);
+void __fastcall PlayerCmd_playerADS(scr_entref_t *entref);
+void __fastcall PlayerCmd_isOnGround(scr_entref_t *entref);
+void __fastcall PlayerCmd_SetViewmodel(scr_entref_t *entref);
+void __fastcall PlayerCmd_AllowADS(scr_entref_t *entref);
+void __fastcall PlayerCmd_AllowJump(scr_entref_t *entref);
+void __fastcall PlayerCmd_AllowSprint(scr_entref_t *entref);
+void __fastcall PlayerCmd_AllowMelee(scr_entref_t *entref);
+void __fastcall PlayerCmd_SetSpreadOverride(scr_entref_t *entref);
+void __fastcall PlayerCmd_ResetSpreadOverride(scr_entref_t *entref);
+void __fastcall PlayerCmd_ShowViewmodel(scr_entref_t *entref);
+void __fastcall PlayerCmd_HideViewmodel(scr_entref_t *entref);
+void __fastcall PlayerCmd_AllowStand(scr_entref_t *entref);
+void __fastcall PlayerCmd_AllowCrouch(scr_entref_t *entref);
+void __fastcall PlayerCmd_AllowProne(scr_entref_t *entref);
+void __fastcall PlayerCmd_AllowLean(scr_entref_t *entref);
+void __fastcall PlayerCmd_OpenMenu(scr_entref_t *entref);
+void __fastcall PlayerCmd_OpenMenuNoMouse(scr_entref_t *entref);
+void __fastcall PlayerCmd_CloseMenu(scr_entref_t *entref);
+void __fastcall PlayerCmd_FreezeControls(scr_entref_t *entref);
+void __fastcall PlayerCmd_SetEQLerp(scr_entref_t *entref);
+void __fastcall PlayerCmd_SetEQ(scr_entref_t *entref);
+void __fastcall PlayerCmd_DeactivateEq(scr_entref_t *entref);
+void __fastcall PlayerCmd_SetReverb(scr_entref_t *entref);
+void __fastcall PlayerCmd_DeactivateReverb(scr_entref_t *entref);
+void __fastcall PlayerCmd_SetChannelVolumes(scr_entref_t *entref);
+void __fastcall PlayerCmd_DeactivateChannelVolumes(scr_entref_t *entref);
+void __fastcall ScrCmd_IsLookingAt(scr_entref_t *entref);
+void __fastcall PlayerCmd_IsFiring(scr_entref_t *entref);
+void __fastcall PlayerCmd_IsThrowingGrenade(scr_entref_t *entref);
+void __fastcall PlayerCmd_IsMeleeing(scr_entref_t *entref);
+void __fastcall ScrCmd_PlayLocalSound(scr_entref_t *entref);
+void __fastcall ScrCmd_StopLocalSound(scr_entref_t *entref);
+void __fastcall ScrCmd_SetAutoPickup(scr_entref_t *entref);
+void __fastcall PlayerCmd_SetWeaponAmmoClip(scr_entref_t *entref);
+void __fastcall PlayerCmd_SetWeaponAmmoStock(scr_entref_t *entref);
+void __fastcall PlayerCmd_GetWeaponAmmoClip(scr_entref_t *entref);
+void __fastcall PlayerCmd_GetWeaponAmmoStock(scr_entref_t *entref);
+void __fastcall PlayerCmd_AnyAmmoForWeaponModes(scr_entref_t *entref);
+void __fastcall PlayerCmd_EnableHealthShield(scr_entref_t *entref);
+void __fastcall PlayerCmd_SetClientDvar(scr_entref_t *entref);
+void __fastcall PlayerCmd_SetClientDvars(scr_entref_t *entref);
+void __fastcall PlayerCmd_BeginLocationSelection(scr_entref_t *entref);
+void __fastcall PlayerCmd_EndLocationSelection(scr_entref_t *entref);
+void __fastcall PlayerCmd_WeaponLockStart(scr_entref_t *entref);
+void __fastcall PlayerCmd_WeaponLockFinalize(scr_entref_t *entref);
+void __fastcall PlayerCmd_WeaponLockFree(scr_entref_t *entref);
+void __fastcall PlayerCmd_WeaponLockTargetTooClose(scr_entref_t *entref);
+void __fastcall PlayerCmd_WeaponLockNoClearance(scr_entref_t *entref);
+void __fastcall PlayerCmd_SetActionSlot(scr_entref_t *entref);
+void __fastcall PlayerCmd_DisableWeapons(scr_entref_t *entref);
+void __fastcall PlayerCmd_EnableWeapons(scr_entref_t *entref);
+void __fastcall PlayerCmd_NightVisionForceOff(scr_entref_t *entref);
+void __fastcall PlayerCmd_GetWeaponsList(scr_entref_t *entref);
+void __fastcall PlayerCmd_GetWeaponsListPrimaries(scr_entref_t *entref);
+void __fastcall PlayerCmd_EnableInvulnerability(scr_entref_t *entref);
+void __fastcall PlayerCmd_DisableInvulnerability(scr_entref_t *entref);
+void __fastcall PlayerCmd_ForceViewmodelAnimation(scr_entref_t *entref);
+void __fastcall PlayerCmd_DisableTurretDismount(scr_entref_t *entref);
+void __fastcall PlayerCmd_EnableTurretDismount(scr_entref_t *entref);
+void __fastcall PlayerCmd_UploadScore(scr_entref_t *entref);
+void __fastcall PlayerCmd_UploadTime(scr_entref_t *entref);
+void(__fastcall *__fastcall Player_GetMethod(const char **pName))(scr_entref_t);
+void __fastcall G_AddCommandNotify(volatile unsigned __int16 notify);
+
+
+// g_cmds
+int __fastcall CheatsOkInternal(gentity_s *ent);
+int __fastcall CheatsOk(gentity_s *ent);
+char *__fastcall ConcatArgs(int start);
+void __fastcall SanitizeString(char *in, char *out);
+void __fastcall G_setfog(const char *fogstring);
+void __fastcall Cmd_Fogswitch_f();
+void __fastcall Cmd_SetSoundLength_f();
+void __fastcall Cmd_RemoveCorpse_f();
+void __fastcall Cmd_Give_f(gentity_s *ent);
+void __fastcall Cmd_Take_f(gentity_s *ent);
+void __fastcall Cmd_God_f(gentity_s *ent);
+void __fastcall Cmd_DemiGod_f(gentity_s *ent);
+void __fastcall Cmd_Notarget_f(gentity_s *ent);
+void __fastcall Cmd_Noclip_f(gentity_s *ent);
+void __fastcall Cmd_UFO_f(gentity_s *ent);
+void __fastcall Cmd_Kill_f(gentity_s *ent);
+void __fastcall Cmd_Where_f(gentity_s *ent);
+void __fastcall Cmd_SetViewpos_f(gentity_s *ent);
+void __fastcall Cmd_JumpToNode_f(gentity_s *ent);
+void __fastcall Cmd_InterruptCamera_f(gentity_s *ent);
+void __fastcall Cmd_DropWeapon_f(gentity_s *pSelf);
+void __fastcall Cmd_MenuResponse_f(gentity_s *pEnt);
+// attributes: thunk
+void __fastcall Cmd_PrintEntities_f();
+void Cmd_VisionSetNaked_f();
+void Cmd_VisionSetNight_f();
+void __fastcall ClientCommand(int clientNum, const char *s);
+
+
+// g_combat
+void __fastcall TRACK_g_combat();
+void __fastcall G_HitLocStrcpy(unsigned __int8 *pMember, const char *pszKeyValue);
+void __fastcall G_ParseHitLocDmgTable();
+void __fastcall TossClientItems(gentity_s *self);
+void __fastcall LookAtKiller(gentity_s *self, gentity_s *inflictor, gentity_s *attacker);
+int __fastcall G_MeansOfDeathFromScriptParam(unsigned int scrParam);
+void __fastcall player_die(
+    gentity_s *self,
+    gentity_s *inflictor,
+    gentity_s *attacker,
+    int damage,
+    int meansOfDeath,
+    unsigned int iWeapon,
+    const float *vDir,
+    hitLocation_t hitLoc);
+float __fastcall G_GetWeaponHitLocationMultiplier(unsigned int hitLoc, unsigned int weapon);
+void __fastcall handleDeathInvulnerability(gentity_s *targ, int prevHealth, int mod);
+void __fastcall G_DamageNotify(
+    unsigned __int16 notify,
+    gentity_s *targ,
+    gentity_s *attacker,
+    const float *dir,
+    const float *point,
+    int damage,
+    int mod,
+    unsigned int modelIndex,
+    unsigned int partName,
+    int a10,
+    int a11,
+    int a12,
+    int a13,
+    int a14,
+    int a15,
+    int a16,
+    int a17,
+    int a18,
+    int a19,
+    int a20,
+    int a21,
+    int a22,
+    int a23,
+    int a24,
+    int a25,
+    int a26,
+    int a27,
+    unsigned int a28);
+int __fastcall G_GetWeaponIndexForEntity(const gentity_s *ent);
+void __fastcall G_DamageKnockback(
+    gentity_s *targ,
+    const gentity_s *attacker,
+    const float *dir,
+    float *scaledDir,
+    __int64 dflags,
+    int mod);
+bool __fastcall G_ShouldTakeBulletDamage(gentity_s *targ, gentity_s *attacker);
+void __fastcall G_Damage(
+    gentity_s *targ,
+    gentity_s *inflictor,
+    gentity_s *attacker,
+    const float *dir,
+    const float *point,
+    int damage,
+    unsigned int dflags,
+    int mod,
+    int weapon,
+    hitLocation_t hitLoc,
+    unsigned int modelIndex,
+    unsigned int partName,
+    int a13,
+    int a14,
+    int a15,
+    int a16,
+    int a17,
+    int a18,
+    int a19,
+    int a20,
+    int a21,
+    int a22,
+    int a23,
+    int a24,
+    int a25,
+    int a26,
+    int a27,
+    unsigned int a28,
+    int a29,
+    unsigned int a30,
+    int a31,
+    unsigned int a32,
+    int a33,
+    unsigned int a34);
+int __fastcall G_CanRadiusDamageFromPos(
+    gentity_s *targ,
+    const float *targetPos,
+    gentity_s *inflictor,
+    const float *centerPos,
+    double radius,
+    double coneAngleCos,
+    float *coneDirection,
+    double maxHeight,
+    bool useEyeOffset,
+    float *contentMask,
+    int a11,
+    int a12,
+    int a13,
+    int a14,
+    int a15,
+    int a16,
+    int a17,
+    int a18,
+    int a19,
+    int a20,
+    int a21,
+    int a22,
+    int a23,
+    int a24,
+    int a25,
+    int a26,
+    int a27,
+    int a28,
+    int a29,
+    int a30,
+    char a31,
+    int a32,
+    int a33);
+float __fastcall EntDistToPoint(float *origin, gentity_s *ent);
+void __fastcall GetEntListForRadius(
+    const float *origin,
+    double radius_max,
+    double radius_min,
+    int *entList,
+    int *entListCount,
+    int *a6,
+    unsigned int *a7);
+void __fastcall AddScrTeamName(team_t team);
+float __fastcall G_GetRadiusDamageDistanceSquared(float *damageOrigin, gentity_s *ent);
+bool __fastcall G_WithinDamageRadius(float *damageOrigin, double radiusSquared, gentity_s *ent, gentity_s *a4);
+bool __fastcall G_ClientFlashbanged(gclient_s *client);
+int __fastcall G_GetHitLocationString(unsigned int hitLoc);
+int __fastcall G_CanRadiusDamage(
+    gentity_s *targ,
+    gentity_s *inflictor,
+    const float *centerPos,
+    double radius,
+    double coneAngleCos,
+    float *coneDirection,
+    float *contentMask,
+    float *a8,
+    int a9);
+void __fastcall FlashbangBlastEnt(
+    gentity_s *ent,
+    float *blastOrigin,
+    double radius_max,
+    double radius_min,
+    gentity_s *attacker,
+    team_t team,
+    gentity_s *a7,
+    team_t a8);
+void __fastcall G_FlashbangBlast(
+    float *origin,
+    double radius_max,
+    double radius_min,
+    gentity_s *attacker,
+    int *team,
+    gentity_s *a6,
+    team_t a7);
+int __fastcall G_RadiusDamage(
+    float *origin,
+    gentity_s *inflictor,
+    gentity_s *attacker,
+    double fInnerDamage,
+    double fOuterDamage,
+    double radius,
+    double coneAngleCos,
+    float *coneDirection,
+    gentity_s *ignore,
+    int mod,
+    int weapon,
+    float *a12,
+    int a13,
+    int a14,
+    int a15,
+    int a16,
+    int a17,
+    int a18,
+    int a19,
+    int a20,
+    int a21,
+    int a22,
+    int a23,
+    int a24,
+    int a25,
+    int a26,
+    int a27,
+    int a28,
+    int a29,
+    int a30,
+    int a31,
+    gentity_s *a32,
+    int a33,
+    int a34,
+    int a35,
+    unsigned int a36);
+
+
+// g_spawn
+int __fastcall G_LevelSpawnString(const char *key, const char *defaultString, const char **out);
+int __fastcall G_SpawnFloat(const char *key, const char *defaultString, float *out);
+int __fastcall G_SpawnInt(const char *key, const char *defaultString, int *out);
+int __fastcall G_SpawnVector(const char *key, const char *defaultString, float *out);
+void __fastcall Scr_ReadOnlyField(gentity_s *ent, int offset);
+unsigned int __fastcall G_SetEntityScriptVariableInternal(const char *key, const char *value);
+void G_SpawnStruct();
+void __fastcall G_DuplicateEntityFields(gentity_s *dest, const gentity_s *source);
+void __fastcall G_DuplicateScriptFields(gentity_s *dest, const gentity_s *source);
+const gitem_s *__fastcall G_GetItemForClassname(const char *classname, unsigned __int8 model);
+void(__fastcall *__fastcall G_FindSpawnFunc(
+    const char *classname,
+    const SpawnFuncEntry *spawnFuncArray,
+    int spawnFuncCount))(gentity_s *);
+void __fastcall G_PrintBadModelMessage(gentity_s *ent);
+int __fastcall G_CallSpawnEntity(gentity_s *ent);
+void __fastcall GScr_AddFieldsForEntity();
+void __fastcall GScr_AddFieldsForRadiant();
+void __fastcall Scr_FreeEntity(gentity_s *ent);
+void __fastcall Scr_AddEntity(gentity_s *ent);
+gentity_s *__fastcall Scr_GetEntityAllowNull(scr_entref_t *index);
+gentity_s *__fastcall Scr_GetEntity(scr_entref_t *index, unsigned int a2);
+void __fastcall Scr_FreeHudElem(game_hudelem_s *hud);
+void __fastcall Scr_AddHudElem(game_hudelem_s *hud);
+game_hudelem_s *__fastcall Scr_GetHudElem(scr_entref_t *index, unsigned int a2);
+int __fastcall Scr_ExecEntThread(gentity_s *ent, int handle, unsigned int paramcount);
+void __fastcall Scr_AddExecEntThread(gentity_s *ent, int handle, unsigned int paramcount);
+void __fastcall Scr_Notify(gentity_s *ent, unsigned __int16 stringValue, unsigned int paramcount);
+void __fastcall Scr_GetGenericEnt(unsigned int offset, unsigned int name);
+void __fastcall Scr_GetEnt();
+void __fastcall Scr_GetGenericEntArray(unsigned int offset, unsigned int name);
+void __fastcall Scr_GetEntArray();
+void __fastcall GScr_SetDynamicEntityField(gentity_s *ent, unsigned int index);
+void __fastcall SP_worldspawn();
+void __fastcall G_LoadStructs();
+void __fastcall G_SetEntityScriptVariable(const char *key, const char *value, gentity_s *ent);
+void __fastcall G_ParseEntityField(const char *key, const char *value, gentity_s *ent, int ignoreModel);
+void __fastcall G_ParseEntityFields(gentity_s *ent, int ignoreModel);
+void G_CallSpawn();
+void __fastcall Scr_SetGenericField(unsigned __int8 *b, fieldtype_t type, int ofs);
+void __fastcall Scr_GetGenericField(unsigned __int8 *b, fieldtype_t type, int ofs);
+void __fastcall G_SpawnEntitiesFromString();
+int __fastcall Scr_SetEntityField(unsigned int entnum, unsigned int offset);
+int __fastcall Scr_SetObjectField(unsigned int classnum, unsigned int entnum, int offset);
+void __fastcall Scr_GetEntityField(unsigned int entnum, unsigned int offset);
+void __fastcall Scr_GetObjectField(unsigned int classnum, unsigned int entnum, unsigned int offset);
+
+
+// g_targets
+void __fastcall G_InitTargets();
+void __fastcall G_LoadTargets();
+void __fastcall Scr_Target_SetShader();
+void __fastcall Scr_Target_SetOffscreenShader();
+void __fastcall Scr_Target_GetArray();
+int __fastcall TargetIndex(gentity_s *ent);
+void __fastcall Scr_Target_IsTarget();
+void __fastcall Scr_Target_Set();
+int __fastcall Targ_Remove(gentity_s *ent);
+void __fastcall Targ_RemoveAll();
+void __fastcall Scr_Target_Remove();
+int __fastcall G_WorldDirToScreenPos(
+    const gentity_s *player,
+    double fov_x,
+    const float *worldDir,
+    const float *outScreenPos,
+    float *a5);
+int __fastcall ScrGetTargetScreenPos(float *screenPos);
+void __fastcall Scr_Target_IsInCircle();
+void __fastcall Scr_Target_IsInRect();
+void __fastcall Scr_Target_StartLockOn(int a1, unsigned int a2);
+void __fastcall Scr_Target_ClearLockOn();
+int __fastcall GetTargetIdx(const gentity_s *ent);
+int __fastcall G_TargetGetOffset(const gentity_s *targ, float *result);
+int __fastcall G_TargetAttackProfileTop(const gentity_s *ent);
+void __fastcall Scr_Target_SetAttackMode();
+void __fastcall Scr_Target_SetJavelinOnly();
+
+
+// g_trigger
+void __fastcall G_Trigger(gentity_s *self, gentity_s *other);
+int __fastcall InitTrigger(gentity_s *self);
+void __fastcall InitTriggerWait(gentity_s *ent, int spawnflag);
+void __fastcall InitSentientTrigger(gentity_s *self);
+void __fastcall multi_trigger(gentity_s *ent, gentity_s *activator);
+void __fastcall Touch_Multi(gentity_s *self, gentity_s *other, int bTouched);
+void __fastcall SP_trigger_multiple(gentity_s *ent);
+void __fastcall SP_trigger_radius(gentity_s *ent);
+void __fastcall SP_trigger_disk(gentity_s *ent);
+void __fastcall Touch_FriendlyChain(gentity_s *self, gentity_s *other, int bTouched);
+void __fastcall SP_trigger_friendlychain(gentity_s *ent);
+void __fastcall hurt_touch(gentity_s *self, gentity_s *other, int bTouched);
+void __fastcall hurt_use(gentity_s *self, gentity_s *other, gentity_s *activator);
+void __fastcall SP_trigger_hurt(gentity_s *self);
+void __fastcall SP_trigger_once(gentity_s *ent);
+bool __fastcall Respond_trigger_damage(gentity_s *trigger, int damageType);
+void __fastcall Activate_trigger_damage(gentity_s *pEnt, gentity_s *pOther, int iDamage, int iMOD);
+void __fastcall Use_trigger_damage(gentity_s *pEnt, gentity_s *pOther, gentity_s *pActivator);
+void __fastcall Pain_trigger_damage(
+    gentity_s *pSelf,
+    gentity_s *pAttacker,
+    int iDamage,
+    const float *vPoint,
+    int iMod,
+    const float *vDir,
+    const hitLocation_t hitLoc,
+    const int weaponIdx);
+void __fastcall Die_trigger_damage(
+    gentity_s *pSelf,
+    gentity_s *pInflictor,
+    gentity_s *pAttacker,
+    int iDamage,
+    int iMod,
+    int iWeapon,
+    const float *vDir,
+    const hitLocation_t hitLoc);
+void __fastcall SP_trigger_damage(gentity_s *pSelf);
+void __fastcall G_CheckHitTriggerDamage(
+    gentity_s *pActivator,
+    const float *vStart,
+    const float *vEnd,
+    int iDamage,
+    unsigned int iMOD);
+void __fastcall G_GrenadeTouchTriggerDamage(
+    gentity_s *pActivator,
+    const float *vStart,
+    const float *vEnd,
+    int iDamage,
+    int iMOD);
+void __fastcall SP_trigger_lookat(gentity_s *self);
+
+
+// g_utils
+void __fastcall TRACK_g_utils();
+void __fastcall G_DumpConfigStrings(int start, int max);
+int __fastcall G_FindConfigstringIndex(const char *name, int start, int max, int create, const char *errormsg);
+int __fastcall G_LocalizedStringIndex(const char *string);
+int __fastcall G_MaterialIndex(const char *name);
+void __fastcall G_SetModelIndex(int modelIndex, const char *name);
+int __fastcall G_ModelIndex(const char *name);
+XModel *__fastcall G_GetModel(int index);
+bool __fastcall G_GetModelBounds(int index, float *outMins, float *outMaxs);
+int __fastcall G_XModelBad(int index);
+unsigned int __fastcall G_ModelName(unsigned int index);
+void __fastcall G_EntityCentroidWithBounds(const gentity_s *ent, const float *mins, const float *maxs, float *centroid);
+void __fastcall G_EntityCentroid(const gentity_s *ent, float *centroid);
+int __fastcall G_EffectIndex(const char *name);
+int __fastcall G_ShellShockIndex(const char *name);
+unsigned int __fastcall G_SoundAliasIndexTransientAdvance(unsigned __int16 aliasIndex, int offset);
+unsigned int __fastcall G_SoundAliasIndexTransient(const char *name);
+int __fastcall G_SoundAliasIndexPermanent(const char *name);
+int __fastcall G_RumbleIndex(const char *name);
+void __fastcall G_SetClientDemoTime(int time);
+void __fastcall G_SetClientDemoServerSnapTime(int time);
+void __fastcall G_ClearDemoEntities();
+void __fastcall G_UpdateDemoEntity(entityState_s *es);
+unsigned int __fastcall G_GetEntAnimTreeId(int entnum);
+XAnimTree_s *__fastcall G_GetEntAnimTreeForId(int entnum, unsigned int id);
+void __fastcall G_ShutdownClientDemo();
+XAnimTree_s *__fastcall G_GetEntAnimTree(gentity_s *ent);
+void __fastcall G_CheckDObjUpdate(gentity_s *ent);
+void __fastcall G_SetModel(gentity_s *ent, const char *modelName);
+// attributes: thunk
+void __fastcall G_ReplaceModel_FastFile(const char *originalName, const char *replacementName);
+void __fastcall G_OverrideModel(unsigned int modelindex, const char *defaultModelName);
+void __fastcall G_PrecacheDefaultModels();
+int __fastcall G_EntIsLinkedTo(gentity_s *ent, gentity_s *parent);
+void __fastcall G_UpdateViewAngleClamp(gclient_s *client, const float *worldAnglesCenter);
+void __fastcall G_UpdateGroundTilt(gclient_s *client);
+bool __fastcall G_SlideMove(
+    double deltaT,
+    float *origin,
+    float *velocity,
+    float *mins,
+    const float *maxs,
+    const float *gravity,
+    unsigned __int8 passEntityNum,
+    int clipMask,
+    int a9);
+void __fastcall G_StepSlideMove(
+    double deltaT,
+    float *origin,
+    float *velocity,
+    float *mins,
+    const float *maxs,
+    const float *gravity,
+    unsigned __int8 passEntityNum,
+    int clipMask,
+    int a9);
+void __fastcall G_SafeDObjFree(gentity_s *ent);
+int __fastcall G_DObjUpdateServerTime(gentity_s *ent, int bNotify);
+void __fastcall G_DObjCalcPose(gentity_s *ent, int *partBits);
+void __fastcall G_DObjCalcBone(const gentity_s *ent, int boneIndex);
+DObjAnimMat *__fastcall G_DObjGetLocalBoneIndexMatrix(const gentity_s *ent, int boneIndex);
+void __fastcall G_DObjGetWorldBoneIndexMatrix(const gentity_s *ent, int boneIndex, float (*tagMat)[3]);
+void __fastcall G_DObjGetWorldBoneIndexPos(const gentity_s *ent, int boneIndex, float *pos);
+DObjAnimMat *__fastcall G_DObjGetLocalTagMatrix(const gentity_s *ent, unsigned int tagName);
+int __fastcall G_DObjGetWorldTagMatrix(const gentity_s *ent, unsigned int tagName, float (*tagMat)[3]);
+int __fastcall G_DObjGetWorldTagPos(const gentity_s *ent, unsigned int tagName, float *pos);
+void __fastcall G_DObjGetWorldTagPos_CheckTagExists(const gentity_s *ent, unsigned int tagName, float *pos);
+gentity_s *__fastcall G_Find(gentity_s *from, int fieldofs, unsigned __int16 match);
+void __fastcall G_InitGentity(gentity_s *e);
+void __fastcall G_PrintEntities();
+gentity_s *__fastcall G_Spawn();
+void __fastcall G_FreeEntityRefs(gentity_s *ed);
+void __fastcall G_FreeAllEntityRefs();
+void __fastcall G_FreeEntityDelay(gentity_s *ed);
+void __fastcall G_BroadcastEntity(gentity_s *ent);
+void __fastcall G_FreeEntityAfterEvent(gentity_s *ent);
+int __fastcall G_SaveFreeEntities(unsigned __int8 *buf);
+void __fastcall G_LoadFreeEntities(unsigned __int8 *buf);
+void __fastcall G_AddPredictableEvent(gentity_s *ent, int event, unsigned int eventParm);
+void __fastcall G_AddEvent(gentity_s *ent, unsigned int event, unsigned int eventParm);
+void __fastcall G_RegisterSoundWait(gentity_s *ent, unsigned __int16 index, unsigned int notifyString, int stoppable);
+void __fastcall G_PlaySoundAliasWithNotify(
+    gentity_s *ent,
+    unsigned __int16 index,
+    unsigned int notifyString,
+    int stoppable,
+    unsigned int event,
+    unsigned int notifyevent);
+void __fastcall G_PlaySoundAlias(gentity_s *ent, unsigned __int16 index);
+void __fastcall G_SetOrigin(gentity_s *ent, float *origin);
+void __fastcall G_SetAngle(gentity_s *ent, float *angle);
+void __fastcall G_SetConstString(unsigned __int16 *to, const char *from);
+const char *__fastcall G_GetEntityTypeName(const gentity_s *ent);
+void __fastcall G_SetPM_MPViewer(bool setting);
+void __fastcall G_srand(unsigned int seed);
+unsigned int __fastcall G_GetRandomSeed();
+unsigned int __fastcall G_rand();
+float __fastcall G_flrand(double min, double max);
+int __fastcall G_irand(int min, int max);
+float __fastcall G_random();
+float __fastcall G_crandom();
+void __fastcall G_CalcTagParentAxis(gentity_s *ent, float (*parentAxis)[3]);
+void __fastcall G_CalcTagParentRelAxis(gentity_s *ent, float (*parentRelAxis)[3]);
+void __fastcall G_CalcTagAxis(gentity_s *ent, int bAnglesOnly);
+void __fastcall G_SetFixedLink(gentity_s *ent, unsigned int eAngles);
+void __fastcall G_SetPlayerFixedLink(gentity_s *ent);
+void __fastcall G_GeneralLink(gentity_s *ent);
+gentity_s *__fastcall G_TempEntity(float *origin, int event);
+void __fastcall G_PlaySoundAliasAtPoint(float *origin, unsigned __int16 index);
+void __fastcall G_EntUnlink(gentity_s *ent);
+void __fastcall G_UpdateTagInfo(gentity_s *ent, int bParentHasDObj);
+void __fastcall G_UpdateTagInfoOfChildren(gentity_s *parent, int bHasDObj);
+void __fastcall G_EntUnlinkFree(gentity_s *ent);
+void __fastcall G_FreeEntity(gentity_s *ed);
+void __fastcall G_UpdateTags(gentity_s *ent, int bHasDObj);
+void __fastcall G_DObjUpdate(gentity_s *ent);
+int __fastcall G_EntDetach(gentity_s *ent, const char *modelName, unsigned int tagName);
+void __fastcall G_EntDetachAll(gentity_s *ent);
+int __fastcall G_EntLinkToInternal(gentity_s *ent, gentity_s *parent, unsigned int tagName);
+int __fastcall G_EntLinkTo(gentity_s *ent, gentity_s *parent, unsigned int tagName);
+int __fastcall G_EntLinkToWithOffset(
+    gentity_s *ent,
+    gentity_s *parent,
+    unsigned int tagName,
+    float *originOffset,
+    const float *anglesOffset);
+int __fastcall G_EntAttach(gentity_s *ent, const char *modelName, unsigned int tagName, int ignoreCollision);
