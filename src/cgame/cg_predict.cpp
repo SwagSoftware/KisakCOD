@@ -4,12 +4,12 @@
 
 #include "cg_predict.h"
 
-void __fastcall TRACK_cg_predict()
+void __cdecl TRACK_cg_predict()
 {
     track_static_alloc_internal(&cg_pmove, 292, "cg_pmove", 9);
 }
 
-void __fastcall CG_InterpolatePlayerState(int localClientNum, int grabAngles, int grabStance)
+void __cdecl CG_InterpolatePlayerState(int localClientNum, int grabAngles, int grabStance)
 {
     snapshot_s *nextSnap; // r27
     snapshot_s *snap; // r31
@@ -128,7 +128,7 @@ void __fastcall CG_InterpolatePlayerState(int localClientNum, int grabAngles, in
     }
 }
 
-void __fastcall CG_RestorePlayerOrientation(cg_s *cgameGlob)
+void __cdecl CG_RestorePlayerOrientation(cg_s *cgameGlob)
 {
     double v2; // fp0
     double v3; // fp13
@@ -152,7 +152,7 @@ void __fastcall CG_RestorePlayerOrientation(cg_s *cgameGlob)
         - cgameGlob->predictedPlayerState.viewHeightCurrent;
 }
 
-void __fastcall CG_UpdateFreeMove(cg_s *cgameGlob)
+void __cdecl CG_UpdateFreeMove(cg_s *cgameGlob)
 {
     const dvar_s *v2; // r11
     int v3; // r10
@@ -197,7 +197,7 @@ void __fastcall CG_UpdateFreeMove(cg_s *cgameGlob)
         CG_DebugBox(v9, cg_pmove.mins, cg_pmove.maxs, v8, v7, (int)colorRed, 1);
 }
 
-void __fastcall CG_InterpolateGroundTilt(int localClientNum)
+void __cdecl CG_InterpolateGroundTilt(int localClientNum)
 {
     snapshot_s *nextSnap; // r28
     snapshot_s *snap; // r29
@@ -241,7 +241,7 @@ void __fastcall CG_InterpolateGroundTilt(int localClientNum)
     }
 }
 
-void __fastcall CG_PredictPlayerState_Internal(int localClientNum)
+void __cdecl CG_PredictPlayerState_Internal(int localClientNum)
 {
     playerState_s *Buf; // r20
     int v3; // r11
@@ -508,7 +508,7 @@ LABEL_81:
     LargeLocal::~LargeLocal(&v31);
 }
 
-void __fastcall CG_PredictPlayerState(int localClientNum)
+void __cdecl CG_PredictPlayerState(int localClientNum)
 {
     centity_s *Entity; // r3
 

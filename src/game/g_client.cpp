@@ -4,7 +4,7 @@
 
 #include "g_local.h"
 
-void __fastcall G_FinishSetupSpawnPoint(gentity_s *ent)
+void __cdecl G_FinishSetupSpawnPoint(gentity_s *ent)
 {
     double v2; // fp13
     int number; // r8
@@ -69,7 +69,7 @@ void __fastcall G_FinishSetupSpawnPoint(gentity_s *ent)
     G_SetOrigin(ent, &v14);
 }
 
-void __fastcall G_SetupSpawnPoint(gentity_s *ent)
+void __cdecl G_SetupSpawnPoint(gentity_s *ent)
 {
     int time; // r11
 
@@ -78,7 +78,7 @@ void __fastcall G_SetupSpawnPoint(gentity_s *ent)
     ent->nextthink = time + 100;
 }
 
-void __fastcall SP_info_player_start(gentity_s *ent)
+void __cdecl SP_info_player_start(gentity_s *ent)
 {
     int time; // r11
 
@@ -88,7 +88,7 @@ void __fastcall SP_info_player_start(gentity_s *ent)
     ent->nextthink = time + 100;
 }
 
-int __fastcall SpotWouldTelefrag(gentity_s *spot)
+int __cdecl SpotWouldTelefrag(gentity_s *spot)
 {
     double v1; // fp13
     int v2; // r3
@@ -128,7 +128,7 @@ int __fastcall SpotWouldTelefrag(gentity_s *spot)
     return 1;
 }
 
-gentity_s *__fastcall SelectNearestDeathmatchSpawnPoint(const float *from)
+gentity_s *__cdecl SelectNearestDeathmatchSpawnPoint(const float *from)
 {
     gentity_s *v2; // r29
     double v3; // fp31
@@ -156,7 +156,7 @@ gentity_s *__fastcall SelectNearestDeathmatchSpawnPoint(const float *from)
     return v2;
 }
 
-gentity_s *__fastcall SelectRandomDeathmatchSpawnPoint()
+gentity_s *__cdecl SelectRandomDeathmatchSpawnPoint()
 {
     signed int v0; // r30
     gentity_s *v1; // r31
@@ -187,7 +187,7 @@ gentity_s *__fastcall SelectRandomDeathmatchSpawnPoint()
     return (gentity_s *)v5[v4 % v0];
 }
 
-gentity_s *__fastcall SelectSpawnPoint(const float *avoidPoint, float *origin, float *angles)
+gentity_s *__cdecl SelectSpawnPoint(const float *avoidPoint, float *origin, float *angles)
 {
     gentity_s *v5; // r30
     gentity_s *v6; // r31
@@ -213,7 +213,7 @@ gentity_s *__fastcall SelectSpawnPoint(const float *avoidPoint, float *origin, f
     return result;
 }
 
-gentity_s *__fastcall SelectInitialSpawnPoint(float *origin, float *angles)
+gentity_s *__cdecl SelectInitialSpawnPoint(float *origin, float *angles)
 {
     gentity_s *v4; // r31
     gentity_s *result; // r3
@@ -239,7 +239,7 @@ gentity_s *__fastcall SelectInitialSpawnPoint(float *origin, float *angles)
     return result;
 }
 
-void __fastcall SetClientOrigin(gentity_s *ent, float *origin)
+void __cdecl SetClientOrigin(gentity_s *ent, float *origin)
 {
     gclient_s *client; // r11
     gclient_s *v5; // r11
@@ -259,7 +259,7 @@ void __fastcall SetClientOrigin(gentity_s *ent, float *origin)
     ent->r.currentOrigin[2] = v5->ps.origin[2];
 }
 
-void __fastcall InitClientDeltaAngles(gclient_s *client, long double a2)
+void __cdecl InitClientDeltaAngles(gclient_s *client, long double a2)
 {
     int v2; // r30
     int *angles; // r31
@@ -284,7 +284,7 @@ void __fastcall InitClientDeltaAngles(gclient_s *client, long double a2)
     } while (v2);
 }
 
-void __fastcall SetClientViewAngle(gentity_s *ent, const float *angle, long double a3)
+void __cdecl SetClientViewAngle(gentity_s *ent, const float *angle, long double a3)
 {
     double v4; // fp31
     double v5; // fp30
@@ -355,7 +355,7 @@ void __fastcall SetClientViewAngle(gentity_s *ent, const float *angle, long doub
     InitClientDeltaAngles(v19, a3);
 }
 
-void __fastcall G_GetPlayerViewOrigin(const playerState_s *ps, float *origin)
+void __cdecl G_GetPlayerViewOrigin(const playerState_s *ps, float *origin)
 {
     double v4; // fp0
 
@@ -383,7 +383,7 @@ void __fastcall G_GetPlayerViewOrigin(const playerState_s *ps, float *origin)
     }
 }
 
-void __fastcall G_GetPlayerViewDirection(const gentity_s *ent, float *forward, float *right, float *up)
+void __cdecl G_GetPlayerViewDirection(const gentity_s *ent, float *forward, float *right, float *up)
 {
     if (!ent)
         MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\g_client.cpp", 403, 0, "%s", "ent");
@@ -392,7 +392,7 @@ void __fastcall G_GetPlayerViewDirection(const gentity_s *ent, float *forward, f
     BG_GetPlayerViewDirection(&ent->client->ps, forward, right, up);
 }
 
-int __fastcall Client_GetPushed(gentity_s *pSelf, gentity_s *pOther)
+int __cdecl Client_GetPushed(gentity_s *pSelf, gentity_s *pOther)
 {
     gclient_s *client; // r10
     int result; // r3
@@ -427,7 +427,7 @@ int __fastcall Client_GetPushed(gentity_s *pSelf, gentity_s *pOther)
     return result;
 }
 
-void __fastcall Client_Touch(gentity_s *pSelf, gentity_s *pOther, int bTouched)
+void __cdecl Client_Touch(gentity_s *pSelf, gentity_s *pOther, int bTouched)
 {
     actor_s *actor; // r30
 
@@ -458,7 +458,7 @@ void __fastcall Client_Touch(gentity_s *pSelf, gentity_s *pOther, int bTouched)
     }
 }
 
-void __fastcall respawn(gentity_s *ent)
+void __cdecl respawn(gentity_s *ent)
 {
     const dvar_s *v2; // r30
     const char *v3; // r3
@@ -490,7 +490,7 @@ void __fastcall respawn(gentity_s *ent)
     }
 }
 
-char *__fastcall ClientConnect(int clientNum)
+char *__cdecl ClientConnect(int clientNum)
 {
     gclient_s *v2; // r31
     gentity_s *v3; // r29
@@ -533,7 +533,7 @@ char *__fastcall ClientConnect(int clientNum)
     return 0;
 }
 
-void __fastcall ClientSpawn(gentity_s *ent)
+void __cdecl ClientSpawn(gentity_s *ent)
 {
     gclient_s *client; // r31
     int v3; // r23
@@ -643,7 +643,7 @@ void __fastcall ClientSpawn(gentity_s *ent)
     BG_PlayerStateToEntityState(&client->ps, &ent->s, 1, 1u);
 }
 
-void __fastcall HeadHitEnt_Pain(
+void __cdecl HeadHitEnt_Pain(
     gentity_s *pSelf,
     gentity_s *pAttacker,
     int iDamage,
@@ -669,7 +669,7 @@ void __fastcall HeadHitEnt_Pain(
         G_Damage(v14, pAttacker, pAttacker, vDir, vPoint, iDamage, 0, iMod, v15, v16, v17, v18);
 }
 
-void __fastcall HeadHitEnt_Die(
+void __cdecl HeadHitEnt_Die(
     gentity_s *self,
     gentity_s *inflictor,
     gentity_s *attacker,
@@ -682,7 +682,7 @@ void __fastcall HeadHitEnt_Die(
     HeadHitEnt_Pain(self, attacker, damage, self->r.currentOrigin, meansOfDeath, vDir, hitLoc, iWeapon);
 }
 
-void __fastcall G_UpdateHeadHitEnt(gentity_s *pSelf)
+void __cdecl G_UpdateHeadHitEnt(gentity_s *pSelf)
 {
     gentity_s *pHitHitEnt; // r31
     float v3[12]; // [sp+50h] [-30h] BYREF
@@ -711,7 +711,7 @@ void __fastcall G_UpdateHeadHitEnt(gentity_s *pSelf)
     SV_LinkEntity(pHitHitEnt);
 }
 
-void __fastcall G_RemoveHeadHitEnt(gentity_s *pSelf)
+void __cdecl G_RemoveHeadHitEnt(gentity_s *pSelf)
 {
     gentity_s *pHitHitEnt; // r3
 
@@ -723,7 +723,7 @@ void __fastcall G_RemoveHeadHitEnt(gentity_s *pSelf)
     }
 }
 
-void __fastcall ClientBegin(int clientNum)
+void __cdecl ClientBegin(int clientNum)
 {
     level.clients[clientNum].pers.connected = CON_CONNECTED;
     ClientSpawn(&g_entities[clientNum]);

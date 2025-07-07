@@ -9,17 +9,17 @@ char **difficultyStrings;
 struct BuiltinFunctionDef *functions;
 struct scr_data_t g_scr_data;
 
-unsigned int __fastcall GScr_AllocString(const char *s)
+unsigned int __cdecl GScr_AllocString(const char *s)
 {
     return Scr_AllocString(s, 1);
 }
 
-void __fastcall TRACK_g_scr_main()
+void __cdecl TRACK_g_scr_main()
 {
     track_static_alloc_internal(&g_scr_data, 3380, "g_scr_data", 7);
 }
 
-void __fastcall Scr_LoadLevel()
+void __cdecl Scr_LoadLevel()
 {
     unsigned __int16 v0; // r3
 
@@ -30,7 +30,7 @@ void __fastcall Scr_LoadLevel()
     }
 }
 
-int __fastcall GScr_SetScriptAndLabel(
+int __cdecl GScr_SetScriptAndLabel(
     ScriptFunctions *functions,
     const char *filename,
     const char *label,
@@ -54,7 +54,7 @@ int __fastcall GScr_SetScriptAndLabel(
     return v10;
 }
 
-void __fastcall GScr_SetLevelScript(ScriptFunctions *functions)
+void __cdecl GScr_SetLevelScript(ScriptFunctions *functions)
 {
     const char *String; // r31
     char v3[72]; // [sp+50h] [-60h] BYREF
@@ -71,12 +71,12 @@ void __fastcall GScr_SetLevelScript(ScriptFunctions *functions)
     }
 }
 
-void *__fastcall GScr_AnimscriptAlloc(int size)
+void *__cdecl GScr_AnimscriptAlloc(int size)
 {
     return Hunk_AllocLow(size, "GScr_AnimscriptAlloc", 5);
 }
 
-void __fastcall GScr_SetScriptsForPathNode(pathnode_t *loadNode, ScriptFunctions *data)
+void __cdecl GScr_SetScriptsForPathNode(pathnode_t *loadNode, ScriptFunctions *data)
 {
     const char *v4; // r30
     void *DataForFile; // r3
@@ -142,12 +142,12 @@ void __fastcall GScr_SetScriptsForPathNode(pathnode_t *loadNode, ScriptFunctions
     }
 }
 
-void __fastcall GScr_SetScriptsForPathNodes(ScriptFunctions *functions)
+void __cdecl GScr_SetScriptsForPathNodes(ScriptFunctions *functions)
 {
-    Path_CallFunctionForNodes((void(__fastcall *)(pathnode_t *, void *))GScr_SetScriptsForPathNode, functions);
+    Path_CallFunctionForNodes((void(__cdecl *)(pathnode_t *, void *))GScr_SetScriptsForPathNode, functions);
 }
 
-scr_animtree_t *__fastcall GScr_FindAnimTree(
+scr_animtree_t *__cdecl GScr_FindAnimTree(
     scr_animtree_t *__return_ptr retstr,
     const char *filename,
     int bEnforceExists)
@@ -160,7 +160,7 @@ scr_animtree_t *__fastcall GScr_FindAnimTree(
     return AnimTree;
 }
 
-void __fastcall GScr_FindAnimTrees(int a1, const char *a2)
+void __cdecl GScr_FindAnimTrees(int a1, const char *a2)
 {
     XAnim_s *AnimTree; // r31
 
@@ -170,7 +170,7 @@ void __fastcall GScr_FindAnimTrees(int a1, const char *a2)
     g_scr_data.generic_human.tree.anims = AnimTree;
 }
 
-void __fastcall GScr_SetSingleAnimScript(ScriptFunctions *functions, scr_animscript_t *pAnim, const char *name)
+void __cdecl GScr_SetSingleAnimScript(ScriptFunctions *functions, scr_animscript_t *pAnim, const char *name)
 {
     char v6[112]; // [sp+50h] [-70h] BYREF
 
@@ -183,7 +183,7 @@ void __fastcall GScr_SetSingleAnimScript(ScriptFunctions *functions, scr_animscr
     pAnim->name = Scr_AllocString(name, 1);
 }
 
-void __fastcall GScr_SetAnimScripts(ScriptFunctions *functions)
+void __cdecl GScr_SetAnimScripts(ScriptFunctions *functions)
 {
     GScr_SetSingleAnimScript(functions, &g_scr_data.anim.combat, "combat");
     GScr_SetSingleAnimScript(functions, &g_scr_data.anim.concealment_crouch, "concealment_crouch");
@@ -211,7 +211,7 @@ void __fastcall GScr_SetAnimScripts(ScriptFunctions *functions)
     g_animScriptTable[1] = &g_scr_data.dogAnim;
 }
 
-void __fastcall GScr_SetDogAnimScripts(ScriptFunctions *functions)
+void __cdecl GScr_SetDogAnimScripts(ScriptFunctions *functions)
 {
     GScr_SetSingleAnimScript(functions, &g_scr_data.dogAnim.combat, "dog_combat");
     GScr_SetSingleAnimScript(functions, &g_scr_data.dogAnim.death, "dog_death");
@@ -236,12 +236,12 @@ void GScr_PostLoadScripts()
     GScr_AddFieldsForRadiant();
 }
 
-void *__fastcall Hunk_AllocXAnimCreate(int size)
+void *__cdecl Hunk_AllocXAnimCreate(int size)
 {
     return Hunk_AllocLow(size, "XAnimCreateAnims", 11);
 }
 
-void __fastcall GScr_FreeScripts()
+void __cdecl GScr_FreeScripts()
 {
     signed int i; // r31
 
@@ -249,7 +249,7 @@ void __fastcall GScr_FreeScripts()
         Scr_RemoveClassMap(i);
 }
 
-gentity_s *__fastcall GetEntity(scr_entref_t *entref)
+gentity_s *__cdecl GetEntity(scr_entref_t *entref)
 {
     unsigned __int16 v2; // [sp+74h] [+14h]
 
@@ -272,7 +272,7 @@ gentity_s *__fastcall GetEntity(scr_entref_t *entref)
     }
 }
 
-gentity_s *__fastcall GetPlayerEntity(scr_entref_t *entref)
+gentity_s *__cdecl GetPlayerEntity(scr_entref_t *entref)
 {
     gentity_s *Entity; // r31
     const char *v2; // r30
@@ -394,12 +394,12 @@ void println()
 }
 
 // attributes: thunk
-void __fastcall Scr_LocalizationError(unsigned int iParm, const char *pszErrorMessage)
+void __cdecl Scr_LocalizationError(unsigned int iParm, const char *pszErrorMessage)
 {
     Scr_ParamError(iParm, pszErrorMessage);
 }
 
-void __fastcall Scr_ValidateLocalizedStringRef(unsigned int parmIndex, const char *token, int tokenLen)
+void __cdecl Scr_ValidateLocalizedStringRef(unsigned int parmIndex, const char *token, int tokenLen)
 {
     int v6; // r31
     const char *v7; // r3
@@ -425,7 +425,7 @@ void __fastcall Scr_ValidateLocalizedStringRef(unsigned int parmIndex, const cha
     }
 }
 
-int __fastcall Scr_ValidateNonLocalizedStringRef(
+int __cdecl Scr_ValidateNonLocalizedStringRef(
     unsigned int parmIndex,
     const char *token,
     int tokenLen,
@@ -471,7 +471,7 @@ int __fastcall Scr_ValidateNonLocalizedStringRef(
     return 0;
 }
 
-unsigned int __fastcall Scr_NonLocalizedStringErrorPrefix(
+unsigned int __cdecl Scr_NonLocalizedStringErrorPrefix(
     unsigned int parmIndex,
     unsigned int tokenLen,
     const char *errorContext,
@@ -499,7 +499,7 @@ unsigned int __fastcall Scr_NonLocalizedStringErrorPrefix(
     return stringLen + 13;
 }
 
-int __fastcall Scr_IsValidMessageChar(char key)
+int __cdecl Scr_IsValidMessageChar(char key)
 {
     bool IsValidGamePadChar; // r3
     unsigned __int8 v2; // r11
@@ -513,7 +513,7 @@ int __fastcall Scr_IsValidMessageChar(char key)
     return v2;
 }
 
-void __fastcall Scr_ConstructMessageString(
+void __cdecl Scr_ConstructMessageString(
     int firstParmIndex,
     int lastParmIndex,
     const char *errorContext,
@@ -591,7 +591,7 @@ void __fastcall Scr_ConstructMessageString(
     string[v9] = 0;
 }
 
-void __fastcall Scr_MakeGameMessage(const char *cmd)
+void __cdecl Scr_MakeGameMessage(const char *cmd)
 {
     unsigned int NumParam; // r3
     const char *v3; // r3
@@ -603,7 +603,7 @@ void __fastcall Scr_MakeGameMessage(const char *cmd)
     SV_GameSendServerCommand(-1, v3);
 }
 
-void __fastcall Scr_VerifyWeaponIndex(int weaponIndex, const char *weaponName)
+void __cdecl Scr_VerifyWeaponIndex(int weaponIndex, const char *weaponName)
 {
     const char *v4; // r3
 
@@ -1151,7 +1151,7 @@ void Scr_GetEntByNum()
     }
 }
 
-int __fastcall Scr_GetTeamFlag(const char *pszTeamName, const char *pszCaller)
+int __cdecl Scr_GetTeamFlag(const char *pszTeamName, const char *pszCaller)
 {
     const char *v5; // r3
 
@@ -1168,7 +1168,7 @@ int __fastcall Scr_GetTeamFlag(const char *pszTeamName, const char *pszCaller)
     return 0;
 }
 
-int __fastcall Scr_GetTeamFlags(unsigned int i, const char *pszCaller)
+int __cdecl Scr_GetTeamFlags(unsigned int i, const char *pszCaller)
 {
     unsigned int v2; // r31
     int j; // r30
@@ -1180,7 +1180,7 @@ int __fastcall Scr_GetTeamFlags(unsigned int i, const char *pszCaller)
     return j;
 }
 
-int __fastcall Scr_GetSpecies(unsigned __int16 speciesString)
+int __cdecl Scr_GetSpecies(unsigned __int16 speciesString)
 {
     int v1; // r10
     const unsigned __int16 **v2; // r11
@@ -1404,7 +1404,7 @@ LABEL_6:
     Scr_AddString(Name);
 }
 
-void __fastcall GScr_GetAnimLength(int a1, int a2, XAnimTree_s *a3)
+void __cdecl GScr_GetAnimLength(int a1, int a2, XAnimTree_s *a3)
 {
     XAnim_s *Anims; // r31
     double Length; // fp1
@@ -1418,7 +1418,7 @@ void __fastcall GScr_GetAnimLength(int a1, int a2, XAnimTree_s *a3)
     Scr_AddFloat(Length);
 }
 
-void __fastcall GScr_AnimHasNotetrack(int a1, int a2, XAnimTree_s *a3)
+void __cdecl GScr_AnimHasNotetrack(int a1, int a2, XAnimTree_s *a3)
 {
     unsigned int ConstString; // r31
     const XAnim_s *Anims; // r3
@@ -1432,7 +1432,7 @@ void __fastcall GScr_AnimHasNotetrack(int a1, int a2, XAnimTree_s *a3)
     Scr_AddBool(v5);
 }
 
-void __fastcall GScr_GetNotetrackTimes(int a1, int a2, XAnimTree_s *a3)
+void __cdecl GScr_GetNotetrackTimes(int a1, int a2, XAnimTree_s *a3)
 {
     unsigned int ConstString; // r31
     const XAnim_s *Anims; // r3
@@ -1580,7 +1580,7 @@ int GScr_PrecacheTurret()
     return G_GetWeaponIndexForName(String);
 }
 
-void __fastcall ScrCmd_startIgnoringSpotLight(scr_entref_t *entref)
+void __cdecl ScrCmd_startIgnoringSpotLight(scr_entref_t *entref)
 {
     gentity_s *Entity; // r3
 
@@ -1588,7 +1588,7 @@ void __fastcall ScrCmd_startIgnoringSpotLight(scr_entref_t *entref)
     Entity->s.lerp.eFlags |= 0x80u;
 }
 
-void __fastcall ScrCmd_stopIgnoringSpotLight(scr_entref_t *entref)
+void __cdecl ScrCmd_stopIgnoringSpotLight(scr_entref_t *entref)
 {
     gentity_s *Entity; // r3
 
@@ -1596,7 +1596,7 @@ void __fastcall ScrCmd_stopIgnoringSpotLight(scr_entref_t *entref)
     Entity->s.lerp.eFlags &= ~0x80u;
 }
 
-void __fastcall ScrCmd_attach(scr_entref_t *entref)
+void __cdecl ScrCmd_attach(scr_entref_t *entref)
 {
     gentity_s *Entity; // r29
     const char *String; // r30
@@ -1631,7 +1631,7 @@ void __fastcall ScrCmd_attach(scr_entref_t *entref)
     }
 }
 
-void __fastcall ScrCmd_detach(scr_entref_t *entref)
+void __cdecl ScrCmd_detach(scr_entref_t *entref)
 {
     gentity_s *Entity; // r31
     const char *String; // r27
@@ -1676,7 +1676,7 @@ void __fastcall ScrCmd_detach(scr_entref_t *entref)
     }
 }
 
-void __fastcall ScrCmd_detachAll(scr_entref_t *entref)
+void __cdecl ScrCmd_detachAll(scr_entref_t *entref)
 {
     gentity_s *Entity; // r3
 
@@ -1684,7 +1684,7 @@ void __fastcall ScrCmd_detachAll(scr_entref_t *entref)
     G_EntDetachAll(Entity);
 }
 
-void __fastcall ScrCmd_GetAttachSize(scr_entref_t *entref)
+void __cdecl ScrCmd_GetAttachSize(scr_entref_t *entref)
 {
     gentity_s *Entity; // r3
     int v2; // r11
@@ -1703,7 +1703,7 @@ void __fastcall ScrCmd_GetAttachSize(scr_entref_t *entref)
     Scr_AddInt(v2);
 }
 
-void __fastcall ScrCmd_GetAttachModelName(scr_entref_t *entref)
+void __cdecl ScrCmd_GetAttachModelName(scr_entref_t *entref)
 {
     gentity_s *Entity; // r30
     unsigned int Int; // r3
@@ -1719,7 +1719,7 @@ void __fastcall ScrCmd_GetAttachModelName(scr_entref_t *entref)
     Scr_AddConstString(v4);
 }
 
-void __fastcall ScrCmd_GetAttachTagName(scr_entref_t *entref)
+void __cdecl ScrCmd_GetAttachTagName(scr_entref_t *entref)
 {
     gentity_s *Entity; // r30
     unsigned int Int; // r3
@@ -1737,7 +1737,7 @@ void __fastcall ScrCmd_GetAttachTagName(scr_entref_t *entref)
     Scr_AddConstString(*(unsigned __int16 *)(&Entity->s.eType + v4));
 }
 
-void __fastcall ScrCmd_GetAttachIgnoreCollision(scr_entref_t *entref)
+void __cdecl ScrCmd_GetAttachIgnoreCollision(scr_entref_t *entref)
 {
     gentity_s *Entity; // r30
     unsigned int Int; // r3
@@ -1751,7 +1751,7 @@ void __fastcall ScrCmd_GetAttachIgnoreCollision(scr_entref_t *entref)
     Scr_AddBool((Entity->attachIgnoreCollision & (1 << v3)) != 0);
 }
 
-void __fastcall ScrCmd_hidepart(scr_entref_t *entref)
+void __cdecl ScrCmd_hidepart(scr_entref_t *entref)
 {
     gentity_s *Entity; // r3
     DObj_s *ServerDObj; // r29
@@ -1794,7 +1794,7 @@ void __fastcall ScrCmd_hidepart(scr_entref_t *entref)
     DObjSetHidePartBits(ServerDObj, v9);
 }
 
-void __fastcall ScrCmd_showpart(scr_entref_t *entref)
+void __cdecl ScrCmd_showpart(scr_entref_t *entref)
 {
     gentity_s *Entity; // r3
     DObj_s *ServerDObj; // r29
@@ -1837,7 +1837,7 @@ void __fastcall ScrCmd_showpart(scr_entref_t *entref)
     DObjSetHidePartBits(ServerDObj, v9);
 }
 
-void __fastcall ScrCmd_showallparts(scr_entref_t *entref)
+void __cdecl ScrCmd_showallparts(scr_entref_t *entref)
 {
     gentity_s *Entity; // r3
     DObj_s *ServerDObj; // r31
@@ -1854,7 +1854,7 @@ void __fastcall ScrCmd_showallparts(scr_entref_t *entref)
     DObjSetHidePartBits(ServerDObj, (const unsigned int *)v4);
 }
 
-void __fastcall ScrCmd_LinkTo(scr_entref_t *entref)
+void __cdecl ScrCmd_LinkTo(scr_entref_t *entref)
 {
     gentity_s *Entity; // r28
     const char *EntityTypeName; // r31
@@ -1932,7 +1932,7 @@ void __fastcall ScrCmd_LinkTo(scr_entref_t *entref)
     }
 }
 
-void __fastcall ScrCmd_SetMoveSpeedScale(scr_entref_t *entref)
+void __cdecl ScrCmd_SetMoveSpeedScale(scr_entref_t *entref)
 {
     gentity_s *PlayerEntity; // r29
 
@@ -1982,7 +1982,7 @@ void ScrCmd_SetPhysicsGravityDir()
     SV_GameSendServerCommand(-1, v4);
 }
 
-void __fastcall ScrCmd_PlayerSetGroundReferenceEnt(scr_entref_t *entref)
+void __cdecl ScrCmd_PlayerSetGroundReferenceEnt(scr_entref_t *entref)
 {
     gentity_s *Entity; // r31
     int number; // r9
@@ -2003,7 +2003,7 @@ void __fastcall ScrCmd_PlayerSetGroundReferenceEnt(scr_entref_t *entref)
     Entity->client->groundTiltEntNum = number;
 }
 
-void __fastcall ScrCmd_PlayerLinkTo(scr_entref_t *entref)
+void __cdecl ScrCmd_PlayerLinkTo(scr_entref_t *entref)
 {
     gentity_s *Entity; // r31
     gentity_s *v2; // r26
@@ -2124,7 +2124,7 @@ void __fastcall ScrCmd_PlayerLinkTo(scr_entref_t *entref)
     }
 }
 
-void __fastcall ScrCmd_PlayerLinkToDelta(scr_entref_t *entref)
+void __cdecl ScrCmd_PlayerLinkToDelta(scr_entref_t *entref)
 {
     gentity_s *Entity; // r31
     gentity_s *v2; // r27
@@ -2244,7 +2244,7 @@ void __fastcall ScrCmd_PlayerLinkToDelta(scr_entref_t *entref)
     }
 }
 
-void __fastcall ScrCmd_PlayerLinkToAbsolute(scr_entref_t *entref)
+void __cdecl ScrCmd_PlayerLinkToAbsolute(scr_entref_t *entref)
 {
     gentity_s *Entity; // r31
     gentity_s *v2; // r29
@@ -2286,7 +2286,7 @@ void __fastcall ScrCmd_PlayerLinkToAbsolute(scr_entref_t *entref)
         Scr_Error("Failed to link entity");
 }
 
-void __fastcall ScrCmd_Unlink(scr_entref_t *entref)
+void __cdecl ScrCmd_Unlink(scr_entref_t *entref)
 {
     gentity_s *Entity; // r31
     gclient_s *client; // r11
@@ -2302,7 +2302,7 @@ void __fastcall ScrCmd_Unlink(scr_entref_t *entref)
     }
 }
 
-void __fastcall ScrCmd_EnableLinkTo(scr_entref_t *entref)
+void __cdecl ScrCmd_EnableLinkTo(scr_entref_t *entref)
 {
     gentity_s *Entity; // r31
     const char *EntityTypeName; // r30
@@ -2324,7 +2324,7 @@ void __fastcall ScrCmd_EnableLinkTo(scr_entref_t *entref)
     Entity->flags |= 0x800u;
 }
 
-void __fastcall ScrCmd_DontInterpolate(scr_entref_t *entref)
+void __cdecl ScrCmd_DontInterpolate(scr_entref_t *entref)
 {
     gentity_s *Entity; // r3
     gclient_s *client; // r11
@@ -2337,7 +2337,7 @@ void __fastcall ScrCmd_DontInterpolate(scr_entref_t *entref)
         Entity->s.lerp.eFlags ^= 2u;
 }
 
-void __fastcall ScrCmd_dospawn(scr_entref_t *entref)
+void __cdecl ScrCmd_dospawn(scr_entref_t *entref)
 {
     gentity_s *Entity; // r3
     gentity_s *v2; // r31
@@ -2391,7 +2391,7 @@ void __fastcall ScrCmd_dospawn(scr_entref_t *entref)
     }
 }
 
-void __fastcall ScrCmd_StalingradSpawn(scr_entref_t *entref)
+void __cdecl ScrCmd_StalingradSpawn(scr_entref_t *entref)
 {
     gentity_s *Entity; // r3
     gentity_s *v2; // r31
@@ -2445,7 +2445,7 @@ void __fastcall ScrCmd_StalingradSpawn(scr_entref_t *entref)
     }
 }
 
-void __fastcall ScrCmd_GetOrigin(scr_entref_t *entref)
+void __cdecl ScrCmd_GetOrigin(scr_entref_t *entref)
 {
     gentity_s *Entity; // r3
     float v2[6]; // [sp+50h] [-20h] BYREF
@@ -2464,7 +2464,7 @@ void __fastcall ScrCmd_GetOrigin(scr_entref_t *entref)
     Scr_AddVector(v2);
 }
 
-void __fastcall ScrCmd_GetCentroid(scr_entref_t *entref)
+void __cdecl ScrCmd_GetCentroid(scr_entref_t *entref)
 {
     const gentity_s *Entity; // r3
     float v2[6]; // [sp+50h] [-20h] BYREF
@@ -2474,7 +2474,7 @@ void __fastcall ScrCmd_GetCentroid(scr_entref_t *entref)
     Scr_AddVector(v2);
 }
 
-void __fastcall ScrCmd_GetStance(scr_entref_t *entref)
+void __cdecl ScrCmd_GetStance(scr_entref_t *entref)
 {
     gclient_s *client; // r11
     int pm_flags; // r11
@@ -2502,7 +2502,7 @@ void __fastcall ScrCmd_GetStance(scr_entref_t *entref)
     }
 }
 
-void __fastcall ScrCmd_SetStance(scr_entref_t *entref)
+void __cdecl ScrCmd_SetStance(scr_entref_t *entref)
 {
     gentity_s *Entity; // r31
     __int16 ConstString; // r3
@@ -2546,7 +2546,7 @@ void __fastcall ScrCmd_SetStance(scr_entref_t *entref)
     }
 }
 
-void __fastcall ScrCmd_ItemWeaponSetAmmo(scr_entref_t *entref)
+void __cdecl ScrCmd_ItemWeaponSetAmmo(scr_entref_t *entref)
 {
     gentity_s *Entity; // r28
     int Int; // r29
@@ -2592,7 +2592,7 @@ void __fastcall ScrCmd_ItemWeaponSetAmmo(scr_entref_t *entref)
     }
 }
 
-void __fastcall ScrCmd_MagicGrenade(scr_entref_t *entref)
+void __cdecl ScrCmd_MagicGrenade(scr_entref_t *entref)
 {
     gentity_s *Entity; // r30
     actor_s *actor; // r31
@@ -2652,7 +2652,7 @@ void __fastcall ScrCmd_MagicGrenade(scr_entref_t *entref)
     }
 }
 
-void __fastcall ScrCmd_MagicGrenadeManual(scr_entref_t *entref)
+void __cdecl ScrCmd_MagicGrenadeManual(scr_entref_t *entref)
 {
     gentity_s *Entity; // r31
     actor_s *actor; // r30
@@ -2697,7 +2697,7 @@ void __fastcall ScrCmd_MagicGrenadeManual(scr_entref_t *entref)
     }
 }
 
-void __fastcall Scr_BulletSpread()
+void __cdecl Scr_BulletSpread()
 {
     double Float; // fp31
     double v3; // fp11
@@ -2737,7 +2737,7 @@ void __fastcall Scr_BulletSpread()
     Scr_AddVector(&v5);
 }
 
-void __fastcall Scr_BulletTracer()
+void __cdecl Scr_BulletTracer()
 {
     gentity_s *v0; // r31
     bool v1; // r11
@@ -2754,7 +2754,7 @@ void __fastcall Scr_BulletTracer()
     v0->s.eventParm = v1;
 }
 
-void __fastcall Scr_MagicBullet()
+void __cdecl Scr_MagicBullet()
 {
     const char *String; // r31
     int WeaponIndexForName; // r30
@@ -2866,7 +2866,7 @@ void __fastcall Scr_MagicBullet()
     v17->s.eventParms[v17->s.eventSequence & 3] = 0;
 }
 
-void __fastcall GScr_IsFiringTurret(scr_entref_t *entref)
+void __cdecl GScr_IsFiringTurret(scr_entref_t *entref)
 {
     gentity_s *Entity; // r3
     gentity_s *v2; // r31
@@ -2886,7 +2886,7 @@ void __fastcall GScr_IsFiringTurret(scr_entref_t *entref)
     Scr_AddBool(IsFiring);
 }
 
-void __fastcall GScr_SetFriendlyChain(scr_entref_t *entref)
+void __cdecl GScr_SetFriendlyChain(scr_entref_t *entref)
 {
     gentity_s *Entity; // r30
     pathnode_t *Pathnode; // r3
@@ -2914,7 +2914,7 @@ void __fastcall GScr_SetFriendlyChain(scr_entref_t *entref)
     Entity->sentient->pActualChainPos = (pathnode_t *)v3;
 }
 
-int __fastcall GScr_UpdateTagInternal(
+int __cdecl GScr_UpdateTagInternal(
     gentity_s *ent,
     unsigned int tagName,
     cached_tag_mat_t *cachedTag,
@@ -2960,7 +2960,7 @@ int __fastcall GScr_UpdateTagInternal(
     return 0;
 }
 
-void __fastcall GScr_GetTagOrigin(scr_entref_t *entref)
+void __cdecl GScr_GetTagOrigin(scr_entref_t *entref)
 {
     gentity_s *Entity; // r30
     unsigned int ConstLowercaseString; // r3
@@ -2971,7 +2971,7 @@ void __fastcall GScr_GetTagOrigin(scr_entref_t *entref)
     Scr_AddVector(level.cachedTagMat.tagMat[3]);
 }
 
-void __fastcall GScr_GetTagAngles(scr_entref_t *entref)
+void __cdecl GScr_GetTagAngles(scr_entref_t *entref)
 {
     gentity_s *Entity; // r30
     unsigned int ConstLowercaseString; // r3
@@ -2984,7 +2984,7 @@ void __fastcall GScr_GetTagAngles(scr_entref_t *entref)
     Scr_AddVector(v3);
 }
 
-void __fastcall ScrCmd_GetEye(scr_entref_t *entref)
+void __cdecl ScrCmd_GetEye(scr_entref_t *entref)
 {
     gentity_s *Entity; // r3
     gentity_s *v2; // r31
@@ -3004,7 +3004,7 @@ void __fastcall ScrCmd_GetEye(scr_entref_t *entref)
     Scr_AddVector(v5);
 }
 
-void __fastcall ScrCmd_GetDebugEye(scr_entref_t *entref)
+void __cdecl ScrCmd_GetDebugEye(scr_entref_t *entref)
 {
     gentity_s *Entity; // r3
     gentity_s *v2; // r31
@@ -3024,13 +3024,13 @@ void __fastcall ScrCmd_GetDebugEye(scr_entref_t *entref)
     Scr_AddVector(v5);
 }
 
-void __fastcall ScrCmd_UseBy(scr_entref_t *entref)
+void __cdecl ScrCmd_UseBy(scr_entref_t *entref)
 {
     gentity_s *Entity; // r31
     gentity_s *v2; // r3
     gentity_s *v3; // r30
     gclient_s *client; // r11
-    void(__fastcall * use)(gentity_s *, gentity_s *, gentity_s *); // r11
+    void(__cdecl * use)(gentity_s *, gentity_s *, gentity_s *); // r11
 
     Entity = GetEntity(entref);
     v2 = Scr_GetEntity(0);
@@ -3049,7 +3049,7 @@ void __fastcall ScrCmd_UseBy(scr_entref_t *entref)
     }
 }
 
-void __fastcall ScrCmd_IsTouching(scr_entref_t *entref)
+void __cdecl ScrCmd_IsTouching(scr_entref_t *entref)
 {
     gentity_s *Entity; // r3
     gentity_s *v2; // r31
@@ -3146,7 +3146,7 @@ void __fastcall ScrCmd_IsTouching(scr_entref_t *entref)
     Scr_AddInt(v12);
 }
 
-void __fastcall ParsePlaySoundCmd(scr_entref_t *entref, int event, int notifyevent)
+void __cdecl ParsePlaySoundCmd(scr_entref_t *entref, int event, int notifyevent)
 {
     gentity_s *Entity; // r30
     const char *String; // r31
@@ -3194,17 +3194,17 @@ void ScrCmd_SoundExists()
     Scr_AddBool(SoundAlias != 0);
 }
 
-void __fastcall ScrCmd_PlaySound(scr_entref_t *entref)
+void __cdecl ScrCmd_PlaySound(scr_entref_t *entref)
 {
     ParsePlaySoundCmd(entref, 3, 42);
 }
 
-void __fastcall ScrCmd_PlaySoundAsMaster(scr_entref_t *entref)
+void __cdecl ScrCmd_PlaySoundAsMaster(scr_entref_t *entref)
 {
     ParsePlaySoundCmd(entref, 4, 43);
 }
 
-void __fastcall ScrCmd_PlayLoopSound(scr_entref_t *entref)
+void __cdecl ScrCmd_PlayLoopSound(scr_entref_t *entref)
 {
     gentity_s *Entity; // r30
     const char *String; // r31
@@ -3225,12 +3225,12 @@ void __fastcall ScrCmd_PlayLoopSound(scr_entref_t *entref)
     Entity->r.svFlags = svFlags & 0xFE;
 }
 
-void __fastcall ScrCmd_StopLoopSound(scr_entref_t *entref)
+void __cdecl ScrCmd_StopLoopSound(scr_entref_t *entref)
 {
     GetEntity(entref)->s.loopSound = 0;
 }
 
-void __fastcall ScrCmd_StopSounds(scr_entref_t *entref)
+void __cdecl ScrCmd_StopSounds(scr_entref_t *entref)
 {
     gentity_s *Entity; // r3
 
@@ -3239,7 +3239,7 @@ void __fastcall ScrCmd_StopSounds(scr_entref_t *entref)
     G_AddEvent(Entity, 5, 0);
 }
 
-void __fastcall ScrCmd_EqOn(scr_entref_t *entref)
+void __cdecl ScrCmd_EqOn(scr_entref_t *entref)
 {
     gentity_s *Entity; // r3
     gclient_s *client; // r11
@@ -3252,7 +3252,7 @@ void __fastcall ScrCmd_EqOn(scr_entref_t *entref)
         Entity->s.lerp.eFlags &= ~0x200000u;
 }
 
-void __fastcall ScrCmd_EqOff(scr_entref_t *entref)
+void __cdecl ScrCmd_EqOff(scr_entref_t *entref)
 {
     gentity_s *Entity; // r3
     gclient_s *client; // r11
@@ -3265,7 +3265,7 @@ void __fastcall ScrCmd_EqOff(scr_entref_t *entref)
         Entity->s.lerp.eFlags |= 0x200000u;
 }
 
-void __fastcall ScrCmd_HasEq(scr_entref_t *entref)
+void __cdecl ScrCmd_HasEq(scr_entref_t *entref)
 {
     gentity_s *Entity; // r3
     gclient_s *client; // r11
@@ -3280,7 +3280,7 @@ void __fastcall ScrCmd_HasEq(scr_entref_t *entref)
     Scr_AddInt(((unsigned int)~eFlags >> 21) & 1);
 }
 
-void __fastcall ScrCmd_IsWaitingOnSound(scr_entref_t *entref)
+void __cdecl ScrCmd_IsWaitingOnSound(scr_entref_t *entref)
 {
     gentity_s *Entity; // r3
 
@@ -3288,7 +3288,7 @@ void __fastcall ScrCmd_IsWaitingOnSound(scr_entref_t *entref)
     Scr_AddInt(Entity->snd_wait.notifyString != 0);
 }
 
-void __fastcall ScrCmd_Delete(scr_entref_t *entref)
+void __cdecl ScrCmd_Delete(scr_entref_t *entref)
 {
     gentity_s *Entity; // r31
 
@@ -3301,7 +3301,7 @@ void __fastcall ScrCmd_Delete(scr_entref_t *entref)
     G_FreeEntity(Entity);
 }
 
-void __fastcall ScrCmd_SetModel(scr_entref_t *entref)
+void __cdecl ScrCmd_SetModel(scr_entref_t *entref)
 {
     gentity_s *Entity; // r31
     const char *String; // r30
@@ -3318,7 +3318,7 @@ void __fastcall ScrCmd_SetModel(scr_entref_t *entref)
     SV_LinkEntity(Entity);
 }
 
-void __fastcall ScrCmd_SetShadowHint(scr_entref_t *entref)
+void __cdecl ScrCmd_SetShadowHint(scr_entref_t *entref)
 {
     gentity_s *Entity; // r30
     unsigned int ConstString; // r3
@@ -3359,7 +3359,7 @@ void __fastcall ScrCmd_SetShadowHint(scr_entref_t *entref)
 }
 
 // local variable allocation has failed, the output may be wrong!
-void __fastcall ScrCmd_GetNormalHealth(scr_entref_t *entref)
+void __cdecl ScrCmd_GetNormalHealth(scr_entref_t *entref)
 {
     gentity_s *Entity; // r3
     __int64 v3; // r11 OVERLAPPED
@@ -3399,7 +3399,7 @@ void __fastcall ScrCmd_GetNormalHealth(scr_entref_t *entref)
     }
 }
 
-void __fastcall ScrCmd_SetNormalHealth(scr_entref_t *entref)
+void __cdecl ScrCmd_SetNormalHealth(scr_entref_t *entref)
 {
     gentity_s *Entity; // r31
     __int64 v2; // r11
@@ -3487,7 +3487,7 @@ void __fastcall ScrCmd_SetNormalHealth(scr_entref_t *entref)
     Scr_Error(v15);
 }
 
-void __fastcall ScrCmd_DoDamage(scr_entref_t *entref)
+void __cdecl ScrCmd_DoDamage(scr_entref_t *entref)
 {
     gentity_s *v2; // r27
     gentity_s *Entity; // r26
@@ -3672,7 +3672,7 @@ void __fastcall ScrCmd_DoDamage(scr_entref_t *entref)
         0);
 }
 
-void __fastcall ScrCmd_Show(scr_entref_t *entref)
+void __cdecl ScrCmd_Show(scr_entref_t *entref)
 {
     gentity_s *Entity; // r3
 
@@ -3680,7 +3680,7 @@ void __fastcall ScrCmd_Show(scr_entref_t *entref)
     Entity->s.lerp.eFlags &= ~0x20u;
 }
 
-void __fastcall ScrCmd_Hide(scr_entref_t *entref)
+void __cdecl ScrCmd_Hide(scr_entref_t *entref)
 {
     gentity_s *Entity; // r3
 
@@ -3688,7 +3688,7 @@ void __fastcall ScrCmd_Hide(scr_entref_t *entref)
     Entity->s.lerp.eFlags |= 0x20u;
 }
 
-void __fastcall ScrCmd_LaserOn(scr_entref_t *entref)
+void __cdecl ScrCmd_LaserOn(scr_entref_t *entref)
 {
     gentity_s *Entity; // r3
 
@@ -3696,7 +3696,7 @@ void __fastcall ScrCmd_LaserOn(scr_entref_t *entref)
     Entity->s.lerp.eFlags |= 0x4000u;
 }
 
-void __fastcall ScrCmd_LaserOff(scr_entref_t *entref)
+void __cdecl ScrCmd_LaserOff(scr_entref_t *entref)
 {
     gentity_s *Entity; // r3
 
@@ -3704,7 +3704,7 @@ void __fastcall ScrCmd_LaserOff(scr_entref_t *entref)
     Entity->s.lerp.eFlags &= ~0x4000u;
 }
 
-void __fastcall ScrCmd_SetContents(scr_entref_t *entref)
+void __cdecl ScrCmd_SetContents(scr_entref_t *entref)
 {
     gentity_s *Entity; // r31
     int Int; // r30
@@ -3716,7 +3716,7 @@ void __fastcall ScrCmd_SetContents(scr_entref_t *entref)
     SV_LinkEntity(Entity);
 }
 
-void __fastcall Scr_SetStableMissile(scr_entref_t *entref)
+void __cdecl Scr_SetStableMissile(scr_entref_t *entref)
 {
     gentity_s *Entity; // r31
     int Int; // r3
@@ -3739,7 +3739,7 @@ void __fastcall Scr_SetStableMissile(scr_entref_t *entref)
     Entity->flags = v6;
 }
 
-void __fastcall GScr_DisconnectPaths(scr_entref_t *entref)
+void __cdecl GScr_DisconnectPaths(scr_entref_t *entref)
 {
     gentity_s *Entity; // r31
     const char *v2; // r3
@@ -3757,7 +3757,7 @@ void __fastcall GScr_DisconnectPaths(scr_entref_t *entref)
     Path_DisconnectPathsForEntity(Entity);
 }
 
-void __fastcall GScr_ConnectPaths(scr_entref_t *entref)
+void __cdecl GScr_ConnectPaths(scr_entref_t *entref)
 {
     gentity_s *Entity; // r31
     const char *v2; // r3
@@ -3775,7 +3775,7 @@ void __fastcall GScr_ConnectPaths(scr_entref_t *entref)
     Path_ConnectPathsForEntity(Entity);
 }
 
-void __fastcall GScr_StartFiring(scr_entref_t *entref)
+void __cdecl GScr_StartFiring(scr_entref_t *entref)
 {
     gentity_s *Entity; // r3
     gentity_s *v2; // r31
@@ -3797,7 +3797,7 @@ void __fastcall GScr_StartFiring(scr_entref_t *entref)
     pTurretInfo->flags |= 4u;
 }
 
-void __fastcall GScr_StopFiring(scr_entref_t *entref)
+void __cdecl GScr_StopFiring(scr_entref_t *entref)
 {
     gentity_s *Entity; // r3
     gentity_s *v2; // r31
@@ -3819,7 +3819,7 @@ void __fastcall GScr_StopFiring(scr_entref_t *entref)
     pTurretInfo->flags &= ~4u;
 }
 
-void __fastcall GScr_ShootTurret(scr_entref_t *entref)
+void __cdecl GScr_ShootTurret(scr_entref_t *entref)
 {
     gentity_s *Entity; // r3
     gentity_s *v2; // r31
@@ -3837,7 +3837,7 @@ void __fastcall GScr_ShootTurret(scr_entref_t *entref)
     turret_shoot(v2);
 }
 
-void __fastcall GScr_SetMode(scr_entref_t *entref)
+void __cdecl GScr_SetMode(scr_entref_t *entref)
 {
     gentity_s *Entity; // r3
     gentity_s *v2; // r31
@@ -3880,7 +3880,7 @@ void __fastcall GScr_SetMode(scr_entref_t *entref)
     }
 }
 
-void __fastcall GScr_GetTurretOwner(scr_entref_t *entref)
+void __cdecl GScr_GetTurretOwner(scr_entref_t *entref)
 {
     gentity_s *Entity; // r3
     gentity_s *v2; // r31
@@ -3908,7 +3908,7 @@ void __fastcall GScr_GetTurretOwner(scr_entref_t *entref)
     }
 }
 
-void __fastcall GScr_SetTargetEntity(scr_entref_t *entref)
+void __cdecl GScr_SetTargetEntity(scr_entref_t *entref)
 {
     gentity_s *Entity; // r3
     gentity_s *v2; // r31
@@ -3930,7 +3930,7 @@ void __fastcall GScr_SetTargetEntity(scr_entref_t *entref)
     EntHandle::setEnt(&v2->pTurretInfo->manualTarget, v5);
 }
 
-void __fastcall GScr_SetAiSpread(scr_entref_t *entref)
+void __cdecl GScr_SetAiSpread(scr_entref_t *entref)
 {
     gentity_s *Entity; // r3
     gentity_s *v2; // r31
@@ -3950,7 +3950,7 @@ void __fastcall GScr_SetAiSpread(scr_entref_t *entref)
     v2->pTurretInfo->aiSpread = Scr_GetFloat(0);
 }
 
-void __fastcall GScr_SetPlayerSpread(scr_entref_t *entref)
+void __cdecl GScr_SetPlayerSpread(scr_entref_t *entref)
 {
     gentity_s *Entity; // r3
     gentity_s *v2; // r31
@@ -3970,7 +3970,7 @@ void __fastcall GScr_SetPlayerSpread(scr_entref_t *entref)
     v2->pTurretInfo->playerSpread = Scr_GetFloat(0);
 }
 
-void __fastcall GScr_SetConvergenceTime(scr_entref_t *entref)
+void __cdecl GScr_SetConvergenceTime(scr_entref_t *entref)
 {
     gentity_s *Entity; // r3
     gentity_s *v2; // r30
@@ -4032,7 +4032,7 @@ void __fastcall GScr_SetConvergenceTime(scr_entref_t *entref)
     v2->pTurretInfo->convergenceTime[v5] = (int)(float)(Scr_GetFloat(0) * (float)1000.0);
 }
 
-void __fastcall GScr_SetSuppressionTime(scr_entref_t *entref)
+void __cdecl GScr_SetSuppressionTime(scr_entref_t *entref)
 {
     gentity_s *Entity; // r3
     gentity_s *v2; // r31
@@ -4052,7 +4052,7 @@ void __fastcall GScr_SetSuppressionTime(scr_entref_t *entref)
     v2->pTurretInfo->suppressTime = (int)(float)(Scr_GetFloat(0) * (float)1000.0);
 }
 
-void __fastcall GScr_ClearTargetEntity(scr_entref_t *entref)
+void __cdecl GScr_ClearTargetEntity(scr_entref_t *entref)
 {
     gentity_s *Entity; // r3
     gentity_s *v2; // r31
@@ -4072,7 +4072,7 @@ void __fastcall GScr_ClearTargetEntity(scr_entref_t *entref)
     EntHandle::setEnt(&v2->pTurretInfo->manualTarget, 0);
 }
 
-void __fastcall GScr_SetTurretTeam(scr_entref_t *entref)
+void __cdecl GScr_SetTurretTeam(scr_entref_t *entref)
 {
     const char *String; // r31
     gentity_s *Entity; // r3
@@ -4108,7 +4108,7 @@ void __fastcall GScr_SetTurretTeam(scr_entref_t *entref)
     }
 }
 
-void __fastcall GScr_SetTurretIgnoreGoals(scr_entref_t *entref)
+void __cdecl GScr_SetTurretIgnoreGoals(scr_entref_t *entref)
 {
     gentity_s *Entity; // r3
     gentity_s *v2; // r31
@@ -4139,7 +4139,7 @@ void __fastcall GScr_SetTurretIgnoreGoals(scr_entref_t *entref)
     pTurretInfo->flags = v8;
 }
 
-void __fastcall GScr_MakeTurretUsable(scr_entref_t *entref)
+void __cdecl GScr_MakeTurretUsable(scr_entref_t *entref)
 {
     gentity_s *Entity; // r3
     gentity_s *v2; // r31
@@ -4159,7 +4159,7 @@ void __fastcall GScr_MakeTurretUsable(scr_entref_t *entref)
     v2->pTurretInfo->flags |= 0x1000u;
 }
 
-void __fastcall GScr_MakeTurretUnusable(scr_entref_t *entref)
+void __cdecl GScr_MakeTurretUnusable(scr_entref_t *entref)
 {
     gentity_s *Entity; // r3
     gentity_s *v2; // r31
@@ -4179,12 +4179,12 @@ void __fastcall GScr_MakeTurretUnusable(scr_entref_t *entref)
     v2->pTurretInfo->flags &= ~0x1000u;
 }
 
-void __fastcall GScr_SetTurretAccuracy(scr_entref_t *entref)
+void __cdecl GScr_SetTurretAccuracy(scr_entref_t *entref)
 {
     Com_PrintWarning(23, "WARNING: Turret Accuracy no longer has any effect\n");
 }
 
-void __fastcall GScr_GetTurretTarget(scr_entref_t *entref)
+void __cdecl GScr_GetTurretTarget(scr_entref_t *entref)
 {
     gentity_s *Entity; // r3
     gentity_s *v2; // r31
@@ -4214,7 +4214,7 @@ void __fastcall GScr_GetTurretTarget(scr_entref_t *entref)
     }
 }
 
-void __fastcall GScr_SetCursorHint(scr_entref_t *entref)
+void __cdecl GScr_SetCursorHint(scr_entref_t *entref)
 {
     gentity_s *Entity; // r27
     const char *String; // r3
@@ -4267,7 +4267,7 @@ void __fastcall GScr_SetCursorHint(scr_entref_t *entref)
     }
 }
 
-int __fastcall G_GetHintStringIndex(int *piIndex, const char *pszString)
+int __cdecl G_GetHintStringIndex(int *piIndex, const char *pszString)
 {
     int v4; // r31
     char *v5; // r9
@@ -4308,7 +4308,7 @@ LABEL_10:
     return result;
 }
 
-void __fastcall GScr_SetHintString(scr_entref_t *entref)
+void __cdecl GScr_SetHintString(scr_entref_t *entref)
 {
     gentity_s *Entity; // r3
     gentity_s *v2; // r29
@@ -4363,7 +4363,7 @@ void __fastcall GScr_SetHintString(scr_entref_t *entref)
     }
 }
 
-void __fastcall GScr_UseTriggerRequireLookAt(scr_entref_t *entref)
+void __cdecl GScr_UseTriggerRequireLookAt(scr_entref_t *entref)
 {
     gentity_s *Entity; // r31
 
@@ -4373,7 +4373,7 @@ void __fastcall GScr_UseTriggerRequireLookAt(scr_entref_t *entref)
     Entity->trigger.requireLookAt = 1;
 }
 
-void __fastcall G_InitObjectives()
+void __cdecl G_InitObjectives()
 {
     int i; // r31
 
@@ -4381,7 +4381,7 @@ void __fastcall G_InitObjectives()
         SV_SetConfigstring(i + 11, 0);
 }
 
-int __fastcall PrintObjectiveUpdate(unsigned int state, const char *objectiveDesc)
+int __cdecl PrintObjectiveUpdate(unsigned int state, const char *objectiveDesc)
 {
     const char *v2; // r3
 
@@ -4403,7 +4403,7 @@ int __fastcall PrintObjectiveUpdate(unsigned int state, const char *objectiveDes
     return 1;
 }
 
-int __fastcall ObjectiveStateIndexFromString(int *piStateIndex, unsigned int stateString)
+int __cdecl ObjectiveStateIndexFromString(int *piStateIndex, unsigned int stateString)
 {
     int result; // r3
 
@@ -4445,7 +4445,7 @@ int __fastcall ObjectiveStateIndexFromString(int *piStateIndex, unsigned int sta
     return result;
 }
 
-void __fastcall SetObjectiveIconIntoConfigString(char *objConfigString, unsigned int paramNum)
+void __cdecl SetObjectiveIconIntoConfigString(char *objConfigString, unsigned int paramNum)
 {
     const char *String; // r31
     int v4; // r30
@@ -4672,7 +4672,7 @@ int Scr_Objective_State()
     return PrintObjectiveUpdate(ConstString, "GAME_OBJECTIVESUPDATED");
 }
 
-void __fastcall Scr_Objective_String_Internal(int makeUpdateMessage)
+void __cdecl Scr_Objective_String_Internal(int makeUpdateMessage)
 {
     unsigned int Int; // r31
     const char *v3; // r3
@@ -5114,7 +5114,7 @@ void Scr_BulletTracePassed()
     Scr_AddBool(v2);
 }
 
-void __fastcall Scr_SightTracePassed()
+void __cdecl Scr_SightTracePassed()
 {
     int number; // r31
     int v1; // r30
@@ -6054,7 +6054,7 @@ void Scr_AmplifyStop()
     SV_GameSendServerCommand(-1, "amp_stop");
 }
 
-void __fastcall Scr_ErrorOnDefaultAsset(XAssetHeader *type, const char *assetName, const char *a3)
+void __cdecl Scr_ErrorOnDefaultAsset(XAssetHeader *type, const char *assetName, const char *a3)
 {
     const char *XAssetTypeName; // r3
     const char *v6; // r3
@@ -6188,7 +6188,7 @@ void Scr_PrecacheNightvisionCodeAssets()
         Scr_Error("PrecacheNightvisionCodeAssets() must be called during level initialization.\n");
 }
 
-int __fastcall GScr_GetLocSelIndex(const char *mtlName)
+int __cdecl GScr_GetLocSelIndex(const char *mtlName)
 {
     int v2; // r31
     const char *v3; // r3
@@ -6297,7 +6297,7 @@ void Scr_AmbientStop()
     SV_SetConfigstring(1114, v6);
 }
 
-void __fastcall Scr_CheckForSaveErrors(int saveId)
+void __cdecl Scr_CheckForSaveErrors(int saveId)
 {
     switch (saveId)
     {
@@ -6502,7 +6502,7 @@ void Scr_CommitSave()
     }
 }
 
-void __fastcall GScr_RadiusDamageInternal(gentity_s *inflictor)
+void __cdecl GScr_RadiusDamageInternal(gentity_s *inflictor)
 {
     double Float; // fp31
     double v3; // fp30
@@ -6600,7 +6600,7 @@ void GScr_RadiusDamage()
     GScr_RadiusDamageInternal(0);
 }
 
-void __fastcall GScr_EntityRadiusDamage(scr_entref_t *entref)
+void __cdecl GScr_EntityRadiusDamage(scr_entref_t *entref)
 {
     gentity_s *Entity; // r3
 
@@ -6608,7 +6608,7 @@ void __fastcall GScr_EntityRadiusDamage(scr_entref_t *entref)
     GScr_RadiusDamageInternal(Entity);
 }
 
-void __fastcall GScr_Detonate(scr_entref_t *entref)
+void __cdecl GScr_Detonate(scr_entref_t *entref)
 {
     gentity_s *Entity; // r30
     WeaponDef *WeaponDef; // r3
@@ -6644,7 +6644,7 @@ int GScr_SetPlayerIgnoreRadiusDamage()
     return result;
 }
 
-void __fastcall GScr_DamageConeTraceInternal(scr_entref_t *entref, int contentMask)
+void __cdecl GScr_DamageConeTraceInternal(scr_entref_t *entref, int contentMask)
 {
     gentity_s *Entity; // r31
     gentity_s *v4; // r30
@@ -6720,12 +6720,12 @@ void __fastcall GScr_DamageConeTraceInternal(scr_entref_t *entref, int contentMa
     }
 }
 
-void __fastcall GScr_DamageConeTrace(scr_entref_t *entref)
+void __cdecl GScr_DamageConeTrace(scr_entref_t *entref)
 {
     GScr_DamageConeTraceInternal(entref, 8396817);
 }
 
-void __fastcall GScr_SightConeTrace(scr_entref_t *entref)
+void __cdecl GScr_SightConeTrace(scr_entref_t *entref)
 {
     GScr_DamageConeTraceInternal(entref, 2049);
 }
@@ -6792,7 +6792,7 @@ void GScr_MissionFailed()
     }
 }
 
-void __fastcall GScr_SetMissionDvar()
+void __cdecl GScr_SetMissionDvar()
 {
     const char *String; // r31
     const char **v1; // r29
@@ -7016,7 +7016,7 @@ void GScr_WeaponClipSize()
     Scr_AddInt(WeaponDef->iClipSize);
 }
 
-void __fastcall GScr_GetAmmoCount(scr_entref_t *entref)
+void __cdecl GScr_GetAmmoCount(scr_entref_t *entref)
 {
     gentity_s *PlayerEntity; // r29
     const char *String; // r31
@@ -7162,7 +7162,7 @@ void GScr_WeaponAltWeaponName()
     }
 }
 
-WeaponDef *__fastcall GScr_GetWeaponDef()
+WeaponDef *__cdecl GScr_GetWeaponDef()
 {
     const char *String; // r3
     unsigned int WeaponIndexForName; // r31
@@ -7342,7 +7342,7 @@ void GScr_GetNorthYaw()
     Scr_AddFloat((float)*(double *)&v0);
 }
 
-void __fastcall Scr_SetFxAngles(unsigned int givenAxisCount, float (*axis)[3], float *angles)
+void __cdecl Scr_SetFxAngles(unsigned int givenAxisCount, float (*axis)[3], float *angles)
 {
     double v6; // fp0
     double v7; // fp13
@@ -7416,7 +7416,7 @@ void Scr_LoadFX()
     Scr_AddInt(v1);
 }
 
-void __fastcall Scr_FxParamError(unsigned int paramIndex, const char *errorString, int fxId)
+void __cdecl Scr_FxParamError(unsigned int paramIndex, const char *errorString, int fxId)
 {
     const char *v6; // r3
     char v7[1056]; // [sp+50h] [-420h] BYREF
@@ -7888,7 +7888,7 @@ void Scr_PhysicsExplosionCylinder()
     v0->s.lerp.u.turret.gunAngles[1] = Scr_GetFloat(3u);
 }
 
-void __fastcall Scr_SetFog(const char *cmd, double start, double density, double r, double g, double b, double time)
+void __cdecl Scr_SetFog(const char *cmd, double start, double density, double r, double g, double b, double time)
 {
     const char *v14; // r3
     const char *v15; // r3
@@ -8306,7 +8306,7 @@ void Scr_ClearAllCorpses()
     G_RemoveActorCorpses(0);
 }
 
-void __fastcall GScr_GetNumParts()
+void __cdecl GScr_GetNumParts()
 {
     const char *String; // r3
     const XModel *v1; // r3
@@ -8320,7 +8320,7 @@ void __fastcall GScr_GetNumParts()
     Scr_AddInt(v2);
 }
 
-void __fastcall GScr_GetPartName()
+void __cdecl GScr_GetPartName()
 {
     const char *String; // r3
     XModel *v1; // r31
@@ -8348,7 +8348,7 @@ void __fastcall GScr_GetPartName()
     Scr_AddConstString(v6);
 }
 
-XAnimTree_s *__fastcall GScr_GetEntAnimTree(gentity_s *ent)
+XAnimTree_s *__cdecl GScr_GetEntAnimTree(gentity_s *ent)
 {
     XAnimTree_s *EntAnimTree; // r30
     double v3; // fp31
@@ -8377,7 +8377,7 @@ XAnimTree_s *__fastcall GScr_GetEntAnimTree(gentity_s *ent)
     return EntAnimTree;
 }
 
-void __fastcall G_FlagAnimForUpdate(gentity_s *ent)
+void __cdecl G_FlagAnimForUpdate(gentity_s *ent)
 {
     int flags; // r11
 
@@ -8386,7 +8386,7 @@ void __fastcall G_FlagAnimForUpdate(gentity_s *ent)
         ent->flags = flags | 0x40000;
 }
 
-void __fastcall Scr_AnimRelative(scr_entref_t *entref)
+void __cdecl Scr_AnimRelative(scr_entref_t *entref)
 {
     gentity_s *Entity; // r31
     XAnimTree_s *EntAnimTree; // r30
@@ -8476,7 +8476,7 @@ void __fastcall Scr_AnimRelative(scr_entref_t *entref)
     }
 }
 
-void __fastcall ScrCmd_animrelative(scr_entref_t *entref)
+void __cdecl ScrCmd_animrelative(scr_entref_t *entref)
 {
     if (Scr_GetNumParam() > 6)
         Scr_Error("too many parameters");
@@ -8485,7 +8485,7 @@ void __fastcall ScrCmd_animrelative(scr_entref_t *entref)
     Scr_AnimRelative(entref);
 }
 
-void __fastcall DumpAnimCommand(
+void __cdecl DumpAnimCommand(
     const char *funcName,
     XAnimTree_s *tree,
     unsigned int anim,
@@ -8518,7 +8518,7 @@ void __fastcall DumpAnimCommand(
         v13);
 }
 
-void __fastcall GScr_ClearAnim(scr_entref_t *entref)
+void __cdecl GScr_ClearAnim(scr_entref_t *entref)
 {
     gentity_s *Entity; // r30
     XAnimTree_s *EntAnimTree; // r31
@@ -8537,7 +8537,7 @@ void __fastcall GScr_ClearAnim(scr_entref_t *entref)
     XAnimClearTreeGoalWeights(EntAnimTree, v4, v6);
 }
 
-void __fastcall GScr_HandleAnimError(int error)
+void __cdecl GScr_HandleAnimError(int error)
 {
     if (error == 1)
     {
@@ -8557,7 +8557,7 @@ LABEL_5:
     Scr_Error("cannot flag anim since it has 0 effective goal weight");
 }
 
-void __fastcall GScr_SetAnimKnobInternal(scr_entref_t *entref, unsigned int flags)
+void __cdecl GScr_SetAnimKnobInternal(scr_entref_t *entref, unsigned int flags)
 {
     gentity_s *Entity; // r28
     double Float; // fp30
@@ -8646,27 +8646,27 @@ void __fastcall GScr_SetAnimKnobInternal(scr_entref_t *entref, unsigned int flag
     }
 }
 
-void __fastcall GScr_SetAnimKnob(scr_entref_t *entref)
+void __cdecl GScr_SetAnimKnob(scr_entref_t *entref)
 {
     GScr_SetAnimKnobInternal(entref, 1u);
 }
 
-void __fastcall GScr_SetAnimKnobLimited(scr_entref_t *entref)
+void __cdecl GScr_SetAnimKnobLimited(scr_entref_t *entref)
 {
     GScr_SetAnimKnobInternal(entref, 0);
 }
 
-void __fastcall GScr_SetAnimKnobRestart(scr_entref_t *entref)
+void __cdecl GScr_SetAnimKnobRestart(scr_entref_t *entref)
 {
     GScr_SetAnimKnobInternal(entref, 3u);
 }
 
-void __fastcall GScr_SetAnimKnobLimitedRestart(scr_entref_t *entref)
+void __cdecl GScr_SetAnimKnobLimitedRestart(scr_entref_t *entref)
 {
     GScr_SetAnimKnobInternal(entref, 2u);
 }
 
-void __fastcall GScr_SetAnimKnobAllInternal(scr_entref_t *entref, unsigned int flags)
+void __cdecl GScr_SetAnimKnobAllInternal(scr_entref_t *entref, unsigned int flags)
 {
     gentity_s *Entity; // r27
     double Float; // fp30
@@ -8762,27 +8762,27 @@ void __fastcall GScr_SetAnimKnobAllInternal(scr_entref_t *entref, unsigned int f
     }
 }
 
-void __fastcall GScr_SetAnimKnobAll(scr_entref_t *entref)
+void __cdecl GScr_SetAnimKnobAll(scr_entref_t *entref)
 {
     GScr_SetAnimKnobAllInternal(entref, 1u);
 }
 
-void __fastcall GScr_SetAnimKnobAllLimited(scr_entref_t *entref)
+void __cdecl GScr_SetAnimKnobAllLimited(scr_entref_t *entref)
 {
     GScr_SetAnimKnobAllInternal(entref, 0);
 }
 
-void __fastcall GScr_SetAnimKnobAllRestart(scr_entref_t *entref)
+void __cdecl GScr_SetAnimKnobAllRestart(scr_entref_t *entref)
 {
     GScr_SetAnimKnobAllInternal(entref, 3u);
 }
 
-void __fastcall GScr_SetAnimKnobAllLimitedRestart(scr_entref_t *entref)
+void __cdecl GScr_SetAnimKnobAllLimitedRestart(scr_entref_t *entref)
 {
     GScr_SetAnimKnobAllInternal(entref, 2u);
 }
 
-void __fastcall GScr_SetAnimInternal(scr_entref_t *entref, unsigned int flags)
+void __cdecl GScr_SetAnimInternal(scr_entref_t *entref, unsigned int flags)
 {
     gentity_s *Entity; // r28
     double Float; // fp30
@@ -8872,27 +8872,27 @@ void __fastcall GScr_SetAnimInternal(scr_entref_t *entref, unsigned int flags)
     }
 }
 
-void __fastcall GScr_SetAnim(scr_entref_t *entref)
+void __cdecl GScr_SetAnim(scr_entref_t *entref)
 {
     GScr_SetAnimInternal(entref, 1u);
 }
 
-void __fastcall GScr_SetAnimLimited(scr_entref_t *entref)
+void __cdecl GScr_SetAnimLimited(scr_entref_t *entref)
 {
     GScr_SetAnimInternal(entref, 0);
 }
 
-void __fastcall GScr_SetAnimRestart(scr_entref_t *entref)
+void __cdecl GScr_SetAnimRestart(scr_entref_t *entref)
 {
     GScr_SetAnimInternal(entref, 3u);
 }
 
-void __fastcall GScr_SetAnimLimitedRestart(scr_entref_t *entref)
+void __cdecl GScr_SetAnimLimitedRestart(scr_entref_t *entref)
 {
     GScr_SetAnimInternal(entref, 2u);
 }
 
-void __fastcall GScr_GetAnimTime(scr_entref_t *entref)
+void __cdecl GScr_GetAnimTime(scr_entref_t *entref)
 {
     gentity_s *Entity; // r3
     const XAnimTree_s *EntAnimTree; // r31
@@ -8911,7 +8911,7 @@ void __fastcall GScr_GetAnimTime(scr_entref_t *entref)
     Scr_AddFloat(Time);
 }
 
-void __fastcall GScr_GetAnimAssetType(scr_entref_t *entref)
+void __cdecl GScr_GetAnimAssetType(scr_entref_t *entref)
 {
     gentity_s *Entity; // r3
     XAnimTree_s *EntAnimTree; // r31
@@ -8926,7 +8926,7 @@ void __fastcall GScr_GetAnimAssetType(scr_entref_t *entref)
     Scr_AddInt(AssetType);
 }
 
-void __fastcall GScr_SetFlaggedAnimKnobInternal(scr_entref_t *entref, unsigned int flags)
+void __cdecl GScr_SetFlaggedAnimKnobInternal(scr_entref_t *entref, unsigned int flags)
 {
     gentity_s *Entity; // r25
     double Float; // fp30
@@ -9021,27 +9021,27 @@ void __fastcall GScr_SetFlaggedAnimKnobInternal(scr_entref_t *entref, unsigned i
     }
 }
 
-void __fastcall GScr_SetFlaggedAnimKnob(scr_entref_t *entref)
+void __cdecl GScr_SetFlaggedAnimKnob(scr_entref_t *entref)
 {
     GScr_SetFlaggedAnimKnobInternal(entref, 1u);
 }
 
-void __fastcall GScr_SetFlaggedAnimKnobLimited(scr_entref_t *entref)
+void __cdecl GScr_SetFlaggedAnimKnobLimited(scr_entref_t *entref)
 {
     GScr_SetFlaggedAnimKnobInternal(entref, 0);
 }
 
-void __fastcall GScr_SetFlaggedAnimKnobRestart(scr_entref_t *entref)
+void __cdecl GScr_SetFlaggedAnimKnobRestart(scr_entref_t *entref)
 {
     GScr_SetFlaggedAnimKnobInternal(entref, 3u);
 }
 
-void __fastcall GScr_SetFlaggedAnimKnobLimitedRestart(scr_entref_t *entref)
+void __cdecl GScr_SetFlaggedAnimKnobLimitedRestart(scr_entref_t *entref)
 {
     GScr_SetFlaggedAnimKnobInternal(entref, 2u);
 }
 
-void __fastcall GScr_SetFlaggedAnimKnobAllInternal(scr_entref_t *entref, unsigned int flags, const char *usage)
+void __cdecl GScr_SetFlaggedAnimKnobAllInternal(scr_entref_t *entref, unsigned int flags, const char *usage)
 {
     gentity_s *Entity; // r24
     double Float; // fp30
@@ -9141,17 +9141,17 @@ void __fastcall GScr_SetFlaggedAnimKnobAllInternal(scr_entref_t *entref, unsigne
     }
 }
 
-void __fastcall GScr_SetFlaggedAnimKnobAll(scr_entref_t *entref)
+void __cdecl GScr_SetFlaggedAnimKnobAll(scr_entref_t *entref)
 {
     GScr_SetFlaggedAnimKnobAllInternal(entref, 1u, "illegal call to SetFlaggedAnimKnobAll()\n");
 }
 
-void __fastcall GScr_SetFlaggedAnimKnobAllRestart(scr_entref_t *entref)
+void __cdecl GScr_SetFlaggedAnimKnobAllRestart(scr_entref_t *entref)
 {
     GScr_SetFlaggedAnimKnobAllInternal(entref, 3u, "illegal call to SetFlaggedAnimKnobAllRestart()\n");
 }
 
-void __fastcall GScr_SetFlaggedAnimInternal(scr_entref_t *entref, unsigned int flags)
+void __cdecl GScr_SetFlaggedAnimInternal(scr_entref_t *entref, unsigned int flags)
 {
     gentity_s *Entity; // r25
     double Float; // fp30
@@ -9247,27 +9247,27 @@ void __fastcall GScr_SetFlaggedAnimInternal(scr_entref_t *entref, unsigned int f
     }
 }
 
-void __fastcall GScr_SetFlaggedAnim(scr_entref_t *entref)
+void __cdecl GScr_SetFlaggedAnim(scr_entref_t *entref)
 {
     GScr_SetFlaggedAnimInternal(entref, 1u);
 }
 
-void __fastcall GScr_SetFlaggedAnimLimited(scr_entref_t *entref)
+void __cdecl GScr_SetFlaggedAnimLimited(scr_entref_t *entref)
 {
     GScr_SetFlaggedAnimInternal(entref, 0);
 }
 
-void __fastcall GScr_SetFlaggedAnimRestart(scr_entref_t *entref)
+void __cdecl GScr_SetFlaggedAnimRestart(scr_entref_t *entref)
 {
     GScr_SetFlaggedAnimInternal(entref, 3u);
 }
 
-void __fastcall GScr_SetFlaggedAnimLimitedRestart(scr_entref_t *entref)
+void __cdecl GScr_SetFlaggedAnimLimitedRestart(scr_entref_t *entref)
 {
     GScr_SetFlaggedAnimInternal(entref, 2u);
 }
 
-void __fastcall GScr_SetAnimTime(scr_entref_t *entref)
+void __cdecl GScr_SetAnimTime(scr_entref_t *entref)
 {
     gentity_s *Entity; // r28
     double v2; // fp31
@@ -9317,7 +9317,7 @@ LABEL_9:
         Entity->flags = flags | 0x40000;
 }
 
-void __fastcall GScr_DumpAnims(scr_entref_t *entref)
+void __cdecl GScr_DumpAnims(scr_entref_t *entref)
 {
     gentity_s *Entity; // r3
 
@@ -9325,7 +9325,7 @@ void __fastcall GScr_DumpAnims(scr_entref_t *entref)
     SV_DObjDisplayAnim(Entity, byte_82003CDD);
 }
 
-void __fastcall GScr_ShellShock(scr_entref_t *entref)
+void __cdecl GScr_ShellShock(scr_entref_t *entref)
 {
     gentity_s *PlayerEntity; // r29
     const char *String; // r31
@@ -9375,7 +9375,7 @@ void __fastcall GScr_ShellShock(scr_entref_t *entref)
     }
 }
 
-void __fastcall GScr_StopShellShock(scr_entref_t *entref)
+void __cdecl GScr_StopShellShock(scr_entref_t *entref)
 {
     gentity_s *PlayerEntity; // r31
 
@@ -9388,7 +9388,7 @@ void __fastcall GScr_StopShellShock(scr_entref_t *entref)
     PlayerEntity->client->ps.pm_flags &= ~0x10000u;
 }
 
-void __fastcall GScr_SetDepthOfField(scr_entref_t *entref)
+void __cdecl GScr_SetDepthOfField(scr_entref_t *entref)
 {
     gentity_s *PlayerEntity; // r31
     double Float; // fp28
@@ -9451,7 +9451,7 @@ void __fastcall GScr_SetDepthOfField(scr_entref_t *entref)
     PlayerEntity->client->ps.dofFarBlur = v7;
 }
 
-void __fastcall GScr_SetViewModelDepthOfField(scr_entref_t *entref)
+void __cdecl GScr_SetViewModelDepthOfField(scr_entref_t *entref)
 {
     gentity_s *PlayerEntity; // r31
     double Float; // fp29
@@ -9473,7 +9473,7 @@ void __fastcall GScr_SetViewModelDepthOfField(scr_entref_t *entref)
     PlayerEntity->client->ps.dofViewmodelEnd = v3;
 }
 
-void __fastcall GScr_ViewKick(scr_entref_t *entref)
+void __cdecl GScr_ViewKick(scr_entref_t *entref)
 {
     gentity_s *PlayerEntity; // r31
     const char *v2; // r3
@@ -9498,12 +9498,12 @@ void __fastcall GScr_ViewKick(scr_entref_t *entref)
     p_commandTime[11492] = p_commandTime[9] - v5[2];
 }
 
-void __fastcall GScr_GetEntnum(scr_entref_t *entref)
+void __cdecl GScr_GetEntnum(scr_entref_t *entref)
 {
     Scr_AddInt(HIWORD(entref));
 }
 
-void __fastcall GScr_ValidateLightVis(int eType)
+void __cdecl GScr_ValidateLightVis(int eType)
 {
     const char *v1; // r3
 
@@ -9514,7 +9514,7 @@ void __fastcall GScr_ValidateLightVis(int eType)
     }
 }
 
-void __fastcall GScr_LockLightVis(scr_entref_t *entref)
+void __cdecl GScr_LockLightVis(scr_entref_t *entref)
 {
     gentity_s *Entity; // r3
     int eType; // r4
@@ -9530,7 +9530,7 @@ void __fastcall GScr_LockLightVis(scr_entref_t *entref)
     }
 }
 
-void __fastcall GScr_UnlockLightVis(scr_entref_t *entref)
+void __cdecl GScr_UnlockLightVis(scr_entref_t *entref)
 {
     gentity_s *Entity; // r3
     int eType; // r4
@@ -9546,7 +9546,7 @@ void __fastcall GScr_UnlockLightVis(scr_entref_t *entref)
     }
 }
 
-void __fastcall GScr_Launch(scr_entref_t *entref)
+void __cdecl GScr_Launch(scr_entref_t *entref)
 {
     gentity_s *Entity; // r31
     double v3; // fp1
@@ -9614,7 +9614,7 @@ void __fastcall GScr_Launch(scr_entref_t *entref)
     SV_LinkEntity(Entity);
 }
 
-void __fastcall GScr_SetSoundBlend(scr_entref_t *entref)
+void __cdecl GScr_SetSoundBlend(scr_entref_t *entref)
 {
     gentity_s *Entity; // r29
     const char *String; // r3
@@ -9638,7 +9638,7 @@ void __fastcall GScr_SetSoundBlend(scr_entref_t *entref)
     G_SetSoundBlend(Entity, v3, v5, v7);
 }
 
-void __fastcall GScr_LocalToWorldCoords(scr_entref_t *entref)
+void __cdecl GScr_LocalToWorldCoords(scr_entref_t *entref)
 {
     gentity_s *Entity; // r31
     float v2; // [sp+50h] [-60h] BYREF
@@ -9657,7 +9657,7 @@ void __fastcall GScr_LocalToWorldCoords(scr_entref_t *entref)
     Scr_AddVector(&v2);
 }
 
-void __fastcall GScr_GetEntityNumber(scr_entref_t *entref)
+void __cdecl GScr_GetEntityNumber(scr_entref_t *entref)
 {
     gentity_s *Entity; // r3
 
@@ -9665,7 +9665,7 @@ void __fastcall GScr_GetEntityNumber(scr_entref_t *entref)
     Scr_AddInt(Entity->s.number);
 }
 
-void __fastcall GScr_EnableGrenadeTouchDamage(scr_entref_t *entref)
+void __cdecl GScr_EnableGrenadeTouchDamage(scr_entref_t *entref)
 {
     gentity_s *Entity; // r31
 
@@ -9675,7 +9675,7 @@ void __fastcall GScr_EnableGrenadeTouchDamage(scr_entref_t *entref)
     Entity->flags |= 0x4000u;
 }
 
-void __fastcall GScr_DisableGrenadeTouchDamage(scr_entref_t *entref)
+void __cdecl GScr_DisableGrenadeTouchDamage(scr_entref_t *entref)
 {
     gentity_s *Entity; // r31
 
@@ -9685,7 +9685,7 @@ void __fastcall GScr_DisableGrenadeTouchDamage(scr_entref_t *entref)
     Entity->flags &= ~0x4000u;
 }
 
-void __fastcall GScr_MissileSetTarget(scr_entref_t *entref)
+void __cdecl GScr_MissileSetTarget(scr_entref_t *entref)
 {
     gentity_s *Entity; // r31
     gentity_s *v2; // r30
@@ -9714,7 +9714,7 @@ void __fastcall GScr_MissileSetTarget(scr_entref_t *entref)
     }
 }
 
-void __fastcall GScr_EnableAimAssist(scr_entref_t *entref)
+void __cdecl GScr_EnableAimAssist(scr_entref_t *entref)
 {
     gentity_s *Entity; // r31
 
@@ -9724,7 +9724,7 @@ void __fastcall GScr_EnableAimAssist(scr_entref_t *entref)
     Entity->s.lerp.eFlags |= 0x800u;
 }
 
-void __fastcall GScr_DisableAimAssist(scr_entref_t *entref)
+void __cdecl GScr_DisableAimAssist(scr_entref_t *entref)
 {
     gentity_s *Entity; // r31
 
@@ -9734,7 +9734,7 @@ void __fastcall GScr_DisableAimAssist(scr_entref_t *entref)
     Entity->s.lerp.eFlags &= ~0x800u;
 }
 
-void __fastcall GScr_MakeFakeAI(scr_entref_t *entref)
+void __cdecl GScr_MakeFakeAI(scr_entref_t *entref)
 {
     gentity_s *Entity; // r3
     gentity_s *v2; // r31
@@ -9754,7 +9754,7 @@ void __fastcall GScr_MakeFakeAI(scr_entref_t *entref)
     SV_LinkEntity(v2);
 }
 
-void __fastcall GScr_SetLookatText(scr_entref_t *entref)
+void __cdecl GScr_SetLookatText(scr_entref_t *entref)
 {
     gentity_s *Entity; // r31
     unsigned int ConstString; // r3
@@ -9772,7 +9772,7 @@ void __fastcall GScr_SetLookatText(scr_entref_t *entref)
     }
 }
 
-void __fastcall GScr_SetRightArc(scr_entref_t *entref)
+void __cdecl GScr_SetRightArc(scr_entref_t *entref)
 {
     TurretInfo *pTurretInfo; // r31
     double Float; // fp1
@@ -9786,7 +9786,7 @@ void __fastcall GScr_SetRightArc(scr_entref_t *entref)
         pTurretInfo->arcmin[1] = 0.0;
 }
 
-void __fastcall GScr_SetLeftArc(scr_entref_t *entref)
+void __cdecl GScr_SetLeftArc(scr_entref_t *entref)
 {
     TurretInfo *pTurretInfo; // r31
     double Float; // fp1
@@ -9800,7 +9800,7 @@ void __fastcall GScr_SetLeftArc(scr_entref_t *entref)
         pTurretInfo->arcmax[1] = 0.0;
 }
 
-void __fastcall GScr_SetTopArc(scr_entref_t *entref)
+void __cdecl GScr_SetTopArc(scr_entref_t *entref)
 {
     TurretInfo *pTurretInfo; // r31
     double Float; // fp1
@@ -9814,7 +9814,7 @@ void __fastcall GScr_SetTopArc(scr_entref_t *entref)
         pTurretInfo->arcmin[0] = 0.0;
 }
 
-void __fastcall GScr_SetBottomArc(scr_entref_t *entref)
+void __cdecl GScr_SetBottomArc(scr_entref_t *entref)
 {
     TurretInfo *pTurretInfo; // r31
     double Float; // fp1
@@ -9828,7 +9828,7 @@ void __fastcall GScr_SetBottomArc(scr_entref_t *entref)
         pTurretInfo->arcmax[0] = 0.0;
 }
 
-void __fastcall GScr_SetDefaultDropPitch(scr_entref_t *entref)
+void __cdecl GScr_SetDefaultDropPitch(scr_entref_t *entref)
 {
     gentity_s *Entity; // r31
     double Float; // fp1
@@ -9852,7 +9852,7 @@ void __fastcall GScr_SetDefaultDropPitch(scr_entref_t *entref)
     }
 }
 
-void __fastcall GScr_RestoreDefaultDropPitch(scr_entref_t *entref)
+void __cdecl GScr_RestoreDefaultDropPitch(scr_entref_t *entref)
 {
     gentity_s *Entity; // r3
 
@@ -9870,7 +9870,7 @@ void __fastcall GScr_RestoreDefaultDropPitch(scr_entref_t *entref)
     }
 }
 
-void __fastcall GScr_TurretFireDisable(scr_entref_t *entref)
+void __cdecl GScr_TurretFireDisable(scr_entref_t *entref)
 {
     gentity_s *Entity; // r3
     gentity_s *v2; // r31
@@ -9888,7 +9888,7 @@ void __fastcall GScr_TurretFireDisable(scr_entref_t *entref)
     v2->pTurretInfo->flags |= 0x4000u;
 }
 
-void __fastcall GScr_TurretFireEnable(scr_entref_t *entref)
+void __cdecl GScr_TurretFireEnable(scr_entref_t *entref)
 {
     gentity_s *Entity; // r3
     gentity_s *v2; // r31
@@ -9906,7 +9906,7 @@ void __fastcall GScr_TurretFireEnable(scr_entref_t *entref)
     v2->pTurretInfo->flags &= ~0x4000u;
 }
 
-void __fastcall GScr_SetSpawnerTeam(scr_entref_t *entref)
+void __cdecl GScr_SetSpawnerTeam(scr_entref_t *entref)
 {
     gentity_s *Entity; // r30
     const char *String; // r31
@@ -9975,7 +9975,7 @@ void GScr_PrecacheMenu()
     SV_SetConfigstring(j + 2551, String);
 }
 
-int __fastcall GScr_GetScriptMenuIndex(const char *pszMenu)
+int __cdecl GScr_GetScriptMenuIndex(const char *pszMenu)
 {
     int v2; // r31
     const char *v3; // r3
@@ -10196,7 +10196,7 @@ void GScr_CloseFile()
     }
 }
 
-void __fastcall Scr_FPrint_internal(bool commaBetweenFields)
+void __cdecl Scr_FPrint_internal(bool commaBetweenFields)
 {
     unsigned int Int; // r3
     unsigned int v3; // r31
@@ -10365,7 +10365,7 @@ void GScr_FGetArg()
     }
 }
 
-void __fastcall Scr_PlayRumbleOnPosition_Internal(int event)
+void __cdecl Scr_PlayRumbleOnPosition_Internal(int event)
 {
     const char *String; // r31
     unsigned int v3; // r30
@@ -10562,7 +10562,7 @@ void Scr_TableLookupIString()
     Scr_AddIString(v4);
 }
 
-void __fastcall Scr_GetReflectionLocs()
+void __cdecl Scr_GetReflectionLocs()
 {
     const float *v0; // r30
     unsigned int DebugReflectionProbeLocs; // r31
@@ -10602,7 +10602,7 @@ void Scr_LogString()
     LSP_LogString(cl_controller_in_use, String);
 }
 
-void __fastcall ScrCmd_LogString(scr_entref_t *entref)
+void __cdecl ScrCmd_LogString(scr_entref_t *entref)
 {
     const char *String; // r3
 
@@ -10610,7 +10610,7 @@ void __fastcall ScrCmd_LogString(scr_entref_t *entref)
     LSP_LogString(cl_controller_in_use, String);
 }
 
-void(__fastcall *__fastcall BuiltIn_GetFunction(const char **pName, int *type))()
+void(__cdecl *__cdecl BuiltIn_GetFunction(const char **pName, int *type))()
 {
     int v2; // r6
     unsigned int v3; // r31
@@ -10645,9 +10645,9 @@ void(__fastcall *__fastcall BuiltIn_GetFunction(const char **pName, int *type))(
     return functions[v2].actionFunc;
 }
 
-void(__fastcall *__fastcall Scr_GetFunction(const char **pName, int *type))()
+void(__cdecl *__cdecl Scr_GetFunction(const char **pName, int *type))()
 {
-    void(__fastcall * result)(); // r3
+    void(__cdecl * result)(); // r3
 
     *type = 0;
     result = Sentient_GetFunction(pName);
@@ -10656,7 +10656,7 @@ void(__fastcall *__fastcall Scr_GetFunction(const char **pName, int *type))()
     return result;
 }
 
-void __fastcall ScrCmd_PlayRumbleOnEntity_Internal(scr_entref_t *entref, int event)
+void __cdecl ScrCmd_PlayRumbleOnEntity_Internal(scr_entref_t *entref, int event)
 {
     gentity_s *Entity; // r29
     const char *String; // r31
@@ -10678,17 +10678,17 @@ void __fastcall ScrCmd_PlayRumbleOnEntity_Internal(scr_entref_t *entref, int eve
         Scr_Error("Incorrect number of parameters.\n");
 }
 
-void __fastcall ScrCmd_PlayRumbleOnEntity(scr_entref_t *entref)
+void __cdecl ScrCmd_PlayRumbleOnEntity(scr_entref_t *entref)
 {
     ScrCmd_PlayRumbleOnEntity_Internal(entref, 70);
 }
 
-void __fastcall ScrCmd_PlayRumbleLoopOnEntity(scr_entref_t *entref)
+void __cdecl ScrCmd_PlayRumbleLoopOnEntity(scr_entref_t *entref)
 {
     ScrCmd_PlayRumbleOnEntity_Internal(entref, 72);
 }
 
-void __fastcall ScrCmd_StopRumble(scr_entref_t *entref)
+void __cdecl ScrCmd_StopRumble(scr_entref_t *entref)
 {
     gentity_s *Entity; // r29
     const char *String; // r31
@@ -10710,7 +10710,7 @@ void __fastcall ScrCmd_StopRumble(scr_entref_t *entref)
         Scr_Error("Incorrect number of parameters.\n");
 }
 
-void __fastcall ScrCmd_AddAIEventListener(scr_entref_t *entref)
+void __cdecl ScrCmd_AddAIEventListener(scr_entref_t *entref)
 {
     gentity_s *Entity; // r31
     unsigned __int16 ConstString; // r3
@@ -10722,7 +10722,7 @@ void __fastcall ScrCmd_AddAIEventListener(scr_entref_t *entref)
     Actor_EventListener_Add(Entity->s.number, ConstString);
 }
 
-void __fastcall ScrCmd_RemoveAIEventListener(scr_entref_t *entref)
+void __cdecl ScrCmd_RemoveAIEventListener(scr_entref_t *entref)
 {
     gentity_s *Entity; // r31
     unsigned __int16 ConstString; // r3
@@ -10741,7 +10741,7 @@ void __fastcall ScrCmd_RemoveAIEventListener(scr_entref_t *entref)
     }
 }
 
-gentity_s *__fastcall GScr_SetupLightEntity(scr_entref_t *entref)
+gentity_s *__cdecl GScr_SetupLightEntity(scr_entref_t *entref)
 {
     gentity_s *Entity; // r31
     const char *v2; // r3
@@ -10759,7 +10759,7 @@ gentity_s *__fastcall GScr_SetupLightEntity(scr_entref_t *entref)
     return Entity;
 }
 
-void __fastcall GScr_GetLightColor(scr_entref_t *entref)
+void __cdecl GScr_GetLightColor(scr_entref_t *entref)
 {
     gentity_s *v1; // r3
     __int128 v2; // r11
@@ -10777,7 +10777,7 @@ void __fastcall GScr_GetLightColor(scr_entref_t *entref)
     Scr_AddVector(v3);
 }
 
-void __fastcall GScr_SetLightColor(scr_entref_t *entref)
+void __cdecl GScr_SetLightColor(scr_entref_t *entref)
 {
     gentity_s *v1; // r31
     unsigned __int8 v2; // r30
@@ -10795,7 +10795,7 @@ void __fastcall GScr_SetLightColor(scr_entref_t *entref)
     v1->s.lerp.u.primaryLight.colorAndExp[3] = v2;
 }
 
-void __fastcall GScr_GetLightIntensity(scr_entref_t *entref)
+void __cdecl GScr_GetLightIntensity(scr_entref_t *entref)
 {
     gentity_s *v1; // r3
 
@@ -10803,7 +10803,7 @@ void __fastcall GScr_GetLightIntensity(scr_entref_t *entref)
     Scr_AddFloat(v1->s.lerp.u.turret.gunAngles[1]);
 }
 
-void __fastcall GScr_SetLightIntensity(scr_entref_t *entref)
+void __cdecl GScr_SetLightIntensity(scr_entref_t *entref)
 {
     gentity_s *v1; // r31
 
@@ -10815,7 +10815,7 @@ void __fastcall GScr_SetLightIntensity(scr_entref_t *entref)
     v1->s.lerp.u.turret.gunAngles[1] = _FP0;
 }
 
-void __fastcall GScr_GetLightRadius(scr_entref_t *entref)
+void __cdecl GScr_GetLightRadius(scr_entref_t *entref)
 {
     gentity_s *v1; // r3
 
@@ -10823,7 +10823,7 @@ void __fastcall GScr_GetLightRadius(scr_entref_t *entref)
     Scr_AddFloat(v1->s.lerp.u.turret.gunAngles[2]);
 }
 
-void __fastcall GScr_SetLightRadius(scr_entref_t *entref)
+void __cdecl GScr_SetLightRadius(scr_entref_t *entref)
 {
     gentity_s *v1; // r30
     const ComPrimaryLight *PrimaryLight; // r31
@@ -10855,7 +10855,7 @@ LABEL_8:
     v1->s.lerp.u.turret.gunAngles[2] = _FP0;
 }
 
-void __fastcall GScr_GetLightFovInner(scr_entref_t *entref)
+void __cdecl GScr_GetLightFovInner(scr_entref_t *entref)
 {
     long double v1; // fp2
     long double v2; // fp2
@@ -10865,7 +10865,7 @@ void __fastcall GScr_GetLightFovInner(scr_entref_t *entref)
     Scr_AddFloat((float)((float)*(double *)&v2 * (float)2.0));
 }
 
-void __fastcall GScr_GetLightFovOuter(scr_entref_t *entref)
+void __cdecl GScr_GetLightFovOuter(scr_entref_t *entref)
 {
     long double v1; // fp2
     long double v2; // fp2
@@ -10875,7 +10875,7 @@ void __fastcall GScr_GetLightFovOuter(scr_entref_t *entref)
     Scr_AddFloat((float)((float)*(double *)&v2 * (float)2.0));
 }
 
-void __fastcall GScr_SetLightFovRange(scr_entref_t *entref)
+void __cdecl GScr_SetLightFovRange(scr_entref_t *entref)
 {
     gentity_s *v1; // r29
     const ComPrimaryLight *PrimaryLight; // r31
@@ -10944,7 +10944,7 @@ void __fastcall GScr_SetLightFovRange(scr_entref_t *entref)
     v1->s.lerp.u.primaryLight.cosHalfFovInner = _FP31;
 }
 
-void __fastcall GScr_GetLightExponent(scr_entref_t *entref)
+void __cdecl GScr_GetLightExponent(scr_entref_t *entref)
 {
     gentity_s *v1; // r3
 
@@ -10952,7 +10952,7 @@ void __fastcall GScr_GetLightExponent(scr_entref_t *entref)
     Scr_AddInt(v1->s.lerp.u.primaryLight.colorAndExp[3]);
 }
 
-void __fastcall GScr_SetLightExponent(scr_entref_t *entref)
+void __cdecl GScr_SetLightExponent(scr_entref_t *entref)
 {
     gentity_s *v1; // r30
     unsigned int Int; // r3
@@ -10966,7 +10966,7 @@ void __fastcall GScr_SetLightExponent(scr_entref_t *entref)
     v1->s.lerp.u.primaryLight.colorAndExp[3] = v3;
 }
 
-void __fastcall GScr_StartRagdoll(scr_entref_t *entref)
+void __cdecl GScr_StartRagdoll(scr_entref_t *entref)
 {
     gentity_s *Entity; // r31
     trType_t trType; // r11
@@ -11011,7 +11011,7 @@ void __fastcall GScr_StartRagdoll(scr_entref_t *entref)
     }
 }
 
-void __fastcall GScr_IsRagdoll(scr_entref_t *entref)
+void __cdecl GScr_IsRagdoll(scr_entref_t *entref)
 {
     gentity_s *Entity; // r3
     unsigned __int8 IsRagdollTrajectory; // r3
@@ -11021,7 +11021,7 @@ void __fastcall GScr_IsRagdoll(scr_entref_t *entref)
     Scr_AddInt(IsRagdollTrajectory);
 }
 
-void(__fastcall *__fastcall BuiltIn_GetMethod(const char **pName, int *type))(scr_entref_t)
+void(__cdecl *__cdecl BuiltIn_GetMethod(const char **pName, int *type))(scr_entref_t)
 {
     int v2; // r6
     unsigned int v3; // r31
@@ -11056,9 +11056,9 @@ void(__fastcall *__fastcall BuiltIn_GetMethod(const char **pName, int *type))(sc
     return methods_2[v2].actionFunc;
 }
 
-void(__fastcall *__fastcall Scr_GetMethod(const char **pName, int *type))(scr_entref_t *__struct_ptr)
+void(__cdecl *__cdecl Scr_GetMethod(const char **pName, int *type))(scr_entref_t *__struct_ptr)
 {
-    void(__fastcall * result)(scr_entref_t * __struct_ptr); // r3
+    void(__cdecl * result)(scr_entref_t * __struct_ptr); // r3
 
     *type = 0;
     result = Actor_GetMethod(pName);
@@ -11087,7 +11087,7 @@ void(__fastcall *__fastcall Scr_GetMethod(const char **pName, int *type))(scr_en
     return result;
 }
 
-void __fastcall Scr_SetOrigin(gentity_s *ent, int offset)
+void __cdecl Scr_SetOrigin(gentity_s *ent, int offset)
 {
     sentient_s *sentient; // r3
     float v4[6]; // [sp+58h] [-28h] BYREF
@@ -11109,7 +11109,7 @@ void __fastcall Scr_SetOrigin(gentity_s *ent, int offset)
         SV_LinkEntity(ent);
 }
 
-void __fastcall Scr_SetAngles(gentity_s *ent, int offset)
+void __cdecl Scr_SetAngles(gentity_s *ent, int offset)
 {
     float v3[4]; // [sp+50h] [-20h] BYREF
 
@@ -11119,7 +11119,7 @@ void __fastcall Scr_SetAngles(gentity_s *ent, int offset)
     G_SetAngle(ent, v3);
 }
 
-void __fastcall Scr_SetHealth(gentity_s *ent, int offset)
+void __cdecl Scr_SetHealth(gentity_s *ent, int offset)
 {
     int Int; // r30
     const char *v4; // r6
@@ -11157,13 +11157,13 @@ void __fastcall Scr_SetHealth(gentity_s *ent, int offset)
     }
 }
 
-void __fastcall GScr_Shutdown()
+void __cdecl GScr_Shutdown()
 {
     if (level.cachedTagMat.name)
         Scr_SetString(&level.cachedTagMat.name, 0);
 }
 
-void __fastcall GScr_SetScriptsAndAnimsForEntities(ScriptFunctions *functions)
+void __cdecl GScr_SetScriptsAndAnimsForEntities(ScriptFunctions *functions)
 {
     int v2; // r15
     int *v3; // r29
@@ -11257,7 +11257,7 @@ void __fastcall GScr_SetScriptsAndAnimsForEntities(ScriptFunctions *functions)
     G_ResetEntityParsePoint();
 }
 
-void __fastcall GScr_SetScripts(ScriptFunctions *functions)
+void __cdecl GScr_SetScripts(ScriptFunctions *functions)
 {
     const char *v2; // r4
     int v3; // r3
@@ -11268,7 +11268,7 @@ void __fastcall GScr_SetScripts(ScriptFunctions *functions)
     GScr_SetAnimScripts(functions);
     GScr_SetLevelScript(functions);
     GScr_SetScriptsAndAnimsForEntities(functions);
-    Path_CallFunctionForNodes((void(__fastcall *)(pathnode_t *, void *))GScr_SetScriptsForPathNode, functions);
+    Path_CallFunctionForNodes((void(__cdecl *)(pathnode_t *, void *))GScr_SetScriptsForPathNode, functions);
     GScr_PostLoadScripts();
     Scr_EndLoadScripts();
     if (!(unsigned __int8)G_ExitAfterConnectPaths())
@@ -11279,7 +11279,7 @@ void __fastcall GScr_SetScripts(ScriptFunctions *functions)
     Scr_EndLoadAnimTrees();
 }
 
-void __fastcall ScrCmd_GetShootAtPosition(scr_entref_t *entref)
+void __cdecl ScrCmd_GetShootAtPosition(scr_entref_t *entref)
 {
     gentity_s *Entity; // r30
     const sentient_s *sentient; // r3
@@ -11304,7 +11304,7 @@ void __fastcall ScrCmd_GetShootAtPosition(scr_entref_t *entref)
     Scr_AddVector(v3);
 }
 
-void __fastcall ScrCmd_animscriptedInternal(scr_entref_t *entref, int bDelayForActor)
+void __cdecl ScrCmd_animscriptedInternal(scr_entref_t *entref, int bDelayForActor)
 {
     gentity_s *Entity; // r31
     DObj_s *ServerDObj; // r19
@@ -11446,7 +11446,7 @@ void __fastcall ScrCmd_animscriptedInternal(scr_entref_t *entref, int bDelayForA
     }
 }
 
-void __fastcall G_StopAnimScripted(gentity_s *ent)
+void __cdecl G_StopAnimScripted(gentity_s *ent)
 {
     actor_s *actor; // r3
     animscripted_s *scripted; // r30
@@ -11478,7 +11478,7 @@ void __fastcall G_StopAnimScripted(gentity_s *ent)
     }
 }
 
-void __fastcall ScrCmd_stopanimscripted(scr_entref_t *entref)
+void __cdecl ScrCmd_stopanimscripted(scr_entref_t *entref)
 {
     gentity_s *Entity; // r3
 
@@ -11486,7 +11486,7 @@ void __fastcall ScrCmd_stopanimscripted(scr_entref_t *entref)
     G_StopAnimScripted(Entity);
 }
 
-void __fastcall ScrCmd_animscripted(scr_entref_t *entref)
+void __cdecl ScrCmd_animscripted(scr_entref_t *entref)
 {
     if (Scr_GetNumParam() > 6)
         Scr_Error("too many parameters");
@@ -11495,7 +11495,7 @@ void __fastcall ScrCmd_animscripted(scr_entref_t *entref)
     ScrCmd_animscriptedInternal(entref, 1);
 }
 
-void __fastcall G_SetAnimTree(gentity_s *ent, scr_animtree_t *animtree)
+void __cdecl G_SetAnimTree(gentity_s *ent, scr_animtree_t *animtree)
 {
     XAnimTree_s *pAnimTree; // r30
 
@@ -11527,7 +11527,7 @@ void __fastcall G_SetAnimTree(gentity_s *ent, scr_animtree_t *animtree)
     }
 }
 
-void __fastcall GScr_UseAnimTree(scr_entref_t *entref)
+void __cdecl GScr_UseAnimTree(scr_entref_t *entref)
 {
     gentity_s *Entity; // r31
     unsigned int v2; // r4
@@ -11546,7 +11546,7 @@ void __fastcall GScr_UseAnimTree(scr_entref_t *entref)
     G_SetAnimTree(Entity, &v5);
 }
 
-void __fastcall GScr_StopUseAnimTree(scr_entref_t *entref)
+void __cdecl GScr_StopUseAnimTree(scr_entref_t *entref)
 {
     gentity_s *Entity; // r31
     const char *v2; // r3

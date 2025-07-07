@@ -4,6 +4,8 @@
 
 #include <cgame_mp/cg_local_mp.h>
 
+#include <bgame/bg_public.h>
+
 static EntHandleList g_entitiesHandleList[0x400];
 static EntHandleInfo g_entHandleInfoArray[0x1000];
 

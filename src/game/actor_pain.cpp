@@ -4,14 +4,14 @@
 
 #include "actor_pain.h"
 
-bool __fastcall Actor_InPain(const actor_s *self)
+bool __cdecl Actor_InPain(const actor_s *self)
 {
     if (!self)
         MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\actor_pain.cpp", 14, 0, "%s", "self");
     return self->eState[self->stateLevel] == AIS_PAIN;
 }
 
-int __fastcall Actor_Pain_Start(actor_s *self, ai_state_t ePrevState)
+int __cdecl Actor_Pain_Start(actor_s *self, ai_state_t ePrevState)
 {
     if (!self)
         MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\actor_pain.cpp", 28, 0, "%s", "self");
@@ -22,7 +22,7 @@ int __fastcall Actor_Pain_Start(actor_s *self, ai_state_t ePrevState)
     return 1;
 }
 
-void __fastcall Actor_Pain_Finish(actor_s *self, ai_state_t eNextState)
+void __cdecl Actor_Pain_Finish(actor_s *self, ai_state_t eNextState)
 {
     sentient_s *sentient; // r3
 
@@ -38,7 +38,7 @@ void __fastcall Actor_Pain_Finish(actor_s *self, ai_state_t eNextState)
     }
 }
 
-int __fastcall Actor_Pain_Think(actor_s *self)
+int __cdecl Actor_Pain_Think(actor_s *self)
 {
     int iPainTime; // r10
     int time; // r11

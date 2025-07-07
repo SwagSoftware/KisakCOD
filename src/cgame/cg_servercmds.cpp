@@ -4,7 +4,7 @@
 
 #include "cg_servercmds.h"
 
-void __fastcall CG_ParseServerInfo(int localClientNum)
+void __cdecl CG_ParseServerInfo(int localClientNum)
 {
     const char *ConfigString; // r3
     const char *v3; // r30
@@ -22,7 +22,7 @@ void __fastcall CG_ParseServerInfo(int localClientNum)
     Com_GetBspFilename(cgsArray[0].mapname, 64, v3);
 }
 
-void __fastcall CG_ParseCullDist(int localClientNum)
+void __cdecl CG_ParseCullDist(int localClientNum)
 {
     const char *ConfigString; // r3
     long double v2; // fp2
@@ -32,7 +32,7 @@ void __fastcall CG_ParseCullDist(int localClientNum)
     R_SetCullDist((float)*(double *)&v2);
 }
 
-void __fastcall CG_ParseSunLight(int localClientNum)
+void __cdecl CG_ParseSunLight(int localClientNum)
 {
     const char *ConfigString; // r3
     int v2; // r8
@@ -60,7 +60,7 @@ void __fastcall CG_ParseSunLight(int localClientNum)
     }
 }
 
-void __fastcall CG_ParseSunDirection(int localClientNum)
+void __cdecl CG_ParseSunDirection(int localClientNum)
 {
     const char *ConfigString; // r3
     int v2; // r3
@@ -102,7 +102,7 @@ void __fastcall CG_ParseSunDirection(int localClientNum)
     }
 }
 
-void __fastcall CG_ParseFog(int time)
+void __cdecl CG_ParseFog(int time)
 {
     int nesting; // r7
     const char *v3; // r3
@@ -203,7 +203,7 @@ LABEL_14:
     R_SwitchFog(v25, time, v24);
 }
 
-void __fastcall CG_PrecacheScriptMenu(int localClientNum, int iConfigNum)
+void __cdecl CG_PrecacheScriptMenu(int localClientNum, int iConfigNum)
 {
     const char *ConfigString; // r3
     const char *v5; // r31
@@ -224,7 +224,7 @@ void __fastcall CG_PrecacheScriptMenu(int localClientNum, int iConfigNum)
     }
 }
 
-void __fastcall CG_RegisterServerMaterial(int localClientNum, int num)
+void __cdecl CG_RegisterServerMaterial(int localClientNum, int num)
 {
     const char *ConfigString; // r3
 
@@ -241,7 +241,7 @@ void __fastcall CG_RegisterServerMaterial(int localClientNum, int num)
         Material_RegisterHandle(ConfigString, 7);
 }
 
-void __fastcall CG_RegisterServerMaterials(int localClientNum)
+void __cdecl CG_RegisterServerMaterials(int localClientNum)
 {
     signed int i; // r31
     const char *ConfigString; // r3
@@ -262,7 +262,7 @@ void __fastcall CG_RegisterServerMaterials(int localClientNum)
     }
 }
 
-void __fastcall CG_ConfigStringModifiedInternal(int localClientNum, unsigned int stringIndex)
+void __cdecl CG_ConfigStringModifiedInternal(int localClientNum, unsigned int stringIndex)
 {
     const char *ConfigString; // r3
     const char *v5; // r29
@@ -384,7 +384,7 @@ void __fastcall CG_ConfigStringModifiedInternal(int localClientNum, unsigned int
     }
 }
 
-void __fastcall CG_ConfigStringModified(int localClientNum)
+void __cdecl CG_ConfigStringModified(int localClientNum)
 {
     int nesting; // r7
     const char *v3; // r3
@@ -410,14 +410,14 @@ void __fastcall CG_ConfigStringModified(int localClientNum)
     CG_ConfigStringModifiedInternal(localClientNum, v4);
 }
 
-void __fastcall CG_ShutdownPhysics(int localClientNum)
+void __cdecl CG_ShutdownPhysics(int localClientNum)
 {
     DynEntCl_Shutdown(localClientNum);
     FX_KillAllEffects(localClientNum);
     Phys_Shutdown();
 }
 
-void __fastcall CG_OpenScriptMenu(int localClientNum)
+void __cdecl CG_OpenScriptMenu(int localClientNum)
 {
     int nesting; // r7
     const char *v3; // r3
@@ -490,7 +490,7 @@ void __fastcall CG_OpenScriptMenu(int localClientNum)
     }
 }
 
-void __fastcall CG_CheckOpenWaitingScriptMenu()
+void __cdecl CG_CheckOpenWaitingScriptMenu()
 {
     if (cg_waitingScriptMenu.name[0])
     {
@@ -499,13 +499,13 @@ void __fastcall CG_CheckOpenWaitingScriptMenu()
     }
 }
 
-void __fastcall CG_CloseScriptMenu(bool allowResponse)
+void __cdecl CG_CloseScriptMenu(bool allowResponse)
 {
     UI_ClosePopupScriptMenu(0, allowResponse);
     cg_waitingScriptMenu.name[0] = 0;
 }
 
-void __fastcall CG_MenuShowNotify(int localClientNum, int menuToShow)
+void __cdecl CG_MenuShowNotify(int localClientNum, int menuToShow)
 {
     int time; // r10
     const char *v4; // r4
@@ -592,7 +592,7 @@ void __fastcall CG_MenuShowNotify(int localClientNum, int menuToShow)
     }
 }
 
-void __fastcall CG_HudMenuShowAllTimed(int localClientNum)
+void __cdecl CG_HudMenuShowAllTimed(int localClientNum)
 {
     int time; // r11
 
@@ -859,7 +859,7 @@ void CG_DeactivateReverbCmd()
     }
 }
 
-void __fastcall CG_SetChannelVolCmd(int localClientNum)
+void __cdecl CG_SetChannelVolCmd(int localClientNum)
 {
     int nesting; // r7
     int v3; // r5
@@ -961,7 +961,7 @@ void CG_DeactivateChannelVolCmd()
     }
 }
 
-void __fastcall LocalSound(int localClientNum)
+void __cdecl LocalSound(int localClientNum)
 {
     int nesting; // r7
     int v3; // r31
@@ -1011,7 +1011,7 @@ void __fastcall LocalSound(int localClientNum)
     }
 }
 
-void __fastcall LocalSoundStop(int localClientNum)
+void __cdecl LocalSoundStop(int localClientNum)
 {
     int nesting; // r7
     const char *v3; // r3
@@ -1060,12 +1060,12 @@ void CG_ReachedCheckpoint()
     CG_GameMessage(v1, 17);
 }
 
-void __fastcall CG_GameSaveFailed(cg_s *cgameGlob)
+void __cdecl CG_GameSaveFailed(cg_s *cgameGlob)
 {
     UI_SetActiveMenu(0, UIMENU_SAVEERROR);
 }
 
-void __fastcall CG_BlurServerCommand(int localClientNum)
+void __cdecl CG_BlurServerCommand(int localClientNum)
 {
     int nesting; // r7
     const char *v3; // r3
@@ -1162,7 +1162,7 @@ void __fastcall CG_BlurServerCommand(int localClientNum)
     CG_Blur(localClientNum, v6, v10, v17, v14, v16);
 }
 
-void __fastcall CG_SlowServerCommand(int localClientNum)
+void __cdecl CG_SlowServerCommand(int localClientNum)
 {
     int nesting; // r7
     const char *v3; // r3
@@ -1232,7 +1232,7 @@ void __fastcall CG_SlowServerCommand(int localClientNum)
     CG_AlterTimescale(localClientNum, v6, v10, (float)*(double *)&v12);
 }
 
-void __fastcall CG_SetClientDvarFromServer(const char *dvarname, const char *value)
+void __cdecl CG_SetClientDvarFromServer(const char *dvarname, const char *value)
 {
     if (I_stricmp(dvarname, "hud_drawHUD"))
         Com_Error(ERR_DROP, byte_8200F418, dvarname);
@@ -1341,7 +1341,7 @@ void CG_ParseAmp()
     }
 }
 
-void __fastcall CG_ParsePhysGravityDir(int localClientNum)
+void __cdecl CG_ParsePhysGravityDir(int localClientNum)
 {
     unsigned int nesting; // r7
     int v3; // r28
@@ -1419,7 +1419,7 @@ void __fastcall CG_ParsePhysGravityDir(int localClientNum)
     }
 }
 
-void __fastcall CG_DispatchServerCommand(int localClientNum)
+void __cdecl CG_DispatchServerCommand(int localClientNum)
 {
     int nesting; // r7
     const char *v3; // r31
@@ -2516,13 +2516,13 @@ void __fastcall CG_DispatchServerCommand(int localClientNum)
     }
 }
 
-void __fastcall CG_ServerCommand(int localClientNum)
+void __cdecl CG_ServerCommand(int localClientNum)
 {
     CG_DispatchServerCommand(localClientNum);
     Cmd_EndTokenizedString();
 }
 
-void __fastcall CG_ExecuteNewServerCommands(int localClientNum, int latestSequence)
+void __cdecl CG_ExecuteNewServerCommands(int localClientNum, int latestSequence)
 {
     int nesting; // r23
     int i; // r11
@@ -2561,7 +2561,7 @@ void __fastcall CG_ExecuteNewServerCommands(int localClientNum, int latestSequen
     }
 }
 
-void __fastcall CG_MapInit(int restart)
+void __cdecl CG_MapInit(int restart)
 {
     signed int i; // r31
     int j; // r31

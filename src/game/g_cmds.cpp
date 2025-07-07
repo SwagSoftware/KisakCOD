@@ -7,7 +7,7 @@
 int g_allowRemoveCorpse;
 bool g_godModeRemoteInputValid;
 
-int __fastcall CheatsOkInternal(gentity_s *ent)
+int __cdecl CheatsOkInternal(gentity_s *ent)
 {
     const char *v2; // r3
     const char *v4; // r3
@@ -33,7 +33,7 @@ int __fastcall CheatsOkInternal(gentity_s *ent)
     }
 }
 
-int __fastcall CheatsOk(gentity_s *ent)
+int __cdecl CheatsOk(gentity_s *ent)
 {
     int ok; // r31
 
@@ -44,7 +44,7 @@ int __fastcall CheatsOk(gentity_s *ent)
     return ok;
 }
 
-char *__fastcall ConcatArgs(int start)
+char *__cdecl ConcatArgs(int start)
 {
     size_t v2; // r30
     int nesting; // r7
@@ -91,7 +91,7 @@ char *__fastcall ConcatArgs(int start)
     return result;
 }
 
-void __fastcall SanitizeString(char *in, char *out)
+void __cdecl SanitizeString(char *in, char *out)
 {
     char *v2; // r31
     char v4; // r11
@@ -120,7 +120,7 @@ void __fastcall SanitizeString(char *in, char *out)
     *out = 0;
 }
 
-void __fastcall G_setfog(const char *fogstring)
+void __cdecl G_setfog(const char *fogstring)
 {
     const char *v2; // r3
     double v3; // fp0
@@ -144,7 +144,7 @@ void __fastcall G_setfog(const char *fogstring)
     }
 }
 
-void __fastcall Cmd_Fogswitch_f()
+void __cdecl Cmd_Fogswitch_f()
 {
     const char *v0; // r3
 
@@ -152,7 +152,7 @@ void __fastcall Cmd_Fogswitch_f()
     G_setfog(v0);
 }
 
-void __fastcall Cmd_SetSoundLength_f()
+void __cdecl Cmd_SetSoundLength_f()
 {
     int nesting; // r7
     int v1; // r5
@@ -200,12 +200,12 @@ void __fastcall Cmd_SetSoundLength_f()
     }
 }
 
-void __fastcall Cmd_RemoveCorpse_f()
+void __cdecl Cmd_RemoveCorpse_f()
 {
     G_GetFreeActorCorpseIndex(0);
 }
 
-void __fastcall Cmd_Give_f(gentity_s *ent)
+void __cdecl Cmd_Give_f(gentity_s *ent)
 {
     int ok; // r31
     int v3; // r3
@@ -346,7 +346,7 @@ LABEL_25:
         goto LABEL_31;
 }
 
-void __fastcall Cmd_Take_f(gentity_s *ent)
+void __cdecl Cmd_Take_f(gentity_s *ent)
 {
     int ok; // r30
     int v3; // r3
@@ -478,7 +478,7 @@ LABEL_25:
         goto LABEL_33;
 }
 
-void __fastcall Cmd_God_f(gentity_s *ent)
+void __cdecl Cmd_God_f(gentity_s *ent)
 {
     int ok; // r30
     int v3; // r3
@@ -510,7 +510,7 @@ void __fastcall Cmd_God_f(gentity_s *ent)
     }
 }
 
-void __fastcall Cmd_DemiGod_f(gentity_s *ent)
+void __cdecl Cmd_DemiGod_f(gentity_s *ent)
 {
     int ok; // r30
     int v3; // r3
@@ -541,7 +541,7 @@ void __fastcall Cmd_DemiGod_f(gentity_s *ent)
     }
 }
 
-void __fastcall Cmd_Notarget_f(gentity_s *ent)
+void __cdecl Cmd_Notarget_f(gentity_s *ent)
 {
     int ok; // r30
     int v3; // r3
@@ -572,7 +572,7 @@ void __fastcall Cmd_Notarget_f(gentity_s *ent)
     }
 }
 
-void __fastcall Cmd_Noclip_f(gentity_s *ent)
+void __cdecl Cmd_Noclip_f(gentity_s *ent)
 {
     int ok; // r30
     int v3; // r3
@@ -603,7 +603,7 @@ void __fastcall Cmd_Noclip_f(gentity_s *ent)
     }
 }
 
-void __fastcall Cmd_UFO_f(gentity_s *ent)
+void __cdecl Cmd_UFO_f(gentity_s *ent)
 {
     int ok; // r30
     int v3; // r3
@@ -634,7 +634,7 @@ void __fastcall Cmd_UFO_f(gentity_s *ent)
     }
 }
 
-void __fastcall Cmd_Kill_f(gentity_s *ent)
+void __cdecl Cmd_Kill_f(gentity_s *ent)
 {
     gclient_s *client; // r5
     unsigned int v2; // r6
@@ -650,7 +650,7 @@ void __fastcall Cmd_Kill_f(gentity_s *ent)
     }
 }
 
-void __fastcall Cmd_Where_f(gentity_s *ent)
+void __cdecl Cmd_Where_f(gentity_s *ent)
 {
     gclient_s *client; // r11
     char *v3; // r3
@@ -665,7 +665,7 @@ void __fastcall Cmd_Where_f(gentity_s *ent)
     }
 }
 
-void __fastcall Cmd_SetViewpos_f(gentity_s *ent)
+void __cdecl Cmd_SetViewpos_f(gentity_s *ent)
 {
     int ok; // r31
     int v3; // r3
@@ -742,7 +742,7 @@ LABEL_20:
     SV_GameSendServerCommand(ent - g_entities, v4);
 }
 
-void __fastcall Cmd_JumpToNode_f(gentity_s *ent)
+void __cdecl Cmd_JumpToNode_f(gentity_s *ent)
 {
     int ok; // r30
     int v3; // r3
@@ -797,12 +797,12 @@ void __fastcall Cmd_JumpToNode_f(gentity_s *ent)
     SV_GameSendServerCommand((v5 >> 7) + ((unsigned int)v5 >> 31), v4);
 }
 
-void __fastcall Cmd_InterruptCamera_f(gentity_s *ent)
+void __cdecl Cmd_InterruptCamera_f(gentity_s *ent)
 {
     ;
 }
 
-void __fastcall Cmd_DropWeapon_f(gentity_s *pSelf)
+void __cdecl Cmd_DropWeapon_f(gentity_s *pSelf)
 {
     int ok; // r31
     int v3; // r3
@@ -824,7 +824,7 @@ void __fastcall Cmd_DropWeapon_f(gentity_s *pSelf)
     }
 }
 
-void __fastcall Cmd_MenuResponse_f(gentity_s *pEnt)
+void __cdecl Cmd_MenuResponse_f(gentity_s *pEnt)
 {
     int nesting; // r7
     unsigned int v3; // r3
@@ -862,7 +862,7 @@ void __fastcall Cmd_MenuResponse_f(gentity_s *pEnt)
 }
 
 // attributes: thunk
-void __fastcall Cmd_PrintEntities_f()
+void __cdecl Cmd_PrintEntities_f()
 {
     G_PrintEntities();
 }
@@ -983,7 +983,7 @@ void Cmd_VisionSetNight_f()
     SV_SetConfigstring(1150, v6);
 }
 
-void __fastcall ClientCommand(int clientNum, const char *s)
+void __cdecl ClientCommand(int clientNum, const char *s)
 {
     gentity_s *v3; // r30
     const char *v5; // r3

@@ -162,7 +162,7 @@ union entityState_s_un2 // sizeof=0x4
     int vehicleXModel;
 };
 
-struct entityState_s // sizeof=0xF4
+struct entityState_s // sizeof=0xF4 // (KISAKTODO: should be in q_shared?)
 {                                       // XREF: ?SV_SendClientGameState@@YAXPAUclient_t@@@Z/r
                                         // archivedEntity_s/r ...
     int number;

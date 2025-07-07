@@ -1,173 +1,737 @@
 #pragma once
+#include <qcommon/ent.h>
 
 #ifndef KISAK_SP 
 #error This file is for SinglePlayer only 
 #endif
+#include <game/enthandle.h>
+#include <qcommon/net_chan.h>
+#include <client/client.h>
+
+union entityState_s_un
+{
+    unsigned __int8 scale;
+    unsigned __int8 eventParm2;
+    unsigned __int8 vehicleCompassType;
+};
+
+struct entityState_s
+{
+    unsigned __int8 eType;
+    unsigned __int8 surfType;
+    unsigned __int8 weapon;
+    unsigned __int8 weaponModel;
+    entityState_s_un un1;
+    LerpEntityState lerp;
+    unsigned int eventParm;
+    unsigned __int16 loopSound;
+    unsigned __int16 number;
+    unsigned __int16 otherEntityNum;
+    unsigned __int16 groundEntityNum;
+    _BYTE index[2];
+    int time2;
+    int solid;
+    int eventSequence;
+    unsigned __int8 events[4];
+    unsigned int eventParms[4];
+    _BYTE un2[4];
+};
+
+struct entityShared_t
+{
+    unsigned __int8 linked;
+    unsigned __int8 bmodel;
+    unsigned __int8 svFlags;
+    unsigned __int8 eventType;
+    unsigned __int8 inuse;
+    float mins[3];
+    float maxs[3];
+    int contents;
+    float absmin[3];
+    float absmax[3];
+    float currentOrigin[3];
+    float currentAngles[3];
+    EntHandle ownerNum;
+    int eventTime;
+};
+
+enum he_type_t : __int32
+{
+    HE_TYPE_FREE = 0x0,
+    HE_TYPE_TEXT = 0x1,
+    HE_TYPE_VALUE = 0x2,
+    HE_TYPE_MATERIAL = 0x3,
+    HE_TYPE_TIMER_DOWN = 0x4,
+    HE_TYPE_TIMER_UP = 0x5,
+    HE_TYPE_TENTHS_TIMER_DOWN = 0x6,
+    HE_TYPE_TENTHS_TIMER_UP = 0x7,
+    HE_TYPE_CLOCK_DOWN = 0x8,
+    HE_TYPE_CLOCK_UP = 0x9,
+    HE_TYPE_WAYPOINT = 0xA,
+    HE_TYPE_COUNT = 0xB,
+};
+
+struct $0D0CB43DF22755AD856C77DD3F304010
+{
+    unsigned __int8 r;
+    unsigned __int8 g;
+    unsigned __int8 b;
+    unsigned __int8 a;
+};
+
+union hudelem_color_t
+{
+    $0D0CB43DF22755AD856C77DD3F304010 __s0;
+    int rgba;
+};
+
+struct hudelem_s
+{
+    he_type_t type;
+    float x;
+    float y;
+    float z;
+    int targetEntNum;
+    float fontScale;
+    float fromFontScale;
+    int fontScaleStartTime;
+    int fontScaleTime;
+    int font;
+    int alignOrg;
+    int alignScreen;
+    hudelem_color_t color;
+    hudelem_color_t fromColor;
+    int fadeStartTime;
+    int fadeTime;
+    int label;
+    int width;
+    int height;
+    int materialIndex;
+    int offscreenMaterialIdx;
+    int fromWidth;
+    int fromHeight;
+    int scaleStartTime;
+    int scaleTime;
+    float fromX;
+    float fromY;
+    int fromAlignOrg;
+    int fromAlignScreen;
+    int moveStartTime;
+    int moveTime;
+    int time;
+    int duration;
+    float value;
+    int text;
+    float sort;
+    hudelem_color_t glowColor;
+    int fxBirthTime;
+    int fxLetterTime;
+    int fxDecayStartTime;
+    int fxDecayDuration;
+    int soundID;
+    int flags;
+};
+
+struct game_hudelem_s
+{
+    hudelem_s elem;
+};
+
+struct playerState_s_hud
+{
+    hudelem_s elem[256];
+};
+
+enum ViewLockTypes : __int32
+{
+    PLAYERVIEWLOCK_NONE = 0x0,
+    PLAYERVIEWLOCK_FULL = 0x1,
+    PLAYERVIEWLOCK_WEAPONJITTER = 0x2,
+    PLAYERVIEWLOCKCOUNT = 0x3,
+};
+
+struct SprintState
+{
+    int sprintButtonUpRequired;
+    int sprintDelay;
+    int lastSprintStart;
+    int lastSprintEnd;
+    int sprintStartMaxLength;
+};
+
+struct MantleState
+{
+    float yaw;
+    int timer;
+    int transIndex;
+    int flags;
+};
+
+enum ActionSlotType : __int32
+{
+    ACTIONSLOTTYPE_DONOTHING = 0x0,
+    ACTIONSLOTTYPE_SPECIFYWEAPON = 0x1,
+    ACTIONSLOTTYPE_ALTWEAPONTOGGLE = 0x2,
+    ACTIONSLOTTYPE_NIGHTVISION = 0x3,
+    ACTIONSLOTTYPECOUNT = 0x4,
+};
+
+struct ActionSlotParam_SpecifyWeapon
+{
+    unsigned int index;
+};
+
+/* 9179 */
+struct ActionSlotParam
+{
+    ActionSlotParam_SpecifyWeapon specifyWeapon;
+};
+
+/* 9184 */
+struct playerState_s
+{
+    int commandTime;
+    int pm_type;
+    int bobCycle;
+    int pm_flags;
+    int weapFlags;
+    int otherFlags;
+    int pm_time;
+    float origin[3];
+    float velocity[3];
+    float oldVelocity[2];
+    int weaponTime;
+    int weaponDelay;
+    int grenadeTimeLeft;
+    int throwBackGrenadeOwner;
+    int throwBackGrenadeTimeLeft;
+    int weaponRestrictKickTime;
+    int foliageSoundTime;
+    int gravity;
+    float leanf;
+    int speed;
+    float delta_angles[3];
+    int groundEntityNum;
+    float vLadderVec[3];
+    int jumpTime;
+    float jumpOriginZ;
+    int movementDir;
+    int eFlags;
+    int eventSequence;
+    int events[4];
+    unsigned int eventParms[4];
+    int oldEventSequence;
+    int clientNum;
+    int offHandIndex;
+    OffhandSecondaryClass offhandSecondary;
+    unsigned int weapon;
+    int weaponstate;
+    unsigned int weaponShotCount;
+    float fWeaponPosFrac;
+    int adsDelayTime;
+    int spreadOverride;
+    int spreadOverrideState;
+    int viewmodelIndex;
+    float viewangles[3];
+    int viewHeightTarget;
+    float viewHeightCurrent;
+    int viewHeightLerpTime;
+    int viewHeightLerpTarget;
+    int viewHeightLerpDown;
+    float viewAngleClampBase[2];
+    float viewAngleClampRange[2];
+    int damageEvent;
+    int damageYaw;
+    int damagePitch;
+    int damageCount;
+    int stats[4];
+    int ammo[128];
+    int ammoclip[128];
+    unsigned int weapons[4];
+    unsigned int weaponold[4];
+    unsigned int weaponrechamber[4];
+    float proneDirection;
+    float proneDirectionPitch;
+    float proneTorsoPitch;
+    ViewLockTypes viewlocked;
+    int viewlocked_entNum;
+    int vehicleType;
+    float linkAngles[3];
+    float groundTiltAngles[3];
+    int cursorHint;
+    int cursorHintString;
+    int cursorHintEntIndex;
+    int locationSelectionInfo;
+    SprintState sprintState;
+    float fTorsoPitch;
+    float fWaistPitch;
+    float holdBreathScale;
+    int holdBreathTimer;
+    float moveSpeedScaleMultiplier;
+    MantleState mantleState;
+    float meleeChargeYaw;
+    int meleeChargeDist;
+    int meleeChargeTime;
+    int weapLockFlags;
+    int weapLockedEntnum;
+    unsigned int forcedViewAnimWeaponIdx;
+    int forcedViewAnimWeaponState;
+    unsigned int forcedViewAnimOriginalWeaponIdx;
+    ActionSlotType actionSlotType[4];
+    ActionSlotParam actionSlotParam[4];
+    int entityEventSequence;
+    int weapAnim;
+    float aimSpreadScale;
+    int shellshockIndex;
+    int shellshockTime;
+    int shellshockDuration;
+    float dofNearStart;
+    float dofNearEnd;
+    float dofFarStart;
+    float dofFarEnd;
+    float dofNearBlur;
+    float dofFarBlur;
+    float dofViewmodelStart;
+    float dofViewmodelEnd;
+    int hudElemLastAssignedSoundID;
+    unsigned __int8 weaponmodels[128];
+    playerState_s_hud hud;
+};
+
+enum clientConnected_t : __int32
+{
+    CON_DISCONNECTED = 0x0,
+    CON_CONNECTING = 0x1,
+    CON_CONNECTED = 0x2,
+};
+
+struct clientPersistent_t
+{
+    clientConnected_t connected;
+    usercmd_s cmd;
+    usercmd_s oldcmd;
+    int maxHealth;
+    float moveSpeedScaleMultiplier;
+};
+
+struct gclient_s
+{
+    playerState_s ps;
+    clientPersistent_t pers;
+    int noclip;
+    int ufo;
+    int bFrozen;
+    int buttons;
+    int oldbuttons;
+    int latched_buttons;
+    int buttonsSinceLastFrame;
+    float fGunPitch;
+    float fGunYaw;
+    float fGunXOfs;
+    float fGunYOfs;
+    float fGunZOfs;
+    int damage_blood;
+    float damage_from[3];
+    int damage_fromWorld;
+    int respawnTime;
+    float currentAimSpreadScale;
+    gentity_s *pHitHitEnt;
+    EntHandle pLookatEnt;
+    float prevLinkedInvQuat[4];
+    bool prevLinkAnglesSet;
+    bool link_rotationMovesEyePos;
+    bool link_doCollision;
+    bool link_useTagAnglesForViewAngles;
+    bool linkAnglesLocked;
+    float linkAnglesFrac;
+    float linkAnglesMinClamp[2];
+    float linkAnglesMaxClamp[2];
+    int inControlTime;
+    int lastTouchTime;
+    EntHandle useHoldEntity;
+    int useHoldTime;
+    int useButtonDone;
+    int bDisableAutoPickup;
+    int invulnerableExpireTime;
+    bool invulnerableActivated;
+    bool invulnerableEnabled;
+    bool playerMoved;
+    float playerLOSCheckPos[2];
+    float playerLOSCheckDir[2];
+    int playerLOSPosTime;
+    int playerADSTargetTime;
+    unsigned int lastWeapon;
+    bool previouslyFiring;
+    bool previouslyUsingNightVision;
+    int groundTiltEntNum;
+};
+
+
+/* 9426 */
+struct __declspec(align(2)) usercmd_s
+{
+    int serverTime;
+    int buttons;
+    int angles[3];
+    unsigned __int8 weapon;
+    unsigned __int8 offHandIndex;
+    char forwardmove;
+    char rightmove;
+    char upmove;
+    char pitchmove;
+    char yawmove;
+    float gunPitch;
+    float gunYaw;
+    float gunXOfs;
+    float gunYOfs;
+    float gunZOfs;
+    float meleeChargeYaw;
+    unsigned __int8 meleeChargeDist;
+    char selectedLocation[2];
+};
+
+struct serverCommandsHeader_t
+{
+    int rover;
+    int sequence;
+    int sent;
+};
+
+struct serverCommands_s
+{
+    serverCommandsHeader_t header;
+    char buf[8192];
+    int commands[256];
+};
+
+struct client_t
+{
+    int state;
+    serverCommands_s reliableCommands;
+    usercmd_s lastUsercmd;
+    gentity_s *gentity;
+    playerState_s frames[1];
+    netchan_t netchan;
+};
+
+struct server_demo_save_t
+{
+    unsigned __int8 *buf;
+    int bufLen;
+};
+
+struct server_demo_history_t
+{
+    bool manual;
+    int time;
+    char name[64];
+    server_demo_save_t save;
+    unsigned __int8 *cmBuf;
+    int cmBufLen;
+    unsigned __int8 *freeEntBuf;
+    int freeEntBufLen;
+    int randomSeed;
+    int nextFramePos;
+    usercmd_s lastUsercmd;
+    int msgBit;
+    int msgReadcount;
+    int readType;
+};
+
+struct SaveImmediate
+{
+    void *f;
+};
+
+struct FileMarkSkip
+{
+    char name[64];
+    int fileOffset;
+};
+
+enum SaveType : __int32
+{
+    SAVE_TYPE_INTERNAL = 0x0,
+    SAVE_TYPE_AUTOSAVE = 0x1,
+    SAVE_TYPE_CONSOLE = 0x2,
+};
+
+struct __declspec(align(4)) PendingSave
+{
+    char filename[64];
+    char description[256];
+    char screenShotName[64];
+    int saveId;
+    SaveType saveType;
+    unsigned int commitLevel;
+    bool suppressPlayerNotify;
+};
+
+enum ServerFrameExtent : __int32
+{
+    SV_FRAME_DO_ALL = 0x0,
+    SV_FRAME_DO_SMOOTHING = 0x1,
+};
 
 // sv_ccmds
-void __fastcall SV_SetValuesFromSkill();
+void __cdecl SV_SetValuesFromSkill();
 void SV_DifficultyEasy();
 void SV_DifficultyMedium();
 void SV_DifficultyHard();
 void SV_DifficultyFu();
-int __fastcall ReadSaveHeader(const char *filename, SaveHeader *header);
-int __fastcall ExtractMapStringFromSaveGame(const char *filename, char *mapname);
-void __fastcall ShowLoadErrorsSummary(const char *mapName, unsigned int count, int a3);
-void __fastcall SV_ClearLoadGame();
-void __fastcall SV_MapRestart(int savegame, int loadScripts);
-int __fastcall CheckForSaveGame(char *mapname, char *filename);
-int __fastcall SV_CheckLoadGame();
-void __fastcall SV_RequestMapRestart(int loadScripts);
-void __fastcall SV_FastRestart_f();
-void __fastcall SV_MapRestart_f();
-// attributes: thunk
-void __fastcall SV_NextLevel_f();
-void __fastcall SV_LoadGame_f();
-void __fastcall SV_ForceSelectSaveDevice_f();
-void __fastcall SV_SelectSaveDevice_f();
-void __fastcall CheckSaveExists(const char *filename);
-void __fastcall SV_LoadGameContinue_f();
-// attributes: thunk
-void __fastcall SV_ScriptUsage_f();
+int __cdecl ReadSaveHeader(const char *filename, SaveHeader *header);
+int __cdecl ExtractMapStringFromSaveGame(const char *filename, char *mapname);
+void __cdecl ShowLoadErrorsSummary(const char *mapName, unsigned int count, int a3);
+void __cdecl SV_ClearLoadGame();
+void __cdecl SV_MapRestart(int savegame, int loadScripts);
+int __cdecl CheckForSaveGame(char *mapname, char *filename);
+int __cdecl SV_CheckLoadGame();
+void __cdecl SV_RequestMapRestart(int loadScripts);
+void __cdecl SV_FastRestart_f();
+void __cdecl SV_MapRestart_f();
+void __cdecl SV_NextLevel_f();
+void __cdecl SV_LoadGame_f();
+void __cdecl SV_ForceSelectSaveDevice_f();
+void __cdecl SV_SelectSaveDevice_f();
+void __cdecl CheckSaveExists(const char *filename);
+void __cdecl SV_LoadGameContinue_f();
+void __cdecl SV_ScriptUsage_f();
 void SV_ScriptVarUsage_f_usage();
 void SV_ScriptVarUsage_f();
-void SV_Script//Profile_f();
+void SV_ScriptProfile_f();
 void SV_ScriptBuiltin_f();
 void SV_ScriptProfileReset_f();
-// attributes: thunk
-void __fastcall SV_ScriptProfileFile_f();
-// attributes: thunk
-void __fastcall SV_StringUsage_f();
+void __cdecl SV_ScriptProfileFile_f();
+void __cdecl SV_StringUsage_f();
 void SV_SaveGame_f();
-void __fastcall SV_SaveGameLastCommit_f();
-void __fastcall SV_RemoveOperatorCommands();
+void __cdecl SV_SaveGameLastCommit_f();
+void __cdecl SV_RemoveOperatorCommands();
 void SV_Map_f();
-void __fastcall SV_AddOperatorCommands();
+void __cdecl SV_AddOperatorCommands();
 
 
 // sv_client
-void __fastcall SV_DirectConnect();
-void __fastcall SV_SendClientGameState(client_t *client);
-void __fastcall SV_SendGameState();
-void __fastcall SV_ClientEnterWorld(client_t *client);
-float __fastcall SV_FX_GetVisibility(const float *start, const float *end);
-void __fastcall SV_ExecuteClientCommand(const char *s);
-void __fastcall SV_ClientThink(usercmd_s *cmd);
-// attributes: thunk
-gentity_s *__fastcall SV_GetEntityState(int entnum);
-void __fastcall SV_TrackPlayerDied();
-void __fastcall SV_AddToPlayerScore(int amount);
+void __cdecl SV_DirectConnect();
+void __cdecl SV_SendClientGameState(client_t *client);
+void __cdecl SV_SendGameState();
+void __cdecl SV_ClientEnterWorld(client_t *client);
+float __cdecl SV_FX_GetVisibility(const float *start, const float *end);
+void __cdecl SV_ExecuteClientCommand(const char *s);
+void __cdecl SV_ClientThink(usercmd_s *cmd);
+gentity_s *__cdecl SV_GetEntityState(int entnum);
+void __cdecl SV_TrackPlayerDied();
+void __cdecl SV_AddToPlayerScore(int amount);
 
 
 
 // sv_demo
-void __fastcall TRACK_sv_demo();
-unsigned int __fastcall SV_GetHistoryIndex(server_demo_history_t *history);
-int __fastcall SV_GetBufferIndex(unsigned __int8 *ptr);
-void __fastcall SV_HistoryFree(unsigned __int8 *ptr, int size);
-int __fastcall SV_HistoryAlloc(server_demo_history_t *history, unsigned __int8 **pData, int size);
-int __fastcall SV_MsgAlloc(unsigned int maxsize);
+void __cdecl TRACK_sv_demo();
+unsigned int __cdecl SV_GetHistoryIndex(server_demo_history_t *history);
+int __cdecl SV_GetBufferIndex(unsigned __int8 *ptr);
+void __cdecl SV_HistoryFree(unsigned __int8 *ptr, int size);
+int __cdecl SV_HistoryAlloc(server_demo_history_t *history, unsigned __int8 **pData, int size);
+int __cdecl SV_MsgAlloc(unsigned int maxsize);
 void SV_CheckDemoSize();
-bool __fastcall SV_DemoWrite(const void *buffer, unsigned int len, _iobuf *file);
-int __fastcall SV_FindTimeSkipIndex(int time);
-FileMarkSkip *__fastcall SV_FindMarkSkip(const char *name);
-void __fastcall SV_TruncateHistoryTimeCache(int maxTime);
+bool __cdecl SV_DemoWrite(const void *buffer, unsigned int len, _iobuf *file);
+int __cdecl SV_FindTimeSkipIndex(int time);
+FileMarkSkip *__cdecl SV_FindMarkSkip(const char *name);
+void __cdecl SV_TruncateHistoryTimeCache(int maxTime);
 int SV_ClearHistoryMarkCache();
 // attributes: thunk
-void __fastcall SV_TruncateHistoryCache(int maxTime);
+void __cdecl SV_TruncateHistoryCache(int maxTime);
 int SV_SetAutoSaveHistoryTime();
-void __fastcall SV_ResetDemo();
+void __cdecl SV_ResetDemo();
 _iobuf *SV_ClearHistoryCache();
-void __fastcall SV_FreeDemoSaveBuf(server_demo_save_t *save);
-void __fastcall SV_FreeHistoryData(server_demo_history_t *history);
-void __fastcall SV_FreeHistory(server_demo_history_t **history);
+void __cdecl SV_FreeDemoSaveBuf(server_demo_save_t *save);
+void __cdecl SV_FreeHistoryData(server_demo_history_t *history);
+void __cdecl SV_FreeHistory(server_demo_history_t **history);
 void SV_FreeDemoMsg();
-int __fastcall SV_WaitForSaveHistoryDone();
-void __fastcall SV_ShutdownDemo();
-int __fastcall SV_AddDemoSave(SaveGame *savehandle, server_demo_save_t *save, int createSave);
-_iobuf *__fastcall SV_DemoOpenFile(const char *fileName);
-void __fastcall SV_InitWriteDemo(int randomSeed);
-void __fastcall SV_InitReadDemoSavegame(SaveGame **saveHandle);
-int __fastcall SV_InitDemoSavegame(SaveGame **save);
-bool __fastcall SV_IsDemoPlaying();
-bool __fastcall SV_UsingDemoSave();
-void __fastcall SV_RecordClientCommand(const char *s);
-void __fastcall SV_RecordClientThink(usercmd_s *cmd);
-void __fastcall SV_RecordFxVisibility(double visibility);
-void __fastcall SV_RecordCheatsOk(int cheatsOk);
-void __fastcall SV_RecordIsRecentlyLoaded(bool isRecentlyLoaded);
-void __fastcall SV_Record_Dvar_GetVariantString(const char *buffer);
-void __fastcall SV_RecordButtonPressed(int buttonPressed);
-void __fastcall SV_GetFreeDemoName(const char *baseName, int demoCount, char *testDemoName);
-void __fastcall SV_SaveDemoImmediate(SaveImmediate *save);
-void __fastcall SV_WriteDemo(SaveGame *save);
-void __fastcall SV_SaveDemo(const char *demoName, const char *description, unsigned __int32 saveType);
-void __fastcall SV_AutoSaveDemo(const char *baseName, const char *description, int demoCount, bool force);
+int __cdecl SV_WaitForSaveHistoryDone();
+void __cdecl SV_ShutdownDemo();
+int __cdecl SV_AddDemoSave(SaveGame *savehandle, server_demo_save_t *save, int createSave);
+_iobuf *__cdecl SV_DemoOpenFile(const char *fileName);
+void __cdecl SV_InitWriteDemo(int randomSeed);
+void __cdecl SV_InitReadDemoSavegame(SaveGame **saveHandle);
+int __cdecl SV_InitDemoSavegame(SaveGame **save);
+bool __cdecl SV_IsDemoPlaying();
+bool __cdecl SV_UsingDemoSave();
+void __cdecl SV_RecordClientCommand(const char *s);
+void __cdecl SV_RecordClientThink(usercmd_s *cmd);
+void __cdecl SV_RecordFxVisibility(double visibility);
+void __cdecl SV_RecordCheatsOk(int cheatsOk);
+void __cdecl SV_RecordIsRecentlyLoaded(bool isRecentlyLoaded);
+void __cdecl SV_Record_Dvar_GetVariantString(const char *buffer);
+void __cdecl SV_RecordButtonPressed(int buttonPressed);
+void __cdecl SV_GetFreeDemoName(const char *baseName, int demoCount, char *testDemoName);
+void __cdecl SV_SaveDemoImmediate(SaveImmediate *save);
+void __cdecl SV_WriteDemo(SaveGame *save);
+void __cdecl SV_SaveDemo(const char *demoName, const char *description, unsigned __int32 saveType);
+void __cdecl SV_AutoSaveDemo(const char *baseName, const char *description, int demoCount, bool force);
 void SV_EnableAutoDemo();
-void __fastcall SV_SaveDemo_f();
+void __cdecl SV_SaveDemo_f();
 void SV_DemoRestart();
-void __fastcall SV_DemoRestart_f();
-int __fastcall SV_DemoHasMark();
-void __fastcall SV_LoadDemo(SaveGame *save, void *fileHandle);
-bool __fastcall SV_RecordingDemo();
-int __fastcall SV_Demo_Dvar_Set(const char *var_name, const char *value);
-int __fastcall SV_WriteDemoSaveBuf(server_demo_save_t *save);
-bool __fastcall SV_WriteHistory(_iobuf *fileHistory, const server_demo_history_t *history);
-void __fastcall SV_SaveHistoryTime(server_demo_history_t *history);
-void __fastcall SV_SaveHistoryMark(const server_demo_history_t *history);
-void __fastcall SV_SaveHistory(server_demo_history_t *history);
-void __fastcall  SV_SaveHistoryLoop(unsigned int threadContext);
+void __cdecl SV_DemoRestart_f();
+int __cdecl SV_DemoHasMark();
+void __cdecl SV_LoadDemo(SaveGame *save, void *fileHandle);
+bool __cdecl SV_RecordingDemo();
+int __cdecl SV_Demo_Dvar_Set(const char *var_name, const char *value);
+int __cdecl SV_WriteDemoSaveBuf(server_demo_save_t *save);
+bool __cdecl SV_WriteHistory(_iobuf *fileHistory, const server_demo_history_t *history);
+void __cdecl SV_SaveHistoryTime(server_demo_history_t *history);
+void __cdecl SV_SaveHistoryMark(const server_demo_history_t *history);
+void __cdecl SV_SaveHistory(server_demo_history_t *history);
+void __cdecl  SV_SaveHistoryLoop(unsigned int threadContext);
 bool SV_InitHistorySaveThread();
-void __fastcall SV_InitDemoSystem();
-server_demo_history_t *__fastcall SV_DemoGetFreeBuffer();
-int __fastcall SV_HistoryIsNew(server_demo_history_t *history);
-void __fastcall SV_ClearInfrequentTimeMarks(server_demo_history_t *history);
-server_demo_history_t *__fastcall SV_DemoGetBuffer();
-server_demo_history_t *__fastcall SV_GetMarkHistory(const char *name);
-int __fastcall SV_DemoSaveHistory(server_demo_history_t *history);
-void __fastcall SV_DemoMark_f();
-bool __fastcall SV_DemoRead(void *buffer, unsigned int len, _iobuf *file);
-int __fastcall SV_DemoAllocRead(
+void __cdecl SV_InitDemoSystem();
+server_demo_history_t *__cdecl SV_DemoGetFreeBuffer();
+int __cdecl SV_HistoryIsNew(server_demo_history_t *history);
+void __cdecl SV_ClearInfrequentTimeMarks(server_demo_history_t *history);
+server_demo_history_t *__cdecl SV_DemoGetBuffer();
+server_demo_history_t *__cdecl SV_GetMarkHistory(const char *name);
+int __cdecl SV_DemoSaveHistory(server_demo_history_t *history);
+void __cdecl SV_DemoMark_f();
+bool __cdecl SV_DemoRead(void *buffer, unsigned int len, _iobuf *file);
+int __cdecl SV_DemoAllocRead(
     server_demo_history_t *history,
     unsigned __int8 **buffer,
     unsigned int len,
     _iobuf *file);
-bool __fastcall SV_ReadHistory(_iobuf *fileHistory, server_demo_history_t *history);
-bool __fastcall SV_DemoLoadHistory(_iobuf *fileHistory, int fileOffset);
-bool __fastcall SV_LoadHistoryForTime(int time);
-bool __fastcall SV_ActiveHistoryIsMark(const char *name);
-int __fastcall SV_LoadHistoryForMark(const char *name);
-void __fastcall SV_DemoGoto_f();
-void __fastcall SV_DemoSetNextLevelTime(int time);
-void __fastcall SV_DemoBack_f();
-void __fastcall SV_DemoForward_f();
-void __fastcall SV_DemoFullForward_f();
-void __fastcall SV_DemoLive_f();
-void __fastcall SV_DemoInfo_f(int a1, int a2, int a3);
-int __fastcall SV_GetDemoStartTime();
-int __fastcall SV_GetDemoEndTime();
-int __fastcall SV_CheckAutoSaveHistory(int setTooSoon);
+bool __cdecl SV_ReadHistory(_iobuf *fileHistory, server_demo_history_t *history);
+bool __cdecl SV_DemoLoadHistory(_iobuf *fileHistory, int fileOffset);
+bool __cdecl SV_LoadHistoryForTime(int time);
+bool __cdecl SV_ActiveHistoryIsMark(const char *name);
+int __cdecl SV_LoadHistoryForMark(const char *name);
+void __cdecl SV_DemoGoto_f();
+void __cdecl SV_DemoSetNextLevelTime(int time);
+void __cdecl SV_DemoBack_f();
+void __cdecl SV_DemoForward_f();
+void __cdecl SV_DemoFullForward_f();
+void __cdecl SV_DemoLive_f();
+void __cdecl SV_DemoInfo_f(int a1, int a2, int a3);
+int __cdecl SV_GetDemoStartTime();
+int __cdecl SV_GetDemoEndTime();
+int __cdecl SV_CheckAutoSaveHistory(int setTooSoon);
 void SV_DoAutoSaveHistory();
-void __fastcall SV_UpdateDemo();
+void __cdecl SV_UpdateDemo();
 void SV_DemoLive();
-void __fastcall SV_EndDemo(bool error);
+void __cdecl SV_EndDemo(bool error);
 void SV_ReadNextDemoType();
-bool __fastcall SV_InitReadDemo(int *randomSeed);
-bool __fastcall SV_InitDemo(int *randomSeed);
-bool __fastcall SV_ReadPacket(int framePos);
-float __fastcall SV_DemoFxVisibility();
-int __fastcall SV_DemoCheatsOk();
-bool __fastcall SV_DemoIsRecentlyLoaded();
-char *__fastcall SV_Demo_Dvar_GetVariantString();
-int __fastcall SV_DemoButtonPressed();
+bool __cdecl SV_InitReadDemo(int *randomSeed);
+bool __cdecl SV_InitDemo(int *randomSeed);
+bool __cdecl SV_ReadPacket(int framePos);
+float __cdecl SV_DemoFxVisibility();
+int __cdecl SV_DemoCheatsOk();
+bool __cdecl SV_DemoIsRecentlyLoaded();
+char *__cdecl SV_Demo_Dvar_GetVariantString();
+int __cdecl SV_DemoButtonPressed();
 
 
 // sv_main
-void __fastcall TRACK_sv_main();
-char *__fastcall SV_ExpandNewlines(char *in);
-void __fastcall SV_DumpServerCommands(client_t *client);
-void __fastcall AppendCommandsForInternalSave(const char *filename);
-void __fastcall SV_InitiatePendingSave(
+enum serverState_t : __int32
+{
+    SS_DEAD = 0x0,
+    SS_LOADING = 0x1,
+    SS_GAME = 0x2,
+};
+struct svEntity_s
+{
+    unsigned __int16 worldSector;
+    unsigned __int16 nextEntityInWorldSector;
+    int linkcontents;
+    float linkmin[2];
+    float linkmax[2];
+};
+struct server_demo_t
+{
+    int startTime;
+    int endTime;
+    bool nextLevelplaying;
+    server_demo_history_t *nextLevelSave;
+    int nextLevelTime;
+    bool changed;
+    bool recording;
+    bool playing;
+    int nextFramePos;
+    int readType;
+    int forwardMsec;
+    msg_t msg;
+    server_demo_save_t save;
+    bool startLive;
+    int autoSaveTime;
+};
+struct snapshotEntityNumbers_t
+{
+    int numSnapshotEntities;
+    int snapshotEntities[2048];
+};
+struct server_t
+{
+    serverState_t state;
+    int timeResidual;
+    bool clearTimeResidual;
+    int pendingSnapshot;
+    volatile int restartServerThread;
+    volatile int requestSaveGame;
+    volatile int savingGame;
+    bool smp;
+    int waitSnapshotTime;
+    volatile int serverExecTime;
+    volatile int serverFrameTime;
+    volatile int serverFrameTimeMin;
+    volatile int serverFrameTimeMax;
+    int inFrame;
+    int clientMessageTimeout;
+    int partialFrametime;
+    int nextFrameTime;
+    cmodel_t *models[512];
+    unsigned __int16 emptyConfigString;
+    unsigned __int16 configstrings[2815];
+    svEntity_s svEntities[2176];
+    gentity_s *gentities;
+    int gentitySize;
+    int num_entities;
+    playerState_s *gameClients;
+    int gameClientSize;
+    int checksum;
+    server_demo_t demo;
+    int levelTime;
+    int skelTimeStamp;
+    unsigned int skelMemPos;
+    int previousTime;
+    int previousTimeIndex;
+    int previousTotalTimes[10];
+    int previousErrorTimes[10];
+    snapshotEntityNumbers_t entityNumbers;
+    char cmd[1024];
+    char cmd2[1024];
+    char cmd3[1024];
+    char cmd4[1024];
+};
+
+struct serverStatic_t
+{
+    int initialized;
+    int snapFlagServerBit;
+    client_t *clients;
+    int numSnapshotEntities;
+    int nextSnapshotEntities;
+    netadr_t authorizeAddress;
+    int playerDeaths;
+    int playerScore;
+};
+
+struct __declspec(align(4)) PendingSaveList
+{
+    PendingSave pendingSaves[3];
+    volatile int count;
+    bool isAutoSaving;
+};
+
+void __cdecl TRACK_sv_main();
+char *__cdecl SV_ExpandNewlines(char *in);
+void __cdecl SV_DumpServerCommands(client_t *client);
+void __cdecl AppendCommandsForInternalSave(const char *filename);
+void __cdecl SV_InitiatePendingSave(
     const char *filename,
     const char *description,
     const char *screenshot,
@@ -175,69 +739,64 @@ void __fastcall SV_InitiatePendingSave(
     unsigned int commitLevel,
     PendingSave *pendingSave,
     bool suppressPlayerNotify);
-int __fastcall SV_AddPendingSave(
+int __cdecl SV_AddPendingSave(
     const char *filename,
     const char *description,
     const char *screenshot,
     SaveType saveType,
     unsigned int commitLevel,
     bool suppressPlayerNotify);
-int __fastcall SV_ProcessPendingSave(PendingSave *pendingSave);
-int __fastcall SV_ProcessPendingSaves();
-void __fastcall SV_ClearPendingSaves();
-int __fastcall SV_IsInternalSave(const char *filename);
-void __fastcall SV_SetLastSaveName(const char *filename);
-void __fastcall SV_AddServerCommand(client_t *client, const char *cmd);
-// local variable allocation has failed, the output may be wrong!
-void SV_SendServerCommand(
-    client_t *cl,
-    const char *fmt,
-    __int64 a3,
-    __int64 a4,
-    __int64 a5,
-    int a6,
-    int a7,
-    int a8,
-    int a9,
-    int a10,
-    int a11,
-    ...);
-void __fastcall SV_SaveServerCommands(SaveGame *save);
-void __fastcall SV_LoadServerCommands(SaveGame *save);
-void __fastcall SV_PreFrame();
-int __fastcall SV_RunFrame(ServerFrameExtent extent, int timeCap);
+int __cdecl SV_ProcessPendingSave(PendingSave *pendingSave);
+int __cdecl SV_ProcessPendingSaves();
+void __cdecl SV_ClearPendingSaves();
+int __cdecl SV_IsInternalSave(const char *filename);
+void __cdecl SV_SetLastSaveName(const char *filename);
+void __cdecl SV_AddServerCommand(client_t *client, const char *cmd);
+void SV_SendServerCommand(client_t *cl, const char *fmt, ...);
+void __cdecl SV_SaveServerCommands(SaveGame *save);
+void __cdecl SV_LoadServerCommands(SaveGame *save);
+void __cdecl SV_PreFrame();
+int __cdecl SV_RunFrame(ServerFrameExtent extent, int timeCap);
 void SV_ProcessPostFrame();
-void __fastcall SV_UpdatePerformanceFrame(int time);
-bool __fastcall SV_CheckSkipTimeout();
-int __fastcall SV_CheckStartServer();
-int __fastcall SV_WaitStartServer();
-void __fastcall  SV_ServerThread(unsigned int threadContext);
-void __fastcall SV_InitServerThread();
-void __fastcall SV_ExitAfterTime();
+void __cdecl SV_UpdatePerformanceFrame(int time);
+bool __cdecl SV_CheckSkipTimeout();
+int __cdecl SV_CheckStartServer();
+int __cdecl SV_WaitStartServer();
+void __cdecl  SV_ServerThread(unsigned int threadContext);
+void __cdecl SV_InitServerThread();
+void __cdecl SV_ExitAfterTime();
 void SV_WakeServer();
-void __fastcall SV_WaitServer();
-void __fastcall SV_InitSnapshot();
-void __fastcall SV_WaitSaveGame();
-void __fastcall SV_BeginSaveGame();
-void __fastcall SV_EndSaveGame();
-int __fastcall SV_WaitServerSnapshot();
-bool __fastcall SV_ReachedServerCommandThreshold();
-void __fastcall SV_FrameInternal(int msec);
-int __fastcall SV_GetPartialFrametime();
-int __fastcall SV_ForwardFrame();
-int __fastcall SV_ClientFrameRateFix(int msec);
-int __fastcall SV_Frame(int msec);
-bool __fastcall SV_SaveMemory_IsRecentlyLoaded();
+void __cdecl SV_WaitServer();
+void __cdecl SV_InitSnapshot();
+void __cdecl SV_WaitSaveGame();
+void __cdecl SV_BeginSaveGame();
+void __cdecl SV_EndSaveGame();
+int __cdecl SV_WaitServerSnapshot();
+bool __cdecl SV_ReachedServerCommandThreshold();
+void __cdecl SV_FrameInternal(int msec);
+int __cdecl SV_GetPartialFrametime();
+int __cdecl SV_ForwardFrame();
+int __cdecl SV_ClientFrameRateFix(int msec);
+int __cdecl SV_Frame(int msec);
+bool __cdecl SV_SaveMemory_IsRecentlyLoaded();
+
+extern server_t sv;
+extern serverStatic_t svs;
+
+inline int SV_GetCheckSum()
+{
+    return sv.checksum;
+}
 
 
 // sv_snapshot
-void __fastcall SV_WriteSnapshotToClient(client_t *client, msg_t *msg);
-void __fastcall SV_UpdateServerCommandsToClient(client_t *client);
-void __fastcall SV_AddEntToSnapshot(int entnum);
-void __fastcall SV_AddEntitiesVisibleFromPoint(int clientNum);
-void __fastcall SV_BuildClientSnapshot(client_t *client);
-void __fastcall SV_SendMessageToClient(msg_t *msg, client_t *client);
-void __fastcall SV_BuildAndSendClientSnapshot(client_t *client);
-void __fastcall SV_SendClientMessages();
-void __fastcall SV_WriteSnapshotToClientCmd(void *cmdData);
-void __fastcall SV_ArchiveSnapshotCmd(void *cmdData);
+void __cdecl SV_WriteSnapshotToClient(client_t *client, msg_t *msg);
+void __cdecl SV_UpdateServerCommandsToClient(client_t *client);
+void __cdecl SV_AddEntToSnapshot(int entnum);
+void __cdecl SV_AddEntitiesVisibleFromPoint(int clientNum);
+void __cdecl SV_BuildClientSnapshot(client_t *client);
+void __cdecl SV_SendMessageToClient(msg_t *msg, client_t *client);
+void __cdecl SV_BuildAndSendClientSnapshot(client_t *client);
+void __cdecl SV_SendClientMessages();
+void __cdecl SV_WriteSnapshotToClientCmd(void *cmdData);
+void __cdecl SV_ArchiveSnapshotCmd(void *cmdData);

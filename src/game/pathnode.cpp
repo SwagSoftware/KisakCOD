@@ -6,7 +6,7 @@
 
 //Line 37928:  0006 : 00006700       char const **nodeStringTable  82696700     pathnode.obj
 
-void __fastcall TRACK_pathnode()
+void __cdecl TRACK_pathnode()
 {
     track_static_alloc_internal(&g_path, 16512, "g_path", 6);
     track_static_alloc_internal((void *)nodeColorTable, 320, "nodeColorTable", 5);
@@ -14,7 +14,7 @@ void __fastcall TRACK_pathnode()
     track_static_alloc_internal(&unk_82E20408, 996, "debugPathBuf", 0);
 }
 
-int __fastcall NodeTypeCanHavePriority(nodeType type)
+int __cdecl NodeTypeCanHavePriority(nodeType type)
 {
     unsigned int v1; // r10
     NodeTypeToName *i; // r11
@@ -29,7 +29,7 @@ int __fastcall NodeTypeCanHavePriority(nodeType type)
     return 1;
 }
 
-void __fastcall TurretNode_GetAngles(const pathnode_t *node, float *angleMin, float *angleMax)
+void __cdecl TurretNode_GetAngles(const pathnode_t *node, float *angleMin, float *angleMax)
 {
     int turretEntNumber; // r11
     gentity_s *v7; // r29
@@ -70,7 +70,7 @@ void __fastcall TurretNode_GetAngles(const pathnode_t *node, float *angleMin, fl
     }
 }
 
-bool __fastcall TurretNode_HasTurret(const pathnode_t *node)
+bool __cdecl TurretNode_HasTurret(const pathnode_t *node)
 {
     int turretEntNumber; // r11
 
@@ -96,7 +96,7 @@ bool __fastcall TurretNode_HasTurret(const pathnode_t *node)
     return (_cntlzw((unsigned int)g_entities[node->dynamic.turretEntNumber].pTurretInfo) & 0x20) == 0;
 }
 
-void __fastcall Path_ReadOnly(int offset)
+void __cdecl Path_ReadOnly(int offset)
 {
     const char *v1; // r3
 
@@ -104,7 +104,7 @@ void __fastcall Path_ReadOnly(int offset)
     Scr_Error(v1);
 }
 
-void __fastcall Path_NonNegativeFloat(pathnode_t *node, int offset)
+void __cdecl Path_NonNegativeFloat(pathnode_t *node, int offset)
 {
     double Float; // fp31
     const char *v5; // r3
@@ -128,7 +128,7 @@ void __fastcall Path_NonNegativeFloat(pathnode_t *node, int offset)
     *(float *)((char *)&node->constant.type + fields_3[offset].ofs) = Float;
 }
 
-void __fastcall Path_GetType(pathnode_t *node, int offset)
+void __cdecl Path_GetType(pathnode_t *node, int offset)
 {
     if (node->constant.type >= (unsigned int)NODE_NUMTYPES)
         MyAssertHandler(
@@ -140,7 +140,7 @@ void __fastcall Path_GetType(pathnode_t *node, int offset)
     Scr_AddString(nodeStringTable[node->constant.type]);
 }
 
-void __fastcall Scr_SetPathnodeField(unsigned int entnum, unsigned int offset)
+void __cdecl Scr_SetPathnodeField(unsigned int entnum, unsigned int offset)
 {
     const char *v4; // r3
 
@@ -162,11 +162,11 @@ void __fastcall Scr_SetPathnodeField(unsigned int entnum, unsigned int offset)
     Scr_Error(v4);
 }
 
-void __fastcall Scr_GetPathnodeField(unsigned int entnum, unsigned int offset)
+void __cdecl Scr_GetPathnodeField(unsigned int entnum, unsigned int offset)
 {
     node_field_t *v4; // r11
     unsigned __int8 *v5; // r3
-    void(__fastcall * getter)(pathnode_t *, int); // r10
+    void(__cdecl * getter)(pathnode_t *, int); // r10
 
     if (offset >= 0xB)
         MyAssertHandler(
@@ -193,7 +193,7 @@ void __fastcall Scr_GetPathnodeField(unsigned int entnum, unsigned int offset)
         Scr_GetGenericField(v5, v4->type, v4->ofs);
 }
 
-void __fastcall PathNode_ClearStringField(unsigned __int16 *destScrString)
+void __cdecl PathNode_ClearStringField(unsigned __int16 *destScrString)
 {
     unsigned int v2; // r3
 
@@ -205,7 +205,7 @@ void __fastcall PathNode_ClearStringField(unsigned __int16 *destScrString)
     }
 }
 
-void __fastcall PathNode_UpdateStringField(
+void __cdecl PathNode_UpdateStringField(
     const char *destKey,
     unsigned __int16 *destScrString,
     const char *key,
@@ -225,7 +225,7 @@ void __fastcall PathNode_UpdateStringField(
     }
 }
 
-void __fastcall PathNode_UpdateFloatField(const char *destKey, float *destFloat, const char *key, const char *value)
+void __cdecl PathNode_UpdateFloatField(const char *destKey, float *destFloat, const char *key, const char *value)
 {
     float v8; // [sp+50h] [-40h] BYREF
 
@@ -241,7 +241,7 @@ void __fastcall PathNode_UpdateFloatField(const char *destKey, float *destFloat,
     }
 }
 
-void __fastcall PathNode_OriginMatches(const char *value, const float *nodeOrigin)
+void __cdecl PathNode_OriginMatches(const char *value, const float *nodeOrigin)
 {
     float v4; // [sp+50h] [-30h] BYREF
     float v5; // [sp+54h] [-2Ch] BYREF
@@ -253,7 +253,7 @@ void __fastcall PathNode_OriginMatches(const char *value, const float *nodeOrigi
         ++g_path.originErrors;
 }
 
-void __fastcall node_droptofloor(pathnode_t *node)
+void __cdecl node_droptofloor(pathnode_t *node)
 {
     double v2; // fp29
     double v3; // fp31
@@ -326,7 +326,7 @@ LABEL_9:
     node->constant.type = NODE_BADNODE;
 }
 
-void __fastcall G_UpdateTrackExtraNodes()
+void __cdecl G_UpdateTrackExtraNodes()
 {
     unsigned int nodeCount; // r11
 
@@ -355,7 +355,7 @@ void __fastcall G_UpdateTrackExtraNodes()
     g_path.actualNodeCount = nodeCount;
 }
 
-void __fastcall GScr_AddFieldsForPathnode()
+void __cdecl GScr_AddFieldsForPathnode()
 {
     node_field_t *v0; // r30
     int v1; // r29
@@ -380,7 +380,7 @@ void __fastcall GScr_AddFieldsForPathnode()
     }
 }
 
-pathnode_t *__fastcall Scr_GetPathnode(scr_entref_t *index, unsigned int a2)
+pathnode_t *__cdecl Scr_GetPathnode(scr_entref_t *index, unsigned int a2)
 {
     scr_entref_t *EntityRef; // [sp+50h] [-20h]
 
@@ -404,7 +404,7 @@ pathnode_t *__fastcall Scr_GetPathnode(scr_entref_t *index, unsigned int a2)
     }
 }
 
-void __fastcall G_FreePathnodesScriptInfo()
+void __cdecl G_FreePathnodesScriptInfo()
 {
     unsigned int v0; // r31
     int v1; // r30
@@ -429,7 +429,7 @@ void __fastcall G_FreePathnodesScriptInfo()
     }
 }
 
-bool __fastcall Path_CompareNodesIncreasing(const pathsort_t *ps1, const pathsort_t *ps2)
+bool __cdecl Path_CompareNodesIncreasing(const pathsort_t *ps1, const pathsort_t *ps2)
 {
     if (ps1->node->dynamic.wLinkCount)
     {
@@ -443,7 +443,7 @@ bool __fastcall Path_CompareNodesIncreasing(const pathsort_t *ps1, const pathsor
     return ps1->metric < (double)ps2->metric;
 }
 
-unsigned int __fastcall Path_ConvertNodeToIndex(const pathnode_t *node)
+unsigned int __cdecl Path_ConvertNodeToIndex(const pathnode_t *node)
 {
     unsigned int v2; // r31
 
@@ -461,7 +461,7 @@ unsigned int __fastcall Path_ConvertNodeToIndex(const pathnode_t *node)
     return v2;
 }
 
-pathnode_t *__fastcall Path_ConvertIndexToNode(unsigned int index)
+pathnode_t *__cdecl Path_ConvertIndexToNode(unsigned int index)
 {
     if (index >= g_path.actualNodeCount)
         MyAssertHandler(
@@ -474,12 +474,12 @@ pathnode_t *__fastcall Path_ConvertIndexToNode(unsigned int index)
     return &gameWorldSp.path.nodes[index];
 }
 
-unsigned int __fastcall Path_NodeCount()
+unsigned int __cdecl Path_NodeCount()
 {
     return g_path.actualNodeCount;
 }
 
-void __fastcall Path_Init(int restart)
+void __cdecl Path_Init(int restart)
 {
     memset(&g_path, 0, sizeof(g_path));
     if (!gameWorldSp.path.nodes)
@@ -488,21 +488,21 @@ void __fastcall Path_Init(int restart)
     Path_InitBadPlaces();
 }
 
-int __fastcall NodeVisCacheEntry(int i, int j)
+int __cdecl NodeVisCacheEntry(int i, int j)
 {
     if (i >= j)
         MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\pathnode.cpp", 1255, 0, "%s", "i < j");
     return g_path.actualNodeCount * i + j;
 }
 
-int __fastcall ExpandedNodeVisCacheEntry(int i, int j)
+int __cdecl ExpandedNodeVisCacheEntry(int i, int j)
 {
     if (i <= j)
         MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\pathnode.cpp", 1262, 0, "%s", "i > j");
     return (i - 1) * g_path.actualNodeCount + j;
 }
 
-void __fastcall Path_NodesInCylinder_r(pathnode_tree_t *tree)
+void __cdecl Path_NodesInCylinder_r(pathnode_tree_t *tree)
 {
     pathnode_tree_t *v1; // r18
     int axis; // r11
@@ -626,7 +626,7 @@ LABEL_9:
     }
 }
 
-pathnode_tree_t *__fastcall Path_NodesInCylinder(
+pathnode_tree_t *__cdecl Path_NodesInCylinder(
     float *origin,
     double maxDist,
     double maxHeight,
@@ -657,7 +657,7 @@ pathnode_tree_t *__fastcall Path_NodesInCylinder(
     return result;
 }
 
-pathnode_tree_t *__fastcall Path_NodesInRadius(
+pathnode_tree_t *__cdecl Path_NodesInRadius(
     float *origin,
     double maxDist,
     pathsort_t *nodes,
@@ -668,12 +668,12 @@ pathnode_tree_t *__fastcall Path_NodesInRadius(
     return Path_NodesInCylinder(origin, maxDist, 1000000000.0, nodes, (int)maxNodes, maxNodes, typeFlags, a6);
 }
 
-int __fastcall Path_IsDynamicBlockingEntity(gentity_s *ent)
+int __cdecl Path_IsDynamicBlockingEntity(gentity_s *ent)
 {
     return ent->flags & 0x100;
 }
 
-bool __fastcall Path_IsBadPlaceLink(unsigned int nodeNumFrom, unsigned int nodeNumTo, team_t eTeam)
+bool __cdecl Path_IsBadPlaceLink(unsigned int nodeNumFrom, unsigned int nodeNumTo, team_t eTeam)
 {
     unsigned int actualNodeCount; // r8
     unsigned int v7; // r11
@@ -804,7 +804,7 @@ void Path_InitLinkInfoArray()
     }
 }
 
-void __fastcall Path_InitNodeDynamic(pathnode_t *loadNode)
+void __cdecl Path_InitNodeDynamic(pathnode_t *loadNode)
 {
     pathnode_dynamic_t *p_dynamic; // r11
     int v3; // ctr
@@ -836,7 +836,7 @@ void __fastcall Path_InitNodeDynamic(pathnode_t *loadNode)
     loadNode->dynamic.turretEntNumber = -1;
 }
 
-void __fastcall Path_InitNodesDynamic(float *a1)
+void __cdecl Path_InitNodesDynamic(float *a1)
 {
     unsigned int v1; // r28
     int v2; // r30
@@ -880,13 +880,13 @@ void __fastcall Path_InitNodesDynamic(float *a1)
     }
 }
 
-void __fastcall Path_PreSpawnInitPaths(float *a1)
+void __cdecl Path_PreSpawnInitPaths(float *a1)
 {
     Path_InitNodesDynamic(a1);
     Path_InitLinkCounts();
 }
 
-void __fastcall Path_DrawDebugNoLinks(const pathnode_t *node, const float (*color)[4], int duration)
+void __cdecl Path_DrawDebugNoLinks(const pathnode_t *node, const float (*color)[4], int duration)
 {
     double v5; // fp31
     double v6; // fp30
@@ -917,7 +917,7 @@ void __fastcall Path_DrawDebugNoLinks(const pathnode_t *node, const float (*colo
     G_DebugLineWithDuration(&v8, &v11, (const float *)color, 0, duration);
 }
 
-void __fastcall Path_DrawDebugLink(const pathnode_t *node, const int i, bool bShowAll)
+void __cdecl Path_DrawDebugLink(const pathnode_t *node, const int i, bool bShowAll)
 {
     double v3; // fp13
     pathlink_s *v4; // r6
@@ -1089,7 +1089,7 @@ void __fastcall Path_DrawDebugLink(const pathnode_t *node, const int i, bool bSh
     }
 }
 
-float __fastcall Path_GetDebugStringScale(const float *cameraPos, const float *origin)
+float __cdecl Path_GetDebugStringScale(const float *cameraPos, const float *origin)
 {
     gentity_s *v4; // r3
     double v5; // fp13
@@ -1117,7 +1117,7 @@ float __fastcall Path_GetDebugStringScale(const float *cameraPos, const float *o
     return *((float *)&v7 + 1);
 }
 
-void __fastcall Path_DrawDebugNodeBox(const pathnode_t *node, int a2, int a3, const float *a4)
+void __cdecl Path_DrawDebugNodeBox(const pathnode_t *node, int a2, int a3, const float *a4)
 {
     long double v5; // fp2
     double v6; // fp31
@@ -1171,7 +1171,7 @@ void __fastcall Path_DrawDebugNodeBox(const pathnode_t *node, int a2, int a3, co
     }
 }
 
-void __fastcall Path_DrawDebugNode(const float *cameraPos, const pathnode_t *node, int a3, const float *a4)
+void __cdecl Path_DrawDebugNode(const float *cameraPos, const pathnode_t *node, int a3, const float *a4)
 {
     double DebugStringScale; // fp1
     const char *v7; // r5
@@ -1189,7 +1189,7 @@ void __fastcall Path_DrawDebugNode(const float *cameraPos, const pathnode_t *nod
     G_AddDebugString(v8, colorYellow, DebugStringScale, v7, (int)nodeStringTable[node->constant.type]);
 }
 
-void __fastcall Path_DrawDebugFindPath(float *vOrigin)
+void __cdecl Path_DrawDebugFindPath(float *vOrigin)
 {
     int integer; // r11
     int v2; // r11
@@ -1333,7 +1333,7 @@ LABEL_11:
     }
 }
 
-void __fastcall Path_DrawFriendlyChain()
+void __cdecl Path_DrawFriendlyChain()
 {
     const float *v0; // r6
     int v1; // r5
@@ -1420,7 +1420,7 @@ void __fastcall Path_DrawFriendlyChain()
     }
 }
 
-bool __fastcall Path_IsNodeIndex(const pathnode_t *node, unsigned int nodeIndexToCheck)
+bool __cdecl Path_IsNodeIndex(const pathnode_t *node, unsigned int nodeIndexToCheck)
 {
     unsigned int v4; // r31
     pathnode_t *nodes; // r11
@@ -1449,7 +1449,7 @@ bool __fastcall Path_IsNodeIndex(const pathnode_t *node, unsigned int nodeIndexT
     return nodeIndexToCheck == v4;
 }
 
-int __fastcall Path_NodesVisible(const pathnode_t *node0, const pathnode_t *node1)
+int __cdecl Path_NodesVisible(const pathnode_t *node0, const pathnode_t *node1)
 {
     unsigned int v4; // r31
     unsigned int v5; // r29
@@ -1510,7 +1510,7 @@ int __fastcall Path_NodesVisible(const pathnode_t *node0, const pathnode_t *node
     return result;
 }
 
-int __fastcall Path_ExpandedNodeVisible(const pathnode_t *node0, const pathnode_t *node1)
+int __cdecl Path_ExpandedNodeVisible(const pathnode_t *node0, const pathnode_t *node1)
 {
     unsigned int v4; // r31
     unsigned int v5; // r29
@@ -1571,7 +1571,7 @@ int __fastcall Path_ExpandedNodeVisible(const pathnode_t *node0, const pathnode_
     return result;
 }
 
-pathnode_t *__fastcall Path_FindChainPos(const float *vOrigin, pathnode_t *pPrevChainPos)
+pathnode_t *__cdecl Path_FindChainPos(const float *vOrigin, pathnode_t *pPrevChainPos)
 {
     pathnode_t *result; // r3
     __int16 wChainId; // r31
@@ -1710,7 +1710,7 @@ pathnode_t *__fastcall Path_FindChainPos(const float *vOrigin, pathnode_t *pPrev
     return result;
 }
 
-void __fastcall Path_UpdateBestChainNode(pathnode_t *node, pathnode_t **bestNode, unsigned int *foundCount)
+void __cdecl Path_UpdateBestChainNode(pathnode_t *node, pathnode_t **bestNode, unsigned int *foundCount)
 {
     int wChainDepth; // r11
     int v6; // r10
@@ -1735,7 +1735,7 @@ void __fastcall Path_UpdateBestChainNode(pathnode_t *node, pathnode_t **bestNode
         *bestNode = node;
 }
 
-int __fastcall Path_CanSetDesiredChainPos(actor_s *claimer, const pathnode_t *node)
+int __cdecl Path_CanSetDesiredChainPos(actor_s *claimer, const pathnode_t *node)
 {
     int v4; // r30
     actor_s *Actor; // r3
@@ -1753,7 +1753,7 @@ int __fastcall Path_CanSetDesiredChainPos(actor_s *claimer, const pathnode_t *no
     return 0;
 }
 
-void __fastcall Path_AttachSentientToChainNode(sentient_s *sentient, unsigned __int16 targetname)
+void __cdecl Path_AttachSentientToChainNode(sentient_s *sentient, unsigned __int16 targetname)
 {
     unsigned int v4; // r28
     pathnode_t *pActualChainPos; // r11
@@ -1823,7 +1823,7 @@ void __fastcall Path_AttachSentientToChainNode(sentient_s *sentient, unsigned __
     }
 }
 
-pathnode_t *__fastcall Path_FirstNode(int typeFlags)
+pathnode_t *__cdecl Path_FirstNode(int typeFlags)
 {
     int v1; // r10
     pathnode_t *i; // r11
@@ -1839,7 +1839,7 @@ pathnode_t *__fastcall Path_FirstNode(int typeFlags)
     return &gameWorldSp.path.nodes[v1];
 }
 
-pathnode_t *__fastcall Path_NextNode(pathnode_t *prevNode, int typeFlags)
+pathnode_t *__cdecl Path_NextNode(pathnode_t *prevNode, int typeFlags)
 {
     pathnode_t *nodes; // r11
     unsigned int actualNodeCount; // r9
@@ -1883,7 +1883,7 @@ pathnode_t *__fastcall Path_NextNode(pathnode_t *prevNode, int typeFlags)
     return &nodes[v6];
 }
 
-sentient_s *__fastcall Path_GetNodeOwner(const pathnode_t *node)
+sentient_s *__cdecl Path_GetNodeOwner(const pathnode_t *node)
 {
     pathnode_dynamic_t *p_dynamic; // r31
     int v4; // r11
@@ -1912,7 +1912,7 @@ sentient_s *__fastcall Path_GetNodeOwner(const pathnode_t *node)
     return 0;
 }
 
-int __fastcall Path_CanStealPriorityNode(const pathnode_t *node, sentient_s *claimer)
+int __cdecl Path_CanStealPriorityNode(const pathnode_t *node, sentient_s *claimer)
 {
     sentient_s *NodeOwner; // r3
     sentient_s *v5; // r29
@@ -1969,7 +1969,7 @@ int __fastcall Path_CanStealPriorityNode(const pathnode_t *node, sentient_s *cla
     return result;
 }
 
-int __fastcall Path_CanStealNode(const pathnode_t *node, sentient_s *claimer)
+int __cdecl Path_CanStealNode(const pathnode_t *node, sentient_s *claimer)
 {
     sentient_s *NodeOwner; // r3
     sentient_s *v5; // r28
@@ -2019,7 +2019,7 @@ int __fastcall Path_CanStealNode(const pathnode_t *node, sentient_s *claimer)
     return result;
 }
 
-void __fastcall Path_ClaimNodeInternal(pathnode_t *node, sentient_s *claimer)
+void __cdecl Path_ClaimNodeInternal(pathnode_t *node, sentient_s *claimer)
 {
     actor_s *actor; // r3
 
@@ -2036,7 +2036,7 @@ void __fastcall Path_ClaimNodeInternal(pathnode_t *node, sentient_s *claimer)
     Sentient_BanNearNodes(claimer);
 }
 
-void __fastcall Path_MarkNodeOverlap(pathnode_t *node)
+void __cdecl Path_MarkNodeOverlap(pathnode_t *node)
 {
     if (!node)
         MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\pathnode.cpp", 3075, 0, "%s", "node");
@@ -2045,7 +2045,7 @@ void __fastcall Path_MarkNodeOverlap(pathnode_t *node)
     node->dynamic.iFreeTime = 0x7FFFFFFF;
 }
 
-void __fastcall Path_ClaimNode(pathnode_t *node, sentient_s *claimer)
+void __cdecl Path_ClaimNode(pathnode_t *node, sentient_s *claimer)
 {
     team_t eTeam; // r8
     int iFreeTime; // r8
@@ -2165,7 +2165,7 @@ void __fastcall Path_ClaimNode(pathnode_t *node, sentient_s *claimer)
     Sentient_BanNearNodes(claimer);
 }
 
-void __fastcall Path_RevokeClaim(pathnode_t *node, sentient_s *pNewClaimer)
+void __cdecl Path_RevokeClaim(pathnode_t *node, sentient_s *pNewClaimer)
 {
     pathnode_dynamic_t *p_dynamic; // r31
     sentient_s *v5; // r3
@@ -2190,7 +2190,7 @@ void __fastcall Path_RevokeClaim(pathnode_t *node, sentient_s *pNewClaimer)
     }
 }
 
-void __fastcall Path_RelinquishNode(sentient_s *claimer, int timeUntilRelinquished)
+void __cdecl Path_RelinquishNode(sentient_s *claimer, int timeUntilRelinquished)
 {
     pathnode_t *pClaimedNode; // r27
     team_t eTeam; // r8
@@ -2276,7 +2276,7 @@ void __fastcall Path_RelinquishNode(sentient_s *claimer, int timeUntilRelinquish
     }
 }
 
-int __fastcall Path_AllowedStancesForNode(pathnode_t *node)
+int __cdecl Path_AllowedStancesForNode(pathnode_t *node)
 {
     int spawnflags; // r8
     int v3; // r31
@@ -2302,7 +2302,7 @@ int __fastcall Path_AllowedStancesForNode(pathnode_t *node)
     return v3;
 }
 
-int __fastcall Path_SaveIndex(const pathnode_t *node)
+int __cdecl Path_SaveIndex(const pathnode_t *node)
 {
     pathnode_t *nodes; // r11
 
@@ -2322,7 +2322,7 @@ int __fastcall Path_SaveIndex(const pathnode_t *node)
     return node - nodes + 1;
 }
 
-pathnode_t *__fastcall Path_LoadNode(unsigned int index)
+pathnode_t *__cdecl Path_LoadNode(unsigned int index)
 {
     if (index > g_path.actualNodeCount)
         Com_Error(ERR_DROP, byte_8204195C, index);
@@ -2332,7 +2332,7 @@ pathnode_t *__fastcall Path_LoadNode(unsigned int index)
         return 0;
 }
 
-void __fastcall Path_ValidateNode(pathnode_t *node)
+void __cdecl Path_ValidateNode(pathnode_t *node)
 {
     int v2; // r31
     int v3; // r27
@@ -2394,7 +2394,7 @@ void __fastcall Path_ValidateNode(pathnode_t *node)
     }
 }
 
-void __fastcall Path_ValidateAllNodes()
+void __cdecl Path_ValidateAllNodes()
 {
     unsigned int v0; // r31
     int v1; // r30
@@ -2412,7 +2412,7 @@ void __fastcall Path_ValidateAllNodes()
     }
 }
 
-void __fastcall Path_CheckLinkLeaks()
+void __cdecl Path_CheckLinkLeaks()
 {
     int next; // r11
     int v1; // r10
@@ -2458,7 +2458,7 @@ void __fastcall Path_CheckLinkLeaks()
     }
 }
 
-void __fastcall Path_CheckUserCountLeaks()
+void __cdecl Path_CheckUserCountLeaks()
 {
     unsigned int v0; // r25
     unsigned int actualNodeCount; // r10
@@ -2487,7 +2487,7 @@ void __fastcall Path_CheckUserCountLeaks()
     }
 }
 
-void __fastcall Path_DisconnectPath(pathnode_t *node, pathlink_s *link)
+void __cdecl Path_DisconnectPath(pathnode_t *node, pathlink_s *link)
 {
     int v4; // r11
     pathlink_s *v5; // r11
@@ -2586,7 +2586,7 @@ void __fastcall Path_DisconnectPath(pathnode_t *node, pathlink_s *link)
     Path_ValidateNode(node);
 }
 
-void __fastcall Path_ConnectPath(pathnode_t *node, pathlink_s *link)
+void __cdecl Path_ConnectPath(pathnode_t *node, pathlink_s *link)
 {
     int v4; // r11
     float fDist; // r10
@@ -2625,7 +2625,7 @@ void __fastcall Path_ConnectPath(pathnode_t *node, pathlink_s *link)
     Path_ValidateNode(node);
 }
 
-void __fastcall Path_ConnectPathsForEntity(gentity_s *ent)
+void __cdecl Path_ConnectPathsForEntity(gentity_s *ent)
 {
     int disconnectedLinks; // r7
     int next; // r11
@@ -2662,7 +2662,7 @@ void __fastcall Path_ConnectPathsForEntity(gentity_s *ent)
     }
 }
 
-void __fastcall Path_DisconnectPathsForEntity(gentity_s *ent)
+void __cdecl Path_DisconnectPathsForEntity(gentity_s *ent)
 {
     int number; // r26
     unsigned int v3; // r21
@@ -2724,7 +2724,7 @@ void __fastcall Path_DisconnectPathsForEntity(gentity_s *ent)
     }
 }
 
-void __fastcall Path_UpdateBadPlaceCountForLink(pathlink_s *link, int teamflags, int delta)
+void __cdecl Path_UpdateBadPlaceCountForLink(pathlink_s *link, int teamflags, int delta)
 {
     unsigned int i; // r29
     int v7; // r31
@@ -2752,7 +2752,7 @@ void __fastcall Path_UpdateBadPlaceCountForLink(pathlink_s *link, int teamflags,
     }
 }
 
-void __fastcall Path_UpdateArcBadPlaceCount(badplace_arc_t *arc, int teamflags, int delta)
+void __cdecl Path_UpdateArcBadPlaceCount(badplace_arc_t *arc, int teamflags, int delta)
 {
     float *v6; // r3
     float *v7; // r3
@@ -2966,7 +2966,7 @@ void __fastcall Path_UpdateArcBadPlaceCount(badplace_arc_t *arc, int teamflags, 
     }
 }
 
-void __fastcall Path_UpdateBrushBadPlaceCount(gentity_s *brushEnt, int teamflags, int delta)
+void __cdecl Path_UpdateBrushBadPlaceCount(gentity_s *brushEnt, int teamflags, int delta)
 {
     int v6; // r5
     pathsort_t *v7; // r4
@@ -3052,7 +3052,7 @@ void __fastcall Path_UpdateBrushBadPlaceCount(gentity_s *brushEnt, int teamflags
     }
 }
 
-int __fastcall Path_IsNodeInArc(
+int __cdecl Path_IsNodeInArc(
     pathnode_t *pNode,
     const float *origin,
     double radius,
@@ -3063,7 +3063,7 @@ int __fastcall Path_IsNodeInArc(
     return IsPosInsideArc(pNode->constant.vOrigin, 15.0, origin, radius, angle0, angle1, halfHeight);
 }
 
-void __fastcall WriteEntityDisconnectedLinks(gentity_s *ent, SaveGame *save)
+void __cdecl WriteEntityDisconnectedLinks(gentity_s *ent, SaveGame *save)
 {
     int disconnectedLinks; // r11
     int v5; // r31
@@ -3082,7 +3082,7 @@ void __fastcall WriteEntityDisconnectedLinks(gentity_s *ent, SaveGame *save)
     }
 }
 
-void __fastcall ReadEntityDisconnectedLinks(gentity_s *ent, SaveGame *save)
+void __cdecl ReadEntityDisconnectedLinks(gentity_s *ent, SaveGame *save)
 {
     int disconnectedLinks; // r27
     int v5; // r31
@@ -3139,7 +3139,7 @@ void __fastcall ReadEntityDisconnectedLinks(gentity_s *ent, SaveGame *save)
     }
 }
 
-void __fastcall Scr_SetNodePriority()
+void __cdecl Scr_SetNodePriority()
 {
     unsigned int v0; // r4
     pathnode_t *Pathnode; // r29
@@ -3193,7 +3193,7 @@ void __fastcall Scr_SetNodePriority()
     }
 }
 
-void __fastcall Scr_IsNodeOccupied()
+void __cdecl Scr_IsNodeOccupied()
 {
     unsigned int v0; // r4
     bool v1; // r3
@@ -3209,7 +3209,7 @@ void __fastcall Scr_IsNodeOccupied()
     }
 }
 
-void __fastcall Scr_SetTurretNode()
+void __cdecl Scr_SetTurretNode()
 {
     unsigned int v0; // r4
     pathnode_t *Pathnode; // r30
@@ -3237,7 +3237,7 @@ void __fastcall Scr_SetTurretNode()
     }
 }
 
-void __fastcall Scr_UnsetTurretNode()
+void __cdecl Scr_UnsetTurretNode()
 {
     unsigned int v0; // r4
     pathnode_t *Pathnode; // r3
@@ -3256,7 +3256,7 @@ void __fastcall Scr_UnsetTurretNode()
     }
 }
 
-void __fastcall GScr_SetDynamicPathnodeField(pathnode_t *node, unsigned int index)
+void __cdecl GScr_SetDynamicPathnodeField(pathnode_t *node, unsigned int index)
 {
     unsigned int v3; // r3
 
@@ -3264,7 +3264,7 @@ void __fastcall GScr_SetDynamicPathnodeField(pathnode_t *node, unsigned int inde
     Scr_SetDynamicEntityField(v3, 2u, index);
 }
 
-void __fastcall G_DropPathnodesToFloor()
+void __cdecl G_DropPathnodesToFloor()
 {
     int v0; // r7
     int num_entities; // r8
@@ -3354,7 +3354,7 @@ void __fastcall G_DropPathnodesToFloor()
     }
 }
 
-void __fastcall Scr_FreePathnode(pathnode_t *node)
+void __cdecl Scr_FreePathnode(pathnode_t *node)
 {
     unsigned int v2; // r3
 
@@ -3369,7 +3369,7 @@ void __fastcall Scr_FreePathnode(pathnode_t *node)
     Scr_FreeEntityNum(v2, 2u);
 }
 
-void __fastcall Scr_AddPathnode(pathnode_t *node)
+void __cdecl Scr_AddPathnode(pathnode_t *node)
 {
     unsigned int v1; // r3
 
@@ -3377,7 +3377,7 @@ void __fastcall Scr_AddPathnode(pathnode_t *node)
     Scr_AddEntityNum(v1, 2u);
 }
 
-void __fastcall Scr_GetNode()
+void __cdecl Scr_GetNode()
 {
     unsigned int ConstString; // r26
     const char *String; // r3
@@ -3437,7 +3437,7 @@ void __fastcall Scr_GetNode()
     }
 }
 
-void __fastcall Scr_GetNodeArray()
+void __cdecl Scr_GetNodeArray()
 {
     unsigned int ConstString; // r27
     const char *String; // r30
@@ -3492,7 +3492,7 @@ void __fastcall Scr_GetNodeArray()
     }
 }
 
-void __fastcall Scr_GetAllNodes()
+void __cdecl Scr_GetAllNodes()
 {
     unsigned int v0; // r31
     int v1; // r30
@@ -3514,7 +3514,7 @@ void __fastcall Scr_GetAllNodes()
     }
 }
 
-void __fastcall Path_Shutdown()
+void __cdecl Path_Shutdown()
 {
     pathnode_t *i; // r31
     pathnode_t *nodes; // r31
@@ -3550,7 +3550,7 @@ void __fastcall Path_Shutdown()
     dword_82E20404 = 0;
 }
 
-void __fastcall Path_AutoDisconnectPaths()
+void __cdecl Path_AutoDisconnectPaths()
 {
     int v0; // r29
     int num_entities; // r10
@@ -3582,13 +3582,13 @@ void __fastcall Path_AutoDisconnectPaths()
     }
 }
 
-void __fastcall Path_InitPaths()
+void __cdecl Path_InitPaths()
 {
     Path_InitLinkInfoArray();
     Path_ValidateAllNodes();
 }
 
-void __fastcall Path_DrawVisData()
+void __cdecl Path_DrawVisData()
 {
     gentity_s *v0; // r3
     const float *v1; // r6
@@ -3656,17 +3656,17 @@ void __fastcall Path_DrawVisData()
     }
 }
 
-void __fastcall Path_RelinquishNodeNow(sentient_s *claimer)
+void __cdecl Path_RelinquishNodeNow(sentient_s *claimer)
 {
     Path_RelinquishNode(claimer, 0);
 }
 
-void __fastcall Path_RelinquishNodeSoon(sentient_s *claimer)
+void __cdecl Path_RelinquishNodeSoon(sentient_s *claimer)
 {
     Path_RelinquishNode(claimer, 5000);
 }
 
-void __fastcall Path_MarkNodeInvalid(pathnode_t *node, team_t eTeam)
+void __cdecl Path_MarkNodeInvalid(pathnode_t *node, team_t eTeam)
 {
     pathnode_dynamic_t *p_dynamic; // r23
     sentient_s *v5; // r3
@@ -3733,7 +3733,7 @@ void __fastcall Path_MarkNodeInvalid(pathnode_t *node, team_t eTeam)
     }
 }
 
-void __fastcall G_SetPathnodeScriptVariable(const char *key, const char *value, pathnode_t *ent)
+void __cdecl G_SetPathnodeScriptVariable(const char *key, const char *value, pathnode_t *ent)
 {
     unsigned int Field; // r30
     long double v6; // fp2
@@ -3775,7 +3775,7 @@ void __fastcall G_SetPathnodeScriptVariable(const char *key, const char *value, 
     }
 }
 
-void __fastcall G_ParsePathnodeScriptField(const char *key, const char *value, pathnode_t *node)
+void __cdecl G_ParsePathnodeScriptField(const char *key, const char *value, pathnode_t *node)
 {
     node_field_t *v6; // r28
 
@@ -3803,7 +3803,7 @@ void __fastcall G_ParsePathnodeScriptField(const char *key, const char *value, p
     }
 }
 
-void __fastcall G_ParsePathnodeScriptFields(pathnode_t *node)
+void __cdecl G_ParsePathnodeScriptFields(pathnode_t *node)
 {
     int v2; // r30
     const char **v3; // r31
@@ -3823,7 +3823,7 @@ void __fastcall G_ParsePathnodeScriptFields(pathnode_t *node)
     }
 }
 
-void __fastcall G_SpawnPathnodeDynamic()
+void __cdecl G_SpawnPathnodeDynamic()
 {
     unsigned int v0; // r6
     pathnode_t *v1; // r31
@@ -3884,7 +3884,7 @@ void __fastcall G_SpawnPathnodeDynamic()
     }
 }
 
-int __fastcall Path_CanClaimNode(const pathnode_t *node, sentient_s *claimer)
+int __cdecl Path_CanClaimNode(const pathnode_t *node, sentient_s *claimer)
 {
     team_t eTeam; // r8
     int iFreeTime; // r10
@@ -3927,7 +3927,7 @@ int __fastcall Path_CanClaimNode(const pathnode_t *node, sentient_s *claimer)
     return result;
 }
 
-void __fastcall Path_ForceClaimNode(pathnode_t *node, sentient_s *claimer)
+void __cdecl Path_ForceClaimNode(pathnode_t *node, sentient_s *claimer)
 {
     team_t eTeam; // r8
     pathnode_t *pClaimedNode; // r11
@@ -3989,7 +3989,7 @@ void __fastcall Path_ForceClaimNode(pathnode_t *node, sentient_s *claimer)
     }
 }
 
-pathnode_t *__fastcall Path_ChooseSubsequentChainNode_r(
+pathnode_t *__cdecl Path_ChooseSubsequentChainNode_r(
     int depthMin,
     int depthMax,
     pathnode_t *pParent,
@@ -4074,7 +4074,7 @@ pathnode_t *__fastcall Path_ChooseSubsequentChainNode_r(
     return v12;
 }
 
-pathnode_t *__fastcall Path_ChooseAnyChainNodeIfDeadEnd(
+pathnode_t *__cdecl Path_ChooseAnyChainNodeIfDeadEnd(
     int depthMin,
     int depthMax,
     pathnode_t *chainPos,
@@ -4134,7 +4134,7 @@ pathnode_t *__fastcall Path_ChooseAnyChainNodeIfDeadEnd(
     return v16;
 }
 
-pathnode_t *__fastcall Path_ChoosePreviousChainNode(int depthMin, int depthMax, pathnode_t *chainPos, actor_s *claimer)
+pathnode_t *__cdecl Path_ChoosePreviousChainNode(int depthMin, int depthMax, pathnode_t *chainPos, actor_s *claimer)
 {
     int wChainParent; // r11
     int v9; // r11
@@ -4175,7 +4175,7 @@ pathnode_t *__fastcall Path_ChoosePreviousChainNode(int depthMin, int depthMax, 
     return chainPos;
 }
 
-pathnode_t *__fastcall Path_ChooseDesperationChainNode(
+pathnode_t *__cdecl Path_ChooseDesperationChainNode(
     int depthMin,
     int depthMax,
     pathnode_t *refPos,
@@ -4251,7 +4251,7 @@ pathnode_t *__fastcall Path_ChooseDesperationChainNode(
     return (pathnode_t *)v8;
 }
 
-pathnode_t *__fastcall Path_ChooseDesperationNewChainNode(
+pathnode_t *__cdecl Path_ChooseDesperationNewChainNode(
     int depthMin,
     int depthMax,
     pathnode_t *refPos,
@@ -4329,7 +4329,7 @@ pathnode_t *__fastcall Path_ChooseDesperationNewChainNode(
     return (pathnode_t *)v8;
 }
 
-pathnode_t *__fastcall Path_ChooseChainPos(
+pathnode_t *__cdecl Path_ChooseChainPos(
     pathnode_t *refPos,
     int iFollowMin,
     int iFollowMax,
@@ -4424,7 +4424,7 @@ pathnode_t *__fastcall Path_ChooseChainPos(
     return result;
 }
 
-pathnode_t *__fastcall Path_NearestNodeNotCrossPlanes(
+pathnode_t *__cdecl Path_NearestNodeNotCrossPlanes(
     float *vOrigin,
     pathsort_t *nodes,
     int typeFlags,
@@ -4500,7 +4500,7 @@ pathnode_t *__fastcall Path_NearestNodeNotCrossPlanes(
         nodes,
         &nodes[(unsigned int)v43],
         12 * (int)v43 / 12,
-        (bool(__fastcall *)(const pathsort_t *, const pathsort_t *))Path_CompareNodesIncreasing);
+        (bool(__cdecl *)(const pathsort_t *, const pathsort_t *))Path_CompareNodesIncreasing);
     v44 = 0;
     v45 = 0;
     v59[0] = -15.0;
@@ -4594,7 +4594,7 @@ LABEL_19:
     }
 }
 
-pathnode_t *__fastcall Path_NearestNode(
+pathnode_t *__cdecl Path_NearestNode(
     float *vOrigin,
     pathsort_t *nodes,
     int typeFlags,
@@ -4659,7 +4659,7 @@ pathnode_t *__fastcall Path_NearestNode(
         a8);
 }
 
-void __fastcall Path_DrawDebugNearestNode(float *vOrigin, int numNodes)
+void __cdecl Path_DrawDebugNearestNode(float *vOrigin, int numNodes)
 {
     const float *v3; // r6
     int v4; // r5
@@ -4751,7 +4751,7 @@ void __fastcall Path_DrawDebugNearestNode(float *vOrigin, int numNodes)
     }
 }
 
-void __fastcall Path_DrawDebugClaimedNodes(float *origin, int numNodes)
+void __cdecl Path_DrawDebugClaimedNodes(float *origin, int numNodes)
 {
     const float *v3; // r6
     int v4; // r5
@@ -4911,7 +4911,7 @@ void __fastcall Path_DrawDebugClaimedNodes(float *origin, int numNodes)
     }
 }
 
-void __fastcall Path_DrawDebug()
+void __cdecl Path_DrawDebug()
 {
     unsigned int v0; // r24
     int v1; // r25

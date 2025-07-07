@@ -18,24 +18,24 @@ struct SaveGame;
 struct cpose_t;
 struct GfxSceneEntity;
 
-int __fastcall CompressUnit(double unit);
-void __fastcall LocalConvertQuatToMat(const DObjAnimMat *mat, float (*axis)[3]);
-unsigned int __fastcall Com_GetPrimaryLightCount();
-const ComPrimaryLight *__fastcall Com_GetPrimaryLight(unsigned int primaryLightIndex);
-void __fastcall CG_LockLightingOrigin(centity_s *cent, float *lightingOrigin);
-int __fastcall CG_GetRenderFlagForRefEntity(__int16 eFlags);
-void __fastcall CG_General(int localClientNum, centity_s *cent);
-void __fastcall CG_Item(centity_s *cent);
-void __fastcall CG_AddEntityLoopSound(int localClientNum, const centity_s *cent);
-void __fastcall CG_EntityEffects(int localClientNum, centity_s *cent);
-void __fastcall CG_mg42_PreControllers(int localClientNum, const DObj_s *obj, centity_s *cent);
-void __fastcall CG_mg42(int localClientNum, centity_s *cent);
-bool __fastcall JavelinSoftLaunch(WeaponDef *weapDef, cg_s *cgameGlob, entityState_s *s1);
-void __fastcall CG_Missile(int localClientNum, centity_s *cent);
-bool __fastcall CG_VecLessThan(float *a, float *b);
-void __fastcall CG_UpdateBModelWorldBounds(unsigned int localClientNum, centity_s *cent, int forceFilter);
-void __fastcall CG_ScriptMover(int localClientNum, centity_s *cent);
-void __fastcall CG_AdjustPositionForMover(
+int __cdecl CompressUnit(double unit);
+void __cdecl LocalConvertQuatToMat(const DObjAnimMat *mat, float (*axis)[3]);
+unsigned int __cdecl Com_GetPrimaryLightCount();
+const ComPrimaryLight *__cdecl Com_GetPrimaryLight(unsigned int primaryLightIndex);
+void __cdecl CG_LockLightingOrigin(centity_s *cent, float *lightingOrigin);
+int __cdecl CG_GetRenderFlagForRefEntity(__int16 eFlags);
+void __cdecl CG_General(int localClientNum, centity_s *cent);
+void __cdecl CG_Item(centity_s *cent);
+void __cdecl CG_AddEntityLoopSound(int localClientNum, const centity_s *cent);
+void __cdecl CG_EntityEffects(int localClientNum, centity_s *cent);
+void __cdecl CG_mg42_PreControllers(int localClientNum, const DObj_s *obj, centity_s *cent);
+void __cdecl CG_mg42(int localClientNum, centity_s *cent);
+bool __cdecl JavelinSoftLaunch(WeaponDef *weapDef, cg_s *cgameGlob, entityState_s *s1);
+void __cdecl CG_Missile(int localClientNum, centity_s *cent);
+bool __cdecl CG_VecLessThan(float *a, float *b);
+void __cdecl CG_UpdateBModelWorldBounds(unsigned int localClientNum, centity_s *cent, int forceFilter);
+void __cdecl CG_ScriptMover(int localClientNum, centity_s *cent);
+void __cdecl CG_AdjustPositionForMover(
     int localClientNum,
     float *in,
     int moverNum,
@@ -43,62 +43,62 @@ void __fastcall CG_AdjustPositionForMover(
     int toTime,
     float *out,
     float *outDeltaAngles);
-void __fastcall CG_SetFrameInterpolation(int localClientNum);
-void __fastcall CG_DObjUpdateInfo(const cg_s *cgameGlob, DObj_s *obj, bool notify);
-centity_s *__fastcall CG_GetPose(int localClientNum, int handle);
-void __fastcall CG_Vehicle_PreControllers(int localClientNum, const DObj_s *obj, centity_s *cent);
-void __fastcall CG_Vehicle(int localClientNum, centity_s *cent);
-void __fastcall CG_SoundBlend(int localClientNum, centity_s *cent);
-FxEffect *__fastcall CG_StartFx(int localClientNum, centity_s *cent, int startAtTime);
-void __fastcall CG_Fx(int localClientNum, centity_s *cent);
-void __fastcall CG_LoopFx(int localClientNum, centity_s *cent);
-void __fastcall CG_ClampPrimaryLightOrigin(GfxLight *light, const ComPrimaryLight *refLight);
-void __fastcall CG_ClampPrimaryLightDir(GfxLight *light, const ComPrimaryLight *refLight);
+void __cdecl CG_SetFrameInterpolation(int localClientNum);
+void __cdecl CG_DObjUpdateInfo(const cg_s *cgameGlob, DObj_s *obj, bool notify);
+centity_s *__cdecl CG_GetPose(int localClientNum, int handle);
+void __cdecl CG_Vehicle_PreControllers(int localClientNum, const DObj_s *obj, centity_s *cent);
+void __cdecl CG_Vehicle(int localClientNum, centity_s *cent);
+void __cdecl CG_SoundBlend(int localClientNum, centity_s *cent);
+FxEffect *__cdecl CG_StartFx(int localClientNum, centity_s *cent, int startAtTime);
+void __cdecl CG_Fx(int localClientNum, centity_s *cent);
+void __cdecl CG_LoopFx(int localClientNum, centity_s *cent);
+void __cdecl CG_ClampPrimaryLightOrigin(GfxLight *light, const ComPrimaryLight *refLight);
+void __cdecl CG_ClampPrimaryLightDir(GfxLight *light, const ComPrimaryLight *refLight);
 // local variable allocation has failed, the output may be wrong!
-void __fastcall CG_PrimaryLight(int localClientNum, centity_s *cent);
-void __fastcall CG_InterpolateEntityOrigin(const cg_s *cgameGlob, centity_s *cent);
-void __fastcall CG_InterpolateEntityAngles(const cg_s *cgameGlob, centity_s *cent);
-void __fastcall CG_CreatePhysicsObject(int localClientNum, centity_s *cent);
-void __fastcall CG_UpdatePhysicsPose(centity_s *cent);
-int __fastcall CG_ExpiredLaunch(int localClientNum, centity_s *cent);
-void __fastcall CG_CalcEntityPhysicsPositions(int localClientNum, centity_s *cent);
-void __fastcall CG_SaveEntityPhysics(centity_s *cent, SaveGame *save);
-void __fastcall CG_LoadEntityPhysics(centity_s *cent, SaveGame *save);
-void __fastcall CG_CreateRagdollObject(int localClientNum, centity_s *cent);
-void __fastcall CG_UpdateRagdollPose(centity_s *cent);
-void __fastcall CG_CalcEntityRagdollPositions(int localClientNum, centity_s *cent);
-void __fastcall CG_CalcEntityLerpPositions(int localClientNum, centity_s *cent);
-void __fastcall CG_DObjCalcBone(const cpose_t *pose, DObj_s *obj, int boneIndex);
-void __fastcall CG_DrawEntEqDebug(const centity_s *cent);
-void __fastcall CG_ClearUnion(int localClientNum, centity_s *cent);
-void __fastcall CG_SetUnionType(int localClientNum, centity_s *cent);
-void __fastcall CG_UpdatePoseUnion(int localClientNum, centity_s *cent);
-void __fastcall CG_ProcessEntity(int localClientNum, centity_s *cent);
-void __fastcall CG_SaveEntityFX(centity_s *cent, SaveGame *save);
-void __fastcall CG_LoadEntityFX(centity_s *cent, SaveGame *save);
-void __fastcall CG_SaveEntity(unsigned int entnum, SaveGame *save);
-void __fastcall CG_LoadEntity(unsigned int entnum, SaveGame *save);
-void __fastcall CG_SaveEntities(SaveGame *save);
-void __fastcall CG_LoadEntities(SaveGame *save);
-void __fastcall CG_GetPoseOrigin(const cpose_t *pose, float *origin);
-void __fastcall CG_GetPoseAngles(const cpose_t *pose, float *angles);
-float *__fastcall CG_GetEntityOrigin(int localClientNum, int entnum);
-void __fastcall CG_GetPoseLightingHandle(const cpose_t *pose);
-void __fastcall CG_PredictiveSkinCEntity(GfxSceneEntity *sceneEnt);
-void __fastcall CG_AddPacketEntity(unsigned int localClientNum, unsigned int entnum);
-int __fastcall CG_AddPacketEntities(int localClientNum);
-DObjAnimMat *__fastcall CG_DObjGetLocalBoneMatrix(const cpose_t *pose, DObj_s *obj, int boneIndex);
-DObjAnimMat *__fastcall CG_DObjGetLocalTagMatrix(const cpose_t *pose, DObj_s *obj, unsigned int tagName);
-DObjAnimMat *__fastcall CG_DObjGetWorldBoneMatrix(
+void __cdecl CG_PrimaryLight(int localClientNum, centity_s *cent);
+void __cdecl CG_InterpolateEntityOrigin(const cg_s *cgameGlob, centity_s *cent);
+void __cdecl CG_InterpolateEntityAngles(const cg_s *cgameGlob, centity_s *cent);
+void __cdecl CG_CreatePhysicsObject(int localClientNum, centity_s *cent);
+void __cdecl CG_UpdatePhysicsPose(centity_s *cent);
+int __cdecl CG_ExpiredLaunch(int localClientNum, centity_s *cent);
+void __cdecl CG_CalcEntityPhysicsPositions(int localClientNum, centity_s *cent);
+void __cdecl CG_SaveEntityPhysics(centity_s *cent, SaveGame *save);
+void __cdecl CG_LoadEntityPhysics(centity_s *cent, SaveGame *save);
+void __cdecl CG_CreateRagdollObject(int localClientNum, centity_s *cent);
+void __cdecl CG_UpdateRagdollPose(centity_s *cent);
+void __cdecl CG_CalcEntityRagdollPositions(int localClientNum, centity_s *cent);
+void __cdecl CG_CalcEntityLerpPositions(int localClientNum, centity_s *cent);
+void __cdecl CG_DObjCalcBone(const cpose_t *pose, DObj_s *obj, int boneIndex);
+void __cdecl CG_DrawEntEqDebug(const centity_s *cent);
+void __cdecl CG_ClearUnion(int localClientNum, centity_s *cent);
+void __cdecl CG_SetUnionType(int localClientNum, centity_s *cent);
+void __cdecl CG_UpdatePoseUnion(int localClientNum, centity_s *cent);
+void __cdecl CG_ProcessEntity(int localClientNum, centity_s *cent);
+void __cdecl CG_SaveEntityFX(centity_s *cent, SaveGame *save);
+void __cdecl CG_LoadEntityFX(centity_s *cent, SaveGame *save);
+void __cdecl CG_SaveEntity(unsigned int entnum, SaveGame *save);
+void __cdecl CG_LoadEntity(unsigned int entnum, SaveGame *save);
+void __cdecl CG_SaveEntities(SaveGame *save);
+void __cdecl CG_LoadEntities(SaveGame *save);
+void __cdecl CG_GetPoseOrigin(const cpose_t *pose, float *origin);
+void __cdecl CG_GetPoseAngles(const cpose_t *pose, float *angles);
+float *__cdecl CG_GetEntityOrigin(int localClientNum, int entnum);
+void __cdecl CG_GetPoseLightingHandle(const cpose_t *pose);
+void __cdecl CG_PredictiveSkinCEntity(GfxSceneEntity *sceneEnt);
+void __cdecl CG_AddPacketEntity(unsigned int localClientNum, unsigned int entnum);
+int __cdecl CG_AddPacketEntities(int localClientNum);
+DObjAnimMat *__cdecl CG_DObjGetLocalBoneMatrix(const cpose_t *pose, DObj_s *obj, int boneIndex);
+DObjAnimMat *__cdecl CG_DObjGetLocalTagMatrix(const cpose_t *pose, DObj_s *obj, unsigned int tagName);
+DObjAnimMat *__cdecl CG_DObjGetWorldBoneMatrix(
     const cpose_t *pose,
     DObj_s *obj,
     int boneIndex,
     float (*tagMat)[3],
     float *origin);
-DObjAnimMat *__fastcall CG_DObjGetWorldTagMatrix(
+DObjAnimMat *__cdecl CG_DObjGetWorldTagMatrix(
     const cpose_t *pose,
     DObj_s *obj,
     unsigned int tagName,
     float (*tagMat)[3],
     float *origin);
-int __fastcall CG_DObjGetWorldTagPos(const cpose_t *pose, DObj_s *obj, unsigned int tagName, float *pos);
+int __cdecl CG_DObjGetWorldTagPos(const cpose_t *pose, DObj_s *obj, unsigned int tagName, float *pos);

@@ -7,13 +7,13 @@
 char const **entityTypeNames;
 
 
-void __fastcall TRACK_g_utils()
+void __cdecl TRACK_g_utils()
 {
     track_static_alloc_internal(entityTypeNames, 68, "entityTypeNames", 9);
     track_static_alloc_internal(cached_models, 2048, "cached_models", 9);
 }
 
-void __fastcall G_DumpConfigStrings(int start, int max)
+void __cdecl G_DumpConfigStrings(int start, int max)
 {
     int v4; // r31
     unsigned int ConfigstringConst; // r3
@@ -31,7 +31,7 @@ void __fastcall G_DumpConfigStrings(int start, int max)
     }
 }
 
-int __fastcall G_FindConfigstringIndex(const char *name, int start, int max, int create, const char *errormsg)
+int __cdecl G_FindConfigstringIndex(const char *name, int start, int max, int create, const char *errormsg)
 {
     unsigned int String; // r3
     unsigned int v11; // r26
@@ -82,7 +82,7 @@ LABEL_16:
     return i;
 }
 
-int __fastcall G_LocalizedStringIndex(const char *string)
+int __cdecl G_LocalizedStringIndex(const char *string)
 {
     const char *v3; // r29
     int initializing; // r28
@@ -187,7 +187,7 @@ LABEL_24:
     return 0;
 }
 
-int __fastcall G_MaterialIndex(const char *name)
+int __cdecl G_MaterialIndex(const char *name)
 {
     const char *v2; // r11
     int v3; // r10
@@ -207,7 +207,7 @@ int __fastcall G_MaterialIndex(const char *name)
     return G_FindConfigstringIndex(v5, 2583, 128, level.initializing, "material");
 }
 
-void __fastcall G_SetModelIndex(int modelIndex, const char *name)
+void __cdecl G_SetModelIndex(int modelIndex, const char *name)
 {
     if (modelIndex <= 0 || modelIndex >= 512)
         MyAssertHandler(
@@ -221,7 +221,7 @@ void __fastcall G_SetModelIndex(int modelIndex, const char *name)
     SV_SetConfigstring(modelIndex + 1155, name);
 }
 
-int __fastcall G_ModelIndex(const char *name)
+int __cdecl G_ModelIndex(const char *name)
 {
     unsigned int LowercaseString; // r29
     int v4; // r31
@@ -271,7 +271,7 @@ int __fastcall G_ModelIndex(const char *name)
     return v4;
 }
 
-XModel *__fastcall G_GetModel(int index)
+XModel *__cdecl G_GetModel(int index)
 {
     if (index <= 0)
         MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\g_utils.cpp", 282, 0, "%s", "index > 0");
@@ -280,7 +280,7 @@ XModel *__fastcall G_GetModel(int index)
     return cached_models[index];
 }
 
-bool __fastcall G_GetModelBounds(int index, float *outMins, float *outMaxs)
+bool __cdecl G_GetModelBounds(int index, float *outMins, float *outMaxs)
 {
     const XModel *Model; // r29
     float v8[8][3]; // [sp+50h] [-60h] BYREF
@@ -296,7 +296,7 @@ bool __fastcall G_GetModelBounds(int index, float *outMins, float *outMaxs)
     return (_cntlzw(XModelGetStaticBounds(Model, v8, outMins, outMaxs)) & 0x20) == 0;
 }
 
-int __fastcall G_XModelBad(int index)
+int __cdecl G_XModelBad(int index)
 {
     const XModel *Model; // r3
 
@@ -306,14 +306,14 @@ int __fastcall G_XModelBad(int index)
     return XModelBad(Model);
 }
 
-unsigned int __fastcall G_ModelName(unsigned int index)
+unsigned int __cdecl G_ModelName(unsigned int index)
 {
     if (index >= 0x200)
         MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\g_utils.cpp", 316, 0, "%s", "(unsigned)index < MAX_MODELS");
     return SV_GetConfigstringConst(index + 1155);
 }
 
-void __fastcall G_EntityCentroidWithBounds(const gentity_s *ent, const float *mins, const float *maxs, float *centroid)
+void __cdecl G_EntityCentroidWithBounds(const gentity_s *ent, const float *mins, const float *maxs, float *centroid)
 {
     double v8; // fp11
     double v9; // fp13
@@ -336,7 +336,7 @@ void __fastcall G_EntityCentroidWithBounds(const gentity_s *ent, const float *mi
     centroid[2] = ent->r.currentOrigin[2] + centroid[2];
 }
 
-void __fastcall G_EntityCentroid(const gentity_s *ent, float *centroid)
+void __cdecl G_EntityCentroid(const gentity_s *ent, float *centroid)
 {
     double v4; // fp10
     double v5; // fp13
@@ -359,7 +359,7 @@ void __fastcall G_EntityCentroid(const gentity_s *ent, float *centroid)
     centroid[2] = ent->r.currentOrigin[2] + centroid[2];
 }
 
-int __fastcall G_EffectIndex(const char *name)
+int __cdecl G_EffectIndex(const char *name)
 {
     if (!name)
         MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\g_utils.cpp", 357, 0, "%s", "name");
@@ -374,14 +374,14 @@ int __fastcall G_EffectIndex(const char *name)
     return G_FindConfigstringIndex(name, 2179, 100, level.initializing, "effect");
 }
 
-int __fastcall G_ShellShockIndex(const char *name)
+int __cdecl G_ShellShockIndex(const char *name)
 {
     if (!name)
         MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\g_utils.cpp", 365, 0, "%s", "name");
     return G_FindConfigstringIndex(name, 2535, 16, 1, 0);
 }
 
-unsigned int __fastcall G_SoundAliasIndexTransientAdvance(unsigned __int16 aliasIndex, int offset)
+unsigned int __cdecl G_SoundAliasIndexTransientAdvance(unsigned __int16 aliasIndex, int offset)
 {
     unsigned int v4; // r31
 
@@ -415,7 +415,7 @@ unsigned int __fastcall G_SoundAliasIndexTransientAdvance(unsigned __int16 alias
     return v4;
 }
 
-unsigned int __fastcall G_SoundAliasIndexTransient(const char *name)
+unsigned int __cdecl G_SoundAliasIndexTransient(const char *name)
 {
     unsigned __int16 soundAliasFirst; // r11
     unsigned __int16 soundAliasLast; // r3
@@ -592,21 +592,21 @@ unsigned int __fastcall G_SoundAliasIndexTransient(const char *name)
     return v8;
 }
 
-int __fastcall G_SoundAliasIndexPermanent(const char *name)
+int __cdecl G_SoundAliasIndexPermanent(const char *name)
 {
     if (!name)
         MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\g_utils.cpp", 424, 0, "%s", "name");
     return (unsigned __int16)G_FindConfigstringIndex(name, 1667, 256, 1, 0);
 }
 
-int __fastcall G_RumbleIndex(const char *name)
+int __cdecl G_RumbleIndex(const char *name)
 {
     if (!name)
         MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\g_utils.cpp", 432, 0, "%s", "name");
     return G_FindConfigstringIndex(name, 1115, 32, 1, 0);
 }
 
-void __fastcall G_SetClientDemoTime(int time)
+void __cdecl G_SetClientDemoTime(int time)
 {
     level.framenum = time / 50;
     if (time - 50 > 0)
@@ -616,12 +616,12 @@ void __fastcall G_SetClientDemoTime(int time)
     level.time = time;
 }
 
-void __fastcall G_SetClientDemoServerSnapTime(int time)
+void __cdecl G_SetClientDemoServerSnapTime(int time)
 {
     level.snapTime = time;
 }
 
-void __fastcall G_ClearDemoEntities()
+void __cdecl G_ClearDemoEntities()
 {
     int v0; // r20
     gentity_s *i; // r31
@@ -708,7 +708,7 @@ void __fastcall G_ClearDemoEntities()
     }
 }
 
-void __fastcall G_UpdateDemoEntity(entityState_s *es)
+void __cdecl G_UpdateDemoEntity(entityState_s *es)
 {
     unsigned int number; // r26
     gentity_s *v3; // r31
@@ -811,7 +811,7 @@ void __fastcall G_UpdateDemoEntity(entityState_s *es)
     }
 }
 
-unsigned int __fastcall G_GetEntAnimTreeId(int entnum)
+unsigned int __cdecl G_GetEntAnimTreeId(int entnum)
 {
     gentity_s *v2; // r31
     int eType; // r11
@@ -858,7 +858,7 @@ LABEL_18:
     return Scr_GetAnimsIndex(Anims);
 }
 
-XAnimTree_s *__fastcall G_GetEntAnimTreeForId(int entnum, unsigned int id)
+XAnimTree_s *__cdecl G_GetEntAnimTreeForId(int entnum, unsigned int id)
 {
     gentity_s *v4; // r30
     int eType; // r11
@@ -925,7 +925,7 @@ LABEL_14:
     return v4->pAnimTree;
 }
 
-void __fastcall G_ShutdownClientDemo()
+void __cdecl G_ShutdownClientDemo()
 {
     int v0; // r29
     int num_entities; // r11
@@ -951,7 +951,7 @@ void __fastcall G_ShutdownClientDemo()
     }
 }
 
-XAnimTree_s *__fastcall G_GetEntAnimTree(gentity_s *ent)
+XAnimTree_s *__cdecl G_GetEntAnimTree(gentity_s *ent)
 {
     int eType; // r11
 
@@ -965,7 +965,7 @@ XAnimTree_s *__fastcall G_GetEntAnimTree(gentity_s *ent)
     return G_GetActorCorpseAnimTree(ent);
 }
 
-void __fastcall G_CheckDObjUpdate(gentity_s *ent)
+void __cdecl G_CheckDObjUpdate(gentity_s *ent)
 {
     const DObj_s *ServerDObj; // r3
     int model; // r29
@@ -1093,7 +1093,7 @@ void __fastcall G_CheckDObjUpdate(gentity_s *ent)
     }
 }
 
-void __fastcall G_SetModel(gentity_s *ent, const char *modelName)
+void __cdecl G_SetModel(gentity_s *ent, const char *modelName)
 {
     int v3; // r3
     unsigned __int16 v4; // r31
@@ -1118,12 +1118,12 @@ void __fastcall G_SetModel(gentity_s *ent, const char *modelName)
 }
 
 // attributes: thunk
-void __fastcall G_ReplaceModel_FastFile(const char *originalName, const char *replacementName)
+void __cdecl G_ReplaceModel_FastFile(const char *originalName, const char *replacementName)
 {
     DB_ReplaceModel(originalName, replacementName);
 }
 
-void __fastcall G_OverrideModel(unsigned int modelindex, const char *defaultModelName)
+void __cdecl G_OverrideModel(unsigned int modelindex, const char *defaultModelName)
 {
     int v4; // r4
     const char *v5; // r7
@@ -1151,13 +1151,13 @@ LABEL_6:
     DB_ReplaceModel(v7, defaultModelName);
 }
 
-void __fastcall G_PrecacheDefaultModels()
+void __cdecl G_PrecacheDefaultModels()
 {
     G_ModelIndex("defaultactor");
     G_PrecacheDefaultVehicle();
 }
 
-int __fastcall G_EntIsLinkedTo(gentity_s *ent, gentity_s *parent)
+int __cdecl G_EntIsLinkedTo(gentity_s *ent, gentity_s *parent)
 {
     tagInfo_s *tagInfo; // r11
     int result; // r3
@@ -1171,7 +1171,7 @@ int __fastcall G_EntIsLinkedTo(gentity_s *ent, gentity_s *parent)
     return result;
 }
 
-void __fastcall G_UpdateViewAngleClamp(gclient_s *client, const float *worldAnglesCenter)
+void __cdecl G_UpdateViewAngleClamp(gclient_s *client, const float *worldAnglesCenter)
 {
     double v4; // fp0
     double v5; // fp13
@@ -1200,7 +1200,7 @@ void __fastcall G_UpdateViewAngleClamp(gclient_s *client, const float *worldAngl
     client->ps.viewAngleClampBase[1] = AngleNormalize360((float)((float)v9 - (float)v8));
 }
 
-void __fastcall G_UpdateGroundTilt(gclient_s *client)
+void __cdecl G_UpdateGroundTilt(gclient_s *client)
 {
     int groundTiltEntNum; // r10
     gentity_s *v2; // r11
@@ -1224,7 +1224,7 @@ void __fastcall G_UpdateGroundTilt(gclient_s *client)
     }
 }
 
-bool __fastcall G_SlideMove(
+bool __cdecl G_SlideMove(
     double deltaT,
     float *origin,
     float *velocity,
@@ -1475,7 +1475,7 @@ bool __fastcall G_SlideMove(
     return (_cntlzw(v19) & 0x20) == 0;
 }
 
-void __fastcall G_StepSlideMove(
+void __cdecl G_StepSlideMove(
     double deltaT,
     float *origin,
     float *velocity,
@@ -1571,7 +1571,7 @@ void __fastcall G_StepSlideMove(
     }
 }
 
-void __fastcall G_SafeDObjFree(gentity_s *ent)
+void __cdecl G_SafeDObjFree(gentity_s *ent)
 {
     if (ent->s.number == level.cachedTagMat.entnum)
         level.cachedTagMat.entnum = 2175;
@@ -1580,16 +1580,16 @@ void __fastcall G_SafeDObjFree(gentity_s *ent)
     Com_SafeServerDObjFree(ent->s.number);
 }
 
-int __fastcall G_DObjUpdateServerTime(gentity_s *ent, int bNotify)
+int __cdecl G_DObjUpdateServerTime(gentity_s *ent, int bNotify)
 {
     ent->flags &= ~0x40000u;
     return SV_DObjUpdateServerTime(ent, 0.050000001, bNotify);
 }
 
-void __fastcall G_DObjCalcPose(gentity_s *ent, int *partBits)
+void __cdecl G_DObjCalcPose(gentity_s *ent, int *partBits)
 {
     DObj_s *ServerDObj; // r29
-    void(__fastcall * controller)(const gentity_s *, int *); // r11
+    void(__cdecl * controller)(const gentity_s *, int *); // r11
 
     ServerDObj = Com_GetServerDObj(ent->s.number);
     if (!ServerDObj)
@@ -1603,10 +1603,10 @@ void __fastcall G_DObjCalcPose(gentity_s *ent, int *partBits)
     }
 }
 
-void __fastcall G_DObjCalcBone(const gentity_s *ent, int boneIndex)
+void __cdecl G_DObjCalcBone(const gentity_s *ent, int boneIndex)
 {
     DObj_s *ServerDObj; // r31
-    void(__fastcall * controller)(const gentity_s *, int *); // r11
+    void(__cdecl * controller)(const gentity_s *, int *); // r11
     int v6[12]; // [sp+50h] [-30h] BYREF
 
     ServerDObj = Com_GetServerDObj(ent->s.number);
@@ -1622,7 +1622,7 @@ void __fastcall G_DObjCalcBone(const gentity_s *ent, int boneIndex)
     }
 }
 
-DObjAnimMat *__fastcall G_DObjGetLocalBoneIndexMatrix(const gentity_s *ent, int boneIndex)
+DObjAnimMat *__cdecl G_DObjGetLocalBoneIndexMatrix(const gentity_s *ent, int boneIndex)
 {
     //Profile_Begin(318);
     G_DObjCalcBone(ent, boneIndex);
@@ -1630,7 +1630,7 @@ DObjAnimMat *__fastcall G_DObjGetLocalBoneIndexMatrix(const gentity_s *ent, int 
     return &SV_DObjGetMatrixArray(ent)[boneIndex];
 }
 
-void __fastcall G_DObjGetWorldBoneIndexMatrix(const gentity_s *ent, int boneIndex, float (*tagMat)[3])
+void __cdecl G_DObjGetWorldBoneIndexMatrix(const gentity_s *ent, int boneIndex, float (*tagMat)[3])
 {
     DObjAnimMat *v6; // r30
     float v7[4][3]; // [sp+50h] [-80h] BYREF
@@ -1649,7 +1649,7 @@ void __fastcall G_DObjGetWorldBoneIndexMatrix(const gentity_s *ent, int boneInde
     MatrixTransformVector43(v6->trans, (const float (*)[3])v8, &(*tagMat)[9]);
 }
 
-void __fastcall G_DObjGetWorldBoneIndexPos(const gentity_s *ent, int boneIndex, float *pos)
+void __cdecl G_DObjGetWorldBoneIndexPos(const gentity_s *ent, int boneIndex, float *pos)
 {
     DObjAnimMat *MatrixArray; // r28
     float v7[24]; // [sp+50h] [-60h] BYREF
@@ -1665,7 +1665,7 @@ void __fastcall G_DObjGetWorldBoneIndexPos(const gentity_s *ent, int boneIndex, 
     MatrixTransformVector43(MatrixArray[boneIndex].trans, (const float (*)[3])v7, pos);
 }
 
-DObjAnimMat *__fastcall G_DObjGetLocalTagMatrix(const gentity_s *ent, unsigned int tagName)
+DObjAnimMat *__cdecl G_DObjGetLocalTagMatrix(const gentity_s *ent, unsigned int tagName)
 {
     int BoneIndex; // r30
 
@@ -1678,7 +1678,7 @@ DObjAnimMat *__fastcall G_DObjGetLocalTagMatrix(const gentity_s *ent, unsigned i
     return &SV_DObjGetMatrixArray(ent)[BoneIndex];
 }
 
-int __fastcall G_DObjGetWorldTagMatrix(const gentity_s *ent, unsigned int tagName, float (*tagMat)[3])
+int __cdecl G_DObjGetWorldTagMatrix(const gentity_s *ent, unsigned int tagName, float (*tagMat)[3])
 {
     int BoneIndex; // r4
 
@@ -1689,7 +1689,7 @@ int __fastcall G_DObjGetWorldTagMatrix(const gentity_s *ent, unsigned int tagNam
     return 1;
 }
 
-int __fastcall G_DObjGetWorldTagPos(const gentity_s *ent, unsigned int tagName, float *pos)
+int __cdecl G_DObjGetWorldTagPos(const gentity_s *ent, unsigned int tagName, float *pos)
 {
     int BoneIndex; // r30
     DObjAnimMat *MatrixArray; // r29
@@ -1710,7 +1710,7 @@ int __fastcall G_DObjGetWorldTagPos(const gentity_s *ent, unsigned int tagName, 
     return 1;
 }
 
-void __fastcall G_DObjGetWorldTagPos_CheckTagExists(const gentity_s *ent, unsigned int tagName, float *pos)
+void __cdecl G_DObjGetWorldTagPos_CheckTagExists(const gentity_s *ent, unsigned int tagName, float *pos)
 {
     const DObj_s *ServerDObj; // r3
     const DObj_s *v6; // r30
@@ -1740,7 +1740,7 @@ void __fastcall G_DObjGetWorldTagPos_CheckTagExists(const gentity_s *ent, unsign
     }
 }
 
-gentity_s *__fastcall G_Find(gentity_s *from, int fieldofs, unsigned __int16 match)
+gentity_s *__cdecl G_Find(gentity_s *from, int fieldofs, unsigned __int16 match)
 {
     gentity_s *result; // r3
     gentity_s *v4; // r9
@@ -1761,7 +1761,7 @@ gentity_s *__fastcall G_Find(gentity_s *from, int fieldofs, unsigned __int16 mat
     return result;
 }
 
-void __fastcall G_InitGentity(gentity_s *e)
+void __cdecl G_InitGentity(gentity_s *e)
 {
     int inuse; // r11
     int v3; // r9
@@ -1783,7 +1783,7 @@ void __fastcall G_InitGentity(gentity_s *e)
     e->angleLerpRate = 540.0;
 }
 
-void __fastcall G_PrintEntities()
+void __cdecl G_PrintEntities()
 {
     int v0; // r30
     unsigned __int16 *p_model; // r31
@@ -1850,7 +1850,7 @@ void __fastcall G_PrintEntities()
     }
 }
 
-gentity_s *__fastcall G_Spawn()
+gentity_s *__cdecl G_Spawn()
 {
     gentity_s *firstFreeEnt; // r30
     int num_entities; // r11
@@ -1881,7 +1881,7 @@ gentity_s *__fastcall G_Spawn()
     return firstFreeEnt;
 }
 
-void __fastcall G_FreeEntityRefs(gentity_s *ed)
+void __cdecl G_FreeEntityRefs(gentity_s *ed)
 {
     int number; // r29
     int num_entities; // r10
@@ -1916,7 +1916,7 @@ void __fastcall G_FreeEntityRefs(gentity_s *ed)
         Targ_Remove(ed);
 }
 
-void __fastcall G_FreeAllEntityRefs()
+void __cdecl G_FreeAllEntityRefs()
 {
     actor_s *actors; // r11
     int i; // r31
@@ -1941,7 +1941,7 @@ void __fastcall G_FreeAllEntityRefs()
     Targ_RemoveAll();
 }
 
-void __fastcall G_FreeEntityDelay(gentity_s *ed)
+void __cdecl G_FreeEntityDelay(gentity_s *ed)
 {
     int delete; // r4
     unsigned __int16 v3; // r3
@@ -1956,17 +1956,17 @@ void __fastcall G_FreeEntityDelay(gentity_s *ed)
     Scr_FreeThread(v3);
 }
 
-void __fastcall G_BroadcastEntity(gentity_s *ent)
+void __cdecl G_BroadcastEntity(gentity_s *ent)
 {
     ;
 }
 
-void __fastcall G_FreeEntityAfterEvent(gentity_s *ent)
+void __cdecl G_FreeEntityAfterEvent(gentity_s *ent)
 {
     ent->r.eventType |= 1u;
 }
 
-int __fastcall G_SaveFreeEntities(unsigned __int8 *buf)
+int __cdecl G_SaveFreeEntities(unsigned __int8 *buf)
 {
     gentity_s *firstFreeEnt; // r9
     int result; // r3
@@ -1999,7 +1999,7 @@ int __fastcall G_SaveFreeEntities(unsigned __int8 *buf)
     return result;
 }
 
-void __fastcall G_LoadFreeEntities(unsigned __int8 *buf)
+void __cdecl G_LoadFreeEntities(unsigned __int8 *buf)
 {
     _BYTE *v2; // r11
     bool v3; // cr58
@@ -2028,7 +2028,7 @@ void __fastcall G_LoadFreeEntities(unsigned __int8 *buf)
     }
 }
 
-void __fastcall G_AddPredictableEvent(gentity_s *ent, int event, unsigned int eventParm)
+void __cdecl G_AddPredictableEvent(gentity_s *ent, int event, unsigned int eventParm)
 {
     gclient_s *client; // r5
 
@@ -2037,7 +2037,7 @@ void __fastcall G_AddPredictableEvent(gentity_s *ent, int event, unsigned int ev
         BG_AddPredictableEventToPlayerstate(event, eventParm, &client->ps);
 }
 
-void __fastcall G_AddEvent(gentity_s *ent, unsigned int event, unsigned int eventParm)
+void __cdecl G_AddEvent(gentity_s *ent, unsigned int event, unsigned int eventParm)
 {
     unsigned __int8 v3; // r30
     gclient_s *client; // r11
@@ -2074,7 +2074,7 @@ void __fastcall G_AddEvent(gentity_s *ent, unsigned int event, unsigned int even
     ent->r.eventTime = level.time;
 }
 
-void __fastcall G_RegisterSoundWait(gentity_s *ent, unsigned __int16 index, unsigned int notifyString, int stoppable)
+void __cdecl G_RegisterSoundWait(gentity_s *ent, unsigned __int16 index, unsigned int notifyString, int stoppable)
 {
     const char *v7; // r20
     double v8; // fp31
@@ -2127,7 +2127,7 @@ void __fastcall G_RegisterSoundWait(gentity_s *ent, unsigned __int16 index, unsi
     ent->snd_wait.basetime = time;
 }
 
-void __fastcall G_PlaySoundAliasWithNotify(
+void __cdecl G_PlaySoundAliasWithNotify(
     gentity_s *ent,
     unsigned __int16 index,
     unsigned int notifyString,
@@ -2165,7 +2165,7 @@ void __fastcall G_PlaySoundAliasWithNotify(
     }
 }
 
-void __fastcall G_PlaySoundAlias(gentity_s *ent, unsigned __int16 index)
+void __cdecl G_PlaySoundAlias(gentity_s *ent, unsigned __int16 index)
 {
     if (!ent)
         MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\g_utils.cpp", 2773, 0, "%s", "ent");
@@ -2173,7 +2173,7 @@ void __fastcall G_PlaySoundAlias(gentity_s *ent, unsigned __int16 index)
         G_AddEvent(ent, 3u, index);
 }
 
-void __fastcall G_SetOrigin(gentity_s *ent, float *origin)
+void __cdecl G_SetOrigin(gentity_s *ent, float *origin)
 {
     if ((COERCE_UNSIGNED_INT(*origin) & 0x7F800000) == 0x7F800000
         || (COERCE_UNSIGNED_INT(origin[1]) & 0x7F800000) == 0x7F800000
@@ -2200,7 +2200,7 @@ void __fastcall G_SetOrigin(gentity_s *ent, float *origin)
     ent->r.currentOrigin[2] = origin[2];
 }
 
-void __fastcall G_SetAngle(gentity_s *ent, float *angle)
+void __cdecl G_SetAngle(gentity_s *ent, float *angle)
 {
     ent->s.lerp.apos.trBase[0] = *angle;
     ent->s.lerp.apos.trBase[1] = angle[1];
@@ -2216,13 +2216,13 @@ void __fastcall G_SetAngle(gentity_s *ent, float *angle)
     ent->r.currentAngles[2] = angle[2];
 }
 
-void __fastcall G_SetConstString(unsigned __int16 *to, const char *from)
+void __cdecl G_SetConstString(unsigned __int16 *to, const char *from)
 {
     Scr_SetString(to, 0);
     *to = SL_GetString(from, 0);
 }
 
-const char *__fastcall G_GetEntityTypeName(const gentity_s *ent)
+const char *__cdecl G_GetEntityTypeName(const gentity_s *ent)
 {
     if (ent->s.eType >= 0x11u)
         MyAssertHandler(
@@ -2234,22 +2234,22 @@ const char *__fastcall G_GetEntityTypeName(const gentity_s *ent)
     return *(const char **)((char *)entityTypeNames + __ROL4__(ent->s.eType, 2));
 }
 
-void __fastcall G_SetPM_MPViewer(bool setting)
+void __cdecl G_SetPM_MPViewer(bool setting)
 {
     level.mpviewer = setting;
 }
 
-void __fastcall G_srand(unsigned int seed)
+void __cdecl G_srand(unsigned int seed)
 {
     holdrand = seed;
 }
 
-unsigned int __fastcall G_GetRandomSeed()
+unsigned int __cdecl G_GetRandomSeed()
 {
     return holdrand;
 }
 
-unsigned int __fastcall G_rand()
+unsigned int __cdecl G_rand()
 {
     unsigned int result; // r3
 
@@ -2258,7 +2258,7 @@ unsigned int __fastcall G_rand()
     return result;
 }
 
-float __fastcall G_flrand(double min, double max)
+float __cdecl G_flrand(double min, double max)
 {
     __int64 v2; // r11
     double v3; // fp1
@@ -2270,7 +2270,7 @@ float __fastcall G_flrand(double min, double max)
     return *((float *)&v3 + 1);
 }
 
-int __fastcall G_irand(int min, int max)
+int __cdecl G_irand(int min, int max)
 {
     __int128 v2; // r11
 
@@ -2281,7 +2281,7 @@ int __fastcall G_irand(int min, int max)
     return ((__int64)(v2 * *(_QWORD *)((char *)&v2 + 4)) >> 15) + min;
 }
 
-float __fastcall G_random()
+float __cdecl G_random()
 {
     __int64 v0; // r11
     double v1; // fp1
@@ -2293,7 +2293,7 @@ float __fastcall G_random()
     return *((float *)&v1 + 1);
 }
 
-float __fastcall G_crandom()
+float __cdecl G_crandom()
 {
     __int64 v0; // r11
     double v1; // fp1
@@ -2305,7 +2305,7 @@ float __fastcall G_crandom()
     return *((float *)&v1 + 1);
 }
 
-void __fastcall G_CalcTagParentAxis(gentity_s *ent, float (*parentAxis)[3])
+void __cdecl G_CalcTagParentAxis(gentity_s *ent, float (*parentAxis)[3])
 {
     tagInfo_s *tagInfo; // r29
     const gentity_s *parent; // r31
@@ -2391,7 +2391,7 @@ void __fastcall G_CalcTagParentAxis(gentity_s *ent, float (*parentAxis)[3])
     //Profile_EndInternal(0);
 }
 
-void __fastcall G_CalcTagParentRelAxis(gentity_s *ent, float (*parentRelAxis)[3])
+void __cdecl G_CalcTagParentRelAxis(gentity_s *ent, float (*parentRelAxis)[3])
 {
     tagInfo_s *tagInfo; // r30
     float v5[6][3]; // [sp+50h] [-50h] BYREF
@@ -2403,7 +2403,7 @@ void __fastcall G_CalcTagParentRelAxis(gentity_s *ent, float (*parentRelAxis)[3]
     MatrixMultiply43(tagInfo->parentInvAxis, v5, parentRelAxis);
 }
 
-void __fastcall G_CalcTagAxis(gentity_s *ent, int bAnglesOnly)
+void __cdecl G_CalcTagAxis(gentity_s *ent, int bAnglesOnly)
 {
     tagInfo_s *tagInfo; // r30
     float v5[12]; // [sp+50h] [-B0h] BYREF
@@ -2430,7 +2430,7 @@ void __fastcall G_CalcTagAxis(gentity_s *ent, int bAnglesOnly)
     }
 }
 
-void __fastcall G_SetFixedLink(gentity_s *ent, unsigned int eAngles)
+void __cdecl G_SetFixedLink(gentity_s *ent, unsigned int eAngles)
 {
     tagInfo_s *tagInfo; // r30
     double v5; // fp13
@@ -2483,7 +2483,7 @@ void __fastcall G_SetFixedLink(gentity_s *ent, unsigned int eAngles)
     }
 }
 
-void __fastcall G_SetPlayerFixedLink(gentity_s *ent)
+void __cdecl G_SetPlayerFixedLink(gentity_s *ent)
 {
     gclient_s *client; // r28
     float *v3; // r5
@@ -2643,7 +2643,7 @@ void __fastcall G_SetPlayerFixedLink(gentity_s *ent)
     SV_LinkEntity(ent);
 }
 
-void __fastcall G_GeneralLink(gentity_s *ent)
+void __cdecl G_GeneralLink(gentity_s *ent)
 {
     tagInfo_s *tagInfo; // r28
     double v3; // fp13
@@ -2682,7 +2682,7 @@ void __fastcall G_GeneralLink(gentity_s *ent)
     SV_LinkEntity(ent);
 }
 
-gentity_s *__fastcall G_TempEntity(float *origin, int event)
+gentity_s *__cdecl G_TempEntity(float *origin, int event)
 {
     gentity_s *v4; // r3
     gentity_s *v5; // r31
@@ -2711,7 +2711,7 @@ gentity_s *__fastcall G_TempEntity(float *origin, int event)
     return v5;
 }
 
-void __fastcall G_PlaySoundAliasAtPoint(float *origin, unsigned __int16 index)
+void __cdecl G_PlaySoundAliasAtPoint(float *origin, unsigned __int16 index)
 {
     if (!origin)
         MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\g_utils.cpp", 2756, 0, "%s", "origin");
@@ -2719,7 +2719,7 @@ void __fastcall G_PlaySoundAliasAtPoint(float *origin, unsigned __int16 index)
         G_TempEntity(origin, 3)->s.eventParm = index;
 }
 
-void __fastcall G_EntUnlink(gentity_s *ent)
+void __cdecl G_EntUnlink(gentity_s *ent)
 {
     tagInfo_s *tagInfo; // r22
     animscripted_s *scripted; // r30
@@ -2824,7 +2824,7 @@ void __fastcall G_EntUnlink(gentity_s *ent)
     //Profile_EndInternal(0);
 }
 
-void __fastcall G_UpdateTagInfo(gentity_s *ent, int bParentHasDObj)
+void __cdecl G_UpdateTagInfo(gentity_s *ent, int bParentHasDObj)
 {
     tagInfo_s *tagInfo; // r31
     int BoneIndex; // r3
@@ -2850,7 +2850,7 @@ void __fastcall G_UpdateTagInfo(gentity_s *ent, int bParentHasDObj)
     //Profile_EndInternal(0);
 }
 
-void __fastcall G_UpdateTagInfoOfChildren(gentity_s *parent, int bHasDObj)
+void __cdecl G_UpdateTagInfoOfChildren(gentity_s *parent, int bHasDObj)
 {
     gentity_s *tagChildren; // r3
     gentity_s *next; // r31
@@ -2869,7 +2869,7 @@ void __fastcall G_UpdateTagInfoOfChildren(gentity_s *parent, int bHasDObj)
     //Profile_EndInternal(0);
 }
 
-void __fastcall G_EntUnlinkFree(gentity_s *ent)
+void __cdecl G_EntUnlinkFree(gentity_s *ent)
 {
     animscripted_s *scripted; // r3
 
@@ -2882,7 +2882,7 @@ void __fastcall G_EntUnlinkFree(gentity_s *ent)
     G_EntUnlink(ent);
 }
 
-void __fastcall G_FreeEntity(gentity_s *ed)
+void __cdecl G_FreeEntity(gentity_s *ed)
 {
     animscripted_s *scripted; // r3
     gentity_s *tagChildren; // r30
@@ -3008,14 +3008,14 @@ void __fastcall G_FreeEntity(gentity_s *ed)
     //Profile_EndInternal(0);
 }
 
-void __fastcall G_UpdateTags(gentity_s *ent, int bHasDObj)
+void __cdecl G_UpdateTags(gentity_s *ent, int bHasDObj)
 {
     if (ent->scr_vehicle)
         G_UpdateVehicleTags(ent);
     G_UpdateTagInfoOfChildren(ent, bHasDObj);
 }
 
-void __fastcall G_DObjUpdate(gentity_s *ent)
+void __cdecl G_DObjUpdate(gentity_s *ent)
 {
     int model; // r31
     int v3; // r4
@@ -3113,7 +3113,7 @@ LABEL_31:
     //Profile_EndInternal(0);
 }
 
-int __fastcall G_EntDetach(gentity_s *ent, const char *modelName, unsigned int tagName)
+int __cdecl G_EntDetach(gentity_s *ent, const char *modelName, unsigned int tagName)
 {
     unsigned int LowercaseString; // r3
     unsigned int v7; // r24
@@ -3198,7 +3198,7 @@ int __fastcall G_EntDetach(gentity_s *ent, const char *modelName, unsigned int t
     }
 }
 
-void __fastcall G_EntDetachAll(gentity_s *ent)
+void __cdecl G_EntDetachAll(gentity_s *ent)
 {
     unsigned __int16 *attachTagNames; // r31
     int v3; // r30
@@ -3218,7 +3218,7 @@ void __fastcall G_EntDetachAll(gentity_s *ent)
     //Profile_EndInternal(0);
 }
 
-int __fastcall G_EntLinkToInternal(gentity_s *ent, gentity_s *parent, unsigned int tagName)
+int __cdecl G_EntLinkToInternal(gentity_s *ent, gentity_s *parent, unsigned int tagName)
 {
     int BoneIndex; // r24
     int result; // r3
@@ -3320,7 +3320,7 @@ int __fastcall G_EntLinkToInternal(gentity_s *ent, gentity_s *parent, unsigned i
     return 0;
 }
 
-int __fastcall G_EntLinkTo(gentity_s *ent, gentity_s *parent, unsigned int tagName)
+int __cdecl G_EntLinkTo(gentity_s *ent, gentity_s *parent, unsigned int tagName)
 {
     //Profile_Begin(254);
     if (G_EntLinkToInternal(ent, parent, tagName))
@@ -3336,7 +3336,7 @@ int __fastcall G_EntLinkTo(gentity_s *ent, gentity_s *parent, unsigned int tagNa
     }
 }
 
-int __fastcall G_EntLinkToWithOffset(
+int __cdecl G_EntLinkToWithOffset(
     gentity_s *ent,
     gentity_s *parent,
     unsigned int tagName,
@@ -3363,7 +3363,7 @@ int __fastcall G_EntLinkToWithOffset(
     }
 }
 
-int __fastcall G_EntAttach(gentity_s *ent, const char *modelName, unsigned int tagName, int ignoreCollision)
+int __cdecl G_EntAttach(gentity_s *ent, const char *modelName, unsigned int tagName, int ignoreCollision)
 {
     int v8; // r31
     unsigned __int16 *i; // r11

@@ -4,7 +4,7 @@
 
 #include "actor_events.h"
 
-float __fastcall Actor_EventDefaultRadiusSqrd(ai_event_t eType)
+float __cdecl Actor_EventDefaultRadiusSqrd(ai_event_t eType)
 {
     ai_event_t v1; // r31
     const dvar_s *v2; // r31
@@ -25,7 +25,7 @@ float __fastcall Actor_EventDefaultRadiusSqrd(ai_event_t eType)
     return *((float *)&v3 + 1);
 }
 
-float __fastcall Actor_EventDefaultHeightDiff(ai_event_t eType)
+float __cdecl Actor_EventDefaultHeightDiff(ai_event_t eType)
 {
     double defaultHeight; // fp1
 
@@ -33,12 +33,12 @@ float __fastcall Actor_EventDefaultHeightDiff(ai_event_t eType)
     return *((float *)&defaultHeight + 1);
 }
 
-const char *__fastcall Actor_NameForEvent(ai_event_t eType)
+const char *__cdecl Actor_NameForEvent(ai_event_t eType)
 {
     return g_ai_event_info[eType].name;
 }
 
-void __fastcall Actor_DumpEvents(actor_s *self, ai_event_t event, gentity_s *originator)
+void __cdecl Actor_DumpEvents(actor_s *self, ai_event_t event, gentity_s *originator)
 {
     int number; // r5
     int v7; // r7
@@ -62,7 +62,7 @@ void __fastcall Actor_DumpEvents(actor_s *self, ai_event_t event, gentity_s *ori
     }
 }
 
-int __fastcall Actor_EventForName(const char *name)
+int __cdecl Actor_EventForName(const char *name)
 {
     const $51E54BD14BE3E2EF9DA2A8BD94E6B80E *v2; // r31
     int v3; // r29
@@ -83,12 +83,12 @@ int __fastcall Actor_EventForName(const char *name)
 }
 
 // attributes: thunk
-void __fastcall Actor_GetPerfectInfo(actor_s *self, sentient_s *pOther)
+void __cdecl Actor_GetPerfectInfo(actor_s *self, sentient_s *pOther)
 {
     Actor_UpdateLastKnownPos(self, pOther);
 }
 
-void __fastcall Actor_WasAttackedBy(actor_s *self, sentient_s *pOther)
+void __cdecl Actor_WasAttackedBy(actor_s *self, sentient_s *pOther)
 {
     sentient_s *sentients; // r11
 
@@ -120,7 +120,7 @@ void __fastcall Actor_WasAttackedBy(actor_s *self, sentient_s *pOther)
     self->sentientInfo[pOther - sentients].iLastAttackMeTime = level.time;
 }
 
-void __fastcall Actor_EventFootstep(actor_s *self, sentient_s *originator, const float *vOrigin)
+void __cdecl Actor_EventFootstep(actor_s *self, sentient_s *originator, const float *vOrigin)
 {
     if (!self)
         MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\actor_events.cpp", 488, 0, "%s", "self");
@@ -131,7 +131,7 @@ void __fastcall Actor_EventFootstep(actor_s *self, sentient_s *originator, const
     Actor_UpdateLastKnownPos(self, originator);
 }
 
-void __fastcall Actor_EventNewEnemy(actor_s *self, sentient_s *originator)
+void __cdecl Actor_EventNewEnemy(actor_s *self, sentient_s *originator)
 {
     sentient_s *sentient; // r4
 
@@ -162,7 +162,7 @@ void __fastcall Actor_EventNewEnemy(actor_s *self, sentient_s *originator)
         Actor_UpdateLastKnownPos(self, sentient);
 }
 
-void __fastcall Actor_EventPain(actor_s *self, sentient_s *pCasualty, sentient_s *pAttacker)
+void __cdecl Actor_EventPain(actor_s *self, sentient_s *pCasualty, sentient_s *pAttacker)
 {
     if (!self)
         MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\actor_events.cpp", 534, 0, "%s", "self");
@@ -174,7 +174,7 @@ void __fastcall Actor_EventPain(actor_s *self, sentient_s *pCasualty, sentient_s
     Actor_UpdateLastKnownPos(self, pAttacker);
 }
 
-void __fastcall Actor_EventDeath(actor_s *self, sentient_s *pCasualty, sentient_s *pAttacker)
+void __cdecl Actor_EventDeath(actor_s *self, sentient_s *pCasualty, sentient_s *pAttacker)
 {
     if (!self)
         MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\actor_events.cpp", 552, 0, "%s", "self");
@@ -185,7 +185,7 @@ void __fastcall Actor_EventDeath(actor_s *self, sentient_s *pCasualty, sentient_
     Actor_UpdateLastKnownPos(self, pAttacker);
 }
 
-void __fastcall Actor_EventExplosion(actor_s *self, gentity_s *originator, const float *vOrigin)
+void __cdecl Actor_EventExplosion(actor_s *self, gentity_s *originator, const float *vOrigin)
 {
     if (!self)
         MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\actor_events.cpp", 567, 0, "%s", "self");
@@ -199,7 +199,7 @@ void __fastcall Actor_EventExplosion(actor_s *self, gentity_s *originator, const
     Scr_Notify(self->ent, scr_const.explode, 2u);
 }
 
-void __fastcall Actor_EventGrenadePing(actor_s *self, gentity_s *originator, const float *vOrigin)
+void __cdecl Actor_EventGrenadePing(actor_s *self, gentity_s *originator, const float *vOrigin)
 {
     if (!self)
         MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\actor_events.cpp", 589, 0, "%s", "self");
@@ -210,7 +210,7 @@ void __fastcall Actor_EventGrenadePing(actor_s *self, gentity_s *originator, con
     Actor_GrenadePing(self, originator);
 }
 
-void __fastcall Actor_EventGunshot(actor_s *self, sentient_s *originator, const float *vOrigin)
+void __cdecl Actor_EventGunshot(actor_s *self, sentient_s *originator, const float *vOrigin)
 {
     if (!self)
         MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\actor_events.cpp", 606, 0, "%s", "self");
@@ -221,7 +221,7 @@ void __fastcall Actor_EventGunshot(actor_s *self, sentient_s *originator, const 
     Actor_UpdateLastKnownPos(self, originator);
 }
 
-void __fastcall Actor_EventBullet(
+void __cdecl Actor_EventBullet(
     actor_s *self,
     gentity_s *originator,
     const float *vStart,
@@ -262,7 +262,7 @@ void __fastcall Actor_EventBullet(
     }
 }
 
-void __fastcall Actor_ReceivePointEvent(
+void __cdecl Actor_ReceivePointEvent(
     actor_s *self,
     gentity_s *originator,
     ai_event_t eType,
@@ -397,7 +397,7 @@ void __fastcall Actor_ReceivePointEvent(
     }
 }
 
-void __fastcall Actor_ReceiveLineEvent(
+void __cdecl Actor_ReceiveLineEvent(
     actor_s *self,
     gentity_s *originator,
     ai_event_t eType,
@@ -469,7 +469,7 @@ void __fastcall Actor_ReceiveLineEvent(
     }
 }
 
-void __fastcall Actor_ReceiveArcEvent(
+void __cdecl Actor_ReceiveArcEvent(
     actor_s *self,
     gentity_s *originator,
     ai_event_t eType,
@@ -506,7 +506,7 @@ void __fastcall Actor_ReceiveArcEvent(
     }
 }
 
-void __fastcall Actor_ReceiveVolumeEvent(actor_s *self, gentity_s *originator, ai_event_t eType)
+void __cdecl Actor_ReceiveVolumeEvent(actor_s *self, gentity_s *originator, ai_event_t eType)
 {
     if (!self)
         MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\actor_events.cpp", 819, 0, "%s", "self");
@@ -532,7 +532,7 @@ void __fastcall Actor_ReceiveVolumeEvent(actor_s *self, gentity_s *originator, a
     }
 }
 
-void __fastcall Actor_BroadcastPointEvent(
+void __cdecl Actor_BroadcastPointEvent(
     gentity_s *originator,
     int eType,
     int teamFlags,
@@ -606,7 +606,7 @@ void __fastcall Actor_BroadcastPointEvent(
     }
 }
 
-void __fastcall Actor_BroadcastLineEvent(
+void __cdecl Actor_BroadcastLineEvent(
     gentity_s *originator,
     int eType,
     int teamFlags,
@@ -746,7 +746,7 @@ void __fastcall Actor_BroadcastLineEvent(
     }
 }
 
-void __fastcall Actor_BroadcastArcEvent(
+void __cdecl Actor_BroadcastArcEvent(
     gentity_s *originator,
     __int32 eventType,
     int teamFlags,
@@ -836,7 +836,7 @@ void __fastcall Actor_BroadcastArcEvent(
     }
 }
 
-void __fastcall Actor_BroadcastVolumeEvent(
+void __cdecl Actor_BroadcastVolumeEvent(
     gentity_s *originator,
     __int32 eventType,
     int teamFlags,
@@ -919,7 +919,7 @@ void __fastcall Actor_BroadcastVolumeEvent(
     }
 }
 
-void __fastcall Actor_BroadcastTeamEvent(sentient_s *sentient, int eType)
+void __cdecl Actor_BroadcastTeamEvent(sentient_s *sentient, int eType)
 {
     if (!sentient)
         MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\actor_events.cpp", 168, 0, "%s", "sentient");

@@ -25,71 +25,6 @@
 const float up[3] = { 0.0f, 0.0f, 1.0f };
 
 
-struct tagInfo_s // sizeof=0x70
-{
-    gentity_s* parent;
-    gentity_s* next;
-    uint16_t name;
-    // padding byte
-    // padding byte
-    int32_t index;
-    float axis[4][3];
-    float parentInvAxis[4][3];
-};
-
-
-struct gentity_s // sizeof=0x274
-{                                       // ...
-    entityState_s s;                    // ...
-    entityShared_t r;                   // ...
-    gclient_s* client;                  // ...
-    turretInfo_s* pTurretInfo;
-    scr_vehicle_s* scr_vehicle;
-    uint16_t model;
-    uint8_t physicsObject;
-    uint8_t takedamage;
-    uint8_t active;
-    uint8_t nopickup;
-    uint8_t handler;
-    uint8_t team;
-    uint16_t classname;         // ...
-    uint16_t target;
-    uint16_t targetname;
-    // padding byte
-    // padding byte
-    uint32_t attachIgnoreCollision;
-    int32_t spawnflags;                     // ...
-    int32_t flags;                          // ...
-    int32_t eventTime;
-    int32_t freeAfterEvent;
-    int32_t unlinkAfterEvent;
-    int32_t clipmask;
-    int32_t processedFrame;
-    EntHandle parent;
-    int32_t nextthink;
-    int32_t health;                         // ...
-    int32_t maxHealth;
-    int32_t damage;
-    int32_t count;
-    gentity_s* chain;
-    //$4FD1F2C094A0DF020529999C4E24827D ___u30;
-    union //$4FD1F2C094A0DF020529999C4E24827D // sizeof=0x60
-    {                                       // ...
-        item_ent_t item[2];
-        trigger_ent_t trigger;
-        mover_ent_t mover;
-        corpse_ent_t corpse;
-        missile_ent_t missile;
-    };
-    EntHandle missileTargetEnt;
-    tagInfo_s* tagInfo;
-    gentity_s* tagChildren;
-    uint16_t attachModelNames[19]; // ...
-    uint16_t attachTagNames[19];
-    int32_t useCount;
-    gentity_s* nextFree;
-};
-
 struct snapshot_s // sizeof=0x2307C
 {                                       // ...
     int32_t snapFlags;
@@ -1495,7 +1430,7 @@ inline cgs_t *CG_GetLocalClientStaticGlobals(int32_t localClientNum)
     return &cgsArray[localClientNum];
 }
 
-inline weaponInfo_s *__fastcall CG_GetLocalClientWeaponInfo(int localClientNum, int weaponIndex)
+inline weaponInfo_s *__cdecl CG_GetLocalClientWeaponInfo(int localClientNum, int weaponIndex)
 {
     iassert(localClientNum == 0);
     return &cg_weaponsArray[localClientNum][weaponIndex];

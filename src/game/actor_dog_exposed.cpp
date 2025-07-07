@@ -4,7 +4,7 @@
 
 #include "actor_dog_exposed.h"
 
-int __fastcall Actor_Dog_Exposed_Start(actor_s *self, ai_state_t ePrevState)
+int __cdecl Actor_Dog_Exposed_Start(actor_s *self, ai_state_t ePrevState)
 {
     int time; // r11
 
@@ -19,21 +19,21 @@ int __fastcall Actor_Dog_Exposed_Start(actor_s *self, ai_state_t ePrevState)
     return 1;
 }
 
-void __fastcall Actor_Dog_Exposed_Finish(actor_s *self, ai_state_t eNextState)
+void __cdecl Actor_Dog_Exposed_Finish(actor_s *self, ai_state_t eNextState)
 {
     self->ProneInfo.fTorsoPitch = 0.0;
     self->ProneInfo.prone = 0;
     self->ProneInfo.orientPitch = 0;
 }
 
-void __fastcall Actor_Dog_Exposed_Suspend(actor_s *self, ai_state_t eNextState)
+void __cdecl Actor_Dog_Exposed_Suspend(actor_s *self, ai_state_t eNextState)
 {
     self->ProneInfo.fTorsoPitch = 0.0;
     self->ProneInfo.prone = 0;
     self->ProneInfo.orientPitch = 0;
 }
 
-int __fastcall Actor_Dog_IsInSyncedMelee(actor_s *self, sentient_s *enemy)
+int __cdecl Actor_Dog_IsInSyncedMelee(actor_s *self, sentient_s *enemy)
 {
     EntHandle *p_syncedMeleeEnt; // r31
     int result; // r3
@@ -53,7 +53,7 @@ int __fastcall Actor_Dog_IsInSyncedMelee(actor_s *self, sentient_s *enemy)
     return result;
 }
 
-void __fastcall Actor_Dog_Attack(actor_s *self)
+void __cdecl Actor_Dog_Attack(actor_s *self)
 {
     if (!self)
         MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\actor_dog_exposed.cpp", 77, 0, "%s", "self");
@@ -67,7 +67,7 @@ void __fastcall Actor_Dog_Attack(actor_s *self)
     }
 }
 
-void __fastcall Actor_FindPathToGoalNearestNode(actor_s *self, int a2, int a3, int *a4)
+void __cdecl Actor_FindPathToGoalNearestNode(actor_s *self, int a2, int a3, int *a4)
 {
     pathnode_t *v5; // r30
     pathnode_t *v6; // r5
@@ -94,7 +94,7 @@ void __fastcall Actor_FindPathToGoalNearestNode(actor_s *self, int a2, int a3, i
     }
 }
 
-int __fastcall Actor_SetMeleeAttackSpot(actor_s *self, const float *enemyPosition, float *attackPosition)
+int __cdecl Actor_SetMeleeAttackSpot(actor_s *self, const float *enemyPosition, float *attackPosition)
 {
     sentient_s *TargetSentient; // r3
     gentity_s *ent; // r11
@@ -311,7 +311,7 @@ LABEL_46:
     return 1;
 }
 
-void __fastcall Actor_UpdateMeleeGoalPos(actor_s *self, float *goalPos)
+void __cdecl Actor_UpdateMeleeGoalPos(actor_s *self, float *goalPos)
 {
     double pathEnemyFightDist; // fp1
 
@@ -329,7 +329,7 @@ void __fastcall Actor_UpdateMeleeGoalPos(actor_s *self, float *goalPos)
     Actor_SetGoalRadius(&self->codeGoal, pathEnemyFightDist);
 }
 
-int __fastcall Actor_Dog_IsAttackScriptRunning(actor_s *self)
+int __cdecl Actor_Dog_IsAttackScriptRunning(actor_s *self)
 {
     unsigned __int8 v2; // r11
 
@@ -343,7 +343,7 @@ int __fastcall Actor_Dog_IsAttackScriptRunning(actor_s *self)
     return v2;
 }
 
-float __fastcall Actor_Dog_GetEnemyPos(actor_s *self, sentient_s *enemy, float *enemyPos)
+float __cdecl Actor_Dog_GetEnemyPos(actor_s *self, sentient_s *enemy, float *enemyPos)
 {
     gentity_s *ent; // r11
     float *p_commandTime; // r10
@@ -386,7 +386,7 @@ float __fastcall Actor_Dog_GetEnemyPos(actor_s *self, sentient_s *enemy, float *
     return *((float *)&v12 + 1);
 }
 
-bool __fastcall Actor_Dog_IsEnemyInAttackRange(actor_s *self, sentient_s *enemy, int *goalPosSet)
+bool __cdecl Actor_Dog_IsEnemyInAttackRange(actor_s *self, sentient_s *enemy, int *goalPosSet)
 {
     bool v6; // r29
     double EnemyPos; // fp31
@@ -449,7 +449,7 @@ bool __fastcall Actor_Dog_IsEnemyInAttackRange(actor_s *self, sentient_s *enemy,
     return 0;
 }
 
-actor_think_result_t __fastcall Actor_Dog_Exposed_Think(actor_s *self)
+actor_think_result_t __cdecl Actor_Dog_Exposed_Think(actor_s *self)
 {
     bool IsEnemyInAttackRange; // r28
     bool v3; // r29

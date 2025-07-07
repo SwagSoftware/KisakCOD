@@ -4,12 +4,12 @@
 
 #include "actor_physics.h"
 
-void __fastcall TRACK_actor_physics()
+void __cdecl TRACK_actor_physics()
 {
     track_static_alloc_internal(&g_apl, 92, "g_apl", 5);
 }
 
-void __fastcall AIPhys_AddTouchEnt(int entityNum)
+void __cdecl AIPhys_AddTouchEnt(int entityNum)
 {
     actor_physics_t *v1; // r11
     int iNumTouch; // r8
@@ -44,7 +44,7 @@ void __fastcall AIPhys_AddTouchEnt(int entityNum)
     }
 }
 
-void __fastcall AIPhys_ClipVelocity(
+void __cdecl AIPhys_ClipVelocity(
     const float *in,
     const float *normal,
     bool isWalkable,
@@ -73,7 +73,7 @@ void __fastcall AIPhys_ClipVelocity(
     }
 }
 
-SlideMoveResult __fastcall AIPhys_SlideMove(int gravity, int zonly)
+SlideMoveResult __cdecl AIPhys_SlideMove(int gravity, int zonly)
 {
     float *vVelocity; // r3
     double v4; // fp26
@@ -445,7 +445,7 @@ SlideMoveResult __fastcall AIPhys_SlideMove(int gravity, int zonly)
     return 1;
 }
 
-int __fastcall AIPhys_StepSlideMove(int gravity, int zonly)
+int __cdecl AIPhys_StepSlideMove(int gravity, int zonly)
 {
     double v4; // fp30
     double v5; // fp29
@@ -579,7 +579,7 @@ int __fastcall AIPhys_StepSlideMove(int gravity, int zonly)
     return 1;
 }
 
-int __fastcall AIPhys_AirMove()
+int __cdecl AIPhys_AirMove()
 {
     if (g_apl.bGroundPlane)
         AIPhys_ClipVelocity(
@@ -591,7 +591,7 @@ int __fastcall AIPhys_AirMove()
     return AIPhys_StepSlideMove(1, 0);
 }
 
-int __fastcall AIPhys_WalkMove()
+int __cdecl AIPhys_WalkMove()
 {
     actor_physics_t *v0; // r9
     double v1; // fp0
@@ -635,7 +635,7 @@ int __fastcall AIPhys_WalkMove()
         return AIPhys_StepSlideMove(0, 0);
 }
 
-int __fastcall AIPhys_ZOnlyPhysicsMove()
+int __cdecl AIPhys_ZOnlyPhysicsMove()
 {
     actor_physics_t *v0; // r11
     double v1; // fp0
@@ -816,7 +816,7 @@ void AIPhys_Footsteps()
     }
 }
 
-void __fastcall AIPhys_FoliageSounds()
+void __cdecl AIPhys_FoliageSounds()
 {
     actor_physics_t *v0; // r7
     const dvar_s *v1; // r10
@@ -884,7 +884,7 @@ void __fastcall AIPhys_FoliageSounds()
     }
 }
 
-int __fastcall Actor_Physics(actor_physics_t *pPhys)
+int __cdecl Actor_Physics(actor_physics_t *pPhys)
 {
     int groundEntNum; // r9
     actor_physics_t *v3; // r29
@@ -982,7 +982,7 @@ int __fastcall Actor_Physics(actor_physics_t *pPhys)
     }
 }
 
-void __fastcall Actor_PostPhysics(actor_physics_t *pPhys)
+void __cdecl Actor_PostPhysics(actor_physics_t *pPhys)
 {
     int bIsAlive; // r10
 

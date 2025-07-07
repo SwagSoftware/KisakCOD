@@ -4,7 +4,7 @@
 
 #include "g_local.h"
 
-int __fastcall G_GetNeededStartAmmo(gentity_s *pSelf, WeaponDef *weapDef)
+int __cdecl G_GetNeededStartAmmo(gentity_s *pSelf, WeaponDef *weapDef)
 {
     gclient_s *client; // r29
     unsigned int v5; // r30
@@ -38,7 +38,7 @@ int __fastcall G_GetNeededStartAmmo(gentity_s *pSelf, WeaponDef *weapDef)
         return weapDef->iStartAmmo;
 }
 
-void __fastcall InitializeAmmo(gentity_s *pSelf, int weaponIndex, unsigned __int8 weaponModel, int hadWeapon)
+void __cdecl InitializeAmmo(gentity_s *pSelf, int weaponIndex, unsigned __int8 weaponModel, int hadWeapon)
 {
     signed int altWeaponIndex; // r31
     int NumWeapons; // r14
@@ -95,7 +95,7 @@ void __fastcall InitializeAmmo(gentity_s *pSelf, int weaponIndex, unsigned __int
     } while (((1 << (altWeaponIndex & 0x1F)) & weapons[altWeaponIndex >> 5]) != 0);
 }
 
-void __fastcall PlayerCmd_giveWeapon(scr_entref_t *entref)
+void __cdecl PlayerCmd_giveWeapon(scr_entref_t *entref)
 {
     gentity_s *v1; // r29
     const char *v2; // r3
@@ -148,7 +148,7 @@ void __fastcall PlayerCmd_giveWeapon(scr_entref_t *entref)
     InitializeAmmo(v1, WeaponIndexForName, v9, v6);
 }
 
-void __fastcall PlayerCmd_takeWeapon(scr_entref_t *entref)
+void __cdecl PlayerCmd_takeWeapon(scr_entref_t *entref)
 {
     gentity_s *v1; // r31
     const char *v2; // r3
@@ -184,7 +184,7 @@ void __fastcall PlayerCmd_takeWeapon(scr_entref_t *entref)
     BG_TakePlayerWeapon(&v1->client->ps, WeaponIndexForName, 1);
 }
 
-void __fastcall PlayerCmd_takeAllWeapons(scr_entref_t *entref)
+void __cdecl PlayerCmd_takeAllWeapons(scr_entref_t *entref)
 {
     gentity_s *v1; // r30
     const char *v2; // r3
@@ -218,7 +218,7 @@ void __fastcall PlayerCmd_takeAllWeapons(scr_entref_t *entref)
         BG_TakePlayerWeapon(&v1->client->ps, v3, 1);
 }
 
-void __fastcall PlayerCmd_getCurrentWeapon(scr_entref_t *entref)
+void __cdecl PlayerCmd_getCurrentWeapon(scr_entref_t *entref)
 {
     gentity_s *v1; // r31
     const char *v2; // r3
@@ -258,7 +258,7 @@ void __fastcall PlayerCmd_getCurrentWeapon(scr_entref_t *entref)
     Scr_AddString(szInternalName);
 }
 
-void __fastcall PlayerCmd_getCurrentWeaponClipAmmo(scr_entref_t *entref)
+void __cdecl PlayerCmd_getCurrentWeaponClipAmmo(scr_entref_t *entref)
 {
     gentity_s *v1; // r31
     const char *v2; // r3
@@ -296,7 +296,7 @@ void __fastcall PlayerCmd_getCurrentWeaponClipAmmo(scr_entref_t *entref)
     Scr_AddInt(v4);
 }
 
-void __fastcall PlayerCmd_getCurrentOffhand(scr_entref_t *entref)
+void __cdecl PlayerCmd_getCurrentOffhand(scr_entref_t *entref)
 {
     gentity_s *v1; // r31
     const char *v2; // r3
@@ -334,7 +334,7 @@ void __fastcall PlayerCmd_getCurrentOffhand(scr_entref_t *entref)
     Scr_AddString(szInternalName);
 }
 
-void __fastcall PlayerCmd_setOffhandSecondaryClass(scr_entref_t *entref)
+void __cdecl PlayerCmd_setOffhandSecondaryClass(scr_entref_t *entref)
 {
     gentity_s *v1; // r31
     const char *v2; // r3
@@ -386,7 +386,7 @@ void __fastcall PlayerCmd_setOffhandSecondaryClass(scr_entref_t *entref)
     Scr_Error(v3);
 }
 
-void __fastcall PlayerCmd_getOffhandSecondaryClass(scr_entref_t *entref)
+void __cdecl PlayerCmd_getOffhandSecondaryClass(scr_entref_t *entref)
 {
     gentity_s *v1; // r31
     const char *v2; // r3
@@ -433,7 +433,7 @@ void __fastcall PlayerCmd_getOffhandSecondaryClass(scr_entref_t *entref)
     }
 }
 
-void __fastcall PlayerCmd_hasWeapon(scr_entref_t *entref)
+void __cdecl PlayerCmd_hasWeapon(scr_entref_t *entref)
 {
     gentity_s *v1; // r31
     const char *v2; // r3
@@ -473,7 +473,7 @@ void __fastcall PlayerCmd_hasWeapon(scr_entref_t *entref)
     Scr_AddBool(v5);
 }
 
-void __fastcall PlayerCmd_switchToWeapon(scr_entref_t *entref)
+void __cdecl PlayerCmd_switchToWeapon(scr_entref_t *entref)
 {
     unsigned __int16 v1; // r27
     gentity_s *v2; // r31
@@ -521,7 +521,7 @@ void __fastcall PlayerCmd_switchToWeapon(scr_entref_t *entref)
     }
 }
 
-void __fastcall PlayerCmd_switchToOffhand(scr_entref_t *entref)
+void __cdecl PlayerCmd_switchToOffhand(scr_entref_t *entref)
 {
     unsigned __int16 v1; // r27
     gentity_s *v2; // r29
@@ -577,7 +577,7 @@ void __fastcall PlayerCmd_switchToOffhand(scr_entref_t *entref)
     }
 }
 
-void __fastcall PlayerCmd_giveStartAmmo(scr_entref_t *entref)
+void __cdecl PlayerCmd_giveStartAmmo(scr_entref_t *entref)
 {
     gentity_s *v1; // r31
     const char *v2; // r3
@@ -618,7 +618,7 @@ void __fastcall PlayerCmd_giveStartAmmo(scr_entref_t *entref)
         InitializeAmmo(v1, WeaponIndexForName, v1->client->ps.weaponmodels[WeaponIndexForName], 0);
 }
 
-void __fastcall PlayerCmd_giveMaxAmmo(scr_entref_t *entref)
+void __cdecl PlayerCmd_giveMaxAmmo(scr_entref_t *entref)
 {
     gentity_s *v1; // r30
     const char *v2; // r3
@@ -671,7 +671,7 @@ void __fastcall PlayerCmd_giveMaxAmmo(scr_entref_t *entref)
 }
 
 // local variable allocation has failed, the output may be wrong!
-void __fastcall PlayerCmd_getFractionStartAmmo(scr_entref_t *entref)
+void __cdecl PlayerCmd_getFractionStartAmmo(scr_entref_t *entref)
 {
     gentity_s *v1; // r29
     const char *v2; // r3
@@ -728,7 +728,7 @@ void __fastcall PlayerCmd_getFractionStartAmmo(scr_entref_t *entref)
 }
 
 // local variable allocation has failed, the output may be wrong!
-void __fastcall PlayerCmd_getFractionMaxAmmo(scr_entref_t *entref)
+void __cdecl PlayerCmd_getFractionMaxAmmo(scr_entref_t *entref)
 {
     gentity_s *v1; // r30
     const char *v2; // r3
@@ -805,7 +805,7 @@ void __fastcall PlayerCmd_getFractionMaxAmmo(scr_entref_t *entref)
     Scr_AddFloat(1.0);
 }
 
-void __fastcall PlayerCmd_setOrigin(scr_entref_t *entref)
+void __cdecl PlayerCmd_setOrigin(scr_entref_t *entref)
 {
     gentity_s *v1; // r31
     const char *v2; // r3
@@ -838,7 +838,7 @@ void __fastcall PlayerCmd_setOrigin(scr_entref_t *entref)
     SetClientOrigin(v1, v3);
 }
 
-void __fastcall PlayerCmd_SetVelocity(scr_entref_t *entref)
+void __cdecl PlayerCmd_SetVelocity(scr_entref_t *entref)
 {
     gentity_s *v1; // r31
     const char *v2; // r3
@@ -875,7 +875,7 @@ void __fastcall PlayerCmd_SetVelocity(scr_entref_t *entref)
     p_commandTime[12] = v4[2];
 }
 
-void __fastcall PlayerCmd_GetVelocity(scr_entref_t *entref)
+void __cdecl PlayerCmd_GetVelocity(scr_entref_t *entref)
 {
     gentity_s *v1; // r31
     const char *v2; // r3
@@ -906,7 +906,7 @@ void __fastcall PlayerCmd_GetVelocity(scr_entref_t *entref)
     Scr_AddVector(v1->client->ps.velocity);
 }
 
-void __fastcall PlayerCmd_setAngles(scr_entref_t *entref)
+void __cdecl PlayerCmd_setAngles(scr_entref_t *entref)
 {
     gentity_s *v1; // r31
     const char *v2; // r3
@@ -940,7 +940,7 @@ void __fastcall PlayerCmd_setAngles(scr_entref_t *entref)
     SetClientViewAngle(v1, v4, v3);
 }
 
-void __fastcall PlayerCmd_getAngles(scr_entref_t *entref)
+void __cdecl PlayerCmd_getAngles(scr_entref_t *entref)
 {
     gentity_s *v1; // r31
     const char *v2; // r3
@@ -971,7 +971,7 @@ void __fastcall PlayerCmd_getAngles(scr_entref_t *entref)
     Scr_AddVector(v1->client->ps.viewangles);
 }
 
-void __fastcall PlayerCmd_getViewHeight(scr_entref_t *entref)
+void __cdecl PlayerCmd_getViewHeight(scr_entref_t *entref)
 {
     gentity_s *v1; // r31
     const char *v2; // r3
@@ -1002,7 +1002,7 @@ void __fastcall PlayerCmd_getViewHeight(scr_entref_t *entref)
     Scr_AddFloat(v1->client->ps.viewHeightCurrent);
 }
 
-void __fastcall PlayerCmd_getNormalizedMovement(scr_entref_t *entref)
+void __cdecl PlayerCmd_getNormalizedMovement(scr_entref_t *entref)
 {
     gentity_s *v1; // r31
     const char *v2; // r3
@@ -1044,7 +1044,7 @@ void __fastcall PlayerCmd_getNormalizedMovement(scr_entref_t *entref)
     Scr_AddVector(v5);
 }
 
-void __fastcall PlayerCmd_useButtonPressed(scr_entref_t *entref)
+void __cdecl PlayerCmd_useButtonPressed(scr_entref_t *entref)
 {
     gentity_s *v1; // r31
     const char *v2; // r3
@@ -1075,7 +1075,7 @@ void __fastcall PlayerCmd_useButtonPressed(scr_entref_t *entref)
     Scr_AddInt((((unsigned __int8)v1->client->buttonsSinceLastFrame | (unsigned __int8)v1->client->buttons) & 0x28) != 0);
 }
 
-void __fastcall PlayerCmd_attackButtonPressed(scr_entref_t *entref)
+void __cdecl PlayerCmd_attackButtonPressed(scr_entref_t *entref)
 {
     gentity_s *v1; // r31
     const char *v2; // r3
@@ -1106,7 +1106,7 @@ void __fastcall PlayerCmd_attackButtonPressed(scr_entref_t *entref)
     Scr_AddInt((((unsigned __int8)v1->client->buttonsSinceLastFrame | (unsigned __int8)v1->client->buttons) & 1) != 0);
 }
 
-void __fastcall PlayerCmd_adsButtonPressed(scr_entref_t *entref)
+void __cdecl PlayerCmd_adsButtonPressed(scr_entref_t *entref)
 {
     gentity_s *v1; // r31
     const char *v2; // r3
@@ -1137,7 +1137,7 @@ void __fastcall PlayerCmd_adsButtonPressed(scr_entref_t *entref)
     Scr_AddInt((((unsigned __int16)v1->client->buttonsSinceLastFrame | (unsigned __int16)v1->client->buttons) & 0x800) != 0);
 }
 
-void __fastcall PlayerCmd_meleeButtonPressed(scr_entref_t *entref)
+void __cdecl PlayerCmd_meleeButtonPressed(scr_entref_t *entref)
 {
     gentity_s *v1; // r31
     const char *v2; // r3
@@ -1168,7 +1168,7 @@ void __fastcall PlayerCmd_meleeButtonPressed(scr_entref_t *entref)
     Scr_AddInt((((unsigned __int8)v1->client->buttonsSinceLastFrame | (unsigned __int8)v1->client->buttons) & 4) != 0);
 }
 
-int __fastcall PlayerCmd_CheckButtonPressed()
+int __cdecl PlayerCmd_CheckButtonPressed()
 {
     int result; // r3
     bool IsActive; // zf
@@ -1188,7 +1188,7 @@ int __fastcall PlayerCmd_CheckButtonPressed()
     return result;
 }
 
-void __fastcall PlayerCmd_buttonPressed(scr_entref_t *entref)
+void __cdecl PlayerCmd_buttonPressed(scr_entref_t *entref)
 {
     int v1; // r31
     int v2; // r3
@@ -1211,7 +1211,7 @@ void __fastcall PlayerCmd_buttonPressed(scr_entref_t *entref)
     Scr_AddInt(v2);
 }
 
-void __fastcall G_FlushCommandNotifies()
+void __cdecl G_FlushCommandNotifies()
 {
     unsigned int v0; // r30
     unsigned int v1; // r3
@@ -1255,7 +1255,7 @@ void __fastcall G_FlushCommandNotifies()
     }
 }
 
-void __fastcall G_ProcessCommandNotifies()
+void __cdecl G_ProcessCommandNotifies()
 {
     unsigned __int16 v0; // r26
     unsigned int v1; // r28
@@ -1318,7 +1318,7 @@ void __fastcall G_ProcessCommandNotifies()
     }
 }
 
-void __fastcall PlayerCmd_notifyOnCommand(scr_entref_t *entref)
+void __cdecl PlayerCmd_notifyOnCommand(scr_entref_t *entref)
 {
     const char *String; // r31
     const char *v2; // r3
@@ -1330,7 +1330,7 @@ void __fastcall PlayerCmd_notifyOnCommand(scr_entref_t *entref)
     Cmd_RegisterNotification(v2, String);
 }
 
-void __fastcall PlayerCmd_playerADS(scr_entref_t *entref)
+void __cdecl PlayerCmd_playerADS(scr_entref_t *entref)
 {
     gentity_s *v1; // r31
     const char *v2; // r3
@@ -1361,7 +1361,7 @@ void __fastcall PlayerCmd_playerADS(scr_entref_t *entref)
     Scr_AddFloat(v1->client->ps.fWeaponPosFrac);
 }
 
-void __fastcall PlayerCmd_isOnGround(scr_entref_t *entref)
+void __cdecl PlayerCmd_isOnGround(scr_entref_t *entref)
 {
     gentity_s *v1; // r31
     const char *v2; // r3
@@ -1398,7 +1398,7 @@ void __fastcall PlayerCmd_isOnGround(scr_entref_t *entref)
     Scr_AddInt(v4);
 }
 
-void __fastcall PlayerCmd_SetViewmodel(scr_entref_t *entref)
+void __cdecl PlayerCmd_SetViewmodel(scr_entref_t *entref)
 {
     gentity_s *v1; // r30
     const char *v2; // r3
@@ -1444,7 +1444,7 @@ void __fastcall PlayerCmd_SetViewmodel(scr_entref_t *entref)
     v1->client->ps.viewmodelIndex = v5;
 }
 
-void __fastcall PlayerCmd_AllowADS(scr_entref_t *entref)
+void __cdecl PlayerCmd_AllowADS(scr_entref_t *entref)
 {
     gentity_s *v1; // r31
     const char *v2; // r3
@@ -1496,7 +1496,7 @@ void __fastcall PlayerCmd_AllowADS(scr_entref_t *entref)
     }
 }
 
-void __fastcall PlayerCmd_AllowJump(scr_entref_t *entref)
+void __cdecl PlayerCmd_AllowJump(scr_entref_t *entref)
 {
     gentity_s *v1; // r31
     const char *v2; // r3
@@ -1538,7 +1538,7 @@ void __fastcall PlayerCmd_AllowJump(scr_entref_t *entref)
     client->ps.pm_flags = v6;
 }
 
-void __fastcall PlayerCmd_AllowSprint(scr_entref_t *entref)
+void __cdecl PlayerCmd_AllowSprint(scr_entref_t *entref)
 {
     gentity_s *v1; // r31
     const char *v2; // r3
@@ -1580,7 +1580,7 @@ void __fastcall PlayerCmd_AllowSprint(scr_entref_t *entref)
     client->ps.pm_flags = v6;
 }
 
-void __fastcall PlayerCmd_AllowMelee(scr_entref_t *entref)
+void __cdecl PlayerCmd_AllowMelee(scr_entref_t *entref)
 {
     gentity_s *v1; // r31
     const char *v2; // r3
@@ -1622,7 +1622,7 @@ void __fastcall PlayerCmd_AllowMelee(scr_entref_t *entref)
     client->ps.pm_flags = v6;
 }
 
-void __fastcall PlayerCmd_SetSpreadOverride(scr_entref_t *entref)
+void __cdecl PlayerCmd_SetSpreadOverride(scr_entref_t *entref)
 {
     gentity_s *v1; // r31
     const char *v2; // r3
@@ -1679,7 +1679,7 @@ void __fastcall PlayerCmd_SetSpreadOverride(scr_entref_t *entref)
     }
 }
 
-void __fastcall PlayerCmd_ResetSpreadOverride(scr_entref_t *entref)
+void __cdecl PlayerCmd_ResetSpreadOverride(scr_entref_t *entref)
 {
     gentity_s *v1; // r31
     const char *v2; // r3
@@ -1713,7 +1713,7 @@ void __fastcall PlayerCmd_ResetSpreadOverride(scr_entref_t *entref)
         Scr_Error("USAGE: <player> resetspreadoverride()\n");
 }
 
-void __fastcall PlayerCmd_ShowViewmodel(scr_entref_t *entref)
+void __cdecl PlayerCmd_ShowViewmodel(scr_entref_t *entref)
 {
     unsigned __int16 v1; // r30
     int v2; // r31
@@ -1742,7 +1742,7 @@ void __fastcall PlayerCmd_ShowViewmodel(scr_entref_t *entref)
     SV_GameSendServerCommand(v1, "showViewModel");
 }
 
-void __fastcall PlayerCmd_HideViewmodel(scr_entref_t *entref)
+void __cdecl PlayerCmd_HideViewmodel(scr_entref_t *entref)
 {
     unsigned __int16 v1; // r29
     gentity_s *v2; // r31
@@ -1780,7 +1780,7 @@ void __fastcall PlayerCmd_HideViewmodel(scr_entref_t *entref)
     SV_GameSendServerCommand(v1, "hideViewModel");
 }
 
-void __fastcall PlayerCmd_AllowStand(scr_entref_t *entref)
+void __cdecl PlayerCmd_AllowStand(scr_entref_t *entref)
 {
     gentity_s *v1; // r31
     const char *v2; // r3
@@ -1822,7 +1822,7 @@ void __fastcall PlayerCmd_AllowStand(scr_entref_t *entref)
     client->ps.pm_flags = v6;
 }
 
-void __fastcall PlayerCmd_AllowCrouch(scr_entref_t *entref)
+void __cdecl PlayerCmd_AllowCrouch(scr_entref_t *entref)
 {
     gentity_s *v1; // r31
     const char *v2; // r3
@@ -1864,7 +1864,7 @@ void __fastcall PlayerCmd_AllowCrouch(scr_entref_t *entref)
     client->ps.pm_flags = v6;
 }
 
-void __fastcall PlayerCmd_AllowProne(scr_entref_t *entref)
+void __cdecl PlayerCmd_AllowProne(scr_entref_t *entref)
 {
     gentity_s *v1; // r31
     const char *v2; // r3
@@ -1906,7 +1906,7 @@ void __fastcall PlayerCmd_AllowProne(scr_entref_t *entref)
     client->ps.pm_flags = v6;
 }
 
-void __fastcall PlayerCmd_AllowLean(scr_entref_t *entref)
+void __cdecl PlayerCmd_AllowLean(scr_entref_t *entref)
 {
     gentity_s *v1; // r31
     const char *v2; // r3
@@ -1948,7 +1948,7 @@ void __fastcall PlayerCmd_AllowLean(scr_entref_t *entref)
     client->ps.pm_flags = v6;
 }
 
-void __fastcall PlayerCmd_OpenMenu(scr_entref_t *entref)
+void __cdecl PlayerCmd_OpenMenu(scr_entref_t *entref)
 {
     unsigned __int16 v1; // r27
     gentity_s *v2; // r31
@@ -1999,7 +1999,7 @@ void __fastcall PlayerCmd_OpenMenu(scr_entref_t *entref)
     Scr_AddInt(v4);
 }
 
-void __fastcall PlayerCmd_OpenMenuNoMouse(scr_entref_t *entref)
+void __cdecl PlayerCmd_OpenMenuNoMouse(scr_entref_t *entref)
 {
     unsigned __int16 v1; // r27
     gentity_s *v2; // r31
@@ -2050,7 +2050,7 @@ void __fastcall PlayerCmd_OpenMenuNoMouse(scr_entref_t *entref)
     Scr_AddInt(v4);
 }
 
-void __fastcall PlayerCmd_CloseMenu(scr_entref_t *entref)
+void __cdecl PlayerCmd_CloseMenu(scr_entref_t *entref)
 {
     unsigned __int16 v1; // r30
     int v2; // r31
@@ -2079,7 +2079,7 @@ void __fastcall PlayerCmd_CloseMenu(scr_entref_t *entref)
     SV_GameSendServerCommand(v1, "popupclose");
 }
 
-void __fastcall PlayerCmd_FreezeControls(scr_entref_t *entref)
+void __cdecl PlayerCmd_FreezeControls(scr_entref_t *entref)
 {
     gentity_s *v1; // r31
     const char *v2; // r3
@@ -2110,7 +2110,7 @@ void __fastcall PlayerCmd_FreezeControls(scr_entref_t *entref)
     v1->client->bFrozen = Scr_GetInt(0);
 }
 
-void __fastcall PlayerCmd_SetEQLerp(scr_entref_t *entref)
+void __cdecl PlayerCmd_SetEQLerp(scr_entref_t *entref)
 {
     unsigned __int16 v1; // r30
     int v2; // r31
@@ -2177,7 +2177,7 @@ void __fastcall PlayerCmd_SetEQLerp(scr_entref_t *entref)
     Scr_Error(v9);
 }
 
-void __fastcall PlayerCmd_SetEQ(scr_entref_t *entref)
+void __cdecl PlayerCmd_SetEQ(scr_entref_t *entref)
 {
     unsigned __int16 v1; // r26
     const char *v2; // r3
@@ -2234,7 +2234,7 @@ void __fastcall PlayerCmd_SetEQ(scr_entref_t *entref)
     }
 }
 
-void __fastcall PlayerCmd_DeactivateEq(scr_entref_t *entref)
+void __cdecl PlayerCmd_DeactivateEq(scr_entref_t *entref)
 {
     unsigned __int16 v1; // r29
     const char *v2; // r3
@@ -2298,7 +2298,7 @@ void __fastcall PlayerCmd_DeactivateEq(scr_entref_t *entref)
     }
 }
 
-void __fastcall PlayerCmd_SetReverb(scr_entref_t *entref)
+void __cdecl PlayerCmd_SetReverb(scr_entref_t *entref)
 {
     unsigned __int16 v1; // r29
     const char *v2; // r3
@@ -2365,7 +2365,7 @@ void __fastcall PlayerCmd_SetReverb(scr_entref_t *entref)
     }
 }
 
-void __fastcall PlayerCmd_DeactivateReverb(scr_entref_t *entref)
+void __cdecl PlayerCmd_DeactivateReverb(scr_entref_t *entref)
 {
     unsigned __int16 v1; // r30
     int v2; // r31
@@ -2413,7 +2413,7 @@ void __fastcall PlayerCmd_DeactivateReverb(scr_entref_t *entref)
     SV_GameSendServerCommand(v1, v7);
 }
 
-void __fastcall PlayerCmd_SetChannelVolumes(scr_entref_t *entref)
+void __cdecl PlayerCmd_SetChannelVolumes(scr_entref_t *entref)
 {
     unsigned __int16 v1; // r29
     const char *v2; // r3
@@ -2478,7 +2478,7 @@ void __fastcall PlayerCmd_SetChannelVolumes(scr_entref_t *entref)
     SV_GameSendServerCommand(v1, v8);
 }
 
-void __fastcall PlayerCmd_DeactivateChannelVolumes(scr_entref_t *entref)
+void __cdecl PlayerCmd_DeactivateChannelVolumes(scr_entref_t *entref)
 {
     unsigned __int16 v1; // r30
     int v2; // r31
@@ -2531,7 +2531,7 @@ void __fastcall PlayerCmd_DeactivateChannelVolumes(scr_entref_t *entref)
     SV_GameSendServerCommand(v1, v7);
 }
 
-void __fastcall ScrCmd_IsLookingAt(scr_entref_t *entref)
+void __cdecl ScrCmd_IsLookingAt(scr_entref_t *entref)
 {
     gentity_s *v1; // r31
     const char *v2; // r3
@@ -2570,7 +2570,7 @@ void __fastcall ScrCmd_IsLookingAt(scr_entref_t *entref)
     Scr_AddInt(v4);
 }
 
-void __fastcall PlayerCmd_IsFiring(scr_entref_t *entref)
+void __cdecl PlayerCmd_IsFiring(scr_entref_t *entref)
 {
     gentity_s *v1; // r29
     const char *v2; // r3
@@ -2616,7 +2616,7 @@ void __fastcall PlayerCmd_IsFiring(scr_entref_t *entref)
     Scr_AddBool(v4);
 }
 
-void __fastcall PlayerCmd_IsThrowingGrenade(scr_entref_t *entref)
+void __cdecl PlayerCmd_IsThrowingGrenade(scr_entref_t *entref)
 {
     gentity_s *v1; // r29
     const char *v2; // r3
@@ -2656,7 +2656,7 @@ void __fastcall PlayerCmd_IsThrowingGrenade(scr_entref_t *entref)
     Scr_AddBool(v4);
 }
 
-void __fastcall PlayerCmd_IsMeleeing(scr_entref_t *entref)
+void __cdecl PlayerCmd_IsMeleeing(scr_entref_t *entref)
 {
     gentity_s *v1; // r29
     const char *v2; // r3
@@ -2696,7 +2696,7 @@ void __fastcall PlayerCmd_IsMeleeing(scr_entref_t *entref)
     Scr_AddBool(v4);
 }
 
-void __fastcall ScrCmd_PlayLocalSound(scr_entref_t *entref)
+void __cdecl ScrCmd_PlayLocalSound(scr_entref_t *entref)
 {
     unsigned __int16 v1; // r28
     gentity_s *v2; // r30
@@ -2764,7 +2764,7 @@ void __fastcall ScrCmd_PlayLocalSound(scr_entref_t *entref)
     }
 }
 
-void __fastcall ScrCmd_StopLocalSound(scr_entref_t *entref)
+void __cdecl ScrCmd_StopLocalSound(scr_entref_t *entref)
 {
     unsigned __int16 v1; // r30
     int v2; // r31
@@ -2807,7 +2807,7 @@ void __fastcall ScrCmd_StopLocalSound(scr_entref_t *entref)
     SV_GameSendServerCommand(v1, v7);
 }
 
-void __fastcall ScrCmd_SetAutoPickup(scr_entref_t *entref)
+void __cdecl ScrCmd_SetAutoPickup(scr_entref_t *entref)
 {
     gentity_s *v1; // r31
     const char *v2; // r3
@@ -2838,7 +2838,7 @@ void __fastcall ScrCmd_SetAutoPickup(scr_entref_t *entref)
     v1->client->bDisableAutoPickup = Scr_GetInt(0) == 0;
 }
 
-void __fastcall PlayerCmd_SetWeaponAmmoClip(scr_entref_t *entref)
+void __cdecl PlayerCmd_SetWeaponAmmoClip(scr_entref_t *entref)
 {
     gentity_s *v1; // r28
     const char *v2; // r3
@@ -2892,7 +2892,7 @@ void __fastcall PlayerCmd_SetWeaponAmmoClip(scr_entref_t *entref)
     }
 }
 
-void __fastcall PlayerCmd_SetWeaponAmmoStock(scr_entref_t *entref)
+void __cdecl PlayerCmd_SetWeaponAmmoStock(scr_entref_t *entref)
 {
     gentity_s *v1; // r31
     const char *v2; // r3
@@ -2963,7 +2963,7 @@ void __fastcall PlayerCmd_SetWeaponAmmoStock(scr_entref_t *entref)
     }
 }
 
-void __fastcall PlayerCmd_GetWeaponAmmoClip(scr_entref_t *entref)
+void __cdecl PlayerCmd_GetWeaponAmmoClip(scr_entref_t *entref)
 {
     gentity_s *v1; // r31
     const char *v2; // r3
@@ -3001,7 +3001,7 @@ void __fastcall PlayerCmd_GetWeaponAmmoClip(scr_entref_t *entref)
     Scr_AddInt(v1->client->ps.ammoclip[v5]);
 }
 
-void __fastcall PlayerCmd_GetWeaponAmmoStock(scr_entref_t *entref)
+void __cdecl PlayerCmd_GetWeaponAmmoStock(scr_entref_t *entref)
 {
     gentity_s *v1; // r31
     const char *v2; // r3
@@ -3042,7 +3042,7 @@ void __fastcall PlayerCmd_GetWeaponAmmoStock(scr_entref_t *entref)
     Scr_AddInt(*(&v1->client->ps.commandTime + v5));
 }
 
-void __fastcall PlayerCmd_AnyAmmoForWeaponModes(scr_entref_t *entref)
+void __cdecl PlayerCmd_AnyAmmoForWeaponModes(scr_entref_t *entref)
 {
     gentity_s *v1; // r30
     const char *v2; // r3
@@ -3084,7 +3084,7 @@ void __fastcall PlayerCmd_AnyAmmoForWeaponModes(scr_entref_t *entref)
     Scr_AddInt(v5 != 0);
 }
 
-void __fastcall PlayerCmd_EnableHealthShield(scr_entref_t *entref)
+void __cdecl PlayerCmd_EnableHealthShield(scr_entref_t *entref)
 {
     gentity_s *v1; // r31
     const char *v2; // r3
@@ -3115,7 +3115,7 @@ void __fastcall PlayerCmd_EnableHealthShield(scr_entref_t *entref)
     v1->client->invulnerableEnabled = Scr_GetInt(0) != 0;
 }
 
-void __fastcall PlayerCmd_SetClientDvar(scr_entref_t *entref)
+void __cdecl PlayerCmd_SetClientDvar(scr_entref_t *entref)
 {
     unsigned __int16 v1; // r29
     const char *v2; // r3
@@ -3168,7 +3168,7 @@ void __fastcall PlayerCmd_SetClientDvar(scr_entref_t *entref)
     }
 }
 
-void __fastcall PlayerCmd_SetClientDvars(scr_entref_t *entref)
+void __cdecl PlayerCmd_SetClientDvars(scr_entref_t *entref)
 {
     unsigned __int16 v1; // r27
     const char *v2; // r3
@@ -3220,7 +3220,7 @@ void __fastcall PlayerCmd_SetClientDvars(scr_entref_t *entref)
     }
 }
 
-void __fastcall PlayerCmd_BeginLocationSelection(scr_entref_t *entref)
+void __cdecl PlayerCmd_BeginLocationSelection(scr_entref_t *entref)
 {
     gentity_s *v1; // r28
     const char *v2; // r3
@@ -3297,7 +3297,7 @@ void __fastcall PlayerCmd_BeginLocationSelection(scr_entref_t *entref)
     v1->client->ps.locationSelectionInfo = (4 * v9) | v5;
 }
 
-void __fastcall PlayerCmd_EndLocationSelection(scr_entref_t *entref)
+void __cdecl PlayerCmd_EndLocationSelection(scr_entref_t *entref)
 {
     gentity_s *v1; // r31
     const char *v2; // r3
@@ -3330,7 +3330,7 @@ void __fastcall PlayerCmd_EndLocationSelection(scr_entref_t *entref)
     v1->client->ps.locationSelectionInfo = 0;
 }
 
-void __fastcall PlayerCmd_WeaponLockStart(scr_entref_t *entref)
+void __cdecl PlayerCmd_WeaponLockStart(scr_entref_t *entref)
 {
     gentity_s *v1; // r31
     const char *v2; // r3
@@ -3374,7 +3374,7 @@ void __fastcall PlayerCmd_WeaponLockStart(scr_entref_t *entref)
     }
 }
 
-void __fastcall PlayerCmd_WeaponLockFinalize(scr_entref_t *entref)
+void __cdecl PlayerCmd_WeaponLockFinalize(scr_entref_t *entref)
 {
     gentity_s *v1; // r31
     const char *v2; // r3
@@ -3428,7 +3428,7 @@ void __fastcall PlayerCmd_WeaponLockFinalize(scr_entref_t *entref)
     }
 }
 
-void __fastcall PlayerCmd_WeaponLockFree(scr_entref_t *entref)
+void __cdecl PlayerCmd_WeaponLockFree(scr_entref_t *entref)
 {
     gentity_s *v1; // r31
     const char *v2; // r3
@@ -3463,7 +3463,7 @@ void __fastcall PlayerCmd_WeaponLockFree(scr_entref_t *entref)
     v1->client->ps.weapLockFlags &= ~8u;
 }
 
-void __fastcall PlayerCmd_WeaponLockTargetTooClose(scr_entref_t *entref)
+void __cdecl PlayerCmd_WeaponLockTargetTooClose(scr_entref_t *entref)
 {
     gentity_s *v1; // r31
     const char *v2; // r3
@@ -3505,7 +3505,7 @@ void __fastcall PlayerCmd_WeaponLockTargetTooClose(scr_entref_t *entref)
     client->ps.weapLockFlags = v6;
 }
 
-void __fastcall PlayerCmd_WeaponLockNoClearance(scr_entref_t *entref)
+void __cdecl PlayerCmd_WeaponLockNoClearance(scr_entref_t *entref)
 {
     gentity_s *v1; // r31
     const char *v2; // r3
@@ -3547,7 +3547,7 @@ void __fastcall PlayerCmd_WeaponLockNoClearance(scr_entref_t *entref)
     client->ps.weapLockFlags = v6;
 }
 
-void __fastcall PlayerCmd_SetActionSlot(scr_entref_t *entref)
+void __cdecl PlayerCmd_SetActionSlot(scr_entref_t *entref)
 {
     gentity_s *v1; // r28
     const char *v2; // r3
@@ -3623,7 +3623,7 @@ void __fastcall PlayerCmd_SetActionSlot(scr_entref_t *entref)
     }
 }
 
-void __fastcall PlayerCmd_DisableWeapons(scr_entref_t *entref)
+void __cdecl PlayerCmd_DisableWeapons(scr_entref_t *entref)
 {
     gentity_s *v1; // r31
     const char *v2; // r3
@@ -3654,7 +3654,7 @@ void __fastcall PlayerCmd_DisableWeapons(scr_entref_t *entref)
     v1->client->ps.weapFlags |= 0x80u;
 }
 
-void __fastcall PlayerCmd_EnableWeapons(scr_entref_t *entref)
+void __cdecl PlayerCmd_EnableWeapons(scr_entref_t *entref)
 {
     gentity_s *v1; // r31
     const char *v2; // r3
@@ -3685,7 +3685,7 @@ void __fastcall PlayerCmd_EnableWeapons(scr_entref_t *entref)
     v1->client->ps.weapFlags &= ~0x80u;
 }
 
-void __fastcall PlayerCmd_NightVisionForceOff(scr_entref_t *entref)
+void __cdecl PlayerCmd_NightVisionForceOff(scr_entref_t *entref)
 {
     gentity_s *v1; // r31
     const char *v2; // r3
@@ -3716,7 +3716,7 @@ void __fastcall PlayerCmd_NightVisionForceOff(scr_entref_t *entref)
     v1->client->ps.weapFlags &= ~0x40u;
 }
 
-void __fastcall PlayerCmd_GetWeaponsList(scr_entref_t *entref)
+void __cdecl PlayerCmd_GetWeaponsList(scr_entref_t *entref)
 {
     gentity_s *v1; // r27
     const char *v2; // r3
@@ -3764,7 +3764,7 @@ void __fastcall PlayerCmd_GetWeaponsList(scr_entref_t *entref)
     }
 }
 
-void __fastcall PlayerCmd_GetWeaponsListPrimaries(scr_entref_t *entref)
+void __cdecl PlayerCmd_GetWeaponsListPrimaries(scr_entref_t *entref)
 {
     gentity_s *v1; // r27
     const char *v2; // r3
@@ -3815,7 +3815,7 @@ void __fastcall PlayerCmd_GetWeaponsListPrimaries(scr_entref_t *entref)
     }
 }
 
-void __fastcall PlayerCmd_EnableInvulnerability(scr_entref_t *entref)
+void __cdecl PlayerCmd_EnableInvulnerability(scr_entref_t *entref)
 {
     gentity_s *v1; // r31
     const char *v2; // r3
@@ -3846,7 +3846,7 @@ void __fastcall PlayerCmd_EnableInvulnerability(scr_entref_t *entref)
     v1->client->ps.otherFlags |= 1u;
 }
 
-void __fastcall PlayerCmd_DisableInvulnerability(scr_entref_t *entref)
+void __cdecl PlayerCmd_DisableInvulnerability(scr_entref_t *entref)
 {
     gentity_s *v1; // r31
     const char *v2; // r3
@@ -3877,7 +3877,7 @@ void __fastcall PlayerCmd_DisableInvulnerability(scr_entref_t *entref)
     v1->client->ps.otherFlags &= ~1u;
 }
 
-void __fastcall PlayerCmd_ForceViewmodelAnimation(scr_entref_t *entref)
+void __cdecl PlayerCmd_ForceViewmodelAnimation(scr_entref_t *entref)
 {
     gentity_s *v1; // r30
     const char *v2; // r3
@@ -3942,7 +3942,7 @@ void __fastcall PlayerCmd_ForceViewmodelAnimation(scr_entref_t *entref)
     Scr_Error(v7);
 }
 
-void __fastcall PlayerCmd_DisableTurretDismount(scr_entref_t *entref)
+void __cdecl PlayerCmd_DisableTurretDismount(scr_entref_t *entref)
 {
     gentity_s *v1; // r31
     const char *v2; // r3
@@ -3973,7 +3973,7 @@ void __fastcall PlayerCmd_DisableTurretDismount(scr_entref_t *entref)
     v1->client->ps.weapFlags |= 0x800u;
 }
 
-void __fastcall PlayerCmd_EnableTurretDismount(scr_entref_t *entref)
+void __cdecl PlayerCmd_EnableTurretDismount(scr_entref_t *entref)
 {
     gentity_s *v1; // r31
     const char *v2; // r3
@@ -4004,7 +4004,7 @@ void __fastcall PlayerCmd_EnableTurretDismount(scr_entref_t *entref)
     v1->client->ps.weapFlags &= ~0x800u;
 }
 
-void __fastcall PlayerCmd_UploadScore(scr_entref_t *entref)
+void __cdecl PlayerCmd_UploadScore(scr_entref_t *entref)
 {
     unsigned __int16 v1; // r30
     int v2; // r31
@@ -4046,7 +4046,7 @@ void __fastcall PlayerCmd_UploadScore(scr_entref_t *entref)
     }
 }
 
-void __fastcall PlayerCmd_UploadTime(scr_entref_t *entref)
+void __cdecl PlayerCmd_UploadTime(scr_entref_t *entref)
 {
     unsigned __int16 v1; // r30
     int v2; // r31
@@ -4095,7 +4095,7 @@ void __fastcall PlayerCmd_UploadTime(scr_entref_t *entref)
     }
 }
 
-void(__fastcall *__fastcall Player_GetMethod(const char **pName))(scr_entref_t)
+void(__cdecl *__cdecl Player_GetMethod(const char **pName))(scr_entref_t)
 {
     int v1; // r6
     unsigned int v2; // r5
@@ -4129,7 +4129,7 @@ void(__fastcall *__fastcall Player_GetMethod(const char **pName))(scr_entref_t)
     return methods_0[v1].actionFunc;
 }
 
-void __fastcall G_AddCommandNotify(volatile unsigned __int16 notify)
+void __cdecl G_AddCommandNotify(volatile unsigned __int16 notify)
 {
     int nesting; // r7
     int v3; // r29

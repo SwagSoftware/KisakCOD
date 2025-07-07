@@ -6,14 +6,14 @@
 
 // struct threat_bias_t g_threatBias 82c39ca8     actor_threat.obj
 
-void __fastcall TRACK_actor_threat()
+void __cdecl TRACK_actor_threat()
 {
     track_static_alloc_internal(&g_threatBias, 1060, "g_threatBias", 5);
     track_static_alloc_internal(g_threatDebugStrings, 640, "g_threatDebugStrings", 5);
     track_static_alloc_internal(g_threatDebugLabels, 40, "g_threatDebugLabels", 5);
 }
 
-void __fastcall Actor_InitThreatBiasGroups()
+void __cdecl Actor_InitThreatBiasGroups()
 {
     threat_bias_t *v0; // r11
     int v1; // ctr
@@ -30,7 +30,7 @@ void __fastcall Actor_InitThreatBiasGroups()
     g_threatBias.threatGroupCount = 1;
 }
 
-void __fastcall Actor_ClearThreatBiasGroups()
+void __cdecl Actor_ClearThreatBiasGroups()
 {
     threat_bias_t *v0; // r31
 
@@ -44,7 +44,7 @@ void __fastcall Actor_ClearThreatBiasGroups()
     memset(&g_threatBias, 0, sizeof(g_threatBias));
 }
 
-int __fastcall Actor_FindThreatBiasGroupIndex(unsigned int name)
+int __cdecl Actor_FindThreatBiasGroupIndex(unsigned int name)
 {
     int result; // r3
     threat_bias_t *v3; // r11
@@ -65,7 +65,7 @@ int __fastcall Actor_FindThreatBiasGroupIndex(unsigned int name)
     return result;
 }
 
-void __fastcall Actor_CreateThreatBiasGroup(unsigned int name)
+void __cdecl Actor_CreateThreatBiasGroup(unsigned int name)
 {
     const char *v2; // r3
 
@@ -86,7 +86,7 @@ void __fastcall Actor_CreateThreatBiasGroup(unsigned int name)
     }
 }
 
-void __fastcall Actor_SetThreatBiasEntireGroup(int group, int threatBias)
+void __cdecl Actor_SetThreatBiasEntireGroup(int group, int threatBias)
 {
     if (group < 0 || group >= g_threatBias.threatGroupCount)
         MyAssertHandler(
@@ -98,7 +98,7 @@ void __fastcall Actor_SetThreatBiasEntireGroup(int group, int threatBias)
     memset(g_threatBias.threatTable[group], threatBias, sizeof(g_threatBias.threatTable[group]));
 }
 
-void __fastcall Actor_SetThreatBias(int groupSelf, int groupEnemy, int threatBias)
+void __cdecl Actor_SetThreatBias(int groupSelf, int groupEnemy, int threatBias)
 {
     int threatGroupCount; // r11
 
@@ -122,7 +122,7 @@ void __fastcall Actor_SetThreatBias(int groupSelf, int groupEnemy, int threatBia
     g_threatBias.threatTable[groupSelf][groupEnemy] = threatBias;
 }
 
-void __fastcall Actor_SetIgnoreMeGroup(int groupSelf, int groupIgnoreMe)
+void __cdecl Actor_SetIgnoreMeGroup(int groupSelf, int groupIgnoreMe)
 {
     int threatGroupCount; // r11
 
@@ -146,7 +146,7 @@ void __fastcall Actor_SetIgnoreMeGroup(int groupSelf, int groupIgnoreMe)
     g_threatBias.threatTable[groupSelf][groupIgnoreMe] = 0x80000000;
 }
 
-int __fastcall Actor_GetThreatBias(int groupSelf, int groupEnemy)
+int __cdecl Actor_GetThreatBias(int groupSelf, int groupEnemy)
 {
     int threatGroupCount; // r11
 
@@ -170,7 +170,7 @@ int __fastcall Actor_GetThreatBias(int groupSelf, int groupEnemy)
     return g_threatBias.threatTable[groupSelf][groupEnemy];
 }
 
-void __fastcall Actor_FlagEnemyUnattackable(actor_s *self)
+void __cdecl Actor_FlagEnemyUnattackable(actor_s *self)
 {
     sentient_s *TargetSentient; // r3
 
@@ -189,7 +189,7 @@ void __fastcall Actor_FlagEnemyUnattackable(actor_s *self)
     }
 }
 
-int __fastcall Actor_CaresAboutInfo(actor_s *self, sentient_s *pOther)
+int __cdecl Actor_CaresAboutInfo(actor_s *self, sentient_s *pOther)
 {
     int lastKnownPosTime; // r11
     int result; // r3
@@ -205,12 +205,12 @@ int __fastcall Actor_CaresAboutInfo(actor_s *self, sentient_s *pOther)
     return result;
 }
 
-int __fastcall DebugThreatInfoDuration()
+int __cdecl DebugThreatInfoDuration()
 {
     return ai_threatUpdateInterval->current.integer / 50;
 }
 
-void __fastcall DebugResetThreatStrings(const actor_s *self)
+void __cdecl DebugResetThreatStrings(const actor_s *self)
 {
     char *v2; // r11
 
@@ -232,7 +232,7 @@ void __fastcall DebugResetThreatStrings(const actor_s *self)
     }
 }
 
-void __fastcall DebugSetThreatString(ThreatDebugStringCategory category, int threat)
+void __cdecl DebugSetThreatString(ThreatDebugStringCategory category, int threat)
 {
     if (!g_skipDebugString)
     {
@@ -243,7 +243,7 @@ void __fastcall DebugSetThreatString(ThreatDebugStringCategory category, int thr
     }
 }
 
-void __fastcall DebugSetThreatStringFromString(ThreatDebugStringCategory category, const char *string)
+void __cdecl DebugSetThreatStringFromString(ThreatDebugStringCategory category, const char *string)
 {
     if (!g_skipDebugString)
     {
@@ -254,7 +254,7 @@ void __fastcall DebugSetThreatStringFromString(ThreatDebugStringCategory categor
     }
 }
 
-void __fastcall DebugThreatStringAll(const actor_s *self, sentient_s *enemy, int threat)
+void __cdecl DebugThreatStringAll(const actor_s *self, sentient_s *enemy, int threat)
 {
     __int64 v6; // r10
     const char *v11; // r5
@@ -298,7 +298,7 @@ void __fastcall DebugThreatStringAll(const actor_s *self, sentient_s *enemy, int
     }
 }
 
-void __fastcall DebugThreatStringSimple(const actor_s *self, gentity_s *enemy, const char *string, const float *color)
+void __cdecl DebugThreatStringSimple(const actor_s *self, gentity_s *enemy, const char *string, const float *color)
 {
     sentient_s *sentient; // r3
     const char *v9; // r5
@@ -332,7 +332,7 @@ void __fastcall DebugThreatStringSimple(const actor_s *self, gentity_s *enemy, c
     }
 }
 
-void __fastcall DebugThreatNodes(
+void __cdecl DebugThreatNodes(
     const actor_s *self,
     sentient_s *enemy,
     pathnode_t *selfNode,
@@ -378,7 +378,7 @@ void __fastcall DebugThreatNodes(
     }
 }
 
-int __fastcall Actor_ThreatFromScariness(double fScariness)
+int __cdecl Actor_ThreatFromScariness(double fScariness)
 {
     int v1; // r11
     int v2; // r31
@@ -405,7 +405,7 @@ int __fastcall Actor_ThreatFromScariness(double fScariness)
 }
 
 // local variable allocation has failed, the output may be wrong!
-int __fastcall Actor_ThreatFromDistance(double fDistance)
+int __cdecl Actor_ThreatFromDistance(double fDistance)
 {
     long double v3; // fp2
     long double v4; // fp2
@@ -432,7 +432,7 @@ int __fastcall Actor_ThreatFromDistance(double fDistance)
     return v5;
 }
 
-bool __fastcall Actor_IsFullyAware(actor_s *self, sentient_s *enemy, int isCurrentEnemy)
+bool __cdecl Actor_IsFullyAware(actor_s *self, sentient_s *enemy, int isCurrentEnemy)
 {
     double v6; // fp0
     double v7; // fp13
@@ -477,7 +477,7 @@ bool __fastcall Actor_IsFullyAware(actor_s *self, sentient_s *enemy, int isCurre
     }
 }
 
-int __fastcall Actor_ThreatFromVisibilityAndAwareness(int isVisible, int isFullyAware, int friendlyTimingOut)
+int __cdecl Actor_ThreatFromVisibilityAndAwareness(int isVisible, int isFullyAware, int friendlyTimingOut)
 {
     int v3; // r31
     char *v4; // r3
@@ -521,7 +521,7 @@ int __fastcall Actor_ThreatFromVisibilityAndAwareness(int isVisible, int isFully
     return v3;
 }
 
-int __fastcall Actor_ThreatFromAttackerCount(actor_s *self, sentient_s *enemy, int isCurrentEnemy)
+int __cdecl Actor_ThreatFromAttackerCount(actor_s *self, sentient_s *enemy, int isCurrentEnemy)
 {
     int attackerCount; // r11
     int v7; // r31
@@ -553,7 +553,7 @@ int __fastcall Actor_ThreatFromAttackerCount(actor_s *self, sentient_s *enemy, i
     return v7;
 }
 
-int __fastcall Actor_ThreatBonusForCurrentEnemy(
+int __cdecl Actor_ThreatBonusForCurrentEnemy(
     int isCurrentEnemy,
     int isFullyAware,
     int friendlyTimingOut,
@@ -587,7 +587,7 @@ int __fastcall Actor_ThreatBonusForCurrentEnemy(
     return v5;
 }
 
-int __fastcall Actor_ThreatCoveringFire(actor_s *self, sentient_s *enemy)
+int __cdecl Actor_ThreatCoveringFire(actor_s *self, sentient_s *enemy)
 {
     actor_s *actor; // r30
     pathnode_t *pClaimedNode; // r31
@@ -623,7 +623,7 @@ int __fastcall Actor_ThreatCoveringFire(actor_s *self, sentient_s *enemy)
     return -3000;
 }
 
-int __fastcall Actor_ThreatFlashed(sentient_s *enemy)
+int __cdecl Actor_ThreatFlashed(sentient_s *enemy)
 {
     actor_s *actor; // r11
     int flashBanged; // r11
@@ -648,7 +648,7 @@ int __fastcall Actor_ThreatFlashed(sentient_s *enemy)
     return 200;
 }
 
-int __fastcall Actor_UpdateSingleThreat(actor_s *self, sentient_s *enemy)
+int __cdecl Actor_UpdateSingleThreat(actor_s *self, sentient_s *enemy)
 {
     int v4; // r25
     char *v5; // r11
@@ -778,7 +778,7 @@ LABEL_19:
     return v32;
 }
 
-void __fastcall Actor_InitThreatUpdateInterval(actor_s *self)
+void __cdecl Actor_InitThreatUpdateInterval(actor_s *self)
 {
     signed int integer; // r10
     int v3; // r11
@@ -806,7 +806,7 @@ void __fastcall Actor_InitThreatUpdateInterval(actor_s *self)
     self->threatUpdateTime = v6;
 }
 
-void __fastcall Actor_IncrementThreatTime(actor_s *self)
+void __cdecl Actor_IncrementThreatTime(actor_s *self)
 {
     const dvar_s *v2; // r11
     int v3; // r9
@@ -857,7 +857,7 @@ void __fastcall Actor_IncrementThreatTime(actor_s *self)
             "level.time < self->threatUpdateTime");
 }
 
-void __fastcall Actor_CanAttackAll(actor_s *self)
+void __cdecl Actor_CanAttackAll(actor_s *self)
 {
     team_t v2; // r3
     int v3; // r29
@@ -875,7 +875,7 @@ void __fastcall Actor_CanAttackAll(actor_s *self)
 }
 
 // local variable allocation has failed, the output may be wrong!
-void __fastcall Actor_SetPotentialThreat(potential_threat_t *self, double yaw)
+void __cdecl Actor_SetPotentialThreat(potential_threat_t *self, double yaw)
 {
     double v3; // fp31
     long double v4; // fp2
@@ -892,19 +892,19 @@ void __fastcall Actor_SetPotentialThreat(potential_threat_t *self, double yaw)
     self->direction[1] = *(double *)&v6;
 }
 
-void __fastcall Actor_ClearPotentialThreat(potential_threat_t *self)
+void __cdecl Actor_ClearPotentialThreat(potential_threat_t *self)
 {
     self->isEnabled = 0;
 }
 
-bool __fastcall Actor_GetPotentialThreat(potential_threat_t *self, double *potentialThreatDir)
+bool __cdecl Actor_GetPotentialThreat(potential_threat_t *self, double *potentialThreatDir)
 {
     if (self->isEnabled)
         *potentialThreatDir = *(double *)self->direction;
     return self->isEnabled;
 }
 
-void __fastcall Actor_PotentialThreat_Debug(actor_s *self)
+void __cdecl Actor_PotentialThreat_Debug(actor_s *self)
 {
     const char *v2; // r5
     double v3; // fp0
@@ -926,7 +926,7 @@ void __fastcall Actor_PotentialThreat_Debug(actor_s *self)
     }
 }
 
-int __fastcall Actor_CheckIgnore(sentient_s *self, sentient_s *enemy)
+int __cdecl Actor_CheckIgnore(sentient_s *self, sentient_s *enemy)
 {
     int result; // r3
     bool v5; // zf
@@ -944,7 +944,7 @@ int __fastcall Actor_CheckIgnore(sentient_s *self, sentient_s *enemy)
     return result;
 }
 
-void __fastcall Actor_UpdateThreat(actor_s *self)
+void __cdecl Actor_UpdateThreat(actor_s *self)
 {
     sentient_s *sentient; // r11
     const char *v3; // r29

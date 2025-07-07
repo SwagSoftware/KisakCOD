@@ -4,7 +4,7 @@
 
 #include "g_local.h"
 
-void __fastcall P_DamageFeedback(gentity_s *player)
+void __cdecl P_DamageFeedback(gentity_s *player)
 {
     gclient_s *client; // r31
     const float *v3; // r4
@@ -77,20 +77,20 @@ void __fastcall P_DamageFeedback(gentity_s *player)
     }
 }
 
-void __fastcall G_SetClientSound(gentity_s *ent)
+void __cdecl G_SetClientSound(gentity_s *ent)
 {
     ent->s.loopSound = 0;
 }
 
-void __fastcall G_TouchEnts(gentity_s *ent, int numtouch, int *touchents)
+void __cdecl G_TouchEnts(gentity_s *ent, int numtouch, int *touchents)
 {
     int v6; // r30
     int *v7; // r28
     int v8; // r10
     int *v9; // r11
     gentity_s *v10; // r31
-    void(__fastcall * touch)(gentity_s *, gentity_s *, int); // r11
-    void(__fastcall * v12)(gentity_s *, gentity_s *, int); // r11
+    void(__cdecl * touch)(gentity_s *, gentity_s *, int); // r11
+    void(__cdecl * v12)(gentity_s *, gentity_s *, int); // r11
 
     v6 = 0;
     if (numtouch > 0)
@@ -133,12 +133,12 @@ void __fastcall G_TouchEnts(gentity_s *ent, int numtouch, int *touchents)
     }
 }
 
-void __fastcall ClientImpacts(gentity_s *ent, pmove_t *pm)
+void __cdecl ClientImpacts(gentity_s *ent, pmove_t *pm)
 {
     G_TouchEnts(ent, pm->numtouch, pm->touchents);
 }
 
-void __fastcall G_DoTouchTriggers(gentity_s *ent)
+void __cdecl G_DoTouchTriggers(gentity_s *ent)
 {
     int v2; // r20
     sentient_s *sentient; // r11
@@ -155,11 +155,11 @@ void __fastcall G_DoTouchTriggers(gentity_s *ent)
     double v14; // fp12
     double v15; // fp9
     double v16; // fp6
-    void(__fastcall * touch)(gentity_s *, gentity_s *, int); // r19
+    void(__cdecl * touch)(gentity_s *, gentity_s *, int); // r19
     int *v18; // r21
     int i; // r17
     gentity_s *v20; // r30
-    void(__fastcall * v21)(gentity_s *, gentity_s *, int); // r29
+    void(__cdecl * v21)(gentity_s *, gentity_s *, int); // r29
     gclient_s *client; // r3
     float v23; // [sp+50h] [-22A0h] BYREF
     float v24; // [sp+54h] [-229Ch]
@@ -277,7 +277,7 @@ LABEL_34:
     //Profile_EndInternal(0);
 }
 
-void __fastcall NotifyGrenadePullback(gentity_s *ent, unsigned int weaponIndex)
+void __cdecl NotifyGrenadePullback(gentity_s *ent, unsigned int weaponIndex)
 {
     WeaponDef *WeaponDef; // r29
 
@@ -294,7 +294,7 @@ void __fastcall NotifyGrenadePullback(gentity_s *ent, unsigned int weaponIndex)
     Scr_Notify(ent, scr_const.grenade_pullback, 1u);
 }
 
-bool __fastcall IsLiveGrenade(gentity_s *ent)
+bool __cdecl IsLiveGrenade(gentity_s *ent)
 {
     WeaponDef *WeaponDef; // r31
 
@@ -306,10 +306,10 @@ bool __fastcall IsLiveGrenade(gentity_s *ent)
     return WeaponDef->offhandClass == OFFHAND_CLASS_FRAG_GRENADE;
 }
 
-void __fastcall AttemptLiveGrenadePickup(gentity_s *clientEnt)
+void __cdecl AttemptLiveGrenadePickup(gentity_s *clientEnt)
 {
     gentity_s *v2; // r31
-    void(__fastcall * touch)(gentity_s *, gentity_s *, int); // r29
+    void(__cdecl * touch)(gentity_s *, gentity_s *, int); // r29
 
     if (!clientEnt)
         MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\g_active.cpp", 315, 0, "%s", "clientEnt");
@@ -348,7 +348,7 @@ void __fastcall AttemptLiveGrenadePickup(gentity_s *clientEnt)
     }
 }
 
-void __fastcall ClientEvents(gentity_s *ent, int oldEventSequence)
+void __cdecl ClientEvents(gentity_s *ent, int oldEventSequence)
 {
     gclient_s *client; // r23
     int eventSequence; // r10
@@ -485,7 +485,7 @@ void __fastcall ClientEvents(gentity_s *ent, int oldEventSequence)
     }
 }
 
-void __fastcall Client_ClaimNode(gentity_s *ent)
+void __cdecl Client_ClaimNode(gentity_s *ent)
 {
     pathnode_t *v2; // r29
     pathnode_t *pClaimedNode; // r11
@@ -530,7 +530,7 @@ void __fastcall Client_ClaimNode(gentity_s *ent)
     }
 }
 
-void __fastcall G_PlayerStateToEntityStateExtrapolate(playerState_s *ps, entityState_s *s, int time, int snap)
+void __cdecl G_PlayerStateToEntityStateExtrapolate(playerState_s *ps, entityState_s *s, int time, int snap)
 {
     int entityEventSequence; // r10
     int eventSequence; // r11
@@ -599,7 +599,7 @@ void __fastcall G_PlayerStateToEntityStateExtrapolate(playerState_s *ps, entityS
 }
 
 // local variable allocation has failed, the output may be wrong!
-void __fastcall ClientThink_real(gentity_s *ent, long double a2)
+void __cdecl ClientThink_real(gentity_s *ent, long double a2)
 {
     gclient_s *client; // r30
     usercmd_s *p_cmd; // r25
@@ -815,7 +815,7 @@ LABEL_35:
         respawn(ent);
 }
 
-void __fastcall ClientThink(int clientNum)
+void __cdecl ClientThink(int clientNum)
 {
     gentity_s *v2; // r31
     long double v3; // fp2
@@ -830,7 +830,7 @@ void __fastcall ClientThink(int clientNum)
         G_UpdateHeadHitEnt(v2);
 }
 
-void __fastcall ClientEndFrame(gentity_s *ent)
+void __cdecl ClientEndFrame(gentity_s *ent)
 {
     gclient_s *client; // r11
     gclient_s *v3; // r11
@@ -894,12 +894,12 @@ void __fastcall ClientEndFrame(gentity_s *ent)
     ent->client->buttonsSinceLastFrame = 0;
 }
 
-gentity_s *__fastcall G_GetPlayer()
+gentity_s *__cdecl G_GetPlayer()
 {
     return level.gentities;
 }
 
-void __fastcall G_UpdatePlayer(gentity_s *ent)
+void __cdecl G_UpdatePlayer(gentity_s *ent)
 {
     int v2; // r3
 
@@ -914,7 +914,7 @@ void __fastcall G_UpdatePlayer(gentity_s *ent)
     }
 }
 
-void __fastcall G_UpdatePlayerTriggers(gentity_s *ent)
+void __cdecl G_UpdatePlayerTriggers(gentity_s *ent)
 {
     sentient_s *sentient; // r11
     int v3; // r10

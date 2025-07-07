@@ -25,14 +25,14 @@
 // Line 26295 : 0004 : 000f6bf8       public: BOOL const __cdecl CustomSearchInfo_FindPathInCylinderWithLOSNotCrossPlanes::IgnoreNode(struct pathnode_t *) 82206bf8 f i actor_navigation.obj
 // Line 26296 : 0004 : 000f6ca0       public: BOOL const __cdecl CustomSearchInfo_FindPathFromInCylinderNotCrossPlanes::IgnoreNode(struct pathnode_t *) 82206ca0 f i actor_navigation.obj
 
-bool __fastcall Path_IsPathStanceNode(const pathnode_t *node)
+bool __cdecl Path_IsPathStanceNode(const pathnode_t *node)
 {
     if (!node)
         MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\pathnode.h", 166, 0, "%s", "node");
     return ((1 << node->constant.type) & 0xC1FFC) == 0;
 }
 
-float __fastcall Path_GetPathDir(float *delta, const float *vFrom, const float *vTo)
+float __cdecl Path_GetPathDir(float *delta, const float *vFrom, const float *vTo)
 {
     double v4; // fp31
     double v5; // fp12
@@ -58,7 +58,7 @@ float __fastcall Path_GetPathDir(float *delta, const float *vFrom, const float *
     return *((float *)&v6 + 1);
 }
 
-pathnode_t *__fastcall Path_GetNegotiationNode(const path_t *pPath)
+pathnode_t *__cdecl Path_GetNegotiationNode(const path_t *pPath)
 {
     if (pPath->wNegotiationStartNode <= 0)
         MyAssertHandler(
@@ -70,7 +70,7 @@ pathnode_t *__fastcall Path_GetNegotiationNode(const path_t *pPath)
     return Path_ConvertIndexToNode(pPath->pts[pPath->wNegotiationStartNode].iNodeNum);
 }
 
-void __fastcall Path_IncrementNodeUserCount(path_t *pPath)
+void __cdecl Path_IncrementNodeUserCount(path_t *pPath)
 {
     pathnode_t *NegotiationNode; // r31
 
@@ -80,7 +80,7 @@ void __fastcall Path_IncrementNodeUserCount(path_t *pPath)
     ++NegotiationNode->dynamic.userCount;
 }
 
-void __fastcall Path_DecrementNodeUserCount(path_t *pPath)
+void __cdecl Path_DecrementNodeUserCount(path_t *pPath)
 {
     pathnode_t *NegotiationNode; // r29
 
@@ -97,14 +97,14 @@ void __fastcall Path_DecrementNodeUserCount(path_t *pPath)
     --NegotiationNode->dynamic.userCount;
 }
 
-void __fastcall Path_Backup(const path_t *path)
+void __cdecl Path_Backup(const path_t *path)
 {
     if (!path)
         MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\actor_navigation.cpp", 123, 0, "%s", "path");
     Com_Memcpy(&pathBackup, path, 996);
 }
 
-float __fastcall Path_GetDistToPathSegment(const float *vStartPos, const pathpoint_t *pt)
+float __cdecl Path_GetDistToPathSegment(const float *vStartPos, const pathpoint_t *pt)
 {
     double v4; // fp31
     double v5; // fp30
@@ -125,7 +125,7 @@ float __fastcall Path_GetDistToPathSegment(const float *vStartPos, const pathpoi
     return *((float *)&v6 + 1);
 }
 
-void __fastcall Path_AddTrimmedAmount(path_t *pPath, const float *vStartPos)
+void __cdecl Path_AddTrimmedAmount(path_t *pPath, const float *vStartPos)
 {
     int v4; // r27
     float *vOrigPoint; // r31
@@ -238,7 +238,7 @@ void __fastcall Path_AddTrimmedAmount(path_t *pPath, const float *vStartPos)
     }
 }
 
-void __fastcall Path_SubtractTrimmedAmount(path_t *pPath, const float *vStartPos)
+void __cdecl Path_SubtractTrimmedAmount(path_t *pPath, const float *vStartPos)
 {
     int wPathLen; // r11
     pathpoint_t *v5; // r30
@@ -304,7 +304,7 @@ void __fastcall Path_SubtractTrimmedAmount(path_t *pPath, const float *vStartPos
     }
 }
 
-void __fastcall Path_BeginTrim(path_t *pPath, path_trim_t *pTrim)
+void __cdecl Path_BeginTrim(path_t *pPath, path_trim_t *pTrim)
 {
     if (!pPath)
         MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\actor_navigation.cpp", 2018, 0, "%s", "pPath");
@@ -317,14 +317,14 @@ void __fastcall Path_BeginTrim(path_t *pPath, path_trim_t *pTrim)
     }
 }
 
-void __fastcall Path_Begin(path_t *pPath)
+void __cdecl Path_Begin(path_t *pPath)
 {
     memset(pPath, 0, sizeof(path_t));
     pPath->fLookaheadAmount = 32768.0;
     pPath->wDodgeEntity = 2175;
 }
 
-void __fastcall Path_Clear(path_t *pPath)
+void __cdecl Path_Clear(path_t *pPath)
 {
     if (!pPath)
         MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\actor_navigation.cpp", 2142, 0, "%s", "pPath");
@@ -337,14 +337,14 @@ void __fastcall Path_Clear(path_t *pPath)
     pPath->wOrigPathLen = 0;
 }
 
-bool __fastcall Path_Exists(const path_t *pPath)
+bool __cdecl Path_Exists(const path_t *pPath)
 {
     if (!pPath)
         MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\actor_navigation.cpp", 2164, 0, "%s", "pPath");
     return pPath->wPathLen > 0;
 }
 
-int __fastcall Path_CompleteLookahead(const path_t *pPath)
+int __cdecl Path_CompleteLookahead(const path_t *pPath)
 {
     if (!pPath)
         MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\actor_navigation.cpp", 2178, 0, "%s", "pPath");
@@ -353,7 +353,7 @@ int __fastcall Path_CompleteLookahead(const path_t *pPath)
     return pPath->flags & 1;
 }
 
-unsigned int __fastcall Path_AttemptedCompleteLookahead(const path_t *pPath)
+unsigned int __cdecl Path_AttemptedCompleteLookahead(const path_t *pPath)
 {
     if (!pPath)
         MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\actor_navigation.cpp", 2194, 0, "%s", "pPath");
@@ -362,7 +362,7 @@ unsigned int __fastcall Path_AttemptedCompleteLookahead(const path_t *pPath)
     return ((unsigned int)pPath->flags >> 6) & 1;
 }
 
-bool __fastcall Path_UsesObstacleNegotiation(const path_t *pPath)
+bool __cdecl Path_UsesObstacleNegotiation(const path_t *pPath)
 {
     int wPathLen; // r11
     double fCurrLength; // fp1
@@ -414,14 +414,14 @@ bool __fastcall Path_UsesObstacleNegotiation(const path_t *pPath)
     return pPath->wNegotiationStartNode > 0;
 }
 
-bool __fastcall Path_HasNegotiationNode(const path_t *path)
+bool __cdecl Path_HasNegotiationNode(const path_t *path)
 {
     if (!path)
         MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\actor_navigation.cpp", 2164, 0, "%s", "pPath");
     return path->wPathLen > 0 && path->wNegotiationStartNode > 0;
 }
 
-unsigned int __fastcall Path_AllowsObstacleNegotiation(const path_t *pPath)
+unsigned int __cdecl Path_AllowsObstacleNegotiation(const path_t *pPath)
 {
     if (!pPath)
         MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\actor_navigation.cpp", 2246, 0, "%s", "pPath");
@@ -430,7 +430,7 @@ unsigned int __fastcall Path_AllowsObstacleNegotiation(const path_t *pPath)
     return ((unsigned int)pPath->flags >> 4) & 1;
 }
 
-void __fastcall Path_GetObstacleNegotiationScript(const path_t *pPath, scr_animscript_t *animscript)
+void __cdecl Path_GetObstacleNegotiationScript(const path_t *pPath, scr_animscript_t *animscript)
 {
     int wPathLen; // r11
     double fCurrLength; // fp1
@@ -485,7 +485,7 @@ void __fastcall Path_GetObstacleNegotiationScript(const path_t *pPath, scr_anims
     Scr_SetString(&animscript->name, v8->constant.animscript);
 }
 
-int __fastcall Path_NeedsReevaluation(const path_t *pPath)
+int __cdecl Path_NeedsReevaluation(const path_t *pPath)
 {
     unsigned __int8 v2; // r11
 
@@ -501,7 +501,7 @@ int __fastcall Path_NeedsReevaluation(const path_t *pPath)
     return v2;
 }
 
-int __fastcall Path_EncroachesPoint2D(path_t *pPath, const float *vStart, const float *vPoint, double fMinDistSqrd)
+int __cdecl Path_EncroachesPoint2D(path_t *pPath, const float *vStart, const float *vPoint, double fMinDistSqrd)
 {
     double v8; // fp0
     double v9; // fp13
@@ -652,7 +652,7 @@ int __fastcall Path_EncroachesPoint2D(path_t *pPath, const float *vStart, const 
     return 0;
 }
 
-int __fastcall Path_DistanceGreaterThan(path_t *pPath, double fDist)
+int __cdecl Path_DistanceGreaterThan(path_t *pPath, double fDist)
 {
     int wPathLen; // r11
     double fCurrLength; // fp1
@@ -751,7 +751,7 @@ int __fastcall Path_DistanceGreaterThan(path_t *pPath, double fDist)
     return 0;
 }
 
-void __fastcall Path_ReduceLookaheadAmount(path_t *pPath, double maxLookaheadAmountIfReduce)
+void __cdecl Path_ReduceLookaheadAmount(path_t *pPath, double maxLookaheadAmountIfReduce)
 {
     int flags; // r10
     double v3; // fp0
@@ -769,12 +769,12 @@ void __fastcall Path_ReduceLookaheadAmount(path_t *pPath, double maxLookaheadAmo
         pPath->fLookaheadAmount = 0.001;
 }
 
-bool __fastcall Path_FailedLookahead(path_t *pPath)
+bool __cdecl Path_FailedLookahead(path_t *pPath)
 {
     return pPath->fLookaheadAmount <= 0.001;
 }
 
-void __fastcall Path_IncreaseLookaheadAmount(path_t *pPath)
+void __cdecl Path_IncreaseLookaheadAmount(path_t *pPath)
 {
     double v1; // fp0
     int flags; // r11
@@ -792,7 +792,7 @@ void __fastcall Path_IncreaseLookaheadAmount(path_t *pPath)
     pPath->flags = v3;
 }
 
-bool __fastcall Path_PredictionTrace(
+bool __cdecl Path_PredictionTrace(
     float *vStartPos,
     float *vEndPos,
     int entityIgnore,
@@ -938,7 +938,7 @@ bool __fastcall Path_PredictionTrace(
     return 0;
 }
 
-int __fastcall Path_IsTrimmed(path_t *pPath)
+int __cdecl Path_IsTrimmed(path_t *pPath)
 {
     int wPathLen; // r11
     double fCurrLength; // fp1
@@ -1001,7 +1001,7 @@ int __fastcall Path_IsTrimmed(path_t *pPath)
     return result;
 }
 
-void __fastcall Path_RemoveCompletedPathPoints(path_t *pPath, __int16 pathPointIndex)
+void __cdecl Path_RemoveCompletedPathPoints(path_t *pPath, __int16 pathPointIndex)
 {
     int wDodgeCount; // r10
     int v5; // r11
@@ -1104,7 +1104,7 @@ void __fastcall Path_RemoveCompletedPathPoints(path_t *pPath, __int16 pathPointI
     }
 }
 
-void __fastcall Path_TrimCompletedPath(path_t *pPath, const float *vStartPos)
+void __cdecl Path_TrimCompletedPath(path_t *pPath, const float *vStartPos)
 {
     int wPathLen; // r11
     double fCurrLength; // fp1
@@ -1320,7 +1320,7 @@ void __fastcall Path_TrimCompletedPath(path_t *pPath, const float *vStartPos)
     }
 }
 
-void __fastcall Path_BacktrackCompletedPath(path_t *pPath, const float *vStartPos)
+void __cdecl Path_BacktrackCompletedPath(path_t *pPath, const float *vStartPos)
 {
     int v4; // r22
     float *vOrigPoint; // r29
@@ -1751,7 +1751,7 @@ handleFraction:
     }
 }
 
-void __fastcall PathCalcLookahead_CheckMinLookaheadNodes(path_t *pPath, const pathpoint_t *pt, int currentNode)
+void __cdecl PathCalcLookahead_CheckMinLookaheadNodes(path_t *pPath, const pathpoint_t *pt, int currentNode)
 {
     int wPathLen; // r11
     float *vOrigPoint; // r31
@@ -1782,7 +1782,7 @@ void __fastcall PathCalcLookahead_CheckMinLookaheadNodes(path_t *pPath, const pa
     }
 }
 
-int __fastcall Path_GetForwardStartPos(path_t *pPath, const float *vStartPos, float *vForwardStartPos)
+int __cdecl Path_GetForwardStartPos(path_t *pPath, const float *vStartPos, float *vForwardStartPos)
 {
     int result; // r3
 
@@ -1796,7 +1796,7 @@ int __fastcall Path_GetForwardStartPos(path_t *pPath, const float *vStartPos, fl
     return result;
 }
 
-void __fastcall Path_UpdateForwardLookahead_IncompletePath(
+void __cdecl Path_UpdateForwardLookahead_IncompletePath(
     path_t *pPath,
     const pathpoint_t *pt,
     const float *vForwardStartPos,
@@ -1832,7 +1832,7 @@ void __fastcall Path_UpdateForwardLookahead_IncompletePath(
     Vec2Normalize(pPath->forwardLookaheadDir2D);
 }
 
-void __fastcall Path_UpdateForwardLookahead(path_t *pPath, const float *vStartPos)
+void __cdecl Path_UpdateForwardLookahead(path_t *pPath, const float *vStartPos)
 {
     int wPathLen; // r11
     double fCurrLength; // fp1
@@ -2080,7 +2080,7 @@ void __fastcall Path_UpdateForwardLookahead(path_t *pPath, const float *vStartPo
     }
 }
 
-void __fastcall Path_DebugDraw(path_t *pPath, float *vStartPos, int bDrawLookahead)
+void __cdecl Path_DebugDraw(path_t *pPath, float *vStartPos, int bDrawLookahead)
 {
     double fLookaheadDist; // fp0
     double v6; // fp10
@@ -2167,7 +2167,7 @@ void __fastcall Path_DebugDraw(path_t *pPath, float *vStartPos, int bDrawLookahe
     }
 }
 
-bool __fastcall Path_WithinApproxDist(path_t *pPath, double checkDist)
+bool __cdecl Path_WithinApproxDist(path_t *pPath, double checkDist)
 {
     int lookaheadNextNode; // r11
     double v5; // fp31
@@ -2241,7 +2241,7 @@ bool __fastcall Path_WithinApproxDist(path_t *pPath, double checkDist)
     return 1;
 }
 
-ai_stance_e __fastcall Path_AllowedStancesForPath(path_t *pPath)
+ai_stance_e __cdecl Path_AllowedStancesForPath(path_t *pPath)
 {
     int wPathLen; // r11
     double fCurrLength; // fp1
@@ -2361,7 +2361,7 @@ ai_stance_e __fastcall Path_AllowedStancesForPath(path_t *pPath)
     return Path_AllowedStancesForNode(v15);
 }
 
-void __fastcall Path_DodgeDrawRaisedLine(float *start, float *end, const float *color)
+void __cdecl Path_DodgeDrawRaisedLine(float *start, float *end, const float *color)
 {
     double v3; // fp12
     float v4[4]; // [sp+50h] [-30h] BYREF
@@ -2380,7 +2380,7 @@ void __fastcall Path_DodgeDrawRaisedLine(float *start, float *end, const float *
     }
 }
 
-int __fastcall Path_MayFaceEnemy(path_t *pPath, float *vEnemyDir, float *vOrg)
+int __cdecl Path_MayFaceEnemy(path_t *pPath, float *vEnemyDir, float *vOrg)
 {
     int wPathLen; // r11
     double fCurrLength; // fp1
@@ -2460,7 +2460,7 @@ int __fastcall Path_MayFaceEnemy(path_t *pPath, float *vEnemyDir, float *vOrg)
     return result;
 }
 
-void __fastcall Path_Restore(path_t *path)
+void __cdecl Path_Restore(path_t *path)
 {
     if (!path)
         MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\actor_navigation.cpp", 135, 0, "%s", "path");
@@ -2471,7 +2471,7 @@ void __fastcall Path_Restore(path_t *path)
         Path_IncrementNodeUserCount(path);
 }
 
-int __fastcall Path_FindPathFromTo(
+int __cdecl Path_FindPathFromTo(
     path_t *pPath,
     team_t eTeam,
     pathnode_t *pNodeFrom,
@@ -2516,7 +2516,7 @@ int __fastcall Path_FindPathFromTo(
         &v15);
 }
 
-void __fastcall Path_TrimLastNodes(path_t *pPath, const int iNodeCount, bool bMaintainGoalPos)
+void __cdecl Path_TrimLastNodes(path_t *pPath, const int iNodeCount, bool bMaintainGoalPos)
 {
     int wPathLen; // r11
     double fCurrLength; // fp1
@@ -2712,7 +2712,7 @@ void __fastcall Path_TrimLastNodes(path_t *pPath, const int iNodeCount, bool bMa
     }
 }
 
-int __fastcall Path_ClipToGoal(path_t *pPath, const actor_goal_s *goal)
+int __cdecl Path_ClipToGoal(path_t *pPath, const actor_goal_s *goal)
 {
     int v5; // r31
     const float *i; // r30
@@ -2739,7 +2739,7 @@ int __fastcall Path_ClipToGoal(path_t *pPath, const actor_goal_s *goal)
     return 1;
 }
 
-int __fastcall Path_TrimToSeePoint(
+int __cdecl Path_TrimToSeePoint(
     path_t *pPath,
     path_trim_t *pTrim,
     actor_s *pActor,
@@ -2840,7 +2840,7 @@ int __fastcall Path_TrimToSeePoint(
     }
 }
 
-PredictionTraceResult __fastcall Path_PredictionTraceCheckForEntities(
+PredictionTraceResult __cdecl Path_PredictionTraceCheckForEntities(
     float *vStartPos,
     float *vEndPos,
     int *entities,
@@ -2891,7 +2891,7 @@ PredictionTraceResult __fastcall Path_PredictionTraceCheckForEntities(
     return result;
 }
 
-bool __fastcall Path_LookaheadPredictionTrace(path_t *pPath, float *vStartPos, float *vEndPos, int a4, int a5, int a6)
+bool __cdecl Path_LookaheadPredictionTrace(path_t *pPath, float *vStartPos, float *vEndPos, int a4, int a5, int a6)
 {
     int v6; // r6
     int wDodgeEntity; // r11
@@ -2915,7 +2915,7 @@ bool __fastcall Path_LookaheadPredictionTrace(path_t *pPath, float *vStartPos, f
     return Path_PredictionTrace(vStartPos, vEndPos, 2175, v6, v10, 18.0, a6, 1);
 }
 
-void __fastcall Path_UpdateLookaheadAmount(
+void __cdecl Path_UpdateLookaheadAmount(
     path_t *pPath,
     float *vStartPos,
     float *vLookaheadPos,
@@ -3085,7 +3085,7 @@ void __fastcall Path_UpdateLookaheadAmount(
     }
 }
 
-void __fastcall Path_CalcLookahead_Completed(
+void __cdecl Path_CalcLookahead_Completed(
     path_t *pPath,
     float *vStartPos,
     int bReduceLookaheadAmount,
@@ -3122,7 +3122,7 @@ void __fastcall Path_CalcLookahead_Completed(
     pPath->fLookaheadAmount = _FP0;
 }
 
-void __fastcall Path_CalcLookahead(path_t *pPath, float *vStartPos, int bReduceLookaheadAmount, int a4, int a5)
+void __cdecl Path_CalcLookahead(path_t *pPath, float *vStartPos, int bReduceLookaheadAmount, int a4, int a5)
 {
     int wPathLen; // r11
     double fCurrLength; // fp1
@@ -3262,7 +3262,7 @@ void __fastcall Path_CalcLookahead(path_t *pPath, float *vStartPos, int bReduceL
     }
 }
 
-void __fastcall Path_CheckNodeCountForDodge(path_t *pPath, int numNeeded, pathpoint_t **pt, int *startIndex)
+void __cdecl Path_CheckNodeCountForDodge(path_t *pPath, int numNeeded, pathpoint_t **pt, int *startIndex)
 {
     int v7; // r11
     int v8; // r31
@@ -3291,7 +3291,7 @@ void __fastcall Path_CheckNodeCountForDodge(path_t *pPath, int numNeeded, pathpo
     }
 }
 
-void __fastcall Path_TrimToBadPlaceLink(path_t *pPath, team_t eTeam)
+void __cdecl Path_TrimToBadPlaceLink(path_t *pPath, team_t eTeam)
 {
     int v4; // r30
     int *i; // r31
@@ -3314,7 +3314,7 @@ void __fastcall Path_TrimToBadPlaceLink(path_t *pPath, team_t eTeam)
     }
 }
 
-int __fastcall Path_FindPath(
+int __cdecl Path_FindPath(
     path_t *pPath,
     team_t eTeam,
     const float *vStartPos,
@@ -3334,7 +3334,7 @@ int __fastcall Path_FindPath(
         return 0;
 }
 
-pathnode_t *__fastcall Path_FindPathFrom(
+pathnode_t *__cdecl Path_FindPathFrom(
     path_t *pPath,
     team_t eTeam,
     pathnode_t *pNodeFrom,
@@ -3359,7 +3359,7 @@ pathnode_t *__fastcall Path_FindPathFrom(
     return result;
 }
 
-void __fastcall Path_UpdateLookahead(
+void __cdecl Path_UpdateLookahead(
     path_t *pPath,
     float *vStartPos,
     int bReduceLookaheadAmount,
@@ -3465,7 +3465,7 @@ LABEL_25:
     //Profile_EndInternal(0);
 }
 
-void __fastcall Path_SetLookaheadToStart(path_t *pPath, float *vStartPos, int bTrimAmount)
+void __cdecl Path_SetLookaheadToStart(path_t *pPath, float *vStartPos, int bTrimAmount)
 {
     float *lookaheadDir; // r3
     double v7; // fp0
@@ -3491,7 +3491,7 @@ void __fastcall Path_SetLookaheadToStart(path_t *pPath, float *vStartPos, int bT
     Path_UpdateLookahead(pPath, vStartPos, 0, bTrimAmount, 1);
 }
 
-void __fastcall Path_TransferLookahead(path_t *pPath, float *vStartPos)
+void __cdecl Path_TransferLookahead(path_t *pPath, float *vStartPos)
 {
     int wPathLen; // r11
     double fCurrLength; // fp1
@@ -3706,7 +3706,7 @@ void __fastcall Path_TransferLookahead(path_t *pPath, float *vStartPos)
     }
 }
 
-int __fastcall Path_GeneratePath(
+int __cdecl Path_GeneratePath(
     path_t *pPath,
     team_t eTeam,
     float *vStartPos,
@@ -4004,7 +4004,7 @@ LABEL_18:
     return 1;
 }
 
-void __fastcall Path_UpdateLookahead_NonCodeMove(path_t *pPath, const float *vPrevPos, float *vStartPos)
+void __cdecl Path_UpdateLookahead_NonCodeMove(path_t *pPath, const float *vPrevPos, float *vStartPos)
 {
     double v6; // fp13
     int wNegotiationStartNode; // r9
@@ -4053,7 +4053,7 @@ LABEL_16:
     Path_UpdateLookahead(pPath, vStartPos, 0, 0, 0);
 }
 
-int __fastcall Path_AttemptDodge(
+int __cdecl Path_AttemptDodge(
     path_t *pPath,
     float *vOrg,
     float *vDodgeStart,
@@ -4552,7 +4552,7 @@ done:
     return 1;
 }
 
-pathnode_t *__fastcall Path_FindCloseNode(
+pathnode_t *__cdecl Path_FindCloseNode(
     team_t eTeam,
     pathnode_t *pNodeFrom,
     const float *vGoalPos,
@@ -4588,7 +4588,7 @@ pathnode_t *__fastcall Path_FindCloseNode(
     return v9.closestNode;
 }
 
-int __fastcall Path_FindPathFromToWithWidth(
+int __cdecl Path_FindPathFromToWithWidth(
     path_t *pPath,
     team_t eTeam,
     pathnode_t *pNodeFrom,
@@ -4655,7 +4655,7 @@ int __fastcall Path_FindPathFromToWithWidth(
         &v38);
 }
 
-int __fastcall Path_FindPathFromToNotCrossPlanes(
+int __cdecl Path_FindPathFromToNotCrossPlanes(
     path_t *pPath,
     team_t eTeam,
     pathnode_t *pNodeFrom,
@@ -4734,7 +4734,7 @@ int __fastcall Path_FindPathFromToNotCrossPlanes(
     }
 }
 
-int __fastcall Path_FindPathFromAway(
+int __cdecl Path_FindPathFromAway(
     path_t *pPath,
     team_t eTeam,
     pathnode_t *pNodeFrom,
@@ -4803,7 +4803,7 @@ int __fastcall Path_FindPathFromAway(
     return Path;
 }
 
-int __fastcall Path_FindPathFromAwayNotCrossPlanes(
+int __cdecl Path_FindPathFromAwayNotCrossPlanes(
     path_t *pPath,
     team_t eTeam,
     pathnode_t *pNodeFrom,
@@ -4896,7 +4896,7 @@ int __fastcall Path_FindPathFromAwayNotCrossPlanes(
     return Path;
 }
 
-int __fastcall Path_FindPathInCylinderWithLOS(
+int __cdecl Path_FindPathInCylinderWithLOS(
     path_t *pPath,
     team_t eTeam,
     const float *vStartPos,
@@ -4935,7 +4935,7 @@ int __fastcall Path_FindPathInCylinderWithLOS(
         &v19);
 }
 
-int __fastcall Path_FindPathInCylinderWithLOSNotCrossPlanes(
+int __cdecl Path_FindPathInCylinderWithLOSNotCrossPlanes(
     path_t *pPath,
     team_t eTeam,
     const float *vStartPos,
@@ -5010,7 +5010,7 @@ int __fastcall Path_FindPathInCylinderWithLOSNotCrossPlanes(
         &v43);
 }
 
-pathnode_t *__fastcall Path_FindPathFromInCylinder(
+pathnode_t *__cdecl Path_FindPathFromInCylinder(
     path_t *pPath,
     team_t eTeam,
     pathnode_t *pNodeFrom,
@@ -5081,7 +5081,7 @@ pathnode_t *__fastcall Path_FindPathFromInCylinder(
     return result;
 }
 
-int __fastcall Path_FindPathFromInCylinderNotCrossPlanes(
+int __cdecl Path_FindPathFromInCylinderNotCrossPlanes(
     path_t *pPath,
     team_t eTeam,
     pathnode_t *pNodeFrom,
@@ -5163,7 +5163,7 @@ int __fastcall Path_FindPathFromInCylinderNotCrossPlanes(
             &v48);
 }
 
-const pathnode_t *__fastcall Path_FindFacingNode(sentient_s *pSelf, sentient_s *pOther, sentient_info_t *pInfo)
+const pathnode_t *__cdecl Path_FindFacingNode(sentient_s *pSelf, sentient_s *pOther, sentient_info_t *pInfo)
 {
     pathnode_t *v6; // r29
     const pathnode_t *result; // r3
@@ -5203,7 +5203,7 @@ const pathnode_t *__fastcall Path_FindFacingNode(sentient_s *pSelf, sentient_s *
     return result;
 }
 
-int __fastcall Path_FindPathGetCloseAsPossible(
+int __cdecl Path_FindPathGetCloseAsPossible(
     path_t *pPath,
     team_t eTeam,
     pathnode_t *pNodeFrom,
@@ -5270,7 +5270,7 @@ int __fastcall Path_FindPathGetCloseAsPossible(
     return 0;
 }
 
-int __fastcall Path_FindPathWithWidth(
+int __cdecl Path_FindPathWithWidth(
     path_t *pPath,
     team_t eTeam,
     const float *vStartPos,
@@ -5342,7 +5342,7 @@ int __fastcall Path_FindPathWithWidth(
         return 0;
 }
 
-int __fastcall Path_FindPathNotCrossPlanes(
+int __cdecl Path_FindPathNotCrossPlanes(
     path_t *pPath,
     team_t eTeam,
     const float *vStartPos,
@@ -5442,7 +5442,7 @@ int __fastcall Path_FindPathNotCrossPlanes(
     }
 }
 
-pathnode_t *__fastcall Path_FindPathFromNotCrossPlanes(
+pathnode_t *__cdecl Path_FindPathFromNotCrossPlanes(
     path_t *pPath,
     team_t eTeam,
     pathnode_t *pNodeFrom,
@@ -5543,7 +5543,7 @@ pathnode_t *__fastcall Path_FindPathFromNotCrossPlanes(
     return result;
 }
 
-pathnode_t *__fastcall Path_FindPathAway(
+pathnode_t *__cdecl Path_FindPathAway(
     path_t *pPath,
     team_t eTeam,
     float *vStartPos,
@@ -5563,7 +5563,7 @@ pathnode_t *__fastcall Path_FindPathAway(
     return result;
 }
 
-pathnode_t *__fastcall Path_FindPathAwayNotCrossPlanes(
+pathnode_t *__cdecl Path_FindPathAwayNotCrossPlanes(
     path_t *pPath,
     team_t eTeam,
     float *vStartPos,

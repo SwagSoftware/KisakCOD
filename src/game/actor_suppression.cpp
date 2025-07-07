@@ -4,7 +4,7 @@
 
 #include "actor_suppression.h"
 
-void __fastcall DebugDrawSuppression(actor_s *self, const float *a2, int a3, int a4, int a5)
+void __cdecl DebugDrawSuppression(actor_s *self, const float *a2, int a3, int a4, int a5)
 {
     int *p_movementOnly; // r31
     int v7; // r29
@@ -33,7 +33,7 @@ void __fastcall DebugDrawSuppression(actor_s *self, const float *a2, int a3, int
     } while (v7);
 }
 
-int __fastcall Actor_PickNewSuppressantEntry(actor_s *self, sentient_s *pSuppressor)
+int __cdecl Actor_PickNewSuppressantEntry(actor_s *self, sentient_s *pSuppressor)
 {
     int result; // r3
     int v4; // r10
@@ -61,7 +61,7 @@ int __fastcall Actor_PickNewSuppressantEntry(actor_s *self, sentient_s *pSuppres
     return v4;
 }
 
-int __fastcall Actor_NearCoverNode(actor_s *self)
+int __cdecl Actor_NearCoverNode(actor_s *self)
 {
     int result; // r3
     const pathnode_t *v3; // r3
@@ -87,7 +87,7 @@ int __fastcall Actor_NearCoverNode(actor_s *self)
     return result;
 }
 
-void __fastcall Actor_BulletWhizbyNotify(actor_s *self, sentient_s *pSuppressor)
+void __cdecl Actor_BulletWhizbyNotify(actor_s *self, sentient_s *pSuppressor)
 {
     if (!self)
         MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\actor_suppression.cpp", 85, 0, "%s", "self");
@@ -97,7 +97,7 @@ void __fastcall Actor_BulletWhizbyNotify(actor_s *self, sentient_s *pSuppressor)
     Scr_Notify(self->ent, scr_const.bulletwhizby, 1u);
 }
 
-void __fastcall Actor_AddSuppressionLine(
+void __cdecl Actor_AddSuppressionLine(
     actor_s *self,
     sentient_s *pSuppressor,
     const float *vStart,
@@ -193,7 +193,7 @@ void __fastcall Actor_AddSuppressionLine(
     }
 }
 
-void __fastcall Actor_ClearSuppressant(ai_suppression_t *suppressant)
+void __cdecl Actor_ClearSuppressant(ai_suppression_t *suppressant)
 {
     if (!suppressant)
         MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\actor_suppression.cpp", 199, 0, "%s", "suppressant");
@@ -202,7 +202,7 @@ void __fastcall Actor_ClearSuppressant(ai_suppression_t *suppressant)
     suppressant->movementOnly = 0;
 }
 
-void __fastcall Actor_DecaySuppressionLines(actor_s *self, const float *a2, int a3, int a4, int a5)
+void __cdecl Actor_DecaySuppressionLines(actor_s *self, const float *a2, int a3, int a4, int a5)
 {
     bool v6; // r21
     char v7; // r24
@@ -276,7 +276,7 @@ void __fastcall Actor_DecaySuppressionLines(actor_s *self, const float *a2, int 
         DebugDrawSuppression(self, a2, a3, a4, a5);
 }
 
-void __fastcall Actor_DissociateSuppressor(actor_s *self, sentient_s *pSuppressor)
+void __cdecl Actor_DissociateSuppressor(actor_s *self, sentient_s *pSuppressor)
 {
     bool v4; // r22
     char v5; // r26
@@ -316,7 +316,7 @@ void __fastcall Actor_DissociateSuppressor(actor_s *self, sentient_s *pSuppresso
         self->suppressionStartTime = 0;
 }
 
-int __fastcall Actor_IsSuppressedInAnyway(actor_s *self)
+int __cdecl Actor_IsSuppressedInAnyway(actor_s *self)
 {
     int v3; // r11
     ai_suppression_t *i; // r10
@@ -335,14 +335,14 @@ int __fastcall Actor_IsSuppressedInAnyway(actor_s *self)
     return 1;
 }
 
-bool __fastcall Actor_IsSuppressed(actor_s *self)
+bool __cdecl Actor_IsSuppressed(actor_s *self)
 {
     if (!self)
         MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\actor_suppression.cpp", 359, 0, "%s", "self");
     return self->suppressionStartTime > 0;
 }
 
-int __fastcall Actor_IsMoveSuppressed(actor_s *self)
+int __cdecl Actor_IsMoveSuppressed(actor_s *self)
 {
     int v2; // r10
     int *i; // r11
@@ -358,7 +358,7 @@ int __fastcall Actor_IsMoveSuppressed(actor_s *self)
     return 1;
 }
 
-int __fastcall Actor_IsSuppressionWaiting(actor_s *self)
+int __cdecl Actor_IsSuppressionWaiting(actor_s *self)
 {
     int v2; // r9
     ai_suppression_t *i; // r10
@@ -376,7 +376,7 @@ int __fastcall Actor_IsSuppressionWaiting(actor_s *self)
     return 1;
 }
 
-int __fastcall Actor_GetSuppressionPlanes(actor_s *self, float (*vNormalOut)[2], float *fDistOut)
+int __cdecl Actor_GetSuppressionPlanes(actor_s *self, float (*vNormalOut)[2], float *fDistOut)
 {
     int result; // r3
     float *v7; // r11
@@ -417,7 +417,7 @@ int __fastcall Actor_GetSuppressionPlanes(actor_s *self, float (*vNormalOut)[2],
     return result;
 }
 
-int __fastcall Actor_GetMoveOnlySuppressionPlanes(actor_s *self, float (*vNormalOut)[2], float *fDistOut)
+int __cdecl Actor_GetMoveOnlySuppressionPlanes(actor_s *self, float (*vNormalOut)[2], float *fDistOut)
 {
     int result; // r3
     float *v7; // r11
@@ -461,7 +461,7 @@ int __fastcall Actor_GetMoveOnlySuppressionPlanes(actor_s *self, float (*vNormal
     return result;
 }
 
-void __fastcall Actor_ClearAllSuppressionFromEnemySentient(sentient_s *pSuppressor)
+void __cdecl Actor_ClearAllSuppressionFromEnemySentient(sentient_s *pSuppressor)
 {
     int v2; // r26
     actor_s *i; // r31

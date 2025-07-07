@@ -4,7 +4,7 @@
 
 #include "actor_fields.h"
 
-unsigned __int8 *__fastcall BaseForFields(unsigned __int8 *actor, const actor_fields_s *fields)
+unsigned __int8 *__cdecl BaseForFields(unsigned __int8 *actor, const actor_fields_s *fields)
 {
     if (fields != aifields)
     {
@@ -31,7 +31,7 @@ unsigned __int8 *__fastcall BaseForFields(unsigned __int8 *actor, const actor_fi
     return actor;
 }
 
-const actor_fields_s *__fastcall FindFieldForName(const actor_fields_s *fields, const char *pszFieldName)
+const actor_fields_s *__cdecl FindFieldForName(const actor_fields_s *fields, const char *pszFieldName)
 {
     int v4; // r31
     const actor_fields_s *v5; // r11
@@ -49,7 +49,7 @@ const actor_fields_s *__fastcall FindFieldForName(const actor_fields_s *fields, 
     return &fields[v4];
 }
 
-void __fastcall ActorScr_SetSpecies(actor_s *pSelf, const actor_fields_s *pField)
+void __cdecl ActorScr_SetSpecies(actor_s *pSelf, const actor_fields_s *pField)
 {
     unsigned int ConstString; // r3
     AISpecies v4; // r10
@@ -81,7 +81,7 @@ void __fastcall ActorScr_SetSpecies(actor_s *pSelf, const actor_fields_s *pField
     G_DObjUpdate(pSelf->ent);
 }
 
-void __fastcall ActorScr_GetSpecies(actor_s *pSelf, const actor_fields_s *pField)
+void __cdecl ActorScr_GetSpecies(actor_s *pSelf, const actor_fields_s *pField)
 {
     AISpecies species; // r7
 
@@ -99,7 +99,7 @@ void __fastcall ActorScr_GetSpecies(actor_s *pSelf, const actor_fields_s *pField
     Scr_AddConstString(*g_AISpeciesNames[pSelf->species]);
 }
 
-void __fastcall ActorScr_Clamp_0_1(actor_s *pSelf, const actor_fields_s *pField)
+void __cdecl ActorScr_Clamp_0_1(actor_s *pSelf, const actor_fields_s *pField)
 {
     double Float; // fp1
     double v5; // fp31
@@ -129,7 +129,7 @@ LABEL_10:
     *(float *)((char *)&pSelf->ent + pField->ofs) = Float;
 }
 
-void __fastcall ActorScr_Clamp_0_Positive(actor_s *pSelf, const actor_fields_s *pField)
+void __cdecl ActorScr_Clamp_0_Positive(actor_s *pSelf, const actor_fields_s *pField)
 {
     double Float; // fp1
     const char *v5; // r3
@@ -148,7 +148,7 @@ void __fastcall ActorScr_Clamp_0_Positive(actor_s *pSelf, const actor_fields_s *
     *(float *)((char *)&pSelf->ent + pField->ofs) = Float;
 }
 
-void __fastcall ActorScr_ReadOnly(actor_s *pSelf, const actor_fields_s *pField)
+void __cdecl ActorScr_ReadOnly(actor_s *pSelf, const actor_fields_s *pField)
 {
     const char *v3; // r3
 
@@ -160,7 +160,7 @@ void __fastcall ActorScr_ReadOnly(actor_s *pSelf, const actor_fields_s *pField)
     Scr_Error(v3);
 }
 
-void __fastcall ActorScr_SetGoalRadius(actor_s *pSelf, const actor_fields_s *pField)
+void __cdecl ActorScr_SetGoalRadius(actor_s *pSelf, const actor_fields_s *pField)
 {
     double Float; // fp31
 
@@ -172,7 +172,7 @@ void __fastcall ActorScr_SetGoalRadius(actor_s *pSelf, const actor_fields_s *pFi
     Actor_SetGoalRadius(&pSelf->scriptGoal, Float);
 }
 
-void __fastcall ActorScr_SetGoalHeight(actor_s *pSelf, const actor_fields_s *pField)
+void __cdecl ActorScr_SetGoalHeight(actor_s *pSelf, const actor_fields_s *pField)
 {
     double Float; // fp1
 
@@ -182,7 +182,7 @@ void __fastcall ActorScr_SetGoalHeight(actor_s *pSelf, const actor_fields_s *pFi
     Actor_SetGoalHeight(&pSelf->scriptGoal, Float);
 }
 
-void __fastcall ActorScr_SetTime(actor_s *pSelf, const actor_fields_s *pField)
+void __cdecl ActorScr_SetTime(actor_s *pSelf, const actor_fields_s *pField)
 {
     long double v4; // fp2
     long double v5; // fp2
@@ -198,7 +198,7 @@ void __fastcall ActorScr_SetTime(actor_s *pSelf, const actor_fields_s *pField)
     *(gentity_s **)((char *)&pSelf->ent + pField->ofs) = (gentity_s *)(int)(float)*(double *)&v5;
 }
 
-void __fastcall ActorScr_GetTime(actor_s *pSelf, const actor_fields_s *pField)
+void __cdecl ActorScr_GetTime(actor_s *pSelf, const actor_fields_s *pField)
 {
     __int64 v2; // r11
 
@@ -210,7 +210,7 @@ void __fastcall ActorScr_GetTime(actor_s *pSelf, const actor_fields_s *pField)
     Scr_AddFloat((float)((float)v2 * (float)0.001));
 }
 
-void __fastcall ActorScr_SetWeapon(actor_s *pSelf, const actor_fields_s *pField)
+void __cdecl ActorScr_SetWeapon(actor_s *pSelf, const actor_fields_s *pField)
 {
     const char *String; // r31
     const char *v5; // r3
@@ -232,7 +232,7 @@ void __fastcall ActorScr_SetWeapon(actor_s *pSelf, const actor_fields_s *pField)
     *(gentity_s **)((char *)&pSelf->ent + pField->ofs) = (gentity_s *)G_GetWeaponIndexForName(v6);
 }
 
-void __fastcall ActorScr_GetWeapon(actor_s *pSelf, const actor_fields_s *pField)
+void __cdecl ActorScr_GetWeapon(actor_s *pSelf, const actor_fields_s *pField)
 {
     WeaponDef *WeaponDef; // r3
 
@@ -245,7 +245,7 @@ void __fastcall ActorScr_GetWeapon(actor_s *pSelf, const actor_fields_s *pField)
         Scr_AddString(WeaponDef->szInternalName);
 }
 
-void __fastcall ActorScr_GetGroundType(actor_s *pSelf, const actor_fields_s *pField)
+void __cdecl ActorScr_GetGroundType(actor_s *pSelf, const actor_fields_s *pField)
 {
     int iSurfaceType; // r3
     const char *v5; // r3
@@ -271,7 +271,7 @@ void __fastcall ActorScr_GetGroundType(actor_s *pSelf, const actor_fields_s *pFi
     }
 }
 
-void __fastcall ActorScr_SetAnimPos(actor_s *pSelf, const actor_fields_s *pField)
+void __cdecl ActorScr_SetAnimPos(actor_s *pSelf, const actor_fields_s *pField)
 {
     unsigned int ConstString; // r30
     int IsProne; // r3
@@ -308,7 +308,7 @@ void __fastcall ActorScr_SetAnimPos(actor_s *pSelf, const actor_fields_s *pField
     }
 }
 
-void __fastcall ActorScr_SetLastEnemySightPos(actor_s *pSelf, const actor_fields_s *pField)
+void __cdecl ActorScr_SetLastEnemySightPos(actor_s *pSelf, const actor_fields_s *pField)
 {
     if (!pSelf)
         MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\actor_fields.cpp", 523, 0, "%s", "pSelf");
@@ -334,7 +334,7 @@ void __fastcall ActorScr_SetLastEnemySightPos(actor_s *pSelf, const actor_fields
     }
 }
 
-void __fastcall ActorScr_GetLastEnemySightPos(actor_s *pSelf, const actor_fields_s *pField)
+void __cdecl ActorScr_GetLastEnemySightPos(actor_s *pSelf, const actor_fields_s *pField)
 {
     if (!pSelf)
         MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\actor_fields.cpp", 546, 0, "%s", "pSelf");
@@ -353,7 +353,7 @@ void __fastcall ActorScr_GetLastEnemySightPos(actor_s *pSelf, const actor_fields
         Scr_AddVector(pSelf->lastEnemySightPos);
 }
 
-void __fastcall ActorScr_GetPathGoalPos(actor_s *self, const actor_fields_s *field)
+void __cdecl ActorScr_GetPathGoalPos(actor_s *self, const actor_fields_s *field)
 {
     if (!self)
         MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\actor_fields.cpp", 564, 0, "%s", "self");
@@ -372,7 +372,7 @@ void __fastcall ActorScr_GetPathGoalPos(actor_s *self, const actor_fields_s *fie
         Scr_AddVector(self->Path.vFinalGoal);
 }
 
-void __fastcall ActorScr_SetFixedNode(actor_s *self, const actor_fields_s *field)
+void __cdecl ActorScr_SetFixedNode(actor_s *self, const actor_fields_s *field)
 {
     unsigned int Int; // r3
 
@@ -387,7 +387,7 @@ void __fastcall ActorScr_SetFixedNode(actor_s *self, const actor_fields_s *field
     self->fixedNode = (_cntlzw(Int) & 0x20) == 0;
 }
 
-void __fastcall ActorScr_GetMoveMode(actor_s *pSelf, const actor_fields_s *pField)
+void __cdecl ActorScr_GetMoveMode(actor_s *pSelf, const actor_fields_s *pField)
 {
     if (!pSelf)
         MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\actor_fields.cpp", 598, 0, "%s", "pSelf");
@@ -423,7 +423,7 @@ void __fastcall ActorScr_GetMoveMode(actor_s *pSelf, const actor_fields_s *pFiel
     }
 }
 
-void __fastcall PrintFieldUsage(const actor_fields_s *fields)
+void __cdecl PrintFieldUsage(const actor_fields_s *fields)
 {
     int v2; // r15
     const actor_fields_s *v3; // r10
@@ -504,7 +504,7 @@ void Cmd_AI_PrintUsage()
     PrintFieldUsage(entfields);
 }
 
-void __fastcall Cmd_AI_DisplayInfo(actor_s *actor)
+void __cdecl Cmd_AI_DisplayInfo(actor_s *actor)
 {
     const char *v2; // r31
     const char *v3; // r3
@@ -529,7 +529,7 @@ void __fastcall Cmd_AI_DisplayInfo(actor_s *actor)
     Com_Printf(0, "\n");
 }
 
-void __fastcall Cmd_AI_Delete(actor_s *actor)
+void __cdecl Cmd_AI_Delete(actor_s *actor)
 {
     if (!actor)
         MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\actor_fields.cpp", 742, 0, "%s", "actor");
@@ -538,7 +538,7 @@ void __fastcall Cmd_AI_Delete(actor_s *actor)
     G_FreeEntityDelay(actor->ent);
 }
 
-void __fastcall Cmd_AI_DisplayValue(actor_s *pSelf, unsigned __int8 *pBase, const actor_fields_s *pField)
+void __cdecl Cmd_AI_DisplayValue(actor_s *pSelf, unsigned __int8 *pBase, const actor_fields_s *pField)
 {
     int number; // r28
     __int64 v7; // r11
@@ -731,9 +731,9 @@ void __fastcall Cmd_AI_DisplayValue(actor_s *pSelf, unsigned __int8 *pBase, cons
     }
 }
 
-void __fastcall Cmd_AI_SetValue(actor_s *pSelf, int argc, unsigned __int8 *pBase, const actor_fields_s *pField)
+void __cdecl Cmd_AI_SetValue(actor_s *pSelf, int argc, unsigned __int8 *pBase, const actor_fields_s *pField)
 {
-    void(__fastcall * setter)(actor_s *, const actor_fields_s *); // r11
+    void(__cdecl * setter)(actor_s *, const actor_fields_s *); // r11
     long double v9; // fp2
     long double v10; // fp2
     long double v11; // fp2
@@ -846,7 +846,7 @@ void __fastcall Cmd_AI_SetValue(actor_s *pSelf, int argc, unsigned __int8 *pBase
     }
 }
 
-void __fastcall Cmd_AI_Dispatch(int argc, actor_s *pSelf, const actor_fields_s *fields, const actor_fields_s *pField)
+void __cdecl Cmd_AI_Dispatch(int argc, actor_s *pSelf, const actor_fields_s *fields, const actor_fields_s *pField)
 {
     unsigned __int8 *v8; // r3
     unsigned __int8 *v9; // r3
@@ -887,7 +887,7 @@ void __fastcall Cmd_AI_Dispatch(int argc, actor_s *pSelf, const actor_fields_s *
     }
 }
 
-void __fastcall Cmd_AI_EntityNumber(
+void __cdecl Cmd_AI_EntityNumber(
     int argc,
     const actor_fields_s *fields,
     const actor_fields_s *pField,
@@ -929,7 +929,7 @@ void __fastcall Cmd_AI_EntityNumber(
     }
 }
 
-void __fastcall Cmd_AI_Team(
+void __cdecl Cmd_AI_Team(
     int argc,
     const actor_fields_s *fields,
     const actor_fields_s *pField,
@@ -946,7 +946,7 @@ void __fastcall Cmd_AI_Team(
         Cmd_AI_Dispatch(argc, i, fields, pField);
 }
 
-void __fastcall Cmd_AI_Name(
+void __cdecl Cmd_AI_Name(
     int argc,
     const actor_fields_s *fields,
     const actor_fields_s *pField,
@@ -974,7 +974,7 @@ void __fastcall Cmd_AI_Name(
     Scr_SetString("", 0);
 }
 
-void __fastcall Cmd_AI_f()
+void __cdecl Cmd_AI_f()
 {
     int v0; // r27
     int nesting; // r7
@@ -1075,7 +1075,7 @@ LABEL_8:
     }
 }
 
-void __fastcall GScr_AddFieldsForActor()
+void __cdecl GScr_AddFieldsForActor()
 {
     const actor_fields_s *v0; // r25
     int v1; // r27
@@ -1107,10 +1107,10 @@ void __fastcall GScr_AddFieldsForActor()
     }
 }
 
-void __fastcall Scr_SetActorField(actor_s *actor, unsigned int offset)
+void __cdecl Scr_SetActorField(actor_s *actor, unsigned int offset)
 {
     const actor_fields_s *v4; // r4
-    void(__fastcall * setter)(actor_s *, const actor_fields_s *); // r11
+    void(__cdecl * setter)(actor_s *, const actor_fields_s *); // r11
 
     if (!actor)
         MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\actor_fields.cpp", 1283, 0, "%s", "actor");
@@ -1124,15 +1124,15 @@ void __fastcall Scr_SetActorField(actor_s *actor, unsigned int offset)
     v4 = &aifields[offset];
     setter = v4->setter;
     if (setter)
-        ((void(__fastcall *)(actor_s *))setter)(actor);
+        ((void(__cdecl *)(actor_s *))setter)(actor);
     else
         Scr_SetGenericField((unsigned __int8 *)actor, v4->type, v4->ofs);
 }
 
-void __fastcall Scr_GetActorField(actor_s *actor, unsigned int offset)
+void __cdecl Scr_GetActorField(actor_s *actor, unsigned int offset)
 {
     const actor_fields_s *v4; // r4
-    void(__fastcall * getter)(actor_s *, const actor_fields_s *); // r11
+    void(__cdecl * getter)(actor_s *, const actor_fields_s *); // r11
 
     if (!actor)
         MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\actor_fields.cpp", 1306, 0, "%s", "actor");
@@ -1146,7 +1146,7 @@ void __fastcall Scr_GetActorField(actor_s *actor, unsigned int offset)
     v4 = &aifields[offset];
     getter = v4->getter;
     if (getter)
-        ((void(__fastcall *)(actor_s *))getter)(actor);
+        ((void(__cdecl *)(actor_s *))getter)(actor);
     else
         Scr_GetGenericField((unsigned __int8 *)actor, v4->type, v4->ofs);
 }

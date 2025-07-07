@@ -6,16 +6,16 @@
 
 #include "cg_local.h"
 
-void __fastcall CG_AntiBurnInHUD_RegisterDvars(int a1, unsigned __int16 a2, const char *a3);
-unsigned int __fastcall CG_GetSelectedWeaponIndex(const cg_s *cgameGlob);
-int __fastcall CG_IsHudHidden();
-int __fastcall CG_CheckPlayerForLowAmmoSpecific(const cg_s *cgameGlob, unsigned int weapIndex);
-int __fastcall CG_CheckPlayerForLowAmmo(const cg_s *cgameGlob);
+void __cdecl CG_AntiBurnInHUD_RegisterDvars(int a1, unsigned __int16 a2, const char *a3);
+unsigned int __cdecl CG_GetSelectedWeaponIndex(const cg_s *cgameGlob);
+int __cdecl CG_IsHudHidden();
+int __cdecl CG_CheckPlayerForLowAmmoSpecific(const cg_s *cgameGlob, unsigned int weapIndex);
+int __cdecl CG_CheckPlayerForLowAmmo(const cg_s *cgameGlob);
 // local variable allocation has failed, the output may be wrong!
-int __fastcall CG_CheckPlayerForLowClipSpecific(const cg_s *cgameGlob, unsigned int weapIndex);
-int __fastcall CG_CheckPlayerForLowClip(const cg_s *cgameGlob);
-void __fastcall CG_CalcPlayerSprintColor(const cg_s *cgameGlob, const playerState_s *ps, DvarValue *color);
-void __fastcall CG_DrawStanceIcon(
+int __cdecl CG_CheckPlayerForLowClipSpecific(const cg_s *cgameGlob, unsigned int weapIndex);
+int __cdecl CG_CheckPlayerForLowClip(const cg_s *cgameGlob);
+void __cdecl CG_CalcPlayerSprintColor(const cg_s *cgameGlob, const playerState_s *ps, DvarValue *color);
+void __cdecl CG_DrawStanceIcon(
     int localClientNum,
     const rectDef_s *rect,
     float *drawColor,
@@ -24,7 +24,7 @@ void __fastcall CG_DrawStanceIcon(
     double fadeAlpha,
     const float *a7);
 // local variable allocation has failed, the output may be wrong!
-void __fastcall CG_DrawStanceHintPrints(
+void __cdecl CG_DrawStanceHintPrints(
     int localClientNum,
     const rectDef_s *rect,
     double x,
@@ -34,42 +34,42 @@ void __fastcall CG_DrawStanceHintPrints(
     double scale,
     int textStyle,
     Font_s *a9);
-float __fastcall CG_CalcPlayerHealth(const playerState_s *ps);
-float __fastcall CG_FadeLowHealthOverlay(const cg_s *cgameGlob);
-void __fastcall CG_PulseLowHealthOverlay(cg_s *cgameGlob, double healthRatio);
-void __fastcall CG_DrawPlayerLowHealthOverlay(
+float __cdecl CG_CalcPlayerHealth(const playerState_s *ps);
+float __cdecl CG_FadeLowHealthOverlay(const cg_s *cgameGlob);
+void __cdecl CG_PulseLowHealthOverlay(cg_s *cgameGlob, double healthRatio);
+void __cdecl CG_DrawPlayerLowHealthOverlay(
     int localClientNum,
     const rectDef_s *rect,
     Material *material,
     float *color);
-int __fastcall CG_ServerMaterialName(int localClientNum, int index, char *materialName, unsigned int maxLen);
-Material *__fastcall CG_ObjectiveIcon(int icon, unsigned int type);
-void __fastcall CG_UpdateCursorHints(int localClientNum);
-char *__fastcall CG_GetWeaponUseString(int localClientNum, const char **secondaryString);
-char *__fastcall CG_GetUseString(int localClientNum);
-void __fastcall CG_DrawCursorhint(
+int __cdecl CG_ServerMaterialName(int localClientNum, int index, char *materialName, unsigned int maxLen);
+Material *__cdecl CG_ObjectiveIcon(int icon, unsigned int type);
+void __cdecl CG_UpdateCursorHints(int localClientNum);
+char *__cdecl CG_GetWeaponUseString(int localClientNum, const char **secondaryString);
+char *__cdecl CG_GetUseString(int localClientNum);
+void __cdecl CG_DrawCursorhint(
     int localClientNum,
     const rectDef_s *rect,
     Font_s *font,
     double fontscale,
     int textStyle);
-void __fastcall CG_DrawHoldBreathHint(
+void __cdecl CG_DrawHoldBreathHint(
     int localClientNum,
     const rectDef_s *rect,
     Font_s *font,
     double fontscale,
     int textStyle);
-void __fastcall CG_DrawMantleHint(
+void __cdecl CG_DrawMantleHint(
     int localClientNum,
     const rectDef_s *rect,
     Font_s *font,
     double fontscale,
     int textStyle);
-void __fastcall CG_DrawSaving(int localClientNum, const rectDef_s *rect, float *color, Material *material);
-int __fastcall CG_OwnerDrawVisible(int flags);
-void __fastcall CG_DrawTankBody(int localClientNum, rectDef_s *rect, Material *material, float *color);
+void __cdecl CG_DrawSaving(int localClientNum, const rectDef_s *rect, float *color, Material *material);
+int __cdecl CG_OwnerDrawVisible(int flags);
+void __cdecl CG_DrawTankBody(int localClientNum, rectDef_s *rect, Material *material, float *color);
 // local variable allocation has failed, the output may be wrong!
-void __fastcall CG_DrawDeadQuote(
+void __cdecl CG_DrawDeadQuote(
     const cg_s *cgameGlob,
     rectDef_s *rect,
     Font_s *font,
@@ -78,20 +78,20 @@ void __fastcall CG_DrawDeadQuote(
     rectDef_s *textStyle,
     double text_x,
     double text_y);
-void __fastcall CG_DrawTankBarrel(int localClientNum, const rectDef_s *rect, Material *material, const float *color);
+void __cdecl CG_DrawTankBarrel(int localClientNum, const rectDef_s *rect, Material *material, const float *color);
 // local variable allocation has failed, the output may be wrong!
-void __fastcall CG_DrawInvalidCmdHint(
+void __cdecl CG_DrawInvalidCmdHint(
     int localClientNum,
     const rectDef_s *rect,
     Font_s *font,
     double fontscale,
     float *color,
     int textStyle);
-void __fastcall CG_ArchiveState(int localClientNum, MemoryFile *memFile);
-float __fastcall CG_FadeHudMenu(int localClientNum, const dvar_s *fadeDvar, int displayStartTime, int duration);
-void __fastcall CG_DrawPlayerAmmoBackdrop(int localClientNum, const rectDef_s *rect, float *color, Material *material);
+void __cdecl CG_ArchiveState(int localClientNum, MemoryFile *memFile);
+float __cdecl CG_FadeHudMenu(int localClientNum, const dvar_s *fadeDvar, int displayStartTime, int duration);
+void __cdecl CG_DrawPlayerAmmoBackdrop(int localClientNum, const rectDef_s *rect, float *color, Material *material);
 // local variable allocation has failed, the output may be wrong!
-void __fastcall CG_DrawPlayerAmmoValue(
+void __cdecl CG_DrawPlayerAmmoValue(
     int localClientNum,
     const rectDef_s *rect,
     Font_s *font,
@@ -99,14 +99,14 @@ void __fastcall CG_DrawPlayerAmmoValue(
     float *color,
     Material *material,
     int textStyle);
-void __fastcall CG_DrawPlayerWeaponName(
+void __cdecl CG_DrawPlayerWeaponName(
     int localClientNum,
     const rectDef_s *rect,
     Font_s *font,
     double scale,
     float *color,
     int textStyle);
-void __fastcall CG_DrawPlayerWeaponNameBack(
+void __cdecl CG_DrawPlayerWeaponNameBack(
     int localClientNum,
     const rectDef_s *rect,
     Font_s *font,
@@ -115,35 +115,35 @@ void __fastcall CG_DrawPlayerWeaponNameBack(
     Material *material,
     int a7);
 // local variable allocation has failed, the output may be wrong!
-void __fastcall CG_DrawPlayerStance(
+void __cdecl CG_DrawPlayerStance(
     int localClientNum,
     const rectDef_s *rect,
     Font_s *color,
     Font_s *font,
     double scale,
     int textStyle);
-void __fastcall CG_DrawPlayerSprintBack(
+void __cdecl CG_DrawPlayerSprintBack(
     int localClientNum,
     const rectDef_s *rect,
     Material *material,
     float *color,
     long double a5);
-void __fastcall CG_DrawPlayerSprintMeter(
+void __cdecl CG_DrawPlayerSprintMeter(
     int localClientNum,
     const rectDef_s *rect,
     Material *material,
     DvarValue *color,
     long double a5);
-void __fastcall CG_DrawPlayerBarHealth(int localClientNum, const rectDef_s *rect, Material *material, float *color);
+void __cdecl CG_DrawPlayerBarHealth(int localClientNum, const rectDef_s *rect, Material *material, float *color);
 // local variable allocation has failed, the output may be wrong!
-void __fastcall CG_DrawPlayerBarHealthBack(
+void __cdecl CG_DrawPlayerBarHealthBack(
     int localClientNum,
     const rectDef_s *rect,
     Material *material,
     float *color,
     long double a5);
 // local variable allocation has failed, the output may be wrong!
-void __fastcall CG_OwnerDraw(
+void __cdecl CG_OwnerDraw(
     rectDef_s *parentRect,
     double x,
     double y,

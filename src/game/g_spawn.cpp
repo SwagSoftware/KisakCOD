@@ -5,12 +5,12 @@
 #include "g_local.h"
 
 
-int __fastcall G_LevelSpawnString(const char *key, const char *defaultString, const char **out)
+int __cdecl G_LevelSpawnString(const char *key, const char *defaultString, const char **out)
 {
     return G_SpawnString(&level.spawnVar, key, defaultString, out);
 }
 
-int __fastcall G_SpawnFloat(const char *key, const char *defaultString, float *out)
+int __cdecl G_SpawnFloat(const char *key, const char *defaultString, float *out)
 {
     int v4; // r30
     long double v5; // fp2
@@ -24,7 +24,7 @@ int __fastcall G_SpawnFloat(const char *key, const char *defaultString, float *o
     return result;
 }
 
-int __fastcall G_SpawnInt(const char *key, const char *defaultString, int *out)
+int __cdecl G_SpawnInt(const char *key, const char *defaultString, int *out)
 {
     int v4; // r30
     const char *v6; // [sp+50h] [-20h] BYREF
@@ -34,7 +34,7 @@ int __fastcall G_SpawnInt(const char *key, const char *defaultString, int *out)
     return v4;
 }
 
-int __fastcall G_SpawnVector(const char *key, const char *defaultString, float *out)
+int __cdecl G_SpawnVector(const char *key, const char *defaultString, float *out)
 {
     int v4; // r30
     const char *v5; // r3
@@ -49,12 +49,12 @@ int __fastcall G_SpawnVector(const char *key, const char *defaultString, float *
     return v4;
 }
 
-void __fastcall Scr_ReadOnlyField(gentity_s *ent, int offset)
+void __cdecl Scr_ReadOnlyField(gentity_s *ent, int offset)
 {
     Scr_Error("Tried to set a read only entity field");
 }
 
-unsigned int __fastcall G_SetEntityScriptVariableInternal(const char *key, const char *value)
+unsigned int __cdecl G_SetEntityScriptVariableInternal(const char *key, const char *value)
 {
     unsigned int result; // r3
     unsigned int v4; // r30
@@ -136,7 +136,7 @@ void G_SpawnStruct()
     }
 }
 
-void __fastcall G_DuplicateEntityFields(gentity_s *dest, const gentity_s *source)
+void __cdecl G_DuplicateEntityFields(gentity_s *dest, const gentity_s *source)
 {
     int *p_ofs; // r31
     float *v5; // r11
@@ -180,7 +180,7 @@ void __fastcall G_DuplicateEntityFields(gentity_s *dest, const gentity_s *source
     }
 }
 
-void __fastcall G_DuplicateScriptFields(gentity_s *dest, const gentity_s *source)
+void __cdecl G_DuplicateScriptFields(gentity_s *dest, const gentity_s *source)
 {
     if (dest->s.number != dest - g_entities)
         MyAssertHandler(
@@ -199,7 +199,7 @@ void __fastcall G_DuplicateScriptFields(gentity_s *dest, const gentity_s *source
     Scr_CopyEntityNum(source->s.number, dest->s.number, 0);
 }
 
-const gitem_s *__fastcall G_GetItemForClassname(const char *classname, unsigned __int8 model)
+const gitem_s *__cdecl G_GetItemForClassname(const char *classname, unsigned __int8 model)
 {
     unsigned int WeaponIndexForName; // r3
     int v5; // r31
@@ -214,7 +214,7 @@ const gitem_s *__fastcall G_GetItemForClassname(const char *classname, unsigned 
     return BG_FindItemForWeapon(v5, model);
 }
 
-void(__fastcall *__fastcall G_FindSpawnFunc(
+void(__cdecl *__cdecl G_FindSpawnFunc(
     const char *classname,
     const SpawnFuncEntry *spawnFuncArray,
     int spawnFuncCount))(gentity_s *)
@@ -248,7 +248,7 @@ void(__fastcall *__fastcall G_FindSpawnFunc(
     return spawnFuncArray[v3].callback;
 }
 
-void __fastcall G_PrintBadModelMessage(gentity_s *ent)
+void __cdecl G_PrintBadModelMessage(gentity_s *ent)
 {
     unsigned int v2; // r3
     double v3; // fp31
@@ -279,7 +279,7 @@ void __fastcall G_PrintBadModelMessage(gentity_s *ent)
     }
 }
 
-int __fastcall G_CallSpawnEntity(gentity_s *ent)
+int __cdecl G_CallSpawnEntity(gentity_s *ent)
 {
     const char *v3; // r30
     const gitem_s *ItemForClassname; // r4
@@ -288,7 +288,7 @@ int __fastcall G_CallSpawnEntity(gentity_s *ent)
     const char *classname; // r10
     const char *v8; // r11
     int v9; // r8
-    void(__fastcall * callback)(gentity_s *); // r31
+    void(__cdecl * callback)(gentity_s *); // r31
 
     if (level.spawnVar.spawnVarsValid)
         MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\g_spawn.cpp", 518, 1, "%s", "!level.spawnVar.spawnVarsValid");
@@ -354,7 +354,7 @@ int __fastcall G_CallSpawnEntity(gentity_s *ent)
     }
 }
 
-void __fastcall GScr_AddFieldsForEntity()
+void __cdecl GScr_AddFieldsForEntity()
 {
     const ent_field_t *v0; // r27
     int v1; // r24
@@ -389,12 +389,12 @@ void __fastcall GScr_AddFieldsForEntity()
     GScr_AddFieldsForClient();
 }
 
-void __fastcall GScr_AddFieldsForRadiant()
+void __cdecl GScr_AddFieldsForRadiant()
 {
     Scr_AddFields("radiant", "txt");
 }
 
-void __fastcall Scr_FreeEntity(gentity_s *ent)
+void __cdecl Scr_FreeEntity(gentity_s *ent)
 {
     int number; // r7
 
@@ -421,7 +421,7 @@ void __fastcall Scr_FreeEntity(gentity_s *ent)
     Scr_FreeEntityNum(ent->s.number, 0);
 }
 
-void __fastcall Scr_AddEntity(gentity_s *ent)
+void __cdecl Scr_AddEntity(gentity_s *ent)
 {
     int number; // r7
 
@@ -447,7 +447,7 @@ void __fastcall Scr_AddEntity(gentity_s *ent)
     Scr_AddEntityNum(ent->s.number, 0);
 }
 
-gentity_s *__fastcall Scr_GetEntityAllowNull(scr_entref_t *index)
+gentity_s *__cdecl Scr_GetEntityAllowNull(scr_entref_t *index)
 {
     unsigned int v2; // r4
     scr_entref_t *EntityRef; // [sp+50h] [-20h]
@@ -462,7 +462,7 @@ gentity_s *__fastcall Scr_GetEntityAllowNull(scr_entref_t *index)
     return &g_entities[HIWORD(EntityRef)];
 }
 
-gentity_s *__fastcall Scr_GetEntity(scr_entref_t *index, unsigned int a2)
+gentity_s *__cdecl Scr_GetEntity(scr_entref_t *index, unsigned int a2)
 {
     scr_entref_t *EntityRef; // [sp+50h] [-20h]
 
@@ -480,7 +480,7 @@ gentity_s *__fastcall Scr_GetEntity(scr_entref_t *index, unsigned int a2)
     }
 }
 
-void __fastcall Scr_FreeHudElem(game_hudelem_s *hud)
+void __cdecl Scr_FreeHudElem(game_hudelem_s *hud)
 {
     unsigned int v2; // r31
 
@@ -502,7 +502,7 @@ void __fastcall Scr_FreeHudElem(game_hudelem_s *hud)
     Scr_FreeEntityNum(v2, 1u);
 }
 
-void __fastcall Scr_AddHudElem(game_hudelem_s *hud)
+void __cdecl Scr_AddHudElem(game_hudelem_s *hud)
 {
     unsigned int v2; // r31
 
@@ -522,7 +522,7 @@ void __fastcall Scr_AddHudElem(game_hudelem_s *hud)
     Scr_AddEntityNum(v2, 1u);
 }
 
-game_hudelem_s *__fastcall Scr_GetHudElem(scr_entref_t *index, unsigned int a2)
+game_hudelem_s *__cdecl Scr_GetHudElem(scr_entref_t *index, unsigned int a2)
 {
     scr_entref_t *EntityRef; // [sp+50h] [-20h]
 
@@ -545,7 +545,7 @@ game_hudelem_s *__fastcall Scr_GetHudElem(scr_entref_t *index, unsigned int a2)
     }
 }
 
-int __fastcall Scr_ExecEntThread(gentity_s *ent, int handle, unsigned int paramcount)
+int __cdecl Scr_ExecEntThread(gentity_s *ent, int handle, unsigned int paramcount)
 {
     int number; // r7
 
@@ -571,7 +571,7 @@ int __fastcall Scr_ExecEntThread(gentity_s *ent, int handle, unsigned int paramc
     return Scr_ExecEntThreadNum(ent->s.number, 0, handle, paramcount);
 }
 
-void __fastcall Scr_AddExecEntThread(gentity_s *ent, int handle, unsigned int paramcount)
+void __cdecl Scr_AddExecEntThread(gentity_s *ent, int handle, unsigned int paramcount)
 {
     int number; // r7
 
@@ -597,7 +597,7 @@ void __fastcall Scr_AddExecEntThread(gentity_s *ent, int handle, unsigned int pa
     Scr_AddExecEntThreadNum(ent->s.number, 0, handle, paramcount);
 }
 
-void __fastcall Scr_Notify(gentity_s *ent, unsigned __int16 stringValue, unsigned int paramcount)
+void __cdecl Scr_Notify(gentity_s *ent, unsigned __int16 stringValue, unsigned int paramcount)
 {
     const char *v6; // r3
     const char *v7; // r3
@@ -627,7 +627,7 @@ void __fastcall Scr_Notify(gentity_s *ent, unsigned __int16 stringValue, unsigne
     Scr_NotifyNum(ent->s.number, 0, stringValue, paramcount);
 }
 
-void __fastcall Scr_GetGenericEnt(unsigned int offset, unsigned int name)
+void __cdecl Scr_GetGenericEnt(unsigned int offset, unsigned int name)
 {
     const ent_field_t *v4; // r27
     gentity_s *v5; // r3
@@ -671,7 +671,7 @@ void __fastcall Scr_GetGenericEnt(unsigned int offset, unsigned int name)
     }
 }
 
-void __fastcall Scr_GetEnt()
+void __cdecl Scr_GetEnt()
 {
     unsigned int ConstString; // r31
     const char *String; // r3
@@ -691,7 +691,7 @@ void __fastcall Scr_GetEnt()
     }
 }
 
-void __fastcall Scr_GetGenericEntArray(unsigned int offset, unsigned int name)
+void __cdecl Scr_GetGenericEntArray(unsigned int offset, unsigned int name)
 {
     const ent_field_t *v4; // r28
     int v5; // r30
@@ -724,7 +724,7 @@ void __fastcall Scr_GetGenericEntArray(unsigned int offset, unsigned int name)
     }
 }
 
-void __fastcall Scr_GetEntArray()
+void __cdecl Scr_GetEntArray()
 {
     int v0; // r30
     gentity_s *v1; // r31
@@ -772,12 +772,12 @@ void __fastcall Scr_GetEntArray()
     }
 }
 
-void __fastcall GScr_SetDynamicEntityField(gentity_s *ent, unsigned int index)
+void __cdecl GScr_SetDynamicEntityField(gentity_s *ent, unsigned int index)
 {
     Scr_SetDynamicEntityField(ent->s.number, 0, index);
 }
 
-void __fastcall SP_worldspawn()
+void __cdecl SP_worldspawn()
 {
     const char *v0; // r4
     long double v1; // fp2
@@ -867,7 +867,7 @@ void __fastcall SP_worldspawn()
     AngleVectors(&v18, level.mapSunDirection, 0, 0);
 }
 
-void __fastcall G_LoadStructs()
+void __cdecl G_LoadStructs()
 {
     int initstructs; // r3
     unsigned __int16 v1; // r3
@@ -903,7 +903,7 @@ void __fastcall G_LoadStructs()
     G_ResetEntityParsePoint();
 }
 
-void __fastcall G_SetEntityScriptVariable(const char *key, const char *value, gentity_s *ent)
+void __cdecl G_SetEntityScriptVariable(const char *key, const char *value, gentity_s *ent)
 {
     unsigned int v4; // r5
 
@@ -912,7 +912,7 @@ void __fastcall G_SetEntityScriptVariable(const char *key, const char *value, ge
         Scr_SetDynamicEntityField(ent->s.number, 0, v4);
 }
 
-void __fastcall G_ParseEntityField(const char *key, const char *value, gentity_s *ent, int ignoreModel)
+void __cdecl G_ParseEntityField(const char *key, const char *value, gentity_s *ent, int ignoreModel)
 {
     const ent_field_t *v5; // r31
     unsigned int v9; // r5
@@ -997,7 +997,7 @@ void __fastcall G_ParseEntityField(const char *key, const char *value, gentity_s
     }
 }
 
-void __fastcall G_ParseEntityFields(gentity_s *ent, int ignoreModel)
+void __cdecl G_ParseEntityFields(gentity_s *ent, int ignoreModel)
 {
     int v4; // r30
     const char **v5; // r31
@@ -1035,7 +1035,7 @@ void G_CallSpawn()
     const char *classname; // r10
     const char *v12; // r11
     int v13; // r8
-    void(__fastcall * callback)(gentity_s *); // r31
+    void(__cdecl * callback)(gentity_s *); // r31
     int v15; // r6
     const SpawnFuncEntry *v16; // r7
     const char *v17; // r10
@@ -1178,7 +1178,7 @@ void G_CallSpawn()
     }
 }
 
-void __fastcall Scr_SetGenericField(unsigned __int8 *b, fieldtype_t type, int ofs)
+void __cdecl Scr_SetGenericField(unsigned __int8 *b, fieldtype_t type, int ofs)
 {
     unsigned int ConstStringIncludeNull; // r3
     unsigned __int8 *v6; // r11
@@ -1260,7 +1260,7 @@ void __fastcall Scr_SetGenericField(unsigned __int8 *b, fieldtype_t type, int of
     }
 }
 
-void __fastcall Scr_GetGenericField(unsigned __int8 *b, fieldtype_t type, int ofs)
+void __cdecl Scr_GetGenericField(unsigned __int8 *b, fieldtype_t type, int ofs)
 {
     unsigned int v4; // r3
     gentity_s *v5; // r3
@@ -1342,7 +1342,7 @@ void __fastcall Scr_GetGenericField(unsigned __int8 *b, fieldtype_t type, int of
     }
 }
 
-void __fastcall G_SpawnEntitiesFromString()
+void __cdecl G_SpawnEntitiesFromString()
 {
     if (!G_ParseSpawnVars(&level.spawnVar))
         Com_Error(ERR_DROP, byte_8203ED48);
@@ -1352,7 +1352,7 @@ void __fastcall G_SpawnEntitiesFromString()
     G_ResetEntityParsePoint();
 }
 
-int __fastcall Scr_SetEntityField(unsigned int entnum, unsigned int offset)
+int __cdecl Scr_SetEntityField(unsigned int entnum, unsigned int offset)
 {
     gentity_s *v4; // r29
     int number; // r8
@@ -1362,7 +1362,7 @@ int __fastcall Scr_SetEntityField(unsigned int entnum, unsigned int offset)
     gclient_s *client; // r3
     gentity_s *v11; // r3
     const ent_field_t *v12; // r11
-    void(__fastcall * callback)(gentity_s *, int); // r10
+    void(__cdecl * callback)(gentity_s *, int); // r10
 
     if (entnum >= 0x880)
         MyAssertHandler(
@@ -1429,7 +1429,7 @@ int __fastcall Scr_SetEntityField(unsigned int entnum, unsigned int offset)
     }
 }
 
-int __fastcall Scr_SetObjectField(unsigned int classnum, unsigned int entnum, int offset)
+int __cdecl Scr_SetObjectField(unsigned int classnum, unsigned int entnum, int offset)
 {
     int result; // r3
     const char *v4; // r3
@@ -1465,7 +1465,7 @@ int __fastcall Scr_SetObjectField(unsigned int classnum, unsigned int entnum, in
     return result;
 }
 
-void __fastcall Scr_GetEntityField(unsigned int entnum, unsigned int offset)
+void __cdecl Scr_GetEntityField(unsigned int entnum, unsigned int offset)
 {
     gentity_s *v4; // r30
     int number; // r8
@@ -1530,7 +1530,7 @@ void __fastcall Scr_GetEntityField(unsigned int entnum, unsigned int offset)
     }
 }
 
-void __fastcall Scr_GetObjectField(unsigned int classnum, unsigned int entnum, unsigned int offset)
+void __cdecl Scr_GetObjectField(unsigned int classnum, unsigned int entnum, unsigned int offset)
 {
     const char *v3; // r3
 

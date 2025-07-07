@@ -33,7 +33,7 @@ const dvar_t *sv_privateClients;
 const dvar_t *sv_maxclients;
 const dvar_t *sv_hostname;
 const dvar_t *sv_allowedClan1;
-const dvar_t *sv_smp    ;
+const dvar_t *sv_smp;
 const dvar_t *sv_debugReliableCmds;
 const dvar_t *sv_clientSideBullets;
 const dvar_t *sv_privateClientsForClients;
@@ -42,7 +42,7 @@ const dvar_t *sv_kickBanTime;
 const dvar_t *sv_floodProtect;
 const dvar_t *sv_gametype;
 const dvar_t *sv_mapname;
-const dvar_t *sv_cheats ;
+const dvar_t *sv_cheats;
 const dvar_t *sv_maxRate;
 const dvar_t *sv_showCommands;
 const dvar_t *sv_packet_info;
@@ -51,7 +51,7 @@ const dvar_t *sv_connectTimeout;
 const dvar_t *sv_disableClientConsole;
 const dvar_t *sv_network_fps;
 const dvar_t *sv_minPing;
-const dvar_t *sv_mapcrc ;
+const dvar_t *sv_mapcrc;
 const dvar_t *sv_debugPacketContents;
 const dvar_t *sv_zombietime;
 const dvar_t *sv_debugRate;
@@ -62,7 +62,7 @@ const dvar_t *sv_debugPlayerstate;
 const dvar_t *sv_maxHappyPingTime;
 const dvar_t *sv_endGameIfISuck;
 const dvar_t *sv_debugMessageKey;
-const dvar_t *sv_fps    ;
+const dvar_t *sv_fps;
 const dvar_t *sv_botsPressAttackBtn;
 const dvar_t *sv_serverid;
 const dvar_t *sv_mapRotation;
@@ -1031,8 +1031,8 @@ void __cdecl SV_UpdatePerformanceFrame(float time)
     s_lastWallClockEndTime = wallClockEndTime;
     if (s_serverDebugFrame >= 10)
     {
-        sv.profile.frameTime = 0.0;
-        sv.profile.wallClockTime = 0.0;
+        sv.profile.frameTime = 0.0f;
+        sv.profile.wallClockTime = 0.0f;
         for (i = 0; i < 10; ++i)
         {
             sv.profile.frameTime = sv.profile.frameTime + s_serverProfileTimes[i].frameTime;
@@ -1042,17 +1042,17 @@ void __cdecl SV_UpdatePerformanceFrame(float time)
             if (s_serverProfileTimes[i].frameTime > maxTime)
                 maxTime = s_serverProfileTimes[i].frameTime;
         }
-        sv.profile.frameTime = sv.profile.frameTime * 0.1000000014901161;
-        sv.profile.wallClockTime = sv.profile.wallClockTime * 0.1000000014901161;
-        v4 = minTime - 1.0;
-        if (v4 < 0.0)
-            v3 = 1.0;
+        sv.profile.frameTime = sv.profile.frameTime * 0.1f;
+        sv.profile.wallClockTime = sv.profile.wallClockTime * 0.1f;
+        v4 = minTime - 1.0f;
+        if (v4 < 0.0f)
+            v3 = 1.0f;
         else
             v3 = minTime;
         sv.serverFrameTimeMin = v3;
-        v2 = maxTime - 1.0;
-        if (v2 < 0.0)
-            v1 = 1.0;
+        v2 = maxTime - 1.0f;
+        if (v2 < 0.0f)
+            v1 = 1.0f;
         else
             v1 = maxTime;
         sv.serverFrameTimeMax = v1;

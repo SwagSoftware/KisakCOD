@@ -4,7 +4,7 @@
 
 #include "g_scr_load_obj.h"
 
-int __fastcall GScr_LoadScriptAndLabel(const char *filename, const char *label, ScriptFunctions *functions)
+int __cdecl GScr_LoadScriptAndLabel(const char *filename, const char *label, ScriptFunctions *functions)
 {
     int FunctionHandle; // r3
 
@@ -29,7 +29,7 @@ int __fastcall GScr_LoadScriptAndLabel(const char *filename, const char *label, 
     return 0;
 }
 
-void __fastcall GScr_LoadSingleAnimScript(const char *name, ScriptFunctions *functions)
+void __cdecl GScr_LoadSingleAnimScript(const char *name, ScriptFunctions *functions)
 {
     char v4[72]; // [sp+50h] [-60h] BYREF
 
@@ -39,7 +39,7 @@ void __fastcall GScr_LoadSingleAnimScript(const char *name, ScriptFunctions *fun
     GScr_LoadScriptAndLabel(v4, "main", functions);
 }
 
-void __fastcall GScr_LoadAnimScripts(ScriptFunctions *functions)
+void __cdecl GScr_LoadAnimScripts(ScriptFunctions *functions)
 {
     GScr_LoadSingleAnimScript("combat", functions);
     GScr_LoadSingleAnimScript("concealment_crouch", functions);
@@ -65,7 +65,7 @@ void __fastcall GScr_LoadAnimScripts(ScriptFunctions *functions)
     GScr_LoadScriptAndLabel("animscripts/scripted", "init", functions);
 }
 
-void __fastcall GScr_LoadDogAnimScripts(ScriptFunctions *functions)
+void __cdecl GScr_LoadDogAnimScripts(ScriptFunctions *functions)
 {
     GScr_LoadSingleAnimScript("dog_combat", functions);
     GScr_LoadSingleAnimScript("dog_death", functions);
@@ -77,7 +77,7 @@ void __fastcall GScr_LoadDogAnimScripts(ScriptFunctions *functions)
     GScr_LoadSingleAnimScript("dog_flashed", functions);
 }
 
-void __fastcall GScr_LoadLevelScript(const char *mapname, ScriptFunctions *functions)
+void __cdecl GScr_LoadLevelScript(const char *mapname, ScriptFunctions *functions)
 {
     char v3[64]; // [sp+50h] [-50h] BYREF
 
@@ -85,7 +85,7 @@ void __fastcall GScr_LoadLevelScript(const char *mapname, ScriptFunctions *funct
     GScr_LoadScriptAndLabel(v3, "main", functions);
 }
 
-void __fastcall GScr_LoadScriptsForPathNode(pathnode_t *loadNode, ScriptFunctions **data)
+void __cdecl GScr_LoadScriptsForPathNode(pathnode_t *loadNode, ScriptFunctions **data)
 {
     ScriptFunctions *v2; // r28
     unsigned int v3; // r27
@@ -134,18 +134,18 @@ void __fastcall GScr_LoadScriptsForPathNode(pathnode_t *loadNode, ScriptFunction
     }
 }
 
-void __fastcall GScr_LoadScriptsForPathNodes(ScriptFunctions *functions)
+void __cdecl GScr_LoadScriptsForPathNodes(ScriptFunctions *functions)
 {
     ScriptFunctions *v1; // [sp+50h] [-20h] BYREF
     unsigned int inited; // [sp+54h] [-1Ch]
 
     v1 = functions;
     inited = Scr_InitStringSet();
-    Path_CallFunctionForNodes((void(__fastcall *)(pathnode_t *, void *))GScr_LoadScriptsForPathNode, &v1);
+    Path_CallFunctionForNodes((void(__cdecl *)(pathnode_t *, void *))GScr_LoadScriptsForPathNode, &v1);
     Scr_ShutdownStringSet(inited);
 }
 
-void __fastcall GScr_LoadScriptsForEntities(ScriptFunctions *functions)
+void __cdecl GScr_LoadScriptsForEntities(ScriptFunctions *functions)
 {
     int v2; // r17
     unsigned int inited; // r16
@@ -211,7 +211,7 @@ void __fastcall GScr_LoadScriptsForEntities(ScriptFunctions *functions)
     G_ResetEntityParsePoint();
 }
 
-void __fastcall GScr_LoadEntities()
+void __cdecl GScr_LoadEntities()
 {
     const char *v0; // [sp+50h] [-A50h] BYREF
     const char *v1; // [sp+54h] [-A4Ch] BYREF
@@ -231,7 +231,7 @@ void __fastcall GScr_LoadEntities()
     G_ResetEntityParsePoint();
 }
 
-void __fastcall GScr_LoadScripts(const char *mapname, ScriptFunctions *functions)
+void __cdecl GScr_LoadScripts(const char *mapname, ScriptFunctions *functions)
 {
     ScriptFunctions *v4; // [sp+50h] [-80h] BYREF
     unsigned int inited; // [sp+54h] [-7Ch]
@@ -255,7 +255,7 @@ void __fastcall GScr_LoadScripts(const char *mapname, ScriptFunctions *functions
     ProfLoad_End();
     inited = Scr_InitStringSet();
     v4 = functions;
-    Path_CallFunctionForNodes((void(__fastcall *)(pathnode_t *, void *))GScr_LoadScriptsForPathNode, &v4);
+    Path_CallFunctionForNodes((void(__cdecl *)(pathnode_t *, void *))GScr_LoadScriptsForPathNode, &v4);
     Scr_ShutdownStringSet(inited);
     Scr_PostCompileScripts();
 }

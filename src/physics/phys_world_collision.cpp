@@ -14,6 +14,8 @@
 #include "ode/collision_std.h"
 #include "phys_coll_local.h"
 
+#include <bgame/bg_public.h>
+
 // LWSS HACK - unfk some types
 #define float dReal
 

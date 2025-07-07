@@ -5,7 +5,7 @@
 #include "cg_pose.h"
 
 // local variable allocation has failed, the output may be wrong!
-void __fastcall PitchToQuat(double pitch, float *quat, float *a3)
+void __cdecl PitchToQuat(double pitch, float *quat, float *a3)
 {
     double v4; // fp31
     long double v5; // fp2
@@ -24,7 +24,7 @@ void __fastcall PitchToQuat(double pitch, float *quat, float *a3)
 }
 
 // local variable allocation has failed, the output may be wrong!
-void __fastcall RollToQuat(double roll, float *quat, float *a3)
+void __cdecl RollToQuat(double roll, float *quat, float *a3)
 {
     double v4; // fp31
     long double v5; // fp2
@@ -42,7 +42,7 @@ void __fastcall RollToQuat(double roll, float *quat, float *a3)
     a3[3] = *(double *)&v7;
 }
 
-void __fastcall LocalMatrixTransformVectorQuatTrans(const float *in, const DObjAnimMat *mat, float *out)
+void __cdecl LocalMatrixTransformVectorQuatTrans(const float *in, const DObjAnimMat *mat, float *out)
 {
     double v6; // fp8
     double v7; // fp7
@@ -68,7 +68,7 @@ void __fastcall LocalMatrixTransformVectorQuatTrans(const float *in, const DObjA
         + mat->trans[2];
 }
 
-void __fastcall NormalizeQuatTrans(DObjAnimMat *mat)
+void __cdecl NormalizeQuatTrans(DObjAnimMat *mat)
 {
     if ((float)((float)(mat->quat[3] * mat->quat[3])
         + (float)((float)(mat->quat[2] * mat->quat[2])
@@ -87,7 +87,7 @@ void __fastcall NormalizeQuatTrans(DObjAnimMat *mat)
     }
 }
 
-void __fastcall CG_mg42_DoControllers(const cpose_t *pose, const DObj_s *obj, int *partBits, long double a4)
+void __cdecl CG_mg42_DoControllers(const cpose_t *pose, const DObj_s *obj, int *partBits, long double a4)
 {
     bool playerUsing; // r10
     float *proneType; // r30
@@ -142,7 +142,7 @@ void __fastcall CG_mg42_DoControllers(const cpose_t *pose, const DObj_s *obj, in
 }
 
 // local variable allocation has failed, the output may be wrong!
-void __fastcall CG_Vehicle_DoControllers(const cpose_t *pose, const DObj_s *obj, int *partBits)
+void __cdecl CG_Vehicle_DoControllers(const cpose_t *pose, const DObj_s *obj, int *partBits)
 {
     __int64 v3; // r28
     __int128 v7; // r9 OVERLAPPED
@@ -339,7 +339,7 @@ void __fastcall CG_Vehicle_DoControllers(const cpose_t *pose, const DObj_s *obj,
     } while (v25 < 6);
 }
 
-void __fastcall CG_Actor_DoControllers(const cpose_t *pose, const DObj_s *obj, int *partBits)
+void __cdecl CG_Actor_DoControllers(const cpose_t *pose, const DObj_s *obj, int *partBits)
 {
     DObjAnimMat *RotTransArray; // r28
     float *v7; // r3
@@ -387,7 +387,7 @@ void __fastcall CG_Actor_DoControllers(const cpose_t *pose, const DObj_s *obj, i
     }
 }
 
-void __fastcall CG_DoBaseOriginController(const cpose_t *pose, const DObj_s *obj, int *setPartBits)
+void __cdecl CG_DoBaseOriginController(const cpose_t *pose, const DObj_s *obj, int *setPartBits)
 {
     unsigned int RootBoneCount; // r31
     int v7; // r29
@@ -550,7 +550,7 @@ void __fastcall CG_DoBaseOriginController(const cpose_t *pose, const DObj_s *obj
     }
 }
 
-void __fastcall CG_DoControllers(const cpose_t *pose, const DObj_s *obj, int *partBits)
+void __cdecl CG_DoControllers(const cpose_t *pose, const DObj_s *obj, int *partBits)
 {
     long double v6; // fp2
     int v7[12]; // [sp+50h] [-30h] BYREF
@@ -579,7 +579,7 @@ void __fastcall CG_DoControllers(const cpose_t *pose, const DObj_s *obj, int *pa
     //Profile_EndInternal(0);
 }
 
-DObjAnimMat *__fastcall CG_DObjCalcPose(const cpose_t *pose, const DObj_s *obj, int *partBits)
+DObjAnimMat *__cdecl CG_DObjCalcPose(const cpose_t *pose, const DObj_s *obj, int *partBits)
 {
     DObjAnimMat *v7; // [sp+50h] [-40h] BYREF
 

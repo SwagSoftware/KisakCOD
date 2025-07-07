@@ -38,7 +38,7 @@ clientStatic_t cls;
 // struct dvar_s const *const cl_freelook 828d5ffc     cl_main.obj
 // struct dvar_s const *const cl_shownet 828d6000     cl_main.obj
 
-void __fastcall TRACK_cl_main()
+void __cdecl TRACK_cl_main()
 {
     track_static_alloc_internal(clientUIActives, 20, "clientUIActives", 9);
     track_static_alloc_internal(clients, 633532, "clients", 9);
@@ -46,27 +46,27 @@ void __fastcall TRACK_cl_main()
     track_static_alloc_internal(&cls, 612, "cls", 9);
 }
 
-int __fastcall CL_GetLocalClientActiveCount()
+int __cdecl CL_GetLocalClientActiveCount()
 {
     return 1;
 }
 
-int __fastcall CL_GetFirstActiveLocalClient()
+int __cdecl CL_GetFirstActiveLocalClient()
 {
     return 0;
 }
 
-bool __fastcall CL_IsLocalClientActive(int clientNum)
+bool __cdecl CL_IsLocalClientActive(int clientNum)
 {
     return clientNum == 0;
 }
 
-void __fastcall CL_SetLocalClientActive(int clientNum, bool active)
+void __cdecl CL_SetLocalClientActive(int clientNum, bool active)
 {
     ;
 }
 
-int __fastcall CL_LocalClientNumFromControllerIndex(unsigned int controllerIndex)
+int __cdecl CL_LocalClientNumFromControllerIndex(unsigned int controllerIndex)
 {
     if (controllerIndex >= 4)
         MyAssertHandler(
@@ -85,7 +85,7 @@ int __fastcall CL_LocalClientNumFromControllerIndex(unsigned int controllerIndex
     return 0;
 }
 
-int __fastcall CL_ControllerIndexFromClientNum(int clientIndex)
+int __cdecl CL_ControllerIndexFromClientNum(int clientIndex)
 {
     if (clientIndex)
         MyAssertHandler(
@@ -98,28 +98,28 @@ int __fastcall CL_ControllerIndexFromClientNum(int clientIndex)
     return cl_controller_in_use;
 }
 
-int __fastcall CL_GetFirstActiveControllerIndex()
+int __cdecl CL_GetFirstActiveControllerIndex()
 {
     return cl_controller_in_use;
 }
 
-int __fastcall CL_AllLocalClientsInactive()
+int __cdecl CL_AllLocalClientsInactive()
 {
     return 0;
 }
 
 // attributes: thunk
-void __fastcall CL_RunOncePerClientFrame(int localClientNum, int msec)
+void __cdecl CL_RunOncePerClientFrame(int localClientNum, int msec)
 {
     IN_Frame();
 }
 
-void __fastcall CL_DumpReliableCommand(int cmdIndex, const char *cmd)
+void __cdecl CL_DumpReliableCommand(int cmdIndex, const char *cmd)
 {
     Com_Printf(0, "cmd[%d] '%s'\n", cmdIndex, cmd);
 }
 
-void __fastcall CL_DumpReliableCommands(clientConnection_t *clc)
+void __cdecl CL_DumpReliableCommands(clientConnection_t *clc)
 {
     int reliableAcknowledge; // r11
     int reliableSequence; // r28
@@ -167,7 +167,7 @@ void __fastcall CL_DumpReliableCommands(clientConnection_t *clc)
     }
 }
 
-void __fastcall CL_AddReliableCommand(int localClientNum, const char *cmd)
+void __cdecl CL_AddReliableCommand(int localClientNum, const char *cmd)
 {
     int reliableSequence; // r11
 
@@ -188,7 +188,7 @@ void __fastcall CL_AddReliableCommand(int localClientNum, const char *cmd)
     }
 }
 
-void __fastcall CL_ShutdownDevGui()
+void __cdecl CL_ShutdownDevGui()
 {
     CL_DestroyDevGui();
     DevGui_Shutdown();
@@ -197,7 +197,7 @@ void __fastcall CL_ShutdownDevGui()
     Cmd_RemoveCommand("devgui_open");
 }
 
-void __fastcall CL_ShutdownHunkUsers()
+void __cdecl CL_ShutdownHunkUsers()
 {
     Com_SyncThreads();
     CL_ShutdownCGame();
@@ -215,7 +215,7 @@ void __fastcall CL_ShutdownHunkUsers()
         MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\client\\cl_main.cpp", 383, 0, "%s", "!cls.uiStarted");
 }
 
-void __fastcall CL_ShutdownDemo()
+void __cdecl CL_ShutdownDemo()
 {
     void *demofile; // r3
     void *demobuf; // r3
@@ -246,7 +246,7 @@ void __fastcall CL_ShutdownDemo()
     }
 }
 
-void __fastcall CL_SaveSettings(MemoryFile *memFile)
+void __cdecl CL_SaveSettings(MemoryFile *memFile)
 {
     bool usingAds; // r31
     bool v3; // [sp+50h] [-30h] BYREF
@@ -266,7 +266,7 @@ void __fastcall CL_SaveSettings(MemoryFile *memFile)
     MemFile_WriteData(memFile, 1, &v3);
 }
 
-void __fastcall CL_RestoreSettings(MemoryFile *memFile)
+void __cdecl CL_RestoreSettings(MemoryFile *memFile)
 {
     int v2; // r31
     _BYTE v3[8]; // [sp+50h] [-20h] BYREF
@@ -288,7 +288,7 @@ void __fastcall CL_RestoreSettings(MemoryFile *memFile)
     clients[0].usingAds = v2 > 0;
 }
 
-void __fastcall CL_MapLoading_CalcMovieToPlay(
+void __cdecl CL_MapLoading_CalcMovieToPlay(
     const char *buffer,
     const char *inMapName,
     char *outMovieName,
@@ -532,7 +532,7 @@ void __fastcall CL_MapLoading_CalcMovieToPlay(
         MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\client\\cl_main.cpp", 622, 0, "%s", "outMovieName[0]");
 }
 
-void __fastcall CL_MapLoading_CalcMovieToPlay_FastFile(const char *inMapName, char *outMovieName, const char *a3)
+void __cdecl CL_MapLoading_CalcMovieToPlay_FastFile(const char *inMapName, char *outMovieName, const char *a3)
 {
     XAssetHeader *XAssetHeader; // r30
     int v6; // r10
@@ -571,7 +571,7 @@ void __fastcall CL_MapLoading_CalcMovieToPlay_FastFile(const char *inMapName, ch
         v18);
 }
 
-void __fastcall CL_MapLoading_StartCinematic(const char *mapname, double volume, int a3, const char *a4)
+void __cdecl CL_MapLoading_StartCinematic(const char *mapname, double volume, int a3, const char *a4)
 {
     XAssetHeader *XAssetHeader; // r30
     int v7; // r10
@@ -612,7 +612,7 @@ void __fastcall CL_MapLoading_StartCinematic(const char *mapname, double volume,
     R_Cinematic_StartPlayback(v20, 5u, volume);
 }
 
-void __fastcall CL_MapLoading(const char *mapname)
+void __cdecl CL_MapLoading(const char *mapname)
 {
     const char *v2; // r5
     int v3; // r4
@@ -645,7 +645,7 @@ void __fastcall CL_MapLoading(const char *mapname)
     SND_FadeAllSounds(0.0, v4);
 }
 
-void __fastcall CL_ResetSkeletonCache()
+void __cdecl CL_ResetSkeletonCache()
 {
     if (!Sys_IsMainThread())
         MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\client\\cl_main.cpp", 714, 0, "%s", "Sys_IsMainThread()");
@@ -656,7 +656,7 @@ void __fastcall CL_ResetSkeletonCache()
     clients[0].skelMemPos = 0;
 }
 
-void __fastcall CL_ClearState(int a1, int a2)
+void __cdecl CL_ClearState(int a1, int a2)
 {
     unsigned __int16 *configstrings; // r31
 
@@ -675,7 +675,7 @@ void __fastcall CL_ClearState(int a1, int a2)
     memset(clientConnections, 0, sizeof(clientConnections));
 }
 
-void __fastcall CL_Disconnect(int localClientNum)
+void __cdecl CL_Disconnect(int localClientNum)
 {
     if (clientUIActives[0].isRunning)
     {
@@ -695,7 +695,7 @@ void __fastcall CL_Disconnect(int localClientNum)
     }
 }
 
-void __fastcall CL_ForwardCommandToServer(int localClientNum, const char *string)
+void __cdecl CL_ForwardCommandToServer(int localClientNum, const char *string)
 {
     int nesting; // r7
     const char *v5; // r31
@@ -735,7 +735,7 @@ void __fastcall CL_ForwardCommandToServer(int localClientNum, const char *string
     }
 }
 
-void __fastcall CL_ForwardToServer_f()
+void __cdecl CL_ForwardToServer_f()
 {
     char v0[1032]; // [sp+50h] [-410h] BYREF
 
@@ -750,14 +750,14 @@ void __fastcall CL_ForwardToServer_f()
     }
 }
 
-void __fastcall CL_ConnectResponse()
+void __cdecl CL_ConnectResponse()
 {
     if (!clientUIActives[0].isRunning)
         MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\client\\cl_main.cpp", 998, 0, "%s", "clUI->isRunning");
     clientUIActives[0].connectionState = !clientUIActives[0].cgameInitialized ? CA_LOADING : CA_MAP_RESTART;
 }
 
-void __fastcall CL_InitLoad(const char *mapname)
+void __cdecl CL_InitLoad(const char *mapname)
 {
     com_expectedHunkUsage = 0;
     Dvar_SetString(nextmap, byte_82003CDD);
@@ -773,7 +773,7 @@ void __fastcall CL_InitLoad(const char *mapname)
     clientUIActives[0].connectionState = CA_MAP_RESTART;
 }
 
-void __fastcall CL_PacketEvent(msg_t *msg, int serverMessageSequence)
+void __cdecl CL_PacketEvent(msg_t *msg, int serverMessageSequence)
 {
     int readcount; // r27
     int messageNum; // r26
@@ -800,7 +800,7 @@ void __fastcall CL_PacketEvent(msg_t *msg, int serverMessageSequence)
     }
 }
 
-void __fastcall CL_SetFrametime(int frametime, int animFrametime)
+void __cdecl CL_SetFrametime(int frametime, int animFrametime)
 {
     if (frametime - animFrametime < 0)
         MyAssertHandler(
@@ -813,7 +813,7 @@ void __fastcall CL_SetFrametime(int frametime, int animFrametime)
     cls.animFrametime = animFrametime;
 }
 
-void __fastcall CheckForConsoleGuidePause(int localClientNum)
+void __cdecl CheckForConsoleGuidePause(int localClientNum)
 {
     if (Live_IsSystemUiActive()
         && !cl_paused->current.integer
@@ -825,7 +825,7 @@ void __fastcall CheckForConsoleGuidePause(int localClientNum)
     }
 }
 
-void __fastcall CL_Frame(
+void __cdecl CL_Frame(
     int localClientNum,
     int msec,
     int a3,
@@ -916,17 +916,17 @@ void __fastcall CL_Frame(
     }
 }
 
-bool __fastcall CL_IsLocalClientInGame(int localClientNum)
+bool __cdecl CL_IsLocalClientInGame(int localClientNum)
 {
     return clientUIActives[0].connectionState == CA_ACTIVE;
 }
 
-bool __fastcall CL_IsUIActive(const int localClientNum)
+bool __cdecl CL_IsUIActive(const int localClientNum)
 {
     return (clientUIActives[0].keyCatchers & 0x10) != 0;
 }
 
-void __fastcall CL_InitRenderer()
+void __cdecl CL_InitRenderer()
 {
     if (cls.rendererStarted)
         MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\client\\cl_main.cpp", 1199, 0, "%s", "!cls.rendererStarted");
@@ -946,7 +946,7 @@ void __fastcall CL_InitRenderer()
     Con_InitClientAssets();
 }
 
-void __fastcall CL_ShutdownRenderer(int destroyWindow)
+void __cdecl CL_ShutdownRenderer(int destroyWindow)
 {
     if (!cls.rendererStarted && !destroyWindow)
         MyAssertHandler(
@@ -1077,7 +1077,7 @@ void CL_InitDevGui()
     CL_CreateDevGui();
 }
 
-void __fastcall CL_StartHunkUsers()
+void __cdecl CL_StartHunkUsers()
 {
     if (clientUIActives[0].isRunning)
     {
@@ -1099,12 +1099,12 @@ void __fastcall CL_StartHunkUsers()
     }
 }
 
-int __fastcall CL_ScaledMilliseconds()
+int __cdecl CL_ScaledMilliseconds()
 {
     return cls.realtime;
 }
 
-void __fastcall CL_InitRef()
+void __cdecl CL_InitRef()
 {
     GfxConfiguration v0; // [sp+50h] [-20h] BYREF
 
@@ -1119,12 +1119,12 @@ void __fastcall CL_InitRef()
     Dvar_SetInt(cl_paused, 0);
 }
 
-void __fastcall CL_VoidCommand()
+void __cdecl CL_VoidCommand()
 {
     ;
 }
 
-void __fastcall CL_startMultiplayer_f()
+void __cdecl CL_startMultiplayer_f()
 {
     if (!Sys_IsMainThread())
         MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\client\\cl_main.cpp", 1453, 0, "%s", "Sys_IsMainThread()");
@@ -1137,7 +1137,7 @@ void __fastcall CL_startMultiplayer_f()
     JUMPOUT(0x82179E04);
 }
 
-void __fastcall CL_ShellExecute_URL_f()
+void __cdecl CL_ShellExecute_URL_f()
 {
     int nesting; // r7
     const char *v1; // r3
@@ -1182,7 +1182,7 @@ void __fastcall CL_ShellExecute_URL_f()
     }
 }
 
-void __fastcall CL_IncAnimWeight_f(int a1, int a2, int a3, int a4, int a5, int a6, __int64 a7)
+void __cdecl CL_IncAnimWeight_f(int a1, int a2, int a3, int a4, int a5, int a6, __int64 a7)
 {
     const dvar_s *v7; // r3
     double v8; // fp0
@@ -1206,7 +1206,7 @@ void __fastcall CL_IncAnimWeight_f(int a1, int a2, int a3, int a4, int a5, int a
     Com_Printf(0, (const char *)HIDWORD(v10), LODWORD(v10));
 }
 
-void __fastcall CL_DecAnimWeight_f(int a1, int a2, int a3, int a4, int a5, int a6, __int64 a7)
+void __cdecl CL_DecAnimWeight_f(int a1, int a2, int a3, int a4, int a5, int a6, __int64 a7)
 {
     const dvar_s *v7; // r3
     double v8; // fp0
@@ -1230,7 +1230,7 @@ void __fastcall CL_DecAnimWeight_f(int a1, int a2, int a3, int a4, int a5, int a
     Com_Printf(0, (const char *)HIDWORD(v10), LODWORD(v10));
 }
 
-void __fastcall CL_StopLogo(int localClientNum)
+void __cdecl CL_StopLogo(int localClientNum)
 {
     const char *string; // r4
     const char *v3; // r3
@@ -1257,7 +1257,7 @@ void __fastcall CL_StopLogo(int localClientNum)
     }
 }
 
-void __fastcall CL_PlayLogo_f()
+void __cdecl CL_PlayLogo_f()
 {
     int nesting; // r7
     int v1; // r3
@@ -1340,7 +1340,7 @@ void __fastcall CL_PlayLogo_f()
     cls.logo.startTime = cls.realtime + 100;
 }
 
-void __fastcall CL_StopLogoOrCinematic(int localClientNum)
+void __cdecl CL_StopLogoOrCinematic(int localClientNum)
 {
     connstate_t connectionState; // r30
 
@@ -1373,12 +1373,12 @@ void __fastcall CL_StopLogoOrCinematic(int localClientNum)
 }
 
 // attributes: thunk
-void __fastcall CL_InitOnceForAllClients()
+void __cdecl CL_InitOnceForAllClients()
 {
     Ragdoll_Register();
 }
 
-void __fastcall CL_StopControllerRumbles()
+void __cdecl CL_StopControllerRumbles()
 {
     CG_StopAllRumbles(0);
 }
@@ -1426,7 +1426,7 @@ void CL_Pause_f()
     }
 }
 
-void __fastcall CL_Shutdown(int localClientNum)
+void __cdecl CL_Shutdown(int localClientNum)
 {
     if (!Sys_IsMainThread())
         MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\client\\cl_main.cpp", 1982, 0, "%s", "Sys_IsMainThread()");
@@ -1476,7 +1476,7 @@ void __fastcall CL_Shutdown(int localClientNum)
     }
 }
 
-void __fastcall CL_DrawTextPhysical(
+void __cdecl CL_DrawTextPhysical(
     const char *text,
     int maxChars,
     Font_s *font,
@@ -1490,7 +1490,7 @@ void __fastcall CL_DrawTextPhysical(
     R_AddCmdDrawText(text, maxChars, font, x, y, xScale, yScale, 0.0, color, style);
 }
 
-void __fastcall CL_DrawTextPhysicalWithEffects(
+void __cdecl CL_DrawTextPhysicalWithEffects(
     const char *text,
     int maxChars,
     Font_s *font,
@@ -1533,7 +1533,7 @@ void __fastcall CL_DrawTextPhysicalWithEffects(
         v19);
 }
 
-void __fastcall CL_DrawText(
+void __cdecl CL_DrawText(
     const ScreenPlacement *scrPlace,
     const char *text,
     int maxChars,
@@ -1584,7 +1584,7 @@ void __fastcall CL_DrawText(
     R_AddCmdDrawText(text, maxChars, font, a28, a30, a36, a38, 0.0, v42, v41);
 }
 
-void __fastcall CL_DrawTextRotate(
+void __cdecl CL_DrawTextRotate(
     const ScreenPlacement *scrPlace,
     const char *text,
     int maxChars,
@@ -1637,7 +1637,7 @@ void __fastcall CL_DrawTextRotate(
     R_AddCmdDrawText(text, maxChars, font, a28, a30, a38, a40, rotation, v45, v44);
 }
 
-void __fastcall CL_DrawTextPhysicalWithCursor(
+void __cdecl CL_DrawTextPhysicalWithCursor(
     const char *text,
     int maxChars,
     Font_s *font,
@@ -1653,7 +1653,7 @@ void __fastcall CL_DrawTextPhysicalWithCursor(
     R_AddCmdDrawTextWithCursor(text, maxChars, font, x, y, xScale, yScale, 0.0, color, style, cursorPos, cursor);
 }
 
-void __fastcall CL_DrawTextWithCursor(
+void __cdecl CL_DrawTextWithCursor(
     const ScreenPlacement *scrPlace,
     const char *text,
     int maxChars,
@@ -1709,22 +1709,22 @@ void __fastcall CL_DrawTextWithCursor(
 }
 
 // attributes: thunk
-Font_s *__fastcall CL_RegisterFont(const char *fontName, int imageTrack)
+Font_s *__cdecl CL_RegisterFont(const char *fontName, int imageTrack)
 {
     return R_RegisterFont(fontName, imageTrack);
 }
 
-void __fastcall CL_SetSkipRendering(bool skip)
+void __cdecl CL_SetSkipRendering(bool skip)
 {
     cl_skipRendering = skip;
 }
 
-bool __fastcall CL_SkipRendering()
+bool __cdecl CL_SkipRendering()
 {
     return cl_skipRendering;
 }
 
-void __fastcall CL_UpdateSound()
+void __cdecl CL_UpdateSound()
 {
     PIXBeginNamedEvent_Copy_NoVarArgs(0xFFFFFFFF, "update sound");
     SND_PlayFXSounds();
@@ -1733,7 +1733,7 @@ void __fastcall CL_UpdateSound()
     PIXEndNamedEvent();
 }
 
-void __fastcall CL_ShutdownAll()
+void __cdecl CL_ShutdownAll()
 {
     R_SyncRenderThread();
     CL_ShutdownHunkUsers();
@@ -1755,7 +1755,7 @@ void __fastcall CL_ShutdownAll()
     track_shutdown(3);
 }
 
-void __fastcall CL_DisconnectLocalClient()
+void __cdecl CL_DisconnectLocalClient()
 {
     connstate_t connectionState; // r30
     int v1; // r31
@@ -1779,12 +1779,12 @@ void __fastcall CL_DisconnectLocalClient()
 }
 
 // attributes: thunk
-void __fastcall CL_Disconnect_f()
+void __cdecl CL_Disconnect_f()
 {
     CL_DisconnectLocalClient();
 }
 
-void __fastcall CL_ShutdownRef()
+void __cdecl CL_ShutdownRef()
 {
     R_SyncRenderThread();
     cls.rendererStarted = 0;
@@ -1798,7 +1798,7 @@ void __fastcall CL_ShutdownRef()
 }
 
 // local variable allocation has failed, the output may be wrong!
-void __fastcall CL_DrawLogo(const float *a1, Material *a2)
+void __cdecl CL_DrawLogo(const float *a1, Material *a2)
 {
     unsigned int v2; // r9 OVERLAPPED
     int v3; // r30
@@ -1865,7 +1865,7 @@ LABEL_11:
         CL_StopLogo(0);
 }
 
-void __fastcall CL_Init(int localClientNum)
+void __cdecl CL_Init(int localClientNum)
 {
     unsigned int v2; // r3
     const char *v3; // r5
@@ -2008,8 +2008,8 @@ void __fastcall CL_Init(int localClientNum)
     Cmd_AddCommandInternal("sl", CL_VoidCommand, &CL_VoidCommand_VAR);
     Cmd_AddCommandInternal("startMultiplayer", CL_startMultiplayer_f, &CL_startMultiplayer_f_VAR);
     Cmd_AddCommandInternal("shellExecute", CL_ShellExecute_URL_f, &CL_ShellExecute_URL_f_VAR);
-    Cmd_AddCommandInternal("+incAnimWeight", (void(__fastcall *)())CL_IncAnimWeight_f, &CL_IncAnimWeight_f_VAR);
-    Cmd_AddCommandInternal("+decAnimWeight", (void(__fastcall *)())CL_DecAnimWeight_f, &CL_DecAnimWeight_f_VAR);
+    Cmd_AddCommandInternal("+incAnimWeight", (void(__cdecl *)())CL_IncAnimWeight_f, &CL_IncAnimWeight_f_VAR);
+    Cmd_AddCommandInternal("+decAnimWeight", (void(__cdecl *)())CL_DecAnimWeight_f, &CL_DecAnimWeight_f_VAR);
     cl_testAnimWeight = Dvar_RegisterFloat("cl_testAnimWeight", 0.0, 0.0, 1.0, v27, v26);
     Cmd_AddCommandInternal("modelDumpInfo", XModelDumpInfo, &XModelDumpInfo_VAR);
     CL_Xenon_RegisterDvars();

@@ -4,14 +4,14 @@
 
 #include "actor_cover.h"
 
-void __fastcall TRACK_actor_cover()
+void __cdecl TRACK_actor_cover()
 {
     track_static_alloc_internal(&unk_82C356D8, 0x2000, "debugCoverNodeColors", 5);
     track_static_alloc_internal(debugCoverNodeMsg, 10752, "debugCoverNodeMsg", 5);
     track_static_alloc_internal(&dword_82C376E0, 2048, "debugCoverNode", 5);
 }
 
-void __fastcall DebugDrawNodeSelectionOverlay()
+void __cdecl DebugDrawNodeSelectionOverlay()
 {
     unsigned int v0; // r24
     const float *v1; // r28
@@ -86,7 +86,7 @@ void __fastcall DebugDrawNodeSelectionOverlay()
     }
 }
 
-void __fastcall DebugDrawNodePicking(const char *msg, actor_s *self, const pathnode_t *node, float *color)
+void __cdecl DebugDrawNodePicking(const char *msg, actor_s *self, const pathnode_t *node, float *color)
 {
     int time; // r7
     unsigned int v8; // r10
@@ -155,7 +155,7 @@ void __fastcall DebugDrawNodePicking(const char *msg, actor_s *self, const pathn
     }
 }
 
-int __fastcall Actor_Cover_IsWithinNodeAngle(
+int __cdecl Actor_Cover_IsWithinNodeAngle(
     const float *pos,
     const pathnode_t *node,
     const pathnodeRange_t *range,
@@ -221,7 +221,7 @@ int __fastcall Actor_Cover_IsWithinNodeAngle(
     return 1;
 }
 
-int __fastcall Actor_Cover_NodeRangeValid(const float *pos, const pathnode_t *node, pathnodeRange_t *range)
+int __cdecl Actor_Cover_NodeRangeValid(const float *pos, const pathnode_t *node, pathnodeRange_t *range)
 {
     long double v6; // fp4
     double v7; // fp2
@@ -238,7 +238,7 @@ int __fastcall Actor_Cover_NodeRangeValid(const float *pos, const pathnode_t *no
         return 0;
 }
 
-void __fastcall Actor_Cover_InitRange(pathnodeRange_t *rangeOut, const pathnode_t *node)
+void __cdecl Actor_Cover_InitRange(pathnodeRange_t *rangeOut, const pathnode_t *node)
 {
     if (!rangeOut)
         MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\actor_cover.cpp", 195, 0, "%s", "rangeOut");
@@ -293,7 +293,7 @@ void __fastcall Actor_Cover_InitRange(pathnodeRange_t *rangeOut, const pathnode_
     }
 }
 
-bool __fastcall Actor_Cover_GetAttackScript(
+bool __cdecl Actor_Cover_GetAttackScript(
     actor_s *self,
     const pathnode_t *node,
     scr_animscript_t **pAttackScriptFunc)
@@ -366,7 +366,7 @@ bool __fastcall Actor_Cover_GetAttackScript(
     return result;
 }
 
-bool __fastcall Actor_Cover_CheckWithEnemy(actor_s *self, const pathnode_t *node, bool checkEnemyRange)
+bool __cdecl Actor_Cover_CheckWithEnemy(actor_s *self, const pathnode_t *node, bool checkEnemyRange)
 {
     gentity_s *TargetEntity; // r31
     sentient_s *TargetSentient; // r3
@@ -422,7 +422,7 @@ bool __fastcall Actor_Cover_CheckWithEnemy(actor_s *self, const pathnode_t *node
     return 1;
 }
 
-bool __fastcall Actor_Cover_PickAttackScript(
+bool __cdecl Actor_Cover_PickAttackScript(
     actor_s *self,
     const pathnode_t *node,
     bool checkEnemyRange,
@@ -459,7 +459,7 @@ bool __fastcall Actor_Cover_PickAttackScript(
     return result;
 }
 
-float __fastcall Actor_Cover_ScoreOnDistance(actor_s *self, const pathnode_t *node)
+float __cdecl Actor_Cover_ScoreOnDistance(actor_s *self, const pathnode_t *node)
 {
     double v2; // fp13
     double v3; // fp0
@@ -479,7 +479,7 @@ float __fastcall Actor_Cover_ScoreOnDistance(actor_s *self, const pathnode_t *no
     return *((float *)&v10 + 1);
 }
 
-float __fastcall Actor_Cover_ScoreOnEngagement(actor_s *self, const pathnode_t *node)
+float __cdecl Actor_Cover_ScoreOnEngagement(actor_s *self, const pathnode_t *node)
 {
     gentity_s *TargetEntity; // r3
     double v5; // fp0
@@ -562,7 +562,7 @@ float __fastcall Actor_Cover_ScoreOnEngagement(actor_s *self, const pathnode_t *
     return *((float *)&v12 + 1);
 }
 
-float __fastcall Actor_Cover_ScoreOnNodeAngle(actor_s *self, const pathnode_t *node)
+float __cdecl Actor_Cover_ScoreOnNodeAngle(actor_s *self, const pathnode_t *node)
 {
     bool PotentialThreat; // r28
     gentity_s *TargetEntity; // r29
@@ -600,7 +600,7 @@ float __fastcall Actor_Cover_ScoreOnNodeAngle(actor_s *self, const pathnode_t *n
     return *((float *)&v9 + 1);
 }
 
-float __fastcall Actor_Cover_ScoreOnTargetDir(actor_s *self, const pathnode_t *node)
+float __cdecl Actor_Cover_ScoreOnTargetDir(actor_s *self, const pathnode_t *node)
 {
     gentity_s *TargetEntity; // r29
     double v5; // fp1
@@ -638,7 +638,7 @@ float __fastcall Actor_Cover_ScoreOnTargetDir(actor_s *self, const pathnode_t *n
     return *((float *)&v5 + 1);
 }
 
-float __fastcall Actor_Cover_ScoreOnPriority(actor_s *self, const pathnode_t *node)
+float __cdecl Actor_Cover_ScoreOnPriority(actor_s *self, const pathnode_t *node)
 {
     double v2; // fp1
 
@@ -649,7 +649,7 @@ float __fastcall Actor_Cover_ScoreOnPriority(actor_s *self, const pathnode_t *no
     return *((float *)&v2 + 1);
 }
 
-float __fastcall Actor_Cover_ScoreOnPlayerLOS(actor_s *self, const pathnode_t *node)
+float __cdecl Actor_Cover_ScoreOnPlayerLOS(actor_s *self, const pathnode_t *node)
 {
     double v2; // fp1
 
@@ -660,7 +660,7 @@ float __fastcall Actor_Cover_ScoreOnPlayerLOS(actor_s *self, const pathnode_t *n
     return *((float *)&v2 + 1);
 }
 
-float __fastcall Actor_Cover_ScoreOnVisibility(actor_s *self, const pathnode_t *node)
+float __cdecl Actor_Cover_ScoreOnVisibility(actor_s *self, const pathnode_t *node)
 {
     sentient_s *TargetSentient; // r3
     const pathnode_t *v4; // r4
@@ -674,7 +674,7 @@ float __fastcall Actor_Cover_ScoreOnVisibility(actor_s *self, const pathnode_t *
     return *((float *)&v5 + 1);
 }
 
-float __fastcall Actor_Cover_ScoreOnCoverType(actor_s *self, const pathnode_t *node)
+float __cdecl Actor_Cover_ScoreOnCoverType(actor_s *self, const pathnode_t *node)
 {
     double v2; // fp1
 
@@ -685,7 +685,7 @@ float __fastcall Actor_Cover_ScoreOnCoverType(actor_s *self, const pathnode_t *n
     return *((float *)&v2 + 1);
 }
 
-float __fastcall Actor_Cover_GetNodeDistMetric(actor_s *self, const pathnode_t *node)
+float __cdecl Actor_Cover_GetNodeDistMetric(actor_s *self, const pathnode_t *node)
 {
     double v4; // fp13
     double v5; // fp0
@@ -712,7 +712,7 @@ float __fastcall Actor_Cover_GetNodeDistMetric(actor_s *self, const pathnode_t *
     return *((float *)&v12 + 1);
 }
 
-float __fastcall Actor_Cover_GetNodeMetric(actor_s *self, const pathnode_t *node)
+float __cdecl Actor_Cover_GetNodeMetric(actor_s *self, const pathnode_t *node)
 {
     double NodeDistMetric; // fp31
     double v5; // fp31
@@ -758,7 +758,7 @@ float __fastcall Actor_Cover_GetNodeMetric(actor_s *self, const pathnode_t *node
     return *((float *)&v14 + 1);
 }
 
-float __fastcall Actor_Cover_FromPoint_GetNodeMetric(actor_s *self, const pathnode_t *node)
+float __cdecl Actor_Cover_FromPoint_GetNodeMetric(actor_s *self, const pathnode_t *node)
 {
     double NodeDistMetric; // fp31
     double v5; // fp1
@@ -792,7 +792,7 @@ float __fastcall Actor_Cover_FromPoint_GetNodeMetric(actor_s *self, const pathno
     return *((float *)&v10 + 1);
 }
 
-int __fastcall Actor_Cover_IsValidReacquire(actor_s *self, const pathnode_t *node)
+int __cdecl Actor_Cover_IsValidReacquire(actor_s *self, const pathnode_t *node)
 {
     int result; // r3
     sentient_s *TargetSentient; // r3
@@ -816,7 +816,7 @@ int __fastcall Actor_Cover_IsValidReacquire(actor_s *self, const pathnode_t *nod
     return result;
 }
 
-int __fastcall Actor_Cover_IsValidCoverDir(actor_s *self, const pathnode_t *node)
+int __cdecl Actor_Cover_IsValidCoverDir(actor_s *self, const pathnode_t *node)
 {
     gentity_s *TargetEntity; // r3
     int result; // r3
@@ -833,7 +833,7 @@ int __fastcall Actor_Cover_IsValidCoverDir(actor_s *self, const pathnode_t *node
     return result;
 }
 
-int __fastcall Actor_Cover_IsValidCover(actor_s *self, const pathnode_t *node)
+int __cdecl Actor_Cover_IsValidCover(actor_s *self, const pathnode_t *node)
 {
     sentient_s *TargetSentient; // r3
     scr_animscript_t *v6[12]; // [sp+50h] [-30h] BYREF
@@ -870,7 +870,7 @@ int __fastcall Actor_Cover_IsValidCover(actor_s *self, const pathnode_t *node)
     return 1;
 }
 
-float __fastcall Actor_Cover_MinHeightAtCover(pathnode_t *node)
+float __cdecl Actor_Cover_MinHeightAtCover(pathnode_t *node)
 {
     double v2; // fp1
 
@@ -883,7 +883,7 @@ float __fastcall Actor_Cover_MinHeightAtCover(pathnode_t *node)
     return *((float *)&v2 + 1);
 }
 
-pathnode_t *__fastcall Actor_Cover_FindCoverFromPoint(actor_s *self, const float *vPoint, double fMinSafeDist)
+pathnode_t *__cdecl Actor_Cover_FindCoverFromPoint(actor_s *self, const float *vPoint, double fMinSafeDist)
 {
     int v6; // r5
     pathsort_t *v7; // r4
@@ -939,7 +939,7 @@ pathnode_t *__fastcall Actor_Cover_FindCoverFromPoint(actor_s *self, const float
     return v9;
 }
 
-int __fastcall isNodeInRegion(pathnode_t *node, gentity_s *volume)
+int __cdecl isNodeInRegion(pathnode_t *node, gentity_s *volume)
 {
     if (!node)
         MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\actor_cover.cpp", 908, 0, "%s", "node");
@@ -948,7 +948,7 @@ int __fastcall isNodeInRegion(pathnode_t *node, gentity_s *volume)
     return SV_EntityContact(node->constant.vOrigin, node->constant.vOrigin, volume);
 }
 
-int __fastcall Actor_Cover_FindBestCoverListInList(actor_s *self, pathsort_t *nodes, int iNodeCount, gentity_s *volume)
+int __cdecl Actor_Cover_FindBestCoverListInList(actor_s *self, pathsort_t *nodes, int iNodeCount, gentity_s *volume)
 {
     int v4; // r25
     int v7; // r18
@@ -1002,7 +1002,7 @@ int __fastcall Actor_Cover_FindBestCoverListInList(actor_s *self, pathsort_t *no
     return v4;
 }
 
-int __fastcall compare_node_sort(float *pe1, float *pe2)
+int __cdecl compare_node_sort(float *pe1, float *pe2)
 {
     double v2; // fp0
 
@@ -1013,7 +1013,7 @@ int __fastcall compare_node_sort(float *pe1, float *pe2)
         return -1;
 }
 
-int __fastcall Actor_Cover_FindBestCoverList(actor_s *self, pathnode_t **bestNodes, int bestNodesInList)
+int __cdecl Actor_Cover_FindBestCoverList(actor_s *self, pathnode_t **bestNodes, int bestNodesInList)
 {
     int v6; // r5
     pathsort_t *v7; // r4
@@ -1078,7 +1078,7 @@ int __fastcall Actor_Cover_FindBestCoverList(actor_s *self, pathnode_t **bestNod
             v18 += 3;
         } while (v17);
     }
-    qsort(v29, BestCoverListInList, 0xCu, (int(__fastcall *)(const void *, const void *))compare_node_sort);
+    qsort(v29, BestCoverListInList, 0xCu, (int(__cdecl *)(const void *, const void *))compare_node_sort);
     v19 = 0;
     if (v10 > 0)
     {
@@ -1093,7 +1093,7 @@ int __fastcall Actor_Cover_FindBestCoverList(actor_s *self, pathnode_t **bestNod
             ++v20;
         } while (v19 < v10);
     }
-    qsort(v29, v10, 0xCu, (int(__fastcall *)(const void *, const void *))compare_node_sort);
+    qsort(v29, v10, 0xCu, (int(__cdecl *)(const void *, const void *))compare_node_sort);
     v21 = 0;
     if (v10 > bestNodesInList)
         v21 = v10 - bestNodesInList;
@@ -1122,7 +1122,7 @@ int __fastcall Actor_Cover_FindBestCoverList(actor_s *self, pathnode_t **bestNod
     return v22;
 }
 
-void __fastcall Actor_Cover_FindCoverNode(actor_s *self)
+void __cdecl Actor_Cover_FindCoverNode(actor_s *self)
 {
     if (Actor_GetTargetEntity(self) && self->eState[self->stateLevel] == AIS_EXPOSED)
         self->iPotentialCoverNodeCount = Actor_Cover_FindBestCoverList(self, self->pPotentialCoverNode, 1000);
@@ -1130,7 +1130,7 @@ void __fastcall Actor_Cover_FindCoverNode(actor_s *self)
         self->iPotentialCoverNodeCount = 0;
 }
 
-pathnode_t *__fastcall Actor_Cover_GetCoverNode(actor_s *self)
+pathnode_t *__cdecl Actor_Cover_GetCoverNode(actor_s *self)
 {
     int v2; // r11
 
@@ -1157,7 +1157,7 @@ pathnode_t *__fastcall Actor_Cover_GetCoverNode(actor_s *self)
     return 0;
 }
 
-int __fastcall Actor_Cover_UseCoverNode(actor_s *self, pathnode_t *node)
+int __cdecl Actor_Cover_UseCoverNode(actor_s *self, pathnode_t *node)
 {
     ai_state_t v4; // r11
     unsigned int v6; // r11
@@ -1187,7 +1187,7 @@ int __fastcall Actor_Cover_UseCoverNode(actor_s *self, pathnode_t *node)
     return 1;
 }
 
-void __fastcall Actor_DebugDrawNodesInVolume(actor_s *self)
+void __cdecl Actor_DebugDrawNodesInVolume(actor_s *self)
 {
     int v2; // r5
     pathsort_t *v3; // r4
@@ -1223,7 +1223,7 @@ void __fastcall Actor_DebugDrawNodesInVolume(actor_s *self)
     }
 }
 
-pathnode_t *__fastcall Actor_Cover_FindBestCover(actor_s *self)
+pathnode_t *__cdecl Actor_Cover_FindBestCover(actor_s *self)
 {
     pathnode_t *result; // r3
     bool v2; // zf

@@ -3,6 +3,12 @@
 #include <gfx_d3d/r_debug.h>
 #include <client_mp/client_mp.h>
 
+void CL_RecordServerDebugData()
+{
+    cls.debug.prevFromServer = cls.debug.fromServer;
+    cls.debug.fromServer = 0;
+}
+
 void __cdecl CL_AddDebugString(
     const float *xyz,
     const float *color,

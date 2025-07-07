@@ -7,7 +7,7 @@
 #include "client.h"
 #include <ui/ui.h>
 
-void __fastcall Key_KeynumToStringBuf(int keynum, char *buf, int buflen)
+void __cdecl Key_KeynumToStringBuf(int keynum, char *buf, int buflen)
 {
     const char *v5; // r3
 
@@ -15,7 +15,7 @@ void __fastcall Key_KeynumToStringBuf(int keynum, char *buf, int buflen)
     I_strncpyz(buf, v5, buflen);
 }
 
-int __fastcall CL_ShutdownUI()
+int __cdecl CL_ShutdownUI()
 {
     int result; // r3
 
@@ -30,7 +30,7 @@ int __fastcall CL_ShutdownUI()
     return result;
 }
 
-void __fastcall CL_InitUI()
+void __cdecl CL_InitUI()
 {
     int v0; // r3
 

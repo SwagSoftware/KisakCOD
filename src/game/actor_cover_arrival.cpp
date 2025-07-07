@@ -4,7 +4,7 @@
 
 #include "actor_cover_arrival.h"
 
-bool __fastcall Actor_CheckCoverLeave(actor_s *self, const float *exitPos)
+bool __cdecl Actor_CheckCoverLeave(actor_s *self, const float *exitPos)
 {
     double v5; // fp1
     int wPathLen; // r11
@@ -54,7 +54,7 @@ bool __fastcall Actor_CheckCoverLeave(actor_s *self, const float *exitPos)
     return 1;
 }
 
-int __fastcall Actor_CheckCoverApproach(actor_s *self)
+int __cdecl Actor_CheckCoverApproach(actor_s *self)
 {
     int result; // r3
     sentient_s *sentient; // r11
@@ -86,7 +86,7 @@ int __fastcall Actor_CheckCoverApproach(actor_s *self)
     return result;
 }
 
-void __fastcall Actor_CoverApproachNotify(actor_s *self)
+void __cdecl Actor_CoverApproachNotify(actor_s *self)
 {
     path_t *p_Path; // r29
     pathnode_t *NegotiationNode; // r25
@@ -172,7 +172,7 @@ void __fastcall Actor_CoverApproachNotify(actor_s *self)
     }
 }
 
-int __fastcall Actor_CoverArrival_Start(actor_s *self, ai_state_t ePrevState)
+int __cdecl Actor_CoverArrival_Start(actor_s *self, ai_state_t ePrevState)
 {
     int result; // r3
 
@@ -183,12 +183,12 @@ int __fastcall Actor_CoverArrival_Start(actor_s *self, ai_state_t ePrevState)
     return result;
 }
 
-int __fastcall Actor_CoverArrival_Resume(actor_s *self, ai_state_t ePrevState)
+int __cdecl Actor_CoverArrival_Resume(actor_s *self, ai_state_t ePrevState)
 {
     return 0;
 }
 
-int __fastcall Actor_CoverArrival_Think(actor_s *self)
+int __cdecl Actor_CoverArrival_Think(actor_s *self)
 {
     scr_animscript_t *StopAnim; // r3
 

@@ -257,6 +257,8 @@ void __cdecl Com_InitDefaultSoundAliasVolumeFalloffCurve(SndCurve* sndCurve);
 void __cdecl Com_InitDefaultSoundAliasSpeakerMap(SpeakerMapInfo* info);
 void __cdecl Com_FreeEvent(char* ptr);
 
+void Com_CheckError();
+
 void __cdecl Com_ProcessSoundAliasFileLocalization(char *sourceFile, char *loadspecCurGame);
 
 // com_loadutils.cpp

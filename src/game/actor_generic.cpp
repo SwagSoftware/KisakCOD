@@ -4,12 +4,12 @@
 
 #include "actor_generic.h"
 
-void __fastcall Actor_Generic_Finish(actor_s *self, ai_state_t eNextState)
+void __cdecl Actor_Generic_Finish(actor_s *self, ai_state_t eNextState)
 {
     ;
 }
 
-void __fastcall Actor_Generic_Suspend(actor_s *self, ai_state_t eNextState)
+void __cdecl Actor_Generic_Suspend(actor_s *self, ai_state_t eNextState)
 {
     unsigned int stateLevel; // r7
     ai_state_t v5; // r8
@@ -45,7 +45,7 @@ void __fastcall Actor_Generic_Suspend(actor_s *self, ai_state_t eNextState)
     AIFuncTable[self->species][self->eState[self->stateLevel]].pfnFinish(self, eNextState);
 }
 
-int __fastcall Actor_Generic_Resume(actor_s *self, ai_state_t ePrevState)
+int __cdecl Actor_Generic_Resume(actor_s *self, ai_state_t ePrevState)
 {
     unsigned int stateLevel; // r7
     ai_state_t v5; // r8
@@ -78,12 +78,12 @@ int __fastcall Actor_Generic_Resume(actor_s *self, ai_state_t ePrevState)
             "%s\n\t(self->eState[self->stateLevel]) = %i",
             "(AIFuncTable[self->species][self->eState[self->stateLevel]].pfnStart)",
             v6);
-    return ((int(__fastcall *)(actor_s *, ai_state_t))AIFuncTable[self->species][self->eState[self->stateLevel]].pfnStart)(
+    return ((int(__cdecl *)(actor_s *, ai_state_t))AIFuncTable[self->species][self->eState[self->stateLevel]].pfnStart)(
         self,
         ePrevState);
 }
 
-void __fastcall Actor_Generic_Pain(
+void __cdecl Actor_Generic_Pain(
     actor_s *self,
     gentity_s *attacker,
     int iDamage,
@@ -95,7 +95,7 @@ void __fastcall Actor_Generic_Pain(
     ;
 }
 
-void __fastcall Actor_Generic_Touch(actor_s *self, gentity_s *pOther)
+void __cdecl Actor_Generic_Touch(actor_s *self, gentity_s *pOther)
 {
     int iHitEntnum; // r11
 

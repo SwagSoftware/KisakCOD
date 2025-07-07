@@ -20,17 +20,17 @@
 
 kbutton_t kb[29];
 
-void __fastcall TRACK_cl_input()
+void __cdecl TRACK_cl_input()
 {
     track_static_alloc_internal(kb, 580, "kb", 10);
 }
 
-bool __fastcall IN_IsTempProneKeyActive()
+bool __cdecl IN_IsTempProneKeyActive()
 {
     return kb[24].active;
 }
 
-int __fastcall IN_IsTempStanceKeyActive()
+int __cdecl IN_IsTempStanceKeyActive()
 {
     unsigned __int8 v0; // r11
 
@@ -47,7 +47,7 @@ void IN_MLookDown()
     kb[13].active = 1;
 }
 
-void __fastcall IN_KeyDown(kbutton_t *b)
+void __cdecl IN_KeyDown(kbutton_t *b)
 {
     int nesting; // r7
     const char *v3; // r3
@@ -104,7 +104,7 @@ void __fastcall IN_KeyDown(kbutton_t *b)
     }
 }
 
-void __fastcall IN_KeyUp(kbutton_t *b)
+void __cdecl IN_KeyUp(kbutton_t *b)
 {
     int nesting; // r7
     char *v3; // r3
@@ -167,7 +167,7 @@ void __fastcall IN_KeyUp(kbutton_t *b)
 }
 
 // local variable allocation has failed, the output may be wrong!
-float __fastcall CL_KeyState(kbutton_t *key)
+float __cdecl CL_KeyState(kbutton_t *key)
 {
     __int64 v1; // r11 OVERLAPPED
     bool active; // r10
@@ -212,7 +212,7 @@ float __fastcall CL_KeyState(kbutton_t *key)
     return *((float *)&v5 + 1);
 }
 
-void __fastcall CL_SetStance(int localClientNum, StanceState stance)
+void __cdecl CL_SetStance(int localClientNum, StanceState stance)
 {
     char v3; // r11
 
@@ -232,7 +232,7 @@ void __fastcall CL_SetStance(int localClientNum, StanceState stance)
     }
 }
 
-void __fastcall CL_ToggleStance(StanceState preferredStance)
+void __cdecl CL_ToggleStance(StanceState preferredStance)
 {
     char v1; // r11
     StanceState v2; // r11
@@ -458,13 +458,13 @@ void IN_Smoke_Up()
     IN_KeyUp(&kb[17]);
 }
 
-void __fastcall IN_BreathSprint_Down()
+void __cdecl IN_BreathSprint_Down()
 {
     IN_KeyDown(&kb[15]);
     IN_KeyDown(&kb[27]);
 }
 
-void __fastcall IN_BreathSprint_Up()
+void __cdecl IN_BreathSprint_Up()
 {
     IN_KeyUp(&kb[15]);
     IN_KeyUp(&kb[27]);
@@ -570,12 +570,12 @@ void IN_Stance_Up()
     }
 }
 
-void __fastcall IN_CenterView()
+void __cdecl IN_CenterView()
 {
     clients[0].viewangles[0] = -clients[0].snap.ps.delta_angles[0];
 }
 
-void __fastcall IN_RemoteKeyboard()
+void __cdecl IN_RemoteKeyboard()
 {
     int nesting; // r7
     const char *v1; // r3
@@ -623,7 +623,7 @@ void __fastcall IN_RemoteKeyboard()
     }
 }
 
-void __fastcall IN_RemoteMouseMove()
+void __cdecl IN_RemoteMouseMove()
 {
     const char *v0; // r3
     int v1; // r31
@@ -818,27 +818,27 @@ void IN_GoStandUp()
     IN_KeyUp(&kb[10]);
 }
 
-void __fastcall IN_SprintDown()
+void __cdecl IN_SprintDown()
 {
     IN_KeyDown(&kb[27]);
 }
 
-void __fastcall IN_SprintUp()
+void __cdecl IN_SprintUp()
 {
     IN_KeyUp(&kb[27]);
 }
 
-void __fastcall IN_NightVisionDown()
+void __cdecl IN_NightVisionDown()
 {
     IN_KeyDown(&kb[28]);
 }
 
-void __fastcall IN_NightVisionUp()
+void __cdecl IN_NightVisionUp()
 {
     IN_KeyUp(&kb[28]);
 }
 
-void __fastcall CL_AdjustAngles(int a1, int a2, int a3, int a4, int a5, int a6, __int64 a7)
+void __cdecl CL_AdjustAngles(int a1, int a2, int a3, int a4, int a5, int a6, __int64 a7)
 {
     __int64 v7; // r11
     double v8; // fp13
@@ -885,7 +885,7 @@ void CL_StanceButtonUpdate()
     }
 }
 
-void __fastcall CL_AddCurrentStanceToCmd(usercmd_s *cmd)
+void __cdecl CL_AddCurrentStanceToCmd(usercmd_s *cmd)
 {
     unsigned int v2; // r11
 
@@ -912,7 +912,7 @@ void __fastcall CL_AddCurrentStanceToCmd(usercmd_s *cmd)
     cmd->buttons = v2 & 0xFFFFEFFF;
 }
 
-void __fastcall CL_KeyMove(usercmd_s *cmd)
+void __cdecl CL_KeyMove(usercmd_s *cmd)
 {
     char v2; // r10
     int buttons; // r11
@@ -974,7 +974,7 @@ void __fastcall CL_KeyMove(usercmd_s *cmd)
     cmd->upmove = ClampChar(v11);
 }
 
-int __fastcall CL_AllowInput()
+int __cdecl CL_AllowInput()
 {
     int integer; // r11
     int result; // r3
@@ -996,7 +996,7 @@ int __fastcall CL_AllowInput()
     return result;
 }
 
-void __fastcall CL_GamepadMove(usercmd_s *cmd)
+void __cdecl CL_GamepadMove(usercmd_s *cmd)
 {
     double v2; // fp27
     double v3; // fp28
@@ -1108,7 +1108,7 @@ void __fastcall CL_GamepadMove(usercmd_s *cmd)
     }
 }
 
-void __fastcall CL_GetMouseMovement(clientActive_t *cl, float *mx, float *my, int a4, int a5, __int64 a6)
+void __cdecl CL_GetMouseMovement(clientActive_t *cl, float *mx, float *my, int a4, int a5, __int64 a6)
 {
     __int64 v9; // r11
     double v10; // fp0
@@ -1140,7 +1140,7 @@ void __fastcall CL_GetMouseMovement(clientActive_t *cl, float *mx, float *my, in
     cl->mouseDy[cl->mouseIndex] = 0;
 }
 
-void __fastcall CL_MouseMove(usercmd_s *cmd, int a2, int a3, int a4, int a5, int a6, __int64 a7)
+void __cdecl CL_MouseMove(usercmd_s *cmd, int a2, int a3, int a4, int a5, int a6, __int64 a7)
 {
     __int64 v8; // r9
     long double v9; // fp2
@@ -1239,7 +1239,7 @@ void __fastcall CL_MouseMove(usercmd_s *cmd, int a2, int a3, int a4, int a5, int
     }
 }
 
-void __fastcall CL_UpdateCmdButton(int *cmdButtons, int kbButton, int buttonFlag)
+void __cdecl CL_UpdateCmdButton(int *cmdButtons, int kbButton, int buttonFlag)
 {
     int v3; // r10
 
@@ -1249,7 +1249,7 @@ void __fastcall CL_UpdateCmdButton(int *cmdButtons, int kbButton, int buttonFlag
     kb[v3].wasPressed = 0;
 }
 
-void __fastcall CL_CmdButtons(usercmd_s *cmd)
+void __cdecl CL_CmdButtons(usercmd_s *cmd)
 {
     if (kb[14].active || kb[14].wasPressed)
         cmd->buttons |= 1u;
@@ -1313,7 +1313,7 @@ void __fastcall CL_CmdButtons(usercmd_s *cmd)
             "cmd->buttons < (1 << BUTTON_BIT_COUNT)");
 }
 
-void __fastcall CL_SetUsercmdButtonsWeapons(int buttons, int weapon, int offhand)
+void __cdecl CL_SetUsercmdButtonsWeapons(int buttons, int weapon, int offhand)
 {
     if (clientUIActives[0].isRunning)
     {
@@ -1324,7 +1324,7 @@ void __fastcall CL_SetUsercmdButtonsWeapons(int buttons, int weapon, int offhand
     }
 }
 
-void __fastcall CL_FinishMove(usercmd_s *cmd)
+void __cdecl CL_FinishMove(usercmd_s *cmd)
 {
     int buttons; // r9
 
@@ -1351,7 +1351,7 @@ void __fastcall CL_FinishMove(usercmd_s *cmd)
     }
 }
 
-int __fastcall CG_HandleLocationSelectionInput(int localClientNum, usercmd_s *cmd)
+int __cdecl CG_HandleLocationSelectionInput(int localClientNum, usercmd_s *cmd)
 {
     int result; // r3
     double v5; // fp27
@@ -1434,7 +1434,7 @@ int __fastcall CG_HandleLocationSelectionInput(int localClientNum, usercmd_s *cm
     return result;
 }
 
-void __fastcall CL_CreateCmd(usercmd_s *result, int a2, int a3, int a4, int a5, int a6, __int64 a7)
+void __cdecl CL_CreateCmd(usercmd_s *result, int a2, int a3, int a4, int a5, int a6, __int64 a7)
 {
     double v8; // fp31
     __int64 v9; // r10
@@ -1474,7 +1474,7 @@ LABEL_10:
     CL_FinishMove(result);
 }
 
-void __fastcall CL_CreateNewCommands(int a1, int a2, int a3, int a4, int a5)
+void __cdecl CL_CreateNewCommands(int a1, int a2, int a3, int a4, int a5)
 {
     __int64 v5; // r10
     const void *v6; // r3
@@ -1504,7 +1504,7 @@ void __fastcall CL_CreateNewCommands(int a1, int a2, int a3, int a4, int a5)
     Sys_LeaveCriticalSection(CRITSECT_CLIENT_CMD);
 }
 
-void __fastcall CL_WritePacket()
+void __cdecl CL_WritePacket()
 {
     int reliableAcknowledge; // r11
     bool v1; // cr58
@@ -1571,14 +1571,14 @@ void __fastcall CL_WritePacket()
     Sys_LeaveCriticalSection(CRITSECT_CLIENT_CMD);
 }
 
-void __fastcall CL_ClearClientCommandPacket()
+void __cdecl CL_ClearClientCommandPacket()
 {
     Sys_EnterCriticalSection(CRITSECT_CLIENT_CMD);
     clientConnections[0].reliableAcknowledge = clientConnections[0].reliableSequence;
     Sys_LeaveCriticalSection(CRITSECT_CLIENT_CMD);
 }
 
-void __fastcall CL_ClearClientThinkPacket()
+void __cdecl CL_ClearClientThinkPacket()
 {
     Sys_EnterCriticalSection(CRITSECT_CLIENT_CMD);
     clients[0].cmdNumberAcknowledge = clients[0].cmdNumber;
@@ -1605,7 +1605,7 @@ void PausedModelPreviewerGamepad()
     CG_ModelPreviewerHandleGamepadEvents(0, v5, v6, v3, v4);
 }
 
-void __fastcall CL_Input(int localClientNum)
+void __cdecl CL_Input(int localClientNum)
 {
     int v1; // r7
     int v2; // r6
@@ -1626,7 +1626,7 @@ void __fastcall CL_Input(int localClientNum)
     }
 }
 
-void __fastcall CL_ShutdownInput()
+void __cdecl CL_ShutdownInput()
 {
     Cmd_RemoveCommand("mouseMove");
     Cmd_RemoveCommand("remoteKey");
@@ -1703,7 +1703,7 @@ void __fastcall CL_ShutdownInput()
     Cmd_RemoveCommand("-gostand");
 }
 
-void __fastcall CL_ClearKeys(int localClientNum)
+void __cdecl CL_ClearKeys(int localClientNum)
 {
     memset(kb, 0, sizeof(kb));
 }
@@ -1715,7 +1715,7 @@ void IN_MLookUp()
         clients[0].viewangles[0] = -clients[0].snap.ps.delta_angles[0];
 }
 
-void __fastcall CL_InitInput()
+void __cdecl CL_InitInput()
 {
     const char *v0; // r5
     unsigned __int16 v1; // r4

@@ -4,7 +4,7 @@
 
 #include "actor_spawner.h"
 
-int __fastcall PointCouldSeeSpawn(const float *vEyePos, const float *vSpawnPos, int iIgnoreEnt1, int iIgnoreEnt2)
+int __cdecl PointCouldSeeSpawn(const float *vEyePos, const float *vSpawnPos, int iIgnoreEnt1, int iIgnoreEnt2)
 {
     double v8; // fp13
     double v9; // fp12
@@ -43,7 +43,7 @@ int __fastcall PointCouldSeeSpawn(const float *vEyePos, const float *vSpawnPos, 
     return 1;
 }
 
-gentity_s *__fastcall SpawnActor(gentity_s *ent, unsigned int targetname, enumForceSpawn forceSpawn, int getEnemyInfo)
+gentity_s *__cdecl SpawnActor(gentity_s *ent, unsigned int targetname, enumForceSpawn forceSpawn, int getEnemyInfo)
 {
     unsigned int v8; // r3
     const char *v9; // r5
@@ -156,7 +156,7 @@ gentity_s *__fastcall SpawnActor(gentity_s *ent, unsigned int targetname, enumFo
     }
 }
 
-void __fastcall G_DropActorSpawnersToFloor()
+void __cdecl G_DropActorSpawnersToFloor()
 {
     int v0; // r27
     int num_entities; // r11
@@ -239,7 +239,7 @@ void __fastcall G_DropActorSpawnersToFloor()
     }
 }
 
-int __fastcall SP_actor_spawner(gentity_s *pEnt)
+int __cdecl SP_actor_spawner(gentity_s *pEnt)
 {
     int count; // r10
     int v3; // r31

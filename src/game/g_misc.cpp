@@ -4,7 +4,7 @@
 
 #include "g_local.h"
 
-float __fastcall G_GetEntInfoScale()
+float __cdecl G_GetEntInfoScale()
 {
     double v0; // fp1
 
@@ -12,12 +12,12 @@ float __fastcall G_GetEntInfoScale()
     return *((float *)&v0 + 1);
 }
 
-void __fastcall SP_info_notnull(gentity_s *self)
+void __cdecl SP_info_notnull(gentity_s *self)
 {
     G_SetOrigin(self, self->r.currentOrigin);
 }
 
-void __fastcall SP_light(gentity_s *self)
+void __cdecl SP_light(gentity_s *self)
 {
     const ComPrimaryLight *PrimaryLight; // r30
     const float *origin; // r28
@@ -98,7 +98,7 @@ void __fastcall SP_light(gentity_s *self)
     }
 }
 
-void __fastcall SP_info_volume(gentity_s *self)
+void __cdecl SP_info_volume(gentity_s *self)
 {
     int v2; // r11
 
@@ -122,7 +122,7 @@ void __fastcall SP_info_volume(gentity_s *self)
     }
 }
 
-void __fastcall TeleportPlayer(gentity_s *player, float *origin, const float *angles)
+void __cdecl TeleportPlayer(gentity_s *player, float *origin, const float *angles)
 {
     long double v5; // fp2
 
@@ -133,7 +133,7 @@ void __fastcall TeleportPlayer(gentity_s *player, float *origin, const float *an
     SV_LinkEntity(player);
 }
 
-void __fastcall SP_sound_blend(gentity_s *self)
+void __cdecl SP_sound_blend(gentity_s *self)
 {
     self->s.lerp.u.turret.gunAngles[0] = 0.0;
     self->r.contents = 0;
@@ -145,7 +145,7 @@ void __fastcall SP_sound_blend(gentity_s *self)
     self->s.eventParms[1] = 0;
 }
 
-gentity_s *__fastcall G_SpawnSoundBlend()
+gentity_s *__cdecl G_SpawnSoundBlend()
 {
     gentity_s *v0; // r31
     gentity_s *result; // r3
@@ -164,7 +164,7 @@ gentity_s *__fastcall G_SpawnSoundBlend()
     return result;
 }
 
-void __fastcall G_SetSoundBlend(gentity_s *ent, unsigned __int16 alias0, unsigned __int16 alias1, double lerp)
+void __cdecl G_SetSoundBlend(gentity_s *ent, unsigned __int16 alias0, unsigned __int16 alias1, double lerp)
 {
     if (!ent->r.inuse)
         MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\g_misc.cpp", 311, 0, "%s", "ent->r.inuse");
@@ -176,12 +176,12 @@ void __fastcall G_SetSoundBlend(gentity_s *ent, unsigned __int16 alias0, unsigne
     SV_LinkEntity(ent);
 }
 
-void __fastcall G_SetSoundBlendVolumeScale(gentity_s *ent, double scale)
+void __cdecl G_SetSoundBlendVolumeScale(gentity_s *ent, double scale)
 {
     ent->s.lerp.u.turret.gunAngles[1] = scale;
 }
 
-float __fastcall G_GetSoundBlendVolumeScale(gentity_s *ent)
+float __cdecl G_GetSoundBlendVolumeScale(gentity_s *ent)
 {
     double v1; // fp1
 
@@ -189,7 +189,7 @@ float __fastcall G_GetSoundBlendVolumeScale(gentity_s *ent)
     return *((float *)&v1 + 1);
 }
 
-void __fastcall EntinfoPosAndScale(gentity_s *self, float *source, float *pos, float *textScale, float *dist)
+void __cdecl EntinfoPosAndScale(gentity_s *self, float *source, float *pos, float *textScale, float *dist)
 {
     double v10; // fp12
     double v11; // fp0
@@ -222,7 +222,7 @@ void __fastcall EntinfoPosAndScale(gentity_s *self, float *source, float *pos, f
         *textScale = (float)(*textScale * (float)v16) * (float)0.0026041667;
 }
 
-void __fastcall misc_EntInfo(gentity_s *self, float *source)
+void __cdecl misc_EntInfo(gentity_s *self, float *source)
 {
     const float *v4; // r6
     int integer; // r11
@@ -257,7 +257,7 @@ void __fastcall misc_EntInfo(gentity_s *self, float *source)
     G_AddDebugString(v12, color, (float)(v10 * (float)0.75), v8, (int)v9);
 }
 
-void __fastcall EntInfo_Item(gentity_s *self, float *source)
+void __cdecl EntInfo_Item(gentity_s *self, float *source)
 {
     double v4; // fp0
     int *p_index; // r30

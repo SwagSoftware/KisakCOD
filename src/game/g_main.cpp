@@ -857,7 +857,7 @@ void G_RegisterDebugDvars()
     G_RegisterMissileDebugDvars();
 }
 
-void __fastcall TRACK_g_main()
+void __cdecl TRACK_g_main()
 {
     track_static_alloc_internal(&level, 15892, "level", 9);
     track_static_alloc_internal(g_entities, 1366528, "g_entities", 9);
@@ -870,17 +870,17 @@ void __fastcall TRACK_g_main()
     track_static_alloc_internal(g_actors, 250368, "g_actors", 5);
 }
 
-int __fastcall G_GetServerSnapTime()
+int __cdecl G_GetServerSnapTime()
 {
     return level.snapTime;
 }
 
-int __fastcall G_GetTime()
+int __cdecl G_GetTime()
 {
     return level.time;
 }
 
-int __fastcall G_GetSpecialIndex(int entnum)
+int __cdecl G_GetSpecialIndex(int entnum)
 {
     return level.specialIndex[entnum];
 }
@@ -911,7 +911,7 @@ void G_InitDvars()
     ProfLoad_End();
 }
 
-void __fastcall G_FreeEntities()
+void __cdecl G_FreeEntities()
 {
     int v0; // r29
     gentity_s *v1; // r31
@@ -947,7 +947,7 @@ void __fastcall G_FreeEntities()
     Path_CheckUserCountLeaks();
 }
 
-void *__fastcall Hunk_AllocActorXAnimServer(int size)
+void *__cdecl Hunk_AllocActorXAnimServer(int size)
 {
     return Hunk_AllocLow(size, "Hunk_AllocActorXAnimServer", 5);
 }
@@ -1045,7 +1045,7 @@ void G_FreeAnimTreeInstances()
     } while (v4);
 }
 
-void __fastcall G_ClearLowHunk()
+void __cdecl G_ClearLowHunk()
 {
     if (level.loading == LOADING_SAVEGAME)
         XAnimDisableLeakCheck();
@@ -1059,17 +1059,17 @@ void __fastcall G_ClearLowHunk()
     Hunk_ResetDebugMem();
 }
 
-bool __fastcall G_DemoPlaying()
+bool __cdecl G_DemoPlaying()
 {
     return level.demoplaying;
 }
 
-void *__fastcall Hunk_AllocXAnimServer(int size)
+void *__cdecl Hunk_AllocXAnimServer(int size)
 {
     return Hunk_AllocLow(size, "Hunk_AllocXAnimServer", 11);
 }
 
-int __fastcall G_ExitAfterConnectPaths()
+int __cdecl G_ExitAfterConnectPaths()
 {
     return 0;
 }
@@ -1114,7 +1114,7 @@ void ScriptIOFilesShutdown()
     level.openScriptIOFileHandles[0] = 0;
 }
 
-void __fastcall G_PrintFastFileErrors(const char *fastfile, int a2, const char *a3)
+void __cdecl G_PrintFastFileErrors(const char *fastfile, int a2, const char *a3)
 {
     XAssetHeader *XAssetHeader; // r28
 
@@ -1130,7 +1130,7 @@ void __fastcall G_PrintFastFileErrors(const char *fastfile, int a2, const char *
     }
 }
 
-void __fastcall G_PrintAllFastFileErrors(int a1, int a2, const char *a3)
+void __cdecl G_PrintAllFastFileErrors(int a1, int a2, const char *a3)
 {
     const char *v3; // r5
     int v4; // r4
@@ -1142,7 +1142,7 @@ void __fastcall G_PrintAllFastFileErrors(int a1, int a2, const char *a3)
     G_PrintFastFileErrors(sv_mapname->current.string, v6, v5);
 }
 
-void __fastcall G_InitGame(
+void __cdecl G_InitGame(
     unsigned int randomSeed,
     int restart,
     int checksum,
@@ -1355,7 +1355,7 @@ LABEL_43:
     level.initializing = 0;
 }
 
-void __fastcall G_ShutdownGame(int clearScripts)
+void __cdecl G_ShutdownGame(int clearScripts)
 {
     unsigned __int8 v2; // r11
     int v3; // r4
@@ -1428,17 +1428,17 @@ void G_ChangeLevel()
     }
 }
 
-bool __fastcall G_IsNextMapWaiting()
+bool __cdecl G_IsNextMapWaiting()
 {
     return g_reloading->current.integer == 4;
 }
 
-void __fastcall G_SetNextMap(const char *mapname)
+void __cdecl G_SetNextMap(const char *mapname)
 {
     I_strncpyz(g_nextMap, mapname, 64);
 }
 
-void __fastcall G_LoadNextMap()
+void __cdecl G_LoadNextMap()
 {
     const char *v0; // r4
     char *v1; // r3
@@ -1458,7 +1458,7 @@ void __fastcall G_LoadNextMap()
     Cbuf_AddText(0, v0);
 }
 
-void __fastcall G_CheckReloadStatus()
+void __cdecl G_CheckReloadStatus()
 {
     const char *v0; // r3
 
@@ -1505,7 +1505,7 @@ void __fastcall G_CheckReloadStatus()
     }
 }
 
-void __fastcall G_ApplyEntityEq(gentity_s *ent)
+void __cdecl G_ApplyEntityEq(gentity_s *ent)
 {
     gentity_s *Player; // r3
     gclient_s *client; // r11
@@ -1569,11 +1569,11 @@ void __fastcall G_ApplyEntityEq(gentity_s *ent)
     }
 }
 
-void __fastcall G_RunThink(gentity_s *ent)
+void __cdecl G_RunThink(gentity_s *ent)
 {
     int nextthink; // r10
     int handler; // r10
-    void(__fastcall * think)(gentity_s *); // r31
+    void(__cdecl * think)(gentity_s *); // r31
 
     nextthink = ent->nextthink;
     if (nextthink > 0 && nextthink <= level.time)
@@ -1589,7 +1589,7 @@ void __fastcall G_RunThink(gentity_s *ent)
     }
 }
 
-void __fastcall G_DrawEntityBBoxes(int a1, int a2, int a3, const float *a4)
+void __cdecl G_DrawEntityBBoxes(int a1, int a2, int a3, const float *a4)
 {
     const dvar_s *v4; // r9
     int v5; // r27
@@ -1674,7 +1674,7 @@ void DebugDumpAIEventListeners()
     }
 }
 
-void __fastcall G_CheckLoadGame(int checksum, SaveGame *save)
+void __cdecl G_CheckLoadGame(int checksum, SaveGame *save)
 {
     loading_t loading; // r11
 
@@ -1713,7 +1713,7 @@ LABEL_8:
     level.loading = LOADING;
 }
 
-void __fastcall G_XAnimUpdateEnt(gentity_s *ent)
+void __cdecl G_XAnimUpdateEnt(gentity_s *ent)
 {
     while (ent->r.inuse)
     {
@@ -1725,7 +1725,7 @@ void __fastcall G_XAnimUpdateEnt(gentity_s *ent)
     }
 }
 
-void __fastcall G_ClientDoPerFrameNotifies(gentity_s *ent)
+void __cdecl G_ClientDoPerFrameNotifies(gentity_s *ent)
 {
     gclient_s *client; // r31
     unsigned int weapon; // r3
@@ -1776,7 +1776,7 @@ void __fastcall G_ClientDoPerFrameNotifies(gentity_s *ent)
     }
 }
 
-void __fastcall G_RunFrameForEntityInternal(gentity_s *ent)
+void __cdecl G_RunFrameForEntityInternal(gentity_s *ent)
 {
     int eventTime; // r10
     int eType; // r11
@@ -1843,7 +1843,7 @@ void __fastcall G_RunFrameForEntityInternal(gentity_s *ent)
     G_RunMover(ent);
 }
 
-void __fastcall G_RunFrameForEntity(gentity_s *ent)
+void __cdecl G_RunFrameForEntity(gentity_s *ent)
 {
     tagInfo_s *tagInfo; // r10
     const char *v3; // r3
@@ -2002,19 +2002,19 @@ void __fastcall G_RunFrameForEntity(gentity_s *ent)
     }
 }
 
-void __fastcall G_RunPreFrame()
+void __cdecl G_RunPreFrame()
 {
     level.previousTime = level.time;
     ++level.framenum;
     level.time += 50;
 }
 
-int __fastcall G_GetFramePos()
+int __cdecl G_GetFramePos()
 {
     return level.framePos;
 }
 
-int __fastcall NotifyTriggers()
+int __cdecl NotifyTriggers()
 {
     int v0; // r18
     int v1; // r25
@@ -2066,7 +2066,7 @@ int __fastcall NotifyTriggers()
     return v0;
 }
 
-void __fastcall G_SendClientMessages()
+void __cdecl G_SendClientMessages()
 {
     int v0; // r28
     int v1; // r25
@@ -2240,7 +2240,7 @@ void __fastcall G_SendClientMessages()
         SaveRegisteredItems();
 }
 
-void __fastcall G_ArchiveSpecialEntityInfo(const entityState_s *es, MemoryFile *memFile)
+void __cdecl G_ArchiveSpecialEntityInfo(const entityState_s *es, MemoryFile *memFile)
 {
     int eType; // r11
     int v5; // r30
@@ -2260,7 +2260,7 @@ void __fastcall G_ArchiveSpecialEntityInfo(const entityState_s *es, MemoryFile *
     }
 }
 
-void __fastcall G_TraceCapsule(
+void __cdecl G_TraceCapsule(
     trace_t *results,
     const float *start,
     const float *mins,
@@ -2277,7 +2277,7 @@ void __fastcall G_TraceCapsule(
     SV_Trace(results, start, mins, maxs, end, v15, contentmask, 0, v13, v14);
 }
 
-int __fastcall G_TraceCapsuleComplete(
+int __cdecl G_TraceCapsuleComplete(
     const float *start,
     const float *mins,
     const float *maxs,
@@ -2291,7 +2291,7 @@ int __fastcall G_TraceCapsuleComplete(
     return SV_TracePassed(start, mins, maxs, end, passEntityNum, 2175, contentmask, 0, v7, v8);
 }
 
-void __fastcall G_LocationalTrace(
+void __cdecl G_LocationalTrace(
     trace_t *results,
     const float *start,
     const float *end,
@@ -2307,7 +2307,7 @@ void __fastcall G_LocationalTrace(
     SV_Trace(results, start, vec3_origin, vec3_origin, end, v12, contentmask, 1, v10, v11);
 }
 
-void __fastcall G_LocationalTraceAllowChildren(
+void __cdecl G_LocationalTraceAllowChildren(
     trace_t *results,
     const float *start,
     const float *end,
@@ -2324,7 +2324,7 @@ void __fastcall G_LocationalTraceAllowChildren(
     SV_Trace(results, start, vec3_origin, vec3_origin, end, v12, contentmask, 1, v10, v11);
 }
 
-int __fastcall G_LocationalTracePassed(
+int __cdecl G_LocationalTracePassed(
     const float *start,
     const float *end,
     int passEntityNum,
@@ -2338,17 +2338,17 @@ int __fastcall G_LocationalTracePassed(
     return SV_TracePassed(start, vec3_origin, vec3_origin, end, passEntityNum, passEntityNum1, contentmask, 1, v7, v8);
 }
 
-void __fastcall G_SightTrace(int *hitNum, const float *start, const float *end, int passEntityNum, int contentmask)
+void __cdecl G_SightTrace(int *hitNum, const float *start, const float *end, int passEntityNum, int contentmask)
 {
     SV_SightTrace(hitNum, start, vec3_origin, vec3_origin, end, passEntityNum, 2175, contentmask);
 }
 
-void __fastcall G_AddDebugString(const float *xyz, const float *color, double scale, const char *pszText, int a5)
+void __cdecl G_AddDebugString(const float *xyz, const float *color, double scale, const char *pszText, int a5)
 {
     CL_AddDebugString(xyz, color, scale, pszText, a5, 1);
 }
 
-void __fastcall G_AddDebugStringWithDuration(
+void __cdecl G_AddDebugStringWithDuration(
     const float *xyz,
     const float *color,
     double scale,
@@ -2358,7 +2358,7 @@ void __fastcall G_AddDebugStringWithDuration(
     CL_AddDebugString(xyz, color, scale, pszText, duration, 1);
 }
 
-void __fastcall ShowEntityInfo()
+void __cdecl ShowEntityInfo()
 {
     int integer; // r11
     int v1; // r30
@@ -2366,7 +2366,7 @@ void __fastcall ShowEntityInfo()
     entityShared_t *p_r; // r31
     int v4; // r11
     float v5; // r11
-    void(__fastcall * v6)(gentity_s *, float *); // r11
+    void(__cdecl * v6)(gentity_s *, float *); // r11
     int v7; // r11
     int v8; // r31
     int EntityHitId; // r4
@@ -2374,7 +2374,7 @@ void __fastcall ShowEntityInfo()
     int v11; // r11
     int v12; // r9
     gentity_s *v13; // r31
-    void(__fastcall * entinfo)(gentity_s *, float *); // r11
+    void(__cdecl * entinfo)(gentity_s *, float *); // r11
     unsigned __int8 *v15; // [sp+8h] [-F8h]
     int v16; // [sp+Ch] [-F4h]
     float v17[4]; // [sp+60h] [-A0h] BYREF
@@ -2471,7 +2471,7 @@ void __fastcall ShowEntityInfo()
     }
 }
 
-int __fastcall G_RunFrame(ServerFrameExtent extent, int timeCap)
+int __cdecl G_RunFrame(ServerFrameExtent extent, int timeCap)
 {
     int currentIndex; // r5
     int num_entities; // r11
@@ -2772,7 +2772,7 @@ int __fastcall G_RunFrame(ServerFrameExtent extent, int timeCap)
     return 1;
 }
 
-void __fastcall G_LoadLevel()
+void __cdecl G_LoadLevel()
 {
     if (level.loading != LOADING_LEVEL && level.loading != LOADING_SAVEGAME)
         MyAssertHandler(

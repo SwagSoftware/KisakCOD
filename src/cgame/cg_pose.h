@@ -7,14 +7,14 @@
 #include <xanim/dobj.h>
 #include <bgame/bg_local.h>
 
-void __fastcall QuatMultiply(float *in1, float *in2, float *out);
-void __fastcall PitchToQuat(double pitch, float *quat, float *a3);
-void __fastcall RollToQuat(double roll, float *quat, float *a3);
-void __fastcall LocalMatrixTransformVectorQuatTrans(const float *in, const DObjAnimMat *mat, float *out);
-void __fastcall NormalizeQuatTrans(DObjAnimMat *mat);
-void __fastcall CG_mg42_DoControllers(const cpose_t *pose, const DObj_s *obj, int *partBits, long double a4);
-void __fastcall CG_Vehicle_DoControllers(const cpose_t *pose, const DObj_s *obj, int *partBits);
-void __fastcall CG_Actor_DoControllers(const cpose_t *pose, const DObj_s *obj, int *partBits);
-void __fastcall CG_DoBaseOriginController(const cpose_t *pose, const DObj_s *obj, int *setPartBits);
-void __fastcall CG_DoControllers(const cpose_t *pose, const DObj_s *obj, int *partBits);
-DObjAnimMat *__fastcall CG_DObjCalcPose(const cpose_t *pose, const DObj_s *obj, int *partBits);
+void __cdecl QuatMultiply(float *in1, float *in2, float *out);
+void __cdecl PitchToQuat(double pitch, float *quat, float *a3);
+void __cdecl RollToQuat(double roll, float *quat, float *a3);
+void __cdecl LocalMatrixTransformVectorQuatTrans(const float *in, const DObjAnimMat *mat, float *out);
+void __cdecl NormalizeQuatTrans(DObjAnimMat *mat);
+void __cdecl CG_mg42_DoControllers(const cpose_t *pose, const DObj_s *obj, int *partBits, long double a4);
+void __cdecl CG_Vehicle_DoControllers(const cpose_t *pose, const DObj_s *obj, int *partBits);
+void __cdecl CG_Actor_DoControllers(const cpose_t *pose, const DObj_s *obj, int *partBits);
+void __cdecl CG_DoBaseOriginController(const cpose_t *pose, const DObj_s *obj, int *setPartBits);
+void __cdecl CG_DoControllers(const cpose_t *pose, const DObj_s *obj, int *partBits);
+DObjAnimMat *__cdecl CG_DObjCalcPose(const cpose_t *pose, const DObj_s *obj, int *partBits);

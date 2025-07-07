@@ -4,12 +4,12 @@
 
 #include "actor_animscripted.h"
 
-int __fastcall Actor_ScriptedAnim_Start(actor_s *self, ai_state_t ePrevState)
+int __cdecl Actor_ScriptedAnim_Start(actor_s *self, ai_state_t ePrevState)
 {
     return 1;
 }
 
-void __fastcall Actor_ScriptedAnim_Finish(actor_s *self, ai_state_t eNextState)
+void __cdecl Actor_ScriptedAnim_Finish(actor_s *self, ai_state_t eNextState)
 {
     gentity_s *ent; // r31
     animscripted_s *scripted; // r3
@@ -25,7 +25,7 @@ void __fastcall Actor_ScriptedAnim_Finish(actor_s *self, ai_state_t eNextState)
     }
 }
 
-actor_think_result_t __fastcall Actor_ScriptedAnim_Think(actor_s *self)
+actor_think_result_t __cdecl Actor_ScriptedAnim_Think(actor_s *self)
 {
     int keepNodeDuringScriptedAnim; // r10
     actor_s *v3; // r3
@@ -80,13 +80,13 @@ actor_think_result_t __fastcall Actor_ScriptedAnim_Think(actor_s *self)
     return result;
 }
 
-int __fastcall Actor_CustomAnim_Start(actor_s *self, ai_state_t ePrevState)
+int __cdecl Actor_CustomAnim_Start(actor_s *self, ai_state_t ePrevState)
 {
     Scr_Notify(self->ent, scr_const.begin_custom_anim, 0);
     return 1;
 }
 
-int __fastcall Actor_CustomAnim_Think(actor_s *self)
+int __cdecl Actor_CustomAnim_Think(actor_s *self)
 {
     scr_animscript_t *p_AnimScriptSpecific; // r28
     int keepNodeDuringScriptedAnim; // r10

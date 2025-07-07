@@ -16,7 +16,7 @@
 //  struct dvar_s const *const hud_health_pulserate_critical 827d8a94     cg_newdraw.obj
 //  struct dvar_s const *const hud_fade_healthbar 827d8aa0     cg_newdraw.obj
 
-void __fastcall CG_AntiBurnInHUD_RegisterDvars(int a1, unsigned __int16 a2, const char *a3)
+void __cdecl CG_AntiBurnInHUD_RegisterDvars(int a1, unsigned __int16 a2, const char *a3)
 {
     const char *v3; // r5
     unsigned __int16 v4; // r4
@@ -161,7 +161,7 @@ void __fastcall CG_AntiBurnInHUD_RegisterDvars(int a1, unsigned __int16 a2, cons
         "Signals the \"FacemaskOverlay\" menu to draw, meant to be changed by script.");
 }
 
-unsigned int __fastcall CG_GetSelectedWeaponIndex(const cg_s *cgameGlob)
+unsigned int __cdecl CG_GetSelectedWeaponIndex(const cg_s *cgameGlob)
 {
     unsigned int *p_weaponSelect; // r29
     unsigned int weaponSelect; // r30
@@ -174,7 +174,7 @@ unsigned int __fastcall CG_GetSelectedWeaponIndex(const cg_s *cgameGlob)
         return cgameGlob->predictedPlayerState.weapon;
 }
 
-int __fastcall CG_IsHudHidden()
+int __cdecl CG_IsHudHidden()
 {
     unsigned __int8 v0; // r11
 
@@ -186,7 +186,7 @@ int __fastcall CG_IsHudHidden()
     return v0;
 }
 
-int __fastcall CG_CheckPlayerForLowAmmoSpecific(const cg_s *cgameGlob, unsigned int weapIndex)
+int __cdecl CG_CheckPlayerForLowAmmoSpecific(const cg_s *cgameGlob, unsigned int weapIndex)
 {
     playerState_s *p_predictedPlayerState; // r30
     int TotalAmmoReserve; // r29
@@ -222,7 +222,7 @@ int __fastcall CG_CheckPlayerForLowAmmoSpecific(const cg_s *cgameGlob, unsigned 
     return 0;
 }
 
-int __fastcall CG_CheckPlayerForLowAmmo(const cg_s *cgameGlob)
+int __cdecl CG_CheckPlayerForLowAmmo(const cg_s *cgameGlob)
 {
     unsigned int *p_weaponSelect; // r29
     unsigned int weaponSelect; // r30
@@ -236,7 +236,7 @@ int __fastcall CG_CheckPlayerForLowAmmo(const cg_s *cgameGlob)
 }
 
 // local variable allocation has failed, the output may be wrong!
-int __fastcall CG_CheckPlayerForLowClipSpecific(const cg_s *cgameGlob, unsigned int weapIndex)
+int __cdecl CG_CheckPlayerForLowClipSpecific(const cg_s *cgameGlob, unsigned int weapIndex)
 {
     int v4; // r31
     WeaponDef *WeaponDef; // r3
@@ -275,7 +275,7 @@ int __fastcall CG_CheckPlayerForLowClipSpecific(const cg_s *cgameGlob, unsigned 
     return 0;
 }
 
-int __fastcall CG_CheckPlayerForLowClip(const cg_s *cgameGlob)
+int __cdecl CG_CheckPlayerForLowClip(const cg_s *cgameGlob)
 {
     unsigned int *p_weaponSelect; // r29
     unsigned int weaponSelect; // r30
@@ -288,7 +288,7 @@ int __fastcall CG_CheckPlayerForLowClip(const cg_s *cgameGlob)
         return CG_CheckPlayerForLowClipSpecific(cgameGlob, cgameGlob->predictedPlayerState.weapon);
 }
 
-void __fastcall CG_CalcPlayerSprintColor(const cg_s *cgameGlob, const playerState_s *ps, DvarValue *color)
+void __cdecl CG_CalcPlayerSprintColor(const cg_s *cgameGlob, const playerState_s *ps, DvarValue *color)
 {
     __int64 v6; // r8
     int SprintLeft; // r3
@@ -334,7 +334,7 @@ void __fastcall CG_CalcPlayerSprintColor(const cg_s *cgameGlob, const playerStat
     }
 }
 
-void __fastcall CG_DrawStanceIcon(
+void __cdecl CG_DrawStanceIcon(
     int localClientNum,
     const rectDef_s *rect,
     float *drawColor,
@@ -381,7 +381,7 @@ void __fastcall CG_DrawStanceIcon(
 }
 
 // local variable allocation has failed, the output may be wrong!
-void __fastcall CG_DrawStanceHintPrints(
+void __cdecl CG_DrawStanceHintPrints(
     int localClientNum,
     const rectDef_s *rect,
     double x,
@@ -649,7 +649,7 @@ void __fastcall CG_DrawStanceHintPrints(
     } while (v10 < 3);
 }
 
-float __fastcall CG_CalcPlayerHealth(const playerState_s *ps)
+float __cdecl CG_CalcPlayerHealth(const playerState_s *ps)
 {
     _BYTE v1[12]; // r11 OVERLAPPED
 
@@ -668,7 +668,7 @@ float __fastcall CG_CalcPlayerHealth(const playerState_s *ps)
     return *((float *)&_FP1 + 1);
 }
 
-float __fastcall CG_FadeLowHealthOverlay(const cg_s *cgameGlob)
+float __cdecl CG_FadeLowHealthOverlay(const cg_s *cgameGlob)
 {
     _BYTE v1[12]; // r11 OVERLAPPED
     double healthOverlayToAlpha; // fp31
@@ -701,7 +701,7 @@ float __fastcall CG_FadeLowHealthOverlay(const cg_s *cgameGlob)
     return *((float *)&v3 + 1);
 }
 
-void __fastcall CG_PulseLowHealthOverlay(cg_s *cgameGlob, double healthRatio)
+void __cdecl CG_PulseLowHealthOverlay(cg_s *cgameGlob, double healthRatio)
 {
     int *p_healthOverlayPulseDuration; // r29
     int *p_healthOverlayPulseTime; // r23
@@ -809,7 +809,7 @@ LABEL_16:
     }
 }
 
-void __fastcall CG_DrawPlayerLowHealthOverlay(
+void __cdecl CG_DrawPlayerLowHealthOverlay(
     int localClientNum,
     const rectDef_s *rect,
     Material *material,
@@ -879,7 +879,7 @@ void __fastcall CG_DrawPlayerLowHealthOverlay(
     }
 }
 
-int __fastcall CG_ServerMaterialName(int localClientNum, int index, char *materialName, unsigned int maxLen)
+int __cdecl CG_ServerMaterialName(int localClientNum, int index, char *materialName, unsigned int maxLen)
 {
     const char *ConfigString; // r3
     const char *v7; // r11
@@ -905,7 +905,7 @@ int __fastcall CG_ServerMaterialName(int localClientNum, int index, char *materi
     return 1;
 }
 
-Material *__fastcall CG_ObjectiveIcon(int icon, unsigned int type)
+Material *__cdecl CG_ObjectiveIcon(int icon, unsigned int type)
 {
     char v5[72]; // [sp+50h] [-60h] BYREF
 
@@ -923,7 +923,7 @@ Material *__fastcall CG_ObjectiveIcon(int icon, unsigned int type)
         return cgMedia.objectiveMaterials[type];
 }
 
-void __fastcall CG_UpdateCursorHints(int localClientNum)
+void __cdecl CG_UpdateCursorHints(int localClientNum)
 {
     if (localClientNum)
         MyAssertHandler(
@@ -942,7 +942,7 @@ void __fastcall CG_UpdateCursorHints(int localClientNum)
     }
 }
 
-char *__fastcall CG_GetWeaponUseString(int localClientNum, const char **secondaryString)
+char *__cdecl CG_GetWeaponUseString(int localClientNum, const char **secondaryString)
 {
     int cursorHintIcon; // r11
     int v5; // r30
@@ -1005,7 +1005,7 @@ char *__fastcall CG_GetWeaponUseString(int localClientNum, const char **secondar
     return UI_ReplaceConversionString(v8, v11);
 }
 
-char *__fastcall CG_GetUseString(int localClientNum)
+char *__cdecl CG_GetUseString(int localClientNum)
 {
     int cursorHintString; // r11
     const char *ConfigString; // r3
@@ -1046,7 +1046,7 @@ char *__fastcall CG_GetUseString(int localClientNum)
     return UI_ReplaceConversionString(v6, v8);
 }
 
-void __fastcall CG_DrawCursorhint(
+void __cdecl CG_DrawCursorhint(
     int localClientNum,
     const rectDef_s *rect,
     Font_s *font,
@@ -1481,7 +1481,7 @@ void __fastcall CG_DrawCursorhint(
     }
 }
 
-void __fastcall CG_DrawHoldBreathHint(
+void __cdecl CG_DrawHoldBreathHint(
     int localClientNum,
     const rectDef_s *rect,
     Font_s *font,
@@ -1588,7 +1588,7 @@ void __fastcall CG_DrawHoldBreathHint(
     }
 }
 
-void __fastcall CG_DrawMantleHint(
+void __cdecl CG_DrawMantleHint(
     int localClientNum,
     const rectDef_s *rect,
     Font_s *font,
@@ -1699,17 +1699,17 @@ void __fastcall CG_DrawMantleHint(
     }
 }
 
-void __fastcall CG_DrawSaving(int localClientNum, const rectDef_s *rect, float *color, Material *material)
+void __cdecl CG_DrawSaving(int localClientNum, const rectDef_s *rect, float *color, Material *material)
 {
     ;
 }
 
-int __fastcall CG_OwnerDrawVisible(int flags)
+int __cdecl CG_OwnerDrawVisible(int flags)
 {
     return 0;
 }
 
-void __fastcall CG_DrawTankBody(int localClientNum, rectDef_s *rect, Material *material, float *color)
+void __cdecl CG_DrawTankBody(int localClientNum, rectDef_s *rect, Material *material, float *color)
 {
     centity_s *Entity; // r3
     double v7; // fp31
@@ -1752,7 +1752,7 @@ void __fastcall CG_DrawTankBody(int localClientNum, rectDef_s *rect, Material *m
 }
 
 // local variable allocation has failed, the output may be wrong!
-void __fastcall CG_DrawDeadQuote(
+void __cdecl CG_DrawDeadQuote(
     const cg_s *cgameGlob,
     rectDef_s *rect,
     Font_s *font,
@@ -1817,7 +1817,7 @@ void __fastcall CG_DrawDeadQuote(
     }
 }
 
-void __fastcall CG_DrawTankBarrel(int localClientNum, const rectDef_s *rect, Material *material, const float *color)
+void __cdecl CG_DrawTankBarrel(int localClientNum, const rectDef_s *rect, Material *material, const float *color)
 {
     centity_s *Entity; // r3
     const cpose_t *p_pose; // r28
@@ -1892,7 +1892,7 @@ void __fastcall CG_DrawTankBarrel(int localClientNum, const rectDef_s *rect, Mat
 }
 
 // local variable allocation has failed, the output may be wrong!
-void __fastcall CG_DrawInvalidCmdHint(
+void __cdecl CG_DrawInvalidCmdHint(
     int localClientNum,
     const rectDef_s *rect,
     Font_s *font,
@@ -2054,7 +2054,7 @@ void __fastcall CG_DrawInvalidCmdHint(
     }
 }
 
-void __fastcall CG_ArchiveState(int localClientNum, MemoryFile *memFile)
+void __cdecl CG_ArchiveState(int localClientNum, MemoryFile *memFile)
 {
     if (localClientNum)
         MyAssertHandler(
@@ -2088,7 +2088,7 @@ void __fastcall CG_ArchiveState(int localClientNum, MemoryFile *memFile)
     MemFile_ArchiveData(memFile, 128, cgArray[0].hudElemSound);
 }
 
-float __fastcall CG_FadeHudMenu(int localClientNum, const dvar_s *fadeDvar, int displayStartTime, int duration)
+float __cdecl CG_FadeHudMenu(int localClientNum, const dvar_s *fadeDvar, int displayStartTime, int duration)
 {
     double v8; // fp1
     char v9; // r11
@@ -2120,7 +2120,7 @@ float __fastcall CG_FadeHudMenu(int localClientNum, const dvar_s *fadeDvar, int 
     return *((float *)&v8 + 1);
 }
 
-void __fastcall CG_DrawPlayerAmmoBackdrop(int localClientNum, const rectDef_s *rect, float *color, Material *material)
+void __cdecl CG_DrawPlayerAmmoBackdrop(int localClientNum, const rectDef_s *rect, float *color, Material *material)
 {
     long double v7; // fp2
     long double v8; // fp2
@@ -2163,7 +2163,7 @@ void __fastcall CG_DrawPlayerAmmoBackdrop(int localClientNum, const rectDef_s *r
 }
 
 // local variable allocation has failed, the output may be wrong!
-void __fastcall CG_DrawPlayerAmmoValue(
+void __cdecl CG_DrawPlayerAmmoValue(
     int localClientNum,
     const rectDef_s *rect,
     Font_s *font,
@@ -2636,7 +2636,7 @@ void __fastcall CG_DrawPlayerAmmoValue(
     }
 }
 
-void __fastcall CG_DrawPlayerWeaponName(
+void __cdecl CG_DrawPlayerWeaponName(
     int localClientNum,
     const rectDef_s *rect,
     Font_s *font,
@@ -2733,7 +2733,7 @@ void __fastcall CG_DrawPlayerWeaponName(
     }
 }
 
-void __fastcall CG_DrawPlayerWeaponNameBack(
+void __cdecl CG_DrawPlayerWeaponNameBack(
     int localClientNum,
     const rectDef_s *rect,
     Font_s *font,
@@ -2800,7 +2800,7 @@ void __fastcall CG_DrawPlayerWeaponNameBack(
 }
 
 // local variable allocation has failed, the output may be wrong!
-void __fastcall CG_DrawPlayerStance(
+void __cdecl CG_DrawPlayerStance(
     int localClientNum,
     const rectDef_s *rect,
     Font_s *color,
@@ -2958,7 +2958,7 @@ void __fastcall CG_DrawPlayerStance(
     }
 }
 
-void __fastcall CG_DrawPlayerSprintBack(
+void __cdecl CG_DrawPlayerSprintBack(
     int localClientNum,
     const rectDef_s *rect,
     Material *material,
@@ -3027,7 +3027,7 @@ void __fastcall CG_DrawPlayerSprintBack(
     }
 }
 
-void __fastcall CG_DrawPlayerSprintMeter(
+void __cdecl CG_DrawPlayerSprintMeter(
     int localClientNum,
     const rectDef_s *rect,
     Material *material,
@@ -3118,7 +3118,7 @@ void __fastcall CG_DrawPlayerSprintMeter(
     }
 }
 
-void __fastcall CG_DrawPlayerBarHealth(int localClientNum, const rectDef_s *rect, Material *material, float *color)
+void __cdecl CG_DrawPlayerBarHealth(int localClientNum, const rectDef_s *rect, Material *material, float *color)
 {
     double v7; // fp31
     long double v8; // fp2
@@ -3292,7 +3292,7 @@ void __fastcall CG_DrawPlayerBarHealth(int localClientNum, const rectDef_s *rect
 }
 
 // local variable allocation has failed, the output may be wrong!
-void __fastcall CG_DrawPlayerBarHealthBack(
+void __cdecl CG_DrawPlayerBarHealthBack(
     int localClientNum,
     const rectDef_s *rect,
     Material *material,
@@ -3460,7 +3460,7 @@ void __fastcall CG_DrawPlayerBarHealthBack(
 }
 
 // local variable allocation has failed, the output may be wrong!
-void __fastcall CG_OwnerDraw(
+void __cdecl CG_OwnerDraw(
     rectDef_s *parentRect,
     double x,
     double y,

@@ -1,3 +1,7 @@
+#ifndef KISAK_MP
+#error This File is MultiPlayer Only
+#endif
+
 #include "net_chan_mp.h"
 #include "qcommon.h"
 #include <client_mp/client_mp.h>

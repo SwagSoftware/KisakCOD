@@ -9,14 +9,14 @@ unsigned char *riflePriorityMap;
 unsigned short **modNames;
 float *g_fHitLocDamageMult;
 
-void __fastcall TRACK_g_combat()
+void __cdecl TRACK_g_combat()
 {
     track_static_alloc_internal(g_fHitLocDamageMult, 76, "g_fHitLocDamageMult", 9);
     track_static_alloc_internal(g_HitLocNames, 76, "g_HitLocNames", 9);
     track_static_alloc_internal(g_HitLocConstNames, 38, "g_HitLocConstNames", 9);
 }
 
-void __fastcall G_HitLocStrcpy(unsigned __int8 *pMember, const char *pszKeyValue)
+void __cdecl G_HitLocStrcpy(unsigned __int8 *pMember, const char *pszKeyValue)
 {
     int v2; // r10
     int v3; // r11
@@ -29,7 +29,7 @@ void __fastcall G_HitLocStrcpy(unsigned __int8 *pMember, const char *pszKeyValue
     } while (v3);
 }
 
-void __fastcall G_ParseHitLocDmgTable()
+void __cdecl G_ParseHitLocDmgTable()
 {
     int v0; // r30
     unsigned __int16 *v1; // r29
@@ -59,7 +59,7 @@ void __fastcall G_ParseHitLocDmgTable()
         Com_Error(ERR_DROP, byte_8202D650, "info/ai_lochit_dmgtable");
 }
 
-void __fastcall TossClientItems(gentity_s *self)
+void __cdecl TossClientItems(gentity_s *self)
 {
     gclient_s *client; // r30
     unsigned int weapon; // r31
@@ -98,7 +98,7 @@ void __fastcall TossClientItems(gentity_s *self)
     }
 }
 
-void __fastcall LookAtKiller(gentity_s *self, gentity_s *inflictor, gentity_s *attacker)
+void __cdecl LookAtKiller(gentity_s *self, gentity_s *inflictor, gentity_s *attacker)
 {
     double v3; // fp0
     double v4; // fp12
@@ -128,7 +128,7 @@ void __fastcall LookAtKiller(gentity_s *self, gentity_s *inflictor, gentity_s *a
     self->client->ps.stats[1] = (int)self->r.currentAngles[1];
 }
 
-int __fastcall G_MeansOfDeathFromScriptParam(unsigned int scrParam)
+int __cdecl G_MeansOfDeathFromScriptParam(unsigned int scrParam)
 {
     unsigned __int16 ConstString; // r3
     int v3; // r10
@@ -154,7 +154,7 @@ int __fastcall G_MeansOfDeathFromScriptParam(unsigned int scrParam)
     return v3;
 }
 
-void __fastcall player_die(
+void __cdecl player_die(
     gentity_s *self,
     gentity_s *inflictor,
     gentity_s *attacker,
@@ -274,7 +274,7 @@ void __fastcall player_die(
     }
 }
 
-float __fastcall G_GetWeaponHitLocationMultiplier(unsigned int hitLoc, unsigned int weapon)
+float __cdecl G_GetWeaponHitLocationMultiplier(unsigned int hitLoc, unsigned int weapon)
 {
     WeaponDef *WeaponDef; // r3
     double v5; // fp1
@@ -293,7 +293,7 @@ float __fastcall G_GetWeaponHitLocationMultiplier(unsigned int hitLoc, unsigned 
     return *((float *)&v5 + 1);
 }
 
-void __fastcall handleDeathInvulnerability(gentity_s *targ, int prevHealth, int mod)
+void __cdecl handleDeathInvulnerability(gentity_s *targ, int prevHealth, int mod)
 {
     gclient_s *client; // r28
     int health; // r11
@@ -338,7 +338,7 @@ void __fastcall handleDeathInvulnerability(gentity_s *targ, int prevHealth, int 
     }
 }
 
-void __fastcall G_DamageNotify(
+void __cdecl G_DamageNotify(
     unsigned __int16 notify,
     gentity_s *targ,
     gentity_s *attacker,
@@ -412,7 +412,7 @@ void __fastcall G_DamageNotify(
     Scr_Notify(targ, notify, 8u);
 }
 
-int __fastcall G_GetWeaponIndexForEntity(const gentity_s *ent)
+int __cdecl G_GetWeaponIndexForEntity(const gentity_s *ent)
 {
     gclient_s *client; // r28
     unsigned int viewlocked_entNum; // r7
@@ -457,7 +457,7 @@ int __fastcall G_GetWeaponIndexForEntity(const gentity_s *ent)
     return result;
 }
 
-void __fastcall G_DamageKnockback(
+void __cdecl G_DamageKnockback(
     gentity_s *targ,
     const gentity_s *attacker,
     const float *dir,
@@ -544,7 +544,7 @@ void __fastcall G_DamageKnockback(
     }
 }
 
-bool __fastcall G_ShouldTakeBulletDamage(gentity_s *targ, gentity_s *attacker)
+bool __cdecl G_ShouldTakeBulletDamage(gentity_s *targ, gentity_s *attacker)
 {
     sentient_s *sentient; // r11
     actor_s *actor; // r11
@@ -565,7 +565,7 @@ bool __fastcall G_ShouldTakeBulletDamage(gentity_s *targ, gentity_s *attacker)
         || attacker->actor->eState[attacker->actor->stateLevel] == AIS_SCRIPTEDANIM;
 }
 
-void __fastcall G_Damage(
+void __cdecl G_Damage(
     gentity_s *targ,
     gentity_s *inflictor,
     gentity_s *attacker,
@@ -623,9 +623,9 @@ void __fastcall G_Damage(
     sentient_s *sentient; // r11
     int v61; // r3
     sentient_s *v62; // r11
-    void(__fastcall * die)(gentity_s *, gentity_s *, gentity_s *, const int, const int, const int, const float *, const hitLocation_t); // r30
+    void(__cdecl * die)(gentity_s *, gentity_s *, gentity_s *, const int, const int, const int, const float *, const hitLocation_t); // r30
     int v64; // r3
-    void(__fastcall * pain)(gentity_s *, gentity_s *, int, const float *, const int, const float *, const hitLocation_t, const int); // r11
+    void(__cdecl * pain)(gentity_s *, gentity_s *, int, const float *, const int, const float *, const hitLocation_t, const int); // r11
     gclient_s *v66; // r11
     unsigned int v67; // [sp+8h] [-F8h]
     int v68; // [sp+Ch] [-F4h]
@@ -925,7 +925,7 @@ void __fastcall G_Damage(
     }
 }
 
-int __fastcall G_CanRadiusDamageFromPos(
+int __cdecl G_CanRadiusDamageFromPos(
     gentity_s *targ,
     const float *targetPos,
     gentity_s *inflictor,
@@ -1309,7 +1309,7 @@ int __fastcall G_CanRadiusDamageFromPos(
     return 1;
 }
 
-float __fastcall EntDistToPoint(float *origin, gentity_s *ent)
+float __cdecl EntDistToPoint(float *origin, gentity_s *ent)
 {
     float *v2; // r11
     double v3; // fp0
@@ -1362,7 +1362,7 @@ float __fastcall EntDistToPoint(float *origin, gentity_s *ent)
     return *((float *)&v7 + 1);
 }
 
-void __fastcall GetEntListForRadius(
+void __cdecl GetEntListForRadius(
     const float *origin,
     double radius_max,
     double radius_min,
@@ -1389,7 +1389,7 @@ void __fastcall GetEntListForRadius(
     *a7 = CM_AreaEntities(v10, v11, a6, 2176, -1);
 }
 
-void __fastcall AddScrTeamName(team_t team)
+void __cdecl AddScrTeamName(team_t team)
 {
     switch (team)
     {
@@ -1415,7 +1415,7 @@ void __fastcall AddScrTeamName(team_t team)
     }
 }
 
-float __fastcall G_GetRadiusDamageDistanceSquared(float *damageOrigin, gentity_s *ent)
+float __cdecl G_GetRadiusDamageDistanceSquared(float *damageOrigin, gentity_s *ent)
 {
     double v4; // fp12
     double v5; // fp13
@@ -1468,14 +1468,14 @@ float __fastcall G_GetRadiusDamageDistanceSquared(float *damageOrigin, gentity_s
     return *((float *)&v12 + 1);
 }
 
-bool __fastcall G_WithinDamageRadius(float *damageOrigin, double radiusSquared, gentity_s *ent, gentity_s *a4)
+bool __cdecl G_WithinDamageRadius(float *damageOrigin, double radiusSquared, gentity_s *ent, gentity_s *a4)
 {
     if (!a4)
         MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\g_combat.cpp", 1333, 0, "%s", "ent");
     return G_GetRadiusDamageDistanceSquared(damageOrigin, a4) < radiusSquared;
 }
 
-bool __fastcall G_ClientFlashbanged(gclient_s *client)
+bool __cdecl G_ClientFlashbanged(gclient_s *client)
 {
     if (!client)
         MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\g_combat.cpp", 1436, 0, "%s", "client");
@@ -1484,14 +1484,14 @@ bool __fastcall G_ClientFlashbanged(gclient_s *client)
         && BG_GetShellshockParms(client->ps.shellshockIndex)->screenBlend.type == SHELLSHOCK_VIEWTYPE_FLASHED;
 }
 
-int __fastcall G_GetHitLocationString(unsigned int hitLoc)
+int __cdecl G_GetHitLocationString(unsigned int hitLoc)
 {
     if (hitLoc >= 0x13)
         MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\g_combat.cpp", 1459, 0, "%s", "(unsigned)hitLoc < HITLOC_NUM");
     return g_HitLocConstNames[hitLoc];
 }
 
-int __fastcall G_CanRadiusDamage(
+int __cdecl G_CanRadiusDamage(
     gentity_s *targ,
     gentity_s *inflictor,
     const float *centerPos,
@@ -1561,7 +1561,7 @@ int __fastcall G_CanRadiusDamage(
         a9);
 }
 
-void __fastcall FlashbangBlastEnt(
+void __cdecl FlashbangBlastEnt(
     gentity_s *ent,
     float *blastOrigin,
     double radius_max,
@@ -1637,7 +1637,7 @@ void __fastcall FlashbangBlastEnt(
     }
 }
 
-void __fastcall G_FlashbangBlast(
+void __cdecl G_FlashbangBlast(
     float *origin,
     double radius_max,
     double radius_min,
@@ -1679,7 +1679,7 @@ void __fastcall G_FlashbangBlast(
     }
 }
 
-int __fastcall G_RadiusDamage(
+int __cdecl G_RadiusDamage(
     float *origin,
     gentity_s *inflictor,
     gentity_s *attacker,

@@ -4,7 +4,7 @@
 
 #include "actor_exposed.h"
 
-void __fastcall Actor_Exposed_CheckLockGoal(actor_s *self)
+void __cdecl Actor_Exposed_CheckLockGoal(actor_s *self)
 {
     ai_animmode_t eAnimMode; // r11
     double v3; // fp31
@@ -30,7 +30,7 @@ void __fastcall Actor_Exposed_CheckLockGoal(actor_s *self)
     }
 }
 
-void __fastcall Actor_Exposed_Combat(actor_s *self)
+void __cdecl Actor_Exposed_Combat(actor_s *self)
 {
     sentient_s *TargetSentient; // r30
     int iLastVisTime; // r11
@@ -68,7 +68,7 @@ void __fastcall Actor_Exposed_Combat(actor_s *self)
     }
 }
 
-int __fastcall Actor_Exposed_Start(actor_s *self, ai_state_t ePrevState)
+int __cdecl Actor_Exposed_Start(actor_s *self, ai_state_t ePrevState)
 {
     if (!self)
         MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\actor_exposed.cpp", 119, 0, "%s", "self");
@@ -76,22 +76,22 @@ int __fastcall Actor_Exposed_Start(actor_s *self, ai_state_t ePrevState)
     return 1;
 }
 
-void __fastcall Actor_Exposed_Finish(actor_s *self, ai_state_t eNextState)
+void __cdecl Actor_Exposed_Finish(actor_s *self, ai_state_t eNextState)
 {
     ;
 }
 
-void __fastcall Actor_Exposed_Suspend(actor_s *self, ai_state_t eNextState)
+void __cdecl Actor_Exposed_Suspend(actor_s *self, ai_state_t eNextState)
 {
     ;
 }
 
-int __fastcall Actor_Exposed_Resume(actor_s *self, ai_state_t ePrevState)
+int __cdecl Actor_Exposed_Resume(actor_s *self, ai_state_t ePrevState)
 {
     return 1;
 }
 
-void __fastcall Actor_Exposed_DecideSubState(actor_s *self)
+void __cdecl Actor_Exposed_DecideSubState(actor_s *self)
 {
     ai_substate_t v2; // r11
 
@@ -136,7 +136,7 @@ void __fastcall Actor_Exposed_DecideSubState(actor_s *self)
     }
 }
 
-void __fastcall Actor_Exposed_FindReacquireNode(actor_s *self)
+void __cdecl Actor_Exposed_FindReacquireNode(actor_s *self)
 {
     if (Actor_GetTargetEntity(self) && self->eState[self->stateLevel] == AIS_EXPOSED)
         self->iPotentialReacquireNodeCount = Actor_Cover_FindBestCoverList(self, self->pPotentialReacquireNode, 10);
@@ -144,7 +144,7 @@ void __fastcall Actor_Exposed_FindReacquireNode(actor_s *self)
         self->iPotentialReacquireNodeCount = 0;
 }
 
-pathnode_t *__fastcall Actor_Exposed_GetReacquireNode(actor_s *self)
+pathnode_t *__cdecl Actor_Exposed_GetReacquireNode(actor_s *self)
 {
     int v2; // r11
 
@@ -171,7 +171,7 @@ pathnode_t *__fastcall Actor_Exposed_GetReacquireNode(actor_s *self)
     return 0;
 }
 
-int __fastcall Actor_Exposed_UseReacquireNode(actor_s *self, pathnode_t *pNode)
+int __cdecl Actor_Exposed_UseReacquireNode(actor_s *self, pathnode_t *pNode)
 {
     int v4; // r6
     float v6[4]; // [sp+50h] [-50h] BYREF
@@ -206,7 +206,7 @@ int __fastcall Actor_Exposed_UseReacquireNode(actor_s *self, pathnode_t *pNode)
     return 1;
 }
 
-int __fastcall Actor_Exposed_ReacquireStepMove(actor_s *self, double fDist)
+int __cdecl Actor_Exposed_ReacquireStepMove(actor_s *self, double fDist)
 {
     gentity_s *TargetEntity; // r23
     double v5; // fp31
@@ -316,7 +316,7 @@ int __fastcall Actor_Exposed_ReacquireStepMove(actor_s *self, double fDist)
     return 1;
 }
 
-void __fastcall Actor_Exposed_FindReacquireDirectPath(actor_s *self, bool ignoreSuppression)
+void __cdecl Actor_Exposed_FindReacquireDirectPath(actor_s *self, bool ignoreSuppression)
 {
     sentient_s *TargetSentient; // r4
     float v5[16]; // [sp+50h] [-40h] BYREF
@@ -343,7 +343,7 @@ void __fastcall Actor_Exposed_FindReacquireDirectPath(actor_s *self, bool ignore
     }
 }
 
-void __fastcall Actor_Exposed_FindReacquireProximatePath(actor_s *self, char ignoreSuppression)
+void __cdecl Actor_Exposed_FindReacquireProximatePath(actor_s *self, char ignoreSuppression)
 {
     bool v4; // r5
     double v5; // fp0
@@ -376,7 +376,7 @@ void __fastcall Actor_Exposed_FindReacquireProximatePath(actor_s *self, char ign
     }
 }
 
-int __fastcall Actor_Exposed_StartReacquireMove(actor_s *self)
+int __cdecl Actor_Exposed_StartReacquireMove(actor_s *self)
 {
     if (!self)
         MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\actor_exposed.cpp", 521, 0, "%s", "self");
@@ -390,7 +390,7 @@ int __fastcall Actor_Exposed_StartReacquireMove(actor_s *self)
     return 1;
 }
 
-void __fastcall Actor_Exposed_Reacquire_Move(actor_s *self)
+void __cdecl Actor_Exposed_Reacquire_Move(actor_s *self)
 {
     if (!self)
         MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\actor_exposed.cpp", 548, 0, "%s", "self");
@@ -407,7 +407,7 @@ void __fastcall Actor_Exposed_Reacquire_Move(actor_s *self)
     Actor_MoveAlongPathWithTeam(self, 1, 0, 1);
 }
 
-void __fastcall Actor_Exposed_MoveToGoal_Move(actor_s *self)
+void __cdecl Actor_Exposed_MoveToGoal_Move(actor_s *self)
 {
     if (!self)
         MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\actor_exposed.cpp", 568, 0, "%s", "self");
@@ -417,7 +417,7 @@ void __fastcall Actor_Exposed_MoveToGoal_Move(actor_s *self)
     Actor_MoveAlongPathWithTeam(self, 1, 1, 1);
 }
 
-bool __fastcall Actor_Exposed_IsShortMove(actor_s *self)
+bool __cdecl Actor_Exposed_IsShortMove(actor_s *self)
 {
     if (!self)
         MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\actor_exposed.cpp", 585, 0, "%s", "self");
@@ -428,7 +428,7 @@ bool __fastcall Actor_Exposed_IsShortMove(actor_s *self)
         && Path_DistanceGreaterThan(&self->Path, 60.0) == 0;
 }
 
-void __fastcall Actor_Exposed_NonCombat_Think(actor_s *self)
+void __cdecl Actor_Exposed_NonCombat_Think(actor_s *self)
 {
     pathnode_t *pClaimedNode; // r29
     gentity_s *ent; // r11
@@ -498,7 +498,7 @@ void __fastcall Actor_Exposed_NonCombat_Think(actor_s *self)
     }
 }
 
-void __fastcall Actor_Exposed_FlashBanged(actor_s *self)
+void __cdecl Actor_Exposed_FlashBanged(actor_s *self)
 {
     if (!self->flashBanged)
         MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\actor_exposed.cpp", 684, 0, "%s", "self->flashBanged");
@@ -506,7 +506,7 @@ void __fastcall Actor_Exposed_FlashBanged(actor_s *self)
     Actor_SetOrientMode(self, AI_ORIENT_DONT_CHANGE);
 }
 
-bool __fastcall Actor_Exposed_CheckStopMovingAndStartCombat(actor_s *self)
+bool __cdecl Actor_Exposed_CheckStopMovingAndStartCombat(actor_s *self)
 {
     if (!self)
         MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\actor_exposed.cpp", 701, 0, "%s", "self");
@@ -521,7 +521,7 @@ bool __fastcall Actor_Exposed_CheckStopMovingAndStartCombat(actor_s *self)
     return Actor_PointNearGoal(self->ent->r.currentOrigin, &self->codeGoal, -_FP0);
 }
 
-actor_think_result_t __fastcall Actor_Exposed_Think(actor_s *self)
+actor_think_result_t __cdecl Actor_Exposed_Think(actor_s *self)
 {
     actor_think_result_t result; // r3
     gentity_s *pTurret; // r11
@@ -599,7 +599,7 @@ actor_think_result_t __fastcall Actor_Exposed_Think(actor_s *self)
     return result;
 }
 
-void __fastcall Actor_Exposed_Touch(actor_s *self, gentity_s *pOther)
+void __cdecl Actor_Exposed_Touch(actor_s *self, gentity_s *pOther)
 {
     sentient_s *sentient; // r4
 

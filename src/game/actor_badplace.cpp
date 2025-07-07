@@ -7,12 +7,12 @@
 // Line 38954:  0006 : 005a27c8       struct badplace_t *g_badplaces 82c327c8     actor_badplace.obj
 
 
-void __fastcall TRACK_actor_badplace()
+void __cdecl TRACK_actor_badplace()
 {
     track_static_alloc_internal(g_badplaces, 1280, "g_badplaces", 5);
 }
 
-void __fastcall Path_UpdateBadPlaceCount(badplace_t *place, int delta)
+void __cdecl Path_UpdateBadPlaceCount(badplace_t *place, int delta)
 {
     int type; // r4
     const char *v5; // r3
@@ -43,7 +43,7 @@ void __fastcall Path_UpdateBadPlaceCount(badplace_t *place, int delta)
     }
 }
 
-void __fastcall Path_FreeBadPlace(int index)
+void __cdecl Path_FreeBadPlace(int index)
 {
     int v1; // r30
 
@@ -56,7 +56,7 @@ void __fastcall Path_FreeBadPlace(int index)
     }
 }
 
-int __fastcall Path_FindBadPlace(unsigned int name)
+int __cdecl Path_FindBadPlace(unsigned int name)
 {
     int v1; // r10
     unsigned __int16 *p_name; // r11
@@ -73,7 +73,7 @@ int __fastcall Path_FindBadPlace(unsigned int name)
     return v1;
 }
 
-badplace_t *__fastcall Path_AllocBadPlace(unsigned int name, int duration, int a3, int a4, int a5, int a6, __int64 a7)
+badplace_t *__cdecl Path_AllocBadPlace(unsigned int name, int duration, int a3, int a4, int a5, int a6, __int64 a7)
 {
     int v9; // r10
     unsigned __int16 *p_name; // r11
@@ -140,7 +140,7 @@ badplace_t *__fastcall Path_AllocBadPlace(unsigned int name, int duration, int a
     return result;
 }
 
-void __fastcall Path_MakeBadPlace(
+void __cdecl Path_MakeBadPlace(
     unsigned int name,
     int duration,
     int teamflags,
@@ -203,7 +203,7 @@ void __fastcall Path_MakeBadPlace(
     }
 }
 
-void __fastcall Path_MakeArcBadPlace(
+void __cdecl Path_MakeArcBadPlace(
     unsigned int name,
     int duration,
     int teamflags,
@@ -232,7 +232,7 @@ void __fastcall Path_MakeArcBadPlace(
     Path_MakeBadPlace(name, duration, teamflags, 1, v13, a6, v10);
 }
 
-void __fastcall Path_MakeBrushBadPlace(unsigned int name, int duration, int teamflags, gentity_s *volume)
+void __cdecl Path_MakeBrushBadPlace(unsigned int name, int duration, int teamflags, gentity_s *volume)
 {
     int flags; // r11
     __int64 v9; // r10
@@ -248,7 +248,7 @@ void __fastcall Path_MakeBrushBadPlace(unsigned int name, int duration, int team
     Path_MakeBadPlace(name, duration, teamflags, 2, &v11, v10, v9);
 }
 
-void __fastcall Path_RemoveBadPlaceEntity(gentity_s *entity)
+void __cdecl Path_RemoveBadPlaceEntity(gentity_s *entity)
 {
     unsigned int v2; // r9
     int v3; // r11
@@ -277,7 +277,7 @@ void __fastcall Path_RemoveBadPlaceEntity(gentity_s *entity)
     }
 }
 
-void __fastcall Path_DrawBadPlace(badplace_t *place)
+void __cdecl Path_DrawBadPlace(badplace_t *place)
 {
     const float *type; // r4
     const char *v3; // r3
@@ -381,12 +381,12 @@ void __fastcall Path_DrawBadPlace(badplace_t *place)
     }
 }
 
-void __fastcall Path_InitBadPlaces()
+void __cdecl Path_InitBadPlaces()
 {
     memset(g_badplaces, 0, sizeof(g_badplaces));
 }
 
-void __fastcall Path_ShutdownBadPlaces()
+void __cdecl Path_ShutdownBadPlaces()
 {
     int v0; // r31
     unsigned __int16 *p_name; // r30
@@ -402,7 +402,7 @@ void __fastcall Path_ShutdownBadPlaces()
     memset(g_badplaces, 0, sizeof(g_badplaces));
 }
 
-void __fastcall Actor_Badplace_Ping(actor_s *self)
+void __cdecl Actor_Badplace_Ping(actor_s *self)
 {
     __int64 v2; // r11
 
@@ -416,7 +416,7 @@ void __fastcall Actor_Badplace_Ping(actor_s *self)
     }
 }
 
-int __fastcall Actor_IsInAnyBadPlace(actor_s *self)
+int __cdecl Actor_IsInAnyBadPlace(actor_s *self)
 {
     unsigned int v2; // r27
     float *i; // r31
@@ -473,7 +473,7 @@ actor_s *Actor_BadPlace_UpdateFleeingActors()
     return result;
 }
 
-float __fastcall Actor_BadPlace_GetMaximumFleeRadius()
+float __cdecl Actor_BadPlace_GetMaximumFleeRadius()
 {
     int v0; // r28
     unsigned __int8 *p_type; // r31
@@ -518,7 +518,7 @@ float __fastcall Actor_BadPlace_GetMaximumFleeRadius()
     return *((float *)&v6 + 1);
 }
 
-int __fastcall Actor_BadPlace_HasPotentialNodeDuplicates(
+int __cdecl Actor_BadPlace_HasPotentialNodeDuplicates(
     pathsort_t *potentialNodes,
     int potentialNodeCount,
     pathnode_t *checkNode)
@@ -541,7 +541,7 @@ int __fastcall Actor_BadPlace_HasPotentialNodeDuplicates(
     return 1;
 }
 
-int __fastcall Actor_BadPlace_IsNodeInAnyBadPlace(pathnode_t *node)
+int __cdecl Actor_BadPlace_IsNodeInAnyBadPlace(pathnode_t *node)
 {
     unsigned int v2; // r30
     float *i; // r31
@@ -585,7 +585,7 @@ int __fastcall Actor_BadPlace_IsNodeInAnyBadPlace(pathnode_t *node)
     return 1;
 }
 
-pathnode_t *__fastcall Actor_BadPlace_FindSafeNodeAlongPath(actor_s *self)
+pathnode_t *__cdecl Actor_BadPlace_FindSafeNodeAlongPath(actor_s *self)
 {
     int v2; // r30
     int *i; // r29
@@ -617,12 +617,12 @@ pathnode_t *__fastcall Actor_BadPlace_FindSafeNodeAlongPath(actor_s *self)
     return (pathnode_t *)v5;
 }
 
-void __fastcall Actor_BadPlace_Flee_Finish(actor_s *self, ai_state_t eNextState)
+void __cdecl Actor_BadPlace_Flee_Finish(actor_s *self, ai_state_t eNextState)
 {
     ;
 }
 
-void __fastcall Path_RemoveBadPlace(unsigned int name)
+void __cdecl Path_RemoveBadPlace(unsigned int name)
 {
     int v1; // r10
     unsigned __int16 *p_name; // r11
@@ -643,7 +643,7 @@ void __fastcall Path_RemoveBadPlace(unsigned int name)
     Actor_BadPlace_UpdateFleeingActors();
 }
 
-void __fastcall Path_RunBadPlaces()
+void __cdecl Path_RunBadPlaces()
 {
     char v0; // r24
     float *p_angle1; // r31
@@ -715,7 +715,7 @@ void __fastcall Path_RunBadPlaces()
         Actor_BadPlace_UpdateFleeingActors();
 }
 
-int __fastcall Actor_BadPlace_FindSafeNodeOutsideBadPlace(
+int __cdecl Actor_BadPlace_FindSafeNodeOutsideBadPlace(
     actor_s *self,
     pathsort_t *potentialNodes,
     double maxFleeDist)
@@ -787,7 +787,7 @@ int __fastcall Actor_BadPlace_FindSafeNodeOutsideBadPlace(
     return v9;
 }
 
-int __fastcall Actor_BadPlace_AttemptEscape(actor_s *self)
+int __cdecl Actor_BadPlace_AttemptEscape(actor_s *self)
 {
     double MaximumFleeRadius; // fp1
     double v3; // fp31
@@ -835,7 +835,7 @@ int __fastcall Actor_BadPlace_AttemptEscape(actor_s *self)
     return 0;
 }
 
-int __fastcall Actor_BadPlace_Flee_Start(actor_s *self, ai_state_t ePrevState)
+int __cdecl Actor_BadPlace_Flee_Start(actor_s *self, ai_state_t ePrevState)
 {
     if (!self)
         MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\actor_badplace.cpp", 732, 0, "%s", "self");
@@ -843,7 +843,7 @@ int __fastcall Actor_BadPlace_Flee_Start(actor_s *self, ai_state_t ePrevState)
     return 1;
 }
 
-int __fastcall Actor_BadPlace_Flee_Think(actor_s *self)
+int __cdecl Actor_BadPlace_Flee_Think(actor_s *self)
 {
     actor_s *v2; // r3
 

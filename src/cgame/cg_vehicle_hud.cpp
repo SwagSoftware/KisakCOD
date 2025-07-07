@@ -4,7 +4,7 @@
 
 #include "cg_vehicle_hud.h"
 
-bool __fastcall ClampScreenPosToEdges(
+bool __cdecl ClampScreenPosToEdges(
     const float *localClientNum,
     Material *point,
     double padLeft,
@@ -218,7 +218,7 @@ LABEL_40:
     return (_cntlzw(v22) & 0x20) == 0;
 }
 
-void __fastcall CG_VehicleHudRegisterDvars(int a1, unsigned __int16 a2, const char *a3)
+void __cdecl CG_VehicleHudRegisterDvars(int a1, unsigned __int16 a2, const char *a3)
 {
     const char *v3; // r5
     unsigned __int16 v4; // r4
@@ -283,7 +283,7 @@ void __fastcall CG_VehicleHudRegisterDvars(int a1, unsigned __int16 a2, const ch
     dword_827DD9C0 = (int)Dvar_RegisterFloat("vehHudReticleBouncingSpeed", 400.0, 0.0, 1000000.0, v26, v25);
 }
 
-int __fastcall WorldDirToScreenPos(int localClientNum, const float *worldDir, float *outScreenPos)
+int __cdecl WorldDirToScreenPos(int localClientNum, const float *worldDir, float *outScreenPos)
 {
     double v5; // fp28
     double v6; // fp30
@@ -368,7 +368,7 @@ int __fastcall WorldDirToScreenPos(int localClientNum, const float *worldDir, fl
     return result;
 }
 
-void __fastcall CG_DrawVehicleTargets(int localClientNum, rectDef_s *rect, float *color, Material *defaultMaterial)
+void __cdecl CG_DrawVehicleTargets(int localClientNum, rectDef_s *rect, float *color, Material *defaultMaterial)
 {
     float *v6; // r29
     centity_s *Entity; // r31
@@ -494,7 +494,7 @@ void __fastcall CG_DrawVehicleTargets(int localClientNum, rectDef_s *rect, float
     } while ((int)v6 < (int)&cgArray[0].shellshock.loopEndTime);
 }
 
-void __fastcall CG_DrawJavelinTargets(int localClientNum, rectDef_s *rect, float *color, Material *defaultMaterial)
+void __cdecl CG_DrawJavelinTargets(int localClientNum, rectDef_s *rect, float *color, Material *defaultMaterial)
 {
     const playerState_s *PredictedPlayerState; // r3
     const playerState_s *v7; // r30
@@ -666,7 +666,7 @@ void __fastcall CG_DrawJavelinTargets(int localClientNum, rectDef_s *rect, float
     }
 }
 
-void __fastcall CG_DrawPipOnAStickReticle(int localClientNum, rectDef_s *rect, float *color)
+void __cdecl CG_DrawPipOnAStickReticle(int localClientNum, rectDef_s *rect, float *color)
 {
     centity_s *Entity; // r31
     DObj_s *ClientDObj; // r29
@@ -883,7 +883,7 @@ void __fastcall CG_DrawPipOnAStickReticle(int localClientNum, rectDef_s *rect, f
     }
 }
 
-void __fastcall CG_InitVehicleReticle(int localClientNum)
+void __cdecl CG_InitVehicleReticle(int localClientNum)
 {
     if (localClientNum)
         MyAssertHandler(
@@ -900,7 +900,7 @@ void __fastcall CG_InitVehicleReticle(int localClientNum)
     cgArray[0].vehReticleVel[1] = 0.0;
 }
 
-void __fastcall CG_ReticleStartLockOn(int localClientNum, int targetEntNum, int msecDuration)
+void __cdecl CG_ReticleStartLockOn(int localClientNum, int targetEntNum, int msecDuration)
 {
     if (localClientNum)
         MyAssertHandler(
@@ -915,7 +915,7 @@ void __fastcall CG_ReticleStartLockOn(int localClientNum, int targetEntNum, int 
     cgArray[0].vehReticleLockOnDuration = msecDuration;
 }
 
-int __fastcall CG_GetTargetPos(int localClientNum, int targetEntNum, float *outPos)
+int __cdecl CG_GetTargetPos(int localClientNum, int targetEntNum, float *outPos)
 {
     int v6; // r30
     targetInfo_t *targets; // r11
@@ -952,7 +952,7 @@ int __fastcall CG_GetTargetPos(int localClientNum, int targetEntNum, float *outP
 }
 
 // local variable allocation has failed, the output may be wrong!
-void __fastcall CG_DrawBouncingDiamond(int localClientNum, rectDef_s *rect, float *color, const float *a4)
+void __cdecl CG_DrawBouncingDiamond(int localClientNum, rectDef_s *rect, float *color, const float *a4)
 {
     double v6; // fp29
     int vehReticleLockOnEntNum; // r4
@@ -1171,7 +1171,7 @@ void __fastcall CG_DrawBouncingDiamond(int localClientNum, rectDef_s *rect, floa
         v55);
 }
 
-void __fastcall CG_DrawVehicleReticle(int localClientNum, rectDef_s *rect, float *color)
+void __cdecl CG_DrawVehicleReticle(int localClientNum, rectDef_s *rect, float *color)
 {
     centity_s *Entity; // r30
     activeReticleType_t activeReticleType; // r11
@@ -1206,7 +1206,7 @@ void __fastcall CG_DrawVehicleReticle(int localClientNum, rectDef_s *rect, float
     }
 }
 
-void __fastcall CG_TargetsChanged(int localClientNum, unsigned int num)
+void __cdecl CG_TargetsChanged(int localClientNum, unsigned int num)
 {
     const char *ConfigString; // r3
     unsigned int v5; // r31

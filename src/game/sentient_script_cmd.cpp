@@ -4,7 +4,7 @@
 
 #include "sentient.h"
 
-sentient_s *__fastcall Sentient_Get(scr_entref_t *entref)
+sentient_s *__cdecl Sentient_Get(scr_entref_t *entref)
 {
     sentient_s *result; // r3
     unsigned __int16 v2; // [sp+74h] [+14h]
@@ -29,13 +29,13 @@ sentient_s *__fastcall Sentient_Get(scr_entref_t *entref)
     return result;
 }
 
-void __fastcall SentientCmd_GetEnemySqDist(scr_entref_t *entref)
+void __cdecl SentientCmd_GetEnemySqDist(scr_entref_t *entref)
 {
     Sentient_Get(entref);
     Scr_Error("GetEnemySqDist is depricated, use GetClosestEnemySqDist.\n");
 }
 
-void __fastcall SentientCmd_GetClosestEnemySqDist(scr_entref_t *entref)
+void __cdecl SentientCmd_GetClosestEnemySqDist(scr_entref_t *entref)
 {
     sentient_s *v1; // r29
     double v2; // fp31
@@ -240,7 +240,7 @@ void SentientCmd_SetIgnoreMeGroup()
     }
 }
 
-void __fastcall SentientCmd_SetThreatBiasGroup(scr_entref_t *entref)
+void __cdecl SentientCmd_SetThreatBiasGroup(scr_entref_t *entref)
 {
     sentient_s *v1; // r31
     unsigned int ConstString; // r3
@@ -270,7 +270,7 @@ void __fastcall SentientCmd_SetThreatBiasGroup(scr_entref_t *entref)
     }
 }
 
-void __fastcall SentientCmd_GetThreatBiasGroup(scr_entref_t *entref)
+void __cdecl SentientCmd_GetThreatBiasGroup(scr_entref_t *entref)
 {
     int iThreatBiasGroupIndex; // r11
     const char *v2; // r3
@@ -287,7 +287,7 @@ void __fastcall SentientCmd_GetThreatBiasGroup(scr_entref_t *entref)
     }
 }
 
-void(__fastcall *__fastcall Sentient_GetMethod(const char **pName))(scr_entref_t)
+void(__cdecl *__cdecl Sentient_GetMethod(const char **pName))(scr_entref_t)
 {
     int v1; // r6
     unsigned int v2; // r5
@@ -321,7 +321,7 @@ void(__fastcall *__fastcall Sentient_GetMethod(const char **pName))(scr_entref_t
     return methods_4[v1].actionFunc;
 }
 
-void(__fastcall *__fastcall Sentient_GetFunction(const char **pName))()
+void(__cdecl *__cdecl Sentient_GetFunction(const char **pName))()
 {
     int v1; // r6
     unsigned int v2; // r5

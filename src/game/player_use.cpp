@@ -5,11 +5,11 @@
 #include "player_use.h"
 
 
-void __fastcall Player_UseEntity(gentity_s *playerEnt, gentity_s *useEnt)
+void __cdecl Player_UseEntity(gentity_s *playerEnt, gentity_s *useEnt)
 {
     int eType; // r11
     int handler; // r10
-    void(__fastcall * touch)(gentity_s *, gentity_s *, gentity_s *); // r11
+    void(__cdecl * touch)(gentity_s *, gentity_s *, gentity_s *); // r11
     gentity_s *v7; // r5
 
     if (!playerEnt)
@@ -27,7 +27,7 @@ void __fastcall Player_UseEntity(gentity_s *playerEnt, gentity_s *useEnt)
         Scr_Notify(useEnt, scr_const.touch, 1u);
         handler = useEnt->handler;
         useEnt->active = 1;
-        touch = (void(__fastcall *)(gentity_s *, gentity_s *, gentity_s *))entityHandlers[handler].touch;
+        touch = (void(__cdecl *)(gentity_s *, gentity_s *, gentity_s *))entityHandlers[handler].touch;
         if (touch)
         {
             v7 = 0;
@@ -51,7 +51,7 @@ void __fastcall Player_UseEntity(gentity_s *playerEnt, gentity_s *useEnt)
     EntHandle::setEnt(&playerEnt->client->useHoldEntity, 0);
 }
 
-int __fastcall Player_ActivateCmd(gentity_s *ent)
+int __cdecl Player_ActivateCmd(gentity_s *ent)
 {
     int result; // r3
     gentity_s *v3; // r4
@@ -111,7 +111,7 @@ int __fastcall Player_ActivateCmd(gentity_s *ent)
     return 1;
 }
 
-void __fastcall Player_ActivateHoldCmd(gentity_s *ent)
+void __cdecl Player_ActivateHoldCmd(gentity_s *ent)
 {
     gclient_s *client; // r11
     gentity_s *v3; // r30
@@ -154,7 +154,7 @@ void __fastcall Player_ActivateHoldCmd(gentity_s *ent)
     }
 }
 
-void __fastcall Player_UpdateActivate(gentity_s *ent)
+void __cdecl Player_UpdateActivate(gentity_s *ent)
 {
     char v2; // r28
     gclient_s *client; // r11
@@ -188,12 +188,12 @@ void __fastcall Player_UpdateActivate(gentity_s *ent)
     ent->client->useButtonDone = 1;
 }
 
-int __fastcall compare_use(float *pe1, float *pe2)
+int __cdecl compare_use(float *pe1, float *pe2)
 {
     return (int)(float)(pe1[1] - pe2[1]);
 }
 
-int __fastcall Player_GetUseList(gentity_s *ent, useList_t *useList, int prevHintEntIndex)
+int __cdecl Player_GetUseList(gentity_s *ent, useList_t *useList, int prevHintEntIndex)
 {
     int v6; // r22
     gclient_s *client; // r29
@@ -373,7 +373,7 @@ int __fastcall Player_GetUseList(gentity_s *ent, useList_t *useList, int prevHin
             ++v13;
         }
     }
-    qsort(useList, v11, 8u, (int(__fastcall *)(const void *, const void *))compare_use);
+    qsort(useList, v11, 8u, (int(__cdecl *)(const void *, const void *))compare_use);
     v31 = v11 - v6;
     v33 = (int)(v11 - v6) <= 0;
     v32 = 0;
@@ -404,11 +404,11 @@ int __fastcall Player_GetUseList(gentity_s *ent, useList_t *useList, int prevHin
             p_score += 2;
         } while (v35);
     }
-    qsort(useList, v31, 8u, (int(__fastcall *)(const void *, const void *))compare_use);
+    qsort(useList, v31, 8u, (int(__cdecl *)(const void *, const void *))compare_use);
     return v31 - v32;
 }
 
-void __fastcall G_UpdateFriendlyOverlay(gentity_s *ent)
+void __cdecl G_UpdateFriendlyOverlay(gentity_s *ent)
 {
     gentity_s *v2; // r30
     actor_s *actor; // r11
@@ -487,7 +487,7 @@ LABEL_20:
     SV_SetConfigstring(v10, v9);
 }
 
-int __fastcall Player_GetItemCursorHint(const gclient_s *client, const gentity_s *traceEnt)
+int __cdecl Player_GetItemCursorHint(const gclient_s *client, const gentity_s *traceEnt)
 {
     int v4; // r31
     unsigned int v5; // r30
@@ -533,7 +533,7 @@ int __fastcall Player_GetItemCursorHint(const gclient_s *client, const gentity_s
     return result;
 }
 
-void __fastcall Player_SetTurretDropHint(gentity_s *ent)
+void __cdecl Player_SetTurretDropHint(gentity_s *ent)
 {
     gclient_s *client; // r28
     gentity_s *v3; // r29
@@ -570,7 +570,7 @@ void __fastcall Player_SetTurretDropHint(gentity_s *ent)
     }
 }
 
-void __fastcall Player_UpdateCursorHints(gentity_s *ent)
+void __cdecl Player_UpdateCursorHints(gentity_s *ent)
 {
     gclient_s *client; // r23
     int v3; // r30
@@ -739,7 +739,7 @@ void __fastcall Player_UpdateCursorHints(gentity_s *ent)
     }
 }
 
-gentity_s *__fastcall Player_UpdateLookAtEntityTrace(
+gentity_s *__cdecl Player_UpdateLookAtEntityTrace(
     trace_t *trace,
     const float *start,
     const float *end,
@@ -776,7 +776,7 @@ gentity_s *__fastcall Player_UpdateLookAtEntityTrace(
         return &g_entities[EntityHitId];
 }
 
-int __fastcall Player_CheckAlmostStationary(gentity_s *ent, float *dir)
+int __cdecl Player_CheckAlmostStationary(gentity_s *ent, float *dir)
 {
     gclient_s *client; // r29
     float *currentOrigin; // r30
@@ -823,7 +823,7 @@ int __fastcall Player_CheckAlmostStationary(gentity_s *ent, float *dir)
     return 0;
 }
 
-void __fastcall Player_DebugDrawLOS(const float *center, const float *dir, double dist2D, int debugDrawDuration)
+void __cdecl Player_DebugDrawLOS(const float *center, const float *dir, double dist2D, int debugDrawDuration)
 {
     double v5; // fp1
     const float *v6; // r6
@@ -840,7 +840,7 @@ void __fastcall Player_DebugDrawLOS(const float *center, const float *dir, doubl
     G_DebugBox(center, v8, v7, v5, v6, (int)colorOrange, 0);
 }
 
-void __fastcall Player_BanNodesInFront(gentity_s *ent, double dist, const float *start, const float *dir, int a5)
+void __cdecl Player_BanNodesInFront(gentity_s *ent, double dist, const float *start, const float *dir, int a5)
 {
     double v9; // fp0
     double v10; // fp31
@@ -943,7 +943,7 @@ void __fastcall Player_BanNodesInFront(gentity_s *ent, double dist, const float 
     }
 }
 
-void __fastcall Player_BlockFriendliesInADS(gentity_s *ent, double dist, const float *start, const float *dir, int a5)
+void __cdecl Player_BlockFriendliesInADS(gentity_s *ent, double dist, const float *start, const float *dir, int a5)
 {
     int BestTarget; // r29
     gclient_s *client; // r10
@@ -976,7 +976,7 @@ void __fastcall Player_BlockFriendliesInADS(gentity_s *ent, double dist, const f
         G_DebugLine(ent->r.currentOrigin, g_entities[BestTarget].r.currentOrigin, colorCyan, 0);
 }
 
-void __fastcall Player_GrenadeThrowBlockFriendlies(
+void __cdecl Player_GrenadeThrowBlockFriendlies(
     gentity_s *ent,
     double dist,
     const float *start,
@@ -1002,7 +1002,7 @@ void __fastcall Player_GrenadeThrowBlockFriendlies(
     }
 }
 
-void __fastcall Player_UpdateLookAtEntity(gentity_s *ent)
+void __cdecl Player_UpdateLookAtEntity(gentity_s *ent)
 {
     gclient_s *client; // r21
     unsigned int weapon; // r3

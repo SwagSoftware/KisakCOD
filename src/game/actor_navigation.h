@@ -4,32 +4,32 @@
 #error This file is for SinglePlayer only 
 #endif
 
-bool __fastcall Path_IsPathStanceNode(const pathnode_t *node);
-float __fastcall Path_GetPathDir(float *delta, const float *vFrom, const float *vTo);
-pathnode_t *__fastcall Path_GetNegotiationNode(const path_t *pPath);
-void __fastcall Path_IncrementNodeUserCount(path_t *pPath);
-void __fastcall Path_DecrementNodeUserCount(path_t *pPath);
-void __fastcall Path_Backup(const path_t *path);
-float __fastcall Path_GetDistToPathSegment(const float *vStartPos, const pathpoint_t *pt);
-void __fastcall Path_AddTrimmedAmount(path_t *pPath, const float *vStartPos);
-void __fastcall Path_SubtractTrimmedAmount(path_t *pPath, const float *vStartPos);
-void __fastcall Path_BeginTrim(path_t *pPath, path_trim_t *pTrim);
-void __fastcall Path_Begin(path_t *pPath);
-void __fastcall Path_Clear(path_t *pPath);
-bool __fastcall Path_Exists(const path_t *pPath);
-int __fastcall Path_CompleteLookahead(const path_t *pPath);
-unsigned int __fastcall Path_AttemptedCompleteLookahead(const path_t *pPath);
-bool __fastcall Path_UsesObstacleNegotiation(const path_t *pPath);
-bool __fastcall Path_HasNegotiationNode(const path_t *path);
-unsigned int __fastcall Path_AllowsObstacleNegotiation(const path_t *pPath);
-void __fastcall Path_GetObstacleNegotiationScript(const path_t *pPath, scr_animscript_t *animscript);
-int __fastcall Path_NeedsReevaluation(const path_t *pPath);
-int __fastcall Path_EncroachesPoint2D(path_t *pPath, const float *vStart, const float *vPoint, double fMinDistSqrd);
-int __fastcall Path_DistanceGreaterThan(path_t *pPath, double fDist);
-void __fastcall Path_ReduceLookaheadAmount(path_t *pPath, double maxLookaheadAmountIfReduce);
-bool __fastcall Path_FailedLookahead(path_t *pPath);
-void __fastcall Path_IncreaseLookaheadAmount(path_t *pPath);
-bool __fastcall Path_PredictionTrace(
+bool __cdecl Path_IsPathStanceNode(const pathnode_t *node);
+float __cdecl Path_GetPathDir(float *delta, const float *vFrom, const float *vTo);
+pathnode_t *__cdecl Path_GetNegotiationNode(const path_t *pPath);
+void __cdecl Path_IncrementNodeUserCount(path_t *pPath);
+void __cdecl Path_DecrementNodeUserCount(path_t *pPath);
+void __cdecl Path_Backup(const path_t *path);
+float __cdecl Path_GetDistToPathSegment(const float *vStartPos, const pathpoint_t *pt);
+void __cdecl Path_AddTrimmedAmount(path_t *pPath, const float *vStartPos);
+void __cdecl Path_SubtractTrimmedAmount(path_t *pPath, const float *vStartPos);
+void __cdecl Path_BeginTrim(path_t *pPath, path_trim_t *pTrim);
+void __cdecl Path_Begin(path_t *pPath);
+void __cdecl Path_Clear(path_t *pPath);
+bool __cdecl Path_Exists(const path_t *pPath);
+int __cdecl Path_CompleteLookahead(const path_t *pPath);
+unsigned int __cdecl Path_AttemptedCompleteLookahead(const path_t *pPath);
+bool __cdecl Path_UsesObstacleNegotiation(const path_t *pPath);
+bool __cdecl Path_HasNegotiationNode(const path_t *path);
+unsigned int __cdecl Path_AllowsObstacleNegotiation(const path_t *pPath);
+void __cdecl Path_GetObstacleNegotiationScript(const path_t *pPath, scr_animscript_t *animscript);
+int __cdecl Path_NeedsReevaluation(const path_t *pPath);
+int __cdecl Path_EncroachesPoint2D(path_t *pPath, const float *vStart, const float *vPoint, double fMinDistSqrd);
+int __cdecl Path_DistanceGreaterThan(path_t *pPath, double fDist);
+void __cdecl Path_ReduceLookaheadAmount(path_t *pPath, double maxLookaheadAmountIfReduce);
+bool __cdecl Path_FailedLookahead(path_t *pPath);
+void __cdecl Path_IncreaseLookaheadAmount(path_t *pPath);
+bool __cdecl Path_PredictionTrace(
     float *vStartPos,
     float *vEndPos,
     int entityIgnore,
@@ -38,26 +38,26 @@ bool __fastcall Path_PredictionTrace(
     double stepheight,
     int allowStartSolid,
     int a8);
-int __fastcall Path_IsTrimmed(path_t *pPath);
-void __fastcall Path_RemoveCompletedPathPoints(path_t *pPath, __int16 pathPointIndex);
-void __fastcall Path_TrimCompletedPath(path_t *pPath, const float *vStartPos);
-void __fastcall Path_BacktrackCompletedPath(path_t *pPath, const float *vStartPos);
-void __fastcall PathCalcLookahead_CheckMinLookaheadNodes(path_t *pPath, const pathpoint_t *pt, int currentNode);
-int __fastcall Path_GetForwardStartPos(path_t *pPath, const float *vStartPos, float *vForwardStartPos);
-void __fastcall Path_UpdateForwardLookahead_IncompletePath(
+int __cdecl Path_IsTrimmed(path_t *pPath);
+void __cdecl Path_RemoveCompletedPathPoints(path_t *pPath, __int16 pathPointIndex);
+void __cdecl Path_TrimCompletedPath(path_t *pPath, const float *vStartPos);
+void __cdecl Path_BacktrackCompletedPath(path_t *pPath, const float *vStartPos);
+void __cdecl PathCalcLookahead_CheckMinLookaheadNodes(path_t *pPath, const pathpoint_t *pt, int currentNode);
+int __cdecl Path_GetForwardStartPos(path_t *pPath, const float *vStartPos, float *vForwardStartPos);
+void __cdecl Path_UpdateForwardLookahead_IncompletePath(
     path_t *pPath,
     const pathpoint_t *pt,
     const float *vForwardStartPos,
     double area,
     double height);
-void __fastcall Path_UpdateForwardLookahead(path_t *pPath, const float *vStartPos);
-void __fastcall Path_DebugDraw(path_t *pPath, float *vStartPos, int bDrawLookahead);
-bool __fastcall Path_WithinApproxDist(path_t *pPath, double checkDist);
-ai_stance_e __fastcall Path_AllowedStancesForPath(path_t *pPath);
-void __fastcall Path_DodgeDrawRaisedLine(float *start, float *end, const float *color);
-int __fastcall Path_MayFaceEnemy(path_t *pPath, float *vEnemyDir, float *vOrg);
-void __fastcall Path_Restore(path_t *path);
-int __fastcall Path_FindPathFromTo(
+void __cdecl Path_UpdateForwardLookahead(path_t *pPath, const float *vStartPos);
+void __cdecl Path_DebugDraw(path_t *pPath, float *vStartPos, int bDrawLookahead);
+bool __cdecl Path_WithinApproxDist(path_t *pPath, double checkDist);
+ai_stance_e __cdecl Path_AllowedStancesForPath(path_t *pPath);
+void __cdecl Path_DodgeDrawRaisedLine(float *start, float *end, const float *color);
+int __cdecl Path_MayFaceEnemy(path_t *pPath, float *vEnemyDir, float *vOrg);
+void __cdecl Path_Restore(path_t *path);
+int __cdecl Path_FindPathFromTo(
     path_t *pPath,
     team_t eTeam,
     pathnode_t *pNodeFrom,
@@ -65,9 +65,9 @@ int __fastcall Path_FindPathFromTo(
     pathnode_t *pNodeTo,
     const float *vGoalPos,
     int bAllowNegotiationLinks);
-void __fastcall Path_TrimLastNodes(path_t *pPath, const int iNodeCount, bool bMaintainGoalPos);
-int __fastcall Path_ClipToGoal(path_t *pPath, const actor_goal_s *goal);
-int __fastcall Path_TrimToSeePoint(
+void __cdecl Path_TrimLastNodes(path_t *pPath, const int iNodeCount, bool bMaintainGoalPos);
+int __cdecl Path_ClipToGoal(path_t *pPath, const actor_goal_s *goal);
+int __cdecl Path_TrimToSeePoint(
     path_t *pPath,
     path_trim_t *pTrim,
     actor_s *pActor,
@@ -75,7 +75,7 @@ int __fastcall Path_TrimToSeePoint(
     int iIgnoreEntityNum,
     const float *vPoint,
     const float *a7);
-PredictionTraceResult __fastcall Path_PredictionTraceCheckForEntities(
+PredictionTraceResult __cdecl Path_PredictionTraceCheckForEntities(
     float *vStartPos,
     float *vEndPos,
     int *entities,
@@ -83,8 +83,8 @@ PredictionTraceResult __fastcall Path_PredictionTraceCheckForEntities(
     int entityIgnore,
     int mask,
     float *vTraceEndPos);
-bool __fastcall Path_LookaheadPredictionTrace(path_t *pPath, float *vStartPos, float *vEndPos, int a4, int a5, int a6);
-void __fastcall Path_UpdateLookaheadAmount(
+bool __cdecl Path_LookaheadPredictionTrace(path_t *pPath, float *vStartPos, float *vEndPos, int a4, int a5, int a6);
+void __cdecl Path_UpdateLookaheadAmount(
     path_t *pPath,
     float *vStartPos,
     float *vLookaheadPos,
@@ -93,38 +93,38 @@ void __fastcall Path_UpdateLookaheadAmount(
     int lookaheadNextNode,
     double maxLookaheadAmountIfReduce,
     __int16 a8);
-void __fastcall Path_CalcLookahead_Completed(
+void __cdecl Path_CalcLookahead_Completed(
     path_t *pPath,
     float *vStartPos,
     int bReduceLookaheadAmount,
     double totalArea,
     int a5,
     int a6);
-void __fastcall Path_CalcLookahead(path_t *pPath, float *vStartPos, int bReduceLookaheadAmount, int a4, int a5);
-void __fastcall Path_CheckNodeCountForDodge(path_t *pPath, int numNeeded, pathpoint_t **pt, int *startIndex);
-void __fastcall Path_TrimToBadPlaceLink(path_t *pPath, team_t eTeam);
-int __fastcall Path_FindPath(
+void __cdecl Path_CalcLookahead(path_t *pPath, float *vStartPos, int bReduceLookaheadAmount, int a4, int a5);
+void __cdecl Path_CheckNodeCountForDodge(path_t *pPath, int numNeeded, pathpoint_t **pt, int *startIndex);
+void __cdecl Path_TrimToBadPlaceLink(path_t *pPath, team_t eTeam);
+int __cdecl Path_FindPath(
     path_t *pPath,
     team_t eTeam,
     const float *vStartPos,
     float *vGoalPos,
     int bAllowNegotiationLinks);
-pathnode_t *__fastcall Path_FindPathFrom(
+pathnode_t *__cdecl Path_FindPathFrom(
     path_t *pPath,
     team_t eTeam,
     pathnode_t *pNodeFrom,
     float *vStartPos,
     const float *vGoalPos,
     int bAllowNegotiationLinks);
-void __fastcall Path_UpdateLookahead(
+void __cdecl Path_UpdateLookahead(
     path_t *pPath,
     float *vStartPos,
     int bReduceLookaheadAmount,
     int bTrimAmount,
     int bAllowBacktrack);
-void __fastcall Path_SetLookaheadToStart(path_t *pPath, float *vStartPos, int bTrimAmount);
-void __fastcall Path_TransferLookahead(path_t *pPath, float *vStartPos);
-int __fastcall Path_GeneratePath(
+void __cdecl Path_SetLookaheadToStart(path_t *pPath, float *vStartPos, int bTrimAmount);
+void __cdecl Path_TransferLookahead(path_t *pPath, float *vStartPos);
+int __cdecl Path_GeneratePath(
     path_t *pPath,
     team_t eTeam,
     float *vStartPos,
@@ -133,8 +133,8 @@ int __fastcall Path_GeneratePath(
     pathnode_t *pNodeTo,
     int bIncludeGoalPos,
     int bAllowNegotiationLinks);
-void __fastcall Path_UpdateLookahead_NonCodeMove(path_t *pPath, const float *vPrevPos, float *vStartPos);
-int __fastcall Path_AttemptDodge(
+void __cdecl Path_UpdateLookahead_NonCodeMove(path_t *pPath, const float *vPrevPos, float *vStartPos);
+int __cdecl Path_AttemptDodge(
     path_t *pPath,
     float *vOrg,
     float *vDodgeStart,
@@ -165,12 +165,12 @@ int __fastcall Path_AttemptDodge(
     int a28,
     int a29,
     int a30);
-pathnode_t *__fastcall Path_FindCloseNode(
+pathnode_t *__cdecl Path_FindCloseNode(
     team_t eTeam,
     pathnode_t *pNodeFrom,
     const float *vGoalPos,
     int bAllowNegotiationLinks);
-int __fastcall Path_FindPathFromToWithWidth(
+int __cdecl Path_FindPathFromToWithWidth(
     path_t *pPath,
     team_t eTeam,
     pathnode_t *pNodeFrom,
@@ -200,7 +200,7 @@ int __fastcall Path_FindPathFromToWithWidth(
     int a27,
     int a28,
     float *a29);
-int __fastcall Path_FindPathFromToNotCrossPlanes(
+int __cdecl Path_FindPathFromToNotCrossPlanes(
     path_t *pPath,
     team_t eTeam,
     pathnode_t *pNodeFrom,
@@ -231,7 +231,7 @@ int __fastcall Path_FindPathFromToNotCrossPlanes(
     int a28,
     int a29,
     int a30);
-int __fastcall Path_FindPathFromAway(
+int __cdecl Path_FindPathFromAway(
     path_t *pPath,
     team_t eTeam,
     pathnode_t *pNodeFrom,
@@ -240,7 +240,7 @@ int __fastcall Path_FindPathFromAway(
     double fDistAway,
     int bAllowNegotiationLinks,
     int a8);
-int __fastcall Path_FindPathFromAwayNotCrossPlanes(
+int __cdecl Path_FindPathFromAwayNotCrossPlanes(
     path_t *pPath,
     team_t eTeam,
     pathnode_t *pNodeFrom,
@@ -272,7 +272,7 @@ int __fastcall Path_FindPathFromAwayNotCrossPlanes(
     int a29,
     int a30,
     int a31);
-int __fastcall Path_FindPathInCylinderWithLOS(
+int __cdecl Path_FindPathInCylinderWithLOS(
     path_t *pPath,
     team_t eTeam,
     const float *vStartPos,
@@ -281,7 +281,7 @@ int __fastcall Path_FindPathInCylinderWithLOS(
     double fWithinDistSqrd,
     int bAllowNegotiationLinks,
     int a8);
-int __fastcall Path_FindPathInCylinderWithLOSNotCrossPlanes(
+int __cdecl Path_FindPathInCylinderWithLOSNotCrossPlanes(
     path_t *pPath,
     team_t eTeam,
     const float *vStartPos,
@@ -313,7 +313,7 @@ int __fastcall Path_FindPathInCylinderWithLOSNotCrossPlanes(
     int *a29,
     int a30,
     int a31);
-pathnode_t *__fastcall Path_FindPathFromInCylinder(
+pathnode_t *__cdecl Path_FindPathFromInCylinder(
     path_t *pPath,
     team_t eTeam,
     pathnode_t *pNodeFrom,
@@ -344,7 +344,7 @@ pathnode_t *__fastcall Path_FindPathFromInCylinder(
     int a28,
     int a29,
     int a30);
-int __fastcall Path_FindPathFromInCylinderNotCrossPlanes(
+int __cdecl Path_FindPathFromInCylinderNotCrossPlanes(
     path_t *pPath,
     team_t eTeam,
     pathnode_t *pNodeFrom,
@@ -381,8 +381,8 @@ int __fastcall Path_FindPathFromInCylinderNotCrossPlanes(
     int *a34,
     int a35,
     int a36);
-const pathnode_t *__fastcall Path_FindFacingNode(sentient_s *pSelf, sentient_s *pOther, sentient_info_t *pInfo);
-int __fastcall Path_FindPathGetCloseAsPossible(
+const pathnode_t *__cdecl Path_FindFacingNode(sentient_s *pSelf, sentient_s *pOther, sentient_info_t *pInfo);
+int __cdecl Path_FindPathGetCloseAsPossible(
     path_t *pPath,
     team_t eTeam,
     pathnode_t *pNodeFrom,
@@ -390,7 +390,7 @@ int __fastcall Path_FindPathGetCloseAsPossible(
     pathnode_t *pNodeTo,
     const float *vGoalPos,
     int bAllowNegotiationLinks);
-int __fastcall Path_FindPathWithWidth(
+int __cdecl Path_FindPathWithWidth(
     path_t *pPath,
     team_t eTeam,
     const float *vStartPos,
@@ -399,7 +399,7 @@ int __fastcall Path_FindPathWithWidth(
     double width,
     float *perp,
     float *a8);
-int __fastcall Path_FindPathNotCrossPlanes(
+int __cdecl Path_FindPathNotCrossPlanes(
     path_t *pPath,
     team_t eTeam,
     const float *vStartPos,
@@ -408,7 +408,7 @@ int __fastcall Path_FindPathNotCrossPlanes(
     float *fDist,
     int *iPlaneCount,
     int bAllowNegotiationLinks);
-pathnode_t *__fastcall Path_FindPathFromNotCrossPlanes(
+pathnode_t *__cdecl Path_FindPathFromNotCrossPlanes(
     path_t *pPath,
     team_t eTeam,
     pathnode_t *pNodeFrom,
@@ -437,7 +437,7 @@ pathnode_t *__fastcall Path_FindPathFromNotCrossPlanes(
     int a26,
     int a27,
     int a28);
-pathnode_t *__fastcall Path_FindPathAway(
+pathnode_t *__cdecl Path_FindPathAway(
     path_t *pPath,
     team_t eTeam,
     float *vStartPos,
@@ -445,7 +445,7 @@ pathnode_t *__fastcall Path_FindPathAway(
     double fDistAway,
     int bAllowNegotiationLinks,
     int a7);
-pathnode_t *__fastcall Path_FindPathAwayNotCrossPlanes(
+pathnode_t *__cdecl Path_FindPathAwayNotCrossPlanes(
     path_t *pPath,
     team_t eTeam,
     float *vStartPos,

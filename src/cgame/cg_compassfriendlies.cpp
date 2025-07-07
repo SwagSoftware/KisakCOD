@@ -5,19 +5,19 @@
 #include "cg_compassfriendlies.h"
 
 
-void __fastcall TRACK_cg_compassfriendlies()
+void __cdecl TRACK_cg_compassfriendlies()
 {
     track_static_alloc_internal(s_compassActors, 768, "s_compassActors", 9);
     track_static_alloc_internal(s_compassVehicles, 1280, "s_compassVehicles", 9);
 }
 
-void __fastcall CG_ClearCompassPingData()
+void __cdecl CG_ClearCompassPingData()
 {
     memset(s_compassActors, 0, sizeof(s_compassActors));
     memset(s_compassVehicles, 0, sizeof(s_compassVehicles));
 }
 
-void __fastcall CG_CompassAddWeaponPingInfo(int localClientNum, centity_s *cent, float *origin, int msec)
+void __cdecl CG_CompassAddWeaponPingInfo(int localClientNum, centity_s *cent, float *origin, int msec)
 {
     int eType; // r11
     unsigned int v9; // r7
@@ -83,14 +83,14 @@ void __fastcall CG_CompassAddWeaponPingInfo(int localClientNum, centity_s *cent,
     }
 }
 
-void __fastcall CG_CompassApplyPointerRadiusScale(float *radiusScale)
+void __cdecl CG_CompassApplyPointerRadiusScale(float *radiusScale)
 {
     if (!radiusScale)
         MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\cgame\\cg_compassfriendlies.cpp", 81, 0, "%s", "radiusScale");
     *radiusScale = (float)(compassSize->current.value * *radiusScale) * (float)55.0;
 }
 
-void __fastcall CG_CalcCompassPointerRadius(float *radius, double dist)
+void __cdecl CG_CalcCompassPointerRadius(float *radius, double dist)
 {
     const dvar_s *v4; // r11
     double v5; // fp0
@@ -109,7 +109,7 @@ void __fastcall CG_CalcCompassPointerRadius(float *radius, double dist)
     CG_CompassApplyPointerRadiusScale(radius);
 }
 
-void __fastcall CG_CompassUpdateActorInfo(int localClientNum, int entityIndex)
+void __cdecl CG_CompassUpdateActorInfo(int localClientNum, int entityIndex)
 {
     centity_s *Entity; // r31
     int ClientActorFriendlyIndex; // r3
@@ -149,7 +149,7 @@ void __fastcall CG_CompassUpdateActorInfo(int localClientNum, int entityIndex)
     }
 }
 
-CompassVehicle *__fastcall Compass_GetVehicle(int localClientNum, int entityNum)
+CompassVehicle *__cdecl Compass_GetVehicle(int localClientNum, int entityNum)
 {
     unsigned int v2; // r5
     int v3; // r11
@@ -238,7 +238,7 @@ LABEL_25:
     return result;
 }
 
-void __fastcall CG_CompassUpdateVehicleInfo(int localClientNum, int entityIndex)
+void __cdecl CG_CompassUpdateVehicleInfo(int localClientNum, int entityIndex)
 {
     centity_s *Entity; // r31
     CompassVehicle *Vehicle; // r3
@@ -272,7 +272,7 @@ void __fastcall CG_CompassUpdateVehicleInfo(int localClientNum, int entityIndex)
     Vehicle->lastYaw = Entity->pose.angles[1];
 }
 
-void __fastcall CG_CompassDrawActors(
+void __cdecl CG_CompassDrawActors(
     int localClientNum,
     CompassType compassType,
     const rectDef_s *parentRect,
@@ -550,7 +550,7 @@ void __fastcall CG_CompassDrawActors(
     }
 }
 
-void __fastcall CG_CompassDrawVehicles(
+void __cdecl CG_CompassDrawVehicles(
     int localClientNum,
     CompassType compassType,
     const rectDef_s *parentRect,

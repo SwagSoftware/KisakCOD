@@ -1,5 +1,9 @@
 #pragma once
 
+#ifndef KISAK_MP
+#error This File is MultiPlayer Only
+#endif
+
 #include "msg_mp.h"
 
 // number of old messages that must be kept on client and

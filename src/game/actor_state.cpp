@@ -4,14 +4,14 @@
 
 #include "actor_state.h"
 
-void __fastcall TRACK_actor_state()
+void __cdecl TRACK_actor_state()
 {
     track_static_alloc_internal((void *)g_eSimplificationRules, 64, "g_eSimplificationRules", 5);
     track_static_alloc_internal((void *)g_eSupercedingStates, 64, "g_eSupercedingStates", 5);
     track_static_alloc_internal((void *)g_eSupercededStates, 64, "g_eSupercededStates", 5);
 }
 
-void __fastcall Actor_SetDefaultState(actor_s *actor)
+void __cdecl Actor_SetDefaultState(actor_s *actor)
 {
     if (actor->stateLevel)
         MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\actor_state.cpp", 110, 0, "%s", "actor->stateLevel == 0");
@@ -28,7 +28,7 @@ void __fastcall Actor_SetDefaultState(actor_s *actor)
     actor->eSimulatedState[0] = AIS_EXPOSED;
 }
 
-int __fastcall Actor_StartState(actor_s *self, ai_state_t eStartedState)
+int __cdecl Actor_StartState(actor_s *self, ai_state_t eStartedState)
 {
     if (!self->stateLevel)
         self->iStateTime = level.time;
@@ -41,12 +41,12 @@ int __fastcall Actor_StartState(actor_s *self, ai_state_t eStartedState)
             "(AIFuncTable[self->species][eStartedState].pfnStart)",
             eStartedState);
     self->eState[self->stateLevel] = eStartedState;
-    return ((int(__fastcall *)(actor_s *, ai_state_t))AIFuncTable[self->species][eStartedState].pfnStart)(
+    return ((int(__cdecl *)(actor_s *, ai_state_t))AIFuncTable[self->species][eStartedState].pfnStart)(
         self,
         self->eState[self->stateLevel]);
 }
 
-void __fastcall Actor_FinishState(actor_s *self, ai_state_t eNextState)
+void __cdecl Actor_FinishState(actor_s *self, ai_state_t eNextState)
 {
     ai_state_t v4; // r8
     ai_state_t v5; // r29
@@ -64,7 +64,7 @@ void __fastcall Actor_FinishState(actor_s *self, ai_state_t eNextState)
     AIFuncTable[self->species][v5].pfnFinish(self, eNextState);
 }
 
-void __fastcall Actor_SuspendState(actor_s *self, ai_state_t eNextState)
+void __cdecl Actor_SuspendState(actor_s *self, ai_state_t eNextState)
 {
     ai_state_t v4; // r8
     ai_state_t v5; // r29
@@ -82,7 +82,7 @@ void __fastcall Actor_SuspendState(actor_s *self, ai_state_t eNextState)
     AIFuncTable[self->species][v5].pfnSuspend(self, eNextState);
 }
 
-int __fastcall Actor_GetNextPopedState(actor_s *self)
+int __cdecl Actor_GetNextPopedState(actor_s *self)
 {
     unsigned int stateLevel; // r11
 
@@ -93,7 +93,7 @@ int __fastcall Actor_GetNextPopedState(actor_s *self)
         return 1;
 }
 
-int __fastcall Actor_ResumeState(actor_s *self, ai_state_t ePrevState)
+int __cdecl Actor_ResumeState(actor_s *self, ai_state_t ePrevState)
 {
     ai_state_t v4; // r8
     ai_state_t v5; // r29
@@ -119,13 +119,13 @@ int __fastcall Actor_ResumeState(actor_s *self, ai_state_t ePrevState)
     return 0;
 }
 
-void __fastcall Actor_StartDefaultState(actor_s *self)
+void __cdecl Actor_StartDefaultState(actor_s *self)
 {
     if (!(unsigned __int8)Actor_StartState(self, AIS_EXPOSED))
         MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\actor_state.cpp", 228, 0, "%s", "startSuccess");
 }
 
-void __fastcall Actor_ResumePopedState(actor_s *self, ai_state_t state)
+void __cdecl Actor_ResumePopedState(actor_s *self, ai_state_t state)
 {
     unsigned int stateLevel; // r11
     char v4; // r3
@@ -144,7 +144,7 @@ void __fastcall Actor_ResumePopedState(actor_s *self, ai_state_t state)
         MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\actor_state.cpp", 228, 0, "%s", "startSuccess");
 }
 
-void __fastcall Actor_ThinkStateTransitions(actor_s *self)
+void __cdecl Actor_ThinkStateTransitions(actor_s *self)
 {
     unsigned int v2; // r19
     ai_state_t *p_eState; // r29
@@ -242,14 +242,14 @@ void __fastcall Actor_ThinkStateTransitions(actor_s *self)
     } while (v9 <= self->stateLevel);
 }
 
-void __fastcall Actor_SetSubState(actor_s *self, ai_substate_t eSubState)
+void __cdecl Actor_SetSubState(actor_s *self, ai_substate_t eSubState)
 {
     if (!self)
         MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\actor_state.cpp", 328, 0, "%s", "self");
     self->eSubState[self->stateLevel] = eSubState;
 }
 
-int __fastcall Actor_IsStateOnStack(const actor_s *self, ai_state_t eState)
+int __cdecl Actor_IsStateOnStack(const actor_s *self, ai_state_t eState)
 {
     int v2; // r10
     ai_state_t *i; // r11
@@ -263,7 +263,7 @@ int __fastcall Actor_IsStateOnStack(const actor_s *self, ai_state_t eState)
     return 1;
 }
 
-int __fastcall Actor_PendingTransitionTo(actor_s *self, ai_state_t eState)
+int __cdecl Actor_PendingTransitionTo(actor_s *self, ai_state_t eState)
 {
     unsigned int transitionCount; // r8
     int v3; // r10
@@ -283,7 +283,7 @@ int __fastcall Actor_PendingTransitionTo(actor_s *self, ai_state_t eState)
     return 1;
 }
 
-void __fastcall Actor_SimplifyStateTransitions(actor_s *self)
+void __cdecl Actor_SimplifyStateTransitions(actor_s *self)
 {
     unsigned int transitionCount; // r11
     int v3; // r10
@@ -342,7 +342,7 @@ void __fastcall Actor_SimplifyStateTransitions(actor_s *self)
     }
 }
 
-int __fastcall Actor_AllowedToPushState(actor_s *self, int eState)
+int __cdecl Actor_AllowedToPushState(actor_s *self, int eState)
 {
     unsigned int simulatedStateLevel; // r5
     unsigned int v5; // r6
@@ -386,12 +386,12 @@ int __fastcall Actor_AllowedToPushState(actor_s *self, int eState)
 }
 
 // attributes: thunk
-void __fastcall Actor_OnStateChange(actor_s *self)
+void __cdecl Actor_OnStateChange(actor_s *self)
 {
     Actor_ClearArrivalPos(self);
 }
 
-void __fastcall Actor_SetState(actor_s *self, ai_state_t eState)
+void __cdecl Actor_SetState(actor_s *self, ai_state_t eState)
 {
     unsigned int transitionCount; // r7
     unsigned int simulatedStateLevel; // r4
@@ -445,7 +445,7 @@ void __fastcall Actor_SetState(actor_s *self, ai_state_t eState)
     Actor_ClearArrivalPos(self);
 }
 
-void __fastcall Actor_PopState(actor_s *self)
+void __cdecl Actor_PopState(actor_s *self)
 {
     unsigned int transitionCount; // r7
 
@@ -473,7 +473,7 @@ void __fastcall Actor_PopState(actor_s *self)
     --self->simulatedStateLevel;
 }
 
-void __fastcall Actor_ForceState(actor_s *self, ai_state_t eState)
+void __cdecl Actor_ForceState(actor_s *self, ai_state_t eState)
 {
     unsigned int v4; // r11
 
@@ -498,7 +498,7 @@ void __fastcall Actor_ForceState(actor_s *self, ai_state_t eState)
     Actor_SetState(self, eState);
 }
 
-void __fastcall Actor_PrepareToPushState(actor_s *self, int eState)
+void __cdecl Actor_PrepareToPushState(actor_s *self, int eState)
 {
     unsigned int simulatedStateLevel; // r6
     unsigned int v5; // r31
@@ -545,7 +545,7 @@ void __fastcall Actor_PrepareToPushState(actor_s *self, int eState)
     }
 }
 
-int __fastcall Actor_PushState(actor_s *self, ai_state_t eState)
+int __cdecl Actor_PushState(actor_s *self, ai_state_t eState)
 {
     int result; // r3
     unsigned int simulatedStateLevel; // r7

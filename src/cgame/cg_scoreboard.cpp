@@ -4,7 +4,7 @@
 
 #include "cg_scoreboard.h"
 
-float __fastcall CG_FadeObjectives(const cg_s *cgameGlob)
+float __cdecl CG_FadeObjectives(const cg_s *cgameGlob)
 {
     double v2; // fp1
     float *v3; // r3
@@ -27,7 +27,7 @@ float __fastcall CG_FadeObjectives(const cg_s *cgameGlob)
     return *((float *)&v2 + 1);
 }
 
-void __fastcall CG_DrawObjectiveBackdrop(const cg_s *cgameGlob, const float *color)
+void __cdecl CG_DrawObjectiveBackdrop(const cg_s *cgameGlob, const float *color)
 {
     __int64 v2; // r10
     const float *v3; // r3
@@ -47,7 +47,7 @@ void __fastcall CG_DrawObjectiveBackdrop(const cg_s *cgameGlob, const float *col
     }
 }
 
-void __fastcall CG_DrawObjectiveHeader(
+void __cdecl CG_DrawObjectiveHeader(
     int localClientNum,
     const rectDef_s *rect,
     Font_s *font,
@@ -151,7 +151,7 @@ void __fastcall CG_DrawObjectiveHeader(
     }
 }
 
-const char *__fastcall CG_WordWrap(
+const char *__cdecl CG_WordWrap(
     const char *inputText,
     Font_s *font,
     double scale,
@@ -228,7 +228,7 @@ const char *__fastcall CG_WordWrap(
     return v21;
 }
 
-void __fastcall CG_DrawObjectiveList(
+void __cdecl CG_DrawObjectiveList(
     int localClientNum,
     const rectDef_s *rect,
     Font_s *font,
@@ -494,7 +494,7 @@ void __fastcall CG_DrawObjectiveList(
     }
 }
 
-void __fastcall CG_DrawPausedMenuLine(
+void __cdecl CG_DrawPausedMenuLine(
     int localClientNum,
     const rectDef_s *rect,
     Font_s *font,
@@ -553,7 +553,7 @@ void __fastcall CG_DrawPausedMenuLine(
     }
 }
 
-int __fastcall CG_DrawScoreboard(int localClientNum)
+int __cdecl CG_DrawScoreboard(int localClientNum)
 {
     if (cg_paused->current.integer && cg_drawpaused->current.enabled)
         return 0;
@@ -571,7 +571,7 @@ int __fastcall CG_DrawScoreboard(int localClientNum)
     return 1;
 }
 
-void __fastcall CG_ParseObjectiveChange(int localClientNum, unsigned int num)
+void __cdecl CG_ParseObjectiveChange(int localClientNum, unsigned int num)
 {
     const char *ConfigString; // r26
     float *v5; // r30

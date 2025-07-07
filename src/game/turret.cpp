@@ -4,12 +4,12 @@
 
 #include "turret.h"
 
-void __fastcall TRACK_turret()
+void __cdecl TRACK_turret()
 {
     track_static_alloc_internal(turretInfoStore, 6016, "turretInfoStore", 9);
 }
 
-void __fastcall G_InitTurrets()
+void __cdecl G_InitTurrets()
 {
     TurretInfo *v0; // r11
 
@@ -22,14 +22,14 @@ void __fastcall G_InitTurrets()
     level.turrets = turretInfoStore;
 }
 
-int __fastcall Turret_GetRemainingConvergenceTime(const TurretInfo *turretInfo, unsigned int type)
+int __cdecl Turret_GetRemainingConvergenceTime(const TurretInfo *turretInfo, unsigned int type)
 {
     if (type >= 2)
         MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\turret.cpp", 65, 0, "%s", "type == PITCH || type == YAW");
     return turretInfo->convergenceTime[type] + turretInfo->targetTime - level.time;
 }
 
-void __fastcall Turret_FillWeaponParms(const gentity_s *ent, const gentity_s *activator, weaponParms *wp)
+void __cdecl Turret_FillWeaponParms(const gentity_s *ent, const gentity_s *activator, weaponParms *wp)
 {
     const char *v6; // r3
     gclient_s *client; // r3
@@ -102,7 +102,7 @@ void __fastcall Turret_FillWeaponParms(const gentity_s *ent, const gentity_s *ac
     }
 }
 
-bool __fastcall MayHitTarget(const weaponParms *weapon, const gentity_s *target, const float *forward)
+bool __cdecl MayHitTarget(const weaponParms *weapon, const gentity_s *target, const float *forward)
 {
     double v6; // fp0
     double v7; // fp13
@@ -141,7 +141,7 @@ bool __fastcall MayHitTarget(const weaponParms *weapon, const gentity_s *target,
     return (_cntlzw(SV_SightTraceToEntity(v17, vec3_origin, vec3_origin, v18, number, -1)) & 0x20) == 0;
 }
 
-void __fastcall Fire_Lead(gentity_s *ent, gentity_s *activator, int bUseAccuracy)
+void __cdecl Fire_Lead(gentity_s *ent, gentity_s *activator, int bUseAccuracy)
 {
     gentity_s *v6; // r25
     weaponParms *v7; // r5
@@ -248,7 +248,7 @@ void __fastcall Fire_Lead(gentity_s *ent, gentity_s *activator, int bUseAccuracy
     //Profile_EndInternal(0);
 }
 
-void __fastcall clamp_playerbehindgun(gentity_s *self, gentity_s *other)
+void __cdecl clamp_playerbehindgun(gentity_s *self, gentity_s *other)
 {
     double v4; // fp12
     double v5; // fp11
@@ -282,7 +282,7 @@ void __fastcall clamp_playerbehindgun(gentity_s *self, gentity_s *other)
     SV_LinkEntity(other);
 }
 
-void __fastcall turret_clientaim(gentity_s *self, gentity_s *other)
+void __cdecl turret_clientaim(gentity_s *self, gentity_s *other)
 {
     TurretInfo *pTurretInfo; // r27
     gclient_s *client; // r30
@@ -357,7 +357,7 @@ void __fastcall turret_clientaim(gentity_s *self, gentity_s *other)
     }
 }
 
-void __fastcall turret_shoot_internal(gentity_s *self, gentity_s *other)
+void __cdecl turret_shoot_internal(gentity_s *self, gentity_s *other)
 {
     if (!self->pTurretInfo)
         MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\turret.cpp", 297, 0, "%s", "self->pTurretInfo");
@@ -378,7 +378,7 @@ void __fastcall turret_shoot_internal(gentity_s *self, gentity_s *other)
     }
 }
 
-void __fastcall turret_track(gentity_s *self, gentity_s *other)
+void __cdecl turret_track(gentity_s *self, gentity_s *other)
 {
     TurretInfo *pTurretInfo; // r31
     WeaponDef *WeaponDef; // r3
@@ -422,7 +422,7 @@ void __fastcall turret_track(gentity_s *self, gentity_s *other)
     }
 }
 
-void __fastcall turret_UpdateSound(gentity_s *self)
+void __cdecl turret_UpdateSound(gentity_s *self)
 {
     TurretInfo *pTurretInfo; // r29
     gentity_s *v3; // r3
@@ -459,7 +459,7 @@ void __fastcall turret_UpdateSound(gentity_s *self)
 }
 
 // local variable allocation has failed, the output may be wrong!
-void __fastcall turret_CalculateConvergenceAngularVelocity(
+void __cdecl turret_CalculateConvergenceAngularVelocity(
     const gentity_s *self,
     const float *desiredAngles,
     float *angularVelocity,
@@ -518,7 +518,7 @@ void __fastcall turret_CalculateConvergenceAngularVelocity(
     }
 }
 
-int __fastcall turret_UpdateTargetAngles(gentity_s *self, const float *desiredAngles, int bManned, long double a4)
+int __cdecl turret_UpdateTargetAngles(gentity_s *self, const float *desiredAngles, int bManned, long double a4)
 {
     TurretInfo *pTurretInfo; // r23
     int v8; // r22
@@ -628,12 +628,12 @@ int __fastcall turret_UpdateTargetAngles(gentity_s *self, const float *desiredAn
     return result;
 }
 
-bool __fastcall turret_IsFiringInternal(int state)
+bool __cdecl turret_IsFiringInternal(int state)
 {
     return state != 0;
 }
 
-bool __fastcall turret_IsFiring(gentity_s *self)
+bool __cdecl turret_IsFiring(gentity_s *self)
 {
     TurretInfo *pTurretInfo; // r31
 
@@ -643,7 +643,7 @@ bool __fastcall turret_IsFiring(gentity_s *self)
     return pTurretInfo->state != 0;
 }
 
-void __fastcall turret_SetState(gentity_s *self, unsigned int state)
+void __cdecl turret_SetState(gentity_s *self, unsigned int state)
 {
     TurretInfo *pTurretInfo; // r30
     TurretInfo *v5; // r25
@@ -659,7 +659,7 @@ void __fastcall turret_SetState(gentity_s *self, unsigned int state)
     pTurretInfo->state = state;
 }
 
-void __fastcall turret_ClearTargetEnt(gentity_s *self)
+void __cdecl turret_ClearTargetEnt(gentity_s *self)
 {
     TurretInfo *pTurretInfo; // r31
 
@@ -671,7 +671,7 @@ void __fastcall turret_ClearTargetEnt(gentity_s *self)
     turret_SetState(self, 0);
 }
 
-int __fastcall turret_ReturnToDefaultPos(gentity_s *self, int bManned)
+int __cdecl turret_ReturnToDefaultPos(gentity_s *self, int bManned)
 {
     TurretInfo *pTurretInfo; // r29
     long double v5; // fp2
@@ -689,7 +689,7 @@ int __fastcall turret_ReturnToDefaultPos(gentity_s *self, int bManned)
     return turret_UpdateTargetAngles(self, v7, bManned, v5);
 }
 
-void __fastcall turret_SetDefaultDropPitch(gentity_s *self, double pitch)
+void __cdecl turret_SetDefaultDropPitch(gentity_s *self, double pitch)
 {
     TurretInfo *pTurretInfo; // r31
 
@@ -699,7 +699,7 @@ void __fastcall turret_SetDefaultDropPitch(gentity_s *self, double pitch)
     pTurretInfo->dropPitch = pitch;
 }
 
-void __fastcall turret_shoot(gentity_s *self)
+void __cdecl turret_shoot(gentity_s *self)
 {
     gentity_s *v2; // r4
 
@@ -712,7 +712,7 @@ void __fastcall turret_shoot(gentity_s *self)
     //Profile_EndInternal(0);
 }
 
-int __fastcall turret_CanTargetPoint(const gentity_s *self, const float *vPoint, float *vSource, float *localAngles)
+int __cdecl turret_CanTargetPoint(const gentity_s *self, const float *vPoint, float *vSource, float *localAngles)
 {
     int result; // r3
     TurretInfo *pTurretInfo; // r27
@@ -772,7 +772,7 @@ int __fastcall turret_CanTargetPoint(const gentity_s *self, const float *vPoint,
     return 0;
 }
 
-int __fastcall turret_CanTargetSentient(
+int __cdecl turret_CanTargetSentient(
     const gentity_s *self,
     const sentient_s *sentient,
     float *targetPosition,
@@ -931,7 +931,7 @@ int __fastcall turret_CanTargetSentient(
     return 0;
 }
 
-void __fastcall turret_aimat_vector_internal(gentity_s *self, float *origin, int bShoot, const float *desiredAngles)
+void __cdecl turret_aimat_vector_internal(gentity_s *self, float *origin, int bShoot, const float *desiredAngles)
 {
     TurretInfo *pTurretInfo; // r31
     int targetTime; // r11
@@ -979,7 +979,7 @@ LABEL_15:
     pTurretInfo->targetPos[2] = origin[2];
 }
 
-int __fastcall turret_aimat_vector(gentity_s *self, float *origin, int bShoot, float *desiredAngles)
+int __cdecl turret_aimat_vector(gentity_s *self, float *origin, int bShoot, float *desiredAngles)
 {
     int result; // r3
     float v9; // [sp+50h] [-40h] BYREF
@@ -999,7 +999,7 @@ int __fastcall turret_aimat_vector(gentity_s *self, float *origin, int bShoot, f
     return result;
 }
 
-void __fastcall turret_SetTargetEnt(gentity_s *self, gentity_s *ent)
+void __cdecl turret_SetTargetEnt(gentity_s *self, gentity_s *ent)
 {
     TurretInfo *pTurretInfo; // r31
     gentity_s *v4; // r3
@@ -1024,7 +1024,7 @@ void __fastcall turret_SetTargetEnt(gentity_s *self, gentity_s *ent)
 }
 
 // local variable allocation has failed, the output may be wrong!
-int __fastcall turret_aimat_Sentient_Internal(
+int __cdecl turret_aimat_Sentient_Internal(
     gentity_s *self,
     sentient_s *enemy,
     int bShoot,
@@ -1155,7 +1155,7 @@ int __fastcall turret_aimat_Sentient_Internal(
     return 1;
 }
 
-int __fastcall turret_aimat_Sentient(gentity_s *self, sentient_s *enemy, int bShoot, int missTime)
+int __cdecl turret_aimat_Sentient(gentity_s *self, sentient_s *enemy, int bShoot, int missTime)
 {
     int result; // r3
     long double v6; // fp2
@@ -1170,7 +1170,7 @@ int __fastcall turret_aimat_Sentient(gentity_s *self, sentient_s *enemy, int bSh
     return result;
 }
 
-int __fastcall turret_aimat_Ent(gentity_s *self, gentity_s *ent, int bShoot)
+int __cdecl turret_aimat_Ent(gentity_s *self, gentity_s *ent, int bShoot)
 {
     long double v6; // fp2
     float v8[12]; // [sp+50h] [-30h] BYREF
@@ -1182,7 +1182,7 @@ int __fastcall turret_aimat_Ent(gentity_s *self, gentity_s *ent, int bShoot)
     return 1;
 }
 
-bool __fastcall turret_SightTrace(const float *start, const float *end, int passEnt1, int passEnt2)
+bool __cdecl turret_SightTrace(const float *start, const float *end, int passEnt1, int passEnt2)
 {
     bool v9; // [sp+50h] [-30h] BYREF
 
@@ -1195,7 +1195,7 @@ bool __fastcall turret_SightTrace(const float *start, const float *end, int pass
     return v9;
 }
 
-int __fastcall turret_isTargetTooCloseToPlayer(
+int __cdecl turret_isTargetTooCloseToPlayer(
     const float *flashOrigin,
     const gentity_s *turret,
     const gentity_s *target)
@@ -1295,7 +1295,7 @@ int __fastcall turret_isTargetTooCloseToPlayer(
     return result;
 }
 
-int __fastcall turret_isTargetVisible(gentity_s *self, const gentity_s *target, float *distSqr)
+int __cdecl turret_isTargetVisible(gentity_s *self, const gentity_s *target, float *distSqr)
 {
     TurretInfo *pTurretInfo; // r27
     double v8; // fp0
@@ -1349,7 +1349,7 @@ LABEL_16:
     return 1;
 }
 
-sentient_s *__fastcall turret_findBestTarget(gentity_s *self)
+sentient_s *__cdecl turret_findBestTarget(gentity_s *self)
 {
     TurretInfo *pTurretInfo; // r30
     sentient_s *sentient; // r28
@@ -1410,7 +1410,7 @@ sentient_s *__fastcall turret_findBestTarget(gentity_s *self)
     return sentient;
 }
 
-void __fastcall turret_think_auto_nonai(gentity_s *self)
+void __cdecl turret_think_auto_nonai(gentity_s *self)
 {
     TurretInfo *pTurretInfo; // r28
     sentient_s *BestTarget; // r29
@@ -1467,7 +1467,7 @@ LABEL_20:
     turret_UpdateTargetAngles(self, v7, 1, v5);
 }
 
-int __fastcall turret_think_auto(gentity_s *self, actor_s *actor)
+int __cdecl turret_think_auto(gentity_s *self, actor_s *actor)
 {
     TurretInfo *pTurretInfo; // r24
     sentient_s *TargetSentient; // r26
@@ -1708,7 +1708,7 @@ LABEL_73:
     return 1;
 }
 
-int __fastcall turret_think_manual(gentity_s *self, actor_s *actor)
+int __cdecl turret_think_manual(gentity_s *self, actor_s *actor)
 {
     TurretInfo *pTurretInfo; // r30
     sentient_s *TargetSentient; // r3
@@ -1810,7 +1810,7 @@ int __fastcall turret_think_manual(gentity_s *self, actor_s *actor)
     return 1;
 }
 
-void __fastcall turret_RestoreDefaultDropPitch(gentity_s *self)
+void __cdecl turret_RestoreDefaultDropPitch(gentity_s *self)
 {
     TurretInfo *pTurretInfo; // r27
     DObjAnimMat *LocalTagMatrix; // r28
@@ -1874,7 +1874,7 @@ void __fastcall turret_RestoreDefaultDropPitch(gentity_s *self)
     }
 }
 
-void __fastcall turret_think(gentity_s *self)
+void __cdecl turret_think(gentity_s *self)
 {
     TurretInfo *pTurretInfo; // r29
     tagInfo_s *tagInfo; // r9
@@ -1936,7 +1936,7 @@ LABEL_22:
         Actor_StopUseTurret(actor);
 }
 
-bool __fastcall Actor_IsTurretCloserThenCurrent(actor_s *actor, gentity_s *turret)
+bool __cdecl Actor_IsTurretCloserThenCurrent(actor_s *actor, gentity_s *turret)
 {
     double v4; // fp31
 
@@ -1952,7 +1952,7 @@ bool __fastcall Actor_IsTurretCloserThenCurrent(actor_s *actor, gentity_s *turre
     return Vec2DistanceSq(actor->ent->r.currentOrigin, actor->pTurret->r.currentOrigin) < v4;
 }
 
-bool __fastcall turret_canuse_auto(gentity_s *self, actor_s *actor)
+bool __cdecl turret_canuse_auto(gentity_s *self, actor_s *actor)
 {
     TurretInfo *pTurretInfo; // r29
     sentient_s *TargetSentient; // r3
@@ -2040,7 +2040,7 @@ bool __fastcall turret_canuse_auto(gentity_s *self, actor_s *actor)
     return (_cntlzw(turret_SightTrace(&v20, v27, actor->ent->s.number, v7->ent->s.number)) & 0x20) == 0;
 }
 
-bool __fastcall turret_canuse_manual(gentity_s *self, actor_s *actor)
+bool __cdecl turret_canuse_manual(gentity_s *self, actor_s *actor)
 {
     sentient_s *TargetSentient; // r3
     bool result; // r3
@@ -2063,7 +2063,7 @@ bool __fastcall turret_canuse_manual(gentity_s *self, actor_s *actor)
     return result;
 }
 
-bool __fastcall turret_canuse(actor_s *actor, gentity_s *pTurret)
+bool __cdecl turret_canuse(actor_s *actor, gentity_s *pTurret)
 {
     TurretInfo *pTurretInfo; // r27
 
@@ -2083,7 +2083,7 @@ bool __fastcall turret_canuse(actor_s *actor, gentity_s *pTurret)
     return turret_canuse_manual(pTurret, actor);
 }
 
-void __fastcall turret_controller(const gentity_s *self, int *partBits)
+void __cdecl turret_controller(const gentity_s *self, int *partBits)
 {
     int number; // r3
     double v5; // fp12
@@ -2116,7 +2116,7 @@ void __fastcall turret_controller(const gentity_s *self, int *partBits)
     DObjSetControlTagAngles(ServerDObj, partBits, v8[0], &v9);
 }
 
-void __fastcall SP_turret_XAnimPrecache(ScriptFunctions *functions, const char *classname)
+void __cdecl SP_turret_XAnimPrecache(ScriptFunctions *functions, const char *classname)
 {
     unsigned int WeaponIndexForName; // r31
     WeaponDef *WeaponDef; // r28
@@ -2144,7 +2144,7 @@ void __fastcall SP_turret_XAnimPrecache(ScriptFunctions *functions, const char *
     }
 }
 
-bool __fastcall turret_behind(gentity_s *self, gentity_s *other, long double a3)
+bool __cdecl turret_behind(gentity_s *self, gentity_s *other, long double a3)
 {
     TurretInfo *pTurretInfo; // r29
     double v6; // fp13
@@ -2190,7 +2190,7 @@ bool __fastcall turret_behind(gentity_s *self, gentity_s *other, long double a3)
         * (float)57.295776) <= v7;
 }
 
-bool __fastcall G_IsTurretUsable(gentity_s *self, gentity_s *owner, long double a3)
+bool __cdecl G_IsTurretUsable(gentity_s *self, gentity_s *owner, long double a3)
 {
     TurretInfo *pTurretInfo; // r30
     gclient_s *client; // r11
@@ -2212,7 +2212,7 @@ bool __fastcall G_IsTurretUsable(gentity_s *self, gentity_s *owner, long double 
     }
 }
 
-void __fastcall G_DeactivateTurret(gentity_s *self)
+void __cdecl G_DeactivateTurret(gentity_s *self)
 {
     if (!self)
         MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\turret.cpp", 2037, 0, "%s", "self");
@@ -2221,7 +2221,7 @@ void __fastcall G_DeactivateTurret(gentity_s *self)
     self->active = 0;
 }
 
-void __fastcall turret_use(gentity_s *self, gentity_s *owner, gentity_s *activator)
+void __cdecl turret_use(gentity_s *self, gentity_s *owner, gentity_s *activator)
 {
     TurretInfo *pTurretInfo; // r31
     gclient_s *client; // r30
@@ -2351,7 +2351,7 @@ LABEL_19:
     Scr_Notify(self, scr_const.turretownerchange, 0);
 }
 
-int __fastcall G_CanSpawnTurret()
+int __cdecl G_CanSpawnTurret()
 {
     TurretInfo *v0; // r11
 
@@ -2364,7 +2364,7 @@ int __fastcall G_CanSpawnTurret()
     return 1;
 }
 
-void __fastcall G_SpawnTurret(gentity_s *self, const char *weaponinfoname)
+void __cdecl G_SpawnTurret(gentity_s *self, const char *weaponinfoname)
 {
     int v4; // r10
     TurretInfo *i; // r11
@@ -2666,7 +2666,7 @@ void __fastcall G_SpawnTurret(gentity_s *self, const char *weaponinfoname)
     SV_LinkEntity(self);
 }
 
-void __fastcall SP_turret(gentity_s *self)
+void __cdecl SP_turret(gentity_s *self)
 {
     const char *v2; // [sp+50h] [-20h] BYREF
 
@@ -2675,7 +2675,7 @@ void __fastcall SP_turret(gentity_s *self)
     G_SpawnTurret(self, v2);
 }
 
-void __fastcall G_ClientStopUsingTurret(gentity_s *self)
+void __cdecl G_ClientStopUsingTurret(gentity_s *self)
 {
     TurretInfo *pTurretInfo; // r30
     gentity_s *v3; // r31
@@ -2719,7 +2719,7 @@ void __fastcall G_ClientStopUsingTurret(gentity_s *self)
     Scr_Notify(self, scr_const.turretownerchange, 0);
 }
 
-void __fastcall turret_think_client(gentity_s *self)
+void __cdecl turret_think_client(gentity_s *self)
 {
     EntHandle *p_ownerNum; // r29
     gentity_s *v3; // r29
@@ -2743,7 +2743,7 @@ void __fastcall turret_think_client(gentity_s *self)
     }
 }
 
-void __fastcall turret_think_init(gentity_s *self)
+void __cdecl turret_think_init(gentity_s *self)
 {
     tagInfo_s *tagInfo; // r9
     int time; // r11
@@ -2770,7 +2770,7 @@ void __fastcall turret_think_init(gentity_s *self)
         turret_RestoreDefaultDropPitch(self);
 }
 
-void __fastcall G_FreeTurret(gentity_s *self)
+void __cdecl G_FreeTurret(gentity_s *self)
 {
     EntHandle *p_ownerNum; // r31
     gentity_s *v3; // r30

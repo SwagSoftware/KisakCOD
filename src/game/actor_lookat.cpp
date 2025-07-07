@@ -4,7 +4,7 @@
 
 #include "actor_lookat.h"
 
-void __fastcall Actor_InitLookAt(actor_s *self)
+void __cdecl Actor_InitLookAt(actor_s *self)
 {
     self->lookAtInfo.bDoLookAt = 0;
     self->lookAtInfo.vLookAtPos[0] = 0.0;
@@ -18,7 +18,7 @@ void __fastcall Actor_InitLookAt(actor_s *self)
     self->lookAtInfo.fLookAtYawLimit = 90.0;
 }
 
-void __fastcall Actor_SetLookAtAnimNodes(
+void __cdecl Actor_SetLookAtAnimNodes(
     actor_s *self,
     unsigned __int16 animStraight,
     unsigned __int16 animLeft,
@@ -50,7 +50,7 @@ void __fastcall Actor_SetLookAtAnimNodes(
     self->lookAtInfo.iLookAtBlendEndTime = time;
 }
 
-void __fastcall Actor_SetLookAt(actor_s *self, float *vPosition, double fTurnAccel)
+void __cdecl Actor_SetLookAt(actor_s *self, float *vPosition, double fTurnAccel)
 {
     double fLookAtTurnAccel; // fp13
 
@@ -65,7 +65,7 @@ void __fastcall Actor_SetLookAt(actor_s *self, float *vPosition, double fTurnAcc
         self->lookAtInfo.fLookAtTurnAccel = 20.0;
 }
 
-float __fastcall Actor_CurrentLookAtAnimYawMax(actor_s *self)
+float __cdecl Actor_CurrentLookAtAnimYawMax(actor_s *self)
 {
     __int64 v1; // r11
     double v2; // fp1
@@ -87,7 +87,7 @@ float __fastcall Actor_CurrentLookAtAnimYawMax(actor_s *self)
     return *((float *)&v2 + 1);
 }
 
-float __fastcall Actor_CurrentLookAtYawMax(actor_s *self)
+float __cdecl Actor_CurrentLookAtYawMax(actor_s *self)
 {
     __int64 v1; // r11
     double v2; // fp1
@@ -108,7 +108,7 @@ float __fastcall Actor_CurrentLookAtYawMax(actor_s *self)
     return *((float *)&v2 + 1);
 }
 
-void __fastcall Actor_SetLookAtYawLimits(actor_s *self, double fAnimYawLimit, double fYawLimit, double fBlendTime)
+void __cdecl Actor_SetLookAtYawLimits(actor_s *self, double fAnimYawLimit, double fYawLimit, double fBlendTime)
 {
     __int64 v4; // r11
     double v5; // fp0
@@ -162,14 +162,14 @@ void __fastcall Actor_SetLookAtYawLimits(actor_s *self, double fAnimYawLimit, do
     }
 }
 
-void __fastcall Actor_StopLookAt(actor_s *self, double fTurnAccel)
+void __cdecl Actor_StopLookAt(actor_s *self, double fTurnAccel)
 {
     self->lookAtInfo.bDoLookAt = 0;
     if (fTurnAccel > 20.0)
         self->lookAtInfo.fLookAtTurnAccel = fTurnAccel;
 }
 
-void __fastcall Actor_UpdateLookAt(actor_s *self)
+void __cdecl Actor_UpdateLookAt(actor_s *self)
 {
     int v2; // r30
     double v3; // fp31

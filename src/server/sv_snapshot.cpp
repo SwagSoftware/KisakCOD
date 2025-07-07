@@ -5,7 +5,7 @@
 #include "server.h"
 
 
-void __fastcall SV_WriteSnapshotToClient(client_t *client, msg_t *msg)
+void __cdecl SV_WriteSnapshotToClient(client_t *client, msg_t *msg)
 {
     int Time; // r3
     int numSnapshotEntities; // r7
@@ -60,14 +60,14 @@ void __fastcall SV_WriteSnapshotToClient(client_t *client, msg_t *msg)
     MSG_WriteBits(msg, 2175, 12);
 }
 
-void __fastcall SV_UpdateServerCommandsToClient(client_t *client)
+void __cdecl SV_UpdateServerCommandsToClient(client_t *client)
 {
     CL_ParseCommandString(&client->reliableCommands);
     client->reliableCommands.header.sent = client->reliableCommands.header.sequence;
     client->reliableCommands.header.rover = 0;
 }
 
-void __fastcall SV_AddEntToSnapshot(int entnum)
+void __cdecl SV_AddEntToSnapshot(int entnum)
 {
     int numSnapshotEntities; // r11
 
@@ -86,7 +86,7 @@ void __fastcall SV_AddEntToSnapshot(int entnum)
     ++sv.entityNumbers.numSnapshotEntities;
 }
 
-void __fastcall SV_AddEntitiesVisibleFromPoint(int clientNum)
+void __cdecl SV_AddEntitiesVisibleFromPoint(int clientNum)
 {
     int i; // r30
     gentity_s *v3; // r3
@@ -128,7 +128,7 @@ void __fastcall SV_AddEntitiesVisibleFromPoint(int clientNum)
     }
 }
 
-void __fastcall SV_BuildClientSnapshot(client_t *client)
+void __cdecl SV_BuildClientSnapshot(client_t *client)
 {
     playerState_s *frames; // r31
     playerState_s *v2; // r3
@@ -147,7 +147,7 @@ void __fastcall SV_BuildClientSnapshot(client_t *client)
     }
 }
 
-void __fastcall SV_SendMessageToClient(msg_t *msg, client_t *client)
+void __cdecl SV_SendMessageToClient(msg_t *msg, client_t *client)
 {
     int outgoingSequence; // r4
 
@@ -157,7 +157,7 @@ void __fastcall SV_SendMessageToClient(msg_t *msg, client_t *client)
     CL_PacketEvent(msg, outgoingSequence);
 }
 
-void __fastcall SV_BuildAndSendClientSnapshot(client_t *client)
+void __cdecl SV_BuildAndSendClientSnapshot(client_t *client)
 {
     int outgoingSequence; // r4
     msg_t v3; // [sp+50h] [-4040h] BYREF
@@ -174,7 +174,7 @@ void __fastcall SV_BuildAndSendClientSnapshot(client_t *client)
     CL_PacketEvent(&v3, outgoingSequence);
 }
 
-void __fastcall SV_SendClientMessages()
+void __cdecl SV_SendClientMessages()
 {
     client_t *clients; // r11
     client_t *v1; // r30
@@ -202,13 +202,13 @@ void __fastcall SV_SendClientMessages()
     }
 }
 
-void __fastcall SV_WriteSnapshotToClientCmd(void *cmdData)
+void __cdecl SV_WriteSnapshotToClientCmd(void *cmdData)
 {
     if (!alwaysfails)
         MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\server\\sv_snapshot.cpp", 236, 0, "MP only");
 }
 
-void __fastcall SV_ArchiveSnapshotCmd(void *cmdData)
+void __cdecl SV_ArchiveSnapshotCmd(void *cmdData)
 {
     if (!alwaysfails)
         MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\server\\sv_snapshot.cpp", 242, 0, "MP only");

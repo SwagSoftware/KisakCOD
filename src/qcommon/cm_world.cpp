@@ -6,6 +6,8 @@
 #include <server/sv_game.h>
 #include <universal/profile.h>
 
+#include <bgame/bg_public.h>
+
 struct worldContents_s // sizeof=0x10
 {                                       // ...
     int contentsStaticModels;           // ...

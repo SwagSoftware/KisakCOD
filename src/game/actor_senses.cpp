@@ -4,7 +4,7 @@
 
 #include "actor_senses.h"
 
-int __fastcall Actor_SightTrace(actor_s *self, const float *start, const float *end, int passEntNum)
+int __cdecl Actor_SightTrace(actor_s *self, const float *start, const float *end, int passEntNum)
 {
     const float *v8; // r7
     int ignoreCloseFoliage; // r10
@@ -84,7 +84,7 @@ int __fastcall Actor_SightTrace(actor_s *self, const float *start, const float *
     return 1;
 }
 
-int __fastcall Actor_CanSeePointFrom(
+int __cdecl Actor_CanSeePointFrom(
     actor_s *self,
     const float *vStart,
     const float *vEnd,
@@ -120,7 +120,7 @@ int __fastcall Actor_CanSeePointFrom(
         return 0;
 }
 
-int __fastcall Actor_CanSeeEnemyViaClaimedNode(actor_s *self)
+int __cdecl Actor_CanSeeEnemyViaClaimedNode(actor_s *self)
 {
     pathnode_t *pClaimedNode; // r30
     sentient_s *TargetSentient; // r31
@@ -144,7 +144,7 @@ int __fastcall Actor_CanSeeEnemyViaClaimedNode(actor_s *self)
     return v6;
 }
 
-sentient_s *__fastcall Actor_KnowAboutEnemy(actor_s *self, int hadPath)
+sentient_s *__cdecl Actor_KnowAboutEnemy(actor_s *self, int hadPath)
 {
     sentient_s *result; // r3
     sentient_s *v5; // r30
@@ -175,7 +175,7 @@ sentient_s *__fastcall Actor_KnowAboutEnemy(actor_s *self, int hadPath)
     return result;
 }
 
-int __fastcall Actor_CanShootFrom(actor_s *self, const float *vTarget, const float *vFrom)
+int __cdecl Actor_CanShootFrom(actor_s *self, const float *vTarget, const float *vFrom)
 {
     double v6; // fp13
     double v7; // fp12
@@ -215,12 +215,12 @@ int __fastcall Actor_CanShootFrom(actor_s *self, const float *vTarget, const flo
     return v11;
 }
 
-int __fastcall compare_sentient_sort(unsigned int *pe1, unsigned int *pe2)
+int __cdecl compare_sentient_sort(unsigned int *pe1, unsigned int *pe2)
 {
     return pe2[1] - pe1[1];
 }
 
-void __fastcall Actor_UpdateLastKnownPos(actor_s *self, sentient_s *other)
+void __cdecl Actor_UpdateLastKnownPos(actor_s *self, sentient_s *other)
 {
     sentient_s *sentients; // r11
     char *v5; // r11
@@ -258,7 +258,7 @@ void __fastcall Actor_UpdateLastKnownPos(actor_s *self, sentient_s *other)
     *((unsigned int *)v6 + 9) = other->pNearestNode;
 }
 
-void __fastcall Actor_UpdateLastEnemySightPos(actor_s *self)
+void __cdecl Actor_UpdateLastEnemySightPos(actor_s *self)
 {
     const sentient_s *TargetSentient; // r3
     char *v3; // r11
@@ -278,7 +278,7 @@ void __fastcall Actor_UpdateLastEnemySightPos(actor_s *self)
     }
 }
 
-void __fastcall Actor_UpdateEyeInformation(actor_s *self)
+void __cdecl Actor_UpdateEyeInformation(actor_s *self)
 {
     gentity_s *ent; // r3
     double v3; // fp13
@@ -329,7 +329,7 @@ void __fastcall Actor_UpdateEyeInformation(actor_s *self)
     }
 }
 
-void __fastcall Actor_GetEyePosition(actor_s *self, float *vEyePosOut)
+void __cdecl Actor_GetEyePosition(actor_s *self, float *vEyePosOut)
 {
     if (!self)
         MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\actor_senses.cpp", 843, 0, "%s", "self");
@@ -341,7 +341,7 @@ void __fastcall Actor_GetEyePosition(actor_s *self, float *vEyePosOut)
     vEyePosOut[2] = self->eyeInfo.pos[2];
 }
 
-void __fastcall Actor_GetDebugEyePosition(actor_s *self, float *vEyePosOut)
+void __cdecl Actor_GetDebugEyePosition(actor_s *self, float *vEyePosOut)
 {
     gentity_s *ent; // r8
     int v5; // r9
@@ -376,7 +376,7 @@ void __fastcall Actor_GetDebugEyePosition(actor_s *self, float *vEyePosOut)
     vEyePosOut[2] = ent->r.currentOrigin[2] + (float)56.0;
 }
 
-void __fastcall Actor_GetEyeDirection(actor_s *self, float *vEyeDir)
+void __cdecl Actor_GetEyeDirection(actor_s *self, float *vEyeDir)
 {
     if (!self)
         MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\actor_senses.cpp", 896, 0, "%s", "self");
@@ -388,7 +388,7 @@ void __fastcall Actor_GetEyeDirection(actor_s *self, float *vEyeDir)
     vEyeDir[2] = self->eyeInfo.dir[2];
 }
 
-void __fastcall Actor_GetEyeOffset(actor_s *self, float *vEyePosOut)
+void __cdecl Actor_GetEyeOffset(actor_s *self, float *vEyePosOut)
 {
     if (!self)
         MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\actor_senses.cpp", 913, 0, "%s", "self");
@@ -399,7 +399,7 @@ void __fastcall Actor_GetEyeOffset(actor_s *self, float *vEyePosOut)
     vEyePosOut[2] = 64.0;
 }
 
-int __fastcall Actor_GetMuzzleInfo(actor_s *self, float *vOrigin, float *vForward)
+int __cdecl Actor_GetMuzzleInfo(actor_s *self, float *vOrigin, float *vForward)
 {
     double v7; // fp0
     double v8; // fp13
@@ -448,7 +448,7 @@ int __fastcall Actor_GetMuzzleInfo(actor_s *self, float *vOrigin, float *vForwar
     return 1;
 }
 
-bool __fastcall PointInFovAndRange(
+bool __cdecl PointInFovAndRange(
     actor_s *self,
     const float *vEyePos,
     const float *vPoint,
@@ -485,7 +485,7 @@ bool __fastcall PointInFovAndRange(
     return result;
 }
 
-int __fastcall Actor_CanSeePointExInternal(
+int __cdecl Actor_CanSeePointExInternal(
     actor_s *self,
     const float *vPoint,
     double fovDot,
@@ -519,7 +519,7 @@ int __fastcall Actor_CanSeePointExInternal(
     return result;
 }
 
-int __fastcall Actor_CanSeePointEx(
+int __cdecl Actor_CanSeePointEx(
     actor_s *self,
     const float *vPoint,
     double fovDot,
@@ -554,7 +554,7 @@ int __fastcall Actor_CanSeePointEx(
     return Actor_CanSeePointExInternal(self, vPoint, fovDot, fMaxDistSqrd, v13, v12, a7, v16);
 }
 
-void __fastcall Actor_UpdateVisCache(actor_s *self, const gentity_s *ent, sentient_info_t *pInfo, bool bVisible)
+void __cdecl Actor_UpdateVisCache(actor_s *self, const gentity_s *ent, sentient_info_t *pInfo, bool bVisible)
 {
     bool v8; // r31
     int number; // r5
@@ -583,7 +583,7 @@ void __fastcall Actor_UpdateVisCache(actor_s *self, const gentity_s *ent, sentie
     }
 }
 
-int __fastcall Actor_CanSeeEntityEx(actor_s *self, const gentity_s *ent, double fovDot, double fMaxDistSqrd)
+int __cdecl Actor_CanSeeEntityEx(actor_s *self, const gentity_s *ent, double fovDot, double fMaxDistSqrd)
 {
     sentient_s *sentient; // r30
     sentient_info_t *v9; // r28
@@ -688,7 +688,7 @@ LABEL_35:
     return 1;
 }
 
-int __fastcall Actor_CanSeeSentientEx(
+int __cdecl Actor_CanSeeSentientEx(
     actor_s *self,
     sentient_s *sentient,
     double fovDot,
@@ -716,7 +716,7 @@ int __fastcall Actor_CanSeeSentientEx(
         return Actor_CanSeeEntityEx(self, sentient->ent, fovDot, fMaxDistSqrd);
 }
 
-int __fastcall Actor_CanShootEnemy(actor_s *self)
+int __cdecl Actor_CanShootEnemy(actor_s *self)
 {
     int result; // r3
     float v3[4]; // [sp+50h] [-40h] BYREF
@@ -742,22 +742,22 @@ int __fastcall Actor_CanShootEnemy(actor_s *self)
     return result;
 }
 
-int __fastcall Actor_CanSeePoint(actor_s *self, const float *vPoint, int a3, int a4)
+int __cdecl Actor_CanSeePoint(actor_s *self, const float *vPoint, int a3, int a4)
 {
     return Actor_CanSeePointEx(self, vPoint, self->fovDot, self->fMaxSightDistSqrd, a3, a4, 2175);
 }
 
-int __fastcall Actor_CanSeeEntityPoint(actor_s *self, const float *vPoint, const gentity_s *ent, int a4)
+int __cdecl Actor_CanSeeEntityPoint(actor_s *self, const float *vPoint, const gentity_s *ent, int a4)
 {
     return Actor_CanSeePointEx(self, vPoint, self->fovDot, self->fMaxSightDistSqrd, (int)ent, a4, ent->s.number);
 }
 
-int __fastcall Actor_CanSeeEntity(actor_s *self, const gentity_s *ent)
+int __cdecl Actor_CanSeeEntity(actor_s *self, const gentity_s *ent)
 {
     return Actor_CanSeeEntityEx(self, ent, self->fovDot, self->fMaxSightDistSqrd);
 }
 
-int __fastcall Actor_CanSeeSentient(actor_s *self, sentient_s *sentient, int iMaxLatency)
+int __cdecl Actor_CanSeeSentient(actor_s *self, sentient_s *sentient, int iMaxLatency)
 {
     char *v3; // r9
     int v4; // r11
@@ -770,7 +770,7 @@ int __fastcall Actor_CanSeeSentient(actor_s *self, sentient_s *sentient, int iMa
         return Actor_CanSeeEntityEx(self, sentient->ent, self->fovDot, self->fMaxSightDistSqrd);
 }
 
-int __fastcall Actor_CanSeeEnemy(actor_s *self)
+int __cdecl Actor_CanSeeEnemy(actor_s *self)
 {
     sentient_s *TargetSentient; // r4
     const gentity_s *v4; // r3
@@ -793,7 +793,7 @@ int __fastcall Actor_CanSeeEnemy(actor_s *self)
     return Actor_CanSeeEntityEx(self, v4, self->fovDot, self->fMaxSightDistSqrd);
 }
 
-int __fastcall Actor_CanSeeEnemyExtended(actor_s *self, int useClaimedNode)
+int __cdecl Actor_CanSeeEnemyExtended(actor_s *self, int useClaimedNode)
 {
     sentient_s *TargetSentient; // r30
     int iLastVisTime; // r11
@@ -838,7 +838,7 @@ int __fastcall Actor_CanSeeEnemyExtended(actor_s *self, int useClaimedNode)
     }
 }
 
-void __fastcall Actor_UpdateSight(actor_s *self)
+void __cdecl Actor_UpdateSight(actor_s *self)
 {
     team_t v2; // r3
     signed int v3; // r25
@@ -911,7 +911,7 @@ void __fastcall Actor_UpdateSight(actor_s *self)
                 Sentient = Sentient_NextSentient(Sentient, v4);
             } while (Sentient);
             if (v3 > 1)
-                qsort(v21, v3, 8u, (int(__fastcall *)(const void *, const void *))compare_sentient_sort);
+                qsort(v21, v3, 8u, (int(__cdecl *)(const void *, const void *))compare_sentient_sort);
         }
         iTraceCount = self->iTraceCount;
         v13 = 0;

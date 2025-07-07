@@ -4,7 +4,7 @@
 
 #include "actor_turret.h"
 
-void __fastcall Actor_Turret_Touch(actor_s *self, gentity_s *pOther)
+void __cdecl Actor_Turret_Touch(actor_s *self, gentity_s *pOther)
 {
     sentient_s *sentient; // r4
 
@@ -13,7 +13,7 @@ void __fastcall Actor_Turret_Touch(actor_s *self, gentity_s *pOther)
         Actor_GetPerfectInfo(self, sentient);
 }
 
-int __fastcall Actor_IsUsingTurret(actor_s *self)
+int __cdecl Actor_IsUsingTurret(actor_s *self)
 {
     gentity_s *pTurret; // r11
     gentity_s *v3; // r3
@@ -31,7 +31,7 @@ int __fastcall Actor_IsUsingTurret(actor_s *self)
     return v4;
 }
 
-int __fastcall Actor_UseTurret(actor_s *self, gentity_s *pTurret)
+int __cdecl Actor_UseTurret(actor_s *self, gentity_s *pTurret)
 {
     int result; // r3
 
@@ -49,7 +49,7 @@ int __fastcall Actor_UseTurret(actor_s *self, gentity_s *pTurret)
     return result;
 }
 
-int __fastcall Actor_Turret_Start(actor_s *self, ai_state_t ePrevState)
+int __cdecl Actor_Turret_Start(actor_s *self, ai_state_t ePrevState)
 {
     gentity_s *pTurret; // r28
     TurretInfo *pTurretInfo; // r29
@@ -129,7 +129,7 @@ int __fastcall Actor_Turret_Start(actor_s *self, ai_state_t ePrevState)
     return 1;
 }
 
-void __fastcall Actor_DetachTurret(actor_s *self)
+void __cdecl Actor_DetachTurret(actor_s *self)
 {
     gentity_s *pTurret; // r11
     gentity_s *v3; // r3
@@ -198,7 +198,7 @@ void __fastcall Actor_DetachTurret(actor_s *self)
     pTurretInfo->flags &= ~0x200u;
 }
 
-void __fastcall Actor_Turret_Finish(actor_s *self, ai_state_t eNextState)
+void __cdecl Actor_Turret_Finish(actor_s *self, ai_state_t eNextState)
 {
     gentity_s *pTurret; // r11
     gentity_s *v5; // r3
@@ -223,7 +223,7 @@ void __fastcall Actor_Turret_Finish(actor_s *self, ai_state_t eNextState)
     }
 }
 
-void __fastcall Actor_Turret_Suspend(actor_s *self, ai_state_t eNextState)
+void __cdecl Actor_Turret_Suspend(actor_s *self, ai_state_t eNextState)
 {
     gentity_s *pTurret; // r11
     gentity_s *v4; // r3
@@ -240,7 +240,7 @@ void __fastcall Actor_Turret_Suspend(actor_s *self, ai_state_t eNextState)
         Actor_DetachTurret(self);
 }
 
-void __fastcall Actor_StopUseTurret(actor_s *self)
+void __cdecl Actor_StopUseTurret(actor_s *self)
 {
     gentity_s *pTurret; // r11
     gentity_s *v3; // r3
@@ -262,7 +262,7 @@ void __fastcall Actor_StopUseTurret(actor_s *self)
     self->pTurret = 0;
 }
 
-actor_think_result_t __fastcall Actor_Turret_PostThink(actor_s *self)
+actor_think_result_t __cdecl Actor_Turret_PostThink(actor_s *self)
 {
     gentity_s *ent; // r16
     DObjAnimMat *LocalTagMatrix; // r31
@@ -769,7 +769,7 @@ LABEL_60:
     return 1;
 }
 
-int __fastcall Actor_Turret_Think(actor_s *self)
+int __cdecl Actor_Turret_Think(actor_s *self)
 {
     gentity_s *pTurret; // r11
     gentity_s *v3; // r3
@@ -906,7 +906,7 @@ LABEL_53:
     return 1;
 }
 
-void __fastcall Actor_Turret_Pain(
+void __cdecl Actor_Turret_Pain(
     actor_s *self,
     gentity_s *pAttacker,
     int iDamage,

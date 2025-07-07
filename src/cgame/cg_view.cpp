@@ -4,13 +4,13 @@
 
 #include "cg_view.h"
 
-void __fastcall TRACK_cg_view()
+void __cdecl TRACK_cg_view()
 {
     track_static_alloc_internal(clientViewParamsArray, 16, "clientViewParamsArray", 10);
     track_static_alloc_internal(s_testEffect, 84, "s_testEffect", 9);
 }
 
-void __fastcall CG_PlayTestFx(int localClientNum)
+void __cdecl CG_PlayTestFx(int localClientNum)
 {
     TestEffect *v2; // r30
     const FxEffectDef *v3; // r28
@@ -41,7 +41,7 @@ void __fastcall CG_PlayTestFx(int localClientNum)
     v2->time = time;
 }
 
-void __fastcall CG_UpdateTestFX(int localClientNum)
+void __cdecl CG_UpdateTestFX(int localClientNum)
 {
     TestEffect *v2; // r31
 
@@ -50,7 +50,7 @@ void __fastcall CG_UpdateTestFX(int localClientNum)
         CG_PlayTestFx(localClientNum);
 }
 
-void __fastcall CG_FxSetTestPosition()
+void __cdecl CG_FxSetTestPosition()
 {
     if (cmd_args.nesting >= 8u)
         MyAssertHandler(
@@ -74,7 +74,7 @@ void __fastcall CG_FxSetTestPosition()
     }
 }
 
-void __fastcall CG_FxTest()
+void __cdecl CG_FxTest()
 {
     const char *v0; // r3
     const char *v1; // r3
@@ -116,7 +116,7 @@ void __fastcall CG_FxTest()
     }
 }
 
-void __fastcall CG_CalcVrect(int localClientNum)
+void __cdecl CG_CalcVrect(int localClientNum)
 {
     if (localClientNum)
     {
@@ -143,7 +143,7 @@ void __fastcall CG_CalcVrect(int localClientNum)
 }
 
 // local variable allocation has failed, the output may be wrong!
-void __fastcall CG_SmoothCameraZ(cg_s *cgameGlob)
+void __cdecl CG_SmoothCameraZ(cg_s *cgameGlob)
 {
     float *p_stepViewChange; // r28
     int *p_stepViewStart; // r31
@@ -187,7 +187,7 @@ void __fastcall CG_SmoothCameraZ(cg_s *cgameGlob)
     }
 }
 
-void __fastcall CG_KickAngles(cg_s *cgameGlob)
+void __cdecl CG_KickAngles(cg_s *cgameGlob)
 {
     unsigned int ViewmodelWeaponIndex; // r22
     WeaponDef *WeaponDef; // r23
@@ -278,7 +278,7 @@ void __fastcall CG_KickAngles(cg_s *cgameGlob)
 }
 
 // local variable allocation has failed, the output may be wrong!
-float __fastcall CG_GetVerticalBobFactor(
+float __cdecl CG_GetVerticalBobFactor(
     const playerState_s *predictedPlayerState,
     double cycle,
     double speed,
@@ -327,7 +327,7 @@ float __fastcall CG_GetVerticalBobFactor(
 }
 
 // local variable allocation has failed, the output may be wrong!
-float __fastcall CG_GetHorizontalBobFactor(
+float __cdecl CG_GetHorizontalBobFactor(
     const playerState_s *predictedPlayerState,
     double cycle,
     double speed,
@@ -364,7 +364,7 @@ float __fastcall CG_GetHorizontalBobFactor(
     return *((float *)&v8 + 1);
 }
 
-void __fastcall CG_CalculateView_IdleAngles(cg_s *cgameGlob, float *angles)
+void __cdecl CG_CalculateView_IdleAngles(cg_s *cgameGlob, float *angles)
 {
     playerEntity_t *p_playerEntity; // r27
     unsigned int ViewmodelWeaponIndex; // r28
@@ -467,7 +467,7 @@ void __fastcall CG_CalculateView_IdleAngles(cg_s *cgameGlob, float *angles)
     }
 }
 
-void __fastcall CG_CalculateView_BobAngles(const cg_s *cgameGlob, float *angles)
+void __cdecl CG_CalculateView_BobAngles(const cg_s *cgameGlob, float *angles)
 {
     unsigned int ViewmodelWeaponIndex; // r3
     double v5; // fp10
@@ -488,7 +488,7 @@ void __fastcall CG_CalculateView_BobAngles(const cg_s *cgameGlob, float *angles)
     }
 }
 
-void __fastcall CG_AddGroundTiltToAngles(int localClientNum, float *angles, const cg_s *cgameGlob)
+void __cdecl CG_AddGroundTiltToAngles(int localClientNum, float *angles, const cg_s *cgameGlob)
 {
     float v4[4][3]; // [sp+50h] [-A0h] BYREF
     float v5[4][3]; // [sp+80h] [-70h] BYREF
@@ -505,7 +505,7 @@ void __fastcall CG_AddGroundTiltToAngles(int localClientNum, float *angles, cons
     }
 }
 
-void __fastcall OffsetFirstPersonView(int localClientNum, cg_s *cgameGlob)
+void __cdecl OffsetFirstPersonView(int localClientNum, cg_s *cgameGlob)
 {
     unsigned int ViewmodelWeaponIndex; // r3
     WeaponDef *WeaponDef; // r3
@@ -671,7 +671,7 @@ void __fastcall OffsetFirstPersonView(int localClientNum, cg_s *cgameGlob)
     }
 }
 
-float __fastcall CG_GetViewFov(int localClientNum)
+float __cdecl CG_GetViewFov(int localClientNum)
 {
     unsigned int ViewmodelWeaponIndex; // r30
     WeaponDef *WeaponDef; // r29
@@ -736,7 +736,7 @@ float __fastcall CG_GetViewFov(int localClientNum)
     return *((float *)&v9 + 1);
 }
 
-void __fastcall CG_CalcFov(int localClientNum)
+void __cdecl CG_CalcFov(int localClientNum)
 {
     long double v2; // fp2
     long double v3; // fp2
@@ -770,7 +770,7 @@ void __fastcall CG_CalcFov(int localClientNum)
     cgArray[0].zoomSensitivity = (float)v4 / (float)*(double *)&v5;
 }
 
-float __fastcall CG_GetViewZoomScale()
+float __cdecl CG_GetViewZoomScale()
 {
     double v0; // fp1
 
@@ -778,7 +778,7 @@ float __fastcall CG_GetViewZoomScale()
     return *((float *)&v0 + 1);
 }
 
-void __fastcall CG_CalcCubemapViewValues(cg_s *cgameGlob)
+void __cdecl CG_CalcCubemapViewValues(cg_s *cgameGlob)
 {
     playerState_s *p_predictedPlayerState; // r10
     int *p_fromAlignOrg; // r3
@@ -796,7 +796,7 @@ void __fastcall CG_CalcCubemapViewValues(cg_s *cgameGlob)
     R_CalcCubeMapViewValues((refdef_s *)(p_fromAlignOrg + 5815), cubemapShot, cubemapSize);
 }
 
-void __fastcall CG_CalcVehicleViewValues(int localClientNum)
+void __cdecl CG_CalcVehicleViewValues(int localClientNum)
 {
     centity_s *Entity; // r30
     DObj_s *ClientDObj; // r3
@@ -955,7 +955,7 @@ void __fastcall CG_CalcVehicleViewValues(int localClientNum)
     }
 }
 
-void __fastcall CalcTurretViewValues(int localClientNum)
+void __cdecl CalcTurretViewValues(int localClientNum)
 {
     int viewlocked_entNum; // r4
     centity_s *Entity; // r30
@@ -1003,7 +1003,7 @@ void __fastcall CalcTurretViewValues(int localClientNum)
     }
 }
 
-void __fastcall CG_CalcLinkedViewValues(int localClientNum)
+void __cdecl CG_CalcLinkedViewValues(int localClientNum)
 {
     float v1[4]; // [sp+50h] [-E0h] BYREF
     float v2[4][3]; // [sp+60h] [-D0h] BYREF
@@ -1032,7 +1032,7 @@ void __fastcall CG_CalcLinkedViewValues(int localClientNum)
     }
 }
 
-void __fastcall CG_ApplyViewAnimation(int localClientNum)
+void __cdecl CG_ApplyViewAnimation(int localClientNum)
 {
     int ViewmodelWeaponIndex; // r4
     weaponInfo_s *LocalClientWeaponInfo; // r3
@@ -1085,7 +1085,7 @@ void __fastcall CG_ApplyViewAnimation(int localClientNum)
     }
 }
 
-int __fastcall PausedClientFreeMove(int localClientNum)
+int __cdecl PausedClientFreeMove(int localClientNum)
 {
     int integer; // r11
     int CurrentCmdNumber; // r3
@@ -1221,7 +1221,7 @@ int __fastcall PausedClientFreeMove(int localClientNum)
     return 1;
 }
 
-void __fastcall CG_SetDebugOrigin(float *origin)
+void __cdecl CG_SetDebugOrigin(float *origin)
 {
     if (cl_freemove->current.integer)
     {
@@ -1231,7 +1231,7 @@ void __fastcall CG_SetDebugOrigin(float *origin)
     }
 }
 
-void __fastcall CG_SetDebugAngles(const float *angles)
+void __cdecl CG_SetDebugAngles(const float *angles)
 {
     double v1; // fp12
     double v2; // fp0
@@ -1247,7 +1247,7 @@ void __fastcall CG_SetDebugAngles(const float *angles)
     }
 }
 
-void __fastcall CG_UpdateEntInfo(int localClientNum)
+void __cdecl CG_UpdateEntInfo(int localClientNum)
 {
     snapshot_s *nextSnap; // r11
     unsigned int numEntities; // r7
@@ -1307,14 +1307,14 @@ void __fastcall CG_UpdateEntInfo(int localClientNum)
     PIXEndNamedEvent();
 }
 
-const ClientViewParams *__fastcall CG_GetLocalClientViewParams(int localClientNum)
+const ClientViewParams *__cdecl CG_GetLocalClientViewParams(int localClientNum)
 {
     if (localClientNum)
         MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\cgame\\cg_view.cpp", 1241, 0, "%s", "localClientNum == 0");
     return clientViewParamsArray[0];
 }
 
-void __fastcall CG_ArchiveViewInfo(cg_s *cgameGlob, MemoryFile *memFile)
+void __cdecl CG_ArchiveViewInfo(cg_s *cgameGlob, MemoryFile *memFile)
 {
     if (!memFile)
         MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\cgame\\cg_view.cpp", 1248, 0, "%s", "memFile");
@@ -1324,7 +1324,7 @@ void __fastcall CG_ArchiveViewInfo(cg_s *cgameGlob, MemoryFile *memFile)
     MemFile_ArchiveData(memFile, 12, cgameGlob->vehicleViewLockedAngles);
 }
 
-void __fastcall GetCeilingHeight(cg_s *cgameGlob)
+void __cdecl GetCeilingHeight(cg_s *cgameGlob)
 {
     float *origin; // r31
     double v3; // fp0
@@ -1345,7 +1345,7 @@ void __fastcall GetCeilingHeight(cg_s *cgameGlob)
     cgameGlob->heightToCeiling = v3;
 }
 
-void __fastcall DumpAnims(int localClientNum)
+void __cdecl DumpAnims(int localClientNum)
 {
     const dvar_s *v2; // r11
     int integer; // r8
@@ -1381,7 +1381,7 @@ void __fastcall DumpAnims(int localClientNum)
     }
 }
 
-void __fastcall DrawShellshockBlend(int localClientNum)
+void __cdecl DrawShellshockBlend(int localClientNum)
 {
     ShockViewTypes type; // r10
 
@@ -1427,7 +1427,7 @@ void __fastcall DrawShellshockBlend(int localClientNum)
     }
 }
 
-void __fastcall CG_UpdateViewOffset(int localClientNum)
+void __cdecl CG_UpdateViewOffset(int localClientNum)
 {
     double v1; // fp0
 
@@ -1455,7 +1455,7 @@ void __fastcall CG_UpdateViewOffset(int localClientNum)
     CL_ResetSkeletonCache();
 }
 
-void __fastcall UpdateTurretScopeZoom(cg_s *cgameGlob)
+void __cdecl UpdateTurretScopeZoom(cg_s *cgameGlob)
 {
     unsigned int v2; // r3
     int CurrentCmdNumber; // r3
@@ -1504,7 +1504,7 @@ void __fastcall UpdateTurretScopeZoom(cg_s *cgameGlob)
     }
 }
 
-void __fastcall CG_UpdateSceneDepthOfField(cg_s *cgameGlob)
+void __cdecl CG_UpdateSceneDepthOfField(cg_s *cgameGlob)
 {
     snapshot_s *snap; // r11
 
@@ -1517,7 +1517,7 @@ void __fastcall CG_UpdateSceneDepthOfField(cg_s *cgameGlob)
     cgameGlob->refdef.dof.farBlur = snap->ps.dofFarBlur;
 }
 
-void __fastcall CG_CalcViewValues(int localClientNum)
+void __cdecl CG_CalcViewValues(int localClientNum)
 {
     double BlurRadius; // fp31
     double MenuBlurRadius; // fp1
@@ -1643,7 +1643,7 @@ LABEL_14:
             &cgArray[0].refdef.zNear);
 }
 
-void __fastcall CG_InitView(int localClientNum)
+void __cdecl CG_InitView(int localClientNum)
 {
     double FarPlaneDist; // fp1
 
@@ -1664,7 +1664,7 @@ void __fastcall CG_InitView(int localClientNum)
     FX_SetNextUpdateCamera(localClientNum, &cgArray[0].refdef, FarPlaneDist);
 }
 
-int __fastcall CG_DrawActiveFrame(
+int __cdecl CG_DrawActiveFrame(
     int localClientNum,
     int serverTime,
     DemoType demoType,

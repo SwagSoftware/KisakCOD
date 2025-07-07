@@ -1995,3 +1995,18 @@ void __cdecl Com_FreeEvent(char* ptr)
     Z_Free(ptr, 10);
 }
 
+void Com_CheckError()
+{
+    int v0; // r31
+    //SETJMP_VECTOR4 *Value; // r3
+
+    Sys_EnterCriticalSection(CRITSECT_COM_ERROR);
+    //__lwsync();
+    v0 = com_errorEntered;
+    Sys_LeaveCriticalSection(CRITSECT_COM_ERROR);
+    if (v0)
+    {
+        void * value = Sys_GetValue(2);
+        longjmp((int*)value, -1);
+    }
+}

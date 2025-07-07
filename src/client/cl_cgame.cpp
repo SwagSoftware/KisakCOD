@@ -23,19 +23,19 @@ const float g_color_table[8][4]
 };
 
 
-void __fastcall CL_SetLocalClientConnectionState(int localClientNum, connstate_t connstate)
+void __cdecl CL_SetLocalClientConnectionState(int localClientNum, connstate_t connstate)
 {
     iassert(localClientNum == 0);
     clientUIActives[0].connectionState = connstate;
 }
 
-void __fastcall TRACK_cl_cgame()
+void __cdecl TRACK_cl_cgame()
 {
     track_static_alloc_internal(bigConfigString, 0x2000, "bigConfigString", 9);
     track_static_alloc_internal((void *)g_color_table, 128, "g_color_table", 10);
 }
 
-void __fastcall CL_GetScreenDimensions(unsigned int *width, unsigned int *height, float *aspect)
+void __cdecl CL_GetScreenDimensions(unsigned int *width, unsigned int *height, float *aspect)
 {
     if (!width)
         MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\client\\cl_cgame.cpp", 84, 0, "%s", "width");
@@ -48,7 +48,7 @@ void __fastcall CL_GetScreenDimensions(unsigned int *width, unsigned int *height
     *aspect = cls.vidConfig.aspectRatioWindow;
 }
 
-float __fastcall CL_GetScreenAspectRatioDisplayPixel()
+float __cdecl CL_GetScreenAspectRatioDisplayPixel()
 {
     double aspectRatioDisplayPixel; // fp1
 
@@ -56,7 +56,7 @@ float __fastcall CL_GetScreenAspectRatioDisplayPixel()
     return *((float *)&aspectRatioDisplayPixel + 1);
 }
 
-int __fastcall CL_GetUserCmd(int localClientNum, int cmdNumber, usercmd_s *ucmd)
+int __cdecl CL_GetUserCmd(int localClientNum, int cmdNumber, usercmd_s *ucmd)
 {
     int v5; // r6
 
@@ -80,7 +80,7 @@ int __fastcall CL_GetUserCmd(int localClientNum, int cmdNumber, usercmd_s *ucmd)
     return 1;
 }
 
-int __fastcall CL_GetCurrentCmdNumber(int localClientNum)
+int __cdecl CL_GetCurrentCmdNumber(int localClientNum)
 {
     if (localClientNum)
         MyAssertHandler(
@@ -93,7 +93,7 @@ int __fastcall CL_GetCurrentCmdNumber(int localClientNum)
     return clients[0].cmdNumber;
 }
 
-void __fastcall CL_GetCurrentSnapshotNumber(int localClientNum, int *snapshotNumber, int *serverTime)
+void __cdecl CL_GetCurrentSnapshotNumber(int localClientNum, int *snapshotNumber, int *serverTime)
 {
     if (localClientNum)
         MyAssertHandler(
@@ -107,7 +107,7 @@ void __fastcall CL_GetCurrentSnapshotNumber(int localClientNum, int *snapshotNum
     *serverTime = clients[0].snap.serverTime;
 }
 
-int __fastcall CL_GetSnapshot(int localClientNum, snapshot_s *snapshot)
+int __cdecl CL_GetSnapshot(int localClientNum, snapshot_s *snapshot)
 {
     int numEntities; // r28
     int v4; // r30
@@ -168,7 +168,7 @@ int __fastcall CL_GetSnapshot(int localClientNum, snapshot_s *snapshot)
     return 1;
 }
 
-void __fastcall CL_SetUserCmdWeapons(int localClientNum, int weapon, int offHandIndex)
+void __cdecl CL_SetUserCmdWeapons(int localClientNum, int weapon, int offHandIndex)
 {
     if (localClientNum)
         MyAssertHandler(
@@ -182,7 +182,7 @@ void __fastcall CL_SetUserCmdWeapons(int localClientNum, int weapon, int offHand
     clients[0].cgameUserCmdOffHandIndex = offHandIndex;
 }
 
-void __fastcall CL_SetUserCmdAimValues(
+void __cdecl CL_SetUserCmdAimValues(
     int localClientNum,
     double gunPitch,
     double gunYaw,
@@ -205,7 +205,7 @@ void __fastcall CL_SetUserCmdAimValues(
     clients[0].cgameUserCmdGunZOfs = gunZOfs;
 }
 
-void __fastcall CL_SetFOVSensitivityScale(int localClientNum, double scale)
+void __cdecl CL_SetFOVSensitivityScale(int localClientNum, double scale)
 {
     if (localClientNum)
         MyAssertHandler(
@@ -218,7 +218,7 @@ void __fastcall CL_SetFOVSensitivityScale(int localClientNum, double scale)
     clients[0].cgameFOVSensitivityScale = scale;
 }
 
-void __fastcall CL_SetExtraButtons(int localClientNum, int buttons)
+void __cdecl CL_SetExtraButtons(int localClientNum, int buttons)
 {
     if (localClientNum)
         MyAssertHandler(
@@ -302,7 +302,7 @@ void CL_ConfigstringModified()
     }
 }
 
-void __fastcall CL_Restart()
+void __cdecl CL_Restart()
 {
     unsigned __int16 *configstrings; // r31
 
@@ -326,7 +326,7 @@ void __fastcall CL_Restart()
     CG_ParseSunLight(0);
 }
 
-int __fastcall CL_PreprocessServerCommand(const char *s)
+int __cdecl CL_PreprocessServerCommand(const char *s)
 {
     int nesting; // r7
     char *v3; // r31
@@ -512,7 +512,7 @@ int __fastcall CL_PreprocessServerCommand(const char *s)
     return 0;
 }
 
-int __fastcall CL_CGameNeedsServerCommand(int localClientNum, int serverCommandNumber)
+int __cdecl CL_CGameNeedsServerCommand(int localClientNum, int serverCommandNumber)
 {
     int sequence; // r11
     const char *v4; // r3
@@ -539,7 +539,7 @@ int __fastcall CL_CGameNeedsServerCommand(int localClientNum, int serverCommandN
     return CL_PreprocessServerCommand(v4);
 }
 
-void __fastcall CL_ArchiveServerCommands(MemoryFile *memFile)
+void __cdecl CL_ArchiveServerCommands(MemoryFile *memFile)
 {
     int i; // r30
     int rover; // r30
@@ -573,7 +573,7 @@ void __fastcall CL_ArchiveServerCommands(MemoryFile *memFile)
     memFile->archiveProc(memFile, rover, clientConnections[0].serverCommands.buf);
 }
 
-void __fastcall CL_LoadServerCommands(SaveGame *save)
+void __cdecl CL_LoadServerCommands(SaveGame *save)
 {
     int i; // r31
 
@@ -589,7 +589,7 @@ void __fastcall CL_LoadServerCommands(SaveGame *save)
     SaveMemory_LoadRead(clientConnections[0].serverCommands.buf, clientConnections[0].serverCommands.header.rover, save);
 }
 
-void __fastcall CL_ShutdownCGame()
+void __cdecl CL_ShutdownCGame()
 {
     if (clientUIActives[0].cgameInitCalled)
     {
@@ -605,7 +605,7 @@ void __fastcall CL_ShutdownCGame()
     }
 }
 
-int __fastcall CL_DObjCreateSkelForBone(DObj_s *obj, int boneIndex)
+int __cdecl CL_DObjCreateSkelForBone(DObj_s *obj, int boneIndex)
 {
     int SkelTimeStamp; // r31
     unsigned int AllocSkelSize; // r3
@@ -634,7 +634,7 @@ int __fastcall CL_DObjCreateSkelForBone(DObj_s *obj, int boneIndex)
     }
 }
 
-void __fastcall LoadWorld(const char *name, int savegame)
+void __cdecl LoadWorld(const char *name, int savegame)
 {
     int v2; // [sp+50h] [-10h] BYREF
 
@@ -642,7 +642,7 @@ void __fastcall LoadWorld(const char *name, int savegame)
     SV_SetCheckSum(v2);
 }
 
-void __fastcall CL_SubtitlePrint(int localClientNum, const char *text, int duration, int pixelWidth)
+void __cdecl CL_SubtitlePrint(int localClientNum, const char *text, int duration, int pixelWidth)
 {
     const char *String; // r3
 
@@ -668,7 +668,7 @@ void __fastcall CL_SubtitlePrint(int localClientNum, const char *text, int durat
     }
 }
 
-const char *__fastcall CL_GetConfigString(int localClientNum, unsigned int configStringIndex)
+const char *__cdecl CL_GetConfigString(int localClientNum, unsigned int configStringIndex)
 {
     unsigned int v3; // r30
 
@@ -700,31 +700,31 @@ const char *__fastcall CL_GetConfigString(int localClientNum, unsigned int confi
 }
 
 // attributes: thunk
-snd_alias_t *__fastcall CL_PickSoundAlias(const char *aliasname)
+snd_alias_t *__cdecl CL_PickSoundAlias(const char *aliasname)
 {
     return Com_PickSoundAlias(aliasname);
 }
 
-void __fastcall CL_FinishLoadingModels()
+void __cdecl CL_FinishLoadingModels()
 {
     ;
 }
 
-void __fastcall CL_GetViewForward(float *forward)
+void __cdecl CL_GetViewForward(float *forward)
 {
     *forward = cls.renderForward[0];
     forward[1] = cls.renderForward[1];
     forward[2] = cls.renderForward[2];
 }
 
-void __fastcall CL_GetViewPos(float *pos)
+void __cdecl CL_GetViewPos(float *pos)
 {
     *pos = cls.renderPos[0];
     pos[1] = cls.renderPos[1];
     pos[2] = cls.renderPos[2];
 }
 
-void __fastcall CL_RenderScene(const refdef_s *fd)
+void __cdecl CL_RenderScene(const refdef_s *fd)
 {
     cls.renderPos[0] = fd->vieworg[0];
     cls.renderPos[1] = fd->vieworg[1];
@@ -735,18 +735,18 @@ void __fastcall CL_RenderScene(const refdef_s *fd)
     R_RenderScene(fd);
 }
 
-void __fastcall CL_SetFullScreenViewport()
+void __cdecl CL_SetFullScreenViewport()
 {
     R_AddCmdSetViewportValues(0, 0, cls.vidConfig.displayWidth, cls.vidConfig.displayHeight);
 }
 
 // attributes: thunk
-void __fastcall CL_SetViewport(int x, int y, int width, int height)
+void __cdecl CL_SetViewport(int x, int y, int width, int height)
 {
     R_AddCmdSetViewportValues(x, y, width, height);
 }
 
-void __fastcall CL_DrawStretchPicPhysical(
+void __cdecl CL_DrawStretchPicPhysical(
     double x,
     double y,
     double w,
@@ -761,7 +761,7 @@ void __fastcall CL_DrawStretchPicPhysical(
     R_AddCmdDrawStretchPic(x, y, w, h, s1, t1, s2, t2, color, material);
 }
 
-void __fastcall CL_DrawStretchPicPhysicalFlipST(
+void __cdecl CL_DrawStretchPicPhysicalFlipST(
     double x,
     double y,
     double w,
@@ -776,7 +776,7 @@ void __fastcall CL_DrawStretchPicPhysicalFlipST(
     R_AddCmdDrawStretchPicFlipST(x, y, w, h, s1, t1, s2, t2, color, material);
 }
 
-void __fastcall CL_DrawStretchPic(
+void __cdecl CL_DrawStretchPic(
     const ScreenPlacement *scrPlace,
     double x,
     double y,
@@ -816,7 +816,7 @@ void __fastcall CL_DrawStretchPic(
     R_AddCmdDrawStretchPic(a21, a23, a25, a27, s1, t1, s2, t2, v32, v31);
 }
 
-void __fastcall CL_DrawStretchPicPhysicalRotateXY(
+void __cdecl CL_DrawStretchPicPhysicalRotateXY(
     double x,
     double y,
     double w,
@@ -834,7 +834,7 @@ void __fastcall CL_DrawStretchPicPhysicalRotateXY(
     R_AddCmdDrawStretchPicRotateXY(x, y, w, h, s1, t1, s2, t2, v11, color, material);
 }
 
-void __fastcall CL_DrawStretchPicFlipST(
+void __cdecl CL_DrawStretchPicFlipST(
     const ScreenPlacement *scrPlace,
     double x,
     double y,
@@ -874,7 +874,7 @@ void __fastcall CL_DrawStretchPicFlipST(
     R_AddCmdDrawStretchPicFlipST(a21, a23, a25, a27, s1, t1, s2, t2, v32, v31);
 }
 
-void __fastcall CL_DrawStretchPicRotatedST(
+void __cdecl CL_DrawStretchPicRotatedST(
     const ScreenPlacement *scrPlace,
     double x,
     double y,
@@ -917,18 +917,18 @@ void __fastcall CL_DrawStretchPicRotatedST(
 }
 
 // attributes: thunk
-void __fastcall CL_ProjectionSet2D()
+void __cdecl CL_ProjectionSet2D()
 {
     R_AddCmdProjectionSet2D();
 }
 
 // attributes: thunk
-void __fastcall CL_ProjectionSet3D()
+void __cdecl CL_ProjectionSet3D()
 {
     R_AddCmdProjectionSet3D();
 }
 
-void __fastcall CL_CapTurnRate(int localClientNum, double maxPitchSpeed, double maxYawSpeed)
+void __cdecl CL_CapTurnRate(int localClientNum, double maxPitchSpeed, double maxYawSpeed)
 {
     if (localClientNum)
         MyAssertHandler(
@@ -942,7 +942,7 @@ void __fastcall CL_CapTurnRate(int localClientNum, double maxPitchSpeed, double 
     clients[0].cgameMaxYawSpeed = maxYawSpeed;
 }
 
-void __fastcall CL_SetViewAngles(int localClientNum, float *angles)
+void __cdecl CL_SetViewAngles(int localClientNum, float *angles)
 {
     if (localClientNum)
         MyAssertHandler(
@@ -957,7 +957,7 @@ void __fastcall CL_SetViewAngles(int localClientNum, float *angles)
     clients[0].viewangles[2] = angles[2];
 }
 
-void __fastcall CL_StartLoading(const char *mapname)
+void __cdecl CL_StartLoading(const char *mapname)
 {
     if (!clientUIActives[0].isRunning)
         MyAssertHandler(
@@ -973,7 +973,7 @@ void __fastcall CL_StartLoading(const char *mapname)
     Dvar_SetInt(cl_paused, 1);
 }
 
-void __fastcall CL_InitCGame(int localClientNum, int savegame)
+void __cdecl CL_InitCGame(int localClientNum, int savegame)
 {
     int v4; // r22
     unsigned __int16 v5; // r11
@@ -1086,7 +1086,7 @@ void __fastcall CL_InitCGame(int localClientNum, int savegame)
     Con_InitGameMsgChannels();
 }
 
-void __fastcall CL_FirstSnapshot()
+void __cdecl CL_FirstSnapshot()
 {
     if (!clientUIActives[0].isRunning)
         MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\client\\cl_cgame.cpp", 886, 0, "%s", "clUI->isRunning");
@@ -1100,12 +1100,12 @@ void __fastcall CL_FirstSnapshot()
     clientUIActives[0].cgameInitialized = 1;
 }
 
-void __fastcall CL_SetActive()
+void __cdecl CL_SetActive()
 {
     clientUIActives[0].connectionState = CA_ACTIVE;
 }
 
-void __fastcall CL_CreateNextSnap()
+void __cdecl CL_CreateNextSnap()
 {
     __int64 v0; // r11
     int v1; // r4
@@ -1114,7 +1114,7 @@ void __fastcall CL_CreateNextSnap()
     CG_CreateNextSnap(0, (float)((float)v0 * (float)0.001), v1);
 }
 
-char *__fastcall CL_TimeDemoLogBaseName(const char *mapname)
+char *__cdecl CL_TimeDemoLogBaseName(const char *mapname)
 {
     const char *v1; // r31
     const char *v2; // r30
@@ -1179,7 +1179,7 @@ void CL_UpdateTimeDemo()
     Com_Printf(14, "time %i (UpdateTimeDemo)\n", v5 + cls.timeDemoBaseTime);
 }
 
-void __fastcall CL_SetCGameTime(int localClientNum)
+void __cdecl CL_SetCGameTime(int localClientNum)
 {
     int serverTime; // r11
 
@@ -1220,7 +1220,7 @@ void __fastcall CL_SetCGameTime(int localClientNum)
     }
 }
 
-void __fastcall CL_SetADS(int localClientNum, bool ads)
+void __cdecl CL_SetADS(int localClientNum, bool ads)
 {
     if (localClientNum)
         MyAssertHandler(
@@ -1233,7 +1233,7 @@ void __fastcall CL_SetADS(int localClientNum, bool ads)
     clients[0].usingAds = ads;
 }
 
-void __fastcall CL_ArchiveClientState(MemoryFile *memFile, int segmentIndex)
+void __cdecl CL_ArchiveClientState(MemoryFile *memFile, int segmentIndex)
 {
     unsigned int UsedSize; // r3
     unsigned int v5; // r3
@@ -1273,7 +1273,7 @@ void __fastcall CL_ArchiveClientState(MemoryFile *memFile, int segmentIndex)
     R_ArchiveFogState(memFile);
 }
 
-void __fastcall CL_LookupColor(unsigned __int8 c, float *color)
+void __cdecl CL_LookupColor(unsigned __int8 c, float *color)
 {
     unsigned __int8 v3; // r3
     float *v4; // r11
@@ -1298,7 +1298,7 @@ void __fastcall CL_LookupColor(unsigned __int8 c, float *color)
     color[3] = v5;
 }
 
-bool __fastcall CL_IsCgameInitialized(int localClientNum)
+bool __cdecl CL_IsCgameInitialized(int localClientNum)
 {
     if (localClientNum)
         MyAssertHandler(

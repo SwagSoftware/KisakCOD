@@ -4,7 +4,7 @@
 
 #include "g_local.h"
 
-void __fastcall G_Trigger(gentity_s *self, gentity_s *other)
+void __cdecl G_Trigger(gentity_s *self, gentity_s *other)
 {
     int pendingTriggerListSize; // r11
     trigger_info_t *v5; // r11
@@ -33,7 +33,7 @@ void __fastcall G_Trigger(gentity_s *self, gentity_s *other)
     }
 }
 
-int __fastcall InitTrigger(gentity_s *self)
+int __cdecl InitTrigger(gentity_s *self)
 {
     int model; // r8
     int v4; // r11
@@ -62,7 +62,7 @@ int __fastcall InitTrigger(gentity_s *self)
     }
 }
 
-void __fastcall InitTriggerWait(gentity_s *ent, int spawnflag)
+void __cdecl InitTriggerWait(gentity_s *ent, int spawnflag)
 {
     float v4[2]; // [sp+50h] [-20h] BYREF
 
@@ -70,7 +70,7 @@ void __fastcall InitTriggerWait(gentity_s *ent, int spawnflag)
         ent->spawnflags |= spawnflag;
 }
 
-void __fastcall InitSentientTrigger(gentity_s *self)
+void __cdecl InitSentientTrigger(gentity_s *self)
 {
     int spawnflags; // r11
 
@@ -90,20 +90,20 @@ void __fastcall InitSentientTrigger(gentity_s *self)
         self->r.contents |= 8u;
 }
 
-void __fastcall multi_trigger(gentity_s *ent, gentity_s *activator)
+void __cdecl multi_trigger(gentity_s *ent, gentity_s *activator)
 {
     if ((ent->spawnflags & 0x40) != 0)
         G_FreeEntityDelay(ent);
 }
 
-void __fastcall Touch_Multi(gentity_s *self, gentity_s *other, int bTouched)
+void __cdecl Touch_Multi(gentity_s *self, gentity_s *other, int bTouched)
 {
     G_Trigger(self, other);
     if ((self->spawnflags & 0x40) != 0)
         G_FreeEntityDelay(self);
 }
 
-void __fastcall SP_trigger_multiple(gentity_s *ent)
+void __cdecl SP_trigger_multiple(gentity_s *ent)
 {
     ent->handler = 4;
     InitTriggerWait(ent, 64);
@@ -114,7 +114,7 @@ void __fastcall SP_trigger_multiple(gentity_s *ent)
     }
 }
 
-void __fastcall SP_trigger_radius(gentity_s *ent)
+void __cdecl SP_trigger_radius(gentity_s *ent)
 {
     const char *v2; // r3
     const char *v3; // r3
@@ -168,7 +168,7 @@ void __fastcall SP_trigger_radius(gentity_s *ent)
     SV_LinkEntity(ent);
 }
 
-void __fastcall SP_trigger_disk(gentity_s *ent)
+void __cdecl SP_trigger_disk(gentity_s *ent)
 {
     const char *v2; // r3
     double v3; // fp0
@@ -198,7 +198,7 @@ void __fastcall SP_trigger_disk(gentity_s *ent)
     SV_LinkEntity(ent);
 }
 
-void __fastcall Touch_FriendlyChain(gentity_s *self, gentity_s *other, int bTouched)
+void __cdecl Touch_FriendlyChain(gentity_s *self, gentity_s *other, int bTouched)
 {
     if (!other->sentient)
         MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\g_trigger.cpp", 239, 0, "%s", "other->sentient");
@@ -206,7 +206,7 @@ void __fastcall Touch_FriendlyChain(gentity_s *self, gentity_s *other, int bTouc
     G_Trigger(self, other);
 }
 
-void __fastcall SP_trigger_friendlychain(gentity_s *ent)
+void __cdecl SP_trigger_friendlychain(gentity_s *ent)
 {
     int target; // r10
 
@@ -221,7 +221,7 @@ void __fastcall SP_trigger_friendlychain(gentity_s *ent)
     }
 }
 
-void __fastcall hurt_touch(gentity_s *self, gentity_s *other, int bTouched)
+void __cdecl hurt_touch(gentity_s *self, gentity_s *other, int bTouched)
 {
     int v5; // r11
     int v6; // [sp+8h] [-88h]
@@ -301,7 +301,7 @@ void __fastcall hurt_touch(gentity_s *self, gentity_s *other, int bTouched)
     }
 }
 
-void __fastcall hurt_use(gentity_s *self, gentity_s *other, gentity_s *activator)
+void __cdecl hurt_use(gentity_s *self, gentity_s *other, gentity_s *activator)
 {
     int handler; // r11
     unsigned __int8 v5; // r11
@@ -325,7 +325,7 @@ void __fastcall hurt_use(gentity_s *self, gentity_s *other, gentity_s *activator
     self->handler = v5;
 }
 
-void __fastcall SP_trigger_hurt(gentity_s *self)
+void __cdecl SP_trigger_hurt(gentity_s *self)
 {
     bool v2; // cr58
     unsigned __int8 v3; // r11
@@ -343,7 +343,7 @@ void __fastcall SP_trigger_hurt(gentity_s *self)
     }
 }
 
-void __fastcall SP_trigger_once(gentity_s *ent)
+void __cdecl SP_trigger_once(gentity_s *ent)
 {
     int spawnflags; // r11
 
@@ -357,7 +357,7 @@ void __fastcall SP_trigger_once(gentity_s *ent)
     }
 }
 
-bool __fastcall Respond_trigger_damage(gentity_s *trigger, int damageType)
+bool __cdecl Respond_trigger_damage(gentity_s *trigger, int damageType)
 {
     int spawnflags; // r11
 
@@ -373,7 +373,7 @@ bool __fastcall Respond_trigger_damage(gentity_s *trigger, int damageType)
         && ((spawnflags & 0x100) == 0 || damageType && (damageType <= 8 || damageType > 13));
 }
 
-void __fastcall Activate_trigger_damage(gentity_s *pEnt, gentity_s *pOther, int iDamage, int iMOD)
+void __cdecl Activate_trigger_damage(gentity_s *pEnt, gentity_s *pOther, int iDamage, int iMOD)
 {
     int ammoCount; // r11
     int clipAmmoCount; // r11
@@ -398,7 +398,7 @@ void __fastcall Activate_trigger_damage(gentity_s *pEnt, gentity_s *pOther, int 
     }
 }
 
-void __fastcall Use_trigger_damage(gentity_s *pEnt, gentity_s *pOther, gentity_s *pActivator)
+void __cdecl Use_trigger_damage(gentity_s *pEnt, gentity_s *pOther, gentity_s *pActivator)
 {
     int ammoCount; // r11
     int clipAmmoCount; // r11
@@ -418,7 +418,7 @@ void __fastcall Use_trigger_damage(gentity_s *pEnt, gentity_s *pOther, gentity_s
     }
 }
 
-void __fastcall Pain_trigger_damage(
+void __cdecl Pain_trigger_damage(
     gentity_s *pSelf,
     gentity_s *pAttacker,
     int iDamage,
@@ -433,7 +433,7 @@ void __fastcall Pain_trigger_damage(
         pSelf->health = 32000;
 }
 
-void __fastcall Die_trigger_damage(
+void __cdecl Die_trigger_damage(
     gentity_s *pSelf,
     gentity_s *pInflictor,
     gentity_s *pAttacker,
@@ -448,7 +448,7 @@ void __fastcall Die_trigger_damage(
         pSelf->health = 32000;
 }
 
-void __fastcall SP_trigger_damage(gentity_s *pSelf)
+void __cdecl SP_trigger_damage(gentity_s *pSelf)
 {
     G_SpawnInt("accumulate", "0", &pSelf->item[0].clipAmmoCount);
     G_SpawnInt("threshold", "0", (int *)&pSelf->352);
@@ -460,7 +460,7 @@ void __fastcall SP_trigger_damage(gentity_s *pSelf)
         SV_LinkEntity(pSelf);
 }
 
-void __fastcall G_CheckHitTriggerDamage(
+void __cdecl G_CheckHitTriggerDamage(
     gentity_s *pActivator,
     const float *vStart,
     const float *vEnd,
@@ -544,7 +544,7 @@ void __fastcall G_CheckHitTriggerDamage(
     }
 }
 
-void __fastcall G_GrenadeTouchTriggerDamage(
+void __cdecl G_GrenadeTouchTriggerDamage(
     gentity_s *pActivator,
     const float *vStart,
     const float *vEnd,
@@ -615,7 +615,7 @@ void __fastcall G_GrenadeTouchTriggerDamage(
     }
 }
 
-void __fastcall SP_trigger_lookat(gentity_s *self)
+void __cdecl SP_trigger_lookat(gentity_s *self)
 {
     int model; // r8
     int v3; // r11

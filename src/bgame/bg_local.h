@@ -1114,50 +1114,6 @@ struct VehicleHover // sizeof=0x1C
 };
 static_assert(sizeof(VehicleHover) == 0x1C);
 
-struct item_ent_t // sizeof=0xC
-{                                       // ...
-    int32_t ammoCount;
-    int32_t clipAmmoCount;
-    int32_t index;
-};
-static_assert(sizeof(item_ent_t) == 0xC);
-
-struct trigger_ent_t // sizeof=0x14
-{                                       // ...
-    int32_t threshold;
-    int32_t accumulate;
-    int32_t timestamp;
-    int32_t singleUserEntIndex;
-    bool requireLookAt;
-    // padding byte
-    // padding byte
-    // padding byte
-};
-static_assert(sizeof(trigger_ent_t) == 0x14);
-
-struct mover_ent_t // sizeof=0x60
-{                                       // ...
-    float decelTime;
-    float aDecelTime;
-    float speed;
-    float aSpeed;
-    float midTime;
-    float aMidTime;
-    float pos1[3];
-    float pos2[3];
-    float pos3[3];
-    float apos1[3];
-    float apos2[3];
-    float apos3[3];
-};
-static_assert(sizeof(mover_ent_t) == 0x60);
-
-struct corpse_ent_t // sizeof=0x4
-{                                       // ...
-    int32_t deathAnimStartTime;
-};
-static_assert(sizeof(corpse_ent_t) == 0x4);
-
 enum MissileStage : __int32
 {                                       // ...
     MISSILESTAGE_SOFTLAUNCH = 0x0,

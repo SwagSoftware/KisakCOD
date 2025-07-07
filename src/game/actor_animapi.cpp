@@ -4,7 +4,7 @@
 
 #include "actor_animapi.h"
 
-void __fastcall Actor_InitAnim(actor_s *self)
+void __cdecl Actor_InitAnim(actor_s *self)
 {
     if (self->AnimScriptHandle)
         MyAssertHandler(
@@ -29,7 +29,7 @@ void __fastcall Actor_InitAnim(actor_s *self)
             "self->eAnimMode == AI_ANIM_UNKNOWN");
 }
 
-unsigned int __fastcall Actor_IsAnimScriptAlive(actor_s *self)
+unsigned int __cdecl Actor_IsAnimScriptAlive(actor_s *self)
 {
     unsigned int result; // r3
 
@@ -39,7 +39,7 @@ unsigned int __fastcall Actor_IsAnimScriptAlive(actor_s *self)
     return result;
 }
 
-void __fastcall Actor_KillAnimScript(actor_s *self)
+void __cdecl Actor_KillAnimScript(actor_s *self)
 {
     int AnimScriptHandle; // r11
 
@@ -61,7 +61,7 @@ void __fastcall Actor_KillAnimScript(actor_s *self)
     }
 }
 
-void __fastcall Actor_SetAnimScript(
+void __cdecl Actor_SetAnimScript(
     actor_s *self,
     scr_animscript_t *pAnimScriptFunc,
     unsigned __int8 moveMode,
@@ -115,7 +115,7 @@ void __fastcall Actor_SetAnimScript(
     }
 }
 
-void __fastcall Actor_AnimMoveAway(actor_s *self, scr_animscript_t *pAnimScriptFunc)
+void __cdecl Actor_AnimMoveAway(actor_s *self, scr_animscript_t *pAnimScriptFunc)
 {
     unsigned __int8 v4; // r5
     scr_animscript_t *p_move; // r4
@@ -137,7 +137,7 @@ void __fastcall Actor_AnimMoveAway(actor_s *self, scr_animscript_t *pAnimScriptF
     self->bUseGoalWeight = 0;
 }
 
-void __fastcall Actor_AnimStop(actor_s *self, scr_animscript_t *pAnimScriptFunc)
+void __cdecl Actor_AnimStop(actor_s *self, scr_animscript_t *pAnimScriptFunc)
 {
     if (!pAnimScriptFunc)
         MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\actor_animapi.cpp", 150, 0, "%s", "pAnimScriptFunc");
@@ -155,7 +155,7 @@ void __fastcall Actor_AnimStop(actor_s *self, scr_animscript_t *pAnimScriptFunc)
     }
 }
 
-void __fastcall Actor_AnimWalk(actor_s *self, scr_animscript_t *pAfterMoveAnimScriptFunc)
+void __cdecl Actor_AnimWalk(actor_s *self, scr_animscript_t *pAfterMoveAnimScriptFunc)
 {
     int iPathEndTime; // r10
     unsigned __int8 v5; // r5
@@ -180,7 +180,7 @@ void __fastcall Actor_AnimWalk(actor_s *self, scr_animscript_t *pAfterMoveAnimSc
     self->bUseGoalWeight = 0;
 }
 
-scr_animscript_t *__fastcall Actor_GetStopAnim(actor_s *self)
+scr_animscript_t *__cdecl Actor_GetStopAnim(actor_s *self)
 {
     AISpecies species; // r10
     pathnode_t *pClaimedNode; // r30
@@ -207,7 +207,7 @@ scr_animscript_t *__fastcall Actor_GetStopAnim(actor_s *self)
     return &g_animScriptTable[species]->stop;
 }
 
-void __fastcall Actor_AnimTryWalk(actor_s *self)
+void __cdecl Actor_AnimTryWalk(actor_s *self)
 {
     int iPathEndTime; // r10
     scr_animscript_t *StopAnim; // r4
@@ -237,7 +237,7 @@ void __fastcall Actor_AnimTryWalk(actor_s *self)
     }
 }
 
-void __fastcall Actor_AnimRun(actor_s *self, scr_animscript_t *pAfterMoveAnimScriptFunc)
+void __cdecl Actor_AnimRun(actor_s *self, scr_animscript_t *pAfterMoveAnimScriptFunc)
 {
     int iPathEndTime; // r10
     unsigned __int8 v5; // r5
@@ -262,7 +262,7 @@ void __fastcall Actor_AnimRun(actor_s *self, scr_animscript_t *pAfterMoveAnimScr
     self->bUseGoalWeight = 0;
 }
 
-void __fastcall Actor_AnimTryRun(actor_s *self)
+void __cdecl Actor_AnimTryRun(actor_s *self)
 {
     int iPathEndTime; // r10
     scr_animscript_t *StopAnim; // r4
@@ -292,7 +292,7 @@ void __fastcall Actor_AnimTryRun(actor_s *self)
     }
 }
 
-void __fastcall Actor_AnimCombat(actor_s *self)
+void __cdecl Actor_AnimCombat(actor_s *self)
 {
     sentient_s *sentient; // r10
     bool fixedNode; // r11
@@ -339,13 +339,13 @@ LABEL_18:
     Actor_SetAnimScript(self, &v5->combat, 0, v7);
 }
 
-void __fastcall Actor_AnimPain(actor_s *self)
+void __cdecl Actor_AnimPain(actor_s *self)
 {
     Actor_SetAnimScript(self, &g_animScriptTable[self->species]->pain, 0, AI_ANIM_USE_BOTH_DELTAS);
     self->bUseGoalWeight = 0;
 }
 
-void __fastcall Actor_AnimDeath(actor_s *self)
+void __cdecl Actor_AnimDeath(actor_s *self)
 {
     ai_animmode_t eScriptSetAnimMode; // r6
 
@@ -356,7 +356,7 @@ void __fastcall Actor_AnimDeath(actor_s *self)
     self->bUseGoalWeight = 0;
 }
 
-void __fastcall Actor_AnimSpecific(actor_s *self, scr_animscript_t *func, ai_animmode_t eAnimMode, bool bUseGoalWeight)
+void __cdecl Actor_AnimSpecific(actor_s *self, scr_animscript_t *func, ai_animmode_t eAnimMode, bool bUseGoalWeight)
 {
     ai_animmode_t eScriptSetAnimMode; // r6
 
@@ -369,7 +369,7 @@ void __fastcall Actor_AnimSpecific(actor_s *self, scr_animscript_t *func, ai_ani
     self->bUseGoalWeight = bUseGoalWeight;
 }
 
-void __fastcall Actor_AnimScripted(actor_s *self)
+void __cdecl Actor_AnimScripted(actor_s *self)
 {
     Actor_SetAnimScript(self, &g_animScriptTable[self->species]->scripted, 0, AI_ANIM_USE_BOTH_DELTAS);
     self->bUseGoalWeight = 1;

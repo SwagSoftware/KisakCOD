@@ -6,7 +6,7 @@
 #include <xanim/xmodel.h>
 #include <script/scr_stringlist.h>
 
-void __fastcall CL_WriteDemoShortCString(MemoryFile *memFile, const char *string)
+void __cdecl CL_WriteDemoShortCString(MemoryFile *memFile, const char *string)
 {
     const char *v4; // r11
     int v6; // r11
@@ -39,7 +39,7 @@ void __fastcall CL_WriteDemoShortCString(MemoryFile *memFile, const char *string
     }
 }
 
-const char *__fastcall CL_ReadDemoShortCString(MemoryFile *memFile, char *string)
+const char *__cdecl CL_ReadDemoShortCString(MemoryFile *memFile, char *string)
 {
     const char *result; // r3
     MemoryFile *v5; // r3
@@ -57,7 +57,7 @@ const char *__fastcall CL_ReadDemoShortCString(MemoryFile *memFile, char *string
     return result;
 }
 
-void __fastcall CL_WriteDemoDObjModel(MemoryFile *memFile, const DObjModel_s *dobjModel)
+void __cdecl CL_WriteDemoDObjModel(MemoryFile *memFile, const DObjModel_s *dobjModel)
 {
     const char *Name; // r3
     const char *v5; // r3
@@ -73,7 +73,7 @@ void __fastcall CL_WriteDemoDObjModel(MemoryFile *memFile, const DObjModel_s *do
     MemFile_WriteData(memFile, 1, v6);
 }
 
-void __fastcall CL_ReadDemoDObjModel(MemoryFile *memFile, DObjModel_s *dobjModel)
+void __cdecl CL_ReadDemoDObjModel(MemoryFile *memFile, DObjModel_s *dobjModel)
 {
     const char *DemoShortCString; // r3
     XModel *Existing; // r3
@@ -94,7 +94,7 @@ void __fastcall CL_ReadDemoDObjModel(MemoryFile *memFile, DObjModel_s *dobjModel
     dobjModel->ignoreCollision = (_cntlzw(v7[0]) & 0x20) == 0;
 }
 
-void __fastcall CL_WriteAnimTree(MemoryFile *memFile, int entnum, const XAnimTree_s *tree)
+void __cdecl CL_WriteAnimTree(MemoryFile *memFile, int entnum, const XAnimTree_s *tree)
 {
     MemoryFile *v4; // r30
     int v5; // r4
@@ -129,7 +129,7 @@ void __fastcall CL_WriteAnimTree(MemoryFile *memFile, int entnum, const XAnimTre
     MemFile_WriteData(memFile, v5, v8);
 }
 
-XAnimTree_s *__fastcall CL_ReadAnimTree(MemoryFile *memFile, int entnum)
+XAnimTree_s *__cdecl CL_ReadAnimTree(MemoryFile *memFile, int entnum)
 {
     XAnimTree_s *EntAnimTreeForId; // r31
     _WORD v6[4]; // [sp+50h] [-20h] BYREF
@@ -145,7 +145,7 @@ XAnimTree_s *__fastcall CL_ReadAnimTree(MemoryFile *memFile, int entnum)
     return EntAnimTreeForId;
 }
 
-void __fastcall CL_WriteDemoDObj(int entnum, const DObj_s *obj)
+void __cdecl CL_WriteDemoDObj(int entnum, const DObj_s *obj)
 {
     const XAnimTree_s *Tree; // r3
     char v5; // r11
@@ -195,7 +195,7 @@ void __fastcall CL_WriteDemoDObj(int entnum, const DObj_s *obj)
     FS_Write(v11.buffer, v11.bytesUsed, cls.demofile);
 }
 
-void __fastcall CL_ReadDemoDObj(int entnum)
+void __cdecl CL_ReadDemoDObj(int entnum)
 {
     void *TempMemory; // r31
     int v3; // r3
@@ -304,7 +304,7 @@ int CL_ReadDemoDObjs()
     return result;
 }
 
-void __fastcall CL_WriteDemoEntityState(const entityState_s *es)
+void __cdecl CL_WriteDemoEntityState(const entityState_s *es)
 {
     _BYTE v2[16]; // [sp+50h] [-1F0h] BYREF
     MemoryFile v3; // [sp+60h] [-1E0h] BYREF
@@ -329,7 +329,7 @@ void __fastcall CL_WriteDemoEntityState(const entityState_s *es)
     FS_Write(v4, v2[0], cls.demofile);
 }
 
-void __fastcall CL_ReadDemoEntityState(entityState_s *es)
+void __cdecl CL_ReadDemoEntityState(entityState_s *es)
 {
     _BYTE v2[16]; // [sp+50h] [-1F0h] BYREF
     MemoryFile v3; // [sp+60h] [-1E0h] BYREF
@@ -349,7 +349,7 @@ void __fastcall CL_ReadDemoEntityState(entityState_s *es)
     G_UpdateDemoEntity(es);
 }
 
-void __fastcall CL_WriteDemoSnapshotData()
+void __cdecl CL_WriteDemoSnapshotData()
 {
     int i; // r31
     const entityState_s *EntityState; // r3
@@ -369,7 +369,7 @@ void __fastcall CL_WriteDemoSnapshotData()
     CL_WriteDemoDObjs();
 }
 
-void __fastcall CL_ReadDemoSnapshotData()
+void __cdecl CL_ReadDemoSnapshotData()
 {
     int i; // r31
     entityState_s *EntityState; // r3
@@ -390,7 +390,7 @@ void __fastcall CL_ReadDemoSnapshotData()
     CL_ReadDemoDObjs();
 }
 
-void __fastcall CL_WriteDemoMessage(msg_t *msg, int headerBytes)
+void __cdecl CL_WriteDemoMessage(msg_t *msg, int headerBytes)
 {
     int v4; // r28
     unsigned int v5[12]; // [sp+50h] [-30h] BYREF
@@ -403,7 +403,7 @@ void __fastcall CL_WriteDemoMessage(msg_t *msg, int headerBytes)
     FS_Write(&msg->data[headerBytes], v4, cls.demofile);
 }
 
-void __fastcall CL_StopRecord_f()
+void __cdecl CL_StopRecord_f()
 {
     void *demobuf; // r3
     unsigned int v1[4]; // [sp+50h] [-20h] BYREF
@@ -432,7 +432,7 @@ void __fastcall CL_StopRecord_f()
     }
 }
 
-void __fastcall CL_Record_f()
+void __cdecl CL_Record_f()
 {
     int nesting; // r7
     const char *v1; // r3
@@ -598,7 +598,7 @@ void CL_DemoPlaybackStartup()
     }
 }
 
-void __fastcall CL_PlayDemo_f()
+void __cdecl CL_PlayDemo_f()
 {
     int nesting; // r7
     const char *v1; // r3
@@ -643,7 +643,7 @@ void __fastcall CL_PlayDemo_f()
     }
 }
 
-void __fastcall CL_CheckStartPlayingDemo()
+void __cdecl CL_CheckStartPlayingDemo()
 {
     const char *v0; // r3
     char v1[256]; // [sp+50h] [-110h] BYREF
@@ -664,7 +664,7 @@ void __fastcall CL_CheckStartPlayingDemo()
     }
 }
 
-void __fastcall CL_NextDemo()
+void __cdecl CL_NextDemo()
 {
     const char *String; // r31
     int v1; // r3
@@ -681,24 +681,24 @@ void __fastcall CL_NextDemo()
     }
 }
 
-int __fastcall CL_DemoPlaybackTime()
+int __cdecl CL_DemoPlaybackTime()
 {
     if (!cls.demoplaying)
         MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\client\\cl_demo.cpp", 832, 0, "%s", "cls.demoplaying");
     return clients[0].snap.serverTime;
 }
 
-bool __fastcall CL_DemoPlaying()
+bool __cdecl CL_DemoPlaying()
 {
     return cls.demoplaying;
 }
 
-bool __fastcall CL_DemoRecording()
+bool __cdecl CL_DemoRecording()
 {
     return cls.demorecording;
 }
 
-int __fastcall CL_TimeDemoPlaying()
+int __cdecl CL_TimeDemoPlaying()
 {
     int result; // r3
 
@@ -754,7 +754,7 @@ void CL_DemoCompleted()
     }
 }
 
-int __fastcall CL_GetDemoMessage(msg_t *buf, unsigned __int8 *bufData, int bufDataSize)
+int __cdecl CL_GetDemoMessage(msg_t *buf, unsigned __int8 *bufData, int bufDataSize)
 {
     int *p_cursize; // r31
     int result; // r3
@@ -792,7 +792,7 @@ int __fastcall CL_GetDemoMessage(msg_t *buf, unsigned __int8 *bufData, int bufDa
     return result;
 }
 
-void __fastcall CL_ReadDemoMessage()
+void __cdecl CL_ReadDemoMessage()
 {
     msg_t v0; // [sp+50h] [-4040h] BYREF
     unsigned __int8 v1[16]; // [sp+80h] [-4010h] BYREF
@@ -801,7 +801,7 @@ void __fastcall CL_ReadDemoMessage()
         CL_ParseServerMessage(&v0);
 }
 
-void __fastcall CL_ReadDemoMessagesUntilNextSnap()
+void __cdecl CL_ReadDemoMessagesUntilNextSnap()
 {
     int serverTime; // r30
 
@@ -814,7 +814,7 @@ void __fastcall CL_ReadDemoMessagesUntilNextSnap()
     } while (serverTime == clients[0].snap.serverTime);
 }
 
-void __fastcall CL_FinishLoadingDemo()
+void __cdecl CL_FinishLoadingDemo()
 {
     int v0; // r30
     char *v1; // r31
@@ -874,7 +874,7 @@ void __fastcall CL_FinishLoadingDemo()
     }
 }
 
-void __fastcall CL_StartPlayingDemo()
+void __cdecl CL_StartPlayingDemo()
 {
     int v0; // r3
 

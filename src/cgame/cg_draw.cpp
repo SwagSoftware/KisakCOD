@@ -4,14 +4,14 @@
 
 #include "cg_draw.h"
 
-void __fastcall TRACK_cg_draw()
+void __cdecl TRACK_cg_draw()
 {
     track_static_alloc_internal(s_centerPrint, 1028, "s_centerPrint", 9);
     track_static_alloc_internal(s_screenBlur, 28, "s_screenBlur", 9);
     track_static_alloc_internal(s_screenFade, 16, "s_screenFade", 9);
 }
 
-void __fastcall CG_CenterPrint(int localClientNum, const char *str)
+void __cdecl CG_CenterPrint(int localClientNum, const char *str)
 {
     CenterPrint *v3; // r30
     const char *v4; // r3
@@ -30,7 +30,7 @@ void __fastcall CG_CenterPrint(int localClientNum, const char *str)
     v3->time = cgArray[0].time;
 }
 
-void __fastcall CG_DrawCenterString(
+void __cdecl CG_DrawCenterString(
     int localClientNum,
     const rectDef_s *rect,
     Font_s *font,
@@ -132,7 +132,7 @@ void __fastcall CG_DrawCenterString(
     }
 }
 
-int __fastcall CG_DrawFriendlyFire(const cg_s *cgameGlob)
+int __cdecl CG_DrawFriendlyFire(const cg_s *cgameGlob)
 {
     playerState_s *p_predictedPlayerState; // r31
     double fWeaponPosFrac; // fp30
@@ -179,7 +179,7 @@ int __fastcall CG_DrawFriendlyFire(const cg_s *cgameGlob)
 }
 
 // local variable allocation has failed, the output may be wrong!
-void __fastcall CG_DrawFlashFade(int localClientNum)
+void __cdecl CG_DrawFlashFade(int localClientNum)
 {
     ScreenFade *v2; // r31
     double alpha; // fp0
@@ -264,7 +264,7 @@ LABEL_12:
 }
 
 // local variable allocation has failed, the output may be wrong!
-int __fastcall CG_CheckPlayerMovement(
+int __cdecl CG_CheckPlayerMovement(
     __int64 newCmd,
     __int64 a2,
     __int64 a3,
@@ -318,7 +318,7 @@ int __fastcall CG_CheckPlayerMovement(
     return result;
 }
 
-int __fastcall CG_CheckPlayerStanceChange(int localClientNum, __int16 newButtons, __int16 changedButtons)
+int __cdecl CG_CheckPlayerStanceChange(int localClientNum, __int16 newButtons, __int16 changedButtons)
 {
     if ((changedButtons & 0x1300) != 0)
     {
@@ -333,7 +333,7 @@ int __fastcall CG_CheckPlayerStanceChange(int localClientNum, __int16 newButtons
     }
 }
 
-int __fastcall CG_CheckPlayerTryReload(int localClientNum, char buttons)
+int __cdecl CG_CheckPlayerTryReload(int localClientNum, char buttons)
 {
     int result; // r3
 
@@ -355,7 +355,7 @@ int __fastcall CG_CheckPlayerTryReload(int localClientNum, char buttons)
     return result;
 }
 
-int __fastcall CG_CheckPlayerFireNonTurret(int localClientNum, char buttons)
+int __cdecl CG_CheckPlayerFireNonTurret(int localClientNum, char buttons)
 {
     int result; // r3
 
@@ -375,7 +375,7 @@ int __fastcall CG_CheckPlayerFireNonTurret(int localClientNum, char buttons)
     return result;
 }
 
-int __fastcall CG_CheckPlayerWeaponUsage(int localClientNum, char buttons)
+int __cdecl CG_CheckPlayerWeaponUsage(int localClientNum, char buttons)
 {
     int result; // r3
 
@@ -388,7 +388,7 @@ int __fastcall CG_CheckPlayerWeaponUsage(int localClientNum, char buttons)
     return result;
 }
 
-int __fastcall CG_CheckPlayerOffHandUsage(int localClientNum, __int16 buttons)
+int __cdecl CG_CheckPlayerOffHandUsage(int localClientNum, __int16 buttons)
 {
     if ((buttons & 0xC000) == 0)
         return 0;
@@ -396,13 +396,13 @@ int __fastcall CG_CheckPlayerOffHandUsage(int localClientNum, __int16 buttons)
     return 1;
 }
 
-unsigned int __fastcall CG_CheckPlayerMiscInput(int buttons)
+unsigned int __cdecl CG_CheckPlayerMiscInput(int buttons)
 {
     return buttons & 0xFFFFECFF;
 }
 
 // local variable allocation has failed, the output may be wrong!
-void __fastcall CG_CheckForPlayerInput(int localClientNum)
+void __cdecl CG_CheckForPlayerInput(int localClientNum)
 {
     int CurrentCmdNumber; // r3
     int v3; // r30
@@ -478,7 +478,7 @@ void __fastcall CG_CheckForPlayerInput(int localClientNum)
     }
 }
 
-void __fastcall CG_CheckHudHealthDisplay(int localClientNum)
+void __cdecl CG_CheckHudHealthDisplay(int localClientNum)
 {
     __int64 v2; // r11
 
@@ -509,7 +509,7 @@ void __fastcall CG_CheckHudHealthDisplay(int localClientNum)
     }
 }
 
-void __fastcall CG_CheckHudAmmoDisplay(int localClientNum)
+void __cdecl CG_CheckHudAmmoDisplay(int localClientNum)
 {
     __int64 v2; // r11
 
@@ -536,7 +536,7 @@ void __fastcall CG_CheckHudAmmoDisplay(int localClientNum)
     }
 }
 
-void __fastcall CG_CheckHudCompassDisplay(int localClientNum)
+void __cdecl CG_CheckHudCompassDisplay(int localClientNum)
 {
     const dvar_s *v1; // r11
     __int64 v2; // r9
@@ -568,7 +568,7 @@ void __fastcall CG_CheckHudCompassDisplay(int localClientNum)
     }
 }
 
-void __fastcall CG_CheckHudStanceDisplay(int localClientNum)
+void __cdecl CG_CheckHudStanceDisplay(int localClientNum)
 {
     int eFlags; // r11
     __int64 v3; // r11
@@ -596,7 +596,7 @@ void __fastcall CG_CheckHudStanceDisplay(int localClientNum)
     }
 }
 
-void __fastcall CG_CheckHudSprintDisplay(int localClientNum)
+void __cdecl CG_CheckHudSprintDisplay(int localClientNum)
 {
     playerState_s *p_ps; // r30
     __int64 v3; // r11
@@ -635,7 +635,7 @@ void __fastcall CG_CheckHudSprintDisplay(int localClientNum)
     }
 }
 
-void __fastcall CG_CheckHudOffHandDisplay(int localClientNum)
+void __cdecl CG_CheckHudOffHandDisplay(int localClientNum)
 {
     const dvar_s *v1; // r11
     __int64 v2; // r9
@@ -667,7 +667,7 @@ void __fastcall CG_CheckHudOffHandDisplay(int localClientNum)
     }
 }
 
-void __fastcall CG_CheckHudObjectiveDisplay(int localClientNum)
+void __cdecl CG_CheckHudObjectiveDisplay(int localClientNum)
 {
     if (localClientNum)
         MyAssertHandler(
@@ -687,7 +687,7 @@ void __fastcall CG_CheckHudObjectiveDisplay(int localClientNum)
     }
 }
 
-void __fastcall CG_CheckTimedMenus(int localClientNum)
+void __cdecl CG_CheckTimedMenus(int localClientNum)
 {
     if (localClientNum)
         MyAssertHandler(
@@ -712,7 +712,7 @@ void __fastcall CG_CheckTimedMenus(int localClientNum)
     CG_CheckHudSprintDisplay(localClientNum);
 }
 
-void __fastcall CG_Blur(
+void __cdecl CG_Blur(
     int localClientNum,
     int time,
     double endBlur,
@@ -775,7 +775,7 @@ void __fastcall CG_Blur(
     }
 }
 
-void __fastcall CG_ClearBlur(int localClientNum)
+void __cdecl CG_ClearBlur(int localClientNum)
 {
     ScreenBlur *v1; // r11
 
@@ -788,7 +788,7 @@ void __fastcall CG_ClearBlur(int localClientNum)
     v1->priority = BLUR_PRIORITY_NONE;
 }
 
-float __fastcall CG_GetBlurRadius(int localClientNum)
+float __cdecl CG_GetBlurRadius(int localClientNum)
 {
     double radius; // fp1
 
@@ -796,7 +796,7 @@ float __fastcall CG_GetBlurRadius(int localClientNum)
     return *((float *)&radius + 1);
 }
 
-void __fastcall CG_ScreenBlur(int localClientNum)
+void __cdecl CG_ScreenBlur(int localClientNum)
 {
     ScreenBlur *v2; // r31
     int time; // r28
@@ -889,7 +889,7 @@ void __fastcall CG_ScreenBlur(int localClientNum)
     }
 }
 
-void __fastcall CG_Fade(int localClientNum, int r, __int64 b, int a, int startTime, int duration)
+void __cdecl CG_Fade(int localClientNum, int r, __int64 b, int a, int startTime, int duration)
 {
     ScreenFade *v6; // r31
 
@@ -921,7 +921,7 @@ void CG_DrawErrorMessages()
     Con_DrawErrors(0, 2, 300, 1.0);
 }
 
-void __fastcall CG_DrawFadeInCinematic(int localClientNum)
+void __cdecl CG_DrawFadeInCinematic(int localClientNum)
 {
     char v2; // r31
 
@@ -942,7 +942,7 @@ void __fastcall CG_DrawFadeInCinematic(int localClientNum)
     }
 }
 
-void __fastcall CG_DrawFriendOverlay(int localClientNum)
+void __cdecl CG_DrawFriendOverlay(int localClientNum)
 {
     cg_s *LocalClientGlobals; // r30
     const char *ConfigString; // r3
@@ -1161,7 +1161,7 @@ void __fastcall CG_DrawFriendOverlay(int localClientNum)
     }
 }
 
-void __fastcall CG_DrawPaused(int localClientNum)
+void __cdecl CG_DrawPaused(int localClientNum)
 {
     if (cg_paused->current.integer)
     {
@@ -1170,7 +1170,7 @@ void __fastcall CG_DrawPaused(int localClientNum)
     }
 }
 
-void __fastcall CG_AlterTimescale(int localClientNum, int time, double startScale, double endScale)
+void __cdecl CG_AlterTimescale(int localClientNum, int time, double startScale, double endScale)
 {
     if (localClientNum)
         MyAssertHandler(
@@ -1186,7 +1186,7 @@ void __fastcall CG_AlterTimescale(int localClientNum, int time, double startScal
     cgArray[0].timeScaleEnd = endScale;
 }
 
-void __fastcall CG_UpdateTimeScale(cg_s *cgameGlob)
+void __cdecl CG_UpdateTimeScale(cg_s *cgameGlob)
 {
     int v2; // r3
     int v3; // r29
@@ -1233,7 +1233,7 @@ void __fastcall CG_UpdateTimeScale(cg_s *cgameGlob)
     }
 }
 
-void __fastcall DrawFontTest(int localClientNum)
+void __cdecl DrawFontTest(int localClientNum)
 {
     const ScreenPlacement *v1; // r31
     Font_s *FontHandle; // r25
@@ -1541,7 +1541,7 @@ void __fastcall DrawFontTest(int localClientNum)
         v107[0]);
 }
 
-void __fastcall DrawViewmodelInfo(int localClientNum)
+void __cdecl DrawViewmodelInfo(int localClientNum)
 {
     int ViewmodelWeaponIndex; // r31
     Font_s *FontHandle; // r24
@@ -1681,7 +1681,7 @@ void __fastcall DrawViewmodelInfo(int localClientNum)
     }
 }
 
-void __fastcall CG_Draw2D(int localClientNum)
+void __cdecl CG_Draw2D(int localClientNum)
 {
     snapshot_s *nextSnap; // r29
     int integer; // r11
@@ -1750,7 +1750,7 @@ void __fastcall CG_Draw2D(int localClientNum)
     }
 }
 
-void __fastcall CG_DrawActive(int localClientNum)
+void __cdecl CG_DrawActive(int localClientNum)
 {
     double zoomSensitivity; // fp1
 
@@ -1780,13 +1780,13 @@ void __fastcall CG_DrawActive(int localClientNum)
 }
 
 // attributes: thunk
-void __fastcall CG_AddSceneTracerBeams(int localClientNum)
+void __cdecl CG_AddSceneTracerBeams(int localClientNum)
 {
     CG_AddLocalEntityTracerBeams(localClientNum);
 }
 
 // attributes: thunk
-void __fastcall CG_GenerateSceneVerts(int localClientNum)
+void __cdecl CG_GenerateSceneVerts(int localClientNum)
 {
     CG_AddDrawSurfsFor3dHudElems(localClientNum);
 }

@@ -2,7 +2,7 @@
 #error This file is for SinglePlayer only 
 #endif
 
-void __fastcall SentientScr_ReadOnly(sentient_s *pSelf, const sentient_fields_s *pField)
+void __cdecl SentientScr_ReadOnly(sentient_s *pSelf, const sentient_fields_s *pField)
 {
     const char *v3; // r3
 
@@ -12,7 +12,7 @@ void __fastcall SentientScr_ReadOnly(sentient_s *pSelf, const sentient_fields_s 
     Scr_Error(v3);
 }
 
-void __fastcall SentientScr_SetTeam(sentient_s *pSelf, const sentient_fields_s *pField)
+void __cdecl SentientScr_SetTeam(sentient_s *pSelf, const sentient_fields_s *pField)
 {
     const char *String; // r31
     const char *v4; // r3
@@ -45,7 +45,7 @@ void __fastcall SentientScr_SetTeam(sentient_s *pSelf, const sentient_fields_s *
     }
 }
 
-void __fastcall SentientScr_GetTeam(sentient_s *pSelf, const sentient_fields_s *pField)
+void __cdecl SentientScr_GetTeam(sentient_s *pSelf, const sentient_fields_s *pField)
 {
     team_t eTeam; // r11
 
@@ -84,7 +84,7 @@ void __fastcall SentientScr_GetTeam(sentient_s *pSelf, const sentient_fields_s *
     }
 }
 
-void __fastcall GScr_AddFieldsForSentient()
+void __cdecl GScr_AddFieldsForSentient()
 {
     const sentient_fields_s *v0; // r25
     int v1; // r27
@@ -116,10 +116,10 @@ void __fastcall GScr_AddFieldsForSentient()
     }
 }
 
-void __fastcall Scr_SetSentientField(sentient_s *sentient, unsigned int offset)
+void __cdecl Scr_SetSentientField(sentient_s *sentient, unsigned int offset)
 {
     const sentient_fields_s *v4; // r4
-    void(__fastcall * setter)(sentient_s *, const sentient_fields_s *); // r11
+    void(__cdecl * setter)(sentient_s *, const sentient_fields_s *); // r11
 
     if (!sentient)
         MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\sentient_fields.cpp", 135, 0, "%s", "sentient");
@@ -133,15 +133,15 @@ void __fastcall Scr_SetSentientField(sentient_s *sentient, unsigned int offset)
     v4 = &fields_2[offset];
     setter = v4->setter;
     if (setter)
-        ((void(__fastcall *)(sentient_s *))setter)(sentient);
+        ((void(__cdecl *)(sentient_s *))setter)(sentient);
     else
         Scr_SetGenericField((unsigned __int8 *)sentient, v4->type, v4->ofs);
 }
 
-void __fastcall Scr_GetSentientField(sentient_s *sentient, unsigned int offset)
+void __cdecl Scr_GetSentientField(sentient_s *sentient, unsigned int offset)
 {
     const sentient_fields_s *v4; // r4
-    void(__fastcall * getter)(sentient_s *, const sentient_fields_s *); // r11
+    void(__cdecl * getter)(sentient_s *, const sentient_fields_s *); // r11
 
     if (!sentient)
         MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\sentient_fields.cpp", 159, 0, "%s", "sentient");
@@ -155,7 +155,7 @@ void __fastcall Scr_GetSentientField(sentient_s *sentient, unsigned int offset)
     v4 = &fields_2[offset];
     getter = v4->getter;
     if (getter)
-        ((void(__fastcall *)(sentient_s *))getter)(sentient);
+        ((void(__cdecl *)(sentient_s *))getter)(sentient);
     else
         Scr_GetGenericField((unsigned __int8 *)sentient, v4->type, v4->ofs);
 }

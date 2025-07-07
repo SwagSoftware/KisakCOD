@@ -3,7 +3,7 @@
 #endif
 
 
-char *__fastcall CL_AllocSkelMemory(unsigned int size)
+char *__cdecl CL_AllocSkelMemory(unsigned int size)
 {
     unsigned int v2; // r28
     char v7; // cr34
@@ -47,12 +47,12 @@ char *__fastcall CL_AllocSkelMemory(unsigned int size)
     return v9;
 }
 
-int __fastcall CL_GetSkelTimeStamp()
+int __cdecl CL_GetSkelTimeStamp()
 {
     return clients[R_GetLocalClientNum()].skelTimeStamp;
 }
 
-int __fastcall CL_DObjCreateSkelForBones(const DObj_s *obj, int *partBits, DObjAnimMat **pMatOut)
+int __cdecl CL_DObjCreateSkelForBones(const DObj_s *obj, int *partBits, DObjAnimMat **pMatOut)
 {
     int skelTimeStamp; // r31
     unsigned int AllocSkelSize; // r3

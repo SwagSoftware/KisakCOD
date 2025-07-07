@@ -7,6 +7,7 @@
 #include <client_mp/client_mp.h>
 #include <gfx_d3d/rb_drawprofile.h>
 #include <gfx_d3d/r_init.h>
+#include <win32/win_local.h>
 
 unsigned int Win_InitThreads();
 
@@ -19,6 +20,18 @@ static thread_local void **g_threadLocals;
 //static unsigned int s_affinityMaskForProcess;
 //static unsigned int s_cpuCount;
 //static unsigned int s_affinityMaskForCpu[4];
+
+#ifdef KISAK_SP
+int isDoingDatabaseInit;
+
+void *wakeServerEvent;
+void *serverCompletedEvent;
+void *allowSendClientMessagesEvent;
+void *serverSnapshotEvent;
+void *clientMessageReceived;
+
+volatile int g_timeout;
+#endif
 
 typedef void (*ThreadFuncFn)(unsigned int);
 static ThreadFuncFn threadFunc[7];
@@ -278,14 +291,7 @@ void __cdecl Sys_WaitForSingleObject(void** event)
     unsigned int result; // [esp+0h] [ebp-4h]
 
     result = WaitForSingleObject(*event, 0xFFFFFFFF);
-    if (result)
-        MyAssertHandler(
-            ".\\qcommon\\threads.cpp",
-            244,
-            0,
-            "%s\n\t(result) = %i",
-            "(result == ((((unsigned int )0x00000000L) ) + 0 ))",
-            result);
+    iassert(result == ((((unsigned int)0x00000000L)) + 0));
 }
 
 bool __cdecl Sys_SpawnWorkerThread(void(__cdecl* function)(unsigned int), unsigned int threadIndex)
@@ -393,6 +399,12 @@ void __cdecl Sys_NotifyRenderer()
 
 void __cdecl Sys_DatabaseCompleted()
 {
+#ifdef KISAK_SP 
+    Sys_EnterCriticalSection(CRITSECT_START_SERVER);
+    isDoingDatabaseInit = 1;
+    Sys_LeaveCriticalSection(CRITSECT_START_SERVER);
+    Sys_WaitForSingleObject(&serverCompletedEvent);
+#endif
     Sys_SetEvent(&databaseCompletedEvent);
 }
 
@@ -423,6 +435,11 @@ void __cdecl Sys_NotifyDatabase()
 
 void __cdecl Sys_DatabaseCompleted2()
 {
+#ifdef KISAK_SP
+    Sys_EnterCriticalSection(CRITSECT_START_SERVER);
+    isDoingDatabaseInit = 0;
+    Sys_LeaveCriticalSection(CRITSECT_START_SERVER);
+#endif
     Sys_SetEvent(&databaseCompletedEvent2);
 }
 
@@ -688,3 +705,203 @@ void __cdecl Sys_BeginLoadThreadPriorities()
         MyAssertHandler(".\\qcommon\\threads.cpp", 715, 0, "%s", "Sys_IsMainThread()");
     SetThreadPriority(threadHandle[0], -1);
 }
+
+#ifdef KISAK_SP
+int Sys_WaitStartServer(unsigned int timeout)
+{
+    int v2; // r3
+    int v3; // r30
+
+    Sys_EnterCriticalSection(CRITSECT_START_SERVER);
+    v2 = Sys_WaitForSingleObjectTimeout(&wakeServerEvent, timeout);
+    v3 = v2;
+    if (isDoingDatabaseInit)
+    {
+        v3 = 0;
+    }
+    else if (v2)
+    {
+        ResetEvent(serverCompletedEvent);
+    }
+    Sys_LeaveCriticalSection(CRITSECT_START_SERVER);
+    return v3;
+}
+
+void Sys_InitServerEvents()
+{
+    ResetEvent(wakeServerEvent);
+    ResetEvent(serverCompletedEvent);
+    SetEvent(allowSendClientMessagesEvent);
+    ResetEvent(serverSnapshotEvent);
+    SetEvent(clientMessageReceived);
+    g_timeout = 0;
+}
+
+void Sys_ClientMessageReceived()
+{
+    SetEvent(clientMessageReceived);
+}
+void Sys_ClearClientMessage()
+{
+    ResetEvent(clientMessageReceived);
+}
+int Sys_SpawnServerThread(void(*function)(unsigned int))
+{
+    int result; // r3
+
+    wakeServerEvent = CreateEventA(0, 1, 0, 0);
+    serverCompletedEvent = CreateEventA(0, 1, 0, 0);
+    allowSendClientMessagesEvent = CreateEventA(0, 1, 0, 0);
+    serverSnapshotEvent = CreateEventA(0, 0, 0, 0);
+    clientMessageReceived = CreateEventA(0, 1, 1, 0);
+    Sys_CreateThread(function, 5);
+    result = (int)threadHandle[5];
+
+    if (threadHandle[5])
+    {
+        //XSetThreadProcessor(threadHandle[5], 3u);
+        Sys_ResumeThread(5u);
+        return 1;
+    }
+
+    return result;
+}
+void Sys_WaitClientMessageReceived()
+{
+    unsigned int v0; // r8
+
+    Profile_Begin(424);
+    //PIXBeginNamedEvent_Copy_NoVarArgs(0xFFFFFFFF, "wait receive msg");
+    Sys_WaitForSingleObject(&clientMessageReceived);
+    //PIXEndNamedEvent();
+    Profile_EndInternal(0);
+}
+void Sys_ServerSnapshotCompleted()
+{
+    SetEvent(serverSnapshotEvent);
+}
+bool Sys_WaitServerSnapshot()
+{
+    bool v0; // r31
+
+    Profile_Begin(423);
+    //PIXBeginNamedEvent_Copy_NoVarArgs(0xFFFFFFFF, "wait snapshot");
+    v0 = WaitForSingleObject(serverSnapshotEvent, 1) == 0;
+    //PIXEndNamedEvent();
+    Profile_EndInternal(0);
+    return v0;
+}
+void Sys_AllowSendClientMessages()
+{
+    SetEvent(allowSendClientMessagesEvent);
+}
+void Sys_DisallowSendClientMessages()
+{
+    ResetEvent(allowSendClientMessagesEvent);
+}
+int Sys_CanSendClientMessages()
+{
+    return WaitForSingleObject(allowSendClientMessagesEvent, 0) == 0;
+}
+void Sys_ServerCompleted()
+{
+    SetEvent(serverCompletedEvent);
+}
+int Sys_ServerTimeout()
+{
+    int time = g_timeout;
+
+    if (!time)
+    {
+        return 1;
+    }
+
+    int timeMS = Sys_Milliseconds();
+    if (timeMS - g_timeout >= 0)
+    {
+        int nextTimeout = timeMS - (int)(-50.0f / com_timescaleValue);
+
+        // shitty atomic looping that is emulated from XBox360
+        while (true)
+        {
+            int current = g_timeout;
+            if (current != time)
+                break;
+
+            // linux spergs, use: __sync_bool_compare_and_swap()
+            int oldVal = InterlockedCompareExchange((volatile unsigned int*)&g_timeout, nextTimeout, current);
+            if (oldVal == current)
+            {
+                return 1;
+            }
+        }
+
+        // timeout modified by someone else
+        return 1;
+    }
+
+
+    return 0;
+}
+void Sys_WakeServer()
+{
+    SetEvent(wakeServerEvent);
+}
+bool Sys_WaitServer()
+{
+    bool v0; // r31
+
+    Profile_Begin(422);
+    //PIXBeginNamedEvent_Copy_NoVarArgs(0xFFFFFFFF, "wait server");
+    v0 = WaitForSingleObject(serverCompletedEvent, 1u) == 0;
+    //PIXEndNamedEvent();
+    Profile_EndInternal(0);
+    return v0;
+}
+void Sys_SleepServer()
+{
+    bool v0; // r30
+
+    //PIXBeginNamedEvent_Copy_NoVarArgs(0xFFFFFFFF, "sleep server");
+    v0 = WaitForSingleObject(wakeServerEvent, 0) == 0;
+    //PIXEndNamedEvent();
+    if (v0)
+    {
+        Sys_EnterCriticalSection(CRITSECT_START_SERVER);
+        ResetEvent(wakeServerEvent);
+        Sys_LeaveCriticalSection(CRITSECT_START_SERVER);
+    }
+}
+void Sys_Sleep(unsigned int msec)
+{
+    Sleep(msec);
+}
+void Sys_SetServerTimeout(int timeout)
+{
+    int timeMS; // r3
+
+    iassert(timeout >= 0);
+    iassert(com_timescaleValue);
+
+    if (timeout)
+    {
+        //a12 = (int)(float)((float)__SPAIR64__(&a12, timeout) / (float)v13);
+        int val = (int)((float)timeout / com_timescaleValue);
+        timeMS = Sys_Milliseconds();
+        if (g_timeout && timeMS - g_timeout < 0 && g_timeout - (timeMS + val) <= 0)
+        {
+            //PIXSetMarker(0xFFFFFFFF, "ignore server timeout: %d", a12);
+        }
+        else
+        {
+            g_timeout = timeMS + val;
+            //PIXSetMarker(0xFFFFFFFF, "server timeout: %d", a12);
+        }
+    }
+    else
+    {
+        g_timeout = 0;
+        //PIXSetMarker(0xFFFFFFFF, "server timeout");
+    }
+}
+#endif

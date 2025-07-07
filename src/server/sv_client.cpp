@@ -4,7 +4,7 @@
 
 #include "server.h"
 
-void __fastcall SV_DirectConnect()
+void __cdecl SV_DirectConnect()
 {
     client_t *clients; // r31
 
@@ -18,19 +18,19 @@ void __fastcall SV_DirectConnect()
     clients->lastUsercmd.serverTime = G_GetTime();
 }
 
-void __fastcall SV_SendClientGameState(client_t *client)
+void __cdecl SV_SendClientGameState(client_t *client)
 {
     if (client != svs.clients)
         MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\server\\sv_client.cpp", 64, 0, "%s", "client == svs.clients");
     CL_ParseGamestate((char *)sv.configstrings);
 }
 
-void __fastcall SV_SendGameState()
+void __cdecl SV_SendGameState()
 {
     CL_ParseGamestate((char *)sv.configstrings);
 }
 
-void __fastcall SV_ClientEnterWorld(client_t *client)
+void __cdecl SV_ClientEnterWorld(client_t *client)
 {
     if (client->state != 1)
         MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\server\\sv_client.cpp", 87, 0, "%s", "client->state == CS_ACTIVE");
@@ -38,7 +38,7 @@ void __fastcall SV_ClientEnterWorld(client_t *client)
     client->gentity = SV_GentityNum(client - svs.clients);
 }
 
-float __fastcall SV_FX_GetVisibility(const float *start, const float *end)
+float __cdecl SV_FX_GetVisibility(const float *start, const float *end)
 {
     double ServerVisibility; // fp31
     double v3; // fp1
@@ -56,7 +56,7 @@ float __fastcall SV_FX_GetVisibility(const float *start, const float *end)
     return *((float *)&v3 + 1);
 }
 
-void __fastcall SV_ExecuteClientCommand(const char *s)
+void __cdecl SV_ExecuteClientCommand(const char *s)
 {
     if (!SV_Loaded())
         MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\server\\sv_client.cpp", 140, 0, "%s", "SV_Loaded()");
@@ -70,7 +70,7 @@ void __fastcall SV_ExecuteClientCommand(const char *s)
     ClientCommand(0, s);
 }
 
-void __fastcall SV_ClientThink(usercmd_s *cmd)
+void __cdecl SV_ClientThink(usercmd_s *cmd)
 {
     client_t *clients; // r11
 
@@ -92,17 +92,17 @@ void __fastcall SV_ClientThink(usercmd_s *cmd)
 }
 
 // attributes: thunk
-gentity_s *__fastcall SV_GetEntityState(int entnum)
+gentity_s *__cdecl SV_GetEntityState(int entnum)
 {
     return SV_GentityNum(entnum);
 }
 
-void __fastcall SV_TrackPlayerDied()
+void __cdecl SV_TrackPlayerDied()
 {
     Live_SetDeaths(++svs.playerDeaths);
 }
 
-void __fastcall SV_AddToPlayerScore(int amount)
+void __cdecl SV_AddToPlayerScore(int amount)
 {
     svs.playerScore += amount;
     Live_SetScore(svs.playerScore);

@@ -6,14 +6,14 @@
 #include "sv_public.h"
 #include <universal/q_shared.h>
 
-const dvar_t *const sv_clientFrameRateFix;
+const dvar_t *sv_clientFrameRateFix;
 
-void __fastcall TRACK_sv_init()
+void __cdecl TRACK_sv_init()
 {
     track_static_alloc_internal(g_sv_clients, 55080, "g_sv_clients", 9);
 }
 
-void __fastcall SV_GetConfigstring(unsigned int index, char *buffer, int bufferSize)
+void __cdecl SV_GetConfigstring(unsigned int index, char *buffer, int bufferSize)
 {
     unsigned int v6; // r31
     const char *v7; // r3
@@ -29,7 +29,7 @@ void __fastcall SV_GetConfigstring(unsigned int index, char *buffer, int bufferS
     I_strncpyz(buffer, v7, bufferSize);
 }
 
-unsigned int __fastcall SV_GetConfigstringConst(unsigned int index)
+unsigned int __cdecl SV_GetConfigstringConst(unsigned int index)
 {
     unsigned int v2; // r31
 
@@ -46,17 +46,17 @@ unsigned int __fastcall SV_GetConfigstringConst(unsigned int index)
     return sv.configstrings[v2];
 }
 
-void __fastcall SV_InitReliableCommandsForClient(client_t *cl)
+void __cdecl SV_InitReliableCommandsForClient(client_t *cl)
 {
     Com_Memset(&cl->reliableCommands, 0, 12);
 }
 
-void __fastcall SV_FreeReliableCommandsForClient(client_t *cl)
+void __cdecl SV_FreeReliableCommandsForClient(client_t *cl)
 {
     Com_Memset(&cl->reliableCommands, 0, 12);
 }
 
-void __fastcall SV_AddReliableCommand(client_t *cl, int index, const char *cmd)
+void __cdecl SV_AddReliableCommand(client_t *cl, int index, const char *cmd)
 {
     const char *v5; // r11
     int v8; // r30
@@ -87,7 +87,7 @@ void __fastcall SV_AddReliableCommand(client_t *cl, int index, const char *cmd)
     cl->reliableCommands.header.rover += v8 + 1;
 }
 
-void __fastcall SV_Startup()
+void __cdecl SV_Startup()
 {
     if (svs.initialized)
         Com_Error(ERR_FATAL, byte_8207B568);
@@ -97,7 +97,7 @@ void __fastcall SV_Startup()
     Dvar_SetBool(com_sv_running, 1);
 }
 
-void __fastcall SV_ClearServer()
+void __cdecl SV_ClearServer()
 {
     unsigned __int16 *configstrings; // r31
 
@@ -117,7 +117,7 @@ void __fastcall SV_ClearServer()
     com_inServerFrame = 0;
 }
 
-void __fastcall SV_StartMap(int randomSeed)
+void __cdecl SV_StartMap(int randomSeed)
 {
     com_inServerFrame = 0;
     sv.state = SS_LOADING;
@@ -126,7 +126,7 @@ void __fastcall SV_StartMap(int randomSeed)
     Dvar_SetInt(cl_paused, 1);
 }
 
-void __fastcall SV_Settle()
+void __cdecl SV_Settle()
 {
     int v0; // r30
 
@@ -142,7 +142,7 @@ void __fastcall SV_Settle()
     } while (v0);
 }
 
-int __fastcall SV_SaveImmediately(const char *levelName)
+int __cdecl SV_SaveImmediately(const char *levelName)
 {
     int v3; // r3
 
@@ -160,7 +160,7 @@ int __fastcall SV_SaveImmediately(const char *levelName)
     return SV_ProcessPendingSaves();
 }
 
-void __fastcall SV_LoadLevelAssets(const char *mapname)
+void __cdecl SV_LoadLevelAssets(const char *mapname)
 {
     int v1; // r3
     XZoneInfo v2; // [sp+50h] [-20h] BYREF
@@ -176,12 +176,12 @@ void __fastcall SV_LoadLevelAssets(const char *mapname)
     }
 }
 
-bool __fastcall SV_Loaded()
+bool __cdecl SV_Loaded()
 {
     return sv.state == SS_GAME;
 }
 
-void __fastcall SV_Init()
+void __cdecl SV_Init()
 {
     const char *v0; // r5
     unsigned __int16 v1; // r4
@@ -242,7 +242,7 @@ void __fastcall SV_Init()
         "Slow down server frame time to allow good client frame rate with server bound.");
 }
 
-void __fastcall SV_Shutdown(const char *finalmsg)
+void __cdecl SV_Shutdown(const char *finalmsg)
 {
     serverStatic_t *v1; // r11
     int v2; // ctr
@@ -272,7 +272,7 @@ void __fastcall SV_Shutdown(const char *finalmsg)
     }
 }
 
-void __fastcall SV_SetConfigstring(unsigned int index, const char *val)
+void __cdecl SV_SetConfigstring(unsigned int index, const char *val)
 {
     unsigned int v4; // r31
     const char *v5; // r3
@@ -367,7 +367,7 @@ void SV_SaveSystemInfo()
     dvar_modifiedFlags &= ~4u;
 }
 
-void __fastcall SV_SpawnServer(const char *server, int savegame)
+void __cdecl SV_SpawnServer(const char *server, int savegame)
 {
     int v4; // r21
     const char *v5; // r3

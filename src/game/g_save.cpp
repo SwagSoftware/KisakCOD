@@ -8,12 +8,12 @@
 
 bool g_useDevSaveArea;
 
-void __fastcall TRACK_g_save()
+void __cdecl TRACK_g_save()
 {
     track_static_alloc_internal(&tempClient, 46104, "tempClient", 9);
 }
 
-void __fastcall Scr_FreeFields(const saveField_t *fields, unsigned __int8 *base)
+void __cdecl Scr_FreeFields(const saveField_t *fields, unsigned __int8 *base)
 {
     saveFieldtype_t *p_type; // r11
     const saveField_t *i; // r31
@@ -39,17 +39,17 @@ void __fastcall Scr_FreeFields(const saveField_t *fields, unsigned __int8 *base)
     }
 }
 
-void __fastcall Scr_FreeEntityFields(gentity_s *ent)
+void __cdecl Scr_FreeEntityFields(gentity_s *ent)
 {
     Scr_FreeFields(gentityFields, &ent->s.eType);
 }
 
-void __fastcall Scr_FreeActorFields(actor_s *pActor)
+void __cdecl Scr_FreeActorFields(actor_s *pActor)
 {
     Scr_FreeFields(actorFields, (unsigned __int8 *)pActor);
 }
 
-void __fastcall Scr_FreeSentientFields(sentient_s *sentient)
+void __cdecl Scr_FreeSentientFields(sentient_s *sentient)
 {
     Scr_FreeFields(sentientFields, (unsigned __int8 *)sentient);
 }
@@ -114,7 +114,7 @@ void G_SaveError(
     Com_Error(code, v15);
 }
 
-void __fastcall WriteCStyleString(const char *psz, int maxlen, SaveGame *save)
+void __cdecl WriteCStyleString(const char *psz, int maxlen, SaveGame *save)
 {
     const char *v6; // r11
     int v8; // r31
@@ -157,7 +157,7 @@ void __fastcall WriteCStyleString(const char *psz, int maxlen, SaveGame *save)
     SaveMemory_SaveWrite(psz, v8, save);
 }
 
-void __fastcall ReadCStyleString(char *psz, int maxlen, SaveGame *save)
+void __cdecl ReadCStyleString(char *psz, int maxlen, SaveGame *save)
 {
     int v6; // r31
     _BYTE v7[2]; // [sp+50h] [-30h] BYREF
@@ -189,7 +189,7 @@ void __fastcall ReadCStyleString(char *psz, int maxlen, SaveGame *save)
     psz[v6] = 0;
 }
 
-void __fastcall WriteWeaponIndex(unsigned int weapon, SaveGame *save)
+void __cdecl WriteWeaponIndex(unsigned int weapon, SaveGame *save)
 {
     WeaponDef *WeaponDef; // r29
 
@@ -210,7 +210,7 @@ void __fastcall WriteWeaponIndex(unsigned int weapon, SaveGame *save)
     }
 }
 
-int __fastcall ReadWeaponIndex(SaveGame *save)
+int __cdecl ReadWeaponIndex(SaveGame *save)
 {
     int v2; // r31
     _BYTE v4[16]; // [sp+50h] [-140h] BYREF
@@ -231,7 +231,7 @@ int __fastcall ReadWeaponIndex(SaveGame *save)
         return 0;
 }
 
-void __fastcall WriteItemIndex(int iIndex, SaveGame *save)
+void __cdecl WriteItemIndex(int iIndex, SaveGame *save)
 {
     gitem_s *v4; // r29
     char v5; // [sp+50h] [-40h] BYREF
@@ -255,7 +255,7 @@ void __fastcall WriteItemIndex(int iIndex, SaveGame *save)
     }
 }
 
-int __fastcall ReadItemIndex(SaveGame *save)
+int __cdecl ReadItemIndex(SaveGame *save)
 {
     int v2; // r31
     const gitem_s *Item; // r3
@@ -278,7 +278,7 @@ int __fastcall ReadItemIndex(SaveGame *save)
         return 0;
 }
 
-void __fastcall WriteVehicleIndex(__int16 index, SaveGame *save)
+void __cdecl WriteVehicleIndex(__int16 index, SaveGame *save)
 {
     const char *VehicleInfoName; // r3
 
@@ -288,7 +288,7 @@ void __fastcall WriteVehicleIndex(__int16 index, SaveGame *save)
     WriteCStyleString(VehicleInfoName, 256, save);
 }
 
-int __fastcall ReadVehicleIndex(SaveGame *save)
+int __cdecl ReadVehicleIndex(SaveGame *save)
 {
     int v2; // r31
     _BYTE v4[16]; // [sp+50h] [-140h] BYREF
@@ -306,7 +306,7 @@ int __fastcall ReadVehicleIndex(SaveGame *save)
     return G_GetVehicleInfoIndex(v5);
 }
 
-void __fastcall WriteField1(const saveField_t *field, const unsigned __int8 *base, unsigned __int8 *original)
+void __cdecl WriteField1(const saveField_t *field, const unsigned __int8 *base, unsigned __int8 *original)
 {
     EntHandle *v3; // r28
     unsigned int v4; // r31
@@ -499,7 +499,7 @@ void __fastcall WriteField1(const saveField_t *field, const unsigned __int8 *bas
     }
 }
 
-void __fastcall WriteField2(const saveField_t *field, unsigned __int8 *base, SaveGame *save)
+void __cdecl WriteField2(const saveField_t *field, unsigned __int8 *base, SaveGame *save)
 {
     saveFieldtype_t type; // r11
     int ofs; // r30
@@ -563,7 +563,7 @@ void __fastcall WriteField2(const saveField_t *field, unsigned __int8 *base, Sav
     }
 }
 
-void __fastcall ReadField(const saveField_t *field, unsigned __int8 *base, SaveGame *save)
+void __cdecl ReadField(const saveField_t *field, unsigned __int8 *base, SaveGame *save)
 {
     __int32 v6; // r11
     EntHandle *v7; // r31
@@ -739,7 +739,7 @@ void __fastcall ReadField(const saveField_t *field, unsigned __int8 *base, SaveG
     }
 }
 
-void __fastcall G_WriteStruct(
+void __cdecl G_WriteStruct(
     const saveField_t *fields,
     unsigned __int8 *original,
     const unsigned __int8 *source,
@@ -767,7 +767,7 @@ void __fastcall G_WriteStruct(
         WriteField2(fields, original, save);
 }
 
-void __fastcall G_ReadStruct(const saveField_t *fields, unsigned __int8 *dest, int tempsize, SaveGame *save)
+void __cdecl G_ReadStruct(const saveField_t *fields, unsigned __int8 *dest, int tempsize, SaveGame *save)
 {
     if (!save)
         MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\g_save.cpp", 1214, 0, "%s", "save");
@@ -776,7 +776,7 @@ void __fastcall G_ReadStruct(const saveField_t *fields, unsigned __int8 *dest, i
         ReadField(fields, dest, save);
 }
 
-void __fastcall WriteClient(gclient_s *cl, SaveGame *save)
+void __cdecl WriteClient(gclient_s *cl, SaveGame *save)
 {
     if (!save)
         MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\g_save.cpp", 1232, 0, "%s", "save");
@@ -798,7 +798,7 @@ void __fastcall WriteClient(gclient_s *cl, SaveGame *save)
     WriteWeaponIndex(cl->pers.cmd.offHandIndex, save);
 }
 
-void __fastcall ReadClient(gclient_s *client, SaveGame *save)
+void __cdecl ReadClient(gclient_s *client, SaveGame *save)
 {
     unsigned __int8 WeaponIndex; // r3
     int weapon; // r4
@@ -820,7 +820,7 @@ void __fastcall ReadClient(gclient_s *client, SaveGame *save)
     SV_SetUsercmdButtonsWeapons(buttons, weapon, v8);
 }
 
-void __fastcall WriteEntity(gentity_s *ent, SaveGame *save)
+void __cdecl WriteEntity(gentity_s *ent, SaveGame *save)
 {
     MemoryFile *MemoryFile; // r3
     unsigned int UsedSize; // r3
@@ -846,7 +846,7 @@ void __fastcall WriteEntity(gentity_s *ent, SaveGame *save)
     WriteEntityDisconnectedLinks(ent, save);
 }
 
-void __fastcall ReadEntity(gentity_s *ent, SaveGame *save)
+void __cdecl ReadEntity(gentity_s *ent, SaveGame *save)
 {
     _BYTE v4[8]; // [sp+50h] [-20h] BYREF
 
@@ -866,7 +866,7 @@ void __fastcall ReadEntity(gentity_s *ent, SaveGame *save)
     }
 }
 
-void __fastcall WriteActorPotentialCoverNodes(actor_s *pActor, SaveGame *save)
+void __cdecl WriteActorPotentialCoverNodes(actor_s *pActor, SaveGame *save)
 {
     int v4; // r30
     pathnode_t **pPotentialCoverNode; // r31
@@ -886,7 +886,7 @@ void __fastcall WriteActorPotentialCoverNodes(actor_s *pActor, SaveGame *save)
     }
 }
 
-void __fastcall ReadActorPotentialCoverNodes(actor_s *pActor, SaveGame *save)
+void __cdecl ReadActorPotentialCoverNodes(actor_s *pActor, SaveGame *save)
 {
     int v4; // r30
     pathnode_t **pPotentialCoverNode; // r31
@@ -906,7 +906,7 @@ void __fastcall ReadActorPotentialCoverNodes(actor_s *pActor, SaveGame *save)
     }
 }
 
-void __fastcall WriteActor(actor_s *pActor, SaveGame *save)
+void __cdecl WriteActor(actor_s *pActor, SaveGame *save)
 {
     unsigned __int8 v4[3832]; // [sp+50h] [-F10h] BYREF
 
@@ -921,7 +921,7 @@ void __fastcall WriteActor(actor_s *pActor, SaveGame *save)
     }
 }
 
-void __fastcall ReadActor(actor_s *pActor, SaveGame *save)
+void __cdecl ReadActor(actor_s *pActor, SaveGame *save)
 {
     if (!save)
         MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\g_save.cpp", 1385, 0, "%s", "save");
@@ -936,7 +936,7 @@ void __fastcall ReadActor(actor_s *pActor, SaveGame *save)
     }
 }
 
-void __fastcall WriteSentient(sentient_s *sentient, SaveGame *save)
+void __cdecl WriteSentient(sentient_s *sentient, SaveGame *save)
 {
     unsigned __int8 v4[120]; // [sp+50h] [-90h] BYREF
 
@@ -950,7 +950,7 @@ void __fastcall WriteSentient(sentient_s *sentient, SaveGame *save)
     }
 }
 
-void __fastcall ReadSentient(sentient_s *sentient, SaveGame *save)
+void __cdecl ReadSentient(sentient_s *sentient, SaveGame *save)
 {
     if (!save)
         MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\g_save.cpp", 1437, 0, "%s", "save");
@@ -963,7 +963,7 @@ void __fastcall ReadSentient(sentient_s *sentient, SaveGame *save)
     }
 }
 
-void __fastcall WriteVehicle(scr_vehicle_s *pVehicle, SaveGame *save)
+void __cdecl WriteVehicle(scr_vehicle_s *pVehicle, SaveGame *save)
 {
     bool v4[4]; // [sp+50h] [-360h] BYREF
     unsigned __int8 v5[824]; // [sp+60h] [-350h] BYREF
@@ -980,7 +980,7 @@ void __fastcall WriteVehicle(scr_vehicle_s *pVehicle, SaveGame *save)
     }
 }
 
-void __fastcall ReadVehicle(scr_vehicle_s *pVehicle, SaveGame *save)
+void __cdecl ReadVehicle(scr_vehicle_s *pVehicle, SaveGame *save)
 {
     int v4; // [sp+50h] [-20h] BYREF
 
@@ -995,7 +995,7 @@ void __fastcall ReadVehicle(scr_vehicle_s *pVehicle, SaveGame *save)
     }
 }
 
-void __fastcall WriteTurretInfo(TurretInfo *pTurretInfo, SaveGame *save)
+void __cdecl WriteTurretInfo(TurretInfo *pTurretInfo, SaveGame *save)
 {
     bool v4[4]; // [sp+50h] [-F0h] BYREF
     unsigned __int8 v5[200]; // [sp+60h] [-E0h] BYREF
@@ -1009,7 +1009,7 @@ void __fastcall WriteTurretInfo(TurretInfo *pTurretInfo, SaveGame *save)
         G_WriteStruct(turretFields, (unsigned __int8 *)pTurretInfo, v5, 188, save);
 }
 
-void __fastcall ReadTurretInfo(TurretInfo *pTurretInfo, SaveGame *save)
+void __cdecl ReadTurretInfo(TurretInfo *pTurretInfo, SaveGame *save)
 {
     int v4; // [sp+50h] [-20h] BYREF
 
@@ -1021,7 +1021,7 @@ void __fastcall ReadTurretInfo(TurretInfo *pTurretInfo, SaveGame *save)
         G_ReadStruct(turretFields, (unsigned __int8 *)pTurretInfo, 188, save);
 }
 
-void __fastcall WritePathNodes(SaveGame *save)
+void __cdecl WritePathNodes(SaveGame *save)
 {
     pathnode_t *i; // r29
     unsigned __int8 *v3; // r10
@@ -1067,7 +1067,7 @@ void __fastcall WritePathNodes(SaveGame *save)
     }
 }
 
-void __fastcall ReadPathNodes(SaveGame *save)
+void __cdecl ReadPathNodes(SaveGame *save)
 {
     pathnode_t *i; // r31
     int wLinkCount; // r11
@@ -1130,7 +1130,7 @@ void __fastcall ReadPathNodes(SaveGame *save)
     }
 }
 
-const saveField_t *__fastcall BadPlaceParmSaveFields(const badplace_t *badplace)
+const saveField_t *__cdecl BadPlaceParmSaveFields(const badplace_t *badplace)
 {
     if (!badplace)
         MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\g_save.cpp", 1618, 0, "%s", "badplace");
@@ -1140,7 +1140,7 @@ const saveField_t *__fastcall BadPlaceParmSaveFields(const badplace_t *badplace)
         return badplaceDefaultParmsFields;
 }
 
-void __fastcall WriteBadPlaces(SaveGame *save)
+void __cdecl WriteBadPlaces(SaveGame *save)
 {
     int v2; // r27
     unsigned __int8 *v3; // r31
@@ -1191,7 +1191,7 @@ void __fastcall WriteBadPlaces(SaveGame *save)
     } while (v2);
 }
 
-void __fastcall ReadBadPlaces(SaveGame *save)
+void __cdecl ReadBadPlaces(SaveGame *save)
 {
     int v2; // r27
     unsigned __int8 *v3; // r31
@@ -1217,7 +1217,7 @@ void __fastcall ReadBadPlaces(SaveGame *save)
     } while (v2);
 }
 
-void __fastcall WriteThreatBiasGroups(SaveGame *save)
+void __cdecl WriteThreatBiasGroups(SaveGame *save)
 {
     unsigned __int8 v2[1064]; // [sp+50h] [-440h] BYREF
 
@@ -1227,12 +1227,12 @@ void __fastcall WriteThreatBiasGroups(SaveGame *save)
     G_WriteStruct(threatGroupFields, (unsigned __int8 *)&g_threatBias, v2, 1060, save);
 }
 
-void __fastcall ReadThreatBiasGroups(SaveGame *save)
+void __cdecl ReadThreatBiasGroups(SaveGame *save)
 {
     G_ReadStruct(threatGroupFields, (unsigned __int8 *)&g_threatBias, 1060, save);
 }
 
-void __fastcall WriteAIEventListeners(SaveGame *save)
+void __cdecl WriteAIEventListeners(SaveGame *save)
 {
     int v2[4]; // [sp+50h] [-20h] BYREF
 
@@ -1242,7 +1242,7 @@ void __fastcall WriteAIEventListeners(SaveGame *save)
         SaveMemory_SaveWrite(g_AIEVlisteners, 8 * v2[0], save);
 }
 
-void __fastcall ReadAIEventListeners(SaveGame *save)
+void __cdecl ReadAIEventListeners(SaveGame *save)
 {
     int v2[4]; // [sp+50h] [-20h] BYREF
 
@@ -1259,7 +1259,7 @@ void __fastcall ReadAIEventListeners(SaveGame *save)
         SaveMemory_LoadRead(g_AIEVlisteners, 8 * v2[0], save);
 }
 
-char *__fastcall G_Save_DateStr()
+char *__cdecl G_Save_DateStr()
 {
     qtime_s v1; // [sp+50h] [-30h] BYREF
 
@@ -1267,7 +1267,7 @@ char *__fastcall G_Save_DateStr()
     return va("%s %i, %i", monthStr[v1.tm_mon], v1.tm_mday, v1.tm_year + 1900);
 }
 
-void __fastcall G_SaveConfigstrings(int iFirst, int iCount, SaveGame *save)
+void __cdecl G_SaveConfigstrings(int iFirst, int iCount, SaveGame *save)
 {
     int i; // r29
     char *v7; // r11
@@ -1296,7 +1296,7 @@ void __fastcall G_SaveConfigstrings(int iFirst, int iCount, SaveGame *save)
     }
 }
 
-void __fastcall G_LoadConfigstrings(int iFirst, int iCount, SaveGame *save)
+void __cdecl G_LoadConfigstrings(int iFirst, int iCount, SaveGame *save)
 {
     int i; // r31
     int v7; // r30
@@ -1319,7 +1319,7 @@ void __fastcall G_LoadConfigstrings(int iFirst, int iCount, SaveGame *save)
     }
 }
 
-void __fastcall G_LoadModelPrecacheList(SaveGame *save)
+void __cdecl G_LoadModelPrecacheList(SaveGame *save)
 {
     unsigned __int16 *modelMap; // r30
     int v3; // r31
@@ -1348,7 +1348,7 @@ void __fastcall G_LoadModelPrecacheList(SaveGame *save)
     } while ((int)modelMap < (int)&level.priorityNodeBias);
 }
 
-void __fastcall G_ClearConfigstrings(int iFirst, int iCount)
+void __cdecl G_ClearConfigstrings(int iFirst, int iCount)
 {
     int i; // r31
 
@@ -1356,7 +1356,7 @@ void __fastcall G_ClearConfigstrings(int iFirst, int iCount)
         SV_SetConfigstring(i + iFirst, byte_82003CDD);
 }
 
-void __fastcall G_ClearAllConfigstrings()
+void __cdecl G_ClearAllConfigstrings()
 {
     int i; // r30
     int j; // r30
@@ -1388,7 +1388,7 @@ void __fastcall G_ClearAllConfigstrings()
         SV_SetConfigstring(jj + 27, byte_82003CDD);
 }
 
-void __fastcall G_SaveInitConfigstrings(SaveGame *save)
+void __cdecl G_SaveInitConfigstrings(SaveGame *save)
 {
     if (!save)
         MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\g_save.cpp", 1871, 0, "%s", "save");
@@ -1408,7 +1408,7 @@ void __fastcall G_SaveInitConfigstrings(SaveGame *save)
     G_SaveConfigstrings(1150, 1, save);
 }
 
-void __fastcall G_LoadInitConfigstrings(SaveGame *save)
+void __cdecl G_LoadInitConfigstrings(SaveGame *save)
 {
     if (!save)
         MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\g_save.cpp", 1896, 0, "%s", "save");
@@ -1428,7 +1428,7 @@ void __fastcall G_LoadInitConfigstrings(SaveGame *save)
     G_LoadConfigstrings(1150, 1, save);
 }
 
-void __fastcall G_SaveItems(SaveGame *save)
+void __cdecl G_SaveItems(SaveGame *save)
 {
     int v2; // r31
     _BYTE v3[8]; // [sp+50h] [-20h] BYREF
@@ -1450,7 +1450,7 @@ void __fastcall G_SaveItems(SaveGame *save)
     SaveMemory_SaveWrite(v3, 1, save);
 }
 
-void __fastcall G_SaveWeaponCue(SaveGame *save)
+void __cdecl G_SaveWeaponCue(SaveGame *save)
 {
     EntHandle *droppedWeaponCue; // r31
     int number; // r11
@@ -1479,7 +1479,7 @@ void __fastcall G_SaveWeaponCue(SaveGame *save)
     } while ((int)droppedWeaponCue < (int)&level.changelevel);
 }
 
-void __fastcall G_LoadWeaponCue(SaveGame *save)
+void __cdecl G_LoadWeaponCue(SaveGame *save)
 {
     EntHandle *droppedWeaponCue; // r30
     int number; // r11
@@ -1522,7 +1522,7 @@ void __fastcall G_LoadWeaponCue(SaveGame *save)
     } while ((int)droppedWeaponCue < (int)&level.changelevel);
 }
 
-void __fastcall G_SaveDvars(SaveGame *save)
+void __cdecl G_SaveDvars(SaveGame *save)
 {
     MemoryFile *MemoryFile; // r3
 
@@ -1532,7 +1532,7 @@ void __fastcall G_SaveDvars(SaveGame *save)
     Dvar_SaveDvars(MemoryFile, 0x1000u);
 }
 
-void __fastcall G_LoadDvars(SaveGame *save)
+void __cdecl G_LoadDvars(SaveGame *save)
 {
     MemoryFile *MemoryFile; // r3
 
@@ -1542,7 +1542,7 @@ void __fastcall G_LoadDvars(SaveGame *save)
     Dvar_LoadDvars(MemoryFile);
 }
 
-void __fastcall G_CheckEntityDefaultModel(gentity_s *e)
+void __cdecl G_CheckEntityDefaultModel(gentity_s *e)
 {
     int model; // r3
     int eType; // r11
@@ -1566,7 +1566,7 @@ void __fastcall G_CheckEntityDefaultModel(gentity_s *e)
     }
 }
 
-void __fastcall G_UpdateAllEntities()
+void __cdecl G_UpdateAllEntities()
 {
     int v0; // r30
     int num_entities; // r11
@@ -1612,7 +1612,7 @@ void G_CheckAllEntities()
     }
 }
 
-void __fastcall G_SaveInitState(SaveGame *save)
+void __cdecl G_SaveInitState(SaveGame *save)
 {
     signed int i; // r28
     const char *szInternalName; // r29
@@ -1649,7 +1649,7 @@ void __fastcall G_SaveInitState(SaveGame *save)
     G_SaveInitConfigstrings(save);
 }
 
-void __fastcall G_SaveMainState(bool savegame, SaveGame *save)
+void __cdecl G_SaveMainState(bool savegame, SaveGame *save)
 {
     MemoryFile *MemoryFile; // r3
     unsigned int UsedSize; // r3
@@ -1945,7 +1945,7 @@ void __fastcall G_SaveMainState(bool savegame, SaveGame *save)
     ProfMem_End(v59);
 }
 
-void __fastcall G_SaveState(bool savegame, SaveGame *save)
+void __cdecl G_SaveState(bool savegame, SaveGame *save)
 {
     CM_ValidateWorld();
     if (!save)
@@ -1954,7 +1954,7 @@ void __fastcall G_SaveState(bool savegame, SaveGame *save)
     G_SaveMainState(savegame, save);
 }
 
-int __fastcall G_IsSavePossible(SaveType saveType)
+int __cdecl G_IsSavePossible(SaveType saveType)
 {
     int result; // r3
 
@@ -1966,7 +1966,7 @@ int __fastcall G_IsSavePossible(SaveType saveType)
     return result;
 }
 
-int __fastcall G_WriteGame(const PendingSave *pendingSave, int checksum, SaveGame *save)
+int __cdecl G_WriteGame(const PendingSave *pendingSave, int checksum, SaveGame *save)
 {
     MemoryFile *MemoryFile; // r3
     unsigned int UsedSize; // r3
@@ -2028,7 +2028,7 @@ int __fastcall G_WriteGame(const PendingSave *pendingSave, int checksum, SaveGam
     }
 }
 
-void __fastcall G_WriteCurrentCommitToDevice()
+void __cdecl G_WriteCurrentCommitToDevice()
 {
     SaveGame *LastCommittedSave; // r3
     SaveGame *v1; // r31
@@ -2043,7 +2043,7 @@ void __fastcall G_WriteCurrentCommitToDevice()
     }
 }
 
-void __fastcall G_PrepareSaveMemoryForWrite(char commitLevel)
+void __cdecl G_PrepareSaveMemoryForWrite(char commitLevel)
 {
     SaveGame *SaveHandle; // r30
     bool v3; // r31
@@ -2059,7 +2059,7 @@ void __fastcall G_PrepareSaveMemoryForWrite(char commitLevel)
         G_WriteCurrentCommitToDevice();
 }
 
-int __fastcall G_ProcessCommitActions(const PendingSave *pendingSave, SaveGame *save)
+int __cdecl G_ProcessCommitActions(const PendingSave *pendingSave, SaveGame *save)
 {
     int v4; // r31
 
@@ -2081,7 +2081,7 @@ int __fastcall G_ProcessCommitActions(const PendingSave *pendingSave, SaveGame *
     return v4;
 }
 
-int __fastcall G_SaveGame(const PendingSave *pendingSave, int checksum)
+int __cdecl G_SaveGame(const PendingSave *pendingSave, int checksum)
 {
     char v4; // r11
     SaveGame *SaveHandle; // r31
@@ -2102,7 +2102,7 @@ int __fastcall G_SaveGame(const PendingSave *pendingSave, int checksum)
         return 0;
 }
 
-bool __fastcall G_CommitSavedGame(int saveId)
+bool __cdecl G_CommitSavedGame(int saveId)
 {
     SaveGame *SaveHandle; // r31
 
@@ -2112,7 +2112,7 @@ bool __fastcall G_CommitSavedGame(int saveId)
     return SaveMemory_CommitSave(SaveHandle, saveId);
 }
 
-void __fastcall G_LoadItems(SaveGame *save)
+void __cdecl G_LoadItems(SaveGame *save)
 {
     _BYTE v2[16]; // [sp+50h] [-20h] BYREF
 
@@ -2126,12 +2126,12 @@ void __fastcall G_LoadItems(SaveGame *save)
     }
 }
 
-void __fastcall G_SetPendingLoadName(const char *filename)
+void __cdecl G_SetPendingLoadName(const char *filename)
 {
     I_strncpyz(g_pendingLoadName, filename, 64);
 }
 
-void __fastcall G_PreLoadGame(int checksum, int *useLoadedSourceFiles, SaveGame **save)
+void __cdecl G_PreLoadGame(int checksum, int *useLoadedSourceFiles, SaveGame **save)
 {
     void *LoadFromDevice; // r28
     const SaveHeader *Header; // r26
@@ -2212,7 +2212,7 @@ void __fastcall G_PreLoadGame(int checksum, int *useLoadedSourceFiles, SaveGame 
     //Profile_EndInternal(0);
 }
 
-int __fastcall G_LoadWeapons(SaveGame *save)
+int __cdecl G_LoadWeapons(SaveGame *save)
 {
     int v2; // r29
     int v3; // r31
@@ -2243,14 +2243,14 @@ int __fastcall G_LoadWeapons(SaveGame *save)
     return 0;
 }
 
-void __fastcall G_InitLoadGame(SaveGame *save)
+void __cdecl G_InitLoadGame(SaveGame *save)
 {
     if (!save)
         MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\g_save.cpp", 2774, 0, "%s", "save");
     G_LoadInitConfigstrings(save);
 }
 
-void __fastcall G_LoadMainState(SaveGame *save)
+void __cdecl G_LoadMainState(SaveGame *save)
 {
     MemoryFile *MemoryFile; // r21
     MemoryFile *v3; // r3
@@ -2518,7 +2518,7 @@ void __fastcall G_LoadMainState(SaveGame *save)
     level.initializing = 0;
 }
 
-void __fastcall G_LoadGame(int checksum, SaveGame *save)
+void __cdecl G_LoadGame(int checksum, SaveGame *save)
 {
     const SaveHeader *Header; // r31
     __int64 v4; // r10
@@ -2569,7 +2569,7 @@ void __fastcall G_LoadGame(int checksum, SaveGame *save)
     //Profile_EndInternal(0);
 }
 
-int __fastcall G_LoadErrorCleanup()
+int __cdecl G_LoadErrorCleanup()
 {
     SaveGame *SaveHandle; // r31
     SaveGame *v1; // r30

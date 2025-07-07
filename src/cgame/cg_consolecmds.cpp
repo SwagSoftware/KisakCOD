@@ -4,7 +4,7 @@
 
 #include "cg_consolecmds.h"
 
-int __fastcall CG_CheatsOK(const char *cmdName)
+int __cdecl CG_CheatsOK(const char *cmdName)
 {
     if (sv_cheats->current.enabled)
         return 1;
@@ -296,7 +296,7 @@ void CG_UFO_f()
     }
 }
 
-void __fastcall CG_SetViewPos_f()
+void __cdecl CG_SetViewPos_f()
 {
     int v0; // r30
     float *origin; // r31
@@ -395,7 +395,7 @@ void __fastcall CG_SetViewPos_f()
 }
 
 // local variable allocation has failed, the output may be wrong!
-void __fastcall SphereCoordsToPos(
+void __cdecl SphereCoordsToPos(
     double sphereDistance,
     double sphereYaw,
     double sphereAltitude,
@@ -436,7 +436,7 @@ void __fastcall SphereCoordsToPos(
     *a7 = (float)((float)*(double *)&v20 * (float)v15) * (float)v8;
 }
 
-void __fastcall CG_SetViewOrbit_f()
+void __cdecl CG_SetViewOrbit_f()
 {
     int v0; // r3
     playerState_s *p_predictedPlayerState; // r31
@@ -544,18 +544,18 @@ void CG_PlayRumble_f()
 }
 
 // attributes: thunk
-void __fastcall UpdateGlowTweaks_f()
+void __cdecl UpdateGlowTweaks_f()
 {
     CG_VisionSetUpdateTweaksFromFile_Glow();
 }
 
 // attributes: thunk
-void __fastcall UpdateFilmTweaks_f()
+void __cdecl UpdateFilmTweaks_f()
 {
     CG_VisionSetUpdateTweaksFromFile_Film();
 }
 
-void __fastcall CG_InitConsoleCommands()
+void __cdecl CG_InitConsoleCommands()
 {
     Cmd_AddCommandInternal("viewpos", CG_Viewpos_f, &CG_Viewpos_f_VAR);
     Cmd_AddCommandInternal("+scores", CG_ScoresDown_f, &CG_ScoresDown_f_VAR);

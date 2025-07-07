@@ -78,6 +78,27 @@ void __cdecl Sys_ResetCinematicsHostOutstandingRequestEvent();
 int __cdecl Sys_IsRendererReady();
 void __cdecl Sys_BeginLoadThreadPriorities();
 
+#ifdef KISAK_SP
+int Sys_WaitStartServer(unsigned int timeout);
+void Sys_InitServerEvents();
+void Sys_ClientMessageReceived();
+void Sys_ClearClientMessage();
+int Sys_SpawnServerThread(void(*function)(unsigned int));
+void Sys_WaitClientMessageReceived();
+void Sys_ServerSnapshotCompleted();
+bool Sys_WaitServerSnapshot();
+void Sys_AllowSendClientMessages();
+void Sys_DisallowSendClientMessages();
+int Sys_CanSendClientMessages();
+void Sys_ServerCompleted();
+int Sys_ServerTimeout();
+void Sys_WakeServer();
+void Sys_SleepServer();
+bool Sys_WaitServer();
+void Sys_Sleep(unsigned int msec);
+void Sys_SetServerTimeout(int timeout);
+#endif
+
 
 enum WinThreadLock : __int32
 {                                       // ...

@@ -4,7 +4,7 @@
 
 #include "cg_snapshot.h"
 
-void __fastcall CG_ShutdownEntity(int localClientNum, centity_s *cent)
+void __cdecl CG_ShutdownEntity(int localClientNum, centity_s *cent)
 {
     int oldEType; // r11
     FxEffect *effect; // r4
@@ -50,7 +50,7 @@ void __fastcall CG_ShutdownEntity(int localClientNum, centity_s *cent)
     cent->pose.physObjId = 0;
 }
 
-void __fastcall CG_InitEntity(centity_s *cent)
+void __cdecl CG_InitEntity(centity_s *cent)
 {
     int eType; // r11
 
@@ -62,7 +62,7 @@ void __fastcall CG_InitEntity(centity_s *cent)
     }
 }
 
-void __fastcall CG_ResetEntity(int localClientNum, centity_s *cent)
+void __cdecl CG_ResetEntity(int localClientNum, centity_s *cent)
 {
     int eType; // r11
     unsigned __int8 v5; // r11
@@ -158,7 +158,7 @@ void __fastcall CG_ResetEntity(int localClientNum, centity_s *cent)
     }
 }
 
-void __fastcall CG_SetInitialSnapshot(int localClientNum)
+void __cdecl CG_SetInitialSnapshot(int localClientNum)
 {
     snapshot_s *nextSnap; // r31
     int *p_numEntities; // r28
@@ -225,7 +225,7 @@ void __fastcall CG_SetInitialSnapshot(int localClientNum)
     }
 }
 
-int __fastcall CG_DObjCloneToBuffer(int localClientNum, centity_s *cent, const XAnimTree_s *serverTree)
+int __cdecl CG_DObjCloneToBuffer(int localClientNum, centity_s *cent, const XAnimTree_s *serverTree)
 {
     int eType; // r11
     int result; // r3
@@ -266,7 +266,7 @@ int __fastcall CG_DObjCloneToBuffer(int localClientNum, centity_s *cent, const X
     return result;
 }
 
-void __fastcall CG_FreeTree(XAnimTree_s *tree, centity_s *cent)
+void __cdecl CG_FreeTree(XAnimTree_s *tree, centity_s *cent)
 {
     int oldEType; // r11
 
@@ -277,7 +277,7 @@ void __fastcall CG_FreeTree(XAnimTree_s *tree, centity_s *cent)
         Com_XAnimFreeSmallTree(tree);
 }
 
-void __fastcall CG_UpdateSnapshotNum(int localClientNum)
+void __cdecl CG_UpdateSnapshotNum(int localClientNum)
 {
     int v2; // r10
     int v3; // [sp+50h] [-20h] BYREF
@@ -303,7 +303,7 @@ void __fastcall CG_UpdateSnapshotNum(int localClientNum)
     }
 }
 
-snapshot_s *__fastcall CG_ReadNextSnapshot(int localClientNum)
+snapshot_s *__cdecl CG_ReadNextSnapshot(int localClientNum)
 {
     int v2; // r3
     snapshot_s *v3; // r31
@@ -322,7 +322,7 @@ snapshot_s *__fastcall CG_ReadNextSnapshot(int localClientNum)
     return v3;
 }
 
-void __fastcall CG_CheckSnapshot(int localClientNum, const char *caller)
+void __cdecl CG_CheckSnapshot(int localClientNum, const char *caller)
 {
     int numEntities; // r11
     int *entityNums; // r10
@@ -394,13 +394,13 @@ void __fastcall CG_CheckSnapshot(int localClientNum, const char *caller)
     }
 }
 
-void __fastcall CG_ServerDObjClean(int entnum)
+void __cdecl CG_ServerDObjClean(int entnum)
 {
     Com_ServerDObjClean(entnum);
     g_clientDirty[entnum] = 1;
 }
 
-void __fastcall CG_SetNextSnap(int localClientNum)
+void __cdecl CG_SetNextSnap(int localClientNum)
 {
     snapshot_s *snap; // r18
     int *p_numEntities; // r24
@@ -628,7 +628,7 @@ void __fastcall CG_SetNextSnap(int localClientNum)
     CG_CheckSnapshot(localClientNum, "CG_SetNextSnap-post");
 }
 
-void __fastcall CG_ProcessNextSnap(int localClientNum)
+void __cdecl CG_ProcessNextSnap(int localClientNum)
 {
     unsigned int *v1; // r27
     int v3; // r25
@@ -740,7 +740,7 @@ void __fastcall CG_ProcessNextSnap(int localClientNum)
     }
 }
 
-void __fastcall CG_CreateNextSnap(int localClientNum, double dtime, int readNext, int a4)
+void __cdecl CG_CreateNextSnap(int localClientNum, double dtime, int readNext, int a4)
 {
     snapshot_s *nextSnap; // r18
     double value; // fp0
@@ -1027,7 +1027,7 @@ void __fastcall CG_CreateNextSnap(int localClientNum, double dtime, int readNext
     CG_CheckSnapshot(localClientNum, "CG_CreateNextSnap(post)");
 }
 
-void __fastcall CG_FirstSnapshot(int localClientNum, int a2)
+void __cdecl CG_FirstSnapshot(int localClientNum, int a2)
 {
     unsigned int i; // r31
     const char *v4; // r3
@@ -1109,7 +1109,7 @@ void __fastcall CG_FirstSnapshot(int localClientNum, int a2)
             "cgameGlob->nextSnap->serverTime == G_GetServerSnapTime()");
 }
 
-void __fastcall CG_ProcessDemoSnapshots(int localClientNum, int a2)
+void __cdecl CG_ProcessDemoSnapshots(int localClientNum, int a2)
 {
     snapshot_s *nextSnap; // r11
     __int64 v4; // r11
@@ -1140,7 +1140,7 @@ void __fastcall CG_ProcessDemoSnapshots(int localClientNum, int a2)
     }
 }
 
-void __fastcall CG_ProcessSnapshots(int localClientNum)
+void __cdecl CG_ProcessSnapshots(int localClientNum)
 {
     int v2; // r4
     snapshot_s *snap; // r11

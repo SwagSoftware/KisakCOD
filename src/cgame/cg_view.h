@@ -14,54 +14,54 @@ struct ClientViewParams
     float height;
 };
 
-void __fastcall TRACK_cg_view();
-void __fastcall CG_PlayTestFx(int localClientNum);
-void __fastcall CG_UpdateTestFX(int localClientNum);
-void __fastcall CG_FxSetTestPosition();
-void __fastcall CG_FxTest();
-void __fastcall CG_CalcVrect(int localClientNum);
+void __cdecl TRACK_cg_view();
+void __cdecl CG_PlayTestFx(int localClientNum);
+void __cdecl CG_UpdateTestFX(int localClientNum);
+void __cdecl CG_FxSetTestPosition();
+void __cdecl CG_FxTest();
+void __cdecl CG_CalcVrect(int localClientNum);
 // local variable allocation has failed, the output may be wrong!
-void __fastcall CG_SmoothCameraZ(cg_s *cgameGlob);
-void __fastcall CG_KickAngles(cg_s *cgameGlob);
+void __cdecl CG_SmoothCameraZ(cg_s *cgameGlob);
+void __cdecl CG_KickAngles(cg_s *cgameGlob);
 // local variable allocation has failed, the output may be wrong!
-float __fastcall CG_GetVerticalBobFactor(
+float __cdecl CG_GetVerticalBobFactor(
     const playerState_s *predictedPlayerState,
     double cycle,
     double speed,
     double maxAmp);
 // local variable allocation has failed, the output may be wrong!
-float __fastcall CG_GetHorizontalBobFactor(
+float __cdecl CG_GetHorizontalBobFactor(
     const playerState_s *predictedPlayerState,
     double cycle,
     double speed,
     double maxAmp);
-void __fastcall CG_CalculateView_IdleAngles(cg_s *cgameGlob, float *angles);
-void __fastcall CG_CalculateView_BobAngles(const cg_s *cgameGlob, float *angles);
-void __fastcall CG_AddGroundTiltToAngles(int localClientNum, float *angles, const cg_s *cgameGlob);
-void __fastcall OffsetFirstPersonView(int localClientNum, cg_s *cgameGlob);
-float __fastcall CG_GetViewFov(int localClientNum);
-void __fastcall CG_CalcFov(int localClientNum);
-float __fastcall CG_GetViewZoomScale();
-void __fastcall CG_CalcCubemapViewValues(cg_s *cgameGlob);
-void __fastcall CG_CalcVehicleViewValues(int localClientNum);
-void __fastcall CalcTurretViewValues(int localClientNum);
-void __fastcall CG_CalcLinkedViewValues(int localClientNum);
-void __fastcall CG_ApplyViewAnimation(int localClientNum);
-int __fastcall PausedClientFreeMove(int localClientNum);
-void __fastcall CG_SetDebugOrigin(float *origin);
-void __fastcall CG_SetDebugAngles(const float *angles);
-void __fastcall CG_UpdateEntInfo(int localClientNum);
-const ClientViewParams *__fastcall CG_GetLocalClientViewParams(int localClientNum);
-void __fastcall CG_ArchiveViewInfo(cg_s *cgameGlob, MemoryFile *memFile);
-void __fastcall GetCeilingHeight(cg_s *cgameGlob);
-void __fastcall DumpAnims(int localClientNum);
-void __fastcall DrawShellshockBlend(int localClientNum);
-void __fastcall CG_UpdateViewOffset(int localClientNum);
-void __fastcall UpdateTurretScopeZoom(cg_s *cgameGlob);
-void __fastcall CG_UpdateSceneDepthOfField(cg_s *cgameGlob);
-void __fastcall CG_CalcViewValues(int localClientNum);
-void __fastcall CG_InitView(int localClientNum);
-int __fastcall CG_DrawActiveFrame(
+void __cdecl CG_CalculateView_IdleAngles(cg_s *cgameGlob, float *angles);
+void __cdecl CG_CalculateView_BobAngles(const cg_s *cgameGlob, float *angles);
+void __cdecl CG_AddGroundTiltToAngles(int localClientNum, float *angles, const cg_s *cgameGlob);
+void __cdecl OffsetFirstPersonView(int localClientNum, cg_s *cgameGlob);
+float __cdecl CG_GetViewFov(int localClientNum);
+void __cdecl CG_CalcFov(int localClientNum);
+float __cdecl CG_GetViewZoomScale();
+void __cdecl CG_CalcCubemapViewValues(cg_s *cgameGlob);
+void __cdecl CG_CalcVehicleViewValues(int localClientNum);
+void __cdecl CalcTurretViewValues(int localClientNum);
+void __cdecl CG_CalcLinkedViewValues(int localClientNum);
+void __cdecl CG_ApplyViewAnimation(int localClientNum);
+int __cdecl PausedClientFreeMove(int localClientNum);
+void __cdecl CG_SetDebugOrigin(float *origin);
+void __cdecl CG_SetDebugAngles(const float *angles);
+void __cdecl CG_UpdateEntInfo(int localClientNum);
+const ClientViewParams *__cdecl CG_GetLocalClientViewParams(int localClientNum);
+void __cdecl CG_ArchiveViewInfo(cg_s *cgameGlob, MemoryFile *memFile);
+void __cdecl GetCeilingHeight(cg_s *cgameGlob);
+void __cdecl DumpAnims(int localClientNum);
+void __cdecl DrawShellshockBlend(int localClientNum);
+void __cdecl CG_UpdateViewOffset(int localClientNum);
+void __cdecl UpdateTurretScopeZoom(cg_s *cgameGlob);
+void __cdecl CG_UpdateSceneDepthOfField(cg_s *cgameGlob);
+void __cdecl CG_CalcViewValues(int localClientNum);
+void __cdecl CG_InitView(int localClientNum);
+int __cdecl CG_DrawActiveFrame(
     int localClientNum,
     int serverTime,
     DemoType demoType,

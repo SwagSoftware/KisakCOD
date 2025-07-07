@@ -7,7 +7,7 @@
 //Line 38411:  0006 : 00140148       struct ModelPreviewer g_mdlprv 827d0148     cg_modelpreviewer.obj
 
 
-void __fastcall CG_ModPrvUpdateMru(const dvar_s **mruDvars, const char **stringTable, const dvar_s *dvar)
+void __cdecl CG_ModPrvUpdateMru(const dvar_s **mruDvars, const char **stringTable, const dvar_s *dvar)
 {
     const dvar_s **v3; // r31
     int v6; // r30
@@ -40,7 +40,7 @@ void __fastcall CG_ModPrvUpdateMru(const dvar_s **mruDvars, const char **stringT
         Dvar_UpdateEnumDomain(dvar, stringTable);
 }
 
-void __fastcall CG_ModPrvPushMruEntry(
+void __cdecl CG_ModPrvPushMruEntry(
     const char *entry,
     const dvar_s **mruDvars,
     const char **stringTable,
@@ -96,7 +96,7 @@ void __fastcall CG_ModPrvPushMruEntry(
     CG_ModPrvUpdateMru(mruDvars, stringTable, dvar);
 }
 
-void __fastcall CG_ModPrvRemoveMruEntry(const dvar_s **mruDvars, const char **stringTable, const dvar_s *dvar)
+void __cdecl CG_ModPrvRemoveMruEntry(const dvar_s **mruDvars, const char **stringTable, const dvar_s *dvar)
 {
     int v6; // r11
     int v7; // r30
@@ -304,7 +304,7 @@ const dvar_s *CG_ModPrvRegisterDvars()
     return result;
 }
 
-void __fastcall CG_ModPrvSetEntityAxis(float *angles, float *quat)
+void __cdecl CG_ModPrvSetEntityAxis(float *angles, float *quat)
 {
     double v2; // fp13
     float v3[6]; // [sp+50h] [-20h] BYREF
@@ -316,7 +316,7 @@ void __fastcall CG_ModPrvSetEntityAxis(float *angles, float *quat)
     AnglesToQuat(v3, quat);
 }
 
-void __fastcall MdlPrvGetBounds(float *mins, float *maxs, float *center)
+void __cdecl MdlPrvGetBounds(float *mins, float *maxs, float *center)
 {
     *mins = g_mdlprv.model.currentEntity.cull.mins[0] - g_mdlprv.model.currentEntity.placement.base.origin[0];
     mins[1] = g_mdlprv.model.currentEntity.cull.mins[1] - g_mdlprv.model.currentEntity.placement.base.origin[1];
@@ -395,7 +395,7 @@ void CG_ModPrvResetOrientation_f()
 }
 
 // attributes: thunk
-void __fastcall SetViewerActive(bool active)
+void __cdecl SetViewerActive(bool active)
 {
     G_SetPM_MPViewer(active);
 }
@@ -406,7 +406,7 @@ void CG_ModPrvUnregisterCmds()
     Cmd_RemoveCommand("modPrvExit");
 }
 
-void *__fastcall CG_ModPrvAlloc(int size)
+void *__cdecl CG_ModPrvAlloc(int size)
 {
     HunkUser *v2; // r3
 
@@ -419,7 +419,7 @@ void *__fastcall CG_ModPrvAlloc(int size)
     return Hunk_UserAlloc(v2, size, 4);
 }
 
-void __fastcall CG_ModPrvFree(void *allocated, int size)
+void __cdecl CG_ModPrvFree(void *allocated, int size)
 {
     if (!allocated)
         MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\cgame\\cg_modelpreviewer.cpp", 608, 0, "%s", "allocated");
@@ -499,7 +499,7 @@ void CG_ModPrvResetGlobals()
     Dvar_Reset(modPrvLightSetup, DVAR_SOURCE_INTERNAL);
 }
 
-bool __fastcall CG_ModPrvCompareString(const char *string1, const char *string2)
+bool __cdecl CG_ModPrvCompareString(const char *string1, const char *string2)
 {
     unsigned int v3; // r9
 
@@ -514,7 +514,7 @@ bool __fastcall CG_ModPrvCompareString(const char *string1, const char *string2)
     return _cntlzw(v3) == 0;
 }
 
-void __fastcall CG_ModPrvGetAssetName(const XModel *header, unsigned int *data)
+void __cdecl CG_ModPrvGetAssetName(const XModel *header, unsigned int *data)
 {
     const char *Name; // r3
 
@@ -595,7 +595,7 @@ void CG_ModPrvShutdown()
     }
 }
 
-void __fastcall CG_ModPrvDrawViewAxis(const float *centerPos)
+void __cdecl CG_ModPrvDrawViewAxis(const float *centerPos)
 {
     int i; // r31
     double v3; // fp13
@@ -683,7 +683,7 @@ void CG_ModPrvModelResetRotationXY()
     AnglesToQuat(&value, g_mdlprv.model.currentEntity.placement.base.quat);
 }
 
-int __fastcall CG_ModPrvGetNumTotalBones(DObj_s *dobj)
+int __cdecl CG_ModPrvGetNumTotalBones(DObj_s *dobj)
 {
     int v2; // r30
     int NumModels; // r29
@@ -699,7 +699,7 @@ int __fastcall CG_ModPrvGetNumTotalBones(DObj_s *dobj)
     return v2;
 }
 
-int __fastcall CG_ModPrvGetNumSurfaces(DObj_s *obj, int lod)
+int __cdecl CG_ModPrvGetNumSurfaces(DObj_s *obj, int lod)
 {
     int NumModels; // r29
     char *v5; // r11
@@ -731,7 +731,7 @@ int __fastcall CG_ModPrvGetNumSurfaces(DObj_s *obj, int lod)
     return DObjGetNumSurfaces(obj, v8);
 }
 
-const char *__fastcall CG_ModPrvModelGetBoneName(DObj_s *dobj, int modelIndex, int boneIndex)
+const char *__cdecl CG_ModPrvModelGetBoneName(DObj_s *dobj, int modelIndex, int boneIndex)
 {
     XModel *Model; // r3
     unsigned __int16 *v7; // r29
@@ -900,7 +900,7 @@ void CG_ModPrvDrawBones()
     }
 }
 
-void __fastcall CG_ModPrvLoadAnimations(const char *animationFilename)
+void __cdecl CG_ModPrvLoadAnimations(const char *animationFilename)
 {
     const XAnimTree_s *Tree; // r3
     XAnimTree_s *v3; // r30
@@ -992,7 +992,7 @@ void __fastcall CG_ModPrvLoadAnimations(const char *animationFilename)
     }
 }
 
-void __fastcall CG_ModPrvApplyAnimationBlend(double deltaTime)
+void __cdecl CG_ModPrvApplyAnimationBlend(double deltaTime)
 {
     double Time; // fp31
     int v2; // r7
@@ -1026,7 +1026,7 @@ void __fastcall CG_ModPrvApplyAnimationBlend(double deltaTime)
     }
 }
 
-void __fastcall CG_ModPrvApplyDelta(double deltaTime)
+void __cdecl CG_ModPrvApplyDelta(double deltaTime)
 {
     float v1; // [sp+50h] [-50h] BYREF
     float v2; // [sp+54h] [-4Ch]
@@ -1071,7 +1071,7 @@ void __fastcall CG_ModPrvApplyDelta(double deltaTime)
     }
 }
 
-int __fastcall CG_ModPrvLoopAnimation()
+int __cdecl CG_ModPrvLoopAnimation()
 {
     double v0; // fp28
     double v1; // fp30
@@ -1177,7 +1177,7 @@ LABEL_15:
     return 1;
 }
 
-void __fastcall CG_ModPrvAnimRecentAccept(const dvar_s *dvar, int *currentIndex)
+void __cdecl CG_ModPrvAnimRecentAccept(const dvar_s *dvar, int *currentIndex)
 {
     const char *v4; // r3
     const char *v5; // r29
@@ -1237,7 +1237,7 @@ void __fastcall CG_ModPrvAnimRecentAccept(const dvar_s *dvar, int *currentIndex)
     }
 }
 
-void __fastcall CG_ModPrvLoadAnimAccept(const dvar_s *dvar, int *currentIndex)
+void __cdecl CG_ModPrvLoadAnimAccept(const dvar_s *dvar, int *currentIndex)
 {
     if (!dvar)
         MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\cgame\\cg_modelpreviewer.cpp", 1636, 0, "%s", "dvar");
@@ -1412,7 +1412,7 @@ void CG_ModPrvLightSetupModified()
     }
 }
 
-bool __fastcall CG_ModPrvAnyLightValuesChanged()
+bool __cdecl CG_ModPrvAnyLightValuesChanged()
 {
     return *(_BYTE *)(dword_827D89D8 + 11)
         || *(_BYTE *)(dword_827D89B4 + 11)
@@ -1457,14 +1457,14 @@ void CG_ModPrvLightValuesUpdate()
     R_InterpretSunLightParseParams(&g_mdlprv.light.tweakableSunLight);
 }
 
-void __fastcall TRACK_cg_modelpreviewer()
+void __cdecl TRACK_cg_modelpreviewer()
 {
     track_static_alloc_internal(&g_mdlprv, 34904, "g_mdlprv", 0);
     track_static_alloc_internal(mpDefaultDrawBoneOptions, 16, "mpDefaultDrawBoneOptions", 0);
     track_static_alloc_internal(modPrvAnimBlendModeNames, 12, "modPrvAnimBlendModeNames", 0);
 }
 
-void __fastcall CG_ModelPreviewerPauseAnim()
+void __cdecl CG_ModelPreviewerPauseAnim()
 {
     if (g_mdlprv.model.currentObj && (g_mdlprv.anim.fromCurrentIndex >= 0 || g_mdlprv.anim.toCurrentIndex >= 0))
     {
@@ -1473,7 +1473,7 @@ void __fastcall CG_ModelPreviewerPauseAnim()
     }
 }
 
-void __fastcall CG_ModelPreviewerStepAnim(double deltaTime)
+void __cdecl CG_ModelPreviewerStepAnim(double deltaTime)
 {
     if (g_mdlprv.model.currentObj && (g_mdlprv.anim.fromCurrentIndex >= 0 || g_mdlprv.anim.toCurrentIndex >= 0))
     {
@@ -1483,12 +1483,12 @@ void __fastcall CG_ModelPreviewerStepAnim(double deltaTime)
     }
 }
 
-int __fastcall MdlPrvPrint(double x, double y, const char *txt, const char *a4, const float *a5, int a6, Font_s *a7)
+int __cdecl MdlPrvPrint(double x, double y, const char *txt, const char *a4, const float *a5, int a6, Font_s *a7)
 {
     return CG_DrawDevString(&scrPlaceFull, x, y, 0.5, 0.5, a4, a5, a6, a7);
 }
 
-int __fastcall MdlPrvPrintColor(
+int __cdecl MdlPrvPrintColor(
     double x,
     double y,
     const char *txt,
@@ -1500,7 +1500,7 @@ int __fastcall MdlPrvPrintColor(
     return CG_DrawDevString(&scrPlaceFull, x, y, 0.5, 0.5, (const char *)color, a5, a6, a7);
 }
 
-int __fastcall MdlPrvPrintHelpLine(ButtonNames idx, double vPos, const char *a3, const float *a4, int a5)
+int __cdecl MdlPrvPrintHelpLine(ButtonNames idx, double vPos, const char *a3, const float *a4, int a5)
 {
     Font_s *v6; // r7
     int v7; // r6
@@ -1537,7 +1537,7 @@ void DrawDistFromModel()
     }
 }
 
-void __fastcall MdlPrvDrawOverlayGamepad()
+void __cdecl MdlPrvDrawOverlayGamepad()
 {
     const float *v0; // r5
     const char *v1; // r4
@@ -1752,18 +1752,18 @@ void __fastcall MdlPrvDrawOverlayGamepad()
 }
 
 // attributes: thunk
-void __fastcall CG_ModelPreviewerDrawInfo()
+void __cdecl CG_ModelPreviewerDrawInfo()
 {
     MdlPrvDrawOverlayGamepad();
 }
 
-void __fastcall CG_ModelPreviewerRotateCamera(double dx, double dy)
+void __cdecl CG_ModelPreviewerRotateCamera(double dx, double dy)
 {
     g_mdlprv.viewer.vertical = g_mdlprv.viewer.vertical - (float)dy;
     g_mdlprv.viewer.horizontal = g_mdlprv.viewer.horizontal - (float)dx;
 }
 
-void __fastcall CG_ModelPreviewerZoomCamera(double dx, double dy)
+void __cdecl CG_ModelPreviewerZoomCamera(double dx, double dy)
 {
     double v2; // fp11
     double v3; // fp0
@@ -1789,7 +1789,7 @@ void __fastcall CG_ModelPreviewerZoomCamera(double dx, double dy)
         g_mdlprv.viewer.zNear = 0.0099999998;
 }
 
-void __fastcall MdlPrvModelOriginSet(float *origin)
+void __cdecl MdlPrvModelOriginSet(float *origin)
 {
     Dvar_SetVec3(modPrvOrigin, 0.0, 0.0, 0.0);
     g_mdlprv.model.initialOrigin[0] = *origin;
@@ -1800,7 +1800,7 @@ void __fastcall MdlPrvModelOriginSet(float *origin)
     g_mdlprv.model.currentEntity.placement.base.origin[2] = origin[2];
 }
 
-void __fastcall MdlPrvModelOriginOffset(double dx, double dy, double dz)
+void __cdecl MdlPrvModelOriginOffset(double dx, double dy, double dz)
 {
     g_mdlprv.model.initialOrigin[0] = g_mdlprv.model.initialOrigin[0] + (float)dx;
     g_mdlprv.model.initialOrigin[1] = g_mdlprv.model.initialOrigin[1] + (float)dy;
@@ -1813,7 +1813,7 @@ void __fastcall MdlPrvModelOriginOffset(double dx, double dy, double dz)
         + (float)dz;
 }
 
-void __fastcall MdlPrvSpin_(unsigned int yprIdx, double deg)
+void __cdecl MdlPrvSpin_(unsigned int yprIdx, double deg)
 {
     double v2; // fp29
     long double v3; // fp2
@@ -1854,22 +1854,22 @@ void __fastcall MdlPrvSpin_(unsigned int yprIdx, double deg)
     Dvar_SetVec3(modPrvRotationAngles, v9, v10, v11);
 }
 
-void __fastcall MdlPrvSpinYaw(double deg)
+void __cdecl MdlPrvSpinYaw(double deg)
 {
     MdlPrvSpin_(1u, deg);
 }
 
-void __fastcall MdlPrvSpinPitch(double deg)
+void __cdecl MdlPrvSpinPitch(double deg)
 {
     MdlPrvSpin_(0, deg);
 }
 
-void __fastcall MdlPrvSpinRoll(double deg)
+void __cdecl MdlPrvSpinRoll(double deg)
 {
     MdlPrvSpin_(2u, deg);
 }
 
-void __fastcall MdlPrvSpinYawOffset(double deg)
+void __cdecl MdlPrvSpinYawOffset(double deg)
 {
     double v1; // fp0
     double v2; // fp30
@@ -1929,14 +1929,14 @@ void MdlPrvSpinClearPitchRoll()
     AxisToQuat(v2, g_mdlprv.model.currentEntity.placement.base.quat);
 }
 
-void __fastcall MdlPrvMoveModelUpDown(double dist)
+void __cdecl MdlPrvMoveModelUpDown(double dist)
 {
     g_mdlprv.model.initialOrigin[2] = g_mdlprv.model.initialOrigin[2] + (float)dist;
     g_mdlprv.model.currentEntity.placement.base.origin[2] = g_mdlprv.model.currentEntity.placement.base.origin[2]
         + (float)dist;
 }
 
-void __fastcall MdlPrvMoveModel2D(const cg_s *cgGlob, double away, double left)
+void __cdecl MdlPrvMoveModel2D(const cg_s *cgGlob, double away, double left)
 {
     double v9; // fp9
     float v10; // [sp+50h] [-40h] BYREF
@@ -1969,7 +1969,7 @@ void __fastcall MdlPrvMoveModel2D(const cg_s *cgGlob, double away, double left)
             + (float)((float)((float)v9 * v11) * (float)away));
 }
 
-void __fastcall MdlPrvMoveFocusUpDown(double dist)
+void __cdecl MdlPrvMoveFocusUpDown(double dist)
 {
     Dvar_SetVec3(
         modPrvCenterOffset,
@@ -1978,7 +1978,7 @@ void __fastcall MdlPrvMoveFocusUpDown(double dist)
         (float)(modPrvCenterOffset->current.vector[2] + (float)dist));
 }
 
-void __fastcall MdlPrvMoveFocus2D(const cg_s *cgGlob, double away, double left)
+void __cdecl MdlPrvMoveFocus2D(const cg_s *cgGlob, double away, double left)
 {
     double v9; // fp13
     double v10; // fp12
@@ -2024,7 +2024,7 @@ void MdlPrvMoveFocusReset()
     }
 }
 
-void __fastcall MdlPrvFreeMove(const cg_s *cgGlob, double dx, double dy)
+void __cdecl MdlPrvFreeMove(const cg_s *cgGlob, double dx, double dy)
 {
     float v5[4]; // [sp+50h] [-50h] BYREF
     float v6[4]; // [sp+60h] [-40h] BYREF
@@ -2039,7 +2039,7 @@ void __fastcall MdlPrvFreeMove(const cg_s *cgGlob, double dx, double dy)
         + (float)(v6[2] * (float)dx);
 }
 
-void __fastcall MdlPrvFreeMoveVertical(const cg_s *cgGlob, double dz)
+void __cdecl MdlPrvFreeMoveVertical(const cg_s *cgGlob, double dz)
 {
     float v3[4]; // [sp+50h] [-40h] BYREF
     float v4[4]; // [sp+60h] [-30h] BYREF
@@ -2052,7 +2052,7 @@ void __fastcall MdlPrvFreeMoveVertical(const cg_s *cgGlob, double dz)
 }
 
 // local variable allocation has failed, the output may be wrong!
-void __fastcall MdlPrvFreeRot(double yaw, double pitch)
+void __cdecl MdlPrvFreeRot(double yaw, double pitch)
 {
     double v2; // fp1
     double v3; // fp30
@@ -2074,12 +2074,12 @@ void __fastcall MdlPrvFreeRot(double yaw, double pitch)
 }
 
 // attributes: thunk
-void __fastcall MdlPrvFreePlaceModel(float *pos)
+void __cdecl MdlPrvFreePlaceModel(float *pos)
 {
     MdlPrvModelOriginSet(pos);
 }
 
-void __fastcall MdlPrvFreePlaceModelInFrontCamera(const cg_s *cgGlob)
+void __cdecl MdlPrvFreePlaceModelInFrontCamera(const cg_s *cgGlob)
 {
     float *refdefViewAngles; // r30
     double v3; // fp0
@@ -2161,7 +2161,7 @@ void MdlPrvDropToFloor()
     }
 }
 
-void __fastcall MdlPrvCloneClear(MdlPrvClone *clone)
+void __cdecl MdlPrvCloneClear(MdlPrvClone *clone)
 {
     DObj_s *obj; // r3
 
@@ -2192,7 +2192,7 @@ void MdlPrvCloneClearAll()
     } while (v0);
 }
 
-void __fastcall MdlPrvCloneModel(const cg_s *cgGlob)
+void __cdecl MdlPrvCloneModel(const cg_s *cgGlob)
 {
     int cloneNextIdx; // r11
     MdlPrvClone *v3; // r30
@@ -2274,7 +2274,7 @@ void MdlPrvRagdollToggle()
     }
 }
 
-void __fastcall MdlPrvControlsGamepad(int localClientNum, double forward, double side, double pitch, double yaw)
+void __cdecl MdlPrvControlsGamepad(int localClientNum, double forward, double side, double pitch, double yaw)
 {
     int v10; // r29
     __int64 v11; // r11
@@ -2474,7 +2474,7 @@ void __fastcall MdlPrvControlsGamepad(int localClientNum, double forward, double
 }
 
 // attributes: thunk
-void __fastcall CG_ModelPreviewerHandleGamepadEvents(
+void __cdecl CG_ModelPreviewerHandleGamepadEvents(
     int localClientNum,
     double forward,
     double side,
@@ -2484,7 +2484,7 @@ void __fastcall CG_ModelPreviewerHandleGamepadEvents(
     MdlPrvControlsGamepad(localClientNum, forward, side, pitch, yaw);
 }
 
-void __fastcall CG_ModelPreviewerHandleKeyEvents(int localClientNum, int key, int down, unsigned int time)
+void __cdecl CG_ModelPreviewerHandleKeyEvents(int localClientNum, int key, int down, unsigned int time)
 {
     if (localClientNum)
         MyAssertHandler(
@@ -2519,7 +2519,7 @@ void __fastcall CG_ModelPreviewerHandleKeyEvents(int localClientNum, int key, in
     }
 }
 
-void __fastcall MdlPrvUpdateViewFocused(float *viewOrigin, float (*viewAxis)[3], float *viewAngles, float *zNear)
+void __cdecl MdlPrvUpdateViewFocused(float *viewOrigin, float (*viewAxis)[3], float *viewAngles, float *zNear)
 {
     const dvar_s *v8; // r11
     double v9; // fp0
@@ -2611,7 +2611,7 @@ void __fastcall MdlPrvUpdateViewFocused(float *viewOrigin, float (*viewAxis)[3],
     *zNear = g_mdlprv.viewer.zNear;
 }
 
-void __fastcall MdlPrvUpdateViewFree(float *viewOrigin, float (*viewAxis)[3], float *viewAngles, float *zNear)
+void __cdecl MdlPrvUpdateViewFree(float *viewOrigin, float (*viewAxis)[3], float *viewAngles, float *zNear)
 {
     *viewOrigin = g_mdlprv.viewer.freeModeOrigin[0];
     viewOrigin[1] = g_mdlprv.viewer.freeModeOrigin[1];
@@ -2622,7 +2622,7 @@ void __fastcall MdlPrvUpdateViewFree(float *viewOrigin, float (*viewAxis)[3], fl
     AnglesToAxis(viewAngles, viewAxis);
 }
 
-void __fastcall CG_ModelPreviewerUpdateView(float *viewOrigin, float (*viewAxis)[3], float *viewAngles, float *zNear)
+void __cdecl CG_ModelPreviewerUpdateView(float *viewOrigin, float (*viewAxis)[3], float *viewAngles, float *zNear)
 {
     if (g_mdlprv.system.uiModeGPad)
     {
@@ -2646,7 +2646,7 @@ void __fastcall CG_ModelPreviewerUpdateView(float *viewOrigin, float (*viewAxis)
     }
 }
 
-bool __fastcall CG_ModelPreviewerNeedsVieworgInterpSkipped(int localClientNum)
+bool __cdecl CG_ModelPreviewerNeedsVieworgInterpSkipped(int localClientNum)
 {
     if (localClientNum)
         MyAssertHandler(
@@ -2659,7 +2659,7 @@ bool __fastcall CG_ModelPreviewerNeedsVieworgInterpSkipped(int localClientNum)
     return cgArray[0].predictedPlayerState.pm_type == 4;
 }
 
-void __fastcall CG_AddModelPreviewerModel(int frametime, int a2, int a3, int a4, int a5, int a6, __int64 a7)
+void __cdecl CG_AddModelPreviewerModel(int frametime, int a2, int a3, int a4, int a5, int a6, __int64 a7)
 {
     double v7; // fp0
     bool isAnimPlaying; // r11
@@ -2759,14 +2759,14 @@ void __fastcall CG_AddModelPreviewerModel(int frametime, int a2, int a3, int a4,
     }
 }
 
-void __fastcall CG_ModelPreviewerDestroyDevGui()
+void __cdecl CG_ModelPreviewerDestroyDevGui()
 {
     Cmd_RemoveCommand("modPrvResetOrientation");
     Cmd_RemoveCommand("modPrvExit");
     CG_ModPrvShutdown();
 }
 
-void __fastcall CG_ModelPreviewerBuildInfoStr(char *buffer, int bufferSize)
+void __cdecl CG_ModelPreviewerBuildInfoStr(char *buffer, int bufferSize)
 {
     int modelCount; // r29
     int v5; // r27
@@ -2882,7 +2882,7 @@ void __fastcall CG_ModelPreviewerBuildInfoStr(char *buffer, int bufferSize)
     }
 }
 
-void __fastcall CG_ModelPreviewerBuildViewPosStr(char *buffer, int bufferSize)
+void __cdecl CG_ModelPreviewerBuildViewPosStr(char *buffer, int bufferSize)
 {
     if (modPrvCenterOffset)
         Com_sprintf(
@@ -2899,7 +2899,7 @@ void __fastcall CG_ModelPreviewerBuildViewPosStr(char *buffer, int bufferSize)
         Com_sprintf(buffer, bufferSize, "#ERROR-NotInGame");
 }
 
-void __fastcall CG_ModPrvSaveDObjs()
+void __cdecl CG_ModPrvSaveDObjs()
 {
     int v0; // r30
     DObj_s **p_obj; // r31
@@ -2917,7 +2917,7 @@ void __fastcall CG_ModPrvSaveDObjs()
         DObjArchive(g_mdlprv.model.currentObj);
 }
 
-void __fastcall CG_ModPrvLoadDObjs()
+void __cdecl CG_ModPrvLoadDObjs()
 {
     int v0; // r30
     DObj_s **p_obj; // r31
@@ -3024,7 +3024,7 @@ void CG_ModPrvModelGetBoneNameList()
     Dvar_UpdateEnumDomain(v9, g_mdlprv.model.boneNameTable);
 }
 
-void __fastcall CG_ModPrvLoadModel(
+void __cdecl CG_ModPrvLoadModel(
     const cg_s *cgameGlob,
     const char *modelFilename,
     double a3,
@@ -3292,7 +3292,7 @@ void __fastcall CG_ModPrvLoadModel(
     g_mdlprv.mat.replaceSliderIndex = 0;
 }
 
-void __fastcall CG_ModPrvModelRecentAccepted(const cg_s *cgameGlob)
+void __cdecl CG_ModPrvModelRecentAccepted(const cg_s *cgameGlob)
 {
     const char *v2; // r3
     double v3; // fp8
@@ -3417,7 +3417,7 @@ void __fastcall CG_ModPrvModelRecentAccepted(const cg_s *cgameGlob)
     }
 }
 
-void __fastcall CG_ModelPreviewerFrame(const cg_s *cgameGlob)
+void __cdecl CG_ModelPreviewerFrame(const cg_s *cgameGlob)
 {
     if (modPrvLoadModel->modified)
         CG_ModPrvModelLoadAccepted(cgameGlob);
@@ -3474,14 +3474,14 @@ void CG_ModPrvEnumerateModels_FastFile()
         v1[0] = 0;
         DB_EnumXAssets(
             ASSET_TYPE_XMODEL,
-            (void(__fastcall *)(XAssetHeader * __struct_ptr, void *))CG_ModPrvGetAssetName,
+            (void(__cdecl *)(XAssetHeader * __struct_ptr, void *))CG_ModPrvGetAssetName,
             v1,
             0);
         std::_Sort<int *, int, bool(__cdecl *)(int, int)>(
             (Material **)g_mdlprv.system.modelNames,
             (Material **)&g_mdlprv.system.modelNames[g_mdlprv.system.modelCount],
             (4 * g_mdlprv.system.modelCount) >> 2,
-            (bool(__fastcall *)(const Material *, const Material *))CG_ModPrvCompareString);
+            (bool(__cdecl *)(const Material *, const Material *))CG_ModPrvCompareString);
     }
 }
 
@@ -3513,14 +3513,14 @@ void CG_ModPrvEnumerateAnimations_FastFile()
         v1[0] = 0;
         DB_EnumXAssets(
             ASSET_TYPE_XANIMPARTS,
-            (void(__fastcall *)(XAssetHeader * __struct_ptr, void *))CG_ModPrvGetAssetName,
+            (void(__cdecl *)(XAssetHeader * __struct_ptr, void *))CG_ModPrvGetAssetName,
             v1,
             0);
         std::_Sort<int *, int, bool(__cdecl *)(int, int)>(
             (Material **)g_mdlprv.system.animNames,
             (Material **)&g_mdlprv.system.animNames[g_mdlprv.system.animCount],
             (4 * g_mdlprv.system.animCount) >> 2,
-            (bool(__fastcall *)(const Material *, const Material *))CG_ModPrvCompareString);
+            (bool(__cdecl *)(const Material *, const Material *))CG_ModPrvCompareString);
     }
 }
 
@@ -3530,7 +3530,7 @@ void CG_ModPrvEnumerateAnimations()
     CG_ModPrvEnumerateAnimations_FastFile();
 }
 
-void __fastcall CG_ModelPreviewerEnumerateAssets()
+void __cdecl CG_ModelPreviewerEnumerateAssets()
 {
     if (g_mdlprv.inited)
     {
@@ -3542,7 +3542,7 @@ void __fastcall CG_ModelPreviewerEnumerateAssets()
     }
 }
 
-void __fastcall CG_ModPrvStartup(int localClientNum)
+void __cdecl CG_ModPrvStartup(int localClientNum)
 {
     CG_ModPrvEnumerateModels_FastFile();
     CG_ModPrvEnumerateAnimations_FastFile();
@@ -3552,7 +3552,7 @@ void __fastcall CG_ModPrvStartup(int localClientNum)
     g_mdlprv.inited = 1;
 }
 
-void __fastcall CG_ModelPreviewerCreateDevGui(int localClientNum)
+void __cdecl CG_ModelPreviewerCreateDevGui(int localClientNum)
 {
     memset(&g_mdlprv, 0, sizeof(g_mdlprv));
     CG_ModPrvEnumerateModels_FastFile();

@@ -2,7 +2,7 @@
 #include <cstdint>
 #include <xanim/xanim.h>
 
-struct EntHandleInfo // sizeof=0x8
+struct EntHandleInfo // sizeof=0x8 // (SP/MP same)
 {                                       // ...
     void *handle;
     uint16_t next;              // ...
@@ -10,13 +10,13 @@ struct EntHandleInfo // sizeof=0x8
 };
 static_assert(sizeof(EntHandleInfo) == 0x8);
 
-struct EntHandleList // sizeof=0x2
+struct EntHandleList // sizeof=0x2 // (SP/MP same)
 {                                       // ...
     uint16_t infoIndex;
 };
 static_assert(sizeof(EntHandleList) == 0x2);
 
-struct EntHandle // sizeof=0x4
+struct EntHandle // sizeof=0x4 // (SP/MP same)
 {                                       // ...
     uint16_t number;
     uint16_t infoIndex;

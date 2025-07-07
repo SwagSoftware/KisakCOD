@@ -7,6 +7,8 @@
 #include <cgame_mp/cg_local_mp.h>
 #include <universal/profile.h>
 
+#include <bgame/bg_public.h>
+
 void __cdecl SV_ArchiveSnapshot(msg_t *msg)
 {
     clientState_s *ClientStateLocal; // eax

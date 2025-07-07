@@ -6,18 +6,18 @@
 
 //char **svc_strings      82692208     cl_parse.obj
 
-void __fastcall TRACK_cl_parse()
+void __cdecl TRACK_cl_parse()
 {
     track_static_alloc_internal(svc_strings, 1024, "svc_strings", 9);
 }
 
-void __fastcall SHOWNET(msg_t *msg, char *s)
+void __cdecl SHOWNET(msg_t *msg, char *s)
 {
     if (cl_shownet->current.integer >= 2)
         Com_Printf(14, "%3i %3i:%s\n", msg->readcount - 1, msg->cursize, s);
 }
 
-void __fastcall CL_ParsePacketEntities(clientActive_t *cl, msg_t *msg, clSnapshot_t *newframe)
+void __cdecl CL_ParsePacketEntities(clientActive_t *cl, msg_t *msg, clSnapshot_t *newframe)
 {
     int *p_parseEntitiesNum; // r30
     int *p_numEntities; // r29
@@ -44,7 +44,7 @@ void __fastcall CL_ParsePacketEntities(clientActive_t *cl, msg_t *msg, clSnapsho
     }
 }
 
-void __fastcall CL_ParseSnapshot(msg_t *msg)
+void __cdecl CL_ParseSnapshot(msg_t *msg)
 {
     memset(clients, 0, 0xB2F8u);
     clients[0].snap.serverCommandNum = clientConnections[0].serverCommands.header.sequence;
@@ -65,7 +65,7 @@ void __fastcall CL_ParseSnapshot(msg_t *msg)
         Com_Printf(14, "   snapshot:%i\n", clients[0].snap.messageNum);
 }
 
-void __fastcall CL_ParseGamestate(char *configstrings)
+void __cdecl CL_ParseGamestate(char *configstrings)
 {
     int v2; // r28
     unsigned __int16 *v3; // r31
@@ -105,7 +105,7 @@ void __fastcall CL_ParseGamestate(char *configstrings)
     } while ((int)v3 < (int)clients[0].mapname);
 }
 
-void __fastcall CL_ParseServerCommands(msg_t *msg)
+void __cdecl CL_ParseServerCommands(msg_t *msg)
 {
     int Short; // r3
     int v3; // r31
@@ -125,7 +125,7 @@ void __fastcall CL_ParseServerCommands(msg_t *msg)
     }
 }
 
-void __fastcall CL_RecordServerCommands(serverCommands_s *serverCommands)
+void __cdecl CL_RecordServerCommands(serverCommands_s *serverCommands)
 {
     int i; // r31
     msg_t v3; // [sp+50h] [-4050h] BYREF
@@ -142,7 +142,7 @@ void __fastcall CL_RecordServerCommands(serverCommands_s *serverCommands)
     CL_WriteDemoMessage(&v3, 0);
 }
 
-void __fastcall CL_ParseCommandString(serverCommands_s *serverCommands)
+void __cdecl CL_ParseCommandString(serverCommands_s *serverCommands)
 {
     int sequence; // r11
     int i; // r11
@@ -189,7 +189,7 @@ void __fastcall CL_ParseCommandString(serverCommands_s *serverCommands)
     }
 }
 
-void __fastcall CL_ParseServerMessage(msg_t *msg)
+void __cdecl CL_ParseServerMessage(msg_t *msg)
 {
     int integer; // r11
     int v3; // r18

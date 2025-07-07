@@ -7,7 +7,7 @@
 int sv_loadScripts;
 int sv_map_restart;
 
-void __fastcall SV_SetValuesFromSkill()
+void __cdecl SV_SetValuesFromSkill()
 {
     unsigned int unsignedInt; // r11
     __int64 v1; // r11
@@ -83,7 +83,7 @@ void SV_DifficultyFu()
     SV_SetValuesFromSkill();
 }
 
-int __fastcall ReadSaveHeader(const char *filename, SaveHeader *header)
+int __cdecl ReadSaveHeader(const char *filename, SaveHeader *header)
 {
     int v5; // r31
     void *v6; // [sp+50h] [-20h] BYREF
@@ -122,7 +122,7 @@ int __fastcall ReadSaveHeader(const char *filename, SaveHeader *header)
     }
 }
 
-int __fastcall ExtractMapStringFromSaveGame(const char *filename, char *mapname)
+int __cdecl ExtractMapStringFromSaveGame(const char *filename, char *mapname)
 {
     char *v5; // r11
     int v6; // r10
@@ -146,7 +146,7 @@ int __fastcall ExtractMapStringFromSaveGame(const char *filename, char *mapname)
     return 1;
 }
 
-void __fastcall ShowLoadErrorsSummary(const char *mapName, unsigned int count, int a3)
+void __cdecl ShowLoadErrorsSummary(const char *mapName, unsigned int count, int a3)
 {
     const char *v3; // r6
     int v4; // r11
@@ -188,14 +188,14 @@ void __fastcall ShowLoadErrorsSummary(const char *mapName, unsigned int count, i
         Com_Error(ERR_MAPLOADERRORSUMMARY, v11, a3, v3);
 }
 
-void __fastcall SV_ClearLoadGame()
+void __cdecl SV_ClearLoadGame()
 {
     sv_save_filename[0] = 0;
     sv_map_restart = 0;
     sv_loadScripts = 0;
 }
 
-void __fastcall SV_MapRestart(int savegame, int loadScripts)
+void __cdecl SV_MapRestart(int savegame, int loadScripts)
 {
     int integer; // r28
     int v5; // r3
@@ -236,7 +236,7 @@ void __fastcall SV_MapRestart(int savegame, int loadScripts)
     }
 }
 
-int __fastcall CheckForSaveGame(char *mapname, char *filename)
+int __cdecl CheckForSaveGame(char *mapname, char *filename)
 {
     char *v4; // r11
     int v5; // r10
@@ -293,7 +293,7 @@ int __fastcall CheckForSaveGame(char *mapname, char *filename)
     }
 }
 
-int __fastcall SV_CheckLoadGame()
+int __cdecl SV_CheckLoadGame()
 {
     int result; // r3
     bool v1; // zf
@@ -336,7 +336,7 @@ int __fastcall SV_CheckLoadGame()
     return result;
 }
 
-void __fastcall SV_RequestMapRestart(int loadScripts)
+void __cdecl SV_RequestMapRestart(int loadScripts)
 {
     CL_FlushDebugServerData();
     CL_UpdateDebugServerData();
@@ -347,7 +347,7 @@ void __fastcall SV_RequestMapRestart(int loadScripts)
         SV_CheckLoadGame();
 }
 
-void __fastcall SV_FastRestart_f()
+void __cdecl SV_FastRestart_f()
 {
     CL_FlushDebugServerData();
     CL_UpdateDebugServerData();
@@ -358,7 +358,7 @@ void __fastcall SV_FastRestart_f()
         SV_CheckLoadGame();
 }
 
-void __fastcall SV_MapRestart_f()
+void __cdecl SV_MapRestart_f()
 {
     CL_FlushDebugServerData();
     CL_UpdateDebugServerData();
@@ -370,12 +370,12 @@ void __fastcall SV_MapRestart_f()
 }
 
 // attributes: thunk
-void __fastcall SV_NextLevel_f()
+void __cdecl SV_NextLevel_f()
 {
     G_LoadNextMap();
 }
 
-void __fastcall SV_LoadGame_f()
+void __cdecl SV_LoadGame_f()
 {
     int nesting; // r7
     char *v1; // r31
@@ -437,7 +437,7 @@ void __fastcall SV_LoadGame_f()
         SV_CheckLoadGame();
 }
 
-void __fastcall SV_ForceSelectSaveDevice_f()
+void __cdecl SV_ForceSelectSaveDevice_f()
 {
     int v0; // r31
 
@@ -450,7 +450,7 @@ void __fastcall SV_ForceSelectSaveDevice_f()
         }
 }
 
-void __fastcall SV_SelectSaveDevice_f()
+void __cdecl SV_SelectSaveDevice_f()
 {
     int v0; // r30
     bool v1; // r3
@@ -483,7 +483,7 @@ void __fastcall SV_SelectSaveDevice_f()
         }
 }
 
-void __fastcall CheckSaveExists(const char *filename)
+void __cdecl CheckSaveExists(const char *filename)
 {
     __int64 v2; // r10
     __int64 v3; // r8
@@ -508,7 +508,7 @@ void __fastcall CheckSaveExists(const char *filename)
     }
 }
 
-void __fastcall SV_LoadGameContinue_f()
+void __cdecl SV_LoadGameContinue_f()
 {
     __int64 v0; // r10
     __int64 v1; // r8
@@ -540,7 +540,7 @@ void __fastcall SV_LoadGameContinue_f()
 }
 
 // attributes: thunk
-void __fastcall SV_ScriptUsage_f()
+void __cdecl SV_ScriptUsage_f()
 {
     Scr_DumpScriptThreads();
 }
@@ -804,13 +804,13 @@ void SV_ScriptProfileReset_f()
 }
 
 // attributes: thunk
-void __fastcall SV_ScriptProfileFile_f()
+void __cdecl SV_ScriptProfileFile_f()
 {
     Scr_PrintScriptProfileTimesForScriptFile();
 }
 
 // attributes: thunk
-void __fastcall SV_StringUsage_f()
+void __cdecl SV_StringUsage_f()
 {
     MT_DumpTree();
 }
@@ -868,7 +868,7 @@ void SV_SaveGame_f()
     }
 }
 
-void __fastcall SV_SaveGameLastCommit_f()
+void __cdecl SV_SaveGameLastCommit_f()
 {
     SaveGame *LastCommittedSave; // r31
 
@@ -879,7 +879,7 @@ void __fastcall SV_SaveGameLastCommit_f()
         SV_DisplaySaveErrorUI();
 }
 
-void __fastcall SV_RemoveOperatorCommands()
+void __cdecl SV_RemoveOperatorCommands()
 {
     ;
 }
@@ -926,7 +926,7 @@ void SV_Map_f()
     ShowLoadErrorsSummary(v14, com_errorPrintsCount, v5);
 }
 
-void __fastcall SV_AddOperatorCommands()
+void __cdecl SV_AddOperatorCommands()
 {
     if (!initialized_0)
     {

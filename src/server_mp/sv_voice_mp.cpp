@@ -6,6 +6,7 @@
 #include <game_mp/g_main_mp.h>
 #include <cgame_mp/cg_local_mp.h>
 
+#include <bgame/bg_public.h>
 
 void __cdecl G_BroadcastVoice(gentity_s *talker, VoicePacket_t *voicePacket)
 {

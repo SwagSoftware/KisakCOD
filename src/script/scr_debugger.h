@@ -316,6 +316,7 @@ char __cdecl Scr_WatchElementHasSameValue(Scr_WatchElement_s *element, VariableV
 int __cdecl Scr_HitAssignmentBreakpoint(VariableValue *top, char *pos, unsigned int localId, int forceBreak);
 bool __cdecl Scr_IgnoreErrors();
 
+void Scr_EnableBreakpoints(bool enable);
 
 extern scrDebuggerGlob_t scrDebuggerGlob;
 extern Scr_Breakpoint g_breakpoints[128];

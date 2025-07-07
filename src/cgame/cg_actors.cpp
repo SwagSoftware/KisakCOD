@@ -4,7 +4,7 @@
 
 #include "cg_actors.h"
 
-int __fastcall CG_GetEntityIndex(const centity_s *cent)
+int __cdecl CG_GetEntityIndex(const centity_s *cent)
 {
     if (cent->nextState.number != ((char *)cent - (char *)cg_entitiesArray) / 372 % 2176)
         MyAssertHandler(
@@ -15,7 +15,7 @@ int __fastcall CG_GetEntityIndex(const centity_s *cent)
     return cent->nextState.number;
 }
 
-int __fastcall CG_GetLocalClientTime(int localClientNum)
+int __cdecl CG_GetLocalClientTime(int localClientNum)
 {
     if (localClientNum)
         MyAssertHandler(
@@ -28,7 +28,7 @@ int __fastcall CG_GetLocalClientTime(int localClientNum)
     return cgArray[0].time;
 }
 
-void __fastcall CG_Actor_PreControllers(centity_s *cent)
+void __cdecl CG_Actor_PreControllers(centity_s *cent)
 {
     int EntityIndex; // r3
     actor_prone_info_s *ClientActorProneInfo; // r3
@@ -66,7 +66,7 @@ void __fastcall CG_Actor_PreControllers(centity_s *cent)
     }
 }
 
-void __fastcall CG_Actor(int localClientNum, centity_s *cent)
+void __cdecl CG_Actor(int localClientNum, centity_s *cent)
 {
     entityState_s *p_nextState; // r30
     DObj_s *ClientDObj; // r29
@@ -107,7 +107,7 @@ void __fastcall CG_Actor(int localClientNum, centity_s *cent)
     }
 }
 
-void __fastcall CG_ActorSpawner(centity_s *cent, int a2, int a3, const float *a4)
+void __cdecl CG_ActorSpawner(centity_s *cent, int a2, int a3, const float *a4)
 {
     float v4[4]; // [sp+50h] [-30h] BYREF
     float v5[6]; // [sp+60h] [-20h] BYREF

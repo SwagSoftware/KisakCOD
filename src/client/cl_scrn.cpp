@@ -5,13 +5,13 @@
 int scr_initialized;
 bool updateScreenCalled;
 
-void __fastcall TRACK_cl_srcn()
+void __cdecl TRACK_cl_srcn()
 {
     ;
 }
 
 // local variable allocation has failed, the output may be wrong!
-void __fastcall SCR_DrawSmallStringExt(unsigned int x, int y, const char *string, const float *setColor)
+void __cdecl SCR_DrawSmallStringExt(unsigned int x, int y, const char *string, const float *setColor)
 {
     int v7; // r3
     __int128 v8; // r9 OVERLAPPED
@@ -33,17 +33,17 @@ void __fastcall SCR_DrawSmallStringExt(unsigned int x, int y, const char *string
         SDWORD1(v8));
 }
 
-void __fastcall SCR_Init()
+void __cdecl SCR_Init()
 {
     scr_initialized = 1;
 }
 
-bool __fastcall CL_IsCGameRendering()
+bool __cdecl CL_IsCGameRendering()
 {
     return cls.uiStarted && !UI_IsFullscreen() && clientUIActives[0].connectionState == CA_ACTIVE;
 }
 
-int __fastcall CL_GetDemoType()
+int __cdecl CL_GetDemoType()
 {
     if (G_DemoPlaying())
         return 2;
@@ -51,7 +51,7 @@ int __fastcall CL_GetDemoType()
         return CL_DemoPlaying();
 }
 
-int __fastcall CL_CGameRendering()
+int __cdecl CL_CGameRendering()
 {
     int animFrametime; // r31
     DemoType DemoType; // r3
@@ -84,12 +84,12 @@ void CL_DrawScreen()
     DevGui_Draw(0);
 }
 
-void __fastcall SCR_ClearScreen(int a1, int a2, unsigned __int8 a3)
+void __cdecl SCR_ClearScreen(int a1, int a2, unsigned __int8 a3)
 {
     R_AddCmdClearScreen(15, colorBlack, 0.0, a3);
 }
 
-void __fastcall SCR_DrawScreenField(int refreshedUI)
+void __cdecl SCR_DrawScreenField(int refreshedUI)
 {
     unsigned __int8 v2; // r5
     connstate_t connectionState; // r31
@@ -152,7 +152,7 @@ void __fastcall SCR_DrawScreenField(int refreshedUI)
     }
 }
 
-float __fastcall CL_GetMenuBlurRadius(int localClientNum)
+float __cdecl CL_GetMenuBlurRadius(int localClientNum)
 {
     double BlurRadius; // fp1
 
@@ -171,7 +171,7 @@ float __fastcall CL_GetMenuBlurRadius(int localClientNum)
     return *((float *)&BlurRadius + 1);
 }
 
-void __fastcall SCR_UpdateRumble()
+void __cdecl SCR_UpdateRumble()
 {
     int v0; // r3
 
@@ -231,7 +231,7 @@ int SCR_UpdateFrame()
     return //Profile_EndInternal(0);
 }
 
-void __fastcall SCR_UpdateScreen()
+void __cdecl SCR_UpdateScreen()
 {
     if (!updateScreenCalled)
     {
@@ -251,7 +251,7 @@ void __fastcall SCR_UpdateScreen()
     }
 }
 
-void __fastcall SCR_UpdateLoadScreen()
+void __cdecl SCR_UpdateLoadScreen()
 {
     ;
 }
@@ -271,7 +271,7 @@ void CL_CubemapShotUsage()
     Com_Printf(0, "  This is always calculated, and defaults to air-water interface (n0 = 1, n1 = 1.333).\n");
 }
 
-void __fastcall CL_CubemapShot_f()
+void __cdecl CL_CubemapShot_f()
 {
     const char *v0; // r3
     const char *v1; // r11

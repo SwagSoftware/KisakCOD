@@ -3224,3 +3224,8 @@ void __cdecl Scr_SelectScriptLine(unsigned int bufferIndex, int lineNum)
     //Scr_AbstractScriptList::AddEntry(&scrDebuggerGlob.openScriptList, scrDebuggerGlob.scriptList.scriptWindows[sortedIndex], 0);
     scrDebuggerGlob.openScriptList.AddEntry(scrDebuggerGlob.scriptList.scriptWindows[sortedIndex], 0);
 }
+
+void Scr_EnableBreakpoints(bool enable)
+{
+    scrDebuggerGlob.disableBreakpoints = !enable;
+}
