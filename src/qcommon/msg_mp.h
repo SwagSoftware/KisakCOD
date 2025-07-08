@@ -1,5 +1,9 @@
 #pragma once
 
+#ifndef KISAK_MP
+#error This File is for MultiPlayer Only
+#endif
+
 #include "qcommon.h"
 #include "ent.h"
 

@@ -2110,3 +2110,8 @@ double __cdecl FX_GetClientVisibility(int32_t localClientNum, const float *start
         return 1.0;
     }
 }
+
+double FX_GetServerVisibility(const float *start, const float *end)
+{
+    return FX_GetClientVisibility(fx_serverVisClient, start, end);
+}

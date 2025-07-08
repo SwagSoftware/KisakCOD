@@ -3,6 +3,13 @@
 #endif
 
 #include "server.h"
+#include <client/cl_parse.h>
+#include "sv_game.h"
+#include <bgame/bg_public.h>
+#include <qcommon/msg.h>
+#include <game/g_local.h>
+#include <client/cl_demo.h>
+#include <client/client.h>
 
 
 void __cdecl SV_WriteSnapshotToClient(client_t *client, msg_t *msg)
@@ -142,7 +149,7 @@ void __cdecl SV_BuildClientSnapshot(client_t *client)
         memcpy(frames, v2, sizeof(playerState_s));
         clientNum = frames->clientNum;
         if (clientNum >= 0x880)
-            Com_Error(ERR_DROP, byte_8207C1C0);
+            Com_Error(ERR_DROP, "SV_BuildClientSnapshot: bad gEnt");
         SV_AddEntitiesVisibleFromPoint(clientNum);
     }
 }
@@ -167,7 +174,7 @@ void __cdecl SV_BuildAndSendClientSnapshot(client_t *client)
     MSG_Init(&v3, v4, 0x4000);
     SV_WriteSnapshotToClient(client, &v3);
     if (v3.overflowed)
-        Com_Error(ERR_DROP, byte_8207C1E4);
+        Com_Error(ERR_DROP, "SV_BuildAndSendClientSnapshot: bad gEnt");
     MSG_WriteByte(&v3, 4);
     outgoingSequence = client->netchan.outgoingSequence;
     client->netchan.outgoingSequence = outgoingSequence + 1;

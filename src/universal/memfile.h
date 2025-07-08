@@ -2,7 +2,7 @@
 
 #include <qcommon/qcommon.h>
 
-struct MemoryFile
+struct MemoryFile // (SP/MP Same)
 {
     byte* buffer;
     int bufferSize;

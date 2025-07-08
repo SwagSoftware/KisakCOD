@@ -81,6 +81,16 @@ FILE *__cdecl FS_FileOpenWriteText(const char *filename)
     return file;
 }
 
+FILE *FS_FileOpenWriteReadBinary(const char *filename)
+{
+    FILE *file;
+
+    ProfLoad_BeginTrackedValue(MAP_PROFILE_FILE_OPEN);
+    file = fopen(filename, "w+b"); // KISAKTODO: unsure if flag is accurate, it uses CreateFileA()
+    ProfLoad_EndTrackedValue(MAP_PROFILE_FILE_OPEN);
+    return file;
+}
+
 int __cdecl FS_FileSeek(FILE *file, int offset, int whence)
 {
     int seek; // [esp+4h] [ebp-4h]
@@ -124,3 +134,16 @@ int __cdecl FileWrapper_GetFileSize(FILE *h)
     return fileSize;
 }
 
+#ifdef KISAK_SP
+#include <fileapi.h>
+unsigned int FS_FileTell(FILE *file)
+{
+    _LARGE_INTEGER v2; // [sp+50h] [-20h] BYREF
+
+    ProfLoad_BeginTrackedValue(MAP_PROFILE_FILE_SEEK);
+    v2.QuadPart = 0;
+    SetFilePointerEx(0, (LARGE_INTEGER)0, &v2, 1u);
+    ProfLoad_EndTrackedValue(MAP_PROFILE_FILE_SEEK);
+    return v2.LowPart;
+}
+#endif

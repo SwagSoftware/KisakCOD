@@ -58,4 +58,8 @@ void __cdecl SV_InitGameVM(int restart, int savepersist);
 void __cdecl SV_InitGameProgs(int savepersist);
 int __cdecl SV_GameCommand();
 
+#ifdef KISAK_SP
+void SV_CheckLoadLevel(SaveGame *save);
+#endif
+
 extern int gameInitialized;

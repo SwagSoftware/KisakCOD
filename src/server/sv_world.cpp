@@ -5,12 +5,19 @@
 #include <universal/profile.h>
 
 
-entityState_s_type_index __cdecl SV_ClipHandleForEntity(const gentity_s *ent)
+unsigned int __cdecl SV_ClipHandleForEntity(const gentity_s *ent)
 {
+#ifdef KISAK_MP
     if (ent->r.bmodel)
-        return ent->s.index;
+        return ent->s.index.brushmodel;
     else
-        return (entityState_s_type_index)CM_TempBoxModel(ent->r.mins, ent->r.maxs, ent->r.contents);
+        return CM_TempBoxModel(ent->r.mins, ent->r.maxs, ent->r.contents);
+#elif KISAK_SP
+    if (ent->r.bmodel)
+        return *(unsigned __int16 *)ent->s.index;
+    else
+        return CM_TempBoxModel(ent->r.mins, ent->r.maxs, ent->r.contents);
+#endif
 }
 
 void __cdecl SV_UnlinkEntity(gentity_s *gEnt)
@@ -29,6 +36,7 @@ float actorLocationalMaxs[3] = { 64.0f, 64.0f, 72.0f };
 
 void __cdecl SV_LinkEntity(gentity_s *gEnt)
 {
+#ifdef KISAK_MP
     int v1; // eax
     float v2; // [esp+1Ch] [ebp-1B8h]
     float v3; // [esp+20h] [ebp-1B4h]
@@ -54,8 +62,8 @@ void __cdecl SV_LinkEntity(gentity_s *gEnt)
     svEntity_s *ent; // [esp+1CCh] [ebp-8h]
     int i; // [esp+1D0h] [ebp-4h]
 
-    if (!gEnt->r.inuse)
-        MyAssertHandler(".\\server\\sv_world.cpp", 108, 0, "%s", "gEnt->r.inuse");
+    iassert(gEnt->r.inuse);
+
     ent = SV_SvEntityForGentity(gEnt);
     if (gEnt->r.bmodel)
     {
@@ -176,7 +184,7 @@ void __cdecl SV_LinkEntity(gentity_s *gEnt)
     PROF_SCOPED("CM_LinkEntity_Part2");
     if (gEnt->r.contents)
     {
-        clipHandle = SV_ClipHandleForEntity(gEnt).brushmodel;
+        clipHandle = SV_ClipHandleForEntity(gEnt);
         obj = Com_GetServerDObj(gEnt->s.number);
         if (obj && (gEnt->r.svFlags & 6) != 0)
         {
@@ -210,6 +218,220 @@ void __cdecl SV_LinkEntity(gentity_s *gEnt)
     {
         CM_UnlinkEntity(ent);
     }
+#elif KISAK_SP
+    svEntity_s *v2; // r25
+    int v3; // r11
+    int v4; // r9
+    int v5; // r10
+    int v6; // r11
+    float *currentOrigin; // r30
+    double v8; // fp13
+    float *maxs; // r28
+    float *mins; // r29
+    double v11; // fp1
+    float *absmin; // r27
+    float *absmax; // r26
+    double v14; // fp1
+    double v15; // fp13
+    double v16; // fp10
+    double v17; // fp12
+    double v18; // fp9
+    double v19; // fp11
+    int contents; // r5
+    unsigned int v21; // r29
+    const DObj_s *ServerDObj; // r3
+    double v23; // fp0
+    double v24; // fp13
+    float *v25; // r5
+    float *v26; // r4
+    double v27; // fp12
+    double v28; // fp0
+    double v29; // fp13
+    float v30; // [sp+58h] [-68h] BYREF
+    float v31; // [sp+5Ch] [-64h]
+    float v32; // [sp+68h] [-58h] BYREF
+    float v33; // [sp+6Ch] [-54h]
+
+    iassert(gEnt->r.inuse);
+    v2 = SV_SvEntityForGentity(gEnt);
+    if (gEnt->r.bmodel)
+    {
+        v3 = 0xFFFFFF;
+    }
+    else if ((gEnt->r.contents & 0x200C001) != 0)
+    {
+        v4 = (int)gEnt->r.maxs[0];
+        if (v4 >= 1)
+        {
+            if (v4 > 255)
+                v4 = 255;
+        }
+        else
+        {
+            v4 = 1;
+        }
+        v5 = (int)(float)((float)1.0 - gEnt->r.mins[2]);
+        if (v5 >= 1)
+        {
+            if (v5 > 255)
+                v5 = 255;
+        }
+        else
+        {
+            v5 = 1;
+        }
+        v6 = (int)(float)(gEnt->r.maxs[2] + (float)32.0);
+        if (v6 >= 1)
+        {
+            if (v6 > 255)
+                v6 = 255;
+            v3 = (((v6 << 8) | v5) << 8) | v4;
+        }
+        else
+        {
+            v3 = ((v5 | 0x100) << 8) | v4;
+        }
+    }
+    else
+    {
+        v3 = 0;
+    }
+    gEnt->s.solid = v3;
+    currentOrigin = gEnt->r.currentOrigin;
+    if ((COERCE_UNSIGNED_INT(gEnt->r.currentAngles[0]) & 0x7F800000) == 0x7F800000
+        || (COERCE_UNSIGNED_INT(gEnt->r.currentAngles[1]) & 0x7F800000) == 0x7F800000
+        || (COERCE_UNSIGNED_INT(gEnt->r.currentAngles[2]) & 0x7F800000) == 0x7F800000)
+    {
+        MyAssertHandler(
+            "c:\\trees\\cod3\\cod3src\\src\\server\\sv_world.cpp",
+            156,
+            0,
+            "%s",
+            "!IS_NAN((angles)[0]) && !IS_NAN((angles)[1]) && !IS_NAN((angles)[2])");
+    }
+    if ((COERCE_UNSIGNED_INT(*currentOrigin) & 0x7F800000) == 0x7F800000
+        || (COERCE_UNSIGNED_INT(gEnt->r.currentOrigin[1]) & 0x7F800000) == 0x7F800000
+        || (COERCE_UNSIGNED_INT(gEnt->r.currentOrigin[2]) & 0x7F800000) == 0x7F800000)
+    {
+        MyAssertHandler(
+            "c:\\trees\\cod3\\cod3src\\src\\server\\sv_world.cpp",
+            157,
+            0,
+            "%s",
+            "!IS_NAN((origin)[0]) && !IS_NAN((origin)[1]) && !IS_NAN((origin)[2])");
+    }
+    if (gEnt->r.bmodel)
+    {
+        v8 = gEnt->r.currentAngles[0];
+        if (v8 != 0.0)
+        {
+        LABEL_35:
+            maxs = gEnt->r.maxs;
+            mins = gEnt->r.mins;
+            v14 = RadiusFromBounds(gEnt->r.mins, gEnt->r.maxs);
+            gEnt->r.absmin[0] = *currentOrigin - (float)v14;
+            absmin = gEnt->r.absmin;
+            gEnt->r.absmax[0] = *currentOrigin + (float)v14;
+            absmax = gEnt->r.absmax;
+            gEnt->r.absmin[1] = gEnt->r.currentOrigin[1] - (float)v14;
+            gEnt->r.absmax[1] = gEnt->r.currentOrigin[1] + (float)v14;
+            gEnt->r.absmin[2] = gEnt->r.currentOrigin[2] - (float)v14;
+            gEnt->r.absmax[2] = gEnt->r.currentOrigin[2] + (float)v14;
+            goto LABEL_37;
+        }
+        if (gEnt->r.currentAngles[1] != 0.0 || gEnt->r.currentAngles[2] != 0.0)
+        {
+            if (v8 == 0.0 && gEnt->r.currentAngles[2] == 0.0)
+            {
+                maxs = gEnt->r.maxs;
+                mins = gEnt->r.mins;
+                v11 = RadiusFromBounds2D(gEnt->r.mins, gEnt->r.maxs);
+                gEnt->r.absmin[0] = *currentOrigin - (float)v11;
+                absmin = gEnt->r.absmin;
+                gEnt->r.absmax[0] = *currentOrigin + (float)v11;
+                absmax = gEnt->r.absmax;
+                gEnt->r.absmin[1] = gEnt->r.currentOrigin[1] - (float)v11;
+                gEnt->r.absmax[1] = gEnt->r.currentOrigin[1] + (float)v11;
+                gEnt->r.absmin[2] = gEnt->r.mins[2] + gEnt->r.currentOrigin[2];
+                gEnt->r.absmax[2] = gEnt->r.maxs[2] + gEnt->r.currentOrigin[2];
+                goto LABEL_37;
+            }
+            goto LABEL_35;
+        }
+    }
+    mins = gEnt->r.mins;
+    absmin = gEnt->r.absmin;
+    maxs = gEnt->r.maxs;
+    absmax = gEnt->r.absmax;
+    gEnt->r.absmin[0] = *currentOrigin + gEnt->r.mins[0];
+    gEnt->r.absmin[1] = gEnt->r.mins[1] + gEnt->r.currentOrigin[1];
+    gEnt->r.absmin[2] = gEnt->r.mins[2] + gEnt->r.currentOrigin[2];
+    gEnt->r.absmax[0] = *currentOrigin + gEnt->r.maxs[0];
+    gEnt->r.absmax[1] = gEnt->r.maxs[1] + gEnt->r.currentOrigin[1];
+    gEnt->r.absmax[2] = gEnt->r.maxs[2] + gEnt->r.currentOrigin[2];
+    LABEL_37:
+    v15 = (float)(gEnt->r.absmin[1] - (float)1.0);
+    v16 = gEnt->r.absmax[1];
+    v17 = (float)(gEnt->r.absmin[2] - (float)1.0);
+    v18 = gEnt->r.absmax[2];
+    v19 = (float)(*absmax + (float)1.0);
+    *absmin = *absmin - (float)1.0;
+    gEnt->r.absmin[1] = v15;
+    gEnt->r.absmin[2] = v17;
+    gEnt->r.linked = 1;
+    *absmax = v19;
+    gEnt->r.absmax[1] = (float)v16 + (float)1.0;
+    gEnt->r.absmax[2] = (float)v18 + (float)1.0;
+    Profile_Begin(42);
+    contents = gEnt->r.contents;
+    if (contents)
+    {
+        if (gEnt->r.bmodel)
+            v21 = *(unsigned __int16 *)gEnt->s.index;
+        else
+            v21 = CM_TempBoxModel(mins, maxs, contents);
+        ServerDObj = Com_GetServerDObj(gEnt->s.number);
+        if (ServerDObj && (gEnt->r.svFlags & 6) != 0)
+        {
+            if ((gEnt->r.svFlags & 2) != 0)
+            {
+                v23 = *currentOrigin;
+                v24 = gEnt->r.currentOrigin[1];
+                v25 = &v30;
+                v26 = &v32;
+                v27 = (float)(gEnt->r.currentOrigin[1] + actorLocationalMins[1]);
+                v32 = *currentOrigin + actorLocationalMins[0];
+                v33 = v27;
+                v30 = (float)v23 + actorLocationalMaxs[0];
+                v31 = (float)v24 + actorLocationalMaxs[1];
+            }
+            else
+            {
+                DObjGetBounds(ServerDObj, &v32, &v30);
+                v28 = *currentOrigin;
+                v25 = &v30;
+                v32 = *currentOrigin + v32;
+                v29 = gEnt->r.currentOrigin[1];
+                v26 = &v32;
+                v33 = gEnt->r.currentOrigin[1] + v33;
+                v30 = (float)v28 + v30;
+                v31 = (float)v29 + v31;
+            }
+        }
+        else
+        {
+            v25 = absmax;
+            v26 = absmin;
+        }
+        CM_LinkEntity(v2, v26, v25, v21);
+        Profile_EndInternal(0);
+    }
+    else
+    {
+        CM_UnlinkEntity(v2);
+        Profile_EndInternal(0);
+    }
+#endif
 }
 
 void __cdecl SnapAngles(float *vAngles)
@@ -360,7 +582,7 @@ void __cdecl SV_PointTraceToEntity(const pointtrace_t *clip, svEntity_s *check, 
     else if ((check->linkcontents & clip->contentmask) != 0
         && !CM_TraceBox(&clip->extents, touch->r.absmin, touch->r.absmax, trace->fraction))
     {
-        clipHandle = SV_ClipHandleForEntity(touch).brushmodel;
+        clipHandle = SV_ClipHandleForEntity(touch);
         angles = touch->r.currentAngles;
         if (!touch->r.bmodel)
             angles = vec3_origin;
@@ -425,7 +647,7 @@ void __cdecl SV_ClipMoveToEntity(const moveclip_t *clip, svEntity_s *check, trac
         Vec3Add(touch->r.absmax, clip->maxs, absmax);
         if (!CM_TraceBox(&clip->extents, absmin, absmax, trace->fraction))
         {
-            clipHandle = SV_ClipHandleForEntity(touch).brushmodel;
+            clipHandle = SV_ClipHandleForEntity(touch);
             angles = touch->r.currentAngles;
             if (!touch->r.bmodel)
                 angles = vec3_origin;
@@ -565,7 +787,7 @@ int __cdecl SV_PointSightTraceToEntity(const sightpointtrace_t *clip, svEntity_s
     }
     else
     {
-        clipHandle = SV_ClipHandleForEntity(touch).brushmodel;
+        clipHandle = SV_ClipHandleForEntity(touch);
         angles = touch->r.currentAngles;
         if (!touch->r.bmodel)
             angles = vec3_origin;
@@ -622,7 +844,7 @@ int __cdecl SV_ClipSightToEntity(const sightclip_t *clip, svEntity_s *check)
     if (EntHandle::isDefined(&touch->r.ownerNum) && EntHandle::entnum(&touch->r.ownerNum) == clip->passEntityNum[1])
         return 0;
 LABEL_15:
-    clipHandle = SV_ClipHandleForEntity(touch).brushmodel;
+    clipHandle = SV_ClipHandleForEntity(touch);
     angles = touch->r.currentAngles;
     if (!touch->r.bmodel)
         angles = vec3_origin;
@@ -1118,7 +1340,7 @@ int __cdecl SV_SightTraceToEntity(float *start, float *mins, float *maxs, float 
     {
         return 0;
     }
-    clipHandle = SV_ClipHandleForEntity(ent).brushmodel;
+    clipHandle = SV_ClipHandleForEntity(ent);
     origin = ent->r.currentOrigin;
     angles = ent->r.currentAngles;
     if (!ent->r.bmodel)
@@ -1146,7 +1368,7 @@ int __cdecl SV_PointContents(float *p, int passEntityNum, int contentmask)
         if (entityList[i] != passEntityNum)
         {
             ent = SV_GentityNum(entityList[i]);
-            model = SV_ClipHandleForEntity(ent).brushmodel;
+            model = SV_ClipHandleForEntity(ent);
             v3 = CM_TransformedPointContents(p, model, ent->r.currentOrigin, ent->r.currentAngles);
             v6 |= v3;
         }

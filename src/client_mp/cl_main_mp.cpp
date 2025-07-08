@@ -33,6 +33,8 @@
 #include <universal/profile.h>
 #include <qcommon/com_bsp.h>
 
+#include <ui_mp/ui_mp.h>
+
 #ifdef WIN32
 #include <win32/win_steam.h>
 #include <universal/base64.h>

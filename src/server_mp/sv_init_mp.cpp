@@ -124,24 +124,20 @@ void __cdecl SV_SetConfigstring(int index, const char *val)
 
 void __cdecl SV_GetConfigstring(unsigned int index, char *buffer, int bufferSize)
 {
-    char *v3; // eax
-
     if (bufferSize < 1)
         Com_Error(ERR_DROP, "SV_GetConfigstring: bufferSize == %i", bufferSize);
-    if (index >= 0x98A)
+    if (index >= ARRAY_COUNT(sv.configstrings))
         Com_Error(ERR_DROP, "SV_GetConfigstring: bad index %i", index);
-    if (!sv.configstrings[index])
-        MyAssertHandler(".\\server_mp\\sv_init_mp.cpp", 195, 0, "%s", "sv.configstrings[index]");
-    v3 = SL_ConvertToString(sv.configstrings[index]);
-    I_strncpyz(buffer, v3, bufferSize);
+
+    iassert(sv.configstrings[index]);
+    I_strncpyz(buffer, SL_ConvertToString(sv.configstrings[index]), bufferSize);
 }
 
 unsigned int __cdecl SV_GetConfigstringConst(unsigned int index)
 {
-    if (index >= 0x98A)
-        MyAssertHandler(".\\server_mp\\sv_init_mp.cpp", 208, 0, "%s", "(unsigned)index < MAX_CONFIGSTRINGS");
-    if (!sv.configstrings[index])
-        MyAssertHandler(".\\server_mp\\sv_init_mp.cpp", 210, 0, "%s", "sv.configstrings[index]");
+    iassert((unsigned)index < MAX_CONFIGSTRINGS);
+    iassert(sv.configstrings[index]);
+    
     return sv.configstrings[index];
 }
 
@@ -268,17 +264,9 @@ void __cdecl SV_BoundMaxClients(int minimum)
 
 void __cdecl SV_Startup()
 {
-    if (svs.initialized)
-        MyAssertHandler(".\\server_mp\\sv_init_mp.cpp", 454, 0, "%s", "!svs.initialized");
+    iassert(!svs.initialized);
     SV_BoundMaxClients(1);
-    if (sv_maxclients->current.integer > 64)
-        MyAssertHandler(
-            ".\\server_mp\\sv_init_mp.cpp",
-            458,
-            0,
-            "%s\n\t(sv_maxclients->current.integer) = %i",
-            "(sv_maxclients->current.integer <= 64)",
-            sv_maxclients->current.integer);
+    iassert(sv_maxclients->current.integer <= 64);
     svs.numSnapshotEntities = 172032;
     svs.numSnapshotClients = sv_maxclients->current.integer * 32 * sv_maxclients->current.integer;
     svs.sv_lastTimeMasterServerCommunicated = svs.time;

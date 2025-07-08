@@ -9,6 +9,7 @@
 #include <universal/com_files.h>
 #include <universal/com_sndalias.h>
 #include <game_mp/g_public_mp.h>
+#include "sv_public.h"
 
 
 //int gameInitialized      834a4d50     sv_game.obj
@@ -228,7 +229,7 @@ bool __cdecl SV_EntityContact(const float *mins, const float *maxs, const gentit
     }
     else
     {
-        model = SV_ClipHandleForEntity(gEnt).brushmodel;
+        model = SV_ClipHandleForEntity(gEnt);
         CM_TransformedBoxTraceExternal(
             &trace,
             vec3_origin,
@@ -268,18 +269,13 @@ void __cdecl SV_LocateGameData(
 
 void __cdecl SV_GetUsercmd(int clientNum, usercmd_s *cmd)
 {
-    if (clientNum < 0)
-        MyAssertHandler(".\\server\\sv_game.cpp", 504, 0, "%s", "clientNum >= 0");
-    if (sv_maxclients->current.integer < 1 || sv_maxclients->current.integer > 64)
-        MyAssertHandler(
-            ".\\server\\sv_game.cpp",
-            506,
-            0,
-            "%s\n\t(sv_maxclients->current.integer) = %i",
-            "(sv_maxclients->current.integer >= 1 && sv_maxclients->current.integer <= 64)",
-            sv_maxclients->current.integer);
-    if (clientNum >= sv_maxclients->current.integer)
-        MyAssertHandler(".\\server\\sv_game.cpp", 507, 0, "%s", "clientNum < sv_maxclients->current.integer");
+    iassert(clientNum >= 0);
+#ifdef KISAK_MP
+    iassert(sv_maxclients->current.integer >= 1 && sv_maxclients->current.integer <= 64);
+    iassert(clientNum < sv_maxclients->current.integer);
+#elif KISAK_SP
+    iassert(clientNum < MAX_CLIENTS);
+#endif
     memcpy(cmd, &svs.clients[clientNum].lastUsercmd, sizeof(usercmd_s));
 }
 
@@ -720,3 +716,20 @@ int __cdecl SV_GameCommand()
         return 0;
 }
 
+#ifdef KISAK_SP
+void SV_CheckLoadLevel(SaveGame *save)
+{
+    int v1; // r3
+    int v2; // r3
+
+    G_CheckLoadGame(sv.checksum, save);
+    com_time = G_GetTime();
+    sv.timeResidual = 49;
+    if (CL_DemoPlaying())
+        CL_ReadDemoMessagesUntilNextSnap();
+    else
+        SV_SendClientMessages();
+    v2 = Hunk_CheckTempMemoryClear(v1);
+    Hunk_CheckTempMemoryHighClear(v2);
+}
+#endif

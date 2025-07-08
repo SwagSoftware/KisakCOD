@@ -661,6 +661,8 @@ set(SCRIPT
     "${SRC_DIR}/script/scr_parser.h"
     "${SRC_DIR}/script/scr_parsetree.cpp"
     "${SRC_DIR}/script/scr_parsetree.h"
+    "${SRC_DIR}/script/scr_readwrite.h"
+    "${SRC_DIR}/script/scr_readwrite.cpp"
     "${SRC_DIR}/script/scr_stringlist.cpp"
     "${SRC_DIR}/script/scr_stringlist.h"
     "${SRC_DIR}/script/scr_variable.cpp"

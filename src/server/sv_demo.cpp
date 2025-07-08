@@ -3,6 +3,32 @@
 #endif
 
 #include "server.h"
+#include <qcommon/com_fileaccess.h>
+#include <game/g_local.h>
+#include <qcommon/threads.h>
+#include <game/savememory.h>
+#include <win32/win_local.h>
+#include <universal/com_files.h>
+#include <client/cl_demo.h>
+#include <game/g_save.h>
+#include <qcommon/msg.h>
+#include <qcommon/com_playerprofile.h>
+#include <qcommon/cmd.h>
+#include <client/cl_input.h>
+
+unsigned __int8 g_buf[2][3145728];
+unsigned __int8 g_msgBuf[10485760];
+FileSkip g_fileSkips[3600]{ 0 };
+FileMarkSkip g_fileMarkSkips[50];
+server_demo_history_t g_historyBuffers[2];
+int g_bufSize[2];
+int g_numFileSkips;
+int g_numFileMarkSkips;
+FILE *g_fileMarkHistory;
+FILE *g_fileTimeHistory;
+server_demo_history_t *g_history;
+bool g_savingHistory;
+server_demo_history_t *volatile g_historySaving;
 
 void __cdecl TRACK_sv_demo()
 {
@@ -17,13 +43,8 @@ unsigned int __cdecl SV_GetHistoryIndex(server_demo_history_t *history)
 {
     if (history == &g_historyBuffers[1])
         return 1;
-    if (history != g_historyBuffers)
-        MyAssertHandler(
-            "c:\\trees\\cod3\\cod3src\\src\\server\\sv_demo.cpp",
-            164,
-            0,
-            "%s",
-            "history == &g_historyBuffers[0]");
+
+    iassert(history == &g_historyBuffers[0]);
     return 0;
 }
 
@@ -470,6 +491,9 @@ LABEL_22:
     return 1;
 }
 
+char byte_82003CDD[3] =
+{ '\0', '\0', '\0' };
+
 _iobuf *__cdecl SV_DemoOpenFile(const char *fileName)
 {
     const char *v2; // r3
@@ -599,7 +623,7 @@ void __cdecl SV_RecordClientCommand(const char *s)
         MSG_WriteByte(&sv.demo.msg, 2);
         FramePos = G_GetFramePos();
         MSG_WriteLong(&sv.demo.msg, FramePos);
-        MSG_WriteString(&sv.demo.msg, s);
+        MSG_WriteString(&sv.demo.msg, (char*)s);
     }
 }
 
@@ -653,7 +677,7 @@ void __cdecl SV_Record_Dvar_GetVariantString(const char *buffer)
     {
         SV_CheckDemoSize();
         MSG_WriteByte(&sv.demo.msg, 3);
-        MSG_WriteString(&sv.demo.msg, buffer);
+        MSG_WriteString(&sv.demo.msg, (char*)buffer);
     }
 }
 
@@ -696,9 +720,9 @@ LABEL_10:
         __twlgei(demoCount & ~(__ROL4__(i + 1, 1) - 1), 0xFFFFFFFF);
         Com_sprintf(testDemoName, 64, "%s%i", baseName, (i + 1) % demoCount);
         Com_BuildPlayerProfilePath(v10, 256, "save/%s.svg", testDemoName);
-        if (FS_IsUsingRemotePCSharing())
-            FS_DeleteRemote(v10);
-        else
+        //if (FS_IsUsingRemotePCSharing())
+        //    FS_DeleteRemote(v10);
+        //else
             FS_Delete(v10);
         Com_sprintf(testDemoName, 64, "%s%i", baseName, i);
     }
@@ -1005,8 +1029,8 @@ int __cdecl SV_Demo_Dvar_Set(const char *var_name, const char *value)
         MSG_WriteByte(&sv.demo.msg, 6);
         FramePos = G_GetFramePos();
         MSG_WriteLong(&sv.demo.msg, FramePos);
-        MSG_WriteString(&sv.demo.msg, var_name);
-        MSG_WriteString(&sv.demo.msg, value);
+        MSG_WriteString(&sv.demo.msg, (char*)var_name);
+        MSG_WriteString(&sv.demo.msg, (char*)value);
     }
     return 1;
 }
@@ -1152,7 +1176,7 @@ void __cdecl  SV_SaveHistoryLoop(unsigned int threadContext)
     while (1)
     {
         Sys_WaitForSaveHistory();
-        __lwsync();
+        //__lwsync();
         if (!g_historySaving)
             MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\server\\sv_demo.cpp", 2114, 0, "%s", "g_historySaving");
         v1 = g_historySaving;
@@ -1164,7 +1188,7 @@ void __cdecl  SV_SaveHistoryLoop(unsigned int threadContext)
         //Profile_EndInternal(0);
         SV_FreeHistoryData(g_historySaving);
         g_historySaving = 0;
-        __lwsync();
+        //__lwsync();
         Sys_SetSaveHistoryDoneEvent();
     }
 }
@@ -1276,7 +1300,7 @@ server_demo_history_t *__cdecl SV_DemoGetBuffer()
         {
             if (g_savingHistory)
             {
-                __lwsync();
+                //__lwsync();
                 if (g_historySaving)
                 {
                     if (!replay_autosave)
@@ -1305,7 +1329,7 @@ server_demo_history_t *__cdecl SV_DemoGetBuffer()
                 v0 = g_history;
             }
             g_historySaving = v0;
-            __lwsync();
+            //__lwsync();
             g_savingHistory = 1;
             Sys_SetSaveHistoryEvent();
         }
@@ -2120,7 +2144,7 @@ bool __cdecl SV_ReadPacket(int framePos)
             if (!Var || !MSG_ReadString(&sv.demo.msg, v5, 1024))
                 goto LABEL_15;
             SV_ReadNextDemoType();
-            Dvar_SetFromString(Var, v5);
+            Dvar_SetFromString((dvar_s*)Var, v5);
         LABEL_18:
             result = sv.demo.playing;
             if (framePos != sv.demo.nextFramePos)

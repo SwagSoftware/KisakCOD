@@ -3,6 +3,11 @@
 #endif
 
 #include "server.h"
+#include "sv_game.h"
+#include <client/cl_parse.h>
+#include <game/g_local.h>
+#include "sv_public.h"
+#include <EffectsCore/fx_system.h>
 
 void __cdecl SV_DirectConnect()
 {
@@ -99,12 +104,12 @@ gentity_s *__cdecl SV_GetEntityState(int entnum)
 
 void __cdecl SV_TrackPlayerDied()
 {
-    Live_SetDeaths(++svs.playerDeaths);
+    //Live_SetDeaths(++svs.playerDeaths);
 }
 
 void __cdecl SV_AddToPlayerScore(int amount)
 {
     svs.playerScore += amount;
-    Live_SetScore(svs.playerScore);
+    //Live_SetScore(svs.playerScore);
 }
 

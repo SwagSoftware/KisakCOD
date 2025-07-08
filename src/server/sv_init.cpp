@@ -5,8 +5,17 @@
 #include "server.h"
 #include "sv_public.h"
 #include <universal/q_shared.h>
+#include <ui/ui.h>
+#include <database/database.h>
+#include <qcommon/cmd.h>
+#include "sv_game.h"
+#include <qcommon/com_bsp.h>
+#include <client/cl_demo.h>
 
 const dvar_t *sv_clientFrameRateFix;
+const dvar_t *sv_loadMyChanges;
+
+client_t g_sv_clients[1];
 
 void __cdecl TRACK_sv_init()
 {
@@ -15,45 +24,31 @@ void __cdecl TRACK_sv_init()
 
 void __cdecl SV_GetConfigstring(unsigned int index, char *buffer, int bufferSize)
 {
-    unsigned int v6; // r31
-    const char *v7; // r3
-
     if (bufferSize < 1)
-        Com_Error(ERR_DROP, byte_8207B4F8);
-    if (index > 0xAFE)
-        Com_Error(ERR_DROP, byte_8207B4D4, index);
-    v6 = index;
-    if (!sv.configstrings[v6])
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\server\\sv_init.cpp", 166, 0, "%s", "sv.configstrings[index]");
-    v7 = SL_ConvertToString(sv.configstrings[v6]);
-    I_strncpyz(buffer, v7, bufferSize);
+        Com_Error(ERR_DROP, "SV_GetConfigstring: bufferSize == %i", bufferSize);
+    if (index >= ARRAY_COUNT(sv.configstrings))
+        Com_Error(ERR_DROP, "SV_GetConfigstring: bad index %i", index);
+
+    iassert(sv.configstrings[index]);
+    I_strncpyz(buffer, SL_ConvertToString(sv.configstrings[index]), bufferSize);
 }
 
 unsigned int __cdecl SV_GetConfigstringConst(unsigned int index)
 {
-    unsigned int v2; // r31
+    iassert((unsigned)index < MAX_CONFIGSTRINGS);
+    iassert(sv.configstrings[index]);
 
-    if (index >= 0xAFF)
-        MyAssertHandler(
-            "c:\\trees\\cod3\\cod3src\\src\\server\\sv_init.cpp",
-            179,
-            0,
-            "%s",
-            "(unsigned)index < MAX_CONFIGSTRINGS");
-    v2 = index;
-    if (!sv.configstrings[v2])
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\server\\sv_init.cpp", 181, 0, "%s", "sv.configstrings[index]");
-    return sv.configstrings[v2];
+    return sv.configstrings[index];
 }
 
 void __cdecl SV_InitReliableCommandsForClient(client_t *cl)
 {
-    Com_Memset(&cl->reliableCommands, 0, 12);
+    Com_Memset(&cl->reliableCommands.header, 0, sizeof(serverCommandsHeader_t));
 }
 
 void __cdecl SV_FreeReliableCommandsForClient(client_t *cl)
 {
-    Com_Memset(&cl->reliableCommands, 0, 12);
+    Com_Memset(&cl->reliableCommands.header, 0, sizeof(serverCommandsHeader_t));
 }
 
 void __cdecl SV_AddReliableCommand(client_t *cl, int index, const char *cmd)
@@ -90,7 +85,8 @@ void __cdecl SV_AddReliableCommand(client_t *cl, int index, const char *cmd)
 void __cdecl SV_Startup()
 {
     if (svs.initialized)
-        Com_Error(ERR_FATAL, byte_8207B568);
+        Com_Error(ERR_FATAL, "SV_Startup() - already initialized");
+
     svs.clients = g_sv_clients;
     svs.numSnapshotEntities = 2176;
     svs.initialized = 1;
@@ -112,7 +108,7 @@ void __cdecl SV_ClearServer()
     } while ((int)configstrings < (int)&sv.svEntities[0].worldSector);
     if (sv.emptyConfigString)
         SL_RemoveRefToString(sv.emptyConfigString);
-    Com_Memset(&sv, 0, 72480);
+    Com_Memset(&sv, 0, sizeof(server_t));
     SV_ClearPendingSaves();
     com_inServerFrame = 0;
 }
@@ -142,6 +138,9 @@ void __cdecl SV_Settle()
     } while (v0);
 }
 
+char byte_82003CDD[3] =
+{ '\0', '\0', '\0' };
+
 int __cdecl SV_SaveImmediately(const char *levelName)
 {
     int v3; // r3
@@ -154,8 +153,8 @@ int __cdecl SV_SaveImmediately(const char *levelName)
     R_EndRemoteScreenUpdate();
     R_BeginRemoteScreenUpdate();
     v3 = CL_ControllerIndexFromClientNum(0);
-    Gamer//Profile_UpdateProfileFromDvars(v3, PROFILE_WRITE_IF_CHANGED);
-        SV_ClearPendingSaves();
+    //GamerProfile_UpdateProfileFromDvars(v3, PROFILE_WRITE_IF_CHANGED);
+    SV_ClearPendingSaves();
     SV_AddPendingSave(levelName, "Start Level Save", byte_82003CDD, SAVE_TYPE_AUTOSAVE, 6u, 1);
     return SV_ProcessPendingSaves();
 }
@@ -249,8 +248,8 @@ void __cdecl SV_Shutdown(const char *finalmsg)
 
     if (com_sv_running && com_sv_running->current.enabled)
     {
-        LSP_LogStringEvenIfControllerIsInactive("server shutdown");
-        LSP_ForceSendPacket();
+        //LSP_LogStringEvenIfControllerIsInactive("server shutdown");
+        //LSP_ForceSendPacket();
         Com_Printf(15, "----- Server Shutdown -----\n");
         SV_RemoveOperatorCommands();
         SV_ShutdownGameProgs();
@@ -286,8 +285,8 @@ void __cdecl SV_SetConfigstring(unsigned int index, const char *val)
     const char *v14; // r31
     char v15[1120]; // [sp+50h] [-460h] BYREF
 
-    if (index > 0xAFE)
-        Com_Error(ERR_DROP, byte_8207BA2C, index);
+    if (index > MAX_CONFIGSTRINGS)
+        Com_Error(ERR_DROP, "SV_SetConfigstring: bad index %i", index);
     v4 = index;
     if (sv.configstrings[index])
     {
@@ -384,11 +383,11 @@ void __cdecl SV_SpawnServer(const char *server, int savegame)
     DB_ResetZoneSize(0);
     CL_InitLoad(server);
     v5 = va("loading map: %s", server);
-    LSP_LogString(cl_controller_in_use, v5);
+    //LSP_LogString(cl_controller_in_use, v5);
     CL_MapLoading(server);
     R_BeginRemoteScreenUpdate();
     v6 = CL_ControllerIndexFromClientNum(0);
-    Live_Frame(v6, 0);
+    //Live_Frame(v6, 0);
     ProfLoad_Activate();
     ProfLoad_Begin("Clear load game");
     SV_ClearLoadGame();
@@ -448,7 +447,7 @@ void __cdecl SV_SpawnServer(const char *server, int savegame)
     CM_LoadMap(v12, &sv.checksum);
     ProfLoad_End();
     Com_LoadWorld(v12);
-    Live_SetCurrentMapname(server);
+    //Live_SetCurrentMapname(server);
     SCR_UpdateLoadScreen();
     SCR_UpdateLoadScreen();
     SaveMemory_InitializeSaveSystem();

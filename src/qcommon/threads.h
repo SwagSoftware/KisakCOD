@@ -97,6 +97,9 @@ void Sys_SleepServer();
 bool Sys_WaitServer();
 void Sys_Sleep(unsigned int msec);
 void Sys_SetServerTimeout(int timeout);
+bool Sys_WaitForSaveHistoryDone();
+int Sys_SpawnServerDemoThread(void(*function)(unsigned int));
+void Sys_SetSaveHistoryEvent();
 #endif
 
 

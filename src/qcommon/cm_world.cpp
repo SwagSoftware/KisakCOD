@@ -7,6 +7,7 @@
 #include <universal/profile.h>
 
 #include <bgame/bg_public.h>
+#include "cmd.h"
 
 struct worldContents_s // sizeof=0x10
 {                                       // ...
@@ -1222,3 +1223,22 @@ int __cdecl CM_PointSightTraceToEntities_r(
     return 0;
 }
 
+int CM_SaveWorld(unsigned __int8 *buf)
+{
+    unsigned __int8 *v1; // r30
+    worldTree_s *p_tree; // r31
+
+    if (buf)
+    {
+        v1 = buf + 2;
+        p_tree = &cm_world.sectors[0].tree;
+        *(_WORD *)buf = cm_world.freeHead;
+        do
+        {
+            memcpy(v1, p_tree, 0xCu);
+            p_tree = (worldTree_s *)((char *)p_tree + 28);
+            v1 += 12;
+        } while ((int)p_tree < (int)&cmd_args.localClientNum[2]);
+    }
+    return 12290;
+}

@@ -6,18 +6,7 @@
 
 struct Scr_WatchElement_s;
 
-enum parseSkip_t : __int32
-{                                       // ...
-    SKIP_NO = 0x0,
-    SKIP_YES = 0x1,
-    SKIP_ALL_ELIFS = 0x2,
-};
-enum UILocalVarType : __int32
-{                                       // ...
-    UILOCALVAR_INT = 0x0,
-    UILOCALVAR_FLOAT = 0x1,
-    UILOCALVAR_STRING = 0x2,
-};
+#ifdef KISAK_MP
 enum uiMenuCommand_t : __int32
 {                                       // ...
     UIMENU_NONE = 0x0,
@@ -33,7 +22,36 @@ enum uiMenuCommand_t : __int32
     UIMENU_SCOREBOARD = 0xA,
     UIMENU_ENDOFGAME = 0xB,
 };
+#elif KISAK_SP
+enum uiMenuCommand_t : __int32
+{
+    UIMENU_NONE = 0x0,
+    UIMENU_MAIN = 0x1,
+    UIMENU_INGAME = 0x2,
+    UIMENU_PREGAME = 0x3,
+    UIMENU_POSTGAME = 0x4,
+    UIMENU_CLIPBOARD = 0x5,
+    UIMENU_BRIEFING = 0x6,
+    UIMENU_VICTORYSCREEN = 0x7,
+    UIMENU_SAVEERROR = 0x8,
+    UIMENU_SCRIPT_POPUP = 0x9,
+    UIMENU_SAVE_LOADING = 0xA,
+    UIMENU_CONTROLLERREMOVED = 0xB,
+};
+#endif
 
+enum parseSkip_t : __int32
+{                                       // ...
+    SKIP_NO = 0x0,
+    SKIP_YES = 0x1,
+    SKIP_ALL_ELIFS = 0x2,
+};
+enum UILocalVarType : __int32
+{                                       // ...
+    UILOCALVAR_INT = 0x0,
+    UILOCALVAR_FLOAT = 0x1,
+    UILOCALVAR_STRING = 0x2,
+};
 enum EvalValueType : __int32
 {                                       // ...
     EVAL_VALUE_DOUBLE = 0x0,

@@ -245,6 +245,10 @@ void __cdecl Com_ShutdownDObj();
 void Com_InitHunkMemory();
 unsigned __int8 *__cdecl CM_Hunk_Alloc(unsigned int size, const char *name, int type);
 
+#ifdef KISAK_SP
+void Com_ResetFrametime();
+#endif
+
 
 void		Com_BeginRedirect(char *buffer, int buffersize, void (*flush)(char *));
 void		Com_EndRedirect(void);
@@ -1050,6 +1054,7 @@ int __cdecl CM_PointSightTraceToEntities_r(
     const float *p1,
     const float *p2);
 
+int CM_SaveWorld(unsigned __int8 *buf);
 
 // cm_load
 void __cdecl TRACK_cm_load();

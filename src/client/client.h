@@ -2,7 +2,11 @@
 #include <qcommon/qcommon.h>
 
 #include <ui/ui_shared.h>
+#ifdef KISAK_MP
 #include <qcommon/msg_mp.h>
+#elif KISAK_SP
+#include <qcommon/msg.h>
+#endif
 
 enum msgwnd_mode_t : int32_t
 {                                       // ...

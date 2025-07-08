@@ -29,6 +29,8 @@ void *serverCompletedEvent;
 void *allowSendClientMessagesEvent;
 void *serverSnapshotEvent;
 void *clientMessageReceived;
+void *g_saveHistoryEvent;
+void *g_saveHistoryDoneEvent;
 
 volatile int g_timeout;
 #endif
@@ -903,5 +905,32 @@ void Sys_SetServerTimeout(int timeout)
         g_timeout = 0;
         //PIXSetMarker(0xFFFFFFFF, "server timeout");
     }
+}
+
+bool Sys_WaitForSaveHistoryDone()
+{
+    return WaitForSingleObject(g_saveHistoryDoneEvent, 0x7D0u) == 0;
+}
+
+int Sys_SpawnServerDemoThread(void(*function)(unsigned int))
+{
+    int result; // r3
+
+    g_saveHistoryEvent = CreateEventA(0, 0, 0, 0);
+    g_saveHistoryDoneEvent = CreateEventA(0, 0, 0, 0);
+    Sys_CreateThread(function, 0xBu);
+    result = (int)threadHandle[11];
+    if (threadHandle[11])
+    {
+        //XSetThreadProcessor(threadHandle[11], 2u);
+        Sys_ResumeThread(0xBu);
+        return 1;
+    }
+    return result;
+}
+
+void Sys_SetSaveHistoryEvent()
+{
+    SetEvent(g_saveHistoryEvent);
 }
 #endif

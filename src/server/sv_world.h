@@ -2,7 +2,7 @@
 #include <bgame/bg_local.h>
 #include <qcommon/ent.h>
 
-entityState_s_type_index __cdecl SV_ClipHandleForEntity(const gentity_s *ent);
+unsigned int __cdecl SV_ClipHandleForEntity(const gentity_s *ent);
 void __cdecl SV_UnlinkEntity(gentity_s *gEnt);
 void __cdecl SV_LinkEntity(gentity_s *gEnt);
 void __cdecl SnapAngles(float *vAngles);

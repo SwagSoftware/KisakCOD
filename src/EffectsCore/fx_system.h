@@ -189,6 +189,8 @@ void __cdecl FX_FreeSpotLightElem(FxSystem *system, uint16_t elemHandle, FxEffec
 double __cdecl FX_GetClientVisibility(int32_t localClientNum, const float *start, const float *end);
 void __cdecl FX_TrailElem_CompressBasis(const float (*inBasis)[3], char (*outBasis)[3]);
 
+double FX_GetServerVisibility(const float *start, const float *end);
+
 extern FxSystem fx_systemPool[1];
 extern FxSystemBuffers fx_systemBufferPool[1];
 extern FxMarksSystem fx_marksSystemPool[1];

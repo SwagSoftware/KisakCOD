@@ -108,7 +108,11 @@ static unsigned int rd_buffersize = 0;
 char com_errorMessage[4096];
 
 int com_lastFrameIndex;
+#ifdef KISAK_MP
 int com_lastFrameTime[1];
+#elif KISAK_SP
+int com_lastFrameTime[4];
+#endif 
 int com_fullyInitialized;
 float com_codeTimeScale;
 int timeClientFrame;
@@ -2010,3 +2014,12 @@ void Com_CheckError()
         longjmp((int*)value, -1);
     }
 }
+
+#ifdef KISAK_SP
+void Com_ResetFrametime()
+{
+    com_lastFrameTime[0] = Sys_Milliseconds();
+    com_lastFrameTime[1] = com_lastFrameTime[0];
+    com_lastFrameTime[2] = com_lastFrameTime[0];
+}
+#endif

@@ -443,6 +443,12 @@ struct SaveImmediate
     void *f;
 };
 
+struct FileSkip
+{
+    int time;
+    int fileEndOffset;
+};
+
 struct FileMarkSkip
 {
     char name[64];
@@ -664,6 +670,8 @@ struct snapshotEntityNumbers_t
     int numSnapshotEntities;
     int snapshotEntities[2048];
 };
+
+#define MAX_CONFIGSTRINGS 2815
 struct server_t
 {
     serverState_t state;
@@ -685,7 +693,7 @@ struct server_t
     int nextFrameTime;
     cmodel_t *models[512];
     unsigned __int16 emptyConfigString;
-    unsigned __int16 configstrings[2815];
+    unsigned __int16 configstrings[MAX_CONFIGSTRINGS];
     svEntity_s svEntities[2176];
     gentity_s *gentities;
     int gentitySize;
@@ -782,6 +790,30 @@ bool __cdecl SV_SaveMemory_IsRecentlyLoaded();
 
 extern server_t sv;
 extern serverStatic_t svs;
+
+extern int com_time;
+extern int com_inServerFrame;
+
+extern const dvar_t *sv_lastSaveGame;
+extern const dvar_t *sv_smp;
+extern const dvar_t *sv_player_damageMultiplier;
+extern const dvar_t *sv_player_maxhealth;
+extern const dvar_t *sv_saveOnStartMap;
+extern const dvar_t *sv_gameskill;
+extern const dvar_t *sv_mapname;
+extern const dvar_t *sv_saveDeviceAvailable;
+extern const dvar_t *sv_cheats;
+extern const dvar_t *player_healthEasy;
+extern const dvar_t *player_healthHard;
+extern const dvar_t *sv_player_deathInvulnerableTime;
+extern const dvar_t *runForTime;
+extern const dvar_t *sv_saveGameSuccess;
+extern const dvar_t *sv_saveGameAvailable;
+extern const dvar_t *sv_saveGameNotReadable;
+extern const dvar_t *replay_autosave;
+extern const dvar_t *player_healthMedium;
+extern const dvar_t *player_healthFu;
+extern const dvar_t *replay_asserts;
 
 inline int SV_GetCheckSum()
 {
