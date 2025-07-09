@@ -9,20 +9,24 @@
 #include <universal/com_files.h>
 #include <universal/com_sndalias.h>
 #include <game_mp/g_public_mp.h>
+#include <qcommon/threads.h>
 
+#ifdef KISAK_MP
+#define SKEL_MEMORY_SIZE 0x40000
+#elif KISAK_SP
+#define SKEL_MEMORY_SIZE 0x80000
+#endif
 
-//int gameInitialized      834a4d50     sv_game.obj
-char g_sv_skel_memory[262144];
+#define SKEL_MEM_ALIGNMENT 16
 
+char g_sv_skel_memory[SKEL_MEMORY_SIZE];
 char *g_sv_skel_memory_start;
-
 int gameInitialized;
-
 
 
 void __cdecl TRACK_sv_game()
 {
-    track_static_alloc_internal(g_sv_skel_memory, 0x40000, "g_sv_skel_memory", 11);
+    track_static_alloc_internal(g_sv_skel_memory, SKEL_MEMORY_SIZE, "g_sv_skel_memory", 11);
 }
 
 gentity_s *__cdecl SV_GentityNum(int num)
@@ -37,7 +41,7 @@ playerState_s *__cdecl SV_GameClientNum(int num)
 
 svEntity_s *__cdecl SV_SvEntityForGentity(const gentity_s *gEnt)
 {
-    if (!gEnt || gEnt->s.number >= 1024)
+    if (!gEnt || gEnt->s.number >= ARRAY_COUNT(sv.svEntities))
         Com_Error(ERR_DROP, "SV_SvEntityForGentity: bad gEnt");
     return &sv.svEntities[gEnt->s.number];
 }
@@ -45,134 +49,6 @@ svEntity_s *__cdecl SV_SvEntityForGentity(const gentity_s *gEnt)
 gentity_s *__cdecl SV_GEntityForSvEntity(svEntity_s *svEnt)
 {
     return SV_GentityNum(svEnt - sv.svEntities);
-}
-
-void __cdecl SV_GameSendServerCommand(int clientNum, svscmd_type type, const char *text)
-{
-    if (clientNum == -1)
-    {
-        SV_SendServerCommand(0, type, "%s", text);
-    }
-    else
-    {
-        if (sv_maxclients->current.integer < 1 || sv_maxclients->current.integer > 64)
-            MyAssertHandler(
-                ".\\server\\sv_game.cpp",
-                154,
-                0,
-                "%s\n\t(sv_maxclients->current.integer) = %i",
-                "(sv_maxclients->current.integer >= 1 && sv_maxclients->current.integer <= 64)",
-                sv_maxclients->current.integer);
-        if (clientNum >= 0 && clientNum < sv_maxclients->current.integer)
-            SV_SendServerCommand(&svs.clients[clientNum], type, "%s", text);
-    }
-}
-
-void __cdecl SV_GameDropClient(int clientNum, const char *reason)
-{
-    if (sv_maxclients->current.integer < 1 || sv_maxclients->current.integer > 64)
-        MyAssertHandler(
-            ".\\server\\sv_game.cpp",
-            184,
-            0,
-            "%s\n\t(sv_maxclients->current.integer) = %i",
-            "(sv_maxclients->current.integer >= 1 && sv_maxclients->current.integer <= 64)",
-            sv_maxclients->current.integer);
-    if (clientNum >= 0 && clientNum < sv_maxclients->current.integer)
-        SV_DropClient(&svs.clients[clientNum], reason, 1);
-}
-
-void __cdecl SV_SetMapCenter(float *mapCenter)
-{
-    char *v1; // eax
-
-    svs.mapCenter[0] = *mapCenter;
-    svs.mapCenter[1] = mapCenter[1];
-    svs.mapCenter[2] = mapCenter[2];
-    v1 = va("%f %f %f", *mapCenter, mapCenter[1], mapCenter[2]);
-    SV_SetConfigstring(12, v1);
-}
-
-void __cdecl SV_SetGameEndTime(int gameEndTime)
-{
-    char *v1; // eax
-    char lastGameEndTime[12]; // [esp+0h] [ebp-10h] BYREF
-
-    SV_GetConfigstring(0xBu, lastGameEndTime, 12);
-    if ((int)abs(atoi(lastGameEndTime) - gameEndTime) > 500)
-    {
-        v1 = va("%i", gameEndTime);
-        SV_SetConfigstring(11, v1);
-    }
-}
-
-char __cdecl SV_SetBrushModel(gentity_s *ent)
-{
-    float mins[3]; // [esp+8h] [ebp-18h] BYREF
-    float maxs[3]; // [esp+14h] [ebp-Ch] BYREF
-
-    if (!ent->r.inuse)
-        MyAssertHandler(".\\server\\sv_game.cpp", 224, 0, "%s", "ent->r.inuse");
-    if (!CM_ClipHandleIsValid(ent->s.index.brushmodel))
-        return 0;
-    CM_ModelBounds(ent->s.index.brushmodel, mins, maxs);
-    ent->r.mins[0] = mins[0];
-    ent->r.mins[1] = mins[1];
-    ent->r.mins[2] = mins[2];
-    ent->r.maxs[0] = maxs[0];
-    ent->r.maxs[1] = maxs[1];
-    ent->r.maxs[2] = maxs[2];
-    ent->r.bmodel = 1;
-    ent->r.contents = CM_ContentsOfModel(ent->s.index.brushmodel);
-    SV_LinkEntity(ent);
-    return 1;
-}
-
-bool __cdecl SV_inSnapshot(const float *origin, int iEntityNum)
-{
-    int clientcluster; // [esp+4h] [ebp-24h]
-    float fogOpaqueDistSqrd; // [esp+8h] [ebp-20h]
-    svEntity_s *svEnt; // [esp+Ch] [ebp-1Ch]
-    int l; // [esp+10h] [ebp-18h]
-    unsigned int leafnum; // [esp+14h] [ebp-14h]
-    gentity_s *ent; // [esp+18h] [ebp-10h]
-    int i; // [esp+1Ch] [ebp-Ch]
-    unsigned __int8 *bitvector; // [esp+20h] [ebp-8h]
-
-    ent = SV_GentityNum(iEntityNum);
-    if (!ent->r.linked)
-        return 0;
-    if (ent->r.broadcastTime)
-        return 1;
-    if ((ent->r.svFlags & 1) != 0)
-        return 0;
-    if ((ent->r.svFlags & 0x18) != 0)
-        return 1;
-    svEnt = SV_SvEntityForGentity(ent);
-    leafnum = CM_PointLeafnum(origin);
-    if (!svEnt->numClusters)
-        return 0;
-    clientcluster = CM_LeafCluster(leafnum);
-    bitvector = CM_ClusterPVS(clientcluster);
-    l = 0;
-    for (i = 0; i < svEnt->numClusters; ++i)
-    {
-        l = svEnt->clusternums[i];
-        if (((1 << (l & 7)) & bitvector[l >> 3]) != 0)
-            break;
-    }
-    if (i == svEnt->numClusters)
-    {
-        if (!svEnt->lastCluster)
-            return 0;
-        while (l <= svEnt->lastCluster && ((1 << (l & 7)) & bitvector[l >> 3]) == 0)
-            ++l;
-        if (l == svEnt->lastCluster)
-            return 0;
-    }
-    fogOpaqueDistSqrd = G_GetFogOpaqueDistSqrd();
-    return fogOpaqueDistSqrd == 3.402823466385289e38
-        || !BoxDistSqrdExceeds(ent->r.absmin, ent->r.absmax, origin, fogOpaqueDistSqrd);
 }
 
 bool __cdecl SV_EntityContact(const float *mins, const float *maxs, const gentity_s *gEnt)
@@ -244,12 +120,10 @@ bool __cdecl SV_EntityContact(const float *mins, const float *maxs, const gentit
 
 void __cdecl SV_GetServerinfo(char *buffer, int bufferSize)
 {
-    char *v2; // eax
-
     if (bufferSize < 1)
         Com_Error(ERR_DROP, "SV_GetServerinfo: bufferSize == %i", bufferSize);
-    v2 = Dvar_InfoString(0, 4);
-    I_strncpyz(buffer, v2, bufferSize);
+
+    I_strncpyz(buffer, Dvar_InfoString(0, 4), bufferSize);
 }
 
 void __cdecl SV_LocateGameData(
@@ -337,18 +211,16 @@ char *__cdecl SV_AllocSkelMemory(unsigned int size)
     char *result; // [esp+0h] [ebp-4h]
     unsigned int sizea; // [esp+Ch] [ebp+8h]
 
-    if (!size)
-        MyAssertHandler(".\\server\\sv_game.cpp", 600, 0, "%s", "size");
+    iassert(size);
     sizea = (size + 15) & 0xFFFFFFF0;
-    if (sizea > 0x3FFF0)
-        MyAssertHandler(".\\server\\sv_game.cpp", 603, 0, "%s", "size <= sizeof( g_sv_skel_memory ) - SKEL_MEM_ALIGNMENT");
-    if (!g_sv_skel_memory_start)
-        MyAssertHandler(".\\server\\sv_game.cpp", 605, 0, "%s", "g_sv_skel_memory_start");
+    iassert(size <= sizeof(g_sv_skel_memory) - SKEL_MEM_ALIGNMENT);
+    iassert(g_sv_skel_memory_start);
+
     while (1)
     {
         result = &g_sv_skel_memory_start[sv.skelMemPos];
         sv.skelMemPos += sizea;
-        if (sv.skelMemPos <= 262128)
+        if (sv.skelMemPos <= (sizeof(g_sv_skel_memory) - SKEL_MEM_ALIGNMENT))
             break;
         if (warnCount_2 != sv.skelTimeStamp)
         {
@@ -357,8 +229,8 @@ char *__cdecl SV_AllocSkelMemory(unsigned int size)
         }
         SV_ResetSkeletonCache();
     }
-    if (!result)
-        MyAssertHandler(".\\server\\sv_game.cpp", 613, 0, "%s", "result");
+
+    iassert(result);
     return result;
 }
 
@@ -415,11 +287,9 @@ DObjAnimMat *__cdecl SV_DObjGetMatrixArray(const gentity_s *ent)
     const DObj_s *obj; // [esp+0h] [ebp-4h]
 
     obj = Com_GetServerDObj(ent->s.number);
-    if (!obj)
-        MyAssertHandler(".\\server\\sv_game.cpp", 763, 0, "%s", "obj");
+    iassert(obj);
     return DObjGetRotTransArray(obj);
 }
-
 void __cdecl SV_DObjDisplayAnim(gentity_s *ent, const char *header)
 {
     DObj_s *obj; // [esp+0h] [ebp-4h]
@@ -428,14 +298,12 @@ void __cdecl SV_DObjDisplayAnim(gentity_s *ent, const char *header)
     if (obj)
         DObjDisplayAnim(obj, header);
 }
-
 void __cdecl SV_DObjGetBounds(gentity_s *ent, float *mins, float *maxs)
 {
     const DObj_s *obj; // [esp+0h] [ebp-4h]
 
     obj = Com_GetServerDObj(ent->s.number);
-    if (!obj)
-        MyAssertHandler(".\\server\\sv_game.cpp", 820, 0, "%s", "obj");
+    iassert(obj);
     DObjGetBounds(obj, mins, maxs);
 }
 
@@ -599,6 +467,266 @@ void __cdecl SV_XModelDebugBoxes(gentity_s *ent)
         }
     }
 }
+bool __cdecl SV_DObjExists(gentity_s *ent)
+{
+    return Com_GetServerDObj(ent->s.number) != 0;
+}
+void __cdecl SV_track_shutdown()
+{
+    track_shutdown(2);
+}
+
+int __cdecl SV_GameCommand()
+{
+    if (sv.state == SS_GAME)
+        return ConsoleCommand();
+    else
+        return 0;
+}
+
+#ifdef KISAK_SP
+#include <game/g_local.h>
+#include <client/cl_demo.h>
+#include "sv_public.h"
+#include <win32/win_local.h>
+
+void __fastcall SV_CheckLoadLevel(SaveGame *save)
+{
+    G_CheckLoadGame(sv.checksum, save);
+    com_time = G_GetTime();
+    sv.timeResidual = 49;
+    if (CL_DemoPlaying())
+        CL_ReadDemoMessagesUntilNextSnap();
+    else
+        SV_SendClientMessages();
+    Hunk_CheckTempMemoryClear();
+    Hunk_CheckTempMemoryHighClear();
+}
+
+static void SV_FreeReliableCommandsForClient(client_t *cl)
+{
+    Com_Memset(&cl->reliableCommands, 0, 12);
+}
+static void SV_ShutdownGameVM(int clearScripts)
+{
+    iassert(Sys_IsMainThread());
+    SV_AutoSaveDemo("autosave/autoreplay", 0, 50, 0);
+    if (!sv.demo.nextLevelplaying)
+        SV_ShutdownDemo();
+    sv.state = SS_DEAD;
+    G_ShutdownGame(clearScripts);
+    svs.clients->gentity = 0;
+    SV_FreeReliableCommandsForClient(svs.clients);
+}
+
+void __cdecl SV_ShutdownGameProgs()
+{
+    iassert(Sys_IsMainThread());
+
+    Com_SyncThreads();
+    if (gameInitialized)
+    {
+        SV_ShutdownGameVM(1);
+        SV_ShutdownDemo();
+        gameInitialized = 0;
+    }
+    else
+    {
+        iassert(!sv.state);
+    }
+}
+void __cdecl SV_RestartGameProgs(unsigned int randomSeed, int savegame, SaveGame **save, int loadScripts)
+{
+    iassert(Sys_IsMainThread());
+    iassert(gameInitialized);
+    R_BeginRemoteScreenUpdate();
+    SV_ShutdownGameVM(loadScripts);
+    iassert(save);
+
+    if (loadScripts)
+        Com_SetScriptSettings();
+
+    com_fixedConsolePosition = 0;
+    R_EndRemoteScreenUpdate();
+    SV_InitGameVM(randomSeed, 1, savegame, save, loadScripts);
+}
+
+void __cdecl SV_InitGameProgs(unsigned int randomSeed, int savegame, SaveGame **save)
+{
+    iassert(save);
+    gameInitialized = 1;
+    SV_InitGameVM(randomSeed, 0, savegame, save, 1);
+}
+
+
+
+void __fastcall SV_InitGameVM(unsigned int randomSeed, int restart, int savegame, SaveGame **save, int loadScripts)
+{
+    int v10; // r10
+    int v11; // r9
+    int v12; // [sp+8h] [-88h]
+    int v13; // [sp+Ch] [-84h]
+    int v14; // [sp+10h] [-80h]
+    unsigned int v15; // [sp+14h] [-7Ch]
+
+    if (!save)
+        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\server\\sv_game.cpp", 1130, 0, "%s", "save");
+    ProfLoad_Begin("Start map");
+    SV_StartMap(randomSeed);
+    ProfLoad_End();
+    G_ResetEntityParsePoint();
+    if (!++sv.skelTimeStamp)
+        sv.skelTimeStamp = 1;
+    sv.skelMemPos = 0;
+    g_sv_skel_memory_start = (char *)((unsigned int)&g_sv_skel_memory[15] & 0xFFFFFFF0);
+    SND_ErrorCleanup();
+    ProfLoad_Begin("Init game");
+    Sys_LoadingKeepAlive();
+    G_InitGame(randomSeed, restart, sv.checksum, loadScripts, savegame, save, v11, v10, v12, v13, v14, v15);
+    Sys_LoadingKeepAlive();
+    ProfLoad_End();
+    ProfLoad_Begin("Settle game");
+    SV_Settle();
+    ProfLoad_End();
+    ProfLoad_Begin("Connecting");
+    SV_DirectConnect();
+    CL_ConnectResponse();
+    SV_ClientEnterWorld(svs.clients);
+    ProfLoad_End();
+    if (!restart || !*save)
+    {
+        R_BeginRemoteScreenUpdate();
+        sv.demo.forwardMsec -= 50;
+        if (sv.demo.forwardMsec < 0)
+            sv.demo.forwardMsec = 0;
+        ProfLoad_Begin("Server pre-frame");
+        SV_PreFrame();
+        ProfLoad_End();
+        ProfLoad_Begin("Load game level");
+        G_LoadLevel();
+        ProfLoad_End();
+        R_EndRemoteScreenUpdate();
+    }
+}
+
+bool SV_SetBrushModel(gentity_s *ent)
+{
+    unsigned int index; // r3
+    float mins[4]; // [sp+50h] [-30h] BYREF
+    float maxs[4]; // [sp+60h] [-20h] BYREF
+
+    iassert(ent->r.inuse);
+
+    if (!CM_ClipHandleIsValid(ent->s.index))
+        return false;
+
+    CM_ModelBounds(ent->s.index, mins, maxs);
+
+    ent->r.mins[0] = mins[0];
+    ent->r.mins[1] = mins[1];
+    ent->r.mins[2] = mins[2];
+
+    ent->r.maxs[0] = maxs[0];
+    ent->r.maxs[1] = maxs[1];
+    ent->r.maxs[2] = maxs[2];
+
+    index = ent->s.index;
+    ent->r.bmodel = 1;
+
+    ent->r.contents = CM_ContentsOfModel(index);
+
+    SV_LinkEntity(ent);
+
+    return true;
+}
+
+#endif
+
+#ifdef KISAK_MP
+bool __cdecl SV_inSnapshot(const float *origin, int iEntityNum)
+{
+    int clientcluster; // [esp+4h] [ebp-24h]
+    float fogOpaqueDistSqrd; // [esp+8h] [ebp-20h]
+    svEntity_s *svEnt; // [esp+Ch] [ebp-1Ch]
+    int l; // [esp+10h] [ebp-18h]
+    unsigned int leafnum; // [esp+14h] [ebp-14h]
+    gentity_s *ent; // [esp+18h] [ebp-10h]
+    int i; // [esp+1Ch] [ebp-Ch]
+    unsigned __int8 *bitvector; // [esp+20h] [ebp-8h]
+
+    ent = SV_GentityNum(iEntityNum);
+    if (!ent->r.linked)
+        return 0;
+    if (ent->r.broadcastTime)
+        return 1;
+    if ((ent->r.svFlags & 1) != 0)
+        return 0;
+    if ((ent->r.svFlags & 0x18) != 0)
+        return 1;
+    svEnt = SV_SvEntityForGentity(ent);
+    leafnum = CM_PointLeafnum(origin);
+    if (!svEnt->numClusters)
+        return 0;
+    clientcluster = CM_LeafCluster(leafnum);
+    bitvector = CM_ClusterPVS(clientcluster);
+    l = 0;
+    for (i = 0; i < svEnt->numClusters; ++i)
+    {
+        l = svEnt->clusternums[i];
+        if (((1 << (l & 7)) & bitvector[l >> 3]) != 0)
+            break;
+    }
+    if (i == svEnt->numClusters)
+    {
+        if (!svEnt->lastCluster)
+            return 0;
+        while (l <= svEnt->lastCluster && ((1 << (l & 7)) & bitvector[l >> 3]) == 0)
+            ++l;
+        if (l == svEnt->lastCluster)
+            return 0;
+    }
+    fogOpaqueDistSqrd = G_GetFogOpaqueDistSqrd();
+    return fogOpaqueDistSqrd == 3.402823466385289e38
+        || !BoxDistSqrdExceeds(ent->r.absmin, ent->r.absmax, origin, fogOpaqueDistSqrd);
+}
+
+void __cdecl SV_SetGameEndTime(int gameEndTime)
+{
+    char *v1; // eax
+    char lastGameEndTime[12]; // [esp+0h] [ebp-10h] BYREF
+
+    SV_GetConfigstring(0xBu, lastGameEndTime, 12);
+    if ((int)abs(atoi(lastGameEndTime) - gameEndTime) > 500)
+    {
+        v1 = va("%i", gameEndTime);
+        SV_SetConfigstring(11, v1);
+    }
+}
+
+void __cdecl SV_SetMapCenter(float *mapCenter)
+{
+    char *v1; // eax
+
+    svs.mapCenter[0] = *mapCenter;
+    svs.mapCenter[1] = mapCenter[1];
+    svs.mapCenter[2] = mapCenter[2];
+    v1 = va("%f %f %f", *mapCenter, mapCenter[1], mapCenter[2]);
+    SV_SetConfigstring(12, v1);
+}
+
+void __cdecl SV_GameDropClient(int clientNum, const char *reason)
+{
+    if (sv_maxclients->current.integer < 1 || sv_maxclients->current.integer > 64)
+        MyAssertHandler(
+            ".\\server\\sv_game.cpp",
+            184,
+            0,
+            "%s\n\t(sv_maxclients->current.integer) = %i",
+            "(sv_maxclients->current.integer >= 1 && sv_maxclients->current.integer <= 64)",
+            sv_maxclients->current.integer);
+    if (clientNum >= 0 && clientNum < sv_maxclients->current.integer)
+        SV_DropClient(&svs.clients[clientNum], reason, 1);
+}
 
 bool __cdecl SV_MapExists(char *name)
 {
@@ -608,16 +736,6 @@ bool __cdecl SV_MapExists(char *name)
     basename = SV_GetMapBaseName(name);
     Com_GetBspFilename(fullpath, 0x100u, basename);
     return FS_ReadFile(fullpath, 0) >= 0;
-}
-
-bool __cdecl SV_DObjExists(gentity_s *ent)
-{
-    return Com_GetServerDObj(ent->s.number) != 0;
-}
-
-void __cdecl SV_track_shutdown()
-{
-    track_shutdown(2);
 }
 
 char *__cdecl SV_GetGuid(int clientNum)
@@ -640,18 +758,6 @@ bool __cdecl SV_IsLocalClient(int clientNum)
     return NET_IsLocalAddress(svs.clients[clientNum].header.netchan.remoteAddress);
 }
 
-void __cdecl SV_ShutdownGameProgs()
-{
-    Com_SyncThreads();
-    sv.state = SS_DEAD;
-    Com_UnloadSoundAliases(SASYS_GAME);
-    if (gameInitialized)
-    {
-        G_ShutdownGame(1);
-        gameInitialized = 0;
-    }
-}
-
 void __cdecl SV_SetGametype()
 {
     char gametype[64]; // [esp+0h] [ebp-48h] BYREF
@@ -670,14 +776,6 @@ void __cdecl SV_SetGametype()
         strcpy(gametype, "dm");
     }
     Dvar_SetString((dvar_s *)sv_gametype, gametype);
-}
-
-void __cdecl SV_RestartGameProgs(int savepersist)
-{
-    Com_SyncThreads();
-    G_ShutdownGame(0);
-    com_fixedConsolePosition = 0;
-    SV_InitGameVM(1, savepersist);
 }
 
 void __cdecl SV_InitGameVM(int restart, int savepersist)
@@ -701,34 +799,73 @@ void __cdecl SV_InitGameVM(int restart, int savepersist)
         svs.clients[i].gentity = 0;
 }
 
+void __cdecl SV_GameSendServerCommand(int clientNum, svscmd_type type, const char *text)
+{
+    if (clientNum == -1)
+    {
+        SV_SendServerCommand(0, type, "%s", text);
+    }
+    else
+    {
+        iassert(sv_maxclients->current.integer >= 1 && sv_maxclients->current.integer <= 64);
+        if (clientNum >= 0 && clientNum < sv_maxclients->current.integer)
+            SV_SendServerCommand(&svs.clients[clientNum], type, "%s", text);
+    }
+}
+
+bool __cdecl SV_SetBrushModel(gentity_s *ent)
+{
+    float mins[3]; // [esp+8h] [ebp-18h] BYREF
+    float maxs[3]; // [esp+14h] [ebp-Ch] BYREF
+
+    iassert(ent->r.inuse);
+
+    if (!CM_ClipHandleIsValid(ent->s.index.brushmodel))
+        return 0;
+
+    CM_ModelBounds(ent->s.index.brushmodel, mins, maxs);
+
+    ent->r.mins[0] = mins[0];
+    ent->r.mins[1] = mins[1];
+    ent->r.mins[2] = mins[2];
+
+    ent->r.maxs[0] = maxs[0];
+    ent->r.maxs[1] = maxs[1];
+    ent->r.maxs[2] = maxs[2];
+
+    ent->r.bmodel = 1;
+
+    ent->r.contents = CM_ContentsOfModel(ent->s.index.brushmodel);
+
+    SV_LinkEntity(ent);
+
+    return 1;
+}
+
+void __cdecl SV_ShutdownGameProgs()
+{
+    Com_SyncThreads();
+    sv.state = SS_DEAD;
+    Com_UnloadSoundAliases(SASYS_GAME);
+    if (gameInitialized)
+    {
+        G_ShutdownGame(1);
+        gameInitialized = 0;
+    }
+}
+
 void __cdecl SV_InitGameProgs(int savepersist)
 {
     gameInitialized = 1;
     SV_InitGameVM(0, savepersist);
 }
 
-int __cdecl SV_GameCommand()
+void __cdecl SV_RestartGameProgs(int savepersist)
 {
-    if (sv.state == SS_GAME)
-        return ConsoleCommand();
-    else
-        return 0;
+    Com_SyncThreads();
+    G_ShutdownGame(0);
+    com_fixedConsolePosition = 0;
+    SV_InitGameVM(1, savepersist);
 }
 
-#ifdef KISAK_SP
-void SV_CheckLoadLevel(SaveGame *save)
-{
-    int v1; // r3
-    int v2; // r3
-
-    G_CheckLoadGame(sv.checksum, save);
-    com_time = G_GetTime();
-    sv.timeResidual = 49;
-    if (CL_DemoPlaying())
-        CL_ReadDemoMessagesUntilNextSnap();
-    else
-        SV_SendClientMessages();
-    v2 = Hunk_CheckTempMemoryClear(v1);
-    Hunk_CheckTempMemoryHighClear(v2);
-}
 #endif

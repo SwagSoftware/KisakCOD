@@ -28,7 +28,7 @@ struct entityState_s
     unsigned __int16 number;
     unsigned __int16 otherEntityNum;
     unsigned __int16 groundEntityNum;
-    _BYTE index[2];
+    unsigned __int16 index;
     int time2;
     int solid;
     int eventSequence;
