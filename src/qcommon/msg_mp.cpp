@@ -970,7 +970,7 @@ int __cdecl MSG_ReadEntityIndex(msg_t *msg, unsigned int indexBits)
 void __cdecl MSG_ReadDeltaField(
     msg_t *msg,
     int time,
-    char *from,
+    const char * const from,
     char *to,
     const NetField *field,
     int print,
@@ -1562,11 +1562,86 @@ int __cdecl MSG_ReadDeltaClient(msg_t *msg, int time, clientState_s *from, clien
         numClientStateFields);
 }
 
+static void __cdecl MSG_ReadDeltaFields(
+    msg_t *msg,
+    int time,
+    const char *const from,
+    char *to,
+    int numFields,
+    const NetField *stateFields)
+{
+    if (MSG_ReadBit(msg))
+    {
+        for (int i = 0; i < numFields; ++i)
+            MSG_ReadDeltaField(msg, time, from, to, &stateFields[i], 0, 0);
+    }
+    // LWSS: redundant since the caller does memcpy(to, from) on the entire block
+    //else
+    //{
+    //    for (int i = 0; i < numFields; ++i)
+    //        *(unsigned int *)&to[stateFields[i].offset] = *(unsigned int *)&from[stateFields[i].offset];
+    //}
+}
+
+static void __cdecl MSG_ReadDeltaHudElems(msg_t *msg, int time, const hudelem_s *from, hudelem_s *to, int count)
+{
+    unsigned int j; // [esp+8h] [ebp-18h]
+    unsigned int lc; // [esp+Ch] [ebp-14h]
+
+    if (count != 31)
+        MyAssertHandler(
+            ".\\qcommon\\msg_mp.cpp",
+            1884,
+            0,
+            "%s",
+            "count == MAX_HUDELEMS_ARCHIVAL || count == MAX_HUDELEMS_CURRENT");
+
+    int inuse = MSG_ReadBits(msg, 5u);
+
+    for (int i = 0; i < inuse; ++i)
+    {
+        lc = MSG_ReadBits(msg, 6);
+
+        for (j = 0; j <= lc; ++j)
+            MSG_ReadDeltaField(msg, time, (const char *)&from[i], (char *)&to[i], &hudElemFields[j], 0, 0);
+
+        // Redundant since caller does memcpy(to, from)
+        //while (j < numHudElemFields)
+        //{
+        //    *(&to[i].type + hudElemFields[j].offset) = *(&from[i].type + hudElemFields[j].offset);
+        //    ++j;
+        //}
+
+        iassert(!(from[i].alignOrg & ~15));
+        iassert(!(to[i].alignOrg & ~15));
+
+        {
+            int alignX = ((from[i].alignOrg >> 2) & 3);
+            int alignY = (from[i].alignOrg & 3);
+            iassert(alignX == 0 || alignX == 1 || alignX == 2);
+            iassert(alignY == 0 || alignY == 1 || alignY == 2);
+        }
+        {
+            int alignX = ((to[i].alignOrg >> 2) & 3);
+            int alignY = (to[i].alignOrg & 3);
+            iassert(alignX == 0 || alignX == 1 || alignX == 2);
+            iassert(alignY == 0 || alignY == 1 || alignY == 2);
+        }
+    }
+
+    while (inuse < count && to[inuse].type)
+    {
+        memset(&to[inuse], 0, sizeof(hudelem_s));
+        iassert(to[inuse].type == HE_TYPE_FREE);
+        ++inuse;
+    }
+}
+
 void __cdecl MSG_ReadDeltaPlayerstate(
     int localClientNum,
     msg_t *msg,
     int time,
-    playerState_s *from,
+    const playerState_s *from,
     playerState_s *to,
     bool predictedFieldsIgnoreXor)
 {
@@ -1578,21 +1653,22 @@ void __cdecl MSG_ReadDeltaPlayerstate(
     int i; // [esp+20h] [ebp-2F98h]
     int k; // [esp+20h] [ebp-2F98h]
     int print; // [esp+24h] [ebp-2F94h]
-    NetField *field; // [esp+28h] [ebp-2F90h]
-    NetField *fielda; // [esp+28h] [ebp-2F90h]
     int LastChangedField; // [esp+30h] [ebp-2F88h]
-    unsigned __int8 dst[12140]; // [esp+38h] [ebp-2F80h] BYREF
     int Bits; // [esp+2FA8h] [ebp-10h]
     int *v19; // [esp+2FACh] [ebp-Ch]
     bool lc; // [esp+2FB3h] [ebp-5h]
-    int j; // [esp+2FB4h] [ebp-4h]
+
+    unsigned __int8 dst[sizeof(playerState_s) + 8]; // [esp+38h] [ebp-2F80h] BYREF
 
     if (!from)
     {
         from = (playerState_s *)dst;
-        memset(dst, 0, 0x2F64u);
+        memset(dst, 0, sizeof(playerState_s));
     }
-    memcpy((unsigned __int8 *)to, (unsigned __int8 *)from, sizeof(playerState_s));
+
+    // Copy entire `from` into `to`
+    memcpy(to, from, sizeof(playerState_s));
+
     if (cl_shownet && (cl_shownet->current.integer >= 2 || cl_shownet->current.integer == -2))
     {
         print = 1;
@@ -1602,37 +1678,44 @@ void __cdecl MSG_ReadDeltaPlayerstate(
     {
         print = 0;
     }
+
     lc = MSG_ReadBit(msg) > 0;
     LastChangedField = MSG_ReadLastChangedField(msg, numPlayerStateFields);
 
-    j = 0;
-    field = (NetField *)playerStateFields;
-    while (j < LastChangedField)
     {
-        iassert(!msg->overflowed);
+        int itr = 0;
+        NetField *field = (NetField *)playerStateFields;
+        while (itr < LastChangedField)
+        {
+            iassert(!msg->overflowed);
 
-        if (predictedFieldsIgnoreXor && lc && field->changeHints == 3)
-            MSG_ReadDeltaField(msg, time, (char *)from, (char *)to, field, print, 1);
-        else
-            MSG_ReadDeltaField(msg, time, (char *)from, (char *)to, field, print, 0);
+            if (predictedFieldsIgnoreXor && lc && field->changeHints == 3)
+                MSG_ReadDeltaField(msg, time, (const char *)from, (char *)to, field, print, 1);
+            else
+                MSG_ReadDeltaField(msg, time, (const char *)from, (char *)to, field, print, 0);
 
-        iassert(!msg->overflowed);
-        ++j;
-        ++field;
+            iassert(!msg->overflowed);
+            ++itr;
+            ++field;
+        }
     }
 
-    j = LastChangedField;
-    fielda = (NetField *)&playerStateFields[LastChangedField];
-    while (j < numPlayerStateFields)
-    {
-        v19 = (int *)((char *)&from->commandTime + fielda->offset);
-        *(int *)((char *)&to->commandTime + fielda->offset) = *v19;
-        ++j;
-        ++fielda;
-    }
+    // LWSS: this is made redundant via the memcpy at the start (#36)
+    //{
+    //    int itr = LastChangedField;
+    //    NetField *field = (NetField *)&playerStateFields[LastChangedField];
+    //    while (itr < numPlayerStateFields)
+    //    {
+    //        v19 = (int *)((char *)&from->commandTime + field->offset);
+    //        *(int *)((char *)&to->commandTime + field->offset) = *v19;
+    //        ++itr;
+    //        ++field;
+    //    }
+    //}
+
+
     if (!lc)
     {
-#ifndef DEDICATED
         LocalClientGlobals = CL_GetLocalClientGlobals(localClientNum);
 
         if (!CL_GetPredictedOriginForServerTime(
@@ -1643,22 +1726,24 @@ void __cdecl MSG_ReadDeltaPlayerstate(
             to->viewangles,
             &to->bobCycle,
             &to->movementDir))
-#endif
         {
             Com_PrintError(14, "Unable to find the origin we sent, delta is not going to work");
-            to->origin[0] = from->origin[0];
-            to->origin[1] = from->origin[1];
-            to->origin[2] = from->origin[2];
-            to->velocity[0] = from->velocity[0];
-            to->velocity[1] = from->velocity[1];
-            to->velocity[2] = from->velocity[2];
-            to->bobCycle = from->bobCycle;
-            to->movementDir = from->movementDir;
-            to->viewangles[0] = from->viewangles[0];
-            to->viewangles[1] = from->viewangles[1];
-            to->viewangles[2] = from->viewangles[2];
+            // LWSS: if the above function returns false, there is no data set in `to`. 
+            // The below copy code is redundant via the memcpy at the top (#36)
+            //to->origin[0] = from->origin[0];
+            //to->origin[1] = from->origin[1];
+            //to->origin[2] = from->origin[2];
+            //to->velocity[0] = from->velocity[0];
+            //to->velocity[1] = from->velocity[1];
+            //to->velocity[2] = from->velocity[2];
+            //to->bobCycle = from->bobCycle;
+            //to->movementDir = from->movementDir;
+            //to->viewangles[0] = from->viewangles[0];
+            //to->viewangles[1] = from->viewangles[1];
+            //to->viewangles[2] = from->viewangles[2];
         }
     }
+
     if (MSG_ReadBit(msg))
     {
         if (cl_shownet && cl_shownet->current.integer == 4)
@@ -1675,6 +1760,7 @@ void __cdecl MSG_ReadDeltaPlayerstate(
         if ((Bits & 0x10) != 0)
             to->stats[4] = MSG_ReadByte(msg);
     }
+
     if (MSG_ReadBit(msg))
     {
         for (i = 0; i < 4; ++i)
@@ -1684,7 +1770,7 @@ void __cdecl MSG_ReadDeltaPlayerstate(
                 if (cl_shownet && cl_shownet->current.integer == 4)
                     Com_Printf(16, "%s ", "PS_AMMO");
                 Bits = MSG_ReadShort(msg);
-                for (j = 0; j < 16; ++j)
+                for (int j = 0; j < 16; ++j)
                 {
                     if ((Bits & (1 << j)) != 0)
                     {
@@ -1695,6 +1781,7 @@ void __cdecl MSG_ReadDeltaPlayerstate(
             }
         }
     }
+
     for (k = 0; k < 8; ++k)
     {
         if (MSG_ReadBit(msg))
@@ -1702,7 +1789,7 @@ void __cdecl MSG_ReadDeltaPlayerstate(
             if (cl_shownet && cl_shownet->current.integer == 4)
                 Com_Printf(16, "%s ", "PS_AMMOCLIP");
             Bits = MSG_ReadShort(msg);
-            for (j = 0; j < 16; ++j)
+            for (int j = 0; j < 16; ++j)
             {
                 if ((Bits & (1 << j)) != 0)
                 {
@@ -1712,139 +1799,35 @@ void __cdecl MSG_ReadDeltaPlayerstate(
             }
         }
     }
+
     if (MSG_ReadBit(msg))
     {
-        for (j = 0; j < 16; ++j)
+        for (int j = 0; j < 16; ++j)
         {
-            v8 = (objectiveState_t)MSG_ReadBits(msg, 3u);
-            to->objective[j].state = v8;
+            to->objective[j].state = (objectiveState_t)MSG_ReadBits(msg, 3);
             MSG_ReadDeltaFields(
                 msg,
                 time,
-                (char *)&from->objective[j],
+                (const char *)&from->objective[j],
                 (char *)&to->objective[j],
                 numObjectiveFields,
                 objectiveFields);
         }
     }
+
     if (MSG_ReadBit(msg))
     {
         MSG_ReadDeltaHudElems(msg, time, from->hud.archival, to->hud.archival, 31);
         MSG_ReadDeltaHudElems(msg, time, from->hud.current, to->hud.current, 31);
     }
+
     if (MSG_ReadBit(msg))
     {
-        for (j = 0; j < 128; ++j)
+        for (int j = 0; j < 128; ++j)
         {
             Byte = MSG_ReadByte(msg);
             to->weaponmodels[j] = Byte;
         }
-    }
-}
-
-void __cdecl MSG_ReadDeltaFields(
-    msg_t *msg,
-    int time,
-    char *from,
-    char *to,
-    int numFields,
-    const NetField *stateFields)
-{
-    int i; // [esp+Ch] [ebp-4h]
-    int ia; // [esp+Ch] [ebp-4h]
-
-    if (MSG_ReadBit(msg))
-    {
-        for (i = 0; i < numFields; ++i)
-            MSG_ReadDeltaField(msg, time, from, to, &stateFields[i], 0, 0);
-    }
-    else
-    {
-        for (ia = 0; ia < numFields; ++ia)
-            *(unsigned int *)&to[stateFields[ia].offset] = *(unsigned int *)&from[stateFields[ia].offset];
-    }
-}
-
-void __cdecl MSG_ReadDeltaHudElems(msg_t *msg, int time, const hudelem_s *from, hudelem_s *to, int count)
-{
-    unsigned int j; // [esp+8h] [ebp-18h]
-    unsigned int lc; // [esp+Ch] [ebp-14h]
-    int i; // [esp+18h] [ebp-8h]
-    int inuse; // [esp+1Ch] [ebp-4h]
-
-    if (count != 31)
-        MyAssertHandler(
-            ".\\qcommon\\msg_mp.cpp",
-            1884,
-            0,
-            "%s",
-            "count == MAX_HUDELEMS_ARCHIVAL || count == MAX_HUDELEMS_CURRENT");
-    inuse = MSG_ReadBits(msg, 5u);
-    for (i = 0; i < inuse; ++i)
-    {
-        lc = MSG_ReadBits(msg, 6u);
-        for (j = 0; j <= lc; ++j)
-            MSG_ReadDeltaField(msg, time, (char*)&from[i], (char*)&to[i], &hudElemFields[j], 0, 0);
-        while (j < numHudElemFields)
-        {
-            *(&to[i].type + hudElemFields[j].offset) = *(&from[i].type + hudElemFields[j].offset);
-            ++j;
-        }
-        if ((from[i].alignOrg & 0xFFFFFFF0) != 0)
-            MyAssertHandler(
-                ".\\qcommon\\msg_mp.cpp",
-                1903,
-                0,
-                "%s\n\t(from[i].alignOrg) = %i",
-                "(!(from[i].alignOrg & ~15))",
-                from[i].alignOrg);
-        if ((to[i].alignOrg & 0xFFFFFFF0) != 0)
-            MyAssertHandler(
-                ".\\qcommon\\msg_mp.cpp",
-                1904,
-                0,
-                "%s\n\t(from[i].alignOrg) = %i",
-                "(!(to[i].alignOrg & ~15))",
-                from[i].alignOrg);
-        if (((from[i].alignOrg >> 2) & 3) == 3)
-            MyAssertHandler(
-                ".\\qcommon\\msg_mp.cpp",
-                1907,
-                0,
-                "%s\n\t(from[i].alignOrg) = %i",
-                "(alignX == 0 || alignX == 1 || alignX == 2)",
-                from[i].alignOrg);
-        if ((from[i].alignOrg & 3) == 3)
-            MyAssertHandler(
-                ".\\qcommon\\msg_mp.cpp",
-                1910,
-                0,
-                "%s\n\t(from[i].alignOrg) = %i",
-                "(alignY == 0 || alignY == 1 || alignY == 2)",
-                from[i].alignOrg);
-        if (((to[i].alignOrg >> 2) & 3) == 3)
-            MyAssertHandler(
-                ".\\qcommon\\msg_mp.cpp",
-                1913,
-                0,
-                "%s\n\t(to[i].alignOrg) = %i",
-                "(alignX == 0 || alignX == 1 || alignX == 2)",
-                to[i].alignOrg);
-        if ((to[i].alignOrg & 3) == 3)
-            MyAssertHandler(
-                ".\\qcommon\\msg_mp.cpp",
-                1916,
-                0,
-                "%s\n\t(to[i].alignOrg) = %i",
-                "(alignY == 0 || alignY == 1 || alignY == 2)",
-                to[i].alignOrg);
-    }
-    while (inuse < count && to[inuse].type)
-    {
-        memset(&to[inuse], 0, sizeof(hudelem_s));
-        if (to[inuse].type)
-            MyAssertHandler(".\\qcommon\\msg_mp.cpp", 1923, 0, "%s", "to[inuse].type == HE_TYPE_FREE");
-        ++inuse;
     }
 }
 

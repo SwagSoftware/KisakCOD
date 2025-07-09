@@ -9,7 +9,6 @@
 #include <universal/com_files.h>
 #include <universal/com_sndalias.h>
 #include <game_mp/g_public_mp.h>
-#include "sv_public.h"
 
 
 //int gameInitialized      834a4d50     sv_game.obj

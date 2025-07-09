@@ -950,7 +950,7 @@ void __cdecl CL_SavePredictedOriginForServerTime(
     float *viewangles,
     int32_t bobCycle,
     int32_t movementDir);
-char __cdecl CL_GetPredictedOriginForServerTime(
+bool __cdecl CL_GetPredictedOriginForServerTime(
     clientActive_t *cl,
     int32_t serverTime,
     float *predictedOrigin,

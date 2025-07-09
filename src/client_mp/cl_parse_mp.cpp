@@ -94,7 +94,7 @@ void __cdecl CL_SavePredictedOriginForServerTime(
     }
 }
 
-char __cdecl CL_GetPredictedOriginForServerTime(
+bool __cdecl CL_GetPredictedOriginForServerTime(
     clientActive_t *cl,
     int serverTime,
     float *predictedOrigin,
@@ -103,65 +103,45 @@ char __cdecl CL_GetPredictedOriginForServerTime(
     int *bobCycle,
     int *movementDir)
 {
-    unsigned int v7; // edx
-    unsigned int v9; // ecx
-    int index; // [esp+24h] [ebp-8h]
-    int indexa; // [esp+24h] [ebp-8h]
-    int cmd; // [esp+28h] [ebp-4h]
-    int cmda; // [esp+28h] [ebp-4h]
-
-    for (cmd = 0; cmd < CLIENT_ARCHIVE_SIZE; ++cmd)
+    for (int cmd = 0; cmd < CLIENT_ARCHIVE_SIZE; ++cmd)
     {
-        v7 = (cl->clientArchiveIndex + CLIENT_ARCHIVE_SIZE - cmd - 1) % CLIENT_ARCHIVE_SIZE;
-        index = v7;
-        if (v7 >= CLIENT_ARCHIVE_SIZE)
-            MyAssertHandler(
-                ".\\client_mp\\cl_parse_mp.cpp",
-                108,
-                0,
-                "index doesn't index CLIENT_ARCHIVE_SIZE\n\t%i not in [0, %i)",
-                v7,
-                CLIENT_ARCHIVE_SIZE);
+        int index = (cl->clientArchiveIndex + CLIENT_ARCHIVE_SIZE - cmd - 1) % CLIENT_ARCHIVE_SIZE;
+        bcassert(index, CLIENT_ARCHIVE_SIZE);
         if (cl->clientArchive[index].serverTime <= serverTime)
         {
             if (cl->clientArchive[index].serverTime != serverTime)
-                Com_Printf(
-                    14,
-                    "Couldn't find exact match for servertime %i, using servertime %i\n",
-                    serverTime,
-                    cl->clientArchive[index].serverTime);
-            *predictedOrigin = cl->clientArchive[index].origin[0];
+            {
+                Com_Printf(14, "Couldn't find exact match for servertime %i, using servertime %i\n", serverTime, cl->clientArchive[index].serverTime);
+            }
+                
+            predictedOrigin[0] = cl->clientArchive[index].origin[0];
             predictedOrigin[1] = cl->clientArchive[index].origin[1];
             predictedOrigin[2] = cl->clientArchive[index].origin[2];
-            *predictedVelocity = cl->clientArchive[index].velocity[0];
+            predictedVelocity[0] = cl->clientArchive[index].velocity[0];
             predictedVelocity[1] = cl->clientArchive[index].velocity[1];
             predictedVelocity[2] = cl->clientArchive[index].velocity[2];
-            *viewangles = cl->clientArchive[index].viewangles[0];
+            viewangles[0] = cl->clientArchive[index].viewangles[0];
             viewangles[1] = cl->clientArchive[index].viewangles[1];
             viewangles[2] = cl->clientArchive[index].viewangles[2];
             *bobCycle = cl->clientArchive[index].bobCycle;
             *movementDir = cl->clientArchive[index].movementDir;
             iassert(!IS_NAN((predictedOrigin)[0]) && !IS_NAN((predictedOrigin)[1]) && !IS_NAN((predictedOrigin)[2]));
             iassert(!IS_NAN((predictedVelocity)[0]) && !IS_NAN((predictedVelocity)[1]) && !IS_NAN((predictedVelocity)[2]));
-            return 1;
+
+            return true;
         }
     }
+
     Com_PrintError(14, "Unable to find predicted origin for server time %i.  Here's what we have:\n", serverTime);
-    for (cmda = 0; cmda < CLIENT_ARCHIVE_SIZE; ++cmda)
+
+    for (int cmd = 0; cmd < CLIENT_ARCHIVE_SIZE; ++cmd)
     {
-        v9 = (cl->clientArchiveIndex + CLIENT_ARCHIVE_SIZE - cmda - 1) % CLIENT_ARCHIVE_SIZE;
-        indexa = v9;
-        if (v9 >= 0x100)
-            MyAssertHandler(
-                ".\\client_mp\\cl_parse_mp.cpp",
-                130,
-                0,
-                "index doesn't index CLIENT_ARCHIVE_SIZE\n\t%i not in [0, %i)",
-                v9,
-                CLIENT_ARCHIVE_SIZE);
-        Com_PrintError(14, "%i: %i\n", indexa, cl->clientArchive[indexa].serverTime);
+        int index = (cl->clientArchiveIndex + CLIENT_ARCHIVE_SIZE - cmd - 1) % CLIENT_ARCHIVE_SIZE;
+        bcassert(index, CLIENT_ARCHIVE_SIZE);
+        Com_PrintError(14, "%i: %i\n", index, cl->clientArchive[index].serverTime);
     }
-    return 0;
+
+    return false;
 }
 
 void __cdecl CL_DeltaClient(

@@ -87,7 +87,7 @@ int __cdecl MSG_ReadEntityIndex(msg_t *msg, unsigned int indexBits);
 void __cdecl MSG_ReadDeltaField(
     msg_t *msg,
     int time,
-    char *from,
+    const char * const from,
     char *to,
     const NetField *field,
     int print,
@@ -122,17 +122,9 @@ void __cdecl MSG_ReadDeltaPlayerstate(
     int localClientNum,
     msg_t *msg,
     int time,
-    playerState_s *from,
+    const playerState_s *from,
     playerState_s *to,
     bool predictedFieldsIgnoreXor);
-void __cdecl MSG_ReadDeltaFields(
-    msg_t *msg,
-    int time,
-    char *from,
-    char *to,
-    int numFields,
-    const NetField *stateFields);
-void __cdecl MSG_ReadDeltaHudElems(msg_t *msg, int time, const hudelem_s *from, hudelem_s *to, int count);
 void __cdecl MSG_InitHuffman();
 void MSG_initHuffmanInternal();
 void __cdecl MSG_DumpNetFieldChanges_f();
