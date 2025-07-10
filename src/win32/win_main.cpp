@@ -820,3 +820,6 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 	track_shutdown(0);
 	return 0;
 }
+
+extern "C" __declspec(dllexport) DWORD NvOptimusEnablement = 1;
+extern "C" __declspec(dllexport) DWORD AmdPowerXpressRequestHighPerformance = 1;
