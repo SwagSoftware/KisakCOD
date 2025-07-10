@@ -44,6 +44,11 @@ int __cdecl XAnimGetTreeMaxMemUsage()
     return 0x40000;
 }
 
+XAnimInfo *XAnimAllocInfo(DObj_s *obj, unsigned int animIndex, int after)
+{
+    return &g_xAnimInfo[XAnimAllocInfoIndex(obj, animIndex, after)];
+}
+
 void __cdecl XAnimInit()
 {
     int i; // [esp+0h] [ebp-4h]

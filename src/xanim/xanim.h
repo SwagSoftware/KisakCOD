@@ -1240,6 +1240,7 @@ enum XAssetType : __int32
     ASSET_TYPE_XANIMPARTS = 0x2,
     ASSET_TYPE_XMODEL = 0x3,
     ASSET_TYPE_MATERIAL = 0x4,
+    // PIXELSHADER?
     ASSET_TYPE_TECHNIQUE_SET = 0x5,
     ASSET_TYPE_IMAGE = 0x6,
     ASSET_TYPE_SOUND = 0x7,
@@ -1486,6 +1487,7 @@ int __cdecl XAnimGetTreeHighMemUsage();
 int __cdecl XAnimGetTreeMemUsage();
 void __cdecl TRACK_xanim();
 int __cdecl XAnimGetTreeMaxMemUsage();
+XAnimInfo *XAnimAllocInfo(DObj_s *obj, unsigned int animIndex, int after);
 void __cdecl XAnimInit();
 void __cdecl XAnimShutdown();
 XAnimParts* __cdecl XAnimFindData_LoadObj(const char* name);

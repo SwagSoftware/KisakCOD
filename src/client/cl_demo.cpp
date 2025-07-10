@@ -4,7 +4,14 @@
 
 #include "cl_demo.h"
 #include <xanim/xmodel.h>
+#include <xanim/dobj.h>
 #include <script/scr_stringlist.h>
+#include <universal/com_files.h>
+#include <universal/com_memory.h>
+#include <game/g_local.h>
+#include <xanim/xanim.h>
+#include "client.h"
+#include <xanim/xanim_readwrite.h>
 
 void __cdecl CL_WriteDemoShortCString(MemoryFile *memFile, const char *string)
 {
@@ -51,7 +58,7 @@ const char *__cdecl CL_ReadDemoShortCString(MemoryFile *memFile, char *string)
         return 0;
     v5 = memFile;
     v6 = (unsigned __int8)(v7[0] - 1);
-    MemFile_ReadData(v5, v6, string);
+    MemFile_ReadData(v5, v6, (unsigned char*)string);
     result = string;
     string[v6] = 0;
     return result;
@@ -78,7 +85,7 @@ void __cdecl CL_ReadDemoDObjModel(MemoryFile *memFile, DObjModel_s *dobjModel)
     const char *DemoShortCString; // r3
     XModel *Existing; // r3
     const char *v6; // r3
-    _BYTE v7[16]; // [sp+50h] [-140h] BYREF
+    unsigned char modelFlags; // [sp+50h] [-140h] BYREF
     char v8[304]; // [sp+60h] [-130h] BYREF
 
     if (!dobjModel)
@@ -90,109 +97,87 @@ void __cdecl CL_ReadDemoDObjModel(MemoryFile *memFile, DObjModel_s *dobjModel)
         MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\client\\cl_demo.cpp", 85, 0, "%s", "dobjModel->model");
     v6 = CL_ReadDemoShortCString(memFile, v8);
     dobjModel->boneName = SL_FindString(v6);
-    MemFile_ReadData(memFile, 1, v7);
-    dobjModel->ignoreCollision = (_cntlzw(v7[0]) & 0x20) == 0;
+    MemFile_ReadData(memFile, 1, &modelFlags);
+    //dobjModel->ignoreCollision = (_cntlzw(v7[0]) & 0x20) == 0;
+    dobjModel->ignoreCollision = (modelFlags & 0x20); // KISAKTODO: double check this logic
 }
 
 void __cdecl CL_WriteAnimTree(MemoryFile *memFile, int entnum, const XAnimTree_s *tree)
 {
-    MemoryFile *v4; // r30
-    int v5; // r4
-    int EntAnimTreeId; // r8
-    __int16 v7; // r31
-    _WORD v8[4]; // [sp+50h] [-20h] BYREF
+    int byteCount; // r4
+    unsigned int id; // r8
+    bool bytes[2]; // [sp+50h] [-20h] BYREF
 
-    v4 = memFile;
-    v5 = 1;
+    byteCount = 1;
     if (tree)
     {
-        HIBYTE(v8[0]) = 1;
-        MemFile_WriteData(memFile, 1, v8);
-        EntAnimTreeId = G_GetEntAnimTreeId(entnum);
-        v7 = EntAnimTreeId;
-        if (EntAnimTreeId != (unsigned __int16)EntAnimTreeId)
-            MyAssertHandler(
-                "c:\\trees\\cod3\\cod3src\\src\\client\\cl_demo.cpp",
-                103,
-                0,
-                "%s\n\t(id) = %i",
-                "(id == static_cast< unsigned short >( id ))",
-                EntAnimTreeId);
-        v8[0] = v7;
-        v5 = 2;
-        memFile = v4;
+        bytes[0] = 1;
+        MemFile_WriteData(memFile, 1, bytes);
+        id = G_GetEntAnimTreeId(entnum);
+        iassert(id == static_cast<unsigned short>(id));
+        *(_WORD *)bytes = id;
+        byteCount = 2;
     }
     else
     {
-        HIBYTE(v8[0]) = 0;
+        bytes[0] = 0;
     }
-    MemFile_WriteData(memFile, v5, v8);
+    MemFile_WriteData(memFile, byteCount, bytes);
 }
 
 XAnimTree_s *__cdecl CL_ReadAnimTree(MemoryFile *memFile, int entnum)
 {
-    XAnimTree_s *EntAnimTreeForId; // r31
-    _WORD v6[4]; // [sp+50h] [-20h] BYREF
+    XAnimTree_s *tree; // r31
+    unsigned char buf[4]; // [sp+50h] [-20h] BYREF
 
-    MemFile_ReadData(memFile, 1, v6);
-    if (!HIBYTE(v6[0]))
+    MemFile_ReadData(memFile, 1, (unsigned char*)buf);
+    if (!HIBYTE(buf[0]))
         return 0;
-    MemFile_ReadData(memFile, 2, v6);
-    EntAnimTreeForId = G_GetEntAnimTreeForId(entnum, v6[0]);
-    if (!EntAnimTreeForId)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\client\\cl_demo.cpp", 118, 0, "%s", "tree");
-    XAnimClearTree(EntAnimTreeForId);
-    return EntAnimTreeForId;
+
+    MemFile_ReadData(memFile, 2, (unsigned char *)buf);
+    tree = G_GetEntAnimTreeForId(entnum, buf[0]);
+    iassert(tree);
+    XAnimClearTree(tree);
+    return tree;
 }
 
 void __cdecl CL_WriteDemoDObj(int entnum, const DObj_s *obj)
 {
     const XAnimTree_s *Tree; // r3
-    char v5; // r11
-    int v6; // r31
-    const DObjModel_s *v7; // r30
-    unsigned __int16 v8; // [sp+50h] [-160h] BYREF
-    _BYTE v9[2]; // [sp+52h] [-15Eh] BYREF
+    const DObjModel_s *pModel; // r30
+    unsigned __int16 modelCount; // [sp+50h] [-160h] BYREF
+    unsigned char modelCountWrite; // [sp+52h] [-15Eh] BYREF
     unsigned __int16 v10[6]; // [sp+54h] [-15Ch] BYREF
-    MemoryFile v11; // [sp+60h] [-150h] BYREF
+    MemoryFile memFile; // [sp+60h] [-150h] BYREF
     XAnimTree_s *v12; // [sp+7Ch] [-134h] BYREF
     DObjModel_s v13[38]; // [sp+80h] [-130h] BYREF
 
-    if (!obj)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\client\\cl_demo.cpp", 136, 0, "%s", "obj");
-    DObjGetCreateParms(obj, v13, &v8, &v12, v10);
-    MemFile_InitForWriting(&v11, 0x100000, cls.demobuf, 1, 0);
+    iassert(obj);
+    DObjGetCreateParms(obj, v13, &modelCount, &v12, v10);
+    MemFile_InitForWriting(&memFile, 0x100000, (byte*)cls.demobuf, 1, 0);
     Tree = DObjGetTree(obj);
-    CL_WriteAnimTree(&v11, entnum, Tree);
-    v5 = v8;
-    if (v8 != (unsigned __int8)v8)
+    CL_WriteAnimTree(&memFile, entnum, Tree);
+    iassert(modelCount == static_cast<byte>(modelCount));
+    modelCountWrite = modelCount;
+    MemFile_WriteData(&memFile, 1, &modelCountWrite);
+
+    if (modelCount)
     {
-        MyAssertHandler(
-            "c:\\trees\\cod3\\cod3src\\src\\client\\cl_demo.cpp",
-            143,
-            0,
-            "%s\n\t(modelCount) = %i",
-            "(modelCount == static_cast< byte >( modelCount ))",
-            v8);
-        v5 = v8;
-    }
-    v9[0] = v5;
-    MemFile_WriteData(&v11, 1, v9);
-    v6 = 0;
-    if (v8)
-    {
-        v7 = v13;
+        int i = 0;
+
+        pModel = v13;
         do
         {
-            CL_WriteDemoDObjModel(&v11, v7);
-            ++v6;
-            ++v7;
-        } while (v6 < v8);
+            CL_WriteDemoDObjModel(&memFile, pModel);
+            ++i;
+            ++pModel;
+        } while (i < modelCount);
     }
-    XAnimSaveAnimTree(obj, &v11);
-    MemFile_StartSegment(&v11, -1);
-    FS_Write(&v11.bytesUsed, 4, cls.demofile);
-    FS_Write(v11.buffer, v11.bytesUsed, cls.demofile);
+
+    XAnimSaveAnimTree(obj, &memFile);
+    MemFile_StartSegment(&memFile, -1);
+    FS_Write((const char*)&memFile.bytesUsed, 4, cls.demofile);
+    FS_Write((const char*)memFile.buffer, memFile.bytesUsed, cls.demofile);
 }
 
 void __cdecl CL_ReadDemoDObj(int entnum)

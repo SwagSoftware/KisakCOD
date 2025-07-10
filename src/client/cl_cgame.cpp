@@ -8,6 +8,7 @@
 #include <gfx_d3d/r_cinematic.h>
 #include <universal/com_files.h>
 #include <stringed/stringed_hooks.h>
+#include <cgame/cg_servercmds.h>
 
 char bigConfigString[8192];
 const float g_color_table[8][4]
@@ -37,12 +38,10 @@ void __cdecl TRACK_cl_cgame()
 
 void __cdecl CL_GetScreenDimensions(unsigned int *width, unsigned int *height, float *aspect)
 {
-    if (!width)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\client\\cl_cgame.cpp", 84, 0, "%s", "width");
-    if (!height)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\client\\cl_cgame.cpp", 85, 0, "%s", "height");
-    if (!aspect)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\client\\cl_cgame.cpp", 86, 0, "%s", "aspect");
+    iassert(width);
+    iassert(height);
+    iassert(aspect);
+
     *width = cls.vidConfig.displayWidth;
     *height = cls.vidConfig.displayHeight;
     *aspect = cls.vidConfig.aspectRatioWindow;
@@ -60,49 +59,31 @@ int __cdecl CL_GetUserCmd(int localClientNum, int cmdNumber, usercmd_s *ucmd)
 {
     int v5; // r6
 
-    if (localClientNum)
-        MyAssertHandler(
-            "c:\\trees\\cod3\\cod3src\\src\\client\\client.h",
-            555,
-            0,
-            "%s\n\t(localClientNum) = %i",
-            "(localClientNum == 0)",
-            localClientNum);
-    v5 = clients[0].cmdNumber;
+    iassert(localClientNum == 0);
+    
     if (cmdNumber > clients[0].cmdNumber)
     {
-        Com_Error(ERR_DROP, byte_82012648, cmdNumber);
-        v5 = clients[0].cmdNumber;
+        Com_Error(ERR_DROP, "CL_GetUserCmd:cmdNumber %i >= %i", cmdNumber, clients[0].cmdNumber);
     }
+
     if (cmdNumber <= v5 - 64 || cmdNumber <= 0)
         return 0;
+
     memcpy(ucmd, &clients[0].cmds[cmdNumber & 0x3F], sizeof(usercmd_s));
+
     return 1;
 }
 
 int __cdecl CL_GetCurrentCmdNumber(int localClientNum)
 {
-    if (localClientNum)
-        MyAssertHandler(
-            "c:\\trees\\cod3\\cod3src\\src\\client\\client.h",
-            555,
-            0,
-            "%s\n\t(localClientNum) = %i",
-            "(localClientNum == 0)",
-            localClientNum);
+    iassert(localClientNum == 0);
     return clients[0].cmdNumber;
 }
 
 void __cdecl CL_GetCurrentSnapshotNumber(int localClientNum, int *snapshotNumber, int *serverTime)
 {
-    if (localClientNum)
-        MyAssertHandler(
-            "c:\\trees\\cod3\\cod3src\\src\\client\\client.h",
-            555,
-            0,
-            "%s\n\t(localClientNum) = %i",
-            "(localClientNum == 0)",
-            localClientNum);
+    iassert(localClientNum == 0);
+
     *snapshotNumber = clients[0].snap.messageNum;
     *serverTime = clients[0].snap.serverTime;
 }
@@ -114,14 +95,8 @@ int __cdecl CL_GetSnapshot(int localClientNum, snapshot_s *snapshot)
     int *entityNums; // r29
     unsigned int v6; // r7
 
-    if (localClientNum)
-        MyAssertHandler(
-            "c:\\trees\\cod3\\cod3src\\src\\client\\client.h",
-            555,
-            0,
-            "%s\n\t(localClientNum) = %i",
-            "(localClientNum == 0)",
-            localClientNum);
+    iassert(localClientNum == 0);
+
     if (!clients[0].snapshots[0].valid)
         MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\client\\cl_cgame.cpp", 155, 0, "%s", "clSnap->valid");
     if (clients[0].parseEntitiesNum - clients[0].snapshots[0].parseEntitiesNum >= 2048)
@@ -235,56 +210,27 @@ void CL_ConfigstringModified()
 {
     int nesting; // r7
     const char *v1; // r3
-    unsigned int v2; // r30
+    unsigned int index; // r30
     int v3; // r7
     const char *v4; // r26
-    unsigned int v5; // r28
     const char *v6; // r29
     const char *v7; // r10
     const char *v8; // r11
     int v9; // r8
 
-    nesting = cmd_args.nesting;
-    if (cmd_args.nesting >= 8u)
-    {
-        MyAssertHandler(
-            "c:\\trees\\cod3\\cod3src\\src\\client\\../qcommon/cmd.h",
-            174,
-            0,
-            "cmd_args.nesting doesn't index CMD_MAX_NESTING\n\t%i not in [0, %i)",
-            cmd_args.nesting,
-            8);
-        nesting = cmd_args.nesting;
-    }
-    if (cmd_args.argc[nesting] <= 1)
-        v1 = byte_82003CDD;
-    else
-        v1 = (const char *)*((unsigned int *)cmd_args.argv[nesting] + 1);
-    v2 = atol(v1);
-    if (v2 > 0xAFE)
-        Com_Error(ERR_DROP, byte_82012758);
-    v3 = cmd_args.nesting;
-    if (cmd_args.nesting >= 8u)
-    {
-        MyAssertHandler(
-            "c:\\trees\\cod3\\cod3src\\src\\client\\../qcommon/cmd.h",
-            174,
-            0,
-            "cmd_args.nesting doesn't index CMD_MAX_NESTING\n\t%i not in [0, %i)",
-            cmd_args.nesting,
-            8);
-        v3 = cmd_args.nesting;
-    }
-    if (cmd_args.argc[v3] <= 2)
-        v4 = byte_82003CDD;
-    else
-        v4 = (const char *)*((unsigned int *)cmd_args.argv[v3] + 2);
-    v5 = v2;
-    if (!clients[0].configstrings[v2])
+    v1 = Cmd_Argv(1);
+    index = atol(v1);
+    if (index > 2814)
+        Com_Error(ERR_DROP, "configstring > MAX_CONFIGSTRINGS");
+
+    v4 = Cmd_Argv(2);
+    if (!clients[0].configstrings[index])
         MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\client\\cl_cgame.cpp", 244, 0, "%s", "cl->configstrings[index]");
-    v6 = SL_ConvertToString(clients[0].configstrings[v5]);
+
+    v6 = SL_ConvertToString(clients[0].configstrings[index]);
     if (!v6)
         MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\client\\cl_cgame.cpp", 246, 0, "%s", "old");
+
     v7 = v4;
     v8 = v6;
     do
@@ -297,8 +243,8 @@ void CL_ConfigstringModified()
     } while (!v9);
     if (v9)
     {
-        SL_RemoveRefToString(clients[0].configstrings[v5]);
-        clients[0].configstrings[v5] = SL_GetString_(v4, 0, 19);
+        SL_RemoveRefToString(clients[0].configstrings[index]);
+        clients[0].configstrings[index] = SL_GetString_(v4, 0, 19);
     }
 }
 
@@ -314,7 +260,7 @@ void __cdecl CL_Restart()
     {
         if (*configstrings)
             MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\client\\cl_cgame.cpp", 279, 0, "%s", "!cl->configstrings[i]");
-        *configstrings++ = SL_GetString_(byte_82003CDD, 0, 19);
+        *configstrings++ = SL_GetString_("", 0, 19);
     } while ((int)configstrings < (int)clients[0].mapname);
     Con_ClearNotify(0);
     Con_ClearErrors(0);
@@ -517,22 +463,17 @@ int __cdecl CL_CGameNeedsServerCommand(int localClientNum, int serverCommandNumb
     int sequence; // r11
     const char *v4; // r3
 
-    if (localClientNum)
-        MyAssertHandler(
-            "c:\\trees\\cod3\\cod3src\\src\\client\\client.h",
-            562,
-            0,
-            "%s\n\t(localClientNum) = %i",
-            "(localClientNum == 0)",
-            localClientNum);
+    iassert(localClientNum == 0);
+
     sequence = clientConnections[0].serverCommands.header.sequence;
+
     if (serverCommandNumber <= clientConnections[0].serverCommands.header.sequence - 256)
     {
-        Com_Error(ERR_DROP, byte_82012834);
+        Com_Error(ERR_DROP, "a reliable command was cycled out");
         sequence = clientConnections[0].serverCommands.header.sequence;
     }
     if (serverCommandNumber > sequence)
-        Com_Error(ERR_DROP, byte_820127FC);
+        Com_Error(ERR_DROP, "requested a command not received");
     v4 = &clientConnections[0].serverCommands.buf[*(int *)((char *)clientConnections[0].serverCommands.commands
         + ((4 * serverCommandNumber) & 0x3FC))];
     clientConnections[0].serverCommands.header.sent = serverCommandNumber;

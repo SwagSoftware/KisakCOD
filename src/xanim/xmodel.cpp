@@ -671,3 +671,8 @@ int __cdecl XModelGetStaticBounds(const XModel *model, mat3x3 &axis, float *mins
         return 0;
     }
 }
+
+XModel* XModelFindExisting(const char *name)
+{
+    return DB_FindXAssetHeader(ASSET_TYPE_XMODEL, name).model;
+}

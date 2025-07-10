@@ -2,7 +2,9 @@
 #include <sound/snd_public.h>
 #include <gfx_d3d/r_cinematic.h>
 #include <qcommon/cmd.h>
+#ifdef KISAK_MP
 #include <client_mp/client_mp.h>
+#endif
 
 bool cin_skippable;
 

@@ -10,24 +10,6 @@
 #include <universal/com_files.h>
 #include <buildnumber_mp.h>
 
-//int32_t con_inputMaxMatchesShown 827b26dc     cl_console.obj
-//int32_t g_console_field_width 827b26e0     cl_console.obj
-//float g_console_char_height 827b26e4     cl_console.obj
-//char (*)[29] con_gameMsgWindowNFadeInTime_Names 82850d78     cl_console.obj
-//char (*)[55] con_gameMsgWindowNFadeOutTime_Descs 82850df0     cl_console.obj
-
-//char (*)[48] con_gameMsgWindowNSplitscreenScale_Descs 82850ef8     cl_console.obj
-//char (*)[26] con_gameMsgWindowNMsgTime_Names 82851020     cl_console.obj
-//char (*)[73] con_gameMsgWindowNLineCount_Descs 82851088     cl_console.obj
-//char (*)[28] con_gameMsgWindowNLineCount_Names 828511b0     cl_console.obj
-//char (*)[84] con_gameMsgWindowNScrollTime_Descs 82851220     cl_console.obj
-//char (*)[69] con_gameMsgWindowNMsgTime_Descs 82851390     cl_console.obj
-//char (*)[30] con_gameMsgWindowNFadeOutTime_Names 828514a8     cl_console.obj
-//char (*)[35] con_gameMsgWindowNSplitscreenScale_Names 82851520     cl_console.obj
-//char (*)[29] con_gameMsgWindowNScrollTime_Names 828739a8     cl_console.obj
-//char (*)[54] con_gameMsgWindowNFadeInTime_Descs 82873a20     cl_console.obj
-//BOOL con_ignoreMatchPrefixOnly 82851380     cl_console.obj
-// 
 const dvar_t *con_typewriterColorGlowFailed;
 const dvar_t *con_typewriterColorGlowCompleted;
 const dvar_t *con_typewriterColorGlowCheckpoint;
@@ -51,6 +33,7 @@ const dvar_t *con_outputWindowColor;
 
 Console con;
 
+int32_t con_inputMaxMatchesShown = 24;
 int32_t g_console_field_width = 620;
 float g_console_char_height = 16.0f;
 
@@ -79,7 +62,6 @@ const dvar_s *con_gameMsgWindowNSplitscreenScale[4];
 
 ConDrawInputGlob conDrawInputGlob;
 bool con_ignoreMatchPrefixOnly;
-int32_t con_inputMaxMatchesShown = 24;
 
 const float con_versionColor[4] = { 1.0f, 1.0f, 0.0f, 1.0f };
 const float con_screenPadding = 4.0f;

@@ -758,7 +758,8 @@ struct clientStatic_t
     bool demorecording;
     bool isTimeDemo;
     char demoName[64];
-    void *demofile;
+    //void *demofile;
+    int demofile;
     void *demobuf;
     void *timeDemoLog;
     int32_t timeDemoFrames;

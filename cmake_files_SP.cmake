@@ -827,6 +827,8 @@ set(XANIM
     "${SRC_DIR}/xanim/xanim_load_db.h"
     "${SRC_DIR}/xanim/xanim_load_obj.cpp"
     "${SRC_DIR}/xanim/xanim_public.h"
+    "${SRC_DIR}/xanim/xanim_readwrite.cpp"
+    "${SRC_DIR}/xanim/xanim_readwrite.h"
     "${SRC_DIR}/xanim/xmodel.cpp"
     "${SRC_DIR}/xanim/xmodel.h"
     "${SRC_DIR}/xanim/xmodel_load_obj.cpp"
