@@ -373,6 +373,11 @@ void __cdecl CL_PlayTextFXPulseSounds(
     int32_t fxDecayStartTime,
     int32_t *soundTimeKeeper);
 
+#ifdef KISAK_SP
+void CL_ArchiveMessages(MemoryFile *memFile);
+#endif
+
+
 extern const dvar_t *con_typewriterColorGlowFailed;
 extern const dvar_t *con_typewriterColorGlowCompleted;
 extern const dvar_t *con_typewriterColorGlowCheckpoint;
@@ -558,6 +563,10 @@ void __cdecl Con_FilterList_f();
 void __cdecl Con_ShutdownChannels();
 void __cdecl Con_CloseChannelInternal(uint32_t channel);
 
+#ifdef KISAK_SP
+void Con_SaveChannels(MemoryFile *memFile);
+void Con_RestoreChannels(MemoryFile *memFile);
+#endif
 
 
 // cl_devgui
@@ -637,6 +646,9 @@ extern int32_t dvar_modifiedFlags;
 
 
 #ifdef KISAK_SP
+
+#define CL_SKEL_MEMORY_SIZE 0x80000
+#define SKEL_MEM_ALIGNMENT 16
 
 enum connstate_t : int32_t
 {
@@ -761,7 +773,8 @@ struct clientStatic_t
     //void *demofile;
     int demofile;
     void *demobuf;
-    void *timeDemoLog;
+    //void *timeDemoLog;
+    int timeDemoLog;
     int32_t timeDemoFrames;
     int32_t timeDemoStart;
     int32_t timeDemoPrev;
@@ -828,11 +841,14 @@ struct clientActive_t
     int32_t iForceButtons;
     int32_t iForceWeapon;
     int32_t forceOffhand;
+
+    // skel_glob sub-struct?
     int32_t skelTimeStamp;
     volatile int32_t skelMemPos;
     char skelMemory[524288];
     char *skelMemoryStart;
     bool allowedAllocSkel;
+
     clSnapshot_t snapshots[1];
     int32_t parseEntityNums[2048];
 };
@@ -1075,7 +1091,7 @@ void __cdecl CL_MapLoading_CalcMovieToPlay_FastFile(const char *inMapName, char 
 void __cdecl CL_MapLoading_StartCinematic(const char *mapname, double volume, int32_t a3, const char *a4);
 void __cdecl CL_MapLoading(const char *mapname);
 void __cdecl CL_ResetSkeletonCache();
-void __cdecl CL_ClearState(int32_t a1, int32_t a2);
+void __cdecl CL_ClearState();
 void __cdecl CL_Disconnect(int32_t localClientNum);
 void __cdecl CL_ForwardCommandToServer(int32_t localClientNum, const char *string);
 void __cdecl CL_ForwardToServer_f();
@@ -1084,21 +1100,7 @@ void __cdecl CL_InitLoad(const char *mapname);
 void __cdecl CL_PacketEvent(msg_t *msg, int32_t serverMessageSequence);
 void __cdecl CL_SetFrametime(int32_t frametime, int32_t animFrametime);
 void __cdecl CheckForConsoleGuidePause(int32_t localClientNum);
-void __cdecl CL_Frame(
-    int32_t localClientNum,
-    int32_t msec,
-    int32_t a3,
-    int32_t a4,
-    int32_t a5,
-    int32_t a6,
-    int32_t a7,
-    int32_t a8,
-    int32_t a9,
-    int32_t a10,
-    int32_t a11,
-    int32_t a12,
-    int32_t a13,
-    int32_t a14);
+void __cdecl CL_Frame(int32_t localClientNum, int32_t msec);
 bool __cdecl CL_IsLocalClientInGame(int32_t localClientNum);
 bool __cdecl CL_IsUIActive(const int32_t localClientNum);
 void __cdecl CL_InitRenderer();
@@ -1296,5 +1298,33 @@ extern clientConnection_t clientConnections[1];
 extern clientUIActive_t clientUIActives[1];
 extern clientActive_t clients[1];
 extern clientStatic_t cls;
+
+extern const dvar_t *const input_invertPitch;
+extern const dvar_t *const cl_avidemo;
+extern const dvar_t *const cl_testAnimWeight;
+extern const dvar_t *const cl_freemoveScale;
+extern const dvar_t *const motd;
+extern const dvar_t *const cl_sensitivity;
+extern const dvar_t *const cl_forceavidemo;
+extern const dvar_t *const m_yaw;
+extern const dvar_t *const m_pitch;
+extern const dvar_t *const nextdemo;
+extern const dvar_t *const cl_freemove;
+extern const dvar_t *const cl_showMouseRate;
+extern const dvar_t *const takeCoverWarnings;
+extern const dvar_t *const m_forward;
+extern const dvar_t *const cheat_items_set2;
+extern const dvar_t *const cl_mouseAccel;
+extern const dvar_t *const cheat_points;
+extern const dvar_t *const input_viewSensitivity;
+extern const dvar_t *const input_autoAim;
+extern const dvar_t *const cl_inGameVideo;
+extern const dvar_t *const cl_noprint;
+extern const dvar_t *const m_side;
+extern const dvar_t *const m_filter;
+extern const dvar_t *const cheat_items_set1;
+extern const dvar_t *const cl_freelook;
+extern const dvar_t *const cl_shownet;
+
 
 #endif

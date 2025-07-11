@@ -72,6 +72,12 @@ const char **__cdecl Cmd_GetAutoCompleteFileList(const char *cmdName, int32_t  *
         return 0;
 }
 
+int Cmd_LocalClientNum()
+{
+    bcassert(cmd_args.nesting, CMD_MAX_NESTING);
+    return 0;
+}
+
 /*
 ============
 Cmd_Argc

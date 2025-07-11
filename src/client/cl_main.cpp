@@ -3,40 +3,109 @@
 #endif
 
 #include "client.h"
+#include <game/g_local.h>
+#include "cl_ui.h"
+#include <qcommon/cmd.h>
+#include <devgui/devgui.h>
+#include <win32/win_local.h>
+#include <server/sv_public.h>
+#include <universal/com_files.h>
+#include <universal/q_parse.h>
+#include <database/database.h>
+#include <ui/ui.h>
+#include <qcommon/threads.h>
+#include <cgame/cg_snapshot.h>
+#include "cl_parse.h"
+#include "cl_demo.h"
+#include <gfx_d3d/r_init.h>
+
+enum MovieToPlayScriptOp : __int32
+{
+    MTPSOP_PLUS = 0x0,
+    MTPSOP_MINUS = 0x1,
+    MTPSOP_MUL = 0x2,
+    MTPSOP_GT = 0x3,
+    MTPSOP_LT = 0x4,
+    MTPSOP_EQ = 0x5,
+    MTPSOP_STRCMP = 0x6,
+    MTPSOP_STRCAT = 0x7,
+    MTPSOP_NOT = 0x8,
+    MTPSOP_DUP = 0x9,
+    MTPSOP_DROP = 0xA,
+    MTPSOP_SWAP = 0xB,
+    MTPSOP_GETDVAR = 0xC,
+    MTPSOP_GETMAPNAME = 0xD,
+    MTPSOP_IF = 0xE,
+    MTPSOP_THEN = 0xF,
+    MTPSOP_PLAY = 0x10,
+    MTPSOP_LITERAL = 0x11,
+    MTPSOP_COUNT = 0x12,
+};
+
+struct MovieToPlayScriptOpInfo
+{
+    MovieToPlayScriptOp op;
+    const char *opName;
+    unsigned int inValues;
+    unsigned int outValues;
+};
+
+const MovieToPlayScriptOpInfo s_movieToPlayScriptOpInfo[18] =
+{
+  { MTPSOP_PLUS, "+", 2u, 1u },
+  { MTPSOP_MINUS, "-", 2u, 1u },
+  { MTPSOP_MUL, "*", 2u, 1u },
+  { MTPSOP_GT, ">", 2u, 1u },
+  { MTPSOP_LT, "<", 2u, 1u },
+  { MTPSOP_EQ, "==", 2u, 1u },
+  { MTPSOP_STRCMP, "strcmp", 2u, 1u },
+  { MTPSOP_STRCAT, "strcat", 2u, 1u },
+  { MTPSOP_NOT, "!", 1u, 1u },
+  { MTPSOP_DUP, "dup", 1u, 2u },
+  { MTPSOP_DROP, "drop", 1u, 0u },
+  { MTPSOP_SWAP, "swap", 2u, 2u },
+  { MTPSOP_GETDVAR, "getdvar", 1u, 1u },
+  { MTPSOP_GETMAPNAME, "getmapname", 0u, 1u },
+  { MTPSOP_IF, "if", 1u, 0u },
+  { MTPSOP_THEN, "then", 0u, 0u },
+  { MTPSOP_PLAY, "play", 1u, 0u },
+  { MTPSOP_LITERAL, NULL, 0u, 1u }
+};
+
 
 clientConnection_t clientConnections[1];
 clientUIActive_t clientUIActives[1];
 clientActive_t clients[1];
 clientStatic_t cls;
 
-// struct dvar_s const *const input_invertPitch 827f8df8     cl_main.obj
-// struct dvar_s const *const cl_avidemo 827f8dfc     cl_main.obj
-// struct dvar_s const *const cl_testAnimWeight 8283b220     cl_main.obj
-// struct dvar_s const *const cl_freemoveScale 8283b224     cl_main.obj
-// struct dvar_s const *const motd       8283b228     cl_main.obj
-// struct dvar_s const *const cl_sensitivity 8283b22c     cl_main.obj
-// struct dvar_s const *const cl_forceavidemo 8283b230     cl_main.obj
-// struct dvar_s const *const m_yaw      8283b234     cl_main.obj
-// struct dvar_s const *const m_pitch    8283b238     cl_main.obj
-// struct dvar_s const *const nextdemo   8283b23c     cl_main.obj
-// struct dvar_s const **arcadeScore 8283b240     cl_main.obj
-// struct dvar_s const *const cl_freemove 8283b28c     cl_main.obj
-// struct dvar_s const *const cl_showMouseRate 8283b4f4     cl_main.obj
-// struct dvar_s const *const takeCoverWarnings 8283b4f8     cl_main.obj
-// int marker_cl_main       8283b4fc     cl_main.obj
-// struct dvar_s const *const m_forward  8283b500     cl_main.obj
-// struct dvar_s const *const cheat_items_set2 8283b504     cl_main.obj
-// struct dvar_s const *const cl_mouseAccel 8283b508     cl_main.obj
-// struct dvar_s const *const cheat_points 8283b50c     cl_main.obj
-// struct dvar_s const *const input_viewSensitivity 8283b510     cl_main.obj
-// struct dvar_s const *const input_autoAim 8283b514     cl_main.obj
-// struct dvar_s const *const cl_inGameVideo 8283b52c     cl_main.obj
-// struct dvar_s const *const cl_noprint 8283b530     cl_main.obj
-// struct dvar_s const *const m_side     8283b534     cl_main.obj
-// struct dvar_s const *const m_filter   8283b538     cl_main.obj
-// struct dvar_s const *const cheat_items_set1 8283b53c     cl_main.obj
-// struct dvar_s const *const cl_freelook 828d5ffc     cl_main.obj
-// struct dvar_s const *const cl_shownet 828d6000     cl_main.obj
+const dvar_t *const input_invertPitch;
+const dvar_t *const cl_avidemo;
+const dvar_t *const cl_testAnimWeight;
+const dvar_t *const cl_freemoveScale;
+const dvar_t *const motd;
+const dvar_t *const cl_sensitivity;
+const dvar_t *const cl_forceavidemo;
+const dvar_t *const m_yaw;
+const dvar_t *const m_pitch;
+const dvar_t *const nextdemo;
+const dvar_t *const cl_freemove;
+const dvar_t *const cl_showMouseRate;
+const dvar_t *const takeCoverWarnings;
+const dvar_t *const m_forward;
+const dvar_t *const cheat_items_set2;
+const dvar_t *const cl_mouseAccel;
+const dvar_t *const cheat_points;
+const dvar_t *const input_viewSensitivity;
+const dvar_t *const input_autoAim;
+const dvar_t *const cl_inGameVideo;
+const dvar_t *const cl_noprint;
+const dvar_t *const m_side;
+const dvar_t *const m_filter;
+const dvar_t *const cheat_items_set1;
+const dvar_t *const cl_freelook;
+const dvar_t *const cl_shownet;
+
+const dvar_s *arcadeScore[19]{ 0 };
 
 void __cdecl TRACK_cl_main()
 {
@@ -217,7 +286,7 @@ void __cdecl CL_ShutdownHunkUsers()
 
 void __cdecl CL_ShutdownDemo()
 {
-    void *demofile; // r3
+    int demofile; // r3
     void *demobuf; // r3
 
     demofile = cls.demofile;
@@ -240,7 +309,7 @@ void __cdecl CL_ShutdownDemo()
                 MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\client\\cl_main.cpp", 417, 0, "%s", "cls.demobuf");
                 demobuf = cls.demobuf;
             }
-            Z_VirtualFree(demobuf, 0);
+            Z_VirtualFree(demobuf);
             cls.demobuf = 0;
         }
     }
@@ -355,7 +424,7 @@ void __cdecl CL_MapLoading_CalcMovieToPlay(
     Com_BeginParseSession("video/cin_levels.txt");
     do
     {
-        v19 = Com_Parse(&a12);
+        v19 = Com_Parse(&a12)->token;
         v20 = v19;
         if (!*v19)
             break;
@@ -639,7 +708,7 @@ void __cdecl CL_MapLoading(const char *mapname)
         v3,
         v2);
     UI_DrawConnectScreen();
-    Live_SetCurrentMapname(mapname);
+    //Live_SetCurrentMapname(mapname);
     if (cl_multi_gamepads_enabled)
         Cmd_ExecuteSingleCommand(0, cl_controller_in_use, "nosplitscreen\n");
     SND_FadeAllSounds(0.0, v4);
@@ -647,20 +716,19 @@ void __cdecl CL_MapLoading(const char *mapname)
 
 void __cdecl CL_ResetSkeletonCache()
 {
-    if (!Sys_IsMainThread())
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\client\\cl_main.cpp", 714, 0, "%s", "Sys_IsMainThread()");
-    PIXSetMarker(0xFFFFFFFF, "CL_ResetSkeletonCache");
+    iassert(Sys_IsMainThread());
+    //PIXSetMarker(0xFFFFFFFF, "CL_ResetSkeletonCache");
     if (!++clients[0].skelTimeStamp)
         clients[0].skelTimeStamp = 1;
     clients[0].skelMemoryStart = (char *)((unsigned int)&clients[0].skelMemory[15] & 0xFFFFFFF0);
     clients[0].skelMemPos = 0;
 }
 
-void __cdecl CL_ClearState(int a1, int a2)
+void __cdecl CL_ClearState()
 {
     unsigned __int16 *configstrings; // r31
 
-    CG_CreateNextSnap(0, 0.0, a2);
+    CG_CreateNextSnap(0, 0.0, 0);
     CG_SetNextSnap(0);
     SND_StopSounds(SND_STOP_ALL);
     configstrings = clients[0].configstrings;
@@ -671,7 +739,7 @@ void __cdecl CL_ClearState(int a1, int a2)
         ++configstrings;
     } while ((int)configstrings < (int)clients[0].mapname);
     memset(clients, 0, sizeof(clients));
-    Com_ClientDObjClearAllSkel(0);
+    Com_ClientDObjClearAllSkel();
     memset(clientConnections, 0, sizeof(clientConnections));
 }
 
@@ -691,42 +759,25 @@ void __cdecl CL_Disconnect(int localClientNum)
                 "clientIndex doesn't index STATIC_MAX_LOCAL_CLIENTS\n\t%i not in [0, %i)",
                 localClientNum,
                 1);
-        Live_Disconnected(cl_controller_in_use);
+        //Live_Disconnected(cl_controller_in_use);
     }
 }
 
 void __cdecl CL_ForwardCommandToServer(int localClientNum, const char *string)
 {
-    int nesting; // r7
-    const char *v5; // r31
-    int v6; // r10
+    const char *cmd; // r31
 
-    nesting = cmd_args.nesting;
-    if (cmd_args.nesting >= 8u)
+    cmd = Cmd_Argv(0);
+
+    if (*cmd != '-')
     {
-        MyAssertHandler(
-            "c:\\trees\\cod3\\cod3src\\src\\client\\../qcommon/cmd.h",
-            174,
-            0,
-            "cmd_args.nesting doesn't index CMD_MAX_NESTING\n\t%i not in [0, %i)",
-            cmd_args.nesting,
-            8);
-        nesting = cmd_args.nesting;
-    }
-    if (cmd_args.argc[nesting] <= 0)
-        v5 = byte_82003CDD;
-    else
-        v5 = *cmd_args.argv[nesting];
-    v6 = *v5;
-    if (v6 != 45)
-    {
-        if (cls.demoplaying || clientUIActives[0].connectionState == CA_DISCONNECTED || v6 == 43)
+        if (cls.demoplaying || clientUIActives[0].connectionState == CA_DISCONNECTED || *cmd == '+')
         {
-            Com_Printf(14, "Unknown command \"%s\"\n", v5);
+            Com_Printf(14, "Unknown command \"%s\"\n", cmd);
         }
         else if (Cmd_Argc() <= 1)
         {
-            CL_AddReliableCommand(localClientNum, v5);
+            CL_AddReliableCommand(localClientNum, cmd);
         }
         else
         {
@@ -760,14 +811,14 @@ void __cdecl CL_ConnectResponse()
 void __cdecl CL_InitLoad(const char *mapname)
 {
     com_expectedHunkUsage = 0;
-    Dvar_SetString(nextmap, byte_82003CDD);
+    Dvar_SetString(nextmap, "");
     if (clientUIActives[0].isRunning)
     {
         SCR_StopCinematic(0);
         clientUIActives[0].connectionState = CA_DISCONNECTED;
         SND_DisconnectListener(0);
         CL_ResetLastGamePadEventTime();
-        Live_Disconnected(cl_controller_in_use);
+        //Live_Disconnected(cl_controller_in_use);
     }
     UI_SetMap(mapname);
     clientUIActives[0].connectionState = CA_MAP_RESTART;
@@ -815,6 +866,7 @@ void __cdecl CL_SetFrametime(int frametime, int animFrametime)
 
 void __cdecl CheckForConsoleGuidePause(int localClientNum)
 {
+#ifdef KISAK_XBOX
     if (Live_IsSystemUiActive()
         && !cl_paused->current.integer
         && com_sv_running->current.enabled
@@ -823,23 +875,10 @@ void __cdecl CheckForConsoleGuidePause(int localClientNum)
     {
         UI_SetActiveMenu(localClientNum, UIMENU_INGAME);
     }
+#endif
 }
 
-void __cdecl CL_Frame(
-    int localClientNum,
-    int msec,
-    int a3,
-    int a4,
-    int a5,
-    int a6,
-    int a7,
-    int a8,
-    int a9,
-    int a10,
-    int a11,
-    int a12,
-    int a13,
-    int a14)
+void __cdecl CL_Frame(int localClientNum, int msec)
 {
     int v14; // r29
     int v16; // r3
@@ -1029,7 +1068,7 @@ void CL_DevGuiCmd_f()
     {
         v2 = Cmd_Argv(2);
         v3 = Cmd_Argv(1);
-        DevGui_AddCommand(v3, v2);
+        DevGui_AddCommand(v3, (const char*)v2);
     }
     else
     {
@@ -1068,6 +1107,9 @@ void CL_DevGuiOpen_f()
     }
 }
 
+cmd_function_s CL_DevGuiDvar_f_VAR;
+cmd_function_s CL_DevGuiCmd_f_VAR;
+cmd_function_s CL_DevGuiOpen_f_VAR;
 void CL_InitDevGui()
 {
     DevGui_Init();
@@ -1126,15 +1168,16 @@ void __cdecl CL_VoidCommand()
 
 void __cdecl CL_startMultiplayer_f()
 {
+    iassert(0); // KISAKTODO
     if (!Sys_IsMainThread())
         MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\client\\cl_main.cpp", 1453, 0, "%s", "Sys_IsMainThread()");
-    LSP_SendLogRequest(cl_controller_in_use);
-    LB_EndOngoingTasks();
+    //LSP_SendLogRequest(cl_controller_in_use);
+    //LB_EndOngoingTasks();
     Com_SyncThreads();
     Sys_SuspendOtherThreads();
     R_ShutdownDirect3D();
-    XLaunchNewImage("cod3mp.exe", 0);
-    JUMPOUT(0x82179E04);
+    //XLaunchNewImage("cod3mp.exe", 0);
+    //JUMPOUT(0x82179E04);
 }
 
 void __cdecl CL_ShellExecute_URL_f()
@@ -1146,22 +1189,9 @@ void __cdecl CL_ShellExecute_URL_f()
     const char *v4; // r3
 
     Com_DPrintf(0, "CL_ShellExecute_URL_f\n");
-    nesting = cmd_args.nesting;
-    if (cmd_args.nesting >= 8u)
-    {
-        MyAssertHandler(
-            "c:\\trees\\cod3\\cod3src\\src\\client\\../qcommon/cmd.h",
-            174,
-            0,
-            "cmd_args.nesting doesn't index CMD_MAX_NESTING\n\t%i not in [0, %i)",
-            cmd_args.nesting,
-            8);
-        nesting = cmd_args.nesting;
-    }
-    if (cmd_args.argc[nesting] <= 1)
-        v1 = byte_82003CDD;
-    else
-        v1 = (const char *)*((unsigned int *)cmd_args.argv[nesting] + 1);
+
+    v1 = Cmd_Argv(1);
+
     if (I_stricmp(v1, "open"))
     {
         Com_DPrintf(0, "invalid CL_ShellExecute_URL_f syntax (shellExecute \"open\" <url> <doExit>)\n");
@@ -1252,7 +1282,7 @@ void __cdecl CL_StopLogo(int localClientNum)
         {
             v3 = va("%s\n", string);
             Cbuf_AddText(0, v3);
-            Dvar_SetString(nextmap, byte_82003CDD);
+            Dvar_SetString(nextmap, "");
         }
     }
 }

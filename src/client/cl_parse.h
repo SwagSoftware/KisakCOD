@@ -1,11 +1,12 @@
 #pragma once
-#include <qcommon/msg_mp.h>
 
 #ifndef KISAK_SP
 #error This file is for SinglePlayer only
 #endif
 
 #include "client.h"
+
+#include <qcommon/msg.h>
 
 void __cdecl TRACK_cl_parse();
 void __cdecl SHOWNET(msg_t *msg, char *s);

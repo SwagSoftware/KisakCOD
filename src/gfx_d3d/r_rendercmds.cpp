@@ -1664,6 +1664,11 @@ void __cdecl R_AddCmdProjectionSet2D()
     R_AddCmdProjectionSet(GFX_PROJECTION_2D);
 }
 
+void __cdecl R_AddCmdProjectionSet3D()
+{
+    R_AddCmdProjectionSet(GFX_PROJECTION_3D);
+}
+
 void __cdecl R_AddCmdProjectionSet(GfxProjectionTypes projection)
 {
     GfxCmdProjectionSet *cmd; // [esp+0h] [ebp-4h]

@@ -383,3 +383,95 @@ void __cdecl Con_CloseChannelInternal(uint32_t channel)
     }
 }
 
+#ifdef KISAK_SP
+void Con_SaveChannels(MemoryFile *memFile)
+{
+    int v2; // r10
+    PrintChannel *v3; // r11
+    int v4; // r29
+    PrintChannelGlob *v5; // r31
+    PrintChannelGlob *v6; // r11
+    int v7; // r9
+    int v8; // r30
+    _DWORD v9[16]; // [sp+50h] [-40h] BYREF
+
+    v2 = 0;
+    v3 = &pcGlob.openChannels[1];
+    do
+    {
+        if (v3[-1].name[0])
+            ++v2;
+        if (v3->name[0])
+            ++v2;
+        if (v3[1].name[0])
+            ++v2;
+        if (v3[2].name[0])
+            ++v2;
+        v3 += 4;
+    } while ((int)v3 < (int)((char *)&pcGlob.filters[1][0] + 1));
+    v9[0] = v2;
+    MemFile_WriteData(memFile, 4, v9);
+    v4 = 0;
+    v5 = &pcGlob;
+    do
+    {
+        if (v5->openChannels[0].name[0])
+        {
+            v6 = v5;
+            do
+            {
+                v7 = (unsigned __int8)v6->openChannels[0].name[0];
+                v6 = (PrintChannelGlob *)((char *)v6 + 1);
+            } while (v7);
+            v9[0] = v4;
+            v8 = (char *)v6 - (char *)v5 - 1;
+            MemFile_WriteData(memFile, 4, v9);
+            v9[0] = v8;
+            MemFile_WriteData(memFile, 4, v9);
+            MemFile_WriteData(memFile, v8, v5);
+        }
+        v5 = (PrintChannelGlob *)((char *)v5 + 33);
+        ++v4;
+    } while ((int)v5 < (int)pcGlob.filters);
+}
+
+void Con_RestoreChannels(MemoryFile *memFile)
+{
+    unsigned int v2; // r25
+    int v3; // r30
+    int v4; // r31
+    unsigned int v5; // [sp+50h] [-70h] BYREF
+    int v6[3]; // [sp+54h] [-6Ch] BYREF
+    char v7[96]; // [sp+60h] [-60h] BYREF
+
+    MemFile_ReadData(memFile, 4, (unsigned char*)&v5);
+    v2 = v5;
+    if (v5)
+    {
+        while (1)
+        {
+            MemFile_ReadData(memFile, 4, (unsigned char *)&v5);
+            v3 = v5;
+            if (v5 >= 0x100)
+                Com_Error(ERR_DROP, "GAME_ERR_SAVEGAME_BAD");
+            MemFile_ReadData(memFile, 4, (unsigned char *)v6);
+            v4 = v6[0];
+            if (!v6[0] || v6[0] >= 31)
+                Com_Error(ERR_DROP, "GAME_ERR_SAVEGAME_BAD");
+            MemFile_ReadData(memFile, v4, (unsigned char *)v7);
+            v7[v4] = 0;
+            if (!pcGlob.openChannels[v3].name[0])
+                goto LABEL_10;
+            if (I_stricmp(pcGlob.openChannels[v3].name, v7))
+                break;
+        LABEL_11:
+            if (!--v2)
+                return;
+        }
+        Con_CloseChannelInternal(v3);
+    LABEL_10:
+        I_strncpyz(pcGlob.openChannels[v3].name, v7, 32);
+        goto LABEL_11;
+    }
+}
+#endif

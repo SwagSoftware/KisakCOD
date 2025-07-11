@@ -618,6 +618,10 @@ double __cdecl SND_GetVolumeNormalized();
 void __cdecl SND_SetHWND(HWND hwnd);
 void __cdecl SND_SetData(MssSoundCOD4 *mssSound, void *srcData);
 
+#ifdef KISAK_SP
+void SND_RestoreEventually(struct MemoryFile *memFile);
+#endif
+
 // snd_driver_load_obj
 struct LoadedSound *__cdecl SND_LoadSoundFile(const char *name);
 

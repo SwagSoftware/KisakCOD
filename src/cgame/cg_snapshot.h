@@ -19,7 +19,7 @@ void __cdecl CG_CheckSnapshot(int localClientNum, const char *caller);
 void __cdecl CG_ServerDObjClean(int entnum);
 void __cdecl CG_SetNextSnap(int localClientNum);
 void __cdecl CG_ProcessNextSnap(int localClientNum);
-void __cdecl CG_CreateNextSnap(int localClientNum, double dtime, int readNext, int a4);
+void __cdecl CG_CreateNextSnap(int localClientNum, double dtime, int readNext);
 void __cdecl CG_FirstSnapshot(int localClientNum, int a2);
 void __cdecl CG_ProcessDemoSnapshots(int localClientNum, int a2);
 void __cdecl CG_ProcessSnapshots(int localClientNum);

@@ -2,6 +2,55 @@
 #error This file is for SinglePlayer only
 #endif
 
+#include "cl_scrn.h"
+#include <gfx_d3d/r_font.h>
+#include <gfx_d3d/r_rendercmds.h>
+#include "client.h"
+#include <ui/ui.h>
+#include <game/g_local.h>
+#include "cl_demo.h"
+#include <cgame/cg_view.h>
+#include <devgui/devgui.h>
+#include <qcommon/threads.h>
+#include <win32/win_local.h>
+#include <qcommon/cmd.h>
+#include <gfx_d3d/r_screenshot.h>
+
+const char *WeaponStateNames_51[27] =
+{
+  "WEAPON_READY",
+  "WEAPON_RAISING",
+  "WEAPON_RAISING_ALTSWITCH",
+  "WEAPON_DROPPING",
+  "WEAPON_DROPPING_QUICK",
+  "WEAPON_FIRING",
+  "WEAPON_RECHAMBERING",
+  "WEAPON_RELOADING",
+  "WEAPON_RELOADING_INTERUPT",
+  "WEAPON_RELOAD_START",
+  "WEAPON_RELOAD_START_INTERUPT",
+  "WEAPON_RELOAD_END",
+  "WEAPON_MELEE_INIT",
+  "WEAPON_MELEE_FIRE",
+  "WEAPON_MELEE_END",
+  "WEAPON_OFFHAND_INIT",
+  "WEAPON_OFFHAND_PREPARE",
+  "WEAPON_OFFHAND_HOLD",
+  "WEAPON_OFFHAND_START",
+  "WEAPON_OFFHAND",
+  "WEAPON_OFFHAND_END",
+  "WEAPON_DETONATING",
+  "WEAPON_SPRINT_RAISE",
+  "WEAPON_SPRINT_LOOP",
+  "WEAPON_SPRINT_DROP",
+  "WEAPON_NIGHTVISION_WEAR",
+  "WEAPON_NIGHTVISION_REMOVE"
+};
+
+const char *szShotName[6] =
+{ "_rt", "_lf", "_bk", "_ft", "_up", "_dn" };
+
+
 int scr_initialized;
 bool updateScreenCalled;
 
@@ -10,27 +59,9 @@ void __cdecl TRACK_cl_srcn()
     ;
 }
 
-// local variable allocation has failed, the output may be wrong!
 void __cdecl SCR_DrawSmallStringExt(unsigned int x, int y, const char *string, const float *setColor)
 {
-    int v7; // r3
-    __int128 v8; // r9 OVERLAPPED
-    int v9; // r10
-
-    v7 = R_TextHeight(cls.consoleFont);
-    *((_QWORD *)&v8 + 1) = __PAIR64__(x, v7);
-    v9 = y;
-    R_AddCmdDrawText(
-        string,
-        0x7FFFFFFF,
-        cls.consoleFont,
-        (float)*(__int64 *)((char *)&v8 + 4),
-        (float)((float)__SPAIR64__(x, v7) + (float)*(__int64 *)((char *)&v8 - 4)),
-        1.0,
-        1.0,
-        0.0,
-        (const float *)HIDWORD(v8),
-        SDWORD1(v8));
+    R_AddCmdDrawText(string, 0x7FFFFFFF, cls.consoleFont, x, y, 1.0f, 1.0f, 0.0f, setColor, 0);
 }
 
 void __cdecl SCR_Init()
@@ -43,12 +74,12 @@ bool __cdecl CL_IsCGameRendering()
     return cls.uiStarted && !UI_IsFullscreen() && clientUIActives[0].connectionState == CA_ACTIVE;
 }
 
-int __cdecl CL_GetDemoType()
+DemoType CL_GetDemoType()
 {
     if (G_DemoPlaying())
-        return 2;
+        return DEMO_TYPE_SERVER;
     else
-        return CL_DemoPlaying();
+        return (DemoType)CL_DemoPlaying();
 }
 
 int __cdecl CL_CGameRendering()
@@ -142,7 +173,7 @@ void __cdecl SCR_DrawScreenField(int refreshedUI)
             break;
         default:
         LABEL_11:
-            Com_Error(ERR_FATAL, byte_8201754C);
+            Com_Error(ERR_FATAL, "SCR_DrawScreenField: bad clcState");
             break;
         }
     LABEL_12:
@@ -184,17 +215,11 @@ void __cdecl SCR_UpdateRumble()
         GPad_UpdateRumbles(v0);
 }
 
-int SCR_UpdateFrame()
+void SCR_UpdateFrame()
 {
     int v0; // r31
 
-    if (!Sys_IsMainThread() && !Sys_IsRenderThread())
-        MyAssertHandler(
-            "c:\\trees\\cod3\\cod3src\\src\\client\\cl_scrn.cpp",
-            299,
-            0,
-            "%s",
-            "Sys_IsMainThread() || Sys_IsRenderThread()");
+    iassert(Sys_IsMainThread() || Sys_IsRenderThread());
     //Profile_Begin(18);
     //Profile_Begin(19);
     R_BeginFrame();
@@ -223,12 +248,14 @@ int SCR_UpdateFrame()
     R_EndFrame();
     R_IssueRenderCommands(0xFFFFFFFF);
     //Profile_EndInternal(0);
+#ifdef KISAK_XBOX
     if (R_SkinCacheReachedThreshold() && g_allowRemoveCorpse)
     {
         CL_AddReliableCommand(0, "removecorpse");
         g_allowRemoveCorpse = 0;
     }
-    return //Profile_EndInternal(0);
+#endif
+    //Profile_EndInternal(0);
 }
 
 void __cdecl SCR_UpdateScreen()
@@ -402,7 +429,7 @@ LABEL_20:
         do
         {
             v29 = va("env/%s%s.tga", v33, *v28);
-            R_SaveCubemapShot(v29, v27, v10, v11);
+            R_SaveCubemapShot((char*)v29, v27, v10, v11);
             ++v28;
             ++v27;
         } while ((int)v28 < (int)&szShotName[2]);

@@ -9,6 +9,19 @@
 #include <universal/com_files.h>
 #include <stringed/stringed_hooks.h>
 #include <cgame/cg_servercmds.h>
+#include <gfx_d3d/r_init.h>
+#include <cgame/cg_snapshot.h>
+#include "cl_demo.h"
+#include <cgame/cg_main.h>
+#include <server/server.h>
+#include <EffectsCore/fx_system.h>
+#include <cgame/cg_newdraw.h>
+#include <ui/ui.h>
+#include <gfx_d3d/r_scene.h>
+#include <universal/com_sndalias.h>
+#include <xanim/dobj_utils.h>
+#include "cl_pose.h"
+#include <game/savememory.h>
 
 char bigConfigString[8192];
 const float g_color_table[8][4]
@@ -314,23 +327,10 @@ int __cdecl CL_PreprocessServerCommand(const char *s)
 
     while (1)
     {
-        Cmd_TokenizeString(s);
-        nesting = cmd_args.nesting;
-        if (cmd_args.nesting >= 8u)
-        {
-            MyAssertHandler(
-                "c:\\trees\\cod3\\cod3src\\src\\client\\../qcommon/cmd.h",
-                174,
-                0,
-                "cmd_args.nesting doesn't index CMD_MAX_NESTING\n\t%i not in [0, %i)",
-                cmd_args.nesting,
-                8);
-            nesting = cmd_args.nesting;
-        }
-        if (cmd_args.argc[nesting] <= 0)
-            v3 = byte_82003CDD;
-        else
-            v3 = (char *)*cmd_args.argv[nesting];
+        Cmd_TokenizeString((char *)s);
+
+        v3 = (char*)Cmd_Argv(0);
+
         v4 = v3;
         v5 = "disconnect";
         do
@@ -341,8 +341,10 @@ int __cdecl CL_PreprocessServerCommand(const char *s)
             ++v4;
             ++v5;
         } while (!v6);
+
         if (!v6)
             Com_Error(ERR_SERVERDISCONNECT, "EXE_SERVER_DISCONNECTED");
+
         v7 = v3;
         v8 = "bcs0";
         do
@@ -353,10 +355,11 @@ int __cdecl CL_PreprocessServerCommand(const char *s)
             ++v7;
             ++v8;
         } while (!v9);
+
         if (!v9)
         {
             Cmd_EndTokenizedString();
-            Cmd_TokenizeStringWithLimit(s, 3);
+            Cmd_TokenizeStringWithLimit((char *)s, 3);
             v28 = Cmd_Argv(2);
             v29 = Cmd_Argv(1);
             Com_sprintf(bigConfigString, 0x2000, "cs %s %s", v29, v28);
@@ -400,13 +403,13 @@ int __cdecl CL_PreprocessServerCommand(const char *s)
             if (!v45)
             {
                 Cmd_EndTokenizedString();
-                Cmd_TokenizeStringWithLimit(s, 3);
+                Cmd_TokenizeStringWithLimit((char*)s, 3);
                 CL_ConfigstringModified();
             }
             return 1;
         }
         Cmd_EndTokenizedString();
-        Cmd_TokenizeStringWithLimit(s, 3);
+        Cmd_TokenizeStringWithLimit((char *)s, 3);
         v16 = Cmd_Argv(2);
         v17 = bigConfigString;
         v18 = v16;
@@ -417,7 +420,7 @@ int __cdecl CL_PreprocessServerCommand(const char *s)
         while (*(unsigned __int8 *)v20++)
             ;
         if ((unsigned int)(v20 - v16 + v21) >= 0x2000)
-            Com_Error(ERR_DROP, byte_820127D4);
+            Com_Error(ERR_DROP, "bcs exceeded BIG_INFO_STRING");
         v23 = v18;
         v24 = bigConfigString;
         while (*v24++)
@@ -432,7 +435,7 @@ int __cdecl CL_PreprocessServerCommand(const char *s)
         s = bigConfigString;
     }
     Cmd_EndTokenizedString();
-    Cmd_TokenizeStringWithLimit(s, 3);
+    Cmd_TokenizeStringWithLimit((char*)s, 3);
     v31 = Cmd_Argv(2);
     v32 = bigConfigString;
     v33 = v31;
@@ -443,7 +446,7 @@ int __cdecl CL_PreprocessServerCommand(const char *s)
     while (*(unsigned __int8 *)v35++)
         ;
     if ((unsigned int)(v35 - v31 - 1 + v36) >= 0x2000)
-        Com_Error(ERR_DROP, byte_820127D4);
+        Com_Error(ERR_DROP, "bcs exceeded BIG_INFO_STRING");
     v38 = v33;
     v39 = bigConfigString;
     while (*v39++)
@@ -499,7 +502,7 @@ void __cdecl CL_ArchiveServerCommands(MemoryFile *memFile)
                 0,
                 "%s",
                 "memFile->archiveProc");
-        memFile->archiveProc(memFile, 4, (char *)clientConnections[0].serverCommands.commands + ((4 * i) & 0x3FC));
+        memFile->archiveProc(memFile, 4, (unsigned char *)clientConnections[0].serverCommands.commands + ((4 * i) & 0x3FC));
     }
     rover = clientConnections[0].serverCommands.header.rover;
     if (!memFile)
@@ -511,7 +514,7 @@ void __cdecl CL_ArchiveServerCommands(MemoryFile *memFile)
             0,
             "%s",
             "memFile->archiveProc");
-    memFile->archiveProc(memFile, rover, clientConnections[0].serverCommands.buf);
+    memFile->archiveProc(memFile, rover, (byte*)clientConnections[0].serverCommands.buf);
 }
 
 void __cdecl CL_LoadServerCommands(SaveGame *save)
@@ -579,7 +582,7 @@ void __cdecl LoadWorld(const char *name, int savegame)
 {
     int v2; // [sp+50h] [-10h] BYREF
 
-    R_LoadWorld(name, &v2, savegame);
+    R_LoadWorld((char*)name, &v2, savegame);
     SV_SetCheckSum(v2);
 }
 
@@ -965,7 +968,7 @@ void __cdecl CL_InitCGame(int localClientNum, int savegame)
         MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\client\\cl_cgame.cpp", 828, 0, "%s", "info");
     v7 = Info_ValueForKey(v6, "mapname");
     Com_GetBspFilename(clients[0].mapname, 64, v7);
-    Live_SetCurrentMapname(v7);
+    //Live_SetCurrentMapname(v7);
     clientUIActives[0].isLoadComplete = 1;
     if (localClientNum)
         MyAssertHandler(
@@ -1037,7 +1040,7 @@ void __cdecl CL_FirstSnapshot()
     if (cls.demoplaying)
         CL_StartPlayingDemo();
     CG_FirstSnapshot(0);
-    __lwsync();
+    //__lwsync();
     clientUIActives[0].cgameInitialized = 1;
 }
 
@@ -1057,7 +1060,7 @@ void __cdecl CL_CreateNextSnap()
 
 char *__cdecl CL_TimeDemoLogBaseName(const char *mapname)
 {
-    const char *v1; // r31
+    char *v1; // r31
     const char *v2; // r30
     int v3; // r11
     char *result; // r3
@@ -1076,7 +1079,7 @@ char *__cdecl CL_TimeDemoLogBaseName(const char *mapname)
         }
         else if (v3 == 46)
         {
-            v1 = mapname;
+            v1 = (char*)mapname;
         }
         v3 = *++mapname;
     } while (*mapname);
@@ -1186,16 +1189,16 @@ void __cdecl CL_ArchiveClientState(MemoryFile *memFile, int segmentIndex)
         if (segmentIndex)
             MemFile_StartSegment(memFile, segmentIndex);
         UsedSize = MemFile_GetUsedSize(memFile);
-        ProfMem_Begin("sound", UsedSize);
+        //ProfMem_Begin("sound", UsedSize);
         SND_Save(memFile);
         v5 = MemFile_GetUsedSize(memFile);
-        ProfMem_End(v5);
+        //ProfMem_End(v5);
         MemFile_StartSegment(memFile, segmentIndex + 1);
         v6 = MemFile_GetUsedSize(memFile);
-        ProfMem_Begin("FX", v6);
+        //ProfMem_Begin("FX", v6);
         FX_Save(0, memFile);
         v7 = MemFile_GetUsedSize(memFile);
-        ProfMem_End(v7);
+        //ProfMem_End(v7);
         CL_SaveSettings(memFile);
         Con_SaveChannels(memFile);
     }

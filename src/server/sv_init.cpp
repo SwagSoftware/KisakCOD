@@ -138,9 +138,6 @@ void __cdecl SV_Settle()
     } while (v0);
 }
 
-char byte_82003CDD[3] =
-{ '\0', '\0', '\0' };
-
 int __cdecl SV_SaveImmediately(const char *levelName)
 {
     int v3; // r3
@@ -155,7 +152,7 @@ int __cdecl SV_SaveImmediately(const char *levelName)
     v3 = CL_ControllerIndexFromClientNum(0);
     //GamerProfile_UpdateProfileFromDvars(v3, PROFILE_WRITE_IF_CHANGED);
     SV_ClearPendingSaves();
-    SV_AddPendingSave(levelName, "Start Level Save", byte_82003CDD, SAVE_TYPE_AUTOSAVE, 6u, 1);
+    SV_AddPendingSave(levelName, "Start Level Save", "", SAVE_TYPE_AUTOSAVE, 6u, 1);
     return SV_ProcessPendingSaves();
 }
 

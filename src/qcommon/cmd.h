@@ -1,5 +1,7 @@
 #pragma once
 
+#define CMD_MAX_NESTING 8
+
 struct CmdArgs
 {
     int nesting;
@@ -86,5 +88,7 @@ char __cdecl Cmd_ExecFromFastFile(int localClientNum, int controllerIndex, const
 void __cdecl SV_Cmd_ArgvBuffer(int arg, char *buffer, int bufferLength);
 
 const char **__cdecl Cmd_GetAutoCompleteFileList(const char *cmdName, int *fileCount);
+
+int Cmd_LocalClientNum();
 
 extern CmdArgs sv_cmd_args;

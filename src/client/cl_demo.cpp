@@ -12,6 +12,13 @@
 #include <xanim/xanim.h>
 #include "client.h"
 #include <xanim/xanim_readwrite.h>
+#include <server/server.h>
+#include <bgame/bg_public.h>
+#include <server/sv_public.h>
+#include "cl_parse.h"
+#include <ui/ui.h>
+#include <qcommon/cmd.h>
+#include <gfx_d3d/r_drawsurf.h>
 
 void __cdecl CL_WriteDemoShortCString(MemoryFile *memFile, const char *string)
 {
@@ -190,19 +197,19 @@ void __cdecl CL_ReadDemoDObj(int entnum)
     DObjModel_s *v7; // r30
     DObj_s *v8; // r3
     _BYTE v9[16]; // [sp+50h] [-160h] BYREF
-    MemoryFile v10; // [sp+60h] [-150h] BYREF
+    MemoryFile memFile; // [sp+60h] [-150h] BYREF
     DObjModel_s v11[38]; // [sp+80h] [-130h] BYREF
 
-    if (FS_Read(&v10.bufferSize, 4, cls.demofile) == 4)
+    if (FS_Read((unsigned char *)&memFile.bufferSize, 4, cls.demofile) == 4)
     {
         Hunk_CheckTempMemoryClear();
-        TempMemory = Hunk_AllocateTempMemory(v10.bufferSize, "CL_ReadDemoDObj");
-        v3 = FS_Read(TempMemory, v10.bufferSize, cls.demofile);
-        if (v3 == v10.bufferSize)
+        TempMemory = Hunk_AllocateTempMemory(memFile.bufferSize, "CL_ReadDemoDObj");
+        v3 = FS_Read((unsigned char*)TempMemory, memFile.bufferSize, cls.demofile);
+        if (v3 == memFile.bufferSize)
         {
-            MemFile_InitForReading(&v10, v10.bufferSize, TempMemory, 0);
-            v4 = CL_ReadAnimTree(&v10, entnum);
-            MemFile_ReadData(&v10, 1, v9);
+            MemFile_InitForReading(&memFile, memFile.bufferSize, (unsigned char*)TempMemory, 0);
+            v4 = CL_ReadAnimTree(&memFile, entnum);
+            MemFile_ReadData(&memFile, 1, v9);
             v5 = v9[0];
             v6 = v9[0];
             if (v9[0])
@@ -210,14 +217,14 @@ void __cdecl CL_ReadDemoDObj(int entnum)
                 v7 = v11;
                 do
                 {
-                    CL_ReadDemoDObjModel(&v10, v7);
+                    CL_ReadDemoDObjModel(&memFile, v7);
                     --v6;
                     ++v7;
                 } while (v6);
             }
             v8 = Com_ServerDObjCreate(v11, v5, v4, entnum);
-            XAnimLoadAnimTree(v8, &v10);
-            MemFile_MoveToSegment(&v10, -1);
+            XAnimLoadAnimTree(v8, &memFile);
+            MemFile_MoveToSegment(&memFile, -1);
             Hunk_ClearTempMemory();
         }
     }
@@ -240,13 +247,13 @@ int CL_WriteDemoDObjs()
         ServerDObj = Com_GetServerDObj(v0);
         if (ServerDObj)
         {
-            FS_Write(v3, 2, cls.demofile);
+            FS_Write((const char*)v3, 2, cls.demofile);
             CL_WriteDemoDObj(v3[0], ServerDObj);
         }
         v0 = ++v3[0];
     } while (v3[0] < 2176);
     v3[0] = 0;
-    return FS_Write(v3, 2, cls.demofile);
+    return FS_Write((const char*)v3, 2, cls.demofile);
 }
 
 void CL_ClearDemoDObjs()
@@ -272,7 +279,7 @@ int CL_ReadDemoDObjs()
     for (i = 1; i < 2176; ++i)
         Com_SafeServerDObjFree(i);
     v3[0] = 0;
-    result = FS_Read(v3, 2, cls.demofile);
+    result = FS_Read((unsigned char*)v3, 2, cls.demofile);
     for (j = v3[0]; v3[0]; j = v3[0])
     {
         if (j < 1 || j >= 2176)
@@ -284,7 +291,7 @@ int CL_ReadDemoDObjs()
                 "entnum >= MAX_CLIENTS && entnum < MAX_GENTITIES");
         CL_ReadDemoDObj(v3[0]);
         v3[0] = 0;
-        result = FS_Read(v3, 2, cls.demofile);
+        result = FS_Read((unsigned char *)v3, 2, cls.demofile);
     }
     return result;
 }
@@ -310,8 +317,8 @@ void __cdecl CL_WriteDemoEntityState(const entityState_s *es)
             "%s\n\t(memFile.bytesUsed) = %i",
             "(byteLen == memFile.bytesUsed)",
             v3.bytesUsed);
-    FS_Write(v2, 1, cls.demofile);
-    FS_Write(v4, v2[0], cls.demofile);
+    FS_Write((const char*)v2, 1, cls.demofile);
+    FS_Write((const char *)v4, v2[0], cls.demofile);
 }
 
 void __cdecl CL_ReadDemoEntityState(entityState_s *es)
@@ -327,8 +334,8 @@ void __cdecl CL_ReadDemoEntityState(entityState_s *es)
     {
         FS_Read(v4, v2[0], cls.demofile);
         MemFile_InitForReading(&v3, v2[0], v4, 0);
-        MemFile_ReadData(&v3, 164, es);
-        G_ArchiveSpecialEntityInfo(es, &v3);
+        MemFile_ReadData(&v3, 164, (unsigned char*)es);
+        G_ArchiveSpecialEntityInfo((const entityState_s*)es, &v3);
         MemFile_MoveToSegment(&v3, -1);
     }
     G_UpdateDemoEntity(es);
@@ -337,7 +344,7 @@ void __cdecl CL_ReadDemoEntityState(entityState_s *es)
 void __cdecl CL_WriteDemoSnapshotData()
 {
     int i; // r31
-    const entityState_s *EntityState; // r3
+    gentity_s *EntityState; // r3
 
     if (!clients[0].snap.valid)
         MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\client\\cl_demo.cpp", 295, 0, "%s", "cl->snap.valid");
@@ -347,9 +354,8 @@ void __cdecl CL_WriteDemoSnapshotData()
         MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\client\\cl_demo.cpp", 297, 0, "%s", "cls.demofile");
     for (i = 0; i < clients[0].snap.numEntities; ++i)
     {
-        EntityState = SV_GetEntityState(*(int *)((char *)clients[0].parseEntityNums
-            + ((4 * (clients[0].snap.parseEntitiesNum + i)) & 0x1FFC)));
-        CL_WriteDemoEntityState(EntityState);
+        EntityState = SV_GetEntityState(*(int *)((char *)clients[0].parseEntityNums + ((4 * (clients[0].snap.parseEntitiesNum + i)) & 0x1FFC)));
+        CL_WriteDemoEntityState(&EntityState->s);
     }
     CL_WriteDemoDObjs();
 }
@@ -357,7 +363,7 @@ void __cdecl CL_WriteDemoSnapshotData()
 void __cdecl CL_ReadDemoSnapshotData()
 {
     int i; // r31
-    entityState_s *EntityState; // r3
+    gentity_s *EntityState; // r3
 
     if (!clients[0].snap.valid)
         MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\client\\cl_demo.cpp", 317, 0, "%s", "cl->snap.valid");
@@ -370,7 +376,7 @@ void __cdecl CL_ReadDemoSnapshotData()
     {
         EntityState = SV_GetEntityState(*(int *)((char *)clients[0].parseEntityNums
             + ((4 * (clients[0].snap.parseEntitiesNum + i)) & 0x1FFC)));
-        CL_ReadDemoEntityState(EntityState);
+        CL_ReadDemoEntityState(&EntityState->s);
     }
     CL_ReadDemoDObjs();
 }
@@ -381,11 +387,11 @@ void __cdecl CL_WriteDemoMessage(msg_t *msg, int headerBytes)
     unsigned int v5[12]; // [sp+50h] [-30h] BYREF
 
     v5[0] = clientConnections[0].serverMessageSequence;
-    FS_Write(v5, 4, cls.demofile);
+    FS_Write((const char*)v5, 4, cls.demofile);
     v5[0] = msg->cursize - headerBytes;
     v4 = v5[0];
-    FS_Write(v5, 4, cls.demofile);
-    FS_Write(&msg->data[headerBytes], v4, cls.demofile);
+    FS_Write((const char *)v5, 4, cls.demofile);
+    FS_Write((const char *)&msg->data[headerBytes], v4, cls.demofile);
 }
 
 void __cdecl CL_StopRecord_f()
@@ -396,8 +402,8 @@ void __cdecl CL_StopRecord_f()
     if (cls.demorecording)
     {
         v1[0] = -1;
-        FS_Write(v1, 4, cls.demofile);
-        FS_Write(v1, 4, cls.demofile);
+        FS_Write((const char *)v1, 4, cls.demofile);
+        FS_Write((const char *)v1, 4, cls.demofile);
         FS_FCloseFile(cls.demofile);
         cls.demofile = 0;
         cls.demorecording = 0;
@@ -407,7 +413,7 @@ void __cdecl CL_StopRecord_f()
             MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\client\\cl_demo.cpp", 383, 0, "%s", "cls.demobuf");
             demobuf = cls.demobuf;
         }
-        Z_VirtualFree(demobuf, 0);
+        Z_VirtualFree(demobuf);
         cls.demobuf = 0;
         Com_Printf(0, "Stopped demo.\n");
     }
@@ -490,28 +496,28 @@ void __cdecl CL_Record_f()
                     if (!*configstrings)
                         MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\client\\cl_demo.cpp", 489, 0, "%s", "cl->configstrings[i]");
                     v4 = SL_ConvertToString(*configstrings);
-                    MSG_WriteString(&v13, v4);
+                    MSG_WriteString(&v13, (char*)v4);
                     ++configstrings;
                 } while ((int)configstrings < (int)clients[0].mapname);
                 v5 = SL_ConvertToString(clients[0].configstrings[0]);
-                v6 = Info_ValueForKey(v5, "mapname");
+                v6 = (char*)Info_ValueForKey(v5, "mapname");
                 v7 = v6;
                 while (*v7++)
                     ;
                 v10[0] = (_BYTE)v7 - (_BYTE)v6 - 1;
-                FS_Write(v10, 1, cls.demofile);
+                FS_Write((const char*)v10, 1, cls.demofile);
                 v9 = FS_Write(v6, v10[0], cls.demofile);
-                Hunk_CheckTempMemoryClear(v9);
-                MemFile_InitForWriting(&v12, 0x100000, cls.demobuf, 1, 0);
+                Hunk_CheckTempMemoryClear();
+                MemFile_InitForWriting(&v12, 0x100000, (unsigned char*)cls.demobuf, 1, 0);
                 CL_ArchiveClientState(&v12, 0);
                 MemFile_StartSegment(&v12, -1);
-                FS_Write(&v12.bytesUsed, 4, cls.demofile);
-                FS_Write(v12.buffer, v12.bytesUsed, cls.demofile);
+                FS_Write((const char *)&v12.bytesUsed, 4, cls.demofile);
+                FS_Write((const char *)v12.buffer, v12.bytesUsed, cls.demofile);
                 v11[0] = 0;
-                FS_Write(v11, 4, cls.demofile);
+                FS_Write((const char *)v11, 4, cls.demofile);
                 v11[0] = v13.cursize;
-                FS_Write(v11, 4, cls.demofile);
-                FS_Write(v13.data, v13.cursize, cls.demofile);
+                FS_Write((const char *)v11, 4, cls.demofile);
+                FS_Write((const char *)v13.data, v13.cursize, cls.demofile);
             }
             else
             {
@@ -533,7 +539,7 @@ void CL_DemoPlaybackStartup()
 {
     unsigned __int8 v0; // r11
     int v1; // r30
-    void *demofile; // r5
+    int demofile; // r5
     void *v3; // r28
     int v4; // r3
     _BYTE v5[4]; // [sp+50h] [-A0h] BYREF
@@ -548,14 +554,14 @@ void CL_DemoPlaybackStartup()
         if (v5[0] < 0x3Fu)
         {
             v1 = v5[0];
-            if (FS_Read(v8, v5[0], cls.demofile) == v0)
+            if (FS_Read((unsigned char *)v8, v5[0], cls.demofile) == v0)
             {
                 demofile = cls.demofile;
                 v8[v1] = 0;
-                if (FS_Read(v6, 4, demofile) == 4)
+                if (FS_Read((unsigned char*)v6, 4, demofile) == 4)
                 {
                     v3 = Z_VirtualAlloc(v6[0], "CL_DemoPlaybackStartup", 10);
-                    v4 = FS_Read(v3, v6[0], cls.demofile);
+                    v4 = FS_Read((unsigned char *)v3, v6[0], cls.demofile);
                     if (v4 == v6[0])
                     {
                         Dvar_SetBoolByName("sv_cheats", 1);
@@ -565,17 +571,17 @@ void CL_DemoPlaybackStartup()
                             MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\client\\cl_demo.cpp", 715, 0, "%s", "cls.demofile");
                         if (!cls.demoplaying)
                             MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\client\\cl_demo.cpp", 716, 0, "%s", "cls.demoplaying");
-                        MemFile_InitForReading(&v7, v6[0], v3, 0);
+                        MemFile_InitForReading(&v7, v6[0], (unsigned char *)v3, 0);
                         CL_ArchiveClientState(&v7, 0);
                         MemFile_MoveToSegment(&v7, -1);
-                        Z_VirtualFree(v3, 10);
+                        Z_VirtualFree(v3);
                         R_SyncRenderThread();
                         Material_Sort();
                         R_SortWorldSurfaces();
                     }
                     else
                     {
-                        Z_VirtualFree(v3, 10);
+                        Z_VirtualFree(v3);
                     }
                 }
             }
@@ -630,18 +636,16 @@ void __cdecl CL_PlayDemo_f()
 
 void __cdecl CL_CheckStartPlayingDemo()
 {
-    const char *v0; // r3
-    char v1[256]; // [sp+50h] [-110h] BYREF
+    char buf[256]; // [sp+50h] [-110h] BYREF
 
     if (cls.demoPending)
     {
         cls.demoPending = 0;
-        Com_sprintf(v1, 256, "demos/%s.spd", cls.demoName);
-        FS_FOpenFileRead(v1, &cls.demofile);
+        Com_sprintf(buf, 256, "demos/%s.spd", cls.demoName);
+        FS_FOpenFileRead(buf, &cls.demofile);
         if (!cls.demofile)
         {
-            v0 = va(aExeErrCantRead, v1);
-            Com_Error(ERR_DROP, v0);
+            Com_Error(ERR_DROP, va("EXE_ERR_CANT_READ", buf));
         }
         Con_Close(0);
         cls.demoplaying = 1;
@@ -660,7 +664,7 @@ void __cdecl CL_NextDemo()
     {
         Cbuf_AddText(0, String);
         Cbuf_AddText(0, "\n");
-        Dvar_SetStringByName("nextdemo", byte_82003CDD);
+        Dvar_SetStringByName("nextdemo", "");
         v1 = CL_ControllerIndexFromClientNum(0);
         Cbuf_Execute(0, v1);
     }
@@ -668,8 +672,7 @@ void __cdecl CL_NextDemo()
 
 int __cdecl CL_DemoPlaybackTime()
 {
-    if (!cls.demoplaying)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\client\\cl_demo.cpp", 832, 0, "%s", "cls.demoplaying");
+    iassert(cls.demoplaying);
     return clients[0].snap.serverTime;
 }
 
@@ -698,30 +701,29 @@ int __cdecl CL_TimeDemoPlaying()
 // local variable allocation has failed, the output may be wrong!
 void CL_DemoCompleted()
 {
-    int i; // r30
-    __int64 v1; // r9 OVERLAPPED
-    int v2; // r3
-    int v3; // r10
+    //__int64 v1; // r9 OVERLAPPED
+    int timeMS; // r3
+    int timeElapsedMS; // r10
 
-    if (!cls.demoplaying)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\client\\cl_demo.cpp", 538, 0, "%s", "cls.demoplaying");
-    if (!cls.demofile)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\client\\cl_demo.cpp", 539, 0, "%s", "cls.demofile");
-    for (i = 1; i < 2176; ++i)
+    iassert(cls.demoplaying);
+    iassert(cls.demofile);
+
+    for (int i = 1; i < 2176; ++i)
         Com_SafeServerDObjFree(i);
+
     if (cls.isTimeDemo)
     {
-        v2 = Sys_Milliseconds();
-        if (v2 - cls.timeDemoStart > 0)
+        timeMS = Sys_Milliseconds();
+        if (timeMS - cls.timeDemoStart > 0)
         {
-            v3 = v2 - cls.timeDemoStart;
-            LODWORD(v1) = cls.timeDemoFrames;
+            timeElapsedMS = timeMS - cls.timeDemoStart;
             Com_Printf(
                 14,
                 "%i frames, %3.1f seconds: %3.1f fps\n",
-                (unsigned int)HIDWORD(COERCE_UNSIGNED_INT64((double)*(__int64 *)((char *)&v1 - 4) * 0.001)),
-                (double)*(__int64 *)((char *)&v1 - 4) * 0.001,
-                (double)v1 * 1000.0 / (double)*(__int64 *)((char *)&v1 - 4));
+                cls.timeDemoFrames,
+                timeElapsedMS * 0.001f,
+                (timeElapsedMS * 1000.0f / cls.timeDemoFrames)
+            );
         }
     }
     if (cls.timeDemoLog)
@@ -755,15 +757,15 @@ int __cdecl CL_GetDemoMessage(msg_t *buf, unsigned __int8 *bufData, int bufDataS
         MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\client\\cl_demo.cpp", 584, 0, "%s", "bufDataSize > 0");
     if (!cls.demofile)
         goto LABEL_17;
-    if (FS_Read(&v8, 4, cls.demofile) != 4)
+    if (FS_Read((unsigned char*)&v8, 4, cls.demofile) != 4)
         goto LABEL_17;
     clientConnections[0].serverMessageSequence = v8;
     MSG_Init(buf, bufData, bufDataSize);
     p_cursize = &buf->cursize;
-    if (FS_Read(&buf->cursize, 4, cls.demofile) != 4 || *p_cursize == -1)
+    if (FS_Read((unsigned char*)&buf->cursize, 4, cls.demofile) != 4 || *p_cursize == -1)
         goto LABEL_17;
     if (*p_cursize > buf->maxsize)
-        Com_Error(ERR_DROP, byte_820147B4);
+        Com_Error(ERR_DROP, "CL_GetDemoMessage: demoMsglen > MAX_MSGLEN");
     if (FS_Read(buf->data, *p_cursize, cls.demofile) != *p_cursize)
     {
         Com_Printf(14, "Demo file was truncated.\n");

@@ -3638,3 +3638,48 @@ void __cdecl CL_PlayTextFXPulseSounds(
     }
 }
 
+#ifdef KISAK_SP
+static void CL_ArchiveMessageType(MemoryFile *memFile, MessageWindow *msgwnd)
+{
+    int textBufPos; // r29
+    int v5; // r11
+    char *v6; // r5
+
+    iassert(memFile);
+    iassert(msgwnd);
+
+    MemFile_ArchiveData(memFile, 4, &msgwnd->activeLineCount);
+    MemFile_ArchiveData(memFile, 4, &msgwnd->firstLineIndex);
+    MemFile_ArchiveData(memFile, 4, &msgwnd->messageIndex);
+    MemFile_ArchiveData(memFile, 4, &msgwnd->textBufPos);
+    MemFile_ArchiveData(memFile, 24 * msgwnd->lineCount, msgwnd->lines);
+    MemFile_ArchiveData(memFile, 8 * msgwnd->lineCount, msgwnd->messages);
+    textBufPos = msgwnd->textBufPos;
+    v5 = msgwnd->lines[msgwnd->firstLineIndex].textBufPos;
+    v6 = &msgwnd->circularTextBuffer[v5];
+    if (v5 >= textBufPos)
+    {
+        MemFile_ArchiveData(memFile, msgwnd->textBufSize - v5, v6);
+        MemFile_ArchiveData(memFile, textBufPos, msgwnd->circularTextBuffer);
+    }
+    else
+    {
+        MemFile_ArchiveData(memFile, textBufPos - v5, v6);
+    }
+}
+
+void CL_ArchiveMessages(MemoryFile *memFile)
+{
+    int v2; // r31
+    MessageWindow *gamemsgWindows; // r30
+
+    v2 = 4;
+    gamemsgWindows = con.messageBuffer[0].gamemsgWindows;
+    do
+    {
+        CL_ArchiveMessageType(memFile, gamemsgWindows);
+        --v2;
+        ++gamemsgWindows;
+    } while (v2);
+}
+#endif

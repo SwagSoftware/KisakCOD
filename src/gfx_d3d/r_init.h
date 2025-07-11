@@ -1,6 +1,10 @@
 #pragma once
 
+#ifdef KISAK_MP
 #include "client_mp/client_mp.h"
+#elif KISAK_SP
+#include "client/client.h"
+#endif
 
 #include "r_gfx.h"
 #include "r_bsp.h"

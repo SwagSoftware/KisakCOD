@@ -740,7 +740,7 @@ void __cdecl CG_ProcessNextSnap(int localClientNum)
     }
 }
 
-void __cdecl CG_CreateNextSnap(int localClientNum, double dtime, int readNext, int a4)
+void __cdecl CG_CreateNextSnap(int localClientNum, double dtime, int readNext)
 {
     snapshot_s *nextSnap; // r18
     double value; // fp0

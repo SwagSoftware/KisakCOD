@@ -4883,3 +4883,24 @@ void __cdecl SND_SetData(MssSoundCOD4 *mssSound, void *srcData)
     mssSound->info.data_ptr = mssSound->data;
     mssSound->info.initial_ptr = mssSound->data;
 }
+
+#ifdef KISAK_SP
+void SND_RestoreEventually(MemoryFile *memFile)
+{
+    int v2; // r11
+    int *v3; // r28
+    int v4; // r29
+
+    SND_StopSounds(SND_KEEP_MUSIC_AND_AMBIENT);
+    g_snd.restore.size = 0;
+    v2 = memFile->bytesUsed - 4;
+    v3 = (int *)&memFile->buffer[v2];
+    memFile->bytesUsed = v2;
+    v4 = *v3;
+    if (*v3 > 0x4000)
+        Com_Error(ERR_DROP, "SND_RESTORE_BUFFER_SIZE exceeded");
+    g_snd.restore.size = v4;
+    g_snd.restore.compress = memFile->compress;
+    memcpy(&g_snd.restore, v3, v4);
+}
+#endif

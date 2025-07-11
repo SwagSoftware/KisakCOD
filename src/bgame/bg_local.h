@@ -1264,30 +1264,44 @@ struct viewLerpWaypoint_s // sizeof=0xC
 };
 static_assert(sizeof(viewLerpWaypoint_s) == 0xC);
 
+#ifdef KISAK_MP
 struct usercmd_s // sizeof=0x20
 {                                       // XREF: ?SV_BotUserMove@@YAXPAUclient_t@@@Z/r
-                                        // ?SV_UserMove@@YAXPAUclient_t@@PAUmsg_t@@H@Z/r ...
     int32_t serverTime;                     // XREF: CG_DrawDisconnect+85/r
-    // CG_DrawDisconnect+90/r ...
     int32_t buttons;                        // XREF: CG_CheckForPlayerInput+5D/r
-    // CG_CheckForPlayerInput+60/r ...
     int32_t angles[3];                      // XREF: CG_CheckPlayerMovement+B/o
-    // CG_CheckPlayerMovement+E/o ...
     uint8_t weapon;             // XREF: CL_CreateCmd+64/w
-    // SV_AddTestClient(void)+232/w ...
     uint8_t offHandIndex;
     char forwardmove;                   // XREF: CG_CheckPlayerMovement:loc_4413AE/r
-    // SV_BotUserMove(client_t *)+138/w ...
     char rightmove;                     // XREF: CG_CheckPlayerMovement+26/r
-    // SV_BotUserMove(client_t *)+166/w ...
     float meleeChargeYaw;               // XREF: CL_CreateCmd+67/w
-    // SV_AddTestClient(void)+238/w ...
     uint8_t meleeChargeDist;    // XREF: CL_CreateCmd+6A/w
-    // SV_AddTestClient(void)+23E/w ...
     char selectedLocation[2];
-    // padding byte
 };
 static_assert(sizeof(usercmd_s) == 0x20);
+#elif KISAK_SP
+struct __declspec(align(2)) usercmd_s
+{
+    int serverTime;
+    int buttons;
+    int angles[3];
+    unsigned __int8 weapon;
+    unsigned __int8 offHandIndex;
+    char forwardmove;
+    char rightmove;
+    char upmove;
+    char pitchmove;
+    char yawmove;
+    float gunPitch;
+    float gunYaw;
+    float gunXOfs;
+    float gunYOfs;
+    float gunZOfs;
+    float meleeChargeYaw;
+    unsigned __int8 meleeChargeDist;
+    char selectedLocation[2];
+};
+#endif
 
 // bg_jump
 

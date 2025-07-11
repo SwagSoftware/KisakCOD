@@ -819,6 +819,7 @@ void __cdecl R_AddCmdBlendSavedScreenShockFlashed(
     float viewHeight);
 void __cdecl R_AddCmdDrawProfile();
 void __cdecl R_AddCmdProjectionSet2D();
+void __cdecl R_AddCmdProjectionSet3D(); // KISAK_SP
 void __cdecl R_AddCmdProjectionSet(GfxProjectionTypes projection);
 void __cdecl R_BeginRemoteScreenUpdate();
 void __cdecl R_EndRemoteScreenUpdate();

@@ -6,7 +6,7 @@
 
 #include <universal/memfile.h>
 #include <qcommon/ent.h>
-#include <qcommon/msg_mp.h> // LWSS: this is OK, msg_t matches
+#include <qcommon/msg.h>
 
 void __cdecl CL_WriteDemoShortCString(MemoryFile *memFile, const char *string);
 const char *__cdecl CL_ReadDemoShortCString(MemoryFile *memFile, char *string);

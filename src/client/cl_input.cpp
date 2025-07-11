@@ -4,19 +4,21 @@
 
 #include "cl_input.h"
 #include <qcommon/mem_track.h>
+#include <qcommon/cmd.h>
+#include <cgame/cg_main.h>
+#include <game/g_local.h>
 
+const dvar_t *cl_stanceHoldTime;
+const dvar_t *cl_analog_attack_threshold;
+const dvar_t *cl_yawspeed;
+const dvar_t *cl_upspeed;
+const dvar_t *cl_sidespeed;
+const dvar_t *cl_pitchspeed;
+const dvar_t *cl_forwardspeed;
+const dvar_t *cl_anglespeedkey;
 
-//struct dvar_s const *const cl_stanceHoldTime 827f4fc8     cl_input.obj
-//struct dvar_s const *const cl_analog_attack_threshold 827f4fcc     cl_input.obj
-//struct dvar_s const *const cl_yawspeed 827f4fd0     cl_input.obj
-//int marker_cl_input      827f4fd4     cl_input.obj
-//struct dvar_s const *const cl_upspeed 827f4fd8     cl_input.obj
-//struct dvar_s const *const cl_sidespeed 827f4fdc     cl_input.obj
-//int old_com_frameTime    827f4fe0     cl_input.obj
-//unsigned int frame_msec           827f4fe4     cl_input.obj
-//struct dvar_s const *const cl_pitchspeed 827f522c     cl_input.obj
-//struct dvar_s const *const cl_forwardspeed 827f5230     cl_input.obj
-//struct dvar_s const *const cl_anglespeedkey 827f5234     cl_input.obj
+unsigned int frame_msec;
+int old_com_frameTime;
 
 kbutton_t kb[29];
 
@@ -49,120 +51,78 @@ void IN_MLookDown()
 
 void __cdecl IN_KeyDown(kbutton_t *b)
 {
-    int nesting; // r7
-    const char *v3; // r3
-    int v4; // r3
-    int v5; // r11
-    const char *v6; // r3
+    const char *c; // [esp+0h] [ebp-8h]
+    const char *ca; // [esp+0h] [ebp-8h]
+    int k; // [esp+4h] [ebp-4h]
 
-    nesting = cmd_args.nesting;
-    if (cmd_args.nesting >= 8u)
-    {
-        MyAssertHandler(
-            "c:\\trees\\cod3\\cod3src\\src\\client\\../qcommon/cmd.h",
-            174,
-            0,
-            "cmd_args.nesting doesn't index CMD_MAX_NESTING\n\t%i not in [0, %i)",
-            cmd_args.nesting,
-            8);
-        nesting = cmd_args.nesting;
-    }
-    if (cmd_args.argc[nesting] <= 1)
-        v3 = byte_82003CDD;
+    c = Cmd_Argv(1);
+    if (*c)
+        k = atoi(c);
     else
-        v3 = (const char *)*((unsigned int *)cmd_args.argv[nesting] + 1);
-    if (*v3)
-        v4 = atol(v3);
-    else
-        v4 = -1;
-    if (v4 != b->down[0])
+        k = -1;
+    if (k != b->down[0] && k != b->down[1])
     {
-        v5 = b->down[1];
-        if (v4 != v5)
+        if (b->down[0])
         {
-            if (b->down[0])
+            if (b->down[1])
             {
-                if (v5)
-                {
-                    Com_Printf(14, "Three keys down for a button!\n");
-                    return;
-                }
-                b->down[1] = v4;
+                Com_Printf(14, "Three keys down for a button!\n");
+                return;
             }
-            else
-            {
-                b->down[0] = v4;
-            }
-            if (!b->active)
-            {
-                v6 = Cmd_Argv(2);
-                b->downtime = atol(v6);
-                b->active = 1;
-                b->wasPressed = 1;
-            }
+            b->down[1] = k;
+        }
+        else
+        {
+            b->down[0] = k;
+        }
+        if (!b->active)
+        {
+            ca = Cmd_Argv(2);
+            b->downtime = atoi(ca);
+            b->active = 1;
+            b->wasPressed = 1;
         }
     }
 }
 
 void __cdecl IN_KeyUp(kbutton_t *b)
 {
-    int nesting; // r7
-    char *v3; // r3
-    int v4; // r3
-    int v5; // r11
-    const char *v6; // r3
-    int v7; // r3
-    unsigned int msec; // r10
-    unsigned int v9; // r11
+    unsigned int v1; // edx
+    const char *c; // [esp+0h] [ebp-Ch]
+    const char *ca; // [esp+0h] [ebp-Ch]
+    unsigned int uptime; // [esp+4h] [ebp-8h]
+    int k; // [esp+8h] [ebp-4h]
 
-    nesting = cmd_args.nesting;
-    if (cmd_args.nesting >= 8u)
-    {
-        MyAssertHandler(
-            "c:\\trees\\cod3\\cod3src\\src\\client\\../qcommon/cmd.h",
-            174,
-            0,
-            "cmd_args.nesting doesn't index CMD_MAX_NESTING\n\t%i not in [0, %i)",
-            cmd_args.nesting,
-            8);
-        nesting = cmd_args.nesting;
-    }
-    if (cmd_args.argc[nesting] <= 1)
-        v3 = byte_82003CDD;
-    else
-        v3 = (char *)*((unsigned int *)cmd_args.argv[nesting] + 1);
-    if (!*v3)
+    c = Cmd_Argv(1);
+    if (!*c)
     {
         b->down[1] = 0;
         b->down[0] = 0;
-    LABEL_17:
         b->active = 0;
         return;
     }
-    v4 = atol(v3);
-    v5 = b->down[0];
-    if (b->down[0] == v4)
+    k = atoi(c);
+    if (b->down[0] == k)
     {
         b->down[0] = 0;
-    LABEL_11:
-        if (b->down[1])
-            return;
-        b->active = 0;
-        v6 = Cmd_Argv(2);
-        v7 = atol(v6);
-        msec = b->msec;
-        if (v7)
-            v9 = v7 - b->downtime + msec;
-        else
-            v9 = (frame_msec >> 1) + msec;
-        b->msec = v9;
-        goto LABEL_17;
     }
-    if (b->down[1] == v4)
+    else
     {
+        if (b->down[1] != k)
+            return;
         b->down[1] = 0;
-        if (!v5)
-            goto LABEL_11;
+    }
+    if (!b->down[0] && !b->down[1])
+    {
+        b->active = 0;
+        ca = Cmd_Argv(2);
+        uptime = atoi(ca);
+        if (uptime)
+            v1 = b->msec + uptime - b->downtime;
+        else
+            v1 = b->msec + (frame_msec >> 1);
+        b->msec = v1;
+        b->active = 0;
     }
 }
 
@@ -674,7 +634,7 @@ void IN_Throw_Up()
 
 void IN_ToggleADS_Throw_Down()
 {
-    clients[0].usingAds = (_cntlzw(clients[0].usingAds) & 0x20) != 0;
+    IN_ToggleADS();
     IN_KeyDown(&kb[26]);
 }
 
@@ -756,42 +716,22 @@ void IN_RaiseStance()
 
 void IN_ToggleCrouch()
 {
-    char v0; // r11
-
-    if (kb[24].active || (v0 = 0, kb[11].active))
-        v0 = 1;
-    if (!v0)
-        clients[0].stance = (_cntlzw(clients[0].stance - 1) & 0x20) == 0;
+    CL_ToggleStance(CL_STANCE_CROUCH);
 }
 
 void IN_ToggleProne()
 {
-    char v0; // r11
-
-    if (kb[24].active || (v0 = 0, kb[11].active))
-        v0 = 1;
-    if (!v0)
-        clients[0].stance = (_cntlzw(clients[0].stance - 2) >> 4) & 2 ^ 2;
+    CL_ToggleStance(CL_STANCE_PRONE);
 }
 
 void IN_GoProne()
 {
-    char v0; // r11
-
-    if (kb[24].active || (v0 = 0, kb[11].active))
-        v0 = 1;
-    if (!v0)
-        clients[0].stance = CL_STANCE_PRONE;
+    CL_SetStance(0, CL_STANCE_PRONE);
 }
 
 void IN_GoCrouch()
 {
-    char v0; // r11
-
-    if (kb[24].active || (v0 = 0, kb[11].active))
-        v0 = 1;
-    if (!v0)
-        clients[0].stance = CL_STANCE_CROUCH;
+    CL_SetStance(0, CL_STANCE_CROUCH);
 }
 
 void IN_GoStandDown()

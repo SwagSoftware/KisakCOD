@@ -514,7 +514,7 @@ void __cdecl CL_ForwardCommandToServer(int32_t localClientNum, const char *strin
     const char *cmd; // [esp+8h] [ebp-4h]
 
     cmd = Cmd_Argv(0);
-    if (*cmd != 45)
+    if (*cmd != '-')
     {
         if (localClientNum)
             MyAssertHandler(
@@ -524,7 +524,7 @@ void __cdecl CL_ForwardCommandToServer(int32_t localClientNum, const char *strin
                 "%s\n\t(localClientNum) = %i",
                 "(localClientNum == 0)",
                 localClientNum);
-        if (clientUIActives[0].connectionState < 5 || *cmd == 43 || CL_GetLocalClientConnection(localClientNum)->demoplaying)
+        if (clientUIActives[0].connectionState < 5 || *cmd == '+' || CL_GetLocalClientConnection(localClientNum)->demoplaying)
         {
             Com_Printf(14, "Unknown command \"%s\"\n", cmd);
         }

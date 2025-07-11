@@ -1379,7 +1379,7 @@ double __cdecl CL_GetMenuBlurRadius(int localClientNum);
 void __cdecl SCR_UpdateScreen();
 void SCR_UpdateFrame();
 int __cdecl CL_CGameRendering(int localClientNum);
-DemoType __cdecl CL_GetDemoType();
+DemoType CL_GetDemoType();
 void __cdecl CL_DrawScreen(int localClientNum);
 void __cdecl SCR_DrawScreenField(int localClientNum, int refreshedUI);
 void SCR_DrawDemoRecording();

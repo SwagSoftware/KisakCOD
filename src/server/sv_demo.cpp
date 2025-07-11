@@ -491,16 +491,13 @@ LABEL_22:
     return 1;
 }
 
-char byte_82003CDD[3] =
-{ '\0', '\0', '\0' };
-
 _iobuf *__cdecl SV_DemoOpenFile(const char *fileName)
 {
     const char *v2; // r3
     char v4[288]; // [sp+50h] [-120h] BYREF
 
     v2 = Sys_DefaultInstallPath();
-    FS_BuildOSPath(v2, byte_82003CDD, fileName, v4);
+    FS_BuildOSPath(v2, "", fileName, v4);
     if (!FS_CreatePath(v4))
         return FS_FileOpenWriteReadBinary(v4);
     Com_PrintError(1, "Failed to create path '%s'\n", v4);
