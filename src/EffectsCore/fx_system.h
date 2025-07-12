@@ -10,6 +10,8 @@
 
 #define FX_MARK_FREE -1
 
+#define FX_EFFECT_LIMIT 1024
+
 enum $FFE723C3A54D7F6DDF86A219D7944B2F : int32_t
 {
     FX_STATUS_REF_COUNT_MASK = 0xFFFF,
@@ -190,6 +192,8 @@ double __cdecl FX_GetClientVisibility(int32_t localClientNum, const float *start
 void __cdecl FX_TrailElem_CompressBasis(const float (*inBasis)[3], char (*outBasis)[3]);
 
 double FX_GetServerVisibility(const float *start, const float *end);
+FxEffect *FX_GetClientEffectByIndex(int clientIndex, unsigned int index);
+int FX_GetClientEffectIndex(int clientIndex, FxEffect *effect);
 
 extern FxSystem fx_systemPool[1];
 extern FxSystemBuffers fx_systemBufferPool[1];

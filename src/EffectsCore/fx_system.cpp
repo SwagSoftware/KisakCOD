@@ -124,7 +124,7 @@ void __cdecl FX_ResetSystem(FxSystem *system)
     int32_t effectIndex; // [esp+24h] [ebp-4h]
 
     system->effects->def = 0;
-    for (effectIndex = 0; effectIndex < 1024; ++effectIndex)
+    for (effectIndex = 0; effectIndex < FX_EFFECT_LIMIT; ++effectIndex)
         system->allEffectHandles[effectIndex] = FX_EffectToHandle(system, &system->effects[effectIndex]);
     system->firstActiveEffect = 0;
     system->firstNewEffect = 0;
@@ -159,21 +159,9 @@ void __cdecl FX_ResetSystem(FxSystem *system)
 
 int32_t __cdecl FX_EffectToHandle(FxSystem *system, FxEffect *effect)
 {
-    const char *v2; // eax
+    iassert(system);
+    iassert(effect && effect >= &system->effects[0] && effect < &system->effects[FX_EFFECT_LIMIT]);
 
-    if (!system)
-        MyAssertHandler("c:\\trees\\cod3\\src\\effectscore\\fx_system.h", 241, 0, "%s", "system");
-    if (!effect || effect < system->effects || effect >= &system->effects[1024])
-    {
-        v2 = va("%p %p", system->effects, effect);
-        MyAssertHandler(
-            "c:\\trees\\cod3\\src\\effectscore\\fx_system.h",
-            248,
-            0,
-            "%s\n\t%s",
-            "effect && effect >= &system->effects[0] && effect < &system->effects[FX_EFFECT_LIMIT]",
-            v2);
-    }
     return ((char *)effect - (char *)system->effects) / 4;
 }
 
@@ -629,7 +617,7 @@ FxEffect* __cdecl FX_SpawnEffect(
     if (!isSpotLightEffect || FX_CanAllocSpotLightEffect(system))
     {
         allocIndex = InterlockedExchangeAdd(&system->firstFreeEffect, 1);
-        while (allocIndex - system->firstActiveEffect >= 1024)
+        while (allocIndex - system->firstActiveEffect >= FX_EFFECT_LIMIT)
         {
             if (InterlockedCompareExchange(&system->firstFreeEffect, allocIndex, allocIndex + 1) == allocIndex + 1)
                 return 0;
@@ -2114,4 +2102,26 @@ double __cdecl FX_GetClientVisibility(int32_t localClientNum, const float *start
 double FX_GetServerVisibility(const float *start, const float *end)
 {
     return FX_GetClientVisibility(fx_serverVisClient, start, end);
+}
+
+FxEffect *FX_GetClientEffectByIndex(int clientIndex, unsigned int index)
+{
+    iassert(clientIndex == 0);
+    iassert(index >= 0 && index < FX_EFFECT_LIMIT);
+
+    return &fx_systemPool[0].effects[index];
+}
+
+int FX_GetClientEffectIndex(int clientIndex, FxEffect *effect)
+{
+    FxEffect *effects; // r11
+
+    iassert(clientIndex == 0);
+    iassert(effect);
+    
+    effects = fx_systemPool[0].effects;
+
+    iassert(effect >= &fx_systemPool[0].effects[0] && effect < &fx_systemPool[0].effects[FX_EFFECT_LIMIT]);
+
+    return ((uintptr_t)effect - (uintptr_t)effects);
 }

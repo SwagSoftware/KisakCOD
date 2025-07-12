@@ -4,6 +4,7 @@
 #error This file is for SinglePlayer only
 #endif
 
+#include <universal/q_shared.h>
 
 struct DObjAnimMat;
 struct ComPrimaryLight;
@@ -32,7 +33,6 @@ void __cdecl CG_mg42_PreControllers(int localClientNum, const DObj_s *obj, centi
 void __cdecl CG_mg42(int localClientNum, centity_s *cent);
 bool __cdecl JavelinSoftLaunch(WeaponDef *weapDef, cg_s *cgameGlob, entityState_s *s1);
 void __cdecl CG_Missile(int localClientNum, centity_s *cent);
-bool __cdecl CG_VecLessThan(float *a, float *b);
 void __cdecl CG_UpdateBModelWorldBounds(unsigned int localClientNum, centity_s *cent, int forceFilter);
 void __cdecl CG_ScriptMover(int localClientNum, centity_s *cent);
 void __cdecl CG_AdjustPositionForMover(

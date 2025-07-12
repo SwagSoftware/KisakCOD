@@ -8,6 +8,8 @@
 #include <qcommon/net_chan.h>
 #include <client/client.h>
 
+#include <bgame/bg_local.h>
+
 union entityState_s_un
 {
     unsigned __int8 scale;
@@ -185,117 +187,6 @@ struct ActionSlotParam_SpecifyWeapon
 struct ActionSlotParam
 {
     ActionSlotParam_SpecifyWeapon specifyWeapon;
-};
-
-/* 9184 */
-struct playerState_s
-{
-    int commandTime;
-    int pm_type;
-    int bobCycle;
-    int pm_flags;
-    int weapFlags;
-    int otherFlags;
-    int pm_time;
-    float origin[3];
-    float velocity[3];
-    float oldVelocity[2];
-    int weaponTime;
-    int weaponDelay;
-    int grenadeTimeLeft;
-    int throwBackGrenadeOwner;
-    int throwBackGrenadeTimeLeft;
-    int weaponRestrictKickTime;
-    int foliageSoundTime;
-    int gravity;
-    float leanf;
-    int speed;
-    float delta_angles[3];
-    int groundEntityNum;
-    float vLadderVec[3];
-    int jumpTime;
-    float jumpOriginZ;
-    int movementDir;
-    int eFlags;
-    int eventSequence;
-    int events[4];
-    unsigned int eventParms[4];
-    int oldEventSequence;
-    int clientNum;
-    int offHandIndex;
-    OffhandSecondaryClass offhandSecondary;
-    unsigned int weapon;
-    int weaponstate;
-    unsigned int weaponShotCount;
-    float fWeaponPosFrac;
-    int adsDelayTime;
-    int spreadOverride;
-    int spreadOverrideState;
-    int viewmodelIndex;
-    float viewangles[3];
-    int viewHeightTarget;
-    float viewHeightCurrent;
-    int viewHeightLerpTime;
-    int viewHeightLerpTarget;
-    int viewHeightLerpDown;
-    float viewAngleClampBase[2];
-    float viewAngleClampRange[2];
-    int damageEvent;
-    int damageYaw;
-    int damagePitch;
-    int damageCount;
-    int stats[4];
-    int ammo[128];
-    int ammoclip[128];
-    unsigned int weapons[4];
-    unsigned int weaponold[4];
-    unsigned int weaponrechamber[4];
-    float proneDirection;
-    float proneDirectionPitch;
-    float proneTorsoPitch;
-    ViewLockTypes viewlocked;
-    int viewlocked_entNum;
-    int vehicleType;
-    float linkAngles[3];
-    float groundTiltAngles[3];
-    int cursorHint;
-    int cursorHintString;
-    int cursorHintEntIndex;
-    int locationSelectionInfo;
-    SprintState sprintState;
-    float fTorsoPitch;
-    float fWaistPitch;
-    float holdBreathScale;
-    int holdBreathTimer;
-    float moveSpeedScaleMultiplier;
-    MantleState mantleState;
-    float meleeChargeYaw;
-    int meleeChargeDist;
-    int meleeChargeTime;
-    int weapLockFlags;
-    int weapLockedEntnum;
-    unsigned int forcedViewAnimWeaponIdx;
-    int forcedViewAnimWeaponState;
-    unsigned int forcedViewAnimOriginalWeaponIdx;
-    ActionSlotType actionSlotType[4];
-    ActionSlotParam actionSlotParam[4];
-    int entityEventSequence;
-    int weapAnim;
-    float aimSpreadScale;
-    int shellshockIndex;
-    int shellshockTime;
-    int shellshockDuration;
-    float dofNearStart;
-    float dofNearEnd;
-    float dofFarStart;
-    float dofFarEnd;
-    float dofNearBlur;
-    float dofFarBlur;
-    float dofViewmodelStart;
-    float dofViewmodelEnd;
-    int hudElemLastAssignedSoundID;
-    unsigned __int8 weaponmodels[128];
-    playerState_s_hud hud;
 };
 
 enum clientConnected_t : __int32

@@ -3,33 +3,16 @@
 #endif
 
 #include "cg_ents.h"
-
-int __cdecl Com_IsRagdollTrajectory(const trajectory_t *trajectory)
-{
-    unsigned __int8 v2; // r11
-
-    if (!trajectory)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\cgame\\../universal/q_shared.h", 1948, 0, "%s", "trajectory");
-    if (trajectory->trType < TR_FIRST_RAGDOLL)
-        return 0;
-    v2 = 1;
-    if (trajectory->trType > TR_RAGDOLL_INTERPOLATE)
-        return 0;
-    return v2;
-}
-
-int __cdecl CompressUnit(double unit)
-{
-    if (unit < 0.0 || unit > 1.0)
-        MyAssertHandler(
-            "c:\\trees\\cod3\\cod3src\\src\\cgame\\cg_pose.h",
-            71,
-            0,
-            "%s\n\t(unit) = %g",
-            HIDWORD(unit),
-            LODWORD(unit));
-    return (unsigned __int16)(__int64)(float)((float)((float)unit * (float)65535.0) + (float)0.5);
-}
+#include <qcommon/com_bsp.h>
+#include <gfx_d3d/r_scene.h>
+#include "cg_actors.h"
+#include <xanim/dobj_utils.h>
+#include <EffectsCore/fx_system.h>
+#include <win32/win_local.h>
+#include <physics/phys_local.h>
+#include <game/savememory.h>
+#include <ragdoll/ragdoll.h>
+#include <gfx_d3d/r_workercmds_common.h>
 
 void __cdecl LocalConvertQuatToMat(const DObjAnimMat *mat, float (*axis)[3])
 {
@@ -204,7 +187,7 @@ void __cdecl CG_Item(centity_s *cent)
 
     p_nextState = &cent->nextState;
     if (*(unsigned __int16 *)cent->nextState.index >= 0x800u)
-        Com_Error(ERR_DROP, byte_82006B78);
+        Com_Error(ERR_DROP, "Bad item index %i on entity", cent->nextState.index);
     if ((p_nextState->lerp.eFlags & 0x20) == 0)
     {
         v3 = *(unsigned __int16 *)p_nextState->index;
@@ -214,7 +197,7 @@ void __cdecl CG_Item(centity_s *cent)
         if (!WeaponDef)
             MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\cgame\\cg_ents.cpp", 166, 0, "%s", "weapDef");
         if (!WeaponDef->worldModel[v4])
-            Com_Error(ERR_DROP, byte_82006B08, *(unsigned __int16 *)p_nextState->index, v5);
+            Com_Error(ERR_DROP, "Bad item/weap index"); //KISAKTODO: "XModel loaded for item index %i weap index %i model %i (%s)", *(unsigned __int16 *)p_nextState->index, v5);
         if (Com_GetClientDObj(p_nextState->number, 0))
         {
             RenderFlagForRefEntity = CG_GetRenderFlagForRefEntity(p_nextState->lerp.eFlags);
@@ -232,7 +215,7 @@ void __cdecl CG_AddEntityLoopSound(int localClientNum, const centity_s *cent)
     double v8; // fp12
     double v9; // fp0
     const char *ConfigString; // r3
-    float *origin; // r5
+    const float *origin; // r5
     float v12[6]; // [sp+50h] [-30h] BYREF
 
     if (cent->nextState.solid == 0xFFFFFF)
@@ -394,17 +377,38 @@ void __cdecl CG_Missile(int localClientNum, centity_s *cent)
     }
 }
 
+static float g_entMoveTolVec[3] = { 16.0, 16.0, 16.0 };
+
+// KISAKTODO: Remove this stupid function
 bool __cdecl CG_VecLessThan(float *a, float *b)
 {
-    _FP11 = (float)((float)(*a - *b) - (float)(a[1] - b[1]));
-    __asm { fsel      f0, f11, f13, f0 }
-    _FP13 = (float)((float)_FP0 - (float)(a[2] - b[2]));
-    __asm { fsel      f13, f13, f0, f12 }
-    return _FP13 <= 0.0;
+    float v3; // [esp+4h] [ebp-1Ch]
+    float v4; // [esp+8h] [ebp-18h]
+    float v5; // [esp+Ch] [ebp-14h]
+    float v6; // [esp+10h] [ebp-10h]
+    float v7; // [esp+14h] [ebp-Ch]
+    float v8; // [esp+18h] [ebp-8h]
+    float v9; // [esp+1Ch] [ebp-4h]
+
+    v8 = *a - *b;
+    v9 = a[1] - b[1];
+    v5 = v8 - v9;
+    if (v5 < 0.0)
+        v6 = a[1] - b[1];
+    else
+        v6 = *a - *b;
+    v7 = a[2] - b[2];
+    v4 = v6 - v7;
+    if (v4 < 0.0)
+        v3 = a[2] - b[2];
+    else
+        v3 = v6;
+    return v3 <= 0.0;
 }
 
 void __cdecl CG_UpdateBModelWorldBounds(unsigned int localClientNum, centity_s *cent, int forceFilter)
 {
+#if 0
     GfxBrushModel *BrushModel; // r30
     double v25; // fp7
     double v26; // fp6
@@ -545,6 +549,280 @@ void __cdecl CG_UpdateBModelWorldBounds(unsigned int localClientNum, centity_s *
     __asm { lvx128    v126, r1, r0 }
     _R0 = -64;
     __asm { lvx128    v127, r1, r0 }
+#endif
+    // TODO(mrsteyk): re-decompiled, check validity!
+
+   //float* v4; // [esp-10h] [ebp-1F0h]
+    float maxs[3]; // [esp-Ch] [ebp-1ECh] BYREF
+    float v6; // [esp+0h] [ebp-1E0h]
+    float mins[3]; // [esp+4h] [ebp-1DCh] BYREF
+    float v8[8]; // [esp+10h] [ebp-1D0h]
+    float v9; // [esp+30h] [ebp-1B0h]
+    float v10; // [esp+34h] [ebp-1ACh]
+    float v11; // [esp+38h] [ebp-1A8h]
+    float4 rotatedBounds[2]; // [esp+3Ch] [ebp-1A4h] BYREF
+    int32_t v13; // [esp+5Ch] [ebp-184h]
+    __int64 v14; // [esp+60h] [ebp-180h]
+    int32_t v15; // [esp+68h] [ebp-178h]
+    int32_t v16; // [esp+6Ch] [ebp-174h]
+    int32_t v17; // [esp+70h] [ebp-170h]
+    int32_t v18; // [esp+74h] [ebp-16Ch]
+    int32_t v19; // [esp+78h] [ebp-168h]
+    __int64 v20; // [esp+7Ch] [ebp-164h]
+    int32_t v21; // [esp+84h] [ebp-15Ch]
+    int32_t v22; // [esp+88h] [ebp-158h]
+    int32_t v23; // [esp+8Ch] [ebp-154h]
+    float *v24; // [esp+90h] [ebp-150h]
+    __int64 v25; // [esp+94h] [ebp-14Ch]
+    int32_t v26; // [esp+9Ch] [ebp-144h]
+    int32_t v27; // [esp+A0h] [ebp-140h]
+    __int64 v28; // [esp+A4h] [ebp-13Ch]
+    int32_t v29; // [esp+ACh] [ebp-134h]
+    int32_t v30; // [esp+B0h] [ebp-130h]
+    int32_t v31; // [esp+B4h] [ebp-12Ch]
+    int32_t v32; // [esp+B8h] [ebp-128h]
+    int32_t v33; // [esp+BCh] [ebp-124h]
+    __int64 v34; // [esp+C0h] [ebp-120h]
+    int32_t v35; // [esp+C8h] [ebp-118h]
+    int32_t v36; // [esp+CCh] [ebp-114h]
+    int32_t v37; // [esp+D0h] [ebp-110h]
+    float *v38; // [esp+D4h] [ebp-10Ch]
+    __int64 v39; // [esp+D8h] [ebp-108h]
+    int32_t v40; // [esp+E0h] [ebp-100h]
+    int32_t v41; // [esp+E4h] [ebp-FCh]
+    __int64 v42; // [esp+E8h] [ebp-F8h]
+    int32_t v43; // [esp+F0h] [ebp-F0h]
+    int32_t v44; // [esp+F4h] [ebp-ECh]
+    int32_t v45; // [esp+F8h] [ebp-E8h]
+    int32_t v46; // [esp+FCh] [ebp-E4h]
+    int32_t v47; // [esp+100h] [ebp-E0h]
+    __int64 v48; // [esp+104h] [ebp-DCh]
+    int32_t v49; // [esp+10Ch] [ebp-D4h]
+    int32_t v50; // [esp+110h] [ebp-D0h]
+    int32_t v51; // [esp+114h] [ebp-CCh]
+    __int64 v52; // [esp+118h] [ebp-C8h]
+    float v53; // [esp+120h] [ebp-C0h]
+    float v54; // [esp+124h] [ebp-BCh]
+    float *v55; // [esp+128h] [ebp-B8h]
+    __int64 v56; // [esp+12Ch] [ebp-B4h]
+    float v57; // [esp+134h] [ebp-ACh]
+    float v58; // [esp+138h] [ebp-A8h]
+    float v59; // [esp+13Ch] [ebp-A4h]
+    float v60; // [esp+140h] [ebp-A0h]
+    float v61; // [esp+144h] [ebp-9Ch]
+    float v62; // [esp+148h] [ebp-98h]
+    float v63; // [esp+14Ch] [ebp-94h]
+    float v64; // [esp+150h] [ebp-90h]
+    float v65; // [esp+154h] [ebp-8Ch]
+    float v66; // [esp+158h] [ebp-88h]
+    float *v67; // [esp+15Ch] [ebp-84h]
+    float v68; // [esp+160h] [ebp-80h]
+    float v69; // [esp+164h] [ebp-7Ch]
+    float v70; // [esp+168h] [ebp-78h]
+    float v71; // [esp+16Ch] [ebp-74h]
+    float *v72; // [esp+170h] [ebp-70h]
+    float v73; // [esp+174h] [ebp-6Ch]
+    float v74; // [esp+178h] [ebp-68h]
+    float v75; // [esp+17Ch] [ebp-64h]
+    float v76; // [esp+180h] [ebp-60h]
+    float *origin; // [esp+184h] [ebp-5Ch]
+    float v78[3][3]; // [esp+188h] [ebp-58h] BYREF
+    float axis_24[4]; // [esp+1ACh] [ebp-34h]
+    float bounds_4[3]; // [esp+1BCh] [ebp-24h] BYREF
+    int32_t v81; // [esp+1C8h] [ebp-18h]
+    GfxBrushModel *brush; // [esp+1CCh] [ebp-14h]
+    //int32_t bounds_28; // [esp+1D4h] [ebp-Ch]
+    //GfxBrushModel* bmodel; // [esp+1D8h] [ebp-8h]
+    //GfxBrushModel* retaddr; // [esp+1E0h] [ebp+0h]
+
+    //bounds_28 = a1;
+    //bmodel = retaddr;
+    //brush = R_GetBrushModel(cent->nextState.index.brushmodel);
+    brush = R_GetBrushModel(*(unsigned __int16 *)cent->nextState.index);
+    axis_24[0] = brush->bounds[0][0];
+    axis_24[1] = brush->bounds[0][1];
+    axis_24[2] = brush->bounds[0][2];
+    axis_24[3] = brush->bounds[1][0];
+    bounds_4[0] = brush->bounds[1][0];
+    bounds_4[1] = brush->bounds[1][1];
+    bounds_4[2] = brush->bounds[1][2];
+    v81 = *(_DWORD *)&brush->surfaceCount;
+    AnglesToAxis(cent->pose.angles, v78);
+    origin = cent->pose.origin;
+    v73 = v78[0][0];
+    v74 = v78[0][1];
+    v75 = v78[0][2];
+    v76 = 0.0f;
+    v72 = v78[1];
+    v68 = v78[1][0];
+    v69 = v78[1][1];
+    v70 = v78[1][2];
+    v71 = 0.0f;
+    v67 = v78[2];
+    v63 = v78[2][0];
+    v64 = v78[2][1];
+    v65 = v78[2][2];
+    v66 = 0.0f;
+    v59 = cent->pose.origin[0];
+    v60 = cent->pose.origin[1];
+    v61 = cent->pose.origin[2];
+    v62 = 0.0f;
+    *(float *)&v56 = axis_24[0];
+    *((float *)&v56 + 1) = axis_24[0];
+    v57 = axis_24[0];
+    v58 = axis_24[0];
+    v55 = bounds_4;
+    *(float *)&v52 = bounds_4[0];
+    *((float *)&v52 + 1) = bounds_4[0];
+    v53 = bounds_4[0];
+    v54 = bounds_4[0];
+    if (v78[0][0] >= 0.0)
+        v51 = 0;
+    else
+        v51 = -1;
+    LODWORD(v48) = v51;
+    if (v74 >= 0.0)
+        v47 = 0;
+    else
+        v47 = -1;
+    HIDWORD(v48) = v47;
+    if (v75 >= 0.0)
+        v46 = 0;
+    else
+        v46 = -1;
+    v49 = v46;
+    if (v76 >= 0.0)
+        v45 = 0;
+    else
+        v45 = -1;
+    v50 = v45;
+    v42 = v52 & v48 | v56 & ~v48;
+    v43 = LODWORD(v53) & v49 | LODWORD(v57) & ~v49;
+    v44 = LODWORD(v54) & v50 | LODWORD(v58) & ~v50;
+    v39 = v56 & v48 | v52 & ~v48;
+    v40 = LODWORD(v57) & v49 | LODWORD(v53) & ~v49;
+    v41 = LODWORD(v58) & v50 | LODWORD(v54) & ~v50;
+    *(float *)&v56 = axis_24[1];
+    *((float *)&v56 + 1) = axis_24[1];
+    v57 = axis_24[1];
+    v58 = axis_24[1];
+    v38 = bounds_4;
+    *(float *)&v52 = bounds_4[1];
+    *((float *)&v52 + 1) = bounds_4[1];
+    v53 = bounds_4[1];
+    v54 = bounds_4[1];
+    if (v68 >= 0.0f)
+        v37 = 0;
+    else
+        v37 = -1;
+    LODWORD(v34) = v37;
+    if (v69 >= 0.0f)
+        v33 = 0;
+    else
+        v33 = -1;
+    HIDWORD(v34) = v33;
+    if (v70 >= 0.0f)
+        v32 = 0;
+    else
+        v32 = -1;
+    v35 = v32;
+    if (v71 >= 0.0f)
+        v31 = 0;
+    else
+        v31 = -1;
+    v36 = v31;
+    v28 = v52 & v34 | v56 & ~v34;
+    v29 = LODWORD(v53) & v35 | LODWORD(v57) & ~v35;
+    v30 = LODWORD(v54) & v36 | LODWORD(v58) & ~v36;
+    v25 = v56 & v34 | v52 & ~v34;
+    v26 = LODWORD(v57) & v35 | LODWORD(v53) & ~v35;
+    v27 = LODWORD(v58) & v36 | LODWORD(v54) & ~v36;
+    *(float *)&v56 = axis_24[2];
+    *((float *)&v56 + 1) = axis_24[2];
+    v57 = axis_24[2];
+    v58 = axis_24[2];
+    v24 = bounds_4;
+    *(float *)&v52 = bounds_4[2];
+    *((float *)&v52 + 1) = bounds_4[2];
+    v53 = bounds_4[2];
+    v54 = bounds_4[2];
+    if (v63 >= 0.0f)
+        v23 = 0;
+    else
+        v23 = -1;
+    LODWORD(v20) = v23;
+    if (v64 >= 0.0f)
+        v19 = 0;
+    else
+        v19 = -1;
+    HIDWORD(v20) = v19;
+    if (v65 >= 0.0f)
+        v18 = 0;
+    else
+        v18 = -1;
+    v21 = v18;
+    if (v66 >= 0.0f)
+        v17 = 0;
+    else
+        v17 = -1;
+    v22 = v17;
+    v14 = v52 & v20 | v56 & ~v20;
+    v15 = LODWORD(v53) & v21 | LODWORD(v57) & ~v21;
+    v16 = LODWORD(v54) & v22 | LODWORD(v58) & ~v22;
+    *(_QWORD *)&rotatedBounds[1].unitVec[1].packed = v56 & v20 | v52 & ~v20;
+    rotatedBounds[1].u[3] = LODWORD(v57) & v21 | LODWORD(v53) & ~v21;
+    v13 = LODWORD(v58) & v22 | LODWORD(v54) & ~v22;
+    v9 = *(float *)&v42 * v73 + v59;
+    v10 = *((float *)&v42 + 1) * v74 + v60;
+    v11 = *(float *)&v43 * v75 + v61;
+    rotatedBounds[0].v[0] = *(float *)&v44 * v76 + v62;
+    v9 = *(float *)&v28 * v68 + v9;
+    v10 = *((float *)&v28 + 1) * v69 + v10;
+    v11 = *(float *)&v29 * v70 + v11;
+    rotatedBounds[0].v[0] = *(float *)&v30 * v71 + rotatedBounds[0].v[0];
+    v9 = *(float *)&v14 * v63 + v9;
+    v10 = *((float *)&v14 + 1) * v64 + v10;
+    v11 = *(float *)&v15 * v65 + v11;
+    rotatedBounds[0].v[0] = *(float *)&v16 * v66 + rotatedBounds[0].v[0];
+    LODWORD(v8[7]) = (uintptr_t)&rotatedBounds[0].v[1];
+    rotatedBounds[0].v[1] = *(float *)&v39 * v73 + v59;
+    rotatedBounds[0].v[2] = *((float *)&v39 + 1) * v74 + v60;
+    rotatedBounds[0].v[3] = *(float *)&v40 * v75 + v61;
+    rotatedBounds[1].v[0] = *(float *)&v41 * v76 + v62;
+    LODWORD(v8[6]) = (uintptr_t)&rotatedBounds[0].v[1];
+    LODWORD(v8[5]) = (uintptr_t)&rotatedBounds[0].v[1];
+    rotatedBounds[0].v[1] = *(float *)&v25 * v68 + rotatedBounds[0].v[1];
+    rotatedBounds[0].v[2] = *((float *)&v25 + 1) * v69 + rotatedBounds[0].v[2];
+    rotatedBounds[0].v[3] = *(float *)&v26 * v70 + rotatedBounds[0].v[3];
+    rotatedBounds[1].v[0] = *(float *)&v27 * v71 + rotatedBounds[1].v[0];
+    LODWORD(v8[4]) = (uintptr_t)&rotatedBounds[0].v[1];
+    LODWORD(v8[3]) = (uintptr_t)&rotatedBounds[0].v[1];
+    rotatedBounds[0].v[1] = rotatedBounds[1].v[1] * v63 + rotatedBounds[0].v[1];
+    rotatedBounds[0].v[2] = rotatedBounds[1].v[2] * v64 + rotatedBounds[0].v[2];
+    rotatedBounds[0].v[3] = rotatedBounds[1].v[3] * v65 + rotatedBounds[0].v[3];
+    rotatedBounds[1].v[0] = *(float *)&v13 * v66 + rotatedBounds[1].v[0];
+    mins[0] = v9;
+    mins[1] = v10;
+    mins[2] = v11;
+    v8[0] = rotatedBounds[0].v[0];
+    *(_QWORD *)maxs = *(_QWORD *)&rotatedBounds[0].unitVec[1].packed;
+    maxs[2] = rotatedBounds[0].v[3];
+    v6 = rotatedBounds[1].v[0];
+    if (forceFilter)
+        goto LABEL_41;
+    if (!CG_VecLessThan(brush->writable.mins, mins) || !CG_VecLessThan(maxs, brush->writable.maxs))
+    {
+        Vec3Sub(mins, g_entMoveTolVec, mins);
+        Vec3Add(maxs, g_entMoveTolVec, maxs);
+    LABEL_41:
+        brush->writable.mins[0] = mins[0];
+        brush->writable.mins[1] = mins[1];
+        brush->writable.mins[2] = mins[2];
+        brush->writable.maxs[0] = maxs[0];
+        brush->writable.maxs[1] = maxs[1];
+        brush->writable.maxs[2] = maxs[2];
+        R_LinkBModelEntity(localClientNum, cent->nextState.number, brush);
+    }
 }
 
 void __cdecl CG_ScriptMover(int localClientNum, centity_s *cent)
@@ -1617,7 +1895,7 @@ void __cdecl CG_DObjCalcBone(const cpose_t *pose, DObj_s *obj, int boneIndex)
         DObjCalcSkel(obj, v8);
         v6 = obj;
     }
-    DObjUnlock(v6);
+    DObjUnlock((DObj_s *)v6);
 }
 
 void __cdecl CG_DrawEntEqDebug(const centity_s *cent)
@@ -1798,7 +2076,7 @@ void __cdecl CG_ProcessEntity(int localClientNum, centity_s *cent)
         CG_ActorSpawner(cent, v5, eType, v4);
         break;
     default:
-        Com_Error(ERR_DROP, byte_820070DC, eType);
+        Com_Error(ERR_DROP, "Bad entity type %i", eType);
         break;
     }
 }
@@ -1950,7 +2228,7 @@ void __cdecl CG_LoadEntities(SaveGame *save)
     {
         if (i >= 2176)
         {
-            Com_Error(ERR_DROP, byte_8200713C);
+            Com_Error(ERR_DROP, "G_LoadGame: entitynum out of range (%i, MAX = %i)", i, 2176);
             i = v3[0];
         }
         CG_LoadEntity(i, save);
@@ -2113,7 +2391,7 @@ int __cdecl CG_AddPacketEntities(int localClientNum)
     unsigned int v7; // r31
     centity_s *Entity; // r4
 
-    PIXBeginNamedEvent_Copy_NoVarArgs(0xFFFFFFFF, "add packet ents");
+    //PIXBeginNamedEvent_Copy_NoVarArgs(0xFFFFFFFF, "add packet ents");
     //Profile_Begin(325);
     if (localClientNum)
         MyAssertHandler(

@@ -144,6 +144,7 @@ void __cdecl R_Cinematic_SyncNow();
 void __cdecl R_Cinematic_DrawStretchPic_Letterboxed();
 bool __cdecl R_Cinematic_IsFinished();
 bool __cdecl R_Cinematic_IsStarted();
+bool R_Cinematic_IsPending();
 bool __cdecl R_Cinematic_IsNextReady();
 bool __cdecl R_Cinematic_IsUnderrun();
 

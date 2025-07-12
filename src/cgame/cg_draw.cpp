@@ -3,6 +3,17 @@
 #endif
 
 #include "cg_draw.h"
+#include <stringed/stringed_hooks.h>
+#include "cg_main.h"
+#include "cg_servercmds.h"
+#include "cg_newdraw.h"
+#include <gfx_d3d/r_cinematic.h>
+#include <ui/ui.h>
+#include "cg_view.h"
+
+CenterPrint s_centerPrint[1];
+ScreenBlur s_screenBlur[1];
+ScreenFade s_screenFade[1];
 
 void __cdecl TRACK_cg_draw()
 {
@@ -1233,6 +1244,27 @@ void __cdecl CG_UpdateTimeScale(cg_s *cgameGlob)
     }
 }
 
+const char strButtons[17] =
+{
+  '\x01',
+  '\x02',
+  '\x03',
+  '\x04',
+  '\x05',
+  '\x06',
+  '\x0E',
+  '\x0F',
+  '\x10',
+  '\x11',
+  '\x12',
+  '\x13',
+  '\x14',
+  '\x15',
+  '\x16',
+  '\x17',
+  '\0'
+};
+
 void __cdecl DrawFontTest(int localClientNum)
 {
     const ScreenPlacement *v1; // r31
@@ -1644,7 +1676,7 @@ void __cdecl DrawViewmodelInfo(int localClientNum)
         } while (v15);
         DObjDisplayAnimToBuffer(
             LocalClientWeaponInfo->viewModelDObj,
-            byte_82003CDD,
+            "",
             (char *)v37 + (char *)v14 - (char *)v37 - 1,
             2048 - ((char *)v14 - (char *)v37 - 1));
         UI_DrawText(

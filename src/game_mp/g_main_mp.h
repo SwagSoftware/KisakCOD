@@ -4,30 +4,6 @@
 #include <universal/q_parse.h>
 #include <client_mp/client_mp.h>
 
-enum hitLocation_t : int32_t
-{                                       // ...
-    HITLOC_NONE = 0x0,
-    HITLOC_HELMET = 0x1,
-    HITLOC_HEAD = 0x2,
-    HITLOC_NECK = 0x3,
-    HITLOC_TORSO_UPR = 0x4,
-    HITLOC_TORSO_LWR = 0x5,
-    HITLOC_R_ARM_UPR = 0x6,
-    HITLOC_L_ARM_UPR = 0x7,
-    HITLOC_R_ARM_LWR = 0x8,
-    HITLOC_L_ARM_LWR = 0x9,
-    HITLOC_R_HAND = 0xA,
-    HITLOC_L_HAND = 0xB,
-    HITLOC_R_LEG_UPR = 0xC,
-    HITLOC_L_LEG_UPR = 0xD,
-    HITLOC_R_LEG_LWR = 0xE,
-    HITLOC_L_LEG_LWR = 0xF,
-    HITLOC_R_FOOT = 0x10,
-    HITLOC_L_FOOT = 0x11,
-    HITLOC_GUN = 0x12,
-    HITLOC_NUM = 0x13,
-};
-
 struct entityHandler_t // sizeof=0x28
 {
     void(__cdecl *think)(gentity_s *);
@@ -309,5 +285,3 @@ extern const dvar_t *voice_deadChat;
 extern gentity_s g_entities[1024];
 extern level_locals_t level;
 extern bgs_t level_bgs;
-
-

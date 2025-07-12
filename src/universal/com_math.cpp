@@ -3174,3 +3174,10 @@ void __cdecl FinitePerspectiveMatrix(float (*mtx)[4], float tanHalfFovX, float t
     (*mtx)[11] = 1.0;
     (*mtx)[14] = zNear * zFar / (zNear - zFar);
 }
+
+// KISAKTODO: double check this function's logic
+float LerpAngle(float from, float to, float frac)
+{
+    float delta = fmodf(to - from + 540.0f, 360.0f) - 180.0f;
+    return from + delta * frac;
+}

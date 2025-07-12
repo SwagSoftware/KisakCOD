@@ -1091,3 +1091,121 @@ void __cdecl Scr_ResetTimeout();
 extern BuiltinFunctionDef functions[];
 extern BuiltinMethodDef methods_2[];
 extern uint16_t *controller_names[6];
+
+
+const entityHandler_t entityHandlers[] =
+{
+  { NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 0, 0 },
+  { NULL, NULL, NULL, &Touch_Multi, NULL, NULL, NULL, NULL, 0, 0 },
+  { NULL, NULL, NULL, NULL, &hurt_use, NULL, NULL, NULL, 0, 0 },
+  { NULL, NULL, NULL, &hurt_touch, &hurt_use, NULL, NULL, NULL, 0, 0 },
+  {
+    NULL,
+    NULL,
+    NULL,
+    NULL,
+    &Use_trigger_damage,
+    &Pain_trigger_damage,
+    &Die_trigger_damage,
+    NULL,
+    0,
+    0
+  },
+  { NULL, &Reached_ScriptMover, NULL, NULL, NULL, NULL, NULL, NULL, 0, 0 },
+  { NULL, &Reached_ScriptMover, NULL, NULL, NULL, NULL, NULL, NULL, 0, 0 },
+  {
+    &G_ExplodeMissile,
+    NULL,
+    NULL,
+    &Touch_Item_Auto,
+    NULL,
+    NULL,
+    NULL,
+    NULL,
+    3,
+    4
+  },
+  { &G_TimedObjectThink, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 0, 0 },
+  { &G_ExplodeMissile, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 5, 6 },
+  { NULL, NULL, NULL, NULL, NULL, NULL, &player_die, &G_PlayerController, 0, 0 },
+  { NULL, NULL, NULL, NULL, NULL, NULL, &player_die, NULL, 0, 0 },
+  { NULL, NULL, NULL, NULL, NULL, NULL, NULL, &G_PlayerController, 0, 0 },
+  { &BodyEnd, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 0, 0 },
+  {
+    &turret_think_init,
+    NULL,
+    NULL,
+    NULL,
+    &turret_use,
+    NULL,
+    NULL,
+    &turret_controller,
+    0,
+    0
+  },
+  {
+    &turret_think,
+    NULL,
+    NULL,
+    NULL,
+    &turret_use,
+    NULL,
+    NULL,
+    &turret_controller,
+    0,
+    0
+  },
+  {
+    &DroppedItemClearOwner,
+    NULL,
+    NULL,
+    &Touch_Item_Auto,
+    NULL,
+    NULL,
+    NULL,
+    NULL,
+    0,
+    0
+  },
+  {
+    &FinishSpawningItem,
+    NULL,
+    NULL,
+    &Touch_Item_Auto,
+    NULL,
+    NULL,
+    NULL,
+    NULL,
+    0,
+    0
+  },
+  { NULL, NULL, NULL, &Touch_Item_Auto, NULL, NULL, NULL, NULL, 0, 0 },
+    //{ NULL, NULL, NULL, NULL, &KISAK_NULLSUB, NULL, NULL, NULL, 0, 0 },
+    { NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 0, 0 },
+    { NULL, &Reached_ScriptMover, NULL, NULL, NULL, NULL, NULL, NULL, 0, 0 },
+    { &G_FreeEntity, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 0, 0 },
+    {
+      &G_VehEntHandler_Think,
+      NULL,
+      NULL,
+      &G_VehEntHandler_Touch,
+      &G_VehEntHandler_Use,
+      &Helicopter_Pain,
+      &G_VehEntHandler_Die,
+      &G_VehEntHandler_Controller,
+      0,
+      0
+    },
+    {
+      &Helicopter_Think,
+      NULL,
+      NULL,
+      NULL,
+      NULL,
+      &Helicopter_Pain,
+      &Helicopter_Die,
+      &Helicopter_Controller,
+      0,
+      0
+    }
+}; // idb

@@ -130,7 +130,6 @@ void __cdecl FS_ConvertPath(char *s);
 void __cdecl FS_InitFilesystem();
 unsigned int __cdecl FS_FOpenFileByMode(char *qpath, int *f, fsMode_t mode);
 void __cdecl FS_Flush(int f);
-void __cdecl Com_GetBspFilename(char *filename, unsigned int size, const char *mapname);
 void __cdecl FS_FreeFileList(const char **list);
 
 void __cdecl FS_CopyFile(char *fromOSPath, char *toOSPath);

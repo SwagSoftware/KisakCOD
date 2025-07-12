@@ -1,9 +1,15 @@
 #pragma once
+
+#ifdef KISAK_MP
 #include <cgame_mp/cg_local_mp.h>
 #include <game_mp/g_main_mp.h>
+#elif KISAK_SP
+#include <server/server.h>
+#endif
 
 #include <script/scr_stringlist.h>
 #include <script/scr_variable.h>
+#include <bgame/bg_public.h>
 //#include <game_mp/g_public_mp.h>
 
 static const char *hintStrings[] = { "", "HINT_NOICON", "HINT_ACTIVATE", "HINT_HEALTH" }; // idb
@@ -126,6 +132,7 @@ bool __cdecl VEH_TestSlideMove(gentity_s *ent, float *outPos);
 
 
 // g_hudelem
+#ifdef KISAK_MP
 struct game_hudelem_s // sizeof=0xAC
 {
     hudelem_s elem;
@@ -135,7 +142,20 @@ struct game_hudelem_s // sizeof=0xAC
 };
 static_assert(sizeof(game_hudelem_s) == 0xAC);
 
-struct game_hudelem_field_t // sizeof=0x1C
+enum hudelem_update_t : int32_t
+{                                       // ...
+    HUDELEM_UPDATE_ARCHIVAL = 0x1,
+    HUDELEM_UPDATE_CURRENT = 0x2,
+    HUDELEM_UPDATE_ARCHIVAL_AND_CURRENT = 0x3,
+};
+#elif KISAK_SP
+struct game_hudelem_s
+{
+    hudelem_s elem;
+};
+#endif
+
+struct game_hudelem_field_t // sizeof=0x1C  (SP/MP same)
 {                                       // ...
     const char *name;
     int32_t ofs;                            // ...
@@ -147,12 +167,7 @@ struct game_hudelem_field_t // sizeof=0x1C
 };
 static_assert(sizeof(game_hudelem_field_t) == 0x1C);
 
-enum hudelem_update_t : int32_t
-{                                       // ...
-    HUDELEM_UPDATE_ARCHIVAL = 0x1,
-    HUDELEM_UPDATE_CURRENT = 0x2,
-    HUDELEM_UPDATE_ARCHIVAL_AND_CURRENT = 0x3,
-};
+
 
 void __cdecl TRACK_g_hudelem();
 game_hudelem_s *__cdecl HudElem_Alloc(int32_t clientNum, int32_t teamNum);
@@ -232,7 +247,11 @@ void __cdecl HECmd_SetMapNameString(scr_entref_t entref);
 void __cdecl HECmd_SetPulseFX(scr_entref_t entref);
 VariableUnion __cdecl GetIntGTZero(uint32_t index);
 void(__cdecl *__cdecl HudElem_GetMethod(const char **pName))(scr_entref_t);
+#ifdef KISAK_MP
 void __cdecl HudElem_UpdateClient(gclient_s *client, int32_t clientNum, hudelem_update_t which);
+#elif KISAK_SP
+void __cdecl HudElem_UpdateClient(gclient_s *client);
+#endif
 
 extern game_hudelem_s g_hudelems[1024];
 
@@ -768,122 +787,7 @@ void __cdecl Helicopter_Die(
 
 void __cdecl Helicopter_Controller(const gentity_s *pSelf, int32_t *partBits);
 
-const entityHandler_t entityHandlers[] =
-{
-  { NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 0, 0 },
-  { NULL, NULL, NULL, &Touch_Multi, NULL, NULL, NULL, NULL, 0, 0 },
-  { NULL, NULL, NULL, NULL, &hurt_use, NULL, NULL, NULL, 0, 0 },
-  { NULL, NULL, NULL, &hurt_touch, &hurt_use, NULL, NULL, NULL, 0, 0 },
-  {
-    NULL,
-    NULL,
-    NULL,
-    NULL,
-    &Use_trigger_damage,
-    &Pain_trigger_damage,
-    &Die_trigger_damage,
-    NULL,
-    0,
-    0
-  },
-  { NULL, &Reached_ScriptMover, NULL, NULL, NULL, NULL, NULL, NULL, 0, 0 },
-  { NULL, &Reached_ScriptMover, NULL, NULL, NULL, NULL, NULL, NULL, 0, 0 },
-  {
-    &G_ExplodeMissile,
-    NULL,
-    NULL,
-    &Touch_Item_Auto,
-    NULL,
-    NULL,
-    NULL,
-    NULL,
-    3,
-    4
-  },
-  { &G_TimedObjectThink, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 0, 0 },
-  { &G_ExplodeMissile, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 5, 6 },
-  { NULL, NULL, NULL, NULL, NULL, NULL, &player_die, &G_PlayerController, 0, 0 },
-  { NULL, NULL, NULL, NULL, NULL, NULL, &player_die, NULL, 0, 0 },
-  { NULL, NULL, NULL, NULL, NULL, NULL, NULL, &G_PlayerController, 0, 0 },
-  { &BodyEnd, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 0, 0 },
-  {
-    &turret_think_init,
-    NULL,
-    NULL,
-    NULL,
-    &turret_use,
-    NULL,
-    NULL,
-    &turret_controller,
-    0,
-    0
-  },
-  {
-    &turret_think,
-    NULL,
-    NULL,
-    NULL,
-    &turret_use,
-    NULL,
-    NULL,
-    &turret_controller,
-    0,
-    0
-  },
-  {
-    &DroppedItemClearOwner,
-    NULL,
-    NULL,
-    &Touch_Item_Auto,
-    NULL,
-    NULL,
-    NULL,
-    NULL,
-    0,
-    0
-  },
-  {
-    &FinishSpawningItem,
-    NULL,
-    NULL,
-    &Touch_Item_Auto,
-    NULL,
-    NULL,
-    NULL,
-    NULL,
-    0,
-    0
-  },
-  { NULL, NULL, NULL, &Touch_Item_Auto, NULL, NULL, NULL, NULL, 0, 0 },
-  //{ NULL, NULL, NULL, NULL, &KISAK_NULLSUB, NULL, NULL, NULL, 0, 0 },
-  { NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 0, 0 },
-  { NULL, &Reached_ScriptMover, NULL, NULL, NULL, NULL, NULL, NULL, 0, 0 },
-  { &G_FreeEntity, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 0, 0 },
-  {
-    &G_VehEntHandler_Think,
-    NULL,
-    NULL,
-    &G_VehEntHandler_Touch,
-    &G_VehEntHandler_Use,
-    &Helicopter_Pain,
-    &G_VehEntHandler_Die,
-    &G_VehEntHandler_Controller,
-    0,
-    0
-  },
-  {
-    &Helicopter_Think,
-    NULL,
-    NULL,
-    NULL,
-    NULL,
-    &Helicopter_Pain,
-    &Helicopter_Die,
-    &Helicopter_Controller,
-    0,
-    0
-  }
-}; // idb
+
 
 
 extern vehicle_info_t s_vehicleInfos[32];

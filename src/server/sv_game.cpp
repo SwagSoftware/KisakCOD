@@ -9,6 +9,7 @@
 #include <universal/com_files.h>
 #include <universal/com_sndalias.h>
 #include <game_mp/g_public_mp.h>
+#include <qcommon/com_bsp.h>
 #include <qcommon/threads.h>
 
 #ifdef KISAK_MP

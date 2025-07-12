@@ -1379,6 +1379,7 @@ void __cdecl R_Cinematic_SyncNow() { /* THUNK */ }
 void __cdecl R_Cinematic_DrawStretchPic_Letterboxed() { /* THUNK */ }
 bool __cdecl R_Cinematic_IsFinished() { /* THUNK */ return true; }
 bool __cdecl R_Cinematic_IsStarted() { /* THUNK */ return false; }
+bool R_Cinematic_IsPending() { return false; }
 bool __cdecl R_Cinematic_IsNextReady() { /* THUNK */ return true; }
 bool __cdecl R_Cinematic_IsUnderrun() { /* THUNK */ return false; }
 void __cdecl R_Cinematic_BeginLostDevice() { /* THUNK */ }

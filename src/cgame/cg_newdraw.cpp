@@ -4,19 +4,19 @@
 
 #include "cg_newdraw.h"
 
-//  struct dvar_s const *const hud_fade_sprint 827d8a3c     cg_newdraw.obj
-//  struct dvar_s const *const hud_health_pulserate_injured 827d8a44     cg_newdraw.obj
-//  struct dvar_s const *const hud_health_startpulse_critical 827d8a50     cg_newdraw.obj
-//  struct dvar_s const *const hud_fade_offhand 827d8a54     cg_newdraw.obj
-//  struct dvar_s const *const hud_deathQuoteFadeTime 827d8a5c     cg_newdraw.obj
-//  struct dvar_s const *const hud_fade_ammodisplay 827d8a64     cg_newdraw.obj
-//  struct dvar_s const *const hud_health_startpulse_injured 827d8a6c     cg_newdraw.obj
-//  struct dvar_s const *const hud_fade_stance 827d8a74     cg_newdraw.obj
-//  struct dvar_s const *const hud_fade_compass 827d8a84     cg_newdraw.obj
-//  struct dvar_s const *const hud_health_pulserate_critical 827d8a94     cg_newdraw.obj
-//  struct dvar_s const *const hud_fade_healthbar 827d8aa0     cg_newdraw.obj
+const dvar_t *hud_fade_sprint;
+const dvar_t *hud_health_pulserate_injured;
+const dvar_t *hud_health_startpulse_critical;
+const dvar_t *hud_fade_offhand;
+const dvar_t *hud_deathQuoteFadeTime;
+const dvar_t *hud_fade_ammodisplay;
+const dvar_t *hud_health_startpulse_injured;
+const dvar_t *hud_fade_stance;
+const dvar_t *hud_fade_compass;
+const dvar_t *hud_health_pulserate_critical;
+const dvar_t *hud_fade_healthbar;
 
-void __cdecl CG_AntiBurnInHUD_RegisterDvars(int a1, unsigned __int16 a2, const char *a3)
+void __cdecl CG_AntiBurnInHUD_RegisterDvars()
 {
     const char *v3; // r5
     unsigned __int16 v4; // r4

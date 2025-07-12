@@ -454,10 +454,17 @@ static_assert(sizeof(clientControllers_t) == 0x60);
 enum team_t : __int32
 {                                       // XREF: GetOtherTeamField/r
     TEAM_FREE = 0x0,
+    TEAM_BAD = 0x0,
     TEAM_AXIS = 0x1,
     TEAM_ALLIES = 0x2,
+#ifdef KISAK_MP
     TEAM_SPECTATOR = 0x3,
     TEAM_NUM_TEAMS = 0x4,
+#elif KISAK_SP
+    TEAM_NEUTRAL = 0x3,
+    TEAM_DEAD = 0x4,
+    TEAM_NUM_TEAMS = 0x5,
+#endif
 };
 
 struct clientInfo_t // sizeof=0x4CC
@@ -559,14 +566,13 @@ enum he_type_t : __int32
     HE_TYPE_COUNT = 0xE,
 };
 
+#ifdef KISAK_MP
 struct hudelem_s // sizeof=0xA0
 {                                       // XREF: .data:g_dummyHudCurrent/r
-                                        // .data:g_dummyHudCurrent_0/r ...
     he_type_t type;
     float x;
     float y;
     float z;                            // XREF: .rdata:off_866438/o
-    // .rdata:uint const * const g_swizzleYZXW__uint4/o
     int32_t targetEntNum;
     float fontScale;
     int32_t font;
@@ -575,31 +581,23 @@ struct hudelem_s // sizeof=0xA0
     hudelem_color_t color;
     hudelem_color_t fromColor;
     int32_t fadeStartTime;                  // XREF: _memmove:UnwindDown3/o
-    // _memcpy:UnwindDown3_0/o ...
     int32_t fadeTime;                       // XREF: Sys_GetPhysicalCpuCount+131/o
-    // RB_LogPrintState_0(int,int)+19D/o ...
     int32_t label;
     int32_t width;
     int32_t height;
     int32_t materialIndex;
     int32_t offscreenMaterialIdx;           // XREF: Image_CopyBitmapData:off_810011/o
     int32_t fromWidth;                      // XREF: .rdata:008CF9F1/o
-    // .rdata:008CFBF1/o ...
     int32_t fromHeight;
     int32_t scaleStartTime;                 // XREF: .rdata:008CFA4D/o
-    // .rdata:008CFC01/o
     int32_t scaleTime;
     float fromX;
     float fromY;
     int32_t fromAlignOrg;
     int32_t fromAlignScreen;                // XREF: SV_Shutdown(char const *):loc_5D1039/o
-    // TRACK_sv_main(void)+A/o
     int32_t moveStartTime;                  // XREF: .rdata:val_dc_luminance/o
-    // .rdata:val_dc_chrominance/o ...
     int32_t moveTime;                       // XREF: .rdata:008CFA2D/o
-    // .rdata:008CFBFD/o ...
     int32_t time;                           // XREF: .rdata:off_866450/o
-    // .rdata:008CFA51/o ...
     int32_t duration;
     float value;                        // XREF: unzlocal_CheckCurrentFileCoherencyHeader:loc_67D5A6/o
     int32_t text;
@@ -608,12 +606,59 @@ struct hudelem_s // sizeof=0xA0
     int32_t fxBirthTime;                    // XREF: R_Cinematic_BinkOpenPath:loc_792B62/o
     int32_t fxLetterTime;                   // XREF: .rdata:008CFA1D/o
     int32_t fxDecayStartTime;               // XREF: .rdata:008CFA31/o
-    // .rdata:008CFA35/o ...
     int32_t fxDecayDuration;                // XREF: .rdata:008E8CBD/o
     int32_t soundID;
     int32_t flags;
 };
 static_assert(sizeof(hudelem_s) == 0xA0);
+#elif KISAK_SP
+struct hudelem_s
+{
+    he_type_t type;
+    float x;
+    float y;
+    float z;
+    int targetEntNum;
+    float fontScale;
+    float fromFontScale;
+    int fontScaleStartTime;
+    int fontScaleTime;
+    int font;
+    int alignOrg;
+    int alignScreen;
+    hudelem_color_t color;
+    hudelem_color_t fromColor;
+    int fadeStartTime;
+    int fadeTime;
+    int label;
+    int width;
+    int height;
+    int materialIndex;
+    int offscreenMaterialIdx;
+    int fromWidth;
+    int fromHeight;
+    int scaleStartTime;
+    int scaleTime;
+    float fromX;
+    float fromY;
+    int fromAlignOrg;
+    int fromAlignScreen;
+    int moveStartTime;
+    int moveTime;
+    int time;
+    int duration;
+    float value;
+    int text;
+    float sort;
+    hudelem_color_t glowColor;
+    int fxBirthTime;
+    int fxLetterTime;
+    int fxDecayStartTime;
+    int fxDecayDuration;
+    int soundID;
+    int flags;
+};
+#endif
 
 struct MantleState // sizeof=0x10
 {                                       // XREF: playerState_s/r
@@ -624,14 +669,19 @@ struct MantleState // sizeof=0x10
 };
 static_assert(sizeof(MantleState) == 0x10);
 
+#ifdef KISAK_MP
 struct playerState_s_hud // sizeof=0x26C0
 {                                       // XREF: playerState_s/r
     hudelem_s current[31];              // XREF: Sys_GetPhysicalCpuCount+131/o
-    // unzlocal_CheckCurrentFileCoherencyHeader:loc_67D5A6/o ...
     hudelem_s archival[31];             // XREF: SV_Shutdown(char const *):loc_5D1039/o
-    // TRACK_sv_main(void)+A/o ...
 };
 static_assert(sizeof(playerState_s_hud) == 0x26C0);
+#elif KISAK_SP
+struct playerState_s_hud
+{
+    hudelem_s elem[256];
+};
+#endif
 
 enum ActionSlotType : __int32
 {                                       // XREF: playerState_s/r
@@ -687,6 +737,7 @@ struct objective_t // sizeof=0x1C
 };
 static_assert(sizeof(objective_t) == 0x1C);
 
+#ifdef KISAK_MP
 struct playerState_s // sizeof=0x2F64
 {                                       // XREF: gclient_s/r
                                         // clSnapshot_t/r ...
@@ -813,6 +864,119 @@ struct playerState_s // sizeof=0x2F64
 };
 static_assert(sizeof(playerState_s) == 0x2F64);
 
+#elif KISAK_SP
+/* 9184 */
+struct playerState_s
+{
+    int commandTime;
+    int pm_type;
+    int bobCycle;
+    int pm_flags;
+    int weapFlags;
+    int otherFlags;
+    int pm_time;
+    float origin[3];
+    float velocity[3];
+    float oldVelocity[2];
+    int weaponTime;
+    int weaponDelay;
+    int grenadeTimeLeft;
+    int throwBackGrenadeOwner;
+    int throwBackGrenadeTimeLeft;
+    int weaponRestrictKickTime;
+    int foliageSoundTime;
+    int gravity;
+    float leanf;
+    int speed;
+    float delta_angles[3];
+    int groundEntityNum;
+    float vLadderVec[3];
+    int jumpTime;
+    float jumpOriginZ;
+    int movementDir;
+    int eFlags;
+    int eventSequence;
+    int events[4];
+    unsigned int eventParms[4];
+    int oldEventSequence;
+    int clientNum;
+    int offHandIndex;
+    OffhandSecondaryClass offhandSecondary;
+    unsigned int weapon;
+    int weaponstate;
+    unsigned int weaponShotCount;
+    float fWeaponPosFrac;
+    int adsDelayTime;
+    int spreadOverride;
+    int spreadOverrideState;
+    int viewmodelIndex;
+    float viewangles[3];
+    int viewHeightTarget;
+    float viewHeightCurrent;
+    int viewHeightLerpTime;
+    int viewHeightLerpTarget;
+    int viewHeightLerpDown;
+    float viewAngleClampBase[2];
+    float viewAngleClampRange[2];
+    int damageEvent;
+    int damageYaw;
+    int damagePitch;
+    int damageCount;
+    int stats[4];
+    int ammo[128];
+    int ammoclip[128];
+    unsigned int weapons[4];
+    unsigned int weaponold[4];
+    unsigned int weaponrechamber[4];
+    float proneDirection;
+    float proneDirectionPitch;
+    float proneTorsoPitch;
+    ViewLockTypes viewlocked;
+    int viewlocked_entNum;
+    int vehicleType;
+    float linkAngles[3];
+    float groundTiltAngles[3];
+    int cursorHint;
+    int cursorHintString;
+    int cursorHintEntIndex;
+    int locationSelectionInfo;
+    SprintState sprintState;
+    float fTorsoPitch;
+    float fWaistPitch;
+    float holdBreathScale;
+    int holdBreathTimer;
+    float moveSpeedScaleMultiplier;
+    MantleState mantleState;
+    float meleeChargeYaw;
+    int meleeChargeDist;
+    int meleeChargeTime;
+    int weapLockFlags;
+    int weapLockedEntnum;
+    unsigned int forcedViewAnimWeaponIdx;
+    int forcedViewAnimWeaponState;
+    unsigned int forcedViewAnimOriginalWeaponIdx;
+    ActionSlotType actionSlotType[4];
+    ActionSlotParam actionSlotParam[4];
+    int entityEventSequence;
+    int weapAnim;
+    float aimSpreadScale;
+    int shellshockIndex;
+    int shellshockTime;
+    int shellshockDuration;
+    float dofNearStart;
+    float dofNearEnd;
+    float dofFarStart;
+    float dofFarEnd;
+    float dofNearBlur;
+    float dofFarBlur;
+    float dofViewmodelStart;
+    float dofViewmodelEnd;
+    int hudElemLastAssignedSoundID;
+    unsigned __int8 weaponmodels[128];
+    playerState_s_hud hud;
+};
+#endif
+
 struct CEntPlayerInfo // sizeof=0xC
 {                                       // ...
     clientControllers_t* control;       // ...
@@ -864,13 +1028,14 @@ struct CEntVehicleInfo // sizeof=0x24
 };
 static_assert(sizeof(CEntVehicleInfo) == 0x24);
 
-struct CEntFx // sizeof=0x8
+struct CEntFx // sizeof=0x8  (SP/MP Same)
 {                                       // ...
     int32_t triggerTime;
     FxEffect* effect;
 };
 static_assert(sizeof(CEntFx) == 0x8);
 
+#ifdef KISAK_MP
 struct GfxSkinCacheEntry // sizeof=0xC
 {                                       // ...
     uint32_t frameCount;
@@ -879,28 +1044,20 @@ struct GfxSkinCacheEntry // sizeof=0xC
     uint16_t ageCount;
 };
 static_assert(sizeof(GfxSkinCacheEntry) == 0xC);
-
 struct cpose_t // sizeof=0x64
 {                                       // ...
     uint16_t lightingHandle;
     uint8_t eType;
     uint8_t eTypeUnion;
     uint8_t localClientNum;
-    // padding byte
-    // padding byte
-    // padding byte
     volatile uint32_t cullIn;
     uint8_t isRagdoll;
-    // padding byte
-    // padding byte
-    // padding byte
     int32_t ragdollHandle;
     int32_t killcamRagdollHandle;
     int32_t physObjId;
     float origin[3];
     float angles[3];
     GfxSkinCacheEntry skinCacheEntry;
-    //$9D88A49AD898204B3D6E378457DD8419 ___u12;
     union //$9D88A49AD898204B3D6E378457DD8419 // sizeof=0x24
     {                                       // ...
         CEntPlayerInfo player;
@@ -910,6 +1067,35 @@ struct cpose_t // sizeof=0x64
     };
 };
 static_assert(sizeof(cpose_t) == 0x64);
+#elif KISAK_SP
+struct CEntActorInfo
+{
+    int proneType;
+    float pitch;
+    float roll;
+    float height;
+};
+struct cpose_t
+{
+    unsigned __int16 lightingHandle;
+    unsigned __int8 eType;
+    unsigned __int8 eTypeUnion;
+    bool isRagdoll;
+    int ragdollHandle;
+    int physObjId;
+    volatile int cullIn;
+    float origin[3];
+    float angles[3];
+    //$51809EA76892896F64281DFB626CE797 ___u9;
+    union //$51809EA76892896F64281DFB626CE797
+    {
+        CEntActorInfo actor;
+        CEntTurretInfo turret;
+        CEntVehicleInfo vehicle;
+        CEntFx fx;
+    };
+};
+#endif
 
 struct centity_s // sizeof=0x1DC
 {                                       // ...
@@ -1202,17 +1388,14 @@ struct scr_vehicle_s // sizeof=0x354
 };
 static_assert(sizeof(scr_vehicle_s) == 0x354);
 
+#ifdef KISAK_MP
 struct entityShared_t // sizeof=0x68
 {                                       // ...
     uint8_t linked;
     uint8_t bmodel;
     uint8_t svFlags;
-    // padding byte
     int32_t clientMask[2];
     uint8_t inuse;              // ...
-    // padding byte
-    // padding byte
-    // padding byte
     int32_t broadcastTime;
     float mins[3];                      // ...
     float maxs[3];
@@ -1225,6 +1408,25 @@ struct entityShared_t // sizeof=0x68
     int32_t eventTime;
 };
 static_assert(sizeof(entityShared_t) == 0x68);
+#elif KISAK_SP
+struct entityShared_t
+{
+    unsigned __int8 linked;
+    unsigned __int8 bmodel;
+    unsigned __int8 svFlags;
+    unsigned __int8 eventType;
+    unsigned __int8 inuse;
+    float mins[3];
+    float maxs[3];
+    int contents;
+    float absmin[3];
+    float absmax[3];
+    float currentOrigin[3];
+    float currentAngles[3];
+    EntHandle ownerNum;
+    int eventTime;
+};
+#endif
 
 enum proneCheckType_t : __int32
 {                                       // ...

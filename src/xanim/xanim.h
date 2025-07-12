@@ -400,7 +400,7 @@ struct DynEntityPose;
 struct DynEntityClient;
 struct DynEntityColl;
 
-struct ComPrimaryLight // sizeof=0x44
+struct ComPrimaryLight // sizeof=0x44 (SP/MP Same)
 {
     unsigned __int8 type;
     unsigned __int8 canUseShadowMap;
@@ -417,7 +417,7 @@ struct ComPrimaryLight // sizeof=0x44
     float translationLimit;
     const char* defName;
 };
-struct ComWorld // sizeof=0x10
+struct ComWorld // sizeof=0x10 (SP/MP Same)
 {                                       // ...
     const char* name;                   // ...
     int isInUse;                        // ...

@@ -6,8 +6,8 @@
 
 #include "cg_local.h"
 
-float __cdecl CG_FadeObjectives(const cg_s *cgameGlob);
-void __cdecl CG_DrawObjectiveBackdrop(const cg_s *cgameGlob, const float *color);
+float __cdecl CG_FadeObjectives(const struct cg_s *cgameGlob);
+void __cdecl CG_DrawObjectiveBackdrop(const struct cg_s *cgameGlob, const float *color);
 void __cdecl CG_DrawObjectiveHeader(
     int localClientNum,
     const rectDef_s *rect,

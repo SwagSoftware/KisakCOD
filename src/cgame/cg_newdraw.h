@@ -6,7 +6,7 @@
 
 #include "cg_local.h"
 
-void __cdecl CG_AntiBurnInHUD_RegisterDvars(int a1, unsigned __int16 a2, const char *a3);
+void __cdecl CG_AntiBurnInHUD_RegisterDvars();
 unsigned int __cdecl CG_GetSelectedWeaponIndex(const cg_s *cgameGlob);
 int __cdecl CG_IsHudHidden();
 int __cdecl CG_CheckPlayerForLowAmmoSpecific(const cg_s *cgameGlob, unsigned int weapIndex);
@@ -197,3 +197,16 @@ void __cdecl CG_OwnerDraw(
     Material *a51,
     int a52,
     Font_s *font_0);
+
+
+extern const dvar_t *hud_fade_sprint;
+extern const dvar_t *hud_health_pulserate_injured;
+extern const dvar_t *hud_health_startpulse_critical;
+extern const dvar_t *hud_fade_offhand;
+extern const dvar_t *hud_deathQuoteFadeTime;
+extern const dvar_t *hud_fade_ammodisplay;
+extern const dvar_t *hud_health_startpulse_injured;
+extern const dvar_t *hud_fade_stance;
+extern const dvar_t *hud_fade_compass;
+extern const dvar_t *hud_health_pulserate_critical;
+extern const dvar_t *hud_fade_healthbar;

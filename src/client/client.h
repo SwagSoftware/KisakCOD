@@ -701,7 +701,7 @@ struct SaveGame
     bool isWrittenToDevice;
     bool suppressPlayerNotify;
 };
-struct snapshot_s
+struct snapshot_s // (SP/MP same)
 {
     int32_t snapFlags;
     int32_t serverTime;

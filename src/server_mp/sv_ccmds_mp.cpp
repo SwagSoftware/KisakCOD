@@ -22,6 +22,7 @@
 #else
 #error Steam auth for Arch(Server)
 #endif
+#include <qcommon/com_bsp.h>
 
 int sv_serverId_value;
 

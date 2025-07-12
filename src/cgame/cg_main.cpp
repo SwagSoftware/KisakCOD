@@ -4,168 +4,185 @@
 
 #include "cg_main.h"
 
-//struct dvar_s const *const cg_hudGrenadeIconEnabledFlash 826cf7b8     cg_main.obj
-//struct dvar_s const *const vehHelicopterHeadSwayOnRollVert 826cf7bc     cg_main.obj
-//struct dvar_s const *const cg_hudGrenadePointerPulseMax 826cf7c0     cg_main.obj
-//struct dvar_s const *const cg_laserLight 826cf7c4     cg_main.obj
-//struct dvar_s const *const hostileNameFontColor 826cf7c8     cg_main.obj
-//struct dvar_s const *const cg_drawVersionY 826cf7cc     cg_main.obj
-//struct dvar_s const *const turretScopeZoomRate 826cf7d0     cg_main.obj
-//struct dvar_s const *const turretScopeZoomMax 826cf7d4     cg_main.obj
-//struct dvar_s const *const cg_drawVersion 826cf7d8     cg_main.obj
-//struct dvar_s const *const cg_gun_y   826cf7dc     cg_main.obj
-//struct UiContext cgDC      826cf7e0     cg_main.obj
-//struct dvar_s const *const cg_drawBreathHint 826d0558     cg_main.obj
-//struct dvar_s const *const cg_drawFriendlyFireCrosshair 826d055c     cg_main.obj
-//struct dvar_s const *const cg_bloodLimitMsec 826d0560     cg_main.obj
-//struct dvar_s const *const cg_hudGrenadeIconMaxRangeFrag 826d0564     cg_main.obj
-//struct dvar_s const *const cg_drawFPS 826d0568     cg_main.obj
-//struct dvar_s const *const cg_drawVersionX 826d056c     cg_main.obj
-//struct dvar_s const *const vehHelicopterHeadSwayOnRollHorz 826d0570     cg_main.obj
-//struct dvar_s const *const cg_drawHealth 826d0574     cg_main.obj
-//struct dvar_s const *const cg_brass   826d0578     cg_main.obj
-//struct dvar_s const *const replay_time 826d057c     cg_main.obj
-//struct dvar_s const *const cg_weaponHintsCoD1Style 826d0580     cg_main.obj
-//struct dvar_s const *const debugOverlay 826d0584     cg_main.obj
-//struct dvar_s const *const cg_viewZSmoothingMax 826d0588     cg_main.obj
-//struct dvar_s const *const cg_marks_ents_player_only 826d058c     cg_main.obj
-//struct dvar_s const *const cg_drawCrosshair 826d0590     cg_main.obj
-//struct dvar_s const *const hostileNameFontGlowColor 826d0594     cg_main.obj
-//struct weaponInfo_s(*)[128] cg_weaponsArray 826d0598     cg_main.obj
-//struct dvar_s const *const cg_drawPerformanceWarnings 826d2998     cg_main.obj
-//struct dvar_s const *const cg_laserRadius 826d299c     cg_main.obj
-//struct dvar_s const *const cg_invalidCmdHintDuration 826d29a0     cg_main.obj
-//struct dvar_s const *const hud_drawHUD 826d29a4     cg_main.obj
-//struct dvar_s const *const cg_mapLocationSelectionCursorSpeed 826d29a8     cg_main.obj
-//struct dvar_s const *const turretScopeZoom 826d29ac     cg_main.obj
-//struct dvar_s const *const cg_gun_rot_rate 826d29b0     cg_main.obj
-//struct dvar_s const *const cg_objectiveListWrapCountStandard 826d29b4     cg_main.obj
-//struct dvar_s const *const cg_hudGrenadeIconWidth 826d29b8     cg_main.obj
-//struct dvar_s const *const cg_gun_z   826d29bc     cg_main.obj
-//struct dvar_s const *const cg_hudDamageIconOffset 826d29c0     cg_main.obj
-//struct dvar_s const *const overrideNVGModelWithKnife 826d29c4     cg_main.obj
-//struct dvar_s const *const cg_viewZSmoothingMin 826d29c8     cg_main.obj
-//struct dvar_s const *const cg_drawTurretCrosshair 826d29cc     cg_main.obj
-//struct dvar_s const *const cg_hudDamageIconHeight 826d29d0     cg_main.obj
-//struct dvar_s const *const cg_drawShellshock 826d29d4     cg_main.obj
-//struct dvar_s const *const cg_gun_move_minspeed 826d29d8     cg_main.obj
-//struct dvar_s const *const cg_gun_ofs_u 826d29dc     cg_main.obj
-//struct dvar_s const *const cg_subtitles 826d29e0     cg_main.obj
-//struct dvar_s const *const cg_hudStanceHintPrints 826d29e4     cg_main.obj
-//struct dvar_s const *const vehHelicopterHeadSwayOnPitch 826d29e8     cg_main.obj
-//struct dvar_s const *const cg_modPrvMruAnims 826d29ec     cg_main.obj
-//struct dvar_s const *const cg_hudDamageIconWidth 826d29f0     cg_main.obj
-//struct dvar_s const *const cg_viewVehicleInfluence 826d29f4     cg_main.obj
-//struct dvar_s const *const cg_draw2D  826d29f8     cg_main.obj
-//struct dvar_s const *const cg_gun_x   826d29fc     cg_main.obj
-//struct dvar_s const *const hud_showStance 826d2a00     cg_main.obj
-//struct dvar_s const *const cg_crosshairAlpha 826d2a04     cg_main.obj
-//struct dvar_s const *const cg_laserLightRadius 826d2a08     cg_main.obj
-//int marker_cg_main       826d2a0c     cg_main.obj
-//struct dvar_s const *const hud_missionFailed 826d2a10     cg_main.obj
-//struct dvar_s const *const cg_objectiveListWrapCountWidescreen 826d2a14     cg_main.obj
-//struct dvar_s const *const cg_gun_rot_r 826d2a18     cg_main.obj
-//struct dvar_s const *const friendlyNameFontSize 826d2a1c     cg_main.obj
-//struct dvar_s const *const cg_drawGun 826d2a20     cg_main.obj
-//struct dvar_s const *const cg_hudGrenadeIconOffset 826d2a24     cg_main.obj
-//struct dvar_s const *const cg_modPrvMruModels 826d2a28     cg_main.obj
-//struct dvar_s const *const cg_centertime 826d2a2c     cg_main.obj
-//struct dvar_s const *const cg_hudGrenadePointerPulseFreq 826d2a30     cg_main.obj
-//struct dvar_s const *const cg_minicon 826d2a34     cg_main.obj
-//struct dvar_s const *const cg_gun_move_rate 826d2a38     cg_main.obj
-//struct dvar_s const *const cg_tracerSpeed 826d2a3c     cg_main.obj
-//struct dvar_s const *const cg_bobWeaponRollAmplitude 826d2a40     cg_main.obj
-//struct dvar_s const *const cg_viewKickMax 826d2a44     cg_main.obj
-//struct cgs_t *cgsArray    826d2a48     cg_main.obj
-//struct dvar_s const *const cg_laserFlarePct 826d2ea0     cg_main.obj
-//struct dvar_s const *const cg_invalidCmdHintBlinkInterval 826d2ea4     cg_main.obj
-//struct cg_s *cgArray      826d2ea8     cg_main.obj
-//struct dvar_s const *const friendlyNameFontGlowColor 82701cf0     cg_main.obj
-//struct dvar_s const *const cg_hudGrenadePointerPivot 82701cf4     cg_main.obj
-//struct cgMedia_t cgMedia   82701cf8     cg_main.obj
-//struct dvar_s const *const cg_crosshairAlphaMin 82703fdc     cg_main.obj
-//struct centity_s(*)[2176] cg_entitiesArray 82703fe0     cg_main.obj
-//struct dvar_s const *const vehHelicopterFreeLookReleaseSpeed 827c99e0     cg_main.obj
-//struct dvar_s const *const cg_laserLightEndOffset 827c99e4     cg_main.obj
-//struct dvar_s const *const cg_tracerChance 827c99e8     cg_main.obj
-//struct dvar_s const *const cg_hudGrenadeIconInScope 827c99ec     cg_main.obj
-//struct dvar_s const *const cg_crosshairEnemyColor 827c99f0     cg_main.obj
-//struct dvar_s const *const cg_drawRumbleDebug 827c99f4     cg_main.obj
-//struct dvar_s const *const cg_laserRangePlayer 827c99f8     cg_main.obj
-//struct dvar_s const *const cg_tracerScale 827c99fc     cg_main.obj
-//struct dvar_s const *const cg_weaponCycleDelay 827c9a00     cg_main.obj
-//struct dvar_s const *const cg_laserRange 827c9a04     cg_main.obj
-//struct dvar_s const *const cg_laserForceOn 827c9a08     cg_main.obj
-//struct dvar_s const *const cg_gun_rot_y 827c9a0c     cg_main.obj
-//struct dvar_s const *const cg_gameMessageWidth 827c9a10     cg_main.obj
-//struct dvar_s const *const cg_gun_ofs_r 827c9a14     cg_main.obj
-//struct dvar_s const *const cg_hudGrenadeIconMaxHeight 827c9a18     cg_main.obj
-//struct dvar_s const *const cg_modPrvDrawAxis 827c9a1c     cg_main.obj
-//struct dvar_s const *const cg_debugEvents 827c9a20     cg_main.obj
-//struct dvar_s const *const cg_hudGrenadeIconMaxRangeFlash 827c9a24     cg_main.obj
-//struct dvar_s const *const cg_drawPlayerPosInFreeMove 827c9a28     cg_main.obj
-//struct dvar_s const *const cg_hudStanceFlash 827c9a2c     cg_main.obj
-//struct dvar_s const *const cg_drawScriptUsage 827c9a30     cg_main.obj
-//struct dvar_s const *const cg_drawHUD 827c9a34     cg_main.obj
-//struct dvar_s const *const cg_crosshairDynamic 827c9a38     cg_main.obj
-//struct dvar_s const *const cg_hudDamageIconInScope 827c9a3c     cg_main.obj
-//struct dvar_s const *const cg_gun_move_r 827c9a40     cg_main.obj
-//struct dvar_s const *const cg_viewZSmoothingTime 827c9a44     cg_main.obj
-//struct dvar_s const *const cg_bobWeaponAmplitude 827c9a48     cg_main.obj
-//struct dvar_s const *const cg_footsteps 827c9a4c     cg_main.obj
-//struct dvar_s const *const cg_gun_move_f 827c9a50     cg_main.obj
-//struct dvar_s const *const cg_hudGrenadeIconHeight 827c9a54     cg_main.obj
-//struct dvar_s const *const friendlyNameFontObjective 827c9a58     cg_main.obj
-//struct dvar_s const *const cg_hudGrenadePointerWidth 827c9a5c     cg_main.obj
-//struct dvar_s const *const cg_nopredict 827c9a60     cg_main.obj
-//struct dvar_s const *const cg_drawMaterial 827c9a64     cg_main.obj
-//struct dvar_s const *const cg_r_forceLod 827c9a68     cg_main.obj
-//struct dvar_s const *const snd_drawInfo 827c9a6c     cg_main.obj
-//struct dvar_s const *const cg_debug_overlay_viewport 827c9a70     cg_main.obj
-//struct dvar_s const *const cg_small_dev_string_fontscale 827c9a74     cg_main.obj
-//struct dvar_s const *const cg_dumpAnims 827c9a78     cg_main.obj
-//struct dvar_s const *const cg_gun_rot_p 827c9a7c     cg_main.obj
-//struct dvar_s const *const cg_viewKickScale 827c9a80     cg_main.obj
-//struct dvar_s const *const cg_errorDecay 827c9a84     cg_main.obj
-//struct dvar_s const *const cg_subtitleWidthStandard 827c9a88     cg_main.obj
-//struct dvar_s const *const friendlyNameFontColor 827c9a8c     cg_main.obj
-//struct dvar_s const *const sv_znear   827c9a90     cg_main.obj
-//struct dvar_s const *const cg_hudGrenadePointerPulseMin 827c9a94     cg_main.obj
-//struct dvar_s const *const cg_bobWeaponMax 827c9a98     cg_main.obj
-//struct dvar_s const *const cg_tracerScaleMinDist 827c9a9c     cg_main.obj
-//struct dvar_s const *const cg_laserEndOffset 827c9aa0     cg_main.obj
-//struct dvar_s const *const cg_drawMantleHint 827c9aa4     cg_main.obj
-//struct dvar_s const *const cg_gameBoldMessageWidth 827c9aa8     cg_main.obj
-//struct dvar_s const *const cg_tracerWidth 827c9aac     cg_main.obj
-//struct dvar_s const *const cg_bobWeaponLag 827c9ab0     cg_main.obj
-//struct dvar_s const *const cg_laserLightBodyTweak 827c9ab4     cg_main.obj
-//struct dvar_s const *const cg_bloodLimit 827c9ab8     cg_main.obj
-//struct dvar_s const *const cg_drawFPSLabels 827c9abc     cg_main.obj
-//struct dvar_s const *const cg_drawpaused 827c9ac0     cg_main.obj
-//struct dvar_s const *const cg_hudDamageIconTime 827c9ac4     cg_main.obj
-//struct dvar_s const *const cg_debugInfoCornerOffset 827c9ac8     cg_main.obj
-//struct dvar_s const *const cg_gun_rot_minspeed 827c9acc     cg_main.obj
-//struct dvar_s const *const cg_blood   827c9ad0     cg_main.obj
-//struct dvar_s const *const cg_showmiss 827c9ad4     cg_main.obj
-//float (*)[2176][3] cg_entityOriginArray 827c9ad8     cg_main.obj
-//struct dvar_s const *const cg_fov     827d00d8     cg_main.obj
-//struct dvar_s const *const turretScopeZoomMin 827d00dc     cg_main.obj
-//struct dvar_s const *const cg_subtitleWidthWidescreen 827d00e0     cg_main.obj
-//struct dvar_s const *const cg_developer 827d00e4     cg_main.obj
-//struct dvar_s const *const cg_tracerScrewRadius 827d00e8     cg_main.obj
-//struct dvar_s const *const cg_hudGrenadePointerHeight 827d00ec     cg_main.obj
-//struct dvar_s const *const cg_gun_move_u 827d00f0     cg_main.obj
-//struct dvar_s const *const cg_hintFadeTime 827d00f4     cg_main.obj
-//struct dvar_s const *const cg_subtitleMinTime 827d00f8     cg_main.obj
-//struct dvar_s const *const cg_tracerScaleDistRange 827d00fc     cg_main.obj
-//struct dvar_s const *const cg_paused  827d0100     cg_main.obj
-//struct dvar_s const *const cg_cursorHints 827d0104     cg_main.obj
-//struct dvar_s const *const cg_gun_ofs_f 827d0108     cg_main.obj
-//struct dvar_s const *const vehHelicopterHeadSwayOnYaw 827d010c     cg_main.obj
-//struct dvar_s const *const cg_laserLightBeginOffset 827d0110     cg_main.obj
-//struct dvar_s const *const cg_tracerScrewDist 827d0114     cg_main.obj
-//struct dvar_s const *const cg_tracerLength 827d0118     cg_main.obj
-//struct dvar_s const *const cg_cinematicFullscreen 827d011c     cg_main.obj
+#include "cg_local.h"
+#include <DynEntity/DynEntity_client.h>
+#include "cg_vehicle_hud.h"
+#include <universal/com_sndalias.h>
+#include <universal/surfaceflags.h>
+#include <database/database.h>
+#include "cg_servercmds.h"
+#include <gfx_d3d/r_model.h>
+#include <EffectsCore/fx_system.h>
+#include <ragdoll/ragdoll.h>
+#include "cg_consolecmds.h"
+#include "cg_newdraw.h"
+#include <aim_assist/aim_assist.h>
+#include "cg_modelpreviewer.h"
+
+weaponInfo_s cg_weaponsArray[1][128];
+UiContext cgDC;
+
+cgs_t cgsArray[1];
+cg_s cgArray[1];
+cgMedia_t cgMedia;
+
+centity_s cg_entitiesArray[1][2176];
+float cg_entityOriginArray[1][2176][3];
+
+const dvar_t *cg_hudGrenadeIconEnabledFlash;
+const dvar_t *vehHelicopterHeadSwayOnRollVert;
+const dvar_t *cg_hudGrenadePointerPulseMax;
+const dvar_t *cg_laserLight;
+const dvar_t *hostileNameFontColor;
+const dvar_t *cg_drawVersionY;
+const dvar_t *turretScopeZoomRate;
+const dvar_t *turretScopeZoomMax;
+const dvar_t *cg_drawVersion;
+const dvar_t *cg_gun_y;
+const dvar_t *cg_drawBreathHint;
+const dvar_t *cg_drawFriendlyFireCrosshair;
+const dvar_t *cg_bloodLimitMsec;
+const dvar_t *cg_hudGrenadeIconMaxRangeFrag;
+const dvar_t *cg_drawFPS;
+const dvar_t *cg_drawVersionX;
+const dvar_t *vehHelicopterHeadSwayOnRollHorz;
+const dvar_t *cg_drawHealth;
+const dvar_t *cg_brass;
+const dvar_t *replay_time;
+const dvar_t *cg_weaponHintsCoD1Style;
+const dvar_t *debugOverlay;
+const dvar_t *cg_viewZSmoothingMax;
+const dvar_t *cg_marks_ents_player_only;
+const dvar_t *cg_drawCrosshair;
+const dvar_t *hostileNameFontGlowColor;
+const dvar_t *cg_drawPerformanceWarnings;
+const dvar_t *cg_laserRadius;
+const dvar_t *cg_invalidCmdHintDuration;
+const dvar_t *hud_drawHUD;
+const dvar_t *cg_mapLocationSelectionCursorSpeed;
+const dvar_t *turretScopeZoom;
+const dvar_t *cg_gun_rot_rate;
+const dvar_t *cg_objectiveListWrapCountStandard;
+const dvar_t *cg_hudGrenadeIconWidth;
+const dvar_t *cg_gun_z;
+const dvar_t *cg_hudDamageIconOffset;
+const dvar_t *overrideNVGModelWithKnife;
+const dvar_t *cg_viewZSmoothingMin;
+const dvar_t *cg_drawTurretCrosshair;
+const dvar_t *cg_hudDamageIconHeight;
+const dvar_t *cg_drawShellshock;
+const dvar_t *cg_gun_move_minspeed;
+const dvar_t *cg_gun_ofs_u;
+const dvar_t *cg_subtitles;
+const dvar_t *cg_hudStanceHintPrints;
+const dvar_t *vehHelicopterHeadSwayOnPitch;
+const dvar_t *cg_modPrvMruAnims;
+const dvar_t *cg_hudDamageIconWidth;
+const dvar_t *cg_viewVehicleInfluence;
+const dvar_t *cg_draw2D;
+const dvar_t *cg_gun_x;
+const dvar_t *hud_showStance;
+const dvar_t *cg_crosshairAlpha;
+const dvar_t *cg_laserLightRadius;
+const dvar_t *hud_missionFailed;
+const dvar_t *cg_objectiveListWrapCountWidescreen;
+const dvar_t *cg_gun_rot_r;
+const dvar_t *friendlyNameFontSize;
+const dvar_t *cg_drawGun;
+const dvar_t *cg_hudGrenadeIconOffset;
+const dvar_t *cg_modPrvMruModels;
+const dvar_t *cg_centertime;
+const dvar_t *cg_hudGrenadePointerPulseFreq;
+const dvar_t *cg_minicon;
+const dvar_t *cg_gun_move_rate;
+const dvar_t *cg_tracerSpeed;
+const dvar_t *cg_bobWeaponRollAmplitude;
+const dvar_t *cg_viewKickMax;
+const dvar_t *cg_laserFlarePct;
+const dvar_t *cg_invalidCmdHintBlinkInterval;
+const dvar_t *friendlyNameFontGlowColor;
+const dvar_t *cg_hudGrenadePointerPivot;
+const dvar_t *cg_crosshairAlphaMin;
+const dvar_t *vehHelicopterFreeLookReleaseSpeed;
+const dvar_t *cg_laserLightEndOffset;
+const dvar_t *cg_tracerChance;
+const dvar_t *cg_hudGrenadeIconInScope;
+const dvar_t *cg_crosshairEnemyColor;
+const dvar_t *cg_drawRumbleDebug;
+const dvar_t *cg_laserRangePlayer;
+const dvar_t *cg_tracerScale;
+const dvar_t *cg_weaponCycleDelay;
+const dvar_t *cg_laserRange;
+const dvar_t *cg_laserForceOn;
+const dvar_t *cg_gun_rot_y;
+const dvar_t *cg_gameMessageWidth;
+const dvar_t *cg_gun_ofs_r;
+const dvar_t *cg_hudGrenadeIconMaxHeight;
+const dvar_t *cg_modPrvDrawAxis;
+const dvar_t *cg_debugEvents;
+const dvar_t *cg_hudGrenadeIconMaxRangeFlash;
+const dvar_t *cg_drawPlayerPosInFreeMove;
+const dvar_t *cg_hudStanceFlash;
+const dvar_t *cg_drawScriptUsage;
+const dvar_t *cg_drawHUD;
+const dvar_t *cg_crosshairDynamic;
+const dvar_t *cg_hudDamageIconInScope;
+const dvar_t *cg_gun_move_r;
+const dvar_t *cg_viewZSmoothingTime;
+const dvar_t *cg_bobWeaponAmplitude;
+const dvar_t *cg_footsteps;
+const dvar_t *cg_gun_move_f;
+const dvar_t *cg_hudGrenadeIconHeight;
+const dvar_t *friendlyNameFontObjective;
+const dvar_t *cg_hudGrenadePointerWidth;
+const dvar_t *cg_nopredict;
+const dvar_t *cg_drawMaterial;
+const dvar_t *cg_r_forceLod;
+const dvar_t *snd_drawInfo;
+const dvar_t *cg_debug_overlay_viewport;
+const dvar_t *cg_small_dev_string_fontscale;
+const dvar_t *cg_dumpAnims;
+const dvar_t *cg_gun_rot_p;
+const dvar_t *cg_viewKickScale;
+const dvar_t *cg_errorDecay;
+const dvar_t *cg_subtitleWidthStandard;
+const dvar_t *friendlyNameFontColor;
+const dvar_t *sv_znear;
+const dvar_t *cg_hudGrenadePointerPulseMin;
+const dvar_t *cg_bobWeaponMax;
+const dvar_t *cg_tracerScaleMinDist;
+const dvar_t *cg_laserEndOffset;
+const dvar_t *cg_drawMantleHint;
+const dvar_t *cg_gameBoldMessageWidth;
+const dvar_t *cg_tracerWidth;
+const dvar_t *cg_bobWeaponLag;
+const dvar_t *cg_laserLightBodyTweak;
+const dvar_t *cg_bloodLimit;
+const dvar_t *cg_drawFPSLabels;
+const dvar_t *cg_drawpaused;
+const dvar_t *cg_hudDamageIconTime;
+const dvar_t *cg_debugInfoCornerOffset;
+const dvar_t *cg_gun_rot_minspeed;
+const dvar_t *cg_blood;
+const dvar_t *cg_showmiss;
+const dvar_t *cg_fov;
+const dvar_t *turretScopeZoomMin;
+const dvar_t *cg_subtitleWidthWidescreen;
+const dvar_t *cg_developer;
+const dvar_t *cg_tracerScrewRadius;
+const dvar_t *cg_hudGrenadePointerHeight;
+const dvar_t *cg_gun_move_u;
+const dvar_t *cg_hintFadeTime;
+const dvar_t *cg_subtitleMinTime;
+const dvar_t *cg_tracerScaleDistRange;
+const dvar_t *cg_paused;
+const dvar_t *cg_cursorHints;
+const dvar_t *cg_gun_ofs_f;
+const dvar_t *vehHelicopterHeadSwayOnYaw;
+const dvar_t *cg_laserLightBeginOffset;
+const dvar_t *cg_tracerScrewDist;
+const dvar_t *cg_tracerLength;
+const dvar_t *cg_cinematicFullscreen;
 
 
 
@@ -188,6 +205,20 @@ connstate_t __cdecl CL_GetLocalClientConnectionState(int localClientNum)
             localClientNum);
     return clientUIActives[0].connectionState;
 }
+
+const char *cg_drawFpsNames[5] =
+{ "Off", "Simple", "Extra", "Verbose", NULL };
+
+const char *snd_drawInfoStrings[5] =
+{ "None", "3D", "Stream", "2D", NULL };
+
+const char *cg_drawMaterialNames[5] =
+{ "Off", "CONTENTS_SOLID", "MASK_SHOT", "MASK_PLAYERSOLID", NULL };
+
+const char *debugOverlayNames[4] =
+{ "Off", "ViewmodelInfo", "FontTest", NULL };
+
+
 
 const dvar_s *CG_RegisterDvars()
 {
@@ -396,7 +427,11 @@ const dvar_s *CG_RegisterDvars()
     replay_time = Dvar_RegisterBool("replay_time", 0, 1u, "Draw replay time");
     cg_drawFPS = Dvar_RegisterEnum("cg_drawFPS", cg_drawFpsNames, 1, 1u, "Draw frames per second");
     cg_drawFPSLabels = Dvar_RegisterBool("cg_drawFPSLabels", 1, 1u, "Draw FPS Info Labels");
-    cg_debugInfoCornerOffset = Dvar_RegisterVec2("cg_debugInfoCornerOffset", 20.0, -20.0, -200.0, 640.0, v5, v4);
+    DvarLimits limits;
+    limits.value.min = -200.0f;
+    limits.value.max = 640.0f;
+    //cg_debugInfoCornerOffset = Dvar_RegisterVec2("cg_debugInfoCornerOffset", 20.0, -20.0, -200.0, 640.0, v5, v4);
+    cg_debugInfoCornerOffset = Dvar_RegisterVec2("cg_debugInfoCornerOffset", 20.0, -20.0, limits, v5, v4);
     cg_drawVersion = Dvar_RegisterBool("cg_drawVersion", 1, 0, "Draw the game version");
     cg_drawVersionX = Dvar_RegisterFloat("cg_drawVersionX", 50.0, 0.0, 512.0, v7, v6);
     cg_drawVersionY = Dvar_RegisterFloat("cg_drawVersionY", 18.0, 0.0, 512.0, v9, v8);
@@ -459,7 +494,11 @@ const dvar_s *CG_RegisterDvars()
         "Show the grenade indicator for flash grenades");
     cg_hudGrenadePointerHeight = Dvar_RegisterFloat("cg_hudGrenadePointerHeight", 12.0, 0.0, 512.0, v31, v30);
     cg_hudGrenadePointerWidth = Dvar_RegisterFloat("cg_hudGrenadePointerWidth", 25.0, 0.0, 512.0, v33, v32);
-    cg_hudGrenadePointerPivot = Dvar_RegisterVec2("cg_hudGrenadePointerPivot", 12.0, 27.0, 0.0, 512.0, v35, v34);
+    DvarLimits limits;
+    limits.value.min = 0.0f;
+    limits.value.max = 512.0f;
+    //cg_hudGrenadePointerPivot = Dvar_RegisterVec2("cg_hudGrenadePointerPivot", 12.0, 27.0, 0.0, 512.0, v35, v34);
+    cg_hudGrenadePointerPivot = Dvar_RegisterVec2("cg_hudGrenadePointerPivot", 12.0, 27.0, limits, v35, v34);
     cg_hudGrenadePointerPulseFreq = Dvar_RegisterFloat("cg_hudGrenadePointerPulseFreq", 1.7, 0.1, 50.0, v37, v36);
     cg_hudGrenadePointerPulseMax = Dvar_RegisterFloat("cg_hudGrenadePointerPulseMax", 1.85, 0.0, 3.0, v39, v38);
     cg_hudGrenadePointerPulseMin = Dvar_RegisterFloat("cg_hudGrenadePointerPulseMin", 0.30000001, -3.0, 1.0, v41, v40);
@@ -640,8 +679,8 @@ const dvar_s *CG_RegisterDvars()
         "When true, nightvision animations will attach the weapDef's knife model instead of the n"
         "ight vision goggles.");
     cg_modPrvDrawAxis = Dvar_RegisterBool("cg_modPrvDrawAxis", 1, 1u, "Draw Axes in the model previewer");
-    cg_modPrvMruModels = Dvar_RegisterString("cg_modPrvMruModels", byte_82003CDD, 1u, byte_82003CDD);
-    cg_modPrvMruAnims = Dvar_RegisterString("cg_modPrvMruAnims", byte_82003CDD, 1u, byte_82003CDD);
+    cg_modPrvMruModels = Dvar_RegisterString("cg_modPrvMruModels", "", 1u, "");
+    cg_modPrvMruAnims = Dvar_RegisterString("cg_modPrvMruAnims", "", 1u, "");
     cg_r_forceLod = Dvar_FindVar("r_forceLod");
     if (!cg_r_forceLod)
         MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\cgame\\cg_main.cpp", 490, 0, "%s", "cg_r_forceLod");
@@ -721,44 +760,49 @@ const dvar_s *CG_RegisterDvars()
         0,
         "Use the objective font for friendly prints.");
     friendlyNameFontSize = Dvar_RegisterFloat("friendlyNameFontSize", 0.30000001, 0.0099999998, 100.0, v159, v158);
+    DvarLimits limits;
+    limits.value.min = 0.0f;
+    limits.value.max = 1.0f;
     friendlyNameFontColor = Dvar_RegisterVec4(
         "friendlyNameFontColor",
         0.89999998,
         1.0,
         0.89999998,
         0.69999999,
-        0.0,
-        1.0,
+        limits,
         v161,
         v160);
+    limits.value.min = 0.0f;
+    limits.value.max = 1.0f;
     friendlyNameFontGlowColor = Dvar_RegisterVec4(
         "friendlyNameFontGlowColor",
         0.0,
         0.30000001,
         0.0,
         1.0,
-        0.0,
-        1.0,
+        limits,
         v163,
         v162);
+    limits.value.min = 0.0f;
+    limits.value.max = 1.0f;
     hostileNameFontColor = Dvar_RegisterVec4(
         "hostileNameFontColor",
         1.0,
         0.89999998,
         0.89999998,
         0.69999999,
-        0.0,
-        1.0,
+        limits,
         v165,
         v164);
+    limits.value.min = 0.0f;
+    limits.value.max = 1.0f;
     hostileNameFontGlowColor = Dvar_RegisterVec4(
         "hostileNameFontGlowColor",
         0.60000002,
         0.0,
         0.0,
         1.0,
-        0.0,
-        1.0,
+        limits,
         v167,
         v166);
     result = Dvar_RegisterEnum("debugOverlay", debugOverlayNames, 0, 0, "Toggles the display of various debug info.");
@@ -933,12 +977,12 @@ void __cdecl CG_RegisterSurfaceTypeSounds(const char *pszType, snd_alias_list_t 
         MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\cgame\\cg_main.cpp", 700, 0, "%s", "pszType");
     if (*pszType)
     {
-        sprintf_0(v11, "%s_default", pszType);
+        sprintf(v11, "%s_default", pszType);
         SoundAlias = Com_FindSoundAlias(v11);
         for (i = 0; i < 29; ++i)
         {
             v9 = Com_SurfaceTypeToName(i);
-            sprintf_0(v11, "%s_%s", pszType, v9);
+            sprintf(v11, "%s_%s", pszType, v9);
             SoundAliasNoErrors = Com_FindSoundAliasNoErrors(v11);
             *sound = SoundAliasNoErrors;
             if (!SoundAliasNoErrors)
@@ -1427,7 +1471,7 @@ void __cdecl CG_LoadHudMenu(int localClientNum)
     MenuList *Menus; // r3
     menuDef_t *v3; // r31
 
-    Menus = UI_LoadMenus("ui/hud.txt", 7);
+    Menus = UI_LoadMenus((char*)"ui/hud.txt", 7);
     UI_AddMenuList(&cgDC, Menus);
     v3 = Menus_FindByName(&cgDC, "Compass");
     if (v3)
@@ -1486,9 +1530,9 @@ void __cdecl CG_InitViewDimensions(int localClientNum)
             cgsArray[0].viewAspect);
 }
 
-char *__cdecl CG_GetTeamName(team_t team)
+const char *__cdecl CG_GetTeamName(team_t team)
 {
-    char *result; // r3
+    const char *result; // r3
     const char *v2; // r3
 
     switch (team)
@@ -1514,7 +1558,7 @@ char *__cdecl CG_GetTeamName(team_t team)
             v2 = va("Unhandled team index %i!", team);
             MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\cgame\\cg_main.cpp", 1347, 0, v2);
         }
-        result = byte_82003CDD;
+        result = "";
         break;
     }
     return result;
@@ -1682,7 +1726,7 @@ void __cdecl CG_Init(int localClientNum, int savegame)
         Com_Error(ERR_DROP, byte_8200B990);
     ProfLoad_Begin("Parse server info");
     CG_ParseServerInfo(localClientNum);
-    CG_SetupWeaponDef();
+    CG_SetupWeaponDef(localClientNum);
     ProfLoad_End();
     SCR_UpdateLoadScreen();
     Menu_Setup(&cgDC);
@@ -1735,9 +1779,8 @@ void __cdecl CG_Init(int localClientNum, int savegame)
     AimAssist_Init(localClientNum);
     CG_ModelPreviewerCreateDevGui(localClientNum);
     CG_InitDevguiRumbleGraph(localClientNum);
-    String = Dvar_GetString("profile");
-    I_strncpyz(v10, String, 1024);
-    Dvar_SetFromStringByName("profile", byte_82003CDD);
+    I_strncpyz(v10, Dvar_GetString("profile"), 1024);
+    Dvar_SetFromStringByName("profile", (char*)"");
     Dvar_SetFromStringByName("profile", v10);
     CG_InitVehicleReticle(localClientNum);
 }

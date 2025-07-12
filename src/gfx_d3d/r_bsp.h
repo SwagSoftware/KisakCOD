@@ -217,6 +217,11 @@ void __cdecl R_CopyParseParamsToDvars(const SunLightParseParams *sunParse, int s
 void R_InitDynamicData();
 void __cdecl R_SetWorldPtr_FastFile(const char *name);
 void __cdecl R_SetWorldPtr_LoadObj(const char *name);
+void R_SetSunLightOverride(float *sunColor);
+void R_ResetSunLightOverride();
+void R_SetSunDirectionOverride(float *sunDir);
+void R_LerpSunDirectionOverride(float *sunDirBegin, float *sunDirEnd, int lerpBeginTime, int lerpEndTime);
+void R_ResetSunDirectionOverride();
 
 extern GfxWorld s_world;
 extern r_globals_load_t rgl;

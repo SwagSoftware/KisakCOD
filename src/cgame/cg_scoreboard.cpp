@@ -3,6 +3,11 @@
 #endif
 
 #include "cg_scoreboard.h"
+#include "cg_newdraw.h"
+#include "cg_main.h"
+#include <ui/ui.h>
+#include <stringed/stringed_hooks.h>
+#include "cg_servercmds.h"
 
 float __cdecl CG_FadeObjectives(const cg_s *cgameGlob)
 {
@@ -118,26 +123,7 @@ void __cdecl CG_DrawObjectiveHeader(
             v13,
             scale,
             (const float *)rect->horzAlign,
-            rect->vertAlign,
-            v20,
-            v19,
-            v18,
-            v17,
-            v16,
-            v33,
-            v34,
-            v35,
-            v36,
-            v37,
-            v38,
-            v39,
-            v40,
-            v41,
-            v42,
-            v43,
-            v44,
-            v45,
-            v46);
+            rect->vertAlign);
         v22 = ScrPlace_ApplyX(v14, rect->x, v21);
         v25 = (float)(ScrPlace_ApplyX(v14, -rect->x, v23) - (float)v22);
         *(double *)&v24 = (float)(v14->scaleVirtualToReal[0] + (float)0.5);
@@ -439,26 +425,7 @@ void __cdecl CG_DrawObjectiveList(
                             v31,
                             scale,
                             (const float *)rect->horzAlign,
-                            rect->vertAlign,
-                            v37,
-                            v36,
-                            v35,
-                            v34,
-                            v33,
-                            v50,
-                            v51,
-                            v52,
-                            v53,
-                            v54,
-                            v55,
-                            v56,
-                            v57,
-                            v58,
-                            v59,
-                            v60,
-                            v61,
-                            v62,
-                            v63);
+                            rect->vertAlign);
                         y = (float)((float)((float)y + (float)v20) + (float)4.0);
                     }
                     v27 = v38;
@@ -669,7 +636,7 @@ void __cdecl CG_ParseObjectiveChange(int localClientNum, unsigned int num)
     v11 = v5 + 3;
     do
     {
-        sprintf_0(v17, "org%d", v10);
+        sprintf(v17, "org%d", v10);
         v12 = Info_ValueForKey(ConfigString, v17);
         *(v11 - 2) = 0.0;
         *(v11 - 1) = 0.0;

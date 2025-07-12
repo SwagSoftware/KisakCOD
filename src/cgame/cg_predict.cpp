@@ -3,6 +3,10 @@
 #endif
 
 #include "cg_predict.h"
+#include <client/client.h>
+#include "cg_main.h"
+
+pmove_t cg_pmove;
 
 void __cdecl TRACK_cg_predict()
 {

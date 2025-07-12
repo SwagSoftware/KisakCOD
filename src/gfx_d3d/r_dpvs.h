@@ -297,7 +297,7 @@ void __cdecl R_SetDpvsPlaneSides(DpvsPlane *plane);
 float __cdecl R_DpvsPlaneMinSignedDistToBox(const DpvsPlane *plane, float forward);
 float __cdecl R_DpvsPlaneMaxSignedDistToBox(const DpvsPlane *plane, float forward);
 
-
+void R_SetCullDist(float dist);
 
 // r_dpvs_entity
 void __cdecl R_AddEntitySurfacesInFrustumCmd(unsigned __int16 *data);

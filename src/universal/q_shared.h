@@ -40,6 +40,7 @@
 #include <time.h>
 #include <ctype.h>
 #include <cfloat> // FLT_MAX
+#include <cstdint>
 
 // this is the define for determining if we have an asm version of a C function
 #if (defined _M_IX86 || defined __i386__) && !defined __sun__  && !defined __LCC__

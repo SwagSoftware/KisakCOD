@@ -218,7 +218,7 @@ LABEL_40:
     return (_cntlzw(v22) & 0x20) == 0;
 }
 
-void __cdecl CG_VehicleHudRegisterDvars(int a1, unsigned __int16 a2, const char *a3)
+void __cdecl CG_VehicleHudRegisterDvars()
 {
     const char *v3; // r5
     unsigned __int16 v4; // r4

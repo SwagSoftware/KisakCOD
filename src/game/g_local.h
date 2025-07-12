@@ -4,6 +4,32 @@
 #error This file is for SinglePlayer only 
 #endif
 
+#include <qcommon/qcommon.h>
+#include <bgame/bg_local.h>
+#include <script/scr_variable.h>
+#include "game_public.h"
+
+struct SpawnFuncEntry
+{
+    const char *classname;
+    void(__fastcall *callback)(gentity_s *);
+};
+
+struct entityHandler_t
+{
+    void(*think)(gentity_s *);
+    void(*reached)(gentity_s *);
+    void(*blocked)(gentity_s *, gentity_s *);
+    void(*touch)(gentity_s *, gentity_s *, int);
+    void(*use)(gentity_s *, gentity_s *, gentity_s *);
+    void(*pain)(gentity_s *, gentity_s *, int, const float *, const int, const float *, const hitLocation_t, const int);
+    void(*die)(gentity_s *, gentity_s *, gentity_s *, const int, const int, const int, const float *, const hitLocation_t);
+    void(*entinfo)(gentity_s *, float *);
+    void(*controller)(const gentity_s *, int *);
+    int methodOfDeath;
+    int splashMethodOfDeath;
+};
+
 // g_active
 void __cdecl P_DamageFeedback(gentity_s *player);
 void __cdecl G_SetClientSound(gentity_s *ent);

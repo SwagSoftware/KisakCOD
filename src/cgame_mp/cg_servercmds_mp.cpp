@@ -18,6 +18,7 @@
 #include <qcommon/cmd.h>
 #include <gfx_d3d/r_model.h>
 #include <gfx_d3d/r_primarylights.h>
+#include <qcommon/com_bsp.h>
 
 struct $59835072FC2CD3936CE4A4C9F556010B // sizeof=0x48
 {                                       // ...

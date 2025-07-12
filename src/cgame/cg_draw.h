@@ -6,6 +6,31 @@
 #error This file is for SinglePlayer only
 #endif
 
+struct CenterPrint
+{
+    int time;
+    char text[1024];
+};
+
+struct ScreenBlur
+{
+    BlurPriority priority;
+    BlurTime time;
+    int timeStart;
+    int timeEnd;
+    float start;
+    float end;
+    float radius;
+};
+
+struct ScreenFade
+{
+    float alpha;
+    float alphaCurrent;
+    int startTime;
+    int duration;
+};
+
 enum BlurTime : __int32
 {
     BLUR_TIME_RELATIVE = 0x0,

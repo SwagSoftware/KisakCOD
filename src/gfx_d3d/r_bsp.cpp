@@ -238,3 +238,49 @@ void __cdecl R_SetWorldPtr_FastFile(const char *name)
     rgp.needSortMaterials = 1;
 }
 
+void R_SetSunLightOverride(float *sunColor)
+{
+    iassert(sunColor);
+
+    rg.useSunLightOverride = 1;
+    rg.sunLightOverride[0] = sunColor[0];
+    rg.sunLightOverride[1] = sunColor[1];
+    rg.sunLightOverride[2] = sunColor[2];
+}
+
+void R_ResetSunLightOverride()
+{
+    rg.useSunLightOverride = 0;
+}
+
+void R_SetSunDirectionOverride(float *sunDir)
+{
+    iassert(sunDir);
+    rg.useSunDirOverride = 1;
+    rg.useSunDirLerp = 0;
+    rg.sunDirOverride[0] = sunDir[0];
+    rg.sunDirOverride[1] = sunDir[1];
+    rg.sunDirOverride[2] = sunDir[2];
+}
+
+void R_LerpSunDirectionOverride(float *sunDirBegin, float *sunDirEnd, int lerpBeginTime, int lerpEndTime)
+{
+    iassert(sunDirBegin);
+    iassert(sunDirEnd);
+
+    rg.useSunDirOverride = 1;
+    rg.useSunDirLerp = 1;
+    rg.sunDirOverride[0] = sunDirBegin[0];
+    rg.sunDirOverride[1] = sunDirBegin[1];
+    rg.sunDirOverride[2] = sunDirBegin[2];
+    rg.sunDirOverrideTarget[0] = *sunDirEnd;
+    rg.sunDirOverrideTarget[1] = sunDirEnd[1];
+    rg.sunDirOverrideTarget[2] = sunDirEnd[2];
+    rg.sunDirLerpBeginTime = lerpBeginTime;
+    rg.sunDirLerpEndTime = lerpEndTime;
+}
+
+void R_ResetSunDirectionOverride()
+{
+    rg.useSunDirOverride = 0;
+}

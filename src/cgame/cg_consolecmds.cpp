@@ -4,6 +4,15 @@
 
 #include "cg_consolecmds.h"
 
+#include <server/server.h>
+#include <qcommon/cmd.h>
+#include "cg_draw.h"
+#include "cg_actors.h"
+#include "cg_main.h"
+#include "cg_modelpreviewer.h"
+#include <stringed/stringed_hooks.h>
+#include "cg_view.h"
+
 int __cdecl CG_CheatsOK(const char *cmdName)
 {
     if (sv_cheats->current.enabled)
@@ -61,36 +70,24 @@ void CG_ScoresDown_f()
 
 void CG_Fade_f()
 {
-    const char *v0; // r3
-    int v1; // r30
-    const char *v2; // r3
-    int v3; // r29
-    const char *v4; // r3
-    int v5; // r28
-    const char *v6; // r3
-    int v7; // r27
-    const char *v8; // r3
-    int v9; // r26
-    int v10; // r31
+    int r; // r30
+    int g; // r29
+    int b; // r28
+    int a; // r27
+    int duration; // r26
     int LocalClientTime; // r3
 
     if (cgArray[0].nextSnap)
     {
         if (Cmd_Argc() >= 6)
         {
-            v0 = Cmd_Argv(1);
-            v1 = atol(v0);
-            v2 = Cmd_Argv(2);
-            v3 = atol(v2);
-            v4 = Cmd_Argv(3);
-            v5 = atol(v4);
-            v6 = Cmd_Argv(4);
-            v7 = atol(v6);
-            v8 = Cmd_Argv(5);
-            v9 = 1000 * atol(v8);
-            v10 = Cmd_LocalClientNum();
-            LocalClientTime = CG_GetLocalClientTime(v10);
-            CG_Fade(v10, v1, v3, v5, v7, LocalClientTime, v9);
+            r = atol(Cmd_Argv(1));
+            g = atol(Cmd_Argv(2));
+            b = atol(Cmd_Argv(3));
+            a = atol(Cmd_Argv(4));
+            duration = 1000 * atol(Cmd_Argv(5));
+            LocalClientTime = CG_GetLocalClientTime(Cmd_LocalClientNum());
+            CG_Fade(Cmd_LocalClientNum(), r, g, b, a, LocalClientTime, duration);
         }
     }
 }
@@ -554,6 +551,46 @@ void __cdecl UpdateFilmTweaks_f()
 {
     CG_VisionSetUpdateTweaksFromFile_Film();
 }
+
+cmd_function_s CG_Viewpos_f_VAR;
+cmd_function_s CG_ScoresDown_f_VAR;
+cmd_function_s CG_ScoresUp_f_VAR;
+cmd_function_s CG_NextWeapon_f_VAR;
+cmd_function_s CG_PrevWeapon_f_VAR;
+cmd_function_s CG_Fade_f_VAR;
+cmd_function_s CG_ActionSlotDown_f_VAR;
+cmd_function_s CG_ActionSlotUp_f_VAR;
+cmd_function_s CG_ShellShock_f_VAR;
+cmd_function_s CG_ShellShock_Load_f_VAR;
+cmd_function_s CG_ShellShock_Save_f_VAR;
+cmd_function_s CG_ModelPreviewerPauseAnim_f_VAR;
+cmd_function_s CG_ModelPreviewerStepAnim_f_VAR;
+cmd_function_s CG_Noclip_f_VAR;
+cmd_function_s CG_UFO_f_VAR;
+cmd_function_s CG_FxSetTestPosition_VAR;
+cmd_function_s CG_FxTest_VAR;
+cmd_function_s CG_SetViewPos_f_VAR;
+cmd_function_s CG_SetViewOrbit_f_VAR;
+cmd_function_s UpdateGlowTweaks_f_VAR;
+cmd_function_s UpdateFilmTweaks_f_VAR;
+cmd_function_s CG_PlayRumble_f_VAR;
+cmd_function_s ai_history_VAR;
+cmd_function_s kill_VAR;
+cmd_function_s give_VAR;
+cmd_function_s take_VAR;
+cmd_function_s god_VAR;
+cmd_function_s demigod_VAR;
+cmd_function_s notarget_VAR;
+cmd_function_s noclip_VAR;
+cmd_function_s ufo_VAR;
+cmd_function_s levelshot_VAR;
+cmd_function_s setviewpos_VAR;
+cmd_function_s jumptonode_VAR;
+cmd_function_s stats_VAR;
+cmd_function_s echo_VAR;
+cmd_function_s printentities_VAR;
+cmd_function_s VisionSetNaked_VAR;
+cmd_function_s VisionSetNight_VAR;
 
 void __cdecl CG_InitConsoleCommands()
 {

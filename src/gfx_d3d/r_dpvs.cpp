@@ -3771,3 +3771,11 @@ void __cdecl R_SetDpvsPlaneSides(DpvsPlane *plane)
     plane->side[1] = SLODWORD(plane->coeffs[1]) <= 0 ? 4 : 16;
     plane->side[2] = SLODWORD(plane->coeffs[2]) <= 0 ? 8 : 20;
 }
+
+void R_SetCullDist(float dist)
+{
+    if (dist > 0.0)
+        dpvsGlob.cullDist = dist;
+    else
+        dpvsGlob.cullDist = 0.0;
+}

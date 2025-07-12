@@ -20,7 +20,7 @@ bool __cdecl ClampScreenPosToEdges(
     int a10,
     float *a11,
     float *a12);
-void __cdecl CG_VehicleHudRegisterDvars(int a1, unsigned __int16 a2, const char *a3);
+void __cdecl CG_VehicleHudRegisterDvars();
 int __cdecl WorldDirToScreenPos(int localClientNum, const float *worldDir, float *outScreenPos);
 void __cdecl CG_DrawVehicleTargets(int localClientNum, rectDef_s *rect, float *color, Material *defaultMaterial);
 void __cdecl CG_DrawJavelinTargets(int localClientNum, rectDef_s *rect, float *color, Material *defaultMaterial);

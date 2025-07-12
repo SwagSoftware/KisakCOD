@@ -3,6 +3,9 @@
 #endif
 
 #include "cg_servercmds.h"
+#include <client/client.h>
+#include <qcommon/com_bsp.h>
+#include <gfx_d3d/r_dpvs.h>
 
 void __cdecl CG_ParseServerInfo(int localClientNum)
 {
@@ -35,24 +38,15 @@ void __cdecl CG_ParseCullDist(int localClientNum)
 void __cdecl CG_ParseSunLight(int localClientNum)
 {
     const char *ConfigString; // r3
-    int v2; // r8
-    float v3; // [sp+50h] [-20h] BYREF
-    char v4; // [sp+54h] [-1Ch] BYREF
-    char v5; // [sp+58h] [-18h] BYREF
+    int argCount; // r8
+    float sunColor[3]; // [sp+50h] [-20h] BYREF
 
-    ConfigString = CL_GetConfigString(localClientNum, 7u);
+    ConfigString = CL_GetConfigString(localClientNum, 7);
     if (*ConfigString)
     {
-        v2 = sscanf(ConfigString, "%g %g %g", &v3, &v4, &v5);
-        if (v2 != 3)
-            MyAssertHandler(
-                "c:\\trees\\cod3\\cod3src\\src\\cgame\\cg_servercmds.cpp",
-                89,
-                0,
-                "%s\n\t(argCount) = %i",
-                "(argCount == 3)",
-                v2);
-        R_SetSunLightOverride(&v3);
+        argCount = sscanf(ConfigString, "%g %g %g", &sunColor[0], &sunColor[1], &sunColor[2]);
+        iassert(argCount == 3);
+        R_SetSunLightOverride(sunColor);
     }
     else
     {

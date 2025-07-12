@@ -414,6 +414,7 @@ void  CG_UpdateBModelWorldBounds(uint32_t localClientNum, centity_s *cent, int32
     }
 }
 
+// KISAKTODO: Remove this stupid function
 bool __cdecl CG_VecLessThan(float *a, float *b)
 {
     float v3; // [esp+4h] [ebp-1Ch]
