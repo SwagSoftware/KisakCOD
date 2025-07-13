@@ -252,6 +252,8 @@ void __cdecl AxisToQuat(const float (*mat)[3], float* out);
 
 float __cdecl PointToBoxDistSq(const float* pt, const float* mins, const float* maxs);
 
+void __cdecl Vec4Set(float *v, float x, float y, float z, float w);
+bool __cdecl Vec4Compare(const float *a, const float *b);
 float __cdecl Vec4Dot(const float* a, const float* b);
 float __cdecl Vec4Normalize(float* v);
 void __cdecl Vec4Mul(const float* a, const float* b, float* product);

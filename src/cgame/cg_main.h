@@ -372,6 +372,10 @@ extern cgs_t cgsArray[1];
 extern cg_s cgArray[1];
 extern cgMedia_t cgMedia;
 
+extern weaponInfo_s cg_weaponsArray[1][128];
+extern centity_s cg_entitiesArray[1][2176];
+extern float cg_entityOriginArray[1][2176][3];
+
 extern const dvar_t *cg_hudGrenadeIconEnabledFlash;
 extern const dvar_t *vehHelicopterHeadSwayOnRollVert;
 extern const dvar_t *cg_hudGrenadePointerPulseMax;
@@ -526,3 +530,19 @@ extern const dvar_t *cg_laserLightBeginOffset;
 extern const dvar_t *cg_tracerScrewDist;
 extern const dvar_t *cg_tracerLength;
 extern const dvar_t *cg_cinematicFullscreen;
+
+
+inline cgs_t *CG_GetLocalClientStaticGlobals(int localClientNum)
+{
+    iassert(localClientNum == 0);
+
+    return &cgsArray[localClientNum];
+}
+
+inline centity_s *CG_GetEntity(int32_t localClientNum, uint32_t entityIndex)
+{
+    iassert(localClientNum == 0);
+    bcassert(entityIndex, MAX_GENTITIES);
+
+    return &cg_entitiesArray[localClientNum][entityIndex];
+}

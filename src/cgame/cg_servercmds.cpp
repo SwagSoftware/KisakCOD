@@ -6,6 +6,30 @@
 #include <client/client.h>
 #include <qcommon/com_bsp.h>
 #include <gfx_d3d/r_dpvs.h>
+#include "cg_vehicle_hud.h"
+#include "cg_scoreboard.h"
+#include <EffectsCore/fx_system.h>
+#include <gfx_d3d/r_model.h>
+#include <qcommon/cmd.h>
+#include <gfx_d3d/r_fog.h>
+#include <ui/ui.h>
+#include <DynEntity/DynEntity_client.h>
+#include "cg_main.h"
+#include <stringed/stringed_hooks.h>
+#include "cg_draw.h"
+#include <sound/snd_local.h>
+#include "cg_compassfriendlies.h"
+#include <ragdoll/ragdoll.h>
+#include <physics/phys_local.h>
+
+struct __declspec(align(4)) $59835072FC2CD3936CE4A4C9F556010B
+{
+    char name[64];
+    int index;
+    bool useMouse;
+};
+
+$59835072FC2CD3936CE4A4C9F556010B cg_waitingScriptMenu;
 
 void __cdecl CG_ParseServerInfo(int localClientNum)
 {
@@ -103,7 +127,7 @@ void __cdecl CG_ParseFog(int time)
     long double v4; // fp2
     int v5; // r7
     double v6; // fp28
-    char *v7; // r3
+    const char *v7; // r3
     long double v8; // fp2
     double v9; // fp29
     const char *v10; // r3
@@ -123,22 +147,8 @@ void __cdecl CG_ParseFog(int time)
     int v24; // r5
     int v25; // r3
 
-    nesting = cmd_args.nesting;
-    if (cmd_args.nesting >= 8u)
-    {
-        MyAssertHandler(
-            "c:\\trees\\cod3\\cod3src\\src\\cgame\\../qcommon/cmd.h",
-            174,
-            0,
-            "cmd_args.nesting doesn't index CMD_MAX_NESTING\n\t%i not in [0, %i)",
-            cmd_args.nesting,
-            8);
-        nesting = cmd_args.nesting;
-    }
-    if (cmd_args.argc[nesting] <= 1)
-        v3 = byte_82003CDD;
-    else
-        v3 = (const char *)*((unsigned int *)cmd_args.argv[nesting] + 1);
+    v3 = Cmd_Argv(1);
+
     v4 = atof(v3);
     v5 = cmd_args.nesting;
     v6 = (float)*(double *)&v4;
@@ -155,7 +165,7 @@ void __cdecl CG_ParseFog(int time)
     }
     if (cmd_args.argc[v5] <= 2)
     {
-        v7 = byte_82003CDD;
+        v7 = "";
     }
     else
     {
@@ -214,7 +224,7 @@ void __cdecl CG_PrecacheScriptMenu(int localClientNum, int iConfigNum)
     if (*ConfigString)
     {
         if (!Load_ScriptMenu(ConfigString, 7))
-            Com_Error(ERR_DROP, byte_8200EEDC, v5);
+            Com_Error(ERR_DROP, "Could not load script menu file %s", v5);
     }
 }
 
@@ -380,28 +390,7 @@ void __cdecl CG_ConfigStringModifiedInternal(int localClientNum, unsigned int st
 
 void __cdecl CG_ConfigStringModified(int localClientNum)
 {
-    int nesting; // r7
-    const char *v3; // r3
-    unsigned int v4; // r3
-
-    nesting = cmd_args.nesting;
-    if (cmd_args.nesting >= 8u)
-    {
-        MyAssertHandler(
-            "c:\\trees\\cod3\\cod3src\\src\\cgame\\../qcommon/cmd.h",
-            174,
-            0,
-            "cmd_args.nesting doesn't index CMD_MAX_NESTING\n\t%i not in [0, %i)",
-            cmd_args.nesting,
-            8);
-        nesting = cmd_args.nesting;
-    }
-    if (cmd_args.argc[nesting] <= 1)
-        v3 = byte_82003CDD;
-    else
-        v3 = (const char *)*((unsigned int *)cmd_args.argv[nesting] + 1);
-    v4 = atol(v3);
-    CG_ConfigStringModifiedInternal(localClientNum, v4);
+    CG_ConfigStringModifiedInternal(localClientNum, atol(Cmd_Argv(1)));
 }
 
 void __cdecl CG_ShutdownPhysics(int localClientNum)
@@ -414,7 +403,6 @@ void __cdecl CG_ShutdownPhysics(int localClientNum)
 void __cdecl CG_OpenScriptMenu(int localClientNum)
 {
     int nesting; // r7
-    const char *v3; // r3
     unsigned int v4; // r3
     int v5; // r29
     const char *ConfigString; // r30
@@ -423,23 +411,7 @@ void __cdecl CG_OpenScriptMenu(int localClientNum)
     const char *v9; // r11
     const char *v11; // r3
 
-    nesting = cmd_args.nesting;
-    if (cmd_args.nesting >= 8u)
-    {
-        MyAssertHandler(
-            "c:\\trees\\cod3\\cod3src\\src\\cgame\\../qcommon/cmd.h",
-            174,
-            0,
-            "cmd_args.nesting doesn't index CMD_MAX_NESTING\n\t%i not in [0, %i)",
-            cmd_args.nesting,
-            8);
-        nesting = cmd_args.nesting;
-    }
-    if (cmd_args.argc[nesting] <= 1)
-        v3 = byte_82003CDD;
-    else
-        v3 = (const char *)*((unsigned int *)cmd_args.argv[nesting] + 1);
-    v4 = atol(v3);
+    v4 = atol(Cmd_Argv(1));
     v5 = v4;
     if (v4 > 0x1F)
     {
@@ -684,7 +656,7 @@ void CG_EqCommand()
         v5 = Cmd_Argv(3);
         v6 = atol(v5);
         v7 = Cmd_Argv(4);
-        v8 = atol(v7);
+        v8 = (SND_EQTYPE)atol(v7);
         v9 = Cmd_Argv(5);
         v10 = atof(v9);
         v11 = (float)*(double *)&v10;
@@ -995,7 +967,7 @@ void __cdecl LocalSound(int localClientNum)
             {
                 v8 = Cmd_Argv(2);
                 v9 = (void *)atol(v8);
-                SND_AddLengthNotify(v7, v9, SndLengthNotify_Script);
+                SND_AddLengthNotify(v7, (const snd_alias_t*)v9, SndLengthNotify_Script);
             }
         }
     }
@@ -1062,98 +1034,31 @@ void __cdecl CG_GameSaveFailed(cg_s *cgameGlob)
 void __cdecl CG_BlurServerCommand(int localClientNum)
 {
     int nesting; // r7
-    const char *v3; // r3
-    int v4; // r3
     int v5; // r7
-    int v6; // r26
-    const char *v7; // r3
+    int time; // r26
     long double v8; // fp2
     int v9; // r7
-    double v10; // fp31
+    double blurEndValue; // fp31
     const char *v11; // r3
-    int v12; // r3
     int v13; // r7
-    BlurTime v14; // r28
+    BlurTime blurTime; // r28
     const char *v15; // r3
-    BlurPriority v16; // r29
+    BlurPriority blurPrio; // r29
     BlurTime v17; // r5
 
-    nesting = cmd_args.nesting;
-    if (cmd_args.nesting >= 8u)
-    {
-        MyAssertHandler(
-            "c:\\trees\\cod3\\cod3src\\src\\cgame\\../qcommon/cmd.h",
-            174,
-            0,
-            "cmd_args.nesting doesn't index CMD_MAX_NESTING\n\t%i not in [0, %i)",
-            cmd_args.nesting,
-            8);
-        nesting = cmd_args.nesting;
-    }
-    if (cmd_args.argc[nesting] <= 1)
-        v3 = byte_82003CDD;
-    else
-        v3 = (const char *)*((unsigned int *)cmd_args.argv[nesting] + 1);
-    v4 = atol(v3);
+    time = atol(Cmd_Argv(1));
     v5 = cmd_args.nesting;
-    v6 = v4;
-    if (cmd_args.nesting >= 8u)
-    {
-        MyAssertHandler(
-            "c:\\trees\\cod3\\cod3src\\src\\cgame\\../qcommon/cmd.h",
-            174,
-            0,
-            "cmd_args.nesting doesn't index CMD_MAX_NESTING\n\t%i not in [0, %i)",
-            cmd_args.nesting,
-            8);
-        v5 = cmd_args.nesting;
-    }
-    if (cmd_args.argc[v5] <= 2)
-        v7 = byte_82003CDD;
-    else
-        v7 = (const char *)*((unsigned int *)cmd_args.argv[v5] + 2);
-    v8 = atof(v7);
+    v8 = atof(Cmd_Argv(2));
     v9 = cmd_args.nesting;
-    v10 = (float)*(double *)&v8;
-    if (cmd_args.nesting >= 8u)
-    {
-        MyAssertHandler(
-            "c:\\trees\\cod3\\cod3src\\src\\cgame\\../qcommon/cmd.h",
-            174,
-            0,
-            "cmd_args.nesting doesn't index CMD_MAX_NESTING\n\t%i not in [0, %i)",
-            cmd_args.nesting,
-            8);
-        v9 = cmd_args.nesting;
-    }
-    if (cmd_args.argc[v9] <= 3)
-        v11 = byte_82003CDD;
-    else
-        v11 = (const char *)*((unsigned int *)cmd_args.argv[v9] + 3);
-    v12 = atol(v11);
+    blurEndValue = (float)*(double *)&v8;
+    blurTime = (BlurTime)atol(Cmd_Argv(3));
     v13 = cmd_args.nesting;
-    v14 = v12;
-    if (cmd_args.nesting >= 8u)
-    {
-        MyAssertHandler(
-            "c:\\trees\\cod3\\cod3src\\src\\cgame\\../qcommon/cmd.h",
-            174,
-            0,
-            "cmd_args.nesting doesn't index CMD_MAX_NESTING\n\t%i not in [0, %i)",
-            cmd_args.nesting,
-            8);
-        v13 = cmd_args.nesting;
-    }
-    if (cmd_args.argc[v13] <= 4)
-        v15 = byte_82003CDD;
-    else
-        v15 = (const char *)*((unsigned int *)cmd_args.argv[v13] + 4);
-    v16 = atol(v15);
-    if (v6 < 0)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\cgame\\cg_servercmds.cpp", 859, 0, "%s", "time >= 0");
-    if (v10 < 0.0)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\cgame\\cg_servercmds.cpp", 860, 0, "%s", "blurEndValue >= 0");
-    CG_Blur(localClientNum, v6, v10, v17, v14, v16);
+    blurPrio = (BlurPriority)atol(Cmd_Argv(4));
+
+    iassert(time >= 0);
+    iassert(blurEndValue >= 0);
+
+    CG_Blur(localClientNum, time, blurEndValue, BLUR_TIME_RELATIVE, blurTime, blurPrio); // KISAKTODO: double check 4th arg
 }
 
 void __cdecl CG_SlowServerCommand(int localClientNum)
@@ -1170,58 +1075,15 @@ void __cdecl CG_SlowServerCommand(int localClientNum)
     const char *v11; // r3
     long double v12; // fp2
 
-    nesting = cmd_args.nesting;
-    if (cmd_args.nesting >= 8u)
-    {
-        MyAssertHandler(
-            "c:\\trees\\cod3\\cod3src\\src\\cgame\\../qcommon/cmd.h",
-            174,
-            0,
-            "cmd_args.nesting doesn't index CMD_MAX_NESTING\n\t%i not in [0, %i)",
-            cmd_args.nesting,
-            8);
-        nesting = cmd_args.nesting;
-    }
-    if (cmd_args.argc[nesting] <= 1)
-        v3 = byte_82003CDD;
-    else
-        v3 = (const char *)*((unsigned int *)cmd_args.argv[nesting] + 1);
+    v3 = Cmd_Argv(1);
     v4 = atol(v3);
     v5 = cmd_args.nesting;
     v6 = v4;
-    if (cmd_args.nesting >= 8u)
-    {
-        MyAssertHandler(
-            "c:\\trees\\cod3\\cod3src\\src\\cgame\\../qcommon/cmd.h",
-            174,
-            0,
-            "cmd_args.nesting doesn't index CMD_MAX_NESTING\n\t%i not in [0, %i)",
-            cmd_args.nesting,
-            8);
-        v5 = cmd_args.nesting;
-    }
-    if (cmd_args.argc[v5] <= 2)
-        v7 = byte_82003CDD;
-    else
-        v7 = (const char *)*((unsigned int *)cmd_args.argv[v5] + 2);
+    v7 = Cmd_Argv(2);
     v8 = atof(v7);
     v9 = cmd_args.nesting;
     v10 = (float)*(double *)&v8;
-    if (cmd_args.nesting >= 8u)
-    {
-        MyAssertHandler(
-            "c:\\trees\\cod3\\cod3src\\src\\cgame\\../qcommon/cmd.h",
-            174,
-            0,
-            "cmd_args.nesting doesn't index CMD_MAX_NESTING\n\t%i not in [0, %i)",
-            cmd_args.nesting,
-            8);
-        v9 = cmd_args.nesting;
-    }
-    if (cmd_args.argc[v9] <= 3)
-        v11 = byte_82003CDD;
-    else
-        v11 = (const char *)*((unsigned int *)cmd_args.argv[v9] + 3);
+    v11 = Cmd_Argv(3);
     v12 = atof(v11);
     CG_AlterTimescale(localClientNum, v6, v10, (float)*(double *)&v12);
 }
@@ -1229,9 +1091,9 @@ void __cdecl CG_SlowServerCommand(int localClientNum)
 void __cdecl CG_SetClientDvarFromServer(const char *dvarname, const char *value)
 {
     if (I_stricmp(dvarname, "hud_drawHUD"))
-        Com_Error(ERR_DROP, byte_8200F418, dvarname);
+        Com_Error(ERR_DROP, "%s is not a valid dvar to set using setclientdvar", dvarname);
     else
-        Dvar_SetFromStringByName("hud_drawHUD", value);
+        Dvar_SetFromStringByName("hud_drawHUD", (char*)value);
 }
 
 void CG_ParseAmp()
@@ -1450,7 +1312,7 @@ void __cdecl CG_DispatchServerCommand(int localClientNum)
     const char *v34; // r3
     unsigned __int16 v35; // r31
     const char *v36; // r3
-    DynEntityDrawType v37; // r30
+    DynEntityCollType v37; // r30
     const char *v38; // r3
     long double v39; // fp2
     double v40; // fp31
@@ -1622,22 +1484,8 @@ void __cdecl CG_DispatchServerCommand(int localClientNum)
     float v206[6]; // [sp+68h] [-88h] BYREF
     bool v207[64]; // [sp+80h] [-70h] BYREF
 
-    nesting = cmd_args.nesting;
-    if (cmd_args.nesting >= 8u)
-    {
-        MyAssertHandler(
-            "c:\\trees\\cod3\\cod3src\\src\\cgame\\../qcommon/cmd.h",
-            174,
-            0,
-            "cmd_args.nesting doesn't index CMD_MAX_NESTING\n\t%i not in [0, %i)",
-            cmd_args.nesting,
-            8);
-        nesting = cmd_args.nesting;
-    }
-    if (cmd_args.argc[nesting] <= 0)
-        v3 = byte_82003CDD;
-    else
-        v3 = *cmd_args.argv[nesting];
+    v3 = Cmd_Argv(0);
+
     if (localClientNum)
         MyAssertHandler(
             "c:\\trees\\cod3\\cod3src\\src\\cgame\\cg_local.h",
@@ -2203,10 +2051,7 @@ void __cdecl CG_DispatchServerCommand(int localClientNum)
                                                                                                                                                                                         v202 = Cmd_Argv(1);
                                                                                                                                                                                         v203 = atol(v202);
                                                                                                                                                                                         v204 = CL_ControllerIndexFromClientNum(localClientNum);
-                                                                                                                                                                                        LB_UploadPlayerScore(
-                                                                                                                                                                                            v204,
-                                                                                                                                                                                            v203,
-                                                                                                                                                                                            v201);
+                                                                                                                                                                                        //LB_UploadPlayerScore(v204, v203, v201);
                                                                                                                                                                                     }
                                                                                                                                                                                 }
                                                                                                                                                                                 else
@@ -2382,7 +2227,8 @@ void __cdecl CG_DispatchServerCommand(int localClientNum)
                                                                     else
                                                                     {
                                                                         v88 = Cmd_Argv(2);
-                                                                        v89 = (_cntlzw(atol(v88)) & 0x20) == 0;
+                                                                        //v89 = (_cntlzw(atol(v88)) & 0x20) == 0;
+                                                                        v89 = (atol(v88) & 0x20) == 0;
                                                                         v90 = Cmd_Argv(1);
                                                                         v91 = CL_PickSoundAlias(v90);
                                                                         SND_PlayMusicAlias(localClientNum, v91, v89, SASYS_CGAME);
@@ -2443,7 +2289,7 @@ void __cdecl CG_DispatchServerCommand(int localClientNum)
                                     v34 = Cmd_Argv(1);
                                     v35 = atol(v34);
                                     v36 = Cmd_Argv(2);
-                                    v37 = atol(v36);
+                                    v37 = (DynEntityCollType)atol(v36);
                                     v38 = Cmd_Argv(5);
                                     v39 = atof(v38);
                                     v40 = (float)*(double *)&v39;

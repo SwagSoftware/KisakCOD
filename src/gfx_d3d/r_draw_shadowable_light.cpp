@@ -6,7 +6,6 @@
 #include <qcommon/com_bsp.h>
 
 
-
 void __cdecl R_SetLightProperties(
     GfxCmdBufSourceState *source,
     const GfxLight *light,

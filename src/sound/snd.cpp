@@ -4903,4 +4903,86 @@ void SND_RestoreEventually(MemoryFile *memFile)
     g_snd.restore.compress = memFile->compress;
     memcpy(&g_snd.restore, v3, v4);
 }
+
+void SND_Amplify(float *org, int min_r, int max_r, double min_vol, double max_vol, double falloff)
+{
+    snd_listener *listener; // r10
+
+    iassert(!IS_NAN(org[0]) && !IS_NAN(org[2]) && !IS_NAN(org[2]));
+    iassert(min_r >= 0);
+    iassert(max_r >= min_r);
+    iassert(min_vol >= 0);
+    iassert(max_vol >= min_vol);
+    iassert(falloff >= 0);
+
+    g_snd.amplifier.listener->active = 1;
+    listener = g_snd.amplifier.listener;
+    g_snd.amplifier.listener->orient.origin[0] = *org;
+    listener->orient.origin[1] = org[1];
+    listener->orient.origin[2] = org[2];
+    g_snd.amplifier.minRadius = min_r;
+    g_snd.amplifier.maxRadius = max_r;
+    g_snd.amplifier.minVol = min_vol;
+    g_snd.amplifier.maxVol = max_vol;
+    g_snd.amplifier.falloffExp = falloff;
+}
+
+void SND_SetEq(
+    const char *channelName,
+    int eqIndex,
+    int band,
+    SND_EQTYPE type,
+    float gain,
+    float freq,
+    float q)
+{
+    int EntChannelFromName; // r3
+
+    EntChannelFromName = SND_GetEntChannelFromName(channelName);
+    if (EntChannelFromName >= 0)
+        SND_SetEqParams(EntChannelFromName, eqIndex, band, type, gain, freq, q);
+    else
+        Com_PrintError(9, "Unknown channel name (%s), please check channel definitions file\n", channelName);
+}
+
+void SND_StopAmplify()
+{
+    g_snd.amplifier.listener->active = 0;
+}
+
+void SND_SetPauseSettings(const bool *pauseSettings)
+{
+    int i; // r11
+
+    iassert(pauseSettings);
+
+    for (i = 0; i < 64; ++i)
+        g_snd.pauseSettings[i] = pauseSettings[i];
+}
+
+void SND_MapInit()
+{
+    __int64 v0; // r9
+    int v1; // r11
+    double v2; // fp13
+
+    SND_StopSounds(SND_STOP_ALL);
+    LODWORD(v0) = snd_levelFadeTime->current.integer;
+    if (!(_DWORD)v0)
+        LODWORD(v0) = 1;
+    HIDWORD(v0) = 0;
+    if (g_snd.entchannel_count > 0)
+    {
+        v1 = 0;
+        v2 = (float)((float)1.0 / (float)v0);
+        do
+        {
+            ++HIDWORD(v0);
+            g_snd.channelvol->channelvol[v1].volume = 0.0;
+            g_snd.channelvol->channelvol[v1].goalrate = g_snd.channelvol->channelvol[v1].goalvolume * (float)v2;
+            ++v1;
+        } while (SHIDWORD(v0) < g_snd.entchannel_count);
+    }
+}
+
 #endif

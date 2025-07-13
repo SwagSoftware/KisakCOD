@@ -2756,6 +2756,14 @@ bool __cdecl Vec4Compare(const float *a, const float *b)
     return *b == *a && b[1] == a[1] && b[2] == a[2] && b[3] == a[3];
 }
 
+void __cdecl Vec4Set(float *v, float x, float y, float z, float w)
+{
+    v[0] = x;
+    v[1] = y;
+    v[2] = z;
+    v[3] = w;
+}
+
 void __cdecl Vec3MadMad(
     const float *start,
     float scale0,

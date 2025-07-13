@@ -462,6 +462,9 @@ void __cdecl Phys_AddJitterRegion(
     float minDisplacement,
     float maxDisplacement);
 void __cdecl Phys_ObjSetContactCentroid(dxBody *id, const float *worldPos);
+#ifdef KISAK_SP
+void Phys_SetGravityDir(float *down);
+#endif
 
 // phys_world_collision
 int __cdecl Phys_GetSurfaceFlagsFromBrush(const cbrush_t *brush, unsigned int brushSideIndex);

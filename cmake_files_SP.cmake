@@ -44,6 +44,8 @@ source_group("aim_assist" FILES ${AIM_ASSIST})
 
 set(BGAME
     "${SRC_DIR}/bgame/bg_animation_mp.cpp"
+    "${SRC_DIR}/bgame/bg_actor_prone.cpp"
+    "${SRC_DIR}/bgame/bg_actor_prone.h"
     "${SRC_DIR}/bgame/bg_jump.cpp"
     "${SRC_DIR}/bgame/bg_local.h"
     "${SRC_DIR}/bgame/bg_mantle.cpp"

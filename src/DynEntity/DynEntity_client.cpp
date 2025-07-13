@@ -1696,3 +1696,82 @@ void __cdecl DynEntCl_DestroyEvent(
     }
 }
 
+
+#ifdef KISAK_SP
+void DynEntCl_WakeUpAroundPlayer(int localClientNum)
+{
+    const dvar_s *v1; // r11
+    DynEntityDrawType v2; // r29
+    double v3; // fp0
+    double v4; // fp13
+    double v5; // fp0
+    unsigned int ClosestEntities; // r3
+    unsigned __int16 *v7; // r31
+    unsigned int v8; // r27
+    const DynEntityDef *EntityDef; // r28
+    DynEntityClient *ClientEntity; // r30
+    DynEntityPose *ClientPose; // r3
+    float v12[4]; // [sp+50h] [-2080h] BYREF
+    float v13[4]; // [sp+60h] [-2070h] BYREF
+    float v14[4]; // [sp+70h] [-2060h] BYREF
+    unsigned __int16 v15[40]; // [sp+80h] [-2050h] BYREF
+
+    v1 = phys_gravityChangeWakeupRadius;
+    if (phys_gravityChangeWakeupRadius->current.value != 0.0)
+    {
+        if (localClientNum)
+        {
+            MyAssertHandler(
+                "c:\\trees\\cod3\\cod3src\\src\\dynentity\\../cgame/cg_local.h",
+                910,
+                0,
+                "%s\n\t(localClientNum) = %i",
+                "(localClientNum == 0)",
+                localClientNum);
+            v1 = phys_gravityChangeWakeupRadius;
+        }
+        v2 = DYNENT_DRAW_MODEL;
+        v14[0] = cgArray[0].predictedPlayerState.origin[0];
+        v14[1] = cgArray[0].predictedPlayerState.origin[1];
+        v14[2] = cgArray[0].predictedPlayerState.origin[2];
+        v3 = -v1->current.value;
+        v13[0] = (float)v3 + cgArray[0].predictedPlayerState.origin[0];
+        v13[1] = (float)v3 + cgArray[0].predictedPlayerState.origin[1];
+        v13[2] = cgArray[0].predictedPlayerState.origin[2] + (float)v3;
+        v4 = (float)(v1->current.value + cgArray[0].predictedPlayerState.origin[1]);
+        v5 = (float)(cgArray[0].predictedPlayerState.origin[2] + v1->current.value);
+        v12[0] = v1->current.value + cgArray[0].predictedPlayerState.origin[0];
+        v12[1] = v4;
+        v12[2] = v5;
+        do
+        {
+            ClosestEntities = DynEntCl_GetClosestEntities(v2, v13, v12, v14, v15, 0);
+            if (ClosestEntities)
+            {
+                v7 = v15;
+                v8 = ClosestEntities;
+                do
+                {
+                    EntityDef = DynEnt_GetEntityDef(*v7, v2);
+                    ClientEntity = DynEnt_GetClientEntity(*v7, v2);
+                    if ((ClientEntity->flags & 1) == 0)
+                        MyAssertHandler(
+                            "c:\\trees\\cod3\\cod3src\\src\\DynEntity\\DynEntity_client.cpp",
+                            1501,
+                            0,
+                            "%s",
+                            "dynEntClient->flags & DYNENT_CL_ACTIVE");
+                    if (DynEnt_GetEntityProps(EntityDef->type)->usePhysics && !ClientEntity->physObjId)
+                    {
+                        ClientPose = DynEnt_GetClientPose(*v7, v2);
+                        ClientEntity->physObjId = DynEntCl_CreatePhysObj(EntityDef, &ClientPose->pose);
+                    }
+                    --v8;
+                    ++v7;
+                } while (v8);
+            }
+            ++v2;
+        } while ((unsigned int)v2 < DYNENT_DRAW_COUNT);
+    }
+}
+#endif 

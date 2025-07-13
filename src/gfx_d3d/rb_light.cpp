@@ -11,6 +11,12 @@
 #include "r_primarylights.h"
 #include <universal/profile.h>
 
+#ifdef KISAK_MP
+#include <cgame_mp/cg_local_mp.h>
+#elif
+#include <cgame/cg_local.h>
+#endif
+
 struct // sizeof=0x8
 {                                       // ...
     unsigned __int16 (*history)[3];     // ...

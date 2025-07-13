@@ -620,6 +620,11 @@ void __cdecl SND_SetData(MssSoundCOD4 *mssSound, void *srcData);
 
 #ifdef KISAK_SP
 void SND_RestoreEventually(struct MemoryFile *memFile);
+void SND_Amplify(float *org, int min_r, int max_r, double min_vol, double max_vol, double falloff);
+void SND_StopAmplify();
+void SND_SetPauseSettings(const bool *pauseSettings);
+void SND_MapInit();
+void SND_SetEq(const char *channelName, int eqIndex, int band, SND_EQTYPE type, float gain, float freq, float q);
 #endif
 
 // snd_driver_load_obj

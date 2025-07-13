@@ -152,6 +152,9 @@ void __cdecl SND_Update2DChannel(int i, int frametime);
 void __cdecl SND_Update3DChannel(int i, int frametime);
 void __cdecl SND_UpdateStreamChannel(int i, int frametime);
 
+#ifdef KISAK_SP
+void SND_SetEqLerp(double lerp);
+#endif
 
 
 

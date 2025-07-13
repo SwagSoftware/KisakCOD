@@ -2735,3 +2735,15 @@ void __cdecl Phys_ObjSetContactCentroid(dxBody *id, const float *worldPos)
     userData->contactCentroid[2] = worldPos[2];
 }
 
+#ifdef KISAK_SP
+void Phys_SetGravityDir(float *down)
+{
+    iassert(physInited);
+
+    Sys_EnterCriticalSection(CRITSECT_PHYSICS);
+    physGlob.gravityDirection[0] = down[0];
+    physGlob.gravityDirection[1] = down[1];
+    physGlob.gravityDirection[2] = down[2];
+    Sys_LeaveCriticalSection(CRITSECT_PHYSICS);
+}
+#endif

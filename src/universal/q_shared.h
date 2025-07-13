@@ -563,6 +563,30 @@ union FloatReadSwap_union // sizeof=0x4
 	unsigned __int8 b[4];
 };
 
+static const float colorBlack[4] = { 0.0, 0.0, 0.0, 1.0 }; // idb
+static const float colorRed[4] = { 1.0, 0.0, 0.0, 1.0 }; // idb
+static const float colorGreen[4] = { 0.0, 1.0, 0.0, 1.0 }; // idb
+static const float colorLtGreen[4] = { 0.0, 0.69999999f, 0.0, 1.0 }; // idb
+static const float colorBlue[4] = { 0.0, 0.0, 1.0, 1.0 }; // idb
+static const float colorLtBlue[4] = { 0.5, 0.5, 1.0, 1.0 }; // idb
+static const float colorYellow[4] = { 1.0, 1.0, 0.0, 1.0 }; // idb
+static const float colorLtYellow[4] = { 0.75, 0.75f, 0.0f, 1.0f };
+static const float colorMdYellow[4] = { 0.5, 0.5, 0.0, 1.0 }; // idb
+static const float colorMagenta[4] = { 1.0, 0.0, 1.0, 1.0 }; // idb
+static const float colorCyan[4] = { 0.0f, 1.0f, 1.0f, 1.0f };
+static const float colorLtCyan[4] = { 0.0, 0.75, 0.75, 1.0 }; // idb
+static const float colorMdCyan[4] = { 0.0f, 0.5f, 0.5f, 1.0f };
+static const float colorDkCyan[4] = { 0.0f, 0.25f, 0.25f, 1.0f };
+static const float colorWhite[4] = { 1.0, 1.0, 1.0, 1.0 }; // idb
+static const float colorLtGrey[4] = { 0.75, 0.75, 0.75, 1.0 }; // idb
+static const float colorMdGrey[4] = { 0.5f, 0.5f, 0.5f, 1.0f };
+static const float colorDkGrey[4] = { 0.25f, 0.25f, 0.25f, 1.0f };
+static const float colorOrange[4] = { 1.0, 0.69999999f, 0.0, 1.0 }; // idb
+static const float colorLtOrange[4] = { 0.75, 0.52499998f, 0.0, 1.0 }; // idb
+static const float colorWhiteFaded[4] = { 1.0, 1.0, 1.0, 0.75 }; // idb
+static const float colorGreenFaded[4] = { 0.0, 1.0, 0.0, 0.75 }; // idb
+static const float colorRedFaded[4] = { 0.75, 0.25, 0.0, 0.75 }; // idb
+
 void __cdecl TRACK_q_shared();
 unsigned __int8 __cdecl ColorIndex(unsigned __int8 c);
 const char *__cdecl Com_GetFilenameSubString(const char *pathname);

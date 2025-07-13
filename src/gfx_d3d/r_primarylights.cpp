@@ -6,6 +6,12 @@
 #include "r_dvars.h"
 #include "r_spotshadow.h"
 
+#ifdef KISAK_MP
+#include <cgame_mp/cg_local_mp.h>
+#elif
+#include <cgame/cg_local.h>
+#endif
+
 GfxShadowedLightHistory s_shadowHistory[4];
 void __cdecl R_ClearShadowedPrimaryLightHistory(int localClientNum)
 {

@@ -32,6 +32,11 @@
 #include <universal/profile.h>
 #include "rb_state.h"
 
+#ifdef KISAK_MP
+#include <cgame_mp/cg_local_mp.h>
+#elif
+#include <cgame/cg_local.h>
+#endif
 
 //struct GfxScene scene      859c8280     gfx_d3d : r_scene.obj
 GfxViewParms lockPvsViewParms;

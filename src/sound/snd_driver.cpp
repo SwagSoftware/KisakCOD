@@ -1874,3 +1874,21 @@ void __cdecl SND_UpdateStreamChannel(int i, int frametime)
         }
     }
 }
+
+
+#ifdef KISAK_SP
+void SND_SetEqLerp(double lerp)
+{
+#if KISAK_XBOX
+    if (lerp < 0.0 || lerp > 1.0)
+        MyAssertHandler(
+            "c:\\trees\\cod3\\cod3src\\src\\xenon\\snd_driver.cpp",
+            1740,
+            0,
+            "%s\n\t(lerp) = %g",
+            HIDWORD(lerp),
+            LODWORD(lerp));
+    xaGlob.eqLerp = lerp;
+#endif
+}
+#endif

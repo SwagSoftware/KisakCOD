@@ -6,9 +6,6 @@
 #include <cgame_mp/cg_local_mp.h>
 #include <universal/profile.h>
 
-//struct localEntity_s **cg_freeLocalEntities 82834808     cg_localents.obj
-//struct localEntity_s *cg_activeLocalEntities 82834818     cg_localents.obj
-
 localEntity_s cg_localEntities[1][128];
 localEntity_s cg_activeLocalEntities[1];
 localEntity_s *cg_freeLocalEntities[1];

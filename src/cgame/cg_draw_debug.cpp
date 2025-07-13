@@ -779,11 +779,3 @@ void __cdecl CG_DrawFxMarkProfile(int32_t localClientNum)
     profilePos[1] = 12.0f;
     FX_DrawMarkProfile(localClientNum, (void(*)(const char*, float*))CG_DrawFxText, profilePos);
 }
-
-void __cdecl Vec4Set(float *v, float x, float y, float z, float w)
-{
-    *v = x;
-    v[1] = y;
-    v[2] = z;
-    v[3] = w;
-}

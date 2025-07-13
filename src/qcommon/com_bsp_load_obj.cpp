@@ -52,7 +52,7 @@ void __cdecl Com_CleanupBsp()
         MyAssertHandler(".\\qcommon\\com_bsp_load_obj.cpp", 368, 0, "%s", "!Com_IsBspLoaded()");
 }
 
-BOOL __cdecl Com_BspHasLump(LumpType type)
+bool __cdecl Com_BspHasLump(LumpType type)
 {
     unsigned int count; // [esp+0h] [ebp-4h] BYREF
 
@@ -95,7 +95,7 @@ char *__cdecl Com_GetBspLump(LumpType type, unsigned int elemSize, unsigned int 
     }
 }
 
-BOOL __cdecl Com_IsBspLoaded()
+bool __cdecl Com_IsBspLoaded()
 {
     return comBspGlob.header != 0;
 }

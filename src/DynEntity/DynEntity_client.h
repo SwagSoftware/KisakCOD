@@ -208,6 +208,9 @@ void __cdecl DynEntCl_DestroyEvent(
     DynEntityCollType drawType,
     const float *hitPos,
     const float *hitDir);
+#ifdef KISAK_SP
+void DynEntCl_WakeUpAroundPlayer(int localClientNum);
+#endif
 
 
 

@@ -860,3 +860,6 @@ int __cdecl G_EntLinkToWithOffset(
     float *originOffset,
     const float *anglesOffset);
 int __cdecl G_EntAttach(gentity_s *ent, const char *modelName, unsigned int tagName, int ignoreCollision);
+
+
+extern bool g_godModeRemoteInputValid;

@@ -18,14 +18,15 @@
 #include "cg_newdraw.h"
 #include <aim_assist/aim_assist.h>
 #include "cg_modelpreviewer.h"
+#include <game/g_local.h>
 
-weaponInfo_s cg_weaponsArray[1][128];
 UiContext cgDC;
 
 cgs_t cgsArray[1];
 cg_s cgArray[1];
 cgMedia_t cgMedia;
 
+weaponInfo_s cg_weaponsArray[1][128];
 centity_s cg_entitiesArray[1][2176];
 float cg_entityOriginArray[1][2176][3];
 
@@ -854,7 +855,7 @@ void __cdecl CG_GetDObjOrientation(int localClientNum, int dobjHandle, float (*a
                 "%s\n\t(localClientNum) = %i",
                 "(localClientNum == 0)",
                 localClientNum);
-        AxisCopy(cgArray[0].viewModelAxis, axis);
+        AxisCopy((const mat3x3&)cgArray[0].viewModelAxis, (mat3x3&)axis);
         *origin = cgArray[0].viewModelAxis[3][0];
         origin[1] = cgArray[0].viewModelAxis[3][1];
         origin[2] = cgArray[0].viewModelAxis[3][2];
@@ -1242,7 +1243,7 @@ void __cdecl CG_RegisterGraphics(int localClientNum, const char *mapname)
         if (!*v11)
             break;
         if (!BG_LoadShellShockDvars(v11))
-            Com_Error(ERR_DROP, byte_8200B458, v12);
+            Com_Error(ERR_DROP, "couldn't register shellchock '%s' -- see console", v12);
         ShellshockParms = BG_GetShellshockParms(j);
         BG_SetShellShockParmsFromDvars(ShellshockParms);
     }
@@ -1256,7 +1257,7 @@ void __cdecl CG_RegisterGraphics(int localClientNum, const char *mapname)
     ProfLoad_Begin("Register impact effects");
     cgMedia.fx = CG_RegisterImpactEffects(mapname);
     if (!cgMedia.fx)
-        Com_Error(ERR_DROP, byte_8200B3A8);
+        Com_Error(ERR_DROP, "Error reading CSV files in the fx directory to identify impact effects");
     cgMedia.fxNoBloodFleshHit = FX_Register("impacts/flesh_hit_noblood");
     cgMedia.fxKnifeBlood = FX_Register("impacts/flesh_hit_knife");
     cgMedia.fxKnifeNoBlood = FX_Register("impacts/flesh_hit_knife_noblood");
@@ -1723,7 +1724,7 @@ void __cdecl CG_Init(int localClientNum, int savegame)
         ++v5;
     } while (!v6);
     if (v6)
-        Com_Error(ERR_DROP, byte_8200B990);
+        Com_Error(ERR_DROP, "Client/Server game mismatch");
     ProfLoad_Begin("Parse server info");
     CG_ParseServerInfo(localClientNum);
     CG_SetupWeaponDef(localClientNum);

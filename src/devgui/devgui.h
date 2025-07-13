@@ -154,7 +154,6 @@ int32_t DevGui_ScrollUpInternal();
 int32_t DevGui_ScrollDown();
 int32_t DevGui_ScrollDownInternal();
 void __cdecl DevGui_UpdateDvar(float deltaTime);
-bool __cdecl Vec4Compare(const float *a, const float *b);
 float __cdecl DevGui_PickFloatScrollStep(float min, float max);
 void __cdecl DevGui_UpdateGraph(int32_t localClientNum, float deltaTime);
 void __cdecl DevGui_AddGraphKnot(DevGraph *graph, int32_t localClientNum);

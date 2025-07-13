@@ -3,6 +3,8 @@
 #endif
 
 #include "cg_actors.h"
+#include "cg_main.h"
+#include <bgame/bg_public.h>
 
 int __cdecl CG_GetEntityIndex(const centity_s *cent)
 {

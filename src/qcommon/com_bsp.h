@@ -1,6 +1,6 @@
 #pragma once
-#include <cgame_mp/cg_local_mp.h>
 
+#include <xanim/xanim.h>
 struct DiskPrimaryLight_Version16 // sizeof=0x60
 {
     unsigned __int16 falloffStart;
@@ -130,11 +130,11 @@ struct BspGlob // sizeof=0x54
 char *__cdecl Com_GetBspLump(LumpType type, unsigned int elemSize, unsigned int *count);
 void __cdecl Com_LoadBsp(char *filename);
 void __cdecl Com_UnloadBsp();
-BOOL __cdecl Com_IsBspLoaded();
+bool __cdecl Com_IsBspLoaded();
 unsigned int __cdecl Com_GetBspLumpCountForVersion(int version);
 void __cdecl Com_GetBspFilename(char *filename, unsigned int size, const char *mapname);
 void __cdecl Com_CleanupBsp();
-BOOL __cdecl Com_BspHasLump(LumpType type);
+bool __cdecl Com_BspHasLump(LumpType type);
 bool __cdecl Com_BspError();
 char *__cdecl Com_ValidateBspLumpData(
     LumpType type,

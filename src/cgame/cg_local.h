@@ -67,30 +67,6 @@ enum $53B7CF4E68BA96864516EAE91DEE3467 : __int32
      ET_EVENTS          = 0x11,
  };
 
-const float colorBlack[4] = { 0.0, 0.0, 0.0, 1.0 }; // idb
-const float colorRed[4] = { 1.0, 0.0, 0.0, 1.0 }; // idb
-const float colorGreen[4] = { 0.0, 1.0, 0.0, 1.0 }; // idb
-const float colorLtGreen[4] = { 0.0, 0.69999999f, 0.0, 1.0 }; // idb
-const float colorBlue[4] = { 0.0, 0.0, 1.0, 1.0 }; // idb
-const float colorLtBlue[4] = { 0.5, 0.5, 1.0, 1.0 }; // idb
-const float colorYellow[4] = { 1.0, 1.0, 0.0, 1.0 }; // idb
-const float colorLtYellow[4] = { 0.75, 0.75f, 0.0f, 1.0f };
-const float colorMdYellow[4] = { 0.5, 0.5, 0.0, 1.0 }; // idb
-const float colorMagenta[4] = { 1.0, 0.0, 1.0, 1.0 }; // idb
-const float colorCyan[4] = { 0.0f, 1.0f, 1.0f, 1.0f };
-const float colorLtCyan[4] = { 0.0, 0.75, 0.75, 1.0 }; // idb
-const float colorMdCyan[4] = { 0.0f, 0.5f, 0.5f, 1.0f };
-const float colorDkCyan[4] = { 0.0f, 0.25f, 0.25f, 1.0f };
-const float colorWhite[4] = { 1.0, 1.0, 1.0, 1.0 }; // idb
-const float colorLtGrey[4] = { 0.75, 0.75, 0.75, 1.0 }; // idb
-const float colorMdGrey[4] = { 0.5f, 0.5f, 0.5f, 1.0f };
-const float colorDkGrey[4] = { 0.25f, 0.25f, 0.25f, 1.0f };
-const float colorOrange[4] = { 1.0, 0.69999999f, 0.0, 1.0 }; // idb
-const float colorLtOrange[4] = { 0.75, 0.52499998f, 0.0, 1.0 }; // idb
-const float colorWhiteFaded[4] = { 1.0, 1.0, 1.0, 0.75 }; // idb
-const float colorGreenFaded[4] = { 0.0, 1.0, 0.0, 0.75 }; // idb
-const float colorRedFaded[4] = { 0.75, 0.25, 0.0, 0.75 }; // idb
-
 
 void __cdecl CG_DrawRotatedPicPhysical(
     const ScreenPlacement *scrPlace,
@@ -998,7 +974,6 @@ void __cdecl CG_DrawSoundOverlay(const ScreenPlacement *scrPlace);
 void __cdecl CG_DrawFxProfile(int32_t localClientNum);
 void __cdecl CG_DrawFxText(char *text, float *profilePos);
 void __cdecl CG_DrawFxMarkProfile(int32_t localClientNum);
-void __cdecl Vec4Set(float *v, float x, float y, float z, float w);
 
 
 
