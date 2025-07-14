@@ -25,7 +25,28 @@ struct netField_t
 	int bits;
 };
 
-struct usercmd_s;
+struct __declspec(align(2)) usercmd_s
+{
+    int serverTime;
+    int buttons;
+    int angles[3];
+    unsigned __int8 weapon;
+    unsigned __int8 offHandIndex;
+    char forwardmove;
+    char rightmove;
+    char upmove;
+    char pitchmove;
+    char yawmove;
+    float gunPitch;
+    float gunYaw;
+    float gunXOfs;
+    float gunYOfs;
+    float gunZOfs;
+    float meleeChargeYaw;
+    unsigned __int8 meleeChargeDist;
+    char selectedLocation[2];
+};
+
 struct hudelem_s;
 struct playerState_s;
 

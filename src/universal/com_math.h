@@ -185,6 +185,7 @@ void __cdecl AnglesSubtract(float* v1, float* v2, float* v3);
 
 float __cdecl RotationToYaw(const float* rot);
 float __cdecl AngleNormalize360(float angle);
+float AngleSubtract(float a1, float a2);
 
 float __cdecl ColorNormalize(const float *in, float *out);
 

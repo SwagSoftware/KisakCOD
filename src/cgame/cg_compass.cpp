@@ -57,7 +57,12 @@ const dvar_t *compassECoordCutoff;
 const dvar_t *cg_hudMapBorderWidth;
 const dvar_t *compassObjectiveNumRings;
 
-
+#ifdef KISAK_SP
+const dvar_t *compassIconTankWidth;
+const dvar_t *compassIconTankHeight;
+const dvar_t *compassIconOtherVehWidth;
+const dvar_t *compassIconOtherVehHeight;
+#endif
 
 void __cdecl CG_CompassRegisterDvars()
 {
@@ -412,6 +417,12 @@ void __cdecl CG_CompassRegisterDvars()
         0,
         DVAR_CHEAT,
         "Enables enemies showing on the compass because of moving rapidly nearby.");
+#ifdef KISAK_SP
+    compassIconTankWidth = Dvar_RegisterFloat("compassIconTankWidth", 35.0, 0.0, FLT_MAX, 0, 0);
+    compassIconTankHeight = Dvar_RegisterFloat("compassIconTankHeight", 35.0, 0.0, FLT_MAX, 0, 0);
+    compassIconOtherVehWidth = Dvar_RegisterFloat("compassIconOtherVehWidth", 40.0, 0.0, FLT_MAX, 0, 0);
+    compassIconOtherVehHeight = Dvar_RegisterFloat("compassIconOtherVehHeight", 40.0, 0.0, FLT_MAX, 0, 0);
+#endif
     compassDebug = Dvar_RegisterBool("compassDebug", 0, 1u, "Compass Debugging Mode");
     minbj.value.max = 10.0f;
     minbj.value.min = 0.0099999998f;

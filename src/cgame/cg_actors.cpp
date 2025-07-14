@@ -5,30 +5,13 @@
 #include "cg_actors.h"
 #include "cg_main.h"
 #include <bgame/bg_public.h>
-
-int __cdecl CG_GetEntityIndex(const centity_s *cent)
-{
-    if (cent->nextState.number != ((char *)cent - (char *)cg_entitiesArray) / 372 % 2176)
-        MyAssertHandler(
-            "c:\\trees\\cod3\\cod3src\\src\\cgame\\cg_local.h",
-            943,
-            0,
-            "cent->nextState.number == (cent - &cg_entitiesArray[0][0]) % MAX_GENTITIES\n\t%i, %i");
-    return cent->nextState.number;
-}
-
-int __cdecl CG_GetLocalClientTime(int localClientNum)
-{
-    if (localClientNum)
-        MyAssertHandler(
-            "c:\\trees\\cod3\\cod3src\\src\\cgame\\cg_local.h",
-            910,
-            0,
-            "%s\n\t(localClientNum) = %i",
-            "(localClientNum == 0)",
-            localClientNum);
-    return cgArray[0].time;
-}
+#include <bgame/bg_actor_prone.h>
+#include <game/g_actor_prone.h>
+#include <ragdoll/ragdoll.h>
+#include "cg_ents.h"
+#include <gfx_d3d/r_scene.h>
+#include "cg_local.h"
+#include "cg_compassfriendlies.h"
 
 void __cdecl CG_Actor_PreControllers(centity_s *cent)
 {

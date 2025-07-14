@@ -817,12 +817,11 @@ void __cdecl Hunk_ResetDebugMem()
     Hunk_UserReset(g_debugUser);
 }
 
-int32_t __cdecl Hunk_AllocDebugMem(uint32_t size)
+void* Hunk_AllocDebugMem(uint32_t size)
 {
-    if (!Sys_IsMainThread())
-        MyAssertHandler(".\\universal\\com_memory.cpp", 2789, 0, "%s", "Sys_IsMainThread()");
-    if (!g_debugUser)
-        MyAssertHandler(".\\universal\\com_memory.cpp", 2790, 0, "%s", "g_debugUser");
+    iassert(Sys_IsMainThread());
+    iassert(g_debugUser);
+
     return Hunk_UserAlloc(g_debugUser, size, 4);
 }
 
@@ -855,38 +854,25 @@ HunkUser* __cdecl Hunk_UserCreate(int32_t maxSize, const char* name, bool fixed,
     return user;
 }
 
-int32_t __cdecl Hunk_UserAlloc(HunkUser* user, uint32_t size, int32_t alignment)
+void* Hunk_UserAlloc(HunkUser* user, uint32_t size, int32_t alignment)
 {
     const char* v3; // eax
     int32_t pos; // [esp+4h] [ebp-10h]
-    void* posa; // [esp+4h] [ebp-10h]
     int32_t result; // [esp+8h] [ebp-Ch]
     HunkUser* current; // [esp+Ch] [ebp-8h]
     HunkUser* newCurrent; // [esp+10h] [ebp-4h]
-    int32_t alignmenta; // [esp+24h] [ebp+10h]
 
-    if (!user)
-        MyAssertHandler(".\\universal\\com_memory.cpp", 2873, 0, "%s", "user");
-    if (size > user->maxSize - 32)
-    {
-        v3 = va("size: %d, maxSize: %d", size, user->maxSize - 32);
-        MyAssertHandler(
-            ".\\universal\\com_memory.cpp",
-            2874,
-            0,
-            "%s\n\t%s",
-            "static_cast< uint >( size ) <= user->maxSize - offsetof( HunkUser, buf )",
-            v3);
-    }
-    if ((alignment & (alignment - 1)) != 0)
-        MyAssertHandler(".\\universal\\com_memory.cpp", 2875, 0, "%s", "!(alignment & (alignment - 1))");
-    if (alignment > 4096)
-        MyAssertHandler(".\\universal\\com_memory.cpp", 2876, 0, "%s", "alignment <= HUNK_MAX_ALIGNEMT");
-    alignmenta = alignment - 1;
+    iassert(user);
+    iassert(static_cast<uint>(size) <= user->maxSize - offsetof(HunkUser, buf));
+    iassert(!(alignment & (alignment - 1)));
+    iassert(alignment <= HUNK_MAX_ALIGNEMT);
+
+    alignment = alignment - 1;
+
     for (current = user->current; ; current = newCurrent)
     {
         pos = current->pos;
-        result = ~alignmenta & (alignmenta + pos);
+        result = ~alignment & (alignment + pos);
         if ((signed int)(size + result) <= current->end)
             break;
         if (user->fixed)
@@ -895,30 +881,30 @@ int32_t __cdecl Hunk_UserAlloc(HunkUser* user, uint32_t size, int32_t alignment)
         user->current = newCurrent;
         current->next = newCurrent;
     }
-    current->pos = size + (~alignmenta & (alignmenta + pos));
-    posa = (void*)((pos + 4095) & 0xFFFFF000);
-    if (posa != (void*)((current->pos + 4095) & 0xFFFFF000))
+
+    current->pos = size + (~alignment & (alignment + pos));
+    pos = ((pos + 4095) & 0xFFFFF000);
+
+    if (pos != ((current->pos + 4095) & 0xFFFFF000))
     {
-        if (current->pos - (int)posa <= 0)
-            MyAssertHandler(".\\universal\\com_memory.cpp", 2904, 0, "%s", "current->pos - pos > 0");
-        Z_VirtualCommit(posa, current->pos - (uint32_t)posa);
+        iassert(current->pos - pos > 0);
+        Z_VirtualCommit((void*)pos, current->pos - (uint32_t)pos);
     }
-    return result;
+
+    return (void*)result;
 }
 
-int32_t __cdecl Hunk_UserAllocAlignStrict(HunkUser* user, uint32_t size)
+void* Hunk_UserAllocAlignStrict(HunkUser* user, uint32_t size)
 {
     return Hunk_UserAlloc(user, size, 1);
 }
 
 void __cdecl Hunk_UserSetPos(HunkUser* user, uint8_t* pos)
 {
-    if (!user->fixed)
-        MyAssertHandler(".\\universal\\com_memory.cpp", 2991, 0, "%s", "user->fixed");
-    if (pos < user->buf)
-        MyAssertHandler(".\\universal\\com_memory.cpp", 2992, 0, "%s", "pos >= user->buf");
-    if ((int)pos > user->pos)
-        MyAssertHandler(".\\universal\\com_memory.cpp", 2993, 0, "%s", "(psize_int)pos <= user->pos");
+    iassert(user->fixed);
+    iassert(pos >= user->buf);
+    iassert((uintptr_t)pos <= user->pos); // (psize_int)pos <= user->pos
+
     user->pos = (int)pos;
 }
 

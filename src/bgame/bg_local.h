@@ -1,5 +1,11 @@
 #pragma once
 
+#ifdef KISAK_MP
+#include <qcommon/msg_mp.h>
+#elif KISAK_SP
+#include <qcommon/msg.h>
+#endif
+
 #include <qcommon/qcommon.h>
 #include <qcommon/ent.h>
 
@@ -1118,29 +1124,6 @@ struct centity_s // sizeof=0x1DC
 #endif
 };
 
-enum CubemapShot : __int32
-{                                       // ...
-    CUBEMAPSHOT_NONE = 0x0,
-    CUBEMAPSHOT_RIGHT = 0x1,
-    CUBEMAPSHOT_LEFT = 0x2,
-    CUBEMAPSHOT_BACK = 0x3,
-    CUBEMAPSHOT_FRONT = 0x4,
-    CUBEMAPSHOT_UP = 0x5,
-    CUBEMAPSHOT_DOWN = 0x6,
-    CUBEMAPSHOT_COUNT = 0x7,
-};
-
-inline CubemapShot &operator++(CubemapShot &e) {
-    e = static_cast<CubemapShot>(static_cast<int>(e) + 1);
-    return e;
-}
-
-inline CubemapShot &operator++(CubemapShot &e, int i)
-{
-    ++e;
-    return e;
-}
-
 struct turretInfo_s // sizeof=0x48
 {                                       // ...
     int32_t inuse;                          // ...
@@ -1465,45 +1448,6 @@ struct viewLerpWaypoint_s // sizeof=0xC
     int32_t iOffset;
 };
 static_assert(sizeof(viewLerpWaypoint_s) == 0xC);
-
-#ifdef KISAK_MP
-struct usercmd_s // sizeof=0x20
-{                                       // XREF: ?SV_BotUserMove@@YAXPAUclient_t@@@Z/r
-    int32_t serverTime;                     // XREF: CG_DrawDisconnect+85/r
-    int32_t buttons;                        // XREF: CG_CheckForPlayerInput+5D/r
-    int32_t angles[3];                      // XREF: CG_CheckPlayerMovement+B/o
-    uint8_t weapon;             // XREF: CL_CreateCmd+64/w
-    uint8_t offHandIndex;
-    char forwardmove;                   // XREF: CG_CheckPlayerMovement:loc_4413AE/r
-    char rightmove;                     // XREF: CG_CheckPlayerMovement+26/r
-    float meleeChargeYaw;               // XREF: CL_CreateCmd+67/w
-    uint8_t meleeChargeDist;    // XREF: CL_CreateCmd+6A/w
-    char selectedLocation[2];
-};
-static_assert(sizeof(usercmd_s) == 0x20);
-#elif KISAK_SP
-struct __declspec(align(2)) usercmd_s
-{
-    int serverTime;
-    int buttons;
-    int angles[3];
-    unsigned __int8 weapon;
-    unsigned __int8 offHandIndex;
-    char forwardmove;
-    char rightmove;
-    char upmove;
-    char pitchmove;
-    char yawmove;
-    float gunPitch;
-    float gunYaw;
-    float gunXOfs;
-    float gunYOfs;
-    float gunZOfs;
-    float meleeChargeYaw;
-    unsigned __int8 meleeChargeDist;
-    char selectedLocation[2];
-};
-#endif
 
 // bg_jump
 

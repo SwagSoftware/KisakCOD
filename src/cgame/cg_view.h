@@ -6,6 +6,14 @@
 
 #include "cg_local.h"
 
+struct TestEffect
+{
+    char name[64];
+    float pos[3];
+    int time;
+    int respawnTime;
+};
+
 struct ClientViewParams
 {
     float x;

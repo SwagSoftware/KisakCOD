@@ -13,6 +13,11 @@
 #include <game/savememory.h>
 #include <ragdoll/ragdoll.h>
 #include <gfx_d3d/r_workercmds_common.h>
+#include "cg_main.h"
+#include <script/scr_const.h>
+#include "cg_local.h"
+#include <gfx_d3d/r_model.h>
+#include "cg_pose.h"
 
 void __cdecl LocalConvertQuatToMat(const DObjAnimMat *mat, float (*axis)[3])
 {
@@ -1011,6 +1016,16 @@ centity_s *__cdecl CG_GetPose(int localClientNum, int handle)
     return (centity_s *)&cgArray[0].viewModelPose;
 }
 
+unsigned __int16 *g_wheelTags[6] =
+{
+  &scr_const.tag_wheel_front_left,
+  &scr_const.tag_wheel_front_right,
+  &scr_const.tag_wheel_back_left,
+  &scr_const.tag_wheel_back_right,
+  &scr_const.tag_wheel_middle_left,
+  &scr_const.tag_wheel_middle_right,
+};
+
 void __cdecl CG_Vehicle_PreControllers(int localClientNum, const DObj_s *obj, centity_s *cent)
 {
     long double v6; // fp2
@@ -1199,7 +1214,7 @@ void __cdecl CG_SoundBlend(int localClientNum, centity_s *cent)
     snd_alias_t *v9; // r3
     const snd_alias_t *v10; // r27
     const float *v11; // r6
-    SndEntHandle *v12; // r5
+    int v12; // r5
     cg_s *LocalClientGlobals; // r3
     double v14; // fp31
     double v15; // fp30
@@ -2434,7 +2449,7 @@ int __cdecl CG_AddPacketEntities(int localClientNum)
         } while (v5 < cgArray[0].nextSnap->numEntities);
     }
     //Profile_EndInternal(0);
-    PIXEndNamedEvent();
+    //PIXEndNamedEvent();
     return v3;
 }
 

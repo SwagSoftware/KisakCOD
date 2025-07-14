@@ -1277,7 +1277,7 @@ void __cdecl CG_StartAmbient(int localClientNum)
 {
     const char *ConfigString; // r31
     const char *v3; // r29
-    char *v4; // r31
+    const char *v4; // r31
     const char *v5; // r3
     int time; // r31
     int v7; // r31
@@ -1314,7 +1314,7 @@ void __cdecl CG_StartAmbient(int localClientNum)
     }
 }
 
-void __cdecl CG_StopSoundAlias(const int localClientNum, SndEntHandle *entitynum, snd_alias_list_t *aliasList)
+void __cdecl CG_StopSoundAlias(const int localClientNum, SndEntHandle entitynum, snd_alias_list_t *aliasList)
 {
     if (aliasList)
     {
@@ -1323,12 +1323,12 @@ void __cdecl CG_StopSoundAlias(const int localClientNum, SndEntHandle *entitynum
     }
 }
 
-void __cdecl CG_StopSoundsOnEnt(const int localClientNum, SndEntHandle *entitynum)
+void __cdecl CG_StopSoundsOnEnt(const int localClientNum, SndEntHandle entitynum)
 {
     SND_StopSoundsOnEnt(entitynum);
 }
 
-void __cdecl CG_StopSoundAliasByName(int localClientNum, SndEntHandle *entityNum, const char *aliasName)
+void __cdecl CG_StopSoundAliasByName(int localClientNum, SndEntHandle entityNum, const char *aliasName)
 {
     SND_StopSoundAliasOnEnt(entityNum, aliasName);
 }
@@ -1343,7 +1343,7 @@ void __cdecl CG_StopClientSoundAliasByName(int localClientNum, const char *alias
             "%s\n\t(localClientNum) = %i",
             "(localClientNum == 0)",
             localClientNum);
-    SND_StopSoundAliasOnEnt((SndEntHandle *)cgArray[0].nextSnap->ps.clientNum, aliasName);
+    SND_StopSoundAliasOnEnt((SndEntHandle)cgArray[0].nextSnap->ps.clientNum, aliasName);
 }
 
 void __cdecl CG_SubtitlePrint(int msec, snd_alias_t *alias, long double a3)
@@ -1406,15 +1406,11 @@ void __cdecl CG_AddFXSoundAlias(int localClientNum, const float *origin, snd_ali
     if (v4)
     {
         Snd_AssertAliasValid(v4);
-        SND_AddPlayFXSoundAlias(v5, (SndEntHandle *)0x87E, origin);
+        SND_AddPlayFXSoundAlias(v5, (SndEntHandle)2174, origin);
     }
 }
 
-int __cdecl CG_PlaySoundAlias(
-    int localClientNum,
-    SndEntHandle *entitynum,
-    const float *origin,
-    snd_alias_list_t *aliasList)
+int __cdecl CG_PlaySoundAlias(int localClientNum, SndEntHandle entitynum, const float *origin, snd_alias_list_t *aliasList)
 {
     const snd_alias_t *v6; // r3
     snd_alias_t *v7; // r31
@@ -1429,11 +1425,7 @@ int __cdecl CG_PlaySoundAlias(
     return v9;
 }
 
-int __cdecl CG_PlaySoundAliasByName(
-    int localClientNum,
-    SndEntHandle *entitynum,
-    const float *origin,
-    const char *aliasname)
+int __cdecl CG_PlaySoundAliasByName(int localClientNum, SndEntHandle entitynum, const float *origin, const char *aliasname)
 {
     const snd_alias_t *v6; // r3
     snd_alias_t *v7; // r31
@@ -1448,11 +1440,7 @@ int __cdecl CG_PlaySoundAliasByName(
     return v9;
 }
 
-int __cdecl CG_PlaySoundAliasAsMasterByName(
-    int localClientNum,
-    SndEntHandle *entitynum,
-    const float *origin,
-    const char *aliasname)
+int __cdecl CG_PlaySoundAliasAsMasterByName(int localClientNum, SndEntHandle entitynum, const float *origin, const char *aliasname)
 {
     const snd_alias_t *v6; // r3
     snd_alias_t *v7; // r31
@@ -1826,7 +1814,7 @@ void __cdecl CG_Shutdown(int localClientNum)
     int i; // r30
     centity_s *Entity; // r31
     int ragdollHandle; // r3
-    int physObjId; // r4
+    dxBody *physObjId; // r4
 
     R_TrackStatistics(0);
     SND_FadeAllSounds(1.0, v2);
@@ -1840,8 +1828,8 @@ void __cdecl CG_Shutdown(int localClientNum)
             Ragdoll_Remove(ragdollHandle);
             Entity->pose.ragdollHandle = 0;
         }
-        physObjId = Entity->pose.physObjId;
-        if (physObjId && physObjId != -1)
+        physObjId = (dxBody *)Entity->pose.physObjId;
+        if (physObjId && physObjId != (dxBody *)-1)
         {
             Phys_ObjDestroy(PHYS_WORLD_FX, physObjId);
             Entity->pose.physObjId = 0;
@@ -1865,7 +1853,7 @@ void *__cdecl Hunk_AllocXAnimClient(int size)
 int __cdecl CG_PlayClientSoundAlias(int localClientNum, snd_alias_list_t *aliasList)
 {
     float *origin; // r29
-    SndEntHandle *clientNum; // r30
+    int clientNum; // r30
     const snd_alias_t *v5; // r3
     snd_alias_t *v6; // r31
     int v8; // r30
@@ -1879,12 +1867,12 @@ int __cdecl CG_PlayClientSoundAlias(int localClientNum, snd_alias_list_t *aliasL
             "(localClientNum == 0)",
             localClientNum);
     origin = cgArray[0].nextSnap->ps.origin;
-    clientNum = (SndEntHandle *)cgArray[0].nextSnap->ps.clientNum;
+    clientNum = cgArray[0].nextSnap->ps.clientNum;
     v5 = Com_PickSoundAliasFromList(aliasList);
     v6 = (snd_alias_t *)v5;
     if (!v5)
         return -1;
-    v8 = SND_PlaySoundAlias(v5, clientNum, origin, 0, SASYS_CGAME);
+    v8 = SND_PlaySoundAlias(v5, (SndEntHandle)clientNum, origin, 0, SASYS_CGAME);
     SND_AddLengthNotify(v8, v6, SndLengthNotify_Subtitle);
     return v8;
 }
@@ -1892,7 +1880,7 @@ int __cdecl CG_PlayClientSoundAlias(int localClientNum, snd_alias_list_t *aliasL
 int __cdecl CG_PlayClientSoundAliasByName(int localClientNum, const char *aliasname)
 {
     float *origin; // r29
-    SndEntHandle *clientNum; // r30
+    int clientNum; // r30
     const snd_alias_t *v5; // r3
     snd_alias_t *v6; // r31
     int v8; // r30
@@ -1906,24 +1894,24 @@ int __cdecl CG_PlayClientSoundAliasByName(int localClientNum, const char *aliasn
             "(localClientNum == 0)",
             localClientNum);
     origin = cgArray[0].nextSnap->ps.origin;
-    clientNum = (SndEntHandle *)cgArray[0].nextSnap->ps.clientNum;
+    clientNum = cgArray[0].nextSnap->ps.clientNum;
     v5 = CL_PickSoundAlias(aliasname);
     v6 = (snd_alias_t *)v5;
     if (!v5)
         return -1;
-    v8 = SND_PlaySoundAlias(v5, clientNum, origin, 0, SASYS_CGAME);
+    v8 = SND_PlaySoundAlias(v5, (SndEntHandle)clientNum, origin, 0, SASYS_CGAME);
     SND_AddLengthNotify(v8, v6, SndLengthNotify_Subtitle);
     return v8;
 }
 
-int __cdecl CG_PlayEntitySoundAlias(int localClientNum, SndEntHandle *entitynum, snd_alias_list_t *aliasList)
+int __cdecl CG_PlayEntitySoundAlias(int localClientNum, SndEntHandle entitynum, snd_alias_list_t *aliasList)
 {
     entityState_s *p_nextState; // r29
     const snd_alias_t *v6; // r3
     snd_alias_t *v7; // r31
     int v9; // r30
 
-    p_nextState = &CG_GetEntity(localClientNum, (int)entitynum)->nextState;
+    p_nextState = &CG_GetEntity(localClientNum, entitynum.handle)->nextState;
     v6 = Com_PickSoundAliasFromList(aliasList);
     v7 = (snd_alias_t *)v6;
     if (!v6)
@@ -1933,14 +1921,14 @@ int __cdecl CG_PlayEntitySoundAlias(int localClientNum, SndEntHandle *entitynum,
     return v9;
 }
 
-int __cdecl CG_PlayEntitySoundAliasByName(int localClientNum, SndEntHandle *entitynum, const char *aliasname)
+int __cdecl CG_PlayEntitySoundAliasByName(int localClientNum, SndEntHandle entitynum, const char *aliasname)
 {
     entityState_s *p_nextState; // r29
     const snd_alias_t *v6; // r3
     snd_alias_t *v7; // r31
     int v9; // r30
 
-    p_nextState = &CG_GetEntity(localClientNum, (int)entitynum)->nextState;
+    p_nextState = &CG_GetEntity(localClientNum, entitynum.handle)->nextState;
     v6 = CL_PickSoundAlias(aliasname);
     v7 = (snd_alias_t *)v6;
     if (!v6)

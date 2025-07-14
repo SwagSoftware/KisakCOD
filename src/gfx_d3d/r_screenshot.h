@@ -1,5 +1,6 @@
 #pragma once
 #include <bgame/bg_local.h>
+#include "r_reflection_probe.h"
 
 enum GfxScreenshotType : __int32
 {                                       // ...

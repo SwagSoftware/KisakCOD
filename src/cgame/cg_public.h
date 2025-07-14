@@ -68,3 +68,10 @@ extern const dvar_t *cg_hudMapPlayerHeight;
 extern const dvar_t *compassECoordCutoff;
 extern const dvar_t *cg_hudMapBorderWidth;
 extern const dvar_t *compassObjectiveNumRings;
+
+#ifdef KISAK_SP
+extern const dvar_t *compassIconTankWidth;
+extern const dvar_t *compassIconTankHeight;
+extern const dvar_t *compassIconOtherVehWidth;
+extern const dvar_t *compassIconOtherVehHeight;
+#endif

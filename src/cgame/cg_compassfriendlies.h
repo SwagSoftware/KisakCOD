@@ -11,6 +11,15 @@ enum CompassType : __int32
     COMPASS_TYPE_FULL = 0x1,
 };
 
+struct __declspec(align(4)) CompassActor
+{
+    int lastUpdate;
+    float lastPos[2];
+    float lastYaw;
+    int beginFadeTime;
+    bool enemy;
+};
+
 struct CompassVehicle
 {
     int entityNum;

@@ -3,6 +3,27 @@
 #endif
 
 #include "cg_view.h"
+#include <EffectsCore/fx_system.h>
+#include "cg_main.h"
+#include "cg_actors.h"
+#include <qcommon/cmd.h>
+#include <gfx_d3d/r_reflection_probe.h>
+#include <script/scr_const.h>
+#include "cg_ents.h"
+#include "cg_draw.h"
+#include <qcommon/threads.h>
+#include <gfx_d3d/r_cinematic.h>
+#include <gfx_d3d/r_workercmds_common.h>
+#include <aim_assist/aim_assist.h>
+#include <gfx_d3d/r_dpvs.h>
+#include "cg_predict.h"
+#include "cg_modelpreviewer.h"
+#include <client/cl_input.h>
+#include <game/g_local.h>
+#include "cg_snapshot.h"
+
+ClientViewParams clientViewParamsArray[1][1] = { { { 0.0, 0.0, 1.0, 1.0 } } };
+TestEffect s_testEffect[1];
 
 void __cdecl TRACK_cg_view()
 {
@@ -62,15 +83,13 @@ void __cdecl CG_FxSetTestPosition()
             8);
     if (cgArray[0].nextSnap)
     {
-        s_testEffect[0].pos[0] = (float)(cgArray[0].refdef.viewaxis[0][0] * (float)100.0) + cgArray[0].refdef.vieworg[0];
-        s_testEffect[0].pos[1] = (float)(cgArray[0].refdef.viewaxis[0][1] * (float)100.0) + cgArray[0].refdef.vieworg[1];
-        s_testEffect[0].pos[2] = (float)(cgArray[0].refdef.viewaxis[0][2] * (float)100.0) + cgArray[0].refdef.vieworg[2];
+        Vec3Mad(cgArray[0].refdef.vieworg, 100.0, cgArray[0].refdef.viewaxis[0], s_testEffect[0].pos);
         Com_Printf(
             21,
-            (const char *)(const char *)HIDWORD(COERCE_UNSIGNED_INT64(s_testEffect[0].pos[0])),
-            (unsigned int)COERCE_UNSIGNED_INT64(s_testEffect[0].pos[0]),
-            (unsigned int)HIDWORD(COERCE_UNSIGNED_INT64(s_testEffect[0].pos[2])),
-            (unsigned int)COERCE_UNSIGNED_INT64(s_testEffect[0].pos[2]));
+            "\n\nFX Testing position set to: (%f, %f, %f)\n\n",
+            s_testEffect[0].pos[0],
+            s_testEffect[0].pos[1],
+            s_testEffect[0].pos[2]);
     }
 }
 
@@ -259,7 +278,7 @@ void __cdecl CG_KickAngles(cg_s *cgameGlob)
                     *kickAngles = v13;
                     if (v13 != 0.0)
                     {
-                        if (__fabs(v13) <= 10.0)
+                        if (fabs(v13) <= 10.0)
                             goto LABEL_30;
                         if (v13 <= 0.0)
                             *kickAngles = -10.0;
@@ -500,15 +519,15 @@ void __cdecl CG_AddGroundTiltToAngles(int localClientNum, float *angles, const c
     {
         AnglesToAxis(cgameGlob->predictedPlayerState.groundTiltAngles, v4);
         AnglesToAxis(angles, v5);
-        MatrixMultiply(v5, v4, v6);
-        AxisToAngles(v6, angles);
+        MatrixMultiply((const mat3x3&)v5, (const mat3x3 &)v4, (mat3x3 &)v6);
+        AxisToAngles((const mat3x3 &)v6, angles);
     }
 }
 
-void __cdecl OffsetFirstPersonView(int localClientNum, cg_s *cgameGlob)
+void __fastcall OffsetFirstPersonView(int localClientNum, cg_s *cgameGlob)
 {
     unsigned int ViewmodelWeaponIndex; // r3
-    WeaponDef *WeaponDef; // r3
+    WeaponDef *weapDef; // r3
     WeaponDef *v6; // r21
     float *refdefViewAngles; // r30
     __int64 v8; // r11
@@ -537,13 +556,13 @@ void __cdecl OffsetFirstPersonView(int localClientNum, cg_s *cgameGlob)
     if ((cgameGlob->predictedPlayerState.eFlags & 0x300) == 0)
     {
         ViewmodelWeaponIndex = BG_GetViewmodelWeaponIndex(&cgameGlob->predictedPlayerState);
-        WeaponDef = BG_GetWeaponDef(ViewmodelWeaponIndex);
+        weapDef = BG_GetWeaponDef(ViewmodelWeaponIndex);
         HIDWORD(v8) = 108060;
-        v6 = WeaponDef;
+        v6 = weapDef;
         refdefViewAngles = cgameGlob->refdefViewAngles;
         cgameGlob->refdef.vieworg[2] = cgameGlob->predictedPlayerState.viewHeightCurrent + cgameGlob->refdef.vieworg[2];
         LODWORD(v8) = cgameGlob->predictedPlayerState.pm_type;
-        if ((unsigned int)v8 != 3 && (unsigned int)v8 != 2)
+        if ((_DWORD)v8 != 3 && (_DWORD)v8 != 2)
         {
             pm_type = cgameGlob->nextSnap->ps.pm_type;
             if (pm_type == 5)
@@ -670,7 +689,6 @@ void __cdecl OffsetFirstPersonView(int localClientNum, cg_s *cgameGlob)
         }
     }
 }
-
 float __cdecl CG_GetViewFov(int localClientNum)
 {
     unsigned int ViewmodelWeaponIndex; // r30
@@ -955,12 +973,12 @@ void __cdecl CG_CalcVehicleViewValues(int localClientNum)
     }
 }
 
-void __cdecl CalcTurretViewValues(int localClientNum)
+void CalcTurretViewValues(int localClientNum)
 {
     int viewlocked_entNum; // r4
     centity_s *Entity; // r30
     DObj_s *ClientDObj; // r4
-    WeaponDef *WeaponDef; // r29
+    WeaponDef *weapDef; // r29
     WeaponDef *v6; // r30
 
     if (localClientNum)
@@ -991,11 +1009,11 @@ void __cdecl CalcTurretViewValues(int localClientNum)
         if (ClientDObj)
         {
             if (!CG_DObjGetWorldTagPos(&Entity->pose, ClientDObj, scr_const.tag_player, cgArray[0].refdef.vieworg))
-                Com_Error(ERR_DROP, byte_8201091C);
+                Com_Error(ERR_DROP, "Turret has no bone: tag_player");
             if (cgArray[0].predictedPlayerState.viewlocked == PLAYERVIEWLOCK_WEAPONJITTER && !cg_paused->current.integer)
             {
-                WeaponDef = BG_GetWeaponDef(Entity->nextState.weapon);
-                cgArray[0].refdefViewAngles[0] = (float)(crandom() * WeaponDef->vertViewJitter) + cgArray[0].refdefViewAngles[0];
+                weapDef = BG_GetWeaponDef(Entity->nextState.weapon);
+                cgArray[0].refdefViewAngles[0] = (float)(crandom() * weapDef->vertViewJitter) + cgArray[0].refdefViewAngles[0];
                 v6 = BG_GetWeaponDef(Entity->nextState.weapon);
                 cgArray[0].refdefViewAngles[1] = (float)(crandom() * v6->horizViewJitter) + cgArray[0].refdefViewAngles[1];
             }
@@ -1024,10 +1042,10 @@ void __cdecl CG_CalcLinkedViewValues(int localClientNum)
         && (cgArray[0].predictedPlayerState.pm_flags & 0x1000000) == 0)
     {
         AnglesToAxis(cgArray[0].predictedPlayerState.linkAngles, v4);
-        MatrixTranspose(v4, v2);
+        MatrixTranspose((const mat3x3&)v4, (mat3x3 &)v2);
         AnglesToAxis(cgArray[0].predictedPlayerState.viewangles, v3);
-        MatrixMultiply(v3, v2, v5);
-        AxisToAngles(v5, v1);
+        MatrixMultiply((const mat3x3 &)v3, (const mat3x3 &)v2, (mat3x3 &)v5);
+        AxisToAngles((const mat3x3 &)v5, v1);
         cgArray[0].predictedPlayerState.viewangles[2] = -v1[2];
     }
 }
@@ -1085,6 +1103,10 @@ void __cdecl CG_ApplyViewAnimation(int localClientNum)
     }
 }
 
+float angles[3];
+int oldTime;
+int oldMsec;
+int moveMsec;
 int __cdecl PausedClientFreeMove(int localClientNum)
 {
     int integer; // r11
@@ -1256,7 +1278,7 @@ void __cdecl CG_UpdateEntInfo(int localClientNum)
     unsigned int v6; // r31
     DObj_s *ClientDObj; // r4
 
-    PIXBeginNamedEvent_Copy_NoVarArgs(0xFFFFFFFF, "update ent info");
+    //PIXBeginNamedEvent_Copy_NoVarArgs(0xFFFFFFFF, "update ent info");
     //Profile_Begin(12);
     if (localClientNum)
         MyAssertHandler(
@@ -1304,7 +1326,7 @@ void __cdecl CG_UpdateEntInfo(int localClientNum)
         } while (v4 < cgArray[0].nextSnap->numEntities);
     }
     //Profile_EndInternal(0);
-    PIXEndNamedEvent();
+    //PIXEndNamedEvent();
 }
 
 const ClientViewParams *__cdecl CG_GetLocalClientViewParams(int localClientNum)
@@ -1493,7 +1515,7 @@ void __cdecl UpdateTurretScopeZoom(cg_s *cgameGlob)
                 Dvar_SetFloat(turretScopeZoom, v8);
                 v6 = turretScopeZoom;
             }
-            if (__fabs((float)(v6->current.value - (float)value)) > 0.0)
+            if (fabs((float)(v6->current.value - (float)value)) > 0.0)
             {
                 v9 = CG_PlayerTurretWeaponIdx(cgameGlob->localClientNum);
                 fireStopSoundPlayer = BG_GetWeaponDef(v9)->fireStopSoundPlayer;
@@ -1546,9 +1568,7 @@ void __cdecl CG_CalcViewValues(int localClientNum)
         MenuBlurRadius = CL_GetMenuBlurRadius(localClientNum);
     else
         MenuBlurRadius = 0.0;
-    cgArray[0].refdef.blurRadius = __fsqrts((float)((float)((float)BlurRadius * (float)BlurRadius)
-        + (float)((float)(cgDC.blurRadiusOut * cgDC.blurRadiusOut)
-            + (float)((float)MenuBlurRadius * (float)MenuBlurRadius))));
+    cgArray[0].refdef.blurRadius = __fsqrts((float)((float)((float)BlurRadius * (float)BlurRadius) + (float)((float)(cgDC.blurRadiusOut * cgDC.blurRadiusOut) + (float)((float)MenuBlurRadius * (float)MenuBlurRadius))));
     CG_VisionSetApplyToRefdef(localClientNum);
     if (cgArray[0].cubemapShot)
     {
@@ -1830,16 +1850,16 @@ int __cdecl CG_DrawActiveFrame(
     CL_Input(localClientNum);
     CG_ModelPreviewerFrame(cgArray);
     CG_AddModelPreviewerModel(cgArray[0].frametime, v30, v29, v28, v27, v26, v25);
-    PIXBeginNamedEvent_Copy_NoVarArgs(0xFFFFFFFF, "player state");
+    //PIXBeginNamedEvent_Copy_NoVarArgs(0xFFFFFFFF, "player state");
     CG_PredictPlayerState(localClientNum);
-    PIXEndNamedEvent();
-    PIXBeginNamedEvent_Copy_NoVarArgs(0xFFFFFFFF, "view anim");
+    //PIXEndNamedEvent();
+    //PIXBeginNamedEvent_Copy_NoVarArgs(0xFFFFFFFF, "view anim");
     CG_UpdateViewWeaponAnim(localClientNum);
-    PIXEndNamedEvent();
-    PIXBeginNamedEvent_Copy_NoVarArgs(0xFFFFFFFF, "view values");
+    //PIXEndNamedEvent();
+    //PIXBeginNamedEvent_Copy_NoVarArgs(0xFFFFFFFF, "view values");
     CG_CalcViewValues(localClientNum);
-    PIXEndNamedEvent();
-    PIXBeginNamedEvent_Copy_NoVarArgs(0xFFFFFFFF, "player entity");
+    //PIXEndNamedEvent();
+    //PIXBeginNamedEvent_Copy_NoVarArgs(0xFFFFFFFF, "player entity");
     if (cl_freemove->current.integer)
         R_SetLodOrigin(&cgArray[0].refdef);
     FarPlaneDist = R_GetFarPlaneDist();
@@ -1865,31 +1885,31 @@ int __cdecl CG_DrawActiveFrame(
         CG_AddPacketEntity(localClientNum, viewlocked_entNum);
     GetCeilingHeight(cgArray);
     DumpAnims(localClientNum);
-    PIXEndNamedEvent();
-    PIXBeginNamedEvent_Copy_NoVarArgs(0xFFFFFFFF, "remaining fx");
+    //PIXEndNamedEvent();
+    //PIXBeginNamedEvent_Copy_NoVarArgs(0xFFFFFFFF, "remaining fx");
     R_UpdateRemainingEffects(v32);
-    PIXEndNamedEvent();
-    PIXBeginNamedEvent_Copy_NoVarArgs(0xFFFFFFFF, "aim assist");
+    //PIXEndNamedEvent();
+    //PIXBeginNamedEvent_Copy_NoVarArgs(0xFFFFFFFF, "aim assist");
     AimAssist_UpdateScreenTargets(
         localClientNum,
         cgArray[0].refdef.vieworg,
         cgArray[0].refdefViewAngles,
         cgArray[0].refdef.tanHalfFovX,
         cgArray[0].refdef.tanHalfFovY);
-    PIXEndNamedEvent();
+    //PIXEndNamedEvent();
     cgArray[0].refdef.dof.nearStart = cgArray[0].snap->ps.dofNearStart;
     cgArray[0].refdef.dof.nearEnd = cgArray[0].snap->ps.dofNearEnd;
     cgArray[0].refdef.dof.farStart = cgArray[0].snap->ps.dofFarStart;
     cgArray[0].refdef.dof.farEnd = cgArray[0].snap->ps.dofFarEnd;
     cgArray[0].refdef.dof.nearBlur = cgArray[0].snap->ps.dofNearBlur;
     cgArray[0].refdef.dof.farBlur = cgArray[0].snap->ps.dofFarBlur;
-    PIXBeginNamedEvent_Copy_NoVarArgs(0xFFFFFFFF, "draw 2D");
+    //PIXBeginNamedEvent_Copy_NoVarArgs(0xFFFFFFFF, "draw 2D");
     R_AddCmdProjectionSet2D();
     DrawShellshockBlend(localClientNum);
     //Profile_Begin(350);
     CG_Draw2D(localClientNum);
     //Profile_EndInternal(0);
-    PIXEndNamedEvent();
+    //PIXEndNamedEvent();
     if (cgArray[0].nextSnap->serverTime != G_GetServerSnapTime())
         MyAssertHandler(
             "c:\\trees\\cod3\\cod3src\\src\\cgame\\cg_view.cpp",

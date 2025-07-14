@@ -186,10 +186,10 @@ int __cdecl XAnimIsHighPrecisionPart(const char *name)
     return 0;
 }
 
-int __cdecl XAnimTempAlloc(unsigned int size)
+void* XAnimTempAlloc(unsigned int size)
 {
-    if (!g_animUser)
-        MyAssertHandler(".\\xanim\\xanim_load_obj.cpp", 382, 0, "%s", "g_animUser");
+    iassert(g_animUser);
+
     return Hunk_UserAlloc(g_animUser, size, 4);
 }
 

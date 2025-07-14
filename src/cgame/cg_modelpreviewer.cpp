@@ -3,9 +3,10 @@
 #endif
 
 #include "cg_modelpreviewer.h"
+#include <game/g_local.h>
+#include <qcommon/cmd.h>
 
-//Line 38411:  0006 : 00140148       struct ModelPreviewer g_mdlprv 827d0148     cg_modelpreviewer.obj
-
+ModelPreviewer g_mdlprv;
 
 void __cdecl CG_ModPrvUpdateMru(const dvar_s **mruDvars, const char **stringTable, const dvar_s *dvar)
 {
@@ -120,7 +121,7 @@ void __cdecl CG_ModPrvRemoveMruEntry(const dvar_s **mruDvars, const char **strin
             ++v8;
         } while (v7);
     }
-    Dvar_SetString(mruDvars[3], byte_82003CDD);
+    Dvar_SetString(mruDvars[3], "");
     CG_ModPrvUpdateMru(mruDvars, stringTable, dvar);
 }
 

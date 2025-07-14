@@ -1660,6 +1660,14 @@ float __cdecl AngleNormalize360(float angle)
         return (result - 360.0);
 }
 
+float AngleSubtract(float a1, float a2)
+{
+    float delta = fmodf(a1 - a2, 360.0f);
+    if (delta < 0.0f)
+        delta += 360.0f;
+    return delta;
+}
+
 float __cdecl RadiusFromBounds(const float *mins, const float *maxs)
 {
     float v4; // [esp+4h] [ebp-4h]

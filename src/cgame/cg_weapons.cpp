@@ -3705,3 +3705,24 @@ bool __cdecl CG_PlayerUsingScopedTurret(int32_t localClientNum)
     weapIdxTurret = CG_PlayerTurretWeaponIdx(localClientNum);
     return weapIdxTurret && BG_GetWeaponDef(weapIdxTurret)->overlayMaterial != 0;
 }
+
+void CG_DisplayViewmodelAnim(int localClientNum)
+{
+    int ViewmodelWeaponIndex; // r4
+    weaponInfo_s *LocalClientWeaponInfo; // r3
+
+    if (localClientNum)
+        MyAssertHandler(
+            "c:\\trees\\cod3\\cod3src\\src\\cgame\\cg_local.h",
+            910,
+            0,
+            "%s\n\t(localClientNum) = %i",
+            "(localClientNum == 0)",
+            localClientNum);
+    ViewmodelWeaponIndex = BG_GetViewmodelWeaponIndex(&cgArray[0].predictedPlayerState);
+    if (ViewmodelWeaponIndex > 0)
+    {
+        LocalClientWeaponInfo = CG_GetLocalClientWeaponInfo(localClientNum, ViewmodelWeaponIndex);
+        DObjDisplayAnim(LocalClientWeaponInfo->viewModelDObj, "");
+    }
+}

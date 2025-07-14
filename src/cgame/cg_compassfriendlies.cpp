@@ -3,7 +3,14 @@
 #endif
 
 #include "cg_compassfriendlies.h"
+#include <game/actor.h>
+#include "cg_actors.h"
+#include "cg_public.h"
+#include "cg_main.h"
+#include "cg_local.h"
 
+CompassActor s_compassActors[1][32];
+CompassVehicle s_compassVehicles[1][64];
 
 void __cdecl TRACK_cg_compassfriendlies()
 {

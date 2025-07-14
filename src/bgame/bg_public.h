@@ -1,6 +1,12 @@
 #pragma once
 #include <server/sv_world.h>
 
+#ifdef KISAK_MP
+#include <qcommon/msg_mp.h>
+#elif KISAK_SP
+#include <qcommon/msg.h>
+#endif
+
 #define abs8(x) abs(x)
 #define abs32(x) abs(x)
 

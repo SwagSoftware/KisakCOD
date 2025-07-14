@@ -3,6 +3,18 @@
 #endif
 
 #include "cg_snapshot.h"
+#include <EffectsCore/fx_system.h>
+#include <ragdoll/ragdoll.h>
+#include "cg_ents.h"
+#include <aim_assist/aim_assist.h>
+#include "cg_main.h"
+#include "cg_actors.h"
+#include <gfx_d3d/r_dpvs.h>
+#include "cg_view.h"
+#include <game/actor.h>
+#include <game/g_local.h>
+#include <gfx_d3d/r_model.h>
+#include "cg_servercmds.h"
 
 void __cdecl CG_ShutdownEntity(int localClientNum, centity_s *cent)
 {
@@ -1151,7 +1163,7 @@ void __cdecl CG_ProcessSnapshots(int localClientNum)
     int v8; // r4
     const char *v9; // r3
 
-    PIXBeginNamedEvent_Copy_NoVarArgs(0xFFFFFFFF, "process snapshots");
+    //PIXBeginNamedEvent_Copy_NoVarArgs(0xFFFFFFFF, "process snapshots");
     //Profile_Begin(11);
     if (localClientNum)
         MyAssertHandler(
@@ -1219,6 +1231,6 @@ void __cdecl CG_ProcessSnapshots(int localClientNum)
         }
     }
     //Profile_EndInternal(0);
-    PIXEndNamedEvent();
+    //PIXEndNamedEvent();
 }
 

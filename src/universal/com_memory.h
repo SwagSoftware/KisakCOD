@@ -4,6 +4,8 @@
 #include "q_shared.h"
 #include <qcommon/mem_track.h>
 
+#define HUNK_MAX_ALIGNEMT 4096
+
 struct TempMemInfo // sizeof=0x28
 {                                       // ...
     int permanent;
@@ -105,15 +107,16 @@ void __cdecl Hunk_ShowTempMemory(int mark);
 void __cdecl Hunk_InitDebugMemory();
 void __cdecl Hunk_ShutdownDebugMemory();
 void __cdecl Hunk_ResetDebugMem();
-int __cdecl Hunk_AllocDebugMem(unsigned int size);
-inline int Hunk_AllocDebugMem(unsigned int size, const char *shit)
+void* Hunk_AllocDebugMem(unsigned int size);
+inline void *Hunk_AllocDebugMem(unsigned int size, const char *why) // why is rarely used and unused in this project
 {
     return Hunk_AllocDebugMem(size);
 }
+
 void __cdecl Hunk_FreeDebugMem(void* ptr = NULL);
 HunkUser* __cdecl Hunk_UserCreate(int maxSize, const char* name, bool fixed, bool tempMem, int type);
-int __cdecl Hunk_UserAlloc(HunkUser* user, unsigned int size, int alignment);
-int __cdecl Hunk_UserAllocAlignStrict(HunkUser* user, unsigned int size);
+void* Hunk_UserAlloc(HunkUser* user, unsigned int size, int alignment);
+void* Hunk_UserAllocAlignStrict(HunkUser* user, unsigned int size);
 void __cdecl Hunk_UserSetPos(HunkUser* user, unsigned __int8* pos);
 void __cdecl Hunk_UserReset(HunkUser* user);
 void __cdecl Hunk_UserDestroy(HunkUser* user);

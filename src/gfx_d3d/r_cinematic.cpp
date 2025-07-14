@@ -1384,4 +1384,16 @@ bool __cdecl R_Cinematic_IsNextReady() { /* THUNK */ return true; }
 bool __cdecl R_Cinematic_IsUnderrun() { /* THUNK */ return false; }
 void __cdecl R_Cinematic_BeginLostDevice() { /* THUNK */ }
 void __cdecl R_Cinematic_EndLostDevice() { /* THUNK */ }
+void __cdecl R_Cinematic_SetPaused(CinematicEnum paused) {}
+//{
+//    if ((unsigned int)paused >= 2)
+//        MyAssertHandler(
+//            "c:\\trees\\cod3\\cod3src\\src\\gfx_d3d\\r_cinematic.cpp",
+//            1961,
+//            0,
+//            "%s\n\t(paused) = %i",
+//            "(paused == CINEMATIC_PAUSED || paused == CINEMATIC_NOT_PAUSED)",
+//            paused);
+//    cinematicGlob.targetPaused = paused;
+//}
 #endif

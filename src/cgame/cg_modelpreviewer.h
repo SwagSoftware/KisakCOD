@@ -42,12 +42,166 @@ enum ButtonNames : __int32
     TOTAL_BUTTONNAMES = 0x1B,
 };
 
+enum MdlPrvFreeSpeed : __int32
+{
+    FREESPEED_NORMAL = 0x0,
+    FREESPEED_SLOW = 0x1,
+    FREESPEED_FAST = 0x2,
+};
+
+enum ModPrvUiModePC : __int32
+{
+    SELECTION_MODE = 0x0,
+    MOVE_MODE = 0x1,
+    ROTATE_MODE = 0x2,
+    SCALE_MODE = 0x3,
+};
+
+enum MdlPrvUiModeGamepad : __int32
+{
+    MDLPRVMODE_FOCUSED = 0x0,
+    MDLPRVMODE_FREE = 0x1,
+    MDLPRVMODE_WALKABOUT = 0x2,
+};
+
 struct MdlPrvClone
 {
     GfxSceneEntity ent;
     DObj_s *obj;
     cpose_t pose;
     char objBuf[100];
+};
+
+enum MdlPrvFocusedMode : __int32
+{
+    FOCUSEDMODE_CAMERA = 0x0,
+    FOCUSEDMODE_MODELROTATE = 0x1,
+    FOCUSEDMODE_MODELMOVE = 0x2,
+    FOCUSEDMODE_FOCALMOVE = 0x3,
+};
+
+enum MdlPrvMRotCamMode : __int32
+{
+    MROTCAMMODE_STATIC = 0x0,
+    MROTCAMMODE_TRAVEL = 0x1,
+};
+
+struct MdlPrvBtnTimes
+{
+    int mode;
+    int mdlRotMode;
+    int camUp;
+    int camDown;
+    int dropToFloor;
+    int clone;
+    int clearClones;
+    int walkabout;
+    int freeSpeed;
+    int ragdollSpeed;
+};
+
+struct __declspec(align(4)) ModelPreviewer_System
+{
+    int modelCount;
+    const char **modelNames;
+    int animCount;
+    const char **animNames;
+    bool cachedAllModels;
+    bool startedCaching;
+    int cachedModelCount;
+    int lastLoadModel;
+    int lastMatReplace;
+    ModPrvUiModePC uiModePC;
+    float gamePadRStickDeflect;
+    MdlPrvUiModeGamepad uiModeGPad;
+    MdlPrvFocusedMode focusedMode;
+    MdlPrvMRotCamMode modelRotCamMode;
+    MdlPrvBtnTimes buttonTimes;
+    bool walkaboutActive;
+};
+
+struct ModelPreviewer_Viewer
+{
+    float vertical;
+    float horizontal;
+    float centerRadius;
+    float zNear;
+    float zNearChangeLimit;
+    MdlPrvFreeSpeed freeModeSpeed;
+    float freeModeOrigin[3];
+    float freeModeAngles[3];
+};
+
+struct ModelPreviewer_Material
+{
+    int handleCount;
+    Material **handleArray;
+    Material **surfMatHandles;
+    const char *nameTable[66];
+    int replaceIndex;
+    Material *prevReplaced;
+    int selectSliderIndex;
+    int replaceSliderIndex;
+};
+
+struct ModelPreviewer_Light
+{
+    int setupCount;
+    const char *nameTable[18];
+    SunLightParseParams parsedSunLight[16];
+    SunLightParseParams tweakableSunLight;
+};
+
+struct ModelPreviewer_Anim
+{
+    int fromCurrentIndex;
+    int toCurrentIndex;
+    bool isAnimPlaying;
+    const dvar_s *mruNames[4];
+    const char *mruNameTable[5];
+    bool isToAnimPlaying;
+    float stepCounter;
+    bool isFromLooped;
+    bool isToLooped;
+    __int16 fromSliderID;
+    __int16 toSliderID;
+    __int16 fromMRUSliderID;
+    __int16 toMRUSliderID;
+    float deltaYaw;
+};
+
+struct ModelPreviewer_Model
+{
+    bool inited;
+    int currentIndex;
+    GfxSceneEntity currentEntity;
+    cpose_t pose;
+    DObj_s *currentObj;
+    char objBuf[100];
+    float initialOrigin[3];
+    float initialYaw;
+    int lodDist[4];
+    int surfaceCount;
+    __int16 boneInfoSliderID;
+    __int16 loadSliderID;
+    const dvar_s *mruNames[4];
+    const char *mruNameTable[5];
+    const char *boneNameTable[133];
+    MdlPrvClone clones[100];
+    int cloneNextIdx;
+    int ragdoll;
+    int ragdollDef;
+};
+
+struct ModelPreviewer
+{
+    bool inited;
+    ModelPreviewer_System system;
+    ModelPreviewer_Viewer viewer;
+    ModelPreviewer_Model model;
+    ModelPreviewer_Anim anim;
+    ModelPreviewer_Material mat;
+    ModelPreviewer_Light light;
 };
 
 void __cdecl CG_ModPrvUpdateMru(const dvar_s **mruDvars, const char **stringTable, const dvar_s *dvar);

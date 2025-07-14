@@ -9,6 +9,7 @@
 #include <cgame/cg_local.h>
 
 #include <gfx_d3d/r_gfx.h>
+#include <gfx_d3d/r_reflection_probe.h>
 #include <ui_mp/ui_mp.h>
 #include <client_mp/client_mp.h>
 
@@ -1433,5 +1434,6 @@ inline cgs_t *CG_GetLocalClientStaticGlobals(int32_t localClientNum)
 inline weaponInfo_s *__cdecl CG_GetLocalClientWeaponInfo(int localClientNum, int weaponIndex)
 {
     iassert(localClientNum == 0);
+
     return &cg_weaponsArray[localClientNum][weaponIndex];
 }

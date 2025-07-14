@@ -327,29 +327,17 @@ void __cdecl CG_LoadWorld(int savegame);
 void __cdecl RegisterNightVisionAssets(int localClientNum);
 void __cdecl CG_RegisterGraphics(int localClientNum, const char *mapname);
 void __cdecl CG_StartAmbient(int localClientNum);
-void __cdecl CG_StopSoundAlias(const int localClientNum, SndEntHandle *entitynum, snd_alias_list_t *aliasList);
-void __cdecl CG_StopSoundsOnEnt(const int localClientNum, SndEntHandle *entitynum);
-void __cdecl CG_StopSoundAliasByName(int localClientNum, SndEntHandle *entityNum, const char *aliasName);
+void __cdecl CG_StopSoundAlias(const int localClientNum, SndEntHandle entitynum, snd_alias_list_t *aliasList);
+void __cdecl CG_StopSoundsOnEnt(const int localClientNum, SndEntHandle entitynum);
+void __cdecl CG_StopSoundAliasByName(int localClientNum, SndEntHandle entityNum, const char *aliasName);
 void __cdecl CG_StopClientSoundAliasByName(int localClientNum, const char *aliasName);
 void __cdecl CG_SubtitlePrint(int msec, snd_alias_t *alias, long double a3);
 void __cdecl CG_SubtitleSndLengthNotify(int msec, snd_alias_t *lengthNotifyData, long double a3);
 void __cdecl CG_ScriptNotifySndLengthNotify(int msec, void *lengthNotifyData);
 void __cdecl CG_AddFXSoundAlias(int localClientNum, const float *origin, snd_alias_list_t *aliasList);
-int __cdecl CG_PlaySoundAlias(
-    int localClientNum,
-    SndEntHandle *entitynum,
-    const float *origin,
-    snd_alias_list_t *aliasList);
-int __cdecl CG_PlaySoundAliasByName(
-    int localClientNum,
-    SndEntHandle *entitynum,
-    const float *origin,
-    const char *aliasname);
-int __cdecl CG_PlaySoundAliasAsMasterByName(
-    int localClientNum,
-    SndEntHandle *entitynum,
-    const float *origin,
-    const char *aliasname);
+int __cdecl CG_PlaySoundAlias(int localClientNum, SndEntHandle entitynum, const float *origin, snd_alias_list_t *aliasList);
+int __cdecl CG_PlaySoundAliasByName(int localClientNum, SndEntHandle entitynum, const float *origin, const char *aliasname);
+int __cdecl CG_PlaySoundAliasAsMasterByName(int localClientNum, SndEntHandle entitynum, const float *origin, const char *aliasname);
 void __cdecl CG_LoadHudMenu(int localClientNum);
 void __cdecl CG_InitViewDimensions(int localClientNum);
 const char *__cdecl CG_GetTeamName(team_t team);
@@ -364,8 +352,8 @@ void __cdecl CG_Shutdown(int localClientNum);
 void *__cdecl Hunk_AllocXAnimClient(int size);
 int __cdecl CG_PlayClientSoundAlias(int localClientNum, snd_alias_list_t *aliasList);
 int __cdecl CG_PlayClientSoundAliasByName(int localClientNum, const char *aliasname);
-int __cdecl CG_PlayEntitySoundAlias(int localClientNum, SndEntHandle *entitynum, snd_alias_list_t *aliasList);
-int __cdecl CG_PlayEntitySoundAliasByName(int localClientNum, SndEntHandle *entitynum, const char *aliasname);
+int __cdecl CG_PlayEntitySoundAlias(int localClientNum, SndEntHandle entitynum, snd_alias_list_t *aliasList);
+int __cdecl CG_PlayEntitySoundAliasByName(int localClientNum, SndEntHandle entitynum, const char *aliasname);
 
 extern UiContext cgDC;
 extern cgs_t cgsArray[1];
@@ -545,4 +533,18 @@ inline centity_s *CG_GetEntity(int32_t localClientNum, uint32_t entityIndex)
     bcassert(entityIndex, MAX_GENTITIES);
 
     return &cg_entitiesArray[localClientNum][entityIndex];
+}
+
+inline cg_s *CG_GetLocalClientGlobals(int32_t localClientNum)
+{
+    iassert(localClientNum == 0);
+
+    return &cgArray[localClientNum];
+}
+
+inline weaponInfo_s *__cdecl CG_GetLocalClientWeaponInfo(int localClientNum, int weaponIndex)
+{
+    iassert(localClientNum == 0);
+
+    return &cg_weaponsArray[localClientNum][weaponIndex];
 }
