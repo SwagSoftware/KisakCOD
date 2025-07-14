@@ -2620,7 +2620,7 @@ void __cdecl Con_DrawMessageWindowOldToNew(
 
 bool __cdecl CL_ShouldntDrawMessageWindow(int32_t localClientNum)
 {
-    return CL_GetLocalClientGlobals(localClientNum)->snap.ps.pm_type != 5 && !CL_ShouldDisplayHud(localClientNum);
+    return CL_GetLocalClientGlobals(localClientNum)->snap.ps.pm_type != PM_INTERMISSION && !CL_ShouldDisplayHud(localClientNum);
 }
 
 void __cdecl Con_DrawMiniConsole(int32_t localClientNum, int32_t xPos, int32_t yPos, float alpha)

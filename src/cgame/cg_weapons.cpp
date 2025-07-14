@@ -715,7 +715,7 @@ void __cdecl CG_UpdateViewWeaponAnim(int32_t localClientNum)
 
     cgameGlob = CG_GetLocalClientGlobals(localClientNum);
     ps = &cgameGlob->predictedPlayerState;
-    if (cgameGlob->predictedPlayerState.pm_type < 7)
+    if (cgameGlob->predictedPlayerState.pm_type < PM_DEAD)
     {
         weaponIndex = BG_GetViewmodelWeaponIndex(ps);
         if (weaponIndex > 0)
@@ -1203,7 +1203,7 @@ void __cdecl CG_AddViewWeapon(int32_t localClientNum)
     ps = &cgameGlob->predictedPlayerState;
     cgameGlob->refdef.dof.viewModelStart = 0.0f;
     cgameGlob->refdef.dof.viewModelEnd = 0.0f;
-    if (ps->pm_type != 4 && ps->pm_type != 5 && !cgameGlob->renderingThirdPerson)
+    if (ps->pm_type != PM_SPECTATOR && ps->pm_type != PM_INTERMISSION && !cgameGlob->renderingThirdPerson)
     {
         if (cgameGlob->cubemapShot || !cg_drawGun->current.enabled || CG_GetWeapReticleZoom(cgameGlob, &fZoom))
             drawgun = 0;
@@ -1641,7 +1641,7 @@ void __cdecl CG_OutOfAmmoChange(int32_t localClientNum)
 
     cgameGlob = CG_GetLocalClientGlobals(localClientNum);
 
-    if (cgameGlob->nextSnap && cgameGlob->predictedPlayerState.pm_type < 7)
+    if (cgameGlob->nextSnap && cgameGlob->predictedPlayerState.pm_type < PM_DEAD)
     {
         if (!cgameGlob->predictedPlayerState.weapon && cgameGlob->weaponLatestPrimaryIdx)
         {
@@ -1708,7 +1708,7 @@ char __cdecl CycleWeapPrimary(int32_t localClientNum, int32_t cycleForward, int3
     if ((cgameGlob->nextSnap->ps.otherFlags & 4) == 0)
         return 0;
 
-    if (cgameGlob->predictedPlayerState.pm_type >= 7)
+    if (cgameGlob->predictedPlayerState.pm_type >= PM_DEAD)
         return 0;
 
     weaponIndex = cgameGlob->weaponSelect;

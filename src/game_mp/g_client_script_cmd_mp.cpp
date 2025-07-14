@@ -1302,7 +1302,7 @@ void __cdecl PlayerCmd_finishPlayerDamage(scr_entref_t entref)
             floatValue = Scr_GetConstString(8);
             hitLoc = (hitLocation_t)G_GetHitLocationIndexFromString(floatValue);
             psTimeOffset = Scr_GetInt(9);
-            if (pSelf->client->ps.pm_type == 7)
+            if (pSelf->client->ps.pm_type == PM_DEAD)
             {
                 Scr_Error("Trying to do damage to a client that is already dead");
                 return;

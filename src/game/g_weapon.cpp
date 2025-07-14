@@ -444,7 +444,7 @@ bool __cdecl LogAccuracyHit(gentity_s *target, gentity_s *attacker)
         return 0;
     if (!attacker->client)
         return 0;
-    if (target->client->ps.pm_type < 7)
+    if (target->client->ps.pm_type < PM_DEAD)
         return !OnSameTeam(target, attacker);
     return 0;
 }

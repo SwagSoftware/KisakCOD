@@ -43,212 +43,32 @@ const char *cg_drawTalkNames[5] = { "NONE", "ALL", "FRIENDLY", "ENEMY", NULL }; 
 
 void __cdecl CG_AntiBurnInHUD_RegisterDvars()
 {
-    DvarLimits min; // [esp+10h] [ebp-10h]
-    DvarLimits mina; // [esp+10h] [ebp-10h]
-    DvarLimits minb; // [esp+10h] [ebp-10h]
-    DvarLimits minc; // [esp+10h] [ebp-10h]
-    DvarLimits mind; // [esp+10h] [ebp-10h]
-    DvarLimits mine; // [esp+10h] [ebp-10h]
-    DvarLimits minf; // [esp+10h] [ebp-10h]
-    DvarLimits ming; // [esp+10h] [ebp-10h]
-    DvarLimits minh; // [esp+10h] [ebp-10h]
-    DvarLimits mini; // [esp+10h] [ebp-10h]
-    DvarLimits minj; // [esp+10h] [ebp-10h]
-    DvarLimits mink; // [esp+10h] [ebp-10h]
-    DvarLimits minl; // [esp+10h] [ebp-10h]
-    DvarLimits minm; // [esp+10h] [ebp-10h]
-    DvarLimits minn; // [esp+10h] [ebp-10h]
-    DvarLimits mino; // [esp+10h] [ebp-10h]
-    DvarLimits minp; // [esp+10h] [ebp-10h]
-    DvarLimits minq; // [esp+10h] [ebp-10h]
-
-    min.value.max = 1.0f;
-    min.value.min = 0.0f;
-    hud_fadeout_speed = Dvar_RegisterFloat("hud_fadeout_speed", 0.1f, min, DVAR_ARCHIVE, "The speed that the HUD will fade at");
+    hud_fadeout_speed = Dvar_RegisterFloat("hud_fadeout_speed", 0.1f, 0.0f, 1.0f, DVAR_ARCHIVE, "The speed that the HUD will fade at");
     hud_enable = Dvar_RegisterBool("hud_enable", 1, DVAR_ARCHIVE, "Enable hud elements");
-    mina.value.max = 30.0f;
-    mina.value.min = 0.0f;
-    hud_fade_ammodisplay = Dvar_RegisterFloat(
-        "hud_fade_ammodisplay",
-        0.0f,
-        mina,
-        DVAR_ARCHIVE,
-        "The time for the ammo display to fade in seconds");
-    minb.value.max = 30.0f;
-    minb.value.min = 0.0f;
-    hud_fade_healthbar = Dvar_RegisterFloat(
-        "hud_fade_healthbar",
-        2.0f,
-        minb,
-        DVAR_ARCHIVE,
-        "The time for the health bar to fade in seconds");
-    minc.value.max = 30.0f;
-    minc.value.min = 0.0f;
-    hud_fade_compass = Dvar_RegisterFloat(
-        "hud_fade_compass",
-        0.0f,
-        minc,
-        DVAR_ARCHIVE,
-        "The time for the compass to fade in seconds");
-    mind.value.max = 30.0f;
-    mind.value.min = 0.0f;
-    hud_fade_stance = Dvar_RegisterFloat("hud_fade_stance", 1.7f, mind, DVAR_ARCHIVE, "The time for the stance to fade in seconds");
-    mine.value.max = 30.0f;
-    mine.value.min = 0.0f;
-    hud_fade_offhand = Dvar_RegisterFloat(
-        "hud_fade_offhand",
-        0.0f,
-        mine,
-        DVAR_ARCHIVE,
-        "The time for the offhand weapons to fade in seconds");
-    minf.value.max = 30.0f;
-    minf.value.min = 0.0f;
-    hud_fade_sprint = Dvar_RegisterFloat(
-        "hud_fade_sprint",
-        1.7f,
-        minf,
-        DVAR_ARCHIVE,
-        "The time for the sprint meter to fade in seconds");
-    ming.value.max = 1.1f;
-    ming.value.min = 0.0f;
-    hud_health_startpulse_injured = Dvar_RegisterFloat(
-        "hud_health_startpulse_injured",
-        1.0f,
-        ming,
-        DVAR_ARCHIVE,
-        "The health level at which to start the 'injured' pulse effect");
-    minh.value.max = 1.1f;
-    minh.value.min = 0.0f;
-    hud_health_startpulse_critical = Dvar_RegisterFloat(
-        "hud_health_startpulse_critical",
-        0.33000001f,
-        minh,
-        DVAR_ARCHIVE,
-        "The health level at which to start the 'critical' pulse effect");
-    mini.value.max = 3.0f;
-    mini.value.min = 0.1f;
-    hud_health_pulserate_injured = Dvar_RegisterFloat(
-        "hud_health_pulserate_injured",
-        1.0f,
-        mini,
-        DVAR_ARCHIVE,
-        "The pulse rate of the 'injured' pulse effect");
-    minj.value.max = 3.0f;
-    minj.value.min = 0.1f;
-    hud_health_pulserate_critical = Dvar_RegisterFloat(
-        "hud_health_pulserate_critical",
-        0.5f,
-        minj,
-        DVAR_ARCHIVE,
-        "The pulse rate of the 'critical' pulse effect");
-    hud_deathQuoteFadeTime = Dvar_RegisterInt(
-        "hud_deathQuoteFadeTime",
-        1000,
-        (DvarLimits)0x186A000000000LL,
-        DVAR_ARCHIVE,
-        "The time for the death quote to fade");
-    hud_healthOverlay_regenPauseTime = Dvar_RegisterInt(
-        "hud_healthOverlay_regenPauseTime",
-        8000,
-        (DvarLimits)0x271000000000LL,
-        DVAR_CHEAT,
-        "The time in milliseconds before the health regeneration kicks in");
-    mink.value.max = 1.0f;
-    mink.value.min = 0.0f;
-    hud_healthOverlay_pulseStart = Dvar_RegisterFloat(
-        "hud_healthOverlay_pulseStart",
-        0.55000001f,
-        mink,
-        DVAR_CHEAT,
-        "The percentage of full health at which the low-health warning overlay begins flashing");
-    hud_healthOverlay_phaseOne_pulseDuration = Dvar_RegisterInt(
-        "hud_healthOverlay_phaseOne_pulseDuration",
-        150,
-        (DvarLimits)0x3E800000000LL,
-        DVAR_CHEAT,
-        "Time in milliseconds to ramp up to the first alpha value (the peak of the pulse)");
-    minl.value.max = 1.0f;
-    minl.value.min = 0.0f;
-    hud_healthOverlay_phaseTwo_toAlphaMultiplier = Dvar_RegisterFloat(
-        "hud_healthOverlay_phaseTwo_toAlphaMultiplier",
-        0.69999999f,
-        minl,
-        DVAR_CHEAT,
-        "Alpha multiplier for the second health overlay phase (percentage of the pulse peak)");
-    hud_healthOverlay_phaseTwo_pulseDuration = Dvar_RegisterInt(
-        "hud_healthOverlay_phaseTwo_pulseDuration",
-        320,
-        (DvarLimits)0x3E800000000LL,
-        DVAR_CHEAT,
-        "Time in milliseconds to fade the alpha to hud_healthOverlay_phaseTwo_toAlphaMultiplier");
-    minm.value.max = 1.0f;
-    minm.value.min = 0.0f;
-    hud_healthOverlay_phaseThree_toAlphaMultiplier = Dvar_RegisterFloat(
-        "hud_healthOverlay_phaseThree_toAlphaMultiplier",
-        0.60000002f,
-        minm,
-        DVAR_CHEAT,
-        "Alpha multiplier for the third health overlay phase (percentage of the pulse peak)");
-    hud_healthOverlay_phaseThree_pulseDuration = Dvar_RegisterInt(
-        "hud_healthOverlay_phaseThree_pulseDuration",
-        400,
-        (DvarLimits)0x3E800000000LL,
-        DVAR_CHEAT,
-        "Time in milliseconds to fade the alpha to hud_healthOverlay_phaseThree_"
-        "toAlphaMultiplier");
-    minn.value.max = 1.0f;
-    minn.value.min = 0.0f;
-    hud_healthOverlay_phaseEnd_toAlpha = Dvar_RegisterFloat(
-        "hud_healthOverlay_phaseEnd_toAlpha",
-        0.0f,
-        minn,
-        DVAR_CHEAT,
-        "Alpha multiplier to fade to before turning off the overlay (percentage of the pulse peak)");
-    hud_healthOverlay_phaseEnd_pulseDuration = Dvar_RegisterInt(
-        "hud_healthOverlay_phaseEnd_pulseDuration",
-        700,
-        (DvarLimits)0x3E800000000LL,
-        DVAR_CHEAT,
-        "Time in milliseconds to fade out the health overlay after it is done flashing");
-    mino.value.max = 1.0f;
-    mino.value.min = 0.0f;
-    cg_sprintMeterFullColor = Dvar_RegisterVec4(
-        "cg_sprintMeterFullColor",
-        0.80000001f,
-        0.80000001f,
-        0.80000001f,
-        0.80000001f,
-        mino,
-        DVAR_ARCHIVE,
-        "The color of the sprint meter when the sprint meter is full");
-    minp.value.max = 1.0f;
-    minp.value.min = 0.0f;
-    cg_sprintMeterEmptyColor = Dvar_RegisterVec4(
-        "cg_sprintMeterEmptyColor",
-        0.69999999f,
-        0.5f,
-        0.2f,
-        0.80000001f,
-        minp,
-        DVAR_ARCHIVE,
-        "The color of the sprint meter when the sprint meter is empty");
-    minq.value.max = 1.0f;
-    minq.value.min = 0.0f;
-    cg_sprintMeterDisabledColor = Dvar_RegisterVec4(
-        "cg_sprintMeterDisabledColor",
-        0.80000001f,
-        0.1f,
-        0.1f,
-        0.2f,
-        minq,
-        DVAR_ARCHIVE,
-        "The color of the sprint meter when the sprint meter is disabled");
-    cg_drawTalk = Dvar_RegisterEnum(
-        "cg_drawTalk",
-        cg_drawTalkNames,
-        1,
-        DVAR_NOFLAG,
-        "Controls which icons CG_TALKER ownerdraw draws");
+    hud_fade_ammodisplay = Dvar_RegisterFloat("hud_fade_ammodisplay", 0.0f, 0.0f, 30.0f, DVAR_ARCHIVE, "The time for the ammo display to fade in seconds");
+    hud_fade_healthbar = Dvar_RegisterFloat("hud_fade_healthbar", 2.0f, 0.0f, 30.0f, DVAR_ARCHIVE,"The time for the health bar to fade in seconds");
+    hud_fade_compass = Dvar_RegisterFloat("hud_fade_compass", 0.0f, 0.0f, 30.0f, DVAR_ARCHIVE, "The time for the compass to fade in seconds");
+    hud_fade_stance = Dvar_RegisterFloat("hud_fade_stance", 1.7f, 0.0f, 30.0f, DVAR_ARCHIVE, "The time for the stance to fade in seconds");
+    hud_fade_offhand = Dvar_RegisterFloat("hud_fade_offhand", 0.0f, 0.0f, 30.0f, DVAR_ARCHIVE, "The time for the offhand weapons to fade in seconds");
+    hud_fade_sprint = Dvar_RegisterFloat("hud_fade_sprint", 1.7f, 0.0f, 30.0f, DVAR_ARCHIVE, "The time for the sprint meter to fade in seconds");
+    hud_health_startpulse_injured = Dvar_RegisterFloat("hud_health_startpulse_injured", 1.0f, 0.0f, 1.1f, DVAR_ARCHIVE, "The health level at which to start the 'injured' pulse effect");
+    hud_health_startpulse_critical = Dvar_RegisterFloat("hud_health_startpulse_critical", 0.33f, 0.0f, 1.1f, DVAR_ARCHIVE, "The health level at which to start the 'critical' pulse effect");
+    hud_health_pulserate_injured = Dvar_RegisterFloat("hud_health_pulserate_injured", 1.0f, 0.1f, 3.0f, DVAR_ARCHIVE, "The pulse rate of the 'injured' pulse effect");
+    hud_health_pulserate_critical = Dvar_RegisterFloat("hud_health_pulserate_critical", 0.5f, 0.1f, 3.0f, DVAR_ARCHIVE, "The pulse rate of the 'critical' pulse effect");
+    hud_deathQuoteFadeTime = Dvar_RegisterInt("hud_deathQuoteFadeTime", 1000, (DvarLimits)0x186A000000000LL, DVAR_ARCHIVE,"The time for the death quote to fade");
+    hud_healthOverlay_regenPauseTime = Dvar_RegisterInt("hud_healthOverlay_regenPauseTime", 8000, (DvarLimits)0x271000000000LL, DVAR_CHEAT, "The time in milliseconds before the health regeneration kicks in");
+    hud_healthOverlay_pulseStart = Dvar_RegisterFloat("hud_healthOverlay_pulseStart", 0.55f, 0.0f, 1.0f, DVAR_CHEAT, "The percentage of full health at which the low-health warning overlay begins flashing");
+    hud_healthOverlay_phaseOne_pulseDuration = Dvar_RegisterInt("hud_healthOverlay_phaseOne_pulseDuration", 150, (DvarLimits)0x3E800000000LL, DVAR_CHEAT, "Time in milliseconds to ramp up to the first alpha value (the peak of the pulse)");
+    hud_healthOverlay_phaseTwo_toAlphaMultiplier = Dvar_RegisterFloat("hud_healthOverlay_phaseTwo_toAlphaMultiplier", 0.7f, 0.0f, 1.0f, DVAR_CHEAT, "Alpha multiplier for the second health overlay phase (percentage of the pulse peak)");
+    hud_healthOverlay_phaseTwo_pulseDuration = Dvar_RegisterInt("hud_healthOverlay_phaseTwo_pulseDuration", 320, (DvarLimits)0x3E800000000LL, DVAR_CHEAT, "Time in milliseconds to fade the alpha to hud_healthOverlay_phaseTwo_toAlphaMultiplier");
+    hud_healthOverlay_phaseThree_toAlphaMultiplier = Dvar_RegisterFloat("hud_healthOverlay_phaseThree_toAlphaMultiplier", 0.6f, 0.0f, 1.0f, DVAR_CHEAT, "Alpha multiplier for the third health overlay phase (percentage of the pulse peak)");
+    hud_healthOverlay_phaseThree_pulseDuration = Dvar_RegisterInt("hud_healthOverlay_phaseThree_pulseDuration", 400, (DvarLimits)0x3E800000000LL, DVAR_CHEAT, "Time in milliseconds to fade the alpha to hud_healthOverlay_phaseThree_" "toAlphaMultiplier");
+    hud_healthOverlay_phaseEnd_toAlpha = Dvar_RegisterFloat("hud_healthOverlay_phaseEnd_toAlpha", 0.0f, 0.0f, 1.0f, DVAR_CHEAT, "Alpha multiplier to fade to before turning off the overlay (percentage of the pulse peak)");
+    hud_healthOverlay_phaseEnd_pulseDuration = Dvar_RegisterInt("hud_healthOverlay_phaseEnd_pulseDuration", 700, (DvarLimits)0x3E800000000LL, DVAR_CHEAT, "Time in milliseconds to fade out the health overlay after it is done flashing");
+    cg_sprintMeterFullColor = Dvar_RegisterVec4("cg_sprintMeterFullColor", 0.8f, 0.8f, 0.8f, 0.8f, 0.0f, 1.0f, DVAR_ARCHIVE, "The color of the sprint meter when the sprint meter is full");
+    cg_sprintMeterEmptyColor = Dvar_RegisterVec4("cg_sprintMeterEmptyColor", 0.7f, 0.5f, 0.2f, 0.8f, 0.0f, 1.0f, DVAR_ARCHIVE, "The color of the sprint meter when the sprint meter is empty");
+    cg_sprintMeterDisabledColor = Dvar_RegisterVec4("cg_sprintMeterDisabledColor", 0.8f, 0.1f, 0.1f, 0.2f, 0.0f, 1.0f, DVAR_ARCHIVE, "The color of the sprint meter when the sprint meter is disabled");
+    cg_drawTalk = Dvar_RegisterEnum( "cg_drawTalk", cg_drawTalkNames, 1, DVAR_NOFLAG, "Controls which icons CG_TALKER ownerdraw draws");
 }
 
 bool __cdecl CG_ShouldDrawHud(int32_t localClientNum)
@@ -343,7 +163,7 @@ double __cdecl CG_CalcPlayerHealth(const playerState_s *ps)
     float v5; // [esp+Ch] [ebp-8h]
     float health; // [esp+10h] [ebp-4h]
 
-    if (!ps->stats[0] || !ps->stats[2] || ps->pm_type == 7)
+    if (!ps->stats[0] || !ps->stats[2] || ps->pm_type == PM_DEAD)
         return 0.0;
     health = (double)ps->stats[0] / (double)ps->stats[2];
     v4 = health - 1.0;
@@ -1512,7 +1332,7 @@ void __cdecl CG_CalcPlayerSprintColor(const cg_s *cgameGlob, const playerState_s
     int32_t maxSprint; // [esp+1Ch] [ebp-4h]
 
     maxSprint = BG_GetMaxSprintTime(ps);
-    if (ps->pm_type == 7 || !maxSprint)
+    if (ps->pm_type == PM_DEAD || !maxSprint)
     {
         p_current = &cg_sprintMeterFullColor->current;
         *color = cg_sprintMeterFullColor->current.value;
@@ -2538,7 +2358,7 @@ void __cdecl CG_DrawTalkerNum(
                     textColor[1] = color[1];
                     textColor[2] = color[2];
                     textColor[3] = color[3];
-                    if (cgameGlob->nextSnap->ps.pm_type != 5 && isEnemy && (cgameGlob->nextSnap->ps.perks & 0x200) != 0)
+                    if (cgameGlob->nextSnap->ps.pm_type != PM_INTERMISSION && isEnemy && (cgameGlob->nextSnap->ps.perks & 0x200) != 0)
                     {
                         CG_RelativeTeamColor(client, "g_TeamColor", textColor, localClientNum);
                         material = Material_RegisterHandle((const char*)perk_parabolicIcon->current.integer, 7);

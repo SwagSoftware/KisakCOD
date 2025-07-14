@@ -765,9 +765,9 @@ void __cdecl CL_CmdButtons(int localClientNum, usercmd_s *cmd)
     if (clientUIActives[0].connectionState > CA_CONNECTED)
     {
         LocalClientGlobals = CL_GetLocalClientGlobals(localClientNum);
-        if (LocalClientGlobals->snap.ps.pm_type == 2
-            || LocalClientGlobals->snap.ps.pm_type == 3
-            || LocalClientGlobals->snap.ps.pm_type == 4)
+        if (LocalClientGlobals->snap.ps.pm_type == PM_NOCLIP
+            || LocalClientGlobals->snap.ps.pm_type == PM_UFO
+            || LocalClientGlobals->snap.ps.pm_type == PM_SPECTATOR)
         {
             CL_UpdateCmdButton(localClientNum, &cmd->buttons, 12, 1024);
         }

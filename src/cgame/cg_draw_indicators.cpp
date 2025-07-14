@@ -286,7 +286,7 @@ void __cdecl CG_DrawGrenadeIndicators(int32_t localClientNum)
 
     cgameGlob = CG_GetLocalClientGlobals(localClientNum);
     if (cgameGlob->nextSnap
-        && cgameGlob->predictedPlayerState.pm_type != 4
+        && cgameGlob->predictedPlayerState.pm_type != PM_SPECTATOR
         && (cgameGlob->predictedPlayerState.otherFlags & 2) == 0
         && g_hudGrenadeCount)
     {

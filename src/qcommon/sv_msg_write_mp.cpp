@@ -2579,7 +2579,7 @@ bool __cdecl MSG_ShouldSendPSField(
         }
         else
         {
-            return ((oldPs->eFlags ^ ps->eFlags) & 2) != 0 || ps->viewlocked_entNum != 1023 || ps->pm_type == 5;
+            return ((oldPs->eFlags ^ ps->eFlags) & 2) != 0 || ps->viewlocked_entNum != 1023 || ps->pm_type == PM_INTERMISSION;
         }
     }
     else if (field->changeHints != 3 || snapInfo->archived)

@@ -323,7 +323,7 @@ void __cdecl ClientBegin(int32_t clientNum)
 
     client = &level.clients[clientNum];
     client->sess.connected = CON_CONNECTED;
-    client->ps.pm_type = 4;
+    client->ps.pm_type = PM_SPECTATOR;
     CalculateRanks();
     Scr_Notify(&g_entities[clientNum], scr_const.begin, 0);
 }

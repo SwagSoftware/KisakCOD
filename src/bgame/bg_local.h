@@ -744,11 +744,24 @@ struct objective_t // sizeof=0x1C
 static_assert(sizeof(objective_t) == 0x1C);
 
 #ifdef KISAK_MP
+enum pmtype_t : __int32
+{
+    PM_NORMAL = 0x0,
+    PM_NORMAL_LINKED = 0x1,
+    PM_NOCLIP = 0x2,
+    PM_UFO = 0x3,
+    PM_SPECTATOR = 0x4,
+    PM_INTERMISSION = 0x5,
+    PM_LASTSTAND = 0x6,
+    PM_DEAD = 0x7,
+    PM_DEAD_LINKED = 0x8,
+};
+
 struct playerState_s // sizeof=0x2F64
 {                                       // XREF: gclient_s/r
                                         // clSnapshot_t/r ...
     int32_t commandTime;
-    int32_t pm_type;
+    pmtype_t pm_type;
     int32_t bobCycle;                       // XREF: R_ChangeState_1(GfxCmdBufState *,uint)+2AB/o
     int32_t pm_flags;
     int32_t weapFlags;
@@ -871,11 +884,20 @@ struct playerState_s // sizeof=0x2F64
 static_assert(sizeof(playerState_s) == 0x2F64);
 
 #elif KISAK_SP
-/* 9184 */
+enum pmtype_t : __int32
+{
+    PM_NORMAL = 0x0,
+    PM_NORMAL_LINKED = 0x1,
+    PM_NOCLIP = 0x2,
+    PM_UFO = 0x3,
+    PM_MPVIEWER = 0x4,
+    PM_DEAD = 0x5,
+    PM_DEAD_LINKED = 0x6,
+};
 struct playerState_s
 {
     int commandTime;
-    int pm_type;
+    pmtype_t pm_type;
     int bobCycle;
     int pm_flags;
     int weapFlags;

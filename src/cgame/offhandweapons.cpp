@@ -110,7 +110,7 @@ int32_t __cdecl GetBestOffhand(const playerState_s *predictedPlayerState, int32_
 
 bool __cdecl IsOffHandDisplayVisible(const cg_s *cgameGlob)
 {
-    return cgameGlob->predictedPlayerState.pm_type < 7 && (cgameGlob->predictedPlayerState.weapFlags & 0x80) == 0;
+    return cgameGlob->predictedPlayerState.pm_type < PM_DEAD && (cgameGlob->predictedPlayerState.weapFlags & 0x80) == 0;
 }
 
 void __cdecl CG_DrawOffHandHighlight(

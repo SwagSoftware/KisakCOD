@@ -140,7 +140,7 @@ void __cdecl player_die(
     if (!self->client)
         MyAssertHandler(".\\game_mp\\g_combat_mp.cpp", 312, 0, "%s", "self->client");
     if (Com_GetServerDObj(self->client->ps.clientNum)
-        && (self->client->ps.pm_type < 2u || self->client->ps.pm_type == 6)
+        && (self->client->ps.pm_type < PM_NOCLIP || self->client->ps.pm_type == PM_LASTSTAND)
         && (self->client->ps.otherFlags & 2) == 0)
     {
         if (bgs != &level_bgs)
@@ -150,16 +150,10 @@ void __cdecl player_die(
         DeathGrenadeDrop(self, meansOfDeath);
         Scr_AddEntity(attacker);
         Scr_Notify(self, scr_const.death, 1u);
-        if (self->client->ps.pm_type >= 2u && self->client->ps.pm_type != 6)
-            MyAssertHandler(
-                ".\\game_mp\\g_combat_mp.cpp",
-                341,
-                1,
-                "%s\n\t(self->client->ps.pm_type) = %i",
-                "(self->client->ps.pm_type == PM_NORMAL_LINKED || self->client->ps.pm_type == PM_NORMAL || self->client->ps.pm_ty"
-                "pe == PM_LASTSTAND)",
-                self->client->ps.pm_type);
-        self->client->ps.pm_type = 8 - (self->client->ps.pm_type != 1);
+        iassert((self->client->ps.pm_type == PM_NORMAL_LINKED || self->client->ps.pm_type == PM_NORMAL || self->client->ps.pm_type == PM_LASTSTAND));
+
+        self->client->ps.pm_type = (self->client->ps.pm_type == PM_NORMAL_LINKED) ? PM_DEAD_LINKED : PM_DEAD;
+
         deathAnimDuration = BG_AnimScriptEvent(&self->client->ps, ANIM_ET_DEATH, 0, 1);
         self->client->ps.stats[0] = 0;
         Scr_PlayerKilled(
@@ -300,7 +294,7 @@ void __cdecl G_DamageClient(
         && !targ->client->noclip
         && !targ->client->ufo
         && targ->client->sess.connected == CON_CONNECTED
-        && targ->client->ps.pm_type != 7)
+        && targ->client->ps.pm_type != PM_DEAD)
     {
         if (weapon == -1)
         {

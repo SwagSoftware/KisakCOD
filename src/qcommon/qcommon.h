@@ -509,6 +509,16 @@ const dvar_s *__cdecl Dvar_RegisterVec4(
     DvarLimits min,
     unsigned __int16 flags,
     const char *description);
+const dvar_s *__cdecl Dvar_RegisterVec4(
+    const char *dvarName,
+    float x,
+    float y,
+    float z,
+    float w,
+    float minimum,
+    float maximum,
+    unsigned __int16 flags,
+    const char *description);
 const dvar_s *__cdecl Dvar_RegisterString(
     const char *dvarName,
     const char *value,

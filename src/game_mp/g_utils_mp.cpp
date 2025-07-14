@@ -592,12 +592,12 @@ int __cdecl G_EntLinkToInternal(gentity_s *ent, gentity_s *parent, unsigned int 
         pm_type = ent->client->ps.pm_type;
         if (pm_type)
         {
-            if (pm_type == 7)
-                ent->client->ps.pm_type = 8;
+            if (pm_type == PM_DEAD)
+                ent->client->ps.pm_type = PM_DEAD_LINKED;
         }
         else
         {
-            ent->client->ps.pm_type = 1;
+            ent->client->ps.pm_type = PM_NORMAL_LINKED;
         }
     }
     return 1;
@@ -670,13 +670,13 @@ void __cdecl G_EntUnlink(gentity_s *ent)
         if (ent->client)
         {
             pm_type = ent->client->ps.pm_type;
-            if (pm_type == 1)
+            if (pm_type == PM_NORMAL_LINKED)
             {
-                ent->client->ps.pm_type = 0;
+                ent->client->ps.pm_type = PM_NORMAL;
             }
-            else if (pm_type == 8)
+            else if (pm_type == PM_DEAD_LINKED)
             {
-                ent->client->ps.pm_type = 7;
+                ent->client->ps.pm_type = PM_DEAD;
             }
         }
         Scr_SetString(&tagInfo->name, 0);

@@ -901,7 +901,7 @@ void __cdecl SendScoreboardMessageToAllIntermissionClients()
     {
         for (i = 0; i < level.maxclients; ++i)
         {
-            if (level.clients[i].sess.connected == CON_CONNECTED && level.clients[i].ps.pm_type == 5)
+            if (level.clients[i].sess.connected == CON_CONNECTED && level.clients[i].ps.pm_type == PM_INTERMISSION)
                 SendScoreboard(&g_entities[i]);
         }
         level.bUpdateScoresForIntermission = 0;
@@ -1400,7 +1400,7 @@ void __cdecl G_ClientDoPerFrameNotifies(gentity_s *ent)
         Scr_Notify(ent, scr_const.weapon_change, 1u);
         client->lastWeapon = client->ps.weapon;
     }
-    if (client->ps.weaponstate == 5 && client->ps.pm_type < 7)
+    if (client->ps.weaponstate == 5 && client->ps.pm_type < PM_DEAD)
         v2 = DoPerFrameNotify(ent, 1, client->previouslyFiring, scr_const.begin_firing, scr_const.end_firing);
     else
         v2 = DoPerFrameNotify(ent, 0, client->previouslyFiring, scr_const.begin_firing, scr_const.end_firing);

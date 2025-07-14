@@ -2684,7 +2684,7 @@ void GScr_positionWouldTelefrag()
     for (i = 0; i < v4; ++i)
     {
         v2 = &g_entities[entityList[i]];
-        if (v2->client && v2->client->ps.pm_type < 7)
+        if (v2->client && v2->client->ps.pm_type < PM_DEAD)
         {
             Scr_AddInt(1);
             return;

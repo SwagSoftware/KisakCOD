@@ -2138,15 +2138,31 @@ const dvar_s *__cdecl Dvar_RegisterVec4(
     unsigned __int16 flags,
     const char *description)
 {
-    DvarValue v9; // [esp-1Ch] [ebp-38h]
-    __int64 dvarValue_4; // [esp+Ch] [ebp-10h]
+    DvarValue val; // [esp-1Ch] [ebp-38h]
+    val.vector[0] = x;
+    val.vector[1] = y;
+    val.vector[2] = z;
+    val.vector[3] = w;
 
-    *(float *)&dvarValue_4 = y;
-    *((float *)&dvarValue_4 + 1) = z;
-    v9.value = x;
-    *(_QWORD *)(&v9.value + 1) = dvarValue_4;
-    v9.vector[3] = w;
-    return Dvar_RegisterVariant(dvarName, DVAR_TYPE_FLOAT_4, flags, v9, min, description);
+    return Dvar_RegisterVariant(dvarName, DVAR_TYPE_FLOAT_4, flags, val, min, description);
+}
+
+const dvar_s *__cdecl Dvar_RegisterVec4(
+    const char *dvarName,
+    float x,
+    float y,
+    float z,
+    float w,
+    float minimum,
+    float maximum,
+    unsigned __int16 flags,
+    const char *description)
+{
+    DvarLimits limits;
+    limits.value.min = minimum;
+    limits.value.max = maximum;
+
+    return Dvar_RegisterVec4(dvarName, x, y, z, w, limits, flags, description);
 }
 
 const dvar_s *__cdecl Dvar_RegisterString(

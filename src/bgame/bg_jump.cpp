@@ -193,7 +193,7 @@ char __cdecl Jump_Check(pmove_t *pm, pml_t *pml)
         return 0;
     if ((ps->pm_flags & 4) != 0)
         return 0;
-    if (ps->pm_type >= 7)
+    if (ps->pm_type >= PM_DEAD)
         return 0;
     if (PM_GetEffectiveStance(ps))
         return 0;

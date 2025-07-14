@@ -242,7 +242,7 @@ void __cdecl CG_SetNextSnap(int localClientNum, snapshot_s *snap)
                 CG_Respawn(localClientNum);
             }
         }
-        else if (snap->ps.pm_type == 4)
+        else if (snap->ps.pm_type == PM_SPECTATOR)
         {
             cent = CG_GetEntity(localClientNum, entnum);
             centInPrevSnapshot[cgameGlob->snap->ps.clientNum >> 5] &= ~(0x80000000 >> (cgameGlob->snap->ps.clientNum & 0x1F));

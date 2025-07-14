@@ -434,7 +434,7 @@ void __cdecl CG_Draw2dHudElems(int32_t localClientNum, int32_t foreground)
 
     if (SortedHudElems)
     {
-        v2 = cgameGlob->nextSnap->ps.pm_type < 7;
+        v2 = cgameGlob->nextSnap->ps.pm_type < PM_DEAD;
         for (i = 0; i < SortedHudElems; ++i)
         {
             if ((v2 || (elems[i]->flags & 2) == 0)

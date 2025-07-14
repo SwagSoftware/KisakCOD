@@ -84,7 +84,7 @@ void __cdecl P_DamageFeedback(gentity_s *player)
     client = player->client;
     if (!client)
         MyAssertHandler(".\\game_mp\\g_active_mp.cpp", 41, 0, "%s", "client");
-    if (client->ps.pm_type < 7)
+    if (client->ps.pm_type < PM_DEAD)
     {
         if (level.time - client->damageTime > 500)
             client->ps.damageCount = 0;
@@ -184,7 +184,7 @@ void __cdecl G_TouchTriggers(gentity_s *ent)
     PROF_SCOPED("G_TouchTriggers");
     if (!ent->client)
         MyAssertHandler(".\\game_mp\\g_active_mp.cpp", 191, 0, "%s", "ent->client");
-    if (ent->client->ps.pm_type > 1)
+    if (ent->client->ps.pm_type > PM_NORMAL_LINKED)
     {
         return;
     }
@@ -254,7 +254,7 @@ void __cdecl SpectatorThink(gentity_s *ent, usercmd_s *ucmd)
     }
     if ((client->ps.otherFlags & 2) == 0)
     {
-        client->ps.pm_type = 4;
+        client->ps.pm_type = PM_SPECTATOR;
         if (G_ClientCanSpectateTeam(client, TEAM_NUM_TEAMS))
             client->ps.speed = 400;
         else
@@ -599,7 +599,7 @@ void __cdecl ClientThink_real(gentity_s *ent, usercmd_s *ucmd)
                 pm.ps = &client->ps;
                 memcpy(&pm.cmd, ucmd, sizeof(pm.cmd));
                 memcpy(&pm.oldcmd, &client->sess.oldcmd, sizeof(pm.oldcmd));
-                if (client->ps.pm_type < 7)
+                if (client->ps.pm_type < PM_DEAD)
                     pm.tracemask = 0x2810011;
                 else
                     pm.tracemask = 0x810011;
@@ -827,11 +827,10 @@ void __cdecl ClientThink(int32_t clientNum)
 void __cdecl G_RunClient(gentity_s *ent)
 {
     float *origin; // [esp+0h] [ebp-10h]
+    
+    iassert(ent->client);
+    iassert(ent->client->sess.connected != CON_DISCONNECTED);
 
-    if (!ent->client)
-        MyAssertHandler(".\\game_mp\\g_active_mp.cpp", 1000, 0, "%s", "ent->client");
-    if (ent->client->sess.connected == CON_DISCONNECTED)
-        MyAssertHandler(".\\game_mp\\g_active_mp.cpp", 1001, 0, "%s", "ent->client->sess.connected != CON_DISCONNECTED");
     if (g_synchronousClients->current.enabled)
     {
         ent->client->sess.cmd.serverTime = level.time;
@@ -841,7 +840,7 @@ void __cdecl G_RunClient(gentity_s *ent)
     {
         if (ent->tagInfo)
         {
-            ent->client->ps.pm_type = ent->client->sess.sessionState != SESS_STATE_DEAD ? 1 : 8;
+            ent->client->ps.pm_type = (ent->client->sess.sessionState != SESS_STATE_DEAD) ? PM_NORMAL_LINKED : PM_DEAD_LINKED;
             G_SetFixedLink(ent, 2);
             G_SetOrigin(ent, ent->r.currentOrigin);
             G_SetAngle(ent, ent->r.currentAngles);
@@ -859,13 +858,20 @@ void __cdecl G_RunClient(gentity_s *ent)
             ent->s.lerp.apos.trDelta[2] = 0.0;
             SV_LinkEntity(ent);
             origin = ent->client->ps.origin;
-            *origin = ent->r.currentOrigin[0];
+            origin[0] = ent->r.currentOrigin[0];
             origin[1] = ent->r.currentOrigin[1];
             origin[2] = ent->r.currentOrigin[2];
         }
-        else if (ent->client->ps.pm_type == 1 || ent->client->ps.pm_type == 8)
+        else
         {
-            --ent->client->ps.pm_type;
+            if (ent->client->ps.pm_type == PM_NORMAL_LINKED)
+            {
+                ent->client->ps.pm_type = PM_NORMAL;
+            }
+            if (ent->client->ps.pm_type == PM_DEAD_LINKED)
+            {
+                ent->client->ps.pm_type = PM_DEAD;
+            }
         }
     }
 }
@@ -882,7 +888,7 @@ void __cdecl IntermissionClientEndFrame(gentity_s *ent)
     ent->takedamage = 0;
     ent->r.contents = 0;
     client->ps.otherFlags &= 0xFFFFFFE3;
-    client->ps.pm_type = 5;
+    client->ps.pm_type = PM_INTERMISSION;
     client->ps.eFlags &= ~0x200000u;
     client->ps.eFlags &= ~0x40u;
     client->ps.viewmodelIndex = 0;
@@ -1188,26 +1194,26 @@ void __cdecl ClientEndFrame(gentity_s *ent)
                 client->ps.eFlags &= ~0x400000u;
             if (client->noclip)
             {
-                client->ps.pm_type = 2;
+                client->ps.pm_type = PM_NOCLIP;
             }
             else if (client->ufo)
             {
-                client->ps.pm_type = 3;
+                client->ps.pm_type = PM_UFO;
             }
             else if (client->sess.sessionState == SESS_STATE_DEAD)
             {
-                client->ps.pm_type = (ent->tagInfo != 0) + 7;
+                client->ps.pm_type = (ent->tagInfo != 0) ? PM_DEAD_LINKED : PM_DEAD;
                 ent->r.svFlags |= 1u;
                 ent->r.svFlags &= ~2u;
                 ent->takedamage = 0;
             }
             else if (client->lastStand)
             {
-                client->ps.pm_type = 6;
+                client->ps.pm_type = PM_LASTSTAND;
             }
             else
             {
-                client->ps.pm_type = ent->tagInfo != 0;
+                client->ps.pm_type = (ent->tagInfo != 0) ? PM_NORMAL_LINKED : PM_NORMAL;
             }
             client->currentAimSpreadScale = client->ps.aimSpreadScale / 255.0;
             {

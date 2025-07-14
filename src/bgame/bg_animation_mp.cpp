@@ -732,7 +732,7 @@ int32_t __cdecl BG_AnimScriptAnimation(playerState_s *ps, aistateEnum_t state, s
             0,
             "%s",
             "BG_GetConditionBit( &bgs->clientinfo[ps->clientNum], ANIM_COND_MOVETYPE ) < NUM_ANIM_MOVETYPES");
-    if (ps->pm_type >= 7)
+    if (ps->pm_type >= PM_DEAD)
         return -1;
     while (!scriptItem && state >= AISTATE_COMBAT)
     {
@@ -1068,7 +1068,7 @@ int32_t __cdecl BG_AnimScriptEvent(playerState_s *ps, scriptAnimEventTypes_t eve
     int32_t v5; // eax
     animScriptItem_t *scriptItem; // [esp+8h] [ebp-4h]
 
-    if (event != ANIM_ET_DEATH && ps->pm_type >= 7)
+    if (event != ANIM_ET_DEATH && ps->pm_type >= PM_DEAD)
         return -1;
     if (G_IsServerGameSystem(ps->clientNum))
         Com_Printf(19, "event: %s\n", animEventTypesStr[event].string);
@@ -1277,24 +1277,30 @@ void __cdecl BG_AnimUpdatePlayerStateConditions(pmove_t *pmove)
     ps = pmove->ps;
     ViewmodelWeaponIndex = BG_GetViewmodelWeaponIndex(pmove->ps);
     weaponDef = BG_GetWeaponDef(ViewmodelWeaponIndex);
-    if (!weaponDef)
-        MyAssertHandler(".\\bgame\\bg_animation_mp.cpp", 2356, 0, "%s", "weaponDef");
+
+    iassert(weaponDef);
+
     BG_SetConditionBit(ps->clientNum, 0, weaponDef->playerAnimType);
     BG_SetConditionBit(ps->clientNum, 1, weaponDef->weapClass);
+
     if ((ps->eFlags & 0x40000) != 0)
         BG_SetConditionValue(ps->clientNum, 7u, 1u);
     else
         BG_SetConditionValue(ps->clientNum, 7u, 0);
+
     if ((ps->eFlags & 0x300) != 0)
         BG_SetConditionValue(ps->clientNum, 2u, 1u);
     else
         BG_SetConditionValue(ps->clientNum, 2u, 0);
+
     BG_SetConditionValue(ps->clientNum, 4u, ps->viewangles[0] > 0.0);
+
     if ((pmove->cmd.buttons & 1) != 0)
         BG_SetConditionValue(ps->clientNum, 6u, 1u);
     else
         BG_SetConditionValue(ps->clientNum, 6u, 0);
-    if (ps->pm_type == 6)
+
+    if (ps->pm_type == PM_LASTSTAND)
         BG_SetConditionValue(ps->clientNum, 9u, 1u);
     else
         BG_SetConditionValue(ps->clientNum, 9u, 0);

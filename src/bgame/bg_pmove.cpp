@@ -513,8 +513,8 @@ void __cdecl PM_UpdateLean(
     leanofs = 0.0;
     if ((cmd->buttons & 0xC0) != 0
         && (ps->pm_flags & 0x800) == 0
-        && ps->pm_type < 7
-        && (ps->groundEntityNum != 1023 || ps->pm_type == 1))
+        && ps->pm_type < PM_DEAD
+        && (ps->groundEntityNum != 1023 || ps->pm_type == PM_NORMAL_LINKED))
     {
         if ((cmd->buttons & 0x40) != 0)
             --leaning;
@@ -597,9 +597,9 @@ void __cdecl PM_UpdateViewAngles(playerState_s *ps, float msec, usercmd_s *cmd, 
     float temp; // [esp+14h] [ebp-Ch]
     float oldViewYaw; // [esp+18h] [ebp-8h]
 
-    if (ps->pm_type != 5)
+    if (ps->pm_type != PM_INTERMISSION)
     {
-        if (ps->pm_type >= 7)
+        if (ps->pm_type >= PM_DEAD)
         {
             if (ps->stats[1] == 999)
             {
@@ -635,7 +635,7 @@ void __cdecl PM_UpdateViewAngles(playerState_s *ps, float msec, usercmd_s *cmd, 
                 MyAssertHandler(".\\bgame\\bg_pmove.cpp", 4241, 0, "%s", "!(ps->eFlags & EF_TURRET_ACTIVE)");
             PM_UpdateViewAngles_Prone(ps, msec, cmd, handler, oldViewYaw);
         }
-        if (ps->pm_type != 3 && ps->pm_type != 2 && ps->pm_type != 4)
+        if (ps->pm_type != PM_UFO && ps->pm_type != PM_NOCLIP && ps->pm_type != PM_SPECTATOR)
             goto LABEL_21;
     }
 }
@@ -1356,7 +1356,7 @@ void __cdecl PmoveSingle(pmove_t *pm)
         pm->cmd.rightmove = 0;
     }
     ps->pm_flags &= ~0x1000u;
-    if (ps->pm_type >= 7)
+    if (ps->pm_type >= PM_DEAD)
         pm->tracemask &= ~0x2000000u;
     if ((ps->pm_flags & 1) == 0 || BG_UsingSniperScope(ps))
     {
@@ -1405,7 +1405,7 @@ void __cdecl PmoveSingle(pmove_t *pm)
         v1 = ps->eFlags & 0xFFDFFFFF;
     ps->eFlags = v1;
     ps->eFlags &= ~0x40u;
-    if (ps->pm_type != 5
+    if (ps->pm_type != PM_INTERMISSION
         && (ps->pm_flags & 0x400) == 0
         && (!ps->weaponstate || ps->weaponstate == 5)
         && PM_WeaponAmmoAvailable(ps)
@@ -1413,7 +1413,7 @@ void __cdecl PmoveSingle(pmove_t *pm)
     {
         ps->eFlags |= 0x40u;
     }
-    if (ps->pm_type < 7 && (pm->cmd.buttons & 0x101) == 0)
+    if (ps->pm_type < PM_DEAD && (pm->cmd.buttons & 0x101) == 0)
         ps->pm_flags &= ~0x400u;
     memset((uint8_t *)&pml, 0, sizeof(pml));
     pml.msec = pm->cmd.serverTime - ps->commandTime;
@@ -1447,7 +1447,7 @@ void __cdecl PmoveSingle(pmove_t *pm)
     {
         ps->pm_flags |= 0x20u;
     }
-    if (ps->pm_type >= 6)
+    if (ps->pm_type >= PM_LASTSTAND)
     {
         pm->cmd.forwardmove = 0;
         pm->cmd.rightmove = 0;
@@ -1574,7 +1574,7 @@ void __cdecl PmoveSingle(pmove_t *pm)
             {
                 PM_UpdatePronePitch(pm, &pml);
                 PM_DropTimers(ps, &pml);
-                if (ps->pm_type >= 6)
+                if (ps->pm_type >= PM_LASTSTAND)
                     PM_DeadMove(ps, &pml);
                 PM_CheckLadderMove(pm, &pml);
 
@@ -1651,7 +1651,7 @@ void __cdecl PM_UpdateSprint(pmove_t *pm, const pml_t *pml)
     p_sprintState = &ps->sprintState;
     if (ps->sprintState.sprintButtonUpRequired && (pm->cmd.buttons & 2) == 0)
         p_sprintState->sprintButtonUpRequired = 0;
-    if (ps->pm_type >= 2u || BG_GetMaxSprintTime(ps) <= 0)
+    if (ps->pm_type >= PM_NOCLIP || BG_GetMaxSprintTime(ps) <= 0)
     {
     LABEL_13:
         PM_EndSprint(ps, pm);
@@ -1862,7 +1862,7 @@ void __cdecl PM_Friction(playerState_s *ps, pml_t *pml)
             }
             drop = control * friction->current.value * pml->frametime + drop;
         }
-        if (ps->pm_type == 4)
+        if (ps->pm_type == PM_SPECTATOR)
             drop = speed * 5.0 * pml->frametime + drop;
         newspeed = speed - drop;
         if (newspeed < 0.0)
@@ -1927,15 +1927,19 @@ double __cdecl PM_PlayerInertia(const playerState_s *ps, float accelspeed, const
 {
     float v4; // [esp+8h] [ebp-8h]
 
-    if (ps->pm_type == 2)
+    if (ps->pm_type == PM_NOCLIP)
         return accelspeed;
+
     if (accelspeed <= (double)inertiaMax->current.value)
         return accelspeed;
+
     v4 = ps->oldVelocity[1] * ps->oldVelocity[1] + ps->oldVelocity[0] * ps->oldVelocity[0];
     if (v4 < 0.0001)
         return accelspeed;
+
     if (PM_DoPlayerInertia(ps, accelspeed, wishdir))
         return inertiaMax->current.value;
+
     return accelspeed;
 }
 
@@ -2017,12 +2021,16 @@ double __cdecl PM_MoveScale(playerState_s *ps, float fmove, float rmove, float u
         scalea = scale * 1.0;
     else
         scalea = scale * 0.4000000059604645;
-    if (ps->pm_type == 2)
+
+    if (ps->pm_type == PM_NOCLIP)
         scalea = scalea * 3.0;
-    if (ps->pm_type == 3)
+
+    if (ps->pm_type == PM_UFO)
         scalea = scalea * 6.0;
-    if (ps->pm_type == 4)
+
+    if (ps->pm_type == PM_SPECTATOR)
         return (float)(scalea * player_spectateSpeedScale->current.value);
+
     return scalea;
 }
 
@@ -2048,11 +2056,11 @@ double __cdecl PM_CmdScale(playerState_s *ps, usercmd_s *cmd)
         scalea = scale * 1.0;
     else
         scalea = scale * 0.4000000059604645;
-    if (ps->pm_type == 2)
+    if (ps->pm_type == PM_NOCLIP)
         scalea = scalea * 3.0;
-    if (ps->pm_type == 3)
+    if (ps->pm_type == PM_UFO)
         scalea = scalea * 6.0;
-    if (ps->pm_type == 4)
+    if (ps->pm_type == PM_SPECTATOR)
         return (float)(scalea * player_spectateSpeedScale->current.value);
     return scalea;
 }
@@ -2312,11 +2320,11 @@ double __cdecl PM_CmdScale_Walk(pmove_t *pm, usercmd_s *cmd)
         scalea = scale * 1.0;
     if ((ps->pm_flags & 0x8000) != 0)
         scalea = scalea * player_sprintSpeedScale->current.value;
-    if (ps->pm_type == 2)
+    if (ps->pm_type == PM_NOCLIP)
     {
         scaleb = scalea * 3.0;
     }
-    else if (ps->pm_type == 3)
+    else if (ps->pm_type == PM_UFO)
     {
         scaleb = scalea * 6.0;
     }
@@ -2685,7 +2693,7 @@ void __cdecl PM_CrashLand(playerState_s *ps, pml_t *pml)
         {
             if (bg_fallDamageMinHeight->current.value >= (float)fallHeight
                 || (pml->groundTrace.surfaceFlags & 1) != 0
-                || ps->pm_type >= 7)
+                || ps->pm_type >= PM_DEAD)
             {
                 damage = 0;
             }
@@ -2953,7 +2961,7 @@ void __cdecl PM_CheckDuck(pmove_t *pm, pml_t *pml)
     if (!ps)
         MyAssertHandler(".\\bgame\\bg_pmove.cpp", 2512, 0, "%s", "ps");
     pm->proneChange = 0;
-    if (ps->pm_type == 4)
+    if (ps->pm_type == PM_SPECTATOR)
     {
         pm->mins[0] = -8.0;
         pm->mins[1] = -8.0;
@@ -2980,7 +2988,7 @@ void __cdecl PM_CheckDuck(pmove_t *pm, pml_t *pml)
         pm->maxs[0] = 15.0;
         pm->maxs[1] = 15.0;
         pm->maxs[2] = 70.0;
-        if (ps->pm_type == 7)
+        if (ps->pm_type == PM_DEAD)
         {
             ps->viewHeightTarget = 8;
             PM_ViewHeightAdjust(pm, pml);
@@ -3024,7 +3032,7 @@ void __cdecl PM_CheckDuck(pmove_t *pm, pml_t *pml)
             }
             else if ((ps->pm_flags & 0xC00) == 0 && !PM_IsPlayerFrozenByWeapon(ps))
             {
-                if (ps->pm_type == 6)
+                if (ps->pm_type == PM_LASTSTAND)
                 {
                     ps->pm_flags &= ~1u;
                     ps->pm_flags |= 2u;
@@ -3149,7 +3157,7 @@ void __cdecl PM_CheckDuck(pmove_t *pm, pml_t *pml)
             }
             if (!ps->viewHeightLerpTime)
             {
-                if (ps->pm_type == 6)
+                if (ps->pm_type == PM_LASTSTAND)
                 {
                     ps->viewHeightTarget = 22;
                 }
@@ -3462,7 +3470,7 @@ void __cdecl PM_ViewHeightAdjust(pmove_t *pm, pml_t *pml)
             }
         }
     }
-    else if (ps->pm_type == 4)
+    else if (ps->pm_type == PM_SPECTATOR)
     {
         ps->viewHeightCurrent = 0.0;
     }
@@ -3544,7 +3552,7 @@ void __cdecl PM_Footsteps(pmove_t *pm, pml_t *pml)
     BG_CheckThread();
     if (!bgs)
         MyAssertHandler(".\\bgame\\bg_pmove.cpp", 3537, 0, "%s", "bgs");
-    if (ps->pm_type < 7)
+    if (ps->pm_type < PM_DEAD)
     {
         pm->xyspeed = Vec2Length(ps->velocity);
         if ((ps->eFlags & 0x300) != 0)
@@ -3555,7 +3563,7 @@ void __cdecl PM_Footsteps(pmove_t *pm, pml_t *pml)
         else
         {
             iStance = PM_GetEffectiveStance(ps);
-            if (ps->groundEntityNum != 1023 || ps->pm_type == 1)
+            if (ps->groundEntityNum != 1023 || ps->pm_type == PM_NORMAL_LINKED)
             {
                 v5 = (ps->pm_flags & 0x40) != 0 || ps->leanf != 0.0;
                 walking = v5;
@@ -3563,7 +3571,7 @@ void __cdecl PM_Footsteps(pmove_t *pm, pml_t *pml)
                 sprinting = v3 != 0;
                 if (v3 && v5)
                     MyAssertHandler(".\\bgame\\bg_pmove.cpp", 3569, 0, "%s", "!sprinting || !walking");
-                if (player_moveThreshhold->current.value > (double)pm->xyspeed || ps->pm_type == 1)
+                if (player_moveThreshhold->current.value > (double)pm->xyspeed || ps->pm_type == PM_NORMAL_LINKED)
                 {
                     PM_Footsteps_NotMoving(pm, iStance);
                 }
@@ -4011,7 +4019,7 @@ void __cdecl PM_UpdatePlayerWalkingFlag(pmove_t *pm)
     if (!pm->ps)
         MyAssertHandler(".\\bgame\\bg_pmove.cpp", 4379, 0, "%s", "ps");
     ps->pm_flags &= ~0x40u;
-    if (ps->pm_type < 7
+    if (ps->pm_type < PM_DEAD
         && (pm->cmd.buttons & 0x800) != 0
         && (ps->pm_flags & 1) == 0
         && (ps->pm_flags & 0x10) != 0
@@ -4077,7 +4085,7 @@ void __cdecl PM_CheckLadderMove(pmove_t *pm, pml_t *pml)
             vLadderCheckDir[2] = 0.0;
             Vec3Normalize(vLadderCheckDir);
         }
-        if (ps->pm_type < 7)
+        if (ps->pm_type < PM_DEAD)
         {
             if ((ps->pm_flags & 0x2000) != 0 || PM_GetEffectiveStance(ps) == 1 || pm->cmd.serverTime - ps->jumpTime < 300)
             {

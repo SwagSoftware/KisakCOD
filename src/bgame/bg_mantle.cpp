@@ -160,7 +160,7 @@ void __cdecl Mantle_Check(pmove_t *pm, pml_t *pml)
         if (!ps)
             MyAssertHandler(".\\bgame\\bg_mantle.cpp", 682, 0, "%s", "ps");
         Mantle_ClearHint(ps);
-        if (ps->pm_type < 7)
+        if (ps->pm_type < PM_DEAD)
         {
             if ((ps->pm_flags & 4) != 0)
             {

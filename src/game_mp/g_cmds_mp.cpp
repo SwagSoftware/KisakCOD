@@ -1208,7 +1208,7 @@ void __cdecl ClientCommand(int32_t clientNum)
             {
                 if (I_stricmp(cmd, "score"))
                 {
-                    if (ent->client->ps.pm_type != 5)
+                    if (ent->client->ps.pm_type != PM_INTERMISSION)
                     {
                         if (I_stricmp(cmd, "mr"))
                         {

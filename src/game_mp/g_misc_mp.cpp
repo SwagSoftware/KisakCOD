@@ -173,7 +173,7 @@ void __cdecl turret_think_client(gentity_s *self)
     owner = EntHandle::ent(&self->r.ownerNum);
     if (!owner->client)
         MyAssertHandler(".\\game_mp\\g_misc_mp.cpp", 596, 0, "%s", "owner->client");
-    if (owner->active != 1 || owner->client->sess.sessionState || owner->client->ps.pm_type == 6)
+    if (owner->active != 1 || owner->client->sess.sessionState || owner->client->ps.pm_type == PM_LASTSTAND)
     {
         G_ClientStopUsingTurret(self);
     }

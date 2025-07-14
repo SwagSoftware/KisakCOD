@@ -1557,7 +1557,7 @@ void __cdecl BG_PlayerToEntitySetFlags(playerState_s *ps, entityState_s *s)
     int v3; // ecx
 
     s->lerp.eFlags = ps->eFlags;
-    if (ps->pm_type < 7)
+    if (ps->pm_type < PM_DEAD)
         v2 = s->lerp.eFlags & 0xFFFDFFFF;
     else
         v2 = s->lerp.eFlags | 0x20000;

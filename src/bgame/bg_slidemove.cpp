@@ -208,7 +208,7 @@ void __cdecl PM_StepSlideMove(pmove_t *pm, pml_t *pml, int32_t gravity)
             Jump_ClampVelocity(ps, down_o);
         if (bHadGround)
         {
-            if (ps->pm_type < 7)
+            if (ps->pm_type < PM_DEAD)
             {
                 if (PM_VerifyPronePosition(pm, start_o, start_v))
                 {

@@ -152,7 +152,7 @@ double __cdecl CG_GetViewFov(int32_t localClientNum)
     cgameGlob = CG_GetLocalClientGlobals(localClientNum);
     weapIndex = BG_GetViewmodelWeaponIndex(&cgameGlob->predictedPlayerState);
     weapDef = BG_GetWeaponDef(weapIndex);
-    if (cgameGlob->predictedPlayerState.pm_type == 5)
+    if (cgameGlob->predictedPlayerState.pm_type == PM_INTERMISSION)
     {
         viewFov = 90.0;
     }
@@ -578,7 +578,7 @@ void __cdecl CG_CalcViewValues(int32_t localClientNum)
     else
     {
         CG_CalcVrect(localClientNum);
-        if (cgameGlob->predictedPlayerState.pm_type == 5)
+        if (cgameGlob->predictedPlayerState.pm_type == PM_INTERMISSION)
         {
             cgameGlob->refdef.vieworg[0] = cgameGlob->predictedPlayerState.origin[0];
             cgameGlob->refdef.vieworg[1] = cgameGlob->predictedPlayerState.origin[1];
@@ -610,8 +610,8 @@ void __cdecl CG_CalcViewValues(int32_t localClientNum)
             cgameGlob->refdef.vieworg[2] = cgameGlob->predictedPlayerState.origin[2];
             if (!cgameGlob->playerTeleported
                 && (!cgameGlob->nextSnap->ps.pm_type
-                    || cgameGlob->nextSnap->ps.pm_type == 2
-                    || cgameGlob->nextSnap->ps.pm_type == 3))
+                    || cgameGlob->nextSnap->ps.pm_type == PM_NOCLIP
+                    || cgameGlob->nextSnap->ps.pm_type == PM_UFO))
             {
                 CG_SmoothCameraZ(cgameGlob);
             }
@@ -666,7 +666,7 @@ void __cdecl CG_OffsetThirdPersonView(cg_s *cgameGlob)
     focusAngles[0] = cgameGlob->refdefViewAngles[0];
     focusAngles[1] = cgameGlob->refdefViewAngles[1];
     focusAngles[2] = cgameGlob->refdefViewAngles[2];
-    if (cgameGlob->predictedPlayerState.pm_type >= 7)
+    if (cgameGlob->predictedPlayerState.pm_type >= PM_DEAD)
     {
         focusAngles[1] = (float)cgameGlob->predictedPlayerState.stats[1];
         viewAngles[1] = (float)cgameGlob->predictedPlayerState.stats[1];
@@ -787,9 +787,9 @@ void __cdecl CG_OffsetFirstPersonView(cg_s *cgameGlob)
     float deltaB; // [esp+40h] [ebp-28h]
     viewState_t vs; // [esp+44h] [ebp-24h] BYREF
 
-    if (cgameGlob->nextSnap->ps.pm_type >= 7)
-        MyAssertHandler(".\\cgame_mp\\cg_view_mp.cpp", 451, 0, "%s", "cgameGlob->nextSnap->ps.pm_type < PM_DEAD");
-    if (cgameGlob->nextSnap->ps.pm_type != 5 && (cgameGlob->predictedPlayerState.eFlags & 0x300) == 0)
+    iassert(cgameGlob->nextSnap->ps.pm_type < PM_DEAD);
+
+    if (cgameGlob->nextSnap->ps.pm_type != PM_INTERMISSION && (cgameGlob->predictedPlayerState.eFlags & 0x300) == 0)
     {
         vs.ps = &cgameGlob->predictedPlayerState;
         if (cgameGlob->damageTime)
@@ -982,8 +982,8 @@ void __cdecl CG_ApplyViewAnimation(int32_t localClientNum)
 
     cgameGlob = CG_GetLocalClientGlobals(localClientNum);
 
-    if (cgameGlob->predictedPlayerState.pm_type != 4
-        && cgameGlob->predictedPlayerState.pm_type != 5
+    if (cgameGlob->predictedPlayerState.pm_type != PM_SPECTATOR
+        && cgameGlob->predictedPlayerState.pm_type != PM_INTERMISSION
         && (cgameGlob->predictedPlayerState.eFlags & 0x300) == 0
         && !cgameGlob->renderingThirdPerson)
     {
@@ -1162,7 +1162,7 @@ void __cdecl CG_UpdateThirdPerson(int32_t localClientNum)
 
     cgameGlob = CG_GetLocalClientGlobals(localClientNum);
 
-    v1 = cg_thirdPerson->current.enabled || cgameGlob->nextSnap->ps.pm_type >= 7;
+    v1 = cg_thirdPerson->current.enabled || cgameGlob->nextSnap->ps.pm_type >= PM_DEAD;
     cgameGlob->renderingThirdPerson = v1;
     if (CG_VehLocalClientDriving(localClientNum))
         cgameGlob->renderingThirdPerson = 1;
@@ -1741,7 +1741,7 @@ void __cdecl CG_UpdateAdsDof(int32_t localClientNum, GfxDepthOfField *dof)
     cgameGlob = CG_GetLocalClientGlobals(localClientNum);
 
     ps = &cgameGlob->predictedPlayerState;
-    if (cgameGlob->predictedPlayerState.fWeaponPosFrac == 0.0f && ps->pm_type < 7)
+    if (cgameGlob->predictedPlayerState.fWeaponPosFrac == 0.0f && ps->pm_type < PM_DEAD)
     {
         dof->nearStart = 0.0f;
         dof->nearEnd = 0.0f;
@@ -1815,7 +1815,7 @@ void __cdecl CG_UpdateAdsDof(int32_t localClientNum, GfxDepthOfField *dof)
         nearBlur = 6.0f;
         farBlur = 0.0f;
         dt = (float)cgameGlob->frametime * EQUAL_EPSILON;
-        if (ps->fWeaponPosFrac == 1.0 || ps->pm_type >= 7)
+        if (ps->fWeaponPosFrac == 1.0 || ps->pm_type >= PM_DEAD)
         {
             dof->nearStart = CG_UpdateAdsDofValue(dof->nearStart, nearStart, 50.0f, dt);
             dof->nearEnd = CG_UpdateAdsDofValue(dof->nearEnd, nearEnd, 50.0f, dt);

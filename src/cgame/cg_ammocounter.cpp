@@ -1133,8 +1133,8 @@ void __cdecl CG_DrawPlayerWeaponLowAmmoWarning(
 
     cgameGlob = CG_GetLocalClientGlobals(localClientNum);
 
-    if ( cgameGlob->predictedPlayerState.pm_type < 7
-        && cgameGlob->predictedPlayerState.pm_type != 4
+    if ( cgameGlob->predictedPlayerState.pm_type < PM_DEAD
+        && cgameGlob->predictedPlayerState.pm_type != PM_SPECTATOR
         && (cgameGlob->predictedPlayerState.eFlags & 0x300) == 0
         && cgameGlob->predictedPlayerState.weaponstate != 7
         && cgameGlob->predictedPlayerState.weaponstate != 9

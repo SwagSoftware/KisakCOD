@@ -289,7 +289,7 @@ void __cdecl CG_VoiceChat_f()
 
     if (cgameGlob->nextSnap && Cmd_Argc() == 2)
     {
-        if (cgameGlob->nextSnap->ps.pm_type == 5 || (cgameGlob->nextSnap->ps.otherFlags & 4) != 0)
+        if (cgameGlob->nextSnap->ps.pm_type == PM_INTERMISSION || (cgameGlob->nextSnap->ps.otherFlags & 4) != 0)
         {
             chatCmd = Cmd_Argv(1);
             v1 = va("cmd vsay %s\n", chatCmd);
@@ -315,7 +315,7 @@ void __cdecl CG_TeamVoiceChat_f()
 
     if (cgameGlob->nextSnap && Cmd_Argc() == 2)
     {
-        if (cgameGlob->nextSnap->ps.pm_type == 5 || (cgameGlob->nextSnap->ps.otherFlags & 4) != 0)
+        if (cgameGlob->nextSnap->ps.pm_type == PM_INTERMISSION || (cgameGlob->nextSnap->ps.otherFlags & 4) != 0)
         {
             chatCmd = Cmd_Argv(1);
             v1 = va("cmd vsay_team %s\n", chatCmd);

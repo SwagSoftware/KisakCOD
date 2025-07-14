@@ -151,7 +151,7 @@ void __cdecl CG_Draw2D(int32_t localClientNum)
         {
             drawHud = CG_ShouldDrawHud(localClientNum);
             ps = &cgameGlob->nextSnap->ps;
-            if (cgameGlob->nextSnap->ps.pm_type == 5)
+            if (cgameGlob->nextSnap->ps.pm_type == PM_INTERMISSION)
             {
                 DrawIntermission(localClientNum);
                 CG_DrawSay(localClientNum);
@@ -161,7 +161,7 @@ void __cdecl CG_Draw2D(int32_t localClientNum)
                 Dvar_SetBool(ui_showEndOfGame, 0);
                 CG_CompassUpdateActors(localClientNum);
                 chatOverScoreboard = CG_IsScoreboardDisplayed(localClientNum);
-                if (ps->pm_type == 4)
+                if (ps->pm_type == PM_SPECTATOR)
                 {
                     if (drawHud)
                     {
@@ -178,11 +178,11 @@ void __cdecl CG_Draw2D(int32_t localClientNum)
                 {
                     CG_DrawNightVisionOverlay(localClientNum);
                     CG_ScanForCrosshairEntity(localClientNum);
-                    if (ps->pm_type < 7)
+                    if (ps->pm_type < PM_DEAD)
                         CG_DrawCrosshair(localClientNum);
                     if (drawHud)
                     {
-                        if (ps->pm_type < 7)
+                        if (ps->pm_type < PM_DEAD)
                             CG_UpdatePlayerNames(localClientNum);
                         if (!chatOverScoreboard)
                             CG_DrawChatMessages(localClientNum);
@@ -633,13 +633,13 @@ void __cdecl CG_CheckHudSprintDisplay(int32_t localClientNum)
     cgameGlob = CG_GetLocalClientGlobals(localClientNum);
 
     ps = &cgameGlob->nextSnap->ps;
-    if (cgameGlob->nextSnap->ps.pm_type != 7)
+    if (cgameGlob->nextSnap->ps.pm_type != PM_DEAD)
     {
         maxSprintTime = BG_GetMaxSprintTime(ps);
         if (PM_GetSprintLeft(ps, cgameGlob->time) < maxSprintTime)
             CG_MenuShowNotify(localClientNum, 6);
     }
-    if (ps->pm_type != 7
+    if (ps->pm_type != PM_DEAD
         && cgameGlob->predictedPlayerState.sprintState.lastSprintStart > cgameGlob->predictedPlayerState.sprintState.lastSprintEnd)
     {
         CG_MenuShowNotify(localClientNum, 6);

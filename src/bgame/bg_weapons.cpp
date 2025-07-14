@@ -325,7 +325,7 @@ void __cdecl BG_SetupClipIndexes(uint32_t weapIndex)
 
 void __cdecl PM_StartWeaponAnim(playerState_s *ps, int32_t anim)
 {
-    if (ps->pm_type < 7)
+    if (ps->pm_type < PM_DEAD)
         ps->weapAnim = anim | ps->weapAnim & 0x200 ^ 0x200;
 }
 
@@ -1085,7 +1085,7 @@ void __cdecl PM_AdjustAimSpreadScale(pmove_t *pm, pml_t *pml)
     {
         spreadOverrideScale = ((double)ps->spreadOverride - weapDef->fHipSpreadStandMin)
             / (weapDef->hipSpreadStandMax - weapDef->fHipSpreadStandMin);
-        if (ps->groundEntityNum != 1023 || ps->pm_type == 1)
+        if (ps->groundEntityNum != 1023 || ps->pm_type == PM_NORMAL_LINKED)
         {
             if ((ps->eFlags & 8) != 0)
             {
@@ -1140,7 +1140,7 @@ void __cdecl PM_AdjustAimSpreadScale(pmove_t *pm, pml_t *pml)
                         viewchange = weapDef->fHipSpreadMoveAdd * v3 / (double)ps->speed + viewchange;
                     }
                 }
-                if (ps->groundEntityNum == 1023 && ps->pm_type != 1)
+                if (ps->groundEntityNum == 1023 && ps->pm_type != PM_NORMAL_LINKED)
                 {
                     for (ia = 0; ia < 2; ++ia)
                         viewchange = (float)0.0099999998 * 128.0 + viewchange;
@@ -1252,7 +1252,7 @@ void __cdecl PM_Weapon(pmove_t *pm, pml_t *pml)
         v2 = va("PWF_USING_OFFHAND set during non-offhand weapon state [%d]\n", ps->weaponstate);
         MyAssertHandler(".\\bgame\\bg_weapons.cpp", 3961, 0, v2);
     }
-    if (ps->pm_type < 7)
+    if (ps->pm_type < PM_DEAD)
     {
         if (!G_ExitAfterConnectPaths() && (ps->pm_flags & 0x400) == 0 && (ps->eFlags & 0x300) == 0)
         {
