@@ -38,12 +38,12 @@ source_group("EffectsCore" FILES ${EFFECTSCORE})
 set(AIM_ASSIST
     "${SRC_DIR}/aim_assist/aim_assist.cpp"
     "${SRC_DIR}/aim_assist/aim_assist.h"
-    "${SRC_DIR}/aim_assist/aim_target_mp.cpp"
+    "${SRC_DIR}/aim_assist/aim_target.h"
+    "${SRC_DIR}/aim_assist/aim_target.cpp"
 )
 source_group("aim_assist" FILES ${AIM_ASSIST})
 
 set(BGAME
-    "${SRC_DIR}/bgame/bg_animation_mp.cpp"
     "${SRC_DIR}/bgame/bg_actor_prone.cpp"
     "${SRC_DIR}/bgame/bg_actor_prone.h"
     "${SRC_DIR}/bgame/bg_jump.cpp"

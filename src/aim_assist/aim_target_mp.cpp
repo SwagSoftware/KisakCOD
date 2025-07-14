@@ -391,19 +391,19 @@ int __cdecl AimTarget_CompareTargets(const AimTarget *targetA, const AimTarget *
 bool __cdecl AimTarget_PlayerInValidState(const playerState_s *ps)
 {
     bool result; // al
-
-    if (!ps)
-        MyAssertHandler(".\\aim_assist\\aim_target_mp.cpp", 430, 0, "%s", "ps");
+    
+    iassert(ps);
+#ifdef KISAK_MP
     if ((ps->otherFlags & 2) != 0)
         return 0;
     switch (ps->pm_type)
     {
-    case 2:
-    case 3:
-    case 4:
-    case 5:
-    case 7:
-    case 8:
+    case PM_NOCLIP:
+    case PM_UFO:
+    case PM_SPECTATOR:
+    case PM_INTERMISSION:
+    case PM_DEAD:
+    case PM_DEAD_LINKED:
         result = 0;
         break;
     default:
@@ -411,6 +411,9 @@ bool __cdecl AimTarget_PlayerInValidState(const playerState_s *ps)
         break;
     }
     return result;
+#elif KISAK_SP
+    return (ps->pm_type > PM_DEAD_LINKED); // weird
+#endif
 }
 
 void __cdecl AimTarget_UpdateClientTargets(int32_t localClientNum)
