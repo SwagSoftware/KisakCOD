@@ -1,8 +1,11 @@
 #pragma once
 
+#include <universal/q_shared.h>
+
 #ifdef KISAK_MP
 #include <cgame_mp/cg_local_mp.h>
 #include <game_mp/g_main_mp.h>
+#include <client_mp/client_mp.h>
 #elif KISAK_SP
 #include <server/server.h>
 #endif
@@ -15,6 +18,7 @@
 static const char *hintStrings[] = { "", "HINT_NOICON", "HINT_ACTIVATE", "HINT_HEALTH" }; // idb
 
 // g_client_fields
+#ifdef KISAK_MP
 enum fieldtype_t : int32_t
 {                                       // ...
     F_INT = 0x0,                 // ...
@@ -28,6 +32,27 @@ enum fieldtype_t : int32_t
     F_OBJECT = 0x8,                 // ...
     F_MODEL = 0x9,                 // ...
 };
+#elif KISAK_SP
+enum fieldtype_t : __int32
+{
+    F_INT = 0x0,
+    F_SHORT = 0x1,
+    F_BYTE = 0x2,
+    F_FLOAT = 0x3,
+    F_STRING = 0x4,
+    F_VECTOR = 0x5,
+    F_ENTITY = 0x6,
+    F_ENTHANDLE = 0x7,
+    F_ACTOR = 0x8,
+    F_SENTIENT = 0x9,
+    F_SENTIENTHANDLE = 0xA,
+    F_CLIENT = 0xB,
+    F_PATHNODE = 0xC,
+    F_VECTORHACK = 0xD,
+    F_MODEL = 0xE,
+    F_ACTORGROUP = 0xF,
+};
+#endif
 
 struct vehicle_info_t // sizeof=0x270
 {                                       // ...
@@ -791,7 +816,6 @@ void __cdecl Helicopter_Controller(const gentity_s *pSelf, int32_t *partBits);
 
 
 extern vehicle_info_t s_vehicleInfos[32];
-extern GameWorldMp gameWorldMp;
 
 extern VehicleLocalPhysics s_phys;
 extern VehicleLocalPhysics s_phys_0;

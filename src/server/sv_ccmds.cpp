@@ -223,7 +223,7 @@ void __cdecl SV_MapRestart(int savegame, int loadScripts)
             if (loadScripts)
             {
                 SV_ClearPendingSaves();
-                SV_AddPendingSave("map_restart", "Start Level Save", byte_82003CDD, SAVE_TYPE_AUTOSAVE, 2u, 1);
+                SV_AddPendingSave("map_restart", "Start Level Save", "", SAVE_TYPE_AUTOSAVE, 2u, 1);
                 SV_ProcessPendingSaves();
             }
         }
@@ -398,7 +398,7 @@ void __cdecl SV_LoadGame_f()
         nesting = sv_cmd_args.nesting;
     }
     if (sv_cmd_args.argc[nesting] <= 1)
-        v1 = byte_82003CDD;
+        v1 = "";
     else
         v1 = (char *)*((unsigned int *)sv_cmd_args.argv[nesting] + 1);
     if (!*v1)
@@ -764,7 +764,7 @@ void SV_Script//Profile_f()
     nesting = sv_cmd_args.nesting;
   }
   if (sv_cmd_args.argc[nesting] <= 1)
-    v1 = byte_82003CDD;
+    v1 = "";
   else
     v1 = (const char *)*((unsigned int *)sv_cmd_args.argv[nesting] + 1);
   v2 = atof(v1);
@@ -790,7 +790,7 @@ void SV_ScriptBuiltin_f()
         nesting = sv_cmd_args.nesting;
     }
     if (sv_cmd_args.argc[nesting] <= 1)
-        v1 = byte_82003CDD;
+        v1 = "";
     else
         v1 = (const char *)*((unsigned int *)sv_cmd_args.argv[nesting] + 1);
     v2 = atof(v1);

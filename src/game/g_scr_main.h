@@ -4,6 +4,80 @@
 #error This file is for SinglePlayer only 
 #endif
 
+#include <bgame/bg_public.h>
+#include <bgame/bg_actor_prone.h>
+#include <script/scr_variable.h>
+
+struct scr_data_t_tag
+{
+    scr_animtree_t tree;
+};
+
+struct BuiltinFunctionDef
+{
+    const char *actionString;
+    void(__fastcall *actionFunc)();
+    int type;
+};
+
+struct corpseInfo_t
+{
+    XAnimTree_s *tree;
+    int entnum;
+    actor_prone_info_s proneInfo;
+};
+
+struct actorBackup_s
+{
+    ai_animmode_t eAnimMode;
+    ai_animmode_t eDesiredAnimMode;
+    ai_animmode_t eScriptSetAnimMode;
+    bool bUseGoalWeight;
+    actor_physics_t Physics;
+    ai_orient_t ScriptOrient;
+    ai_orient_t CodeOrient;
+    float fDesiredBodyYaw;
+    float currentOrigin[3];
+    float currentAngles[3];
+    float vLookForward[3];
+    float vLookRight[3];
+    float vLookUp[3];
+};
+
+struct scr_data_t
+{
+    int levelscript;
+    int scripted_init;
+    scr_data_t_tag generic_human;
+    AnimScriptList anim;
+    AnimScriptList dogAnim;
+    int delete_;
+    int initstructs;
+    int createstruct;
+    XAnimTree_s *actorXAnimTrees[32];
+    corpseInfo_t actorCorpseInfo[16];
+    XAnimTree_s *actorBackupXAnimTree;
+    actorBackup_s *actorBackup;
+    XAnimTree_s *actorXAnimClientTrees[64];
+    bool actorXAnimClientTreesInuse[64];
+    int actorFreeClientTree;
+};
+
+struct ScriptFunctions
+{
+    int maxSize;
+    int count;
+    int *address;
+};
+
+struct cached_tag_mat_t
+{
+    int time;
+    int entnum;
+    unsigned __int16 name;
+    float tagMat[4][3];
+};
+
 unsigned int __cdecl GScr_AllocString(const char *s);
 void __cdecl TRACK_g_scr_main();
 void __cdecl Scr_LoadLevel();
@@ -16,10 +90,7 @@ void __cdecl GScr_SetLevelScript(ScriptFunctions *functions);
 void *__cdecl GScr_AnimscriptAlloc(int size);
 void __cdecl GScr_SetScriptsForPathNode(pathnode_t *loadNode, ScriptFunctions *data);
 void __cdecl GScr_SetScriptsForPathNodes(ScriptFunctions *functions);
-scr_animtree_t *__cdecl GScr_FindAnimTree(
-    scr_animtree_t *__return_ptr retstr,
-    const char *filename,
-    int bEnforceExists);
+scr_animtree_t __cdecl GScr_FindAnimTree(const char *filename, int bEnforceExists);
 void __cdecl GScr_FindAnimTrees(int a1, const char *a2);
 void __cdecl GScr_SetSingleAnimScript(ScriptFunctions *functions, scr_animscript_t *pAnim, const char *name);
 void __cdecl GScr_SetAnimScripts(ScriptFunctions *functions);
@@ -494,3 +565,31 @@ void __cdecl ScrCmd_animscripted(scr_entref_t *entref);
 void __cdecl G_SetAnimTree(gentity_s *ent, scr_animtree_t *animtree);
 void __cdecl GScr_UseAnimTree(scr_entref_t *entref);
 void __cdecl GScr_StopUseAnimTree(scr_entref_t *entref);
+
+
+static const char *nodeStringTable[20] =
+{
+  "BAD NODE",
+  "Path",
+  "Cover Stand",
+  "Cover Crouch",
+  "Cover Crouch Window",
+  "Cover Prone",
+  "Cover Right",
+  "Cover Left",
+  "Cover Wide Right",
+  "Cover Wide Left",
+  "Conceal Stand",
+  "Conceal Crouch",
+  "Conceal Prone",
+  "Reacquire",
+  "Balcony",
+  "Scripted",
+  "Begin",
+  "End",
+  "Turret",
+  "Guard"
+};
+
+
+extern scr_data_t g_scr_data;

@@ -691,14 +691,14 @@ void __cdecl CL_SetViewport(int x, int y, int width, int height)
 }
 
 void __cdecl CL_DrawStretchPicPhysical(
-    double x,
-    double y,
-    double w,
-    double h,
-    double s1,
-    double t1,
-    double s2,
-    double t2,
+    float x,
+    float y,
+    float w,
+    float h,
+    float s1,
+    float t1,
+    float s2,
+    float t2,
     const float *color,
     Material *material)
 {
@@ -706,14 +706,14 @@ void __cdecl CL_DrawStretchPicPhysical(
 }
 
 void __cdecl CL_DrawStretchPicPhysicalFlipST(
-    double x,
-    double y,
-    double w,
-    double h,
-    double s1,
-    double t1,
-    double s2,
-    double t2,
+    float x,
+    float y,
+    float w,
+    float h,
+    float s1,
+    float t1,
+    float s2,
+    float t2,
     const float *color,
     Material *material)
 {

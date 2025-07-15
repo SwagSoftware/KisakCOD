@@ -2,6 +2,7 @@
 
 #include "net_chan_mp.h"
 #include "huffman.h"
+#include "msg_mp.h"
 
 static const unsigned int kbitmask[33] =
 {

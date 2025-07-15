@@ -14,6 +14,10 @@
 #include <gfx_d3d/r_material.h>
 #include <gfx_d3d/r_gfx.h>
 
+#include <game/pathnode.h>
+
+#include <ui/ui_shared.h>
+
 union XAnimIndices // sizeof=0x4
 {                                       // ...
     unsigned __int8 *_1;
@@ -425,121 +429,6 @@ struct ComWorld // sizeof=0x10 (SP/MP Same)
     ComPrimaryLight* primaryLights;     // ...
 };
 
-struct pathlink_s // sizeof=0xC
-{
-    float fDist;
-    unsigned __int16 nodeNum;
-    unsigned __int8 disconnectCount;
-    unsigned __int8 negotiationLink;
-    unsigned __int8 ubBadPlaceCount[4];
-};
-static_assert(sizeof(pathlink_s) == 12);
-
-struct pathnode_constant_t // sizeof=0x44
-{                                       // ...
-    nodeType type;
-    unsigned __int16 spawnflags;
-    unsigned __int16 targetname;
-    unsigned __int16 script_linkName;
-    unsigned __int16 script_noteworthy;
-    unsigned __int16 target;
-    unsigned __int16 animscript;
-    int animscriptfunc;
-    float vOrigin[3];
-    float fAngle;
-    float forward[2];
-    float fRadius;
-    float minUseDistSq;
-    __int16 wOverlapNode[2];
-    __int16 wChainId;
-    __int16 wChainDepth;
-    __int16 wChainParent;
-    unsigned __int16 totalLinkCount;
-    pathlink_s* Links;
-};
-static_assert(sizeof(pathnode_constant_t) == 68);
-
-struct pathnode_dynamic_t // sizeof=0x20
-{                                       // ...
-    void* pOwner;
-    int iFreeTime;
-    int iValidTime[3];
-    int inPlayerLOSTime;
-    __int16 wLinkCount;
-    __int16 wOverlapCount;
-    __int16 turretEntNumber;
-    __int16 userCount;
-};
-struct pathnode_t;
-struct pathnode_transient_t // sizeof=0x1C
-{
-    int iSearchFrame;
-    pathnode_t* pNextOpen;
-    pathnode_t* pPrevOpen;
-    pathnode_t* pParent;
-    float fCost;
-    float fHeuristic;
-    float costFactor;
-};
-
-struct pathnode_t // sizeof=0x80
-{
-    pathnode_constant_t constant;
-    pathnode_dynamic_t dynamic;
-    pathnode_transient_t transient;
-};
-static_assert(sizeof(pathnode_t) == 128);
-
-struct pathbasenode_t // sizeof=0x10
-{
-    float vOrigin[3];
-    unsigned int type;
-};
-static_assert(sizeof(pathbasenode_t) == 16);
-
-struct pathnode_tree_nodes_t // sizeof=0x8
-{                                       // ...
-    int nodeCount;
-    unsigned __int16* nodes;
-};
-static_assert(sizeof(pathnode_tree_nodes_t) == 8);
-
-struct pathnode_tree_t;
-union pathnode_tree_info_t // sizeof=0x8
-{
-    pathnode_tree_t* child[2];
-    pathnode_tree_nodes_t s;
-};
-
-struct pathnode_tree_t // sizeof=0x10
-{
-    int axis;
-    float dist;
-    pathnode_tree_info_t u;
-};
-struct PathData // sizeof=0x28
-{                                       // ...
-    unsigned int nodeCount;
-    pathnode_t* nodes;
-    pathbasenode_t* basenodes;
-    unsigned int chainNodeCount;
-    unsigned __int16* chainNodeForNode;
-    unsigned __int16* nodeForChainNode;
-    int visBytes;
-    unsigned __int8* pathVis;
-    int nodeTreeCount;
-    pathnode_tree_t* nodeTree;
-};
-struct GameWorldSp // sizeof=0x2C
-{
-    const char* name;
-    PathData path;
-};
-struct GameWorldMp // sizeof=0x4
-{                                       // ...
-    const char* name;
-};
-
 struct XModelDrawInfo // sizeof=0x4
 {                                       // ...
     unsigned __int16 lod;
@@ -558,236 +447,6 @@ struct GfxSceneDynBrush // sizeof=0x4
 {
     BModelDrawInfo info;
     unsigned __int16 dynEntId;
-};
-
-
-
-struct rectDef_s // sizeof=0x18 // (SP/MP Same)
-{                                       // ...
-    float x;                            // ...
-    float y;                            // ...
-    float w;                            // ...
-    float h;                            // ...
-    int horzAlign;                      // ...
-    int vertAlign;                      // ...
-};
-struct windowDef_t // sizeof=0x9C
-{                                       // ...
-    const char* name;
-    rectDef_s rect;
-    rectDef_s rectClient;
-    const char* group;
-    int style;
-    int border;
-    int ownerDraw;
-    int ownerDrawFlags;
-    float borderSize;
-    int staticFlags;
-    int dynamicFlags[1];
-    int nextTime;
-    float foreColor[4];
-    float backColor[4];
-    float borderColor[4];
-    float outlineColor[4];
-    Material* background;
-};
-struct ItemKeyHandler // sizeof=0xC
-{
-    int key;
-    const char* action;
-    ItemKeyHandler* next;
-};
-
-union operandInternalDataUnion // sizeof=0x4
-{                                       // ...
-    operandInternalDataUnion()
-    {
-        intVal = 0;
-    }
-    operandInternalDataUnion(int i)
-    {
-        intVal = i;
-    }
-    operandInternalDataUnion(float f)
-    {
-        floatVal = f;
-    }
-    operandInternalDataUnion(const char *str)
-    {
-        string = str;
-    }
-
-    operator int()
-    {
-        return intVal;
-    }
-    operator float()
-    {
-        return floatVal;
-    }
-    int intVal;
-    float floatVal;
-    const char* string;
-};
-struct Operand // sizeof=0x8
-{                                       // ...
-    expDataType dataType;               // ...
-    operandInternalDataUnion internals; // ...
-};
-union entryInternalData // sizeof=0x8
-{                                       // ...
-    operationEnum op;
-    Operand operand;
-};
-struct expressionEntry // sizeof=0xC
-{
-    int type;
-    entryInternalData data;
-};
-struct statement_s // sizeof=0x8
-{                                       // ...
-    int numEntries;
-    expressionEntry** entries;
-};
-struct columnInfo_s // sizeof=0x10
-{                                       // ...
-    int pos;
-    int width;
-    int maxChars;
-    int alignment;
-};
-struct listBoxDef_s // sizeof=0x154
-{
-    int mousePos;
-    int startPos[1];
-    int endPos[1];
-    int drawPadding;
-    float elementWidth;
-    float elementHeight;
-    int elementStyle;
-    int numColumns;
-    columnInfo_s columnInfo[16];
-    const char* doubleClick;
-    int notselectable;
-    int noScrollBars;
-    int usePaging;
-    float selectBorder[4];
-    float disableColor[4];
-    Material* selectIcon;
-};
-struct editFieldDef_s // sizeof=0x20
-{
-    float minVal;
-    float maxVal;
-    float defVal;
-    float range;
-    int maxChars;
-    int maxCharsGotoNext;
-    int maxPaintChars;
-    int paintOffset;
-};
-struct multiDef_s // sizeof=0x188
-{
-    const char* dvarList[32];
-    const char* dvarStr[32];
-    float dvarValue[32];
-    int count;
-    int strDef;
-};
-union itemDefData_t // sizeof=0x4
-{                                       // ...
-    listBoxDef_s* listBox;
-    editFieldDef_s* editField;
-    multiDef_s* multi;
-    const char* enumDvarName;
-    void* data;
-};
-struct itemDef_s // sizeof=0x174
-{                                       // ...
-    windowDef_t window;
-    rectDef_s textRect[1];
-    int type;
-    int dataType;
-    int alignment;
-    int fontEnum;
-    int textAlignMode;
-    float textalignx;
-    float textaligny;
-    float textscale;
-    int textStyle;
-    int gameMsgWindowIndex;
-    int gameMsgWindowMode;
-    const char* text;
-    int itemFlags;
-    struct menuDef_t* parent;                  // ...
-    const char* mouseEnterText;
-    const char* mouseExitText;
-    const char* mouseEnter;
-    const char* mouseExit;
-    const char* action;
-    const char* onAccept;
-    const char* onFocus;
-    const char* leaveFocus;
-    const char* dvar;
-    const char* dvarTest;
-    ItemKeyHandler* onKey;
-    const char* enableDvar;
-    int dvarFlags;
-    snd_alias_list_t* focusSound;
-    float special;
-    int cursorPos[1];
-    itemDefData_t typeData;
-    int imageTrack;
-    statement_s visibleExp;
-    statement_s textExp;
-    statement_s materialExp;
-    statement_s rectXExp;
-    statement_s rectYExp;
-    statement_s rectWExp;
-    statement_s rectHExp;
-    statement_s forecolorAExp;
-};
-
-struct menuDef_t // sizeof=0x11C
-{                                       // ...
-    windowDef_t window;
-    const char* font;
-    int fullScreen;
-    int itemCount;
-    int fontIndex;
-    int cursorItem[1];
-    int fadeCycle;
-    float fadeClamp;
-    float fadeAmount;
-    float fadeInAmount;
-    float blurRadius;
-    const char* onOpen;
-    const char* onClose;
-    const char* onESC;
-    ItemKeyHandler* onKey;
-    statement_s visibleExp;
-    const char* allowedBinding;
-    const char* soundName;
-    int imageTrack;
-    float focusColor[4];
-    float disableColor[4];
-    statement_s rectXExp;
-    statement_s rectYExp;
-    itemDef_s** items;
-};
-static_assert(sizeof(menuDef_t) == 284);
-
-struct MenuList // sizeof=0xC
-{                                       // ...
-    const char* name;
-    int menuCount;                      // ...
-    menuDef_t** menus;                  // ...
-};
-
-struct LocalizeEntry // sizeof=0x8
-{                                       // ...
-    const char* value;
-    const char* name;
 };
 
 struct WeaponDef // sizeof=0x878
@@ -1235,6 +894,7 @@ union XAssetHeader // sizeof=0x4
 
 enum XAssetType : __int32
 {
+#ifdef KISAK_MP
     ASSET_TYPE_XMODELPIECES = 0x0,
     ASSET_TYPE_PHYSPRESET = 0x1,
     ASSET_TYPE_XANIMPARTS = 0x2,
@@ -1272,6 +932,45 @@ enum XAssetType : __int32
     ASSET_TYPE_COUNT = 0x21,
     ASSET_TYPE_STRING = 0x21,
     ASSET_TYPE_ASSETLIST = 0x22,
+#elif KISAK_SP
+    ASSET_TYPE_XMODELPIECES = 0x0,
+    ASSET_TYPE_PHYSPRESET = 0x1,
+    ASSET_TYPE_XANIMPARTS = 0x2,
+    ASSET_TYPE_XMODEL = 0x3,
+    ASSET_TYPE_MATERIAL = 0x4,
+    ASSET_TYPE_PIXELSHADER = 0x5,
+    ASSET_TYPE_TECHNIQUE_SET = 0x6,
+    ASSET_TYPE_IMAGE = 0x7,
+    ASSET_TYPE_SOUND = 0x8,
+    ASSET_TYPE_SOUND_CURVE = 0x9,
+    ASSET_TYPE_LOADED_SOUND = 0xA,
+    ASSET_TYPE_CLIPMAP = 0xB,
+    ASSET_TYPE_CLIPMAP_PVS = 0xC,
+    ASSET_TYPE_COMWORLD = 0xD,
+    ASSET_TYPE_GAMEWORLD_SP = 0xE,
+    ASSET_TYPE_GAMEWORLD_MP = 0xF,
+    ASSET_TYPE_MAP_ENTS = 0x10,
+    ASSET_TYPE_GFXWORLD = 0x11,
+    ASSET_TYPE_LIGHT_DEF = 0x12,
+    ASSET_TYPE_UI_MAP = 0x13,
+    ASSET_TYPE_FONT = 0x14,
+    ASSET_TYPE_MENULIST = 0x15,
+    ASSET_TYPE_MENU = 0x16,
+    ASSET_TYPE_LOCALIZE_ENTRY = 0x17,
+    ASSET_TYPE_WEAPON = 0x18,
+    ASSET_TYPE_SNDDRIVER_GLOBALS = 0x19,
+    ASSET_TYPE_FX = 0x1A,
+    ASSET_TYPE_IMPACT_FX = 0x1B,
+    ASSET_TYPE_AITYPE = 0x1C,
+    ASSET_TYPE_MPTYPE = 0x1D,
+    ASSET_TYPE_CHARACTER = 0x1E,
+    ASSET_TYPE_XMODELALIAS = 0x1F,
+    ASSET_TYPE_RAWFILE = 0x20,
+    ASSET_TYPE_STRINGTABLE = 0x21,
+    ASSET_TYPE_COUNT = 0x22,
+    ASSET_TYPE_STRING = 0x22,
+    ASSET_TYPE_ASSETLIST = 0x23,
+#endif
 };
 inline XAssetType &operator++(XAssetType &e) {
     e = static_cast<XAssetType>(static_cast<int>(e) + 1);
@@ -1720,6 +1419,7 @@ void __cdecl XAnimCloneAnimTree_r(
     unsigned int fromInfoIndex,
     unsigned int toInfoParentIndex);
 XAnimInfo* __cdecl GetAnimInfo(int infoIndex);
+void XAnimDisableLeakCheck();
 
 
 // xanim_load_obj

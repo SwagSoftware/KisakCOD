@@ -915,25 +915,25 @@ void __cdecl CL_RenderScene(const refdef_s *fd);
 void __cdecl CL_SetFullScreenViewport();
 void __cdecl CL_SetViewport(int32_t x, int32_t y, int32_t width, int32_t height);
 void __cdecl CL_DrawStretchPicPhysical(
-    double x,
-    double y,
-    double w,
-    double h,
-    double s1,
-    double t1,
-    double s2,
-    double t2,
+    float x,
+    float y,
+    float w,
+    float h,
+    float s1,
+    float t1,
+    float s2,
+    float t2,
     const float *color,
     Material *material);
 void __cdecl CL_DrawStretchPicPhysicalFlipST(
-    double x,
-    double y,
-    double w,
-    double h,
-    double s1,
-    double t1,
-    double s2,
-    double t2,
+    float x,
+    float y,
+    float w,
+    float h,
+    float s1,
+    float t1,
+    float s2,
+    float t2,
     const float *color,
     Material *material);
 void __cdecl CL_DrawStretchPic(

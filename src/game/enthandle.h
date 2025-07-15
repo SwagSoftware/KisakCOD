@@ -1,6 +1,8 @@
 #pragma once
-#include <cstdint>
-#include <xanim/xanim.h>
+
+#include <universal/q_shared.h>
+
+struct gentity_s;
 
 struct EntHandleInfo // sizeof=0x8 // (SP/MP same)
 {                                       // ...

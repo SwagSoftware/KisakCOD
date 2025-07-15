@@ -2,32 +2,54 @@
 #error This file is for SinglePlayer only 
 #endif
 
-//  float const ACTOR_EYE_OFFSET     82021054     actor.obj
-//  int const ACTOR_MAX_HEALTH     82021058     actor.obj
-//  int const ACTOR_TEAMMOVE_WAIT_TIME 8202105c     actor.obj
-//  float const *const actorMins          82021070     actor.obj
-//  float const *const actorMaxs          8202107c     actor.obj
-//  float const (*)[2] meleeAttackOffsets 82021088     actor.obj
-//  float const *const g_actorAssumedSpeed 820210a8     actor.obj
-//
-//  unsigned short const **g_AISpeciesNames 82693684     actor.obj
-//  char const **g_entinfoAITextNames 8269368c     actor.obj
-//  char **ai_orient_mode_text 826936a4     actor.obj
-//  float *g_pathAttemptGoalPos 82c20e08     actor.obj
-//  int marker_actor         82c20e14     actor.obj
-//  struct AnimScriptList **g_animScriptTable 82c20e18     actor.obj
+#include <xanim/xanim.h>
+#include <bgame/bg_local.h>
+#include <script/scr_const.h>
+#include <bgame/bg_public.h>
+#include "actor_event_listeners.h"
+
+const float ACTOR_EYE_OFFSET = 64.0f;
+const int ACTOR_MAX_HEALTH = 100;
+const int ACTOR_TEAMMOVE_WAIT_TIME = 500;
+
+const float actorMins[3] = { -15.0, -15.0, 0.0 };
+const float actorMaxs[3] = { 15.0, 15.0, 72.0 };
+const float meleeAttackOffsets[4][2] = { { 1.0, 0.0 }, { 0.0, 1.0 }, { -1.0, 0.0 }, { 0.0, -1.0 } };
+const float g_actorAssumedSpeed[2] = { 190.0, 300.0 };
+
+
+const unsigned __int16 *g_AISpeciesNames[2] =
+{ 
+    &scr_const.human,
+    &scr_const.dog
+};
+
+const char *g_entinfoAITextNames[] = { "all", "brief", "combat", "movement", "state", NULL };
+const char *ai_orient_mode_text[7] =
+{
+  "invalid",
+  "dont_change",
+  "motion",
+  "enemy",
+  "enemy_or_motion",
+  "enemy_or_motion_sidestep",
+  "goal"
+};
+
+float g_pathAttemptGoalPos[3] = { 0.0f, 0.0f, 0.0f };
+AnimScriptList *g_animScriptTable[2] = { NULL, NULL };
 
 int __cdecl Path_IsValidClaimNode(const pathnode_t *node)
 {
-    if (!node)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\pathnode.h", 164, 0, "%s", "node");
+    iassert(node);
+
     return node->constant.spawnflags & 0x8000;
 }
 
 int __cdecl Path_IsCoverNode(const pathnode_t *node)
 {
-    if (!node)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\pathnode.h", 165, 0, "%s", "node");
+    iassert(node);
+
     return (1 << node->constant.type) & 0x41FFC;
 }
 
@@ -40,14 +62,10 @@ team_t __cdecl Sentient_EnemyTeam(unsigned int eTeam)
     v3[3] = 0;
     v3[4] = 0;
     v3[2] = 1;
-    if (eTeam > 4)
-        MyAssertHandler(
-            "c:\\trees\\cod3\\cod3src\\src\\game\\sentient.h",
-            162,
-            0,
-            "%s",
-            "eTeam >= 0 && eTeam < TEAM_NUM_TEAMS");
-    return v3[eTeam];
+
+    iassert(eTeam >= 0 && eTeam < TEAM_NUM_TEAMS);
+
+    return (team_t)v3[eTeam];
 }
 
 void __cdecl TRACK_actor()
@@ -61,10 +79,9 @@ void __cdecl TRACK_actor()
 
 void __cdecl VisCache_Copy(vis_cache_t *pDstCache, const vis_cache_t *pSrcCache)
 {
-    if (!pDstCache)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\actor.cpp", 123, 0, "%s", "pDstCache");
-    if (!pSrcCache)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\actor.cpp", 124, 0, "%s", "pSrcCache");
+    iassert(pDstCache);
+    iassert(pSrcCache);
+
     *(unsigned int *)&pDstCache->bVisible = *(unsigned int *)&pSrcCache->bVisible;
     pDstCache->iLastUpdateTime = pSrcCache->iLastUpdateTime;
     pDstCache->iLastVisTime = pSrcCache->iLastVisTime;
@@ -72,8 +89,8 @@ void __cdecl VisCache_Copy(vis_cache_t *pDstCache, const vis_cache_t *pSrcCache)
 
 void __cdecl VisCache_Update(vis_cache_t *pCache, bool bVisible)
 {
-    if (!pCache)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\actor.cpp", 134, 0, "%s", "pCache");
+    iassert(pCache);
+
     pCache->bVisible = bVisible;
     pCache->iLastUpdateTime = level.time;
     if (bVisible)
@@ -85,8 +102,8 @@ void __cdecl SentientInfo_Clear(sentient_info_t *pInfo)
     sentient_info_t *v2; // r11
     int v3; // ctr
 
-    if (!pInfo)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\actor.cpp", 146, 0, "%s", "pInfo");
+    iassert(pInfo);
+
     v2 = pInfo;
     v3 = 10;
     do
@@ -166,6 +183,7 @@ void __cdecl G_InitActors()
 
     for (i = 0; i < 32; ++i)
         level.actors[i].inuse = 0;
+
     Actor_EventListener_Init();
 }
 

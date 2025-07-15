@@ -2,6 +2,7 @@
 
 #include "bg_public.h"
 #include "bg_local.h"
+#include <universal/com_math.h>
 
 const dvar_t *jump_height;
 const dvar_t *jump_stepSize;

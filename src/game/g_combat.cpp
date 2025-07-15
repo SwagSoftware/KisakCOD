@@ -376,7 +376,7 @@ void __cdecl G_DamageNotify(
     if (a28)
         Scr_AddConstString(a28);
     else
-        Scr_AddString(byte_82003CDD);
+        Scr_AddString("");
     if (modelIndex)
     {
         v36 = 2 * (modelIndex + 272);
@@ -395,8 +395,8 @@ void __cdecl G_DamageNotify(
     }
     else
     {
-        Scr_AddString(byte_82003CDD);
-        Scr_AddString(byte_82003CDD);
+        Scr_AddString("");
+        Scr_AddString("");
     }
     Scr_AddConstString(*modNames[mod]);
     v38 = point;

@@ -1,4 +1,5 @@
 #include "database.h"
+#include <game/g_bsp.h>
 
 //int32_t marker_db_assetnames 828ddeec     db_assetnames.obj
 

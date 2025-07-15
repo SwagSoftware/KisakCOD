@@ -1,9 +1,213 @@
 #pragma once
+#include <script/scr_variable.h>
+#include <bgame/bg_public.h>
+#include <bgame/bg_local.h>
 
-#ifndef KISAK_SP 
-#error This file is for SinglePlayer only 
+enum nearestNodeHeightCheck : __int32
+{
+    NEAREST_NODE_DO_HEIGHT_CHECK = 0x0,
+    NEAREST_NODE_DONT_DO_HEIGHT_CHECK = 0x1,
+};
+
+enum nodeType : __int32
+{                                       // ...
+    NODE_BADNODE = 0x0,
+    NODE_PATHNODE = 0x1,
+    NODE_COVER_STAND = 0x2,
+    NODE_COVER_CROUCH = 0x3,
+    NODE_COVER_CROUCH_WINDOW = 0x4,
+    NODE_COVER_PRONE = 0x5,
+    NODE_COVER_RIGHT = 0x6,
+    NODE_COVER_LEFT = 0x7,
+    NODE_COVER_WIDE_RIGHT = 0x8,
+    NODE_COVER_WIDE_LEFT = 0x9,
+    NODE_CONCEALMENT_STAND = 0xA,
+    NODE_CONCEALMENT_CROUCH = 0xB,
+    NODE_CONCEALMENT_PRONE = 0xC,
+    NODE_REACQUIRE = 0xD,
+    NODE_BALCONY = 0xE,
+    NODE_SCRIPTED = 0xF,
+    NODE_NEGOTIATION_BEGIN = 0x10,
+    NODE_NEGOTIATION_END = 0x11,
+    NODE_TURRET = 0x12,
+    NODE_GUARD = 0x13,
+    NODE_NUMTYPES = 0x14,
+    NODE_DONTLINK = 0x14,
+};
+
+struct NodeTypeToName
+{
+    nodeType type;
+    const char *name;
+};
+
+struct PathLinkInfo
+{
+    unsigned __int16 from;
+    unsigned __int16 to;
+    unsigned __int16 prev;
+    unsigned __int16 next;
+};
+
+struct pathlocal_t_tag
+{
+    float maxDist;
+    float maxDistSq;
+    float maxHeightSq;
+    int typeFlags;
+    struct pathsort_t *nodes;
+    int maxNodes;
+    int nodeCount;
+};
+
+/* 10009 */
+struct __declspec(align(128)) pathlocal_t
+{
+    PathLinkInfo pathLinkInfoArray[2048];
+    int pathLinkInfoArrayInited;
+    unsigned int actualNodeCount;
+    unsigned int extraNodes;
+    unsigned int originErrors;
+    pathlocal_t_tag circle;
+};
+
+struct pathlink_s // sizeof=0xC
+{
+    float fDist;
+    unsigned __int16 nodeNum;
+    unsigned __int8 disconnectCount;
+    unsigned __int8 negotiationLink;
+    unsigned __int8 ubBadPlaceCount[4];
+};
+static_assert(sizeof(pathlink_s) == 12);
+
+struct badplace_arc_t
+{
+    float origin[3];
+    float radius;
+    float halfheight;
+    float angle0;
+    float angle1;
+};
+
+struct pathnode_constant_t // sizeof=0x44
+{                                       // ...
+    nodeType type;
+    unsigned __int16 spawnflags;
+    unsigned __int16 targetname;
+    unsigned __int16 script_linkName;
+    unsigned __int16 script_noteworthy;
+    unsigned __int16 target;
+    unsigned __int16 animscript;
+    int animscriptfunc;
+    float vOrigin[3];
+    float fAngle;
+    float forward[2];
+    float fRadius;
+    float minUseDistSq;
+    __int16 wOverlapNode[2];
+    __int16 wChainId;
+    __int16 wChainDepth;
+    __int16 wChainParent;
+    unsigned __int16 totalLinkCount;
+    pathlink_s *Links;
+};
+
+#ifdef KISAK_MP
+struct pathnode_dynamic_t // sizeof=0x20
+{                                       // ...
+    void *pOwner;
+    int iFreeTime;
+    int iValidTime[3];
+    int inPlayerLOSTime;
+    __int16 wLinkCount;
+    __int16 wOverlapCount;
+    __int16 turretEntNumber;
+    __int16 userCount;
+};
+#elif KISAK_SP
+struct pathnode_dynamic_t
+{
+    SentientHandle pOwner;
+    int iFreeTime;
+    int iValidTime[3];
+    int inPlayerLOSTime;
+    __int16 wLinkCount;
+    __int16 wOverlapCount;
+    __int16 turretEntNumber;
+    __int16 userCount;
+};
 #endif
 
+
+struct pathnode_t;
+struct pathnode_transient_t // sizeof=0x1C
+{
+    int iSearchFrame;
+    pathnode_t *pNextOpen;
+    pathnode_t *pPrevOpen;
+    pathnode_t *pParent;
+    float fCost;
+    float fHeuristic;
+    float costFactor;
+};
+
+struct pathnode_t // sizeof=0x80 (SP/MP Same)
+{
+    pathnode_constant_t constant;
+    pathnode_dynamic_t dynamic;
+    pathnode_transient_t transient;
+};
+
+struct pathbasenode_t // sizeof=0x10
+{
+    float vOrigin[3];
+    unsigned int type;
+};
+static_assert(sizeof(pathbasenode_t) == 16);
+
+struct pathnode_tree_nodes_t // sizeof=0x8
+{                                       // ...
+    int nodeCount;
+    unsigned __int16 *nodes;
+};
+static_assert(sizeof(pathnode_tree_nodes_t) == 8);
+
+struct pathnode_tree_t;
+union pathnode_tree_info_t // sizeof=0x8
+{
+    pathnode_tree_t *child[2];
+    pathnode_tree_nodes_t s;
+};
+
+struct pathnode_tree_t // sizeof=0x10
+{
+    int axis;
+    float dist;
+    pathnode_tree_info_t u;
+};
+struct PathData // sizeof=0x28
+{                                       // ...
+    unsigned int nodeCount;
+    pathnode_t *nodes;
+    pathbasenode_t *basenodes;
+    unsigned int chainNodeCount;
+    unsigned __int16 *chainNodeForNode;
+    unsigned __int16 *nodeForChainNode;
+    int visBytes;
+    unsigned __int8 *pathVis;
+    int nodeTreeCount;
+    pathnode_tree_t *nodeTree;
+};
+
+struct pathsort_t
+{
+    pathnode_t *node;
+    float metric;
+    float distMetric;
+};
+
+#ifndef KISAK_MP
 void __cdecl TRACK_pathnode();
 int __cdecl NodeTypeCanHavePriority(nodeType type);
 void __cdecl TurretNode_GetAngles(const pathnode_t *node, float *angleMin, float *angleMax);
@@ -165,28 +369,7 @@ pathnode_t *__cdecl Path_NearestNodeNotCrossPlanes(
     float *iPlaneCount,
     int *returnCount,
     unsigned int *maxNodes,
-    nearestNodeHeightCheck heightCheck,
-    int a11,
-    int a12,
-    int a13,
-    int a14,
-    int a15,
-    int a16,
-    int a17,
-    int a18,
-    int a19,
-    int a20,
-    int a21,
-    int a22,
-    int a23,
-    int a24,
-    int a25,
-    int a26,
-    int a27,
-    int a28,
-    int a29,
-    int a30,
-    int a31);
+    nearestNodeHeightCheck heightCheck);
 pathnode_t *__cdecl Path_NearestNode(
     float *vOrigin,
     pathsort_t *nodes,
@@ -199,3 +382,4 @@ pathnode_t *__cdecl Path_NearestNode(
 void __cdecl Path_DrawDebugNearestNode(float *vOrigin, int numNodes);
 void __cdecl Path_DrawDebugClaimedNodes(float *origin, int numNodes);
 void __cdecl Path_DrawDebug();
+#endif

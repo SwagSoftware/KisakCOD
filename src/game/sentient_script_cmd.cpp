@@ -278,7 +278,7 @@ void __cdecl SentientCmd_GetThreatBiasGroup(scr_entref_t *entref)
     iThreatBiasGroupIndex = Sentient_Get(entref)->iThreatBiasGroupIndex;
     if (iThreatBiasGroupIndex <= 0)
     {
-        Scr_AddString(byte_82003CDD);
+        Scr_AddString("");
     }
     else
     {

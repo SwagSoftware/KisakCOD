@@ -182,6 +182,7 @@ set(GAME
     "${SRC_DIR}/game/enthandle.h"
     "${SRC_DIR}/game/game_public.h"
     "${SRC_DIR}/game/g_bsp.cpp"
+    "${SRC_DIR}/game/g_bsp.h"
     "${SRC_DIR}/game/g_client_fields.cpp"
     "${SRC_DIR}/game/g_debug.cpp"
     "${SRC_DIR}/game/g_helicopter.cpp"

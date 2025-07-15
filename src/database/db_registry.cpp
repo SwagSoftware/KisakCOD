@@ -25,6 +25,7 @@
 #include <algorithm>
 
 #include <setjmp.h>
+#include <game/g_bsp.h>
 
 GfxWorld s_world;
 MaterialGlobals materialGlobals;

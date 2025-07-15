@@ -453,7 +453,7 @@ int __cdecl Targ_Remove(gentity_s *ent)
             "targGlob.targetCount doesn't index MAX_TARGETS\n\t%i not in [0, %i)",
             v5,
             32);
-    SV_SetConfigstring(v1 + 27, byte_82003CDD);
+    SV_SetConfigstring(v1 + 27, "");
     return 1;
 }
 
@@ -482,7 +482,7 @@ void __cdecl Targ_RemoveAll()
                     "targGlob.targetCount doesn't index MAX_TARGETS\n\t%i not in [0, %i)",
                     v3,
                     32);
-            SV_SetConfigstring(v0 + 27, byte_82003CDD);
+            SV_SetConfigstring(v0 + 27, "");
         }
         --v2;
         ++v0;

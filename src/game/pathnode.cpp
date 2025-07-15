@@ -3,15 +3,67 @@
 #endif
 
 #include "pathnode.h"
+#include "g_scr_main.h"
+#include <script/scr_vm.h>
+#include "game_public.h"
 
 //Line 37928:  0006 : 00006700       char const **nodeStringTable  82696700     pathnode.obj
+
+struct node_field_t
+{
+    char *name;
+    int ofs;
+    fieldtype_t type;
+    void(*getter)(struct pathnode_t *, int);
+};
+
+pathlocal_t g_path;
+
+const float nodeColorTable[20][4] =
+{
+  { 1.0f, 0.0f, 0.0f, 1.0f },
+  { 1.0f, 0.0f, 1.0f, 1.0f },
+  { 0.0f, 0.54f, 0.66f, 1.0f },
+  { 0.0f, 0.93f, 0.72f, 1.0f },
+  { 0.0f, 0.7f, 0.5f, 1.0f },
+  { 0.0f, 0.6f, 0.46f, 1.0f },
+  { 0.85f, 0.85f, 0.1f, 1.0f },
+  { 1.0f, 0.7f, 0.0f, 1.0f },
+  { 0.75f, 0.75f, 0.0f, 1.0f },
+  { 0.75f, 0.53f, 0.38f, 1.0f },
+  { 0.0f, 0.0f, 1.0f, 1.0f },
+  { 0.0f, 0.0f, 0.75f, 1.0f },
+  { 0.0f, 0.0f, 0.5f, 1.0f },
+  { 0.52f, 0.52f, 0.6f, 1.0f },
+  { 0.5f, 0.5f, 0.0f, 1.0f },
+  { 0.72f, 0.72f, 0.83f, 1.0f },
+  { 0.5f, 0.6f, 0.5f, 1.0f },
+  { 0.6f, 0.5f, 0.5f, 1.0f },
+  { 0.0f, 0.93f, 0.72f, 1.0f },
+  { 0.7f, 0.0f, 0.0f, 1.0f }
+};
+
+path_t debugPathBuf;
+
+NodeTypeToName priorityAllowedNodes[9] =
+{
+  { NODE_TURRET, "NODE_TURRET" },
+  { NODE_COVER_STAND, "NODE_COVER_STAND" },
+  { NODE_COVER_CROUCH, "NODE_COVER_CROUCH" },
+  { NODE_COVER_PRONE, "NODE_COVER_PRONE" },
+  { NODE_CONCEALMENT_STAND, "NODE_CONCEALMENT_STAND" },
+  { NODE_CONCEALMENT_CROUCH, "NODE_CONCEALMENT_CROUCH" },
+  { NODE_CONCEALMENT_PRONE, "NODE_CONCEALMENT_PRONE" },
+  { NODE_COVER_RIGHT, "NODE_COVER_RIGHT" },
+  { NODE_COVER_LEFT, "NODE_COVER_LEFT" }
+};
 
 void __cdecl TRACK_pathnode()
 {
     track_static_alloc_internal(&g_path, 16512, "g_path", 6);
     track_static_alloc_internal((void *)nodeColorTable, 320, "nodeColorTable", 5);
     track_static_alloc_internal(nodeStringTable, 80, "nodeStringTable", 5);
-    track_static_alloc_internal(&unk_82E20408, 996, "debugPathBuf", 0);
+    track_static_alloc_internal(&debugPathBuf, 996, "debugPathBuf", 0);
 }
 
 int __cdecl NodeTypeCanHavePriority(nodeType type)
@@ -34,19 +86,11 @@ void __cdecl TurretNode_GetAngles(const pathnode_t *node, float *angleMin, float
     int turretEntNumber; // r11
     gentity_s *v7; // r29
 
-    if (!node)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\pathnode.cpp", 513, 0, "%s", "node");
-    if (!angleMin)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\pathnode.cpp", 514, 0, "%s", "angleMin");
-    if (!angleMax)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\pathnode.cpp", 515, 0, "%s", "angleMax");
-    if (node->constant.type != NODE_TURRET)
-        MyAssertHandler(
-            "c:\\trees\\cod3\\cod3src\\src\\game\\pathnode.cpp",
-            516,
-            0,
-            "%s",
-            "node->constant.type == NODE_TURRET");
+    iassert(node);
+    iassert(angleMin);
+    iassert(angleMax);
+    iassert(node->constant.type == NODE_TURRET);
+    
     turretEntNumber = node->dynamic.turretEntNumber;
     if (turretEntNumber >= 0)
     {

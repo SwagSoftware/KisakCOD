@@ -164,12 +164,9 @@ union entityState_s_un2 // sizeof=0x4
 
 struct entityState_s // sizeof=0xF4 // (KISAKTODO: should be in q_shared?)
 {                                       // XREF: ?SV_SendClientGameState@@YAXPAUclient_t@@@Z/r
-                                        // archivedEntity_s/r ...
     int number;
     int eType;                          // XREF: BounceMissile+1ED/r
-    // .rdata:0091FF68/o ...
     LerpEntityState lerp;               // XREF: Mantle_FindMantleSurface+244/o
-    // CountBitsEnabled(uint)+1B/o ...
     int time2;
     int otherEntityNum;                 // XREF: CG_CompassUpdateActors(int)+540/o
     int attackerEntityNum;
@@ -177,12 +174,9 @@ struct entityState_s // sizeof=0xF4 // (KISAKTODO: should be in q_shared?)
     int loopSound;
     int surfType;
     entityState_s_type_index index;
-    // XREF: PM_UpdateLean(playerState_s *,float,usercmd_s *,void (*)(trace_t *,float const * const,float const * const,float const * const,float const * const,int,int))+2AC/o
-    // CG_DrawMaterial+35/o ...
     int clientNum;
     int iHeadIcon;
     int iHeadIconTeam;                  // XREF: G_InitGrenadeEntity(gentity_s *,gentity_s *)+218/o
-    // G_FireRocket(gentity_s *,uint,float * const,float * const,float const * const,gentity_s *,float const * const)+188/o ...
     int solid;
     unsigned int eventParm;
     int eventSequence;
@@ -193,12 +187,10 @@ struct entityState_s // sizeof=0xF4 // (KISAKTODO: should be in q_shared?)
     int legsAnim;
     int torsoAnim;
     entityState_s_un1 un1;
-    // XREF: IsValidArrayIndex(uint)+B/o
     entityState_s_un2 un2;
     float fTorsoPitch;
     float fWaistPitch;
     unsigned int partBits[4];           // XREF: Fire_Lead:loc_5189EC/o
-    // turret_think(gentity_s *):loc_518D27/o ...
 };
 struct archivedEntityShared_t // sizeof=0x24
 {                                       // ...

@@ -7,6 +7,8 @@
 #include <qcommon/msg.h>
 #endif
 
+#include <game/enthandle.h>
+
 #define abs8(x) abs(x)
 #define abs32(x) abs(x)
 
@@ -341,19 +343,87 @@ struct mover_ent_t // sizeof=0x60 (SP/MP same)
 static_assert(sizeof(mover_ent_t) == 0x60);
 
 #ifdef KISAK_MP
+struct entityShared_t // sizeof=0x68
+{                                       // ...
+    uint8_t linked;
+    uint8_t bmodel;
+    uint8_t svFlags;
+    int32_t clientMask[2];
+    uint8_t inuse;              // ...
+    int32_t broadcastTime;
+    float mins[3];                      // ...
+    float maxs[3];
+    int32_t contents;                       // ...
+    float absmin[3];                    // ...
+    float absmax[3];
+    float currentOrigin[3];             // ...
+    float currentAngles[3];
+    EntHandle ownerNum;
+    int32_t eventTime;
+};
+static_assert(sizeof(entityShared_t) == 0x68);
+#elif KISAK_SP
+struct entityShared_t
+{
+    unsigned __int8 linked;
+    unsigned __int8 bmodel;
+    unsigned __int8 svFlags;
+    unsigned __int8 eventType;
+    unsigned __int8 inuse;
+    float mins[3];
+    float maxs[3];
+    int contents;
+    float absmin[3];
+    float absmax[3];
+    float currentOrigin[3];
+    float currentAngles[3];
+    EntHandle ownerNum;
+    int eventTime;
+};
+#endif
+
+enum team_t;
+#ifdef KISAK_MP
 struct corpse_ent_t // sizeof=0x4
 {                                       // ...
     int32_t deathAnimStartTime;
 };
 static_assert(sizeof(corpse_ent_t) == 0x4);
 
+enum MissileStage : __int32
+{                                       // ...
+    MISSILESTAGE_SOFTLAUNCH = 0x0,
+    MISSILESTAGE_ASCENT = 0x1,
+    MISSILESTAGE_DESCENT = 0x2,
+};
+
+enum MissileFlightMode : __int32
+{                                       // ...
+    MISSILEFLIGHTMODE_TOP = 0x0,
+    MISSILEFLIGHTMODE_DIRECT = 0x1,
+};
+
+struct missile_ent_t // sizeof=0x3C
+{                                       // ...
+    float time;
+    int32_t timeOfBirth;
+    float travelDist;
+    float surfaceNormal[3];
+    team_t team;
+    float curvature[3];
+    float targetOffset[3];
+    MissileStage stage;
+    MissileFlightMode flightMode;
+};
+static_assert(sizeof(missile_ent_t) == 0x3C);
+
 struct gentity_s // sizeof=0x274
 {                                       // ...
     entityState_s s;                    // ...
     entityShared_t r;                   // ...
     struct gclient_s *client;                  // ...
-    turretInfo_s *pTurretInfo;
-    scr_vehicle_s *scr_vehicle;
+    struct turretInfo_s *pTurretInfo;
+    struct scr_vehicle_s *scr_vehicle;
     uint16_t model;
     uint8_t physicsObject;
     uint8_t takedamage;

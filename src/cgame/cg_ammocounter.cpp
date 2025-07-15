@@ -808,11 +808,10 @@ void __cdecl DrawClipAmmoMagazine(
     int32_t clipIdx; // [esp+3Ch] [ebp-Ch]
     int32_t clipCnt; // [esp+44h] [ebp-4h]
 
-    if (!cgameGlob)
-        MyAssertHandler(".\\cgame\\cg_ammocounter.cpp", 170, 0, "%s", "cgameGlob");
-    if (!weapDef)
-        MyAssertHandler(".\\cgame\\cg_ammocounter.cpp", 171, 0, "%s", "weapDef");
-    bulletX = *base - 4.0f;
+    iassert(cgameGlob);
+    iassert(weapDef);
+
+    bulletX = base[0] - 4.0f;
     bulletY = base[1] - 8.0f * 0.5f;
     clipCnt = cgameGlob->predictedPlayerState.ammoclip[BG_ClipForWeapon(weapIdx)];
     AmmoColor(cgameGlob, color, weapIdx);
@@ -820,11 +819,11 @@ void __cdecl DrawClipAmmoMagazine(
     {
         if (clipIdx == clipCnt)
         {
-            *color = 0.30000001f;
-            color[1] = 0.30000001f;
-            color[2] = 0.30000001f;
+            color[0] = 0.3f;
+            color[1] = 0.3f;
+            color[2] = 0.3f;
         }
-        CL_DrawStretchPicPhysical(bulletX, bulletY, 4.0, 8.0, 0.0, 0.0, 1.0, 1.0, color, cgMedia.ammoCounterBullet);
+        CL_DrawStretchPicPhysical(bulletX, bulletY, 4.0f, 8.0f, 0.0f, 0.0f, 1.0f, 1.0f, color, cgMedia.ammoCounterBullet);
         bulletX = bulletX - 4.0f;
     }
 }
@@ -1134,7 +1133,11 @@ void __cdecl CG_DrawPlayerWeaponLowAmmoWarning(
     cgameGlob = CG_GetLocalClientGlobals(localClientNum);
 
     if ( cgameGlob->predictedPlayerState.pm_type < PM_DEAD
+#ifdef KISAK_MP
         && cgameGlob->predictedPlayerState.pm_type != PM_SPECTATOR
+#elif KISAK_SP
+        && (cgArray[0].predictedPlayerState.eFlags & 0x20000) == 0
+#endif
         && (cgameGlob->predictedPlayerState.eFlags & 0x300) == 0
         && cgameGlob->predictedPlayerState.weaponstate != 7
         && cgameGlob->predictedPlayerState.weaponstate != 9

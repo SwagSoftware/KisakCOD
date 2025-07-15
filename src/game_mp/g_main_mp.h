@@ -2,7 +2,11 @@
 
 #include <qcommon/qcommon.h>
 #include <universal/q_parse.h>
-#include <client_mp/client_mp.h>
+
+#include <bgame/bg_public.h>
+#include <bgame/bg_local.h>
+
+struct gentity_s;
 
 struct entityHandler_t // sizeof=0x28
 {
@@ -54,7 +58,7 @@ static_assert(sizeof(cached_tag_mat_t) == 0x3C);
 
 struct level_locals_t // sizeof=0x2E6C
 {                                       // ...
-    gclient_s *clients;                 // ...
+    struct gclient_s *clients;                 // ...
     gentity_s *gentities;               // ...
     int32_t gentitySize;
     int32_t num_entities;                   // ...
@@ -121,7 +125,7 @@ int32_t __cdecl G_GetClientScore(int32_t clientNum);
 int32_t __cdecl G_GetClientArchiveTime(int32_t clientNum);
 void __cdecl G_SetClientArchiveTime(int32_t clientNum, int32_t time);
 clientState_s *__cdecl G_GetClientState(int32_t clientNum);
-gclient_s *__cdecl G_GetPlayerState(int32_t clientNum);
+struct gclient_s *__cdecl G_GetPlayerState(int32_t clientNum);
 int32_t __cdecl G_GetClientSize();
 void __cdecl G_FreeEntities();
 bool __cdecl G_ExitAfterConnectPaths();
@@ -200,7 +204,7 @@ int32_t __cdecl G_LocationalTracePassed(
     uint8_t *priorityMap);
 void __cdecl G_SightTrace(int32_t *hitNum, float *start, float *end, int32_t passEntityNum, int32_t contentmask);
 void __cdecl G_AddDebugString(const float *xyz, const float *color, float scale, const char *text, int32_t duration);
-BOOL __cdecl OnSameTeam(struct gentity_s *ent1, struct gentity_s *ent2);
+bool __cdecl OnSameTeam(struct gentity_s *ent1, struct gentity_s *ent2);
 
 extern const dvar_t *pickupPrints;
 extern const dvar_t *g_password;

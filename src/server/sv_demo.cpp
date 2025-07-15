@@ -1428,7 +1428,7 @@ void __cdecl SV_DemoMark_f()
         if (sv.demo.playing || sv.demo.recording)
         {
             if (SV_Cmd_Argc() <= 1)
-                v0 = byte_82003CDD;
+                v0 = "";
             else
                 v0 = SV_Cmd_Argv(1);
             if (SV_GetMarkHistory(v0))
@@ -1633,7 +1633,7 @@ void __cdecl SV_DemoGoto_f()
     if (sv.demo.msg.data)
     {
         if (SV_Cmd_Argc() <= 1)
-            v0 = byte_82003CDD;
+            v0 = "";
         else
             v0 = SV_Cmd_Argv(1);
         if ((unsigned __int8)SV_LoadHistoryForMark(v0))
@@ -2228,7 +2228,7 @@ char *__cdecl SV_Demo_Dvar_GetVariantString()
     else
     {
         SV_EndDemo(1);
-        return byte_82003CDD;
+        return "";
     }
 }
 

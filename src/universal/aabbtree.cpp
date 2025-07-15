@@ -20,7 +20,7 @@ int __cdecl compare_floats(float *e0, float *e1)
         return -1;
 }
 
-BOOL __cdecl PickAabbSplitPlane(
+static bool PickAabbSplitPlane(
     float (*mins)[3],
     float (*maxs)[3],
     int *remap,

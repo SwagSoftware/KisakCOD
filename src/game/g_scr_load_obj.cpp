@@ -163,12 +163,12 @@ void __cdecl GScr_LoadScriptsForEntities(ScriptFunctions *functions)
     inited = Scr_InitStringSet();
     while (G_ParseSpawnVars(&v10))
     {
-        G_SpawnString(&v10, "classname", byte_82003CDD, &v7);
+        G_SpawnString(&v10, "classname", "", &v7);
         if (I_strnicmp(v7, "actor_", 6))
         {
             if (!I_stricmp(v7, "misc_mg42") || !I_stricmp(v7, "misc_turret"))
             {
-                G_SpawnString(&v10, "weaponinfo", byte_82003CDD, &v8);
+                G_SpawnString(&v10, "weaponinfo", "", &v8);
                 WeaponIndexForName = G_GetWeaponIndexForName(v8);
                 if (WeaponIndexForName)
                 {
@@ -221,10 +221,10 @@ void __cdecl GScr_LoadEntities()
         Com_Error(ERR_DROP, byte_8203560C);
     while (G_ParseSpawnVars(&v2))
     {
-        G_SpawnString(&v2, "classname", byte_82003CDD, &v0);
+        G_SpawnString(&v2, "classname", "", &v0);
         if (!I_stricmp(v0, "misc_mg42") || !I_stricmp(v0, "misc_turret"))
         {
-            G_SpawnString(&v2, "weaponinfo", byte_82003CDD, &v1);
+            G_SpawnString(&v2, "weaponinfo", "", &v1);
             G_GetWeaponIndexForName(v1);
         }
     }

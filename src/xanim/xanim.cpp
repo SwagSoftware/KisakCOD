@@ -3978,3 +3978,8 @@ XAnimInfo* __cdecl GetAnimInfo(int infoIndex)
 
     return &g_xAnimInfo[infoIndex];
 }
+
+void XAnimDisableLeakCheck()
+{
+    g_disableLeakCheck = 1;
+}

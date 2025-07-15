@@ -411,7 +411,7 @@ void __cdecl SaveMemory_CreateHeader(
     *(_BYTE *)(a28 + 1097) = demoPlayback;
     *(unsigned int *)(a28 + 32) = 287;
     *(_BYTE *)(a28 + 1096) = (_cntlzw(saveType) & 0x20) != 0;
-    v36 = Dvar_RegisterString("mapname", byte_82003CDD, 0x44u, "The current map name");
+    v36 = Dvar_RegisterString("mapname", "", 0x44u, "The current map name");
     *(unsigned int *)(a28 + 44) = saveId;
     I_strncpyz((char *)(a28 + 64), v36->current.string, 256);
     BuildNumber = getBuildNumber();

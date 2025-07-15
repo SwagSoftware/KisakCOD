@@ -1305,33 +1305,6 @@ struct VehicleHover // sizeof=0x1C
 };
 static_assert(sizeof(VehicleHover) == 0x1C);
 
-enum MissileStage : __int32
-{                                       // ...
-    MISSILESTAGE_SOFTLAUNCH = 0x0,
-    MISSILESTAGE_ASCENT = 0x1,
-    MISSILESTAGE_DESCENT = 0x2,
-};
-
-enum MissileFlightMode : __int32
-{                                       // ...
-    MISSILEFLIGHTMODE_TOP = 0x0,
-    MISSILEFLIGHTMODE_DIRECT = 0x1,
-};
-
-struct missile_ent_t // sizeof=0x3C
-{                                       // ...
-    float time;
-    int32_t timeOfBirth;
-    float travelDist;
-    float surfaceNormal[3];
-    team_t team;
-    float curvature[3];
-    float targetOffset[3];
-    MissileStage stage;
-    MissileFlightMode flightMode;
-};
-static_assert(sizeof(missile_ent_t) == 0x3C);
-
 struct scr_vehicle_s // sizeof=0x354
 {                                       // ...
     vehicle_pathpos_t pathPos;
@@ -1392,46 +1365,6 @@ struct scr_vehicle_s // sizeof=0x354
     float forcedMaterialSpeed;
 };
 static_assert(sizeof(scr_vehicle_s) == 0x354);
-
-#ifdef KISAK_MP
-struct entityShared_t // sizeof=0x68
-{                                       // ...
-    uint8_t linked;
-    uint8_t bmodel;
-    uint8_t svFlags;
-    int32_t clientMask[2];
-    uint8_t inuse;              // ...
-    int32_t broadcastTime;
-    float mins[3];                      // ...
-    float maxs[3];
-    int32_t contents;                       // ...
-    float absmin[3];                    // ...
-    float absmax[3];
-    float currentOrigin[3];             // ...
-    float currentAngles[3];
-    EntHandle ownerNum;
-    int32_t eventTime;
-};
-static_assert(sizeof(entityShared_t) == 0x68);
-#elif KISAK_SP
-struct entityShared_t
-{
-    unsigned __int8 linked;
-    unsigned __int8 bmodel;
-    unsigned __int8 svFlags;
-    unsigned __int8 eventType;
-    unsigned __int8 inuse;
-    float mins[3];
-    float maxs[3];
-    int contents;
-    float absmin[3];
-    float absmax[3];
-    float currentOrigin[3];
-    float currentAngles[3];
-    EntHandle ownerNum;
-    int eventTime;
-};
-#endif
 
 enum proneCheckType_t : __int32
 {                                       // ...

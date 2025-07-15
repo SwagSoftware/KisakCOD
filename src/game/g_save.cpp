@@ -206,7 +206,7 @@ void __cdecl WriteWeaponIndex(unsigned int weapon, SaveGame *save)
     }
     else
     {
-        WriteCStyleString(byte_82003CDD, 256, save);
+        WriteCStyleString("", 256, save);
     }
 }
 
@@ -251,7 +251,7 @@ void __cdecl WriteItemIndex(int iIndex, SaveGame *save)
     }
     else
     {
-        WriteCStyleString(byte_82003CDD, 256, save);
+        WriteCStyleString("", 256, save);
     }
 }
 
@@ -932,7 +932,7 @@ void __cdecl ReadActor(actor_s *pActor, SaveGame *save)
         if (!pActor->inuse)
             MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\g_save.cpp", 1394, 0, "%s", "pActor->inuse");
         ReadActorPotentialCoverNodes(pActor, save);
-        pActor->pszDebugInfo = byte_82003CDD;
+        pActor->pszDebugInfo = "";
     }
 }
 
@@ -1353,7 +1353,7 @@ void __cdecl G_ClearConfigstrings(int iFirst, int iCount)
     int i; // r31
 
     for (i = 0; i < iCount; ++i)
-        SV_SetConfigstring(i + iFirst, byte_82003CDD);
+        SV_SetConfigstring(i + iFirst, "");
 }
 
 void __cdecl G_ClearAllConfigstrings()
@@ -1367,25 +1367,25 @@ void __cdecl G_ClearAllConfigstrings()
     int jj; // r30
 
     for (i = 0; i < 100; ++i)
-        SV_SetConfigstring(i + 2179, byte_82003CDD);
+        SV_SetConfigstring(i + 2179, "");
     for (j = 0; j < 256; ++j)
-        SV_SetConfigstring(j + 2279, byte_82003CDD);
+        SV_SetConfigstring(j + 2279, "");
     for (k = 0; k < 512; ++k)
-        SV_SetConfigstring(k + 1667, byte_82003CDD);
+        SV_SetConfigstring(k + 1667, "");
     for (m = 0; m < 128; ++m)
-        SV_SetConfigstring(m + 2583, byte_82003CDD);
+        SV_SetConfigstring(m + 2583, "");
     for (n = 0; n < 1023; ++n)
-        SV_SetConfigstring(n + 91, byte_82003CDD);
-    SV_SetConfigstring(1114, byte_82003CDD);
+        SV_SetConfigstring(n + 91, "");
+    SV_SetConfigstring(1114, "");
     for (ii = 0; ii < 16; ++ii)
-        SV_SetConfigstring(ii + 11, byte_82003CDD);
-    SV_SetConfigstring(6, byte_82003CDD);
-    SV_SetConfigstring(7, byte_82003CDD);
-    SV_SetConfigstring(8, byte_82003CDD);
-    SV_SetConfigstring(1148, byte_82003CDD);
-    SV_SetConfigstring(1151, byte_82003CDD);
+        SV_SetConfigstring(ii + 11, "");
+    SV_SetConfigstring(6, "");
+    SV_SetConfigstring(7, "");
+    SV_SetConfigstring(8, "");
+    SV_SetConfigstring(1148, "");
+    SV_SetConfigstring(1151, "");
     for (jj = 0; jj < 32; ++jj)
-        SV_SetConfigstring(jj + 27, byte_82003CDD);
+        SV_SetConfigstring(jj + 27, "");
 }
 
 void __cdecl G_SaveInitConfigstrings(SaveGame *save)

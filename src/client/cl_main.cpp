@@ -2007,8 +2007,8 @@ void __cdecl CL_Init(int localClientNum)
     input_autoAim = Dvar_RegisterBool("input_autoAim", 1, 0x400u, "Turn on auto aim for consoles");
     v25 = SEH_SafeTranslateString("PLATFORM_NOMOTD");
     motd = Dvar_RegisterString("motd", v25, 0, "Message of the day");
-    nextmap = Dvar_RegisterString("nextmap", byte_82003CDD, 0, "The next map name");
-    nextdemo = Dvar_RegisterString("nextdemo", byte_82003CDD, 0, "The next demo to play");
+    nextmap = Dvar_RegisterString("nextmap", "", 0, "The next map name");
+    nextdemo = Dvar_RegisterString("nextdemo", "", 0, "The next demo to play");
     Dvar_RegisterBool("cg_blood", 1, 1u, "Show blood");
     Campaign_RegisterDvars();
     if (!loc_language)

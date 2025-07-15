@@ -4,6 +4,7 @@
 #include <universal/com_sndalias.h>
 
 #include <universal/q_shared.h> // LOBYTE()
+#include <gfx_d3d/r_material.h>
 
 $F99A9AECA2B60514CA5C8024B8EAC369 g_load_0;
 char menuBuf1[4096];

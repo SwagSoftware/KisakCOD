@@ -48,8 +48,6 @@ struct usercmd_s // sizeof=0x20
 };
 static_assert(sizeof(usercmd_s) == 0x20);
 
-#define	NETF_BASE(s, x) #x,(size_t)&((s*)0)->x
-
 struct hudelem_s;
 
 struct clientState_s;

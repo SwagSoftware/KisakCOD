@@ -30,10 +30,7 @@
 #include <universal/com_sndalias.h>
 #include <universal/profile.h>
 
-//struct bgs_t level_bgs     82d8f0f8     g_main_mp.obj
 //struct entityHandler_t *entityHandlers 827b5088     g_main_mp.obj
-//struct gentity_s *g_entities 82cf2090     g_main_mp.obj
-//struct level_locals_t level 82e7b988     g_main_mp.obj
 // 
 
 const dvar_t *pickupPrints;
@@ -1739,7 +1736,7 @@ void __cdecl G_AddDebugString(const float *xyz, const float *color, float scale,
     CL_AddDebugString(xyz, color, scale, text, 1, duration);
 }
 
-BOOL __cdecl OnSameTeam(struct gentity_s *ent1, struct gentity_s *ent2)
+bool __cdecl OnSameTeam(struct gentity_s *ent1, struct gentity_s *ent2)
 {
     if (!ent1->client || !ent2->client)
         return 0;

@@ -2,9 +2,187 @@
 
 #include <bgame/bg_local.h> // team_t
 
+#include <gfx_d3d/r_font.h>
+
 #undef DrawText
 
 struct Scr_WatchElement_s;
+
+#ifdef KISAK_MP
+enum operationEnum : __int32
+{                                       // ...
+    OP_NOOP = 0x0,
+    OP_RIGHTPAREN = 0x1,
+    OP_MULTIPLY = 0x2,
+    OP_DIVIDE = 0x3,
+    OP_MODULUS = 0x4,
+    OP_ADD = 0x5,
+    OP_SUBTRACT = 0x6,
+    OP_NOT = 0x7,
+    OP_LESSTHAN = 0x8,
+    OP_LESSTHANEQUALTO = 0x9,
+    OP_GREATERTHAN = 0xA,
+    OP_GREATERTHANEQUALTO = 0xB,
+    OP_EQUALS = 0xC,
+    OP_NOTEQUAL = 0xD,
+    OP_AND = 0xE,
+    OP_OR = 0xF,
+    OP_LEFTPAREN = 0x10,
+    OP_COMMA = 0x11,
+    OP_BITWISEAND = 0x12,
+    OP_BITWISEOR = 0x13,
+    OP_BITWISENOT = 0x14,
+    OP_BITSHIFTLEFT = 0x15,
+    OP_BITSHIFTRIGHT = 0x16,
+    OP_SIN = 0x17,
+    OP_FIRSTFUNCTIONCALL = 0x17,
+    OP_COS = 0x18,
+    OP_MIN = 0x19,
+    OP_MAX = 0x1A,
+    OP_MILLISECONDS = 0x1B,
+    OP_DVARINT = 0x1C,
+    OP_DVARBOOL = 0x1D,
+    OP_DVARFLOAT = 0x1E,
+    OP_DVARSTRING = 0x1F,
+    OP_STAT = 0x20,
+    OP_UIACTIVE = 0x21,
+    OP_FLASHBANGED = 0x22,
+    OP_SCOPED = 0x23,
+    OP_SCOREBOARDVISIBLE = 0x24,
+    OP_INKILLCAM = 0x25,
+    OP_PLAYERFIELD = 0x26,
+    OP_SELECTINGLOCATION = 0x27,
+    OP_TEAMFIELD = 0x28,
+    OP_OTHERTEAMFIELD = 0x29,
+    OP_MARINESFIELD = 0x2A,
+    OP_OPFORFIELD = 0x2B,
+    OP_MENUISOPEN = 0x2C,
+    OP_WRITINGDATA = 0x2D,
+    OP_INLOBBY = 0x2E,
+    OP_INPRIVATEPARTY = 0x2F,
+    OP_PRIVATEPARTYHOST = 0x30,
+    OP_PRIVATEPARTYHOSTINLOBBY = 0x31,
+    OP_ALONEINPARTY = 0x32,
+    OP_ADSJAVELIN = 0x33,
+    OP_WEAPLOCKBLINK = 0x34,
+    OP_WEAPATTACKTOP = 0x35,
+    OP_WEAPATTACKDIRECT = 0x36,
+    OP_SECONDSASTIME = 0x37,
+    OP_TABLELOOKUP = 0x38,
+    OP_LOCALIZESTRING = 0x39,
+    OP_LOCALVARINT = 0x3A,
+    OP_LOCALVARBOOL = 0x3B,
+    OP_LOCALVARFLOAT = 0x3C,
+    OP_LOCALVARSTRING = 0x3D,
+    OP_TIMELEFT = 0x3E,
+    OP_SECONDSASCOUNTDOWN = 0x3F,
+    OP_GAMEMSGWNDACTIVE = 0x40,
+    OP_TOINT = 0x41,
+    OP_TOSTRING = 0x42,
+    OP_TOFLOAT = 0x43,
+    OP_GAMETYPENAME = 0x44,
+    OP_GAMETYPE = 0x45,
+    OP_GAMETYPEDESCRIPTION = 0x46,
+    OP_SCORE = 0x47,
+    OP_FRIENDSONLINE = 0x48,
+    OP_FOLLOWING = 0x49,
+    OP_STATRANGEBITSSET = 0x4A,
+    OP_KEYBINDING = 0x4B,
+    OP_ACTIONSLOTUSABLE = 0x4C,
+    OP_HUDFADE = 0x4D,
+    OP_MAXPLAYERS = 0x4E,
+    OP_ACCEPTINGINVITE = 0x4F,
+    OP_ISINTERMISSION = 0x50,
+    NUM_OPERATORS = 0x51,
+};
+#elif KISAK_SP
+enum operationEnum : __int32
+{
+    OP_NOOP = 0x0,
+    OP_RIGHTPAREN = 0x1,
+    OP_MULTIPLY = 0x2,
+    OP_DIVIDE = 0x3,
+    OP_MODULUS = 0x4,
+    OP_ADD = 0x5,
+    OP_SUBTRACT = 0x6,
+    OP_NOT = 0x7,
+    OP_LESSTHAN = 0x8,
+    OP_LESSTHANEQUALTO = 0x9,
+    OP_GREATERTHAN = 0xA,
+    OP_GREATERTHANEQUALTO = 0xB,
+    OP_EQUALS = 0xC,
+    OP_NOTEQUAL = 0xD,
+    OP_AND = 0xE,
+    OP_OR = 0xF,
+    OP_LEFTPAREN = 0x10,
+    OP_COMMA = 0x11,
+    OP_BITWISEAND = 0x12,
+    OP_BITWISEOR = 0x13,
+    OP_BITWISENOT = 0x14,
+    OP_BITSHIFTLEFT = 0x15,
+    OP_BITSHIFTRIGHT = 0x16,
+    OP_SIN = 0x17,
+    OP_FIRSTFUNCTIONCALL = 0x17,
+    OP_COS = 0x18,
+    OP_MIN = 0x19,
+    OP_MAX = 0x1A,
+    OP_MILLISECONDS = 0x1B,
+    OP_DVARINT = 0x1C,
+    OP_DVARBOOL = 0x1D,
+    OP_DVARFLOAT = 0x1E,
+    OP_DVARSTRING = 0x1F,
+    OP_STAT = 0x20,
+    OP_UIACTIVE = 0x21,
+    OP_FLASHBANGED = 0x22,
+    OP_SCOPED = 0x23,
+    OP_SCOREBOARDVISIBLE = 0x24,
+    OP_INKILLCAM = 0x25,
+    OP_PLAYERFIELD = 0x26,
+    OP_SELECTINGLOCATION = 0x27,
+    OP_TEAMFIELD = 0x28,
+    OP_OTHERTEAMFIELD = 0x29,
+    OP_MARINESFIELD = 0x2A,
+    OP_OPFORFIELD = 0x2B,
+    OP_MENUISOPEN = 0x2C,
+    OP_WRITINGDATA = 0x2D,
+    OP_INLOBBY = 0x2E,
+    OP_INPRIVATEPARTY = 0x2F,
+    OP_PRIVATEPARTYHOST = 0x30,
+    OP_PRIVATEPARTYHOSTINLOBBY = 0x31,
+    OP_ALONEINPARTY = 0x32,
+    OP_ADSJAVELIN = 0x33,
+    OP_WEAPLOCKBLINK = 0x34,
+    OP_WEAPATTACKTOP = 0x35,
+    OP_WEAPATTACKDIRECT = 0x36,
+    OP_SECONDSASTIME = 0x37,
+    OP_TABLELOOKUP = 0x38,
+    OP_LOCALIZESTRING = 0x39,
+    OP_LOCALVARINT = 0x3A,
+    OP_LOCALVARBOOL = 0x3B,
+    OP_LOCALVARFLOAT = 0x3C,
+    OP_LOCALVARSTRING = 0x3D,
+    OP_TIMELEFT = 0x3E,
+    OP_SECONDSASCOUNTDOWN = 0x3F,
+    OP_GAMEMSGWNDACTIVE = 0x40,
+    OP_TOINT = 0x41,
+    OP_TOSTRING = 0x42,
+    OP_TOFLOAT = 0x43,
+    OP_GAMETYPENAME = 0x44,
+    OP_GAMETYPE = 0x45,
+    OP_GAMETYPEDESCRIPTION = 0x46,
+    OP_SCORE = 0x47,
+    OP_FRIENDSONLINE = 0x48,
+    OP_FOLLOWING = 0x49,
+    OP_STATRANGEBITSSET = 0x4A,
+    OP_KEYBINDING = 0x4B,
+    OP_ACTIONSLOTUSABLE = 0x4C,
+    OP_HUDFADE = 0x4D,
+    OP_MAXPLAYERS = 0x4E,
+    OP_ACCEPTINGINVITE = 0x4F,
+    NUM_OPERATORS = 0x50,
+};
+#endif
+
 
 #ifdef KISAK_MP
 enum uiMenuCommand_t : __int32
@@ -158,6 +336,196 @@ struct Eval // sizeof=0x5010
     // padding byte
 };
 
+struct rectDef_s // sizeof=0x18 // (SP/MP Same)
+{                                       // ...
+    float x;                            // ...
+    float y;                            // ...
+    float w;                            // ...
+    float h;                            // ...
+    int horzAlign;                      // ...
+    int vertAlign;                      // ...
+};
+struct windowDef_t // sizeof=0x9C
+{                                       // ...
+    const char *name;
+    rectDef_s rect;
+    rectDef_s rectClient;
+    const char *group;
+    int style;
+    int border;
+    int ownerDraw;
+    int ownerDrawFlags;
+    float borderSize;
+    int staticFlags;
+    int dynamicFlags[1];
+    int nextTime;
+    float foreColor[4];
+    float backColor[4];
+    float borderColor[4];
+    float outlineColor[4];
+    struct Material *background;
+};
+
+struct ItemKeyHandler // sizeof=0xC
+{
+    int key;
+    const char *action;
+    ItemKeyHandler *next;
+};
+
+union operandInternalDataUnion // sizeof=0x4
+{                                       // ...
+    operandInternalDataUnion()
+    {
+        intVal = 0;
+    }
+    operandInternalDataUnion(int i)
+    {
+        intVal = i;
+    }
+    operandInternalDataUnion(float f)
+    {
+        floatVal = f;
+    }
+    operandInternalDataUnion(const char *str)
+    {
+        string = str;
+    }
+
+    operator int()
+    {
+        return intVal;
+    }
+    operator float()
+    {
+        return floatVal;
+    }
+    int intVal;
+    float floatVal;
+    const char *string;
+};
+enum expDataType : __int32
+{                                       // ...
+    VAL_INT = 0x0,
+    VAL_FLOAT = 0x1,
+    VAL_STRING = 0x2,
+};
+struct Operand // sizeof=0x8
+{                                       // ...
+    expDataType dataType;               // ...
+    operandInternalDataUnion internals; // ...
+};
+union entryInternalData // sizeof=0x8
+{                                       // ...
+    operationEnum op;
+    Operand operand;
+};
+struct expressionEntry // sizeof=0xC
+{
+    int type;
+    entryInternalData data;
+};
+struct statement_s // sizeof=0x8
+{                                       // ...
+    int numEntries;
+    expressionEntry **entries;
+};
+
+union itemDefData_t // sizeof=0x4
+{                                       // ...
+    struct listBoxDef_s *listBox;
+    struct editFieldDef_s *editField;
+    struct multiDef_s *multi;
+    const char *enumDvarName;
+    void *data;
+};
+
+struct itemDef_s // sizeof=0x174
+{                                       // ...
+    windowDef_t window;
+#ifdef KISAK_MP
+    rectDef_s textRect[1];
+#elif KISAK_SP
+    rectDef_s textRect[4];
+#endif
+    int type;
+    int dataType;
+    int alignment;
+    int fontEnum;
+    int textAlignMode;
+    float textalignx;
+    float textaligny;
+    float textscale;
+    int textStyle;
+    int gameMsgWindowIndex;
+    int gameMsgWindowMode;
+    const char *text;
+    int itemFlags;
+    struct menuDef_t *parent;                  // ...
+    const char *mouseEnterText;
+    const char *mouseExitText;
+    const char *mouseEnter;
+    const char *mouseExit;
+    const char *action;
+    const char *onAccept;
+    const char *onFocus;
+    const char *leaveFocus;
+    const char *dvar;
+    const char *dvarTest;
+    ItemKeyHandler *onKey;
+    const char *enableDvar;
+    int dvarFlags;
+    snd_alias_list_t *focusSound;
+    float special;
+#ifdef KISAK_MP
+    int cursorPos[1];
+#elif KISAK_SP
+    int cursorPos[4];
+#endif
+    itemDefData_t typeData;
+    int imageTrack;
+    statement_s visibleExp;
+    statement_s textExp;
+    statement_s materialExp;
+    statement_s rectXExp;
+    statement_s rectYExp;
+    statement_s rectWExp;
+    statement_s rectHExp;
+    statement_s forecolorAExp;
+};
+
+struct menuDef_t // sizeof=0x11C
+{                                       // ...
+    windowDef_t window;
+    const char *font;
+    int fullScreen;
+    int itemCount;
+    int fontIndex;
+#ifdef KISAK_MP
+    int cursorItem[1];
+#elif KISAK_SP
+    int cursorItem[4];
+#endif
+    int fadeCycle;
+    float fadeClamp;
+    float fadeAmount;
+    float fadeInAmount;
+    float blurRadius;
+    const char *onOpen;
+    const char *onClose;
+    const char *onESC;
+    ItemKeyHandler *onKey;
+    statement_s visibleExp;
+    const char *allowedBinding;
+    const char *soundName;
+    int imageTrack;
+    float focusColor[4];
+    float disableColor[4];
+    statement_s rectXExp;
+    statement_s rectYExp;
+    itemDef_s **items;
+};
+
 union UILocalVar_u // sizeof=0x4
 {                                       // ...
     UILocalVar_u()
@@ -235,6 +603,13 @@ struct loadAssets_t // sizeof=0x10
     int fadeCycle;                      // ...
     float fadeAmount;                   // ...
     float fadeInAmount;                 // ...
+};
+
+struct MenuList // sizeof=0xC
+{                                       // ...
+    const char *name;
+    int menuCount;                      // ...
+    menuDef_t **menus;                  // ...
 };
 
 struct $F99A9AECA2B60514CA5C8024B8EAC369 // sizeof=0xC1C
@@ -402,6 +777,59 @@ struct CachedAssets_t // sizeof=0x48
 #ifdef KISAK_MP
     snd_alias_list_t *itemFocusSound;
 #endif
+};
+
+
+struct columnInfo_s // sizeof=0x10
+{                                       // ...
+    int pos;
+    int width;
+    int maxChars;
+    int alignment;
+};
+struct listBoxDef_s // sizeof=0x154
+{
+    int mousePos;
+    int startPos[1];
+    int endPos[1];
+    int drawPadding;
+    float elementWidth;
+    float elementHeight;
+    int elementStyle;
+    int numColumns;
+    columnInfo_s columnInfo[16];
+    const char *doubleClick;
+    int notselectable;
+    int noScrollBars;
+    int usePaging;
+    float selectBorder[4];
+    float disableColor[4];
+    Material *selectIcon;
+};
+struct editFieldDef_s // sizeof=0x20
+{
+    float minVal;
+    float maxVal;
+    float defVal;
+    float range;
+    int maxChars;
+    int maxCharsGotoNext;
+    int maxPaintChars;
+    int paintOffset;
+};
+struct multiDef_s // sizeof=0x188
+{
+    const char *dvarList[32];
+    const char *dvarStr[32];
+    float dvarValue[32];
+    int count;
+    int strDef;
+};
+
+struct LocalizeEntry // sizeof=0x8
+{                                       // ...
+    const char *value;
+    const char *name;
 };
 
 // ui_shared
@@ -907,7 +1335,6 @@ void __cdecl compare_isFloatGreaterThanFloat(Operand *leftSide, Operand *rightSi
 void __cdecl compare_isIntGreaterThanEqualToInt(Operand *leftSide, Operand *rightSide, Operand *result);
 void __cdecl compare_isIntGreaterThanEqualToFloat(Operand *leftSide, Operand *rightSide, Operand *result);
 void __cdecl compare_isFloatGreaterThanEqualToFloat(Operand *leftSide, Operand *rightSide, Operand *result);
-int __cdecl compare_floats(float *e0, float *e1);
 
 void __cdecl add_IntWithInt(Operand *leftSide, Operand *rightSide, Operand *result);
 void __cdecl add_IntWithFloat(Operand *leftSide, Operand *rightSide, Operand *result);

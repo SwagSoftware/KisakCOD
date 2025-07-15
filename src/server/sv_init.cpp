@@ -199,8 +199,8 @@ void __cdecl SV_Init()
         0x7FFFFFFF,
         0x1082u,
         "Time player is invlunerable just before death");
-    sv_mapname = Dvar_RegisterString("mapname", byte_82003CDD, 0x44u, "current map name");
-    sv_lastSaveGame = Dvar_RegisterString("sv_lastSaveGame", byte_82003CDD, 1u, "Last save game file name");
+    sv_mapname = Dvar_RegisterString("mapname", "", 0x44u, "current map name");
+    sv_lastSaveGame = Dvar_RegisterString("sv_lastSaveGame", "", 1u, "Last save game file name");
     sv_saveOnStartMap = Dvar_RegisterBool("sv_saveOnStartMap", 0, 0x1004u, "Save at the start of a level");
     sv_saveGameAvailable = Dvar_RegisterBool(
         "sv_saveGameAvailable",
@@ -227,7 +227,7 @@ void __cdecl SV_Init()
         "Use autosaves as part of demos - will make demo access faster but will cause hitches");
     replay_asserts = Dvar_RegisterBool("replay_asserts", 1, 0, "Enable/Disable replay aborts due to inconsistency");
     SV_InitDemoSystem();
-    nextmap = Dvar_RegisterString("nextmap", byte_82003CDD, 0, "Next map to load");
+    nextmap = Dvar_RegisterString("nextmap", "", 0, "Next map to load");
     Dvar_RegisterInt("g_reloading", 0, 0, 4, 0x40u, "True if the game is currently reloading");
     sv_smp = Dvar_RegisterBool("sv_smp", 1, 0, "Enable server multithreading");
     sv_loadMyChanges = Dvar_RegisterBool("sv_loadMyChanges", 0, 0, "Load my changes fast file on devmap.");
@@ -288,7 +288,7 @@ void __cdecl SV_SetConfigstring(unsigned int index, const char *val)
     if (sv.configstrings[index])
     {
         if (!val)
-            val = byte_82003CDD;
+            val = "";
         v5 = SL_ConvertToString(sv.configstrings[index]);
         v6 = val;
         do
@@ -430,12 +430,12 @@ void __cdecl SV_SpawnServer(const char *server, int savegame)
     ProfLoad_End();
     ProfLoad_Begin("allocate empty config strings");
     configstrings = sv.configstrings;
-    sv.emptyConfigString = SL_GetString_(byte_82003CDD, 0, 19);
+    sv.emptyConfigString = SL_GetString_("", 0, 19);
     do
     {
         if (*configstrings)
             MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\server\\sv_init.cpp", 659, 0, "%s", "!sv.configstrings[i]");
-        *configstrings++ = SL_GetString_(byte_82003CDD, 0, 19);
+        *configstrings++ = SL_GetString_("", 0, 19);
     } while ((int)configstrings < (int)&sv.svEntities[0].worldSector);
     SCR_UpdateLoadScreen();
     ProfLoad_End();

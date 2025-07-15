@@ -1118,7 +1118,7 @@ char *__cdecl UI_FeederItemText(
     if (feederID == 30.0)
         return (char *)LB_FeederItemText(localClientNum, column, (int)handle, a7);
     else
-        return byte_82003CDD;
+        return "";
 }
 
 int __cdecl UI_FeederItemEnabled(int localClientNum, double feederID, int index)
@@ -1850,7 +1850,7 @@ void __cdecl UI_SavegameSort(int column, int force)
         }
         else
         {
-            Dvar_SetString(ui_savegame, byte_82003CDD);
+            Dvar_SetString(ui_savegame, "");
             uiInfo.savegameName[0] = 0;
             strcpy(uiInfo.savegameInfo, "EXE_NOSAVEGAMES");
         }
@@ -1877,7 +1877,7 @@ void __cdecl UI_RunMenuScript(int localClientNum, const char **args, const char 
         return;
     if (!I_stricmp(v13, "clearError"))
     {
-        Dvar_SetStringByName("com_errorMessage", byte_82003CDD);
+        Dvar_SetStringByName("com_errorMessage", "");
         Dvar_SetBoolByName("com_isNotice", 0);
         return;
     }

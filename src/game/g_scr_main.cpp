@@ -3,15 +3,22 @@
 #endif
 
 #include "g_scr_main.h"
+#include <script/scr_stringlist.h>
+#include <qcommon/mem_track.h>
+#include <script/scr_vm.h>
+#include "g_local.h"
+#include "pathnode.h"
+#include <server/sv_game.h>
+#include <script/scr_animtree.h>
 
 bool g_archiveGetDvar;
 char **difficultyStrings;
-struct BuiltinFunctionDef *functions;
-struct scr_data_t g_scr_data;
+BuiltinFunctionDef *functions;
+scr_data_t g_scr_data;
 
 unsigned int __cdecl GScr_AllocString(const char *s)
 {
-    return Scr_AllocString(s, 1);
+    return Scr_AllocString((char*)s, 1);
 }
 
 void __cdecl TRACK_g_scr_main()
@@ -49,7 +56,7 @@ int __cdecl GScr_SetScriptAndLabel(
     if (!v10)
     {
         if (bEnforceExists)
-            Com_Error(ERR_DROP, byte_82037884, label, filename);
+            Com_Error(ERR_DROP, "Could not find label '%s' in script %s", label, filename);
     }
     return v10;
 }
@@ -147,17 +154,16 @@ void __cdecl GScr_SetScriptsForPathNodes(ScriptFunctions *functions)
     Path_CallFunctionForNodes((void(__cdecl *)(pathnode_t *, void *))GScr_SetScriptsForPathNode, functions);
 }
 
-scr_animtree_t *__cdecl GScr_FindAnimTree(
-    scr_animtree_t *__return_ptr retstr,
-    const char *filename,
-    int bEnforceExists)
+scr_animtree_t GScr_FindAnimTree(const char *filename, int bEnforceExists)
 {
-    scr_animtree_t *AnimTree; // r31
+    scr_animtree_t tree;
 
-    AnimTree = Scr_FindAnimTree(retstr, filename);
-    if (!AnimTree && filename)
-        Com_Error(ERR_DROP, byte_820379C0, retstr);
-    return AnimTree;
+    tree = Scr_FindAnimTree(filename);
+
+    if (!tree.anims && bEnforceExists)
+        Com_Error(ERR_DROP, "Could not find animation tree %s", filename);
+
+    return tree;
 }
 
 void __cdecl GScr_FindAnimTrees(int a1, const char *a2)
@@ -951,7 +957,7 @@ void GScr_GetDebugDvar()
     }
     else
     {
-        Scr_AddString(byte_82003CDD);
+        Scr_AddString("");
     }
 }
 
@@ -1369,7 +1375,7 @@ void Scr_GetWeaponModel()
                 Com_Printf(23, v3);
             }
         }
-        Scr_AddString(byte_82003CDD);
+        Scr_AddString("");
     }
 }
 
@@ -1399,7 +1405,7 @@ void Scr_GetWeaponClipModel()
         v3 = va("unknown weapon '%s' in getWeaponClipModel\n", String);
         Com_Printf(23, v3);
     }
-    Name = byte_82003CDD;
+    Name = "";
 LABEL_6:
     Scr_AddString(Name);
 }
@@ -1476,7 +1482,7 @@ void GScr_GetCommandFromKey()
     String = Scr_GetString(0);
     CommandFromKey = CL_GetCommandFromKey(String);
     if (!CommandFromKey)
-        CommandFromKey = byte_82003CDD;
+        CommandFromKey = "";
     Scr_AddString(CommandFromKey);
 }
 
@@ -4326,7 +4332,7 @@ void __cdecl GScr_SetHintString(scr_entref_t *entref)
     classname = Entity->classname;
     if (classname != scr_const.trigger_use && classname != scr_const.trigger_use_touch && !Entity->actor)
         Scr_Error("The setHintString command only works on trigger_use entities and actors.\n");
-    if (Scr_GetType(0) != 2 || (String = Scr_GetString(0), I_stricmp(String, byte_82003CDD)))
+    if (Scr_GetType(0) != 2 || (String = Scr_GetString(0), I_stricmp(String, "")))
     {
         NumParam = Scr_GetNumParam();
         Scr_ConstructMessageString(0, NumParam - 1, "Hint String", v10, 0x400u);
@@ -6331,7 +6337,7 @@ void Scr_SaveGame()
     int v9; // r3
     char v10[112]; // [sp+50h] [-70h] BYREF
 
-    IString = byte_82003CDD;
+    IString = "";
     if (g_entities[0].health <= 0)
         Scr_Error("Attempting to save while dead\n");
     String = Dvar_GetString("mapname");
@@ -6389,7 +6395,7 @@ void Scr_SaveGameNoCommit()
     int v10; // r31
     char v11[112]; // [sp+50h] [-70h] BYREF
 
-    IString = byte_82003CDD;
+    IString = "";
     if (g_entities[0].health <= 0)
         Scr_Error("Attempting to save while dead\n");
     String = Dvar_GetString("mapname");
@@ -8062,7 +8068,7 @@ void Scr_ResetSunLight()
 {
     if (Scr_GetNumParam())
         Scr_Error("Incorrect number of parameters\n");
-    SV_SetConfigstring(7, byte_82003CDD);
+    SV_SetConfigstring(7, "");
 }
 
 void Scr_GetMapSunDirection()
@@ -8147,7 +8153,7 @@ void Scr_ResetSunDirection()
 {
     if (Scr_GetNumParam())
         Scr_Error("Incorrect number of parameters\n");
-    SV_SetConfigstring(8, byte_82003CDD);
+    SV_SetConfigstring(8, "");
 }
 
 void Scr_BadPlace_Delete()
@@ -9322,7 +9328,7 @@ void __cdecl GScr_DumpAnims(scr_entref_t *entref)
     gentity_s *Entity; // r3
 
     Entity = GetEntity(entref);
-    SV_DObjDisplayAnim(Entity, byte_82003CDD);
+    SV_DObjDisplayAnim(Entity, "");
 }
 
 void __cdecl GScr_ShellShock(scr_entref_t *entref)
@@ -10314,7 +10320,7 @@ void GScr_FGetArg()
     if (Scr_GetNumParam() <= 1)
     {
         Com_Printf(23, "freadline requires at least 2 parameters (file, string)\n");
-        Scr_AddString(byte_82003CDD);
+        Scr_AddString("");
         return;
     }
     Int = Scr_GetInt(0);
@@ -10329,7 +10335,7 @@ void GScr_FGetArg()
     {
         Com_Printf(23, "freadline failed, invalid argument number %i\n", v1);
     LABEL_14:
-        Scr_AddString(byte_82003CDD);
+        Scr_AddString("");
         return;
     }
     if (!level.openScriptIOFileBuffers[Int])
@@ -10361,7 +10367,7 @@ void GScr_FGetArg()
             "freadline failed, there aren't %i arguments on this line, there are only %i arguments\n",
             v2 + 1,
             v4);
-        Scr_AddString(byte_82003CDD);
+        Scr_AddString("");
     }
 }
 
@@ -11184,7 +11190,7 @@ void __cdecl GScr_SetScriptsAndAnimsForEntities(ScriptFunctions *functions)
         Com_Error(ERR_DROP, byte_8203C28C);
     while (G_ParseSpawnVars(&level.spawnVar))
     {
-        G_LevelSpawnString("classname", byte_82003CDD, &v13);
+        G_LevelSpawnString("classname", "", &v13);
         if (I_strnicmp(v13, "actor_", 6))
         {
             if (!I_stricmp(v13, "misc_mg42") || !I_stricmp(v13, "misc_turret"))

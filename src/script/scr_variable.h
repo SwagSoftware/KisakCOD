@@ -485,6 +485,7 @@ int  Scr_MakeValuePrimitive(unsigned int parentId);
 void  SafeRemoveArrayVariable(unsigned int parentId, unsigned int unsignedValue);
 VariableValue  Scr_EvalVariableEntityField(unsigned int entId, unsigned int fieldName);
 void  Scr_ClearThread(unsigned int parentId);
+void Scr_GetChecksum(unsigned int *checksum);
 
 //int marker_scr_variable
 

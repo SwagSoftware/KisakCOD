@@ -304,7 +304,7 @@ void __cdecl ActorScr_SetAnimPos(actor_s *pSelf, const actor_fields_s *pField)
             v8,
             v7,
             v6);
-        Scr_ErrorWithDialogMessage(v9, byte_82003CDD);
+        Scr_ErrorWithDialogMessage(v9, "");
     }
 }
 

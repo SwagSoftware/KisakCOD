@@ -4583,3 +4583,32 @@ void  Scr_ClearThread(unsigned int parentId)
 
 	RemoveRefToObject(parentValue->u.o.u.size);
 }
+
+void Scr_GetChecksum(unsigned int *checksum)
+{
+	const char *programBuffer; // r11
+
+	if (!scrVarPub.endScriptBuffer)
+		MyAssertHandler(
+			"c:\\trees\\cod3\\cod3src\\src\\script\\scr_variable.cpp",
+			5337,
+			0,
+			"%s",
+			"scrVarPub.endScriptBuffer");
+	programBuffer = scrVarPub.programBuffer;
+	if (!scrVarPub.programBuffer)
+	{
+		MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\script\\scr_variable.cpp", 5338, 0, "%s", "scrVarPub.programBuffer");
+		programBuffer = scrVarPub.programBuffer;
+	}
+	if (programBuffer > scrVarPub.endScriptBuffer)
+		MyAssertHandler(
+			"c:\\trees\\cod3\\cod3src\\src\\script\\scr_variable.cpp",
+			5339,
+			0,
+			"%s",
+			"scrVarPub.programBuffer <= scrVarPub.endScriptBuffer");
+	*checksum = scrVarPub.checksum;
+	checksum[1] = scrCompilePub.programLen;
+	checksum[2] = scrVarPub.endScriptBuffer - scrVarPub.programBuffer;
+}

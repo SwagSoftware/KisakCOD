@@ -1,5 +1,6 @@
-#include "game_public.h"
+#include "g_bsp.h"
 
+#include "game_public.h"
 
 #ifdef KISAK_MP
 GameWorldMp gameWorldMp;

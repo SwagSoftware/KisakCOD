@@ -357,7 +357,7 @@ void __cdecl CG_SetViewPos_f()
                     nesting = cmd_args.nesting;
                 }
                 if (cmd_args.argc[nesting] <= 4)
-                    v5 = byte_82003CDD;
+                    v5 = "";
                 else
                     v5 = (const char *)*((unsigned int *)cmd_args.argv[nesting] + 4);
                 v6 = atof(v5);
@@ -375,7 +375,7 @@ void __cdecl CG_SetViewPos_f()
                     v7 = cmd_args.nesting;
                 }
                 if (cmd_args.argc[v7] <= 5)
-                    v8 = byte_82003CDD;
+                    v8 = "";
                 else
                     v8 = (const char *)*((unsigned int *)cmd_args.argv[v7] + 5);
                 v9 = atof(v8);

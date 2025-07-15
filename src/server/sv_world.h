@@ -1,6 +1,17 @@
 #pragma once
-#include <bgame/bg_local.h>
+
+#include <qcommon/qcommon.h>
 #include <qcommon/ent.h>
+
+//#ifdef KISAK_MP
+//#include <server_mp/server_mp.h>
+//#elif KISAK_SP 
+//#include "server.h"
+//#endif
+
+struct gentity_s;
+struct IgnoreEntParams;
+struct sightpointtrace_t;
 
 unsigned int __cdecl SV_ClipHandleForEntity(const gentity_s *ent);
 void __cdecl SV_UnlinkEntity(gentity_s *gEnt);

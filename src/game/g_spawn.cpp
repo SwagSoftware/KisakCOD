@@ -799,24 +799,24 @@ void __cdecl SP_worldspawn()
     char v19; // [sp+6Ch] [-64h] BYREF
     char v20; // [sp+70h] [-60h] BYREF
 
-    G_SpawnString(&level.spawnVar, "classname", byte_82003CDD, v14);
+    G_SpawnString(&level.spawnVar, "classname", "", v14);
     if (I_stricmp(v14[0], "worldspawn"))
         Com_Error(ERR_DROP, byte_8203EC40);
     SV_SetConfigstring(2, "cod-sp");
-    G_SpawnString(&level.spawnVar, "ambienttrack", byte_82003CDD, v14);
+    G_SpawnString(&level.spawnVar, "ambienttrack", "", v14);
     if (*v14[0])
         v0 = va("n\\%s", v14[0]);
     else
-        v0 = byte_82003CDD;
+        v0 = "";
     SV_SetConfigstring(1114, v0);
-    G_SpawnString(&level.spawnVar, "message", byte_82003CDD, v14);
+    G_SpawnString(&level.spawnVar, "message", "", v14);
     SV_SetConfigstring(3, v14[0]);
     G_SpawnString(&level.spawnVar, "gravity", "800", v14);
     if (!g_gravity)
         MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\g_spawn.cpp", 1209, 0, "%s", "g_gravity");
     v1 = atof(v14[0]);
     Dvar_SetFloat(g_gravity, (float)*(double *)&v1);
-    G_SpawnString(&level.spawnVar, "northyaw", byte_82003CDD, v14);
+    G_SpawnString(&level.spawnVar, "northyaw", "", v14);
     if (*v14[0])
     {
         SV_SetConfigstring(1147, v14[0]);
@@ -886,7 +886,7 @@ void __cdecl G_LoadStructs()
     Scr_FreeThread(v1);
     while (G_ParseSpawnVars(&level.spawnVar))
     {
-        G_SpawnString(&level.spawnVar, "classname", byte_82003CDD, &v5);
+        G_SpawnString(&level.spawnVar, "classname", "", &v5);
         v2 = v5;
         v3 = "script_struct";
         do
@@ -1046,7 +1046,7 @@ void G_CallSpawn()
 
     if (!level.spawnVar.spawnVarsValid)
         MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\g_spawn.cpp", 434, 1, "%s", "level.spawnVar.spawnVarsValid");
-    G_SpawnString(&level.spawnVar, "classname", byte_82003CDD, &v21);
+    G_SpawnString(&level.spawnVar, "classname", "", &v21);
     if (v21)
     {
         if (strncmp(v21, "dyn_", 4u))

@@ -2280,7 +2280,7 @@ void __cdecl ActorCmd_trackScriptState(scr_entref_t *entref)
             "trackScriptState should only be called on script state transitions.  Called for state %s from state %s.",
             v6,
             v5);
-        Scr_ErrorWithDialogMessage(v7, byte_82003CDD);
+        Scr_ErrorWithDialogMessage(v7, "");
     }
 }
 

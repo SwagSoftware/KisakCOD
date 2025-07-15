@@ -3597,7 +3597,7 @@ void __cdecl PlayerCmd_SetActionSlot(scr_entref_t *entref)
             {
                 if (I_stricmp(String, "nightvision"))
                 {
-                    if (I_stricmp(String, byte_82003CDD))
+                    if (I_stricmp(String, ""))
                         Scr_Error("Invalid option: expected \"weapon\", \"altweapon\", or \"nightvision\".\n");
                     else
                         v1->client->ps.actionSlotType[v4] = ACTIONSLOTTYPE_DONOTHING;

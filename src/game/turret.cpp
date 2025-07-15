@@ -2124,7 +2124,7 @@ void __cdecl SP_turret_XAnimPrecache(ScriptFunctions *functions, const char *cla
     unsigned int v7; // r11
     const char *v8; // [sp+50h] [-30h] BYREF
 
-    G_LevelSpawnString("weaponinfo", byte_82003CDD, &v8);
+    G_LevelSpawnString("weaponinfo", "", &v8);
     WeaponIndexForName = G_GetWeaponIndexForName(v8);
     if (!WeaponIndexForName)
         Com_Error(ERR_DROP, byte_820444E4, v8, classname);
@@ -2483,7 +2483,7 @@ void __cdecl G_SpawnTurret(gentity_s *self, const char *weaponinfoname)
     else
         v6->stopSndPlayer = 0;
     if (!level.spawnVar.spawnVarsValid
-        || (v17 = &v6->arcmin[1], !G_SpawnFloat("rightarc", byte_82003CDD, &v6->arcmin[1])))
+        || (v17 = &v6->arcmin[1], !G_SpawnFloat("rightarc", "", &v6->arcmin[1])))
     {
         v17 = &v6->arcmin[1];
         v6->arcmin[1] = WeaponDef->rightArc;
@@ -2494,7 +2494,7 @@ void __cdecl G_SpawnTurret(gentity_s *self, const char *weaponinfoname)
         *v17 = 0.0;
     spawnVarsValid = level.spawnVar.spawnVarsValid;
     v6->initialYawmin = *v17;
-    if (!spawnVarsValid || (v20 = &v6->arcmax[1], !G_SpawnFloat("leftarc", byte_82003CDD, &v6->arcmax[1])))
+    if (!spawnVarsValid || (v20 = &v6->arcmax[1], !G_SpawnFloat("leftarc", "", &v6->arcmax[1])))
     {
         v20 = &v6->arcmax[1];
         v6->arcmax[1] = WeaponDef->leftArc;
@@ -2513,7 +2513,7 @@ void __cdecl G_SpawnTurret(gentity_s *self, const char *weaponinfoname)
     v26 = cos(v9);
     v27 = level.spawnVar.spawnVarsValid;
     v6->forwardAngleDot = *(double *)&v26;
-    if (!v27 || (arcmin = v6->arcmin, !G_SpawnFloat("toparc", byte_82003CDD, v6->arcmin)))
+    if (!v27 || (arcmin = v6->arcmin, !G_SpawnFloat("toparc", "", v6->arcmin)))
     {
         arcmin = v6->arcmin;
         v6->arcmin[0] = WeaponDef->topArc;
@@ -2522,15 +2522,15 @@ void __cdecl G_SpawnTurret(gentity_s *self, const char *weaponinfoname)
     *arcmin = *arcmin * (float)-1.0;
     if (v29 > 0.0)
         *arcmin = 0.0;
-    if (!level.spawnVar.spawnVarsValid || (arcmax = v6->arcmax, !G_SpawnFloat("bottomarc", byte_82003CDD, v6->arcmax)))
+    if (!level.spawnVar.spawnVarsValid || (arcmax = v6->arcmax, !G_SpawnFloat("bottomarc", "", v6->arcmax)))
     {
         arcmax = v6->arcmax;
         v6->arcmax[0] = WeaponDef->bottomArc;
     }
     if (*arcmax < 0.0)
         *arcmax = 0.0;
-    if (level.spawnVar.spawnVarsValid && G_SpawnFloat("yawconvergencetime", byte_82003CDD, &v46)
-        || level.spawnVar.spawnVarsValid && G_SpawnFloat("convergencetime", byte_82003CDD, &v46))
+    if (level.spawnVar.spawnVarsValid && G_SpawnFloat("yawconvergencetime", "", &v46)
+        || level.spawnVar.spawnVarsValid && G_SpawnFloat("convergencetime", "", &v46))
     {
         yawConvergenceTime = v46;
     }
@@ -2546,7 +2546,7 @@ void __cdecl G_SpawnTurret(gentity_s *self, const char *weaponinfoname)
     }
     v32 = !level.spawnVar.spawnVarsValid;
     v6->convergenceTime[1] = (int)(float)((float)((float)yawConvergenceTime * (float)1000.0) + (float)0.5);
-    if (!v32 && G_SpawnFloat("pitchconvergencetime", byte_82003CDD, &v46))
+    if (!v32 && G_SpawnFloat("pitchconvergencetime", "", &v46))
     {
         pitchConvergenceTime = v46;
     }
@@ -2562,7 +2562,7 @@ void __cdecl G_SpawnTurret(gentity_s *self, const char *weaponinfoname)
     }
     v34 = level.spawnVar.spawnVarsValid;
     v6->convergenceTime[0] = (int)(float)((float)((float)pitchConvergenceTime * (float)1000.0) + (float)0.5);
-    if (v34 && G_SpawnFloat("suppressionTime", byte_82003CDD, &v47))
+    if (v34 && G_SpawnFloat("suppressionTime", "", &v47))
     {
         suppressTime = v47;
     }
@@ -2578,7 +2578,7 @@ void __cdecl G_SpawnTurret(gentity_s *self, const char *weaponinfoname)
     }
     v36 = level.spawnVar.spawnVarsValid;
     v6->suppressTime = (int)(float)((float)((float)suppressTime * (float)1000.0) + (float)0.5);
-    if (v36 && G_SpawnFloat("maxrange", byte_82003CDD, v48))
+    if (v36 && G_SpawnFloat("maxrange", "", v48))
     {
         maxRange = v48[0];
     }
@@ -2670,7 +2670,7 @@ void __cdecl SP_turret(gentity_s *self)
 {
     const char *v2; // [sp+50h] [-20h] BYREF
 
-    if (!G_LevelSpawnString("weaponinfo", byte_82003CDD, &v2))
+    if (!G_LevelSpawnString("weaponinfo", "", &v2))
         Com_Error(ERR_DROP, byte_82044700);
     G_SpawnTurret(self, v2);
 }

@@ -918,7 +918,7 @@ void Cmd_VisionSetNaked_f()
         nesting = sv_cmd_args.nesting;
     }
     if (sv_cmd_args.argc[nesting] <= 1)
-        v5 = byte_82003CDD;
+        v5 = "";
     else
         v5 = (const char *)*((unsigned int *)sv_cmd_args.argv[nesting] + 1);
     v6 = va("\"%s\" %i", v5, v7);
@@ -976,7 +976,7 @@ void Cmd_VisionSetNight_f()
         nesting = sv_cmd_args.nesting;
     }
     if (sv_cmd_args.argc[nesting] <= 1)
-        v5 = byte_82003CDD;
+        v5 = "";
     else
         v5 = (const char *)*((unsigned int *)sv_cmd_args.argv[nesting] + 1);
     v6 = va("\"%s\" %i", v5, v7);

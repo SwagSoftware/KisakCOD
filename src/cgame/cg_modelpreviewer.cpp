@@ -163,22 +163,22 @@ const dvar_s *CG_ModPrvRegisterDvars()
 
     g_mdlprv.model.mruNames[0] = Dvar_RegisterString(
         "modPrvModelMruName0",
-        byte_82003CDD,
+        "",
         1u,
         "Model previewer most recently used model name 0");
     g_mdlprv.model.mruNames[1] = Dvar_RegisterString(
         "modPrvModelMruName1",
-        byte_82003CDD,
+        "",
         1u,
         "Model previewer most recently used model name 1");
     g_mdlprv.model.mruNames[2] = Dvar_RegisterString(
         "modPrvModelMruName2",
-        byte_82003CDD,
+        "",
         1u,
         "Model previewer most recently used model name 2");
     g_mdlprv.model.mruNames[3] = Dvar_RegisterString(
         "modPrvModelMruName3",
-        byte_82003CDD,
+        "",
         1u,
         "Model previewer most recently used model name 3");
     CG_ModPrvUpdateMru(g_mdlprv.model.mruNames, g_mdlprv.model.mruNameTable, 0);
@@ -208,22 +208,22 @@ const dvar_s *CG_ModPrvRegisterDvars()
         "Draw model previewer bone information");
     g_mdlprv.anim.mruNames[0] = Dvar_RegisterString(
         "modPrvAnimMruName0",
-        byte_82003CDD,
+        "",
         1u,
         "Model previewer most recently used anim name 0");
     g_mdlprv.anim.mruNames[1] = Dvar_RegisterString(
         "modPrvAnimMruName1",
-        byte_82003CDD,
+        "",
         1u,
         "Model previewer most recently used anim name 1");
     g_mdlprv.anim.mruNames[2] = Dvar_RegisterString(
         "modPrvAnimMruName2",
-        byte_82003CDD,
+        "",
         1u,
         "Model previewer most recently used anim name 2");
     g_mdlprv.anim.mruNames[3] = Dvar_RegisterString(
         "modPrvAnimMruName3",
-        byte_82003CDD,
+        "",
         1u,
         "Model previewer most recently used anim name 3");
     CG_ModPrvUpdateMru(g_mdlprv.anim.mruNames, g_mdlprv.anim.mruNameTable, 0);

@@ -6,6 +6,7 @@
 #include <qcommon/ent.h>
 #include <qcommon/net_chan_mp.h>
 #include <qcommon/sv_msg_write_mp.h>
+
 #include <client_mp/client_mp.h>
 
 enum svscmd_type : __int32
@@ -14,6 +15,7 @@ enum svscmd_type : __int32
     SV_CMD_RELIABLE = 0x1,
 };
 
+#define	NETF_BASE(s, x) #x,(size_t)&((s*)0)->x
 #define NETF_HUD(x) NETF_BASE(hudelem_s, x)
 
 const NetField hudElemFields[40] =

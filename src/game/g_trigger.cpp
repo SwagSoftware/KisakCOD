@@ -66,7 +66,7 @@ void __cdecl InitTriggerWait(gentity_s *ent, int spawnflag)
 {
     float v4[2]; // [sp+50h] [-20h] BYREF
 
-    if (level.spawnVar.spawnVarsValid && G_SpawnFloat("wait", byte_82003CDD, v4) && v4[0] <= 0.0)
+    if (level.spawnVar.spawnVarsValid && G_SpawnFloat("wait", "", v4) && v4[0] <= 0.0)
         ent->spawnflags |= spawnflag;
 }
 
@@ -126,7 +126,7 @@ void __cdecl SP_trigger_radius(gentity_s *ent)
 
     if (level.spawnVar.spawnVarsValid)
     {
-        if (!G_SpawnFloat("radius", byte_82003CDD, &Float))
+        if (!G_SpawnFloat("radius", "", &Float))
         {
             v2 = va(
                 (const char *)(const char *)HIDWORD(COERCE_UNSIGNED_INT64(ent->r.currentOrigin[0])),
@@ -135,7 +135,7 @@ void __cdecl SP_trigger_radius(gentity_s *ent)
                 (unsigned int)COERCE_UNSIGNED_INT64(ent->r.currentOrigin[2]));
             Com_Error(ERR_DROP, v2);
         }
-        if (!G_SpawnFloat("height", byte_82003CDD, &v8))
+        if (!G_SpawnFloat("height", "", &v8))
         {
             v3 = va(
                 (const char *)(const char *)HIDWORD(COERCE_UNSIGNED_INT64(ent->r.currentOrigin[0])),
@@ -174,7 +174,7 @@ void __cdecl SP_trigger_disk(gentity_s *ent)
     double v3; // fp0
     float v4[4]; // [sp+50h] [-20h] BYREF
 
-    if (!G_SpawnFloat("radius", byte_82003CDD, v4))
+    if (!G_SpawnFloat("radius", "", v4))
     {
         v2 = va(
             (const char *)(const char *)HIDWORD(COERCE_UNSIGNED_INT64(ent->r.currentOrigin[0])),
