@@ -251,3 +251,72 @@ void __cdecl EntHandle::Init()
     memset((uint8_t *)g_entitiesHandleList, 0, sizeof(g_entitiesHandleList));
     g_usedEntHandle = 0;
 }
+
+
+#ifdef KISAK_SP
+
+#include "sentient.h"
+#include "g_main.h"
+
+EntHandleList g_sentientsHandleList[33];
+
+void SentientHandleDissociate(sentient_s *sentient)
+{
+    EntHandleDissociateInternal(&g_sentientsHandleList[sentient - g_sentients]);
+}
+
+sentient_s *SentientHandle::sentient()
+{
+    bcassert(this->number - 1, MAX_SENTIENTS);
+    iassert((g_sentients[this->number - 1].ent));
+    iassert(g_sentients[this->number - 1].ent->r.inuse);
+    
+    return &g_sentients[this->number - 1];
+}
+
+void SentientHandle::setEntient(sentient_s *sentient)
+{
+    sentient_s *thisSentient; // r3
+
+    if (this->isDefined())
+    {
+        thisSentient = this->sentient();
+
+        if (sentient == thisSentient)
+            return;
+
+        RemoveEntHandleInfo(&g_sentientsHandleList[thisSentient - g_sentients], this->infoIndex);
+
+        if (!sentient)
+        {
+            this->infoIndex = 0;
+            this->number = 0;
+            return;
+        }
+    }
+    else if (!sentient)
+    {
+        return;
+    }
+
+    this->infoIndex = AddEntHandleInfo(&g_sentientsHandleList[sentient - g_sentients], this);
+    this->number = sentient - g_sentients + 1;
+}
+
+void SentientHandle::Init()
+{
+    memset(g_sentientsHandleList, 0, sizeof(g_sentientsHandleList));
+}
+
+bool SentientHandle::isDefined()
+{
+    int number = this->number;
+
+    iassert(!number || g_sentients[number - 1].ent);
+    iassert(!number || g_sentients[number - 1].ent->r.inuse);
+
+    //return (_cntlzw(this->number) & 0x20) == 0;
+    return this->number != 0;
+}
+
+#endif

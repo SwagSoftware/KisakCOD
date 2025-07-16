@@ -236,7 +236,7 @@ int __cdecl G_LocationalTracePassed(
     int contentmask,
     unsigned __int8 *priorityMap);
 void __cdecl G_SightTrace(int *hitNum, const float *start, const float *end, int passEntityNum, int contentmask);
-void __cdecl G_AddDebugString(const float *xyz, const float *color, double scale, const char *pszText, int a5);
+void __cdecl G_AddDebugString(const float *xyz, const float *color, double scale, const char *pszText);
 void __cdecl G_AddDebugStringWithDuration(
     const float *xyz,
     const float *color,

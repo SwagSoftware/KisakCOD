@@ -56,11 +56,11 @@ const char *moveOrientModeStrings[7] =
   "goal"
 };
 
-struct entityHandler_t *entityHandlers;
-struct gentity_s *g_entities;
-struct sentient_s *g_sentients;
+entityHandler_t *entityHandlers;
+gentity_s *g_entities;
+sentient_s *g_sentients;
 char *g_nextMap;
-struct level_locals_t level;
+level_locals_t level;
 gclient_s g_clients[1];
 actor_s g_actors[32];
 
@@ -2381,9 +2381,9 @@ void __cdecl G_SightTrace(int *hitNum, const float *start, const float *end, int
     SV_SightTrace(hitNum, start, vec3_origin, vec3_origin, end, passEntityNum, 2175, contentmask);
 }
 
-void __cdecl G_AddDebugString(const float *xyz, const float *color, double scale, const char *pszText, int a5)
+void __cdecl G_AddDebugString(const float *xyz, const float *color, double scale, const char *pszText)
 {
-    CL_AddDebugString(xyz, color, scale, pszText, a5, 1);
+    CL_AddDebugString(xyz, color, scale, pszText, 0, 1);
 }
 
 void __cdecl G_AddDebugStringWithDuration(

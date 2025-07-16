@@ -4,6 +4,8 @@
 #error This file is for SinglePlayer only 
 #endif
 
+#include <bgame/bg_public.h>
+
 int __cdecl Actor_SightTrace(actor_s *self, const float *start, const float *end, int passEntNum);
 int __cdecl Actor_CanSeePointFrom(
     actor_s *self,

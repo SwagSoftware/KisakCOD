@@ -2,6 +2,7 @@
 #error This file is for SinglePlayer only 
 #endif
 
+#include "actor.h"
 #include <xanim/xanim.h>
 #include <bgame/bg_local.h>
 #include <script/scr_const.h>
@@ -12,8 +13,6 @@ const float ACTOR_EYE_OFFSET = 64.0f;
 const int ACTOR_MAX_HEALTH = 100;
 const int ACTOR_TEAMMOVE_WAIT_TIME = 500;
 
-const float actorMins[3] = { -15.0, -15.0, 0.0 };
-const float actorMaxs[3] = { 15.0, 15.0, 72.0 };
 const float meleeAttackOffsets[4][2] = { { 1.0, 0.0 }, { 0.0, 1.0 }, { -1.0, 0.0 }, { 0.0, -1.0 } };
 const float g_actorAssumedSpeed[2] = { 190.0, 300.0 };
 

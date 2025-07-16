@@ -4,6 +4,54 @@
 #error This file is for SinglePlayer only 
 #endif
 
+#include "enthandle.h"
+
+#include <bgame/bg_local.h>
+#include <bgame/bg_public.h>
+
+struct pathnode_t;
+
+struct sentient_s
+{
+    gentity_s *ent;
+    team_t eTeam;
+    int iThreatBias;
+    int iThreatBiasGroupIndex;
+    bool bIgnoreMe;
+    bool bIgnoreAll;
+    bool originChanged;
+    float oldOrigin[3];
+    float maxVisibleDist;
+    int iEnemyNotifyTime;
+    int attackerCount;
+    gentity_s *lastAttacker;
+    EntHandle syncedMeleeEnt;
+    EntHandle targetEnt;
+    EntHandle scriptTargetEnt;
+    float entityTargetThreat;
+    int meleeAttackerSpot[4];
+    float attackerAccuracy;
+    bool ignoreRandomBulletDamage;
+    bool turretInvulnerability;
+    pathnode_t *pClaimedNode;
+    pathnode_t *pPrevClaimedNode;
+    pathnode_t *pActualChainPos;
+    int iActualChainPosTime;
+    pathnode_t *pNearestNode;
+    unsigned __int8 bNearestNodeValid;
+    unsigned __int8 bNearestNodeBad;
+    bool inuse;
+    int banNodeTime;
+};
+
+struct SentientGlobals
+{
+    int lastTime;
+    int lastSample;
+    float playerTrail[2][3];
+    int sampleTime[2];
+};
+
 sentient_s *__cdecl Sentient_Alloc();
 void __cdecl Sentient_DissociateSentient(sentient_s *self, sentient_s *other, team_t eOtherTeam);
 void __cdecl Sentient_GetOrigin(const sentient_s *self, float *vOriginOut);

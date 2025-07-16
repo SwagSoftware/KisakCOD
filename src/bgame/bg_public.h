@@ -476,39 +476,6 @@ struct potential_threat_t
     float direction[2];
 };
 
-struct sentient_s
-{
-    gentity_s *ent;
-    team_t eTeam;
-    int iThreatBias;
-    int iThreatBiasGroupIndex;
-    bool bIgnoreMe;
-    bool bIgnoreAll;
-    bool originChanged;
-    float oldOrigin[3];
-    float maxVisibleDist;
-    int iEnemyNotifyTime;
-    int attackerCount;
-    gentity_s *lastAttacker;
-    EntHandle syncedMeleeEnt;
-    EntHandle targetEnt;
-    EntHandle scriptTargetEnt;
-    float entityTargetThreat;
-    int meleeAttackerSpot[4];
-    float attackerAccuracy;
-    bool ignoreRandomBulletDamage;
-    bool turretInvulnerability;
-    pathnode_t *pClaimedNode;
-    pathnode_t *pPrevClaimedNode;
-    pathnode_t *pActualChainPos;
-    int iActualChainPosTime;
-    pathnode_t *pNearestNode;
-    unsigned __int8 bNearestNodeValid;
-    unsigned __int8 bNearestNodeBad;
-    bool inuse;
-    int banNodeTime;
-};
-
 enum AISpecies : __int32
 {
     AI_SPECIES_HUMAN = 0x0,
@@ -787,12 +754,6 @@ struct sentient_info_t
     int attackTime;
     float vLastKnownPos[3];
     pathnode_t *pLastKnownNode;
-};
-
-struct SentientHandle
-{
-    unsigned __int16 number;
-    unsigned __int16 infoIndex;
 };
 
 struct ai_suppression_t

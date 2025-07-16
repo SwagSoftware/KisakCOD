@@ -4,6 +4,22 @@
 #error This file is for SinglePlayer only 
 #endif
 
+#include <qcommon/graph.h>
+
+enum WeapAccuracyType : __int32
+{
+    WEAP_ACCURACY_AI_VS_AI = 0x0,
+    WEAP_ACCURACY_AI_VS_PLAYER = 0x1,
+    WEAP_ACCURACY_COUNT = 0x2,
+};
+
+struct WeaponDef;
+struct actor_s;
+struct sentient_s;
+struct weaponParms;
+struct DevGraph;
+
+
 void __cdecl TRACK_actor_aim();
 void __cdecl Actor_DrawDebugAccuracy(const float *pos, double scale, double rowHeight, int a4, const char *a5);
 void __cdecl Actor_DebugAccuracyMsg(

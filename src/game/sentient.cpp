@@ -2,6 +2,22 @@
 #error This file is for SinglePlayer only 
 #endif
 
+#include "sentient.h"
+#include "g_main.h"
+#include <server/server.h>
+#include "actor.h"
+#include <universal/com_math.h>
+#include "actor_senses.h"
+#include "g_local.h"
+#include "actor_events.h"
+#include <script/scr_vm.h>
+#include <script/scr_const.h>
+#include "savememory.h"
+#include "actor_threat.h"
+#include "g_save.h"
+
+SentientGlobals glob;
+
 sentient_s *__cdecl Sentient_Alloc()
 {
     sentient_s *sentients; // r11
@@ -484,7 +500,7 @@ void __cdecl Sentient_SetEnemy(sentient_s *self, gentity_s *enemy, int bNotify)
             self->iEnemyNotifyTime = 0;
         }
         EntHandle::setEnt(&self->targetEnt, enemy);
-        if (bNotify && Scr_IsSystemActive(1u))
+        if (bNotify && Scr_IsSystemActive())
             Scr_Notify(self->ent, scr_const.enemy, 0);
         if (actor)
         {
@@ -577,6 +593,9 @@ sentient_s *__cdecl Sentient_NextSentient(sentient_s *pPrevSentient, int iTeamFl
     }
     return &sentients[v5];
 }
+
+const char *pszTeamName[5] =
+{ "invalid", "axis", "allies", "neutral", "dead" };
 
 const char *__cdecl Sentient_NameForTeam(unsigned int eTeam)
 {

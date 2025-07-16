@@ -3,6 +3,27 @@
 #endif
 
 #include "actor_aim.h"
+#include <qcommon/mem_track.h>
+#include <qcommon/graph.h>
+#include <universal/assertive.h>
+#include <universal/com_math.h>
+#include "g_local.h"
+#include "sentient.h"
+#include "g_main.h"
+#include <xanim/xanim.h>
+#include "actor_senses.h"
+#include "actor.h"
+
+struct AccuracyGraphBackup
+{
+    float accuracyGraphKnots[2][16][2];
+};
+
+float debugAccuracyColors[8][4] = { 0.0f };
+
+DevGraph g_accuracyGraphs[128];
+AccuracyGraphBackup g_accuGraphBuf[2][128];
+char debugAccuracyStrings[8][32] = { 0 };
 
 void __cdecl TRACK_actor_aim()
 {
@@ -19,13 +40,19 @@ void __cdecl Actor_DrawDebugAccuracy(const float *pos, double scale, double rowH
         MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\actor_aim.cpp", 88, 0, "%s", "pos");
     v8 = debugAccuracyColors[0];
     v9 = debugAccuracyStrings[0];
-    do
+
+    for (int i = 0; i < 8; i++)
     {
-        G_AddDebugString(pos, v8, scale, a5);
-        v9 += 32;
+        G_AddDebugString(pos, debugAccuracyColors[i], scale, a5);
         *((float *)pos + 2) = pos[2] - (float)rowHeight;
-        v8 += 4;
-    } while ((int)v9 < (int)&dword_82C31FB0);
+    }
+    //do
+    //{
+    //    G_AddDebugString(pos, v8, scale, a5);
+    //    v9 += 32;
+    //    *((float *)pos + 2) = pos[2] - (float)rowHeight;
+    //    v8 += 4;
+    //} while ((int)v9 < (int)&dword_82C31FB0);
 }
 
 void __cdecl Actor_DebugAccuracyMsg(
@@ -115,17 +142,14 @@ float __cdecl Actor_GetAccuracyFraction(
         if (a4)
         {
             if (a4 == 1)
-                Com_Error(ERR_DROP, byte_82022DD0, *accuracyType);
+                Com_Error(ERR_DROP, "No AI vs Player accuracy for weapon %s", *accuracyType);
         }
         else
         {
-            Com_Error(ERR_DROP, byte_82022DA0, *accuracyType);
+            Com_Error(ERR_DROP, "No AI vs AI accuracy graph for weapon %s", *accuracyType);
         }
     }
-    ValueFromFraction = GraphGetValueFromFraction(
-        (const int)accuracyType[a4 + 481],
-        (const float (*)[2])accuracyType[v7],
-        v6);
+    ValueFromFraction = GraphGetValueFromFraction((const int)accuracyType[a4 + 481], (const float (*)[2])accuracyType[v7], v6);
     return *((float *)&ValueFromFraction + 1);
 }
 
@@ -165,12 +189,11 @@ float __cdecl Actor_GetWeaponAccuracy(
             2);
     Sentient_GetOrigin(self->sentient, &v14);
     Sentient_GetOrigin(enemy, &v17);
-    v9 = __fsqrts((float)((float)((float)(v14 - v17) * (float)(v14 - v17))
-        + (float)((float)((float)(v16 - v19) * (float)(v16 - v19))
-            + (float)((float)(v15 - v18) * (float)(v15 - v18)))));
+    //v9 = __fsqrts((float)((float)((float)(v14 - v17) * (float)(v14 - v17)) + (float)((float)((float)(v16 - v19) * (float)(v16 - v19)) + (float)((float)(v15 - v18) * (float)(v15 - v18)))));
+    v9 = sqrtf((float)((float)((float)(v14 - v17) * (float)(v14 - v17)) + (float)((float)((float)(v16 - v19) * (float)(v16 - v19)) + (float)((float)(v15 - v18) * (float)(v15 - v18)))));
     if (accuracyType == WEAP_ACCURACY_AI_VS_PLAYER)
         v9 = (float)(ai_accuracyDistScale->current.value * (float)v9);
-    AccuracyFraction = Actor_GetAccuracyFraction(v9, v8, &weapDef->szInternalName, accuracyType);
+    AccuracyFraction = Actor_GetAccuracyFraction(v9, v8, (const char**)&weapDef->szInternalName, (unsigned int)accuracyType);
     v11 = AccuracyFraction;
     if (AccuracyFraction < 0.0 || AccuracyFraction > 1.0)
         MyAssertHandler(
@@ -214,51 +237,91 @@ float __cdecl Actor_GetPlayerStanceAccuracy(const actor_s *self, const sentient_
     return *((float *)&v4 + 1);
 }
 
+//float __cdecl Actor_GetPlayerMovementAccuracy(const actor_s *self, const sentient_s *enemy)
+//{
+//    double v6; // fp0
+//    double v10; // fp1
+//    double v12; // fp31
+//    float v14; // [sp+50h] [-50h] BYREF
+//    float v15; // [sp+54h] [-4Ch]
+//    float v16; // [sp+58h] [-48h]
+//    float v17; // [sp+60h] [-40h] BYREF
+//    float v18; // [sp+64h] [-3Ch]
+//    float v19; // [sp+68h] [-38h]
+//
+//    iassert(self);
+//    iassert(enemy);
+//    iassert(enemy->ent);
+//    iassert(enemy->ent->client);
+//
+//    Sentient_GetOrigin(self->sentient, &v14);
+//    Sentient_GetOrigin(enemy, &v17);
+//
+//    _FP5 = -__fsqrts((float)((float)((float)(v17 - v14) * (float)(v17 - v14)) + (float)((float)((float)(v19 - v16) * (float)(v19 - v16)) + (float)((float)(v18 - v15) * (float)(v18 - v15)))));
+//    __asm { fsel      f10, f5, f11, f10 }
+//    v6 = __fabs((float)((float)(enemy->ent->client->ps.velocity[0]
+//        * (float)((float)((float)1.0 / (float)_FP10) * (float)(v18 - v15)))
+//        + (float)((float)(enemy->ent->client->ps.velocity[2]
+//            * (float)((float)(v19 - v16) * (float)((float)1.0 / (float)_FP10)))
+//            + (float)(enemy->ent->client->ps.velocity[1]
+//                * (float)-(float)((float)((float)1.0 / (float)_FP10) * (float)(v17 - v14))))));
+//    _FP12 = (float)((float)v6 - (float)250.0);
+//    _FP10 = -v6;
+//    __asm { fsel      f13, f12, f13, f0 }
+//    v10 = 0.1;
+//    __asm { fsel      f13, f10, f0, f13 }
+//    v12 = (float)-(float)((float)((float)_FP13 * (float)0.0040000002) - (float)1.0);
+//    if (v12 >= 0.1)
+//    {
+//        if (v12 < 0.0 || v12 > 1.0)
+//            MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\actor_aim.cpp", 244, 1, (const char *)HIDWORD(v12), 0, 0, 0);
+//        v10 = v12;
+//    }
+//    return *((float *)&v10 + 1);
+//}
+
 float __cdecl Actor_GetPlayerMovementAccuracy(const actor_s *self, const sentient_s *enemy)
 {
-    double v6; // fp0
-    double v10; // fp1
-    double v12; // fp31
-    float v14; // [sp+50h] [-50h] BYREF
-    float v15; // [sp+54h] [-4Ch]
-    float v16; // [sp+58h] [-48h]
-    float v17; // [sp+60h] [-40h] BYREF
-    float v18; // [sp+64h] [-3Ch]
-    float v19; // [sp+68h] [-38h]
+    assert(self);
+    assert(enemy);
+    assert(enemy->ent);
+    assert(enemy->ent->client);
 
-    if (!self)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\actor_aim.cpp", 221, 0, "%s", "self");
-    if (!enemy)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\actor_aim.cpp", 222, 0, "%s", "enemy");
-    if (!enemy->ent)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\actor_aim.cpp", 223, 0, "%s", "enemy->ent");
-    if (!enemy->ent->client)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\actor_aim.cpp", 224, 0, "%s", "enemy->ent->client");
-    Sentient_GetOrigin(self->sentient, &v14);
-    Sentient_GetOrigin(enemy, &v17);
-    _FP5 = -__fsqrts((float)((float)((float)(v17 - v14) * (float)(v17 - v14))
-        + (float)((float)((float)(v19 - v16) * (float)(v19 - v16))
-            + (float)((float)(v18 - v15) * (float)(v18 - v15)))));
-    __asm { fsel      f10, f5, f11, f10 }
-    v6 = __fabs((float)((float)(enemy->ent->client->ps.velocity[0]
-        * (float)((float)((float)1.0 / (float)_FP10) * (float)(v18 - v15)))
-        + (float)((float)(enemy->ent->client->ps.velocity[2]
-            * (float)((float)(v19 - v16) * (float)((float)1.0 / (float)_FP10)))
-            + (float)(enemy->ent->client->ps.velocity[1]
-                * (float)-(float)((float)((float)1.0 / (float)_FP10) * (float)(v17 - v14))))));
-    _FP12 = (float)((float)v6 - (float)250.0);
-    _FP10 = -v6;
-    __asm { fsel      f13, f12, f13, f0 }
-    v10 = 0.1;
-    __asm { fsel      f13, f10, f0, f13 }
-    v12 = (float)-(float)((float)((float)_FP13 * (float)0.0040000002) - (float)1.0);
-    if (v12 >= 0.1)
+    float selfPos[3];
+    float enemyPos[3];
+
+    Sentient_GetOrigin(self->sentient, selfPos);
+    Sentient_GetOrigin(enemy, enemyPos);
+
+    float dx = enemyPos[0] - selfPos[0];
+    float dy = enemyPos[1] - selfPos[1];
+    float dz = enemyPos[2] - selfPos[2];
+
+    float dist = sqrtf(dx * dx + dy * dy + dz * dz);
+    float inv_dist = (dist != 0.0f) ? (1.0f / dist) : 0.0f;
+
+    const float *velocity = enemy->ent->client->ps.velocity;
+
+    float dot =
+        velocity[0] * dx * inv_dist +
+        velocity[2] * dz * inv_dist -
+        velocity[1] * dy * inv_dist;
+
+    float absDot = fabsf(dot);
+    float delta = absDot - 250.0f;
+
+    float penalty = (delta >= 0.0f) ? delta : 0.0f;
+    penalty = (-absDot >= 0.0f) ? 0.0f : penalty;
+
+    float accuracy = -(penalty * 0.004f - 1.0f);
+
+    if (accuracy >= 0.1f)
     {
-        if (v12 < 0.0 || v12 > 1.0)
-            MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\actor_aim.cpp", 244, 1, (const char *)HIDWORD(v12), 0, 0, 0);
-        v10 = v12;
+        iassert(accuracy > 0.0f && accuracy <= 1.0f);
+        return accuracy;
     }
-    return *((float *)&v10 + 1);
+
+    return 0.1f;
 }
 
 float __cdecl Actor_GetPlayerSightAccuracy(actor_s *self, const sentient_s *enemy)
@@ -281,15 +344,13 @@ float __cdecl Actor_GetPlayerSightAccuracy(actor_s *self, const sentient_s *enem
     float v20; // [sp+58h] [-88h]
     float v21[22]; // [sp+60h] [-80h] BYREF
 
-    if (!self)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\actor_aim.cpp", 261, 0, "%s", "self");
-    if (!enemy)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\actor_aim.cpp", 262, 0, "%s", "enemy");
-    if (!enemy->ent)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\actor_aim.cpp", 263, 0, "%s", "enemy->ent");
-    if (!enemy->ent->client)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\actor_aim.cpp", 264, 0, "%s", "enemy->ent->client");
+    iassert(self);
+    iassert(enemy);
+    iassert(enemy->ent);
+    iassert(enemy->ent->client);
+
     Sentient_GetEyePosition(enemy, v21);
+
     client = enemy->ent->client;
     v5 = 0.0;
     v6 = client->ps.origin[0];

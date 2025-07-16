@@ -37,3 +37,24 @@ void __cdecl EntHandleDissociate(gentity_s *ent);
 void __cdecl EntHandleDissociateInternal(EntHandleList *entHandleList);
 void __cdecl RemoveEntHandleInfo(EntHandleList *entHandleList, uint32_t oldInfoIndex);
 uint32_t __cdecl AddEntHandleInfo(EntHandleList *entHandleList, void *handle);
+
+
+#ifdef KISAK_SP
+struct sentient_s;
+
+#define MAX_SENTIENTS 33
+
+struct SentientHandle
+{
+    unsigned __int16 number;
+    unsigned __int16 infoIndex;
+
+    sentient_s *sentient();
+    void setEntient(sentient_s *sentient);
+
+    static void Init();
+    bool isDefined();
+};
+
+void SentientHandleDissociate(sentient_s *sentient);
+#endif

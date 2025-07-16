@@ -3,6 +3,16 @@
 #endif
 
 #include "actor_senses.h"
+#include "g_main.h"
+#include <universal/com_math.h>
+#include <server/server.h>
+#include "pathnode.h"
+#include "actor.h"
+#include "sentient.h"
+#include "g_local.h"
+#include <script/scr_const.h>
+#include "actor_turret.h"
+#include "turret.h"
 
 int __cdecl Actor_SightTrace(actor_s *self, const float *start, const float *end, int passEntNum)
 {
@@ -642,8 +652,8 @@ int __cdecl Actor_CanSeeEntityEx(actor_s *self, const gentity_s *ent, double fov
         Actor_GetEyePosition(self, v26);
     LABEL_19:
         v11 = fovDot;
-        if (Actor_GetTargetSentient(self) == sentient
-            || SentientHandle::isDefined(&self->pFavoriteEnemy) && SentientHandle::sentient(&self->pFavoriteEnemy) == sentient)
+        //if (Actor_GetTargetSentient(self) == sentient || SentientHandle::isDefined(&self->pFavoriteEnemy) && SentientHandle::sentient(&self->pFavoriteEnemy) == sentient)
+        if (Actor_GetTargetSentient(self) == sentient || (self->pFavoriteEnemy.isDefined() && self->pFavoriteEnemy.sentient()  == sentient))
         {
             v11 = 0.0;
         }

@@ -211,3 +211,7 @@ void __cdecl Actor_FindPathToGoal(actor_s *self);
 void __cdecl Actor_UpdateOriginAndAngles(actor_s *self);
 void __cdecl Actor_PredictOriginAndAngles(actor_s *self);
 void __cdecl Actor_PostThink(actor_s *self);
+
+
+static const float actorMins[3] = { -15.0, -15.0, 0.0 };
+static const float actorMaxs[3] = { 15.0, 15.0, 72.0 };
