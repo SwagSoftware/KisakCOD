@@ -15,6 +15,21 @@ struct SpawnFuncEntry
     void(__fastcall *callback)(gentity_s *);
 };
 
+struct animscripted_s
+{
+    float axis[4][3];
+    float originError[3];
+    float anglesError[3];
+    unsigned __int16 anim;
+    unsigned __int16 root;
+    unsigned __int8 bStarted;
+    unsigned __int8 mode;
+    float fHeightOfs;
+    float fEndPitch;
+    float fEndRoll;
+    float fOrientLerp;
+};
+
 struct entityHandler_t
 {
     void(*think)(gentity_s *);

@@ -5196,4 +5196,15 @@ int __cdecl Scr_BuiltinCompare(_DWORD* a, _DWORD* b)
     return scrVmDebugPub.func_table[*a].prof - scrVmDebugPub.func_table[*b].prof;
 }
 
+void Scr_DecTime()
+{
+    unsigned int time; // r11
+
+    time = scrVarPub.time;
+    iassert(!(scrVarPub.time & ~VAR_NAME_LOW_MASK));
+    scrVarPub.time = time - 1;
+    scrVarPub.time &= 0x00FFFFFF; // Zero out highest byte to ensure the unsigned int didn't rollback to 4 billion
+    //HIBYTE(scrVarPub.time) = 0; 
+}
+
 #pragma warning(pop)

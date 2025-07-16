@@ -4,7 +4,7 @@
 
 #include "actor_negotiation.h"
 
-int __cdecl Actor_Negotiation_Start(actor_s *pSelf, ai_state_t ePrevState)
+bool __cdecl Actor_Negotiation_Start(actor_s *pSelf, ai_state_t ePrevState)
 {
     int result; // r3
 
@@ -18,7 +18,7 @@ int __cdecl Actor_Negotiation_Start(actor_s *pSelf, ai_state_t ePrevState)
     return result;
 }
 
-int __cdecl Actor_Negotiation_Think(actor_s *pSelf)
+actor_think_result_t __cdecl Actor_Negotiation_Think(actor_s *pSelf)
 {
     ai_animmode_t v2; // r28
     ai_traverse_mode_t eTraverseMode; // r4

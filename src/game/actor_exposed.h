@@ -4,12 +4,14 @@
 #error This file is for SinglePlayer only 
 #endif
 
+#include "actor.h"
+
 void __cdecl Actor_Exposed_CheckLockGoal(actor_s *self);
 void __cdecl Actor_Exposed_Combat(actor_s *self);
-int __cdecl Actor_Exposed_Start(actor_s *self, ai_state_t ePrevState);
+bool Actor_Exposed_Start(actor_s *self, ai_state_t ePrevState);
 void __cdecl Actor_Exposed_Finish(actor_s *self, ai_state_t eNextState);
 void __cdecl Actor_Exposed_Suspend(actor_s *self, ai_state_t eNextState);
-int __cdecl Actor_Exposed_Resume(actor_s *self, ai_state_t ePrevState);
+bool __cdecl Actor_Exposed_Resume(actor_s *self, ai_state_t ePrevState);
 void __cdecl Actor_Exposed_DecideSubState(actor_s *self);
 void __cdecl Actor_Exposed_FindReacquireNode(actor_s *self);
 pathnode_t *__cdecl Actor_Exposed_GetReacquireNode(actor_s *self);

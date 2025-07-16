@@ -3,8 +3,13 @@
 #endif
 
 #include "actor_animscripted.h"
+#include "g_local.h"
+#include <script/scr_memorytree.h>
+#include "actor_state.h"
+#include "actor_orientation.h"
+#include <script/scr_const.h>
 
-int __cdecl Actor_ScriptedAnim_Start(actor_s *self, ai_state_t ePrevState)
+bool __cdecl Actor_ScriptedAnim_Start(actor_s *self, ai_state_t ePrevState)
 {
     return 1;
 }
@@ -20,7 +25,7 @@ void __cdecl Actor_ScriptedAnim_Finish(actor_s *self, ai_state_t eNextState)
     scripted = ent->scripted;
     if (scripted)
     {
-        MT_Free(scripted, 96);
+        MT_Free((unsigned char*)scripted, 96);
         ent->scripted = 0;
     }
 }
@@ -29,7 +34,6 @@ actor_think_result_t __cdecl Actor_ScriptedAnim_Think(actor_s *self)
 {
     int keepNodeDuringScriptedAnim; // r10
     actor_s *v3; // r3
-    actor_think_result_t result; // r3
     gentity_s *ent; // r30
 
     keepNodeDuringScriptedAnim = self->keepNodeDuringScriptedAnim;
@@ -55,38 +59,41 @@ actor_think_result_t __cdecl Actor_ScriptedAnim_Think(actor_s *self)
                 "self->eSimulatedState[self->simulatedStateLevel] == AIS_SCRIPTEDANIM || self->eState[self->stateLevel] == AIS_DEATH");
         }
         if (self->eSimulatedState[self->simulatedStateLevel] != AIS_SCRIPTEDANIM)
-            return 1;
+            return ACTOR_THINK_REPEAT;
         v3 = self;
     LABEL_9:
         Actor_PopState(v3);
-        return 1;
+        return ACTOR_THINK_REPEAT;
     }
     ent = self->ent;
     if (!self->ent)
         MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\actor_animscripted.cpp", 73, 0, "%s", "ent");
     G_Animscripted_Think(ent);
     v3 = self;
+
     if (!ent->scripted)
         goto LABEL_9;
+
     Actor_PreThink(self);
     Actor_SetDesiredAngles(&self->CodeOrient, ent->r.currentAngles[0], ent->r.currentAngles[1]);
-    result = ACTOR_THINK;
-    self->Physics.vVelocity[0] = 0.0;
-    self->Physics.vVelocity[1] = 0.0;
-    self->Physics.vVelocity[2] = 0.0;
-    self->Physics.vWishDelta[0] = 0.0;
-    self->Physics.vWishDelta[1] = 0.0;
-    self->Physics.vWishDelta[2] = 0.0;
-    return result;
+
+    self->Physics.vVelocity[0] = 0.0f;
+    self->Physics.vVelocity[1] = 0.0f;
+    self->Physics.vVelocity[2] = 0.0f;
+    self->Physics.vWishDelta[0] = 0.0f;
+    self->Physics.vWishDelta[1] = 0.0f;
+    self->Physics.vWishDelta[2] = 0.0f;
+
+    return ACTOR_THINK_DONE;
 }
 
-int __cdecl Actor_CustomAnim_Start(actor_s *self, ai_state_t ePrevState)
+bool __cdecl Actor_CustomAnim_Start(actor_s *self, ai_state_t ePrevState)
 {
     Scr_Notify(self->ent, scr_const.begin_custom_anim, 0);
     return 1;
 }
 
-int __cdecl Actor_CustomAnim_Think(actor_s *self)
+actor_think_result_t __cdecl Actor_CustomAnim_Think(actor_s *self)
 {
     scr_animscript_t *p_AnimScriptSpecific; // r28
     int keepNodeDuringScriptedAnim; // r10
@@ -121,12 +128,12 @@ int __cdecl Actor_CustomAnim_Think(actor_s *self)
                 "%s",
                 "self->eAnimMode != AI_ANIM_UNKNOWN");
         Actor_UpdateOriginAndAngles(self);
-        return 0;
+        return ACTOR_THINK_DONE;
     }
     else
     {
         Actor_PopState(self);
-        return 1;
+        return ACTOR_THINK_REPEAT;
     }
 }
 

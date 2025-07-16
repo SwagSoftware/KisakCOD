@@ -49,7 +49,7 @@ int __cdecl Actor_UseTurret(actor_s *self, gentity_s *pTurret)
     return result;
 }
 
-int __cdecl Actor_Turret_Start(actor_s *self, ai_state_t ePrevState)
+bool __cdecl Actor_Turret_Start(actor_s *self, ai_state_t ePrevState)
 {
     gentity_s *pTurret; // r28
     TurretInfo *pTurretInfo; // r29
@@ -769,7 +769,7 @@ LABEL_60:
     return 1;
 }
 
-int __cdecl Actor_Turret_Think(actor_s *self)
+actor_think_result_t __cdecl Actor_Turret_Think(actor_s *self)
 {
     gentity_s *pTurret; // r11
     gentity_s *v3; // r3

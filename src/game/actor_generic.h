@@ -1,4 +1,5 @@
 #pragma once
+#include "actor.h"
 
 #ifndef KISAK_SP 
 #error This file is for SinglePlayer only 
@@ -6,7 +7,7 @@
 
 void __cdecl Actor_Generic_Finish(actor_s *self, ai_state_t eNextState);
 void __cdecl Actor_Generic_Suspend(actor_s *self, ai_state_t eNextState);
-int __cdecl Actor_Generic_Resume(actor_s *self, ai_state_t ePrevState);
+bool __cdecl Actor_Generic_Resume(actor_s *self, ai_state_t ePrevState);
 void __cdecl Actor_Generic_Pain(
     actor_s *self,
     gentity_s *attacker,

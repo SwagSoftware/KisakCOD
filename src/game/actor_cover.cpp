@@ -3,18 +3,36 @@
 #endif
 
 #include "actor_cover.h"
+#include <qcommon/mem_track.h>
+#include "sentient.h"
+#include <client/client.h>
+#include "g_main.h"
+#include "actor.h"
+#include "g_local.h"
+#include <universal/com_math.h>
+#include "actor_senses.h"
+#include "actor_threat.h"
+#include <server/sv_game.h>
+#include "actor_state.h"
+#include "actor_team_move.h"
+
+float debugCoverNodeColors[512][4];
+char debugCoverNodeMsg[512][21];
+pathnode_t *debugCoverNode[512];
+
+unsigned int debugNodeIndex;
 
 void __cdecl TRACK_actor_cover()
 {
-    track_static_alloc_internal(&unk_82C356D8, 0x2000, "debugCoverNodeColors", 5);
+    track_static_alloc_internal(debugCoverNodeColors, 0x2000, "debugCoverNodeColors", 5);
     track_static_alloc_internal(debugCoverNodeMsg, 10752, "debugCoverNodeMsg", 5);
-    track_static_alloc_internal(&dword_82C376E0, 2048, "debugCoverNode", 5);
+    track_static_alloc_internal(debugCoverNode, 2048, "debugCoverNode", 5);
 }
 
 void __cdecl DebugDrawNodeSelectionOverlay()
 {
     unsigned int v0; // r24
-    const float *v1; // r28
+    float *v1; // r28
     const pathnode_t **v2; // r25
     const char *v3; // r30
     const pathnode_t *v4; // r31
@@ -37,8 +55,8 @@ void __cdecl DebugDrawNodeSelectionOverlay()
             v0 = 0;
             if (debugNodeIndex)
             {
-                v1 = (const float *)&unk_82C356D8;
-                v2 = (const pathnode_t **)&dword_82C376E0;
+                v1 = debugCoverNodeColors[0];
+                v2 = (const pathnode_t **)debugCoverNode;
                 v3 = debugCoverNodeMsg[0];
                 do
                 {

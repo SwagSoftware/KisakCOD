@@ -15,6 +15,8 @@
 
 #include <cstdint>
 
+#include <game/teams.h>
+
 struct FxEffect;
 struct snd_alias_list_t;
 struct XAnim_s;
@@ -456,22 +458,6 @@ struct clientControllers_t // sizeof=0x60
     float tag_origin_offset[3];
 };
 static_assert(sizeof(clientControllers_t) == 0x60);
-
-enum team_t : __int32
-{                                       // XREF: GetOtherTeamField/r
-    TEAM_FREE = 0x0,
-    TEAM_BAD = 0x0,
-    TEAM_AXIS = 0x1,
-    TEAM_ALLIES = 0x2,
-#ifdef KISAK_MP
-    TEAM_SPECTATOR = 0x3,
-    TEAM_NUM_TEAMS = 0x4,
-#elif KISAK_SP
-    TEAM_NEUTRAL = 0x3,
-    TEAM_DEAD = 0x4,
-    TEAM_NUM_TEAMS = 0x5,
-#endif
-};
 
 struct clientInfo_t // sizeof=0x4CC
 {                                       // ...

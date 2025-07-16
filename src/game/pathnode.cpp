@@ -6,12 +6,31 @@
 #include "g_scr_main.h"
 #include <script/scr_vm.h>
 #include "game_public.h"
+#include "g_main.h"
+#include "g_local.h"
+#include "g_bsp.h"
 
 //Line 37928:  0006 : 00006700       char const **nodeStringTable  82696700     pathnode.obj
 
+node_field_t fields_3[12] =
+{
+  { "targetname", 6, F_STRING, NULL },
+  { "target", 12, F_STRING, NULL },
+  { "animscript", 14, F_STRING, NULL },
+  { "script_linkname", 8, F_STRING, NULL },
+  { "script_noteworthy", 10, F_STRING, NULL },
+  { "origin", 20, F_VECTOR, NULL },
+  { "angles", 32, F_VECTORHACK, NULL },
+  { "radius", 44, F_FLOAT, NULL },
+  { "minusedistsq", 48, F_FLOAT, NULL },
+  { "spawnflags", 4, F_SHORT, NULL },
+  { "type", 0, F_INT, &Path_GetType },
+  { NULL, 0, F_INT, NULL }
+};
+
 struct node_field_t
 {
-    char *name;
+    const char *name;
     int ofs;
     fieldtype_t type;
     void(*getter)(struct pathnode_t *, int);
@@ -1215,7 +1234,7 @@ void __cdecl Path_DrawDebugNodeBox(const pathnode_t *node, int a2, int a3, const
     }
 }
 
-void __cdecl Path_DrawDebugNode(const float *cameraPos, const pathnode_t *node, int a3, const float *a4)
+void __cdecl Path_DrawDebugNode(const float *cameraPos, const pathnode_t *node)
 {
     double DebugStringScale; // fp1
     const char *v7; // r5

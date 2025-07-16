@@ -1660,6 +1660,14 @@ float __cdecl AngleNormalize360(float angle)
         return (result - 360.0);
 }
 
+float AngleNormalize180Fast(float angle)
+{
+    angle = fmodf(angle + 180.0f, 360.0f);
+    if (angle < 0.0f)
+        angle += 360.0f;
+    return angle - 180.0f;
+}
+
 float AngleSubtract(float a1, float a2)
 {
     float delta = fmodf(a1 - a2, 360.0f);

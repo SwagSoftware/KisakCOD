@@ -322,7 +322,7 @@ void __cdecl Scr_ExecCode(const char* pos, unsigned int localId);
 void __cdecl Scr_InitSystem(int sys);
 void __cdecl Scr_ShutdownSystem(unsigned __int8 sys, int bComplete);
 void __cdecl VM_TerminateTime(unsigned int timeId);
-BOOL __cdecl Scr_IsSystemActive();
+BOOL __cdecl Scr_IsSystemActive(); // LWSS: Note this has a "system" argument, however it's not used and optimized out in some builds
 int __cdecl Scr_GetInt(unsigned int index);
 scr_anim_s __cdecl Scr_GetAnim(unsigned int index, XAnimTree_s* tree);
 BOOL Scr_ErrorInternal();
@@ -383,6 +383,8 @@ void __cdecl Scr_DoProfile(float minTime);
 void __cdecl Scr_DoProfileBuiltin(float minTime);
 char __cdecl Scr_PrintProfileBuiltinTimes(float minTime);
 int __cdecl Scr_BuiltinCompare(_DWORD* a, _DWORD* b);
+
+void Scr_DecTime();
 
 extern scrVmPub_t scrVmPub;
 extern scrVmDebugPub_t scrVmDebugPub;

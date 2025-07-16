@@ -3,6 +3,7 @@
 #endif
 
 #include "actor_exposed.h"
+#include "actor_state.h"
 
 void __cdecl Actor_Exposed_CheckLockGoal(actor_s *self)
 {
@@ -68,12 +69,11 @@ void __cdecl Actor_Exposed_Combat(actor_s *self)
     }
 }
 
-int __cdecl Actor_Exposed_Start(actor_s *self, ai_state_t ePrevState)
+bool Actor_Exposed_Start(actor_s *self, ai_state_t ePrevState)
 {
-    if (!self)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\actor_exposed.cpp", 119, 0, "%s", "self");
+    iassert(self);
     Actor_SetSubState(self, STATE_EXPOSED_COMBAT);
-    return 1;
+    return true;
 }
 
 void __cdecl Actor_Exposed_Finish(actor_s *self, ai_state_t eNextState)
@@ -86,9 +86,9 @@ void __cdecl Actor_Exposed_Suspend(actor_s *self, ai_state_t eNextState)
     ;
 }
 
-int __cdecl Actor_Exposed_Resume(actor_s *self, ai_state_t ePrevState)
+bool __cdecl Actor_Exposed_Resume(actor_s *self, ai_state_t ePrevState)
 {
-    return 1;
+    return true;
 }
 
 void __cdecl Actor_Exposed_DecideSubState(actor_s *self)

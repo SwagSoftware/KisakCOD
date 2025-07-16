@@ -724,6 +724,14 @@ void __cdecl G_DebugCircleEx(
     const float *color,
     int32_t depthTest,
     int32_t duration);
+void G_DebugArc(
+    const float *center,
+    double radius,
+    double angle0,
+    double angle1,
+    const float *color,
+    int depthTest,
+    int duration);
 
 
 

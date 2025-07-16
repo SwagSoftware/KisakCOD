@@ -3,9 +3,21 @@
 #endif
 
 #include "actor_badplace.h"
+#include "g_main.h"
+#include <script/scr_vm.h>
+#include "actor_corpse.h"
+#include "actor_events.h"
+#include "game_public.h"
+#include "g_local.h"
+#include <server/sv_game.h>
+#include "actor_cover.h"
+#include "actor_orientation.h"
+#include "actor_team_move.h"
+#include "actor_state.h"
 
 // Line 38954:  0006 : 005a27c8       struct badplace_t *g_badplaces 82c327c8     actor_badplace.obj
 
+badplace_t g_badplaces[32];
 
 void __cdecl TRACK_actor_badplace()
 {
@@ -316,7 +328,8 @@ void __cdecl Path_DrawBadPlace(badplace_t *place)
     if (type == (const float *)1)
     {
         if ((float)(place->parms.arc.radius * place->parms.arc.radius) == 0.0)
-            radius = __fsqrts(Actor_EventDefaultRadiusSqrd(AI_EV_BADPLACE_ARC));
+            //radius = __fsqrts(Actor_EventDefaultRadiusSqrd(AI_EV_BADPLACE_ARC));
+            radius = sqrtf(Actor_EventDefaultRadiusSqrd(AI_EV_BADPLACE_ARC));
         else
             radius = place->parms.arc.radius;
         angle0 = place->parms.arc.angle0;
@@ -835,7 +848,7 @@ int __cdecl Actor_BadPlace_AttemptEscape(actor_s *self)
     return 0;
 }
 
-int __cdecl Actor_BadPlace_Flee_Start(actor_s *self, ai_state_t ePrevState)
+bool __cdecl Actor_BadPlace_Flee_Start(actor_s *self, ai_state_t ePrevState)
 {
     if (!self)
         MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\actor_badplace.cpp", 732, 0, "%s", "self");
@@ -843,7 +856,7 @@ int __cdecl Actor_BadPlace_Flee_Start(actor_s *self, ai_state_t ePrevState)
     return 1;
 }
 
-int __cdecl Actor_BadPlace_Flee_Think(actor_s *self)
+actor_think_result_t __cdecl Actor_BadPlace_Flee_Think(actor_s *self)
 {
     actor_s *v2; // r3
 
@@ -863,7 +876,7 @@ int __cdecl Actor_BadPlace_Flee_Think(actor_s *self)
             {
                 Actor_ClearPath(self);
                 Actor_PostThink(self);
-                return 0;
+                return ACTOR_THINK_DONE;
             }
             goto LABEL_13;
         }
@@ -876,13 +889,13 @@ int __cdecl Actor_BadPlace_Flee_Think(actor_s *self)
                 Actor_AnimStop(self, &g_animScriptTable[self->species]->stop);
             LABEL_13:
                 Actor_PostThink(self);
-                return 0;
+                return ACTOR_THINK_DONE;
             }
         }
         v2 = self;
         self->isInBadPlace = 0;
     }
     Actor_SetState(v2, AIS_EXPOSED);
-    return 1;
+    return ACTOR_THINK_REPEAT;
 }
 

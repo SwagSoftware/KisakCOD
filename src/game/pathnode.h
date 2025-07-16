@@ -81,15 +81,6 @@ struct pathlink_s // sizeof=0xC
 };
 static_assert(sizeof(pathlink_s) == 12);
 
-struct badplace_arc_t
-{
-    float origin[3];
-    float radius;
-    float halfheight;
-    float angle0;
-    float angle1;
-};
-
 struct pathnode_constant_t // sizeof=0x44
 {                                       // ...
     nodeType type;
@@ -159,6 +150,13 @@ struct pathnode_t // sizeof=0x80 (SP/MP Same)
     pathnode_transient_t transient;
 };
 
+struct pathnodeRange_t
+{
+    float minSqDist;
+    float fAngleMin;
+    float fAngleMax;
+};
+
 struct pathbasenode_t // sizeof=0x10
 {
     float vOrigin[3];
@@ -208,6 +206,13 @@ struct pathsort_t
 };
 
 #ifndef KISAK_MP
+
+#include "actor_badplace.h"
+#include <client/client.h>
+
+struct actor_s;
+
+
 void __cdecl TRACK_pathnode();
 int __cdecl NodeTypeCanHavePriority(nodeType type);
 void __cdecl TurretNode_GetAngles(const pathnode_t *node, float *angleMin, float *angleMax);
@@ -265,7 +270,7 @@ void __cdecl Path_DrawDebugNoLinks(const pathnode_t *node, const float (*color)[
 void __cdecl Path_DrawDebugLink(const pathnode_t *node, const int i, bool bShowAll);
 float __cdecl Path_GetDebugStringScale(const float *cameraPos, const float *origin);
 void __cdecl Path_DrawDebugNodeBox(const pathnode_t *node, int a2, int a3, const float *a4);
-void __cdecl Path_DrawDebugNode(const float *cameraPos, const pathnode_t *node, int a3, const float *a4);
+void __cdecl Path_DrawDebugNode(const float *cameraPos, const pathnode_t *node);
 void __cdecl Path_DrawDebugFindPath(float *vOrigin);
 void __cdecl Path_DrawFriendlyChain();
 bool __cdecl Path_IsNodeIndex(const pathnode_t *node, unsigned int nodeIndexToCheck);

@@ -8,6 +8,20 @@
 #include <script/scr_const.h>
 #include <bgame/bg_public.h>
 #include "actor_event_listeners.h"
+#include "g_scr_main.h"
+#include "g_main.h"
+#include "actor_state.h"
+#include "g_local.h"
+#include <script/scr_vm.h>
+#include "sentient.h"
+#include "actor_events.h"
+#include "actor_senses.h"
+#include "actor_threat.h"
+#include <cgame/cg_pose.h>
+#include <xanim/dobj_utils.h>
+#include "actor_team_move.h"
+#include <server/sv_game.h>
+#include <qcommon/threads.h>
 
 const float ACTOR_EYE_OFFSET = 64.0f;
 const int ACTOR_MAX_HEALTH = 100;
@@ -513,10 +527,11 @@ void __cdecl Actor_PreThink(actor_s *self)
         self->preThinkTime = level.time;
         if (!flashBanged)
         {
-            if (SentientHandle::isDefined(&self->pFavoriteEnemy))
+            //if (SentientHandle::isDefined(&self->pFavoriteEnemy))
+            if (self->pFavoriteEnemy.isDefined())
             {
-                v3 = SentientHandle::sentient(&self->pFavoriteEnemy);
-                Actor_GetPerfectInfo(self, v3);
+                //v3 = SentientHandle::sentient(&self->pFavoriteEnemy);
+                Actor_GetPerfectInfo(self, self->pFavoriteEnemy.sentient());
             }
             Actor_UpdateSight(self);
             Actor_UpdateThreat(self);
@@ -1034,7 +1049,8 @@ void __cdecl Actor_PhysicsRestoreInputs(actor_s *self, PhysicsInputs *inputs)
 
 bool __cdecl Actor_AtDifferentElevation(float *vOrgSelf, float *vOrgOther)
 {
-    return __fabs((float)(vOrgSelf[2] - vOrgOther[2])) >= 80.0;
+    //return __fabs((float)(vOrgSelf[2] - vOrgOther[2])) >= 80.0;
+    return fabsf((float)(vOrgSelf[2] - vOrgOther[2])) >= 80.0f;
 }
 
 float __cdecl Actor_CalcultatePlayerPushDelta(const actor_s *self, const gentity_s *pusher, float *pushDir)

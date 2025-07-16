@@ -45,7 +45,7 @@ void __cdecl Actor_Generic_Suspend(actor_s *self, ai_state_t eNextState)
     AIFuncTable[self->species][self->eState[self->stateLevel]].pfnFinish(self, eNextState);
 }
 
-int __cdecl Actor_Generic_Resume(actor_s *self, ai_state_t ePrevState)
+bool __cdecl Actor_Generic_Resume(actor_s *self, ai_state_t ePrevState)
 {
     unsigned int stateLevel; // r7
     ai_state_t v5; // r8

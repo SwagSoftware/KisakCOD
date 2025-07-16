@@ -4,6 +4,17 @@
 
 #include "actor_corpse.h"
 
+#include <xanim/xanim.h>
+#include "g_scr_main.h"
+#include "g_local.h"
+#include <script/scr_const.h>
+#include "sentient.h"
+#include "g_main.h"
+#include "actor.h"
+#include "actor_event_listeners.h"
+
+float playerEyePos[3];
+
 XAnimTree_s *__cdecl G_GetActorCorpseIndexAnimTree(unsigned int index)
 {
     if (index >= 0x10)
@@ -574,7 +585,8 @@ void __cdecl Actor_GetBodyPlantAngles(
     v16 = Actor_SetBodyPlantAngle((int)iEntNum, iClipMask, vOrigin, vOrigin, v26, pfRoll);
     if (pfHeight)
     {
-        if (__fabs(*pfRoll) >= 30.0)
+        //if (__fabs(*pfRoll) >= 30.0)
+        if (fabsf(*pfRoll) >= 30.0)
             *pfHeight = 0.0;
         else
             v16 = (float)((float)(Actor_SetBodyPlantAngle((int)iEntNum, iClipMask, vOrigin, vOrigin, v27, pfHeight)
@@ -605,7 +617,8 @@ float __cdecl Actor_Orient_LerpWithLimit(double current, double newValue, double
 {
     double v5; // fp1
 
-    if (__fabs(delta) <= rate)
+    //if (__fabs(delta) <= rate)
+    if (fabsf(delta) <= rate)
     {
         v5 = newValue;
     }

@@ -4,6 +4,16 @@
 #error This file is for SinglePlayer only 
 #endif
 
+#include "actor.h"
+
+struct ai_suppression_t
+{
+    int iTime;
+    sentient_s *pSuppressor;
+    float clipPlane[3];
+    int movementOnly;
+};
+
 void __cdecl DebugDrawSuppression(actor_s *self, const float *a2, int a3, int a4, int a5);
 int __cdecl Actor_PickNewSuppressantEntry(actor_s *self, sentient_s *pSuppressor);
 int __cdecl Actor_NearCoverNode(actor_s *self);

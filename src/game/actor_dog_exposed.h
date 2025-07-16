@@ -1,10 +1,11 @@
 #pragma once
+#include "actor.h"
 
 #ifndef KISAK_SP 
 #error This file is for SinglePlayer only 
 #endif
 
-int __cdecl Actor_Dog_Exposed_Start(actor_s *self, ai_state_t ePrevState);
+bool __cdecl Actor_Dog_Exposed_Start(actor_s *self, ai_state_t ePrevState);
 void __cdecl Actor_Dog_Exposed_Finish(actor_s *self, ai_state_t eNextState);
 void __cdecl Actor_Dog_Exposed_Suspend(actor_s *self, ai_state_t eNextState);
 int __cdecl Actor_Dog_IsInSyncedMelee(actor_s *self, sentient_s *enemy);

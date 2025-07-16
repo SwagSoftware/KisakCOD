@@ -13,6 +13,8 @@
 #include <xanim/xanim.h>
 #include "actor_senses.h"
 #include "actor.h"
+#include <game/bullet.h>
+#include "actor_events.h"
 
 struct AccuracyGraphBackup
 {
@@ -774,6 +776,7 @@ void __cdecl Actor_HitEnemy(actor_s *self, weaponParms *wp, double accuracy)
     Actor_HitSentient(wp, v8->sentient, accuracy);
 }
 
+float outerRadius;
 void __cdecl Actor_MissSentient(weaponParms *wp, sentient_s *enemy, double accuracy)
 {
     gentity_s *ent; // r27
@@ -903,6 +906,7 @@ void __cdecl Actor_MissSentient(weaponParms *wp, sentient_s *enemy, double accur
     wp->forward[2] = (float)v41 * (float)v44;
 }
 
+float outerRadius_0;
 void __cdecl Actor_MissTarget(const weaponParms *wp, const float *target, float *forward)
 {
     float *up; // r28

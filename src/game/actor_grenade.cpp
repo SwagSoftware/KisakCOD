@@ -1396,7 +1396,7 @@ int __cdecl Actor_Grenade_InActorHands(gentity_s *grenade)
     return grenade->r.svFlags & 1;
 }
 
-int __cdecl Actor_Grenade_Resume(actor_s *self, ai_state_t ePrevState)
+bool __cdecl Actor_Grenade_Resume(actor_s *self, ai_state_t ePrevState)
 {
     int result; // r3
 
@@ -2511,7 +2511,7 @@ void __cdecl Actor_GrenadeBounced(gentity_s *pGrenade, gentity_s *pHitEnt)
     }
 }
 
-int __cdecl Actor_Grenade_Start(actor_s *self, ai_state_t ePrevState)
+bool __cdecl Actor_Grenade_Start(actor_s *self, ai_state_t ePrevState)
 {
     int result; // r3
 

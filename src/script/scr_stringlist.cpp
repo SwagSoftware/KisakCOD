@@ -804,3 +804,17 @@ HashEntry_unnamed_type_u __cdecl Scr_CreateCanonicalFilename(const char *filenam
 	CreateCanonicalFilename(newFilename, filename, 1024);
 	return SL_GetString_(newFilename, 0, 7);
 }
+
+void Scr_SetStringFromCharString(unsigned __int16 *to, const char *from)
+{
+	unsigned int v4; // r3
+	const char *v5; // r11
+
+	v4 = *to;
+	if (v4)
+		SL_RemoveRefToString(v4);
+	v5 = from;
+	while (*(unsigned __int8 *)v5++)
+		;
+	*to = SL_GetStringOfSize(from, 0, v5 - from, 6);
+}

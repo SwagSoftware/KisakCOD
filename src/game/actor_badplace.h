@@ -1,8 +1,40 @@
 #pragma once
+#include "actor.h"
 
 #ifndef KISAK_SP 
 #error This file is for SinglePlayer only 
 #endif
+
+struct badplace_arc_t
+{
+    float origin[3];
+    float radius;
+    float halfheight;
+    float angle0;
+    float angle1;
+};
+
+struct badplace_brush_t
+{
+    gentity_s *volume;
+    float radius;
+};
+
+union badplace_parms_t
+{
+    badplace_arc_t arc;
+    badplace_brush_t brush;
+};
+
+struct badplace_t
+{
+    int endtime;
+    int pingTime;
+    unsigned __int16 name;
+    unsigned __int8 type;
+    unsigned __int8 teamflags;
+    badplace_parms_t parms;
+};
 
 void __cdecl TRACK_actor_badplace();
 void __cdecl Path_UpdateBadPlaceCount(badplace_t *place, int delta);
@@ -47,5 +79,5 @@ int __cdecl Actor_BadPlace_FindSafeNodeOutsideBadPlace(
     pathsort_t *potentialNodes,
     double maxFleeDist);
 int __cdecl Actor_BadPlace_AttemptEscape(actor_s *self);
-int __cdecl Actor_BadPlace_Flee_Start(actor_s *self, ai_state_t ePrevState);
-int __cdecl Actor_BadPlace_Flee_Think(actor_s *self);
+bool __cdecl Actor_BadPlace_Flee_Start(actor_s *self, ai_state_t ePrevState);
+actor_think_result_t __cdecl Actor_BadPlace_Flee_Think(actor_s *self);

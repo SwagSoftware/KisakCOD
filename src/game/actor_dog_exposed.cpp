@@ -4,7 +4,7 @@
 
 #include "actor_dog_exposed.h"
 
-int __cdecl Actor_Dog_Exposed_Start(actor_s *self, ai_state_t ePrevState)
+bool __cdecl Actor_Dog_Exposed_Start(actor_s *self, ai_state_t ePrevState)
 {
     int time; // r11
 

@@ -52,6 +52,23 @@ struct SentientGlobals
     int sampleTime[2];
 };
 
+struct vis_cache_t
+{
+    bool bVisible;
+    int iLastUpdateTime;
+    int iLastVisTime;
+};
+
+struct sentient_info_t
+{
+    vis_cache_t VisCache;
+    int iLastAttackMeTime;
+    int lastKnownPosTime;
+    int attackTime;
+    float vLastKnownPos[3];
+    pathnode_t *pLastKnownNode;
+};
+
 sentient_s *__cdecl Sentient_Alloc();
 void __cdecl Sentient_DissociateSentient(sentient_s *self, sentient_s *other, team_t eOtherTeam);
 void __cdecl Sentient_GetOrigin(const sentient_s *self, float *vOriginOut);

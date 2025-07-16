@@ -3,6 +3,13 @@
 #endif
 
 #include "actor_animapi.h"
+#include <script/scr_vm.h>
+#include <script/scr_const.h>
+#include "g_local.h"
+#include "actor_orientation.h"
+#include "g_scr_main.h"
+#include "g_main.h"
+#include "actor_cover.h"
 
 void __cdecl Actor_InitAnim(actor_s *self)
 {
@@ -43,7 +50,7 @@ void __cdecl Actor_KillAnimScript(actor_s *self)
 {
     int AnimScriptHandle; // r11
 
-    if (!Scr_IsSystemActive(1u))
+    if (!Scr_IsSystemActive())
         MyAssertHandler(
             "c:\\trees\\cod3\\cod3src\\src\\game\\actor_animapi.cpp",
             47,

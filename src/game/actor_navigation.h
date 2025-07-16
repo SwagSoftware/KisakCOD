@@ -4,6 +4,72 @@
 #error This file is for SinglePlayer only 
 #endif
 
+enum aiGoalSources : __int32
+{
+    AI_GOAL_SRC_SCRIPT_GOAL = 0x0,
+    AI_GOAL_SRC_SCRIPT_ENTITY_GOAL = 0x1,
+    AI_GOAL_SRC_FRIENDLY_CHAIN = 0x2,
+    AI_GOAL_SRC_ENEMY = 0x3,
+};
+
+enum PredictionTraceResult : __int32
+{
+    PTR_SUCCESS = 0x0,
+    PTR_HIT_WORLD = 0x1,
+    PTR_HIT_ENTITY = 0x2,
+};
+
+struct pathpoint_t
+{
+    float vOrigPoint[3];
+    float fDir2D[2];
+    float fOrigLength;
+    int iNodeNum;
+};
+
+struct path_t
+{
+    pathpoint_t pts[32];
+    __int16 wPathLen;
+    __int16 wOrigPathLen;
+    __int16 wDodgeCount;
+    __int16 wNegotiationStartNode;
+    __int16 lookaheadNextNode;
+    __int16 wDodgeEntity;
+    float vFinalGoal[3];
+    float lookaheadDir[3];
+    float forwardLookaheadDir2D[2];
+    float fLookaheadDist;
+    float fLookaheadAmount;
+    float fLookaheadDistToNextNode;
+    int minLookAheadNodes;
+    int flags;
+    int iPathTime;
+    team_t eTeam;
+    float fCurrLength;
+    float vCurrPoint[3];
+    int iPathEndTime;
+    float pathEndAnimDistSq;
+    int pathEndAnimNotified;
+};
+
+struct path_trim_t
+{
+    int iIndex;
+    int iDelta;
+};
+
+struct actor_goal_s
+{
+    float pos[3];
+    float radius;
+    float height;
+    pathnode_t *node;
+    gentity_s *volume;
+};
+
+struct actor_s;
+
 bool __cdecl Path_IsPathStanceNode(const pathnode_t *node);
 float __cdecl Path_GetPathDir(float *delta, const float *vFrom, const float *vTo);
 pathnode_t *__cdecl Path_GetNegotiationNode(const path_t *pPath);
