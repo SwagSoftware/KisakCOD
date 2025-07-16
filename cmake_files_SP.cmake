@@ -185,6 +185,7 @@ set(DEVGUI
 source_group("devgui" FILES ${DEVGUI})
 
 set(GAME
+	"${SRC_DIR}/game/teams.h"
     "${SRC_DIR}/game/actor.cpp"
     "${SRC_DIR}/game/actor.h"
     "${SRC_DIR}/game/actor_aim.cpp"
