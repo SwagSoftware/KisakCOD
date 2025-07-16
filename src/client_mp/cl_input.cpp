@@ -30,7 +30,7 @@ void __cdecl TRACK_cl_input()
     track_static_alloc_internal(playersKb, 600, "playersKb", 10);
 }
 
-void __cdecl CL_ShowSystemCursor(BOOL show)
+void __cdecl CL_ShowSystemCursor(bool show)
 {
     IN_ShowSystemCursor(show);
 }

@@ -991,7 +991,7 @@ bool __cdecl Dvar_GetBool(const char *dvarName)
             1143,
             0,
             "%s\n\t(dvar->type) = %i",
-            "(dvar->type == DVAR_TYPE_bool || (dvar->type == DVAR_TYPE_STRING && (dvar->flags & (1 << 14))))",
+            "(dvar->type == DVAR_TYPE_BOOL || (dvar->type == DVAR_TYPE_STRING && (dvar->flags & (1 << 14))))",
             dvar->type);
     if (dvar->type)
         return Dvar_StringToBool(dvar->current.string);
@@ -2326,7 +2326,7 @@ void __cdecl Dvar_SetBoolFromSource(dvar_s *dvar, bool value, DvarSetSource sour
             1800,
             0,
             "%s\n\t(dvar->name) = %s",
-            "(dvar->type == DVAR_TYPE_bool || (dvar->type == DVAR_TYPE_STRING && (dvar->flags & (1 << 14))))",
+            "(dvar->type == DVAR_TYPE_BOOL || (dvar->type == DVAR_TYPE_STRING && (dvar->flags & (1 << 14))))",
             dvar->name);
     if (dvar->type)
     {

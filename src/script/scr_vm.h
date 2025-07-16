@@ -322,10 +322,10 @@ void __cdecl Scr_ExecCode(const char* pos, unsigned int localId);
 void __cdecl Scr_InitSystem(int sys);
 void __cdecl Scr_ShutdownSystem(unsigned __int8 sys, int bComplete);
 void __cdecl VM_TerminateTime(unsigned int timeId);
-BOOL __cdecl Scr_IsSystemActive(); // LWSS: Note this has a "system" argument, however it's not used and optimized out in some builds
+bool __cdecl Scr_IsSystemActive(); // LWSS: Note this has a "system" argument, however it's not used and optimized out in some builds
 int __cdecl Scr_GetInt(unsigned int index);
 scr_anim_s __cdecl Scr_GetAnim(unsigned int index, XAnimTree_s* tree);
-BOOL Scr_ErrorInternal();
+bool Scr_ErrorInternal();
 float __cdecl Scr_GetFloat(unsigned int index);
 unsigned int __cdecl Scr_GetConstString(unsigned int index);
 unsigned int __cdecl Scr_GetConstLowercaseString(unsigned int index);
@@ -375,7 +375,7 @@ void __cdecl VM_UnarchiveStack(unsigned int startLocalId, VariableStackBuffer* s
 void VM_UnarchiveStack2(unsigned int startLocalId, function_stack_t *stack, VariableStackBuffer *stackValue);
 int __cdecl Scr_AddLocalVars(unsigned int localId);
 void __cdecl Scr_ResetTimeout();
-BOOL __cdecl Scr_IsStackClear();
+bool __cdecl Scr_IsStackClear();
 void __cdecl Scr_StackClear();
 void __cdecl Scr_ProfileUpdate();
 void __cdecl Scr_ProfileBuiltinUpdate();

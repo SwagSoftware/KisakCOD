@@ -699,7 +699,7 @@ Font_s *__cdecl UI_GetFontHandle(const ScreenPlacement *scrPlace, int fontEnum, 
 
 void __cdecl UI_MouseEvent(int localClientNum, int x, int y)
 {
-    BOOL v3; // [esp+0h] [ebp-8h]
+    bool v3; // [esp+0h] [ebp-8h]
 
     if (localClientNum)
         MyAssertHandler(
@@ -2156,7 +2156,7 @@ int __cdecl UI_NetFilter_HandleKey(int flags, float *special, int key)
     return 1;
 }
 
-BOOL __cdecl UI_IsMapActive(int mapIndex)
+bool __cdecl UI_IsMapActive(int mapIndex)
 {
     if (mapIndex < 0 || mapIndex >= sharedUiInfo.mapCount)
         MyAssertHandler(
@@ -4646,7 +4646,7 @@ void __cdecl UI_LoadSoundAliases()
     Com_LoadSoundAliases("menu", "all_mp", SASYS_UI);
 }
 
-BOOL __cdecl LAN_LoadCachedServersInternal(int fileIn)
+bool __cdecl LAN_LoadCachedServersInternal(int fileIn)
 {
     int version; // [esp+0h] [ebp-8h] BYREF
     int size; // [esp+4h] [ebp-4h] BYREF

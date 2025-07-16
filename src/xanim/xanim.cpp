@@ -1240,8 +1240,8 @@ void __cdecl XAnimUpdateTimeAndNotetrackLeaf(
 {
     const char* v5; // eax
     const char* v6; // eax
-    BOOL v7; // [esp+10h] [ebp-30h]
-    BOOL v8; // [esp+20h] [ebp-20h]
+    bool v7; // [esp+10h] [ebp-30h]
+    bool v8; // [esp+20h] [ebp-20h]
     float v9; // [esp+28h] [ebp-18h]
     float v10; // [esp+2Ch] [ebp-14h]
     XAnimState* state; // [esp+30h] [ebp-10h]
@@ -1553,8 +1553,8 @@ void __cdecl XAnimUpdateTimeAndNotetrackSyncSubTree(
 {
     const char* v4; // eax
     const char* v5; // eax
-    BOOL v6; // [esp+1Ch] [ebp-34h]
-    BOOL v7; // [esp+2Ch] [ebp-24h]
+    bool v6; // [esp+1Ch] [ebp-34h]
+    bool v7; // [esp+2Ch] [ebp-24h]
     float v8; // [esp+34h] [ebp-1Ch]
     float v9; // [esp+38h] [ebp-18h]
     XAnimState* state; // [esp+3Ch] [ebp-14h]
@@ -3203,7 +3203,7 @@ void __cdecl XAnimClearTreeGoalWeightsInternal(
     float blendTime,
     int forceBlendTime)
 {
-    BOOL v4; // [esp+8h] [ebp-8h]
+    bool v4; // [esp+8h] [ebp-8h]
     unsigned int animIndex; // [esp+Ch] [ebp-4h]
     unsigned int infoIndexa; // [esp+1Ch] [ebp+Ch]
 
@@ -3674,7 +3674,7 @@ bool __cdecl XAnimHasTime(const XAnim_s* anims, unsigned int animIndex)
     return IsLeafNode(&anims->entries[animIndex]) || (anims->entries[animIndex].animParent.flags & 3) != 0;
 }
 
-BOOL __cdecl XAnimIsPrimitive(XAnim_s* anims, unsigned int animIndex)
+bool __cdecl XAnimIsPrimitive(XAnim_s* anims, unsigned int animIndex)
 {
     return anims->entries[animIndex].numAnims == 0;
 }

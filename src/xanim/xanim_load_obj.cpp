@@ -962,7 +962,7 @@ XAnimParts *__cdecl XAnimLoadFile(char *name, void *(__cdecl *Alloc)(int))
     int v24; // [esp+38h] [ebp-14ACh]
     int v25; // [esp+3Ch] [ebp-14A8h]
     int v26; // [esp+40h] [ebp-14A4h]
-    BOOL v27; // [esp+44h] [ebp-14A0h]
+    bool v27; // [esp+44h] [ebp-14A0h]
     double v28; // [esp+58h] [ebp-148Ch]
     unsigned __int16 v29; // [esp+66h] [ebp-147Eh]
     int v30; // [esp+B0h] [ebp-1434h]
@@ -1013,7 +1013,7 @@ XAnimParts *__cdecl XAnimLoadFile(char *name, void *(__cdecl *Alloc)(int))
     XAnimIndices indices; // [esp+6B8h] [ebp-E2Ch] BYREF
     XAnimPartQuatPtr part[128]; // [esp+6BCh] [ebp-E28h] BYREF
     _WORD v77[128]; // [esp+ABCh] [ebp-A28h]
-    BOOL v78; // [esp+BBCh] [ebp-928h]
+    bool v78; // [esp+BBCh] [ebp-928h]
     unsigned int PartQuatType; // [esp+BC0h] [ebp-924h]
     _DWORD v80[256]; // [esp+BC4h] [ebp-920h]
     unsigned __int8 v81[2]; // [esp+FC4h] [ebp-520h] BYREF

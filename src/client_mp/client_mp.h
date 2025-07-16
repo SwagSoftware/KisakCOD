@@ -762,9 +762,9 @@ extern const dvar_t *name;
 //extern ping_t *cl_pinglist;
 extern ping_t cl_pinglist[16];
 
-extern BOOL g_waitingForServer;
+extern bool g_waitingForServer;
 extern bool cl_waitingOnServerToLoadMap[1];
-extern BOOL cl_serverLoadingMap;
+extern bool cl_serverLoadingMap;
 
 #define MAX_CLIENTS 1 // LWSS Add
 
@@ -778,7 +778,7 @@ extern uint32_t frame_msec;
 
 extern char cl_cdkey[34];
 
-extern BOOL updateScreenCalled;
+extern bool updateScreenCalled;
 
 extern const char *svc_strings[256];
 extern int32_t autoupdateStarted;
@@ -922,7 +922,7 @@ void __cdecl CL_ArchiveClientState(int32_t localClientNum, MemoryFile *memFile);
 void __cdecl CL_LookupColor(int32_t localClientNum, uint8_t c, float *color);
 void __cdecl CL_UpdateColor(int32_t localClientNum);
 void __cdecl CL_UpdateColorInternal(const char *var_name, float *color);
-int32_t __cdecl CL_IsCgameInitialized(int32_t localClientNum);
+bool __cdecl CL_IsCgameInitialized(int32_t localClientNum);
 
 
 
@@ -1045,7 +1045,7 @@ struct kbutton_t // sizeof=0x14
     // padding byte
 };
 void __cdecl TRACK_cl_input();
-void __cdecl CL_ShowSystemCursor(BOOL show);
+void __cdecl CL_ShowSystemCursor(bool show);
 int32_t __cdecl CL_MouseEvent(int32_t x, int32_t y, int32_t dx, int32_t dy);
 void __cdecl CL_SetStance(int32_t localClientNum, StanceState stance);
 void __cdecl IN_CenterView();

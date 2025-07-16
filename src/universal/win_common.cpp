@@ -124,7 +124,7 @@ void __cdecl Sys_Mkdir(const char *path)
     _mkdir(path);
 }
 
-BOOL __cdecl Sys_RemoveDirTree(const char *path)
+bool __cdecl Sys_RemoveDirTree(const char *path)
 {
     bool v2; // [esp+8h] [ebp-250h]
     int handle; // [esp+1Ch] [ebp-23Ch]
@@ -205,7 +205,7 @@ void __cdecl Sys_ListFilteredFiles(
     }
 }
 
-BOOL __cdecl HasFileExtension(const char *name, const char *extension)
+bool __cdecl HasFileExtension(const char *name, const char *extension)
 {
     char search[260]; // [esp+0h] [ebp-108h] BYREF
 

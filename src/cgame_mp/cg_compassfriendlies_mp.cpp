@@ -457,7 +457,7 @@ void __cdecl CG_CompassDrawFriendlies(
     float angle; // [esp+48h] [ebp-C4h]
     float v13; // [esp+4Ch] [ebp-C0h]
     float v14; // [esp+50h] [ebp-BCh]
-    BOOL icon; // [esp+68h] [ebp-A4h]
+    bool icon; // [esp+68h] [ebp-A4h]
     float yawVector[2]; // [esp+6Ch] [ebp-A0h] BYREF
     bool clipped; // [esp+77h] [ebp-95h]
     clientInfo_t *localClientInfo; // [esp+78h] [ebp-94h]

@@ -602,7 +602,7 @@ char __cdecl GetOperandList(OperandStack *dataStack, OperandList *list)
     }
 }
 
-BOOL __cdecl CG_IsIntermission(int localClientNum)
+bool __cdecl CG_IsIntermission(int localClientNum)
 {
     return CG_GetLocalClientGlobals(localClientNum)->nextSnap->ps.pm_type == PM_INTERMISSION;
 }

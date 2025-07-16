@@ -4055,7 +4055,7 @@ void __cdecl VM_TerminateTime(unsigned int timeId)
     RemoveRefToObject(timeId);
 }
 
-BOOL __cdecl Scr_IsSystemActive()
+bool __cdecl Scr_IsSystemActive()
 {
     return scrVarPub.timeArrayId && !scrVarPub.error_message;
 }
@@ -4131,9 +4131,9 @@ scr_anim_s __cdecl Scr_GetAnim(unsigned int index, XAnimTree_s* tree)
     return 0;
 }
 
-BOOL Scr_ErrorInternal()
+bool Scr_ErrorInternal()
 {
-    BOOL result; // eax
+    bool result; // eax
 
     if (!scrVarPub.error_message)
         MyAssertHandler(".\\script\\scr_vm.cpp", 215, 0, "%s", "scrVarPub.error_message");
@@ -5059,7 +5059,7 @@ void __cdecl Scr_ResetTimeout()
     memset(scrVmDebugPub.jumpbackHistory, 0, sizeof(scrVmDebugPub.jumpbackHistory));
 }
 
-BOOL __cdecl Scr_IsStackClear()
+bool __cdecl Scr_IsStackClear()
 {
     iassert(!Sys_IsRemoteDebugClient());
     return scrVmPub.top == scrVmPub.stack;

@@ -708,7 +708,7 @@ void __cdecl CM_TraceThroughLeafBrushNode_r(
     float v12; // [esp+30h] [ebp-6Ch]
     float v13; // [esp+34h] [ebp-68h]
     float v14; // [esp+38h] [ebp-64h]
-    BOOL side; // [esp+3Ch] [ebp-60h]
+    bool side; // [esp+3Ch] [ebp-60h]
     float diff; // [esp+40h] [ebp-5Ch]
     float t1; // [esp+48h] [ebp-54h]
     float frac; // [esp+4Ch] [ebp-50h]

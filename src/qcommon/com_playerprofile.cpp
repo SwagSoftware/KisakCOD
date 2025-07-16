@@ -404,7 +404,7 @@ int __cdecl Com_GpuStringCompare(const char *wild, const char *s)
     return 0;
 }
 
-BOOL __cdecl Com_DoesGpuStringMatch(const char *find, const char *ref)
+bool __cdecl Com_DoesGpuStringMatch(const char *find, const char *ref)
 {
     int wildcardLen; // [esp+0h] [ebp-40Ch]
     char wildcardTemplate[1024]; // [esp+4h] [ebp-408h] BYREF

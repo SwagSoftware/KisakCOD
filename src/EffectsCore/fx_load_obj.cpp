@@ -670,7 +670,7 @@ Material *__cdecl FX_RegisterMaterial(char *material)
     return Material_RegisterHandle(material, 6);
 }
 
-BOOL __cdecl FX_RegisterAsset_Material(char *name, FxElemVisuals *visuals)
+bool __cdecl FX_RegisterAsset_Material(char *name, FxElemVisuals *visuals)
 {
     visuals->anonymous = FX_RegisterMaterial(name);
     return visuals->anonymous != 0;
@@ -796,7 +796,7 @@ bool __cdecl FX_ParseDecal(const char **parse, FxEditorElemDef *edElemDef)
         FX_RegisterAsset_DecalMaterials);
 }
 
-BOOL __cdecl FX_RegisterAsset_Model(const char *name, FxElemVisuals *visuals)
+bool __cdecl FX_RegisterAsset_Model(const char *name, FxElemVisuals *visuals)
 {
     visuals->anonymous = FX_RegisterModel(name);
     return visuals->anonymous != 0;
@@ -823,7 +823,7 @@ bool __cdecl FX_ParseSpotLight(const char **parse, FxEditorElemDef *edElemDef)
     return FX_SetEditorElemType(edElemDef, 7u);
 }
 
-BOOL __cdecl FX_RegisterAsset_EffectDef(char *name, FxElemVisuals *visuals)
+bool __cdecl FX_RegisterAsset_EffectDef(char *name, FxElemVisuals *visuals)
 {
     visuals->anonymous = FX_Register(name);
     return visuals->anonymous != 0;

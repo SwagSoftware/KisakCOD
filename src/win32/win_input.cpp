@@ -228,7 +228,7 @@ static DIDATAFORMAT	df = {
 	rgodf,                      // and here they are
 };
 
-BOOL __cdecl IN_IsForegroundWindow()
+bool __cdecl IN_IsForegroundWindow()
 {
 	return GetForegroundWindow() == g_wv.hWnd;
 }
@@ -431,7 +431,7 @@ int IN_MouseMove()
 =========================================================================
 */
 
-void __cdecl IN_ShowSystemCursor(BOOL show)
+void __cdecl IN_ShowSystemCursor(bool show)
 {
 	int actualShow; // [esp+0h] [ebp-8h]
 	int desiredShow; // [esp+4h] [ebp-4h]

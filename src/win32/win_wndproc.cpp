@@ -247,7 +247,7 @@ static unsigned char MapKey(int key, unsigned int wParam)
 
 void __cdecl VID_AppActivate(unsigned int activeState, int minimize)
 {
-	BOOL v2; // [esp+0h] [ebp-8h]
+	bool v2; // [esp+0h] [ebp-8h]
 
 	g_wv.isMinimized = minimize;
 	Key_ClearStates(0);

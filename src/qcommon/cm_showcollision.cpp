@@ -610,7 +610,7 @@ char __cdecl CM_BrushInView(const cbrush_t *brush, cplane_s *frustumPlanes, int 
 
 int bops_initialized;
 int Ljmptab[8];
-BOOL __cdecl BoxOnPlaneSide(const float *emins, const float *emaxs, const cplane_s *p)
+bool __cdecl BoxOnPlaneSide(const float *emins, const float *emaxs, const cplane_s *p)
 {
     // KISAKTODO: Needs ASM jump table and assembly bits (Probably critical function lmao)
     // 

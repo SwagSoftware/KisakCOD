@@ -9,6 +9,7 @@
 #include "r_dpvs.h"
 #include "r_model_pose.h"
 #include "r_model.h"
+#include "r_light.h"
 #include "r_drawsurf.h"
 #include <cgame/cg_local.h>
 #include "r_sunshadow.h"
@@ -26,11 +27,6 @@ struct ShadowCookieGlob // sizeof=0x8
 };
 
 ShadowCookieGlob shadowCookieGlob;
-
-bool __cdecl R_SortBspShadowReceiverSurfaces(GfxSurface *surface0, GfxSurface *surface1)
-{
-    return surface0 < surface1;
-}
 
 void __cdecl R_EmitShadowCookieSurfs(GfxViewInfo *viewInfo)
 {

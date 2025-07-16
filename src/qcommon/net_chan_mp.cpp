@@ -32,7 +32,7 @@ const dvar_t *msg_hudelemspew;
 // 
 // struct fakedLatencyPackets_t *laggedPackets 82ff2720     net_chan_mp.obj
 // int g_qport              83020760     net_chan_mp.obj
-// BOOL fakelagInitialized  83020768     net_chan_mp.obj
+// bool fakelagInitialized  83020768     net_chan_mp.obj
 unsigned __int8 tempNetchanPacketBuf[131072];
 loopback_t loopbacks[2];
 fakedLatencyPackets_t laggedPackets[512];

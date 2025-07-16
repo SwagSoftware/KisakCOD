@@ -577,7 +577,7 @@ void __cdecl NumberValue(char *string, __int16 subtype, unsigned int *intvalue, 
 int __cdecl PS_ReadNumber(script_s *script, token_s *token)
 {
     int v3; // edx
-    BOOL octal; // [esp+0h] [ebp-14h]
+    bool octal; // [esp+0h] [ebp-14h]
     char c; // [esp+7h] [ebp-Dh]
     char ca; // [esp+7h] [ebp-Dh]
     char cb; // [esp+7h] [ebp-Dh]
@@ -793,7 +793,7 @@ int __cdecl PS_ReadToken(script_s *script, token_s *token)
     return 1;
 }
 
-BOOL __cdecl EndOfScript(script_s *script)
+bool __cdecl EndOfScript(script_s *script)
 {
     return script->script_p >= script->end_p;
 }

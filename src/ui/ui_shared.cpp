@@ -956,7 +956,7 @@ void __cdecl Script_FocusFirstInMenu(UiContext *dc, itemDef_s *item, const char*
     }
 }
 
-BOOL __cdecl IsVisible(char flags)
+bool __cdecl IsVisible(char flags)
 {
     return (flags & 4) != 0 && (flags & 0x10) == 0;
 }
@@ -1222,7 +1222,7 @@ void __cdecl Item_SetMouseOver(const UiContext *dc, itemDef_s *item, int focus)
 }
 
 itemDef_s *itemCapture;
-BOOL __cdecl Menu_HandleMouseMove(UiContext *dc, menuDef_t *menu)
+bool __cdecl Menu_HandleMouseMove(UiContext *dc, menuDef_t *menu)
 {
     const rectDef_s *v3; // eax
     itemDef_s *v4; // [esp+Ch] [ebp-4Ch]
@@ -3303,7 +3303,7 @@ int __cdecl Item_YesNo_HandleKey(UiContext *dc, itemDef_s *item, int key)
     return 1;
 }
 
-BOOL __cdecl Item_ContainsMouse(UiContext *dc, itemDef_s *item)
+bool __cdecl Item_ContainsMouse(UiContext *dc, itemDef_s *item)
 {
     if (!dc->isCursorVisible)
         return 0;

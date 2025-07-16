@@ -1670,7 +1670,7 @@ static int ctContacts = 0;
 // Test normal of mesh face as separating axis for intersection
 // LWSS: Changed
 #if 0
-static BOOL _cldTestNormal( dReal fp0, dReal fR, dVector3 vNormal, int iAxis ) 
+static bool _cldTestNormal( dReal fp0, dReal fR, dVector3 vNormal, int iAxis ) 
 {
   // calculate overlapping interval of box and triangle
   dReal fDepth = fR+fp0;
@@ -1711,7 +1711,7 @@ static BOOL _cldTestNormal( dReal fp0, dReal fR, dVector3 vNormal, int iAxis )
 
 // Test box axis as separating axis 
 #if 0 // LWSS: Changed
-static BOOL _cldTestFace( dReal fp0, dReal fp1, dReal fp2, dReal fR, dReal fD, 
+static bool _cldTestFace( dReal fp0, dReal fp1, dReal fp2, dReal fR, dReal fD, 
                           dVector3 vNormal, int iAxis ) 
 {
   dReal fMin, fMax;
@@ -1791,7 +1791,7 @@ static BOOL _cldTestFace( dReal fp0, dReal fp1, dReal fp2, dReal fR, dReal fD,
 
 // Test cross products of box axis and triangle edges as separating axis
 #if 0 // LWSS: Changed
-static BOOL _cldTestEdge( dReal fp0, dReal fp1, dReal fR, dReal fD, 
+static bool _cldTestEdge( dReal fp0, dReal fp1, dReal fR, dReal fD, 
                           dVector3 vNormal, int iAxis ) 
 {
   dReal fMin, fMax;
@@ -1916,7 +1916,7 @@ static void _cldClipPolyToPlane( dVector3 avArrayIn[], int ctIn,
 
 
 #if 0 // LWSS: Changed 
-static BOOL _cldTestSeparatingAxes(const dVector3 &v0, const dVector3 &v1, const dVector3 &v2) {
+static bool _cldTestSeparatingAxes(const dVector3 &v0, const dVector3 &v1, const dVector3 &v2) {
   // reset best axis
   iBestAxis = 0;
   iExitAxis = -1;
@@ -2174,7 +2174,7 @@ static BOOL _cldTestSeparatingAxes(const dVector3 &v0, const dVector3 &v1, const
 
 // find two closest points on two lines
 #if 0 // LWSS: Changed quite a bit (Only used by cldClipping()
-static BOOL _cldClosestPointOnTwoLines( dVector3 vPoint1, dVector3 vLenVec1, 
+static bool _cldClosestPointOnTwoLines( dVector3 vPoint1, dVector3 vLenVec1, 
                                         dVector3 vPoint2, dVector3 vLenVec2, 
                                         dReal &fvalue1, dReal &fvalue2) 
 {

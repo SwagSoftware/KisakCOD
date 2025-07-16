@@ -46,7 +46,7 @@ void	IN_Init (void);
 void	IN_Shutdown (void);
 void	IN_JoystickCommands (void);
 
-void __cdecl IN_ShowSystemCursor(BOOL show);
+void __cdecl IN_ShowSystemCursor(bool show);
 
 // KISAKTODO void	IN_Move (usercmd_s *cmd); // usercmd_t -> usercmd_s
 // add additional non keyboard / non mouse movement on top of the keyboard move cmd
@@ -231,7 +231,7 @@ void Sys_Net_Restart_f();
 void __cdecl Sys_Listen_f();
 
 void __cdecl Sys_Mkdir(const char *path);
-BOOL __cdecl Sys_RemoveDirTree(const char *path);
+bool __cdecl Sys_RemoveDirTree(const char *path);
 int __cdecl Sys_CountFileList(char **list);
 char **__cdecl Sys_ListFiles(
 	const char *directory,

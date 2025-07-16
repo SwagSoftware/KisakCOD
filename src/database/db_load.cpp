@@ -131,7 +131,7 @@ enum expDataType *varoperandDataType     ;
 //int32_t (*)[4] varXPartBits        ;
 ComPrimaryLight *varComPrimaryLight     ;
 MaterialTextureDef *varMaterialTextureDef     ;
-BOOL * varbool               ;
+bool * varbool               ;
 uint16_t *varUnsignedShort       ;
 union MaterialArgumentDef *varMaterialArgumentDef     ;
 Glyph *varGlyph        ;

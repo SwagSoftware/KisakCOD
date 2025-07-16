@@ -1767,7 +1767,7 @@ XAssetHeader __cdecl DB_FindXAssetDefaultHeaderInternal(XAssetType type)
     return assetEntry->entry.asset.header;
 }
 
-BOOL __cdecl IsConfigFile(const char *name)
+bool __cdecl IsConfigFile(const char *name)
 {
     iassert(name);
     return (strstr(name, ".cfg") != NULL);

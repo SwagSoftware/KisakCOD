@@ -9,7 +9,7 @@
 #include "r_utils.h"
 
 //float const *const shadowmapClearColor 820ebb50     gfx_d3d : r_state.obj
-//BOOL g_renderTargetIsOverridden 85b5dd38     gfx_d3d : r_state.obj
+//bool g_renderTargetIsOverridden 85b5dd38     gfx_d3d : r_state.obj
 //unsigned int *s_decodeSamplerFilterState 85b5dcb8     gfx_d3d : r_state.obj
 //struct GfxScaledPlacement s_manualObjectPlacement 85b5dd18     gfx_d3d : r_state.obj
 

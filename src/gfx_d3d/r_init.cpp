@@ -301,7 +301,7 @@ vidConfig_t vidConfig;
 //struct GfxMetrics gfxMetrics 85827c00     gfx_d3d : r_init.obj
 GfxMetrics gfxMetrics;
 //int marker_r_init        85827c18     gfx_d3d : r_init.obj
-//BOOL g_allocateMinimalResources 85827c1c     gfx_d3d : r_init.obj
+//bool g_allocateMinimalResources 85827c1c     gfx_d3d : r_init.obj
 bool g_allocateMinimalResources;
 GfxConfiguration gfxCfg;
 GfxGlobals r_glob;

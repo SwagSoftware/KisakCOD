@@ -9,7 +9,6 @@ struct ShadowCandidate // sizeof=0x8
     float weight;                       // ...
 };
 
-bool __cdecl R_SortBspShadowReceiverSurfaces(GfxSurface *surface0, GfxSurface *surface1);
 void __cdecl R_EmitShadowCookieSurfs(GfxViewInfo *viewInfo);
 void __cdecl R_GenerateShadowCookiesCmd(ShadowCookieCmd *cmd);
 void __cdecl R_GenerateShadowCookies(
