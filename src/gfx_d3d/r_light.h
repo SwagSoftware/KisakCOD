@@ -75,7 +75,6 @@ int __cdecl R_GetPointLightPartitions(const GfxLight **visibleLights);
 void __cdecl R_MostImportantLights(const GfxLight **lights, int lightCount, int keepCount);
 bool __cdecl R_LightImportanceGreaterEqual(const GfxLight *light0, const GfxLight *light1);
 void __cdecl R_GetBspLightSurfs(const GfxLight **visibleLights, int visibleCount);
-bool __cdecl R_SortBspShadowReceiverSurfaces(GfxSurface *surface0, GfxSurface *surface1);
 void __cdecl R_GetBspOmniLightSurfs(const GfxLight *light, int lightIndex, GfxBspDrawSurfData *surfData);
 int __cdecl R_AllowBspOmniLight(int surfIndex, void *bspLightCallbackAsVoid);
 void __cdecl R_GetBspSpotLightSurfs(const GfxLight *light, int lightIndex, GfxBspDrawSurfData *surfData);

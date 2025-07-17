@@ -23,7 +23,7 @@ const dvar_t *ragdoll_max_life;
 const dvar_t *ragdoll_explode_force;
 const dvar_t *ragdoll_explode_upbias;
 
-bool ragdollInited;
+BOOL ragdollInited;
 RagdollDef ragdollDefs[2];
 RagdollBody ragdollBodies[32];
 

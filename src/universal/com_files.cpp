@@ -46,7 +46,7 @@ char fs_gamedir[256];
 searchpath_s *fs_searchpaths;
 
 char __cdecl FS_SanitizeFilename(const char *filename, char *sanitizedName, int sanitizedNameSize);
-bool __cdecl FS_UseSearchPath(const searchpath_s *pSearch);
+BOOL __cdecl FS_UseSearchPath(const searchpath_s *pSearch);
 int __cdecl FS_GetHandleAndOpenFile(const char *filename, const char *ospath, FsThread thread);
 int __cdecl FS_IwdIsPure(iwd_t *iwd);
 const char **__cdecl FS_ListFilteredFiles(
@@ -112,7 +112,7 @@ char *__cdecl FS_ReferencedIwdPureChecksums()
     return info6;
 }
 
-bool __cdecl FS_PureIgnoresExtension(const char *extension)
+BOOL __cdecl FS_PureIgnoresExtension(const char *extension)
 {
     if (*extension == 46)
         ++extension;
@@ -707,7 +707,7 @@ char __cdecl FS_SanitizeFilename(const char *filename, char *sanitizedName, int 
     return 1;
 }
 
-bool __cdecl FS_UseSearchPath(const searchpath_s *pSearch)
+BOOL __cdecl FS_UseSearchPath(const searchpath_s *pSearch)
 {
     if (pSearch->bLocalized && fs_ignoreLocalized->current.enabled)
         return 0;

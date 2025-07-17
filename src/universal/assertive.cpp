@@ -15,10 +15,10 @@ int lastAssertType;
 
 void(__cdecl* AssertCallback)(const char*);
 
-bool CopyMessageToClipboard()
+BOOL CopyMessageToClipboard()
 {
     HWND DesktopWindow; // eax
-    bool result; // eax
+    BOOL result; // eax
     char v2; // dl
     char* v3; // [esp+8h] [ebp-20h]
     char* v4; // [esp+Ch] [ebp-1Ch]

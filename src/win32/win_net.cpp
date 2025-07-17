@@ -930,9 +930,9 @@ void NET_OpenIPX( void ) {
 //===================================================================
 
 
-bool __cdecl NET_GetDvars()
+BOOL __cdecl NET_GetDvars()
 {
-	bool modified; // [esp+0h] [ebp-4h]
+	BOOL modified; // [esp+0h] [ebp-4h]
 
 	modified = 0;
 	if (net_noudp)
@@ -968,7 +968,7 @@ void __cdecl NET_Config(int enableNetworking)
 {
 	int start; // [esp+0h] [ebp-Ch]
 	int stop; // [esp+4h] [ebp-8h]
-	bool modified; // [esp+8h] [ebp-4h]
+	BOOL modified; // [esp+8h] [ebp-4h]
 
 	modified = NET_GetDvars();
 	if (net_noudp->current.enabled && net_noipx->current.enabled)

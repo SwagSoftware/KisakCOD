@@ -20,7 +20,7 @@ void __cdecl R_StaticModelWriteInfoHeader(int fileHandle)
     FS_Write(dest, &dest[strlen(dest) + 1] - &dest[1], fileHandle);
 }
 
-bool __cdecl R_StaticModelHasLighting(unsigned int smodelIndex)
+BOOL __cdecl R_StaticModelHasLighting(unsigned int smodelIndex)
 {
     return rgp.world->dpvs.smodelDrawInsts[smodelIndex].lightingHandle != 0;
 }
@@ -56,7 +56,7 @@ int __cdecl R_StaticModelGetMemoryUsage(XModel *model, int *modelCount)
     return usage;
 }
 
-bool __cdecl R_StaticModelCompare(
+BOOL __cdecl R_StaticModelCompare(
     const GfxStaticModelCombinedInst &smodelInst0,
     const GfxStaticModelCombinedInst &smodelInst1)
 {

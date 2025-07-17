@@ -170,7 +170,7 @@ void __cdecl Com_LoadSoundAliasDefaults(snd_alias_build_s *alias, const char *so
     alias->pNext = 0;
 }
 
-bool __cdecl Com_IsValidName(
+BOOL __cdecl Com_IsValidName(
     const char *token,
     unsigned int maxLength,
     int(__cdecl *validityFunction)(const char *),

@@ -1157,7 +1157,7 @@ bool __cdecl CG_AirstrikeKillCamEnabled(int32_t localClientNum)
 
 void __cdecl CG_UpdateThirdPerson(int32_t localClientNum)
 {
-    bool v1; // [esp+0h] [ebp-8h]
+    BOOL v1; // [esp+0h] [ebp-8h]
     cg_s *cgameGlob;
 
     cgameGlob = CG_GetLocalClientGlobals(localClientNum);

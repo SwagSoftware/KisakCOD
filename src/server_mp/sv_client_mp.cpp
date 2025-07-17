@@ -46,7 +46,7 @@ ucmd_t ucmds[13] =
 
 unsigned __int16 botport;
 
-bool __cdecl SV_ShouldAuthorizeAddress(netadr_t adr)
+BOOL __cdecl SV_ShouldAuthorizeAddress(netadr_t adr)
 {
     if (net_lanauthorize->current.enabled)
         return 1;

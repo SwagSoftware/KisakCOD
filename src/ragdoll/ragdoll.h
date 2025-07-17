@@ -284,6 +284,6 @@ extern const dvar_t *ragdoll_max_life;
 extern const dvar_t *ragdoll_explode_force;
 extern const dvar_t *ragdoll_explode_upbias;
 
-extern bool ragdollInited;
+extern BOOL ragdollInited;
 extern RagdollDef ragdollDefs[2];
 extern RagdollBody ragdollBodies[32];

@@ -20,7 +20,7 @@
 #include <qcommon/qcommon.h>
 
 int scr_initialized;
-bool updateScreenCalled;
+BOOL updateScreenCalled;
 
 void __cdecl SCR_DrawSmallStringExt(int x, int y, char *string, const float *setColor)
 {
@@ -98,8 +98,8 @@ void SCR_UpdateFrame()
 
 int __cdecl CL_CGameRendering(int localClientNum)
 {
-    bool demType; // eax
-    bool v3; // [esp-4h] [ebp-Ch]
+    BOOL demType; // eax
+    BOOL v3; // [esp-4h] [ebp-Ch]
     clientActive_t *LocalClientGlobals; // [esp+0h] [ebp-8h]
 
     if (localClientNum)

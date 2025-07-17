@@ -2632,11 +2632,11 @@ void  Scr_EvalBoolNot(VariableValue* value)
 
 void  Scr_EvalEquality(VariableValue* value1, VariableValue* value2)
 {
-	bool v2; // [esp+0h] [ebp-18h]
+	BOOL v2; // [esp+0h] [ebp-18h]
 	float v3; // [esp+8h] [ebp-10h]
 	float v4; // [esp+10h] [ebp-8h]
-	bool tempInt; // [esp+14h] [ebp-4h]
-	bool tempInta; // [esp+14h] [ebp-4h]
+	BOOL tempInt; // [esp+14h] [ebp-4h]
+	BOOL tempInta; // [esp+14h] [ebp-4h]
 
 	Scr_CastWeakerPair(value1, value2);
 	iassert(value1->type == value2->type);

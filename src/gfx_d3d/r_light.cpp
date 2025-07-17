@@ -273,7 +273,7 @@ void __cdecl R_GetBspLightSurfs(const GfxLight **visibleLights, int visibleCount
     }
 }
 
-bool __cdecl R_SortBspShadowReceiverSurfaces(GfxSurface *surface0, GfxSurface *surface1)
+BOOL __cdecl R_SortBspShadowReceiverSurfaces(GfxSurface *surface0, GfxSurface *surface1)
 {
     return surface0 < surface1;
 }

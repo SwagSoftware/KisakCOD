@@ -8,7 +8,7 @@
 int sceneWaterMapSetupsCount;
 water_t sceneWaterMapSetups[16];
 
-bool __cdecl R_WatersEquivalent(const water_t *w0, const water_t *w1)
+BOOL __cdecl R_WatersEquivalent(const water_t *w0, const water_t *w1)
 {
     float v3; // [esp+0h] [ebp-4Ch]
     float v4; // [esp+4h] [ebp-48h]

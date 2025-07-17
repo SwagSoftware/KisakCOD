@@ -317,7 +317,7 @@ int __cdecl Sys_ReadDebugSocketMessageType(unsigned __int8 *type, int blocking)
 	return Sys_ReadDebugSocketData((char*)type, 1, blocking);
 }
 
-bool __cdecl Sys_DebugCanSend()
+BOOL __cdecl Sys_DebugCanSend()
 {
 	return g_debugWriteBytes - g_debugReadBytesRemote <= 40960;
 }

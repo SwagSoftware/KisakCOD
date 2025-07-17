@@ -1379,7 +1379,7 @@ void __cdecl CL_UpdateColorInternal(const char *var_name, float *color)
     color[3] = 1.0;
 }
 
-bool __cdecl CL_IsCgameInitialized(int32_t localClientNum)
+BOOL __cdecl CL_IsCgameInitialized(int32_t localClientNum)
 {
     if (localClientNum)
         MyAssertHandler(

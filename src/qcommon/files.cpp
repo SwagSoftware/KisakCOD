@@ -39,7 +39,7 @@ char *__cdecl FS_GetMapBaseName(char *mapname)
     return basename;
 }
 
-bool __cdecl FS_serverPak(const char *pak)
+BOOL __cdecl FS_serverPak(const char *pak)
 {
     char v2; // [esp+3h] [ebp-55h]
     char *v3; // [esp+8h] [ebp-50h]

@@ -68,7 +68,7 @@ char __cdecl R_AddSpotShadowsForLight(
     float spotShadowFade)
 {
     float nearPlaneBias; // [esp+4h] [ebp-20h]
-    bool v6; // [esp+8h] [ebp-1Ch]
+    BOOL v6; // [esp+8h] [ebp-1Ch]
     unsigned int tileCount; // [esp+18h] [ebp-Ch]
     unsigned int spotShadowIndex; // [esp+20h] [ebp-4h]
 

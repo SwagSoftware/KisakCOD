@@ -2992,7 +2992,7 @@ void __cdecl  RB_RenderThread(unsigned int threadContext)
 
 int __cdecl RB_BackendTimeout()
 {
-    bool v1; // [esp+0h] [ebp-Ch]
+    BOOL v1; // [esp+0h] [ebp-Ch]
     _BYTE v2[4]; // [esp+8h] [ebp-4h] BYREF
 
     if (dx.swapFence)

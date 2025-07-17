@@ -531,7 +531,7 @@ void __cdecl CG_AddPlayerWeapon(
     uint32_t v5; // eax
     uint32_t fLeanDist; // [esp+Ch] [ebp-48h]
     bool v7; // [esp+10h] [ebp-44h]
-    bool v8; // [esp+14h] [ebp-40h]
+    BOOL v8; // [esp+14h] [ebp-40h]
     bool v9; // [esp+18h] [ebp-3Ch]
     snapshot_s* nextSnap; // [esp+28h] [ebp-2Ch]
     const weaponInfo_s* weapInfo; // [esp+30h] [ebp-24h]
@@ -746,9 +746,9 @@ void __cdecl CG_UpdateViewWeaponAnim(int32_t localClientNum)
 
 void __cdecl WeaponRunXModelAnims(int32_t localClientNum, const playerState_s* ps, weaponInfo_s* weapInfo)
 {
-    bool v3; // [esp+14h] [ebp-34h]
-    bool v4; // [esp+18h] [ebp-30h]
-    bool v5; // [esp+1Ch] [ebp-2Ch]
+    BOOL v3; // [esp+14h] [ebp-34h]
+    BOOL v4; // [esp+18h] [ebp-30h]
+    BOOL v5; // [esp+1Ch] [ebp-2Ch]
     DObj_s* obj; // [esp+24h] [ebp-24h]
     float transitionTime; // [esp+28h] [ebp-20h]
     int32_t weaponIndex; // [esp+38h] [ebp-10h]
@@ -3643,7 +3643,7 @@ uint32_t __cdecl ValidLatestPrimaryWeapIdx(uint32_t weaponIndex)
 
 void __cdecl CG_SelectWeaponIndex(int32_t localClientNum, uint32_t weaponIndex)
 {
-    bool v2; // [esp+0h] [ebp-10h]
+    BOOL v2; // [esp+0h] [ebp-10h]
     uint32_t validLatest; // [esp+Ch] [ebp-4h]
     cg_s *cgameGlob;
 

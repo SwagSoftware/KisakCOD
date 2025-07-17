@@ -15,7 +15,7 @@ void __cdecl CG_LoadingString(int32_t localClientNum, const char *s)
     SCR_UpdateLoadScreen();
 }
 
-bool __cdecl CG_IsShowingProgress_LoadObj()
+BOOL __cdecl CG_IsShowingProgress_LoadObj()
 {
     return com_expectedHunkUsage > 0;
 }

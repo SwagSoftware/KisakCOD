@@ -5403,7 +5403,7 @@ char __cdecl Material_Validate(const Material *material)
     return 1;
 }
 
-bool __cdecl R_IsWorldMaterialType(unsigned int materialType)
+BOOL __cdecl R_IsWorldMaterialType(unsigned int materialType)
 {
     return materialType == 3 || materialType == 4;
 }
@@ -5457,7 +5457,7 @@ int __cdecl CompareRawMaterialTextures(_DWORD *e0, _DWORD *e1)
     return v2 < R_HashString(name_4) ? -1 : 1;
 }
 
-bool __cdecl Material_RegisterImage(
+BOOL __cdecl Material_RegisterImage(
     const MaterialRaw *material,
     int imageNameOffset,
     unsigned __int8 semantic,
@@ -5466,7 +5466,7 @@ bool __cdecl Material_RegisterImage(
     return Image_Register((const char*)material + imageNameOffset, semantic, imageTrack) != 0;
 }
 
-bool __cdecl Material_FinishLoadingTexdef(
+BOOL __cdecl Material_FinishLoadingTexdef(
     const MaterialRaw *material,
     MaterialTextureDefRaw *texdef,
     unsigned int materialType,

@@ -12,7 +12,7 @@
 //   int (*)[1024] g_currentSnapshotPerEntity 85032728     sv_snapshot_profile_mp.obj
 //   unsigned int (*)[160] currentSnapshotNetworkEntityFieldsChanged 8504a730     sv_snapshot_profile_mp.obj
 //   unsigned int bitsUsedForServerCommands 8504e0b0     sv_snapshot_profile_mp.obj
-//   bool g_archivingSnapshot 8504e0b9     sv_snapshot_profile_mp.obj
+//   BOOL g_archivingSnapshot 8504e0b9     sv_snapshot_profile_mp.obj
 //   int originsSentDueToPredicitonError 8504e0bc     sv_snapshot_profile_mp.obj
 //   struct ClientSnapshotData *s_clientSnapshotData 8504e0c0     sv_snapshot_profile_mp.obj
 //   int originsSentDueToServerTimeMismatch 8504ea14     sv_snapshot_profile_mp.obj

@@ -1385,7 +1385,7 @@ void __cdecl XAnimSetupSyncNodes(XAnim_s* anims);
 void __cdecl XAnimSetupSyncNodes_r(XAnim_s* anims, unsigned int animIndex);
 void __cdecl XAnimFillInSyncNodes_r(XAnim_s* anims, unsigned int animIndex, bool bLoop);
 bool __cdecl XAnimHasTime(const XAnim_s* anims, unsigned int animIndex);
-bool __cdecl XAnimIsPrimitive(XAnim_s* anims, unsigned int animIndex);
+BOOL __cdecl XAnimIsPrimitive(XAnim_s* anims, unsigned int animIndex);
 void __cdecl XAnimSetTime(XAnimTree_s *tree, unsigned int animIndex, float time);
 void __cdecl XAnimUpdateServerNotifyIndex(XAnimInfo* info, const XAnimParts* parts);
 unsigned int __cdecl XAnimRestart(XAnimTree_s* tree, unsigned int infoIndex, float goalTime);

@@ -2172,7 +2172,7 @@ void __cdecl SND_ContinueLoopingSound_Internal(
         *pChannel = chanIndex;
 }
 
-bool __cdecl StreamFileNameIsNullSound(const StreamFileName *streamFileName)
+BOOL __cdecl StreamFileNameIsNullSound(const StreamFileName *streamFileName)
 {
     return !*streamFileName->info.raw.dir && !I_stricmp("null.wav", streamFileName->info.raw.name);
 }

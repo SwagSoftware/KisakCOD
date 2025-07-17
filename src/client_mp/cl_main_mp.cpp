@@ -113,8 +113,8 @@ const char *customClassDvars[6] =
   NULL
 };
 
-bool g_waitingForServer;
-bool cl_serverLoadingMap;
+BOOL g_waitingForServer;
+BOOL cl_serverLoadingMap;
 
 //ping_t *cl_pinglist;
 ping_t cl_pinglist[16];
@@ -730,7 +730,7 @@ void __cdecl CL_Vid_Restart_f()
 {
     uint8_t *v0; // eax
     const char *v1; // eax
-    bool v2; // [esp+0h] [ebp-D4h]
+    BOOL v2; // [esp+0h] [ebp-D4h]
     char *info; // [esp+4h] [ebp-D0h]
     XZoneInfo zoneInfo[1]; // [esp+8h] [ebp-CCh] BYREF
     char zoneName[64]; // [esp+14h] [ebp-C0h] BYREF

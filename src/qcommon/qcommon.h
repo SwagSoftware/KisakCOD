@@ -1284,7 +1284,7 @@ void __cdecl CM_ShowBrushCollision(
     void(__cdecl *drawCollisionPoly)(int, float (*)[3], const float *));
 void __cdecl CM_GetShowCollisionColor(float *colorFloat, char colorCounter);
 char __cdecl CM_BrushInView(const cbrush_t *brush, cplane_s *frustumPlanes, int frustumPlaneCount);
-bool __cdecl BoxOnPlaneSide(const float *emins, const float *emaxs, const cplane_s *p);
+int __cdecl BoxOnPlaneSide(const float *emins, const float *emaxs, const cplane_s *p);
 
 
 // cm_staticmodel

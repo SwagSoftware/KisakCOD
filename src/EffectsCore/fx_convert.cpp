@@ -973,7 +973,7 @@ void __cdecl FX_SampleVisualState(FxElemDef *elemDef, const FxEditorElemDef *edE
     double v2; // st7
     double v3; // st7
     float sampleTime; // [esp+11Ch] [ebp-3Ch]
-    bool secondAlphaSrc; // [esp+120h] [ebp-38h]
+    BOOL secondAlphaSrc; // [esp+120h] [ebp-38h]
     float rotationScale; // [esp+124h] [ebp-34h]
     int32_t sampleIndex; // [esp+128h] [ebp-30h]
     float rgba[4]; // [esp+12Ch] [ebp-2Ch] BYREF

@@ -169,7 +169,7 @@ void __cdecl R_ForEachPrimaryLightAffectingSurface(
     }
 }
 
-bool __cdecl R_ChooseTrisContextType()
+BOOL __cdecl R_ChooseTrisContextType()
 {
     if (Com_GetBspVersion() <= 0x12)
         return 0;
@@ -1991,7 +1991,7 @@ void __cdecl R_LoadNodesAndLeafs(unsigned int bspVersion)
     Z_Free((char *)rgl.nodes, 22);
 }
 
-bool __cdecl R_CompareSurfaces(const GfxSurface &surf0, const GfxSurface &surf1)
+BOOL __cdecl R_CompareSurfaces(const GfxSurface &surf0, const GfxSurface &surf1)
 {
     const MaterialTechnique *techniqueEmissive; // [esp+28h] [ebp-64h]
     int surfIndex; // [esp+30h] [ebp-5Ch]
@@ -2194,11 +2194,11 @@ unsigned int R_SortSurfaces()
 char __cdecl R_DoWorldTrisCoincide(const float **xyz0, const float **xyz1)
 {
     char v3; // [esp+0h] [ebp-78h]
-    bool v5; // [esp+8h] [ebp-70h]
+    BOOL v5; // [esp+8h] [ebp-70h]
     char v7; // [esp+10h] [ebp-68h]
-    bool v9; // [esp+18h] [ebp-60h]
+    BOOL v9; // [esp+18h] [ebp-60h]
     char v11; // [esp+20h] [ebp-58h]
-    bool v13; // [esp+28h] [ebp-50h]
+    BOOL v13; // [esp+28h] [ebp-50h]
     const float *v15; // [esp+30h] [ebp-48h]
     const float *v16; // [esp+34h] [ebp-44h]
     int v17; // [esp+38h] [ebp-40h]
@@ -3707,7 +3707,7 @@ struct GfxSModelSurfStats // sizeof=0x10
     unsigned int useCount;              // ...
 };
 
-bool __cdecl R_CompareSModels_Model(const GfxStaticModelDrawInst *s0, const GfxStaticModelDrawInst *s1)
+BOOL __cdecl R_CompareSModels_Model(const GfxStaticModelDrawInst *s0, const GfxStaticModelDrawInst *s1)
 {
     return s0->model < s1->model;
 }
@@ -3905,7 +3905,7 @@ unsigned int __cdecl R_OptimalSModelResourceStats(GfxWorld *world, GfxSModelSurf
     return statCount;
 }
 
-static bool __cdecl R_CompareSModelStats_Score(const GfxSModelSurfStats &s0, const GfxSModelSurfStats &s1)
+static BOOL __cdecl R_CompareSModelStats_Score(const GfxSModelSurfStats &s0, const GfxSModelSurfStats &s1)
 {
     return s1.useCount << s0.smcAllocBits < s0.useCount << s1.smcAllocBits;
 }
