@@ -43,9 +43,9 @@ gentity_s *__cdecl G_TestEntityPosition(gentity_s *ent, float *vOrigin)
     }
     if (ent->s.eType == 4)
     {
-        if (EntHandle::isDefined(&ent->r.ownerNum))
+        if (ent->r.ownerNum.isDefined())
         {
-            passEntityNum = EntHandle::entnum(&ent->r.ownerNum);
+            passEntityNum = ent->r.ownerNum.entnum();
             G_TraceCapsule(&tr, vOrigin, ent->r.mins, ent->r.maxs, vOrigin, passEntityNum, mask);
         }
         else

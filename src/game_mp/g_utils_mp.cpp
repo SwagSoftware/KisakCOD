@@ -1141,8 +1141,9 @@ void __cdecl G_InitGentity(gentity_s *e)
     e->r.inuse = 1;
     Scr_SetString(&e->classname, scr_const.noclass);
     e->s.number = e - g_entities;
-    if (EntHandle::isDefined(&e->r.ownerNum))
-        MyAssertHandler(".\\game_mp\\g_utils_mp.cpp", 1317, 0, "%s", "!e->r.ownerNum.isDefined()");
+
+    iassert(!e->r.ownerNum.isDefined());
+
     e->eventTime = 0;
     e->freeAfterEvent = 0;
 }
@@ -1234,8 +1235,8 @@ void __cdecl G_FreeEntityRefs(gentity_s *ed)
         {
             other = &g_entities[i];
             if (other->r.inuse
-                && EntHandle::isDefined(&other->r.ownerNum)
-                && EntHandle::entnum(&other->r.ownerNum) == entnum
+                && other->r.ownerNum.isDefined()
+                && other->r.ownerNum.entnum() == entnum
                 && other->s.eType == 11)
             {
                 other->active = 0;
@@ -1304,9 +1305,9 @@ void __cdecl G_FreeEntity(gentity_s *ed)
     if (ed->s.eType == 2)
         PlayerCorpse_Free(ed);
     EntHandleDissociate(ed);
-    EntHandle::setEnt(&ed->r.ownerNum, 0);
-    EntHandle::setEnt(&ed->parent, 0);
-    EntHandle::setEnt(&ed->missileTargetEnt, 0);
+    ed->r.ownerNum.setEnt(NULL);
+    ed->parent.setEnt(NULL);
+    ed->missileTargetEnt.setEnt(NULL);
     if (!ed->r.inuse)
         MyAssertHandler(".\\game_mp\\g_utils_mp.cpp", 1537, 0, "%s", "ed->r.inuse");
     Scr_FreeEntity(ed);

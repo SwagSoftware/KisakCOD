@@ -484,12 +484,12 @@ void __cdecl SV_PointTraceToEntity(const pointtrace_t *clip, svEntity_s *check, 
         && clip->ignoreEntParams->baseEntity != 1023
         && (clip->ignoreEntParams->ignoreSelf && entnum == clip->ignoreEntParams->baseEntity
             || clip->ignoreEntParams->ignoreParent && entnum == clip->ignoreEntParams->parentEntity
-            || EntHandle::isDefined(&touch->r.ownerNum)
+            || touch->r.ownerNum.isDefined()
             && (clip->ignoreEntParams->ignoreSiblings
-                && EntHandle::entnum(&touch->r.ownerNum) == clip->ignoreEntParams->parentEntity
+                && touch->r.ownerNum.entnum() == clip->ignoreEntParams->parentEntity
                 && entnum != clip->ignoreEntParams->baseEntity
                 || clip->ignoreEntParams->ignoreChildren
-                && EntHandle::entnum(&touch->r.ownerNum) == clip->ignoreEntParams->baseEntity)))
+                && touch->r.ownerNum.entnum() == clip->ignoreEntParams->baseEntity)))
     {
         return;
     }
@@ -639,9 +639,9 @@ void __cdecl SV_ClipMoveToEntity(const moveclip_t *clip, svEntity_s *check, trac
     if ((touch->r.contents & clip->contentmask) != 0
         && (clip->passEntityNum == 1023
             || entnum != clip->passEntityNum
-            && (!EntHandle::isDefined(&touch->r.ownerNum)
-                || EntHandle::entnum(&touch->r.ownerNum) != clip->passEntityNum
-                && EntHandle::entnum(&touch->r.ownerNum) != clip->passOwnerNum)))
+            && (!touch->r.ownerNum.isDefined()
+                || touch->r.ownerNum.entnum() != clip->passEntityNum
+                && touch->r.ownerNum.entnum() != clip->passOwnerNum)))
     {
         Vec3Add(touch->r.absmin, clip->mins, absmin);
         Vec3Add(touch->r.absmax, clip->maxs, absmax);
@@ -716,8 +716,7 @@ int __cdecl SV_PointSightTraceToEntity(const sightpointtrace_t *clip, svEntity_s
         {
             if (entnum == clip->passEntityNum[passEntityIdx])
                 return 0;
-            if (EntHandle::isDefined(&touch->r.ownerNum)
-                && EntHandle::entnum(&touch->r.ownerNum) == clip->passEntityNum[passEntityIdx])
+            if (touch->r.ownerNum.isDefined() && touch->r.ownerNum.entnum() == clip->passEntityNum[passEntityIdx])
             {
                 return 0;
             }
@@ -834,14 +833,14 @@ int __cdecl SV_ClipSightToEntity(const sightclip_t *clip, svEntity_s *check)
     {
         if (entnum == clip->passEntityNum[0])
             return 0;
-        if (EntHandle::isDefined(&touch->r.ownerNum) && EntHandle::entnum(&touch->r.ownerNum) == clip->passEntityNum[0])
+        if (touch->r.ownerNum.isDefined() && touch->r.ownerNum.entnum() == clip->passEntityNum[0])
             return 0;
     }
     if (clip->passEntityNum[1] == 1023)
         goto LABEL_15;
     if (entnum == clip->passEntityNum[1])
         return 0;
-    if (EntHandle::isDefined(&touch->r.ownerNum) && EntHandle::entnum(&touch->r.ownerNum) == clip->passEntityNum[1])
+    if (touch->r.ownerNum.isDefined() && touch->r.ownerNum.entnum() == clip->passEntityNum[1])
         return 0;
 LABEL_15:
     clipHandle = SV_ClipHandleForEntity(touch);
@@ -890,8 +889,9 @@ void __cdecl SV_SetupIgnoreEntParams(IgnoreEntParams *ignoreEntParams, int baseE
     else
     {
         base = SV_GentityNum(baseEntity);
-        if (EntHandle::isDefined(&base->r.ownerNum))
-            ignoreEntParams->parentEntity = EntHandle::entnum(&base->r.ownerNum);
+
+        if (base->r.ownerNum.isDefined())
+            ignoreEntParams->parentEntity = base->r.ownerNum.entnum();
         else
             ignoreEntParams->parentEntity = -1;
     }
@@ -991,15 +991,15 @@ void __cdecl SV_Trace(
         if (ignoreEntParams->baseEntity != 1023 && ignoreEntParams->parentEntity != -1)
         {
             v10 = SV_GentityNum(ignoreEntParams->baseEntity);
-            if (!EntHandle::isDefined(&v10->r.ownerNum)
+            if (!v10->r.ownerNum.isDefined()
                 || (v11 = SV_GentityNum(ignoreEntParams->baseEntity),
-                    ignoreEntParams->parentEntity != EntHandle::entnum(&v11->r.ownerNum)))
+                    ignoreEntParams->parentEntity != v11->r.ownerNum.entnum()))
             {
                 v12 = SV_GentityNum(ignoreEntParams->baseEntity);
-                if (EntHandle::isDefined(&v12->r.ownerNum))
+                if (v12->r.ownerNum.isDefined())
                 {
                     v13 = SV_GentityNum(ignoreEntParams->baseEntity);
-                    v21 = EntHandle::entnum(&v13->r.ownerNum);
+                    v21 = v13->r.ownerNum.entnum();
                     v14 = va(
                         "base: %d; parent: %d; base's parent: %d\n",
                         ignoreEntParams->baseEntity,
@@ -1038,15 +1038,13 @@ void __cdecl SV_Trace(
         if (ignoreEntParams->baseEntity != 1023 && ignoreEntParams->parentEntity != -1)
         {
             v15 = SV_GentityNum(ignoreEntParams->baseEntity);
-            if (!EntHandle::isDefined(&v15->r.ownerNum)
-                || (v16 = SV_GentityNum(ignoreEntParams->baseEntity),
-                    ignoreEntParams->parentEntity != EntHandle::entnum(&v16->r.ownerNum)))
+            if (!v15->r.ownerNum.isDefined() || (v16 = SV_GentityNum(ignoreEntParams->baseEntity), ignoreEntParams->parentEntity != v16->r.ownerNum.entnum()))
             {
                 v17 = SV_GentityNum(ignoreEntParams->baseEntity);
-                if (EntHandle::isDefined(&v17->r.ownerNum))
+                if (v17->r.ownerNum.isDefined())
                 {
                     v18 = SV_GentityNum(ignoreEntParams->baseEntity);
-                    v20 = EntHandle::entnum(&v18->r.ownerNum);
+                    v20 = v18->r.ownerNum.entnum();
                     v19 = va(
                         "base: %d; parent: %d; base's parent: %d\n",
                         ignoreEntParams->baseEntity,

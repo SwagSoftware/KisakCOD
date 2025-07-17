@@ -437,8 +437,8 @@ void __cdecl AttemptLiveGrenadePickup(gentity_s *clientEnt)
             touch = entityHandlers[grenadeEnt->handler].touch;
             if (touch)
             {
-                if (EntHandle::isDefined(&grenadeEnt->parent))
-                    clientEnt->client->ps.throwBackGrenadeOwner = EntHandle::entnum(&grenadeEnt->parent);
+                if (grenadeEnt->parent.isDefined())
+                    clientEnt->client->ps.throwBackGrenadeOwner = grenadeEnt->parent.entnum();
                 else
                     clientEnt->client->ps.throwBackGrenadeOwner = 1022;
                 clientEnt->client->ps.grenadeTimeLeft = clientEnt->client->ps.throwBackGrenadeTimeLeft;
@@ -784,8 +784,8 @@ void __cdecl G_AddPlayerMantleBlockage(float *endPos, int32_t duration, pmove_t 
 
     owner = &g_entities[pm->ps->clientNum];
     ent = G_Spawn();
-    EntHandle::setEnt(&ent->parent, owner);
-    EntHandle::setEnt(&ent->r.ownerNum, owner);
+    ent->parent.setEnt(owner);
+    ent->r.ownerNum.setEnt(owner);
     ent->r.contents = 0x10000;
     ent->clipmask = 0x10000;
     ent->r.svFlags = 33;
@@ -1304,12 +1304,11 @@ void __cdecl ClientEndFrame(gentity_s *ent)
                             0,
                             "%s",
                             "client->ps.viewlocked_entNum != ENTITYNUM_NONE");
-                    if (!EntHandle::isDefined(&level.gentities[client->ps.viewlocked_entNum].r.ownerNum)
-                        || EntHandle::ent(&level.gentities[client->ps.viewlocked_entNum].r.ownerNum) != ent)
+                    if (!level.gentities[client->ps.viewlocked_entNum].r.ownerNum.isDefined() || level.gentities[client->ps.viewlocked_entNum].r.ownerNum.ent() != ent)
                     {
-                        if (EntHandle::isDefined(&level.gentities[client->ps.viewlocked_entNum].r.ownerNum))
+                        if (level.gentities[client->ps.viewlocked_entNum].r.ownerNum.isDefined())
                         {
-                            v6 = EntHandle::entnum(&level.gentities[client->ps.viewlocked_entNum].r.ownerNum);
+                            v6 = level.gentities[client->ps.viewlocked_entNum].r.ownerNum.entnum();
                             v4 = va(
                                 "viewlocked_entNum is %i, ownerNum is %i, ent->s.number is %i",
                                 client->ps.viewlocked_entNum,
@@ -1384,7 +1383,6 @@ int32_t __cdecl G_UpdateClientInfo(gentity_s *ent)
     uint32_t v1; // eax
     uint32_t v2; // eax
     const char *v3; // eax
-    gentity_s *v4; // eax
     int32_t number; // [esp-4h] [ebp-5Ch]
     char *tagName; // [esp+3Ch] [ebp-1Ch]
     int32_t bChanged; // [esp+40h] [ebp-18h]
@@ -1464,14 +1462,12 @@ int32_t __cdecl G_UpdateClientInfo(gentity_s *ent)
     }
     if ((client->ps.pm_flags & 0x100000) != 0)
     {
-        if (EntHandle::isDefined(&ent->r.ownerNum))
+        if (ent->r.ownerNum.isDefined())
         {
-            if (!EntHandle::isDefined(&ent->r.ownerNum))
-                MyAssertHandler(".\\game_mp\\g_active_mp.cpp", 1449, 0, "%s", "ent->r.ownerNum.isDefined()");
-            client->sess.cs.attachedVehEntNum = EntHandle::entnum(&ent->r.ownerNum);
+            iassert(ent->r.ownerNum.isDefined());
+            client->sess.cs.attachedVehEntNum = ent->r.ownerNum.entnum();
             number = ent->s.number;
-            v4 = EntHandle::ent(&ent->r.ownerNum);
-            client->sess.cs.attachedVehSlotIndex = G_VehPlayerRideSlot(v4, number);
+            client->sess.cs.attachedVehSlotIndex = G_VehPlayerRideSlot(ent->r.ownerNum.ent(), number);
         }
         else
         {

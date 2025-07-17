@@ -120,20 +120,21 @@ uint32_t __cdecl AddEntHandleInfo(EntHandleList *entHandleList, void *handle)
 }
 
 
-void EntHandle::setEnt(EntHandle *_this, gentity_s *ent)
+void EntHandle::setEnt(gentity_s *ent)
 {
     gentity_s *oldEnt; // [esp+4h] [ebp-8h]
 
-    if (EntHandle::isDefined(_this))
+    //if (EntHandle::isDefined(_this))
+    if (this->isDefined())
     {
-        oldEnt = EntHandle::ent(_this);
+        oldEnt = this->ent();
         if (ent == oldEnt)
             return;
-        RemoveEntHandleInfo(&g_entitiesHandleList[oldEnt - g_entities], _this->infoIndex);
+        RemoveEntHandleInfo(&g_entitiesHandleList[oldEnt - g_entities], this->infoIndex);
         if (!ent)
         {
-            _this->number = 0;
-            _this->infoIndex = 0;
+            this->number = 0;
+            this->infoIndex = 0;
             return;
         }
     }
@@ -141,65 +142,38 @@ void EntHandle::setEnt(EntHandle *_this, gentity_s *ent)
     {
         return;
     }
-    _this->infoIndex = AddEntHandleInfo(&g_entitiesHandleList[ent - g_entities], _this);
-    _this->number = ent - g_entities + 1;
+
+    this->infoIndex = AddEntHandleInfo(&g_entitiesHandleList[ent - g_entities], this);
+    this->number = ent - g_entities + 1;
 }
 
-int32_t EntHandle::entnum(EntHandle *_this)
+int32_t EntHandle::entnum()
 {
-    if ((uint32_t)_this->number - 1 >= 0x3FF)
-        MyAssertHandler(
-            "c:\\trees\\cod3\\src\\game_mp\\g_public_mp.h",
-            295,
-            0,
-            "number - 1 doesn't index ENTITYNUM_NONE\n\t%i not in [0, %i)",
-            _this->number - 1,
-            1023);
-    if (!g_entities[_this->number - 1].r.inuse)
-        MyAssertHandler(
-            "c:\\trees\\cod3\\src\\game_mp\\g_public_mp.h",
-            296,
-            0,
-            "%s\n\t(number - 1) = %i",
-            "(g_entities[number - 1].r.inuse)",
-            _this->number - 1);
-    return _this->number - 1;
-}
+    int number = this->number;
 
-bool EntHandle::isDefined(EntHandle *_this)
-{
-    if (_this->number && !g_entities[_this->number - 1].r.inuse)
-        MyAssertHandler(
-            "c:\\trees\\cod3\\src\\game_mp\\g_public_mp.h",
-            280,
-            0,
-            "%s\n\t(number - 1) = %i",
-            "(!number || g_entities[number - 1].r.inuse)",
-            _this->number - 1);
-    return _this->number != 0;
-}
-
-gentity_s *EntHandle::ent(EntHandle *_this)
-{
-    if ((uint32_t)_this->number - 1 >= 0x3FF)
-        MyAssertHandler(
-            "c:\\trees\\cod3\\src\\game_mp\\g_public_mp.h",
-            287,
-            0,
-            "number - 1 doesn't index ENTITYNUM_NONE\n\t%i not in [0, %i)",
-            _this->number - 1,
-            1023);
+    bcassert(number - 1, ENTITYNUM_NONE);
+    iassert(g_entities[number - 1].r.inuse);
     
-    if (!g_entities[_this->number - 1].r.inuse)
-        MyAssertHandler(
-            "c:\\trees\\cod3\\src\\game_mp\\g_public_mp.h",
-            288,
-            0,
-            "%s\n\t(number - 1) = %i",
-            "(g_entities[number - 1].r.inuse)",
-            _this->number - 1);
+    return number - 1;
+}
 
-    return &g_entities[_this->number - 1];
+bool EntHandle::isDefined()
+{
+    int number = this->number;
+
+    iassert(!number || g_entities[number - 1].r.inuse);
+    
+    return number != 0;
+}
+
+gentity_s *EntHandle::ent()
+{
+    int number = this->number;
+
+    bcassert(number - 1, ENTITYNUM_NONE);
+    iassert(g_entities[number - 1].r.inuse);
+
+    return &g_entities[number - 1];
 }
 
 void EntHandle::Shutdown()
@@ -274,7 +248,7 @@ sentient_s *SentientHandle::sentient()
     return &g_sentients[this->number - 1];
 }
 
-void SentientHandle::setEntient(sentient_s *sentient)
+void SentientHandle::setSentient(sentient_s *sentient)
 {
     sentient_s *thisSentient; // r3
 

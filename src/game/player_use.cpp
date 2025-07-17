@@ -3,6 +3,18 @@
 #endif
 
 #include "player_use.h"
+#include "g_local.h"
+#include <script/scr_const.h>
+#include "g_main.h"
+#include "sentient.h"
+#include <script/scr_vm.h>
+#include <server/sv_game.h>
+#include <server/sv_public.h>
+#include "actor_grenade.h"
+#include "turret.h"
+#include <aim_assist/aim_target.h>
+#include "actor_events.h"
+#include "bullet.h"
 
 
 void __cdecl Player_UseEntity(gentity_s *playerEnt, gentity_s *useEnt)
@@ -66,7 +78,7 @@ int __cdecl Player_ActivateCmd(gentity_s *ent)
         MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\player_use.cpp", 91, 0, "%s", "ent->r.inuse");
     if (!ent->client)
         MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\player_use.cpp", 92, 0, "%s", "ent->client");
-    if (!Scr_IsSystemActive(1u))
+    if (!Scr_IsSystemActive())
         return 0;
     EntHandle::setEnt(&ent->client->useHoldEntity, 0);
     v3 = G_IsVehicleUnusable(ent);
@@ -121,7 +133,7 @@ void __cdecl Player_ActivateHoldCmd(gentity_s *ent)
         MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\player_use.cpp", 150, 0, "%s", "ent");
     if (!ent->client)
         MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\player_use.cpp", 151, 0, "%s", "ent->client");
-    if (Scr_IsSystemActive(1u))
+    if (Scr_IsSystemActive())
     {
         if (EntHandle::isDefined(&ent->client->useHoldEntity))
         {
@@ -440,7 +452,7 @@ void __cdecl G_UpdateFriendlyOverlay(gentity_s *ent)
             if (scr_vehicle->lookAtText0)
             {
                 v12 = SL_ConvertToString(scr_vehicle->lookAtText0);
-                v13 = va(byte_82042380, v12);
+                v13 = va("%s", v12);
                 SV_SetConfigstring(9, v13);
                 lookAtText1 = v2->scr_vehicle->lookAtText1;
                 goto LABEL_12;
@@ -453,7 +465,7 @@ void __cdecl G_UpdateFriendlyOverlay(gentity_s *ent)
         if (v2->lookAtText0)
         {
             v15 = SL_ConvertToString(v2->lookAtText0);
-            v16 = va(byte_82042380, v15);
+            v16 = va("%s", v15);
             SV_SetConfigstring(9, v16);
             lookAtText1 = v2->lookAtText1;
         LABEL_12:
@@ -474,7 +486,7 @@ void __cdecl G_UpdateFriendlyOverlay(gentity_s *ent)
         goto LABEL_19;
     }
     v4 = SL_ConvertToString(actor->properName);
-    v5 = va(byte_82042380, v4);
+    v5 = va("%s", v4);
     SV_SetConfigstring(9, v5);
     if (!ent->client)
         MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\player_use.cpp", 455, 0, "%s", "ent->client");
@@ -853,7 +865,7 @@ void __cdecl Player_BanNodesInFront(gentity_s *ent, double dist, const float *st
     int v17; // r19
     double v18; // fp31
     pathsort_t *v19; // r22
-    const pathnode_t *node; // r29
+    pathnode_t *node; // r29
     sentient_s *v21; // r3
     sentient_s *v22; // r31
     actor_s *actor; // r27
@@ -899,9 +911,11 @@ void __cdecl Player_BanNodesInFront(gentity_s *ent, double dist, const float *st
             node = v19->node;
             if (PointToLineDistSq2D(v19->node->constant.vOrigin, dir, &v25) <= v18)
             {
-                if (SentientHandle::isDefined(&node->dynamic.pOwner))
+                //if (SentientHandle::isDefined(&node->dynamic.pOwner))
+                if (node->dynamic.pOwner.isDefined())
                 {
-                    v21 = SentientHandle::sentient(&node->dynamic.pOwner);
+                    //v21 = SentientHandle::sentient(&node->dynamic.pOwner);
+                    v21 = node->dynamic.pOwner.sentient();
                     v22 = v21;
                     if (v21)
                     {
@@ -927,7 +941,8 @@ void __cdecl Player_BanNodesInFront(gentity_s *ent, double dist, const float *st
                             if (actor->numCoverNodesInGoal > 1)
                             {
                                 Path_RelinquishNodeSoon(v22);
-                                SentientHandle::setSentient(&node->dynamic.pOwner, 0);
+                                //SentientHandle::setSentient(&node->dynamic.pOwner, 0);
+                                node->dynamic.pOwner.setSentient(0);
                             }
                         }
                     }

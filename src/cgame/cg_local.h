@@ -18,7 +18,8 @@ struct ScreenPlacement;
 
 #define ACTIONSLOTS_NUM 3
 
-#define ENTITYNUM_NONE 1023
+#define ENTITYNUM_WORLD 1022
+#define ENTITYNUM_NONE 1023 // SP/MP same
 #define SURF_TYPECOUNT 29
 
 #define WEAPON_HINT_OFFSET 4
@@ -1292,6 +1293,7 @@ void __cdecl CG_DrawPlayerWeaponLowAmmoWarning(
     char textAlignMode,
     Material *material);
 uint32_t __cdecl GetWeaponIndex(const cg_s *cgameGlob);
+int BG_PlayerHasWeapon(const playerState_s *ps, int weaponIndex);
 void __cdecl Vec4Copy(const float *from, float *to);
 
 

@@ -77,8 +77,6 @@ void __cdecl PlayerCorpse_Free(gentity_s *ent)
 void __cdecl G_RunCorpseMove(gentity_s *ent)
 {
     int v1; // eax
-    int v2; // [esp+Ch] [ebp-E8h]
-    int v3; // [esp+10h] [ebp-E4h]
     int passEntityNum; // [esp+14h] [ebp-E0h]
     bool v5; // [esp+18h] [ebp-DCh]
     bool v6; // [esp+1Ch] [ebp-D8h]
@@ -145,9 +143,9 @@ void __cdecl G_RunCorpseMove(gentity_s *ent)
         mask = ent->clipmask;
         if ((mask & ent->r.contents) != 0)
             MyAssertHandler(".\\game_mp\\g_player_corpse_mp.cpp", 268, 0, "%s", "!( ent->r.contents & mask )");
-        if (EntHandle::isDefined(&ent->r.ownerNum))
+        if (ent->r.ownerNum.isDefined())
         {
-            passEntityNum = EntHandle::entnum(&ent->r.ownerNum);
+            passEntityNum = ent->r.ownerNum.entnum();
             G_TraceCapsule(&tr, ent->r.currentOrigin, ent->r.mins, ent->r.maxs, origin, passEntityNum, mask);
         }
         else
@@ -178,10 +176,9 @@ void __cdecl G_RunCorpseMove(gentity_s *ent)
                     ent->s.lerp.pos.trDelta[1] = 0.0;
                     ent->s.lerp.pos.trDelta[2] = 0.0;
                     origin[2] = origin[2] - 1.0;
-                    if (EntHandle::isDefined(&ent->r.ownerNum))
+                    if (ent->r.ownerNum.isDefined())
                     {
-                        v3 = EntHandle::entnum(&ent->r.ownerNum);
-                        v1 = G_TraceCapsuleComplete(ent->r.currentOrigin, ent->r.mins, ent->r.maxs, origin, v3, mask);
+                        v1 = G_TraceCapsuleComplete(ent->r.currentOrigin, ent->r.mins, ent->r.maxs, origin, ent->r.ownerNum.entnum(), mask);
                     }
                     else
                     {
@@ -215,11 +212,10 @@ void __cdecl G_RunCorpseMove(gentity_s *ent)
                     start[0] = ent->r.currentOrigin[0];
                     start[1] = ent->r.currentOrigin[1];
                     start[2] = ent->r.currentOrigin[2];
-                    start[2] = start[2] + (float)32.0;
-                    if (EntHandle::isDefined(&ent->r.ownerNum))
+                    start[2] = start[2] + 32.0f;
+                    if (ent->r.ownerNum.isDefined())
                     {
-                        v2 = EntHandle::entnum(&ent->r.ownerNum);
-                        G_TraceCapsule(&tr, start, ent->r.mins, ent->r.maxs, origin, v2, mask & 0xFFFEFFFF);
+                        G_TraceCapsule(&tr, start, ent->r.mins, ent->r.maxs, origin, ent->r.ownerNum.entnum(), mask & 0xFFFEFFFF);
                     }
                     else
                     {

@@ -408,15 +408,17 @@ void __cdecl G_VehUnlinkPlayer(gentity_s *ent, gentity_s *player)
     float angles[3]; // [esp+20h] [ebp-Ch] BYREF
 
     client = player->client;
-    if (!EntHandle::isDefined(&player->r.ownerNum))
-        MyAssertHandler(".\\game_mp\\g_vehicles_mp.cpp", 2586, 0, "%s", "player->r.ownerNum.isDefined()");
-    if (ent != EntHandle::ent(&player->r.ownerNum))
-        MyAssertHandler(".\\game_mp\\g_vehicles_mp.cpp", 2587, 0, "%s", "ent == player->r.ownerNum.ent()");
+
+    iassert(player->r.ownerNum.isDefined());
+    iassert(ent == player->r.ownerNum.ent());
+
     if ((client->ps.pm_flags & 0x100000) == 0)
         Com_Error(ERR_DROP, "G_VehUnlinkPlayer: Player is not using a vehicle");
+
     veh = ent->scr_vehicle;
-    if (!veh)
-        MyAssertHandler(".\\game_mp\\g_vehicles_mp.cpp", 2593, 0, "%s", "veh");
+
+    iassert(veh);
+
     veh->flags &= ~1u;
     angles[0] = client->ps.viewangles[0];
     angles[1] = client->ps.viewangles[1];
@@ -428,7 +430,7 @@ void __cdecl G_VehUnlinkPlayer(gentity_s *ent, gentity_s *player)
     angles[0] = 0.0;
     TeleportPlayer(player, origin, angles);
     VehicleClearRideSlotForPlayer(ent, player->s.number);
-    EntHandle::setEnt(&player->r.ownerNum, 0);
+    player->r.ownerNum.setEnt(NULL);
     client->ps.pm_flags &= ~0x100000u;
     client->ps.weapFlags &= ~0x80u;
     client->ps.viewlocked_entNum = 1023;
@@ -933,9 +935,9 @@ void __cdecl G_VehFreeEntity(gentity_s *vehEnt)
     VEH_UpdateSounds(vehEnt);
     Scr_SetString(&scr_vehicle->lookAtText0, 0);
     Scr_SetString(&scr_vehicle->lookAtText1, 0);
-    EntHandle::setEnt(&scr_vehicle->lookAtEnt, 0);
-    EntHandle::setEnt(&scr_vehicle->idleSndEnt, 0);
-    EntHandle::setEnt(&scr_vehicle->engineSndEnt, 0);
+    scr_vehicle->lookAtEnt.setEnt(NULL);
+    scr_vehicle->idleSndEnt.setEnt(NULL);
+    scr_vehicle->engineSndEnt.setEnt(NULL);
     vehEnt->nextthink = 0;
     vehEnt->takedamage = 0;
     vehEnt->active = 0;
@@ -955,7 +957,7 @@ bool __cdecl G_VehUsable(gentity_s *vehicle, gentity_s *player)
         return 0;
     if ((client->ps.pm_flags & 0x100000) != 0)
         return 0;
-    if (EntHandle::isDefined(&player->r.ownerNum))
+    if (player->r.ownerNum.isDefined())
         return 0;
     if (!VehicleHasSeatFree(vehicle))
         return 0;
@@ -1218,8 +1220,7 @@ void __cdecl VEH_TouchEntities_0(gentity_s *ent, float frameTime)
             v24 = entityHandlers[target->handler].touch;
             if (target->s.number != ent->s.number
                 && (target->s.eType == 1 || target->s.eType == 6 || target->s.eType == 14 || target->s.eType == 4)
-                && (!EntHandle::isDefined(&target->r.ownerNum)
-                    || target->s.eType == 4 && EntHandle::ent(&target->r.ownerNum) != ent))
+                && (!target->r.ownerNum.isDefined() || target->s.eType == 4 && target->r.ownerNum.ent() != ent))
             {
                 if (target->s.groundEntityNum == ent->s.number)
                     goto LABEL_18;
@@ -2643,7 +2644,7 @@ void __cdecl LinkPlayerToVehicle(gentity_s *ent, gentity_s *player)
         MyAssertHandler(".\\game_mp\\g_vehicles_mp.cpp", 2489, 0, "Trying to attach a player to a vehicle!");
     if ((client->ps.pm_flags & 0x100000) != 0)
         Com_Error(ERR_DROP, "LinkPlayerToVehicle: Player is already using a vehicle");
-    if (EntHandle::isDefined(&player->r.ownerNum))
+    if (player->r.ownerNum.isDefined())
         Com_Error(ERR_DROP, "LinkPlayerToVehicle: Player already has an owner");
     if (!VehicleHasSeatFree(ent))
         Com_Error(ERR_DROP, "LinkPlayerToVehicle: Vehicle has all seats filled");
@@ -2684,7 +2685,7 @@ void __cdecl LinkPlayerToVehicle(gentity_s *ent, gentity_s *player)
     }
     veh->flags |= 1u;
     bestRiderTag->entNum = player->s.number;
-    EntHandle::setEnt(&player->r.ownerNum, ent);
+    player->r.ownerNum.setEnt(ent);
     client->ps.pm_flags |= 0x100000u;
     if (bestRiderTag->tagName != scr_const.tag_passenger)
         client->ps.weapFlags |= 0x80u;

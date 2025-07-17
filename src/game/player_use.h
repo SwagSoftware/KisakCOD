@@ -1,10 +1,18 @@
 #pragma once
+#include <universal/q_shared.h>
 
 #ifndef KISAK_SP 
 #error This file is for SinglePlayer only 
 #endif
 
-// LWSS: unsure this .h is supposed to be here.
+struct gentity_s;
+struct gclient_s;
+
+struct useList_t
+{
+    gentity_s *ent;
+    float score;
+};
 
 void __cdecl Player_UseEntity(gentity_s *playerEnt, gentity_s *useEnt);
 int __cdecl Player_ActivateCmd(gentity_s *ent);

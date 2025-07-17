@@ -27,7 +27,7 @@ void __cdecl Player_UpdateActivate(gentity_s *ent)
         MyAssertHandler(".\\game_mp\\player_use_mp.cpp", 166, 0, "%s", "ent->client");
     ent->client->ps.weapFlags &= ~1u;
     useSucceeded = 0;
-    if (EntHandle::isDefined(&ent->client->useHoldEntity)
+    if (ent->client->useHoldEntity.isDefined()
         && (ent->client->oldbuttons & 0x20) != 0
         && (ent->client->buttons & 0x20) == 0)
     {
@@ -37,7 +37,7 @@ void __cdecl Player_UpdateActivate(gentity_s *ent)
     {
         if ((ent->client->latched_buttons & 0x28) != 0)
             useSucceeded = Player_ActivateCmd(ent);
-        if (EntHandle::isDefined(&ent->client->useHoldEntity) || useSucceeded)
+        if (ent->client->useHoldEntity.isDefined() || useSucceeded)
         {
             if ((ent->client->buttons & 0x28) != 0)
                 Player_ActivateHoldCmd(ent);
@@ -52,15 +52,14 @@ void __cdecl Player_UpdateActivate(gentity_s *ent)
 
 char __cdecl Player_ActivateCmd(gentity_s *ent)
 {
-    if (!ent)
-        MyAssertHandler(".\\game_mp\\player_use_mp.cpp", 82, 0, "%s", "ent");
-    if (!ent->r.inuse)
-        MyAssertHandler(".\\game_mp\\player_use_mp.cpp", 83, 0, "%s", "ent->r.inuse");
-    if (!ent->client)
-        MyAssertHandler(".\\game_mp\\player_use_mp.cpp", 84, 0, "%s", "ent->client");
+    iassert(ent);
+    iassert(ent->r.inuse);
+    iassert(ent->client);
+
     if (!Scr_IsSystemActive())
         return 0;
-    EntHandle::setEnt(&ent->client->useHoldEntity, 0);
+
+    ent->client->useHoldEntity.setEnt(NULL);
     if (ent->active)
     {
         if ((ent->client->ps.eFlags & 0x300) != 0)
@@ -94,7 +93,7 @@ char __cdecl Player_ActivateCmd(gentity_s *ent)
                         0,
                         "%s",
                         "g_entities[ ent->client->ps.cursorHintEntIndex ].r.inuse");
-                EntHandle::setEnt(&ent->client->useHoldEntity, &g_entities[ent->client->ps.cursorHintEntIndex]);
+                ent->client->useHoldEntity.setEnt(&g_entities[ent->client->ps.cursorHintEntIndex]);
                 ent->client->useHoldTime = level.time;
                 return 1;
             }
@@ -112,38 +111,21 @@ char __cdecl Player_ActivateCmd(gentity_s *ent)
 
 void __cdecl Player_ActivateHoldCmd(gentity_s *ent)
 {
-    int32_t v1; // eax
     gentity_s *useEnt; // [esp+0h] [ebp-4h]
 
-    if (!ent)
-        MyAssertHandler(".\\game_mp\\player_use_mp.cpp", 133, 0, "%s", "ent");
-    if (!ent->client)
-        MyAssertHandler(".\\game_mp\\player_use_mp.cpp", 134, 0, "%s", "ent->client");
+    iassert(ent);
+    iassert(ent->client);
+
     if (Scr_IsSystemActive()
-        && EntHandle::isDefined(&ent->client->useHoldEntity)
+        && ent->client->useHoldEntity.isDefined()
         && level.time - ent->client->lastSpawnTime >= g_useholdspawndelay->current.integer
         && level.time - ent->client->useHoldTime >= g_useholdtime->current.integer)
     {
-        useEnt = EntHandle::ent(&ent->client->useHoldEntity);
-        if (useEnt->s.number != EntHandle::entnum(&ent->client->useHoldEntity))
-        {
-            v1 = EntHandle::entnum(&ent->client->useHoldEntity);
-            MyAssertHandler(
-                ".\\game_mp\\player_use_mp.cpp",
-                151,
-                0,
-                "useEnt->s.number == (int)ent->client->useHoldEntity.entnum()\n\t%i, %i",
-                useEnt->s.number,
-                v1);
-        }
-        if (!useEnt->r.inuse)
-            MyAssertHandler(
-                ".\\game_mp\\player_use_mp.cpp",
-                152,
-                0,
-                "%s\n\t(useEnt->s.number) = %i",
-                "(useEnt->r.inuse)",
-                useEnt->s.number);
+        useEnt = ent->client->useHoldEntity.ent();
+
+        iassert(useEnt->s.number == (int)ent->client->useHoldEntity.entnum());
+        iassert(useEnt->r.inuse);
+        
         Player_UseEntity(ent, useEnt);
     }
 }
@@ -178,7 +160,7 @@ void __cdecl Player_UseEntity(gentity_s *playerEnt, gentity_s *useEnt)
         if (use)
             use(useEnt, playerEnt, playerEnt);
     }
-    EntHandle::setEnt(&playerEnt->client->useHoldEntity, 0);
+    playerEnt->client->useHoldEntity.setEnt(NULL);
 }
 
 void __cdecl Player_UpdateCursorHints(gentity_s *ent)
@@ -530,20 +512,19 @@ void __cdecl Player_SetTurretDropHint(gentity_s *ent)
 
 void __cdecl Player_SetVehicleDropHint(gentity_s *ent)
 {
-    gentity_s *v1; // eax
     gclient_s *ps; // [esp+4h] [ebp-4h]
 
-    if (!ent)
-        MyAssertHandler(".\\game_mp\\player_use_mp.cpp", 497, 0, "%s", "ent");
-    if (!ent->client)
-        MyAssertHandler(".\\game_mp\\player_use_mp.cpp", 498, 0, "%s", "ent->client");
+    iassert(ent);
+    iassert(ent->client);
+
     ps = ent->client;
+
     if ((ps->ps.pm_flags & 0x100000) == 0)
         MyAssertHandler(".\\game_mp\\player_use_mp.cpp", 502, 0, "%s", "ps->pm_flags & PMF_VEHICLE_ATTACHED");
-    if (!EntHandle::isDefined(&ent->r.ownerNum))
-        MyAssertHandler(".\\game_mp\\player_use_mp.cpp", 503, 0, "%s", "ent->r.ownerNum.isDefined()");
-    ps->ps.cursorHintEntIndex = EntHandle::entnum(&ent->r.ownerNum);
-    v1 = EntHandle::ent(&ent->r.ownerNum);
-    v1->flags |= 0x200000u;
+
+    iassert(ent->r.ownerNum.isDefined());
+
+    ps->ps.cursorHintEntIndex = ent->r.ownerNum.entnum();
+    ent->r.ownerNum.ent()->flags |= 0x200000u;
 }
 

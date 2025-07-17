@@ -23,10 +23,10 @@ struct EntHandle // sizeof=0x4 // (SP/MP same)
     uint16_t number;
     uint16_t infoIndex;
 
-    static void setEnt(EntHandle *_this, gentity_s *ent);
-    static gentity_s *ent(EntHandle *_this);
-    static int32_t entnum(EntHandle *_this);
-    static bool isDefined(EntHandle *_this);
+    void setEnt(gentity_s *ent);
+    gentity_s *ent();
+    int32_t entnum();
+    bool isDefined();
 
     static void Init();
     static void Shutdown();
@@ -50,7 +50,7 @@ struct SentientHandle
     unsigned __int16 infoIndex;
 
     sentient_s *sentient();
-    void setEntient(sentient_s *sentient);
+    void setSentient(sentient_s *sentient);
 
     static void Init();
     bool isDefined();

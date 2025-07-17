@@ -359,12 +359,11 @@ void __cdecl G_SpawnHelicopter(gentity_s *ent, gentity_s *owner, const char *veh
     veh = ent->scr_vehicle;
     s_vehicleInfos[veh->infoIdx].type = 5;
     veh->targetEnt = 1023;
-    if (EntHandle::isDefined(&veh->lookAtEnt))
-        MyAssertHandler(".\\game_mp\\g_scr_helicopter.cpp", 267, 0, "%s", "!veh->lookAtEnt.isDefined()");
-    if (EntHandle::isDefined(&veh->idleSndEnt))
-        MyAssertHandler(".\\game_mp\\g_scr_helicopter.cpp", 268, 0, "%s", "!veh->idleSndEnt.isDefined()");
-    if (EntHandle::isDefined(&veh->engineSndEnt))
-        MyAssertHandler(".\\game_mp\\g_scr_helicopter.cpp", 269, 0, "%s", "!veh->engineSndEnt.isDefined()");
+
+    iassert(!veh->lookAtEnt.isDefined());
+    iassert(!veh->idleSndEnt.isDefined());
+    iassert(!veh->engineSndEnt.isDefined());
+
     VEH_InitEntity(ent, veh, veh->infoIdx);
     VEH_InitVehicle(ent, veh, veh->infoIdx);
     veh->phys.mins[0] = -50.0f;

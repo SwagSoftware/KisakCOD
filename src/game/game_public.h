@@ -390,7 +390,7 @@ void __cdecl RunMissile_CreateWaterSplash(const gentity_s *missile, const trace_
 void __cdecl MissileTrajectory(gentity_s *ent, float *result);
 bool __cdecl MissileIsReadyForSteering(gentity_s *ent);
 void __cdecl GuidedMissileSteering(gentity_s *ent);
-char __cdecl IsMissileLockedOn(gentity_s *ent);
+bool IsMissileLockedOn(gentity_s *ent);
 void __cdecl MissileHorzSteerToTarget(
     gentity_s *ent,
     const float *currentRight,

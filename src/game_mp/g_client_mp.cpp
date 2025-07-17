@@ -314,7 +314,7 @@ char *__cdecl ClientConnect(uint32_t clientNum, uint16_t scriptPersId)
 
 void __cdecl ClientClearFields(gclient_s *client)
 {
-    EntHandle::setEnt(&client->useHoldEntity, 0);
+    client->useHoldEntity.setEnt(NULL);
 }
 
 void __cdecl ClientBegin(int32_t clientNum)
@@ -339,30 +339,16 @@ void __cdecl ClientSpawn(gentity_s *ent, const float *spawn_origin, const float 
 
     index = ent - g_entities;
     client = ent->client;
-    if (client != &level.clients[index])
-        MyAssertHandler(".\\game_mp\\g_client_mp.cpp", 432, 0, "%s", "ent->client == &level.clients[index]");
-    if (!ent->r.inuse)
-        MyAssertHandler(".\\game_mp\\g_client_mp.cpp", 433, 0, "%s", "ent->r.inuse");
+
+    iassert(ent->client == &level.clients[index]);
+    iassert(ent->r.inuse);
+
     if ((client->ps.otherFlags & 4) != 0 && (client->ps.eFlags & 0x300) != 0)
     {
-        if (client->ps.clientNum != ent->s.number)
-            MyAssertHandler(".\\game_mp\\g_client_mp.cpp", 438, 0, "%s", "client->ps.clientNum == ent->s.number");
-        if (client->ps.viewlocked_entNum == 1023)
-            MyAssertHandler(".\\game_mp\\g_client_mp.cpp", 439, 0, "%s", "client->ps.viewlocked_entNum != ENTITYNUM_NONE");
-        if (!EntHandle::isDefined(&level.gentities[client->ps.viewlocked_entNum].r.ownerNum))
-            MyAssertHandler(
-                ".\\game_mp\\g_client_mp.cpp",
-                440,
-                0,
-                "%s",
-                "level.gentities[client->ps.viewlocked_entNum].r.ownerNum.isDefined()");
-        if (EntHandle::ent(&level.gentities[client->ps.viewlocked_entNum].r.ownerNum) != ent)
-            MyAssertHandler(
-                ".\\game_mp\\g_client_mp.cpp",
-                441,
-                0,
-                "%s",
-                "level.gentities[client->ps.viewlocked_entNum].r.ownerNum.ent() == ent");
+        iassert(client->ps.clientNum == ent->s.number);
+        iassert(client->ps.viewlocked_entNum != ENTITYNUM_NONE);
+        iassert(level.gentities[client->ps.viewlocked_entNum].r.ownerNum.isDefined());
+        iassert(level.gentities[client->ps.viewlocked_entNum].r.ownerNum.ent() == ent);
         G_ClientStopUsingTurret(&level.gentities[client->ps.viewlocked_entNum]);
     }
     G_EntUnlink(ent);

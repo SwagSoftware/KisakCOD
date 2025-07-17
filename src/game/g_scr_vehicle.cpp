@@ -106,8 +106,7 @@ void __cdecl VEH_InitVehicle(gentity_s *ent, scr_vehicle_s *veh, __int16 infoIdx
     veh->turningAbility = 0.5f;
     veh->hasTarget = 0;
     veh->targetEnt = 1023;
-    if (EntHandle::isDefined(&veh->lookAtEnt))
-        MyAssertHandler(".\\game\\g_scr_vehicle.cpp", 910, 0, "%s", "!veh->lookAtEnt.isDefined()");
+    iassert(!veh->lookAtEnt.isDefined());
     veh->targetOrigin[0] = 0.0f;
     veh->targetOrigin[1] = 0.0f;
     veh->targetOrigin[2] = 0.0f;
@@ -121,10 +120,8 @@ void __cdecl VEH_InitVehicle(gentity_s *ent, scr_vehicle_s *veh, __int16 infoIdx
     veh->joltSpeed = 0.0f;
     veh->joltDecel = 0.0f;
     veh->playEngineSound = 1;
-    if (EntHandle::isDefined(&veh->idleSndEnt))
-        MyAssertHandler(".\\game\\g_scr_vehicle.cpp", 922, 0, "%s", "!veh->idleSndEnt.isDefined()");
-    if (EntHandle::isDefined(&veh->engineSndEnt))
-        MyAssertHandler(".\\game\\g_scr_vehicle.cpp", 923, 0, "%s", "!veh->engineSndEnt.isDefined()");
+    iassert(!veh->idleSndEnt.isDefined());
+    iassert(!veh->engineSndEnt.isDefined());
     veh->idleSndLerp = 0.0f;
     veh->engineSndLerp = 0.0f;
     veh->turretHitNum = 0;
@@ -744,9 +741,9 @@ void __cdecl VEH_UpdateAim(gentity_s *ent)
                 G_DObjGetWorldBoneIndexMatrix(ent, veh->boneIndex.turret_base, turretBaseMat);
                 AxisToAngles(*(const mat3x3*)turretBaseMat, angles);
             }
-            if (EntHandle::isDefined(&ent->r.ownerNum) && veh->targetEnt == 1023)
+            if (ent->r.ownerNum.isDefined() && veh->targetEnt == ENTITYNUM_NONE)
             {
-                player = EntHandle::ent(&ent->r.ownerNum);
+                player = ent->r.ownerNum.ent();
                 if (!player->client)
                     MyAssertHandler(".\\game\\g_scr_vehicle.cpp", 2081, 0, "%s", "player->client");
                 Vec3Sub(veh->targetOrigin, barrelPos, tgtDir);
@@ -1198,9 +1195,9 @@ float __cdecl VEH_UpdateMove_GetDesiredYaw(scr_vehicle_s *veh, float *desiredDir
     float desiredYaw; // [esp+48h] [ebp-4h]
 
     phys = &veh->phys;
-    if (EntHandle::isDefined(&veh->lookAtEnt))
+    if (veh->lookAtEnt.isDefined())
     {
-        lookAtEnt = EntHandle::ent(&veh->lookAtEnt);
+        lookAtEnt = veh->lookAtEnt.ent();
         Vec3Sub(lookAtEnt->r.currentOrigin, phys->origin, diff);
         return (float)vectoyaw(diff);
     }
@@ -2105,7 +2102,7 @@ void __cdecl CMD_VEH_SetLookAtEnt(scr_entref_t entref)
         v3 = va("Invalid entity");
         Scr_Error(v3);
     }
-    EntHandle::setEnt(&veh->lookAtEnt, tgtEnt);
+    veh->lookAtEnt.setEnt(tgtEnt);
 }
 
 void __cdecl CMD_VEH_ClearLookAtEnt(scr_entref_t entref)
@@ -2113,7 +2110,7 @@ void __cdecl CMD_VEH_ClearLookAtEnt(scr_entref_t entref)
     gentity_s *ent; // [esp+4h] [ebp-4h]
 
     ent = GScr_GetVehicle(entref);
-    EntHandle::setEnt(&ent->scr_vehicle->lookAtEnt, 0);
+    ent->scr_vehicle->lookAtEnt.setEnt(NULL);
 }
 
 void __cdecl CMD_VEH_SetWeapon(scr_entref_t entref)
@@ -2223,12 +2220,12 @@ void __cdecl CMD_VEH_FireWeapon(scr_entref_t entref)
         if (boneIndex < 0)
             MyAssertHandler(".\\game\\g_scr_vehicle.cpp", 6189, 1, "%s", "boneIndex >= 0");
         G_DObjGetWorldBoneIndexMatrix(ent, boneIndex, flashMtx);
-        if (EntHandle::isDefined(&ent->r.ownerNum)
+        if (ent->r.ownerNum.isDefined()
             && numBarrels == 1
             && !veh->turret.barrelBlocked
             && veh->targetEnt == 1023)
         {
-            player = EntHandle::ent(&ent->r.ownerNum);
+            player = ent->r.ownerNum.ent();
             if (!player->client)
                 MyAssertHandler(".\\game\\g_scr_vehicle.cpp", 6196, 0, "%s", "player->client");
             Vec3Sub(veh->targetOrigin, flashMtx[3], wp.gunForward);
@@ -2368,4 +2365,28 @@ int32_t __cdecl VEH_GetTagBoneIndex(gentity_s *ent, int32_t barrel)
         }
     }
     return boneIndex;
+}
+
+gentity_s *G_IsVehicleUnusable(gentity_s *player)
+{
+    gclient_s *client; // r11
+    EntHandle *p_ownerNum; // r31
+    gentity_s *result; // r3
+
+    client = player->client;
+    if (!client)
+        return 0;
+    if ((client->ps.eFlags & 0x20000) == 0)
+        return 0;
+
+    p_ownerNum = &player->r.ownerNum;
+
+    //if (!EntHandle::isDefined(&player->r.ownerNum))
+    if (!player->r.ownerNum.isDefined())
+        return 0;
+
+    result = p_ownerNum->ent();
+    if ((result->r.contents & 0x200000) == 0)
+        return 0;
+    return result;
 }

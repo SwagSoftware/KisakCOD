@@ -326,6 +326,8 @@ void __cdecl InfinitePerspectiveMatrix(float (*mtx)[4], float tanHalfFovX, float
 
 void __cdecl FinitePerspectiveMatrix(float (*mtx)[4], float tanHalfFovX, float tanHalfFovY, float zNear, float zFar);
 
+float PointToLineDistSq2D(const float *point, const float *start, const float *end);
+
 float LerpAngle(float from, float to, float frac);
 
 void __cdecl ClearBounds(float *mins, float *maxs);

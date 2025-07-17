@@ -3205,3 +3205,28 @@ float LerpAngle(float from, float to, float frac)
     float delta = fmodf(to - from + 540.0f, 360.0f) - 180.0f;
     return from + delta * frac;
 }
+
+float PointToLineDistSq2D(const float *point, const float *start, const float *end)
+{
+    float dx = end[0] - start[0];
+    float dy = end[1] - start[1];
+
+    float px = point[0] - start[0];
+    float py = point[1] - start[1];
+
+    float segDot = dx * dx + dy * dy;
+
+    if (segDot == 0.0f)
+    {
+        iassert(0);
+        return 0.0f;
+    }
+
+    float proj = -(px * dx + py * dy) / segDot;
+
+    float projX = dx * proj + px;
+    float projY = dy * proj + py;
+
+    float distSq = projX * projX + projY * projY;
+    return distSq;
+}

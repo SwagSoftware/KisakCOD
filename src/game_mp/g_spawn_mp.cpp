@@ -186,8 +186,8 @@ void __cdecl GScr_AddFieldsForRadiant()
 void __cdecl Scr_SetGenericField(uint8_t *b, fieldtype_t type, int32_t ofs)
 {
     VariableUnion v3; // eax
-    gentity_s *EntityAllowNull; // eax
     float vec[3]; // [esp+4h] [ebp-Ch] BYREF
+    EntHandle *pEnt;
 
     switch (type)
     {
@@ -211,8 +211,8 @@ void __cdecl Scr_SetGenericField(uint8_t *b, fieldtype_t type, int32_t ofs)
         *(uint32_t *)&b[ofs] = (uint32_t)Scr_GetEntityAllowNull(0);
         break;
     case F_ENTHANDLE:
-        EntityAllowNull = Scr_GetEntityAllowNull(0);
-        EntHandle::setEnt((EntHandle *)&b[ofs], EntityAllowNull);
+        pEnt = (EntHandle *)&b[ofs];
+        pEnt->setEnt(Scr_GetEntityAllowNull(0));
         break;
     case F_VECTORHACK:
         Scr_GetVector(0, vec);
@@ -300,11 +300,11 @@ void __cdecl Scr_GetEntityField(uint32_t entnum, uint32_t offset)
 
 void __cdecl Scr_GetGenericField(uint8_t *b, fieldtype_t type, int32_t ofs)
 {
-    gentity_s *v3; // eax
     uint32_t value; // eax
     uint16_t str; // [esp+8h] [ebp-18h]
     float vec[3]; // [esp+10h] [ebp-10h] BYREF
     uint16_t id; // [esp+1Ch] [ebp-4h]
+    EntHandle *pEnt;
 
     switch (type)
     {
@@ -330,10 +330,10 @@ void __cdecl Scr_GetGenericField(uint8_t *b, fieldtype_t type, int32_t ofs)
             Scr_AddEntity(*(gentity_s **)&b[ofs]);
         break;
     case F_ENTHANDLE:
-        if (EntHandle::isDefined((EntHandle *)&b[ofs]))
+        pEnt = (EntHandle *)&b[ofs];
+        if (pEnt->isDefined())
         {
-            v3 = EntHandle::ent((EntHandle *)&b[ofs]);
-            Scr_AddEntity(v3);
+            Scr_AddEntity(pEnt->ent());
         }
         break;
     case F_VECTORHACK:
@@ -680,8 +680,8 @@ void __cdecl SP_worldspawn()
     g_entities[1022].s.number = 1022;
     Scr_SetString(&g_entities[1022].classname, scr_const.worldspawn);
     g_entities[1022].r.inuse = 1;
-    if (EntHandle::isDefined(&g_entities[1022].r.ownerNum))
-        MyAssertHandler(".\\game_mp\\g_spawn_mp.cpp", 1145, 0, "%s", "!g_entities[ENTITYNUM_WORLD].r.ownerNum.isDefined()");
+
+    iassert(!g_entities[ENTITYNUM_WORLD].r.ownerNum.isDefined());
 }
 
 void __cdecl G_SpawnEntitiesFromString()

@@ -241,7 +241,6 @@ int32_t __cdecl WeaponPickup_AddWeapon(
     gentity_s **pDroppedWeapon)
 {
     const char *v6; // eax
-    int32_t v7; // [esp+8h] [ebp-5Ch]
     int32_t passEntityNum; // [esp+Ch] [ebp-58h]
     uint32_t bitNum; // [esp+14h] [ebp-50h]
     gentity_s *droppedEnt; // [esp+18h] [ebp-4Ch]
@@ -298,9 +297,9 @@ LABEL_12:
                 up[1] = ent->r.currentOrigin[1];
                 up[2] = ent->r.currentOrigin[2] + 2.0;
                 mask = G_ItemClipMask(ent);
-                if (EntHandle::isDefined(&droppedEnt->r.ownerNum))
+                if (droppedEnt->r.ownerNum.isDefined())
                 {
-                    passEntityNum = EntHandle::entnum(&droppedEnt->r.ownerNum);
+                    passEntityNum = droppedEnt->r.ownerNum.entnum();
                     G_TraceCapsule(&trace, ent->r.currentOrigin, droppedEnt->r.mins, droppedEnt->r.maxs, up, passEntityNum, mask);
                 }
                 else
@@ -314,10 +313,9 @@ LABEL_12:
                 else
                 {
                     Vec3Lerp(ent->r.currentOrigin, up, trace.fraction, up);
-                    if (EntHandle::isDefined(&droppedEnt->r.ownerNum))
+                    if (droppedEnt->r.ownerNum.isDefined())
                     {
-                        v7 = EntHandle::entnum(&droppedEnt->r.ownerNum);
-                        G_TraceCapsule(&trace, up, droppedEnt->r.mins, droppedEnt->r.maxs, ent->r.currentOrigin, v7, mask);
+                        G_TraceCapsule(&trace, up, droppedEnt->r.mins, droppedEnt->r.maxs, ent->r.currentOrigin, droppedEnt->r.ownerNum.entnum(), mask);
                     }
                     else
                     {
@@ -645,8 +643,7 @@ gentity_s *__cdecl LaunchItem(const gitem_s *item, float *origin, float *angles,
     itemIndex = ((char *)item - (char *)bg_itemlist) >> 2;
     dropped = G_Spawn();
     dropIdx = GetFreeDropCueIdx();
-    //EntHandle::setEnt((EntHandle *)(4 * dropIdx + 23802164), dropped);
-    EntHandle::setEnt(&level.droppedWeaponCue[dropIdx], dropped);
+    level.droppedWeaponCue[dropIdx].setEnt(dropped);
     dropped->s.eType = 3;
     dropped->s.index.brushmodel = itemIndex;
     G_GetItemClassname(item, &dropped->classname);
@@ -726,9 +723,9 @@ int32_t __cdecl GetFreeDropCueIdx()
     fBestDistSqrd = -1.0;
     for (i = 0; i < maxDroppedWeapon; ++i)
     {
-        if (!EntHandle::isDefined(&level.droppedWeaponCue[i]))
+        if (!level.droppedWeaponCue[i].isDefined())
             return i;
-        ent = EntHandle::ent(&level.droppedWeaponCue[i]);
+        ent = level.droppedWeaponCue[i].ent();
         if ((ent->flags & 0x1000000) == 0)
         {
             if (bg_itemlist[ent->s.index.brushmodel].giType != IT_WEAPON)
@@ -765,13 +762,12 @@ int32_t __cdecl GetFreeDropCueIdx()
             maxDroppedWeapon);
         iBest = 0;
     }
-    //ent = EntHandle::ent((EntHandle *)(4 * iBest + 23802164));
-    ent = EntHandle::ent(&level.droppedWeaponCue[iBest]);
-    if (!ent)
-        MyAssertHandler(".\\game\\g_items.cpp", 707, 0, "%s", "ent");
+    ent = level.droppedWeaponCue[iBest].ent();
+
+    iassert(ent);
+
     G_FreeEntity(ent);
-    //EntHandle::setEnt((EntHandle *)(4 * iBest + 23802164), 0);
-    EntHandle::setEnt(&level.droppedWeaponCue[iBest], 0);
+    level.droppedWeaponCue[iBest].setEnt(NULL);
     return iBest;
 }
 
@@ -1221,7 +1217,6 @@ void __cdecl G_SpawnItem(gentity_s *ent, const gitem_s *item)
 
 void __cdecl G_RunItem(gentity_s *ent)
 {
-    int32_t v1; // [esp+Ch] [ebp-B0h]
     int32_t passEntityNum; // [esp+10h] [ebp-ACh]
     float diff[6]; // [esp+24h] [ebp-98h] BYREF
     float v4; // [esp+3Ch] [ebp-80h]
@@ -1305,9 +1300,9 @@ void __cdecl G_RunItem(gentity_s *ent)
         Vec3Sub(origin, ent->r.currentOrigin, diff);
         if (Vec3LengthSq(diff) < 0.1000000014901161)
             origin[2] = origin[2] - 1.0;
-        if (EntHandle::isDefined(&ent->r.ownerNum))
+        if (ent->r.ownerNum.isDefined())
         {
-            passEntityNum = EntHandle::entnum(&ent->r.ownerNum);
+            passEntityNum = ent->r.ownerNum.entnum();
             G_TraceCapsule(&tr, ent->r.currentOrigin, ent->r.mins, ent->r.maxs, origin, passEntityNum, mask);
         }
         else
@@ -1328,10 +1323,9 @@ void __cdecl G_RunItem(gentity_s *ent)
                 Vec3Sub(origin, ent->r.currentOrigin, delta);
                 dot = 1.0 - Vec3Dot(delta, tr.normal);
                 Vec3Mad(origin, dot, tr.normal, origin);
-                if (EntHandle::isDefined(&ent->r.ownerNum))
+                if (ent->r.ownerNum.isDefined())
                 {
-                    v1 = EntHandle::entnum(&ent->r.ownerNum);
-                    G_TraceCapsule(&tr, endpos, ent->r.mins, ent->r.maxs, origin, v1, mask);
+                    G_TraceCapsule(&tr, endpos, ent->r.mins, ent->r.maxs, origin, ent->r.ownerNum.entnum(), mask);
                 }
                 else
                 {

@@ -119,13 +119,14 @@ void __cdecl G_ClientStopUsingTurret(gentity_s *self)
     playerState_s *ps; // [esp+8h] [ebp-4h]
 
     pTurretInfo = self->pTurretInfo;
-    if (!pTurretInfo)
-        MyAssertHandler(".\\game_mp\\g_misc_mp.cpp", 529, 0, "%s", "pTurretInfo");
-    if (!EntHandle::isDefined(&self->r.ownerNum))
-        MyAssertHandler(".\\game_mp\\g_misc_mp.cpp", 531, 0, "%s", "self->r.ownerNum.isDefined()");
-    owner = EntHandle::ent(&self->r.ownerNum);
-    if (!owner->client)
-        MyAssertHandler(".\\game_mp\\g_misc_mp.cpp", 533, 0, "%s", "owner->client");
+    
+    iassert(pTurrentInfo);
+    iassert(self->r.ownerNum.isDefined());
+
+    owner = self->r.ownerNum.ent();
+
+    iassert(owner->client);
+
     pTurretInfo->fireSndDelay = 0;
     self->s.loopSound = 0;
     if (pTurretInfo->prevStance != -1)
@@ -160,7 +161,7 @@ void __cdecl G_ClientStopUsingTurret(gentity_s *self)
     owner->active = 0;
     owner->s.otherEntityNum = 0;
     self->active = 0;
-    EntHandle::setEnt(&self->r.ownerNum, 0);
+    self->r.ownerNum.setEnt(0);
     pTurretInfo->flags &= ~0x800u;
 }
 
@@ -168,9 +169,8 @@ void __cdecl turret_think_client(gentity_s *self)
 {
     gentity_s *owner; // [esp+0h] [ebp-4h]
 
-    if (!EntHandle::isDefined(&self->r.ownerNum))
-        MyAssertHandler(".\\game_mp\\g_misc_mp.cpp", 593, 0, "%s", "self->r.ownerNum.isDefined()");
-    owner = EntHandle::ent(&self->r.ownerNum);
+    iassert(self->r.ownerNum.isDefined());
+    owner = self->r.ownerNum.ent();
     if (!owner->client)
         MyAssertHandler(".\\game_mp\\g_misc_mp.cpp", 596, 0, "%s", "owner->client");
     if (owner->active != 1 || owner->client->sess.sessionState || owner->client->ps.pm_type == PM_LASTSTAND)
@@ -192,16 +192,12 @@ void __cdecl turret_track(gentity_s *self, gentity_s *other)
     WeaponDef *weapDef; // [esp+4h] [ebp-4h]
 
     turretInfo = self->pTurretInfo;
-    if (!turretInfo)
-        MyAssertHandler(".\\game_mp\\g_misc_mp.cpp", 448, 0, "%s", "turretInfo");
-    if (!self->active)
-        MyAssertHandler(".\\game_mp\\g_misc_mp.cpp", 450, 0, "%s", "self->active");
-    if (!EntHandle::isDefined(&self->r.ownerNum))
-        MyAssertHandler(".\\game_mp\\g_misc_mp.cpp", 451, 0, "%s", "self->r.ownerNum.isDefined()");
-    if (EntHandle::ent(&self->r.ownerNum) != other)
-        MyAssertHandler(".\\game_mp\\g_misc_mp.cpp", 452, 0, "%s", "self->r.ownerNum.ent() == other");
-    if (!other->client)
-        MyAssertHandler(".\\game_mp\\g_misc_mp.cpp", 453, 0, "%s", "other->client");
+    iassert(turretInfo);
+    iassert(self->active);
+    iassert(self->r.ownerNum.isDefined());
+    iassert(self->r.ownerNum.ent() == other);
+    iassert(other->client);
+
     turret_clientaim(self, other);
     G_PlayerTurretPositionAndBlend(other, self);
     weapDef = BG_GetWeaponDef(self->s.weapon);
@@ -515,10 +511,10 @@ void __cdecl turret_clientaim(gentity_s *self, gentity_s *other)
     ps = other->client;
     if (!self->active)
         MyAssertHandler(".\\game_mp\\g_misc_mp.cpp", 403, 0, "%s", "self->active");
-    if (!EntHandle::isDefined(&self->r.ownerNum))
-        MyAssertHandler(".\\game_mp\\g_misc_mp.cpp", 404, 0, "%s", "self->r.ownerNum.isDefined()");
-    if (EntHandle::ent(&self->r.ownerNum) != other)
-        MyAssertHandler(".\\game_mp\\g_misc_mp.cpp", 405, 0, "%s", "self->r.ownerNum.ent() == other");
+
+    iassert(self->r.ownerNum.isDefined());
+    iassert(self->r.ownerNum.ent() == other);
+
     ps->ps.viewlocked = PLAYERVIEWLOCK_FULL;
     ps->ps.viewlocked_entNum = self->s.number;
     self->s.lerp.u.turret.gunAngles[0] = AngleDelta(ps->ps.viewangles[0], self->r.currentAngles[0]);
@@ -650,8 +646,8 @@ void __cdecl turret_think(gentity_s *self)
     self->nextthink = level.time + 50;
     if (self->tagInfo)
         G_GeneralLink(self);
-    if (EntHandle::isDefined(&self->r.ownerNum))
-        v1 = EntHandle::ent(&self->r.ownerNum);
+    if (self->r.ownerNum.isDefined())
+        v1 = self->r.ownerNum.ent();
     else
         v1 = &g_entities[1023];
     if (!v1->client)
@@ -867,8 +863,8 @@ void __cdecl G_FreeTurret(gentity_s *self)
 {
     gentity_s *v1; // [esp+0h] [ebp-Ch]
 
-    if (EntHandle::isDefined(&self->r.ownerNum))
-        v1 = EntHandle::ent(&self->r.ownerNum);
+    if (self->r.ownerNum.isDefined())
+        v1 = self->r.ownerNum.ent();
     else
         v1 = &g_entities[1023];
     if (!self->pTurretInfo)
@@ -984,7 +980,7 @@ void __cdecl turret_use(gentity_s *self, gentity_s *owner, gentity_s* activator)
     ps = owner->client;
     owner->active = 1;
     self->active = 1;
-    EntHandle::setEnt(&self->r.ownerNum, owner);
+    self->r.ownerNum.setEnt(owner);
     owner->flags |= 0x400000u;
     ps->ps.viewlocked = PLAYERVIEWLOCK_FULL;
     ps->ps.viewlocked_entNum = self->s.number;
@@ -1167,8 +1163,9 @@ void __cdecl G_SpawnTurret(gentity_s *self, const char *weaponinfoname)
     self->nextthink = level.time + 50;
     self->s.lerp.apos.trType = TR_LINEAR_STOP;
     self->takedamage = 0;
-    if (EntHandle::isDefined(&self->r.ownerNum))
-        MyAssertHandler(".\\game_mp\\g_misc_mp.cpp", 1128, 0, "%s", "!self->r.ownerNum.isDefined()");
+
+    iassert(!self->r.ownerNum.isDefined());
+
     SV_LinkEntity(self);
 }
 

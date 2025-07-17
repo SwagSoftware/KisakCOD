@@ -2264,7 +2264,7 @@ void __cdecl GScr_MissileSetTarget(scr_entref_t entref)
         v1 = va("Entity %i is not a rocket\n", missile->s.number);
         Scr_Error(v1);
     }
-    EntHandle::setEnt(&missile->missileTargetEnt, Entity);
+    missile->missileTargetEnt.setEnt(Entity);
     if (Scr_GetNumParam() <= 1)
     {
         missile->mover.pos2[1] = 0.0;
@@ -4120,11 +4120,11 @@ void __cdecl GScr_Detonate(scr_entref_t entref)
             player = Scr_GetEntity(0);
             if (!player->client)
                 Scr_ParamError(0, "Entity is not a player");
-            EntHandle::setEnt(&ent->parent, player);
+            ent->parent.setEnt(player);
         }
         else
         {
-            EntHandle::setEnt(&ent->parent, &g_entities[1022]);
+            ent->parent.setEnt(&g_entities[ENTITYNUM_WORLD]);
         }
     }
     G_ExplodeMissile(ent);
