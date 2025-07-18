@@ -544,15 +544,6 @@ struct spawner_ent_t
     int timestamp;
 };
 
-union $B62A4B71B7088F8B102AB9DD52F45DCF
-{
-    item_ent_t item[2];
-    spawner_ent_t spawner;
-    trigger_ent_t trigger;
-    mover_ent_t mover;
-    missile_ent_t missile;
-};
-
 struct gentity_s
 {
     entityState_s s;
@@ -587,7 +578,15 @@ struct gentity_s
     int count;
     gentity_s *chain;
     gentity_s *activator;
-    $B62A4B71B7088F8B102AB9DD52F45DCF ___u32;
+    //$B62A4B71B7088F8B102AB9DD52F45DCF ___u32;
+    union //$B62A4B71B7088F8B102AB9DD52F45DCF
+    {
+        item_ent_t item[2];
+        spawner_ent_t spawner;
+        trigger_ent_t trigger;
+        mover_ent_t mover;
+        missile_ent_t missile;
+    };
     EntHandle missileTargetEnt;
     unsigned __int16 lookAtText0;
     unsigned __int16 lookAtText1;

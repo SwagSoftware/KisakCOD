@@ -2,6 +2,7 @@
 #error This file is for SinglePlayer only 
 #endif
 
+#include "pathnode.h"
 #include "actor_badplace.h"
 #include "g_main.h"
 #include <script/scr_vm.h>
@@ -85,42 +86,43 @@ int __cdecl Path_FindBadPlace(unsigned int name)
     return v1;
 }
 
-badplace_t *__cdecl Path_AllocBadPlace(unsigned int name, int duration, int a3, int a4, int a5, int a6, __int64 a7)
+badplace_t *__fastcall Path_AllocBadPlace(unsigned int name, int duration)
 {
-    int v9; // r10
+    __int64 v2; // r10
+    int v5; // r10
     unsigned __int16 *p_name; // r11
-    int v11; // r29
+    int v7; // r29
     badplace_t *result; // r3
-    double v13; // r5
-    int v14; // r11
+    double v9; // r5
+    int v10; // r11
     unsigned __int8 *p_type; // r10
-    const char *v16; // r3
-    int v17; // r31
+    const char *v12; // r3
+    int v13; // r31
 
     if (name)
     {
-        v9 = 0;
+        v5 = 0;
         p_name = &g_badplaces[0].name;
         while (*p_name != name)
         {
             p_name += 20;
-            ++v9;
+            ++v5;
             if ((int)p_name >= (int)&playerEyePos[1])
             {
-                v9 = -1;
+                v5 = -1;
                 break;
             }
         }
-        Path_FreeBadPlace(v9);
+        Path_FreeBadPlace(v5);
     }
-    v11 = level.time + duration;
+    v7 = level.time + duration;
     if (duration > 0)
     {
         if (duration < 250)
         {
-            LODWORD(a7) = duration;
-            v13 = (float)((float)a7 * (float)0.001);
-            Com_PrintWarning(18, (const char *)HIDWORD(v13), LODWORD(v13), 0);
+            LODWORD(v2) = duration;
+            v9 = (float)((float)v2 * (float)0.001);
+            Com_PrintWarning(18, (const char *)HIDWORD(v9), LODWORD(v9), 0);
         }
     }
     else
@@ -130,41 +132,34 @@ badplace_t *__cdecl Path_AllocBadPlace(unsigned int name, int duration, int a3, 
             Scr_Error("anonymous bad places must have a duration");
             return 0;
         }
-        v11 = 0x7FFFFFFF;
+        v7 = 0x7FFFFFFF;
     }
-    v14 = 0;
+    v10 = 0;
     p_type = &g_badplaces[0].type;
     while (*p_type)
     {
         p_type += 40;
-        ++v14;
+        ++v10;
         if ((int)p_type >= (int)((unsigned __int8 *)&playerEyePos[1] + 2))
         {
-            v16 = va("too many bad places (more than %i)", 32);
-            Scr_Error(v16);
+            v12 = va("too many bad places (more than %i)", 32);
+            Scr_Error(v12);
             return 0;
         }
     }
-    v17 = v14;
-    Scr_SetString(&g_badplaces[v14].name, name);
-    result = &g_badplaces[v17];
-    g_badplaces[v17].endtime = v11;
+    v13 = v10;
+    Scr_SetString(&g_badplaces[v10].name, name);
+    result = &g_badplaces[v13];
+    g_badplaces[v13].endtime = v7;
     return result;
 }
 
-void __cdecl Path_MakeBadPlace(
-    unsigned int name,
-    int duration,
-    int teamflags,
-    int type,
-    badplace_parms_t *parms,
-    int a6,
-    __int64 a7)
+void __fastcall Path_MakeBadPlace(unsigned int name, int duration, int teamflags, int type, badplace_parms_t *parms)
 {
-    badplace_t *v12; // r3
+    badplace_t *v10; // r3
     badplace_brush_t *p_parms; // r10
-    badplace_parms_t *v14; // r11
-    int v15; // ctr
+    badplace_parms_t *v12; // r11
+    int v13; // ctr
 
     if (!parms)
         MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\actor_badplace.cpp", 171, 0, "%s", "parms");
@@ -194,70 +189,61 @@ void __cdecl Path_MakeBadPlace(
             "%s\n\t(type) = %i",
             "(type == (byte) type)",
             type);
-    v12 = Path_AllocBadPlace(name, duration, teamflags, type, (int)parms, a6, a7);
-    if (v12)
+    v10 = Path_AllocBadPlace(name, duration);
+    if (v10)
     {
-        p_parms = (badplace_brush_t *)&v12->parms;
-        v12->teamflags = teamflags;
-        v14 = parms;
-        v12->type = type;
-        v15 = 7;
+        p_parms = (badplace_brush_t *)&v10->parms;
+        v10->teamflags = teamflags;
+        v12 = parms;
+        v10->type = type;
+        v13 = 7;
         do
         {
-            p_parms->volume = v14->brush.volume;
-            v14 = (badplace_parms_t *)((char *)v14 + 4);
+            p_parms->volume = v12->brush.volume;
+            v12 = (badplace_parms_t *)((char *)v12 + 4);
             p_parms = (badplace_brush_t *)((char *)p_parms + 4);
-            --v15;
-        } while (v15);
-        v12->pingTime = level.time;
-        Path_UpdateBadPlaceCount(v12, 1);
+            --v13;
+        } while (v13);
+        v10->pingTime = level.time;
+        Path_UpdateBadPlaceCount(v10, 1);
         Actor_BadPlacesChanged();
     }
 }
 
-void __cdecl Path_MakeArcBadPlace(
-    unsigned int name,
-    int duration,
-    int teamflags,
-    badplace_arc_t *arc,
-    int a5,
-    int a6)
+void __fastcall Path_MakeArcBadPlace(unsigned int name, int duration, int teamflags, badplace_arc_t *arc)
 {
-    __int64 v10; // r10
-    badplace_arc_t *v11; // r11
-    int v12; // ctr
-    badplace_parms_t v13[2]; // [sp+50h] [-50h] BYREF
+    badplace_parms_t *v8; // r10
+    badplace_arc_t *v9; // r11
+    int v10; // ctr
+    badplace_parms_t v11[2]; // [sp+50h] [-50h] BYREF
 
     if (!arc)
         MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\actor_badplace.cpp", 199, 0, "%s", "arc");
-    LODWORD(v10) = v13;
-    v11 = arc;
-    v12 = 7;
+    v8 = v11;
+    v9 = arc;
+    v10 = 7;
     do
     {
-        *(float *)&v10 = v11->origin[0];
-        *(float *)v10 = v11->origin[0];
-        v11 = (badplace_arc_t *)((char *)v11 + 4);
-        LODWORD(v10) = v10 + 4;
-        --v12;
-    } while (v12);
-    Path_MakeBadPlace(name, duration, teamflags, 1, v13, a6, v10);
+        v8->brush.volume = (gentity_s *)LODWORD(v9->origin[0]);
+        v9 = (badplace_arc_t *)((char *)v9 + 4);
+        v8 = (badplace_parms_t *)((char *)v8 + 4);
+        --v10;
+    } while (v10);
+    Path_MakeBadPlace(name, duration, teamflags, 1, v11);
 }
 
-void __cdecl Path_MakeBrushBadPlace(unsigned int name, int duration, int teamflags, gentity_s *volume)
+void __fastcall Path_MakeBrushBadPlace(unsigned int name, int duration, int teamflags, gentity_s *volume)
 {
     int flags; // r11
-    __int64 v9; // r10
-    int v10; // r8
-    badplace_parms_t v11; // [sp+50h] [-50h] BYREF
+    badplace_parms_t v9; // [sp+50h] [-50h] BYREF
 
     if (!volume)
         MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\actor_badplace.cpp", 215, 0, "%s", "volume");
     flags = volume->flags;
-    v11.brush.volume = volume;
+    v9.brush.volume = volume;
     volume->flags = flags | 0x200000;
-    v11.arc.origin[1] = RadiusFromBounds2D(volume->r.mins, volume->r.maxs);
-    Path_MakeBadPlace(name, duration, teamflags, 2, &v11, v10, v9);
+    v9.arc.origin[1] = RadiusFromBounds2D(volume->r.mins, volume->r.maxs);
+    Path_MakeBadPlace(name, duration, teamflags, 2, &v9);
 }
 
 void __cdecl Path_RemoveBadPlaceEntity(gentity_s *entity)
@@ -860,8 +846,7 @@ actor_think_result_t __cdecl Actor_BadPlace_Flee_Think(actor_s *self)
 {
     actor_s *v2; // r3
 
-    if (!self)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\actor_badplace.cpp", 759, 0, "%s", "self");
+    iassert(self);
     v2 = self;
     if (self->isInBadPlace)
     {
@@ -872,7 +857,7 @@ actor_think_result_t __cdecl Actor_BadPlace_Flee_Think(actor_s *self)
             Actor_SetOrientMode(self, AI_ORIENT_TO_ENEMY_OR_MOTION);
             Actor_TeamMoveBlockedClear(self);
             Actor_MoveAlongPathWithTeam(self, 1, 0, 0);
-            if (EntHandle::isDefined(&self->pCloseEnt) || self->pPileUpActor)
+            if (self->pCloseEnt.isDefined() || self->pPileUpActor)
             {
                 Actor_ClearPath(self);
                 Actor_PostThink(self);

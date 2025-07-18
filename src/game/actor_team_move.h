@@ -4,6 +4,50 @@
 #error This file is for SinglePlayer only 
 #endif
 
+#include "actor.h"
+#include "sentient.h"
+
+enum ai_teammove_t : __int32
+{
+    AI_TEAMMOVE_TRAVEL = 0x0,
+    AI_TEAMMOVE_WAIT = 0x1,
+    AI_TEAMMOVE_SLOW_DOWN = 0x2,
+};
+
+struct team_move_context_t
+{
+    actor_s *self;
+    float vVelSelf[2];
+    float vOrgSelf[3];
+    float vVelDirSelf[2];
+    float fVelSelfSqrd;
+    float fDeltaCorrection;
+    float fIntervalSqrd;
+    float fWalkIntervalSqrd;
+    float fMaxIntervalSqrd;
+    int bFailedLookahead;
+    float fDodgePosDeltaLengthSqrd;
+    int dodgeEntities[33];
+    int dodgeEntityCount;
+    sentient_s *pDodgeOther;
+    bool bPileUp;
+    float fSlowDownPosDeltaLengthSqrd;
+    sentient_s *pSlowDownOther;
+    float vVelSlowDownOther[2];
+};
+
+struct team_move_other_context_t
+{
+    sentient_s *other;
+    float vOrgOther[3];
+    float vVelOther[2];
+    float vDelta[2];
+    float vPerp[2];
+    float fPosDeltaLengthSqrd;
+    float fScale;
+};
+
+
 bool __cdecl Actor_AtDifferentElevation(float *vOrgSelf, float *vOrgOther);
 void __cdecl Actor_TeamMoveBlocked(actor_s *self);
 void __cdecl Actor_TeamMoveBlockedClear(actor_s *self);

@@ -396,6 +396,39 @@ typedef ull             uint64;
 #define __PAIR64__(high, low)   (((uint64) (high) << 32) | (uint32)(low))
 #define __PAIR128__(high, low)  (((uint128)(high) << 64) | (uint64)(low))
 
+// rotate left
+template<class T> T __ROL__(T value, int count)
+{
+	const uint nbits = sizeof(T) * 8;
+
+	if (count > 0)
+	{
+		count %= nbits;
+		T high = value >> (nbits - count);
+		if (T(-1) < 0) // signed value
+			high &= ~((T(-1) << count));
+		value <<= count;
+		value |= high;
+	}
+	else
+	{
+		count = -count % nbits;
+		T low = value << (nbits - count);
+		value >>= count;
+		value |= low;
+	}
+	return value;
+}
+
+inline uint8  __ROL1__(uint8  value, int count) { return __ROL__((uint8)value, count); }
+inline uint16 __ROL2__(uint16 value, int count) { return __ROL__((uint16)value, count); }
+inline uint32 __ROL4__(uint32 value, int count) { return __ROL__((uint32)value, count); }
+inline uint64 __ROL8__(uint64 value, int count) { return __ROL__((uint64)value, count); }
+inline uint8  __ROR1__(uint8  value, int count) { return __ROL__((uint8)value, -count); }
+inline uint16 __ROR2__(uint16 value, int count) { return __ROL__((uint16)value, -count); }
+inline uint32 __ROR4__(uint32 value, int count) { return __ROL__((uint32)value, -count); }
+inline uint64 __ROR8__(uint64 value, int count) { return __ROL__((uint64)value, -count); }
+
 
 //=============================================
 void Com_Memset(void* dest, const int val, const size_t count);

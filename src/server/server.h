@@ -10,53 +10,6 @@
 
 #include <bgame/bg_local.h>
 
-union entityState_s_un
-{
-    unsigned __int8 scale;
-    unsigned __int8 eventParm2;
-    unsigned __int8 vehicleCompassType;
-};
-
-struct entityState_s
-{
-    unsigned __int8 eType;
-    unsigned __int8 surfType;
-    unsigned __int8 weapon;
-    unsigned __int8 weaponModel;
-    entityState_s_un un1;
-    LerpEntityState lerp;
-    unsigned int eventParm;
-    unsigned __int16 loopSound;
-    unsigned __int16 number;
-    unsigned __int16 otherEntityNum;
-    unsigned __int16 groundEntityNum;
-    unsigned __int16 index;
-    int time2;
-    int solid;
-    int eventSequence;
-    unsigned __int8 events[4];
-    unsigned int eventParms[4];
-    _BYTE un2[4];
-};
-
-struct entityShared_t
-{
-    unsigned __int8 linked;
-    unsigned __int8 bmodel;
-    unsigned __int8 svFlags;
-    unsigned __int8 eventType;
-    unsigned __int8 inuse;
-    float mins[3];
-    float maxs[3];
-    int contents;
-    float absmin[3];
-    float absmax[3];
-    float currentOrigin[3];
-    float currentAngles[3];
-    EntHandle ownerNum;
-    int eventTime;
-};
-
 enum he_type_t : __int32
 {
     HE_TYPE_FREE = 0x0,

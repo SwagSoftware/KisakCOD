@@ -777,6 +777,13 @@ void __cdecl Actor_PostThink(actor_s *self);
 static const float actorMins[3] = { -15.0, -15.0, 0.0 };
 static const float actorMaxs[3] = { 15.0, 15.0, 72.0 };
 
+static const float ACTOR_EYE_OFFSET = 64.0f;
+static const int ACTOR_MAX_HEALTH = 100;
+static const int ACTOR_TEAMMOVE_WAIT_TIME = 500;
+
+static const float meleeAttackOffsets[4][2] = { { 1.0, 0.0 }, { 0.0, 1.0 }, { -1.0, 0.0 }, { 0.0, -1.0 } };
+static const float g_actorAssumedSpeed[2] = { 190.0, 300.0 };
+
 extern struct AnimScriptList *g_animScriptTable[2];
 
 // actor_function_table

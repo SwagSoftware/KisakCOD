@@ -23,13 +23,6 @@
 #include <server/sv_game.h>
 #include <qcommon/threads.h>
 
-const float ACTOR_EYE_OFFSET = 64.0f;
-const int ACTOR_MAX_HEALTH = 100;
-const int ACTOR_TEAMMOVE_WAIT_TIME = 500;
-
-const float meleeAttackOffsets[4][2] = { { 1.0, 0.0 }, { 0.0, 1.0 }, { -1.0, 0.0 }, { 0.0, -1.0 } };
-const float g_actorAssumedSpeed[2] = { 190.0, 300.0 };
-
 
 const unsigned __int16 *g_AISpeciesNames[2] =
 { 

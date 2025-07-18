@@ -3,6 +3,55 @@
 #endif
 
 #include "actor_state.h"
+#include <qcommon/mem_track.h>
+#include "g_main.h"
+
+const ai_state_transition_t g_eSimplificationRules[4][4] =
+{
+  {
+    AIS_TRANSITION_CANONICAL,
+    AIS_TRANSITION_CANONICAL,
+    AIS_TRANSITION_CANONICAL,
+    AIS_TRANSITION_CANONICAL
+  },
+  {
+    AIS_TRANSITION_CANONICAL,
+    AIS_TRANSITION_SET,
+    AIS_TRANSITION_CANONICAL,
+    AIS_TRANSITION_POP
+  },
+  {
+    AIS_TRANSITION_CANONICAL,
+    AIS_TRANSITION_SET,
+    AIS_TRANSITION_CANONICAL,
+    AIS_TRANSITION_NONE
+  },
+  {
+    AIS_TRANSITION_CANONICAL,
+    AIS_TRANSITION_CANONICAL,
+    AIS_TRANSITION_SET,
+    AIS_TRANSITION_CANONICAL
+  }
+};
+
+const ai_state_t g_eSupercedingStates[4][4] =
+{
+  { AIS_SCRIPTEDANIM, AIS_NEGOTIATION, AIS_INVALID, AIS_INVALID },
+  { AIS_INVALID, AIS_INVALID, AIS_INVALID, AIS_INVALID },
+  { AIS_NEGOTIATION, AIS_INVALID, AIS_INVALID, AIS_INVALID },
+  { AIS_SCRIPTEDANIM, AIS_INVALID, AIS_INVALID, AIS_INVALID }
+};
+
+const ai_state_t g_eSupercededStates[4][4] =
+{
+  { AIS_PAIN, AIS_CUSTOMANIM, AIS_INVALID, AIS_INVALID },
+  { AIS_PAIN, AIS_SCRIPTEDANIM, AIS_CUSTOMANIM, AIS_NEGOTIATION },
+  { AIS_PAIN, AIS_SCRIPTEDANIM, AIS_CUSTOMANIM, AIS_NEGOTIATION },
+  { AIS_PAIN, AIS_SCRIPTEDANIM, AIS_CUSTOMANIM, AIS_NEGOTIATION }
+};
+
+
+
 
 void __cdecl TRACK_actor_state()
 {
@@ -252,7 +301,7 @@ void __cdecl Actor_SetSubState(actor_s *self, ai_substate_t eSubState)
 int __cdecl Actor_IsStateOnStack(const actor_s *self, ai_state_t eState)
 {
     int v2; // r10
-    ai_state_t *i; // r11
+    const ai_state_t *i; // r11
 
     v2 = 0;
     for (i = self->eSimulatedState; *i != eState; ++i)
@@ -289,7 +338,7 @@ void __cdecl Actor_SimplifyStateTransitions(actor_s *self)
     int v3; // r10
     unsigned int v4; // r30
     unsigned int v5; // r29
-    ai_substate_t v6; // r11
+    ai_state_transition_t v6; // r11
     unsigned int v7; // r11
 
     if (self->transitionCount >= 2)
@@ -323,8 +372,8 @@ void __cdecl Actor_SimplifyStateTransitions(actor_s *self)
             {
                 if (v6)
                 {
-                    self->eSubState[2 * self->transitionCount + 4] = v6;
-                    self->eSubState[2 * self->transitionCount + 5] = *(&self->preThinkTime + 2 * self->transitionCount);
+                    self->eSubState[2 * self->transitionCount + 4] = (ai_substate_t)v6;
+                    self->eSubState[2 * self->transitionCount + 5] = (ai_substate_t)*(&self->preThinkTime + 2 * self->transitionCount);
                     v7 = self->transitionCount - 1;
                 }
                 else

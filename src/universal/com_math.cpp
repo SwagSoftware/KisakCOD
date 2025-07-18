@@ -2889,6 +2889,20 @@ void __cdecl Vec4MadMad(
     result[3] = scale0 * dir0[3] + start[3] + scale1 * dir1[3];
 }
 
+void __cdecl Vec3Mad(const float *start, float scale, const float *dir, float *result)
+{
+    result[0] = scale * dir[0] + start[0];
+    result[1] = scale * dir[1] + start[1];
+    result[2] = scale * dir[2] + start[2];
+}
+
+void __cdecl Vec3Accum(const float *subTotal, const float *weight, const float *added, float *total)
+{
+    total[0] = weight[0] * added[0] + subTotal[0];
+    total[1] = weight[1] * added[1] + subTotal[1];
+    total[2] = weight[2] * added[2] + subTotal[2];
+}
+
 void __cdecl Vec3Cross(const vec3r v0, const vec3r v1, vec3r cross)
 {
     iassert(v0 != cross);

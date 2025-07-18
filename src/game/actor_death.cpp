@@ -3,6 +3,12 @@
 #endif
 
 #include "actor_death.h"
+#include "actor_events.h"
+#include "actor_grenade.h"
+#include "g_main.h"
+#include "actor_state.h"
+#include "actor_orientation.h"
+#include "actor_corpse.h"
 
 bool __cdecl Actor_Death_Start(actor_s *self, ai_state_t ePrevState)
 {
@@ -85,13 +91,13 @@ actor_think_result_t __cdecl Actor_Death_Think(actor_s *self)
             self->ent->r.contents = 67117056;
             SV_LinkEntity(self->ent);
         }
-        return 0;
+        return ACTOR_THINK_DONE;
     }
     else
     {
         if (self->eSubState[self->stateLevel] == STATE_DEATH_PRECLEANUP)
             Actor_Death_Cleanup(self);
-        return 2;
+        return ACTOR_THINK_MOVE_TO_BODY_QUEUE;
     }
 }
 

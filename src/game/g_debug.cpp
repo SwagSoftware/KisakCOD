@@ -2,6 +2,12 @@
 #include <client/client.h>
 #include <cgame/cg_public.h>
 
+#include <universal/com_math.h>
+#include <qcommon/qcommon.h>
+#include <xanim/xanim.h>
+#ifdef KISAK_SP
+#include "g_main.h"
+#endif
 
 void __cdecl G_DebugLine(const float *start, const float *end, const float *color, int depthTest)
 {
@@ -140,3 +146,149 @@ void __cdecl G_DebugCircleEx(
         G_DebugLineWithDuration(v[i], v[(i + 1) % 0x10], color, depthTest, duration);
 }
 
+#ifdef KISAK_SP
+struct DebugDrawBrushInfo
+{
+    int depthTest;
+    int duration;
+    float transform[4][3];
+};
+
+DebugDrawBrushInfo g_debugDrawBrushInfo;
+
+void DrawBrushPoly(int numPoints, float (*points)[3], const float *color)
+{
+    int v5; // r30
+    const float *v6; // r29
+    float v7[4]; // [sp+50h] [-50h] BYREF
+    float v8[16]; // [sp+60h] [-40h] BYREF
+
+    v5 = numPoints - 1;
+    MatrixTransformVector43((const float *)points, g_debugDrawBrushInfo.transform, v8);
+    if (v5 > 0)
+    {
+        v6 = &(*points)[3];
+        do
+        {
+            MatrixTransformVector43(v6, g_debugDrawBrushInfo.transform, v7);
+            CL_AddDebugLine(v8, v7, color, g_debugDrawBrushInfo.depthTest, g_debugDrawBrushInfo.duration, 1);
+            v8[0] = v7[0];
+            --v5;
+            v6 += 3;
+            v8[1] = v7[1];
+            v8[2] = v7[2];
+        } while (v5);
+    }
+    MatrixTransformVector43((const float *)points, g_debugDrawBrushInfo.transform, v7);
+    CL_AddDebugLine(v8, v7, color, g_debugDrawBrushInfo.depthTest, g_debugDrawBrushInfo.duration, 1);
+}
+
+void G_DebugDrawBrush_r(cLeafBrushNode_s *node, const float *color)
+{
+    int v4; // r30
+    unsigned __int16 *brushes; // r31
+
+    while (1)
+    {
+        iassert(node);
+        if (node->leafBrushCount > 0)
+            break;
+        ++node;
+    }
+    v4 = 0;
+    brushes = node->data.leaf.brushes;
+    do
+    {
+        CM_ShowSingleBrushCollision((const cbrush_t *)((char *)cm.brushes + 16 * *brushes + 16 * __ROL4__(*brushes, 2)), color, DrawBrushPoly);
+        ++v4;
+        ++brushes;
+    } while (v4 < node->leafBrushCount);
+}
+
+void G_DebugDrawBrushModel(gentity_s *entity, const float *color, int depthTest, int duration)
+{
+    unsigned int v8; // r29
+    cmodel_t *v9; // r31
+
+    iassert(entity);
+
+    v8 = *(unsigned __int16 *)entity->s.index;
+
+    if (*(_WORD *)entity->s.index)
+    {
+        g_debugDrawBrushInfo.depthTest = depthTest;
+        g_debugDrawBrushInfo.duration = duration;
+        AnglesToAxis(entity->r.currentAngles, g_debugDrawBrushInfo.transform);
+        g_debugDrawBrushInfo.transform[3][0] = entity->r.currentOrigin[0];
+        g_debugDrawBrushInfo.transform[3][1] = entity->r.currentOrigin[1];
+        g_debugDrawBrushInfo.transform[3][2] = entity->r.currentOrigin[2];
+        v9 = CM_ClipHandleToModel(v8);
+        if (!v9)
+            MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\g_debug.cpp", 319, 0, "%s", "cmod");
+        G_DebugDrawBrush_r(&cm.leafbrushNodes[v9->leaf.leafBrushNode], color);
+    }
+}
+
+void G_DebugPlane(
+    const float * const normal,
+    float dist,
+    const float * const origin,
+    const float * const color,
+    float size,
+    int depthTest,
+    int duration)
+{
+    double v14; // fp13
+    double v15; // fp29
+    double v16; // fp1
+    double v17; // fp10
+    double v18; // fp9
+    double v19; // fp13
+    double v20; // fp0
+    float v21; // [sp+50h] [-90h] BYREF
+    float v22; // [sp+54h] [-8Ch]
+    float v23[3]; // [sp+58h] [-88h] BYREF
+    float v26[3]; // [sp+68h] [-78h] BYREF
+    float v29[3]; // [sp+78h] [-68h] BYREF
+    float v32[3]; // [sp+88h] [-58h] BYREF
+
+    v14 = (float)(color[1] * normal[1]);
+    v22 = normal[1];
+    v15 = (float)((float)dist - (float)((float)(*color * *normal) + (float)v14));
+    v21 = *normal;
+    v16 = Vec2Normalize(&v21);
+    v17 = *color;
+    v18 = color[1];
+    v32[2] = (float)((float)size * (float)0.5) + color[2];
+    v23[2] = v32[2];
+    v19 = -(float)((float)v15 / (float)v16);
+    v32[0] = (float)(v21 * (float)((float)v15 / (float)v16)) + (float)v17;
+    v32[1] = (float)(v22 * (float)((float)v15 / (float)v16)) + (float)v18;
+    v23[0] = (float)((float)v19 * v21) + v32[0];
+    v23[1] = (float)((float)v19 * v22) + v32[1];
+    CL_AddDebugLine(v32, v23, color, depthTest, duration, 1);
+
+    v20 = -v22;
+    v26[2] = color[2];
+    v23[2] = v26[2];
+    v26[0] = (float)((float)((float)size * (float)0.5) * (float)v20) + v32[0];
+    v26[1] = (float)((float)((float)size * (float)0.5) * v21) + v32[1];
+    v23[0] = (float)((float)((float)size * (float)-0.5) * (float)v20) + v32[0];
+    v23[2] = (float)((float)((float)size * (float)-0.5) * v21) + v32[1];
+    CL_AddDebugLine(v26, v23, color, depthTest, duration, 1);
+
+    v26[2] = v26[2] + (float)size;
+    v23[2] = v23[2] + (float)size;
+    CL_AddDebugLine(v26, v23, color, depthTest, duration, 1);
+
+    v29[0] = v26[0];
+    v29[1] = v26[1];
+    v29[2] = v26[2] - (float)size;
+    CL_AddDebugLine(v26, v29, color, depthTest, duration, 1);
+
+    v29[0] = v23[0];
+    v29[1] = v23[1];
+    v29[2] = v23[2] - (float)size;
+    CL_AddDebugLine(v23, v29, color, depthTest, duration, 1);
+}
+#endif

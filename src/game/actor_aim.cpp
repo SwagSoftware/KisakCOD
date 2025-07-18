@@ -15,6 +15,7 @@
 #include "actor.h"
 #include <game/bullet.h>
 #include "actor_events.h"
+#include <universal/com_files.h>
 
 struct AccuracyGraphBackup
 {
@@ -395,7 +396,7 @@ float __cdecl Actor_GetPlayerSightAccuracy(actor_s *self, const sentient_s *enem
 float __cdecl Actor_GetFinalAccuracy(actor_s *self, weaponParms *wp, double accuracyMod)
 {
     double accuracy; // fp1
-    sentient_s *TargetSentient; // r30
+    sentient_s *enemy; // r30
     WeaponDef *weapDef; // r5
     double WeaponAccuracy; // fp30
     double PlayerStanceAccuracy; // fp29
@@ -412,56 +413,37 @@ float __cdecl Actor_GetFinalAccuracy(actor_s *self, weaponParms *wp, double accu
     const float *v21; // r5
     const float *v22; // r5
 
-    if (!self)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\actor_aim.cpp", 312, 0, "%s", "self");
-    if (!self->sentient)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\actor_aim.cpp", 313, 0, "%s", "self->sentient");
-    if (!EntHandle::isDefined(&self->sentient->targetEnt))
-        MyAssertHandler(
-            "c:\\trees\\cod3\\cod3src\\src\\game\\actor_aim.cpp",
-            314,
-            0,
-            "%s",
-            "self->sentient->targetEnt.isDefined()");
-    if (!wp)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\actor_aim.cpp", 315, 0, "%s", "wp");
+    iassert(self);
+    iassert(self->sentient);
+    iassert(self->sentient->targetEnt.isDefined());
+    iassert(wp);
+
     accuracy = self->accuracy;
-    if (accuracy < 0.0)
-        MyAssertHandler(
-            "c:\\trees\\cod3\\cod3src\\src\\game\\actor_aim.cpp",
-            317,
-            0,
-            "%s\n\t(self->accuracy) = %g",
-            "(self->accuracy >= 0.0f)",
-            accuracy);
-    if (accuracyMod < 0.0)
-        MyAssertHandler(
-            "c:\\trees\\cod3\\cod3src\\src\\game\\actor_aim.cpp",
-            318,
-            0,
-            "%s\n\t(accuracyMod) = %g",
-            HIDWORD(accuracyMod),
-            LODWORD(accuracyMod));
-    TargetSentient = Actor_GetTargetSentient(self);
-    if (!TargetSentient)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\actor_aim.cpp", 321, 0, "%s", "enemy");
+
+    iassert(self->accuracy >= 0.0f);
+    iassert(accuracyMod >= 0.0f);
+
+    enemy = Actor_GetTargetSentient(self);
+
+    iassert(enemy);
+
     weapDef = wp->weapDef;
-    if (TargetSentient->ent->client)
+    if (enemy->ent->client)
     {
-        WeaponAccuracy = Actor_GetWeaponAccuracy(self, TargetSentient, weapDef, WEAP_ACCURACY_AI_VS_PLAYER);
-        PlayerStanceAccuracy = Actor_GetPlayerStanceAccuracy(self, TargetSentient);
-        PlayerMovementAccuracy = Actor_GetPlayerMovementAccuracy(self, TargetSentient);
+        WeaponAccuracy = Actor_GetWeaponAccuracy(self, enemy, weapDef, WEAP_ACCURACY_AI_VS_PLAYER);
+        PlayerStanceAccuracy = Actor_GetPlayerStanceAccuracy(self, enemy);
+        PlayerMovementAccuracy = Actor_GetPlayerMovementAccuracy(self, enemy);
         playerSightAccuracy = self->playerSightAccuracy;
         v14 = PlayerMovementAccuracy;
     }
     else
     {
-        WeaponAccuracy = Actor_GetWeaponAccuracy(self, TargetSentient, weapDef, WEAP_ACCURACY_AI_VS_AI);
+        WeaponAccuracy = Actor_GetWeaponAccuracy(self, enemy, weapDef, WEAP_ACCURACY_AI_VS_AI);
         PlayerStanceAccuracy = 1.0;
         v14 = 1.0;
         playerSightAccuracy = 1.0;
     }
-    v15 = (float)((float)((float)((float)((float)((float)(self->accuracy * TargetSentient->attackerAccuracy)
+    v15 = (float)((float)((float)((float)((float)((float)(self->accuracy * enemy->attackerAccuracy)
         * (float)accuracyMod)
         * (float)WeaponAccuracy)
         * (float)PlayerStanceAccuracy)
@@ -470,7 +452,7 @@ float __cdecl Actor_GetFinalAccuracy(actor_s *self, weaponParms *wp, double accu
     if (ai_debugAccuracy->current.enabled && ai_debugEntIndex->current.integer == self->ent->s.number)
     {
         Actor_DebugAccuracyMsg(0, "Self    ", self->accuracy, v11, (float *)colorWhite);
-        Actor_DebugAccuracyMsg(1u, "Target  ", TargetSentient->attackerAccuracy, v16, (float *)colorWhite);
+        Actor_DebugAccuracyMsg(1u, "Target  ", enemy->attackerAccuracy, v16, (float *)colorWhite);
         Actor_DebugAccuracyMsg(2u, "Script  ", accuracyMod, v17, (float *)colorWhite);
         Actor_DebugAccuracyMsg(3u, "Weapon  ", WeaponAccuracy, v18, (float *)colorWhite);
         Actor_DebugAccuracyMsg(4u, "Stance  ", PlayerStanceAccuracy, v19, (float *)colorWhite);
@@ -748,32 +730,13 @@ void __cdecl Actor_HitTarget(const weaponParms *wp, const float *target, float *
 
 void __cdecl Actor_HitEnemy(actor_s *self, weaponParms *wp, double accuracy)
 {
-    sentient_s *sentient; // r9
-    unsigned int v7; // r11
-    gentity_s *v8; // r3
-
-    sentient = self->sentient;
-    v7 = self->hitCount + 1;
     self->missCount = 0;
-    self->hitCount = v7;
-    if (!sentient)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\actor_aim.cpp", 501, 0, "%s", "self->sentient");
-    if (!EntHandle::isDefined(&self->sentient->targetEnt))
-        MyAssertHandler(
-            "c:\\trees\\cod3\\cod3src\\src\\game\\actor_aim.cpp",
-            502,
-            0,
-            "%s",
-            "self->sentient->targetEnt.isDefined()");
-    if (!EntHandle::ent(&self->sentient->targetEnt)->sentient)
-        MyAssertHandler(
-            "c:\\trees\\cod3\\cod3src\\src\\game\\actor_aim.cpp",
-            503,
-            0,
-            "%s",
-            "self->sentient->targetEnt.ent()->sentient");
-    v8 = EntHandle::ent(&self->sentient->targetEnt);
-    Actor_HitSentient(wp, v8->sentient, accuracy);
+    self->hitCount = self->hitCount + 1;
+    iassert(self->sentient);
+    iassert(self->sentient->targetEnt.isDefined());
+    iassert(self->sentient->targetEnt.ent()->sentient);
+
+    Actor_HitSentient(wp, self->sentient->targetEnt.ent()->sentient, accuracy);
 }
 
 float outerRadius;
@@ -1000,29 +963,13 @@ void __cdecl Actor_MissTarget(const weaponParms *wp, const float *target, float 
 
 void __cdecl Actor_MissEnemy(actor_s *self, weaponParms *wp, double accuracy)
 {
-    sentient_s *sentient; // r10
-    gentity_s *v7; // r3
-
-    sentient = self->sentient;
     ++self->missCount;
-    if (!sentient)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\actor_aim.cpp", 608, 0, "%s", "self->sentient");
-    if (!EntHandle::isDefined(&self->sentient->targetEnt))
-        MyAssertHandler(
-            "c:\\trees\\cod3\\cod3src\\src\\game\\actor_aim.cpp",
-            609,
-            0,
-            "%s",
-            "self->sentient->targetEnt.isDefined()");
-    if (!EntHandle::ent(&self->sentient->targetEnt)->sentient)
-        MyAssertHandler(
-            "c:\\trees\\cod3\\cod3src\\src\\game\\actor_aim.cpp",
-            610,
-            0,
-            "%s",
-            "self->sentient->targetEnt.ent()->sentient");
-    v7 = EntHandle::ent(&self->sentient->targetEnt);
-    Actor_MissSentient(wp, v7->sentient, accuracy);
+
+    iassert(self->sentient);
+    iassert(self->sentient->targetEnt.isDefined());
+    iassert(self->sentient->targetEnt.ent()->sentient);
+
+    Actor_MissSentient(wp, self->sentient->targetEnt.ent()->sentient, accuracy);
 }
 
 void __cdecl Actor_ShootNoEnemy(actor_s *self, weaponParms *wp)
@@ -1666,14 +1613,14 @@ void __cdecl Actor_CommonAccuracyGraphEventCallback(
     if (event == EVENT_ACCEPT)
     {
         memset(v15, 0, 0x2000u);
-        sprintf_0((char *)v15, "Weapon: %s\nKnot Count: %d\n", *data, *graph->knotCount);
+        sprintf((char *)v15, "Weapon: %s\nKnot Count: %d\n", *data, *graph->knotCount);
         v7 = 0;
         if (*graph->knotCount > 0)
         {
             v8 = 0;
             do
             {
-                sprintf_0(
+                sprintf(
                     v14,
                     (const char *)(const char *)HIDWORD(COERCE_UNSIGNED_INT64(graph->knots[v8][0])),
                     (unsigned int)COERCE_UNSIGNED_INT64(graph->knots[v8][0]),
@@ -1724,7 +1671,7 @@ void __cdecl Actor_AccuracyGraphTextCallback(
     const int textLength,
     char *a6)
 {
-    sprintf_0(
+    sprintf(
         a6,
         (const char *)(const char *)HIDWORD(COERCE_UNSIGNED_INT64((float)((float)inputX * (float)4000.0))),
         (unsigned int)COERCE_UNSIGNED_INT64((float)((float)inputX * (float)4000.0)),

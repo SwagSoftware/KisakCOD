@@ -208,6 +208,25 @@ struct archivedEntity_s // sizeof=0x118
 #endif
 
 #ifdef KISAK_SP
+
+struct entityShared_t
+{
+    unsigned __int8 linked;
+    unsigned __int8 bmodel;
+    unsigned __int8 svFlags;
+    unsigned __int8 eventType;
+    unsigned __int8 inuse;
+    float mins[3];
+    float maxs[3];
+    int contents;
+    float absmin[3];
+    float absmax[3];
+    float currentOrigin[3];
+    float currentAngles[3];
+    EntHandle ownerNum;
+    int eventTime;
+};
+
 union entityState_s_tag
 {
     unsigned __int8 scale;

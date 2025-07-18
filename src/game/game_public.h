@@ -732,7 +732,15 @@ void G_DebugArc(
     const float *color,
     int depthTest,
     int duration);
-
+void G_DebugDrawBrushModel(gentity_s *entity, const float *color, int depthTest, int duration);
+void G_DebugPlane(
+    const float *const normal,
+    float dist,
+    const float *const origin,
+    const float *const color,
+    float size,
+    int depthTest,
+    int duration);
 
 
 // g_svcmds

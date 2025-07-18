@@ -3,6 +3,11 @@
 #endif
 
 #include "actor_cover_arrival.h"
+#include "g_local.h"
+#include "actor_state.h"
+#include "actor_orientation.h"
+#include <script/scr_const.h>
+#include <script/scr_vm.h>
 
 bool __cdecl Actor_CheckCoverLeave(actor_s *self, const float *exitPos)
 {
@@ -192,13 +197,7 @@ actor_think_result_t __cdecl Actor_CoverArrival_Think(actor_s *self)
 {
     scr_animscript_t *StopAnim; // r3
 
-    if (!self->bUseGoalWeight)
-        MyAssertHandler(
-            "c:\\trees\\cod3\\cod3src\\src\\game\\actor_cover_arrival.cpp",
-            212,
-            0,
-            "%s",
-            "self->bUseGoalWeight");
+    iassert(self->bUseGoalWeight);
     Actor_SetAnimScript(self, &g_animScriptTable[self->species]->cover_arrival, 0, self->eAnimMode);
     self->pushable = 0;
     if (Actor_IsAnimScriptAlive(self))
@@ -207,7 +206,7 @@ actor_think_result_t __cdecl Actor_CoverArrival_Think(actor_s *self)
         Actor_PreThink(self);
         G_ReduceOriginError(self->ent->r.currentOrigin, self->arrivalInfo.animscriptOverrideOriginError, 0.25);
         Actor_UpdateOriginAndAngles(self);
-        return 0;
+        return ACTOR_THINK_DONE;
     }
     else
     {
@@ -215,7 +214,7 @@ actor_think_result_t __cdecl Actor_CoverArrival_Think(actor_s *self)
         StopAnim = Actor_GetStopAnim(self);
         Actor_SetAnimScript(self, StopAnim, 0, AI_ANIM_MOVE_CODE);
         Actor_ClearPath(self);
-        return 1;
+        return ACTOR_THINK_REPEAT;
     }
 }
 

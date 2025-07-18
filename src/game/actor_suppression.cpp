@@ -3,6 +3,7 @@
 #endif
 
 #include "actor_suppression.h"
+#include "game_public.h"
 
 void __cdecl DebugDrawSuppression(actor_s *self, const float *a2, int a3, int a4, int a5)
 {
@@ -10,27 +11,43 @@ void __cdecl DebugDrawSuppression(actor_s *self, const float *a2, int a3, int a4
     int v7; // r29
     const float *v8; // r6
 
-    p_movementOnly = &self->Suppressant[0].movementOnly;
-    v7 = 4;
-    do
+    // LWSS: this decomp sucks
+    //p_movementOnly = &self->Suppressant[0].movementOnly;
+    //v7 = 4;
+    //do
+    //{
+    //    if (*(p_movementOnly - 5))
+    //    {
+    //        v8 = colorCyan;
+    //        if (!*p_movementOnly)
+    //            v8 = colorRed;
+    //        G_DebugPlane(
+    //            (const float *)p_movementOnly - 3,
+    //            *((float *)p_movementOnly - 1),
+    //            a2,
+    //            self->ent->r.currentOrigin,
+    //            100.0,
+    //            (int)v8,
+    //            a5);
+    //    }
+    //    --v7;
+    //    p_movementOnly += 6;
+    //} while (v7);
+
+    for (int i = 0; i < 4; i++)
     {
-        if (*(p_movementOnly - 5))
+        ai_suppression_t *pSupp = &self->Suppressant[i];
+        if (pSupp->iTime)
         {
-            v8 = colorCyan;
-            if (!*p_movementOnly)
-                v8 = colorRed;
-            G_DebugPlane(
-                (const float *)p_movementOnly - 3,
-                *((float *)p_movementOnly - 1),
-                a2,
-                self->ent->r.currentOrigin,
-                100.0,
-                (int)v8,
-                a5);
+            const float *color = colorCyan;
+            if (!pSupp->movementOnly)
+            {
+                color = colorRed;
+            }
+
+            G_DebugPlane(pSupp->clipPlane, pSupp->clipPlane[2], self->ent->r.currentOrigin, color, 100.0,  )
         }
-        --v7;
-        p_movementOnly += 6;
-    } while (v7);
+    }
 }
 
 int __cdecl Actor_PickNewSuppressantEntry(actor_s *self, sentient_s *pSuppressor)

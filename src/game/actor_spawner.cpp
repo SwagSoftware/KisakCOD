@@ -3,6 +3,30 @@
 #endif
 
 #include "actor_spawner.h"
+#include "g_main.h"
+#include <universal/com_math.h>
+#include "actor.h"
+#include "g_local.h"
+#include <script/scr_const.h>
+#include "actor_events.h"
+#include "actor_senses.h"
+#include "actor_threat.h"
+
+const float g_vSpawnCheckPoints[11][3] =
+{
+  { 0.5f, 0.5f, 0.8f },
+  { 0.5f, 0.5f, 0.5f },
+  { 0.5f, 0.5f, 0.2f },
+  { 0.0f, 0.0f, 1.0f },
+  { 0.0f, 1.0f, 1.0f },
+  { 1.0f, 1.0f, 1.0f },
+  { 1.0f, 0.0f, 1.0f },
+  { 1.0f, 0.0f, 0.0f },
+  { 1.0f, 1.0f, 0.0f },
+  { 0.0f, 1.0f, 0.0f },
+  { 0.0f, 0.0f, 0.0f }
+};
+
 
 int __cdecl PointCouldSeeSpawn(const float *vEyePos, const float *vSpawnPos, int iIgnoreEnt1, int iIgnoreEnt2)
 {

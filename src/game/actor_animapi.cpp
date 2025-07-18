@@ -2,6 +2,7 @@
 #error This file is for SinglePlayer only 
 #endif
 
+#include "actor.h"
 #include "actor_animapi.h"
 #include <script/scr_vm.h>
 #include <script/scr_const.h>
@@ -149,7 +150,7 @@ void __cdecl Actor_AnimStop(actor_s *self, scr_animscript_t *pAnimScriptFunc)
     if (!pAnimScriptFunc)
         MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\actor_animapi.cpp", 150, 0, "%s", "pAnimScriptFunc");
     Actor_CheckCollisions(self);
-    if (EntHandle::isDefined(&self->pCloseEnt))
+    if (self->pCloseEnt.isDefined())
     {
         Actor_AnimMoveAway(self, pAnimScriptFunc);
     }
@@ -220,7 +221,7 @@ void __cdecl Actor_AnimTryWalk(actor_s *self)
     scr_animscript_t *StopAnim; // r4
     unsigned __int8 v4; // r5
 
-    if (EntHandle::isDefined(&self->pCloseEnt))
+    if (self->pCloseEnt.isDefined())
     {
         Actor_AnimMoveAway(self, &g_animScriptTable[self->species]->stop);
     }
@@ -275,7 +276,7 @@ void __cdecl Actor_AnimTryRun(actor_s *self)
     scr_animscript_t *StopAnim; // r4
     unsigned __int8 v4; // r5
 
-    if (EntHandle::isDefined(&self->pCloseEnt))
+    if (self->pCloseEnt.isDefined())
     {
         Actor_AnimMoveAway(self, &g_animScriptTable[self->species]->stop);
     }
@@ -337,7 +338,7 @@ void __cdecl Actor_AnimCombat(actor_s *self)
         if (self->fixedNode && (AnimScriptList *)self->pAnimScriptFunc != g_animScriptTable[self->species])
             self->exposedStartTime = level.time;
     }
-    isDefined = EntHandle::isDefined(&self->pCloseEnt);
+    isDefined = self->pCloseEnt.isDefined();
     v7 = AI_ANIM_USE_BOTH_DELTAS;
     v5 = g_animScriptTable[self->species];
     if (isDefined)

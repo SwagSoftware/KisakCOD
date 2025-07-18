@@ -3,8 +3,34 @@
 #endif
 
 #include "actor_threat.h"
+#include <qcommon/mem_track.h>
+#include "g_main.h"
+#include "actor_state.h"
+#include "game_public.h"
+#include "g_local.h"
+#include "actor_pain.h"
+#include "actor_aim.h"
+#include "actor_turret.h"
 
-// struct threat_bias_t g_threatBias 82c39ca8     actor_threat.obj
+const float AI_THREAT_DISTANCE_RATE = 0.0008f;
+
+threat_bias_t g_threatBias;
+char g_threatDebugStrings[10][64]{ 0 };
+const char *g_threatDebugLabels[10] =
+{
+  "Total:",
+  "Flashed",
+  "Suppressed",
+  "Bias",
+  "BiasGroup",
+  "Attacker",
+  "CurBonus",
+  "Awareness",
+  "Dist",
+  "Scariness"
+};
+
+int g_skipDebugString;
 
 void __cdecl TRACK_actor_threat()
 {
@@ -237,7 +263,7 @@ void __cdecl DebugSetThreatString(ThreatDebugStringCategory category, int threat
     if (!g_skipDebugString)
     {
         if (threat)
-            sprintf_0(g_threatDebugStrings[category], "%s %d", g_threatDebugLabels[category], threat);
+            sprintf(g_threatDebugStrings[category], "%s %d", g_threatDebugLabels[category], threat);
         else
             g_threatDebugStrings[category][0] = 0;
     }
@@ -248,7 +274,7 @@ void __cdecl DebugSetThreatStringFromString(ThreatDebugStringCategory category, 
     if (!g_skipDebugString)
     {
         if (string)
-            sprintf_0(g_threatDebugStrings[category], "%s %s", g_threatDebugLabels[category], string);
+            sprintf(g_threatDebugStrings[category], "%s %s", g_threatDebugLabels[category], string);
         else
             g_threatDebugStrings[category][0] = 0;
     }
@@ -397,7 +423,7 @@ int __cdecl Actor_ThreatFromScariness(double fScariness)
     if (!g_skipDebugString)
     {
         if (v2)
-            sprintf_0(g_threatDebugStrings[9], "%s %d", g_threatDebugLabels[9], v2);
+            sprintf(g_threatDebugStrings[9], "%s %d", g_threatDebugLabels[9], v2);
         else
             g_threatDebugStrings[9][0] = 0;
     }
@@ -425,7 +451,7 @@ int __cdecl Actor_ThreatFromDistance(double fDistance)
     if (!g_skipDebugString)
     {
         if (v6)
-            sprintf_0(g_threatDebugStrings[8], "%s %s", g_threatDebugLabels[8], v6);
+            sprintf(g_threatDebugStrings[8], "%s %s", g_threatDebugLabels[8], v6);
         else
             g_threatDebugStrings[8][0] = 0;
     }
@@ -491,7 +517,7 @@ int __cdecl Actor_ThreatFromVisibilityAndAwareness(int isVisible, int isFullyAwa
         {
             if (v4)
             {
-                sprintf_0(g_threatDebugStrings[7], "%s %s", g_threatDebugLabels[7], v4);
+                sprintf(g_threatDebugStrings[7], "%s %s", g_threatDebugLabels[7], v4);
                 return v3;
             }
         LABEL_13:
@@ -512,7 +538,7 @@ int __cdecl Actor_ThreatFromVisibilityAndAwareness(int isVisible, int isFullyAwa
         {
             if (v3)
             {
-                sprintf_0(g_threatDebugStrings[7], "%s %d", g_threatDebugLabels[7], v3);
+                sprintf(g_threatDebugStrings[7], "%s %d", g_threatDebugLabels[7], v3);
                 return v3;
             }
             goto LABEL_13;
@@ -536,16 +562,16 @@ int __cdecl Actor_ThreatFromAttackerCount(actor_s *self, sentient_s *enemy, int 
     v7 = -150 * attackerCount;
     if (-150 * attackerCount < -1000)
         v7 = -1000;
-    if (EntHandle::isDefined(&enemy->syncedMeleeEnt))
+    if (enemy->syncedMeleeEnt.isDefined())
     {
-        if (self->ent != EntHandle::ent(&enemy->syncedMeleeEnt))
+        if (self->ent != enemy->syncedMeleeEnt.ent())
             v7 -= 10000;
     }
     if (!g_skipDebugString)
     {
         if (v7)
         {
-            sprintf_0(g_threatDebugStrings[5], "%s %d", g_threatDebugLabels[5], v7);
+            sprintf(g_threatDebugStrings[5], "%s %d", g_threatDebugLabels[5], v7);
             return v7;
         }
         g_threatDebugStrings[5][0] = 0;
@@ -580,7 +606,7 @@ int __cdecl Actor_ThreatBonusForCurrentEnemy(
     if (!g_skipDebugString)
     {
         if (v5)
-            sprintf_0(g_threatDebugStrings[6], "%s %d", g_threatDebugLabels[6], v5);
+            sprintf(g_threatDebugStrings[6], "%s %d", g_threatDebugLabels[6], v5);
         else
             g_threatDebugStrings[6][0] = 0;
     }
@@ -619,7 +645,7 @@ int __cdecl Actor_ThreatCoveringFire(actor_s *self, sentient_s *enemy)
             return 0;
     }
     if (!g_skipDebugString)
-        sprintf_0(g_threatDebugStrings[2], "%s %d", g_threatDebugLabels[2], -3000);
+        sprintf(g_threatDebugStrings[2], "%s %d", g_threatDebugLabels[2], -3000);
     return -3000;
 }
 
@@ -644,7 +670,7 @@ int __cdecl Actor_ThreatFlashed(sentient_s *enemy)
     if (!flashBanged)
         return 0;
     if (!g_skipDebugString)
-        sprintf_0(g_threatDebugStrings[1], "%s %d", g_threatDebugLabels[1], 200);
+        sprintf(g_threatDebugStrings[1], "%s %d", g_threatDebugLabels[1], 200);
     return 200;
 }
 
@@ -739,7 +765,7 @@ LABEL_19:
     {
         if (ThreatBias)
         {
-            sprintf_0(g_threatDebugStrings[4], "%s %d", g_threatDebugLabels[4], ThreatBias);
+            sprintf(g_threatDebugStrings[4], "%s %d", g_threatDebugLabels[4], ThreatBias);
             v24 = g_skipDebugString;
         }
         else
@@ -751,7 +777,7 @@ LABEL_19:
     if (!v24)
     {
         if (iThreatBias)
-            sprintf_0(g_threatDebugStrings[3], "%s %d", g_threatDebugLabels[3], iThreatBias);
+            sprintf(g_threatDebugStrings[3], "%s %d", g_threatDebugLabels[3], iThreatBias);
         else
             g_threatDebugStrings[3][0] = 0;
     }
@@ -770,7 +796,7 @@ LABEL_19:
     if (!g_skipDebugString)
     {
         if (v35)
-            sprintf_0(g_threatDebugStrings[0], "%s %s", g_threatDebugLabels[0], v35);
+            sprintf(g_threatDebugStrings[0], "%s %s", g_threatDebugLabels[0], v35);
         else
             g_threatDebugStrings[0][0] = 0;
     }
@@ -996,12 +1022,12 @@ void __cdecl Actor_UpdateThreat(actor_s *self)
             Sentient_SetEnemy(self->sentient, 0, 1);
         return;
     }
-    if (EntHandle::isDefined(&sentient->scriptTargetEnt) && self->sentient->entityTargetThreat == 1.0)
+    if (sentient->scriptTargetEnt.isDefined()  && self->sentient->entityTargetThreat == 1.0)
     {
         v3 = va((const char *)0x3FF00000, 0);
-        v4 = EntHandle::ent(&self->sentient->scriptTargetEnt);
+        v4 = self->sentient->scriptTargetEnt.ent();
         DebugThreatStringSimple(self, v4, v3, colorGreen);
-        v5 = EntHandle::ent(&self->sentient->scriptTargetEnt);
+        v5 = self->sentient->scriptTargetEnt.ent();
         Sentient_SetEnemy(self->sentient, v5, 1);
         return;
     }
@@ -1046,11 +1072,11 @@ void __cdecl Actor_UpdateThreat(actor_s *self)
                         {
                             if (v7 < updated
                                 || !v11 && v22
-                                || SentientHandle::isDefined(&self->pFavoriteEnemy)
-                                && i == SentientHandle::sentient(&self->pFavoriteEnemy))
+                                || self->pFavoriteEnemy.isDefined()
+                                && i == self->pFavoriteEnemy.sentient())
                             {
-                                if (SentientHandle::isDefined(&self->pFavoriteEnemy)
-                                    && i == SentientHandle::sentient(&self->pFavoriteEnemy))
+                                if (self->pFavoriteEnemy.isDefined()
+                                    && i == self->pFavoriteEnemy.sentient())
                                 {
                                     ent = i->ent;
                                     v11 = v21;
@@ -1083,20 +1109,20 @@ void __cdecl Actor_UpdateThreat(actor_s *self)
         LABEL_51:
             DebugThreatStringSimple(self, i->ent, v14, colorRed);
         }
-        if (EntHandle::isDefined(&self->sentient->scriptTargetEnt))
+        if (self->sentient->scriptTargetEnt.isDefined())
         {
             LODWORD(v25) = v7;
             v26 = self->sentient;
             entityTargetThreat = v26->entityTargetThreat;
             if (entityTargetThreat > (float)((float)v25 * (float)0.00014285714))
             {
-                ent = EntHandle::ent(&v26->scriptTargetEnt);
+                ent = v26->scriptTargetEnt.ent();
                 v28 = self->sentient->entityTargetThreat;
                 v29 = va((const char *)HIDWORD(v28), LODWORD(v28));
                 goto LABEL_59;
             }
             v30 = va("enemy (%0.3f)", entityTargetThreat);
-            v31 = EntHandle::ent(&self->sentient->scriptTargetEnt);
+            v31 = self->sentient->scriptTargetEnt.ent();
             DebugThreatStringSimple(self, v31, v30, colorYellow);
         }
         if (!ent)

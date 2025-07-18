@@ -124,7 +124,6 @@ void EntHandle::setEnt(gentity_s *ent)
 {
     gentity_s *oldEnt; // [esp+4h] [ebp-8h]
 
-    //if (EntHandle::isDefined(_this))
     if (this->isDefined())
     {
         oldEnt = this->ent();

@@ -40,22 +40,9 @@ void __cdecl TRACK_actor_badplace();
 void __cdecl Path_UpdateBadPlaceCount(badplace_t *place, int delta);
 void __cdecl Path_FreeBadPlace(int index);
 int __cdecl Path_FindBadPlace(unsigned int name);
-badplace_t *__cdecl Path_AllocBadPlace(unsigned int name, int duration, int a3, int a4, int a5, int a6, __int64 a7);
-void __cdecl Path_MakeBadPlace(
-    unsigned int name,
-    int duration,
-    int teamflags,
-    int type,
-    badplace_parms_t *parms,
-    int a6,
-    __int64 a7);
-void __cdecl Path_MakeArcBadPlace(
-    unsigned int name,
-    int duration,
-    int teamflags,
-    badplace_arc_t *arc,
-    int a5,
-    int a6);
+badplace_t *__cdecl Path_AllocBadPlace(unsigned int name, int duration);
+void Path_MakeBadPlace(unsigned int name, int duration, int teamflags, int type, badplace_parms_t *parms);
+void __cdecl Path_MakeArcBadPlace(unsigned int name, int duration, int teamflags, badplace_arc_t *arc);
 void __cdecl Path_MakeBrushBadPlace(unsigned int name, int duration, int teamflags, gentity_s *volume);
 void __cdecl Path_RemoveBadPlaceEntity(gentity_s *entity);
 void __cdecl Path_DrawBadPlace(badplace_t *place);

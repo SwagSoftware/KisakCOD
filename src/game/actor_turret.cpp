@@ -2,7 +2,20 @@
 #error This file is for SinglePlayer only 
 #endif
 
+#include "actor.h"
 #include "actor_turret.h"
+#include "actor_events.h"
+#include "turret.h"
+#include "g_local.h"
+#include <script/scr_vm.h>
+#include <script/scr_const.h>
+#include "actor_threat.h"
+#include "actor_state.h"
+#include <cgame/cg_ents.h>
+#include "g_main.h"
+#include "actor_orientation.h"
+#include "actor_senses.h"
+#include "actor_grenade.h"
 
 void __cdecl Actor_Turret_Touch(actor_s *self, gentity_s *pOther)
 {
@@ -22,9 +35,9 @@ int __cdecl Actor_IsUsingTurret(actor_s *self)
     pTurret = self->pTurret;
     if (!pTurret)
         return 0;
-    if (!EntHandle::isDefined(&pTurret->r.ownerNum))
+    if (!pTurret->r.ownerNum.isDefined())
         return 0;
-    v3 = EntHandle::ent(&self->pTurret->r.ownerNum);
+    v3 = self->pTurret->r.ownerNum.ent();
     v4 = 1;
     if (v3 != self->ent)
         return 0;
@@ -81,15 +94,9 @@ bool __cdecl Actor_Turret_Start(actor_s *self, ai_state_t ePrevState)
             "%s",
             "!Actor_IsUsingTurret( self )");
     pTurret->active = 1;
-    if (EntHandle::isDefined(&pTurret->r.ownerNum))
-        MyAssertHandler(
-            "c:\\trees\\cod3\\cod3src\\src\\game\\actor_turret.cpp",
-            40,
-            0,
-            "%s",
-            "!pTurret->r.ownerNum.isDefined()");
-    EntHandle::setEnt(&pTurret->r.ownerNum, self->ent);
-    if (Scr_IsSystemActive(1u))
+    iassert(!pTurret->r.ownerNum.isDefined());
+    pTurret->r.ownerNum.setEnt(self->ent);
+    if (Scr_IsSystemActive())
         Scr_Notify(pTurret, scr_const.turretownerchange, 0);
     if (!(unsigned __int8)Actor_IsUsingTurret(self))
         MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\actor_turret.cpp", 46, 0, "%s", "Actor_IsUsingTurret( self )");
@@ -121,7 +128,7 @@ bool __cdecl Actor_Turret_Start(actor_s *self, ai_state_t ePrevState)
     if (ePrevState != AIS_PAIN)
     {
         pTurretInfo->flags &= ~0x10u;
-        SentientHandle::setSentient(&pTurretInfo->detachSentient, 0);
+        pTurretInfo->detachSentient.setSentient(NULL);
     }
     Actor_ClearKeepClaimedNode(self);
     Sentient_ClaimNode(self->sentient, 0);
@@ -132,67 +139,39 @@ bool __cdecl Actor_Turret_Start(actor_s *self, ai_state_t ePrevState)
 void __cdecl Actor_DetachTurret(actor_s *self)
 {
     gentity_s *pTurret; // r11
-    gentity_s *v3; // r3
-    char v4; // r11
-    gentity_s *v5; // r28
-    gentity_s *v6; // r11
-    gentity_s *v7; // r3
-    char v8; // r11
+    gentity_s *pTurret; // r28
     gentity_s *ent; // r3
     TurretInfo *pTurretInfo; // r31
 
-    if (!self)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\actor_turret.cpp", 89, 0, "%s", "self");
+    iassert(self);
+
+    iassert(Actor_IsUsingTurret(self));
+
     pTurret = self->pTurret;
-    if (!pTurret
-        || !EntHandle::isDefined(&pTurret->r.ownerNum)
-        || (v3 = EntHandle::ent(&self->pTurret->r.ownerNum), v4 = 1, v3 != self->ent))
-    {
-        v4 = 0;
-    }
-    if (!v4)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\actor_turret.cpp", 91, 0, "%s", "Actor_IsUsingTurret( self )");
-    v5 = self->pTurret;
-    if (!v5)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\actor_turret.cpp", 94, 0, "%s", "pTurret");
-    if (!v5->r.inuse)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\actor_turret.cpp", 95, 0, "%s", "pTurret->r.inuse");
-    if (!v5->active)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\actor_turret.cpp", 97, 0, "%s", "pTurret->active");
-    G_DeactivateTurret(v5);
-    if (!EntHandle::isDefined(&v5->r.ownerNum) || EntHandle::ent(&v5->r.ownerNum) != self->ent)
-        MyAssertHandler(
-            "c:\\trees\\cod3\\cod3src\\src\\game\\actor_turret.cpp",
-            100,
-            0,
-            "%s",
-            "pTurret->r.ownerNum.isDefined() && (pTurret->r.ownerNum.ent() == self->ent)");
-    EntHandle::setEnt(&v5->r.ownerNum, 0);
-    if (Scr_IsSystemActive(1u))
-        Scr_Notify(v5, scr_const.turretownerchange, 0);
-    v6 = self->pTurret;
-    if (!v6
-        || !EntHandle::isDefined(&v6->r.ownerNum)
-        || (v7 = EntHandle::ent(&self->pTurret->r.ownerNum), v8 = 1, v7 != self->ent))
-    {
-        v8 = 0;
-    }
-    if (v8)
-        MyAssertHandler(
-            "c:\\trees\\cod3\\cod3src\\src\\game\\actor_turret.cpp",
-            106,
-            0,
-            "%s",
-            "!Actor_IsUsingTurret( self )");
-    if (G_EntIsLinkedTo(self->ent, v5))
+
+    iassert(pTurret);
+    iassert(pTurret->r.inuse);
+    iassert(pTurret->active);
+
+    G_DeactivateTurret(pTurret);
+
+    iassert(pTurret->r.ownerNum.isDefined() && (pTurret->r.ownerNum.ent() == self->ent));
+
+    pTurret->r.ownerNum.setEnt(NULL);
+    if (Scr_IsSystemActive())
+        Scr_Notify(pTurret, scr_const.turretownerchange, 0);
+
+    iassert(!Actor_IsUsingTurret(self));
+
+    if (G_EntIsLinkedTo(self->ent, pTurret))
     {
         ent = self->ent;
-        if (v5->tagInfo)
-            G_EntLinkTo(ent, v5->tagInfo->parent, v5->tagInfo->name);
+        if (pTurret->tagInfo)
+            G_EntLinkTo(ent, pTurret->tagInfo->parent, pTurret->tagInfo->name);
         else
             G_EntUnlink(ent);
     }
-    pTurretInfo = v5->pTurretInfo;
+    pTurretInfo = pTurret->pTurretInfo;
     if (!pTurretInfo)
         MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\actor_turret.cpp", 122, 0, "%s", "pTurretInfo");
     pTurretInfo->flags &= ~0x200u;
@@ -207,8 +186,8 @@ void __cdecl Actor_Turret_Finish(actor_s *self, ai_state_t eNextState)
 
     pTurret = self->pTurret;
     if (!pTurret
-        || !EntHandle::isDefined(&pTurret->r.ownerNum)
-        || (v5 = EntHandle::ent(&self->pTurret->r.ownerNum), v6 = 1, v5 != self->ent))
+        || !pTurret->r.ownerNum.isDefined()
+        || (v5 = self->pTurret->r.ownerNum.ent(), v6 = 1, v5 != self->ent))
     {
         v6 = 0;
     }
@@ -225,39 +204,16 @@ void __cdecl Actor_Turret_Finish(actor_s *self, ai_state_t eNextState)
 
 void __cdecl Actor_Turret_Suspend(actor_s *self, ai_state_t eNextState)
 {
-    gentity_s *pTurret; // r11
-    gentity_s *v4; // r3
-    char v5; // r11
-
-    pTurret = self->pTurret;
-    if (!pTurret
-        || !EntHandle::isDefined(&pTurret->r.ownerNum)
-        || (v4 = EntHandle::ent(&self->pTurret->r.ownerNum), v5 = 1, v4 != self->ent))
-    {
-        v5 = 0;
-    }
-    if (v5)
+    if (Actor_IsUsingTurret(self))
         Actor_DetachTurret(self);
 }
 
 void __cdecl Actor_StopUseTurret(actor_s *self)
 {
-    gentity_s *pTurret; // r11
-    gentity_s *v3; // r3
-    char v4; // r11
+    iassert(self);
+    iassert(self->sentient);
 
-    if (!self)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\actor_turret.cpp", 757, 0, "%s", "self");
-    if (!self->sentient)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\actor_turret.cpp", 758, 0, "%s", "self->sentient");
-    pTurret = self->pTurret;
-    if (!pTurret
-        || !EntHandle::isDefined(&pTurret->r.ownerNum)
-        || (v3 = EntHandle::ent(&self->pTurret->r.ownerNum), v4 = 1, v3 != self->ent))
-    {
-        v4 = 0;
-    }
-    if (v4)
+    if (Actor_IsUsingTurret(self))
         Actor_DetachTurret(self);
     self->pTurret = 0;
 }
@@ -385,7 +341,7 @@ actor_think_result_t __cdecl Actor_Turret_PostThink(actor_s *self)
         Com_PrintWarning(18, "WARNING: aborting turret behavior since 'tag_weapon' does not exist\n");
         Actor_StopUseTurret(self);
         Actor_SetState(self, AIS_EXPOSED);
-        return 1;
+        return ACTOR_THINK_REPEAT;
     }
     if (self->eAnimMode == AI_ANIM_UNKNOWN)
         MyAssertHandler(
@@ -399,7 +355,7 @@ actor_think_result_t __cdecl Actor_Turret_PostThink(actor_s *self)
         Com_PrintWarning(18, "WARNING: aborting turret behavior since no turret animation specified\n");
         Actor_StopUseTurret(self);
         Actor_SetState(self, AIS_EXPOSED);
-        return 1;
+        return ACTOR_THINK_REPEAT;
     }
     turretAnim = self->turretAnim;
     if (!pTurret->s.weapon)
@@ -429,7 +385,7 @@ actor_think_result_t __cdecl Actor_Turret_PostThink(actor_s *self)
     if (!NumChildren)
     {
         AnimDebugName = XAnimGetAnimDebugName(Anims, turretAnim);
-        Com_Error(ERR_DROP, byte_8202B208, AnimDebugName);
+        Com_Error(ERR_DROP, "anim '%s' has no children", AnimDebugName);
     }
     ServerDObj = Com_GetServerDObj(ent->s.number);
     v18 = 0;
@@ -440,7 +396,7 @@ actor_think_result_t __cdecl Actor_Turret_PostThink(actor_s *self)
         if (!v20)
         {
             v22 = XAnimGetAnimDebugName(Anims, ChildAt);
-            Com_Error(ERR_DROP, byte_8202B208, v22);
+            Com_Error(ERR_DROP, "anim '%s' has no children", v22);
         }
         if (WeaponDef->fAnimHorRotateInc == 0.0)
             MyAssertHandler(
@@ -551,7 +507,7 @@ actor_think_result_t __cdecl Actor_Turret_PostThink(actor_s *self)
         Com_PrintWarning(18, "WARNING: aborting turret behavior since 'tag_aim' does not exist\n");
         Actor_StopUseTurret(self);
         Actor_SetState(self, AIS_EXPOSED);
-        return 1;
+        return ACTOR_THINK_REPEAT;
     }
     v63 = pTurretInfo->flags;
     if ((v63 & 0x20) != 0
@@ -620,13 +576,13 @@ LABEL_60:
     v100[10] = v54[5] + v78;
     v100[11] = v54[6] + v79;
     v55 = RotationToYaw(v93);
-    YawToAxis((float)((float)v55 + (float)v7), v56);
+    YawToAxis((float)((float)v55 + (float)v7), (mat3x3&)v56);
     AnglesToAxis(v34->r.currentAngles, (float (*)[3])v101);
     v101[9] = v34->r.currentOrigin[0];
     v101[10] = v34->r.currentOrigin[1];
     v101[11] = v34->r.currentOrigin[2];
-    MatrixMultiply43((const float (*)[3])v100, (const float (*)[3])v101, (float (*)[3])v102);
-    AxisToAngles((const float (*)[3])v102, &v85);
+    MatrixMultiply43((const mat4x3&)v100, (const mat4x3&)v101, (mat4x3&)v102);
+    AxisToAngles((const mat3x3&)v102, &v85);
     v81 = v102[9];
     v82 = v102[10];
     v83 = v102[11];
@@ -712,11 +668,11 @@ LABEL_60:
             {
                 Com_PrintWarning(
                     18,
-                    (const char *)(const char *)HIDWORD(COERCE_UNSIGNED_INT64(v34->r.currentOrigin[0])),
-                    (unsigned int)COERCE_UNSIGNED_INT64(v34->r.currentOrigin[0]),
-                    (unsigned int)COERCE_UNSIGNED_INT64(v34->r.currentOrigin[1]),
-                    (unsigned int)COERCE_UNSIGNED_INT64(v34->r.currentOrigin[2]),
-                    (unsigned int)COERCE_UNSIGNED_INT64(-v76));
+                    "WARNING: capping rightarc of turret at (%.2f, %.2f, %.2f) to %.2f\n",
+                    v34->r.currentOrigin[0],
+                    v34->r.currentOrigin[1],
+                    v34->r.currentOrigin[2],
+                    -v76);
                 goto success;
             }
             pTurretInfo->arcmin[1] = 0.0;
@@ -729,14 +685,14 @@ LABEL_60:
             {
                 Com_PrintWarning(
                     18,
-                    (const char *)(const char *)HIDWORD(COERCE_UNSIGNED_INT64(v34->r.currentOrigin[0])),
-                    (unsigned int)COERCE_UNSIGNED_INT64(v34->r.currentOrigin[0]),
-                    (unsigned int)COERCE_UNSIGNED_INT64(v34->r.currentOrigin[1]),
-                    (unsigned int)COERCE_UNSIGNED_INT64(v34->r.currentOrigin[2]),
-                    LODWORD(v75));
+                    "WARNING: capping leftarc of turret at (%.2f, %.2f, %.2f) to %.2f\n",
+                    v34->r.currentOrigin[0],
+                    v34->r.currentOrigin[1],
+                    v34->r.currentOrigin[2],
+                    v75);
             success:
                 self->Physics.vVelocity[0] = 0.0;
-                result = ACTOR_THINK;
+                result = ACTOR_THINK_DONE;
                 self->Physics.vVelocity[1] = 0.0;
                 self->Physics.vVelocity[2] = 0.0;
                 self->Physics.vWishDelta[0] = 0.0;
@@ -749,12 +705,12 @@ LABEL_60:
         Com_PrintWarning(
             18,
             "WARNING: AI %d at (%.2f, %.2f, %.2f) with turret angles (%.2f, %.2f) detaching from turret due to obstruction\n",
-            (unsigned int)HIDWORD(COERCE_UNSIGNED_INT64(self->ent->r.currentOrigin[0])),
-            (unsigned int)COERCE_UNSIGNED_INT64(self->ent->r.currentOrigin[0]),
-            (unsigned int)COERCE_UNSIGNED_INT64(self->ent->r.currentOrigin[1]),
-            (unsigned int)COERCE_UNSIGNED_INT64(self->ent->r.currentOrigin[2]),
-            (unsigned int)COERCE_UNSIGNED_INT64(v34->s.lerp.u.turret.gunAngles[0]),
-            (unsigned int)COERCE_UNSIGNED_INT64(v34->s.lerp.u.turret.gunAngles[1]));
+            0, // KISAKTODO: number
+            self->ent->r.currentOrigin[0],
+            self->ent->r.currentOrigin[1],
+            self->ent->r.currentOrigin[2],
+            v34->s.lerp.u.turret.gunAngles[0],
+            v34->s.lerp.u.turret.gunAngles[2]);
     }
     Actor_StopUseTurret(self);
     if (v74->client)
@@ -766,15 +722,14 @@ LABEL_60:
         }
     }
     Actor_SetState(self, AIS_EXPOSED);
-    return 1;
+    return ACTOR_THINK_REPEAT;
 }
 
 actor_think_result_t __cdecl Actor_Turret_Think(actor_s *self)
 {
-    gentity_s *pTurret; // r11
     gentity_s *v3; // r3
-    char v4; // r11
-    gentity_s *v5; // r29
+    char isUsingTurret; // r11
+    gentity_s *pTurret; // r29
     TurretInfo *pTurretInfo; // r28
     actor_s *v8; // r3
     unsigned int state; // r4
@@ -793,23 +748,16 @@ actor_think_result_t __cdecl Actor_Turret_Think(actor_s *self)
         MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\actor_turret.cpp", 556, 0, "%s", "self->sentient");
     Actor_ClearPath(self);
     Actor_ClearPileUp(self);
-    pTurret = self->pTurret;
-    if (!pTurret
-        || !EntHandle::isDefined(&pTurret->r.ownerNum)
-        || (v3 = EntHandle::ent(&self->pTurret->r.ownerNum), v4 = 1, v3 != self->ent))
+
+    isUsingTurret = Actor_IsUsingTurret(self);
+
+    if (isUsingTurret)
     {
-        v4 = 0;
-    }
-    if (v4)
-    {
-        v5 = self->pTurret;
-        if (!v5)
-            MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\actor_turret.cpp", 570, 0, "%s", "pTurret");
-        if (!v5->r.inuse)
-            MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\actor_turret.cpp", 571, 0, "%s", "pTurret->r.inuse");
-        pTurretInfo = v5->pTurretInfo;
-        if (!pTurretInfo)
-            MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\actor_turret.cpp", 574, 0, "%s", "pTurretInfo");
+        pTurret = self->pTurret;
+        iassert(pTurret);
+        iassert(pTurret->r.inuse);
+        pTurretInfo = pTurret->pTurretInfo;
+        iassert(pTurretInfo);
         if (!(unsigned __int8)Actor_KnowAboutEnemy(self, 0))
             self->useEnemyGoal = 0;
         if (!(unsigned __int8)Actor_KeepClaimedNode(self))
@@ -817,19 +765,19 @@ actor_think_result_t __cdecl Actor_Turret_Think(actor_s *self)
             Actor_UpdateDesiredChainPos(self);
             Actor_UpdateGoalPos(self);
         }
-        if (((pTurretInfo->flags & 0x2000) != 0 || Actor_PointNearGoal(v5->r.currentOrigin, &self->codeGoal, 92.0))
-            && G_EntIsLinkedTo(self->ent, v5)
+        if (((pTurretInfo->flags & 0x2000) != 0 || Actor_PointNearGoal(pTurret->r.currentOrigin, &self->codeGoal, 92.0))
+            && G_EntIsLinkedTo(self->ent, pTurret)
             && (pTurretInfo->flags & 0x80) == 0)
         {
-            if (EntHandle::isDefined(&self->pGrenade) && !v5->tagInfo)
+            if (self->pGrenade.isDefined() && !pTurret->tagInfo)
             {
                 if (!Actor_Grenade_IsPointSafe(self, self->ent->r.currentOrigin))
                 {
                     Actor_StopUseTurret(self);
                     Actor_SetState(self, AIS_GRENADE_RESPONSE);
-                    return 1;
+                    return ACTOR_THINK_REPEAT;
                 }
-                EntHandle::setEnt(&self->pGrenade, 0);
+                self->pGrenade.setEnt(NULL);
             }
             v8 = self;
             if (self->flashBanged)
@@ -860,7 +808,7 @@ actor_think_result_t __cdecl Actor_Turret_Think(actor_s *self)
                         if (!v13->func)
                         {
                             WeaponDef = BG_GetWeaponDef(weapon);
-                            Com_Error(ERR_DROP, byte_8202B2D8, WeaponDef->szInternalName);
+                            Com_Error(ERR_DROP, "no script specified for weapon info '%s' being used by AI", WeaponDef->szInternalName);
                         }
                         v15 = Sentient_NearestNode(self->sentient);
                         v16 = (pathnode_t *)v15;
@@ -903,7 +851,7 @@ LABEL_52:
 LABEL_53:
     Actor_StopUseTurret(v8);
     Actor_SetState(self, AIS_EXPOSED);
-    return 1;
+    return ACTOR_THINK_REPEAT;
 }
 
 void __cdecl Actor_Turret_Pain(
@@ -933,7 +881,7 @@ void __cdecl Actor_Turret_Pain(
         else
         {
             pTurretInfo->flags = flags | 0x10;
-            SentientHandle::setSentient(&pTurretInfo->detachSentient, pAttacker->sentient);
+            pTurretInfo->detachSentient.setSentient(pAttacker->sentient);
         }
     }
 }
