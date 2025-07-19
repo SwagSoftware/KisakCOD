@@ -120,7 +120,7 @@ void __cdecl G_ClientStopUsingTurret(gentity_s *self)
 
     pTurretInfo = self->pTurretInfo;
     
-    iassert(pTurrentInfo);
+    iassert(pTurretInfo);
     iassert(self->r.ownerNum.isDefined());
 
     owner = self->r.ownerNum.ent();
