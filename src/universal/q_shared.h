@@ -143,7 +143,7 @@ typedef int		clipHandle_t;
 #define	MAX_NAME_LENGTH		32		// max length of a client name
 
 #ifdef KISAK_SP
-#define	MAX_GENTITIES		(2176)
+#define	MAX_GENTITIES		(2176) // 0x880
 #elif KISAK_MP
 #define	MAX_GENTITIES		(1024)
 #endif

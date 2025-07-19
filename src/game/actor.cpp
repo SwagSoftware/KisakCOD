@@ -22,7 +22,21 @@
 #include "actor_team_move.h"
 #include <server/sv_game.h>
 #include <qcommon/threads.h>
+#include "actor_cover.h"
 
+const char *animModeNames[10] =
+{
+  "none",
+  "(code)",
+  "(pos deltas)",
+  "angle_deltas",
+  "gravity",
+  "(noclip)",
+  "nogravity",
+  "zonly_physics",
+  "(nophysics)",
+  "point_relative"
+};
 
 const unsigned __int16 *g_AISpeciesNames[2] =
 { 
@@ -3164,9 +3178,9 @@ void __cdecl Actor_CheckClearNodeClaimCloseEnt(actor_s *self)
     gentity_s *v3; // r3
 
     pClaimedNode = self->sentient->pClaimedNode;
-    if (pClaimedNode && EntHandle::isDefined(&self->pCloseEnt))
+    if (pClaimedNode && self->pCloseEnt.isDefined())
     {
-        v3 = EntHandle::ent(&self->pCloseEnt);
+        v3 = self->pCloseEnt.ent();
         if (Actor_PointNearNode(v3->r.currentOrigin, pClaimedNode))
             Actor_NodeClaimRevoked(self, 1000);
     }
@@ -3245,18 +3259,13 @@ void __cdecl Actor_UpdatePlayerPush(actor_s *self, gentity_s *player)
     float v9[4]; // [sp+50h] [-50h] BYREF
     float v10[16]; // [sp+60h] [-40h] BYREF
 
-    if (!self)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\actor.cpp", 1117, 0, "%s", "self");
-    if (!self->ent)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\actor.cpp", 1118, 0, "%s", "self->ent");
-    if (!self->sentient)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\actor.cpp", 1119, 0, "%s", "self->sentient");
-    if (!player)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\actor.cpp", 1121, 0, "%s", "player");
-    if (!player->client)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\actor.cpp", 1122, 0, "%s", "player->client");
-    if (!player->sentient)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\actor.cpp", 1123, 0, "%s", "player->sentient");
+    iassert(self);
+    iassert(self->ent);
+    iassert(self->sentient);
+    iassert(player);
+    iassert(player->client);
+    iassert(player->sentient);
+
     if (!self->bDontAvoidPlayer
         && (self->Physics.iTraceMask & 0x2000000) != 0
         && self->eState[self->stateLevel] != AIS_TURRET
@@ -3281,7 +3290,7 @@ void __cdecl Actor_UpdatePlayerPush(actor_s *self, gentity_s *player)
                     return;
                 Sentient_StealClaimNode(player->sentient, self->sentient);
             }
-            EntHandle::setEnt(&self->pCloseEnt, player);
+            self->pCloseEnt.setEnt(player);
         }
     }
 }
@@ -3295,46 +3304,47 @@ void __cdecl Actor_UpdateCloseEnt(actor_s *self)
     gentity_s *v6; // r3
     gentity_s *v7; // r3
 
-    if (!self)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\actor.cpp", 1161, 0, "%s", "self");
-    if (EntHandle::isDefined(&self->pCloseEnt))
+    iassert(self);
+
+    if (self->pCloseEnt.isDefined())
     {
-        actor = EntHandle::ent(&self->pCloseEnt)->actor;
-        v3 = EntHandle::ent(&self->pCloseEnt);
+        actor = self->pCloseEnt.ent()->actor;
+        v3 = self->pCloseEnt.ent();
         if (Vec2DistanceSq(self->ent->r.currentOrigin, v3->r.currentOrigin) >= 1406.25)
         {
             if (actor)
             {
                 p_pCloseEnt = &actor->pCloseEnt;
-                if (EntHandle::isDefined(p_pCloseEnt))
+                if (p_pCloseEnt->isDefined())
                 {
-                    if (EntHandle::ent(p_pCloseEnt) == self->ent)
-                        EntHandle::setEnt(p_pCloseEnt, 0);
+                    if (p_pCloseEnt->ent() == self->ent)
+                        p_pCloseEnt->setEnt(NULL);
                 }
             }
             goto LABEL_11;
         }
         if (actor && actor->pPileUpEnt == self->ent)
             LABEL_11:
-        EntHandle::setEnt(&self->pCloseEnt, 0);
+        self->pCloseEnt.setEnt(NULL);
     }
     Player = G_GetPlayer();
-    if (EntHandle::isDefined(&self->pCloseEnt))
+    if (self->pCloseEnt.isDefined())
     {
-        if (EntHandle::ent(&self->pCloseEnt) != Player)
+        if (self->pCloseEnt.ent() != Player)
             Actor_UpdatePlayerPush(self, Player);
-        if (!EntHandle::isDefined(&self->pCloseEnt))
-            MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\actor.cpp", 1188, 0, "%s", "self->pCloseEnt.isDefined()");
-        v6 = EntHandle::ent(&self->pCloseEnt);
+
+        iassert(self->pCloseEnt.isDefined());
+
+        v6 = self->pCloseEnt.ent();
         if (Vec2DistanceSq(self->ent->r.currentOrigin, v6->r.currentOrigin) >= 900.0
             && !self->pPileUpActor
             && self->eAnimMode == AI_ANIM_MOVE_CODE
             && Actor_HasPath(self))
         {
-            v7 = EntHandle::ent(&self->pCloseEnt);
+            v7 = self->pCloseEnt.ent();
             if ((float)((float)(self->Path.lookaheadDir[1] * (float)(self->ent->r.currentOrigin[1] - v7->r.currentOrigin[1]))
                 + (float)(self->Path.lookaheadDir[0] * (float)(self->ent->r.currentOrigin[0] - v7->r.currentOrigin[0]))) > 0.0)
-                EntHandle::setEnt(&self->pCloseEnt, 0);
+                self->pCloseEnt.setEnt(NULL);
         }
     }
 }
@@ -3647,8 +3657,8 @@ void __cdecl Actor_EntInfo(gentity_s *self, float *source)
     v16 = (float)(source[2] - self->r.currentOrigin[2]);
     v17 = (float)(source[1] - self->r.currentOrigin[1]);
     value = g_entinfo_maxdist->current.value;
-    v19 = __fsqrts((float)((float)((float)v17 * (float)v17)
-        + (float)((float)((float)v16 * (float)v16) + (float)((float)v15 * (float)v15))));
+    //v19 = __fsqrts((float)((float)((float)v17 * (float)v17) + (float)((float)((float)v16 * (float)v16) + (float)((float)v15 * (float)v15))));
+    v19 = sqrtf((float)((float)((float)v17 * (float)v17) + (float)((float)((float)v16 * (float)v16) + (float)((float)v15 * (float)v15))));
     if (value > 0.0 && v19 > value)
         return;
     v21 = (float)((float)(G_GetEntInfoScale() * (float)v19) * (float)0.0026041667);
@@ -3732,20 +3742,20 @@ void __cdecl Actor_EntInfo(gentity_s *self, float *source)
             }
             G_DebugArc(&v104, 16.0, v29, v30, v28, v27, v26);
         }
-        if (EntHandle::isDefined(&actor->pGrenade))
+        if (actor->pGrenade.isDefined())
         {
-            v31 = EntHandle::ent(&actor->pGrenade);
+            v31 = actor->pGrenade.ent();
             G_DebugLine(&v104, (const float *)&v31->352, colorOrange, 1);
-            v32 = EntHandle::ent(&actor->pGrenade);
+            v32 = actor->pGrenade.ent();
             G_DebugCircle((const float *)&v32->352, 8.0, v33, (int)colorOrange, 0, 1);
-            v34 = EntHandle::ent(&actor->pGrenade);
+            v34 = actor->pGrenade.ent();
             WeaponDef = BG_GetWeaponDef(v34->s.weapon);
             if (!WeaponDef)
                 MyAssertHandler(v125, 1956, 0, "%s", "weapDef");
             LODWORD(v36) = WeaponDef->iExplosionRadius;
             v124 = v36;
             v37 = (float)v36;
-            v38 = EntHandle::ent(&actor->pGrenade);
+            v38 = actor->pGrenade.ent();
             G_DebugCircle((const float *)&v38->352, v37, v39, (int)colorOrange, 0, 1);
         }
     }
@@ -3778,7 +3788,7 @@ void __cdecl Actor_EntInfo(gentity_s *self, float *source)
     v110 = v42;
     v111 = v42;
     v112 = v42;
-    if (!EntHandle::isDefined(&actor->scriptGoalEnt))
+    if (!actor->scriptGoalEnt.isDefined())
     {
         v117 = actor->scriptGoal.pos[0];
         v118 = actor->scriptGoal.pos[1];
@@ -3796,13 +3806,13 @@ void __cdecl Actor_EntInfo(gentity_s *self, float *source)
         v110 = 0.0;
         G_DebugLine(&v104, &v117, &v110, 0);
         G_DebugCircle(&v117, actor->fixedNodeSafeRadius, v44, (int)&v110, 0, 1);
-        if (EntHandle::isDefined(&actor->fixedNodeSafeVolume))
+        if (actor->fixedNodeSafeVolume.isDefined())
         {
             number = self->s.number;
             v46 = ai_showVolume->current.integer;
             if (v46 == number || v46 > 0 && ai_debugEntIndex->current.integer == number)
             {
-                v47 = EntHandle::ent(&actor->fixedNodeSafeVolume);
+                v47 = actor->fixedNodeSafeVolume.ent();
                 G_DebugDrawBrushModel(v47, colorGreenFaded, 0, 0);
             }
         }
@@ -4076,10 +4086,10 @@ LABEL_87:
             va("blockee: %d, blocker: %d", actor->pPileUpActor->ent->s.number, actor->pPileUpEnt->s.number);
             G_AddDebugString(&v104, colorWhite, v65, v97);
         }
-        if (EntHandle::isDefined(&actor->pCloseEnt))
+        if (actor->pCloseEnt.isDefined())
         {
             v106 = v106 - (float)((float)v21 * (float)7.0);
-            v99 = EntHandle::ent(&actor->pCloseEnt);
+            v99 = actor->pCloseEnt.ent();
             va("closeEnt: %d", v99->s.number);
             G_AddDebugString(&v104, colorWhite, v65, v100);
         }
@@ -4162,13 +4172,14 @@ int __cdecl Actor_MoveAwayNoWorse(actor_s *self)
         v4 = &level.actors[i];
         if (level.actors[i].inuse
             && v4 != self
-            && (!EntHandle::isDefined(&self->pCloseEnt) || v4->ent != EntHandle::ent(&self->pCloseEnt))
+            && (!self->pCloseEnt.isDefined() || v4->ent != self->pCloseEnt.ent())
             && Vec2DistanceSq(self->Physics.vOrigin, v4->ent->r.currentOrigin) < 900.0
             && Vec2DistanceSq(self->ent->r.currentOrigin, v4->ent->r.currentOrigin) >= 900.0
-            && __fabs((float)(self->ent->r.currentOrigin[2] - v4->ent->r.currentOrigin[2])) < 80.0)
+            //&& __fabs((float)(self->ent->r.currentOrigin[2] - v4->ent->r.currentOrigin[2])) < 80.0)
+            && fabs((float)(self->ent->r.currentOrigin[2] - v4->ent->r.currentOrigin[2])) < 80.0)
         {
-            if (!EntHandle::isDefined(&v4->pCloseEnt) && !Actor_AtClaimNode(v4))
-                EntHandle::setEnt(&v4->pCloseEnt, self->ent);
+            if (!v4->pCloseEnt.isDefined() && !Actor_AtClaimNode(v4))
+                v4->pCloseEnt.setEnt(self->ent);
             v2 = 0;
         }
     }
@@ -4230,16 +4241,10 @@ int __cdecl Actor_PhysicsMoveAway(actor_s *self)
     float v29; // [sp+60h] [-A0h] BYREF
     float v30; // [sp+64h] [-9Ch]
 
-    if (!Actor_ShouldMoveAwayFromCloseEnt(self))
-        MyAssertHandler(
-            "c:\\trees\\cod3\\cod3src\\src\\game\\actor.cpp",
-            2774,
-            0,
-            "%s",
-            "Actor_ShouldMoveAwayFromCloseEnt( self )");
-    if (!EntHandle::isDefined(&self->pCloseEnt))
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\actor.cpp", 2775, 0, "%s", "self->pCloseEnt.isDefined()");
-    v2 = EntHandle::ent(&self->pCloseEnt);
+    iassert(Actor_ShouldMoveAwayFromCloseEnt(self));
+    iassert(self->pCloseEnt.isDefined());
+
+    v2 = self->pCloseEnt.ent();
     ent = self->ent;
     p_Physics = &self->Physics;
     groundEntNum = self->Physics.groundEntNum;
@@ -4275,7 +4280,8 @@ int __cdecl Actor_PhysicsMoveAway(actor_s *self)
         v15 = (float)((float)(v30 * v30) + (float)(v29 * v29));
         if (v15 < 2.2500002)
             v15 = 2.2500002;
-        v16 = __fsqrts(v15);
+        //v16 = __fsqrts(v15);
+        v16 = sqrtf(v15);
     }
     v17 = (float)((float)v16 * v27);
     self->Physics.vWishDelta[0] = (float)v16 * v26;
@@ -4318,8 +4324,8 @@ int __cdecl Actor_PhysicsMoveAway(actor_s *self)
             actor = v11->actor;
             if (actor)
             {
-                if (!EntHandle::isDefined(&actor->pCloseEnt))
-                    EntHandle::setEnt(&v11->actor->pCloseEnt, self->ent);
+                if (!actor->pCloseEnt.isDefined())
+                    v11->actor->pCloseEnt.setEnt(self->ent);
             }
             self->ent->flags &= 0xFFFFFFE7;
             self->Physics.vVelocity[0] = v9;
@@ -4347,31 +4353,27 @@ int __cdecl Actor_PhysicsMoveAway(actor_s *self)
 
 int __cdecl Actor_IsAtScriptGoal(actor_s *self)
 {
-    if (!self)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\actor.cpp", 3249, 0, "%s", "self");
-    if (!self->ent)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\actor.cpp", 3250, 0, "%s", "self->ent");
-    if (!self->sentient)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\actor.cpp", 3251, 0, "%s", "self->sentient");
-    if (!(unsigned __int8)Actor_PointAtGoal(self->ent->r.currentOrigin, &self->scriptGoal))
+    iassert(self);
+    iassert(self->ent);
+    iassert(self->sentient);
+
+    if (!Actor_PointAtGoal(self->ent->r.currentOrigin, &self->scriptGoal))
         return 0;
+
     if (Path_Exists(&self->Path))
         return Actor_PointAtGoal(self->Path.vFinalGoal, &self->scriptGoal);
+
     return 1;
 }
 
 bool __cdecl Actor_IsNearClaimedNode(actor_s *self)
 {
-    if (!self)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\actor.cpp", 3269, 0, "%s", "self");
-    if (!self->ent)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\actor.cpp", 3270, 0, "%s", "self->ent");
-    if (!self->sentient)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\actor.cpp", 3271, 0, "%s", "self->sentient");
-    if (!self->sentient->pClaimedNode)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\actor.cpp", 3272, 0, "%s", "self->sentient->pClaimedNode");
-    return (unsigned __int8)Actor_KeepClaimedNode(self)
-        || Actor_PointNearNode(self->ent->r.currentOrigin, self->sentient->pClaimedNode);
+    iassert(self);
+    iassert(self->ent);
+    iassert(self->sentient);
+    iassert(self->sentient->pClaimedNode);
+
+    return Actor_KeepClaimedNode(self) || Actor_PointNearNode(self->ent->r.currentOrigin, self->sentient->pClaimedNode);
 }
 
 int __cdecl Actor_IsFixedNodeUseable(actor_s *self)
@@ -4406,8 +4408,8 @@ int __cdecl Actor_IsFixedNodeUseable(actor_s *self)
     }
     if (!node || Path_CanClaimNode(node, self->sentient))
     {
-        if (EntHandle::isDefined(&self->fixedNodeSafeVolume))
-            v7 = EntHandle::ent(&self->fixedNodeSafeVolume);
+        if (self->fixedNodeSafeVolume.isDefined())
+            v7 = self->fixedNodeSafeVolume.ent();
         else
             v7 = 0;
         v8 = Actor_IsKnownEnemyInRegion(self, v7, self->codeGoal.pos, self->fixedNodeSafeRadius);
@@ -4419,9 +4421,9 @@ int __cdecl Actor_IsFixedNodeUseable(actor_s *self)
     }
     else
     {
-        if (SentientHandle::isDefined(&node->dynamic.pOwner))
+        if (node->dynamic.pOwner.isDefined())
         {
-            v6 = SentientHandle::sentient(&node->dynamic.pOwner);
+            v6 = node->dynamic.pOwner.sentient();
             Scr_AddEntity(v6->ent);
             Scr_Notify(self->ent, scr_const.node_taken, 1u);
         }
@@ -6614,9 +6616,9 @@ void __cdecl Actor_PostThink(actor_s *self)
     }
     Actor_CheckNodeClaim(self);
     pClaimedNode = self->sentient->pClaimedNode;
-    if (pClaimedNode && EntHandle::isDefined(&self->pCloseEnt))
+    if (pClaimedNode && self->pCloseEnt.isDefined())
     {
-        v3 = EntHandle::ent(&self->pCloseEnt);
+        v3 = self->pCloseEnt.ent();
         if (Actor_PointNearNode(v3->r.currentOrigin, pClaimedNode))
             Actor_NodeClaimRevoked(self, 1000);
     }

@@ -3244,3 +3244,58 @@ float PointToLineDistSq2D(const float *point, const float *start, const float *e
     float distSq = projX * projX + projY * projY;
     return distSq;
 }
+
+// aislop
+int IsPosInsideArc(
+    const float *pos,
+    float posRadius,
+    const float *arcOrigin,
+    float arcRadius,
+    float arcAngle0,
+    float arcAngle1,
+    float arcHalfHeight)
+{
+    iassert(pos);
+    iassert(arcOrigin);
+
+    float dx = pos[0] - arcOrigin[0];
+    float dy = pos[1] - arcOrigin[1];
+    float horizontalDist = sqrtf(dx * dx + dy * dy);
+
+    float zDiff = pos[2] - arcOrigin[2];
+    float verticalLowerBound = arcOrigin[2] - arcHalfHeight;
+    float verticalUpperBound = arcOrigin[2] + arcHalfHeight;
+
+    float effectiveDist = horizontalDist - (float)posRadius;
+
+    if ((effectiveDist * effectiveDist <= arcRadius * arcRadius) &&
+        (pos[2] >= verticalLowerBound) &&
+        (pos[2] <= verticalUpperBound))
+    {
+        //float invLen = 1.0f / fmaxf(horizontalDist, 1e-6f);  // prevent divide by zero
+        float invLen = 1.0f / horizontalDist;
+
+        float dir[3] = 
+        {
+            dx * invLen,
+            dy * invLen,
+            zDiff  // unused in yaw calculation, but preserved in vector format
+        };
+
+        float yaw = vectoyaw(dir);
+        float normYaw = AngleNormalize360(yaw);
+
+        if (arcAngle0 >= arcAngle1) 
+        {
+            if (normYaw < arcAngle1 || normYaw > arcAngle0)
+                return 1;
+        }
+        else 
+        {
+            if (normYaw < arcAngle1 && normYaw > arcAngle0)
+                return 1;
+        }
+    }
+
+    return 0;
+}

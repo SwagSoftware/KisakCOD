@@ -732,23 +732,16 @@ int __cdecl Actor_CanShootEnemy(actor_s *self)
     float v3[4]; // [sp+50h] [-40h] BYREF
     float v4[12]; // [sp+60h] [-30h] BYREF
 
-    if (!self)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\actor_senses.cpp", 614, 0, "%s", "self");
-    if (!self->ent)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\actor_senses.cpp", 615, 0, "%s", "self->ent");
-    if (!self->sentient)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\actor_senses.cpp", 616, 0, "%s", "self->sentient");
-    if (!EntHandle::isDefined(&self->sentient->targetEnt))
-        MyAssertHandler(
-            "c:\\trees\\cod3\\cod3src\\src\\game\\actor_senses.cpp",
-            617,
-            0,
-            "%s",
-            "self->sentient->targetEnt.isDefined()");
+    iassert(self);
+    iassert(self->ent);
+    iassert(self->sentient);
+    iassert(self->sentient->targetEnt.isDefined());
+
     Actor_GetTargetLookPosition(self, v4);
     result = Actor_GetMuzzleInfo(self, v3, 0);
     if (result)
         return Actor_CanShootFrom(self, v4, v3);
+
     return result;
 }
 
@@ -785,21 +778,15 @@ int __cdecl Actor_CanSeeEnemy(actor_s *self)
     sentient_s *TargetSentient; // r4
     const gentity_s *v4; // r3
 
-    if (!self)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\actor_senses.cpp", 441, 0, "%s", "self");
-    if (!self->sentient)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\actor_senses.cpp", 442, 0, "%s", "self->sentient");
-    if (!EntHandle::isDefined(&self->sentient->targetEnt))
-        MyAssertHandler(
-            "c:\\trees\\cod3\\cod3src\\src\\game\\actor_senses.cpp",
-            443,
-            0,
-            "%s",
-            "self->sentient->targetEnt.isDefined()");
+    iassert(self);
+    iassert(self->sentient);
+    iassert(self->sentient->targetEnt.isDefined());
+
     TargetSentient = Actor_GetTargetSentient(self);
     if (TargetSentient)
         return Actor_CanSeeSentient(self, TargetSentient, 250);
-    v4 = EntHandle::ent(&self->sentient->targetEnt);
+
+    v4 = self->sentient->targetEnt.ent();
     return Actor_CanSeeEntityEx(self, v4, self->fovDot, self->fMaxSightDistSqrd);
 }
 
@@ -811,17 +798,10 @@ int __cdecl Actor_CanSeeEnemyExtended(actor_s *self, int useClaimedNode)
     bool v8; // zf
     const gentity_s *v9; // r3
 
-    if (!self)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\actor_senses.cpp", 520, 0, "%s", "self");
-    if (!self->sentient)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\actor_senses.cpp", 521, 0, "%s", "self->sentient");
-    if (!EntHandle::isDefined(&self->sentient->targetEnt))
-        MyAssertHandler(
-            "c:\\trees\\cod3\\cod3src\\src\\game\\actor_senses.cpp",
-            522,
-            0,
-            "%s",
-            "self->sentient->targetEnt.isDefined()");
+    iassert(self);
+    iassert(self->sentient);
+    iassert(self->sentient->targetEnt.isDefined());
+
     TargetSentient = Actor_GetTargetSentient(self);
     if (TargetSentient)
     {
@@ -843,7 +823,7 @@ int __cdecl Actor_CanSeeEnemyExtended(actor_s *self, int useClaimedNode)
     }
     else
     {
-        v9 = EntHandle::ent(&self->sentient->targetEnt);
+        v9 = self->sentient->targetEnt.ent();
         return Actor_CanSeeEntityEx(self, v9, self->fovDot, self->fMaxSightDistSqrd);
     }
 }

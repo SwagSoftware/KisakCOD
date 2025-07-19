@@ -4612,3 +4612,79 @@ void Scr_GetChecksum(unsigned int *checksum)
 	checksum[1] = scrCompilePub.programLen;
 	checksum[2] = scrVarPub.endScriptBuffer - scrVarPub.programBuffer;
 }
+
+void CopyEntity(unsigned int parentId, unsigned int newParentId)
+{
+	VariableValueInternal *parentValue; // r31
+	unsigned int FirstSibling; // r15
+	VariableValueInternal *entryValue; // r26
+	int v8; // r11
+	unsigned int name; // r29
+	VariableValueInternal *newEntryValue; // r31
+	int v11; // r11
+	int v12; // r30
+	unsigned int v13; // r11
+	VariableUnion *intValue; // r4
+
+	iassert(parentId);
+	iassert(newParentId);
+
+	parentValue = &scrVarGlob.variableList[parentId + 1];
+
+	iassert((parentValue->w.status & VAR_STAT_MASK) == VAR_STAT_EXTERNAL);
+	iassert(IsObject(parentValue));
+	iassert((parentValue->w.type & VAR_MASK) == VAR_ENTITY);
+	iassert((scrVarGlob.variableList[VARIABLELIST_PARENT_BEGIN + newParentId].w.status & VAR_STAT_MASK) == VAR_STAT_EXTERNAL);
+	iassert(IsObject(&scrVarGlob.variableList[VARIABLELIST_PARENT_BEGIN + newParentId]));
+	iassert((scrVarGlob.variableList[VARIABLELIST_PARENT_BEGIN + newParentId].w.type & VAR_MASK) == VAR_ENTITY);
+
+	FirstSibling = FindFirstSibling(parentId);
+
+	if (FirstSibling)
+	{
+		while (1)
+		{
+			entryValue = &scrVarGlob.variableList[FirstSibling + VARIABLELIST_CHILD_BEGIN];
+			//v8 = entryValue->w.u.intValue & 0x60;
+			iassert((entryValue->w.status & VAR_STAT_MASK) != VAR_STAT_FREE && (entryValue->w.status & VAR_STAT_MASK) != VAR_STAT_EXTERNAL);
+			iassert((entryValue->w.status & VAR_STAT_MASK) != VAR_STAT_FREE);
+			iassert(!IsObject(entryValue));
+
+			//v9 = (unsigned int)entryValue->w.u.intValue >> 8;
+			name = entryValue->w.name;
+			iassert(name != OBJECT_STACK);
+
+			if (name != 0x18000)
+				goto LABEL_28;
+		LABEL_40:
+			FirstSibling = FindNextSibling(FirstSibling);
+			if (!FirstSibling)
+				return;
+		}
+	LABEL_28:
+		iassert(!FindVariableIndexInternal(newParentId, name));
+		newEntryValue = (VariableValueInternal*)((char *)&scrVarGlob.variableList[VARIABLELIST_CHILD_BEGIN] + __ROL4__(scrVarGlob.variableList[GetVariableIndexInternal(newParentId, name) + VARIABLELIST_CHILD_BEGIN].hash.id, 4));
+		iassert((newEntryValue->w.status & VAR_STAT_MASK) != VAR_STAT_FREE && (newEntryValue->w.status & VAR_STAT_MASK) != VAR_STAT_EXTERNAL);
+		iassert((newEntryValue->w.type & VAR_MASK) == VAR_UNDEFINED);
+		iassert(!(newEntryValue->w.type & VAR_MASK));
+		iassert((newEntryValue->w.name >> VAR_NAME_BITS) == name);
+		//intValue = (VariableUnion *)entryValue->u.u.intValue;
+		//*((_DWORD *)newEntryValue + 1) = intValue;
+		newEntryValue->w.type = entryValue->w.type; // sus
+		newEntryValue->u.u.intValue = entryValue->u.u.intValue;
+		AddRefToValue((newEntryValue->w.type & VAR_MASK), newEntryValue->u.u.intValue);
+		goto LABEL_40;
+	}
+}
+
+void Scr_CopyEntityNum(int fromEntnum, int toEntnum, unsigned int classnum)
+{
+	unsigned int entID; // r3
+
+	entID = FindEntityId(fromEntnum, classnum);
+	if (entID && FindFirstSibling(entID))
+	{
+		iassert(!FindEntityId(toEntnum, classnum));
+		CopyEntity(entID, Scr_GetEntityId(toEntnum, classnum));
+	}
+}

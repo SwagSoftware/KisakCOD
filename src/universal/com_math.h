@@ -196,6 +196,16 @@ float __cdecl PitchForYawOnNormal(float fYaw, const float* normal);
 unsigned __int8 __cdecl DirToByte(const float *dir);
 void __cdecl ByteToDir(unsigned int b, float *dir);
 
+// == ARCs ==
+int IsPosInsideArc(
+    const float *pos,
+    float posRadius,
+    const float *arcOrigin,
+    float arcRadius,
+    float arcAngle0,
+    float arcAngle1,
+    float arcHalfHeight);
+
 // == VECTOR FUNCTIONS ==
 float __cdecl Vec2Distance(const vec2r v1, const vec2r v2);
 float __cdecl Vec2DistanceSq(const vec2r p1, const vec2r p2);

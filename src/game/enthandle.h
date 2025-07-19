@@ -49,11 +49,12 @@ struct SentientHandle
     unsigned __int16 number;
     unsigned __int16 infoIndex;
 
-    sentient_s *sentient();
+    sentient_s *sentient() const;
     void setSentient(sentient_s *sentient);
 
+    bool isDefined() const;
+
     static void Init();
-    bool isDefined();
 };
 
 void SentientHandleDissociate(sentient_s *sentient);

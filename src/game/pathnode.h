@@ -3,6 +3,8 @@
 #include <bgame/bg_public.h>
 #include <bgame/bg_local.h>
 
+#define PNF_PRIORITY 0x40
+
 enum nearestNodeHeightCheck : __int32
 {
     NEAREST_NODE_DO_HEIGHT_CHECK = 0x0,
@@ -35,6 +37,10 @@ enum nodeType : __int32
     NODE_DONTLINK = 0x14,
 };
 
+
+
+
+#ifdef KISAK_SP
 struct NodeTypeToName
 {
     nodeType type;
@@ -48,19 +54,17 @@ struct PathLinkInfo
     unsigned __int16 prev;
     unsigned __int16 next;
 };
-
 struct pathlocal_t_tag
 {
+    float origin[3];
     float maxDist;
     float maxDistSq;
     float maxHeightSq;
     int typeFlags;
-    struct pathsort_t *nodes;
+    pathsort_t *nodes;
     int maxNodes;
     int nodeCount;
 };
-
-/* 10009 */
 struct __declspec(align(128)) pathlocal_t
 {
     PathLinkInfo pathLinkInfoArray[2048];
@@ -70,6 +74,19 @@ struct __declspec(align(128)) pathlocal_t
     unsigned int originErrors;
     pathlocal_t_tag circle;
 };
+struct pathnodeRange_t
+{
+    float minSqDist;
+    float fAngleMin;
+    float fAngleMax;
+};
+struct pathsort_t
+{
+    pathnode_t *node;
+    float metric;
+    float distMetric;
+};
+#endif
 
 struct pathlink_s // sizeof=0xC
 {
@@ -150,12 +167,6 @@ struct pathnode_t // sizeof=0x80 (SP/MP Same)
     pathnode_transient_t transient;
 };
 
-struct pathnodeRange_t
-{
-    float minSqDist;
-    float fAngleMin;
-    float fAngleMax;
-};
 
 struct pathbasenode_t // sizeof=0x10
 {
@@ -198,12 +209,6 @@ struct PathData // sizeof=0x28
     pathnode_tree_t *nodeTree;
 };
 
-struct pathsort_t
-{
-    pathnode_t *node;
-    float metric;
-    float distMetric;
-};
 
 #ifndef KISAK_MP
 
@@ -233,7 +238,7 @@ void __cdecl PathNode_OriginMatches(const char *value, const float *nodeOrigin);
 void __cdecl node_droptofloor(pathnode_t *node);
 void __cdecl G_UpdateTrackExtraNodes();
 void __cdecl GScr_AddFieldsForPathnode();
-pathnode_t *__cdecl Scr_GetPathnode(scr_entref_t *index, unsigned int a2);
+pathnode_t *__cdecl Scr_GetPathnode(unsigned int index);
 void __cdecl G_FreePathnodesScriptInfo();
 bool __cdecl Path_CompareNodesIncreasing(const pathsort_t *ps1, const pathsort_t *ps2);
 unsigned int __cdecl Path_ConvertNodeToIndex(const pathnode_t *node);
@@ -269,7 +274,7 @@ void __cdecl Path_PreSpawnInitPaths(float *a1);
 void __cdecl Path_DrawDebugNoLinks(const pathnode_t *node, const float (*color)[4], int duration);
 void __cdecl Path_DrawDebugLink(const pathnode_t *node, const int i, bool bShowAll);
 float __cdecl Path_GetDebugStringScale(const float *cameraPos, const float *origin);
-void __cdecl Path_DrawDebugNodeBox(const pathnode_t *node, int a2, int a3, const float *a4);
+void __cdecl Path_DrawDebugNodeBox(const pathnode_t *node);
 void __cdecl Path_DrawDebugNode(const float *cameraPos, const pathnode_t *node);
 void __cdecl Path_DrawDebugFindPath(float *vOrigin);
 void __cdecl Path_DrawFriendlyChain();

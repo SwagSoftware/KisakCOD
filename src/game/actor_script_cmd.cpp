@@ -4,6 +4,22 @@
 
 
 #include "actor_script_cmd.h"
+#include "actor.h"
+#include "g_main.h"
+#include <script/scr_vm.h>
+#include <server/sv_game.h>
+#include "actor_state.h"
+#include "actor_orientation.h"
+#include "actor_cover_arrival.h"
+#include "actor_aim.h"
+#include "game_public.h"
+#include "g_local.h"
+#include "actor_cover.h"
+#include "actor_exposed.h"
+#include "actor_threat.h"
+#include "g_actor_prone.h"
+#include "actor_lookat.h"
+#include "actor_senses.h"
 
 actor_s *__cdecl Actor_Get(scr_entref_t *entref)
 {
@@ -34,7 +50,7 @@ void __cdecl Actor_SetScriptGoalPos(actor_s *self, const float *vGoalPos, pathno
 {
     gentity_s *volume; // r5
 
-    EntHandle::setEnt(&self->scriptGoalEnt, 0);
+    self->scriptGoalEnt.setEnt(NULL);
     Actor_ClearKeepClaimedNode(self);
     self->scriptGoal.pos[0] = *vGoalPos;
     self->scriptGoal.pos[1] = vGoalPos[1];

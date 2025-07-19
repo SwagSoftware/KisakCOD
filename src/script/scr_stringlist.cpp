@@ -818,3 +818,9 @@ void Scr_SetStringFromCharString(unsigned __int16 *to, const char *from)
 		;
 	*to = SL_GetStringOfSize(from, 0, v5 - from, 6);
 }
+
+unsigned int SL_GetUser(unsigned int stringValue)
+{
+	//return *((unsigned __int8 *)&GetRefString(stringValue)->0 + 1);
+	return GetRefString(stringValue)->user;
+}

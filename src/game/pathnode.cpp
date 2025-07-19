@@ -9,8 +9,15 @@
 #include "g_main.h"
 #include "g_local.h"
 #include "g_bsp.h"
+#include <script/scr_const.h>
+#include <server/sv_game.h>
+#include "savememory.h"
+#include "actor_senses.h"
 
 //Line 37928:  0006 : 00006700       char const **nodeStringTable  82696700     pathnode.obj
+
+path_t *g_pPath;
+path_t some_path; // idk name
 
 node_field_t fields_3[12] =
 {
@@ -137,26 +144,19 @@ bool __cdecl TurretNode_HasTurret(const pathnode_t *node)
 {
     int turretEntNumber; // r11
 
-    if (!node)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\pathnode.cpp", 538, 0, "%s", "node");
-    if (node->constant.type != NODE_TURRET)
-        MyAssertHandler(
-            "c:\\trees\\cod3\\cod3src\\src\\game\\pathnode.cpp",
-            539,
-            0,
-            "%s",
-            "node->constant.type == NODE_TURRET");
+    iassert(node);
+    iassert(node->constant.type == NODE_TURRET);
+
     turretEntNumber = node->dynamic.turretEntNumber;
+
     if (turretEntNumber < 0)
         return 0;
-    if (turretEntNumber >= 2176)
-        MyAssertHandler(
-            "c:\\trees\\cod3\\cod3src\\src\\game\\pathnode.cpp",
-            545,
-            0,
-            "%s",
-            "node->dynamic.turretEntNumber < MAX_GENTITIES");
-    return (_cntlzw((unsigned int)g_entities[node->dynamic.turretEntNumber].pTurretInfo) & 0x20) == 0;
+
+    iassert(node->dynamic.turretEntNumber < MAX_GENTITIES);
+
+    //return (_cntlzw((unsigned int)g_entities[node->dynamic.turretEntNumber].pTurretInfo) & 0x20) == 0;
+
+    return g_entities[node->dynamic.turretEntNumber].pTurretInfo != 0;
 }
 
 void __cdecl Path_ReadOnly(int offset)
@@ -436,29 +436,24 @@ void __cdecl GScr_AddFieldsForPathnode()
                     0,
                     "%s",
                     "(f - fields) == (unsigned short)( f - fields )");
-            Scr_AddClassField(2u, v0->name, (unsigned __int16)(v1 >> 4));
+            Scr_AddClassField(2u, (char*)v0->name, (unsigned __int16)(v1 >> 4));
             ++v0;
             v1 += 16;
         } while (v0->name);
     }
 }
 
-pathnode_t *__cdecl Scr_GetPathnode(scr_entref_t *index, unsigned int a2)
+pathnode_t *__cdecl Scr_GetPathnode(unsigned int index)
 {
-    scr_entref_t *EntityRef; // [sp+50h] [-20h]
+    scr_entref_t entref; // [sp+50h] [-20h]
 
-    EntityRef = Scr_GetEntityRef(index, a2);
-    if ((unsigned __int16)EntityRef == 2)
+    entref = Scr_GetEntityRef(index);
+
+    if (entref.classnum == 2)
     {
-        if (HIWORD(EntityRef) >= g_path.actualNodeCount)
-            MyAssertHandler(
-                "c:\\trees\\cod3\\cod3src\\src\\game\\pathnode.cpp",
-                1132,
-                0,
-                "entref.entnum doesn't index g_path.actualNodeCount\n\t%i not in [0, %i)",
-                HIWORD(EntityRef),
-                g_path.actualNodeCount);
-        return &gameWorldSp.path.nodes[HIWORD(EntityRef)];
+        bcassert(entref.entnum, g_path.actualNodeCount);
+
+        return &gameWorldSp.path.nodes[entref.entnum];
     }
     else
     {
@@ -469,26 +464,17 @@ pathnode_t *__cdecl Scr_GetPathnode(scr_entref_t *index, unsigned int a2)
 
 void __cdecl G_FreePathnodesScriptInfo()
 {
-    unsigned int v0; // r31
-    int v1; // r30
+    unsigned int nodeIndex; // r31
 
     Path_ShutdownBadPlaces();
-    v0 = 0;
+    nodeIndex = 0;
     if (g_path.actualNodeCount)
     {
-        v1 = 0;
         do
         {
-            if (SentientHandle::isDefined(&gameWorldSp.path.nodes[v1].dynamic.pOwner))
-                MyAssertHandler(
-                    "c:\\trees\\cod3\\cod3src\\src\\game\\pathnode.cpp",
-                    1148,
-                    0,
-                    "%s",
-                    "!gameWorldSp.path.nodes[nodeIndex].dynamic.pOwner.isDefined()");
-            Scr_FreeEntityNum(v0++, 2u);
-            ++v1;
-        } while (v0 < g_path.actualNodeCount);
+            iassert(!gameWorldSp.path.nodes[nodeIndex].dynamic.pOwner.isDefined());
+            Scr_FreeEntityNum(nodeIndex++, 2);
+        } while (nodeIndex < g_path.actualNodeCount);
     }
 }
 
@@ -547,7 +533,7 @@ void __cdecl Path_Init(int restart)
     memset(&g_path, 0, sizeof(g_path));
     if (!gameWorldSp.path.nodes)
         MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\pathnode.cpp", 1210, 0, "%s", "gameWorldSp.path.nodes");
-    dword_82E20404 = 0;
+    g_pPath = 0;
     Path_InitBadPlaces();
 }
 
@@ -704,7 +690,7 @@ pathnode_tree_t *__cdecl Path_NodesInCylinder(
     result = gameWorldSp.path.nodeTree;
     if (gameWorldSp.path.nodeTree)
     {
-        g_path.circle.origin[0] = *origin;
+        g_path.circle.origin[0] = origin[0];
         g_path.circle.origin[1] = origin[1];
         g_path.circle.origin[2] = origin[2];
         g_path.circle.maxDist = maxDist;
@@ -788,7 +774,8 @@ bool __cdecl Path_IsBadPlaceLink(unsigned int nodeNumFrom, unsigned int nodeNumT
             if (v7 >= totalLinkCount)
                 goto LABEL_11;
         }
-        return (_cntlzw(Links[v7].ubBadPlaceCount[eTeam]) & 0x20) == 0;
+        //return (_cntlzw(Links[v7].ubBadPlaceCount[eTeam]) & 0x20) == 0;
+        return Links[v7].ubBadPlaceCount[eTeam] != 0;
     }
     else
     {
@@ -880,7 +867,7 @@ void __cdecl Path_InitNodeDynamic(pathnode_t *loadNode)
     v3 = 8;
     do
     {
-        p_dynamic->pOwner = 0;
+        p_dynamic->pOwner = (SentientHandle)0;
         p_dynamic = (pathnode_dynamic_t *)((char *)p_dynamic + 4);
         --v3;
     } while (v3);
@@ -921,7 +908,7 @@ void __cdecl Path_InitNodesDynamic(float *a1)
             v5 = 8;
             do
             {
-                p_dynamic->pOwner = 0;
+                p_dynamic->pOwner = (SentientHandle)0;
                 p_dynamic = (pathnode_dynamic_t *)((char *)p_dynamic + 4);
                 --v5;
             } while (v5);
@@ -980,177 +967,198 @@ void __cdecl Path_DrawDebugNoLinks(const pathnode_t *node, const float (*color)[
     G_DebugLineWithDuration(&v8, &v11, (const float *)color, 0, duration);
 }
 
-void __cdecl Path_DrawDebugLink(const pathnode_t *node, const int i, bool bShowAll)
-{
-    double v3; // fp13
-    pathlink_s *v4; // r6
-    int nodeNum; // r11
-    float *v6; // r11
-    int v7; // r5
-    int v8; // r7
-    int v9; // r4
-    unsigned __int16 *v10; // r10
-    int v11; // r9
-    unsigned __int8 *v12; // r11
-    const float *v13; // r31
-    const float *v14; // r5
-    int v15; // r30
-    int v16; // r11
-    unsigned __int8 *v17; // r10
-    int v18; // r11
-    _BYTE *v19; // r10
-    const float *v20; // r5
-    double v23; // fp11
-    double v24; // fp12
-    double v25; // fp13
-    double v26; // fp11
-    double v27; // fp11
-    int v28; // r6
-    double v31; // fp10
-    float v32; // [sp+50h] [-70h] BYREF
-    float v33; // [sp+54h] [-6Ch]
-    float v34; // [sp+58h] [-68h]
-    float v35; // [sp+60h] [-60h] BYREF
-    float v36; // [sp+64h] [-5Ch]
-    float v37; // [sp+68h] [-58h]
-    float v38; // [sp+70h] [-50h] BYREF
-    float v39; // [sp+74h] [-4Ch]
-    float v40; // [sp+78h] [-48h]
-    float v41; // [sp+80h] [-40h] BYREF
-    float v42; // [sp+84h] [-3Ch]
-    float v43; // [sp+88h] [-38h]
-    float v44; // [sp+90h] [-30h] BYREF
-    float v45; // [sp+94h] [-2Ch]
-    float v46; // [sp+98h] [-28h]
 
-    v3 = node->constant.vOrigin[2];
-    v4 = &node->constant.Links[i];
-    nodeNum = v4->nodeNum;
-    v32 = node->constant.vOrigin[0];
-    v33 = node->constant.vOrigin[1];
-    v34 = v3;
-    v6 = (float *)((char *)gameWorldSp.path.nodes + __ROL4__(nodeNum, 7));
-    v35 = v6[5];
-    v36 = v6[6];
-    v37 = v6[7] + (float)16.0;
-    v34 = (float)v3 + (float)16.0;
-    if (bShowAll)
-        v7 = *((unsigned __int16 *)v6 + 31);
-    else
-        v7 = *((__int16 *)v6 + 46);
-    v8 = 0;
-    if (v7 <= 0)
+// aislop
+void Path_DrawDebugLink(const pathnode_t *node, const int i, bool bShowAll)
+{
+    pathlink_s *link = &node->constant.Links[i];
+    int nodeNum = link->nodeNum;
+
+    float start[3] =
     {
-    LABEL_8:
-        v11 = 3;
-        v12 = &v4->ubBadPlaceCount[3];
-        while (1)
+        node->constant.vOrigin[0],
+        node->constant.vOrigin[1],
+        node->constant.vOrigin[2] + 16.0f
+    };
+
+    float *destNode = (float *)((char *)gameWorldSp.path.nodes + (nodeNum << 7));
+
+    float end[3] =
+    {
+        destNode[5],
+        destNode[6],
+        destNode[7] + 16.0f
+    };
+
+    int linkCount = bShowAll ? *((uint16_t *)destNode + 31) : *((int16_t *)destNode + 46);
+    int found = 0;
+
+    if (linkCount > 0)
+    {
+        uint16_t *linkedNodes = (uint16_t *)((char *)destNode + 64); // Offset assumption
+        for (int j = 0; j < linkCount; ++j)
         {
-            v13 = colorRed;
-            if (*v12)
+            const pathnode_t *linked = (const pathnode_t *)((char *)gameWorldSp.path.nodes + (linkedNodes[j * 3] << 7));
+            if (linked == node)
+            {
+                found = 1;
                 break;
-            --v11;
-            --v12;
-            if (v11 < 0)
-            {
-                v14 = colorRed;
-                goto LABEL_34;
             }
         }
-        v14 = colorMagenta;
-    LABEL_34:
-        G_DebugLine(&v32, &v35, v14, 1);
-        v40 = (float)(v37 + v34) * (float)0.5;
-        v38 = (float)(v35 + v32) * (float)0.5;
-        v39 = (float)(v36 + v33) * (float)0.5;
-        _FP5 = -__fsqrts((float)((float)((float)(v32 - v35) * (float)(v32 - v35))
-            + (float)((float)((float)(v34 - v37) * (float)(v34 - v37))
-                + (float)((float)(v33 - v36) * (float)(v33 - v36)))));
-        __asm { fsel      f10, f5, f9, f10 }
-        v31 = (float)((float)1.0 / (float)_FP10);
-        v42 = (float)((float)((float)(v33 - v36) * (float)v31) * (float)8.0) + v39;
-        v45 = v42;
-        v41 = (float)((float)((float)v31 * (float)(v32 - v35)) * (float)8.0) + v38;
-        v44 = v41;
-        v43 = (float)((float)((float)((float)(v34 - v37) * (float)v31) * (float)8.0) + v40) + (float)8.0;
-        v46 = (float)((float)((float)((float)(v34 - v37) * (float)v31) * (float)8.0) + v40) - (float)8.0;
-        G_DebugLine(&v41, &v38, colorRed, 0);
-        v28 = 0;
-        goto LABEL_35;
     }
-    v9 = *((unsigned int *)v6 + 16);
-    v10 = (unsigned __int16 *)(v9 + 4);
-    while (node != (const pathnode_t *)((char *)gameWorldSp.path.nodes + __ROL4__(*v10, 7)))
+
+    const float *lineColor = colorRed;
+
+    if (!found)
     {
-        ++v8;
-        v10 += 6;
-        if (v8 >= v7)
-            goto LABEL_8;
-    }
-    if (node > (const pathnode_t *)v6)
-    {
-        v15 = 0;
-        v16 = 3;
-        v17 = &v4->ubBadPlaceCount[3];
-        while (!*v17)
+        for (int j = 3; j >= 0; --j)
         {
-            --v16;
-            --v17;
-            if (v16 < 0)
-                goto LABEL_18;
-        }
-        v15 = 1;
-    LABEL_18:
-        v18 = 3;
-        v19 = (_BYTE *)(12 * v8 + v9 + 11);
-        while (!*v19)
-        {
-            --v18;
-            --v19;
-            if (v18 < 0)
-                goto LABEL_23;
-        }
-        v15 |= 2u;
-    LABEL_23:
-        v13 = colorBlue;
-        if (v15)
-            v20 = v15 == 3 ? colorYellow : colorBlue;
-        else
-            v20 = colorCyan;
-        G_DebugLine(&v32, &v35, v20, 1);
-        if (v15 == 1 || v15 == 2)
-        {
-            v38 = (float)(v35 + v32) * (float)0.5;
-            v40 = (float)(v37 + v34) * (float)0.5;
-            v39 = (float)(v36 + v33) * (float)0.5;
-            _FP6 = -__fsqrts((float)((float)((float)(v32 - v35) * (float)(v32 - v35))
-                + (float)((float)((float)(v34 - v37) * (float)(v34 - v37))
-                    + (float)((float)(v33 - v36) * (float)(v33 - v36)))));
-            __asm { fsel      f11, f6, f10, f11 }
-            v23 = (float)((float)1.0 / (float)_FP11);
-            v24 = (float)((float)v23 * (float)(v32 - v35));
-            v25 = (float)((float)(v33 - v36) * (float)v23);
-            v26 = (float)((float)(v34 - v37) * (float)v23);
-            if (v15 == 1)
+            if (link->ubBadPlaceCount[j])
             {
-                v24 = -v24;
-                v25 = -v25;
-                v26 = -v26;
+                lineColor = colorMagenta;
+                break;
             }
-            v27 = (float)((float)((float)v26 * (float)8.0) + (float)((float)(v37 + v34) * (float)0.5));
-            v42 = (float)((float)v25 * (float)8.0) + (float)((float)(v36 + v33) * (float)0.5);
-            v45 = v42;
-            v41 = (float)((float)v24 * (float)8.0) + (float)((float)(v35 + v32) * (float)0.5);
-            v44 = v41;
-            v43 = (float)v27 + (float)8.0;
-            v46 = (float)v27 - (float)8.0;
-            G_DebugLine(&v41, &v38, colorBlue, 1);
-            v28 = 1;
-        LABEL_35:
-            G_DebugLine(&v44, &v38, v13, v28);
+        }
+
+        G_DebugLine(start, end, lineColor, 1);
+
+        float mid[3] =
+        {
+            0.5f * (start[0] + end[0]),
+            0.5f * (start[1] + end[1]),
+            0.5f * (start[2] + end[2])
+        };
+
+        float dx = end[0] - start[0];
+        float dy = end[1] - start[1];
+        float dz = end[2] - start[2];
+
+        float length = sqrtf(dx * dx + dy * dy + dz * dz);
+
+        if (length != 0.0f)
+        {
+            float invLen = 1.0f / length;
+            float dir[3] =
+            {
+                dx * invLen,
+                dy * invLen,
+                dz * invLen
+            };
+
+            float arrowStart[3] =
+            {
+                mid[0] + dir[0] * 8.0f,
+                mid[1] + dir[1] * 8.0f,
+                mid[2] + dir[2] * 8.0f
+            };
+
+            float arrowEnd[3] =
+            {
+                mid[0] + dir[0] * 8.0f,
+                mid[1] + dir[1] * 8.0f,
+                mid[2] - dir[2] * 8.0f
+            };
+
+            G_DebugLine(arrowStart, mid, colorRed, 0);
+            G_DebugLine(mid, arrowEnd, colorRed, 0);
+        }
+
+        return;
+    }
+
+    int flags = 0;
+
+    if (node > (const pathnode_t *)destNode)
+    {
+        for (int j = 3; j >= 0; --j)
+        {
+            if (link->ubBadPlaceCount[j])
+            {
+                flags |= 1;
+                break;
+            }
+        }
+
+        uint8_t *badLinkData = (uint8_t *)((uint8_t *)destNode + 64 + 12 * i + 11);
+        for (int j = 3; j >= 0; --j)
+        {
+            if (badLinkData[-j])
+            {
+                flags |= 2;
+                break;
+            }
+        }
+    }
+
+    const float *color;
+
+    if (flags == 0)
+    {
+        color = colorCyan;
+    }
+    else if (flags == 3)
+    {
+        color = colorYellow;
+    }
+    else
+    {
+        color = colorBlue;
+    }
+
+    G_DebugLine(start, end, color, 1);
+
+    if (flags == 1 || flags == 2)
+    {
+        float mid[3] =
+        {
+            0.5f * (start[0] + end[0]),
+            0.5f * (start[1] + end[1]),
+            0.5f * (start[2] + end[2])
+        };
+
+        float dx = end[0] - start[0];
+        float dy = end[1] - start[1];
+        float dz = end[2] - start[2];
+
+        float length = sqrtf(dx * dx + dy * dy + dz * dz);
+
+        if (length != 0.0f)
+        {
+            float invLen = 1.0f / length;
+            float dir[3] =
+            {
+                dx * invLen,
+                dy * invLen,
+                dz * invLen
+            };
+
+            if (flags == 1)
+            {
+                dir[0] = -dir[0];
+                dir[1] = -dir[1];
+                dir[2] = -dir[2];
+            }
+
+            float arrowStart[3] =
+            {
+                mid[0] + dir[0] * 8.0f,
+                mid[1] + dir[1] * 8.0f,
+                mid[2] + dir[2] * 8.0f
+            };
+
+            float arrowEnd[3] =
+            {
+                mid[0] + dir[0] * 8.0f,
+                mid[1] + dir[1] * 8.0f,
+                mid[2] - dir[2] * 8.0f
+            };
+
+            G_DebugLine(arrowStart, mid, colorBlue, 1);
+            G_DebugLine(mid, arrowEnd, (flags == 1 ? colorBlue : colorRed), 1);
         }
     }
 }
+
 
 float __cdecl Path_GetDebugStringScale(const float *cameraPos, const float *origin)
 {
@@ -1168,7 +1176,8 @@ float __cdecl Path_GetDebugStringScale(const float *cameraPos, const float *orig
     {
         v5 = (float)(cameraPos[1] - origin[1]);
         v6 = (float)((float)(cameraPos[2] - origin[2]) + v4->client->ps.viewHeightCurrent);
-        v7 = (float)((float)__fsqrts((float)((float)((float)v6 * (float)v6)
+        //v7 = (float)((float)__fsqrts((float)((float)((float)v6 * (float)v6)
+        v7 = (float)((float)sqrtf((float)((float)((float)v6 * (float)v6)
             + (float)((float)((float)(*cameraPos - *origin) * (float)(*cameraPos - *origin))
                 + (float)((float)v5 * (float)v5))))
             * (float)0.0022222223);
@@ -1180,7 +1189,7 @@ float __cdecl Path_GetDebugStringScale(const float *cameraPos, const float *orig
     return *((float *)&v7 + 1);
 }
 
-void __cdecl Path_DrawDebugNodeBox(const pathnode_t *node, int a2, int a3, const float *a4)
+void __cdecl Path_DrawDebugNodeBox(const pathnode_t *node)
 {
     long double v5; // fp2
     double v6; // fp31
@@ -1191,34 +1200,32 @@ void __cdecl Path_DrawDebugNodeBox(const pathnode_t *node, int a2, int a3, const
     double v11; // fp31
     long double v12; // fp2
     nodeType type; // r11
-    float v14; // [sp+50h] [-70h] BYREF
-    float v15; // [sp+54h] [-6Ch]
-    float v16; // [sp+58h] [-68h]
-    float v17; // [sp+60h] [-60h] BYREF
-    float v18; // [sp+64h] [-5Ch]
-    float v19; // [sp+68h] [-58h]
+    float maxs[3]; // [sp+50h] [-70h] BYREF
+    float mins[3]; // [sp+60h] [-60h] BYREF
     float v20; // [sp+70h] [-50h] BYREF
     float v21; // [sp+74h] [-4Ch]
     float v22; // [sp+78h] [-48h]
     float v23[6]; // [sp+80h] [-40h] BYREF
 
-    v17 = -16.0;
-    v18 = -16.0;
-    v19 = 0.0;
-    v14 = 16.0;
-    v15 = 16.0;
-    v16 = 16.0;
-    if (!node)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\pathnode.cpp", 1685, 0, "%s", "node");
-    G_DebugBox(node->constant.vOrigin, &v17, &v14, node->constant.fAngle, a4, (int)nodeColorTable[node->constant.type], 1);
+    mins[0] = -16.0f;
+    mins[1] = -16.0f;
+    mins[2] = 0.0f;
+
+    maxs[0] = 16.0f;
+    maxs[1] = 16.0f;
+    maxs[2] = 16.0f;
+
+    iassert(node);
+
+    G_DebugBox(node->constant.vOrigin, mins, maxs, node->constant.fAngle, nodeColorTable[node->constant.type], 1, 1);
     if ((node->constant.spawnflags & 0x8000) != 0)
     {
         v6 = (float)(node->constant.fAngle * (float)0.017453292);
         *(double *)&v5 = v6;
-        v7 = (float)((float)(node->constant.vOrigin[2] + v16) + (float)(node->constant.vOrigin[2] + v19));
-        v8 = (float)((float)((float)(node->constant.vOrigin[1] + v15) + (float)(node->constant.vOrigin[1] + v18))
+        v7 = (float)((float)(node->constant.vOrigin[2] + maxs[2]) + (float)(node->constant.vOrigin[2] + mins[2]));
+        v8 = (float)((float)((float)(node->constant.vOrigin[1] + maxs[1]) + (float)(node->constant.vOrigin[1] + mins[1]))
             * (float)0.5);
-        v20 = (float)((float)(node->constant.vOrigin[0] + v14) + (float)(node->constant.vOrigin[0] + v17)) * (float)0.5;
+        v20 = (float)((float)(node->constant.vOrigin[0] + maxs[0]) + (float)(node->constant.vOrigin[0] + mins[0])) * (float)0.5;
         v21 = v8;
         v22 = (float)v7 * (float)0.5;
         v9 = sin(v5);
@@ -1228,8 +1235,8 @@ void __cdecl Path_DrawDebugNodeBox(const pathnode_t *node, int a2, int a3, const
         v12 = cos(v9);
         type = node->constant.type;
         v23[2] = v22;
-        v23[1] = (float)((float)v11 * v14) + v21;
-        v23[0] = (float)((float)*(double *)&v12 * v14) + v20;
+        v23[1] = (float)((float)v11 * maxs[0]) + v21;
+        v23[0] = (float)((float)*(double *)&v12 * maxs[0]) + v20;
         G_DebugLine(&v20, v23, nodeColorTable[type], 1);
     }
 }
@@ -1238,19 +1245,25 @@ void __cdecl Path_DrawDebugNode(const float *cameraPos, const pathnode_t *node)
 {
     double DebugStringScale; // fp1
     const char *v7; // r5
-    float v8[16]; // [sp+50h] [-40h] BYREF
+    float xyz[16]; // [sp+50h] [-40h] BYREF
 
     if (!cameraPos)
         MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\pathnode.cpp", 1724, 0, "%s", "cameraPos");
     if (!node)
         MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\pathnode.cpp", 1725, 0, "%s", "node");
-    Path_DrawDebugNodeBox(node, (int)node, a3, a4);
-    v8[0] = node->constant.vOrigin[0];
-    v8[2] = node->constant.vOrigin[2] + (float)8.0;
-    v8[1] = node->constant.vOrigin[1];
-    DebugStringScale = Path_GetDebugStringScale(cameraPos, v8);
-    G_AddDebugString(v8, colorYellow, DebugStringScale, v7, (int)nodeStringTable[node->constant.type]);
+    Path_DrawDebugNodeBox(node);
+    xyz[0] = node->constant.vOrigin[0];
+    xyz[2] = node->constant.vOrigin[2] + 8.0f;
+    xyz[1] = node->constant.vOrigin[1];
+    DebugStringScale = Path_GetDebugStringScale(cameraPos, xyz);
+    G_AddDebugString(xyz, colorYellow, DebugStringScale, nodeStringTable[node->constant.type]);
 }
+
+static int iValidBits;
+static float vStartPos[3];
+static float vGoalPos[3];
+static float width;
+static float perp[2];
 
 void __cdecl Path_DrawDebugFindPath(float *vOrigin)
 {
@@ -1313,19 +1326,19 @@ void __cdecl Path_DrawDebugFindPath(float *vOrigin)
 LABEL_11:
     if (iValidBits != 3 || vStartPos[0] == vGoalPos[0] && vStartPos[1] == vGoalPos[1] && vStartPos[2] == vGoalPos[2])
         return;
-    v3 = (path_t *)dword_82E20404;
-    if (!dword_82E20404)
+    v3 = (path_t *)g_pPath;
+    if (!g_pPath)
     {
-        dword_82E20404 = (int)&stru_82E20408;
-        Path_Begin(&stru_82E20408);
-        Path_FindPath((path_t *)dword_82E20404, TEAM_FREE, vStartPos, vGoalPos, 1);
-        v3 = (path_t *)dword_82E20404;
+        g_pPath = &some_path;
+        Path_Begin(&some_path);
+        Path_FindPath((path_t *)g_pPath, TEAM_FREE, vStartPos, vGoalPos, 1);
+        v3 = (path_t *)g_pPath;
     }
     if (ai_debugFindPath->current.integer == 4)
         goto LABEL_36;
     if (ai_debugFindPathDirect->current.enabled)
     {
-        if (!Path_FindPath(v3, TEAM_FREE, vStartPos, vGoalPos, 1) || !Path_Exists((const path_t *)dword_82E20404))
+        if (!Path_FindPath(v3, TEAM_FREE, vStartPos, vGoalPos, 1) || !Path_Exists((const path_t *)g_pPath))
             return;
         goto LABEL_30;
     }
@@ -1359,8 +1372,8 @@ LABEL_11:
     v19[0] = (float)((float)(perp[1] * (float)5000.0) + v15) + (float)(perp[0] * width);
     v19[1] = (float)(v16 - (float)(perp[0] * (float)5000.0)) + (float)(perp[1] * width);
     G_DebugLine(v18, v19, colorCyan, 0);
-    if (Path_FindPathWithWidth((path_t *)dword_82E20404, TEAM_FREE, vStartPos, vGoalPos, 1, width, v5, perp)
-        && Path_Exists((const path_t *)dword_82E20404))
+    if (Path_FindPathWithWidth((path_t *)g_pPath, TEAM_FREE, vStartPos, vGoalPos, 1, width, v5, perp)
+        && Path_Exists((const path_t *)g_pPath))
     {
     LABEL_30:
         actualNodeCount = g_path.actualNodeCount;
@@ -1374,20 +1387,20 @@ LABEL_11:
                 if (gameWorldSp.path.nodes[v8].transient.iSearchFrame == level.iSearchFrame)
                 {
                     v10 = va("%i", v7);
-                    G_AddDebugString(v9->constant.vOrigin, colorWhite, 1.0, v11, (int)v10);
+                    G_AddDebugString(v9->constant.vOrigin, colorWhite, 1.0, v11);
                     actualNodeCount = g_path.actualNodeCount;
                 }
                 ++v7;
                 ++v8;
             } while (v7 < actualNodeCount);
         }
-        v3 = (path_t *)dword_82E20404;
+        v3 = (path_t *)g_pPath;
     LABEL_36:
         v12 = ai_debugFindPath->current.integer;
         if (v12 == 4 || v12 == 5)
         {
             Path_UpdateLookahead(v3, vStartPos, 0, 0, 1);
-            Path_DebugDraw((path_t *)dword_82E20404, vStartPos, 1);
+            Path_DebugDraw((path_t *)g_pPath, vStartPos, 1);
         }
         else
         {
@@ -1452,11 +1465,11 @@ void __cdecl Path_DrawFriendlyChain()
                             break;
                         if (v10->constant.wChainId == v7)
                         {
-                            Path_DrawDebugNode(v18, &gameWorldSp.path.nodes[v9], v1, v0);
+                            Path_DrawDebugNode(v18, &gameWorldSp.path.nodes[v9]);
                             v11 = "%i";
                         LABEL_14:
                             v12 = va(v11, v10->constant.wChainDepth);
-                            G_AddDebugString(v10->constant.vOrigin, colorWhite, 1.0, v13, (int)v12);
+                            G_AddDebugString(v10->constant.vOrigin, colorWhite, 1.0, v13);
                             fRadius = v10->constant.fRadius;
                             if (fRadius != 0.0)
                                 G_DebugCircle(v10->constant.vOrigin, fRadius, v14, (int)colorWhite, 1, 1);
@@ -1466,7 +1479,7 @@ void __cdecl Path_DrawFriendlyChain()
                         if (v8 >= g_path.actualNodeCount)
                             goto LABEL_17;
                     }
-                    Path_DrawDebugNode(v18, &gameWorldSp.path.nodes[v9], v1, v0);
+                    Path_DrawDebugNode(v18, &gameWorldSp.path.nodes[v9]);
                     v11 = "CURRENT %i";
                     goto LABEL_14;
                 }
@@ -1870,7 +1883,7 @@ void __cdecl Path_AttachSentientToChainNode(sentient_s *sentient, unsigned __int
                         if (*(unsigned __int16 *)((char *)&nodes->constant.targetname + __ROL4__(nodeForChainNode[v12], 7)) == v4)
                         {
                             v13 = SL_ConvertToString(v4);
-                            Com_Error(ERR_DROP, byte_82041320, v13);
+                            Com_Error(ERR_DROP, "node '%s' is not part of a friendly chain", v13);
                             nodeForChainNode = gameWorldSp.path.nodeForChainNode;
                             nodes = gameWorldSp.path.nodes;
                             actualNodeCount = g_path.actualNodeCount;
@@ -1880,7 +1893,7 @@ void __cdecl Path_AttachSentientToChainNode(sentient_s *sentient, unsigned __int
                     } while (v6 < actualNodeCount);
                 }
                 v14 = SL_ConvertToString(v4);
-                Com_Error(ERR_DROP, byte_820412F4, v14);
+                Com_Error(ERR_DROP, "friendly chain node '%s' does not exist", v14);
             }
         }
     }
@@ -1948,28 +1961,30 @@ pathnode_t *__cdecl Path_NextNode(pathnode_t *prevNode, int typeFlags)
 
 sentient_s *__cdecl Path_GetNodeOwner(const pathnode_t *node)
 {
-    pathnode_dynamic_t *p_dynamic; // r31
+    const pathnode_dynamic_t *p_dynamic; // r31
     int v4; // r11
     pathnode_dynamic_t *v5; // r30
     int v6; // r11
 
-    if (!node)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\pathnode.cpp", 2834, 0, "%s", "node");
+    iassert(node);
+
     p_dynamic = &node->dynamic;
-    if (SentientHandle::isDefined(&node->dynamic.pOwner))
-        return SentientHandle::sentient(&p_dynamic->pOwner);
+
+    if (node->dynamic.pOwner.isDefined())
+        return p_dynamic->pOwner.sentient();
+
     v4 = node->constant.wOverlapNode[0];
     if (v4 >= 0)
     {
         v5 = &gameWorldSp.path.nodes[v4].dynamic;
-        if (SentientHandle::isDefined(&v5->pOwner))
-            return SentientHandle::sentient(&v5->pOwner);
+        if (v5->pOwner.isDefined())
+            return v5->pOwner.sentient();
         v6 = node->constant.wOverlapNode[1];
         if (v6 >= 0)
         {
             p_dynamic = &gameWorldSp.path.nodes[v6].dynamic;
-            if (SentientHandle::isDefined(&p_dynamic->pOwner))
-                return SentientHandle::sentient(&p_dynamic->pOwner);
+            if (p_dynamic->pOwner.isDefined())
+                return p_dynamic->pOwner.sentient();
         }
     }
     return 0;
@@ -1984,33 +1999,17 @@ int __cdecl Path_CanStealPriorityNode(const pathnode_t *node, sentient_s *claime
     double v8; // fp31
     double v9; // fp1
 
-    if (!node)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\pathnode.cpp", 2865, 0, "%s", "node");
-    if ((node->constant.spawnflags & 0x40) == 0)
-        MyAssertHandler(
-            "c:\\trees\\cod3\\cod3src\\src\\game\\pathnode.cpp",
-            2866,
-            0,
-            "%s",
-            "node->constant.spawnflags & PNF_PRIORITY");
-    if (!claimer)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\pathnode.cpp", 2867, 0, "%s", "claimer");
+    iassert(node);
+    iassert(node->constant.spawnflags & PNF_PRIORITY);
+    iassert(claimer);
+
     NodeOwner = Path_GetNodeOwner(node);
     v5 = NodeOwner;
     if (!NodeOwner)
         return 1;
     if (node->dynamic.wOverlapCount > 1)
     {
-        if (SentientHandle::isDefined(&node->dynamic.pOwner))
-        {
-            MyAssertHandler(
-                "c:\\trees\\cod3\\cod3src\\src\\game\\pathnode.cpp",
-                2885,
-                0,
-                "%s",
-                "!node->dynamic.pOwner.isDefined()");
-            return 0;
-        }
+        iassert(!node->dynamic.pOwner.isDefined());
         return 0;
     }
     actor = NodeOwner->ent->actor;
@@ -2050,16 +2049,7 @@ int __cdecl Path_CanStealNode(const pathnode_t *node, sentient_s *claimer)
         return 1;
     if (node->dynamic.wOverlapCount > 1)
     {
-        if (SentientHandle::isDefined(&node->dynamic.pOwner))
-        {
-            MyAssertHandler(
-                "c:\\trees\\cod3\\cod3src\\src\\game\\pathnode.cpp",
-                2960,
-                0,
-                "%s",
-                "!node->dynamic.pOwner.isDefined()");
-            return 0;
-        }
+        iassert(!node->dynamic.pOwner.isDefined());
         return 0;
     }
     if (!NodeOwner->ent->actor)
@@ -2101,67 +2091,33 @@ void __cdecl Path_ClaimNodeInternal(pathnode_t *node, sentient_s *claimer)
 
 void __cdecl Path_MarkNodeOverlap(pathnode_t *node)
 {
-    if (!node)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\pathnode.cpp", 3075, 0, "%s", "node");
-    SentientHandle::setSentient(&node->dynamic.pOwner, 0);
+    iassert(node);
+    node->dynamic.pOwner.setSentient(NULL);
     ++node->dynamic.wOverlapCount;
     node->dynamic.iFreeTime = 0x7FFFFFFF;
 }
 
 void __cdecl Path_ClaimNode(pathnode_t *node, sentient_s *claimer)
 {
-    team_t eTeam; // r8
     int iFreeTime; // r8
-    int v6; // r18
+    int loopItr; // r18
     __int16 *wOverlapNode; // r20
     int v8; // r11
-    pathnode_t *v9; // r31
+    pathnode_t *otherNode; // r31
     SentientHandle *p_pOwner; // r30
     int v11; // r5
     const char *v12; // r3
-    __int16 wOverlapCount; // r11
-    __int16 v14; // r11
     actor_s *actor; // r3
 
-    if (!node)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\pathnode.cpp", 3091, 0, "%s", "node");
-    if (!claimer)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\pathnode.cpp", 3092, 0, "%s", "claimer");
-    eTeam = claimer->eTeam;
-    if (eTeam != TEAM_AXIS && eTeam != TEAM_ALLIES && eTeam != TEAM_NEUTRAL)
-        MyAssertHandler(
-            "c:\\trees\\cod3\\cod3src\\src\\game\\pathnode.cpp",
-            3093,
-            0,
-            "%s\n\t(claimer->eTeam) = %i",
-            "(claimer->eTeam == TEAM_AXIS || claimer->eTeam == TEAM_ALLIES || claimer->eTeam == TEAM_NEUTRAL)",
-            eTeam);
-    if (!SentientHandle::isDefined(&node->dynamic.pOwner) || SentientHandle::sentient(&node->dynamic.pOwner) != claimer)
-    {
-        iFreeTime = node->dynamic.iFreeTime;
-        if (iFreeTime >= level.time)
-            MyAssertHandler(
-                "c:\\trees\\cod3\\cod3src\\src\\game\\pathnode.cpp",
-                3094,
-                0,
-                "%s\n\t(node->dynamic.iFreeTime) = %i",
-                "((node->dynamic.pOwner.isDefined() && (node->dynamic.pOwner.sentient() == claimer)) || node->dynamic.iFreeTime < level.time)",
-                iFreeTime);
-    }
-    if (SentientHandle::isDefined(&node->dynamic.pOwner)
-        && SentientHandle::sentient(&node->dynamic.pOwner) != claimer
-        && level.time <= *(&node->dynamic.iFreeTime + claimer->eTeam))
-    {
-        MyAssertHandler(
-            "c:\\trees\\cod3\\cod3src\\src\\game\\pathnode.cpp",
-            3095,
-            0,
-            "%s",
-            "!node->dynamic.pOwner.isDefined() || node->dynamic.pOwner.sentient() == claimer || level.time > node->dynamic.iVal"
-            "idTime[claimer->eTeam - TEAM_AXIS]");
-    }
-    SentientHandle::setSentient(&node->dynamic.pOwner, claimer);
-    v6 = 0;
+    iassert(node);
+    iassert(claimer);
+    iassert(claimer->eTeam == TEAM_AXIS || claimer->eTeam == TEAM_ALLIES || claimer->eTeam == TEAM_NEUTRAL);
+    iassert(((node->dynamic.pOwner.isDefined() && (node->dynamic.pOwner.sentient() == claimer)) || node->dynamic.iFreeTime < level.time));
+    iassert(!node->dynamic.pOwner.isDefined() || node->dynamic.pOwner.sentient() == claimer || level.time > node->dynamic.iValidTime[claimer->eTeam - TEAM_AXIS]);
+
+    node->dynamic.pOwner.setSentient(claimer);
+
+    loopItr = 0;
     wOverlapNode = node->constant.wOverlapNode;
     node->dynamic.iFreeTime = 0x7FFFFFFF;
     do
@@ -2169,60 +2125,25 @@ void __cdecl Path_ClaimNode(pathnode_t *node, sentient_s *claimer)
         v8 = *wOverlapNode;
         if (v8 < 0)
             break;
-        v9 = &gameWorldSp.path.nodes[v8];
-        p_pOwner = &v9->dynamic.pOwner;
-        if ((!SentientHandle::isDefined(&v9->dynamic.pOwner) || SentientHandle::sentient(p_pOwner) != claimer)
-            && v9->dynamic.iFreeTime == 0x7FFFFFFF
-            && !v9->dynamic.wOverlapCount)
-        {
-            if (SentientHandle::isDefined(p_pOwner))
-                v11 = SentientHandle::sentient(p_pOwner) - level.sentients;
-            else
-                v11 = -1;
-            v12 = va("node = %i, owner = %i, free time = %i", v9 - gameWorldSp.path.nodes, v11, v9->dynamic.iFreeTime);
-            MyAssertHandler(
-                "c:\\trees\\cod3\\cod3src\\src\\game\\pathnode.cpp",
-                3108,
-                0,
-                "%s\n\t%s",
-                "((otherNode->dynamic.pOwner.isDefined() && (otherNode->dynamic.pOwner.sentient() == claimer)) || (otherNode->dyn"
-                "amic.iFreeTime != INT_MAX) || (otherNode->dynamic.wOverlapCount))",
-                v12);
-        }
-        if (!v9)
-            MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\pathnode.cpp", 3075, 0, "%s", "node");
-        SentientHandle::setSentient(p_pOwner, 0);
-        wOverlapCount = v9->dynamic.wOverlapCount;
-        v9->dynamic.iFreeTime = 0x7FFFFFFF;
-        v14 = wOverlapCount + 1;
-        v9->dynamic.wOverlapCount = v14;
-        if ((unsigned __int16)v14 >= 3u)
-            MyAssertHandler(
-                "c:\\trees\\cod3\\cod3src\\src\\game\\pathnode.cpp",
-                3112,
-                0,
-                "otherNode->dynamic.wOverlapCount doesn't index ARRAY_COUNT( otherNode->constant.wOverlapNode ) + 1\n"
-                "\t%i not in [0, %i)",
-                v14,
-                3);
-        if (*((unsigned __int16 *)&v9->constant.minUseDistSq + v9->dynamic.wOverlapCount + 1) >= 0x8000u)
-            MyAssertHandler(
-                "c:\\trees\\cod3\\cod3src\\src\\game\\pathnode.cpp",
-                3113,
-                0,
-                "%s",
-                "otherNode->constant.wOverlapNode[otherNode->dynamic.wOverlapCount - 1] >= 0");
-        ++v6;
+        otherNode = &gameWorldSp.path.nodes[v8];
+        p_pOwner = &otherNode->dynamic.pOwner;
+
+        iassert(((otherNode->dynamic.pOwner.isDefined() && (otherNode->dynamic.pOwner.sentient() == claimer)) || (otherNode->dynamic.iFreeTime != INT_MAX) || (otherNode->dynamic.wOverlapCount)));
+        iassert(otherNode);
+
+        p_pOwner->setSentient(NULL);
+
+        otherNode->dynamic.iFreeTime = 0x7FFFFFFF;
+        otherNode->dynamic.wOverlapCount++;
+
+        bcassert(otherNode->dynamic.wOverlapCount, ARRAY_COUNT(otherNode->constant.wOverlapNode) + 1);
+        iassert(otherNode->constant.wOverlapNode[otherNode->dynamic.wOverlapCount - 1] >= 0);
+        ++loopItr;
         ++wOverlapNode;
-    } while (v6 < 2);
-    actor = claimer->ent->actor;
-    if (actor && (unsigned __int8)Actor_KeepClaimedNode(actor))
-        MyAssertHandler(
-            "c:\\trees\\cod3\\cod3src\\src\\game\\pathnode.cpp",
-            3066,
-            0,
-            "%s",
-            "!claimer->ent->actor || !Actor_KeepClaimedNode(claimer->ent->actor)");
+    } while (loopItr < 2);
+
+    iassert(!claimer->ent->actor || !Actor_KeepClaimedNode(claimer->ent->actor));
+
     claimer->pClaimedNode = node;
     claimer->banNodeTime = 0;
     Sentient_BanNearNodes(claimer);
@@ -2231,32 +2152,23 @@ void __cdecl Path_ClaimNode(pathnode_t *node, sentient_s *claimer)
 void __cdecl Path_RevokeClaim(pathnode_t *node, sentient_s *pNewClaimer)
 {
     pathnode_dynamic_t *p_dynamic; // r31
-    sentient_s *v5; // r3
 
     p_dynamic = &node->dynamic;
-    if ((!SentientHandle::isDefined(&node->dynamic.pOwner)
-        || !SentientHandle::sentient(&p_dynamic->pOwner)->ent
-        || SentientHandle::sentient(&p_dynamic->pOwner)->ent->actor)
-        && SentientHandle::isDefined(&p_dynamic->pOwner)
-        && SentientHandle::sentient(&p_dynamic->pOwner) != pNewClaimer
+    if ((!node->dynamic.pOwner.isDefined()
+        || !p_dynamic->pOwner.sentient()->ent
+        || p_dynamic->pOwner.sentient()->ent->actor)
+        && p_dynamic->pOwner.isDefined()
+        && p_dynamic->pOwner.sentient() != pNewClaimer
         && node->dynamic.iFreeTime == 0x7FFFFFFF)
     {
-        v5 = SentientHandle::sentient(&p_dynamic->pOwner);
-        Sentient_NodeClaimRevoked(v5, node);
-        if (node->dynamic.iFreeTime == 0x7FFFFFFF)
-            MyAssertHandler(
-                "c:\\trees\\cod3\\cod3src\\src\\game\\pathnode.cpp",
-                3132,
-                0,
-                "%s",
-                "node->dynamic.iFreeTime != INT_MAX");
+        Sentient_NodeClaimRevoked(p_dynamic->pOwner.sentient(), node);
+        iassert(node->dynamic.iFreeTime != INT_MAX);
     }
 }
 
 void __cdecl Path_RelinquishNode(sentient_s *claimer, int timeUntilRelinquished)
 {
-    pathnode_t *pClaimedNode; // r27
-    team_t eTeam; // r8
+    pathnode_t *node; // r27
     gentity_s *ent; // r3
     gentity_s *v7; // r11
     actor_s *actor; // r11
@@ -2265,35 +2177,16 @@ void __cdecl Path_RelinquishNode(sentient_s *claimer, int timeUntilRelinquished)
     __int16 *wOverlapNode; // r26
     int i; // r25
     int v13; // r11
-    pathnode_t *v14; // r31
+    pathnode_t *otherNode; // r31
     int v15; // r11
 
-    pClaimedNode = claimer->pClaimedNode;
-    if (!pClaimedNode)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\pathnode.cpp", 3228, 0, "%s", "node");
-    if (!SentientHandle::isDefined(&pClaimedNode->dynamic.pOwner))
-        MyAssertHandler(
-            "c:\\trees\\cod3\\cod3src\\src\\game\\pathnode.cpp",
-            3229,
-            0,
-            "%s",
-            "node->dynamic.pOwner.isDefined()");
-    if (SentientHandle::sentient(&pClaimedNode->dynamic.pOwner) != claimer)
-        MyAssertHandler(
-            "c:\\trees\\cod3\\cod3src\\src\\game\\pathnode.cpp",
-            3230,
-            0,
-            "%s",
-            "node->dynamic.pOwner.sentient() == claimer");
-    eTeam = claimer->eTeam;
-    if (eTeam != TEAM_AXIS && eTeam != TEAM_ALLIES && eTeam != TEAM_NEUTRAL)
-        MyAssertHandler(
-            "c:\\trees\\cod3\\cod3src\\src\\game\\pathnode.cpp",
-            3232,
-            0,
-            "%s\n\t(claimer->eTeam) = %i",
-            "(claimer->eTeam == TEAM_AXIS || claimer->eTeam == TEAM_ALLIES || claimer->eTeam == TEAM_NEUTRAL)",
-            eTeam);
+    node = claimer->pClaimedNode;
+
+    iassert(node);
+    iassert(node->dynamic.pOwner.isDefined());
+    iassert(node->dynamic.pOwner.sentient() == claimer);
+    iassert(claimer->eTeam == TEAM_AXIS || claimer->eTeam == TEAM_ALLIES || claimer->eTeam == TEAM_NEUTRAL);
+    
     ent = claimer->ent;
     claimer->pClaimedNode = 0;
     Scr_Notify(ent, scr_const.node_relinquished, 0);
@@ -2312,28 +2205,22 @@ void __cdecl Path_RelinquishNode(sentient_s *claimer, int timeUntilRelinquished)
         v9 = 0;
         v10 = 0;
     }
-    pClaimedNode->dynamic.iFreeTime = v9;
-    SentientHandle::setSentient(&pClaimedNode->dynamic.pOwner, v10);
-    wOverlapNode = pClaimedNode->constant.wOverlapNode;
+    node->dynamic.iFreeTime = v9;
+    node->dynamic.pOwner.setSentient(v10);
+    wOverlapNode = node->constant.wOverlapNode;
     for (i = 0; i < 2; ++i)
     {
         v13 = *wOverlapNode;
         if (v13 < 0)
             break;
-        v14 = &gameWorldSp.path.nodes[v13];
-        if (SentientHandle::isDefined(&v14->dynamic.pOwner))
-            MyAssertHandler(
-                "c:\\trees\\cod3\\cod3src\\src\\game\\pathnode.cpp",
-                3266,
-                0,
-                "%s",
-                "!otherNode->dynamic.pOwner.isDefined()");
-        v15 = (__int16)(v14->dynamic.wOverlapCount - 1);
-        v14->dynamic.wOverlapCount = v15;
+        otherNode = &gameWorldSp.path.nodes[v13];
+        iassert(!otherNode->dynamic.pOwner.isDefined());
+        v15 = (__int16)(otherNode->dynamic.wOverlapCount - 1);
+        otherNode->dynamic.wOverlapCount = v15;
         if (!v15)
         {
-            SentientHandle::setSentient(&v14->dynamic.pOwner, v10);
-            v14->dynamic.iFreeTime = v9;
+            otherNode->dynamic.pOwner.setSentient(v10);
+            otherNode->dynamic.iFreeTime = v9;
         }
         ++wOverlapNode;
     }
@@ -2388,7 +2275,7 @@ int __cdecl Path_SaveIndex(const pathnode_t *node)
 pathnode_t *__cdecl Path_LoadNode(unsigned int index)
 {
     if (index > g_path.actualNodeCount)
-        Com_Error(ERR_DROP, byte_8204195C, index);
+        Com_Error(ERR_DROP, "Path_LoadNode: node out of range (%i)", index);
     if (index)
         return &gameWorldSp.path.nodes[index - 1];
     else
@@ -2688,6 +2575,38 @@ void __cdecl Path_ConnectPath(pathnode_t *node, pathlink_s *link)
     Path_ValidateNode(node);
 }
 
+static void __fastcall Path_ConnectPath_0(pathnode_t *node, int toNodeNum)
+{
+    int totalLinkCount; // r8
+    int wLinkCount; // r11
+    pathlink_s *v4; // r10
+
+    totalLinkCount = node->constant.totalLinkCount;
+    wLinkCount = node->dynamic.wLinkCount;
+    if (wLinkCount >= totalLinkCount)
+    {
+    LABEL_5:
+        if (!alwaysfails)
+            MyAssertHandler(
+                "c:\\trees\\cod3\\cod3src\\src\\game\\pathnode.cpp",
+                3499,
+                0,
+                "Path_ConnectPath: should be unreachable");
+    }
+    else
+    {
+        v4 = &node->constant.Links[wLinkCount];
+        while (v4->nodeNum != toNodeNum)
+        {
+            ++wLinkCount;
+            ++v4;
+            if (wLinkCount >= totalLinkCount)
+                goto LABEL_5;
+        }
+        Path_ConnectPath(node, v4);
+    }
+}
+
 void __cdecl Path_ConnectPathsForEntity(gentity_s *ent)
 {
     int disconnectedLinks; // r7
@@ -2725,6 +2644,43 @@ void __cdecl Path_ConnectPathsForEntity(gentity_s *ent)
     }
 }
 
+void __fastcall Path_DisconnectPath_0(gentity_s *ent, pathnode_t *node, pathlink_s *link)
+{
+    int next; // r29
+    unsigned __int16 v7; // r28
+    PathLinkInfo *v8; // r11
+    int v9; // r7
+    int v10; // r10
+
+    next = g_path.pathLinkInfoArray[0].next;
+    v7 = g_path.pathLinkInfoArray[0].next;
+    if (!g_path.pathLinkInfoArray[0].next)
+        Com_Error(ERR_DROP, "max number of disconnected paths exceeded");
+    v8 = &g_path.pathLinkInfoArray[next];
+    v9 = node - gameWorldSp.path.nodes;
+    g_path.pathLinkInfoArray[0].next = v8->next;
+    *(unsigned __int16 *)((char *)&g_path.pathLinkInfoArray[0].prev + __ROL4__(v8->next, 3)) = 0;
+    v8->from = v9;
+    v8->to = link->nodeNum;
+    if (ent->disconnectedLinks)
+    {
+        v8->prev = ent->disconnectedLinks;
+        v10 = *(unsigned __int16 *)((char *)&g_path.pathLinkInfoArray[0].next + __ROL4__(ent->disconnectedLinks, 3));
+        v8->next = v10;
+        *(unsigned __int16 *)((char *)&g_path.pathLinkInfoArray[0].prev + __ROL4__(v10, 3)) = v7;
+        *(unsigned __int16 *)((char *)&g_path.pathLinkInfoArray[0].next + __ROL4__(v8->prev, 3)) = v7;
+    }
+    else
+    {
+        ent->disconnectedLinks = v7;
+        v8->next = v7;
+        v8->prev = v7;
+    }
+    Path_DisconnectPath(node, link);
+}
+
+static float disconnectMins[3] = { -15.0, -15.0, 18.0 };
+static float disconnectMaxs[3] = { 15.0, 15.0, 72.0 };
 void __cdecl Path_DisconnectPathsForEntity(gentity_s *ent)
 {
     int number; // r26
@@ -3078,8 +3034,10 @@ void __cdecl Path_UpdateBrushBadPlaceCount(gentity_s *brushEnt, int teamflags, i
         do
         {
             node = v11->node;
+
             if (SV_EntityContact(v11->node->constant.vOrigin, v11->node->constant.vOrigin, brushEnt))
                 *((_BYTE *)v21 + node - gameWorldSp.path.nodes) = 1;
+
             v10 = (pathnode_tree_t *)((char *)v10 - 1);
             ++v11;
         } while (v10);
@@ -3211,7 +3169,7 @@ void __cdecl Scr_SetNodePriority()
     NodeTypeToName *v4; // r11
     char v5; // r11
     int v6; // r31
-    char **p_name; // r30
+    const char **p_name; // r30
     unsigned __int16 v8; // r11
 
     if (Scr_GetNumParam() == 2)
@@ -3419,17 +3377,9 @@ void __cdecl G_DropPathnodesToFloor()
 
 void __cdecl Scr_FreePathnode(pathnode_t *node)
 {
-    unsigned int v2; // r3
+    iassert(!node->dynamic.pOwner.isDefined());
 
-    if (SentientHandle::isDefined(&node->dynamic.pOwner))
-        MyAssertHandler(
-            "c:\\trees\\cod3\\cod3src\\src\\game\\pathnode.cpp",
-            989,
-            0,
-            "%s",
-            "!node->dynamic.pOwner.isDefined()");
-    v2 = Path_ConvertNodeToIndex(node);
-    Scr_FreeEntityNum(v2, 2u);
+    Scr_FreeEntityNum(Path_ConvertNodeToIndex(node), 2u);
 }
 
 void __cdecl Scr_AddPathnode(pathnode_t *node)
@@ -3580,8 +3530,7 @@ void __cdecl Scr_GetAllNodes()
 void __cdecl Path_Shutdown()
 {
     pathnode_t *i; // r31
-    pathnode_t *nodes; // r31
-    unsigned int v2; // r3
+    pathnode_t *node; // r31
 
     Path_ShutdownBadPlaces();
     for (i = gameWorldSp.path.nodes; i != &gameWorldSp.path.nodes[g_path.actualNodeCount]; ++i)
@@ -3595,22 +3544,15 @@ void __cdecl Path_Shutdown()
         if (i->constant.script_noteworthy && (SL_GetUser(i->constant.script_noteworthy) & 1) != 0)
             i->constant.script_noteworthy = 0;
     }
-    nodes = gameWorldSp.path.nodes;
+    node = gameWorldSp.path.nodes;
     g_path.extraNodes = 0;
-    for (g_path.originErrors = 0; nodes != &gameWorldSp.path.nodes[g_path.actualNodeCount]; ++nodes)
+    for (g_path.originErrors = 0; node != &gameWorldSp.path.nodes[g_path.actualNodeCount]; ++node)
     {
-        if (SentientHandle::isDefined(&nodes->dynamic.pOwner))
-            MyAssertHandler(
-                "c:\\trees\\cod3\\cod3src\\src\\game\\pathnode.cpp",
-                989,
-                0,
-                "%s",
-                "!node->dynamic.pOwner.isDefined()");
-        v2 = Path_ConvertNodeToIndex(nodes);
-        Scr_FreeEntityNum(v2, 2u);
+        iassert(!node->dynamic.pOwner.isDefined());
+        Scr_FreeEntityNum(Path_ConvertNodeToIndex(node), 2);
     }
     g_path.actualNodeCount = 0;
-    dword_82E20404 = 0;
+    g_pPath = 0;
 }
 
 void __cdecl Path_AutoDisconnectPaths()
@@ -3678,7 +3620,7 @@ void __cdecl Path_DrawVisData()
         v4 = v3;
         if (v3)
         {
-            Path_DrawDebugNode(v15, v3, v2, v1);
+            Path_DrawDebugNode(v15, v3);
             v5 = 0;
             if (g_path.actualNodeCount)
             {
@@ -3695,13 +3637,13 @@ void __cdecl Path_DrawVisData()
                         break;
                     if (Path_ExpandedNodeVisible(v4, v7))
                     {
-                        Path_DrawDebugNode(v15, v7, v12, v11);
+                        Path_DrawDebugNode(v15, v7);
                         v10 = colorRed;
                         goto LABEL_16;
                     }
                     if (Path_NodesVisible(v4, v7))
                     {
-                        Path_DrawDebugNode(v15, v7, v14, v13);
+                        Path_DrawDebugNode(v15, v7);
                         v10 = colorYellow;
                         goto LABEL_16;
                     }
@@ -3709,7 +3651,7 @@ void __cdecl Path_DrawVisData()
                     if (++v5 >= g_path.actualNodeCount)
                         return;
                 }
-                Path_DrawDebugNode(v15, v7, v9, v8);
+                Path_DrawDebugNode(v15, v7);
                 v10 = colorGreen;
             LABEL_16:
                 G_DebugLine(v4->constant.vOrigin, v7->constant.vOrigin, v10, 0);
@@ -3732,32 +3674,22 @@ void __cdecl Path_RelinquishNodeSoon(sentient_s *claimer)
 void __cdecl Path_MarkNodeInvalid(pathnode_t *node, team_t eTeam)
 {
     pathnode_dynamic_t *p_dynamic; // r23
-    sentient_s *v5; // r3
     int v6; // r27
     __int16 *wOverlapNode; // r28
     int v8; // r11
     pathnode_t *v9; // r31
 
-    if (!node)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\pathnode.cpp", 3284, 0, "%s", "node");
-    if (eTeam != TEAM_AXIS && eTeam != TEAM_ALLIES && eTeam != TEAM_NEUTRAL)
-        MyAssertHandler(
-            "c:\\trees\\cod3\\cod3src\\src\\game\\pathnode.cpp",
-            3285,
-            0,
-            "%s\n\t(eTeam) = %i",
-            "(eTeam == TEAM_AXIS || eTeam == TEAM_ALLIES || eTeam == TEAM_NEUTRAL)",
-            eTeam);
+    iassert(node);
+    iassert(eTeam == TEAM_AXIS || eTeam == TEAM_ALLIES || eTeam == TEAM_NEUTRAL);
+
     p_dynamic = &node->dynamic;
-    if (SentientHandle::isDefined(&node->dynamic.pOwner)
-        && SentientHandle::sentient(&node->dynamic.pOwner)->eTeam == eTeam)
+    if (node->dynamic.pOwner.isDefined() && node->dynamic.pOwner.sentient()->eTeam == eTeam)
     {
-        if (SentientHandle::sentient(&node->dynamic.pOwner)->pClaimedNode)
+        if (node->dynamic.pOwner.sentient()->pClaimedNode)
         {
-            v5 = SentientHandle::sentient(&node->dynamic.pOwner);
-            Path_RelinquishNode(v5, 5000);
+            Path_RelinquishNode(node->dynamic.pOwner.sentient(), 5000);
         }
-        SentientHandle::setSentient(&node->dynamic.pOwner, 0);
+        node->dynamic.pOwner.setSentient(NULL);
     }
     *(&node->dynamic.iFreeTime + eTeam) = level.time + 5000;
     if (!node->dynamic.wOverlapCount)
@@ -3773,10 +3705,9 @@ void __cdecl Path_MarkNodeInvalid(pathnode_t *node, team_t eTeam)
             v9 = &gameWorldSp.path.nodes[v8];
             if (!v9->dynamic.wOverlapCount && v9->dynamic.iFreeTime != 0x7FFFFFFF)
             {
-                if (SentientHandle::isDefined(&v9->dynamic.pOwner)
-                    && SentientHandle::sentient(&v9->dynamic.pOwner)->eTeam == eTeam)
+                if (v9->dynamic.pOwner.isDefined() && v9->dynamic.pOwner.sentient()->eTeam == eTeam)
                 {
-                    SentientHandle::setSentient(&v9->dynamic.pOwner, 0);
+                    v9->dynamic.pOwner.setSentient(NULL);
                 }
                 v9->dynamic.iFreeTime = 0;
             }
@@ -3784,16 +3715,8 @@ void __cdecl Path_MarkNodeInvalid(pathnode_t *node, team_t eTeam)
             ++wOverlapNode;
         } while (v6 < 2);
     }
-    if (SentientHandle::isDefined(&p_dynamic->pOwner))
-    {
-        if (SentientHandle::sentient(&p_dynamic->pOwner)->eTeam == eTeam)
-            MyAssertHandler(
-                "c:\\trees\\cod3\\cod3src\\src\\game\\pathnode.cpp",
-                3315,
-                0,
-                "%s",
-                "!node->dynamic.pOwner.isDefined() || node->dynamic.pOwner.sentient()->eTeam != eTeam");
-    }
+
+    iassert(!node->dynamic.pOwner.isDefined() || node->dynamic.pOwner.sentient()->eTeam != eTeam);
 }
 
 void __cdecl G_SetPathnodeScriptVariable(const char *key, const char *value, pathnode_t *ent)
@@ -3886,6 +3809,8 @@ void __cdecl G_ParsePathnodeScriptFields(pathnode_t *node)
     }
 }
 
+int overCount;
+
 void __cdecl G_SpawnPathnodeDynamic()
 {
     unsigned int v0; // r6
@@ -3915,7 +3840,7 @@ void __cdecl G_SpawnPathnodeDynamic()
                     v3 = 8;
                     do
                     {
-                        p_dynamic->pOwner = 0;
+                        p_dynamic->pOwner = (SentientHandle)0;
                         p_dynamic = (pathnode_dynamic_t *)((char *)p_dynamic + 4);
                         --v3;
                     } while (v3);
@@ -3949,26 +3874,16 @@ void __cdecl G_SpawnPathnodeDynamic()
 
 int __cdecl Path_CanClaimNode(const pathnode_t *node, sentient_s *claimer)
 {
-    team_t eTeam; // r8
     int iFreeTime; // r10
     sentient_s *NodeOwner; // r3
     int result; // r3
     bool v8; // zf
 
-    if (!node)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\pathnode.cpp", 3010, 0, "%s", "node");
-    if (!claimer)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\pathnode.cpp", 3011, 0, "%s", "claimer");
-    eTeam = claimer->eTeam;
-    if (eTeam != TEAM_AXIS && eTeam != TEAM_ALLIES && eTeam != TEAM_NEUTRAL)
-        MyAssertHandler(
-            "c:\\trees\\cod3\\cod3src\\src\\game\\pathnode.cpp",
-            3012,
-            0,
-            "%s\n\t(claimer->eTeam) = %i",
-            "(claimer->eTeam == TEAM_AXIS || claimer->eTeam == TEAM_ALLIES || claimer->eTeam == TEAM_NEUTRAL)",
-            eTeam);
-    if (SentientHandle::isDefined(&node->dynamic.pOwner) && SentientHandle::sentient(&node->dynamic.pOwner) == claimer)
+    iassert(node);
+    iassert(claimer);
+    iassert(claimer->eTeam == TEAM_AXIS || claimer->eTeam == TEAM_ALLIES || claimer->eTeam == TEAM_NEUTRAL);
+
+    if (node->dynamic.pOwner.isDefined() && node->dynamic.pOwner.sentient() == claimer)
         return 1;
     if (level.time <= *(&node->dynamic.iFreeTime + claimer->eTeam))
         return 0;
@@ -4015,7 +3930,7 @@ void __cdecl Path_ForceClaimNode(pathnode_t *node, sentient_s *claimer)
     pClaimedNode = claimer->pClaimedNode;
     if (pClaimedNode && pClaimedNode != node)
         Path_RelinquishNode(claimer, 5000);
-    if (SentientHandle::isDefined(&node->dynamic.pOwner) && SentientHandle::sentient(&node->dynamic.pOwner) == claimer)
+    if (node->dynamic.pOwner.isDefined() && node->dynamic.pOwner.sentient() == claimer)
     {
         if (claimer->pClaimedNode != node)
             Path_ClaimNode(node, claimer);
@@ -4038,7 +3953,7 @@ void __cdecl Path_ForceClaimNode(pathnode_t *node, sentient_s *claimer)
                 0,
                 "%s",
                 "node->dynamic.iFreeTime != INT_MAX");
-        SentientHandle::setSentient(&node->dynamic.pOwner, claimer);
+        node->dynamic.pOwner.setSentient(claimer);
         v8 = node->constant.wOverlapNode[0];
         node->dynamic.iFreeTime = 0x7FFFFFFF;
         if (v8 >= 0)
@@ -4914,17 +4829,16 @@ void __cdecl Path_DrawDebugClaimedNodes(float *origin, int numNodes)
                 break;
             node = v8->node;
             vOrigin = v8->node->constant.vOrigin;
-            Path_DrawDebugNodeBox(v8->node, v5, v4, v3);
+            Path_DrawDebugNodeBox(v8->node);
             DebugStringScale = Path_GetDebugStringScale(origin, node->constant.vOrigin);
             v47[0] = *vOrigin;
             v12 = (float)((float)DebugStringScale * (float)0.5);
             v47[1] = node->constant.vOrigin[1];
             v48 = node->constant.vOrigin[2];
-            if (SentientHandle::isDefined(&node->dynamic.pOwner))
+            if (node->dynamic.pOwner.isDefined())
             {
-                if (!SentientHandle::sentient(&node->dynamic.pOwner)->ent)
-                    MyAssertHandler(v50, 1793, 0, v49, "node->dynamic.pOwner.sentient()->ent");
-                v14 = SentientHandle::sentient(&node->dynamic.pOwner);
+                iassert(node->dynamic.pOwner.sentient()->ent);
+                v14 = node->dynamic.pOwner.sentient();
                 v15 = va("Owner: %d", v14->ent->s.number);
                 v16 = colorGreen;
             }

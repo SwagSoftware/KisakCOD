@@ -3,7 +3,90 @@
 #endif
 
 #include "g_local.h"
+#include <script/scr_vm.h>
+#include "g_main.h"
+#include "actor_fields.h"
+#include "sentient_fields.h"
+#include "g_save.h"
+#include <script/scr_const.h>
+#include <server/sv_public.h>
+#include <cgame/cg_local.h>
+#include "actor_grenade.h"
+#include "turret.h"
+#include "g_vehicle_path.h"
 
+const ent_field_t fields_1[16] =
+{
+  { "classname", 284, F_STRING, &Scr_ReadOnlyField },
+  { "origin", 224, F_VECTOR, &Scr_SetOrigin },
+  { "model", 280, F_MODEL, &Scr_ReadOnlyField },
+  { "spawnflags", 300, F_INT, &Scr_ReadOnlyField },
+  { "target", 290, F_STRING, NULL },
+  { "targetname", 292, F_STRING, NULL },
+  { "count", 340, F_INT, NULL },
+  { "health", 324, F_INT, &Scr_SetHealth },
+  { "dmg", 336, F_INT, NULL },
+  { "angles", 236, F_VECTOR, &Scr_SetAngles },
+  { "script_linkname", 286, F_STRING, NULL },
+  { "script_noteworthy", 288, F_STRING, NULL },
+  { "maxhealth", 328, F_INT, NULL },
+  { "anglelerprate", 616, F_FLOAT, NULL },
+  { "activator", 348, F_ENTITY, &Scr_ReadOnlyField },
+  { NULL, 0, F_INT, NULL }
+};
+
+
+void SP_script_vehicle_collmap(gentity_s *pSelf)
+{
+    pSelf->r.contents = 0;
+    pSelf->s.eType = 12;
+}
+
+const SpawnFuncEntry s_bspOrDynamicSpawns[9] =
+{
+  { "info_player_start", &SP_info_player_start },
+  { "info_notnull", &SP_info_notnull },
+  { "info_notnull_big", &SP_info_notnull },
+  { "info_volume", &SP_info_volume },
+  { "trigger_radius", &SP_trigger_radius },
+  { "sound_blend", &SP_sound_blend },
+  { "script_model", &SP_script_model },
+  { "script_origin", &SP_script_origin },
+  { "script_vehicle_collmap", &SP_script_vehicle_collmap }
+};
+
+void trigger_use_touch(gentity_s *ent)
+{
+    trigger_use_shared(ent);
+}
+
+void SP_script_vehicle(gentity_s *pSelf)
+{
+    const char *v2; // [sp+50h] [-20h] BYREF
+
+    G_LevelSpawnString("vehicletype", 0, &v2);
+    G_SpawnVehicle(pSelf, v2, 1);
+}
+
+const SpawnFuncEntry s_bspOnlySpawns[16] =
+{
+  { "info_grenade_hint", &SP_info_grenade_hint },
+  { "trigger_use", &trigger_use },
+  { "trigger_use_touch", &trigger_use_touch },
+  { "trigger_multiple", &SP_trigger_multiple },
+  { "trigger_disk", &SP_trigger_disk },
+  { "trigger_friendlychain", &SP_trigger_friendlychain },
+  { "trigger_hurt", &SP_trigger_hurt },
+  { "trigger_once", &SP_trigger_once },
+  { "trigger_damage", &SP_trigger_damage },
+  { "trigger_lookat", &SP_trigger_lookat },
+  { "light", &SP_light },
+  { "misc_mg42", &SP_turret },
+  { "misc_turret", &SP_turret },
+  { "script_brushmodel", &SP_script_brushmodel },
+  { "script_struct", &G_FreeEntity },
+  { "script_vehicle", &SP_script_vehicle }
+};
 
 int __cdecl G_LevelSpawnString(const char *key, const char *defaultString, const char **out)
 {
@@ -138,7 +221,7 @@ void G_SpawnStruct()
 
 void __cdecl G_DuplicateEntityFields(gentity_s *dest, const gentity_s *source)
 {
-    int *p_ofs; // r31
+    const int *p_ofs; // r31
     float *v5; // r11
     float *v6; // r10
 
@@ -343,7 +426,7 @@ int __cdecl G_CallSpawnEntity(gentity_s *ent)
         }
         else
         {
-            Com_Error(ERR_DROP, byte_8203E8A4);
+            Com_Error(ERR_DROP, "cannot spawn AI directly; use spawners instead");
             return 0;
         }
     }
@@ -379,7 +462,7 @@ void __cdecl GScr_AddFieldsForEntity()
                     0,
                     "%s",
                     "(f - fields) == (unsigned short)( f - fields )");
-            Scr_AddClassField(0, v0->name, (unsigned __int16)(v1 >> 4));
+            Scr_AddClassField(0, (char*)v0->name, (unsigned __int16)(v1 >> 4));
             ++v0;
             v1 += 16;
         } while (v0->name);
@@ -447,36 +530,33 @@ void __cdecl Scr_AddEntity(gentity_s *ent)
     Scr_AddEntityNum(ent->s.number, 0);
 }
 
-gentity_s *__cdecl Scr_GetEntityAllowNull(scr_entref_t *index)
+gentity_s *__cdecl Scr_GetEntityAllowNull(unsigned int index)
 {
-    unsigned int v2; // r4
-    scr_entref_t *EntityRef; // [sp+50h] [-20h]
+    scr_entref_t entref; // [sp+50h] [-20h]
 
     if (!Scr_GetType(0))
         return 0;
-    EntityRef = Scr_GetEntityRef(index, v2);
-    if ((_WORD)EntityRef)
+    entref = (scr_entref_t)Scr_GetEntityRef(index);
+    if (entref.classnum)
         return 0;
-    if (HIWORD(EntityRef) >= 0x880u)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\g_spawn.cpp", 891, 0, "%s", "entref.entnum < MAX_GENTITIES");
-    return &g_entities[HIWORD(EntityRef)];
+    iassert(entref.entnum < MAX_GENTITIES);
+    return &g_entities[entref.entnum];
 }
 
-gentity_s *__cdecl Scr_GetEntity(scr_entref_t *index, unsigned int a2)
+gentity_s *__cdecl Scr_GetEntity(unsigned int index)
 {
-    scr_entref_t *EntityRef; // [sp+50h] [-20h]
+    scr_entref_t entref; // [sp+50h] [-20h]
 
-    EntityRef = Scr_GetEntityRef(index, a2);
-    if ((_WORD)EntityRef)
+    entref = Scr_GetEntityRef(index);
+    if (entref.classnum)
     {
-        Scr_ParamError((unsigned int)index, "not an entity");
+        Scr_ParamError(index, "not an entity");
         return 0;
     }
     else
     {
-        if (HIWORD(EntityRef) >= 0x880u)
-            MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\g_spawn.cpp", 906, 0, "%s", "entref.entnum < MAX_GENTITIES");
-        return &g_entities[HIWORD(EntityRef)];
+        iassert(entref.entnum < MAX_GENTITIES);
+        return &g_entities[entref.entnum];
     }
 }
 
@@ -484,8 +564,7 @@ void __cdecl Scr_FreeHudElem(game_hudelem_s *hud)
 {
     unsigned int v2; // r31
 
-    if (!hud)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\g_spawn.cpp", 918, 0, "%s", "hud");
+    iassert(hud);
     v2 = hud - g_hudelems;
     if (v2 >= 0x100)
         MyAssertHandler(
@@ -522,25 +601,19 @@ void __cdecl Scr_AddHudElem(game_hudelem_s *hud)
     Scr_AddEntityNum(v2, 1u);
 }
 
-game_hudelem_s *__cdecl Scr_GetHudElem(scr_entref_t *index, unsigned int a2)
+game_hudelem_s *__cdecl Scr_GetHudElem(unsigned int index)
 {
-    scr_entref_t *EntityRef; // [sp+50h] [-20h]
+    scr_entref_t entref; // [sp+50h] [-20h]
 
-    EntityRef = Scr_GetEntityRef(index, a2);
-    if ((unsigned __int16)EntityRef == 1)
+    entref = Scr_GetEntityRef(index);
+    if (entref.classnum == 1)
     {
-        if (HIWORD(EntityRef) >= 0x100u)
-            MyAssertHandler(
-                "c:\\trees\\cod3\\cod3src\\src\\game\\g_spawn.cpp",
-                949,
-                0,
-                "%s",
-                "entref.entnum < MAX_HUDELEMS_TOTAL");
-        return &g_hudelems[HIWORD(EntityRef)];
+        iassert(entref.entnum < MAX_HUDELEMS_TOTAL);
+        return &g_hudelems[entref.entnum];
     }
     else
     {
-        Scr_ParamError((unsigned int)index, "not a hudelem");
+        Scr_ParamError(index, "not a hudelem");
         return 0;
     }
 }
@@ -801,7 +874,7 @@ void __cdecl SP_worldspawn()
 
     G_SpawnString(&level.spawnVar, "classname", "", v14);
     if (I_stricmp(v14[0], "worldspawn"))
-        Com_Error(ERR_DROP, byte_8203EC40);
+        Com_Error(ERR_DROP, "SP_worldspawn: the first entity isn't worldspawn");
     SV_SetConfigstring(2, "cod-sp");
     G_SpawnString(&level.spawnVar, "ambienttrack", "", v14);
     if (*v14[0])
@@ -838,13 +911,7 @@ void __cdecl SP_worldspawn()
     g_entities[2174].s.number = 2174;
     Scr_SetString(&g_entities[2174].classname, scr_const.worldspawn);
     g_entities[2174].r.inuse = 1;
-    if (EntHandle::isDefined(&g_entities[2174].r.ownerNum))
-        MyAssertHandler(
-            "c:\\trees\\cod3\\cod3src\\src\\game\\g_spawn.cpp",
-            1228,
-            0,
-            "%s",
-            "!g_entities[ENTITYNUM_WORLD].r.ownerNum.isDefined()");
+    iassert(!g_entities[ENTITYNUM_WORLD].r.ownerNum.isDefined());
     G_SpawnString(&level.spawnVar, "ambient", "0", v14);
     v6 = atof(v14[0]);
     v7 = (float)*(double *)&v6;
@@ -1192,6 +1259,9 @@ void __cdecl Scr_SetGenericField(unsigned __int8 *b, fieldtype_t type, int ofs)
     float v14; // [sp+54h] [-2Ch]
     float v15; // [sp+58h] [-28h]
 
+    EntHandle *enthand;
+    SentientHandle *senthand;
+
     switch (type)
     {
     case F_INT:
@@ -1223,33 +1293,40 @@ void __cdecl Scr_SetGenericField(unsigned __int8 *b, fieldtype_t type, int ofs)
         goto LABEL_20;
     case F_ENTHANDLE:
         EntityAllowNull = Scr_GetEntityAllowNull(0);
-        EntHandle::setEnt((EntHandle *)&b[ofs], EntityAllowNull);
+        enthand = (EntHandle *)&b[ofs];
+        enthand->setEnt(EntityAllowNull);
         return;
     case F_ACTOR:
         v10 = Scr_GetEntityAllowNull(0);
         if (!v10)
             goto LABEL_12;
-        *(unsigned int *)&b[ofs] = v10->actor;
+        *(uintptr_t *)&b[ofs] = (uintptr_t)v10->actor;
         break;
     case F_SENTIENT:
         v11 = Scr_GetEntityAllowNull(0);
         if (v11)
-            *(unsigned int *)&b[ofs] = v11->sentient;
+            *(uintptr_t *)&b[ofs] = (uintptr_t)v11->sentient;
         else
             LABEL_12:
-        *(unsigned int *)&b[ofs] = 0;
+        *(uintptr_t *)&b[ofs] = 0;
         break;
     case F_SENTIENTHANDLE:
         v12 = Scr_GetEntityAllowNull(0);
         if (v12)
-            SentientHandle::setSentient((SentientHandle *)&b[ofs], v12->sentient);
+        {
+            senthand = (SentientHandle *)&b[ofs];
+            senthand->setSentient(v12->sentient);
+        }
         else
-            SentientHandle::setSentient((SentientHandle *)&b[ofs], 0);
+        {
+            senthand = (SentientHandle *)&b[ofs];
+            senthand->setSentient(NULL);
+        }
         break;
     case F_PATHNODE:
         Int = (gentity_s *)Scr_GetPathnode(0);
     LABEL_20:
-        *(unsigned int *)&b[ofs] = Int;
+        *(uintptr_t *)&b[ofs] = (uintptr_t)Int;
         break;
     case F_VECTORHACK:
         Scr_GetVector(0, &v13);
@@ -1264,13 +1341,12 @@ void __cdecl Scr_GetGenericField(unsigned __int8 *b, fieldtype_t type, int ofs)
 {
     unsigned int v4; // r3
     gentity_s *v5; // r3
-    EntHandle *v6; // r31
-    gentity_s *v7; // r3
     gentity_s **v8; // r11
-    SentientHandle *v9; // r31
-    sentient_s *v10; // r3
     pathnode_t *v11; // r3
     float v12[4]; // [sp+50h] [-20h] BYREF
+
+    EntHandle *enthand;
+    SentientHandle *senthand;
 
     switch (type)
     {
@@ -1300,11 +1376,10 @@ void __cdecl Scr_GetGenericField(unsigned __int8 *b, fieldtype_t type, int ofs)
             Scr_AddEntity(v5);
         break;
     case F_ENTHANDLE:
-        v6 = (EntHandle *)&b[ofs];
-        if (EntHandle::isDefined((EntHandle *)&b[ofs]))
+        enthand = (EntHandle *)&b[ofs];
+        if (enthand->isDefined())
         {
-            v7 = EntHandle::ent(v6);
-            Scr_AddEntity(v7);
+            Scr_AddEntity(enthand->ent());
         }
         break;
     case F_ACTOR:
@@ -1314,11 +1389,10 @@ void __cdecl Scr_GetGenericField(unsigned __int8 *b, fieldtype_t type, int ofs)
             Scr_AddEntity(*v8);
         break;
     case F_SENTIENTHANDLE:
-        v9 = (SentientHandle *)&b[ofs];
-        if (SentientHandle::isDefined((SentientHandle *)&b[ofs]))
+        senthand = (SentientHandle *)&b[ofs];
+        if (senthand->isDefined())
         {
-            v10 = SentientHandle::sentient(v9);
-            Scr_AddEntity(v10->ent);
+            Scr_AddEntity(senthand->sentient()->ent);
         }
         break;
     case F_PATHNODE:
@@ -1345,7 +1419,7 @@ void __cdecl Scr_GetGenericField(unsigned __int8 *b, fieldtype_t type, int ofs)
 void __cdecl G_SpawnEntitiesFromString()
 {
     if (!G_ParseSpawnVars(&level.spawnVar))
-        Com_Error(ERR_DROP, byte_8203ED48);
+        Com_Error(ERR_DROP, "SpawnEntities: no entities");
     SP_worldspawn();
     while (G_ParseSpawnVars(&level.spawnVar))
         G_CallSpawn();

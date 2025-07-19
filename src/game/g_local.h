@@ -9,10 +9,20 @@
 #include <script/scr_variable.h>
 #include "game_public.h"
 
+#define MAX_HUDELEMS_TOTAL 0x100
+
 struct SpawnFuncEntry
 {
     const char *classname;
-    void(__fastcall *callback)(gentity_s *);
+    void(*callback)(gentity_s *);
+};
+
+struct ent_field_t
+{
+    const char *name;
+    int ofs;
+    fieldtype_t type;
+    void(*callback)(gentity_s *, int);
 };
 
 struct animscripted_s
@@ -636,11 +646,11 @@ void __cdecl GScr_AddFieldsForEntity();
 void __cdecl GScr_AddFieldsForRadiant();
 void __cdecl Scr_FreeEntity(gentity_s *ent);
 void __cdecl Scr_AddEntity(gentity_s *ent);
-gentity_s *__cdecl Scr_GetEntityAllowNull(scr_entref_t *index);
+gentity_s *__cdecl Scr_GetEntityAllowNull(unsigned int index);
 gentity_s *__cdecl Scr_GetEntity(scr_entref_t *index, unsigned int a2);
 void __cdecl Scr_FreeHudElem(game_hudelem_s *hud);
 void __cdecl Scr_AddHudElem(game_hudelem_s *hud);
-game_hudelem_s *__cdecl Scr_GetHudElem(scr_entref_t *index, unsigned int a2);
+game_hudelem_s *__cdecl Scr_GetHudElem(unsigned int index);
 int __cdecl Scr_ExecEntThread(gentity_s *ent, int handle, unsigned int paramcount);
 void __cdecl Scr_AddExecEntThread(gentity_s *ent, int handle, unsigned int paramcount);
 void __cdecl Scr_Notify(gentity_s *ent, unsigned __int16 stringValue, unsigned int paramcount);

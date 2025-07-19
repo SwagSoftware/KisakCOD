@@ -487,6 +487,9 @@ VariableValue  Scr_EvalVariableEntityField(unsigned int entId, unsigned int fiel
 void  Scr_ClearThread(unsigned int parentId);
 void Scr_GetChecksum(unsigned int *checksum);
 
+void Scr_CopyEntityNum(int fromEntnum, int toEntnum, unsigned int classnum);
+void CopyEntity(unsigned int parentId, unsigned int newParentId);
+
 //int marker_scr_variable
 
 extern scr_classStruct_t g_classMap[4];
