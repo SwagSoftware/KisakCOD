@@ -386,5 +386,7 @@ int __cdecl Scr_BuiltinCompare(_DWORD* a, _DWORD* b);
 
 void Scr_DecTime();
 
+void Scr_AddExecEntThreadNum(int entnum, unsigned int classnum, int handle, unsigned int paramcount);
+
 extern scrVmPub_t scrVmPub;
 extern scrVmDebugPub_t scrVmDebugPub;

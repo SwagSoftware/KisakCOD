@@ -248,22 +248,21 @@ void __cdecl Path_Init(int restart);
 int __cdecl NodeVisCacheEntry(int i, int j);
 int __cdecl ExpandedNodeVisCacheEntry(int i, int j);
 void __cdecl Path_NodesInCylinder_r(pathnode_tree_t *tree);
-pathnode_tree_t *__cdecl Path_NodesInCylinder(
+
+// returns nodecount
+int __cdecl Path_NodesInCylinder(
     float *origin,
     double maxDist,
     double maxHeight,
     pathsort_t *nodes,
     int maxNodes,
-    pathsort_t *typeFlags,
-    int a7,
-    int a8);
+    int typeFlags);
 pathnode_tree_t *__cdecl Path_NodesInRadius(
     float *origin,
     double maxDist,
     pathsort_t *nodes,
-    pathsort_t *maxNodes,
-    int typeFlags,
-    int a6);
+    int maxNodes,
+    int typeFlags);
 int __cdecl Path_IsDynamicBlockingEntity(gentity_s *ent);
 bool __cdecl Path_IsBadPlaceLink(unsigned int nodeNumFrom, unsigned int nodeNumTo, team_t eTeam);
 unsigned int Path_InitLinkCounts();

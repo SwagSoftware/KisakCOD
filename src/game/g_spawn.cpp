@@ -865,9 +865,7 @@ void __cdecl SP_worldspawn()
     long double v10; // fp2
     double v11; // fp29
     const char *v14[2]; // [sp+50h] [-80h] BYREF
-    float v15; // [sp+58h] [-78h] BYREF
-    float v16; // [sp+5Ch] [-74h] BYREF
-    float v17; // [sp+60h] [-70h] BYREF
+    float color[3]; // [sp+58h] [-78h] BYREF
     float v18; // [sp+68h] [-68h] BYREF
     char v19; // [sp+6Ch] [-64h] BYREF
     char v20; // [sp+70h] [-60h] BYREF
@@ -922,13 +920,23 @@ void __cdecl SP_worldspawn()
     v10 = atof(v14[0]);
     v11 = (float)*(double *)&v10;
     G_SpawnString(&level.spawnVar, "sunColor", "1 1 1", v14);
-    sscanf(v14[0], "%g %g %g", &v15, &v16, &v17);
-    ColorNormalize(&v15, &v15);
-    _FP13 = -(float)((float)((float)v11 - (float)v7) * (float)((float)1.0 - (float)v9));
-    __asm { fsel      f0, f13, f27, f0 }
-    level.mapSunColor[0] = v15 * (float)_FP0;
-    level.mapSunColor[1] = v16 * (float)_FP0;
-    level.mapSunColor[2] = v17 * (float)_FP0;
+
+    sscanf(v14[0], "%g %g %g", &color[0], &color[1], &color[2]);
+    ColorNormalize(color, color);
+
+    //_FP13 = -(float)((float)((float)v11 - (float)v7) * (float)((float)1.0 - (float)v9));
+    //__asm { fsel      f0, f13, f27, f0 }
+    //level.mapSunColor[0] = color[0] * (float)_FP0;
+    //level.mapSunColor[1] = color[1] * (float)_FP0;
+    //level.mapSunColor[2] = color[2] * (float)_FP0;
+
+    float scale = (v11 - v7) * (1.0f - v9);
+    scale = (scale < 0.0f) ? 1.0f : scale;
+
+    level.mapSunColor[0] = color[0] * scale;
+    level.mapSunColor[1] = color[1] * scale;
+    level.mapSunColor[2] = color[2] * scale;
+
     G_SpawnString(&level.spawnVar, "sunDirection", "0 0 0", v14);
     sscanf(v14[0], "%g %g %g", &v18, &v19, &v20);
     AngleVectors(&v18, level.mapSunDirection, 0, 0);

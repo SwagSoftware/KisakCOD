@@ -5207,4 +5207,56 @@ void Scr_DecTime()
     //HIBYTE(scrVarPub.time) = 0; 
 }
 
+
+void Scr_AddExecEntThreadNum(int entnum, unsigned int classnum, int handle, unsigned int paramcount)
+{
+    int v9; // r3
+    const char *varUsagePos; // r27
+    unsigned int EntityId; // r28
+    unsigned int v12; // r3
+    unsigned int v13; // r3
+
+    //_R29 = &scrVarPub.programBuffer[handle];
+    const char *pos = &scrVarPub.programBuffer[handle];
+    //__asm { dcbt      0, r29 } // prefetches into l1 data cache
+    if (!scrVmPub.function_count)
+    {
+        if ((int *)scrVmPub.localVars != &scrVmGlob.starttime)
+            MyAssertHandler(
+                "c:\\trees\\cod3\\cod3src\\src\\script\\scr_vm.cpp",
+                4192,
+                0,
+                "%s",
+                "scrVmPub.localVars == scrVmGlob.localVarsStack - 1");
+        Profile_Begin(336);
+        Scr_ResetTimeout();
+    }
+    iassert(scrVarPub.timeArrayId);
+    iassert(handle);
+    iassert(Scr_IsInOpcodeMemory(pos));
+
+    v9 = entnum;
+    varUsagePos = scrVarPub.varUsagePos;
+    scrVarPub.varUsagePos = pos + 1;
+    EntityId = Scr_GetEntityId(v9, classnum);
+    AddRefToObject(EntityId);
+    v12 = AllocThread(EntityId);
+    v13 = VM_Execute(v12, pos, paramcount);
+    RemoveRefToObject(v13);
+    scrVarPub.varUsagePos = varUsagePos;
+    ++scrVmPub.outparamcount;
+    --scrVmPub.inparamcount;
+    if (!scrVmPub.function_count)
+    {
+        Profile_EndInternal(0);
+        if ((int *)scrVmPub.localVars != &scrVmGlob.starttime)
+            MyAssertHandler(
+                "c:\\trees\\cod3\\cod3src\\src\\script\\scr_vm.cpp",
+                4223,
+                0,
+                "%s",
+                "scrVmPub.localVars == scrVmGlob.localVarsStack - 1");
+    }
+}
+
 #pragma warning(pop)

@@ -1,4 +1,5 @@
 #pragma once
+#include "actor.h"
 
 #ifndef KISAK_SP 
 #error This file is for SinglePlayer only 
@@ -10,8 +11,8 @@ void __cdecl Actor_SetDesiredAngles(ai_orient_t *pOrient, double fPitch, double 
 void __cdecl Actor_SetLookAngles(actor_s *self, double fPitch, double fYaw);
 void __cdecl Actor_SetBodyAngle(actor_s *self, double fAngle);
 void __cdecl Actor_ChangeAngles(actor_s *self, double fPitch, double fYaw);
-void __cdecl Actor_UpdateLookAngles(actor_s *self, long double a2);
-void __cdecl Actor_UpdateBodyAngle(actor_s *self, long double a2);
+void __cdecl Actor_UpdateLookAngles(actor_s *self);
+void __cdecl Actor_UpdateBodyAngle(actor_s *self);
 void __cdecl Actor_FaceVector(ai_orient_t *pOrient, const float *v);
 void __cdecl Actor_FaceMotion(actor_s *self, ai_orient_t *pOrient);
 void __cdecl Actor_SetAnglesToLikelyEnemyPath(actor_s *self);

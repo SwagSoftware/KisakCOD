@@ -38,17 +38,13 @@ int __cdecl Actor_CanSeePointExInternal(
     double fovDot,
     double fMaxDistSqrd,
     int ignoreEntityNum,
-    float *vViewPos,
-    int a7,
-    const float *a8);
+    float *vViewPos);
 int __cdecl Actor_CanSeePointEx(
     actor_s *self,
     const float *vPoint,
     double fovDot,
     double fMaxDistSqrd,
-    int ignoreEntityNum,
-    int a6,
-    int a7);
+    int ignoreEntityNum);
 void __cdecl Actor_UpdateVisCache(actor_s *self, const gentity_s *ent, sentient_info_t *pInfo, bool bVisible);
 int __cdecl Actor_CanSeeEntityEx(actor_s *self, const gentity_s *ent, double fovDot, double fMaxDistSqrd);
 int __cdecl Actor_CanSeeSentientEx(
@@ -60,7 +56,7 @@ int __cdecl Actor_CanSeeSentientEx(
     int a6,
     int a7);
 int __cdecl Actor_CanShootEnemy(actor_s *self);
-int __cdecl Actor_CanSeePoint(actor_s *self, const float *vPoint, int a3, int a4);
+int __cdecl Actor_CanSeePoint(actor_s *self, const float *vPoint);
 int __cdecl Actor_CanSeeEntityPoint(actor_s *self, const float *vPoint, const gentity_s *ent, int a4);
 int __cdecl Actor_CanSeeEntity(actor_s *self, const gentity_s *ent);
 int __cdecl Actor_CanSeeSentient(actor_s *self, sentient_s *sentient, int iMaxLatency);

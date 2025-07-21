@@ -3,6 +3,8 @@
 #endif
 
 #include "actor_grenade.h"
+#include "g_main.h"
+#include "g_local.h"
 
 void __cdecl TRACK_actor_grenade()
 {

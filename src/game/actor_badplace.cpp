@@ -16,6 +16,8 @@
 #include "actor_team_move.h"
 #include "actor_state.h"
 
+#include <algorithm>
+
 // Line 38954:  0006 : 005a27c8       struct badplace_t *g_badplaces 82c327c8     actor_badplace.obj
 
 badplace_t g_badplaces[32];
@@ -721,69 +723,72 @@ int __cdecl Actor_BadPlace_FindSafeNodeOutsideBadPlace(
 {
     int v6; // r5
     pathsort_t *v7; // r4
-    int v8; // r3
-    int v9; // r30
-    pathsort_t *v10; // r29
-    pathnode_t **v11; // r27
-    int v12; // r23
-    pathnode_t *v13; // r31
+    int nodeCount;
+    int nodesWritten; // r30
+    pathsort_t *pOutNode; // r29
+    pathsort_t *pNode; // r27
+    pathnode_t *node; // r31
     double v14; // fp0
     double v15; // fp13
     double v16; // fp12
     double v17; // fp31
-    _BYTE v19[3072]; // [sp+50h] [-C70h] BYREF
+    pathsort_t nodes[256];
 
     //Profile_Begin(357);
-    if (!self)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\actor_badplace.cpp", 588, 0, "%s", "self");
-    if (!self->sentient)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\actor_badplace.cpp", 589, 0, "%s", "self->sentient");
-    if (!potentialNodes)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\actor_badplace.cpp", 590, 0, "%s", "potentialNodes");
-    if (maxFleeDist <= 0.0)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\actor_badplace.cpp", 591, 0, "%s", "maxFleeDist > 0.0f");
-    v8 = Path_NodesInCylinder(self->ent->r.currentOrigin, maxFleeDist, 80.0, v7, v6, (int)v19);
-    v9 = 0;
-    if (v8 > 0)
+    iassert(self);
+    iassert(self->sentient);
+    iassert(potentialNodes);
+    iassert(maxFleeDist > 0.0f);
+
+    nodeCount = Path_NodesInCylinder(self->ent->r.currentOrigin, maxFleeDist, 80.0, nodes, 256, -2);
+
+    if (nodeCount > 0)
     {
-        v10 = potentialNodes;
-        v11 = (pathnode_t **)v19;
-        v12 = v8;
+        nodesWritten = 0;
+        pOutNode = potentialNodes;
+        pNode = &nodes[0];
         do
         {
-            v13 = *v11;
-            if (!(unsigned __int8)Actor_BadPlace_IsNodeInAnyBadPlace(*v11) && Path_CanClaimNode(v13, self->sentient))
+            node = pNode->node;
+
+            if (!Actor_BadPlace_IsNodeInAnyBadPlace(node) && Path_CanClaimNode(node, self->sentient))
             {
-                if (!v13)
-                    MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\pathnode.h", 165, 0, "%s", "node");
-                if ((((1 << v13->constant.type) & 0x41FFC) == 0 || Actor_Cover_IsValidCover(self, v13))
-                    && !(unsigned __int8)Actor_BadPlace_HasPotentialNodeDuplicates(potentialNodes, v9, v13))
+                iassert(node);
+
+                if ((((1 << node->constant.type) & 0x41FFC) == 0 || Actor_Cover_IsValidCover(self, node))
+                    && !Actor_BadPlace_HasPotentialNodeDuplicates(potentialNodes, nodesWritten, node))
                 {
-                    v14 = (float)(v13->constant.vOrigin[0] - self->ent->r.currentOrigin[0]);
-                    v15 = (float)(v13->constant.vOrigin[2] - self->ent->r.currentOrigin[2]);
-                    v16 = (float)(v13->constant.vOrigin[1] - self->ent->r.currentOrigin[1]);
-                    v17 = (float)((float)((float)v16 * (float)v16)
-                        + (float)((float)((float)v15 * (float)v15) + (float)((float)v14 * (float)v14)));
-                    if (Path_IsCoverNode(v13))
+                    v14 = (float)(node->constant.vOrigin[0] - self->ent->r.currentOrigin[0]);
+                    v15 = (float)(node->constant.vOrigin[2] - self->ent->r.currentOrigin[2]);
+                    v16 = (float)(node->constant.vOrigin[1] - self->ent->r.currentOrigin[1]);
+                    v17 = (float)((float)((float)v16 * (float)v16) + (float)((float)((float)v15 * (float)v15) + (float)((float)v14 * (float)v14)));
+
+                    if (Path_IsCoverNode(node))
                         v17 = (float)((float)v17 * 0.89999998);
-                    v10->metric = v17;
-                    v10->node = v13;
-                    ++v9;
-                    ++v10;
+
+                    pOutNode->metric = v17;
+                    pOutNode->node = node;
+                    ++nodesWritten;
+                    ++pOutNode;
                 }
             }
-            --v12;
-            v11 += 3;
-        } while (v12);
-        if (v9 > 1)
-            std::_Sort<pathsort_t *, int, bool(__cdecl *)(pathsort_t const &, pathsort_t const &)>(
-                potentialNodes,
-                &potentialNodes[v9],
-                12 * v9 / 12,
-                Path_CompareNodesIncreasing);
+            --nodeCount;
+            pNode += 3;
+        } while (nodeCount);
+
+        if (nodesWritten > 1)
+        {
+            //std::_Sort<pathsort_t *, int, bool(__cdecl *)(pathsort_t const &, pathsort_t const &)>(
+            //    potentialNodes,
+            //    &potentialNodes[v9],
+            //    12 * v9 / 12,
+            //    Path_CompareNodesIncreasing);
+            std::sort(&potentialNodes[0], &potentialNodes[nodesWritten], Path_CompareNodesIncreasing);
+        }
     }
+
     //Profile_EndInternal(0);
-    return v9;
+    return 0;
 }
 
 int __cdecl Actor_BadPlace_AttemptEscape(actor_s *self)

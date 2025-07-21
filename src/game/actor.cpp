@@ -23,6 +23,10 @@
 #include <server/sv_game.h>
 #include <qcommon/threads.h>
 #include "actor_cover.h"
+#include "g_save.h"
+#include "actor_spawner.h"
+#include "actor_aim.h"
+#include "actor_orientation.h"
 
 const char *animModeNames[10] =
 {
@@ -725,7 +729,7 @@ void __cdecl Actor_Pain(
     sentient = pAttacker->sentient;
     if (sentient)
         Actor_WasAttackedBy(actor, sentient);
-    if (!EntHandle::isDefined(&actor->sentient->syncedMeleeEnt) && actor->allowPain)
+    if (!actor->sentient->syncedMeleeEnt.isDefined() && actor->allowPain)
     {
         if (Actor_PushState(actor, AIS_PAIN))
             Actor_KillAnimScript(actor);
@@ -840,7 +844,7 @@ bool __cdecl Actor_IsDying(const actor_s *self)
 bool __cdecl usingCodeGoal(actor_s *actor)
 {
     return actor->codeGoalSrc
-        && (EntHandle::isDefined(&actor->scriptGoalEnt)
+        && (actor->scriptGoalEnt.isDefined()
             || actor->scriptGoal.pos[0] != actor->codeGoal.pos[0]
             || actor->scriptGoal.pos[1] != actor->codeGoal.pos[1]
             || actor->scriptGoal.pos[2] != actor->codeGoal.pos[2]
@@ -853,20 +857,19 @@ gentity_s *__cdecl Actor_GetTargetEntity(actor_s *self)
         MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\actor.cpp", 2308, 0, "%s", "self");
     if (!self->sentient)
         MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\actor.cpp", 2309, 0, "%s", "self->sentient");
-    if (EntHandle::isDefined(&self->sentient->targetEnt))
-        return EntHandle::ent(&self->sentient->targetEnt);
+    if (self->sentient->targetEnt.isDefined())
+        return self->sentient->targetEnt.ent();
     else
         return 0;
 }
 
 sentient_s *__cdecl Actor_GetTargetSentient(actor_s *self)
 {
-    if (!self)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\actor.cpp", 2317, 0, "%s", "self");
-    if (!self->sentient)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\actor.cpp", 2318, 0, "%s", "self->sentient");
-    if (EntHandle::isDefined(&self->sentient->targetEnt))
-        return EntHandle::ent(&self->sentient->targetEnt)->sentient;
+    iassert(self);
+    iassert(self->sentient);
+
+    if (self->sentient->targetEnt.isDefined())
+        return self->sentient->targetEnt.ent()->sentient;
     else
         return 0;
 }
@@ -875,18 +878,10 @@ void __cdecl Actor_GetTargetPosition(actor_s *self, float *position)
 {
     gentity_s *v4; // r3
 
-    if (!self)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\actor.cpp", 2329, 0, "%s", "self");
-    if (!self->sentient)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\actor.cpp", 2330, 0, "%s", "self->sentient");
-    if (!EntHandle::isDefined(&self->sentient->targetEnt))
-        MyAssertHandler(
-            "c:\\trees\\cod3\\cod3src\\src\\game\\actor.cpp",
-            2331,
-            0,
-            "%s",
-            "self->sentient->targetEnt.isDefined()");
-    v4 = EntHandle::ent(&self->sentient->targetEnt);
+    iassert(self);
+    iassert(self->sentient);
+    iassert(self->sentient->targetEnt.isDefined());
+    v4 = self->sentient->targetEnt.ent();
     *position = v4->r.currentOrigin[0];
     position[1] = v4->r.currentOrigin[1];
     position[2] = v4->r.currentOrigin[2];
@@ -896,17 +891,10 @@ void __cdecl Actor_GetTargetLookPosition(actor_s *self, float *position)
 {
     gentity_s *TargetEntity; // r3
 
-    if (!self)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\actor.cpp", 2346, 0, "%s", "self");
-    if (!self->sentient)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\actor.cpp", 2347, 0, "%s", "self->sentient");
-    if (!EntHandle::isDefined(&self->sentient->targetEnt))
-        MyAssertHandler(
-            "c:\\trees\\cod3\\cod3src\\src\\game\\actor.cpp",
-            2348,
-            0,
-            "%s",
-            "self->sentient->targetEnt.isDefined()");
+    iassert(self);
+    iassert(self->sentient);
+    iassert(self->sentient->targetEnt.isDefined());
+
     TargetEntity = Actor_GetTargetEntity(self);
     if (TargetEntity->sentient)
         Sentient_GetEyePosition(TargetEntity->sentient, position);
@@ -1113,9 +1101,8 @@ bool __cdecl Actor_ShouldMoveAwayFromCloseEnt(actor_s *self)
     bool result; // r3
     bool v3; // zf
 
-    if (!self)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\actor.cpp", 2718, 0, "%s", "self");
-    v3 = EntHandle::isDefined(&self->pCloseEnt) == 0;
+    iassert(self);
+    v3 = self->pCloseEnt.isDefined() == 0;
     result = 0;
     if (!v3 && self->Physics.ePhysicsType != AIPHYS_NOCLIP)
         return self->pushable;
@@ -1387,9 +1374,9 @@ bool __cdecl Actor_EnemyInPathFightDist(actor_s *self, sentient_s *enemy)
     result = 0;
     v5 = (float)(enemy->ent->r.currentOrigin[0] - self->ent->r.currentOrigin[0]);
     v6 = (float)(enemy->ent->r.currentOrigin[1] - self->ent->r.currentOrigin[1]);
-    if ((float)((float)((float)v6 * (float)v6) + (float)((float)v5 * (float)v5)) < (double)(float)(self->pathEnemyFightDist
-        * self->pathEnemyFightDist))
-        return __fabs((float)(enemy->ent->r.currentOrigin[2] - self->ent->r.currentOrigin[2])) <= self->codeGoal.height;
+    if ((float)((float)((float)v6 * (float)v6) + (float)((float)v5 * (float)v5)) < (double)(float)(self->pathEnemyFightDist* self->pathEnemyFightDist))
+        return fabs((float)(enemy->ent->r.currentOrigin[2] - self->ent->r.currentOrigin[2])) <= self->codeGoal.height;
+        //return __fabs((float)(enemy->ent->r.currentOrigin[2] - self->ent->r.currentOrigin[2])) <= self->codeGoal.height;
     return result;
 }
 
@@ -1552,7 +1539,7 @@ gentity_s *__cdecl Actor_IsKnownEnemyInRegion(
 {
     int v8; // r27
     unsigned int v9; // r30
-    float *i; // r31
+    const float *i; // r31
     sentient_s *v11; // r11
     int v12; // r10
     __int64 v13; // r10
@@ -1782,7 +1769,8 @@ void __cdecl Actor_PathEndActions(actor_s *self)
                 v4 = 0;
             if (!v4)
             {
-                Scr_AddFloat(__fsqrts(v3));
+                //Scr_AddFloat(__fsqrts(v3));
+                Scr_AddFloat(sqrtf(v3));
                 Scr_Notify(self->ent, scr_const.stop_soon, 1u);
                 self->Path.pathEndAnimNotified = 1;
             }
@@ -1884,7 +1872,7 @@ void __cdecl Actor_CheckCollisions(actor_s *self)
         MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\actor.cpp", 4962, 0, "%s", "self");
     if (!self->sentient)
         MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\actor.cpp", 4963, 0, "%s", "self->sentient");
-    if (!EntHandle::isDefined(&self->pCloseEnt))
+    if (!self->pCloseEnt.isDefined())
     {
         ent = self->ent;
         pAnimScriptFunc = self->pAnimScriptFunc;
@@ -1907,7 +1895,7 @@ void __cdecl Actor_CheckCollisions(actor_s *self)
             if (++v7 >= 32)
                 return;
         }
-        EntHandle::setEnt(&self->pCloseEnt, v8->ent);
+        self->pCloseEnt.setEnt(v8->ent);
     }
 }
 
@@ -2377,7 +2365,8 @@ void __cdecl Path_UpdateMovementDelta(actor_s *self, double fMoveDist)
     {
         sideMove = self->sideMove;
         v18 = (float)(p_Path->fLookaheadDist * (float)0.5);
-        v19 = __fabs(sideMove);
+        //v19 = __fabs(sideMove);
+        v19 = fabs(sideMove);
         v20 = (float)(p_Path->fLookaheadDist * v32);
         if (v18 > v19)
             v18 = v19;
@@ -2645,7 +2634,8 @@ void __cdecl Actor_UpdateDesiredChainPosInternal(
         v15 = ent->r.currentOrigin[1];
         v16 = ent->r.currentOrigin[0];
         SL_ConvertToString(ent->classname);
-        Com_Error(ERR_DROP, byte_82021D00, HIDWORD(v16), HIDWORD(v15), v14, v13);
+        //Com_Error(ERR_DROP, byte_82021D00, HIDWORD(v16), HIDWORD(v15), v14, v13);
+        Com_Error(ERR_DROP, "sentient following someone else not on a friendly chain"); // KISAKTODO: not proper
     }
     v17 = self->pDesiredChainPos;
     if (!v17
@@ -2673,20 +2663,13 @@ void __cdecl Actor_UpdateDesiredChainPos(actor_s *self)
     if (!self)
         MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\actor.cpp", 5540, 0, "%s", "self");
     sentient = self->sentient;
-    if (!EntHandle::isDefined(&self->scriptGoalEnt))
+    if (!self->scriptGoalEnt.isDefined())
         goto LABEL_16;
-    if (!EntHandle::ent(&self->scriptGoalEnt)->r.inuse)
-        MyAssertHandler(
-            "c:\\trees\\cod3\\cod3src\\src\\game\\actor.cpp",
-            5546,
-            0,
-            "%s",
-            "self->scriptGoalEnt.ent()->r.inuse");
-    v3 = EntHandle::ent(&self->scriptGoalEnt)->sentient;
+    iassert(self->scriptGoalEnt.ent()->r.inuse);
+    v3 = self->scriptGoalEnt.ent()->sentient;
     if (!v3)
         goto LABEL_16;
-    if (!sentient)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\actor.cpp", 5551, 0, "%s", "sentient");
+    iassert(sentient);
     if (v3->eTeam == Sentient_EnemyTeam(sentient->eTeam))
     {
         Actor_GetPerfectInfo(self, v3);
@@ -2752,8 +2735,8 @@ bool __cdecl Actor_IsInsideArc(
     double angle1,
     double halfHeight)
 {
-    if (!self)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\actor.cpp", 5712, 0, "%s", "self");
+    iassert(self);
+
     return (_cntlzw(IsPosInsideArc(self->ent->r.currentOrigin, 15.0, origin, radius, angle0, angle1, halfHeight)) & 0x20) == 0;
 }
 
@@ -2926,7 +2909,7 @@ void __cdecl Actor_FreeExpendable()
 
     Com_Printf(18, "^3trying to delete somebody to make room for spawned AI (time %d)\n", level.time);
     if (level.loading)
-        Com_Error(ERR_DROP, byte_8202201C);
+        Com_Error(ERR_DROP, "too many actors in BSP file");
     v0 = G_Find(0, 284, scr_const.player);
     if (!v0)
         MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\actor.cpp", 500, 0, "%s", "player");
@@ -3106,7 +3089,7 @@ void __cdecl Actor_FinishSpawningAll()
                         0,
                         "%s",
                         "!strncmp( classname, ACTOR_CLASSNAME_PREFIX, ACTOR_CLASSNAME_PREFIX_LEN )");
-                DataForFile = Hunk_FindDataForFile(0, v3 + 6);
+                DataForFile = (unsigned int*)Hunk_FindDataForFile(0, v3 + 6);
                 if (!DataForFile)
                     MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\actor.cpp", 829, 0, "%s", "typeScript");
                 if (!*DataForFile)
@@ -4818,7 +4801,7 @@ void __cdecl Actor_UpdateAnglesAndDelta(actor_s *self)
     switch (eAnimMode)
     {
     case AI_ANIM_MOVE_CODE:
-        if (self->moveMode && Actor_HasPath(self) && !EntHandle::isDefined(&self->pCloseEnt))
+        if (self->moveMode && Actor_HasPath(self) && !self->pCloseEnt.isDefined())
         {
             Actor_GetAnimDeltas(self, v17, &v18);
             if (!Actor_HasPath(self))

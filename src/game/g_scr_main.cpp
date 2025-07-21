@@ -4850,7 +4850,7 @@ void Scr_Objective_AdditionalPosition()
     v4 = Int + 11;
     SV_GetConfigstring(v4, v9, 1024);
     Scr_GetVector(2u, v7);
-    sprintf_0(v8, "org%d", v2);
+    sprintf(v8, "org%d", v2);
     v6 = (int)v7[0];
     v5 = va("%i %i %i", v6, (int)v7[1], (int)v7[2]);
     Info_SetValueForKey(v9, v8, v5);

@@ -3,6 +3,9 @@
 #endif
 
 #include "actor_negotiation.h"
+#include "actor_orientation.h"
+#include <universal/com_math.h>
+#include "actor_state.h"
 
 bool __cdecl Actor_Negotiation_Start(actor_s *pSelf, ai_state_t ePrevState)
 {
@@ -61,7 +64,7 @@ actor_think_result_t __cdecl Actor_Negotiation_Think(actor_s *pSelf)
         pSelf->pszDebugInfo = "negotiation";
         Actor_PreThink(pSelf);
         Actor_UpdateOriginAndAngles(pSelf);
-        return 0;
+        return ACTOR_THINK_DONE;
     }
     else
     {
@@ -98,7 +101,7 @@ actor_think_result_t __cdecl Actor_Negotiation_Think(actor_s *pSelf)
         YawVectors2D(pSelf->fDesiredBodyYaw, (float *)HasNegotiationNode, pSelf->prevMoveDir);
         Actor_RecalcPath(pSelf);
         Actor_PopState(pSelf);
-        return 1;
+        return ACTOR_THINK_REPEAT;
     }
 }
 

@@ -675,15 +675,13 @@ LABEL_9:
     }
 }
 
-pathnode_tree_t *__cdecl Path_NodesInCylinder(
+int __cdecl Path_NodesInCylinder(
     float *origin,
     double maxDist,
     double maxHeight,
     pathsort_t *nodes,
     int maxNodes,
-    pathsort_t *typeFlags,
-    int a7,
-    int a8)
+    int typeFlags)
 {
     pathnode_tree_t *result; // r3
 
@@ -695,10 +693,10 @@ pathnode_tree_t *__cdecl Path_NodesInCylinder(
         g_path.circle.origin[2] = origin[2];
         g_path.circle.maxDist = maxDist;
         g_path.circle.maxDistSq = (float)maxDist * (float)maxDist;
-        g_path.circle.typeFlags = a8;
+        g_path.circle.typeFlags = typeFlags;
         g_path.circle.maxHeightSq = (float)maxHeight * (float)maxHeight;
-        g_path.circle.nodes = typeFlags;
-        g_path.circle.maxNodes = a7;
+        g_path.circle.nodes = nodes;
+        g_path.circle.maxNodes = maxNodes;
         g_path.circle.nodeCount = 0;
         Path_NodesInCylinder_r(gameWorldSp.path.nodeTree);
         return (pathnode_tree_t *)g_path.circle.nodeCount;
@@ -710,11 +708,10 @@ pathnode_tree_t *__cdecl Path_NodesInRadius(
     float *origin,
     double maxDist,
     pathsort_t *nodes,
-    pathsort_t *maxNodes,
-    int typeFlags,
-    int a6)
+    int maxNodes,
+    int typeFlags)
 {
-    return Path_NodesInCylinder(origin, maxDist, 1000000000.0, nodes, (int)maxNodes, maxNodes, typeFlags, a6);
+    return Path_NodesInCylinder(origin, maxDist, 1000000000.0, nodes, maxNodes, typeFlags);
 }
 
 int __cdecl Path_IsDynamicBlockingEntity(gentity_s *ent)

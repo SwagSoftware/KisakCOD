@@ -490,8 +490,6 @@ void Scr_GetChecksum(unsigned int *checksum);
 void Scr_CopyEntityNum(int fromEntnum, int toEntnum, unsigned int classnum);
 void CopyEntity(unsigned int parentId, unsigned int newParentId);
 
-//int marker_scr_variable
-
 extern scr_classStruct_t g_classMap[4];
 extern scrStringDebugGlob_t *scrStringDebugGlob;
 extern scrMemTreePub_t scrMemTreePub;

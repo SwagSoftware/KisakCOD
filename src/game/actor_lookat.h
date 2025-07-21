@@ -4,6 +4,8 @@
 #error This file is for SinglePlayer only 
 #endif
 
+#include "actor.h"
+
 void __cdecl Actor_InitLookAt(actor_s *self);
 void __cdecl Actor_SetLookAtAnimNodes(
     actor_s *self,

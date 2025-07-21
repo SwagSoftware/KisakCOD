@@ -3,6 +3,10 @@
 #endif
 
 #include "actor_orientation.h"
+#include "g_main.h"
+#include <universal/com_math.h>
+#include "actor_threat.h"
+#include "actor_senses.h"
 
 void __cdecl Actor_SetDesiredLookAngles(ai_orient_t *pOrient, double fPitch, double fYaw)
 {
@@ -80,7 +84,7 @@ void __cdecl Actor_ChangeAngles(actor_s *self, double fPitch, double fYaw)
     Actor_SetLookAngles(self, (float)(self->fLookPitch + (float)fPitch), (float)(self->fLookYaw + (float)fYaw));
 }
 
-void __cdecl Actor_UpdateLookAngles(actor_s *self, long double a2)
+void __cdecl Actor_UpdateLookAngles(actor_s *self)
 {
     ai_orient_t *p_ScriptOrient; // r30
     double v4; // fp31
@@ -91,12 +95,13 @@ void __cdecl Actor_UpdateLookAngles(actor_s *self, long double a2)
     long double v9; // fp2
     double v10; // fp0
 
+    double a2;
+
     p_ScriptOrient = &self->ScriptOrient;
     if (self->ScriptOrient.eMode == AI_ORIENT_INVALID)
         p_ScriptOrient = &self->CodeOrient;
     v4 = (float)((float)(p_ScriptOrient->fDesiredLookPitch - self->fLookPitch) * (float)0.0027777778);
-    *(double *)&a2 = (float)((float)((float)(p_ScriptOrient->fDesiredLookPitch - self->fLookPitch) * (float)0.0027777778)
-        + (float)0.5);
+    a2 = (float)((float)((float)(p_ScriptOrient->fDesiredLookPitch - self->fLookPitch) * (float)0.0027777778) + (float)0.5);
     v5 = floor(a2);
     v6 = (float)((float)((float)v4 - (float)*(double *)&v5) * (float)360.0);
     if (v6 <= 40.0)
@@ -126,7 +131,7 @@ void __cdecl Actor_UpdateLookAngles(actor_s *self, long double a2)
     Actor_SetLookAngles(self, v7, (float)(self->fLookYaw + (float)v10));
 }
 
-void __cdecl Actor_UpdateBodyAngle(actor_s *self, long double a2)
+void __cdecl Actor_UpdateBodyAngle(actor_s *self)
 {
     double fDesiredBodyYaw; // fp0
     gentity_s *ent; // r11
@@ -136,6 +141,8 @@ void __cdecl Actor_UpdateBodyAngle(actor_s *self, long double a2)
     double v8; // fp13
     double v9; // fp0
 
+    double a2;
+
     if (self->ScriptOrient.eMode)
         fDesiredBodyYaw = self->ScriptOrient.fDesiredBodyYaw;
     else
@@ -143,8 +150,7 @@ void __cdecl Actor_UpdateBodyAngle(actor_s *self, long double a2)
     ent = self->ent;
     self->fDesiredBodyYaw = fDesiredBodyYaw;
     v5 = (float)((float)((float)fDesiredBodyYaw - ent->r.currentAngles[1]) * (float)0.0027777778);
-    *(double *)&a2 = (float)((float)((float)((float)fDesiredBodyYaw - ent->r.currentAngles[1]) * (float)0.0027777778)
-        + (float)0.5);
+    a2 = (float)((float)((float)((float)fDesiredBodyYaw - ent->r.currentAngles[1]) * (float)0.0027777778) + (float)0.5);
     v6 = floor(a2);
     v7 = (float)((float)((float)v5 - (float)*(double *)&v6) * (float)360.0);
     if (BG_ActorIsProne(&self->ProneInfo, level.time))
@@ -453,154 +459,159 @@ void __cdecl Actor_FaceEnemy(actor_s *self, ai_orient_t *pOrient)
         Actor_FaceLikelyEnemyPath(self, pOrient);
 }
 
-int __cdecl Actor_FaceGoodShootPos(actor_s *self, ai_orient_t *pOrient)
+// aislop
+int Actor_FaceGoodShootPos(actor_s *self, ai_orient_t *pOrient)
 {
-    double v3; // fp13
-    float *currentOrigin; // r5
-    double v5; // fp12
-    double v6; // fp0
-    double v7; // fp12
-    double v10; // fp11
-    float v12; // [sp+50h] [-20h] BYREF
-    float v13; // [sp+54h] [-1Ch]
-    float v14; // [sp+58h] [-18h]
-
     if (!self->goodShootPosValid)
+    {
         return 0;
-    v3 = self->goodShootPos[1];
-    currentOrigin = self->ent->r.currentOrigin;
-    v5 = self->goodShootPos[2];
-    v6 = (float)(self->goodShootPos[0] - *currentOrigin);
-    v12 = self->goodShootPos[0] - *currentOrigin;
-    v13 = (float)v3 - currentOrigin[1];
-    v7 = (float)((float)v5 - currentOrigin[2]);
-    _FP9 = -__fsqrts((float)((float)(v13 * v13) + (float)((float)((float)v7 * (float)v7) + (float)((float)v6 * (float)v6))));
-    __asm { fsel      f11, f9, f10, f11 }
-    v10 = (float)((float)1.0 / (float)_FP11);
-    v12 = (float)v10 * (float)v6;
-    v13 = (float)v10 * v13;
-    v14 = (float)v7 * (float)v10;
-    if (!Path_MayFaceEnemy(&self->Path, &v12, currentOrigin))
+    }
+
+    float *origin = self->ent->r.currentOrigin;
+
+    float dx = self->goodShootPos[0] - origin[0];
+    float dy = self->goodShootPos[1] - origin[1];
+    float dz = self->goodShootPos[2] - origin[2];
+
+    float distSq = dx * dx + dy * dy + dz * dz;
+
+    if (distSq == 0.0f)
+    {
         return 0;
-    Actor_FaceVector(pOrient, &v12);
+    }
+
+    float invLen = 1.0f / sqrtf(distSq);
+
+    float dir[3] =
+    {
+        dx * invLen,
+        dy * invLen,
+        dz * invLen
+    };
+
+    if (!Path_MayFaceEnemy(&self->Path, dir, origin))
+    {
+        return 0;
+    }
+
+    Actor_FaceVector(pOrient, dir);
     return 1;
 }
 
-void __cdecl Actor_FaceEnemyOrMotion(actor_s *self, ai_orient_t *pOrient)
+// aislop
+void Actor_FaceEnemyOrMotion(actor_s *self, ai_orient_t *pOrient)
 {
-    float *currentOrigin; // r5
-    double v5; // fp0
-    double v6; // fp13
-    double v7; // fp12
-    double v10; // fp11
-    int MayFaceEnemy; // r3
-    ai_orient_t *v12; // r4
-    actor_s *v13; // r3
-    bool v14; // zf
-    float v15; // [sp+50h] [-50h] BYREF
-    float v16; // [sp+54h] [-4Ch]
-    float v17; // [sp+58h] [-48h]
-    float v18; // [sp+60h] [-40h] BYREF
-    float v19; // [sp+64h] [-3Ch]
-    float v20; // [sp+68h] [-38h]
+    iassert(self);
+    iassert(pOrient);
 
-    if (!self)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\actor_orientation.cpp", 545, 0, "%s", "self");
-    if (!pOrient)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\actor_orientation.cpp", 546, 0, "%s", "pOrient");
-    if (!Actor_HasPath(self) || self->Physics.vVelocity[0] == 0.0 && self->Physics.vVelocity[1] == 0.0)
+    // If actor is not moving or doesn't have a path, face enemy directly
+    if (!Actor_HasPath(self) ||
+        (self->Physics.vVelocity[0] == 0.0f && self->Physics.vVelocity[1] == 0.0f))
     {
-        v12 = pOrient;
-        v13 = self;
+        Actor_FaceEnemy(self, pOrient);
+        return;
     }
-    else
+
+    // Check whether there's an enemy target, it's visible, and within range
+    if (!Actor_GetTargetEntity(self) || !Actor_CanSeeEnemy(self))
     {
-        if (!Actor_GetTargetEntity(self)
-            || !Actor_CanSeeEnemy(self)
-            || (Actor_GetTargetPosition(self, &v18),
-                currentOrigin = self->ent->r.currentOrigin,
-                v5 = (float)(v19 - self->ent->r.currentOrigin[1]),
-                v6 = (float)(v20 - self->ent->r.currentOrigin[2]),
-                (float)((float)((float)(v18 - *currentOrigin) * (float)(v18 - *currentOrigin))
-                    + (float)((float)((float)v6 * (float)v6) + (float)((float)v5 * (float)v5))) > 122500.0))
-        {
-            Actor_FaceMotion(self, pOrient);
-            return;
-        }
-        v15 = v18 - *currentOrigin;
-        v16 = v19 - currentOrigin[1];
-        v7 = (float)(v20 - currentOrigin[2]);
-        _FP9 = -__fsqrts((float)((float)(v15 * v15)
-            + (float)((float)((float)(v20 - currentOrigin[2]) * (float)(v20 - currentOrigin[2]))
-                + (float)(v16 * v16))));
-        __asm { fsel      f11, f9, f10, f11 }
-        v10 = (float)((float)1.0 / (float)_FP11);
-        v15 = (float)v10 * v15;
-        v16 = v16 * (float)v10;
-        v17 = (float)v7 * (float)v10;
-        MayFaceEnemy = Path_MayFaceEnemy(&self->Path, &v15, currentOrigin);
-        v12 = pOrient;
-        v14 = MayFaceEnemy != 0;
-        v13 = self;
-        if (!v14)
-        {
-            Actor_FaceMotion(self, pOrient);
-            return;
-        }
+        Actor_FaceMotion(self, pOrient);
+        return;
     }
-    Actor_FaceEnemy(v13, v12);
+
+    float targetPos[3];
+    Actor_GetTargetPosition(self, targetPos);
+
+    float *origin = self->ent->r.currentOrigin;
+
+    float dx = targetPos[0] - origin[0];
+    float dy = targetPos[1] - origin[1];
+    float dz = targetPos[2] - origin[2];
+
+    float distSq = dx * dx + dy * dy + dz * dz;
+
+    // If target is farther than 350 units (squared: 122500), just face motion
+    if (distSq > 122500.0f)
+    {
+        Actor_FaceMotion(self, pOrient);
+        return;
+    }
+
+    float length = sqrtf(distSq);
+
+    if (length == 0.0f)
+    {
+        Actor_FaceMotion(self, pOrient);
+        return;
+    }
+
+    float invLen = 1.0f / length;
+
+    float dir[3] =
+    {
+        dx * invLen,
+        dy * invLen,
+        dz * invLen
+    };
+
+    if (!Path_MayFaceEnemy(&self->Path, dir, origin))
+    {
+        Actor_FaceMotion(self, pOrient);
+        return;
+    }
+
+    Actor_FaceEnemy(self, pOrient);
 }
 
-void __cdecl Actor_FaceEnemyOrMotionSidestep(actor_s *self, ai_orient_t *pOrient)
-{
-    float *currentOrigin; // r5
-    double v5; // fp12
-    double v8; // fp11
-    int MayFaceEnemy; // r3
-    ai_orient_t *v10; // r4
-    actor_s *v11; // r3
-    bool v12; // zf
-    float v13; // [sp+50h] [-50h] BYREF
-    float v14; // [sp+54h] [-4Ch]
-    float v15; // [sp+58h] [-48h]
-    float v16[2]; // [sp+60h] [-40h] BYREF
-    float v17; // [sp+68h] [-38h]
 
-    if (!self)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\actor_orientation.cpp", 595, 0, "%s", "self");
-    if (!pOrient)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\actor_orientation.cpp", 596, 0, "%s", "pOrient");
-    if (!Actor_HasPath(self) || self->Physics.vVelocity[0] == 0.0 && self->Physics.vVelocity[1] == 0.0)
+// aislop
+void Actor_FaceEnemyOrMotionSidestep(actor_s *self, ai_orient_t *pOrient)
+{
+    iassert(self);
+    iassert(pOrient);
+
+    // If actor is not moving or has no path, face enemy directly
+    if (!Actor_HasPath(self) ||
+        (self->Physics.vVelocity[0] == 0.0f && self->Physics.vVelocity[1] == 0.0f))
     {
-        v10 = pOrient;
-        v11 = self;
+        Actor_FaceEnemy(self, pOrient);
+        return;
     }
-    else
+
+    // Otherwise, face in direction of motion toward target (if valid)
+    float targetPos[2];
+    float targetZ;
+    Actor_GetTargetPosition(self, targetPos);
+    targetZ = *(float *)&targetPos[1]; // assuming 3rd value returned into stack after v16
+
+    float *currentOrigin = self->ent->r.currentOrigin;
+
+    float dx = targetPos[0] - currentOrigin[0];
+    float dy = targetPos[1] - currentOrigin[1];
+    float dz = targetZ - currentOrigin[2];
+
+    float lengthSq = dx * dx + dy * dy + dz * dz;
+    if (lengthSq == 0.0f)
     {
-        Actor_GetTargetPosition(self, v16);
-        currentOrigin = self->ent->r.currentOrigin;
-        v13 = v16[0] - *currentOrigin;
-        v14 = v16[1] - currentOrigin[1];
-        v5 = (float)(v17 - currentOrigin[2]);
-        _FP9 = -__fsqrts((float)((float)(v13 * v13)
-            + (float)((float)((float)(v17 - currentOrigin[2]) * (float)(v17 - currentOrigin[2]))
-                + (float)(v14 * v14))));
-        __asm { fsel      f11, f9, f10, f11 }
-        v8 = (float)((float)1.0 / (float)_FP11);
-        v13 = (float)v8 * v13;
-        v14 = v14 * (float)v8;
-        v15 = (float)v5 * (float)v8;
-        MayFaceEnemy = Path_MayFaceEnemy(&self->Path, &v13, currentOrigin);
-        v10 = pOrient;
-        v12 = MayFaceEnemy != 0;
-        v11 = self;
-        if (!v12)
-        {
-            Actor_FaceMotion(self, pOrient);
-            return;
-        }
+        Actor_FaceMotion(self, pOrient);
+        return;
     }
-    Actor_FaceEnemy(v11, v10);
+
+    float invLength = 1.0f / sqrtf(lengthSq);
+    float dir[3] =
+    {
+        dx * invLength,
+        dy * invLength,
+        dz * invLength
+    };
+
+    if (!Path_MayFaceEnemy(&self->Path, dir, currentOrigin))
+    {
+        Actor_FaceMotion(self, pOrient);
+        return;
+    }
+
+    Actor_FaceEnemy(self, pOrient);
 }
 
 void __cdecl Actor_DecideOrientation(actor_s *self)

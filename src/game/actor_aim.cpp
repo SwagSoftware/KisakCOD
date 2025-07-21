@@ -1847,7 +1847,7 @@ void __cdecl Actor_InitWeaponAccuracyGraphForWeapon(unsigned int weaponIndex)
         Actor_AiVsAiAccuracyGraphEventCallback);
     if (inited)
     {
-        sprintf_0(v5, "AI/AI Vs. AI Accuracy/%s", WeaponDef->szInternalName);
+        sprintf(v5, "AI/AI Vs. AI Accuracy/%s", WeaponDef->szInternalName);
         DevGui_AddGraph(v5, inited);
     }
     v4 = Actor_InitWeaponAccuracyGraphForWeaponType(
@@ -1856,7 +1856,7 @@ void __cdecl Actor_InitWeaponAccuracyGraphForWeapon(unsigned int weaponIndex)
         Actor_AiVsPlayerAccuracyGraphEventCallback);
     if (v4)
     {
-        sprintf_0(v5, "AI/AI Vs. Player Accuracy/%s", WeaponDef->szInternalName);
+        sprintf(v5, "AI/AI Vs. Player Accuracy/%s", WeaponDef->szInternalName);
         DevGui_AddGraph(v5, v4);
     }
 }
@@ -1875,9 +1875,9 @@ void __cdecl Actor_ShutdownWeaponAccuracyGraph()
         do
         {
             v2 = *p_data;
-            sprintf_0(v3, "AI/AI Vs. AI Accuracy/%s", **p_data);
+            sprintf(v3, "AI/AI Vs. AI Accuracy/%s", **p_data);
             DevGui_RemoveMenu(v3);
-            sprintf_0(v3, "AI/AI Vs. Player Accuracy/%s", *v2);
+            sprintf(v3, "AI/AI Vs. Player Accuracy/%s", *v2);
             DevGui_RemoveMenu(v3);
             ++v0;
             p_data += 8;

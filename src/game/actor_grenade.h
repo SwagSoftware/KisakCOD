@@ -1,8 +1,15 @@
 #pragma once
+#include "actor.h"
 
 #ifndef KISAK_SP 
 #error This file is for SinglePlayer only 
 #endif
+
+enum ActorGrenadeReevaluateMode : __int32
+{
+    REEVALUATE_ATTEMPT_RETURN = 0x0,
+    REEVALUATE_NO_RETURN = 0x1,
+};
 
 void __cdecl TRACK_actor_grenade();
 void __cdecl SP_info_grenade_hint(gentity_s *ent);

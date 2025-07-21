@@ -2244,12 +2244,12 @@ void __cdecl CG_DrawPlayerAmmoValue(
                             TotalAmmoReserve = 999;
                         if (v18)
                         {
-                            sprintf_0(v139, "%2i", v29);
+                            sprintf(v139, "%2i", v29);
                             v20 = CG_CheckPlayerForLowClip(cgArray);
                         }
                         if (v17)
                         {
-                            sprintf_0(v140, "%3i", TotalAmmoReserve);
+                            sprintf(v140, "%3i", TotalAmmoReserve);
                             v19 = CG_CheckPlayerForLowAmmo(cgArray);
                         }
                         if (v20)

@@ -841,13 +841,13 @@ void CG_ModPrvDrawBones()
             MatrixTransformVector(v24, v27, v26);
             MatrixMultiply(v30, v27, v28);
             AxisToAngles(v28, v25);
-            sprintf_0(
+            sprintf(
                 v32,
                 (const char *)(const char *)HIDWORD(COERCE_UNSIGNED_INT64(v25[0])),
                 (unsigned int)COERCE_UNSIGNED_INT64(v25[0]),
                 (unsigned int)COERCE_UNSIGNED_INT64(v25[1]),
                 (unsigned int)COERCE_UNSIGNED_INT64(v25[2]));
-            sprintf_0(
+            sprintf(
                 v31,
                 (const char *)(const char *)HIDWORD(COERCE_UNSIGNED_INT64(v26[0])),
                 (unsigned int)COERCE_UNSIGNED_INT64(v26[0]),
@@ -2814,40 +2814,40 @@ void __cdecl CG_ModelPreviewerBuildInfoStr(char *buffer, int bufferSize)
     if (Dvar_FindVar("modPrvLoadModel"))
     {
         I_strncat(buffer, bufferSize, "#DVARS,");
-        sprintf_0(v18, "modPrvLoadModel %s,", g_mdlprv.system.modelNames[modPrvLoadModel->current.integer]);
+        sprintf(v18, "modPrvLoadModel %s,", g_mdlprv.system.modelNames[modPrvLoadModel->current.integer]);
         I_strncat(buffer, bufferSize, v18);
-        sprintf_0(v18, "modPrvLoadFromAnim %s,", g_mdlprv.system.animNames[modPrvLoadFromAnim->current.integer]);
+        sprintf(v18, "modPrvLoadFromAnim %s,", g_mdlprv.system.animNames[modPrvLoadFromAnim->current.integer]);
         I_strncat(buffer, bufferSize, v18);
-        sprintf_0(v18, "modPrvLoadToAnim %s,", g_mdlprv.system.animNames[modPrvLoadToAnim->current.integer]);
+        sprintf(v18, "modPrvLoadToAnim %s,", g_mdlprv.system.animNames[modPrvLoadToAnim->current.integer]);
         I_strncat(buffer, bufferSize, v18);
         v8 = Dvar_EnumToString(modPrvDrawBoneInfo);
-        sprintf_0(v18, "modPrvDrawBoneInfo %s,", v8);
+        sprintf(v18, "modPrvDrawBoneInfo %s,", v8);
         I_strncat(buffer, bufferSize, v18);
-        sprintf_0(v18, "modPrvDrawAxis %i,", (_cntlzw(modPrvDrawAxis->current.color[0]) & 0x20) == 0);
+        sprintf(v18, "modPrvDrawAxis %i,", (_cntlzw(modPrvDrawAxis->current.color[0]) & 0x20) == 0);
         I_strncat(buffer, bufferSize, v18);
-        sprintf_0(
+        sprintf(
             v18,
             (const char *)(const char *)HIDWORD(COERCE_UNSIGNED_INT64(modPrvAnimCrossBlendTime->current.value)),
             (unsigned int)COERCE_UNSIGNED_INT64(modPrvAnimCrossBlendTime->current.value));
         I_strncat(buffer, bufferSize, v18);
-        sprintf_0(
+        sprintf(
             v18,
             (const char *)(const char *)HIDWORD(COERCE_UNSIGNED_INT64(modPrvAnimCrossBlendDuration->current.value)),
             (unsigned int)COERCE_UNSIGNED_INT64(modPrvAnimCrossBlendDuration->current.value));
         I_strncat(buffer, bufferSize, v18);
-        sprintf_0(
+        sprintf(
             v18,
             (const char *)(const char *)HIDWORD(COERCE_UNSIGNED_INT64(*(float *)(dword_827D89F0 + 12))),
             (unsigned int)COERCE_UNSIGNED_INT64(*(float *)(dword_827D89F0 + 12)));
         I_strncat(buffer, bufferSize, v18);
-        sprintf_0(v18, "modPrvAnimApplyDelta %i,", (_cntlzw(*(unsigned __int8 *)(dword_827D89A8 + 12)) & 0x20) == 0);
+        sprintf(v18, "modPrvAnimApplyDelta %i,", (_cntlzw(*(unsigned __int8 *)(dword_827D89A8 + 12)) & 0x20) == 0);
         I_strncat(buffer, bufferSize, v18);
-        sprintf_0(v18, "modPrvAnimForceLoop %i,", (_cntlzw(*(unsigned __int8 *)(dword_827D8A0C + 12)) & 0x20) == 0);
+        sprintf(v18, "modPrvAnimForceLoop %i,", (_cntlzw(*(unsigned __int8 *)(dword_827D8A0C + 12)) & 0x20) == 0);
         I_strncat(buffer, bufferSize, v18);
         v9 = Dvar_EnumToString((const dvar_s *)dword_827D89A0);
-        sprintf_0(v18, "modPrvAnimBlendMode %s,", v9);
+        sprintf(v18, "modPrvAnimBlendMode %s,", v9);
         I_strncat(buffer, bufferSize, v18);
-        sprintf_0(
+        sprintf(
             v18,
             (const char *)(const char *)HIDWORD(COERCE_UNSIGNED_INT64(modPrvAnimBlendWeight->current.value)),
             (unsigned int)COERCE_UNSIGNED_INT64(modPrvAnimBlendWeight->current.value));
@@ -2856,28 +2856,28 @@ void __cdecl CG_ModelPreviewerBuildInfoStr(char *buffer, int bufferSize)
         if (Var)
         {
             v11 = Dvar_EnumToString(Var);
-            sprintf_0(v18, "r_forceLod %s,", v11);
+            sprintf(v18, "r_forceLod %s,", v11);
             I_strncat(buffer, bufferSize, v18);
         }
         v12 = Dvar_FindVar("r_colorMap");
         if (v12)
         {
             v13 = Dvar_EnumToString(v12);
-            sprintf_0(v18, "r_colorMap %s,", v13);
+            sprintf(v18, "r_colorMap %s,", v13);
             I_strncat(buffer, bufferSize, v18);
         }
         v14 = Dvar_FindVar("r_specularMap");
         if (v14)
         {
             v15 = Dvar_EnumToString(v14);
-            sprintf_0(v18, "r_specularMap %s,", v15);
+            sprintf(v18, "r_specularMap %s,", v15);
             I_strncat(buffer, bufferSize, v18);
         }
         v16 = Dvar_FindVar("r_normalMap");
         if (v16)
         {
             v17 = Dvar_EnumToString(v16);
-            sprintf_0(v18, "r_normalMap %s,", v17);
+            sprintf(v18, "r_normalMap %s,", v17);
             I_strncat(buffer, bufferSize, v18);
         }
     }
