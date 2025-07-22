@@ -3,6 +3,12 @@
 #endif
 
 #include "actor_pain.h"
+#include "g_main.h"
+#include <script/scr_const.h>
+#include "g_local.h"
+#include "actor_events.h"
+#include "actor_state.h"
+#include "actor_orientation.h"
 
 bool __cdecl Actor_InPain(const actor_s *self)
 {
@@ -44,10 +50,9 @@ actor_think_result_t __cdecl Actor_Pain_Think(actor_s *self)
     int time; // r11
     sentient_s *sentient; // r3
 
-    if (!self)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\actor_pain.cpp", 71, 0, "%s", "self");
-    if (!self->ent)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\actor_pain.cpp", 72, 0, "%s", "self->ent");
+    iassert(self);
+    iassert(self->ent);
+
     iPainTime = self->iPainTime;
     self->pszDebugInfo = "pain";
     time = level.time;
@@ -56,7 +61,7 @@ actor_think_result_t __cdecl Actor_Pain_Think(actor_s *self)
         if (!Actor_IsAnimScriptAlive(self))
         {
             Actor_PopState(self);
-            return 1;
+            return ACTOR_THINK_REPEAT;
         }
         time = level.time;
     }
@@ -73,6 +78,6 @@ actor_think_result_t __cdecl Actor_Pain_Think(actor_s *self)
     Actor_SetOrientMode(self, AI_ORIENT_DONT_CHANGE);
     Actor_AnimPain(self);
     Actor_PostThink(self);
-    return 0;
+    return ACTOR_THINK_DONE;
 }
 

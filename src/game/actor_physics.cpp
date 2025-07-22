@@ -2,7 +2,31 @@
 #error This file is for SinglePlayer only 
 #endif
 
+#include "actor.h"
 #include "actor_physics.h"
+#include <qcommon/mem_track.h>
+#include <universal/q_shared.h>
+#include <universal/com_math.h>
+#include "g_local.h"
+#include "g_main.h"
+#include "actor_events.h"
+#include "sentient.h"
+
+struct actor_physics_local_t
+{
+    float fFrameTime;
+    int bIsWalking;
+    int bGroundPlane;
+    trace_t groundTrace;
+    float fImpactSpeed;
+    float vPrevOrigin[3];
+    float vPrevVelocity[3];
+    int iTraceMask;
+    float stepheight;
+};
+
+actor_physics_local_t g_apl;
+actor_physics_t *g_pPhys;
 
 void __cdecl TRACK_actor_physics()
 {
@@ -445,139 +469,135 @@ SlideMoveResult __cdecl AIPhys_SlideMove(int gravity, int zonly)
     return 1;
 }
 
-int __cdecl AIPhys_StepSlideMove(int gravity, int zonly)
+// aislop
+int AIPhys_StepSlideMove(int gravity, int zonly)
 {
-    double v4; // fp30
-    double v5; // fp29
-    double v6; // fp28
-    SlideMoveResult v7; // r3
-    double stepheight; // fp31
-    int result; // r3
-    actor_physics_t *v10; // r30
-    double v11; // fp13
-    double v12; // fp11
-    double v13; // fp10
-    double v14; // fp8
-    double fraction; // fp0
-    double v16; // fp31
-    actor_physics_t *v17; // r10
-    double v18; // fp12
-    double v19; // fp13
-    double v20; // fp11
-    int v21; // r10
-    float v24; // [sp+50h] [-230h] BYREF
-    float v25; // [sp+54h] [-22Ch]
-    float v26; // [sp+58h] [-228h]
-    float v27; // [sp+60h] [-220h] BYREF
-    float v28; // [sp+64h] [-21Ch]
-    float v29; // [sp+68h] [-218h]
-    float v30; // [sp+70h] [-210h] BYREF
-    float v31; // [sp+74h] [-20Ch]
-    float v32; // [sp+78h] [-208h]
-    trace_t v33; // [sp+80h] [-200h] BYREF
-    _BYTE v34[92]; // [sp+B0h] [-1D0h] BYREF
-    float v35[67]; // [sp+110h] [-170h] BYREF
+    float startX = g_pPhys->vOrigin[0];
+    float startY = g_pPhys->vOrigin[1];
+    float startZ = g_pPhys->vOrigin[2];
+    float velX = g_pPhys->vVelocity[0];
+    float velY = g_pPhys->vVelocity[1];
+    float velZ = g_pPhys->vVelocity[2];
 
-    v24 = g_pPhys->vOrigin[0];
-    v25 = g_pPhys->vOrigin[1];
-    v4 = g_pPhys->vVelocity[0];
-    v5 = g_pPhys->vVelocity[1];
-    v6 = g_pPhys->vVelocity[2];
-    v26 = g_pPhys->vOrigin[2];
-    v7 = AIPhys_SlideMove(gravity, zonly);
-    if (v7)
+    SlideMoveResult moveResult = AIPhys_SlideMove(gravity, zonly);
+
+    if (moveResult == SLIDEMOVE_FAIL)
+        return 0;
+
+    iassert(moveResult == SLIDEMOVE_CLIPPED);
+
+    float stepHeight = g_apl.stepheight;
+
+    // Check if we should attempt to step up
+    int tryStep = 0;
+    if (g_pPhys->vVelocity[2] <= 0.0f)
+        tryStep = 1;
+    else if (g_apl.bIsWalking)
+        tryStep = 1;
+    else
     {
-        if (v7 == SLIDEMOVE_FAIL)
-            return 0;
-        if (v7 != SLIDEMOVE_CLIPPED)
-            MyAssertHandler(
-                "c:\\trees\\cod3\\cod3src\\src\\game\\actor_physics.cpp",
-                443,
-                0,
-                "%s",
-                "moveResult == SLIDEMOVE_CLIPPED");
-        stepheight = g_apl.stepheight;
-        if (g_pPhys->vVelocity[2] <= 0.0
-            || g_apl.bIsWalking
-            || (v27 = v24,
-                v28 = v25,
-                v29 = v26 - g_apl.stepheight,
-                //Profile_Begin(226),
-                G_TraceCapsule(&v33, &v24, g_pPhys->vMins, g_pPhys->vMaxs, &v27, g_pPhys->iEntNum, g_apl.iTraceMask),
-                //Profile_EndInternal(0),
-                v33.fraction != 1.0)
-            && v33.walkable)
-        {
-            v30 = v24;
-            v31 = v25;
-            v32 = v26 + (float)stepheight;
-            //Profile_Begin(226);
-            G_TraceCapsule(&v33, &v24, g_pPhys->vMins, g_pPhys->vMaxs, &v30, g_pPhys->iEntNum, g_apl.iTraceMask);
-            //Profile_EndInternal(0);
-            if (v33.allsolid)
-            {
-                result = 1;
-                if (v33.fraction != 0.0)
-                    return result;
-                return 0;
-            }
-            v10 = g_pPhys;
-            memcpy(v35, g_pPhys, sizeof(v35));
-            memcpy(v34, &g_apl, sizeof(v34));
-            g_pPhys->iHitEntnum = 2175;
-            g_apl.bGroundPlane = 0;
-            v11 = v24;
-            v13 = (float)(v30 - v24);
-            v14 = (float)(v32 - v26);
-            fraction = v33.fraction;
-            v12 = v26;
-            v10->vOrigin[1] = (float)((float)(v31 - v25) * v33.fraction) + v25;
-            v10->vOrigin[0] = (float)((float)v13 * (float)fraction) + (float)v11;
-            v16 = (float)((float)((float)v14 * (float)fraction) + (float)v12);
-            v10->vOrigin[2] = (float)((float)v14 * (float)fraction) + (float)v12;
-            v10->vVelocity[0] = v4;
-            v10->vVelocity[1] = v5;
-            v10->vVelocity[2] = v6;
-            if (AIPhys_SlideMove(gravity, zonly) == SLIDEMOVE_FAIL)
-            {
-                memcpy(g_pPhys, v35, sizeof(actor_physics_t));
-                memcpy(&g_apl, v34, sizeof(g_apl));
-                return 1;
-            }
-            v27 = g_pPhys->vOrigin[0];
-            v28 = g_pPhys->vOrigin[1];
-            v29 = (float)(v26 - (float)v16) + g_pPhys->vOrigin[2];
-            //Profile_Begin(226);
-            G_TraceCapsule(&v33, g_pPhys->vOrigin, g_pPhys->vMins, g_pPhys->vMaxs, &v27, g_pPhys->iEntNum, g_apl.iTraceMask);
-            //Profile_EndInternal(0);
-            v17 = g_pPhys;
-            if (!v33.startsolid)
-            {
-                v18 = v33.fraction;
-                v19 = g_pPhys->vOrigin[1];
-                v20 = g_pPhys->vOrigin[2];
-                g_pPhys->vOrigin[0] = (float)((float)(v27 - g_pPhys->vOrigin[0]) * v33.fraction) + g_pPhys->vOrigin[0];
-                v17->vOrigin[1] = (float)((float)(v28 - (float)v19) * (float)v18) + (float)v19;
-                v17->vOrigin[2] = (float)((float)(v29 - (float)v20) * (float)v18) + (float)v20;
-            }
-            if (v33.fraction < 1.0)
-            {
-                if (v33.normal[2] < 0.30000001)
-                {
-                    memcpy(v17, v35, sizeof(actor_physics_t));
-                    memcpy(&g_apl, v34, sizeof(g_apl));
-                    return 1;
-                }
-                AIPhys_ClipVelocity(v17->vVelocity, v33.normal, v33.walkable, v17->vVelocity, 1.001);
-                _FP12 = (float)(v26 - v35[2]);
-                __asm { fsel      f13, f12, f0, f13 }
-                if (*(float *)(v21 + 8) > (double)(float)((float)_FP13 + (float)0.1))
-                    *(unsigned int *)(v21 + 244) = 2175;
-            }
-        }
+        float downX = startX;
+        float downY = startY;
+        float downZ = startZ - stepHeight;
+        trace_t traceDown;
+        G_TraceCapsule(&traceDown, &startX, g_pPhys->vMins, g_pPhys->vMaxs,
+            &downX, g_pPhys->iEntNum, g_apl.iTraceMask);
+
+        if (traceDown.fraction != 1.0f && traceDown.walkable)
+            tryStep = 1;
     }
+
+    if (!tryStep)
+        return 1;
+
+    // Trace up by stepHeight to see if stepping up is possible
+    float upX = startX;
+    float upY = startY;
+    float upZ = startZ + stepHeight;
+    trace_t traceUp;
+    G_TraceCapsule(&traceUp, &startX, g_pPhys->vMins, g_pPhys->vMaxs,
+        &upX, g_pPhys->iEntNum, g_apl.iTraceMask);
+
+    if (traceUp.allsolid)
+    {
+        if (traceUp.fraction != 0.0f)
+            return 1;
+        return 0;
+    }
+
+    // Backup current physics state
+    actor_physics_t physBackup;
+    memcpy(&physBackup, g_pPhys, sizeof(actor_physics_t));
+
+    actor_physics_local_t aplBackup;
+    memcpy(&aplBackup, &g_apl, sizeof(actor_physics_local_t));
+
+    g_pPhys->iHitEntnum = 2175;  // Magic number (entity hit)
+    g_apl.bGroundPlane = 0;
+
+    // Move up fraction of stepHeight
+    float deltaX = upX - startX;
+    float deltaY = upY - startY;
+    float deltaZ = upZ - startZ;
+    float fraction = traceUp.fraction;
+
+    g_pPhys->vOrigin[0] = startX + deltaX * fraction;
+    g_pPhys->vOrigin[1] = startY + deltaY * fraction;
+    g_pPhys->vOrigin[2] = startZ + deltaZ * fraction;
+
+    // Restore velocity
+    g_pPhys->vVelocity[0] = velX;
+    g_pPhys->vVelocity[1] = velY;
+    g_pPhys->vVelocity[2] = velZ;
+
+    if (AIPhys_SlideMove(gravity, zonly) == SLIDEMOVE_FAIL)
+    {
+        // Rollback on failure
+        memcpy(g_pPhys, &physBackup, sizeof(actor_physics_t));
+        memcpy(&g_apl, &aplBackup, sizeof(actor_physics_local_t));
+        return 1;
+    }
+
+    // Trace down from new position to floor
+    float floorX = g_pPhys->vOrigin[0];
+    float floorY = g_pPhys->vOrigin[1];
+    float floorZ = g_pPhys->vOrigin[2];
+
+    float floorTraceEndX = startX;
+    float floorTraceEndY = startY;
+    float floorTraceEndZ = startZ - (g_pPhys->vOrigin[2] - startZ) + g_pPhys->vOrigin[2];
+
+    G_TraceCapsule(&traceUp, g_pPhys->vOrigin, g_pPhys->vMins, g_pPhys->vMaxs,
+        &floorTraceEndX, g_pPhys->iEntNum, g_apl.iTraceMask);
+
+    if (!traceUp.startsolid)
+    {
+        float frac = traceUp.fraction;
+        g_pPhys->vOrigin[0] += (floorTraceEndX - g_pPhys->vOrigin[0]) * frac;
+        g_pPhys->vOrigin[1] += (floorTraceEndY - g_pPhys->vOrigin[1]) * frac;
+        g_pPhys->vOrigin[2] += (floorTraceEndZ - g_pPhys->vOrigin[2]) * frac;
+    }
+
+    // Handle velocity clipping if needed
+    if (traceUp.fraction < 1.0f)
+    {
+        if (traceUp.normal[2] < 0.3f)
+        {
+            // Rollback on steep slopes
+            memcpy(g_pPhys, &physBackup, sizeof(actor_physics_t));
+            memcpy(&g_apl, &aplBackup, sizeof(actor_physics_local_t));
+            return 1;
+        }
+
+        AIPhys_ClipVelocity(g_pPhys->vVelocity, traceUp.normal, traceUp.walkable,
+            g_pPhys->vVelocity, 1.001f);
+
+        // Additional ground plane update could go here
+    }
+
     return 1;
 }
+
 
 int __cdecl AIPhys_AirMove()
 {

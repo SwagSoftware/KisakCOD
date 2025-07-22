@@ -302,6 +302,8 @@ void __cdecl AxisTransformVec3(const mat3x3& axis, const float* vec, float* out)
 void __cdecl YawToAxis(float yaw, mat3x3& axis);
 void __cdecl AxisToAngles(const mat3x3& axis, vec3r angles);
 
+void ProjectPointOntoVector(const float *point, const float *start, const float *end, float *vProj);
+
 // == MATRICES ==
 void __cdecl OrthographicMatrix(mat4x4 &mtx, float width, float height, float depth);
 

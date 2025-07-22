@@ -280,47 +280,42 @@ void __cdecl DebugSetThreatStringFromString(ThreatDebugStringCategory category, 
     }
 }
 
-void __cdecl DebugThreatStringAll(const actor_s *self, sentient_s *enemy, int threat)
+void DebugThreatStringAll(const actor_s *self, sentient_s *enemy, int threat)
 {
-    __int64 v6; // r10
-    const char *v11; // r5
-    char *v12; // r30
-    float v13[2]; // [sp+58h] [-78h] BYREF
-    float v14; // [sp+60h] [-70h]
-    float v15[6]; // [sp+68h] [-68h] BYREF
-    float v16[4]; // [sp+80h] [-50h] BYREF
+    iassert(self);
 
-    if (!self)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\actor_threat.cpp", 362, 0, "%s", "self");
-    if (ai_debugThreatSelection->current.enabled && ai_debugEntIndex->current.integer == self->ent->s.number)
+    if (!ai_debugThreatSelection->current.enabled || ai_debugEntIndex->current.integer != self->ent->s.number)
     {
-        if (!enemy)
-            MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\actor_threat.cpp", 366, 0, "%s", "enemy");
-        LODWORD(v6) = threat;
-        HIDWORD(v6) = self->ent;
-        v16[2] = 0.0;
-        v16[3] = 1.0;
-        _FP11 = (float)((float)((float)v6 * (float)0.00014285714) - (float)1.0);
-        _FP10 = -(float)((float)v6 * (float)0.00014285714);
-        __asm
+        return;
+    }
+
+    iassert(enemy);
+
+    // Compute debug line color based on threat value
+    //float normalized = (float)threat * 0.00014285714f;  // ~1 / 7000
+    float normalized = (float)threat * (1.0f / 7000.0f);  // ~1 / 7000
+    float colorValue = fminf(fmaxf(normalized, 0.0f), 1.0f);
+    float color[4] = { (colorValue + 1.0f) * 0.5f, 0.0f, 0.0f, 1.0f };
+
+    float start[3];
+    float end[3];
+    Sentient_GetDebugEyePosition(self->sentient, start);
+    Sentient_GetDebugEyePosition(enemy, end);
+
+    // Draw line between eye positions
+    int duration = ai_threatUpdateInterval->current.integer / 50;
+    G_DebugLineWithDuration(start, end, color, 0, duration);
+
+    // Print debug threat strings
+    float drawPos[3] = { end[0], end[1], end[2] + 32.0f };
+    for (int i = 0; i < 5; ++i)
+    {
+        const char *str = g_threatDebugStrings[i];
+        if (str[0])
         {
-            fsel      f13, f11, f0, f13
-            fsel      f13, f10, f12, f13
+            G_AddDebugStringWithDuration(drawPos, color, 0.5f, str, 1); // KISAKTODO: check duration
         }
-        v16[0] = (float)((float)_FP13 + (float)1.0) * (float)0.5;
-        v16[1] = v16[0];
-        Sentient_GetDebugEyePosition(*(const sentient_s **)(HIDWORD(v6) + 264), v15);
-        Sentient_GetDebugEyePosition(enemy, v13);
-        G_DebugLineWithDuration(v15, v13, v16, 0, ai_threatUpdateInterval->current.integer / 50);
-        v12 = g_threatDebugStrings[0];
-        v14 = v14 + (float)32.0;
-        do
-        {
-            if (*v12)
-                G_AddDebugStringWithDuration(v13, v16, 0.5, v11, (int)v12);
-            v12 += 64;
-            v14 = v14 + (float)8.0;
-        } while ((int)v12 < (int)&g_skipDebugString);
+        drawPos[2] += 8.0f;
     }
 }
 
@@ -674,213 +669,160 @@ int __cdecl Actor_ThreatFlashed(sentient_s *enemy)
     return 200;
 }
 
-int __cdecl Actor_UpdateSingleThreat(actor_s *self, sentient_s *enemy)
+// aislop
+int Actor_UpdateSingleThreat(actor_s *self, sentient_s *enemy)
 {
-    int v4; // r25
-    char *v5; // r11
-    float *v6; // r31
-    int v7; // r10
-    int ThreatBias; // r20
-    double v10; // fp0
-    double v11; // fp13
-    double v12; // fp12
-    double v13; // fp31
-    _BYTE v14[12]; // r10 OVERLAPPED
-    sentient_s *TargetSentient; // r3
-    int v16; // r21
-    unsigned int v17; // r11
-    int v18; // r27
-    int v19; // r26
-    bool v20; // r22
-    bool v21; // r23
-    double ScarinessForDistance; // fp30
-    double v23; // fp30
-    int v24; // r11
-    int iThreatBias; // r6
-    int v26; // r31
-    int v27; // r31
-    int v28; // r31
-    int v29; // r31
-    int v30; // r31
-    int v31; // r31
-    int v32; // r31
-    __int64 v33; // r11
-    double v34; // r5
-    const char *v35; // r3
+    iassert(self);
+    iassert(enemy);
 
-    if (!self)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\actor_threat.cpp", 716, 0, "%s", "self");
-    if (!enemy)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\actor_threat.cpp", 717, 0, "%s", "enemy");
-    v4 = 0;
-    v5 = (char *)self + 40 * (enemy - level.sentients);
-    v6 = (float *)(v5 + 2100);
+    char *info = (char *)self + 40 * (enemy - level.sentients);
+    float *enemyData = (float *)(info + 2100);
+
+    // Pacifist check
     if (self->bPacifist)
     {
-        v7 = *((unsigned int *)v5 + 528);
-        if (!v7 || level.time - v7 >= self->iPacifistWait)
+        int lastThreat = ((unsigned int *)info)[528];
+        if (!lastThreat || level.time - lastThreat >= self->iPacifistWait)
         {
             DebugThreatStringSimple(self, enemy->ent, "pacifist", colorRed);
-            return 0x80000000;
+            return INT_MIN;
         }
     }
-    ThreatBias = Actor_GetThreatBias(enemy->iThreatBiasGroupIndex, self->sentient->iThreatBiasGroupIndex);
-    if (ThreatBias == 0x80000000)
-        return 0x80000000;
-    v10 = (float)(v6[7] - self->ent->r.currentOrigin[1]);
-    v11 = (float)(v6[8] - self->ent->r.currentOrigin[2]);
-    v12 = (float)(v6[6] - self->ent->r.currentOrigin[0]);
-    v13 = __fsqrts((float)((float)((float)v12 * (float)v12)
-        + (float)((float)((float)v11 * (float)v11) + (float)((float)v10 * (float)v10))));
-    TargetSentient = Actor_GetTargetSentient(self);
-    v16 = *(unsigned __int8 *)v6;
-    v17 = _cntlzw((char *)TargetSentient - (char *)enemy);
-    v18 = (v17 >> 5) & 1;
-    if (*(_BYTE *)v6 || (v19 = 0, Actor_IsFullyAware(self, enemy, (v17 >> 5) & 1)))
-        v19 = 1;
-    *(_QWORD *)&v14[4] = *(_QWORD *)&enemy->ent->health;
-    v20 = (_cntlzw((unsigned int)enemy->ent->client) & 0x20) == 0;
-    v21 = (double)*(__int64 *)v14 < (double)*(__int64 *)&v14[4] * 0.8;
-    if (v19)
-        goto LABEL_18;
-    if (!v18)
+
+    // Threat bias
+    int bias = Actor_GetThreatBias(enemy->iThreatBiasGroupIndex, self->sentient->iThreatBiasGroupIndex);
+    if (bias == INT_MIN)
     {
-    LABEL_23:
-        v23 = 0.0;
-        goto LABEL_19;
+        return INT_MIN;
     }
-    if (level.time - *((unsigned int *)v6 + 4) >= 10000)
+
+    // Compute distance to enemy
+    float dx = enemyData[6] - self->ent->r.currentOrigin[0];
+    float dy = enemyData[7] - self->ent->r.currentOrigin[1];
+    float dz = enemyData[8] - self->ent->r.currentOrigin[2];
+    float dist = sqrtf(dx * dx + dy * dy + dz * dz);
+
+    sentient_s *currentTarget = Actor_GetTargetSentient(self);
+    bool aware = false;
+    int idxDiff = (((uintptr_t)currentTarget - (uintptr_t)enemy) >> 5) & 1;
+
+    if (enemyData[0] != 0 ||
+        Actor_IsFullyAware(self, enemy, idxDiff))
     {
-        v4 = 0;
-        goto LABEL_23;
+        aware = true;
     }
-    v4 = 1;
-LABEL_18:
-    ScarinessForDistance = Sentient_GetScarinessForDistance(self->sentient, enemy, v13);
-    v23 = (float)((float)ScarinessForDistance - Sentient_GetScarinessForDistance(enemy, self->sentient, v13));
-LABEL_19:
+
+    bool isDamaged =  enemy->ent->health < enemy->ent->maxHealth * 0.8f; // KISAKTODO: double check logic
+    bool isPlayer = (enemy->ent->client != NULL);
+
+    int proximityFlag = 0;
+    if (!aware && idxDiff != 0 && level.time - ((unsigned int *)info)[4] < 10000)
+    {
+        proximityFlag = 1;
+    }
+
+    // Scariness difference
+    float scarinessMe = Sentient_GetScarinessForDistance(self->sentient, enemy, dist);
+    float scarinessOther = Sentient_GetScarinessForDistance(enemy, self->sentient, dist);
+    float scarinessDiff = aware || idxDiff || proximityFlag ? (scarinessMe - scarinessOther) : 0.0f;
+
     DebugResetThreatStrings(self);
-    v24 = g_skipDebugString;
     if (!g_skipDebugString)
     {
-        if (ThreatBias)
+        if (bias)
         {
-            sprintf(g_threatDebugStrings[4], "%s %d", g_threatDebugLabels[4], ThreatBias);
-            v24 = g_skipDebugString;
+            sprintf(g_threatDebugStrings[4], "%s %d",
+                g_threatDebugLabels[4], bias);
         }
         else
         {
-            g_threatDebugStrings[4][0] = 0;
+            g_threatDebugStrings[4][0] = '\0';
+        }
+
+        if (enemy->iThreatBias)
+        {
+            sprintf(g_threatDebugStrings[3], "%s %d",
+                g_threatDebugLabels[3], enemy->iThreatBias);
+        }
+        else
+        {
+            g_threatDebugStrings[3][0] = '\0';
         }
     }
-    iThreatBias = enemy->iThreatBias;
-    if (!v24)
+
+    int threatValue = bias + enemy->iThreatBias;
+    threatValue += Actor_ThreatFromVisibilityAndAwareness((int)enemyData[0], aware, proximityFlag);
+    threatValue += Actor_ThreatFromScariness(scarinessDiff);
+    threatValue += Actor_ThreatFromDistance(dist);
+    threatValue += Actor_ThreatFromAttackerCount(self, enemy, idxDiff);
+    threatValue += Actor_ThreatBonusForCurrentEnemy(idxDiff, aware, proximityFlag, isPlayer, isDamaged);
+
+    if (dist > 256.0f)
     {
-        if (iThreatBias)
-            sprintf(g_threatDebugStrings[3], "%s %d", g_threatDebugLabels[3], iThreatBias);
-        else
-            g_threatDebugStrings[3][0] = 0;
+        threatValue += Actor_ThreatCoveringFire(self, enemy);
     }
-    v26 = ThreatBias + enemy->iThreatBias;
-    v27 = Actor_ThreatFromVisibilityAndAwareness(v16, v19, v4) + v26;
-    v28 = Actor_ThreatFromScariness(v23) + v27;
-    v29 = Actor_ThreatFromDistance(v13) + v28;
-    v30 = Actor_ThreatFromAttackerCount(self, enemy, v18) + v29;
-    v31 = Actor_ThreatBonusForCurrentEnemy(v18, v19, v4, v20, v21) + v30;
-    if (v13 > 256.0)
-        v31 += Actor_ThreatCoveringFire(self, enemy);
-    v32 = Actor_ThreatFlashed(enemy) + v31;
-    LODWORD(v33) = v32;
-    v34 = (float)((float)v33 * (float)0.00014285714);
-    v35 = va("%d (%0.3f)", HIDWORD(v34), LODWORD(v34));
+
+    threatValue += Actor_ThreatFlashed(enemy);
+
+    float scaledThreat = threatValue * 0.00014285714f; // scale by ~1/7000
+
     if (!g_skipDebugString)
     {
-        if (v35)
-            sprintf(g_threatDebugStrings[0], "%s %s", g_threatDebugLabels[0], v35);
+        char *threatStr = va("%d (%.3f)", threatValue, scaledThreat);
+        if (threatStr)
+        {
+            sprintf(g_threatDebugStrings[0], "%s %s",
+                g_threatDebugLabels[0], threatStr);
+        }
         else
-            g_threatDebugStrings[0][0] = 0;
+        {
+            g_threatDebugStrings[0][0] = '\0';
+        }
     }
-    DebugThreatStringAll(self, enemy, v32);
-    return v32;
+
+    DebugThreatStringAll(self, enemy, threatValue);
+    return threatValue;
 }
 
-void __cdecl Actor_InitThreatUpdateInterval(actor_s *self)
+void Actor_InitThreatUpdateInterval(actor_s *self)
 {
-    signed int integer; // r10
-    int v3; // r11
-    unsigned int v4; // r9
-    const dvar_s *v5; // r11
-    int v6; // r11
+    iassert(self);
 
-    if (!self)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\actor_threat.cpp", 811, 0, "%s", "self");
-    integer = ai_threatUpdateInterval->current.integer;
-    if (integer)
+    int interval = ai_threatUpdateInterval->current.integer;
+
+    if (interval > 0)
     {
-        v3 = ai_threatUpdateInterval->current.integer;
-        __twllei(integer, 0);
-        v4 = integer & ~(__ROL4__(level.time, 1) - 1);
-        self->threatUpdateTime = level.time / integer * v3;
-        v5 = ai_threatUpdateInterval;
-        __twlgei(v4, 0xFFFFFFFF);
-        v6 = G_irand(0, v5->current.integer) + self->threatUpdateTime;
+        int alignedTime = (level.time / interval) * interval;
+        int randomOffset = G_irand(0, interval);
+        self->threatUpdateTime = alignedTime + randomOffset;
     }
     else
     {
-        v6 = 0;
+        self->threatUpdateTime = 0;
     }
-    self->threatUpdateTime = v6;
 }
 
-void __cdecl Actor_IncrementThreatTime(actor_s *self)
-{
-    const dvar_s *v2; // r11
-    int v3; // r9
-    int time; // r11
-    signed int integer; // r8
-    int threatUpdateTime; // r8
-    signed int v7; // r11
-    unsigned int v8; // r7
-    int v9; // r9
 
-    if (!self)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\actor_threat.cpp", 831, 0, "%s", "self");
-    v2 = ai_threatUpdateInterval;
-    if (!ai_threatUpdateInterval->current.integer)
+// aislop
+void Actor_IncrementThreatTime(actor_s *self)
+{
+    iassert(self);
+    iassert(ai_threatUpdateInterval->current.integer);
+
+    int interval = ai_threatUpdateInterval->current.integer;
+
+    self->threatUpdateTime += interval;
+
+    if (self->threatUpdateTime <= level.time)
     {
-        MyAssertHandler(
-            "c:\\trees\\cod3\\cod3src\\src\\game\\actor_threat.cpp",
-            832,
-            0,
-            "%s",
-            "ai_threatUpdateInterval->current.integer");
-        v2 = ai_threatUpdateInterval;
+        // Wrap-around handling
+        self->threatUpdateTime %= interval;
+
+        int cyclesAhead = (level.time / interval) + 1;
+        self->threatUpdateTime += cyclesAhead * interval;
     }
-    v3 = v2->current.integer + self->threatUpdateTime;
-    self->threatUpdateTime = v3;
-    time = level.time;
-    if (v3 <= level.time)
-    {
-        integer = ai_threatUpdateInterval->current.integer;
-        __twllei(integer, 0);
-        __twlgei(integer & ~(__ROL4__(v3, 1) - 1), 0xFFFFFFFF);
-        self->threatUpdateTime = v3 % integer;
-        threatUpdateTime = self->threatUpdateTime;
-        v7 = ai_threatUpdateInterval->current.integer;
-        v8 = v7 & ~(__ROL4__(level.time, 1) - 1);
-        v9 = level.time / v7 + 1;
-        __twllei(v7, 0);
-        __twlgei(v8, 0xFFFFFFFF);
-        self->threatUpdateTime = v9 * v7 + threatUpdateTime;
-        time = level.time;
-    }
-    if (time >= self->threatUpdateTime)
-        MyAssertHandler(
-            "c:\\trees\\cod3\\cod3src\\src\\game\\actor_threat.cpp",
-            842,
-            0,
-            "%s",
-            "level.time < self->threatUpdateTime");
+
+    iassert(level.time < self->threatUpdateTime);
 }
 
 void __cdecl Actor_CanAttackAll(actor_s *self)
@@ -923,10 +865,14 @@ void __cdecl Actor_ClearPotentialThreat(potential_threat_t *self)
     self->isEnabled = 0;
 }
 
-bool __cdecl Actor_GetPotentialThreat(potential_threat_t *self, double *potentialThreatDir)
+bool __cdecl Actor_GetPotentialThreat(potential_threat_t *self, float *potentialThreatDir)
 {
     if (self->isEnabled)
-        *potentialThreatDir = *(double *)self->direction;
+    {
+        potentialThreatDir[0] = self->direction[0];
+        potentialThreatDir[1] = self->direction[1];
+    }
+
     return self->isEnabled;
 }
 

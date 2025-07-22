@@ -6,6 +6,17 @@
 #include "g_main.h"
 #include "g_local.h"
 
+#include <universal/com_math.h>
+#include <xanim/xanim.h>
+#include <script/scr_const.h>
+#include "actor_orientation.h"
+#include "actor_team_move.h"
+#include "actor_cover.h"
+#include "actor_state.h"
+
+float g_vGrenadeHint[512][3]{ 0.0f };
+float g_vRefPos[3]{ 0.0f };
+
 void __cdecl TRACK_actor_grenade()
 {
     track_static_alloc_internal(g_vGrenadeHint, 6144, "g_vGrenadeHint", 5);
@@ -21,7 +32,7 @@ void __cdecl SP_info_grenade_hint(gentity_s *ent)
     grenadeHintCount = level.grenadeHintCount;
     if (level.grenadeHintCount >= 0x200)
     {
-        Com_Error(ERR_DROP, byte_820269AC, 512);
+        Com_Error(ERR_DROP, "MAX_GRENADE_HINTS (%i) exceeded", 512);
         grenadeHintCount = level.grenadeHintCount;
     }
     v3 = g_vGrenadeHint[grenadeHintCount];
@@ -294,7 +305,7 @@ void __cdecl Actor_Grenade_GetTossFromPosition(
     if (!self->ent)
         MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\actor_grenade.cpp", 278, 0, "%s", "self->ent");
     AnglesToAxis(self->ent->r.currentAngles, v9);
-    MatrixTransformVector(vOffset, v9, v8);
+    MatrixTransformVector(vOffset, (const mat3x3&)v9, v8);
     *vFrom = *vStandPos + v8[0];
     vFrom[1] = vStandPos[1] + v8[1];
     vFrom[2] = vStandPos[2] + v8[2];
@@ -306,7 +317,7 @@ void __cdecl Actor_Grenade_GetTossPositions(
     float *vLand,
     unsigned int grenadeWPID)
 {
-    WeaponDef *WeaponDef; // r28
+    WeaponDef *weapDef; // r28
     double v8; // fp12
     int v9; // r11
     int v10; // r10
@@ -319,8 +330,8 @@ void __cdecl Actor_Grenade_GetTossPositions(
     float v17[4]; // [sp+60h] [-70h] BYREF
     trace_t v18; // [sp+70h] [-60h] BYREF
 
-    WeaponDef = BG_GetWeaponDef(grenadeWPID);
-    if (!WeaponDef)
+    weapDef = BG_GetWeaponDef(grenadeWPID);
+    if (!weapDef)
         MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\actor_grenade.cpp", 306, 0, "%s", "weapDef");
     v8 = vTargetPos[2];
     v14 = *vTargetPos;
@@ -338,23 +349,23 @@ void __cdecl Actor_Grenade_GetTossPositions(
     v11 = 4 * ((unsigned __int8)v9 + 397);
     v12 = (float)((float)(vTargetPos[1] - vFrom[1])
         * (float)((float)1.0
-            - (float)((float)((float)(*(float *)((char *)&WeaponDef->szInternalName + v11)
-                - *(float *)((char *)&WeaponDef->szInternalName + v10))
+            - (float)((float)((float)(*(float *)((char *)&weapDef->szInternalName + v11)
+                - *(float *)((char *)&weapDef->szInternalName + v10))
                 * (float)0.93970001)
-                + *(float *)((char *)&WeaponDef->szInternalName + v10))));
+                + *(float *)((char *)&weapDef->szInternalName + v10))));
     v13 = (float)((float)(vTargetPos[2] - vFrom[2])
         * (float)((float)1.0
-            - (float)((float)((float)(*(float *)((char *)&WeaponDef->szInternalName + v11)
-                - *(float *)((char *)&WeaponDef->szInternalName + v10))
+            - (float)((float)((float)(*(float *)((char *)&weapDef->szInternalName + v11)
+                - *(float *)((char *)&weapDef->szInternalName + v10))
                 * (float)0.93970001)
-                + *(float *)((char *)&WeaponDef->szInternalName + v10))));
+                + *(float *)((char *)&weapDef->szInternalName + v10))));
     *vLand = *vFrom
         + (float)((float)(*vTargetPos - *vFrom)
             * (float)((float)1.0
-                - (float)((float)((float)(*(float *)((char *)&WeaponDef->szInternalName + v11)
-                    - *(float *)((char *)&WeaponDef->szInternalName + v10))
+                - (float)((float)((float)(*(float *)((char *)&weapDef->szInternalName + v11)
+                    - *(float *)((char *)&weapDef->szInternalName + v10))
                     * (float)0.93970001)
-                    + *(float *)((char *)&WeaponDef->szInternalName + v10))));
+                    + *(float *)((char *)&weapDef->szInternalName + v10))));
     vLand[1] = vFrom[1] + (float)v12;
     vLand[2] = vFrom[2] + (float)v13;
 }
@@ -1081,14 +1092,9 @@ bool __cdecl Actor_Grenade_IsPointSafe(actor_s *self, const float *vPoint)
     float *v15; // r7
 
     p_pGrenade = &self->pGrenade;
-    if (!EntHandle::isDefined(&self->pGrenade))
-        MyAssertHandler(
-            "c:\\trees\\cod3\\cod3src\\src\\game\\actor_grenade.cpp",
-            1048,
-            0,
-            "%s",
-            "self->pGrenade.isDefined()");
-    v5 = EntHandle::ent(p_pGrenade);
+
+    iassert(self->pGrenade.isDefined());
+    v5 = p_pGrenade->ent();
     WeaponDef = BG_GetWeaponDef(v5->s.weapon);
     if (!WeaponDef)
         MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\actor_grenade.cpp", 1051, 0, "%s", "weapDef");
@@ -1096,10 +1102,10 @@ bool __cdecl Actor_Grenade_IsPointSafe(actor_s *self, const float *vPoint)
         return 1;
     LODWORD(v7) = WeaponDef->iExplosionRadius;
     v9 = (float)((float)v7 * (float)1.1);
-    v10 = EntHandle::ent(p_pGrenade);
+    v10 = p_pGrenade->ent();
     v11 = p_pGrenade;
     v12 = (const float *)&v10->352;
-    v13 = EntHandle::ent(v11);
+    v13 = v11->ent();
     return G_CanRadiusDamageFromPos(self->ent, vPoint, v13, v12, v9, 1.0, v15, 0.0, v14, 0) == 0;
 }
 
@@ -1404,7 +1410,7 @@ bool __cdecl Actor_Grenade_Resume(actor_s *self, ai_state_t ePrevState)
 
     if (!self)
         MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\actor_grenade.cpp", 1810, 0, "%s", "self");
-    if (!EntHandle::isDefined(&self->pGrenade))
+    if (!self->pGrenade.isDefined())
         return 0;
     result = 1;
     if (!self->bGrenadeTossValid)
@@ -1510,7 +1516,7 @@ void __cdecl Actor_Grenade_TakeCover(actor_s *self)
     }
 }
 
-int __cdecl Actor_Grenade_ThrowBack(actor_s *self)
+actor_think_result_t __cdecl Actor_Grenade_ThrowBack(actor_s *self)
 {
     gentity_s *v2; // r3
     double v3; // fp31
@@ -1670,27 +1676,7 @@ bool __cdecl Actor_Grenade_CheckTossPos(
     float *vPosOut,
     float *vVelOut,
     double randomRange,
-    int bRechecking,
-    int a10,
-    int a11,
-    int a12,
-    int a13,
-    int a14,
-    int a15,
-    int a16,
-    int a17,
-    int a18,
-    int a19,
-    int a20,
-    int a21,
-    int a22,
-    int a23,
-    int a24,
-    int a25,
-    int a26,
-    int a27,
-    int a28,
-    int a29)
+    int bRechecking)
 {
     double v38; // fp0
     double v39; // fp1
@@ -2196,8 +2182,7 @@ void __cdecl Actor_Grenade_Finish(actor_s *self, ai_state_t eNextState)
 
 void __cdecl Actor_Grenade_Suspend(actor_s *self, ai_state_t eNextState)
 {
-    if (!self)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\actor_grenade.cpp", 1796, 0, "%s", "self");
+    iassert(self);
     Actor_Grenade_DropIfHeld(self);
 }
 
@@ -2209,8 +2194,7 @@ bool __cdecl Actor_Grenade_CheckToss(
     float *vPosOut,
     float *vVelOut,
     double randomRange,
-    int bRechecking,
-    int a9)
+    int bRechecking)
 {
     const sentient_s *TargetSentient; // r30
     double v19; // fp0
@@ -2240,15 +2224,15 @@ bool __cdecl Actor_Grenade_CheckToss(
     float v43[4]; // [sp+70h] [-80h] BYREF
     float v44[6]; // [sp+80h] [-70h] BYREF
 
-    if (!self)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\actor_grenade.cpp", 701, 0, "%s", "self");
-    if (!self->sentient)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\actor_grenade.cpp", 702, 0, "%s", "self->sentient");
-    if (!vStandPos)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\actor_grenade.cpp", 703, 0, "%s", "vStandPos");
+    iassert(self);
+    iassert(self->sentient);
+    iassert(vStandPos);
+
     TargetSentient = Actor_GetTargetSentient(self);
-    if (!TargetSentient || g_gravity->current.value <= 0.0 || EntHandle::isDefined(&self->pGrenade) && !a9)
+
+    if (!TargetSentient || g_gravity->current.value <= 0.0 || self->pGrenade.isDefined() && !bRechecking)
         return 0;
+
     Sentient_GetOrigin(TargetSentient, v42);
     Sentient_GetVelocity(TargetSentient, v43);
     v19 = (float)(v43[0] + v42[0]);
@@ -2271,27 +2255,7 @@ bool __cdecl Actor_Grenade_CheckToss(
         vPosOut,
         vVelOut,
         randomRange,
-        v22,
-        v23,
-        v24,
-        v25,
-        v26,
-        v27,
-        v28,
-        v29,
-        v30,
-        v31,
-        v32,
-        v33,
-        v34,
-        v35,
-        v36,
-        v37,
-        v38,
-        v39,
-        v40,
-        v41,
-        a9);
+        bRechecking);
 }
 
 void __cdecl Actor_Grenade_AttemptEscape(actor_s *self, int bForceAbortPath)
@@ -2503,8 +2467,8 @@ void __cdecl Actor_GrenadeBounced(gentity_s *pGrenade, gentity_s *pHitEnt)
         Actor_PredictGrenadeLandPos(pGrenade);
         for (i = Actor_FirstActor(-1); i; i = Actor_NextActor(i, -1))
         {
-            if (EntHandle::isDefined(&i->pGrenade)
-                && EntHandle::ent(&i->pGrenade) == pGrenade
+            if (i->pGrenade.isDefined()
+                && i->pGrenade.ent() == pGrenade
                 && i->eSimulatedState[i->simulatedStateLevel] == AIS_GRENADE_RESPONSE)
             {
                 Actor_Grenade_ReevaluateResponse(i, REEVALUATE_ATTEMPT_RETURN);
@@ -2517,9 +2481,9 @@ bool __cdecl Actor_Grenade_Start(actor_s *self, ai_state_t ePrevState)
 {
     int result; // r3
 
-    if (!self)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\actor_grenade.cpp", 1760, 0, "%s", "self");
-    result = EntHandle::isDefined(&self->pGrenade);
+    iassert(self);
+
+    result = self->pGrenade.isDefined();
     if (result)
     {
         Actor_Grenade_DecideResponse(self);
@@ -2535,9 +2499,9 @@ bool __cdecl Actor_Grenade_Start(actor_s *self, ai_state_t ePrevState)
     return result;
 }
 
-int __cdecl Actor_Grenade_Acquire(actor_s *self)
+actor_think_result_t __cdecl Actor_Grenade_Acquire(actor_s *self)
 {
-    actor_s *actor; // r28
+    actor_s *pOther; // r28
     gentity_s *v3; // r30
     gentity_s *ent; // r30
     gentity_s *v6; // r3
@@ -2545,33 +2509,28 @@ int __cdecl Actor_Grenade_Acquire(actor_s *self)
     float v8; // [sp+54h] [-3Ch]
     float v9; // [sp+58h] [-38h]
 
-    if (!self)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\actor_grenade.cpp", 2000, 0, "%s", "self");
-    if (!EntHandle::isDefined(&self->pGrenade))
-        MyAssertHandler(
-            "c:\\trees\\cod3\\cod3src\\src\\game\\actor_grenade.cpp",
-            2001,
-            0,
-            "%s",
-            "self->pGrenade.isDefined()");
+    iassert(self);
+    iassert(self->pGrenade.isDefined());
+
     if (self->pPileUpEnt)
     {
         Actor_Grenade_AttemptEscape(self, 1);
-        actor = self->pPileUpEnt->actor;
-        if (actor == self)
-            MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\actor_grenade.cpp", 2008, 0, "%s", "pOther != self");
-        if (actor)
+        pOther = self->pPileUpEnt->actor;
+
+        iassert(pOther != self);
+
+        if (pOther)
         {
-            if (EntHandle::isDefined(&actor->pGrenade))
+            if (pOther->pGrenade.isDefined())
             {
-                v3 = EntHandle::ent(&actor->pGrenade);
-                if (v3 == EntHandle::ent(&self->pGrenade) && actor->eState[actor->stateLevel] == AIS_GRENADE_RESPONSE)
-                    Actor_Grenade_ReevaluateResponse(actor, REEVALUATE_ATTEMPT_RETURN);
+                v3 = pOther->pGrenade.ent();
+                if (v3 == self->pGrenade.ent() && pOther->eState[pOther->stateLevel] == AIS_GRENADE_RESPONSE)
+                    Actor_Grenade_ReevaluateResponse(pOther, REEVALUATE_ATTEMPT_RETURN);
             }
         }
         if (self->eSubState[self->stateLevel] == STATE_GRENADE_ACQUIRE)
             Actor_SetSubState(self, STATE_GRENADE_COWER);
-        return 1;
+        return ACTOR_THINK_REPEAT;
     }
     if (self->Physics.iHitEntnum != 2175)
     {
@@ -2579,9 +2538,9 @@ int __cdecl Actor_Grenade_Acquire(actor_s *self)
         if (self->eSubState[self->stateLevel] == STATE_GRENADE_ACQUIRE)
         {
             Actor_SetSubState(self, STATE_GRENADE_COWER);
-            return 1;
+            return ACTOR_THINK_REPEAT;
         }
-        return 1;
+        return ACTOR_THINK_REPEAT;
     }
     if (Actor_HasPath(self))
     {
@@ -2593,7 +2552,7 @@ int __cdecl Actor_Grenade_Acquire(actor_s *self)
         if (Vec2DistanceSq(self->ent->r.currentOrigin, self->Path.vFinalGoal) > 100.0)
         {
             if ((unsigned __int8)Actor_Grenade_ReevaluateResponse(self, REEVALUATE_NO_RETURN))
-                return 1;
+                return ACTOR_THINK_REPEAT;
             if (self->eSubState[self->stateLevel] == STATE_GRENADE_ACQUIRE)
             {
                 MyAssertHandler(
@@ -2602,14 +2561,14 @@ int __cdecl Actor_Grenade_Acquire(actor_s *self)
                     0,
                     "%s",
                     "self->eSubState[self->stateLevel] != STATE_GRENADE_ACQUIRE");
-                return 0;
+                return ACTOR_THINK_DONE;
             }
-            return 0;
+            return ACTOR_THINK_DONE;
         }
         if (__fabs((float)(self->ent->r.currentOrigin[2] - self->Path.vFinalGoal[2])) > 32.0)
         {
             if ((unsigned __int8)Actor_Grenade_ReevaluateResponse(self, REEVALUATE_NO_RETURN))
-                return 1;
+                return ACTOR_THINK_REPEAT;
             if (self->eSubState[self->stateLevel] == STATE_GRENADE_ACQUIRE)
                 MyAssertHandler(
                     "c:\\trees\\cod3\\cod3src\\src\\game\\actor_grenade.cpp",
@@ -2619,7 +2578,7 @@ int __cdecl Actor_Grenade_Acquire(actor_s *self)
                     "self->eSubState[self->stateLevel] != STATE_GRENADE_ACQUIRE");
         }
         ent = self->ent;
-        v6 = EntHandle::ent(&self->pGrenade);
+        v6 = self->pGrenade.ent();
         v7 = v6->mover.decelTime - ent->r.currentOrigin[0];
         v8 = v6->mover.aDecelTime - ent->r.currentOrigin[1];
         v9 = v6->mover.speed - ent->r.currentOrigin[2];
@@ -2627,15 +2586,15 @@ int __cdecl Actor_Grenade_Acquire(actor_s *self)
             Actor_FaceVector(&self->CodeOrient, &v7);
         Actor_SetOrientMode(self, AI_ORIENT_DONT_CHANGE);
         self->ScriptOrient.eMode = AI_ORIENT_INVALID;
-        if (EntHandle::ent(&self->pGrenade)->item[1].ammoCount <= level.time)
+        if (self->pGrenade.ent()->item[1].ammoCount <= level.time)
         {
-            EntHandle::ent(&self->pGrenade)->missile.thrownBack = 1;
+            self->pGrenade.ent()->missile.thrownBack = 1;
             Actor_SetSubState(self, STATE_GRENADE_THROWBACK);
             return Actor_Grenade_ThrowBack(self);
         }
     }
     Actor_PostThink(self);
-    return 0;
+    return ACTOR_THINK_DONE;
 }
 
 actor_think_result_t __cdecl Actor_Grenade_Think(actor_s *self)
@@ -2645,12 +2604,12 @@ actor_think_result_t __cdecl Actor_Grenade_Think(actor_s *self)
     ai_substate_t v4; // r4
     const char *v5; // r3
 
-    if (!self)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\actor_grenade.cpp", 2087, 0, "%s", "self");
-    if (!EntHandle::isDefined(&self->pGrenade) || self->flashBanged)
+    iassert(self);
+
+    if (!self->pGrenade.isDefined() || self->flashBanged)
     {
         Actor_SetState(self, AIS_EXPOSED);
-        return 1;
+        return ACTOR_THINK_REPEAT;
     }
     else
     {
@@ -2690,12 +2649,11 @@ actor_think_result_t __cdecl Actor_Grenade_Think(actor_s *self)
         default:
             if (!alwaysfails)
             {
-                v5 = va("unhandled grenade state %i", v4);
-                MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\actor_grenade.cpp", 2152, 0, v5);
+                MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\actor_grenade.cpp", 2152, 0, va("unhandled grenade state %i", v4));
             }
         LABEL_20:
             Actor_PostThink(self);
-            result = ACTOR_THINK;
+            result = ACTOR_THINK_DONE;
             break;
         }
     }

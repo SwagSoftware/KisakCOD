@@ -61,12 +61,12 @@ int __cdecl Actor_ThreatCoveringFire(actor_s *self, sentient_s *enemy);
 int __cdecl Actor_ThreatFlashed(sentient_s *enemy);
 int __cdecl Actor_UpdateSingleThreat(actor_s *self, sentient_s *enemy);
 void __cdecl Actor_InitThreatUpdateInterval(actor_s *self);
-void __cdecl Actor_IncrementThreatTime(actor_s *self);
+void Actor_IncrementThreatTime(actor_s *self);
 void __cdecl Actor_CanAttackAll(actor_s *self);
 // local variable allocation has failed, the output may be wrong!
 void __cdecl Actor_SetPotentialThreat(potential_threat_t *self, double yaw);
 void __cdecl Actor_ClearPotentialThreat(potential_threat_t *self);
-bool __cdecl Actor_GetPotentialThreat(potential_threat_t *self, double *potentialThreatDir);
+bool __cdecl Actor_GetPotentialThreat(potential_threat_t *self, float *potentialThreatDir);
 void __cdecl Actor_PotentialThreat_Debug(actor_s *self);
 int __cdecl Actor_CheckIgnore(sentient_s *self, sentient_s *enemy);
 void __cdecl Actor_UpdateThreat(actor_s *self);

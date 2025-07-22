@@ -3,6 +3,15 @@
 #endif
 
 #include "actor_dog_exposed.h"
+#include "g_main.h"
+#include "actor_state.h"
+#include <universal/com_math.h>
+#include "game_public.h"
+#include "g_local.h"
+#include "actor_corpse.h"
+#include "actor_orientation.h"
+#include "actor_team_move.h"
+#include "actor_exposed.h"
 
 bool __cdecl Actor_Dog_Exposed_Start(actor_s *self, ai_state_t ePrevState)
 {
@@ -44,9 +53,9 @@ int __cdecl Actor_Dog_IsInSyncedMelee(actor_s *self, sentient_s *enemy)
     if (!enemy)
         return 0;
     p_syncedMeleeEnt = &enemy->syncedMeleeEnt;
-    if (!EntHandle::isDefined(p_syncedMeleeEnt))
+    if (!p_syncedMeleeEnt->isDefined())
         return 0;
-    v6 = EntHandle::ent(p_syncedMeleeEnt) == self->ent;
+    v6 = p_syncedMeleeEnt->ent() == self->ent;
     result = 1;
     if (!v6)
         return 0;
@@ -59,7 +68,7 @@ void __cdecl Actor_Dog_Attack(actor_s *self)
         MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\actor_dog_exposed.cpp", 77, 0, "%s", "self");
     if (!self->sentient)
         MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\actor_dog_exposed.cpp", 78, 0, "%s", "self->sentient");
-    if (EntHandle::isDefined(&self->sentient->targetEnt))
+    if (self->sentient->targetEnt.isDefined())
     {
         if ((AnimScriptList *)self->pAnimScriptFunc == &g_scr_data.dogAnim && !Actor_IsAnimScriptAlive(self))
             Actor_KillAnimScript(self);
@@ -67,14 +76,14 @@ void __cdecl Actor_Dog_Attack(actor_s *self)
     }
 }
 
-void __cdecl Actor_FindPathToGoalNearestNode(actor_s *self, int a2, int a3, int *a4)
+void __cdecl Actor_FindPathToGoalNearestNode(actor_s *self)
 {
     pathnode_t *v5; // r30
     pathnode_t *v6; // r5
     _BYTE v7[16]; // [sp+50h] [-330h] BYREF
-    pathsort_t v8[64]; // [sp+60h] [-320h] BYREF
+    pathsort_t nodes[64]; // [sp+60h] [-320h] BYREF
 
-    v5 = Path_NearestNode(self->codeGoal.pos, v8, -2, self->codeGoal.radius, a4, (int)v7, (nearestNodeHeightCheck)64);
+    v5 = Path_NearestNode(self->codeGoal.pos, nodes, -2, self->codeGoal.radius, a4, (int)v7, (nearestNodeHeightCheck)64);
     if (v5)
     {
         v6 = Sentient_NearestNode(self->sentient);
@@ -101,13 +110,13 @@ int __cdecl Actor_SetMeleeAttackSpot(actor_s *self, const float *enemyPosition, 
     sentient_s *v8; // r16
     double v9; // fp13
     int v10; // r20
-    int *v11; // r7
+    unsigned int *v11; // r7
     int v12; // r11
     int v13; // r6
     int v14; // r5
     int v15; // r10
     double v16; // fp0
-    int *v17; // r11
+    unsigned int *v17; // r11
     int v18; // r8
     int v19; // r9
     int v20; // r8
@@ -319,7 +328,7 @@ void __cdecl Actor_UpdateMeleeGoalPos(actor_s *self, float *goalPos)
         MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\actor_dog_exposed.cpp", 262, 0, "%s", "self");
     if (!goalPos)
         MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\actor_dog_exposed.cpp", 263, 0, "%s", "goalPos");
-    self->codeGoal.pos[0] = *goalPos;
+    self->codeGoal.pos[0] = goalPos[0];
     self->codeGoal.pos[1] = goalPos[1];
     self->codeGoal.pos[2] = goalPos[2];
     self->codeGoalSrc = AI_GOAL_SRC_ENEMY;
@@ -374,7 +383,7 @@ float __cdecl Actor_Dog_GetEnemyPos(actor_s *self, sentient_s *enemy, float *ene
             enemyPos[1] = (float)(p_commandTime[11] * (float)0.25) + (float)v9;
             enemyPos[2] = (float)(p_commandTime[12] * (float)0.25) + (float)v10;
         }
-        isDefined = EntHandle::isDefined(&ent->sentient->syncedMeleeEnt);
+        isDefined = ent->sentient->syncedMeleeEnt.isDefined();
         v12 = v8;
         if (isDefined)
             enemyPos[2] = enemyPos[2] + (float)64.0;
@@ -534,7 +543,7 @@ LABEL_15:
         {
             Actor_Dog_Attack(self);
             Actor_PostThink(self);
-            return 0;
+            return ACTOR_THINK_DONE;
         }
         else
         {
@@ -550,14 +559,14 @@ LABEL_15:
                 Actor_AnimStop(self, &g_animScriptTable[species]->stop);
             }
             Actor_PostThink(self);
-            return 0;
+            return ACTOR_THINK_DONE;
         }
     }
     else
     {
         Actor_Exposed_FlashBanged(self);
         Actor_PostThink(self);
-        return 0;
+        return ACTOR_THINK_DONE;
     }
 }
 

@@ -209,6 +209,28 @@ struct archivedEntity_s // sizeof=0x118
 
 #ifdef KISAK_SP
 
+enum entityType_t : __int32
+{
+    ET_GENERAL = 0x0,
+    ET_PLAYER = 0x1,
+    ET_ITEM = 0x2,
+    ET_MISSILE = 0x3,
+    ET_INVISIBLE = 0x4,
+    ET_SCRIPTMOVER = 0x5,
+    ET_SOUND_BLEND = 0x6,
+    ET_FX = 0x7,
+    ET_LOOP_FX = 0x8,
+    ET_PRIMARY_LIGHT = 0x9,
+    ET_MG42 = 0xA,
+    ET_VEHICLE = 0xB,
+    ET_VEHICLE_COLLMAP = 0xC,
+    ET_VEHICLE_CORPSE = 0xD,
+    ET_ACTOR = 0xE,
+    ET_ACTOR_SPAWNER = 0xF,
+    ET_ACTOR_CORPSE = 0x10,
+    ET_EVENTS = 0x11,
+};
+
 struct entityShared_t
 {
     unsigned __int8 linked;
@@ -236,7 +258,7 @@ union entityState_s_tag
 
 struct entityState_s
 {
-    unsigned __int8 eType;
+    unsigned __int8 eType; // entityType_t
     unsigned __int8 surfType;
     unsigned __int8 weapon;
     unsigned __int8 weaponModel;

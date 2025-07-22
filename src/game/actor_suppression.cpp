@@ -4,8 +4,11 @@
 
 #include "actor_suppression.h"
 #include "game_public.h"
+#include "g_local.h"
+#include <script/scr_const.h>
+#include "g_main.h"
 
-void __cdecl DebugDrawSuppression(actor_s *self, const float *a2, int a3, int a4, int a5)
+void __cdecl DebugDrawSuppression(actor_s *self)
 {
     int *p_movementOnly; // r31
     int v7; // r29
@@ -45,7 +48,8 @@ void __cdecl DebugDrawSuppression(actor_s *self, const float *a2, int a3, int a4
                 color = colorRed;
             }
 
-            G_DebugPlane(pSupp->clipPlane, pSupp->clipPlane[2], self->ent->r.currentOrigin, color, 100.0,  )
+            // KISAKTODO
+            //G_DebugPlane(pSupp->clipPlane, pSupp->clipPlane[2], self->ent->r.currentOrigin, color, 100.0,  )
         }
     }
 }
@@ -129,19 +133,19 @@ void __cdecl Actor_AddSuppressionLine(
     double v16; // fp12
     float v17[20]; // [sp+50h] [-50h] BYREF
 
-    if (!self)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\actor_suppression.cpp", 102, 0, "%s", "self");
-    if (!pSuppressor)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\actor_suppression.cpp", 103, 0, "%s", "pSuppressor");
-    if (!vStart)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\actor_suppression.cpp", 104, 0, "%s", "vStart");
-    if (!vEnd)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\actor_suppression.cpp", 105, 0, "%s", "vEnd");
+    iassert(self);
+    iassert(pSuppressor);
+    iassert(vStart);
+    iassert(vEnd);
+    
     if (self->sentient->eTeam != pSuppressor->eTeam)
     {
-        _FP12 = (float)((float)1.0 - (float)(self->suppressionMeter + (float)0.15000001));
-        __asm { fsel      f0, f12, f0, f13 }
-        self->suppressionMeter = _FP0;
+        //_FP12 = (float)((float)1.0 - (float)(self->suppressionMeter + (float)0.15000001));
+        //__asm { fsel      f0, f12, f0, f13 }
+        //self->suppressionMeter = _FP0;
+
+        float suppression = 1.0f - (self->suppressionMeter + 0.15f);
+        self->suppressionMeter = (suppression >= 0.0f) ? suppression : 0.0f;
         if (!(unsigned __int8)Actor_NearCoverNode(self))
             goto LABEL_29;
         goto LABEL_18;
@@ -168,7 +172,7 @@ void __cdecl Actor_AddSuppressionLine(
             LABEL_18:
                 v13 = (char *)self + 24 * Actor_PickNewSuppressantEntry(self, pSuppressor);
                 *((unsigned int *)v13 + 867) = level.time;
-                *((unsigned int *)v13 + 868) = pSuppressor;
+                *((unsigned int *)v13 + 868) = (unsigned int)pSuppressor;
                 v14 = (float)(vStart[1] - vEnd[1]);
                 v15 = (float)(*vEnd - *vStart);
                 v16 = (float)((float)(vStart[1] * (float)(*vEnd - *vStart)) + (float)(*vStart * (float)(vStart[1] - vEnd[1])));
@@ -219,78 +223,87 @@ void __cdecl Actor_ClearSuppressant(ai_suppression_t *suppressant)
     suppressant->movementOnly = 0;
 }
 
-void __cdecl Actor_DecaySuppressionLines(actor_s *self, const float *a2, int a3, int a4, int a5)
+// aislop
+void __cdecl Actor_DecaySuppressionLines(actor_s *self)
 {
-    bool v6; // r21
-    char v7; // r24
-    ai_suppression_t *Suppressant; // r31
-    int v11; // r27
-    int integer; // r11
-    const dvar_s *v13; // r11
-    int v14; // r9
-    int number; // r11
+    bool hadSuppression = false;
+    bool suppressionActive = false;
+    ai_suppression_t *suppressant;
+    int i;
+    int suppressionDurationValue;
+    const dvar_s *debugEntIndex;
+    int debugIndex;
+    int selfNumber;
 
-    if (!self)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\actor_suppression.cpp", 215, 0, "%s", "self");
-    v6 = self->suppressionStartTime > 0;
-    v7 = 0;
+    iassert(self);
+
+    hadSuppression = (self->suppressionStartTime > 0);
+
     if (self->ignoreSuppression)
     {
-        _FP0 = 0.0;
+        self->suppressionMeter = 0.0f;
     }
     else
     {
-        _FP12 = -(float)(self->suppressionMeter - (float)0.0099999998);
-        __asm { fsel      f0, f12, f13, f0 }
+        float temp = -(self->suppressionMeter - 0.0099999998f);
+        // Replace fsel: if temp >= 0 then temp else 0
+        self->suppressionMeter = (temp >= 0.0f) ? temp : 0.0f;
     }
-    self->suppressionMeter = _FP0;
-    Suppressant = self->Suppressant;
-    v11 = 4;
-    do
+
+    suppressant = self->Suppressant;
+    for (i = 0; i < 4; ++i)
     {
-        if (Suppressant->iTime > 0)
+        if (suppressant->iTime > 0)
         {
-            if (Suppressant->movementOnly)
+            if (suppressant->movementOnly)
             {
-                integer = ai_friendlyFireBlockDuration->current.integer;
+                suppressionDurationValue = ai_friendlyFireBlockDuration->current.integer;
             }
             else
             {
-                integer = 0;
+                suppressionDurationValue = 0;
                 if (!self->ignoreSuppression)
-                    integer = self->suppressionDuration;
+                    suppressionDurationValue = self->suppressionDuration;
             }
-            if (level.time - Suppressant->iTime < integer)
+
+            if ((level.time - suppressant->iTime) < suppressionDurationValue)
             {
-                if (!Suppressant->movementOnly)
-                    v7 = 1;
+                if (!suppressant->movementOnly)
+                    suppressionActive = true;
             }
             else
             {
-                if (!Suppressant)
+                if (!suppressant)
                     MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\actor_suppression.cpp", 199, 0, "%s", "suppressant");
-                Suppressant->iTime = 0;
-                Suppressant->pSuppressor = 0;
-                Suppressant->movementOnly = 0;
+                suppressant->iTime = 0;
+                suppressant->pSuppressor = NULL;
+                suppressant->movementOnly = 0;
             }
         }
-        --v11;
-        ++Suppressant;
-    } while (v11);
-    if (v6 && !v7)
-        Scr_Notify(self->ent, scr_const.suppression_end, 0);
-    if (!v7)
-        self->suppressionStartTime = 0;
-    v13 = ai_debugEntIndex;
-    if (ai_debugEntIndex->current.integer == self->ent->s.number && ai_showSuppression->current.integer > 0)
-    {
-        DebugDrawSuppression(self, a2, a3, a4, a5);
-        v13 = ai_debugEntIndex;
+        ++suppressant;
     }
-    v14 = v13->current.integer;
-    number = self->ent->s.number;
-    if (v14 != number && ai_showSuppression->current.integer == number)
-        DebugDrawSuppression(self, a2, a3, a4, a5);
+
+    if (hadSuppression && !suppressionActive)
+        Scr_Notify(self->ent, scr_const.suppression_end, 0);
+
+    if (!suppressionActive)
+        self->suppressionStartTime = 0;
+
+    debugEntIndex = ai_debugEntIndex;
+
+    if (debugEntIndex->current.integer == self->ent->s.number && ai_showSuppression->current.integer > 0)
+    {
+        DebugDrawSuppression(self);
+        debugEntIndex = ai_debugEntIndex;  // Not strictly needed
+    }
+
+    debugIndex = debugEntIndex->current.integer;
+    selfNumber = self->ent->s.number;
+
+    if (debugIndex != selfNumber && ai_showSuppression->current.integer == selfNumber)
+    {
+        DebugDrawSuppression(self);
+    }
 }
 
 void __cdecl Actor_DissociateSuppressor(actor_s *self, sentient_s *pSuppressor)

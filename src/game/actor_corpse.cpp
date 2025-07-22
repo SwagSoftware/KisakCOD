@@ -55,147 +55,130 @@ int __cdecl G_GetActorCorpseIndex(gentity_s *ent)
     return result;
 }
 
-int __cdecl G_GetFreeActorCorpseIndex(int reuse)
+int G_GetFreeActorCorpseIndex(int reuse)
 {
-    int v2; // r25
-    int v3; // r26
-    int v4; // r27
-    double v5; // fp30
-    double v6; // fp28
-    double v7; // fp29
-    gentity_s *v8; // r31
-    char v9; // r30
-    double v10; // fp0
-    bool v12; // mr_fpscr50
-    double v14; // fp0
-    double v15; // fp9
-    double v16; // fp10
-    double v17; // fp11
-    int v18; // r8
-    int result; // r3
-    int *p_entnum; // r7
-    gentity_s *v21; // r11
-    double v22; // fp0
-    double v23; // fp13
-    double v24; // fp0
-    int v25; // r31
-    float v26; // [sp+50h] [-90h] BYREF
-    float v27; // [sp+54h] [-8Ch]
-    float v28; // [sp+58h] [-88h]
-    float v29; // [sp+60h] [-80h] BYREF
-    float v30; // [sp+64h] [-7Ch]
-    float v31; // [sp+68h] [-78h]
+    int closestBehindIndex = 0;
+    int closestSideIndex = 0;
+    int farthestIndex = 0;
 
-    v2 = 0;
-    v3 = 0;
-    v4 = 0;
-    v5 = -1.0;
-    v6 = -1.0;
-    v7 = -1.0;
-    v8 = G_Find(0, 284, scr_const.player);
-    if (!v8)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\actor_corpse.cpp", 88, 0, "%s", "ent");
-    if (!v8->sentient)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\actor_corpse.cpp", 89, 0, "%s", "ent->sentient");
-    Sentient_GetEyePosition(v8->sentient, &v29);
-    G_GetPlayerViewDirection(v8, &v26, 0, 0);
-    v9 = 1;
-    v10 = __fsqrts((float)((float)(v26 * v26) + (float)(v27 * v27)));
-    _FP10 = -v10;
-    v12 = v10 == 0.0;
-    __asm { fsel      f0, f10, f11, f0 }
-    v14 = (float)((float)1.0 / (float)_FP0);
-    v15 = (float)(v26 * (float)v14);
-    v26 = v26 * (float)v14;
-    v16 = (float)((float)v14 * v27);
-    v27 = (float)v14 * v27;
-    v17 = (float)((float)v14 * (float)0.0);
-    v28 = (float)v14 * (float)0.0;
-    if (v12)
+    double maxDistBehind = -1.0;
+    double maxDistSide = -1.0;
+    double maxDist = -1.0;
+
+    gentity_s *playerEnt = G_Find(0, 284, scr_const.player);
+    iassert(playerEnt);
+    iassert(playerEnt->sentient);
+
+    // Get player's eye position and view direction
+    float playerEyePos[3];
+    Sentient_GetEyePosition(playerEnt->sentient, playerEyePos);
+
+    float viewDir[3] = { 0 };
+    G_GetPlayerViewDirection(playerEnt, &viewDir[0], 0, 0);
+
+    // Normalize view direction's X and Y
+    float horizLen = sqrtf(viewDir[0] * viewDir[0] + viewDir[1] * viewDir[1]);
+    if (horizLen == 0.0f)
     {
-        v9 = 0;
-        G_GetPlayerViewDirection(v8, &v26, 0, 0);
-        v17 = v28;
-        v16 = v27;
-        v15 = v26;
+        // If horizontal length zero, just use viewDir as is
+        horizLen = 1.0f;
     }
-    v18 = 0;
-    result = 0;
+
+    float normViewDirX = viewDir[0] / horizLen;
+    float normViewDirY = viewDir[1] / horizLen;
+    float normViewDirZ = 0.0f;
+
+    if (horizLen == 0.0f)
+    {
+        normViewDirX = viewDir[0];
+        normViewDirY = viewDir[1];
+        normViewDirZ = viewDir[2];
+    }
+
+    int foundAnyCorpse = 0;
+    int selectedIndex = -1;
+
     if (level.actorCorpseCount <= 0)
-        goto LABEL_24;
-    p_entnum = &g_scr_data.actorCorpseInfo[0].entnum;
-    do
     {
-        if (*p_entnum == -1)
-        {
-            if (reuse)
-                return result;
-        }
-        else
-        {
-            v21 = &level.gentities[*p_entnum];
-            v18 = 1;
-            v22 = (float)(v21->r.currentOrigin[2] - v31);
-            if (v9)
-                v22 = 0.0;
-            v23 = (float)((float)((float)v22 * (float)v17)
-                + (float)((float)((float)(v21->r.currentOrigin[0] - v29) * (float)v15)
-                    + (float)((float)(v21->r.currentOrigin[1] - v30) * (float)v16)));
-            v24 = (float)((float)((float)v22 * (float)v22)
-                + (float)((float)((float)(v21->r.currentOrigin[1] - v30) * (float)(v21->r.currentOrigin[1] - v30))
-                    + (float)((float)(v21->r.currentOrigin[0] - v29) * (float)(v21->r.currentOrigin[0] - v29))));
-            if (v23 < 0.0 && v5 < v24)
-            {
-                v5 = v24;
-                v2 = result;
-            }
-            if ((float)((float)v23 * (float)v23) <= (double)(float)((float)v24 * (float)0.5) && v6 < v24)
-            {
-                v6 = v24;
-                v3 = result;
-            }
-            if (v7 < v24)
-            {
-                v7 = v24;
-                v4 = result;
-            }
-        }
-        ++result;
-        p_entnum += 8;
-    } while (result < level.actorCorpseCount);
-    if (v18)
-    {
-        if (v5 == -1.0)
-        {
-            v25 = v3;
-            if (v6 == -1.0)
-                v25 = v4;
-        }
-        else
-        {
-            v25 = v2;
-        }
-        G_FreeEntity(&level.gentities[g_scr_data.actorCorpseInfo[v25].entnum]);
-        result = v25;
-        g_scr_data.actorCorpseInfo[v25].entnum = -1;
-    }
-    else
-    {
-    LABEL_24:
-        if (reuse)
-        {
-            if (level.actorCorpseCount)
-                MyAssertHandler(
-                    "c:\\trees\\cod3\\cod3src\\src\\game\\actor_corpse.cpp",
-                    145,
-                    0,
-                    "%s",
-                    "!reuse || !level.actorCorpseCount");
-        }
+        // No corpses, but reuse requested - this should not happen
+        iassert(!reuse || !level.actorCorpseCount);
         return -1;
     }
-    return result;
+
+    // Loop through corpse info entries
+    for (int i = 0; i < level.actorCorpseCount; ++i)
+    {
+        int entnum = g_scr_data.actorCorpseInfo[i].entnum;
+        if (entnum == -1)
+        {
+            if (reuse)
+                return i;  // Return first free corpse slot if reuse requested
+            continue;
+        }
+
+        gentity_s *corpseEnt = &level.gentities[entnum];
+        foundAnyCorpse = 1;
+
+        // Compute relative vector from player eye to corpse position
+        float dx = corpseEnt->r.currentOrigin[0] - playerEyePos[0];
+        float dy = corpseEnt->r.currentOrigin[1] - playerEyePos[1];
+        float dz = corpseEnt->r.currentOrigin[2] - playerEyePos[2];
+
+        // If horizLen was zero, treat vertical difference as zero for projection
+        if (horizLen == 0.0f)
+            dz = 0.0f;
+
+        // Project vector onto normalized view direction
+        float dotView = dx * normViewDirX + dy * normViewDirY + dz * normViewDirZ;
+
+        // Calculate squared distance to corpse
+        float distSq = dx * dx + dy * dy + dz * dz;
+
+        // Find corpse behind player (dotView < 0) with max distance squared
+        if (dotView < 0.0f && maxDistBehind < distSq)
+        {
+            maxDistBehind = distSq;
+            closestBehindIndex = i;
+        }
+
+        // Find corpse somewhat to the side (dotView^2 <= distSq * 0.5) with max distance squared
+        if ((dotView * dotView) <= (distSq * 0.5f) && maxDistSide < distSq)
+        {
+            maxDistSide = distSq;
+            closestSideIndex = i;
+        }
+
+        // Find corpse with max distance squared overall
+        if (maxDist < distSq)
+        {
+            maxDist = distSq;
+            farthestIndex = i;
+        }
+    }
+
+    if (foundAnyCorpse)
+    {
+        // Choose corpse index based on proximity heuristics
+        if (maxDistBehind == -1.0)
+        {
+            // No corpse behind player, pick closest to side or farthest
+            selectedIndex = (maxDistSide == -1.0) ? farthestIndex : closestSideIndex;
+        }
+        else
+        {
+            selectedIndex = closestBehindIndex;
+        }
+
+        // Free entity at selected corpse index and mark slot free
+        G_FreeEntity(&level.gentities[g_scr_data.actorCorpseInfo[selectedIndex].entnum]);
+        g_scr_data.actorCorpseInfo[selectedIndex].entnum = -1;
+
+        return selectedIndex;
+    }
+
+    return -1;
 }
+
 
 void __cdecl G_RemoveActorCorpses(unsigned int allowedCorpseCount)
 {
@@ -555,8 +538,7 @@ void __cdecl Actor_GetBodyPlantAngles(
     double fYaw,
     float *pfPitch,
     float *pfRoll,
-    float *pfHeight,
-    float *a8)
+    float *pfHeight)
 {
     double v15; // fp12
     double v16; // fp30
@@ -613,31 +595,31 @@ void __cdecl Actor_GetBodyPlantAngles(
     }
 }
 
-float __cdecl Actor_Orient_LerpWithLimit(double current, double newValue, double delta, double rate)
+// aislop
+float Actor_Orient_LerpWithLimit(float current, float newValue, float delta, float rate)
 {
-    double v5; // fp1
-
-    //if (__fabs(delta) <= rate)
+    // If the difference (delta) is less than or equal to rate, snap to newValue
     if (fabsf(delta) <= rate)
     {
-        v5 = newValue;
+        return newValue;
     }
     else
     {
-        __asm { fsel      f0, f3, f0, f13 }
-        v5 = (float)((float)((float)_FP0 * (float)rate) + (float)current);
+        // Otherwise, move from current toward newValue by 'rate' units, respecting delta’s sign
+        float sign = (delta > 0) ? 1.0f : -1.0f;
+        return current + sign * rate;
     }
-    return *((float *)&v5 + 1);
 }
 
-void __cdecl Actor_OrientCorpseToGround(gentity_s *self, int bLerp, int a3, float *a4)
+void __cdecl Actor_OrientCorpseToGround(gentity_s *self, int bLerp)
 {
     int eType; // r11
     actor_prone_info_s *p_proneInfo; // r30
-    double v8; // fp1
-    float *number; // r3
-    float *currentOrigin; // r5
-    unsigned int v11; // r4
+    double yaw; // fp1
+    double pitch; // fp1
+    float *entNum; // r3
+    float *origin; // r5
+    unsigned int clipMask; // r4
     double v12; // fp29
     double v15; // fp0
     double v16; // fp29
@@ -664,13 +646,13 @@ void __cdecl Actor_OrientCorpseToGround(gentity_s *self, int bLerp, int a3, floa
         p_proneInfo = &self->actor->ProneInfo;
     if (p_proneInfo->bCorpseOrientation)
     {
-        v8 = self->r.currentAngles[1];
-        number = (float *)self->s.number;
-        currentOrigin = self->r.currentOrigin;
-        v11 = self->clipmask & 0xFDFF3FFF;
+        yaw = self->r.currentAngles[YAW];
+        entNum = (float *)self->s.number;
+        origin = self->r.currentOrigin;
+        clipMask = self->clipmask & 0xFDFF3FFF;
         if (bLerp)
         {
-            Actor_GetBodyPlantAngles(number, v11, currentOrigin, v8, a4, &v26, &v27, v28);
+            Actor_GetBodyPlantAngles(entNum, clipMask, origin, yaw, a4, &v26, &v27, v28);
             v12 = v26;
             _FP1 = AngleSubtract(v26, p_proneInfo->fTorsoPitch);
             if (__fabs(_FP1) <= 6.0)
@@ -713,10 +695,10 @@ void __cdecl Actor_OrientCorpseToGround(gentity_s *self, int bLerp, int a3, floa
         else
         {
             Actor_GetBodyPlantAngles(
-                number,
-                v11,
-                currentOrigin,
-                v8,
+                entNum,
+                clipMask,
+                origin,
+                yaw,
                 a4,
                 &p_proneInfo->fTorsoPitch,
                 &p_proneInfo->fWaistPitch,
@@ -725,7 +707,7 @@ void __cdecl Actor_OrientCorpseToGround(gentity_s *self, int bLerp, int a3, floa
     }
 }
 
-void __cdecl Actor_OrientPitchToGround(gentity_s *self, int bLerp, int a3, float *a4)
+void __cdecl Actor_OrientPitchToGround(gentity_s *self, int bLerp)
 {
     actor_prone_info_s *p_ProneInfo; // r30
     double v7; // fp1
@@ -739,8 +721,8 @@ void __cdecl Actor_OrientPitchToGround(gentity_s *self, int bLerp, int a3, float
     float v19; // [sp+50h] [-30h] BYREF
     float v20; // [sp+54h] [-2Ch] BYREF
 
-    if (self->s.eType != 14)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\actor_corpse.cpp", 513, 0, "%s", "self->s.eType == ET_ACTOR");
+    iassert(self->s.eType == ET_ACTOR);
+
     p_ProneInfo = &self->actor->ProneInfo;
     if (self->actor->ProneInfo.orientPitch)
     {
@@ -892,7 +874,7 @@ int __cdecl Actor_BecomeCorpse(gentity_s *self)
             v15->proneInfo.fWaistPitch = 0.0;
             v15->proneInfo.iProneTrans = 500;
         }
-        Actor_OrientCorpseToGround(self, 0, v19, v18);
+        Actor_OrientCorpseToGround(self, 0);
     }
     SV_LinkEntity(self);
     return 1;

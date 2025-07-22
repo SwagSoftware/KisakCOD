@@ -4,6 +4,8 @@
 #error This file is for SinglePlayer only 
 #endif
 
+#include "actor.h"
+
 void __cdecl TRACK_actor_cover();
 void __cdecl DebugDrawNodeSelectionOverlay();
 void __cdecl DebugDrawNodePicking(const char *msg, actor_s *self, const pathnode_t *node, float *color);

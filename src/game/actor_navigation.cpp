@@ -3,6 +3,7 @@
 #endif
 
 #include "actor_navigation.h"
+#include <universal/com_math.h>
 
 //   int const __cdecl Path_AStarAlgorithm<class CustomSearchInfo_FindCloseNode>(struct path_t *, enum team_t, float const *const, struct pathnode_t *, float const *const, int, int, class CustomSearchInfo_FindCloseNode &) 82202a88 f   actor_navigation.obj
 //   int const __cdecl Path_AStarAlgorithm<class CustomSearchInfo_FindPathWithWidth>(struct path_t *, enum team_t, float const *const, struct pathnode_t *, float const *const, int, int, class CustomSearchInfo_FindPathWithWidth &) 82202dd0 f   actor_navigation.obj

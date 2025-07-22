@@ -5,6 +5,8 @@
 
 #define PNF_PRIORITY 0x40
 
+#define MAX_NODES_IN_BRUSH 0x200
+
 enum nearestNodeHeightCheck : __int32
 {
     NEAREST_NODE_DO_HEIGHT_CHECK = 0x0,
@@ -257,7 +259,7 @@ int __cdecl Path_NodesInCylinder(
     pathsort_t *nodes,
     int maxNodes,
     int typeFlags);
-pathnode_tree_t *__cdecl Path_NodesInRadius(
+int __cdecl Path_NodesInRadius(
     float *origin,
     double maxDist,
     pathsort_t *nodes,
@@ -369,25 +371,24 @@ pathnode_t *__cdecl Path_ChooseChainPos(
     actor_s *claimer,
     int chainFallback);
 pathnode_t *__cdecl Path_NearestNodeNotCrossPlanes(
-    float *vOrigin,
+    const float * const vOrigin,
     pathsort_t *nodes,
     int typeFlags,
-    double fMaxDist,
+    float fMaxDist,
     float (*vNormal)[2],
-    float *fDist,
-    float *iPlaneCount,
+    const float *fDist,
+    int iPlaneCount,
     int *returnCount,
-    unsigned int *maxNodes,
+    int maxNodes,
     nearestNodeHeightCheck heightCheck);
 pathnode_t *__cdecl Path_NearestNode(
-    float *vOrigin,
+    const float * const vOrigin,
     pathsort_t *nodes,
     int typeFlags,
-    double fMaxDist,
-    float *returnCount,
-    unsigned int *maxNodes,
-    int heightCheck,
-    int a8);
+    float fMaxDist,
+    int *returnCount,
+    int maxNodes,
+    nearestNodeHeightCheck heightCheck);
 void __cdecl Path_DrawDebugNearestNode(float *vOrigin, int numNodes);
 void __cdecl Path_DrawDebugClaimedNodes(float *origin, int numNodes);
 void __cdecl Path_DrawDebug();

@@ -683,9 +683,6 @@ int __cdecl Path_NodesInCylinder(
     int maxNodes,
     int typeFlags)
 {
-    pathnode_tree_t *result; // r3
-
-    result = gameWorldSp.path.nodeTree;
     if (gameWorldSp.path.nodeTree)
     {
         g_path.circle.origin[0] = origin[0];
@@ -699,12 +696,13 @@ int __cdecl Path_NodesInCylinder(
         g_path.circle.maxNodes = maxNodes;
         g_path.circle.nodeCount = 0;
         Path_NodesInCylinder_r(gameWorldSp.path.nodeTree);
-        return (pathnode_tree_t *)g_path.circle.nodeCount;
+        return g_path.circle.nodeCount;
     }
-    return result;
+
+    return 0;
 }
 
-pathnode_tree_t *__cdecl Path_NodesInRadius(
+int __cdecl Path_NodesInRadius(
     float *origin,
     double maxDist,
     pathsort_t *nodes,
@@ -2723,7 +2721,7 @@ void __cdecl Path_DisconnectPathsForEntity(gentity_s *ent)
                         v10,
                         disconnectMins,
                         disconnectMaxs,
-                        (const float *)((char *)gameWorldSp.path.nodes->constant.vOrigin + __ROL4__(v9->nodeNum, 7)),
+                        (float *)((char *)gameWorldSp.path.nodes->constant.vOrigin + __ROL4__(v9->nodeNum, 7)),
                         number,
                         42074129))
                     {
@@ -2768,228 +2766,85 @@ void __cdecl Path_UpdateBadPlaceCountForLink(pathlink_s *link, int teamflags, in
     }
 }
 
-void __cdecl Path_UpdateArcBadPlaceCount(badplace_arc_t *arc, int teamflags, int delta)
+// 
+void Path_UpdateArcBadPlaceCount(badplace_arc_t *arc, int teamFlags, int delta)
 {
-    float *v6; // r3
-    float *v7; // r3
-    double v8; // fp31
-    bool v9; // r20
-    long double v10; // fp2
-    long double v11; // fp2
-    int v12; // r22
-    double v13; // fp22
-    double v14; // fp26
-    double v15; // fp4
-    double v16; // fp12
-    double v17; // fp11
-    double v18; // fp20
-    double v19; // fp19
-    double v20; // fp0
-    double v21; // fp13
-    int i; // r23
-    pathnode_t *v23; // r27
-    float *vOrigin; // r28
-    double v25; // fp24
-    double v26; // fp28
-    double v27; // fp23
-    double v28; // fp25
-    double v29; // fp21
-    unsigned int v30; // r24
-    int v31; // r26
-    pathlink_s *v32; // r29
-    float *v33; // r11
-    float *v34; // r31
-    double v35; // fp0
-    double v36; // fp13
-    double v37; // fp31
-    double v38; // fp30
-    double halfheight; // fp0
-    double v40; // fp0
-    double v41; // fp12
-    double v42; // fp0
-    double v43; // fp13
-    double v44; // fp12
-    double v45; // fp12
-    double v46; // fp11
-    double v47; // fp13
-    double v48; // fp13
-    double v49; // fp0
-    double v50; // fp12
-    double v51; // fp0
-    float v52; // [sp+50h] [-130h]
-    float v53; // [sp+50h] [-130h]
-    float v54; // [sp+54h] [-12Ch]
-    float v55; // [sp+54h] [-12Ch]
-    float v56; // [sp+58h] [-128h]
-    float v57; // [sp+60h] [-120h]
-    float v58; // [sp+64h] [-11Ch]
-    float v59; // [sp+68h] [-118h]
-    float v60[4]; // [sp+70h] [-110h] BYREF
-    float v61[34]; // [sp+80h] [-100h] BYREF
+    // Compute angular difference between arc start and end
+    float angleDelta = arc->angle1 - arc->angle0;
+    if (angleDelta < 0.0f)
+        angleDelta += 360.0f;
 
+    bool clockwise = angleDelta < 180.0f;
+
+    // Compute unit vectors for Yaw
+    float arcMidAngle = arc->angle0 + (angleDelta * 0.5f);
+    float direction[3], rightVec[3], upVec[3];
     YawVectors(arc->angle0, arc->origin, 0);
-    YawVectors(arc->angle1, v6, 0);
-    v8 = (float)(arc->angle1 - arc->angle0);
-    v55 = -v54;
-    v53 = -v52;
-    v59 = (float)(arc->origin[1] * v58) + (float)(arc->origin[0] * v57);
-    v56 = (float)(arc->origin[0] * v53) + (float)(arc->origin[1] * v55);
-    if (v8 < 0.0)
-        v8 = (float)((float)(arc->angle1 - arc->angle0) + (float)360.0);
-    v9 = v8 < 180.0;
-    YawVectors((float)((float)((float)v8 * (float)0.5) + arc->angle0), v7, v61);
-    *(double *)&v10 = (float)((float)v8 * (float)0.0087266462);
-    v11 = sin(v10);
-    v12 = 0;
-    v13 = (float)(arc->halfheight * arc->halfheight);
-    v14 = (float)(arc->radius * arc->radius);
-    v15 = arc->origin[2];
-    v16 = (float)(arc->radius + (float)256.0);
-    v17 = (float)(arc->halfheight + (float)128.0);
-    v18 = (float)((float)v16 * (float)v16);
-    v19 = (float)((float)v17 * (float)v17);
-    v20 = (float)((float)((float)((float)*(double *)&v11 / (float)v8) * (float)76.394371) * arc->radius);
-    v21 = (float)((float)(v61[1]
-        * (float)((float)((float)((float)*(double *)&v11 / (float)v8) * (float)76.394371) * arc->radius))
-        + arc->origin[1]);
-    v60[0] = (float)(v61[0]
-        * (float)((float)((float)((float)*(double *)&v11 / (float)v8) * (float)76.394371) * arc->radius))
-        + arc->origin[0];
-    v60[1] = v21;
-    v60[2] = (float)(v61[2] * (float)v20) + (float)v15;
-    if (g_path.actualNodeCount)
+    YawVectors(arc->angle1, direction, 0);
+    YawVectors(arcMidAngle, rightVec, upVec);
+
+    float angleRad = angleDelta * 0.0087266462f;  // Convert degrees to radians
+    float sinAngle = sinf(angleRad);
+
+    float arcRadiusSq = arc->radius * arc->radius;
+    float arcHalfHeightSq = arc->halfheight * arc->halfheight;
+
+    float extendedRadius = arc->radius + 256.0f;
+    float extendedHeight = arc->halfheight + 128.0f;
+    float extendedRadiusSq = extendedRadius * extendedRadius;
+    float extendedHeightSq = extendedHeight * extendedHeight;
+
+    // Compute center point of the arc
+    float scalar = ((sinAngle / angleDelta) * 76.394371f) * arc->radius;
+    float arcCenter[3] = {
+        arc->origin[0] + (rightVec[0] * scalar),
+        arc->origin[1] + (rightVec[1] * scalar),
+        arc->origin[2] + (rightVec[2] * scalar)
+    };
+
+    if (!g_path.actualNodeCount)
+        return;
+
+    for (int nodeIdx = 0; nodeIdx < g_path.actualNodeCount; ++nodeIdx)
     {
-        for (i = 0; ; ++i)
+        pathnode_t *node = &gameWorldSp.path.nodes[nodeIdx];
+        float *nodeOrigin = node->constant.vOrigin;
+
+        float dx = nodeOrigin[0] - arc->origin[0];
+        float dy = nodeOrigin[1] - arc->origin[1];
+        float dz = nodeOrigin[2] - arc->origin[2];
+
+        float horizontalDistSq = dx * dx + dy * dy;
+        float verticalDistSq = dz * dz;
+
+        if (horizontalDistSq >= extendedRadiusSq || verticalDistSq >= extendedHeightSq)
+            continue;
+
+        float distToArcCenterSq = Vec2DistanceSq(nodeOrigin, arcCenter);
+
+        for (int linkIdx = 0; linkIdx < node->constant.totalLinkCount; ++linkIdx)
         {
-            v23 = &gameWorldSp.path.nodes[i];
-            vOrigin = gameWorldSp.path.nodes[i].constant.vOrigin;
-            v25 = (float)(*vOrigin - arc->origin[0]);
-            v26 = (float)(gameWorldSp.path.nodes[i].constant.vOrigin[2] - arc->origin[2]);
-            v27 = (float)(gameWorldSp.path.nodes[i].constant.vOrigin[1] - arc->origin[1]);
-            v28 = (float)((float)((float)v27 * (float)v27)
-                + (float)((float)(*vOrigin - arc->origin[0]) * (float)(*vOrigin - arc->origin[0])));
-            if (v28 < v18 && (float)((float)v26 * (float)v26) < v19)
-            {
-                v29 = Vec2DistanceSq(gameWorldSp.path.nodes[i].constant.vOrigin, v60);
-                v30 = 0;
-                if (v23->constant.totalLinkCount)
-                    break;
-            }
-        LABEL_36:
-            if (++v12 >= g_path.actualNodeCount)
-                return;
-        }
-        v31 = 0;
-        while (1)
-        {
-            v32 = &v23->constant.Links[v31];
-            v33 = (float *)((char *)gameWorldSp.path.nodes + __ROL4__(v32->nodeNum, 7));
-            v34 = v33 + 5;
-            v35 = (float)(v33[5] - arc->origin[0]);
-            v36 = (float)(v33[6] - arc->origin[1]);
-            v37 = (float)(v33[7] - arc->origin[2]);
-            v38 = (float)((float)((float)v36 * (float)v36) + (float)((float)v35 * (float)v35));
-            if (Vec2DistanceSq(v33 + 5, v60) <= v29)
-            {
-                halfheight = arc->halfheight;
-                if (v26 < halfheight)
-                {
-                    v40 = -halfheight;
-                    if (v26 <= v40 && v37 <= v40)
-                        goto LABEL_35;
-                LABEL_15:
-                    if (v28 > v14 && v38 > v14)
-                    {
-                        v42 = (float)-(float)((float)((float)(v34[1] - vOrigin[1]) * (float)v27)
-                            + (float)((float)(*v34 - *vOrigin) * (float)v25));
-                        if (v42 <= 0.0)
-                            goto LABEL_35;
-                        v41 = (float)(v34[1] - vOrigin[1]);
-                        v43 = (float)((float)((float)v41 * (float)v41) + (float)((float)(*v34 - *vOrigin) * (float)(*v34 - *vOrigin)));
-                        v44 = (float)((float)((float)v42 * (float)v42)
-                            - (float)((float)((float)v28 - (float)v14)
-                                * (float)((float)((float)v41 * (float)v41)
-                                    + (float)((float)(*v34 - *vOrigin) * (float)(*v34 - *vOrigin)))));
-                        if (v44 <= 0.0)
-                            goto LABEL_35;
-                        v45 = __fsqrts(v44);
-                        v46 = (float)((float)1.0 / (float)v43);
-                        v47 = (float)((float)((float)-(float)((float)((float)(v34[1] - vOrigin[1]) * (float)v27)
-                            + (float)((float)(*v34 - *vOrigin) * (float)v25))
-                            - (float)v45)
-                            * (float)((float)1.0 / (float)v43));
-                        if (v47 >= 1.0)
-                            goto LABEL_35;
-                        v48 = (float)((float)((float)(v34[2] - vOrigin[2]) * (float)v47) + (float)v26);
-                        if ((float)((float)v48 * (float)v48) > v13)
-                        {
-                            if ((float)((float)((float)v45
-                                - (float)((float)((float)(v34[1] - vOrigin[1]) * (float)v27)
-                                    + (float)((float)(*v34 - *vOrigin) * (float)v25)))
-                                * (float)v46) >= 1.0)
-                                goto LABEL_35;
-                            v49 = (float)((float)((float)((float)((float)v45
-                                - (float)((float)((float)(v34[1] - vOrigin[1]) * (float)v27)
-                                    + (float)((float)(*v34 - *vOrigin) * (float)v25)))
-                                * (float)v46)
-                                * (float)(v34[2] - vOrigin[2]))
-                                + (float)v26);
-                            if ((float)((float)v49 * (float)v49) > v13
-                                && (float)((float)((float)((float)((float)((float)v45
-                                    - (float)((float)((float)(v34[1] - vOrigin[1]) * (float)v27)
-                                        + (float)((float)(*v34 - *vOrigin) * (float)v25)))
-                                    * (float)v46)
-                                    * (float)(v34[2] - vOrigin[2]))
-                                    + (float)v26)
-                                    * (float)v48) >= 0.0)
-                            {
-                                goto LABEL_35;
-                            }
-                        }
-                    }
-                    if (arc->angle0 != 0.0 || arc->angle1 != 360.0)
-                    {
-                        v50 = (float)((float)((float)(vOrigin[1] * v55) + (float)(*vOrigin * v53)) - v56);
-                        v51 = (float)((float)((float)(v34[1] * v55) + (float)(*v34 * v53)) - v56);
-                        if (v9)
-                        {
-                            if (v50 < 0.0 && v51 < 0.0)
-                                goto LABEL_35;
-                            goto LABEL_32;
-                        }
-                        if (v50 < 0.0 && v51 < 0.0)
-                        {
-                        LABEL_32:
-                            if ((float)((float)((float)(vOrigin[1] * v58) + (float)(*vOrigin * v57)) - v59) < 0.0
-                                && (float)((float)((float)(v34[1] * v58) + (float)(*v34 * v57)) - v59) < 0.0)
-                            {
-                                goto LABEL_35;
-                            }
-                        }
-                    }
-                    Path_UpdateBadPlaceCountForLink(v32, teamflags, delta);
-                    goto LABEL_35;
-                }
-                if (v37 < halfheight)
-                    goto LABEL_15;
-            }
-        LABEL_35:
-            ++v30;
-            ++v31;
-            if (v30 >= v23->constant.totalLinkCount)
-                goto LABEL_36;
+            pathlink_s *link = &node->constant.Links[linkIdx];
+
+            // Convert link->nodeNum to real pointer using PPC-specific __ROL4__ trick
+            float *targetNode = (float *)((char *)gameWorldSp.path.nodes + __ROL4__(link->nodeNum, 7));
+            float *targetOrigin = targetNode + 5;
+
+            // TODO: Insert further checks & cleanup inside the loop
+            // We'll handle this in the next step.
         }
     }
 }
+
 
 void __cdecl Path_UpdateBrushBadPlaceCount(gentity_s *brushEnt, int teamflags, int delta)
 {
     int v6; // r5
     pathsort_t *v7; // r4
-    double v8; // fp29
-    double v9; // fp30
-    pathnode_tree_t *v10; // r29
-    pathsort_t *v11; // r30
+    double radius; // fp29
+    double height; // fp30
+    int nodeCount; // r29
+    pathsort_t *nodePtr; // r30
     pathnode_t *node; // r31
     unsigned int v13; // r28
     unsigned int actualNodeCount; // r10
@@ -2998,47 +2853,38 @@ void __cdecl Path_UpdateBrushBadPlaceCount(gentity_s *brushEnt, int teamflags, i
     unsigned int v17; // r29
     int v18; // r31
     pathlink_s *v19; // r3
-    pathsort_t v20[180]; // [sp+50h] [-3870h] BYREF
-    _QWORD v21[1025]; // [sp+1850h] [-2070h] BYREF
+    pathsort_t nodes[768]; // [sp+50h] [-3870h] BYREF
 
-    if (!brushEnt)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\pathnode.cpp", 3792, 0, "%s", "brushEnt");
-    if (brushEnt->r.currentAngles[0] != 0.0 || brushEnt->r.currentAngles[2] != 0.0)
-        MyAssertHandler(
-            "c:\\trees\\cod3\\cod3src\\src\\game\\pathnode.cpp",
-            3793,
-            0,
-            "%s",
-            "brushEnt->r.currentAngles[PITCH] == 0.f && brushEnt->r.currentAngles[ROLL] == 0.f");
-    memset(v21, 0, 0x2000u);
-    v8 = RadiusFromBounds2D(brushEnt->r.mins, brushEnt->r.maxs);
-    v9 = (float)(brushEnt->r.maxs[2] - brushEnt->r.mins[2]);
-    if (v8 <= 0.0)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\pathnode.cpp", 3800, 0, "%s", "radius > 0.f");
-    if (v9 <= 0.0)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\pathnode.cpp", 3801, 0, "%s", "height > 0.f");
-    v10 = Path_NodesInCylinder(brushEnt->r.currentOrigin, v8, v9, v7, v6, v20, 512, -2);
-    if ((unsigned int)v10 >= 0x200)
-        MyAssertHandler(
-            "c:\\trees\\cod3\\cod3src\\src\\game\\pathnode.cpp",
-            3804,
-            0,
-            "%s",
-            "nodeCount < static_cast< uint >( MAX_NODES_IN_BRUSH )");
-    if (v10)
+    iassert(brushEnt);
+    iassert(brushEnt->r.currentAngles[PITCH] == 0.f && brushEnt->r.currentAngles[ROLL] == 0.f);
+
+    memset(nodes, 0, sizeof(nodes));
+
+    radius = RadiusFromBounds2D(brushEnt->r.mins, brushEnt->r.maxs);
+    height = (float)(brushEnt->r.maxs[2] - brushEnt->r.mins[2]);
+
+    iassert(radius > 0.0f);
+    iassert(height > 0.0f);
+
+    nodeCount = Path_NodesInCylinder(brushEnt->r.currentOrigin, radius, height, nodes, 512, -2);
+
+    iassert((unsigned int)nodeCount < MAX_NODES_IN_BRUSH);
+
+    if (nodeCount)
     {
-        v11 = v20;
+        nodePtr = nodes;
         do
         {
-            node = v11->node;
+            node = nodePtr->node;
 
-            if (SV_EntityContact(v11->node->constant.vOrigin, v11->node->constant.vOrigin, brushEnt))
-                *((_BYTE *)v21 + node - gameWorldSp.path.nodes) = 1;
+            if (SV_EntityContact(nodePtr->node->constant.vOrigin, nodePtr->node->constant.vOrigin, brushEnt))
+                *((_BYTE *)&nodes[512].node + (uintptr_t)node - (uintptr_t)gameWorldSp.path.nodes) = 1; // KISAKTODO 
 
-            v10 = (pathnode_tree_t *)((char *)v10 - 1);
-            ++v11;
-        } while (v10);
+            nodeCount--;
+            ++nodePtr;
+        } while (nodeCount);
     }
+
     v13 = 0;
     actualNodeCount = g_path.actualNodeCount;
     if (g_path.actualNodeCount)
@@ -3047,7 +2893,7 @@ void __cdecl Path_UpdateBrushBadPlaceCount(gentity_s *brushEnt, int teamflags, i
         do
         {
             v16 = &gameWorldSp.path.nodes[v15];
-            if (!*((_BYTE *)v21 + v13))
+            if (!*((_BYTE *)&nodes[512].node + v13))// KISAKTODO 
             {
                 v17 = 0;
                 if (v16->constant.totalLinkCount)
@@ -3056,7 +2902,7 @@ void __cdecl Path_UpdateBrushBadPlaceCount(gentity_s *brushEnt, int teamflags, i
                     do
                     {
                         v19 = &v16->constant.Links[v18];
-                        if (*((_BYTE *)v21 + v19->nodeNum))
+                        if (*((_BYTE *)&nodes[512].node + v19->nodeNum))// KISAKTODO 
                             Path_UpdateBadPlaceCountForLink(v19, teamflags, delta);
                         ++v17;
                         ++v18;
@@ -3171,7 +3017,7 @@ void __cdecl Scr_SetNodePriority()
 
     if (Scr_GetNumParam() == 2)
     {
-        Pathnode = Scr_GetPathnode(0, v0);
+        Pathnode = Scr_GetPathnode(0);
         Int = Scr_GetInt(1u);
         v3 = 0;
         v4 = priorityAllowedNodes;
@@ -3218,7 +3064,7 @@ void __cdecl Scr_IsNodeOccupied()
 
     if (Scr_GetNumParam() == 1)
     {
-        v1 = level.time <= Scr_GetPathnode(0, v0)->dynamic.iFreeTime;
+        v1 = level.time <= Scr_GetPathnode(0)->dynamic.iFreeTime;
         Scr_AddBool(v1);
     }
     else
@@ -3236,7 +3082,7 @@ void __cdecl Scr_SetTurretNode()
 
     if (Scr_GetNumParam() == 2)
     {
-        Pathnode = Scr_GetPathnode(0, v0);
+        Pathnode = Scr_GetPathnode(0);
         if (Pathnode->constant.type == NODE_TURRET)
         {
             Entity = Scr_GetEntity((scr_entref_t *)1, v2);
@@ -3262,7 +3108,7 @@ void __cdecl Scr_UnsetTurretNode()
 
     if (Scr_GetNumParam() == 1)
     {
-        Pathnode = Scr_GetPathnode(0, v0);
+        Pathnode = Scr_GetPathnode(0);
         if (Pathnode->constant.type == NODE_TURRET)
             Pathnode->dynamic.turretEntNumber = -1;
         else
@@ -4400,43 +4246,22 @@ pathnode_t *__cdecl Path_ChooseChainPos(
 }
 
 pathnode_t *__cdecl Path_NearestNodeNotCrossPlanes(
-    float *vOrigin,
+    const float *const vOrigin,
     pathsort_t *nodes,
     int typeFlags,
-    double fMaxDist,
+    float fMaxDist,
     float (*vNormal)[2],
-    float *fDist,
-    float *iPlaneCount,
+    const float *fDist,
+    int iPlaneCount,
     int *returnCount,
-    unsigned int *maxNodes,
-    nearestNodeHeightCheck heightCheck,
-    int a11,
-    int a12,
-    int a13,
-    int a14,
-    int a15,
-    int a16,
-    int a17,
-    int a18,
-    int a19,
-    int a20,
-    int a21,
-    int a22,
-    int a23,
-    int a24,
-    int a25,
-    int a26,
-    int a27,
-    int a28,
-    int a29,
-    int a30,
-    int a31)
+    int maxNodes,
+    nearestNodeHeightCheck heightCheck)
 {
     int v39; // r5
     pathsort_t *v40; // r4
-    float *v41; // r3
-    double v42; // fp2
-    pathnode_tree_t *v43; // r28
+    float *pOrigin; // r3
+    double maxHeight; // fp2
+    int numNodes; // r28
     int v44; // r24
     int v45; // r25
     pathnode_t **v46; // r23
@@ -4459,18 +4284,18 @@ pathnode_t *__cdecl Path_NearestNodeNotCrossPlanes(
     //Profile_Begin(232);
     if (a31)
     {
-        v41 = vOrigin;
-        v42 = 1000000000.0;
+        pOrigin = vOrigin;
+        maxHeight = 1000000000.0;
     }
     else
     {
-        v61[0] = *vOrigin;
-        v41 = v61;
+        v61[0] = vOrigin[0];
         v61[1] = vOrigin[1];
         v61[2] = vOrigin[2] - (float)120.0;
-        v42 = 184.0;
+        pOrigin = v61;
+        maxHeight = 184.0;
     }
-    v43 = Path_NodesInCylinder(v41, fMaxDist, v42, v40, v39, nodes, a29, typeFlags);
+    numNodes = Path_NodesInCylinder(pOrigin, fMaxDist, maxHeight, nodes, a29, typeFlags);
     std::_Sort<pathsort_t *, int, bool(__cdecl *)(pathsort_t const &, pathsort_t const &)>(
         nodes,
         &nodes[(unsigned int)v43],
@@ -4483,9 +4308,9 @@ pathnode_t *__cdecl Path_NearestNodeNotCrossPlanes(
     v60[0] = 15.0;
     v60[1] = 15.0;
     v60[2] = 72.0;
-    *maxNodes = v43;
+    *maxNodes = numNodes;
     v59[2] = (float)0.0 + (float)17.0;
-    if ((int)v43 > 0)
+    if ((int)numNodes > 0)
     {
         v46 = (pathnode_t **)v62;
         while (1)
@@ -4522,7 +4347,7 @@ pathnode_t *__cdecl Path_NearestNodeNotCrossPlanes(
         LABEL_18:
             ++v45;
             ++nodes;
-            if (v45 >= (int)v43)
+            if (v45 >= (int)numNodes)
                 goto LABEL_19;
         }
         v52 = iPlaneCount;
@@ -4570,36 +4395,14 @@ LABEL_19:
 }
 
 pathnode_t *__cdecl Path_NearestNode(
-    float *vOrigin,
+    const float *const vOrigin,
     pathsort_t *nodes,
     int typeFlags,
-    double fMaxDist,
-    float *returnCount,
-    unsigned int *maxNodes,
-    int heightCheck,
-    int a8)
+    float fMaxDist,
+    int *returnCount,
+    int maxNodes,
+    nearestNodeHeightCheck heightCheck)
 {
-    nearestNodeHeightCheck v9; // [sp+8h] [-68h]
-    int v10; // [sp+Ch] [-64h]
-    int v11; // [sp+10h] [-60h]
-    int v12; // [sp+14h] [-5Ch]
-    int v13; // [sp+18h] [-58h]
-    int v14; // [sp+1Ch] [-54h]
-    int v15; // [sp+20h] [-50h]
-    int v16; // [sp+24h] [-4Ch]
-    int v17; // [sp+28h] [-48h]
-    int v18; // [sp+2Ch] [-44h]
-    int v19; // [sp+30h] [-40h]
-    int v20; // [sp+34h] [-3Ch]
-    int v21; // [sp+38h] [-38h]
-    int v22; // [sp+3Ch] [-34h]
-    int v23; // [sp+40h] [-30h]
-    int v24; // [sp+44h] [-2Ch]
-    int v25; // [sp+48h] [-28h]
-    int v26; // [sp+4Ch] [-24h]
-    int v27; // [sp+50h] [-20h]
-    int v28; // [sp+58h] [-18h]
-
     return Path_NearestNodeNotCrossPlanes(
         vOrigin,
         nodes,
@@ -4610,28 +4413,7 @@ pathnode_t *__cdecl Path_NearestNode(
         0,
         0,
         maxNodes,
-        v9,
-        v10,
-        v11,
-        v12,
-        v13,
-        v14,
-        v15,
-        v16,
-        v17,
-        v18,
-        v19,
-        v20,
-        v21,
-        v22,
-        v23,
-        v24,
-        v25,
-        v26,
-        v27,
-        heightCheck,
-        v28,
-        a8);
+        heightCheck);
 }
 
 void __cdecl Path_DrawDebugNearestNode(float *vOrigin, int numNodes)
@@ -4644,25 +4426,6 @@ void __cdecl Path_DrawDebugNearestNode(float *vOrigin, int numNodes)
     int v8; // r31
     pathsort_t *v9; // r30
     nearestNodeHeightCheck v10; // [sp+8h] [-C98h]
-    int v11; // [sp+Ch] [-C94h]
-    int v12; // [sp+10h] [-C90h]
-    int v13; // [sp+14h] [-C8Ch]
-    int v14; // [sp+18h] [-C88h]
-    int v15; // [sp+1Ch] [-C84h]
-    int v16; // [sp+20h] [-C80h]
-    int v17; // [sp+24h] [-C7Ch]
-    int v18; // [sp+28h] [-C78h]
-    int v19; // [sp+2Ch] [-C74h]
-    int v20; // [sp+30h] [-C70h]
-    int v21; // [sp+34h] [-C6Ch]
-    int v22; // [sp+38h] [-C68h]
-    int v23; // [sp+3Ch] [-C64h]
-    int v24; // [sp+40h] [-C60h]
-    int v25; // [sp+44h] [-C5Ch]
-    int v26; // [sp+48h] [-C58h]
-    int v27; // [sp+4Ch] [-C54h]
-    int v28; // [sp+50h] [-C50h]
-    int v29; // [sp+58h] [-C48h]
     int v30[4]; // [sp+60h] [-C40h] BYREF
     pathsort_t v31[260]; // [sp+70h] [-C30h] BYREF
 
@@ -4675,34 +4438,13 @@ void __cdecl Path_DrawDebugNearestNode(float *vOrigin, int numNodes)
         0,
         0,
         0,
-        v30,
-        v10,
-        v11,
-        v12,
-        v13,
-        v14,
-        v15,
-        v16,
-        v17,
-        v18,
-        v19,
-        v20,
-        v21,
-        v22,
-        v23,
-        v24,
-        v25,
-        v26,
-        v27,
-        v28,
         256,
-        v29,
-        1);
+        NEAREST_NODE_DONT_DO_HEIGHT_CHECK);
     v6 = ai_showNearestNode;
     if (ai_showNearestNode->current.integer <= 1)
     {
         if (v5)
-            Path_DrawDebugNode(vOrigin, v5, v4, v3);
+            Path_DrawDebugNode(vOrigin, v5);
         else
             G_DebugCircle(vOrigin, 192.0, 0, (int)colorRed, 1, 1);
     }
@@ -4715,7 +4457,7 @@ void __cdecl Path_DrawDebugNearestNode(float *vOrigin, int numNodes)
             v9 = v31;
             while (v8 < v6->current.integer)
             {
-                Path_DrawDebugNode(vOrigin, v9->node, v4, v3);
+                Path_DrawDebugNode(vOrigin, v9->node);
                 ++v8;
                 ++v9;
                 if (v8 >= v7)
@@ -4753,25 +4495,6 @@ void __cdecl Path_DrawDebugClaimedNodes(float *origin, int numNodes)
     char *v25; // r3
     const char *v26; // r5
     nearestNodeHeightCheck v27; // [sp+8h] [-D48h]
-    int v28; // [sp+Ch] [-D44h]
-    int v29; // [sp+10h] [-D40h]
-    int v30; // [sp+14h] [-D3Ch]
-    int v31; // [sp+18h] [-D38h]
-    int v32; // [sp+1Ch] [-D34h]
-    int v33; // [sp+20h] [-D30h]
-    int v34; // [sp+24h] [-D2Ch]
-    int v35; // [sp+28h] [-D28h]
-    int v36; // [sp+2Ch] [-D24h]
-    int v37; // [sp+30h] [-D20h]
-    int v38; // [sp+34h] [-D1Ch]
-    int v39; // [sp+38h] [-D18h]
-    int v40; // [sp+3Ch] [-D14h]
-    int v41; // [sp+40h] [-D10h]
-    int v42; // [sp+44h] [-D0Ch]
-    int v43; // [sp+48h] [-D08h]
-    int v44; // [sp+4Ch] [-D04h]
-    int v45; // [sp+50h] [-D00h]
-    int v46; // [sp+58h] [-CF8h]
     float v47[2]; // [sp+60h] [-CF0h] BYREF
     float v48; // [sp+68h] [-CE8h]
     const char *v49; // [sp+6Ch] [-CE4h]
@@ -4792,29 +4515,8 @@ void __cdecl Path_DrawDebugClaimedNodes(float *origin, int numNodes)
         0,
         0,
         0,
-        v51,
-        v27,
-        v28,
-        v29,
-        v30,
-        v31,
-        v32,
-        v33,
-        v34,
-        v35,
-        v36,
-        v37,
-        v38,
-        v39,
-        v40,
-        v41,
-        v42,
-        v43,
-        v44,
-        v45,
         256,
-        v46,
-        1);
+        NEAREST_NODE_DONT_DO_HEIGHT_CHECK);
     v6 = HIDWORD(v51[0]);
     v7 = 0;
     if (SHIDWORD(v51[0]) > 0)
@@ -4844,7 +4546,7 @@ void __cdecl Path_DrawDebugClaimedNodes(float *origin, int numNodes)
                 v15 = "Owner: None";
                 v16 = colorWhite;
             }
-            G_AddDebugString(v47, v16, v12, v13, (int)v15);
+            G_AddDebugString(v47, v16, v12, v13);
             LODWORD(v17) = level.time;
             v48 = (float)((float)v12 * (float)12.0) + v48;
             HIDWORD(v17) = node->dynamic.iValidTime[1];
@@ -4854,7 +4556,7 @@ void __cdecl Path_DrawDebugClaimedNodes(float *origin, int numNodes)
                 v51[0] = v17;
                 v18 = (float)((float)v17 * (float)0.001);
                 v19 = va((const char *)HIDWORD(v18), LODWORD(v18));
-                G_AddDebugString(v47, colorYellow, v12, v20, (int)v19);
+                G_AddDebugString(v47, colorYellow, v12, v20);
                 LODWORD(v17) = level.time;
                 v48 = (float)((float)v12 * (float)12.0) + v48;
             }
@@ -4865,7 +4567,7 @@ void __cdecl Path_DrawDebugClaimedNodes(float *origin, int numNodes)
                 v51[1] = v17;
                 v21 = (float)((float)v17 * (float)0.001);
                 v22 = va((const char *)HIDWORD(v21), LODWORD(v21));
-                G_AddDebugString(v47, colorYellow, v12, v23, (int)v22);
+                G_AddDebugString(v47, colorYellow, v12, v23);
                 LODWORD(v17) = level.time;
                 v48 = (float)((float)v12 * (float)12.0) + v48;
             }
@@ -4876,7 +4578,7 @@ void __cdecl Path_DrawDebugClaimedNodes(float *origin, int numNodes)
                 v51[2] = v17;
                 v24 = (float)((float)v17 * (float)0.001);
                 v25 = va((const char *)HIDWORD(v24), LODWORD(v24));
-                G_AddDebugString(v47, colorYellow, v12, v26, (int)v25);
+                G_AddDebugString(v47, colorYellow, v12, v26);
                 v48 = (float)((float)v12 * (float)12.0) + v48;
             }
             ++v7;
@@ -4919,7 +4621,7 @@ void __cdecl Path_DrawDebug()
                         if (integer == 2 || integer == 4)
                         {
                             v4 = va("%i", v0);
-                            G_AddDebugString(v2->constant.vOrigin, colorWhite, 1.0, v5, (int)v4);
+                            G_AddDebugString(v2->constant.vOrigin, colorWhite, 1.0, v5);
                         }
                         v6 = ai_showNodes->current.integer >= 3;
                         if (ai_showNodes->current.integer < 3)

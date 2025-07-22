@@ -3299,3 +3299,39 @@ int IsPosInsideArc(
 
     return 0;
 }
+
+// aislop
+void ProjectPointOntoVector(const float *point, const float *start, const float *end, float *vProj)
+{
+    float dir[3] = 
+    {
+        end[0] - start[0],
+        end[1] - start[1],
+        end[2] - start[2]
+    };
+
+    float lengthSq = dir[0] * dir[0] + dir[1] * dir[1] + dir[2] * dir[2];
+    if (lengthSq == 0.0f) 
+    {
+        // Degenerate line (start == end), projection is just the start point
+        vProj[0] = start[0];
+        vProj[1] = start[1];
+        vProj[2] = start[2];
+        return;
+    }
+
+    float toPoint[3] = 
+    {
+        point[0] - start[0],
+        point[1] - start[1],
+        point[2] - start[2]
+    };
+
+    // Project point onto the line direction
+    float dot = toPoint[0] * dir[0] + toPoint[1] * dir[1] + toPoint[2] * dir[2];
+    float t = dot / lengthSq;
+
+    vProj[0] = start[0] + t * dir[0];
+    vProj[1] = start[1] + t * dir[1];
+    vProj[2] = start[2] + t * dir[2];
+}

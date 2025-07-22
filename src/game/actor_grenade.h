@@ -71,7 +71,7 @@ void __cdecl Actor_Grenade_Combat(actor_s *self);
 void __cdecl Actor_Grenade_CoverAttack(actor_s *self);
 void __cdecl Actor_Grenade_Flee(actor_s *self);
 void __cdecl Actor_Grenade_TakeCover(actor_s *self);
-int __cdecl Actor_Grenade_ThrowBack(actor_s *self);
+actor_think_result_t __cdecl Actor_Grenade_ThrowBack(actor_s *self);
 void __cdecl G_DrawGrenadeHints(int a1, const float *a2, int a3, int a4, __int64 a5);
 bool __cdecl Actor_Grenade_CheckTossPos(
     actor_s *self,
@@ -82,27 +82,7 @@ bool __cdecl Actor_Grenade_CheckTossPos(
     float *vPosOut,
     float *vVelOut,
     double randomRange,
-    int bRechecking,
-    int a10,
-    int a11,
-    int a12,
-    int a13,
-    int a14,
-    int a15,
-    int a16,
-    int a17,
-    int a18,
-    int a19,
-    int a20,
-    int a21,
-    int a22,
-    int a23,
-    int a24,
-    int a25,
-    int a26,
-    int a27,
-    int a28,
-    int a29);
+    int bRechecking);
 bool __cdecl Actor_Grenade_AttemptReturnTo(
     actor_s *self,
     float *vFrom,
@@ -121,12 +101,11 @@ bool __cdecl Actor_Grenade_CheckToss(
     float *vPosOut,
     float *vVelOut,
     double randomRange,
-    int bRechecking,
-    int a9);
+    int bRechecking);
 void __cdecl Actor_Grenade_AttemptEscape(actor_s *self, int bForceAbortPath);
 void __cdecl Actor_Grenade_DecideResponse(actor_s *self);
 int __cdecl Actor_Grenade_ReevaluateResponse(actor_s *self, ActorGrenadeReevaluateMode reevaluateMode);
 void __cdecl Actor_GrenadeBounced(gentity_s *pGrenade, gentity_s *pHitEnt);
 bool __cdecl Actor_Grenade_Start(actor_s *self, ai_state_t ePrevState);
-int __cdecl Actor_Grenade_Acquire(actor_s *self);
+actor_think_result_t __cdecl Actor_Grenade_Acquire(actor_s *self);
 actor_think_result_t __cdecl Actor_Grenade_Think(actor_s *self);

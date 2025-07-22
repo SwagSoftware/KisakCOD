@@ -30,11 +30,10 @@ void __cdecl Actor_GetBodyPlantAngles(
     double fYaw,
     float *pfPitch,
     float *pfRoll,
-    float *pfHeight,
-    float *a8);
-float __cdecl Actor_Orient_LerpWithLimit(double current, double newValue, double delta, double rate);
-void __cdecl Actor_OrientCorpseToGround(gentity_s *self, int bLerp, int a3, float *a4);
-void __cdecl Actor_OrientPitchToGround(gentity_s *self, int bLerp, int a3, float *a4);
+    float *pfHeight);
+float Actor_Orient_LerpWithLimit(float current, float newValue, float delta, float rate);
+void __cdecl Actor_OrientCorpseToGround(gentity_s *self, int bLerp);
+void __cdecl Actor_OrientPitchToGround(gentity_s *self, int bLerp);
 int __cdecl Actor_BecomeCorpse(gentity_s *self);
 XAnimTree_s *__cdecl G_GetActorCorpseAnimTree(gentity_s *ent);
 
