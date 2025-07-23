@@ -143,7 +143,6 @@ unsigned int __cdecl SV_GetConfigstringConst(unsigned int index)
 
 void __cdecl SV_SetConfigValueForKey(int start, int max, char *key, char *value)
 {
-    char *v4; // eax
     HashEntry_unnamed_type_u v5; // [esp+0h] [ebp-14h]
     unsigned int name; // [esp+4h] [ebp-10h]
     signed int i; // [esp+10h] [ebp-4h]
@@ -179,8 +178,7 @@ void __cdecl SV_SetConfigValueForKey(int start, int max, char *key, char *value)
         Com_Printf(15, "Overflow at config string start value of %i: key values printed below\n", start);
         for (ia = 0; ia < max; ++ia)
         {
-            v4 = SL_ConvertToString(sv.configstrings[ia + start]);
-            Com_Printf(15, "%i: %i ( %s )\n", ia + start, sv.configstrings[ia + start], v4);
+            Com_Printf(15, "%i: %i ( %s )\n", ia + start, sv.configstrings[ia + start], SL_ConvertToString(sv.configstrings[ia + start]));
         }
         Com_Error(ERR_DROP, "SV_SetConfigValueForKey: overflow'");
     }

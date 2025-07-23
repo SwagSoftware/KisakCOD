@@ -880,6 +880,15 @@ enum pmtype_t : __int32
     PM_DEAD = 0x5,
     PM_DEAD_LINKED = 0x6,
 };
+inline pmtype_t &operator--(pmtype_t &e) {
+    e = static_cast<pmtype_t>(static_cast<int>(e) - 1);
+    return e;
+}
+inline pmtype_t &operator--(pmtype_t &e, int i)
+{
+    --e;
+    return e;
+}
 struct playerState_s
 {
     int commandTime;
@@ -2131,3 +2140,6 @@ extern int itemRegistered[2048];
 
 const float playerMins[] = { -15.0, -15.0, 0.0 };
 const float playerMaxs[] = { 15.0, 15.0, 70.0 };
+
+const int serverOnlyEvents[4] = { 31, 20, 19, -1 }; // idb
+const int singleClientEvents[13] = { 6, 7, 8, 34, 13, 14, 32, 33, 34, 37, 42, 43, -1 }; // idb

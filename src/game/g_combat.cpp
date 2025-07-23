@@ -3,11 +3,42 @@
 #endif
 
 #include "g_local.h"
+#include <script/scr_vm.h>
+#include <script/scr_const.h>
+#include "g_main.h"
+#include <server/sv_public.h>
+#include "actor_senses.h"
+#include "actor_events.h"
 
 unsigned char *bulletPriorityMap;
 unsigned char *riflePriorityMap;
 unsigned short **modNames;
 float *g_fHitLocDamageMult;
+
+const char *g_HitLocNames[19] =
+{
+  "none",
+  "helmet",
+  "head",
+  "neck",
+  "torso_upper",
+  "torso_lower",
+  "right_arm_upper",
+  "left_arm_upper",
+  "right_arm_lower",
+  "left_arm_lower",
+  "right_hand",
+  "left_hand",
+  "right_leg_upper",
+  "left_leg_upper",
+  "right_leg_lower",
+  "left_leg_lower",
+  "right_foot",
+  "left_foot",
+  "gun"
+};
+
+unsigned __int16 g_HitLocConstNames[19]{ 0 };
 
 void __cdecl TRACK_g_combat()
 {
@@ -25,7 +56,7 @@ void __cdecl G_HitLocStrcpy(unsigned __int8 *pMember, const char *pszKeyValue)
     do
     {
         v3 = *(unsigned __int8 *)pszKeyValue;
-        (pszKeyValue++)[v2] = v3;
+        ((char*)pszKeyValue++)[v2] = v3;
     } while (v3);
 }
 
@@ -49,14 +80,15 @@ void __cdecl G_ParseHitLocDmgTable()
         *p_iOffset = v0 * 4;
         p_iOffset[1] = 6;
         *(p_iOffset - 1) = (int)v3;
-        *v1++ = Scr_AllocString(v3, 1);
+        *v1++ = Scr_AllocString((char*)v3, 1);
         p_iOffset += 3;
         ++v0;
-    } while ((int)v1 < (int)&word_82C43A02);
+    } while ((uintptr_t)v1 < (uintptr_t)&g_HitLocConstNames[19]);
+
     g_fHitLocDamageMult[18] = 0.0;
-    InfoString = Com_LoadInfoString("info/ai_lochit_dmgtable", "hitloc damage table", "LOCDMGTABLE", v6);
-    if (!ParseConfigStringToStruct((unsigned __int8 *)g_fHitLocDamageMult, v5, 19, InfoString, 0, 0, G_HitLocStrcpy))
-        Com_Error(ERR_DROP, byte_8202D650, "info/ai_lochit_dmgtable");
+    InfoString = Com_LoadInfoString((char*)"info/ai_lochit_dmgtable", "hitloc damage table", "LOCDMGTABLE", v6);
+    if (!ParseConfigStringToStruct((unsigned __int8 *)g_fHitLocDamageMult, v5, 19, (char*)InfoString, 0, 0, G_HitLocStrcpy))
+        Com_Error(ERR_DROP, "Error parsing hitloc damage table %s", "info/ai_lochit_dmgtable");
 }
 
 void __cdecl TossClientItems(gentity_s *self)
@@ -133,8 +165,6 @@ int __cdecl G_MeansOfDeathFromScriptParam(unsigned int scrParam)
     unsigned __int16 ConstString; // r3
     int v3; // r10
     unsigned __int16 **v4; // r11
-    const char *v5; // r3
-    const char *v6; // r3
 
     ConstString = Scr_GetConstString(scrParam);
     v3 = 0;
@@ -143,11 +173,10 @@ int __cdecl G_MeansOfDeathFromScriptParam(unsigned int scrParam)
     {
         ++v4;
         ++v3;
-        if ((int)v4 >= (int)WeaponStateNames_110)
+        //if ((int)v4 >= (int)WeaponStateNames_110)
+        if ((int)v4 >= ARRAY_COUNT(WeaponStateNames)) // KISAKTODO: double check
         {
-            v5 = SL_ConvertToString(ConstString);
-            v6 = va("Unknown means of death \"%s\"\n", v5);
-            Scr_ParamError(scrParam, v6);
+            Scr_ParamError(scrParam, va("Unknown means of death \"%s\"\n", SL_ConvertToString(ConstString)));
             return 0;
         }
     }
@@ -215,7 +244,7 @@ void __cdecl player_die(
         Scr_AddConstString(*modNames[meansOfDeath]);
         Scr_AddEntity(attacker);
         Scr_Notify(self, scr_const.death, 3u);
-        self->client->ps.pm_type = (self->client->ps.pm_type == 1) + 5;
+        self->client->ps.pm_type = (pmtype_t)((self->client->ps.pm_type == 1) + 5);
         if (!attacker || (number = attacker->s.number) != 0)
             number = 2174;
         self->sentient->lastAttacker = attacker;
@@ -260,16 +289,16 @@ void __cdecl player_die(
         v26 = self->client;
         v27 = SL_ConvertToStringSafe(*modNames[v20]);
         v28 = va(
-            (const char *)(const char *)HIDWORD(COERCE_UNSIGNED_INT64(v26->ps.origin[0])),
-            (unsigned int)COERCE_UNSIGNED_INT64(v26->ps.origin[0]),
-            (unsigned int)COERCE_UNSIGNED_INT64(v26->ps.origin[1]),
-            (unsigned int)COERCE_UNSIGNED_INT64(v26->ps.origin[2]),
+            "died at %.1f %.1f %.1f from %s (weapon:%s) - hitloc %i, killer was %i",
+            v26->ps.origin[0],
+            v26->ps.origin[1],
+            v26->ps.origin[2],
             v27,
             v25,
             hitLoc,
             number);
-        LSP_LogString(cl_controller_in_use, v28);
-        LSP_SendLogRequest(cl_controller_in_use);
+        //LSP_LogString(cl_controller_in_use, v28);
+        //LSP_SendLogRequest(cl_controller_in_use);
         SV_LinkEntity(self);
     }
 }
@@ -549,16 +578,13 @@ bool __cdecl G_ShouldTakeBulletDamage(gentity_s *targ, gentity_s *attacker)
     sentient_s *sentient; // r11
     actor_s *actor; // r11
 
-    if (!targ)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\g_combat.cpp", 602, 0, "%s", "targ");
-    if (!attacker)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\g_combat.cpp", 603, 0, "%s", "attacker");
+    iassert(targ);
+    iassert(attacker);
     sentient = targ->sentient;
     if (!sentient || !sentient->ignoreRandomBulletDamage || !attacker->actor)
         return 1;
-    if (!attacker->sentient)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\g_combat.cpp", 614, 0, "%s", "attacker->sentient");
-    if (EntHandle::isDefined(&attacker->sentient->targetEnt) && EntHandle::ent(&attacker->sentient->targetEnt) == targ)
+    iassert(attacker->sentient);
+    if (attacker->sentient->targetEnt.isDefined() && attacker->sentient->targetEnt.ent() == targ)
         return 1;
     actor = targ->actor;
     return actor && actor->eState[actor->stateLevel] == AIS_SCRIPTEDANIM
@@ -925,139 +951,117 @@ void __cdecl G_Damage(
     }
 }
 
-int __cdecl G_CanRadiusDamageFromPos(
+int __fastcall G_CanRadiusDamageFromPos(
     gentity_s *targ,
     const float *targetPos,
     gentity_s *inflictor,
     const float *centerPos,
     double radius,
     double coneAngleCos,
-    float *coneDirection,
+    const float *coneDirection,
     double maxHeight,
     bool useEyeOffset,
-    float *contentMask,
-    int a11,
-    int a12,
-    int a13,
-    int a14,
-    int a15,
-    int a16,
-    int a17,
-    int a18,
-    int a19,
-    int a20,
-    int a21,
-    int a22,
-    int a23,
-    int a24,
-    int a25,
-    int a26,
-    int a27,
-    int a28,
-    int a29,
-    int a30,
-    char a31,
-    int a32,
-    int a33)
+    int contentMask)
 {
-    double v38; // fp27
-    double v40; // fp13
-    double v41; // fp12
-    double v42; // fp25
+    double v15; // fp27
+    double v17; // fp13
+    double v18; // fp12
+    double v19; // fp25
     int number; // r21
     sentient_s *sentient; // r3
-    double v45; // fp13
-    double v48; // fp12
-    double v49; // fp30
-    double v50; // fp29
-    double v51; // fp28
-    double v52; // fp0
-    double v53; // fp13
-    double v54; // fp12
-    double v55; // fp10
-    double v56; // fp11
-    float *v57; // r30
-    int v58; // r28
-    char v59; // r11
-    const float *v60; // r29
-    double v61; // fp13
-    double v62; // fp12
-    int v65; // r29
+    double v22; // fp13
+    double v25; // fp12
+    double v26; // fp30
+    double v27; // fp29
+    double v28; // fp28
+    double v29; // fp0
+    double v30; // fp13
+    double v31; // fp12
+    double v32; // fp10
+    double v33; // fp11
+    float *v34; // r30
+    int v35; // r28
+    char inCone; // r11
+    const float *v37; // r29
+    double v38; // fp13
+    double v39; // fp12
+    int v42; // r29
     float *i; // r30
-    double v67; // fp13
-    double v68; // fp12
+    double v44; // fp13
+    double v45; // fp12
     const DObj_s *ServerDObj; // r3
-    double v73; // fp27
-    double v74; // fp26
-    double v75; // fp25
-    double v76; // fp13
-    double v79; // fp11
-    double v80; // fp12
-    double v81; // fp0
-    double v82; // fp12
-    double v85; // fp13
-    double v86; // fp29
-    double v87; // fp30
-    double v88; // fp28
-    double v89; // fp8
-    double v90; // fp7
-    double v91; // fp8
-    double v92; // fp12
-    double v93; // fp9
-    double v94; // fp0
-    double v95; // fp7
-    double v96; // fp5
-    double v97; // fp10
-    double v98; // fp0
-    double v99; // fp9
-    double v100; // fp13
-    double v101; // fp12
-    float *v102; // r30
-    int v103; // r28
-    char v104; // r11
-    const float *v105; // r29
-    double v106; // fp0
-    double v107; // fp13
-    int v110; // r29
+    double v50; // fp27
+    double v51; // fp26
+    double v52; // fp25
+    double v53; // fp13
+    double v56; // fp11
+    double v57; // fp12
+    double v58; // fp0
+    double v59; // fp12
+    double v62; // fp13
+    double v63; // fp29
+    double v64; // fp30
+    double v65; // fp28
+    double v66; // fp8
+    double v67; // fp7
+    double v68; // fp8
+    double v69; // fp12
+    double v70; // fp9
+    double v71; // fp0
+    double v72; // fp7
+    double v73; // fp5
+    double v74; // fp10
+    double v75; // fp0
+    double v76; // fp9
+    double v77; // fp13
+    double v78; // fp12
+    float *v79; // r30
+    int v80; // r28
+    char v81; // r11
+    const float *v82; // r29
+    double v83; // fp0
+    double v84; // fp13
+    int v87; // r29
     float *j; // r30
-    double v112; // fp0
-    double v113; // fp13
-    float v116; // [sp+50h] [-140h] BYREF
-    float v117; // [sp+54h] [-13Ch]
-    float v118; // [sp+58h] [-138h]
-    float v119; // [sp+5Ch] [-134h]
-    float v120; // [sp+60h] [-130h]
-    float v121; // [sp+64h] [-12Ch]
-    float v122; // [sp+68h] [-128h]
-    float v123; // [sp+6Ch] [-124h]
-    float v124; // [sp+70h] [-120h]
-    float v125; // [sp+74h] [-11Ch]
-    float v126; // [sp+78h] [-118h]
-    float v127; // [sp+7Ch] [-114h]
-    float v128; // [sp+80h] [-110h]
-    float v129; // [sp+84h] [-10Ch]
-    float v130; // [sp+88h] [-108h]
-    float v131[4]; // [sp+90h] [-100h] BYREF
-    float v132[2]; // [sp+A0h] [-F0h] BYREF
-    float v133; // [sp+A8h] [-E8h]
-    float v134[4]; // [sp+B0h] [-E0h] BYREF
-    float v135[4]; // [sp+C0h] [-D0h] BYREF
-    float v136; // [sp+D0h] [-C0h] BYREF
-    float v137; // [sp+D4h] [-BCh]
-    float v138; // [sp+D8h] [-B8h]
-    float v139[20]; // [sp+E0h] [-B0h] BYREF
+    double v89; // fp0
+    double v90; // fp13
+    float v93; // [sp+50h] [-140h] BYREF
+    float v94; // [sp+54h] [-13Ch]
+    float v95; // [sp+58h] [-138h]
+    float v96; // [sp+5Ch] [-134h]
+    float v97; // [sp+60h] [-130h]
+    float v98; // [sp+64h] [-12Ch]
+    float v99; // [sp+68h] [-128h]
+    float v100; // [sp+6Ch] [-124h]
+    float v101; // [sp+70h] [-120h]
+    float v102; // [sp+74h] [-11Ch]
+    float v103; // [sp+78h] [-118h]
+    float v104; // [sp+7Ch] [-114h]
+    float v105; // [sp+80h] [-110h]
+    float v106; // [sp+84h] [-10Ch]
+    float v107; // [sp+88h] [-108h]
+    float v108[4]; // [sp+90h] [-100h] BYREF
+    float v109[2]; // [sp+A0h] [-F0h] BYREF
+    float v110; // [sp+A8h] [-E8h]
+    float v111[4]; // [sp+B0h] [-E0h] BYREF
+    float v112[4]; // [sp+C0h] [-D0h] BYREF
+    float v113; // [sp+D0h] [-C0h] BYREF
+    float v114; // [sp+D4h] [-BCh]
+    float v115; // [sp+D8h] [-B8h]
+    float v116[20]; // [sp+E0h] [-B0h] BYREF
+    int v118; // [sp+1ECh] [+5Ch]
 
-    v38 = 15.0;
+    v15 = 15.0;
     if ((targ->r.contents & 0x405C0008) == 0)
     {
-        v40 = (float)(centerPos[2] - targetPos[2]);
-        v41 = (float)(centerPos[1] - targetPos[1]);
-        if ((float)((float)((float)v41 * (float)v41)
+        v17 = (float)(centerPos[2] - targetPos[2]);
+        v18 = (float)(centerPos[1] - targetPos[1]);
+        if ((float)((float)((float)v18 * (float)v18)
             + (float)((float)((float)(*centerPos - *targetPos) * (float)(*centerPos - *targetPos))
-                + (float)((float)v40 * (float)v40))) >= (double)(float)((float)radius * (float)radius))
+                + (float)((float)v17 * (float)v17))) >= (double)(float)((float)radius * (float)radius))
             return 0;
     }
-    v42 = targ->r.currentOrigin[2];
+    v19 = targ->r.currentOrigin[2];
     if (inflictor)
         number = inflictor->s.number;
     else
@@ -1066,248 +1070,403 @@ int __cdecl G_CanRadiusDamageFromPos(
     if (sentient)
     {
         if (targ->client)
-            v38 = 8.0;
-        v45 = (float)(centerPos[1] - targetPos[1]);
-        _FP10 = -__fsqrts((float)((float)((float)(*centerPos - *targetPos) * (float)(*centerPos - *targetPos))
-            + (float)((float)v45 * (float)v45)));
-        __asm { fsel      f12, f10, f31, f12 }
-        v48 = (float)((float)1.0 / (float)_FP12);
-        v49 = (float)((float)v48 * (float)(*centerPos - *targetPos));
-        v50 = (float)((float)v48 * (float)0.0);
-        v51 = -(float)((float)v48 * (float)(centerPos[1] - targetPos[1]));
+            v15 = 8.0;
+        //v22 = (float)(centerPos[1] - targetPos[1]);
+        //_FP10 = -__fsqrts((float)((float)((float)(*centerPos - *targetPos) * (float)(*centerPos - *targetPos)) + (float)((float)v22 * (float)v22)));
+        //__asm { fsel      f12, f10, f31, f12 }
+        //v25 = (float)((float)1.0 / (float)_FP12);
+
+        float dx = centerPos[0] - targetPos[0];
+        float dy = centerPos[1] - targetPos[1];
+        float dist2D = sqrtf(dx * dx + dy * dy);
+
+        v25 = (1.0f / dist2D);
+
+        v26 = (float)((float)v25 * (float)(*centerPos - *targetPos));
+        v27 = (float)((float)v25 * (float)0.0);
+        v28 = -(float)((float)v25 * (float)(centerPos[1] - targetPos[1]));
         if (maxHeight == 0.0)
         {
-            Sentient_GetEyePosition(sentient, v132);
-            v52 = 0.5;
-            v53 = (float)((float)(v133 - (float)v42) * (float)0.5);
+            Sentient_GetEyePosition(sentient, v109);
+            v29 = 0.5;
+            v30 = (float)((float)(v110 - (float)v19) * (float)0.5);
         }
         else
         {
-            if (a31)
-                MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\g_combat.cpp", 952, 0, "%s", "!useEyeOffset");
-            v52 = 0.5;
-            v53 = (float)((float)maxHeight * (float)0.5);
+            iassert(!useEyeOffset);
+            v29 = 0.5;
+            v30 = (float)((float)maxHeight * (float)0.5);
         }
-        v54 = *targetPos;
-        if (a31)
+        v31 = *targetPos;
+        if (useEyeOffset)
         {
-            v54 = (float)((float)(v132[0] + *targetPos) * (float)v52);
-            v55 = (float)((float)(targetPos[1] + v132[1]) * (float)v52);
-            v56 = (float)((float)(targetPos[2] + v133) * (float)v52);
+            v31 = (float)((float)(v109[0] + *targetPos) * (float)v29);
+            v32 = (float)((float)(targetPos[1] + v109[1]) * (float)v29);
+            v33 = (float)((float)(targetPos[2] + v110) * (float)v29);
         }
         else
         {
-            v55 = targetPos[1];
-            v56 = (float)(targetPos[2] + (float)v53);
+            v32 = targetPos[1];
+            v33 = (float)(targetPos[2] + (float)v30);
         }
-        v118 = v56;
-        v119 = (float)((float)v51 * (float)v38) + (float)v54;
-        v122 = v119;
-        v116 = v54;
-        v117 = v55;
-        v120 = (float)((float)v49 * (float)v38) + (float)v55;
-        v123 = v120;
-        v121 = (float)((float)((float)v50 * (float)v38) + (float)v56) + (float)v53;
-        v124 = (float)((float)((float)v50 * (float)v38) + (float)v56) - (float)v53;
-        v125 = (float)((float)-v38 * (float)v51) + (float)v54;
-        v126 = (float)((float)-v38 * (float)v49) + (float)v55;
-        v128 = v125;
-        v129 = v126;
-        v127 = (float)((float)((float)-v38 * (float)v50) + (float)v56) + (float)v53;
-        v130 = (float)((float)((float)-v38 * (float)v50) + (float)v56) - (float)v53;
+        v95 = v33;
+        v96 = (float)((float)v28 * (float)v15) + (float)v31;
+        v99 = v96;
+        v93 = v31;
+        v94 = v32;
+        v97 = (float)((float)v26 * (float)v15) + (float)v32;
+        v100 = v97;
+        v98 = (float)((float)((float)v27 * (float)v15) + (float)v33) + (float)v30;
+        v101 = (float)((float)((float)v27 * (float)v15) + (float)v33) - (float)v30;
+        v102 = (float)((float)-v15 * (float)v28) + (float)v31;
+        v103 = (float)((float)-v15 * (float)v26) + (float)v32;
+        v105 = v102;
+        v106 = v103;
+        v104 = (float)((float)((float)-v15 * (float)v27) + (float)v33) + (float)v30;
+        v107 = (float)((float)((float)-v15 * (float)v27) + (float)v33) - (float)v30;
+        //if (radius_damage_debug->current.enabled)
+        //{
+        //    v34 = &v93;
+        //    v35 = 5;
+        //    do
+        //    {
+        //        inCone = 1;
+        //        v37 = colorWhite;
+        //        if (coneAngleCos != -1.0)
+        //        {
+        //            if (contentMask)
+        //            {
+        //                v38 = (float)(v34[2] - centerPos[2]);
+        //                v39 = (float)(v34[1] - centerPos[1]);
+        //                _FP7 = -__fsqrts((float)((float)((float)v39 * (float)v39)
+        //                    + (float)((float)((float)(*v34 - *centerPos) * (float)(*v34 - *centerPos))
+        //                        + (float)((float)v38 * (float)v38))));
+        //                __asm { fsel      f11, f7, f31, f11 }
+        //                if ((float)((float)(*(float *)contentMask
+        //                    * (float)((float)((float)1.0 / (float)_FP11) * (float)(*v34 - *centerPos)))
+        //                    + (float)((float)(*(float *)(contentMask + 8)
+        //                        * (float)((float)(v34[2] - centerPos[2]) * (float)((float)1.0 / (float)_FP11)))
+        //                        + (float)(*(float *)(contentMask + 4)
+        //                            * (float)((float)(v34[1] - centerPos[1]) * (float)((float)1.0 / (float)_FP11))))) < coneAngleCos)
+        //                {
+        //                    inCone = 0;
+        //                    v37 = colorOrange;
+        //                }
+        //            }
+        //        }
+        //        if (inCone && !G_LocationalTracePassed(centerPos, v34, targ->s.number, number, v118, 0))
+        //            v37 = colorRed;
+        //        G_DebugLineWithDuration(centerPos, v34, v37, 1, 200);
+        //        --v35;
+        //        v34 += 3;
+        //    } while (v35);
+        //}
+
         if (radius_damage_debug->current.enabled)
         {
-            v57 = &v116;
-            v58 = 5;
-            do
+            float *sample = &v93;
+            int sampleCount = 5;
+
+            for (int i = 0; i < sampleCount; ++i, sample += 3)
             {
-                v59 = 1;
-                v60 = colorWhite;
-                if (coneAngleCos != -1.0)
+                bool inCone = true;
+                const float *color = colorWhite;
+
+                if (coneAngleCos != -1.0f && contentMask)
                 {
-                    if (contentMask)
+                    float dx = sample[0] - centerPos[0];
+                    float dy = sample[1] - centerPos[1];
+                    float dz = sample[2] - centerPos[2];
+
+                    float dist = sqrtf(dx * dx + dy * dy + dz * dz);
+                    if (dist > 0.0001f)
                     {
-                        v61 = (float)(v57[2] - centerPos[2]);
-                        v62 = (float)(v57[1] - centerPos[1]);
-                        _FP7 = -__fsqrts((float)((float)((float)v62 * (float)v62)
-                            + (float)((float)((float)(*v57 - *centerPos) * (float)(*v57 - *centerPos))
-                                + (float)((float)v61 * (float)v61))));
-                        __asm { fsel      f11, f7, f31, f11 }
-                        if ((float)((float)(*contentMask * (float)((float)((float)1.0 / (float)_FP11) * (float)(*v57 - *centerPos)))
-                            + (float)((float)(contentMask[2]
-                                * (float)((float)(v57[2] - centerPos[2]) * (float)((float)1.0 / (float)_FP11)))
-                                + (float)(contentMask[1]
-                                    * (float)((float)(v57[1] - centerPos[1]) * (float)((float)1.0 / (float)_FP11))))) < coneAngleCos)
+                        const float *coneDir = coneDirection;
+
+                        float dot = (dx * coneDir[0] + dy * coneDir[1] + dz * coneDir[2]) / dist;
+                        if (dot < coneAngleCos)
                         {
-                            v59 = 0;
-                            v60 = colorOrange;
+                            inCone = false;
+                            color = colorOrange;
                         }
                     }
                 }
-                if (v59 && !G_LocationalTracePassed(centerPos, v57, targ->s.number, number, a33, 0))
-                    v60 = colorRed;
-                G_DebugLineWithDuration(centerPos, v57, v60, 1, 200);
-                --v58;
-                v57 += 3;
-            } while (v58);
-        }
-        v65 = 0;
-        for (i = &v116; ; i += 3)
-        {
-            if (coneAngleCos == -1.0)
-                goto LABEL_58;
-            if (!contentMask)
-                goto LABEL_58;
-            v67 = (float)(i[2] - centerPos[2]);
-            v68 = (float)(i[1] - centerPos[1]);
-            _FP7 = -__fsqrts((float)((float)((float)v68 * (float)v68)
-                + (float)((float)((float)(*i - *centerPos) * (float)(*i - *centerPos))
-                    + (float)((float)v67 * (float)v67))));
-            __asm { fsel      f11, f7, f31, f11 }
-            if ((float)((float)(*contentMask * (float)((float)((float)1.0 / (float)_FP11) * (float)(*i - *centerPos)))
-                + (float)((float)(contentMask[2]
-                    * (float)((float)(i[2] - centerPos[2]) * (float)((float)1.0 / (float)_FP11)))
-                    + (float)(contentMask[1]
-                        * (float)((float)(i[1] - centerPos[1]) * (float)((float)1.0 / (float)_FP11))))) >= coneAngleCos)
-            {
-            LABEL_58:
-                if (G_LocationalTracePassed(centerPos, i, targ->s.number, number, a33, 0))
-                    break;
+
+                if (inCone && !G_LocationalTracePassed(centerPos, sample, targ->s.number, number, v118, 0))
+                {
+                    color = colorRed;
+                }
+
+                G_DebugLineWithDuration(centerPos, sample, color, 1, 200);
             }
-            if (++v65 >= 5)
-                return 0;
         }
+
+        //v42 = 0;
+        //for (i = &v93; ; i += 3)
+        //{
+        //    if (coneAngleCos == -1.0)
+        //        goto LABEL_58;
+        //    if (!contentMask)
+        //        goto LABEL_58;
+        //    v44 = (float)(i[2] - centerPos[2]);
+        //    v45 = (float)(i[1] - centerPos[1]);
+        //    _FP7 = -__fsqrts((float)((float)((float)v45 * (float)v45)
+        //        + (float)((float)((float)(*i - *centerPos) * (float)(*i - *centerPos))
+        //            + (float)((float)v44 * (float)v44))));
+        //    __asm { fsel      f11, f7, f31, f11 }
+        //    if ((float)((float)(*(float *)contentMask * (float)((float)((float)1.0 / (float)_FP11) * (float)(*i - *centerPos)))
+        //        + (float)((float)(*(float *)(contentMask + 8)
+        //            * (float)((float)(i[2] - centerPos[2]) * (float)((float)1.0 / (float)_FP11)))
+        //            + (float)(*(float *)(contentMask + 4)
+        //                * (float)((float)(i[1] - centerPos[1]) * (float)((float)1.0 / (float)_FP11))))) >= coneAngleCos)
+        //    {
+        //    LABEL_58:
+        //        if (G_LocationalTracePassed(centerPos, i, targ->s.number, number, v118, 0))
+        //            break;
+        //    }
+        //    if (++v42 >= 5)
+        //        return 0;
+        //}
+
+        int passed = 0;
+        for (int idx = 0; idx < 5; ++idx) {
+            float *point = &v93 + idx * 3;
+
+            bool withinCone = true;
+
+            if (coneAngleCos != -1.0f && contentMask) {
+                float dx = point[0] - centerPos[0];
+                float dy = point[1] - centerPos[1];
+                float dz = point[2] - centerPos[2];
+
+                float len = sqrtf(dx * dx + dy * dy + dz * dz);
+
+                if (len > 0.0001f) {
+                    float invLen = 1.0f / len;
+
+                    float dot = ((float *)contentMask)[0] * dx * invLen +
+                        ((float *)contentMask)[1] * dy * invLen +
+                        ((float *)contentMask)[2] * dz * invLen;
+
+                    if (dot < coneAngleCos)
+                        withinCone = false;
+                }
+                else {
+                    withinCone = false;
+                }
+            }
+
+            if (withinCone && G_LocationalTracePassed(centerPos, point, targ->s.number, number, v118, 0)) {
+                passed = 1;
+                break;
+            }
+        }
+
+        if (!passed)
+            return 0;
     }
     else
     {
         if (targ->classname == scr_const.script_model && targ->model)
         {
             ServerDObj = Com_GetServerDObj(targ->s.number);
-            DObjPhysicsGetBounds(ServerDObj, v139, v131);
-            G_EntityCentroidWithBounds(targ, v139, v131, &v116);
-            v73 = (float)(v131[0] + targ->r.currentOrigin[0]);
-            v74 = (float)(targ->r.currentOrigin[1] + v131[1]);
-            v75 = (float)(targ->r.currentOrigin[2] + v131[2]);
+            DObjPhysicsGetBounds(ServerDObj, v116, v108);
+            G_EntityCentroidWithBounds(targ, v116, v108, &v93);
+            v50 = (float)(v108[0] + targ->r.currentOrigin[0]);
+            v51 = (float)(targ->r.currentOrigin[1] + v108[1]);
+            v52 = (float)(targ->r.currentOrigin[2] + v108[2]);
         }
         else
         {
-            G_EntityCentroid(targ, &v116);
-            v73 = targ->r.absmax[0];
-            v74 = targ->r.absmax[1];
-            v75 = targ->r.absmax[2];
+            G_EntityCentroid(targ, &v93);
+            v50 = targ->r.absmax[0];
+            v51 = targ->r.absmax[1];
+            v52 = targ->r.absmax[2];
         }
-        v76 = (float)(centerPos[2] - v118);
-        _FP10 = -__fsqrts((float)((float)((float)(centerPos[1] - v117) * (float)(centerPos[1] - v117))
-            + (float)((float)((float)(centerPos[2] - v118) * (float)(centerPos[2] - v118))
-                + (float)((float)(*centerPos - v116) * (float)(*centerPos - v116)))));
-        __asm { fsel      f11, f10, f31, f11 }
-        v79 = (float)((float)1.0 / (float)_FP11);
-        v80 = (float)((float)v79 * (float)(centerPos[1] - v117));
-        v81 = (float)((float)v79 * (float)(*centerPos - v116));
-        v135[1] = (float)v79 * (float)(centerPos[1] - v117);
-        v135[0] = v81;
-        v135[2] = (float)v76 * (float)v79;
-        v82 = -v80;
-        _FP11 = -__fsqrts((float)((float)((float)v81 * (float)v81) + (float)((float)v82 * (float)v82)));
-        __asm { fsel      f13, f11, f31, f13 }
-        v85 = (float)((float)1.0 / (float)_FP13);
-        v86 = (float)((float)v85 * (float)v81);
-        v87 = (float)((float)v85 * (float)v82);
-        v134[1] = (float)v85 * (float)v81;
-        v88 = (float)((float)v85 * (float)0.0);
-        v134[0] = (float)v85 * (float)v82;
-        v134[2] = (float)v85 * (float)0.0;
-        Vec3Cross(v135, v134, &v136);
-        v89 = __fabs((float)((float)((float)v73 - v116) * (float)v87));
-        v90 = __fabs((float)((float)((float)v74 - v117) * (float)v86));
-        v92 = (float)((float)((float)__fabs((float)(v137 * (float)((float)v74 - v117)))
-            + (float)__fabs((float)(v136 * (float)((float)v73 - v116))))
-            + (float)__fabs((float)((float)((float)v75 - v118) * v138)));
-        v93 = (float)((float)((float)v89 + (float)v90) * (float)v87);
-        v94 = (float)((float)((float)v89 + (float)v90) * (float)v88);
-        v91 = (float)((float)((float)v89 + (float)v90) * (float)v86);
-        v95 = (float)(v116 + (float)v93);
-        v96 = (float)((float)v94 + v118);
-        v97 = (float)(v118 - (float)v94);
-        v98 = (float)(v136 * (float)v92);
-        v100 = (float)(v137 * (float)v92);
-        v119 = (float)(v116 + (float)v93) + (float)(v136 * (float)v92);
-        v99 = (float)(v116 - (float)v93);
-        v120 = (float)(v117 + (float)v91) + (float)(v137 * (float)v92);
-        v101 = (float)(v138 * (float)v92);
-        v121 = (float)v101 + (float)v96;
-        v122 = (float)v99 + (float)v98;
-        v123 = (float)(v117 - (float)v91) + (float)v100;
-        v124 = (float)v101 + (float)v97;
-        v125 = (float)v95 - (float)v98;
-        v128 = (float)v99 - (float)v98;
-        v126 = (float)(v117 + (float)v91) - (float)v100;
-        v129 = (float)(v117 - (float)v91) - (float)v100;
-        v127 = (float)v96 - (float)v101;
-        v130 = (float)v97 - (float)v101;
+        v53 = (float)(centerPos[2] - v95);
+
+        //_FP10 = -__fsqrts((float)((float)((float)(centerPos[1] - v94) * (float)(centerPos[1] - v94))
+        //    + (float)((float)((float)(centerPos[2] - v95) * (float)(centerPos[2] - v95))
+        //        + (float)((float)(*centerPos - v93) * (float)(*centerPos - v93)))));
+        //__asm { fsel      f11, f10, f31, f11 }
+        //v56 = (float)((float)1.0 / (float)_FP11);
+
+
+        {
+            float dx = centerPos[0] - v93;
+            float dy = centerPos[1] - v94;
+            float dz = centerPos[2] - v95;
+
+            float len = sqrtf(dx * dx + dy * dy + dz * dz);
+            v56 = (1.0f / len);
+        }
+
+
+        v57 = (float)((float)v56 * (float)(centerPos[1] - v94));
+        v58 = (float)((float)v56 * (float)(*centerPos - v93));
+        v112[1] = (float)v56 * (float)(centerPos[1] - v94);
+        v112[0] = v58;
+        v112[2] = (float)v53 * (float)v56;
+        v59 = -v57;
+
+        //_FP11 = -__fsqrts((float)((float)((float)v58 * (float)v58) + (float)((float)v59 * (float)v59)));
+        //__asm { fsel      f13, f11, f31, f13 }
+        //v62 = (float)((float)1.0 / (float)_FP13);
+
+        v62 = 1.0f / sqrtf((v58 * v58) + (v59 * v59));
+
+
+        v63 = (float)((float)v62 * (float)v58);
+        v64 = (float)((float)v62 * (float)v59);
+        v111[1] = (float)v62 * (float)v58;
+        v65 = (float)((float)v62 * (float)0.0);
+        v111[0] = (float)v62 * (float)v59;
+        v111[2] = (float)v62 * (float)0.0;
+        Vec3Cross(v112, v111, &v113);
+        v66 = fabs((float)((float)((float)v50 - v93) * (float)v64));
+        v67 = fabs((float)((float)((float)v51 - v94) * (float)v63));
+        v69 = (float)((float)((float)fabs((float)(v114 * (float)((float)v51 - v94)))
+            + (float)fabs((float)(v113 * (float)((float)v50 - v93))))
+            + (float)fabs((float)((float)((float)v52 - v95) * v115)));
+        v70 = (float)((float)((float)v66 + (float)v67) * (float)v64);
+        v71 = (float)((float)((float)v66 + (float)v67) * (float)v65);
+        v68 = (float)((float)((float)v66 + (float)v67) * (float)v63);
+        v72 = (float)(v93 + (float)v70);
+        v73 = (float)((float)v71 + v95);
+        v74 = (float)(v95 - (float)v71);
+        v75 = (float)(v113 * (float)v69);
+        v77 = (float)(v114 * (float)v69);
+        v96 = (float)(v93 + (float)v70) + (float)(v113 * (float)v69);
+        v76 = (float)(v93 - (float)v70);
+        v97 = (float)(v94 + (float)v68) + (float)(v114 * (float)v69);
+        v78 = (float)(v115 * (float)v69);
+        v98 = (float)v78 + (float)v73;
+        v99 = (float)v76 + (float)v75;
+        v100 = (float)(v94 - (float)v68) + (float)v77;
+        v101 = (float)v78 + (float)v74;
+        v102 = (float)v72 - (float)v75;
+        v105 = (float)v76 - (float)v75;
+        v103 = (float)(v94 + (float)v68) - (float)v77;
+        v106 = (float)(v94 - (float)v68) - (float)v77;
+        v104 = (float)v73 - (float)v78;
+        v107 = (float)v74 - (float)v78;
         if (radius_damage_debug->current.enabled)
         {
-            v102 = &v116;
-            v103 = 5;
+            v79 = &v93;
+            v80 = 5;
             do
             {
-                v104 = 1;
-                v105 = colorWhite;
+                v81 = 1;
+                v82 = colorWhite;
                 if (coneAngleCos != -1.0)
                 {
                     if (contentMask)
                     {
-                        v106 = (float)(v102[1] - centerPos[1]);
-                        v107 = (float)(v102[2] - centerPos[2]);
-                        _FP7 = -__fsqrts((float)((float)((float)(*v102 - *centerPos) * (float)(*v102 - *centerPos))
-                            + (float)((float)((float)v107 * (float)v107) + (float)((float)v106 * (float)v106))));
-                        __asm { fsel      f11, f7, f31, f11 }
-                        if ((float)((float)(*contentMask * (float)((float)((float)1.0 / (float)_FP11) * (float)(*v102 - *centerPos)))
-                            + (float)((float)(contentMask[2]
-                                * (float)((float)(v102[2] - centerPos[2]) * (float)((float)1.0 / (float)_FP11)))
-                                + (float)(contentMask[1]
-                                    * (float)((float)(v102[1] - centerPos[1]) * (float)((float)1.0 / (float)_FP11))))) < coneAngleCos)
+                        //v83 = (float)(v79[1] - centerPos[1]);
+                        //v84 = (float)(v79[2] - centerPos[2]);
+                        //_FP7 = -__fsqrts((float)((float)((float)(*v79 - *centerPos) * (float)(*v79 - *centerPos))
+                        //    + (float)((float)((float)v84 * (float)v84) + (float)((float)v83 * (float)v83))));
+                        //__asm { fsel      f11, f7, f31, f11 }
+                        //if ((float)((float)(*(float *)contentMask
+                        //    * (float)((float)((float)1.0 / (float)_FP11) * (float)(*v79 - *centerPos)))
+                        //    + (float)((float)(*(float *)(contentMask + 8)
+                        //        * (float)((float)(v79[2] - centerPos[2]) * (float)((float)1.0 / (float)_FP11)))
+                        //        + (float)(*(float *)(contentMask + 4)
+                        //            * (float)((float)(v79[1] - centerPos[1]) * (float)((float)1.0 / (float)_FP11))))) < coneAngleCos)
+                        //{
+                        //    v81 = 0;
+                        //    v82 = colorOrange;
+                        //}
+
+                        float dx = v79[0] - centerPos[0];
+                        float dy = v79[1] - centerPos[1];
+                        float dz = v79[2] - centerPos[2];
+
+                        float len = sqrtf(dx * dx + dy * dy + dz * dz);
+                        float invLen = (len > 0.0001f) ? (1.0f / len) : 0.0f;
+
+                        float dot = (*(float *)contentMask * (dx * invLen)) +
+                            (*(float *)(contentMask + 8) * (dz * invLen)) +
+                            (*(float *)(contentMask + 4) * (dy * invLen));
+
+                        if (dot < coneAngleCos)
                         {
-                            v104 = 0;
-                            v105 = colorOrange;
+                            v81 = 0;
+                            v82 = colorOrange;
                         }
+
                     }
                 }
-                if (v104 && !G_LocationalTracePassed(centerPos, v102, targ->s.number, number, a33, 0))
-                    v105 = colorRed;
-                G_DebugLineWithDuration(centerPos, v102, v105, 1, 200);
-                --v103;
-                v102 += 3;
-            } while (v103);
+                if (v81 && !G_LocationalTracePassed(centerPos, v79, targ->s.number, number, v118, 0))
+                    v82 = colorRed;
+                G_DebugLineWithDuration(centerPos, v79, v82, 1, 200);
+                --v80;
+                v79 += 3;
+            } while (v80);
         }
-        v110 = 0;
-        for (j = &v116; ; j += 3)
+        //v87 = 0;
+        //for (j = &v93; ; j += 3)
+        //{
+        //    if (coneAngleCos == -1.0)
+        //        goto LABEL_59;
+        //    if (!contentMask)
+        //        goto LABEL_59;
+        //    v89 = (float)(j[1] - centerPos[1]);
+        //    v90 = (float)(j[2] - centerPos[2]);
+        //    _FP7 = -__fsqrts((float)((float)((float)(*j - *centerPos) * (float)(*j - *centerPos))
+        //        + (float)((float)((float)v90 * (float)v90) + (float)((float)v89 * (float)v89))));
+        //    __asm { fsel      f11, f7, f31, f11 }
+        //    if ((float)((float)(*(float *)contentMask * (float)((float)((float)1.0 / (float)_FP11) * (float)(*j - *centerPos)))
+        //        + (float)((float)(*(float *)(contentMask + 8)
+        //            * (float)((float)(j[2] - centerPos[2]) * (float)((float)1.0 / (float)_FP11)))
+        //            + (float)(*(float *)(contentMask + 4)
+        //                * (float)((float)(j[1] - centerPos[1]) * (float)((float)1.0 / (float)_FP11))))) >= coneAngleCos)
+        //    {
+        //    LABEL_59:
+        //        if (G_LocationalTracePassed(centerPos, j, targ->s.number, number, v118, 0))
+        //            break;
+        //    }
+        //    if (++v87 >= 5)
+        //        return 0;
+        //}
+
+        v87 = 0;
+        for (float *j = &v93; ; j += 3)
         {
-            if (coneAngleCos == -1.0)
-                goto LABEL_59;
-            if (!contentMask)
-                goto LABEL_59;
-            v112 = (float)(j[1] - centerPos[1]);
-            v113 = (float)(j[2] - centerPos[2]);
-            _FP7 = -__fsqrts((float)((float)((float)(*j - *centerPos) * (float)(*j - *centerPos))
-                + (float)((float)((float)v113 * (float)v113) + (float)((float)v112 * (float)v112))));
-            __asm { fsel      f11, f7, f31, f11 }
-            if ((float)((float)(*contentMask * (float)((float)((float)1.0 / (float)_FP11) * (float)(*j - *centerPos)))
-                + (float)((float)(contentMask[2]
-                    * (float)((float)(j[2] - centerPos[2]) * (float)((float)1.0 / (float)_FP11)))
-                    + (float)(contentMask[1]
-                        * (float)((float)(j[1] - centerPos[1]) * (float)((float)1.0 / (float)_FP11))))) >= coneAngleCos)
+            if (coneAngleCos == -1.0 || !contentMask)
             {
-            LABEL_59:
-                if (G_LocationalTracePassed(centerPos, j, targ->s.number, number, a33, 0))
+                // Skip the cone angle/content mask check
+                if (G_LocationalTracePassed(centerPos, j, targ->s.number, number, v118, 0))
                     break;
             }
-            if (++v110 >= 5)
+            else
+            {
+                float dx = j[0] - centerPos[0];
+                float dy = j[1] - centerPos[1];
+                float dz = j[2] - centerPos[2];
+
+                float len = sqrtf(dx * dx + dy * dy + dz * dz);
+                float invLen = (len > 0.0001f) ? (1.0f / len) : 0.0f;
+
+                float dot = (*(float *)contentMask * (dx * invLen)) +
+                    (*(float *)(contentMask + 8) * (dz * invLen)) +
+                    (*(float *)(contentMask + 4) * (dy * invLen));
+
+                if (dot >= coneAngleCos)
+                {
+                    if (G_LocationalTracePassed(centerPos, j, targ->s.number, number, v118, 0))
+                        break;
+                }
+            }
+
+            if (++v87 >= 5)
                 return 0;
         }
+
     }
     return 1;
 }
+
 
 float __cdecl EntDistToPoint(float *origin, gentity_s *ent)
 {
@@ -1349,7 +1508,8 @@ float __cdecl EntDistToPoint(float *origin, gentity_s *ent)
             ++v2;
             ++absmax;
         } while (v10);
-        v7 = __fsqrts((float)((float)(v14 * v14) + (float)((float)(v15 * v15) + (float)(back_chain * back_chain))));
+        //v7 = __fsqrts((float)((float)(v14 * v14) + (float)((float)(v15 * v15) + (float)(back_chain * back_chain))));
+        v7 = sqrtf((float)((float)(v14 * v14) + (float)((float)(v15 * v15) + (float)(back_chain * back_chain))));
     }
     else
     {
@@ -1357,7 +1517,8 @@ float __cdecl EntDistToPoint(float *origin, gentity_s *ent)
         v4 = (float)(ent->r.currentOrigin[2] - origin[2]);
         v6 = (float)((float)((float)v4 * (float)v4) + (float)((float)v3 * (float)v3));
         v5 = (float)(ent->r.currentOrigin[1] - origin[1]);
-        v7 = __fsqrts((float)((float)((float)v5 * (float)v5) + (float)v6));
+        //v7 = __fsqrts((float)((float)((float)v5 * (float)v5) + (float)v6));
+        v7 = sqrtf((float)((float)((float)v5 * (float)v5) + (float)v6));
     }
     return *((float *)&v7 + 1);
 }
@@ -1653,7 +1814,7 @@ void __cdecl G_FlashbangBlast(
     int v14; // r29
     int *v15; // r30
     gentity_s *v16; // r31
-    int v17[4]; // [sp+50h] [-2280h] BYREF
+    unsigned int v17[4]; // [sp+50h] [-2280h] BYREF
     int v18[156]; // [sp+60h] [-2270h] BYREF
 
     v7 = radius_min;
@@ -1786,7 +1947,8 @@ int __cdecl G_RadiusDamage(
                 if (RadiusDamageDistanceSquared < (float)((float)radius * (float)radius))
                 {
                     v55 = (float)((float)((float)((float)1.0
-                        - (float)((float)__fsqrts(RadiusDamageDistanceSquared) / (float)radius))
+                        //- (float)((float)__fsqrts(RadiusDamageDistanceSquared) / (float)radius))
+                        - (float)((float)sqrtf(RadiusDamageDistanceSquared) / (float)radius))
                         * (float)((float)fInnerDamage - (float)fOuterDamage))
                         + (float)fOuterDamage);
                     if (G_CanRadiusDamage(v51, inflictor, origin, radius, coneAngleCos, v53, v52, a12, 8396817))

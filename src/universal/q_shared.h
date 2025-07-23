@@ -145,7 +145,7 @@ typedef int		clipHandle_t;
 #ifdef KISAK_SP
 #define	MAX_GENTITIES		(2176) // 0x880
 #elif KISAK_MP
-#define	MAX_GENTITIES		(1024)
+#define	MAX_GENTITIES		(1024) // 0x400
 #endif
 
 // paramters for command buffer stuffing

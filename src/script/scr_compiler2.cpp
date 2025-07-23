@@ -2936,7 +2936,7 @@ void EmitObject(sval_u expr, sval_u sourcePos)
 {
 	signed int ObjectType; // [esp+0h] [ebp-18h]
 	int classnum; // [esp+4h] [ebp-14h]
-	char *s; // [esp+Ch] [ebp-Ch]
+	const char *s; // [esp+Ch] [ebp-Ch]
 	int entnum; // [esp+10h] [ebp-8h]
 	unsigned int idValue; // [esp+14h] [ebp-4h]
 

@@ -39,9 +39,6 @@ const char *bgShockDvarNames[27] =
 
 char filebuf[65536];
 
-const int serverOnlyEvents[4] = { 31, 20, 19, -1 }; // idb
-const int singleClientEvents[13] = { 6, 7, 8, 34, 13, 14, 32, 33, 34, 37, 42, 43, -1 }; // idb
-
 
 //char **eventnames       827b08a8     bg_misc.obj
 //char (*)[80] bgShockChannelNames 827ea9d8     bg_misc.obj

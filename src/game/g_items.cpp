@@ -968,8 +968,6 @@ int32_t __cdecl TransferRandomAmmoToWeaponEntity(gentity_s *weaponEnt, int32_t t
 
 void __cdecl FinishSpawningItem(gentity_s *ent)
 {
-    char *v2; // eax
-    const char *v3; // [esp+4h] [ebp-C8h]
     float v4; // [esp+10h] [ebp-BCh]
     float v5; // [esp+14h] [ebp-B8h]
     float v6; // [esp+20h] [ebp-ACh]
@@ -1025,9 +1023,7 @@ void __cdecl FinishSpawningItem(gentity_s *ent)
         }
         if (tr.startsolid)
         {
-            v3 = vtos(ent->r.currentOrigin);
-            v2 = SL_ConvertToString(ent->classname);
-            Com_Printf(15, "FinishSpawningItem: %s startsolid at %s\n", v2, v3);
+            Com_Printf(15, "FinishSpawningItem: %s startsolid at %s\n", SL_ConvertToString(ent->classname), vtos(ent->r.currentOrigin));
             G_FreeEntity(ent);
             return;
         }

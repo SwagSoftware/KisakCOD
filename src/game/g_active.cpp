@@ -3,6 +3,15 @@
 #endif
 
 #include "g_local.h"
+#include "g_main.h"
+#include <universal/com_math.h>
+#include <script/scr_vm.h>
+#include <script/scr_const.h>
+#include <server/sv_game.h>
+#include "actor_events.h"
+#include "player_use.h"
+#include "turret.h"
+#include <client/cl_input.h>
 
 void __cdecl P_DamageFeedback(gentity_s *player)
 {
@@ -113,7 +122,7 @@ void __cdecl G_TouchEnts(gentity_s *ent, int numtouch, int *touchents)
             if (v8 == v6)
             {
                 v10 = &g_entities[*v7];
-                if (Scr_IsSystemActive(1u))
+                if (Scr_IsSystemActive())
                 {
                     Scr_AddEntity(v10);
                     Scr_Notify(ent, scr_const.touch, 1u);
@@ -252,7 +261,7 @@ void __cdecl G_DoTouchTriggers(gentity_s *ent)
                 if (client && BG_PlayerTouchesItem(&client->ps, &v20->s, level.time))
                 {
                 LABEL_26:
-                    if (Scr_IsSystemActive(1u))
+                    if (Scr_IsSystemActive())
                     {
                         Scr_AddEntity(ent);
                         Scr_Notify(v20, scr_const.touch, 1u);
@@ -330,8 +339,8 @@ void __cdecl AttemptLiveGrenadePickup(gentity_s *clientEnt)
             touch = entityHandlers[v2->handler].touch;
             if (touch)
             {
-                if (EntHandle::isDefined(&v2->parent))
-                    clientEnt->client->ps.throwBackGrenadeOwner = EntHandle::entnum(&v2->parent);
+                if (v2->parent.isDefined())
+                    clientEnt->client->ps.throwBackGrenadeOwner = v2->parent.entnum();
                 else
                     clientEnt->client->ps.throwBackGrenadeOwner = 2174;
                 clientEnt->client->ps.grenadeTimeLeft = clientEnt->client->ps.throwBackGrenadeTimeLeft;
@@ -409,10 +418,10 @@ void __cdecl ClientEvents(gentity_s *ent, int oldEventSequence)
                 case 38:
                 case 39:
                 case 40:
-                    FireWeapon(ent);
+                    FireWeapon(ent, 0);
                     break;
                 case 31:
-                    FireWeaponMelee(ent);
+                    FireWeaponMelee(ent, 0);
                     break;
                 case 33:
                     G_UseOffHand(ent);
@@ -505,9 +514,9 @@ void __cdecl Client_ClaimNode(gentity_s *ent)
     {
         if (pClaimedNode)
         {
-            if (EntHandle::isDefined(&ent->client->pLookatEnt)
-                && EntHandle::ent(&ent->client->pLookatEnt)->actor
-                && !EntHandle::ent(&ent->client->pLookatEnt)->sentient->pClaimedNode)
+            if (ent->client->pLookatEnt.isDefined()
+                && ent->client->pLookatEnt.ent()->actor
+                && !ent->client->pLookatEnt.ent()->sentient->pClaimedNode)
             {
                 Path_RelinquishNodeSoon(ent->sentient);
             }
@@ -518,9 +527,9 @@ void __cdecl Client_ClaimNode(gentity_s *ent)
         }
         if (v2)
         {
-            if (!SentientHandle::isDefined(&v2->dynamic.pOwner)
-                || SentientHandle::sentient(&v2->dynamic.pOwner) != ent->sentient
-                && (v4 = SentientHandle::sentient(&v2->dynamic.pOwner),
+            if (!v2->dynamic.pOwner.isDefined()
+                || v2->dynamic.pOwner.sentient() != ent->sentient
+                && (v4 = v2->dynamic.pOwner.sentient(),
                     Sentient_GetOrigin(v4, v5),
                     Vec2DistanceSq(v5, v2->constant.vOrigin) >= 225.0))
             {
@@ -834,7 +843,6 @@ void __cdecl ClientEndFrame(gentity_s *ent)
 {
     gclient_s *client; // r11
     gclient_s *v3; // r11
-    int v4; // r10
     gclient_s *v5; // r11
     gclient_s *v6; // r11
     int pm_type; // r10
@@ -857,10 +865,11 @@ void __cdecl ClientEndFrame(gentity_s *ent)
     {
         if (ent->tagInfo)
         {
-            v4 = 6;
+            v3->ps.pm_type = PM_DEAD_LINKED;
             if (v3->ps.stats[0] > 0)
-                v4 = 1;
-            v3->ps.pm_type = v4;
+            {
+                v3->ps.pm_type = PM_NORMAL_LINKED;
+            }
             G_SetPlayerFixedLink(ent);
             v5 = ent->client;
             v5->ps.origin[0] = ent->r.currentOrigin[0];
@@ -872,8 +881,11 @@ void __cdecl ClientEndFrame(gentity_s *ent)
             v3->prevLinkAnglesSet = 0;
             v6 = ent->client;
             pm_type = v6->ps.pm_type;
+            
             if (pm_type == 1 || pm_type == 6)
+            {
                 --v6->ps.pm_type;
+            }
         }
         G_UpdateGroundTilt(ent->client);
     }

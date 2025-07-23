@@ -591,7 +591,6 @@ void __cdecl Fire_Lead(gentity_s *ent, gentity_s *activator)
 
 void __cdecl Turret_FillWeaponParms(gentity_s *ent, gentity_s *activator, weaponParms *wp)
 {
-    char *v3; // eax
     float diff[3]; // [esp+1Ch] [ebp-4Ch] BYREF
     float playerPos[3]; // [esp+28h] [ebp-40h] BYREF
     float len; // [esp+34h] [ebp-34h]
@@ -599,8 +598,7 @@ void __cdecl Turret_FillWeaponParms(gentity_s *ent, gentity_s *activator, weapon
 
     if (!G_DObjGetWorldTagMatrix(ent, scr_const.tag_flash, flashTag))
     {
-        v3 = SL_ConvertToString(ent->classname);
-        Com_Error(ERR_DROP, "Couldn't find %s on turret (entity %d, classname %s )", "tag_flash", ent->s.number, v3);
+        Com_Error(ERR_DROP, "Couldn't find %s on turret (entity %d, classname %s )", "tag_flash", ent->s.number, SL_ConvertToString(ent->classname));
     }
     if (!activator->client)
         MyAssertHandler(".\\game_mp\\g_misc_mp.cpp", 137, 0, "%s", "activator->client");

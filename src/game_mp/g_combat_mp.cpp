@@ -103,8 +103,6 @@ void __cdecl LookAtKiller(gentity_s *self, gentity_s *inflictor, gentity_s *atta
 
 int32_t __cdecl G_MeansOfDeathFromScriptParam(uint32_t scrParam)
 {
-    char *v2; // eax
-    const char *v3; // eax
     uint16_t modName; // [esp+0h] [ebp-8h]
     int32_t i; // [esp+4h] [ebp-4h]
 
@@ -114,9 +112,7 @@ int32_t __cdecl G_MeansOfDeathFromScriptParam(uint32_t scrParam)
         if (*modNames[i] == modName)
             return i;
     }
-    v2 = SL_ConvertToString(modName);
-    v3 = va("Unknown means of death \"%s\"\n", v2);
-    Scr_ParamError(scrParam, v3);
+    Scr_ParamError(scrParam, va("Unknown means of death \"%s\"\n", SL_ConvertToString(modName)));
     return 0;
 }
 
@@ -781,18 +777,6 @@ void __cdecl FlashbangBlastEnt(
             }
         }
     }
-}
-
-void __cdecl Vec3NormalizeFast(float *v)
-{
-    int32_t number; // [esp+0h] [ebp-1Ch]
-    float invLength; // [esp+18h] [ebp-4h]
-
-    *(float *)&number = Vec3LengthSq(v);
-    invLength = I_rsqrt(number);
-    *v = *v * invLength;
-    v[1] = v[1] * invLength;
-    v[2] = v[2] * invLength;
 }
 
 double __cdecl EntDistToPoint(const float *origin, gentity_s *ent)

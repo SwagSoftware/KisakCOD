@@ -215,14 +215,11 @@ void __cdecl Z_VirtualCommit(void* ptr, int32_t size)
     Z_VirtualCommitInternal(ptr, size);
 }
 
-char* __cdecl CopyString(char* in)
+const char* __cdecl CopyString(char* in)
 {
-    HashEntry_unnamed_type_u out; // [esp+0h] [ebp-4h]
+    iassert(in);
 
-    if (!in)
-        MyAssertHandler(".\\universal\\com_memory.cpp", 829, 0, "%s", "in");
-    out.prev = SL_GetString_(in, 0, 21);
-    return SL_ConvertToString(out.prev);
+    return SL_ConvertToString(SL_GetString_(in, 0, 21));
 }
 
 void __cdecl ReplaceString(const char** str, const char* in)

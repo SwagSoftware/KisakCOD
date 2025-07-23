@@ -206,7 +206,6 @@ void __cdecl AimTarget_GetTargetBounds(const centity_s *targetEnt, float *mins, 
 
 void __cdecl AimTarget_GetTagPos(const centity_s *ent, uint32_t tagName, float *pos)
 {
-    char *v3; // eax
     DObj_s *dobj; // [esp+0h] [ebp-4h]
 
     dobj = Com_GetClientDObj(ent->nextState.number, ent->pose.localClientNum);
@@ -214,8 +213,7 @@ void __cdecl AimTarget_GetTagPos(const centity_s *ent, uint32_t tagName, float *
         MyAssertHandler(".\\aim_assist\\aim_target_mp.cpp", 169, 0, "%s", "dobj");
     if (!CG_DObjGetWorldTagPos(&ent->pose, dobj, tagName, pos))
     {
-        v3 = SL_ConvertToString(tagName);
-        Com_Error(ERR_DROP, "AimTarget_GetTagPos: Cannot find tag [%s] on entity\n", v3);
+        Com_Error(ERR_DROP, "AimTarget_GetTagPos: Cannot find tag [%s] on entity\n", SL_ConvertToString(tagName));
     }
 }
 

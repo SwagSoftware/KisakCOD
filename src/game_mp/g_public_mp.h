@@ -11,6 +11,8 @@
 struct game_hudelem_s;
 struct weaponParms;
 
+#define PERK_COUNT 20
+
 static const char *g_dedicatedEnumNames[4] = { "listen server", "dedicated LAN server", "dedicated internet server", NULL }; // idb
 
 struct BuiltinFunctionDef // sizeof=0xC
@@ -379,7 +381,7 @@ void __cdecl FlashbangBlastEnt(
     float radius_min,
     gentity_s *attacker,
     team_t team);
-void __cdecl Vec3NormalizeFast(float *v);
+
 double __cdecl EntDistToPoint(const float *origin, gentity_s *ent);
 void __cdecl AddScrTeamName(team_t team);
 bool __cdecl G_WithinDamageRadius(const float *damageOrigin, float radiusSquared, gentity_s *ent);

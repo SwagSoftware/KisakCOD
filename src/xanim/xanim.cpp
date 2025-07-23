@@ -458,7 +458,7 @@ void __cdecl XAnimResetAnimMap_r(XModelNameMap* modelMap, unsigned int infoIndex
 
 void __cdecl XAnimResetAnimMapLeaf(const XModelNameMap* modelMap, unsigned int infoIndex)
 {
-    char* animToModel2; // [esp+4h] [ebp-8h]
+    const char* animToModel2; // [esp+4h] [ebp-8h]
     unsigned int animToModel; // [esp+8h] [ebp-4h]
 
     iassert((infoIndex && (infoIndex < 4096)));
@@ -1090,7 +1090,7 @@ void __cdecl XAnimFreeInfo(XAnimTree_s* tree, unsigned int infoIndex)
 {
     XAnimInfo* info; // [esp+0h] [ebp-14h]
     unsigned int next; // [esp+4h] [ebp-10h]
-    char* animToModel; // [esp+8h] [ebp-Ch]
+    const char* animToModel; // [esp+8h] [ebp-Ch]
     unsigned int prev; // [esp+Ch] [ebp-8h]
 
     InterlockedIncrement(&tree->modifyRefCount);
@@ -2225,9 +2225,6 @@ void __cdecl XAnimDisplay(
     int bufferSize,
     int *bufferPos)
 {
-    char *v6; // [esp+28h] [ebp-30h]
-    char *v7; // [esp+28h] [ebp-30h]
-    char *v8; // [esp+28h] [ebp-30h]
     double v9; // [esp+2Ch] [ebp-2Ch]
     XAnimInfo *info; // [esp+38h] [ebp-20h]
     float delta; // [esp+3Ch] [ebp-1Ch]
@@ -2298,7 +2295,6 @@ void __cdecl XAnimDisplay(
         realtimedelta = v9;
         if (info->notifyName)
         {
-            v6 = SL_ConvertToString(info->notifyName);
             Com_sprintfPos(
                 buffer,
                 bufferSize,
@@ -2311,7 +2307,7 @@ void __cdecl XAnimDisplay(
                 g_xAnimInfo[infoIndex].state.oldTime,
                 g_xAnimInfo[infoIndex].state.currentAnimTime,
                 realtimedelta,
-                v6);
+                SL_ConvertToString(info->notifyName));
         }
         else
         {
@@ -2335,7 +2331,6 @@ void __cdecl XAnimDisplay(
         {
             if (XAnimHasTime(tree->anims, animIndex))
             {
-                v7 = SL_ConvertToString(info->notifyName);
                 Com_sprintfPos(
                     buffer,
                     bufferSize,
@@ -2347,11 +2342,10 @@ void __cdecl XAnimDisplay(
                     g_xAnimInfo[infoIndex].state.goalWeight,
                     g_xAnimInfo[infoIndex].state.oldTime,
                     g_xAnimInfo[infoIndex].state.currentAnimTime,
-                    v7);
+                    SL_ConvertToString(info->notifyName));
             }
             else
             {
-                v8 = SL_ConvertToString(info->notifyName);
                 Com_sprintfPos(
                     buffer,
                     bufferSize,
@@ -2361,7 +2355,7 @@ void __cdecl XAnimDisplay(
                     debugName,
                     g_xAnimInfo[infoIndex].state.weight,
                     g_xAnimInfo[infoIndex].state.goalWeight,
-                    v8);
+                    SL_ConvertToString(info->notifyName));
             }
         }
         else if (XAnimHasTime(tree->anims, animIndex))

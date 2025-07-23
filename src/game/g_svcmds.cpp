@@ -160,7 +160,6 @@ void __cdecl Svcmd_RemoveIP_f()
 void __cdecl Svcmd_EntityList_f()
 {
     const char *EntityTypeName; // eax
-    char *v1; // eax
     int e; // [esp+0h] [ebp-8h]
     gentity_s *check; // [esp+4h] [ebp-4h]
 
@@ -174,8 +173,7 @@ void __cdecl Svcmd_EntityList_f()
             Com_Printf(0, "'%s'", EntityTypeName);
             if (check->classname)
             {
-                v1 = SL_ConvertToString(check->classname);
-                Com_Printf(0, ", '%s'", v1);
+                Com_Printf(0, ", '%s'", SL_ConvertToString(check->classname));
             }
             Com_Printf(0, "\n");
         }

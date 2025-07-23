@@ -465,12 +465,14 @@ void __cdecl ScrCmd_GetClanName(scr_entref_t entref)
 
 void GScr_CreatePrintChannel()
 {
-    char *name; // [esp+0h] [ebp-4h]
+    const char *name; // [esp+0h] [ebp-4h]
 
     if (Scr_GetNumParam() != 1)
         Scr_Error("illegal call to createprintchannel()");
+
     name = Scr_GetString(0);
-    if (!Con_OpenChannel(name, 1))
+
+    if (!Con_OpenChannel((char*)name, 1))
         Scr_Error("Unable to create new channel.  Maximum number of channels exeeded.");
 }
 
@@ -552,11 +554,6 @@ void __cdecl Scr_ConstructMessageString(
     char *string,
     uint32_t  stringLimit)
 {
-    const char *v5; // eax
-    const char *v6; // eax
-    const char *v7; // eax
-    const char *v8; // eax
-    const char *v9; // eax
     uint32_t  v10; // [esp+0h] [ebp-54h]
     uint32_t  v11; // [esp+10h] [ebp-44h]
     uint32_t  charIndex; // [esp+34h] [ebp-20h]
@@ -564,7 +561,7 @@ void __cdecl Scr_ConstructMessageString(
     uint32_t  tokenLen; // [esp+38h] [ebp-1Ch]
     int32_t type; // [esp+40h] [ebp-14h]
     gentity_s *ent; // [esp+44h] [ebp-10h]
-    char *token; // [esp+4Ch] [ebp-8h]
+    const char *token; // [esp+4Ch] [ebp-8h]
     uint32_t  stringLen; // [esp+50h] [ebp-4h]
 
     stringLen = 0;
@@ -578,8 +575,7 @@ void __cdecl Scr_ConstructMessageString(
             Scr_ValidateLocalizedStringRef(firstParmIndex, token, tokenLen);
             if (stringLen + tokenLen + 1 >= stringLimit)
             {
-                v5 = va("%s is too long. Max length is %i\n", errorContext, stringLimit);
-                Scr_ParamError(firstParmIndex, v5);
+                Scr_ParamError(firstParmIndex, va("%s is too long. Max length is %i\n", errorContext, stringLimit));
             }
             if (stringLen)
                 string[stringLen++] = 20;
@@ -594,8 +590,7 @@ void __cdecl Scr_ConstructMessageString(
             tokenLen = v11;
             if (stringLen + v11 + 1 >= stringLimit)
             {
-                v6 = va("%s is too long. Max length is %i\n", errorContext, stringLimit);
-                Scr_ParamError(firstParmIndex, v6);
+                Scr_ParamError(firstParmIndex, va("%s is too long. Max length is %i\n", errorContext, stringLimit));
             }
             if (v11)
                 string[stringLen++] = 21;
@@ -609,8 +604,7 @@ void __cdecl Scr_ConstructMessageString(
             {
                 if (token[charIndex] == 20 || token[charIndex] == 21 || token[charIndex] == 22)
                 {
-                    v7 = va("bad escape character (%i) present in string", token[charIndex]);
-                    Scr_ParamError(firstParmIndex, v7);
+                    Scr_ParamError(firstParmIndex, va("bad escape character (%i) present in string", token[charIndex]));
                 }
                 if (isalpha(token[charIndex]))
                 {
@@ -618,8 +612,7 @@ void __cdecl Scr_ConstructMessageString(
                     {
                         if (loc_warningsAsErrors->current.enabled)
                         {
-                            v8 = va("non-localized %s strings are not allowed to have letters in them: \"%s\"", errorContext, token);
-                            Scr_LocalizationError(firstParmIndex, v8);
+                            Scr_LocalizationError(firstParmIndex, va("non-localized %s strings are not allowed to have letters in them: \"%s\"", errorContext, token));
                         }
                         else
                         {
@@ -636,8 +629,7 @@ void __cdecl Scr_ConstructMessageString(
             }
             if (stringLen + v10 + 1 >= stringLimit)
             {
-                v9 = va("%s is too long. Max length is %i\n", errorContext, stringLimit);
-                Scr_ParamError(firstParmIndex, v9);
+                Scr_ParamError(firstParmIndex, va("%s is too long. Max length is %i\n", errorContext, stringLimit));
             }
             if (v10)
                 string[stringLen++] = 21;
@@ -657,23 +649,18 @@ void __cdecl Scr_ConstructMessageString(
 
 void __cdecl Scr_ValidateLocalizedStringRef(uint32_t  parmIndex, const char *token, int32_t tokenLen)
 {
-    const char *v3; // eax
     int32_t charIter; // [esp+0h] [ebp-4h]
 
-    if (!token)
-        MyAssertHandler(".\\game_mp\\g_scr_main_mp.cpp", 376, 0, "%s", "token");
-    if (tokenLen < 0)
-        MyAssertHandler(".\\game_mp\\g_scr_main_mp.cpp", 377, 0, "%s", "tokenLen >= 0");
+    iassert(token);
+    iassert(tokenLen >= 0);
+
     if (tokenLen > 1)
     {
         for (charIter = 0; charIter < tokenLen; ++charIter)
         {
             if (!isalnum(token[charIter]) && token[charIter] != 95)
             {
-                v3 = va(
-                    "Illegal localized string reference: %s must contain only alpha-numeric characters and underscores",
-                    token);
-                Scr_ParamError(parmIndex, v3);
+                Scr_ParamError(parmIndex, va("Illegal localized string reference: %s must contain only alpha-numeric characters and underscores", token));
             }
         }
     }
@@ -891,33 +878,33 @@ void GScr_IsAlive()
 
 void GScr_GetDvar()
 {
-    char *dvarName; // [esp+0h] [ebp-8h]
-    char *dvarValue; // [esp+4h] [ebp-4h]
+    const char *dvarName; // [esp+0h] [ebp-8h]
+    const char *dvarValue; // [esp+4h] [ebp-4h]
 
     dvarName = Scr_GetString(0);
-    dvarValue = (char *)Dvar_GetVariantString(dvarName);
+    dvarValue = Dvar_GetVariantString(dvarName);
     Scr_AddString(dvarValue);
 }
 
 void GScr_GetDvarInt()
 {
-    int32_t v0; // eax
-    char *dvarName; // [esp+0h] [ebp-8h]
+    const char *dvarName; // [esp+0h] [ebp-8h]
     const char *dvarValue; // [esp+4h] [ebp-4h]
 
     dvarName = Scr_GetString(0);
     dvarValue = Dvar_GetVariantString(dvarName);
-    v0 = atoi(dvarValue);
-    Scr_AddInt(v0);
+
+    Scr_AddInt(atoi(dvarValue));
 }
 
 void GScr_GetDvarFloat()
 {
-    char *dvarName; // [esp+8h] [ebp-8h]
+    const char *dvarName; // [esp+8h] [ebp-8h]
     const char *dvarValue; // [esp+Ch] [ebp-4h]
 
     dvarName = Scr_GetString(0);
     dvarValue = Dvar_GetVariantString(dvarName);
+
     Scr_AddFloat(atof(dvarValue));
 }
 
@@ -1000,12 +987,10 @@ void Scr_GetEntByNum()
 
 void Scr_GetWeaponModel()
 {
-    char *v0; // eax
     WeaponDef *WeaponDef; // eax
-    char *Name; // eax
     uint32_t  weaponModel; // [esp+0h] [ebp-Ch]
     int32_t iWeaponIndex; // [esp+4h] [ebp-8h]
-    char *pszWeaponName; // [esp+8h] [ebp-4h]
+    const char *pszWeaponName; // [esp+8h] [ebp-4h]
 
     pszWeaponName = Scr_GetString(0);
     iWeaponIndex = G_GetWeaponIndexForName(pszWeaponName);
@@ -1026,8 +1011,7 @@ void Scr_GetWeaponModel()
             }
         }
         WeaponDef = BG_GetWeaponDef(iWeaponIndex);
-        Name = (char *)XModelGetName(WeaponDef->worldModel[weaponModel]);
-        Scr_AddString(Name);
+        Scr_AddString(XModelGetName(WeaponDef->worldModel[weaponModel]));
     }
     else
     {
@@ -1035,8 +1019,7 @@ void Scr_GetWeaponModel()
         {
             if (I_stricmp(pszWeaponName, "none"))
             {
-                v0 = va("unknown weapon '%s' in getWeaponModel\n", pszWeaponName);
-                Com_Printf(17, v0);
+                Com_Printf(17, va("unknown weapon '%s' in getWeaponModel\n", pszWeaponName));
             }
         }
         Scr_AddString((char *)"");
@@ -1046,15 +1029,15 @@ void Scr_GetWeaponModel()
 void __cdecl GScr_GetAmmoCount(scr_entref_t entref)
 {
     int32_t v1; // eax
-    char *weaponName; // [esp+0h] [ebp-Ch]
+    const char *weaponName; // [esp+0h] [ebp-Ch]
     int32_t weaponIndex; // [esp+4h] [ebp-8h]
     gentity_s *ent; // [esp+8h] [ebp-4h]
 
     ent = GetPlayerEntity(entref);
-    if (!ent)
-        MyAssertHandler(".\\game_mp\\g_scr_main_mp.cpp", 844, 0, "%s", "ent");
-    if (!ent->client)
-        MyAssertHandler(".\\game_mp\\g_scr_main_mp.cpp", 845, 0, "%s", "ent->client");
+
+    iassert(ent);
+    iassert(ent->client);
+
     weaponName = Scr_GetString(0);
     weaponIndex = G_GetWeaponIndexForName(weaponName);
     if (weaponIndex)
@@ -1070,28 +1053,26 @@ void __cdecl GScr_GetAmmoCount(scr_entref_t entref)
 
 gentity_s *__cdecl GetPlayerEntity(scr_entref_t entref)
 {
-    char *v1; // eax
     const char *v2; // eax
     const char *v4; // [esp+20h] [ebp-8h]
     gentity_s *ent; // [esp+24h] [ebp-4h]
 
     ent = GetEntity(entref);
-    if (!ent)
-        MyAssertHandler(".\\game_mp\\g_scr_main_mp.cpp", 212, 0, "%s", "ent");
+    iassert(ent);
+
     if (!ent->client)
     {
         if (ent->targetname)
             v4 = SL_ConvertToString(ent->targetname);
         else
             v4 = "<undefined>";
-        v1 = SL_ConvertToString(ent->classname);
         v2 = va(
             "only valid on players; called on entity %i at %.0f %.0f %.0f classname %s targetname %s\n",
             entref.entnum,
             ent->r.currentOrigin[0],
             ent->r.currentOrigin[1],
             ent->r.currentOrigin[2],
-            v1,
+            SL_ConvertToString(ent->classname),
             v4);
         Scr_Error(v2);
     }
@@ -1153,8 +1134,6 @@ void GScr_GetBrushModelCenter()
 
 void GScr_Spawn()
 {
-    char *v0; // eax
-    const char *v1; // eax
     float *currentOrigin; // [esp+0h] [ebp-1Ch]
     float origin[3]; // [esp+4h] [ebp-18h] BYREF
     int32_t iSpawnFlags; // [esp+10h] [ebp-Ch]
@@ -1180,16 +1159,12 @@ void GScr_Spawn()
     }
     else
     {
-        v0 = SL_ConvertToString(classname);
-        v1 = va("unable to spawn \"%s\" entity", v0);
-        Scr_Error(v1);
+        Scr_Error(va("unable to spawn \"%s\" entity", SL_ConvertToString(classname)));
     }
 }
 
 void GScr_SpawnPlane()
 {
-    char *v0; // eax
-    const char *v1; // eax
     float *currentOrigin; // [esp+0h] [ebp-28h]
     float origin[3]; // [esp+4h] [ebp-24h] BYREF
     int32_t iSpawnFlags; // [esp+10h] [ebp-18h]
@@ -1235,9 +1210,7 @@ void GScr_SpawnPlane()
     {
         ent->s.eType = 13;
         ent->s.lerp.u.vehicle.teamAndOwnerIndex = team | (4 * ownerIndex);
-        v0 = SL_ConvertToString(classname);
-        v1 = va("unable to spawn \"%s\" entity", v0);
-        Scr_Error(v1);
+        Scr_Error(va("unable to spawn \"%s\" entity", SL_ConvertToString(classname)));
     }
 }
 
@@ -1296,10 +1269,11 @@ void GScr_SpawnHelicopter()
 
 uint32_t  GScr_PrecacheTurret()
 {
-    char *turretInfo; // [esp+0h] [ebp-4h]
+    const char *turretInfo; // [esp+0h] [ebp-4h]
 
     if (!level.initializing)
         Scr_Error("precacheTurret must be called before any wait statements in the level script\n");
+
     turretInfo = Scr_GetString(0);
     return G_GetWeaponIndexForName(turretInfo);
 }
@@ -1320,7 +1294,7 @@ void __cdecl ScrCmd_attach(scr_entref_t entref)
 {
     uint32_t  v5; // [esp+0h] [ebp-18h]
     uint32_t  v6; // [esp+4h] [ebp-14h]
-    char *modelName; // [esp+Ch] [ebp-Ch]
+    const char *modelName; // [esp+Ch] [ebp-Ch]
     gentity_s *ent; // [esp+10h] [ebp-8h]
 
     ent = GetEntity(entref);
@@ -1340,7 +1314,7 @@ void __cdecl ScrCmd_attach(scr_entref_t entref)
     {
         Scr_Error(va("model '%s' already attached to tag '%s'", modelName, SL_ConvertToString(v6)));
     }
-    if (!G_EntAttach(ent, modelName, v6, v5))
+    if (!G_EntAttach(ent, (char*)modelName, v6, v5))
     {
         Scr_Error(va("failed to attach model '%s' to tag '%s'", modelName, SL_ConvertToString(v6)));
     }
@@ -1349,7 +1323,7 @@ void __cdecl ScrCmd_attach(scr_entref_t entref)
 void __cdecl ScrCmd_detach(scr_entref_t entref)
 {
     uint32_t  v6; // [esp+0h] [ebp-14h]
-    char *modelName; // [esp+8h] [ebp-Ch]
+    const char *modelName; // [esp+8h] [ebp-Ch]
     gentity_s *ent; // [esp+Ch] [ebp-8h]
     int32_t i; // [esp+10h] [ebp-4h]
 
@@ -1457,11 +1431,6 @@ void __cdecl G_EntityStateGetPartBits(const gentity_s *ent, uint32_t  *partBits)
 
 void __cdecl ScrCmd_hidepart(scr_entref_t entref)
 {
-    char *v1; // eax
-    const char *v2; // eax
-    char *v3; // eax
-    const char *v4; // eax
-    const char *v5; // [esp-4h] [ebp-28h]
     uint32_t  tagName; // [esp+0h] [ebp-24h]
     uint8_t boneIndex; // [esp+7h] [ebp-1Dh] BYREF
     DObj_s *obj; // [esp+8h] [ebp-1Ch]
@@ -1479,9 +1448,7 @@ void __cdecl ScrCmd_hidepart(scr_entref_t entref)
     {
         if (!DObjGetBoneIndex(obj, tagName, &boneIndex))
         {
-            v1 = SL_ConvertToString(tagName);
-            v2 = va("cannot find part '%s' in entity model", v1);
-            Scr_Error(v2);
+            Scr_Error(va("cannot find part '%s' in entity model", SL_ConvertToString(tagName)));
         }
     }
     else
@@ -1489,10 +1456,7 @@ void __cdecl ScrCmd_hidepart(scr_entref_t entref)
         modelName = Scr_GetString(1u);
         if (!DObjGetModelBoneIndex(obj, modelName, tagName, &boneIndex))
         {
-            v5 = modelName;
-            v3 = SL_ConvertToString(tagName);
-            v4 = va("cannot find part '%s' in entity model '%s'", v3, v5);
-            Scr_Error(v4);
+            Scr_Error(va("cannot find part '%s' in entity model '%s'", SL_ConvertToString(tagName), modelName));
         }
     }
     G_EntityStateGetPartBits(ent, partBits);
@@ -1503,11 +1467,6 @@ void __cdecl ScrCmd_hidepart(scr_entref_t entref)
 
 void __cdecl ScrCmd_showpart(scr_entref_t entref)
 {
-    char *v1; // eax
-    const char *v2; // eax
-    char *v3; // eax
-    const char *v4; // eax
-    const char *v5; // [esp-4h] [ebp-28h]
     uint32_t  tagName; // [esp+0h] [ebp-24h]
     uint8_t boneIndex; // [esp+7h] [ebp-1Dh] BYREF
     DObj_s *obj; // [esp+8h] [ebp-1Ch]
@@ -1525,9 +1484,7 @@ void __cdecl ScrCmd_showpart(scr_entref_t entref)
     {
         if (!DObjGetBoneIndex(obj, tagName, &boneIndex))
         {
-            v1 = SL_ConvertToString(tagName);
-            v2 = va("cannot find part '%s' in entity model", v1);
-            Scr_Error(v2);
+            Scr_Error(va("cannot find part '%s' in entity model", SL_ConvertToString(tagName)));
         }
     }
     else
@@ -1535,10 +1492,7 @@ void __cdecl ScrCmd_showpart(scr_entref_t entref)
         modelName = Scr_GetString(1u);
         if (!DObjGetModelBoneIndex(obj, modelName, tagName, &boneIndex))
         {
-            v5 = modelName;
-            v3 = SL_ConvertToString(tagName);
-            v4 = va("cannot find part '%s' in entity model '%s'", v3, v5);
-            Scr_Error(v4);
+            Scr_Error(va("cannot find part '%s' in entity model '%s'", SL_ConvertToString(tagName), modelName));
         }
     }
     G_EntityStateGetPartBits(ent, partBits);
@@ -1564,15 +1518,6 @@ void __cdecl ScrCmd_showallparts(scr_entref_t entref)
 
 void __cdecl ScrCmd_LinkTo(scr_entref_t entref)
 {
-    char *v1; // eax
-    const char *v2; // eax
-    uint32_t  v3; // eax
-    char *v4; // eax
-    const char *v5; // eax
-    uint32_t  v6; // eax
-    char *v7; // eax
-    const char *v8; // eax
-    char *v9; // [esp-4h] [ebp-2Ch]
     uint32_t  tagName; // [esp+0h] [ebp-28h]
     float originOffset[3]; // [esp+4h] [ebp-24h] BYREF
     float anglesOffset[3]; // [esp+10h] [ebp-18h] BYREF
@@ -1585,9 +1530,7 @@ void __cdecl ScrCmd_LinkTo(scr_entref_t entref)
         Scr_ParamError(0, "not an entity");
     if ((ent->flags & 0x1000) == 0)
     {
-        v1 = SL_ConvertToString(ent->classname);
-        v2 = va("entity (classname: '%s') does not currently support linkTo", v1);
-        Scr_ObjectError(v2);
+        Scr_ObjectError(va("entity (classname: '%s') does not currently support linkTo", SL_ConvertToString(ent->classname)));
     }
     parent = Scr_GetEntity(0);
     numParam = Scr_GetNumParam();
@@ -1613,10 +1556,7 @@ void __cdecl ScrCmd_LinkTo(scr_entref_t entref)
     {
         if (!parent->model)
             Scr_Error("failed to link entity since parent has no model");
-        v3 = G_ModelName(parent->model);
-        v4 = SL_ConvertToString(v3);
-        v5 = va("failed to link entity since parent model '%s' is invalid", v4);
-        Scr_Error(v5);
+        Scr_Error(va("failed to link entity since parent model '%s' is invalid", SL_ConvertToString(G_ModelName(parent->model))));
     }
     if (!parent->model)
         MyAssertHandler(".\\game_mp\\g_scr_main_mp.cpp", 1384, 0, "%s", "parent->model");
@@ -1625,11 +1565,7 @@ void __cdecl ScrCmd_LinkTo(scr_entref_t entref)
         if (SV_DObjGetBoneIndex(parent, tagName) < 0)
         {
             SV_DObjDumpInfo(parent);
-            v6 = G_ModelName(parent->model);
-            v9 = SL_ConvertToString(v6);
-            v7 = SL_ConvertToString(tagName);
-            v8 = va("failed to link entity since tag '%s' does not exist in parent model '%s'", v7, v9);
-            Scr_Error(v8);
+            Scr_Error(va("failed to link entity since tag '%s' does not exist in parent model '%s'", SL_ConvertToString(tagName), SL_ConvertToString(G_ModelName(parent->model))));
         }
     }
     Scr_Error("failed to link entity");
@@ -1645,8 +1581,6 @@ void __cdecl ScrCmd_Unlink(scr_entref_t entref)
 
 void __cdecl ScrCmd_EnableLinkTo(scr_entref_t entref)
 {
-    char *v1; // eax
-    const char *v2; // eax
     gentity_s *ent; // [esp+0h] [ebp-4h]
 
     ent = GetEntity(entref);
@@ -1654,12 +1588,11 @@ void __cdecl ScrCmd_EnableLinkTo(scr_entref_t entref)
         Scr_ObjectError("entity already has linkTo enabled");
     if (ent->s.eType || ent->physicsObject)
     {
-        v1 = SL_ConvertToString(ent->classname);
-        v2 = va("entity (classname: '%s') does not currently support enableLinkTo", v1);
-        Scr_ObjectError(v2);
+        Scr_ObjectError(va("entity (classname: '%s') does not currently support enableLinkTo", SL_ConvertToString(ent->classname)));
     }
-    if (ent->client)
-        MyAssertHandler(".\\game_mp\\g_scr_main_mp.cpp", 1418, 0, "%s", "!ent->client");
+
+    iassert(!ent->client);
+
     ent->flags |= 0x1000u;
 }
 
@@ -1704,12 +1637,6 @@ void __cdecl ScrCmd_UseBy(scr_entref_t entref)
 
 void __cdecl ScrCmd_IsTouching(scr_entref_t entref)
 {
-    char *v1; // eax
-    const char *v2; // eax
-    char *v3; // eax
-    const char *v4; // eax
-    char *v5; // eax
-    const char *v6; // eax
     const gentity_s *pOther; // [esp+1Ch] [ebp-28h]
     float vMins[3]; // [esp+20h] [ebp-24h] BYREF
     gentity_s *pEnt; // [esp+2Ch] [ebp-18h]
@@ -1731,44 +1658,11 @@ void __cdecl ScrCmd_IsTouching(scr_entref_t entref)
     {
         pOther = Scr_GetEntity(0);
     }
-    if (!pEnt)
-        MyAssertHandler(".\\game_mp\\g_scr_main_mp.cpp", 1491, 0, "%s", "pEnt");
-    if (pEnt->r.mins[0] > (double)pEnt->r.maxs[0])
-    {
-        v1 = SL_ConvertToString(pEnt->classname);
-        v2 = va(
-            "entnum: %d, origin: %g %g %g, classname: %s",
-            pEnt->s.number,
-            pEnt->r.currentOrigin[0],
-            pEnt->r.currentOrigin[1],
-            pEnt->r.currentOrigin[2],
-            v1);
-        MyAssertHandler(".\\game_mp\\g_scr_main_mp.cpp", 1492, 0, "%s\n\t%s", "pEnt->r.maxs[0] >= pEnt->r.mins[0]", v2);
-    }
-    if (pEnt->r.mins[1] > (double)pEnt->r.maxs[1])
-    {
-        v3 = SL_ConvertToString(pEnt->classname);
-        v4 = va(
-            "entnum: %d, origin: %g %g %g, classname: %s",
-            pEnt->s.number,
-            pEnt->r.currentOrigin[0],
-            pEnt->r.currentOrigin[1],
-            pEnt->r.currentOrigin[2],
-            v3);
-        MyAssertHandler(".\\game_mp\\g_scr_main_mp.cpp", 1493, 0, "%s\n\t%s", "pEnt->r.maxs[1] >= pEnt->r.mins[1]", v4);
-    }
-    if (pEnt->r.mins[2] > (double)pEnt->r.maxs[2])
-    {
-        v5 = SL_ConvertToString(pEnt->classname);
-        v6 = va(
-            "entnum: %d, origin: %g %g %g, classname: %s",
-            pEnt->s.number,
-            pEnt->r.currentOrigin[0],
-            pEnt->r.currentOrigin[1],
-            pEnt->r.currentOrigin[2],
-            v5);
-        MyAssertHandler(".\\game_mp\\g_scr_main_mp.cpp", 1494, 0, "%s\n\t%s", "pEnt->r.maxs[2] >= pEnt->r.mins[2]", v6);
-    }
+    iassert(pEnt);
+    iassert(pEnt->r.maxs[0] >= pEnt->r.mins[0]);
+    iassert(pEnt->r.maxs[1] >= pEnt->r.mins[1]);
+    iassert(pEnt->r.maxs[2] >= pEnt->r.mins[2]);
+
     Vec3Add(pEnt->r.currentOrigin, pEnt->r.mins, vMins);
     Vec3Add(pEnt->r.currentOrigin, pEnt->r.maxs, vMaxs);
     ExpandBoundsToWidth(vMins, vMaxs);
@@ -1779,7 +1673,7 @@ void __cdecl ScrCmd_IsTouching(scr_entref_t entref)
 void ScrCmd_SoundExists()
 {
     snd_alias_list_t *SoundAlias; // eax
-    char *soundName; // [esp+0h] [ebp-4h]
+    const char *soundName; // [esp+0h] [ebp-4h]
 
     soundName = Scr_GetString(0);
     SoundAlias = Com_TryFindSoundAlias(soundName);
@@ -1803,13 +1697,13 @@ void __cdecl ScrCmd_PlaySound(scr_entref_t entref)
 gentity_s *__cdecl StartScriptPlaySoundOnEnt(scr_entref_t entref)
 {
     gentity_s *result; // eax
-    char *pszSoundName; // [esp+0h] [ebp-10h]
+    const char *pszSoundName; // [esp+0h] [ebp-10h]
     uint8_t iSoundIndex; // [esp+7h] [ebp-9h]
     gentity_s *pEnt; // [esp+8h] [ebp-8h]
 
     pEnt = GetEntity(entref);
     pszSoundName = Scr_GetString(0);
-    iSoundIndex = G_SoundAliasIndex(pszSoundName);
+    iSoundIndex = G_SoundAliasIndex((char*)pszSoundName);
     result = G_TempEntity(pEnt->r.currentOrigin, 3);
     result->r.svFlags |= 8u;
     result->s.eventParm = iSoundIndex;
@@ -1818,9 +1712,6 @@ gentity_s *__cdecl StartScriptPlaySoundOnEnt(scr_entref_t entref)
 
 void __cdecl ScrCmd_PlaySoundToTeam(scr_entref_t entref)
 {
-    char *v1; // eax
-    const char *v2; // eax
-    const char *v3; // eax
     gentity_s *tempEnt; // [esp+0h] [ebp-18h]
     int32_t teamNum; // [esp+4h] [ebp-14h]
     uint16_t team; // [esp+8h] [ebp-10h]
@@ -1832,9 +1723,7 @@ void __cdecl ScrCmd_PlaySoundToTeam(scr_entref_t entref)
     team = Scr_GetConstString(1);
     if (team != scr_const.allies && team != scr_const.axis)
     {
-        v1 = SL_ConvertToString(team);
-        v2 = va("Illegal team string '%s'. Must be allies, or axis.", v1);
-        Scr_Error(v2);
+        Scr_Error(va("Illegal team string '%s'. Must be allies, or axis.", SL_ConvertToString(team)));
     }
     if (team == scr_const.allies)
         teamNum = 2;
@@ -1845,8 +1734,7 @@ void __cdecl ScrCmd_PlaySoundToTeam(scr_entref_t entref)
         ignoreClientEnt = Scr_GetEntity(2u);
         if (!ignoreClientEnt->client)
         {
-            v3 = va("entity %i is not a player", ignoreClientEnt->s.number);
-            Scr_ObjectError(v3);
+            Scr_ObjectError(va("entity %i is not a player", ignoreClientEnt->s.number));
         }
     }
     else
@@ -1890,37 +1778,33 @@ void __cdecl ScrCmd_PlaySoundToPlayer(scr_entref_t entref)
 void __cdecl ScrCmd_PlaySoundAsMaster(scr_entref_t entref)
 {
     uint32_t  NumParam; // eax
-    const char *v2; // eax
-    char *pszSoundName; // [esp+0h] [ebp-10h]
+    const char *pszSoundName; // [esp+0h] [ebp-10h]
     uint8_t iSoundIndex; // [esp+7h] [ebp-9h]
     gentity_s *pEnt; // [esp+8h] [ebp-8h]
     gentity_s *pTempEnt; // [esp+Ch] [ebp-4h]
 
     pEnt = GetEntity(entref);
     pszSoundName = Scr_GetString(0);
-    iSoundIndex = G_SoundAliasIndex(pszSoundName);
+    iSoundIndex = G_SoundAliasIndex((char*)pszSoundName);
     pTempEnt = G_TempEntity(pEnt->r.currentOrigin, 4);
     pTempEnt->r.svFlags |= 8u;
     pTempEnt->s.eventParm = iSoundIndex;
     if (Scr_GetNumParam() != 1)
     {
         NumParam = Scr_GetNumParam();
-        v2 = va("playsoundasmaster has %d parameters.  There should be exactly one.", NumParam);
-        Scr_Error(v2);
+        Scr_Error(va("playsoundasmaster has %d parameters.  There should be exactly one.", NumParam));
     }
 }
 
 void __cdecl ScrCmd_PlayLoopSound(scr_entref_t entref)
 {
-    uint8_t v1; // al
-    char *pszSoundName; // [esp+0h] [ebp-Ch]
+    const char *pszSoundName; // [esp+0h] [ebp-Ch]
     gentity_s *pEnt; // [esp+8h] [ebp-4h]
 
     pEnt = GetEntity(entref);
     pszSoundName = Scr_GetString(0);
-    v1 = G_SoundAliasIndex(pszSoundName);
     pEnt->r.broadcastTime = -1;
-    pEnt->s.loopSound = v1;
+    pEnt->s.loopSound = G_SoundAliasIndex((char*)pszSoundName);
 }
 
 void __cdecl ScrCmd_StopLoopSound(scr_entref_t entref)
@@ -1947,12 +1831,12 @@ void __cdecl ScrCmd_Delete(scr_entref_t entref)
 
 void __cdecl ScrCmd_SetModel(scr_entref_t entref)
 {
-    char *modelName; // [esp+0h] [ebp-8h]
+    const char *modelName; // [esp+0h] [ebp-8h]
     gentity_s *pEnt; // [esp+4h] [ebp-4h]
 
     pEnt = GetEntity(entref);
     modelName = Scr_GetString(0);
-    G_SetModel(pEnt, modelName);
+    G_SetModel(pEnt, (char*)modelName);
     G_DObjUpdate(pEnt);
     SV_LinkEntity(pEnt);
 }
@@ -2120,15 +2004,15 @@ void __cdecl Scr_SetStableMissile(scr_entref_t entref)
 
 void __cdecl GScr_SetCursorHint(scr_entref_t entref)
 {
-    const char *v1; // eax
-    char *pszHint; // [esp+0h] [ebp-Ch]
+    const char *pszHint; // [esp+0h] [ebp-Ch]
     gentity_s *pEnt; // [esp+4h] [ebp-8h]
     int32_t i; // [esp+8h] [ebp-4h]
     int32_t ia; // [esp+8h] [ebp-4h]
 
     pEnt = GetEntity(entref);
-    if (pEnt->s.eType == 4)
-        MyAssertHandler(".\\game_mp\\g_scr_main_mp.cpp", 2015, 0, "%s", "pEnt->s.eType != ET_MISSILE");
+    
+    iassert(pEnt->s.eType != ET_MISSILE);
+
     pszHint = Scr_GetString(0);
     if ((pEnt->classname == scr_const.trigger_use || pEnt->classname == scr_const.trigger_use_touch)
         && !I_stricmp(pszHint, "HINT_INHERIT"))
@@ -2150,8 +2034,7 @@ void __cdecl GScr_SetCursorHint(scr_entref_t entref)
             Com_Printf(23, "HINT_INHERIT (for trigger_use or trigger_use_touch entities only)\n");
         for (ia = 1; ia < 5; ++ia)
             Com_Printf(23, "%s\n", hintStrings[ia]);
-        v1 = va("%s is not a valid hint type. See above for list of valid hint types\n", pszHint);
-        Scr_Error(v1);
+        Scr_Error(va("%s is not a valid hint type. See above for list of valid hint types\n", pszHint));
     }
 }
 
@@ -2181,7 +2064,7 @@ int32_t __cdecl G_GetHintStringIndex(int32_t *piIndex, char *pszString)
 
 void __cdecl GScr_SetHintString(scr_entref_t entref)
 {
-    char *String; // eax
+    const char *String; // eax
     uint32_t  NumParam; // eax
     const char *v3; // eax
     char szHint[1024]; // [esp+0h] [ebp-410h] BYREF
@@ -2344,9 +2227,6 @@ void __cdecl ClearObjective(objective_t *obj)
 
 void Scr_Objective_Add()
 {
-    const char *v0; // eax
-    char *v1; // eax
-    const char *v2; // eax
     objective_t *result; // eax
     objectiveState_t state; // [esp+Ch] [ebp-14h] BYREF
     objective_t *obj; // [esp+10h] [ebp-10h]
@@ -2361,17 +2241,14 @@ void Scr_Objective_Add()
     objNum = Scr_GetInt(0);
     if ((uint32_t )objNum >= 0x10)
     {
-        v0 = va("index %i is an illegal objective index. Valid indexes are 0 to %i\n", objNum, 15);
-        Scr_ParamError(0, v0);
+        Scr_ParamError(0, va("index %i is an illegal objective index. Valid indexes are 0 to %i\n", objNum, 15));
     }
     obj = &level.objectives[objNum];
     ClearObjective_OnEntity(obj);
     stateName = Scr_GetConstString(1);
     if (!ObjectiveStateIndexFromString(&state, stateName))
     {
-        v1 = SL_ConvertToString(stateName);
-        v2 = va("Illegal objective state \"%s\". Valid states are \"empty\", \"invisible\", \"current\", \"active\"\n", v1);
-        Scr_ParamError(1u, v2);
+        Scr_ParamError(1u, va("Illegal objective state \"%s\". Valid states are \"empty\", \"invisible\", \"current\", \"active\"\n", SL_ConvertToString(stateName)));
     }
     result = obj;
     obj->state = state;
@@ -2404,9 +2281,7 @@ void __cdecl ClearObjective_OnEntity(objective_t *obj)
 
 void __cdecl SetObjectiveIcon(objective_t *obj, uint32_t  paramNum)
 {
-    const char *v2; // eax
-    const char *v3; // eax
-    char *shaderName; // [esp+0h] [ebp-8h]
+    const char *shaderName; // [esp+0h] [ebp-8h]
     int32_t i; // [esp+4h] [ebp-4h]
 
     shaderName = Scr_GetString(paramNum);
@@ -2414,42 +2289,32 @@ void __cdecl SetObjectiveIcon(objective_t *obj, uint32_t  paramNum)
     {
         if (shaderName[i] <= 31 || shaderName[i] >= 127)
         {
-            v2 = va(
-                "Illegal character '%c'(ascii %i) in objective icon name: %s\n",
-                shaderName[i],
-                (uint8_t)shaderName[i],
-                shaderName);
-            Scr_ParamError(3u, v2);
+            Scr_ParamError(3u, va("Illegal character '%c'(ascii %i) in objective icon name: %s\n", shaderName[i], (uint8_t)shaderName[i], shaderName));
         }
     }
     if (i >= 64)
     {
-        v3 = va("Objective icon name is too long (> %i): %s\n", 63, shaderName);
-        Scr_ParamError(3u, v3);
+        Scr_ParamError(3, va("Objective icon name is too long (> %i): %s\n", 63, shaderName));
     }
     obj->icon = G_MaterialIndex(shaderName);
 }
 
 void Scr_Objective_Delete()
 {
-    const char *v0; // eax
     int32_t objNum; // [esp+0h] [ebp-4h]
 
     objNum = Scr_GetInt(0);
     if ((uint32_t )objNum >= 0x10)
     {
-        v0 = va("index %i is an illegal objective index. Valid indexes are 0 to %i\n", objNum, 15);
-        Scr_ParamError(0, v0);
+        Scr_ParamError(0, va("index %i is an illegal objective index. Valid indexes are 0 to %i\n", objNum, 15));
     }
+
     ClearObjective_OnEntity(&level.objectives[objNum]);
     ClearObjective(&level.objectives[objNum]);
 }
 
 void Scr_Objective_State()
 {
-    const char *v0; // eax
-    char *String; // eax
-    const char *v2; // eax
     objectiveState_t state; // [esp+0h] [ebp-10h] BYREF
     objective_t *obj; // [esp+4h] [ebp-Ch]
     uint16_t stateName; // [esp+8h] [ebp-8h]
@@ -2458,18 +2323,13 @@ void Scr_Objective_State()
     objNum = Scr_GetInt(0);
     if ((uint32_t )objNum >= 0x10)
     {
-        v0 = va("index %i is an illegal objective index. Valid indexes are 0 to %i\n", objNum, 15);
-        Scr_ParamError(0, v0);
+        Scr_ParamError(0, va("index %i is an illegal objective index. Valid indexes are 0 to %i\n", objNum, 15));
     }
     obj = &level.objectives[objNum];
     stateName = Scr_GetConstString(1);
     if (!ObjectiveStateIndexFromString(&state, stateName))
     {
-        String = Scr_GetString(1u);
-        v2 = va(
-            "Illegal objective state \"%s\". Valid states are \"empty\", \"invisible\", \"current\", \"active\"\n",
-            String);
-        Scr_ParamError(1u, v2);
+        Scr_ParamError(1, va("Illegal objective state \"%s\". Valid states are \"empty\", \"invisible\", \"current\", \"active\"\n", Scr_GetString(1)));
     }
     obj->state = state;
     if (state == OBJST_EMPTY || state == OBJST_INVISIBLE)
@@ -2478,21 +2338,18 @@ void Scr_Objective_State()
 
 void Scr_Objective_Icon()
 {
-    const char *v0; // eax
     int32_t objNum; // [esp+0h] [ebp-4h]
 
     objNum = Scr_GetInt(0);
     if ((uint32_t )objNum >= 0x10)
     {
-        v0 = va("index %i is an illegal objective index. Valid indexes are 0 to %i\n", objNum, 15);
-        Scr_ParamError(0, v0);
+        Scr_ParamError(0, va("index %i is an illegal objective index. Valid indexes are 0 to %i\n", objNum, 15));
     }
     SetObjectiveIcon(&level.objectives[objNum], 1u);
 }
 
 void Scr_Objective_Position()
 {
-    const char *v0; // eax
     objective_t *result; // eax
     objective_t *obj; // [esp+Ch] [ebp-8h]
     int32_t objNum; // [esp+10h] [ebp-4h]
@@ -2500,8 +2357,7 @@ void Scr_Objective_Position()
     objNum = Scr_GetInt(0);
     if ((uint32_t )objNum >= 0x10)
     {
-        v0 = va("index %i is an illegal objective index. Valid indexes are 0 to %i\n", objNum, 15);
-        Scr_ParamError(0, v0);
+        Scr_ParamError(0, va("index %i is an illegal objective index. Valid indexes are 0 to %i\n", objNum, 15));
     }
     obj = &level.objectives[objNum];
     ClearObjective_OnEntity(obj);
@@ -2570,9 +2426,6 @@ void Scr_Objective_Current()
 
 void GScr_Objective_Team()
 {
-    const char *v0; // eax
-    char *v1; // eax
-    const char *v2; // eax
     objective_t *obj; // [esp+0h] [ebp-Ch]
     uint16_t team; // [esp+4h] [ebp-8h]
     int32_t objNum; // [esp+8h] [ebp-4h]
@@ -2580,8 +2433,7 @@ void GScr_Objective_Team()
     objNum = Scr_GetInt(0);
     if ((uint32_t )objNum >= 0x10)
     {
-        v0 = va("index %i is an illegal objective index. Valid indexes are 0 to %i\n", objNum, 15);
-        Scr_ParamError(0, v0);
+        Scr_ParamError(0, va("index %i is an illegal objective index. Valid indexes are 0 to %i\n", objNum, 15));
     }
     obj = &level.objectives[objNum];
     team = Scr_GetConstString(1);
@@ -2599,9 +2451,7 @@ void GScr_Objective_Team()
     }
     else
     {
-        v1 = SL_ConvertToString(team);
-        v2 = va("Illegal team string '%s'. Must be allies, axis, or none.", v1);
-        Scr_ParamError(1u, v2);
+        Scr_ParamError(1u, va("Illegal team string '%s'. Must be allies, axis, or none.", SL_ConvertToString(team)));
     }
 }
 
@@ -2638,12 +2488,12 @@ int32_t GScr_Obituary()
 {
     int32_t result; // eax
     gentity_s *pOtherEnt; // [esp+0h] [ebp-14h]
-    char *pszWeapon; // [esp+4h] [ebp-10h]
+    const char *pszWeapon; // [esp+4h] [ebp-10h]
     uint32_t  iWeaponNum; // [esp+8h] [ebp-Ch]
     gentity_s *pEnt; // [esp+Ch] [ebp-8h]
     int32_t iMODNum; // [esp+10h] [ebp-4h]
 
-    pszWeapon = Scr_GetString(2u);
+    pszWeapon = Scr_GetString(2);
     iWeaponNum = G_GetWeaponIndexForName(pszWeapon);
     iMODNum = G_MeansOfDeathFromScriptParam(3u);
     pOtherEnt = Scr_GetEntity(0);
@@ -2700,8 +2550,7 @@ void GScr_getStartTime()
 
 void GScr_PrecacheMenu()
 {
-    const char *v0; // eax
-    char *pszNewMenu; // [esp+0h] [ebp-410h]
+    const char *pszNewMenu; // [esp+0h] [ebp-410h]
     int32_t iConfigNum; // [esp+4h] [ebp-40Ch]
     int32_t iConfigNuma; // [esp+4h] [ebp-40Ch]
     char szConfigString[1028]; // [esp+8h] [ebp-408h] BYREF
@@ -2724,8 +2573,7 @@ void GScr_PrecacheMenu()
     }
     if (iConfigNuma == 32)
     {
-        v0 = va("Too many menus precached. Max allowed menus is %i", 32);
-        Scr_Error(v0);
+        Scr_Error(va("Too many menus precached. Max allowed menus is %i", 32));
     }
     SV_SetConfigstring(iConfigNuma + 1970, pszNewMenu);
 }
@@ -2749,8 +2597,7 @@ int32_t __cdecl GScr_GetScriptMenuIndex(const char *pszMenu)
 
 void GScr_PrecacheStatusIcon()
 {
-    const char *v0; // eax
-    char *pszNewIcon; // [esp+0h] [ebp-410h]
+    const char *pszNewIcon; // [esp+0h] [ebp-410h]
     int32_t iConfigNum; // [esp+4h] [ebp-40Ch]
     int32_t iConfigNuma; // [esp+4h] [ebp-40Ch]
     char szConfigString[1028]; // [esp+8h] [ebp-408h] BYREF
@@ -2773,35 +2620,33 @@ void GScr_PrecacheStatusIcon()
     }
     if (iConfigNuma == 8)
     {
-        v0 = va("Too many player status icons precached. Max allowed is %i", 8);
-        Scr_Error(v0);
+        Scr_Error(va("Too many player status icons precached. Max allowed is %i", 8));
     }
     SV_SetConfigstring(iConfigNuma + 2259, pszNewIcon);
 }
 
 int32_t __cdecl GScr_GetStatusIconIndex(const char *pszIcon)
 {
-    const char *v2; // eax
     int32_t iConfigNum; // [esp+0h] [ebp-40Ch]
     char szConfigString[1028]; // [esp+4h] [ebp-408h] BYREF
 
     if (!*pszIcon)
         return 0;
+
     for (iConfigNum = 0; iConfigNum < 8; ++iConfigNum)
     {
         SV_GetConfigstring(iConfigNum + 2259, szConfigString, 1024);
         if (!I_stricmp(szConfigString, pszIcon))
             return iConfigNum + 1;
     }
-    v2 = va("Status icon '%s' was not precached\n", pszIcon);
-    Scr_Error(v2);
+
+    Scr_Error(va("Status icon '%s' was not precached\n", pszIcon));
     return 0;
 }
 
 void GScr_PrecacheHeadIcon()
 {
-    const char *v0; // eax
-    char *pszNewIcon; // [esp+0h] [ebp-410h]
+    const char *pszNewIcon; // [esp+0h] [ebp-410h]
     int32_t iConfigNum; // [esp+4h] [ebp-40Ch]
     int32_t iConfigNuma; // [esp+4h] [ebp-40Ch]
     char szConfigString[1028]; // [esp+8h] [ebp-408h] BYREF
@@ -2824,8 +2669,7 @@ void GScr_PrecacheHeadIcon()
     }
     if (iConfigNuma == 15)
     {
-        v0 = va("Too many player head icons precached. Max allowed is %i", 15);
-        Scr_Error(v0);
+        Scr_Error(va("Too many player head icons precached. Max allowed is %i", 15));
     }
     SV_SetConfigstring(iConfigNuma + 2267, pszNewIcon);
 }
@@ -2838,20 +2682,21 @@ int32_t __cdecl GScr_GetHeadIconIndex(const char *pszIcon)
 
     if (!*pszIcon)
         return 0;
+
     for (iConfigNum = 0; iConfigNum < 15; ++iConfigNum)
     {
         SV_GetConfigstring(iConfigNum + 2267, szConfigString, 1024);
         if (!I_stricmp(szConfigString, pszIcon))
             return iConfigNum + 1;
     }
-    v2 = va("Head icon '%s' was not precached\n", pszIcon);
-    Scr_Error(v2);
+
+    Scr_Error(va("Head icon '%s' was not precached\n", pszIcon));
     return 0;
 }
 
 void GScr_WeaponClipSize()
 {
-    char *weaponName; // [esp+0h] [ebp-Ch]
+    const char *weaponName; // [esp+0h] [ebp-Ch]
     int32_t weaponIndex; // [esp+4h] [ebp-8h]
     WeaponDef *weapDef; // [esp+8h] [ebp-4h]
 
@@ -2864,7 +2709,7 @@ void GScr_WeaponClipSize()
 
 void GScr_WeaponIsSemiAuto()
 {
-    char *weaponName; // [esp+0h] [ebp-Ch]
+    const char *weaponName; // [esp+0h] [ebp-Ch]
     int32_t weaponIndex; // [esp+4h] [ebp-8h]
     WeaponDef *weapDef; // [esp+8h] [ebp-4h]
 
@@ -2877,7 +2722,7 @@ void GScr_WeaponIsSemiAuto()
 
 void GScr_WeaponIsBoltAction()
 {
-    char *weaponName; // [esp+0h] [ebp-Ch]
+    const char *weaponName; // [esp+0h] [ebp-Ch]
     int32_t weaponIndex; // [esp+4h] [ebp-8h]
     WeaponDef *weapDef; // [esp+8h] [ebp-4h]
 
@@ -2891,7 +2736,7 @@ void GScr_WeaponIsBoltAction()
 void GScr_WeaponType()
 {
     const char *WeaponTypeName; // eax
-    char *weaponName; // [esp+0h] [ebp-Ch]
+    const char *weaponName; // [esp+0h] [ebp-Ch]
     int32_t weaponIndex; // [esp+4h] [ebp-8h]
     WeaponDef *weapDef; // [esp+8h] [ebp-4h]
 
@@ -2906,7 +2751,7 @@ void GScr_WeaponType()
 void GScr_WeaponClass()
 {
     const char *WeaponClassName; // eax
-    char *weaponName; // [esp+0h] [ebp-Ch]
+    const char *weaponName; // [esp+0h] [ebp-Ch]
     int32_t weaponIndex; // [esp+4h] [ebp-8h]
     WeaponDef *weapDef; // [esp+8h] [ebp-4h]
 
@@ -2927,7 +2772,7 @@ void GScr_WeaponClass()
 void GScr_WeaponInventoryType()
 {
     const char *WeaponInventoryTypeName; // eax
-    char *weaponName; // [esp+0h] [ebp-Ch]
+    const char *weaponName; // [esp+0h] [ebp-Ch]
     int32_t weaponIndex; // [esp+4h] [ebp-8h]
     WeaponDef *weapDef; // [esp+8h] [ebp-4h]
 
@@ -2941,7 +2786,7 @@ void GScr_WeaponInventoryType()
 
 void GScr_WeaponStartAmmo()
 {
-    char *weaponName; // [esp+0h] [ebp-Ch]
+    const char *weaponName; // [esp+0h] [ebp-Ch]
     int32_t weaponIndex; // [esp+4h] [ebp-8h]
     WeaponDef *weapDef; // [esp+8h] [ebp-4h]
 
@@ -2954,7 +2799,7 @@ void GScr_WeaponStartAmmo()
 
 void GScr_WeaponMaxAmmo()
 {
-    char *weaponName; // [esp+0h] [ebp-Ch]
+    const char *weaponName; // [esp+0h] [ebp-Ch]
     int32_t weaponIndex; // [esp+4h] [ebp-8h]
     WeaponDef *weapDef; // [esp+8h] [ebp-4h]
 
@@ -2967,7 +2812,7 @@ void GScr_WeaponMaxAmmo()
 
 void GScr_WeaponAltWeaponName()
 {
-    char *weaponName; // [esp+0h] [ebp-14h]
+    const char *weaponName; // [esp+0h] [ebp-14h]
     int32_t altWeaponIndex; // [esp+4h] [ebp-10h]
     int32_t weaponIndex; // [esp+8h] [ebp-Ch]
     WeaponDef *altWeapDef; // [esp+Ch] [ebp-8h]
@@ -2993,7 +2838,7 @@ void GScr_WeaponFireTime()
 {
     float value; // [esp+4h] [ebp-10h]
     int32_t iWeaponIndex; // [esp+Ch] [ebp-8h]
-    char *pszWeaponName; // [esp+10h] [ebp-4h]
+    const char *pszWeaponName; // [esp+10h] [ebp-4h]
 
     pszWeaponName = Scr_GetString(0);
     iWeaponIndex = G_GetWeaponIndexForName(pszWeaponName);
@@ -3011,7 +2856,7 @@ void GScr_WeaponFireTime()
 void GScr_IsWeaponClipOnly()
 {
     uint32_t  IsClipOnly; // eax
-    char *weapName; // [esp+0h] [ebp-8h]
+    const char *weapName; // [esp+0h] [ebp-8h]
     int32_t weapIdx; // [esp+4h] [ebp-4h]
 
     weapName = Scr_GetString(0);
@@ -3029,7 +2874,7 @@ void GScr_IsWeaponClipOnly()
 
 void GScr_IsWeaponDetonationTimed()
 {
-    char *weapName; // [esp+0h] [ebp-Ch]
+    const char *weapName; // [esp+0h] [ebp-Ch]
     int32_t weapIdx; // [esp+4h] [ebp-8h]
     WeaponDef *weapDef; // [esp+8h] [ebp-4h]
 
@@ -3448,19 +3293,14 @@ void GScr_CastInt()
 {
     VariableUnion v0; // eax
     double Float; // st7
-    char *String; // eax
-    int32_t v3; // eax
     const char *TypeName; // eax
-    const char *v5; // eax
     int32_t Type; // [esp+0h] [ebp-4h]
 
     Type = Scr_GetType(0);
     switch (Type)
     {
     case 2:
-        String = Scr_GetString(0);
-        v3 = atoi(String);
-        Scr_AddInt(v3);
+        Scr_AddInt(atoi(Scr_GetString(0)));
         break;
     case 5:
         Float = Scr_GetFloat(0);
@@ -3472,8 +3312,7 @@ void GScr_CastInt()
         break;
     default:
         TypeName = Scr_GetTypeName(0);
-        v5 = va("cannot cast %s to int", TypeName);
-        Scr_ParamError(0, v5);
+        Scr_ParamError(0, va("cannot cast %s to int", TypeName));
         break;
     }
 }
@@ -3850,12 +3689,8 @@ void Scr_StrTok()
 
 void Scr_MusicPlay()
 {
-    char *String; // eax
-    const char *v1; // eax
 
-    String = Scr_GetString(0);
-    v1 = va("%c %s 1", 111, String);
-    SV_GameSendServerCommand(-1, SV_CMD_RELIABLE, v1);
+    SV_GameSendServerCommand(-1, SV_CMD_RELIABLE, va("%c %s 1", 111, Scr_GetString(0)));
 }
 
 void Scr_MusicStop()
@@ -3886,7 +3721,6 @@ void Scr_MusicStop()
 
 void Scr_SoundFade()
 {
-    const char *v0; // eax
     float fTargetVol; // [esp+Ch] [ebp-8h]
     int32_t iFadeTime; // [esp+10h] [ebp-4h]
 
@@ -3895,13 +3729,13 @@ void Scr_SoundFade()
         iFadeTime = 0;
     else
         iFadeTime = (int)(Scr_GetFloat(1u) * 1000.0);
-    v0 = va("%c %f %i\n", 113, fTargetVol, iFadeTime);
-    SV_GameSendServerCommand(-1, SV_CMD_RELIABLE, v0);
+
+    SV_GameSendServerCommand(-1, SV_CMD_RELIABLE, va("%c %f %i\n", 113, fTargetVol, iFadeTime));
 }
 
 int32_t Scr_PrecacheModel()
 {
-    char *modelName; // [esp+4h] [ebp-4h]
+    const char *modelName; // [esp+4h] [ebp-4h]
 
     if (!level.initializing)
         Scr_Error("precacheModel must be called before any wait statements in the gametype or level script\n");
@@ -3910,19 +3744,19 @@ int32_t Scr_PrecacheModel()
         Scr_ParamError(0, "Model name string is empty");
     if (useFastFile->current.enabled)
         Scr_ErrorOnDefaultAsset(ASSET_TYPE_XMODEL, modelName);
-    return G_ModelIndex(modelName);
+    return G_ModelIndex((char*)modelName);
 }
 
 void Scr_PrecacheShellShock()
 {
     shellshock_parms_t *ShellshockParms; // eax
-    char *shellshockName; // [esp+0h] [ebp-8h]
+    const char *shellshockName; // [esp+0h] [ebp-8h]
     uint32_t  index; // [esp+4h] [ebp-4h]
 
     if (!level.initializing)
         Scr_Error("precacheShellShock must be called before any wait statements in the gametype or level script\n");
     shellshockName = Scr_GetString(0);
-    index = G_ShellShockIndex(shellshockName);
+    index = G_ShellShockIndex((char*)shellshockName);
     if (!BG_LoadShellShockDvars(shellshockName))
         Com_Error(ERR_DROP, "Couldn't find shell shock %s -- see console", shellshockName);
     ShellshockParms = BG_GetShellshockParms(index);
@@ -3931,48 +3765,51 @@ void Scr_PrecacheShellShock()
 
 void Scr_PrecacheItem()
 {
-    const char *v0; // eax
-    char *pszItemName; // [esp+4h] [ebp-4h]
+    const char *pszItemName; // [esp+4h] [ebp-4h]
 
     if (!level.initializing)
         Scr_Error("precacheItem must be called before any wait statements in the gametype or level script\n");
+
     pszItemName = Scr_GetString(0);
+
     if (!G_FindItem(pszItemName, 0))
     {
-        v0 = va("unknown item '%s'", pszItemName);
-        Scr_ParamError(0, v0);
+        Scr_ParamError(0, va("unknown item '%s'", pszItemName));
     }
 }
 
 int32_t Scr_PrecacheShader()
 {
-    char *shaderName; // [esp+0h] [ebp-4h]
+    const char *shaderName; // [esp+0h] [ebp-4h]
 
     if (!level.initializing)
         Scr_Error("precacheShader must be called before any wait statements in the gametype or level script\n");
+
     shaderName = Scr_GetString(0);
+
     if (!*shaderName)
         Scr_ParamError(0, "Shader name string is empty");
+
     return G_MaterialIndex(shaderName);
 }
 
 char *Scr_PrecacheString()
 {
-    char *result; // eax
+    const char *result; // eax
 
     if (!level.initializing)
         Scr_Error("precacheString must be called before any wait statements in the gametype or level script\n");
     result = Scr_GetIString(0);
     if (*result)
-        return (char *)G_LocalizedStringIndex(result);
-    return result;
+        return (char *)G_LocalizedStringIndex((char*)result);
+    return (char*)result;
 }
 
 void Scr_AmbientPlay()
 {
     uint32_t  NumParam; // [esp+0h] [ebp-1Ch]
     int32_t iFadeTime; // [esp+14h] [ebp-8h]
-    char *pszAliasName; // [esp+18h] [ebp-4h]
+    const char *pszAliasName; // [esp+18h] [ebp-4h]
 
     iFadeTime = 0;
     NumParam = Scr_GetNumParam();
@@ -4065,7 +3902,6 @@ void GScr_RadiusDamage()
 
 void __cdecl GScr_RadiusDamageInternal(gentity_s *inflictor)
 {
-    char *String; // eax
     gentity_s *attacker; // [esp+20h] [ebp-24h]
     meansOfDeath_t mod; // [esp+24h] [ebp-20h]
     float max_damage; // [esp+28h] [ebp-1Ch]
@@ -4087,8 +3923,7 @@ void __cdecl GScr_RadiusDamageInternal(gentity_s *inflictor)
     weapon = -1;
     if (Scr_GetNumParam() > 6 && Scr_GetType(6u))
     {
-        String = Scr_GetString(6u);
-        weapon = G_GetWeaponIndexForName(String);
+        weapon = G_GetWeaponIndexForName(Scr_GetString(6));
     }
     level.bPlayerIgnoreRadiusDamage = level.bPlayerIgnoreRadiusDamageLatched;
     G_RadiusDamage(origin, inflictor, attacker, max_damage, min_damage, range, 1.0, 0, inflictor, mod, weapon);
@@ -4250,13 +4085,13 @@ void GScr_GetNorthYaw()
 
 void Scr_LoadFX()
 {
-    char *filename; // [esp+0h] [ebp-8h]
+    const char *filename; // [esp+0h] [ebp-8h]
     int32_t id; // [esp+4h] [ebp-4h]
 
     filename = Scr_GetString(0);
     if (!I_strncmp(filename, "fx/", 3))
         Scr_ParamError(0, "effect name should start after the 'fx' folder.");
-    id = G_EffectIndex(filename);
+    id = G_EffectIndex((char*)filename);
     if (!id && !level.initializing)
         Scr_Error("loadFx must be called before any wait statements in the level script, or on an already loaded effect\n");
     Scr_AddInt(id);
@@ -4277,8 +4112,7 @@ void Scr_PlayFX()
     fxId = Scr_GetInt(0);
     Scr_GetVector(1u, pos);
     ent = G_TempEntity(pos, 55);
-    if (ent->s.lerp.apos.trType)
-        MyAssertHandler(".\\game_mp\\g_scr_main_mp.cpp", 4357, 1, "%s", "ent->s.lerp.apos.trType == TR_STATIONARY");
+    iassert(ent->s.lerp.apos.trType == TR_STATIONARY);
     ent->s.eventParm = (uint8_t)fxId;
     if (numParams == 2)
     {
@@ -4378,15 +4212,6 @@ void __cdecl Scr_FxParamError(uint32_t  paramIndex, const char *errorString, int
 
 void Scr_PlayFXOnTag()
 {
-    const char *v0; // eax
-    char *v1; // eax
-    char* v2; // eax
-    uint32_t  v3; // eax
-    char *v4; // eax
-    const char *v5; // eax
-    char *v6; // eax
-    char *v7; // eax
-    char *v8; // [esp-4h] [ebp-14h]
     int32_t fxId; // [esp+0h] [ebp-10h]
     gentity_s *ent; // [esp+4h] [ebp-Ch]
     uint32_t  tag; // [esp+8h] [ebp-8h]
@@ -4397,29 +4222,20 @@ void Scr_PlayFXOnTag()
     fxId = Scr_GetInt(0);
     if (fxId <= 0 || fxId >= 100)
     {
-        v0 = va("effect id %i is invalid\n", fxId);
-        Scr_ParamError(0, v0);
+        Scr_ParamError(0, va("effect id %i is invalid\n", fxId));
     }
     ent = Scr_GetEntity(1u);
     if (!ent->model)
         Scr_ParamError(1u, "cannot play fx on entity with no model");
     tag = Scr_GetConstLowercaseString(2);
-    v1 = SL_ConvertToString(tag);
-    v2 = strchr(v1, '"');
-    if (v2)
+    if (strchr(SL_ConvertToString(tag), '"'))
         Scr_ParamError(2u, "cannot use \" characters in tag names\n");
     if (SV_DObjGetBoneIndex(ent, tag) < 0)
     {
         SV_DObjDumpInfo(ent);
-        v3 = G_ModelName(ent->model);
-        v8 = SL_ConvertToString(v3);
-        v4 = SL_ConvertToString(tag);
-        v5 = va("tag '%s' does not exist on entity with model '%s'", v4, v8);
-        Scr_ParamError(2u, v5);
+        Scr_ParamError(2u, va("tag '%s' does not exist on entity with model '%s'", SL_ConvertToString(tag), SL_ConvertToString(G_ModelName(ent->model))));
     }
-    v6 = SL_ConvertToString(tag);
-    v7 = va("%02d%s", fxId, v6);
-    csIndex = G_FindConfigstringIndex(v7, 1698, 256, 1, 0);
+    csIndex = G_FindConfigstringIndex(va("%02d%s", fxId, SL_ConvertToString(tag)), 1698, 256, 1, 0);
     if (csIndex <= 0 || csIndex >= 256)
         MyAssertHandler(".\\game_mp\\g_scr_main_mp.cpp", 4421, 0, "%s", "csIndex > 0 && csIndex < MAX_EFFECT_TAGS");
     G_AddEvent(ent, 0x38u, csIndex);
@@ -4715,11 +4531,9 @@ void __cdecl Scr_SetFog(const char *cmd, float start, float density, float r, fl
 
 void Scr_VisionSetNaked()
 {
-    char *v0; // eax
     uint32_t  NumParam; // [esp+0h] [ebp-1Ch]
-    float v2; // [esp+4h] [ebp-18h]
     int32_t duration; // [esp+14h] [ebp-8h]
-    char *name; // [esp+18h] [ebp-4h]
+    const char *name; // [esp+18h] [ebp-4h]
 
     duration = 1000;
     NumParam = Scr_GetNumParam();
@@ -4730,8 +4544,7 @@ void Scr_VisionSetNaked()
         duration = (int)(Scr_GetFloat(1) * 1000.0f);
     LABEL_4:
         name = Scr_GetString(0);
-        v0 = va("\"%s\" %i", name, duration);
-        SV_SetConfigstring(824, v0);
+        SV_SetConfigstring(824, va("\"%s\" %i", name, duration));
         return;
     }
     Scr_Error("USAGE: VisionSetNaked( <visionset name>, <transition time> )\n");
@@ -4739,11 +4552,9 @@ void Scr_VisionSetNaked()
 
 void Scr_VisionSetNight()
 {
-    char *v0; // eax
     uint32_t  NumParam; // [esp+0h] [ebp-1Ch]
-    float v2; // [esp+4h] [ebp-18h]
     int32_t duration; // [esp+14h] [ebp-8h]
-    char *name; // [esp+18h] [ebp-4h]
+    const char *name; // [esp+18h] [ebp-4h]
 
     duration = 1000;
     NumParam = Scr_GetNumParam();
@@ -4754,8 +4565,7 @@ void Scr_VisionSetNight()
         duration = (int)(Scr_GetFloat(1) * 1000.0f);
     LABEL_4:
         name = Scr_GetString(0);
-        v0 = va("\"%s\" %i", name, duration);
-        SV_SetConfigstring(825, v0);
+        SV_SetConfigstring(825, va("\"%s\" %i", name, duration));
         return;
     }
     Scr_Error("USAGE: VisionSetNight( <visionset name>, <transition time> )\n");
@@ -4763,9 +4573,9 @@ void Scr_VisionSetNight()
 
 void Scr_TableLookup()
 {
-    char *stringValue; // [esp+4h] [ebp-18h]
-    char *filename; // [esp+8h] [ebp-14h]
-    char *returnValue; // [esp+Ch] [ebp-10h]
+    const char *stringValue; // [esp+4h] [ebp-18h]
+    const char *filename; // [esp+8h] [ebp-14h]
+    const char *returnValue; // [esp+Ch] [ebp-10h]
     const StringTable *table; // [esp+10h] [ebp-Ch] BYREF
     int32_t returnValueColumn; // [esp+14h] [ebp-8h]
     int32_t comparisonColumn; // [esp+18h] [ebp-4h]
@@ -4777,7 +4587,7 @@ void Scr_TableLookup()
         filename = Scr_GetString(0);
         StringTable_GetAsset(filename, (XAssetHeader *)&table);
         comparisonColumn = Scr_GetInt(1);
-        stringValue = Scr_GetString(2u);
+        stringValue = Scr_GetString(2);
         returnValueColumn = Scr_GetInt(3);
         returnValue = (char *)StringTable_Lookup(table, comparisonColumn, stringValue, returnValueColumn);
         Scr_AddString(returnValue);
@@ -4791,9 +4601,9 @@ void Scr_TableLookup()
 
 void Scr_TableLookupIString()
 {
-    char *stringValue; // [esp+4h] [ebp-18h]
-    char *filename; // [esp+8h] [ebp-14h]
-    char *returnValue; // [esp+Ch] [ebp-10h]
+    const char *stringValue; // [esp+4h] [ebp-18h]
+    const char *filename; // [esp+8h] [ebp-14h]
+    const char *returnValue; // [esp+Ch] [ebp-10h]
     const StringTable *table; // [esp+10h] [ebp-Ch] BYREF
     int32_t returnValueColumn; // [esp+14h] [ebp-8h]
     int32_t comparisonColumn; // [esp+18h] [ebp-4h]
@@ -4855,9 +4665,6 @@ void GScr_SetWinningPlayer()
 
 void GScr_SetWinningTeam()
 {
-    char *v0; // eax
-    const char *v1; // eax
-    const char *v2; // eax
     char *pszWinner; // [esp+0h] [ebp-414h]
     uint16_t team; // [esp+4h] [ebp-410h]
     int32_t iWinner; // [esp+8h] [ebp-40Ch]
@@ -4876,17 +4683,14 @@ void GScr_SetWinningTeam()
     {
         if (team != scr_const.none)
         {
-            v0 = SL_ConvertToString(team);
-            v1 = va("Illegal team string '%s'. Must be allies, axis, or none.", v0);
-            Scr_ParamError(0, v1);
+            Scr_ParamError(0, va("Illegal team string '%s'. Must be allies, axis, or none.", SL_ConvertToString(team)));
             return;
         }
         iWinner = 0;
     }
     SV_GetConfigstring(0x13u, buffer, 1024);
     pszWinner = va("%i", iWinner);
-    v2 = Info_ValueForKey(buffer, "winner");
-    if (I_stricmp(v2, pszWinner))
+    if (I_stricmp(Info_ValueForKey(buffer, "winner"), pszWinner))
     {
         Info_SetValueForKey(buffer, "winner", pszWinner);
         SV_SetConfigstring(19, buffer);
@@ -4921,16 +4725,12 @@ void GScr_ClientAnnouncement()
 
 void GScr_GetTeamScore()
 {
-    char *v0; // eax
-    const char *v1; // eax
     uint16_t team; // [esp+4h] [ebp-4h]
 
     team = Scr_GetConstString(0);
     if (team != scr_const.allies && team != scr_const.axis)
     {
-        v0 = SL_ConvertToString(team);
-        v1 = va("Illegal team string '%s'. Must be allies, or axis.", v0);
-        Scr_Error(v1);
+        Scr_Error(va("Illegal team string '%s'. Must be allies, or axis.", SL_ConvertToString(team)));
     }
     if (team == scr_const.allies)
         Scr_AddInt(level.teamScores[2]);
@@ -4940,8 +4740,6 @@ void GScr_GetTeamScore()
 
 void GScr_SetTeamScore()
 {
-    char *v0; // eax
-    const char *v1; // eax
     const char *v2; // eax
     unsigned short team; // [esp+0h] [ebp-8h]
     int32_t teamScore; // [esp+4h] [ebp-4h]
@@ -4949,9 +4747,7 @@ void GScr_SetTeamScore()
     team = Scr_GetConstString(0);
     if (team != scr_const.allies && team != scr_const.axis)
     {
-        v0 = SL_ConvertToString(team);
-        v1 = va("Illegal team string '%s'. Must be allies, or axis.", v0);
-        Scr_Error(v1);
+        Scr_Error(va("Illegal team string '%s'. Must be allies, or axis.", SL_ConvertToString(team)));
     }
     teamScore = Scr_GetInt(1);
     if (team == scr_const.allies)
@@ -5017,8 +4813,6 @@ void GScr_UpdateClientNames()
 
 void GScr_GetTeamPlayersAlive()
 {
-    char *v0; // eax
-    const char *v1; // eax
     int32_t iLivePlayers; // [esp+0h] [ebp-14h]
     unsigned short team; // [esp+4h] [ebp-10h]
     int32_t iTeamNum; // [esp+8h] [ebp-Ch]
@@ -5028,9 +4822,7 @@ void GScr_GetTeamPlayersAlive()
     team = Scr_GetConstString(0);
     if (team != scr_const.allies && team != scr_const.axis)
     {
-        v0 = SL_ConvertToString(team);
-        v1 = va("Illegal team string '%s'. Must be allies, or axis.", v0);
-        Scr_Error(v1);
+        Scr_Error(va("Illegal team string '%s'. Must be allies, or axis.", SL_ConvertToString(team)));
     }
     if (team == scr_const.allies)
         iTeamNum = 2;
@@ -5048,33 +4840,25 @@ void GScr_GetTeamPlayersAlive()
 
 void __cdecl GScr_GetNumParts()
 {
-    char *String; // eax
-    int32_t v1; // eax
     const XModel *model; // [esp+0h] [ebp-4h]
 
-    String = Scr_GetString(0);
-    model = SV_XModelGet(String);
-    v1 = XModelNumBones(model);
-    Scr_AddInt(v1);
+    model = SV_XModelGet((char*)Scr_GetString(0));
+    Scr_AddInt(XModelNumBones(model));
 }
 
 void __cdecl GScr_GetPartName()
 {
-    char *String; // eax
-    const char *v1; // eax
     XModel *model; // [esp+0h] [ebp-10h]
     uint16_t name; // [esp+4h] [ebp-Ch]
     uint32_t  index; // [esp+8h] [ebp-8h]
     uint32_t  numbones; // [esp+Ch] [ebp-4h]
 
-    String = Scr_GetString(0);
-    model = SV_XModelGet(String);
+    model = SV_XModelGet((char*)Scr_GetString(0));
     index = Scr_GetInt(1);
     numbones = XModelNumBones(model);
     if (index >= numbones)
     {
-        v1 = va("index out of range (0 - %d)", numbones - 1);
-        Scr_ParamError(1u, v1);
+        Scr_ParamError(1, va("index out of range (0 - %d)", numbones - 1));
     }
     name = model->boneNames[index];
     if (!name)
@@ -5112,11 +4896,9 @@ gentity_s *GScr_Earthquake()
 
 void __cdecl GScr_ShellShock(scr_entref_t entref)
 {
-    const char *v1; // eax
-    const char *v2; // eax
     float v3; // [esp+8h] [ebp-424h]
     int32_t duration; // [esp+18h] [ebp-414h]
-    char *shock; // [esp+1Ch] [ebp-410h]
+    const char *shock; // [esp+1Ch] [ebp-410h]
     gentity_s *ent; // [esp+20h] [ebp-40Ch]
     char s[1024]; // [esp+24h] [ebp-408h] BYREF
     int32_t id; // [esp+428h] [ebp-4h]
@@ -5130,8 +4912,7 @@ void __cdecl GScr_ShellShock(scr_entref_t entref)
     {
         if (id >= 16)
         {
-            v2 = va("shellshock '%s' was not precached\n", shock);
-            Scr_Error(v2);
+            Scr_Error(va("shellshock '%s' was not precached\n", shock));
             return;
         }
         SV_GetConfigstring(id + 1954, s, 1024);
@@ -5141,8 +4922,7 @@ void __cdecl GScr_ShellShock(scr_entref_t entref)
     duration = (int)(Scr_GetFloat(1) * 1000.0f);
     if ((uint32_t )duration > 0xEA60)
     {
-        v1 = va("duration %g should be >= 0 and <= 60", (double)duration * EQUAL_EPSILON);
-        Scr_ParamError(1u, v1);
+        Scr_ParamError(1u, va("duration %g should be >= 0 and <= 60", (double)duration * EQUAL_EPSILON));
     }
     ent->client->ps.shellshockIndex = id;
     ent->client->ps.shellshockTime = level.time;
@@ -5187,24 +4967,16 @@ int32_t __cdecl GScr_UpdateTagInternal(
     cached_tag_mat_t *cachedTag,
     int32_t showScriptError)
 {
-    char *v4; // eax
-    const char *v5; // eax
-    uint32_t  v7; // eax
-    char *v8; // eax
-    const char *v9; // eax
-    char *v10; // [esp-4h] [ebp-4h]
+    iassert(ent);
 
-    if (!ent)
-        MyAssertHandler(".\\game_mp\\g_scr_main_mp.cpp", 5301, 0, "%s", "ent");
     if (ent->s.number == cachedTag->entnum && level.time == cachedTag->time && tagName == cachedTag->name)
         return 1;
+
     if (!SV_DObjExists(ent))
     {
         if (showScriptError)
         {
-            v4 = SL_ConvertToString(ent->classname);
-            v5 = va("entity has no model defined (classname '%s')", v4);
-            Scr_ObjectError(v5);
+            Scr_ObjectError(va("entity has no model defined (classname '%s')", SL_ConvertToString(ent->classname)));
         }
         return 0;
     }
@@ -5218,11 +4990,7 @@ int32_t __cdecl GScr_UpdateTagInternal(
     if (showScriptError)
     {
         SV_DObjDumpInfo(ent);
-        v7 = G_ModelName(ent->model);
-        v10 = SL_ConvertToString(v7);
-        v8 = SL_ConvertToString(tagName);
-        v9 = va("tag '%s' does not exist in model '%s' (or any attached submodels)", v8, v10);
-        Scr_ParamError(0, v9);
+        Scr_ParamError(0, va("tag '%s' does not exist in model '%s' (or any attached submodels)", SL_ConvertToString(tagName), SL_ConvertToString(G_ModelName(ent->model))));
     }
     return 0;
 }
@@ -5486,13 +5254,12 @@ void GScr_MapRestart()
 
 void GScr_LoadMap()
 {
-    const char *v0; // eax
-    char *mapname; // [esp+4h] [ebp-4h]
+    const char *mapname; // [esp+4h] [ebp-4h]
 
     if (Scr_GetNumParam())
     {
         mapname = Scr_GetString(0);
-        if (SV_MapExists(mapname))
+        if (SV_MapExists((char*)mapname))
         {
             if (level.finished)
             {
@@ -5505,8 +5272,7 @@ void GScr_LoadMap()
             level.savepersist = 0;
             if (Scr_GetNumParam() > 1)
                 level.savepersist = Scr_GetInt(1);
-            v0 = va("map %s\n", mapname);
-            Cbuf_AddText(0, v0);
+            Cbuf_AddText(0, va("map %s\n", mapname));
         }
     }
 }
@@ -5589,25 +5355,20 @@ void GScr_MakeDvarServerInfo()
 
 void GScr_AllClientsPrint()
 {
-    const char *v0; // eax
-    char *string; // [esp+0h] [ebp-4h]
-
     if (Scr_GetNumParam())
     {
-        string = Scr_GetString(0);
-        v0 = va("%c \"%s\"", 101, string);
-        SV_GameSendServerCommand(-1, SV_CMD_CAN_IGNORE, v0);
+        SV_GameSendServerCommand(-1, SV_CMD_CAN_IGNORE, va("%c \"%s\"", 101, Scr_GetString(0)));
     }
 }
 
 void GScr_MapExists()
 {
-    char *mapname; // [esp+0h] [ebp-4h]
+    const char *mapname; // [esp+0h] [ebp-4h]
 
     if (Scr_GetNumParam())
     {
         mapname = Scr_GetString(0);
-        if (SV_MapExists(mapname))
+        if (SV_MapExists((char*)mapname))
             Scr_AddInt(1);
         else
             Scr_AddInt(0);
@@ -5616,7 +5377,7 @@ void GScr_MapExists()
 
 void GScr_IsValidGameType()
 {
-    char *gametype; // [esp+0h] [ebp-4h]
+    const char *gametype; // [esp+0h] [ebp-4h]
 
     if (Scr_GetNumParam())
     {
@@ -5630,125 +5391,89 @@ void GScr_IsValidGameType()
 
 void GScr_SetVoteString()
 {
-    int32_t Int; // eax
-    char *v1; // eax
-    char *v2; // eax
-    char *v3; // eax
-    char *string; // [esp+0h] [ebp-4h]
-
     if (Scr_GetNumParam())
     {
-        string = Scr_GetString(0);
-        SV_SetConfigstring(14, string);
-        Int = Dvar_GetInt("sv_serverId");
-        v1 = va("%i %i", level.voteTime, Int);
-        SV_SetConfigstring(13, v1);
-        v2 = va("%i", level.voteYes);
-        SV_SetConfigstring(15, v2);
-        v3 = va("%i", level.voteNo);
-        SV_SetConfigstring(16, v3);
+        SV_SetConfigstring(14, Scr_GetString(0));
+        SV_SetConfigstring(13, va("%i %i", level.voteTime, Dvar_GetInt("sv_serverId")));
+        SV_SetConfigstring(15, va("%i", level.voteYes));
+        SV_SetConfigstring(16, va("%i", level.voteNo));
     }
 }
 
 void GScr_SetVoteTime()
 {
-    int32_t Int; // eax
-    char *v1; // eax
-    char *v2; // eax
-    char *v3; // eax
     int32_t time; // [esp+0h] [ebp-4h]
 
     if (Scr_GetNumParam())
     {
         time = Scr_GetInt(0);
-        Int = Dvar_GetInt("sv_serverId");
-        v1 = va("%i %i", time, Int);
-        SV_SetConfigstring(13, v1);
-        v2 = va("%i", level.voteYes);
-        SV_SetConfigstring(15, v2);
-        v3 = va("%i", level.voteNo);
-        SV_SetConfigstring(16, v3);
+        SV_SetConfigstring(13, va("%i %i", time, Dvar_GetInt("sv_serverId")));
+        SV_SetConfigstring(15, va("%i", level.voteYes));
+        SV_SetConfigstring(16, va("%i", level.voteNo));
     }
 }
 
 void GScr_SetVoteYesCount()
 {
-    char *v0; // eax
-    char *v1; // eax
     int32_t yes; // [esp+0h] [ebp-4h]
 
     if (Scr_GetNumParam())
     {
         yes = Scr_GetInt(0);
-        v0 = va("%i", yes);
-        SV_SetConfigstring(15, v0);
-        v1 = va("%i", level.voteNo);
-        SV_SetConfigstring(16, v1);
+        SV_SetConfigstring(15, va("%i", yes));
+        SV_SetConfigstring(16, va("%i", level.voteNo));
     }
 }
 
 void GScr_SetVoteNoCount()
 {
-    char *v0; // eax
     int32_t no; // [esp+0h] [ebp-4h]
 
     if (Scr_GetNumParam())
     {
         no = Scr_GetInt(0);
-        v0 = va("%i", no);
-        SV_SetConfigstring(16, v0);
+        SV_SetConfigstring(16, va("%i", no));
     }
 }
 
 void GScr_KickPlayer()
 {
-    const char *v0; // eax
     int32_t playernum; // [esp+0h] [ebp-4h]
 
     if (Scr_GetNumParam())
     {
         playernum = Scr_GetInt(0);
-        v0 = va("tempBanClient %i\n", playernum);
-        Cbuf_AddText(0, v0);
+        Cbuf_AddText(0, va("tempBanClient %i\n", playernum));
     }
 }
 
 void GScr_BanPlayer()
 {
-    const char *v0; // eax
     int32_t playernum; // [esp+0h] [ebp-4h]
 
     if (Scr_GetNumParam())
     {
         playernum = Scr_GetInt(0);
-        v0 = va("banClient %i\n", playernum);
-        Cbuf_AddText(0, v0);
+        Cbuf_AddText(0, va("banClient %i\n", playernum));
     }
 }
 
 void GScr_ClientPrint()
 {
-    const char *v0; // eax
-    char *string; // [esp+0h] [ebp-8h]
     gentity_s *ent; // [esp+4h] [ebp-4h]
 
     if (Scr_GetNumParam())
     {
         ent = Scr_GetEntity(0);
-        string = Scr_GetString(1u);
-        v0 = va("%c \"%s\"", 101, string);
-        SV_GameSendServerCommand(ent - g_entities, SV_CMD_CAN_IGNORE, v0);
+        SV_GameSendServerCommand(ent - g_entities, SV_CMD_CAN_IGNORE, va("%c \"%s\"", 101, Scr_GetString(1)));
     }
 }
 
 void GScr_OpenFile()
 {
-    char *v0; // eax
-    char *v1; // eax
-    char *v2; // eax
     char *fullpathname; // [esp+3Ch] [ebp-20h]
     int32_t filesize; // [esp+40h] [ebp-1Ch]
-    char *filename; // [esp+44h] [ebp-18h]
+    const char *filename; // [esp+44h] [ebp-18h]
     int32_t tempFile; // [esp+48h] [ebp-14h] BYREF
     int32_t *f; // [esp+4Ch] [ebp-10h]
     const char *mode; // [esp+50h] [ebp-Ch]
@@ -5758,7 +5483,7 @@ void GScr_OpenFile()
     if (Scr_GetNumParam() > 1)
     {
         filename = Scr_GetString(0);
-        mode = Scr_GetString(1u);
+        mode = Scr_GetString(1);
         for (filenum = 0; filenum < 1; ++filenum)
         {
             if (!level.openScriptIOFileHandles[filenum])
@@ -5780,8 +5505,7 @@ void GScr_OpenFile()
             filesize = FS_FOpenFileByMode(fullpathname, &tempFile, FS_READ);
             if (filesize >= 0)
             {
-                v0 = Z_VirtualAlloc(filesize + 1, "GScr_OpenFile", 10);
-                level.openScriptIOFileBuffers[filenum] = v0;
+                level.openScriptIOFileBuffers[filenum] = Z_VirtualAlloc(filesize + 1, "GScr_OpenFile", 10);
                 FS_Read((uint8_t *)level.openScriptIOFileBuffers[filenum], filesize, tempFile);
                 FS_FCloseFile(tempFile);
                 level.openScriptIOFileBuffers[filenum][filesize] = 0;
@@ -5798,8 +5522,7 @@ void GScr_OpenFile()
         }
         if (!strcmp(mode, "write"))
         {
-            v1 = va("%s/%s", "scriptdata", filename);
-            *f = FS_FOpenTextFileWrite(v1);
+            *f = FS_FOpenTextFileWrite(va("%s/%s", "scriptdata", filename));
             if (!*f)
                 goto LABEL_15;
         }
@@ -5811,8 +5534,7 @@ void GScr_OpenFile()
                 Scr_AddInt(-1);
                 return;
             }
-            v2 = va("%s/%s", "scriptdata", filename);
-            if ((FS_FOpenFileByMode(v2, f, FS_APPEND) & 0x80000000) != 0)
+            if ((FS_FOpenFileByMode(va("%s/%s", "scriptdata", filename), f, FS_APPEND) & 0x80000000) != 0)
             {
             LABEL_15:
                 Scr_AddInt(-1);
@@ -5875,7 +5597,7 @@ void GScr_FPrintln()
 void __cdecl Scr_FPrint_internal(bool commaBetweenFields)
 {
     uint32_t  NumParam; // eax
-    char *s; // [esp+10h] [ebp-Ch]
+    const char *s; // [esp+10h] [ebp-Ch]
     uint32_t  arg; // [esp+14h] [ebp-8h]
     int32_t filenum; // [esp+18h] [ebp-4h]
 
@@ -6107,23 +5829,13 @@ void __cdecl GScr_SetStat(scr_entref_t entref)
 
 void __cdecl GScr_SetTeamForTrigger(scr_entref_t entref)
 {
-    char *v1; // eax
-    const char *v2; // eax
-    char *v3; // eax
-    const char *v4; // eax
-    char *v5; // [esp-8h] [ebp-10h]
-    char *v6; // [esp-4h] [ebp-Ch]
-    char *v7; // [esp-4h] [ebp-Ch]
     uint16_t team; // [esp+0h] [ebp-8h]
     gentity_s *ent; // [esp+4h] [ebp-4h]
 
     ent = GetEntity(entref);
     if (ent->classname != scr_const.trigger_use && ent->classname != scr_const.trigger_use_touch)
     {
-        v6 = SL_ConvertToString(scr_const.trigger_use_touch);
-        v1 = SL_ConvertToString(scr_const.trigger_use);
-        v2 = va("setteamfortrigger: trigger entity must be of type %s or %s", v1, v6);
-        Scr_Error(v2);
+        Scr_Error(va("setteamfortrigger: trigger entity must be of type %s or %s", SL_ConvertToString(scr_const.trigger_use), SL_ConvertToString(scr_const.trigger_use_touch)));
     }
     team = Scr_GetConstString(0);
     if (team == scr_const.allies)
@@ -6140,19 +5852,12 @@ void __cdecl GScr_SetTeamForTrigger(scr_entref_t entref)
     }
     else
     {
-        v7 = SL_ConvertToString(scr_const.none);
-        v5 = SL_ConvertToString(scr_const.axis);
-        v3 = SL_ConvertToString(scr_const.allies);
-        v4 = va("setteamfortrigger: invalid team used must be %s, %s or %s", v3, v5, v7);
-        Scr_Error(v4);
+        Scr_Error(va("setteamfortrigger: invalid team used must be %s, %s or %s", SL_ConvertToString(scr_const.allies), SL_ConvertToString(scr_const.axis), SL_ConvertToString(scr_const.none)));
     }
 }
 
 void __cdecl GScr_ClientClaimTrigger(scr_entref_t entref)
 {
-    char *v1; // eax
-    const char *v2; // eax
-    char *v3; // [esp-4h] [ebp-Ch]
     gentity_s *clientEnt; // [esp+0h] [ebp-8h]
     gentity_s *triggerEnt; // [esp+4h] [ebp-4h]
 
@@ -6162,10 +5867,7 @@ void __cdecl GScr_ClientClaimTrigger(scr_entref_t entref)
     triggerEnt = Scr_GetEntity(0);
     if (triggerEnt->classname != scr_const.trigger_use && triggerEnt->classname != scr_const.trigger_use_touch)
     {
-        v3 = SL_ConvertToString(scr_const.trigger_use_touch);
-        v1 = SL_ConvertToString(scr_const.trigger_use);
-        v2 = va("clientclaimtrigger: trigger entity must be of type %s or %s", v1, v3);
-        Scr_Error(v2);
+        Scr_Error(va("clientclaimtrigger: trigger entity must be of type %s or %s", SL_ConvertToString(scr_const.trigger_use), SL_ConvertToString(scr_const.trigger_use_touch)));
     }
     if (triggerEnt->item[1].ammoCount == 1023 || triggerEnt->item[1].ammoCount == clientEnt->client->ps.clientNum)
         triggerEnt->item[1].ammoCount = clientEnt->client->ps.clientNum;
@@ -6173,9 +5875,6 @@ void __cdecl GScr_ClientClaimTrigger(scr_entref_t entref)
 
 void __cdecl GScr_ClientReleaseTrigger(scr_entref_t entref)
 {
-    char *v1; // eax
-    const char *v2; // eax
-    char *v3; // [esp-4h] [ebp-Ch]
     gentity_s *clientEnt; // [esp+0h] [ebp-8h]
     gentity_s *triggerEnt; // [esp+4h] [ebp-4h]
 
@@ -6185,10 +5884,7 @@ void __cdecl GScr_ClientReleaseTrigger(scr_entref_t entref)
     triggerEnt = Scr_GetEntity(0);
     if (triggerEnt->classname != scr_const.trigger_use && triggerEnt->classname != scr_const.trigger_use_touch)
     {
-        v3 = SL_ConvertToString(scr_const.trigger_use_touch);
-        v1 = SL_ConvertToString(scr_const.trigger_use);
-        v2 = va("clientreleasetrigger: trigger entity must be of type %s or %s", v1, v3);
-        Scr_Error(v2);
+        Scr_Error(va("clientreleasetrigger: trigger entity must be of type %s or %s", SL_ConvertToString(scr_const.trigger_use), SL_ConvertToString(scr_const.trigger_use_touch)));
     }
     if (triggerEnt->item[1].ammoCount == clientEnt->client->ps.clientNum)
         triggerEnt->item[1].ammoCount = 1023;
@@ -6196,18 +5892,12 @@ void __cdecl GScr_ClientReleaseTrigger(scr_entref_t entref)
 
 void __cdecl GScr_ReleaseClaimedTrigger(scr_entref_t entref)
 {
-    char *v1; // eax
-    const char *v2; // eax
-    char *v3; // [esp-4h] [ebp-8h]
     gentity_s *triggerEnt; // [esp+0h] [ebp-4h]
 
     triggerEnt = GetEntity(entref);
     if (triggerEnt->classname != scr_const.trigger_use && triggerEnt->classname != scr_const.trigger_use_touch)
     {
-        v3 = SL_ConvertToString(scr_const.trigger_use_touch);
-        v1 = SL_ConvertToString(scr_const.trigger_use);
-        v2 = va("releaseclaimedtrigger: trigger entity must be of type %s or %s", v1, v3);
-        Scr_Error(v2);
+        Scr_Error(va("releaseclaimedtrigger: trigger entity must be of type %s or %s", SL_ConvertToString(scr_const.trigger_use), SL_ConvertToString(scr_const.trigger_use_touch)));
     }
     triggerEnt->item[1].ammoCount = 1023;
 }
@@ -6234,14 +5924,13 @@ void GScr_SetGameEndTime()
 
 void GScr_SetMiniMap()
 {
-    char *v0; // eax
     float v1; // [esp+20h] [ebp-58h]
     float v2; // [esp+2Ch] [ebp-4Ch]
     float diff; // [esp+30h] [ebp-48h]
     float diff_4; // [esp+34h] [ebp-44h]
     float upperLeft; // [esp+38h] [ebp-40h]
     float upperLeft_4; // [esp+3Ch] [ebp-3Ch]
-    char *material; // [esp+40h] [ebp-38h]
+    const char *material; // [esp+40h] [ebp-38h]
     char northYawString[32]; // [esp+44h] [ebp-34h] BYREF
     float north[2]; // [esp+68h] [ebp-10h]
     float lowerRight[2]; // [esp+70h] [ebp-8h]
@@ -6267,14 +5956,11 @@ void GScr_SetMiniMap()
             "lower-right X and Y coordinates must be both south and east of upper-left X and Y coordinates in terms of the northyaw");
     level.compassMapUpperLeft[0] = upperLeft;
     level.compassMapUpperLeft[1] = upperLeft_4;
-    v0 = va("\"%s\" %f %f %f %f", material, upperLeft, upperLeft_4, lowerRight[0], lowerRight[1]);
-    SV_SetConfigstring(823, v0);
+    SV_SetConfigstring(823, va("\"%s\" %f %f %f %f", material, upperLeft, upperLeft_4, lowerRight[0], lowerRight[1]));
 }
 
 bool GScr_SetTeamRadar()
 {
-    char *v0; // eax
-    const char *v1; // eax
     bool result; // al
     bool radarAvailable; // [esp+3h] [ebp-5h]
     uint16_t team; // [esp+4h] [ebp-4h]
@@ -6282,9 +5968,7 @@ bool GScr_SetTeamRadar()
     team = Scr_GetConstString(0);
     if (team != scr_const.allies && team != scr_const.axis && team != scr_const.none)
     {
-        v0 = SL_ConvertToString(team);
-        v1 = va("Illegal team string '%s'. Must be allies, axis, or none.", v0);
-        Scr_ParamError(0, v1);
+        Scr_ParamError(0, va("Illegal team string '%s'. Must be allies, axis, or none.", SL_ConvertToString(team)));
     }
     radarAvailable = Scr_GetInt(1) != 0;
     if (team == scr_const.allies)
@@ -6299,8 +5983,7 @@ bool GScr_SetTeamRadar()
     }
     else
     {
-        if (team != scr_const.none)
-            MyAssertHandler(".\\game_mp\\g_scr_main_mp.cpp", 7039, 0, "%s", "team == scr_const.none");
+        iassert(team == scr_const.none);
         result = radarAvailable;
         level.teamHasRadar[0] = radarAvailable;
     }
@@ -6309,8 +5992,6 @@ bool GScr_SetTeamRadar()
 
 void GScr_GetTeamRadar()
 {
-    char *v0; // eax
-    const char *v1; // eax
     bool radarAvailable; // [esp+3h] [ebp-5h]
     uint16_t team; // [esp+4h] [ebp-4h]
 
@@ -6327,9 +6008,7 @@ void GScr_GetTeamRadar()
     {
         if (team != scr_const.none)
         {
-            v0 = SL_ConvertToString(team);
-            v1 = va("Illegal team string '%s'. Must be allies, axis, or none.", v0);
-            Scr_ParamError(0, v1);
+            Scr_ParamError(0, va("Illegal team string '%s'. Must be allies, axis, or none.", SL_ConvertToString(team)));
             return;
         }
         radarAvailable = level.teamHasRadar[0];

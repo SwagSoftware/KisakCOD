@@ -1901,15 +1901,17 @@ void __cdecl CMD_VEH_SetHoverParams(scr_entref_t entref)
 
 void __cdecl CMD_VEH_SetVehicleTeam(scr_entref_t entref)
 {
-    char *team; // [esp+4h] [ebp-8h]
+    const char *team; // [esp+4h] [ebp-8h]
     gentity_s *ent; // [esp+8h] [ebp-4h]
+    scr_vehicle_s *veh;
 
     ent = GScr_GetVehicle(entref);
-    if (!ent)
-        MyAssertHandler(".\\game\\g_scr_vehicle.cpp", 5722, 0, "%s", "ent");
-    if (!ent->scr_vehicle)
-        MyAssertHandler(".\\game\\g_scr_vehicle.cpp", 5725, 0, "%s", "veh");
+    iassert(ent);
+    veh = ent->scr_vehicle;
+    iassert(veh);
+
     team = Scr_GetString(0);
+
     if (I_stricmp(team, "axis"))
     {
         if (I_stricmp(team, "allies"))
@@ -1917,16 +1919,16 @@ void __cdecl CMD_VEH_SetVehicleTeam(scr_entref_t entref)
             if (I_stricmp(team, "none"))
                 Scr_Error("setVehicleTeam: invalid team used must be 'axis', 'allies', or 'none'\n");
             else
-                ent->scr_vehicle->team = 0;
+                veh->team = 0;
         }
         else
         {
-            ent->scr_vehicle->team = 2;
+            veh->team = 2;
         }
     }
     else
     {
-        ent->scr_vehicle->team = 1;
+        veh->team = 1;
     }
 }
 
@@ -2115,23 +2117,16 @@ void __cdecl CMD_VEH_ClearLookAtEnt(scr_entref_t entref)
 
 void __cdecl CMD_VEH_SetWeapon(scr_entref_t entref)
 {
-    char *String; // eax
     gentity_s *ent; // [esp+0h] [ebp-4h]
 
     ent = GScr_GetVehicle(entref);
-    String = Scr_GetString(0);
-    ent->s.weapon = (uint8_t)BG_FindWeaponIndexForName(String);
+    ent->s.weapon = (uint8_t)BG_FindWeaponIndexForName(Scr_GetString(0));
     ent->s.weaponModel = 0;
 }
 
 void __cdecl CMD_VEH_FireWeapon(scr_entref_t entref)
 {
-    const char *v1; // eax
-    char *v2; // eax
-    const char *v3; // eax
     const char *v4; // eax
-    char *v5; // eax
-    const char *v6; // eax
     float intensity; // [esp+8h] [ebp-168h]
     gentity_s *Entity; // [esp+14h] [ebp-15Ch]
     float v9; // [esp+18h] [ebp-158h]
@@ -2172,14 +2167,11 @@ void __cdecl CMD_VEH_FireWeapon(scr_entref_t entref)
     info = &s_vehicleInfos[veh->infoIdx];
     if ((float)ent->health <= 0.0f)
     {
-        v1 = va("Vehicle must have health to control the turret");
-        Scr_Error(v1);
+        Scr_Error(va("Vehicle must have health to control the turret"));
     }
     if (!ent->s.weapon)
     {
-        v2 = SL_ConvertToString(ent->targetname);
-        v3 = va("Invalid weapon specified for [%s]\n", v2);
-        Scr_Error(v3);
+        Scr_Error(va("Invalid weapon specified for [%s]\n", SL_ConvertToString(ent->targetname)));
     }
     wp.weapDef = BG_GetWeaponDef(ent->s.weapon);
     if (wp.weapDef->weapType && wp.weapDef->weapType != WEAPTYPE_PROJECTILE)
@@ -2191,9 +2183,7 @@ void __cdecl CMD_VEH_FireWeapon(scr_entref_t entref)
     {
         if (veh->boneIndex.barrel < 0)
         {
-            v5 = SL_ConvertToString(ent->targetname);
-            v6 = va("No tag_barrel for [%s]\n", v5);
-            Scr_Error(v6);
+            Scr_Error(va("No tag_barrel for [%s]\n", SL_ConvertToString(ent->targetname)));
         }
         G_DObjGetWorldBoneIndexMatrix(ent, veh->boneIndex.barrel, barrelMtx);
         joltDir[0] = -barrelMtx[0][0];
@@ -2331,7 +2321,7 @@ void __cdecl CMD_VEH_FireWeapon(scr_entref_t entref)
 
 int32_t __cdecl VEH_GetTagBoneIndex(gentity_s *ent, int32_t barrel)
 {
-    char *boneName; // [esp+0h] [ebp-Ch]
+    const char *boneName; // [esp+0h] [ebp-Ch]
     int32_t boneIndex; // [esp+4h] [ebp-8h]
     scr_vehicle_s *veh; // [esp+8h] [ebp-4h]
 
@@ -2389,4 +2379,78 @@ gentity_s *G_IsVehicleUnusable(gentity_s *player)
     if ((result->r.contents & 0x200000) == 0)
         return 0;
     return result;
+}
+
+bool G_IsVehicleImmune(gentity_s *ent, int mod, char damageFlags, unsigned int weapon)
+{
+    vehicle_info_t *v4 = &s_vehicleInfos[ent->scr_vehicle->infoIdx];
+    int result;
+    unsigned int damageValue;
+
+    switch (mod)
+    {
+    case 1:
+    case 2:
+        if (v4->bulletDamage || ((damageFlags & 2) != 0 && v4->armorPiercingDamage))
+            goto LABEL_3;
+        goto LABEL_6;
+
+    case 3:
+    case 4:
+    {
+
+        if (BG_GetWeaponDef(weapon)->projExplosion == WEAPPROJEXP_HEAVY)
+            damageValue = v4->heavyExplosiveDamage;
+        else
+            damageValue = v4->grenadeDamage;
+
+        result = (damageValue == 0) ? 1 : 0;
+        break;
+    }
+
+    case 5:
+        result = (v4->projectileDamage == 0);
+        break;
+
+    case 6:
+        result = (v4->projectileSplashDamage == 0);
+        break;
+
+    case 14:
+    LABEL_3:
+        result = 0;
+        break;
+
+    default:
+    LABEL_6:
+        result = 1;
+        break;
+    }
+
+    return result;
+}
+
+bool G_IsPlayerDrivingVehicle(const gentity_s *player)
+{
+    gclient_s *client; // r11
+    int eFlags; // r11
+    const EntHandle *p_ownerNum; // r31
+    scr_vehicle_s *scr_vehicle; // r11
+
+    iassert(player);
+
+    client = player->client;
+    if (client
+        && (eFlags = client->ps.eFlags, (eFlags & 0x20000) != 0)
+        && (eFlags & 0x80000) == 0
+        && (p_ownerNum = &player->r.ownerNum, p_ownerNum->isDefined())
+        && (scr_vehicle = p_ownerNum->ent()->scr_vehicle) != 0
+        && (scr_vehicle->flags & 0xA) == 0)
+    {
+        return s_vehicleInfos[scr_vehicle->infoIdx].type != 4;
+    }
+    else
+    {
+        return 0;
+    }
 }

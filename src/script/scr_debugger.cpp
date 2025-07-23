@@ -918,7 +918,6 @@ bool __cdecl Scr_IsSortWatchElement(Scr_WatchElement_s *element)
 int __cdecl CompareArrayIndices(unsigned int *arg1, unsigned int *arg2)
 {
     int v2; // ecx
-    char *v4; // [esp+10h] [ebp-28h]
     VariableValue ArrayIndexValue; // [esp+14h] [ebp-24h]
     unsigned int name[2]; // [esp+1Ch] [ebp-1Ch]
     int i; // [esp+24h] [ebp-14h]
@@ -937,8 +936,7 @@ int __cdecl CompareArrayIndices(unsigned int *arg1, unsigned int *arg2)
         return value[0].type - value[1].type;
     if (value[0].type == 2)
     {
-        v4 = SL_ConvertToString(value[1].u.stringValue);
-        return strcmp(SL_ConvertToString(value[0].u.stringValue), v4);
+        return strcmp(SL_ConvertToString(value[0].u.stringValue), SL_ConvertToString(value[1].u.stringValue));
     }
     else
     {

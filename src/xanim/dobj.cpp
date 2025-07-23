@@ -43,10 +43,6 @@ void __cdecl DObjShutdown()
 
 void __cdecl DObjDumpInfo(const DObj_s *obj)
 {
-    char *BoneName; // eax
-    char *v2; // eax
-    int v3; // [esp-8h] [ebp-28h]
-    char *v4; // [esp-4h] [ebp-24h]
     int j; // [esp+0h] [ebp-20h]
     int numBones; // [esp+4h] [ebp-1Ch]
     const unsigned __int8 *pos; // [esp+8h] [ebp-18h]
@@ -72,18 +68,14 @@ void __cdecl DObjDumpInfo(const DObj_s *obj)
         numBones = obj->numBones;
         for (i = 0; i < numBones; ++i)
         {
-            BoneName = DObjGetBoneName(obj, i);
-            Com_Printf(19, "Bone %d: '%s'\n", i, BoneName);
+            Com_Printf(19, "Bone %d: '%s'\n", i, DObjGetBoneName(obj, i));
         }
         if (obj->duplicateParts)
         {
             Com_Printf(19, "\nPart duplicates:\n");
             for (pos = (const unsigned __int8 *)(SL_ConvertToString(obj->duplicateParts) + 16); *pos; pos += 2)
             {
-                v4 = DObjGetBoneName(obj, pos[1] - 1);
-                v3 = pos[1] - 1;
-                v2 = DObjGetBoneName(obj, *pos - 1);
-                Com_Printf(19, "%d ('%s') -> %d ('%s')\n", *pos - 1, v2, v3, v4);
+                Com_Printf(19, "%d ('%s') -> %d ('%s')\n", *pos - 1, DObjGetBoneName(obj, *pos - 1), pos[1] - 1, DObjGetBoneName(obj, pos[1] - 1));
             }
         }
         else
@@ -369,7 +361,6 @@ void __cdecl DObjCreateDuplicateParts(DObj_s *obj, DObjModel_s *dobjModels, unsi
 void __cdecl DObjDumpCreationInfo(DObjModel_s *dobjModels, unsigned int numModels)
 {
     const char *Name; // eax
-    char *v3; // eax
     unsigned int j; // [esp+0h] [ebp-14h]
     int numBones; // [esp+4h] [ebp-10h]
     unsigned int boneIndex; // [esp+8h] [ebp-Ch]
@@ -385,8 +376,7 @@ void __cdecl DObjDumpCreationInfo(DObjModel_s *dobjModels, unsigned int numModel
         numBones = XModelNumBones(model);
         for (i = 0; i < numBones; ++i)
         {
-            v3 = SL_ConvertToString(model->boneNames[i]);
-            Com_Printf(19, "Bone %d: '%s'\n", boneIndex++, v3);
+            Com_Printf(19, "Bone %d: '%s'\n", boneIndex++, SL_ConvertToString(model->boneNames[i]));
         }
     }
 }
@@ -613,7 +603,7 @@ const char *__cdecl DObjGetName(const DObj_s *obj)
     return obj->models[0]->name;
 }
 
-char *__cdecl DObjGetBoneName(const DObj_s *obj, int boneIndex)
+const char *__cdecl DObjGetBoneName(const DObj_s *obj, int boneIndex)
 {
     int j; // [esp+0h] [ebp-20h]
     int numBones; // [esp+4h] [ebp-1Ch]
@@ -650,7 +640,7 @@ char *__cdecl DObjGetModelParentBoneName(const DObj_s *obj, int modelIndex)
     iassert(obj);
     iassert(modelIndex < obj->numModels);
 
-    return DObjGetBoneName(obj, *((unsigned __int8 *)&obj->models[obj->numModels] + modelIndex));
+    return (char*)DObjGetBoneName(obj, *((unsigned __int8 *)&obj->models[obj->numModels] + modelIndex));
 }
 
 XAnimTree_s *__cdecl DObjGetTree(const DObj_s *obj)
@@ -1234,21 +1224,10 @@ int __cdecl DObjGetModelBoneIndex(const DObj_s *obj, const char *modelName, unsi
     unsigned int localBoneIndex; // [esp+10h] [ebp-8h]
     XModel **models; // [esp+14h] [ebp-4h]
 
-    if (!obj)
-        MyAssertHandler(".\\xanim\\dobj.cpp", 1698, 0, "%s", "obj");
-    if (!name)
-        MyAssertHandler(".\\xanim\\dobj.cpp", 1699, 0, "%s", "name");
-    if (!SL_IsLowercaseString(name))
-    {
-        v4 = SL_ConvertToString(name);
-        MyAssertHandler(
-            ".\\xanim\\dobj.cpp",
-            1701,
-            0,
-            "%s\n\t(SL_ConvertToString( name )) = %s",
-            "(SL_IsLowercaseString( name ))",
-            v4);
-    }
+    iassert(obj);
+    iassert(name);
+    iassert(SL_IsLowercaseString(name));
+
     localBoneIndex = *index;
     if (localBoneIndex == 255)
         return 0;

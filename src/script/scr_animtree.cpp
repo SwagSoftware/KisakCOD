@@ -416,8 +416,6 @@ LABEL_13:
 
 void __cdecl Scr_CheckAnimsDefined(unsigned int names, unsigned int filename)
 {
-    char *v2; // eax
-    char *v3; // [esp-4h] [ebp-14h]
     unsigned int name; // [esp+0h] [ebp-10h]
     char *msg; // [esp+4h] [ebp-Ch]
     unsigned int animId; // [esp+8h] [ebp-8h]
@@ -432,9 +430,7 @@ void __cdecl Scr_CheckAnimsDefined(unsigned int names, unsigned int filename)
         value = GetVariableValueAddress(animId);
         if (value->u.intValue)
         {
-            v3 = SL_ConvertToString(filename);
-            v2 = SL_ConvertToString(name);
-            msg = va("animation '%s' not defined in anim tree '%s'", v2, v3);
+            msg = va("animation '%s' not defined in anim tree '%s'", SL_ConvertToString(name), SL_ConvertToString(filename));
             if (Scr_IsInOpcodeMemory(value->u.codePosValue))
                 CompileError2((char *)value->u.intValue, "%s", msg);
             else

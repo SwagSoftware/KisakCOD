@@ -4253,12 +4253,9 @@ unsigned int __cdecl Scr_GetConstLowercaseString(unsigned int index)
 
 }
 
-char* __cdecl Scr_GetString(unsigned int index)
+const char* __cdecl Scr_GetString(unsigned int index)
 {
-    VariableUnion v1; // eax
-
-    v1.intValue = Scr_GetConstString(index);
-    return SL_ConvertToString(v1.stringValue);
+    return SL_ConvertToString(Scr_GetConstString(index));
 }
 
 unsigned int __cdecl Scr_GetConstStringIncludeNull(unsigned int index)
@@ -4269,7 +4266,7 @@ unsigned int __cdecl Scr_GetConstStringIncludeNull(unsigned int index)
     return 0;
 }
 
-char* __cdecl Scr_GetDebugString(unsigned int index)
+const char* __cdecl Scr_GetDebugString(unsigned int index)
 {
     const char* v2; // eax
     VariableValue* value; // [esp+0h] [ebp-4h]
@@ -4284,8 +4281,8 @@ char* __cdecl Scr_GetDebugString(unsigned int index)
     {
         value = &scrVmPub.top[-(int)index];
         Scr_CastDebugString(value);
-        if (value->type != 2)
-            MyAssertHandler(".\\script\\scr_vm.cpp", 4693, 0, "%s", "value->type == VAR_STRING");
+
+        iassert(value->type == VAR_STRING); 
         return SL_ConvertToString(value->u.intValue);
     }
 }
@@ -4311,7 +4308,7 @@ unsigned int __cdecl Scr_GetConstIString(unsigned int index)
 	return entryValue->u.stringValue;
 }
 
-char* __cdecl Scr_GetIString(unsigned int index)
+const char* __cdecl Scr_GetIString(unsigned int index)
 {
     return SL_ConvertToString(Scr_GetConstIString(index));
 }

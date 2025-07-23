@@ -241,6 +241,7 @@ float __cdecl Vec3Length(const vec3r v);
 void __cdecl Vec3Copy(const vec3r from, vec3r to);
 
 void __cdecl Vec3ProjectionCoords(const float *dir, int *xCoord, int *yCoord);
+void __cdecl Vec3NormalizeFast(float *v);
 float __cdecl Vec3NormalizeTo(const vec3r v, vec3r out);
 void __cdecl Vec3Mad(const vec3r start, float scale, const vec3r dir, vec3r result);
 void __cdecl Vec3Accum(const float *subTotal, const float *weight, const float *added, float *total);

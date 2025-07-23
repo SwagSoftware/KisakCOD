@@ -631,7 +631,8 @@ void __cdecl VEH_StepSlideMove(gentity_s *ent, int32_t gravity, float frameTime)
 bool __cdecl VEH_SlideMove(gentity_s *ent, int32_t gravity, float frameTime);
 void __cdecl VEH_AirMove(gentity_s *ent, int32_t gravity, float frameTime);
 
-
+bool G_IsVehicleImmune(gentity_s *ent, int mod, char damageFlags, unsigned int weapon);
+bool G_IsPlayerDrivingVehicle(const gentity_s *player);
 
 
 // g_weapon

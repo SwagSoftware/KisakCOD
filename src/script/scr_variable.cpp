@@ -1872,10 +1872,6 @@ unsigned int  Scr_EvalFieldObject(unsigned int tempVariable, VariableValue* valu
 
 void  Scr_UnmatchingTypesError(VariableValue* value1, VariableValue* value2)
 {
-	char* v2; // eax
-	char* v3; // [esp-Ch] [ebp-18h]
-	const char* v4; // [esp-8h] [ebp-14h]
-	const char* v5; // [esp-4h] [ebp-10h]
 	int type1; // [esp+0h] [ebp-Ch]
 	int type2; // [esp+4h] [ebp-8h]
 	char* error_message; // [esp+8h] [ebp-4h]
@@ -1892,11 +1888,12 @@ void  Scr_UnmatchingTypesError(VariableValue* value1, VariableValue* value2)
 		Scr_CastDebugString(value2);
 		iassert(value1->type == VAR_STRING);
 		iassert(value2->type == VAR_STRING);
-		v5 = var_typename[type2];
-		v4 = var_typename[type1];
-		v3 = SL_ConvertToString(value2->u.intValue);
-		v2 = SL_ConvertToString(value1->u.intValue);
-		error_message = va("pair '%s' and '%s' has unmatching types '%s' and '%s'", v2, v3, v4, v5);
+		error_message = va("pair '%s' and '%s' has unmatching types '%s' and '%s'", 
+			SL_ConvertToString(value1->u.intValue), 
+			SL_ConvertToString(value2->u.intValue), 
+			var_typename[type2],
+			var_typename[type1]
+		);
 	}
 	RemoveRefToValue(value1->type, value1->u);
 	value1->type = VAR_UNDEFINED;
@@ -2021,8 +2018,8 @@ void  Scr_EvalPlus(VariableValue* value1, VariableValue* value2)
 	switch (value1->type)
 	{
 	case 2:
-		v12 = SL_ConvertToString(value1->u.intValue);
-		v13 = SL_ConvertToString(value2->u.intValue);
+		v12 = (char*)SL_ConvertToString(value1->u.intValue);
+		v13 = (char*)SL_ConvertToString(value2->u.intValue);
 		StringLen_DONE = SL_GetStringLen(value1->u.intValue);
 		len = StringLen_DONE + SL_GetStringLen(value2->u.intValue) + 1;
 		if ((int)len <= 0x2000)

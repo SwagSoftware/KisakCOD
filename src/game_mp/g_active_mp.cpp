@@ -1384,11 +1384,11 @@ int32_t __cdecl G_UpdateClientInfo(gentity_s *ent)
     uint32_t v2; // eax
     const char *v3; // eax
     int32_t number; // [esp-4h] [ebp-5Ch]
-    char *tagName; // [esp+3Ch] [ebp-1Ch]
+    const char *tagName; // [esp+3Ch] [ebp-1Ch]
     int32_t bChanged; // [esp+40h] [ebp-18h]
     gclient_s *client; // [esp+44h] [ebp-14h]
-    char *modelName; // [esp+48h] [ebp-10h]
-    char *modelNamea; // [esp+48h] [ebp-10h]
+    const char *modelName; // [esp+48h] [ebp-10h]
+    const char *modelNamea; // [esp+48h] [ebp-10h]
     clientInfo_t *ci; // [esp+4Ch] [ebp-Ch]
     int32_t i; // [esp+50h] [ebp-8h]
     uint32_t clientNum; // [esp+54h] [ebp-4h]
@@ -1434,7 +1434,7 @@ int32_t __cdecl G_UpdateClientInfo(gentity_s *ent)
             if (!ent->attachTagNames[i])
                 MyAssertHandler(".\\game_mp\\g_active_mp.cpp", 1424, 0, "%s", "ent->attachTagNames[i]");
             tagName = SL_ConvertToString(ent->attachTagNames[i]);
-            client->sess.cs.attachTagIndex[i] = G_TagIndex(tagName);
+            client->sess.cs.attachTagIndex[i] = G_TagIndex((char*)tagName);
             if (strcmp(ci->attachTagNames[i], tagName))
             {
                 bChanged = 1;

@@ -73,7 +73,7 @@ int32_t __cdecl G_CallSpawnEntity(gentity_s *ent)
 {
     const gitem_s *item; // [esp+0h] [ebp-Ch]
     void(__cdecl * spawnFunc)(gentity_s *); // [esp+4h] [ebp-8h]
-    char *classname; // [esp+8h] [ebp-4h]
+    const char *classname; // [esp+8h] [ebp-4h]
 
     if (level.spawnVar.spawnVarsValid)
         MyAssertHandler(".\\game_mp\\g_spawn_mp.cpp", 489, 1, "%s", "!level.spawnVar.spawnVarsValid");
@@ -495,19 +495,10 @@ uint16_t __cdecl Scr_ExecEntThread(gentity_s *ent, int32_t handle, uint32_t para
 
 void __cdecl Scr_Notify(gentity_s *ent, uint16_t stringValue, uint32_t paramcount)
 {
-    char *v3; // eax
-    const char *v4; // eax
+    iassert(ent);
+    iassert(ent->s.number == ent - g_entities);
+    iassert(ent->r.inuse);
 
-    if (!ent)
-        MyAssertHandler(".\\game_mp\\g_spawn_mp.cpp", 967, 0, "%s", "ent");
-    if (ent->s.number != ent - g_entities)
-    {
-        v3 = SL_ConvertToString(stringValue);
-        v4 = va("s.number = %i, index = %i, stringValue = %s", ent->s.number, ent - g_entities, v3);
-        MyAssertHandler(".\\game_mp\\g_spawn_mp.cpp", 968, 0, "%s\n\t%s", "ent->s.number == ent - g_entities", v4);
-    }
-    if (!ent->r.inuse)
-        MyAssertHandler(".\\game_mp\\g_spawn_mp.cpp", 969, 0, "%s\n\t(ent->s.number) = %i", "(ent->r.inuse)", ent->s.number);
     Scr_NotifyNum(ent->s.number, 0, stringValue, paramcount);
 }
 
@@ -516,13 +507,13 @@ void __cdecl Scr_GetEnt()
     gentity_s *result; // [esp+0h] [ebp-24h]
     uint16_t name; // [esp+8h] [ebp-1Ch]
     int32_t offset; // [esp+Ch] [ebp-18h]
-    char *key; // [esp+10h] [ebp-14h]
+    const char *key; // [esp+10h] [ebp-14h]
     gentity_s *ent; // [esp+18h] [ebp-Ch]
     int32_t i; // [esp+1Ch] [ebp-8h]
     uint16_t value; // [esp+20h] [ebp-4h]
 
     name = Scr_GetConstString(0);
-    key = Scr_GetString(1u);
+    key = Scr_GetString(1);
     offset = Scr_GetOffset(0, key);
     if (offset >= 0)
     {
@@ -566,7 +557,7 @@ void __cdecl Scr_GetEntArray()
 {
     uint16_t name; // [esp+4h] [ebp-1Ch]
     int32_t offset; // [esp+8h] [ebp-18h]
-    char *key; // [esp+Ch] [ebp-14h]
+    const char *key; // [esp+Ch] [ebp-14h]
     gentity_s *ent; // [esp+14h] [ebp-Ch]
     gentity_s *enta; // [esp+14h] [ebp-Ch]
     int32_t i; // [esp+18h] [ebp-8h]
@@ -576,7 +567,7 @@ void __cdecl Scr_GetEntArray()
     if (Scr_GetNumParam())
     {
         name = Scr_GetConstString(0);
-        key = Scr_GetString(1u);
+        key = Scr_GetString(1);
         offset = Scr_GetOffset(0, key);
         if (offset >= 0)
         {

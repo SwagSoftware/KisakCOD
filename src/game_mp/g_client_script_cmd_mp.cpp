@@ -12,11 +12,10 @@
 
 void __cdecl PlayerCmd_giveWeapon(scr_entref_t entref)
 {
-    const char *v1; // eax
     int32_t v2; // eax
     int32_t weaponModel; // [esp+0h] [ebp-60h]
     gentity_s *pSelf; // [esp+4h] [ebp-5Ch]
-    char *weaponName; // [esp+8h] [ebp-58h]
+    const char *weaponName; // [esp+8h] [ebp-58h]
     bool hadWeapon; // [esp+Ch] [ebp-54h]
     char svcmd[64]; // [esp+10h] [ebp-50h] BYREF
     int32_t weaponIndex; // [esp+54h] [ebp-Ch]
@@ -35,8 +34,7 @@ void __cdecl PlayerCmd_giveWeapon(scr_entref_t entref)
         pSelf = &g_entities[entref.entnum];
         if (!pSelf->client)
         {
-            v1 = va("entity %i is not a player", entref.entnum);
-            Scr_ObjectError(v1);
+            Scr_ObjectError(va("entity %i is not a player", entref.entnum));
         }
     }
     weaponName = Scr_GetString(0);
@@ -163,7 +161,7 @@ void __cdecl PlayerCmd_takeWeapon(scr_entref_t entref)
     const char *v1; // eax
     gentity_s *pSelf; // [esp+0h] [ebp-Ch]
     int32_t iWeaponIndex; // [esp+4h] [ebp-8h]
-    char *pszWeaponName; // [esp+8h] [ebp-4h]
+    const char *pszWeaponName; // [esp+8h] [ebp-4h]
 
     if (entref.classnum)
     {
@@ -382,7 +380,7 @@ void __cdecl PlayerCmd_hasWeapon(scr_entref_t entref)
     gclient_s *client; // [esp+0h] [ebp-10h]
     gentity_s *pSelf; // [esp+4h] [ebp-Ch]
     uint32_t iWeaponIndex; // [esp+8h] [ebp-8h]
-    char *pszWeaponName; // [esp+Ch] [ebp-4h]
+    const char *pszWeaponName; // [esp+Ch] [ebp-4h]
 
     if (entref.classnum)
     {
@@ -416,12 +414,10 @@ void __cdecl PlayerCmd_hasWeapon(scr_entref_t entref)
 
 void __cdecl PlayerCmd_switchToWeapon(scr_entref_t entref)
 {
-    const char *v1; // eax
-    const char *v2; // eax
     gclient_s *client; // [esp+0h] [ebp-10h]
     gentity_s *pSelf; // [esp+4h] [ebp-Ch]
     uint32_t iWeaponIndex; // [esp+8h] [ebp-8h]
-    char *pszWeaponName; // [esp+Ch] [ebp-4h]
+    const char *pszWeaponName; // [esp+Ch] [ebp-4h]
 
     if (entref.classnum)
     {
@@ -435,16 +431,14 @@ void __cdecl PlayerCmd_switchToWeapon(scr_entref_t entref)
         pSelf = &g_entities[entref.entnum];
         if (!pSelf->client)
         {
-            v1 = va("entity %i is not a player", entref.entnum);
-            Scr_ObjectError(v1);
+            Scr_ObjectError(va("entity %i is not a player", entref.entnum));
         }
     }
     pszWeaponName = Scr_GetString(0);
     iWeaponIndex = G_GetWeaponIndexForName(pszWeaponName);
     if (!iWeaponIndex)
     {
-        v2 = va("unknown weapon '%s'", pszWeaponName);
-        Scr_ParamError(0, v2);
+        Scr_ParamError(0, va("unknown weapon '%s'", pszWeaponName));
     }
     client = pSelf->client;
     if (!client)
@@ -462,12 +456,10 @@ void __cdecl PlayerCmd_switchToWeapon(scr_entref_t entref)
 
 void __cdecl PlayerCmd_switchToOffhand(scr_entref_t entref)
 {
-    const char *v1; // eax
-    const char *v2; // eax
     gclient_s *client; // [esp+0h] [ebp-10h]
     gentity_s *pSelf; // [esp+4h] [ebp-Ch]
     int32_t iWeaponIndex; // [esp+8h] [ebp-8h]
-    char *pszWeaponName; // [esp+Ch] [ebp-4h]
+    const char *pszWeaponName; // [esp+Ch] [ebp-4h]
 
     if (entref.classnum)
     {
@@ -476,21 +468,18 @@ void __cdecl PlayerCmd_switchToOffhand(scr_entref_t entref)
     }
     else
     {
-        if (entref.entnum >= 0x400u)
-            MyAssertHandler(".\\game_mp\\g_client_script_cmd_mp.cpp", 324, 0, "%s", "entref.entnum < MAX_GENTITIES");
+        iassert(entref.entnum < MAX_GENTITIES);
         pSelf = &g_entities[entref.entnum];
         if (!pSelf->client)
         {
-            v1 = va("entity %i is not a player", entref.entnum);
-            Scr_ObjectError(v1);
+            Scr_ObjectError(va("entity %i is not a player", entref.entnum));
         }
     }
     pszWeaponName = Scr_GetString(0);
     iWeaponIndex = G_GetWeaponIndexForName(pszWeaponName);
     if (!iWeaponIndex)
     {
-        v2 = va("unknown weapon '%s'", pszWeaponName);
-        Scr_ParamError(0, v2);
+        Scr_ParamError(0, va("unknown weapon '%s'", pszWeaponName));
     }
     client = pSelf->client;
     if (!client)
@@ -512,7 +501,7 @@ void __cdecl PlayerCmd_giveStartAmmo(scr_entref_t entref)
     gclient_s *client; // [esp+0h] [ebp-10h]
     gentity_s *pSelf; // [esp+4h] [ebp-Ch]
     uint32_t iWeaponIndex; // [esp+8h] [ebp-8h]
-    char *pszWeaponName; // [esp+Ch] [ebp-4h]
+    const char *pszWeaponName; // [esp+Ch] [ebp-4h]
 
     if (entref.classnum)
     {
@@ -521,8 +510,8 @@ void __cdecl PlayerCmd_giveStartAmmo(scr_entref_t entref)
     }
     else
     {
-        if (entref.entnum >= 0x400u)
-            MyAssertHandler(".\\game_mp\\g_client_script_cmd_mp.cpp", 347, 0, "%s", "entref.entnum < MAX_GENTITIES");
+        iassert(entref.entnum < MAX_GENTITIES);
+
         pSelf = &g_entities[entref.entnum];
         if (!pSelf->client)
         {
@@ -541,10 +530,9 @@ void __cdecl PlayerCmd_giveStartAmmo(scr_entref_t entref)
 
 void __cdecl PlayerCmd_giveMaxAmmo(scr_entref_t entref)
 {
-    const char *v1; // eax
     gclient_s *client; // [esp+0h] [ebp-1Ch]
     gentity_s *pSelf; // [esp+4h] [ebp-18h]
-    char *weaponName; // [esp+8h] [ebp-14h]
+    const char *weaponName; // [esp+8h] [ebp-14h]
     int32_t maxWeaponAmmo; // [esp+Ch] [ebp-10h]
     int32_t weaponIndex; // [esp+10h] [ebp-Ch]
     int32_t ammoGive; // [esp+14h] [ebp-8h]
@@ -556,13 +544,12 @@ void __cdecl PlayerCmd_giveMaxAmmo(scr_entref_t entref)
     }
     else
     {
-        if (entref.entnum >= 0x400u)
-            MyAssertHandler(".\\game_mp\\g_client_script_cmd_mp.cpp", 365, 0, "%s", "entref.entnum < MAX_GENTITIES");
+        iassert(entref.entnum < MAX_GENTITIES);
+
         pSelf = &g_entities[entref.entnum];
         if (!pSelf->client)
         {
-            v1 = va("entity %i is not a player", entref.entnum);
-            Scr_ObjectError(v1);
+            Scr_ObjectError(va("entity %i is not a player", entref.entnum));
         }
     }
     weaponName = Scr_GetString(0);
@@ -585,7 +572,7 @@ void __cdecl PlayerCmd_getFractionStartAmmo(scr_entref_t entref)
     gclient_s *client; // [esp+4h] [ebp-18h]
     gentity_s *pSelf; // [esp+8h] [ebp-14h]
     int32_t iWeaponIndex; // [esp+Ch] [ebp-10h]
-    char *pszWeaponName; // [esp+10h] [ebp-Ch]
+    const char *pszWeaponName; // [esp+10h] [ebp-Ch]
     WeaponDef *weapDef; // [esp+14h] [ebp-8h]
     float fAmmoFrac; // [esp+18h] [ebp-4h]
 
@@ -596,8 +583,8 @@ void __cdecl PlayerCmd_getFractionStartAmmo(scr_entref_t entref)
     }
     else
     {
-        if (entref.entnum >= 0x400u)
-            MyAssertHandler(".\\game_mp\\g_client_script_cmd_mp.cpp", 387, 0, "%s", "entref.entnum < MAX_GENTITIES");
+        iassert(entref.entnum < MAX_GENTITIES);
+
         pSelf = &g_entities[entref.entnum];
         if (!pSelf->client)
         {
@@ -635,7 +622,7 @@ void __cdecl PlayerCmd_getFractionMaxAmmo(scr_entref_t entref)
     gclient_s *client; // [esp+4h] [ebp-18h]
     gentity_s *pSelf; // [esp+8h] [ebp-14h]
     int32_t iWeaponIndex; // [esp+Ch] [ebp-10h]
-    char *pszWeaponName; // [esp+10h] [ebp-Ch]
+    const char *pszWeaponName; // [esp+10h] [ebp-Ch]
     WeaponDef *weapDef; // [esp+14h] [ebp-8h]
     float fAmmoFrac; // [esp+18h] [ebp-4h]
 
@@ -646,8 +633,8 @@ void __cdecl PlayerCmd_getFractionMaxAmmo(scr_entref_t entref)
     }
     else
     {
-        if (entref.entnum >= 0x400u)
-            MyAssertHandler(".\\game_mp\\g_client_script_cmd_mp.cpp", 421, 0, "%s", "entref.entnum < MAX_GENTITIES");
+        iassert(entref.entnum < MAX_GENTITIES);
+
         pSelf = &g_entities[entref.entnum];
         if (!pSelf->client)
         {
@@ -1042,7 +1029,7 @@ void __cdecl PlayerCmd_SetViewmodel(scr_entref_t entref)
 {
     const char *v1; // eax
     gentity_s *pSelf; // [esp+0h] [ebp-Ch]
-    char *modelName; // [esp+4h] [ebp-8h]
+    const char *modelName; // [esp+4h] [ebp-8h]
     int32_t modelIndex; // [esp+8h] [ebp-4h]
 
     if (entref.classnum)
@@ -1052,8 +1039,8 @@ void __cdecl PlayerCmd_SetViewmodel(scr_entref_t entref)
     }
     else
     {
-        if (entref.entnum >= 0x400u)
-            MyAssertHandler(".\\game_mp\\g_client_script_cmd_mp.cpp", 722, 0, "%s", "entref.entnum < MAX_GENTITIES");
+        iassert(entref.entnum < MAX_GENTITIES);
+
         pSelf = &g_entities[entref.entnum];
         if (!pSelf->client)
         {
@@ -1064,7 +1051,7 @@ void __cdecl PlayerCmd_SetViewmodel(scr_entref_t entref)
     modelName = Scr_GetString(0);
     if (!modelName || !*modelName)
         Scr_ParamError(0, "usage: setviewmodel(<model name>)");
-    modelIndex = G_ModelIndex(modelName);
+    modelIndex = G_ModelIndex((char*)modelName);
     if (modelIndex != (uint16_t)modelIndex)
         MyAssertHandler(
             ".\\game_mp\\g_client_script_cmd_mp.cpp",
@@ -1130,7 +1117,7 @@ void __cdecl PlayerCmd_setSpawnWeapon(scr_entref_t entref)
     const char *v1; // eax
     gentity_s *pSelf; // [esp+0h] [ebp-Ch]
     int32_t iWeaponIndex; // [esp+4h] [ebp-8h]
-    char *pszWeaponName; // [esp+8h] [ebp-4h]
+    const char *pszWeaponName; // [esp+8h] [ebp-4h]
 
     if (entref.classnum)
     {
@@ -1139,8 +1126,8 @@ void __cdecl PlayerCmd_setSpawnWeapon(scr_entref_t entref)
     }
     else
     {
-        if (entref.entnum >= 0x400u)
-            MyAssertHandler(".\\game_mp\\g_client_script_cmd_mp.cpp", 790, 0, "%s", "entref.entnum < MAX_GENTITIES");
+        iassert(entref.entnum < MAX_GENTITIES);
+
         pSelf = &g_entities[entref.entnum];
         if (!pSelf->client)
         {
@@ -1168,7 +1155,7 @@ void __cdecl PlayerCmd_dropItem(scr_entref_t entref)
     const gitem_s *pItem; // [esp+10h] [ebp-10h]
     uint32_t dropTag; // [esp+14h] [ebp-Ch]
     gentity_s *pDroppedItem; // [esp+18h] [ebp-8h]
-    char *pszItemName; // [esp+1Ch] [ebp-4h]
+    const char *pszItemName; // [esp+1Ch] [ebp-4h]
 
     if (entref.classnum)
     {
@@ -1177,8 +1164,8 @@ void __cdecl PlayerCmd_dropItem(scr_entref_t entref)
     }
     else
     {
-        if (entref.entnum >= 0x400u)
-            MyAssertHandler(".\\game_mp\\g_client_script_cmd_mp.cpp", 826, 0, "%s", "entref.entnum < MAX_GENTITIES");
+        iassert(entref.entnum < MAX_GENTITIES);
+
         pSelf = &g_entities[entref.entnum];
         if (!pSelf->client)
         {
@@ -1218,8 +1205,6 @@ void __cdecl PlayerCmd_dropItem(scr_entref_t entref)
 
 void __cdecl PlayerCmd_finishPlayerDamage(scr_entref_t entref)
 {
-    const char *v1; // eax
-    char *String; // eax
     uint16_t floatValue; // ax
     uint8_t v4; // al
     WeaponDef *WeaponDef; // eax
@@ -1266,13 +1251,12 @@ void __cdecl PlayerCmd_finishPlayerDamage(scr_entref_t entref)
     }
     else
     {
-        if (entref.entnum >= 0x400u)
-            MyAssertHandler(".\\game_mp\\g_client_script_cmd_mp.cpp", 904, 0, "%s", "entref.entnum < MAX_GENTITIES");
+        iassert(entref.entnum < MAX_GENTITIES);
+
         pSelf = &g_entities[entref.entnum];
         if (!pSelf->client)
         {
-            v1 = va("entity %i is not a player", entref.entnum);
-            Scr_ObjectError(v1);
+            Scr_ObjectError(va("entity %i is not a player", entref.entnum));
         }
     }
     tempBulletHitEntity = 0;
@@ -1287,8 +1271,7 @@ void __cdecl PlayerCmd_finishPlayerDamage(scr_entref_t entref)
                 attacker = Scr_GetEntity(1u);
             dflags = Scr_GetInt(3);
             mod = (meansOfDeath_t)G_MeansOfDeathFromScriptParam(4);
-            String = Scr_GetString(5u);
-            iWeapon = G_GetWeaponIndexForName(String);
+            iWeapon = G_GetWeaponIndexForName(Scr_GetString(5));
             if (Scr_GetType(6u))
             {
                 Scr_GetVector(6u, vPoint);
@@ -1526,8 +1509,6 @@ void __cdecl PlayerCmd_Suicide(scr_entref_t entref)
 
 void __cdecl PlayerCmd_OpenMenu(scr_entref_t entref)
 {
-    const char *v1; // eax
-    char *String; // eax
     gentity_s *pSelf; // [esp+0h] [ebp-50h]
     uint32_t iMenuIndex; // [esp+4h] [ebp-4Ch]
     char svcmd[68]; // [esp+8h] [ebp-48h] BYREF
@@ -1539,19 +1520,16 @@ void __cdecl PlayerCmd_OpenMenu(scr_entref_t entref)
     }
     else
     {
-        if (entref.entnum >= 0x400u)
-            MyAssertHandler(".\\game_mp\\g_client_script_cmd_mp.cpp", 1197, 0, "%s", "entref.entnum < MAX_GENTITIES");
+        iassert(entref.entnum < MAX_GENTITIES);
         pSelf = &g_entities[entref.entnum];
         if (!pSelf->client)
         {
-            v1 = va("entity %i is not a player", entref.entnum);
-            Scr_ObjectError(v1);
+            Scr_ObjectError(va("entity %i is not a player", entref.entnum));
         }
     }
     if (pSelf->client->sess.connected == CON_CONNECTED)
     {
-        String = Scr_GetString(0);
-        iMenuIndex = GScr_GetScriptMenuIndex(String);
+        iMenuIndex = GScr_GetScriptMenuIndex(Scr_GetString(0));
         if (iMenuIndex >= 0x20)
             MyAssertHandler(
                 ".\\game_mp\\g_client_script_cmd_mp.cpp",
@@ -1572,8 +1550,6 @@ void __cdecl PlayerCmd_OpenMenu(scr_entref_t entref)
 
 void __cdecl PlayerCmd_OpenMenuNoMouse(scr_entref_t entref)
 {
-    const char *v1; // eax
-    char *String; // eax
     gentity_s *pSelf; // [esp+0h] [ebp-50h]
     uint32_t iMenuIndex; // [esp+4h] [ebp-4Ch]
     char svcmd[68]; // [esp+8h] [ebp-48h] BYREF
@@ -1585,19 +1561,16 @@ void __cdecl PlayerCmd_OpenMenuNoMouse(scr_entref_t entref)
     }
     else
     {
-        if (entref.entnum >= 0x400u)
-            MyAssertHandler(".\\game_mp\\g_client_script_cmd_mp.cpp", 1221, 0, "%s", "entref.entnum < MAX_GENTITIES");
+        iassert(entref.entnum < MAX_GENTITIES);
         pSelf = &g_entities[entref.entnum];
         if (!pSelf->client)
         {
-            v1 = va("entity %i is not a player", entref.entnum);
-            Scr_ObjectError(v1);
+            Scr_ObjectError(va("entity %i is not a player", entref.entnum));
         }
     }
     if (pSelf->client->sess.connected == CON_CONNECTED)
     {
-        String = Scr_GetString(0);
-        iMenuIndex = GScr_GetScriptMenuIndex(String);
+        iMenuIndex = GScr_GetScriptMenuIndex(Scr_GetString(0));
         if (iMenuIndex >= 0x20)
             MyAssertHandler(
                 ".\\game_mp\\g_client_script_cmd_mp.cpp",
@@ -1669,7 +1642,7 @@ void __cdecl PlayerCmd_SetWeaponAmmoClip(scr_entref_t entref)
     const char *v1; // eax
     int32_t ammoCount; // [esp+0h] [ebp-18h]
     gentity_s *pSelf; // [esp+4h] [ebp-14h]
-    char *weapName; // [esp+8h] [ebp-10h]
+    const char *weapName; // [esp+8h] [ebp-10h]
     int32_t clipIndex; // [esp+Ch] [ebp-Ch]
     int32_t weapIndex; // [esp+10h] [ebp-8h]
     WeaponDef *weapDef; // [esp+14h] [ebp-4h]
@@ -1681,8 +1654,7 @@ void __cdecl PlayerCmd_SetWeaponAmmoClip(scr_entref_t entref)
     }
     else
     {
-        if (entref.entnum >= 0x400u)
-            MyAssertHandler(".\\game_mp\\g_client_script_cmd_mp.cpp", 1285, 0, "%s", "entref.entnum < MAX_GENTITIES");
+        iassert(entref.entnum < MAX_GENTITIES);
         pSelf = &g_entities[entref.entnum];
         if (!pSelf->client)
         {
@@ -1719,7 +1691,6 @@ void __cdecl PlayerCmd_SetWeaponAmmoClip(scr_entref_t entref)
 
 void __cdecl PlayerCmd_SetWeaponAmmoStock(scr_entref_t entref)
 {
-    const char *v1; // eax
     VariableUnion v2; // [esp+0h] [ebp-38h]
     VariableUnion v3; // [esp+4h] [ebp-34h]
     VariableUnion v4; // [esp+8h] [ebp-30h]
@@ -1728,7 +1699,7 @@ void __cdecl PlayerCmd_SetWeaponAmmoStock(scr_entref_t entref)
     int32_t maxAmmo; // [esp+18h] [ebp-20h]
     int32_t clipIdx; // [esp+1Ch] [ebp-1Ch]
     gentity_s *pSelf; // [esp+20h] [ebp-18h]
-    char *weapName; // [esp+24h] [ebp-14h]
+    const char *weapName; // [esp+24h] [ebp-14h]
     int32_t weapIdx; // [esp+28h] [ebp-10h]
     playerState_s *ps; // [esp+2Ch] [ebp-Ch]
     WeaponDef *weapDef; // [esp+30h] [ebp-8h]
@@ -1741,13 +1712,11 @@ void __cdecl PlayerCmd_SetWeaponAmmoStock(scr_entref_t entref)
     }
     else
     {
-        if (entref.entnum >= 0x400u)
-            MyAssertHandler(".\\game_mp\\g_client_script_cmd_mp.cpp", 1319, 0, "%s", "entref.entnum < MAX_GENTITIES");
+        iassert(entref.entnum < MAX_GENTITIES);
         pSelf = &g_entities[entref.entnum];
         if (!pSelf->client)
         {
-            v1 = va("entity %i is not a player", entref.entnum);
-            Scr_ObjectError(v1);
+            Scr_ObjectError(va("entity %i is not a player", entref.entnum));
         }
     }
     weapName = Scr_GetString(0);
@@ -1795,9 +1764,8 @@ void __cdecl PlayerCmd_SetWeaponAmmoStock(scr_entref_t entref)
 
 void __cdecl PlayerCmd_GetWeaponAmmoClip(scr_entref_t entref)
 {
-    const char *v1; // eax
     gentity_s *pSelf; // [esp+0h] [ebp-10h]
-    char *weapName; // [esp+4h] [ebp-Ch]
+    const char *weapName; // [esp+4h] [ebp-Ch]
     int32_t weapIdx; // [esp+8h] [ebp-8h]
     int32_t clipIdx; // [esp+Ch] [ebp-4h]
 
@@ -1808,13 +1776,12 @@ void __cdecl PlayerCmd_GetWeaponAmmoClip(scr_entref_t entref)
     }
     else
     {
-        if (entref.entnum >= 0x400u)
-            MyAssertHandler(".\\game_mp\\g_client_script_cmd_mp.cpp", 1359, 0, "%s", "entref.entnum < MAX_GENTITIES");
+        iassert(entref.entnum < MAX_GENTITIES);
+
         pSelf = &g_entities[entref.entnum];
         if (!pSelf->client)
         {
-            v1 = va("entity %i is not a player", entref.entnum);
-            Scr_ObjectError(v1);
+            Scr_ObjectError(va("entity %i is not a player", entref.entnum));
         }
     }
     weapName = Scr_GetString(0);
@@ -1832,11 +1799,10 @@ void __cdecl PlayerCmd_GetWeaponAmmoClip(scr_entref_t entref)
 
 void __cdecl PlayerCmd_GetWeaponAmmoStock(scr_entref_t entref)
 {
-    const char *v1; // eax
     int32_t ammoIdx; // [esp+0h] [ebp-14h]
     int32_t clipIdx; // [esp+4h] [ebp-10h]
     gentity_s *pSelf; // [esp+8h] [ebp-Ch]
-    char *weapName; // [esp+Ch] [ebp-8h]
+    const char *weapName; // [esp+Ch] [ebp-8h]
     int32_t weapIdx; // [esp+10h] [ebp-4h]
 
     if (entref.classnum)
@@ -1846,13 +1812,12 @@ void __cdecl PlayerCmd_GetWeaponAmmoStock(scr_entref_t entref)
     }
     else
     {
-        if (entref.entnum >= 0x400u)
-            MyAssertHandler(".\\game_mp\\g_client_script_cmd_mp.cpp", 1379, 0, "%s", "entref.entnum < MAX_GENTITIES");
+        iassert(entref.entnum < MAX_GENTITIES);
+
         pSelf = &g_entities[entref.entnum];
         if (!pSelf->client)
         {
-            v1 = va("entity %i is not a player", entref.entnum);
-            Scr_ObjectError(v1);
+            Scr_ObjectError(va("entity %i is not a player", entref.entnum));
         }
     }
     weapName = Scr_GetString(0);
@@ -1878,9 +1843,8 @@ void __cdecl PlayerCmd_GetWeaponAmmoStock(scr_entref_t entref)
 
 void __cdecl PlayerCmd_AnyAmmoForWeaponModes(scr_entref_t entref)
 {
-    const char *v1; // eax
     gentity_s *pSelf; // [esp+0h] [ebp-14h]
-    char *weapName; // [esp+4h] [ebp-10h]
+    const char *weapName; // [esp+4h] [ebp-10h]
     int32_t weapIdx; // [esp+8h] [ebp-Ch]
     uint32_t altWeapIdx; // [esp+Ch] [ebp-8h]
     int32_t totalAmmo; // [esp+10h] [ebp-4h]
@@ -1892,13 +1856,12 @@ void __cdecl PlayerCmd_AnyAmmoForWeaponModes(scr_entref_t entref)
     }
     else
     {
-        if (entref.entnum >= 0x400u)
-            MyAssertHandler(".\\game_mp\\g_client_script_cmd_mp.cpp", 1411, 0, "%s", "entref.entnum < MAX_GENTITIES");
+        iassert(entref.entnum < MAX_GENTITIES);
+
         pSelf = &g_entities[entref.entnum];
         if (!pSelf->client)
         {
-            v1 = va("entity %i is not a player", entref.entnum);
-            Scr_ObjectError(v1);
+            Scr_ObjectError(va("entity %i is not a player", entref.entnum));
         }
     }
     weapName = Scr_GetString(0);
@@ -2145,13 +2108,12 @@ void __cdecl PlayerCmd_ClonePlayer(scr_entref_t entref)
 
 void __cdecl PlayerCmd_SetClientDvar(scr_entref_t entref)
 {
-    const char *v1; // eax
     uint32_t NumParam; // eax
     const char *v3; // eax
     char v4; // al
     const char *v5; // eax
-    char *pszDvar; // [esp+18h] [ebp-818h]
-    char *pszText; // [esp+1Ch] [ebp-814h]
+    const char *pszDvar; // [esp+18h] [ebp-818h]
+    const char *pszText; // [esp+1Ch] [ebp-814h]
     int32_t i; // [esp+24h] [ebp-80Ch]
     char szString[1024]; // [esp+28h] [ebp-808h] BYREF
     char szOutString[1024]; // [esp+428h] [ebp-408h] BYREF
@@ -2163,12 +2125,11 @@ void __cdecl PlayerCmd_SetClientDvar(scr_entref_t entref)
     }
     else
     {
-        if (entref.entnum >= 0x400u)
-            MyAssertHandler(".\\game_mp\\g_client_script_cmd_mp.cpp", 1592, 0, "%s", "entref.entnum < MAX_GENTITIES");
+        iassert(entref.entnum < MAX_GENTITIES);
+
         if (!g_entities[entref.entnum].client)
         {
-            v1 = va("entity %i is not a player", entref.entnum);
-            Scr_ObjectError(v1);
+            Scr_ObjectError(va("entity %i is not a player", entref.entnum));
         }
     }
     pszDvar = Scr_GetString(0);
@@ -2368,7 +2329,7 @@ void __cdecl PlayerCmd_SetReverb(scr_entref_t entref)
     float drylevel; // [esp+20h] [ebp-18h]
     float fadetime; // [esp+24h] [ebp-14h]
     float wetlevel; // [esp+28h] [ebp-10h]
-    char *pszReverb; // [esp+2Ch] [ebp-Ch]
+    const char *pszReverb; // [esp+2Ch] [ebp-Ch]
     uint16_t prio_name; // [esp+30h] [ebp-8h]
     int32_t prio; // [esp+34h] [ebp-4h]
 
@@ -2398,13 +2359,13 @@ void __cdecl PlayerCmd_SetReverb(scr_entref_t entref)
     case 4u:
         goto $LN8_23;
     case 5u:
-        fadetime = Scr_GetFloat(4u);
+        fadetime = Scr_GetFloat(4);
     $LN8_23:
-        wetlevel = Scr_GetFloat(3u);
+        wetlevel = Scr_GetFloat(3);
     $LN7_31:
-        drylevel = Scr_GetFloat(2u);
+        drylevel = Scr_GetFloat(2);
     $LN6_34:
-        pszReverb = Scr_GetString(1u);
+        pszReverb = Scr_GetString(1);
         prio_name = Scr_GetConstString(0);
         prio = 1;
         if (prio_name == scr_const.snd_enveffectsprio_level)
@@ -2480,9 +2441,6 @@ LABEL_6:
 
 void __cdecl PlayerCmd_SetChannelVolumes(scr_entref_t entref)
 {
-    const char *v1; // eax
-    char *String; // eax
-    const char *v3; // eax
     uint32_t NumParam; // [esp+8h] [ebp-18h]
     float fadetime; // [esp+10h] [ebp-10h]
     int32_t shockIndex; // [esp+14h] [ebp-Ch]
@@ -2499,8 +2457,7 @@ void __cdecl PlayerCmd_SetChannelVolumes(scr_entref_t entref)
             MyAssertHandler(".\\game_mp\\g_client_script_cmd_mp.cpp", 1806, 0, "%s", "entref.entnum < MAX_GENTITIES");
         if (!g_entities[entref.entnum].client)
         {
-            v1 = va("entity %i is not a player", entref.entnum);
-            Scr_ObjectError(v1);
+            Scr_ObjectError(va("entity %i is not a player", entref.entnum));
         }
     }
     fadetime = 0.0;
@@ -2517,8 +2474,7 @@ void __cdecl PlayerCmd_SetChannelVolumes(scr_entref_t entref)
         }
         fadetime = Scr_GetFloat(2u);
     }
-    String = Scr_GetString(1u);
-    shockIndex = G_FindConfigstringIndex(String, 1954, 16, 0, 0);
+    shockIndex = G_FindConfigstringIndex((char*)Scr_GetString(1), 1954, 16, 0, 0);
     prio_name = Scr_GetConstString(0);
     prio = 1;
     if (prio_name == scr_const.snd_channelvolprio_holdbreath)
@@ -2538,8 +2494,8 @@ void __cdecl PlayerCmd_SetChannelVolumes(scr_entref_t entref)
         Scr_Error(
             "priority must be 'snd_channelvolprio_holdbreath', 'snd_channelvolprio_pain', or 'snd_channelvolprio_shellshock'\n");
     }
-    v3 = va("%c %i %i %g", 69, prio, shockIndex, fadetime);
-    SV_GameSendServerCommand(entref.entnum, SV_CMD_RELIABLE, v3);
+
+    SV_GameSendServerCommand(entref.entnum, SV_CMD_RELIABLE, va("%c %i %i %g", 69, prio, shockIndex, fadetime));
 }
 
 //void __fastcall PlayerCmd_DeactivateChannelVolumes(scr_entref_t *entref)
@@ -2595,8 +2551,7 @@ LABEL_6:
 
 void __cdecl ScrCmd_PlayLocalSound(scr_entref_t entref)
 {
-    const char *v1; // eax
-    char *pszSoundName; // [esp+4h] [ebp-4Ch]
+    const char *pszSoundName; // [esp+4h] [ebp-4Ch]
     char svcmd[64]; // [esp+8h] [ebp-48h] BYREF
     uint8_t soundIndex; // [esp+4Fh] [ebp-1h]
 
@@ -2606,16 +2561,14 @@ void __cdecl ScrCmd_PlayLocalSound(scr_entref_t entref)
     }
     else
     {
-        if (entref.entnum >= 0x400u)
-            MyAssertHandler(".\\game_mp\\g_client_script_cmd_mp.cpp", 1889, 0, "%s", "entref.entnum < MAX_GENTITIES");
+        iassert(entref.entnum < MAX_GENTITIES);
         if (!g_entities[entref.entnum].client)
         {
-            v1 = va("entity %i is not a player", entref.entnum);
-            Scr_ObjectError(v1);
+            Scr_ObjectError(va("entity %i is not a player", entref.entnum));
         }
     }
     pszSoundName = Scr_GetString(0);
-    soundIndex = G_SoundAliasIndex(pszSoundName);
+    soundIndex = G_SoundAliasIndex((char*)pszSoundName);
     _snprintf(svcmd, 0x40u, "%c %i", 115, soundIndex);
     svcmd[63] = 0;
     SV_GameSendServerCommand(entref.entnum, SV_CMD_CAN_IGNORE, svcmd);
@@ -2623,8 +2576,7 @@ void __cdecl ScrCmd_PlayLocalSound(scr_entref_t entref)
 
 void __cdecl ScrCmd_StopLocalSound(scr_entref_t entref)
 {
-    const char *v1; // eax
-    char *pszSoundName; // [esp+4h] [ebp-4Ch]
+    const char *pszSoundName; // [esp+4h] [ebp-4Ch]
     char svcmd[64]; // [esp+8h] [ebp-48h] BYREF
     uint8_t soundIndex; // [esp+4Fh] [ebp-1h]
 
@@ -2634,16 +2586,15 @@ void __cdecl ScrCmd_StopLocalSound(scr_entref_t entref)
     }
     else
     {
-        if (entref.entnum >= 0x400u)
-            MyAssertHandler(".\\game_mp\\g_client_script_cmd_mp.cpp", 1907, 0, "%s", "entref.entnum < MAX_GENTITIES");
+        iassert(entref.entnum < MAX_GENTITIES);
+
         if (!g_entities[entref.entnum].client)
         {
-            v1 = va("entity %i is not a player", entref.entnum);
-            Scr_ObjectError(v1);
+            Scr_ObjectError(va("entity %i is not a player", entref.entnum));
         }
     }
     pszSoundName = Scr_GetString(0);
-    soundIndex = G_SoundAliasIndex(pszSoundName);
+    soundIndex = G_SoundAliasIndex((char*)pszSoundName);
     _snprintf(svcmd, 0x40u, "%c %i", 107, soundIndex);
     svcmd[63] = 0;
     SV_GameSendServerCommand(entref.entnum, SV_CMD_CAN_IGNORE, svcmd);
@@ -2984,7 +2935,7 @@ void __cdecl PlayerCmd_BeginLocationSelection(scr_entref_t entref)
     float radius; // [esp+14h] [ebp-10h]
     float radiusa; // [esp+14h] [ebp-10h]
     int32_t locSelIndex; // [esp+18h] [ebp-Ch]
-    char *locSelName; // [esp+1Ch] [ebp-8h]
+    const char *locSelName; // [esp+1Ch] [ebp-8h]
     uint32_t radiusBits; // [esp+20h] [ebp-4h]
 
     if (entref.classnum)
@@ -3095,12 +3046,9 @@ void __cdecl PlayerCmd_EndLocationSelection(scr_entref_t entref)
 
 void __cdecl PlayerCmd_SetActionSlot(scr_entref_t entref)
 {
-    const char *v1; // eax
-    const char *v2; // eax
-    const char *v3; // eax
     uint32_t weaponIdx; // [esp+0h] [ebp-10h]
-    char *str; // [esp+4h] [ebp-Ch]
-    char *stra; // [esp+4h] [ebp-Ch]
+    const char *str; // [esp+4h] [ebp-Ch]
+    const char *stra; // [esp+4h] [ebp-Ch]
     gentity_s *pSelf; // [esp+8h] [ebp-8h]
     int32_t slot; // [esp+Ch] [ebp-4h]
     int32_t slota; // [esp+Ch] [ebp-4h]
@@ -3112,20 +3060,18 @@ void __cdecl PlayerCmd_SetActionSlot(scr_entref_t entref)
     }
     else
     {
-        if (entref.entnum >= 0x400u)
-            MyAssertHandler(".\\game_mp\\g_client_script_cmd_mp.cpp", 2195, 0, "%s", "entref.entnum < MAX_GENTITIES");
+        iassert(entref.entnum < MAX_GENTITIES);
         pSelf = &g_entities[entref.entnum];
         if (!pSelf->client)
         {
-            v1 = va("entity %i is not a player", entref.entnum);
-            Scr_ObjectError(v1);
+            Scr_ObjectError(va("entity %i is not a player", entref.entnum));
         }
     }
     slot = Scr_GetInt(0);
     if (slot >= 1 && slot <= 4)
     {
         slota = slot - 1;
-        str = Scr_GetString(1u);
+        str = Scr_GetString(1);
         if (I_stricmp(str, "weapon"))
         {
             if (I_stricmp(str, "altmode"))
@@ -3149,7 +3095,7 @@ void __cdecl PlayerCmd_SetActionSlot(scr_entref_t entref)
         }
         else
         {
-            stra = Scr_GetString(2u);
+            stra = Scr_GetString(2);
             weaponIdx = BG_FindWeaponIndexForName(stra);
             if (weaponIdx)
             {
@@ -3158,15 +3104,13 @@ void __cdecl PlayerCmd_SetActionSlot(scr_entref_t entref)
             }
             else
             {
-                v3 = va("Unknown weapon name \"%s\".\n", stra);
-                Scr_ParamError(2u, v3);
+                Scr_ParamError(2, va("Unknown weapon name \"%s\".\n", stra));
             }
         }
     }
     else
     {
-        v2 = va("Invalid slot (%i) given, expecting 1 - %i\n", slot, 4);
-        Scr_Error(v2);
+        Scr_Error(va("Invalid slot (%i) given, expecting 1 - %i\n", slot, 4));
     }
 }
 
@@ -3257,10 +3201,8 @@ void __cdecl PlayerCmd_GetWeaponsListPrimaries(scr_entref_t entref)
 
 void __cdecl PlayerCmd_SetPerk(scr_entref_t entref)
 {
-    const char *v1; // eax
-    const char *v2; // eax
     gentity_s *pSelf; // [esp+0h] [ebp-Ch]
-    char *perkName; // [esp+4h] [ebp-8h]
+    const char *perkName; // [esp+4h] [ebp-8h]
     uint32_t perkIndex; // [esp+8h] [ebp-4h]
 
     if (entref.classnum)
@@ -3270,21 +3212,19 @@ void __cdecl PlayerCmd_SetPerk(scr_entref_t entref)
     }
     else
     {
-        if (entref.entnum >= 0x400u)
-            MyAssertHandler(".\\game_mp\\g_client_script_cmd_mp.cpp", 2309, 0, "%s", "entref.entnum < MAX_GENTITIES");
+        iassert(entref.entnum < MAX_GENTITIES);
+
         pSelf = &g_entities[entref.entnum];
         if (!pSelf->client)
         {
-            v1 = va("entity %i is not a player", entref.entnum);
-            Scr_ObjectError(v1);
+            Scr_ObjectError(va("entity %i is not a player", entref.entnum));
         }
     }
     perkName = Scr_GetString(0);
     perkIndex = BG_GetPerkIndexForName(perkName);
     if (perkIndex == 20)
     {
-        v2 = va("Unknown perk: %s\n", perkName);
-        Scr_Error(v2);
+        Scr_Error(va("Unknown perk: %s\n", perkName));
     }
     BG_SetPerk(&pSelf->client->ps.perks, perkIndex);
     BG_SetPerk(&pSelf->client->sess.cs.perks, perkIndex);
@@ -3292,26 +3232,17 @@ void __cdecl PlayerCmd_SetPerk(scr_entref_t entref)
 
 void __cdecl BG_SetPerk(int32_t *perks, uint32_t perkIndex)
 {
-    if (!perks)
-        MyAssertHandler("c:\\trees\\cod3\\src\\bgame\\../bgame/bg_perks_mp.h", 47, 0, "%s", "perks");
-    if (perkIndex >= 0x14)
-        MyAssertHandler(
-            "c:\\trees\\cod3\\src\\bgame\\../bgame/bg_perks_mp.h",
-            48,
-            0,
-            "perkIndex doesn't index PERK_COUNT\n\t%i not in [0, %i)",
-            perkIndex,
-            20);
+    iassert(perks);
+    bcassert(perkIndex, PERK_COUNT);
+
     *perks |= 1 << perkIndex;
 }
 
 void __cdecl PlayerCmd_HasPerk(scr_entref_t entref)
 {
-    const char *v1; // eax
-    const char *v2; // eax
     int32_t perks; // [esp+0h] [ebp-10h]
     gentity_s *pSelf; // [esp+4h] [ebp-Ch]
-    char *perkName; // [esp+8h] [ebp-8h]
+    const char *perkName; // [esp+8h] [ebp-8h]
     uint32_t perkIndex; // [esp+Ch] [ebp-4h]
 
     if (entref.classnum)
@@ -3326,16 +3257,14 @@ void __cdecl PlayerCmd_HasPerk(scr_entref_t entref)
         pSelf = &g_entities[entref.entnum];
         if (!pSelf->client)
         {
-            v1 = va("entity %i is not a player", entref.entnum);
-            Scr_ObjectError(v1);
+            Scr_ObjectError(va("entity %i is not a player", entref.entnum));
         }
     }
     perkName = Scr_GetString(0);
     perkIndex = BG_GetPerkIndexForName(perkName);
     if (perkIndex == 20)
     {
-        v2 = va("Unknown perk: %s\n", perkName);
-        Scr_Error(v2);
+        Scr_Error(va("Unknown perk: %s\n", perkName));
     }
     perks = pSelf->client->ps.perks;
     if (perkIndex >= 0x14)
@@ -3351,10 +3280,8 @@ void __cdecl PlayerCmd_HasPerk(scr_entref_t entref)
 
 void __cdecl PlayerCmd_UnsetPerk(scr_entref_t entref)
 {
-    const char *v1; // eax
-    const char *v2; // eax
     gentity_s *pSelf; // [esp+0h] [ebp-Ch]
-    char *perkName; // [esp+4h] [ebp-8h]
+    const char *perkName; // [esp+4h] [ebp-8h]
     uint32_t perkIndex; // [esp+8h] [ebp-4h]
 
     if (entref.classnum)
@@ -3364,21 +3291,19 @@ void __cdecl PlayerCmd_UnsetPerk(scr_entref_t entref)
     }
     else
     {
-        if (entref.entnum >= 0x400u)
-            MyAssertHandler(".\\game_mp\\g_client_script_cmd_mp.cpp", 2364, 0, "%s", "entref.entnum < MAX_GENTITIES");
+        iassert(entref.entnum < MAX_GENTITIES);
+
         pSelf = &g_entities[entref.entnum];
         if (!pSelf->client)
         {
-            v1 = va("entity %i is not a player", entref.entnum);
-            Scr_ObjectError(v1);
+            Scr_ObjectError(va("entity %i is not a player", entref.entnum));
         }
     }
     perkName = Scr_GetString(0);
     perkIndex = BG_GetPerkIndexForName(perkName);
     if (perkIndex == 20)
     {
-        v2 = va("Unknown perk: %s\n", perkName);
-        Scr_Error(v2);
+        Scr_Error(va("Unknown perk: %s\n", perkName));
     }
     BG_UnsetPerk(&pSelf->client->ps.perks, perkIndex);
     BG_UnsetPerk(&pSelf->client->sess.cs.perks, perkIndex);

@@ -110,7 +110,7 @@ void __cdecl DObjPhysicsSetCollisionFromXModel(const DObj_s *obj, PhysWorld worl
 double __cdecl DObjGetRadius(const DObj_s *obj);
 PhysPreset *__cdecl DObjGetPhysPreset(const DObj_s *obj);
 const char *__cdecl DObjGetName(const DObj_s *obj);
-char *__cdecl DObjGetBoneName(const DObj_s *obj, int boneIndex);
+const char *__cdecl DObjGetBoneName(const DObj_s *obj, int boneIndex);
 char *__cdecl DObjGetModelParentBoneName(const DObj_s *obj, int modelIndex);
 XAnimTree_s *__cdecl DObjGetTree(const DObj_s *obj);
 void __cdecl DObjTraceline(DObj_s *obj, float *start, float *end, unsigned __int8 *priorityMap, DObjTrace_s *trace);

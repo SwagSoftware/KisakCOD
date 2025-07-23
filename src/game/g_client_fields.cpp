@@ -76,8 +76,6 @@ void __cdecl ClientScr_ReadOnly(gclient_s *pSelf, const client_fields_s *pField)
 
 void __cdecl ClientScr_SetSessionTeam(gclient_s *pSelf, const client_fields_s *pField)
 {
-    char *v1; // eax
-    const char *v2; // eax
     uint16_t newTeam; // [esp+0h] [ebp-4h]
 
     if (!pSelf)
@@ -101,9 +99,7 @@ void __cdecl ClientScr_SetSessionTeam(gclient_s *pSelf, const client_fields_s *p
     }
     else
     {
-        v1 = SL_ConvertToString(newTeam);
-        v2 = va("'%s' is an illegal sessionteam string. Must be allies, axis, none, or spectator.", v1);
-        Scr_Error(v2);
+        Scr_Error(va("'%s' is an illegal sessionteam string. Must be allies, axis, none, or spectator.", SL_ConvertToString(newTeam)));
     }
     if (pSelf - level.clients >= 64)
         Scr_Error("client is not pointing to the level.clients array");
@@ -144,8 +140,6 @@ void __cdecl ClientScr_GetSessionTeam(gclient_s *pSelf, const client_fields_s *p
 
 void __cdecl ClientScr_SetSessionState(gclient_s *pSelf, const client_fields_s *pField)
 {
-    char *v1; // eax
-    const char *v2; // eax
     uint16_t newState; // [esp+0h] [ebp-4h]
 
     if (!pSelf)
@@ -172,9 +166,7 @@ void __cdecl ClientScr_SetSessionState(gclient_s *pSelf, const client_fields_s *
     }
     else
     {
-        v1 = SL_ConvertToString(newState);
-        v2 = va("'%s' is an illegal sessionstate string. Must be playing, dead, spectator, or intermission.", v1);
-        Scr_Error(v2);
+        Scr_Error(va("'%s' is an illegal sessionstate string. Must be playing, dead, spectator, or intermission.", SL_ConvertToString(newState)));
     }
 }
 
@@ -248,11 +240,9 @@ void __cdecl ClientScr_SetKillCamEntity(gclient_s *pSelf, const client_fields_s 
 
 void __cdecl ClientScr_SetStatusIcon(gclient_s *pSelf, const client_fields_s *pField)
 {
-    char *pszIcon; // [esp+0h] [ebp-4h]
+    iassert(pSelf);
 
-    if (!pSelf)
-        MyAssertHandler(".\\game\\g_client_fields.cpp", 258, 0, "%s", "pSelf");
-    pszIcon = Scr_GetString(0);
+    const char *pszIcon = Scr_GetString(0);
     pSelf->sess.status_icon = GScr_GetStatusIconIndex(pszIcon);
 }
 
@@ -283,10 +273,9 @@ void __cdecl ClientScr_GetStatusIcon(gclient_s *pSelf, const client_fields_s *pF
 void __cdecl ClientScr_SetHeadIcon(gclient_s *pSelf, const client_fields_s *pField)
 {
     gentity_s *pEnt; // [esp+0h] [ebp-8h]
-    char *pszIcon; // [esp+4h] [ebp-4h]
+    const char *pszIcon; // [esp+4h] [ebp-4h]
 
-    if (!pSelf)
-        MyAssertHandler(".\\game\\g_client_fields.cpp", 299, 0, "%s", "pSelf");
+    iassert(pSelf);
     pEnt = &g_entities[pSelf - level.clients];
     pszIcon = Scr_GetString(0);
     pEnt->s.iHeadIcon = GScr_GetHeadIconIndex(pszIcon);
@@ -316,8 +305,6 @@ void __cdecl ClientScr_GetHeadIcon(gclient_s *pSelf, const client_fields_s *pFie
 
 void __cdecl ClientScr_SetHeadIconTeam(gclient_s *pSelf, const client_fields_s *pField)
 {
-    char *v1; // eax
-    const char *v2; // eax
     gentity_s *pEnt; // [esp+0h] [ebp-8h]
     uint16_t sTeam; // [esp+4h] [ebp-4h]
 
@@ -339,9 +326,7 @@ void __cdecl ClientScr_SetHeadIconTeam(gclient_s *pSelf, const client_fields_s *
     }
     else if (sTeam == scr_const.spectator)
     {
-        v1 = SL_ConvertToString(sTeam);
-        v2 = va("'%s' is an illegal head icon team string. Must be none, allies, axis, or spectator.", v1);
-        Scr_Error(v2);
+        Scr_Error(va("'%s' is an illegal head icon team string. Must be none, allies, axis, or spectator.", SL_ConvertToString(sTeam)));
     }
     else
     {

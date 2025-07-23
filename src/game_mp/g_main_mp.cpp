@@ -1166,7 +1166,6 @@ void __cdecl CheckTeamStatus()
 void __cdecl G_RunFrame(int32_t levelTime)
 {
     trigger_info_t *v1; // ecx
-    char *v2; // eax
     float dtime; // [esp+4h] [ebp-530h]
     gentity_s *other; // [esp+110h] [ebp-424h]
     trigger_info_t *trigger_info; // [esp+114h] [ebp-420h]
@@ -1356,8 +1355,7 @@ void __cdecl G_RunFrame(int32_t levelTime)
     {
         for (i = 0; i < 1024; ++i)
         {
-            v2 = SL_ConvertToString(g_entities[i].classname);
-            Com_Printf(15, "%4i: %s\n", i, v2);
+            Com_Printf(15, "%4i: %s\n", i, SL_ConvertToString(g_entities[i].classname));
         }
         Dvar_SetBool((dvar_s *)g_listEntity, 0);
     }
@@ -1514,63 +1512,25 @@ void __cdecl G_RunFrameForEntity(gentity_s *ent)
     char *v5; // eax
     const char *v6; // eax
 
-    if (!ent->r.inuse)
-        MyAssertHandler(".\\game_mp\\g_main_mp.cpp", 1743, 0, "%s", "ent->r.inuse");
+    iassert(ent->r.inuse);
+
     if (ent->processedFrame != level.framenum)
     {
         ent->processedFrame = level.framenum;
         if (ent->tagInfo)
         {
-            if (!ent->tagInfo->parent)
-                MyAssertHandler(".\\game_mp\\g_main_mp.cpp", 1752, 0, "%s", "ent->tagInfo->parent");
+            iassert(ent->tagInfo->parent);
             G_RunFrameForEntity(ent->tagInfo->parent);
         }
-        if ((ent->r.svFlags & 6) == 6)
-            MyAssertHandler(
-                ".\\game_mp\\g_main_mp.cpp",
-                1756,
-                0,
-                "%s\n\t(ent->s.number) = %i",
-                "((ent->r.svFlags & ((1<<1) | (1<<2))) != ((1<<1) | (1<<2)))",
-                ent->s.number);
-        if (ent->r.mins[0] > (float)ent->r.maxs[0])
-        {
-            v1 = SL_ConvertToString(ent->classname);
-            v2 = va(
-                "entnum: %d, origin: %g %g %g, classname: %s",
-                ent->s.number,
-                ent->r.currentOrigin[0],
-                ent->r.currentOrigin[1],
-                ent->r.currentOrigin[2],
-                v1);
-            MyAssertHandler(".\\game_mp\\g_main_mp.cpp", 1758, 0, "%s\n\t%s", "ent->r.maxs[0] >= ent->r.mins[0]", v2);
-        }
-        if (ent->r.mins[1] > (float)ent->r.maxs[1])
-        {
-            v3 = SL_ConvertToString(ent->classname);
-            v4 = va(
-                "entnum: %d, origin: %g %g %g, classname: %s",
-                ent->s.number,
-                ent->r.currentOrigin[0],
-                ent->r.currentOrigin[1],
-                ent->r.currentOrigin[2],
-                v3);
-            MyAssertHandler(".\\game_mp\\g_main_mp.cpp", 1759, 0, "%s\n\t%s", "ent->r.maxs[1] >= ent->r.mins[1]", v4);
-        }
-        if (ent->r.mins[2] > (float)ent->r.maxs[2])
-        {
-            v5 = SL_ConvertToString(ent->classname);
-            v6 = va(
-                "entnum: %d, origin: %g %g %g, classname: %s",
-                ent->s.number,
-                ent->r.currentOrigin[0],
-                ent->r.currentOrigin[1],
-                ent->r.currentOrigin[2],
-                v5);
-            MyAssertHandler(".\\game_mp\\g_main_mp.cpp", 1760, 0, "%s\n\t%s", "ent->r.maxs[2] >= ent->r.mins[2]", v6);
-        }
+
+        iassert(((ent->r.svFlags & ((1 << 1) | (1 << 2))) != ((1 << 1) | (1 << 2))));
+        iassert(ent->r.maxs[0] >= ent->r.mins[0]);
+        iassert(ent->r.maxs[1] >= ent->r.mins[1]);
+        iassert(ent->r.maxs[2] >= ent->r.mins[2]);
+
         if ((ent->s.lerp.eFlags & 0x10000) != 0 && level.time > ent->s.time2)
             goto LABEL_18;
+
         if (level.time - ent->eventTime > 300)
         {
             if (ent->freeAfterEvent)

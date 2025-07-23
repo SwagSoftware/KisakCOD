@@ -24,9 +24,9 @@ struct EntHandle // sizeof=0x4 // (SP/MP same)
     uint16_t infoIndex;
 
     void setEnt(gentity_s *ent);
-    gentity_s *ent();
+    gentity_s *ent() const;
     int32_t entnum();
-    bool isDefined();
+    bool isDefined() const;
 
     static void Init();
     static void Shutdown();

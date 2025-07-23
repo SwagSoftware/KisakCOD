@@ -1,5 +1,6 @@
 #pragma once
 
+#include "actor.h"
 #ifndef KISAK_SP 
 #error This file is for SinglePlayer only 
 #endif

@@ -7,6 +7,7 @@
 #include "g_local.h"
 #include <script/scr_const.h>
 #include "g_main.h"
+#include <universal/com_math.h>
 
 void __cdecl DebugDrawSuppression(actor_s *self)
 {

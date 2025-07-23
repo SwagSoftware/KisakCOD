@@ -3,6 +3,9 @@
 #endif
 
 #include "g_actor_prone.h"
+#include <bgame/bg_actor_prone.h>
+#include "g_main.h"
+#include "actor_corpse.h"
 
 actor_prone_info_s *__cdecl G_GetActorProneInfo(actor_s *actor)
 {

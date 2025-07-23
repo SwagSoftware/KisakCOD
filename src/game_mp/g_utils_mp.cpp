@@ -47,7 +47,6 @@ int __cdecl G_FindConfigstringIndex(char *name, int start, int max, int create, 
 {
     const char *v6; // eax
     unsigned int ConfigstringConst; // eax
-    char *v8; // eax
     const char *v9; // eax
     HashEntry_unnamed_type_u v10; // [esp+0h] [ebp-14h]
     unsigned int s; // [esp+Ch] [ebp-8h]
@@ -109,8 +108,7 @@ int __cdecl G_FindConfigstringIndex(char *name, int start, int max, int create, 
                 for (ic = 1; ic < max; ++ic)
                 {
                     ConfigstringConst = SV_GetConfigstringConst(ic + start);
-                    v8 = SL_ConvertToString(ConfigstringConst);
-                    Com_Printf(15, "%i: %s\n", ic, v8);
+                    Com_Printf(15, "%i: %s\n", ic, SL_ConvertToString(ConfigstringConst));
                 }
                 v9 = va("G_FindConfigstringIndex: overflow (%d): %s", start, name);
                 Com_Error(ERR_DROP, v9);
@@ -138,10 +136,11 @@ int __cdecl G_LocalizedStringIndex(char *string)
     const char *errormsg; // [esp+4h] [ebp-8h]
     int allowCreate; // [esp+8h] [ebp-4h]
 
-    if (!string)
-        MyAssertHandler(".\\game_mp\\g_utils_mp.cpp", 157, 0, "%s", "string");
+    iassert(string);
+
     if (!*string)
         return 0;
+
     allowCreate = level.initializing;
     errormsg = origErrorMsg;
     if (!level.initializing)
@@ -416,14 +415,14 @@ void __cdecl G_OverrideModel(unsigned int modelIndex, char *defaultModelName)
 {
     unsigned int v2; // eax
     XModel *v3; // eax
-    char *modelName; // [esp+8h] [ebp-4h]
+    const char *modelName; // [esp+8h] [ebp-4h]
 
-    if (!modelIndex)
-        MyAssertHandler(".\\game_mp\\g_utils_mp.cpp", 515, 0, "%s", "modelIndex");
+    iassert(modelIndex);
     v2 = G_ModelName(modelIndex);
     modelName = SL_ConvertToString(v2);
-    if (!*modelName)
-        MyAssertHandler(".\\game_mp\\g_utils_mp.cpp", 517, 0, "%s", "modelName[0]");
+
+    iassert(modelName[0]);
+
     if (useFastFile->current.enabled)
     {
         DB_ReplaceModel(modelName, defaultModelName);
@@ -532,7 +531,6 @@ int __cdecl G_EntLinkTo(gentity_s *ent, gentity_s *parent, unsigned int tagName)
 
 int __cdecl G_EntLinkToInternal(gentity_s *ent, gentity_s *parent, unsigned int tagName)
 {
-    char *v4; // eax
     int pm_type; // [esp+0h] [ebp-10h]
     char *tagInfo; // [esp+4h] [ebp-Ch]
     gentity_s *checkEnt; // [esp+8h] [ebp-8h]
@@ -569,17 +567,9 @@ int __cdecl G_EntLinkToInternal(gentity_s *ent, gentity_s *parent, unsigned int 
     tagInfo = (char*)MT_Alloc(112, 17);
     *(unsigned int *)tagInfo = (unsigned int)parent;
     *((_WORD *)tagInfo + 4) = 0;
-    if (tagName && !SL_IsLowercaseString(tagName))
-    {
-        v4 = SL_ConvertToString(tagName);
-        MyAssertHandler(
-            ".\\game_mp\\g_utils_mp.cpp",
-            686,
-            0,
-            "%s\n\t(SL_ConvertToString( tagName )) = %s",
-            "(!tagName || SL_IsLowercaseString( tagName ))",
-            v4);
-    }
+
+    iassert(!tagName || SL_IsLowercaseString(tagName));
+    
     Scr_SetString((unsigned __int16 *)tagInfo + 4, tagName);
     *((unsigned int *)tagInfo + 1) = (unsigned int)parent->tagChildren;
     *((unsigned int *)tagInfo + 3) = index;
@@ -1150,7 +1140,7 @@ void __cdecl G_InitGentity(gentity_s *e)
 
 void __cdecl G_PrintEntities()
 {
-    char *v0; // [esp+18h] [ebp-8h]
+    const char *v0; // [esp+18h] [ebp-8h]
     int entityIndex; // [esp+1Ch] [ebp-4h]
 
     for (entityIndex = 0; entityIndex < level.num_entities; ++entityIndex)

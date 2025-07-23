@@ -1647,9 +1647,6 @@ uint32_t __cdecl DB_HashForName(const char *name, XAssetType type)
 int32_t g_defaultAssetCount;
 XAssetEntry *__cdecl DB_CreateDefaultEntry(XAssetType type, char *name)
 {
-    uint32_t v2; // eax
-    HashEntry_unnamed_type_u v3; // eax
-    char *v4; // eax
     XAsset asset; // [esp+Ch] [ebp-Ch] BYREF
     XAssetEntry *newEntry; // [esp+14h] [ebp-4h]
 
@@ -1679,12 +1676,9 @@ XAssetEntry *__cdecl DB_CreateDefaultEntry(XAssetType type, char *name)
         newEntry->asset.header.xmodelPieces->pieces = 0;
         newEntry->asset.header.xmodelPieces->numpieces = 0;
     }
-    v2 = DB_HashForName(name, type);
-    newEntry->nextHash = db_hashTable[v2];
-    db_hashTable[v2] = ((char *)newEntry - (char *)g_assetEntryPool) >> 4;
-    v3.prev = SL_GetString(name, 4u);
-    v4 = SL_ConvertToString(v3.prev);
-    DB_SetXAssetName(&newEntry->asset, v4);
+    newEntry->nextHash = db_hashTable[DB_HashForName(name, type)];
+    db_hashTable[DB_HashForName(name, type)] = ((char *)newEntry - (char *)g_assetEntryPool) >> 4;
+    DB_SetXAssetName(&newEntry->asset, SL_ConvertToString(SL_GetString(name, 4)));
     newEntry->inuse = 1;
     return newEntry;
 }
@@ -3167,7 +3161,7 @@ void DB_FreeUnusedResources()
     uint32_t hasha; // [esp+0h] [ebp-18h]
     uint16_t *pAssetEntryIndex; // [esp+4h] [ebp-14h]
     uint32_t assetEntryIndex; // [esp+8h] [ebp-10h]
-    char *newName; // [esp+Ch] [ebp-Ch]
+    const char *newName; // [esp+Ch] [ebp-Ch]
     char *name; // [esp+10h] [ebp-8h]
     XAssetEntryPoolEntry *assetEntry; // [esp+14h] [ebp-4h]
 

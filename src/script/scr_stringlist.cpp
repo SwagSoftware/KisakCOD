@@ -164,7 +164,7 @@ int SL_IsLowercaseString(unsigned int stringValue)
 {
 	iassert(stringValue);
 
-	for (char* str = SL_ConvertToString(stringValue); *str; ++str)
+	for (const char* str = SL_ConvertToString(stringValue); *str; ++str)
 	{
 		int cmp = *str;
 		if (cmp != (char)tolower(cmp))
@@ -348,7 +348,7 @@ END_CLEANUP:
 	return stringValue;
 }
 
-char* SL_ConvertToString(unsigned int stringValue)
+const char* SL_ConvertToString(unsigned int stringValue)
 {
 	//iassert((!stringValue || !scrStringDebugGlob || scrStringDebugGlob->refCount[stringValue]));
 
@@ -744,7 +744,7 @@ void __cdecl Scr_SetString(unsigned __int16 *to, unsigned int from)
 
 HashEntry_unnamed_type_u __cdecl SL_ConvertToLowercase(unsigned int stringValue, unsigned int user, int type)
 {
-	char *v4; // [esp+4Ch] [ebp-2014h]
+	const char *v4; // [esp+4Ch] [ebp-2014h]
 	char str[8192]; // [esp+50h] [ebp-2010h] BYREF
 	HashEntry_unnamed_type_u v6; // [esp+2054h] [ebp-Ch]
 	unsigned int len; // [esp+2058h] [ebp-8h]
@@ -823,4 +823,24 @@ unsigned int SL_GetUser(unsigned int stringValue)
 {
 	//return *((unsigned __int8 *)&GetRefString(stringValue)->0 + 1);
 	return GetRefString(stringValue)->user;
+}
+
+const char *SL_ConvertToStringSafe(unsigned int stringValue)
+{
+	if (!stringValue)
+		return "(NULL)";
+
+	if (scrStringDebugGlob)
+	{
+		if (!scrStringDebugGlob->refCount[stringValue])
+			MyAssertHandler(
+				"c:\\trees\\cod3\\cod3src\\src\\script\\scr_stringlist.cpp",
+				180,
+				0,
+				"%s\n\t(stringValue) = %i",
+				"(!stringValue || !scrStringDebugGlob || scrStringDebugGlob->refCount[stringValue])",
+				stringValue);
+	}
+
+	return GetRefString(stringValue)->str;
 }

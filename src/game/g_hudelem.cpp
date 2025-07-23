@@ -215,10 +215,10 @@ void __cdecl HudElem_DestroyAll()
 
 void __cdecl HudElem_SetLocalizedString(game_hudelem_s *hud, int32_t offset)
 {
-    char *string; // [esp+0h] [ebp-8h]
+    const char *string; // [esp+0h] [ebp-8h]
 
     string = Scr_GetIString(0);
-    *(he_type_t *)((char *)&hud->elem.type + fields_0[offset].ofs) = (he_type_t)G_LocalizedStringIndex(string);
+    *(he_type_t *)((char *)&hud->elem.type + fields_0[offset].ofs) = (he_type_t)G_LocalizedStringIndex((char*)string);
 }
 
 void __cdecl HudElem_SetFlagForeground(game_hudelem_s *hud, int32_t offset)
@@ -436,7 +436,7 @@ void __cdecl HudElem_SetEnumString(
     int32_t nameCount)
 {
     const char *v4; // eax
-    char *selectedName; // [esp+0h] [ebp-814h]
+    const char *selectedName; // [esp+0h] [ebp-814h]
     char errormsg[2052]; // [esp+4h] [ebp-810h] BYREF
     int32_t nameIndex; // [esp+80Ch] [ebp-8h]
     int32_t *value; // [esp+810h] [ebp-4h]
@@ -613,8 +613,6 @@ void __cdecl GScr_NewClientHudElem()
 void __cdecl GScr_NewTeamHudElem()
 {
     game_hudelem_s *v0; // eax
-    char *String; // eax
-    const char *v2; // eax
     uint16_t teamName; // [esp+0h] [ebp-Ch]
     game_hudelem_s *hud; // [esp+8h] [ebp-4h]
 
@@ -633,9 +631,7 @@ void __cdecl GScr_NewTeamHudElem()
     }
     else
     {
-        String = Scr_GetString(0);
-        v2 = va("team \"%s\" should be \"allies\", \"axis\", or \"spectator\"", String);
-        Scr_ParamError(0, v2);
+        Scr_ParamError(0, va("team \"%s\" should be \"allies\", \"axis\", or \"spectator\"", Scr_GetString(0)));
         v0 = HudElem_Alloc(1023, 0);
     }
     hud = v0;
@@ -701,9 +697,6 @@ void __cdecl HECmd_ClearAllTextAfterHudElem(scr_entref_t entref)
 
 void __cdecl HECmd_SetMaterial(scr_entref_t entref)
 {
-    char *String; // eax
-    const char *v2; // eax
-    const char *v3; // eax
     int32_t width; // [esp+0h] [ebp-14h]
     int32_t height; // [esp+4h] [ebp-10h]
     int32_t materialIndex; // [esp+8h] [ebp-Ch]
@@ -714,8 +707,7 @@ void __cdecl HECmd_SetMaterial(scr_entref_t entref)
     numParam = Scr_GetNumParam();
     if (numParam != 1 && numParam != 3)
         Scr_Error("USAGE: <hudelem> setShader(\"materialname\"[, optional_width, optional_height]);");
-    String = Scr_GetString(0);
-    materialIndex = G_MaterialIndex(String);
+    materialIndex = G_MaterialIndex(Scr_GetString(0));
     if (numParam == 1)
     {
         width = 0;
@@ -726,14 +718,12 @@ void __cdecl HECmd_SetMaterial(scr_entref_t entref)
         width = Scr_GetInt(1);
         if (width < 0)
         {
-            v2 = va("width %i < 0", width);
-            Scr_ParamError(1u, v2);
+            Scr_ParamError(1, va("width %i < 0", width));
         }
         height = Scr_GetInt(2);
         if (height < 0)
         {
-            v3 = va("height %i < 0", height);
-            Scr_ParamError(2u, v3);
+            Scr_ParamError(2, va("height %i < 0", height));
         }
     }
     HudElem_ClearTypeSettings(hud);
@@ -826,12 +816,6 @@ void __cdecl HECmd_SetClock(scr_entref_t entref)
 
 void __cdecl HECmd_SetClock_Internal(scr_entref_t entref, he_type_t type, const char *cmdName)
 {
-    const char *v3; // eax
-    const char *v4; // eax
-    const char *v5; // eax
-    char *String; // eax
-    const char *v7; // eax
-    const char *v8; // eax
     float v9; // [esp+8h] [ebp-3Ch]
     float v10; // [esp+18h] [ebp-2Ch]
     int32_t duration; // [esp+28h] [ebp-1Ch]
@@ -843,38 +827,27 @@ void __cdecl HECmd_SetClock_Internal(scr_entref_t entref, he_type_t type, const 
     int32_t time; // [esp+40h] [ebp-4h]
 
     hud = HECmd_GetHudElem(entref);
-    if (type != HE_TYPE_CLOCK_DOWN && type != HE_TYPE_CLOCK_UP)
-        MyAssertHandler(
-            ".\\game\\g_hudelem.cpp",
-            1024,
-            0,
-            "%s\n\t(type) = %i",
-            "(type == HE_TYPE_CLOCK_DOWN || type == HE_TYPE_CLOCK_UP)",
-            type);
+
+    iassert(type == HE_TYPE_CLOCK_DOWN || type == HE_TYPE_CLOCK_UP);
+    
     numParam = Scr_GetNumParam();
     if (numParam != 3 && numParam != 5)
     {
-        v3 = va(
-            "USAGE: <hudelem> %s(time_in_seconds, total_clock_time_in_seconds, shadername[, width, height]);\n",
-            cmdName);
-        Scr_Error(v3);
+        Scr_Error(va("USAGE: <hudelem> %s(time_in_seconds, total_clock_time_in_seconds, shadername[, width, height]);\n", cmdName));
     }
-    v10 = Scr_GetFloat(0) * 1000.0;
-    time = (int)(v10 + 0.4999999990686774);
+    v10 = Scr_GetFloat(0) * 1000.0f;
+    time = (int)(v10 + 0.5f);
     if (time <= 0 && type != HE_TYPE_CLOCK_UP)
     {
-        v4 = va("time %g should be > 0", (double)time * EQUAL_EPSILON);
-        Scr_ParamError(0, v4);
+        Scr_ParamError(0, va("time %g should be > 0", (double)time * EQUAL_EPSILON));
     }
-    v9 = Scr_GetFloat(1u) * 1000.0;
-    duration = (int)(v9 + 0.4999999990686774);
+    v9 = Scr_GetFloat(1) * 1000.0f;
+    duration = (int)(v9 + 0.5f);
     if (duration <= 0)
     {
-        v5 = va("duration %g should be > 0", (double)duration * EQUAL_EPSILON);
-        Scr_ParamError(1u, v5);
+        Scr_ParamError(1, va("duration %g should be > 0", (double)duration * EQUAL_EPSILON));
     }
-    String = Scr_GetString(2u);
-    materialIndex = G_MaterialIndex(String);
+    materialIndex = G_MaterialIndex(Scr_GetString(2));
     if (numParam == 3)
     {
         width = 0;
@@ -885,14 +858,12 @@ void __cdecl HECmd_SetClock_Internal(scr_entref_t entref, he_type_t type, const 
         width = Scr_GetInt(3);
         if (width < 0)
         {
-            v7 = va("width %i < 0", width);
-            Scr_ParamError(3u, v7);
+            Scr_ParamError(3, va("width %i < 0", width));
         }
         height = Scr_GetInt(4);
         if (height < 0)
         {
-            v8 = va("height %i < 0", height);
-            Scr_ParamError(4u, v8);
+            Scr_ParamError(4, va("height %i < 0", height));
         }
     }
     HudElem_ClearTypeSettings(hud);
@@ -924,7 +895,6 @@ void __cdecl HECmd_SetValue(scr_entref_t entref)
 void __cdecl HECmd_SetWaypoint(scr_entref_t entref)
 {
     VariableUnion v1; // eax
-    char *String; // eax
     int32_t numParam; // [esp+4h] [ebp-8h]
     game_hudelem_s *hud; // [esp+8h] [ebp-4h]
 
@@ -939,8 +909,7 @@ void __cdecl HECmd_SetWaypoint(scr_entref_t entref)
     }
     else
     {
-        String = Scr_GetString(1u);
-        hud->elem.offscreenMaterialIdx = G_MaterialIndex(String);
+        hud->elem.offscreenMaterialIdx = G_MaterialIndex(Scr_GetString(1));
     }
 }
 
@@ -1079,7 +1048,7 @@ void __cdecl HECmd_SetPlayerNameString(scr_entref_t entref)
 
 void __cdecl HECmd_SetGameTypeString(scr_entref_t entref)
 {
-    char *gametype; // [esp+0h] [ebp-8h]
+    const char *gametype; // [esp+0h] [ebp-8h]
     game_hudelem_s *hud; // [esp+4h] [ebp-4h]
 
     hud = HECmd_GetHudElem(entref);
@@ -1107,13 +1076,13 @@ void __cdecl HECmd_SetGameTypeString(scr_entref_t entref)
 void __cdecl HECmd_SetMapNameString(scr_entref_t entref)
 {
     game_hudelem_s *hud; // [esp+0h] [ebp-8h]
-    char *mapname; // [esp+4h] [ebp-4h]
+    const char *mapname; // [esp+4h] [ebp-4h]
 
     hud = HECmd_GetHudElem(entref);
     mapname = Scr_GetString(0);
     if (mapname)
     {
-        if (SV_MapExists(mapname))
+        if (SV_MapExists((char*)mapname))
         {
             SV_SetConfigstring(17, mapname);
             HudElem_ClearTypeSettings(hud);

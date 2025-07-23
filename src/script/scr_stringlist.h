@@ -101,7 +101,8 @@ void SL_AddRefToString(unsigned int stringValue);
 
 unsigned int SL_GetString_(const char* str, unsigned int user, int type);
 HashEntry_unnamed_type_u SL_GetStringOfSize(const char* str, unsigned int user, unsigned int len, int type);
-char* SL_ConvertToString(unsigned int stringValue);
+const char* SL_ConvertToString(unsigned int stringValue);
+const char *SL_ConvertToStringSafe(unsigned int stringValue);
 RefString* GetRefString(unsigned int stringValue);
 RefString* GetRefString(const char* str);
 

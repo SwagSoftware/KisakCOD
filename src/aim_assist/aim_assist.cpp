@@ -702,7 +702,6 @@ int32_t __cdecl AimAssist_CalcAimPos(
 
 int32_t __cdecl AimTarget_GetTagPos(int32_t localClientNum, const centity_s *cent, uint32_t tagName, float *pos)
 {
-    char *v5; // eax
     DObj_s *dobj; // [esp+0h] [ebp-4h]
 
     if (!cent)
@@ -714,8 +713,7 @@ int32_t __cdecl AimTarget_GetTagPos(int32_t localClientNum, const centity_s *cen
         return 0;
     if (!CG_DObjGetWorldTagPos(&cent->pose, dobj, tagName, pos))
     {
-        v5 = SL_ConvertToString(tagName);
-        Com_Error(ERR_DROP, "AimTarget_GetTagPos: Cannot find tag [%s] on entity\n", v5);
+        Com_Error(ERR_DROP, "AimTarget_GetTagPos: Cannot find tag [%s] on entity\n", SL_ConvertToString(tagName));
     }
     return 1;
 }

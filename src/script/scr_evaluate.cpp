@@ -42,13 +42,13 @@ void __cdecl Scr_ArchiveCanonicalStrings()
 {
     char v0; // [esp+13h] [ebp-35h]
     char *v1; // [esp+18h] [ebp-30h]
-    char *v2; // [esp+1Ch] [ebp-2Ch]
+    const char *v2; // [esp+1Ch] [ebp-2Ch]
     unsigned int stringValue; // [esp+30h] [ebp-18h]
     unsigned int stringValuea; // [esp+30h] [ebp-18h]
     unsigned int len; // [esp+34h] [ebp-14h]
     int lena; // [esp+34h] [ebp-14h]
     unsigned __int16 canonicalStr; // [esp+38h] [ebp-10h]
-    char *s; // [esp+3Ch] [ebp-Ch]
+    const char *s; // [esp+3Ch] [ebp-Ch]
     char *debugString; // [esp+40h] [ebp-8h]
     unsigned __int16 i; // [esp+44h] [ebp-4h]
     unsigned __int16 ia; // [esp+44h] [ebp-4h]
@@ -174,7 +174,7 @@ unsigned __int16 __cdecl Scr_CompileCanonicalString(unsigned int stringValue)
     int v2; // [esp+4h] [ebp-24h]
     int low; // [esp+18h] [ebp-10h]
     int middle; // [esp+1Ch] [ebp-Ch]
-    char *s; // [esp+20h] [ebp-8h]
+    const char *s; // [esp+20h] [ebp-8h]
     int high; // [esp+24h] [ebp-4h]
 
     s = SL_ConvertToString(stringValue);
@@ -235,8 +235,6 @@ void __cdecl Scr_GetFieldValue(unsigned int objectId, const char *fieldName, int
 
 void __cdecl Scr_GetValueString(unsigned int localId, VariableValue *value, int len, char *s)
 {
-    char *v4; // eax
-    char *v5; // eax
     const XAnim_s *Anims; // eax
     char *AnimDebugName; // eax
     char EntClassId; // al
@@ -299,12 +297,10 @@ void __cdecl Scr_GetValueString(unsigned int localId, VariableValue *value, int 
         }
         break;
     case 2:
-        v4 = SL_ConvertToString(value->u.intValue);
-        Com_sprintf(s, len, "\"%s\"", v4);
+        Com_sprintf(s, len, "\"%s\"", SL_ConvertToString(value->u.intValue));
         break;
     case 3:
-        v5 = SL_ConvertToString(value->u.intValue);
-        Com_sprintf(s, len, "&\"%s\"", v5);
+        Com_sprintf(s, len, "&\"%s\"", SL_ConvertToString(value->u.intValue));
         break;
     case 4:
         sprintf(
@@ -432,7 +428,6 @@ void __cdecl Scr_CompileExpression(sval_u *expr)
 
 void __cdecl Scr_CompilePrimitiveExpression(sval_u *expr)
 {
-    char *v1; // eax
     sval_u tempVariableId; // [esp+2Ch] [ebp-8h]
     sval_u tempVariableIda; // [esp+2Ch] [ebp-8h]
 
@@ -446,8 +441,7 @@ void __cdecl Scr_CompilePrimitiveExpression(sval_u *expr)
         break;
     case 0xB:
     case 0xC:
-        v1 = SL_ConvertToString(*(unsigned int *)(expr->type + 4));
-        expr->type = debugger_string(*(debugger_sval_s **)expr->type, v1).type;
+        expr->type = debugger_string(*(debugger_sval_s **)expr->type, (char*)SL_ConvertToString(*(unsigned int *)(expr->type + 4))).type;
         break;
     case 0x11:
         Scr_CompileVariableExpression(&expr->node[1]);
@@ -504,7 +498,7 @@ void __cdecl Scr_CompileVariableExpression(sval_u *expr)
     int argumentIndex; // [esp+48h] [ebp-20h]
     sval_u classnum; // [esp+4Ch] [ebp-1Ch]
     sval_u tempVariableId; // [esp+50h] [ebp-18h]
-    char *s; // [esp+58h] [ebp-10h]
+    const char *s; // [esp+58h] [ebp-10h]
     sval_u entnum; // [esp+5Ch] [ebp-Ch]
     sval_u idValue; // [esp+64h] [ebp-4h]
 

@@ -156,7 +156,7 @@ int32_t EntHandle::entnum()
     return number - 1;
 }
 
-bool EntHandle::isDefined()
+bool EntHandle::isDefined() const
 {
     int number = this->number;
 
@@ -165,7 +165,7 @@ bool EntHandle::isDefined()
     return number != 0;
 }
 
-gentity_s *EntHandle::ent()
+gentity_s *EntHandle::ent() const
 {
     int number = this->number;
 

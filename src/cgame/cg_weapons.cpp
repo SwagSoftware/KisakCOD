@@ -1154,7 +1154,7 @@ void __cdecl ProcessWeaponNoteTracks(int32_t localClientNum, const playerState_s
 
 void __cdecl PlayNoteMappedSoundAliases(int32_t localClientNum, const char *noteName, const WeaponDef *weapDef)
 {
-    char *soundName; // [esp+0h] [ebp-Ch]
+    const char *soundName; // [esp+0h] [ebp-Ch]
     int32_t mapIdx; // [esp+4h] [ebp-8h]
     uint32_t noteNameSL; // [esp+8h] [ebp-4h]
 
@@ -3275,7 +3275,6 @@ void __cdecl CG_BulletHitEvent(
 
 int32_t __cdecl CalcMuzzlePoint(int32_t localClientNum, int32_t entityNum, float *muzzle, uint32_t flashTag)
 {
-    char *v5; // eax
     double v6; // st7
     DObj_s *obj; // [esp+8h] [ebp-Ch]
     const cg_s *cgameGlob; // [esp+Ch] [ebp-8h]
@@ -3306,8 +3305,7 @@ int32_t __cdecl CalcMuzzlePoint(int32_t localClientNum, int32_t entityNum, float
                 muzzle[2] = cent->nextState.lerp.pos.trBase[2];
                 if (entityNum < 64)
                 {
-                    v5 = SL_ConvertToString(flashTag);
-                    Com_DPrintf(17, "No %s in CalcMuzzlePoint on entity %d.\n", v5, entityNum);
+                    Com_DPrintf(17, "No %s in CalcMuzzlePoint on entity %d.\n", SL_ConvertToString(flashTag), entityNum);
                     if ((cent->nextState.lerp.eFlags & 8) != 0)
                     {
                         muzzle[2] = muzzle[2] + 11.0;

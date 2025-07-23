@@ -508,17 +508,9 @@ void __cdecl G_VehiclesSetupSpawnedEnts()
 
 void __cdecl SetupCollisionMap(gentity_s *ent)
 {
-    uint32_t v1; // eax
-    char *v2; // eax
-    uint32_t v3; // eax
-    char *v4; // eax
-    uint32_t v5; // eax
-    char *v6; // eax
     gentity_s *cmEnt; // [esp+0h] [ebp-4h]
 
-    v1 = G_ModelName(ent->model);
-    v2 = SL_ConvertToString(v1);
-    cmEnt = GetCollisionMap(v2);
+    cmEnt = GetCollisionMap(SL_ConvertToString(G_ModelName(ent->model)));
     if (cmEnt)
     {
         if (cmEnt->s.index.brushmodel)
@@ -531,22 +523,18 @@ void __cdecl SetupCollisionMap(gentity_s *ent)
         }
         else
         {
-            v5 = G_ModelName(ent->model);
-            v6 = SL_ConvertToString(v5);
-            Com_PrintWarning(15, "WARNING: Cannot use empty vehicle collmap for [%s]\n", v6);
+            Com_PrintWarning(15, "WARNING: Cannot use empty vehicle collmap for [%s]\n", SL_ConvertToString(G_ModelName(ent->model)));
         }
     }
     else
     {
-        v3 = G_ModelName(ent->model);
-        v4 = SL_ConvertToString(v3);
-        Com_PrintWarning(15, "WARNING: Cannot find vehicle collmap for [%s]\n", v4);
+        Com_PrintWarning(15, "WARNING: Cannot find vehicle collmap for [%s]\n", SL_ConvertToString(G_ModelName(ent->model)));
     }
 }
 
 gentity_s *__cdecl GetCollisionMap(const char *modelname)
 {
-    char *targetname; // [esp+0h] [ebp-Ch]
+    const char *targetname; // [esp+0h] [ebp-Ch]
     gentity_s *ent; // [esp+4h] [ebp-8h]
     int32_t i; // [esp+8h] [ebp-4h]
 
@@ -723,8 +711,6 @@ int32_t __cdecl VEH_ParseSpecificField(uint8_t *pStruct, const char *pValue, int
 
 void __cdecl VEH_InitModelAndValidateTags(gentity_s *ent, int32_t *infoIdx)
 {
-    uint32_t v2; // eax
-    char *v3; // eax
     int32_t defaultInfoIdx; // [esp+0h] [ebp-8h]
     bool isDefault; // [esp+7h] [ebp-1h]
 
@@ -747,12 +733,10 @@ void __cdecl VEH_InitModelAndValidateTags(gentity_s *ent, int32_t *infoIdx)
     {
         if (isDefault)
             Com_Error(ERR_DROP, "ERROR: default vehicle is missing a required tag!");
-        v2 = G_ModelName(ent->model);
-        v3 = SL_ConvertToString(v2);
         Com_PrintWarning(
             15,
             "WARNING: vehicle '%s' is missing a required tag! switching to default vehicle model and info.\n",
-            v3);
+            SL_ConvertToString(G_ModelName(ent->model)));
         G_SetModel(ent, (char*)"defaultvehicle_mp");
         *infoIdx = defaultInfoIdx;
         G_DObjUpdate(ent);
@@ -2398,8 +2382,6 @@ void __cdecl VEH_DebugLine(float *start, float *end, float r, float g, float b)
 
 void __cdecl VEH_GetWheelOrigin(gentity_s *ent, int32_t idx, float *origin)
 {
-    char *v3; // eax
-    char *v4; // [esp+4h] [ebp-28h]
     float scale; // [esp+8h] [ebp-24h]
     DObjAnimMat *mtx; // [esp+20h] [ebp-Ch]
     scr_vehicle_s *veh; // [esp+24h] [ebp-8h]
@@ -2408,9 +2390,7 @@ void __cdecl VEH_GetWheelOrigin(gentity_s *ent, int32_t idx, float *origin)
     veh = ent->scr_vehicle;
     if (veh->boneIndex.wheel[idx] < 0)
     {
-        v4 = SL_ConvertToString(*s_wheelTags[idx]);
-        v3 = SL_ConvertToString(ent->targetname);
-        Com_Error(ERR_DROP, "Script vehicle [%s] needs [%s]", v3, v4);
+        Com_Error(ERR_DROP, "Script vehicle [%s] needs [%s]", SL_ConvertToString(ent->targetname), SL_ConvertToString(*s_wheelTags[idx]));
     }
     mtx = G_DObjGetLocalBoneIndexMatrix(ent, veh->boneIndex.wheel[idx]);
     if (!mtx)
@@ -2622,7 +2602,6 @@ void __cdecl G_VehEntHandler_Use(gentity_s *pEnt, gentity_s *pOther, gentity_s *
 
 void __cdecl LinkPlayerToVehicle(gentity_s *ent, gentity_s *player)
 {
-    char *v2; // eax
     float diff[3]; // [esp+Ch] [ebp-7Ch] BYREF
     float pos[3]; // [esp+18h] [ebp-70h] BYREF
     float dist; // [esp+24h] [ebp-64h]
@@ -2680,8 +2659,7 @@ void __cdecl LinkPlayerToVehicle(gentity_s *ent, gentity_s *player)
         originOffset[2] = -35.0f;
     if (!G_EntLinkToWithOffset(player, ent, bestRiderTag->tagName, originOffset, vec3_origin))
     {
-        v2 = SL_ConvertToString(bestRiderTag->tagName);
-        Com_Error(ERR_DROP, "LinkPlayerToVehicle: Cannot link to vehicle bone %s", v2);
+        Com_Error(ERR_DROP, "LinkPlayerToVehicle: Cannot link to vehicle bone %s", SL_ConvertToString(bestRiderTag->tagName));
     }
     veh->flags |= 1u;
     bestRiderTag->entNum = player->s.number;

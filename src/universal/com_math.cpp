@@ -574,6 +574,18 @@ float __cdecl Vec2Normalize(vec2r v)
     return v3;
 }
 
+void __cdecl Vec3NormalizeFast(float *v)
+{
+    int32_t number; // [esp+0h] [ebp-1Ch]
+    float invLength; // [esp+18h] [ebp-4h]
+
+    *(float *)&number = Vec3LengthSq(v);
+    invLength = I_rsqrt(number);
+    v[0] = v[0] * invLength;
+    v[1] = v[1] * invLength;
+    v[2] = v[2] * invLength;
+}
+
 float __cdecl Vec3NormalizeTo(const vec3r v, vec3r out)
 {
     float v3; // [esp+0h] [ebp-14h]
