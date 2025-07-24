@@ -910,8 +910,8 @@ bool __cdecl turret_behind(gentity_s *self, gentity_s *other)
     if (!other->client)
         MyAssertHandler(".\\game_mp\\g_misc_mp.cpp", 869, 0, "%s", "other->client");
     minYaw = self->r.currentAngles[1] + pTurretInfo->arcmin[1];
-    v10 = fabs(pTurretInfo->arcmin[1]);
-    v9 = fabs(pTurretInfo->arcmax[1]);
+    v10 = I_fabs(pTurretInfo->arcmin[1]);
+    v9 = I_fabs(pTurretInfo->arcmax[1]);
     yawSpan = (v10 + v9) * 0.5;
     v8 = yawSpan + minYaw;
     v12 = v8 * 0.002777777845039964;

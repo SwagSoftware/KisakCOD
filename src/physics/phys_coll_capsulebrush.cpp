@@ -573,7 +573,7 @@ char __cdecl Phys_TestAxis(
     scale = 1.0 / axisLen;
     Vec3Scale(inAxis, scale, axis);
     v14 = Vec3Dot(capsule->axis, axis);
-    v12 = fabs(v14);
+    v12 = I_fabs(v14);
     frc = v12 * capsule->halfHeight + capsule->radius;
     afv[0] = Vec3Dot(p0, axis);
     afv[1] = Vec3Dot(p1, axis);
@@ -590,10 +590,10 @@ char __cdecl Phys_TestAxis(
     center = (minCoord + maxCoord) * 0.5;
     radius = (maxCoord - minCoord) * 0.5;
     v11 = frc + radius;
-    v10 = fabs(center);
+    v10 = I_fabs(center);
     if (v10 > v11)
         return 0;
-    v9 = fabs(center);
+    v9 = I_fabs(center);
     depth = v9 - (frc + radius);
     if (axisResults->bestDepth < depth)
     {
@@ -923,8 +923,8 @@ bool __cdecl Phys_TestCapsulePlane(const float *plane, const Capsule *capsule)
     p1Dist = Vec3Dot(capsule->p1, plane) - plane[3];
     if (p0Dist * p1Dist < 0.0)
         return 1;
-    v6 = fabs(p1Dist);
-    v5 = fabs(p0Dist);
+    v6 = I_fabs(p1Dist);
+    v5 = I_fabs(p0Dist);
     v4 = v6 - v5;
     if (v4 < 0.0)
         v3 = v6;

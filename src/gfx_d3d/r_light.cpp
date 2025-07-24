@@ -625,8 +625,8 @@ void __cdecl R_ComputeSpotLightCrossDirs(const GfxLight *light, float (*crossDir
     bestCrossAxis = 0;
     for (axisIndex = 1; axisIndex < 3; ++axisIndex)
     {
-        v3 = fabs(light->dir[axisIndex]);
-        v2 = fabs(light->dir[bestCrossAxis]);
+        v3 = I_fabs(light->dir[axisIndex]);
+        v2 = I_fabs(light->dir[bestCrossAxis]);
         if (v2 > (double)v3)
             bestCrossAxis = axisIndex;
     }

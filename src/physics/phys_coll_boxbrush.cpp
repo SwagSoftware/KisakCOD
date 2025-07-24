@@ -398,7 +398,7 @@ void __cdecl Phys_GetWindingForBrushFace2(
             v21 = planes[1][0] * v18;
             v22 = planes[2][0] * v19;
             v16 = v20 + v21 + v22;
-            v5 = fabs(v16);
+            v5 = I_fabs(v16);
             if (v5 >= EQUAL_EPSILON)
             {
                 v15 = 1.0 / v16;
@@ -997,7 +997,7 @@ char __cdecl Phys_TestBoxAgainstEachBrushPlane(
     {
         for (c = 0; c < 3; ++c)
         {
-            v9 = fabs(info->R[r][c]);
+            v9 = I_fabs(info->R[r][c]);
             absR[r][c] = v9;
         }
     }
@@ -1116,9 +1116,9 @@ char __cdecl Phys_TestBoxAgainstEachBrushPlane(
                 "!IS_NAN((brushPlane->normal)[0]) && !IS_NAN((brushPlane->normal)[1]) && !IS_NAN((brushPlane->normal)[2])");
         }
         MatrixTransformVector(brushPlane->normal, info->RTransposed, rotatedNormal);
-        v8 = fabs(rotatedNormal[0]);
-        v7 = fabs(rotatedNormal[1]);
-        v6 = fabs(rotatedNormal[2]);
+        v8 = I_fabs(rotatedNormal[0]);
+        v7 = I_fabs(rotatedNormal[1]);
+        v6 = I_fabs(rotatedNormal[2]);
         radius = v8 * info->u.sideExtents[0] + v7 * info->u.sideExtents[1] + v6 * info->u.sideExtents[2];
         diste = Vec3Dot(info->pos, brushPlane->normal) - brushPlane->dist;
         if ((LODWORD(diste) & 0x7F800000) == 0x7F800000)
@@ -1677,7 +1677,7 @@ void __cdecl Phys_GetWindingForBrushFace(
             v21 = planes[1][0] * v18;
             v22 = planes[2][0] * v19;
             v16 = v20 + v21 + v22;
-            v5 = fabs(v16);
+            v5 = I_fabs(v16);
             if (v5 >= EQUAL_EPSILON)
             {
                 v15 = 1.0 / v16;
@@ -2288,7 +2288,7 @@ int __cdecl Phys_GetPlaneForTriangle2(const float (*triangle)[3], const float *o
     Vec3Normalize(result);
     Vec3Sub(origin, (const float *)triangle, point);
     v24 = Vec3Dot(point, result);
-    v5 = fabs(v24);
+    v5 = I_fabs(v24);
     if (radius <= (double)v5)
         return 0;
     Vec3Cross(result, triangleEdge[0], clipPlane);

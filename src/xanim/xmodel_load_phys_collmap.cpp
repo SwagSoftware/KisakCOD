@@ -330,11 +330,11 @@ char __cdecl IsBoxInBrush(const float *boxCenter, const float *boxHalfLengths, c
     {
         plane = brush->sides[sideIndexa].plane;
         v9 = *boxHalfLengths * plane->normal[0];
-        v6 = fabs(v9);
+        v6 = I_fabs(v9);
         v8 = boxHalfLengths[1] * plane->normal[1];
-        v5 = fabs(v8);
+        v5 = I_fabs(v8);
         v7 = boxHalfLengths[2] * plane->normal[2];
-        v4 = fabs(v7);
+        v4 = I_fabs(v7);
         offset = v6 + v5 + v4;
         dist = Vec3Dot(boxCenter, plane->normal) - plane->dist - offset;
         if (dist >= 0.0)
@@ -364,16 +364,16 @@ char __cdecl IsBoxInBox(const float *boxCenter, const float *boxHalfLengths, con
     for (sideIndex = 0; sideIndex < 3; ++sideIndex)
     {
         v11 = *boxHalfLengths * geom->orientation[sideIndex][0];
-        v8 = fabs(v11);
+        v8 = I_fabs(v11);
         v10 = boxHalfLengths[1] * geom->orientation[sideIndex][1];
-        v7 = fabs(v10);
+        v7 = I_fabs(v10);
         v9 = boxHalfLengths[2] * geom->orientation[sideIndex][2];
-        v6 = fabs(v9);
+        v6 = I_fabs(v9);
         offset = v8 + v7 + v6;
         orientedBoxDist = Vec3Dot(geom->orientation[sideIndex], geom->offset);
         alignedBoxDist = Vec3Dot(geom->orientation[sideIndex], boxCenter);
         v5 = alignedBoxDist - orientedBoxDist;
-        v4 = fabs(v5);
+        v4 = I_fabs(v5);
         dist = v4 - geom->halfLengths[sideIndex] - offset;
         if (dist >= 0.0)
             return 0;
@@ -398,7 +398,7 @@ char __cdecl IsBoxInCylinder(const float *boxCenter, const float *boxHalfLengths
         MyAssertHandler(".\\xanim\\xmodel_load_phys_collmap.cpp", 623, 0, "%s", "geom->type == PHYS_GEOM_CYLINDER");
     for (axis = 0; axis < 3; ++axis)
     {
-        v9 = fabs(geom->orientation[0][axis]);
+        v9 = I_fabs(geom->orientation[0][axis]);
         v8 = 1.0 - v9;
         if (v8 < 0.0)
             v7 = 1.0;
@@ -408,7 +408,7 @@ char __cdecl IsBoxInCylinder(const float *boxCenter, const float *boxHalfLengths
         v5 = sqrt(v6);
         cylOffset = v7 * geom->halfLengths[0] + v5 * geom->halfLengths[1];
         v10 = geom->offset[axis] - boxCenter[axis];
-        v4 = fabs(v10);
+        v4 = I_fabs(v10);
         dist = v4 - boxHalfLengths[axis] - cylOffset;
         if (dist >= 0.0)
             return 0;
@@ -642,7 +642,7 @@ char __cdecl SnapAxialVector(float *normal)
     for (axis = 0; axis < 3; ++axis)
     {
         v5 = normal[axis] - 1.0;
-        v3 = fabs(v5);
+        v3 = I_fabs(v5);
         if (v3 < 0.0000001)
         {
             *normal = 0.0;
@@ -652,7 +652,7 @@ char __cdecl SnapAxialVector(float *normal)
             return 1;
         }
         v4 = normal[axis] - -1.0;
-        v2 = fabs(v4);
+        v2 = I_fabs(v4);
         if (v2 < 0.0000001)
         {
             *normal = 0.0;
@@ -672,7 +672,7 @@ void __cdecl SnapPlane(float *plane)
 
     SnapAxialVector(plane);
     v2 = plane[3] - Q_rint(plane[3]);
-    v1 = fabs(v2);
+    v1 = I_fabs(v2);
     if (v1 < 0.001)
         plane[3] = Q_rint(plane[3]);
 }
@@ -685,7 +685,7 @@ bool __cdecl PlaneEqual(const float *p1, const float *p2)
     if (!VecNCompareCustomEpsilon(p1, p2, 0.001f, 3))
         return 0;
     v4 = p1[3] - p2[3];
-    v3 = fabs(v4);
+    v3 = I_fabs(v4);
     return v3 < 0.001;
 }
 
@@ -1096,11 +1096,11 @@ void __cdecl GetGeomAABB(const PhysGeomInfo *geom, float *mins, float *maxs)
         for (axisIndex = 0; axisIndex < 3; ++axisIndex)
         {
             v9 = range * geom->orientation[0][axisIndex];
-            v5 = fabs(v9);
+            v5 = I_fabs(v9);
             v8 = range_4 * geom->orientation[1][axisIndex];
-            v4 = fabs(v8);
+            v4 = I_fabs(v8);
             v7 = range_8 * geom->orientation[2][axisIndex];
-            v3 = fabs(v7);
+            v3 = I_fabs(v7);
             axisRange = v5 + v4 + v3;
             mins[axisIndex] = geom->offset[axisIndex] - axisRange;
             maxs[axisIndex] = geom->offset[axisIndex] + axisRange;

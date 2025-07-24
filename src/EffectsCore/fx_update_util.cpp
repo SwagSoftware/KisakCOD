@@ -212,7 +212,7 @@ void __cdecl FX_GetOrientation(
                         "%s\n\t(elemDef->flags & FX_ELEM_SPAWN_OFFSET_MASK) = %i",
                         "((elemDef->flags & FX_ELEM_SPAWN_OFFSET_MASK) == FX_ELEM_SPAWN_OFFSET_CYLINDER)",
                         elemDef->flags & 0x30);
-                v7 = fabs(orient->axis[0][2]);
+                v7 = I_fabs(orient->axis[0][2]);
                 up[0] = 0.0;
                 if (v7 < 0.9990000128746033)
                 {

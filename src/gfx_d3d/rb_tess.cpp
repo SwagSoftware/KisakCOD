@@ -613,7 +613,7 @@ void __cdecl RB_CreateParticleCloud2dAxis(const GfxParticleCloud *cloud, const f
         viewAxisLength = Vec2Length((const float *)viewAxis);
 
         iassert(viewAxisLength > 0);
-        iassert(fabs(viewAxisLength - Vec2Length(&(*viewAxis)[1][0])) < EQUAL_EPSILON);
+        iassert(I_fabs(viewAxisLength - Vec2Length(&(*viewAxis)[1][0])) < EQUAL_EPSILON);
 
         (*viewAxis)[0][0] *= (cloud->radius[0] / viewAxisLength);
         (*viewAxis)[0][1] *= (cloud->radius[0] / viewAxisLength);

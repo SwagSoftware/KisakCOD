@@ -836,8 +836,8 @@ unsigned int CMod_LoadSubmodels()
         {
             out->mins[j] = *(float *)&in[4 * j] - 1.0;
             out->maxs[j] = *(float *)&in[4 * j + 12] + 1.0;
-            v4 = fabs(out->maxs[j]);
-            v3 = fabs(out->mins[j]);
+            v4 = I_fabs(out->maxs[j]);
+            v3 = I_fabs(out->mins[j]);
             v2 = v3 - v4;
             if (v2 < 0.0)
                 v1 = v4;

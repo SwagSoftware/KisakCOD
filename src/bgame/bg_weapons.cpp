@@ -1126,7 +1126,7 @@ void __cdecl PM_AdjustAimSpreadScale(pmove_t *pm, pml_t *pml)
                         a2 = (double)pm->oldcmd.angles[i] * 0.0054931640625;
                         a1 = (double)pm->cmd.angles[i] * 0.0054931640625;
                         v8 = AngleDelta(a1, a2);
-                        v5 = fabs(v8);
+                        v5 = I_fabs(v8);
                         viewchange = v5 * (float)0.0099999998 * weapDef->fHipSpreadTurnAdd / pml->frametime + viewchange;
                     }
                 }
@@ -3952,8 +3952,8 @@ int __cdecl BG_CalculateWeaponPosition_GunRecoil_SingleAngle(
     int bCanStop; // [esp+10h] [ebp-4h]
 
     bCanStop = 0;
-    v10 = fabs(*fOffset);
-    if (v10 >= 0.25 || (v9 = fabs(*speed), v9 >= 1.0))
+    v10 = I_fabs(*fOffset);
+    if (v10 >= 0.25 || (v9 = I_fabs(*speed), v9 >= 1.0))
     {
         *fOffset = *speed * fTimeStep + *fOffset;
         if (fOfsCap >= (double)*fOffset)

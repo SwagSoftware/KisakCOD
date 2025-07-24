@@ -608,8 +608,8 @@ void __cdecl Scr_KeyEvent(int key)
                     {
                         newMouseTime = Sys_Milliseconds();
                         if ((newMouseTime - scrDebuggerGlob.prevMouseTime) > 300
-                            || (v4 = UI_Component::g.cursorPos[0] - scrDebuggerGlob.prevMousePos[0], v2 = fabs(v4), v2 >= 5.0)
-                            || (v3 = UI_Component::g.cursorPos[1] - scrDebuggerGlob.prevMousePos[1], v1 = fabs(v3), v1 >= 5.0))
+                            || (v4 = UI_Component::g.cursorPos[0] - scrDebuggerGlob.prevMousePos[0], v2 = I_fabs(v4), v2 >= 5.0)
+                            || (v3 = UI_Component::g.cursorPos[1] - scrDebuggerGlob.prevMousePos[1], v1 = I_fabs(v3), v1 >= 5.0))
                         {
                             scrDebuggerGlob.prevMouseTime = newMouseTime;
                             scrDebuggerGlob.prevMousePos[0] = UI_Component::g.cursorPos[0];

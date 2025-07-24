@@ -26,7 +26,7 @@ void __cdecl R_DeriveNearPlaneConstantsForView(GfxCmdBufSourceState *source)
     float scale; // [esp+64h] [ebp-4h]
     float scalea; // [esp+64h] [ebp-4h]
 
-    v4 = fabs(source->viewParms.inverseViewProjectionMatrix.m[0][3]);
+    v4 = I_fabs(source->viewParms.inverseViewProjectionMatrix.m[0][3]);
     v3 = source->viewParms.inverseViewProjectionMatrix.m[3][3] * 0.000009999999747378752;
     if (v4 >= (double)v3)
         MyAssertHandler(
@@ -34,9 +34,9 @@ void __cdecl R_DeriveNearPlaneConstantsForView(GfxCmdBufSourceState *source)
             286,
             0,
             "%s\n\t(mtx->m[0][3]) = %g",
-            "(I_fabs( mtx->m[0][3] ) < 1.0e-5f * mtx->m[3][3])",
+            "(I_I_fabs( mtx->m[0][3] ) < 1.0e-5f * mtx->m[3][3])",
             source->viewParms.inverseViewProjectionMatrix.m[0][3]);
-    v2 = fabs(source->viewParms.inverseViewProjectionMatrix.m[1][3]);
+    v2 = I_fabs(source->viewParms.inverseViewProjectionMatrix.m[1][3]);
     v1 = source->viewParms.inverseViewProjectionMatrix.m[3][3] * 0.000009999999747378752;
     if (v2 >= (double)v1)
         MyAssertHandler(
@@ -44,7 +44,7 @@ void __cdecl R_DeriveNearPlaneConstantsForView(GfxCmdBufSourceState *source)
             287,
             0,
             "%s\n\t(mtx->m[1][3]) = %g",
-            "(I_fabs( mtx->m[1][3] ) < 1.0e-5f * mtx->m[3][3])",
+            "(I_I_fabs( mtx->m[1][3] ) < 1.0e-5f * mtx->m[3][3])",
             source->viewParms.inverseViewProjectionMatrix.m[1][3]);
     if (source->viewParms.inverseViewProjectionMatrix.m[3][3] == 0.0)
         MyAssertHandler(".\\r_state_utils.cpp", 288, 0, "%s", "mtx->m[3][3] != 0");

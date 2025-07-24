@@ -141,7 +141,7 @@ void __cdecl DevGui_UpdateScrollStates(float deltaTime, DevGuiInputState *states
             }
             else
             {
-                v4 = fabs(axis[axisIndex]);
+                v4 = I_fabs(axis[axisIndex]);
                 if (v4 > 0.4000000059604645)
                     states[axisIndex] = SCROLL_PRESSED;
             }
@@ -164,8 +164,8 @@ void __cdecl DevGui_UpdateMenuScroll(float deltaTime)
     bool held; // [esp+3Fh] [ebp-5h]
     float axis; // [esp+40h] [ebp-4h]
 
-    v7 = fabs(s_input.analogAxis[0]);
-    v6 = fabs(s_input.analogAxis[1]);
+    v7 = I_fabs(s_input.analogAxis[0]);
+    v6 = I_fabs(s_input.analogAxis[1]);
     if (v6 >= (double)v7)
     {
         adjustedAnalogAxis[0] = 0.0;
@@ -186,7 +186,7 @@ void __cdecl DevGui_UpdateMenuScroll(float deltaTime)
         axis = (s_input.digitalAxis[axisIndex] + adjustedAnalogAxis[axisIndex]) * s_input.scrollScale;
         if (held)
         {
-            v3 = fabs(axis);
+            v3 = I_fabs(axis);
             for (s_input.menuScrollTime[axisIndex] = deltaTime * v3 + s_input.menuScrollTime[axisIndex];
                 s_input.menuScrollTime[axisIndex] > 0.1000000014901161;
                 s_input.menuScrollTime[axisIndex] = s_input.menuScrollTime[axisIndex] - 0.1000000014901161)
@@ -268,7 +268,7 @@ int32_t __cdecl DevGui_UpdateIntScroll(float deltaTime, int32_t value, int32_t m
     else
     {
         v9 = s_input.scrollScale * s_input.analogAxis[axis];
-        v8 = fabs(v9);
+        v8 = I_fabs(v9);
         stepTimea = s_input.sliderScrollTime / (double)range / v8;
         if (s_input.sliderScrollMaxTimeStep < (double)stepTimea)
             stepTimea = s_input.sliderScrollMaxTimeStep;
@@ -281,7 +281,7 @@ int32_t __cdecl DevGui_UpdateIntScroll(float deltaTime, int32_t value, int32_t m
                 v7 = 1.0;
             scroll += (int)v7;
             s_input.analogSliderTime = s_input.analogSliderTime - stepTimea;
-            v6 = fabs(s_input.analogAxis[axis]);
+            v6 = I_fabs(s_input.analogAxis[axis]);
             if (v6 <= 2.0)
             {
                 s_input.analogSliderTime = 0.0;

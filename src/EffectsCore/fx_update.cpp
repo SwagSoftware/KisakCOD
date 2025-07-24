@@ -1567,14 +1567,14 @@ int32_t __cdecl FX_CollisionResponse(
             velocityAlongNormal = Vec3Dot(scaledPreImpactVelocity, trace->normal);
             if ((LODWORD(velocityAlongNormal) & 0x7F800000) == 0x7F800000)
                 MyAssertHandler(".\\EffectsCore\\fx_update.cpp", 933, 0, "%s", "!IS_NAN(velocityAlongNormal)");
-            v10 = fabs(velocityAlongNormal);
+            v10 = I_fabs(velocityAlongNormal);
             if (v10 >= 1000000.0)
                 MyAssertHandler(
                     ".\\EffectsCore\\fx_update.cpp",
                     934,
                     0,
                     "%s\n\t(velocityAlongNormal) = %g",
-                    "(I_fabs( velocityAlongNormal ) < 1.0e6f)",
+                    "(I_I_fabs( velocityAlongNormal ) < 1.0e6f)",
                     velocityAlongNormal);
             scale = velocityAlongNormal * -2.0;
             Vec3Mad(scaledPreImpactVelocity, scale, trace->normal, postImpactVelocity);

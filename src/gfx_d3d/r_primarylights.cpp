@@ -480,66 +480,66 @@ char __cdecl R_CullBoxFromLightRegionHull(
     unsigned int axisIter; // [esp+C4h] [ebp-4h]
 
     v33 = *boxMidPoint - hull->kdopMidPoint[0];
-    v23 = fabs(v33);
+    v23 = I_fabs(v33);
     if (v23 >= *boxHalfSize + hull->kdopHalfSize[0])
         return 1;
     v32 = boxMidPoint[1] - hull->kdopMidPoint[1];
-    v22 = fabs(v32);
+    v22 = I_fabs(v32);
     if (v22 >= boxHalfSize[1] + hull->kdopHalfSize[1])
         return 1;
     v31 = boxMidPoint[2] - hull->kdopMidPoint[2];
-    v21 = fabs(v31);
+    v21 = I_fabs(v31);
     if (v21 >= boxHalfSize[2] + hull->kdopHalfSize[2])
         return 1;
     halfSizeOnAxis = *boxHalfSize + boxHalfSize[1];
     midPointOnAxis = *boxMidPoint + boxMidPoint[1];
     v30 = midPointOnAxis - hull->kdopMidPoint[3];
-    v20 = fabs(v30);
+    v20 = I_fabs(v30);
     v19 = halfSizeOnAxis + hull->kdopHalfSize[3];
     if (v20 >= (double)v19)
         return 1;
     midPointOnAxisa = *boxMidPoint - boxMidPoint[1];
     v29 = midPointOnAxisa - hull->kdopMidPoint[4];
-    v18 = fabs(v29);
+    v18 = I_fabs(v29);
     v17 = halfSizeOnAxis + hull->kdopHalfSize[4];
     if (v18 >= (double)v17)
         return 1;
     halfSizeOnAxisa = *boxHalfSize + boxHalfSize[2];
     midPointOnAxisb = *boxMidPoint + boxMidPoint[2];
     v28 = midPointOnAxisb - hull->kdopMidPoint[5];
-    v16 = fabs(v28);
+    v16 = I_fabs(v28);
     v15 = halfSizeOnAxisa + hull->kdopHalfSize[5];
     if (v16 >= (double)v15)
         return 1;
     midPointOnAxisc = *boxMidPoint - boxMidPoint[2];
     v27 = midPointOnAxisc - hull->kdopMidPoint[6];
-    v14 = fabs(v27);
+    v14 = I_fabs(v27);
     v13 = halfSizeOnAxisa + hull->kdopHalfSize[6];
     if (v14 >= (double)v13)
         return 1;
     halfSizeOnAxisb = boxHalfSize[1] + boxHalfSize[2];
     midPointOnAxisd = boxMidPoint[1] + boxMidPoint[2];
     v26 = midPointOnAxisd - hull->kdopMidPoint[7];
-    v12 = fabs(v26);
+    v12 = I_fabs(v26);
     v11 = halfSizeOnAxisb + hull->kdopHalfSize[7];
     if (v12 >= (double)v11)
         return 1;
     midPointOnAxise = boxMidPoint[1] - boxMidPoint[2];
     v25 = midPointOnAxise - hull->kdopMidPoint[8];
-    v10 = fabs(v25);
+    v10 = I_fabs(v25);
     v9 = halfSizeOnAxisb + hull->kdopHalfSize[8];
     if (v10 >= (double)v9)
         return 1;
     for (axisIter = 0; axisIter < hull->axisCount; ++axisIter)
     {
         dir = &hull->axis[axisIter];
-        v8 = fabs(dir->dir[0]);
-        v7 = fabs(dir->dir[1]);
-        v6 = fabs(dir->dir[2]);
+        v8 = I_fabs(dir->dir[0]);
+        v7 = I_fabs(dir->dir[1]);
+        v6 = I_fabs(dir->dir[2]);
         halfSizeOnAxisc = *boxHalfSize * v8 + boxHalfSize[1] * v7 + boxHalfSize[2] * v6;
         midPointOnAxisf = *boxMidPoint * dir->dir[0] + boxMidPoint[1] * dir->dir[1] + boxMidPoint[2] * dir->dir[2];
         v24 = midPointOnAxisf - dir->midPoint;
-        v5 = fabs(v24);
+        v5 = I_fabs(v24);
         v4 = halfSizeOnAxisc + dir->halfSize;
         if (v5 >= (double)v4)
             return 1;
@@ -942,53 +942,53 @@ char __cdecl R_CullSphereFromLightRegionHull(const GfxLightRegionHull *hull, con
     unsigned int axisIter; // [esp+A8h] [ebp-4h]
 
     v33 = *origin - hull->kdopMidPoint[0];
-    v23 = fabs(v33);
+    v23 = I_fabs(v33);
     v22 = radius + hull->kdopHalfSize[0];
     if (v23 >= (double)v22)
         return 1;
     v32 = origin[1] - hull->kdopMidPoint[1];
-    v21 = fabs(v32);
+    v21 = I_fabs(v32);
     v20 = radius + hull->kdopHalfSize[1];
     if (v21 >= (double)v20)
         return 1;
     v31 = origin[2] - hull->kdopMidPoint[2];
-    v19 = fabs(v31);
+    v19 = I_fabs(v31);
     v18 = radius + hull->kdopHalfSize[2];
     if (v19 >= (double)v18)
         return 1;
     originOnAxis = *origin + origin[1];
     v30 = originOnAxis - hull->kdopMidPoint[3];
-    v17 = fabs(v30);
+    v17 = I_fabs(v30);
     v16 = radius + hull->kdopHalfSize[3];
     if (v17 >= (double)v16)
         return 1;
     originOnAxisa = *origin - origin[1];
     v29 = originOnAxisa - hull->kdopMidPoint[4];
-    v15 = fabs(v29);
+    v15 = I_fabs(v29);
     v14 = radius + hull->kdopHalfSize[4];
     if (v15 >= (double)v14)
         return 1;
     originOnAxisb = *origin + origin[2];
     v28 = originOnAxisb - hull->kdopMidPoint[5];
-    v13 = fabs(v28);
+    v13 = I_fabs(v28);
     v12 = radius + hull->kdopHalfSize[5];
     if (v13 >= (double)v12)
         return 1;
     originOnAxisc = *origin - origin[2];
     v27 = originOnAxisc - hull->kdopMidPoint[6];
-    v11 = fabs(v27);
+    v11 = I_fabs(v27);
     v10 = radius + hull->kdopHalfSize[6];
     if (v11 >= (double)v10)
         return 1;
     originOnAxisd = origin[1] + origin[2];
     v26 = originOnAxisd - hull->kdopMidPoint[7];
-    v9 = fabs(v26);
+    v9 = I_fabs(v26);
     v8 = radius + hull->kdopHalfSize[7];
     if (v9 >= (double)v8)
         return 1;
     originOnAxise = origin[1] - origin[2];
     v25 = originOnAxise - hull->kdopMidPoint[8];
-    v7 = fabs(v25);
+    v7 = I_fabs(v25);
     v6 = radius + hull->kdopHalfSize[8];
     if (v7 >= (double)v6)
         return 1;
@@ -998,7 +998,7 @@ char __cdecl R_CullSphereFromLightRegionHull(const GfxLightRegionHull *hull, con
             + origin[1] * hull->axis[axisIter].dir[1]
             + origin[2] * hull->axis[axisIter].dir[2];
         v24 = originOnAxisf - hull->axis[axisIter].midPoint;
-        v5 = fabs(v24);
+        v5 = I_fabs(v24);
         v4 = radius + hull->axis[axisIter].halfSize;
         if (v5 >= (double)v4)
             return 1;

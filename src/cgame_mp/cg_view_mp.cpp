@@ -1072,7 +1072,7 @@ void __cdecl CalcViewValuesVehicleDriver(int32_t localClientNum)
     v3 = v4 + 0.5;
     v2 = floor(v3);
     pitch = (v4 - v2) * 360.0;
-    v1 = fabs(pitch);
+    v1 = I_fabs(pitch);
     pitch = v1;
     if (vehDriverViewHeightMax->current.value == 0.0)
         MyAssertHandler(".\\cgame_mp\\cg_view_mp.cpp", 791, 0, "%s", "vehDriverViewHeightMax->current.value != 0");
@@ -1570,7 +1570,7 @@ void __cdecl CG_KickAngles(cg_s *cgameGlob)
                     }
                     else
                     {
-                        v3 = fabs(cgameGlob->kickAngles[i]);
+                        v3 = I_fabs(cgameGlob->kickAngles[i]);
                         if (v3 > 10.0)
                         {
                             if (cgameGlob->kickAngles[i] <= 0.0)

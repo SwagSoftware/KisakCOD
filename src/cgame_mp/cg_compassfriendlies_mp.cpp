@@ -331,7 +331,7 @@ bool __cdecl CanLocalPlayerHearActorFootsteps(int32_t localClientNum, const floa
     v6 = compassEnemyFootstepMaxRange->current.value * compassEnemyFootstepMaxRange->current.value;
     if (v6 < (double)v8)
         return 0;
-    v5 = fabs(delta[2]);
+    v5 = I_fabs(delta[2]);
     if (compassEnemyFootstepMaxZ->current.value < (double)v5)
         return 0;
     snap = cgameGlob->snap;
@@ -529,8 +529,8 @@ void __cdecl CG_CompassDrawFriendlies(
                         actor->lastUpdate = 0;
                     if (actor->lastUpdate >= cgameGlob->time - 1500 && !actor->enemy && cgameGlob->nextSnap->ps.clientNum != num)
                     {
-                        v14 = fabs(actor->lastPos[0]);
-                        if (v14 > 1.0 || (v13 = fabs(actor->lastPos[1]), v13 > 1.0))
+                        v14 = I_fabs(actor->lastPos[0]);
+                        if (v14 > 1.0 || (v13 = I_fabs(actor->lastPos[1]), v13 > 1.0))
                         {
                             posDelta[0] = actor->lastPos[0] - cgameGlob->refdef.vieworg[0];
                             posDelta[1] = actor->lastPos[1] - cgameGlob->refdef.vieworg[1];

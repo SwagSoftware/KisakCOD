@@ -700,8 +700,8 @@ void __cdecl R_CylinderSurfaces_r(
         startDist = Vec3Dot(start2, plane->normal) - plane->dist;
         endDist = Vec3Dot(end2, plane->normal) - plane->dist;
         if (startDist * endDist <= 0.0
-            || (v13 = fabs(startDist), radius > (double)v13)
-            || (v12 = fabs(endDist), radius > (double)v12))
+            || (v13 = I_fabs(startDist), radius > (double)v13)
+            || (v12 = I_fabs(endDist), radius > (double)v12))
         {
             Vec3Sub(end2, start2, delta);
             deltaDist = endDist - startDist;
@@ -1039,9 +1039,9 @@ void __cdecl R_GetMarkFragmentBounds(
 
     for (coord = 0; coord < 3; ++coord)
     {
-        v7 = fabs((*axis)[coord]);
-        v6 = fabs((*axis)[coord + 3]);
-        v5 = fabs((*axis)[coord + 6]);
+        v7 = I_fabs((*axis)[coord]);
+        v6 = I_fabs((*axis)[coord + 3]);
+        v5 = I_fabs((*axis)[coord + 6]);
         offset = (v7 + v6 + v5) * radius;
         mins[coord] = origin[coord] - offset;
         maxs[coord] = origin[coord] + offset;

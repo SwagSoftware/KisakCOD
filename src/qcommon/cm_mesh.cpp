@@ -95,32 +95,32 @@ bool __cdecl CM_CullBox(const traceWork_t *tw, const float *origin, const float 
 
     Vec3Sub(tw->midpoint, origin, centerDelta);
     Vec3Add(halfSize, tw->size, halfBoxSize);
-    v15 = fabs(centerDelta[0]);
+    v15 = I_fabs(centerDelta[0]);
     v14 = halfBoxSize[0] + tw->halfDeltaAbs[0];
     if (v15 > (double)v14)
         return 1;
-    v13 = fabs(centerDelta[1]);
+    v13 = I_fabs(centerDelta[1]);
     v12 = halfBoxSize[1] + tw->halfDeltaAbs[1];
     if (v13 > (double)v12)
         return 1;
-    v11 = fabs(centerDelta[2]);
+    v11 = I_fabs(centerDelta[2]);
     v10 = halfBoxSize[2] + tw->halfDeltaAbs[2];
     if (v11 > (double)v10)
         return 1;
     if (tw->axialCullOnly)
         return 0;
     v18 = centerDelta[2] * tw->halfDelta[1] - centerDelta[1] * tw->halfDelta[2];
-    v9 = fabs(v18);
+    v9 = I_fabs(v18);
     v8 = halfBoxSize[1] * tw->halfDeltaAbs[2] + halfBoxSize[2] * tw->halfDeltaAbs[1];
     if (v9 > (double)v8)
         return 1;
     v17 = centerDelta[0] * tw->halfDelta[2] - centerDelta[2] * tw->halfDelta[0];
-    v7 = fabs(v17);
+    v7 = I_fabs(v17);
     v6 = halfBoxSize[2] * tw->halfDeltaAbs[0] + halfBoxSize[0] * tw->halfDeltaAbs[2];
     if (v7 > (double)v6)
         return 1;
     v16 = centerDelta[1] * tw->halfDelta[0] - centerDelta[0] * tw->halfDelta[1];
-    v5 = fabs(v16);
+    v5 = I_fabs(v16);
     v4 = halfBoxSize[0] * tw->halfDeltaAbs[1] + halfBoxSize[1] * tw->halfDeltaAbs[0];
     return v5 > (double)v4;
 }
@@ -504,7 +504,7 @@ bool __cdecl Vec3IsNormalizedEpsilon(const float *v, float epsilon)
 
     v5 = Vec3LengthSq(v) - 1.0;
     v4 = epsilon * 2.0;
-    v3 = fabs(v5);
+    v3 = I_fabs(v5);
     return v3 < (double)v4;
 }
 
@@ -565,7 +565,7 @@ void __cdecl CM_TraceSphereThroughVertex(
                     if (!Vec3IsNormalizedEpsilon(trace->normal, 0.003f) && !alwaysfails)
                     {
                         v13 = Vec3LengthSq(trace->normal) - 1.0f;
-                        v8 = fabs(v13);
+                        v8 = I_fabs(v13);
                         v7 = tw->radius + 0.125f;
                         v6 = Vec3Length(trace->normal);
                         v5 = va(
@@ -689,7 +689,7 @@ void __cdecl CM_TraceCapsuleThroughBorder(const traceWork_t *tw, CollisionBorder
             if (tw->offsetZ < 0.0)
                 MyAssertHandler(".\\qcommon\\cm_mesh.cpp", 1210, 0, "%s", "tw->offsetZ >= 0");
             v26 = edgePoint_8 - tw->extents.start[2];
-            v20 = fabs(v26);
+            v20 = I_fabs(v26);
             if (tw->offsetZ >= (double)v20)
             {
                 v25 = border->distEq[1];
@@ -805,7 +805,7 @@ void __cdecl CM_TraceCapsuleThroughBorder(const traceWork_t *tw, CollisionBorder
         if (tw->offsetZ < 0.0)
             MyAssertHandler(".\\qcommon\\cm_mesh.cpp", 1249, 0, "%s", "tw->offsetZ >= 0");
         v24 = tw->extents.start[2] - edgePoint_8a;
-        v17 = fabs(v24);
+        v17 = I_fabs(v24);
         if (tw->offsetZ >= (double)v17)
         {
             v23 = border->distEq[1];

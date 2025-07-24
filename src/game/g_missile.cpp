@@ -729,7 +729,7 @@ void __cdecl G_RunMissile(gentity_s *ent)
         return;
     }
     v15 = ent->s.lerp.pos.trDelta[2];
-    v7 = fabs(v15);
+    v7 = I_fabs(v15);
     if (v7 <= 30.0 || SV_PointContents(ent->r.currentOrigin, -1, 32))
     {
         if (ent->r.ownerNum.isDefined())
@@ -1440,7 +1440,7 @@ void __cdecl MissileLandAngles(gentity_s *ent, trace_t *trace, float *vAngles, i
     {
         fSurfacePitch = PitchForYawOnNormal(vAngles[1], trace->normal);
         fAngleDelta = AngleDelta(fSurfacePitch, *vAngles);
-        v13 = fabs(fAngleDelta);
+        v13 = I_fabs(fAngleDelta);
         if (!bForceAlign)
         {
             ent->s.lerp.apos.trBase[0] = *vAngles;
@@ -1459,7 +1459,7 @@ void __cdecl MissileLandAngles(gentity_s *ent, trace_t *trace, float *vAngles, i
         *vAngles = (v14 - v11) * 360.0f;
         if (bForceAlign || 45.0f > v13)
         {
-            v10 = fabs(*vAngles);
+            v10 = I_fabs(*vAngles);
             if (v10 <= 90.0f)
             {
                 v5 = AngleNormalize360(fSurfacePitch);
@@ -1871,7 +1871,7 @@ void __cdecl Missile_ApplyAttractorsRepulsors(gentity_s *missile)
                         MyAssertHandler(".\\game\\g_missile.cpp", 1294, 0, "%s", "attrGlob.attractors[attractorIndex].maxDist > 0");
                     force = 1.0 - totalDist / attrGlob.attractors[attractorIndex].maxDist;
                     force = force * attrGlob.attractors[attractorIndex].strength;
-                    v9 = fabs(perpDist);
+                    v9 = I_fabs(perpDist);
                     v8 = v9 / forwardDist;
                     v7 = atan(v8);
                     angleToAttractor = v7 * 0.6366202831268311f;
@@ -2106,7 +2106,7 @@ void __cdecl MissileHorzSteerToTarget(
     tightestRadius = (float)weapDef->iProjectileSpeed * (float)weapDef->iProjectileSpeed / weapDef->maxSteeringAccel;
     if (*toTargetRelative <= 0.0f)
     {
-        v6 = fabs(radius);
+        v6 = I_fabs(radius);
         if (v6 >= tightestRadius + 60.0f)
         {
             if (toTargetRelative[1] <= 0.0f)
@@ -2126,7 +2126,7 @@ void __cdecl MissileHorzSteerToTarget(
     }
     else if (toTargetRelative[1] != 0.0f)
     {
-        v10 = fabs(radius);
+        v10 = I_fabs(radius);
         if (tightestRadius <= v10)
         {
             if (radius == 0.0f)
@@ -2258,7 +2258,7 @@ void __cdecl MissileVerticalSteerToTarget(
     {
         weapDef = BG_GetWeaponDef(ent->s.weapon);
         horzSpeedToTarg = *toTargetHorzRelDir * currentHorzSpeed;
-        v9 = fabs(horzSpeedToTarg);
+        v9 = I_fabs(horzSpeedToTarg);
         wishVertSpeed = v9 * vertDistToTarg / horzDistToTarg;
         steer[2] = (wishVertSpeed - ent->s.lerp.pos.trDelta[2]) * 20.0f;
         v10 = steer[2];
@@ -2555,7 +2555,7 @@ char __cdecl JavelinClimbExceededAngle(gentity_s *ent, const float *targetPos)
     v5 = deltaHorz / toTarget[2];
     v4 = atan(v5);
     deg = v4 * 57.2957763671875f;
-    v3 = fabs(deg);
+    v3 = I_fabs(deg);
     deg = v3;
     if (limit <= (double)v3)
         return 0;

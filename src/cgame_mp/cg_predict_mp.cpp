@@ -298,7 +298,7 @@ void __cdecl CG_PredictPlayerState_Internal(int32_t localClientNum)
             else
             {
                 diff = cg_pmove[localClientNum].viewChange;
-                v5 = fabs(diff);
+                v5 = I_fabs(diff);
                 if (cg_viewZSmoothingMin->current.value > (double)v5)
                 {
                     if (cg_viewZSmoothingTime->current.value * 1000.0 < (double)(cgameGlob->time - cgameGlob->stepViewStart))

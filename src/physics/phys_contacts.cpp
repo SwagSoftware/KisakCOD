@@ -406,7 +406,7 @@ void __cdecl Phys_CreateBasisFromNormal(const float *normal, float *binormal, fl
     float v3; // [esp+0h] [ebp-2Ch]
     float independent[3]; // [esp+20h] [ebp-Ch] BYREF
 
-    v3 = fabs(normal[2]);
+    v3 = I_fabs(normal[2]);
     independent[0] = 0.0;
     if (v3 < 0.5)
     {

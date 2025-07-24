@@ -87,7 +87,7 @@ double __cdecl FresnelTerm(float n0, float n1, float cosIncidentAngle)
             "%s\n\t(cosIncidentAngle) = %g",
             "(cosIncidentAngle <= 1)",
             cosIncidentAngle);
-    v5 = fabs(cosIncidentAngle);
+    v5 = I_fabs(cosIncidentAngle);
     v4 = acos(v5);
     incidentAngle = v4;
     sinTransmissionAngle = sin(v4) * (n0 / n1);

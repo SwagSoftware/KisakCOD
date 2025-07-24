@@ -113,28 +113,28 @@ void __cdecl Mantle_CreateAnims(void *(__cdecl *xanimAlloc)(int32_t))
             animIndex = s_mantleTrans[transIndex].upAnimIndex;
             XAnimGetAbsDelta(s_mantleAnims, animIndex, rot, delta, 1.0);
             v10 = delta[0] - 16.0;
-            v6 = fabs(v10);
+            v6 = I_fabs(v10);
             if (v6 > 1.0)
                 Com_Error(ERR_DROP, "Mantle anim [%s] has X translation %f, should be %f\n", s_mantleAnimNames[animIndex], delta[0], 16.0);
-            v5 = fabs(delta[1]);
+            v5 = I_fabs(delta[1]);
             if (v5 > 1.0)
                 Com_Error(ERR_DROP, "Mantle anim [%s] has Y translation %f, should be %f\n", s_mantleAnimNames[animIndex], delta[1], 0.0);
             v9 = delta[2] - s_mantleTrans[transIndex].height;
-            v4 = fabs(v9);
+            v4 = I_fabs(v9);
             if (v4 > 1.0)
                 Com_Error(ERR_DROP, "Mantle anim [%s] has Z translation %f, should be %f\n", s_mantleAnimNames[animIndex], delta[2], s_mantleTrans[transIndex].height);
 
             animIndex = s_mantleTrans[transIndex].overAnimIndex;
             XAnimGetAbsDelta(s_mantleAnims, animIndex, rot, delta, 1.0);
             v8 = delta[0] - 31.0;
-            v3 = fabs(v8);
+            v3 = I_fabs(v8);
             if (v3 > 1.0)
                 Com_Error(ERR_DROP, "Mantle anim [%s] has X translation %f, should be %f\n", s_mantleAnimNames[animIndex], delta[0], 31.0);
-            v2 = fabs(delta[1]);
+            v2 = I_fabs(delta[1]);
             if (v2 > 1.0)
                 Com_Error(ERR_DROP, "Mantle anim [%s] has Y translation %f, should be %f\n", s_mantleAnimNames[animIndex], delta[1], 0.0);
             v7 = delta[2] - -18.0;
-            v1 = fabs(v7);
+            v1 = I_fabs(v7);
             if (v1 > 1.0)
                 Com_Error(ERR_DROP, "Mantle anim [%s] has Z translation %f, should be %f\n", s_mantleAnimNames[animIndex], delta[2], -18.0);
         }
@@ -475,12 +475,12 @@ int __cdecl Mantle_FindTransition(float curHeight, float goalHeight)
         MyAssertHandler(".\\bgame\\bg_mantle.cpp", 303, 0, "%s\n\t(height) = %g", "((height > 0))", height);
     bestIndex = 0;
     v6 = s_mantleTrans[0].height - height;
-    v4 = fabs(v6);
+    v4 = I_fabs(v6);
     bestDiff = v4;
     for (transIndex = 1; transIndex < 7; ++transIndex)
     {
         v5 = s_mantleTrans[transIndex].height - height;
-        v3 = fabs(v5);
+        v3 = I_fabs(v5);
         if (bestDiff > (double)v3)
         {
             bestIndex = transIndex;

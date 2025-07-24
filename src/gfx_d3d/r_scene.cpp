@@ -1603,7 +1603,7 @@ void __cdecl R_GenerateSortedDrawSurfs(
         for (den = 1; den <= 10; ++den)
         {
             num = (unsigned int)floor((float)den * rg.sunShadowmapScale + 0.5f);
-            error = fabs((float)num / (float)den - rg.sunShadowmapScale);
+            error = I_fabs((float)num / (float)den - rg.sunShadowmapScale);
             if (error < bestError)
             {
                 bestError = error;

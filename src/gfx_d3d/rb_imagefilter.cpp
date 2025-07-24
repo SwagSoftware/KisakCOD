@@ -102,7 +102,7 @@ int __cdecl RB_GenerateGaussianFilterChain(
     while (passCount < 32 && (radiusX >= 0.3295051157474518f || radiusY >= 0.3295051157474518f))
     {
         v14 = radiusX - radiusY;
-        v13 = fabs(v14);
+        v13 = I_fabs(v14);
         if (v13 < 0.3295051157474518f)
         {
             passRadius = (radiusX + radiusY) * 0.5f;

@@ -1,6 +1,7 @@
 #include "bg_public.h"
 #include "bg_local.h"
 #include <aim_assist/aim_assist.h>
+#include <universal/com_math.h>
 
 void __cdecl PM_StepSlideMove(pmove_t *pm, pml_t *pml, int32_t gravity)
 {
@@ -213,7 +214,7 @@ void __cdecl PM_StepSlideMove(pmove_t *pm, pml_t *pml, int32_t gravity)
                 if (PM_VerifyPronePosition(pm, start_o, start_v))
                 {
                     v8 = ps->origin[2] - down_o[2];
-                    v4 = fabs(v8);
+                    v4 = I_fabs(v8);
                     if (v4 > 0.5)
                     {
                         iDelta = (int)(ps->origin[2] - down_o[2]);
@@ -225,7 +226,7 @@ void __cdecl PM_StepSlideMove(pmove_t *pm, pml_t *pml, int32_t gravity)
                                 pm->viewChangeTime = ps->commandTime;
                             }
                             v6 = ps->origin[2] - start_o[2];
-                            v3 = fabs(v6);
+                            v3 = I_fabs(v6);
                             fSpeedScale = 1.0 - (float)0.80000001 + (1.0 - v3 / fStepSize) * (float)0.80000001;
                             Vec3Scale(ps->velocity, fSpeedScale, ps->velocity);
                             pm->xyspeed = Vec2Length(ps->velocity);

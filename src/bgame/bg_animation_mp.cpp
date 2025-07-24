@@ -1675,7 +1675,7 @@ void __cdecl BG_RunLerpFrameRate(
                 if (isLadderAnim)
                 {
                     v8 = lf->oldFramePos[2] - es->lerp.pos.trBase[2];
-                    v5 = fabs(v8);
+                    v5 = I_fabs(v8);
                     moveSpeed = v5;
                 }
                 else
@@ -2126,7 +2126,7 @@ void __cdecl BG_SwingAngles(
     if (*swinging)
     {
         swinga = AngleDelta(destination, *angle);
-        v10 = fabs(swinga);
+        v10 = I_fabs(swinga);
         scale = v10 * 0.05000000074505806;
         if (scale < 0.5)
             scale = 0.5;

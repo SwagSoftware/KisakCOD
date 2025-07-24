@@ -63,14 +63,14 @@ void __cdecl R_ModernizeLegacyLightGridColors(const unsigned __int8 *legacyColor
                     rotated[0] = Vec3Dot(delta, s_lightGridRotAxis[0]);
                     rotated[1] = Vec3Dot(delta, s_lightGridRotAxis[1]);
                     rotated[2] = Vec3Dot(delta, s_lightGridRotAxis[2]);
-                    v9 = fabs(rotated[2]);
-                    v8 = fabs(rotated[1]);
+                    v9 = I_fabs(rotated[2]);
+                    v8 = I_fabs(rotated[1]);
                     v7 = v8 - v9;
                     if (v7 < 0.0)
                         v11 = v9;
                     else
                         v11 = v8;
-                    v6 = fabs(rotated[0]);
+                    v6 = I_fabs(rotated[0]);
                     v5 = v6 - v11;
                     if (v5 < 0.0)
                         v4 = v11;
@@ -104,14 +104,14 @@ void __cdecl R_ModernizeLegacyLightGridColors(const unsigned __int8 *legacyColor
                         + cornerWeight[1]
                         + cornerWeight[0]
                         - 1.0;
-                    v2 = fabs(v10);
+                    v2 = I_fabs(v10);
                     if (v2 >= EQUAL_EPSILON)
                         MyAssertHandler(
                             ".\\r_bsp_load_obj.cpp",
                             830,
                             0,
                             "%s",
-                            "I_fabs( cornerWeight[0] + cornerWeight[1] + cornerWeight[2] + cornerWeight[3] + cornerWeight[4] + cornerWe"
+                            "I_I_fabs( cornerWeight[0] + cornerWeight[1] + cornerWeight[2] + cornerWeight[3] + cornerWeight[4] + cornerWe"
                             "ight[5] + cornerWeight[6] + cornerWeight[7] - 1.0f ) < 0.001f");
                     for (channelIndex = 0; channelIndex < 3; ++channelIndex)
                     {
@@ -163,14 +163,14 @@ void __cdecl R_LoadDefaultLightGridColors(GfxLightGridColors *colors)
                     rotated[0] = Vec3Dot(delta, s_lightGridRotAxis[0]);
                     rotated[1] = Vec3Dot(delta, s_lightGridRotAxis[1]);
                     rotated[2] = Vec3Dot(delta, s_lightGridRotAxis[2]);
-                    v7 = fabs(rotated[2]);
-                    v6 = fabs(rotated[1]);
+                    v7 = I_fabs(rotated[2]);
+                    v6 = I_fabs(rotated[1]);
                     v5 = v6 - v7;
                     if (v5 < 0.0)
                         v8 = v7;
                     else
                         v8 = v6;
-                    v4 = fabs(rotated[0]);
+                    v4 = I_fabs(rotated[0]);
                     v3 = v4 - v8;
                     if (v3 < 0.0)
                         v2 = v8;

@@ -193,7 +193,7 @@ void __cdecl Phys_CollideCylinderWithFace(
         if (axisInfo.bestAxis == 1)
         {
             dot = Vec3Dot(axisInfo.bestContactNormal, info->R[direction]);
-            v5 = fabs(dot);
+            v5 = I_fabs(dot);
             if (v5 >= 0.9)
                 Phys_ClipCylinderEndcapToPoly(polyPlane, poly, info, surfaceFlags, results);
             else
@@ -524,7 +524,7 @@ char __cdecl Phys_CylinderFaceTestSeparatingAxes(
         Vec3Sub(poly->pts[vertIndexNext], poly->pts[vertIndex], edges[vertIndex]);
     }
     v12 = Vec3Dot(polyPlane, info->R[direction]);
-    v11 = fabs(v12);
+    v11 = I_fabs(v12);
     if (v11 <= 0.01999999955296516)
     {
         testAxisNumber = poly->ptCount + 3;
@@ -676,7 +676,7 @@ char __cdecl Phys_CylinderFaceTestAxis(
         v20 = axis[2];
     normalizedAxis[2] = v20;
     v23 = Vec3Dot(info->R[direction], normalizedAxis);
-    v19 = fabs(v23);
+    v19 = I_fabs(v23);
     v18 = 1.0 - v19;
     if (v18 < 0.0)
         v17 = 1.0;
@@ -760,7 +760,7 @@ char __cdecl Phys_TestCircleToEdgeAxis(
     if (Vec3NormalizeTo(edge, normalizedEdge) < 0.000009999999747378752)
         return 1;
     axialLengthOfNormalizedEdge = Vec3Dot(normalizedEdge, info->R[direction]);
-    v11 = fabs(axialLengthOfNormalizedEdge);
+    v11 = I_fabs(axialLengthOfNormalizedEdge);
     if (v11 < 0.000009999999747378752)
         return 1;
     Vec3Cross(normalizedEdge, polyNormal, clockwiseTestDir);
@@ -1109,7 +1109,7 @@ double __cdecl Phys_DistanceOfCylinderFromPlane(const float *plane, const objInf
     if (dist < 0.0 && centerDist < 0.0)
         return -FLT_MAX;
     v8 = Vec3Dot(info->R[direction], plane);
-    v7 = fabs(v8);
+    v7 = I_fabs(v8);
     v6 = 1.0 - v7;
     if (v6 < 0.0)
         v5 = 1.0;

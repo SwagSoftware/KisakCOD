@@ -270,11 +270,11 @@ float __cdecl LinearTrack(float tgt, float cur, float rate, float deltaTime)
     else
         v4 = rate * deltaTime;
     step = v4;
-    v9 = fabs(err);
+    v9 = I_fabs(err);
     if (v9 <= EQUAL_EPSILON)
         return tgt;
-    v8 = fabs(err);
-    v7 = fabs(step);
+    v8 = I_fabs(err);
+    v7 = I_fabs(step);
     if (v7 > v8)
         return tgt;
     return (cur + step);
@@ -308,11 +308,11 @@ float __cdecl DiffTrack(float tgt, float cur, float rate, float deltaTime)
 
     err = tgt - cur;
     step = rate * err * deltaTime;
-    v8 = fabs(err);
+    v8 = I_fabs(err);
     if (v8 <= EQUAL_EPSILON)
         return tgt;
-    v7 = fabs(err);
-    v6 = fabs(step);
+    v7 = I_fabs(err);
+    v6 = I_fabs(step);
     if (v6 > v7)
         return tgt;
     return (cur + step);
@@ -1007,7 +1007,7 @@ void __cdecl ClosestApproachOfTwoLines(
     det = dir1LenSq * dir2LenSq - dir1dir2 * dir1dir2;
     EPSILON = 0.000099999997f;
     v8 = dir1dir2 * dir1LenSq;
-    v7 = fabs(v8);
+    v7 = I_fabs(v8);
     v6 = 0.000099999997 * v7;
     if (v6 >= det * det)
     {
@@ -1715,9 +1715,9 @@ float __cdecl RadiusFromBoundsSq(const float *mins, const float *maxs)
 
     for (i = 0; i < 3; ++i)
     {
-        v5 = fabs(mins[i]);
+        v5 = I_fabs(mins[i]);
         a = v5;
-        v4 = fabs(maxs[i]);
+        v4 = I_fabs(maxs[i]);
         if (v4 >= v5)
             v3 = v4;
         else
@@ -1738,9 +1738,9 @@ float __cdecl RadiusFromBounds2DSq(const float *mins, const float *maxs)
 
     for (i = 0; i < 2; ++i)
     {
-        v6 = fabs(mins[i]);
+        v6 = I_fabs(mins[i]);
         a = v6;
-        v5 = fabs(maxs[i]);
+        v5 = I_fabs(maxs[i]);
         if (v5 >= v6)
             v4 = v5;
         else
@@ -1994,7 +1994,7 @@ int __cdecl IntersectPlanes(const float **plane, float *xyz)
     determinant = (plane[1][1] * plane[2][2] - plane[2][1] * plane[1][2]) * **plane
         + (plane[2][1] * (*plane)[2] - (*plane)[1] * plane[2][2]) * *plane[1]
         + ((*plane)[1] * plane[1][2] - plane[1][1] * (*plane)[2]) * *plane[2];
-    if (fabs(determinant) < EQUAL_EPSILON)
+    if (I_fabs(determinant) < EQUAL_EPSILON)
         return 0;
     invDeterminant = 1.0 / determinant;
     *xyz = ((plane[1][1] * plane[2][2] - plane[2][1] * plane[1][2]) * (*plane)[3]
@@ -2037,7 +2037,7 @@ void __cdecl SnapPointToIntersectingPlanes(const float **planes, float *xyz, flo
         v13 = xyz[axis] / snapGrid;
         rounded = (int)(v13) * snapGrid;
         v12 = rounded - xyz[axis];
-        v9 = fabs(v12);
+        v9 = I_fabs(v12);
         if (snapEpsilon <= v9)
             snapped[axis] = xyz[axis];
         else
@@ -2051,13 +2051,13 @@ void __cdecl SnapPointToIntersectingPlanes(const float **planes, float *xyz, flo
         {
             v7 = planes[planeIndex][3];
             v11 = Vec3Dot(planes[planeIndex], snapped) - v7;
-            v6 = fabs(v11);
+            v6 = I_fabs(v11);
             snapError = v6;
             if (v6 > maxSnapError)
                 maxSnapError = snapError;
             v5 = planes[planeIndex][3];
             v10 = Vec3Dot(planes[planeIndex], xyz) - v5;
-            v4 = fabs(v10);
+            v4 = I_fabs(v10);
             baseError = v4;
             if (v4 > maxBaseError)
                 maxBaseError = baseError;
@@ -2547,13 +2547,13 @@ bool __cdecl CullBoxFromCone(
     Vec3Mad(coneDir, scale, perpendicular, scaledSepAxis);
     scaledSepDist = Vec3Dot(scaledSepAxis, deltaMid);
     v17 = scaledSepAxis[0] * *boxHalfSize;
-    v9 = fabs(v17);
+    v9 = I_fabs(v17);
     scaledSepDist = scaledSepDist - v9;
     v16 = scaledSepAxis[1] * boxHalfSize[1];
-    v8 = fabs(v16);
+    v8 = I_fabs(v16);
     scaledSepDist = scaledSepDist - v8;
     v15 = scaledSepAxis[2] * boxHalfSize[2];
-    v7 = fabs(v15);
+    v7 = I_fabs(v15);
     scaledSepDist = scaledSepDist - v7;
     return scaledSepDist >= 0.0;
 }
@@ -2578,7 +2578,7 @@ bool __cdecl CullBoxFromSphere(const float *sphereOrg, float radius, const float
     float distFromBoxToMid[3]; // [esp+48h] [ebp-Ch] BYREF
 
     v19 = *sphereOrg - *boxCenter;
-    v13 = fabs(v19);
+    v13 = I_fabs(v19);
     v18 = v13 - *boxHalfSize;
     v12 = v18 - 0.0;
     if (v12 < 0.0)
@@ -2587,7 +2587,7 @@ bool __cdecl CullBoxFromSphere(const float *sphereOrg, float radius, const float
         v11 = v13 - *boxHalfSize;
     distFromBoxToMid[0] = v11;
     v17 = sphereOrg[1] - boxCenter[1];
-    v10 = fabs(v17);
+    v10 = I_fabs(v17);
     v16 = v10 - boxHalfSize[1];
     v9 = v16 - 0.0;
     if (v9 < 0.0)
@@ -2596,7 +2596,7 @@ bool __cdecl CullBoxFromSphere(const float *sphereOrg, float radius, const float
         v8 = v10 - boxHalfSize[1];
     distFromBoxToMid[1] = v8;
     v15 = sphereOrg[2] - boxCenter[2];
-    v7 = fabs(v15);
+    v7 = I_fabs(v15);
     v14 = v7 - boxHalfSize[2];
     v6 = v14 - 0.0;
     if (v6 < 0.0)
@@ -2654,7 +2654,7 @@ bool __cdecl CullBoxFromConicSectionOfSphere(
     if (cosHalfFov < 0.0)
         MyAssertHandler(".\\universal\\com_math.cpp", 4035, 0, "%s", "cosHalfFov >= 0.0f");
     Vec3Sub(boxCenter, coneOrg, deltaMid);
-    v24 = fabs(deltaMid[0]);
+    v24 = I_fabs(deltaMid[0]);
     v30 = v24 - *boxHalfSize;
     v23 = v30 - 0.0;
     if (v23 < 0.0)
@@ -2662,7 +2662,7 @@ bool __cdecl CullBoxFromConicSectionOfSphere(
     else
         v22 = v24 - *boxHalfSize;
     distFromBoxToMid[0] = v22;
-    v21 = fabs(deltaMid[1]);
+    v21 = I_fabs(deltaMid[1]);
     v29 = v21 - boxHalfSize[1];
     v20 = v29 - 0.0;
     if (v20 < 0.0)
@@ -2670,7 +2670,7 @@ bool __cdecl CullBoxFromConicSectionOfSphere(
     else
         v19 = v21 - boxHalfSize[1];
     distFromBoxToMid[1] = v19;
-    v18 = fabs(deltaMid[2]);
+    v18 = I_fabs(deltaMid[2]);
     v28 = v18 - boxHalfSize[2];
     v17 = v28 - 0.0;
     if (v17 < 0.0)
@@ -2711,13 +2711,13 @@ bool __cdecl CullBoxFromConicSectionOfSphere(
     Vec3Mad(coneDir, scale, perpendicular, scaledSepAxis);
     scaledSepDist = Vec3Dot(scaledSepAxis, deltaMid);
     v27 = scaledSepAxis[0] * *boxHalfSize;
-    v10 = fabs(v27);
+    v10 = I_fabs(v27);
     scaledSepDist = scaledSepDist - v10;
     v26 = scaledSepAxis[1] * boxHalfSize[1];
-    v9 = fabs(v26);
+    v9 = I_fabs(v26);
     scaledSepDist = scaledSepDist - v9;
     v25 = scaledSepAxis[2] * boxHalfSize[2];
-    v8 = fabs(v25);
+    v8 = I_fabs(v25);
     scaledSepDist = scaledSepDist - v8;
     return scaledSepDist >= 0.0;
 }
@@ -2767,7 +2767,7 @@ bool __cdecl Vec4IsNormalized(const float* v)
     float v3; // [esp+8h] [ebp-4h]
 
     v3 = Vec4LengthSq(v) - 1.0;
-    v2 = fabs(v3);
+    v2 = I_fabs(v3);
     return v2 < 0.002f;
 }
 
@@ -3044,7 +3044,7 @@ bool __cdecl Vec3IsNormalized(const float *v)
     float v3; // [esp+8h] [ebp-4h]
 
     v3 = Vec3LengthSq(v) - 1.0;
-    v2 = fabs(v3);
+    v2 = I_fabs(v3);
     return v2 < 0.002f;
 }
 

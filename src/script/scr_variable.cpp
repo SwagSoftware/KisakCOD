@@ -2676,7 +2676,7 @@ void  Scr_EvalEquality(VariableValue* value1, VariableValue* value2)
 	case 5:
 		value1->type = VAR_INTEGER;
 		v4 = value1->u.floatValue - value2->u.floatValue;
-		v3 = fabs(v4);
+		v3 = I_fabs(v4);
 		value1->u.intValue = v3 < 0.0000009999999974752427;
 		break;
 	case 6:

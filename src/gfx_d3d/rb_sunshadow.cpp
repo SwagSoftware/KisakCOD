@@ -44,7 +44,7 @@ void __cdecl RB_GetShadowOverlayDepthBounds(float *nearDepth, float *farDepth)
     *nearDepth = sm_showOverlayDepthBounds->current.vector[0];
     *farDepth = sm_showOverlayDepthBounds->current.vector[1];
 
-    if (fabs(*farDepth - *nearDepth) < 0.01f)
+    if (I_fabs(*farDepth - *nearDepth) < 0.01f)
     {
         if (*farDepth <= *nearDepth)
         {

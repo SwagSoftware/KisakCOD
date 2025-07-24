@@ -2080,7 +2080,7 @@ double __cdecl FX_GetClientVisibility(int32_t localClientNum, const float *start
             Vec3Sub(visBlocker->origin, start, projDir);
             dot = Vec3Dot(projDir, dir);
             v5 = dot - halfLen;
-            v4 = fabs(v5);
+            v4 = I_fabs(v5);
             if (halfLen >= (double)v4)
             {
                 Vec3Mad(start, dot, dir, projPt);

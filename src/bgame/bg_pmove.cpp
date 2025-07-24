@@ -197,7 +197,7 @@ void __cdecl PM_ClipVelocity(const float *in, const float *normal, float *out)
     float parallela; // [esp+10h] [ebp-4h]
 
     parallel = Vec3Dot(in, normal);
-    v4 = fabs(parallel);
+    v4 = I_fabs(parallel);
     parallela = parallel - v4 * EQUAL_EPSILON;
     scale = -parallela;
     Vec3Mad(in, scale, normal, out);
@@ -218,7 +218,7 @@ void __cdecl PM_ProjectVelocity(const float *velIn, const float *normal, float *
     float originalLengthSq; // [esp+40h] [ebp-4h]
 
     lengthSq2D = velIn[1] * velIn[1] + *velIn * *velIn;
-    v6 = fabs(normal[2]);
+    v6 = I_fabs(normal[2]);
     if (v6 < EQUAL_EPSILON || lengthSq2D == 0.0)
     {
         *velOut = *velIn;
@@ -579,7 +579,7 @@ void __cdecl PM_UpdateLean(
         tmaxs[2] = 8.0;
         capsuleTrace(&trace, start, tmins, tmaxs, end, ps->clientNum);
         fLean = UnGetLeanFraction(trace.fraction);
-        v5 = fabs(ps->leanf);
+        v5 = I_fabs(ps->leanf);
         if (fLean < (double)v5)
         {
             if (ps->leanf < 0.0)
@@ -816,7 +816,7 @@ void __cdecl PM_UpdateViewAngles_Prone(
     if (v17 || v16)
     {
         maxDeltaYaw = msec * 55.0 * EQUAL_EPSILON;
-        v15 = fabs(delta);
+        v15 = I_fabs(delta);
         if (maxDeltaYaw <= (double)v15)
         {
             if (delta <= 0.0)
@@ -835,7 +835,7 @@ void __cdecl PM_UpdateViewAngles_Prone(
             if (!bRetry)
                 goto LABEL_33;
             deltaa = AngleDelta(ps->proneDirection, newProneYaw);
-            v14 = fabs(deltaa);
+            v14 = I_fabs(deltaa);
             bRetry = v14 > 1.0;
             if (v14 <= 1.0)
             {
@@ -920,7 +920,7 @@ LABEL_33:
             }
             if (!bRetrya)
                 goto LABEL_46;
-            v12 = fabs(deltab);
+            v12 = I_fabs(deltab);
             bRetrya = v12 > 1.0;
             if (v12 > 1.0)
             {
@@ -957,7 +957,7 @@ int32_t __cdecl BG_CheckProneTurned(playerState_s *ps, float newProneYaw, uint8_
     float prone_feet_dist; // [esp+40h] [ebp-4h]
 
     delta = AngleDelta(newProneYaw, ps->viewangles[1]);
-    v5 = fabs(delta);
+    v5 = I_fabs(delta);
     fraction = v5 / 240.0;
     v4 = newProneYaw - (1.0 - fraction) * delta;
     testYaw = AngleNormalize360(v4);
@@ -1020,7 +1020,7 @@ void __cdecl PM_UpdateViewAngles_ProneYawClamp(
     {
         ps->pm_flags |= 0x1000u;
         deltaYaw1 = AngleDelta(oldViewYaw, ps->viewangles[1]);
-        v8 = fabs(deltaYaw1);
+        v8 = I_fabs(deltaYaw1);
         if (v8 <= 1.0)
         {
             deltaYaw2 = AngleDelta(newViewYaw, ps->viewangles[1]);
@@ -1161,7 +1161,7 @@ void __cdecl PM_UpdatePronePitch(pmove_t *pm, pml_t *pml)
         delta = v3;
         if (delta != 0.0)
         {
-            v14 = fabs(delta);
+            v14 = I_fabs(delta);
             v13 = pml->frametime * 70.0;
             if (v14 <= (double)v13)
             {
@@ -1192,7 +1192,7 @@ void __cdecl PM_UpdatePronePitch(pmove_t *pm, pml_t *pml)
         deltaa = v4;
         if (deltaa != 0.0)
         {
-            v9 = fabs(deltaa);
+            v9 = I_fabs(deltaa);
             v8 = pml->frametime * 70.0;
             if (v9 <= (double)v8)
             {
@@ -1367,17 +1367,17 @@ void __cdecl PmoveSingle(pmove_t *pm)
         if (pm->cmd.forwardmove != pm->oldcmd.forwardmove)
         {
             forwardmove = (float)pm->cmd.forwardmove;
-            v9 = fabs(forwardmove);
+            v9 = I_fabs(forwardmove);
             v17 = (float)pm->oldcmd.forwardmove;
-            v8 = fabs(v17);
+            v8 = I_fabs(v17);
             if (v8 < (double)v9)
                 goto LABEL_90;
         }
         if (pm->cmd.rightmove == pm->oldcmd.rightmove
             || (rightmove = (float)pm->cmd.rightmove,
-                v7 = fabs(rightmove),
+                v7 = I_fabs(rightmove),
                 v15 = (float)pm->oldcmd.rightmove,
-                v6 = fabs(v15),
+                v6 = I_fabs(v15),
                 v6 >= (double)v7))
         {
             if ((ps->pm_flags & 0x10) == 0 && (ps->weaponstate <= 4u || ps->weaponstate == 7))
@@ -1996,18 +1996,18 @@ double __cdecl PM_MoveScale(playerState_s *ps, float fmove, float rmove, float u
     float scale; // [esp+24h] [ebp-4h]
     float scalea; // [esp+24h] [ebp-4h]
 
-    v11 = fabs(fmove);
+    v11 = I_fabs(fmove);
     max = v11;
-    v10 = fabs(rmove);
+    v10 = I_fabs(rmove);
     if (v11 < (double)v10)
     {
-        v9 = fabs(rmove);
+        v9 = I_fabs(rmove);
         max = v9;
     }
-    v8 = fabs(umove);
+    v8 = I_fabs(umove);
     if (max < (double)v8)
     {
-        v7 = fabs(umove);
+        v7 = I_fabs(umove);
         max = v7;
     }
     if (max == 0.0)
@@ -2295,17 +2295,17 @@ double __cdecl PM_CmdScale_Walk(pmove_t *pm, usercmd_s *cmd)
     if (cmd->forwardmove >= 0)
     {
         forwardmove = (float)cmd->forwardmove;
-        v6 = fabs(forwardmove);
+        v6 = I_fabs(forwardmove);
         fmove = v6;
     }
     else
     {
         v12 = player_backSpeedScale->current.value * (double)cmd->forwardmove;
-        v7 = fabs(v12);
+        v7 = I_fabs(v12);
         fmove = v7;
     }
     v10 = player_strafeSpeedScale->current.value * (double)cmd->rightmove;
-    v5 = fabs(v10);
+    v5 = I_fabs(v10);
     v4 = fmove - v5;
     if (v4 < 0.0)
         v3 = v5;
@@ -4259,11 +4259,11 @@ void __cdecl PM_LadderMove(pmove_t *pm, pml_t *pml)
                 ps->velocity[0] = v19 * vSideDir[0] + ps->velocity[0];
                 velocity[1] = v19 * vSideDir[1] + v20[1];
                 fSpeedDrop = fSideSpeed * pml->frametime * 16.0;
-                v6 = fabs(fSideSpeed);
-                v5 = fabs(fSpeedDrop);
+                v6 = I_fabs(fSideSpeed);
+                v5 = I_fabs(fSpeedDrop);
                 if (v5 < (double)v6)
                 {
-                    v4 = fabs(fSpeedDrop);
+                    v4 = I_fabs(fSpeedDrop);
                     if (v4 < 1.0)
                     {
                         if (fSpeedDrop < 0.0)

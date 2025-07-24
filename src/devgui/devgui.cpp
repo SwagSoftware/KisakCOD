@@ -1938,7 +1938,7 @@ float __cdecl DevGui_PickFloatScrollStep(float min, float max)
         if (roundedStep != 0.0f)
         {
             v4 = roundedStep - step;
-            v3 = fabs(v4);
+            v3 = I_fabs(v4);
             if (v3 < 0.1f)
                 return (float)(int)(step);
         }
@@ -2054,7 +2054,7 @@ void __cdecl DevGui_UpdateGraph(int32_t localClientNum, float deltaTime)
             else
             {
                 deltaYa = updatedY - knot_4;
-                v5 = fabs(deltaYa);
+                v5 = I_fabs(deltaYa);
                 graphUpdated = v5 > 0.0000009999999974752427f;
                 graph->knots[graph->selectedKnot][1] = deltaYa * 4.0 + graph->knots[graph->selectedKnot][1];
                 v15 = graph->knots[graph->selectedKnot][1];
@@ -2075,11 +2075,11 @@ void __cdecl DevGui_UpdateGraph(int32_t localClientNum, float deltaTime)
         {
             deltaX = updatedX - knot;
             deltaY = updatedY - knot_4;
-            v14 = fabs(deltaX);
+            v14 = I_fabs(deltaX);
             v12 = 1;
             if (v14 <= 0.0000009999999974752427f)
             {
-                v13 = fabs(deltaY);
+                v13 = I_fabs(deltaY);
                 if (v13 <= 0.0000009999999974752427f)
                     v12 = 0;
             }

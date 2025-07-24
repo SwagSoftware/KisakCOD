@@ -3225,7 +3225,7 @@ void GScr_abs()
     float Float; // [esp+8h] [ebp-4h]
 
     Float = Scr_GetFloat(0);
-    Scr_AddFloat(fabs(Float));
+    Scr_AddFloat(I_fabs(Float));
 }
 
 void GScr_min()

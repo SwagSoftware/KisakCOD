@@ -1083,7 +1083,7 @@ double __cdecl GetLeanFraction(float fFrac)
 {
     float v3; // [esp+4h] [ebp-4h]
 
-    v3 = fabs(fFrac);
+    v3 = I_fabs(fFrac);
     return (float)((2.0 - v3) * fFrac);
 }
 

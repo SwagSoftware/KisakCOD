@@ -522,7 +522,7 @@ void __cdecl CG_ClipMoveToEntities_r(
                 }
                 else
                 {
-                    v10 = fabs(diff);
+                    v10 = I_fabs(diff);
                     if (diff < 0.0)
                         v9 = p[sector->tree.axis] - sector->tree.dist;
                     else

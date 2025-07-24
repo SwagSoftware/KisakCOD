@@ -239,13 +239,13 @@ bool __cdecl CM_CullBox2(const objInfo *input, const float *origin, const float 
     Vec3Sub(input->pos, origin, centerDelta);
     Vec3Sub(input->bounds[1], input->bounds[0], size);
     Vec3Mad(halfSize, 0.5, size, halfBoxSize);
-    v6 = fabs(centerDelta[0]);
+    v6 = I_fabs(centerDelta[0]);
     if (halfBoxSize[0] < (double)v6)
         return 1;
-    v5 = fabs(centerDelta[1]);
+    v5 = I_fabs(centerDelta[1]);
     if (halfBoxSize[1] < (double)v5)
         return 1;
-    v4 = fabs(centerDelta[2]);
+    v4 = I_fabs(centerDelta[2]);
     return halfBoxSize[2] < (double)v4;
 }
 
@@ -462,7 +462,7 @@ static int dCollideWorldGeom(dxGeom *o1, dxGeom *o2, int flags, dContactGeomExt 
         {
             for (c = 0; c < 3; ++c)
             {
-                v26 = fabs(input.R[r][c]);
+                v26 = I_fabs(input.R[r][c]);
                 absR[r][c] = v26;
             }
         }
@@ -499,28 +499,28 @@ static int dCollideWorldGeom(dxGeom *o1, dxGeom *o2, int flags, dContactGeomExt 
         Vec3Sub(input.pos, rotatedCenterOfMass, input.pos);
         radius = 0.0;
 
-        tmp = fabs(input.u.brushModel->maxs[1]);
+        tmp = I_fabs(input.u.brushModel->maxs[1]);
 
         if (radius < tmp)
             radius = tmp;
 
-        tmp = fabs(input.u.brushModel->maxs[2]);
+        tmp = I_fabs(input.u.brushModel->maxs[2]);
         if (radius < tmp)
             radius = tmp;
 
-        tmp = fabs(input.u.brushModel->radius);
+        tmp = I_fabs(input.u.brushModel->radius);
         if (radius < tmp)
             radius = tmp;
 
-        tmp = fabs(input.u.brushModel->mins[0]);
+        tmp = I_fabs(input.u.brushModel->mins[0]);
         if (radius < tmp)
             radius = tmp;
 
-        tmp = fabs(input.u.brushModel->mins[1]);
+        tmp = I_fabs(input.u.brushModel->mins[1]);
         if (radius < tmp)
             radius = tmp;
 
-        tmp = fabs(input.u.brushModel->mins[2]);
+        tmp = I_fabs(input.u.brushModel->mins[2]);
         if (radius < tmp)
             radius = tmp;
 
@@ -559,7 +559,7 @@ static int dCollideWorldGeom(dxGeom *o1, dxGeom *o2, int flags, dContactGeomExt 
         {
             for (k = 0; k < 3; ++k)
             {
-                v10 = fabs(input.R[j][k]);
+                v10 = I_fabs(input.R[j][k]);
                 absR[j][k] = v10;
             }
         }
@@ -850,11 +850,11 @@ void __cdecl Phys_GetCylinderAABB(dxGeom *geom, float *aabb)
     for (i = 0; i < 3; ++i)
     {
         v8 = R[3][i] * R[0][axisIdx];
-        v5 = fabs(v8);
+        v5 = I_fabs(v8);
         v7 = R[3][i] * R[1][axisIdx];
-        v4 = fabs(v7);
+        v4 = I_fabs(v7);
         v6 = R[3][i] * R[2][axisIdx];
-        v3 = fabs(v6);
+        v3 = I_fabs(v6);
         axisRange = v5 + v4 + v3;
         aabb[2 * i] = pos[i] - axisRange;
         aabb[2 * i + 1] = pos[i] + axisRange;
@@ -927,11 +927,11 @@ void __cdecl Phys_GetCapsuleAABB(dxGeom *geom, float *aabb)
     for (i = 0; i < 3; ++i)
     {
         v8 = R[3][i] * R[0][axisIdx];
-        v5 = fabs(v8);
+        v5 = I_fabs(v8);
         v7 = R[3][i] * R[1][axisIdx];
-        v4 = fabs(v7);
+        v4 = I_fabs(v7);
         v6 = R[3][i] * R[2][axisIdx];
-        v3 = fabs(v6);
+        v3 = I_fabs(v6);
         axisRange = v5 + v4 + v3;
         aabb[2 * i] = pos[i] - axisRange;
         aabb[2 * i + 1] = pos[i] + axisRange;

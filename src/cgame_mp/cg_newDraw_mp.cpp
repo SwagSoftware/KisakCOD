@@ -978,7 +978,7 @@ void __cdecl CG_DrawPlayerStance(
             deltaTime = (cgameGlob->proneBlockedEndTime - cgameGlob->time);
             v9 = deltaTime / 1500.0f * 540.0f * 0.01745329238474369f;
             v8 = sin(v9);
-            v7 = fabs(v8);
+            v7 = I_fabs(v8);
             drawColor[3] = v7;
             v6 = -halfWidth;
             UI_DrawText(

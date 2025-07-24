@@ -177,7 +177,7 @@ double __cdecl RepresentativeTriangleFromWinding(
                 Vec3Sub(&(*xyz)[3 * i], &(*xyz)[3 * j], va);
                 Vec3Cross(va, vb, vc);
                 v8 = Vec3Dot(vc, normal);
-                v7 = fabs(v8);
+                v7 = I_fabs(v8);
                 if (areaBest < v7)
                 {
                     areaBest = v7;

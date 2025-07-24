@@ -2853,7 +2853,7 @@ int __cdecl PC_Directive_evalfloat(source_s *source)
     token.endwhitespace_p = source->scriptstack->script_p;
     token.linescrossed = 0;
     v3 = value;
-    v2 = fabs(v3);
+    v2 = I_fabs(v3);
     sprintf(token.string, "%1.2f", v2);
     token.type = 3;
     token.subtype = 10248;
@@ -2933,7 +2933,7 @@ int __cdecl PC_DollarDirective_evalfloat(source_s *source)
     token.endwhitespace_p = source->scriptstack->script_p;
     token.linescrossed = 0;
     v3 = value;
-    v2 = fabs(v3);
+    v2 = I_fabs(v3);
     sprintf(token.string, "%1.2f", v2);
     token.type = 3;
     token.subtype = 10248;

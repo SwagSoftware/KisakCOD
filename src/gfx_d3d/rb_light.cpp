@@ -1337,46 +1337,46 @@ char __cdecl R_IsPointInLightRegionHull(const float *relPoint, const GfxLightReg
     float midPointAlongDir; // [esp+7Ch] [ebp-4h]
 
     v22 = *relPoint - hull->kdopMidPoint[0];
-    v12 = fabs(v22);
+    v12 = I_fabs(v22);
     if (hull->kdopHalfSize[0] <= v12)
         return 0;
     v21 = relPoint[1] - hull->kdopMidPoint[1];
-    v11 = fabs(v21);
+    v11 = I_fabs(v21);
     if (hull->kdopHalfSize[1] <= v11)
         return 0;
     v20 = relPoint[2] - hull->kdopMidPoint[2];
-    v10 = fabs(v20);
+    v10 = I_fabs(v20);
     if (hull->kdopHalfSize[2] <= v10)
         return 0;
     v19 = relPoint[1] + *relPoint - hull->kdopMidPoint[3];
-    v9 = fabs(v19);
+    v9 = I_fabs(v19);
     if (hull->kdopHalfSize[3] <= v9)
         return 0;
     v18 = *relPoint - relPoint[1] - hull->kdopMidPoint[4];
-    v8 = fabs(v18);
+    v8 = I_fabs(v18);
     if (hull->kdopHalfSize[4] <= v8)
         return 0;
     v17 = relPoint[2] + *relPoint - hull->kdopMidPoint[5];
-    v7 = fabs(v17);
+    v7 = I_fabs(v17);
     if (hull->kdopHalfSize[5] <= v7)
         return 0;
     v16 = *relPoint - relPoint[2] - hull->kdopMidPoint[6];
-    v6 = fabs(v16);
+    v6 = I_fabs(v16);
     if (hull->kdopHalfSize[6] <= v6)
         return 0;
     v15 = relPoint[2] + relPoint[1] - hull->kdopMidPoint[7];
-    v5 = fabs(v15);
+    v5 = I_fabs(v15);
     if (hull->kdopHalfSize[7] <= v5)
         return 0;
     v14 = relPoint[1] - relPoint[2] - hull->kdopMidPoint[8];
-    v4 = fabs(v14);
+    v4 = I_fabs(v14);
     if (hull->kdopHalfSize[8] <= v4)
         return 0;
     for (axisIter = 0; axisIter < hull->axisCount; ++axisIter)
     {
         midPointAlongDir = Vec3Dot(hull->axis[axisIter].dir, relPoint);
         v13 = midPointAlongDir - hull->axis[axisIter].midPoint;
-        v3 = fabs(v13);
+        v3 = I_fabs(v13);
         if (hull->axis[axisIter].halfSize <= v3)
             return 0;
     }

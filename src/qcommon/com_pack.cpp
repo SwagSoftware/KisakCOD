@@ -35,12 +35,12 @@ PackedUnitVec __cdecl Vec3PackUnitVec(const float *unitVec)
         decoded[1] = (testEncoding[1] - 127.0) * decodeScale;
         decoded[2] = (testEncoding[2] - 127.0) * decodeScale;
         v5 = Vec3Normalize(decoded) - 1.0;
-        v3 = fabs(v5);
+        v3 = I_fabs(v5);
         lenError = v3;
         if (v3 < EQUAL_EPSILON)
         {
             v4 = Vec3Dot(decoded, normalized) - 1.0;
-            v2 = fabs(v4);
+            v2 = I_fabs(v4);
             if (v2 < bestDirError || v2 == bestDirError && lenError < bestLenError)
             {
                 bestDirError = v2;

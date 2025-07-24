@@ -185,7 +185,7 @@ void __cdecl CM_Trace(
         tw.midpoint[i] = (tw.extents.start[i] + tw.delta[i - 6]) * 0.5;
         tw.delta[i] = tw.delta[i - 6] - tw.extents.start[i];
         tw.halfDelta[i] = tw.delta[i] * 0.5;
-        v14 = fabs(tw.halfDelta[i]);
+        v14 = I_fabs(tw.halfDelta[i]);
         tw.halfDeltaAbs[i] = v14;
     }
     CM_CalcTraceExtents(&tw.extents);
@@ -500,7 +500,7 @@ void __cdecl CM_TestBoxInBrush(const traceWork_t *tw, cbrush_t *brush, trace_t *
             if ((COERCE_UNSIGNED_INT(tw->offsetZ) & 0x7F800000) == 0x7F800000)
                 MyAssertHandler(".\\qcommon\\cm_trace.cpp", 256, 0, "%s", "!IS_NAN(tw->offsetZ)");
             v4 = tw->offsetZ * plane->normal[2];
-            v3 = fabs(v4);
+            v3 = I_fabs(v4);
             dist = plane->dist + tw->radius + v3;
             if ((LODWORD(dist) & 0x7F800000) == 0x7F800000)
                 MyAssertHandler(".\\qcommon\\cm_trace.cpp", 259, 0, "%s", "!IS_NAN(dist)");
@@ -594,7 +594,7 @@ void __cdecl CM_TestCapsuleInCapsule(const traceWork_t *tw, trace_t *trace)
     fTotalHalfHeight = offs + tw->size[2] - tw->radius;
     if (fTotalHalfHeight < 0.0)
         MyAssertHandler(".\\qcommon\\cm_trace.cpp", 462, 0, "%s", "fTotalHalfHeight >= 0");
-    v2 = fabs(fHeightDiff);
+    v2 = I_fabs(fHeightDiff);
     if (fTotalHalfHeight >= v2)
     {
         p1[2] = 0.0;
@@ -770,7 +770,7 @@ void __cdecl CM_TraceThroughLeafBrushNode_r(
                 if (p1[3] >= trace->fraction)
                     return;
                 diff = t2 - t1;
-                v10 = fabs(diff);
+                v10 = I_fabs(diff);
                 absDiff = v10;
                 if (v10 <= 0.000000476837158203125)
                 {
@@ -1026,7 +1026,7 @@ void __cdecl CM_TraceThroughBrush(const traceWork_t *tw, cbrush_t *brush, trace_
             if ((COERCE_UNSIGNED_INT(tw->offsetZ) & 0x7F800000) == 0x7F800000)
                 MyAssertHandler(".\\qcommon\\cm_trace.cpp", 648, 0, "%s", "!IS_NAN(tw->offsetZ)");
             v11 = tw->offsetZ * plane->normal[2];
-            v5 = fabs(v11);
+            v5 = I_fabs(v11);
             offsetDotNormal = v5;
             dist = plane->dist + tw->radius + v5;
             if ((LODWORD(dist) & 0x7F800000) == 0x7F800000)
@@ -1384,7 +1384,7 @@ int __cdecl CM_TraceCylinderThroughCylinder(
                     fHitHeight = (fEntry - fEpsilon) * tw->delta[2] + tw->extents.start[2] - vStationary[2];
                     if (fTotalHeighta < 0.0)
                         MyAssertHandler(".\\qcommon\\cm_trace.cpp", 1051, 0, "%s", "fTotalHeight >= 0");
-                    v8 = fabs(fHitHeight);
+                    v8 = I_fabs(fHitHeight);
                     if (fTotalHeighta >= (double)v8)
                     {
                         v7 = fEntry - 0.0;
@@ -1430,7 +1430,7 @@ int __cdecl CM_TraceCylinderThroughCylinder(
         fTotalHeight = tw->size[2] - tw->radius + fStationaryHalfHeight;
         if (fTotalHeight < 0.0)
             MyAssertHandler(".\\qcommon\\cm_trace.cpp", 1011, 0, "%s", "fTotalHeight >= 0");
-        v11 = fabs(vDelta[2]);
+        v11 = I_fabs(vDelta[2]);
         if (fTotalHeight >= (double)v11)
         {
             trace->fraction = 0.0;
@@ -1443,7 +1443,7 @@ int __cdecl CM_TraceCylinderThroughCylinder(
             Vec3Sub(tw->extents.end, vStationary, vDelta);
             if (fTotalHeight < 0.0)
                 MyAssertHandler(".\\qcommon\\cm_trace.cpp", 1024, 0, "%s", "fTotalHeight >= 0");
-            v10 = fabs(vDelta[2]);
+            v10 = I_fabs(vDelta[2]);
             if (fTotalHeight >= (double)v10)
                 trace->allsolid = 1;
             return 0;
@@ -1521,7 +1521,7 @@ void __cdecl CM_TraceThroughTree(const traceWork_t *tw, int num, const float *p1
                 if (p1[3] >= (double)trace->fraction)
                     return;
                 diff = t2 - t1;
-                v10 = fabs(diff);
+                v10 = I_fabs(diff);
                 absDiff = v10;
                 if (v10 <= 0.000000476837158203125)
                 {
@@ -1760,7 +1760,7 @@ int __cdecl CM_BoxSightTrace(
         tw.midpoint[i] = (tw.extents.start[i] + tw.extents.end[i]) * 0.5f;
         tw.delta[i] = tw.extents.end[i] - tw.extents.start[i];
         tw.halfDelta[i] = tw.delta[i] * 0.5f;
-        tw.halfDeltaAbs[i] = fabs(tw.halfDelta[i]);
+        tw.halfDeltaAbs[i] = I_fabs(tw.halfDelta[i]);
     }
 
     CM_CalcTraceExtents(&tw.extents);
@@ -1992,7 +1992,7 @@ int __cdecl CM_SightTraceThroughBrush(const traceWork_t *tw, cbrush_t *brush)
         if ((COERCE_UNSIGNED_INT(tw->offsetZ) & 0x7F800000) == 0x7F800000)
             MyAssertHandler(".\\qcommon\\cm_trace.cpp", 1731, 0, "%s", "!IS_NAN(tw->offsetZ)");
         v8 = tw->offsetZ * plane->normal[2];
-        v3 = fabs(v8);
+        v3 = I_fabs(v8);
         dist = plane->dist + tw->radius + v3;
         if ((LODWORD(dist) & 0x7F800000) == 0x7F800000)
             MyAssertHandler(".\\qcommon\\cm_trace.cpp", 1734, 0, "%s", "!IS_NAN(dist)");
@@ -2156,7 +2156,7 @@ int __cdecl CM_SightTraceThroughLeafBrushNode_r(
             if (tmax > -offset)
             {
                 diff = t2 - t1;
-                v10 = fabs(diff);
+                v10 = I_fabs(diff);
                 absDiff = v10;
                 if (v10 <= 0.000000476837158203125)
                 {
@@ -2431,7 +2431,7 @@ bool __cdecl CM_SightTraceCylinderThroughCylinder(
                     fHitHeight = (fEntry - fEpsilon) * tw->delta[2] + tw->extents.start[2] - vStationary[2];
                     if (fTotalHeighta < 0.0)
                         MyAssertHandler(".\\qcommon\\cm_trace.cpp", 2053, 0, "%s", "fTotalHeight >= 0");
-                    v6 = fabs(fHitHeight);
+                    v6 = I_fabs(fHitHeight);
                     return fTotalHeighta < (double)v6;
                 }
                 else
@@ -2454,7 +2454,7 @@ bool __cdecl CM_SightTraceCylinderThroughCylinder(
         fTotalHeight = tw->size[2] - tw->radius + fStationaryHalfHeight;
         if (fTotalHeight < 0.0)
             MyAssertHandler(".\\qcommon\\cm_trace.cpp", 2029, 0, "%s", "fTotalHeight >= 0");
-        v8 = fabs(vDelta[2]);
+        v8 = I_fabs(vDelta[2]);
         return fTotalHeight < (double)v8;
     }
 }
@@ -2524,7 +2524,7 @@ int __cdecl CM_SightTraceThroughTree(const traceWork_t *tw, int num, const float
             num = node->children[1];
         }
         diff = t2 - t1;
-        v11 = fabs(diff);
+        v11 = I_fabs(diff);
         absDiff = v11;
         if (v11 <= 0.000000476837158203125)
         {

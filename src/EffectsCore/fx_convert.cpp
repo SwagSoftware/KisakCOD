@@ -1,5 +1,6 @@
 #include "fx_system.h"
 #include <gfx_d3d/r_material.h>
+#include <universal/com_math.h>
 
 bool __cdecl FX_ElemUsesMaterial(const FxEditorElemDef *edElemDef)
 {
@@ -401,7 +402,7 @@ double __cdecl FX_MaxErrorForIntervalCount(
             for (componentIndex = 1; componentIndex < componentCount; ++componentIndex)
             {
                 v7 = samples[componentIndex + componentCount * sampleIndexIter] - lerpedValueIter[componentIndex - 1];
-                v6 = fabs(v7);
+                v6 = I_fabs(v7);
                 error = v6;
                 if (v6 > (double)errorMax)
                 {
@@ -1209,7 +1210,7 @@ void __cdecl FX_ConvertTrail_CompileVertices(
             if (SNAP_TOLERANCE_POS >= v5)
             {
                 v9 = outVertPtrIter->texCoord - emittedVertPtrIter->texCoord;
-                v7 = fabs(v9);
+                v7 = I_fabs(v9);
                 if (SNAP_TOLERANCE_TEXCOORD >= (double)v7)
                 {
                     v6 = emittedVertPtrIter->normal[1] * outVertPtrIter->normal[1]

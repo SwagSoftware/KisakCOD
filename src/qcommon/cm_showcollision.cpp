@@ -324,11 +324,11 @@ void __cdecl CM_PickProjectionAxes(const float *normal, int *i, int *j)
     float v6; // [esp+Ch] [ebp-20h]
     int k; // [esp+28h] [ebp-4h]
 
-    v6 = fabs(*normal);
-    v5 = fabs(normal[1]);
+    v6 = I_fabs(*normal);
+    v5 = I_fabs(normal[1]);
     k = v5 > (double)v6;
-    v4 = fabs(normal[k]);
-    v3 = fabs(normal[2]);
+    v4 = I_fabs(normal[k]);
+    v3 = I_fabs(normal[2]);
 
     if (v3 > (double)v4)
     {
@@ -412,8 +412,8 @@ void __cdecl CM_AddColinearExteriorPointToWindingProjected(
             "w->p[index0][i] != w->p[index1][i] || w->p[index0][j] != w->p[index1][j]");
     v13 = w->p[index1][i] - w->p[index0][i];
     dj = w->p[index1][j] - w->p[index0][j];
-    v7 = fabs(v13);
-    v6 = fabs(dj);
+    v7 = I_fabs(v13);
+    v6 = I_fabs(dj);
     if (v6 > (double)v7)
     {
         axis = j;
@@ -496,7 +496,7 @@ double __cdecl CM_RepresentativeTriangleFromWinding(const winding_t *w, const fl
                 Vec3Sub(w->p[i], w->p[j], va);
                 Vec3Cross(va, vb, vc);
                 v7 = Vec3Dot(vc, normal);
-                v6 = fabs(v7);
+                v6 = I_fabs(v7);
                 if (areaBest < (double)v6)
                 {
                     areaBest = v6;

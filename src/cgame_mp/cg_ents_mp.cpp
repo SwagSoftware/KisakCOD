@@ -1947,14 +1947,14 @@ void __cdecl CG_ClampPrimaryLightDir(GfxLight *light, const ComPrimaryLight *ref
         }
         rotationLimit = refLight->rotationLimit;
         v8 = Vec3Dot(light->dir, refLight->dir) - rotationLimit;
-        v5 = fabs(v8);
+        v5 = I_fabs(v8);
         if (v5 > EQUAL_EPSILON)
             MyAssertHandler(
                 ".\\cgame_mp\\cg_ents_mp.cpp",
                 1117,
                 0,
                 "%s",
-                "I_fabs( Vec3Dot( light->dir, refLight->dir ) - refLight->rotationLimit ) <= 0.001f");
+                "I_I_fabs( Vec3Dot( light->dir, refLight->dir ) - refLight->rotationLimit ) <= 0.001f");
     }
 }
 

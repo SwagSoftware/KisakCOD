@@ -35,15 +35,15 @@ BOOL __cdecl R_WatersEquivalent(const water_t *w0, const water_t *w1)
     if (w1->Lx != w0->Lx || w1->Lz != w0->Lz)
         return 0;
     v16 = w0->amplitude - w1->amplitude;
-    v10 = fabs(v16);
+    v10 = I_fabs(v16);
     if (v10 > EQUAL_EPSILON)
         return 0;
     v15 = w0->gravity - w1->gravity;
-    v9 = fabs(v15);
+    v9 = I_fabs(v15);
     if (v9 > 0.1)
         return 0;
     v14 = w0->windvel - w1->windvel;
-    v8 = fabs(v14);
+    v8 = I_fabs(v14);
     if (v8 > 0.1)
         return 0;
     v13 = w0->winddir[0] * w1->winddir[0] + w0->winddir[1] * w1->winddir[1];
@@ -54,7 +54,7 @@ BOOL __cdecl R_WatersEquivalent(const water_t *w0, const water_t *w1)
     v5 = v6 + 1.0e-10;
     fDirAngleCos = v13 / v5;
     v4 = fDirAngleCos - 1.0;
-    v3 = fabs(v4);
+    v3 = I_fabs(v4);
     return v3 <= EQUAL_EPSILON;
 }
 

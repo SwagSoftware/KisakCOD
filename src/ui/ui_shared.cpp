@@ -1560,7 +1560,7 @@ bool __cdecl Script_ExecIfFloatsEqual(const char *dvarValue, const char *testVal
 
     v4 = atof(testValue);
     v5 = atof(dvarValue) - v4;
-    v3 = fabs(v5);
+    v3 = I_fabs(v5);
     return v3 < 0.000009999999747378752;
 }
 

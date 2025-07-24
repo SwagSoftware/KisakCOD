@@ -1195,14 +1195,14 @@ void __cdecl XModelLoadCollData(
                 *pos += 4;
                 plane[3] = v25;
                 v24 = Vec3Length(plane) - 1.0;
-                v4 = fabs(v24);
+                v4 = I_fabs(v24);
                 if (v4 >= 0.009999999776482582)
                     MyAssertHandler(
                         ".\\xanim\\xmodel_load_obj.cpp",
                         348,
                         0,
                         "%s\n\t(name) = %s",
-                        "(I_fabs( Vec3Length( plane ) - 1.0f ) < 0.01f)",
+                        "(I_I_fabs( Vec3Length( plane ) - 1.0f ) < 0.01f)",
                         name);
                 v23 = *(float *)*pos;
                 *pos += 4;

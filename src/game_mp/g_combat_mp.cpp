@@ -628,8 +628,8 @@ double __cdecl CanDamage(
         Vec3Normalize(v1);
         Vec3Cross(v, v1, up);
         Vec3Sub(absMaxs, dest[0], centerToCorner);
-        radiusRight = fabs((centerToCorner[0] * v1[0])) + fabs((centerToCorner[1] * v1[1]));
-        radiusUp = fabs((centerToCorner[0] * up[0])) + fabs((centerToCorner[1] * up[1])) + fabs((centerToCorner[2] * up[2]));
+        radiusRight = I_fabs((centerToCorner[0] * v1[0])) + I_fabs((centerToCorner[1] * v1[1]));
+        radiusUp = I_fabs((centerToCorner[0] * up[0])) + I_fabs((centerToCorner[1] * up[1])) + I_fabs((centerToCorner[2] * up[2]));
         Vec3Scale(v1, radiusRight, v1);
         Vec3Scale(up, radiusUp, up);
         Vec3Add(dest[0], v1, dest[1]);

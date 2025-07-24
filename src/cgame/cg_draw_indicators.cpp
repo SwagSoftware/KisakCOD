@@ -26,7 +26,7 @@ void __cdecl CG_DrawFlashDamage(const cg_s *cgameGlob)
     if (cgameGlob->nextSnap && cgameGlob->v_dmg_time > cgameGlob->time)
     {
         v5 = (float)(cgameGlob->v_dmg_time - cgameGlob->time) * cgameGlob->v_dmg_pitch / 500.0f;
-        v4 = fabs(v5);
+        v4 = I_fabs(v5);
         redFlash = v4;
         if (v4 > 5.0f)
             redFlash = 5.0f;

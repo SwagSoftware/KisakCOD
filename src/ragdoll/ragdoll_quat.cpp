@@ -146,7 +146,7 @@ void __cdecl Ragdoll_QuatToAxisAngle(const float *quat, float *axisAngle)
 
     halfTheta = Q_acos(quat[3]);
     v3 = sin(halfTheta);
-    v2 = fabs(v3);
+    v2 = I_fabs(v3);
     if (v2 <= 0.000001)
     {
         *axisAngle = 0.0;

@@ -767,9 +767,9 @@ void __cdecl VEH_UpdateAim(gentity_s *ent)
             prevAngles[1] = ent->s.lerp.u.vehicle.gunYaw;
             prevAngles[2] = 0.0f;
             AnglesSubtract(tgtAngles, prevAngles, deltaAngles);
-            v8 = fabs(deltaAngles[0]);
+            v8 = I_fabs(deltaAngles[0]);
             deltaAngles[0] = v8;
-            v7 = fabs(deltaAngles[1]);
+            v7 = I_fabs(deltaAngles[1]);
             deltaAngles[1] = v7;
             ent->s.lerp.u.primaryLight.cosHalfFovInner = LinearTrackAngle(
                 tgtAngles[0],
@@ -1112,7 +1112,7 @@ void __cdecl VEH_UpdateAngleAndAngularVel(
     angleDiff = AngleDelta(desiredAngle, phys->angles[index]);
     if (angleDiff != 0.0f || phys->rotVel[index] != 0.0f)
     {
-        v11 = fabs(phys->rotVel[index]);
+        v11 = I_fabs(phys->rotVel[index]);
         targetAngleVel = phys->maxAngleVel[index];
         if (angleDiff * phys->rotVel[index] < 0.0f)
         {
@@ -1127,7 +1127,7 @@ void __cdecl VEH_UpdateAngleAndAngularVel(
             stopTime = v11 / decel;
             stopAngle = v11 * 0.5f * stopTime;
             stopAnglea = (1.0f - overShoot) * stopAngle;
-            v10 = fabs(angleDiff);
+            v10 = I_fabs(angleDiff);
             if (stopAnglea < v10)
             {
                 effectiveAccel = accel;
@@ -1141,7 +1141,7 @@ void __cdecl VEH_UpdateAngleAndAngularVel(
         if (angleDiff < 0.0f)
             targetAngleVel = -targetAngleVel;
         if (v11 >= effectiveAccel * 0.05000000074505806f
-            || (v9 = v11 * 0.05000000074505806f, v8 = fabs(angleDiff), v8 >= v9))
+            || (v9 = v11 * 0.05000000074505806f, v8 = I_fabs(angleDiff), v8 >= v9))
         {
             phys->rotVel[index] = VEH_AccelerateSpeed(phys->rotVel[index], targetAngleVel, effectiveAccel, 0.050000001f);
             phys->angles[index] = phys->rotVel[index] * 0.05000000074505806f + phys->angles[index];
@@ -1219,7 +1219,7 @@ float __cdecl VEH_UpdateMove_GetDesiredYaw(scr_vehicle_s *veh, float *desiredDir
             v6 = v8 + 0.5f;
             v5 = floor(v6);
             v7 = (v8 - v5) * 360.0f;
-            v4 = fabs(v7);
+            v4 = I_fabs(v7);
             if (timeToStop > timeToTurn && v4 > stopAngle)
                 timeToTurn = (v4 - stopAngle) / phys->maxAngleVel[1] + timeToTurn;
             if (timeToStop <= timeToTurn)
@@ -1304,7 +1304,7 @@ void __cdecl VEH_UpdateYawAndNotify(gentity_s *ent, float desiredYaw)
     v3 = 0;
     if (veh->hasGoalYaw)
     {
-        v4 = fabs(initialYawDiff);
+        v4 = I_fabs(initialYawDiff);
         if (EPSILON < v4)
             v3 = 1;
     }
@@ -1331,7 +1331,7 @@ void __cdecl VEH_UpdateYawAndNotify(gentity_s *ent, float desiredYaw)
     if (v3)
     {
         finalYawDiff = veh->phys.angles[1] - veh->goalYaw;
-        if (finalYawDiff * initialYawDiff < 0.0f || (v2 = fabs(finalYawDiff), EPSILON > v2))
+        if (finalYawDiff * initialYawDiff < 0.0f || (v2 = I_fabs(finalYawDiff), EPSILON > v2))
             Scr_Notify(ent, scr_const.goal_yaw, 0);
     }
 }
@@ -1357,11 +1357,11 @@ float __cdecl VEH_GetAccelForAngles(scr_vehicle_s *veh)
         }
         else
         {
-            v5 = fabs(veh->phys.angles[0]);
-            if (MAX_HOVER_ANGLE >= v5 && (v4 = fabs(veh->phys.angles[2]), MAX_HOVER_ANGLE >= v4))
+            v5 = I_fabs(veh->phys.angles[0]);
+            if (MAX_HOVER_ANGLE >= v5 && (v4 = I_fabs(veh->phys.angles[2]), MAX_HOVER_ANGLE >= v4))
             {
-                v3 = fabs(veh->phys.rotVel[0]);
-                if (MAX_HOVER_ANGLE_VEL >= v3 && (v2 = fabs(veh->phys.rotVel[2]), MAX_HOVER_ANGLE_VEL >= v2))
+                v3 = I_fabs(veh->phys.rotVel[0]);
+                if (MAX_HOVER_ANGLE_VEL >= v3 && (v2 = I_fabs(veh->phys.rotVel[2]), MAX_HOVER_ANGLE_VEL >= v2))
                 {
                     veh->hover.useHoverAccelForAngles = 1;
                     return veh->hover.hoverAccel;
@@ -1459,7 +1459,7 @@ void __cdecl VEH_CheckHorizontalVelocityToGoal(
         {
             oldSpeed = Vec2Length(phys->vel);
             v8 = newSpeed - oldSpeed;
-            v7 = fabs(v8);
+            v7 = I_fabs(v8);
             requiredDecel = horizontalSpeed * horizontalSpeed / (horizontalDist * 2.0f) * 0.05000000074505806f;
             if (v7 < requiredDecel)
             {
@@ -1478,7 +1478,7 @@ void __cdecl VEH_CheckHorizontalVelocityToGoal(
             if (horizontalDist == 0.0)
                 MyAssertHandler(".\\game\\g_scr_vehicle.cpp", 3061, 0, "%s", "horizontalDist");
             v12 = perpDir[0] * *vecToGoal + perpDir[1] * vecToGoal[1];
-            v6 = fabs(v12);
+            v6 = I_fabs(v12);
             radiusVec[0] = v6;
             if (horizontalDist < v6)
             {
@@ -1532,10 +1532,10 @@ void __cdecl VEH_CheckVerticalVelocityToGoal(scr_vehicle_s *veh, float verticalD
     float verticalSpeed; // [esp+38h] [ebp-4h]
 
     verticalSpeed = veh->phys.vel[2];
-    v7 = fabs(accelVec[2]);
+    v7 = I_fabs(accelVec[2]);
     if (0.001f <= v7)
     {
-        v6 = fabs(verticalSpeed);
+        v6 = I_fabs(verticalSpeed);
         if (0.001f <= v6 && verticalSpeed * accelVec[2] < 0.0 && verticalDist * verticalSpeed > 0.0f)
         {
             currentStoppingTime = verticalSpeed * 0.05000000074505806f / -accelVec[2];

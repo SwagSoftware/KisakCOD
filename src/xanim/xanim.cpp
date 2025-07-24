@@ -3287,7 +3287,7 @@ void __cdecl XAnimClearGoalWeightKnobInternal(
         if (childInfoIndex == infoIndex)
         {
             v8 = goalWeight - weight;
-            v7 = fabs(v8);
+            v7 = I_fabs(v8);
             v6 = v7;
         }
         else

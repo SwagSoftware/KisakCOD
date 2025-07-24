@@ -562,7 +562,7 @@ void __cdecl SV_PointTraceToEntity(const pointtrace_t *clip, svEntity_s *check, 
                 trace->partGroup = objTrace.partGroup;
                 MatrixTransformVector(objTrace.normal, *(const mat3x3*)&entAxis, trace->normal);
                 v7 = Vec3Length(trace->normal) - 1.0;
-                v5 = fabs(v7);
+                v5 = I_fabs(v7);
                 if (v5 >= 0.01 && Vec3Length(trace->normal) >= 0.01)
                 {
                     v3 = va("%g %g %g", trace->normal[0], trace->normal[1], trace->normal[2]);
@@ -571,7 +571,7 @@ void __cdecl SV_PointTraceToEntity(const pointtrace_t *clip, svEntity_s *check, 
                         482,
                         0,
                         "%s\n\t%s",
-                        "(I_fabs( Vec3Length( trace->normal ) - 1.0f ) < 0.01) || (Vec3Length( trace->normal ) < 0.01)",
+                        "(I_I_fabs( Vec3Length( trace->normal ) - 1.0f ) < 0.01) || (Vec3Length( trace->normal ) < 0.01)",
                         v3);
                 }
                 trace->walkable = trace->normal[2] >= 0.699999988079071;

@@ -444,7 +444,7 @@ void __cdecl HELI_CalcAccel(gentity_s *ent, char *move, float *bodyAccel, float 
     targetTilt[1] = newDecel[1] / maxAccel[1] * vehHelicopterTiltFromDeceleration->current.value + targetTilt[1];
     if (phys->bodyVel[0] > 0.0)
     {
-        v10 = fabs(phys->rotVel[1]);
+        v10 = I_fabs(phys->rotVel[1]);
         if (v10 > 0.0)
         {
             if (maxSpeed[0] <= 0.0f)
@@ -597,13 +597,13 @@ void __cdecl HELI_CmdScale(char *move, float *outFracs)
             *outFracs = scale * *outFracs;
             outFracs[1] = scale * outFracs[1];
         }
-        v6 = fabs(outFracs[1]);
+        v6 = I_fabs(outFracs[1]);
         if (vehHelicopterStrafeDeadzone->current.value > (float)v6)
             outFracs[1] = 0.0;
         if (vehHelicopterScaleMovement->current.enabled)
         {
-            v5 = fabs(*outFracs);
-            v4 = fabs(outFracs[1]);
+            v5 = I_fabs(*outFracs);
+            v4 = I_fabs(outFracs[1]);
             if (v5 > 1.0)
                 MyAssertHandler(".\\game\\g_helicopter.cpp", 49, 0, "%s", "absAxis[0] <= 1.0f");
             if (v4 > 1.0)
@@ -620,10 +620,10 @@ void __cdecl HELI_CmdScale(char *move, float *outFracs)
             }
         }
     }
-    v3 = fabs(outFracs[2]);
+    v3 = I_fabs(outFracs[2]);
     if (vehHelicopterRightStickDeadzone->current.value > (float)v3)
         outFracs[2] = 0.0f;
-    v2 = fabs(outFracs[3]);
+    v2 = I_fabs(outFracs[3]);
     if (vehHelicopterRightStickDeadzone->current.value > (float)v2)
         outFracs[3] = 0.0f;
 }

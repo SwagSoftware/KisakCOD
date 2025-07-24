@@ -624,7 +624,7 @@ bool __cdecl Ragdoll_ValidatePrecalcBoneDef(RagdollDef *def, BoneDef *bone)
         MyAssertHandler(".\\ragdoll\\ragdoll_update.cpp", 815, 0, "%s", "def");
     if (!bone)
         MyAssertHandler(".\\ragdoll\\ragdoll_update.cpp", 816, 0, "%s", "bone");
-    v3 = fabs(bone->mass);
+    v3 = I_fabs(bone->mass);
     return v3 >= 0.000001;
 }
 
@@ -736,13 +736,13 @@ void __cdecl Ragdoll_ClosestPointsTwoSegs(float (*s0)[3], float (*s1)[3], float 
             sN = 0.0;
         }
     }
-    v8 = fabs(sN);
+    v8 = I_fabs(sN);
     if (v8 >= 0.00009999999747378752)
         v7 = sN / sD;
     else
         v7 = 0.0;
     sc = v7;
-    v6 = fabs(tN);
+    v6 = I_fabs(tN);
     if (v6 >= 0.00009999999747378752)
         v5 = tN / tD;
     else

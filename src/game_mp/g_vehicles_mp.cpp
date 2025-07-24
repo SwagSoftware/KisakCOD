@@ -1728,7 +1728,7 @@ char __cdecl VEH_PlayerRotation(gentity_s *player, vehicle_physic_t *phys)
         sign = -1;
     else
         sign = 1;
-    v3 = fabs(yawDelta);
+    v3 = I_fabs(yawDelta);
     if (v3 >= 20.0)
         return 127 * sign;
     if (v3 >= 0.0099999998)
@@ -1886,7 +1886,7 @@ bool __cdecl DriverBreaking(vehicle_physic_t *phys, float driverAccel)
 {
     float v3; // [esp+4h] [ebp-Ch]
 
-    v3 = fabs(driverAccel);
+    v3 = I_fabs(driverAccel);
     return v3 < 0.0099999998f || CarTravelingForward(phys) != driverAccel >= 0.0f;
 }
 
@@ -1917,7 +1917,7 @@ void __cdecl AdvanceVehiclePosition(gentity_s *ent, float frameTime)
         else
             VEH_AirMove(ent, 1, frameTime);
         VEH_GroundPlant(ent, 1, frameTime);
-        v2 = fabs(veh->phys.bodyVel[0]);
+        v2 = I_fabs(veh->phys.bodyVel[0]);
         ent->scr_vehicle->speed = v2;
         if (veh->speed < 0.0f)
             MyAssertHandler(".\\game_mp\\g_vehicles_mp.cpp", 2269, 0, "%s", "veh->speed >= 0.0f");

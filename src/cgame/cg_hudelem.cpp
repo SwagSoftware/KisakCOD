@@ -1442,18 +1442,18 @@ char __cdecl WorldPosToScreenPos(int32_t localClientNum, const float *worldPos, 
     {
         *outScreenPos = -projections[1];
         outScreenPos[1] = -projections[2];
-        v9 = fabs(*outScreenPos);
-        if (v9 >= EQUAL_EPSILON || (v8 = fabs(outScreenPos[1]), v8 >= EQUAL_EPSILON))
+        v9 = I_fabs(*outScreenPos);
+        if (v9 >= EQUAL_EPSILON || (v8 = I_fabs(outScreenPos[1]), v8 >= EQUAL_EPSILON))
         {
-            v7 = fabs(*outScreenPos);
+            v7 = I_fabs(*outScreenPos);
             if (v7 < EQUAL_EPSILON)
                 *outScreenPos = 0.001f;
-            v6 = fabs(outScreenPos[1]);
+            v6 = I_fabs(outScreenPos[1]);
             if (v6 < EQUAL_EPSILON)
                 outScreenPos[1] = 0.001f;
             while (1)
             {
-                v5 = fabs(*outScreenPos);
+                v5 = I_fabs(*outScreenPos);
                 if (scrPlace->realViewportSize[0] <= (double)v5)
                     break;
                 v11 = scrPlace->realViewportSize[0];
@@ -1462,7 +1462,7 @@ char __cdecl WorldPosToScreenPos(int32_t localClientNum, const float *worldPos, 
             }
             while (1)
             {
-                v4 = fabs(outScreenPos[1]);
+                v4 = I_fabs(outScreenPos[1]);
                 if (scrPlace->realViewportSize[1] <= (double)v4)
                     break;
                 v10 = scrPlace->realViewportSize[1];

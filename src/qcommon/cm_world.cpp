@@ -888,7 +888,7 @@ void __cdecl CM_ClipMoveToEntities_r(
                 }
                 else
                 {
-                    v10 = fabs(diff);
+                    v10 = I_fabs(diff);
                     if (diff < 0.0)
                         v9 = p[node->tree.axis] - node->tree.dist;
                     else
@@ -1022,7 +1022,7 @@ int __cdecl CM_ClipSightTraceToEntities_r(
         }
         else
         {
-            v10 = fabs(diff);
+            v10 = I_fabs(diff);
             if (diff < 0.0)
                 v9 = p[node->tree.axis] - node->tree.dist;
             else

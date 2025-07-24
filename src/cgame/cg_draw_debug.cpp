@@ -141,7 +141,7 @@ double __cdecl CG_DrawFPS(const ScreenPlacement *scrPlace, float y, meminfo_t *m
     for (i = 0; i < 32; ++i)
     {
         v14 = (double)fps_previousTimes[i] - average;
-        v7 = fabs(v14);
+        v7 = I_fabs(v14);
         variance = variance + v7;
     }
     variance = variance / 32.0;
