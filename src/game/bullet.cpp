@@ -560,50 +560,62 @@ void __cdecl Bullet_FirePenetrate(BulletFireParams *bp, const WeaponDef *weapDef
     float maxDepth; // [esp+198h] [ebp-8h]
     bool traceHit; // [esp+19Fh] [ebp-1h]
 
-    if (!bp)
-        MyAssertHandler(".\\game\\bullet.cpp", 630, 0, "%s", "bp");
-    if (!weapDef)
-        MyAssertHandler(".\\game\\bullet.cpp", 631, 0, "%s", "weapDef");
-    if (!attacker)
-        MyAssertHandler(".\\game\\bullet.cpp", 632, 0, "%s", "attacker");
-    if (weapDef->penetrateType == PENETRATE_TYPE_NONE)
-        MyAssertHandler(".\\game\\bullet.cpp", 633, 0, "%s", "weapDef->penetrateType != PENETRATE_TYPE_NONE");
+    iassert(bp);
+    iassert(weapDef);
+    iassert(attacker);
+    iassert(weapDef->penetrateType != PENETRATE_TYPE_NONE);
+    
     if (Bullet_Trace(bp, weapDef, attacker, &br, 0))
     {
         Bullet_Process(bp, &br, weapDef, attacker, 0, gameTime, &impactFlags, 1);
+
         for (penetrateIndex = 0; penetrateIndex < 5; ++penetrateIndex)
         {
             maxDepth = BG_GetSurfacePenetrationDepth(weapDef, br.depthSurfaceType);
+
+#ifdef KISAK_MP
             if (attacker->client)
             {
                 perks = attacker->client->ps.perks;
                 if ((perks & 0x20) != 0)
                     maxDepth = maxDepth * perk_bulletPenetrationMultiplier->current.value;
             }
+#endif
+
             if (maxDepth <= 0.0)
-                break;
+                return;
+
             lastHitPos[0] = br.hitPos[0];
             lastHitPos[1] = br.hitPos[1];
             lastHitPos[2] = br.hitPos[2];
-            if (!BG_AdvanceTrace(bp, &br, 0.13500001f))
-                break;
+
+            if (!BG_AdvanceTrace(bp, &br, 0.135f))
+                return;
+
             traceHit = Bullet_Trace(bp, weapDef, attacker, &br, br.depthSurfaceType);
+
             Com_Memcpy((char *)&revBp, (char *)bp, 64);
-            diff[4] = bp->dir[0]; // KISAKTODO check float here
+
+            //diff[4] = bp->dir[0]; // KISAKTODO check float here
             revBp.dir[0] = -bp->dir[0];
             revBp.dir[1] = -bp->dir[1];
             revBp.dir[2] = -bp->dir[2];
-            diff[3] = bp->end[0]; // KISAKTODO check float here
+            //diff[3] = bp->end[0]; // KISAKTODO check float here
             revBp.start[0] = bp->end[0];
             revBp.start[1] = bp->end[1];
             revBp.start[2] = bp->end[2];
-            Vec3Mad(lastHitPos, 0.0099999998f, revBp.dir, revBp.end);
+
+            Vec3Mad(lastHitPos, 0.01f, revBp.dir, revBp.end);
+
             Com_Memcpy((char *)&revBr, (char *)&br, 68);
+
             revBr.trace.normal[0] = -revBr.trace.normal[0];
             revBr.trace.normal[1] = -revBr.trace.normal[1];
             revBr.trace.normal[2] = -revBr.trace.normal[2];
+
             if (traceHit)
-                BG_AdvanceTrace(&revBp, &revBr, 0.0099999998f);
+                BG_AdvanceTrace(&revBp, &revBr, 0.01f);
+
             revTraceHit = Bullet_Trace(&revBp, weapDef, attacker, &revBr, revBr.depthSurfaceType);
             v12 = revTraceHit && revBr.trace.allsolid || br.trace.startsolid && revBr.trace.startsolid;
             allSolid = v12;
@@ -624,6 +636,7 @@ void __cdecl Bullet_FirePenetrate(BulletFireParams *bp, const WeaponDef *weapDef
                     depth = 1.0f;
                 if (revTraceHit)
                 {
+#ifdef KISAK_MP
                     if (attacker->client && (v20 = attacker->client->ps.perks, (v20 & 0x20) != 0))
                     {
                         value = perk_bulletPenetrationMultiplier->current.value;
@@ -633,6 +646,7 @@ void __cdecl Bullet_FirePenetrate(BulletFireParams *bp, const WeaponDef *weapDef
                         maxDepth = v8;
                     }
                     else
+#endif
                     {
                         SurfacePenetrationDepth = BG_GetSurfacePenetrationDepth(weapDef, revBr.depthSurfaceType);
                         v7 = SurfacePenetrationDepth - maxDepth;
@@ -642,9 +656,11 @@ void __cdecl Bullet_FirePenetrate(BulletFireParams *bp, const WeaponDef *weapDef
                     if (maxDepth <= 0.0f)
                         return;
                 }
+
                 bp->damageMultiplier = bp->damageMultiplier - depth / maxDepth;
                 if (bp->damageMultiplier <= 0.0f)
                     return;
+
                 if (!allSolid)
                 {
                     Vec3Sub(revBr.hitPos, br.hitPos, v17);

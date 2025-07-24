@@ -3347,3 +3347,10 @@ void ProjectPointOntoVector(const float *point, const float *start, const float 
     vProj[1] = start[1] + t * dir[1];
     vProj[2] = start[2] + t * dir[2];
 }
+
+float Q_fabs(float f) 
+{
+    int tmp = *(int *)&f;
+    tmp &= 0x7FFFFFFF;
+    return *(float *)&tmp;
+}

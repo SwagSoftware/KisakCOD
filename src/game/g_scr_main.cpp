@@ -3,6 +3,7 @@
 #endif
 
 #include "g_scr_main.h"
+#include "g_public.h"
 #include <script/scr_stringlist.h>
 #include <qcommon/mem_track.h>
 #include <script/scr_vm.h>
@@ -10,6 +11,122 @@
 #include "pathnode.h"
 #include <server/sv_game.h>
 #include <script/scr_animtree.h>
+
+#include "actor_script_cmd.h"
+#include "g_vehicle_path.h"
+#include "g_main.h"
+#include <stringed/stringed_hooks.h>
+
+
+const BuiltinMethodDef methods[104] =
+{
+  { "startscriptedanim", ActorCmd_StartScriptedAnim, 0 },
+  { "startcoverarrival", ActorCmd_StartCoverArrival, 0 },
+  { "starttraversearrival", ActorCmd_StartTraverseArrival, 0 },
+  { "checkcoverexitposwithpath", ActorCmd_CheckCoverExitPosWithPath, 0 },
+  { "shoot", ActorCmd_Shoot, 0 },
+  { "shootblank", ActorCmd_ShootBlank, 0 },
+  { "melee", ActorCmd_Melee, 0 },
+  { "updateplayersightaccuracy", ActorCmd_UpdatePlayerSightAccuracy, 0 },
+  { "findcovernode", ActorCmd_FindCoverNode, 0 },
+  { "findbestcovernode", ActorCmd_FindBestCoverNode, 0 },
+  { "getcovernode", ActorCmd_GetCoverNode, 0 },
+  { "usecovernode", ActorCmd_UseCoverNode, 0 },
+  { "reacquirestep", ActorCmd_ReacquireStep, 0 },
+  { "findreacquirenode", ActorCmd_FindReacquireNode, 0 },
+  { "getreacquirenode", ActorCmd_GetReacquireNode, 0 },
+  { "usereacquirenode", ActorCmd_UseReacquireNode, 0 },
+  { "findreacquiredirectpath", ActorCmd_FindReacquireDirectPath, 0 },
+  { "trimpathtoattack", ActorCmd_TrimPathToAttack, 0 },
+  { "reacquiremove", ActorCmd_ReacquireMove, 0 },
+  { "findreacquireproximatepath", ActorCmd_FindReacquireProximatePath, 0 },
+  { "flagenemyunattackable", ActorCmd_FlagEnemyUnattackable, 0 },
+  { "setaimanims", ActorCmd_SetAimAnims, 0 },
+  { "aimatpos", ActorCmd_AimAtPos, 0 },
+  { "enterprone", ActorCmd_EnterProne, 0 },
+  { "exitprone", ActorCmd_ExitProne, 0 },
+  { "setproneanimnodes", ActorCmd_SetProneAnimNodes, 0 },
+  { "updateprone", ActorCmd_UpdateProne, 0 },
+  { "clearpitchorient", ActorCmd_ClearPitchOrient, 0 },
+  { "setlookatanimnodes", ActorCmd_SetLookAtAnimNodes, 0 },
+  { "setlookat", ActorCmd_SetLookAt, 0 },
+  { "setlookatyawlimits", ActorCmd_SetLookAtYawLimits, 0 },
+  { "stoplookat", ActorCmd_StopLookAt, 0 },
+  { "canshoot", ActorCmd_CanShoot, 0 },
+  { "cansee", ActorCmd_CanSee, 0 },
+  { "dropweapon", ActorCmd_DropWeapon, 0 },
+  { "maymovetopoint", ActorCmd_MayMoveToPoint, 0 },
+  { "maymovefrompointtopoint", ActorCmd_MayMoveFromPointToPoint, 0 },
+  { "teleport", ActorCmd_Teleport, 0 },
+  { "withinapproxpathdist", ActorCmd_WithinApproxPathDist, 0 },
+  { "ispathdirect", ActorCmd_IsPathDirect, 0 },
+  { "allowedstances", ActorCmd_AllowedStances, 0 },
+  { "isstanceallowed", ActorCmd_IsStanceAllowed, 0 },
+  { "issuppressionwaiting", ActorCmd_IsSuppressionWaiting, 0 },
+  { "issuppressed", ActorCmd_IsSuppressed, 0 },
+  { "ismovesuppressed", ActorCmd_IsMoveSuppressed, 0 },
+  { "checkgrenadethrow", ActorCmd_CheckGrenadeThrow, 0 },
+  { "checkgrenadelaunch", ActorCmd_CheckGrenadeLaunch, 0 },
+  { "checkgrenadelaunchpos", ActorCmd_CheckGrenadeLaunchPos, 0 },
+  { "firegrenadelauncher", ActorCmd_FireGrenadeLauncher, 0 },
+  { "throwgrenade", ActorCmd_ThrowGrenade, 0 },
+  { "pickupgrenade", ActorCmd_PickUpGrenade, 0 },
+  { "useturret", ActorCmd_UseTurret, 0 },
+  { "stopuseturret", ActorCmd_StopUseTurret, 0 },
+  { "canuseturret", ActorCmd_CanUseTurret, 0 },
+  { "traversemode", ActorCmd_TraverseMode, 0 },
+  { "animmode", ActorCmd_AnimMode, 0 },
+  { "orientmode", ActorCmd_OrientMode, 0 },
+  { "getmotionangle", ActorCmd_GetMotionAngle, 0 },
+  { "getanglestolikelyenemypath", ActorCmd_GetAnglesToLikelyEnemyPath, 0 },
+  { "setturretanim", ActorCmd_SetTurretAnim, 0 },
+  { "getturret", ActorCmd_GetTurret, 0 },
+  { "beginprediction", ActorCmd_BeginPrediction, 0 },
+  { "endprediction", ActorCmd_EndPrediction, 0 },
+  { "lerpposition", ActorCmd_LerpPosition, 0 },
+  { "predictoriginandangles", ActorCmd_PredictOriginAndAngles, 0 },
+  { "predictanim", ActorCmd_PredictAnim, 0 },
+  { "gethitenttype", ActorCmd_GetHitEntType, 0 },
+  { "gethityaw", ActorCmd_GetHitYaw, 0 },
+  { "getgroundenttype", ActorCmd_GetGroundEntType, 0 },
+  { "isdeflected", ActorCmd_IsDeflected, 0 },
+  { "trackscriptstate", ActorCmd_trackScriptState, 0 },
+  { "dumphistory", ActorCmd_DumpHistory, 0 },
+  { "animcustom", ScrCmd_animcustom, 0 },
+  { "canattackenemynode", ScrCmd_CanAttackEnemyNode, 0 },
+  { "getnegotiationstartnode", ScrCmd_GetNegotiationStartNode, 0 },
+  { "getnegotiationendnode", ScrCmd_GetNegotiationEndNode, 0 },
+  { "checkprone", ActorCmd_CheckProne, 0 },
+  { "pushplayer", ActorCmd_PushPlayer, 0 },
+  { "checkgrenadethrowpos", ActorCmd_CheckGrenadeThrowPos, 0 },
+  { "setgoalnode", ActorCmd_SetGoalNode, 0 },
+  { "setgoalpos", ActorCmd_SetGoalPos, 0 },
+  { "setgoalentity", ActorCmd_SetGoalEntity, 0 },
+  { "setgoalvolume", ActorCmd_SetGoalVolume, 0 },
+  { "getgoalvolume", ActorCmd_GetGoalVolume, 0 },
+  { "cleargoalvolume", ActorCmd_ClearGoalVolume, 0 },
+  { "setfixednodesafevolume", ActorCmd_SetFixedNodeSafeVolume, 0 },
+  { "getfixednodesafevolume", ActorCmd_GetFixedNodeSafeVolume, 0 },
+  { "clearfixednodesafevolume", ActorCmd_ClearFixedNodeSafeVolume, 0 },
+  { "isingoal", ActorCmd_IsInGoal, 0 },
+  { "setruntopos", ActorCmd_SetOverrideRunToPos, 0 },
+  { "nearnode", ActorCmd_NearNode, 0 },
+  { "clearenemy", ActorCmd_ClearEnemy, 0 },
+  { "setentitytarget", ActorCmd_SetEntityTarget, 0 },
+  { "clearentitytarget", ActorCmd_ClearEntityTarget, 0 },
+  { "setpotentialthreat", ActorCmd_SetPotentialThreat, 0 },
+  { "clearpotentialthreat", ActorCmd_ClearPotentialThreat, 0 },
+  { "setflashbangimmunity", ActorCmd_SetFlashbangImmunity, 0 },
+  { "setflashbanged", ActorCmd_SetFlashBanged, 0 },
+  { "getflashbangedstrength", ActorCmd_GetFlashBangedStrength, 0 },
+  { "setengagementmindist", ActorCmd_SetEngagementMinDist, 0 },
+  { "setengagementmaxdist", ActorCmd_SetEngagementMaxDist, 0 },
+  { "isknownenemyinradius", ActorCmd_IsKnownEnemyInRadius, 0 },
+  { "isknownenemyinvolume", ActorCmd_IsKnownEnemyInVolume, 0 },
+  { "settalktospecies", ActorCmd_SetTalkToSpecies, 0 }
+};
+
+
 
 bool g_archiveGetDvar;
 char **difficultyStrings;
@@ -166,14 +283,14 @@ scr_animtree_t GScr_FindAnimTree(const char *filename, int bEnforceExists)
     return tree;
 }
 
-void __cdecl GScr_FindAnimTrees(int a1, const char *a2)
+void __cdecl GScr_FindAnimTrees()
 {
-    XAnim_s *AnimTree; // r31
+    scr_animtree_t tree; // r31
 
-    AnimTree = (XAnim_s *)Scr_FindAnimTree((scr_animtree_t *)"generic_human", a2);
-    if (!AnimTree)
-        Com_Error(ERR_DROP, byte_820379C0, "generic_human");
-    g_scr_data.generic_human.tree.anims = AnimTree;
+    tree = Scr_FindAnimTree("generic_human");
+    if (!tree.anims)
+        Com_Error(ERR_DROP, "Could not find animation tree '%s'", "generic_human");
+    g_scr_data.generic_human.tree = tree;
 }
 
 void __cdecl GScr_SetSingleAnimScript(ScriptFunctions *functions, scr_animscript_t *pAnim, const char *name)
@@ -186,7 +303,7 @@ void __cdecl GScr_SetSingleAnimScript(ScriptFunctions *functions, scr_animscript
         MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\g_scr_main.cpp", 284, 0, "%s", "name");
     Com_sprintf(v6, 64, "animscripts/%s", name);
     pAnim->func = GScr_SetScriptAndLabel(functions, v6, "main", 1);
-    pAnim->name = Scr_AllocString(name, 1);
+    pAnim->name = Scr_AllocString((char*)name, 1);
 }
 
 void __cdecl GScr_SetAnimScripts(ScriptFunctions *functions)
@@ -310,12 +427,9 @@ gentity_s *__cdecl GetPlayerEntity(scr_entref_t *entref)
 
 void GScr_CreatePrintChannel()
 {
-    const char *String; // r3
-
     if (Scr_GetNumParam() != 1)
         Scr_Error("illegal call to createprintchannel()");
-    String = Scr_GetString(0);
-    if (!Con_OpenChannel(String, 1))
+    if (!Con_OpenChannel((char*)Scr_GetString(0), 1))
         Scr_Error("Unable to create new channel.  Maximum number of channels exeeded.");
 }
 

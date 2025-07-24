@@ -57,7 +57,7 @@ int __cdecl Actor_CanSeeSentientEx(
     int a7);
 int __cdecl Actor_CanShootEnemy(actor_s *self);
 int __cdecl Actor_CanSeePoint(actor_s *self, const float *vPoint);
-int __cdecl Actor_CanSeeEntityPoint(actor_s *self, const float *vPoint, const gentity_s *ent, int a4);
+int __cdecl Actor_CanSeeEntityPoint(actor_s *self, const float *vPoint, const gentity_s *ent);
 int __cdecl Actor_CanSeeEntity(actor_s *self, const gentity_s *ent);
 int __cdecl Actor_CanSeeSentient(actor_s *self, sentient_s *sentient, int iMaxLatency);
 int __cdecl Actor_CanSeeEnemy(actor_s *self);

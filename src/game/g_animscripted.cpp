@@ -4,6 +4,15 @@
 
 #include "g_local.h"
 
+#include <universal/com_math.h>
+#include <xanim/xanim.h>
+#include <script/scr_vm.h>
+#include "g_scr_main.h"
+#include <script/scr_memorytree.h>
+#include "g_main.h"
+#include <script/scr_animtree.h>
+#include "actor_corpse.h"
+
 void __cdecl LocalToWorldOriginAndAngles(
     const float (*matrix)[3],
     const float *trans,
@@ -16,11 +25,11 @@ void __cdecl LocalToWorldOriginAndAngles(
     float v10[4][3]; // [sp+50h] [-80h] BYREF
     float v11[6][3]; // [sp+80h] [-50h] BYREF
 
-    MatrixTransformVector43(trans, matrix, origin);
+    MatrixTransformVector43(trans, (const mat4x3&)matrix, origin);
     v8 = RotationToYaw(rot);
-    YawToAxis(v8, v9);
-    MatrixMultiply(v10, matrix, v11);
-    AxisToAngles(v11, angles);
+    YawToAxis(v8, (mat3x3&)v9);
+    MatrixMultiply((const mat3x3&)v10, (const mat3x3&)matrix, (mat3x3&)v11);
+    AxisToAngles((const mat3x3&)v11, angles);
 }
 
 void __cdecl CalcDeltaOriginAndAngles(
@@ -37,11 +46,11 @@ void __cdecl CalcDeltaOriginAndAngles(
     float v12[6][3]; // [sp+A0h] [-50h] BYREF
 
     XAnimCalcAbsDelta(obj, anim, v10, v11);
-    MatrixTransformVector43(v11, matrix, origin);
+    MatrixTransformVector43(v11, (const mat4x3&)matrix, origin);
     v8 = RotationToYaw(v10);
-    YawToAxis(v8, v9);
-    MatrixMultiply((const float (*)[3]) & v11[6], matrix, v12);
-    AxisToAngles(v12, angles);
+    YawToAxis(v8, (mat3x3&)v9);
+    MatrixMultiply((const mat3x3&)v11[6], (const mat3x3 &)matrix, (mat3x3 &)v12);
+    AxisToAngles((const mat3x3&)v12, angles);
 }
 
 void __cdecl GetDeltaOriginAndAngles(
@@ -58,11 +67,11 @@ void __cdecl GetDeltaOriginAndAngles(
     float v13[8][3]; // [sp+90h] [-60h] BYREF
 
     XAnimGetAbsDelta(anims, anim, v12, trans, 1.0);
-    MatrixTransformVector43(trans, matrix, origin);
+    MatrixTransformVector43(trans, (const mat4x3&)matrix, origin);
     v10 = RotationToYaw(v12);
-    YawToAxis(v10, v11);
-    MatrixMultiply((const float (*)[3]) & v12[4], matrix, v13);
-    AxisToAngles(v13, angles);
+    YawToAxis(v10, (mat3x3&)v11);
+    MatrixMultiply((const mat3x3&)v12[4], (const mat3x3&)matrix, (mat3x3&)v13);
+    AxisToAngles((const mat3x3&)v13, angles);
 }
 
 void __cdecl G_Animscripted_DeathPlant(
@@ -81,7 +90,7 @@ void __cdecl G_Animscripted_DeathPlant(
     float (*v16)[3]; // r3
     int v17; // r8
     double v18; // fp0
-    float *v19; // r6
+    float *pPitch; // r6
     float *v20; // r3
     float v21; // [sp+50h] [-160h] BYREF
     float v22; // [sp+54h] [-15Ch]
@@ -90,12 +99,12 @@ void __cdecl G_Animscripted_DeathPlant(
     float v25; // [sp+64h] [-14Ch]
     float v26; // [sp+68h] [-148h]
     float v27; // [sp+70h] [-140h] BYREF
-    float v28; // [sp+74h] [-13Ch]
+    float yaw; // [sp+74h] [-13Ch]
     float v29; // [sp+78h] [-138h]
     float v30; // [sp+80h] [-130h] BYREF
     float v31; // [sp+84h] [-12Ch]
     float v32; // [sp+88h] [-128h]
-    float v33[4]; // [sp+90h] [-120h] BYREF
+    float vOrigin[4]; // [sp+90h] [-120h] BYREF
     float v34; // [sp+A0h] [-110h] BYREF
     float v35; // [sp+A4h] [-10Ch]
     float v36; // [sp+A8h] [-108h]
@@ -127,22 +136,23 @@ void __cdecl G_Animscripted_DeathPlant(
     }
     scripted->axis[3][2] = v14;
     scripted->fHeightOfs = 0.0;
-    v28 = angles[1];
+    yaw = angles[1];
     v29 = angles[2];
     v27 = 0.0;
     AnglesToAxis(&v27, scripted->axis);
     XAnimGetAbsDelta(anims, anim, v37, &v30, 1.0);
     MatrixTransformVector43(&v30, scripted->axis, &v34);
     v15 = RotationToYaw(v37);
-    YawToAxis(v15, v16);
-    MatrixMultiply((const float (*)[3])v38[1].normal, scripted->axis, v39);
-    AxisToAngles(v39, &v27);
+    YawToAxis(v15, (mat3x3&)v16);
+    MatrixMultiply((const mat3x3&)v38[1].normal, (const mat3x3&)scripted->axis, (mat3x3&)v39);
+    AxisToAngles((const mat3x3&)v39, &v27);
     v21 = v34;
     v24 = v34;
     v17 = ent->s.number;
     v22 = v35;
     v25 = v35;
-    v18 = (float)((float)__fsqrts((float)((float)(v30 * v30) + (float)((float)(v31 * v31) + (float)(v32 * v32))))
+    //v18 = (float)((float)__fsqrts((float)((float)(v30 * v30) + (float)((float)(v31 * v31) + (float)(v32 * v32))))
+    v18 = (float)((float)sqrtf((float)((float)(v30 * v30) + (float)((float)(v31 * v31) + (float)(v32 * v32))))
         + (float)128.0);
     v23 = (float)v18 + v36;
     v26 = v36 - (float)v18;
@@ -155,10 +165,10 @@ void __cdecl G_Animscripted_DeathPlant(
     else
     {
         v20 = (float *)ent->s.number;
-        v33[0] = (float)((float)(v24 - v21) * v38[0].fraction) + v21;
-        v33[1] = (float)((float)(v25 - v22) * v38[0].fraction) + v22;
-        v33[2] = (float)((float)(v26 - v23) * v38[0].fraction) + v23;
-        Actor_GetBodyPlantAngles(v20, 8519697, v33, v28, v19, &scripted->fEndPitch, &scripted->fEndRoll, 0);
+        vOrigin[0] = (float)((float)(v24 - v21) * v38[0].fraction) + v21;
+        vOrigin[1] = (float)((float)(v25 - v22) * v38[0].fraction) + v22;
+        vOrigin[2] = (float)((float)(v26 - v23) * v38[0].fraction) + v23;
+        Actor_GetBodyPlantAngles(v20, 8519697, vOrigin, yaw, &scripted->fEndPitch, &scripted->fEndRoll, NULL);
     }
     if (XAnimGetLength(anims, anim) >= 1.0)
         scripted->fOrientLerp = 0.0;
@@ -278,9 +288,9 @@ void __cdecl G_Animscripted(
     XAnimCalcAbsDelta(ServerDObj, anim, v25, v27);
     MatrixTransformVector43(v27, scripted->axis, v26);
     v23 = RotationToYaw(v25);
-    YawToAxis(v23, v24);
-    MatrixMultiply((const float (*)[3]) & v28[6], scripted->axis, v29);
-    AxisToAngles(v29, v28);
+    YawToAxis(v23, (mat3x3&)v24);
+    MatrixMultiply((const mat3x3&)v28[6], (const mat3x3&)scripted->axis, (mat3x3&)v29);
+    AxisToAngles((const mat3x3&)v29, v28);
     scripted->originError[0] = ent->r.currentOrigin[0] - v26[0];
     scripted->originError[1] = ent->r.currentOrigin[1] - v26[1];
     scripted->originError[2] = ent->r.currentOrigin[2] - v26[2];
@@ -446,13 +456,13 @@ void __cdecl G_AnimScripted_UpdateEntityOriginAndAngles(gentity_s *ent, float *o
         v9[10] = origin[1];
         v9[11] = origin[2];
         AnglesToAxis(angles, (float (*)[3])v9);
-        MatrixMultiply43((const float (*)[3])v9, v10, (float (*)[3])v8);
+        MatrixMultiply43((const mat4x3&)v9, (const mat4x3&)v10,(mat4x3&)v8);
         v6 = v8[10];
         v7 = v8[11];
         ent->r.currentOrigin[0] = v8[9];
         ent->r.currentOrigin[1] = v6;
         ent->r.currentOrigin[2] = v7;
-        AxisToAngles((const float (*)[3])v8, ent->r.currentAngles);
+        AxisToAngles((const mat3x3&)v8, ent->r.currentAngles);
         G_CalcTagAxis(ent, 0);
     }
     else
@@ -505,7 +515,7 @@ void __cdecl G_Animscripted_Think(gentity_s *ent)
         }
         else
         {
-            MT_Free(scripted, 96);
+            MT_Free((unsigned char*)scripted, 96);
             ent->scripted = 0;
         }
     }
@@ -515,7 +525,7 @@ void __cdecl GScr_GetStartOrigin()
 {
     XAnimTree_s *v0; // r5
     const XAnim_s *Anims; // r3
-    scr_anim_s *Anim; // [sp+50h] [-A0h]
+    scr_anim_s Anim; // [sp+50h] [-A0h]
     float v3[2]; // [sp+58h] [-98h] BYREF
     float v4[4]; // [sp+60h] [-90h] BYREF
     float v5[4]; // [sp+70h] [-80h] BYREF
@@ -525,14 +535,14 @@ void __cdecl GScr_GetStartOrigin()
 
     Scr_GetVector(0, v4);
     Scr_GetVector(1u, v5);
-    Anim = Scr_GetAnim((scr_anim_s *)2, 0, v0);
-    Anims = Scr_GetAnims((unsigned __int16)Anim);
-    XAnimGetAbsDelta(Anims, HIWORD(Anim), v3, v6, 0.0);
+    Anim = Scr_GetAnim(2, NULL);
+    Anims = Scr_GetAnims(Anim.tree);
+    XAnimGetAbsDelta(Anims, Anim.index, v3, v6, 0.0);
     v8[9] = v4[0];
     v8[10] = v4[1];
     v8[11] = v4[2];
     AnglesToAxis(v5, (float (*)[3])v8);
-    MatrixTransformVector43(v6, (const float (*)[3])v8, v7);
+    MatrixTransformVector43(v6, (const mat4x3&)v8, v7);
     Scr_AddVector(v7);
 }
 
@@ -542,7 +552,7 @@ void __cdecl GScr_GetStartAngles()
     const XAnim_s *Anims; // r3
     double v2; // fp1
     float (*v3)[3]; // r3
-    scr_anim_s *Anim; // [sp+50h] [-100h]
+    scr_anim_s Anim; // [sp+50h] [-100h]
     float v5[4]; // [sp+58h] [-F8h] BYREF
     float v6[2]; // [sp+68h] [-E8h] BYREF
     float v7[4]; // [sp+70h] [-E0h] BYREF
@@ -553,17 +563,17 @@ void __cdecl GScr_GetStartAngles()
 
     Scr_GetVector(0, v5);
     Scr_GetVector(1u, v8);
-    Anim = Scr_GetAnim((scr_anim_s *)2, 0, v0);
-    Anims = Scr_GetAnims((unsigned __int16)Anim);
-    XAnimGetAbsDelta(Anims, HIWORD(Anim), v6, v10, 0.0);
+    Anim = Scr_GetAnim(2, NULL);
+    Anims = Scr_GetAnims(Anim.tree);
+    XAnimGetAbsDelta(Anims, Anim.index, v6, v10, 0.0);
     v9[9] = v5[0];
     v9[10] = v5[1];
     v9[11] = v5[2];
     AnglesToAxis(v8, (float (*)[3])v9);
     v2 = RotationToYaw(v6);
-    YawToAxis(v2, v3);
-    MatrixMultiply((const float (*)[3]) & v10[4], (const float (*)[3])v9, v11);
-    AxisToAngles(v11, v7);
+    YawToAxis(v2, (mat3x3&)v3);
+    MatrixMultiply((const mat3x3&)v10[4], (const mat3x3&)v9, (mat3x3&)v11);
+    AxisToAngles((const mat3x3&)v11, v7);
     Scr_AddVector(v7);
 }
 
@@ -571,7 +581,7 @@ void __cdecl GScr_GetCycleOriginOffset()
 {
     XAnimTree_s *v0; // r5
     const XAnim_s *Anims; // r31
-    scr_anim_s *Anim; // [sp+50h] [-B0h]
+    scr_anim_s Anim; // [sp+50h] [-B0h]
     float v3[2]; // [sp+58h] [-A8h] BYREF
     float v4[4]; // [sp+60h] [-A0h] BYREF
     float v5[4]; // [sp+70h] [-90h] BYREF
@@ -581,15 +591,15 @@ void __cdecl GScr_GetCycleOriginOffset()
     float v9[4][3]; // [sp+B0h] [-50h] BYREF
 
     Scr_GetVector(0, v7);
-    Anim = Scr_GetAnim((scr_anim_s *)1, 0, v0);
+    Anim = Scr_GetAnim(1, NULL);
     AnglesToAxis(v7, v9);
-    Anims = Scr_GetAnims((unsigned __int16)Anim);
-    XAnimGetAbsDelta(Anims, HIWORD(Anim), v3, v4, 0.0);
-    XAnimGetAbsDelta(Anims, HIWORD(Anim), v3, v5, 1.0);
+    Anims = Scr_GetAnims(Anim.tree);
+    XAnimGetAbsDelta(Anims, Anim.index, v3, v4, 0.0);
+    XAnimGetAbsDelta(Anims, Anim.index, v3, v5, 1.0);
     v6[0] = v5[0] - v4[0];
     v6[1] = v5[1] - v4[1];
     v6[2] = v5[2] - v4[2];
-    MatrixTransformVector(v6, v9, v8);
+    MatrixTransformVector(v6, (const mat3x3&)v9, v8);
     Scr_AddVector(v8);
 }
 

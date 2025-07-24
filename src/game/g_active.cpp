@@ -55,9 +55,17 @@ void __cdecl P_DamageFeedback(gentity_s *player)
             {
                 v6 = 100 * damage_blood;
                 v7 = v6 / maxHealth;
-                __twllei(maxHealth, 0);
-                HIDWORD(v8) = __ROL4__(v6, 1) - 1;
-                __twlgei(maxHealth & ~HIDWORD(v8), 0xFFFFFFFF);
+                //__twllei(maxHealth, 0);
+                //HIDWORD(v8) = __ROL4__(v6, 1) - 1;
+                //__twlgei(maxHealth & ~HIDWORD(v8), 0xFFFFFFFF);
+
+                if (maxHealth < 0) {
+                    maxHealth = 0;
+                }
+                unsigned int alignUnit = ((unsigned int)v6 << 1) | ((unsigned int)v6 >> 31);
+                unsigned int alignMask = alignUnit - 1;
+                maxHealth = maxHealth & ~alignMask;
+
                 if (v7 > 127)
                     v7 = 127;
                 LODWORD(v8) = v7;
@@ -629,7 +637,7 @@ void __cdecl ClientThink_real(gentity_s *ent, long double a2)
     int numtouch; // r4
     int time; // r11
     int *p_buttons; // r27
-    unsigned int *p_oldbuttons; // r11
+    int *p_oldbuttons; // r11
     int buttons; // r10
     int useButtonDone; // r8
     int v25; // r10
@@ -676,11 +684,12 @@ void __cdecl ClientThink_real(gentity_s *ent, long double a2)
     }
     else
     {
-        v6 = (_cntlzw((unsigned int)ent->tagInfo) & 0x20) == 0;
+        //v6 = (_cntlzw((unsigned int)ent->tagInfo) & 0x20) == 0;
+        v6 = (ent->tagInfo != 0);
         if (client->ps.stats[0] <= 0)
             v6 += 5;
     }
-    client->ps.pm_type = v6;
+    client->ps.pm_type = (pmtype_t)v6;
     *(double *)&a2 = (float)(g_gravity->current.value + (float)0.5);
     v7 = floor(a2);
     eventSequence = client->ps.eventSequence;

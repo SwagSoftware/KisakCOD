@@ -14,7 +14,7 @@ unsigned int __cdecl SV_ClipHandleForEntity(const gentity_s *ent)
         return CM_TempBoxModel(ent->r.mins, ent->r.maxs, ent->r.contents);
 #elif KISAK_SP
     if (ent->r.bmodel)
-        return *(unsigned __int16 *)ent->s.index;
+        return ent->s.index.item;
     else
         return CM_TempBoxModel(ent->r.mins, ent->r.maxs, ent->r.contents);
 #endif
@@ -387,7 +387,7 @@ void __cdecl SV_LinkEntity(gentity_s *gEnt)
     if (contents)
     {
         if (gEnt->r.bmodel)
-            v21 = *(unsigned __int16 *)gEnt->s.index;
+            v21 = gEnt->s.index.item;
         else
             v21 = CM_TempBoxModel(mins, maxs, contents);
         ServerDObj = Com_GetServerDObj(gEnt->s.number);

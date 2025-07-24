@@ -48,7 +48,7 @@ const unsigned __int16 *g_AISpeciesNames[2] =
     &scr_const.dog
 };
 
-const char *g_entinfoAITextNames[] = { "all", "brief", "combat", "movement", "state", NULL };
+const char *g_entinfoAITextNames[6] = { "all", "brief", "combat", "movement", "state", NULL };
 const char *ai_orient_mode_text[7] =
 {
   "invalid",

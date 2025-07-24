@@ -107,7 +107,7 @@ void __cdecl G_AnimScripted_ClearAnimWeights(
     DObj_s *obj,
     XAnimTree_s *pAnimTree,
     unsigned int root,
-    actor_s *pActor);
+    struct actor_s *pActor);
 void __cdecl G_Animscripted(
     gentity_s *ent,
     float *origin,
@@ -624,7 +624,7 @@ void __cdecl GScr_AddFieldsForRadiant();
 void __cdecl Scr_FreeEntity(gentity_s *ent);
 void __cdecl Scr_AddEntity(gentity_s *ent);
 gentity_s *__cdecl Scr_GetEntityAllowNull(unsigned int index);
-gentity_s *__cdecl Scr_GetEntity(scr_entref_t *index, unsigned int a2);
+gentity_s *__cdecl Scr_GetEntity(unsigned int index);
 void __cdecl Scr_FreeHudElem(game_hudelem_s *hud);
 void __cdecl Scr_AddHudElem(game_hudelem_s *hud);
 game_hudelem_s *__cdecl Scr_GetHudElem(unsigned int index);
@@ -795,10 +795,10 @@ void __cdecl G_SafeDObjFree(gentity_s *ent);
 int __cdecl G_DObjUpdateServerTime(gentity_s *ent, int bNotify);
 void __cdecl G_DObjCalcPose(gentity_s *ent, int *partBits);
 void __cdecl G_DObjCalcBone(const gentity_s *ent, int boneIndex);
-DObjAnimMat *__cdecl G_DObjGetLocalBoneIndexMatrix(const gentity_s *ent, int boneIndex);
+struct DObjAnimMat *__cdecl G_DObjGetLocalBoneIndexMatrix(const gentity_s *ent, int boneIndex);
 void __cdecl G_DObjGetWorldBoneIndexMatrix(const gentity_s *ent, int boneIndex, float (*tagMat)[3]);
 void __cdecl G_DObjGetWorldBoneIndexPos(const gentity_s *ent, int boneIndex, float *pos);
-DObjAnimMat *__cdecl G_DObjGetLocalTagMatrix(const gentity_s *ent, unsigned int tagName);
+struct DObjAnimMat *__cdecl G_DObjGetLocalTagMatrix(const gentity_s *ent, unsigned int tagName);
 int __cdecl G_DObjGetWorldTagMatrix(const gentity_s *ent, unsigned int tagName, float (*tagMat)[3]);
 int __cdecl G_DObjGetWorldTagPos(const gentity_s *ent, unsigned int tagName, float *pos);
 void __cdecl G_DObjGetWorldTagPos_CheckTagExists(const gentity_s *ent, unsigned int tagName, float *pos);

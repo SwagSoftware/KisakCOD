@@ -3,6 +3,9 @@
 #include <server/sv_world.h>
 #include <game_mp/g_utils_mp.h>
 #include <server/sv_game.h>
+#ifdef KISAK_SP
+#include <server/sv_public.h>
+#endif
 
 struct pushed_t // sizeof=0x2C
 {                                       // ...
@@ -471,6 +474,7 @@ void __cdecl trigger_use(gentity_s *ent)
     trigger_use_shared(ent);
 }
 
+#ifdef KISAK_MP
 void __cdecl trigger_use_shared(gentity_s *self)
 {
     char szConfigString[1028]; // [esp+34h] [ebp-410h] BYREF
@@ -545,6 +549,104 @@ void __cdecl trigger_use_shared(gentity_s *self)
         G_FreeEntity(self);
     }
 }
+#elif KISAK_SP
+void trigger_use_shared(gentity_s *self)
+{
+    int v2; // r30
+    int model; // r10
+    int v4; // r11
+    const char **v5; // r29
+    int v6; // r30
+    const char *v7; // r10
+    char *v8; // r9
+    int v9; // r8
+    const char *v10[4]; // [sp+50h] [-440h] BYREF
+    char v11[1072]; // [sp+60h] [-430h] BYREF
+
+    iassert(self->s.eType != ET_MISSILE);
+
+    if (SV_SetBrushModel(self))
+    {
+        self->r.contents = 0x200000;
+        SV_LinkEntity(self);
+        v2 = 1;
+        self->s.lerp.pos.trType = TR_STATIONARY;
+        self->s.lerp.pos.trBase[0] = self->r.currentOrigin[0];
+        self->s.lerp.pos.trBase[1] = self->r.currentOrigin[1];
+        self->s.lerp.pos.trBase[2] = self->r.currentOrigin[2];
+        model = self->model;
+        v4 = self->s.lerp.eFlags | 1;
+        self->r.svFlags = 1;
+        self->s.lerp.eFlags = v4;
+        if (!model)
+            self->s.lerp.eFlags = v4 | 0x20;
+        *(_DWORD *)self->s.un2 = 1;
+        self->handler = 25;
+        if (G_LevelSpawnString("cursorhint", "", v10))
+        {
+            if (I_stricmp(v10[0], "HINT_INHERIT"))
+            {
+                v5 = &hintStrings[1];
+                while (I_stricmp(v10[0], *v5))
+                {
+                    ++v2;
+                    ++v5;
+                    if (v2 >= 5)
+                        goto LABEL_15;
+                }
+                *(_DWORD *)self->s.un2 = v2;
+            }
+            else
+            {
+                *(_DWORD *)self->s.un2 = -1;
+            }
+        }
+    LABEL_15:
+        self->s.un1.scale = -1;
+        if (G_LevelSpawnString("hintstring", "", v10))
+        {
+            v6 = 0;
+            while (1)
+            {
+                SV_GetConfigstring(v6 + 59, v11, 1024);
+                if (!v11[0])
+                    break;
+                v7 = v10[0];
+                v8 = v11;
+                do
+                {
+                    v9 = *(unsigned __int8 *)v7 - (unsigned __int8)*v8;
+                    if (!*v7)
+                        break;
+                    ++v7;
+                    ++v8;
+                } while (!v9);
+                if (!v9)
+                    goto LABEL_25;
+                if ((unsigned int)++v6 >= 0x20)
+                    goto LABEL_26;
+            }
+            SV_SetConfigstring(v6 + 59, v10[0]);
+        LABEL_25:
+            self->s.un1.scale = v6;
+        LABEL_26:
+            if (v6 == 32)
+                Com_Error(ERR_DROP, "too many different hintstring key values on trigger_use entities. Mx allowed %i different strings.", 32);
+        }
+    }
+    else
+    {
+        Com_PrintError(
+            1,
+            "Killing trigger_use_shared at (%f %f %f) because the brush model is invalid.\n",
+            self->s.lerp.pos.trBase[0],
+            self->s.lerp.pos.trBase[1],
+            self->s.lerp.pos.trBase[2]
+        );
+        G_FreeEntity(self);
+    }
+}
+#endif
 
 void __cdecl G_RotatePoint(float *point, float (*matrix)[3])
 {

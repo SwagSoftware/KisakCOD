@@ -42,9 +42,6 @@ const char *g_entinfoNames[7] =
 const char *g_entinfoTypeNames[4] =
 { "all", "AI only", "vehicle only", NULL };
 
-const char *g_entinfoAITextNames[] =
-{ "all", "brief", "combat", "movement", "state", NULL };
-
 const char *moveOrientModeStrings[7] =
 {
   "invalid",

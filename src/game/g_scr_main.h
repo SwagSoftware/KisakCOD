@@ -5,8 +5,12 @@
 #endif
 
 #include <bgame/bg_public.h>
+
 #include <bgame/bg_actor_prone.h>
 #include <script/scr_variable.h>
+
+#include <bgame/bg_local.h>
+#include "actor_animapi.h"
 
 struct scr_data_t_tag
 {

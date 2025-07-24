@@ -16,17 +16,23 @@
 #include <game/bullet.h>
 #include "actor_events.h"
 #include <universal/com_files.h>
+#include <devgui/devgui.h>
+#include <win32/win_local.h>
 
 struct AccuracyGraphBackup
 {
     float accuracyGraphKnots[2][16][2];
 };
 
-float debugAccuracyColors[8][4] = { 0.0f };
+unsigned int g_accuracyBufferIndex;
+int g_numAccuracyGraphs;
 
+float debugAccuracyColors[8][4] = { 0.0f };
+WeaponDef *g_accuGraphWeapon[2][128];
 DevGraph g_accuracyGraphs[128];
 AccuracyGraphBackup g_accuGraphBuf[2][128];
 char debugAccuracyStrings[8][32] = { 0 };
+int dword_82C31FB0[256];
 
 void __cdecl TRACK_actor_aim()
 {
@@ -285,10 +291,10 @@ float __cdecl Actor_GetPlayerStanceAccuracy(const actor_s *self, const sentient_
 
 float __cdecl Actor_GetPlayerMovementAccuracy(const actor_s *self, const sentient_s *enemy)
 {
-    assert(self);
-    assert(enemy);
-    assert(enemy->ent);
-    assert(enemy->ent->client);
+    iassert(self);
+    iassert(enemy);
+    iassert(enemy->ent);
+    iassert(enemy->ent->client);
 
     float selfPos[3];
     float enemyPos[3];
@@ -404,7 +410,7 @@ float __cdecl Actor_GetFinalAccuracy(actor_s *self, weaponParms *wp, double accu
     double PlayerMovementAccuracy; // fp1
     double playerSightAccuracy; // fp27
     double v14; // fp28
-    double v15; // fp31
+    double accuracy; // fp31
     const float *v16; // r5
     const float *v17; // r5
     const float *v18; // r5
@@ -443,12 +449,13 @@ float __cdecl Actor_GetFinalAccuracy(actor_s *self, weaponParms *wp, double accu
         v14 = 1.0;
         playerSightAccuracy = 1.0;
     }
-    v15 = (float)((float)((float)((float)((float)((float)(self->accuracy * enemy->attackerAccuracy)
+    accuracy = (float)((float)((float)((float)((float)((float)(self->accuracy * enemy->attackerAccuracy)
         * (float)accuracyMod)
         * (float)WeaponAccuracy)
         * (float)PlayerStanceAccuracy)
         * (float)v14)
         * (float)playerSightAccuracy);
+
     if (ai_debugAccuracy->current.enabled && ai_debugEntIndex->current.integer == self->ent->s.number)
     {
         Actor_DebugAccuracyMsg(0, "Self    ", self->accuracy, v11, (float *)colorWhite);
@@ -458,25 +465,16 @@ float __cdecl Actor_GetFinalAccuracy(actor_s *self, weaponParms *wp, double accu
         Actor_DebugAccuracyMsg(4u, "Stance  ", PlayerStanceAccuracy, v19, (float *)colorWhite);
         Actor_DebugAccuracyMsg(5u, "Movement", v14, v20, (float *)colorWhite);
         Actor_DebugAccuracyMsg(6u, "Sight   ", playerSightAccuracy, v21, (float *)colorWhite);
-        Actor_DebugAccuracyMsg(7u, "TOTAL   ", v15, v22, (float *)colorRed);
+        Actor_DebugAccuracyMsg(7u, "TOTAL   ", accuracy, v22, (float *)colorRed);
     }
-    if (v15 < 0.0)
-        MyAssertHandler(
-            "c:\\trees\\cod3\\cod3src\\src\\game\\actor_aim.cpp",
-            362,
-            0,
-            "%s\n\t(accuracy) = %g",
-            HIDWORD(v15),
-            LODWORD(v15));
-    _FP0 = (float)((float)v15 - (float)1.0);
-    _FP13 = -v15;
-    __asm
-    {
-        fsel      f0, f0, f25, f31
-        fsel      f1, f13, f24, f0
-    }
-    self->debugLastAccuracy = _FP1;
-    return *((float *)&_FP1 + 1);
+
+    iassert(accuracy);
+
+    float dbg = accuracy <= 0.0f ? 0.0f : (accuracy >= 1.0f ? 1.0f : accuracy);
+
+    self->debugLastAccuracy = dbg;
+
+    return dbg;
 }
 
 void __cdecl Actor_FillWeaponParms(actor_s *self, weaponParms *wp)
@@ -561,172 +559,136 @@ void __cdecl Actor_FillWeaponParms(actor_s *self, weaponParms *wp)
     }
 }
 
-void __cdecl Actor_HitSentient(weaponParms *wp, sentient_s *enemy, double accuracy)
+// aislop
+void Actor_HitSentient(weaponParms *wp, sentient_s *enemy, float accuracy)
 {
-    double HeadHeight; // fp1
-    double v7; // fp13
-    double v8; // fp28
-    double v11; // fp11
-    double v12; // fp12
-    double v15; // fp0
-    double v16; // fp27
-    double v17; // fp26
-    double v18; // fp25
-    double v19; // fp30
-    double v20; // fp29
-    double v21; // fp30
-    double v22; // fp1
-    double v23; // fp12
-    double v24; // fp11
-    double v25; // fp8
-    double v26; // fp7
-    double v27; // fp0
-    double v28; // fp12
-    double v29; // fp11
-    double v30; // fp13
-    double v31; // fp10
-    double v34; // fp12
-    float v35; // [sp+50h] [-90h] BYREF
-    float v36; // [sp+54h] [-8Ch]
-    float v37; // [sp+58h] [-88h]
-    float v38[4]; // [sp+60h] [-80h] BYREF
-    float v39; // [sp+70h] [-70h] BYREF
-    float v40; // [sp+74h] [-6Ch]
-    float v41; // [sp+78h] [-68h]
+    iassert(wp);
+    iassert(enemy);
 
-    Sentient_GetEyePosition(enemy, &v35);
-    HeadHeight = Sentient_GetHeadHeight(enemy);
-    v7 = (float)(v37 - wp->muzzleTrace[2]);
-    v8 = HeadHeight;
-    _FP10 = -__fsqrts((float)((float)((float)(v35 - wp->muzzleTrace[0]) * (float)(v35 - wp->muzzleTrace[0]))
-        + (float)((float)((float)(v37 - wp->muzzleTrace[2]) * (float)(v37 - wp->muzzleTrace[2]))
-            + (float)((float)(v36 - wp->muzzleTrace[1]) * (float)(v36 - wp->muzzleTrace[1])))));
-    __asm { fsel      f11, f10, f31, f11 }
-    v11 = (float)((float)1.0 / (float)_FP11);
-    v12 = (float)((float)v11 * (float)(v35 - wp->muzzleTrace[0]));
-    v38[1] = (float)(v36 - wp->muzzleTrace[1]) * (float)v11;
-    v38[0] = v12;
-    v38[2] = (float)v7 * (float)v11;
-    Vec3Cross(v38, wp->up, &v39);
-    _FP10 = -__fsqrts((float)((float)(v39 * v39) + (float)((float)(v41 * v41) + (float)(v40 * v40))));
-    __asm { fsel      f0, f10, f31, f0 }
-    v15 = (float)((float)1.0 / (float)_FP0);
-    v16 = (float)(v39 * (float)v15);
-    v17 = (float)(v40 * (float)v15);
-    v18 = (float)(v41 * (float)v15);
+    // Get eye position and head height
+    float eyePos[3];
+    Sentient_GetEyePosition(enemy, eyePos);
+    float headHeight = (float)Sentient_GetHeadHeight(enemy);
+
+    // Vector from muzzle to eye
+    float toEye[3] = {
+        eyePos[0] - wp->muzzleTrace[0],
+        eyePos[1] - wp->muzzleTrace[1],
+        eyePos[2] - wp->muzzleTrace[2]
+    };
+
+    // Normalize toEye
+    float lenSq = toEye[0] * toEye[0] + toEye[1] * toEye[1] + toEye[2] * toEye[2];
+    iassert(lenSq > 0.0f);
+    float invLen = 1.0f / sqrtf(lenSq);
+    float dir[3] = { toEye[0] * invLen, toEye[1] * invLen, toEye[2] * invLen };
+
+    // Compute lateral vector by cross with wp->up
+    float lat[3] = {
+        dir[1] * wp->up[2] - dir[2] * wp->up[1],
+        dir[2] * wp->up[0] - dir[0] * wp->up[2],
+        dir[0] * wp->up[1] - dir[1] * wp->up[0]
+    };
+    float latLenSq = lat[0] * lat[0] + lat[1] * lat[1] + lat[2] * lat[2];
+    iassert(latLenSq > 0.0f);
+    float latInv = 1.0f / sqrtf(latLenSq);
+    lat[0] *= latInv; lat[1] *= latInv; lat[2] *= latInv;
+
+    // Determine spread parameters
+    float vertMax, horizMax;
     if (enemy->ent->client)
     {
-        v19 = 8.0;
-        v20 = -44.0;
+        vertMax = 8.0f;
+        horizMax = -44.0f;
     }
     else
     {
-        if (accuracy < 0.0 || accuracy > 1.0)
-            MyAssertHandler(
-                "c:\\trees\\cod3\\cod3src\\src\\game\\actor_aim.cpp",
-                443,
-                0,
-                "%s\n\t(accuracy) = %g",
-                HIDWORD(accuracy),
-                LODWORD(accuracy));
-        v20 = (float)((float)((float)((float)((float)1.0 - (float)accuracy) + (float)1.0) * (float)0.5) * (float)-44.0);
-        v19 = (float)((float)((float)((float)((float)1.0 - (float)accuracy) * (float)0.89999998) + (float)0.1) * (float)15.0);
+        iassert(accuracy >= 0.0f && accuracy <= 1.0f);
+        horizMax = -44.0f * (1.0f + 0.5f * (1.0f - accuracy));
+        vertMax = 15.0f * (0.1f + 0.9f * (1.0f - accuracy));
     }
-    v21 = (float)(G_crandom() * (float)v19);
-    v22 = G_random();
-    v23 = (float)((float)((float)v17 * (float)v21) + v36);
-    v24 = (float)((float)((float)v18 * (float)v21) + v37);
-    v25 = wp->up[1];
-    v26 = wp->up[2];
-    wp->forward[0] = (float)((float)(wp->up[0] * (float)((float)((float)v22 * (float)v20) + (float)v8))
-        + (float)((float)((float)v16 * (float)v21) + v35))
-        - wp->muzzleTrace[0];
-    wp->forward[1] = (float)((float)((float)v25 * (float)((float)((float)v22 * (float)v20) + (float)v8)) + (float)v23)
-        - wp->muzzleTrace[1];
-    v27 = wp->forward[1];
-    v28 = (float)((float)((float)((float)v26 * (float)((float)((float)v22 * (float)v20) + (float)v8)) + (float)v24)
-        - wp->muzzleTrace[2]);
-    v29 = (float)(wp->forward[1] * wp->forward[1]);
-    v30 = wp->forward[0];
-    wp->forward[2] = v28;
-    v31 = v28;
-    _FP11 = -__fsqrts((float)((float)((float)v28 * (float)v28) + (float)((float)((float)v30 * (float)v30) + (float)v29)));
-    __asm { fsel      f12, f11, f31, f12 }
-    v34 = (float)((float)1.0 / (float)_FP12);
-    wp->forward[1] = (float)v27 * (float)v34;
-    wp->forward[0] = (float)v30 * (float)v34;
-    wp->forward[2] = (float)v34 * (float)v31;
+
+    // Add randomness
+    float rVert = G_crandom() * vertMax;
+    float rHoriz = G_random() * horizMax;
+
+    // Compute final forward vector components
+    float center = rHoriz + headHeight;
+    wp->forward[0] = wp->up[0] * center + dir[0] * rVert + eyePos[0] - wp->muzzleTrace[0];
+    wp->forward[1] = wp->up[1] * center + dir[1] * rVert + eyePos[1] - wp->muzzleTrace[1];
+    wp->forward[2] = wp->up[2] * center + dir[2] * rVert + eyePos[2] - wp->muzzleTrace[2];
+
+    // Renormalize forward vector
+    float fwdLenSq = wp->forward[0] * wp->forward[0]
+        + wp->forward[1] * wp->forward[1]
+        + wp->forward[2] * wp->forward[2];
+    iassert(fwdLenSq > 0.0f);
+    float invFwdLen = 1.0f / sqrtf(fwdLenSq);
+    wp->forward[0] *= invFwdLen;
+    wp->forward[1] *= invFwdLen;
+    wp->forward[2] *= invFwdLen;
 }
 
-void __cdecl Actor_HitTarget(const weaponParms *wp, const float *target, float *forward)
+// aislop
+void Actor_HitTarget(const weaponParms *wp, const float *target, float *forward)
 {
-    float *up; // r28
-    double v7; // fp0
-    double v8; // fp13
-    double v9; // fp12
-    double v12; // fp11
-    double v15; // fp0
-    double v16; // fp29
-    double v17; // fp28
-    double v18; // fp27
-    double v19; // fp1
-    double v20; // fp29
-    double v21; // fp28
-    double v22; // fp27
-    double v23; // fp1
-    double v24; // fp12
-    double v25; // fp11
-    double v26; // fp0
-    double v27; // fp13
-    double v28; // fp11
-    double v29; // fp12
-    double v30; // fp10
-    double v33; // fp13
-    float v34[4]; // [sp+50h] [-70h] BYREF
-    float v35; // [sp+60h] [-60h] BYREF
-    float v36; // [sp+64h] [-5Ch]
-    float v37; // [sp+68h] [-58h]
+    iassert(wp && target && forward);
 
-    up = wp->up;
-    v7 = (float)(*target - wp->muzzleTrace[0]);
-    v8 = (float)(target[2] - wp->muzzleTrace[2]);
-    v9 = (float)(target[1] - wp->muzzleTrace[1]);
-    _FP10 = -__fsqrts((float)((float)((float)v9 * (float)v9)
-        + (float)((float)((float)v8 * (float)v8) + (float)((float)v7 * (float)v7))));
-    __asm { fsel      f11, f10, f31, f11 }
-    v12 = (float)((float)1.0 / (float)_FP11);
-    v34[0] = (float)v12 * (float)(*target - wp->muzzleTrace[0]);
-    v34[1] = (float)v12 * (float)v9;
-    v34[2] = (float)v8 * (float)v12;
-    Vec3Cross(v34, wp->up, &v35);
-    _FP10 = -__fsqrts((float)((float)(v35 * v35) + (float)((float)(v37 * v37) + (float)(v36 * v36))));
-    __asm { fsel      f0, f10, f31, f0 }
-    v15 = (float)((float)1.0 / (float)_FP0);
-    v16 = (float)(v35 * (float)v15);
-    v17 = (float)(v36 * (float)v15);
-    v18 = (float)(v37 * (float)v15);
-    v19 = G_crandom();
-    v20 = (float)((float)((float)((float)v19 * (float)8.0) * (float)v16) + *target);
-    v21 = (float)((float)((float)v17 * (float)((float)v19 * (float)8.0)) + target[1]);
-    v22 = (float)((float)((float)v18 * (float)((float)v19 * (float)8.0)) + target[2]);
-    v23 = G_crandom();
-    v24 = (float)((float)(up[1] * (float)((float)v23 * (float)8.0)) + (float)v21);
-    v25 = (float)((float)(up[2] * (float)((float)v23 * (float)8.0)) + (float)v22);
-    *forward = (float)((float)(*up * (float)((float)v23 * (float)8.0)) + (float)v20) - wp->muzzleTrace[0];
-    forward[1] = (float)v24 - wp->muzzleTrace[1];
-    v26 = *forward;
-    v27 = (float)((float)v25 - wp->muzzleTrace[2]);
-    v28 = (float)(*forward * *forward);
-    forward[2] = v27;
-    v29 = forward[1];
-    v30 = v27;
-    _FP11 = -__fsqrts((float)((float)(forward[1] * forward[1]) + (float)((float)((float)v27 * (float)v27) + (float)v28)));
-    __asm { fsel      f13, f11, f31, f13 }
-    v33 = (float)((float)1.0 / (float)_FP13);
-    *forward = (float)v26 * (float)v33;
-    forward[1] = (float)v29 * (float)v33;
-    forward[2] = (float)v30 * (float)v33;
+    const float *up = wp->up;
+
+    // Direction from muzzle to target
+    float toTarget[3] = {
+        target[0] - wp->muzzleTrace[0],
+        target[1] - wp->muzzleTrace[1],
+        target[2] - wp->muzzleTrace[2]
+    };
+    float distSq = toTarget[0] * toTarget[0] + toTarget[1] * toTarget[1] + toTarget[2] * toTarget[2];
+    iassert(distSq > 0.0f);
+    float invLen = 1.0f / sqrtf(distSq);
+    float dir[3] = {
+        toTarget[0] * invLen,
+        toTarget[1] * invLen,
+        toTarget[2] * invLen
+    };
+
+    // Lateral vector = cross(dir, up), normalized
+    float crossVec[3] = {
+        dir[1] * up[2] - dir[2] * up[1],
+        dir[2] * up[0] - dir[0] * up[2],
+        dir[0] * up[1] - dir[1] * up[0]
+    };
+    float crossLenSq = crossVec[0] * crossVec[0] + crossVec[1] * crossVec[1] + crossVec[2] * crossVec[2];
+    iassert(crossLenSq > 0.0f);
+    float crossInv = 1.0f / sqrtf(crossLenSq);
+    crossVec[0] *= crossInv;
+    crossVec[1] *= crossInv;
+    crossVec[2] *= crossInv;
+
+    // Random spread
+    float r1 = G_crandom() * 8.0f;
+    float r2 = G_crandom() * 8.0f;
+
+    // Apply spread around right and up
+    float aimPos[3] = {
+        target[0] + crossVec[0] * r1 + up[0] * r2,
+        target[1] + crossVec[1] * r1 + up[1] * r2,
+        target[2] + crossVec[2] * r1 + up[2] * r2
+    };
+
+    // Compute final forward vector from muzzle to aimPos
+    forward[0] = aimPos[0] - wp->muzzleTrace[0];
+    forward[1] = aimPos[1] - wp->muzzleTrace[1];
+    forward[2] = aimPos[2] - wp->muzzleTrace[2];
+
+    // Normalize forward
+    float fwdLenSq = forward[0] * forward[0] + forward[1] * forward[1] + forward[2] * forward[2];
+    iassert(fwdLenSq > 0.0f);
+    float fwdInvLen = 1.0f / sqrtf(fwdLenSq);
+    forward[0] *= fwdInvLen;
+    forward[1] *= fwdInvLen;
+    forward[2] *= fwdInvLen;
 }
+
 
 void __cdecl Actor_HitEnemy(actor_s *self, weaponParms *wp, double accuracy)
 {
@@ -739,42 +701,43 @@ void __cdecl Actor_HitEnemy(actor_s *self, weaponParms *wp, double accuracy)
     Actor_HitSentient(wp, self->sentient->targetEnt.ent()->sentient, accuracy);
 }
 
+// aislop
 float outerRadius;
-void __cdecl Actor_MissSentient(weaponParms *wp, sentient_s *enemy, double accuracy)
+void __cdecl Actor_MissSentient(weaponParms *wp, sentient_s *enemy, float accuracy)
 {
     gentity_s *ent; // r27
     float *up; // r31
-    double v8; // fp13
-    double v11; // fp11
-    double v12; // fp29
-    double v13; // fp28
-    double v14; // fp27
-    double v17; // fp0
-    double v18; // fp26
-    double v19; // fp25
-    double v20; // fp24
+    float v8; // fp13
+    float v11; // fp11
+    float v12; // fp29
+    float v13; // fp28
+    float v14; // fp27
+    float v17; // fp0
+    float v18; // fp26
+    float v19; // fp25
+    float v20; // fp24
     int v21; // r28
-    double v22; // fp1
+    float v22; // fp1
     __int64 v23; // r10
-    double v24; // fp0
-    double HeadHeight; // fp30
-    double v26; // fp1
-    double v27; // fp0
-    double v28; // fp13
+    float v24; // fp0
+    float HeadHeight; // fp30
+    float v26; // fp1
+    float v27; // fp0
+    float v28; // fp13
     int v29; // r29
-    double v30; // fp30
-    double v31; // fp1
+    float v30; // fp30
+    float v31; // fp1
     __int64 v32; // r10
-    double v33; // fp0
-    double v34; // fp1
-    double v35; // fp12
-    double v36; // fp0
-    double v37; // fp12
-    double v38; // fp0
-    double v39; // fp11
-    double v40; // fp13
-    double v41; // fp10
-    double v44; // fp0
+    float v33; // fp0
+    float v34; // fp1
+    float v35; // fp12
+    float v36; // fp0
+    float v37; // fp12
+    float v38; // fp0
+    float v39; // fp11
+    float v40; // fp13
+    float v41; // fp10
+    float v44; // fp0
     __int64 v45; // [sp+50h] [-A0h] BYREF
     float v46; // [sp+58h] [-98h]
     float v47; // [sp+60h] [-90h] BYREF
@@ -785,181 +748,149 @@ void __cdecl Actor_MissSentient(weaponParms *wp, sentient_s *enemy, double accur
     float v52; // [sp+78h] [-78h]
 
     ent = enemy->ent;
-    if (outerRadius == 6969.0)
-        outerRadius = __fsqrts((float)((float)((float)((float)15.0 * (float)15.0) * (float)2.0) * (float)3.0));
+    if (outerRadius == 6969.0f)
+        outerRadius = sqrtf(15.0f * 15.0f * 2.0f * 3.0f);
     Sentient_GetEyePosition(enemy, &v47);
     up = wp->up;
-    v8 = (float)(v49 - wp->muzzleTrace[2]);
-    _FP10 = -__fsqrts((float)((float)((float)(v47 - wp->muzzleTrace[0]) * (float)(v47 - wp->muzzleTrace[0]))
-        + (float)((float)((float)(v49 - wp->muzzleTrace[2]) * (float)(v49 - wp->muzzleTrace[2]))
-            + (float)((float)(v48 - wp->muzzleTrace[1]) * (float)(v48 - wp->muzzleTrace[1])))));
-    __asm { fsel      f11, f10, f31, f11 }
-    v11 = (float)((float)1.0 / (float)_FP11);
-    v12 = (float)((float)v11 * (float)(v47 - wp->muzzleTrace[0]));
-    v13 = (float)((float)(v48 - wp->muzzleTrace[1]) * (float)v11);
-    *(float *)&v45 = (float)v11 * (float)(v47 - wp->muzzleTrace[0]);
-    *((float *)&v45 + 1) = v13;
-    v14 = (float)((float)v8 * (float)v11);
-    v46 = (float)v8 * (float)v11;
+    v8 = v49 - wp->muzzleTrace[2];
+    v11 = -sqrtf((v47 - wp->muzzleTrace[0]) * (v47 - wp->muzzleTrace[0]) +
+        (v49 - wp->muzzleTrace[2]) * (v49 - wp->muzzleTrace[2]) +
+        (v48 - wp->muzzleTrace[1]) * (v48 - wp->muzzleTrace[1]));
+    v12 = 1.0f / v11;
+    v13 = v12 * (v47 - wp->muzzleTrace[0]);
+    v14 = v12 * (v48 - wp->muzzleTrace[1]);
+    v46 = v12 * (v49 - wp->muzzleTrace[2]);
     Vec3Cross((const float *)&v45, wp->up, &v50);
-    _FP10 = -__fsqrts((float)((float)(v50 * v50) + (float)((float)(v52 * v52) + (float)(v51 * v51))));
-    __asm { fsel      f0, f10, f31, f0 }
-    v17 = (float)((float)1.0 / (float)_FP0);
-    v18 = (float)(v50 * (float)v17);
-    v19 = (float)(v51 * (float)v17);
-    v20 = (float)(v52 * (float)v17);
+    v17 = -sqrtf(v50 * v50 + v52 * v52 + v51 * v51);
+    v18 = v50 * (1.0f / v17);
+    v19 = v51 * (1.0f / v17);
+    v20 = v52 * (1.0f / v17);
     if (ent->client)
     {
         v21 = 1;
-        if (G_random() <= 0.5)
+        if (G_random() <= 0.5f)
             v21 = -1;
         v22 = G_random();
         LODWORD(v23) = v21;
         v45 = v23;
-        v24 = -(float)((float)15.0 + (float)1.0);
-        v47 = (float)((float)v18 * (float)((float)((float)((float)v22 + (float)1.0) * (float)8.0) * (float)v23))
-            + (float)((float)((float)v24 * (float)v12) + v47);
-        v48 = (float)((float)v19 * (float)((float)((float)((float)v22 + (float)1.0) * (float)8.0) * (float)v23))
-            + (float)((float)((float)v13 * (float)v24) + v48);
-        v49 = (float)((float)v20 * (float)((float)((float)((float)v22 + (float)1.0) * (float)8.0) * (float)v23))
-            + (float)((float)((float)v14 * (float)v24) + v49);
+        v24 = -(15.0f + 1.0f);
+        v47 = v18 * ((v22 + 1.0f) * 8.0f * v21) + (v24 * v13 + v47);
+        v48 = v19 * ((v22 + 1.0f) * 8.0f * v21) + (v13 * v24 + v48);
+        v49 = v20 * ((v22 + 1.0f) * 8.0f * v21) + (v14 * v24 + v49);
         HeadHeight = Sentient_GetHeadHeight(enemy);
         v26 = G_random();
-        v27 = (float)-(float)((float)((float)v26 * (float)44.0) - (float)HeadHeight);
-        v28 = (float)((float)((float)-(float)((float)((float)v26 * (float)44.0) - (float)HeadHeight) * *up) + v47);
+        v27 = -(v26 * 44.0f - HeadHeight);
+        v28 = v27 + v47;
     }
     else
     {
         v29 = 1;
-        if (G_random() <= 0.5)
+        if (G_random() <= 0.5f)
             v29 = -1;
-        v30 = (float)((float)1.0 - (float)accuracy);
+        v30 = 1.0f - accuracy;
         v31 = G_random();
         LODWORD(v32) = v29;
-        v33 = -(float)((float)15.0 + (float)1.0);
+        v33 = -(15.0f + 1.0f);
         v45 = v32;
-        v47 = (float)((float)v18
-            * (float)((float)((float)((float)((float)v31 * (float)v30) * (float)10.0) + outerRadius) * (float)v32))
-            + (float)((float)((float)v33 * (float)v12) + v47);
-        v48 = (float)((float)v19
-            * (float)((float)((float)((float)((float)v31 * (float)v30) * (float)10.0) + outerRadius) * (float)v32))
-            + (float)((float)((float)v13 * (float)v33) + v48);
-        v49 = (float)((float)v20
-            * (float)((float)((float)((float)((float)v31 * (float)v30) * (float)10.0) + outerRadius) * (float)v32))
-            + (float)((float)((float)v14 * (float)v33) + v49);
+        v47 = v18 * ((v31 * v30 * 10.0f + outerRadius) * v29) + (v33 * v13 + v47);
+        v48 = v19 * ((v31 * v30 * 10.0f + outerRadius) * v29) + (v13 * v33 + v48);
+        v49 = v20 * ((v31 * v30 * 10.0f + outerRadius) * v29) + (v14 * v33 + v49);
         v34 = G_crandom();
-        v27 = (float)((float)((float)v34 * (float)v30) * (float)-22.0);
-        v28 = (float)((float)(*up * (float)((float)((float)v34 * (float)v30) * (float)-22.0)) + v47);
+        v27 = v34 * v30 * -22.0f;
+        v28 = v27 + v47;
     }
-    v35 = (float)((float)(wp->up[1] * (float)v27) + v48);
-    v36 = (float)((float)(wp->up[2] * (float)v27) + v49);
-    wp->forward[0] = (float)v28 - wp->muzzleTrace[0];
-    wp->forward[1] = (float)v35 - wp->muzzleTrace[1];
+    v35 = wp->up[1] * v27 + v48;
+    v36 = wp->up[2] * v27 + v49;
+    wp->forward[0] = v28 - wp->muzzleTrace[0];
+    wp->forward[1] = v35 - wp->muzzleTrace[1];
     v37 = wp->forward[1];
-    v38 = (float)((float)v36 - wp->muzzleTrace[2]);
-    v39 = (float)(wp->forward[1] * wp->forward[1]);
-    v40 = wp->forward[0];
+    v38 = v36 - wp->muzzleTrace[2];
+    v39 = wp->forward[0] * wp->forward[0];
+    v40 = wp->forward[1] * wp->forward[1];
     wp->forward[2] = v38;
     v41 = v38;
-    _FP11 = -__fsqrts((float)((float)((float)v38 * (float)v38) + (float)((float)((float)v40 * (float)v40) + (float)v39)));
-    __asm { fsel      f0, f11, f31, f0 }
-    v44 = (float)((float)1.0 / (float)_FP0);
-    wp->forward[0] = (float)v40 * (float)v44;
-    wp->forward[1] = (float)v37 * (float)v44;
-    wp->forward[2] = (float)v41 * (float)v44;
+    v44 = 1.0f / sqrtf(v38 * v38 + v40 + v39);
+    wp->forward[0] *= v44;
+    wp->forward[1] *= v44;
+    wp->forward[2] *= v44;
 }
 
+
+// aislop
 float outerRadius_0;
 void __cdecl Actor_MissTarget(const weaponParms *wp, const float *target, float *forward)
 {
-    float *up; // r28
-    double v7; // fp0
-    double v8; // fp13
-    double v9; // fp12
-    double v12; // fp11
-    double v13; // fp30
-    double v14; // fp29
-    double v15; // fp28
-    double v18; // fp0
-    double v19; // fp27
-    double v20; // fp26
-    double v21; // fp25
-    __int64 v22; // r10
-    double v23; // fp1
-    int v24; // r11
-    double v25; // fp0
-    double v26; // fp30
-    double v27; // fp29
-    double v28; // fp28
-    double v29; // fp1
-    double v30; // fp12
-    double v31; // fp11
-    double v32; // fp13
-    double v33; // fp12
-    double v34; // fp11
-    double v35; // fp0
-    double v36; // fp10
-    double v39; // fp12
-    __int64 v40; // [sp+50h] [-90h] BYREF
-    float v41; // [sp+58h] [-88h]
-    float v42; // [sp+60h] [-80h] BYREF
-    float v43; // [sp+64h] [-7Ch]
-    float v44; // [sp+68h] [-78h]
+    const float *up;
+    float v7, v8, v9, v12, v13, v14, v15;
+    float v18, v19, v20, v21;
+    __int64 v22;
+    float v23;
+    int v24;
+    float v25, v26, v27, v28;
+    float v29, v30, v31;
+    float v32, v33, v34, v35, v36;
+    float v39;
+    __int64 v40;
+    float v41, v42, v43, v44;
 
-    if (outerRadius_0 == 6969.0)
-        outerRadius_0 = __fsqrts((float)((float)((float)((float)15.0 * (float)15.0) * (float)2.0) * (float)3.0));
+    if (outerRadius_0 == 6969.0f)
+        outerRadius_0 = sqrtf(15.0f * 15.0f * 2.0f * 3.0f);
+
     up = wp->up;
-    v7 = (float)(*target - wp->muzzleTrace[0]);
-    v8 = (float)(target[2] - wp->muzzleTrace[2]);
-    v9 = (float)(target[1] - wp->muzzleTrace[1]);
-    _FP10 = -__fsqrts((float)((float)((float)v9 * (float)v9)
-        + (float)((float)((float)v8 * (float)v8) + (float)((float)v7 * (float)v7))));
-    __asm { fsel      f11, f10, f31, f11 }
-    v12 = (float)((float)1.0 / (float)_FP11);
-    v13 = (float)((float)v12 * (float)(*target - wp->muzzleTrace[0]));
-    v14 = (float)((float)v12 * (float)(target[1] - wp->muzzleTrace[1]));
-    *(float *)&v40 = (float)v12 * (float)(*target - wp->muzzleTrace[0]);
-    *((float *)&v40 + 1) = v14;
-    v15 = (float)((float)v8 * (float)v12);
-    v41 = (float)v8 * (float)v12;
+    v7 = target[0] - wp->muzzleTrace[0];
+    v8 = target[2] - wp->muzzleTrace[2];
+    v9 = target[1] - wp->muzzleTrace[1];
+
+    v12 = -sqrtf(v9 * v9 + v8 * v8 + v7 * v7);
+    v13 = 1.0f / v12;
+    v14 = v13 * v7;
+    v15 = v13 * v9;
+    v41 = v13 * v8;
+
+    // Pack vector for Vec3Cross
+    *(float *)&v40 = v14;
+    *((float *)&v40 + 1) = v15;
+
     Vec3Cross((const float *)&v40, wp->up, &v42);
-    _FP10 = -__fsqrts((float)((float)(v42 * v42) + (float)((float)(v44 * v44) + (float)(v43 * v43))));
-    __asm { fsel      f0, f10, f31, f0 }
-    v18 = (float)((float)1.0 / (float)_FP0);
-    v19 = (float)(v42 * (float)v18);
-    v20 = (float)(v43 * (float)v18);
-    v21 = (float)(v44 * (float)v18);
+
+    v18 = -sqrtf(v42 * v42 + v44 * v44 + v43 * v43);
+    v19 = v42 * (1.0f / v18);
+    v20 = v43 * (1.0f / v18);
+    v21 = v44 * (1.0f / v18);
+
     v23 = G_random();
     v24 = 1;
-    if (v23 <= 0.5)
+    if (v23 <= 0.5f)
         v24 = -1;
     LODWORD(v22) = v24;
-    v25 = -(float)((float)15.0 + (float)1.0);
-    v26 = (float)((float)((float)v19 * (float)((float)v22 * outerRadius_0))
-        + (float)((float)((float)v25 * (float)v13) + *target));
-    v27 = (float)((float)((float)v20 * (float)((float)v22 * outerRadius_0))
-        + (float)((float)((float)v25 * (float)v14) + target[1]));
-    v28 = (float)((float)((float)v21 * (float)((float)v22 * outerRadius_0))
-        + (float)((float)((float)v15 * (float)v25) + target[2]));
+
+    v25 = -(15.0f + 1.0f);
+
+    v26 = v19 * (v24 * outerRadius_0) + (v25 * v14 + target[0]);
+    v27 = v20 * (v24 * outerRadius_0) + (v25 * v15 + target[1]);
+    v28 = v21 * (v24 * outerRadius_0) + (v25 * v41 + target[2]);
     v40 = v22;
+
     v29 = G_crandom();
-    v30 = (float)((float)(wp->up[1] * (float)((float)v29 * (float)12.0)) + (float)v27);
-    v31 = (float)((float)(wp->up[2] * (float)((float)v29 * (float)12.0)) + (float)v28);
-    *forward = (float)((float)(*up * (float)((float)v29 * (float)12.0)) + (float)v26) - wp->muzzleTrace[0];
-    forward[1] = (float)v30 - wp->muzzleTrace[1];
+    v30 = wp->up[1] * (v29 * 12.0f) + v27;
+    v31 = wp->up[2] * (v29 * 12.0f) + v28;
+
+    *forward = up[0] * (v29 * 12.0f) + v26 - wp->muzzleTrace[0];
+    forward[1] = v30 - wp->muzzleTrace[1];
     v32 = forward[1];
-    v33 = (float)((float)v31 - wp->muzzleTrace[2]);
-    v34 = (float)(forward[1] * forward[1]);
+    v33 = v31 - wp->muzzleTrace[2];
+    v34 = forward[1] * forward[1];
     v35 = *forward;
     forward[2] = v33;
     v36 = v33;
-    _FP11 = -__fsqrts((float)((float)((float)v33 * (float)v33) + (float)((float)((float)v35 * (float)v35) + (float)v34)));
-    __asm { fsel      f12, f11, f31, f12 }
-    v39 = (float)((float)1.0 / (float)_FP12);
-    *forward = (float)v35 * (float)v39;
-    forward[1] = (float)v32 * (float)v39;
-    forward[2] = (float)v36 * (float)v39;
+
+    v39 = 1.0f / sqrtf(v33 * v33 + v35 * v35 + v34);
+
+    *forward *= v39;
+    forward[1] *= v39;
+    forward[2] *= v39;
 }
+
 
 void __cdecl Actor_MissEnemy(actor_s *self, weaponParms *wp, double accuracy)
 {
@@ -979,174 +910,73 @@ void __cdecl Actor_ShootNoEnemy(actor_s *self, weaponParms *wp)
     wp->forward[2] = wp->gunForward[2];
 }
 
+// aislop
 void __cdecl Actor_ShootPos(actor_s *self, weaponParms *wp, float *pos)
 {
-    double v3; // fp13
-    double v4; // fp12
-    double v5; // fp11
-    double v6; // fp0
-    double v7; // fp10
-    double v10; // fp12
-
     wp->forward[0] = *pos - wp->muzzleTrace[0];
     wp->forward[1] = pos[1] - wp->muzzleTrace[1];
-    v3 = wp->forward[1];
-    v4 = (float)(pos[2] - wp->muzzleTrace[2]);
-    v5 = (float)(wp->forward[1] * wp->forward[1]);
-    v6 = wp->forward[0];
     wp->forward[2] = pos[2] - wp->muzzleTrace[2];
-    v7 = v4;
-    _FP9 = -__fsqrts((float)((float)((float)v4 * (float)v4) + (float)((float)((float)v6 * (float)v6) + (float)v5)));
-    __asm { fsel      f12, f9, f11, f12 }
-    v10 = (float)((float)1.0 / (float)_FP12);
-    wp->forward[0] = (float)v6 * (float)v10;
-    wp->forward[1] = (float)v3 * (float)v10;
-    wp->forward[2] = (float)v7 * (float)v10;
+
+    float magnitude = -sqrtf(wp->forward[0] * wp->forward[0] +
+        wp->forward[1] * wp->forward[1] +
+        wp->forward[2] * wp->forward[2]);
+    wp->forward[0] /= magnitude;
+    wp->forward[1] /= magnitude;
+    wp->forward[2] /= magnitude;
 }
 
 void __cdecl Actor_ClampShot(actor_s *self, weaponParms *wp)
 {
-    float *gunForward; // r26
-    double v4; // fp11
-    double v5; // fp12
-    double v6; // fp13
-    double v9; // fp0
-    double v10; // fp11
-    double v11; // fp12
-    double v12; // fp13
-    double v13; // fp0
-    float v14; // [sp+50h] [-70h]
-    float v15; // [sp+50h] [-70h]
-    float v16; // [sp+50h] [-70h]
-    float v17; // [sp+58h] [-68h] BYREF
-    float v18; // [sp+5Ch] [-64h]
-    float v19; // [sp+60h] [-60h]
-    float v20[4]; // [sp+68h] [-58h] BYREF
+    float planeNormal[4]; // [sp+58h] [-68h] BYREF
+    float dest[4]; // [sp+68h] [-58h] BYREF
 
-    gunForward = wp->gunForward;
-    if ((COERCE_UNSIGNED_INT(wp->gunForward[0]) & 0x7F800000) == 0x7F800000
-        || (COERCE_UNSIGNED_INT(wp->gunForward[1]) & 0x7F800000) == 0x7F800000
-        || (COERCE_UNSIGNED_INT(wp->gunForward[2]) & 0x7F800000) == 0x7F800000)
+    iassert(!IS_NAN((wp->gunForward)[0]) && !IS_NAN((wp->gunForward)[1]) && !IS_NAN((wp->gunForward)[2]));
+    iassert(!IS_NAN((wp->forward)[0]) && !IS_NAN((wp->forward)[1]) && !IS_NAN((wp->forward)[2]));
+    iassert(I_fabs(Vec3Dot(wp->gunForward, wp->gunForward) - 1.f) < 0.01f);
+    iassert(I_fabs(Vec3Dot(wp->forward, wp->forward) - 1.f) < 0.01f);
+
+    if (I_fabs(Vec3Dot(wp->gunForward, wp->forward)) < 0.96591997f)
     {
-        MyAssertHandler(
-            "c:\\trees\\cod3\\cod3src\\src\\game\\actor_aim.cpp",
-            651,
-            0,
-            "%s",
-            "!IS_NAN((wp->gunForward)[0]) && !IS_NAN((wp->gunForward)[1]) && !IS_NAN((wp->gunForward)[2])");
-    }
-    if ((COERCE_UNSIGNED_INT(wp->forward[0]) & 0x7F800000) == 0x7F800000
-        || (COERCE_UNSIGNED_INT(wp->forward[1]) & 0x7F800000) == 0x7F800000
-        || (COERCE_UNSIGNED_INT(wp->forward[2]) & 0x7F800000) == 0x7F800000)
-    {
-        MyAssertHandler(
-            "c:\\trees\\cod3\\cod3src\\src\\game\\actor_aim.cpp",
-            652,
-            0,
-            "%s",
-            "!IS_NAN((wp->forward)[0]) && !IS_NAN((wp->forward)[1]) && !IS_NAN((wp->forward)[2])");
-    }
-    if (__fabs((float)((float)((float)(*gunForward * *gunForward)
-        + (float)((float)(gunForward[2] * gunForward[2]) + (float)(gunForward[1] * gunForward[1])))
-        - (float)1.0)) >= 0.0099999998)
-        MyAssertHandler(
-            "c:\\trees\\cod3\\cod3src\\src\\game\\actor_aim.cpp",
-            653,
-            0,
-            "%s",
-            "I_fabs( Vec3Dot( wp->gunForward, wp->gunForward ) - 1.f ) < 0.01f");
-    if (__fabs((float)((float)((float)(wp->forward[0] * wp->forward[0])
-        + (float)((float)(wp->forward[2] * wp->forward[2]) + (float)(wp->forward[1] * wp->forward[1])))
-        - (float)1.0)) >= 0.0099999998)
-        MyAssertHandler(
-            "c:\\trees\\cod3\\cod3src\\src\\game\\actor_aim.cpp",
-            654,
-            0,
-            "%s",
-            "I_fabs( Vec3Dot( wp->forward, wp->forward ) - 1.f ) < 0.01f");
-    if (__fabs((float)((float)(*gunForward * wp->forward[0])
-        + (float)((float)(gunForward[1] * wp->forward[1]) + (float)(gunForward[2] * wp->forward[2])))) < 0.96591997)
-    {
-        Vec3Cross(gunForward, wp->forward, &v17);
-        v4 = v17;
-        if ((LODWORD(v17) & 0x7F800000) == 0x7F800000
-            || (v5 = v18, (LODWORD(v18) & 0x7F800000) == 0x7F800000)
-            || (v6 = v19, (LODWORD(v19) & 0x7F800000) == 0x7F800000))
-        {
-            MyAssertHandler(
-                "c:\\trees\\cod3\\cod3src\\src\\game\\actor_aim.cpp",
-                665,
-                0,
-                "%s",
-                "!IS_NAN((planeNormal)[0]) && !IS_NAN((planeNormal)[1]) && !IS_NAN((planeNormal)[2])");
-            v6 = v19;
-            v5 = v18;
-            v4 = v17;
-        }
-        _FP10 = -__fsqrts((float)((float)((float)v4 * (float)v4)
-            + (float)((float)((float)v6 * (float)v6) + (float)((float)v5 * (float)v5))));
-        __asm { fsel      f0, f10, f31, f0 }
-        v9 = (float)((float)1.0 / (float)_FP0);
-        v10 = (float)((float)v9 * (float)v4);
-        v14 = v10;
-        v11 = (float)((float)v9 * (float)v5);
-        v17 = v10;
-        v12 = (float)((float)v9 * (float)v6);
-        v18 = v11;
-        v19 = v12;
-        if ((LODWORD(v14) & 0x7F800000) == 0x7F800000
-            || (v15 = v11, (LODWORD(v15) & 0x7F800000) == 0x7F800000)
-            || (v16 = v12, (LODWORD(v16) & 0x7F800000) == 0x7F800000))
-        {
-            MyAssertHandler(
-                "c:\\trees\\cod3\\cod3src\\src\\game\\actor_aim.cpp",
-                669,
-                0,
-                "%s",
-                "!IS_NAN((planeNormal)[0]) && !IS_NAN((planeNormal)[1]) && !IS_NAN((planeNormal)[2])");
-            v12 = v19;
-            v11 = v18;
-            v10 = v17;
-        }
-        if (v10 == 0.0 && v11 == 0.0 && v12 == 0.0)
-            MyAssertHandler(
-                "c:\\trees\\cod3\\cod3src\\src\\game\\actor_aim.cpp",
-                670,
-                0,
-                "%s",
-                "planeNormal[0] || planeNormal[1] || planeNormal[2]");
-        RotatePointAroundVector(v20, &v17, gunForward, 15.0);
-        wp->forward[0] = v20[0];
-        v13 = v20[2];
-        wp->forward[1] = v20[1];
-        wp->forward[2] = v13;
+        Vec3Cross(wp->gunForward, wp->forward, planeNormal);
+
+        iassert(!IS_NAN((planeNormal)[0]) && !IS_NAN((planeNormal)[1]) && !IS_NAN((planeNormal)[2]));
+
+        float magnitudeSquared = Vec3Dot(planeNormal, planeNormal);
+        float magnitudeInverse = 1.0f / sqrtf(magnitudeSquared);
+
+        Vec3Scale(planeNormal, magnitudeInverse, planeNormal);
+
+        iassert(!IS_NAN((planeNormal)[0]) && !IS_NAN((planeNormal)[1]) && !IS_NAN((planeNormal)[2]));
+        iassert(planeNormal[0] || planeNormal[1] || planeNormal[2]);
+        
+        RotatePointAroundVector(dest, planeNormal, wp->gunForward, 15.0);
+        wp->forward[0] = dest[0];
+        wp->forward[1] = dest[1];
+        wp->forward[2] = dest[2];
     }
 }
 
-void __cdecl Actor_Shoot(actor_s *self, double accuracyMod, float (*posOverride)[3], float *lastShot, int a5)
+void __cdecl Actor_Shoot(actor_s *self, float accuracyMod, float (*posOverride)[3], enumLastShot lastShot)
 {
     gentity_s *ent; // r27
     unsigned int weaponName; // r3
     const char *v11; // r3
-    unsigned int WeaponIndexForName; // r26
+    unsigned int weapon; // r26
     gentity_s *TargetEntity; // r3
     const float *p_eType; // r25
-    double v17; // fp11
+    float invLen; // fp11
     double v18; // fp0
     double v19; // fp13
     double FinalAccuracy; // fp31
-    weaponParms *v21; // r5
     const weaponParms *v22; // r4
     weapType_t weapType; // r11
-    gentity_s *v24; // r3
-    int v25; // r4
     float v26; // [sp+50h] [-B0h]
     float v27; // [sp+50h] [-B0h]
     float v28[6]; // [sp+58h] [-A8h] BYREF
-    weaponParms v29; // [sp+70h] [-90h] BYREF
+    weaponParms wp; // [sp+70h] [-90h] BYREF
 
-    if (!self)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\actor_aim.cpp", 683, 0, "%s", "self");
+    iassert(self);
+
     ent = self->ent;
     //Profile_Begin(236);
     if (self->lastShotTime == level.time)
@@ -1161,125 +991,89 @@ void __cdecl Actor_Shoot(actor_s *self, double accuracyMod, float (*posOverride)
     weaponName = self->weaponName;
     self->lastShotTime = level.time;
     v11 = SL_ConvertToString(weaponName);
-    WeaponIndexForName = G_GetWeaponIndexForName(v11);
-    v29.weapDef = BG_GetWeaponDef(WeaponIndexForName);
-    Actor_FillWeaponParms(self, &v29);
+    weapon = G_GetWeaponIndexForName(v11);
+    wp.weapDef = BG_GetWeaponDef(weapon);
+    Actor_FillWeaponParms(self, &wp);
     TargetEntity = Actor_GetTargetEntity(self);
     p_eType = (const float *)&TargetEntity->s.eType;
+
     if (lastShot)
     {
-        _FP9 = -__fsqrts((float)((float)((float)(*lastShot - v29.muzzleTrace[0]) * (float)(*lastShot - v29.muzzleTrace[0]))
-            + (float)((float)((float)(lastShot[2] - v29.muzzleTrace[2])
-                * (float)(lastShot[2] - v29.muzzleTrace[2]))
-                + (float)((float)(lastShot[1] - v29.muzzleTrace[1])
-                    * (float)(lastShot[1] - v29.muzzleTrace[1])))));
-        __asm { fsel      f11, f9, f10, f11 }
-        v17 = (float)((float)1.0 / (float)_FP11);
-        v18 = (float)((float)v17 * (float)(lastShot[1] - v29.muzzleTrace[1]));
-        v19 = (float)((float)v17 * (float)(lastShot[2] - v29.muzzleTrace[2]));
-        v29.forward[0] = (float)v17 * (float)(*lastShot - v29.muzzleTrace[0]);
-        v29.forward[1] = v18;
-        v29.forward[2] = v19;
-        if ((LODWORD(v29.forward[0]) & 0x7F800000) == 0x7F800000
-            || (v26 = v18, (LODWORD(v26) & 0x7F800000) == 0x7F800000)
-            || (v27 = v19, (LODWORD(v27) & 0x7F800000) == 0x7F800000))
-        {
-            MyAssertHandler(
-                "c:\\trees\\cod3\\cod3src\\src\\game\\actor_aim.cpp",
-                719,
-                0,
-                "%s",
-                "!IS_NAN((wp.forward)[0]) && !IS_NAN((wp.forward)[1]) && !IS_NAN((wp.forward)[2])");
-        }
+        //_FP9 = -__fsqrts((float)((float)((float)(*lastShot - wp.muzzleTrace[0]) * (float)(*lastShot - wp.muzzleTrace[0]))
+        //    + (float)((float)((float)(lastShot[2] - wp.muzzleTrace[2])
+        //        * (float)(lastShot[2] - wp.muzzleTrace[2]))
+        //        + (float)((float)(lastShot[1] - wp.muzzleTrace[1])
+        //            * (float)(lastShot[1] - wp.muzzleTrace[1])))));
+        //__asm { fsel      f11, f9, f10, f11 }
+        //v17 = (float)((float)1.0 / (float)_FP11);
+
+        float dx = *posOverride[0] - wp.muzzleTrace[0];
+        float dy = *posOverride[1] - wp.muzzleTrace[1];
+        float dz = *posOverride[2] - wp.muzzleTrace[2];
+
+        // Compute inverse length of the vector (dx, dy, dz)
+        float len = sqrtf(dx * dx + dy * dy + dz * dz);
+        invLen = (len != 0.0f ? 1.0f / len : 0.0f);
+
+        wp.forward[0] = invLen * (*posOverride[0] - wp.muzzleTrace[0]);
+        wp.forward[1] = invLen * (*posOverride[1] - wp.muzzleTrace[1]);
+        wp.forward[2] = invLen * (*posOverride[2] - wp.muzzleTrace[2]);
+
+        iassert(!IS_NAN((wp.forward)[0]) && !IS_NAN((wp.forward)[1]) && !IS_NAN((wp.forward)[2]));
     }
+
     else if (TargetEntity)
     {
         if (TargetEntity->sentient)
         {
             Actor_BroadcastTeamEvent(self->sentient, AI_EV_NEW_ENEMY);
-            FinalAccuracy = Actor_GetFinalAccuracy(self, &v29, accuracyMod);
+            FinalAccuracy = Actor_GetFinalAccuracy(self, &wp, accuracyMod);
             if (FinalAccuracy <= G_random())
             {
-                Actor_MissEnemy(self, &v29, FinalAccuracy);
-                if ((LODWORD(v29.forward[0]) & 0x7F800000) == 0x7F800000
-                    || (LODWORD(v29.forward[1]) & 0x7F800000) == 0x7F800000
-                    || (LODWORD(v29.forward[2]) & 0x7F800000) == 0x7F800000)
-                {
-                    MyAssertHandler(
-                        "c:\\trees\\cod3\\cod3src\\src\\game\\actor_aim.cpp",
-                        751,
-                        0,
-                        "%s",
-                        "!IS_NAN((wp.forward)[0]) && !IS_NAN((wp.forward)[1]) && !IS_NAN((wp.forward)[2])");
-                }
+                Actor_MissEnemy(self, &wp, FinalAccuracy);
+                iassert(!IS_NAN((wp.forward)[0]) && !IS_NAN((wp.forward)[1]) && !IS_NAN((wp.forward)[2]));
             }
             else
             {
-                Actor_HitEnemy(self, &v29, FinalAccuracy);
-                if ((LODWORD(v29.forward[0]) & 0x7F800000) == 0x7F800000
-                    || (LODWORD(v29.forward[1]) & 0x7F800000) == 0x7F800000
-                    || (LODWORD(v29.forward[2]) & 0x7F800000) == 0x7F800000)
-                {
-                    MyAssertHandler(
-                        "c:\\trees\\cod3\\cod3src\\src\\game\\actor_aim.cpp",
-                        744,
-                        0,
-                        "%s",
-                        "!IS_NAN((wp.forward)[0]) && !IS_NAN((wp.forward)[1]) && !IS_NAN((wp.forward)[2])");
-                }
+                Actor_HitEnemy(self, &wp, FinalAccuracy);
+                iassert(!IS_NAN((wp.forward)[0]) && !IS_NAN((wp.forward)[1]) && !IS_NAN((wp.forward)[2]));
             }
         }
         else
         {
             G_EntityCentroid(TargetEntity, v28);
-            Actor_HitTarget(&v29, v28, v29.forward);
+            Actor_HitTarget(&wp, v28, wp.forward);
         }
     }
     else
     {
-        v29.forward[0] = v29.gunForward[0];
-        v29.forward[1] = v29.gunForward[1];
-        v29.forward[2] = v29.gunForward[2];
-        if ((LODWORD(v29.gunForward[0]) & 0x7F800000) == 0x7F800000
-            || (LODWORD(v29.gunForward[1]) & 0x7F800000) == 0x7F800000
-            || (LODWORD(v29.gunForward[2]) & 0x7F800000) == 0x7F800000)
-        {
-            MyAssertHandler(
-                "c:\\trees\\cod3\\cod3src\\src\\game\\actor_aim.cpp",
-                726,
-                0,
-                "%s",
-                "!IS_NAN((wp.forward)[0]) && !IS_NAN((wp.forward)[1]) && !IS_NAN((wp.forward)[2])");
-        }
+        wp.forward[0] = wp.gunForward[0];
+        wp.forward[1] = wp.gunForward[1];
+        wp.forward[2] = wp.gunForward[2];
+        iassert(!IS_NAN((wp.forward)[0]) && !IS_NAN((wp.forward)[1]) && !IS_NAN((wp.forward)[2]));
     }
-    Actor_ClampShot(self, &v29);
-    ent->s.weapon = WeaponIndexForName;
-    if ((unsigned __int8)WeaponIndexForName != WeaponIndexForName)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\actor_aim.cpp", 770, 0, "%s", "ent->s.weapon == weapon");
-    weapType = v29.weapDef->weapType;
+    Actor_ClampShot(self, &wp);
+    ent->s.weapon = weapon;
+    weapType = wp.weapDef->weapType;
+
     if (weapType == WEAPTYPE_BULLET)
     {
-        Bullet_Fire(ent, 0.0, v22, (const gentity_s *)&v29);
-        v24 = ent;
-        if (!a5)
+        Bullet_Fire(ent, 0.0, &wp, ent, level.time); // KISAKTODO: guessed last arg
+        if (lastShot == LAST_SHOT_IN_CLIP)
         {
-            v25 = 27;
-        LABEL_34:
-            G_AddEvent(v24, v25, 0);
-            goto LABEL_35;
+            G_AddEvent(ent, 27, 0);
+            return;
         }
-    LABEL_33:
-        v25 = 26;
-        goto LABEL_34;
+        G_AddEvent(ent, 26, 0);
+        return;
     }
+
     if (weapType == WEAPTYPE_PROJECTILE)
     {
-        Weapon_RocketLauncher_Fire(ent, WeaponIndexForName, 0.0, v21, v29.forward, (gentity_s *)vec3_origin, p_eType);
-        v24 = ent;
-        goto LABEL_33;
+        Weapon_RocketLauncher_Fire(ent, weapon, 0.0, &wp, wp.forward, (gentity_s *)vec3_origin, p_eType);
+        G_AddEvent(ent, 26, 0);
+        return;
     }
-LABEL_35:
-    //Profile_EndInternal(0);
 }
 
 void __cdecl Actor_ShootBlank(actor_s *self)
@@ -1349,13 +1143,14 @@ gentity_s *__cdecl Actor_Melee(actor_s *self, const float *direction)
     float v21; // [sp+50h] [-90h] BYREF
     float v22; // [sp+54h] [-8Ch]
     float v23; // [sp+58h] [-88h]
-    weaponParms v24[2]; // [sp+60h] [-80h] BYREF
+    weaponParms wp; // [sp+60h] [-80h] BYREF
+    float x;
+    float y;
+    float z;
+    float mag;
 
-    if (!self)
-    {
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\actor_aim.cpp", 835, 0, "%s", "self");
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\actor_aim.cpp", 841, 0, "%s", "self");
-    }
+    iassert(self);
+
     ent = self->ent;
     v5 = SL_ConvertToString(self->weaponName);
     WeaponIndexForName = G_GetWeaponIndexForName(v5);
@@ -1369,52 +1164,60 @@ gentity_s *__cdecl Actor_Melee(actor_s *self, const float *direction)
     }
     self->lastShotTime = level.time;
     TargetSentient = Actor_GetTargetSentient(self);
-    Actor_FillWeaponParms(self, v24);
-    v24[0].weapDef = BG_GetWeaponDef(WeaponIndexForName);
-    Actor_GetEyePosition(self, v24[0].muzzleTrace);
+    Actor_FillWeaponParms(self, &wp);
+    wp.weapDef = BG_GetWeaponDef(WeaponIndexForName);
+    Actor_GetEyePosition(self, wp.muzzleTrace);
     if (TargetSentient)
     {
         Sentient_GetEyePosition(TargetSentient, &v21);
-        v9 = (float)(v21 - v24[0].muzzleTrace[0]);
-        v10 = (float)(v22 - v24[0].muzzleTrace[1]);
+        v9 = (float)(v21 - wp.muzzleTrace[0]);
+        v10 = (float)(v22 - wp.muzzleTrace[1]);
         if (direction)
         {
-            v11 = (float)((float)__fsqrts((float)((float)((float)(v22 - v24[0].muzzleTrace[1])
-                * (float)(v22 - v24[0].muzzleTrace[1]))
-                + (float)((float)(v21 - v24[0].muzzleTrace[0])
-                    * (float)(v21 - v24[0].muzzleTrace[0]))))
-                / (float)__fsqrts((float)((float)(*direction * *direction) + (float)(direction[1] * direction[1]))));
+            v11 = (float)((float)sqrtf((float)((float)((float)(v22 - wp.muzzleTrace[1]) 
+                * (float)(v22 - wp.muzzleTrace[1])) + (float)((float)(v21 - wp.muzzleTrace[0]) 
+                    * (float)(v21 - wp.muzzleTrace[0]))))
+                / (float)sqrtf((float)((float)(*direction * *direction) + (float)(direction[1] * direction[1]))));
             v9 = (float)(*direction * (float)v11);
             v10 = (float)((float)v11 * direction[1]);
         }
-        _FP9 = -__fsqrts((float)((float)((float)v9 * (float)v9)
-            + (float)((float)((float)(v23 - v24[0].muzzleTrace[2]) * (float)(v23 - v24[0].muzzleTrace[2]))
-                + (float)((float)v10 * (float)v10))));
-        __asm { fsel      f12, f9, f11, f12 }
-        v14 = (float)((float)1.0 / (float)_FP12);
-        v24[0].forward[0] = (float)v14 * (float)v9;
-        v24[0].forward[1] = (float)v10 * (float)v14;
-        v15 = (float)((float)(v23 - v24[0].muzzleTrace[2]) * (float)v14);
+
+        //_FP9 = -__fsqrts((float)((float)((float)v9 * (float)v9)
+        //    + (float)((float)((float)(v23 - v24[0].muzzleTrace[2]) * (float)(v23 - v24[0].muzzleTrace[2]))
+        //        + (float)((float)v10 * (float)v10))));
+        //__asm { fsel      f12, f9, f11, f12 }
+        //v14 = (float)((float)1.0 / (float)_FP12);
+
+        mag = sqrtf(v9 * v9 + v10 * v10 + (v23 - wp.muzzleTrace[2]) * (v23 - wp.muzzleTrace[2]));
+        v14 = mag > 0.0f ? 1.0f / mag : 0.0f;
+
+        wp.forward[0] = (float)v14 * (float)v9;
+        wp.forward[1] = (float)v10 * (float)v14;
+        v15 = (float)((float)(v23 - wp.muzzleTrace[2]) * (float)v14);
         goto LABEL_11;
     }
     if (direction)
     {
         v16 = direction[2];
-        _FP9 = -__fsqrts((float)((float)(*direction * *direction)
-            + (float)((float)(direction[2] * direction[2]) + (float)(direction[1] * direction[1]))));
-        __asm { fsel      f11, f9, f10, f11 }
-        v19 = (float)((float)1.0 / (float)_FP11);
+
+        //_FP9 = -__fsqrts((float)((float)(*direction * *direction)
+        //    + (float)((float)(direction[2] * direction[2]) + (float)(direction[1] * direction[1]))));
+        //__asm { fsel      f11, f9, f10, f11 }
+        //v19 = (float)((float)1.0 / (float)_FP11);
+
+        x = direction[0], y = direction[1], z = direction[2];
+        mag = sqrtf(x * x + y * y + z * z);
+        v19 = 1.0f / mag;
+
         v20 = (float)(direction[1] * (float)v19);
-        v24[0].forward[0] = (float)v19 * *direction;
-        v24[0].forward[1] = v20;
+        wp.forward[0] = (float)v19 * *direction;
+        wp.forward[1] = v20;
         v15 = (float)((float)v16 * (float)v19);
     LABEL_11:
-        v24[0].forward[2] = v15;
+        wp.forward[2] = v15;
     }
     ent->s.weapon = WeaponIndexForName;
-    if ((unsigned __int8)WeaponIndexForName != WeaponIndexForName)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\actor_aim.cpp", 887, 0, "%s", "ent->s.weapon == weapon");
-    return Weapon_Melee(self->ent, v24, 64.0, 0.0, 0.0);
+    return Weapon_Melee(self->ent, &wp, 64.0, 0.0, 0.0, level.time); // KISAKTODO: guessed last arg
 }
 
 float __cdecl Sentient_GetScarinessForDistance(sentient_s *self, sentient_s *enemy, double fDist)
@@ -1519,7 +1322,7 @@ void __cdecl Actor_AccuracyGraphSaveToFile(
     WeaponDef *weaponDef,
     WeapAccuracyType accuracyType)
 {
-    void *v6; // r27
+    int v6; // r27
     int v7; // r30
     char *v8; // r11
     int v10; // r31
@@ -1550,8 +1353,7 @@ void __cdecl Actor_AccuracyGraphSaveToFile(
     v6 = FS_FOpenTextFileWrite(v14);
     if (v6)
     {
-        if (!graph->knotCount)
-            MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\actor_aim.cpp", 1023, 0, "%s", "graph->knotCount");
+        iassert(graph->knotCount);
         v7 = *graph->knotCount;
         Com_sprintf(v15, 512, "%s%d\n", "WEAPONACCUFILE\n\n", v7);
         v8 = v15;
@@ -1566,9 +1368,10 @@ void __cdecl Actor_AccuracyGraphSaveToFile(
                 Com_sprintf(
                     v15,
                     512,
-                    (const char *)(const char *)HIDWORD(COERCE_UNSIGNED_INT64(graph->knots[v10][0])),
-                    (unsigned int)COERCE_UNSIGNED_INT64(graph->knots[v10][0]),
-                    (unsigned int)COERCE_UNSIGNED_INT64(graph->knots[v10][1]));
+                    "%.4f %.4f\n",
+                    graph->knots[v10][0],
+                    graph->knots[v10][1]
+                );
                 v11 = v15;
                 while (*v11++)
                     ;
@@ -1578,9 +1381,10 @@ void __cdecl Actor_AccuracyGraphSaveToFile(
             } while (v7);
         }
         FS_FCloseFile(v6);
-        if (FS_IsUsingRemotePCSharing())
-            RemotePCPath = FS_GetRemotePCPath(0);
-        else
+
+        //if (FS_IsUsingRemotePCSharing())
+        //    RemotePCPath = FS_GetRemotePCPath(0);
+        //else
             RemotePCPath = Sys_DefaultInstallPath();
         Com_Printf(18, "^7Successfully saved accuracy file [%s\\%s].\n", RemotePCPath, v14);
     }
@@ -1622,9 +1426,11 @@ void __cdecl Actor_CommonAccuracyGraphEventCallback(
             {
                 sprintf(
                     v14,
-                    (const char *)(const char *)HIDWORD(COERCE_UNSIGNED_INT64(graph->knots[v8][0])),
-                    (unsigned int)COERCE_UNSIGNED_INT64(graph->knots[v8][0]),
-                    (unsigned int)COERCE_UNSIGNED_INT64(graph->knots[v8][1]));
+                    "%.4f %.4f\n",
+                    graph->knots[v8][0],
+                    graph->knots[v8][1]
+                );
+                    
                 v9 = v14;
                 v10 = (unsigned __int8 *)v15;
                 while (*v10++)
@@ -1668,14 +1474,14 @@ void __cdecl Actor_AccuracyGraphTextCallback(
     double inputX,
     double inputY,
     char *text,
-    const int textLength,
-    char *a6)
+    const int textLength)
 {
     sprintf(
-        a6,
-        (const char *)(const char *)HIDWORD(COERCE_UNSIGNED_INT64((float)((float)inputX * (float)4000.0))),
-        (unsigned int)COERCE_UNSIGNED_INT64((float)((float)inputX * (float)4000.0)),
-        LODWORD(inputY));
+        text,
+        "Distance: %.2f, Accuracy: %.4f",
+        inputX * 4000.0f,
+        inputY
+    ); // KISAKTODO: unsure
 }
 
 void __cdecl G_SwapAccuracyBuffers()
@@ -1743,7 +1549,7 @@ DevGraph *__cdecl Actor_InitWeaponAccuracyGraphForWeaponType(
     v18 = (char *)g_accuGraphBuf + 128 * (2 * v17 + accuracyType);
     memcpy(v18, v10, 8 * *v7);
     v19 = v17;
-    v20 = dword_82C20E2C;
+    v20 = g_numAccuracyGraphs;
     g_accuGraphWeapon[0][v19] = WeaponDef;
     dword_82C31FB0[v19] = v12;
     *(const char **)((char *)&WeaponDef->szInternalName + v9) = v18;
@@ -1755,10 +1561,10 @@ DevGraph *__cdecl Actor_InitWeaponAccuracyGraphForWeaponType(
             0,
             "%s",
             "g_accuracyGraphCount < ARRAY_COUNT( g_accuracyGraphs )");
-        v20 = dword_82C20E2C;
+        v20 = g_numAccuracyGraphs;
     }
     result = &g_accuracyGraphs[v20];
-    dword_82C20E2C = v20 + 1;
+    g_numAccuracyGraphs = v20 + 1;
     result->knotCountMax = 16;
     v21 = *(float **)((char *)&WeaponDef->szInternalName + v9);
     result->knotCount = v7;
@@ -1869,7 +1675,7 @@ void __cdecl Actor_ShutdownWeaponAccuracyGraph()
     char v3[320]; // [sp+50h] [-140h] BYREF
 
     v0 = 0;
-    if (dword_82C20E2C)
+    if (g_numAccuracyGraphs)
     {
         p_data = (const char ***)&g_accuracyGraphs[0].data;
         do
@@ -1881,8 +1687,8 @@ void __cdecl Actor_ShutdownWeaponAccuracyGraph()
             DevGui_RemoveMenu(v3);
             ++v0;
             p_data += 8;
-        } while (v0 < dword_82C20E2C);
+        } while (v0 < g_numAccuracyGraphs);
     }
-    dword_82C20E2C = 0;
+    g_numAccuracyGraphs = 0;
 }
 

@@ -20,8 +20,20 @@
 #include "g_actor_prone.h"
 #include "actor_lookat.h"
 #include "actor_senses.h"
+#include <script/scr_const.h>
+#include "actor_spawner.h"
+#include "actor_grenade.h"
+#include "actor_turret.h"
+#include "turret.h"
+#include "g_public.h"
 
-actor_s *__cdecl Actor_Get(scr_entref_t *entref)
+enum DEBUGMAYMOVE_LIFT_ENUM : __int32
+{
+    DEBUGMAYMOVE_NOT_LIFTED = 0x0,
+    DEBUGMAYMOVE_LIFTED = 0x1,
+};
+
+actor_s *__cdecl Actor_Get(scr_entref_t entref)
 {
     actor_s *result; // r3
     unsigned __int16 v2; // [sp+74h] [+14h]
@@ -64,7 +76,7 @@ void __cdecl Actor_SetScriptGoalPos(actor_s *self, const float *vGoalPos, pathno
     }
 }
 
-void __cdecl ActorCmd_StartScriptedAnim(scr_entref_t *entref)
+void __cdecl ActorCmd_StartScriptedAnim(scr_entref_t entref)
 {
     Actor_Get(entref);
     if (Scr_GetNumParam() > 6)
@@ -107,7 +119,7 @@ void __cdecl Actor_StartArrivalState(actor_s *self, ai_state_t newState)
     Actor_ClearPath(self);
 }
 
-void __cdecl ActorCmd_StartCoverArrival(scr_entref_t *entref)
+void __cdecl ActorCmd_StartCoverArrival(scr_entref_t entref)
 {
     actor_s *v1; // r3
 
@@ -115,7 +127,7 @@ void __cdecl ActorCmd_StartCoverArrival(scr_entref_t *entref)
     Actor_StartArrivalState(v1, AIS_COVERARRIVAL);
 }
 
-void __cdecl ActorCmd_StartTraverseArrival(scr_entref_t *entref)
+void __cdecl ActorCmd_StartTraverseArrival(scr_entref_t entref)
 {
     actor_s *v1; // r3
 
@@ -123,7 +135,7 @@ void __cdecl ActorCmd_StartTraverseArrival(scr_entref_t *entref)
     Actor_StartArrivalState(v1, AIS_NEGOTIATION);
 }
 
-void __cdecl ActorCmd_CheckCoverExitPosWithPath(scr_entref_t *entref)
+void __cdecl ActorCmd_CheckCoverExitPosWithPath(scr_entref_t entref)
 {
     actor_s *v1; // r31
     bool v2; // r3
@@ -135,7 +147,7 @@ void __cdecl ActorCmd_CheckCoverExitPosWithPath(scr_entref_t *entref)
     Scr_AddBool(v2);
 }
 
-void __cdecl ActorCmd_Shoot(scr_entref_t *entref)
+void __cdecl ActorCmd_Shoot(scr_entref_t entref)
 {
     actor_s *v1; // r31
     double Float; // fp31
@@ -163,7 +175,7 @@ void __cdecl ActorCmd_Shoot(scr_entref_t *entref)
     Actor_Shoot(v1, Float, (float (*)[3])v3, v4, 1);
 }
 
-void __cdecl ActorCmd_ShootBlank(scr_entref_t *entref)
+void __cdecl ActorCmd_ShootBlank(scr_entref_t entref)
 {
     actor_s *v1; // r31
     const char *v2; // r3
@@ -183,7 +195,7 @@ void __cdecl ActorCmd_ShootBlank(scr_entref_t *entref)
     Actor_ShootBlank(v1);
 }
 
-void __cdecl ActorCmd_Melee(scr_entref_t *entref)
+void __cdecl ActorCmd_Melee(scr_entref_t entref)
 {
     actor_s *v1; // r31
     const float *v2; // r4
@@ -205,7 +217,7 @@ void __cdecl ActorCmd_Melee(scr_entref_t *entref)
         Scr_AddEntity(v3);
 }
 
-void __cdecl ActorCmd_UpdatePlayerSightAccuracy(scr_entref_t *entref)
+void __cdecl ActorCmd_UpdatePlayerSightAccuracy(scr_entref_t entref)
 {
     actor_s *v1; // r31
     sentient_s *TargetSentient; // r3
@@ -225,7 +237,7 @@ void __cdecl ActorCmd_UpdatePlayerSightAccuracy(scr_entref_t *entref)
     v1->playerSightAccuracy = 1.0;
 }
 
-void __cdecl ActorCmd_FindCoverNode(scr_entref_t *entref)
+void __cdecl ActorCmd_FindCoverNode(scr_entref_t entref)
 {
     actor_s *v1; // r3
 
@@ -233,7 +245,7 @@ void __cdecl ActorCmd_FindCoverNode(scr_entref_t *entref)
     Actor_Cover_FindCoverNode(v1);
 }
 
-void __cdecl ActorCmd_FindBestCoverNode(scr_entref_t *entref)
+void __cdecl ActorCmd_FindBestCoverNode(scr_entref_t entref)
 {
     actor_s *v1; // r3
     pathnode_t *BestCover; // r3
@@ -244,7 +256,7 @@ void __cdecl ActorCmd_FindBestCoverNode(scr_entref_t *entref)
         Scr_AddPathnode(BestCover);
 }
 
-void __cdecl ActorCmd_GetCoverNode(scr_entref_t *entref)
+void __cdecl ActorCmd_GetCoverNode(scr_entref_t entref)
 {
     actor_s *v1; // r3
     pathnode_t *CoverNode; // r3
@@ -255,7 +267,7 @@ void __cdecl ActorCmd_GetCoverNode(scr_entref_t *entref)
         Scr_AddPathnode(CoverNode);
 }
 
-void __cdecl ActorCmd_UseCoverNode(scr_entref_t *entref)
+void __cdecl ActorCmd_UseCoverNode(scr_entref_t entref)
 {
     actor_s *v1; // r31
     pathnode_t *Pathnode; // r3
@@ -271,7 +283,7 @@ void __cdecl ActorCmd_UseCoverNode(scr_entref_t *entref)
     Scr_AddBool(v3);
 }
 
-void __cdecl ActorCmd_ReacquireStep(scr_entref_t *entref)
+void __cdecl ActorCmd_ReacquireStep(scr_entref_t entref)
 {
     actor_s *v1; // r31
     double Float; // fp1
@@ -283,7 +295,7 @@ void __cdecl ActorCmd_ReacquireStep(scr_entref_t *entref)
     Scr_AddBool(v3);
 }
 
-void __cdecl ActorCmd_FindReacquireNode(scr_entref_t *entref)
+void __cdecl ActorCmd_FindReacquireNode(scr_entref_t entref)
 {
     actor_s *v1; // r3
 
@@ -291,7 +303,7 @@ void __cdecl ActorCmd_FindReacquireNode(scr_entref_t *entref)
     Actor_Exposed_FindReacquireNode(v1);
 }
 
-void __cdecl ActorCmd_GetReacquireNode(scr_entref_t *entref)
+void __cdecl ActorCmd_GetReacquireNode(scr_entref_t entref)
 {
     actor_s *v1; // r3
     pathnode_t *ReacquireNode; // r3
@@ -302,7 +314,7 @@ void __cdecl ActorCmd_GetReacquireNode(scr_entref_t *entref)
         Scr_AddPathnode(ReacquireNode);
 }
 
-void __cdecl ActorCmd_UseReacquireNode(scr_entref_t *entref)
+void __cdecl ActorCmd_UseReacquireNode(scr_entref_t entref)
 {
     actor_s *v1; // r31
     pathnode_t *Pathnode; // r3
@@ -316,7 +328,7 @@ void __cdecl ActorCmd_UseReacquireNode(scr_entref_t *entref)
     Scr_AddBool(v3);
 }
 
-void __cdecl ActorCmd_FindReacquireDirectPath(scr_entref_t *entref)
+void __cdecl ActorCmd_FindReacquireDirectPath(scr_entref_t entref)
 {
     actor_s *v1; // r30
     bool v2; // r31
@@ -328,7 +340,7 @@ void __cdecl ActorCmd_FindReacquireDirectPath(scr_entref_t *entref)
     Actor_Exposed_FindReacquireDirectPath(v1, v2);
 }
 
-void __cdecl ActorCmd_FindReacquireProximatePath(scr_entref_t *entref)
+void __cdecl ActorCmd_FindReacquireProximatePath(scr_entref_t entref)
 {
     actor_s *v1; // r30
     char v2; // r31
@@ -340,7 +352,7 @@ void __cdecl ActorCmd_FindReacquireProximatePath(scr_entref_t *entref)
     Actor_Exposed_FindReacquireProximatePath(v1, v2);
 }
 
-void __cdecl ActorCmd_TrimPathToAttack(scr_entref_t *entref)
+void __cdecl ActorCmd_TrimPathToAttack(scr_entref_t entref)
 {
     actor_s *v1; // r31
     int v2; // r3
@@ -352,7 +364,7 @@ void __cdecl ActorCmd_TrimPathToAttack(scr_entref_t *entref)
     Scr_AddBool(v2);
 }
 
-void __cdecl ActorCmd_ReacquireMove(scr_entref_t *entref)
+void __cdecl ActorCmd_ReacquireMove(scr_entref_t entref)
 {
     actor_s *v1; // r31
     unsigned __int8 started; // r3
@@ -364,7 +376,7 @@ void __cdecl ActorCmd_ReacquireMove(scr_entref_t *entref)
     Scr_AddBool(started);
 }
 
-void __cdecl ActorCmd_FlagEnemyUnattackable(scr_entref_t *entref)
+void __cdecl ActorCmd_FlagEnemyUnattackable(scr_entref_t entref)
 {
     actor_s *v1; // r3
 
@@ -372,28 +384,22 @@ void __cdecl ActorCmd_FlagEnemyUnattackable(scr_entref_t *entref)
     Actor_FlagEnemyUnattackable(v1);
 }
 
-void __cdecl ActorCmd_SetAimAnims(scr_entref_t *entref)
+void __cdecl ActorCmd_SetAimAnims(scr_entref_t entref)
 {
     actor_s *v1; // r31
     XAnimTree_s *ActorAnimTree; // r30
-    XAnimTree_s *v3; // r5
-    XAnimTree_s *v4; // r5
-    XAnimTree_s *v5; // r5
-    XAnimTree_s *v6; // r5
-    XAnimTree_s *v7; // r5
-    XAnimTree_s *v8; // r5
 
     v1 = Actor_Get(entref);
     ActorAnimTree = G_GetActorAnimTree(v1);
-    v1->animSets.aimLow = (unsigned int)Scr_GetAnim(0, (unsigned int)ActorAnimTree, v3) >> 16;
-    v1->animSets.aimLevel = (unsigned int)Scr_GetAnim((scr_anim_s *)1, (unsigned int)ActorAnimTree, v4) >> 16;
-    v1->animSets.aimHigh = (unsigned int)Scr_GetAnim((scr_anim_s *)2, (unsigned int)ActorAnimTree, v5) >> 16;
-    v1->animSets.shootLow = (unsigned int)Scr_GetAnim((scr_anim_s *)3, (unsigned int)ActorAnimTree, v6) >> 16;
-    v1->animSets.shootLevel = (unsigned int)Scr_GetAnim((scr_anim_s *)4, (unsigned int)ActorAnimTree, v7) >> 16;
-    v1->animSets.shootHigh = (unsigned int)Scr_GetAnim((scr_anim_s *)5, (unsigned int)ActorAnimTree, v8) >> 16;
+    v1->animSets.aimLow = Scr_GetAnim(0, ActorAnimTree).index;
+    v1->animSets.aimLevel = Scr_GetAnim(1, ActorAnimTree).index;
+    v1->animSets.aimHigh = Scr_GetAnim(2, ActorAnimTree).index;
+    v1->animSets.shootLow = Scr_GetAnim(3, ActorAnimTree).index;
+    v1->animSets.shootLevel = Scr_GetAnim(4, ActorAnimTree).index;
+    v1->animSets.shootHigh = Scr_GetAnim(5, ActorAnimTree).index;
 }
 
-void __cdecl ActorCmd_AimAtPos(scr_entref_t *entref)
+void __cdecl ActorCmd_AimAtPos(scr_entref_t entref)
 {
     actor_s *v1; // r31
     double v2; // fp30
@@ -462,7 +468,7 @@ void __cdecl ActorCmd_AimAtPos(scr_entref_t *entref)
     Scr_AddFloat(0.1);
 }
 
-void __cdecl ActorCmd_EnterProne(scr_entref_t *entref)
+void __cdecl ActorCmd_EnterProne(scr_entref_t entref)
 {
     actor_s *v1; // r3
     actor_s *v2; // r31
@@ -481,7 +487,7 @@ void __cdecl ActorCmd_EnterProne(scr_entref_t *entref)
     G_ActorEnterProne(v2, v3);
 }
 
-void __cdecl ActorCmd_ExitProne(scr_entref_t *entref)
+void __cdecl ActorCmd_ExitProne(scr_entref_t entref)
 {
     actor_s *v1; // r31
     int v2; // [sp+50h] [-20h]
@@ -491,32 +497,37 @@ void __cdecl ActorCmd_ExitProne(scr_entref_t *entref)
     G_ActorExitProne(v1, v2);
 }
 
-void __cdecl ActorCmd_SetProneAnimNodes(scr_entref_t *entref)
+void __cdecl ActorCmd_SetProneAnimNodes(scr_entref_t entref)
 {
-    double Float; // fp29
-    double v3; // fp31
+    float downAng; // fp29
+    float upAng; // fp31
     actor_s *v4; // r31
     XAnimTree_s *ActorAnimTree; // r30
     XAnimTree_s *v6; // r5
     XAnimTree_s *v7; // r5
     XAnimTree_s *v8; // r5
 
-    Float = Scr_GetFloat(0);
-    v3 = Scr_GetFloat(1u);
+    downAng = Scr_GetFloat(0);
+    upAng = Scr_GetFloat(1);
+
     v4 = Actor_Get(entref);
     ActorAnimTree = G_GetActorAnimTree(v4);
-    if (Float >= 0.0)
+
+    if (downAng >= 0.0)
         Scr_Error("Down angle (parameter 1) must be set to be less than 0.");
-    if (v3 <= 0.0)
+
+    if (upAng <= 0.0)
         Scr_Error("Up angle (parameter 2) must be set to be greater than 0.");
-    v4->fInvProneAnimLowPitch = (float)1.0 / (float)Float;
-    v4->fInvProneAnimHighPitch = (float)1.0 / (float)v3;
-    v4->animSets.animProneLow = (unsigned int)Scr_GetAnim((scr_anim_s *)2, (unsigned int)ActorAnimTree, v6) >> 16;
-    v4->animSets.animProneLevel = (unsigned int)Scr_GetAnim((scr_anim_s *)3, (unsigned int)ActorAnimTree, v7) >> 16;
-    v4->animSets.animProneHigh = (unsigned int)Scr_GetAnim((scr_anim_s *)4, (unsigned int)ActorAnimTree, v8) >> 16;
+
+    v4->fInvProneAnimLowPitch = 1.0f / (float)downAng;
+    v4->fInvProneAnimHighPitch = 1.0f / (float)upAng;
+
+    v4->animSets.animProneLow = Scr_GetAnim(2, ActorAnimTree).index;
+    v4->animSets.animProneLevel = Scr_GetAnim(3, ActorAnimTree).index;
+    v4->animSets.animProneHigh = Scr_GetAnim(4, ActorAnimTree).index;
 }
 
-void __cdecl ActorCmd_UpdateProne(scr_entref_t *entref)
+void __cdecl ActorCmd_UpdateProne(scr_entref_t entref)
 {
     actor_s *v1; // r31
     XAnimTree_s *ActorAnimTree; // r30
@@ -535,26 +546,26 @@ void __cdecl ActorCmd_UpdateProne(scr_entref_t *entref)
     float *v15; // r6
     float *v16; // r5
     long double v17; // fp2
-    scr_anim_s *Anim; // [sp+50h] [-40h]
-    scr_anim_s *v19; // [sp+54h] [-3Ch]
+    scr_anim_s Anim; // [sp+50h] [-40h]
+    scr_anim_s v19; // [sp+54h] [-3Ch]
 
     v1 = Actor_Get(entref);
     if (BG_ActorIsProne(&v1->ProneInfo, level.time))
     {
         ActorAnimTree = G_GetActorAnimTree(v1);
-        Anim = Scr_GetAnim(0, (unsigned int)ActorAnimTree, v3);
-        v19 = Scr_GetAnim((scr_anim_s *)1, (unsigned int)ActorAnimTree, v4);
-        Float = Scr_GetFloat(2u);
-        v6 = Scr_GetFloat(3u);
-        v7 = Scr_GetFloat(4u);
+        Anim = Scr_GetAnim(0, ActorAnimTree);
+        v19 = Scr_GetAnim(1, ActorAnimTree);
+        Float = Scr_GetFloat(2);
+        v6 = Scr_GetFloat(3);
+        v7 = Scr_GetFloat(4);
         ServerDObj = Com_GetServerDObj(v1->ent->s.number);
-        XAnimSetCompleteGoalWeight(ServerDObj, HIWORD(Anim), Float, v6, v7, v11, v10, v9);
-        XAnimSetCompleteGoalWeight(ServerDObj, HIWORD(v19), Float, v6, v7, v14, v13, v12);
+        XAnimSetCompleteGoalWeight(ServerDObj, Anim.index, Float, v6, v7, v11, v10, v9);
+        XAnimSetCompleteGoalWeight(ServerDObj, v19.index, Float, v6, v7, v14, v13, v12);
         Actor_UpdateProneInformation(v1, 0, v16, v15, v17);
     }
 }
 
-void __cdecl ActorCmd_ClearPitchOrient(scr_entref_t *entref)
+void __cdecl ActorCmd_ClearPitchOrient(scr_entref_t entref)
 {
     actor_s *v1; // r3
 
@@ -563,26 +574,26 @@ void __cdecl ActorCmd_ClearPitchOrient(scr_entref_t *entref)
     v1->ProneInfo.orientPitch = 0;
 }
 
-void __cdecl ActorCmd_SetLookAtAnimNodes(scr_entref_t *entref)
+void __cdecl ActorCmd_SetLookAtAnimNodes(scr_entref_t entref)
 {
     actor_s *v1; // r30
     XAnimTree_s *ActorAnimTree; // r31
     XAnimTree_s *v3; // r5
     XAnimTree_s *v4; // r5
     XAnimTree_s *v5; // r5
-    scr_anim_s *v6; // [sp+50h] [-30h]
-    scr_anim_s *v7; // [sp+54h] [-2Ch]
-    scr_anim_s *Anim; // [sp+58h] [-28h]
+    scr_anim_s v6; // [sp+50h] [-30h]
+    scr_anim_s v7; // [sp+54h] [-2Ch]
+    scr_anim_s Anim; // [sp+58h] [-28h]
 
     v1 = Actor_Get(entref);
     ActorAnimTree = G_GetActorAnimTree(v1);
-    Anim = Scr_GetAnim(0, (unsigned int)ActorAnimTree, v3);
-    v7 = Scr_GetAnim((scr_anim_s *)1, (unsigned int)ActorAnimTree, v4);
-    v6 = Scr_GetAnim((scr_anim_s *)2, (unsigned int)ActorAnimTree, v5);
-    Actor_SetLookAtAnimNodes(v1, HIWORD(Anim), HIWORD(v7), HIWORD(v6));
+    Anim = Scr_GetAnim(0, ActorAnimTree);
+    v7 = Scr_GetAnim(1, ActorAnimTree);
+    v6 = Scr_GetAnim(2, ActorAnimTree);
+    Actor_SetLookAtAnimNodes(v1, Anim.index, v7.index, v6.index);
 }
 
-void __cdecl ActorCmd_SetLookAt(scr_entref_t *entref)
+void __cdecl ActorCmd_SetLookAt(scr_entref_t entref)
 {
     double Float; // fp31
     actor_s *v2; // r31
@@ -598,7 +609,7 @@ void __cdecl ActorCmd_SetLookAt(scr_entref_t *entref)
     Actor_SetLookAt(v2, v3, Float);
 }
 
-void __cdecl ActorCmd_SetLookAtYawLimits(scr_entref_t *entref)
+void __cdecl ActorCmd_SetLookAtYawLimits(scr_entref_t entref)
 {
     actor_s *v1; // r31
     double Float; // fp31
@@ -612,7 +623,7 @@ void __cdecl ActorCmd_SetLookAtYawLimits(scr_entref_t *entref)
     Actor_SetLookAtYawLimits(v1, v4, v3, Float);
 }
 
-void __cdecl ActorCmd_StopLookAt(scr_entref_t *entref)
+void __cdecl ActorCmd_StopLookAt(scr_entref_t entref)
 {
     double Float; // fp31
     actor_s *v2; // r31
@@ -624,7 +635,7 @@ void __cdecl ActorCmd_StopLookAt(scr_entref_t *entref)
     Actor_StopLookAt(v2, Float);
 }
 
-void __cdecl ActorCmd_CanShoot(scr_entref_t *entref)
+void __cdecl ActorCmd_CanShoot(scr_entref_t entref)
 {
     actor_s *v1; // r31
     const char *v2; // r3
@@ -662,37 +673,38 @@ void __cdecl ActorCmd_CanShoot(scr_entref_t *entref)
     Scr_AddInt(CanShootFrom);
 }
 
-void __cdecl ActorCmd_CanSee(scr_entref_t *entref)
+void __cdecl ActorCmd_CanSee(scr_entref_t entref)
 {
     actor_s *v1; // r30
-    gentity_s *Entity; // r31
+    gentity_s *pOther; // r31
     bool CanSeeSentient; // r3
     int v4; // [sp+50h] [-20h]
 
     v1 = Actor_Get(entref);
-    Entity = Scr_GetEntity(0);
-    if (!Entity)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\actor_script_cmd.cpp", 1056, 0, "%s", "pOther");
-    if (Entity->sentient)
+    pOther = Scr_GetEntity(0);
+
+    iassert(pOther);
+
+    if (pOther->sentient)
     {
         if (Scr_GetNumParam() <= 1)
         {
-            CanSeeSentient = Actor_CanSeeSentient(v1, Entity->sentient, 250);
+            CanSeeSentient = Actor_CanSeeSentient(v1, pOther->sentient, 250);
         }
         else
         {
             v4 = (int)(float)(Scr_GetFloat(0) * (float)1000.0);
-            CanSeeSentient = Actor_CanSeeSentient(v1, Entity->sentient, v4);
+            CanSeeSentient = Actor_CanSeeSentient(v1, pOther->sentient, v4);
         }
     }
     else
     {
-        CanSeeSentient = Actor_CanSeeEntity(v1, Entity);
+        CanSeeSentient = Actor_CanSeeEntity(v1, pOther);
     }
     Scr_AddBool(CanSeeSentient);
 }
 
-void __cdecl ActorCmd_DropWeapon(scr_entref_t *entref)
+void __cdecl ActorCmd_DropWeapon(scr_entref_t entref)
 {
     actor_s *v1; // r29
     const char *String; // r31
@@ -955,7 +967,7 @@ int __cdecl MayMove_TraceCheck(actor_s *self, float *vStart, float *vEnd, int al
     }
 }
 
-void __cdecl ActorCmd_MayMoveToPoint(scr_entref_t *entref)
+void __cdecl ActorCmd_MayMoveToPoint(scr_entref_t entref)
 {
     actor_s *v1; // r31
     int v2; // r30
@@ -1003,7 +1015,7 @@ LABEL_11:
     Scr_AddInt(v5);
 }
 
-void __cdecl ActorCmd_MayMoveFromPointToPoint(scr_entref_t *entref)
+void __cdecl ActorCmd_MayMoveFromPointToPoint(scr_entref_t entref)
 {
     actor_s *v1; // r31
     int v2; // r7
@@ -1042,10 +1054,10 @@ LABEL_8:
     Scr_AddInt(v3);
 }
 
-void __cdecl ActorCmd_Teleport(scr_entref_t *entref)
+void __cdecl ActorCmd_Teleport(scr_entref_t entref)
 {
     actor_s *v1; // r31
-    const float *v2; // r25
+    float *v2; // r25
     gentity_s *ent; // r27
     double v4; // fp31
     gentity_s *v5; // r30
@@ -1137,7 +1149,7 @@ LABEL_16:
     Scr_AddInt(1);
 }
 
-void __cdecl ActorCmd_WithinApproxPathDist(scr_entref_t *entref)
+void __cdecl ActorCmd_WithinApproxPathDist(scr_entref_t entref)
 {
     actor_s *v1; // r31
     double Float; // fp1
@@ -1149,7 +1161,7 @@ void __cdecl ActorCmd_WithinApproxPathDist(scr_entref_t *entref)
     Scr_AddFloat((float)v3);
 }
 
-void __cdecl ActorCmd_IsPathDirect(scr_entref_t *entref)
+void __cdecl ActorCmd_IsPathDirect(scr_entref_t entref)
 {
     actor_s *v1; // r31
     int v2; // r3
@@ -1162,7 +1174,7 @@ void __cdecl ActorCmd_IsPathDirect(scr_entref_t *entref)
     Scr_AddInt(v2);
 }
 
-void __cdecl ActorCmd_AllowedStances(scr_entref_t *entref)
+void __cdecl ActorCmd_AllowedStances(scr_entref_t entref)
 {
     actor_s *v1; // r29
     int NumParam; // r27
@@ -1181,15 +1193,15 @@ void __cdecl ActorCmd_AllowedStances(scr_entref_t *entref)
         ConstString = Scr_GetConstString(v3);
         if (ConstString == scr_const.stand)
         {
-            v1->eAllowedStances |= 1u;
+            v1->eAllowedStances |= STANCE_STAND; // KISAKTODO: check this |= operator works
         }
         else if (ConstString == scr_const.crouch)
         {
-            v1->eAllowedStances |= 2u;
+            v1->eAllowedStances |= STANCE_CROUCH;
         }
         else if (ConstString == scr_const.prone)
         {
-            v1->eAllowedStances |= 4u;
+            v1->eAllowedStances |= STANCE_PRONE;
         }
         else
         {
@@ -1205,7 +1217,7 @@ void __cdecl ActorCmd_AllowedStances(scr_entref_t *entref)
     }
 }
 
-void __cdecl ActorCmd_IsStanceAllowed(scr_entref_t *entref)
+void __cdecl ActorCmd_IsStanceAllowed(scr_entref_t entref)
 {
     actor_s *v1; // r31
     unsigned int ConstString; // r3
@@ -1259,7 +1271,7 @@ LABEL_14:
     Scr_AddInt((eAllowedStances & v3) != 0);
 }
 
-void __cdecl ActorCmd_IsSuppressionWaiting(scr_entref_t *entref)
+void __cdecl ActorCmd_IsSuppressionWaiting(scr_entref_t entref)
 {
     actor_s *v1; // r3
     int IsSuppressionWaiting; // r3
@@ -1269,7 +1281,7 @@ void __cdecl ActorCmd_IsSuppressionWaiting(scr_entref_t *entref)
     Scr_AddInt(IsSuppressionWaiting);
 }
 
-void __cdecl ActorCmd_IsSuppressed(scr_entref_t *entref)
+void __cdecl ActorCmd_IsSuppressed(scr_entref_t entref)
 {
     actor_s *v1; // r3
     int IsSuppressed; // r3
@@ -1279,7 +1291,7 @@ void __cdecl ActorCmd_IsSuppressed(scr_entref_t *entref)
     Scr_AddInt(IsSuppressed);
 }
 
-void __cdecl ActorCmd_IsMoveSuppressed(scr_entref_t *entref)
+void __cdecl ActorCmd_IsMoveSuppressed(scr_entref_t entref)
 {
     actor_s *v1; // r3
     int IsMoveSuppressed; // r3
@@ -1289,7 +1301,7 @@ void __cdecl ActorCmd_IsMoveSuppressed(scr_entref_t *entref)
     Scr_AddInt(IsMoveSuppressed);
 }
 
-void __cdecl ActorCmd_CheckGrenadeThrow(scr_entref_t *entref)
+void __cdecl ActorCmd_CheckGrenadeThrow(scr_entref_t entref)
 {
     actor_s *v1; // r31
     unsigned int ConstString; // r29
@@ -1322,7 +1334,7 @@ void __cdecl ActorCmd_CheckGrenadeThrow(scr_entref_t *entref)
     }
 }
 
-void __cdecl ActorCmd_CheckGrenadeThrowPos(scr_entref_t *entref)
+void __cdecl ActorCmd_CheckGrenadeThrowPos(scr_entref_t entref)
 {
     actor_s *v1; // r31
     unsigned int ConstString; // r27
@@ -1451,7 +1463,7 @@ void __cdecl ActorCmd_CheckGrenadeThrowPos(scr_entref_t *entref)
     }
 }
 
-void __cdecl ActorCmd_ThrowGrenade(scr_entref_t *entref)
+void __cdecl ActorCmd_ThrowGrenade(scr_entref_t entref)
 {
     actor_s *v1; // r3
     actor_s *v2; // r31
@@ -1461,8 +1473,6 @@ void __cdecl ActorCmd_ThrowGrenade(scr_entref_t *entref)
     int number; // r30
     const char *v7; // r3
     const char *v8; // r3
-    gentity_s *v9; // r3
-    gentity_s *v10; // r3
     const char *v11; // r3
     const char *v12; // r3
     WeaponDef *WeaponDef; // r30
@@ -1546,13 +1556,11 @@ void __cdecl ActorCmd_ThrowGrenade(scr_entref_t *entref)
             v34[1] = v2->vGrenadeTossVel[1];
             v34[2] = v2->vGrenadeTossVel[2];
         }
-        if (EntHandle::isDefined(&v2->pGrenade) && v2->eState[v2->stateLevel] == AIS_GRENADE_RESPONSE)
+        if (v2->pGrenade.isDefined() && v2->eState[v2->stateLevel] == AIS_GRENADE_RESPONSE)
         {
             Actor_Grenade_Detach(v2);
-            v9 = EntHandle::ent(&v2->pGrenade);
-            G_InitGrenadeEntity(v2->ent, v9);
-            v10 = EntHandle::ent(&v2->pGrenade);
-            G_InitGrenadeMovement(v10, v35, v34, 1);
+            G_InitGrenadeEntity(v2->ent, v2->pGrenade.ent());
+            G_InitGrenadeMovement(v2->pGrenade.ent(), v35, v34, 1);
         }
         else
         {
@@ -1609,7 +1617,7 @@ bool __cdecl Actor_CheckGrenadeLaunch(actor_s *self, const float *vStartPos, con
     return result;
 }
 
-void __cdecl ActorCmd_CheckGrenadeLaunch(scr_entref_t *entref)
+void __cdecl ActorCmd_CheckGrenadeLaunch(scr_entref_t entref)
 {
     actor_s *v1; // r31
     const sentient_s *TargetSentient; // r3
@@ -1640,7 +1648,7 @@ void __cdecl ActorCmd_CheckGrenadeLaunch(scr_entref_t *entref)
     }
 }
 
-void __cdecl ActorCmd_CheckGrenadeLaunchPos(scr_entref_t *entref)
+void __cdecl ActorCmd_CheckGrenadeLaunchPos(scr_entref_t entref)
 {
     actor_s *v1; // r31
     float v2[4]; // [sp+50h] [-30h] BYREF
@@ -1658,7 +1666,7 @@ void __cdecl ActorCmd_CheckGrenadeLaunchPos(scr_entref_t *entref)
         Scr_AddVector(v1->vGrenadeTossVel);
 }
 
-void __cdecl ActorCmd_FireGrenadeLauncher(scr_entref_t *entref)
+void __cdecl ActorCmd_FireGrenadeLauncher(scr_entref_t entref)
 {
     actor_s *v1; // r3
     actor_s *v2; // r31
@@ -1703,16 +1711,16 @@ void __cdecl ActorCmd_FireGrenadeLauncher(scr_entref_t *entref)
     v2->bGrenadeTossValid = 0;
 }
 
-void __cdecl ActorCmd_PickUpGrenade(scr_entref_t *entref)
+void __cdecl ActorCmd_PickUpGrenade(scr_entref_t entref)
 {
     actor_s *v1; // r31
 
     v1 = Actor_Get(entref);
-    if (EntHandle::isDefined(&v1->pGrenade))
+    if (v1->pGrenade.isDefined())
         Actor_Grenade_Attach(v1);
 }
 
-void __cdecl ActorCmd_UseTurret(scr_entref_t *entref)
+void __cdecl ActorCmd_UseTurret(scr_entref_t entref)
 {
     actor_s *v1; // r30
     gentity_s *Entity; // r31
@@ -1726,7 +1734,7 @@ void __cdecl ActorCmd_UseTurret(scr_entref_t *entref)
     Scr_AddBool(v3);
 }
 
-void __cdecl ActorCmd_StopUseTurret(scr_entref_t *entref)
+void __cdecl ActorCmd_StopUseTurret(scr_entref_t entref)
 {
     actor_s *v1; // r3
 
@@ -1734,7 +1742,7 @@ void __cdecl ActorCmd_StopUseTurret(scr_entref_t *entref)
     Actor_StopUseTurret(v1);
 }
 
-void __cdecl ActorCmd_CanUseTurret(scr_entref_t *entref)
+void __cdecl ActorCmd_CanUseTurret(scr_entref_t entref)
 {
     actor_s *v1; // r30
     gentity_s *Entity; // r31
@@ -1748,7 +1756,7 @@ void __cdecl ActorCmd_CanUseTurret(scr_entref_t *entref)
     Scr_AddBool(v3);
 }
 
-void __cdecl ActorCmd_TraverseMode(scr_entref_t *entref)
+void __cdecl ActorCmd_TraverseMode(scr_entref_t entref)
 {
     actor_s *v1; // r31
     unsigned int ConstString; // r3
@@ -1773,7 +1781,7 @@ void __cdecl ActorCmd_TraverseMode(scr_entref_t *entref)
     }
 }
 
-void __cdecl ActorCmd_AnimMode(scr_entref_t *entref)
+void __cdecl ActorCmd_AnimMode(scr_entref_t entref)
 {
     actor_s *v1; // r28
     bool v2; // r29
@@ -1827,7 +1835,7 @@ void __cdecl ActorCmd_AnimMode(scr_entref_t *entref)
     }
 }
 
-void __cdecl ActorCmd_OrientMode(scr_entref_t *entref)
+void __cdecl ActorCmd_OrientMode(scr_entref_t entref)
 {
     actor_s *v1; // r31
     unsigned int ConstString; // r3
@@ -1906,7 +1914,7 @@ void __cdecl ActorCmd_OrientMode(scr_entref_t *entref)
     }
 }
 
-void __cdecl ActorCmd_GetMotionAngle(scr_entref_t *entref)
+void __cdecl ActorCmd_GetMotionAngle(scr_entref_t entref)
 {
     actor_s *v1; // r31
     double v2; // fp1
@@ -1941,7 +1949,7 @@ void __cdecl ActorCmd_GetMotionAngle(scr_entref_t *entref)
     Scr_AddFloat(v6);
 }
 
-void __cdecl ActorCmd_GetAnglesToLikelyEnemyPath(scr_entref_t *entref)
+void __cdecl ActorCmd_GetAnglesToLikelyEnemyPath(scr_entref_t entref)
 {
     actor_s *v1; // r31
 
@@ -1950,7 +1958,7 @@ void __cdecl ActorCmd_GetAnglesToLikelyEnemyPath(scr_entref_t *entref)
         Scr_AddVector(v1->anglesToLikelyEnemyPath);
 }
 
-void __cdecl ActorCmd_SetTurretAnim(scr_entref_t *entref)
+void __cdecl ActorCmd_SetTurretAnim(scr_entref_t entref)
 {
     actor_s *v1; // r31
     XAnimTree_s *ActorAnimTree; // r3
@@ -1958,11 +1966,11 @@ void __cdecl ActorCmd_SetTurretAnim(scr_entref_t *entref)
 
     v1 = Actor_Get(entref);
     ActorAnimTree = G_GetActorAnimTree(v1);
-    v1->turretAnim = (unsigned int)Scr_GetAnim(0, (unsigned int)ActorAnimTree, v3) >> 16;
+    v1->turretAnim = Scr_GetAnim(0, ActorAnimTree).index;
     v1->turretAnimSet = 1;
 }
 
-void __cdecl ActorCmd_GetTurret(scr_entref_t *entref)
+void __cdecl ActorCmd_GetTurret(scr_entref_t entref)
 {
     actor_s *v1; // r31
 
@@ -1975,7 +1983,7 @@ void __cdecl ActorCmd_GetTurret(scr_entref_t *entref)
     }
 }
 
-void __cdecl ActorCmd_BeginPrediction(scr_entref_t *entref)
+void __cdecl ActorCmd_BeginPrediction(scr_entref_t entref)
 {
     actor_s *v1; // r31
     int actorPredictDepth; // r11
@@ -2053,7 +2061,7 @@ void __cdecl ActorCmd_BeginPrediction(scr_entref_t *entref)
     v12->vLookUp[2] = v1->vLookUp[2];
 }
 
-void __cdecl ActorCmd_EndPrediction(scr_entref_t *entref)
+void __cdecl ActorCmd_EndPrediction(scr_entref_t entref)
 {
     actor_s *v1; // r31
     XAnimTree_s *ActorAnimTree; // r3
@@ -2121,7 +2129,7 @@ void __cdecl ActorCmd_EndPrediction(scr_entref_t *entref)
     v1->vLookUp[2] = v10->vLookUp[2];
 }
 
-void __cdecl ActorCmd_LerpPosition(scr_entref_t *entref)
+void __cdecl ActorCmd_LerpPosition(scr_entref_t entref)
 {
     actor_s *v1; // r31
     float *p_eType; // r30
@@ -2155,31 +2163,34 @@ void __cdecl ActorCmd_LerpPosition(scr_entref_t *entref)
     v1->Physics.groundEntNum = 2175;
 }
 
-void __cdecl ActorCmd_PredictOriginAndAngles(scr_entref_t *entref)
+void __cdecl ActorCmd_PredictOriginAndAngles(scr_entref_t entref)
 {
-    actor_s *v1; // r29
+    actor_s *self; // r29
     gentity_s *ent; // r28
     int eScriptSetAnimMode; // r11
 
-    v1 = Actor_Get(entref);
-    if (!v1)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\actor_script_cmd.cpp", 2528, 0, "%s", "self");
-    ent = v1->ent;
-    if (!v1->ent)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\actor_script_cmd.cpp", 2530, 0, "%s", "ent");
+    self = Actor_Get(entref);
+    iassert(self);
+    ent = self->ent;
+    iassert(ent);
+
     if (ent->tagInfo)
         Scr_Error("cannot predict when linked to an entity");
-    if (v1->eScriptSetAnimMode == AI_ANIM_NOPHYSICS)
+
+    if (self->eScriptSetAnimMode == AI_ANIM_NOPHYSICS)
         Scr_Error("cannot predict when using no physics");
-    eScriptSetAnimMode = v1->eScriptSetAnimMode;
+
+    eScriptSetAnimMode = self->eScriptSetAnimMode;
+
     if (!eScriptSetAnimMode)
         eScriptSetAnimMode = 4;
-    v1->eAnimMode = eScriptSetAnimMode;
-    v1->bUseGoalWeight = 1;
-    Actor_PredictOriginAndAngles(v1);
+
+    self->eAnimMode = (ai_animmode_t)eScriptSetAnimMode;
+    self->bUseGoalWeight = 1;
+    Actor_PredictOriginAndAngles(self);
 }
 
-void __cdecl ActorCmd_PredictAnim(scr_entref_t *entref)
+void __cdecl ActorCmd_PredictAnim(scr_entref_t entref)
 {
     actor_s *v1; // r3
 
@@ -2205,7 +2216,7 @@ void __cdecl Actor_GetEntType(int entnum)
     }
 }
 
-void __cdecl ActorCmd_GetHitEntType(scr_entref_t *entref)
+void __cdecl ActorCmd_GetHitEntType(scr_entref_t entref)
 {
     int iHitEntnum; // r11
     unsigned __int16 obstacle; // r11
@@ -2225,7 +2236,7 @@ void __cdecl ActorCmd_GetHitEntType(scr_entref_t *entref)
     }
 }
 
-void __cdecl ActorCmd_GetHitYaw(scr_entref_t *entref)
+void __cdecl ActorCmd_GetHitYaw(scr_entref_t entref)
 {
     actor_s *v1; // r31
     double v2; // fp1
@@ -2241,7 +2252,7 @@ void __cdecl ActorCmd_GetHitYaw(scr_entref_t *entref)
     Scr_AddFloat(v2);
 }
 
-void __cdecl ActorCmd_GetGroundEntType(scr_entref_t *entref)
+void __cdecl ActorCmd_GetGroundEntType(scr_entref_t entref)
 {
     int groundEntNum; // r11
     unsigned __int16 obstacle; // r11
@@ -2261,7 +2272,7 @@ void __cdecl ActorCmd_GetGroundEntType(scr_entref_t *entref)
     }
 }
 
-void __cdecl ActorCmd_IsDeflected(scr_entref_t *entref)
+void __cdecl ActorCmd_IsDeflected(scr_entref_t entref)
 {
     actor_s *v1; // r3
 
@@ -2269,7 +2280,7 @@ void __cdecl ActorCmd_IsDeflected(scr_entref_t *entref)
     Scr_AddInt(v1->Physics.bDeflected);
 }
 
-void __cdecl ActorCmd_trackScriptState(scr_entref_t *entref)
+void __cdecl ActorCmd_trackScriptState(scr_entref_t entref)
 {
     actor_s *v1; // r31
     unsigned int ConstString; // r3
@@ -2301,12 +2312,12 @@ void __cdecl ActorCmd_trackScriptState(scr_entref_t *entref)
 }
 
 // attributes: thunk
-void __cdecl ActorCmd_DumpHistory(scr_entref_t *entref)
+void __cdecl ActorCmd_DumpHistory(scr_entref_t entref)
 {
     Actor_Get(entref);
 }
 
-void __cdecl ScrCmd_animcustom(scr_entref_t *entref)
+void __cdecl ScrCmd_animcustom(scr_entref_t entref)
 {
     actor_s *v1; // r31
     int Func; // r30
@@ -2321,7 +2332,7 @@ void __cdecl ScrCmd_animcustom(scr_entref_t *entref)
     }
 }
 
-void __cdecl ScrCmd_CanAttackEnemyNode(scr_entref_t *entref)
+void __cdecl ScrCmd_CanAttackEnemyNode(scr_entref_t entref)
 {
     actor_s *v1; // r31
     const pathnode_t *v2; // r30
@@ -2344,7 +2355,7 @@ void __cdecl ScrCmd_CanAttackEnemyNode(scr_entref_t *entref)
     Scr_AddInt(v5);
 }
 
-void __cdecl ScrCmd_GetNegotiationStartNode(scr_entref_t *entref)
+void __cdecl ScrCmd_GetNegotiationStartNode(scr_entref_t entref)
 {
     actor_s *v1; // r31
     pathnode_t *v2; // r3
@@ -2371,7 +2382,7 @@ void __cdecl ScrCmd_GetNegotiationStartNode(scr_entref_t *entref)
     }
 }
 
-void __cdecl ScrCmd_GetNegotiationEndNode(scr_entref_t *entref)
+void __cdecl ScrCmd_GetNegotiationEndNode(scr_entref_t entref)
 {
     actor_s *v1; // r31
     pathnode_t *v2; // r3
@@ -2398,7 +2409,7 @@ void __cdecl ScrCmd_GetNegotiationEndNode(scr_entref_t *entref)
     }
 }
 
-void __cdecl ActorCmd_CheckProne(scr_entref_t *entref)
+void __cdecl ActorCmd_CheckProne(scr_entref_t entref)
 {
     double Float; // fp31
     unsigned int Int; // r3
@@ -2419,7 +2430,7 @@ void __cdecl ActorCmd_CheckProne(scr_entref_t *entref)
     Scr_AddBool(v6);
 }
 
-void __cdecl ActorCmd_PushPlayer(scr_entref_t *entref)
+void __cdecl ActorCmd_PushPlayer(scr_entref_t entref)
 {
     actor_s *v1; // r31
     int Int; // r3
@@ -2438,60 +2449,49 @@ void __cdecl ActorCmd_PushPlayer(scr_entref_t *entref)
 
 void __cdecl Actor_SetScriptGoalVolume(actor_s *self, gentity_s *volume)
 {
-    if (!volume)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\actor_script_cmd.cpp", 2881, 0, "%s", "volume");
-    if (!volume->r.inuse)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\actor_script_cmd.cpp", 2882, 0, "%s", "volume->r.inuse");
-    if (EntHandle::isDefined(&self->scriptGoalEnt))
-        MyAssertHandler(
-            "c:\\trees\\cod3\\cod3src\\src\\game\\actor_script_cmd.cpp",
-            2884,
-            0,
-            "%s",
-            "!self->scriptGoalEnt.isDefined()");
-    if (!SV_EntityContact(self->scriptGoal.pos, self->scriptGoal.pos, volume))
-        MyAssertHandler(
-            "c:\\trees\\cod3\\cod3src\\src\\game\\actor_script_cmd.cpp",
-            2885,
-            0,
-            "%s",
-            "SV_EntityContact( self->scriptGoal.pos, self->scriptGoal.pos, volume )");
+    iassert(volume);
+    iassert(volume->r.inuse);
+    iassert(!self->scriptGoalEnt.isDefined());
+    iassert(SV_EntityContact(self->scriptGoal.pos, self->scriptGoal.pos, volume));
+
     self->scriptGoal.volume = volume;
 }
 
-void __cdecl ActorCmd_SetGoalNode(scr_entref_t *entref)
+void __cdecl ActorCmd_SetGoalNode(scr_entref_t entref)
 {
-    actor_s *v1; // r30
+    actor_s *self; // r30
     pathnode_t *Pathnode; // r3
-    pathnode_t *v3; // r31
 
-    v1 = Actor_Get(entref);
+    self = Actor_Get(entref);
     Pathnode = Scr_GetPathnode(0);
-    v3 = Pathnode;
+
     if (!Pathnode->constant.totalLinkCount && (Pathnode->constant.spawnflags & 1) == 0)
+    {
         Com_PrintError(
             18,
             "AI %d's goal node at (%0.f, %0.f, %0.f) does not have any path links\n",
-            (unsigned int)HIDWORD(COERCE_UNSIGNED_INT64(Pathnode->constant.vOrigin[0])),
-            (unsigned int)COERCE_UNSIGNED_INT64(Pathnode->constant.vOrigin[0]),
-            (unsigned int)COERCE_UNSIGNED_INT64(Pathnode->constant.vOrigin[1]),
-            (unsigned int)COERCE_UNSIGNED_INT64(Pathnode->constant.vOrigin[2]));
-    Actor_SetScriptGoalPos(v1, v3->constant.vOrigin, v3);
+            0, // KISAKTODO: index...
+            Pathnode->constant.vOrigin[0],
+            Pathnode->constant.vOrigin[1],
+            Pathnode->constant.vOrigin[2]
+        );
+    }
+        
+          
+    Actor_SetScriptGoalPos(self, Pathnode->constant.vOrigin, Pathnode);
 }
 
 void __cdecl Actor_SetScriptGoalEntity(actor_s *self, gentity_s *pGoalEnt)
 {
-    if (!pGoalEnt)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\actor_script_cmd.cpp", 2923, 0, "%s", "pGoalEnt");
-    if (!pGoalEnt->r.inuse)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\actor_script_cmd.cpp", 2924, 0, "%s", "pGoalEnt->r.inuse");
+    iassert(pGoalEnt);
+    iassert(pGoalEnt->r.inuse);
     Actor_ClearKeepClaimedNode(self);
-    EntHandle::setEnt(&self->scriptGoalEnt, pGoalEnt);
+    self->scriptGoalEnt.setEnt(pGoalEnt);
     self->scriptGoal.node = 0;
     self->scriptGoal.volume = 0;
 }
 
-void __cdecl ActorCmd_SetGoalPos(scr_entref_t *entref)
+void __cdecl ActorCmd_SetGoalPos(scr_entref_t entref)
 {
     actor_s *v1; // r31
     float v2[4]; // [sp+50h] [-20h] BYREF
@@ -2501,7 +2501,7 @@ void __cdecl ActorCmd_SetGoalPos(scr_entref_t *entref)
     Actor_SetScriptGoalPos(v1, v2, 0);
 }
 
-void __cdecl ActorCmd_SetGoalEntity(scr_entref_t *entref)
+void __cdecl ActorCmd_SetGoalEntity(scr_entref_t entref)
 {
     actor_s *v1; // r31
     gentity_s *Entity; // r30
@@ -2512,22 +2512,22 @@ void __cdecl ActorCmd_SetGoalEntity(scr_entref_t *entref)
     Actor_SetScriptGoalEntity(v1, Entity);
 }
 
-void __cdecl ActorCmd_SetGoalVolume(scr_entref_t *entref)
+void __cdecl ActorCmd_SetGoalVolume(scr_entref_t entref)
 {
-    actor_s *v1; // r31
+    actor_s *self; // r31
     gentity_s *Entity; // r30
 
-    v1 = Actor_Get(entref);
-    if (EntHandle::isDefined(&v1->scriptGoalEnt))
+    self = Actor_Get(entref);
+    if (self->scriptGoalEnt.isDefined())
         Scr_Error("cannot set goal volume when a goal entity is set");
     Entity = Scr_GetEntity(0);
-    if (!SV_EntityContact(v1->scriptGoal.pos, v1->scriptGoal.pos, Entity))
+    if (!SV_EntityContact(self->scriptGoal.pos, self->scriptGoal.pos, Entity))
         Scr_Error("cannot set goal volume which does not contain goal position");
-    Actor_ClearKeepClaimedNode(v1);
-    Actor_SetScriptGoalVolume(v1, Entity);
+    Actor_ClearKeepClaimedNode(self);
+    Actor_SetScriptGoalVolume(self, Entity);
 }
 
-void __cdecl ActorCmd_GetGoalVolume(scr_entref_t *entref)
+void __cdecl ActorCmd_GetGoalVolume(scr_entref_t entref)
 {
     gentity_s *volume; // r3
 
@@ -2536,45 +2536,43 @@ void __cdecl ActorCmd_GetGoalVolume(scr_entref_t *entref)
         Scr_AddEntity(volume);
 }
 
-void __cdecl ActorCmd_ClearGoalVolume(scr_entref_t *entref)
+void __cdecl ActorCmd_ClearGoalVolume(scr_entref_t entref)
 {
     Actor_Get(entref)->scriptGoal.volume = 0;
 }
 
-void __cdecl ActorCmd_SetFixedNodeSafeVolume(scr_entref_t *entref)
+void __cdecl ActorCmd_SetFixedNodeSafeVolume(scr_entref_t entref)
 {
-    actor_s *v1; // r30
+    actor_s *self; // r30
     gentity_s *Entity; // r31
 
-    v1 = Actor_Get(entref);
+    self = Actor_Get(entref);
     Entity = Scr_GetEntity(0);
-    EntHandle::setEnt(&v1->fixedNodeSafeVolume, Entity);
-    v1->fixedNodeSafeVolumeRadiusSq = RadiusFromBounds2DSq(Entity->r.mins, Entity->r.maxs);
+    self->fixedNodeSafeVolume.setEnt(Entity);
+    self->fixedNodeSafeVolumeRadiusSq = RadiusFromBounds2DSq(Entity->r.mins, Entity->r.maxs);
 }
 
-void __cdecl ActorCmd_GetFixedNodeSafeVolume(scr_entref_t *entref)
+void __cdecl ActorCmd_GetFixedNodeSafeVolume(scr_entref_t entref)
 {
     EntHandle *p_fixedNodeSafeVolume; // r31
-    gentity_s *v2; // r3
 
     p_fixedNodeSafeVolume = &Actor_Get(entref)->fixedNodeSafeVolume;
-    if (EntHandle::isDefined(p_fixedNodeSafeVolume))
+    if (p_fixedNodeSafeVolume->isDefined())
     {
-        v2 = EntHandle::ent(p_fixedNodeSafeVolume);
-        Scr_AddEntity(v2);
+        Scr_AddEntity(p_fixedNodeSafeVolume->ent());
     }
 }
 
-void __cdecl ActorCmd_ClearFixedNodeSafeVolume(scr_entref_t *entref)
+void __cdecl ActorCmd_ClearFixedNodeSafeVolume(scr_entref_t entref)
 {
-    actor_s *v1; // r31
+    actor_s *self;
 
-    v1 = Actor_Get(entref);
-    EntHandle::setEnt(&v1->fixedNodeSafeVolume, 0);
-    v1->fixedNodeSafeVolumeRadiusSq = 0.0;
+    self = Actor_Get(entref);
+    self->fixedNodeSafeVolume.setEnt(NULL);
+    self->fixedNodeSafeVolumeRadiusSq = 0.0f;
 }
 
-void __cdecl ActorCmd_IsInGoal(scr_entref_t *entref)
+void __cdecl ActorCmd_IsInGoal(scr_entref_t entref)
 {
     actor_s *v1; // r31
     unsigned __int8 v2; // r3
@@ -2593,7 +2591,7 @@ void __cdecl ActorCmd_IsInGoal(scr_entref_t *entref)
     }
 }
 
-void __cdecl ActorCmd_SetOverrideRunToPos(scr_entref_t *entref)
+void __cdecl ActorCmd_SetOverrideRunToPos(scr_entref_t entref)
 {
     actor_s *v1; // r31
     float v2; // [sp+50h] [-20h] BYREF
@@ -2615,7 +2613,7 @@ void __cdecl ActorCmd_SetOverrideRunToPos(scr_entref_t *entref)
     v1->arrivalInfo.animscriptOverrideRunToPos[2] = v4;
 }
 
-void __cdecl ActorCmd_NearNode(scr_entref_t *entref)
+void __cdecl ActorCmd_NearNode(scr_entref_t entref)
 {
     actor_s *v1; // r31
     const pathnode_t *Pathnode; // r3
@@ -2627,49 +2625,50 @@ void __cdecl ActorCmd_NearNode(scr_entref_t *entref)
     Scr_AddBool(v3);
 }
 
-void __cdecl ActorCmd_ClearEnemy(scr_entref_t *entref)
+void __cdecl ActorCmd_ClearEnemy(scr_entref_t entref)
 {
-    actor_s *v1; // r31
-    gentity_s *v2; // r30
+    actor_s *self; // r31
 
-    v1 = Actor_Get(entref);
-    if (!v1->sentient)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\actor_script_cmd.cpp", 3206, 0, "%s", "self->sentient");
-    if (Actor_GetTargetSentient(v1))
+    self = Actor_Get(entref);
+
+    iassert(self->sentient);
+
+    if (Actor_GetTargetSentient(self))
     {
-        v1->sentientInfo[Actor_GetTargetSentient(v1) - level.sentients].lastKnownPosTime = 0;
-        v1->faceLikelyEnemyPathNode = 0;
+        self->sentientInfo[Actor_GetTargetSentient(self) - level.sentients].lastKnownPosTime = 0;
+        self->faceLikelyEnemyPathNode = 0;
     }
-    if (EntHandle::isDefined(&v1->sentient->scriptTargetEnt))
+    if (self->sentient->scriptTargetEnt.isDefined())
     {
-        v2 = EntHandle::ent(&v1->sentient->scriptTargetEnt);
-        if (Actor_GetTargetEntity(v1) == v2)
-            EntHandle::setEnt(&v1->sentient->scriptTargetEnt, 0);
+        if (Actor_GetTargetEntity(self) == self->sentient->scriptTargetEnt.ent())
+            self->sentient->scriptTargetEnt.setEnt(NULL);
     }
-    Sentient_SetEnemy(v1->sentient, 0, 1);
+    Sentient_SetEnemy(self->sentient, 0, 1);
 }
 
-void __cdecl ActorCmd_SetEntityTarget(scr_entref_t *entref)
+void __cdecl ActorCmd_SetEntityTarget(scr_entref_t entref)
 {
-    actor_s *v1; // r29
-    gentity_s *Entity; // r28
+    actor_s *self; // r29
+    gentity_s *targetEnt; // r28
     double Float; // fp1
     double v5; // fp0
     sentient_s *sentient; // r3
 
-    v1 = Actor_Get(entref);
-    Entity = Scr_GetEntity(0);
-    if (!Entity)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\actor_script_cmd.cpp", 3241, 0, "%s", "targetEnt");
-    if (Entity->sentient)
+    self = Actor_Get(entref);
+    targetEnt = Scr_GetEntity(0);
+    iassert(targetEnt);
+
+    if (targetEnt->sentient)
         Scr_Error("Do not use setentitytarget to set an AI or player as a target");
-    if (!v1->sentient)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\actor_script_cmd.cpp", 3246, 0, "%s", "self->sentient");
-    EntHandle::setEnt(&v1->sentient->scriptTargetEnt, Entity);
+    
+    iassert(self->sentient);
+
+    self->sentient->scriptTargetEnt.setEnt(targetEnt);
+
     if (Scr_GetNumParam() <= 1)
     {
         v5 = 1.0;
-        v1->sentient->entityTargetThreat = 1.0;
+        self->sentient->entityTargetThreat = 1.0;
     }
     else
     {
@@ -2679,29 +2678,27 @@ void __cdecl ActorCmd_SetEntityTarget(scr_entref_t *entref)
         _FP13 = (float)((float)Float - (float)1.0);
         __asm { fsel      f11, f13, f0, f1 }
         __asm { fsel      f13, f12, f13, f11 }
-        v1->sentient->entityTargetThreat = _FP13;
+        self->sentient->entityTargetThreat = _FP13;
     }
-    sentient = v1->sentient;
+    sentient = self->sentient;
     if (sentient->entityTargetThreat == v5)
-        Sentient_SetEnemy(sentient, Entity, 1);
+        Sentient_SetEnemy(sentient, targetEnt, 1);
 }
 
-void __cdecl ActorCmd_ClearEntityTarget(scr_entref_t *entref)
+void __cdecl ActorCmd_ClearEntityTarget(scr_entref_t entref)
 {
-    actor_s *v1; // r31
-    gentity_s *v2; // r30
+    actor_s *self; // r31
 
-    v1 = Actor_Get(entref);
-    if (EntHandle::isDefined(&v1->sentient->scriptTargetEnt))
+    self = Actor_Get(entref);
+    if (self->sentient->scriptTargetEnt.isDefined())
     {
-        v2 = EntHandle::ent(&v1->sentient->scriptTargetEnt);
-        if (Actor_GetTargetEntity(v1) == v2)
-            Sentient_SetEnemy(v1->sentient, 0, 1);
+        if (Actor_GetTargetEntity(self) == self->sentient->scriptTargetEnt.ent())
+            Sentient_SetEnemy(self->sentient, 0, 1);
     }
-    EntHandle::setEnt(&v1->sentient->scriptTargetEnt, 0);
+    self->sentient->scriptTargetEnt.setEnt(NULL);
 }
 
-void __cdecl ActorCmd_SetPotentialThreat(scr_entref_t *entref)
+void __cdecl ActorCmd_SetPotentialThreat(scr_entref_t entref)
 {
     actor_s *v1; // r31
     double Float; // fp1
@@ -2713,7 +2710,7 @@ void __cdecl ActorCmd_SetPotentialThreat(scr_entref_t *entref)
     Actor_SetPotentialThreat(&v1->potentialThreat, Float);
 }
 
-void __cdecl ActorCmd_ClearPotentialThreat(scr_entref_t *entref)
+void __cdecl ActorCmd_ClearPotentialThreat(scr_entref_t entref)
 {
     actor_s *v1; // r31
 
@@ -2723,7 +2720,9 @@ void __cdecl ActorCmd_ClearPotentialThreat(scr_entref_t *entref)
     Actor_ClearPotentialThreat(&v1->potentialThreat);
 }
 
-void __cdecl ActorCmd_SetFlashBanged(scr_entref_t *entref)
+static const char *USAGEMSG = "Invalid call to setFlashBanged().";
+
+void __cdecl ActorCmd_SetFlashBanged(scr_entref_t entref)
 {
     actor_s *v1; // r31
     double Float; // fp31
@@ -2746,7 +2745,9 @@ void __cdecl ActorCmd_SetFlashBanged(scr_entref_t *entref)
     Actor_SetFlashed(v1, Int, Float);
 }
 
-void __cdecl ActorCmd_SetFlashbangImmunity(scr_entref_t *entref)
+static const char *USAGEMSG_0 = "Invalid call to setFlashbangImmunity().";
+
+void __cdecl ActorCmd_SetFlashbangImmunity(scr_entref_t entref)
 {
     actor_s *v1; // r31
 
@@ -2757,7 +2758,7 @@ void __cdecl ActorCmd_SetFlashbangImmunity(scr_entref_t *entref)
         Scr_Error(USAGEMSG_0);
 }
 
-void __cdecl ActorCmd_GetFlashBangedStrength(scr_entref_t *entref)
+void __cdecl ActorCmd_GetFlashBangedStrength(scr_entref_t entref)
 {
     actor_s *v1; // r3
 
@@ -2765,7 +2766,7 @@ void __cdecl ActorCmd_GetFlashBangedStrength(scr_entref_t *entref)
     Scr_AddFloat(v1->flashBangedStrength);
 }
 
-void __cdecl ActorCmd_SetEngagementMinDist(scr_entref_t *entref)
+void __cdecl ActorCmd_SetEngagementMinDist(scr_entref_t entref)
 {
     actor_s *v1; // r31
     double Float; // fp2
@@ -2784,7 +2785,7 @@ void __cdecl ActorCmd_SetEngagementMinDist(scr_entref_t *entref)
     }
 }
 
-void __cdecl ActorCmd_SetEngagementMaxDist(scr_entref_t *entref)
+void __cdecl ActorCmd_SetEngagementMaxDist(scr_entref_t entref)
 {
     actor_s *v1; // r31
     double Float; // fp2
@@ -2803,7 +2804,7 @@ void __cdecl ActorCmd_SetEngagementMaxDist(scr_entref_t *entref)
     }
 }
 
-void __cdecl ActorCmd_IsKnownEnemyInRadius(scr_entref_t *entref)
+void __cdecl ActorCmd_IsKnownEnemyInRadius(scr_entref_t entref)
 {
     const actor_s *v1; // r31
     double Float; // fp1
@@ -2817,7 +2818,7 @@ void __cdecl ActorCmd_IsKnownEnemyInRadius(scr_entref_t *entref)
     Scr_AddInt(v3);
 }
 
-void __cdecl ActorCmd_IsKnownEnemyInVolume(scr_entref_t *entref)
+void __cdecl ActorCmd_IsKnownEnemyInVolume(scr_entref_t entref)
 {
     const actor_s *v1; // r31
     const gentity_s *Entity; // r3
@@ -2829,7 +2830,7 @@ void __cdecl ActorCmd_IsKnownEnemyInVolume(scr_entref_t *entref)
     Scr_AddInt(v3);
 }
 
-void __cdecl ActorCmd_SetTalkToSpecies(scr_entref_t *entref)
+void __cdecl ActorCmd_SetTalkToSpecies(scr_entref_t entref)
 {
     actor_s *v1; // r26
     int v2; // r30
@@ -2854,7 +2855,7 @@ void __cdecl ActorCmd_SetTalkToSpecies(scr_entref_t *entref)
             {
                 ++v6;
                 ++v5;
-                if ((int)v6 >= (int)g_entinfoAITextNames)
+                if ((uintptr_t)v6 >= (uintptr_t)g_AISpeciesNames[2])
                     goto LABEL_8;
             }
             v2 |= 1 << v5;

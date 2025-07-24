@@ -1,12 +1,19 @@
 #include "game_public.h"
 
+#ifdef KISAK_SP
+#include "g_main.h"
+
+#include <qcommon/qcommon.h>
+#include <xanim/xanim.h>
+#include <universal/q_parse.h>
+#endif
+
 const char *g_entityBeginParsePoint;
 const char *g_entityEndParsePoint;
 
 char *__cdecl CM_EntityString()
 {
-    if (!cm.mapEnts)
-        MyAssertHandler(".\\qcommon\\cm_load_obj.cpp", 1435, 0, "%s", "cm.mapEnts");
+    iassert(cm.mapEnts);
     return cm.mapEnts->entityString;
 }
 

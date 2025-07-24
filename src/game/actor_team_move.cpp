@@ -564,9 +564,14 @@ void __cdecl Actor_TeamMoveInitializeContext(
         v8 = 1406.25;
     }
     context->fWalkIntervalSqrd = v8;
-    _FP12 = (float)(context->fIntervalSqrd - context->fVelSelfSqrd);
-    __asm { fsel      f0, f12, f13, f0 }
-    context->fMaxIntervalSqrd = _FP0;
+
+    //_FP12 = (float)(context->fIntervalSqrd - context->fVelSelfSqrd);
+    //__asm { fsel      f0, f12, f13, f0 }
+    //context->fMaxIntervalSqrd = _FP0;
+
+    float diff = context->fIntervalSqrd - context->fVelSelfSqrd;
+    context->fMaxIntervalSqrd = (diff < 0.0f) ? diff : context->fMaxIntervalSqrd;
+
     v11 = self->pPileUpActor || bAllowGoalPileUp && Actor_IsAtGoal(self);
     fMaxIntervalSqrd = context->fMaxIntervalSqrd;
     fIntervalSqrd = context->fIntervalSqrd;
@@ -1057,12 +1062,15 @@ ai_teammove_t __cdecl Actor_GetTeamMoveStatus(actor_s *self, bool bUseInterval, 
             goto failsafe;
         }
         time = level.time;
-        __twllei(0x1F4u, 0);
-        __twllei(0x1F4u, 0);
-        v32 = ~(__ROL4__(level.time, 1) - 1) & 0x1F4;
-        __twllei(4u, 0);
-        __twlgei(v32, 0xFFFFFFFF);
-        __twlgei(~(__ROL4__(time / 500, 1) - 1) & 4, 0xFFFFFFFF);
+        //__twllei(0x1F4u, 0);
+        //__twllei(0x1F4u, 0);
+        //v32 = ~(__ROL4__(level.time, 1) - 1) & 0x1F4;
+        //__twllei(4u, 0);
+        //__twlgei(v32, 0xFFFFFFFF);
+        //__twlgei(~(__ROL4__(time / 500, 1) - 1) & 4, 0xFFFFFFFF);
+
+        v32 = (~((level.time << 1) - 1)) & 0x1F4;
+
         if (time / 500 % 4)
             goto LABEL_100;
         if ((unsigned __int16)self->Path.wDodgeCount < 0x8000u)

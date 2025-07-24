@@ -13,6 +13,12 @@ enum WeapAccuracyType : __int32
     WEAP_ACCURACY_COUNT = 0x2,
 };
 
+enum enumLastShot : __int32
+{
+    LAST_SHOT_IN_CLIP = 0x0,
+    NOT_LAST_SHOT_IN_CLIP = 0x1,
+};
+
 struct WeaponDef;
 struct actor_s;
 struct sentient_s;
@@ -52,7 +58,7 @@ void __cdecl Actor_MissEnemy(actor_s *self, weaponParms *wp, double accuracy);
 void __cdecl Actor_ShootNoEnemy(actor_s *self, weaponParms *wp);
 void __cdecl Actor_ShootPos(actor_s *self, weaponParms *wp, float *pos);
 void __cdecl Actor_ClampShot(actor_s *self, weaponParms *wp);
-void __cdecl Actor_Shoot(actor_s *self, double accuracyMod, float (*posOverride)[3], float *lastShot, int a5);
+void __cdecl Actor_Shoot(actor_s *self, float accuracyMod, float (*posOverride)[3], enumLastShot lastShot);
 void __cdecl Actor_ShootBlank(actor_s *self);
 gentity_s *__cdecl Actor_Melee(actor_s *self, const float *direction);
 float __cdecl Sentient_GetScarinessForDistance(sentient_s *self, sentient_s *enemy, double fDist);
@@ -87,8 +93,7 @@ void __cdecl Actor_AccuracyGraphTextCallback(
     double inputX,
     double inputY,
     char *text,
-    const int textLength,
-    char *a6);
+    const int textLength);
 void __cdecl G_SwapAccuracyBuffers();
 DevGraph *__cdecl Actor_InitWeaponAccuracyGraphForWeaponType(
     unsigned int weaponIndex,

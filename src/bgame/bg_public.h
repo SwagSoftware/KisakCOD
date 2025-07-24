@@ -638,3 +638,4 @@ extern const dvar_t *jump_spreadAdd;
 
 // bg_weapons
 extern unsigned int bg_lastParsedWeaponIndex;
+extern struct WeaponDef *bg_weaponDefs[128];

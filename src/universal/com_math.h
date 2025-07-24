@@ -566,4 +566,7 @@ inline float __cdecl Q_rsqrt(float number)
     return y;
 }
 
+float Q_fabs(float f);
+
 #define I_rsqrt Q_rsqrt
+#define I_fabs Q_fabs

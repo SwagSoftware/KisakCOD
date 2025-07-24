@@ -238,7 +238,7 @@ void SentientHandleDissociate(sentient_s *sentient)
     EntHandleDissociateInternal(&g_sentientsHandleList[sentient - g_sentients]);
 }
 
-sentient_s *SentientHandle::sentient()
+sentient_s *SentientHandle::sentient() const
 {
     bcassert(this->number - 1, MAX_SENTIENTS);
     iassert((g_sentients[this->number - 1].ent));
@@ -281,7 +281,7 @@ void SentientHandle::Init()
     memset(g_sentientsHandleList, 0, sizeof(g_sentientsHandleList));
 }
 
-bool SentientHandle::isDefined()
+bool SentientHandle::isDefined() const
 {
     int number = this->number;
 

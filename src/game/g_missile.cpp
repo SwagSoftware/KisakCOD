@@ -608,20 +608,26 @@ void __cdecl G_MakeMissilePickupItem(gentity_s *ent)
     ent->r.mins[0] = -1.0;
     ent->r.mins[1] = -1.0;
     ent->r.mins[2] = -1.0;
+
     ent->r.maxs[0] = 1.0;
     ent->r.maxs[1] = 1.0;
     ent->r.maxs[2] = 1.0;
+
     ent->r.contents |= 0x200000u;
     item = BG_FindItemForWeapon(ent->s.weapon, ent->s.weaponModel);
-    if (!item)
-        MyAssertHandler(".\\game\\g_missile.cpp", 2058, 0, "%s", "item");
+    iassert(item);
+
+#ifdef KISAK_MP
     itemIndex = ((char *)item - (char *)bg_itemlist) >> 2;
     ent->s.index.brushmodel = (uint16_t)itemIndex;
-    if (ent->s.index.brushmodel != itemIndex)
-        MyAssertHandler(".\\game\\g_missile.cpp", 2063, 0, "%s", "ent->s.index.item == itemIndex");
-    if (item->giType != IT_WEAPON)
-        MyAssertHandler(".\\game\\g_missile.cpp", 2064, 0, "%s", "item->giType == IT_WEAPON");
     ent->s.clientNum = 64;
+#elif KISAK_SP
+    itemIndex = (int32_t)((char *)item - (char *)bg_itemlist);
+    ent->s.index.item = (uint16_t) itemIndex;
+#endif
+
+    iassert(ent->s.index.item == itemIndex);
+    iassert(item->giType == IT_WEAPON);
 }
 
 void __cdecl G_RunMissile(gentity_s *ent)

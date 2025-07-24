@@ -128,6 +128,13 @@ enum ai_stance_e : __int32
     STANCE_PRONE = 0x4,
     STANCE_ANY = 0x7,
 };
+inline constexpr ai_stance_e operator|(ai_stance_e a, ai_stance_e b) {
+    return static_cast<ai_stance_e>(static_cast<unsigned int>(a) | static_cast<unsigned int>(b));
+}
+inline constexpr ai_stance_e &operator|=(ai_stance_e &a, ai_stance_e b) {
+    a = a | b;
+    return a;
+}
 
 
 struct ActorCoverArrivalInfo
@@ -785,6 +792,9 @@ static const float meleeAttackOffsets[4][2] = { { 1.0, 0.0 }, { 0.0, 1.0 }, { -1
 static const float g_actorAssumedSpeed[2] = { 190.0, 300.0 };
 
 extern struct AnimScriptList *g_animScriptTable[2];
+
+extern const unsigned __int16 *g_AISpeciesNames[2];
+extern const char *g_entinfoAITextNames[6];
 
 // actor_function_table
 extern const ai_funcs_t *AIFuncTable[2];

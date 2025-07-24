@@ -256,6 +256,11 @@ union entityState_s_tag
     unsigned __int8 vehicleCompassType;
 };
 
+union entityState_s_type_index
+{
+    uint16_t item;
+};
+
 struct entityState_s
 {
     unsigned __int8 eType; // entityType_t
@@ -269,7 +274,8 @@ struct entityState_s
     unsigned __int16 number;
     unsigned __int16 otherEntityNum;
     unsigned __int16 groundEntityNum;
-    _BYTE index[2];
+    //_BYTE index[2];
+    entityState_s_type_index index;
     int time2;
     int solid;
     int eventSequence;
