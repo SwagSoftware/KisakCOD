@@ -122,7 +122,7 @@ float __cdecl Path_GetDistToPathSegment(const float *vStartPos, const pathpoint_
             0,
             "%s",
             "pt->fDir2D[0] || pt->fDir2D[1]");
-    v6 = __fabs((float)((float)(pt->fDir2D[0] * (float)v5) - (float)(pt->fDir2D[1] * (float)v4)));
+    v6 = I_fabs((float)((float)(pt->fDir2D[0] * (float)v5) - (float)(pt->fDir2D[1] * (float)v4)));
     return *((float *)&v6 + 1);
 }
 
@@ -195,7 +195,7 @@ void __cdecl Path_AddTrimmedAmount(path_t *pPath, const float *vStartPos)
                     0,
                     "%s",
                     "pt->fDir2D[0] || pt->fDir2D[1]");
-            v13 = __fabs((float)((float)((float)v11 * v9[3]) - (float)(v9[4] * (float)v10)));
+            v13 = I_fabs((float)((float)((float)v11 * v9[3]) - (float)(v9[4] * (float)v10)));
             if (v9[5] <= 0.0)
                 MyAssertHandler(
                     "c:\\trees\\cod3\\cod3src\\src\\game\\actor_navigation.cpp",
@@ -893,7 +893,7 @@ bool __cdecl Path_PredictionTrace(
             if (v41 < v35 || v39 == 1.0 || v53[0].normal[2] >= 0.69999999)
             {
                 vTraceEndPos[2] = (float)v41 + (float)stepheight;
-                return __fabs((float)((float)((float)v41 + (float)stepheight) - vEndPos[2])) < 72.0;
+                return I_fabs((float)((float)((float)v41 + (float)stepheight) - vEndPos[2])) < 72.0;
             }
             return 0;
         }
@@ -1387,7 +1387,7 @@ void __cdecl Path_BacktrackCompletedPath(path_t *pPath, const float *vStartPos)
             "nextPt->fDir2D[0] || nextPt->fDir2D[1]");
     fCurrLength = pPath->fCurrLength;
     v11 = v6[5];
-    v12 = __fabs((float)((float)(v6[3] * (float)v9) - (float)(v6[4] * (float)v8)));
+    v12 = I_fabs((float)((float)(v6[3] * (float)v9) - (float)(v6[4] * (float)v8)));
     v13 = -(float)(pPath->fCurrLength * (float)v12);
     if (fCurrLength > v11)
         MyAssertHandler(
@@ -1532,7 +1532,7 @@ void __cdecl Path_BacktrackCompletedPath(path_t *pPath, const float *vStartPos)
                 0,
                 "%s",
                 "nextPt->fDir2D[0] || nextPt->fDir2D[1]");
-        v12 = __fabs((float)((float)(v14[3] * (float)v16) - (float)(v14[4] * (float)v15)));
+        v12 = I_fabs((float)((float)(v14[3] * (float)v16) - (float)(v14[4] * (float)v15)));
     }
     v26 = (float)((float)(pPath->lookaheadDir[1] * (float)(v6[1] - vStartPos[1]))
         + (float)(pPath->lookaheadDir[0] * (float)(*v6 - *vStartPos)));
@@ -3626,7 +3626,7 @@ void __cdecl Path_TransferLookahead(path_t *pPath, float *vStartPos)
                 v22 = v34;
                 v21 = v33;
             }
-            v24 = __fabs((float)((float)(*fDir2D * (float)v22) - (float)(fDir2D[1] * (float)v21)));
+            v24 = I_fabs((float)((float)(*fDir2D * (float)v22) - (float)(fDir2D[1] * (float)v21)));
             v25 = (float)((float)((float)v22 * (float)v10) - (float)((float)v21 * (float)v11));
             if ((float)((float)((float)(*fDir2D * (float)v11) - (float)(fDir2D[1] * (float)v10))
                 * (float)((float)(*fDir2D * (float)v22) - (float)(fDir2D[1] * (float)v21))) > 0.0

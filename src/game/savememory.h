@@ -4,6 +4,8 @@
 #error This file is for SinglePlayer only 
 #endif
 
+#include "g_save.h"
+
 unsigned int __cdecl Com_BlockChecksum32(const void *buffer, unsigned int length);
 void __cdecl TRACK_save_memory();
 SaveGame *__cdecl SaveMemory_GetMemoryFile(SaveGame *save);

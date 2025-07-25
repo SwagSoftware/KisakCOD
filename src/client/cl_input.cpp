@@ -984,9 +984,9 @@ void __cdecl CL_GamepadMove(usercmd_s *cmd)
         v9 = GPad_GetButton(v8, GPAD_L_TRIG);
         v10 = CL_GamepadAxisValue(0, 5);
         v11 = 127.0;
-        if (__fabs(v5) > 0.0 || __fabs(v4) > 0.0)
+        if (I_fabs(v5) > 0.0 || I_fabs(v4) > 0.0)
         {
-            if (__fabs(v5) <= __fabs(v4))
+            if (I_fabs(v5) <= I_fabs(v4))
                 v12 = (float)((float)v5 / (float)v4);
             else
                 v12 = (float)((float)v4 / (float)v5);

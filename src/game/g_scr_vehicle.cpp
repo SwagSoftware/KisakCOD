@@ -24,6 +24,66 @@ VehicleLocalPhysics s_phys;
 
 VehiclePhysicsBackup s_backup;
 
+#ifdef KISAK_SP
+__int16 s_numVehicleInfos;
+
+unsigned __int16 *s_flashTags[5] =
+{
+    &scr_const.tag_flash,
+    &scr_const.tag_flash_11,
+    &scr_const.tag_flash_2,
+    &scr_const.tag_flash_22,
+    &scr_const.tag_flash_3
+};
+unsigned __int16 *s_wheelTags[6] =
+{
+    &scr_const.tag_wheel_front_left,
+    &scr_const.tag_wheel_front_right,
+    &scr_const.tag_wheel_back_left,
+    &scr_const.tag_wheel_back_right,
+    &scr_const.tag_wheel_middle_left,
+    &scr_const.tag_wheel_middle_right,
+};
+cspField_t s_vehicleFields[33] =
+{
+  { "type", 64, 12 },
+  { "steerWheels", 68, 5 },
+  { "texureScroll", 72, 5 },
+  { "quadBarrel", 76, 5 },
+  { "bulletDamage", 80, 5 },
+  { "armorPiercingDamage", 84, 5 },
+  { "grenadeDamage", 88, 5 },
+  { "projectileDamage", 92, 5 },
+  { "projectileSplashDamage", 96, 5 },
+  { "heavyExplosiveDamage", 100, 5 },
+  { "texureScrollScale", 104, 6 },
+  { "maxSpeed", 108, 6 },
+  { "accel", 112, 6 },
+  { "rotRate", 116, 6 },
+  { "rotAccel", 120, 6 },
+  { "collisionDamage", 132, 6 },
+  { "collisionSpeed", 136, 6 },
+  { "suspensionTravel", 140, 6 },
+  { "maxBodyPitch", 124, 6 },
+  { "maxBodyRoll", 128, 6 },
+  { "turretWeapon", 144, 0 },
+  { "turretHorizSpanLeft", 208, 6 },
+  { "turretHorizSpanRight", 212, 6 },
+  { "turretVertSpanUp", 216, 6 },
+  { "turretVertSpanDown", 220, 6 },
+  { "turretRotRate", 224, 6 },
+  { "lowIdleSnd", 228, 0 },
+  { "highIdleSnd", 292, 0 },
+  { "lowEngineSnd", 356, 0 },
+  { "highEngineSnd", 420, 0 },
+  { "turretSpinSnd", 484, 0 },
+  { "turretStopSnd", 548, 0 },
+  { "engineSndSpeed", 624, 6 }
+};
+
+
+#endif
+
 gentity_s *__cdecl GScr_GetVehicle(scr_entref_t entref)
 {
     if (!entref.classnum)
@@ -2454,3 +2514,178 @@ bool G_IsPlayerDrivingVehicle(const gentity_s *player)
         return 0;
     }
 }
+
+#ifdef KISAK_SP
+
+scr_vehicle_s s_vehicles[64]{ 0 };
+
+gentity_s * VEH_GetCollMap(const char *modelname)
+{
+    const char *targetname; // [esp+0h] [ebp-Ch]
+    gentity_s *ent; // [esp+4h] [ebp-8h]
+    int i; // [esp+8h] [ebp-4h]
+
+    for (i = 0; i < level.num_entities; ++i)
+    {
+        ent = &g_entities[i];
+        if (ent->r.inuse && ent->classname == scr_const.script_vehicle_collmap)
+        {
+            targetname = SL_ConvertToString(ent->targetname);
+            if (Com_IsLegacyXModelName(targetname))
+                targetname += 7;
+            if (!I_stricmp(targetname, modelname))
+                return &g_entities[i];
+        }
+    }
+    return 0;
+}
+
+void VEH_SetupCollmap(gentity_s *ent)
+{
+    gentity_s *CollMap; // r3
+
+    CollMap = VEH_GetCollMap(SL_ConvertToString(G_ModelName(ent->model)));
+    if (CollMap)
+    {
+        if (CollMap->s.index.item)
+        {
+            ent->s.index.item = CollMap->s.index.item;
+            SV_SetBrushModel(ent);
+            ent->r.contents = 0x800000;
+            if (ent->spawnflags & 1)
+                ent->r.contents = 0xA00000;
+        }
+        else
+        {
+            Com_PrintWarning(15, "WARNING: Cannot use empty vehicle collmap for [%s]\n", SL_ConvertToString(G_ModelName(ent->model)));
+        }
+    }
+}
+
+void G_UpdateVehicleTags(gentity_s *ent)
+{
+    scr_vehicle_s *scr_vehicle; // r30
+    int *flash; // r28
+    unsigned __int16 **v4; // r29
+    int BoneIndex; // r3
+    int *wheel; // r29
+    unsigned __int16 **v7; // r30
+    int v8; // r3
+
+    iassert(ent);
+    iassert(ent->scr_vehicle);
+
+    scr_vehicle = ent->scr_vehicle;
+    scr_vehicle->boneIndex.player = SV_DObjGetBoneIndex(ent, scr_const.tag_player);
+    scr_vehicle->boneIndex.detach = SV_DObjGetBoneIndex(ent, scr_const.tag_detach);
+    scr_vehicle->boneIndex.popout = SV_DObjGetBoneIndex(ent, scr_const.tag_popout);
+    scr_vehicle->boneIndex.body = SV_DObjGetBoneIndex(ent, scr_const.tag_body);
+    scr_vehicle->boneIndex.turret = SV_DObjGetBoneIndex(ent, scr_const.tag_turret);
+    scr_vehicle->boneIndex.barrel = SV_DObjGetBoneIndex(ent, scr_const.tag_barrel);
+    scr_vehicle->boneIndex.turret_base = SV_DObjGetBoneIndex(ent, scr_const.tag_turret_base);
+    flash = scr_vehicle->boneIndex.flash;
+    v4 = s_flashTags;
+    do
+    {
+        BoneIndex = SV_DObjGetBoneIndex(ent, **v4++);
+        *flash++ = BoneIndex;
+    } while ((int)v4 < (int)s_vehicleFields);
+    wheel = scr_vehicle->boneIndex.wheel;
+    v7 = s_wheelTags;
+    do
+    {
+        v8 = SV_DObjGetBoneIndex(ent, **v7++);
+        *wheel++ = v8;
+    } while ((int)v7 < (int)s_flashTags);
+}
+
+void G_SpawnVehicle(gentity_s *ent, const char *typeName, int load)
+{
+    int vehCount; // r9
+    //int *i; // r11
+    int v9; // r24
+    int WeaponIndexForName; // r3
+    int number; // r11
+    int v13; // r11
+    int v14; // r11
+    int VehicleInfoFromName; // [sp+50h] [-60h] BYREF
+
+    vehCount = 0;
+
+    scr_vehicle_s *veh;
+    int i;
+
+    for (i = 0; i < ARRAY_COUNT(s_vehicles); i++)
+    {
+        veh = &s_vehicles[i];
+        if (veh->entNum == 2175)
+        {
+            break;
+        }
+    }   
+
+    if (vehCount >= 64)
+        Com_Error(ERR_DROP, "Hit max vehicle count [%d]", 64);
+
+    VehicleInfoFromName = VEH_GetVehicleInfoFromName(typeName);
+
+    if (VehicleInfoFromName < 0)
+        Com_Error(ERR_DROP, "Can't find info for script vehicle [%s]", typeName);
+
+    VEH_InitModelAndValidateTags(ent, &VehicleInfoFromName);
+    v9 = VehicleInfoFromName;
+    if (!level.initializing)
+    {
+        WeaponIndexForName = G_GetWeaponIndexForName(s_vehicleInfos[VehicleInfoFromName].turretWeapon);
+        if (!IsItemRegistered(WeaponIndexForName))
+        {
+            Scr_Error(va("vehicle '%s' not precached", s_vehicleInfos[v9].name));
+        }
+    }
+    memset(veh, 0, sizeof(scr_vehicle_s));
+    veh->targetEnt = 2175;
+    number = veh->lookAtEnt.number;
+    iassert(!number || g_entities[number - 1].r.inuse);
+    iassert(!veh->lookAtEnt.isDefined());
+
+    number = veh->idleSndEnt.number;
+
+    iassert(!number || g_entities[number - 1].r.inuse);
+    iassert(!veh->idleSndEnt.isDefined());
+
+    number = veh->engineSndEnt.number;
+
+    iassert(!number || g_entities[number - 1].r.inuse);
+    iassert(!veh->engineSndEnt.isDefined());
+
+    VEH_InitEntity(ent, veh, v9);
+    VEH_InitVehicle(ent, veh, v9);
+
+    if (!load)
+        VEH_SetupCollmap(ent);
+
+    G_UpdateVehicleTags(ent);
+}
+
+const char* G_GetVehicleInfoName(__int16 index)
+{
+    iassert(index >= 0);
+    iassert(index < s_numVehicleInfos);
+    
+    return s_vehicleInfos[index].name;
+}
+
+int G_GetVehicleInfoIndex(const char *name)
+{
+    int index; // r29
+
+    iassert(name && name[0]);
+
+    index = VEH_GetVehicleInfoFromName(name);
+
+    iassert(index != -1);
+
+    return index;
+}
+
+#endif

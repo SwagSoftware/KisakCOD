@@ -5484,7 +5484,7 @@ void GScr_abs()
     double Float; // fp1
 
     Float = Scr_GetFloat(0);
-    Scr_AddFloat(__fabs(Float));
+    Scr_AddFloat(I_fabs(Float));
 }
 
 void GScr_min()

@@ -5,19 +5,218 @@
 #include "g_save.h"
 
 #include "g_local.h"
+#include "savememory.h"
+
+#include <xanim/xanim.h>
+#include "g_main.h"
+#include <script/scr_readwrite.h>
+#include <script/scr_animtree.h>
 
 bool g_useDevSaveArea;
 
+gclient_s tempClient;
+
+const saveField_t gentityFields[86] =
+{
+  { 256, SF_CLIENT },
+  { 260, SF_ACTOR },
+  { 264, SF_SENTIENT },
+  { 268, SF_VEHICLE },
+  { 272, SF_TURRETINFO },
+  { 284, SF_STRING },
+  { 280, SF_MODELUSHORT },
+  { 316, SF_ENTHANDLE },
+  { 290, SF_STRING },
+  { 292, SF_STRING },
+  { 344, SF_ENTITY },
+  { 348, SF_ENTITY },
+  { 286, SF_STRING },
+  { 288, SF_STRING },
+  { 484, SF_MODELUSHORT },
+  { 486, SF_MODELUSHORT },
+  { 488, SF_MODELUSHORT },
+  { 490, SF_MODELUSHORT },
+  { 492, SF_MODELUSHORT },
+  { 494, SF_MODELUSHORT },
+  { 496, SF_MODELUSHORT },
+  { 498, SF_MODELUSHORT },
+  { 500, SF_MODELUSHORT },
+  { 502, SF_MODELUSHORT },
+  { 504, SF_MODELUSHORT },
+  { 506, SF_MODELUSHORT },
+  { 508, SF_MODELUSHORT },
+  { 510, SF_MODELUSHORT },
+  { 512, SF_MODELUSHORT },
+  { 514, SF_MODELUSHORT },
+  { 516, SF_MODELUSHORT },
+  { 518, SF_MODELUSHORT },
+  { 520, SF_MODELUSHORT },
+  { 522, SF_MODELUSHORT },
+  { 524, SF_MODELUSHORT },
+  { 526, SF_MODELUSHORT },
+  { 528, SF_MODELUSHORT },
+  { 530, SF_MODELUSHORT },
+  { 532, SF_MODELUSHORT },
+  { 534, SF_MODELUSHORT },
+  { 536, SF_MODELUSHORT },
+  { 538, SF_MODELUSHORT },
+  { 540, SF_MODELUSHORT },
+  { 542, SF_MODELUSHORT },
+  { 544, SF_MODELUSHORT },
+  { 546, SF_STRING },
+  { 548, SF_STRING },
+  { 550, SF_STRING },
+  { 552, SF_STRING },
+  { 554, SF_STRING },
+  { 556, SF_STRING },
+  { 558, SF_STRING },
+  { 560, SF_STRING },
+  { 562, SF_STRING },
+  { 564, SF_STRING },
+  { 566, SF_STRING },
+  { 568, SF_STRING },
+  { 570, SF_STRING },
+  { 572, SF_STRING },
+  { 574, SF_STRING },
+  { 576, SF_STRING },
+  { 578, SF_STRING },
+  { 580, SF_STRING },
+  { 582, SF_STRING },
+  { 584, SF_STRING },
+  { 586, SF_STRING },
+  { 588, SF_STRING },
+  { 590, SF_STRING },
+  { 592, SF_STRING },
+  { 594, SF_STRING },
+  { 596, SF_STRING },
+  { 598, SF_STRING },
+  { 600, SF_STRING },
+  { 602, SF_STRING },
+  { 604, SF_STRING },
+  { 606, SF_STRING },
+  { 248, SF_ENTHANDLE },
+  { 448, SF_ENTHANDLE },
+  { 620, SF_ANIMTREE },
+  { 472, SF_TYPE_TAG_INFO },
+  { 480, SF_TYPE_SCRIPTED },
+  { 476, SF_ENTITY },
+  { 456, SF_STRING },
+  { 452, SF_STRING },
+  { 454, SF_STRING },
+  { 0, SF_NONE }
+};
+
+const saveField_t actorFields[77] =
+{
+  { 0, SF_ENTITY },
+  { 4, SF_SENTIENT },
+  { 496, SF_THREAD },
+  { 508, SF_STRING },
+  { 500, SF_ANIMSCRIPT },
+  { 2084, SF_ANIMSCRIPT },
+  { 2024, SF_PATHNODE },
+  { 2028, SF_PATHNODE },
+  { 2032, SF_PATHNODE },
+  { 2036, SF_PATHNODE },
+  { 2040, SF_PATHNODE },
+  { 2044, SF_PATHNODE },
+  { 2048, SF_PATHNODE },
+  { 2052, SF_PATHNODE },
+  { 2056, SF_PATHNODE },
+  { 2060, SF_PATHNODE },
+  { 2136, SF_PATHNODE },
+  { 2176, SF_PATHNODE },
+  { 2216, SF_PATHNODE },
+  { 2256, SF_PATHNODE },
+  { 2296, SF_PATHNODE },
+  { 2336, SF_PATHNODE },
+  { 2376, SF_PATHNODE },
+  { 2416, SF_PATHNODE },
+  { 2456, SF_PATHNODE },
+  { 2496, SF_PATHNODE },
+  { 2536, SF_PATHNODE },
+  { 2576, SF_PATHNODE },
+  { 2616, SF_PATHNODE },
+  { 2656, SF_PATHNODE },
+  { 2696, SF_PATHNODE },
+  { 2736, SF_PATHNODE },
+  { 2776, SF_PATHNODE },
+  { 2816, SF_PATHNODE },
+  { 2856, SF_PATHNODE },
+  { 2896, SF_PATHNODE },
+  { 2936, SF_PATHNODE },
+  { 2976, SF_PATHNODE },
+  { 3016, SF_PATHNODE },
+  { 3056, SF_PATHNODE },
+  { 3096, SF_PATHNODE },
+  { 3136, SF_PATHNODE },
+  { 3176, SF_PATHNODE },
+  { 3216, SF_PATHNODE },
+  { 3256, SF_PATHNODE },
+  { 3296, SF_PATHNODE },
+  { 3336, SF_PATHNODE },
+  { 3376, SF_PATHNODE },
+  { 3416, SF_PATHNODE },
+  { 3472, SF_SENTIENT },
+  { 3496, SF_SENTIENT },
+  { 3520, SF_SENTIENT },
+  { 3544, SF_SENTIENT },
+  { 488, SF_STRING },
+  { 490, SF_STRING },
+  { 212, SF_STRING },
+  { 214, SF_STRING },
+  { 3420, SF_SENTIENTHANDLE },
+  { 3608, SF_ENTHANDLE },
+  { 3616, SF_STRING },
+  { 3680, SF_ENTITY },
+  { 3712, SF_STRING },
+  { 3714, SF_STRING },
+  { 3716, SF_STRING },
+  { 3718, SF_ENTHANDLE },
+  { 1828, SF_ACTOR },
+  { 1832, SF_ENTITY },
+  { 318, SF_STRING },
+  { 1896, SF_PATHNODE },
+  { 1900, SF_ENTITY },
+  { 1936, SF_ENTHANDLE },
+  { 1928, SF_PATHNODE },
+  { 1932, SF_ENTITY },
+  { 1968, SF_ENTHANDLE },
+  { 1972, SF_PATHNODE },
+  { 3464, SF_PATHNODE },
+  { 0, SF_NONE }
+};
+
+const saveField_t sentientFields[10] =
+{
+  { 0, SF_ENTITY },
+  { 52, SF_ENTHANDLE },
+  { 56, SF_ENTHANDLE },
+  { 88, SF_PATHNODE },
+  { 92, SF_PATHNODE },
+  { 96, SF_PATHNODE },
+  { 104, SF_PATHNODE },
+  { 44, SF_ENTITY },
+  { 48, SF_ENTHANDLE },
+  { 0, SF_NONE }
+};
+
+
+
+
+
 void __cdecl TRACK_g_save()
 {
-    track_static_alloc_internal(&tempClient, 46104, "tempClient", 9);
+    track_static_alloc_internal(&tempClient, sizeof(gclient_s), "tempClient", 9);
 }
 
 void __cdecl Scr_FreeFields(const saveField_t *fields, unsigned __int8 *base)
 {
-    saveFieldtype_t *p_type; // r11
+    const saveFieldtype_t *p_type; // r11
     const saveField_t *i; // r31
     saveFieldtype_t v5; // r11
+    EntHandle *enthand;
+    SentientHandle *senthand;
 
     p_type = &fields->type;
     for (i = fields; i->type; p_type = &i->type)
@@ -29,10 +228,12 @@ void __cdecl Scr_FreeFields(const saveField_t *fields, unsigned __int8 *base)
             Scr_SetString((unsigned __int16 *)&base[i->ofs], 0);
             break;
         case SF_ENTHANDLE:
-            EntHandle::setEnt((EntHandle *)&base[i->ofs], 0);
+            enthand = (EntHandle *)&base[i->ofs];
+            enthand->setEnt(NULL);
             break;
         case SF_SENTIENTHANDLE:
-            SentientHandle::setSentient((SentientHandle *)&base[i->ofs], 0);
+            senthand = (SentientHandle *)&base[i->ofs];
+            senthand->setSentient(NULL);
             break;
         }
         ++i;
@@ -98,7 +299,7 @@ void G_SaveError(
     v20 = a4;
     v21 = *(__int64 *)((char *)&a5 + 4);
     v22 = a5;
-    vsnprintf_0(v16, 0x200u, (const char *)HIDWORD(fmt), va);
+    vsnprintf(v16, 0x200u, (const char *)HIDWORD(fmt), va);
     v15 = v16;
     v16[511] = 0;
     if (errorType)
@@ -263,11 +464,8 @@ int __cdecl ReadItemIndex(SaveGame *save)
     _BYTE v6[15]; // [sp+51h] [-13Fh] BYREF
     char v7[304]; // [sp+60h] [-130h] BYREF
 
-    if (!save)
-    {
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\g_save.cpp", 746, 0, "%s", "save");
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\g_save.cpp", 640, 0, "%s", "save");
-    }
+    iassert(save);
+
     SaveMemory_LoadRead(v6, 1, save);
     v2 = v6[0];
     SaveMemory_LoadRead(v7, v6[0], save);
@@ -321,10 +519,14 @@ void __cdecl WriteField1(const saveField_t *field, const unsigned __int8 *base, 
     unsigned __int8 *v13; // r11
     int v14; // r11
     int v15; // r31
-    const XAnim_s *Anims; // r29
-    int AnimsIndex; // r29
+    const XAnim_s *anims; // r29
+    int index; // r29
+
+    EntHandle *enthand;
+    SentientHandle *senthand;
 
     v3 = (EntHandle *)&base[field->ofs];
+
     switch (field->type)
     {
     case SF_STRING:
@@ -336,7 +538,7 @@ void __cdecl WriteField1(const saveField_t *field, const unsigned __int8 *base, 
         {
             v4 = (*(unsigned int *)v3 - (int)g_entities) / 628 + 1;
             if (v4 > 0x880)
-                Com_Error(ERR_DROP, byte_82034DC4, v4);
+                Com_Error(ERR_DROP, "WriteField1: entity out of range (%i)", v4);
             *v3 = (EntHandle)v4;
         }
         else
@@ -345,12 +547,13 @@ void __cdecl WriteField1(const saveField_t *field, const unsigned __int8 *base, 
         }
         break;
     case SF_ENTHANDLE:
-        if (EntHandle::isDefined((EntHandle *)&base[field->ofs]))
+        enthand = (EntHandle *)&base[field->ofs];
+        if (enthand->isDefined())
         {
-            v5 = EntHandle::entnum(v3);
+            v5 = v3->entnum();
             v6 = v5 + 1;
             if ((int)(v5 + 1) > 2176 || v6 < 0)
-                Com_Error(ERR_DROP, byte_82034DC4, v5 + 1);
+                Com_Error(ERR_DROP, "WriteField1: entity out of range (%i)", v5 + 1);
             *v3 = (EntHandle)v6;
         }
         else
@@ -363,7 +566,7 @@ void __cdecl WriteField1(const saveField_t *field, const unsigned __int8 *base, 
         {
             v7 = (signed int)(*(unsigned int *)v3 - (unsigned int)level.clients) / 46104 + 1;
             if (v7 >= 2)
-                Com_Error(ERR_DROP, byte_82034D9C, v7);
+                Com_Error(ERR_DROP, "WriteField1: client out of range (%i)", v7);
             *v3 = (EntHandle)v7;
         }
         else
@@ -376,7 +579,7 @@ void __cdecl WriteField1(const saveField_t *field, const unsigned __int8 *base, 
         {
             v8 = (signed int)(*(unsigned int *)v3 - (unsigned int)level.actors) / 7824 + 1;
             if (v8 > 0x20)
-                Com_Error(ERR_DROP, byte_82034D74, v8);
+                Com_Error(ERR_DROP, "WriteField1: actor out of range (%i)", v8);
             *v3 = (EntHandle)v8;
         }
         else
@@ -389,7 +592,7 @@ void __cdecl WriteField1(const saveField_t *field, const unsigned __int8 *base, 
         {
             v9 = (signed int)(*(unsigned int *)v3 - (unsigned int)level.sentients) / 116 + 1;
             if (v9 >= 0x22)
-                Com_Error(ERR_DROP, byte_82034D48, v9);
+                Com_Error(ERR_DROP, "WriteField1: sentient out of range (%i)", v9);
             *v3 = (EntHandle)v9;
         }
         else
@@ -398,11 +601,13 @@ void __cdecl WriteField1(const saveField_t *field, const unsigned __int8 *base, 
         }
         break;
     case SF_SENTIENTHANDLE:
-        if (SentientHandle::isDefined((SentientHandle *)&base[field->ofs]))
+        senthand = (SentientHandle *)&base[field->ofs];
+        if (senthand->isDefined())
         {
-            v10 = SentientHandle::sentient((SentientHandle *)v3) - level.sentients + 1;
+            //v10 = SentientHandle::sentient((SentientHandle *)v3) - level.sentients + 1;
+            v10 = senthand->sentient() - level.sentients + 1;
             if (v10 >= 0x22)
-                Com_Error(ERR_DROP, byte_82034D48, v10);
+                Com_Error(ERR_DROP, "WriteField1: sentient out of range (%i)", v10);
             *v3 = (EntHandle)v10;
         }
         else
@@ -415,7 +620,7 @@ void __cdecl WriteField1(const saveField_t *field, const unsigned __int8 *base, 
         {
             v11 = (signed int)(*(unsigned int *)v3 - (unsigned int)level.vehicles) / 824 + 1;
             if (v11 > 0x40)
-                Com_Error(ERR_DROP, byte_82034D20, v11);
+                Com_Error(ERR_DROP, "WriteField1: vehicle out of range (%i)", v11);
             *v3 = (EntHandle)v11;
         }
         else
@@ -428,7 +633,7 @@ void __cdecl WriteField1(const saveField_t *field, const unsigned __int8 *base, 
         {
             v12 = (signed int)(*(unsigned int *)v3 - (unsigned int)level.turrets) / 188 + 1;
             if (v12 > 0x20)
-                Com_Error(ERR_DROP, byte_82034CF8, v12);
+                Com_Error(ERR_DROP, "WriteField1: turret out of range (%i)", v12);
             *v3 = (EntHandle)v12;
         }
         else
@@ -473,13 +678,11 @@ void __cdecl WriteField1(const saveField_t *field, const unsigned __int8 *base, 
     case SF_ANIMTREE:
         if (*v3)
         {
-            Anims = XAnimGetAnims(*(const XAnimTree_s **)v3);
-            if (!Anims)
-                MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\g_save.cpp", 924, 0, "%s", "anims");
-            AnimsIndex = Scr_GetAnimsIndex(Anims);
-            if (!AnimsIndex)
-                MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\g_save.cpp", 926, 0, "%s", "index");
-            *v3 = (EntHandle)AnimsIndex;
+            anims = XAnimGetAnims(*(const XAnimTree_s **)v3);
+            iassert(anims);
+            index = Scr_GetAnimsIndex(anims);
+            iassert(index);
+            *v3 = (EntHandle)index;
         }
         else
         {
@@ -494,7 +697,7 @@ void __cdecl WriteField1(const saveField_t *field, const unsigned __int8 *base, 
     case SF_MODELINT:
         return;
     default:
-        Com_Error(ERR_DROP, byte_82034C60);
+        Com_Error(ERR_DROP, "WriteField1: unknown field type");
         break;
     }
 }
@@ -527,7 +730,7 @@ void __cdecl WriteField2(const saveField_t *field, unsigned __int8 *base, SaveGa
     case SF_STRING:
         MemoryFile = SaveMemory_GetMemoryFile(save);
         UsedSize = MemFile_GetUsedSize(MemoryFile);
-        ProfMem_Begin("string", UsedSize);
+        //ProfMem_Begin("string", UsedSize);
         if (*(_WORD *)&base[ofs])
         {
             v16 = SL_ConvertToString(*(unsigned __int16 *)&base[ofs]);
@@ -542,7 +745,7 @@ void __cdecl WriteField2(const saveField_t *field, unsigned __int8 *base, SaveGa
         memcpy(v21, v11, 0x70u);
         v12 = SaveMemory_GetMemoryFile(save);
         v13 = MemFile_GetUsedSize(v12);
-        ProfMem_Begin("tagInfo", v13);
+        //ProfMem_Begin("tagInfo", v13);
         G_WriteStruct(tagInfoFields, *(unsigned __int8 **)&base[ofs], v21, 112, save);
         goto LABEL_12;
     case SF_TYPE_SCRIPTED:
@@ -552,12 +755,12 @@ void __cdecl WriteField2(const saveField_t *field, unsigned __int8 *base, SaveGa
             memcpy(v20, v8, sizeof(v20));
             v9 = SaveMemory_GetMemoryFile(save);
             v10 = MemFile_GetUsedSize(v9);
-            ProfMem_Begin("animscripted", v10);
+            //ProfMem_Begin("animscripted", v10);
             G_WriteStruct(animscriptedFields, *(unsigned __int8 **)&base[ofs], v20, 96, save);
         LABEL_12:
             v18 = SaveMemory_GetMemoryFile(save);
             v19 = MemFile_GetUsedSize(v18);
-            ProfMem_End(v19);
+            //ProfMem_End(v19);
         }
         break;
     }
@@ -820,9 +1023,9 @@ void __cdecl ReadClient(gclient_s *client, SaveGame *save)
     SV_SetUsercmdButtonsWeapons(buttons, weapon, v8);
 }
 
-void __cdecl WriteEntity(gentity_s *ent, SaveGame *save)
+void WriteEntity(gentity_s *ent, SaveGame *save)
 {
-    MemoryFile *MemoryFile; // r3
+    MemoryFile *memFile; // r3
     unsigned int UsedSize; // r3
     MemoryFile *v6; // r3
     unsigned int v7; // r3
@@ -831,13 +1034,13 @@ void __cdecl WriteEntity(gentity_s *ent, SaveGame *save)
     if (!save)
         MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\g_save.cpp", 1286, 0, "%s", "save");
     memcpy(v8, ent, 0x274u);
-    MemoryFile = SaveMemory_GetMemoryFile(save);
-    UsedSize = MemFile_GetUsedSize(MemoryFile);
-    ProfMem_Begin("WriteStruct", UsedSize);
+    memFile = SaveMemory_GetMemoryFile(save);
+    UsedSize = MemFile_GetUsedSize(memFile);
+    //ProfMem_Begin("WriteStruct", UsedSize);
     G_WriteStruct(gentityFields, &ent->s.eType, v8, 628, save);
     v6 = SaveMemory_GetMemoryFile(save);
     v7 = MemFile_GetUsedSize(v6);
-    ProfMem_End(v7);
+    //ProfMem_End(v7);
     if (ent->s.weapon)
     {
         WriteWeaponIndex(ent->s.weapon, save);

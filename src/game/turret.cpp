@@ -496,12 +496,12 @@ void __cdecl turret_CalculateConvergenceAngularVelocity(
         + (float)0.5);
     v14 = floor(a4);
     v15 = (float)((float)(self->s.lerp.u.turret.gunAngles[1] - desiredAngles[1]) * (float)0.0027777778);
-    v16 = __fabs((float)((float)((float)v13 - (float)*(double *)&v14) * (float)360.0));
+    v16 = I_fabs((float)((float)((float)v13 - (float)*(double *)&v14) * (float)360.0));
     *(double *)&v14 = (float)((float)((float)(self->s.lerp.u.turret.gunAngles[1] - desiredAngles[1]) * (float)0.0027777778)
         + (float)0.5);
     v17 = floor(v14);
     LODWORD(v18) = v10;
-    v19 = __fabs((float)((float)((float)v15 - (float)*(double *)&v17) * (float)360.0));
+    v19 = I_fabs((float)((float)((float)v15 - (float)*(double *)&v17) * (float)360.0));
     *angularVelocity = (float)((float)v16 * (float)1000.0) / (float)v18;
     angularVelocity[1] = (float)((float)v19 * (float)1000.0) / (float)v18;
     if (v11 > 0 && v10 < v11)
@@ -958,8 +958,8 @@ void __cdecl turret_aimat_vector_internal(gentity_s *self, float *origin, int bS
     else
     {
         if (level.time < targetTime + 250
-            && (__fabs(AngleSubtract(self->s.lerp.u.turret.gunAngles[0], *desiredAngles)) >= 5.0
-                || __fabs(AngleSubtract(self->s.lerp.u.turret.gunAngles[1], desiredAngles[1])) >= 5.0))
+            && (I_fabs(AngleSubtract(self->s.lerp.u.turret.gunAngles[0], *desiredAngles)) >= 5.0
+                || I_fabs(AngleSubtract(self->s.lerp.u.turret.gunAngles[1], desiredAngles[1])) >= 5.0))
         {
             goto LABEL_15;
         }
@@ -2163,7 +2163,7 @@ bool __cdecl turret_behind(gentity_s *self, gentity_s *other, long double a3)
     pTurretInfo = self->pTurretInfo;
     if (!other->client)
         MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\turret.cpp", 1963, 0, "%s", "other->client");
-    v6 = (float)((float)__fabs(pTurretInfo->arcmax[1]) + (float)__fabs(pTurretInfo->arcmin[1]));
+    v6 = (float)((float)I_fabs(pTurretInfo->arcmax[1]) + (float)I_fabs(pTurretInfo->arcmin[1]));
     v7 = (float)((float)v6 * (float)0.5);
     v8 = (float)((float)((float)(self->r.currentAngles[1] + pTurretInfo->arcmin[1]) + (float)((float)v6 * (float)0.5))
         * (float)0.0027777778);

@@ -2819,7 +2819,7 @@ void __cdecl CG_DrawPlayerStance(
                 *(double *)&v29 = (float)((float)((float)((float)(__int64)v27 * (float)0.00066666666) * (float)540.0)
                     * (float)0.017453292);
                 v30 = sin(v29);
-                v52 = __fabs((float)*(double *)&v30);
+                v52 = I_fabs((float)*(double *)&v30);
                 UI_DrawText(
                     &scrPlaceView[localClientNum],
                     v25,

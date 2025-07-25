@@ -1044,7 +1044,7 @@ void __cdecl Actor_PhysicsRestoreInputs(actor_s *self, PhysicsInputs *inputs)
 
 bool __cdecl Actor_AtDifferentElevation(float *vOrgSelf, float *vOrgOther)
 {
-    //return __fabs((float)(vOrgSelf[2] - vOrgOther[2])) >= 80.0;
+    //return I_fabs((float)(vOrgSelf[2] - vOrgOther[2])) >= 80.0;
     return fabsf((float)(vOrgSelf[2] - vOrgOther[2])) >= 80.0f;
 }
 
@@ -1376,7 +1376,7 @@ bool __cdecl Actor_EnemyInPathFightDist(actor_s *self, sentient_s *enemy)
     v6 = (float)(enemy->ent->r.currentOrigin[1] - self->ent->r.currentOrigin[1]);
     if ((float)((float)((float)v6 * (float)v6) + (float)((float)v5 * (float)v5)) < (double)(float)(self->pathEnemyFightDist* self->pathEnemyFightDist))
         return fabs((float)(enemy->ent->r.currentOrigin[2] - self->ent->r.currentOrigin[2])) <= self->codeGoal.height;
-        //return __fabs((float)(enemy->ent->r.currentOrigin[2] - self->ent->r.currentOrigin[2])) <= self->codeGoal.height;
+        //return I_fabs((float)(enemy->ent->r.currentOrigin[2] - self->ent->r.currentOrigin[2])) <= self->codeGoal.height;
     return result;
 }
 
@@ -2365,7 +2365,7 @@ void __cdecl Path_UpdateMovementDelta(actor_s *self, double fMoveDist)
     {
         sideMove = self->sideMove;
         v18 = (float)(p_Path->fLookaheadDist * (float)0.5);
-        //v19 = __fabs(sideMove);
+        //v19 = I_fabs(sideMove);
         v19 = fabs(sideMove);
         v20 = (float)(p_Path->fLookaheadDist * v32);
         if (v18 > v19)
@@ -4158,7 +4158,7 @@ int __cdecl Actor_MoveAwayNoWorse(actor_s *self)
             && (!self->pCloseEnt.isDefined() || v4->ent != self->pCloseEnt.ent())
             && Vec2DistanceSq(self->Physics.vOrigin, v4->ent->r.currentOrigin) < 900.0
             && Vec2DistanceSq(self->ent->r.currentOrigin, v4->ent->r.currentOrigin) >= 900.0
-            //&& __fabs((float)(self->ent->r.currentOrigin[2] - v4->ent->r.currentOrigin[2])) < 80.0)
+            //&& I_fabs((float)(self->ent->r.currentOrigin[2] - v4->ent->r.currentOrigin[2])) < 80.0)
             && fabs((float)(self->ent->r.currentOrigin[2] - v4->ent->r.currentOrigin[2])) < 80.0)
         {
             if (!v4->pCloseEnt.isDefined() && !Actor_AtClaimNode(v4))
@@ -6007,7 +6007,7 @@ bool __cdecl Actor_FindPathToGoalDirectInternal(actor_s *self)
     {
         return 1;
     }
-    v3 = __fabs(self->sideMove);
+    v3 = I_fabs(self->sideMove);
     if (v3 > (float)(self->codeGoal.radius - (float)15.0))
         v3 = (float)(self->codeGoal.radius - (float)15.0);
     if (v3 <= 0.0)

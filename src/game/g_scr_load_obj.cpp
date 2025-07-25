@@ -4,6 +4,8 @@
 
 #include "g_scr_load_obj.h"
 
+#if 0
+
 int __cdecl GScr_LoadScriptAndLabel(const char *filename, const char *label, ScriptFunctions *functions)
 {
     int FunctionHandle; // r3
@@ -260,3 +262,4 @@ void __cdecl GScr_LoadScripts(const char *mapname, ScriptFunctions *functions)
     Scr_PostCompileScripts();
 }
 
+#endif

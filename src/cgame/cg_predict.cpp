@@ -469,7 +469,7 @@ void __cdecl CG_PredictPlayerState_Internal(int localClientNum)
         }
         else
         {
-            if (__fabs(cg_pmove.viewChange) >= cg_viewZSmoothingMin->current.value)
+            if (I_fabs(cg_pmove.viewChange) >= cg_viewZSmoothingMin->current.value)
             {
                 LODWORD(v20) = cgArray[0].time - cgArray[0].stepViewStart;
                 v22 = 0.0;

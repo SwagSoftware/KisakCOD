@@ -4,6 +4,8 @@
 #error This file is for SinglePlayer only 
 #endif
 
+#if 0
+
 int __cdecl GScr_LoadScriptAndLabel(const char *filename, const char *label, ScriptFunctions *functions);
 void __cdecl GScr_LoadSingleAnimScript(const char *name, ScriptFunctions *functions);
 void __cdecl GScr_LoadAnimScripts(ScriptFunctions *functions);
@@ -14,3 +16,5 @@ void __cdecl GScr_LoadScriptsForPathNodes(ScriptFunctions *functions);
 void __cdecl GScr_LoadScriptsForEntities(ScriptFunctions *functions);
 void __cdecl GScr_LoadEntities();
 void __cdecl GScr_LoadScripts(const char *mapname, ScriptFunctions *functions);
+
+#endif

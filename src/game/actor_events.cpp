@@ -704,7 +704,7 @@ void __cdecl Actor_BroadcastLineEvent(
             v26 = (float)(i->ent->r.currentOrigin[1] - (float)v23);
             v27 = (float)((float)((float)v26 * (float)v26) + (float)((float)v25 * (float)v25));
             if (v27 <= fRadiusSqrd
-                && __fabs((float)((float)((float)(72.0 + 0.0) * (float)0.5) + (float)(i->ent->r.currentOrigin[2] - (float)v24))) < __fabs(defaultHeight))
+                && I_fabs((float)((float)((float)(72.0 + 0.0) * (float)0.5) + (float)(i->ent->r.currentOrigin[2] - (float)v24))) < I_fabs(defaultHeight))
             {
                 Actor_ReceiveLineEvent(i, originator, (ai_event_t)eType, vStart, vEnd, &v36, v27, fRadiusSqrd, v20);
             }
@@ -738,7 +738,7 @@ void __cdecl Actor_BroadcastLineEvent(
             v34 = (float)(Entity->r.currentOrigin[0] - (float)v31);
             v35 = (float)(Entity->r.currentOrigin[1] - (float)v32);
             if ((float)((float)((float)v35 * (float)v35) + (float)((float)v34 * (float)v34)) <= fRadiusSqrd
-                && __fabs((float)(Entity->r.currentOrigin[2] - (float)v33)) < __fabs(defaultHeight))
+                && I_fabs((float)(Entity->r.currentOrigin[2] - (float)v33)) < I_fabs(defaultHeight))
             {
                 Actor_EventListener_NotifyToListener(Entity, originator, (ai_event_t)eType, &v36);
             }

@@ -57,3 +57,5 @@ void __cdecl MemFile_WriteCString(MemoryFile* memFile, const char* string);
 const char* __cdecl MemFile_ReadCString(MemoryFile* memFile);
 void __cdecl MemFile_ReadData(MemoryFile* memFile, int byteCount, unsigned __int8* p);
 unsigned __int8 __cdecl MemFile_ReadByteInternal(MemoryFile* memFile);
+void MemFile_Shutdown(MemoryFile *memFile);
+unsigned __int8 *MemFile_CopySegments(MemoryFile *memFile, int index, void *buf);

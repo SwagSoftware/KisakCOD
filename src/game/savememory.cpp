@@ -3,10 +3,33 @@
 #endif
 
 #include "savememory.h"
+#include <qcommon/com_bsp.h>
+#include <buildnumber_mp.h>
+#include "g_main.h"
+#include <bgame/bg_public.h>
+#include <server/server.h>
+#include <server/sv_game.h>
+
+struct __declspec(align(4)) SaveMemoryGlob
+{
+    SaveGame *committedGameSave;
+    SaveGame *currentGameSave;
+    SaveGame game0;
+    SaveGame game1;
+    SaveGame demo;
+    unsigned __int8 buffer0[1572864];
+    unsigned __int8 buffer1[1572864];
+    unsigned __int8 buffer2[1572864];
+    int recentLoadTime;
+    bool isCommitForced;
+};
+
+SaveMemoryGlob saveMemoryGlob;
+int g_saveId;
 
 unsigned int __cdecl Com_BlockChecksum32(const void *buffer, unsigned int length)
 {
-    return Com_BlockChecksumKey32(buffer, length, 0);
+    return Com_BlockChecksumKey32((const unsigned char*)buffer, length, 0);
 }
 
 void __cdecl TRACK_save_memory()
@@ -107,7 +130,7 @@ void __cdecl SaveMemory_AllocateTempMemory(SaveGame *save, int size, void *buffe
     if (save->saveState)
         MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\savememory.cpp", 257, 0, "%s", "save->saveState == MEMCLEAR");
     save->saveState = SAVING;
-    MemFile_InitForWriting(&save->memFile, size, buffer, 0, 0);
+    MemFile_InitForWriting(&save->memFile, size, (byte*)buffer, 0, 0);
     if (!save->memFile.buffer)
         MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\savememory.cpp", 262, 0, "%s", "save->memFile.buffer");
 }
@@ -328,7 +351,7 @@ void __cdecl SaveMemory_SetBuffer(void *buffer, int len, SaveGame *save)
             "%s",
             "save->isDirectWriteActive == false");
     save->saveState = SAVING;
-    MemFile_CommonInit(&save->memFile, len, buffer, 0, 1);
+    MemFile_CommonInit(&save->memFile, len, (byte*)buffer, 0, 1);
 }
 
 void __cdecl SaveMemory_LoadRead(void *buffer, int size, SaveGame *save)
@@ -337,7 +360,7 @@ void __cdecl SaveMemory_LoadRead(void *buffer, int size, SaveGame *save)
         MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\savememory.cpp", 590, 0, "%s", "save");
     if (save->saveState != LOADING)
         MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\savememory.cpp", 591, 0, "%s", "save->saveState == LOADING");
-    MemFile_ReadData(&save->memFile, size, buffer);
+    MemFile_ReadData(&save->memFile, size, (byte *)buffer);
 }
 
 int __cdecl SaveMemory_GetTotalLoadSize(SaveGame *save)
@@ -628,7 +651,7 @@ int __cdecl SaveMemory_IsCommittedSaveAvailable(const char *filename, int checks
 {
     const SaveHeader *Header; // r3
     const SaveHeader *v5; // r31
-    char *v6; // r11
+    const char *v6; // r11
     int result; // r3
 
     if (g_useDevSaveArea)

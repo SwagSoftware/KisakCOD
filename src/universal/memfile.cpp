@@ -943,3 +943,24 @@ unsigned __int8 __cdecl MemFile_ReadByteInternal(MemoryFile* memFile)
     memFile->memoryOverflow = 1;
     return 0;
 }
+
+void MemFile_Shutdown(MemoryFile *memFile)
+{
+    iassert(memFile);
+
+    memFile->buffer = 0;
+}
+
+unsigned __int8 *MemFile_CopySegments(MemoryFile *memFile, int index, void *buf)
+{
+    const unsigned __int8 *SegmentAddess; // r4
+    unsigned __int8 *v7; // r31
+
+    iassert(!memFile->memoryOverflow);
+
+    SegmentAddess = MemFile_GetSegmentAddess(memFile, index);
+    v7 = &memFile->buffer[memFile->bufferSize - (_DWORD)SegmentAddess];
+    if (buf)
+        memcpy(buf, SegmentAddess, (size_t)v7);
+    return v7;
+}

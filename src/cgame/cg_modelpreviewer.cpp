@@ -349,18 +349,18 @@ void CG_ModPrvFrameModel()
     v1 = v6;
     Dvar_SetVec3(modPrvCenterOffset, 0.0, 0.0, (float)((float)(v9 - v6) * (float)0.5));
     v2 = -3.4028235e38;
-    if (__fabs(v4) > -3.4028235e38)
-        v2 = __fabs(v4);
-    if (v2 < __fabs(v7))
-        v2 = __fabs(v7);
-    if (v2 < __fabs(v5))
-        v2 = __fabs(v5);
-    if (v2 < __fabs(v8))
-        v2 = __fabs(v8);
-    if (v2 < __fabs(v1))
-        v2 = __fabs(v1);
-    if (v2 < __fabs(v0))
-        v2 = __fabs(v0);
+    if (I_fabs(v4) > -3.4028235e38)
+        v2 = I_fabs(v4);
+    if (v2 < I_fabs(v7))
+        v2 = I_fabs(v7);
+    if (v2 < I_fabs(v5))
+        v2 = I_fabs(v5);
+    if (v2 < I_fabs(v8))
+        v2 = I_fabs(v8);
+    if (v2 < I_fabs(v1))
+        v2 = I_fabs(v1);
+    if (v2 < I_fabs(v0))
+        v2 = I_fabs(v0);
     v3 = (float)((float)v2 * (float)1.5);
     g_mdlprv.viewer.zNearChangeLimit = g_mdlprv.viewer.centerRadius;
     if (v3 < 10.0)
@@ -1770,7 +1770,7 @@ void __cdecl CG_ModelPreviewerZoomCamera(double dx, double dy)
     double v3; // fp0
     double v4; // fp0
 
-    if (__fabs(dy) <= __fabs(dx))
+    if (I_fabs(dy) <= I_fabs(dx))
         v2 = (float)((float)dx * (float)-0.30000001);
     else
         v2 = (float)((float)dy * (float)-0.30000001);

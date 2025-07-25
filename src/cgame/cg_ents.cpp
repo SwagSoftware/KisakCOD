@@ -18,6 +18,7 @@
 #include "cg_local.h"
 #include <gfx_d3d/r_model.h>
 #include "cg_pose.h"
+#include "cg_compassfriendlies.h"
 
 void __cdecl LocalConvertQuatToMat(const DObjAnimMat *mat, float (*axis)[3])
 {
@@ -191,11 +192,11 @@ void __cdecl CG_Item(centity_s *cent)
     double v10; // fp1
 
     p_nextState = &cent->nextState;
-    if (*(unsigned __int16 *)cent->nextState.index >= 0x800u)
+    if (cent->nextState.index.item >= 0x800u)
         Com_Error(ERR_DROP, "Bad item index %i on entity", cent->nextState.index);
     if ((p_nextState->lerp.eFlags & 0x20) == 0)
     {
-        v3 = *(unsigned __int16 *)p_nextState->index;
+        v3 = p_nextState->index.item;
         v4 = (unsigned int)v3 >> 7;
         v5 = v3 - (v3 >> 7 << 7);
         WeaponDef = BG_GetWeaponDef(v5);
@@ -225,7 +226,7 @@ void __cdecl CG_AddEntityLoopSound(int localClientNum, const centity_s *cent)
 
     if (cent->nextState.solid == 0xFFFFFF)
     {
-        BrushModel = (float *)R_GetBrushModel(*(unsigned __int16 *)cent->nextState.index);
+        BrushModel = (float *)R_GetBrushModel(cent->nextState.index.item);
         v5 = cent->pose.origin[1];
         v6 = cent->nextState.loopSound + 1667;
         v7 = cent->pose.origin[2];
@@ -643,7 +644,7 @@ void __cdecl CG_UpdateBModelWorldBounds(unsigned int localClientNum, centity_s *
     //bounds_28 = a1;
     //bmodel = retaddr;
     //brush = R_GetBrushModel(cent->nextState.index.brushmodel);
-    brush = R_GetBrushModel(*(unsigned __int16 *)cent->nextState.index);
+    brush = R_GetBrushModel(cent->nextState.index.item);
     axis_24[0] = brush->bounds[0][0];
     axis_24[1] = brush->bounds[0][1];
     axis_24[2] = brush->bounds[0][2];
@@ -848,7 +849,7 @@ void __cdecl CG_ScriptMover(int localClientNum, centity_s *cent)
         if (cent->nextState.solid == 0xFFFFFF)
         {
             number = cent->nextState.number;
-            BrushModel = R_GetBrushModel(*(unsigned __int16 *)cent->nextState.index);
+            BrushModel = R_GetBrushModel(cent->nextState.index.item);
             R_AddBrushModelToSceneFromAngles(BrushModel, cent->pose.origin, cent->pose.angles, number);
         }
         else
@@ -1374,7 +1375,7 @@ void __cdecl CG_ClampPrimaryLightOrigin(GfxLight *light, const ComPrimaryLight *
     v5 = (float)((float)((float)v4 * (float)v4) + (float)((float)((float)v3 * (float)v3) + (float)((float)v2 * (float)v2)));
     if (v5 >= (float)(refLight->translationLimit * refLight->translationLimit))
     {
-        v6 = (float)(refLight->translationLimit / (float)__fsqrts(v5));
+        v6 = (float)(refLight->translationLimit / (float)sqrtf(v5));
         light->origin[0] = (float)((float)v6 * (float)(light->origin[0] - refLight->origin[0])) + refLight->origin[0];
         light->origin[1] = (float)((float)v6 * (float)v2) + refLight->origin[1];
         light->origin[2] = (float)((float)v3 * (float)v6) + refLight->origin[2];
@@ -1396,7 +1397,7 @@ void __cdecl CG_ClampPrimaryLightDir(GfxLight *light, const ComPrimaryLight *ref
         + (float)((float)(light->dir[2] * refLight->dir[2]) + (float)(light->dir[1] * refLight->dir[1])));
     if (v5 < rotationLimit)
     {
-        v6 = __fsqrts((float)((float)-(float)((float)(refLight->rotationLimit * refLight->rotationLimit) - (float)1.0)
+        v6 = sqrtf((float)((float)-(float)((float)(refLight->rotationLimit * refLight->rotationLimit) - (float)1.0)
             / (float)-(float)((float)((float)v5 * (float)v5) - (float)1.0)));
         v7 = (float)((float)((float)(refLight->dir[1] * (float)-v5) + light->dir[1]) * (float)v6);
         v8 = (float)((float)((float)(refLight->dir[2] * (float)-v5) + light->dir[2]) * (float)v6);
@@ -1404,12 +1405,11 @@ void __cdecl CG_ClampPrimaryLightDir(GfxLight *light, const ComPrimaryLight *ref
             + (float)(refLight->rotationLimit * refLight->dir[0]);
         light->dir[1] = (float)(refLight->dir[1] * (float)rotationLimit) + (float)v7;
         light->dir[2] = (float)(refLight->dir[2] * (float)rotationLimit) + (float)v8;
-        if (__fabs((float)((float)((float)(light->dir[2] * light->dir[2])
+        if (I_fabs((float)((float)((float)(light->dir[2] * light->dir[2])
             + (float)((float)(light->dir[0] * light->dir[0]) + (float)(light->dir[1] * light->dir[1])))
             - (float)1.0)) >= 0.0020000001)
         {
-            v10 = __fsqrts((float)((float)(light->dir[2] * light->dir[2])
-                + (float)((float)(light->dir[0] * light->dir[0]) + (float)(light->dir[1] * light->dir[1]))));
+            v10 = sqrtf((float)((float)(light->dir[2] * light->dir[2]) + (float)((float)(light->dir[0] * light->dir[0]) + (float)(light->dir[1] * light->dir[1]))));
             v9 = va(
                 (const char *)(const char *)HIDWORD(COERCE_UNSIGNED_INT64(light->dir[0])),
                 (unsigned int)COERCE_UNSIGNED_INT64(light->dir[0]),
@@ -1424,7 +1424,7 @@ void __cdecl CG_ClampPrimaryLightDir(GfxLight *light, const ComPrimaryLight *ref
                 "Vec3IsNormalized( light->dir )",
                 v9);
         }
-        if (__fabs((float)((float)((float)(light->dir[0] * refLight->dir[0])
+        if (I_fabs((float)((float)((float)(light->dir[0] * refLight->dir[0])
             + (float)((float)(light->dir[2] * refLight->dir[2])
                 + (float)(light->dir[1] * refLight->dir[1])))
             - refLight->rotationLimit)) > 0.001)
@@ -1462,33 +1462,11 @@ void __cdecl CG_PrimaryLight(int localClientNum, centity_s *cent)
     const char *v23; // r3
     float v24[4]; // [sp+80h] [-60h] BYREF
 
-    if (cent->nextState.eType != 9)
-        MyAssertHandler(
-            "c:\\trees\\cod3\\cod3src\\src\\cgame\\cg_ents.cpp",
-            1046,
-            0,
-            "%s",
-            "cent->nextState.eType == ET_PRIMARY_LIGHT");
-    if (!*(_WORD *)cent->nextState.index)
-        MyAssertHandler(
-            "c:\\trees\\cod3\\cod3src\\src\\cgame\\cg_ents.cpp",
-            1047,
-            0,
-            "%s",
-            "cent->nextState.index.primaryLight != PRIMARY_LIGHT_NONE");
-    if (!comWorld.isInUse)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\cgame\\../qcommon/com_bsp_api.h", 23, 0, "%s", "comWorld.isInUse");
-    if (*(unsigned __int16 *)cent->nextState.index >= comWorld.primaryLightCount)
-    {
-        PrimaryLightCount = Com_GetPrimaryLightCount();
-        MyAssertHandler(
-            "c:\\trees\\cod3\\cod3src\\src\\cgame\\cg_ents.cpp",
-            1048,
-            0,
-            "cent->nextState.index.primaryLight doesn't index Com_GetPrimaryLightCount()\n\t%i not in [0, %i)",
-            *(unsigned __int16 *)cent->nextState.index,
-            PrimaryLightCount);
-    }
+    iassert(cent->nextState.eType == ET_PRIMARY_LIGHT);
+    iassert(cent->nextState.index.item != PRIMARY_LIGHT_NONE);
+    iassert(comWorld.isInUse);
+    bcassert(cent->nextState.index.primaryLight, Com_GetPrimaryLightCount());
+
     if (localClientNum)
         MyAssertHandler(
             "c:\\trees\\cod3\\cod3src\\src\\cgame\\cg_local.h",
@@ -1497,7 +1475,7 @@ void __cdecl CG_PrimaryLight(int localClientNum, centity_s *cent)
             "%s\n\t(localClientNum) = %i",
             "(localClientNum == 0)",
             localClientNum);
-    v5 = *(unsigned __int16 *)cent->nextState.index;
+    v5 = cent->nextState.index.item;
     p_currentState = &cent->currentState;
     p_lerp = &cent->nextState.lerp;
     v8 = (GfxLight *)((char *)cgArray[0].refdef.primaryLights + __ROL4__(v5, 6));
@@ -1752,62 +1730,52 @@ void __cdecl CG_CalcEntityPhysicsPositions(int localClientNum, centity_s *cent)
 
 void __cdecl CG_SaveEntityPhysics(centity_s *cent, SaveGame *save)
 {
-    const DObj_s *ClientDObj; // r28
+    const DObj_s *obj; // r28
     int physObjId; // r11
     char v6; // r11
     bool v7; // zf
-    MemoryFile *MemoryFile; // r3
-    const char *Name; // r29
-    MemoryFile *v10; // r3
+    SaveGame *memFile; // r3
+    const char *modelName; // r29
     char v11; // [sp+50h] [-40h] BYREF
 
-    if (!cent)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\cgame\\cg_ents.cpp", 1254, 0, "%s", "cent");
-    if (!save)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\cgame\\cg_ents.cpp", 1255, 0, "%s", "save");
-    ClientDObj = Com_GetClientDObj(cent->nextState.number, 0);
-    if (!ClientDObj || (physObjId = cent->pose.physObjId) == 0 || (v7 = physObjId != -1, v6 = 1, !v7))
+    iassert(cent);
+    iassert(save);
+
+    obj = Com_GetClientDObj(cent->nextState.number, 0);
+    if (!obj || (physObjId = cent->pose.physObjId) == 0 || (v7 = physObjId != -1, v6 = 1, !v7))
         v6 = 0;
     v11 = v6;
     SaveMemory_SaveWrite(&v11, 1, save);
     if (v11)
     {
-        MemoryFile = SaveMemory_GetMemoryFile(save);
-        Phys_ObjSave(cent->pose.physObjId, MemoryFile);
-        if (!ClientDObj)
-            MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\cgame\\cg_ents.cpp", 1268, 0, "%s", "obj");
-        Name = DObjGetName(ClientDObj);
-        if (!Name)
-            MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\cgame\\cg_ents.cpp", 1270, 0, "%s", "modelName");
-        v10 = SaveMemory_GetMemoryFile(save);
-        MemFile_WriteCString(v10, Name);
+        memFile = SaveMemory_GetMemoryFile(save);
+        Phys_ObjSave(cent->pose.physObjId, memFile);
+        iassert(obj);
+        modelName = DObjGetName(obj);
+        iassert(modelName);
+        MemFile_WriteCString(SaveMemory_GetMemoryFile(save), modelName);
     }
 }
 
 void __cdecl CG_LoadEntityPhysics(centity_s *cent, SaveGame *save)
 {
-    MemoryFile *MemoryFile; // r3
-    MemoryFile *v5; // r3
     const char *CString; // r3
-    const XModel *v7; // r29
+    const XModel *xmodel; // r29
     char v8; // [sp+50h] [-30h] BYREF
 
-    if (!cent)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\cgame\\cg_ents.cpp", 1280, 0, "%s", "cent");
-    if (!save)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\cgame\\cg_ents.cpp", 1281, 0, "%s", "save");
+    iassert(cent);
+    iassert(save);
+
     v8 = 0;
     SaveMemory_LoadRead(&v8, 1, save);
+
     if (v8)
     {
-        MemoryFile = SaveMemory_GetMemoryFile(save);
-        cent->pose.physObjId = Phys_ObjLoad(PHYS_WORLD_FX, MemoryFile);
-        v5 = SaveMemory_GetMemoryFile(save);
-        CString = MemFile_ReadCString(v5);
-        v7 = R_RegisterModel(CString);
-        if (!v7)
-            MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\cgame\\cg_ents.cpp", 1295, 0, "%s", "xmodel");
-        Phys_ObjSetCollisionFromXModel(v7, PHYS_WORLD_FX, cent->pose.physObjId);
+        cent->pose.physObjId = Phys_ObjLoad(PHYS_WORLD_FX, SaveMemory_GetMemoryFile(save));
+        CString = MemFile_ReadCString(SaveMemory_GetMemoryFile(save));
+        xmodel = R_RegisterModel(CString);
+        iassert(xmodel);
+        Phys_ObjSetCollisionFromXModel(xmodel, PHYS_WORLD_FX, cent->pose.physObjId);
     }
 }
 

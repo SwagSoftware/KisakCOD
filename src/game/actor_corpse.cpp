@@ -567,7 +567,7 @@ void __cdecl Actor_GetBodyPlantAngles(
     v16 = Actor_SetBodyPlantAngle((int)iEntNum, iClipMask, vOrigin, vOrigin, v26, pfRoll);
     if (pfHeight)
     {
-        //if (__fabs(*pfRoll) >= 30.0)
+        //if (I_fabs(*pfRoll) >= 30.0)
         if (fabsf(*pfRoll) >= 30.0)
             *pfHeight = 0.0;
         else
@@ -655,7 +655,7 @@ void __cdecl Actor_OrientCorpseToGround(gentity_s *self, int bLerp)
             Actor_GetBodyPlantAngles(entNum, clipMask, origin, yaw, a4, &v26, &v27, v28);
             v12 = v26;
             _FP1 = AngleSubtract(v26, p_proneInfo->fTorsoPitch);
-            if (__fabs(_FP1) <= 6.0)
+            if (I_fabs(_FP1) <= 6.0)
             {
                 v15 = v12;
             }
@@ -669,7 +669,7 @@ void __cdecl Actor_OrientCorpseToGround(gentity_s *self, int bLerp)
             v18 = v27;
             p_proneInfo->fTorsoPitch = v15;
             _FP1 = AngleSubtract(v18, fWaistPitch);
-            if (__fabs(_FP1) <= 6.0)
+            if (I_fabs(_FP1) <= 6.0)
             {
                 v21 = v16;
             }
@@ -682,7 +682,7 @@ void __cdecl Actor_OrientCorpseToGround(gentity_s *self, int bLerp)
             v23 = v28[0];
             p_proneInfo->fWaistPitch = v21;
             _FP13 = (float)((float)v23 - (float)fBodyHeight);
-            if (__fabs(_FP13) <= 0.60000002)
+            if (I_fabs(_FP13) <= 0.60000002)
             {
                 p_proneInfo->fBodyHeight = v23;
             }
@@ -735,7 +735,7 @@ void __cdecl Actor_OrientPitchToGround(gentity_s *self, int bLerp)
             Actor_GetBodyPlantAngles(number, v9, currentOrigin, v7, a4, &v19, 0, &v20);
             v11 = v19;
             _FP1 = AngleSubtract(v19, p_ProneInfo->fTorsoPitch);
-            if (__fabs(_FP1) <= 6.0)
+            if (I_fabs(_FP1) <= 6.0)
             {
                 v14 = v11;
             }
@@ -748,7 +748,7 @@ void __cdecl Actor_OrientPitchToGround(gentity_s *self, int bLerp)
             v16 = v20;
             p_ProneInfo->fTorsoPitch = v14;
             _FP13 = (float)((float)v16 - (float)fBodyHeight);
-            if (__fabs(_FP13) <= 0.60000002)
+            if (I_fabs(_FP13) <= 0.60000002)
             {
                 p_ProneInfo->fBodyHeight = v16;
             }

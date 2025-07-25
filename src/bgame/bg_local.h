@@ -1240,6 +1240,7 @@ struct vehicle_physic_t // sizeof=0xF8
 };
 static_assert(sizeof(vehicle_physic_t) == 0xF8);
 
+#ifdef KISAK_MP
 struct VehicleTags // sizeof=0x60
 {                                       // ...
     VehicleRideSlot_t riderSlots[3];
@@ -1253,6 +1254,20 @@ struct VehicleTags // sizeof=0x60
     int32_t wheel[4];
 };
 static_assert(sizeof(VehicleTags) == 0x60);
+#elif KISAK_SP
+struct VehicleTags
+{
+    int player;
+    int detach;
+    int popout;
+    int body;
+    int turret;
+    int turret_base;
+    int barrel;
+    int flash[5];
+    int wheel[6];
+};
+#endif
 
 enum VehicleMoveState : __int32
 {                                       // ...
@@ -1300,6 +1315,7 @@ struct VehicleHover // sizeof=0x1C
 };
 static_assert(sizeof(VehicleHover) == 0x1C);
 
+#ifdef KISAK_MP
 struct scr_vehicle_s // sizeof=0x354
 {                                       // ...
     vehicle_pathpos_t pathPos;
@@ -1360,6 +1376,67 @@ struct scr_vehicle_s // sizeof=0x354
     float forcedMaterialSpeed;
 };
 static_assert(sizeof(scr_vehicle_s) == 0x354);
+#elif KISAK_SP
+struct scr_vehicle_s // sizeof=0x338
+{                                       // XREF: .data:s_vehicles/r
+    vehicle_pathpos_t pathPos;
+    vehicle_physic_t phys;
+    int entNum;
+    __int16 infoIdx;
+    // padding byte
+    // padding byte
+    int flags;
+    int team;
+    VehicleMoveState moveState;
+    __int16 waitNode;
+    // padding byte
+    // padding byte
+    float waitSpeed;
+    VehicleTurret turret;
+    VehicleJitter jitter;
+    VehicleHover hover;
+    int drawOnCompass;
+    unsigned __int16 lookAtText0;
+    unsigned __int16 lookAtText1;
+    int manualMode;
+    float manualSpeed;
+    float manualAccel;
+    float manualDecel;
+    float manualTime;
+    float speed;
+    float maxDragSpeed;
+    float turningAbility;
+    int hasTarget;
+    int hasTargetYaw;
+    int hasGoalYaw;
+    int stopAtGoal;
+    int stopping;
+    int targetEnt;
+    EntHandle lookAtEnt;
+    float targetOrigin[3];
+    float targetOffset[3];
+    float targetYaw;
+    float goalPosition[3];
+    float goalYaw;
+    float prevGoalYaw;
+    float yawOverShoot;
+    int yawSlowDown;
+    float nearGoalNotifyDist;
+    float joltDir[2];
+    float joltTime;
+    float joltWave;
+    float joltSpeed;
+    float joltDecel;
+    int playEngineSound;
+    EntHandle idleSndEnt;
+    EntHandle engineSndEnt;
+    float idleSndLerp;
+    float engineSndLerp;
+    VehicleTags boneIndex;
+    int turretHitNum;
+    float forcedMaterialSpeed;
+};
+#endif
 
 enum proneCheckType_t : __int32
 {                                       // ...

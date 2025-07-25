@@ -322,23 +322,23 @@ int __cdecl WorldDirToScreenPos(int localClientNum, const float *worldDir, float
         }
         else
         {
-            if (__fabs(v9) < v5)
+            if (I_fabs(v9) < v5)
             {
                 do
                 {
                     v11 = (float)(*outScreenPos * (float)v5);
                     *outScreenPos = *outScreenPos * (float)v5;
                     outScreenPos[1] = outScreenPos[1] * (float)v5;
-                } while (__fabs(v11) < v5);
+                } while (I_fabs(v11) < v5);
             }
-            if (__fabs(outScreenPos[1]) < 480.0)
+            if (I_fabs(outScreenPos[1]) < 480.0)
             {
                 do
                 {
                     v12 = (float)(outScreenPos[1] * (float)480.0);
                     *outScreenPos = *outScreenPos * (float)480.0;
                     outScreenPos[1] = v12;
-                } while (__fabs(v12) < 480.0);
+                } while (I_fabs(v12) < 480.0);
             }
             return 0;
         }

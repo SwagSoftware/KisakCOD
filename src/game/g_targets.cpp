@@ -646,7 +646,7 @@ void __cdecl Scr_Target_IsInRect()
 
     Float = Scr_GetFloat(3u);
     v1 = Scr_GetFloat(4u);
-    if (!(unsigned __int8)ScrGetTargetScreenPos(v3) || __fabs(v3[0]) >= Float || (v2 = 1, __fabs(v3[1]) >= v1))
+    if (!(unsigned __int8)ScrGetTargetScreenPos(v3) || I_fabs(v3[0]) >= Float || (v2 = 1, I_fabs(v3[1]) >= v1))
         v2 = 0;
     Scr_AddBool(v2);
 }

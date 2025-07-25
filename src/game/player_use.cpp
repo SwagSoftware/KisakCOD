@@ -876,7 +876,7 @@ void __cdecl Player_BanNodesInFront(gentity_s *ent, double dist, const float *st
     float v28[4]; // [sp+60h] [-D0h] BYREF
     pathsort_t v29[4]; // [sp+70h] [-C0h] BYREF
 
-    if (__fabs((float)((float)((float)(*(float *)(a5 + 8) * *(float *)(a5 + 8))
+    if (I_fabs((float)((float)((float)(*(float *)(a5 + 8) * *(float *)(a5 + 8))
         + (float)((float)(*(float *)a5 * *(float *)a5)
             + (float)(*(float *)(a5 + 4) * *(float *)(a5 + 4))))
         - (float)1.0)) >= 0.0020000001)

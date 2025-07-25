@@ -54,7 +54,7 @@ const char *moveOrientModeStrings[7] =
 };
 
 entityHandler_t *entityHandlers;
-gentity_s *g_entities;
+gentity_s g_entities[MAX_GENTITIES];
 sentient_s *g_sentients;
 char *g_nextMap;
 level_locals_t level;

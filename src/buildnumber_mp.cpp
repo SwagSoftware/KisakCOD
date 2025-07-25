@@ -8,6 +8,8 @@ char buildnumbuf[128];
 * Original Build: 13620
 */
 
+// LWSS: shared between SP/MP for simplicity
+
 char *__cdecl getBuildNumber()
 {
 	sprintf_s(buildnumbuf, "%d %s %s", BUILD_NUMBER, __DATE__, __TIME__);

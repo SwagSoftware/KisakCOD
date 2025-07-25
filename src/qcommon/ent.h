@@ -258,7 +258,10 @@ union entityState_s_tag
 
 union entityState_s_type_index
 {
+    uint16_t brushmodel;
     uint16_t item;
+    uint16_t xmodel;
+    uint16_t primaryLight;
 };
 
 struct entityState_s

@@ -33,6 +33,7 @@ struct DiskPrimaryLight // sizeof=0x80
 };
 
 char __cdecl Com_CanPrimaryLightAffectPoint(const ComPrimaryLight *light, const float *point);
+unsigned int Com_FindClosestPrimaryLight(const float *origin);
 double __cdecl CosOfSumOfArcCos(float cos0, float cos1);
 void __cdecl Com_UnloadWorld();
 

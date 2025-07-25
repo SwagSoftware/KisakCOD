@@ -1049,7 +1049,7 @@ void __cdecl G_ParseEntityField(const char *key, const char *value, gentity_s *e
                             0,
                             "%s",
                             "modelIndex == (modelNameIndex_t)modelIndex");
-                    *(_WORD *)ent->s.index = v12;
+                    ent->s.index.item = v12;
                 }
                 else
                 {

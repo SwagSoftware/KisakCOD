@@ -4,6 +4,60 @@
 #error This file is for SinglePlayer only 
 #endif
 
+#include <universal/memfile.h>
+#include <client/client.h>
+
+enum saveFieldtype_t : __int32
+{
+    SF_NONE = 0x0,
+    SF_STRING = 0x1,
+    SF_ENTITY = 0x2,
+    SF_ENTHANDLE = 0x3,
+    SF_CLIENT = 0x4,
+    SF_ACTOR = 0x5,
+    SF_SENTIENT = 0x6,
+    SF_SENTIENTHANDLE = 0x7,
+    SF_VEHICLE = 0x8,
+    SF_TURRETINFO = 0x9,
+    SF_THREAD = 0xA,
+    SF_ANIMSCRIPT = 0xB,
+    SF_PATHNODE = 0xC,
+    SF_ANIMTREE = 0xD,
+    SF_TYPE_TAG_INFO = 0xE,
+    SF_TYPE_SCRIPTED = 0xF,
+    SF_MODELUSHORT = 0x10,
+    SF_MODELINT = 0x11,
+};
+
+enum SaveHandleType : __int32
+{
+    SAVE_GAME_HANDLE = 0x0,
+    SAVE_DEMO_HANDLE = 0x1,
+    SAVE_LAST_COMMITTED = 0x2,
+};
+
+enum SaveErrorType : __int32
+{
+    SAVE_ERROR_MISSING_DEVICE = 0x0,
+    SAVE_ERROR_CORRUPT_SAVE = 0x1,
+};
+
+struct saveField_t
+{
+    int ofs;
+    saveFieldtype_t type;
+};
+
+struct SaveGame
+{
+    MemoryFile memFile;
+    SaveBufferState saveState;
+    SaveHeader header;
+    bool isUsingGlobalBuffer;
+    bool isDirectWriteActive;
+    bool isWrittenToDevice;
+    bool suppressPlayerNotify;
+};
 
 // g_save
 void __cdecl TRACK_g_save();
@@ -102,3 +156,6 @@ void __cdecl G_InitLoadGame(SaveGame *save);
 void __cdecl G_LoadMainState(SaveGame *save);
 void __cdecl G_LoadGame(int checksum, SaveGame *save);
 int __cdecl G_LoadErrorCleanup();
+
+
+extern bool g_useDevSaveArea;

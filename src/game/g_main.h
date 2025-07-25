@@ -6,6 +6,8 @@
 #include <universal/q_parse.h>
 #include "g_scr_main.h"
 
+#include <bgame/bg_public.h>
+
 enum loading_t : __int32
 {
 	LOADING_DONE = 0x0,
@@ -274,7 +276,7 @@ extern const dvar_t *ai_playerLOSMinTime;
 extern const dvar_t *player_radiusDamageMultiplier;
 
 extern entityHandler_t *entityHandlers;
-extern gentity_s *g_entities;
+extern gentity_s g_entities[MAX_GENTITIES];
 extern sentient_s *g_sentients;
 extern char *g_nextMap;
 extern level_locals_t level;

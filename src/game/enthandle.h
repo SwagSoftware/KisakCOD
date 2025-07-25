@@ -46,8 +46,8 @@ struct sentient_s;
 
 struct SentientHandle
 {
-    unsigned __int16 number;
-    unsigned __int16 infoIndex;
+    uint16_t number;
+    uint16_t infoIndex;
 
     sentient_s *sentient() const;
     void setSentient(sentient_s *sentient);

@@ -268,7 +268,7 @@ float __cdecl Actor_GetPlayerStanceAccuracy(const actor_s *self, const sentient_
 //
 //    _FP5 = -__fsqrts((float)((float)((float)(v17 - v14) * (float)(v17 - v14)) + (float)((float)((float)(v19 - v16) * (float)(v19 - v16)) + (float)((float)(v18 - v15) * (float)(v18 - v15)))));
 //    __asm { fsel      f10, f5, f11, f10 }
-//    v6 = __fabs((float)((float)(enemy->ent->client->ps.velocity[0]
+//    v6 = I_fabs((float)((float)(enemy->ent->client->ps.velocity[0]
 //        * (float)((float)((float)1.0 / (float)_FP10) * (float)(v18 - v15)))
 //        + (float)((float)(enemy->ent->client->ps.velocity[2]
 //            * (float)((float)(v19 - v16) * (float)((float)1.0 / (float)_FP10)))

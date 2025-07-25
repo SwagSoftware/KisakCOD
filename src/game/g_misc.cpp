@@ -3,6 +3,13 @@
 #endif
 
 #include "g_local.h"
+#include <cgame/cg_view.h>
+#include "g_main.h"
+#include <cgame/cg_ents.h>
+#include <xanim/xanim.h>
+#include <server/sv_game.h>
+#include <script/scr_const.h>
+#include <qcommon/com_bsp.h>
 
 float __cdecl G_GetEntInfoScale()
 {
@@ -48,15 +55,17 @@ void __cdecl SP_light(gentity_s *self)
             if (!VecNCompareCustomEpsilon(PrimaryLight->origin, self->r.currentOrigin, 1.0, v5))
                 Com_PrintError(
                     1,
-                    (const char *)(const char *)HIDWORD(COERCE_UNSIGNED_INT64(self->r.currentOrigin[0])),
-                    (unsigned int)COERCE_UNSIGNED_INT64(self->r.currentOrigin[0]),
-                    (unsigned int)COERCE_UNSIGNED_INT64(self->r.currentOrigin[1]),
-                    (unsigned int)COERCE_UNSIGNED_INT64(self->r.currentOrigin[2]));
+                    "No primary light was found at (%.0f %.0f %.0f).  You may have added, deleted, or moved a primary light since the last full map compile.  You should recompile the map before using MyMapEnts to avoid issues with primary lights.\n",
+                    self->r.currentOrigin[0],
+                    self->r.currentOrigin[1],
+                    self->r.currentOrigin[2]
+                );
         }
         v6 = ClosestPrimaryLight;
         v7 = ClosestPrimaryLight & 0xFFFF;
         v8 = (ClosestPrimaryLight & 0xFFFF) == ClosestPrimaryLight;
-        *(_WORD *)self->s.index = ClosestPrimaryLight;
+        //*(_WORD *)self->s.index = ClosestPrimaryLight;
+        self->s.index.item = ClosestPrimaryLight;
         if (!v8)
             MyAssertHandler(
                 "c:\\trees\\cod3\\cod3src\\src\\game\\g_misc.cpp",
@@ -76,7 +85,7 @@ void __cdecl SP_light(gentity_s *self)
         v13[2] = -PrimaryLight->dir[2];
         vectoangles(v13, v15);
         G_SetAngle(self, v15);
-        G_SetOrigin(self, origin);
+        G_SetOrigin(self, (float*)origin);
         v9 = -PrimaryLight->radius;
         self->r.mins[0] = v9;
         self->r.mins[2] = v9;
@@ -114,10 +123,11 @@ void __cdecl SP_info_volume(gentity_s *self)
     {
         Com_PrintError(
             1,
-            (const char *)(const char *)HIDWORD(COERCE_UNSIGNED_INT64(self->s.lerp.pos.trBase[0])),
-            (unsigned int)COERCE_UNSIGNED_INT64(self->s.lerp.pos.trBase[0]),
-            (unsigned int)COERCE_UNSIGNED_INT64(self->s.lerp.pos.trBase[1]),
-            (unsigned int)COERCE_UNSIGNED_INT64(self->s.lerp.pos.trBase[2]));
+            "Killing info_volume at (%f %f %f) because the brush model is invalid.\n",
+            self->s.lerp.pos.trBase[0],
+            self->s.lerp.pos.trBase[1],
+            self->s.lerp.pos.trBase[2]
+        );
         G_FreeEntity(self);
     }
 }
@@ -215,15 +225,18 @@ void __cdecl EntinfoPosAndScale(gentity_s *self, float *source, float *pos, floa
     v13 = g_entinfo;
     v14 = (float)(source[2] - self->r.currentOrigin[2]);
     v15 = (float)(source[1] - self->r.currentOrigin[1]);
-    v16 = __fsqrts((float)((float)((float)v15 * (float)v15)
+    v16 = sqrtf((float)((float)((float)v15 * (float)v15)
         + (float)((float)((float)v14 * (float)v14) + (float)((float)v12 * (float)v12))));
     *dist = v16;
     if (v13->current.integer >= 2 || (value = g_entinfo_maxdist->current.value, value <= 0.0) || v16 <= value)
         *textScale = (float)(*textScale * (float)v16) * (float)0.0026041667;
 }
 
+
 void __cdecl misc_EntInfo(gentity_s *self, float *source)
 {
+    static const float color[4] = { 0.5, 0.5, 0.5, 1.0 };
+
     const float *v4; // r6
     int integer; // r11
     const char *v6; // r30
@@ -254,11 +267,17 @@ void __cdecl misc_EntInfo(gentity_s *self, float *source)
         v7 = SL_ConvertToString(self->classname);
         v9 = va("%i : %s : %i : %s", self->s.number, v6, self->health, v7);
     }
-    G_AddDebugString(v12, color, (float)(v10 * (float)0.75), v8, (int)v9);
+    G_AddDebugString(v12, color, (float)(v10 * (float)0.75), v8);
 }
 
 void __cdecl EntInfo_Item(gentity_s *self, float *source)
 {
+    static float MY_MAX_DIST = 500.0f;
+    static float MY_MAX_DIST_HALF = 0.0f;
+    static float MY_RGB[3] = { 0.6f, 0.5f, 0.5f };
+    static unsigned int _S1 = 0;
+    static float MY_NEXTLINE = -3.0f;
+
     double v4; // fp0
     int *p_index; // r30
     int v6; // r25
@@ -275,12 +294,14 @@ void __cdecl EntInfo_Item(gentity_s *self, float *source)
 
     if ((_S1 & 1) == 0)
     {
-        MY_MAX_DIST_HALF = MY_MAX_DIST * (float)0.5;
+        MY_MAX_DIST_HALF = MY_MAX_DIST * 0.5f;
         _S1 |= 1u;
     }
-    if (!self)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\g_misc.cpp", 80, 0, "%s", "self");
+
+    iassert(self);
+
     EntinfoPosAndScale(self, source, v14, &v13, &v12);
+
     if (v12 <= (double)MY_MAX_DIST)
     {
         v16[0] = MY_RGB[0];
@@ -301,7 +322,7 @@ void __cdecl EntInfo_Item(gentity_s *self, float *source)
             {
                 WeaponDef = BG_GetWeaponDef(*p_index);
                 v9 = va("%i: %s (%i + %i)", self->s.number, WeaponDef->szInternalName, *(p_index - 1), *(p_index - 2));
-                G_AddDebugString(v14, v16, (float)((float)v7 * 0.80000001), v10, (int)v9);
+                G_AddDebugString(v14, v16, (float)((float)v7 * 0.8f), v10);
                 G_DebugBox(
                     self->r.currentOrigin,
                     self->r.mins,

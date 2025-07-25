@@ -245,7 +245,7 @@ void __cdecl Actor_UpdateLookAt(actor_s *self)
         }
         fLookAtTurnAngle = self->lookAtInfo.fLookAtTurnAngle;
         v7 = (float)((float)v5 - self->lookAtInfo.fLookAtTurnAngle);
-        //if (__fabs(v7) < 1.0)
+        //if (I_fabs(v7) < 1.0)
         if (fabs(v7) < 1.0)
             goto LABEL_40;
         fLookAtTurnSpeed = self->lookAtInfo.fLookAtTurnSpeed;
@@ -351,7 +351,7 @@ void __cdecl Actor_UpdateLookAt(actor_s *self)
                     ServerDObj,
                     self->lookAtInfo.animLookAtLeft,
                     v13,
-                    //(float)((float)0.075000003 / (float)__fabs((float)((float)v13 - (float)Weight))),
+                    //(float)((float)0.075000003 / (float)I_fabs((float)((float)v13 - (float)Weight))),
                     (float)((float)0.075f / (float)fabs((float)((float)v13 - (float)Weight))),
                     1.0,
                     v27,
@@ -371,7 +371,7 @@ void __cdecl Actor_UpdateLookAt(actor_s *self)
                     ServerDObj,
                     self->lookAtInfo.animLookAtRight,
                     v13,
-                    //(float)((float)0.075000003 / (float)__fabs((float)((float)v13 - (float)v18))),
+                    //(float)((float)0.075000003 / (float)I_fabs((float)((float)v13 - (float)v18))),
                     (float)((float)0.075f / (float)fabs((float)((float)v13 - (float)v18))),
                     1.0,
                     v17,
@@ -391,7 +391,7 @@ void __cdecl Actor_UpdateLookAt(actor_s *self)
                 ServerDObj,
                 self->lookAtInfo.animLookAtStraight,
                 v29,
-                //(float)((float)v19 / (float)__fabs((float)((float)v29 - (float)v33))),
+                //(float)((float)v19 / (float)I_fabs((float)((float)v29 - (float)v33))),
                 (float)((float)v19 / (float)fabs((float)((float)v29 - (float)v33))),
                 1.0,
                 v32,

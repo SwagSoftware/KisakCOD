@@ -286,6 +286,6 @@ extern const dvar_t *voice_global;
 extern const dvar_t *voice_localEcho;
 extern const dvar_t *voice_deadChat;
 
-extern gentity_s g_entities[1024];
+extern gentity_s g_entities[MAX_GENTITIES];
 extern level_locals_t level;
 extern bgs_t level_bgs;

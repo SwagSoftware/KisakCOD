@@ -115,7 +115,7 @@ const dvar_t *voice_deadChat;
 
 bgs_t level_bgs;
 level_locals_t level;
-gentity_s g_entities[1024];
+gentity_s g_entities[MAX_GENTITIES];
 gclient_s g_clients[64];
 const char *g_entinfoNames[3] =
 {

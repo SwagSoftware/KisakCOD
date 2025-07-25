@@ -198,11 +198,11 @@ bool __cdecl Actor_Grenade_IsValidTrajectory(
 LABEL_39:
     v18 = (float)((float)v14 + (float)v9);
     v19 = *vFrom;
-    if (__fabs((float)((float)((float)((float)((float)((float)v14 + (float)v9) + (float)v14) * *vVelocity) + *vFrom)
+    if (I_fabs((float)((float)((float)((float)((float)((float)v14 + (float)v9) + (float)v14) * *vVelocity) + *vFrom)
         - *vGoal)) <= 0.1)
     {
         v20 = vFrom[1];
-        if (__fabs((float)((float)((float)((float)((float)((float)v14 + (float)v9) + (float)v14) * vVelocity[1]) + vFrom[1])
+        if (I_fabs((float)((float)((float)((float)((float)((float)v14 + (float)v9) + (float)v14) * vVelocity[1]) + vFrom[1])
             - vGoal[1])) <= 0.1)
         {
             v36 = 0;
@@ -2565,7 +2565,7 @@ actor_think_result_t __cdecl Actor_Grenade_Acquire(actor_s *self)
             }
             return ACTOR_THINK_DONE;
         }
-        if (__fabs((float)(self->ent->r.currentOrigin[2] - self->Path.vFinalGoal[2])) > 32.0)
+        if (I_fabs((float)(self->ent->r.currentOrigin[2] - self->Path.vFinalGoal[2])) > 32.0)
         {
             if ((unsigned __int8)Actor_Grenade_ReevaluateResponse(self, REEVALUATE_NO_RETURN))
                 return ACTOR_THINK_REPEAT;
