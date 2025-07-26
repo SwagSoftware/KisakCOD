@@ -4,12 +4,33 @@
 
 #include "g_local.h"
 
+#include <xanim/xanim.h>
+#include <script/scr_vm.h>
+#include "g_main.h"
+#include <script/scr_const.h>
+#include <server/sv_game.h>
+#include <server/server.h>
+#include <universal/com_sndalias.h>
+#include <qcommon/threads.h>
+#include <qcommon/cmd.h>
+#include <devgui/devgui.h>
+#include "g_public.h"
+
+struct $1CCC8782424A70CD39BB8AAD8063E797
+{
+    volatile unsigned int write;
+    volatile unsigned int read;
+    volatile unsigned __int16 data[64];
+};
+
+$1CCC8782424A70CD39BB8AAD8063E797 s_cmdNotify;
+
 int __cdecl G_GetNeededStartAmmo(gentity_s *pSelf, WeaponDef *weapDef)
 {
     gclient_s *client; // r29
     unsigned int v5; // r30
     int v6; // r28
-    WeaponDef *WeaponDef; // r31
+    WeaponDef *otherWeapDef; // r31
 
     if (!pSelf)
         MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\g_client_script_cmd.cpp", 44, 0, "%s", "pSelf");
@@ -22,13 +43,13 @@ int __cdecl G_GetNeededStartAmmo(gentity_s *pSelf, WeaponDef *weapDef)
     v6 = client->ps.ammo[weapDef->iAmmoIndex];
     do
     {
-        WeaponDef = BG_GetWeaponDef(v5);
-        if (WeaponDef->iAmmoIndex == weapDef->iAmmoIndex)
+        otherWeapDef = BG_GetWeaponDef(v5);
+        if (otherWeapDef->iAmmoIndex == weapDef->iAmmoIndex)
         {
             if (!client)
                 MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\bgame\\../bgame/bg_weapons.h", 229, 0, "%s", "ps");
-            if (Com_BitCheckAssert(client->ps.weapons, v5, 16) && weapDef != WeaponDef)
-                v6 += client->ps.ammoclip[WeaponDef->iClipIndex] - WeaponDef->iStartAmmo;
+            if (Com_BitCheckAssert(client->ps.weapons, v5, 16) && weapDef != otherWeapDef)
+                v6 += client->ps.ammoclip[otherWeapDef->iClipIndex] - otherWeapDef->iStartAmmo;
         }
         ++v5;
     } while (v5 <= bg_lastParsedWeaponIndex);
@@ -95,7 +116,7 @@ void __cdecl InitializeAmmo(gentity_s *pSelf, int weaponIndex, unsigned __int8 w
     } while (((1 << (altWeaponIndex & 0x1F)) & weapons[altWeaponIndex >> 5]) != 0);
 }
 
-void __cdecl PlayerCmd_giveWeapon(scr_entref_t *entref)
+void __cdecl PlayerCmd_giveWeapon(scr_entref_t entref)
 {
     gentity_s *v1; // r29
     const char *v2; // r3
@@ -138,13 +159,14 @@ void __cdecl PlayerCmd_giveWeapon(scr_entref_t *entref)
         MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\bgame\\../bgame/bg_weapons.h", 229, 0, "%s", "ps");
     v6 = Com_BitCheckAssert(client->ps.weapons, WeaponIndexForName, 16);
     if (Scr_GetNumParam() != 2
-        || (WeaponDef = BG_GetWeaponDef(WeaponIndexForName), Int = Scr_GetInt(1u), Int > 0xFF)
+        || (WeaponDef = BG_GetWeaponDef(WeaponIndexForName), Int = Scr_GetInt(1), Int > 0xFF)
         || !WeaponDef->gunXModel[Int])
     {
-        LOBYTE(Int) = 0;
+        //LOBYTE(Int) = 0;
+        Int = 0;
     }
     v9 = Int;
-    G_GivePlayerWeapon(&v1->client->ps, WeaponIndexForName, Int);
+    G_GivePlayerWeapon(&v1->client->ps, WeaponIndexForName, v9);
     InitializeAmmo(v1, WeaponIndexForName, v9, v6);
 }
 
@@ -1002,46 +1024,41 @@ void __cdecl PlayerCmd_getViewHeight(scr_entref_t *entref)
     Scr_AddFloat(v1->client->ps.viewHeightCurrent);
 }
 
-void __cdecl PlayerCmd_getNormalizedMovement(scr_entref_t *entref)
+// partial aislop
+void PlayerCmd_getNormalizedMovement(scr_entref_t entref)
 {
-    gentity_s *v1; // r31
-    const char *v2; // r3
-    gclient_s *client; // r11
-    __int128 v4; // r11
-    float v5[4]; // [sp+58h] [-28h] BYREF
-    unsigned __int16 v6; // [sp+94h] [+14h]
+    gentity_s *entity;
+    gclient_s *client;
+    float movementVector[3]; // Normalized movement vector
 
-    v6 = HIWORD(entref);
-    if ((_WORD)entref)
+    uint16_t entnum = entref.entnum;
+
+    // Validate that the entref is an entity
+    if (entref.classnum) 
     {
         Scr_ObjectError("not an entity");
-        v1 = 0;
+        return;
     }
-    else
+
+    iassert(entref.entnum < MAX_GENTITIES);
+
+    entity = &g_entities[entnum];
+
+    if (!entity->client) 
     {
-        if (HIWORD(entref) >= 0x880u)
-            MyAssertHandler(
-                "c:\\trees\\cod3\\cod3src\\src\\game\\g_client_script_cmd.cpp",
-                767,
-                0,
-                "%s",
-                "entref.entnum < MAX_GENTITIES");
-        v1 = &g_entities[v6];
-        if (!v1->client)
-        {
-            v2 = va("entity %i is not a player", v6);
-            Scr_ObjectError(v2);
-        }
+        Scr_ObjectError(va("entity %i is not a player", entnum));
+        return;
     }
-    client = v1->client;
-    DWORD1(v4) = 45811;
-    DWORD2(v4) = client->pers.cmd.forwardmove;
-    v5[0] = (float)*(__int64 *)((char *)&v4 + 4) * (float)0.0078740157;
-    DWORD2(v4) = (unsigned __int8)client->pers.cmd.rightmove;
-    LODWORD(v4) = SBYTE11(v4);
-    v5[2] = 0.0;
-    v5[1] = (float)(__int64)v4 * (float)0.0078740157;
-    Scr_AddVector(v5);
+
+    client = entity->client;
+
+    // Normalize the movement input [-127,127] to [-1.0,1.0]
+    movementVector[0] = (float)(int8_t)client->pers.cmd.forwardmove * (1.0f / 127.0f);
+    movementVector[1] = (float)(int8_t)client->pers.cmd.rightmove * (1.0f / 127.0f);
+    movementVector[2] = 0.0f; // No vertical movement
+
+    // Return the vector to the script engine
+    Scr_AddVector(movementVector);
 }
 
 void __cdecl PlayerCmd_useButtonPressed(scr_entref_t *entref)
@@ -1216,7 +1233,7 @@ void __cdecl G_FlushCommandNotifies()
     unsigned int v0; // r30
     unsigned int v1; // r3
 
-    __lwsync();
+    //__lwsync();
     while (s_cmdNotify.read != s_cmdNotify.write)
     {
         if (s_cmdNotify.write - s_cmdNotify.read < 2)
@@ -1251,7 +1268,7 @@ void __cdecl G_FlushCommandNotifies()
             v1 = *(unsigned __int16 *)((char *)s_cmdNotify.data + ((2 * s_cmdNotify.read++) & 0x7E));
             SL_RemoveRefToString(v1);
         }
-        __lwsync();
+        //__lwsync();
     }
 }
 
@@ -1262,8 +1279,9 @@ void __cdecl G_ProcessCommandNotifies()
     unsigned int v2; // r30
     unsigned int v3; // r29
 
-    __lwsync();
-    if (Scr_IsSystemActive(1u))
+    
+    //__lwsync();
+    if (Scr_IsSystemActive())
     {
         while (s_cmdNotify.read != s_cmdNotify.write)
         {
@@ -1306,8 +1324,8 @@ void __cdecl G_ProcessCommandNotifies()
                 } while (v2);
             }
             Scr_Notify(g_entities, v0, v1);
-            __lwsync();
-            if (!Scr_IsSystemActive(1u))
+            //__lwsync();
+            if (!Scr_IsSystemActive())
                 goto LABEL_14;
         }
     }
@@ -1326,7 +1344,7 @@ void __cdecl PlayerCmd_notifyOnCommand(scr_entref_t *entref)
     if (Scr_GetNumParam() != 2)
         Scr_Error("USAGE: <player> notifyOnCommand( <notify>, <command> )\n");
     String = Scr_GetString(0);
-    v2 = Scr_GetString(1u);
+    v2 = Scr_GetString(1);
     Cmd_RegisterNotification(v2, String);
 }
 
@@ -2562,8 +2580,7 @@ void __cdecl ScrCmd_IsLookingAt(scr_entref_t *entref)
             Scr_ObjectError(v2);
         }
     }
-    if (!EntHandle::isDefined(&v1->client->pLookatEnt)
-        || (v3 = EntHandle::ent(&v1->client->pLookatEnt), v5 = v3 == Scr_GetEntity(0), v4 = 1, !v5))
+    if (!v1->client->pLookatEnt.isDefined() || (v3 = v1->client->pLookatEnt.ent(), v5 = v3 == Scr_GetEntity(0), v4 = 1, !v5))
     {
         v4 = 0;
     }
@@ -2896,7 +2913,7 @@ void __cdecl PlayerCmd_SetWeaponAmmoStock(scr_entref_t *entref)
 {
     gentity_s *v1; // r31
     const char *v2; // r3
-    const playerState_s *p_ps; // r28
+    playerState_s *p_ps; // r28
     const char *String; // r30
     int Int; // r29
     int WeaponIndexForName; // r31
@@ -4095,13 +4112,107 @@ void __cdecl PlayerCmd_UploadTime(scr_entref_t *entref)
     }
 }
 
+static const BuiltinMethodDef methods_0[89] =
+{
+  { "giveweapon", PlayerCmd_giveWeapon, 0 },
+  { "takeweapon", PlayerCmd_takeWeapon, 0 },
+  { "takeallweapons", PlayerCmd_takeAllWeapons, 0 },
+  { "getcurrentweapon", PlayerCmd_getCurrentWeapon, 0 },
+  { "getcurrentweaponclipammo", PlayerCmd_getCurrentWeaponClipAmmo, 0 },
+  { "getcurrentoffhand", PlayerCmd_getCurrentOffhand, 0 },
+  { "hasweapon", PlayerCmd_hasWeapon, 0 },
+  { "switchtoweapon", PlayerCmd_switchToWeapon, 0 },
+  { "switchtooffhand", PlayerCmd_switchToOffhand, 0 },
+  { "givestartammo", PlayerCmd_giveStartAmmo, 0 },
+  { "givemaxammo", PlayerCmd_giveMaxAmmo, 0 },
+  { "getfractionstartammo", PlayerCmd_getFractionStartAmmo, 0 },
+  { "getfractionmaxammo", PlayerCmd_getFractionMaxAmmo, 0 },
+  { "setorigin", PlayerCmd_setOrigin, 0 },
+  { "setvelocity", PlayerCmd_SetVelocity, 0 },
+  { "getvelocity", PlayerCmd_GetVelocity, 0 },
+  { "setplayerangles", PlayerCmd_setAngles, 0 },
+  { "getplayerangles", PlayerCmd_getAngles, 0 },
+  { "getplayerviewheight", PlayerCmd_getViewHeight, 0 },
+  { "getnormalizedmovement", PlayerCmd_getNormalizedMovement, 0 },
+  { "usebuttonpressed", PlayerCmd_useButtonPressed, 0 },
+  { "attackbuttonpressed", PlayerCmd_attackButtonPressed, 0 },
+  { "adsbuttonpressed", PlayerCmd_adsButtonPressed, 0 },
+  { "meleebuttonpressed", PlayerCmd_meleeButtonPressed, 0 },
+  { "buttonpressed", PlayerCmd_buttonPressed, 0 },
+  { "notifyoncommand", PlayerCmd_notifyOnCommand, 0 },
+  { "playerads", PlayerCmd_playerADS, 0 },
+  { "isonground", PlayerCmd_isOnGround, 0 },
+  { "setviewmodel", PlayerCmd_SetViewmodel, 0 },
+  { "showviewmodel", PlayerCmd_ShowViewmodel, 0 },
+  { "hideviewmodel", PlayerCmd_HideViewmodel, 0 },
+  { "allowstand", PlayerCmd_AllowStand, 0 },
+  { "allowcrouch", PlayerCmd_AllowCrouch, 0 },
+  { "allowprone", PlayerCmd_AllowProne, 0 },
+  { "allowlean", PlayerCmd_AllowLean, 0 },
+  { "openmenu", PlayerCmd_OpenMenu, 0 },
+  { "openmenunomouse", PlayerCmd_OpenMenuNoMouse, 0 },
+  { "closemenu", PlayerCmd_CloseMenu, 0 },
+  { "freezecontrols", PlayerCmd_FreezeControls, 0 },
+  { "setreverb", PlayerCmd_SetReverb, 0 },
+  { "deactivatereverb", PlayerCmd_DeactivateReverb, 0 },
+  { "seteq", PlayerCmd_SetEQ, 0 },
+  { "deactivateeq", PlayerCmd_DeactivateEq, 0 },
+  { "seteqlerp", PlayerCmd_SetEQLerp, 0 },
+  { "setchannelvolumes", PlayerCmd_SetChannelVolumes, 0 },
+  { "deactivatechannelvolumes", PlayerCmd_DeactivateChannelVolumes, 0 },
+  { "islookingat", ScrCmd_IsLookingAt, 0 },
+  { "isthrowinggrenade", PlayerCmd_IsThrowingGrenade, 0 },
+  { "isfiring", PlayerCmd_IsFiring, 0 },
+  { "ismeleeing", PlayerCmd_IsMeleeing, 0 },
+  { "playlocalsound", ScrCmd_PlayLocalSound, 0 },
+  { "stoplocalsound", ScrCmd_StopLocalSound, 0 },
+  { "setautopickup", ScrCmd_SetAutoPickup, 0 },
+  { "setweaponammoclip", PlayerCmd_SetWeaponAmmoClip, 0 },
+  { "setweaponammostock", PlayerCmd_SetWeaponAmmoStock, 0 },
+  { "getweaponammoclip", PlayerCmd_GetWeaponAmmoClip, 0 },
+  { "getweaponammostock", PlayerCmd_GetWeaponAmmoStock, 0 },
+  { "anyammoforweaponmodes", PlayerCmd_AnyAmmoForWeaponModes, 0 },
+  { "enablehealthshield", PlayerCmd_EnableHealthShield, 0 },
+  { "setclientdvar", PlayerCmd_SetClientDvar, 0 },
+  { "setclientdvars", PlayerCmd_SetClientDvars, 0 },
+  { "setoffhandsecondaryclass", PlayerCmd_setOffhandSecondaryClass, 0 },
+  { "getoffhandsecondaryclass", PlayerCmd_getOffhandSecondaryClass, 0 },
+  { "beginlocationselection", PlayerCmd_BeginLocationSelection, 0 },
+  { "endlocationselection", PlayerCmd_EndLocationSelection, 0 },
+  { "weaponlockstart", PlayerCmd_WeaponLockStart, 0 },
+  { "weaponlockfinalize", PlayerCmd_WeaponLockFinalize, 0 },
+  { "weaponlockfree", PlayerCmd_WeaponLockFree, 0 },
+  { "weaponlocktargettooclose", PlayerCmd_WeaponLockTargetTooClose, 0 },
+  { "weaponlocknoclearance", PlayerCmd_WeaponLockNoClearance, 0 },
+  { "allowads", PlayerCmd_AllowADS, 0 },
+  { "allowjump", PlayerCmd_AllowJump, 0 },
+  { "allowsprint", PlayerCmd_AllowSprint, 0 },
+  { "allowmelee", PlayerCmd_AllowMelee, 0 },
+  { "setspreadoverride", PlayerCmd_SetSpreadOverride, 0 },
+  { "resetspreadoverride", PlayerCmd_ResetSpreadOverride, 0 },
+  { "setactionslot", PlayerCmd_SetActionSlot, 0 },
+  { "disableweapons", PlayerCmd_DisableWeapons, 0 },
+  { "enableweapons", PlayerCmd_EnableWeapons, 0 },
+  { "nightvisionforceoff", PlayerCmd_NightVisionForceOff, 0 },
+  { "getweaponslist", PlayerCmd_GetWeaponsList, 0 },
+  { "getweaponslistprimaries", PlayerCmd_GetWeaponsListPrimaries, 0 },
+  { "enableinvulnerability", PlayerCmd_EnableInvulnerability, 0 },
+  { "disableinvulnerability", PlayerCmd_DisableInvulnerability, 0 },
+  { "forceviewmodelanimation", PlayerCmd_ForceViewmodelAnimation, 0 },
+  { "disableturretdismount", PlayerCmd_DisableTurretDismount, 0 },
+  { "enableturretdismount", PlayerCmd_EnableTurretDismount, 0 },
+  { "uploadscore", PlayerCmd_UploadScore, 0 },
+  { "uploadtime", PlayerCmd_UploadTime, 0 }
+};
+
+
 void(__cdecl *__cdecl Player_GetMethod(const char **pName))(scr_entref_t)
 {
     int v1; // r6
     unsigned int v2; // r5
     const BuiltinMethodDef *i; // r7
     const char *actionString; // r10
-    _BYTE *v5; // r11
+    const char *v5; // r11
     int v6; // r8
 
     v1 = 0;
@@ -4159,7 +4270,7 @@ void __cdecl G_AddCommandNotify(volatile unsigned __int16 notify)
     {
         if (!alwaysfails)
             MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\g_client_script_cmd.cpp", 1022, 1, "inconceivable");
-        __lwsync();
+        //__lwsync();
     }
     *(volatile unsigned __int16 *)((char *)s_cmdNotify.data + ((2 * s_cmdNotify.write) & 0x7E)) = notify;
     if (v3 != (unsigned __int16)v3)
@@ -4188,7 +4299,7 @@ void __cdecl G_AddCommandNotify(volatile unsigned __int16 notify)
                 (unsigned __int16)String);
         *(volatile unsigned __int16 *)((char *)s_cmdNotify.data + ((2 * (s_cmdNotify.write + v4 + 2)) & 0x7E)) = v7;
     }
-    __lwsync();
+    //__lwsync();
     s_cmdNotify.write += v3 + 2;
 }
 

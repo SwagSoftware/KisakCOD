@@ -1734,7 +1734,6 @@ void __cdecl CG_SaveEntityPhysics(centity_s *cent, SaveGame *save)
     int physObjId; // r11
     char v6; // r11
     bool v7; // zf
-    SaveGame *memFile; // r3
     const char *modelName; // r29
     char v11; // [sp+50h] [-40h] BYREF
 
@@ -1748,8 +1747,7 @@ void __cdecl CG_SaveEntityPhysics(centity_s *cent, SaveGame *save)
     SaveMemory_SaveWrite(&v11, 1, save);
     if (v11)
     {
-        memFile = SaveMemory_GetMemoryFile(save);
-        Phys_ObjSave(cent->pose.physObjId, memFile);
+        Phys_ObjSave((dxBody*)cent->pose.physObjId, SaveMemory_GetMemoryFile(save));
         iassert(obj);
         modelName = DObjGetName(obj);
         iassert(modelName);
@@ -1771,11 +1769,11 @@ void __cdecl CG_LoadEntityPhysics(centity_s *cent, SaveGame *save)
 
     if (v8)
     {
-        cent->pose.physObjId = Phys_ObjLoad(PHYS_WORLD_FX, SaveMemory_GetMemoryFile(save));
+        cent->pose.physObjId = (uintptr_t)Phys_ObjLoad(PHYS_WORLD_FX, SaveMemory_GetMemoryFile(save));
         CString = MemFile_ReadCString(SaveMemory_GetMemoryFile(save));
         xmodel = R_RegisterModel(CString);
         iassert(xmodel);
-        Phys_ObjSetCollisionFromXModel(xmodel, PHYS_WORLD_FX, cent->pose.physObjId);
+        Phys_ObjSetCollisionFromXModel(xmodel, PHYS_WORLD_FX, (dxBody*)cent->pose.physObjId);
     }
 }
 
@@ -2080,7 +2078,7 @@ void __cdecl CG_SaveEntityFX(centity_s *cent, SaveGame *save)
     SaveMemory_SaveWrite(&v8, 4, save);
     if (v8)
     {
-        SaveMemory_SaveWrite(&cent->pose.44, 4, save);
+        SaveMemory_SaveWrite(&cent->pose.fx.triggerTime, 4, save);
         effect = cent->pose.fx.effect;
         if (effect)
             ClientEffectIndex = FX_GetClientEffectIndex(0, effect);
@@ -2096,9 +2094,10 @@ void __cdecl CG_LoadEntityFX(centity_s *cent, SaveGame *save)
     int v5; // [sp+54h] [-1Ch] BYREF
 
     SaveMemory_LoadRead(&v4, 4, save);
+
     if (v4)
     {
-        SaveMemory_LoadRead(&cent->pose.44, 4, save);
+        SaveMemory_LoadRead(&cent->pose.fx.triggerTime, 4, save);
         SaveMemory_LoadRead(&v5, 4, save);
         if (v5 == -1)
             cent->pose.fx.effect = 0;
@@ -2252,11 +2251,11 @@ void __cdecl CG_PredictiveSkinCEntity(GfxSceneEntity *sceneEnt)
     GfxSceneEntityInfo v2; // r11
     int cullIn; // r10
 
-    if (!sceneEnt)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\cgame\\cg_ents.cpp", 1730, 0, "%s", "sceneEnt");
+    iassert(sceneEnt);
+
     if (!cl_freemove->current.integer)
     {
-        v2.pose = (const cpose_t *)sceneEnt->info;
+        v2.pose = sceneEnt->info.pose;
         cullIn = v2.pose->cullIn;
         if (cullIn == 1)
         {

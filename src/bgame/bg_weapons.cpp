@@ -771,11 +771,14 @@ void __cdecl BG_GetSpreadForWeapon(
     }
     if (ps->spreadOverrideState == 1)
         *maxSpread = (float)ps->spreadOverride;
+
+#ifdef KISAK_MP
     if ((ps->perks & 2) != 0)
     {
         *minSpread = *minSpread * perk_weapSpreadMultiplier->current.value;
         *maxSpread = *maxSpread * perk_weapSpreadMultiplier->current.value;
     }
+#endif
 }
 
 void __cdecl PM_UpdateAimDownSightFlag(pmove_t *pm, pml_t *pml)
@@ -1402,8 +1405,10 @@ void __cdecl PM_UpdateHoldBreath(pmove_t *pm, pml_t *pml)
     weapDef = BG_GetWeaponDef(weapIndex);
     breathHoldTime = (int)(player_breath_hold_time->current.value * 1000.0);
     breathGaspTime = (int)(player_breath_gasp_time->current.value * 1000.0);
+#ifdef KISAK_MP
     if ((ps->perks & 0x10) != 0)
         breathHoldTime += (int)(perk_extraBreath->current.value * 1000.0);
+#endif
     if (breathHoldTime > 0)
     {
         if (ps->fWeaponPosFrac == 1.0
@@ -2174,7 +2179,11 @@ int __cdecl PM_Weapon_WeaponTimeAdjust(pmove_t *pm, pml_t *pml)
         || ps->weaponstate == 11
         || ps->weaponstate == 10
         || ps->weaponstate == 8)
+#ifdef KISAK_MP
         && (ps->perks & 4) != 0)
+#elif KISAK_SP
+        )
+#endif 
     {
         if (perk_weapReloadMultiplier->current.value == 0.0)
         {
@@ -2197,7 +2206,11 @@ int __cdecl PM_Weapon_WeaponTimeAdjust(pmove_t *pm, pml_t *pml)
         && ps->weaponstate != 12
         && ps->weaponstate != 13
         && ps->weaponstate != 14
+#ifdef KISAK_MP
         && (ps->perks & 8) != 0)
+#elif KISAK_SP
+        )
+#endif 
     {
         if (perk_weapRateMultiplier->current.value == 0.0)
         {
@@ -4442,3 +4455,20 @@ void __cdecl BG_StringCopy(uint8_t *member, const char *keyValue)
     } while (v2);
 }
 
+int BG_ValidateWeaponNumberOffhand(unsigned int weaponIndex)
+{
+    int result; // r3
+    OffhandClass offhandClass; // r11
+
+    if (weaponIndex >= bg_lastParsedWeaponIndex + 1)
+        return 0;
+    if (!weaponIndex)
+        return 1;
+    if (BG_GetWeaponDef(weaponIndex)->offhandClass == OFFHAND_CLASS_NONE)
+        return 0;
+    offhandClass = BG_GetWeaponDef(weaponIndex)->offhandClass;
+    result = 0;
+    if (offhandClass < OFFHAND_CLASS_COUNT)
+        return 1;
+    return result;
+}

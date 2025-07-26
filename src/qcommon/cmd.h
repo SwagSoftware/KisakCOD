@@ -91,4 +91,12 @@ const char **__cdecl Cmd_GetAutoCompleteFileList(const char *cmdName, int *fileC
 
 int Cmd_LocalClientNum();
 
+#ifdef KISAK_SP
+void Cmd_RegisterNotification(const char *commandString, const char *notifyString);
+void Cmd_CheckNotify();
+void Cmd_LoadNotifications(MemoryFile *memFile);
+void Cmd_SaveNotifications(MemoryFile *memFile);
+void Cmd_UnregisterAllNotifications();
+#endif
+
 extern CmdArgs sv_cmd_args;

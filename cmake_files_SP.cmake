@@ -630,8 +630,6 @@ set(QCOMMON
     "${SRC_DIR}/qcommon/net_chan.h"
     "${SRC_DIR}/qcommon/qcommon.h"
     "${SRC_DIR}/qcommon/statmonitor.cpp"
-    "${SRC_DIR}/qcommon/sv_msg_write_mp.cpp"
-    "${SRC_DIR}/qcommon/sv_msg_write_mp.h"
     "${SRC_DIR}/qcommon/threads.cpp"
     "${SRC_DIR}/qcommon/threads.h"
     "${SRC_DIR}/qcommon/threads_interlock.h"

@@ -37,13 +37,12 @@ void __cdecl TRACK_save_memory()
     track_static_alloc_internal(&saveMemoryGlob, 4722040, "saveMemoryGlob", 10);
 }
 
-SaveGame *__cdecl SaveMemory_GetMemoryFile(SaveGame *save)
+MemoryFile * SaveMemory_GetMemoryFile(SaveGame *save)
 {
-    if (!save)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\savememory.cpp", 149, 0, "%s", "save");
-    if (save->isDirectWriteActive)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\savememory.cpp", 150, 0, "%s", "!save->isDirectWriteActive");
-    return save;
+    iassert(save);
+    iassert(!save->isDirectWriteActive);
+
+    return (MemoryFile*)save;
 }
 
 SaveGame *__cdecl SaveMemory_GetSaveHandle(unsigned int type)

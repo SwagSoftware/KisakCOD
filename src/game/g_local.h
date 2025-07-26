@@ -292,6 +292,9 @@ void __cdecl EntInfo_Item(gentity_s *self, float *source);
 // g_client_script_cmd
 int __cdecl G_GetNeededStartAmmo(gentity_s *pSelf, WeaponDef *weapDef);
 void __cdecl InitializeAmmo(gentity_s *pSelf, int weaponIndex, unsigned __int8 weaponModel, int hadWeapon);
+void __cdecl G_FlushCommandNotifies();
+void __cdecl G_ProcessCommandNotifies();
+
 void __cdecl PlayerCmd_giveWeapon(scr_entref_t *entref);
 void __cdecl PlayerCmd_takeWeapon(scr_entref_t *entref);
 void __cdecl PlayerCmd_takeAllWeapons(scr_entref_t *entref);
@@ -305,9 +308,7 @@ void __cdecl PlayerCmd_switchToWeapon(scr_entref_t *entref);
 void __cdecl PlayerCmd_switchToOffhand(scr_entref_t *entref);
 void __cdecl PlayerCmd_giveStartAmmo(scr_entref_t *entref);
 void __cdecl PlayerCmd_giveMaxAmmo(scr_entref_t *entref);
-// local variable allocation has failed, the output may be wrong!
 void __cdecl PlayerCmd_getFractionStartAmmo(scr_entref_t *entref);
-// local variable allocation has failed, the output may be wrong!
 void __cdecl PlayerCmd_getFractionMaxAmmo(scr_entref_t *entref);
 void __cdecl PlayerCmd_setOrigin(scr_entref_t *entref);
 void __cdecl PlayerCmd_SetVelocity(scr_entref_t *entref);
@@ -322,8 +323,6 @@ void __cdecl PlayerCmd_adsButtonPressed(scr_entref_t *entref);
 void __cdecl PlayerCmd_meleeButtonPressed(scr_entref_t *entref);
 int __cdecl PlayerCmd_CheckButtonPressed();
 void __cdecl PlayerCmd_buttonPressed(scr_entref_t *entref);
-void __cdecl G_FlushCommandNotifies();
-void __cdecl G_ProcessCommandNotifies();
 void __cdecl PlayerCmd_notifyOnCommand(scr_entref_t *entref);
 void __cdecl PlayerCmd_playerADS(scr_entref_t *entref);
 void __cdecl PlayerCmd_isOnGround(scr_entref_t *entref);

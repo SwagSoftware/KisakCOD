@@ -1105,7 +1105,8 @@ struct cpose_t
     unsigned __int8 eTypeUnion;
     bool isRagdoll;
     int ragdollHandle;
-    int physObjId;
+    //int physObjId;
+    uintptr_t physObjId;
     volatile int cullIn;
     float origin[3];
     float angles[3];
@@ -2173,6 +2174,7 @@ WeaponDef *__cdecl BG_LoadWeaponDef(const char *name);
 WeaponDef *__cdecl BG_LoadWeaponDef_FastFile(const char *name);
 void __cdecl BG_AssertOffhandIndexOrNone(uint32_t offHandIndex);
 void __cdecl BG_StringCopy(uint8_t *member, const char *keyValue);
+int BG_ValidateWeaponNumberOffhand(unsigned int weaponIndex);
 
 
 // bg_vehicles_mp

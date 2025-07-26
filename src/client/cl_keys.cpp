@@ -1966,3 +1966,17 @@ void __cdecl Key_SetCatcher(int32_t localClientNum, int32_t catcher)
         clientUIActives[0].displayHUDWithKeycatchUI = 0;
 }
 
+
+int CL_IsKeyPressed(int localClientNum, const char *keyName)
+{
+    int keynum; // r30
+
+    keynum = Key_StringToKeynum(keyName);
+
+    if (keynum < 0)
+        return 0;
+
+    iassert(localClientNum >= 0 && localClientNum < 1);
+    
+    return playerKeys[localClientNum].keys[keynum].down;
+}

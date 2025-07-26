@@ -8,7 +8,7 @@
 
 unsigned int __cdecl Com_BlockChecksum32(const void *buffer, unsigned int length);
 void __cdecl TRACK_save_memory();
-SaveGame *__cdecl SaveMemory_GetMemoryFile(SaveGame *save);
+MemoryFile *SaveMemory_GetMemoryFile(SaveGame *save);
 SaveGame *__cdecl SaveMemory_GetSaveHandle(unsigned int type);
 void __cdecl SaveMemory_ClearSaveGame(SaveGame *saveGame, bool isUsingGlobalBuffer);
 void *SaveMemory_ResetGameBuffers();

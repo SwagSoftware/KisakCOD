@@ -519,6 +519,14 @@ void __cdecl QuatMultiplyEquals(const float *in, float *inout);
 void __cdecl MatrixTransformVectorQuatTransEquals(const struct DObjAnimMat *in, float *inout);
 void __cdecl R_TransformSkelMat(const float *origin, const DObjSkelMat *mat, float *out);
 
+
+inline float ClampFloat(float x, float minval, float maxval)
+{
+    iassert(minval < maxval);
+
+    return CLAMP(x, minval, maxval);
+}
+
 /*
 ===========================================================================
 Copyright (C) 1999-2005 Id Software, Inc.

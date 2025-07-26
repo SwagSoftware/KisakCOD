@@ -1231,3 +1231,217 @@ void __cdecl SV_Cmd_ArgvBuffer(int32_t  arg, char *buffer, int32_t  bufferLength
     v3 = (char *)SV_Cmd_Argv(arg);
     I_strncpyz(buffer, v3, bufferLength);
 }
+
+#ifdef KISAK_SP
+#include <script/scr_vm.h>
+#include <game/g_local.h>
+
+struct CmdScriptNotify
+{
+    unsigned __int16 command;
+    unsigned __int16 notify;
+};
+
+int dword_8359AD3C;
+CmdScriptNotify cmd_notify[64]{ 0 };
+
+void Cmd_RegisterNotification(const char *commandString, const char *notifyString)
+{
+    unsigned int LowercaseString; // r30
+    unsigned int String; // r3
+    unsigned int v5; // r26
+    unsigned int v6; // r9
+    int v7; // r11
+    unsigned __int16 *p_notify; // r10
+
+    LowercaseString = SL_GetLowercaseString(commandString, 0);
+    String = SL_GetString(notifyString, 0);
+    v5 = String;
+    v6 = 0;
+    v7 = dword_8359AD3C;
+    if (dword_8359AD3C)
+    {
+        p_notify = &cmd_notify[0].notify;
+        while (*(p_notify - 1) != LowercaseString || *p_notify != String)
+        {
+            ++v6;
+            p_notify += 2;
+            if (v6 >= dword_8359AD3C)
+                goto LABEL_6;
+        }
+        SL_RemoveRefToString(LowercaseString);
+        SL_RemoveRefToString(v5);
+    }
+    else
+    {
+    LABEL_6:
+        if (dword_8359AD3C == 64)
+        {
+            Scr_Error(va("Cannot currently register more than %i commands\n", 64));
+            v7 = dword_8359AD3C;
+        }
+
+        if (LowercaseString != (unsigned __int16)LowercaseString)
+        {
+            MyAssertHandler(
+                "c:\\trees\\cod3\\cod3src\\src\\qcommon\\../universal/assertive.h",
+                281,
+                0,
+                "i == static_cast< Type >( i )\n\t%i, %i",
+                LowercaseString,
+                (unsigned __int16)LowercaseString);
+            v7 = dword_8359AD3C;
+        }
+        cmd_notify[v7].command = LowercaseString;
+        if (v5 != (unsigned __int16)v5)
+        {
+            MyAssertHandler(
+                "c:\\trees\\cod3\\cod3src\\src\\qcommon\\../universal/assertive.h",
+                281,
+                0,
+                "i == static_cast< Type >( i )\n\t%i, %i",
+                v5,
+                (unsigned __int16)v5);
+            v7 = dword_8359AD3C;
+        }
+        cmd_notify[v7].notify = v5;
+        dword_8359AD3C = v7 + 1;
+    }
+}
+void Cmd_CheckNotify()
+{
+    const char *v0; // r3
+    unsigned int LowercaseString; // r28
+    unsigned int v2; // r11
+    unsigned int v3; // r30
+    unsigned __int16 *p_notify; // r31
+
+    iassert(Sys_IsMainThread());
+
+    if (dword_8359AD3C)
+    {
+        if (!cl_paused->current.integer)
+        {
+            v0 = Cmd_Argv(0);
+            LowercaseString = SL_FindLowercaseString(v0);
+            if (LowercaseString)
+            {
+                v2 = dword_8359AD3C;
+                v3 = 0;
+                if (dword_8359AD3C)
+                {
+                    p_notify = &cmd_notify[0].notify;
+                    do
+                    {
+                        if (LowercaseString == *(p_notify - 1))
+                        {
+                            G_AddCommandNotify(*p_notify);
+                            v2 = dword_8359AD3C;
+                        }
+                        ++v3;
+                        p_notify += 2;
+                    } while (v3 < v2);
+                }
+            }
+        }
+    }
+}
+void Cmd_LoadNotifications(MemoryFile *memFile)
+{
+    int v2; // r24
+    int v3; // r26
+    unsigned __int16 *p_notify; // r30
+    const char *CString; // r3
+    unsigned int String; // r7
+    unsigned __int16 v7; // r31
+    const char *v8; // r3
+    unsigned int v9; // r7
+    unsigned __int16 v10; // r31
+    int v11; // [sp+50h] [-50h] BYREF
+
+    dword_8359AD3C = 0;
+    MemFile_ReadData(memFile, 4, (unsigned char*)&v11);
+    v2 = v11;
+    if (v11)
+    {
+        v3 = v11;
+        p_notify = &cmd_notify[0].notify;
+        do
+        {
+            CString = MemFile_ReadCString(memFile);
+            String = SL_GetString(CString, 0);
+            v7 = String;
+            if (String != (unsigned __int16)String)
+                MyAssertHandler(
+                    "c:\\trees\\cod3\\cod3src\\src\\qcommon\\../universal/assertive.h",
+                    281,
+                    0,
+                    "i == static_cast< Type >( i )\n\t%i, %i",
+                    String,
+                    (unsigned __int16)String);
+            *(p_notify - 1) = v7;
+            v8 = MemFile_ReadCString(memFile);
+            v9 = SL_GetString(v8, 0);
+            v10 = v9;
+            if (v9 != (unsigned __int16)v9)
+                MyAssertHandler(
+                    "c:\\trees\\cod3\\cod3src\\src\\qcommon\\../universal/assertive.h",
+                    281,
+                    0,
+                    "i == static_cast< Type >( i )\n\t%i, %i",
+                    v9,
+                    (unsigned __int16)v9);
+            --v3;
+            *p_notify = v10;
+            p_notify += 2;
+        } while (v3);
+    }
+    dword_8359AD3C = v2;
+}
+void Cmd_SaveNotifications(MemoryFile *memFile)
+{
+    unsigned int v2; // r30
+    unsigned __int16 *p_notify; // r31
+    const char *v4; // r3
+    const char *v5; // r3
+    int v6; // [sp+50h] [-30h] BYREF
+
+    v6 = dword_8359AD3C;
+    MemFile_WriteData(memFile, 4, &v6);
+    v2 = 0;
+    if (dword_8359AD3C)
+    {
+        p_notify = &cmd_notify[0].notify;
+        do
+        {
+            v4 = SL_ConvertToString(*(p_notify - 1));
+            MemFile_WriteCString(memFile, v4);
+            v5 = SL_ConvertToString(*p_notify);
+            MemFile_WriteCString(memFile, v5);
+            ++v2;
+            p_notify += 2;
+        } while (v2 < dword_8359AD3C);
+    }
+}
+void Cmd_UnregisterAllNotifications()
+{
+    unsigned int v0; // r30
+    unsigned __int16 *p_notify; // r31
+
+    iassert(Sys_IsMainThread());
+
+    v0 = 0;
+    if (dword_8359AD3C)
+    {
+        p_notify = &cmd_notify[0].notify;
+        do
+        {
+            SL_RemoveRefToString(*(p_notify - 1));
+            SL_RemoveRefToString(*p_notify);
+            ++v0;
+            p_notify += 2;
+        } while (v0 < dword_8359AD3C);
+    }
+    dword_8359AD3C = 0;
+}
+#endif
