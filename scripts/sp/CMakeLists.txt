@@ -1,9 +1,9 @@
 # Build Guard
-if (NOT DEFINED KISAK_SP)
-    return()
-else()
+#if (NOT DEFINED KISAK_SP)
+#    return()
+#else()
     message("----- KisakCOD Client(SP) -----")
-endif()
+#endif()
 
 project(KisakCOD-sp)
 
@@ -64,4 +64,4 @@ include(${SCRIPTS_DIR}/pre_build.cmake)
 include(${SCRIPTS_DIR}/post_build.cmake)
 
 # Tracey
-include(${SCRIPTS_DIR}/extern/tracey.cmake)
+include(${SCRIPTS_DIR}/extern/tracy.cmake)

@@ -15,13 +15,13 @@ execute_process(
 
 # Add a custom target to increment the build number
 add_custom_target(
-  update_build_number
+  update_build_number_${PROJECT_NAME}
   COMMAND ${SCRIPTS_DIR}/increment_build${SCRIPT_EXT} ${SRC_DIR} ${GIT_COMMIT_COUNT}
   COMMENT "Running build number script..."
 )
 
 # We want to update the build number before building
-add_dependencies(${PROJECT_NAME} update_build_number)
+add_dependencies(${PROJECT_NAME} update_build_number_${PROJECT_NAME})
 
 # Set Win32 Visual Studio Specifics
 set_target_properties(${PROJECT_NAME} PROPERTIES

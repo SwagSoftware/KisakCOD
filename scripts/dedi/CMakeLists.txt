@@ -1,9 +1,9 @@
 # Build Guard
-if (NOT DEFINED KISAK_DEDICATED)
-    return()
-else()
+#if (NOT DEFINED DEDICATED) # This should be renamed to KISAK_DEDICATED
+#    return()
+#else()
     message("----- KisakCOD Dedicated(MP) -----")
-endif()
+#endif()
 
 project(KisakCOD-dedi)
 
@@ -12,6 +12,7 @@ include(${SCRIPTS_DIR}/common_files.cmake)
 
 # Include all files specific to mp
 include(${SCRIPTS_DIR}/mp/mp_files.cmake)
+include(dedi_files.cmake)
 
 # Create the source groups
 include(${SCRIPTS_DIR}/source_groups.cmake)
@@ -57,11 +58,11 @@ add_executable(${PROJECT_NAME}
     ${STEAM_HEADERS}
 )
 
-target_compile_definitions(${PROJECT_NAME} PUBLIC KISAK_MP KISAK_DEDICATED)
+target_compile_definitions(${PROJECT_NAME} PUBLIC KISAK_MP KISAK_DEDICATED DEDICATED)
 
 # We need all of the pre/post-build commands
 include(${SCRIPTS_DIR}/pre_build.cmake)
 include(${SCRIPTS_DIR}/post_build.cmake)
 
 # Tracey
-include(${SCRIPTS_DIR}/extern/tracey.cmake)
+include(${SCRIPTS_DIR}/extern/tracy.cmake)
