@@ -34,6 +34,9 @@ echo %BUILD_NUMBER% > "%BUILD_FILE%"
 (
     echo #pragma once
     echo #define BUILD_NUMBER %BUILD_NUMBER%
+    echo:
+    echo char ^*__cdecl getBuildNumber^(^)^;
+    echo int getBuildNumberAsInt^(^)^;
 ) > "%HEADER_FILE%"
 
 echo Updated build number to %BUILD_NUMBER%

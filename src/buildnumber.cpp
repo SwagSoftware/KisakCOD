@@ -1,4 +1,4 @@
-#include "buildnumber_mp.h"
+#include "buildnumber.h"
 #include <stdio.h>
 
 char buildnumbuf[128];

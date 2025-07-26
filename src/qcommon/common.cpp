@@ -24,7 +24,7 @@
 #include <universal/com_constantconfigstrings.h>
 #include <universal/physicalmemory.h>
 #include <win32/win_storage.h>
-#include <buildnumber_mp.h>
+#include <buildnumber.h>
 #include <win32/win_net.h>
 #include <xanim/dobj.h>
 #include <sound/snd_local.h>
