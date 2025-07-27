@@ -2570,7 +2570,7 @@ void __cdecl Path_ConnectPath(pathnode_t *node, pathlink_s *link)
     Path_ValidateNode(node);
 }
 
-static void __fastcall Path_ConnectPath_0(pathnode_t *node, int toNodeNum)
+static void __cdecl Path_ConnectPath_0(pathnode_t *node, int toNodeNum)
 {
     int totalLinkCount; // r8
     int wLinkCount; // r11
@@ -2639,7 +2639,7 @@ void __cdecl Path_ConnectPathsForEntity(gentity_s *ent)
     }
 }
 
-void __fastcall Path_DisconnectPath_0(gentity_s *ent, pathnode_t *node, pathlink_s *link)
+void __cdecl Path_DisconnectPath_0(gentity_s *ent, pathnode_t *node, pathlink_s *link)
 {
     int next; // r29
     unsigned __int16 v7; // r28

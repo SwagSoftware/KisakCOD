@@ -491,7 +491,7 @@ int __cdecl SV_GameCommand()
 #include "sv_public.h"
 #include <win32/win_local.h>
 
-void __fastcall SV_CheckLoadLevel(SaveGame *save)
+void __cdecl SV_CheckLoadLevel(SaveGame *save)
 {
     G_CheckLoadGame(sv.checksum, save);
     com_time = G_GetTime();
@@ -561,7 +561,7 @@ void __cdecl SV_InitGameProgs(unsigned int randomSeed, int savegame, SaveGame **
 
 
 
-void __fastcall SV_InitGameVM(unsigned int randomSeed, int restart, int savegame, SaveGame **save, int loadScripts)
+void __cdecl SV_InitGameVM(unsigned int randomSeed, int restart, int savegame, SaveGame **save, int loadScripts)
 {
     int v10; // r10
     int v11; // r9

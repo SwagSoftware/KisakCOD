@@ -919,7 +919,7 @@ void __cdecl G_Damage(
     }
 }
 
-int __fastcall G_CanRadiusDamageFromPos(
+int __cdecl G_CanRadiusDamageFromPos(
     gentity_s *targ,
     const float *targetPos,
     gentity_s *inflictor,

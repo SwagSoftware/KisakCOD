@@ -4,7 +4,7 @@
 #error This file is Single-Player only
 #endif
 
-void __fastcall VP_AddDebugLine(float *start, float *end, int forceDraw)
+void __cdecl VP_AddDebugLine(float *start, float *end, int forceDraw)
 {
     double v5; // fp9
     double v6; // fp13
@@ -69,7 +69,7 @@ void __fastcall VP_AddDebugLine(float *start, float *end, int forceDraw)
     }
 }
 
-void __fastcall VP_SetScriptVariable(const char *key, const char *value, vehicle_node_t *node)
+void __cdecl VP_SetScriptVariable(const char *key, const char *value, vehicle_node_t *node)
 {
     unsigned int Field; // r30
     long double v6; // fp2
@@ -113,7 +113,7 @@ void __fastcall VP_SetScriptVariable(const char *key, const char *value, vehicle
     }
 }
 
-void __fastcall VP_ParseField(const char *key, const char *value, vehicle_node_t *node)
+void __cdecl VP_ParseField(const char *key, const char *value, vehicle_node_t *node)
 {
     vn_field_t *v4; // r31
     long double v7; // fp2
@@ -176,7 +176,7 @@ void __fastcall VP_ParseField(const char *key, const char *value, vehicle_node_t
     }
 }
 
-void __fastcall VP_ParseFields(vehicle_node_t *node)
+void __cdecl VP_ParseFields(vehicle_node_t *node)
 {
     int v2; // r30
     const char **v3; // r31
@@ -201,7 +201,7 @@ void __fastcall VP_ParseFields(vehicle_node_t *node)
     }
 }
 
-void __fastcall VP_ZeroNode(vehicle_node_t *node)
+void __cdecl VP_ZeroNode(vehicle_node_t *node)
 {
     node->name = 0;
     node->target = 0;
@@ -209,7 +209,7 @@ void __fastcall VP_ZeroNode(vehicle_node_t *node)
     node->script_noteworthy = 0;
 }
 
-void __fastcall VP_ClearNode(vehicle_node_t *node)
+void __cdecl VP_ClearNode(vehicle_node_t *node)
 {
     Scr_SetString(&node->name, 0);
     Scr_SetString(&node->target, 0);
@@ -217,7 +217,7 @@ void __fastcall VP_ClearNode(vehicle_node_t *node)
     Scr_SetString(&node->script_noteworthy, 0);
 }
 
-void __fastcall VP_InitNode(vehicle_node_t *node, __int16 nodeIdx)
+void __cdecl VP_InitNode(vehicle_node_t *node, __int16 nodeIdx)
 {
     node->index = nodeIdx;
     node->speed = -1.0;
@@ -241,7 +241,7 @@ void __fastcall VP_InitNode(vehicle_node_t *node, __int16 nodeIdx)
     node->prevIdx = -1;
 }
 
-void __fastcall VP_CopyNode(const vehicle_node_t *src, vehicle_node_t *dst)
+void __cdecl VP_CopyNode(const vehicle_node_t *src, vehicle_node_t *dst)
 {
     Scr_SetString(&dst->name, src->name);
     Scr_SetString(&dst->target, src->target);
@@ -265,7 +265,7 @@ void __fastcall VP_CopyNode(const vehicle_node_t *src, vehicle_node_t *dst)
     dst->prevIdx = src->prevIdx;
 }
 
-int __fastcall VP_GetNodeIndex(unsigned __int16 name, float *origin)
+int __cdecl VP_GetNodeIndex(unsigned __int16 name, float *origin)
 {
     int v2; // r7
     int result; // r3
@@ -295,7 +295,7 @@ int __fastcall VP_GetNodeIndex(unsigned __int16 name, float *origin)
     return result;
 }
 
-float __fastcall VP_CalcNodeSpeed(__int16 nodeIdx)
+float __cdecl VP_CalcNodeSpeed(__int16 nodeIdx)
 {
     vehicle_node_t *v1; // r11
     double v3; // fp13
@@ -382,7 +382,7 @@ float __fastcall VP_CalcNodeSpeed(__int16 nodeIdx)
     return *((float *)&_FP1 + 1);
 }
 
-float __fastcall VP_CalcNodeLookAhead(__int16 nodeIdx)
+float __cdecl VP_CalcNodeLookAhead(__int16 nodeIdx)
 {
     vehicle_node_t *v1; // r11
     double v3; // fp13
@@ -469,7 +469,7 @@ float __fastcall VP_CalcNodeLookAhead(__int16 nodeIdx)
     return *((float *)&_FP1 + 1);
 }
 
-void __fastcall VP_CalcNodeAngles(__int16 nodeIdx, float *angles)
+void __cdecl VP_CalcNodeAngles(__int16 nodeIdx, float *angles)
 {
     vehicle_node_t *v2; // r11
     double v4; // fp0
@@ -598,7 +598,7 @@ LABEL_24:
     }
 }
 
-float __fastcall VP_GetSpeed(const vehicle_pathpos_t *vpp)
+float __cdecl VP_GetSpeed(const vehicle_pathpos_t *vpp)
 {
     vehicle_node_t *v1; // r11
     int nextIdx; // r9
@@ -613,7 +613,7 @@ float __fastcall VP_GetSpeed(const vehicle_pathpos_t *vpp)
     return *((float *)&speed + 1);
 }
 
-float __fastcall VP_GetLookAhead(const vehicle_pathpos_t *vpp)
+float __cdecl VP_GetLookAhead(const vehicle_pathpos_t *vpp)
 {
     vehicle_node_t *v1; // r11
     int nextIdx; // r9
@@ -628,7 +628,7 @@ float __fastcall VP_GetLookAhead(const vehicle_pathpos_t *vpp)
     return *((float *)&lookAhead + 1);
 }
 
-float __fastcall VP_GetSlide(const vehicle_pathpos_t *vpp)
+float __cdecl VP_GetSlide(const vehicle_pathpos_t *vpp)
 {
     vehicle_node_t *v1; // r11
     __int16 nextIdx; // r9
@@ -668,7 +668,7 @@ LABEL_3:
     return *((float *)&frac + 1);
 }
 
-void __fastcall VP_GetAngles(const vehicle_pathpos_t *vpp, float *angles)
+void __cdecl VP_GetAngles(const vehicle_pathpos_t *vpp, float *angles)
 {
     vehicle_node_t *v4; // r11
     int nextIdx; // r9
@@ -744,7 +744,7 @@ LABEL_13:
     }
 }
 
-void __fastcall VP_GetLookAheadXYZ(const vehicle_pathpos_t *vpp, float *lookXYZ)
+void __cdecl VP_GetLookAheadXYZ(const vehicle_pathpos_t *vpp, float *lookXYZ)
 {
     __int16 v2; // r10
     vehicle_node_t *v3; // r11
@@ -783,7 +783,7 @@ LABEL_8:
     lookXYZ[2] = (float)(v3->dir[2] * (float)v4) + v3->origin[2];
 }
 
-int __fastcall VP_UpdatePathPos(vehicle_pathpos_t *vpp, const float *dir, __int16 nodeTest)
+int __cdecl VP_UpdatePathPos(vehicle_pathpos_t *vpp, const float *dir, __int16 nodeTest)
 {
     __int16 nodeIdx; // r8
     double frac; // fp6
@@ -872,7 +872,7 @@ LABEL_15:
     return v5;
 }
 
-void __fastcall VP_BeginSwitchNode(const vehicle_pathpos_t *vpp)
+void __cdecl VP_BeginSwitchNode(const vehicle_pathpos_t *vpp)
 {
     int name; // r8
     vehicle_node_t *switchNode; // r3
@@ -901,7 +901,7 @@ void __fastcall VP_BeginSwitchNode(const vehicle_pathpos_t *vpp)
         VP_CopyNode(switchNode, &s_nodes[v3]);
 }
 
-void __fastcall VP_EndSwitchNode(const vehicle_pathpos_t *vpp)
+void __cdecl VP_EndSwitchNode(const vehicle_pathpos_t *vpp)
 {
     __int16 v1; // r10
     int v2; // r11
@@ -926,12 +926,12 @@ void __fastcall VP_EndSwitchNode(const vehicle_pathpos_t *vpp)
         VP_CopyNode(&vpp->switchNode[1], &s_nodes[v1]);
 }
 
-void __fastcall G_InitVehiclePaths()
+void __cdecl G_InitVehiclePaths()
 {
     s_numNodes = 0;
 }
 
-void __fastcall G_FreeVehiclePaths()
+void __cdecl G_FreeVehiclePaths()
 {
     int v0; // r30
     vehicle_node_t *v1; // r31
@@ -953,7 +953,7 @@ void __fastcall G_FreeVehiclePaths()
     s_numNodes = 0;
 }
 
-void __fastcall G_FreeVehiclePathsScriptInfo()
+void __cdecl G_FreeVehiclePathsScriptInfo()
 {
     int v0; // r31
 
@@ -968,7 +968,7 @@ void __fastcall G_FreeVehiclePathsScriptInfo()
     }
 }
 
-void __fastcall G_SetupVehiclePaths()
+void __cdecl G_SetupVehiclePaths()
 {
     __int16 v0; // r5
     int v1; // r7
@@ -1137,7 +1137,7 @@ void __fastcall G_SetupVehiclePaths()
     }
 }
 
-void __fastcall G_VehInitPathPos(vehicle_pathpos_t *vpp)
+void __cdecl G_VehInitPathPos(vehicle_pathpos_t *vpp)
 {
     vpp->frac = 0.0;
     vpp->endOfPath = 0;
@@ -1194,7 +1194,7 @@ void __fastcall G_VehInitPathPos(vehicle_pathpos_t *vpp)
     vpp->switchNode[1].prevIdx = -1;
 }
 
-void __fastcall G_VehFreePathPos(vehicle_pathpos_t *vpp)
+void __cdecl G_VehFreePathPos(vehicle_pathpos_t *vpp)
 {
     vehicle_node_t *switchNode; // r31
 
@@ -1209,7 +1209,7 @@ void __fastcall G_VehFreePathPos(vehicle_pathpos_t *vpp)
     Scr_SetString(&vpp->switchNode[1].script_noteworthy, 0);
 }
 
-void __fastcall G_VehSetUpPathPos(vehicle_pathpos_t *vpp, __int16 nodeIdx)
+void __cdecl G_VehSetUpPathPos(vehicle_pathpos_t *vpp, __int16 nodeIdx)
 {
     vehicle_node_t *v2; // r9
     double v3; // fp13
@@ -1276,7 +1276,7 @@ void __fastcall G_VehSetUpPathPos(vehicle_pathpos_t *vpp, __int16 nodeIdx)
     vpp->switchNode[1].prevIdx = -1;
 }
 
-int __fastcall G_VehUpdatePathPos(vehicle_pathpos_t *vpp, __int16 testNode)
+int __cdecl G_VehUpdatePathPos(vehicle_pathpos_t *vpp, __int16 testNode)
 {
     float *v5; // r4
     double v6; // fp0
@@ -1346,7 +1346,7 @@ int __fastcall G_VehUpdatePathPos(vehicle_pathpos_t *vpp, __int16 testNode)
     }
 }
 
-void __fastcall G_VehSetSwitchNode(vehicle_pathpos_t *vpp, __int16 srcNodeIdx, __int16 dstNodeIdx)
+void __cdecl G_VehSetSwitchNode(vehicle_pathpos_t *vpp, __int16 srcNodeIdx, __int16 dstNodeIdx)
 {
     vehicle_node_t *v6; // r29
     float *origin; // r10
@@ -1419,12 +1419,12 @@ void __fastcall G_VehSetSwitchNode(vehicle_pathpos_t *vpp, __int16 srcNodeIdx, _
     }
 }
 
-void __fastcall TRACK_g_vehicle_path()
+void __cdecl TRACK_g_vehicle_path()
 {
     track_static_alloc_internal(s_nodes, 272000, "s_nodes", 9);
 }
 
-void __fastcall SP_info_vehicle_node(int rotated)
+void __cdecl SP_info_vehicle_node(int rotated)
 {
     __int16 v2; // r11
     double v3; // fp13
@@ -1477,7 +1477,7 @@ void __fastcall SP_info_vehicle_node(int rotated)
         v6->speed = v6->speed * (float)17.6;
 }
 
-int __fastcall GScr_GetVehicleNodeIndex(scr_entref_t *index, unsigned int a2)
+int __cdecl GScr_GetVehicleNodeIndex(scr_entref_t *index, unsigned int a2)
 {
     scr_entref_t *EntityRef; // [sp+50h] [-20h]
 
@@ -1500,7 +1500,7 @@ int __fastcall GScr_GetVehicleNodeIndex(scr_entref_t *index, unsigned int a2)
     }
 }
 
-void __fastcall GScr_AddFieldsForVehicleNode()
+void __cdecl GScr_AddFieldsForVehicleNode()
 {
     vn_field_t *v0; // r28
     int v1; // r30
@@ -1525,7 +1525,7 @@ void __fastcall GScr_AddFieldsForVehicleNode()
     }
 }
 
-void __fastcall GScr_GetVehicleNodeField(unsigned int entnum, unsigned int offset)
+void __cdecl GScr_GetVehicleNodeField(unsigned int entnum, unsigned int offset)
 {
     if (offset >= 8)
         MyAssertHandler(
@@ -1546,7 +1546,7 @@ void __fastcall GScr_GetVehicleNodeField(unsigned int entnum, unsigned int offse
     Scr_GetGenericField((unsigned __int8 *)&s_nodes[entnum], vn_fields[offset].type, vn_fields[offset].ofs);
 }
 
-void __fastcall GScr_GetVehicleNode()
+void __cdecl GScr_GetVehicleNode()
 {
     unsigned int ConstString; // r25
     const char *String; // r3
@@ -1603,7 +1603,7 @@ void __fastcall GScr_GetVehicleNode()
     }
 }
 
-void __fastcall GScr_GetVehicleNodeArray()
+void __cdecl GScr_GetVehicleNodeArray()
 {
     unsigned int ConstString; // r27
     const char *String; // r3
@@ -1655,7 +1655,7 @@ void __fastcall GScr_GetVehicleNodeArray()
     }
 }
 
-void __fastcall GScr_GetAllVehicleNodes()
+void __cdecl GScr_GetAllVehicleNodes()
 {
     int v0; // r31
 
@@ -1672,7 +1672,7 @@ void __fastcall GScr_GetAllVehicleNodes()
     }
 }
 
-void __fastcall VP_DrawPath(const vehicle_pathpos_t *vpp)
+void __cdecl VP_DrawPath(const vehicle_pathpos_t *vpp)
 {
     int v2; // r29
     int v3; // r30
@@ -1745,7 +1745,7 @@ LABEL_11:
     }
 }
 
-void __fastcall G_DrawVehiclePaths()
+void __cdecl G_DrawVehiclePaths()
 {
     __int16 v0; // r29
     int v1; // r31

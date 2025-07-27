@@ -5,12 +5,12 @@
 #include "xanim_readwrite.h"
 #include <script/scr_readwrite.h>
 
-void __fastcall XAnimArchiveAnimState(XAnimState *state, MemoryFile *memFile)
+void __cdecl XAnimArchiveAnimState(XAnimState *state, MemoryFile *memFile)
 {
     MemFile_ArchiveData(memFile, 32, state);
 }
 
-void __fastcall XAnimLoadAnimInfo(XAnimInfo *info, MemoryFile *memFile)
+void __cdecl XAnimLoadAnimInfo(XAnimInfo *info, MemoryFile *memFile)
 {
     _WORD v4[4]; // [sp+50h] [-20h] BYREF
 
@@ -24,7 +24,7 @@ void __fastcall XAnimLoadAnimInfo(XAnimInfo *info, MemoryFile *memFile)
     MemFile_ArchiveData(memFile, 32, &info->state);
 }
 
-void __fastcall XAnimSaveAnimInfo(XAnimInfo *info, MemoryFile *memFile)
+void __cdecl XAnimSaveAnimInfo(XAnimInfo *info, MemoryFile *memFile)
 {
     const char *v4; // r3
     _WORD v5[4]; // [sp+50h] [-20h] BYREF
@@ -50,7 +50,7 @@ void __fastcall XAnimSaveAnimInfo(XAnimInfo *info, MemoryFile *memFile)
     MemFile_ArchiveData(memFile, 32, &info->state);
 }
 
-void __fastcall XAnimLoadAnimTree(DObj_s *obj, MemoryFile *memFile)
+void __cdecl XAnimLoadAnimTree(DObj_s *obj, MemoryFile *memFile)
 {
     unsigned int i; // r4
     XAnimInfo *v5; // r3
@@ -72,7 +72,7 @@ void __fastcall XAnimLoadAnimTree(DObj_s *obj, MemoryFile *memFile)
     }
 }
 
-void __fastcall XAnimSaveAnimTree_r(const XAnimTree_s *tree, MemoryFile *memFile, int infoIndex)
+void __cdecl XAnimSaveAnimTree_r(const XAnimTree_s *tree, MemoryFile *memFile, int infoIndex)
 {
     XAnimInfo *info; // r28
     unsigned int children; // r31
@@ -97,7 +97,7 @@ void __fastcall XAnimSaveAnimTree_r(const XAnimTree_s *tree, MemoryFile *memFile
     }
 }
 
-void __fastcall XAnimSaveAnimTree(const DObj_s *obj, MemoryFile *memFile)
+void __cdecl XAnimSaveAnimTree(const DObj_s *obj, MemoryFile *memFile)
 {
     XAnimTree_s *tree; // r3
     __int16 v5[4]; // [sp+50h] [-20h] BYREF

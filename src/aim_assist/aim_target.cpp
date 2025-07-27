@@ -15,12 +15,12 @@ AimTargetGlob atGlob;
 
 const dvar_s *aim_target_sentient_radius;
 
-void __fastcall TRACK_aim_target()
+void __cdecl TRACK_aim_target()
 {
     track_static_alloc_internal(&atGlob, 5640, "atGlob", 10);
 }
 
-const dvar_s *__fastcall AimTarget_RegisterDvars(int a1, unsigned __int16 a2, const char *a3)
+const dvar_s *__cdecl AimTarget_RegisterDvars(int a1, unsigned __int16 a2, const char *a3)
 {
     const dvar_s *result; // r3
 
@@ -29,7 +29,7 @@ const dvar_s *__fastcall AimTarget_RegisterDvars(int a1, unsigned __int16 a2, co
     return result;
 }
 
-void __fastcall AimTarget_Init()
+void __cdecl AimTarget_Init()
 {
     const char *v0; // r5
     unsigned __int16 v1; // r4
@@ -39,12 +39,12 @@ void __fastcall AimTarget_Init()
     Cbuf_InsertText(0, "exec devgui_aimassist\n");
 }
 
-void __fastcall AimTarget_ClearTargetList()
+void __cdecl AimTarget_ClearTargetList()
 {
     atGlob.targetCount = 0;
 }
 
-int __fastcall AimTarget_CompareTargets(const AimTarget *targetA, const AimTarget *targetB)
+int __cdecl AimTarget_CompareTargets(const AimTarget *targetA, const AimTarget *targetB)
 {
     double worldDistSqr; // fp0
     double v5; // fp13
@@ -64,7 +64,7 @@ int __fastcall AimTarget_CompareTargets(const AimTarget *targetA, const AimTarge
     return result;
 }
 
-void __fastcall AimTarget_AddTargetToList(const AimTarget *target)
+void __cdecl AimTarget_AddTargetToList(const AimTarget *target)
 {
     int v2; // r29
     int targetCount; // r11
@@ -129,7 +129,7 @@ void __fastcall AimTarget_AddTargetToList(const AimTarget *target)
     }
 }
 
-void __fastcall AimTarget_GetTargetBounds(const gentity_s *targetEnt, float *mins, float *maxs)
+void __cdecl AimTarget_GetTargetBounds(const gentity_s *targetEnt, float *mins, float *maxs)
 {
     const dvar_s *v6; // r11
     double v7; // fp13
@@ -166,7 +166,7 @@ void __fastcall AimTarget_GetTargetBounds(const gentity_s *targetEnt, float *min
     }
 }
 
-float __fastcall AimTarget_GetTargetRadius(const gentity_s *targetEnt)
+float __cdecl AimTarget_GetTargetRadius(const gentity_s *targetEnt)
 {
     double value; // fp1
     float v4[4]; // [sp+50h] [-30h] BYREF
@@ -186,7 +186,7 @@ float __fastcall AimTarget_GetTargetRadius(const gentity_s *targetEnt)
     return *((float *)&value + 1);
 }
 
-void __fastcall AimTarget_GetTargetCenter(const gentity_s *targetEnt, float *center)
+void __cdecl AimTarget_GetTargetCenter(const gentity_s *targetEnt, float *center)
 {
     double v4; // fp12
     double v5; // fp11
@@ -212,7 +212,7 @@ void __fastcall AimTarget_GetTargetCenter(const gentity_s *targetEnt, float *cen
     center[2] = targetEnt->r.currentOrigin[2] + (float)((float)v5 * (float)0.5);
 }
 
-int __fastcall AimTarget_IsTargetValid(const gentity_s *targetEnt)
+int __cdecl AimTarget_IsTargetValid(const gentity_s *targetEnt)
 {
     gentity_s *Player; // r28
     double v4; // fp31
@@ -264,7 +264,7 @@ int __fastcall AimTarget_IsTargetValid(const gentity_s *targetEnt)
     return 1;
 }
 
-int __fastcall AimTarget_IsTargetVisible(const gentity_s *targetEnt, unsigned int visBone)
+int __cdecl AimTarget_IsTargetVisible(const gentity_s *targetEnt, unsigned int visBone)
 {
     gentity_s *Player; // r28
     unsigned int index; // r4
@@ -325,7 +325,7 @@ int __fastcall AimTarget_IsTargetVisible(const gentity_s *targetEnt, unsigned in
     return 1;
 }
 
-void __fastcall AimTarget_CreateTarget(const gentity_s *targetEnt, AimTarget *target)
+void __cdecl AimTarget_CreateTarget(const gentity_s *targetEnt, AimTarget *target)
 {
     gentity_s *Player; // r27
     double v5; // fp0
@@ -380,14 +380,14 @@ void __fastcall AimTarget_CreateTarget(const gentity_s *targetEnt, AimTarget *ta
     //Profile_EndInternal(0);
 }
 
-bool __fastcall AimTarget_PlayerInValidState(const playerState_s *ps)
+bool __cdecl AimTarget_PlayerInValidState(const playerState_s *ps)
 {
     if (!ps)
         MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\aim_assist\\aim_target.cpp", 410, 0, "%s", "ps");
     return (unsigned int)(ps->pm_type - 2) > 4;
 }
 
-void __fastcall AimTarget_ProcessEntity(gentity_s *ent)
+void __cdecl AimTarget_ProcessEntity(gentity_s *ent)
 {
     gentity_s *Player; // r29
     gclient_s *client; // r29
@@ -484,13 +484,13 @@ LABEL_35:
     //Profile_EndInternal(0);
 }
 
-void __fastcall AimTarget_UpdateClientTargets()
+void __cdecl AimTarget_UpdateClientTargets()
 {
     atGlob.clientTargetCount = atGlob.targetCount;
     memcpy(atGlob.clientTargets, &atGlob, 44 * atGlob.targetCount);
 }
 
-void __fastcall AimTarget_GetClientTargetList(AimTarget **targetList, int *targetCount)
+void __cdecl AimTarget_GetClientTargetList(AimTarget **targetList, int *targetCount)
 {
     if (!targetList)
         MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\aim_assist\\aim_target.cpp", 526, 0, "%s", "targetList");
@@ -500,7 +500,7 @@ void __fastcall AimTarget_GetClientTargetList(AimTarget **targetList, int *targe
     *targetCount = atGlob.clientTargetCount;
 }
 
-int __fastcall AimTarget_GetBestTarget(const float *start, const float *viewDir)
+int __cdecl AimTarget_GetBestTarget(const float *start, const float *viewDir)
 {
     int result; // r3
     double v5; // fp4
@@ -565,7 +565,7 @@ int __fastcall AimTarget_GetBestTarget(const float *start, const float *viewDir)
     return result;
 }
 
-void __fastcall AimTarget_WriteSaveGame(SaveGame *save)
+void __cdecl AimTarget_WriteSaveGame(SaveGame *save)
 {
     int v2; // r31
     AimTargetGlob *v3; // r30
@@ -586,7 +586,7 @@ void __fastcall AimTarget_WriteSaveGame(SaveGame *save)
     }
 }
 
-void __fastcall AimTarget_ReadSaveGame(SaveGame *save)
+void __cdecl AimTarget_ReadSaveGame(SaveGame *save)
 {
     int v2; // r31
     AimTargetGlob *v3; // r30

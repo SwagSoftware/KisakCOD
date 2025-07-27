@@ -88,7 +88,7 @@ int __cdecl Path_FindBadPlace(unsigned int name)
     return v1;
 }
 
-badplace_t *__fastcall Path_AllocBadPlace(unsigned int name, int duration)
+badplace_t *__cdecl Path_AllocBadPlace(unsigned int name, int duration)
 {
     __int64 v2; // r10
     int v5; // r10
@@ -156,7 +156,7 @@ badplace_t *__fastcall Path_AllocBadPlace(unsigned int name, int duration)
     return result;
 }
 
-void __fastcall Path_MakeBadPlace(unsigned int name, int duration, int teamflags, int type, badplace_parms_t *parms)
+void __cdecl Path_MakeBadPlace(unsigned int name, int duration, int teamflags, int type, badplace_parms_t *parms)
 {
     badplace_t *v10; // r3
     badplace_brush_t *p_parms; // r10
@@ -212,7 +212,7 @@ void __fastcall Path_MakeBadPlace(unsigned int name, int duration, int teamflags
     }
 }
 
-void __fastcall Path_MakeArcBadPlace(unsigned int name, int duration, int teamflags, badplace_arc_t *arc)
+void __cdecl Path_MakeArcBadPlace(unsigned int name, int duration, int teamflags, badplace_arc_t *arc)
 {
     badplace_parms_t *v8; // r10
     badplace_arc_t *v9; // r11
@@ -234,7 +234,7 @@ void __fastcall Path_MakeArcBadPlace(unsigned int name, int duration, int teamfl
     Path_MakeBadPlace(name, duration, teamflags, 1, v11);
 }
 
-void __fastcall Path_MakeBrushBadPlace(unsigned int name, int duration, int teamflags, gentity_s *volume)
+void __cdecl Path_MakeBrushBadPlace(unsigned int name, int duration, int teamflags, gentity_s *volume)
 {
     int flags; // r11
     badplace_parms_t v9; // [sp+50h] [-50h] BYREF

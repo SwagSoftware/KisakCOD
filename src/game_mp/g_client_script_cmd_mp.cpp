@@ -2393,7 +2393,7 @@ void __cdecl PlayerCmd_SetReverb(scr_entref_t entref)
     }
 }
 
-//void __fastcall PlayerCmd_DeactivateReverb(scr_entref_t *entref)
+//void __cdecl PlayerCmd_DeactivateReverb(scr_entref_t *entref)
 void __cdecl PlayerCmd_DeactivateReverb(scr_entref_t e)
 {
     scr_entref_t *entref = &e; // HACK
@@ -2498,7 +2498,7 @@ void __cdecl PlayerCmd_SetChannelVolumes(scr_entref_t entref)
     SV_GameSendServerCommand(entref.entnum, SV_CMD_RELIABLE, va("%c %i %i %g", 69, prio, shockIndex, fadetime));
 }
 
-//void __fastcall PlayerCmd_DeactivateChannelVolumes(scr_entref_t *entref)
+//void __cdecl PlayerCmd_DeactivateChannelVolumes(scr_entref_t *entref)
 void __cdecl PlayerCmd_DeactivateChannelVolumes(scr_entref_t e)
 {
     scr_entref_t *entref = &e; // HACK

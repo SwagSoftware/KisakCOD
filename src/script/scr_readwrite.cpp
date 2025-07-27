@@ -5,19 +5,19 @@
 #include "scr_readwrite.h"
 #include "scr_main.h"
 
-void __fastcall WriteByte(
+void __cdecl WriteByte(
     unsigned __int8 b,
     MemoryFile *memFile)
 {
     MemFile_WriteData(memFile, 1, &b);
 }
 
-void __fastcall WriteShort(unsigned __int16 i, MemoryFile *memFile)
+void __cdecl WriteShort(unsigned __int16 i, MemoryFile *memFile)
 {
     MemFile_WriteData(memFile, 2, &i);
 }
 
-void __fastcall WriteString(unsigned __int16 str, MemoryFile *memFile)
+void __cdecl WriteString(unsigned __int16 str, MemoryFile *memFile)
 {
     const char *v3; // r3
 
@@ -25,7 +25,7 @@ void __fastcall WriteString(unsigned __int16 str, MemoryFile *memFile)
     MemFile_WriteCString(memFile, v3);
 }
 
-void __fastcall SafeWriteString(unsigned __int16 str, MemoryFile *memFile)
+void __cdecl SafeWriteString(unsigned __int16 str, MemoryFile *memFile)
 {
     unsigned int v3; // r30
     const char *v4; // r3
@@ -46,7 +46,7 @@ void __fastcall SafeWriteString(unsigned __int16 str, MemoryFile *memFile)
     }
 }
 
-int __fastcall Scr_ReadString(MemoryFile *memFile)
+int __cdecl Scr_ReadString(MemoryFile *memFile)
 {
     const char *CString; // r3
     const char *v2; // r11
@@ -58,7 +58,7 @@ int __fastcall Scr_ReadString(MemoryFile *memFile)
     return (unsigned __int16)SL_GetStringOfSize(CString, 0, v2 - CString, 15);
 }
 
-int __fastcall Scr_ReadOptionalString(MemoryFile *memFile)
+int __cdecl Scr_ReadOptionalString(MemoryFile *memFile)
 {
     const char *CString; // r3
     const char *v4; // r11
@@ -74,7 +74,7 @@ int __fastcall Scr_ReadOptionalString(MemoryFile *memFile)
     return (unsigned __int16)SL_GetStringOfSize(CString, 0, v4 - CString, 15);
 }
 
-void __fastcall WriteInt(int i, MemoryFile *memFile)
+void __cdecl WriteInt(int i, MemoryFile *memFile)
 {
     MemFile_WriteData(memFile, 4, &i);
 }
@@ -85,7 +85,7 @@ void WriteFloat(float f, MemoryFile *memFile)
     MemFile_WriteData(memFile, 4, &f);
 }
 
-void __fastcall WriteVector(float *v, MemoryFile *memFile)
+void __cdecl WriteVector(float *v, MemoryFile *memFile)
 {
     iassert(v);
     iassert(!IS_NAN(v[0]) && !IS_NAN(v[1]) && !IS_NAN(v[2]));
@@ -95,7 +95,7 @@ void __fastcall WriteVector(float *v, MemoryFile *memFile)
     WriteFloat(v[2], memFile);
 }
 
-const float *__fastcall Scr_ReadVec3(MemoryFile *memFile)
+const float *__cdecl Scr_ReadVec3(MemoryFile *memFile)
 {
     double v2; // fp0
     float v4; // [sp+50h] [-50h] BYREF
@@ -138,7 +138,7 @@ const float *__fastcall Scr_ReadVec3(MemoryFile *memFile)
     return Scr_AllocVector(&v6);
 }
 
-void __fastcall WriteCodepos(const char *pos, MemoryFile *memFile)
+void __cdecl WriteCodepos(const char *pos, MemoryFile *memFile)
 {
     int v4; // r11
     int v5; // [sp+50h] [-20h] BYREF
@@ -162,7 +162,7 @@ void __fastcall WriteCodepos(const char *pos, MemoryFile *memFile)
     MemFile_WriteData(memFile, 4, &v5);
 }
 
-const char *__fastcall Scr_ReadCodepos(MemoryFile *memFile)
+const char *__cdecl Scr_ReadCodepos(MemoryFile *memFile)
 {
     int v1; // r31
     const char *v2; // r31
@@ -191,7 +191,7 @@ const char *__fastcall Scr_ReadCodepos(MemoryFile *memFile)
     return result;
 }
 
-unsigned int __fastcall Scr_CheckIdHistory(unsigned int index)
+unsigned int __cdecl Scr_CheckIdHistory(unsigned int index)
 {
     unsigned int result; // r3
     unsigned int v3; // r11
@@ -242,7 +242,7 @@ unsigned int __fastcall Scr_CheckIdHistory(unsigned int index)
     return result;
 }
 
-void __fastcall WriteId(unsigned int id, unsigned int opcode, MemoryFile *memFile)
+void __cdecl WriteId(unsigned int id, unsigned int opcode, MemoryFile *memFile)
 {
     unsigned int v3; // r31
     unsigned __int16 v6; // r29
@@ -290,7 +290,7 @@ void __fastcall WriteId(unsigned int id, unsigned int opcode, MemoryFile *memFil
     g_idHistoryIndex = v8;
 }
 
-unsigned int __fastcall Scr_ReadId(MemoryFile *memFile, unsigned int opcode)
+unsigned int __cdecl Scr_ReadId(MemoryFile *memFile, unsigned int opcode)
 {
     unsigned int v2; // r11
     unsigned int v3; // r29
@@ -322,7 +322,7 @@ unsigned int __fastcall Scr_ReadId(MemoryFile *memFile, unsigned int opcode)
     return result;
 }
 
-void __fastcall WriteStack(const VariableStackBuffer *stackBuf, MemoryFile *memFile)
+void __cdecl WriteStack(const VariableStackBuffer *stackBuf, MemoryFile *memFile)
 {
     int v4; // r30
     __int16 v5; // r11
@@ -357,7 +357,7 @@ void __fastcall WriteStack(const VariableStackBuffer *stackBuf, MemoryFile *memF
     }
 }
 
-VariableStackBuffer *__fastcall Scr_ReadStack(MemoryFile *memFile)
+VariableStackBuffer *__cdecl Scr_ReadStack(MemoryFile *memFile)
 {
     __int16 v2; // r27
     int v3; // r28
@@ -408,7 +408,7 @@ VariableStackBuffer *__fastcall Scr_ReadStack(MemoryFile *memFile)
     return (VariableStackBuffer *)v6;
 }
 
-void __fastcall Scr_DoLoadEntryInternal(VariableValue *value, MemoryFile *memFile)
+void __cdecl Scr_DoLoadEntryInternal(VariableValue *value, MemoryFile *memFile)
 {
     unsigned int v4; // r4
     int v5; // r4
@@ -465,7 +465,7 @@ void __fastcall Scr_DoLoadEntryInternal(VariableValue *value, MemoryFile *memFil
     }
 }
 
-int __fastcall Scr_DoLoadEntry(VariableValue *value, bool isArray, MemoryFile *memFile)
+int __cdecl Scr_DoLoadEntry(VariableValue *value, bool isArray, MemoryFile *memFile)
 {
     int v5; // r30
     MemoryFile *v6; // r3
@@ -522,7 +522,7 @@ int __fastcall Scr_DoLoadEntry(VariableValue *value, bool isArray, MemoryFile *m
     return result;
 }
 
-void __fastcall AddSaveObjectInternal(unsigned int parentId)
+void __cdecl AddSaveObjectInternal(unsigned int parentId)
 {
     if (parentId)
     {
@@ -534,7 +534,7 @@ void __fastcall AddSaveObjectInternal(unsigned int parentId)
     }
 }
 
-unsigned int __fastcall Scr_ConvertThreadFromLoad(unsigned __int16 handle)
+unsigned int __cdecl Scr_ConvertThreadFromLoad(unsigned __int16 handle)
 {
     int v2; // r30
     unsigned int v3; // r30
@@ -557,7 +557,7 @@ unsigned int __fastcall Scr_ConvertThreadFromLoad(unsigned __int16 handle)
     return v3;
 }
 
-void __fastcall Scr_DoLoadObjectInfo(unsigned __int16 parentId, MemoryFile *memFile)
+void __cdecl Scr_DoLoadObjectInfo(unsigned __int16 parentId, MemoryFile *memFile)
 {
     unsigned int v2; // r19
     VariableValueInternal *v4; // r31
@@ -724,7 +724,7 @@ void __fastcall Scr_DoLoadObjectInfo(unsigned __int16 parentId, MemoryFile *memF
     }
 }
 
-void __fastcall Scr_ReadGameEntry(MemoryFile *memFile)
+void __cdecl Scr_ReadGameEntry(MemoryFile *memFile)
 {
     int type; // r28
     unsigned int gameId; // r11
@@ -749,7 +749,7 @@ void __fastcall Scr_ReadGameEntry(MemoryFile *memFile)
     scrVarGlob.variableList[gameId + 32770].u.u = v4;
 }
 
-void __fastcall Scr_SaveShutdown(bool savegame)
+void __cdecl Scr_SaveShutdown(bool savegame)
 {
     char v2; // r20
     unsigned __int16 *v3; // r25
@@ -806,7 +806,7 @@ void __fastcall Scr_SaveShutdown(bool savegame)
     }
 }
 
-void __fastcall Scr_LoadPre(int sys, MemoryFile *memFile)
+void __cdecl Scr_LoadPre(int sys, MemoryFile *memFile)
 {
     unsigned __int16 savecount; // r11
     unsigned int v4; // r30
@@ -939,7 +939,7 @@ void __fastcall Scr_LoadPre(int sys, MemoryFile *memFile)
     } while (v19);
 }
 
-void __fastcall Scr_LoadShutdown()
+void __cdecl Scr_LoadShutdown()
 {
     unsigned int v0; // r30
     unsigned __int16 *v1; // r31
@@ -961,7 +961,7 @@ void __fastcall Scr_LoadShutdown()
         MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\script\\scr_readwrite.cpp", 1115, 0, "%s", "CheckReferences()");
 }
 
-void __fastcall DoSaveEntryInternal(unsigned int type, VariableUnion *u, MemoryFile *memFile)
+void __cdecl DoSaveEntryInternal(unsigned int type, VariableUnion *u, MemoryFile *memFile)
 {
     unsigned int UsedSize; // r3
     unsigned int v7; // r3
@@ -1064,18 +1064,18 @@ void __fastcall DoSaveEntryInternal(unsigned int type, VariableUnion *u, MemoryF
     }
 }
 
-void __fastcall Scr_SaveSource(MemoryFile *memFile)
+void __cdecl Scr_SaveSource(MemoryFile *memFile)
 {
     MemFile_WriteData(memFile, 1, &scrVarPub.developer);
     MemFile_WriteData(memFile, 1, &scrVarPub.developer_script);
 }
 
-void __fastcall SaveMemory_SaveWriteImmediate(const void *buffer, unsigned int len, SaveImmediate *save)
+void __cdecl SaveMemory_SaveWriteImmediate(const void *buffer, unsigned int len, SaveImmediate *save)
 {
     WriteToMemoryCardFile(save->f, buffer, len);
 }
 
-void __fastcall Scr_SaveSourceImmediate(SaveImmediate *save)
+void __cdecl Scr_SaveSourceImmediate(SaveImmediate *save)
 {
     int v2; // r9
     unsigned int sourceBufferLookupLen; // r11
@@ -1124,7 +1124,7 @@ void __fastcall Scr_SaveSourceImmediate(SaveImmediate *save)
     }
 }
 
-void __fastcall Scr_LoadSource(MemoryFile *memFile, void *fileHandle)
+void __cdecl Scr_LoadSource(MemoryFile *memFile, void *fileHandle)
 {
     SaveSourceBufferInfo *saveSourceBufferLookup; // r3
     signed int v5; // r25
@@ -1183,7 +1183,7 @@ void __fastcall Scr_LoadSource(MemoryFile *memFile, void *fileHandle)
     }
 }
 
-void __fastcall Scr_SkipSource(MemoryFile *memFile, void *fileHandle)
+void __cdecl Scr_SkipSource(MemoryFile *memFile, void *fileHandle)
 {
     int i; // r30
     _BYTE v5[4]; // [sp+50h] [-30h] BYREF
@@ -1207,7 +1207,7 @@ void __fastcall Scr_SkipSource(MemoryFile *memFile, void *fileHandle)
     }
 }
 
-void __fastcall AddSaveStackInternal(const VariableStackBuffer *stackBuf)
+void __cdecl AddSaveStackInternal(const VariableStackBuffer *stackBuf)
 {
     int localId; // r7
     unsigned __int16 size; // r11
@@ -1238,7 +1238,7 @@ void __fastcall AddSaveStackInternal(const VariableStackBuffer *stackBuf)
     }
 }
 
-void __fastcall AddSaveEntryInternal(unsigned int type, const VariableStackBuffer *u)
+void __cdecl AddSaveEntryInternal(unsigned int type, const VariableStackBuffer *u)
 {
     if (type == 1)
     {
@@ -1255,7 +1255,7 @@ void __fastcall AddSaveEntryInternal(unsigned int type, const VariableStackBuffe
 }
 
 // local variable allocation has failed, the output may be wrong!
-void __fastcall DoSaveEntry(VariableValue *value, VariableValue *name, bool isArray, MemoryFile *memFile)
+void __cdecl DoSaveEntry(VariableValue *value, VariableValue *name, bool isArray, MemoryFile *memFile)
 {
     unsigned int UsedSize; // r3
     unsigned int v9; // r3
@@ -1390,7 +1390,7 @@ void __fastcall DoSaveEntry(VariableValue *value, VariableValue *name, bool isAr
     }
 }
 
-void __fastcall AddSaveObjectChildren(unsigned int parentId)
+void __cdecl AddSaveObjectChildren(unsigned int parentId)
 {
     VariableValueInternal *v2; // r23
     int v3; // r24
@@ -1480,7 +1480,7 @@ void __fastcall AddSaveObjectChildren(unsigned int parentId)
     }
 }
 
-void __fastcall AddSaveObject(unsigned int parentId)
+void __cdecl AddSaveObject(unsigned int parentId)
 {
     unsigned __int16 savecount; // r11
     int v2; // r29
@@ -1507,7 +1507,7 @@ void __fastcall AddSaveObject(unsigned int parentId)
     }
 }
 
-void __fastcall DoSaveObjectInfo(unsigned int parentId, MemoryFile *memFile)
+void __cdecl DoSaveObjectInfo(unsigned int parentId, MemoryFile *memFile)
 {
     VariableValueInternal *v4; // r31
     int v5; // r30
@@ -1613,7 +1613,7 @@ void __fastcall DoSaveObjectInfo(unsigned int parentId, MemoryFile *memFile)
     }
 }
 
-int __fastcall Scr_ConvertThreadToSave(unsigned __int16 handle)
+int __cdecl Scr_ConvertThreadToSave(unsigned __int16 handle)
 {
     int v1; // r31
     int v3; // r31
@@ -1633,7 +1633,7 @@ int __fastcall Scr_ConvertThreadToSave(unsigned __int16 handle)
     return scrVarPub.saveIdMap[v3];
 }
 
-void __fastcall WriteGameEntry(MemoryFile *memFile)
+void __cdecl WriteGameEntry(MemoryFile *memFile)
 {
     DoSaveEntryInternal(
         scrVarGlob.variableList[scrVarPub.gameId + 32770].w.u.intValue & 0x1F,
@@ -1641,7 +1641,7 @@ void __fastcall WriteGameEntry(MemoryFile *memFile)
         memFile);
 }
 
-void __fastcall Scr_SavePost(MemoryFile *memFile)
+void __cdecl Scr_SavePost(MemoryFile *memFile)
 {
     unsigned int UsedSize; // r3
     unsigned int v3; // r29
@@ -1691,7 +1691,7 @@ void __fastcall Scr_SavePost(MemoryFile *memFile)
     } while (v6);
 }
 
-void __fastcall AddSaveStack(const VariableStackBuffer *stackBuf)
+void __cdecl AddSaveStack(const VariableStackBuffer *stackBuf)
 {
     int size; // r9
     char *buf; // r31
@@ -1723,7 +1723,7 @@ void __fastcall AddSaveStack(const VariableStackBuffer *stackBuf)
     }
 }
 
-void __fastcall AddSaveEntry(unsigned int type, const VariableStackBuffer *u)
+void __cdecl AddSaveEntry(unsigned int type, const VariableStackBuffer *u)
 {
     if (type == 1)
     {
@@ -1735,7 +1735,7 @@ void __fastcall AddSaveEntry(unsigned int type, const VariableStackBuffer *u)
     }
 }
 
-void __fastcall Scr_SavePre(int sys)
+void __cdecl Scr_SavePre(int sys)
 {
     int v2; // r30
     unsigned __int16 *p_entArrayId; // r29

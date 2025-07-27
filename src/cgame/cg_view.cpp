@@ -524,7 +524,7 @@ void __cdecl CG_AddGroundTiltToAngles(int localClientNum, float *angles, const c
     }
 }
 
-void __fastcall OffsetFirstPersonView(int localClientNum, cg_s *cgameGlob)
+void __cdecl OffsetFirstPersonView(int localClientNum, cg_s *cgameGlob)
 {
     unsigned int ViewmodelWeaponIndex; // r3
     WeaponDef *weapDef; // r3
