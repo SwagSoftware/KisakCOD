@@ -18,6 +18,9 @@ set_property( DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} PROPERTY VS_STARTUP_PROJECT 
 set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} /MT /O2 /Ot /MP /W3 /Zi ${MSVC_WARNING_DISABLES} /permissive-")
 set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} /MTd /Od /MP /W3 /Zi ${MSVC_WARNING_DISABLES} /permissive-")
 
+# Include global scripts/tricks
+include(${SCRIPTS_DIR}/extern/increment_build.cmake)
+
 # Include the subprojects
 add_subdirectory(${SCRIPTS_DIR}/mp)
 add_subdirectory(${SCRIPTS_DIR}/sp)

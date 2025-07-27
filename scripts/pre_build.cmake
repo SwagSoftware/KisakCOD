@@ -5,23 +5,8 @@ else()
   set(SCRIPT_EXT .sh)
 endif()
 
-# Get the current git commit count and save it to GIT_COMMIT_COUNT
-execute_process(
-  COMMAND git rev-list --count HEAD
-  WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
-  OUTPUT_VARIABLE GIT_COMMIT_COUNT
-  OUTPUT_STRIP_TRAILING_WHITESPACE
-)
-
-# Add a custom target to increment the build number
-add_custom_target(
-  update_build_number_${PROJECT_NAME}
-  COMMAND ${SCRIPTS_DIR}/increment_build${SCRIPT_EXT} ${SRC_DIR} ${GIT_COMMIT_COUNT}
-  COMMENT "Running build number script..."
-)
-
 # We want to update the build number before building
-add_dependencies(${PROJECT_NAME} update_build_number_${PROJECT_NAME})
+add_dependencies(${PROJECT_NAME} update_build_number)
 
 # Set Win32 Visual Studio Specifics
 set_target_properties(${PROJECT_NAME} PROPERTIES
