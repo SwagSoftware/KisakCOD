@@ -9,7 +9,7 @@
 #include <gfx_d3d/r_rendercmds.h>
 #include <universal/q_parse.h>
 #include <client/client.h>
-#include <buildnumber_mp.h>
+#include <buildnumber.h>
 #include <stringed/stringed_hooks.h>
 #include <database/database.h>
 #include <universal/com_files.h>

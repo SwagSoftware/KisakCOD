@@ -33,6 +33,9 @@ echo "$BUILD_NUMBER" > "$BUILD_FILE"
 cat <<EOF > "$HEADER_FILE"
 #pragma once
 #define BUILD_NUMBER $BUILD_NUMBER
+
+char* getBuildNumber();
+int getBuildNumberAsInt();
 EOF
 
 echo "Updated build number to $BUILD_NUMBER"

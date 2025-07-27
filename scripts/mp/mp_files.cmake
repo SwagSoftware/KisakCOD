@@ -1,0 +1,180 @@
+# Everything here is appended to existing common
+
+set(AIM_ASSIST
+    ${AIM_ASSIST}
+    "${SRC_DIR}/aim_assist/aim_target_mp.cpp"
+)
+
+set(BGAME
+    ${BGAME}
+    "${SRC_DIR}/bgame/bg_animation_mp.cpp"
+)
+
+set(CGAME_MP
+    "${SRC_DIR}/cgame_mp/cg_animtree_mp.cpp"
+    "${SRC_DIR}/cgame_mp/cg_client_side_effects_mp.cpp"
+    "${SRC_DIR}/cgame_mp/cg_compassfriendlies_mp.cpp"
+    "${SRC_DIR}/cgame_mp/cg_consolecmds_mp.cpp"
+    "${SRC_DIR}/cgame_mp/cg_draw_mp.cpp"
+    "${SRC_DIR}/cgame_mp/cg_draw_net_mp.cpp"
+    "${SRC_DIR}/cgame_mp/cg_ents_mp.cpp"
+    "${SRC_DIR}/cgame_mp/cg_local_mp.h"
+    "${SRC_DIR}/cgame_mp/cg_main_mp.cpp"
+    "${SRC_DIR}/cgame_mp/cg_newDraw_mp.cpp"
+    "${SRC_DIR}/cgame_mp/cg_players_mp.cpp"
+    "${SRC_DIR}/cgame_mp/cg_pose_mp.cpp"
+    "${SRC_DIR}/cgame_mp/cg_predict_mp.cpp"
+    "${SRC_DIR}/cgame_mp/cg_public_mp.h"
+    "${SRC_DIR}/cgame_mp/cg_scoreboard_mp.cpp"
+    "${SRC_DIR}/cgame_mp/cg_servercmds_mp.cpp"
+    "${SRC_DIR}/cgame_mp/cg_snapshot_mp.cpp"
+    "${SRC_DIR}/cgame_mp/cg_vehicles_mp.cpp"
+    "${SRC_DIR}/cgame_mp/cg_view_mp.cpp"
+)
+
+set(CLIENT_MP
+    "${SRC_DIR}/client_mp/client_mp.h"
+    "${SRC_DIR}/client_mp/cl_cgame_mp.cpp"
+    "${SRC_DIR}/client_mp/cl_input.cpp"
+    "${SRC_DIR}/client_mp/cl_main_mp.cpp"
+    "${SRC_DIR}/client_mp/cl_main_pc_mp.cpp"
+    "${SRC_DIR}/client_mp/cl_net_chan_mp.cpp"
+    "${SRC_DIR}/client_mp/cl_parse_mp.cpp"
+    "${SRC_DIR}/client_mp/cl_pose_mp.cpp"
+    "${SRC_DIR}/client_mp/cl_rank.cpp"
+    "${SRC_DIR}/client_mp/cl_scrn_mp.cpp"
+    "${SRC_DIR}/client_mp/cl_ui_mp.cpp"
+    "${SRC_DIR}/client_mp/cl_voice.cpp"
+)
+
+set(GAME
+    ${GAME}
+    "${SRC_DIR}/game/pathnode.h"
+    "${SRC_DIR}/game/game_public.h"
+)
+
+set(GAME_MP
+    "${SRC_DIR}/game_mp/g_active_mp.cpp"
+    "${SRC_DIR}/game_mp/g_client_mp.cpp"
+    "${SRC_DIR}/game_mp/g_client_script_cmd_mp.cpp"
+    "${SRC_DIR}/game_mp/g_cmds_mp.cpp"
+    "${SRC_DIR}/game_mp/g_combat_mp.cpp"
+    "${SRC_DIR}/game_mp/g_main_mp.cpp"
+    "${SRC_DIR}/game_mp/g_main_mp.h"
+    "${SRC_DIR}/game_mp/g_misc_mp.cpp"
+    "${SRC_DIR}/game_mp/g_player_corpse_mp.cpp"
+    "${SRC_DIR}/game_mp/g_public_mp.h"
+    "${SRC_DIR}/game_mp/g_scr_helicopter.cpp"
+    "${SRC_DIR}/game_mp/g_scr_main_mp.cpp"
+    "${SRC_DIR}/game_mp/g_spawn_mp.cpp"
+    "${SRC_DIR}/game_mp/g_trigger_mp.cpp"
+    "${SRC_DIR}/game_mp/g_utils_mp.cpp"
+    "${SRC_DIR}/game_mp/g_utils_mp.h"
+    "${SRC_DIR}/game_mp/g_vehicles_mp.cpp"
+    "${SRC_DIR}/game_mp/player_use_mp.cpp"
+)
+
+set(GROUPVOICE
+    "${SRC_DIR}/groupvoice/decode.cpp"
+    "${SRC_DIR}/groupvoice/directsound.h"
+    "${SRC_DIR}/groupvoice/encode.cpp"
+    "${SRC_DIR}/groupvoice/play_dsound.cpp"
+    "${SRC_DIR}/groupvoice/record_dsound.cpp"
+)
+
+set(GROUPVOICE_SPEEX
+    "${SRC_DIR}/groupvoice/speex/arch.h"
+    "${SRC_DIR}/groupvoice/speex/bits.c"
+    "${SRC_DIR}/groupvoice/speex/cb_search.c"
+    "${SRC_DIR}/groupvoice/speex/cb_search.h"
+    "${SRC_DIR}/groupvoice/speex/cb_search_arm4.h"
+    "${SRC_DIR}/groupvoice/speex/cb_search_sse.h"
+    "${SRC_DIR}/groupvoice/speex/exc_10_16_table.c"
+    "${SRC_DIR}/groupvoice/speex/exc_10_32_table.c"
+    "${SRC_DIR}/groupvoice/speex/exc_20_32_table.c"
+    "${SRC_DIR}/groupvoice/speex/exc_5_256_table.c"
+    "${SRC_DIR}/groupvoice/speex/exc_5_64_table.c"
+    "${SRC_DIR}/groupvoice/speex/exc_8_128_table.c"
+    "${SRC_DIR}/groupvoice/speex/filters.c"
+    "${SRC_DIR}/groupvoice/speex/filters.h"
+    "${SRC_DIR}/groupvoice/speex/filters_arm4.h"
+    "${SRC_DIR}/groupvoice/speex/filters_sse.h"
+    "${SRC_DIR}/groupvoice/speex/fixed_arm4.h"
+    "${SRC_DIR}/groupvoice/speex/fixed_arm5e.h"
+    "${SRC_DIR}/groupvoice/speex/fixed_debug.h"
+    "${SRC_DIR}/groupvoice/speex/fixed_generic.h"
+    "${SRC_DIR}/groupvoice/speex/gain_table.c"
+    "${SRC_DIR}/groupvoice/speex/gain_table_lbr.c"
+    "${SRC_DIR}/groupvoice/speex/hexc_10_32_table.c"
+    "${SRC_DIR}/groupvoice/speex/hexc_table.c"
+    "${SRC_DIR}/groupvoice/speex/high_lsp_tables.c"
+    "${SRC_DIR}/groupvoice/speex/jitter.c"
+    "${SRC_DIR}/groupvoice/speex/lbr_48k_tables.c"
+    "${SRC_DIR}/groupvoice/speex/lpc.c"
+    "${SRC_DIR}/groupvoice/speex/lpc.h"
+    "${SRC_DIR}/groupvoice/speex/lsp.c"
+    "${SRC_DIR}/groupvoice/speex/lsp.h"
+    "${SRC_DIR}/groupvoice/speex/lsp_tables_nb.c"
+    "${SRC_DIR}/groupvoice/speex/ltp.c"
+    "${SRC_DIR}/groupvoice/speex/ltp.h"
+    "${SRC_DIR}/groupvoice/speex/ltp_arm4.h"
+    "${SRC_DIR}/groupvoice/speex/ltp_sse.h"
+    "${SRC_DIR}/groupvoice/speex/math_approx.c"
+    "${SRC_DIR}/groupvoice/speex/math_approx.h"
+    "${SRC_DIR}/groupvoice/speex/mdf.c"
+    "${SRC_DIR}/groupvoice/speex/misc.c"
+    "${SRC_DIR}/groupvoice/speex/misc.h"
+    "${SRC_DIR}/groupvoice/speex/modes.c"
+    "${SRC_DIR}/groupvoice/speex/modes.h"
+    "${SRC_DIR}/groupvoice/speex/nb_celp.c"
+    "${SRC_DIR}/groupvoice/speex/nb_celp.h"
+    "${SRC_DIR}/groupvoice/speex/preprocess.c"
+    "${SRC_DIR}/groupvoice/speex/quant_lsp.c"
+    "${SRC_DIR}/groupvoice/speex/quant_lsp.h"
+    "${SRC_DIR}/groupvoice/speex/sb_celp.c"
+    "${SRC_DIR}/groupvoice/speex/sb_celp.h"
+    "${SRC_DIR}/groupvoice/speex/smallft.c"
+    "${SRC_DIR}/groupvoice/speex/smallft.h"
+    "${SRC_DIR}/groupvoice/speex/speex.c"
+    "${SRC_DIR}/groupvoice/speex/speex_callbacks.c"
+    "${SRC_DIR}/groupvoice/speex/speex_header.c"
+    "${SRC_DIR}/groupvoice/speex/stack_alloc.h"
+    "${SRC_DIR}/groupvoice/speex/stereo.c"
+    "${SRC_DIR}/groupvoice/speex/vbr.c"
+    "${SRC_DIR}/groupvoice/speex/vbr.h"
+    "${SRC_DIR}/groupvoice/speex/vq.c"
+    "${SRC_DIR}/groupvoice/speex/vq.h"
+    "${SRC_DIR}/groupvoice/speex/vq_arm4.h"
+    "${SRC_DIR}/groupvoice/speex/vq_sse.h"
+)
+
+set(QCOMMON
+    ${QCOMMON}
+    "${SRC_DIR}/qcommon/msg_mp.cpp"
+    "${SRC_DIR}/qcommon/msg_mp.h"
+    "${SRC_DIR}/qcommon/net_chan_mp.cpp"
+    "${SRC_DIR}/qcommon/net_chan_mp.h"
+    "${SRC_DIR}/qcommon/sv_msg_write_mp.cpp"
+    "${SRC_DIR}/qcommon/sv_msg_write_mp.h"
+)
+
+set(SERVER_MP
+    "${SRC_DIR}/server_mp/server_mp.h"
+    "${SRC_DIR}/server_mp/sv_archive_mp.cpp"
+    "${SRC_DIR}/server_mp/sv_ccmds_mp.cpp"
+    "${SRC_DIR}/server_mp/sv_client_mp.cpp"
+    "${SRC_DIR}/server_mp/sv_init_mp.cpp"
+    "${SRC_DIR}/server_mp/sv_main_mp.cpp"
+    "${SRC_DIR}/server_mp/sv_main_pc_mp.cpp"
+    "${SRC_DIR}/server_mp/sv_net_chan_mp.cpp"
+    "${SRC_DIR}/server_mp/sv_snapshot_mp.cpp"
+    "${SRC_DIR}/server_mp/sv_snapshot_profile_mp.cpp"
+    "${SRC_DIR}/server_mp/sv_voice_mp.cpp"
+    "${SRC_DIR}/server_mp/ucmds.cpp"
+)
+
+set(UI_MP
+    "${SRC_DIR}/ui_mp/ui_gameinfo_mp.cpp"
+    "${SRC_DIR}/ui_mp/ui_main_mp.cpp"
+    "${SRC_DIR}/ui_mp/ui_mp.h"
+)

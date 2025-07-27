@@ -61,13 +61,14 @@ jobs:
           pushd
           mkdir build-${{ matrix.config }}
           cd build-${{ matrix.config }}
-          cmake -G "Visual Studio 17 2022" -A Win32 -DDXSDK_DIR="${{ env.DXSDK_DIR }}" -DCICD=1 -DCMAKE_BUILD_TYPE=${{ matrix.config }} -DKISAK_MP=1 ..
+          cmake -G "Visual Studio 17 2022" -A Win32 -DDXSDK_DIR="${{ env.DXSDK_DIR }}" -DCICD=1 -DCMAKE_BUILD_TYPE=${{ matrix.config }} ..
           popd
 
       - name: Build ${{ matrix.config }}
         run: |
           pushd
-          cmake --build build-${{ matrix.config }} --config ${{ matrix.config }}
+          cmake --build build-${{ matrix.config }} --config ${{ matrix.config }} --target "KisakCOD-mp"
+          cmake --build build-${{ matrix.config }} --config ${{ matrix.config }} --target "KisakCOD-dedi"
           popd
 
       - uses: actions/upload-artifact@v4

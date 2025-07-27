@@ -1,8 +1,8 @@
+# COD
+
 set(SRCROOT
-    "${SRC_DIR}/buildnumber_mp.cpp"
-    "${SRC_DIR}/buildnumber_mp.h"
+    "${SRC_DIR}/buildnumber.cpp"
 )
-source_group("." FILES ${SRCROOT})
 
 set(DYNENTITY
     "${SRC_DIR}/DynEntity/DynEntity_client.cpp"
@@ -11,7 +11,6 @@ set(DYNENTITY
     "${SRC_DIR}/DynEntity/DynEntity_load_obj.cpp"
     "${SRC_DIR}/DynEntity/DynEntity_pieces.cpp"
 )
-source_group("DynEntity" FILES ${DYNENTITY})
 
 set(EFFECTSCORE
     "${SRC_DIR}/EffectsCore/fxcurve.cpp"
@@ -33,19 +32,13 @@ set(EFFECTSCORE
     "${SRC_DIR}/EffectsCore/fx_update.cpp"
     "${SRC_DIR}/EffectsCore/fx_update_util.cpp"
 )
-source_group("EffectsCore" FILES ${EFFECTSCORE})
 
 set(AIM_ASSIST
     "${SRC_DIR}/aim_assist/aim_assist.cpp"
     "${SRC_DIR}/aim_assist/aim_assist.h"
-    "${SRC_DIR}/aim_assist/aim_target.h"
-    "${SRC_DIR}/aim_assist/aim_target.cpp"
 )
-source_group("aim_assist" FILES ${AIM_ASSIST})
 
 set(BGAME
-    "${SRC_DIR}/bgame/bg_actor_prone.cpp"
-    "${SRC_DIR}/bgame/bg_actor_prone.h"
     "${SRC_DIR}/bgame/bg_jump.cpp"
     "${SRC_DIR}/bgame/bg_local.h"
     "${SRC_DIR}/bgame/bg_mantle.cpp"
@@ -60,107 +53,47 @@ set(BGAME
     "${SRC_DIR}/bgame/bg_weapons.h"
     "${SRC_DIR}/bgame/bg_weapons_load_obj.cpp"
 )
-source_group("bgame" FILES ${BGAME})
-
-set(BINKLIB
-    "${DEPS_DIR}/binklib/bink.h"
-    "${DEPS_DIR}/binklib/binktextures.cpp"
-    "${DEPS_DIR}/binklib/binktextures.h"
-    "${DEPS_DIR}/binklib/rad3d.h"
-    "${DEPS_DIR}/binklib/radbase.h"
-)
-source_group("binklib" FILES ${BINKLIB})
 
 set(CGAME
-    "${SRC_DIR}/cgame/cg_actors.cpp"
-    "${SRC_DIR}/cgame/cg_actors.h"
     "${SRC_DIR}/cgame/cg_ammocounter.cpp"
     "${SRC_DIR}/cgame/cg_camerashake.cpp"
     "${SRC_DIR}/cgame/cg_colltree.cpp"
     "${SRC_DIR}/cgame/cg_compass.cpp"
-    "${SRC_DIR}/cgame/cg_compassfriendlies.cpp"
-    "${SRC_DIR}/cgame/cg_compassfriendlies.h"
-    "${SRC_DIR}/cgame/cg_consolecmds.cpp"
-    "${SRC_DIR}/cgame/cg_consolecmds.h"
-    "${SRC_DIR}/cgame/cg_draw.cpp"
-    "${SRC_DIR}/cgame/cg_draw.h"
+    "${SRC_DIR}/cgame/cg_drawtools.cpp"
     "${SRC_DIR}/cgame/cg_draw_debug.cpp"
     "${SRC_DIR}/cgame/cg_draw_indicators.cpp"
     "${SRC_DIR}/cgame/cg_draw_reticles.cpp"
-    "${SRC_DIR}/cgame/cg_drawtools.cpp"
     "${SRC_DIR}/cgame/cg_effects_load_obj.cpp"
-    "${SRC_DIR}/cgame/cg_ents.cpp"
-    "${SRC_DIR}/cgame/cg_ents.h"
     "${SRC_DIR}/cgame/cg_event.cpp"
     "${SRC_DIR}/cgame/cg_hudelem.cpp"
     "${SRC_DIR}/cgame/cg_info.cpp"
     "${SRC_DIR}/cgame/cg_laser.cpp"
     "${SRC_DIR}/cgame/cg_local.h"
     "${SRC_DIR}/cgame/cg_localents.cpp"
-    "${SRC_DIR}/cgame/cg_main.cpp"
-    "${SRC_DIR}/cgame/cg_main.h"
-    "${SRC_DIR}/cgame/cg_modelpreviewer.cpp"
-    "${SRC_DIR}/cgame/cg_modelpreviewer.h"
-    "${SRC_DIR}/cgame/cg_newdraw.cpp"
-    "${SRC_DIR}/cgame/cg_newdraw.h"
     "${SRC_DIR}/cgame/cg_playerstate.cpp"
-    "${SRC_DIR}/cgame/cg_pose.cpp"
-    "${SRC_DIR}/cgame/cg_pose.h"
     "${SRC_DIR}/cgame/cg_pose_utils.cpp"
-    "${SRC_DIR}/cgame/cg_predict.cpp"
-    "${SRC_DIR}/cgame/cg_predict.h"
     "${SRC_DIR}/cgame/cg_public.h"
-    "${SRC_DIR}/cgame/cg_scoreboard.cpp"
-    "${SRC_DIR}/cgame/cg_scoreboard.h"
-    "${SRC_DIR}/cgame/cg_servercmds.cpp"
-    "${SRC_DIR}/cgame/cg_servercmds.h"
     "${SRC_DIR}/cgame/cg_shellshock.cpp"
-    "${SRC_DIR}/cgame/cg_snapshot.cpp"
-    "${SRC_DIR}/cgame/cg_snapshot.h"
-    "${SRC_DIR}/cgame/cg_vehicle_hud.cpp"
-    "${SRC_DIR}/cgame/cg_vehicle_hud.h"
-    "${SRC_DIR}/cgame/cg_view.cpp"
-    "${SRC_DIR}/cgame/cg_view.h"
     "${SRC_DIR}/cgame/cg_visionsets.cpp"
     "${SRC_DIR}/cgame/cg_weapons.cpp"
     "${SRC_DIR}/cgame/cg_world.cpp"
     "${SRC_DIR}/cgame/offhandweapons.cpp"
 )
-source_group("cgame" FILES ${CGAME})
 
 set(CLIENT
-    "${SRC_DIR}/client/cl_cgame.cpp"
     "${SRC_DIR}/client/cl_cin.cpp"
     "${SRC_DIR}/client/cl_console.cpp"
     "${SRC_DIR}/client/cl_debugdata.cpp"
-    "${SRC_DIR}/client/cl_demo.cpp"
-    "${SRC_DIR}/client/cl_demo.h"
-    "${SRC_DIR}/client/cl_demo_api.h"
     "${SRC_DIR}/client/cl_devgui.cpp"
-    "${SRC_DIR}/client/cl_input.cpp"
-    "${SRC_DIR}/client/cl_input.h"
     "${SRC_DIR}/client/cl_keys.cpp"
-    "${SRC_DIR}/client/cl_main.cpp"
-    "${SRC_DIR}/client/cl_parse.cpp"
-    "${SRC_DIR}/client/cl_parse.h"
-    "${SRC_DIR}/client/cl_pose.cpp"
-    "${SRC_DIR}/client/cl_pose.h"
-    "${SRC_DIR}/client/cl_save.h"
-    "${SRC_DIR}/client/cl_scrn.cpp"
-    "${SRC_DIR}/client/cl_scrn.h"
-    "${SRC_DIR}/client/cl_ui.cpp"
-    "${SRC_DIR}/client/cl_ui.h"
-    "${SRC_DIR}/client/client.h"
     "${SRC_DIR}/client/con_channels.cpp"
     "${SRC_DIR}/client/screen_placement.cpp"
 )
-source_group("client" FILES ${CLIENT})
 
 set(COMMON
     "${SRC_DIR}/common/brush.h"
     "${SRC_DIR}/common/brush_edges.cpp"
 )
-source_group("common" FILES ${COMMON})
 
 set(DATABASE
     "${SRC_DIR}/database/database.h"
@@ -174,7 +107,6 @@ set(DATABASE
     "${SRC_DIR}/database/db_stream_load.cpp"
     "${SRC_DIR}/database/db_stringtable_load.cpp"
 )
-source_group("database" FILES ${DATABASE})
 
 set(DEVGUI
     "${SRC_DIR}/devgui/devgui.cpp"
@@ -182,142 +114,29 @@ set(DEVGUI
     "${SRC_DIR}/devgui/devgui_input.cpp"
     "${SRC_DIR}/devgui/devgui_util.cpp"
 )
-source_group("devgui" FILES ${DEVGUI})
 
 set(GAME
-	"${SRC_DIR}/game/teams.h"
-    "${SRC_DIR}/game/actor.cpp"
-    "${SRC_DIR}/game/actor.h"
-    "${SRC_DIR}/game/actor_aim.cpp"
-    "${SRC_DIR}/game/actor_aim.h"
-    "${SRC_DIR}/game/actor_animapi.cpp"
-    "${SRC_DIR}/game/actor_animapi.h"
-    "${SRC_DIR}/game/actor_animscripted.cpp"
-    "${SRC_DIR}/game/actor_animscripted.h"
-    "${SRC_DIR}/game/actor_badplace.cpp"
-    "${SRC_DIR}/game/actor_badplace.h"
-    "${SRC_DIR}/game/actor_common.h"
-    "${SRC_DIR}/game/actor_corpse.cpp"
-    "${SRC_DIR}/game/actor_corpse.h"
-    "${SRC_DIR}/game/actor_cover.cpp"
-    "${SRC_DIR}/game/actor_cover.h"
-    "${SRC_DIR}/game/actor_cover_arrival.cpp"
-    "${SRC_DIR}/game/actor_cover_arrival.h"
-    "${SRC_DIR}/game/actor_death.cpp"
-    "${SRC_DIR}/game/actor_death.h"
-    "${SRC_DIR}/game/actor_dog_exposed.cpp"
-    "${SRC_DIR}/game/actor_dog_exposed.h"
-    "${SRC_DIR}/game/actor_event_listeners.cpp"
-    "${SRC_DIR}/game/actor_event_listeners.h"
-    "${SRC_DIR}/game/actor_events.cpp"
-    "${SRC_DIR}/game/actor_events.h"
-    "${SRC_DIR}/game/actor_exposed.cpp"
-    "${SRC_DIR}/game/actor_exposed.h"
-    "${SRC_DIR}/game/actor_fields.cpp"
-    "${SRC_DIR}/game/actor_fields.h"
-    "${SRC_DIR}/game/actor_function_table.cpp"
-    "${SRC_DIR}/game/actor_generic.cpp"
-    "${SRC_DIR}/game/actor_generic.h"
-    "${SRC_DIR}/game/actor_grenade.cpp"
-    "${SRC_DIR}/game/actor_grenade.h"
-    "${SRC_DIR}/game/actor_lookat.cpp"
-    "${SRC_DIR}/game/actor_lookat.h"
-    "${SRC_DIR}/game/actor_navigation.cpp"
-    "${SRC_DIR}/game/actor_navigation.h"
-    "${SRC_DIR}/game/actor_negotiation.cpp"
-    "${SRC_DIR}/game/actor_negotiation.h"
-    "${SRC_DIR}/game/actor_orientation.cpp"
-    "${SRC_DIR}/game/actor_orientation.h"
-    "${SRC_DIR}/game/actor_pain.cpp"
-    "${SRC_DIR}/game/actor_pain.h"
-    "${SRC_DIR}/game/actor_physics.cpp"
-    "${SRC_DIR}/game/actor_physics.h"
-    "${SRC_DIR}/game/actor_script_cmd.cpp"
-    "${SRC_DIR}/game/actor_script_cmd.h"
-    "${SRC_DIR}/game/actor_senses.cpp"
-    "${SRC_DIR}/game/actor_senses.h"
-    "${SRC_DIR}/game/actor_spawner.cpp"
-    "${SRC_DIR}/game/actor_spawner.h"
-    "${SRC_DIR}/game/actor_state.cpp"
-    "${SRC_DIR}/game/actor_state.h"
-    "${SRC_DIR}/game/actor_suppression.cpp"
-    "${SRC_DIR}/game/actor_suppression.h"
-    "${SRC_DIR}/game/actor_team_move.cpp"
-    "${SRC_DIR}/game/actor_team_move.h"
-    "${SRC_DIR}/game/actor_threat.cpp"
-    "${SRC_DIR}/game/actor_threat.h"
-    "${SRC_DIR}/game/actor_turret.cpp"
-    "${SRC_DIR}/game/actor_turret.h"
-    "${SRC_DIR}/game/ai_history.cpp"
-    "${SRC_DIR}/game/ai_history.h"
+    "${SRC_DIR}/game/teams.h"
     "${SRC_DIR}/game/bullet.cpp"
     "${SRC_DIR}/game/bullet.h"
     "${SRC_DIR}/game/enthandle.cpp"
     "${SRC_DIR}/game/enthandle.h"
-    "${SRC_DIR}/game/g_active.cpp"
-    "${SRC_DIR}/game/g_actor_prone.cpp"
-    "${SRC_DIR}/game/g_actor_prone.h"
-    "${SRC_DIR}/game/g_animscripted.cpp"
     "${SRC_DIR}/game/g_bsp.cpp"
     "${SRC_DIR}/game/g_bsp.h"
-    "${SRC_DIR}/game/g_client.cpp"
     "${SRC_DIR}/game/g_client_fields.cpp"
-    "${SRC_DIR}/game/g_client_script_cmd.cpp"
-    "${SRC_DIR}/game/g_cmds.cpp"
-    "${SRC_DIR}/game/g_combat.cpp"
     "${SRC_DIR}/game/g_debug.cpp"
-    "${SRC_DIR}/game/g_demo_api.h"
     "${SRC_DIR}/game/g_helicopter.cpp"
     "${SRC_DIR}/game/g_hudelem.cpp"
     "${SRC_DIR}/game/g_items.cpp"
     "${SRC_DIR}/game/g_load_utils.cpp"
-    "${SRC_DIR}/game/g_local.h"
-    "${SRC_DIR}/game/g_main.cpp"
-    "${SRC_DIR}/game/g_main.h"
-    "${SRC_DIR}/game/g_misc.cpp"
     "${SRC_DIR}/game/g_missile.cpp"
     "${SRC_DIR}/game/g_mover.cpp"
-    "${SRC_DIR}/game/g_net_bypass_api.h"
-    "${SRC_DIR}/game/g_public.h"
-    "${SRC_DIR}/game/g_save.cpp"
-    "${SRC_DIR}/game/g_save.h"
-    "${SRC_DIR}/game/g_scr_db.h"
-    "${SRC_DIR}/game/g_scr_load_obj.cpp"
-    "${SRC_DIR}/game/g_scr_load_obj.h"
-    "${SRC_DIR}/game/g_scr_main.cpp"
-    "${SRC_DIR}/game/g_scr_main.h"
     "${SRC_DIR}/game/g_scr_mover.cpp"
     "${SRC_DIR}/game/g_scr_vehicle.cpp"
-    "${SRC_DIR}/game/g_spawn.cpp"
     "${SRC_DIR}/game/g_svcmds.cpp"
-    "${SRC_DIR}/game/g_targets.cpp"
-    "${SRC_DIR}/game/g_trigger.cpp"
-    "${SRC_DIR}/game/g_utils.cpp"
     "${SRC_DIR}/game/g_weapon.cpp"
     "${SRC_DIR}/game/g_weapon_load_obj.cpp"
-    "${SRC_DIR}/game/g_vehicle_path.cpp"
-    "${SRC_DIR}/game/g_vehicle_path.h"
-    "${SRC_DIR}/game/game_public.h"
-    "${SRC_DIR}/game/mission_dvarlist.cpp"
-    "${SRC_DIR}/game/pathnode.cpp"
-    "${SRC_DIR}/game/pathnode.h"
-    "${SRC_DIR}/game/pathnode_load_obj.cpp"
-    "${SRC_DIR}/game/pathnode_load_obj.h"
-    "${SRC_DIR}/game/player_use.cpp"
-    "${SRC_DIR}/game/player_use.h"
-    "${SRC_DIR}/game/savedevice.h"
-    "${SRC_DIR}/game/savedevice_pc.cpp"
-    "${SRC_DIR}/game/savememory.cpp"
-    "${SRC_DIR}/game/savememory.h"
-    "${SRC_DIR}/game/sentient.cpp"
-    "${SRC_DIR}/game/sentient.h"
-    "${SRC_DIR}/game/sentient_fields.cpp"
-    "${SRC_DIR}/game/sentient_fields.h"
-    "${SRC_DIR}/game/sentient_script_cmd.cpp"
-    "${SRC_DIR}/game/turret.cpp"
-    "${SRC_DIR}/game/turret.h"
 )
-source_group("game" FILES ${GAME})
 
 set(GFX_D3D
     "${SRC_DIR}/gfx_d3d/fxprimitives.h"
@@ -502,37 +321,6 @@ set(GFX_D3D
     "${SRC_DIR}/gfx_d3d/r_xsurface.cpp"
     "${SRC_DIR}/gfx_d3d/r_xsurface.h"
 )
-source_group("gfx_d3d" FILES ${GFX_D3D})
-
-set(MSSLIB
-    "${DEPS_DIR}/msslib/mss.h"
-)
-source_group("msslib" FILES ${MSSLIB})
-
-set(ODE
-    "${DEPS_DIR}/ode/collision.h"
-    "${DEPS_DIR}/ode/collision_space.h"
-    "${DEPS_DIR}/ode/collision_trimesh.h"
-    "${DEPS_DIR}/ode/common.h"
-    "${DEPS_DIR}/ode/compatibility.h"
-    "${DEPS_DIR}/ode/config.h"
-    "${DEPS_DIR}/ode/contact.h"
-    "${DEPS_DIR}/ode/error.h"
-    "${DEPS_DIR}/ode/export-dif.h"
-    "${DEPS_DIR}/ode/mass.h"
-    "${DEPS_DIR}/ode/matrix.h"
-    "${DEPS_DIR}/ode/memory.h"
-    "${DEPS_DIR}/ode/misc.h"
-    "${DEPS_DIR}/ode/objects.h"
-    "${DEPS_DIR}/ode/ode.h"
-    "${DEPS_DIR}/ode/odecpp.h"
-    "${DEPS_DIR}/ode/odecpp_collision.h"
-    "${DEPS_DIR}/ode/odecpp_old.h"
-    "${DEPS_DIR}/ode/odemath.h"
-    "${DEPS_DIR}/ode/rotation.h"
-    "${DEPS_DIR}/ode/timer.h"
-)
-source_group("ode" FILES ${ODE})
 
 set(PHYSICS
     "${SRC_DIR}/physics/physpreset_load_obj.cpp"
@@ -545,7 +333,6 @@ set(PHYSICS
     "${SRC_DIR}/physics/phys_ode.cpp"
     "${SRC_DIR}/physics/phys_world_collision.cpp"
 )
-source_group("physics" FILES ${PHYSICS})
 
 set(PHYSICS_ODE
     "${SRC_DIR}/physics/ode/collision_kernel.cpp"
@@ -584,7 +371,6 @@ set(PHYSICS_ODE
     "${SRC_DIR}/physics/ode/util.cpp"
     "${SRC_DIR}/physics/ode/util.h"
 )
-source_group("physics/ode" FILES ${PHYSICS_ODE})
 
 set(QCOMMON
     "${SRC_DIR}/qcommon/bitarray.h"
@@ -624,10 +410,6 @@ set(QCOMMON
     "${SRC_DIR}/qcommon/md4.h"
     "${SRC_DIR}/qcommon/mem_track.cpp"
     "${SRC_DIR}/qcommon/mem_track.h"
-    "${SRC_DIR}/qcommon/msg.cpp"
-    "${SRC_DIR}/qcommon/msg.h"
-    "${SRC_DIR}/qcommon/net_chan.cpp"
-    "${SRC_DIR}/qcommon/net_chan.h"
     "${SRC_DIR}/qcommon/qcommon.h"
     "${SRC_DIR}/qcommon/statmonitor.cpp"
     "${SRC_DIR}/qcommon/threads.cpp"
@@ -636,7 +418,6 @@ set(QCOMMON
     "${SRC_DIR}/qcommon/unzip.cpp"
     "${SRC_DIR}/qcommon/unzip.h"
 )
-source_group("qcommon" FILES ${QCOMMON})
 
 set(RAGDOLL
     "${SRC_DIR}/ragdoll/ragdoll.cpp"
@@ -645,7 +426,6 @@ set(RAGDOLL
     "${SRC_DIR}/ragdoll/ragdoll_quat.cpp"
     "${SRC_DIR}/ragdoll/ragdoll_update.cpp"
 )
-source_group("ragdoll" FILES ${RAGDOLL})
 
 set(SCRIPT
     "${SRC_DIR}/script/scr_animtree.cpp"
@@ -666,8 +446,6 @@ set(SCRIPT
     "${SRC_DIR}/script/scr_parser.h"
     "${SRC_DIR}/script/scr_parsetree.cpp"
     "${SRC_DIR}/script/scr_parsetree.h"
-    "${SRC_DIR}/script/scr_readwrite.h"
-    "${SRC_DIR}/script/scr_readwrite.cpp"
     "${SRC_DIR}/script/scr_stringlist.cpp"
     "${SRC_DIR}/script/scr_stringlist.h"
     "${SRC_DIR}/script/scr_variable.cpp"
@@ -678,24 +456,13 @@ set(SCRIPT
     "${SRC_DIR}/script/scr_yacc2.cpp"
     "${SRC_DIR}/script/scr_yacc_structs.h"
 )
-source_group("script" FILES ${SCRIPT})
 
 set(SERVER
-    "${SRC_DIR}/server/server.h"
-    "${SRC_DIR}/server/sv_ccmds.cpp"
-    "${SRC_DIR}/server/sv_client.cpp"
-    "${SRC_DIR}/server/sv_demo.cpp"
     "${SRC_DIR}/server/sv_game.cpp"
     "${SRC_DIR}/server/sv_game.h"
-    "${SRC_DIR}/server/sv_init.cpp"
-    "${SRC_DIR}/server/sv_main.cpp"
-    "${SRC_DIR}/server/sv_public.h"
-    "${SRC_DIR}/server/sv_save.h"
-    "${SRC_DIR}/server/sv_snapshot.cpp"
     "${SRC_DIR}/server/sv_world.cpp"
     "${SRC_DIR}/server/sv_world.h"
 )
-source_group("server" FILES ${SERVER})
 
 set(SOUND
     "${SRC_DIR}/sound/snd.cpp"
@@ -706,7 +473,6 @@ set(SOUND
     "${SRC_DIR}/sound/snd_public.h"
     "${SRC_DIR}/sound/snd_utils.cpp"
 )
-source_group("sound" FILES ${SOUND})
 
 set(SPEEX
     "${DEPS_DIR}/speex/speex.h"
@@ -719,7 +485,6 @@ set(SPEEX
     "${DEPS_DIR}/speex/speex_stereo.h"
     "${DEPS_DIR}/speex/speex_types.h"
 )
-source_group("speex" FILES ${SPEEX})
 
 set(STRINGED
     "${SRC_DIR}/stringed/stringed_hooks.cpp"
@@ -727,11 +492,9 @@ set(STRINGED
     "${SRC_DIR}/stringed/stringed_ingame.cpp"
     "${SRC_DIR}/stringed/stringed_ingame.h"
 )
-source_group("stringed" FILES ${STRINGED})
 
 set(UI
     "${SRC_DIR}/ui/keycodes.h"
-    "${SRC_DIR}/ui/mission.cpp"
     "${SRC_DIR}/ui/ui.h"
     "${SRC_DIR}/ui/ui_shared.h"
     "${SRC_DIR}/ui/ui_atoms.cpp"
@@ -739,12 +502,10 @@ set(UI
     "${SRC_DIR}/ui/ui_expressions.cpp"
     "${SRC_DIR}/ui/ui_expressions_logicfunctions.cpp"
     "${SRC_DIR}/ui/ui_localvars.cpp"
-    "${SRC_DIR}/ui/ui_main.cpp"
     "${SRC_DIR}/ui/ui_shared.cpp"
     "${SRC_DIR}/ui/ui_shared_obj.cpp"
     "${SRC_DIR}/ui/ui_utils.cpp"
 )
-source_group("ui" FILES ${UI})
 
 set(UNIVERSAL
     "${SRC_DIR}/universal/aabbtree.cpp"
@@ -793,7 +554,6 @@ set(UNIVERSAL
     "${SRC_DIR}/universal/win_common.cpp"
     "${SRC_DIR}/universal/win_shared.cpp"
 )
-source_group("universal" FILES ${UNIVERSAL})
 
 set(WIN32
     "${SRC_DIR}/win32/win_configure.cpp"
@@ -817,7 +577,6 @@ set(WIN32
     "${SRC_DIR}/win32/win_steam.cpp"
     "${SRC_DIR}/win32/win_steam.h"
 )
-source_group("win32" FILES ${WIN32})
 
 set(XANIM
     "${SRC_DIR}/xanim/dobj.cpp"
@@ -832,15 +591,49 @@ set(XANIM
     "${SRC_DIR}/xanim/xanim_load_db.h"
     "${SRC_DIR}/xanim/xanim_load_obj.cpp"
     "${SRC_DIR}/xanim/xanim_public.h"
-    "${SRC_DIR}/xanim/xanim_readwrite.cpp"
-    "${SRC_DIR}/xanim/xanim_readwrite.h"
     "${SRC_DIR}/xanim/xmodel.cpp"
     "${SRC_DIR}/xanim/xmodel.h"
     "${SRC_DIR}/xanim/xmodel_load_obj.cpp"
     "${SRC_DIR}/xanim/xmodel_load_phys_collmap.cpp"
     "${SRC_DIR}/xanim/xmodel_utils.cpp"
 )
-source_group("xanim" FILES ${XANIM})
+
+# Dependencies
+set(BINKLIB
+    "${DEPS_DIR}/binklib/bink.h"
+    "${DEPS_DIR}/binklib/binktextures.cpp"
+    "${DEPS_DIR}/binklib/binktextures.h"
+    "${DEPS_DIR}/binklib/rad3d.h"
+    "${DEPS_DIR}/binklib/radbase.h"
+)
+
+set(MSSLIB
+    "${DEPS_DIR}/msslib/mss.h"
+)
+
+set(ODE
+    "${DEPS_DIR}/ode/collision.h"
+    "${DEPS_DIR}/ode/collision_space.h"
+    "${DEPS_DIR}/ode/collision_trimesh.h"
+    "${DEPS_DIR}/ode/common.h"
+    "${DEPS_DIR}/ode/compatibility.h"
+    "${DEPS_DIR}/ode/config.h"
+    "${DEPS_DIR}/ode/contact.h"
+    "${DEPS_DIR}/ode/error.h"
+    "${DEPS_DIR}/ode/export-dif.h"
+    "${DEPS_DIR}/ode/mass.h"
+    "${DEPS_DIR}/ode/matrix.h"
+    "${DEPS_DIR}/ode/memory.h"
+    "${DEPS_DIR}/ode/misc.h"
+    "${DEPS_DIR}/ode/objects.h"
+    "${DEPS_DIR}/ode/ode.h"
+    "${DEPS_DIR}/ode/odecpp.h"
+    "${DEPS_DIR}/ode/odecpp_collision.h"
+    "${DEPS_DIR}/ode/odecpp_old.h"
+    "${DEPS_DIR}/ode/odemath.h"
+    "${DEPS_DIR}/ode/rotation.h"
+    "${DEPS_DIR}/ode/timer.h"
+)
 
 set(ZLIB
     "${DEPS_DIR}/zlib/adler32.c"
@@ -870,7 +663,6 @@ set(ZLIB
     "${DEPS_DIR}/zlib/zutil.c"
     "${DEPS_DIR}/zlib/zutil.h"
 )
-source_group("zlib" FILES ${ZLIB})
 
 set(STEAM_HEADERS
 "${DEPS_DIR}/steamsdk/steam/isteamapps.h"
@@ -918,39 +710,4 @@ set(STEAM_HEADERS
 "${DEPS_DIR}/steamsdk/steam/steamps3params.h"
 "${DEPS_DIR}/steamsdk/steam/steamtypes.h"
 "${DEPS_DIR}/steamsdk/steam/steamuniverse.h"
-)
-source_group("steamsdk/steam" FILES ${STEAM_HEADERS})
-
-
-add_executable(
-        ${BIN_NAME}
-        ${SRCROOT}
-        ${DYNENTITY}
-        ${EFFECTSCORE}
-        ${AIM_ASSIST}
-        ${BGAME}
-        ${BINKLIB}
-        ${CGAME}
-        ${CLIENT}
-        ${COMMON}
-        ${DATABASE}
-        ${DEVGUI}
-        ${GAME}
-        ${GFX_D3D}
-        ${MSSLIB}
-        ${ODE}
-        ${PHYSICS}
-        ${PHYSICS_ODE}
-        ${QCOMMON}
-        ${RAGDOLL}
-        ${SCRIPT}
-        ${SERVER}
-        ${SOUND}
-        ${STRINGED}
-        ${UI}
-        ${UNIVERSAL}
-        ${WIN32}
-        ${XANIM}
-        ${ZLIB}
-        ${STEAM_HEADERS}
 )

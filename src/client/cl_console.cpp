@@ -8,7 +8,7 @@
 #include <gfx_d3d/r_rendercmds.h>
 #include <qcommon/threads.h>
 #include <universal/com_files.h>
-#include <buildnumber_mp.h>
+#include <buildnumber.h>
 
 const dvar_t *con_typewriterColorGlowFailed;
 const dvar_t *con_typewriterColorGlowCompleted;
