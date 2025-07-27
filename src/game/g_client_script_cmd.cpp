@@ -129,15 +129,15 @@ void __cdecl PlayerCmd_giveWeapon(scr_entref_t entref)
     unsigned __int8 v9; // r31
     unsigned __int16 v10; // [sp+94h] [+14h]
 
-    v10 = HIWORD(entref);
-    if ((_WORD)entref)
+    v10 = entref.entnum;
+    if (entref.classnum)
     {
         Scr_ObjectError("not an entity");
         v1 = 0;
     }
     else
     {
-        if (HIWORD(entref) >= 0x880u)
+        if (entref.entnum >= 0x880u)
             MyAssertHandler(
                 "c:\\trees\\cod3\\cod3src\\src\\game\\g_client_script_cmd.cpp",
                 128,
@@ -170,7 +170,7 @@ void __cdecl PlayerCmd_giveWeapon(scr_entref_t entref)
     InitializeAmmo(v1, WeaponIndexForName, v9, v6);
 }
 
-void __cdecl PlayerCmd_takeWeapon(scr_entref_t *entref)
+void __cdecl PlayerCmd_takeWeapon(scr_entref_t entref)
 {
     gentity_s *v1; // r31
     const char *v2; // r3
@@ -178,15 +178,15 @@ void __cdecl PlayerCmd_takeWeapon(scr_entref_t *entref)
     int WeaponIndexForName; // r29
     unsigned __int16 v5; // [sp+84h] [+14h]
 
-    v5 = HIWORD(entref);
-    if ((_WORD)entref)
+    v5 = entref.entnum;
+    if (entref.classnum)
     {
         Scr_ObjectError("not an entity");
         v1 = 0;
     }
     else
     {
-        if (HIWORD(entref) >= 0x880u)
+        if (entref.entnum >= 0x880u)
             MyAssertHandler(
                 "c:\\trees\\cod3\\cod3src\\src\\game\\g_client_script_cmd.cpp",
                 170,
@@ -206,22 +206,22 @@ void __cdecl PlayerCmd_takeWeapon(scr_entref_t *entref)
     BG_TakePlayerWeapon(&v1->client->ps, WeaponIndexForName, 1);
 }
 
-void __cdecl PlayerCmd_takeAllWeapons(scr_entref_t *entref)
+void __cdecl PlayerCmd_takeAllWeapons(scr_entref_t entref)
 {
     gentity_s *v1; // r30
     const char *v2; // r3
     unsigned int v3; // r31
     unsigned __int16 v4; // [sp+84h] [+14h]
 
-    v4 = HIWORD(entref);
-    if ((_WORD)entref)
+    v4 = entref.entnum;
+    if (entref.classnum)
     {
         Scr_ObjectError("not an entity");
         v1 = 0;
     }
     else
     {
-        if (HIWORD(entref) >= 0x880u)
+        if (entref.entnum >= 0x880u)
             MyAssertHandler(
                 "c:\\trees\\cod3\\cod3src\\src\\game\\g_client_script_cmd.cpp",
                 194,
@@ -240,7 +240,7 @@ void __cdecl PlayerCmd_takeAllWeapons(scr_entref_t *entref)
         BG_TakePlayerWeapon(&v1->client->ps, v3, 1);
 }
 
-void __cdecl PlayerCmd_getCurrentWeapon(scr_entref_t *entref)
+void __cdecl PlayerCmd_getCurrentWeapon(scr_entref_t entref)
 {
     gentity_s *v1; // r31
     const char *v2; // r3
@@ -249,15 +249,15 @@ void __cdecl PlayerCmd_getCurrentWeapon(scr_entref_t *entref)
     const char *szInternalName; // r3
     unsigned __int16 v6; // [sp+84h] [+14h]
 
-    v6 = HIWORD(entref);
-    if ((_WORD)entref)
+    v6 = entref.entnum;
+    if (entref.classnum)
     {
         Scr_ObjectError("not an entity");
         v1 = 0;
     }
     else
     {
-        if (HIWORD(entref) >= 0x880u)
+        if (entref.entnum >= 0x880u)
             MyAssertHandler(
                 "c:\\trees\\cod3\\cod3src\\src\\game\\g_client_script_cmd.cpp",
                 221,
@@ -280,7 +280,7 @@ void __cdecl PlayerCmd_getCurrentWeapon(scr_entref_t *entref)
     Scr_AddString(szInternalName);
 }
 
-void __cdecl PlayerCmd_getCurrentWeaponClipAmmo(scr_entref_t *entref)
+void __cdecl PlayerCmd_getCurrentWeaponClipAmmo(scr_entref_t entref)
 {
     gentity_s *v1; // r31
     const char *v2; // r3
@@ -288,15 +288,15 @@ void __cdecl PlayerCmd_getCurrentWeaponClipAmmo(scr_entref_t *entref)
     int v4; // r3
     unsigned __int16 v5; // [sp+84h] [+14h]
 
-    v5 = HIWORD(entref);
-    if ((_WORD)entref)
+    v5 = entref.entnum;
+    if (entref.classnum)
     {
         Scr_ObjectError("not an entity");
         v1 = 0;
     }
     else
     {
-        if (HIWORD(entref) >= 0x880u)
+        if (entref.entnum >= 0x880u)
             MyAssertHandler(
                 "c:\\trees\\cod3\\cod3src\\src\\game\\g_client_script_cmd.cpp",
                 256,
@@ -318,7 +318,7 @@ void __cdecl PlayerCmd_getCurrentWeaponClipAmmo(scr_entref_t *entref)
     Scr_AddInt(v4);
 }
 
-void __cdecl PlayerCmd_getCurrentOffhand(scr_entref_t *entref)
+void __cdecl PlayerCmd_getCurrentOffhand(scr_entref_t entref)
 {
     gentity_s *v1; // r31
     const char *v2; // r3
@@ -326,15 +326,15 @@ void __cdecl PlayerCmd_getCurrentOffhand(scr_entref_t *entref)
     const char *szInternalName; // r3
     unsigned __int16 v5; // [sp+84h] [+14h]
 
-    v5 = HIWORD(entref);
-    if ((_WORD)entref)
+    v5 = entref.entnum;
+    if (entref.classnum)
     {
         Scr_ObjectError("not an entity");
         v1 = 0;
     }
     else
     {
-        if (HIWORD(entref) >= 0x880u)
+        if (entref.entnum >= 0x880u)
             MyAssertHandler(
                 "c:\\trees\\cod3\\cod3src\\src\\game\\g_client_script_cmd.cpp",
                 285,
@@ -356,7 +356,7 @@ void __cdecl PlayerCmd_getCurrentOffhand(scr_entref_t *entref)
     Scr_AddString(szInternalName);
 }
 
-void __cdecl PlayerCmd_setOffhandSecondaryClass(scr_entref_t *entref)
+void __cdecl PlayerCmd_setOffhandSecondaryClass(scr_entref_t entref)
 {
     gentity_s *v1; // r31
     const char *v2; // r3
@@ -364,15 +364,15 @@ void __cdecl PlayerCmd_setOffhandSecondaryClass(scr_entref_t *entref)
     unsigned int ConstString; // r3
     unsigned __int16 v5; // [sp+84h] [+14h]
 
-    v5 = HIWORD(entref);
-    if ((_WORD)entref)
+    v5 = entref.entnum;
+    if (entref.classnum)
     {
         Scr_ObjectError("not an entity");
         v1 = 0;
     }
     else
     {
-        if (HIWORD(entref) >= 0x880u)
+        if (entref.entnum >= 0x880u)
             MyAssertHandler(
                 "c:\\trees\\cod3\\cod3src\\src\\game\\g_client_script_cmd.cpp",
                 314,
@@ -408,22 +408,22 @@ void __cdecl PlayerCmd_setOffhandSecondaryClass(scr_entref_t *entref)
     Scr_Error(v3);
 }
 
-void __cdecl PlayerCmd_getOffhandSecondaryClass(scr_entref_t *entref)
+void __cdecl PlayerCmd_getOffhandSecondaryClass(scr_entref_t entref)
 {
     gentity_s *v1; // r31
     const char *v2; // r3
     OffhandSecondaryClass offhandSecondary; // r11
     unsigned __int16 v4; // [sp+94h] [+14h]
 
-    v4 = HIWORD(entref);
-    if ((_WORD)entref)
+    v4 = entref.entnum;
+    if (entref.classnum)
     {
         Scr_ObjectError("not an entity");
         v1 = 0;
     }
     else
     {
-        if (HIWORD(entref) >= 0x880u)
+        if (entref.entnum >= 0x880u)
             MyAssertHandler(
                 "c:\\trees\\cod3\\cod3src\\src\\game\\g_client_script_cmd.cpp",
                 346,
@@ -455,7 +455,7 @@ void __cdecl PlayerCmd_getOffhandSecondaryClass(scr_entref_t *entref)
     }
 }
 
-void __cdecl PlayerCmd_hasWeapon(scr_entref_t *entref)
+void __cdecl PlayerCmd_hasWeapon(scr_entref_t entref)
 {
     gentity_s *v1; // r31
     const char *v2; // r3
@@ -465,15 +465,15 @@ void __cdecl PlayerCmd_hasWeapon(scr_entref_t *entref)
     bool v6; // zf
     unsigned __int16 v7; // [sp+84h] [+14h]
 
-    v7 = HIWORD(entref);
-    if ((_WORD)entref)
+    v7 = entref.entnum;
+    if (entref.classnum)
     {
         Scr_ObjectError("not an entity");
         v1 = 0;
     }
     else
     {
-        if (HIWORD(entref) >= 0x880u)
+        if (entref.entnum >= 0x880u)
             MyAssertHandler(
                 "c:\\trees\\cod3\\cod3src\\src\\game\\g_client_script_cmd.cpp",
                 376,
@@ -495,7 +495,7 @@ void __cdecl PlayerCmd_hasWeapon(scr_entref_t *entref)
     Scr_AddBool(v5);
 }
 
-void __cdecl PlayerCmd_switchToWeapon(scr_entref_t *entref)
+void __cdecl PlayerCmd_switchToWeapon(scr_entref_t entref)
 {
     unsigned __int16 v1; // r27
     gentity_s *v2; // r31
@@ -504,15 +504,15 @@ void __cdecl PlayerCmd_switchToWeapon(scr_entref_t *entref)
     int WeaponIndexForName; // r29
     gclient_s *client; // r31
 
-    v1 = HIWORD(entref);
-    if ((_WORD)entref)
+    v1 = entref.entnum;
+    if (entref.classnum)
     {
         Scr_ObjectError("not an entity");
         v2 = 0;
     }
     else
     {
-        if (HIWORD(entref) >= 0x880u)
+        if (entref.entnum >= 0x880u)
             MyAssertHandler(
                 "c:\\trees\\cod3\\cod3src\\src\\game\\g_client_script_cmd.cpp",
                 405,
@@ -543,7 +543,7 @@ void __cdecl PlayerCmd_switchToWeapon(scr_entref_t *entref)
     }
 }
 
-void __cdecl PlayerCmd_switchToOffhand(scr_entref_t *entref)
+void __cdecl PlayerCmd_switchToOffhand(scr_entref_t entref)
 {
     unsigned __int16 v1; // r27
     gentity_s *v2; // r29
@@ -554,15 +554,15 @@ void __cdecl PlayerCmd_switchToOffhand(scr_entref_t *entref)
     const char *v7; // r3
     gclient_s *client; // r30
 
-    v1 = HIWORD(entref);
-    if ((_WORD)entref)
+    v1 = entref.entnum;
+    if (entref.classnum)
     {
         Scr_ObjectError("not an entity");
         v2 = 0;
     }
     else
     {
-        if (HIWORD(entref) >= 0x880u)
+        if (entref.entnum >= 0x880u)
             MyAssertHandler(
                 "c:\\trees\\cod3\\cod3src\\src\\game\\g_client_script_cmd.cpp",
                 438,
@@ -599,7 +599,7 @@ void __cdecl PlayerCmd_switchToOffhand(scr_entref_t *entref)
     }
 }
 
-void __cdecl PlayerCmd_giveStartAmmo(scr_entref_t *entref)
+void __cdecl PlayerCmd_giveStartAmmo(scr_entref_t entref)
 {
     gentity_s *v1; // r31
     const char *v2; // r3
@@ -608,15 +608,15 @@ void __cdecl PlayerCmd_giveStartAmmo(scr_entref_t *entref)
     gclient_s *client; // r30
     unsigned __int16 v6; // [sp+94h] [+14h]
 
-    v6 = HIWORD(entref);
-    if ((_WORD)entref)
+    v6 = entref.entnum;
+    if (entref.classnum)
     {
         Scr_ObjectError("not an entity");
         v1 = 0;
     }
     else
     {
-        if (HIWORD(entref) >= 0x880u)
+        if (entref.entnum >= 0x880u)
             MyAssertHandler(
                 "c:\\trees\\cod3\\cod3src\\src\\game\\g_client_script_cmd.cpp",
                 474,
@@ -640,7 +640,7 @@ void __cdecl PlayerCmd_giveStartAmmo(scr_entref_t *entref)
         InitializeAmmo(v1, WeaponIndexForName, v1->client->ps.weaponmodels[WeaponIndexForName], 0);
 }
 
-void __cdecl PlayerCmd_giveMaxAmmo(scr_entref_t *entref)
+void __cdecl PlayerCmd_giveMaxAmmo(scr_entref_t entref)
 {
     gentity_s *v1; // r30
     const char *v2; // r3
@@ -653,15 +653,15 @@ void __cdecl PlayerCmd_giveMaxAmmo(scr_entref_t *entref)
     int v9; // r6
     unsigned __int16 v10; // [sp+94h] [+14h]
 
-    v10 = HIWORD(entref);
-    if ((_WORD)entref)
+    v10 = entref.entnum;
+    if (entref.classnum)
     {
         Scr_ObjectError("not an entity");
         v1 = 0;
     }
     else
     {
-        if (HIWORD(entref) >= 0x880u)
+        if (entref.entnum >= 0x880u)
             MyAssertHandler(
                 "c:\\trees\\cod3\\cod3src\\src\\game\\g_client_script_cmd.cpp",
                 506,
@@ -693,7 +693,7 @@ void __cdecl PlayerCmd_giveMaxAmmo(scr_entref_t *entref)
 }
 
 // local variable allocation has failed, the output may be wrong!
-void __cdecl PlayerCmd_getFractionStartAmmo(scr_entref_t *entref)
+void __cdecl PlayerCmd_getFractionStartAmmo(scr_entref_t entref)
 {
     gentity_s *v1; // r29
     const char *v2; // r3
@@ -705,15 +705,15 @@ void __cdecl PlayerCmd_getFractionStartAmmo(scr_entref_t *entref)
     gclient_s *v8; // r9 OVERLAPPED
     unsigned __int16 v9; // [sp+A4h] [+14h]
 
-    v9 = HIWORD(entref);
-    if ((_WORD)entref)
+    v9 = entref.entnum;
+    if (entref.classnum)
     {
         Scr_ObjectError("not an entity");
         v1 = 0;
     }
     else
     {
-        if (HIWORD(entref) >= 0x880u)
+        if (entref.entnum >= 0x880u)
             MyAssertHandler(
                 "c:\\trees\\cod3\\cod3src\\src\\game\\g_client_script_cmd.cpp",
                 540,
@@ -750,7 +750,7 @@ void __cdecl PlayerCmd_getFractionStartAmmo(scr_entref_t *entref)
 }
 
 // local variable allocation has failed, the output may be wrong!
-void __cdecl PlayerCmd_getFractionMaxAmmo(scr_entref_t *entref)
+void __cdecl PlayerCmd_getFractionMaxAmmo(scr_entref_t entref)
 {
     gentity_s *v1; // r30
     const char *v2; // r3
@@ -762,15 +762,15 @@ void __cdecl PlayerCmd_getFractionMaxAmmo(scr_entref_t *entref)
     gclient_s *v8; // r9 OVERLAPPED
     unsigned __int16 v9; // [sp+A4h] [+14h]
 
-    v9 = HIWORD(entref);
-    if ((_WORD)entref)
+    v9 = entref.entnum;
+    if (entref.classnum)
     {
         Scr_ObjectError("not an entity");
         v1 = 0;
     }
     else
     {
-        if (HIWORD(entref) >= 0x880u)
+        if (entref.entnum >= 0x880u)
             MyAssertHandler(
                 "c:\\trees\\cod3\\cod3src\\src\\game\\g_client_script_cmd.cpp",
                 586,
@@ -827,22 +827,22 @@ void __cdecl PlayerCmd_getFractionMaxAmmo(scr_entref_t *entref)
     Scr_AddFloat(1.0);
 }
 
-void __cdecl PlayerCmd_setOrigin(scr_entref_t *entref)
+void __cdecl PlayerCmd_setOrigin(scr_entref_t entref)
 {
     gentity_s *v1; // r31
     const char *v2; // r3
     float v3[6]; // [sp+50h] [-30h] BYREF
     unsigned __int16 v4; // [sp+94h] [+14h]
 
-    v4 = HIWORD(entref);
-    if ((_WORD)entref)
+    v4 = entref.entnum;
+    if (entref.classnum)
     {
         Scr_ObjectError("not an entity");
         v1 = 0;
     }
     else
     {
-        if (HIWORD(entref) >= 0x880u)
+        if (entref.entnum >= 0x880u)
             MyAssertHandler(
                 "c:\\trees\\cod3\\cod3src\\src\\game\\g_client_script_cmd.cpp",
                 645,
@@ -860,7 +860,7 @@ void __cdecl PlayerCmd_setOrigin(scr_entref_t *entref)
     SetClientOrigin(v1, v3);
 }
 
-void __cdecl PlayerCmd_SetVelocity(scr_entref_t *entref)
+void __cdecl PlayerCmd_SetVelocity(scr_entref_t entref)
 {
     gentity_s *v1; // r31
     const char *v2; // r3
@@ -868,15 +868,15 @@ void __cdecl PlayerCmd_SetVelocity(scr_entref_t *entref)
     float v4[6]; // [sp+50h] [-30h] BYREF
     unsigned __int16 v5; // [sp+94h] [+14h]
 
-    v5 = HIWORD(entref);
-    if ((_WORD)entref)
+    v5 = entref.entnum;
+    if (entref.classnum)
     {
         Scr_ObjectError("not an entity");
         v1 = 0;
     }
     else
     {
-        if (HIWORD(entref) >= 0x880u)
+        if (entref.entnum >= 0x880u)
             MyAssertHandler(
                 "c:\\trees\\cod3\\cod3src\\src\\game\\g_client_script_cmd.cpp",
                 668,
@@ -897,21 +897,21 @@ void __cdecl PlayerCmd_SetVelocity(scr_entref_t *entref)
     p_commandTime[12] = v4[2];
 }
 
-void __cdecl PlayerCmd_GetVelocity(scr_entref_t *entref)
+void __cdecl PlayerCmd_GetVelocity(scr_entref_t entref)
 {
     gentity_s *v1; // r31
     const char *v2; // r3
     unsigned __int16 v3; // [sp+84h] [+14h]
 
-    v3 = HIWORD(entref);
-    if ((_WORD)entref)
+    v3 = entref.entnum;
+    if (entref.classnum)
     {
         Scr_ObjectError("not an entity");
         v1 = 0;
     }
     else
     {
-        if (HIWORD(entref) >= 0x880u)
+        if (entref.entnum >= 0x880u)
             MyAssertHandler(
                 "c:\\trees\\cod3\\cod3src\\src\\game\\g_client_script_cmd.cpp",
                 688,
@@ -928,7 +928,7 @@ void __cdecl PlayerCmd_GetVelocity(scr_entref_t *entref)
     Scr_AddVector(v1->client->ps.velocity);
 }
 
-void __cdecl PlayerCmd_setAngles(scr_entref_t *entref)
+void __cdecl PlayerCmd_setAngles(scr_entref_t entref)
 {
     gentity_s *v1; // r31
     const char *v2; // r3
@@ -936,15 +936,15 @@ void __cdecl PlayerCmd_setAngles(scr_entref_t *entref)
     float v4[6]; // [sp+50h] [-30h] BYREF
     unsigned __int16 v5; // [sp+94h] [+14h]
 
-    v5 = HIWORD(entref);
-    if ((_WORD)entref)
+    v5 = entref.entnum;
+    if (entref.classnum)
     {
         Scr_ObjectError("not an entity");
         v1 = 0;
     }
     else
     {
-        if (HIWORD(entref) >= 0x880u)
+        if (entref.entnum >= 0x880u)
             MyAssertHandler(
                 "c:\\trees\\cod3\\cod3src\\src\\game\\g_client_script_cmd.cpp",
                 709,
@@ -962,21 +962,21 @@ void __cdecl PlayerCmd_setAngles(scr_entref_t *entref)
     SetClientViewAngle(v1, v4, v3);
 }
 
-void __cdecl PlayerCmd_getAngles(scr_entref_t *entref)
+void __cdecl PlayerCmd_getAngles(scr_entref_t entref)
 {
     gentity_s *v1; // r31
     const char *v2; // r3
     unsigned __int16 v3; // [sp+84h] [+14h]
 
-    v3 = HIWORD(entref);
-    if ((_WORD)entref)
+    v3 = entref.entnum;
+    if (entref.classnum)
     {
         Scr_ObjectError("not an entity");
         v1 = 0;
     }
     else
     {
-        if (HIWORD(entref) >= 0x880u)
+        if (entref.entnum >= 0x880u)
             MyAssertHandler(
                 "c:\\trees\\cod3\\cod3src\\src\\game\\g_client_script_cmd.cpp",
                 729,
@@ -993,21 +993,21 @@ void __cdecl PlayerCmd_getAngles(scr_entref_t *entref)
     Scr_AddVector(v1->client->ps.viewangles);
 }
 
-void __cdecl PlayerCmd_getViewHeight(scr_entref_t *entref)
+void __cdecl PlayerCmd_getViewHeight(scr_entref_t entref)
 {
     gentity_s *v1; // r31
     const char *v2; // r3
     unsigned __int16 v3; // [sp+84h] [+14h]
 
-    v3 = HIWORD(entref);
-    if ((_WORD)entref)
+    v3 = entref.entnum;
+    if (entref.classnum)
     {
         Scr_ObjectError("not an entity");
         v1 = 0;
     }
     else
     {
-        if (HIWORD(entref) >= 0x880u)
+        if (entref.entnum >= 0x880u)
             MyAssertHandler(
                 "c:\\trees\\cod3\\cod3src\\src\\game\\g_client_script_cmd.cpp",
                 747,
@@ -1061,21 +1061,21 @@ void PlayerCmd_getNormalizedMovement(scr_entref_t entref)
     Scr_AddVector(movementVector);
 }
 
-void __cdecl PlayerCmd_useButtonPressed(scr_entref_t *entref)
+void __cdecl PlayerCmd_useButtonPressed(scr_entref_t entref)
 {
     gentity_s *v1; // r31
     const char *v2; // r3
     unsigned __int16 v3; // [sp+84h] [+14h]
 
-    v3 = HIWORD(entref);
-    if ((_WORD)entref)
+    v3 = entref.entnum;
+    if (entref.classnum)
     {
         Scr_ObjectError("not an entity");
         v1 = 0;
     }
     else
     {
-        if (HIWORD(entref) >= 0x880u)
+        if (entref.entnum >= 0x880u)
             MyAssertHandler(
                 "c:\\trees\\cod3\\cod3src\\src\\game\\g_client_script_cmd.cpp",
                 789,
@@ -1092,21 +1092,21 @@ void __cdecl PlayerCmd_useButtonPressed(scr_entref_t *entref)
     Scr_AddInt((((unsigned __int8)v1->client->buttonsSinceLastFrame | (unsigned __int8)v1->client->buttons) & 0x28) != 0);
 }
 
-void __cdecl PlayerCmd_attackButtonPressed(scr_entref_t *entref)
+void __cdecl PlayerCmd_attackButtonPressed(scr_entref_t entref)
 {
     gentity_s *v1; // r31
     const char *v2; // r3
     unsigned __int16 v3; // [sp+84h] [+14h]
 
-    v3 = HIWORD(entref);
-    if ((_WORD)entref)
+    v3 = entref.entnum;
+    if (entref.classnum)
     {
         Scr_ObjectError("not an entity");
         v1 = 0;
     }
     else
     {
-        if (HIWORD(entref) >= 0x880u)
+        if (entref.entnum >= 0x880u)
             MyAssertHandler(
                 "c:\\trees\\cod3\\cod3src\\src\\game\\g_client_script_cmd.cpp",
                 810,
@@ -1123,21 +1123,21 @@ void __cdecl PlayerCmd_attackButtonPressed(scr_entref_t *entref)
     Scr_AddInt((((unsigned __int8)v1->client->buttonsSinceLastFrame | (unsigned __int8)v1->client->buttons) & 1) != 0);
 }
 
-void __cdecl PlayerCmd_adsButtonPressed(scr_entref_t *entref)
+void __cdecl PlayerCmd_adsButtonPressed(scr_entref_t entref)
 {
     gentity_s *v1; // r31
     const char *v2; // r3
     unsigned __int16 v3; // [sp+84h] [+14h]
 
-    v3 = HIWORD(entref);
-    if ((_WORD)entref)
+    v3 = entref.entnum;
+    if (entref.classnum)
     {
         Scr_ObjectError("not an entity");
         v1 = 0;
     }
     else
     {
-        if (HIWORD(entref) >= 0x880u)
+        if (entref.entnum >= 0x880u)
             MyAssertHandler(
                 "c:\\trees\\cod3\\cod3src\\src\\game\\g_client_script_cmd.cpp",
                 831,
@@ -1154,21 +1154,21 @@ void __cdecl PlayerCmd_adsButtonPressed(scr_entref_t *entref)
     Scr_AddInt((((unsigned __int16)v1->client->buttonsSinceLastFrame | (unsigned __int16)v1->client->buttons) & 0x800) != 0);
 }
 
-void __cdecl PlayerCmd_meleeButtonPressed(scr_entref_t *entref)
+void __cdecl PlayerCmd_meleeButtonPressed(scr_entref_t entref)
 {
     gentity_s *v1; // r31
     const char *v2; // r3
     unsigned __int16 v3; // [sp+84h] [+14h]
 
-    v3 = HIWORD(entref);
-    if ((_WORD)entref)
+    v3 = entref.entnum;
+    if (entref.classnum)
     {
         Scr_ObjectError("not an entity");
         v1 = 0;
     }
     else
     {
-        if (HIWORD(entref) >= 0x880u)
+        if (entref.entnum >= 0x880u)
             MyAssertHandler(
                 "c:\\trees\\cod3\\cod3src\\src\\game\\g_client_script_cmd.cpp",
                 852,
@@ -1205,7 +1205,7 @@ int __cdecl PlayerCmd_CheckButtonPressed()
     return result;
 }
 
-void __cdecl PlayerCmd_buttonPressed(scr_entref_t *entref)
+void __cdecl PlayerCmd_buttonPressed(scr_entref_t entref)
 {
     int v1; // r31
     int v2; // r3
@@ -1336,7 +1336,7 @@ void __cdecl G_ProcessCommandNotifies()
     }
 }
 
-void __cdecl PlayerCmd_notifyOnCommand(scr_entref_t *entref)
+void __cdecl PlayerCmd_notifyOnCommand(scr_entref_t entref)
 {
     const char *String; // r31
     const char *v2; // r3
@@ -1348,21 +1348,21 @@ void __cdecl PlayerCmd_notifyOnCommand(scr_entref_t *entref)
     Cmd_RegisterNotification(v2, String);
 }
 
-void __cdecl PlayerCmd_playerADS(scr_entref_t *entref)
+void __cdecl PlayerCmd_playerADS(scr_entref_t entref)
 {
     gentity_s *v1; // r31
     const char *v2; // r3
     unsigned __int16 v3; // [sp+84h] [+14h]
 
-    v3 = HIWORD(entref);
-    if ((_WORD)entref)
+    v3 = entref.entnum;
+    if (entref.classnum)
     {
         Scr_ObjectError("not an entity");
         v1 = 0;
     }
     else
     {
-        if (HIWORD(entref) >= 0x880u)
+        if (entref.entnum >= 0x880u)
             MyAssertHandler(
                 "c:\\trees\\cod3\\cod3src\\src\\game\\g_client_script_cmd.cpp",
                 1085,
@@ -1379,7 +1379,7 @@ void __cdecl PlayerCmd_playerADS(scr_entref_t *entref)
     Scr_AddFloat(v1->client->ps.fWeaponPosFrac);
 }
 
-void __cdecl PlayerCmd_isOnGround(scr_entref_t *entref)
+void __cdecl PlayerCmd_isOnGround(scr_entref_t entref)
 {
     gentity_s *v1; // r31
     const char *v2; // r3
@@ -1387,15 +1387,15 @@ void __cdecl PlayerCmd_isOnGround(scr_entref_t *entref)
     bool v4; // r3
     unsigned __int16 v5; // [sp+84h] [+14h]
 
-    v5 = HIWORD(entref);
-    if ((_WORD)entref)
+    v5 = entref.entnum;
+    if (entref.classnum)
     {
         Scr_ObjectError("not an entity");
         v1 = 0;
     }
     else
     {
-        if (HIWORD(entref) >= 0x880u)
+        if (entref.entnum >= 0x880u)
             MyAssertHandler(
                 "c:\\trees\\cod3\\cod3src\\src\\game\\g_client_script_cmd.cpp",
                 1103,
@@ -1416,7 +1416,7 @@ void __cdecl PlayerCmd_isOnGround(scr_entref_t *entref)
     Scr_AddInt(v4);
 }
 
-void __cdecl PlayerCmd_SetViewmodel(scr_entref_t *entref)
+void __cdecl PlayerCmd_SetViewmodel(scr_entref_t entref)
 {
     gentity_s *v1; // r30
     const char *v2; // r3
@@ -1425,15 +1425,15 @@ void __cdecl PlayerCmd_SetViewmodel(scr_entref_t *entref)
     int v5; // r31
     unsigned __int16 v6; // [sp+94h] [+14h]
 
-    v6 = HIWORD(entref);
-    if ((_WORD)entref)
+    v6 = entref.entnum;
+    if (entref.classnum)
     {
         Scr_ObjectError("not an entity");
         v1 = 0;
     }
     else
     {
-        if (HIWORD(entref) >= 0x880u)
+        if (entref.entnum >= 0x880u)
             MyAssertHandler(
                 "c:\\trees\\cod3\\cod3src\\src\\game\\g_client_script_cmd.cpp",
                 1135,
@@ -1462,7 +1462,7 @@ void __cdecl PlayerCmd_SetViewmodel(scr_entref_t *entref)
     v1->client->ps.viewmodelIndex = v5;
 }
 
-void __cdecl PlayerCmd_AllowADS(scr_entref_t *entref)
+void __cdecl PlayerCmd_AllowADS(scr_entref_t entref)
 {
     gentity_s *v1; // r31
     const char *v2; // r3
@@ -1471,15 +1471,15 @@ void __cdecl PlayerCmd_AllowADS(scr_entref_t *entref)
     int weapFlags; // r10
     unsigned __int16 v6; // [sp+84h] [+14h]
 
-    v6 = HIWORD(entref);
-    if ((_WORD)entref)
+    v6 = entref.entnum;
+    if (entref.classnum)
     {
         Scr_ObjectError("not an entity");
         v1 = 0;
     }
     else
     {
-        if (HIWORD(entref) >= 0x880u)
+        if (entref.entnum >= 0x880u)
             MyAssertHandler(
                 "c:\\trees\\cod3\\cod3src\\src\\game\\g_client_script_cmd.cpp",
                 1163,
@@ -1514,7 +1514,7 @@ void __cdecl PlayerCmd_AllowADS(scr_entref_t *entref)
     }
 }
 
-void __cdecl PlayerCmd_AllowJump(scr_entref_t *entref)
+void __cdecl PlayerCmd_AllowJump(scr_entref_t entref)
 {
     gentity_s *v1; // r31
     const char *v2; // r3
@@ -1524,15 +1524,15 @@ void __cdecl PlayerCmd_AllowJump(scr_entref_t *entref)
     unsigned int v6; // r10
     unsigned __int16 v7; // [sp+84h] [+14h]
 
-    v7 = HIWORD(entref);
-    if ((_WORD)entref)
+    v7 = entref.entnum;
+    if (entref.classnum)
     {
         Scr_ObjectError("not an entity");
         v1 = 0;
     }
     else
     {
-        if (HIWORD(entref) >= 0x880u)
+        if (entref.entnum >= 0x880u)
             MyAssertHandler(
                 "c:\\trees\\cod3\\cod3src\\src\\game\\g_client_script_cmd.cpp",
                 1196,
@@ -1556,7 +1556,7 @@ void __cdecl PlayerCmd_AllowJump(scr_entref_t *entref)
     client->ps.pm_flags = v6;
 }
 
-void __cdecl PlayerCmd_AllowSprint(scr_entref_t *entref)
+void __cdecl PlayerCmd_AllowSprint(scr_entref_t entref)
 {
     gentity_s *v1; // r31
     const char *v2; // r3
@@ -1566,15 +1566,15 @@ void __cdecl PlayerCmd_AllowSprint(scr_entref_t *entref)
     unsigned int v6; // r10
     unsigned __int16 v7; // [sp+84h] [+14h]
 
-    v7 = HIWORD(entref);
-    if ((_WORD)entref)
+    v7 = entref.entnum;
+    if (entref.classnum)
     {
         Scr_ObjectError("not an entity");
         v1 = 0;
     }
     else
     {
-        if (HIWORD(entref) >= 0x880u)
+        if (entref.entnum >= 0x880u)
             MyAssertHandler(
                 "c:\\trees\\cod3\\cod3src\\src\\game\\g_client_script_cmd.cpp",
                 1218,
@@ -1598,7 +1598,7 @@ void __cdecl PlayerCmd_AllowSprint(scr_entref_t *entref)
     client->ps.pm_flags = v6;
 }
 
-void __cdecl PlayerCmd_AllowMelee(scr_entref_t *entref)
+void __cdecl PlayerCmd_AllowMelee(scr_entref_t entref)
 {
     gentity_s *v1; // r31
     const char *v2; // r3
@@ -1608,15 +1608,15 @@ void __cdecl PlayerCmd_AllowMelee(scr_entref_t *entref)
     unsigned int v6; // r10
     unsigned __int16 v7; // [sp+84h] [+14h]
 
-    v7 = HIWORD(entref);
-    if ((_WORD)entref)
+    v7 = entref.entnum;
+    if (entref.classnum)
     {
         Scr_ObjectError("not an entity");
         v1 = 0;
     }
     else
     {
-        if (HIWORD(entref) >= 0x880u)
+        if (entref.entnum >= 0x880u)
             MyAssertHandler(
                 "c:\\trees\\cod3\\cod3src\\src\\game\\g_client_script_cmd.cpp",
                 1240,
@@ -1640,7 +1640,7 @@ void __cdecl PlayerCmd_AllowMelee(scr_entref_t *entref)
     client->ps.pm_flags = v6;
 }
 
-void __cdecl PlayerCmd_SetSpreadOverride(scr_entref_t *entref)
+void __cdecl PlayerCmd_SetSpreadOverride(scr_entref_t entref)
 {
     gentity_s *v1; // r31
     const char *v2; // r3
@@ -1648,15 +1648,15 @@ void __cdecl PlayerCmd_SetSpreadOverride(scr_entref_t *entref)
     const char *v4; // r3
     unsigned __int16 v5; // [sp+84h] [+14h]
 
-    v5 = HIWORD(entref);
-    if ((_WORD)entref)
+    v5 = entref.entnum;
+    if (entref.classnum)
     {
         Scr_ObjectError("not an entity");
         v1 = 0;
     }
     else
     {
-        if (HIWORD(entref) >= 0x880u)
+        if (entref.entnum >= 0x880u)
             MyAssertHandler(
                 "c:\\trees\\cod3\\cod3src\\src\\game\\g_client_script_cmd.cpp",
                 1264,
@@ -1697,21 +1697,21 @@ void __cdecl PlayerCmd_SetSpreadOverride(scr_entref_t *entref)
     }
 }
 
-void __cdecl PlayerCmd_ResetSpreadOverride(scr_entref_t *entref)
+void __cdecl PlayerCmd_ResetSpreadOverride(scr_entref_t entref)
 {
     gentity_s *v1; // r31
     const char *v2; // r3
     unsigned __int16 v3; // [sp+84h] [+14h]
 
-    v3 = HIWORD(entref);
-    if ((_WORD)entref)
+    v3 = entref.entnum;
+    if (entref.classnum)
     {
         Scr_ObjectError("not an entity");
         v1 = 0;
     }
     else
     {
-        if (HIWORD(entref) >= 0x880u)
+        if (entref.entnum >= 0x880u)
             MyAssertHandler(
                 "c:\\trees\\cod3\\cod3src\\src\\game\\g_client_script_cmd.cpp",
                 1302,
@@ -1731,20 +1731,20 @@ void __cdecl PlayerCmd_ResetSpreadOverride(scr_entref_t *entref)
         Scr_Error("USAGE: <player> resetspreadoverride()\n");
 }
 
-void __cdecl PlayerCmd_ShowViewmodel(scr_entref_t *entref)
+void __cdecl PlayerCmd_ShowViewmodel(scr_entref_t entref)
 {
     unsigned __int16 v1; // r30
     int v2; // r31
     const char *v3; // r3
 
-    v1 = HIWORD(entref);
-    if ((_WORD)entref)
+    v1 = entref.entnum;
+    if (entref.classnum)
     {
         v3 = "not an entity";
         goto LABEL_7;
     }
-    v2 = HIWORD(entref);
-    if (HIWORD(entref) >= 0x880u)
+    v2 = entref.entnum;
+    if (entref.entnum >= 0x880u)
         MyAssertHandler(
             "c:\\trees\\cod3\\cod3src\\src\\game\\g_client_script_cmd.cpp",
             1324,
@@ -1760,7 +1760,7 @@ void __cdecl PlayerCmd_ShowViewmodel(scr_entref_t *entref)
     SV_GameSendServerCommand(v1, "showViewModel");
 }
 
-void __cdecl PlayerCmd_HideViewmodel(scr_entref_t *entref)
+void __cdecl PlayerCmd_HideViewmodel(scr_entref_t entref)
 {
     unsigned __int16 v1; // r29
     gentity_s *v2; // r31
@@ -1768,15 +1768,15 @@ void __cdecl PlayerCmd_HideViewmodel(scr_entref_t *entref)
     playerState_s *p_ps; // r31
     unsigned int weaponstate; // r4
 
-    v1 = HIWORD(entref);
-    if ((_WORD)entref)
+    v1 = entref.entnum;
+    if (entref.classnum)
     {
         Scr_ObjectError("not an entity");
         v2 = 0;
     }
     else
     {
-        if (HIWORD(entref) >= 0x880u)
+        if (entref.entnum >= 0x880u)
             MyAssertHandler(
                 "c:\\trees\\cod3\\cod3src\\src\\game\\g_client_script_cmd.cpp",
                 1342,
@@ -1798,7 +1798,7 @@ void __cdecl PlayerCmd_HideViewmodel(scr_entref_t *entref)
     SV_GameSendServerCommand(v1, "hideViewModel");
 }
 
-void __cdecl PlayerCmd_AllowStand(scr_entref_t *entref)
+void __cdecl PlayerCmd_AllowStand(scr_entref_t entref)
 {
     gentity_s *v1; // r31
     const char *v2; // r3
@@ -1808,15 +1808,15 @@ void __cdecl PlayerCmd_AllowStand(scr_entref_t *entref)
     unsigned int v6; // r10
     unsigned __int16 v7; // [sp+84h] [+14h]
 
-    v7 = HIWORD(entref);
-    if ((_WORD)entref)
+    v7 = entref.entnum;
+    if (entref.classnum)
     {
         Scr_ObjectError("not an entity");
         v1 = 0;
     }
     else
     {
-        if (HIWORD(entref) >= 0x880u)
+        if (entref.entnum >= 0x880u)
             MyAssertHandler(
                 "c:\\trees\\cod3\\cod3src\\src\\game\\g_client_script_cmd.cpp",
                 1369,
@@ -1840,7 +1840,7 @@ void __cdecl PlayerCmd_AllowStand(scr_entref_t *entref)
     client->ps.pm_flags = v6;
 }
 
-void __cdecl PlayerCmd_AllowCrouch(scr_entref_t *entref)
+void __cdecl PlayerCmd_AllowCrouch(scr_entref_t entref)
 {
     gentity_s *v1; // r31
     const char *v2; // r3
@@ -1850,15 +1850,15 @@ void __cdecl PlayerCmd_AllowCrouch(scr_entref_t *entref)
     unsigned int v6; // r10
     unsigned __int16 v7; // [sp+84h] [+14h]
 
-    v7 = HIWORD(entref);
-    if ((_WORD)entref)
+    v7 = entref.entnum;
+    if (entref.classnum)
     {
         Scr_ObjectError("not an entity");
         v1 = 0;
     }
     else
     {
-        if (HIWORD(entref) >= 0x880u)
+        if (entref.entnum >= 0x880u)
             MyAssertHandler(
                 "c:\\trees\\cod3\\cod3src\\src\\game\\g_client_script_cmd.cpp",
                 1391,
@@ -1882,7 +1882,7 @@ void __cdecl PlayerCmd_AllowCrouch(scr_entref_t *entref)
     client->ps.pm_flags = v6;
 }
 
-void __cdecl PlayerCmd_AllowProne(scr_entref_t *entref)
+void __cdecl PlayerCmd_AllowProne(scr_entref_t entref)
 {
     gentity_s *v1; // r31
     const char *v2; // r3
@@ -1892,15 +1892,15 @@ void __cdecl PlayerCmd_AllowProne(scr_entref_t *entref)
     unsigned int v6; // r10
     unsigned __int16 v7; // [sp+84h] [+14h]
 
-    v7 = HIWORD(entref);
-    if ((_WORD)entref)
+    v7 = entref.entnum;
+    if (entref.classnum)
     {
         Scr_ObjectError("not an entity");
         v1 = 0;
     }
     else
     {
-        if (HIWORD(entref) >= 0x880u)
+        if (entref.entnum >= 0x880u)
             MyAssertHandler(
                 "c:\\trees\\cod3\\cod3src\\src\\game\\g_client_script_cmd.cpp",
                 1413,
@@ -1924,7 +1924,7 @@ void __cdecl PlayerCmd_AllowProne(scr_entref_t *entref)
     client->ps.pm_flags = v6;
 }
 
-void __cdecl PlayerCmd_AllowLean(scr_entref_t *entref)
+void __cdecl PlayerCmd_AllowLean(scr_entref_t entref)
 {
     gentity_s *v1; // r31
     const char *v2; // r3
@@ -1934,15 +1934,15 @@ void __cdecl PlayerCmd_AllowLean(scr_entref_t *entref)
     unsigned int v6; // r10
     unsigned __int16 v7; // [sp+84h] [+14h]
 
-    v7 = HIWORD(entref);
-    if ((_WORD)entref)
+    v7 = entref.entnum;
+    if (entref.classnum)
     {
         Scr_ObjectError("not an entity");
         v1 = 0;
     }
     else
     {
-        if (HIWORD(entref) >= 0x880u)
+        if (entref.entnum >= 0x880u)
             MyAssertHandler(
                 "c:\\trees\\cod3\\cod3src\\src\\game\\g_client_script_cmd.cpp",
                 1435,
@@ -1966,7 +1966,7 @@ void __cdecl PlayerCmd_AllowLean(scr_entref_t *entref)
     client->ps.pm_flags = v6;
 }
 
-void __cdecl PlayerCmd_OpenMenu(scr_entref_t *entref)
+void __cdecl PlayerCmd_OpenMenu(scr_entref_t entref)
 {
     unsigned __int16 v1; // r27
     gentity_s *v2; // r31
@@ -1976,15 +1976,15 @@ void __cdecl PlayerCmd_OpenMenu(scr_entref_t *entref)
     unsigned int ScriptMenuIndex; // r31
     const char *v7; // r3
 
-    v1 = HIWORD(entref);
-    if ((_WORD)entref)
+    v1 = entref.entnum;
+    if (entref.classnum)
     {
         Scr_ObjectError("not an entity");
         v2 = 0;
     }
     else
     {
-        if (HIWORD(entref) >= 0x880u)
+        if (entref.entnum >= 0x880u)
             MyAssertHandler(
                 "c:\\trees\\cod3\\cod3src\\src\\game\\g_client_script_cmd.cpp",
                 1459,
@@ -2017,7 +2017,7 @@ void __cdecl PlayerCmd_OpenMenu(scr_entref_t *entref)
     Scr_AddInt(v4);
 }
 
-void __cdecl PlayerCmd_OpenMenuNoMouse(scr_entref_t *entref)
+void __cdecl PlayerCmd_OpenMenuNoMouse(scr_entref_t entref)
 {
     unsigned __int16 v1; // r27
     gentity_s *v2; // r31
@@ -2027,15 +2027,15 @@ void __cdecl PlayerCmd_OpenMenuNoMouse(scr_entref_t *entref)
     unsigned int ScriptMenuIndex; // r31
     const char *v7; // r3
 
-    v1 = HIWORD(entref);
-    if ((_WORD)entref)
+    v1 = entref.entnum;
+    if (entref.classnum)
     {
         Scr_ObjectError("not an entity");
         v2 = 0;
     }
     else
     {
-        if (HIWORD(entref) >= 0x880u)
+        if (entref.entnum >= 0x880u)
             MyAssertHandler(
                 "c:\\trees\\cod3\\cod3src\\src\\game\\g_client_script_cmd.cpp",
                 1489,
@@ -2068,20 +2068,20 @@ void __cdecl PlayerCmd_OpenMenuNoMouse(scr_entref_t *entref)
     Scr_AddInt(v4);
 }
 
-void __cdecl PlayerCmd_CloseMenu(scr_entref_t *entref)
+void __cdecl PlayerCmd_CloseMenu(scr_entref_t entref)
 {
     unsigned __int16 v1; // r30
     int v2; // r31
     const char *v3; // r3
 
-    v1 = HIWORD(entref);
-    if ((_WORD)entref)
+    v1 = entref.entnum;
+    if (entref.classnum)
     {
         v3 = "not an entity";
         goto LABEL_7;
     }
-    v2 = HIWORD(entref);
-    if (HIWORD(entref) >= 0x880u)
+    v2 = entref.entnum;
+    if (entref.entnum >= 0x880u)
         MyAssertHandler(
             "c:\\trees\\cod3\\cod3src\\src\\game\\g_client_script_cmd.cpp",
             1517,
@@ -2097,21 +2097,21 @@ void __cdecl PlayerCmd_CloseMenu(scr_entref_t *entref)
     SV_GameSendServerCommand(v1, "popupclose");
 }
 
-void __cdecl PlayerCmd_FreezeControls(scr_entref_t *entref)
+void __cdecl PlayerCmd_FreezeControls(scr_entref_t entref)
 {
     gentity_s *v1; // r31
     const char *v2; // r3
     unsigned __int16 v3; // [sp+84h] [+14h]
 
-    v3 = HIWORD(entref);
-    if ((_WORD)entref)
+    v3 = entref.entnum;
+    if (entref.classnum)
     {
         Scr_ObjectError("not an entity");
         v1 = 0;
     }
     else
     {
-        if (HIWORD(entref) >= 0x880u)
+        if (entref.entnum >= 0x880u)
             MyAssertHandler(
                 "c:\\trees\\cod3\\cod3src\\src\\game\\g_client_script_cmd.cpp",
                 1536,
@@ -2128,7 +2128,7 @@ void __cdecl PlayerCmd_FreezeControls(scr_entref_t *entref)
     v1->client->bFrozen = Scr_GetInt(0);
 }
 
-void __cdecl PlayerCmd_SetEQLerp(scr_entref_t *entref)
+void __cdecl PlayerCmd_SetEQLerp(scr_entref_t entref)
 {
     unsigned __int16 v1; // r30
     int v2; // r31
@@ -2140,14 +2140,14 @@ void __cdecl PlayerCmd_SetEQLerp(scr_entref_t *entref)
     const char *v8; // r3
     const char *v9; // r3
 
-    v1 = HIWORD(entref);
-    if ((_WORD)entref)
+    v1 = entref.entnum;
+    if (entref.classnum)
     {
         v3 = "not an entity";
         goto LABEL_7;
     }
-    v2 = HIWORD(entref);
-    if (HIWORD(entref) >= 0x880u)
+    v2 = entref.entnum;
+    if (entref.entnum >= 0x880u)
         MyAssertHandler(
             "c:\\trees\\cod3\\cod3src\\src\\game\\g_client_script_cmd.cpp",
             1559,
@@ -2195,7 +2195,7 @@ void __cdecl PlayerCmd_SetEQLerp(scr_entref_t *entref)
     Scr_Error(v9);
 }
 
-void __cdecl PlayerCmd_SetEQ(scr_entref_t *entref)
+void __cdecl PlayerCmd_SetEQ(scr_entref_t entref)
 {
     unsigned __int16 v1; // r26
     const char *v2; // r3
@@ -2207,13 +2207,13 @@ void __cdecl PlayerCmd_SetEQ(scr_entref_t *entref)
     const char *v8; // r3
     double v9; // [sp+48h] [-58h]
 
-    v1 = HIWORD(entref);
-    if ((_WORD)entref)
+    v1 = entref.entnum;
+    if (entref.classnum)
     {
         v2 = "not an entity";
         goto LABEL_7;
     }
-    if (HIWORD(entref) >= 0x880u)
+    if (entref.entnum >= 0x880u)
         MyAssertHandler(
             "c:\\trees\\cod3\\cod3src\\src\\game\\g_client_script_cmd.cpp",
             1621,
@@ -2252,7 +2252,7 @@ void __cdecl PlayerCmd_SetEQ(scr_entref_t *entref)
     }
 }
 
-void __cdecl PlayerCmd_DeactivateEq(scr_entref_t *entref)
+void __cdecl PlayerCmd_DeactivateEq(scr_entref_t entref)
 {
     unsigned __int16 v1; // r29
     const char *v2; // r3
@@ -2265,13 +2265,13 @@ void __cdecl PlayerCmd_DeactivateEq(scr_entref_t *entref)
     const char *String; // r3
     const char *v10; // r3
 
-    v1 = HIWORD(entref);
-    if ((_WORD)entref)
+    v1 = entref.entnum;
+    if (entref.classnum)
     {
         v2 = "not an entity";
         goto LABEL_7;
     }
-    if (HIWORD(entref) >= 0x880u)
+    if (entref.entnum >= 0x880u)
         MyAssertHandler(
             "c:\\trees\\cod3\\cod3src\\src\\game\\g_client_script_cmd.cpp",
             1691,
@@ -2316,7 +2316,7 @@ void __cdecl PlayerCmd_DeactivateEq(scr_entref_t *entref)
     }
 }
 
-void __cdecl PlayerCmd_SetReverb(scr_entref_t *entref)
+void __cdecl PlayerCmd_SetReverb(scr_entref_t entref)
 {
     unsigned __int16 v1; // r29
     const char *v2; // r3
@@ -2327,13 +2327,13 @@ void __cdecl PlayerCmd_SetReverb(scr_entref_t *entref)
     int v7; // r31
     const char *v8; // r3
 
-    v1 = HIWORD(entref);
-    if ((_WORD)entref)
+    v1 = entref.entnum;
+    if (entref.classnum)
     {
         v2 = "not an entity";
         goto LABEL_7;
     }
-    if (HIWORD(entref) >= 0x880u)
+    if (entref.entnum >= 0x880u)
         MyAssertHandler(
             "c:\\trees\\cod3\\cod3src\\src\\game\\g_client_script_cmd.cpp",
             1747,
@@ -2383,7 +2383,7 @@ void __cdecl PlayerCmd_SetReverb(scr_entref_t *entref)
     }
 }
 
-void __cdecl PlayerCmd_DeactivateReverb(scr_entref_t *entref)
+void __cdecl PlayerCmd_DeactivateReverb(scr_entref_t entref)
 {
     unsigned __int16 v1; // r30
     int v2; // r31
@@ -2393,14 +2393,14 @@ void __cdecl PlayerCmd_DeactivateReverb(scr_entref_t *entref)
     unsigned int ConstString; // r3
     const char *v7; // r3
 
-    v1 = HIWORD(entref);
-    if ((_WORD)entref)
+    v1 = entref.entnum;
+    if (entref.classnum)
     {
         v3 = "not an entity";
         goto LABEL_7;
     }
-    v2 = HIWORD(entref);
-    if (HIWORD(entref) >= 0x880u)
+    v2 = entref.entnum;
+    if (entref.entnum >= 0x880u)
         MyAssertHandler(
             "c:\\trees\\cod3\\cod3src\\src\\game\\g_client_script_cmd.cpp",
             1802,
@@ -2431,7 +2431,7 @@ void __cdecl PlayerCmd_DeactivateReverb(scr_entref_t *entref)
     SV_GameSendServerCommand(v1, v7);
 }
 
-void __cdecl PlayerCmd_SetChannelVolumes(scr_entref_t *entref)
+void __cdecl PlayerCmd_SetChannelVolumes(scr_entref_t entref)
 {
     unsigned __int16 v1; // r29
     const char *v2; // r3
@@ -2442,13 +2442,13 @@ void __cdecl PlayerCmd_SetChannelVolumes(scr_entref_t *entref)
     int v7; // r31
     const char *v8; // r3
 
-    v1 = HIWORD(entref);
-    if ((_WORD)entref)
+    v1 = entref.entnum;
+    if (entref.classnum)
     {
         v2 = "not an entity";
         goto LABEL_7;
     }
-    if (HIWORD(entref) >= 0x880u)
+    if (entref.entnum >= 0x880u)
         MyAssertHandler(
             "c:\\trees\\cod3\\cod3src\\src\\game\\g_client_script_cmd.cpp",
             1850,
@@ -2496,7 +2496,7 @@ void __cdecl PlayerCmd_SetChannelVolumes(scr_entref_t *entref)
     SV_GameSendServerCommand(v1, v8);
 }
 
-void __cdecl PlayerCmd_DeactivateChannelVolumes(scr_entref_t *entref)
+void __cdecl PlayerCmd_DeactivateChannelVolumes(scr_entref_t entref)
 {
     unsigned __int16 v1; // r30
     int v2; // r31
@@ -2506,14 +2506,14 @@ void __cdecl PlayerCmd_DeactivateChannelVolumes(scr_entref_t *entref)
     unsigned int ConstString; // r3
     const char *v7; // r3
 
-    v1 = HIWORD(entref);
-    if ((_WORD)entref)
+    v1 = entref.entnum;
+    if (entref.classnum)
     {
         v3 = "not an entity";
         goto LABEL_7;
     }
-    v2 = HIWORD(entref);
-    if (HIWORD(entref) >= 0x880u)
+    v2 = entref.entnum;
+    if (entref.entnum >= 0x880u)
         MyAssertHandler(
             "c:\\trees\\cod3\\cod3src\\src\\game\\g_client_script_cmd.cpp",
             1900,
@@ -2549,7 +2549,7 @@ void __cdecl PlayerCmd_DeactivateChannelVolumes(scr_entref_t *entref)
     SV_GameSendServerCommand(v1, v7);
 }
 
-void __cdecl ScrCmd_IsLookingAt(scr_entref_t *entref)
+void __cdecl ScrCmd_IsLookingAt(scr_entref_t entref)
 {
     gentity_s *v1; // r31
     const char *v2; // r3
@@ -2558,15 +2558,15 @@ void __cdecl ScrCmd_IsLookingAt(scr_entref_t *entref)
     bool v5; // zf
     unsigned __int16 v6; // [sp+84h] [+14h]
 
-    v6 = HIWORD(entref);
-    if ((_WORD)entref)
+    v6 = entref.entnum;
+    if (entref.classnum)
     {
         Scr_ObjectError("not an entity");
         v1 = 0;
     }
     else
     {
-        if (HIWORD(entref) >= 0x880u)
+        if (entref.entnum >= 0x880u)
             MyAssertHandler(
                 "c:\\trees\\cod3\\cod3src\\src\\game\\g_client_script_cmd.cpp",
                 1943,
@@ -2587,7 +2587,7 @@ void __cdecl ScrCmd_IsLookingAt(scr_entref_t *entref)
     Scr_AddInt(v4);
 }
 
-void __cdecl PlayerCmd_IsFiring(scr_entref_t *entref)
+void __cdecl PlayerCmd_IsFiring(scr_entref_t entref)
 {
     gentity_s *v1; // r29
     const char *v2; // r3
@@ -2596,8 +2596,8 @@ void __cdecl PlayerCmd_IsFiring(scr_entref_t *entref)
     bool v5; // zf
     unsigned __int16 v6; // [sp+94h] [+14h]
 
-    v6 = HIWORD(entref);
-    if ((_WORD)entref)
+    v6 = entref.entnum;
+    if (entref.classnum)
     {
         Scr_ObjectError("not an entity");
         v1 = 0;
@@ -2605,7 +2605,7 @@ void __cdecl PlayerCmd_IsFiring(scr_entref_t *entref)
     }
     else
     {
-        if (HIWORD(entref) >= 0x880u)
+        if (entref.entnum >= 0x880u)
             MyAssertHandler(
                 "c:\\trees\\cod3\\cod3src\\src\\game\\g_client_script_cmd.cpp",
                 1963,
@@ -2633,7 +2633,7 @@ void __cdecl PlayerCmd_IsFiring(scr_entref_t *entref)
     Scr_AddBool(v4);
 }
 
-void __cdecl PlayerCmd_IsThrowingGrenade(scr_entref_t *entref)
+void __cdecl PlayerCmd_IsThrowingGrenade(scr_entref_t entref)
 {
     gentity_s *v1; // r29
     const char *v2; // r3
@@ -2642,8 +2642,8 @@ void __cdecl PlayerCmd_IsThrowingGrenade(scr_entref_t *entref)
     bool v5; // zf
     unsigned __int16 v6; // [sp+94h] [+14h]
 
-    v6 = HIWORD(entref);
-    if ((_WORD)entref)
+    v6 = entref.entnum;
+    if (entref.classnum)
     {
         Scr_ObjectError("not an entity");
         v1 = 0;
@@ -2651,7 +2651,7 @@ void __cdecl PlayerCmd_IsThrowingGrenade(scr_entref_t *entref)
     }
     else
     {
-        if (HIWORD(entref) >= 0x880u)
+        if (entref.entnum >= 0x880u)
             MyAssertHandler(
                 "c:\\trees\\cod3\\cod3src\\src\\game\\g_client_script_cmd.cpp",
                 1985,
@@ -2673,7 +2673,7 @@ void __cdecl PlayerCmd_IsThrowingGrenade(scr_entref_t *entref)
     Scr_AddBool(v4);
 }
 
-void __cdecl PlayerCmd_IsMeleeing(scr_entref_t *entref)
+void __cdecl PlayerCmd_IsMeleeing(scr_entref_t entref)
 {
     gentity_s *v1; // r29
     const char *v2; // r3
@@ -2682,8 +2682,8 @@ void __cdecl PlayerCmd_IsMeleeing(scr_entref_t *entref)
     bool v5; // zf
     unsigned __int16 v6; // [sp+94h] [+14h]
 
-    v6 = HIWORD(entref);
-    if ((_WORD)entref)
+    v6 = entref.entnum;
+    if (entref.classnum)
     {
         Scr_ObjectError("not an entity");
         v1 = 0;
@@ -2691,7 +2691,7 @@ void __cdecl PlayerCmd_IsMeleeing(scr_entref_t *entref)
     }
     else
     {
-        if (HIWORD(entref) >= 0x880u)
+        if (entref.entnum >= 0x880u)
             MyAssertHandler(
                 "c:\\trees\\cod3\\cod3src\\src\\game\\g_client_script_cmd.cpp",
                 2007,
@@ -2713,7 +2713,7 @@ void __cdecl PlayerCmd_IsMeleeing(scr_entref_t *entref)
     Scr_AddBool(v4);
 }
 
-void __cdecl ScrCmd_PlayLocalSound(scr_entref_t *entref)
+void __cdecl ScrCmd_PlayLocalSound(scr_entref_t entref)
 {
     unsigned __int16 v1; // r28
     gentity_s *v2; // r30
@@ -2727,15 +2727,15 @@ void __cdecl ScrCmd_PlayLocalSound(scr_entref_t *entref)
     const char *v10; // r3
     const char *v11; // r3
 
-    v1 = HIWORD(entref);
-    if ((_WORD)entref)
+    v1 = entref.entnum;
+    if (entref.classnum)
     {
         Scr_ObjectError("not an entity");
         v2 = 0;
     }
     else
     {
-        if (HIWORD(entref) >= 0x880u)
+        if (entref.entnum >= 0x880u)
             MyAssertHandler(
                 "c:\\trees\\cod3\\cod3src\\src\\game\\g_client_script_cmd.cpp",
                 2035,
@@ -2781,7 +2781,7 @@ void __cdecl ScrCmd_PlayLocalSound(scr_entref_t *entref)
     }
 }
 
-void __cdecl ScrCmd_StopLocalSound(scr_entref_t *entref)
+void __cdecl ScrCmd_StopLocalSound(scr_entref_t entref)
 {
     unsigned __int16 v1; // r30
     int v2; // r31
@@ -2791,14 +2791,14 @@ void __cdecl ScrCmd_StopLocalSound(scr_entref_t *entref)
     int v6; // r31
     const char *v7; // r3
 
-    v1 = HIWORD(entref);
-    if ((_WORD)entref)
+    v1 = entref.entnum;
+    if (entref.classnum)
     {
         v3 = "not an entity";
         goto LABEL_7;
     }
-    v2 = HIWORD(entref);
-    if (HIWORD(entref) >= 0x880u)
+    v2 = entref.entnum;
+    if (entref.entnum >= 0x880u)
         MyAssertHandler(
             "c:\\trees\\cod3\\cod3src\\src\\game\\g_client_script_cmd.cpp",
             2082,
@@ -2824,21 +2824,21 @@ void __cdecl ScrCmd_StopLocalSound(scr_entref_t *entref)
     SV_GameSendServerCommand(v1, v7);
 }
 
-void __cdecl ScrCmd_SetAutoPickup(scr_entref_t *entref)
+void __cdecl ScrCmd_SetAutoPickup(scr_entref_t entref)
 {
     gentity_s *v1; // r31
     const char *v2; // r3
     unsigned __int16 v3; // [sp+84h] [+14h]
 
-    v3 = HIWORD(entref);
-    if ((_WORD)entref)
+    v3 = entref.entnum;
+    if (entref.classnum)
     {
         Scr_ObjectError("not an entity");
         v1 = 0;
     }
     else
     {
-        if (HIWORD(entref) >= 0x880u)
+        if (entref.entnum >= 0x880u)
             MyAssertHandler(
                 "c:\\trees\\cod3\\cod3src\\src\\game\\g_client_script_cmd.cpp",
                 2112,
@@ -2855,7 +2855,7 @@ void __cdecl ScrCmd_SetAutoPickup(scr_entref_t *entref)
     v1->client->bDisableAutoPickup = Scr_GetInt(0) == 0;
 }
 
-void __cdecl PlayerCmd_SetWeaponAmmoClip(scr_entref_t *entref)
+void __cdecl PlayerCmd_SetWeaponAmmoClip(scr_entref_t entref)
 {
     gentity_s *v1; // r28
     const char *v2; // r3
@@ -2866,15 +2866,15 @@ void __cdecl PlayerCmd_SetWeaponAmmoClip(scr_entref_t *entref)
     WeaponDef *WeaponDef; // r3
     unsigned __int16 v8; // [sp+94h] [+14h]
 
-    v8 = HIWORD(entref);
-    if ((_WORD)entref)
+    v8 = entref.entnum;
+    if (entref.classnum)
     {
         Scr_ObjectError("not an entity");
         v1 = 0;
     }
     else
     {
-        if (HIWORD(entref) >= 0x880u)
+        if (entref.entnum >= 0x880u)
             MyAssertHandler(
                 "c:\\trees\\cod3\\cod3src\\src\\game\\g_client_script_cmd.cpp",
                 2141,
@@ -2909,7 +2909,7 @@ void __cdecl PlayerCmd_SetWeaponAmmoClip(scr_entref_t *entref)
     }
 }
 
-void __cdecl PlayerCmd_SetWeaponAmmoStock(scr_entref_t *entref)
+void __cdecl PlayerCmd_SetWeaponAmmoStock(scr_entref_t entref)
 {
     gentity_s *v1; // r31
     const char *v2; // r3
@@ -2924,15 +2924,15 @@ void __cdecl PlayerCmd_SetWeaponAmmoStock(scr_entref_t *entref)
     int AmmoPlayerMax; // r11
     unsigned __int16 v12; // [sp+94h] [+14h]
 
-    v12 = HIWORD(entref);
-    if ((_WORD)entref)
+    v12 = entref.entnum;
+    if (entref.classnum)
     {
         Scr_ObjectError("not an entity");
         v1 = 0;
     }
     else
     {
-        if (HIWORD(entref) >= 0x880u)
+        if (entref.entnum >= 0x880u)
             MyAssertHandler(
                 "c:\\trees\\cod3\\cod3src\\src\\game\\g_client_script_cmd.cpp",
                 2182,
@@ -2980,7 +2980,7 @@ void __cdecl PlayerCmd_SetWeaponAmmoStock(scr_entref_t *entref)
     }
 }
 
-void __cdecl PlayerCmd_GetWeaponAmmoClip(scr_entref_t *entref)
+void __cdecl PlayerCmd_GetWeaponAmmoClip(scr_entref_t entref)
 {
     gentity_s *v1; // r31
     const char *v2; // r3
@@ -2989,15 +2989,15 @@ void __cdecl PlayerCmd_GetWeaponAmmoClip(scr_entref_t *entref)
     int v5; // r3
     unsigned __int16 v6; // [sp+84h] [+14h]
 
-    v6 = HIWORD(entref);
-    if ((_WORD)entref)
+    v6 = entref.entnum;
+    if (entref.classnum)
     {
         Scr_ObjectError("not an entity");
         v1 = 0;
     }
     else
     {
-        if (HIWORD(entref) >= 0x880u)
+        if (entref.entnum >= 0x880u)
             MyAssertHandler(
                 "c:\\trees\\cod3\\cod3src\\src\\game\\g_client_script_cmd.cpp",
                 2231,
@@ -3018,7 +3018,7 @@ void __cdecl PlayerCmd_GetWeaponAmmoClip(scr_entref_t *entref)
     Scr_AddInt(v1->client->ps.ammoclip[v5]);
 }
 
-void __cdecl PlayerCmd_GetWeaponAmmoStock(scr_entref_t *entref)
+void __cdecl PlayerCmd_GetWeaponAmmoStock(scr_entref_t entref)
 {
     gentity_s *v1; // r31
     const char *v2; // r3
@@ -3027,15 +3027,15 @@ void __cdecl PlayerCmd_GetWeaponAmmoStock(scr_entref_t *entref)
     int v5; // r10
     unsigned __int16 v6; // [sp+84h] [+14h]
 
-    v6 = HIWORD(entref);
-    if ((_WORD)entref)
+    v6 = entref.entnum;
+    if (entref.classnum)
     {
         Scr_ObjectError("not an entity");
         v1 = 0;
     }
     else
     {
-        if (HIWORD(entref) >= 0x880u)
+        if (entref.entnum >= 0x880u)
             MyAssertHandler(
                 "c:\\trees\\cod3\\cod3src\\src\\game\\g_client_script_cmd.cpp",
                 2258,
@@ -3059,7 +3059,7 @@ void __cdecl PlayerCmd_GetWeaponAmmoStock(scr_entref_t *entref)
     Scr_AddInt(*(&v1->client->ps.commandTime + v5));
 }
 
-void __cdecl PlayerCmd_AnyAmmoForWeaponModes(scr_entref_t *entref)
+void __cdecl PlayerCmd_AnyAmmoForWeaponModes(scr_entref_t entref)
 {
     gentity_s *v1; // r30
     const char *v2; // r3
@@ -3069,15 +3069,15 @@ void __cdecl PlayerCmd_AnyAmmoForWeaponModes(scr_entref_t *entref)
     unsigned int altWeaponIndex; // r4
     unsigned __int16 v7; // [sp+84h] [+14h]
 
-    v7 = HIWORD(entref);
-    if ((_WORD)entref)
+    v7 = entref.entnum;
+    if (entref.classnum)
     {
         Scr_ObjectError("not an entity");
         v1 = 0;
     }
     else
     {
-        if (HIWORD(entref) >= 0x880u)
+        if (entref.entnum >= 0x880u)
             MyAssertHandler(
                 "c:\\trees\\cod3\\cod3src\\src\\game\\g_client_script_cmd.cpp",
                 2297,
@@ -3101,21 +3101,21 @@ void __cdecl PlayerCmd_AnyAmmoForWeaponModes(scr_entref_t *entref)
     Scr_AddInt(v5 != 0);
 }
 
-void __cdecl PlayerCmd_EnableHealthShield(scr_entref_t *entref)
+void __cdecl PlayerCmd_EnableHealthShield(scr_entref_t entref)
 {
     gentity_s *v1; // r31
     const char *v2; // r3
     unsigned __int16 v3; // [sp+84h] [+14h]
 
-    v3 = HIWORD(entref);
-    if ((_WORD)entref)
+    v3 = entref.entnum;
+    if (entref.classnum)
     {
         Scr_ObjectError("not an entity");
         v1 = 0;
     }
     else
     {
-        if (HIWORD(entref) >= 0x880u)
+        if (entref.entnum >= 0x880u)
             MyAssertHandler(
                 "c:\\trees\\cod3\\cod3src\\src\\game\\g_client_script_cmd.cpp",
                 2328,
@@ -3132,7 +3132,7 @@ void __cdecl PlayerCmd_EnableHealthShield(scr_entref_t *entref)
     v1->client->invulnerableEnabled = Scr_GetInt(0) != 0;
 }
 
-void __cdecl PlayerCmd_SetClientDvar(scr_entref_t *entref)
+void __cdecl PlayerCmd_SetClientDvar(scr_entref_t entref)
 {
     unsigned __int16 v1; // r29
     const char *v2; // r3
@@ -3143,13 +3143,13 @@ void __cdecl PlayerCmd_SetClientDvar(scr_entref_t *entref)
     const char *v7; // r3
     char v8[1072]; // [sp+50h] [-430h] BYREF
 
-    v1 = HIWORD(entref);
-    if ((_WORD)entref)
+    v1 = entref.entnum;
+    if (entref.classnum)
     {
         v2 = "not an entity";
         goto LABEL_7;
     }
-    if (HIWORD(entref) >= 0x880u)
+    if (entref.entnum >= 0x880u)
         MyAssertHandler(
             "c:\\trees\\cod3\\cod3src\\src\\game\\g_client_script_cmd.cpp",
             2356,
@@ -3185,7 +3185,7 @@ void __cdecl PlayerCmd_SetClientDvar(scr_entref_t *entref)
     }
 }
 
-void __cdecl PlayerCmd_SetClientDvars(scr_entref_t *entref)
+void __cdecl PlayerCmd_SetClientDvars(scr_entref_t entref)
 {
     unsigned __int16 v1; // r27
     const char *v2; // r3
@@ -3195,13 +3195,13 @@ void __cdecl PlayerCmd_SetClientDvars(scr_entref_t *entref)
     const char *v6; // r3
     const char *v7; // r3
 
-    v1 = HIWORD(entref);
-    if ((_WORD)entref)
+    v1 = entref.entnum;
+    if (entref.classnum)
     {
         v2 = "not an entity";
         goto LABEL_7;
     }
-    if (HIWORD(entref) >= 0x880u)
+    if (entref.entnum >= 0x880u)
         MyAssertHandler(
             "c:\\trees\\cod3\\cod3src\\src\\game\\g_client_script_cmd.cpp",
             2399,
@@ -3237,7 +3237,7 @@ void __cdecl PlayerCmd_SetClientDvars(scr_entref_t *entref)
     }
 }
 
-void __cdecl PlayerCmd_BeginLocationSelection(scr_entref_t *entref)
+void __cdecl PlayerCmd_BeginLocationSelection(scr_entref_t entref)
 {
     gentity_s *v1; // r28
     const char *v2; // r3
@@ -3250,15 +3250,15 @@ void __cdecl PlayerCmd_BeginLocationSelection(scr_entref_t *entref)
     unsigned int v9; // r31
     unsigned __int16 v10; // [sp+A4h] [+14h]
 
-    v10 = HIWORD(entref);
-    if ((_WORD)entref)
+    v10 = entref.entnum;
+    if (entref.classnum)
     {
         Scr_ObjectError("not an entity");
         v1 = 0;
     }
     else
     {
-        if (HIWORD(entref) >= 0x880u)
+        if (entref.entnum >= 0x880u)
             MyAssertHandler(
                 "c:\\trees\\cod3\\cod3src\\src\\game\\g_client_script_cmd.cpp",
                 2439,
@@ -3314,21 +3314,21 @@ void __cdecl PlayerCmd_BeginLocationSelection(scr_entref_t *entref)
     v1->client->ps.locationSelectionInfo = (4 * v9) | v5;
 }
 
-void __cdecl PlayerCmd_EndLocationSelection(scr_entref_t *entref)
+void __cdecl PlayerCmd_EndLocationSelection(scr_entref_t entref)
 {
     gentity_s *v1; // r31
     const char *v2; // r3
     unsigned __int16 v3; // [sp+94h] [+14h]
 
-    v3 = HIWORD(entref);
-    if ((_WORD)entref)
+    v3 = entref.entnum;
+    if (entref.classnum)
     {
         Scr_ObjectError("not an entity");
         v1 = 0;
     }
     else
     {
-        if (HIWORD(entref) >= 0x880u)
+        if (entref.entnum >= 0x880u)
             MyAssertHandler(
                 "c:\\trees\\cod3\\cod3src\\src\\game\\g_client_script_cmd.cpp",
                 2486,
@@ -3347,22 +3347,22 @@ void __cdecl PlayerCmd_EndLocationSelection(scr_entref_t *entref)
     v1->client->ps.locationSelectionInfo = 0;
 }
 
-void __cdecl PlayerCmd_WeaponLockStart(scr_entref_t *entref)
+void __cdecl PlayerCmd_WeaponLockStart(scr_entref_t entref)
 {
     gentity_s *v1; // r31
     const char *v2; // r3
     gentity_s *Entity; // r3
     unsigned __int16 v4; // [sp+84h] [+14h]
 
-    v4 = HIWORD(entref);
-    if ((_WORD)entref)
+    v4 = entref.entnum;
+    if (entref.classnum)
     {
         Scr_ObjectError("not an entity");
         v1 = 0;
     }
     else
     {
-        if (HIWORD(entref) >= 0x880u)
+        if (entref.entnum >= 0x880u)
             MyAssertHandler(
                 "c:\\trees\\cod3\\cod3src\\src\\game\\g_client_script_cmd.cpp",
                 2507,
@@ -3391,7 +3391,7 @@ void __cdecl PlayerCmd_WeaponLockStart(scr_entref_t *entref)
     }
 }
 
-void __cdecl PlayerCmd_WeaponLockFinalize(scr_entref_t *entref)
+void __cdecl PlayerCmd_WeaponLockFinalize(scr_entref_t entref)
 {
     gentity_s *v1; // r31
     const char *v2; // r3
@@ -3402,15 +3402,15 @@ void __cdecl PlayerCmd_WeaponLockFinalize(scr_entref_t *entref)
     int v7; // r10
     unsigned __int16 v8; // [sp+84h] [+14h]
 
-    v8 = HIWORD(entref);
-    if ((_WORD)entref)
+    v8 = entref.entnum;
+    if (entref.classnum)
     {
         Scr_ObjectError("not an entity");
         v1 = 0;
     }
     else
     {
-        if (HIWORD(entref) >= 0x880u)
+        if (entref.entnum >= 0x880u)
             MyAssertHandler(
                 "c:\\trees\\cod3\\cod3src\\src\\game\\g_client_script_cmd.cpp",
                 2539,
@@ -3445,21 +3445,21 @@ void __cdecl PlayerCmd_WeaponLockFinalize(scr_entref_t *entref)
     }
 }
 
-void __cdecl PlayerCmd_WeaponLockFree(scr_entref_t *entref)
+void __cdecl PlayerCmd_WeaponLockFree(scr_entref_t entref)
 {
     gentity_s *v1; // r31
     const char *v2; // r3
     unsigned __int16 v3; // [sp+84h] [+14h]
 
-    v3 = HIWORD(entref);
-    if ((_WORD)entref)
+    v3 = entref.entnum;
+    if (entref.classnum)
     {
         Scr_ObjectError("not an entity");
         v1 = 0;
     }
     else
     {
-        if (HIWORD(entref) >= 0x880u)
+        if (entref.entnum >= 0x880u)
             MyAssertHandler(
                 "c:\\trees\\cod3\\cod3src\\src\\game\\g_client_script_cmd.cpp",
                 2573,
@@ -3480,7 +3480,7 @@ void __cdecl PlayerCmd_WeaponLockFree(scr_entref_t *entref)
     v1->client->ps.weapLockFlags &= ~8u;
 }
 
-void __cdecl PlayerCmd_WeaponLockTargetTooClose(scr_entref_t *entref)
+void __cdecl PlayerCmd_WeaponLockTargetTooClose(scr_entref_t entref)
 {
     gentity_s *v1; // r31
     const char *v2; // r3
@@ -3490,15 +3490,15 @@ void __cdecl PlayerCmd_WeaponLockTargetTooClose(scr_entref_t *entref)
     unsigned int v6; // r10
     unsigned __int16 v7; // [sp+84h] [+14h]
 
-    v7 = HIWORD(entref);
-    if ((_WORD)entref)
+    v7 = entref.entnum;
+    if (entref.classnum)
     {
         Scr_ObjectError("not an entity");
         v1 = 0;
     }
     else
     {
-        if (HIWORD(entref) >= 0x880u)
+        if (entref.entnum >= 0x880u)
             MyAssertHandler(
                 "c:\\trees\\cod3\\cod3src\\src\\game\\g_client_script_cmd.cpp",
                 2596,
@@ -3522,7 +3522,7 @@ void __cdecl PlayerCmd_WeaponLockTargetTooClose(scr_entref_t *entref)
     client->ps.weapLockFlags = v6;
 }
 
-void __cdecl PlayerCmd_WeaponLockNoClearance(scr_entref_t *entref)
+void __cdecl PlayerCmd_WeaponLockNoClearance(scr_entref_t entref)
 {
     gentity_s *v1; // r31
     const char *v2; // r3
@@ -3532,15 +3532,15 @@ void __cdecl PlayerCmd_WeaponLockNoClearance(scr_entref_t *entref)
     unsigned int v6; // r10
     unsigned __int16 v7; // [sp+84h] [+14h]
 
-    v7 = HIWORD(entref);
-    if ((_WORD)entref)
+    v7 = entref.entnum;
+    if (entref.classnum)
     {
         Scr_ObjectError("not an entity");
         v1 = 0;
     }
     else
     {
-        if (HIWORD(entref) >= 0x880u)
+        if (entref.entnum >= 0x880u)
             MyAssertHandler(
                 "c:\\trees\\cod3\\cod3src\\src\\game\\g_client_script_cmd.cpp",
                 2618,
@@ -3564,7 +3564,7 @@ void __cdecl PlayerCmd_WeaponLockNoClearance(scr_entref_t *entref)
     client->ps.weapLockFlags = v6;
 }
 
-void __cdecl PlayerCmd_SetActionSlot(scr_entref_t *entref)
+void __cdecl PlayerCmd_SetActionSlot(scr_entref_t entref)
 {
     gentity_s *v1; // r28
     const char *v2; // r3
@@ -3576,15 +3576,15 @@ void __cdecl PlayerCmd_SetActionSlot(scr_entref_t *entref)
     const char *v8; // r3
     unsigned __int16 v9; // [sp+94h] [+14h]
 
-    v9 = HIWORD(entref);
-    if ((_WORD)entref)
+    v9 = entref.entnum;
+    if (entref.classnum)
     {
         Scr_ObjectError("not an entity");
         v1 = 0;
     }
     else
     {
-        if (HIWORD(entref) >= 0x880u)
+        if (entref.entnum >= 0x880u)
             MyAssertHandler(
                 "c:\\trees\\cod3\\cod3src\\src\\game\\g_client_script_cmd.cpp",
                 2648,
@@ -3640,21 +3640,21 @@ void __cdecl PlayerCmd_SetActionSlot(scr_entref_t *entref)
     }
 }
 
-void __cdecl PlayerCmd_DisableWeapons(scr_entref_t *entref)
+void __cdecl PlayerCmd_DisableWeapons(scr_entref_t entref)
 {
     gentity_s *v1; // r31
     const char *v2; // r3
     unsigned __int16 v3; // [sp+84h] [+14h]
 
-    v3 = HIWORD(entref);
-    if ((_WORD)entref)
+    v3 = entref.entnum;
+    if (entref.classnum)
     {
         Scr_ObjectError("not an entity");
         v1 = 0;
     }
     else
     {
-        if (HIWORD(entref) >= 0x880u)
+        if (entref.entnum >= 0x880u)
             MyAssertHandler(
                 "c:\\trees\\cod3\\cod3src\\src\\game\\g_client_script_cmd.cpp",
                 2703,
@@ -3671,21 +3671,21 @@ void __cdecl PlayerCmd_DisableWeapons(scr_entref_t *entref)
     v1->client->ps.weapFlags |= 0x80u;
 }
 
-void __cdecl PlayerCmd_EnableWeapons(scr_entref_t *entref)
+void __cdecl PlayerCmd_EnableWeapons(scr_entref_t entref)
 {
     gentity_s *v1; // r31
     const char *v2; // r3
     unsigned __int16 v3; // [sp+84h] [+14h]
 
-    v3 = HIWORD(entref);
-    if ((_WORD)entref)
+    v3 = entref.entnum;
+    if (entref.classnum)
     {
         Scr_ObjectError("not an entity");
         v1 = 0;
     }
     else
     {
-        if (HIWORD(entref) >= 0x880u)
+        if (entref.entnum >= 0x880u)
             MyAssertHandler(
                 "c:\\trees\\cod3\\cod3src\\src\\game\\g_client_script_cmd.cpp",
                 2720,
@@ -3702,21 +3702,21 @@ void __cdecl PlayerCmd_EnableWeapons(scr_entref_t *entref)
     v1->client->ps.weapFlags &= ~0x80u;
 }
 
-void __cdecl PlayerCmd_NightVisionForceOff(scr_entref_t *entref)
+void __cdecl PlayerCmd_NightVisionForceOff(scr_entref_t entref)
 {
     gentity_s *v1; // r31
     const char *v2; // r3
     unsigned __int16 v3; // [sp+84h] [+14h]
 
-    v3 = HIWORD(entref);
-    if ((_WORD)entref)
+    v3 = entref.entnum;
+    if (entref.classnum)
     {
         Scr_ObjectError("not an entity");
         v1 = 0;
     }
     else
     {
-        if (HIWORD(entref) >= 0x880u)
+        if (entref.entnum >= 0x880u)
             MyAssertHandler(
                 "c:\\trees\\cod3\\cod3src\\src\\game\\g_client_script_cmd.cpp",
                 2737,
@@ -3733,7 +3733,7 @@ void __cdecl PlayerCmd_NightVisionForceOff(scr_entref_t *entref)
     v1->client->ps.weapFlags &= ~0x40u;
 }
 
-void __cdecl PlayerCmd_GetWeaponsList(scr_entref_t *entref)
+void __cdecl PlayerCmd_GetWeaponsList(scr_entref_t entref)
 {
     gentity_s *v1; // r27
     const char *v2; // r3
@@ -3743,15 +3743,15 @@ void __cdecl PlayerCmd_GetWeaponsList(scr_entref_t *entref)
     WeaponDef *WeaponDef; // r3
     unsigned __int16 v7; // [sp+A4h] [+14h]
 
-    v7 = HIWORD(entref);
-    if ((_WORD)entref)
+    v7 = entref.entnum;
+    if (entref.classnum)
     {
         Scr_ObjectError("not an entity");
         v1 = 0;
     }
     else
     {
-        if (HIWORD(entref) >= 0x880u)
+        if (entref.entnum >= 0x880u)
             MyAssertHandler(
                 "c:\\trees\\cod3\\cod3src\\src\\game\\g_client_script_cmd.cpp",
                 2757,
@@ -3781,7 +3781,7 @@ void __cdecl PlayerCmd_GetWeaponsList(scr_entref_t *entref)
     }
 }
 
-void __cdecl PlayerCmd_GetWeaponsListPrimaries(scr_entref_t *entref)
+void __cdecl PlayerCmd_GetWeaponsListPrimaries(scr_entref_t entref)
 {
     gentity_s *v1; // r27
     const char *v2; // r3
@@ -3791,15 +3791,15 @@ void __cdecl PlayerCmd_GetWeaponsListPrimaries(scr_entref_t *entref)
     WeaponDef *WeaponDef; // r3
     unsigned __int16 v7; // [sp+A4h] [+14h]
 
-    v7 = HIWORD(entref);
-    if ((_WORD)entref)
+    v7 = entref.entnum;
+    if (entref.classnum)
     {
         Scr_ObjectError("not an entity");
         v1 = 0;
     }
     else
     {
-        if (HIWORD(entref) >= 0x880u)
+        if (entref.entnum >= 0x880u)
             MyAssertHandler(
                 "c:\\trees\\cod3\\cod3src\\src\\game\\g_client_script_cmd.cpp",
                 2791,
@@ -3832,21 +3832,21 @@ void __cdecl PlayerCmd_GetWeaponsListPrimaries(scr_entref_t *entref)
     }
 }
 
-void __cdecl PlayerCmd_EnableInvulnerability(scr_entref_t *entref)
+void __cdecl PlayerCmd_EnableInvulnerability(scr_entref_t entref)
 {
     gentity_s *v1; // r31
     const char *v2; // r3
     unsigned __int16 v3; // [sp+84h] [+14h]
 
-    v3 = HIWORD(entref);
-    if ((_WORD)entref)
+    v3 = entref.entnum;
+    if (entref.classnum)
     {
         Scr_ObjectError("not an entity");
         v1 = 0;
     }
     else
     {
-        if (HIWORD(entref) >= 0x880u)
+        if (entref.entnum >= 0x880u)
             MyAssertHandler(
                 "c:\\trees\\cod3\\cod3src\\src\\game\\g_client_script_cmd.cpp",
                 2825,
@@ -3863,21 +3863,21 @@ void __cdecl PlayerCmd_EnableInvulnerability(scr_entref_t *entref)
     v1->client->ps.otherFlags |= 1u;
 }
 
-void __cdecl PlayerCmd_DisableInvulnerability(scr_entref_t *entref)
+void __cdecl PlayerCmd_DisableInvulnerability(scr_entref_t entref)
 {
     gentity_s *v1; // r31
     const char *v2; // r3
     unsigned __int16 v3; // [sp+84h] [+14h]
 
-    v3 = HIWORD(entref);
-    if ((_WORD)entref)
+    v3 = entref.entnum;
+    if (entref.classnum)
     {
         Scr_ObjectError("not an entity");
         v1 = 0;
     }
     else
     {
-        if (HIWORD(entref) >= 0x880u)
+        if (entref.entnum >= 0x880u)
             MyAssertHandler(
                 "c:\\trees\\cod3\\cod3src\\src\\game\\g_client_script_cmd.cpp",
                 2842,
@@ -3894,7 +3894,7 @@ void __cdecl PlayerCmd_DisableInvulnerability(scr_entref_t *entref)
     v1->client->ps.otherFlags &= ~1u;
 }
 
-void __cdecl PlayerCmd_ForceViewmodelAnimation(scr_entref_t *entref)
+void __cdecl PlayerCmd_ForceViewmodelAnimation(scr_entref_t entref)
 {
     gentity_s *v1; // r30
     const char *v2; // r3
@@ -3905,15 +3905,15 @@ void __cdecl PlayerCmd_ForceViewmodelAnimation(scr_entref_t *entref)
     const char *v7; // r3
     unsigned __int16 v8; // [sp+84h] [+14h]
 
-    v8 = HIWORD(entref);
-    if ((_WORD)entref)
+    v8 = entref.entnum;
+    if (entref.classnum)
     {
         Scr_ObjectError("not an entity");
         v1 = 0;
     }
     else
     {
-        if (HIWORD(entref) >= 0x880u)
+        if (entref.entnum >= 0x880u)
             MyAssertHandler(
                 "c:\\trees\\cod3\\cod3src\\src\\game\\g_client_script_cmd.cpp",
                 2866,
@@ -3959,21 +3959,21 @@ void __cdecl PlayerCmd_ForceViewmodelAnimation(scr_entref_t *entref)
     Scr_Error(v7);
 }
 
-void __cdecl PlayerCmd_DisableTurretDismount(scr_entref_t *entref)
+void __cdecl PlayerCmd_DisableTurretDismount(scr_entref_t entref)
 {
     gentity_s *v1; // r31
     const char *v2; // r3
     unsigned __int16 v3; // [sp+84h] [+14h]
 
-    v3 = HIWORD(entref);
-    if ((_WORD)entref)
+    v3 = entref.entnum;
+    if (entref.classnum)
     {
         Scr_ObjectError("not an entity");
         v1 = 0;
     }
     else
     {
-        if (HIWORD(entref) >= 0x880u)
+        if (entref.entnum >= 0x880u)
             MyAssertHandler(
                 "c:\\trees\\cod3\\cod3src\\src\\game\\g_client_script_cmd.cpp",
                 2905,
@@ -3990,21 +3990,21 @@ void __cdecl PlayerCmd_DisableTurretDismount(scr_entref_t *entref)
     v1->client->ps.weapFlags |= 0x800u;
 }
 
-void __cdecl PlayerCmd_EnableTurretDismount(scr_entref_t *entref)
+void __cdecl PlayerCmd_EnableTurretDismount(scr_entref_t entref)
 {
     gentity_s *v1; // r31
     const char *v2; // r3
     unsigned __int16 v3; // [sp+84h] [+14h]
 
-    v3 = HIWORD(entref);
-    if ((_WORD)entref)
+    v3 = entref.entnum;
+    if (entref.classnum)
     {
         Scr_ObjectError("not an entity");
         v1 = 0;
     }
     else
     {
-        if (HIWORD(entref) >= 0x880u)
+        if (entref.entnum >= 0x880u)
             MyAssertHandler(
                 "c:\\trees\\cod3\\cod3src\\src\\game\\g_client_script_cmd.cpp",
                 2922,
@@ -4021,7 +4021,7 @@ void __cdecl PlayerCmd_EnableTurretDismount(scr_entref_t *entref)
     v1->client->ps.weapFlags &= ~0x800u;
 }
 
-void __cdecl PlayerCmd_UploadScore(scr_entref_t *entref)
+void __cdecl PlayerCmd_UploadScore(scr_entref_t entref)
 {
     unsigned __int16 v1; // r30
     int v2; // r31
@@ -4030,14 +4030,14 @@ void __cdecl PlayerCmd_UploadScore(scr_entref_t *entref)
     int v5; // r3
     const char *v6; // r3
 
-    v1 = HIWORD(entref);
-    if ((_WORD)entref)
+    v1 = entref.entnum;
+    if (entref.classnum)
     {
         v3 = "not an entity";
         goto LABEL_7;
     }
-    v2 = HIWORD(entref);
-    if (HIWORD(entref) >= 0x880u)
+    v2 = entref.entnum;
+    if (entref.entnum >= 0x880u)
         MyAssertHandler(
             "c:\\trees\\cod3\\cod3src\\src\\game\\g_client_script_cmd.cpp",
             2942,
@@ -4063,7 +4063,7 @@ void __cdecl PlayerCmd_UploadScore(scr_entref_t *entref)
     }
 }
 
-void __cdecl PlayerCmd_UploadTime(scr_entref_t *entref)
+void __cdecl PlayerCmd_UploadTime(scr_entref_t entref)
 {
     unsigned __int16 v1; // r30
     int v2; // r31
@@ -4072,14 +4072,14 @@ void __cdecl PlayerCmd_UploadTime(scr_entref_t *entref)
     double Float; // fp1
     const char *v6; // r3
 
-    v1 = HIWORD(entref);
-    if ((_WORD)entref)
+    v1 = entref.entnum;
+    if (entref.classnum)
     {
         v3 = "not an entity";
         goto LABEL_7;
     }
-    v2 = HIWORD(entref);
-    if (HIWORD(entref) >= 0x880u)
+    v2 = entref.entnum;
+    if (entref.entnum >= 0x880u)
         MyAssertHandler(
             "c:\\trees\\cod3\\cod3src\\src\\game\\g_client_script_cmd.cpp",
             2978,

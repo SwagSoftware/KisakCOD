@@ -316,29 +316,26 @@ FloatWriteSwap_union __cdecl FloatWriteSwap(float f)
 }
 
 
-typedef __int16 (*BigShortFn)(__int16);
-BigShortFn _BigShort;
+unsigned __int64(__cdecl *LittleLong64)(unsigned __int64);
 
 void __cdecl Swap_InitLittleEndian()
 {
-    _BigShort = (__int16(*)(__int16))ShortSwap;
-    // LWSS: Rest are unused afaik
+    //_BigShort = (__int16(*)(__int16))ShortSwap;
     //LittleShort = ShortNoSwap;
     //BigLong = LongSwap;
     //LittleLong = (int(__cdecl *)(int))LongNoSwap;
-    //LittleLong64 = Long64NoSwap;
+    LittleLong64 = Long64NoSwap;
     //LittleFloatRead = (float(__cdecl *)(int))FloatReadNoSwap;
     //LittleFloatWrite = (int(__cdecl *)(float))LongNoSwap;
 }
 
 void __cdecl Swap_InitBigEndian()
 {
-    _BigShort = ShortNoSwap;
-    // LWSS: Rest are unused afaik
+    //_BigShort = ShortNoSwap;
     //LittleShort = (__int16(__cdecl *)(__int16))ShortSwap;
     //BigLong = (int(__cdecl *)(int))LongNoSwap;
     //LittleLong = LongSwap;
-    //LittleLong64 = Long64Swap;
+    LittleLong64 = Long64Swap;
     //LittleFloatRead = (float(__cdecl *)(int))FloatReadSwap;
     //LittleFloatWrite = (int(__cdecl *)(float))FloatWriteSwap;
 }

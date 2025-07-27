@@ -67,7 +67,7 @@ void __cdecl MSG_WriteFloat(msg_t *sb, double f);
 void __cdecl MSG_WriteString(msg_t *sb, char *s);
 void __cdecl MSG_WriteAngle(msg_t *sb, double f);
 void __cdecl MSG_WriteAngle16(msg_t *sb, double f);
-void __cdecl MSG_WriteInt64(unsigned __int64 msg, unsigned __int64 c);
+void __cdecl MSG_WriteInt64(msg_t *msg, unsigned __int64 c);
 int __cdecl MSG_ReadByte(msg_t *msg);
 int __cdecl MSG_ReadShort(msg_t *msg);
 int __cdecl MSG_ReadLong(msg_t *msg);

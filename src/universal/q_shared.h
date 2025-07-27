@@ -91,6 +91,13 @@ static ID_INLINE int BigLong(int l) { return LongSwap(l); }
 
 #endif // WIN32
 
+#define PI_DIV_180		0.017453292519943295769236907684886
+#define INV_PI_DIV_180	57.295779513082320876798154814105
+
+// Punish Aurelio if you don't like these performance enhancements. :-)
+#define DEG2RAD( a ) ( ( (a) * PI_DIV_180 ) )
+#define RAD2DEG( a ) ( ( (a) * INV_PI_DIV_180 ) )
+
 //=============================================================
 
 typedef unsigned long		ulong;
@@ -835,3 +842,6 @@ extern TraceThreadInfo g_traceThreadInfo[7];
 extern jmp_buf g_com_error[7];
 
 extern const dvar_t *useFastFile;
+
+
+extern unsigned __int64(__cdecl *LittleLong64)(unsigned __int64);

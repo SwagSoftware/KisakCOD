@@ -15,13 +15,8 @@ void __cdecl turret_clientaim(gentity_s *self, gentity_s *other);
 void __cdecl turret_shoot_internal(gentity_s *self, gentity_s *other);
 void __cdecl turret_track(gentity_s *self, gentity_s *other);
 void __cdecl turret_UpdateSound(gentity_s *self);
-// local variable allocation has failed, the output may be wrong!
-void __cdecl turret_CalculateConvergenceAngularVelocity(
-    const gentity_s *self,
-    const float *desiredAngles,
-    float *angularVelocity,
-    long double a4);
-int __cdecl turret_UpdateTargetAngles(gentity_s *self, const float *desiredAngles, int bManned, long double a4);
+void __cdecl turret_CalculateConvergenceAngularVelocity(const gentity_s *self, const float *desiredAngles, float *angularVelocity);
+int __cdecl turret_UpdateTargetAngles(gentity_s *self, const float *desiredAngles, int bManned);
 bool __cdecl turret_IsFiringInternal(int state);
 bool __cdecl turret_IsFiring(gentity_s *self);
 void __cdecl turret_SetState(gentity_s *self, unsigned int state);

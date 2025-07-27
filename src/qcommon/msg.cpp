@@ -8,6 +8,8 @@
 
 #include <bgame/bg_local.h>
 #include <bgame/bg_public.h>
+#include <universal/com_math.h>
+#include <client/client.h>
 
 struct netField_t *hudElemFields;
 
@@ -464,28 +466,21 @@ void __cdecl MSG_WriteAngle16(msg_t *sb, double f)
     }
 }
 
-void __cdecl MSG_WriteInt64(unsigned __int64 msg, unsigned __int64 c)
+void __cdecl MSG_WriteInt64(msg_t *msg, unsigned __int64 c)
 {
-    unsigned int *v2; // r31
-    int v3; // r29
-    int v4; // r30
-    __int128 v5; // r4
+    int newsize; // [esp+4h] [ebp-4h]
 
-    v2 = (unsigned int *)HIDWORD(msg);
-    v3 = msg;
-    if (*(unsigned int *)(HIDWORD(msg) + 4))
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\qcommon\\msg.cpp", 540, 0, "%s", "!msg->readOnly");
-    v4 = v2[5] + 8;
-    if (v4 > v2[4])
+    iassert(!msg->readOnly);
+
+    newsize = msg->cursize + 8;
+    if (newsize > msg->maxsize)
     {
-        *v2 = 1;
+        msg->overflowed = 1;
     }
     else
     {
-        HIDWORD(msg) = v3;
-        *((_QWORD *)&v5 + 1) = LittleLong64(msg);
-        *(_QWORD *)(v2[2] + v2[5]) = *(_QWORD *)((char *)&v5 + 4);
-        v2[5] = v4;
+        *(_QWORD *)&msg->data[msg->cursize] = LittleLong64(c);
+        msg->cursize = newsize;
     }
 }
 
@@ -1490,7 +1485,7 @@ void __cdecl MSG_ReadDeltaHudElems(msg_t *msg, hudelem_s *to, unsigned int count
                     }
                     v17 = 32;
                 }
-                *(he_type_t *)((char *)&to->type + v13) = MSG_ReadBits(v14, v17);
+                *(he_type_t *)((char *)&to->type + v13) = (he_type_t)MSG_ReadBits(v14, v17);
             LABEL_18:
                 --v12;
                 p_bits += 3;
@@ -1539,7 +1534,7 @@ void __cdecl MSG_WriteDeltaPlayerstate(msg_t *msg, playerState_s *to)
     int integer; // r11
     int v8; // r19
     int v9; // r23
-    int *p_bits; // r26
+    const int *p_bits; // r26
     int v11; // r27
     __int64 v12; // r11
     double v13; // fp0
@@ -1773,7 +1768,7 @@ void __cdecl MSG_WriteDeltaPlayerstate(msg_t *msg, playerState_s *to)
     {
         MSG_WriteBits(msg, 0, 1u);
     }
-    v30 = v63;
+    v30 = (unsigned int*)v63;
     v31 = &to->ammo[1];
     v32 = 4;
     do
@@ -2049,7 +2044,7 @@ void __cdecl MSG_ReadDeltaPlayerstate(msg_t *msg, playerState_s *to)
     int integer; // r11
     int v8; // r18
     int v9; // r23
-    int *p_bits; // r26
+    const int *p_bits; // r26
     int v11; // r28
     unsigned int v12; // r11
     int Bits; // r6
@@ -2164,7 +2159,8 @@ void __cdecl MSG_ReadDeltaPlayerstate(msg_t *msg, playerState_s *to)
         if (*p_bits)
         {
             v15 = *p_bits;
-            v16 = _cntlzw(v12) == 0;
+            //v16 = _cntlzw(v12) == 0;
+            v16 = (v12 & 0x80000000u) != 0;
             if (v16)
                 v15 = -v12;
             if ((v15 & 7) != 0)
@@ -2381,7 +2377,7 @@ void __cdecl MSG_ReadDeltaPlayerstate(msg_t *msg, playerState_s *to)
                             msg->readcount = v54;
                             v55 = (__int16)v55;
                         }
-                        *(&to->pm_type + i + j) = v55;
+                        *(&to->pm_type + i + j) = (pmtype_t)v55;
                     }
                     if (((1 << (j + 3)) & v45) != 0)
                     {
@@ -2474,7 +2470,7 @@ void __cdecl MSG_ReadDeltaPlayerstate(msg_t *msg, playerState_s *to)
                         msg->readcount = v72;
                         v73 = (__int16)v73;
                     }
-                    *(&to->pm_type + k + m) = v73;
+                    *(&to->pm_type + k + m) = (pmtype_t)v73;
                 }
                 if (((1 << (m + 3)) & v63) != 0)
                 {

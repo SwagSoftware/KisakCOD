@@ -1,6 +1,7 @@
 #include "com_math.h"
 
 #include <universal/assertive.h>
+#include <universal/q_shared.h>
 #include <qcommon/mem_track.h>
 #include <math.h>
 #include <xanim/dobj.h>
@@ -3353,4 +3354,29 @@ float Q_fabs(float f)
     int tmp = *(int *)&f;
     tmp &= 0x7FFFFFFF;
     return *(float *)&tmp;
+}
+
+void vectosignedangles(const float *vec, float *angles)
+{
+    float yaw, pitch;
+
+    // Handle the special case where horizontal components are zero
+    if (vec[0] == 0.0f && vec[1] == 0.0f) {
+        yaw = 0.0f;
+        pitch = (vec[2] < 0.0f) ? -90.0f : 90.0f;
+    }
+    else {
+        // Compute yaw (angle in the XY plane)
+        yaw = RAD2DEG(atan2f(vec[1], vec[0]));
+
+        // Compute horizontal distance (magnitude in the XY plane)
+        float xyLen = sqrtf(vec[0] * vec[0] + vec[1] * vec[1]);
+
+        // Compute pitch (elevation from horizontal plane)
+        pitch = RAD2DEG(atan2f(vec[2], xyLen));
+    }
+
+    angles[0] = pitch;  // X = pitch
+    angles[1] = yaw;    // Y = yaw
+    angles[2] = 0.0f;   // Z = roll (unused in this function)
 }
