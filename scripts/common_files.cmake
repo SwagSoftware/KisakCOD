@@ -2,7 +2,6 @@
 
 set(SRCROOT
     "${SRC_DIR}/buildnumber.cpp"
-    "${SRC_DIR}/buildnumber.h"
 )
 
 set(DYNENTITY
