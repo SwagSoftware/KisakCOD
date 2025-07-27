@@ -33,7 +33,7 @@ void __cdecl CG_CompassAddWeaponPingInfo(int localClientNum, centity_s *cent, fl
     bool v12; // cr58
     char v13; // r10
     unsigned int v14; // [sp+50h] [-40h] BYREF
-    int v15; // [sp+54h] [-3Ch] BYREF
+    int team; // [sp+54h] [-3Ch] BYREF
 
     eType = cent->nextState.eType;
     if (eType != 16)
@@ -45,10 +45,10 @@ void __cdecl CG_CompassAddWeaponPingInfo(int localClientNum, centity_s *cent, fl
                 0,
                 "%s",
                 "cent->nextState.eType == ET_ACTOR");
-        G_BypassForCG_GetClientActorIndexAndTeam(cent->nextState.number, (int *)&v14, &v15);
-        if (v15 != 3 && v15 != 4)
+        G_BypassForCG_GetClientActorIndexAndTeam(cent->nextState.number, (int *)&v14, &team);
+        if (team != 3 && team != 4)
         {
-            if (v15 != 2 && v15 != 1)
+            if (team != 2 && team != 1)
                 MyAssertHandler(
                     "c:\\trees\\cod3\\cod3src\\src\\cgame\\cg_compassfriendlies.cpp",
                     66,
@@ -77,10 +77,11 @@ void __cdecl CG_CompassAddWeaponPingInfo(int localClientNum, centity_s *cent, fl
             }
             v10 = &s_compassActors[localClientNum][v9];
             LocalClientTime = CG_GetLocalClientTime(localClientNum);
-            v12 = v15 == 1;
-            v13 = _cntlzw(v15 - 1);
+            v12 = team == 1;
+            //v13 = _cntlzw(v15 - 1);
             v10->beginFadeTime = LocalClientTime + msec;
-            v10->enemy = (v13 & 0x20) != 0;
+            //v10->enemy = (v13 & 0x20) != 0;
+            v10->enemy = team == TEAM_BAD;
             if (v12)
             {
                 v10->lastPos[0] = *origin;
@@ -508,7 +509,7 @@ void __cdecl CG_CompassDrawActors(
             {
                 v37 = *p_beginFadeTime;
                 value = compassSoundPingFadeTime->current.value;
-                HIDWORD(v39) = compassSoundPingFadeTime;
+                HIDWORD(v39) = (uint32)compassSoundPingFadeTime;
                 LODWORD(v39) = *p_beginFadeTime;
                 v70 = __PAIR64__((unsigned int)compassSoundPingFadeTime, cgArray[0].time);
                 v69 = v39;

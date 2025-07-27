@@ -1,3 +1,5 @@
+#ifdef KISAK_MP
+
 #include "bg_public.h"
 #include "bg_local.h"
 
@@ -15,3 +17,4 @@ uint16 BG_VehiclesGetSlotTagName(int32_t slotIndex)
     iassert(slotIndex == VEHICLE_RIDESLOT_GUNNER);
     return scr_const.tag_gunner;
 }
+#endif

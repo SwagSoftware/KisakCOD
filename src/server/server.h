@@ -26,17 +26,16 @@ enum he_type_t : __int32
     HE_TYPE_COUNT = 0xB,
 };
 
-struct $0D0CB43DF22755AD856C77DD3F304010
-{
-    unsigned __int8 r;
-    unsigned __int8 g;
-    unsigned __int8 b;
-    unsigned __int8 a;
-};
-
 union hudelem_color_t
 {
-    $0D0CB43DF22755AD856C77DD3F304010 __s0;
+    //$0D0CB43DF22755AD856C77DD3F304010 __s0;
+    struct
+    {
+        unsigned __int8 r;
+        unsigned __int8 g;
+        unsigned __int8 b;
+        unsigned __int8 a;
+    };
     int rgba;
 };
 

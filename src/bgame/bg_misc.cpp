@@ -5,6 +5,8 @@
 #include <sound/snd_public.h>
 #include <game/game_public.h>
 #include <universal/com_files.h>
+#include <xanim/xanim.h>
+#include <cgame/cg_local.h>
 
 const char *bgShockDvarNames[27] =
 {
@@ -17,8 +19,8 @@ const char *bgShockDvarNames[27] =
   "bg_shock_viewKickRadius",
   "bg_shock_viewKickFadeTime",
   "bg_shock_soundLoop",
-  "bg_shock_soundLoopSilent",
   "bg_shock_soundEnd",
+  "bg_shock_soundLoopSilent",
   "bg_shock_soundEndAbort",
   "bg_shock_sound",
   "bg_shock_soundFadeInTime",
@@ -1073,36 +1075,43 @@ bool __cdecl BG_PlayerCanPickUpWeaponType(const WeaponDef *weapDef, const player
 
 bool __cdecl BG_CanItemBeGrabbed(const entityState_s *ent, const playerState_s *ps, int32_t touched)
 {
-    const char *v4; // eax
     int32_t weapIdx; // [esp+0h] [ebp-8h]
     const WeaponDef *weapDef; // [esp+4h] [ebp-4h]
 
-    if (!ent)
-        MyAssertHandler(".\\bgame\\bg_misc.cpp", 855, 0, "%s", "ent");
-    if (!ps)
-        MyAssertHandler(".\\bgame\\bg_misc.cpp", 856, 0, "%s", "ps");
+    iassert(ent);
+    iassert(ps);
+
     if ((ps->weapFlags & 0x80) != 0)
         return 0;
+
     if (ent->index.brushmodel < 1 || ent->index.brushmodel >= 2048)
     {
-        v4 = va("BG_CanItemBeGrabbed: index out of range (index is %i, eType is %i)", ent->index.brushmodel, ent->eType);
-        Com_Error(ERR_DROP, v4);
+        Com_Error(ERR_DROP, va("BG_CanItemBeGrabbed: index out of range (index is %i, eType is %i)", ent->index.brushmodel, ent->eType));
     }
+
+#ifdef KISAK_MP
     if (ent->clientNum == ps->clientNum)
         return 0;
+
     if ((ps->pm_flags & 0x100000) != 0)
         return 0;
-    weapIdx = ent->index.brushmodel % 128;
+#endif
+
+    weapIdx = ent->index.brushmodel % MAX_WEAPONS;
     weapDef = BG_GetWeaponDef(weapIdx);
-    if (bg_itemlist[128 * (ent->index.brushmodel / 128) + weapIdx].giType != IT_WEAPON)
-        MyAssertHandler(
-            ".\\bgame\\bg_misc.cpp",
-            877,
-            0,
-            "%s",
-            "bg_itemlist[ ITEM_WEAPMODEL( ent->index.item ) * MAX_WEAPONS + weapIdx].giType == IT_WEAPON");
+
+    iassert(bg_itemlist[ITEM_WEAPMODEL(ent->index.item) * MAX_WEAPONS + weapIdx].giType == IT_WEAPON);
+    //if (bg_itemlist[128 * (ent->index.brushmodel / 128) + weapIdx].giType != IT_WEAPON)
+    //    MyAssertHandler(
+    //        ".\\bgame\\bg_misc.cpp",
+    //        877,
+    //        0,
+    //        "%s",
+    //        "bg_itemlist[ ITEM_WEAPMODEL( ent->index.item ) * MAX_WEAPONS + weapIdx].giType == IT_WEAPON");
+
     if (WeaponEntCanBeGrabbed(ent, ps, touched, weapIdx))
         return 1;
+
     return weapDef->altWeaponIndex && WeaponEntCanBeGrabbed(ent, ps, touched, weapDef->altWeaponIndex);
 }
 
@@ -1568,6 +1577,7 @@ void __cdecl BG_PlayerToEntitySetFlags(playerState_s *ps, entityState_s *s)
 
 void __cdecl BG_PlayerToEntitySetPitchAngles(playerState_s *ps, entityState_s *s)
 {
+#ifdef KISAK_MP
     float v2; // [esp+8h] [ebp-34h]
     float v3; // [esp+Ch] [ebp-30h]
     float v4; // [esp+10h] [ebp-2Ch]
@@ -1616,10 +1626,12 @@ void __cdecl BG_PlayerToEntitySetPitchAngles(playerState_s *ps, entityState_s *s
         s->fTorsoPitch = 0.0;
         s->fWaistPitch = 0.0;
     }
+#endif
 }
 
 void __cdecl BG_PlayerToEntitySetMisc(playerState_s *ps, entityState_s *s)
 {
+#ifdef KISAK_MP
     s->legsAnim = ps->legsAnim;
     s->torsoAnim = ps->torsoAnim;
     s->lerp.u.turret.gunAngles[0] = ps->leanf;
@@ -1633,6 +1645,12 @@ void __cdecl BG_PlayerToEntitySetMisc(playerState_s *ps, entityState_s *s)
     s->weapon = LOBYTE(ps->weapon);
     s->weaponModel = ps->weaponmodels[ps->weapon];
     s->groundEntityNum = LOWORD(ps->groundEntityNum);
+#elif KISAK_SP
+    s->eType = 1;
+    s->weapon = ps->weapon;
+    s->weaponModel = ps->weaponmodels[ps->weapon];
+    s->groundEntityNum = ps->groundEntityNum;
+#endif
 }
 
 void __cdecl BG_PlayerToEntitySetTrajectory(playerState_s *ps, entityState_s *s, int32_t snap)
@@ -2226,13 +2244,13 @@ void __cdecl BG_CheckThread()
 
 int __cdecl BG_GetMaxSprintTime(const playerState_s *ps)
 {
-    double v3; // [esp+4h] [ebp-14h]
     float maxSprintTime; // [esp+14h] [ebp-4h]
 
-    v3 = player_sprintTime->current.value * 1000.0;
-    maxSprintTime = BG_GetWeaponDef(ps->weapon)->sprintDurationScale * v3;
+    maxSprintTime = BG_GetWeaponDef(ps->weapon)->sprintDurationScale * (player_sprintTime->current.value * 1000.0f);
+#ifdef KISAK_MP
     if ((ps->perks & 0x400) != 0)
         maxSprintTime = maxSprintTime * perk_sprintMultiplier->current.value;
+#endif
     if ((int)maxSprintTime > 0x3FFF)
         return 0x3FFF;
     else

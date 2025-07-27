@@ -275,58 +275,66 @@ LABEL_12:
 }
 
 // local variable allocation has failed, the output may be wrong!
-int __cdecl CG_CheckPlayerMovement(
-    __int64 newCmd,
-    __int64 a2,
-    __int64 a3,
-    __int64 a4,
-    __int64 a5,
-    __int64 a6,
-    __int64 a7,
-    __int64 a8,
-    __int64 a9,
-    __int64 a10,
-    __int64 a11,
-    __int64 a12,
-    __int64 a13,
-    __int64 a14,
-    int a15,
-    int a16,
-    int a17,
-    __int16 a18)
-{
-    __int64 *v18; // r11
-    int v19; // r7
-    int v20; // r9
-    int result; // r3
+//int __cdecl CG_CheckPlayerMovement(
+//    __int64 newCmd,
+//    __int64 a2,
+//    __int64 a3,
+//    __int64 a4,
+//    __int64 a5,
+//    __int64 a6,
+//    __int64 a7,
+//    __int64 a8,
+//    __int64 a9,
+//    __int64 a10,
+//    __int64 a11,
+//    __int64 a12,
+//    __int64 a13,
+//    __int64 a14,
+//    int a15,
+//    int a16,
+//    int a17,
+//    __int16 a18)
+//{
+//    __int64 *v18; // r11
+//    int v19; // r7
+//    int v20; // r9
+//    int result; // r3
+//
+//    v18 = &a7;
+//    a11 = a3;
+//    a14 = a4;
+//    LODWORD(a4) = &a15;
+//    LODWORD(a3) = (char *)&a8 + 4;
+//    a7 = newCmd;
+//    a8 = *(__int64 *)((char *)&a2 + 4);
+//    a9 = a2;
+//    a10 = *(__int64 *)((char *)&a3 + 4);
+//    a12 = *(__int64 *)((char *)&a4 + 4);
+//    do
+//    {
+//        v19 = *(unsigned __int8 *)a4;
+//        v20 = *(unsigned __int8 *)v18 - v19;
+//        if (*(unsigned __int8 *)v18 != v19)
+//            break;
+//        v18 = (__int64 *)((char *)v18 + 1);
+//        LODWORD(a4) = a4 + 1;
+//    } while (v18 != (__int64 *)((char *)&a8 + 4));
+//    if (v20)
+//        return 1;
+//    if (HIBYTE(a18))
+//        return 1;
+//    result = 0;
+//    if ((_BYTE)a18)
+//        return 1;
+//    return result;
+//}
 
-    v18 = &a7;
-    a11 = a3;
-    a14 = a4;
-    LODWORD(a4) = &a15;
-    LODWORD(a3) = (char *)&a8 + 4;
-    a7 = newCmd;
-    a8 = *(__int64 *)((char *)&a2 + 4);
-    a9 = a2;
-    a10 = *(__int64 *)((char *)&a3 + 4);
-    a12 = *(__int64 *)((char *)&a4 + 4);
-    do
-    {
-        v19 = *(unsigned __int8 *)a4;
-        v20 = *(unsigned __int8 *)v18 - v19;
-        if (*(unsigned __int8 *)v18 != v19)
-            break;
-        v18 = (__int64 *)((char *)v18 + 1);
-        LODWORD(a4) = a4 + 1;
-    } while (v18 != (__int64 *)((char *)&a8 + 4));
-    if (v20)
+int __cdecl CG_CheckPlayerMovement(usercmd_s oldCmd, usercmd_s newCmd)
+{
+    if (memcmp(oldCmd.angles, newCmd.angles, sizeof(usercmd_s)))
         return 1;
-    if (HIBYTE(a18))
-        return 1;
-    result = 0;
-    if ((_BYTE)a18)
-        return 1;
-    return result;
+
+    return newCmd.forwardmove || newCmd.rightmove;
 }
 
 int __cdecl CG_CheckPlayerStanceChange(int localClientNum, __int16 newButtons, __int16 changedButtons)
@@ -900,23 +908,24 @@ void __cdecl CG_ScreenBlur(int localClientNum)
     }
 }
 
-void __cdecl CG_Fade(int localClientNum, int r, __int64 b, int a, int startTime, int duration)
+void __cdecl CG_Fade(int localClientNum, int r, int g, int b, int a, int startTime, int duration)
 {
     ScreenFade *v6; // r31
 
-    LODWORD(b) = a;
     v6 = &s_screenFade[localClientNum];
     v6->startTime = startTime;
     v6->duration = duration;
-    v6->alpha = (float)b * (float)0.0039215689;
-    if (localClientNum)
-        MyAssertHandler(
-            "c:\\trees\\cod3\\cod3src\\src\\cgame\\cg_local.h",
-            910,
-            0,
-            "%s\n\t(localClientNum) = %i",
-            "(localClientNum == 0)",
-            localClientNum);
+    v6->alpha = (float)a * 0.0039215689f;
+
+    iassert(localClientNum == 0);
+    //if (localClientNum)
+    //    MyAssertHandler(
+    //        "c:\\trees\\cod3\\cod3src\\src\\cgame\\cg_local.h",
+    //        910,
+    //        0,
+    //        "%s\n\t(localClientNum) = %i",
+    //        "(localClientNum == 0)",
+    //        localClientNum);
     if (v6->duration + v6->startTime <= cgArray[0].time)
         v6->alphaCurrent = v6->alpha;
 }

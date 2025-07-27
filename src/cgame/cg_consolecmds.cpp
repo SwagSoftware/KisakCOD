@@ -35,12 +35,13 @@ void CG_Viewpos_f()
                 8);
         Com_Printf(
             0,
-            (const char *)(const char *)HIDWORD(COERCE_UNSIGNED_INT64(cgArray[0].refdef.vieworg[0])),
-            (unsigned int)COERCE_UNSIGNED_INT64(cgArray[0].refdef.vieworg[0]),
-            (unsigned int)COERCE_UNSIGNED_INT64(cgArray[0].refdef.vieworg[1]),
-            (unsigned int)COERCE_UNSIGNED_INT64(cgArray[0].refdef.vieworg[2]),
-            (unsigned int)COERCE_UNSIGNED_INT64(cgArray[0].refdefViewAngles[1]),
-            (unsigned int)COERCE_UNSIGNED_INT64(cgArray[0].refdefViewAngles[0]));
+            "(%.0f %.0f %.0f) : %.0f %.0f\n",
+            cgArray[0].refdef.vieworg[0],
+            cgArray[0].refdef.vieworg[1],
+            cgArray[0].refdef.vieworg[2],
+            cgArray[0].refdefViewAngles[0],
+            cgArray[0].refdefViewAngles[1]
+        );
     }
 }
 
@@ -504,9 +505,20 @@ void __cdecl CG_SetViewOrbit_f()
             v30 = (float)v4 - (float)v23;
             v31 = (float)v7 - p_predictedPlayerState->origin[1];
             v26 = (float)((float)v19 - p_predictedPlayerState->origin[2]);
-            _FP9 = -__fsqrts((float)((float)(v30 * v30) + (float)((float)((float)v26 * (float)v26) + (float)(v31 * v31))));
-            __asm { fsel      f11, f9, f10, f11 }
-            v29 = (float)((float)1.0 / (float)_FP11);
+
+            // aislop
+            //_FP9 = -__fsqrts((float)((float)(v30 * v30) + (float)((float)((float)v26 * (float)v26) + (float)(v31 * v31))));
+            //__asm { fsel      f11, f9, f10, f11 }
+            //v29 = (float)((float)1.0 / (float)_FP11);
+
+            {
+                float temp = v30 * v30 + v26 * v26 + v31 * v31;
+                float _FP9 = -sqrtf(temp > 0.0f ? temp : 0.0f);
+                float _FP11 = (_FP9 < 0.0f) ? -_FP9 : _FP9;  // fsel equivalent: select positive _FP9
+                v29 = 1.0f / _FP11;
+            }
+
+
             v30 = (float)v29 * v30;
             v31 = v31 * (float)v29;
             v32 = (float)v26 * (float)v29;
@@ -531,7 +543,7 @@ void CG_PlayRumble_f()
         {
             v0 = Cmd_Argv(1);
             v1 = Cmd_LocalClientNum();
-            CG_PlayRumbleOnClient(v1, v0);
+            //CG_PlayRumbleOnClient(v1, v0); // KISAKTODO
         }
         else
         {

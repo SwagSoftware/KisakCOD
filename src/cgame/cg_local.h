@@ -31,6 +31,8 @@ struct ScreenPlacement;
 
 #define MAX_WEAPONS 128
 
+#define ITEM_WEAPMODEL(x) (MAX_WEAPONS * (x / MAX_WEAPONS))
+
 #define PRIMARY_LIGHT_NONE 0
 
 enum $73E480FCE7B67BAA29FC24DF5A08B1FF : __int32

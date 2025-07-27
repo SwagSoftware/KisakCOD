@@ -100,7 +100,7 @@ void __cdecl CG_Blur(
 void __cdecl CG_ClearBlur(int localClientNum);
 float __cdecl CG_GetBlurRadius(int localClientNum);
 void __cdecl CG_ScreenBlur(int localClientNum);
-void __cdecl CG_Fade(int localClientNum, int r, __int64 b, int a, int startTime, int duration);
+void __cdecl CG_Fade(int localClientNum, int r, int g, int b, int a, int startTime, int duration);
 void CG_DrawMiniConsole();
 void CG_DrawErrorMessages();
 void __cdecl CG_DrawFadeInCinematic(int localClientNum);
