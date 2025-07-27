@@ -4,6 +4,10 @@
 
 #include "actor_navigation.h"
 #include <universal/com_math.h>
+#include "g_main.h"
+#include "game_public.h"
+#include "actor_senses.h"
+#include <server/sv_game.h>
 
 //   int const __cdecl Path_AStarAlgorithm<class CustomSearchInfo_FindCloseNode>(struct path_t *, enum team_t, float const *const, struct pathnode_t *, float const *const, int, int, class CustomSearchInfo_FindCloseNode &) 82202a88 f   actor_navigation.obj
 //   int const __cdecl Path_AStarAlgorithm<class CustomSearchInfo_FindPathWithWidth>(struct path_t *, enum team_t, float const *const, struct pathnode_t *, float const *const, int, int, class CustomSearchInfo_FindPathWithWidth &) 82202dd0 f   actor_navigation.obj
@@ -25,6 +29,115 @@
 // Line 26294 : 0004 : 000f6b58       public: float const __cdecl CustomSearchInfo_FindPathWithLOS::EvaluateHeuristic(struct pathnode_t *, float const *const) 82206b58 f i actor_navigation.obj
 // Line 26295 : 0004 : 000f6bf8       public: BOOL const __cdecl CustomSearchInfo_FindPathInCylinderWithLOSNotCrossPlanes::IgnoreNode(struct pathnode_t *) 82206bf8 f i actor_navigation.obj
 // Line 26296 : 0004 : 000f6ca0       public: BOOL const __cdecl CustomSearchInfo_FindPathFromInCylinderNotCrossPlanes::IgnoreNode(struct pathnode_t *) 82206ca0 f i actor_navigation.obj
+
+struct CustomSearchInfo_FindCloseNode
+{
+    float goalPos[3];
+    pathnode_t *closestNode;
+    float closestDistSq;
+};
+
+struct CustomSearchInfo_FindPath
+{
+    pathnode_t *m_pNodeTo;
+    float startPos[3];
+    float negotiationOverlapCost;
+};
+/* 10044 */
+struct CustomSearchInfo_FindPathWithWidth
+{
+    pathnode_t *m_pNodeTo;
+    float width;
+    float perp[2];
+};
+
+/* 10045 */
+struct  CustomSearchInfo_FindPathNotCrossPlanes : CustomSearchInfo_FindPath
+{
+    int m_iPlaneCount;
+    float (*m_vNormal)[2];
+    float *m_fDist;
+};
+
+/* 10046 */
+struct  CustomSearchInfo_FindPathAway
+{
+    float m_vAwayFromPos[3];
+    float m_fDistAway;
+    float m_fDistAwaySqrd;
+    float m_fInitialDistAwaySq;
+    float m_fBestScore;
+    pathnode_t *m_pBestNode;
+};
+
+/* 10047 */
+struct  CustomSearchInfo_FindPathAwayNotCrossPlanes : CustomSearchInfo_FindPathAway
+{
+    int m_iPlaneCount;
+    float (*m_vNormal)[2];
+    float *m_fDist;
+};
+
+/* 10048 */
+struct CustomSearchInfo_FindPathWithLOS
+{
+    pathnode_t *m_pNodeTo;
+    float m_fWithinDistSqrd;
+    float startPos[3];
+    float negotiationOverlapCost;
+};
+
+/* 10049 */
+struct  CustomSearchInfo_FindPathInCylinderWithLOS : CustomSearchInfo_FindPathWithLOS
+{
+    const actor_goal_s *goal;
+};
+
+/* 10050 */
+struct  CustomSearchInfo_FindPathInCylinderWithLOSNotCrossPlanes : CustomSearchInfo_FindPathWithLOS
+{
+    const actor_goal_s *goal;
+    int m_iPlaneCount;
+    float (*m_vNormal)[2];
+    float *m_fDist;
+};
+
+/* 10051 */
+struct  CustomSearchInfo_FindPathFromInCylinder : CustomSearchInfo_FindPath
+{
+    float m_vOrigin[2];
+    float m_fRadiusSqrd;
+    float m_fHalfHeightSqrd;
+};
+
+/* 10052 */
+struct  CustomSearchInfo_FindPathFromInCylinderNotCrossPlanes : CustomSearchInfo_FindPath
+{
+    float m_vOrigin[2];
+    float m_fRadiusSqrd;
+    float m_fHalfHeightSqrd;
+    int m_iPlaneCount;
+    float (*m_vNormal)[2];
+    float *m_fDist;
+};
+
+/* 10053 */
+struct CustomSearchInfo_CouldAttack
+{
+    pathnode_t *m_pNodeTo;
+    pathnode_t *attackNode;
+};
+
+/* 10054 */
+struct  CustomSearchInfo_FindPathClosestPossible
+{
+    float m_fBestScore;
+    pathnode_t *m_pBestNode;
+    pathnode_t *m_pNodeTo;
+    float negotiationOverlapCost;
+};
+
+path_t pathBackup;
 
 bool __cdecl Path_IsPathStanceNode(const pathnode_t *node)
 {
@@ -49,7 +162,7 @@ float __cdecl Path_GetPathDir(float *delta, const float *vFrom, const float *vTo
         MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\actor_navigation.cpp", 57, 0, "%s", "!IS_NAN(delta[1])");
     if (*delta == 0.0 && delta[1] == 0.0)
         MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\actor_navigation.cpp", 58, 0, "%s", "delta[0] || delta[1]");
-    v4 = __fsqrts((float)((float)(delta[1] * delta[1]) + (float)(*delta * *delta)));
+    v4 = sqrtf((float)((float)(delta[1] * delta[1]) + (float)(*delta * *delta)));
     if (v4 <= 0.0)
         MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\actor_navigation.cpp", 60, 0, "%s", "fDist > 0");
     v5 = delta[1];
@@ -177,7 +290,7 @@ void __cdecl Path_AddTrimmedAmount(path_t *pPath, const float *vStartPos)
             v9 = vOrigPoint;
             v10 = (float)(*vOrigPoint - *vStartPos);
             v11 = (float)(vOrigPoint[1] - vStartPos[1]);
-            v12 = __fsqrts((float)((float)((float)(*vOrigPoint - *vStartPos) * (float)(*vOrigPoint - *vStartPos))
+            v12 = sqrtf((float)((float)((float)(*vOrigPoint - *vStartPos) * (float)(*vOrigPoint - *vStartPos))
                 + (float)((float)v11 * (float)v11)));
             if (v12 <= v6)
             {
@@ -793,6 +906,8 @@ void __cdecl Path_IncreaseLookaheadAmount(path_t *pPath)
     pPath->flags = v3;
 }
 
+static const float PREDICTION_TRACE_MAX[3] = { 15.0, 15.0, 72.0 };
+
 bool __cdecl Path_PredictionTrace(
     float *vStartPos,
     float *vEndPos,
@@ -1117,7 +1232,7 @@ void __cdecl Path_TrimCompletedPath(path_t *pPath, const float *vStartPos)
     double v11; // fp28
     pathpoint_t *vCurrPoint; // r25
     const char *v13; // r3
-    double v14; // fp29
+    double fraction; // fp29
     const char *v15; // r3
     const char *v16; // r3
     double v17; // fp31
@@ -1126,8 +1241,8 @@ void __cdecl Path_TrimCompletedPath(path_t *pPath, const float *vStartPos)
     double v20; // fp12
     double v21; // fp1
     double v22; // fp2
-    float v23; // [sp+50h] [-70h]
-    float v24; // [sp+54h] [-6Ch]
+    float d2; // [sp+50h] [-70h]
+    float d1; // [sp+54h] [-6Ch]
     float v25; // [sp+54h] [-6Ch]
 
     if (!pPath)
@@ -1171,9 +1286,9 @@ void __cdecl Path_TrimCompletedPath(path_t *pPath, const float *vStartPos)
     {
         for (i = pPath->pts[v9].vOrigPoint; ; i -= 7)
         {
-            v23 = (float)(pPath->lookaheadDir[1] * (float)(i[1] - vStartPos[1]))
+            d2 = (float)(pPath->lookaheadDir[1] * (float)(i[1] - vStartPos[1]))
                 + (float)(pPath->lookaheadDir[0] * (float)(*i - *vStartPos));
-            if (v23 > 0.0)
+            if (d2 > 0.0)
                 break;
             --v9;
             v8 = 0;
@@ -1190,78 +1305,22 @@ void __cdecl Path_TrimCompletedPath(path_t *pPath, const float *vStartPos)
             v11 = i[5];
             vCurrPoint = &pPath->pts[v9 + 1];
         }
-        v24 = (float)((float)(pPath->lookaheadDir[1] * (float)(vCurrPoint->vOrigPoint[1] - vStartPos[1]))
+        d1 = (float)((float)(pPath->lookaheadDir[1] * (float)(vCurrPoint->vOrigPoint[1] - vStartPos[1]))
             + (float)((float)(vCurrPoint->vOrigPoint[0] - *vStartPos) * pPath->lookaheadDir[0]))
             - (float)0.000099999997;
-        if (v24 > 0.0)
-            MyAssertHandler(
-                "c:\\trees\\cod3\\cod3src\\src\\game\\actor_navigation.cpp",
-                2896,
-                0,
-                "%s\n\t(d1) = %g",
-                (unsigned int)HIDWORD(COERCE_UNSIGNED_INT64(v24)),
-                (unsigned int)COERCE_UNSIGNED_INT64(v24));
-        if (v23 <= 0.0)
-            MyAssertHandler(
-                "c:\\trees\\cod3\\cod3src\\src\\game\\actor_navigation.cpp",
-                2897,
-                0,
-                "%s\n\t(d2) = %g",
-                (unsigned int)HIDWORD(COERCE_UNSIGNED_INT64(v23)),
-                (unsigned int)COERCE_UNSIGNED_INT64(v23));
-        if ((float)(v24 - v23) >= 0.0)
-        {
-            v13 = va(
-                (const char *)(const char *)HIDWORD(COERCE_UNSIGNED_INT64(v24)),
-                (unsigned int)COERCE_UNSIGNED_INT64(v24),
-                (unsigned int)COERCE_UNSIGNED_INT64(v23));
-            MyAssertHandler(
-                "c:\\trees\\cod3\\cod3src\\src\\game\\actor_navigation.cpp",
-                2898,
-                0,
-                "%s\n\t%s",
-                "d1 - d2 < 0",
-                v13);
-        }
-        v14 = (float)(v24 / (float)(v24 - v23));
-        if (v14 < 0.0)
-        {
-            v15 = va(
-                "i: %d, pPath->wPathLen: %d, d1: %f, d2: %f, fraction: %f",
-                v9,
-                v24,
-                (unsigned int)COERCE_UNSIGNED_INT64(v23),
-                LODWORD(v14));
-            MyAssertHandler(
-                "c:\\trees\\cod3\\cod3src\\src\\game\\actor_navigation.cpp",
-                2902,
-                0,
-                "%s\n\t%s",
-                "fraction >= 0",
-                v15);
-        }
-        if (v14 > 1.0)
-        {
-            v16 = va(
-                "i: %d, pPath->wPathLen: %d, d1: %f, d2: %f, fraction: %f",
-                v9,
-                v24,
-                (unsigned int)COERCE_UNSIGNED_INT64(v23),
-                LODWORD(v14));
-            MyAssertHandler(
-                "c:\\trees\\cod3\\cod3src\\src\\game\\actor_navigation.cpp",
-                2905,
-                0,
-                "%s\n\t%s",
-                "fraction <= 1.f",
-                v16);
-        }
+        iassert(d1);
+        iassert(d2);
+        iassert(d1 - d2 < 0);
+        fraction = (float)(d1 / (float)(d1 - d2));
+        iassert(fraction >= 0);
+        iassert(fraction <= 1.f);
+        
         v25 = v11;
         if ((LODWORD(v25) & 0x7F800000) == 0x7F800000)
             MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\actor_navigation.cpp", 2907, 0, "%s", "!IS_NAN(fLength)");
         if (v11 <= 0.0)
             MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\actor_navigation.cpp", 2908, 0, "%s", "fLength > 0");
-        v17 = (float)((float)v14 * (float)v11);
+        v17 = (float)((float)fraction * (float)v11);
         if (v17 > v11)
             MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\actor_navigation.cpp", 2911, 0, "%s", "dist <= fLength");
         if (v17 < v11)
@@ -1275,13 +1334,13 @@ void __cdecl Path_TrimCompletedPath(path_t *pPath, const float *vStartPos)
                     "pt->fDir2D[0] || pt->fDir2D[1]");
             if (v17 < 0.0)
                 MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\actor_navigation.cpp", 2928, 0, "%s", "dist >= 0");
-            pPath->vCurrPoint[0] = (float)(i[3] * (float)((float)v14 * (float)v11)) + vCurrPoint->vOrigPoint[0];
-            pPath->vCurrPoint[1] = (float)(i[4] * (float)((float)v14 * (float)v11)) + vCurrPoint->vOrigPoint[1];
+            pPath->vCurrPoint[0] = (float)(i[3] * (float)((float)fraction * (float)v11)) + vCurrPoint->vOrigPoint[0];
+            pPath->vCurrPoint[1] = (float)(i[4] * (float)((float)fraction * (float)v11)) + vCurrPoint->vOrigPoint[1];
             v19 = vCurrPoint->vOrigPoint[2];
             v20 = i[2];
-            pPath->fCurrLength = (float)v11 - (float)((float)v14 * (float)v11);
-            pPath->vCurrPoint[2] = (float)((float)((float)v20 - (float)v19) * (float)v14) + (float)v19;
-            if ((COERCE_UNSIGNED_INT((float)v11 - (float)((float)v14 * (float)v11)) & 0x7F800000) == 0x7F800000)
+            pPath->fCurrLength = (float)v11 - (float)((float)fraction * (float)v11);
+            pPath->vCurrPoint[2] = (float)((float)((float)v20 - (float)v19) * (float)fraction) + (float)v19;
+            if ((COERCE_UNSIGNED_INT((float)v11 - (float)((float)fraction * (float)v11)) & 0x7F800000) == 0x7F800000)
                 MyAssertHandler(
                     "c:\\trees\\cod3\\cod3src\\src\\game\\actor_navigation.cpp",
                     2935,
@@ -1783,18 +1842,20 @@ void __cdecl PathCalcLookahead_CheckMinLookaheadNodes(path_t *pPath, const pathp
     }
 }
 
-int __cdecl Path_GetForwardStartPos(path_t *pPath, const float *vStartPos, float *vForwardStartPos)
+int Path_GetForwardStartPos(path_t *pPath, const float *vStartPos, float *vForwardStartPos)
 {
-    int result; // r3
-
     if (pPath->wPathLen <= 1 || (pPath->flags & 1) != 0)
         return 0;
-    result = 1;
-    _FP11 = (float)((float)60.0 - pPath->fLookaheadDist);
-    __asm { fsel      f0, f11, f0, f13 }
-    *vForwardStartPos = (float)(pPath->lookaheadDir[0] * (float)_FP0) + *vStartPos;
-    vForwardStartPos[1] = (float)(pPath->lookaheadDir[1] * (float)_FP0) + vStartPos[1];
-    return result;
+
+    float lookaheadDistance = 60.0f - pPath->fLookaheadDist;
+
+    if (lookaheadDistance < 0.0f)
+        lookaheadDistance = 0.0f;
+
+    vForwardStartPos[0] = pPath->lookaheadDir[0] * lookaheadDistance + vStartPos[0];
+    vForwardStartPos[1] = pPath->lookaheadDir[1] * lookaheadDistance + vStartPos[1];
+
+    return 1;
 }
 
 void __cdecl Path_UpdateForwardLookahead_IncompletePath(
@@ -1848,19 +1909,19 @@ void __cdecl Path_UpdateForwardLookahead(path_t *pPath, const float *vStartPos)
     pathpoint_t *v14; // r25
     double v15; // fp0
     double v16; // fp13
-    double fOrigLength; // fp31
-    double v18; // fp28
+    double fLength; // fp31
+    double fraction; // fp28
     const char *v19; // r3
     const char *v20; // r3
-    double fLookaheadAmount; // fp30
+    double lookaheadAmount; // fp30
     double DistToPathSegment; // fp2
     double v23; // fp31
     float *p_fOrigLength; // r29
     double v25; // fp1
     double v26; // fp2
     float *vOrigPoint; // r11
-    float v28; // [sp+50h] [-80h]
-    float v29; // [sp+54h] [-7Ch]
+    float d2; // [sp+50h] [-80h]
+    float d1; // [sp+54h] [-7Ch]
     float v30; // [sp+58h] [-78h] BYREF
     float v31; // [sp+5Ch] [-74h]
 
@@ -1920,9 +1981,9 @@ void __cdecl Path_UpdateForwardLookahead(path_t *pPath, const float *vStartPos)
         v13 = &pPath->pts[v12];
         while (1)
         {
-            v28 = (float)(pPath->lookaheadDir[0] * (float)(v13->vOrigPoint[0] - v30))
+            d2 = (float)(pPath->lookaheadDir[0] * (float)(v13->vOrigPoint[0] - v30))
                 + (float)(pPath->lookaheadDir[1] * (float)(v13->vOrigPoint[1] - v31));
-            if (v28 > 0.0)
+            if (d2 > 0.0)
                 break;
             --v12;
             --v13;
@@ -1933,7 +1994,7 @@ void __cdecl Path_UpdateForwardLookahead(path_t *pPath, const float *vStartPos)
         v14 = &pPath->pts[v12];
         if (v10)
         {
-            fOrigLength = pPath->fCurrLength;
+            fLength = pPath->fCurrLength;
             v15 = pPath->vCurrPoint[0];
             v16 = pPath->vCurrPoint[1];
         }
@@ -1941,88 +2002,27 @@ void __cdecl Path_UpdateForwardLookahead(path_t *pPath, const float *vStartPos)
         {
             v15 = v14[1].vOrigPoint[0];
             v16 = v14[1].vOrigPoint[1];
-            fOrigLength = v13->fOrigLength;
+            fLength = v13->fOrigLength;
         }
-        v29 = (float)(pPath->lookaheadDir[1] * (float)((float)v16 - v31))
+        d1 = (float)(pPath->lookaheadDir[1] * (float)((float)v16 - v31))
             + (float)(pPath->lookaheadDir[0] * (float)((float)v15 - v30));
-        if (v29 > 0.0)
-            MyAssertHandler(
-                "c:\\trees\\cod3\\cod3src\\src\\game\\actor_navigation.cpp",
-                3415,
-                0,
-                "%s\n\t(d1) = %g",
-                (unsigned int)HIDWORD(COERCE_UNSIGNED_INT64(v29)),
-                (unsigned int)COERCE_UNSIGNED_INT64(v29));
-        if (v28 <= 0.0)
-            MyAssertHandler(
-                "c:\\trees\\cod3\\cod3src\\src\\game\\actor_navigation.cpp",
-                3416,
-                0,
-                "%s\n\t(d2) = %g",
-                (unsigned int)HIDWORD(COERCE_UNSIGNED_INT64(v28)),
-                (unsigned int)COERCE_UNSIGNED_INT64(v28));
-        if ((float)(v29 - v28) == 0.0)
-            MyAssertHandler(
-                "c:\\trees\\cod3\\cod3src\\src\\game\\actor_navigation.cpp",
-                3417,
-                0,
-                "%s\n\t(d1 - d2) = %g",
-                (unsigned int)HIDWORD(COERCE_UNSIGNED_INT64((float)(v29 - v28))),
-                (unsigned int)COERCE_UNSIGNED_INT64((float)(v29 - v28)));
-        v18 = (float)(v29 / (float)(v29 - v28));
-        if (v18 < 0.0)
-        {
-            v19 = va(
-                "i: %d, pPath->wPathLen: %d, d1: %f, d2: %f, fraction: %f",
-                v12,
-                v29,
-                (unsigned int)COERCE_UNSIGNED_INT64(v28),
-                LODWORD(v18));
-            MyAssertHandler(
-                "c:\\trees\\cod3\\cod3src\\src\\game\\actor_navigation.cpp",
-                3421,
-                0,
-                "%s\n\t%s",
-                "fraction >= 0",
-                v19);
-        }
-        if (v18 > 1.0)
-        {
-            v20 = va(
-                "i: %d, pPath->wPathLen: %d, d1: %f, d2: %f, fraction: %f",
-                v12,
-                v29,
-                (unsigned int)COERCE_UNSIGNED_INT64(v28),
-                LODWORD(v18));
-            MyAssertHandler(
-                "c:\\trees\\cod3\\cod3src\\src\\game\\actor_navigation.cpp",
-                3424,
-                0,
-                "%s\n\t%s",
-                "fraction <= 1.f",
-                v20);
-        }
-        if (fOrigLength <= 0.0)
-            MyAssertHandler(
-                "c:\\trees\\cod3\\cod3src\\src\\game\\actor_navigation.cpp",
-                3425,
-                0,
-                "%s\n\t(fLength) = %g",
-                HIDWORD(fOrigLength),
-                LODWORD(fOrigLength));
-        fLookaheadAmount = pPath->fLookaheadAmount;
-        if (fLookaheadAmount <= 0.0)
-            MyAssertHandler(
-                "c:\\trees\\cod3\\cod3src\\src\\game\\actor_navigation.cpp",
-                3430,
-                0,
-                "%s\n\t(lookaheadAmount) = %g",
-                HIDWORD(fLookaheadAmount),
-                LODWORD(fLookaheadAmount));
+
+        iassert(d1);
+        iassert(d2);
+        iassert(d1 - d2);
+        
+        fraction = (float)(d1 / (float)(d1 - d2));
+        iassert(fraction >= 0);
+        iassert(fraction <= 1.f);
+        
+        iassert(fLength);
+        
+        lookaheadAmount = pPath->fLookaheadAmount;
+        iassert(lookaheadAmount);
         DistToPathSegment = Path_GetDistToPathSegment(&v30, v13);
-        v23 = (float)((float)((float)fOrigLength - (float)((float)(v29 / (float)(v29 - v28)) * (float)fOrigLength))
+        v23 = (float)((float)((float)fLength - (float)((float)(d1 / (float)(d1 - d2)) * (float)fLength))
             * (float)DistToPathSegment);
-        if (v23 < fLookaheadAmount)
+        if (v23 < lookaheadAmount)
         {
             if (v12 <= pPath->wNegotiationStartNode)
             {
@@ -2050,7 +2050,7 @@ void __cdecl Path_UpdateForwardLookahead(path_t *pPath, const float *vStartPos)
                             LODWORD(v25));
                     v26 = Path_GetDistToPathSegment(&v30, (const pathpoint_t *)(p_fOrigLength - 5));
                     v23 = (float)((float)(*p_fOrigLength * (float)v26) + (float)v23);
-                    if (v23 >= fLookaheadAmount)
+                    if (v23 >= lookaheadAmount)
                         break;
                     if (v12 <= pPath->wNegotiationStartNode)
                         goto LABEL_47;
@@ -2059,7 +2059,7 @@ void __cdecl Path_UpdateForwardLookahead(path_t *pPath, const float *vStartPos)
                     pPath,
                     (const pathpoint_t *)(p_fOrigLength - 5),
                     &v30,
-                    (float)((float)v23 - (float)fLookaheadAmount),
+                    (float)((float)v23 - (float)lookaheadAmount),
                     v26);
             }
         }
@@ -2069,7 +2069,7 @@ void __cdecl Path_UpdateForwardLookahead(path_t *pPath, const float *vStartPos)
                 pPath,
                 v13,
                 &v30,
-                (float)((float)v23 - (float)fLookaheadAmount),
+                (float)((float)v23 - (float)lookaheadAmount),
                 DistToPathSegment);
         }
     }
@@ -2337,10 +2337,10 @@ ai_stance_e __cdecl Path_AllowedStancesForPath(path_t *pPath)
         v6 = pPath->wPathLen - 1;
         iNodeNum = pPath->pts[v6].iNodeNum;
         if (iNodeNum < 0)
-            return 7;
+            return STANCE_ANY;
         v11 = Path_ConvertIndexToNode(iNodeNum);
         if (!Path_IsPathStanceNode(v11))
-            return 7;
+            return STANCE_ANY;
     }
     v13 = (int *)&pPath->pts[v6];
     if (v13[6] < 0)
@@ -2359,7 +2359,7 @@ ai_stance_e __cdecl Path_AllowedStancesForPath(path_t *pPath)
             "%s",
             "Path_IsPathStanceNode( Path_ConvertIndexToNode( pPath->pts[i].iNodeNum ) )");
     v15 = Path_ConvertIndexToNode(v13[6]);
-    return Path_AllowedStancesForNode(v15);
+    return (ai_stance_e)Path_AllowedStancesForNode(v15);
 }
 
 void __cdecl Path_DodgeDrawRaisedLine(float *start, float *end, const float *color)
@@ -2868,7 +2868,7 @@ PredictionTraceResult __cdecl Path_PredictionTraceCheckForEntities(
     v22[1] = vEndPos[1];
     v21 = 0.0;
     if (entityCount <= 0)
-        return !Path_PredictionTrace(vStartPos, vEndPos, entityIgnore, mask, vTraceEndPos, 18.0, mask, 1);
+        return (PredictionTraceResult)!Path_PredictionTrace(vStartPos, vEndPos, entityIgnore, mask, vTraceEndPos, 18.0, mask, 1);
     while (1)
     {
         v15 = SV_GentityNum(*entities);
@@ -2878,12 +2878,12 @@ PredictionTraceResult __cdecl Path_PredictionTraceCheckForEntities(
             v17 = 18.0;
         v18 = *entities;
         v21 = v17;
-        if (SV_SightTraceToEntity(vStartPos, v20, PREDICTION_TRACE_MAX, v22, v18, -1))
+        if (SV_SightTraceToEntity(vStartPos, v20, (float*)PREDICTION_TRACE_MAX, v22, v18, -1))
             break;
         ++v13;
         ++entities;
         if (v13 >= entityCount)
-            return !Path_PredictionTrace(vStartPos, vEndPos, entityIgnore, mask, vTraceEndPos, 18.0, mask, 1);
+            return (PredictionTraceResult)!Path_PredictionTrace(vStartPos, vEndPos, entityIgnore, mask, vTraceEndPos, 18.0, mask, 1);
     }
     result = PTR_HIT_ENTITY;
     *vTraceEndPos = *vStartPos;
@@ -3116,11 +3116,23 @@ void __cdecl Path_CalcLookahead_Completed(
         a6,
         totalArea,
         wNegotiationStartNode);
-    _FP12 = (float)((float)totalArea - (float)32768.0);
-    __asm { fsel      f0, f12, f31, f0 }
-    _FP12 = (float)((float)_FP0 - pPath->fLookaheadAmount);
-    __asm { fsel      f0, f12, f13, f0 }
-    pPath->fLookaheadAmount = _FP0;
+
+    // aislop
+    //_FP12 = (float)((float)totalArea - (float)32768.0);
+    //__asm { fsel      f0, f12, f31, f0 }
+    //_FP12 = (float)((float)_FP0 - pPath->fLookaheadAmount);
+    //__asm { fsel      f0, f12, f13, f0 }
+    //
+    //pPath->fLookaheadAmount = _FP0;
+
+    {
+        float _FP12 = totalArea - 32768.0f;
+        _FP12 = fmaxf(_FP12, 0.0f);
+        _FP12 -= pPath->fLookaheadAmount;
+        _FP12 = fmaxf(_FP12, 0.0f);
+
+        pPath->fLookaheadAmount = _FP12;
+    }
 }
 
 void __cdecl Path_CalcLookahead(path_t *pPath, float *vStartPos, int bReduceLookaheadAmount, int a4, int a5)
@@ -3138,7 +3150,7 @@ void __cdecl Path_CalcLookahead(path_t *pPath, float *vStartPos, int bReduceLook
     double fOrigLength; // fp31
     double v19; // fp2
     double v20; // fp30
-    float *vOrigPoint; // r11
+    const float *vOrigPoint; // r11
     double v22; // fp0
     double v23; // fp0
     double v24; // fp13
@@ -4048,9 +4060,18 @@ void __cdecl Path_UpdateLookahead_NonCodeMove(path_t *pPath, const float *vPrevP
         }
     }
 LABEL_16:
-    _FP12 = (float)(pPath->fLookaheadAmount - (float)1024.0);
-    __asm { fsel      f0, f12, f0, f13 }
-    pPath->fLookaheadAmount = _FP0;
+
+    // aislop
+    //_FP12 = (float)(pPath->fLookaheadAmount - (float)1024.0);
+    //__asm { fsel      f0, f12, f0, f13 }
+    //pPath->fLookaheadAmount = _FP0;
+
+    {
+        float lookaheadAmount = pPath->fLookaheadAmount - 1024.0f;
+        pPath->fLookaheadAmount = fmaxf(lookaheadAmount, 0.0f);
+    }
+
+
     Path_UpdateLookahead(pPath, vStartPos, 0, 0, 0);
 }
 

@@ -3380,3 +3380,10 @@ void vectosignedangles(const float *vec, float *angles)
     angles[1] = yaw;    // Y = yaw
     angles[2] = 0.0f;   // Z = roll (unused in this function)
 }
+
+// KISAKTODO: Feel like it could be improved
+void FastSinCos(float radians, float *s, float *c)
+{
+    *s = sinf(radians);
+    *c = cosf(radians);
+}

@@ -2,9 +2,8 @@
 #error This file is for SinglePlayer only 
 #endif
 
-
-#include "actor_script_cmd.h"
 #include "actor.h"
+#include "actor_script_cmd.h"
 #include "g_main.h"
 #include <script/scr_vm.h>
 #include <server/sv_game.h>
@@ -38,10 +37,10 @@ actor_s *__cdecl Actor_Get(scr_entref_t entref)
     actor_s *result; // r3
     unsigned __int16 v2; // [sp+74h] [+14h]
 
-    v2 = HIWORD(entref);
-    if ((_WORD)entref)
+    v2 = entref.entnum;
+    if (entref.classnum)
         goto LABEL_5;
-    if (HIWORD(entref) >= 0x880u)
+    if (entref.entnum >= 0x880u)
         MyAssertHandler(
             "c:\\trees\\cod3\\cod3src\\src\\game\\actor_script_cmd.cpp",
             68,
@@ -149,30 +148,26 @@ void __cdecl ActorCmd_CheckCoverExitPosWithPath(scr_entref_t entref)
 
 void __cdecl ActorCmd_Shoot(scr_entref_t entref)
 {
-    actor_s *v1; // r31
-    double Float; // fp31
-    float *v3; // r4
-    float *v4; // r5
-    float v5[6]; // [sp+50h] [-30h] BYREF
+    actor_s *actor; // r31
+    double accuracyMod; // fp31
+    float *posOverride = NULL; // r5
+    float pos[3]; // [sp+50h] [-30h] BYREF
 
-    v1 = Actor_Get(entref);
-    Float = 1.0;
+    actor = Actor_Get(entref);
+    accuracyMod = 1.0;
     if (Scr_GetNumParam() == 1)
     {
-        Float = Scr_GetFloat(0);
-        if (Float < 0.0)
+        accuracyMod = Scr_GetFloat(0);
+        if (accuracyMod < 0.0)
             Scr_ParamError(0, "accuracy mod must be nonnegative");
     }
     if (Scr_GetNumParam() >= 2)
     {
-        Scr_GetVector(1u, v5);
-        v4 = v5;
+        Scr_GetVector(1, pos);
+        posOverride = pos;
     }
-    else
-    {
-        v4 = 0;
-    }
-    Actor_Shoot(v1, Float, (float (*)[3])v3, v4, 1);
+
+    Actor_Shoot(actor, accuracyMod, (float(*)[3])posOverride, NOT_LAST_SHOT_IN_CLIP);
 }
 
 void __cdecl ActorCmd_ShootBlank(scr_entref_t entref)
@@ -442,11 +437,23 @@ void __cdecl ActorCmd_AimAtPos(scr_entref_t entref)
     v5 = v31[1];
     v6 = v31[2];
     Sentient_GetEyePosition(v1->sentient, &v32);
-    _FP12 = -__fsqrts((float)((float)((float)((float)v6 - v34) * (float)((float)v6 - v34))
-        + (float)((float)((float)((float)v5 - v33) * (float)((float)v5 - v33))
-            + (float)((float)((float)v4 - v32) * (float)((float)v4 - v32)))));
-    __asm { fsel      f13, f12, f31, f13 }
-    v9 = (float)((float)1.0 / (float)_FP13);
+
+    //_FP12 = -__fsqrts((float)((float)((float)((float)v6 - v34) * (float)((float)v6 - v34))
+    //    + (float)((float)((float)((float)v5 - v33) * (float)((float)v5 - v33))
+    //        + (float)((float)((float)v4 - v32) * (float)((float)v4 - v32)))));
+    //__asm { fsel      f13, f12, f31, f13 }
+    //v9 = (float)((float)1.0 / (float)_FP13);
+
+    // aislop
+    {
+        float len = sqrtf((v6 - v34) * (v6 - v34)
+            + (v5 - v33) * (v5 - v33)
+            + (v4 - v32) * (v4 - v32));
+        float neg = -len;
+        float denom = (neg >= 0.0f) ? neg : neg;
+        v9 = 1.0f / denom;
+    }
+
     v10 = -(float)((float)v9 * (float)((float)v6 - v34));
     if (v10 >= 0.0)
     {
@@ -762,10 +769,21 @@ void __cdecl ActorCmd_DropWeapon(scr_entref_t entref)
                 - (float)((float)((float)(v1->ent->r.maxs[2] - v1->ent->r.mins[2]) * (float)0.5)
                     + v1->ent->r.currentOrigin[2]))
                 + (float)2.0);
-            _FP9 = -__fsqrts((float)((float)((float)v12 * (float)v12)
-                + (float)((float)((float)v11 * (float)v11) + (float)((float)v10 * (float)v10))));
-            __asm { fsel      f11, f9, f10, f11 }
-            v15 = (float)((float)1.0 / (float)_FP11);
+
+            // aislop
+            //_FP9 = -__fsqrts((float)((float)((float)v12 * (float)v12)
+            //    + (float)((float)((float)v11 * (float)v11) + (float)((float)v10 * (float)v10))));
+            //__asm { fsel      f11, f9, f10, f11 }
+            //v15 = (float)((float)1.0 / (float)_FP11);
+
+            {
+                float len = sqrtf(v12 * v12 + v11 * v11 + v10 * v10);
+                float neg = -len;
+                // Emulate fsel: if neg >= 0 use neg, else fallback to len (typical PowerPC pattern)
+                float denom = (neg >= 0.0f ? neg : len);
+                v15 = 1.0f / denom;
+            }
+
             v16 = (float)((float)(v8->r.currentOrigin[1] - v1->ent->r.currentOrigin[1]) * (float)v15);
             v17 = (float)((float)v15
                 * (float)((float)(v8->r.currentOrigin[2]
@@ -1068,7 +1086,7 @@ void __cdecl ActorCmd_Teleport(scr_entref_t entref)
     float v10[6]; // [sp+70h] [-70h] BYREF
     unsigned __int16 v11; // [sp+F4h] [+14h]
 
-    v11 = HIWORD(entref);
+    v11 = entref.entnum;
     v1 = Actor_Get(entref);
     v2 = 0;
     ent = v1->ent;
@@ -1261,7 +1279,7 @@ void __cdecl ActorCmd_IsStanceAllowed(scr_entref_t entref)
     pClaimedNode = v1->sentient->pClaimedNode;
     if (pClaimedNode && Actor_PointNearNode(v1->ent->r.currentOrigin, pClaimedNode))
     {
-        v7 = Path_AllowedStancesForNode(v1->sentient->pClaimedNode);
+        v7 = (ai_stance_e)Path_AllowedStancesForNode(v1->sentient->pClaimedNode);
         goto LABEL_13;
     }
 LABEL_14:
@@ -1336,7 +1354,7 @@ void __cdecl ActorCmd_CheckGrenadeThrow(scr_entref_t entref)
 
 void __cdecl ActorCmd_CheckGrenadeThrowPos(scr_entref_t entref)
 {
-    actor_s *v1; // r31
+    actor_s *self; // r31
     unsigned int ConstString; // r27
     gentity_s *ent; // r11
     int v4; // r10
@@ -1360,122 +1378,70 @@ void __cdecl ActorCmd_CheckGrenadeThrowPos(scr_entref_t entref)
     int v22; // [sp+48h] [-C8h]
     int v23; // [sp+4Ch] [-C4h]
     int v24; // [sp+50h] [-C0h]
-    float v25; // [sp+68h] [-A8h] BYREF
-    float v26; // [sp+6Ch] [-A4h]
-    float v27; // [sp+70h] [-A0h]
-    float v28; // [sp+78h] [-98h] BYREF
-    float v29; // [sp+7Ch] [-94h]
-    float v30; // [sp+80h] [-90h]
-    float v31[4]; // [sp+88h] [-88h] BYREF
+    float vTargetPos[3]; // [sp+68h] [-A8h] BYREF
+    float vStandPos[3]; // [sp+78h] [-98h] BYREF
+    float vHandOffset[4]; // [sp+88h] [-88h] BYREF
     float v32[6]; // [sp+98h] [-78h] BYREF
     trace_t v33[2]; // [sp+B0h] [-60h] BYREF
 
-    v1 = Actor_Get(entref);
-    if (!v1->sentient)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\actor_script_cmd.cpp", 1732, 0, "%s", "self->sentient");
-    Scr_GetVector(0, v31);
+    self = Actor_Get(entref);
+    iassert(self->sentient);
+    Scr_GetVector(0, vHandOffset);
     ConstString = Scr_GetConstString(1u);
-    Scr_GetVector(2u, &v25);
-    if (v1->iGrenadeAmmo > 0)
+    Scr_GetVector(2, vTargetPos);
+    if (self->iGrenadeAmmo > 0)
     {
-        ent = v1->ent;
-        v28 = v1->ent->r.currentOrigin[0];
-        v29 = ent->r.currentOrigin[1];
-        v30 = ent->r.currentOrigin[2];
-        v32[0] = v25;
-        v32[1] = v26;
-        v32[2] = v27 - (float)1.0;
-        G_TraceCapsule(v33, &v25, vec3_origin, vec3_origin, v32, 2175, 2065);
+        ent = self->ent;
+        vStandPos[0] = self->ent->r.currentOrigin[0];
+        vStandPos[1] = ent->r.currentOrigin[1];
+        vStandPos[2] = ent->r.currentOrigin[2];
+        v32[0] = vTargetPos[0];
+        v32[1] = vTargetPos[1];
+        v32[2] = vTargetPos[2] - (float)1.0;
+        G_TraceCapsule(v33, vTargetPos, vec3_origin, vec3_origin, v32, 2175, 2065);
+
         if (v33[0].fraction > 0.5)
             Com_Printf(18, "targetPos for checkGrenadeThrowPos not at ground level\n");
-        v1->vGrenadeTargetPos[0] = v25;
-        v1->vGrenadeTargetPos[1] = v26;
-        v1->vGrenadeTargetPos[2] = v27;
-        if ((LODWORD(v28) & 0x7F800000) == 0x7F800000
-            || (LODWORD(v29) & 0x7F800000) == 0x7F800000
-            || (LODWORD(v30) & 0x7F800000) == 0x7F800000)
-        {
-            MyAssertHandler(
-                "c:\\trees\\cod3\\cod3src\\src\\game\\actor_script_cmd.cpp",
-                1763,
-                0,
-                "%s",
-                "!IS_NAN((vStandPos)[0]) && !IS_NAN((vStandPos)[1]) && !IS_NAN((vStandPos)[2])");
-        }
-        if ((LODWORD(v31[0]) & 0x7F800000) == 0x7F800000
-            || (LODWORD(v31[1]) & 0x7F800000) == 0x7F800000
-            || (LODWORD(v31[2]) & 0x7F800000) == 0x7F800000)
-        {
-            MyAssertHandler(
-                "c:\\trees\\cod3\\cod3src\\src\\game\\actor_script_cmd.cpp",
-                1764,
-                0,
-                "%s",
-                "!IS_NAN((vHandOffset)[0]) && !IS_NAN((vHandOffset)[1]) && !IS_NAN((vHandOffset)[2])");
-        }
-        if ((LODWORD(v25) & 0x7F800000) == 0x7F800000
-            || (LODWORD(v26) & 0x7F800000) == 0x7F800000
-            || (LODWORD(v27) & 0x7F800000) == 0x7F800000)
-        {
-            MyAssertHandler(
-                "c:\\trees\\cod3\\cod3src\\src\\game\\actor_script_cmd.cpp",
-                1765,
-                0,
-                "%s",
-                "!IS_NAN((vTargetPos)[0]) && !IS_NAN((vTargetPos)[1]) && !IS_NAN((vTargetPos)[2])");
-        }
+
+        self->vGrenadeTargetPos[0] = vTargetPos[0];
+        self->vGrenadeTargetPos[1] = vTargetPos[1];
+        self->vGrenadeTargetPos[2] = vTargetPos[2];
+
+        iassert(!IS_NAN((vStandPos)[0]) && !IS_NAN((vStandPos)[1]) && !IS_NAN((vStandPos)[2]));
+        iassert(!IS_NAN((vHandOffset)[0]) && !IS_NAN((vHandOffset)[1]) && !IS_NAN((vHandOffset)[2]));
+        iassert(!IS_NAN((vTargetPos)[0]) && !IS_NAN((vTargetPos)[1]) && !IS_NAN((vTargetPos)[2]));
+        
         v5 = Actor_Grenade_CheckTossPos(
-            v1,
-            &v28,
-            v31,
-            &v25,
+            self,
+            vStandPos,
+            vHandOffset,
+            vTargetPos,
             ConstString,
-            v1->vGrenadeTossPos,
-            v1->vGrenadeTossVel,
+            self->vGrenadeTossPos,
+            self->vGrenadeTossVel,
             0.0,
-            v4,
-            v6,
-            v7,
-            v8,
-            v9,
-            v10,
-            v11,
-            v12,
-            v13,
-            v14,
-            v15,
-            v16,
-            v17,
-            v18,
-            v19,
-            v20,
-            v21,
-            v22,
-            v23,
-            v24,
             0);
-        v1->bGrenadeTossValid = v5;
+
+        self->bGrenadeTossValid = v5;
+
         if (v5)
         {
-            Scr_SetString(&v1->GrenadeTossMethod, ConstString);
-            Scr_AddVector(v1->vGrenadeTossVel);
+            Scr_SetString(&self->GrenadeTossMethod, ConstString);
+            Scr_AddVector(self->vGrenadeTossVel);
         }
     }
 }
 
 void __cdecl ActorCmd_ThrowGrenade(scr_entref_t entref)
 {
-    actor_s *v1; // r3
-    actor_s *v2; // r31
+    actor_s *self; // r31
     const DObj_s *ServerDObj; // r3
-    const char *Name; // r3
-    const char *v5; // r31
     int number; // r30
     const char *v7; // r3
     const char *v8; // r3
     const char *v11; // r3
     const char *v12; // r3
-    WeaponDef *WeaponDef; // r30
+    WeaponDef *weapDef; // r30
     int iGrenadeAmmo; // r11
     int v15; // [sp+8h] [-A8h]
     int v16; // [sp+Ch] [-A4h]
@@ -1496,91 +1462,67 @@ void __cdecl ActorCmd_ThrowGrenade(scr_entref_t entref)
     int v31; // [sp+48h] [-68h]
     int v32; // [sp+4Ch] [-64h]
     int v33; // [sp+50h] [-60h]
-    float v34[4]; // [sp+60h] [-50h] BYREF
-    float v35[4]; // [sp+70h] [-40h] BYREF
-    float v36[12]; // [sp+80h] [-30h] BYREF
+    float velOut[4]; // [sp+60h] [-50h] BYREF
+    float posOut[4]; // [sp+70h] [-40h] BYREF
+    float vStandPos[12]; // [sp+80h] [-30h] BYREF
 
-    v1 = Actor_Get(entref);
-    v2 = v1;
-    if (v1->ent->health > 0 && (EntHandle::isDefined(&v1->pGrenade) || v2->bGrenadeTossValid))
+    self = Actor_Get(entref);
+
+    if (self->ent->health > 0 && (self->pGrenade.isDefined() || self->bGrenadeTossValid))
     {
-        if (!v2->bGrenadeTargetValid)
+        if (!self->bGrenadeTargetValid)
             goto LABEL_8;
-        if (!G_DObjGetWorldTagPos(v2->ent, scr_const.grenade_return_hand_tag, v36))
+        if (!G_DObjGetWorldTagPos(self->ent, scr_const.grenade_return_hand_tag, vStandPos))
         {
-            ServerDObj = Com_GetServerDObj(v2->ent->s.number);
-            Name = DObjGetName(ServerDObj);
-            number = v2->ent->s.number;
-            v5 = Name;
-            v7 = SL_ConvertToString(scr_const.grenade_return_hand_tag);
-            v8 = va("Missing tag [%s] on entity [%d] (%s)\n", v7, number, v5);
-            Scr_Error(v8);
+            ServerDObj = Com_GetServerDObj(self->ent->s.number);
+            number = self->ent->s.number;
+            Scr_Error(va("Missing tag [%s] on entity [%d] (%s)\n", SL_ConvertToString(scr_const.grenade_return_hand_tag), number, DObjGetName(ServerDObj)));
             return;
         }
         if (!Actor_Grenade_CheckTossPos(
-            v2,
-            v36,
+            self,
+            vStandPos,
             (float *)vec3_origin,
-            v2->vGrenadeTargetPos,
-            v2->GrenadeTossMethod,
-            v35,
-            v34,
+            self->vGrenadeTargetPos,
+            self->GrenadeTossMethod,
+            posOut,
+            velOut,
             0.0,
-            1,
-            v15,
-            v16,
-            v17,
-            v18,
-            v19,
-            v20,
-            v21,
-            v22,
-            v23,
-            v24,
-            v25,
-            v26,
-            v27,
-            v28,
-            v29,
-            v30,
-            v31,
-            v32,
-            v33,
             1))
         {
         LABEL_8:
-            v35[0] = v2->vGrenadeTossPos[0];
-            v35[1] = v2->vGrenadeTossPos[1];
-            v35[2] = v2->vGrenadeTossPos[2];
-            v34[0] = v2->vGrenadeTossVel[0];
-            v34[1] = v2->vGrenadeTossVel[1];
-            v34[2] = v2->vGrenadeTossVel[2];
+            posOut[0] = self->vGrenadeTossPos[0];
+            posOut[1] = self->vGrenadeTossPos[1];
+            posOut[2] = self->vGrenadeTossPos[2];
+
+            velOut[0] = self->vGrenadeTossVel[0];
+            velOut[1] = self->vGrenadeTossVel[1];
+            velOut[2] = self->vGrenadeTossVel[2];
         }
-        if (v2->pGrenade.isDefined() && v2->eState[v2->stateLevel] == AIS_GRENADE_RESPONSE)
+        if (self->pGrenade.isDefined() && self->eState[self->stateLevel] == AIS_GRENADE_RESPONSE)
         {
-            Actor_Grenade_Detach(v2);
-            G_InitGrenadeEntity(v2->ent, v2->pGrenade.ent());
-            G_InitGrenadeMovement(v2->pGrenade.ent(), v35, v34, 1);
+            Actor_Grenade_Detach(self);
+            G_InitGrenadeEntity(self->ent, self->pGrenade.ent());
+            G_InitGrenadeMovement(self->pGrenade.ent(), posOut, velOut, 1);
         }
         else
         {
-            if (!v2->iGrenadeWeaponIndex)
+            if (!self->iGrenadeWeaponIndex)
             {
-                v11 = SL_ConvertToString(v2->ent->classname);
+                v11 = SL_ConvertToString(self->ent->classname);
                 v12 = va("Actor [%s] doesn't have a grenade weapon set.", v11);
                 Scr_Error(v12);
             }
-            WeaponDef = BG_GetWeaponDef(v2->iGrenadeWeaponIndex);
-            if (!WeaponDef)
-                MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\actor_script_cmd.cpp", 1860, 0, "%s", "weapDef");
-            G_FireGrenade(v2->ent, v35, v34, v2->iGrenadeWeaponIndex, 0, 1, WeaponDef->aiFuseTime);
-            iGrenadeAmmo = v2->iGrenadeAmmo;
+            weapDef = BG_GetWeaponDef(self->iGrenadeWeaponIndex);
+            iassert(weapDef);
+            G_FireGrenade(self->ent, posOut, velOut, self->iGrenadeWeaponIndex, 0, 1, weapDef->aiFuseTime);
+            iGrenadeAmmo = self->iGrenadeAmmo;
             if (iGrenadeAmmo > 0)
-                v2->iGrenadeAmmo = iGrenadeAmmo - 1;
+                self->iGrenadeAmmo = iGrenadeAmmo - 1;
         }
     }
-    v2->bGrenadeTossValid = 0;
-    Scr_SetString(&v2->GrenadeTossMethod, 0);
+    self->bGrenadeTossValid = 0;
+    Scr_SetString(&self->GrenadeTossMethod, 0);
 }
 
 bool __cdecl Actor_CheckGrenadeLaunch(actor_s *self, const float *vStartPos, const float *vOffset)
@@ -2421,12 +2363,13 @@ void __cdecl ActorCmd_CheckProne(scr_entref_t entref)
     float v8[4]; // [sp+80h] [-20h] BYREF
     unsigned __int16 v9; // [sp+B4h] [+14h]
 
-    v9 = HIWORD(entref);
+    v9 = entref.entnum;
     Actor_Get(entref);
     Scr_GetVector(0, v8);
     Float = Scr_GetFloat(1u);
     Int = Scr_GetInt(2u);
-    v6 = BG_CheckProneValid(v9, v8, 15.0, 48.0, Float, v5, v4, v3, 0, 0, (_cntlzw(Int) & 0x20) == 0, v7, 50.0);
+    //v6 = BG_CheckProneValid(v9, v8, 15.0, 48.0, Float, v5, v4, v3, 0, 0, (_cntlzw(Int) & 0x20) == 0, v7, 50.0);
+    v6 = BG_CheckProneValid(v9, v8, 15.0, 48.0, Float, v5, v4, v3, 0, 0, Int != 0, v7, 50.0);
     Scr_AddBool(v6);
 }
 
@@ -2672,13 +2615,17 @@ void __cdecl ActorCmd_SetEntityTarget(scr_entref_t entref)
     }
     else
     {
-        Float = Scr_GetFloat(1u);
-        _FP12 = -Float;
-        v5 = 1.0;
-        _FP13 = (float)((float)Float - (float)1.0);
-        __asm { fsel      f11, f13, f0, f1 }
-        __asm { fsel      f13, f12, f13, f11 }
-        self->sentient->entityTargetThreat = _FP13;
+        Float = Scr_GetFloat(1);
+
+        // aislop
+        //_FP12 = -Float;
+        //v5 = 1.0;
+        //_FP13 = (float)((float)Float - (float)1.0);
+        //__asm { fsel      f11, f13, f0, f1 }
+        //__asm { fsel      f13, f12, f13, f11 }
+        //self->sentient->entityTargetThreat = _FP13;
+
+        self->sentient->entityTargetThreat = (Float >= 0.0f) ? (Float - 1.0f) : 1.0f;
     }
     sentient = self->sentient;
     if (sentient->entityTargetThreat == v5)
@@ -2878,7 +2825,7 @@ void(__cdecl *__cdecl Actor_GetMethod(const char **pName))(scr_entref_t)
     unsigned int v2; // r5
     const BuiltinMethodDef *i; // r7
     const char *actionString; // r10
-    _BYTE *v5; // r11
+    const char *v5; // r11
     int v6; // r8
 
     v1 = 0;

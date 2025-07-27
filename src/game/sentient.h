@@ -8,6 +8,7 @@
 
 #include <bgame/bg_local.h>
 #include <bgame/bg_public.h>
+#include <script/scr_variable.h>
 
 struct pathnode_t;
 
@@ -84,7 +85,7 @@ pathnode_t *__cdecl Sentient_NearestNodeSuppressed(
     sentient_s *self,
     float (*vNormal)[2],
     float *fDist,
-    int *iPlaneCount);
+    int iPlaneCount);
 void __cdecl Sentient_InvalidateNearestNode(sentient_s *self);
 void __cdecl Sentient_SetEnemy(sentient_s *self, gentity_s *enemy, int bNotify);
 sentient_s *__cdecl Sentient_FirstSentient(int iTeamFlags);
@@ -106,16 +107,16 @@ void __cdecl Sentient_Free(sentient_s *sentient);
 
 
 // sentient_script_cmd
-sentient_s *__cdecl Sentient_Get(scr_entref_t *entref);
-void __cdecl SentientCmd_GetEnemySqDist(scr_entref_t *entref);
-void __cdecl SentientCmd_GetClosestEnemySqDist(scr_entref_t *entref);
+sentient_s *__cdecl Sentient_Get(scr_entref_t entref);
+void __cdecl SentientCmd_GetEnemySqDist(scr_entref_t entref);
+void __cdecl SentientCmd_GetClosestEnemySqDist(scr_entref_t entref);
 void SentientCmd_CreateThreatBiasGroup();
 void SentientCmd_ThreatBiasGroupExists();
 void SentientCmd_GetThreatBias();
 void SentientCmd_SetThreatBias();
 void SentientCmd_SetThreatBiasAgainstAll();
 void SentientCmd_SetIgnoreMeGroup();
-void __cdecl SentientCmd_SetThreatBiasGroup(scr_entref_t *entref);
-void __cdecl SentientCmd_GetThreatBiasGroup(scr_entref_t *entref);
+void __cdecl SentientCmd_SetThreatBiasGroup(scr_entref_t entref);
+void __cdecl SentientCmd_GetThreatBiasGroup(scr_entref_t entref);
 void(__cdecl *__cdecl Sentient_GetMethod(const char **pName))(scr_entref_t);
 void(__cdecl *__cdecl Sentient_GetFunction(const char **pName))();

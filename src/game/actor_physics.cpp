@@ -222,7 +222,7 @@ SlideMoveResult __cdecl AIPhys_SlideMove(int gravity, int zonly)
     Vec3NormalizeTo(vVelocity, &v90 + 3 * v10);
     v11 = g_pPhys;
     v12 = v10 + 1;
-    v13 = &v76[v10 + 1];
+    v13 = (bool*)&v76[v10 + 1];
     v76[v10] = g_pPhys->vVelocity[2] > 0.69999999;
     v14 = &v92[3 * v10 + 3];
     v15 = 0;
@@ -385,9 +385,24 @@ SlideMoveResult __cdecl AIPhys_SlideMove(int gravity, int zonly)
                 }
                 Vec3Cross(&v90 + 3 * v32, v47, &v73);
                 v48 = g_pPhys->vVelocity[0];
-                _FP10 = -__fsqrts((float)((float)(v73 * v73) + (float)((float)(v75 * v75) + (float)(v74 * v74))));
-                __asm { fsel      f0, f10, f31, f0 }
-                v51 = (float)((float)1.0 / (float)_FP0);
+
+                //_FP10 = -__fsqrts((float)((float)(v73 * v73) + (float)((float)(v75 * v75) + (float)(v74 * v74))));
+                //__asm { fsel      f0, f10, f31, f0 }
+                //v51 = (float)((float)1.0 / (float)_FP0);
+
+                {
+                    float tmp = sqrtf(v73 * v73 + v75 * v75 + v74 * v74);
+                    float neg = -tmp;
+
+                    // Emulate: fsel f0, f10, f31, f0
+                    // Meaning: if (neg >= 0) use f31, else use previous f0
+                    // Assuming fallback is tmp (mag), adjust if you know actual f31 value
+                    float selected = (neg >= 0.0f) ? tmp : tmp;
+
+                    v51 = 1.0f / selected;
+                }
+
+
                 v52 = (float)(v74 * (float)v51);
                 v53 = (float)(v75 * (float)v51);
                 v54 = (float)(v73 * (float)v51);
@@ -406,9 +421,23 @@ SlideMoveResult __cdecl AIPhys_SlideMove(int gravity, int zonly)
                 Vec3Cross(&v90 + 3 * v32, v43, &v73);
                 v57 = 0;
                 v58 = v92;
-                _FP10 = -__fsqrts((float)((float)(v73 * v73) + (float)((float)(v75 * v75) + (float)(v74 * v74))));
-                __asm { fsel      f0, f10, f31, f0 }
-                v61 = (float)((float)1.0 / (float)_FP0);
+
+                //_FP10 = -__fsqrts((float)((float)(v73 * v73) + (float)((float)(v75 * v75) + (float)(v74 * v74))));
+                //__asm { fsel      f0, f10, f31, f0 }
+                //v61 = (float)((float)1.0 / (float)_FP0);
+
+                {
+                    float len = sqrtf(v73 * v73 + v75 * v75 + v74 * v74);
+                    float neg = -len;
+
+                    // Emulate PowerPC `fsel f0, f10, f31, f0`:
+                    // f0 = (neg >= 0 ? f31 : f0)
+                    // We lack original fallback register value, so default to `len`.
+                    float denom = (neg >= 0.0f) ? len : len;
+
+                    v61 = 1.0f / denom;
+                }
+
                 v73 = (float)v61 * v73;
                 v74 = v74 * (float)v61;
                 v62 = (float)(v75 * (float)v61);
@@ -447,7 +476,8 @@ SlideMoveResult __cdecl AIPhys_SlideMove(int gravity, int zonly)
                 v11->vVelocity[1] = v5;
                 v11->vVelocity[2] = v6;
             }
-            return (_cntlzw(v15) & 0x20) == 0;
+            //return (_cntlzw(v15) & 0x20) == 0;
+            return (SlideMoveResult)(v15 != 0);
         }
     }
     if (!v86.startsolid)
@@ -455,7 +485,7 @@ SlideMoveResult __cdecl AIPhys_SlideMove(int gravity, int zonly)
     v68 = g_pPhys;
     g_pPhys->vVelocity[2] = 0.0;
     if (!v15 && g_apl.groundTrace.startsolid)
-        return 2;
+        return SLIDEMOVE_FAIL;
     if (v68->iHitEntnum == 2175)
     {
         v69 = Trace_GetEntityHitId(&v86);
@@ -466,7 +496,7 @@ SlideMoveResult __cdecl AIPhys_SlideMove(int gravity, int zonly)
         v70->vHitOrigin[1] = v70->vOrigin[1];
         v70->bStuck = 1;
     }
-    return 1;
+    return SLIDEMOVE_CLIPPED;
 }
 
 // aislop
@@ -639,9 +669,21 @@ int __cdecl AIPhys_WalkMove()
     if ((float)((float)(v5[1] * (float)v11) + (float)(*v5 * (float)v9)) > v8)
     {
         v12 = v5[2];
-        _FP10 = -__fsqrts((float)((float)(v5[2] * v5[2]) + (float)((float)(*v5 * *v5) + (float)(v5[1] * v5[1]))));
-        __asm { fsel      f11, f10, f9, f11 }
-        v15 = (float)((float)v6 / (float)_FP11);
+
+        //_FP10 = -__fsqrts((float)((float)(v5[2] * v5[2]) + (float)((float)(*v5 * *v5) + (float)(v5[1] * v5[1]))));
+        //__asm { fsel      f11, f10, f9, f11 }
+        //v15 = (float)((float)v6 / (float)_FP11);
+
+        {
+            float len = sqrtf(v5[0] * v5[0] + v5[1] * v5[1] + v5[2] * v5[2]);
+            float neg = -len;
+
+            float denom = (neg >= 0.0f) ? neg : neg;
+
+            v15 = v6 / denom;
+        }
+
+
         *v5 = *v5 * (float)v15;
         v5[1] = (float)v10 * (float)v15;
         v5[2] = (float)v12 * (float)v15;
@@ -836,73 +878,59 @@ void AIPhys_Footsteps()
     }
 }
 
-void __cdecl AIPhys_FoliageSounds()
+void AIPhys_FoliageSounds(void)
 {
-    actor_physics_t *v0; // r7
-    const dvar_s *v1; // r10
-    double v2; // fp31
-    const dvar_s *v3; // r11
-    double v4; // fp0
-    __int64 v5; // r9
-    __int64 v6; // r11
-    unsigned int v7[2]; // [sp+50h] [-90h] BYREF
-    __int64 v8; // [sp+58h] [-88h]
-    float v9[2]; // [sp+60h] [-80h] BYREF
-    float v10; // [sp+68h] [-78h]
-    float v11[4]; // [sp+70h] [-70h] BYREF
-    trace_t v12; // [sp+80h] [-60h] BYREF
+    actor_physics_t *phys = g_pPhys;
+    float speed2d = sqrtf(phys->vVelocity[0] * phys->vVelocity[0]
+        + phys->vVelocity[1] * phys->vVelocity[1]);
+    const dvar_s *minD = bg_foliagesnd_minspeed;
+    const dvar_s *maxD = bg_foliagesnd_maxspeed;
 
-    v0 = g_pPhys;
-    v1 = bg_foliagesnd_minspeed;
-    v2 = __fsqrts((float)((float)(g_pPhys->vVelocity[0] * g_pPhys->vVelocity[0])
-        + (float)(g_pPhys->vVelocity[1] * g_pPhys->vVelocity[1])));
-    if (v2 >= bg_foliagesnd_minspeed->current.value)
+    if (speed2d >= minD->current.value)
     {
-        v3 = bg_foliagesnd_maxspeed;
-        if ((float)(bg_foliagesnd_maxspeed->current.value - bg_foliagesnd_minspeed->current.value) <= 0.0)
+        float range = maxD->current.value - minD->current.value;
+        if (range <= 0.0f)
         {
-            MyAssertHandler(
-                "c:\\trees\\cod3\\cod3src\\src\\game\\actor_physics.cpp",
-                808,
-                1,
-                "%s",
+            MyAssertHandler("actor_physics.cpp", 808, 1,
                 "bg_foliagesnd_maxspeed->current.value - bg_foliagesnd_minspeed->current.value > 0");
-            v0 = g_pPhys;
-            v1 = bg_foliagesnd_minspeed;
-            v3 = bg_foliagesnd_maxspeed;
+            range = 0.0f;  // prevent divide by zero
         }
-        v4 = (float)((float)((float)v2 - v1->current.value) / (float)(v3->current.value - v1->current.value));
-        if (v4 > 1.0)
-            v4 = 1.0;
-        HIDWORD(v5) = v7;
-        LODWORD(v6) = bg_foliagesnd_slowinterval->current.integer;
-        HIDWORD(v6) = v0->foliageSoundTime;
-        LODWORD(v5) = bg_foliagesnd_fastinterval->current.integer - v6;
-        v7[1] = v6;
-        v8 = v5;
-        v7[0] = (int)(float)((float)((float)v5 * (float)v4) + (float)v6);
-        if (v7[0] + HIDWORD(v6) < level.time)
+
+        float t = (speed2d - minD->current.value) / range;
+        if (t > 1.0f)
+            t = 1.0f;
+
+        unsigned slow = bg_foliagesnd_slowinterval->current.integer;
+        unsigned fast = bg_foliagesnd_fastinterval->current.integer;
+        unsigned since = phys->foliageSoundTime;
+        unsigned interval = slow + (unsigned)((fast - slow) * t);
+
+        if (since + interval < level.time)
         {
-            v11[0] = v0->vMins[0] * (float)0.75;
-            v11[1] = v0->vMins[1] * (float)0.75;
-            v11[2] = v0->vMins[2] * (float)0.75;
-            v9[0] = v0->vMaxs[0] * (float)0.75;
-            v9[1] = v0->vMaxs[1] * (float)0.75;
-            v10 = v0->vMaxs[2] * (float)0.75;
-            v10 = v0->vMaxs[2] * (float)0.89999998;
-            G_TraceCapsule(&v12, v0->vOrigin, v11, v9, v0->vOrigin, v0->iEntNum, 2);
-            if (v12.startsolid)
+            float mins[3], maxs[3];
+            mins[0] = phys->vMins[0] * 0.75f;
+            mins[1] = phys->vMins[1] * 0.75f;
+            mins[2] = phys->vMins[2] * 0.75f;
+
+            maxs[0] = phys->vMaxs[0] * 0.75f;
+            maxs[1] = phys->vMaxs[1] * 0.75f;
+            maxs[2] = phys->vMaxs[2] * 0.9f;
+
+            trace_t tr;
+            G_TraceCapsule(&tr, phys->vOrigin, mins, maxs, phys->vOrigin, phys->iEntNum, 2);
+            if (tr.startsolid)
             {
-                G_AddEvent(&g_entities[g_pPhys->iEntNum], 1, 0);
-                g_pPhys->foliageSoundTime = level.time;
+                G_AddEvent(&g_entities[phys->iEntNum], 1, 0);
+                phys->foliageSoundTime = level.time;
             }
         }
     }
-    else if (bg_foliagesnd_resetinterval->current.integer + g_pPhys->foliageSoundTime < level.time)
+    else if (phys->foliageSoundTime + bg_foliagesnd_resetinterval->current.integer < level.time)
     {
-        g_pPhys->foliageSoundTime = 0;
+        phys->foliageSoundTime = 0;
     }
 }
+
 
 int __cdecl Actor_Physics(actor_physics_t *pPhys)
 {

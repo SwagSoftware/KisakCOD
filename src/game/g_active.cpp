@@ -317,7 +317,7 @@ bool __cdecl IsLiveGrenade(gentity_s *ent)
 
     if (ent->s.eType != 3)
         return 0;
-    WeaponDef = BG_GetWeaponDef(*(unsigned __int16 *)ent->s.index - ((int)*(unsigned __int16 *)ent->s.index >> 7 << 7));
+    WeaponDef = BG_GetWeaponDef(ent->s.index.item - ((int)ent->s.index.item >> 7 << 7));
     if (!WeaponDef)
         MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\g_active.cpp", 301, 0, "%s", "weapDef");
     return WeaponDef->offhandClass == OFFHAND_CLASS_FRAG_GRENADE;

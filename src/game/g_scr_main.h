@@ -20,7 +20,7 @@ struct scr_data_t_tag
 struct BuiltinFunctionDef
 {
     const char *actionString;
-    void(__fastcall *actionFunc)();
+    void(*actionFunc)();
     int type;
 };
 
@@ -562,7 +562,7 @@ void __cdecl GScr_Shutdown();
 void __cdecl GScr_SetScriptsAndAnimsForEntities(ScriptFunctions *functions);
 void __cdecl GScr_SetScripts(ScriptFunctions *functions);
 void __cdecl ScrCmd_GetShootAtPosition(scr_entref_t *entref);
-void __cdecl ScrCmd_animscriptedInternal(scr_entref_t *entref, int bDelayForActor);
+void __cdecl ScrCmd_animscriptedInternal(scr_entref_t entref, int bDelayForActor);
 void __cdecl G_StopAnimScripted(gentity_s *ent);
 void __cdecl ScrCmd_stopanimscripted(scr_entref_t *entref);
 void __cdecl ScrCmd_animscripted(scr_entref_t *entref);

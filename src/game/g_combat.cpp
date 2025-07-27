@@ -603,29 +603,7 @@ void __cdecl G_Damage(
     int weapon,
     hitLocation_t hitLoc,
     unsigned int modelIndex,
-    unsigned int partName,
-    int a13,
-    int a14,
-    int a15,
-    int a16,
-    int a17,
-    int a18,
-    int a19,
-    int a20,
-    int a21,
-    int a22,
-    int a23,
-    int a24,
-    int a25,
-    int a26,
-    int a27,
-    unsigned int a28,
-    int a29,
-    unsigned int a30,
-    int a31,
-    unsigned int a32,
-    int a33,
-    unsigned int a34)
+    unsigned int partName)
 {
     int v34; // r29
     unsigned int WeaponIndexForEntity; // r19
@@ -678,31 +656,21 @@ void __cdecl G_Damage(
 
     v34 = damage;
     a22 = damage;
-    if (!targ)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\g_combat.cpp", 667, 0, "%s", "targ");
+
+    iassert(targ);
+
     if (targ->takedamage)
     {
         if (!inflictor)
             inflictor = &g_entities[2174];
         if (!attacker)
             attacker = &g_entities[2174];
-        if (!targ->r.inuse)
-            MyAssertHandler(
-                "c:\\trees\\cod3\\cod3src\\src\\game\\g_combat.cpp",
-                680,
-                0,
-                "%s\n\t(targ->s.number) = %i",
-                "(targ->r.inuse)",
-                targ->s.number);
-        if (!attacker->r.inuse)
-            MyAssertHandler(
-                "c:\\trees\\cod3\\cod3src\\src\\game\\g_combat.cpp",
-                681,
-                0,
-                "%s\n\t(attacker - g_entities) = %i",
-                "(attacker->r.inuse)",
-                attacker - g_entities);
+
+        iassert(targ->r.inuse);
+        iassert(attacker->r.inuse);
+        
         WeaponIndexForEntity = a28;
+
         if (a28 == -1)
         {
             v43 = inflictor;

@@ -2688,4 +2688,24 @@ int G_GetVehicleInfoIndex(const char *name)
     return index;
 }
 
+bool G_IsVehicleUsable(gentity_s *ent, gentity_s *player)
+{
+    gclient_s *client; // r11
+
+    client = player->client;
+    if (!client
+        || (client->ps.eFlags & 0x20000) != 0
+        || player->r.ownerNum.isDefined()
+        || ent->r.ownerNum.isDefined()
+        || ent->scr_vehicle->speed > 1.0
+        || ent->health <= 0)
+    {
+        return 0;
+    }
+    else
+    {
+        return ((unsigned int)ent->r.contents >> 21) & 1;
+    }
+}
+
 #endif

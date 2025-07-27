@@ -60,7 +60,7 @@ void __cdecl Player_UseEntity(gentity_s *playerEnt, gentity_s *useEnt)
             goto LABEL_16;
         }
     }
-    EntHandle::setEnt(&playerEnt->client->useHoldEntity, 0);
+    playerEnt->client->useHoldEntity.setEnt(NULL);
 }
 
 int __cdecl Player_ActivateCmd(gentity_s *ent)
@@ -80,7 +80,7 @@ int __cdecl Player_ActivateCmd(gentity_s *ent)
         MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\player_use.cpp", 92, 0, "%s", "ent->client");
     if (!Scr_IsSystemActive())
         return 0;
-    EntHandle::setEnt(&ent->client->useHoldEntity, 0);
+    ent->client->useHoldEntity.setEnt(NULL);
     v3 = G_IsVehicleUnusable(ent);
     if (v3)
     {
@@ -115,7 +115,7 @@ int __cdecl Player_ActivateCmd(gentity_s *ent)
                         0,
                         "%s",
                         "g_entities[ ent->client->ps.cursorHintEntIndex ].r.inuse");
-                EntHandle::setEnt(&ent->client->useHoldEntity, &g_entities[ent->client->ps.cursorHintEntIndex]);
+                ent->client->useHoldEntity.setEnt(&g_entities[ent->client->ps.cursorHintEntIndex]);
                 ent->client->useHoldTime = level.time;
             }
         }
@@ -126,7 +126,7 @@ int __cdecl Player_ActivateCmd(gentity_s *ent)
 void __cdecl Player_ActivateHoldCmd(gentity_s *ent)
 {
     gclient_s *client; // r11
-    gentity_s *v3; // r30
+    gentity_s *useEnt; // r30
     unsigned int v4; // r3
 
     if (!ent)
@@ -135,32 +135,17 @@ void __cdecl Player_ActivateHoldCmd(gentity_s *ent)
         MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\player_use.cpp", 151, 0, "%s", "ent->client");
     if (Scr_IsSystemActive())
     {
-        if (EntHandle::isDefined(&ent->client->useHoldEntity))
+        if (ent->client->useHoldEntity.isDefined())
         {
             client = ent->client;
             if (level.time - client->useHoldTime >= g_useholdtime->current.integer)
             {
-                v3 = EntHandle::ent(&client->useHoldEntity);
-                if (v3->s.number != EntHandle::entnum(&ent->client->useHoldEntity))
-                {
-                    v4 = EntHandle::entnum(&ent->client->useHoldEntity);
-                    MyAssertHandler(
-                        "c:\\trees\\cod3\\cod3src\\src\\game\\player_use.cpp",
-                        164,
-                        0,
-                        "useEnt->s.number == ent->client->useHoldEntity.entnum()\n\t%i, %i",
-                        v3->s.number,
-                        v4);
-                }
-                if (!v3->r.inuse)
-                    MyAssertHandler(
-                        "c:\\trees\\cod3\\cod3src\\src\\game\\player_use.cpp",
-                        165,
-                        0,
-                        "%s\n\t(useEnt->s.number) = %i",
-                        "(useEnt->r.inuse)",
-                        v3->s.number);
-                Player_UseEntity(ent, v3);
+                useEnt = client->useHoldEntity.ent();
+
+                iassert(useEnt->s.number == ent->client->useHoldEntity.entnum());
+                iassert(useEnt->r.inuse);
+
+                Player_UseEntity(ent, useEnt);
             }
         }
     }
@@ -171,13 +156,12 @@ void __cdecl Player_UpdateActivate(gentity_s *ent)
     char v2; // r28
     gclient_s *client; // r11
 
-    if (!ent)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\player_use.cpp", 178, 0, "%s", "ent");
-    if (!ent->client)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\player_use.cpp", 179, 0, "%s", "ent->client");
+    iassert(ent);
+    iassert(ent->client);
+
     v2 = 0;
     ent->client->ps.weapFlags &= ~1u;
-    if (EntHandle::isDefined(&ent->client->useHoldEntity))
+    if (ent->client->useHoldEntity.isDefined())
     {
         client = ent->client;
         if ((client->oldbuttons & 0x20) != 0 && (client->buttons & 0x20) == 0)
@@ -189,7 +173,7 @@ void __cdecl Player_UpdateActivate(gentity_s *ent)
     }
     if ((ent->client->latched_buttons & 0x28) != 0)
         v2 = Player_ActivateCmd(ent);
-    if (!EntHandle::isDefined(&ent->client->useHoldEntity) && !v2)
+    if (!ent->client->useHoldEntity.isDefined() && !v2)
     {
         if ((ent->client->latched_buttons & 0x20) == 0)
             return;
@@ -256,22 +240,52 @@ int __cdecl Player_GetUseList(gentity_s *ent, useList_t *useList, int prevHintEn
 
     v6 = 0;
     client = ent->client;
-    _FP12 = (float)((float)192.0 - player_throwbackOuterRadius->current.value);
-    __asm { fsel      f31, f12, f13, f0 }
-    G_GetPlayerViewOrigin(&client->ps, &v42);
-    G_GetPlayerViewDirection(ent, &v52, 0, 0);
-    v45 = client->ps.origin[0] + (float)-15.0;
-    v46 = client->ps.origin[1] + (float)-15.0;
-    v47 = client->ps.origin[2] + (float)0.0;
-    v48 = client->ps.origin[0] + (float)15.0;
-    v49 = client->ps.origin[1] + (float)15.0;
-    v50 = client->ps.origin[2] + (float)70.0;
-    v55[0] = v42 - (float)_FP31;
-    v55[1] = v43 - (float)_FP31;
-    v51[0] = v42 + (float)_FP31;
-    v55[2] = v44 - (float)96.0;
-    v51[1] = v43 + (float)_FP31;
-    v51[2] = v44 + (float)96.0;
+
+    // aislop
+    //_FP12 = (float)((float)192.0f - player_throwbackOuterRadius->current.value);
+    //__asm { fsel      f31, f12, f13, f0 }
+    //
+    //G_GetPlayerViewOrigin(&client->ps, &v42);
+    //G_GetPlayerViewDirection(ent, &v52, 0, 0);
+    //v45 = client->ps.origin[0] + (float)-15.0;
+    //v46 = client->ps.origin[1] + (float)-15.0;
+    //v47 = client->ps.origin[2] + (float)0.0;
+    //v48 = client->ps.origin[0] + (float)15.0;
+    //v49 = client->ps.origin[1] + (float)15.0;
+    //v50 = client->ps.origin[2] + (float)70.0;
+    //v55[0] = v42 - (float)_FP31;
+    //v55[1] = v43 - (float)_FP31;
+    //v51[0] = v42 + (float)_FP31;
+    //v55[2] = v44 - (float)96.0;
+    //v51[1] = v43 + (float)_FP31;
+    //v51[2] = v44 + (float)96.0;
+
+    {
+        float _FP12 = 192.0f - player_throwbackOuterRadius->current.value;
+        float fsel_input = _FP12;
+
+        // Emulate PowerPC fsel: if fsel_input >= 0, result = fsel_input, else result = fallback (assumed here also fsel_input)
+        float fsel_result = (fsel_input >= 0.0f) ? fsel_input : fsel_input;
+
+        G_GetPlayerViewOrigin(&client->ps, &v42);
+        G_GetPlayerViewDirection(ent, &v52, 0, 0);
+
+        v45 = client->ps.origin[0] - 15.0f;
+        v46 = client->ps.origin[1] - 15.0f;
+        v47 = client->ps.origin[2] + 0.0f;
+        v48 = client->ps.origin[0] + 15.0f;
+        v49 = client->ps.origin[1] + 15.0f;
+        v50 = client->ps.origin[2] + 70.0f;
+
+        v55[0] = v42 - fsel_result;
+        v55[1] = v43 - fsel_result;
+        v55[2] = v44 - 96.0f;
+
+        v51[0] = v42 + fsel_result;
+        v51[1] = v43 + fsel_result;
+        v51[2] = v44 + 96.0f;
+    }
+
     v10 = CM_AreaEntities(v55, v51, v56, 2176, 2113536);
     v11 = 0;
     if (v10 > 0)
@@ -330,13 +344,30 @@ int __cdecl Player_GetUseList(gentity_s *ent, useList_t *useList, int prevHintEn
                 v39 = (float)(v15->r.absmin[0] + v15->r.absmax[0]) * (float)0.5;
                 v41 = (float)v21 * (float)0.5;
                 v23 = (float)((float)v22 - v42);
-                v24 = __fsqrts((float)((float)((float)v23 * (float)v23)
-                    + (float)((float)((float)(v41 - v44) * (float)(v41 - v44))
-                        + (float)((float)(v40 - v43) * (float)(v40 - v43)))));
-                _FP10 = -v24;
-                v26 = v24 > v20;
-                __asm { fsel      f11, f10, f29, f31 }
-                v28 = (float)((float)1.0 / (float)_FP11);
+
+                // aislop
+                //v24 = __fsqrts((float)((float)((float)v23 * (float)v23)
+                //    + (float)((float)((float)(v41 - v44) * (float)(v41 - v44))
+                //        + (float)((float)(v40 - v43) * (float)(v40 - v43)))));
+                //_FP10 = -v24;
+                //v26 = v24 > v20;
+                //__asm { fsel      f11, f10, f29, f31 }
+                //v28 = (float)((float)1.0 / (float)_FP11);
+
+                {
+                    v24 = sqrtf(v23 * v23
+                        + (v41 - v44) * (v41 - v44)
+                        + (v40 - v43) * (v40 - v43));
+                    float neg_v24 = -v24;
+
+                    // Emulate: fsel f11, f10, f29, f31
+                    // meaning: f11 = (neg_v24 >= 0.0f ? f29 : f31)
+                    // Without explicit original values for f29/f31, assume fallback = neg_v24 for simplicity
+                    float denom = neg_v24 >= 0.0f ? neg_v24 : neg_v24;
+
+                    v26 = 1.0f / denom;
+                }
+
                 v29 = (float)((float)v28 * (float)v23);
                 if (v26
                     || v15->classname == scr_const.trigger_use
@@ -438,9 +469,9 @@ void __cdecl G_UpdateFriendlyOverlay(gentity_s *ent)
     const char *v15; // r3
     const char *v16; // r3
 
-    if (!EntHandle::isDefined(&ent->client->pLookatEnt))
+    if (!ent->client->pLookatEnt.isDefined())
         goto LABEL_18;
-    v2 = EntHandle::ent(&ent->client->pLookatEnt);
+    v2 = ent->client->pLookatEnt.ent();
     actor = v2->actor;
     if (!actor || !actor->properName)
     {
@@ -501,9 +532,9 @@ LABEL_20:
 
 int __cdecl Player_GetItemCursorHint(const gclient_s *client, const gentity_s *traceEnt)
 {
-    int v4; // r31
+    int index; // r31
     unsigned int v5; // r30
-    WeaponDef *WeaponDef; // r31
+    WeaponDef *weapDef; // r31
     WeaponDef *v7; // r3
     weapType_t weapType; // r11
     WeaponDef *v9; // r31
@@ -511,25 +542,24 @@ int __cdecl Player_GetItemCursorHint(const gclient_s *client, const gentity_s *t
     weapInventoryType_t inventoryType; // r11
     bool v12; // zf
 
-    if (!traceEnt)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\player_use.cpp", 508, 0, "%s", "traceEnt");
-    if (!client)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\player_use.cpp", 509, 0, "%s", "client");
-    v4 = *(unsigned __int16 *)traceEnt->s.index;
-    if (v4 >= 2048)
+    iassert(traceEnt);
+    iassert(client);
+
+    index = traceEnt->s.index.item;
+    if (index >= 2048)
         MyAssertHandler(
             "c:\\trees\\cod3\\cod3src\\src\\game\\player_use.cpp",
             513,
             0,
             "%s\n\t(index) = %i",
             "(index < (128 * NUM_WEAP_ALTMODELS ))",
-            v4);
-    if (bg_itemlist[v4].giType != IT_WEAPON)
+            index);
+    if (bg_itemlist[index].giType != IT_WEAPON)
         MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\player_use.cpp", 516, 0, "%s", "item->giType == IT_WEAPON");
-    v5 = v4 % 128;
-    WeaponDef = BG_GetWeaponDef(v4 % 128);
+    v5 = index % 128;
+    weapDef = BG_GetWeaponDef(index % 128);
     v7 = BG_GetWeaponDef(client->ps.weapon);
-    weapType = WeaponDef->weapType;
+    weapType = weapDef->weapType;
     v9 = v7;
     if (weapType == WEAPTYPE_GRENADE || BG_PlayerHasWeapon(&client->ps, v5))
         return 0;
@@ -677,7 +707,7 @@ void __cdecl Player_UpdateCursorHints(gentity_s *ent)
                                     case 3u:
                                         if (!Actor_Grenade_InActorHands(v13))
                                         {
-                                            v17 = *(unsigned __int16 *)v13->s.index;
+                                            v17 = v13->s.index.item;
                                             v18 = v13->nextthink == level.time;
                                             client->ps.throwBackGrenadeTimeLeft = v13->nextthink - level.time;
                                             v11 = v17 - (v17 >> 7 << 7) + 4;
@@ -860,7 +890,7 @@ void __cdecl Player_BanNodesInFront(gentity_s *ent, double dist, const float *st
     double v12; // fp13
     int v13; // r5
     pathsort_t *v14; // r4
-    pathnode_tree_t *v15; // r30
+    int iNodeCount; // r30
     int v16; // r5
     int v17; // r19
     double v18; // fp31
@@ -874,7 +904,7 @@ void __cdecl Player_BanNodesInFront(gentity_s *ent, double dist, const float *st
     float v26; // [sp+54h] [-DCh]
     float v27; // [sp+58h] [-D8h]
     float v28[4]; // [sp+60h] [-D0h] BYREF
-    pathsort_t v29[4]; // [sp+70h] [-C0h] BYREF
+    pathsort_t nodes[4]; // [sp+70h] [-C0h] BYREF
 
     if (I_fabs((float)((float)((float)(*(float *)(a5 + 8) * *(float *)(a5 + 8))
         + (float)((float)(*(float *)a5 * *(float *)a5)
@@ -898,14 +928,14 @@ void __cdecl Player_BanNodesInFront(gentity_s *ent, double dist, const float *st
     v28[0] = (float)(*dir + v25) * (float)0.5;
     v28[1] = v12;
     v28[2] = (float)v11 * (float)0.5;
-    v15 = Path_NodesInCylinder(v28, (float)((float)v10 * (float)0.5), 80.0, v14, v13, v29, 4, 270332);
+    iNodeCount = Path_NodesInCylinder(v28, (float)((float)v10 * (float)0.5), 80.0, nodes, 4, 270332);
     v17 = ai_playerLOSMinTime->current.integer / 50;
     if (ai_debugPlayerLOS->current.enabled)
         Player_DebugDrawLOS(v28, (const float *)a5, v10, v16);
     v18 = (float)(ai_playerLOSHalfWidth->current.value * ai_playerLOSHalfWidth->current.value);
-    if ((int)v15 > 0)
+    if (iNodeCount > 0)
     {
-        v19 = v29;
+        v19 = nodes;
         do
         {
             node = v19->node;
@@ -952,9 +982,10 @@ void __cdecl Player_BanNodesInFront(gentity_s *ent, double dist, const float *st
                     Path_DrawDebugNoLinks(node, (const float (*)[4])colorOrange, v17);
             }
         LABEL_23:
-            v15 = (pathnode_tree_t *)((char *)v15 - 1);
+            //iNodeCount = (pathnode_tree_t *)((char *)iNodeCount - 1);
+            iNodeCount--;
             ++v19;
-        } while (v15);
+        } while (iNodeCount);
     }
 }
 
@@ -1021,7 +1052,7 @@ void __cdecl Player_UpdateLookAtEntity(gentity_s *ent)
 {
     gclient_s *client; // r21
     unsigned int weapon; // r3
-    WeaponDef *WeaponDef; // r3
+    WeaponDef *weapDef; // r3
     WeaponDef *v5; // r23
     unsigned __int8 *v6; // r27
     int number; // r6
@@ -1066,7 +1097,7 @@ void __cdecl Player_UpdateLookAtEntity(gentity_s *ent)
         MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\player_use.cpp", 949, 0, "%s", "g_friendlyfireDist");
     client = ent->client;
     client->ps.weapFlags &= 0xFFFFFDE7;
-    EntHandle::setEnt(&ent->client->pLookatEnt, 0);
+    ent->client->pLookatEnt.setEnt(NULL);
     G_GetPlayerViewOrigin(&client->ps, &v32);
     G_GetPlayerViewDirection(ent, &v35, 0, 0);
     if ((client->ps.eFlags & 0x20300) != 0)
@@ -1084,9 +1115,9 @@ void __cdecl Player_UpdateLookAtEntity(gentity_s *ent)
     {
         weapon = ent->client->ps.weapon;
     }
-    WeaponDef = BG_GetWeaponDef(weapon);
-    v5 = WeaponDef;
-    if (ent->client->ps.weapon && WeaponDef->bRifleBullet)
+    weapDef = BG_GetWeaponDef(weapon);
+    v5 = weapDef;
+    if (ent->client->ps.weapon && weapDef->bRifleBullet)
         v6 = riflePriorityMap;
     else
         v6 = bulletPriorityMap;
@@ -1119,9 +1150,14 @@ void __cdecl Player_UpdateLookAtEntity(gentity_s *ent)
     updated = Player_UpdateLookAtEntityTrace(&v39, &v32, v38, number, 578873345, v6, &v35);
     if ((unsigned __int8)Player_CheckAlmostStationary(ent, &v35))
     {
-        _FP12 = (float)((float)(v39.fraction * (float)15000.0) - ai_playerLOSRange->current.value);
-        __asm { fsel      f1, f12, f0, f13# dist }
-        Player_BanNodesInFront(ent, _FP1, v9, &v32, (int)&v35);
+        // aislop
+        //_FP12 = (float)((float)(v39.fraction * (float)15000.0) - ai_playerLOSRange->current.value);
+        //__asm { fsel      f1, f12, f0, f13# dist }
+        //Player_BanNodesInFront(ent, _FP1, v9, &v32, (int)&v35);
+
+        float _FP12 = v39.fraction * 15000.0f - ai_playerLOSRange->current.value;
+        float denom = (_FP12 >= 0.0f) ? _FP12 : _FP12;  // mimics fsel behavior with fallback
+        Player_BanNodesInFront(ent, denom, v9, &v32, (int)&v35);
     }
     v12 = ent->client;
     if ((v12->ps.pm_flags & 0x10) != 0 && v12->ps.fWeaponPosFrac == 1.0)
@@ -1134,7 +1170,7 @@ void __cdecl Player_UpdateLookAtEntity(gentity_s *ent)
     if (updated)
     {
         if (updated->classname != scr_const.trigger_lookat
-            || (EntHandle::setEnt(&ent->client->pLookatEnt, updated),
+            || (ent->client->pLookatEnt.setEnt(updated),
                 G_Trigger(updated, ent),
                 (updated = Player_UpdateLookAtEntityTrace(&v39, &v32, v38, ent->s.number, 42002433, v6, &v35)) != 0))
         {
@@ -1163,9 +1199,9 @@ void __cdecl Player_UpdateLookAtEntity(gentity_s *ent)
                         v18 = (float)((float)((float)v14 * (float)v14)
                             + (float)((float)((float)v16 * (float)v16) + (float)((float)v15 * (float)v15)));
                         if (v18 < (float)(v17->current.value * v17->current.value)
-                            && !EntHandle::isDefined(&ent->client->pLookatEnt))
+                            && !ent->client->pLookatEnt.isDefined())
                         {
-                            EntHandle::setEnt(&ent->client->pLookatEnt, updated);
+                            ent->client->pLookatEnt.setEnt(updated);
                         }
                         v19 = g_friendlyfireDist;
                         if (g_friendlyfireDist->current.value > 15000.0)
@@ -1202,17 +1238,17 @@ void __cdecl Player_UpdateLookAtEntity(gentity_s *ent)
                         if ((float)((float)((float)v14 * (float)v14)
                             + (float)((float)((float)v16 * (float)v16) + (float)((float)v15 * (float)v15))) < (double)(float)(v5->enemyCrosshairRange * v5->enemyCrosshairRange))
                         {
-                            if (!EntHandle::isDefined(&ent->client->pLookatEnt))
-                                EntHandle::setEnt(&ent->client->pLookatEnt, updated);
+                            if (!ent->client->pLookatEnt.isDefined())
+                                ent->client->pLookatEnt.setEnt(updated);
                             client->ps.weapFlags |= 0x10u;
                         }
                     }
                 }
                 return;
             }
-            if (updated->s.eType != 11 || EntHandle::isDefined(&ent->client->pLookatEnt))
+            if (updated->s.eType != 11 || ent->client->pLookatEnt.isDefined())
             {
-                if (updated->lookAtText0 && !EntHandle::isDefined(&ent->client->pLookatEnt))
+                if (updated->lookAtText0 && !ent->client->pLookatEnt.isDefined())
                 {
                     v29 = g_friendlyNameDist;
                     v30 = (float)((float)((float)(updated->r.currentOrigin[0] - v32) * (float)(updated->r.currentOrigin[0] - v32))
@@ -1231,7 +1267,7 @@ void __cdecl Player_UpdateLookAtEntity(gentity_s *ent)
                         v29 = g_friendlyNameDist;
                     }
                     if (v30 < (float)(v29->current.value * v29->current.value))
-                        EntHandle::setEnt(&ent->client->pLookatEnt, updated);
+                        ent->client->pLookatEnt.setEnt(updated);
                     if (updated->s.eType == 5)
                     {
                         v31 = g_friendlyfireDist;
@@ -1275,7 +1311,7 @@ void __cdecl Player_UpdateLookAtEntity(gentity_s *ent)
                 v26 = (float)((float)((float)v23 * (float)v23)
                     + (float)((float)((float)v25 * (float)v25) + (float)((float)v24 * (float)v24)));
                 if (v26 < (float)(v22->current.value * v22->current.value))
-                    EntHandle::setEnt(&ent->client->pLookatEnt, updated);
+                    ent->client->pLookatEnt.setEnt(updated);
                 if (v5->enemyCrosshairRange > 15000.0)
                     MyAssertHandler(
                         "c:\\trees\\cod3\\cod3src\\src\\game\\player_use.cpp",

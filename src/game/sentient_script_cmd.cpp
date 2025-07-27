@@ -3,23 +3,22 @@
 #endif
 
 #include "sentient.h"
+#include <script/scr_variable.h>
+#include "g_main.h"
+#include <script/scr_vm.h>
+#include "actor_threat.h"
+#include "g_public.h"
 
-sentient_s *__cdecl Sentient_Get(scr_entref_t *entref)
+sentient_s *__cdecl Sentient_Get(scr_entref_t entref)
 {
     sentient_s *result; // r3
-    unsigned __int16 v2; // [sp+74h] [+14h]
 
-    v2 = HIWORD(entref);
-    if ((_WORD)entref)
+    if (entref.classnum)
         goto LABEL_5;
-    if (HIWORD(entref) >= 0x880u)
-        MyAssertHandler(
-            "c:\\trees\\cod3\\cod3src\\src\\game\\sentient_script_cmd.cpp",
-            47,
-            0,
-            "%s",
-            "entref.entnum < MAX_GENTITIES");
-    result = g_entities[v2].sentient;
+
+    iassert(entref.entnum < MAX_GENTITIES);
+
+    result = g_entities[entref.entnum].sentient;
     if (!result)
     {
     LABEL_5:
@@ -29,13 +28,13 @@ sentient_s *__cdecl Sentient_Get(scr_entref_t *entref)
     return result;
 }
 
-void __cdecl SentientCmd_GetEnemySqDist(scr_entref_t *entref)
+void __cdecl SentientCmd_GetEnemySqDist(scr_entref_t entref)
 {
     Sentient_Get(entref);
     Scr_Error("GetEnemySqDist is depricated, use GetClosestEnemySqDist.\n");
 }
 
-void __cdecl SentientCmd_GetClosestEnemySqDist(scr_entref_t *entref)
+void __cdecl SentientCmd_GetClosestEnemySqDist(scr_entref_t entref)
 {
     sentient_s *v1; // r29
     double v2; // fp31
@@ -94,7 +93,8 @@ void SentientCmd_ThreatBiasGroupExists()
         Scr_ParamError(0, "threatbiasgroupexists [name]");
     ConstString = Scr_GetConstString(0);
     ThreatBiasGroupIndex = Actor_FindThreatBiasGroupIndex(ConstString);
-    Scr_AddBool(_cntlzw(ThreatBiasGroupIndex) != 0);
+    //Scr_AddBool(_cntlzw(ThreatBiasGroupIndex) != 0);
+    Scr_AddBool((bool)ThreatBiasGroupIndex);
 }
 
 void SentientCmd_GetThreatBias()
@@ -240,7 +240,7 @@ void SentientCmd_SetIgnoreMeGroup()
     }
 }
 
-void __cdecl SentientCmd_SetThreatBiasGroup(scr_entref_t *entref)
+void __cdecl SentientCmd_SetThreatBiasGroup(scr_entref_t entref)
 {
     sentient_s *v1; // r31
     unsigned int ConstString; // r3
@@ -270,7 +270,7 @@ void __cdecl SentientCmd_SetThreatBiasGroup(scr_entref_t *entref)
     }
 }
 
-void __cdecl SentientCmd_GetThreatBiasGroup(scr_entref_t *entref)
+void __cdecl SentientCmd_GetThreatBiasGroup(scr_entref_t entref)
 {
     int iThreatBiasGroupIndex; // r11
     const char *v2; // r3
@@ -287,13 +287,22 @@ void __cdecl SentientCmd_GetThreatBiasGroup(scr_entref_t *entref)
     }
 }
 
+static const BuiltinMethodDef methods_4[4] =
+{
+  { "getenemysqdist", SentientCmd_GetEnemySqDist, 0 },
+  { "getclosestenemysqdist", SentientCmd_GetClosestEnemySqDist, 0 },
+  { "setthreatbiasgroup", SentientCmd_SetThreatBiasGroup, 0 },
+  { "getthreatbiasgroup", SentientCmd_GetThreatBiasGroup, 0 }
+};
+
+
 void(__cdecl *__cdecl Sentient_GetMethod(const char **pName))(scr_entref_t)
 {
     int v1; // r6
     unsigned int v2; // r5
     const BuiltinMethodDef *i; // r7
     const char *actionString; // r10
-    _BYTE *v5; // r11
+    const char *v5; // r11
     int v6; // r8
 
     v1 = 0;
@@ -321,13 +330,25 @@ void(__cdecl *__cdecl Sentient_GetMethod(const char **pName))(scr_entref_t)
     return methods_4[v1].actionFunc;
 }
 
+
+static const BuiltinFunctionDef functions[6] =
+{
+  { "createthreatbiasgroup", SentientCmd_CreateThreatBiasGroup, 0 },
+  { "threatbiasgroupexists", SentientCmd_ThreatBiasGroupExists, 0 },
+  { "getthreatbias", SentientCmd_GetThreatBias, 0 },
+  { "setthreatbias", SentientCmd_SetThreatBias, 0 },
+  { "setthreatbiasagainstall", SentientCmd_SetThreatBiasAgainstAll, 0 },
+  { "setignoremegroup", SentientCmd_SetIgnoreMeGroup, 0 }
+};
+
+
 void(__cdecl *__cdecl Sentient_GetFunction(const char **pName))()
 {
     int v1; // r6
     unsigned int v2; // r5
     const BuiltinFunctionDef *i; // r7
     const char *actionString; // r10
-    _BYTE *v5; // r11
+    const char *v5; // r11
     int v6; // r8
 
     v1 = 0;

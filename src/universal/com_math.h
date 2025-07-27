@@ -190,6 +190,8 @@ float AngleNormalize360(float angle);
 float AngleNormalize180(float angle);
 float AngleSubtract(float a1, float a2);
 
+void FastSinCos(float radians, float *s, float *c);
+
 float __cdecl ColorNormalize(const float *in, float *out);
 
 float __cdecl PitchForYawOnNormal(float fYaw, const float* normal);

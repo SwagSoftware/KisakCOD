@@ -3,6 +3,11 @@
 #endif
 
 #include "g_local.h"
+#include "g_main.h"
+#include <script/scr_const.h>
+#include <universal/com_math.h>
+#include "actor.h"
+#include <server/sv_game.h>
 
 void __cdecl G_FinishSetupSpawnPoint(gentity_s *ent)
 {
@@ -145,8 +150,7 @@ gentity_s *__cdecl SelectNearestDeathmatchSpawnPoint(const float *from)
         v5 = (float)(i->r.currentOrigin[0] - *from);
         v6 = (float)(i->r.currentOrigin[2] - from[2]);
         v7 = (float)(i->r.currentOrigin[1] - from[1]);
-        v8 = __fsqrts((float)((float)((float)v7 * (float)v7)
-            + (float)((float)((float)v6 * (float)v6) + (float)((float)v5 * (float)v5))));
+        v8 = sqrtf((float)((float)((float)v7 * (float)v7) + (float)((float)((float)v6 * (float)v6) + (float)((float)v5 * (float)v5))));
         if (v8 < v3)
         {
             v3 = v8;
@@ -182,8 +186,13 @@ gentity_s *__cdecl SelectRandomDeathmatchSpawnPoint()
     if (!v0)
         return G_Find(0, 284, scr_const.info_player_deathmatch);
     v4 = G_rand();
-    __twllei(v0, 0);
-    __twlgei(v0 & ~(__ROL4__(v4, 1) - 1), 0xFFFFFFFF);
+    //__twllei(v0, 0);
+    //__twlgei(v0 & ~(__ROL4__(v4, 1) - 1), 0xFFFFFFFF);
+
+    uint32_t rotated = (v4 << 1) | (v4 >> (32 - 1)); // rotate-left by 1
+    uint32_t mask = ~(rotated - 1);
+    v0 = v0 & mask;
+
     return (gentity_s *)v5[v4 % v0];
 }
 
@@ -202,7 +211,7 @@ gentity_s *__cdecl SelectSpawnPoint(const float *avoidPoint, float *origin, floa
             v6 = SelectRandomDeathmatchSpawnPoint();
     }
     if (!v6)
-        Com_Error(ERR_DROP, byte_8202BBEC);
+        Com_Error(ERR_DROP, "Couldn't find a spawn point");
     *origin = v6->r.currentOrigin[0];
     result = v6;
     origin[1] = v6->r.currentOrigin[1];
@@ -259,30 +268,51 @@ void __cdecl SetClientOrigin(gentity_s *ent, float *origin)
     ent->r.currentOrigin[2] = v5->ps.origin[2];
 }
 
-void __cdecl InitClientDeltaAngles(gclient_s *client, long double a2)
-{
-    int v2; // r30
-    int *angles; // r31
-    __int64 v4; // r11
-    double v5; // fp31
+//void __cdecl InitClientDeltaAngles(gclient_s *client, long double a2)
+//{
+//    int v2; // r30
+//    int *angles; // r31
+//    __int64 v4; // r11
+//    double v5; // fp31
+//
+//    v2 = 3;
+//    angles = client->pers.cmd.angles;
+//    do
+//    {
+//        LODWORD(v4) = *angles;
+//        HIDWORD(v4) = angles - 11392;
+//        v5 = (float)((float)-(float)((float)((float)v4 * (float)0.0054931641) - *((float *)angles - 11392))
+//            * (float)0.0027777778);
+//        *(double *)&a2 = (float)((float)((float)-(float)((float)((float)v4 * (float)0.0054931641)
+//            - *((float *)angles - 11392))
+//            * (float)0.0027777778)
+//            + (float)0.5);
+//        a2 = floor(a2);
+//        --v2;
+//        *((float *)angles++ - 11424) = (float)((float)v5 - (float)*(double *)&a2) * (float)360.0;
+//    } while (v2);
+//}
 
-    v2 = 3;
-    angles = client->pers.cmd.angles;
-    do
+// aislop
+void InitClientDeltaAngles(gclient_s *client)
+{
+    int i;
+    int *angles = client->pers.cmd.angles;
+    double a2;
+
+    for (i = 0; i < 3; i++, angles++)
     {
-        LODWORD(v4) = *angles;
-        HIDWORD(v4) = angles - 11392;
-        v5 = (float)((float)-(float)((float)((float)v4 * (float)0.0054931641) - *((float *)angles - 11392))
-            * (float)0.0027777778);
-        *(double *)&a2 = (float)((float)((float)-(float)((float)((float)v4 * (float)0.0054931641)
-            - *((float *)angles - 11392))
-            * (float)0.0027777778)
-            + (float)0.5);
+        float curr = (float)*angles;
+        float prev = (float)*(angles - 11392);
+        float diff = (curr * 0.0054931641f) - prev;      // 0.0054931641 = 1/182 
+        float turns = -diff * 0.0027777778f;             // 1/360
+        a2 = turns + 0.5;
         a2 = floor(a2);
-        --v2;
-        *((float *)angles++ - 11424) = (float)((float)v5 - (float)*(double *)&a2) * (float)360.0;
-    } while (v2);
+        float frac = turns - a2;
+        client->pers.cmd.angles[i] = frac * 360.0f;
+    }
 }
+
 
 void __cdecl SetClientViewAngle(gentity_s *ent, const float *angle, long double a3)
 {
@@ -352,7 +382,7 @@ void __cdecl SetClientViewAngle(gentity_s *ent, const float *angle, long double 
     v19->ps.viewangles[0] = v4;
     v19->ps.viewangles[1] = ent->r.currentAngles[1];
     v19->ps.viewangles[2] = ent->r.currentAngles[2];
-    InitClientDeltaAngles(v19, a3);
+    InitClientDeltaAngles(v19);
 }
 
 void __cdecl G_GetPlayerViewOrigin(const playerState_s *ps, float *origin)
@@ -418,7 +448,7 @@ int __cdecl Client_GetPushed(gentity_s *pSelf, gentity_s *pOther)
     v7 = (float)((float)(v11 * v11) + (float)(v10 * v10));
     if (v7 >= 900.0)
         return 0;
-    v8 = (float)((float)((float)30.0 - (float)__fsqrts(v7)) * (float)20.0);
+    v8 = (float)((float)((float)30.0 - (float)sqrtf(v7)) * (float)20.0);
     Vec2Normalize(&v10);
     v9 = pSelf->client;
     result = 1;
@@ -440,7 +470,7 @@ void __cdecl Client_Touch(gentity_s *pSelf, gentity_s *pOther, int bTouched)
     pSelf->client->lastTouchTime = level.time;
     actor = pOther->actor;
     if (actor
-        && !EntHandle::isDefined(&actor->pCloseEnt)
+        && !actor->pCloseEnt.isDefined()
         && !actor->bDontAvoidPlayer
         && (actor->Physics.iTraceMask & 0x2000000) != 0
         && actor->eState[actor->stateLevel] != AIS_TURRET)
@@ -454,7 +484,7 @@ void __cdecl Client_Touch(gentity_s *pSelf, gentity_s *pOther, int bTouched)
             Sentient_StealClaimNode(pSelf->sentient, pOther->sentient);
         }
         if (((1 << pOther->sentient->eTeam) & ~(1 << Sentient_EnemyTeam(pSelf->sentient->eTeam))) != 0)
-            EntHandle::setEnt(&actor->pCloseEnt, pSelf);
+            actor->pCloseEnt.setEnt(pSelf);
     }
 }
 
@@ -520,7 +550,7 @@ char *__cdecl ClientConnect(int clientNum)
     v3->handler = 17;
     v5 = Sentient_Alloc();
     if (!v5)
-        Com_Error(ERR_DROP, byte_8202BD1C);
+        Com_Error(ERR_DROP, "no sentient for player");
     v3->sentient = v5;
     v5->attackerAccuracy = 1.0;
     v5->ent = v3;
@@ -612,13 +642,7 @@ void __cdecl ClientSpawn(gentity_s *ent)
     time = level.time;
     client->latched_buttons = 0;
     client->respawnTime = time;
-    if (EntHandle::isDefined(&client->useHoldEntity))
-        MyAssertHandler(
-            "c:\\trees\\cod3\\cod3src\\src\\game\\g_client.cpp",
-            699,
-            0,
-            "%s",
-            "!client->useHoldEntity.isDefined()");
+    iassert(!client->useHoldEntity.isDefined());
     client->invulnerableEnabled = 1;
     level.clientIsSpawning = 1;
     client->playerLOSCheckPos[0] = 0.0;
@@ -654,7 +678,7 @@ void __cdecl HeadHitEnt_Pain(
     const int weaponIdx)
 {
     EntHandle *p_ownerNum; // r30
-    gentity_s *v14; // r3
+    gentity_s *target; // r3
     int v15; // [sp+8h] [-A8h]
     hitLocation_t v16; // [sp+Ch] [-A4h]
     unsigned int v17; // [sp+10h] [-A0h]
@@ -662,11 +686,10 @@ void __cdecl HeadHitEnt_Pain(
 
     p_ownerNum = &pSelf->r.ownerNum;
     pSelf->health = 99999;
-    if (!EntHandle::isDefined(&pSelf->r.ownerNum))
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\g_client.cpp", 744, 0, "%s", "pSelf->r.ownerNum.isDefined()");
-    v14 = EntHandle::ent(p_ownerNum);
-    if (v14->takedamage)
-        G_Damage(v14, pAttacker, pAttacker, vDir, vPoint, iDamage, 0, iMod, v15, v16, v17, v18);
+    iassert(pSelf->r.ownerNum.isDefined());
+    target = p_ownerNum->ent();
+    if (target->takedamage)
+        G_Damage(target, pAttacker, pAttacker, vDir, vPoint, iDamage, 0, iMod, -1/*Weapon*/, hitLoc, 0, 0, 0);
 }
 
 void __cdecl HeadHitEnt_Die(
@@ -702,7 +725,7 @@ void __cdecl G_UpdateHeadHitEnt(gentity_s *pSelf)
         pHitHitEnt->r.maxs[1] = 8.0;
         pHitHitEnt->r.maxs[2] = 8.0;
         pHitHitEnt->r.contents = 8320;
-        EntHandle::setEnt(&pHitHitEnt->r.ownerNum, pSelf);
+        pHitHitEnt->r.ownerNum.setEnt(pSelf);
         pHitHitEnt->handler = 19;
         pHitHitEnt->health = 99999;
         pHitHitEnt->takedamage = 1;

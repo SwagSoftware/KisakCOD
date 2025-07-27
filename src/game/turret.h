@@ -34,7 +34,6 @@ int __cdecl turret_CanTargetSentient(
 void __cdecl turret_aimat_vector_internal(gentity_s *self, float *origin, int bShoot, const float *desiredAngles);
 int __cdecl turret_aimat_vector(gentity_s *self, float *origin, int bShoot, float *desiredAngles);
 void __cdecl turret_SetTargetEnt(gentity_s *self, gentity_s *ent);
-// local variable allocation has failed, the output may be wrong!
 int __cdecl turret_aimat_Sentient_Internal(
     gentity_s *self,
     sentient_s *enemy,
@@ -61,8 +60,8 @@ bool __cdecl turret_canuse_manual(gentity_s *self, actor_s *actor);
 bool __cdecl turret_canuse(actor_s *actor, gentity_s *pTurret);
 void __cdecl turret_controller(const gentity_s *self, int *partBits);
 void __cdecl SP_turret_XAnimPrecache(ScriptFunctions *functions, const char *classname);
-bool __cdecl turret_behind(gentity_s *self, gentity_s *other, long double a3);
-bool __cdecl G_IsTurretUsable(gentity_s *self, gentity_s *owner, long double a3);
+bool __cdecl turret_behind(gentity_s *self, gentity_s *other);
+bool __cdecl G_IsTurretUsable(gentity_s *self, gentity_s *owner);
 void __cdecl G_DeactivateTurret(gentity_s *self);
 void __cdecl turret_use(gentity_s *self, gentity_s *owner, gentity_s *activator);
 int __cdecl G_CanSpawnTurret();

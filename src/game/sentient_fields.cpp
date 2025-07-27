@@ -2,6 +2,30 @@
 #error This file is for SinglePlayer only 
 #endif
 
+#include "sentient_fields.h"
+#include <script/scr_vm.h>
+#include "g_local.h"
+
+static const sentient_fields_s fields_2[14] =
+{
+  { "team", 4, F_INT, SentientScr_SetTeam, SentientScr_GetTeam },
+  { "threatbias", 8, F_INT, NULL, NULL },
+  { "threatbiasgroup", 12, F_INT, SentientScr_ReadOnly, NULL },
+  { "node", 88, F_PATHNODE, SentientScr_ReadOnly, NULL },
+  { "prevnode", 92, F_PATHNODE, SentientScr_ReadOnly, NULL },
+  { "enemy", 52, F_ENTHANDLE, SentientScr_ReadOnly, NULL },
+  { "syncedmeleetarget", 48, F_ENTHANDLE, NULL, NULL },
+  { "ignoreme", 16, F_BYTE, NULL, NULL },
+  { "ignoreall", 17, F_BYTE, NULL, NULL },
+  { "maxvisibledist", 32, F_FLOAT, NULL, NULL },
+  { "attackeraccuracy", 80, F_FLOAT, NULL, NULL },
+  { "ignorerandombulletdamage", 84, F_BYTE, NULL, NULL },
+  { "turretinvulnerability", 85, F_BYTE, NULL, NULL },
+  { NULL, 0, F_INT, NULL, NULL }
+};
+
+
+
 void __cdecl SentientScr_ReadOnly(sentient_s *pSelf, const sentient_fields_s *pField)
 {
     const char *v3; // r3
@@ -15,10 +39,9 @@ void __cdecl SentientScr_ReadOnly(sentient_s *pSelf, const sentient_fields_s *pF
 void __cdecl SentientScr_SetTeam(sentient_s *pSelf, const sentient_fields_s *pField)
 {
     const char *String; // r31
-    const char *v4; // r3
 
-    if (!pSelf)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\sentient_fields.cpp", 60, 0, "%s", "pSelf");
+    iassert(pSelf);
+
     String = Scr_GetString(0);
     if (I_stricmp(String, "axis"))
     {
@@ -26,8 +49,7 @@ void __cdecl SentientScr_SetTeam(sentient_s *pSelf, const sentient_fields_s *pFi
         {
             if (I_stricmp(String, "neutral"))
             {
-                v4 = va("unknown team '%s', should be axis, allies, or neutral\n", String);
-                Scr_Error(v4);
+                Scr_Error(va("unknown team '%s', should be axis, allies, or neutral\n", String));
             }
             else
             {
@@ -49,8 +71,8 @@ void __cdecl SentientScr_GetTeam(sentient_s *pSelf, const sentient_fields_s *pFi
 {
     team_t eTeam; // r11
 
-    if (!pSelf)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\sentient_fields.cpp", 82, 0, "%s", "pSelf");
+    iassert(pSelf);
+
     eTeam = pSelf->eTeam;
     if (eTeam <= TEAM_FREE || eTeam >= TEAM_NUM_TEAMS)
         MyAssertHandler(
@@ -109,7 +131,7 @@ void __cdecl GScr_AddFieldsForSentient()
                     0,
                     "%s",
                     "(f - fields) == (unsigned short)( f - fields )");
-            Scr_AddClassField(0, v0->name, (unsigned __int16)(v1 / 20) | 0x4000);
+            Scr_AddClassField(0, (char*)v0->name, (unsigned __int16)(v1 / 20) | 0x4000);
             ++v0;
             v1 += 20;
         } while (v0->name);

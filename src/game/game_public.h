@@ -631,6 +631,7 @@ void __cdecl VEH_StepSlideMove(gentity_s *ent, int32_t gravity, float frameTime)
 bool __cdecl VEH_SlideMove(gentity_s *ent, int32_t gravity, float frameTime);
 void __cdecl VEH_AirMove(gentity_s *ent, int32_t gravity, float frameTime);
 
+gentity_s *G_IsVehicleUnusable(gentity_s *player);
 bool G_IsVehicleImmune(gentity_s *ent, int mod, char damageFlags, unsigned int weapon);
 bool G_IsPlayerDrivingVehicle(const gentity_s *player);
 gentity_s *VEH_GetCollMap(const char *modelname);
@@ -639,6 +640,7 @@ void G_UpdateVehicleTags(gentity_s *ent);
 void G_SpawnVehicle(gentity_s *ent, const char *typeName, int load);
 const char *G_GetVehicleInfoName(__int16 index);
 int G_GetVehicleInfoIndex(const char *name);
+bool G_IsVehicleUsable(gentity_s *ent, gentity_s *player);
 
 
 // g_weapon

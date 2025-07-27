@@ -67,7 +67,7 @@ void __cdecl Sentient_DissociateSentient(sentient_s *self, sentient_s *other, te
     client = self->ent->client;
     if (client && client->ps.throwBackGrenadeOwner == other->ent->s.number)
         client->ps.throwBackGrenadeOwner = 2174;
-    if (EntHandle::isDefined(&self->targetEnt) && EntHandle::ent(&self->targetEnt)->sentient == other && actor)
+    if (self->targetEnt.isDefined() && self->targetEnt.ent()->sentient == other && actor)
         actor->lastEnemySightPosValid = 0;
     meleeAttackerSpot = self->meleeAttackerSpot;
     v9 = 4;
@@ -285,87 +285,46 @@ void __cdecl Sentient_UpdateActualChainPos(sentient_s *self)
 
 pathnode_t *__cdecl Sentient_NearestNode(sentient_s *self)
 {
-    pathnode_t *v2; // r3
-    nearestNodeHeightCheck v4; // [sp+8h] [-3A8h]
-    int v5; // [sp+Ch] [-3A4h]
-    int v6; // [sp+10h] [-3A0h]
-    int v7; // [sp+14h] [-39Ch]
-    int v8; // [sp+18h] [-398h]
-    int v9; // [sp+1Ch] [-394h]
-    int v10; // [sp+20h] [-390h]
-    int v11; // [sp+24h] [-38Ch]
-    int v12; // [sp+28h] [-388h]
-    int v13; // [sp+2Ch] [-384h]
-    int v14; // [sp+30h] [-380h]
-    int v15; // [sp+34h] [-37Ch]
-    int v16; // [sp+38h] [-378h]
-    int v17; // [sp+3Ch] [-374h]
-    int v18; // [sp+40h] [-370h]
-    int v19; // [sp+44h] [-36Ch]
-    int v20; // [sp+48h] [-368h]
-    int v21; // [sp+4Ch] [-364h]
-    int v22; // [sp+50h] [-360h]
-    int v23; // [sp+58h] [-358h]
-    int v24; // [sp+60h] [-350h] BYREF
-    float v25[6]; // [sp+68h] [-348h] BYREF
-    pathsort_t v26[68]; // [sp+80h] [-330h] BYREF
+    pathnode_t *node; // r3
+    float vOrigin[3]; // [sp+68h] [-348h] BYREF
+    int iNodeCount;
+    pathsort_t nodes[64]; // [sp+80h] [-330h] BYREF
 
-    if (!self)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\sentient.cpp", 391, 0, "%s", "self");
+    iassert(self);
+
     if (!self->bNearestNodeValid)
     {
-        Sentient_GetOrigin(self, v25);
-        v2 = Path_NearestNodeNotCrossPlanes(
-            v25,
-            v26,
+        Sentient_GetOrigin(self, vOrigin); // KISAKTODO: logic upgrade to blops? Logic wrong?
+        node = Path_NearestNodeNotCrossPlanes(
+            vOrigin,
+            nodes,
             -2,
-            192.0,
-            (float (*)[2])0x40,
+            192.0f,
             0,
             0,
             0,
-            &v24,
-            v4,
-            v5,
-            v6,
-            v7,
-            v8,
-            v9,
-            v10,
-            v11,
-            v12,
-            v13,
-            v14,
-            v15,
-            v16,
-            v17,
-            v18,
-            v19,
-            v20,
-            v21,
-            v22,
+            &iNodeCount,
             64,
-            v23,
-            0);
-        if (v2)
+            NEAREST_NODE_DO_HEIGHT_CHECK);
+
+        if (node)
         {
-            self->pNearestNode = v2;
+            self->pNearestNode = node;
             self->bNearestNodeBad = 0;
         }
         else
         {
-            if (v24)
+            if (iNodeCount)
             {
-                if (!v26[0].node)
-                    MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\sentient.cpp", 406, 0, "%s", "nodes[0].node");
-                self->pNearestNode = v26[0].node;
+                iassert(nodes[0].node);
+                self->pNearestNode = nodes[0].node;
             }
             self->bNearestNodeBad = 1;
         }
         self->bNearestNodeValid = 1;
     }
-    if (!self->bNearestNodeValid)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\sentient.cpp", 414, 0, "%s", "self->bNearestNodeValid");
+    iassert(self->bNearestNodeValid);
+
     return self->pNearestNode;
 }
 
@@ -373,67 +332,27 @@ pathnode_t *__cdecl Sentient_NearestNodeSuppressed(
     sentient_s *self,
     float (*vNormal)[2],
     float *fDist,
-    int *iPlaneCount)
+    int iPlaneCount)
 {
-    nearestNodeHeightCheck v9; // [sp+8h] [-3A8h]
-    int v10; // [sp+Ch] [-3A4h]
-    int v11; // [sp+10h] [-3A0h]
-    int v12; // [sp+14h] [-39Ch]
-    int v13; // [sp+18h] [-398h]
-    int v14; // [sp+1Ch] [-394h]
-    int v15; // [sp+20h] [-390h]
-    int v16; // [sp+24h] [-38Ch]
-    int v17; // [sp+28h] [-388h]
-    int v18; // [sp+2Ch] [-384h]
-    int v19; // [sp+30h] [-380h]
-    int v20; // [sp+34h] [-37Ch]
-    int v21; // [sp+38h] [-378h]
-    int v22; // [sp+3Ch] [-374h]
-    int v23; // [sp+40h] [-370h]
-    int v24; // [sp+44h] [-36Ch]
-    int v25; // [sp+48h] [-368h]
-    int v26; // [sp+4Ch] [-364h]
-    int v27; // [sp+50h] [-360h]
-    int v28; // [sp+58h] [-358h]
-    int v29; // [sp+60h] [-350h] BYREF
-    float v30[6]; // [sp+68h] [-348h] BYREF
-    pathsort_t v31[68]; // [sp+80h] [-330h] BYREF
+    float vOrigin[3]; // [sp+68h] [-348h] BYREF
+    pathsort_t nodes[64]; // [sp+80h] [-330h] BYREF
+    int iNodeCount;
 
-    if (!self)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\sentient.cpp", 432, 0, "%s", "self");
-    Sentient_GetOrigin(self, v30);
+    iassert(self);
+
+    Sentient_GetOrigin(self, vOrigin);
+
     return Path_NearestNodeNotCrossPlanes(
-        v30,
-        v31,
+        vOrigin,
+        nodes,
         -2,
         192.0,
-        0,
-        (float *)vNormal,
+        vNormal,
         fDist,
         iPlaneCount,
-        &v29,
-        v9,
-        v10,
-        v11,
-        v12,
-        v13,
-        v14,
-        v15,
-        v16,
-        v17,
-        v18,
-        v19,
-        v20,
-        v21,
-        v22,
-        v23,
-        v24,
-        v25,
-        v26,
-        v27,
+        &iNodeCount,
         64,
-        v28,
-        0);
+        NEAREST_NODE_DO_HEIGHT_CHECK);
 }
 
 void __cdecl Sentient_InvalidateNearestNode(sentient_s *self)
@@ -451,17 +370,16 @@ void __cdecl Sentient_SetEnemy(sentient_s *self, gentity_s *enemy, int bNotify)
     sentient_s *v9; // r11
     bool provideCoveringFire; // r11
 
-    if (!self)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\sentient.cpp", 466, 0, "%s", "self");
-    if (self->ent == enemy)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\sentient.cpp", 467, 0, "%s", "self->ent != enemy");
-    if (!EntHandle::isDefined(&self->targetEnt))
+    iassert(self);
+    iassert(self->ent != enemy);
+
+    if (!self->targetEnt.isDefined())
     {
         if (!enemy)
             return;
         goto LABEL_18;
     }
-    sentient = EntHandle::ent(&self->targetEnt)->sentient;
+    sentient = self->targetEnt.ent()->sentient;
     if (bNotify)
     {
         if (sentient)
@@ -477,7 +395,7 @@ void __cdecl Sentient_SetEnemy(sentient_s *self, gentity_s *enemy, int bNotify)
             }
         }
     }
-    if (EntHandle::ent(&self->targetEnt) != enemy)
+    if (self->targetEnt.ent() != enemy)
     {
         if (sentient)
         {
@@ -499,7 +417,7 @@ void __cdecl Sentient_SetEnemy(sentient_s *self, gentity_s *enemy, int bNotify)
         {
             self->iEnemyNotifyTime = 0;
         }
-        EntHandle::setEnt(&self->targetEnt, enemy);
+        self->targetEnt.setEnt(enemy);
         if (bNotify && Scr_IsSystemActive())
             Scr_Notify(self->ent, scr_const.enemy, 0);
         if (actor)
@@ -693,18 +611,18 @@ void __cdecl Sentient_BanNearNodes(sentient_s *self)
     pathnode_t *pClaimedNode; // r31
     int v3; // r5
     pathsort_t *v4; // r4
-    pathnode_tree_t *v5; // r3
+    int iNodeCount; // r3
     team_t eTeam; // r27
     double v7; // fp31
     double v8; // fp30
     double v9; // fp29
     double v10; // fp28
     pathsort_t *v11; // r30
-    pathnode_tree_t *v12; // r29
+    int v12; // r29
     pathnode_t *node; // r31
     float v14; // [sp+50h] [-370h] BYREF
     float v15; // [sp+54h] [-36Ch]
-    pathsort_t v16[68]; // [sp+60h] [-360h] BYREF
+    pathsort_t nodes[64]; // [sp+60h] [-360h] BYREF
 
     if (level.time - self->banNodeTime >= 0)
     {
@@ -714,16 +632,16 @@ void __cdecl Sentient_BanNearNodes(sentient_s *self)
         {
             if (Path_IsValidClaimNode(pClaimedNode))
             {
-                v5 = Path_NodesInCylinder(pClaimedNode->constant.vOrigin, 80.0, 80.0, v4, v3, v16, 64, 270332);
+                iNodeCount = Path_NodesInCylinder(pClaimedNode->constant.vOrigin, 80.0, 80.0, nodes, 64, 270332);
                 eTeam = self->eTeam;
                 v7 = pClaimedNode->constant.forward[0];
                 v8 = pClaimedNode->constant.forward[1];
                 v9 = pClaimedNode->constant.vOrigin[0];
                 v10 = pClaimedNode->constant.vOrigin[1];
-                if ((int)v5 > 0)
+                if (iNodeCount > 0)
                 {
-                    v11 = v16;
-                    v12 = v5;
+                    v11 = nodes;
+                    v12 = iNodeCount;
                     do
                     {
                         node = v11->node;
@@ -738,7 +656,7 @@ void __cdecl Sentient_BanNearNodes(sentient_s *self)
                                 Path_MarkNodeInvalid(node, eTeam);
                             }
                         }
-                        v12 = (pathnode_tree_t *)((char *)v12 - 1);
+                        --v12;
                         ++v11;
                     } while (v12);
                 }
@@ -883,27 +801,26 @@ int __cdecl Sentient_NearestNodeDirty(sentient_s *self, bool originChanged)
     return result;
 }
 
-void __cdecl Sentient_Dissociate(sentient_s *pSentient)
+void __cdecl Sentient_Dissociate(sentient_s *self)
 {
     sentient_s *sentient; // r29
     actor_s *actor; // r31
     team_t eTeam; // r29
     sentient_s *i; // r31
 
-    if (!pSentient)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\sentient.cpp", 466, 0, "%s", "self");
-    if (!pSentient->ent)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\sentient.cpp", 467, 0, "%s", "self->ent != enemy");
-    if (EntHandle::isDefined(&pSentient->targetEnt))
+    iassert(self);
+    iassert(self->ent);
+    
+    if (self->targetEnt.isDefined())
     {
-        sentient = EntHandle::ent(&pSentient->targetEnt)->sentient;
-        if (EntHandle::ent(&pSentient->targetEnt))
+        sentient = self->targetEnt.ent()->sentient;
+        if (self->targetEnt.ent())
         {
             if (sentient)
                 --sentient->attackerCount;
-            actor = pSentient->ent->actor;
-            pSentient->iEnemyNotifyTime = 0;
-            EntHandle::setEnt(&pSentient->targetEnt, 0);
+            actor = self->ent->actor;
+            self->iEnemyNotifyTime = 0;
+            self->targetEnt.setEnt(NULL);
             if (actor)
             {
                 if (actor->useEnemyGoal)
@@ -918,14 +835,14 @@ void __cdecl Sentient_Dissociate(sentient_s *pSentient)
             }
         }
     }
-    if (pSentient->pClaimedNode)
-        Path_RelinquishNodeNow(pSentient);
-    eTeam = pSentient->eTeam;
-    pSentient->eTeam = TEAM_DEAD;
+    if (self->pClaimedNode)
+        Path_RelinquishNodeNow(self);
+    eTeam = self->eTeam;
+    self->eTeam = TEAM_DEAD;
     for (i = Sentient_FirstSentient(-1); i; i = Sentient_NextSentient(i, -1))
     {
-        if (i != pSentient)
-            Sentient_DissociateSentient(i, pSentient, eTeam);
+        if (i != self)
+            Sentient_DissociateSentient(i, self, eTeam);
     }
 }
 

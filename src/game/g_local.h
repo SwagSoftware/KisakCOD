@@ -136,7 +136,7 @@ gentity_s *__cdecl SelectRandomDeathmatchSpawnPoint();
 gentity_s *__cdecl SelectSpawnPoint(const float *avoidPoint, float *origin, float *angles);
 gentity_s *__cdecl SelectInitialSpawnPoint(float *origin, float *angles);
 void __cdecl SetClientOrigin(gentity_s *ent, float *origin);
-void __cdecl InitClientDeltaAngles(gclient_s *client, long double a2);
+void __cdecl InitClientDeltaAngles(gclient_s *client);
 void __cdecl SetClientViewAngle(gentity_s *ent, const float *angle, long double a3);
 void __cdecl G_GetPlayerViewOrigin(const playerState_s *ps, float *origin);
 void __cdecl G_GetPlayerViewDirection(const gentity_s *ent, float *forward, float *right, float *up);
@@ -475,7 +475,7 @@ void __cdecl G_DamageKnockback(
     __int64 dflags,
     int mod);
 bool __cdecl G_ShouldTakeBulletDamage(gentity_s *targ, gentity_s *attacker);
-void __cdecl G_Damage(
+void G_Damage(
     gentity_s *targ,
     gentity_s *inflictor,
     gentity_s *attacker,
@@ -487,29 +487,7 @@ void __cdecl G_Damage(
     int weapon,
     hitLocation_t hitLoc,
     unsigned int modelIndex,
-    unsigned int partName,
-    int a13,
-    int a14,
-    int a15,
-    int a16,
-    int a17,
-    int a18,
-    int a19,
-    int a20,
-    int a21,
-    int a22,
-    int a23,
-    int a24,
-    int a25,
-    int a26,
-    int a27,
-    unsigned int a28,
-    int a29,
-    unsigned int a30,
-    int a31,
-    unsigned int a32,
-    int a33,
-    unsigned int a34);
+    unsigned int partName);
 int __cdecl G_CanRadiusDamageFromPos(
     gentity_s *targ,
     const float *targetPos,

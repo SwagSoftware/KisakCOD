@@ -70,3 +70,6 @@ bool __cdecl Actor_GetPotentialThreat(potential_threat_t *self, float *potential
 void __cdecl Actor_PotentialThreat_Debug(actor_s *self);
 int __cdecl Actor_CheckIgnore(sentient_s *self, sentient_s *enemy);
 void __cdecl Actor_UpdateThreat(actor_s *self);
+
+
+extern threat_bias_t g_threatBias;

@@ -11424,7 +11424,7 @@ void __cdecl ScrCmd_GetShootAtPosition(scr_entref_t *entref)
     Scr_AddVector(v3);
 }
 
-void __cdecl ScrCmd_animscriptedInternal(scr_entref_t *entref, int bDelayForActor)
+void __cdecl ScrCmd_animscriptedInternal(scr_entref_t entref, int bDelayForActor)
 {
     gentity_s *Entity; // r31
     DObj_s *ServerDObj; // r19

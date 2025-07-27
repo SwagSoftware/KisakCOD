@@ -8,6 +8,8 @@
 #include <script/scr_const.h>
 #include <game/bullet.h>
 #include <game/savememory.h>
+#include <game/actor.h>
+#include <game/g_main.h>
 
 AimTargetGlob atGlob;
 
@@ -160,7 +162,7 @@ void __fastcall AimTarget_GetTargetBounds(const gentity_s *targetEnt, float *min
                 0,
                 "%s",
                 "targetEnt->s.solid == SOLID_BMODEL");
-        CM_ModelBounds(targetEnt->s.index, mins, maxs);
+        CM_ModelBounds(targetEnt->s.index.item, mins, maxs);
     }
 }
 
@@ -236,15 +238,9 @@ int __fastcall AimTarget_IsTargetValid(const gentity_s *targetEnt)
         goto LABEL_16;
     if (targetEnt->s.eType == 14)
     {
-        if (!targetEnt->actor)
-            MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\aim_assist\\aim_target.cpp", 252, 0, "%s", "targetEnt->actor");
-        if (!targetEnt->actor->sentient)
-            MyAssertHandler(
-                "c:\\trees\\cod3\\cod3src\\src\\aim_assist\\aim_target.cpp",
-                253,
-                0,
-                "%s",
-                "targetEnt->actor->sentient");
+        iassert(targetEnt->actor);
+        iassert(targetEnt->actor->sentient);
+        
         if (targetEnt->health <= 0 || targetEnt->actor->sentient->eTeam != TEAM_AXIS)
             goto LABEL_16;
     }
@@ -299,7 +295,7 @@ int __fastcall AimTarget_IsTargetVisible(const gentity_s *targetEnt, unsigned in
         G_LocationalTrace(v14, &v10, v9, Player->s.number, 8396803, bulletPriorityMap);
         if (v14[0].fraction != 1.0 && Trace_GetEntityHitId(v14) != targetEnt->s.number)
         {
-            index = targetEnt->s.index;
+            index = targetEnt->s.index.item;
             v13[0] = (float)((float)(v9[0] - v10) * v14[0].fraction) + v10;
             v13[1] = (float)((float)(v9[1] - v11) * v14[0].fraction) + v11;
             v13[2] = (float)((float)(v9[2] - v12) * v14[0].fraction) + v12;
@@ -337,7 +333,7 @@ void __fastcall AimTarget_CreateTarget(const gentity_s *targetEnt, AimTarget *ta
     double v7; // fp12
     actor_s *actor; // r11
     double v9; // fp0
-    trajectory_t *p_pos; // r30
+    const trajectory_t *p_pos; // r30
     double v11; // fp0
     float v12[4]; // [sp+50h] [-50h] BYREF
     float v13[16]; // [sp+60h] [-40h] BYREF
@@ -539,11 +535,20 @@ int __fastcall AimTarget_GetBestTarget(const float *start, const float *viewDir)
             currentOrigin = g_entities[v6->targets[0].entIndex].r.currentOrigin;
             v9 = (float)(currentOrigin[2] - start[2]);
             v10 = (float)(currentOrigin[1] - start[1]);
-            _FP3 = -__fsqrts((float)((float)((float)v10 * (float)v10)
-                + (float)((float)((float)v9 * (float)v9)
-                    + (float)((float)(*currentOrigin - *start) * (float)(*currentOrigin - *start)))));
-            __asm { fsel      f11, f3, f31, f11 }
-            v13 = (float)((float)1.0 / (float)_FP11);
+
+            //_FP3 = -__fsqrts((float)((float)((float)v10 * (float)v10)
+            //    + (float)((float)((float)v9 * (float)v9)
+            //        + (float)((float)(*currentOrigin - *start) * (float)(*currentOrigin - *start)))));
+            //__asm { fsel      f11, f3, f31, f11 }
+            //v13 = (float)((float)1.0 / (float)_FP11);
+
+            float dx = currentOrigin[0] - start[0];
+            float temp = v10 * v10 + v9 * v9 + dx * dx;
+
+            float _FP3 = -sqrtf(temp > 0.0f ? temp : 0.0f);
+            float _FP11 = -_FP3;
+            v13 = 1.0f / _FP11;
+
             if ((float)((float)(*viewDir * (float)((float)v13 * (float)(*currentOrigin - *start)))
                 + (float)((float)(viewDir[2] * (float)((float)(currentOrigin[2] - start[2]) * (float)v13))
                     + (float)(viewDir[1] * (float)((float)v13 * (float)(currentOrigin[1] - start[1]))))) > v5)

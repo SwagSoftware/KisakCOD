@@ -5256,4 +5256,42 @@ void Scr_AddExecEntThreadNum(int entnum, unsigned int classnum, int handle, unsi
     }
 }
 
+void Scr_ErrorWithDialogMessage(const char *error, const char *dialog_error)
+{
+    I_strncpyz(error_message, error, 1024);
+    scrVmGlob.dialog_error_message = dialog_error;
+    scrVarPub.error_message = error_message;
+    Scr_ErrorInternal();
+}
+
+unsigned int Scr_GetFunc(unsigned int index)
+{
+    VariableValue *value; // r29
+
+    if (index < scrVmPub.outparamcount)
+    {
+        value = &scrVmPub.top[-index];
+        if (value->type == 9)
+        {
+            if (!Scr_IsInOpcodeMemory(value->u.codePosValue))
+                MyAssertHandler(
+                    "c:\\trees\\cod3\\cod3src\\src\\script\\scr_vm.cpp",
+                    4746,
+                    0,
+                    "%s",
+                    "Scr_IsInOpcodeMemory( value->u.codePosValue )");
+            return value->u.intValue - (unsigned int)scrVarPub.programBuffer;
+        }
+        scrVarPub.error_index = index + 1;
+        Scr_Error(va("type %s is not a function", var_typename[value->type]));
+    }
+    if (!scrVarPub.error_message)
+    {
+        I_strncpyz(error_message, va("parameter %d does not exist", index + 1), 1024);
+        scrVarPub.error_message = error_message;
+    }
+    Scr_ErrorInternal();
+    return 0;
+}
+
 #pragma warning(pop)

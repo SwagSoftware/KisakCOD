@@ -4,7 +4,7 @@
 
 #include "savememory.h"
 #include <qcommon/com_bsp.h>
-#include <buildnumber_mp.h>
+#include <buildnumber.h>
 #include "g_main.h"
 #include <bgame/bg_public.h>
 #include <server/server.h>
