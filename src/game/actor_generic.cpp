@@ -3,6 +3,7 @@
 #endif
 
 #include "actor_generic.h"
+#include "g_main.h"
 
 void __cdecl Actor_Generic_Finish(actor_s *self, ai_state_t eNextState)
 {

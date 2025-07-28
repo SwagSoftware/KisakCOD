@@ -4,7 +4,45 @@
 
 #include "actor_event_listeners.h"
 
-// struct AIEventListener *g_AIEVlisteners 82c37f00     actor_event_listeners.obj
+#include <universal/q_shared.h>
+#include <qcommon/mem_track.h>
+
+#include <script/scr_const.h>
+#include <qcommon/qcommon.h>
+#include "g_local.h"
+#include <script/scr_vm.h>
+#include "g_main.h"
+
+AIEventListener g_AIEVlisteners[32];
+
+unsigned __int16 *g_AIEV_scrConst_table[23] =
+{
+  NULL,
+  NULL,
+  NULL,
+  NULL,
+  NULL,
+  NULL,
+  NULL,
+  &scr_const.explode,
+  &scr_const.grenadedanger,
+  &scr_const.grenadedanger,
+  &scr_const.gunshot,
+  &scr_const.silenced_shot,
+  NULL,
+  NULL,
+  &scr_const.bulletwhizby,
+  &scr_const.projectile_impact,
+  NULL,
+  NULL,
+  NULL,
+  NULL,
+  NULL,
+  NULL,
+  NULL
+};
+
+int g_listenerCount;
 
 void __cdecl TRACK_actor_event_listener()
 {
@@ -23,7 +61,7 @@ void __cdecl Actor_EventListener_Init()
         *(p_events - 1) = 2175;
         *p_events = 0;
         p_events += 2;
-    } while ((int)p_events < (int)&marker_actor_exposed);
+    } while ((int)p_events < (int)&g_AIEVlisteners[32]);
 }
 
 void __cdecl Actor_EventListener_SetCount(int listenerCount)
@@ -49,7 +87,7 @@ int __cdecl Actor_FindEventFromString(unsigned __int16 eventString)
     {
         ++v2;
         ++v1;
-        if ((int)v2 >= (int)&dword_82693C0C)
+        if ((int)v2 >= (int)&g_AIEV_scrConst_table[23])
         {
             v3 = SL_ConvertToString(eventString);
             v4 = va("Unable to find AI event for [%s]", v3);

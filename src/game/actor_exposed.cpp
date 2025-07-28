@@ -4,6 +4,13 @@
 
 #include "actor_exposed.h"
 #include "actor_state.h"
+#include "g_main.h"
+#include "actor_cover.h"
+#include "actor_orientation.h"
+#include "actor_senses.h"
+#include "g_local.h"
+#include "actor_team_move.h"
+#include "actor_events.h"
 
 void __cdecl Actor_Exposed_CheckLockGoal(actor_s *self)
 {
@@ -39,17 +46,10 @@ void __cdecl Actor_Exposed_Combat(actor_s *self)
     const pathnode_t *pClaimedNode; // r30
     scr_animscript_t *v6; // [sp+50h] [-30h] BYREF
 
-    if (!self)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\actor_exposed.cpp", 73, 0, "%s", "self");
-    if (!self->sentient)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\actor_exposed.cpp", 74, 0, "%s", "self->sentient");
-    if (!EntHandle::isDefined(&self->sentient->targetEnt))
-        MyAssertHandler(
-            "c:\\trees\\cod3\\cod3src\\src\\game\\actor_exposed.cpp",
-            75,
-            0,
-            "%s",
-            "self->sentient->targetEnt.isDefined()");
+    iassert(self);
+    iassert(self->sentient);
+    iassert(self->sentient->targetEnt.isDefined());
+    
     Actor_AnimCombat(self);
     TargetSentient = Actor_GetTargetSentient(self);
     if (Actor_IsAtGoal(self)
@@ -127,7 +127,7 @@ void __cdecl Actor_Exposed_DecideSubState(actor_s *self)
             Actor_SetSubState(self, STATE_EXPOSED_NONCOMBAT);
         goto LABEL_16;
     }
-    if (!Actor_HasPath(self) || self->pPileUpActor || EntHandle::isDefined(&self->pCloseEnt))
+    if (!Actor_HasPath(self) || self->pPileUpActor || self->pCloseEnt.isDefined())
         Actor_SetSubState(self, STATE_EXPOSED_COMBAT);
     if (Actor_CanSeeEnemy(self) && Actor_CanShootEnemy(self))
     {
@@ -205,6 +205,8 @@ int __cdecl Actor_Exposed_UseReacquireNode(actor_s *self, pathnode_t *pNode)
     Actor_SetSubState(self, STATE_EXPOSED_REACQUIRE_MOVE);
     return 1;
 }
+
+static const float fSign[2] = { -1.0, 1.0 };
 
 int __cdecl Actor_Exposed_ReacquireStepMove(actor_s *self, double fDist)
 {
@@ -392,17 +394,10 @@ int __cdecl Actor_Exposed_StartReacquireMove(actor_s *self)
 
 void __cdecl Actor_Exposed_Reacquire_Move(actor_s *self)
 {
-    if (!self)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\actor_exposed.cpp", 548, 0, "%s", "self");
-    if (!self->sentient)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\actor_exposed.cpp", 549, 0, "%s", "self->sentient");
-    if (!EntHandle::isDefined(&self->sentient->targetEnt))
-        MyAssertHandler(
-            "c:\\trees\\cod3\\cod3src\\src\\game\\actor_exposed.cpp",
-            550,
-            0,
-            "%s",
-            "self->sentient->targetEnt.isDefined()");
+    iassert(self);
+    iassert(self->sentient);
+    iassert(self->sentient->targetEnt.isDefined());
+
     Actor_SetOrientMode(self, AI_ORIENT_TO_ENEMY_OR_MOTION_SIDESTEP);
     Actor_MoveAlongPathWithTeam(self, 1, 0, 1);
 }
@@ -457,7 +452,7 @@ void __cdecl Actor_Exposed_NonCombat_Think(actor_s *self)
             1);
         if (ai_moveOrientMode->current.integer)
         {
-            integer = ai_moveOrientMode->current.integer;
+            integer = (ai_orient_mode_t)ai_moveOrientMode->current.integer;
         }
         else if (!pClaimedNode
             || !Path_IsValidClaimNode(pClaimedNode)
@@ -506,20 +501,33 @@ void __cdecl Actor_Exposed_FlashBanged(actor_s *self)
     Actor_SetOrientMode(self, AI_ORIENT_DONT_CHANGE);
 }
 
-bool __cdecl Actor_Exposed_CheckStopMovingAndStartCombat(actor_s *self)
+// aislop
+bool Actor_Exposed_CheckStopMovingAndStartCombat(actor_s *self)
 {
-    if (!self)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\actor_exposed.cpp", 701, 0, "%s", "self");
-    if (self->pPileUpActor || EntHandle::isDefined(&self->pCloseEnt))
-        return 1;
-    if (!(unsigned __int8)Actor_PointAtGoal(self->Path.vFinalGoal, &self->codeGoal))
-        return 0;
-    if (self->sentient->pClaimedNode && !(unsigned __int8)Actor_KeepClaimedNode(self))
+    iassert(self);
+
+    // If the actor is in a pile-up or has a close entity defined, stop moving and start combat.
+    if (self->pPileUpActor || self->pCloseEnt.isDefined())
+        return true;
+
+    // If the actor can't point at the goal, don't stop or start combat.
+    if (!Actor_PointAtGoal(self->Path.vFinalGoal, &self->codeGoal))
+        return false;
+
+    // If the actor has a claimed node and doesn't want to keep it, point at the node origin.
+    if (self->sentient->pClaimedNode && !Actor_KeepClaimedNode(self))
         return Actor_PointAt(self->ent->r.currentOrigin, self->sentient->pClaimedNode->constant.vOrigin);
-    _FP12 = (float)((float)(self->codeGoal.radius * (float)0.5) - (float)64.0);
-    __asm { fsel      f0, f12, f13, f0 }
-    return Actor_PointNearGoal(self->ent->r.currentOrigin, &self->codeGoal, -_FP0);
+
+    // Compute distance to goal with a fallback to 64 unit offset.
+    float nearDistance = (self->codeGoal.radius * 0.5f) - 64.0f;
+
+    // Clamp the value: if negative, use 0 instead (fsel emulation).
+    float finalDistance = (nearDistance >= 0.0f) ? nearDistance : 0.0f;
+
+    // Check if we're near the goal within the calculated distance.
+    return Actor_PointNearGoal(self->ent->r.currentOrigin, &self->codeGoal, -finalDistance);
 }
+
 
 actor_think_result_t __cdecl Actor_Exposed_Think(actor_s *self)
 {
@@ -533,15 +541,15 @@ actor_think_result_t __cdecl Actor_Exposed_Think(actor_s *self)
     if (!self->sentient)
         MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\actor_exposed.cpp", 737, 0, "%s", "self->sentient");
     self->pszDebugInfo = "exposed";
-    if (EntHandle::isDefined(&self->pGrenade) && !self->flashBanged)
+    if (self->pGrenade.isDefined() && !self->flashBanged)
     {
         Actor_SetState(self, AIS_GRENADE_RESPONSE);
-        return 1;
+        return ACTOR_THINK_REPEAT;
     }
     if (self->isInBadPlace && !self->flashBanged)
     {
         Actor_SetState(self, AIS_BADPLACE_FLEE);
-        return 1;
+        return ACTOR_THINK_REPEAT;
     }
     pTurret = self->pTurret;
     if (pTurret)
@@ -549,7 +557,7 @@ actor_think_result_t __cdecl Actor_Exposed_Think(actor_s *self)
         if (!pTurret->active)
         {
             Actor_SetState(self, AIS_TURRET);
-            return 1;
+            return ACTOR_THINK_REPEAT;
         }
         self->pTurret = 0;
     }
@@ -571,19 +579,19 @@ actor_think_result_t __cdecl Actor_Exposed_Think(actor_s *self)
     case STATE_EXPOSED_NONCOMBAT:
         Actor_Exposed_NonCombat_Think(self);
         Actor_PostThink(self);
-        result = ACTOR_THINK;
+        result = ACTOR_THINK_DONE;
         break;
     case STATE_EXPOSED_REACQUIRE_MOVE:
         self->pszDebugInfo = "exposed_reacquire_move";
         Actor_Exposed_Reacquire_Move(self);
         Actor_PostThink(self);
-        result = ACTOR_THINK;
+        result = ACTOR_THINK_DONE;
         break;
     case STATE_EXPOSED_FLASHBANGED:
         self->pszDebugInfo = "exposed_flashbanged";
         Actor_Exposed_FlashBanged(self);
         Actor_PostThink(self);
-        result = ACTOR_THINK;
+        result = ACTOR_THINK_DONE;
         break;
     default:
         if (!alwaysfails)
@@ -593,7 +601,7 @@ actor_think_result_t __cdecl Actor_Exposed_Think(actor_s *self)
         }
     LABEL_28:
         Actor_PostThink(self);
-        result = ACTOR_THINK;
+        result = ACTOR_THINK_DONE;
         break;
     }
     return result;

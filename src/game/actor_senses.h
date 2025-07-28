@@ -5,6 +5,7 @@
 #endif
 
 #include <bgame/bg_public.h>
+#include "actor.h"
 
 int __cdecl Actor_SightTrace(actor_s *self, const float *start, const float *end, int passEntNum);
 int __cdecl Actor_CanSeePointFrom(
@@ -12,8 +13,7 @@ int __cdecl Actor_CanSeePointFrom(
     const float *vStart,
     const float *vEnd,
     double fMaxDistSqrd,
-    int ignoreEntityNum,
-    int a6);
+    int ignoreEntityNum);
 int __cdecl Actor_CanSeeEnemyViaClaimedNode(actor_s *self);
 sentient_s *__cdecl Actor_KnowAboutEnemy(actor_s *self, int hadPath);
 int __cdecl Actor_CanShootFrom(actor_s *self, const float *vTarget, const float *vFrom);

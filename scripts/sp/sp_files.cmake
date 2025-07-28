@@ -56,6 +56,7 @@ set(CLIENT
     "${SRC_DIR}/client/cl_input.cpp"
     "${SRC_DIR}/client/cl_input.h"
     "${SRC_DIR}/client/cl_main.cpp"
+    "${SRC_DIR}/client/cl_main_pc.cpp"
     "${SRC_DIR}/client/cl_parse.cpp"
     "${SRC_DIR}/client/cl_parse.h"
     "${SRC_DIR}/client/cl_pose.cpp"

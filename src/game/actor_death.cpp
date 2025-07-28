@@ -46,7 +46,7 @@ bool __cdecl Actor_Death_Start(actor_s *self, ai_state_t ePrevState)
         self->ProneInfo.prone = 1;
         self->ProneInfo.bCorpseOrientation = 1;
         self->ProneInfo.iProneTrans = 500;
-        Actor_OrientCorpseToGround(ent, 0, v5, v4);
+        Actor_OrientCorpseToGround(ent, 0);
     }
     Actor_SetSubState(self, STATE_DEATH_PRECLEANUP);
     return 1;

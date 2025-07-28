@@ -36,6 +36,8 @@ struct badplace_t
     badplace_parms_t parms;
 };
 
+struct actor_s;
+
 void __cdecl TRACK_actor_badplace();
 void __cdecl Path_UpdateBadPlaceCount(badplace_t *place, int delta);
 void __cdecl Path_FreeBadPlace(int index);

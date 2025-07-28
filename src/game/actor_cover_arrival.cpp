@@ -26,9 +26,15 @@ bool __cdecl Actor_CheckCoverLeave(actor_s *self, const float *exitPos)
         return 0;
     v5 = Vec2DistanceSq(self->ent->r.currentOrigin, exitPos);
     wPathLen = self->Path.wPathLen;
-    _FP13 = (float)((float)16384.0 - (float)v5);
     wNegotiationStartNode = wPathLen - 3;
-    __asm { fsel      f7, f13, f0, f1 }
+
+    // aislop
+    //_FP13 = (float)((float)16384.0 - (float)v5);
+    //__asm { fsel      f7, f13, f0, f1 }
+
+    float diff = 16384.0f - (float)v5;
+    float _FP7 = (diff >= 0.0f) ? 1.0f : 0.0f;
+
     if (wPathLen - 3 < self->Path.wNegotiationStartNode)
         wNegotiationStartNode = self->Path.wNegotiationStartNode;
     v10 = wPathLen - 2;

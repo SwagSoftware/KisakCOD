@@ -3,6 +3,139 @@
 #endif
 
 #include "actor_fields.h"
+#include "actor.h"
+#include <script/scr_vm.h>
+#include "g_local.h"
+#include <universal/surfaceflags.h>
+#include <script/scr_const.h>
+#include <qcommon/cmd.h>
+#include "g_main.h"
+
+const actor_fields_s aifields[82] =
+{
+  { "type", 8, F_INT, &ActorScr_SetSpecies, &ActorScr_GetSpecies },
+  { "accuracy", 188, F_FLOAT, &ActorScr_Clamp_0_Positive, NULL },
+  { "lookforward", 228, F_VECTOR, &ActorScr_ReadOnly, NULL },
+  { "lookright", 240, F_VECTOR, &ActorScr_ReadOnly, NULL },
+  { "lookup", 252, F_VECTOR, &ActorScr_ReadOnly, NULL },
+  { "fovcosine", 2088, F_FLOAT, &ActorScr_Clamp_0_1, NULL },
+  { "maxsightdistsqrd", 2092, F_FLOAT, NULL, NULL },
+  { "ignoreclosefoliage", 2096, F_INT, NULL, NULL },
+  { "followmin", 1804, F_INT, NULL, NULL },
+  { "followmax", 1808, F_INT, NULL, NULL },
+  { "chainfallback", 1840, F_SHORT, NULL, NULL },
+  { "interval", 1812, F_FLOAT, NULL, NULL },
+  { "damagetaken", 468, F_INT, &ActorScr_ReadOnly, NULL },
+  { "damagedir", 476, F_VECTOR, &ActorScr_ReadOnly, NULL },
+  { "damageyaw", 472, F_INT, &ActorScr_ReadOnly, NULL },
+  { "damagelocation", 488, F_STRING, &ActorScr_ReadOnly, NULL },
+  { "damageweapon", 490, F_STRING, &ActorScr_ReadOnly, NULL },
+  { "proneok", 332, F_INT, &ActorScr_ReadOnly, NULL },
+  { "walkdist", 1792, F_FLOAT, NULL, NULL },
+  { "desiredangle", 296, F_FLOAT, &ActorScr_ReadOnly, NULL },
+  { "pacifist", 2008, F_INT, NULL, NULL },
+  { "pacifistwait", 2012, F_INT, &ActorScr_SetTime, &ActorScr_GetTime },
+  { "ignoresuppression", 3564, F_INT, NULL, NULL },
+  { "suppressionwait", 3568, F_INT, NULL, NULL },
+  { "suppressionduration", 3572, F_INT, NULL, NULL },
+  { "suppressionstarttime", 3576, F_INT, &ActorScr_ReadOnly, NULL },
+  { "suppressionmeter", 3580, F_FLOAT, &ActorScr_ReadOnly, NULL },
+  { "name", 212, F_STRING, NULL, NULL },
+  { "weapon", 214, F_STRING, NULL, NULL },
+  { "dontavoidplayer", 1836, F_INT, NULL, NULL },
+  { "grenadeawareness", 3604, F_FLOAT, &ActorScr_Clamp_0_1, NULL },
+  { "grenade", 3608, F_ENTHANDLE, &ActorScr_ReadOnly, NULL },
+  { "grenadeweapon", 3612, F_INT, &ActorScr_SetWeapon, &ActorScr_GetWeapon },
+  { "grenadeammo", 3628, F_INT, NULL, NULL },
+  { "favoriteenemy", 3420, F_SENTIENTHANDLE, NULL, NULL },
+  { "allowpain", 184, F_BYTE, NULL, NULL },
+  { "allowdeath", 185, F_BYTE, NULL, NULL },
+  { "delayeddeath", 186, F_BYTE, &ActorScr_ReadOnly, NULL },
+  { "providecoveringfire", 187, F_BYTE, NULL, NULL },
+  { "useable", 3687, F_BYTE, NULL, NULL },
+  { "ignoretriggers", 3688, F_BYTE, NULL, NULL },
+  { "pushable", 3689, F_BYTE, NULL, NULL },
+  { "dropweapon", 3668, F_INT, NULL, NULL },
+  { "drawoncompass", 3672, F_INT, NULL, NULL },
+  { "scriptstate", 3712, F_STRING, &ActorScr_ReadOnly, NULL },
+  { "lastscriptstate", 3714, F_STRING, &ActorScr_ReadOnly, NULL },
+  { "statechangereason", 3716, F_STRING, &ActorScr_ReadOnly, NULL },
+  { "groundtype", 568, F_STRING, &ActorScr_ReadOnly, &ActorScr_GetGroundType },
+  { "anim_pose", 318, F_STRING, &ActorScr_SetAnimPos, NULL },
+  { "goalradius", 1920, F_FLOAT, &ActorScr_SetGoalRadius, NULL },
+  { "goalheight", 1924, F_FLOAT, &ActorScr_SetGoalHeight, NULL },
+  { "goalpos", 1876, F_VECTOR, &ActorScr_ReadOnly, NULL },
+  { "ignoreforfixednodesafecheck", 1956, F_BYTE, NULL, NULL },
+  { "fixednode", 1957, F_BYTE, &ActorScr_SetFixedNode, NULL },
+  { "fixednodesaferadius", 1960, F_FLOAT, &ActorScr_Clamp_0_Positive, NULL },
+  {
+    "pathgoalpos",
+    1704,
+    F_VECTOR,
+    &ActorScr_ReadOnly,
+    &ActorScr_GetPathGoalPos
+  },
+  { "stopanimdistsq", 1784, F_FLOAT, NULL, NULL },
+  {
+    "lastenemysightpos",
+    3428,
+    F_VECTOR,
+    &ActorScr_SetLastEnemySightPos,
+    &ActorScr_GetLastEnemySightPos
+  },
+  { "pathenemylookahead", 1940, F_FLOAT, NULL, NULL },
+  { "pathenemyfightdist", 1944, F_FLOAT, NULL, NULL },
+  { "meleeattackdist", 1948, F_FLOAT, NULL, NULL },
+  { "chainnode", 1972, F_PATHNODE, &ActorScr_ReadOnly, NULL },
+  { "movemode", 516, F_STRING, &ActorScr_ReadOnly, &ActorScr_GetMoveMode },
+  { "safetochangescript", 517, F_BYTE, NULL, NULL },
+  { "keepclaimednode", 1848, F_BYTE, NULL, NULL },
+  { "keepclaimednodeingoal", 1849, F_BYTE, NULL, NULL },
+  { "keepnodeduringscriptedanim", 1850, F_BYTE, NULL, NULL },
+  { "nododgemove", 1851, F_BYTE, NULL, NULL },
+  { "leanamount", 1864, F_FLOAT, NULL, NULL },
+  { "badplaceawareness", 3692, F_FLOAT, &ActorScr_Clamp_0_1, NULL },
+  { "goodshootpos", 3696, F_VECTOR, NULL, NULL },
+  { "goodshootposvalid", 3708, F_INT, NULL, NULL },
+  { "flashbangimmunity", 3816, F_INT, NULL, NULL },
+  { "lookaheaddir", 1716, F_VECTOR, &ActorScr_ReadOnly, NULL },
+  { "exposedduration", 1872, F_INT, NULL, NULL },
+  { "requestarrivalnotify", 1976, F_INT, NULL, NULL },
+  { "engagemindist", 2068, F_FLOAT, &ActorScr_ReadOnly, NULL },
+  { "engageminfalloffdist", 2072, F_FLOAT, &ActorScr_ReadOnly, NULL },
+  { "engagemaxdist", 2076, F_FLOAT, &ActorScr_ReadOnly, NULL },
+  { "engagemaxfalloffdist", 2080, F_FLOAT, &ActorScr_ReadOnly, NULL },
+  { "finalaccuracy", 204, F_FLOAT, &ActorScr_ReadOnly, NULL },
+  { NULL, 0, F_INT, NULL, NULL }
+};
+
+const actor_fields_s sentientfields[9] =
+{
+  { "threatbias", 8, F_INT, NULL, NULL },
+  { "node", 88, F_PATHNODE, &ActorScr_ReadOnly, NULL },
+  { "prevnode", 92, F_PATHNODE, &ActorScr_ReadOnly, NULL },
+  { "enemy", 52, F_ENTHANDLE, &ActorScr_ReadOnly, NULL },
+  { "syncedmeleetarget", 48, F_ENTHANDLE, NULL, NULL },
+  { "ignoreme", 16, F_BYTE, NULL, NULL },
+  { "ignoreall", 17, F_BYTE, NULL, NULL },
+  { "maxvisibledist", 32, F_FLOAT, NULL, NULL },
+  { NULL, 0, F_INT, NULL, NULL }
+};
+
+const actor_fields_s entfields[8] =
+{
+  { "health", 324, F_INT, NULL, NULL },
+  { "maxhealth", 328, F_INT, NULL, NULL },
+  { "targetname", 292, F_STRING, NULL, NULL },
+  { "classname", 284, F_STRING, &ActorScr_ReadOnly, NULL },
+  { "spawnflags", 300, F_INT, NULL, NULL },
+  { "model", 280, F_MODEL, &ActorScr_ReadOnly, NULL },
+  { "takedamage", 277, F_INT, NULL, NULL },
+  { NULL, 0, F_INT, NULL, NULL }
+};
+
+actor_fields_s aifield_list = { 0 };
+actor_fields_s aifield_delete = { 0 };
 
 unsigned __int8 *__cdecl BaseForFields(unsigned __int8 *actor, const actor_fields_s *fields)
 {
@@ -24,7 +157,7 @@ unsigned __int8 *__cdecl BaseForFields(unsigned __int8 *actor, const actor_field
                     209,
                     0,
                     "BaseForFields: invalid fields[]");
-            Com_Error(ERR_DROP, byte_82025D98);
+            Com_Error(ERR_DROP, "BaseForFields: invalid fields");
             return 0;
         }
     }
@@ -49,36 +182,23 @@ const actor_fields_s *__cdecl FindFieldForName(const actor_fields_s *fields, con
     return &fields[v4];
 }
 
-void __cdecl ActorScr_SetSpecies(actor_s *pSelf, const actor_fields_s *pField)
+void __cdecl ActorScr_SetSpecies(actor_s *pSelf)
 {
-    unsigned int ConstString; // r3
-    AISpecies v4; // r10
-    const unsigned __int16 **v5; // r11
-    const char *v6; // r3
-    const char *v7; // r3
-    gentity_s *ent; // r11
+    unsigned int type; // [esp+4h] [ebp-4h]
 
-    if (!pSelf)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\actor_fields.cpp", 243, 0, "%s", "pSelf");
-    ConstString = Scr_GetConstString(0);
-    v4 = AI_SPECIES_HUMAN;
-    v5 = g_AISpeciesNames;
-    while (ConstString != **v5)
+    iassert(pSelf);
+    type = Scr_GetConstString(0);
+    for (int i = AI_SPECIES_DOG; i < MAX_AI_SPECIES; ++i)
     {
-        ++v5;
-        ++v4;
-        if ((int)v5 >= (int)g_entinfoAITextNames)
+        if (type == *g_AISpeciesNames[i])
         {
-            v6 = SL_ConvertToString(ConstString);
-            v7 = va("unknown type '%s', should be human, dog\n", v6);
-            Scr_Error(v7);
+            pSelf->species = (AISpecies)i;
+            pSelf->ent->s.lerp.u.loopFx.period = (unsigned __int8)i;
+            G_DObjUpdate(pSelf->ent);
             return;
         }
     }
-    ent = pSelf->ent;
-    pSelf->species = v4;
-    ent->s.lerp.u.actor.species = v4;
-    G_DObjUpdate(pSelf->ent);
+    Scr_Error(va("unknown type '%s', should be human, dog, zombie, zombie_dog\n", SL_ConvertToString(type)));
 }
 
 void __cdecl ActorScr_GetSpecies(actor_s *pSelf, const actor_fields_s *pField)
@@ -206,8 +326,9 @@ void __cdecl ActorScr_GetTime(actor_s *pSelf, const actor_fields_s *pField)
         MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\actor_fields.cpp", 414, 0, "%s", "pField");
     if (pField->type)
         MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\actor_fields.cpp", 415, 0, "%s", "pField->type == F_INT");
-    LODWORD(v2) = *(gentity_s **)((char *)&pSelf->ent + pField->ofs);
-    Scr_AddFloat((float)((float)v2 * (float)0.001));
+    //LODWORD(v2) = *(gentity_s **)((char *)&pSelf->ent + pField->ofs);
+    //Scr_AddFloat((float)((float)v2 * (float)0.001));
+    Scr_AddFloat((float)*(int *)((char *)&pSelf->ent + pField->ofs) * 0.001);
 }
 
 void __cdecl ActorScr_SetWeapon(actor_s *pSelf, const actor_fields_s *pField)
@@ -384,7 +505,8 @@ void __cdecl ActorScr_SetFixedNode(actor_s *self, const actor_fields_s *field)
         MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\actor_fields.cpp", 584, 0, "%s", "field->type == F_BYTE");
     Int = Scr_GetInt(0);
     self->exposedStartTime = 0x80000000;
-    self->fixedNode = (_cntlzw(Int) & 0x20) == 0;
+    //self->fixedNode = (_cntlzw(Int) & 0x20) == 0;
+    self->fixedNode = Int != 0;
 }
 
 void __cdecl ActorScr_GetMoveMode(actor_s *pSelf, const actor_fields_s *pField)
@@ -565,6 +687,9 @@ void __cdecl Cmd_AI_DisplayValue(actor_s *pSelf, unsigned __int8 *pBase, const a
     const char *v28; // r3
     const char *v29; // r3
 
+    SentientHandle *senthand;
+    EntHandle *enthand;
+
     if (!pField)
         MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\actor_fields.cpp", 763, 0, "%s", "pField");
     number = pSelf->ent->s.number;
@@ -578,7 +703,7 @@ void __cdecl Cmd_AI_DisplayValue(actor_s *pSelf, unsigned __int8 *pBase, const a
             0,
             "ent %i: %s = %g\n",
             number,
-            (const char *)(const char *)HIDWORD(COERCE_UNSIGNED_INT64((float)((float)v7 * (float)0.001))),
+            "swag", // KISAKTODO
             (float)((float)v7 * (float)0.001));
     }
     else
@@ -612,7 +737,6 @@ void __cdecl Cmd_AI_DisplayValue(actor_s *pSelf, unsigned __int8 *pBase, const a
                 0,
                 "ent %i: %s = %g %g %g\n",
                 pSelf->ent->s.number,
-                (const char *)(const char *)HIDWORD(COERCE_UNSIGNED_INT64(*(float *)&pBase[pField->ofs])),
                 *(float *)&pBase[pField->ofs],
                 *(float *)&pBase[pField->ofs + 4],
                 *(float *)&pBase[pField->ofs + 8]);
@@ -642,9 +766,13 @@ void __cdecl Cmd_AI_DisplayValue(actor_s *pSelf, unsigned __int8 *pBase, const a
             Com_Printf(0, "ent %i: %s = %i (targetname %s)\n", number, pField->name, v15, v17);
             return;
         case F_ENTHANDLE:
-            if (!EntHandle::isDefined((EntHandle *)&pBase[pField->ofs]))
+            enthand = (EntHandle *)&pBase[pField->ofs];
+            
+            //if (!EntHandle::isDefined((EntHandle *)&pBase[pField->ofs]))
+            if (!enthand->isDefined())
                 goto LABEL_18;
-            v18 = EntHandle::entnum((EntHandle *)&pBase[pField->ofs]);
+            //v18 = EntHandle::entnum((EntHandle *)&pBase[pField->ofs]);
+            v18 = enthand->entnum();
             if (v18 >= 0x880)
                 MyAssertHandler(
                     "c:\\trees\\cod3\\cod3src\\src\\game\\actor_fields.cpp",
@@ -674,9 +802,12 @@ void __cdecl Cmd_AI_DisplayValue(actor_s *pSelf, unsigned __int8 *pBase, const a
                 goto LABEL_38;
             goto LABEL_29;
         case F_SENTIENTHANDLE:
-            if (SentientHandle::isDefined((SentientHandle *)&pBase[pField->ofs]))
+            senthand = (SentientHandle *)&pBase[pField->ofs];
+            //if (SentientHandle::isDefined((SentientHandle *)&pBase[pField->ofs]))
+            if (senthand->isDefined())
             {
-                v18 = SentientHandle::sentient((SentientHandle *)&pBase[pField->ofs])->ent->s.number;
+                //v18 = SentientHandle::sentient((SentientHandle *)&pBase[pField->ofs])->ent->s.number;
+                v18 = senthand->sentient()->ent->s.number;
                 v24 = &level.gentities[v18];
                 targetname = v24->targetname;
                 if (v24->targetname)
@@ -953,26 +1084,24 @@ void __cdecl Cmd_AI_Name(
     const char *szName,
     int bInvertSelection)
 {
-    int v10; // r26
-    actor_s *Actor; // r31
-    bool v12; // r30
-    unsigned __int16 String; // [sp+50h] [-40h] BYREF
+    int offset; // [esp+4h] [ebp-Ch]
+    unsigned __int16 name; // [esp+8h] [ebp-8h] BYREF
+    actor_s *actor; // [esp+Ch] [ebp-4h]
 
-    v10 = I_strnicmp(szName, "actor_", 6) == 0 ? 284 : 292;
-    String = SL_GetString(szName, 0);
-    Actor = Actor_FirstActor(-1);
-    if (Actor)
+    if (I_strnicmp(szName, "actor_", 6))
+        offset = 360;
+    else
+        offset = 356;
+    name = SL_GetString(szName, 0);
+    for (actor = Actor_FirstActor(-1); actor; actor = Actor_NextActor(actor, -1))
     {
-        v12 = bInvertSelection == 0;
-        do
-        {
-            if ((String == *(unsigned __int16 *)(&Actor->ent->s.eType + v10)) == v12)
-                Cmd_AI_Dispatch(argc, Actor, fields, pField);
-            Actor = Actor_NextActor(Actor, -1);
-        } while (Actor);
+        if ((*(unsigned __int16 *)((char *)&actor->ent->s.number + offset) == name) == (bInvertSelection == 0))
+            Cmd_AI_Dispatch(argc, actor, fields, pField);
     }
-    Scr_SetString("", 0);
+    Scr_SetString(&name, 0);
 }
+
+
 
 void __cdecl Cmd_AI_f()
 {
@@ -1100,7 +1229,7 @@ void __cdecl GScr_AddFieldsForActor()
                     0,
                     "%s",
                     "(f - aifields) == (unsigned short)( f - aifields )");
-            Scr_AddClassField(0, v0->name, (unsigned __int16)(v1 / 20) | 0x8000);
+            Scr_AddClassField(0, (char*)v0->name, (unsigned __int16)(v1 / 20) | 0x8000);
             ++v0;
             v1 += 20;
         } while (v0->name);

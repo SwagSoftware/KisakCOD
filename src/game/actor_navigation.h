@@ -244,7 +244,7 @@ int __cdecl Path_FindPathFromAwayNotCrossPlanes(
     double fDistAway,
     float (*vNormal)[2],
     float *fDist,
-    float *iPlaneCount,
+    int iPlaneCount,
     int bAllowNegotiationLinks);
 int __cdecl Path_FindPathInCylinderWithLOS(
     path_t *pPath,
@@ -339,5 +339,5 @@ pathnode_t *__cdecl Path_FindPathAwayNotCrossPlanes(
     double fDistAway,
     float (*vNormal)[2],
     float *fDist,
-    float *iPlaneCount,
+    int iPlaneCount,
     int *bAllowNegotiationLinks);

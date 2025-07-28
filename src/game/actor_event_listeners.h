@@ -1,8 +1,15 @@
 #pragma once
+#include "actor_events.h"
 
 #ifndef KISAK_SP 
 #error This file is for SinglePlayer only 
 #endif
+
+struct AIEventListener
+{
+    int entIndex;
+    unsigned int events;
+};
 
 void __cdecl TRACK_actor_event_listener();
 void __cdecl Actor_EventListener_Init();

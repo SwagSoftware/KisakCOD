@@ -984,7 +984,7 @@ bool __cdecl Path_PredictionTrace(
         v23 = (float)((float)((float)v19 * (float)fraction) + (float)v16);
         *vTraceEndPos = v23;
         vTraceEndPos[2] = (float)((float)v20 * (float)fraction) + (float)v18;
-        if (!v17 && !a8)
+        if (!v17 && !allowStartSolid)
             break;
         if (!v53[0].allsolid && fraction == 1.0)
         {
@@ -2892,12 +2892,12 @@ PredictionTraceResult __cdecl Path_PredictionTraceCheckForEntities(
 
 bool __cdecl Path_LookaheadPredictionTrace(path_t *pPath, float *vStartPos, float *vEndPos)
 {
-    int v6; // r6
+    int mask; // r6
     int wDodgeEntity; // r11
-    int v9; // [sp+50h] [-20h] BYREF
-    float v10[4]; // [sp+58h] [-18h] BYREF
+    int checkentities; // [sp+50h] [-20h] BYREF
+    float endpos[4]; // [sp+58h] [-18h] BYREF
 
-    v6 = 8519697;
+    mask = 8519697;
     if (pPath->wDodgeCount)
     {
         wDodgeEntity = pPath->wDodgeEntity;
@@ -2905,13 +2905,13 @@ bool __cdecl Path_LookaheadPredictionTrace(path_t *pPath, float *vStartPos, floa
         {
             if (level.gentities[wDodgeEntity].actor)
             {
-                v9 = pPath->wDodgeEntity;
-                return Path_PredictionTraceCheckForEntities(vStartPos, vEndPos, &v9, 1, 2175, 8519697, v10) == PTR_SUCCESS;
+                checkentities = pPath->wDodgeEntity;
+                return Path_PredictionTraceCheckForEntities(vStartPos, vEndPos, &checkentities, 1, 2175, 8519697, endpos) == PTR_SUCCESS;
             }
-            v6 = 42074129;
+            mask = 42074129;
         }
     }
-    return Path_PredictionTrace(vStartPos, vEndPos, 2175, v6, v10, 18.0, a6, 1);
+    return Path_PredictionTrace(vStartPos, vEndPos, 2175, mask, endpos, 18.0, 1);
 }
 
 void __cdecl Path_UpdateLookaheadAmount(
@@ -4769,7 +4769,7 @@ int __cdecl Path_FindPathFromAwayNotCrossPlanes(
     double fDistAway,
     float (*vNormal)[2],
     float *fDist,
-    float *iPlaneCount,
+    int iPlaneCount,
     int bAllowNegotiationLinks)
 {
     pathnode_t *m_pBestNode; // r30
@@ -4784,12 +4784,14 @@ int __cdecl Path_FindPathFromAwayNotCrossPlanes(
     v42.m_vAwayFromPos[1] = vAwayFromPos[1];
     v42.m_vNormal = (float (*)[2])fDist;
     v42.m_vAwayFromPos[2] = vAwayFromPos[2];
-    v42.m_fDist = iPlaneCount;
+    v42.m_fDist = fDist;
     v42.m_fDistAway = fDistAway;
-    v42.m_iPlaneCount = a29;
+    v42.m_iPlaneCount = iPlaneCount;
     v42.m_fDistAwaySqrd = (float)fDistAway * (float)fDistAway;
+
     if (CustomSearchInfo_FindPathAwayNotCrossPlanes::IgnoreNode(&v42, pNodeFrom))
         return 0;
+
     if (Path_AStarAlgorithm<CustomSearchInfo_FindPathAwayNotCrossPlanes>(
         pPath,
         eTeam,
@@ -5419,79 +5421,40 @@ pathnode_t *__cdecl Path_FindPathAwayNotCrossPlanes(
     double fDistAway,
     float (*vNormal)[2],
     float *fDist,
-    float *iPlaneCount,
+    int iPlaneCount,
     int *bAllowNegotiationLinks)
 {
     float *v37; // r8
-    pathnode_t *result; // r3
+    pathnode_t *pNodeTo; // r3
     nearestNodeHeightCheck v39; // [sp+8h] [-3B8h]
-    int v40; // [sp+8h] [-3B8h]
-    int v41; // [sp+Ch] [-3B4h]
-    int v42; // [sp+10h] [-3B0h]
-    int v43; // [sp+14h] [-3ACh]
-    int v44; // [sp+18h] [-3A8h]
-    int v45; // [sp+1Ch] [-3A4h]
-    int v46; // [sp+20h] [-3A0h]
-    int v47; // [sp+24h] [-39Ch]
-    int v48; // [sp+28h] [-398h]
-    int v49; // [sp+2Ch] [-394h]
-    int v50; // [sp+30h] [-390h]
-    int v51; // [sp+34h] [-38Ch]
-    int v52; // [sp+38h] [-388h]
-    int v53; // [sp+3Ch] [-384h]
-    int v54; // [sp+40h] [-380h]
-    int v55; // [sp+44h] [-37Ch]
-    int v56; // [sp+48h] [-378h]
-    int v57; // [sp+4Ch] [-374h]
-    int v58; // [sp+50h] [-370h]
-    int v59; // [sp+58h] [-368h]
-    _BYTE v60[16]; // [sp+60h] [-360h] BYREF
-    pathsort_t v61[64]; // [sp+70h] [-350h] BYREF
+    int v60[16]; // [sp+60h] [-360h] BYREF
+    int nodeCount;
+    pathsort_t nodes[64]; // [sp+70h] [-350h] BYREF
 
-    result = Path_NearestNodeNotCrossPlanes(
+    pNodeTo = Path_NearestNodeNotCrossPlanes(
         vStartPos,
-        v61,
+        nodes,
         -2,
         192.0,
         0,
         fDist,
-        (int)iPlaneCount,
-        bAllowNegotiationLinks,
-        (int)v60,
-        v39);
-    if (result)
+        iPlaneCount,
+        &nodeCount,
+        64,
+        NEAREST_NODE_DO_HEIGHT_CHECK);
+
+    if (pNodeTo)
         return (pathnode_t *)Path_FindPathFromAwayNotCrossPlanes(
             pPath,
             eTeam,
-            result,
+            pNodeTo,
             vStartPos,
             vAwayFromPos,
             fDistAway,
             (float (*)[2])v37,
             fDist,
             iPlaneCount,
-            v40,
-            v41,
-            v42,
-            v43,
-            v44,
-            v45,
-            v46,
-            v47,
-            v48,
-            v49,
-            v50,
-            v51,
-            v52,
-            v53,
-            v54,
-            v55,
-            v56,
-            v57,
-            v58,
-            (int)bAllowNegotiationLinks,
-            v59,
-            a29);
-    return result;
+            bAllowNegotiationLinks);
+    return pNodeTo;
 }
 

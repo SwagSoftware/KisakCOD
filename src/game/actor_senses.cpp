@@ -95,8 +95,7 @@ int __cdecl Actor_CanSeePointFrom(
     const float *vStart,
     const float *vEnd,
     double fMaxDistSqrd,
-    int ignoreEntityNum,
-    int a6)
+    int ignoreEntityNum)
 {
     double v11; // fp13
     double v12; // fp12
@@ -115,13 +114,13 @@ int __cdecl Actor_CanSeePointFrom(
     if (!self->ent)
         MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\actor_senses.cpp", 102, 0, "%s", "self->ent");
     if (fMaxDistSqrd == 0.0)
-        return Actor_SightTrace(self, vStart, vEnd, a6);
+        return Actor_SightTrace(self, vStart, vEnd, ignoreEntityNum);
     v11 = (float)(vEnd[2] - vStart[2]);
     v12 = (float)(vEnd[1] - vStart[1]);
     v13 = (float)((float)((float)v12 * (float)v12)
         + (float)((float)((float)(*vEnd - *vStart) * (float)(*vEnd - *vStart)) + (float)((float)v11 * (float)v11)));
     if (v13 <= fMaxDistSqrd && v13 <= level.fFogOpaqueDistSqrd)
-        return Actor_SightTrace(self, vStart, vEnd, a6);
+        return Actor_SightTrace(self, vStart, vEnd, ignoreEntityNum);
     else
         return 0;
 }

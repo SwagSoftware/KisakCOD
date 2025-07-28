@@ -3,6 +3,56 @@
 #endif
 
 #include "actor_events.h"
+#include "actor.h"
+#include <universal/q_shared.h>
+
+#include "g_main.h"
+#include "actor_senses.h"
+#include "g_local.h"
+#include <script/scr_vm.h>
+#include <script/scr_const.h>
+#include "actor_grenade.h"
+#include "actor_threat.h"
+#include "actor_turret.h"
+#include "turret.h"
+#include "actor_event_listeners.h"
+#include <server/sv_game.h>
+
+struct $51E54BD14BE3E2EF9DA2A8BD94E6B80E
+{
+    const char *name;
+    const dvar_s **defaultDistDvar;
+    float defaultHeight;
+};
+
+const $51E54BD14BE3E2EF9DA2A8BD94E6B80E g_ai_event_info[23] =
+{
+  { NULL, NULL, 0.0 },
+  { NULL, NULL, 0.0 },
+  { "footstep", &ai_eventDistFootstep, 0.0 },
+  { "footsteplite", &ai_eventDistFootstepLite, 0.0 },
+  { "new_enemy", &ai_eventDistNewEnemy, 0.0 },
+  { "pain", &ai_eventDistPain, 0.0 },
+  { "death", &ai_eventDistDeath, 0.0 },
+  { "explosion", &ai_eventDistExplosion, 0.0 },
+  { "grenade_ping", &ai_eventDistGrenadePing, 0.0 },
+  { "projectile_ping", &ai_eventDistProjPing, 0.0 },
+  { "gunshot", &ai_eventDistGunShot, 0.0 },
+  { "silenced_shot", &ai_eventDistSilencedShot, 0.0 },
+  { NULL, NULL, 0.0 },
+  { NULL, NULL, 0.0 },
+  { "bullet", &ai_eventDistBullet, 45.0 },
+  { "projectile_impact", &ai_eventDistProjImpact, 45.0 },
+  { NULL, NULL, 0.0 },
+  { NULL, NULL, 0.0 },
+  { "badplacearc", &ai_eventDistBadPlace, 0.0 },
+  { NULL, NULL, 0.0 },
+  { NULL, NULL, 0.0 },
+  { "badplacevolume", &ai_eventDistBadPlace, 0.0 },
+  { NULL, NULL, 0.0 }
+};
+
+
 
 float __cdecl Actor_EventDefaultRadiusSqrd(ai_event_t eType)
 {
@@ -135,27 +185,14 @@ void __cdecl Actor_EventNewEnemy(actor_s *self, sentient_s *originator)
 {
     sentient_s *sentient; // r4
 
-    if (!self)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\actor_events.cpp", 505, 0, "%s", "self");
-    if (!originator)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\actor_events.cpp", 506, 0, "%s", "originator");
-    if (!originator->ent)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\actor_events.cpp", 507, 0, "%s", "originator->ent");
-    if (!EntHandle::isDefined(&originator->targetEnt))
-        MyAssertHandler(
-            "c:\\trees\\cod3\\cod3src\\src\\game\\actor_events.cpp",
-            508,
-            0,
-            "%s",
-            "originator->targetEnt.isDefined()");
-    if (!EntHandle::ent(&originator->targetEnt)->sentient)
-        MyAssertHandler(
-            "c:\\trees\\cod3\\cod3src\\src\\game\\actor_events.cpp",
-            509,
-            0,
-            "%s",
-            "originator->targetEnt.ent()->sentient");
-    sentient = EntHandle::ent(&originator->targetEnt)->sentient;
+    iassert(self);
+    iassert(originator);
+    iassert(originator->ent);
+    iassert(originator->targetEnt.isDefined());
+    iassert(originator->targetEnt.ent()->sentient);
+    
+    sentient = originator->targetEnt.ent()->sentient;
+
     if (originator->ent->actor)
         SentientInfo_Copy(self, originator->ent->actor, sentient - level.sentients);
     else
@@ -229,9 +266,7 @@ void __cdecl Actor_EventBullet(
     const float *vClosest,
     double fDistSqrd,
     double fRadiusSqrd,
-    PARM_SUPPRESSION suppression,
-    int a9,
-    int a10)
+    PARM_SUPPRESSION suppression)
 {
     sentient_s *sentient; // r4
 
@@ -257,7 +292,7 @@ void __cdecl Actor_EventBullet(
     {
         Actor_WasAttackedBy(self, sentient);
         Actor_UpdateLastKnownPos(self, originator->sentient);
-        if (!a10)
+        if (suppression == DO_SUPPRESSION)
             Actor_AddSuppressionLine(self, originator->sentient, vStart, vEnd);
     }
 }
@@ -367,7 +402,7 @@ void __cdecl Actor_ReceivePointEvent(
     case AI_EV_PROJECTILE_PING:
         if (!originator)
             MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\actor_events.cpp", 712, 0, "%s", "originator");
-        if (!EntHandle::isDefined(&originator->parent) || EntHandle::ent(&originator->parent) != self->ent)
+        if (!originator->parent.isDefined() || originator->parent.ent() != self->ent)
         {
         LABEL_50:
             Actor_EventGrenadePing(self, originator, vOrigin);
@@ -405,8 +440,7 @@ void __cdecl Actor_ReceiveLineEvent(
     const float *vEnd,
     const float *vClosest,
     double fDistSqrd,
-    double fRadiusSqrd,
-    int a9)
+    double fRadiusSqrd)
 {
     int v17; // r10
 
@@ -446,17 +480,7 @@ void __cdecl Actor_ReceiveLineEvent(
         }
         v17 = 1;
     LABEL_24:
-        Actor_EventBullet(
-            self,
-            originator,
-            vStart,
-            vEnd,
-            vClosest,
-            fDistSqrd,
-            fRadiusSqrd,
-            (PARM_SUPPRESSION)vClosest,
-            a9,
-            v17);
+        Actor_EventBullet(self, originator, vStart, vEnd, vClosest, fDistSqrd, fRadiusSqrd, DONT_SUPPRESS);
         Actor_DumpEvents(self, eType, originator);
         return;
     }

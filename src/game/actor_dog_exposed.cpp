@@ -78,23 +78,24 @@ void __cdecl Actor_Dog_Attack(actor_s *self)
 
 void __cdecl Actor_FindPathToGoalNearestNode(actor_s *self)
 {
-    pathnode_t *v5; // r30
-    pathnode_t *v6; // r5
+    pathnode_t *nodeTo; // r30
+    pathnode_t *nodeFrom; // r5
     _BYTE v7[16]; // [sp+50h] [-330h] BYREF
     pathsort_t nodes[64]; // [sp+60h] [-320h] BYREF
+    int iNodeCount;
 
-    v5 = Path_NearestNode(self->codeGoal.pos, nodes, -2, self->codeGoal.radius, a4, (int)v7, (nearestNodeHeightCheck)64);
-    if (v5)
+    nodeTo = Path_NearestNode(self->codeGoal.pos, nodes, -2, self->codeGoal.radius, &iNodeCount, 64, NEAREST_NODE_DO_HEIGHT_CHECK);
+    if (nodeTo)
     {
-        v6 = Sentient_NearestNode(self->sentient);
-        if (v6)
+        nodeFrom = Sentient_NearestNode(self->sentient);
+        if (nodeFrom)
             Path_FindPathGetCloseAsPossible(
                 &self->Path,
                 self->sentient->eTeam,
-                v6,
+                nodeFrom,
                 self->ent->r.currentOrigin,
-                v5,
-                v5->constant.vOrigin,
+                nodeTo,
+                nodeTo->constant.vOrigin,
                 1);
     }
     else
@@ -496,7 +497,7 @@ actor_think_result_t __cdecl Actor_Dog_Exposed_Think(actor_s *self)
     v8 = v7;
     if (!v7)
     {
-        Actor_OrientPitchToGround(self->ent, 1, v6, v5);
+        Actor_OrientPitchToGround(self->ent, 1);
         if (!TargetSentient)
         {
         LABEL_14:
@@ -519,7 +520,7 @@ LABEL_15:
     }
     else if (!Actor_HasPath(self))
     {
-        Actor_FindPathToGoalNearestNode(self, v11, v10, v9);
+        Actor_FindPathToGoalNearestNode(self);
         v3 = 0;
     }
     if (!Actor_HasPath(self))
@@ -531,7 +532,7 @@ LABEL_15:
         }
         if (TargetSentient && !Actor_HasPath(self))
         {
-            Actor_FindPathToGoalNearestNode(self, v14, v13, v12);
+            Actor_FindPathToGoalNearestNode(self);
             v3 = 0;
         }
     }

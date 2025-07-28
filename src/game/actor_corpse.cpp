@@ -7,6 +7,7 @@
 #include <xanim/xanim.h>
 #include "g_scr_main.h"
 #include "g_local.h"
+#include <cgame/cg_local.h>
 #include <script/scr_const.h>
 #include "sentient.h"
 #include "g_main.h"
@@ -295,7 +296,7 @@ void __cdecl G_PruneLoadedCorpses()
     int v3; // r11
     unsigned int *v4; // r9
     int *p_entnum; // r10
-    gentity_s *v6; // r30
+    gentity_s *ent; // r30
     int v7; // r27
     int *v8; // r29
     int v9; // r31
@@ -327,12 +328,10 @@ void __cdecl G_PruneLoadedCorpses()
     } while ((int)p_entnum < (int)&g_scr_data.actorBackup);
     if (v2 > 6)
     {
-        v6 = G_Find(0, 284, scr_const.player);
-        if (!v6)
-            MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\actor_corpse.cpp", 265, 0, "%s", "ent");
-        if (!v6->sentient)
-            MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\actor_corpse.cpp", 266, 0, "%s", "ent->sentient");
-        Sentient_GetEyePosition(v6->sentient, playerEyePos);
+        ent = G_Find(0, 284, scr_const.player);
+        iassert(ent);
+        iassert(ent->sentient);
+        Sentient_GetEyePosition(ent->sentient, playerEyePos);
         qsort(v11, v2, 4u, (int(__cdecl *)(const void *, const void *))G_PruneCorpsesSortCmp);
         v7 = v2 - 6;
         v8 = (int *)&v12;
@@ -554,8 +553,8 @@ void __cdecl Actor_GetBodyPlantAngles(
     float v26[4]; // [sp+70h] [-70h] BYREF
     float v27[4]; // [sp+80h] [-60h] BYREF
 
-    if (!pfRoll)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\actor_corpse.cpp", 408, 0, "%s", "pfPitch");
+    iassert(pfPitch);
+
     v15 = vOrigin[2];
     v20 = *vOrigin;
     v23 = v20;
@@ -564,18 +563,17 @@ void __cdecl Actor_GetBodyPlantAngles(
     v24 = v21;
     v25 = (float)v15 - (float)30.0;
     YawVectors(fYaw, iEntNum, v26);
-    v16 = Actor_SetBodyPlantAngle((int)iEntNum, iClipMask, vOrigin, vOrigin, v26, pfRoll);
+    v16 = Actor_SetBodyPlantAngle((int)iEntNum, iClipMask, vOrigin, vOrigin, v26, pfPitch);
     if (pfHeight)
     {
-        //if (I_fabs(*pfRoll) >= 30.0)
-        if (fabsf(*pfRoll) >= 30.0)
+        if (fabsf(*pfPitch) >= 30.0)
             *pfHeight = 0.0;
         else
             v16 = (float)((float)(Actor_SetBodyPlantAngle((int)iEntNum, iClipMask, vOrigin, vOrigin, v27, pfHeight)
                 + (float)v16)
                 * (float)0.5);
     }
-    if (a8)
+    if (pfRoll)
     {
         v17 = (float)((float)v16 - vOrigin[2]);
         if (v17 < 0.0)
@@ -591,7 +589,7 @@ void __cdecl Actor_GetBodyPlantAngles(
             if (G_TraceCapsuleComplete(&v20, actorMins, actorMaxs, &v23, (int)iEntNum, iClipMask))
                 v17 = 0.0;
         }
-        *a8 = v17;
+        *pfRoll = v17;
     }
 }
 
@@ -806,7 +804,7 @@ int __cdecl Actor_BecomeCorpse(gentity_s *self)
     p_ProneInfo = &actor->ProneInfo;
     ActorIndex = G_GetActorIndex(actor);
     IsProne = BG_ActorIsProne(&actor->ProneInfo, level.time);
-    v8 = v25;
+    v8 = (unsigned int*)v25;
     v9 = 6;
     do
     {
@@ -853,7 +851,7 @@ int __cdecl Actor_BecomeCorpse(gentity_s *self)
     Scr_FreeEntityNum(self->s.number, 0);
     G_DObjUpdate(self);
     v20 = &g_scr_data.actorCorpseInfo[FreeActorCorpseIndex].proneInfo;
-    v21 = v25;
+    v21 = (unsigned int*)v25;
     v22 = v20;
     v23 = 6;
     do

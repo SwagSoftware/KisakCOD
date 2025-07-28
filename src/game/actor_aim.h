@@ -60,7 +60,7 @@ void __cdecl Actor_ShootPos(actor_s *self, weaponParms *wp, float *pos);
 void __cdecl Actor_ClampShot(actor_s *self, weaponParms *wp);
 void __cdecl Actor_Shoot(actor_s *self, float accuracyMod, float (*posOverride)[3], enumLastShot lastShot);
 void __cdecl Actor_ShootBlank(actor_s *self);
-gentity_s *__cdecl Actor_Melee(actor_s *self, const float *direction);
+struct gentity_s *__cdecl Actor_Melee(actor_s *self, const float *direction);
 float __cdecl Sentient_GetScarinessForDistance(sentient_s *self, sentient_s *enemy, double fDist);
 void __cdecl Actor_GetAccuracyGraphFileName_FastFile(
     const WeaponDef *weaponDef,

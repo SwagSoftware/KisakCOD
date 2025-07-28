@@ -66,9 +66,7 @@ void __cdecl Actor_EventBullet(
     const float *vClosest,
     double fDistSqrd,
     double fRadiusSqrd,
-    PARM_SUPPRESSION suppression,
-    int a9,
-    int a10);
+    PARM_SUPPRESSION suppression);
 void __cdecl Actor_ReceivePointEvent(
     actor_s *self,
     gentity_s *originator,
@@ -84,8 +82,7 @@ void __cdecl Actor_ReceiveLineEvent(
     const float *vEnd,
     const float *vClosest,
     double fDistSqrd,
-    double fRadiusSqrd,
-    int a9);
+    double fRadiusSqrd);
 void __cdecl Actor_ReceiveArcEvent(
     actor_s *self,
     gentity_s *originator,

@@ -1,8 +1,20 @@
 #pragma once
+#include "game_public.h"
 
 #ifndef KISAK_SP 
 #error This file is for SinglePlayer only 
 #endif
+
+struct actor_s;
+
+struct actor_fields_s
+{
+    const char *name;
+    int ofs;
+    fieldtype_t type;
+    void(*setter)(actor_s *, const actor_fields_s *);
+    void(*getter)(actor_s *, const actor_fields_s *);
+};
 
 unsigned __int8 *__cdecl BaseForFields(unsigned __int8 *actor, const actor_fields_s *fields);
 const actor_fields_s *__cdecl FindFieldForName(const actor_fields_s *fields, const char *pszFieldName);
