@@ -22,6 +22,8 @@
 #include <xanim/dobj_utils.h>
 #include "cl_pose.h"
 #include <game/savememory.h>
+#include <server/sv_game.h>
+#include <qcommon/com_bsp.h>
 
 char bigConfigString[8192];
 const float g_color_table[8][4]
@@ -549,6 +551,7 @@ void __cdecl CL_ShutdownCGame()
     }
 }
 
+static int warnCount;
 int __cdecl CL_DObjCreateSkelForBone(DObj_s *obj, int boneIndex)
 {
     int SkelTimeStamp; // r31
@@ -919,14 +922,14 @@ void __cdecl CL_StartLoading(const char *mapname)
 
 void __cdecl CL_InitCGame(int localClientNum, int savegame)
 {
-    int v4; // r22
+    int startTime; // r22
     unsigned __int16 v5; // r11
-    const char *v6; // r31
+    const char *info; // r31
     const char *v7; // r31
     int v8; // r3
     __int64 v9; // r11
 
-    v4 = Sys_Milliseconds();
+    startTime = Sys_Milliseconds();
     SND_ErrorCleanup();
     if (!com_sv_running->current.enabled)
         MyAssertHandler(
@@ -963,10 +966,10 @@ void __cdecl CL_InitCGame(int localClientNum, int savegame)
             "cl->configstrings[CS_SERVERINFO]");
         v5 = clients[0].configstrings[0];
     }
-    v6 = SL_ConvertToString(v5);
-    if (!v6)
+    info = SL_ConvertToString(v5);
+    if (!info)
         MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\client\\cl_cgame.cpp", 828, 0, "%s", "info");
-    v7 = Info_ValueForKey(v6, "mapname");
+    v7 = Info_ValueForKey(info, "mapname");
     Com_GetBspFilename(clients[0].mapname, 64, v7);
     //Live_SetCurrentMapname(v7);
     clientUIActives[0].isLoadComplete = 1;
@@ -1017,13 +1020,14 @@ void __cdecl CL_InitCGame(int localClientNum, int savegame)
             "!CL_GetLocalClientConnection( localClientNum )->serverCommands.header.sent || cls.demoplaying");
     clientUIActives[0].cgameInitCalled = 1;
     CG_Init(localClientNum, savegame);
-    v8 = Sys_Milliseconds();
-    HIDWORD(v9) = "erverTime - cgameGlob->time > 0";
-    LODWORD(v9) = v8 - v4;
+    //v8 = Sys_Milliseconds();
+    //HIDWORD(v9) = "erverTime - cgameGlob->time > 0";
+    //LODWORD(v9) = v8 - v4;
     Com_Printf(
         14,
-        (const char *)(const char *)HIDWORD(COERCE_UNSIGNED_INT64((double)v9 * 0.001)),
-        (unsigned int)COERCE_UNSIGNED_INT64((double)v9 * 0.001));
+        "CL_InitCGame: %5.2f seconds\n",
+        Sys_Milliseconds() - startTime
+    );
     R_EndRegistration();
     Con_ClearNotify(0);
     Con_InitMessageBuffer();

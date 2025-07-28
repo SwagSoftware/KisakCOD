@@ -1,10 +1,13 @@
 #include "cg_local.h"
 #include "cg_public.h"
 #include <database/database.h>
-#include <client_mp/client_mp.h>
 #include <devgui/devgui.h>
-#include <cgame_mp/cg_local_mp.h>
 #include <universal/q_parse.h>
+#ifdef KISAK_MP
+#include <client_mp/client_mp.h>
+#include <cgame_mp/cg_local_mp.h>
+#elif KISAK_SP
+#endif
 
 const dvar_t *nightVisionFadeInOutTime;
 const dvar_t *nightVisionPowerOnTime;

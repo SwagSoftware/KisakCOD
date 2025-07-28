@@ -161,7 +161,7 @@ struct SpeakerMapInfo // sizeof=0x1D8
     char name[64];
     SpeakerMap speakerMap;              // ...
 };
-const struct snd_alias_t // sizeof=0x5C
+struct snd_alias_t // sizeof=0x5C
 {
     const char *aliasName;
     const char *subtitle;

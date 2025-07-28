@@ -489,11 +489,11 @@ char __cdecl cldTestSeparatingAxes(collData_t *tbData, const dVector3 *v0, const
     fp1 = fp0;
     fp2 = fp0;
     v81 = Vec3Dot(tbData->triangleNormal, boxAxis0);
-    v59 = fabs(v81);
+    v59 = I_fabs(v81);
     v80 = Vec3Dot(tbData->triangleNormal, boxAxis1);
-    v58 = fabs(v80);
+    v58 = I_fabs(v80);
     v79 = Vec3Dot(tbData->triangleNormal, boxAxis2);
-    v57 = fabs(v79);
+    v57 = I_fabs(v79);
     fR = v59 * tbData->vBoxHalfSize[0] + v58 * tbData->vBoxHalfSize[1] + v57 * tbData->vBoxHalfSize[2];
     if (!cldTestNormal(tbData, fp0, fR, tempNormal, 1))
         return 0;
@@ -606,9 +606,9 @@ char __cdecl cldTestSeparatingAxes(collData_t *tbData, const dVector3 *v0, const
     v18 = Vec3Dot(boxAxis0, tbData->triangleNormal);
     fp2 = v18 * triNormalMag + fp0;
     v78 = Vec3Dot(boxAxis2, tbData->triangleEdge0);
-    v56 = fabs(v78);
+    v56 = I_fabs(v78);
     v77 = Vec3Dot(boxAxis1, tbData->triangleEdge0);
-    v55 = fabs(v77);
+    v55 = I_fabs(v77);
     fR = v56 * tbData->vBoxHalfSize[1] + v55 * tbData->vBoxHalfSize[2];
     if (!cldTestEdge(tbData, fp1, fp2, fR, fD, tempNormal, 5))
         return 0;
@@ -637,9 +637,9 @@ char __cdecl cldTestSeparatingAxes(collData_t *tbData, const dVector3 *v0, const
     fp1 = fp0 - v20 * triNormalMag;
     fp2 = fp0;
     v76 = Vec3Dot(boxAxis2, tbData->triangleEdge1);
-    v54 = fabs(v76);
+    v54 = I_fabs(v76);
     v75 = Vec3Dot(boxAxis1, tbData->triangleEdge1);
-    v53 = fabs(v75);
+    v53 = I_fabs(v75);
     fR = v54 * tbData->vBoxHalfSize[1] + v53 * tbData->vBoxHalfSize[2];
     if (!cldTestEdge(tbData, fp0, fp1, fR, fD, tempNormal, 6))
         return 0;
@@ -669,9 +669,9 @@ char __cdecl cldTestSeparatingAxes(collData_t *tbData, const dVector3 *v0, const
     v23 = Vec3Dot(boxAxis0, tbData->triangleNormal);
     fp2 = fp0 - v23 * triNormalMag;
     v74 = Vec3Dot(boxAxis2, tbData->triangleEdge2);
-    v52 = fabs(v74);
+    v52 = I_fabs(v74);
     v73 = Vec3Dot(boxAxis1, tbData->triangleEdge2);
-    v51 = fabs(v73);
+    v51 = I_fabs(v73);
     fR = v52 * tbData->vBoxHalfSize[1] + v51 * tbData->vBoxHalfSize[2];
     if (!cldTestEdge(tbData, fp0, fp1, fR, fD, tempNormal, 7))
         return 0;
@@ -700,9 +700,9 @@ char __cdecl cldTestSeparatingAxes(collData_t *tbData, const dVector3 *v0, const
     v25 = Vec3Dot(boxAxis1, tbData->triangleNormal);
     fp2 = v25 * triNormalMag + fp0;
     v72 = Vec3Dot(boxAxis2, tbData->triangleEdge0);
-    v50 = fabs(v72);
+    v50 = I_fabs(v72);
     v71 = Vec3Dot(boxAxis0, tbData->triangleEdge0);
-    v49 = fabs(v71);
+    v49 = I_fabs(v71);
     fR = v50 * tbData->vBoxHalfSize[0] + v49 * tbData->vBoxHalfSize[2];
     if (!cldTestEdge(tbData, fp0, fp2, fR, fD, tempNormal, 8))
         return 0;
@@ -731,9 +731,9 @@ char __cdecl cldTestSeparatingAxes(collData_t *tbData, const dVector3 *v0, const
     fp1 = fp0 - v27 * triNormalMag;
     fp2 = fp0;
     v70 = Vec3Dot(boxAxis2, tbData->triangleEdge1);
-    v48 = fabs(v70);
+    v48 = I_fabs(v70);
     v69 = Vec3Dot(boxAxis0, tbData->triangleEdge1);
-    v47 = fabs(v69);
+    v47 = I_fabs(v69);
     fR = v48 * tbData->vBoxHalfSize[0] + v47 * tbData->vBoxHalfSize[2];
     if (!cldTestEdge(tbData, fp0, fp1, fR, fD, tempNormal, 9))
         return 0;
@@ -763,9 +763,9 @@ char __cdecl cldTestSeparatingAxes(collData_t *tbData, const dVector3 *v0, const
     v30 = Vec3Dot(boxAxis1, tbData->triangleNormal);
     fp2 = fp0 - v30 * triNormalMag;
     v68 = Vec3Dot(boxAxis2, tbData->triangleEdge2);
-    v46 = fabs(v68);
+    v46 = I_fabs(v68);
     v67 = Vec3Dot(boxAxis0, tbData->triangleEdge2);
-    v45 = fabs(v67);
+    v45 = I_fabs(v67);
     fR = v46 * tbData->vBoxHalfSize[0] + v45 * tbData->vBoxHalfSize[2];
     if (!cldTestEdge(tbData, fp0, fp1, fR, fD, tempNormal, 10))
         return 0;
@@ -794,9 +794,9 @@ char __cdecl cldTestSeparatingAxes(collData_t *tbData, const dVector3 *v0, const
     v32 = Vec3Dot(boxAxis2, tbData->triangleNormal);
     fp2 = v32 * triNormalMag + fp0;
     v66 = Vec3Dot(boxAxis1, tbData->triangleEdge0);
-    v44 = fabs(v66);
+    v44 = I_fabs(v66);
     v65 = Vec3Dot(boxAxis0, tbData->triangleEdge0);
-    v43 = fabs(v65);
+    v43 = I_fabs(v65);
     fR = v44 * tbData->vBoxHalfSize[0] + v43 * tbData->vBoxHalfSize[1];
     if (!cldTestEdge(tbData, fp0, fp2, fR, fD, tempNormal, 11))
         return 0;
@@ -825,9 +825,9 @@ char __cdecl cldTestSeparatingAxes(collData_t *tbData, const dVector3 *v0, const
     fp1 = fp0 - v34 * triNormalMag;
     fp2 = fp0;
     v64 = Vec3Dot(boxAxis1, tbData->triangleEdge1);
-    v42 = fabs(v64);
+    v42 = I_fabs(v64);
     v63 = Vec3Dot(boxAxis0, tbData->triangleEdge1);
-    v41 = fabs(v63);
+    v41 = I_fabs(v63);
     fR = v42 * tbData->vBoxHalfSize[0] + v41 * tbData->vBoxHalfSize[1];
     if (!cldTestEdge(tbData, fp0, fp1, fR, fD, tempNormal, 12))
         return 0;
@@ -857,9 +857,9 @@ char __cdecl cldTestSeparatingAxes(collData_t *tbData, const dVector3 *v0, const
     v37 = Vec3Dot(boxAxis2, tbData->triangleNormal);
     fp2 = fp0 - v37 * triNormalMag;
     v62 = Vec3Dot(boxAxis1, tbData->triangleEdge2);
-    v40 = fabs(v62);
+    v40 = I_fabs(v62);
     v61 = Vec3Dot(boxAxis0, tbData->triangleEdge2);
-    v39 = fabs(v61);
+    v39 = I_fabs(v61);
     fR = v40 * tbData->vBoxHalfSize[0] + v39 * tbData->vBoxHalfSize[1];
     if (!cldTestEdge(tbData, fp0, fp1, fR, fD, tempNormal, 13))
         return 0;
@@ -1292,11 +1292,11 @@ void __cdecl cldClipping(collData_t *tbData, const dVector3 *v0, const dVector3 
     vNr[0] = mTransposed[0] * v41[0] + mTransposed[1] * v41[1] + mTransposed[2] * v41[2];
     vNr[1] = mTransposed[4] * v41[0] + mTransposed[5] * v41[1] + mTransposed[6] * v41[2];
     vNr[2] = mTransposed[8] * v41[0] + mTransposed[9] * v41[1] + mTransposed[10] * v41[2];
-    v13 = fabs(vNr[0]);
+    v13 = I_fabs(vNr[0]);
     vAbsNormal[0] = v13;
-    v12 = fabs(vNr[1]);
+    v12 = I_fabs(vNr[1]);
     vAbsNormal[1] = v12;
-    v11 = fabs(vNr[2]);
+    v11 = I_fabs(vNr[2]);
     vAbsNormal[2] = v11;
     if (v13 >= (double)v12)
     {

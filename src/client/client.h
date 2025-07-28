@@ -8,6 +8,9 @@
 #include <qcommon/msg.h>
 #include <universal/memfile.h>
 #endif
+#include <gfx_d3d/r_debug.h>
+
+struct snd_alias_t;
 
 enum msgwnd_mode_t : int32_t
 {                                       // ...
@@ -403,6 +406,8 @@ extern const dvar_t *con_outputWindowColor;
 extern ConDrawInputGlob conDrawInputGlob;
 extern bool con_ignoreMatchPrefixOnly;
 extern int32_t con_inputMaxMatchesShown;
+
+extern Console con;
 
 
 // cl_keys
@@ -1072,24 +1077,8 @@ void __cdecl CL_ShutdownHunkUsers();
 void __cdecl CL_ShutdownDemo();
 void __cdecl CL_SaveSettings(MemoryFile *memFile);
 void __cdecl CL_RestoreSettings(MemoryFile *memFile);
-void __cdecl CL_MapLoading_CalcMovieToPlay(
-    const char *buffer,
-    const char *inMapName,
-    char *outMovieName,
-    int32_t a4,
-    int32_t a5,
-    int32_t a6,
-    int32_t a7,
-    int32_t a8,
-    int32_t a9,
-    int32_t a10,
-    int32_t a11,
-    const char *a12,
-    int32_t a13,
-    const char *a14,
-    int32_t a15,
-    char *a16);
-void __cdecl CL_MapLoading_CalcMovieToPlay_FastFile(const char *inMapName, char *outMovieName, const char *a3);
+void __cdecl CL_MapLoading_CalcMovieToPlay(const char *buffer, const char *inMapName, char *outMovieName);
+void __cdecl CL_MapLoading_CalcMovieToPlay_FastFile(const char *inMapName, char *outMovieName);
 void __cdecl CL_MapLoading_StartCinematic(const char *mapname, double volume, int32_t a3, const char *a4);
 void __cdecl CL_MapLoading(const char *mapname);
 void __cdecl CL_ResetSkeletonCache();
@@ -1292,7 +1281,7 @@ void __cdecl CL_ShutdownAll();
 void __cdecl CL_DisconnectLocalClient();
 void __cdecl CL_Disconnect_f();
 void __cdecl CL_ShutdownRef();
-void __cdecl CL_DrawLogo(const float *a1, Material *a2);
+void __cdecl CL_DrawLogo();
 void __cdecl CL_Init(int32_t localClientNum);
 
 
@@ -1301,32 +1290,36 @@ extern clientUIActive_t clientUIActives[1];
 extern clientActive_t clients[1];
 extern clientStatic_t cls;
 
-extern const dvar_t *const input_invertPitch;
-extern const dvar_t *const cl_avidemo;
-extern const dvar_t *const cl_testAnimWeight;
-extern const dvar_t *const cl_freemoveScale;
-extern const dvar_t *const motd;
-extern const dvar_t *const cl_sensitivity;
-extern const dvar_t *const cl_forceavidemo;
-extern const dvar_t *const m_yaw;
-extern const dvar_t *const m_pitch;
-extern const dvar_t *const nextdemo;
-extern const dvar_t *const cl_freemove;
-extern const dvar_t *const cl_showMouseRate;
-extern const dvar_t *const takeCoverWarnings;
-extern const dvar_t *const m_forward;
-extern const dvar_t *const cheat_items_set2;
-extern const dvar_t *const cl_mouseAccel;
-extern const dvar_t *const cheat_points;
-extern const dvar_t *const input_viewSensitivity;
-extern const dvar_t *const input_autoAim;
-extern const dvar_t *const cl_inGameVideo;
-extern const dvar_t *const cl_noprint;
-extern const dvar_t *const m_side;
-extern const dvar_t *const m_filter;
-extern const dvar_t *const cheat_items_set1;
-extern const dvar_t *const cl_freelook;
-extern const dvar_t *const cl_shownet;
+extern const dvar_t *input_invertPitch;
+extern const dvar_t *cl_avidemo;
+extern const dvar_t *cl_testAnimWeight;
+extern const dvar_t *cl_freemoveScale;
+extern const dvar_t *motd;
+extern const dvar_t *cl_sensitivity;
+extern const dvar_t *cl_forceavidemo;
+extern const dvar_t *m_yaw;
+extern const dvar_t *m_pitch;
+extern const dvar_t *nextdemo;
+extern const dvar_t *cl_freemove;
+extern const dvar_t *cl_showMouseRate;
+extern const dvar_t *takeCoverWarnings;
+extern const dvar_t *m_forward;
+extern const dvar_t *cheat_items_set2;
+extern const dvar_t *cl_mouseAccel;
+extern const dvar_t *cheat_points;
+extern const dvar_t *input_viewSensitivity;
+extern const dvar_t *input_autoAim;
+extern const dvar_t *cl_inGameVideo;
+extern const dvar_t *cl_noprint;
+extern const dvar_t *m_side;
+extern const dvar_t *m_filter;
+extern const dvar_t *cheat_items_set1;
+extern const dvar_t *cl_freelook;
+extern const dvar_t *cl_shownet;
 
+
+extern int cl_multi_gamepads_enabled;
+extern int cl_controller_in_use;
+extern int cl_last_controller_input;
 
 #endif

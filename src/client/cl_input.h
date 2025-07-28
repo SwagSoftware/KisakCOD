@@ -3,6 +3,7 @@
 #endif
 
 #include "client.h"
+#include <qcommon/msg.h>
 
 struct kbutton_t // sizeof=0x14
 {                                       // ...
@@ -100,21 +101,21 @@ void __cdecl IN_SprintDown();
 void __cdecl IN_SprintUp();
 void __cdecl IN_NightVisionDown();
 void __cdecl IN_NightVisionUp();
-void __cdecl CL_AdjustAngles(int a1, int a2, int a3, int a4, int a5, int a6, __int64 a7);
+void __cdecl CL_AdjustAngles();
 void CL_StanceButtonUpdate();
 void __cdecl CL_AddCurrentStanceToCmd(usercmd_s *cmd);
 void __cdecl CL_KeyMove(usercmd_s *cmd);
 int __cdecl CL_AllowInput();
 void __cdecl CL_GamepadMove(usercmd_s *cmd);
-void __cdecl CL_GetMouseMovement(clientActive_t *cl, float *mx, float *my, int a4, int a5, __int64 a6);
-void __cdecl CL_MouseMove(usercmd_s *cmd, int a2, int a3, int a4, int a5, int a6, __int64 a7);
+void __cdecl CL_GetMouseMovement(clientActive_t *cl, float *mx, float *my);
+void __cdecl CL_MouseMove(usercmd_s *cmd);
 void __cdecl CL_UpdateCmdButton(int *cmdButtons, int kbButton, int buttonFlag);
 void __cdecl CL_CmdButtons(usercmd_s *cmd);
 void __cdecl CL_SetUsercmdButtonsWeapons(int buttons, int weapon, int offhand);
 void __cdecl CL_FinishMove(usercmd_s *cmd);
 int __cdecl CG_HandleLocationSelectionInput(int localClientNum, usercmd_s *cmd);
-void __cdecl CL_CreateCmd(usercmd_s *result, int a2, int a3, int a4, int a5, int a6, __int64 a7);
-void __cdecl CL_CreateNewCommands(int a1, int a2, int a3, int a4, int a5);
+void __cdecl CL_CreateCmd(usercmd_s *result);
+void __cdecl CL_CreateNewCommands();
 void __cdecl CL_WritePacket();
 void __cdecl CL_ClearClientCommandPacket();
 void __cdecl CL_ClearClientThinkPacket();
@@ -124,3 +125,12 @@ void __cdecl CL_ShutdownInput();
 void __cdecl CL_ClearKeys(int localClientNum);
 void IN_MLookUp();
 void __cdecl CL_InitInput();
+
+extern const dvar_t *cl_stanceHoldTime;
+extern const dvar_t *cl_analog_attack_threshold;
+extern const dvar_t *cl_yawspeed;
+extern const dvar_t *cl_upspeed;
+extern const dvar_t *cl_sidespeed;
+extern const dvar_t *cl_pitchspeed;
+extern const dvar_t *cl_forwardspeed;
+extern const dvar_t *cl_anglespeedkey;

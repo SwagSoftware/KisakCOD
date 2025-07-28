@@ -689,70 +689,61 @@ void __cdecl OffsetFirstPersonView(int localClientNum, cg_s *cgameGlob)
         }
     }
 }
+
+// aislop
 float __cdecl CG_GetViewFov(int localClientNum)
 {
-    unsigned int ViewmodelWeaponIndex; // r30
-    WeaponDef *WeaponDef; // r29
-    double value; // fp30
-    double v7; // fp13
-    unsigned int v8; // r3
-    double v9; // fp1
-
-    if (localClientNum)
+    if (localClientNum != 0) {
         MyAssertHandler(
             "c:\\trees\\cod3\\cod3src\\src\\cgame\\cg_local.h",
-            910,
-            0,
+            910, 0,
             "%s\n\t(localClientNum) = %i",
-            "(localClientNum == 0)",
-            localClientNum);
-    ViewmodelWeaponIndex = BG_GetViewmodelWeaponIndex(&cgArray[0].predictedPlayerState);
-    WeaponDef = BG_GetWeaponDef(ViewmodelWeaponIndex);
-    value = cg_fov->current.value;
-    if (value < 1.0 || value > 160.0)
-        MyAssertHandler(
-            "c:\\trees\\cod3\\cod3src\\src\\cgame\\cg_view.cpp",
-            613,
-            1,
-            "%s\n\t(viewFov) = %g",
-            HIDWORD(value),
-            LODWORD(value));
-    if (BG_IsAimDownSightWeapon(ViewmodelWeaponIndex))
-    {
-        _FP12 = (float)(WeaponDef->fAdsZoomFov - (float)value);
-        __asm { fsel      f11, f12, f30, f13 }
-        if (cgArray[0].predictedPlayerState.fWeaponPosFrac == 1.0)
-        {
-            value = _FP11;
+            "(localClientNum == 0)", localClientNum
+        );
+    }
+
+    const playerState_s *ps = &cgArray[0].predictedPlayerState;
+    unsigned int viewmodelWeaponIndex = BG_GetViewmodelWeaponIndex(ps);
+    WeaponDef *weaponDef = BG_GetWeaponDef(viewmodelWeaponIndex);
+
+    float viewFov = cg_fov->current.value;
+
+    iassert(viewFov >= 1.0f && viewFov <= 160.0f);
+
+    if (BG_IsAimDownSightWeapon(viewmodelWeaponIndex)) {
+        float adsFov = weaponDef->fAdsZoomFov;
+        float fovDelta = adsFov - viewFov;
+        float adjustedFov = (fovDelta < 0.0f) ? viewFov : adsFov;
+
+        float frac = ps->fWeaponPosFrac;
+        if (frac == 1.0f) {
+            viewFov = adjustedFov;
         }
-        else if (cgArray[0].predictedPlayerState.fWeaponPosFrac != 0.0)
-        {
-            v7 = cgArray[0].playerEntity.bPositionToADS ? WeaponDef->fAdsZoomInFrac : WeaponDef->fAdsZoomOutFrac;
-            if ((float)(cgArray[0].predictedPlayerState.fWeaponPosFrac - (float)((float)1.0 - (float)v7)) > 0.0
-                && (float)((float)(cgArray[0].predictedPlayerState.fWeaponPosFrac - (float)((float)1.0 - (float)v7)) / (float)v7) > 0.0)
-            {
-                value = (float)-(float)((float)((float)((float)value - (float)_FP11)
-                    * (float)((float)(cgArray[0].predictedPlayerState.fWeaponPosFrac
-                        - (float)((float)1.0 - (float)v7))
-                        / (float)v7))
-                    - (float)value);
+        else if (frac > 0.0f) {
+            float zoomFrac = cgArray[0].playerEntity.bPositionToADS
+                ? weaponDef->fAdsZoomInFrac
+                : weaponDef->fAdsZoomOutFrac;
+
+            float blend = (frac - (1.0f - zoomFrac)) / zoomFrac;
+            if (blend > 0.0f) {
+                viewFov -= (viewFov - adjustedFov) * blend;
             }
         }
     }
-    if ((cgArray[0].predictedPlayerState.eFlags & 0x300) != 0)
-    {
-        v8 = CG_PlayerTurretWeaponIdx(localClientNum);
-        if (BG_GetWeaponDef(v8)->overlayInterface == WEAPOVERLAYINTERFACE_TURRETSCOPE)
-            v9 = turretScopeZoom->current.value;
+
+    if ((ps->eFlags & 0x300) != 0) {
+        unsigned int turretWeapon = CG_PlayerTurretWeaponIdx(localClientNum);
+        WeaponDef *turretDef = BG_GetWeaponDef(turretWeapon);
+
+        if (turretDef->overlayInterface == WEAPOVERLAYINTERFACE_TURRETSCOPE)
+            return turretScopeZoom->current.value;
         else
-            v9 = 55.0;
+            return 55.0f;
     }
-    else
-    {
-        v9 = value;
-    }
-    return *((float *)&v9 + 1);
+
+    return viewFov;
 }
+
 
 void __cdecl CG_CalcFov(int localClientNum)
 {
@@ -1834,7 +1825,7 @@ int __cdecl CG_DrawActiveFrame(
         viewlocked_entNum = cgArray[0].predictedPlayerState.viewlocked_entNum;
     else
         viewlocked_entNum = 2175;
-    CG_UpdateRumble(localClientNum);
+    //CG_UpdateRumble(localClientNum); // KISAKTODO 
     if (!cgArray[0].predictedPlayerState.locationSelectionInfo)
     {
         Key_RemoveCatcher(localClientNum, -9);
@@ -1870,7 +1861,7 @@ int __cdecl CG_DrawActiveFrame(
         cgArray[0].nextSnap->ps.clientNum,
         cgArray[0].refdef.vieworg,
         cgArray[0].refdef.viewaxis);
-    CG_SetRumbleReceiver(localClientNum, cgArray[0].nextSnap->ps.clientNum, cgArray[0].refdef.vieworg);
+    //CG_SetRumbleReceiver(localClientNum, cgArray[0].nextSnap->ps.clientNum, cgArray[0].refdef.vieworg); // KISAKTODO
     CG_AddViewWeapon(localClientNum);
     CG_UpdateTestFX(localClientNum);
     if (cgArray[0].nextSnap->serverTime != G_GetServerSnapTime())

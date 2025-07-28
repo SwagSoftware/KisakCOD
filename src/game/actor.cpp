@@ -1300,7 +1300,7 @@ void __cdecl Actor_HandleInvalidPath(actor_s *self)
                 Com_Printf(
                     18,
                     "AI (entity %d, origin %.1f %.1f %.1f) couldn't find path to goal. Maybe suppressed.\n",
-                    (unsigned int)HIDWORD(COERCE_UNSIGNED_INT64(self->ent->r.currentOrigin[0])),
+                    0, // KISAKTODO ent id
                     self->ent->r.currentOrigin[0],
                     self->ent->r.currentOrigin[1],
                     self->ent->r.currentOrigin[2]);
@@ -1309,9 +1309,8 @@ void __cdecl Actor_HandleInvalidPath(actor_s *self)
         {
             Com_Printf(
                 18,
-                "%sAI (entity %d, origin %.1f %.1f %.1f) couldn't find path to goal.\n",
-                "^1",
-                (unsigned int)HIDWORD(COERCE_UNSIGNED_INT64(self->ent->r.currentOrigin[0])),
+                "AI (entity %d, origin %.1f %.1f %.1f) couldn't find path to goal.\n",
+                0, // KISAKTODO ent id
                 self->ent->r.currentOrigin[0],
                 self->ent->r.currentOrigin[1],
                 self->ent->r.currentOrigin[2]);
@@ -1375,7 +1374,7 @@ bool __cdecl Actor_EnemyInPathFightDist(actor_s *self, sentient_s *enemy)
     v5 = (float)(enemy->ent->r.currentOrigin[0] - self->ent->r.currentOrigin[0]);
     v6 = (float)(enemy->ent->r.currentOrigin[1] - self->ent->r.currentOrigin[1]);
     if ((float)((float)((float)v6 * (float)v6) + (float)((float)v5 * (float)v5)) < (double)(float)(self->pathEnemyFightDist* self->pathEnemyFightDist))
-        return fabs((float)(enemy->ent->r.currentOrigin[2] - self->ent->r.currentOrigin[2])) <= self->codeGoal.height;
+        return I_fabs((float)(enemy->ent->r.currentOrigin[2] - self->ent->r.currentOrigin[2])) <= self->codeGoal.height;
         //return I_fabs((float)(enemy->ent->r.currentOrigin[2] - self->ent->r.currentOrigin[2])) <= self->codeGoal.height;
     return result;
 }
@@ -1618,9 +1617,11 @@ int __cdecl Actor_InFixedNodeExposedCombat(actor_s *self)
     }
     if ((AnimScriptList *)self->pAnimScriptFunc != &g_scr_data.anim)
         return 0;
+
     _FP12 = (float)((float)64.0 - self->codeGoal.radius);
     __asm { fsel      f1, f12, f13, f0# buffer }
     v7 = Actor_PointNearPoint(self->ent->r.currentOrigin, self->codeGoal.pos, _FP1);
+
     v8 = 1;
     if (!v7)
         return 0;
@@ -2365,8 +2366,7 @@ void __cdecl Path_UpdateMovementDelta(actor_s *self, double fMoveDist)
     {
         sideMove = self->sideMove;
         v18 = (float)(p_Path->fLookaheadDist * (float)0.5);
-        //v19 = I_fabs(sideMove);
-        v19 = fabs(sideMove);
+        v19 = I_fabs(sideMove);
         v20 = (float)(p_Path->fLookaheadDist * v32);
         if (v18 > v19)
             v18 = v19;
@@ -4159,7 +4159,7 @@ int __cdecl Actor_MoveAwayNoWorse(actor_s *self)
             && Vec2DistanceSq(self->Physics.vOrigin, v4->ent->r.currentOrigin) < 900.0
             && Vec2DistanceSq(self->ent->r.currentOrigin, v4->ent->r.currentOrigin) >= 900.0
             //&& I_fabs((float)(self->ent->r.currentOrigin[2] - v4->ent->r.currentOrigin[2])) < 80.0)
-            && fabs((float)(self->ent->r.currentOrigin[2] - v4->ent->r.currentOrigin[2])) < 80.0)
+            && I_fabs((float)(self->ent->r.currentOrigin[2] - v4->ent->r.currentOrigin[2])) < 80.0)
         {
             if (!v4->pCloseEnt.isDefined() && !Actor_AtClaimNode(v4))
                 v4->pCloseEnt.setEnt(self->ent);

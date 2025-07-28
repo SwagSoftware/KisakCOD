@@ -25,7 +25,7 @@ struct netField_t
 	int bits;
 };
 
-struct __declspec(align(2)) usercmd_s
+struct usercmd_s
 {
     int serverTime;
     int buttons;

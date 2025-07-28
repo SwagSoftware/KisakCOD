@@ -147,8 +147,6 @@ void __cdecl SV_GetUsercmd(int clientNum, usercmd_s *cmd)
 #ifdef KISAK_MP
     iassert(sv_maxclients->current.integer >= 1 && sv_maxclients->current.integer <= 64);
     iassert(clientNum < sv_maxclients->current.integer);
-#elif KISAK_SP
-    iassert(clientNum < MAX_CLIENTS);
 #endif
     memcpy(cmd, &svs.clients[clientNum].lastUsercmd, sizeof(usercmd_s));
 }
@@ -618,10 +616,10 @@ bool SV_SetBrushModel(gentity_s *ent)
 
     iassert(ent->r.inuse);
 
-    if (!CM_ClipHandleIsValid(ent->s.index))
+    if (!CM_ClipHandleIsValid(ent->s.index.item))
         return false;
 
-    CM_ModelBounds(ent->s.index, mins, maxs);
+    CM_ModelBounds(ent->s.index.item, mins, maxs);
 
     ent->r.mins[0] = mins[0];
     ent->r.mins[1] = mins[1];
@@ -631,7 +629,7 @@ bool SV_SetBrushModel(gentity_s *ent)
     ent->r.maxs[1] = maxs[1];
     ent->r.maxs[2] = maxs[2];
 
-    index = ent->s.index;
+    index = ent->s.index.item;
     ent->r.bmodel = 1;
 
     ent->r.contents = CM_ContentsOfModel(index);
@@ -639,6 +637,33 @@ bool SV_SetBrushModel(gentity_s *ent)
     SV_LinkEntity(ent);
 
     return true;
+}
+
+void SV_SetCheckSum(int checksum)
+{
+    sv.checksum = checksum;
+}
+
+int SV_DObjSetRotTransIndex(const gentity_s *ent, int *partBits, int boneIndex)
+{
+    const DObj_s *obj; // r31
+
+    obj = Com_GetServerDObj(ent->s.number);
+
+    iassert(obj);
+
+    return DObjSetRotTransIndex((DObj_s*)obj, partBits, boneIndex);
+}
+
+DObjAnimMat *SV_DObjGetRotTransArray(const gentity_s *ent)
+{
+    const DObj_s *obj; // r31
+
+    obj = Com_GetServerDObj(ent->s.number);
+
+    iassert(obj);
+
+    return DObjGetRotTransArray(obj);
 }
 
 #endif

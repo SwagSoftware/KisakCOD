@@ -6,14 +6,6 @@
 #error This file is for SinglePlayer only 
 #endif
 
-enum aiGoalSources : __int32
-{
-    AI_GOAL_SRC_SCRIPT_GOAL = 0x0,
-    AI_GOAL_SRC_SCRIPT_ENTITY_GOAL = 0x1,
-    AI_GOAL_SRC_FRIENDLY_CHAIN = 0x2,
-    AI_GOAL_SRC_ENEMY = 0x3,
-};
-
 enum PredictionTraceResult : __int32
 {
     PTR_SUCCESS = 0x0,
@@ -104,8 +96,7 @@ bool __cdecl Path_PredictionTrace(
     int mask,
     float *vTraceEndPos,
     double stepheight,
-    int allowStartSolid,
-    int a8);
+    int allowStartSolid);
 int __cdecl Path_IsTrimmed(path_t *pPath);
 void __cdecl Path_RemoveCompletedPathPoints(path_t *pPath, __int16 pathPointIndex);
 void __cdecl Path_TrimCompletedPath(path_t *pPath, const float *vStartPos);
@@ -141,8 +132,7 @@ int __cdecl Path_TrimToSeePoint(
     actor_s *pActor,
     double fMaxDistSqrd,
     int iIgnoreEntityNum,
-    const float *vPoint,
-    const float *a7);
+    const float *vPoint);
 PredictionTraceResult __cdecl Path_PredictionTraceCheckForEntities(
     float *vStartPos,
     float *vEndPos,
@@ -151,7 +141,7 @@ PredictionTraceResult __cdecl Path_PredictionTraceCheckForEntities(
     int entityIgnore,
     int mask,
     float *vTraceEndPos);
-bool __cdecl Path_LookaheadPredictionTrace(path_t *pPath, float *vStartPos, float *vEndPos, int a4, int a5, int a6);
+bool __cdecl Path_LookaheadPredictionTrace(path_t *pPath, float *vStartPos, float *vEndPos);
 void __cdecl Path_UpdateLookaheadAmount(
     path_t *pPath,
     float *vStartPos,
@@ -159,15 +149,12 @@ void __cdecl Path_UpdateLookaheadAmount(
     int bReduceLookaheadAmount,
     double dist,
     int lookaheadNextNode,
-    double maxLookaheadAmountIfReduce,
-    __int16 a8);
+    double maxLookaheadAmountIfReduce);
 void __cdecl Path_CalcLookahead_Completed(
     path_t *pPath,
     float *vStartPos,
     int bReduceLookaheadAmount,
-    double totalArea,
-    int a5,
-    int a6);
+    double totalArea);
 void __cdecl Path_CalcLookahead(path_t *pPath, float *vStartPos, int bReduceLookaheadAmount, int a4, int a5);
 void __cdecl Path_CheckNodeCountForDodge(path_t *pPath, int numNeeded, pathpoint_t **pt, int *startIndex);
 void __cdecl Path_TrimToBadPlaceLink(path_t *pPath, team_t eTeam);
@@ -212,27 +199,7 @@ int __cdecl Path_AttemptDodge(
     int entityCount,
     int entityIgnore,
     int mask,
-    int bCheckLookahead,
-    int a11,
-    int a12,
-    int a13,
-    int a14,
-    int a15,
-    int a16,
-    int a17,
-    int a18,
-    int a19,
-    int a20,
-    int a21,
-    int a22,
-    int a23,
-    int a24,
-    int a25,
-    int a26,
-    int a27,
-    int a28,
-    int a29,
-    int a30);
+    int bCheckLookahead);
 pathnode_t *__cdecl Path_FindCloseNode(
     team_t eTeam,
     pathnode_t *pNodeFrom,
@@ -247,27 +214,7 @@ int __cdecl Path_FindPathFromToWithWidth(
     const float *vGoalPos,
     int bAllowNegotiationLinks,
     double width,
-    float *perp,
-    int a10,
-    int a11,
-    int a12,
-    int a13,
-    int a14,
-    int a15,
-    int a16,
-    int a17,
-    int a18,
-    int a19,
-    int a20,
-    int a21,
-    int a22,
-    int a23,
-    int a24,
-    int a25,
-    int a26,
-    int a27,
-    int a28,
-    float *a29);
+    float *perp);
 int __cdecl Path_FindPathFromToNotCrossPlanes(
     path_t *pPath,
     team_t eTeam,
@@ -278,27 +225,7 @@ int __cdecl Path_FindPathFromToNotCrossPlanes(
     float (*vNormal)[2],
     float *fDist,
     int iPlaneCount,
-    int bAllowNegotiationLinks,
-    int a11,
-    int a12,
-    int a13,
-    int a14,
-    int a15,
-    int a16,
-    int a17,
-    int a18,
-    int a19,
-    int a20,
-    int a21,
-    int a22,
-    int a23,
-    int a24,
-    int a25,
-    int a26,
-    int a27,
-    int a28,
-    int a29,
-    int a30);
+    int bAllowNegotiationLinks);
 int __cdecl Path_FindPathFromAway(
     path_t *pPath,
     team_t eTeam,
@@ -318,28 +245,7 @@ int __cdecl Path_FindPathFromAwayNotCrossPlanes(
     float (*vNormal)[2],
     float *fDist,
     float *iPlaneCount,
-    int bAllowNegotiationLinks,
-    int a11,
-    int a12,
-    int a13,
-    int a14,
-    int a15,
-    int a16,
-    int a17,
-    int a18,
-    int a19,
-    int a20,
-    int a21,
-    int a22,
-    int a23,
-    int a24,
-    int a25,
-    int a26,
-    int a27,
-    int a28,
-    int a29,
-    int a30,
-    int a31);
+    int bAllowNegotiationLinks);
 int __cdecl Path_FindPathInCylinderWithLOS(
     path_t *pPath,
     team_t eTeam,
@@ -347,8 +253,7 @@ int __cdecl Path_FindPathInCylinderWithLOS(
     float *vGoalPos,
     const actor_goal_s *goal,
     double fWithinDistSqrd,
-    int bAllowNegotiationLinks,
-    int a8);
+    int bAllowNegotiationLinks);
 int __cdecl Path_FindPathInCylinderWithLOSNotCrossPlanes(
     path_t *pPath,
     team_t eTeam,
@@ -359,28 +264,7 @@ int __cdecl Path_FindPathInCylinderWithLOSNotCrossPlanes(
     float (*vNormal)[2],
     float *fDist,
     float *iPlaneCount,
-    int bAllowNegotiationLinks,
-    int a11,
-    int a12,
-    int a13,
-    int a14,
-    int a15,
-    int a16,
-    int a17,
-    int a18,
-    int a19,
-    int a20,
-    int a21,
-    int a22,
-    int a23,
-    int a24,
-    int a25,
-    int a26,
-    int a27,
-    int a28,
-    int *a29,
-    int a30,
-    int a31);
+    int bAllowNegotiationLinks);
 pathnode_t *__cdecl Path_FindPathFromInCylinder(
     path_t *pPath,
     team_t eTeam,
@@ -390,28 +274,7 @@ pathnode_t *__cdecl Path_FindPathFromInCylinder(
     float *vOrigin,
     double fRadiusSqrd,
     double fHalfHeightSqrd,
-    int bAllowNegotiationLinks,
-    int a10,
-    int a11,
-    int a12,
-    int a13,
-    int a14,
-    int a15,
-    int a16,
-    int a17,
-    int a18,
-    int a19,
-    int a20,
-    int a21,
-    int a22,
-    int a23,
-    int a24,
-    int a25,
-    int a26,
-    int a27,
-    int a28,
-    int a29,
-    int a30);
+    int bAllowNegotiationLinks);
 int __cdecl Path_FindPathFromInCylinderNotCrossPlanes(
     path_t *pPath,
     team_t eTeam,
@@ -424,31 +287,7 @@ int __cdecl Path_FindPathFromInCylinderNotCrossPlanes(
     float (*vNormal)[2],
     float *fDist,
     int iPlaneCount,
-    int bAllowNegotiationLinks,
-    int a13,
-    int a14,
-    int a15,
-    int a16,
-    int a17,
-    int a18,
-    int a19,
-    int a20,
-    int a21,
-    int a22,
-    int a23,
-    int a24,
-    int a25,
-    int a26,
-    int a27,
-    int a28,
-    int a29,
-    float *a30,
-    int a31,
-    float *a32,
-    int a33,
-    int *a34,
-    int a35,
-    int a36);
+    int bAllowNegotiationLinks);
 const pathnode_t *__cdecl Path_FindFacingNode(sentient_s *pSelf, sentient_s *pOther, sentient_info_t *pInfo);
 int __cdecl Path_FindPathGetCloseAsPossible(
     path_t *pPath,
@@ -465,8 +304,7 @@ int __cdecl Path_FindPathWithWidth(
     float *vGoalPos,
     int bAllowNegotiationLinks,
     double width,
-    float *perp,
-    float *a8);
+    float *perp);
 int __cdecl Path_FindPathNotCrossPlanes(
     path_t *pPath,
     team_t eTeam,
@@ -485,34 +323,14 @@ pathnode_t *__cdecl Path_FindPathFromNotCrossPlanes(
     float (*vNormal)[2],
     float *fDist,
     int *iPlaneCount,
-    int bAllowNegotiationLinks,
-    int a10,
-    int a11,
-    int a12,
-    int a13,
-    int a14,
-    int a15,
-    int a16,
-    int a17,
-    int a18,
-    int a19,
-    int a20,
-    int a21,
-    int a22,
-    int a23,
-    int a24,
-    int a25,
-    int a26,
-    int a27,
-    int a28);
+    int bAllowNegotiationLinks);
 pathnode_t *__cdecl Path_FindPathAway(
     path_t *pPath,
     team_t eTeam,
     float *vStartPos,
     float *vAwayFromPos,
     double fDistAway,
-    int bAllowNegotiationLinks,
-    int a7);
+    int bAllowNegotiationLinks);
 pathnode_t *__cdecl Path_FindPathAwayNotCrossPlanes(
     path_t *pPath,
     team_t eTeam,
@@ -522,24 +340,4 @@ pathnode_t *__cdecl Path_FindPathAwayNotCrossPlanes(
     float (*vNormal)[2],
     float *fDist,
     float *iPlaneCount,
-    int *bAllowNegotiationLinks,
-    int a10,
-    int a11,
-    int a12,
-    int a13,
-    int a14,
-    int a15,
-    int a16,
-    int a17,
-    int a18,
-    int a19,
-    int a20,
-    int a21,
-    int a22,
-    int a23,
-    int a24,
-    int a25,
-    int a26,
-    int a27,
-    int a28,
-    int a29);
+    int *bAllowNegotiationLinks);

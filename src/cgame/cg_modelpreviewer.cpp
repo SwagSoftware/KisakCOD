@@ -1640,7 +1640,7 @@ void DrawDistFromModel()
     }
 }
 
-void __fastcall MdlPrvDrawOverlayGamepad()
+void __cdecl MdlPrvDrawOverlayGamepad()
 {
     const float *v0; // r5
     const char *v1; // r4

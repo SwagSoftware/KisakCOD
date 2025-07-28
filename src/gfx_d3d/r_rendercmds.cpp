@@ -1805,3 +1805,22 @@ void __cdecl R_InitTempSkinBuf()
         data->tempSkinBuf = (unsigned __int8 *)Z_VirtualReserve(0x480000);
     }
 }
+
+void R_AddCmdSetViewportValues(int x, int y, int width, int height)
+{
+    GfxCmdHeader *cmd; // r30
+
+    iassert(width > 0);
+    iassert(height > 0);
+    
+    cmd = R_GetCommandBuffer(RC_SET_VIEWPORT, 20);
+
+    iassert(cmd);
+
+    _DWORD *writer; // hack
+
+    writer[1] = x;
+    writer[2] = y;
+    writer[3] = width;
+    writer[4] = height;
+}

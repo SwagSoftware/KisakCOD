@@ -1347,6 +1347,8 @@ extern const dvar_t *nightVisionDisableEffects;
 
 
 #ifdef KISAK_SP
+#include "cg_main.h"
+
 inline int CG_GetEntityIndex(const centity_s *cent)
 {
     iassert(cent->nextState.number == (cent - &cg_entitiesArray[0][0]) % MAX_GENTITIES);

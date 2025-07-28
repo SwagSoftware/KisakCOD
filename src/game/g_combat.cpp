@@ -1291,8 +1291,8 @@ int __cdecl G_CanRadiusDamageFromPos(
         v111[0] = (float)v62 * (float)v59;
         v111[2] = (float)v62 * (float)0.0;
         Vec3Cross(v112, v111, &v113);
-        v66 = fabs((float)((float)((float)v50 - v93) * (float)v64));
-        v67 = fabs((float)((float)((float)v51 - v94) * (float)v63));
+        v66 = I_fabs((float)((float)((float)v50 - v93) * (float)v64));
+        v67 = I_fabs((float)((float)((float)v51 - v94) * (float)v63));
         v69 = (float)((float)((float)fabs((float)(v114 * (float)((float)v51 - v94)))
             + (float)fabs((float)(v113 * (float)((float)v50 - v93))))
             + (float)fabs((float)((float)((float)v52 - v95) * v115)));

@@ -1,10 +1,12 @@
 #pragma once
 #include <client/client.h>
 #include <bgame/bg_local.h>
+#include "cg_local.h"
 
 #ifndef KISAK_SP
 #error This file is for SinglePlayer only
 #endif
+#include <gfx_d3d/r_reflection_probe.h>
 
 struct rectDef_s;
 struct windowDef_t;
@@ -12,6 +14,7 @@ struct dvar_s;
 struct playerState_s;
 struct snd_alias_list_t;
 struct PhysPreset;
+struct SndEntHandle;
 
 struct cgs_t
 {
@@ -518,6 +521,8 @@ extern const dvar_t *cg_laserLightBeginOffset;
 extern const dvar_t *cg_tracerScrewDist;
 extern const dvar_t *cg_tracerLength;
 extern const dvar_t *cg_cinematicFullscreen;
+
+#define CS_EFFECT_NAMES 211
 
 
 inline cgs_t *CG_GetLocalClientStaticGlobals(int localClientNum)

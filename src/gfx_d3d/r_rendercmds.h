@@ -829,6 +829,8 @@ bool __cdecl R_IsInRemoteScreenUpdate();
 
 void __cdecl R_InitTempSkinBuf();
 
+void R_AddCmdSetViewportValues(int x, int y, int width, int height);
+
 void __cdecl R_ShutdownDynamicMesh(GfxMeshData *mesh);
 void __cdecl R_ShutdownRenderBuffers();
 

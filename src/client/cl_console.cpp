@@ -2620,7 +2620,26 @@ void __cdecl Con_DrawMessageWindowOldToNew(
 
 bool __cdecl CL_ShouldntDrawMessageWindow(int32_t localClientNum)
 {
+#ifdef KISAK_MP
     return CL_GetLocalClientGlobals(localClientNum)->snap.ps.pm_type != PM_INTERMISSION && !CL_ShouldDisplayHud(localClientNum);
+#elif KISAK_SP
+    unsigned __int8 v1; // r11
+
+    if (localClientNum)
+        MyAssertHandler(
+            "c:\\trees\\cod3\\cod3src\\src\\client\\client.h",
+            548,
+            0,
+            "%s\n\t(localClientNum) = %i",
+            "(localClientNum == 0)",
+            localClientNum);
+    if ((clientUIActives[0].keyCatchers & 0x10) == 0)
+        return 0;
+    v1 = 1;
+    if (clientUIActives[0].displayHUDWithKeycatchUI)
+        return 0;
+    return v1;
+#endif
 }
 
 void __cdecl Con_DrawMiniConsole(int32_t localClientNum, int32_t xPos, int32_t yPos, float alpha)

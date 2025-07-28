@@ -18,6 +18,11 @@
 #include "cl_parse.h"
 #include "cl_demo.h"
 #include <gfx_d3d/r_init.h>
+#include <gfx_d3d/r_cinematic.h>
+#include <stringed/stringed_hooks.h>
+#include "cl_input.h"
+#include <cgame/cg_main.h>
+#include <ragdoll/ragdoll.h>
 
 enum MovieToPlayScriptOp : __int32
 {
@@ -78,32 +83,32 @@ clientUIActive_t clientUIActives[1];
 clientActive_t clients[1];
 clientStatic_t cls;
 
-const dvar_t *const input_invertPitch;
-const dvar_t *const cl_avidemo;
-const dvar_t *const cl_testAnimWeight;
-const dvar_t *const cl_freemoveScale;
-const dvar_t *const motd;
-const dvar_t *const cl_sensitivity;
-const dvar_t *const cl_forceavidemo;
-const dvar_t *const m_yaw;
-const dvar_t *const m_pitch;
-const dvar_t *const nextdemo;
-const dvar_t *const cl_freemove;
-const dvar_t *const cl_showMouseRate;
-const dvar_t *const takeCoverWarnings;
-const dvar_t *const m_forward;
-const dvar_t *const cheat_items_set2;
-const dvar_t *const cl_mouseAccel;
-const dvar_t *const cheat_points;
-const dvar_t *const input_viewSensitivity;
-const dvar_t *const input_autoAim;
-const dvar_t *const cl_inGameVideo;
-const dvar_t *const cl_noprint;
-const dvar_t *const m_side;
-const dvar_t *const m_filter;
-const dvar_t *const cheat_items_set1;
-const dvar_t *const cl_freelook;
-const dvar_t *const cl_shownet;
+const dvar_t *input_invertPitch;
+const dvar_t *cl_avidemo;
+const dvar_t *cl_testAnimWeight;
+const dvar_t *cl_freemoveScale;
+const dvar_t *motd;
+const dvar_t *cl_sensitivity;
+const dvar_t *cl_forceavidemo;
+const dvar_t *m_yaw;
+const dvar_t *m_pitch;
+const dvar_t *nextdemo;
+const dvar_t *cl_freemove;
+const dvar_t *cl_showMouseRate;
+const dvar_t *takeCoverWarnings;
+const dvar_t *m_forward;
+const dvar_t *cheat_items_set2;
+const dvar_t *cl_mouseAccel;
+const dvar_t *cheat_points;
+const dvar_t *input_viewSensitivity;
+const dvar_t *input_autoAim;
+const dvar_t *cl_inGameVideo;
+const dvar_t *cl_noprint;
+const dvar_t *m_side;
+const dvar_t *m_filter;
+const dvar_t *cheat_items_set1;
+const dvar_t *cl_freelook;
+const dvar_t *cl_shownet;
 
 const dvar_s *arcadeScore[19]{ 0 };
 
@@ -357,107 +362,94 @@ void __cdecl CL_RestoreSettings(MemoryFile *memFile)
     clients[0].usingAds = v2 > 0;
 }
 
-void __cdecl CL_MapLoading_CalcMovieToPlay(
-    const char *buffer,
-    const char *inMapName,
-    char *outMovieName,
-    int a4,
-    int a5,
-    int a6,
-    int a7,
-    int a8,
-    int a9,
-    int a10,
-    int a11,
-    const char *a12,
-    int a13,
-    const char *a14,
-    int a15,
-    char *a16)
+void __cdecl CL_MapLoading_CalcMovieToPlay(const char *buffer, const char *inMapName, char *outMovieName)
 {
-    unsigned int v16; // r30
-    char *v17; // r14
-    int v18; // r28
-    const char *v19; // r3
-    const char *v20; // r31
-    const char *v21; // r11
-    const char *v22; // r10
-    int v23; // r8
-    const char *v24; // r11
-    const char *v25; // r10
-    int v26; // r8
+    unsigned int v3; // r30
+    char *v4; // r14
+    int v5; // r28
+    const char *v6; // r3
+    const char *v7; // r31
+    const char *v8; // r11
+    const char *v9; // r10
+    int v10; // r8
+    const char *v11; // r11
+    const char *v12; // r10
+    int v13; // r8
     const MovieToPlayScriptOpInfo *i; // r28
     const char *opName; // r10
-    const char *v29; // r11
-    int v30; // r8
-    const char *v31; // r6
-    const char *v32; // r6
-    int v33; // r14
-    int v34; // r3
-    int v35; // r14
-    int v36; // r3
-    int v37; // r14
-    int v38; // r3
-    int v39; // r14
-    bool v40; // r6
-    int v41; // r14
-    bool v42; // r6
-    int v43; // r14
-    int v44; // r3
-    char *v45; // r10
-    char *v46; // r11
-    int v47; // r6
-    int v48; // r3
+    const char *v16; // r11
+    int v17; // r8
+    const char *v18; // r6
+    const char *v19; // r6
+    int v20; // r14
+    int v21; // r3
+    int v22; // r14
+    int v23; // r3
+    int v24; // r14
+    int v25; // r3
+    int v26; // r14
+    BOOL v27; // r6
+    int v28; // r14
+    BOOL v29; // r6
+    int v30; // r14
+    int v31; // r3
+    char *v32; // r10
+    char *v33; // r11
+    int v34; // r6
+    int v35; // r3
     const char *VariantString; // r3
-    int v50; // r11
-    int v51; // [sp+50h] [-2F0h]
-    char v52[736]; // [sp+60h] [-2E0h] BYREF
+    int v37; // r11
+    int v38; // [sp+50h] [-2F0h]
+    char v39[736]; // [sp+60h] [-2E0h] BYREF
+    const char *v40; // [sp+354h] [+14h] BYREF
+    const char *v41; // [sp+35Ch] [+1Ch]
+    char *v42; // [sp+364h] [+24h]
 
-    v16 = 0;
-    a12 = buffer;
-    a14 = inMapName;
-    v17 = outMovieName;
-    v18 = 0;
-    a16 = outMovieName;
-    v51 = 0;
+    v3 = 0;
+    v40 = buffer;
+    v41 = inMapName;
+    v4 = outMovieName;
+    v5 = 0;
+    v42 = outMovieName;
+    v38 = 0;
     *outMovieName = 0;
     Com_BeginParseSession("video/cin_levels.txt");
     do
     {
-        v19 = Com_Parse(&a12)->token;
-        v20 = v19;
-        if (!*v19)
+        v6 = Com_Parse(&v40)->token;
+        v7 = v6;
+        if (!*v6)
             break;
-        if (v18)
+        if (v5)
         {
-            v21 = v19;
-            v22 = "then";
+            v8 = v6;
+            v9 = "then";
             do
             {
-                v23 = *(unsigned __int8 *)v21 - *(unsigned __int8 *)v22;
-                if (!*v21)
+                v10 = *(unsigned __int8 *)v8 - *(unsigned __int8 *)v9;
+                if (!*v8)
                     break;
-                ++v21;
-                ++v22;
-            } while (!v23);
-            if (v23)
+                ++v8;
+                ++v9;
+            } while (!v10);
+            if (v10)
             {
-                v24 = v19;
-                v25 = "if";
+                v11 = v6;
+                v12 = "if";
                 do
                 {
-                    v26 = *(unsigned __int8 *)v24 - *(unsigned __int8 *)v25;
-                    if (!*v24)
+                    v13 = *(unsigned __int8 *)v11 - *(unsigned __int8 *)v12;
+                    if (!*v11)
                         break;
-                    ++v24;
-                    ++v25;
-                } while (!v26);
-                if (!v26)
-                    v51 = ++v18;
+                    ++v11;
+                    ++v12;
+                } while (!v13);
+                if (!v13)
+                    v38 = ++v5;
             }
             else
             {
-                v51 = --v18;
+                v38 = --v5;
             }
         }
         else
@@ -474,211 +466,157 @@ void __cdecl CL_MapLoading_CalcMovieToPlay(
                 opName = i->opName;
                 if (!opName)
                     break;
-                v29 = v20;
+                v16 = v7;
                 do
                 {
-                    v30 = *(unsigned __int8 *)v29 - *(unsigned __int8 *)opName;
-                    if (!*v29)
+                    v17 = *(unsigned __int8 *)v16 - *(unsigned __int8 *)opName;
+                    if (!*v16)
                         break;
-                    ++v29;
+                    ++v16;
                     ++opName;
-                } while (!v30);
-                if (!v30)
+                } while (!v17);
+                if (!v17)
                     break;
             }
-            if (v16 < i->inValues)
+            if (v3 < i->inValues)
             {
-                v31 = "do special command";
+                v18 = "do special command";
                 if (!i->opName)
-                    v31 = "push literal";
-                Com_Error(ERR_FATAL, "Stack underflow in %s, trying to %s '%s'.", "video/cin_levels.txt", v31, v20);
+                    v18 = "push literal";
+                Com_Error(ERR_FATAL, "Stack underflow in %s, trying to %s '%s'.", "video/cin_levels.txt", v18, v7);
             }
-            if (i->outValues - i->inValues + v16 >= 8)
+            if (i->outValues - i->inValues + v3 >= 8)
             {
-                v32 = "do special command";
+                v19 = "do special command";
                 if (!i->opName)
-                    v32 = "push literal";
-                Com_Error(ERR_FATAL, "Stack overflow in %s, trying to %s '%s'.", "video/cin_levels.txt", v32, v20);
+                    v19 = "push literal";
+                Com_Error(ERR_FATAL, "Stack overflow in %s, trying to %s '%s'.", "video/cin_levels.txt", v19, v7);
             }
             switch (i->op)
             {
             case MTPSOP_PLUS:
-                v33 = atol(&v52[64 * v16]);
-                v34 = atol(&v52[64 * v16 - 64]);
-                snprintf(&v52[64 * v16 - 64], 0x40u, "%i", v33 + v34);
+                v20 = atol(&v39[64 * v3]);
+                v21 = atol(&v39[64 * v3 - 64]);
+                snprintf(&v39[64 * v3 - 64], 0x40u, "%i", v20 + v21);
                 break;
             case MTPSOP_MINUS:
-                v35 = atol(&v52[64 * v16]);
-                v36 = atol(&v52[64 * v16 - 64]);
-                snprintf(&v52[64 * v16 - 64], 0x40u, "%i", v36 - v35);
+                v22 = atol(&v39[64 * v3]);
+                v23 = atol(&v39[64 * v3 - 64]);
+                snprintf(&v39[64 * v3 - 64], 0x40u, "%i", v23 - v22);
                 break;
             case MTPSOP_MUL:
-                v37 = atol(&v52[64 * v16]);
-                v38 = atol(&v52[64 * v16 - 64]);
-                snprintf(&v52[64 * v16 - 64], 0x40u, "%i", v37 * v38);
+                v24 = atol(&v39[64 * v3]);
+                v25 = atol(&v39[64 * v3 - 64]);
+                snprintf(&v39[64 * v3 - 64], 0x40u, "%i", v24 * v25);
                 break;
             case MTPSOP_GT:
-                v39 = atol(&v52[64 * v16]);
-                v40 = atol(&v52[64 * v16 - 64]) > v39;
-                snprintf(&v52[64 * v16 - 64], 0x40u, "%i", v40);
+                v26 = atol(&v39[64 * v3]);
+                v27 = atol(&v39[64 * v3 - 64]) > v26;
+                snprintf(&v39[64 * v3 - 64], 0x40u, "%i", v27);
                 break;
             case MTPSOP_LT:
-                v41 = atol(&v52[64 * v16]);
-                v42 = atol(&v52[64 * v16 - 64]) < v41;
-                snprintf(&v52[64 * v16 - 64], 0x40u, "%i", v42);
+                v28 = atol(&v39[64 * v3]);
+                v29 = atol(&v39[64 * v3 - 64]) < v28;
+                snprintf(&v39[64 * v3 - 64], 0x40u, "%i", v29);
                 break;
             case MTPSOP_EQ:
-                v43 = atol(&v52[64 * v16]);
-                v44 = atol(&v52[64 * v16 - 64]);
-                snprintf(&v52[64 * v16 - 64], 0x40u, "%i", v43 == v44);
+                v30 = atol(&v39[64 * v3]);
+                v31 = atol(&v39[64 * v3 - 64]);
+                snprintf(&v39[64 * v3 - 64], 0x40u, "%i", v30 == v31);
                 break;
             case MTPSOP_STRCMP:
-                v45 = &v52[64 * v16];
-                v46 = &v52[64 * v16 - 64];
+                v32 = &v39[64 * v3];
+                v33 = &v39[64 * v3 - 64];
                 do
                 {
-                    v47 = (unsigned __int8)*v46 - (unsigned __int8)*v45;
-                    if (!*v46)
+                    v34 = (unsigned __int8)*v33 - (unsigned __int8)*v32;
+                    if (!*v33)
                         break;
-                    ++v46;
-                    ++v45;
-                } while (!v47);
-                snprintf(&v52[64 * v16 - 64], 0x40u, "%i", v47);
+                    ++v33;
+                    ++v32;
+                } while (!v34);
+                snprintf(&v39[64 * v3 - 64], 0x40u, "%i", v34);
                 break;
             case MTPSOP_STRCAT:
-                snprintf(v52, 0x40u, "%s%s", &v52[64 * v16 - 64], &v52[64 * v16]);
-                I_strncpyz(&v52[64 * v16 - 64], v52, 64);
+                snprintf(v39, 0x40u, "%s%s", &v39[64 * v3 - 64], &v39[64 * v3]);
+                I_strncpyz(&v39[64 * v3 - 64], v39, 64);
                 break;
             case MTPSOP_NOT:
-                v48 = atol(&v52[64 * v16]);
-                snprintf(&v52[64 * v16], 0x40u, "%i", v48 == 0);
+                v35 = atol(&v39[64 * v3]);
+                snprintf(&v39[64 * v3], 0x40u, "%i", v35 == 0);
                 break;
             case MTPSOP_DUP:
-                I_strncpyz(&v52[64 * v16 + 64], &v52[64 * v16], 64);
+                I_strncpyz(&v39[64 * v3 + 64], &v39[64 * v3], 64);
                 break;
             case MTPSOP_DROP:
             case MTPSOP_THEN:
                 break;
             case MTPSOP_SWAP:
-                I_strncpyz(v52, &v52[64 * v16 - 64], 64);
-                I_strncpyz(&v52[64 * v16 - 64], &v52[64 * v16], 64);
-                I_strncpyz(&v52[64 * v16], v52, 64);
+                I_strncpyz(v39, &v39[64 * v3 - 64], 64);
+                I_strncpyz(&v39[64 * v3 - 64], &v39[64 * v3], 64);
+                I_strncpyz(&v39[64 * v3], v39, 64);
                 break;
             case MTPSOP_GETDVAR:
-                VariantString = Dvar_GetVariantString(&v52[64 * v16]);
-                I_strncpyz(&v52[64 * v16], VariantString, 64);
+                VariantString = Dvar_GetVariantString(&v39[64 * v3]);
+                I_strncpyz(&v39[64 * v3], VariantString, 64);
                 break;
             case MTPSOP_GETMAPNAME:
-                I_strncpyz(&v52[64 * v16 + 64], a14, 64);
+                I_strncpyz(&v39[64 * v3 + 64], v41, 64);
                 break;
             case MTPSOP_IF:
-                if (!atol(&v52[64 * v16]))
-                    v51 = 1;
+                if (!atol(&v39[64 * v3]))
+                    v38 = 1;
                 break;
             case MTPSOP_PLAY:
-                I_strncpyz(v17, &v52[64 * v16], 256);
+                I_strncpyz(v4, &v39[64 * v3], 256);
                 break;
             case MTPSOP_LITERAL:
-                I_strncpyz(&v52[64 * v16 + 64], v20, 64);
+                I_strncpyz(&v39[64 * v3 + 64], v7, 64);
                 break;
             default:
                 if (!alwaysfails)
                     MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\client\\cl_main.cpp", 606, 0, "Can't happen.");
                 break;
             }
-            v17 = a16;
-            v50 = i->outValues - i->inValues;
-            v18 = v51;
-            v16 += v50;
+            v4 = v42;
+            v37 = i->outValues - i->inValues;
+            v5 = v38;
+            v3 += v37;
         }
-    } while (!*v17);
+    } while (!*v4);
     Com_EndParseSession();
-    if (v18)
+    if (v5)
         Com_Error(ERR_FATAL, "Unterminated if in %s", "video/cin_levels.txt");
-    if (!*v17)
+    if (!*v4)
         Com_Error(ERR_FATAL, "No loading movie specified by %s", "video/cin_levels.txt");
-    if (!*v17)
+    if (!*v4)
         MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\client\\cl_main.cpp", 622, 0, "%s", "outMovieName[0]");
 }
 
-void __cdecl CL_MapLoading_CalcMovieToPlay_FastFile(const char *inMapName, char *outMovieName, const char *a3)
+void __cdecl CL_MapLoading_CalcMovieToPlay_FastFile(const char *inMapName, char *outMovieName)
 {
-    XAssetHeader *XAssetHeader; // r30
-    int v6; // r10
-    int v7; // r9
-    int v8; // r8
-    int v9; // r7
-    int v10; // r6
-    int v11; // [sp+8h] [-78h]
-    int v12; // [sp+Ch] [-74h]
-    int v13; // [sp+10h] [-70h]
-    const char *v14; // [sp+14h] [-6Ch]
-    int v15; // [sp+18h] [-68h]
-    const char *v16; // [sp+1Ch] [-64h]
-    int v17; // [sp+20h] [-60h]
-    char *v18; // [sp+24h] [-5Ch]
+    XAssetHeader asset; // r30
 
-    XAssetHeader = DB_FindXAssetHeader((XAssetHeader *)0x20, (XAssetType)"video/cin_levels.txt", a3);
-    if (!XAssetHeader)
+    asset = DB_FindXAssetHeader(ASSET_TYPE_RAWFILE, "video/cin_levels.txt");
+
+    if (!asset.rawfile)
         Com_Error(ERR_FATAL, "Could not open %s", "video/cin_levels.txt");
-    CL_MapLoading_CalcMovieToPlay(
-        (const char *)XAssetHeader[2].xmodelPieces,
-        inMapName,
-        outMovieName,
-        v10,
-        v9,
-        v8,
-        v7,
-        v6,
-        v11,
-        v12,
-        v13,
-        v14,
-        v15,
-        v16,
-        v17,
-        v18);
+
+    CL_MapLoading_CalcMovieToPlay((const char *)asset.xmodelPieces->pieces, inMapName, outMovieName);
 }
 
 void __cdecl CL_MapLoading_StartCinematic(const char *mapname, double volume, int a3, const char *a4)
 {
-    XAssetHeader *XAssetHeader; // r30
-    int v7; // r10
-    int v8; // r9
-    int v9; // r8
-    int v10; // r7
-    int v11; // r6
-    int v12; // [sp+8h] [-178h]
-    int v13; // [sp+Ch] [-174h]
-    int v14; // [sp+10h] [-170h]
-    const char *v15; // [sp+14h] [-16Ch]
-    int v16; // [sp+18h] [-168h]
-    const char *v17; // [sp+1Ch] [-164h]
-    int v18; // [sp+20h] [-160h]
-    char *v19; // [sp+24h] [-15Ch]
-    char v20[264]; // [sp+50h] [-130h] BYREF
+    XAssetHeader asset; // r30
+    char v7[264]; // [sp+50h] [-130h] BYREF
 
-    XAssetHeader = DB_FindXAssetHeader((XAssetHeader *)0x20, (XAssetType)"video/cin_levels.txt", a4);
-    if (!XAssetHeader)
+    asset = DB_FindXAssetHeader(ASSET_TYPE_RAWFILE, "video/cin_levels.txt");
+
+    if (!asset.rawfile)
         Com_Error(ERR_FATAL, "Could not open %s", "video/cin_levels.txt");
-    CL_MapLoading_CalcMovieToPlay(
-        (const char *)XAssetHeader[2].xmodelPieces,
-        mapname,
-        v20,
-        v11,
-        v10,
-        v9,
-        v8,
-        v7,
-        v12,
-        v13,
-        v14,
-        v15,
-        v16,
-        v17,
-        v18,
-        v19);
-    R_Cinematic_StartPlayback(v20, 5u, volume);
+
+    CL_MapLoading_CalcMovieToPlay((const char *)asset.xmodelPieces->pieces, mapname, v7);
+    R_Cinematic_StartPlayback(v7, 5, volume);
 }
 
 void __cdecl CL_MapLoading(const char *mapname)
@@ -710,7 +648,7 @@ void __cdecl CL_MapLoading(const char *mapname)
     UI_DrawConnectScreen();
     //Live_SetCurrentMapname(mapname);
     if (cl_multi_gamepads_enabled)
-        Cmd_ExecuteSingleCommand(0, cl_controller_in_use, "nosplitscreen\n");
+        Cmd_ExecuteSingleCommand(0, cl_controller_in_use, (char*)"nosplitscreen\n");
     SND_FadeAllSounds(0.0, v4);
 }
 
@@ -750,7 +688,7 @@ void __cdecl CL_Disconnect(int localClientNum)
         SCR_StopCinematic(localClientNum);
         CL_SetLocalClientConnectionState(localClientNum, CA_DISCONNECTED);
         SND_DisconnectListener(localClientNum);
-        CL_ResetLastGamePadEventTime();
+        //CL_ResetLastGamePadEventTime(); // KISAKTODO
         if (localClientNum)
             MyAssertHandler(
                 "c:\\trees\\cod3\\cod3src\\src\\client\\cl_main.cpp",
@@ -817,7 +755,7 @@ void __cdecl CL_InitLoad(const char *mapname)
         SCR_StopCinematic(0);
         clientUIActives[0].connectionState = CA_DISCONNECTED;
         SND_DisconnectListener(0);
-        CL_ResetLastGamePadEventTime();
+        //CL_ResetLastGamePadEventTime(); // KISAKTODO
         //Live_Disconnected(cl_controller_in_use);
     }
     UI_SetMap(mapname);
@@ -881,34 +819,38 @@ void __cdecl CheckForConsoleGuidePause(int localClientNum)
 void __cdecl CL_Frame(int localClientNum, int msec)
 {
     int v14; // r29
-    int v16; // r3
     char v21; // cr34
     const dvar_s *v22; // r11
     __int64 v23; // r11
     int v24; // r3
 
     v14 = msec;
-    a14 = msec;
-    v16 = Hunk_CheckTempMemoryClear(localClientNum);
-    Hunk_CheckTempMemoryHighClear(v16);
-    PIXSetMarker(0xFFFFFFFF, "CL_Frame");
+    Hunk_CheckTempMemoryClear();
+    Hunk_CheckTempMemoryHighClear();
+    //PIXSetMarker(0xFFFFFFFF, "CL_Frame");
     if (clientUIActives[0].isRunning)
     {
-        _R11 = 0;
-        _R8 = &cls.scriptError;
-        do
-        {
-            __asm
-            {
-                mfmsr     r9
-                mtmsree   r13
-                lwarx     r10, (_cls__3UclientStatic_t__A.scriptError - 0x8283B3A0), r8# clientStatic_t cls ...
-                stwcx.r11, (_cls__3UclientStatic_t__A.scriptError - 0x8283B3A0), r8# clientStatic_t cls ...
-                mtmsree   r9
-            }
-        } while (!v21);
-        if (_R10)
+        //_R11 = 0;
+        //_R8 = &cls.scriptError;
+        //do
+        //{
+        //    __asm
+        //    {
+        //        mfmsr     r9
+        //        mtmsree   r13
+        //        lwarx     r10, (_cls__3UclientStatic_t__A.scriptError - 0x8283B3A0), r8# clientStatic_t cls ...
+        //        stwcx.r11, (_cls__3UclientStatic_t__A.scriptError - 0x8283B3A0), r8# clientStatic_t cls ...
+        //        mtmsree   r9
+        //    }
+        //} while (!v21);
+        //if (_R10)
+        //    UI_SetActiveMenu(0, UIMENU_MAIN);
+
+        if (cls.scriptError) {
+            cls.scriptError = 0;
             UI_SetActiveMenu(0, UIMENU_MAIN);
+        }
+
         if (clientUIActives[0].connectionState == CA_DISCONNECTED
             && (clientUIActives[0].keyCatchers & 0x10) == 0
             && !com_sv_running->current.enabled)
@@ -926,7 +868,7 @@ void __cdecl CL_Frame(int localClientNum, int msec)
                 "clientIndex doesn't index STATIC_MAX_LOCAL_CLIENTS\n\t%i not in [0, %i)",
                 localClientNum,
                 1);
-        Live_Frame(cl_controller_in_use, v14);
+        //Live_Frame(cl_controller_in_use, v14);
         //Profile_EndInternal(0);
         CheckForConsoleGuidePause(localClientNum);
         v22 = cl_avidemo;
@@ -934,14 +876,11 @@ void __cdecl CL_Frame(int localClientNum, int msec)
         {
             if (clientUIActives[0].connectionState == CA_ACTIVE || cl_forceavidemo->current.enabled)
             {
-                Cmd_ExecuteSingleCommand(0, cl_controller_in_use, "screenshot silent\n");
+                Cmd_ExecuteSingleCommand(0, cl_controller_in_use, (char*)"screenshot silent\n");
                 v22 = cl_avidemo;
             }
-            LODWORD(v23) = v22->current.integer;
-            HIDWORD(v23) = &a14;
-            a14 = (int)(float)((float)((float)1000.0 / (float)v23) * com_timescaleValue);
-            v14 = a14;
-            if (!a14)
+            v14 = (int)(float)((float)((float)1000.0 / (float)v22->current.integer) * com_timescaleValue);
+            if (!v14)
                 v14 = 1;
         }
         cls.realFrametime = v14;
@@ -949,7 +888,7 @@ void __cdecl CL_Frame(int localClientNum, int msec)
         if ((clientUIActives[0].keyCatchers & 0x10) != 0)
         {
             v24 = CL_ControllerIndexFromClientNum(localClientNum);
-            CL_GamepadRepeatScrollingButtons(localClientNum, v24);
+            //CL_GamepadRepeatScrollingButtons(localClientNum, v24); // KISAKTODO
         }
         CL_SetCGameTime(localClientNum);
     }
@@ -999,7 +938,7 @@ void __cdecl CL_ShutdownRenderer(int destroyWindow)
     cls.whiteMaterial = 0;
     cls.consoleMaterial = 0;
     cls.consoleFont = 0;
-    Con_ShutdownClientAssets();
+    //Con_ShutdownClientAssets(); // nullsub
 }
 
 void CL_DevGuiDvar_f()
@@ -1068,7 +1007,7 @@ void CL_DevGuiCmd_f()
     {
         v2 = Cmd_Argv(2);
         v3 = Cmd_Argv(1);
-        DevGui_AddCommand(v3, (const char*)v2);
+        DevGui_AddCommand(v3, (char*)v2);
     }
     else
     {
@@ -1276,7 +1215,7 @@ void __cdecl CL_StopLogo(int localClientNum)
     if (clientUIActives[0].connectionState == CA_LOGO)
     {
         CL_SetLocalClientConnectionState(localClientNum, CA_DISCONNECTED);
-        CL_ResetLastGamePadEventTime();
+        //CL_ResetLastGamePadEventTime(); // KISAKTODO
         string = nextmap->current.string;
         if (*string)
         {
@@ -1410,7 +1349,7 @@ void __cdecl CL_InitOnceForAllClients()
 
 void __cdecl CL_StopControllerRumbles()
 {
-    CG_StopAllRumbles(0);
+    //CG_StopAllRumbles(0); // KISAKTODO
 }
 
 void CL_Pause_f()
@@ -1456,6 +1395,7 @@ void CL_Pause_f()
     }
 }
 
+static int recursive;
 void __cdecl CL_Shutdown(int localClientNum)
 {
     if (!Sys_IsMainThread())
@@ -1469,15 +1409,15 @@ void __cdecl CL_Shutdown(int localClientNum)
     else
     {
         recursive = 1;
-        Live_Shutdown();
+        //Live_Shutdown();
         CL_ShutdownDebugData();
         if (clientUIActives[0].isRunning)
         {
             SCR_StopCinematic(0);
             clientUIActives[0].connectionState = CA_DISCONNECTED;
             SND_DisconnectListener(0);
-            CL_ResetLastGamePadEventTime();
-            Live_Disconnected(cl_controller_in_use);
+            //CL_ResetLastGamePadEventTime(); // KISAKTODO
+            //Live_Disconnected(cl_controller_in_use);
         }
         CL_ShutdownHunkUsers();
         SND_Shutdown();
@@ -1744,6 +1684,7 @@ Font_s *__cdecl CL_RegisterFont(const char *fontName, int imageTrack)
     return R_RegisterFont(fontName, imageTrack);
 }
 
+static bool cl_skipRendering;
 void __cdecl CL_SetSkipRendering(bool skip)
 {
     cl_skipRendering = skip;
@@ -1756,11 +1697,11 @@ bool __cdecl CL_SkipRendering()
 
 void __cdecl CL_UpdateSound()
 {
-    PIXBeginNamedEvent_Copy_NoVarArgs(0xFFFFFFFF, "update sound");
+    //PIXBeginNamedEvent_Copy_NoVarArgs(0xFFFFFFFF, "update sound");
     SND_PlayFXSounds();
     SND_UpdateLoopingSounds();
     SND_Update();
-    PIXEndNamedEvent();
+    //PIXEndNamedEvent();
 }
 
 void __cdecl CL_ShutdownAll()
@@ -1779,7 +1720,7 @@ void __cdecl CL_ShutdownAll()
     cls.whiteMaterial = 0;
     cls.consoleMaterial = 0;
     cls.consoleFont = 0;
-    Con_ShutdownClientAssets();
+    //Con_ShutdownClientAssets(); // nullsub
     if (cls.rendererStarted)
         MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\client\\cl_main.cpp", 394, 0, "%s", "!cls.rendererStarted");
     track_shutdown(3);
@@ -1802,8 +1743,8 @@ void __cdecl CL_DisconnectLocalClient()
     }
     Dvar_SetIntByName("g_reloading", 0);
     v1 = cl_controller_in_use;
-    Gamer//Profile_UpdateProfileFromDvars(cl_controller_in_use, PROFILE_WRITE_IF_CHANGED);
-        Live_Disconnected(v1);
+    //GamerProfile_UpdateProfileFromDvars(cl_controller_in_use, PROFILE_WRITE_IF_CHANGED);
+    //Live_Disconnected(v1);
     if ((unsigned int)connectionState > CA_LOGO)
         Com_Error(ERR_DISCONNECT, "EXE_DISCONNECTED");
 }
@@ -1822,78 +1763,100 @@ void __cdecl CL_ShutdownRef()
     cls.whiteMaterial = 0;
     cls.consoleMaterial = 0;
     cls.consoleFont = 0;
-    Con_ShutdownClientAssets();
+    //Con_ShutdownClientAssets(); // nullsub
     track_shutdown(3);
     StatMon_Reset();
 }
 
-// local variable allocation has failed, the output may be wrong!
-void __cdecl CL_DrawLogo(const float *a1, Material *a2)
+// aislop
+void __cdecl CL_DrawLogo()
 {
-    unsigned int v2; // r9 OVERLAPPED
-    int v3; // r30
-    __int64 v4; // r11 OVERLAPPED
-    double v5; // fp0
-    __int64 v6; // r11 OVERLAPPED
-    int v7; // r9
-    __int128 v8; // r10
-    double v9; // fp28
-    double v10; // fp29
-    double v11; // fp27
-    Material *v12; // r4
-    const float *v13; // r3
-    float v14[14]; // [sp+70h] [-50h] BYREF
-
     if (clientUIActives[0].connectionState != CA_LOGO)
+    {
         MyAssertHandler(
             "c:\\trees\\cod3\\cod3src\\src\\client\\cl_main.cpp",
             1613,
             0,
             "%s",
-            "CL_GetLocalClientConnectionState( ONLY_LOCAL_CLIENT_NUM ) == CA_LOGO");
-    v2 = 0x82000000;
-    v3 = cls.realtime - cls.logo.startTime;
-    LODWORD(v4) = cls.logo.fadein;
-    if (cls.realtime - cls.logo.startTime >= cls.logo.fadein)
-    {
-        LODWORD(v6) = cls.logo.fadeout;
-        if (v3 <= cls.logo.duration - cls.logo.fadeout)
-        {
-        LABEL_10:
-            v5 = 1.0;
-            goto LABEL_11;
-        }
-        HIDWORD(v6) = cls.logo.duration - v3;
-        v7 = cls.logo.duration - cls.logo.fadeout;
-        v5 = (float)((float)*(__int64 *)((char *)&v6 + 4) / (float)v6);
+            "CL_GetLocalClientConnectionState(ONLY_LOCAL_CLIENT_NUM) == CA_LOGO"
+        );
     }
-    else
+
+    int elapsed = cls.realtime - cls.logo.startTime;
+    float alpha = 1.0f;
+
+    if (elapsed < cls.logo.fadein)
     {
-        HIDWORD(v4) = cls.realtime - cls.logo.startTime;
-        v5 = (float)((float)*(__int64 *)((char *)&v4 + 4) / (float)v4);
+        // Fade in phase
+        alpha = (float)elapsed / (float)cls.logo.fadein;
     }
-    if (v5 < 0.0)
+    else if (elapsed > (cls.logo.duration - cls.logo.fadeout))
     {
-        v5 = 0.0;
-        goto LABEL_11;
+        // Fade out phase
+        int fadeOutElapsed = elapsed - (cls.logo.duration - cls.logo.fadeout);
+        alpha = 1.0f - ((float)fadeOutElapsed / (float)cls.logo.fadeout);
     }
-    if (v5 > 1.0)
-        goto LABEL_10;
-LABEL_11:
-    *((_QWORD *)&v8 + 1) = *(_QWORD *)&cls.vidConfig.displayWidth;
-    v14[0] = v5;
-    v14[1] = v5;
-    v14[2] = v5;
-    DWORD1(v8) = v14;
-    v14[3] = 1.0;
-    v9 = (float)*(__int64 *)((char *)&v8 + 4);
-    v10 = (float)((float)((float)*(__int64 *)&cls.vidConfig.displayWidth * (float)2.0) * (float)0.33333334);
-    v11 = (float)((float)(__int64)v8 - (float)((float)((float)(__int64)v8 * (float)2.0) * (float)0.33333334));
-    R_AddCmdDrawStretchPic(0.0, 0.0, v9, v10, 0.0, 0.0, 1.0, 1.0, a1, a2);
-    R_AddCmdDrawStretchPic(0.0, v10, v9, v11, 0.0, 0.0, 1.0, 1.0, v13, v12);
-    if (v3 > cls.logo.duration)
+
+    // Clamp alpha
+    if (alpha < 0.0f)
+        alpha = 0.0f;
+    else if (alpha > 1.0f)
+        alpha = 1.0f;
+
+    // Set color with alpha for drawing
+    float color[4] = { alpha, alpha, alpha, 1.0f };
+
+    float screenWidth = (float)cls.vidConfig.displayWidth;
+    float screenHeight = (float)cls.vidConfig.displayHeight;
+
+    float topHeight = screenHeight * (2.0f / 3.0f);
+    float bottomHeight = screenHeight - topHeight;
+
+    // Draw top part of logo
+    R_AddCmdDrawStretchPic(
+        0.0f, 0.0f,
+        screenWidth, topHeight,
+        0.0f, 0.0f, 1.0f, 1.0f,
+        color,
+        cls.logo.material[0]
+    );
+
+    // Draw bottom part of logo
+    R_AddCmdDrawStretchPic(
+        0.0f, topHeight,
+        screenWidth, bottomHeight,
+        0.0f, 0.0f, 1.0f, 1.0f,
+        color,
+        cls.logo.material[1]
+    );
+
+    if (elapsed > cls.logo.duration)
+    {
         CL_StopLogo(0);
+    }
 }
+
+
+cmd_function_s CL_ForwardToServer_f_VAR;
+cmd_function_s CL_Disconnect_f_VAR;
+cmd_function_s CL_Disconnect_f_VAR_SERVER;
+cmd_function_s CL_PlayDemo_f_VAR_0;
+cmd_function_s CL_PlayDemo_f_VAR_SERVER_0;
+cmd_function_s CL_PlayDemo_f_VAR;
+cmd_function_s CL_PlayDemo_f_VAR_SERVER;
+cmd_function_s CL_Record_f_VAR;
+cmd_function_s CL_StopRecord_f_VAR;
+cmd_function_s CL_PlayLogo_f_VAR;
+cmd_function_s CL_PlayCinematic_f_VAR;
+cmd_function_s CL_PlayUnskippableCinematic_f_VAR;
+cmd_function_s CL_Pause_f_VAR;
+cmd_function_s CL_VoidCommand_VAR;
+cmd_function_s CL_startMultiplayer_f_VAR;
+cmd_function_s CL_ShellExecute_URL_f_VAR;
+cmd_function_s CL_IncAnimWeight_f_VAR;
+cmd_function_s CL_DecAnimWeight_f_VAR;
+cmd_function_s XModelDumpInfo_VAR;
+cmd_function_s CL_StopControllerRumbles_VAR;
 
 void __cdecl CL_Init(int localClientNum)
 {
@@ -1939,7 +1902,7 @@ void __cdecl CL_Init(int localClientNum)
             "(localClientNum == 0)",
             localClientNum);
     clientUIActives[0].connectionState = CA_DISCONNECTED;
-    CL_ResetLastGamePadEventTime();
+    //CL_ResetLastGamePadEventTime(); // KISAKTODO
     cls.realtime = 0;
     CL_InitInput();
     cl_noprint = Dvar_RegisterBool("cl_noprint", 0, 0, "Print nothing to the console");
@@ -2005,20 +1968,16 @@ void __cdecl CL_Init(int localClientNum)
     input_invertPitch = Dvar_RegisterBool("input_invertPitch", 0, 0x400u, "Invert gamepad pitch");
     input_viewSensitivity = Dvar_RegisterFloat("input_viewSensitivity", 1.0, 0.000099999997, 5.0, v24, v23);
     input_autoAim = Dvar_RegisterBool("input_autoAim", 1, 0x400u, "Turn on auto aim for consoles");
-    v25 = SEH_SafeTranslateString("PLATFORM_NOMOTD");
+    v25 = SEH_SafeTranslateString((char*)"PLATFORM_NOMOTD");
     motd = Dvar_RegisterString("motd", v25, 0, "Message of the day");
     nextmap = Dvar_RegisterString("nextmap", "", 0, "The next map name");
     nextdemo = Dvar_RegisterString("nextdemo", "", 0, "The next demo to play");
     Dvar_RegisterBool("cg_blood", 1, 1u, "Show blood");
     Campaign_RegisterDvars();
-    if (!loc_language)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\client\\cl_main.cpp", 1881, 0, "%s", "loc_language");
-    if (!loc_translate)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\client\\cl_main.cpp", 1882, 0, "%s", "loc_translate");
-    if (!loc_warnings)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\client\\cl_main.cpp", 1883, 0, "%s", "loc_warnings");
-    if (!loc_warningsAsErrors)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\client\\cl_main.cpp", 1884, 0, "%s", "loc_warningsAsErrors");
+    iassert(loc_language);
+    iassert(loc_translate);
+    iassert(loc_warnings);
+    iassert(loc_warningsAsErrors);
     Cmd_AddCommandInternal("cmd", CL_ForwardToServer_f, &CL_ForwardToServer_f_VAR);
     Cmd_AddCommandInternal("disconnect", Cbuf_AddServerText_f, &CL_Disconnect_f_VAR);
     Cmd_AddServerCommandInternal("disconnect", CL_Disconnect_f, &CL_Disconnect_f_VAR_SERVER);
@@ -2042,8 +2001,8 @@ void __cdecl CL_Init(int localClientNum)
     Cmd_AddCommandInternal("+decAnimWeight", (void(__cdecl *)())CL_DecAnimWeight_f, &CL_DecAnimWeight_f_VAR);
     cl_testAnimWeight = Dvar_RegisterFloat("cl_testAnimWeight", 0.0, 0.0, 1.0, v27, v26);
     Cmd_AddCommandInternal("modelDumpInfo", XModelDumpInfo, &XModelDumpInfo_VAR);
-    CL_Xenon_RegisterDvars();
-    CL_Xenon_RegisterCommands();
+    //CL_Xenon_RegisterDvars();
+    //CL_Xenon_RegisterCommands();
     Cmd_AddCommandInternal("stopControllerRumble", CL_StopControllerRumbles, &CL_StopControllerRumbles_VAR);
     Com_Printf(14, "----- Initializing Renderer ----\n");
     v28.maxClientViews = 1;

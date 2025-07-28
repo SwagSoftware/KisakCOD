@@ -702,16 +702,15 @@ void __cdecl CL_MouseMove(int localClientNum, usercmd_s *cmd)
 
 void __cdecl CL_GetMouseMovement(clientActive_t *cl, float *mx, float *my)
 {
-    double v3; // st7
+    float v3; // st7
 
-    if (!mx)
-        MyAssertHandler(".\\client_mp\\cl_input.cpp", 1463, 0, "%s", "mx");
-    if (!my)
-        MyAssertHandler(".\\client_mp\\cl_input.cpp", 1464, 0, "%s", "my");
+    iassert(mx);
+    iassert(my);
+
     if (m_filter->current.enabled)
     {
-        *mx = (double)(cl->mouseDx[1] + cl->mouseDx[0]) * 0.5;
-        v3 = (double)(cl->mouseDy[1] + cl->mouseDy[0]) * 0.5;
+        *mx = (double)(cl->mouseDx[1] + cl->mouseDx[0]) * 0.5f;
+        v3 = (double)(cl->mouseDy[1] + cl->mouseDy[0]) * 0.5f;
     }
     else
     {

@@ -681,3 +681,31 @@ unsigned __int16 *XModelBoneNames(XModel *model)
 {
     return model->boneNames;
 }
+
+void XModelDumpInfo()
+{
+    // KISAKTODO
+    //void *v0; // r3
+    //const char *RemotePCPath; // r3
+    //void *v2; // [sp+50h] [-20h] BYREF
+    //char v3[16]; // [sp+58h] [-18h] BYREF
+    //
+    //strcpy(v3, "modelInfo.csv");
+    //v0 = FS_FOpenTextFileWrite(v3);
+    //v2 = v0;
+    //if (v0)
+    //{
+    //    XModelWriteInfoHeader(v0);
+    //    DB_EnumXAssets(ASSET_TYPE_XMODEL, XModelWriteInfo, &v2, 0);
+    //    FS_FCloseFile(v2);
+    //    if (FS_IsUsingRemotePCSharing())
+    //        RemotePCPath = FS_GetRemotePCPath(0);
+    //    else
+    //        RemotePCPath = Sys_DefaultInstallPath();
+    //    Com_Printf(18, "^7Successfully wrote model info [%s\\%s].\n", RemotePCPath, v3);
+    //}
+    //else
+    //{
+    //    Com_PrintError(1, "Could not dump model info.\n");
+    //}
+}

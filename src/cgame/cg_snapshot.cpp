@@ -1039,7 +1039,7 @@ void __cdecl CG_CreateNextSnap(int localClientNum, double dtime, int readNext)
     CG_CheckSnapshot(localClientNum, "CG_CreateNextSnap(post)");
 }
 
-void __cdecl CG_FirstSnapshot(int localClientNum, int a2)
+void __cdecl CG_FirstSnapshot(int localClientNum)
 {
     unsigned int i; // r31
     const char *v4; // r3
@@ -1121,7 +1121,7 @@ void __cdecl CG_FirstSnapshot(int localClientNum, int a2)
             "cgameGlob->nextSnap->serverTime == G_GetServerSnapTime()");
 }
 
-void __cdecl CG_ProcessDemoSnapshots(int localClientNum, int a2)
+void __cdecl CG_ProcessDemoSnapshots(int localClientNum)
 {
     snapshot_s *nextSnap; // r11
     __int64 v4; // r11

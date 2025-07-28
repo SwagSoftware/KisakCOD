@@ -5,6 +5,7 @@
 #include "cg_predict.h"
 #include <client/client.h>
 #include "cg_main.h"
+#include "cg_ents.h"
 
 pmove_t cg_pmove;
 
@@ -509,7 +510,7 @@ void __cdecl CG_PredictPlayerState_Internal(int localClientNum)
     }
 LABEL_81:
     //Profile_EndInternal(0);
-    LargeLocal::~LargeLocal(&v31);
+    //LargeLocal::~LargeLocal(&v31);
 }
 
 void __cdecl CG_PredictPlayerState(int localClientNum)

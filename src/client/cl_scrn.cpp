@@ -150,7 +150,7 @@ void __cdecl SCR_DrawScreenField(int refreshedUI)
                 goto LABEL_12;
             case CA_LOGO:
                 R_AddCmdClearScreen(15, colorBlack, 0.0, v2);
-                CL_DrawLogo(v5, v4);
+                CL_DrawLogo();
                 goto LABEL_12;
             case CA_LOADING:
                 R_AddCmdClearScreen(15, colorBlack, 0.0, v2);
@@ -204,15 +204,16 @@ float __cdecl CL_GetMenuBlurRadius(int localClientNum)
 
 void __cdecl SCR_UpdateRumble()
 {
-    int v0; // r3
-
-    if (!cl_paused)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\client\\cl_scrn.cpp", 284, 0, "%s", "cl_paused");
-    v0 = CL_ControllerIndexFromClientNum(0);
-    if (clientUIActives[0].connectionState != CA_ACTIVE || cl_paused->current.integer)
-        GPad_StopRumbles(v0);
-    else
-        GPad_UpdateRumbles(v0);
+    // KISAKTODO
+    //int v0; // r3
+    //
+    //if (!cl_paused)
+    //    MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\client\\cl_scrn.cpp", 284, 0, "%s", "cl_paused");
+    //v0 = CL_ControllerIndexFromClientNum(0);
+    //if (clientUIActives[0].connectionState != CA_ACTIVE || cl_paused->current.integer)
+    //    GPad_StopRumbles(v0);
+    //else
+    //    GPad_UpdateRumbles(v0);
 }
 
 void SCR_UpdateFrame()

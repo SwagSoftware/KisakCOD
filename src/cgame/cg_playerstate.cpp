@@ -1,15 +1,21 @@
 #include "cg_local.h"
 #include "cg_public.h"
 
+#ifdef KISAK_MP
 #include <cgame_mp/cg_local_mp.h>
-
 #include <client_mp/client_mp.h>
+#elif KISAK_SP
+#include "cg_main.h"
+#include <client/cl_input.h>
+#include "cg_servercmds.h"
+#endif
 
 void __cdecl CG_Respawn(int32_t localClientNum)
 {
     cg_s *cgameGlob;
 
     cgameGlob = CG_GetLocalClientGlobals(localClientNum);
+#ifdef KISAK_MP
     iassert(cgameGlob->snap);
 
     memcpy(
@@ -60,6 +66,12 @@ void __cdecl CG_Respawn(int32_t localClientNum)
     CG_ResetLowHealthOverlay(cgameGlob);
     cgameGlob->heightToCeiling = FLT_MAX;
     CG_HoldBreathInit(cgameGlob);
+#elif KISAK_SP
+    cgameGlob->heightToCeiling = FLT_MAX;
+    cgameGlob->landTime = -1;
+    cgameGlob->vehicleInitView = 1;
+    CG_HoldBreathInit(cgArray);
+#endif
 }
 
 int32_t __cdecl CG_TransitionPlayerState(int32_t localClientNum, playerState_s *ps, const transPlayerState_t *ops)

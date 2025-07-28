@@ -7,6 +7,9 @@
 #include <qcommon/cmd.h>
 #include <cgame/cg_main.h>
 #include <game/g_local.h>
+#include <aim_assist/aim_assist.h>
+#include <win32/win_local.h>
+#include <qcommon/msg.h>
 
 const dvar_t *cl_stanceHoldTime;
 const dvar_t *cl_analog_attack_threshold;
@@ -778,50 +781,51 @@ void __cdecl IN_NightVisionUp()
     IN_KeyUp(&kb[28]);
 }
 
-void __cdecl CL_AdjustAngles(int a1, int a2, int a3, int a4, int a5, int a6, __int64 a7)
+void CL_AdjustAngles()
 {
-    __int64 v7; // r11
-    double v8; // fp13
-    double v9; // fp31
+    __int64 v0; // r10
+    __int64 v1; // r11
+    double v2; // fp13
+    double v3; // fp31
 
-    HIDWORD(v7) = kb[9].active;
-    LODWORD(v7) = cls.frametime;
+    HIDWORD(v1) = kb[9].active;
+    LODWORD(v1) = cls.frametime;
     if (kb[9].active)
     {
-        LODWORD(a7) = cls.frametime;
-        v8 = (float)(cl_anglespeedkey->current.value * (float)a7);
+        LODWORD(v0) = cls.frametime;
+        v2 = (float)(cl_anglespeedkey->current.value * (float)v0);
     }
     else
     {
-        v8 = (float)v7;
+        v2 = (float)v1;
     }
-    v9 = (float)((float)v8 * (float)0.001);
+    v3 = (float)((float)v2 * (float)0.001);
     if (!kb[8].active)
     {
         clients[0].viewangles[1] = -(float)((float)((float)(CL_KeyState(&kb[1]) * cl_yawspeed->current.value)
-            * (float)((float)v8 * (float)0.001))
+            * (float)((float)v2 * (float)0.001))
             - clients[0].viewangles[1]);
-        clients[0].viewangles[1] = (float)((float)(CL_KeyState(kb) * cl_yawspeed->current.value) * (float)v9)
+        clients[0].viewangles[1] = (float)((float)(CL_KeyState(kb) * cl_yawspeed->current.value) * (float)v3)
             + clients[0].viewangles[1];
     }
-    clients[0].viewangles[0] = -(float)((float)((float)(CL_KeyState(&kb[4]) * cl_pitchspeed->current.value) * (float)v9)
+    clients[0].viewangles[0] = -(float)((float)((float)(CL_KeyState(&kb[4]) * cl_pitchspeed->current.value) * (float)v3)
         - clients[0].viewangles[0]);
-    clients[0].viewangles[0] = (float)((float)(CL_KeyState(&kb[5]) * cl_pitchspeed->current.value) * (float)v9)
+    clients[0].viewangles[0] = (float)((float)(CL_KeyState(&kb[5]) * cl_pitchspeed->current.value) * (float)v3)
         + clients[0].viewangles[0];
 }
 
 void CL_StanceButtonUpdate()
 {
-    char v0; // r11
+    iassert(!IN_IsTempStanceKeyActive());
 
-    if (kb[24].active || (v0 = 0, kb[11].active))
-        v0 = 1;
-    if (v0)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\client\\cl_input.cpp", 891, 0, "%s", "!IN_IsTempStanceKeyActive()");
     if (clients[0].stanceHeld && com_frameTime - clients[0].stanceTime >= cl_stanceHoldTime->current.integer)
     {
         clients[0].stanceHeld = 0;
-        clients[0].stance = (_cntlzw(clients[0].stancePosition - 2) >> 4) & 2 ^ 2;
+        //clients[0].stance = (_cntlzw(clients[0].stancePosition - 2) >> 4) & 2 ^ 2;
+        unsigned int val = clients[0].stancePosition - 2;
+        unsigned int isZero = !(val);  // 1 if val == 0, 0 otherwise
+        clients[0].stance = (StanceState)(isZero << 1);  // result is 2 if isZero == 1, then ^ 2 flips it to 0
+        clients[0].stance = (StanceState)((int)clients[0].stance ^ 2);
     }
 }
 
@@ -938,6 +942,8 @@ int __cdecl CL_AllowInput()
 
 void __cdecl CL_GamepadMove(usercmd_s *cmd)
 {
+    // KISAKTODO
+#if 0
     double v2; // fp27
     double v3; // fp28
     double v4; // fp29
@@ -1046,42 +1052,35 @@ void __cdecl CL_GamepadMove(usercmd_s *cmd)
         cmd->meleeChargeYaw = v26.meleeChargeYaw;
         CG_ModelPreviewerHandleGamepadEvents(0, v4, v5, v24, v3);
     }
+#endif
 }
 
-void __cdecl CL_GetMouseMovement(clientActive_t *cl, float *mx, float *my, int a4, int a5, __int64 a6)
+void __cdecl CL_GetMouseMovement(clientActive_t *cl, float *mx, float *my)
 {
-    __int64 v9; // r11
-    double v10; // fp0
-    int v11; // r10
+    float v3; // st7
 
-    if (!mx)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\client\\cl_input.cpp", 1240, 0, "%s", "mx");
-    if (!my)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\client\\cl_input.cpp", 1241, 0, "%s", "my");
-    HIDWORD(v9) = 51536;
+    iassert(mx);
+    iassert(my);
+
     if (m_filter->current.enabled)
     {
-        LODWORD(v9) = cl->mouseDx[1] + cl->mouseDx[0];
-        *mx = (float)v9 * (float)0.5;
-        LODWORD(v9) = cl->mouseDy[1] + cl->mouseDy[0];
-        v10 = (float)((float)v9 * (float)0.5);
+        *mx = (double)(cl->mouseDx[1] + cl->mouseDx[0]) * 0.5f;
+        v3 = (double)(cl->mouseDy[1] + cl->mouseDy[0]) * 0.5f;
     }
     else
     {
-        LODWORD(a6) = cl->mouseDx[cl->mouseIndex];
-        *mx = (float)a6;
-        LODWORD(v9) = cl->mouseDy[cl->mouseIndex];
-        v10 = (float)v9;
+        *mx = (float)cl->mouseDx[cl->mouseIndex];
+        v3 = (double)cl->mouseDy[cl->mouseIndex];
     }
-    *my = v10;
-    v11 = cl->mouseIndex ^ 1;
-    cl->mouseIndex = v11;
-    cl->mouseDx[v11] = 0;
+    *my = v3;
+    cl->mouseIndex ^= 1u;
+    cl->mouseDx[cl->mouseIndex] = 0;
     cl->mouseDy[cl->mouseIndex] = 0;
 }
 
 void __cdecl CL_MouseMove(usercmd_s *cmd, int a2, int a3, int a4, int a5, int a6, __int64 a7)
 {
+#if 0
     __int64 v8; // r9
     long double v9; // fp2
     __int64 v10; // r11
@@ -1175,6 +1174,117 @@ void __cdecl CL_MouseMove(usercmd_s *cmd, int a2, int a3, int a4, int a5, int a6
             }
             cmd->meleeChargeYaw = 0.0;
             cmd->meleeChargeDist = 0;
+        }
+    }
+#endif
+    float v2; // [esp+10h] [ebp-D4h]
+    float v3; // [esp+14h] [ebp-D0h]
+    float v4; // [esp+18h] [ebp-CCh]
+    float v5; // [esp+24h] [ebp-C0h]
+    float v6; // [esp+28h] [ebp-BCh]
+    float v7; // [esp+2Ch] [ebp-B8h]
+    float v8; // [esp+40h] [ebp-A4h]
+    float v9; // [esp+48h] [ebp-9Ch]
+    float v10; // [esp+58h] [ebp-8Ch]
+    float v11; // [esp+5Ch] [ebp-88h]
+    float v12; // [esp+60h] [ebp-84h]
+    float v13; // [esp+64h] [ebp-80h]
+    float v14; // [esp+6Ch] [ebp-78h]
+    float v15; // [esp+80h] [ebp-64h]
+    float rate; // [esp+88h] [ebp-5Ch]
+    float delta; // [esp+8Ch] [ebp-58h]
+    float deltaa; // [esp+8Ch] [ebp-58h]
+    AimInput aimInput; // [esp+90h] [ebp-54h] BYREF
+    float mx; // [esp+C4h] [ebp-20h] BYREF
+    float my; // [esp+C8h] [ebp-1Ch] BYREF
+    AimOutput aimOutput; // [esp+CCh] [ebp-18h] BYREF
+    float cap; // [esp+DCh] [ebp-8h]
+    float accelSensitivity; // [esp+E0h] [ebp-4h]
+
+    CL_GetMouseMovement(clients, &mx, &my);
+    if (frame_msec)
+    {
+        v15 = my * my + mx * mx;
+        v8 = sqrt(v15);
+        rate = v8 / (double)frame_msec;
+        accelSensitivity = rate * cl_mouseAccel->current.value + cl_sensitivity->current.value;
+        accelSensitivity = accelSensitivity * clients[0].cgameFOVSensitivityScale;
+        if (rate != 0.0 && cl_showMouseRate->current.enabled)
+            Com_Printf(14, "%f : %f\n", rate, accelSensitivity);
+        if ((clients[0].snap.ps.pm_flags & 0x800) == 0)
+        {
+            mx = mx * accelSensitivity;
+            my = my * accelSensitivity;
+            if (mx != 0.0 || my != 0.0)
+            {
+                if (kb[8].active)
+                {
+                    cmd->rightmove = ClampChar((int)(mx * m_side->current.value) + cmd->rightmove);
+                }
+                else
+                {
+                    delta = m_yaw->current.value * mx;
+                    if (clients[0].cgameMaxYawSpeed > 0.0)
+                    {
+                        cap = (double)frame_msec * clients[0].cgameMaxYawSpeed * EQUAL_EPSILON;
+                        v7 = delta - cap;
+                        if (v7 < 0.0)
+                            v13 = delta;
+                        else
+                            v13 = cap;
+                        v12 = -cap;
+                        v6 = v12 - v13;
+                        if (v6 < 0.0)
+                            v5 = v13;
+                        else
+                            v5 = -cap;
+                        delta = v5;
+                    }
+                    clients[0].viewangles[1] = clients[0].viewangles[1] - delta;
+                }
+                if ((kb[13].active || cl_freelook->current.enabled) && !kb[8].active)
+                {
+                    deltaa = m_pitch->current.value * my;
+                    if (clients[0].cgameMaxPitchSpeed > 0.0)
+                    {
+                        cap = (double)frame_msec * clients[0].cgameMaxPitchSpeed * EQUAL_EPSILON;
+                        v4 = deltaa - cap;
+                        if (v4 < 0.0)
+                            v11 = deltaa;
+                        else
+                            v11 = cap;
+                        v10 = -cap;
+                        v3 = v10 - v11;
+                        if (v3 < 0.0)
+                            v2 = v11;
+                        else
+                            v2 = -cap;
+                        deltaa = v2;
+                    }
+                    clients[0].viewangles[0] = clients[0].viewangles[0] + deltaa;
+                }
+                else
+                {
+                    cmd->forwardmove = ClampChar(cmd->forwardmove - (int)(my * m_forward->current.value));
+                }
+            }
+            aimInput.deltaTime = (double)cls.frametime * EQUAL_EPSILON;
+            aimInput.pitch = clients[0].viewangles[0];
+            aimInput.pitchAxis = 0.0;
+            aimInput.pitchMax = 0.0;
+            aimInput.yaw = clients[0].viewangles[1];
+            aimInput.yawAxis = 0.0;
+            aimInput.yawMax = 0.0;
+            aimInput.forwardAxis = 0.0;
+            aimInput.rightAxis = 0.0;
+            aimInput.buttons = cmd->buttons;
+            aimInput.localClientNum = 0;
+            aimInput.ps = CG_GetPredictedPlayerState(0);
+            AimAssist_UpdateMouseInput(&aimInput, &aimOutput);
+            clients[0].viewangles[0] = aimOutput.pitch;
+            clients[0].viewangles[1] = aimOutput.yaw;
+            cmd->meleeChargeYaw = aimOutput.meleeChargeYaw;
+            cmd->meleeChargeDist = aimOutput.meleeChargeDist;
         }
     }
 }
@@ -1293,6 +1403,7 @@ void __cdecl CL_FinishMove(usercmd_s *cmd)
 
 int __cdecl CG_HandleLocationSelectionInput(int localClientNum, usercmd_s *cmd)
 {
+#if 0
     int result; // r3
     double v5; // fp27
     double v6; // fp28
@@ -1372,9 +1483,87 @@ int __cdecl CG_HandleLocationSelectionInput(int localClientNum, usercmd_s *cmd)
         return 0;
     }
     return result;
+#endif
+    float v3; // [esp+4h] [ebp-54h]
+    float v4; // [esp+18h] [ebp-40h]
+    float v5; // [esp+28h] [ebp-30h]
+    float v6; // [esp+2Ch] [ebp-2Ch]
+    float v7; // [esp+30h] [ebp-28h]
+    float v8; // [esp+34h] [ebp-24h]
+    float mapAspectRatio; // [esp+40h] [ebp-18h]
+    float mx; // [esp+48h] [ebp-10h] BYREF
+    float my; // [esp+4Ch] [ebp-Ch] BYREF
+    float frametime; // [esp+50h] [ebp-8h]
+    LocSelInputState locSelInputState; // [esp+54h] [ebp-4h]
+
+    cg_s *cgameGlob = CG_GetLocalClientGlobals(localClientNum);
+
+    if (cgameGlob->predictedPlayerState.locationSelectionInfo)
+    {
+        CL_AddCurrentStanceToCmd(cmd);
+        cmd->buttons |= 0x100000u;
+        frametime = (double)cgameGlob->frametime * EQUAL_EPSILON;
+        mapAspectRatio = cgameGlob->compassMapWorldSize[0] / cgameGlob->compassMapWorldSize[1];
+        CL_GetMouseMovement(clients, &mx, &my);
+        cgameGlob->selectedLocation[0] = mx * cg_mapLocationSelectionCursorSpeed->current.value * frametime * (float)0.1
+            + cgameGlob->selectedLocation[0];
+        cgameGlob->selectedLocation[1] = my
+            * mapAspectRatio
+            * cg_mapLocationSelectionCursorSpeed->current.value
+            * frametime
+            * (float)0.1
+            + cgameGlob->selectedLocation[1];
+        v8 = cgameGlob->selectedLocation[0];
+        if (0.0 >= 1.0)
+            MyAssertHandler("c:\\trees\\cod3\\src\\universal\\com_math.h", 533, 0, "%s", "min < max");
+        if (v8 >= 0.0)
+        {
+            if (v8 <= 1.0)
+                v7 = v8;
+            else
+                v7 = 1.0;
+        }
+        else
+        {
+            v7 = 0.0;
+        }
+        cgameGlob->selectedLocation[0] = v7;
+        v6 = cgameGlob->selectedLocation[1];
+        if (0.0 >= 1.0)
+            MyAssertHandler("c:\\trees\\cod3\\src\\universal\\com_math.h", 533, 0, "%s", "min < max");
+        if (v6 >= 0.0)
+        {
+            if (v6 <= 1.0)
+                v5 = v6;
+            else
+                v5 = 1.0;
+        }
+        else
+        {
+            v5 = 0.0;
+        }
+        cgameGlob->selectedLocation[1] = v5;
+        locSelInputState = playerKeys[localClientNum].locSelInputState;
+        if (locSelInputState == LOC_SEL_INPUT_CONFIRM)
+        {
+            cmd->buttons |= 0x10000u;
+            cmd->selectedLocation[0] = (int)(cgameGlob->selectedLocation[0] * 255.0f) + 0x80;
+            cmd->selectedLocation[1] = (int)(cgameGlob->selectedLocation[1] * 255.0f) + 0x80;
+        }
+        else if (locSelInputState == LOC_SEL_INPUT_CANCEL)
+        {
+            cmd->buttons |= 0x20000u;
+        }
+        return 1;
+    }
+    else
+    {
+        Key_RemoveCatcher(localClientNum, -9);
+        return 0;
+    }
 }
 
-void __cdecl CL_CreateCmd(usercmd_s *result, int a2, int a3, int a4, int a5, int a6, __int64 a7)
+void __cdecl CL_CreateCmd(usercmd_s *result)
 {
     double v8; // fp31
     __int64 v9; // r10
@@ -1387,7 +1576,7 @@ void __cdecl CL_CreateCmd(usercmd_s *result, int a2, int a3, int a4, int a5, int
     double v16; // fp0
 
     v8 = clients[0].viewangles[0];
-    CL_AdjustAngles((int)result, a2, a3, a4, a5, a6, a7);
+    CL_AdjustAngles();
     memset(result, 0, sizeof(usercmd_s));
     if (!Key_IsCatcherActive(0, 8) || !(unsigned __int8)CG_HandleLocationSelectionInput(0, result))
     {
@@ -1395,8 +1584,9 @@ void __cdecl CL_CreateCmd(usercmd_s *result, int a2, int a3, int a4, int a5, int
         CL_KeyMove(result);
         CL_MouseMove(result, v14, v13, v12, v11, v10, v9);
         v15 = CL_ControllerIndexFromClientNum(0);
-        if (GPad_IsActive(v15))
-            CL_GamepadMove(result);
+        // KISAKTODO
+        //if (GPad_IsActive(v15))
+        //    CL_GamepadMove(result);
         if ((float)(clients[0].viewangles[0] - (float)v8) > 90.0)
         {
             v16 = (float)((float)v8 + (float)90.0);
@@ -1414,12 +1604,11 @@ LABEL_10:
     CL_FinishMove(result);
 }
 
-void __cdecl CL_CreateNewCommands(int a1, int a2, int a3, int a4, int a5)
+void CL_CreateNewCommands()
 {
-    __int64 v5; // r10
-    const void *v6; // r3
-    _BYTE v7[56]; // [sp+50h] [-80h] BYREF
-    usercmd_s v8; // [sp+90h] [-40h] BYREF
+    usercmd_s *v0; // r3
+    _BYTE v1[56]; // [sp+50h] [-80h] BYREF
+    usercmd_s v2; // [sp+90h] [-40h] BYREF
 
     if (clientUIActives[0].connectionState != CA_ACTIVE)
         MyAssertHandler(
@@ -1428,19 +1617,14 @@ void __cdecl CL_CreateNewCommands(int a1, int a2, int a3, int a4, int a5)
             0,
             "%s",
             "CL_GetLocalClientConnectionState( ONLY_LOCAL_CLIENT_NUM ) == CA_ACTIVE");
-    LODWORD(v5) = &con.consoleText[31992];
-    HIDWORD(v5) = com_frameTime - old_com_frameTime;
     frame_msec = com_frameTime - old_com_frameTime;
     if ((unsigned int)(com_frameTime - old_com_frameTime) > 0xC8)
-    {
-        HIDWORD(v5) = 200;
         frame_msec = 200;
-    }
     old_com_frameTime = com_frameTime;
-    CL_CreateCmd(&v8, a2, a3, a4, a5, (int)&con.consoleText[31992], v5);
-    memcpy(v7, v6, sizeof(v7));
+    CL_CreateCmd(&v2);
+    memcpy(v1, &v2, sizeof(v1));
     Sys_EnterCriticalSection(CRITSECT_CLIENT_CMD);
-    memcpy(&clients[0].cmds[++clients[0].cmdNumber & 0x3F], v7, sizeof(clients[0].cmds[++clients[0].cmdNumber & 0x3F]));
+    memcpy(&clients[0].cmds[++clients[0].cmdNumber & 0x3F], v1, sizeof(clients[0].cmds[++clients[0].cmdNumber & 0x3F]));
     Sys_LeaveCriticalSection(CRITSECT_CLIENT_CMD);
 }
 
@@ -1527,6 +1711,8 @@ void __cdecl CL_ClearClientThinkPacket()
 
 void PausedModelPreviewerGamepad()
 {
+    // KISAKTODO
+#if 0
     double v0; // fp31
     int v1; // r3
     __int64 v2; // r11
@@ -1543,22 +1729,16 @@ void PausedModelPreviewerGamepad()
     v5 = CL_GamepadAxisValue(0, 1);
     v6 = CL_GamepadAxisValue(0, 0);
     CG_ModelPreviewerHandleGamepadEvents(0, v5, v6, v3, v4);
+#endif
 }
 
 void __cdecl CL_Input(int localClientNum)
 {
-    int v1; // r7
-    int v2; // r6
-    int v3; // r5
-    int v4; // r4
-    int v5; // r3
-
-    if ((unsigned __int8)CL_AllowInput())
+    if (CL_AllowInput())
     {
         IN_Frame();
-        v5 = CL_AllowInput();
-        if ((_BYTE)v5)
-            CL_CreateNewCommands(v5, v4, v3, v2, v1);
+        if (CL_AllowInput())
+            CL_CreateNewCommands();
     }
     else
     {
@@ -1654,6 +1834,85 @@ void IN_MLookUp()
     if (!cl_freelook->current.enabled)
         clients[0].viewangles[0] = -clients[0].snap.ps.delta_angles[0];
 }
+
+cmd_function_s IN_RemoteMouseMove_VAR;
+cmd_function_s IN_RemoteKeyboard_VAR;
+cmd_function_s IN_CenterView_VAR;
+cmd_function_s IN_UpDown_VAR;
+cmd_function_s IN_UpUp_VAR;
+cmd_function_s IN_DownDown_VAR;
+cmd_function_s IN_DownUp_VAR;
+cmd_function_s IN_LeftDown_VAR;
+cmd_function_s IN_LeftUp_VAR;
+cmd_function_s IN_RightDown_VAR;
+cmd_function_s IN_RightUp_VAR;
+cmd_function_s IN_ForwardDown_VAR;
+cmd_function_s IN_ForwardUp_VAR;
+cmd_function_s IN_BackDown_VAR;
+cmd_function_s IN_BackUp_VAR;
+cmd_function_s IN_LookupDown_VAR;
+cmd_function_s IN_LookupUp_VAR;
+cmd_function_s IN_LookdownDown_VAR;
+cmd_function_s IN_LookdownUp_VAR;
+cmd_function_s IN_StrafeDown_VAR;
+cmd_function_s IN_StrafeUp_VAR;
+cmd_function_s IN_MoveleftDown_VAR;
+cmd_function_s IN_MoveleftUp_VAR;
+cmd_function_s IN_MoverightDown_VAR;
+cmd_function_s IN_MoverightUp_VAR;
+cmd_function_s IN_SpeedDown_VAR;
+cmd_function_s IN_SpeedUp_VAR;
+cmd_function_s IN_Attack_Down_VAR;
+cmd_function_s IN_Attack_Up_VAR;
+cmd_function_s IN_Melee_Down_VAR;
+cmd_function_s IN_Melee_Up_VAR;
+cmd_function_s IN_Breath_Down_VAR;
+cmd_function_s IN_Breath_Up_VAR;
+cmd_function_s IN_MeleeBreath_Down_VAR;
+cmd_function_s IN_MeleeBreath_Up_VAR;
+cmd_function_s IN_Frag_Down_VAR;
+cmd_function_s IN_Frag_Up_VAR;
+cmd_function_s IN_Smoke_Down_VAR;
+cmd_function_s IN_Smoke_Up_VAR;
+cmd_function_s IN_BreathSprint_Down_VAR;
+cmd_function_s IN_BreathSprint_Up_VAR;
+cmd_function_s IN_Activate_Down_VAR;
+cmd_function_s IN_Activate_Up_VAR;
+cmd_function_s IN_Reload_Down_VAR;
+cmd_function_s IN_Reload_Up_VAR;
+cmd_function_s IN_UseReload_Down_VAR;
+cmd_function_s IN_UseReload_Up_VAR;
+cmd_function_s IN_LeanLeft_Down_VAR;
+cmd_function_s IN_LeanLeft_Up_VAR;
+cmd_function_s IN_LeanRight_Down_VAR;
+cmd_function_s IN_LeanRight_Up_VAR;
+cmd_function_s IN_Prone_Down_VAR;
+cmd_function_s IN_Prone_Up_VAR;
+cmd_function_s IN_Stance_Down_VAR;
+cmd_function_s IN_Stance_Up_VAR;
+cmd_function_s IN_MLookDown_VAR;
+cmd_function_s IN_MLookUp_VAR;
+cmd_function_s IN_ToggleADS_VAR;
+cmd_function_s IN_LeaveADS_VAR;
+cmd_function_s IN_Throw_Down_VAR;
+cmd_function_s IN_Throw_Up_VAR;
+cmd_function_s IN_Speed_Throw_Down_VAR;
+cmd_function_s IN_Speed_Throw_Up_VAR;
+cmd_function_s IN_ToggleADS_Throw_Down_VAR;
+cmd_function_s IN_ToggleADS_Throw_Up_VAR;
+cmd_function_s IN_LowerStance_VAR;
+cmd_function_s IN_RaiseStance_VAR;
+cmd_function_s IN_ToggleCrouch_VAR;
+cmd_function_s IN_ToggleProne_VAR;
+cmd_function_s IN_GoProne_VAR;
+cmd_function_s IN_GoCrouch_VAR;
+cmd_function_s IN_GoStandDown_VAR;
+cmd_function_s IN_GoStandUp_VAR;
+cmd_function_s IN_SprintDown_VAR;
+cmd_function_s IN_SprintUp_VAR;
+cmd_function_s IN_NightVisionDown_VAR;
+cmd_function_s IN_NightVisionUp_VAR;
+
 
 void __cdecl CL_InitInput()
 {

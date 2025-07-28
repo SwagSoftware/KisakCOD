@@ -915,8 +915,7 @@ bool __cdecl Path_PredictionTrace(
     int mask,
     float *vTraceEndPos,
     double stepheight,
-    int allowStartSolid,
-    int a8)
+    int allowStartSolid)
 {
     double v15; // fp0
     double v16; // fp12
@@ -2746,8 +2745,7 @@ int __cdecl Path_TrimToSeePoint(
     actor_s *pActor,
     double fMaxDistSqrd,
     int iIgnoreEntityNum,
-    const float *vPoint,
-    const float *a7)
+    const float *vPoint)
 {
     int iDelta; // r11
     int v13; // r31
@@ -2892,7 +2890,7 @@ PredictionTraceResult __cdecl Path_PredictionTraceCheckForEntities(
     return result;
 }
 
-bool __cdecl Path_LookaheadPredictionTrace(path_t *pPath, float *vStartPos, float *vEndPos, int a4, int a5, int a6)
+bool __cdecl Path_LookaheadPredictionTrace(path_t *pPath, float *vStartPos, float *vEndPos)
 {
     int v6; // r6
     int wDodgeEntity; // r11
@@ -2923,8 +2921,7 @@ void __cdecl Path_UpdateLookaheadAmount(
     int bReduceLookaheadAmount,
     double dist,
     int lookaheadNextNode,
-    double maxLookaheadAmountIfReduce,
-    __int16 a8)
+    double maxLookaheadAmountIfReduce)
 {
     int v15; // r11
     int flags; // r10
@@ -3090,9 +3087,7 @@ void __cdecl Path_CalcLookahead_Completed(
     path_t *pPath,
     float *vStartPos,
     int bReduceLookaheadAmount,
-    double totalArea,
-    int a5,
-    int a6)
+    double totalArea)
 {
     int wNegotiationStartNode; // r8
     int v11; // r11
@@ -4085,27 +4080,7 @@ int __cdecl Path_AttemptDodge(
     int entityCount,
     int entityIgnore,
     int mask,
-    int bCheckLookahead,
-    int a11,
-    int a12,
-    int a13,
-    int a14,
-    int a15,
-    int a16,
-    int a17,
-    int a18,
-    int a19,
-    int a20,
-    int a21,
-    int a22,
-    int a23,
-    int a24,
-    int a25,
-    int a26,
-    int a27,
-    int a28,
-    int a29,
-    int a30)
+    int bCheckLookahead)
 {
     int v30; // r28
     int v38; // r24
@@ -4619,27 +4594,7 @@ int __cdecl Path_FindPathFromToWithWidth(
     const float *vGoalPos,
     int bAllowNegotiationLinks,
     double width,
-    float *perp,
-    int a10,
-    int a11,
-    int a12,
-    int a13,
-    int a14,
-    int a15,
-    int a16,
-    int a17,
-    int a18,
-    int a19,
-    int a20,
-    int a21,
-    int a22,
-    int a23,
-    int a24,
-    int a25,
-    int a26,
-    int a27,
-    int a28,
-    float *a29)
+    float *perp)
 {
     CustomSearchInfo_FindPathWithWidth v38; // [sp+50h] [-70h] BYREF
 
@@ -4687,27 +4642,7 @@ int __cdecl Path_FindPathFromToNotCrossPlanes(
     float (*vNormal)[2],
     float *fDist,
     int iPlaneCount,
-    int bAllowNegotiationLinks,
-    int a11,
-    int a12,
-    int a13,
-    int a14,
-    int a15,
-    int a16,
-    int a17,
-    int a18,
-    int a19,
-    int a20,
-    int a21,
-    int a22,
-    int a23,
-    int a24,
-    int a25,
-    int a26,
-    int a27,
-    int a28,
-    int a29,
-    int a30)
+    int bAllowNegotiationLinks)
 {
     CustomSearchInfo_FindPathNotCrossPlanes v39[4]; // [sp+50h] [-80h] BYREF
 
@@ -4835,28 +4770,7 @@ int __cdecl Path_FindPathFromAwayNotCrossPlanes(
     float (*vNormal)[2],
     float *fDist,
     float *iPlaneCount,
-    int bAllowNegotiationLinks,
-    int a11,
-    int a12,
-    int a13,
-    int a14,
-    int a15,
-    int a16,
-    int a17,
-    int a18,
-    int a19,
-    int a20,
-    int a21,
-    int a22,
-    int a23,
-    int a24,
-    int a25,
-    int a26,
-    int a27,
-    int a28,
-    int a29,
-    int a30,
-    int a31)
+    int bAllowNegotiationLinks)
 {
     pathnode_t *m_pBestNode; // r30
     int Path; // r31
@@ -4925,8 +4839,7 @@ int __cdecl Path_FindPathInCylinderWithLOS(
     float *vGoalPos,
     const actor_goal_s *goal,
     double fWithinDistSqrd,
-    int bAllowNegotiationLinks,
-    int a8)
+    int bAllowNegotiationLinks)
 {
     int *v15; // r6
     pathnode_t *v17; // r6
@@ -4967,28 +4880,7 @@ int __cdecl Path_FindPathInCylinderWithLOSNotCrossPlanes(
     float (*vNormal)[2],
     float *fDist,
     float *iPlaneCount,
-    int bAllowNegotiationLinks,
-    int a11,
-    int a12,
-    int a13,
-    int a14,
-    int a15,
-    int a16,
-    int a17,
-    int a18,
-    int a19,
-    int a20,
-    int a21,
-    int a22,
-    int a23,
-    int a24,
-    int a25,
-    int a26,
-    int a27,
-    int a28,
-    int *a29,
-    int a30,
-    int a31)
+    int bAllowNegotiationLinks)
 {
     pathnode_t *v40; // r6
     nearestNodeHeightCheck v41; // [sp+8h] [-3F8h]
@@ -5041,28 +4933,7 @@ pathnode_t *__cdecl Path_FindPathFromInCylinder(
     float *vOrigin,
     double fRadiusSqrd,
     double fHalfHeightSqrd,
-    int bAllowNegotiationLinks,
-    int a10,
-    int a11,
-    int a12,
-    int a13,
-    int a14,
-    int a15,
-    int a16,
-    int a17,
-    int a18,
-    int a19,
-    int a20,
-    int a21,
-    int a22,
-    int a23,
-    int a24,
-    int a25,
-    int a26,
-    int a27,
-    int a28,
-    int a29,
-    int a30)
+    int bAllowNegotiationLinks)
 {
     unsigned __int16 spawnflags; // r10
     pathnode_t *result; // r3
@@ -5115,31 +4986,7 @@ int __cdecl Path_FindPathFromInCylinderNotCrossPlanes(
     float (*vNormal)[2],
     float *fDist,
     int iPlaneCount,
-    int bAllowNegotiationLinks,
-    int a13,
-    int a14,
-    int a15,
-    int a16,
-    int a17,
-    int a18,
-    int a19,
-    int a20,
-    int a21,
-    int a22,
-    int a23,
-    int a24,
-    int a25,
-    int a26,
-    int a27,
-    int a28,
-    int a29,
-    float *a30,
-    int a31,
-    float *a32,
-    int a33,
-    int *a34,
-    int a35,
-    int a36)
+    int bAllowNegotiationLinks)
 {
     unsigned __int16 spawnflags; // r10
     pathnode_t *v45; // r11
@@ -5299,8 +5146,7 @@ int __cdecl Path_FindPathWithWidth(
     float *vGoalPos,
     int bAllowNegotiationLinks,
     double width,
-    float *perp,
-    float *a8)
+    float *perp)
 {
     pathnode_t *v15; // r30
     int *v16; // r6
@@ -5473,26 +5319,7 @@ pathnode_t *__cdecl Path_FindPathFromNotCrossPlanes(
     float (*vNormal)[2],
     float *fDist,
     int *iPlaneCount,
-    int bAllowNegotiationLinks,
-    int a10,
-    int a11,
-    int a12,
-    int a13,
-    int a14,
-    int a15,
-    int a16,
-    int a17,
-    int a18,
-    int a19,
-    int a20,
-    int a21,
-    int a22,
-    int a23,
-    int a24,
-    int a25,
-    int a26,
-    int a27,
-    int a28)
+    int bAllowNegotiationLinks)
 {
     pathnode_t *result; // r3
     nearestNodeHeightCheck v37; // [sp+8h] [-3B8h]
@@ -5571,8 +5398,7 @@ pathnode_t *__cdecl Path_FindPathAway(
     float *vStartPos,
     float *vAwayFromPos,
     double fDistAway,
-    int bAllowNegotiationLinks,
-    int a7)
+    int bAllowNegotiationLinks)
 {
     int v13; // r8
     pathnode_t *result; // r3
@@ -5594,27 +5420,7 @@ pathnode_t *__cdecl Path_FindPathAwayNotCrossPlanes(
     float (*vNormal)[2],
     float *fDist,
     float *iPlaneCount,
-    int *bAllowNegotiationLinks,
-    int a10,
-    int a11,
-    int a12,
-    int a13,
-    int a14,
-    int a15,
-    int a16,
-    int a17,
-    int a18,
-    int a19,
-    int a20,
-    int a21,
-    int a22,
-    int a23,
-    int a24,
-    int a25,
-    int a26,
-    int a27,
-    int a28,
-    int a29)
+    int *bAllowNegotiationLinks)
 {
     float *v37; // r8
     pathnode_t *result; // r3

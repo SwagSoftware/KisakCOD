@@ -423,7 +423,7 @@ void __cdecl SOR_LCP_MainLoop(
 			else
 			{
 				v15 = rows[v13].lambda * b->hi;
-				v12 = fabs(v15);
+				v12 = I_fabs(v15);
 				hi = v12;
 				lo = -v12;
 			}
@@ -547,7 +547,7 @@ void __cdecl SOR_LCP_MainLoop_OneBody(
 			else
 			{
 				v13 = rows[v11].lambda * b->hi;
-				v10 = fabs(v13);
+				v10 = I_fabs(v13);
 				hi = v10;
 				lo = -v10;
 			}

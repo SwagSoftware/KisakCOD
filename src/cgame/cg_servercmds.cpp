@@ -21,6 +21,7 @@
 #include "cg_compassfriendlies.h"
 #include <ragdoll/ragdoll.h>
 #include <physics/phys_local.h>
+#include "cg_main.h"
 
 struct __declspec(align(4)) $59835072FC2CD3936CE4A4C9F556010B
 {
@@ -272,7 +273,7 @@ void __cdecl CG_ConfigStringModifiedInternal(int localClientNum, unsigned int st
     const char *v5; // r29
     const char *v6; // r3
     long double v7; // fp2
-    cgs_t *LocalClientStaticGlobals; // r30
+    cgs_t *cgs; // r30
     const FxEffectDef *v9; // r3
     shellshock_parms_t *ShellshockParms; // r3
 
@@ -363,16 +364,10 @@ void __cdecl CG_ConfigStringModifiedInternal(int localClientNum, unsigned int st
                 }
                 else
                 {
-                    LocalClientStaticGlobals = CG_GetLocalClientStaticGlobals(localClientNum);
-                    v9 = FX_Register(v5);
-                    *((unsigned int *)&LocalClientStaticGlobals[-7] + stringIndex - 211) = v9;
-                    if (!v9)
-                        MyAssertHandler(
-                            "c:\\trees\\cod3\\cod3src\\src\\cgame\\cg_servercmds.cpp",
-                            241,
-                            0,
-                            "%s",
-                            "cgs->fxs[stringIndex - CS_EFFECT_NAMES]");
+                    cgs = CG_GetLocalClientStaticGlobals(localClientNum);
+                    cgs->fxs[stringIndex - CS_EFFECT_NAMES] = FX_Register(v5);
+                    //*((unsigned int *)&cgs[-7] + stringIndex - 211) = v9;
+                    iassert(cgs->fxs[stringIndex - CS_EFFECT_NAMES]);
                 }
             }
             else
@@ -876,7 +871,7 @@ void __cdecl CG_SetChannelVolCmd(int localClientNum)
         if (v12 <= 0)
             v12 = 0;
         ShellshockParms = BG_GetShellshockParms(v7);
-        SND_SetChannelVolumes(v5, (const float *)&ShellshockParms->sound[292], v12);
+        SND_SetChannelVolumes(v5, ShellshockParms->sound.channelvolume, v12);
     }
     else
     {
@@ -2191,6 +2186,7 @@ void __cdecl CG_DispatchServerCommand(int localClientNum)
                                                                                             v118 = atof(v117);
                                                                                             CG_Fade(
                                                                                                 localClientNum,
+                                                                                                0,
                                                                                                 0,
                                                                                                 0,
                                                                                                 (int)(float)((float)*(double *)&v118 * (float)255.0),

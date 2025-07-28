@@ -3,7 +3,6 @@
 #include "cg_local.h"
 #include "cg_public.h"
 
-#include <cgame_mp/cg_local_mp.h>
 
 #include <xanim/dobj.h>
 #include <DynEntity/DynEntity_client.h>
@@ -14,10 +13,17 @@
 #include <gfx_d3d/r_scene.h>
 #include <sound/snd_public.h>
 #include <qcommon/cmd.h>
-#include <server_mp/server_mp.h>
 #include <EffectsCore/fx_system.h>
 #include <game/bullet.h>
+
+#ifdef KISAK_MP
+#include <cgame_mp/cg_local_mp.h>
+#include <server_mp/server_mp.h>
 #include <game_mp/g_main_mp.h>
+#elif KISAK_SP
+#include "cg_servercmds.h"
+#include "cg_ents.h"
+#endif
 
 const float MYLERP_START = 0.3f;
 const float MYLERP_END = 0.1f;
@@ -400,7 +406,7 @@ void __cdecl CG_RegisterItems(int32_t localClientNum)
 {
     char v1; // al
     char *v2; // [esp+8h] [ebp-98h]
-    char *ConfigString; // [esp+Ch] [ebp-94h]
+    const char *ConfigString; // [esp+Ch] [ebp-94h]
     char items[132]; // [esp+10h] [ebp-90h] BYREF
     int32_t i; // [esp+98h] [ebp-8h]
     int32_t digit; // [esp+9Ch] [ebp-4h]
@@ -451,6 +457,7 @@ void __cdecl CG_UpdateViewModelPose(const DObj_s* obj, int32_t localClientNum)
     cgameGlob->viewModelPose.origin[2] = cgameGlob->viewModelAxis[3][2];
 }
 
+#ifdef KISAK_MP
 bool __cdecl CG_IsPlayerCrouching(clientInfo_t *ci, const centity_s *cent)
 {
     return BG_IsCrouchingAnim(ci, cent->nextState.legsAnim);
@@ -520,6 +527,7 @@ void __cdecl CG_GetPlayerViewOrigin(int32_t localClientNum, const playerState_s 
         BG_GetPlayerViewOrigin(ps, origin, CG_GetLocalClientGlobals(localClientNum)->time);
     }
 }
+#endif
 
 void __cdecl CG_AddPlayerWeapon(
     int32_t localClientNum,
