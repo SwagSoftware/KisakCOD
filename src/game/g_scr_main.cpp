@@ -2089,7 +2089,7 @@ void ScrCmd_SetPhysicsGravityDir()
     float v9; // [sp+58h] [-18h]
 
     Scr_GetVector(0, &v7);
-    _FP9 = -__fsqrts((float)((float)(v9 * v9) + (float)((float)(v7 * v7) + (float)(v8 * v8))));
+    _FP9 = -sqrtf((float)((float)(v9 * v9) + (float)((float)(v7 * v7) + (float)(v8 * v8))));
     __asm { fsel      f0, f9, f10, f0 }
     v2 = (float)((float)1.0 / (float)_FP0);
     v5 = (float)((float)v2 * v8);
@@ -2841,7 +2841,7 @@ void __cdecl Scr_BulletSpread()
     v15[5] = v10;
     v15[3] = v8;
     v15[4] = v9;
-    _FP9 = -__fsqrts((float)((float)((float)(v5 - v8) * (float)(v5 - v8))
+    _FP9 = -sqrtf((float)((float)((float)(v5 - v8) * (float)(v5 - v8))
         + (float)((float)((float)(v7 - v10) * (float)(v7 - v10))
             + (float)((float)(v6 - v9) * (float)(v6 - v9)))));
     __asm { fsel      f11, f9, f10, f11 }
@@ -2929,7 +2929,7 @@ void __cdecl Scr_MagicBullet()
     v24.up[0] = 0.0;
     v24.up[1] = 0.0;
     v24.up[2] = 0.0;
-    _FP9 = -__fsqrts((float)((float)((float)((float)v3 - v21) * (float)((float)v3 - v21))
+    _FP9 = -sqrtf((float)((float)((float)((float)v3 - v21) * (float)((float)v3 - v21))
         + (float)((float)((float)((float)v5 - v23) * (float)((float)v5 - v23))
             + (float)((float)((float)v4 - v22) * (float)((float)v4 - v22)))));
     __asm { fsel      f11, f9, f10, f11 }
@@ -3744,7 +3744,7 @@ void __cdecl ScrCmd_DoDamage(scr_entref_t *entref)
         v13 = v48;
     }
     v17 = 0;
-    v18 = __fsqrts((float)((float)((float)v13 * (float)v13)
+    v18 = sqrtf((float)((float)((float)v13 * (float)v13)
         + (float)((float)((float)v16 * (float)v16) + (float)((float)v14 * (float)v14))));
     _FP9 = -v18;
     v20 = v18 == 0.0;
@@ -5192,7 +5192,7 @@ void Scr_BulletTrace()
     Scr_AddArrayStringIndexed(scr_const.entity);
     if (v15.fraction >= 1.0)
     {
-        _FP9 = -__fsqrts((float)((float)((float)(v10 - v7) * (float)(v10 - v7))
+        _FP9 = -sqrtf((float)((float)((float)(v10 - v7) * (float)(v10 - v7))
             + (float)((float)((float)(v12 - v9) * (float)(v12 - v9))
                 + (float)((float)(v11 - v8) * (float)(v11 - v8)))));
         __asm { fsel      f11, f9, f10, f11 }
@@ -5532,7 +5532,7 @@ void GScr_sqrt()
     double Float; // fp1
 
     Float = Scr_GetFloat(0);
-    Scr_AddFloat(__fsqrts(Float));
+    Scr_AddFloat(sqrtf(Float));
 }
 
 void GScr_VectorFromLineToPoint()
@@ -5663,7 +5663,7 @@ void Scr_Distance()
 
     Scr_GetVector(0, &v0);
     Scr_GetVector(1u, &v3);
-    Scr_AddFloat(__fsqrts((float)((float)((float)(v4 - v1) * (float)(v4 - v1))
+    Scr_AddFloat(sqrtf((float)((float)((float)(v4 - v1) * (float)(v4 - v1))
         + (float)((float)((float)(v5 - v2) * (float)(v5 - v2))
             + (float)((float)(v3 - v0) * (float)(v3 - v0))))));
 }
@@ -5703,7 +5703,7 @@ void Scr_Length()
     float v2; // [sp+58h] [-18h]
 
     Scr_GetVector(0, &v0);
-    Scr_AddFloat(__fsqrts((float)((float)(v2 * v2) + (float)((float)(v1 * v1) + (float)(v0 * v0)))));
+    Scr_AddFloat(sqrtf((float)((float)(v2 * v2) + (float)((float)(v1 * v1) + (float)(v0 * v0)))));
 }
 
 void Scr_LengthSquared()
@@ -5756,7 +5756,7 @@ void Scr_VectorNormalize()
     if (Scr_GetNumParam() != 1)
         Scr_Error("wrong number of arguments to vectornormalize!");
     Scr_GetVector(0, &v3);
-    _FP9 = -__fsqrts((float)((float)(v4 * v4) + (float)((float)(v5 * v5) + (float)(v3 * v3))));
+    _FP9 = -sqrtf((float)((float)(v4 * v4) + (float)((float)(v5 * v5) + (float)(v3 * v3))));
     __asm { fsel      f0, f9, f10, f0 }
     v2 = (float)((float)1.0 / (float)_FP0);
     v6[0] = (float)v2 * v3;
@@ -6802,7 +6802,7 @@ void __cdecl GScr_DamageConeTraceInternal(scr_entref_t *entref, int contentMask)
         Entity->r.currentOrigin,
         v4,
         v27,
-        3.4028235e38,
+        FLT_MAX,
         1.0,
         v6,
         0.0,
@@ -7497,7 +7497,7 @@ void __cdecl Scr_SetFxAngles(unsigned int givenAxisCount, float (*axis)[3], floa
         (*axis)[8] = (float)((*axis)[2] * (float)v6) + (*axis)[8];
         v7 = (*axis)[7];
         v8 = (*axis)[8];
-        v9 = __fsqrts((float)((float)((*axis)[8] * (*axis)[8])
+        v9 = sqrtf((float)((float)((*axis)[8] * (*axis)[8])
             + (float)((float)((*axis)[6] * (*axis)[6]) + (float)((*axis)[7] * (*axis)[7]))));
         _FP9 = -v9;
         v11 = v9 == 0.0;
@@ -7609,7 +7609,7 @@ void Scr_PlayFX()
                 "(numParams == 3 || numParams == 4)",
                 v1);
         Scr_GetVector(2u, v17);
-        v6 = __fsqrts((float)((float)(v17[0] * v17[0]) + (float)((float)(v17[1] * v17[1]) + (float)(v17[2] * v17[2]))));
+        v6 = sqrtf((float)((float)(v17[0] * v17[0]) + (float)((float)(v17[1] * v17[1]) + (float)(v17[2] * v17[2]))));
         _FP10 = -v6;
         v8 = v6 == 0.0;
         __asm { fsel      f0, f10, f31, f0 }
@@ -7634,7 +7634,7 @@ void Scr_PlayFX()
                     "(numParams == 4)",
                     v1);
             Scr_GetVector(3u, &v18);
-            v11 = __fsqrts((float)((float)(v20 * v20) + (float)((float)(v18 * v18) + (float)(v19 * v19))));
+            v11 = sqrtf((float)((float)(v20 * v20) + (float)((float)(v18 * v18) + (float)(v19 * v19))));
             _FP10 = -v11;
             v13 = v11 == 0.0;
             __asm { fsel      f0, f10, f31, f0 }
@@ -7741,7 +7741,7 @@ void Scr_PlayLoopedFX()
                 goto LABEL_13;
             v0 = 1;
             Scr_GetVector(5u, &v20);
-            v4 = __fsqrts((float)((float)(v22 * v22) + (float)((float)(v20 * v20) + (float)(v21 * v21))));
+            v4 = sqrtf((float)((float)(v22 * v22) + (float)((float)(v20 * v20) + (float)(v21 * v21))));
             _FP10 = -v4;
             v6 = v4 == 0.0;
             __asm { fsel      f0, f10, f31, f0 }
@@ -7753,7 +7753,7 @@ void Scr_PlayLoopedFX()
                 Scr_FxParamError(5u, "playLoopedFx called with (0 0 0) up direction", Int);
         }
         Scr_GetVector(4u, v19);
-        v9 = __fsqrts((float)((float)(v19[0] * v19[0]) + (float)((float)(v19[2] * v19[2]) + (float)(v19[1] * v19[1]))));
+        v9 = sqrtf((float)((float)(v19[0] * v19[0]) + (float)((float)(v19[2] * v19[2]) + (float)(v19[1] * v19[1]))));
         _FP10 = -v9;
         v11 = v9 == 0.0;
         __asm { fsel      f0, f10, f31, f0 }
@@ -7820,7 +7820,7 @@ void Scr_SpawnFX()
         if (NumParam != 4)
             goto LABEL_12;
         Scr_GetVector(3u, &v17);
-        v3 = __fsqrts((float)((float)(v19 * v19) + (float)((float)(v17 * v17) + (float)(v18 * v18))));
+        v3 = sqrtf((float)((float)(v19 * v19) + (float)((float)(v17 * v17) + (float)(v18 * v18))));
         _FP10 = -v3;
         v5 = v3 == 0.0;
         __asm { fsel      f0, f10, f31, f0 }
@@ -7833,7 +7833,7 @@ void Scr_SpawnFX()
         v0 = 1;
     }
     Scr_GetVector(2u, v16);
-    v8 = __fsqrts((float)((float)(v16[1] * v16[1]) + (float)((float)(v16[2] * v16[2]) + (float)(v16[0] * v16[0]))));
+    v8 = sqrtf((float)((float)(v16[1] * v16[1]) + (float)((float)(v16[2] * v16[2]) + (float)(v16[0] * v16[0]))));
     _FP10 = -v8;
     v10 = v8 == 0.0;
     __asm { fsel      f0, f10, f31, f0 }
@@ -8206,7 +8206,7 @@ void Scr_SetSunDirection()
     if (Scr_GetNumParam() != 1)
         Scr_Error("Incorrect number of parameters\n");
     Scr_GetVector(0, &v7);
-    _FP9 = -__fsqrts((float)((float)(v9 * v9) + (float)((float)(v7 * v7) + (float)(v8 * v8))));
+    _FP9 = -sqrtf((float)((float)(v9 * v9) + (float)((float)(v7 * v7) + (float)(v8 * v8))));
     __asm { fsel      f0, f9, f10, f0 }
     v2 = (float)((float)1.0 / (float)_FP0);
     v5 = (float)((float)v2 * v8);
@@ -8236,8 +8236,8 @@ void Scr_LerpSunDirection()
     Scr_GetVector(0, &v10);
     Scr_GetVector(1u, &v7);
     Float = Scr_GetFloat(2u);
-    _FP5 = -__fsqrts((float)((float)(v12 * v12) + (float)((float)(v10 * v10) + (float)(v11 * v11))));
-    _FP4 = -__fsqrts((float)((float)(v9 * v9) + (float)((float)(v7 * v7) + (float)(v8 * v8))));
+    _FP5 = -sqrtf((float)((float)(v12 * v12) + (float)((float)(v10 * v10) + (float)(v11 * v11))));
+    _FP4 = -sqrtf((float)((float)(v9 * v9) + (float)((float)(v7 * v7) + (float)(v8 * v8))));
     __asm
     {
         fsel      f13, f5, f0, f13

@@ -1420,6 +1420,7 @@ void __cdecl XAnimCloneAnimTree_r(
     unsigned int toInfoParentIndex);
 XAnimInfo* __cdecl GetAnimInfo(int infoIndex);
 void XAnimDisableLeakCheck();
+void XAnimFreeAnims(XAnim_s *anims, void(*Free)(void *, int));
 
 
 // xanim_load_obj

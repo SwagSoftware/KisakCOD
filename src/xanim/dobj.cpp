@@ -1289,3 +1289,46 @@ void __cdecl DObjSetHidePartBits(DObj_s *obj, const unsigned int *partBits)
     obj->hidePartBits[3] = partBits[3];
 }
 
+int DObjGetNumSurfaces(const DObj_s *obj, char *lods)
+{
+    int result; // r3
+    int v5; // r7
+    XModel **v6; // r8
+    int v7; // r11
+
+    iassert(lods);
+
+    result = 0;
+    v5 = obj->numModels - 1;
+    if (v5 >= 0)
+    {
+        v6 = &obj->models[v5];
+        do
+        {
+            v7 = lods[v5];
+            if (v7 >= 0)
+                result += (*v6)->lodInfo[v7].numsurfs;
+            --v5;
+            --v6;
+        } while (v5 >= 0);
+    }
+    return result;
+}
+
+void DObjClone(const DObj_s *from, DObj_s *obj)
+{
+    unsigned int duplicateParts; // r3
+    XModel **v5; // r3
+
+    iassert(obj);
+
+    memcpy(obj, from, sizeof(DObj_s));
+    memset(&obj->skel, 0, sizeof(obj->skel));
+    duplicateParts = obj->duplicateParts;
+    if (obj->duplicateParts && duplicateParts != g_empty)
+        SL_AddRefToString(duplicateParts);
+    obj->tree = 0;
+    v5 = (XModel **)MT_Alloc(from->numModels + __ROL4__(from->numModels, 2), 13);
+    obj->models = v5;
+    memcpy(v5, from->models, from->numModels + __ROL4__(from->numModels, 2));
+}

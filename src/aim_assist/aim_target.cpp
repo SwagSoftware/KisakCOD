@@ -536,7 +536,7 @@ int __cdecl AimTarget_GetBestTarget(const float *start, const float *viewDir)
             v9 = (float)(currentOrigin[2] - start[2]);
             v10 = (float)(currentOrigin[1] - start[1]);
 
-            //_FP3 = -__fsqrts((float)((float)((float)v10 * (float)v10)
+            //_FP3 = -sqrtf((float)((float)((float)v10 * (float)v10)
             //    + (float)((float)((float)v9 * (float)v9)
             //        + (float)((float)(*currentOrigin - *start) * (float)(*currentOrigin - *start)))));
             //__asm { fsel      f11, f3, f31, f11 }

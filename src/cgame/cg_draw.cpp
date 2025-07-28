@@ -10,6 +10,7 @@
 #include <gfx_d3d/r_cinematic.h>
 #include <ui/ui.h>
 #include "cg_view.h"
+#include <gfx_d3d/r_reflection_probe.h>
 
 CenterPrint s_centerPrint[1];
 ScreenBlur s_screenBlur[1];
@@ -331,7 +332,7 @@ LABEL_12:
 
 int __cdecl CG_CheckPlayerMovement(usercmd_s oldCmd, usercmd_s newCmd)
 {
-    if (memcmp(oldCmd.angles, newCmd.angles, sizeof(usercmd_s)))
+    if (memcmp(oldCmd.angles, newCmd.angles, 20))
         return 1;
 
     return newCmd.forwardmove || newCmd.rightmove;

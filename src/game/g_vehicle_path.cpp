@@ -19,7 +19,7 @@ void __cdecl VP_AddDebugLine(float *start, float *end, int forceDraw)
     v5 = *start;
     v6 = (float)(end[2] - start[2]);
     v7 = (float)(end[1] - start[1]);
-    _FP7 = -__fsqrts((float)((float)((float)v7 * (float)v7)
+    _FP7 = -sqrtf((float)((float)((float)v7 * (float)v7)
         + (float)((float)((float)v6 * (float)v6)
             + (float)((float)(*end - *start) * (float)(*end - *start)))));
     __asm { fsel      f10, f7, f0, f10 }
@@ -1068,7 +1068,7 @@ void __cdecl G_SetupVehiclePaths()
                 v9->dir[2] = origin[2] - v9->origin[2];
                 v12 = v9->dir[1];
                 v13 = v9->dir[2];
-                v14 = __fsqrts((float)((float)(v9->dir[2] * v9->dir[2])
+                v14 = sqrtf((float)((float)(v9->dir[2] * v9->dir[2])
                     + (float)((float)(v9->dir[0] * v9->dir[0]) + (float)(v9->dir[1] * v9->dir[1]))));
                 _FP10 = -v14;
                 __asm { fsel      f10, f10, f25, f11 }
@@ -1306,7 +1306,7 @@ int __cdecl G_VehUpdatePathPos(vehicle_pathpos_t *vpp, __int16 testNode)
     v6 = (float)(v5[1] - vpp->origin[1]);
     v7 = (float)(v5[2] - vpp->origin[2]);
     v8 = (float)(*v5 - vpp->origin[0]);
-    v9 = __fsqrts((float)((float)((float)v8 * (float)v8)
+    v9 = sqrtf((float)((float)((float)v8 * (float)v8)
         + (float)((float)((float)v7 * (float)v7) + (float)((float)v6 * (float)v6))));
     _FP9 = -v9;
     v11 = v9 > 0.0;
@@ -1407,7 +1407,7 @@ void __cdecl G_VehSetSwitchNode(vehicle_pathpos_t *vpp, __int16 srcNodeIdx, __in
         vpp->switchNode[0].dir[2] = origin[2] - v6->origin[2];
         v8 = vpp->switchNode[0].dir[1];
         v9 = vpp->switchNode[0].dir[2];
-        v10 = __fsqrts((float)((float)(vpp->switchNode[0].dir[2] * vpp->switchNode[0].dir[2])
+        v10 = sqrtf((float)((float)(vpp->switchNode[0].dir[2] * vpp->switchNode[0].dir[2])
             + (float)((float)(vpp->switchNode[0].dir[0] * vpp->switchNode[0].dir[0])
                 + (float)(vpp->switchNode[0].dir[1] * vpp->switchNode[0].dir[1]))));
         _FP9 = -v10;

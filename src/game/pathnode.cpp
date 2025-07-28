@@ -1171,7 +1171,7 @@ float __cdecl Path_GetDebugStringScale(const float *cameraPos, const float *orig
     {
         v5 = (float)(cameraPos[1] - origin[1]);
         v6 = (float)((float)(cameraPos[2] - origin[2]) + v4->client->ps.viewHeightCurrent);
-        //v7 = (float)((float)__fsqrts((float)((float)((float)v6 * (float)v6)
+        //v7 = (float)((float)sqrtf((float)((float)((float)v6 * (float)v6)
         v7 = (float)((float)sqrtf((float)((float)((float)v6 * (float)v6)
             + (float)((float)((float)(*cameraPos - *origin) * (float)(*cameraPos - *origin))
                 + (float)((float)v5 * (float)v5))))
@@ -1686,7 +1686,7 @@ pathnode_t *__cdecl Path_FindChainPos(const float *vOrigin, pathnode_t *pPrevCha
     else
         wChainId = 0;
     v6 = 0;
-    v7 = 3.4028235e38;
+    v7 = FLT_MAX;
     if ((int)gameWorldSp.path.chainNodeCount >= 4)
     {
         v8 = gameWorldSp.path.nodeForChainNode + 2;

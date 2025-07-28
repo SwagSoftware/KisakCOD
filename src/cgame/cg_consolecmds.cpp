@@ -507,7 +507,7 @@ void __cdecl CG_SetViewOrbit_f()
             v26 = (float)((float)v19 - p_predictedPlayerState->origin[2]);
 
             // aislop
-            //_FP9 = -__fsqrts((float)((float)(v30 * v30) + (float)((float)((float)v26 * (float)v26) + (float)(v31 * v31))));
+            //_FP9 = -sqrtf((float)((float)(v30 * v30) + (float)((float)((float)v26 * (float)v26) + (float)(v31 * v31))));
             //__asm { fsel      f11, f9, f10, f11 }
             //v29 = (float)((float)1.0 / (float)_FP11);
 

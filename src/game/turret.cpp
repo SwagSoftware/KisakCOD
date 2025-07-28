@@ -208,7 +208,7 @@ void __cdecl Fire_Lead(gentity_s *ent, gentity_s *activator, int bUseAccuracy)
         //v15 = (float)((float)v12 - v32.muzzleTrace[1]);
         //v16 = (float)((float)v11 - v32.muzzleTrace[0]);
         //flags = pTurretInfo->flags;
-        //_FP6 = -__fsqrts((float)((float)((float)v16 * (float)v16)
+        //_FP6 = -sqrtf((float)((float)((float)v16 * (float)v16)
         //    + (float)((float)((float)v14 * (float)v14) + (float)((float)v15 * (float)v15))));
         //__asm { fsel      f11, f6, f10, f11 }
         //v20 = (float)((float)(v32.forward[0] * (float)((float)((float)1.0 / (float)_FP11) * (float)v16))
@@ -1106,7 +1106,7 @@ int __cdecl turret_aimat_Sentient_Internal(
                 v22 = pTurretInfo->missOffsetNormalized[2];
 
                 // aislop
-                //_FP9 = -__fsqrts((float)((float)(pTurretInfo->missOffsetNormalized[2] * pTurretInfo->missOffsetNormalized[2])
+                //_FP9 = -sqrtf((float)((float)(pTurretInfo->missOffsetNormalized[2] * pTurretInfo->missOffsetNormalized[2])
                 //    + (float)((float)(pTurretInfo->missOffsetNormalized[0]
                 //        * pTurretInfo->missOffsetNormalized[0])
                 //        + (float)(pTurretInfo->missOffsetNormalized[1]
@@ -1224,7 +1224,7 @@ int __cdecl turret_isTargetTooCloseToPlayer(
         - *flashOrigin);
 
     // aislop
-    //v10 = __fsqrts((float)((float)((float)v9 * (float)v9)
+    //v10 = sqrtf((float)((float)((float)v9 * (float)v9)
     //    + (float)((float)((float)v8 * (float)v8) + (float)((float)v7 * (float)v7))));
     //_FP10 = -v10;
     //__asm { fsel      f10, f10, f0, f30 }
@@ -1257,7 +1257,7 @@ int __cdecl turret_isTargetTooCloseToPlayer(
         - *flashOrigin);
 
     // aislop
-    //_FP9 = -__fsqrts((float)((float)((float)v21 * (float)v21)
+    //_FP9 = -sqrtf((float)((float)((float)v21 * (float)v21)
     //    + (float)((float)((float)v20 * (float)v20) + (float)((float)v19 * (float)v19))));
     //__asm { fsel      f10, f9, f0, f10 }
     //v24 = (float)((float)1.0 / (float)_FP10);
@@ -1566,7 +1566,7 @@ int __cdecl turret_think_auto(gentity_s *self, actor_s *actor)
     AngleVectors(self->r.currentAngles, v39, 0, 0);
 
    // aislop (fsel)
-   // _FP12 = -__fsqrts(v11);
+   // _FP12 = -sqrtf(v11);
    // __asm { fsel      f0, f12, f13, f0 }
    // v16 = (float)((float)(v39[0] * (float)((float)((float)1.0 / (float)_FP0) * (float)v9))
    //     + (float)((float)(v39[1] * (float)((float)v8 * (float)((float)1.0 / (float)_FP0)))
@@ -2549,7 +2549,7 @@ void __cdecl G_SpawnTurret(gentity_s *self, const char *weaponinfoname)
         v48[0] = WeaponDef->maxRange;
     }
     if (maxRange <= 0.0)
-        v38 = 3.4028235e38;
+        v38 = FLT_MAX;
     else
         v38 = (float)((float)maxRange * (float)maxRange);
     v6->maxRangeSquared = v38;

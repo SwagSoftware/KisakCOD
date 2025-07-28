@@ -316,7 +316,7 @@ void __cdecl Path_DrawBadPlace(badplace_t *place)
     if (type == (const float *)1)
     {
         if ((float)(place->parms.arc.radius * place->parms.arc.radius) == 0.0)
-            //radius = __fsqrts(Actor_EventDefaultRadiusSqrd(AI_EV_BADPLACE_ARC));
+            //radius = sqrtf(Actor_EventDefaultRadiusSqrd(AI_EV_BADPLACE_ARC));
             radius = sqrtf(Actor_EventDefaultRadiusSqrd(AI_EV_BADPLACE_ARC));
         else
             radius = place->parms.arc.radius;

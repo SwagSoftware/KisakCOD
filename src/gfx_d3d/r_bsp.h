@@ -222,6 +222,7 @@ void R_ResetSunLightOverride();
 void R_SetSunDirectionOverride(float *sunDir);
 void R_LerpSunDirectionOverride(float *sunDirBegin, float *sunDirEnd, int lerpBeginTime, int lerpEndTime);
 void R_ResetSunDirectionOverride();
+void R_ResetSunLightParseParams();
 
 extern GfxWorld s_world;
 extern r_globals_load_t rgl;

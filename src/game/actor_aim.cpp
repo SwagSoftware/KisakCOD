@@ -198,7 +198,7 @@ float __cdecl Actor_GetWeaponAccuracy(
             2);
     Sentient_GetOrigin(self->sentient, &v14);
     Sentient_GetOrigin(enemy, &v17);
-    //v9 = __fsqrts((float)((float)((float)(v14 - v17) * (float)(v14 - v17)) + (float)((float)((float)(v16 - v19) * (float)(v16 - v19)) + (float)((float)(v15 - v18) * (float)(v15 - v18)))));
+    //v9 = sqrtf((float)((float)((float)(v14 - v17) * (float)(v14 - v17)) + (float)((float)((float)(v16 - v19) * (float)(v16 - v19)) + (float)((float)(v15 - v18) * (float)(v15 - v18)))));
     v9 = sqrtf((float)((float)((float)(v14 - v17) * (float)(v14 - v17)) + (float)((float)((float)(v16 - v19) * (float)(v16 - v19)) + (float)((float)(v15 - v18) * (float)(v15 - v18)))));
     if (accuracyType == WEAP_ACCURACY_AI_VS_PLAYER)
         v9 = (float)(ai_accuracyDistScale->current.value * (float)v9);
@@ -266,7 +266,7 @@ float __cdecl Actor_GetPlayerStanceAccuracy(const actor_s *self, const sentient_
 //    Sentient_GetOrigin(self->sentient, &v14);
 //    Sentient_GetOrigin(enemy, &v17);
 //
-//    _FP5 = -__fsqrts((float)((float)((float)(v17 - v14) * (float)(v17 - v14)) + (float)((float)((float)(v19 - v16) * (float)(v19 - v16)) + (float)((float)(v18 - v15) * (float)(v18 - v15)))));
+//    _FP5 = -sqrtf((float)((float)((float)(v17 - v14) * (float)(v17 - v14)) + (float)((float)((float)(v19 - v16) * (float)(v19 - v16)) + (float)((float)(v18 - v15) * (float)(v18 - v15)))));
 //    __asm { fsel      f10, f5, f11, f10 }
 //    v6 = I_fabs((float)((float)(enemy->ent->client->ps.velocity[0]
 //        * (float)((float)((float)1.0 / (float)_FP10) * (float)(v18 - v15)))
@@ -999,7 +999,7 @@ void __cdecl Actor_Shoot(actor_s *self, float accuracyMod, float (*posOverride)[
 
     if (lastShot)
     {
-        //_FP9 = -__fsqrts((float)((float)((float)(*lastShot - wp.muzzleTrace[0]) * (float)(*lastShot - wp.muzzleTrace[0]))
+        //_FP9 = -sqrtf((float)((float)((float)(*lastShot - wp.muzzleTrace[0]) * (float)(*lastShot - wp.muzzleTrace[0]))
         //    + (float)((float)((float)(lastShot[2] - wp.muzzleTrace[2])
         //        * (float)(lastShot[2] - wp.muzzleTrace[2]))
         //        + (float)((float)(lastShot[1] - wp.muzzleTrace[1])
@@ -1182,7 +1182,7 @@ gentity_s *__cdecl Actor_Melee(actor_s *self, const float *direction)
             v10 = (float)((float)v11 * direction[1]);
         }
 
-        //_FP9 = -__fsqrts((float)((float)((float)v9 * (float)v9)
+        //_FP9 = -sqrtf((float)((float)((float)v9 * (float)v9)
         //    + (float)((float)((float)(v23 - v24[0].muzzleTrace[2]) * (float)(v23 - v24[0].muzzleTrace[2]))
         //        + (float)((float)v10 * (float)v10))));
         //__asm { fsel      f12, f9, f11, f12 }
@@ -1200,7 +1200,7 @@ gentity_s *__cdecl Actor_Melee(actor_s *self, const float *direction)
     {
         v16 = direction[2];
 
-        //_FP9 = -__fsqrts((float)((float)(*direction * *direction)
+        //_FP9 = -sqrtf((float)((float)(*direction * *direction)
         //    + (float)((float)(direction[2] * direction[2]) + (float)(direction[1] * direction[1]))));
         //__asm { fsel      f11, f9, f10, f11 }
         //v19 = (float)((float)1.0 / (float)_FP11);

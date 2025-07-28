@@ -386,7 +386,7 @@ SlideMoveResult __cdecl AIPhys_SlideMove(int gravity, int zonly)
                 Vec3Cross(&v90 + 3 * v32, v47, &v73);
                 v48 = g_pPhys->vVelocity[0];
 
-                //_FP10 = -__fsqrts((float)((float)(v73 * v73) + (float)((float)(v75 * v75) + (float)(v74 * v74))));
+                //_FP10 = -sqrtf((float)((float)(v73 * v73) + (float)((float)(v75 * v75) + (float)(v74 * v74))));
                 //__asm { fsel      f0, f10, f31, f0 }
                 //v51 = (float)((float)1.0 / (float)_FP0);
 
@@ -422,7 +422,7 @@ SlideMoveResult __cdecl AIPhys_SlideMove(int gravity, int zonly)
                 v57 = 0;
                 v58 = v92;
 
-                //_FP10 = -__fsqrts((float)((float)(v73 * v73) + (float)((float)(v75 * v75) + (float)(v74 * v74))));
+                //_FP10 = -sqrtf((float)((float)(v73 * v73) + (float)((float)(v75 * v75) + (float)(v74 * v74))));
                 //__asm { fsel      f0, f10, f31, f0 }
                 //v61 = (float)((float)1.0 / (float)_FP0);
 
@@ -670,7 +670,7 @@ int __cdecl AIPhys_WalkMove()
     {
         v12 = v5[2];
 
-        //_FP10 = -__fsqrts((float)((float)(v5[2] * v5[2]) + (float)((float)(*v5 * *v5) + (float)(v5[1] * v5[1]))));
+        //_FP10 = -sqrtf((float)((float)(v5[2] * v5[2]) + (float)((float)(*v5 * *v5) + (float)(v5[1] * v5[1]))));
         //__asm { fsel      f11, f10, f9, f11 }
         //v15 = (float)((float)v6 / (float)_FP11);
 

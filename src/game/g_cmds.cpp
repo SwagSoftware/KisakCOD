@@ -134,8 +134,8 @@ void __cdecl G_setfog(const char *fogstring)
 
     v2 = va("fog %s", fogstring);
     SV_GameSendServerCommand(-1, v2);
-    level.fFogOpaqueDist = 3.4028235e38;
-    level.fFogOpaqueDistSqrd = 3.4028235e38;
+    level.fFogOpaqueDist = FLT_MAX;
+    level.fFogOpaqueDistSqrd = FLT_MAX;
     if (sscanf(fogstring, "%f %f %f %f %f %f %i", &v6, &v7, &v5, &v8, &v9, &v10, v4) == 7 && v5 >= 1.0)
     {
         v3 = (float)((float)((float)(v7 - v6) * (float)0.82800001) + v6);

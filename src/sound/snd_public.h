@@ -546,6 +546,7 @@ void __cdecl SND_PlayAmbientAlias(
     const snd_alias_t *alias,
     int fadetime,
     snd_alias_system_t system);
+
 void __cdecl SND_StopAmbient(int localClientNum, int fadetime);
 void __cdecl SND_FadeAllSounds(float volume, int fadetime);
 void __cdecl SND_SetChannelVolumes(int priority, const float *channelvolume, int fademsec);

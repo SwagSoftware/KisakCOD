@@ -438,7 +438,7 @@ void __cdecl ActorCmd_AimAtPos(scr_entref_t entref)
     v6 = v31[2];
     Sentient_GetEyePosition(v1->sentient, &v32);
 
-    //_FP12 = -__fsqrts((float)((float)((float)((float)v6 - v34) * (float)((float)v6 - v34))
+    //_FP12 = -sqrtf((float)((float)((float)((float)v6 - v34) * (float)((float)v6 - v34))
     //    + (float)((float)((float)((float)v5 - v33) * (float)((float)v5 - v33))
     //        + (float)((float)((float)v4 - v32) * (float)((float)v4 - v32)))));
     //__asm { fsel      f13, f12, f31, f13 }
@@ -771,7 +771,7 @@ void __cdecl ActorCmd_DropWeapon(scr_entref_t entref)
                 + (float)2.0);
 
             // aislop
-            //_FP9 = -__fsqrts((float)((float)((float)v12 * (float)v12)
+            //_FP9 = -sqrtf((float)((float)((float)v12 * (float)v12)
             //    + (float)((float)((float)v11 * (float)v11) + (float)((float)v10 * (float)v10))));
             //__asm { fsel      f11, f9, f10, f11 }
             //v15 = (float)((float)1.0 / (float)_FP11);

@@ -21,3 +21,7 @@ void __cdecl R_SkinSceneEnt(GfxSceneEntity *sceneEnt);
 int __cdecl R_SkinAndBoundSceneEnt(GfxSceneEntity *sceneEnt);
 void __cdecl R_UnlockSkinnedCache();
 void __cdecl R_LockSkinnedCache();
+
+void R_DObjReplaceMaterial(DObj_s *obj, int lod, int surfaceIndex, Material *material);
+void R_DObjGetSurfMaterials(DObj_s *obj, int lod, Material **matHandleArray);
+void R_SetIgnorePrecacheErrors(unsigned int ignore);

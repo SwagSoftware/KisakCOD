@@ -346,7 +346,7 @@ int __cdecl Player_GetUseList(gentity_s *ent, useList_t *useList, int prevHintEn
                 v23 = (float)((float)v22 - v42);
 
                 // aislop
-                //v24 = __fsqrts((float)((float)((float)v23 * (float)v23)
+                //v24 = sqrtf((float)((float)((float)v23 * (float)v23)
                 //    + (float)((float)((float)(v41 - v44) * (float)(v41 - v44))
                 //        + (float)((float)(v40 - v43) * (float)(v40 - v43)))));
                 //_FP10 = -v24;

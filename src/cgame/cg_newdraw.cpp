@@ -5,6 +5,11 @@
 #include "cg_newdraw.h"
 #include "cg_main.h"
 
+#include <xanim/xanim.h>
+#include <ui/ui.h>
+#include <stringed/stringed_hooks.h>
+#include "cg_public.h"
+
 const dvar_t *hud_fade_sprint;
 const dvar_t *hud_health_pulserate_injured;
 const dvar_t *hud_health_startpulse_critical;

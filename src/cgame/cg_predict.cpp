@@ -394,7 +394,7 @@ void __cdecl CG_PredictPlayerState_Internal(int localClientNum)
                     v9 = (float)(Buf->origin[1] - v34);
                     v10 = (float)(Buf->origin[2] - v35);
                     v11 = (float)(Buf->origin[0] - v33);
-                    v12 = __fsqrts((float)((float)((float)(Buf->origin[0] - v33) * (float)(Buf->origin[0] - v33))
+                    v12 = sqrtf((float)((float)((float)(Buf->origin[0] - v33) * (float)(Buf->origin[0] - v33))
                         + (float)((float)((float)(Buf->origin[2] - v35) * (float)(Buf->origin[2] - v35))
                             + (float)((float)(Buf->origin[1] - v34) * (float)(Buf->origin[1] - v34)))));
                     if (v12 > 0.1)

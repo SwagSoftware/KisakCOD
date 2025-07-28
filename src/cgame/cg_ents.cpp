@@ -20,6 +20,8 @@
 #include "cg_pose.h"
 #include "cg_compassfriendlies.h"
 
+#include <bgame/bg_local.h>
+
 void __cdecl LocalConvertQuatToMat(const DObjAnimMat *mat, float (*axis)[3])
 {
     double v4; // fp5
@@ -1150,7 +1152,7 @@ void __cdecl CG_Vehicle_PreControllers(int localClientNum, const DObj_s *obj, ce
         {
             if (DObjGetBoneIndex(obj, **v22, wheelBoneIndex))
             {
-                MatrixTransformVector43((const float *)((char *)BasePose->trans + __ROL4__(*wheelBoneIndex, 5)), v32, &v29);
+                MatrixTransformVector43((const float *)((char *)BasePose->trans + __ROL4__(*wheelBoneIndex, 5)), (const mat4x3&)v32, &v29);
                 v27[0] = (float)(v33 * (float)40.0) + v29;
                 v27[1] = (float)(v34 * (float)40.0) + v30;
                 number = cent->nextState.number;
@@ -1159,7 +1161,8 @@ void __cdecl CG_Vehicle_PreControllers(int localClientNum, const DObj_s *obj, ce
                 v28[1] = (float)(v34 * (float)-height) + v30;
                 v28[2] = (float)(v35 * (float)-height) + v31;
                 CG_TraceCapsule(&v39, v27, vec3_origin, vec3_origin, v28, number, 529);
-                HIWORD(v24->triggerTime) = CompressUnit(v39.fraction);
+                //HIWORD(v24->triggerTime) = CompressUnit(v39.fraction);
+                v24->triggerTime = CompressUnit(v39.fraction);
             }
             --v25;
             v24 = (CEntFx *)((char *)v24 + 2);
@@ -1210,15 +1213,15 @@ void __cdecl CG_SoundBlend(int localClientNum, centity_s *cent)
     entityState_s *p_nextState; // r31
     unsigned int v5; // r11
     const char *ConfigString; // r3
-    const snd_alias_t *v7; // r28
+    const snd_alias_t *alias0; // r28
     const char *v8; // r3
     snd_alias_t *v9; // r3
-    const snd_alias_t *v10; // r27
+    const snd_alias_t *alias1; // r27
     const float *v11; // r6
     int v12; // r5
     cg_s *LocalClientGlobals; // r3
-    double v14; // fp31
-    double v15; // fp30
+    double lerp; // fp31
+    double volumeScale; // fp30
 
     p_nextState = &cent->nextState;
     v5 = cent->nextState.eventParms[0];
@@ -1227,39 +1230,33 @@ void __cdecl CG_SoundBlend(int localClientNum, centity_s *cent)
         if (cent->nextState.eventParms[1])
         {
             ConfigString = CL_GetConfigString(localClientNum, v5 + 1667);
-            v7 = CL_PickSoundAlias(ConfigString);
+            alias0 = CL_PickSoundAlias(ConfigString);
             v8 = CL_GetConfigString(localClientNum, p_nextState->eventParms[1] + 1667);
             v9 = CL_PickSoundAlias(v8);
-            v10 = v9;
-            if (v7)
+            alias1 = v9;
+            if (alias0)
             {
                 if (v9)
                 {
                     LocalClientGlobals = CG_GetLocalClientGlobals(localClientNum);
-                    v14 = (float)((float)((float)(p_nextState->lerp.u.turret.gunAngles[0]
+                    lerp = (float)((float)((float)(p_nextState->lerp.u.turret.gunAngles[0]
                         - cent->currentState.u.turret.gunAngles[0])
                         * LocalClientGlobals->frameInterpolation)
                         + cent->currentState.u.turret.gunAngles[0]);
-                    v15 = (float)((float)((float)(p_nextState->lerp.u.turret.gunAngles[1]
+                    volumeScale = (float)((float)((float)(p_nextState->lerp.u.turret.gunAngles[1]
                         - cent->currentState.u.turret.gunAngles[1])
                         * LocalClientGlobals->frameInterpolation)
                         + cent->currentState.u.turret.gunAngles[1]);
-                    if (v14 < 0.0 || v14 > 1.0)
-                        MyAssertHandler(
-                            "c:\\trees\\cod3\\cod3src\\src\\cgame\\cg_ents.cpp",
-                            926,
-                            0,
-                            "%s",
-                            "(lerp >= 0.0f) && (lerp <= 1.0f)");
+                    iassert((lerp >= 0.0f) && (lerp <= 1.0f));
                     SND_PlayBlendedSoundAliases(
-                        v7,
-                        v10,
-                        v14,
-                        v15,
-                        v12,
-                        v11,
+                        alias0,
+                        alias1,
+                        lerp,
+                        volumeScale,
                         p_nextState->number,
-                        (snd_alias_system_t)cent->pose.origin);
+                        cent->pose.origin,
+                        0,
+                        SASYS_CGAME);
                 }
             }
         }
@@ -1405,69 +1402,19 @@ void __cdecl CG_ClampPrimaryLightDir(GfxLight *light, const ComPrimaryLight *ref
             + (float)(refLight->rotationLimit * refLight->dir[0]);
         light->dir[1] = (float)(refLight->dir[1] * (float)rotationLimit) + (float)v7;
         light->dir[2] = (float)(refLight->dir[2] * (float)rotationLimit) + (float)v8;
-        if (I_fabs((float)((float)((float)(light->dir[2] * light->dir[2])
-            + (float)((float)(light->dir[0] * light->dir[0]) + (float)(light->dir[1] * light->dir[1])))
-            - (float)1.0)) >= 0.0020000001)
-        {
-            v10 = sqrtf((float)((float)(light->dir[2] * light->dir[2]) + (float)((float)(light->dir[0] * light->dir[0]) + (float)(light->dir[1] * light->dir[1]))));
-            v9 = va(
-                (const char *)(const char *)HIDWORD(COERCE_UNSIGNED_INT64(light->dir[0])),
-                (unsigned int)COERCE_UNSIGNED_INT64(light->dir[0]),
-                (unsigned int)COERCE_UNSIGNED_INT64(light->dir[1]),
-                HIDWORD(v10),
-                LODWORD(v10));
-            MyAssertHandler(
-                "c:\\trees\\cod3\\cod3src\\src\\cgame\\cg_ents.cpp",
-                1030,
-                0,
-                "%s\n\t%s",
-                "Vec3IsNormalized( light->dir )",
-                v9);
-        }
-        if (I_fabs((float)((float)((float)(light->dir[0] * refLight->dir[0])
-            + (float)((float)(light->dir[2] * refLight->dir[2])
-                + (float)(light->dir[1] * refLight->dir[1])))
-            - refLight->rotationLimit)) > 0.001)
-            MyAssertHandler(
-                "c:\\trees\\cod3\\cod3src\\src\\cgame\\cg_ents.cpp",
-                1031,
-                0,
-                "%s",
-                "I_fabs( Vec3Dot( light->dir, refLight->dir ) - refLight->rotationLimit ) <= 0.001f");
+
+        iassert(Vec3IsNormalized(light->dir));
+        iassert(I_fabs(Vec3Dot(light->dir, refLight->dir) - refLight->rotationLimit) <= 0.001f);
     }
 }
 
-// local variable allocation has failed, the output may be wrong!
-void __cdecl CG_PrimaryLight(int localClientNum, centity_s *cent)
-{
-    unsigned int PrimaryLightCount; // r3
-    unsigned int v5; // r3
-    LerpEntityState *p_currentState; // r29
-    LerpEntityState *p_lerp; // r30
-    GfxLight *v8; // r31
-    const ComPrimaryLight *PrimaryLight; // r3
-    __int128 v10; // r11
-    double v11; // fp13
-    __int64 v12; // r8 OVERLAPPED
-    double v13; // fp12
-    __int64 v14; // r6
-    const ComPrimaryLight *v15; // r26
-    double frameInterpolation; // fp11
-    double v17; // fp0
-    double v18; // fp13
-    double cosHalfFovOuter; // fp1
-    int v20; // r11
-    int v21; // r9
-    double cosHalfFovInner; // fp0
-    const char *v23; // r3
-    float v24[4]; // [sp+80h] [-60h] BYREF
-
+void CG_PrimaryLight(int localClientNum, centity_s *cent) {
     iassert(cent->nextState.eType == ET_PRIMARY_LIGHT);
     iassert(cent->nextState.index.item != PRIMARY_LIGHT_NONE);
     iassert(comWorld.isInUse);
     bcassert(cent->nextState.index.primaryLight, Com_GetPrimaryLightCount());
 
-    if (localClientNum)
+    if (localClientNum != 0) {
         MyAssertHandler(
             "c:\\trees\\cod3\\cod3src\\src\\cgame\\cg_local.h",
             910,
@@ -1475,83 +1422,81 @@ void __cdecl CG_PrimaryLight(int localClientNum, centity_s *cent)
             "%s\n\t(localClientNum) = %i",
             "(localClientNum == 0)",
             localClientNum);
-    v5 = cent->nextState.index.item;
-    p_currentState = &cent->currentState;
-    p_lerp = &cent->nextState.lerp;
-    v8 = (GfxLight *)((char *)cgArray[0].refdef.primaryLights + __ROL4__(v5, 6));
-    PrimaryLight = Com_GetPrimaryLight(v5);
-    DWORD2(v10) = p_currentState->u.primaryLight.colorAndExp[1];
-    LODWORD(v12) = p_lerp->u.primaryLight.colorAndExp[0];
-    v11 = p_currentState->u.turret.gunAngles[1];
-    DWORD1(v10) = p_currentState->u.primaryLight.colorAndExp[2];
-    HIDWORD(v12) = p_lerp->u.primaryLight.colorAndExp[1];
-    v13 = p_lerp->u.turret.gunAngles[1];
-    LODWORD(v14) = p_lerp->u.primaryLight.colorAndExp[2];
-    v15 = PrimaryLight;
-    frameInterpolation = cgArray[0].frameInterpolation;
-    LODWORD(v10) = p_currentState->u.primaryLight.colorAndExp[0];
-    v17 = (float)(p_currentState->u.turret.gunAngles[1] * (float)((float)(__int64)v10 * (float)0.0039215689));
-    v8->color[0] = (float)((float)((float)(p_lerp->u.turret.gunAngles[1] * (float)((float)v12 * (float)0.0039215689))
-        - (float)v17)
-        * cgArray[0].frameInterpolation)
-        + (float)v17;
-    v8->color[1] = (float)((float)((float)((float)((float)*(__int64 *)((char *)&v12 + 4) * (float)0.0039215689)
-        * (float)v13)
-        - (float)((float)((float)*(__int64 *)((char *)&v10 + 4) * (float)0.0039215689)
-            * (float)v11))
-        * (float)frameInterpolation)
-        + (float)((float)((float)*(__int64 *)((char *)&v10 + 4) * (float)0.0039215689) * (float)v11);
-    v18 = (float)((float)((float)*(__int64 *)((char *)&v12 - 4) * (float)0.0039215689) * (float)v11);
-    v8->color[2] = (float)((float)((float)((float)((float)v14 * (float)0.0039215689) * (float)v13) - (float)v18)
-        * (float)frameInterpolation)
-        + (float)v18;
-    if (PrimaryLight->rotationLimit < 1.0)
-    {
-        BG_EvaluateTrajectory(&p_lerp->apos, cgArray[0].time, v24);
-        AngleVectors(v24, v8->dir, 0, 0);
-        v8->dir[0] = -v8->dir[0];
-        v8->dir[1] = -v8->dir[1];
-        v8->dir[2] = -v8->dir[2];
-        if (v15->rotationLimit > -1.0)
-            CG_ClampPrimaryLightDir(v8, v15);
     }
-    if (v15->translationLimit > 0.0)
-    {
-        BG_EvaluateTrajectory(&p_lerp->pos, cgArray[0].time, v8->origin);
-        CG_ClampPrimaryLightOrigin(v8, v15);
+
+    unsigned int lightIndex = cent->nextState.index.item;
+    LerpEntityState *p_currentState = &cent->currentState;
+    LerpEntityState *p_lerp = &cent->nextState.lerp;
+
+    GfxLight *light = (GfxLight *)((char *)cgArray[0].refdef.primaryLights + __ROL4__(lightIndex, 6));
+    const ComPrimaryLight *primaryLight = Com_GetPrimaryLight(lightIndex);
+    float frameInterp = cgArray[0].frameInterpolation;
+
+    // Decode color from current and lerp states (colorAndExp is [R, G, B, Exp])
+    float cR_current = p_currentState->u.primaryLight.colorAndExp[0] * 0.0039215689f;
+    float cG_current = p_currentState->u.primaryLight.colorAndExp[1] * 0.0039215689f;
+    float cB_current = p_currentState->u.primaryLight.colorAndExp[2] * 0.0039215689f;
+
+    float cR_lerp = p_lerp->u.primaryLight.colorAndExp[0] * 0.0039215689f;
+    float cG_lerp = p_lerp->u.primaryLight.colorAndExp[1] * 0.0039215689f;
+    float cB_lerp = p_lerp->u.primaryLight.colorAndExp[2] * 0.0039215689f;
+
+    // GunAngles[1] used to scale color
+    float scale_current = p_currentState->u.turret.gunAngles[1];
+    float scale_lerp = p_lerp->u.turret.gunAngles[1];
+
+    // Interpolate color
+    light->color[0] = ((cR_lerp * scale_lerp - cR_current * scale_current) * frameInterp) + (cR_current * scale_current);
+    light->color[1] = ((cG_lerp * scale_lerp - cG_current * scale_current) * frameInterp) + (cG_current * scale_current);
+    light->color[2] = ((cB_lerp * scale_lerp - cB_current * scale_current) * frameInterp) + (cB_current * scale_current);
+
+    // Handle light direction
+    if (primaryLight->rotationLimit < 1.0f) {
+        float angles[4];
+        BG_EvaluateTrajectory(&p_lerp->apos, cgArray[0].time, angles);
+        AngleVectors(angles, light->dir, NULL, NULL);
+
+        // Flip direction
+        light->dir[0] = -light->dir[0];
+        light->dir[1] = -light->dir[1];
+        light->dir[2] = -light->dir[2];
+
+        if (primaryLight->rotationLimit > -1.0f) {
+            CG_ClampPrimaryLightDir(light, primaryLight);
+        }
     }
-    v8->radius = (float)((float)(p_lerp->u.turret.gunAngles[2] - p_currentState->u.turret.gunAngles[2])
-        * cgArray[0].frameInterpolation)
-        + p_currentState->u.turret.gunAngles[2];
-    v8->cosHalfFovOuter = (float)((float)(p_lerp->u.primaryLight.cosHalfFovOuter
-        - p_currentState->u.primaryLight.cosHalfFovOuter)
-        * cgArray[0].frameInterpolation)
-        + p_currentState->u.primaryLight.cosHalfFovOuter;
-    cosHalfFovOuter = v8->cosHalfFovOuter;
-    v8->cosHalfFovInner = (float)((float)(p_lerp->u.primaryLight.cosHalfFovInner
-        - p_currentState->u.primaryLight.cosHalfFovInner)
-        * cgArray[0].frameInterpolation)
-        + p_currentState->u.primaryLight.cosHalfFovInner;
-    v20 = p_currentState->u.primaryLight.colorAndExp[3];
-    v21 = p_lerp->u.primaryLight.colorAndExp[3] - v20;
-    v8->exponent = (int)(float)((float)*(__int64 *)((char *)&v12 - 4) * cgArray[0].frameInterpolation) + v20;
-    if (cosHalfFovOuter <= 0.0
-        || (cosHalfFovInner = v8->cosHalfFovInner, cosHalfFovOuter >= cosHalfFovInner)
-        || cosHalfFovInner > 1.0)
-    {
-        v23 = va(
-            (const char *)HIDWORD(cosHalfFovOuter),
-            LODWORD(cosHalfFovOuter),
-            (unsigned int)COERCE_UNSIGNED_INT64(v8->cosHalfFovInner));
-        MyAssertHandler(
-            "c:\\trees\\cod3\\cod3src\\src\\cgame\\cg_ents.cpp",
-            1083,
-            0,
-            "%s\n\t%s",
-            "0.0f < light->cosHalfFovOuter && light->cosHalfFovOuter < light->cosHalfFovInner && light->cosHalfFovInner <= 1.0f",
-            v23);
+
+    // Handle light position
+    if (primaryLight->translationLimit > 0.0f) {
+        BG_EvaluateTrajectory(&p_lerp->pos, cgArray[0].time, light->origin);
+        CG_ClampPrimaryLightOrigin(light, primaryLight);
     }
+
+    // Interpolate radius (stored in gunAngles[2])
+    float radius_current = p_currentState->u.turret.gunAngles[2];
+    float radius_lerp = p_lerp->u.turret.gunAngles[2];
+    light->radius = (radius_lerp - radius_current) * frameInterp + radius_current;
+
+    // Interpolate FOV
+    float fovOuter_current = p_currentState->u.primaryLight.cosHalfFovOuter;
+    float fovOuter_lerp = p_lerp->u.primaryLight.cosHalfFovOuter;
+    light->cosHalfFovOuter = (fovOuter_lerp - fovOuter_current) * frameInterp + fovOuter_current;
+
+    float fovInner_current = p_currentState->u.primaryLight.cosHalfFovInner;
+    float fovInner_lerp = p_lerp->u.primaryLight.cosHalfFovInner;
+    light->cosHalfFovInner = (fovInner_lerp - fovInner_current) * frameInterp + fovInner_current;
+
+    // Interpolate exponent (stored in colorAndExp[3])
+    int exp_current = p_currentState->u.primaryLight.colorAndExp[3];
+    int exp_lerp = p_lerp->u.primaryLight.colorAndExp[3];
+    light->exponent = (int)((exp_lerp - exp_current) * frameInterp + exp_current);
+
+    // Final assertion
+    iassert(light->cosHalfFovOuter > 0.0f &&
+        light->cosHalfFovOuter < light->cosHalfFovInner &&
+        light->cosHalfFovInner <= 1.0f);
 }
+
 
 void __cdecl CG_InterpolateEntityOrigin(const cg_s *cgameGlob, centity_s *cent)
 {
@@ -1600,7 +1545,7 @@ void __cdecl CG_CreatePhysicsObject(int localClientNum, centity_s *cent)
     const DObj_s *ClientDObj; // r29
     PhysPreset *PhysPreset; // r28
     const char *v6; // r3
-    int v7; // r30
+    dxBody *v7; // r30
     const char *Name; // r3
     double v9; // fp0
     double v10; // fp1
@@ -1629,18 +1574,32 @@ void __cdecl CG_CreatePhysicsObject(int localClientNum, centity_s *cent)
         {
             DObjPhysicsSetCollisionFromXModel(ClientDObj, PHYS_WORLD_FX, v7);
             v9 = cent->currentState.apos.trDelta[2];
-            v10 = __fsqrts((float)((float)(cent->currentState.apos.trDelta[0] * cent->currentState.apos.trDelta[0])
+
+            v10 = sqrtf((float)((float)(cent->currentState.apos.trDelta[0] * cent->currentState.apos.trDelta[0])
                 + (float)((float)(cent->currentState.apos.trDelta[2] * cent->currentState.apos.trDelta[2])
                     + (float)(cent->currentState.apos.trDelta[1] * cent->currentState.apos.trDelta[1]))));
-            _FP10 = -v10;
-            __asm { fsel      f10, f10, f11, f1 }
-            v13 = (float)(cent->currentState.apos.trDelta[1] * (float)((float)1.0 / (float)_FP10));
-            v16[0] = (float)((float)1.0 / (float)_FP10) * cent->currentState.apos.trDelta[0];
-            v16[1] = v13;
-            v16[2] = (float)v9 * (float)((float)1.0 / (float)_FP10);
+
+            // aislop
+            //float _FP10 = -v10;
+            //__asm { fsel      f10, f10, f11, f1 }
+            //v13 = (float)(cent->currentState.apos.trDelta[1] * (float)((float)1.0 / (float)_FP10));
+            //v16[0] = (float)((float)1.0 / (float)_FP10) * cent->currentState.apos.trDelta[0];
+            //v16[1] = v13;
+            //v16[2] = (float)v9 * (float)((float)1.0 / (float)_FP10);
+
+            {
+                float _FP10 = fabsf(v10);  // Replaces fsel logic: ensure _FP10 is positive
+                float reciprocal = 1.0f / _FP10;
+                v13 = cent->currentState.apos.trDelta[1] * reciprocal;
+                v16[0] = reciprocal * cent->currentState.apos.trDelta[0];
+                v16[1] = v13;
+                v16[2] = v9 * reciprocal;
+            }
+            
+
             Phys_ObjBulletImpact(PHYS_WORLD_FX, v7, cent->currentState.pos.trDelta, v16, v10, PhysPreset->bulletForceScale);
             Sys_LeaveCriticalSection(CRITSECT_PHYSICS);
-            cent->pose.physObjId = v7;
+            cent->pose.physObjId = (uintptr_t)v7;
         }
         else
         {
@@ -1672,7 +1631,7 @@ void __cdecl CG_UpdatePhysicsPose(centity_s *cent)
             "%s",
             "cent->pose.physObjId != PHYS_OBJ_ID_NULL && cent->pose.physObjId != PHYS_OBJ_ID_DEAD");
     Sys_EnterCriticalSection(CRITSECT_PHYSICS);
-    Phys_ObjGetInterpolatedState(PHYS_WORLD_FX, cent->pose.physObjId, cent->pose.origin, v3);
+    Phys_ObjGetInterpolatedState(PHYS_WORLD_FX, (dxBody*)cent->pose.physObjId, cent->pose.origin, v3);
     Sys_LeaveCriticalSection(CRITSECT_PHYSICS);
     UnitQuatToAngles(v3, cent->pose.angles);
 }
@@ -1885,7 +1844,7 @@ void __cdecl CG_DrawEntEqDebug(const centity_s *cent)
     int number; // r30
     const char *EntityTypeName; // r3
     int v5; // r7
-    const char *v6; // r6
+    char *v6; // r6
     const float *v7; // r5
 
     if (snd_drawEqEnts->current.enabled)
@@ -1915,7 +1874,7 @@ void __cdecl CG_DrawEntEqDebug(const centity_s *cent)
 void __cdecl CG_ClearUnion(int localClientNum, centity_s *cent)
 {
     FxEffect *effect; // r4
-    $51809EA76892896F64281DFB626CE797 *v4; // r11
+    CEntActorInfo *v4; // r11
     int v5; // ctr
 
     switch (cent->pose.eTypeUnion)
@@ -1935,12 +1894,12 @@ void __cdecl CG_ClearUnion(int localClientNum, centity_s *cent)
         break;
     case 0xBu:
     case 0xDu:
-        v4 = &cent->pose.44;
+        v4 = &cent->pose.actor;
         v5 = 10;
         do
         {
-            v4->actor.proneType = 0;
-            v4 = ($51809EA76892896F64281DFB626CE797 *)((char *)v4 + 4);
+            v4->proneType = 0;
+            v4 = (CEntActorInfo *)((char *)v4 + 4);
             --v5;
         } while (v5);
         break;

@@ -1041,3 +1041,28 @@ void __cdecl Ragdoll_Shutdown()
     ragdollInited = 0;
 }
 
+int Ragdoll_CreateRagdollForDObjRaw(int localClientNum, int ragdollDef, const cpose_t *pose, DObj_s *dobj)
+{
+    int UnusedBody; // r3
+    int v10; // r31
+    RagdollBody *v11; // r3
+
+    if (!dobj)
+        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\ragdoll\\ragdoll.cpp", 424, 0, "%s", "dobj");
+    if (!pose)
+        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\ragdoll\\ragdoll.cpp", 425, 0, "%s", "pose");
+    if (!Ragdoll_BindDef(ragdollDef))
+        return 0;
+    UnusedBody = Ragdoll_GetUnusedBody();
+    v10 = UnusedBody;
+    if (!UnusedBody)
+        return 0;
+    v11 = Ragdoll_HandleBody(UnusedBody);
+    v11->obj = dobj;
+    v11->pose = pose;
+    v11->localClientNum = localClientNum;
+    v11->ragdollDef = ragdollDef;
+    v11->dobj = -1;
+    Ragdoll_BodyNewState(v11, BS_DOBJ_WAIT);
+    return v10;
+}

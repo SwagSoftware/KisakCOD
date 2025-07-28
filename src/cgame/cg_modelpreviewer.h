@@ -205,18 +205,13 @@ struct ModelPreviewer
 };
 
 void __cdecl CG_ModPrvUpdateMru(const dvar_s **mruDvars, const char **stringTable, const dvar_s *dvar);
-void __cdecl CG_ModPrvPushMruEntry(
-    const char *entry,
-    const dvar_s **mruDvars,
-    const char **stringTable,
-    const dvar_s *dvar);
+void __cdecl CG_ModPrvPushMruEntry(const char *entry, const dvar_s **mruDvars, const char **stringTable, const dvar_s *dvar);
 void __cdecl CG_ModPrvRemoveMruEntry(const dvar_s **mruDvars, const char **stringTable, const dvar_s *dvar);
-const dvar_s *CG_ModPrvRegisterDvars();
+void CG_ModPrvRegisterDvars();
 void __cdecl CG_ModPrvSetEntityAxis(float *angles, float *quat);
 void __cdecl MdlPrvGetBounds(float *mins, float *maxs, float *center);
 void CG_ModPrvFrameModel();
 void CG_ModPrvResetOrientation_f();
-// attributes: thunk
 void __cdecl SetViewerActive(bool active);
 void CG_ModPrvUnregisterCmds();
 void *__cdecl CG_ModPrvAlloc(int size);
@@ -249,20 +244,19 @@ bool __cdecl CG_ModPrvAnyLightValuesChanged();
 void CG_ModPrvLightValuesUpdate();
 void __cdecl TRACK_cg_modelpreviewer();
 void __cdecl CG_ModelPreviewerPauseAnim();
-void __cdecl CG_ModelPreviewerStepAnim(double deltaTime);
-int __cdecl MdlPrvPrint(double x, double y, const char *txt, const char *a4, const float *a5, int a6, Font_s *a7);
-int __cdecl MdlPrvPrintColor(
-    double x,
-    double y,
-    const char *txt,
-    const float *color,
-    const float *a5,
-    int a6,
-    Font_s *a7);
-int __cdecl MdlPrvPrintHelpLine(ButtonNames idx, double vPos, const char *a3, const float *a4, int a5);
+void __cdecl CG_ModelPreviewerStepAnim(float deltaTime);
+//int __cdecl MdlPrvPrint(double x, double y, const char *txt, const char *a4, const float *a5, int a6, Font_s *a7);
+//int __cdecl MdlPrvPrintColor(
+//    double x,
+//    double y,
+//    const char *txt,
+//    const float *color,
+//    const float *a5,
+//    int a6,
+//    Font_s *a7);
+void __cdecl MdlPrvPrintHelpLine(ButtonNames idx, float vPos);
 void DrawDistFromModel();
 void __cdecl MdlPrvDrawOverlayGamepad();
-// attributes: thunk
 void __cdecl CG_ModelPreviewerDrawInfo();
 void __cdecl CG_ModelPreviewerRotateCamera(double dx, double dy);
 void __cdecl CG_ModelPreviewerZoomCamera(double dx, double dy);
@@ -275,15 +269,13 @@ void __cdecl MdlPrvSpinRoll(double deg);
 void __cdecl MdlPrvSpinYawOffset(double deg);
 void MdlPrvSpinClearPitchRoll();
 void __cdecl MdlPrvMoveModelUpDown(double dist);
-void __cdecl MdlPrvMoveModel2D(const cg_s *cgGlob, double away, double left);
+void __cdecl MdlPrvMoveModel2D(const cg_s *cgGlob, float away, float left);
 void __cdecl MdlPrvMoveFocusUpDown(double dist);
 void __cdecl MdlPrvMoveFocus2D(const cg_s *cgGlob, double away, double left);
 void MdlPrvMoveFocusReset();
 void __cdecl MdlPrvFreeMove(const cg_s *cgGlob, double dx, double dy);
 void __cdecl MdlPrvFreeMoveVertical(const cg_s *cgGlob, double dz);
-// local variable allocation has failed, the output may be wrong!
 void __cdecl MdlPrvFreeRot(double yaw, double pitch);
-// attributes: thunk
 void __cdecl MdlPrvFreePlaceModel(float *pos);
 void __cdecl MdlPrvFreePlaceModelInFrontCamera(const cg_s *cgGlob);
 void MdlPrvModeToggle();
@@ -295,13 +287,7 @@ void __cdecl MdlPrvCloneModel(const cg_s *cgGlob);
 void MdlPrvFreeSpeedToggle();
 void MdlPrvRagdollToggle();
 void __cdecl MdlPrvControlsGamepad(int localClientNum, double forward, double side, double pitch, double yaw);
-// attributes: thunk
-void __cdecl CG_ModelPreviewerHandleGamepadEvents(
-    int localClientNum,
-    double forward,
-    double side,
-    double pitch,
-    double yaw);
+void __cdecl CG_ModelPreviewerHandleGamepadEvents(int localClientNum, double forward, double side, double pitch, double yaw);
 void __cdecl CG_ModelPreviewerHandleKeyEvents(int localClientNum, int key, int down, unsigned int time);
 void __cdecl MdlPrvUpdateViewFocused(float *viewOrigin, float (*viewAxis)[3], float *viewAngles, float *zNear);
 void __cdecl MdlPrvUpdateViewFree(float *viewOrigin, float (*viewAxis)[3], float *viewAngles, float *zNear);
@@ -316,57 +302,12 @@ void __cdecl CG_ModPrvLoadDObjs();
 void CG_ModPrvExit_f();
 void CG_ModPrvRegisterCmds();
 void CG_ModPrvModelGetBoneNameList();
-void __cdecl CG_ModPrvLoadModel(
-    const cg_s *cgameGlob,
-    const char *modelFilename,
-    double a3,
-    double a4,
-    double a5,
-    double a6,
-    double a7,
-    double a8,
-    double a9,
-    double a10,
-    int a11,
-    int a12,
-    int a13,
-    int a14,
-    int a15,
-    int a16,
-    int a17,
-    int a18,
-    int a19,
-    int a20,
-    int a21,
-    int a22,
-    int a23,
-    int a24,
-    int a25,
-    int a26,
-    int a27,
-    int a28,
-    int a29,
-    int a30,
-    int a31,
-    int a32,
-    int a33,
-    int a34,
-    XModel *a35,
-    int a36,
-    float value,
-    float a38,
-    float a39,
-    int a40,
-    int a41,
-    int a42,
-    int a43);
+void __cdecl CG_ModPrvLoadModel(const cg_s *cgameGlob, const char *modelFilename);
 void __cdecl CG_ModPrvModelRecentAccepted(const cg_s *cgameGlob);
 void __cdecl CG_ModelPreviewerFrame(const cg_s *cgameGlob);
 void CG_ModPrvEnumerateModels_FastFile();
-// attributes: thunk
 void CG_ModPrvEnumerateModels();
 void CG_ModPrvEnumerateAnimations_FastFile();
-// attributes: thunk
 void CG_ModPrvEnumerateAnimations();
 void __cdecl CG_ModelPreviewerEnumerateAssets();
 void __cdecl CG_ModPrvStartup(int localClientNum);

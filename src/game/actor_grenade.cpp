@@ -408,7 +408,7 @@ int __cdecl Actor_Grenade_GetTossPositionsFromHints(
             "level.grenadeHintCount > 0");
     v10 = -1;
     v11 = 0;
-    v12 = 3.4028235e38;
+    v12 = FLT_MAX;
     if (!level.grenadeHintCount)
         goto LABEL_13;
     v13 = &g_vGrenadeHint[0][1];

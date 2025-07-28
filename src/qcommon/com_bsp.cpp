@@ -95,7 +95,7 @@ unsigned int Com_FindClosestPrimaryLight(const float *origin)
     if (!comWorld.isInUse)
         MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\qcommon\\com_bsp.cpp", 64, 0, "%s", "comWorld.isInUse");
     result = 0;
-    v3 = 3.4028235e38;
+    v3 = FLT_MAX;
     v4 = 2;
     if ((signed int)(comWorld.primaryLightCount - 2) >= 4)
     {

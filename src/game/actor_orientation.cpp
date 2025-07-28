@@ -290,7 +290,7 @@ const pathnode_t *__cdecl Actor_GetAnglesToLikelyEnemyPath(actor_s *self)
         }
     LABEL_10:
         v6 = 0;
-        v7 = 3.4028235e38;
+        v7 = FLT_MAX;
         self->faceLikelyEnemyPathNode = 0;
         v8 = 1 << v4;
         v9 = Sentient_FirstSentient(1 << v4);

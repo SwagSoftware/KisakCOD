@@ -191,6 +191,10 @@ float AngleNormalize180(float angle);
 float AngleSubtract(float a1, float a2);
 
 void FastSinCos(float radians, float *s, float *c);
+void MatrixRotationX(float mat[3][3], float degree);
+void MatrixRotationY(float mat[3][3], float degree);
+void MatrixRotationZ(float mat[3][3], float degree);
+
 
 float __cdecl ColorNormalize(const float *in, float *out);
 

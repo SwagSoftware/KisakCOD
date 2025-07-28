@@ -3,6 +3,12 @@
 #endif
 
 #include "cg_pose.h"
+#include "cg_ents.h"
+#include <xanim/dobj_utils.h>
+#include <ragdoll/ragdoll.h>
+#include <client/cl_pose.h>
+#include "cg_main.h"
+#include <gfx_d3d/r_scene.h>
 
 // local variable allocation has failed, the output may be wrong!
 void __cdecl PitchToQuat(double pitch, float *quat, float *a3)
@@ -136,9 +142,9 @@ void __cdecl CG_mg42_DoControllers(const cpose_t *pose, const DObj_s *obj, int *
         v16 = v15;
         v19[0] = roll;
     }
-    DObjSetControlTagAngles(obj, partBits, pose->turret.tag_aim, &v16);
-    DObjSetControlTagAngles(obj, partBits, pose->turret.tag_aim_animated, &v16);
-    DObjSetControlTagAngles(obj, partBits, pose->turret.tag_flash, v19);
+    DObjSetControlTagAngles((DObj_s*)obj, partBits, pose->turret.tag_aim, &v16);
+    DObjSetControlTagAngles((DObj_s*)obj, partBits, pose->turret.tag_aim_animated, &v16);
+    DObjSetControlTagAngles((DObj_s*)obj, partBits, pose->turret.tag_flash, v19);
 }
 
 // local variable allocation has failed, the output may be wrong!
@@ -356,7 +362,7 @@ void __cdecl CG_Actor_DoControllers(const cpose_t *pose, const DObj_s *obj, int 
         RotTransArray = DObjGetRotTransArray(obj);
         if (RotTransArray)
         {
-            v7 = (float *)DObjSetRotTransIndex(obj, partBits, 0);
+            v7 = (float *)DObjSetRotTransIndex((DObj_s*)obj, partBits, 0);
             if (v7)
             {
                 proneType = pose->actor.proneType;
@@ -479,7 +485,7 @@ void __cdecl CG_DoBaseOriginController(const cpose_t *pose, const DObj_s *obj, i
                 v18 = 4 * (v8 >> 5);
                 if ((setPartBits[v18 / 4] & v17) == 0)
                 {
-                    if (DObjSetRotTransIndex(obj, &v40[v18 / 0xFFFFFFFC], v8))
+                    if (DObjSetRotTransIndex((DObj_s*)obj, &v40[v18 / 0xFFFFFFFC], v8))
                     {
                         RotTransArray->quat[0] = v33;
                         RotTransArray->quat[1] = v34;
@@ -575,7 +581,7 @@ void __cdecl CG_DoControllers(const cpose_t *pose, const DObj_s *obj, int *partB
     }
     CG_DoBaseOriginController(pose, obj, v7);
     if (pose->isRagdoll && pose->ragdollHandle)
-        Ragdoll_DoControllers(pose, obj, partBits);
+        Ragdoll_DoControllers(pose, (DObj_s*)obj, partBits);
     //Profile_EndInternal(0);
 }
 

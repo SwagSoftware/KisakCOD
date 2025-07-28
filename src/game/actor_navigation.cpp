@@ -5238,7 +5238,7 @@ int __cdecl Path_FindPathGetCloseAsPossible(
     CustomSearchInfo_FindPathClosestPossible v16; // [sp+50h] [-60h] BYREF
 
     v16.negotiationOverlapCost = ai_pathNegotiationOverlapCost->current.value;
-    v16.m_fBestScore = 3.4028235e38;
+    v16.m_fBestScore = FLT_MAX;
     v16.m_pBestNode = 0;
     if (!pNodeTo)
         MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\actor_navigation.cpp", 1862, 0, "%s", "pNodeTo");

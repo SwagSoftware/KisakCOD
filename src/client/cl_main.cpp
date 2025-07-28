@@ -1946,9 +1946,9 @@ void __cdecl CL_Init(int localClientNum)
     cl_shownet = Dvar_RegisterInt("cl_shownet", 0, -2, 4, 0, "Display network debugging information");
     cl_avidemo = Dvar_RegisterInt("cl_avidemo", 0, 0, 0x7FFFFFFF, 0, "AVI demo frames per second");
     cl_forceavidemo = Dvar_RegisterBool("cl_forceavidemo", 0, 0, "Record AVI demo even if client is not active");
-    cl_yawspeed = Dvar_RegisterFloat("cl_yawspeed", 140.0, -3.4028235e38, 3.4028235e38, v4, v3);
-    cl_pitchspeed = Dvar_RegisterFloat("cl_pitchspeed", 140.0, -3.4028235e38, 3.4028235e38, v6, v5);
-    cl_anglespeedkey = Dvar_RegisterFloat("cl_anglespeedkey", 1.5, 0.0, 3.4028235e38, v8, v7);
+    cl_yawspeed = Dvar_RegisterFloat("cl_yawspeed", 140.0, -FLT_MAX, FLT_MAX, v4, v3);
+    cl_pitchspeed = Dvar_RegisterFloat("cl_pitchspeed", 140.0, -FLT_MAX, FLT_MAX, v6, v5);
+    cl_anglespeedkey = Dvar_RegisterFloat("cl_anglespeedkey", 1.5, 0.0, FLT_MAX, v8, v7);
     cl_sensitivity = Dvar_RegisterFloat("sensitivity", 5.0, 0.0099999998, 100.0, v10, v9);
     cl_mouseAccel = Dvar_RegisterFloat("cl_mouseAccel", 0.0, 0.0, 100.0, v12, v11);
     cl_freelook = Dvar_RegisterBool("cl_freelook", 1, 1u, "Enable looking with mouse");

@@ -1769,7 +1769,7 @@ void __cdecl Actor_PathEndActions(actor_s *self)
                 v4 = 0;
             if (!v4)
             {
-                //Scr_AddFloat(__fsqrts(v3));
+                //Scr_AddFloat(sqrtf(v3));
                 Scr_AddFloat(sqrtf(v3));
                 Scr_Notify(self->ent, scr_const.stop_soon, 1u);
                 self->Path.pathEndAnimNotified = 1;
@@ -3640,7 +3640,7 @@ void __cdecl Actor_EntInfo(gentity_s *self, float *source)
     v16 = (float)(source[2] - self->r.currentOrigin[2]);
     v17 = (float)(source[1] - self->r.currentOrigin[1]);
     value = g_entinfo_maxdist->current.value;
-    //v19 = __fsqrts((float)((float)((float)v17 * (float)v17) + (float)((float)((float)v16 * (float)v16) + (float)((float)v15 * (float)v15))));
+    //v19 = sqrtf((float)((float)((float)v17 * (float)v17) + (float)((float)((float)v16 * (float)v16) + (float)((float)v15 * (float)v15))));
     v19 = sqrtf((float)((float)((float)v17 * (float)v17) + (float)((float)((float)v16 * (float)v16) + (float)((float)v15 * (float)v15))));
     if (value > 0.0 && v19 > value)
         return;
@@ -3948,7 +3948,7 @@ LABEL_87:
         {
             Sentient_GetOrigin(actor->sentient, &v130);
             v74 = colorRed;
-            v71 = __fsqrts((float)((float)((float)(v130 - TargetEntity->r.currentOrigin[0])
+            v71 = sqrtf((float)((float)((float)(v130 - TargetEntity->r.currentOrigin[0])
                 * (float)(v130 - TargetEntity->r.currentOrigin[0]))
                 + (float)((float)((float)(v132 - TargetEntity->r.currentOrigin[2])
                     * (float)(v132 - TargetEntity->r.currentOrigin[2]))
@@ -4263,7 +4263,7 @@ int __cdecl Actor_PhysicsMoveAway(actor_s *self)
         v15 = (float)((float)(v30 * v30) + (float)(v29 * v29));
         if (v15 < 2.2500002)
             v15 = 2.2500002;
-        //v16 = __fsqrts(v15);
+        //v16 = sqrtf(v15);
         v16 = sqrtf(v15);
     }
     v17 = (float)((float)v16 * v27);
@@ -4809,7 +4809,7 @@ void __cdecl Actor_UpdateAnglesAndDelta(actor_s *self)
             v5 = (float)(v18 * v18);
             v6 = v19;
             self->Physics.ePhysicsType = AIPHYS_NORMAL_ABSOLUTE;
-            Path_UpdateMovementDelta(self, __fsqrts((float)((float)((float)v6 * (float)v6) + (float)v5)));
+            Path_UpdateMovementDelta(self, sqrtf((float)((float)((float)v6 * (float)v6) + (float)v5)));
             Actor_PathEndActions(self);
             v7 = 0.0;
             if (ai_showPaths->current.integer)
@@ -5428,7 +5428,7 @@ void __cdecl Actor_Think(gentity_s *self)
             *(double *)&v20 = actor->fovDot;
             v22 = acos(v20);
             self->s.lerp.u.turret.gunAngles[0] = (float)*(double *)&v22 * (float)57.295776;
-            self->s.lerp.u.turret.gunAngles[1] = __fsqrts(actor->fMaxSightDistSqrd);
+            self->s.lerp.u.turret.gunAngles[1] = sqrtf(actor->fMaxSightDistSqrd);
             if (v8 != ACTOR_THINK_MOVE_TO_BODY_QUEUE || Actor_BecomeCorpse(self))
             {
                 time = level.time;
@@ -5528,7 +5528,7 @@ int __cdecl Actor_PhysicsAndDodge(actor_s *self)
                 "self->Path.wPathLen - 2 >= self->Path.wNegotiationStartNode");
         v13 = (float *)&self->Physics.iTouchEnts[7 * self->Path.wPathLen + 27];
         v14 = 0;
-        v15 = __fsqrts((float)((float)(self->Physics.vWishDelta[0] * self->Physics.vWishDelta[0])
+        v15 = sqrtf((float)((float)(self->Physics.vWishDelta[0] * self->Physics.vWishDelta[0])
             + (float)(self->Physics.vWishDelta[1] * self->Physics.vWishDelta[1])));
         while (1)
         {
@@ -5814,7 +5814,7 @@ void __cdecl Actor_DoMove(actor_s *self)
     v22 = Path_NodesInCylinder(currentOrigin, 384.0, 128.0, v21, v20, (int)v60);
     v23 = 0;
     v24 = 0;
-    v25 = 3.4028235e38;
+    v25 = FLT_MAX;
     if (v22 >= 4)
     {
         v26 = &v61;

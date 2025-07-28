@@ -2128,6 +2128,24 @@ const dvar_s *__cdecl Dvar_RegisterVec3(
     return Dvar_RegisterVariant(dvarName, DVAR_TYPE_FLOAT_3, flags, v8, min, description);
 }
 
+const dvar_s *__cdecl Dvar_RegisterVec3(
+    const char *dvarName,
+    float x,
+    float y,
+    float z,
+    float min,
+    float max,
+    unsigned __int16 flags,
+    const char *description)
+{
+    DvarLimits limits;
+
+    limits.value.min = min;
+    limits.value.max = max;
+
+    return Dvar_RegisterVec3(dvarName, x, y, z, limits, flags, description);
+}
+
 const dvar_s *__cdecl Dvar_RegisterVec4(
     const char *dvarName,
     float x,

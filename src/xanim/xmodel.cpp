@@ -676,3 +676,8 @@ XModel* XModelFindExisting(const char *name)
 {
     return DB_FindXAssetHeader(ASSET_TYPE_XMODEL, name).model;
 }
+
+unsigned __int16 *XModelBoneNames(XModel *model)
+{
+    return model->boneNames;
+}

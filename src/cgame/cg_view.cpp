@@ -1363,7 +1363,7 @@ void __cdecl GetCeilingHeight(cg_s *cgameGlob)
         v3 = (float)((float)((float)((float)(v5 - origin[2]) * v6.fraction) + origin[2])
             - cgameGlob->predictedPlayerState.origin[2]);
     else
-        v3 = 3.4028235e38;
+        v3 = FLT_MAX;
     cgameGlob->heightToCeiling = v3;
 }
 
@@ -1568,7 +1568,7 @@ void __cdecl CG_CalcViewValues(int localClientNum)
         MenuBlurRadius = CL_GetMenuBlurRadius(localClientNum);
     else
         MenuBlurRadius = 0.0;
-    cgArray[0].refdef.blurRadius = __fsqrts((float)((float)((float)BlurRadius * (float)BlurRadius) + (float)((float)(cgDC.blurRadiusOut * cgDC.blurRadiusOut) + (float)((float)MenuBlurRadius * (float)MenuBlurRadius))));
+    cgArray[0].refdef.blurRadius = sqrtf((float)((float)((float)BlurRadius * (float)BlurRadius) + (float)((float)(cgDC.blurRadiusOut * cgDC.blurRadiusOut) + (float)((float)MenuBlurRadius * (float)MenuBlurRadius))));
     CG_VisionSetApplyToRefdef(localClientNum);
     if (cgArray[0].cubemapShot)
     {
@@ -1584,7 +1584,7 @@ void __cdecl CG_CalcViewValues(int localClientNum)
     cgArray[0].fBobCycle = (float)((float)v4 * (float)0.024639944) + (float)6.2831855;
     if ((cgArray[0].predictedPlayerState.pm_flags & 8) == 0)
     {
-        v5 = __fsqrts((float)((float)(cgArray[0].predictedPlayerState.velocity[0]
+        v5 = sqrtf((float)((float)(cgArray[0].predictedPlayerState.velocity[0]
             * cgArray[0].predictedPlayerState.velocity[0])
             + (float)(cgArray[0].predictedPlayerState.velocity[1]
                 * cgArray[0].predictedPlayerState.velocity[1])));

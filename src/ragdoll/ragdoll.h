@@ -158,6 +158,8 @@ void __cdecl Ragdoll_Register();
 void __cdecl Ragdoll_Init();
 void __cdecl Ragdoll_Shutdown();
 
+int Ragdoll_CreateRagdollForDObjRaw(int localClientNum, int ragdollDef, const cpose_t *pose, DObj_s *dobj);
+
 
 
 // ragdoll_controller

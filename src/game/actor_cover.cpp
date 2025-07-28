@@ -522,7 +522,7 @@ float __cdecl Actor_Cover_ScoreOnEngagement(actor_s *self, const pathnode_t *nod
     v6 = (float)(TargetEntity->r.currentOrigin[2] - node->constant.vOrigin[2]);
     v7 = (float)(TargetEntity->r.currentOrigin[1] - node->constant.vOrigin[1]);
     engageMinFalloffDist = self->engageMinFalloffDist;
-    //v9 = __fsqrts((float)((float)((float)v7 * (float)v7) + (float)((float)((float)v5 * (float)v5) + (float)((float)v6 * (float)v6))));
+    //v9 = sqrtf((float)((float)((float)v7 * (float)v7) + (float)((float)((float)v5 * (float)v5) + (float)((float)v6 * (float)v6))));
     v9 = sqrtf((float)((float)((float)v7 * (float)v7) + (float)((float)((float)v5 * (float)v5) + (float)((float)v6 * (float)v6))));
     if (v9 < engageMinFalloffDist)
         goto LABEL_25;

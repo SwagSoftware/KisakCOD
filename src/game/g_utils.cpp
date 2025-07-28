@@ -1424,7 +1424,7 @@ bool __cdecl G_SlideMove(
                 v43 = (float *)v74;
                 v44 = mins[1];
                 v45 = *mins;
-                _FP5 = -__fsqrts((float)((float)(v68 * v68) + (float)((float)(v70 * v70) + (float)(v69 * v69))));
+                _FP5 = -sqrtf((float)((float)(v68 * v68) + (float)((float)(v70 * v70) + (float)(v69 * v69))));
                 __asm { fsel      f12, f5, f31, f12 }
                 v48 = (float)((float)1.0 / (float)_FP12);
                 v49 = (float)(v70 * (float)v48);

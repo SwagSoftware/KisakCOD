@@ -431,3 +431,94 @@ void __cdecl R_LockSkinnedCache()
         gfxBuf.skinnedCacheNormalsAddr = gfxBuf.skinnedCacheNormals[gfxBuf.skinnedCacheNormalsFrameCount & 1];
     }
 }
+
+void R_DObjReplaceMaterial(DObj_s *obj, int lod, int surfaceIndex, Material *material)
+{
+    unsigned int NumModels; // r21
+    int v9; // r29
+    int v10; // r26
+    const XModel *Model; // r31
+    unsigned int SurfCount; // r30
+    Material **Skins; // r31
+    unsigned int v14; // r11
+
+    if (!obj)
+        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\gfx_d3d\\r_model.cpp", 574, 0, "%s", "obj");
+    if (lod < 0)
+        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\gfx_d3d\\r_model.cpp", 575, 0, "%s", "lod >= 0");
+    NumModels = DObjGetNumModels(obj);
+    v9 = 0;
+    v10 = 0;
+    if (NumModels)
+    {
+        while (1)
+        {
+            Model = DObjGetModel(obj, v10);
+            if (!Model)
+                MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\gfx_d3d\\r_model.cpp", 583, 0, "%s", "model");
+            SurfCount = XModelGetSurfCount(Model, lod);
+            Skins = XModelGetSkins(Model, lod);
+            if (!Skins)
+                MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\gfx_d3d\\r_model.cpp", 587, 0, "%s", "originalMaterial");
+            v14 = 0;
+            if (SurfCount)
+                break;
+        LABEL_13:
+            if (++v10 >= NumModels)
+                return;
+        }
+        while (surfaceIndex != v9)
+        {
+            ++v14;
+            ++v9;
+            if (v14 >= SurfCount)
+                goto LABEL_13;
+        }
+        Skins[v14] = material;
+    }
+}
+
+void R_DObjGetSurfMaterials(DObj_s *obj, int lod, Material **matHandleArray)
+{
+    unsigned int NumModels; // r21
+    int v7; // r29
+    unsigned int i; // r28
+    const XModel *model; // r30
+    unsigned int SurfCount; // r31
+    Material *const *material; // r30
+    Material *const *v12; // r10
+    Material **v13; // r9
+    unsigned int v14; // r11
+
+    iassert(obj && matHandleArray);
+    iassert(lod >= 0);
+
+    NumModels = DObjGetNumModels(obj);
+    v7 = 0;
+    for (i = 0; i < NumModels; ++i)
+    {
+        model = DObjGetModel(obj, i);
+        iassert(model);
+        SurfCount = XModelGetSurfCount(model, lod);
+        material = XModelGetSkins(model, lod);
+        iassert(material);
+        if (SurfCount)
+        {
+            v12 = material;
+            v13 = &matHandleArray[v7];
+            v14 = SurfCount;
+            v7 += SurfCount;
+            do
+            {
+                --v14;
+                *v13++ = *v12++;
+            } while (v14);
+        }
+    }
+}
+
+void R_SetIgnorePrecacheErrors(unsigned int ignore)
+{
+    //rg.ignorePrecacheErrors = (_cntlzw(ignore) & 0x20) == 0;
+    rg.ignorePrecacheErrors = ignore;
+}

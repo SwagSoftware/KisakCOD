@@ -237,6 +237,7 @@ XModel *__cdecl XModelPrecache_LoadObj(char *name, void *(__cdecl *Alloc)(int), 
 XModel *__cdecl XModelPrecache_FastFile(const char *name);
 XModel *__cdecl XModelLoad(char *name, void *(__cdecl *Alloc)(int), void *(__cdecl *AllocColl)(int));
 XModel *XModelFindExisting(const char *name);
+unsigned __int16 *XModelBoneNames(XModel *model);
 
 double __cdecl XModelGetRadius(const XModel *model);
 void __cdecl XModelGetBounds(const XModel *model, float *mins, float *maxs);

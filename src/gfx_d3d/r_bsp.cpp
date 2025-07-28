@@ -284,3 +284,8 @@ void R_ResetSunDirectionOverride()
 {
     rg.useSunDirOverride = 0;
 }
+
+void R_ResetSunLightParseParams()
+{
+    R_UpdateLightsFromDvars();
+}

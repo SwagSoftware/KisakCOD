@@ -2253,6 +2253,14 @@ void __cdecl DevGui_Toggle()
     }
 }
 
+void DevGui_Reset()
+{
+    devguiGlob.isActive = 0;
+    devguiGlob.bindNextKey = 0;
+    devguiGlob.editingMenuItem = 0;
+    devguiGlob.selectedMenu = 0;
+}
+
 bool __cdecl DevGui_IsActive()
 {
     return devguiGlob.isActive;

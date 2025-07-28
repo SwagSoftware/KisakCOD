@@ -151,7 +151,7 @@ void __cdecl G_Animscripted_DeathPlant(
     v17 = ent->s.number;
     v22 = v35;
     v25 = v35;
-    //v18 = (float)((float)__fsqrts((float)((float)(v30 * v30) + (float)((float)(v31 * v31) + (float)(v32 * v32))))
+    //v18 = (float)((float)sqrtf((float)((float)(v30 * v30) + (float)((float)(v31 * v31) + (float)(v32 * v32))))
     v18 = (float)((float)sqrtf((float)((float)(v30 * v30) + (float)((float)(v31 * v31) + (float)(v32 * v32))))
         + (float)128.0);
     v23 = (float)v18 + v36;

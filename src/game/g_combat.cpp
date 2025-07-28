@@ -1040,7 +1040,7 @@ int __cdecl G_CanRadiusDamageFromPos(
         if (targ->client)
             v15 = 8.0;
         //v22 = (float)(centerPos[1] - targetPos[1]);
-        //_FP10 = -__fsqrts((float)((float)((float)(*centerPos - *targetPos) * (float)(*centerPos - *targetPos)) + (float)((float)v22 * (float)v22)));
+        //_FP10 = -sqrtf((float)((float)((float)(*centerPos - *targetPos) * (float)(*centerPos - *targetPos)) + (float)((float)v22 * (float)v22)));
         //__asm { fsel      f12, f10, f31, f12 }
         //v25 = (float)((float)1.0 / (float)_FP12);
 
@@ -1106,7 +1106,7 @@ int __cdecl G_CanRadiusDamageFromPos(
         //            {
         //                v38 = (float)(v34[2] - centerPos[2]);
         //                v39 = (float)(v34[1] - centerPos[1]);
-        //                _FP7 = -__fsqrts((float)((float)((float)v39 * (float)v39)
+        //                _FP7 = -sqrtf((float)((float)((float)v39 * (float)v39)
         //                    + (float)((float)((float)(*v34 - *centerPos) * (float)(*v34 - *centerPos))
         //                        + (float)((float)v38 * (float)v38))));
         //                __asm { fsel      f11, f7, f31, f11 }
@@ -1178,7 +1178,7 @@ int __cdecl G_CanRadiusDamageFromPos(
         //        goto LABEL_58;
         //    v44 = (float)(i[2] - centerPos[2]);
         //    v45 = (float)(i[1] - centerPos[1]);
-        //    _FP7 = -__fsqrts((float)((float)((float)v45 * (float)v45)
+        //    _FP7 = -sqrtf((float)((float)((float)v45 * (float)v45)
         //        + (float)((float)((float)(*i - *centerPos) * (float)(*i - *centerPos))
         //            + (float)((float)v44 * (float)v44))));
         //    __asm { fsel      f11, f7, f31, f11 }
@@ -1253,7 +1253,7 @@ int __cdecl G_CanRadiusDamageFromPos(
         }
         v53 = (float)(centerPos[2] - v95);
 
-        //_FP10 = -__fsqrts((float)((float)((float)(centerPos[1] - v94) * (float)(centerPos[1] - v94))
+        //_FP10 = -sqrtf((float)((float)((float)(centerPos[1] - v94) * (float)(centerPos[1] - v94))
         //    + (float)((float)((float)(centerPos[2] - v95) * (float)(centerPos[2] - v95))
         //        + (float)((float)(*centerPos - v93) * (float)(*centerPos - v93)))));
         //__asm { fsel      f11, f10, f31, f11 }
@@ -1277,7 +1277,7 @@ int __cdecl G_CanRadiusDamageFromPos(
         v112[2] = (float)v53 * (float)v56;
         v59 = -v57;
 
-        //_FP11 = -__fsqrts((float)((float)((float)v58 * (float)v58) + (float)((float)v59 * (float)v59)));
+        //_FP11 = -sqrtf((float)((float)((float)v58 * (float)v58) + (float)((float)v59 * (float)v59)));
         //__asm { fsel      f13, f11, f31, f13 }
         //v62 = (float)((float)1.0 / (float)_FP13);
 
@@ -1332,7 +1332,7 @@ int __cdecl G_CanRadiusDamageFromPos(
                     {
                         //v83 = (float)(v79[1] - centerPos[1]);
                         //v84 = (float)(v79[2] - centerPos[2]);
-                        //_FP7 = -__fsqrts((float)((float)((float)(*v79 - *centerPos) * (float)(*v79 - *centerPos))
+                        //_FP7 = -sqrtf((float)((float)((float)(*v79 - *centerPos) * (float)(*v79 - *centerPos))
                         //    + (float)((float)((float)v84 * (float)v84) + (float)((float)v83 * (float)v83))));
                         //__asm { fsel      f11, f7, f31, f11 }
                         //if ((float)((float)(*(float *)contentMask
@@ -1381,7 +1381,7 @@ int __cdecl G_CanRadiusDamageFromPos(
         //        goto LABEL_59;
         //    v89 = (float)(j[1] - centerPos[1]);
         //    v90 = (float)(j[2] - centerPos[2]);
-        //    _FP7 = -__fsqrts((float)((float)((float)(*j - *centerPos) * (float)(*j - *centerPos))
+        //    _FP7 = -sqrtf((float)((float)((float)(*j - *centerPos) * (float)(*j - *centerPos))
         //        + (float)((float)((float)v90 * (float)v90) + (float)((float)v89 * (float)v89))));
         //    __asm { fsel      f11, f7, f31, f11 }
         //    if ((float)((float)(*(float *)contentMask * (float)((float)((float)1.0 / (float)_FP11) * (float)(*j - *centerPos)))
@@ -1476,7 +1476,7 @@ float __cdecl EntDistToPoint(float *origin, gentity_s *ent)
             ++v2;
             ++absmax;
         } while (v10);
-        //v7 = __fsqrts((float)((float)(v14 * v14) + (float)((float)(v15 * v15) + (float)(back_chain * back_chain))));
+        //v7 = sqrtf((float)((float)(v14 * v14) + (float)((float)(v15 * v15) + (float)(back_chain * back_chain))));
         v7 = sqrtf((float)((float)(v14 * v14) + (float)((float)(v15 * v15) + (float)(back_chain * back_chain))));
     }
     else
@@ -1485,7 +1485,7 @@ float __cdecl EntDistToPoint(float *origin, gentity_s *ent)
         v4 = (float)(ent->r.currentOrigin[2] - origin[2]);
         v6 = (float)((float)((float)v4 * (float)v4) + (float)((float)v3 * (float)v3));
         v5 = (float)(ent->r.currentOrigin[1] - origin[1]);
-        //v7 = __fsqrts((float)((float)((float)v5 * (float)v5) + (float)v6));
+        //v7 = sqrtf((float)((float)((float)v5 * (float)v5) + (float)v6));
         v7 = sqrtf((float)((float)((float)v5 * (float)v5) + (float)v6));
     }
     return *((float *)&v7 + 1);
@@ -1915,7 +1915,7 @@ int __cdecl G_RadiusDamage(
                 if (RadiusDamageDistanceSquared < (float)((float)radius * (float)radius))
                 {
                     v55 = (float)((float)((float)((float)1.0
-                        //- (float)((float)__fsqrts(RadiusDamageDistanceSquared) / (float)radius))
+                        //- (float)((float)sqrtf(RadiusDamageDistanceSquared) / (float)radius))
                         - (float)((float)sqrtf(RadiusDamageDistanceSquared) / (float)radius))
                         * (float)((float)fInnerDamage - (float)fOuterDamage))
                         + (float)fOuterDamage);

@@ -524,29 +524,29 @@ const dvar_s *CG_RegisterDvars()
         0x81u,
         "draw the friendly fire crosshair (friendly move)");
     cg_brass = Dvar_RegisterBool("cg_brass", 1, 1u, "Weapons eject brass");
-    cg_gun_x = Dvar_RegisterFloat("cg_gun_x", 0.0, -3.4028235e38, 3.4028235e38, v47, v46);
-    cg_gun_y = Dvar_RegisterFloat("cg_gun_y", 0.0, -3.4028235e38, 3.4028235e38, v49, v48);
-    cg_gun_z = Dvar_RegisterFloat("cg_gun_z", 0.0, -3.4028235e38, 3.4028235e38, v51, v50);
-    cg_gun_move_f = Dvar_RegisterFloat("cg_gun_move_f", 0.0, -3.4028235e38, 3.4028235e38, v53, v52);
-    cg_gun_move_r = Dvar_RegisterFloat("cg_gun_move_r", 0.0, -3.4028235e38, 3.4028235e38, v55, v54);
-    cg_gun_move_u = Dvar_RegisterFloat("cg_gun_move_u", 0.0, -3.4028235e38, 3.4028235e38, v57, v56);
-    cg_gun_ofs_f = Dvar_RegisterFloat("cg_gun_ofs_f", 0.0, -3.4028235e38, 3.4028235e38, v59, v58);
-    cg_gun_ofs_r = Dvar_RegisterFloat("cg_gun_ofs_r", 0.0, -3.4028235e38, 3.4028235e38, v61, v60);
-    cg_gun_ofs_u = Dvar_RegisterFloat("cg_gun_ofs_u", 0.0, -3.4028235e38, 3.4028235e38, v63, v62);
-    cg_gun_rot_p = Dvar_RegisterFloat("cg_gun_rot_p", 0.0, -3.4028235e38, 3.4028235e38, v65, v64);
-    cg_gun_rot_y = Dvar_RegisterFloat("cg_gun_rot_y", 0.0, -3.4028235e38, 3.4028235e38, v67, v66);
-    cg_gun_rot_r = Dvar_RegisterFloat("cg_gun_rot_r", 0.0, -3.4028235e38, 3.4028235e38, v69, v68);
-    cg_gun_move_rate = Dvar_RegisterFloat("cg_gun_move_rate", 0.0, -3.4028235e38, 3.4028235e38, v71, v70);
-    cg_gun_move_minspeed = Dvar_RegisterFloat("cg_gun_move_minspeed", 0.0, -3.4028235e38, 3.4028235e38, v73, v72);
-    cg_gun_rot_rate = Dvar_RegisterFloat("cg_gun_rot_rate", 0.0, -3.4028235e38, 3.4028235e38, v75, v74);
-    cg_gun_rot_minspeed = Dvar_RegisterFloat("cg_gun_rot_minspeed", 0.0, -3.4028235e38, 3.4028235e38, v77, v76);
-    cg_centertime = Dvar_RegisterFloat("cg_centertime", 3.0, 0.0, 3.4028235e38, v79, v78);
+    cg_gun_x = Dvar_RegisterFloat("cg_gun_x", 0.0, -FLT_MAX, FLT_MAX, v47, v46);
+    cg_gun_y = Dvar_RegisterFloat("cg_gun_y", 0.0, -FLT_MAX, FLT_MAX, v49, v48);
+    cg_gun_z = Dvar_RegisterFloat("cg_gun_z", 0.0, -FLT_MAX, FLT_MAX, v51, v50);
+    cg_gun_move_f = Dvar_RegisterFloat("cg_gun_move_f", 0.0, -FLT_MAX, FLT_MAX, v53, v52);
+    cg_gun_move_r = Dvar_RegisterFloat("cg_gun_move_r", 0.0, -FLT_MAX, FLT_MAX, v55, v54);
+    cg_gun_move_u = Dvar_RegisterFloat("cg_gun_move_u", 0.0, -FLT_MAX, FLT_MAX, v57, v56);
+    cg_gun_ofs_f = Dvar_RegisterFloat("cg_gun_ofs_f", 0.0, -FLT_MAX, FLT_MAX, v59, v58);
+    cg_gun_ofs_r = Dvar_RegisterFloat("cg_gun_ofs_r", 0.0, -FLT_MAX, FLT_MAX, v61, v60);
+    cg_gun_ofs_u = Dvar_RegisterFloat("cg_gun_ofs_u", 0.0, -FLT_MAX, FLT_MAX, v63, v62);
+    cg_gun_rot_p = Dvar_RegisterFloat("cg_gun_rot_p", 0.0, -FLT_MAX, FLT_MAX, v65, v64);
+    cg_gun_rot_y = Dvar_RegisterFloat("cg_gun_rot_y", 0.0, -FLT_MAX, FLT_MAX, v67, v66);
+    cg_gun_rot_r = Dvar_RegisterFloat("cg_gun_rot_r", 0.0, -FLT_MAX, FLT_MAX, v69, v68);
+    cg_gun_move_rate = Dvar_RegisterFloat("cg_gun_move_rate", 0.0, -FLT_MAX, FLT_MAX, v71, v70);
+    cg_gun_move_minspeed = Dvar_RegisterFloat("cg_gun_move_minspeed", 0.0, -FLT_MAX, FLT_MAX, v73, v72);
+    cg_gun_rot_rate = Dvar_RegisterFloat("cg_gun_rot_rate", 0.0, -FLT_MAX, FLT_MAX, v75, v74);
+    cg_gun_rot_minspeed = Dvar_RegisterFloat("cg_gun_rot_minspeed", 0.0, -FLT_MAX, FLT_MAX, v77, v76);
+    cg_centertime = Dvar_RegisterFloat("cg_centertime", 3.0, 0.0, FLT_MAX, v79, v78);
     cg_bobWeaponAmplitude = Dvar_RegisterFloat("cg_bobWeaponAmplitude", 0.16, 0.0, 1.0, v81, v80);
     cg_bobWeaponRollAmplitude = Dvar_RegisterFloat("cg_bobWeaponRollAmplitude", 1.5, 0.0, 90.0, v83, v82);
     cg_bobWeaponMax = Dvar_RegisterFloat("cg_bobWeaponMax", 10.0, 0.0, 36.0, v85, v84);
     cg_bobWeaponLag = Dvar_RegisterFloat("cg_bobWeaponLag", 0.25, -1.0, 1.0, v87, v86);
     cg_debugEvents = Dvar_RegisterBool("cg_debugevents", 0, 0x80u, "Output event debug information");
-    cg_errorDecay = Dvar_RegisterFloat("cg_errordecay", 100.0, 0.0, 3.4028235e38, v89, v88);
+    cg_errorDecay = Dvar_RegisterFloat("cg_errordecay", 100.0, 0.0, FLT_MAX, v89, v88);
     cg_nopredict = Dvar_RegisterBool("cg_nopredict", 0, 1u, "Don't do client side prediction");
     cg_cinematicFullscreen = Dvar_RegisterBool("cg_cinematicFullscreen", 1, 0x1000u, "Draw ingame cinematics full screen");
     cg_showmiss = Dvar_RegisterInt("cg_showmiss", 0, 0, 2, 0, "Show prediction errors");
@@ -556,40 +556,40 @@ const dvar_s *CG_RegisterDvars()
         0,
         0x80u,
         "Force laser sights on in all possible places (for debug purposes).");
-    cg_laserRange = Dvar_RegisterFloat("cg_laserRange", 1500.0, 1.0, 3.4028235e38, v91, v90);
-    cg_laserRangePlayer = Dvar_RegisterFloat("cg_laserRangePlayer", 1500.0, 1.0, 3.4028235e38, v93, v92);
-    cg_laserRadius = Dvar_RegisterFloat("cg_laserRadius", 0.80000001, 0.001, 3.4028235e38, v95, v94);
+    cg_laserRange = Dvar_RegisterFloat("cg_laserRange", 1500.0, 1.0, FLT_MAX, v91, v90);
+    cg_laserRangePlayer = Dvar_RegisterFloat("cg_laserRangePlayer", 1500.0, 1.0, FLT_MAX, v93, v92);
+    cg_laserRadius = Dvar_RegisterFloat("cg_laserRadius", 0.80000001, 0.001, FLT_MAX, v95, v94);
     cg_laserLight = Dvar_RegisterBool(
         "cg_laserLight",
         1,
         0,
         "Whether to draw the light emitted from a laser (not the laser itself)");
-    cg_laserLightBodyTweak = Dvar_RegisterFloat("cg_laserLightBodyTweak", 15.0, -3.4028235e38, 3.4028235e38, v97, v96);
-    cg_laserLightRadius = Dvar_RegisterFloat("cg_laserLightRadius", 3.0, 0.001, 3.4028235e38, v99, v98);
+    cg_laserLightBodyTweak = Dvar_RegisterFloat("cg_laserLightBodyTweak", 15.0, -FLT_MAX, FLT_MAX, v97, v96);
+    cg_laserLightRadius = Dvar_RegisterFloat("cg_laserLightRadius", 3.0, 0.001, FLT_MAX, v99, v98);
     cg_laserLightBeginOffset = Dvar_RegisterFloat(
         "cg_laserLightBeginOffset",
         13.0,
-        -3.4028235e38,
-        3.4028235e38,
+        -FLT_MAX,
+        FLT_MAX,
         v101,
         v100);
-    cg_laserLightEndOffset = Dvar_RegisterFloat("cg_laserLightEndOffset", -3.0, -3.4028235e38, 3.4028235e38, v103, v102);
-    cg_laserEndOffset = Dvar_RegisterFloat("cg_laserEndOffset", 0.5, -3.4028235e38, 3.4028235e38, v105, v104);
-    cg_laserFlarePct = Dvar_RegisterFloat("cg_laserFlarePct", 0.2, 0.0, 3.4028235e38, v107, v106);
+    cg_laserLightEndOffset = Dvar_RegisterFloat("cg_laserLightEndOffset", -3.0, -FLT_MAX, FLT_MAX, v103, v102);
+    cg_laserEndOffset = Dvar_RegisterFloat("cg_laserEndOffset", 0.5, -FLT_MAX, FLT_MAX, v105, v104);
+    cg_laserFlarePct = Dvar_RegisterFloat("cg_laserFlarePct", 0.2, 0.0, FLT_MAX, v107, v106);
     cg_marks_ents_player_only = Dvar_RegisterBool(
         "cg_marks_ents_player_only",
         0,
         1u,
         "Marks on entities from player's bullets only.");
     cg_tracerChance = Dvar_RegisterFloat("cg_tracerchance", 0.2, 0.0, 1.0, v109, v108);
-    cg_tracerWidth = Dvar_RegisterFloat("cg_tracerwidth", 4.0, 0.0, 3.4028235e38, v111, v110);
-    cg_tracerSpeed = Dvar_RegisterFloat("cg_tracerSpeed", 7500.0, 0.0, 3.4028235e38, v113, v112);
-    cg_tracerLength = Dvar_RegisterFloat("cg_tracerlength", 160.0, 0.0, 3.4028235e38, v115, v114);
-    cg_tracerScale = Dvar_RegisterFloat("cg_tracerScale", 1.0, 1.0, 3.4028235e38, v117, v116);
-    cg_tracerScaleMinDist = Dvar_RegisterFloat("cg_tracerScaleMinDist", 5000.0, 0.0, 3.4028235e38, v119, v118);
-    cg_tracerScaleDistRange = Dvar_RegisterFloat("cg_tracerScaleDistRange", 25000.0, 0.0, 3.4028235e38, v121, v120);
-    cg_tracerScrewDist = Dvar_RegisterFloat("cg_tracerScrewDist", 100.0, 0.0, 3.4028235e38, v123, v122);
-    cg_tracerScrewRadius = Dvar_RegisterFloat("cg_tracerScrewRadius", 0.5, 0.0, 3.4028235e38, v125, v124);
+    cg_tracerWidth = Dvar_RegisterFloat("cg_tracerwidth", 4.0, 0.0, FLT_MAX, v111, v110);
+    cg_tracerSpeed = Dvar_RegisterFloat("cg_tracerSpeed", 7500.0, 0.0, FLT_MAX, v113, v112);
+    cg_tracerLength = Dvar_RegisterFloat("cg_tracerlength", 160.0, 0.0, FLT_MAX, v115, v114);
+    cg_tracerScale = Dvar_RegisterFloat("cg_tracerScale", 1.0, 1.0, FLT_MAX, v117, v116);
+    cg_tracerScaleMinDist = Dvar_RegisterFloat("cg_tracerScaleMinDist", 5000.0, 0.0, FLT_MAX, v119, v118);
+    cg_tracerScaleDistRange = Dvar_RegisterFloat("cg_tracerScaleDistRange", 25000.0, 0.0, FLT_MAX, v121, v120);
+    cg_tracerScrewDist = Dvar_RegisterFloat("cg_tracerScrewDist", 100.0, 0.0, FLT_MAX, v123, v122);
+    cg_tracerScrewRadius = Dvar_RegisterFloat("cg_tracerScrewRadius", 0.5, 0.0, FLT_MAX, v125, v124);
     cg_paused = Dvar_RegisterInt("cl_paused", 0, 0, 2, 0, "Pause the game");
     cg_drawpaused = Dvar_RegisterBool("cg_drawpaused", 1, 0, "Draw paused screen");
     cg_debug_overlay_viewport = Dvar_RegisterBool(
@@ -614,7 +614,7 @@ const dvar_s *CG_RegisterDvars()
     cg_dumpAnims = Dvar_RegisterInt("cg_dumpAnims", -1, -1, 2175, 0x80u, "Output animation info for the given entity id");
     cg_developer = Dvar_RegisterInt("developer", 0, 0, 2, 0, "Turn on Development systems");
     cg_minicon = Dvar_RegisterBool("con_minicon", 0, 1u, "Display the mini console on screen");
-    cg_subtitleMinTime = Dvar_RegisterFloat("cg_subtitleMinTime", 3.0, 0.0, 3.4028235e38, v127, v126);
+    cg_subtitleMinTime = Dvar_RegisterFloat("cg_subtitleMinTime", 3.0, 0.0, FLT_MAX, v127, v126);
     cg_subtitleWidthStandard = Dvar_RegisterInt(
         "cg_subtitleWidthStandard",
         306,
@@ -656,7 +656,7 @@ const dvar_s *CG_RegisterDvars()
         "cg_small_dev_string_fontscale",
         1.5,
         0.0,
-        3.4028235e38,
+        FLT_MAX,
         v129,
         v128);
     cg_mapLocationSelectionCursorSpeed = Dvar_RegisterFloat(
@@ -669,10 +669,10 @@ const dvar_s *CG_RegisterDvars()
     turretScopeZoom = Dvar_RegisterFloat("turretScopeZoom", 20.0, 0.0099999998, 180.0, v133, v132);
     turretScopeZoomMin = Dvar_RegisterFloat("turretScopeZoomMin", 5.0, 0.0099999998, 180.0, v135, v134);
     turretScopeZoomMax = Dvar_RegisterFloat("turretScopeZoomMax", 20.0, 0.0099999998, 180.0, v137, v136);
-    turretScopeZoomRate = Dvar_RegisterFloat("turretScopeZoomRate", 15.0, 0.0, 3.4028235e38, v139, v138);
-    cg_viewZSmoothingMin = Dvar_RegisterFloat("cg_viewZSmoothingMin", 1.0, 0.0, 3.4028235e38, v141, v140);
-    cg_viewZSmoothingMax = Dvar_RegisterFloat("cg_viewZSmoothingMax", 16.0, 0.0, 3.4028235e38, v143, v142);
-    cg_viewZSmoothingTime = Dvar_RegisterFloat("cg_viewZSmoothingTime", 0.1, 0.0, 3.4028235e38, v145, v144);
+    turretScopeZoomRate = Dvar_RegisterFloat("turretScopeZoomRate", 15.0, 0.0, FLT_MAX, v139, v138);
+    cg_viewZSmoothingMin = Dvar_RegisterFloat("cg_viewZSmoothingMin", 1.0, 0.0, FLT_MAX, v141, v140);
+    cg_viewZSmoothingMax = Dvar_RegisterFloat("cg_viewZSmoothingMax", 16.0, 0.0, FLT_MAX, v143, v142);
+    cg_viewZSmoothingTime = Dvar_RegisterFloat("cg_viewZSmoothingTime", 0.1, 0.0, FLT_MAX, v145, v144);
     overrideNVGModelWithKnife = Dvar_RegisterBool(
         "overrideNVGModelWithKnife",
         0,
@@ -713,35 +713,35 @@ const dvar_s *CG_RegisterDvars()
         "vehHelicopterFreeLookReleaseSpeed",
         8.0,
         0.0099999998,
-        3.4028235e38,
+        FLT_MAX,
         v149,
         v148);
     vehHelicopterHeadSwayOnYaw = Dvar_RegisterFloat(
         "vehHelicopterHeadSwayOnYaw",
         0.1,
-        -3.4028235e38,
-        3.4028235e38,
+        -FLT_MAX,
+        FLT_MAX,
         v151,
         v150);
     vehHelicopterHeadSwayOnPitch = Dvar_RegisterFloat(
         "vehHelicopterHeadSwayOnPitch",
         0.2,
-        -3.4028235e38,
-        3.4028235e38,
+        -FLT_MAX,
+        FLT_MAX,
         v153,
         v152);
     vehHelicopterHeadSwayOnRollHorz = Dvar_RegisterFloat(
         "vehHelicopterHeadSwayOnRollHorz",
         0.1,
-        -3.4028235e38,
-        3.4028235e38,
+        -FLT_MAX,
+        FLT_MAX,
         v155,
         v154);
     vehHelicopterHeadSwayOnRollVert = Dvar_RegisterFloat(
         "vehHelicopterHeadSwayOnRollVert",
         2.0,
-        -3.4028235e38,
-        3.4028235e38,
+        -FLT_MAX,
+        FLT_MAX,
         v157,
         v156);
     hud_showStance = Dvar_RegisterBool(
@@ -1252,7 +1252,7 @@ void __cdecl CG_RegisterGraphics(int localClientNum, const char *mapname)
     BG_SetShellShockParmsFromDvars(&cgsArray[0].holdBreathParams);
     ProfLoad_End();
     ProfLoad_Begin("Register rumbles");
-    CG_RegisterRumbles(localClientNum);
+    //CG_RegisterRumbles(localClientNum); // KISAKTODO
     ProfLoad_End();
     ProfLoad_Begin("Register impact effects");
     cgMedia.fx = CG_RegisterImpactEffects(mapname);
@@ -1305,7 +1305,7 @@ void __cdecl CG_StartAmbient(int localClientNum)
         ;
     if (v8 - v3 == 1)
     {
-        SND_StopAmbient(localClientNum, v7, SASYS_CGAME);
+        SND_StopAmbient(localClientNum, v7);
     }
     else
     {
@@ -1346,7 +1346,7 @@ void __cdecl CG_StopClientSoundAliasByName(int localClientNum, const char *alias
     SND_StopSoundAliasOnEnt((SndEntHandle)cgArray[0].nextSnap->ps.clientNum, aliasName);
 }
 
-void __cdecl CG_SubtitlePrint(int msec, snd_alias_t *alias, long double a3)
+static void __cdecl CG_SubtitlePrint(int msec, snd_alias_t *alias)
 {
     const dvar_s *v5; // r10
     const dvar_s *v6; // r11
@@ -1373,8 +1373,7 @@ void __cdecl CG_SubtitlePrint(int msec, snd_alias_t *alias, long double a3)
         else
             v6 = cg_subtitleWidthWidescreen;
         integer = v6->current.integer;
-        *(double *)&a3 = (float)((float)(v5->current.value * (float)1000.0) + (float)0.5);
-        v8 = floor(a3);
+        v8 = floor((float)((float)(v5->current.value * (float)1000.0) + (float)0.5));
         v9 = (int)(float)*(double *)&v8;
         if (v9 < msec)
             v9 = msec;
@@ -1383,9 +1382,9 @@ void __cdecl CG_SubtitlePrint(int msec, snd_alias_t *alias, long double a3)
 }
 
 // attributes: thunk
-void __cdecl CG_SubtitleSndLengthNotify(int msec, snd_alias_t *lengthNotifyData, long double a3)
+void __cdecl CG_SubtitleSndLengthNotify(int msec, snd_alias_t *lengthNotifyData)
 {
-    CG_SubtitlePrint(msec, lengthNotifyData, a3);
+    CG_SubtitlePrint(msec, lengthNotifyData);
 }
 
 void __cdecl CG_ScriptNotifySndLengthNotify(int msec, void *lengthNotifyData)
@@ -1767,7 +1766,7 @@ void __cdecl CG_Init(int localClientNum, int savegame)
     CL_SetADS(localClientNum, 0);
     AimAssist_Init(localClientNum);
     CG_ModelPreviewerCreateDevGui(localClientNum);
-    CG_InitDevguiRumbleGraph(localClientNum);
+    //CG_InitDevguiRumbleGraph(localClientNum); // KISAKTODO
     I_strncpyz(v10, Dvar_GetString("profile"), 1024);
     Dvar_SetFromStringByName("profile", (char*)"");
     Dvar_SetFromStringByName("profile", v10);
@@ -1818,7 +1817,7 @@ void __cdecl CG_Shutdown(int localClientNum)
 
     R_TrackStatistics(0);
     SND_FadeAllSounds(1.0, v2);
-    CG_StopAllRumbles(localClientNum);
+    //CG_StopAllRumbles(localClientNum); // KISAKTODO
     for (i = 0; i < 2176; ++i)
     {
         Entity = CG_GetEntity(localClientNum, i);

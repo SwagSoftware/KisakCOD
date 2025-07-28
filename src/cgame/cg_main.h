@@ -331,8 +331,8 @@ void __cdecl CG_StopSoundAlias(const int localClientNum, SndEntHandle entitynum,
 void __cdecl CG_StopSoundsOnEnt(const int localClientNum, SndEntHandle entitynum);
 void __cdecl CG_StopSoundAliasByName(int localClientNum, SndEntHandle entityNum, const char *aliasName);
 void __cdecl CG_StopClientSoundAliasByName(int localClientNum, const char *aliasName);
-void __cdecl CG_SubtitlePrint(int msec, snd_alias_t *alias, long double a3);
-void __cdecl CG_SubtitleSndLengthNotify(int msec, snd_alias_t *lengthNotifyData, long double a3);
+//void __cdecl CG_SubtitlePrint(int msec, snd_alias_t *alias);
+void __cdecl CG_SubtitleSndLengthNotify(int msec, snd_alias_t *lengthNotifyData);
 void __cdecl CG_ScriptNotifySndLengthNotify(int msec, void *lengthNotifyData);
 void __cdecl CG_AddFXSoundAlias(int localClientNum, const float *origin, snd_alias_list_t *aliasList);
 int __cdecl CG_PlaySoundAlias(int localClientNum, SndEntHandle entitynum, const float *origin, snd_alias_list_t *aliasList);

@@ -509,7 +509,7 @@ void __cdecl G_CheckHitTriggerDamage(
     AddPointToBounds(vEnd, v23, v24);
     v13 = (float)(vEnd[1] - vStart[1]);
     v14 = (float)(vEnd[2] - vStart[2]);
-    _FP9 = -__fsqrts((float)((float)((float)(*vEnd - *vStart) * (float)(*vEnd - *vStart))
+    _FP9 = -sqrtf((float)((float)((float)(*vEnd - *vStart) * (float)(*vEnd - *vStart))
         + (float)((float)((float)v14 * (float)v14) + (float)((float)v13 * (float)v13))));
     __asm { fsel      f11, f9, f10, f11 }
     v17 = (float)((float)1.0 / (float)_FP11);
@@ -579,7 +579,7 @@ void __cdecl G_GrenadeTouchTriggerDamage(
     AddPointToBounds(vEnd, v23, v24);
     v13 = (float)(vEnd[1] - vStart[1]);
     v14 = (float)(vEnd[2] - vStart[2]);
-    _FP9 = -__fsqrts((float)((float)((float)(*vEnd - *vStart) * (float)(*vEnd - *vStart))
+    _FP9 = -sqrtf((float)((float)((float)(*vEnd - *vStart) * (float)(*vEnd - *vStart))
         + (float)((float)((float)v14 * (float)v14) + (float)((float)v13 * (float)v13))));
     __asm { fsel      f11, f9, f10, f11 }
     v17 = (float)((float)1.0 / (float)_FP11);

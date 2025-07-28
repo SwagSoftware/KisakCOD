@@ -3387,3 +3387,40 @@ void FastSinCos(float radians, float *s, float *c)
     *s = sinf(radians);
     *c = cosf(radians);
 }
+
+// aislop
+void MatrixRotationX(float mat[3][3], float degree)
+{
+    float radians = degree * (3.14159265f / 180.0f);
+    float s = sinf(radians);
+    float c = cosf(radians);
+
+    mat[0][0] = 1.0f; mat[0][1] = 0.0f; mat[0][2] = 0.0f;
+    mat[1][0] = 0.0f; mat[1][1] = c; mat[1][2] = -s;
+    mat[2][0] = 0.0f; mat[2][1] = s; mat[2][2] = c;
+}
+
+
+// aislop
+void MatrixRotationY(float mat[3][3], float degree)
+{
+    float radians = degree * (3.14159265f / 180.0f);
+    float s = sinf(radians);
+    float c = cosf(radians);
+
+    mat[0][0] = c;  mat[0][1] = 0.0f; mat[0][2] = -s;
+    mat[1][0] = 0.0f; mat[1][1] = 1.0f; mat[1][2] = 0.0f;
+    mat[2][0] = s;  mat[2][1] = 0.0f; mat[2][2] = c;
+}
+
+// aislop
+void MatrixRotationZ(float mat[3][3], float degree)
+{
+    float radians = degree * (3.14159265f / 180.0f);
+    float s = sinf(radians);
+    float c = cosf(radians);
+
+    mat[0][0] = c; mat[0][1] = -s; mat[0][2] = 0.0f;
+    mat[1][0] = s; mat[1][1] = c; mat[1][2] = 0.0f;
+    mat[2][0] = 0.0f; mat[2][1] = 0.0f; mat[2][2] = 1.0f;
+}

@@ -799,7 +799,7 @@ void __cdecl Actor_BroadcastArcEvent(
                     v20 = (float)(i->ent->r.currentOrigin[0] - *origin);
                     v21 = (float)(i->ent->r.currentOrigin[2] - origin[2]);
                     v22 = (float)(i->ent->r.currentOrigin[1] - origin[1]);
-                    v23 = __fsqrts((float)((float)((float)v22 * (float)v22)
+                    v23 = sqrtf((float)((float)((float)v22 * (float)v22)
                         + (float)((float)((float)v21 * (float)v21) + (float)((float)v20 * (float)v20))));
                     Actor_ReceiveArcEvent(
                         i,

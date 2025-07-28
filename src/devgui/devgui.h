@@ -159,6 +159,7 @@ void __cdecl DevGui_UpdateGraph(int32_t localClientNum, float deltaTime);
 void __cdecl DevGui_AddGraphKnot(DevGraph *graph, int32_t localClientNum);
 void __cdecl DevGui_RemoveGraphKnot(DevGraph *graph, int32_t localClientNum);
 void __cdecl DevGui_Toggle();
+void DevGui_Reset();
 bool __cdecl DevGui_IsActive();
 
 extern devguiGlob_t devguiGlob;

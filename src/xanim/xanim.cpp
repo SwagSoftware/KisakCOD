@@ -3977,3 +3977,12 @@ void XAnimDisableLeakCheck()
 {
     g_disableLeakCheck = 1;
 }
+
+void XAnimFreeAnims(XAnim_s *anims, void(*Free)(void *, int))
+{
+    int v4; // r29
+
+    v4 = 8 * anims->size + 12;
+    XAnimFreeList(anims);
+    Free(anims, v4);
+}

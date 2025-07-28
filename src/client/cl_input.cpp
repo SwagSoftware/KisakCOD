@@ -990,7 +990,7 @@ void __cdecl CL_GamepadMove(usercmd_s *cmd)
                 v12 = (float)((float)v5 / (float)v4);
             else
                 v12 = (float)((float)v4 / (float)v5);
-            v11 = (float)((float)__fsqrts((float)((float)((float)v12 * (float)v12) + (float)1.0)) * (float)127.0);
+            v11 = (float)((float)sqrtf((float)((float)((float)v12 * (float)v12) + (float)1.0)) * (float)127.0);
         }
         v13 = ClampChar((int)(float)((float)v11 * (float)v5) + cmd->rightmove);
         forwardmove = cmd->forwardmove;
@@ -1108,7 +1108,7 @@ void __cdecl CL_MouseMove(usercmd_s *cmd, int a2, int a3, int a4, int a5, int a6
         v12 = v30[0];
         v13 = (float)((float)(v30[0] * v30[0]) + (float)(*(float *)v31 * *(float *)v31));
         v31[0] = v8;
-        v14 = __fsqrts(v13);
+        v14 = sqrtf(v13);
         v15 = (float)((float)((float)(cl_mouseAccel->current.value * (float)((float)v14 / (float)v8))
             + cl_sensitivity->current.value)
             * clients[0].cgameFOVSensitivityScale);
@@ -1331,7 +1331,7 @@ int __cdecl CG_HandleLocationSelectionInput(int localClientNum, usercmd_s *cmd)
             + (float)((float)v8 * (float)v8));
         if (v12 > 1.0)
         {
-            v13 = (float)((float)1.0 / (float)__fsqrts(v12));
+            v13 = (float)((float)1.0 / (float)sqrtf(v12));
             v8 = (float)((float)v13 * (float)v8);
             v11 = (float)((float)v13 * (float)((float)v9 + (float)v10));
         }
