@@ -740,9 +740,9 @@ ai_teammove_t __cdecl Actor_GetTeamMoveStatus(actor_s *self, bool bUseInterval, 
     bool v13; // r25
     int v14; // r3
     int v15; // r28
-    int v16; // r29
+    int checkLookahead; // r29
     int iTraceMask; // r11
-    int v18; // r31
+    int mask; // r31
     gentity_s *v19; // r10
     double v20; // fp31
     double v21; // fp30
@@ -895,23 +895,23 @@ ai_teammove_t __cdecl Actor_GetTeamMoveStatus(actor_s *self, bool bUseInterval, 
         if (self->Path.fLookaheadDistToNextNode == 0.0
             || self->Path.fLookaheadDist < (double)(float)((float)sqrtf(v88.fDodgePosDeltaLengthSqrd) + (float)37.5))
         {
-            v16 = 0;
+            checkLookahead = 0;
             if (v14 < self->Path.wNegotiationStartNode)
                 goto failed_dodge;
         }
         else
         {
-            v16 = 1;
+            checkLookahead = 1;
             if (self->Path.lookaheadNextNode >= self->Path.wPathLen - 1)
                 MyAssertHandler(v86, 753, 0, v87, "!bCheckLookahead || pPath->lookaheadNextNode < pPath->wPathLen - 1");
         }
         if (v88.vVelDirSelf[0] == 0.0 && v88.vVelDirSelf[1] == 0.0)
             MyAssertHandler(v86, 758, 0, v87, "context.vVelDirSelf[0] || context.vVelDirSelf[1]");
         iTraceMask = self->Physics.iTraceMask;
-        v18 = iTraceMask | 4;
+        mask = iTraceMask | 4;
         if (!actor)
-            v18 = iTraceMask | 0x4004;
-        Actor_TeamMoveTooCloseMoveAway(self, v18, &v88);
+            mask = iTraceMask | 0x4004;
+        Actor_TeamMoveTooCloseMoveAway(self, mask, &v88);
         v19 = self->ent;
         v20 = (float)(v88.vVelDirSelf[1] * (float)37.5);
         v21 = (float)(v88.vVelDirSelf[0] * (float)-37.5);
@@ -933,28 +933,8 @@ ai_teammove_t __cdecl Actor_GetTeamMoveStatus(actor_s *self, bool bUseInterval, 
             v88.dodgeEntities,
             v88.dodgeEntityCount,
             v19->s.number,
-            v39,
-            v41,
-            v43,
-            v45,
-            v47,
-            v49,
-            v51,
-            v53,
-            v55,
-            v57,
-            v59,
-            v61,
-            v63,
-            v65,
-            v67,
-            v69,
-            v71,
-            v73,
-            v75,
-            v18,
-            v77,
-            v16))
+            mask,
+            checkLookahead))
             break;
         if (ai_showDodge->current.enabled)
         {
@@ -978,28 +958,8 @@ ai_teammove_t __cdecl Actor_GetTeamMoveStatus(actor_s *self, bool bUseInterval, 
             v88.dodgeEntities,
             v88.dodgeEntityCount,
             v26->s.number,
-            v40,
-            v42,
-            v44,
-            v46,
-            v48,
-            v50,
-            v52,
-            v54,
-            v56,
-            v58,
-            v60,
-            v62,
-            v64,
-            v66,
-            v68,
-            v70,
-            v72,
-            v74,
-            v76,
-            v18,
-            v78,
-            v16))
+            mask,
+            checkLookahead))
         {
             if (ai_showDodge->current.enabled)
             {

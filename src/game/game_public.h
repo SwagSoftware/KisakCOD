@@ -442,6 +442,7 @@ gentity_s *__cdecl G_FireRocket(
     gentity_s *target,
     const float *targetOffset);
 void __cdecl InitRocketTimer(gentity_s *bolt, WeaponDef *weapDef);
+int G_PredictMissile(gentity_s *ent, int duration, float *vLandPos, int allowBounce, int *timeAtRest);
 
 
 

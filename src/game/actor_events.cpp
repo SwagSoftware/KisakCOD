@@ -730,7 +730,7 @@ void __cdecl Actor_BroadcastLineEvent(
             if (v27 <= fRadiusSqrd
                 && I_fabs((float)((float)((float)(72.0 + 0.0) * (float)0.5) + (float)(i->ent->r.currentOrigin[2] - (float)v24))) < I_fabs(defaultHeight))
             {
-                Actor_ReceiveLineEvent(i, originator, (ai_event_t)eType, vStart, vEnd, &v36, v27, fRadiusSqrd, v20);
+                Actor_ReceiveLineEvent(i, originator, (ai_event_t)eType, vStart, vEnd, &v36, v27, fRadiusSqrd);
             }
         }
     }

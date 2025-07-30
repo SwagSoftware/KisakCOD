@@ -2998,3 +2998,336 @@ void __cdecl InitRocketTimer(gentity_s *bolt, WeaponDef *weapDef)
         bolt->nextthink = level.time + 60000;
 }
 
+static void PredictBounceMissile(
+    gentity_s *ent,
+    trajectory_t *pos,
+    trace_t *trace,
+    int time,
+    int velocityTime,
+    float *origin,
+    float *endpos)
+{
+    WeaponDef *WeaponDef; // r23
+    int v15; // r28
+    double v16; // fp13
+    double v17; // fp12
+    double v18; // fp11
+    double v19; // fp31
+    double v20; // fp0
+    double v21; // fp0
+    double v22; // fp0
+    WeapStickinessType stickiness; // r11
+    double v24; // fp13
+    double v25; // fp0
+    float v26; // [sp+58h] [-88h] BYREF
+    float v27; // [sp+5Ch] [-84h]
+    float v28; // [sp+60h] [-80h]
+
+    if (!ent->s.weapon)
+        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\g_missile.cpp", 2304, 0, "%s", "ent->s.weapon");
+    WeaponDef = BG_GetWeaponDef(ent->s.weapon);
+    if (!WeaponDef)
+        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\g_missile.cpp", 2306, 0, "%s", "weapDef");
+    v15 = (trace->surfaceFlags >> 20) & 0x1F;
+    BG_EvaluateTrajectoryDelta(pos, velocityTime, &v26);
+    v16 = v28;
+    v17 = v27;
+    v18 = v26;
+    v19 = (float)((float)(v26 * trace->normal[0])
+        + (float)((float)(trace->normal[1] * v27) + (float)(trace->normal[2] * v28)));
+    v20 = (float)((float)((float)(v26 * trace->normal[0])
+        + (float)((float)(trace->normal[1] * v27) + (float)(trace->normal[2] * v28)))
+        * (float)-2.0);
+    pos->trDelta[0] = (float)(trace->normal[0]
+        * (float)((float)((float)(v26 * trace->normal[0])
+            + (float)((float)(trace->normal[1] * v27) + (float)(trace->normal[2] * v28)))
+            * (float)-2.0))
+        + v26;
+    pos->trDelta[1] = (float)(trace->normal[1] * (float)v20) + (float)v17;
+    pos->trDelta[2] = (float)(trace->normal[2] * (float)v20) + (float)v16;
+    if ((COERCE_UNSIGNED_INT(pos->trDelta[0]) & 0x7F800000) == 0x7F800000
+        || (COERCE_UNSIGNED_INT(pos->trDelta[1]) & 0x7F800000) == 0x7F800000
+        || (COERCE_UNSIGNED_INT(pos->trDelta[2]) & 0x7F800000) == 0x7F800000)
+    {
+        MyAssertHandler(
+            "c:\\trees\\cod3\\cod3src\\src\\game\\g_missile.cpp",
+            2315,
+            0,
+            "%s",
+            "!IS_NAN((pos->trDelta)[0]) && !IS_NAN((pos->trDelta)[1]) && !IS_NAN((pos->trDelta)[2])");
+        v16 = v28;
+        v17 = v27;
+        v18 = v26;
+    }
+    if ((ent->s.lerp.eFlags & 0x1000000) == 0)
+        goto LABEL_22;
+    v21 = sqrtf((float)((float)((float)v18 * (float)v18) + (float)((float)((float)v17 * (float)v17) + (float)((float)v16 * (float)v16))));
+    if (v21 > 0.0 && v19 <= 0.0)
+    {
+        v22 = (float)((float)((float)(WeaponDef->perpendicularBounce[v15] - WeaponDef->parallelBounce[v15])
+            * (float)((float)((float)-1.0 / (float)v21) * (float)v19))
+            + WeaponDef->parallelBounce[v15]);
+        pos->trDelta[0] = pos->trDelta[0] * (float)v22;
+        pos->trDelta[1] = pos->trDelta[1] * (float)v22;
+        pos->trDelta[2] = pos->trDelta[2] * (float)v22;
+        if ((COERCE_UNSIGNED_INT(pos->trDelta[0]) & 0x7F800000) == 0x7F800000
+            || (COERCE_UNSIGNED_INT(pos->trDelta[1]) & 0x7F800000) == 0x7F800000
+            || (COERCE_UNSIGNED_INT(pos->trDelta[2]) & 0x7F800000) == 0x7F800000)
+        {
+            MyAssertHandler(
+                "c:\\trees\\cod3\\cod3src\\src\\game\\g_missile.cpp",
+                2327,
+                0,
+                "%s",
+                "!IS_NAN((pos->trDelta)[0]) && !IS_NAN((pos->trDelta)[1]) && !IS_NAN((pos->trDelta)[2])");
+        }
+    }
+    stickiness = WeaponDef->stickiness;
+    if (stickiness == WEAPSTICKINESS_ALL
+        || trace->normal[2] > 0.69999999
+        && (stickiness == WEAPSTICKINESS_GROUND
+            || stickiness == WEAPSTICKINESS_GROUND_WITH_YAW
+            || sqrtf((float)((float)(pos->trDelta[2] * pos->trDelta[2]) + (float)((float)(pos->trDelta[0] * pos->trDelta[0]) + (float)(pos->trDelta[1] * pos->trDelta[1])))) < 20.0))
+    {
+        pos->trBase[0] = *endpos;
+        pos->trBase[1] = endpos[1];
+        pos->trBase[2] = endpos[2];
+        pos->trType = TR_STATIONARY;
+        pos->trTime = 0;
+        pos->trDuration = 0;
+        pos->trDelta[0] = 0.0;
+        pos->trDelta[1] = 0.0;
+        pos->trDelta[2] = 0.0;
+    }
+    else
+    {
+    LABEL_22:
+        v24 = (float)(trace->normal[2] * (float)0.1);
+        v25 = (float)(trace->normal[1] * (float)0.1);
+        if (v24 > 0.0)
+            v24 = 0.0;
+        pos->trBase[0] = *origin + (float)(trace->normal[0] * (float)0.1);
+        pos->trBase[1] = origin[1] + (float)v25;
+        pos->trBase[2] = origin[2] + (float)v24;
+        pos->trTime = time;
+    }
+}
+
+int G_PredictMissile(gentity_s *ent, int duration, float *vLandPos, int allowBounce, int *timeAtRest)
+{
+    trajectory_t *p_pos; // r11
+    trajectory_t *v11; // r10
+    int v12; // ctr
+    WeaponDef *WeaponDef; // r20
+    int time; // r30
+    EntHandle *p_ownerNum; // r24
+    int number; // r11
+    int v17; // r6
+    double fraction; // fp0
+    double v19; // fp12
+    double v20; // fp11
+    double v21; // fp13
+    int v22; // r6
+    int v23; // r6
+    double v25; // fp0
+    double v26; // fp13
+    float v27; // [sp+50h] [-420h]
+    float v28; // [sp+50h] [-420h]
+    float v29; // [sp+50h] [-420h]
+    float v30; // [sp+58h] [-418h] BYREF
+    float v31; // [sp+5Ch] [-414h]
+    float v32; // [sp+60h] [-410h]
+    float v33; // [sp+68h] [-408h] BYREF
+    float v34; // [sp+6Ch] [-404h]
+    float v35; // [sp+70h] [-400h]
+    float v36; // [sp+78h] [-3F8h] BYREF
+    float v37; // [sp+7Ch] [-3F4h]
+    float v38; // [sp+80h] [-3F0h]
+    float v39; // [sp+88h] [-3E8h] BYREF
+    float v40; // [sp+8Ch] [-3E4h]
+    float v41; // [sp+90h] [-3E0h]
+    trace_t v42; // [sp+A0h] [-3D0h] BYREF
+    float v43[4]; // [sp+D0h] [-3A0h] BYREF
+    float v44[4]; // [sp+E0h] [-390h] BYREF
+    trajectory_t v45; // [sp+F0h] [-380h] BYREF
+    _BYTE v46[628]; // [sp+120h] [-350h] BYREF
+
+    p_pos = &ent->s.lerp.pos;
+    v11 = &v45;
+    v12 = 9;
+    do
+    {
+        v11->trType = p_pos->trType;
+        p_pos = (trajectory_t *)((char *)p_pos + 4);
+        v11 = (trajectory_t *)((char *)v11 + 4);
+        --v12;
+    } while (v12);
+    BG_EvaluateTrajectory(&v45, level.time - 50, &v33);
+    memcpy(v46, ent, sizeof(v46));
+    *timeAtRest = ent->nextthink;
+    WeaponDef = BG_GetWeaponDef(ent->s.weapon);
+    if (!WeaponDef)
+        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\g_missile.cpp", 2372, 0, "%s", "weapDef");
+    time = level.time;
+    if (time >= time + duration)
+        goto LABEL_48;
+    p_ownerNum = &ent->r.ownerNum;
+    while (1)
+    {
+        BG_EvaluateTrajectory(&v45, time, &v30);
+        number = p_ownerNum->number;
+        if (p_ownerNum->number && !g_entities[number - 1].r.inuse)
+            MyAssertHandler(
+                "c:\\trees\\cod3\\cod3src\\src\\game\\g_public.h",
+                336,
+                0,
+                "%s\n\t(number - 1) = %i",
+                "(!number || g_entities[number - 1].r.inuse)",
+                number - 1);
+        if (p_ownerNum->number)
+            v17 = ent->r.ownerNum.entnum();
+        else
+            v17 = 2175;
+        G_LocationalTrace(&v42, &v33, &v30, v17, ent->clipmask, bulletPriorityMap);
+        if (v42.startsolid)
+        {
+            v43[0] = v33 - v30;
+            v43[1] = v34 - v31;
+            v42.fraction = 0.0;
+            v43[2] = v35 - v32;
+            Vec3NormalizeTo(v43, v42.normal);
+        }
+        if (v42.startsolid)
+        {
+            if (time != level.time)
+                goto LABEL_46;
+            v33 = v30;
+            v34 = v31;
+            v35 = v32;
+            goto LABEL_36;
+        }
+        if ((v42.surfaceFlags & 0x1F00000) == 0x900000)
+            Missile_PenetrateGlass(&v42, ent, &v33, &v30, WeaponDef->damage, 1);
+        fraction = v42.fraction;
+        v44[0] = 0.5;
+        v44[1] = 0.0;
+        v44[2] = 1.0;
+        v44[3] = 1.0;
+        v19 = (float)((float)((float)(v31 - v34) * v42.fraction) + v34);
+        v37 = (float)((float)(v31 - v34) * v42.fraction) + v34;
+        v20 = (float)((float)((float)(v30 - v33) * v42.fraction) + v33);
+        v36 = (float)((float)(v30 - v33) * v42.fraction) + v33;
+        v21 = (float)((float)((float)(v32 - v35) * v42.fraction) + v35);
+        v38 = (float)((float)(v32 - v35) * v42.fraction) + v35;
+        if (g_debugBullets->current.integer >= 5)
+        {
+            G_DebugLineWithDuration(&v33, &v36, v44, 1, 1000);
+            fraction = v42.fraction;
+            v21 = v38;
+            v19 = v37;
+            v20 = v36;
+        }
+        v33 = v20;
+        v34 = v19;
+        v35 = v21;
+        if (WeaponDef->stickiness == WEAPSTICKINESS_ALL)
+        {
+            if (fraction < 1.0)
+            {
+                v39 = (float)(v42.normal[0] * (float)0.13500001) + (float)v20;
+                v30 = -(float)((float)(v42.normal[0] * (float)1.5) - (float)v20);
+                v40 = (float)(v42.normal[1] * (float)0.13500001) + (float)v19;
+                v31 = -(float)((float)(v42.normal[1] * (float)1.5) - (float)v19);
+                v41 = (float)(v42.normal[2] * (float)0.13500001) + (float)v21;
+                v32 = -(float)((float)(v42.normal[2] * (float)1.5) - (float)v21);
+                if (ent->r.ownerNum.isDefined())
+                    v22 = ent->r.ownerNum.entnum();
+                else
+                    v22 = 2175;
+                G_MissileTrace(&v42, &v39, &v30, v22, ent->clipmask);
+                v36 = (float)((float)(v30 - v39) * v42.fraction) + v39;
+                v37 = (float)((float)(v31 - v40) * v42.fraction) + v40;
+                v38 = (float)((float)(v32 - v41) * v42.fraction) + v41;
+                if (v42.fraction == 1.0)
+                    goto LABEL_36;
+                if (Trace_GetEntityHitId(&v42) == 2174)
+                {
+                    v33 = (float)(v36 - v30) + v36;
+                    v34 = (float)(v37 - v31) + v37;
+                    v35 = (float)(v38 - v32) + v38;
+                }
+                fraction = v42.fraction;
+            }
+        }
+        else if (fraction == 1.0 || fraction < 1.0 && v42.normal[2] > 0.69999999)
+        {
+            v41 = (float)v21 + (float)0.13500001;
+            v39 = v20;
+            v40 = v19;
+            v30 = v20;
+            v31 = v19;
+            v32 = (float)v21 - (float)1.5;
+            if (ent->r.ownerNum.isDefined())
+                v23 = ent->r.ownerNum.entnum();
+            else
+                v23 = 2175;
+            G_MissileTrace(&v42, &v39, &v30, v23, ent->clipmask);
+            fraction = v42.fraction;
+            v37 = (float)((float)(v31 - v40) * v42.fraction) + v40;
+            v36 = (float)((float)(v30 - v39) * v42.fraction) + v39;
+            v38 = (float)((float)(v32 - v41) * v42.fraction) + v41;
+            if (v42.fraction == 1.0)
+                goto LABEL_36;
+            v34 = (float)((float)(v31 - v40) * v42.fraction) + v40;
+            v33 = (float)((float)(v30 - v39) * v42.fraction) + v39;
+            v45.trBase[2] = (float)((float)((float)((float)((float)(v32 - v41) * v42.fraction) + v41) + (float)1.5) - v35)
+                + v45.trBase[2];
+            v35 = (float)((float)((float)(v32 - v41) * v42.fraction) + v41) + (float)1.5;
+        }
+        if (fraction != 1.0)
+        {
+            if ((v42.surfaceFlags & 4) != 0)
+            {
+            LABEL_46:
+                memcpy(ent, v46, sizeof(gentity_s));
+                return 0;
+            }
+            if (!allowBounce)
+                break;
+            if ((ent->s.lerp.eFlags & 0x1000000) == 0)
+                break;
+            PredictBounceMissile(ent, &v45, &v42, time, time - (int)(float)((float)fraction * (float)-50.0) - 50, &v33, &v36);
+            v45.trTime = time;
+            if (v45.trType == TR_STATIONARY)
+                break;
+        }
+    LABEL_36:
+        time += 50;
+        if (time >= level.time + duration)
+            goto LABEL_48;
+    }
+    *timeAtRest = time;
+LABEL_48:
+    v27 = v33;
+    *vLandPos = v33;
+    v25 = v34;
+    v26 = v35;
+    vLandPos[1] = v34;
+    vLandPos[2] = v26;
+    if ((LODWORD(v27) & 0x7F800000) == 0x7F800000
+        || (v28 = v25, (LODWORD(v28) & 0x7F800000) == 0x7F800000)
+        || (v29 = v26, (LODWORD(v29) & 0x7F800000) == 0x7F800000))
+    {
+        MyAssertHandler(
+            "c:\\trees\\cod3\\cod3src\\src\\game\\g_missile.cpp",
+            2476,
+            0,
+            "%s",
+            "!IS_NAN((vLandPos)[0]) && !IS_NAN((vLandPos)[1]) && !IS_NAN((vLandPos)[2])");
+    }
+    memcpy(ent, v46, sizeof(gentity_s));
+    if (allowBounce && (ent->s.lerp.eFlags & 0x1000000) != 0)
+        return ent->nextthink;
+    else
+        return time;
+}

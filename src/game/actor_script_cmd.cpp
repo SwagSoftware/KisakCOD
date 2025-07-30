@@ -905,7 +905,6 @@ int __cdecl MayMove_TraceCheck(actor_s *self, float *vStart, float *vEnd, int al
     gentity_s *ent; // r10
     double v11; // fp12
     int iTraceMask; // r9
-    int v13; // r8
     double v15; // fp1
     double v16; // fp9
     float v17; // [sp+50h] [-C0h] BYREF
@@ -972,7 +971,6 @@ int __cdecl MayMove_TraceCheck(actor_s *self, float *vStart, float *vEnd, int al
             self->Physics.iTraceMask | 0x4004,
             v25,
             v15,
-            v13,
             allowStartSolid))
         {
             return 1;
@@ -1285,7 +1283,12 @@ void __cdecl ActorCmd_IsStanceAllowed(scr_entref_t entref)
 LABEL_14:
     eAllowedStances = v1->eAllowedStances;
     if ((eAllowedStances & v6) != 0)
-        eAllowedStances &= v6;
+    {
+        //eAllowedStances &= v6;
+        int tmp = (int)eAllowedStances;
+        tmp &= v6;
+        eAllowedStances = (ai_stance_e)tmp;
+    }
     Scr_AddInt((eAllowedStances & v3) != 0);
 }
 
@@ -1324,7 +1327,6 @@ void __cdecl ActorCmd_CheckGrenadeThrow(scr_entref_t entref)
     actor_s *v1; // r31
     unsigned int ConstString; // r29
     double Float; // fp31
-    int v4; // r9
     gentity_s *ent; // r11
     bool v6; // r3
     float v7[4]; // [sp+50h] [-50h] BYREF
@@ -1342,7 +1344,7 @@ void __cdecl ActorCmd_CheckGrenadeThrow(scr_entref_t entref)
         v7[0] = v1->ent->r.currentOrigin[0];
         v7[1] = ent->r.currentOrigin[1];
         v7[2] = ent->r.currentOrigin[2];
-        v6 = Actor_Grenade_CheckToss(v1, v7, v8, ConstString, v1->vGrenadeTossPos, v1->vGrenadeTossVel, Float, v4, 0);
+        v6 = Actor_Grenade_CheckToss(v1, v7, v8, ConstString, v1->vGrenadeTossPos, v1->vGrenadeTossVel, Float, 0);
         v1->bGrenadeTossValid = v6;
         if (v6)
         {

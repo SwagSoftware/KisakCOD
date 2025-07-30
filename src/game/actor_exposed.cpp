@@ -347,7 +347,6 @@ void __cdecl Actor_Exposed_FindReacquireDirectPath(actor_s *self, bool ignoreSup
 
 void __cdecl Actor_Exposed_FindReacquireProximatePath(actor_s *self, char ignoreSuppression)
 {
-    bool v4; // r5
     double v5; // fp0
     double v6; // fp13
     double v7; // fp12
@@ -369,7 +368,7 @@ void __cdecl Actor_Exposed_FindReacquireProximatePath(actor_s *self, char ignore
             * (float)0.25);
         if (v8 > (float)(self->fMaxSightDistSqrd * (float)0.0625))
             v8 = (float)(self->fMaxSightDistSqrd * (float)0.0625);
-        Actor_FindPathInGoalWithLOS(self, v9, v8, v4, ignoreSuppression);
+        Actor_FindPathInGoalWithLOS(self, v9, v8, ignoreSuppression);
         Actor_BeginTrimPath(self);
     }
     else
