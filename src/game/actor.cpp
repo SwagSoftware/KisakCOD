@@ -27,6 +27,11 @@
 #include "actor_spawner.h"
 #include "actor_aim.h"
 #include "actor_orientation.h"
+#include "actor_turret.h"
+#include "actor_grenade.h"
+#include "actor_lookat.h"
+#include "actor_corpse.h"
+#include "g_actor_prone.h"
 
 const char *animModeNames[10] =
 {
@@ -1618,9 +1623,15 @@ int __cdecl Actor_InFixedNodeExposedCombat(actor_s *self)
     if ((AnimScriptList *)self->pAnimScriptFunc != &g_scr_data.anim)
         return 0;
 
-    _FP12 = (float)((float)64.0 - self->codeGoal.radius);
-    __asm { fsel      f1, f12, f13, f0# buffer }
-    v7 = Actor_PointNearPoint(self->ent->r.currentOrigin, self->codeGoal.pos, _FP1);
+    // aislop
+    //_FP12 = (float)((float)64.0 - self->codeGoal.radius);
+    //__asm { fsel      f1, f12, f13, f0# buffer }
+    //v7 = Actor_PointNearPoint(self->ent->r.currentOrigin, self->codeGoal.pos, _FP1);
+
+    float distance = 64.0f - self->codeGoal.radius;
+    float clampedDistance = (distance >= 0.0f) ? distance : 0.0f;
+    bool v7 = Actor_PointNearPoint(self->ent->r.currentOrigin, self->codeGoal.pos, clampedDistance);
+
 
     v8 = 1;
     if (!v7)
@@ -1655,25 +1666,26 @@ void __cdecl Actor_ClearPath(actor_s *self)
 
 void __cdecl Actor_GetAnimDeltas(actor_s *self, float *rotation, float *translation)
 {
-    DObj_s *ServerDObj; // r28
+    DObj_s *obj; // r28
 
-    if (!self)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\actor.cpp", 4539, 0, "%s", "self");
-    if (!rotation)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\actor.cpp", 4540, 0, "%s", "rotation");
-    if (!translation)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\actor.cpp", 4541, 0, "%s", "translation");
-    ServerDObj = Com_GetServerDObj(self->ent->s.number);
-    if (!ServerDObj)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\actor.cpp", 4544, 0, "%s", "obj");
-    XAnimCalcDelta(ServerDObj, 0, rotation, translation, self->bUseGoalWeight);
+    iassert(self);
+    iassert(rotation);
+    iassert(translation);
+
+    obj = Com_GetServerDObj(self->ent->s.number);
+
+    iassert(obj);
+
+    XAnimCalcDelta(obj, 0, rotation, translation, self->bUseGoalWeight);
+
     if (ai_debugAnimDeltas->current.integer == self->ent->s.number)
         Com_Printf(
             18,
-            (const char *)(const char *)HIDWORD(COERCE_UNSIGNED_INT64(*translation)),
-            (unsigned int)COERCE_UNSIGNED_INT64(*translation),
-            (unsigned int)COERCE_UNSIGNED_INT64(translation[1]),
-            (unsigned int)COERCE_UNSIGNED_INT64(translation[2]));
+            "deltas = %g %g %g\n",
+            translation[0],
+            translation[1],
+            translation[2]
+        );
 }
 
 int __cdecl Actor_IsMovingToMeleeAttack(actor_s *self)
@@ -2737,7 +2749,8 @@ bool __cdecl Actor_IsInsideArc(
 {
     iassert(self);
 
-    return (_cntlzw(IsPosInsideArc(self->ent->r.currentOrigin, 15.0, origin, radius, angle0, angle1, halfHeight)) & 0x20) == 0;
+    //return (_cntlzw(IsPosInsideArc(self->ent->r.currentOrigin, 15.0, origin, radius, angle0, angle1, halfHeight)) & 0x20) == 0;
+    return IsPosInsideArc(self->ent->r.currentOrigin, 15.0, origin, radius, angle0, angle1, halfHeight);
 }
 
 void __cdecl SentientInfo_Copy(actor_s *pTo, const actor_s *pFrom, int index)
@@ -2836,24 +2849,18 @@ void __cdecl Actor_Free(actor_s *actor)
     ent = actor->ent;
     Actor_ClearPath(actor);
     Actor_StopUseTurret(actor);
-    if (Scr_IsSystemActive(1u))
+    if (Scr_IsSystemActive())
         Actor_KillAnimScript(actor);
-    if (EntHandle::isDefined(&actor->pGrenade))
+    if (actor->pGrenade.isDefined())
     {
-        if (EntHandle::ent(&actor->pGrenade)->activator == ent)
+        if (actor->pGrenade.ent()->activator == ent)
         {
-            v4 = EntHandle::ent(&actor->pGrenade);
+            v4 = actor->pGrenade.ent();
             if (Actor_Grenade_InActorHands(v4))
             {
-                v5 = EntHandle::ent(&actor->pGrenade);
+                v5 = actor->pGrenade.ent();
                 G_FreeEntity(v5);
-                if (EntHandle::isDefined(&actor->pGrenade))
-                    MyAssertHandler(
-                        "c:\\trees\\cod3\\cod3src\\src\\game\\actor.cpp",
-                        430,
-                        0,
-                        "%s",
-                        "!actor->pGrenade.isDefined()");
+                iassert(!actor->pGrenade.isDefined());
             }
         }
     }
@@ -3036,7 +3043,7 @@ void __cdecl Actor_FreeExpendable()
                 } while (v11);
                 if (!v1)
                     LABEL_46:
-                Com_Error(ERR_DROP, byte_82021FA8);
+                Com_Error(ERR_DROP, "Tried to force spawning of an AI when all AI slots are used by undeletable AI");
             }
         }
     }
@@ -3452,6 +3459,17 @@ actor_think_result_t __cdecl Actor_CallThink(actor_s *self)
     return v4;
 }
 
+int endTime;
+int direction;
+static const float colorTeam[5][4] =
+{
+  { 1.0f, 1.0f, 1.0f, 1.0f },
+  { 1.0f, 0.4f, 0.4f, 1.0f },
+  { 0.5f, 0.5f, 1.0f, 1.0f },
+  { 0.0f, 1.0f, 0.0f, 1.0f },
+  { 0.5f, 0.5f, 0.5f, 1.0f }
+};
+
 void __cdecl Actor_EntInfo(gentity_s *self, float *source)
 {
     unsigned __int8 v4; // r29
@@ -3728,9 +3746,9 @@ void __cdecl Actor_EntInfo(gentity_s *self, float *source)
         if (actor->pGrenade.isDefined())
         {
             v31 = actor->pGrenade.ent();
-            G_DebugLine(&v104, (const float *)&v31->352, colorOrange, 1);
+            G_DebugLine(&v104, v32->missile.predictLandPos, colorOrange, 1);
             v32 = actor->pGrenade.ent();
-            G_DebugCircle((const float *)&v32->352, 8.0, v33, (int)colorOrange, 0, 1);
+            G_DebugCircle(v32->missile.predictLandPos, 8.0, colorOrange, 0, 1, 1);// KISAKTODO: argcheck
             v34 = actor->pGrenade.ent();
             WeaponDef = BG_GetWeaponDef(v34->s.weapon);
             if (!WeaponDef)
@@ -3739,7 +3757,7 @@ void __cdecl Actor_EntInfo(gentity_s *self, float *source)
             v124 = v36;
             v37 = (float)v36;
             v38 = actor->pGrenade.ent();
-            G_DebugCircle((const float *)&v38->352, v37, v39, (int)colorOrange, 0, 1);
+            G_DebugCircle(v38->missile.predictLandPos, v37, colorOrange, 0, 1, 1); // KISAKTODO: argcheck
         }
     }
     else if (!v5)
@@ -3915,7 +3933,8 @@ LABEL_87:
         v65 = (float)((float)v21 * (float)0.60000002);
         va("%i : %s", self->s.number, v69);
         G_AddDebugString(&v104, v57, v65, v70);
-        LOBYTE(v68) = 30;
+        //LOBYTE(v68) = 30;
+        v68 = 30;
     }
     else
     {
@@ -3989,12 +4008,12 @@ LABEL_87:
                 hitCount = actor->hitCount;
                 v80 = "HIT";
             }
-            va(
-                (const char *)HIDWORD(v71),
-                LODWORD(v71),
-                (unsigned int)COERCE_UNSIGNED_INT64(actor->debugLastAccuracy),
-                v80,
-                hitCount);
+            //va(
+            //    range: %.2f ac: %.2f %s %u
+            //    LODWORD(v71),
+            //    (unsigned int)COERCE_UNSIGNED_INT64(actor->debugLastAccuracy),
+            //    v80,
+            //    hitCount);
             G_AddDebugString(&v104, colorWhite, v65, v81);
             v106 = v106 - (float)((float)v21 * (float)7.0);
             va("talkto: %d", actor->talkToSpecies);
@@ -4125,9 +4144,9 @@ LABEL_87:
         if (Actor_IsSuppressed(actor) || actor->suppressionMeter > 0.0)
         {
             v106 = -(float)((float)((float)v21 * (float)7.0) - v106);
-            va(
-                (const char *)(const char *)HIDWORD(COERCE_UNSIGNED_INT64(actor->suppressionMeter)),
-                (unsigned int)COERCE_UNSIGNED_INT64(actor->suppressionMeter));
+            //va(
+            //    (const char *)(const char *)HIDWORD(COERCE_UNSIGNED_INT64(actor->suppressionMeter)),
+            //    (unsigned int)COERCE_UNSIGNED_INT64(actor->suppressionMeter));
             v61 = v65;
             v60 = colorRed;
         }
@@ -4651,40 +4670,57 @@ void __cdecl Actor_FindPathInGoalWithLOS(
     actor_s *self,
     const float *vGoalPos,
     double fWithinDistSqrd,
-    bool ignoreSuppression,
-    char a5)
+    bool ignoreSuppression)
 {
     int v9; // r8
     int v10; // [sp+8h] [-C8h]
-    float v11[4]; // [sp+60h] [-70h] BYREF
-    float v12[5][2]; // [sp+70h] [-60h] BYREF
+    float fDists[4]; // [sp+60h] [-70h] BYREF
+    float vNormals[5][2]; // [sp+70h] [-60h] BYREF
 
-    if (!self)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\actor.cpp", 4394, 0, "%s", "self");
-    if (!vGoalPos)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\actor.cpp", 4395, 0, "%s", "vGoalPos");
+    iassert(self);
+    iassert(vGoalPos);
+
     Actor_ClearPath(self);
-    if (a5 || !Actor_GetSuppressionPlanes(self, v12, v11))
+
+    if (ignoreSuppression)
         Path_FindPathInCylinderWithLOS(
             &self->Path,
             self->sentient->eTeam,
             self->ent->r.currentOrigin,
-            vGoalPos,
+            (float*)vGoalPos,
             &self->codeGoal,
             fWithinDistSqrd,
-            v9);
+            false);
     else
-        Path_FindPathInCylinderWithLOSNotCrossPlanes(
-            &self->Path,
-            self->sentient->eTeam,
-            self->ent->r.currentOrigin,
-            vGoalPos,
-            &self->codeGoal,
-            fWithinDistSqrd,
-            (float (*)[2])self->sentient,
-            v12[0],
-            (int)v11,
-            v10);
+    {
+        int iPlaneCount = Actor_GetSuppressionPlanes(self, vNormals, fDists);
+        if (!iPlaneCount)
+        {
+            Path_FindPathInCylinderWithLOS(
+                &self->Path,
+                self->sentient->eTeam,
+                self->ent->r.currentOrigin,
+                (float *)vGoalPos,
+                &self->codeGoal,
+                fWithinDistSqrd,
+                false);
+            return;
+        }
+        else
+        {
+            Path_FindPathInCylinderWithLOSNotCrossPlanes(
+                &self->Path,
+                self->sentient->eTeam,
+                self->ent->r.currentOrigin,
+                (float *)vGoalPos,
+                &self->codeGoal,
+                fWithinDistSqrd,
+                (float(*)[2])vNormals[0],
+                fDists,
+                iPlaneCount,
+                true); // KISAKTODO: idk if 'true'
+        }
+    }
 }
 
 void __cdecl Actor_FindPathAway(
@@ -4695,12 +4731,11 @@ void __cdecl Actor_FindPathAway(
 {
     int v7; // r7
 
-    if (!self)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\actor.cpp", 4422, 0, "%s", "self");
-    if (!vBadPos)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\actor.cpp", 4423, 0, "%s", "vBadPos");
+    iassert(self);
+    iassert(vBadPos);
+
     Actor_ClearPath(self);
-    Path_FindPathAway(&self->Path, self->sentient->eTeam, self->ent->r.currentOrigin, vBadPos, fMinSafeDist, v7);
+    Path_FindPathAway(&self->Path, self->sentient->eTeam, self->ent->r.currentOrigin, (float*)vBadPos, fMinSafeDist, v7);
 }
 
 void __cdecl Actor_FindPathAwayNotCrossPlanes(
@@ -4710,42 +4745,42 @@ void __cdecl Actor_FindPathAwayNotCrossPlanes(
     float *normal,
     double dist,
     float *bSuppressable,
-    int bAllowNegotiationLinks,
-    int a8)
+    int bAllowNegotiationLinks)
 {
     int SuppressionPlanes; // r10
     double v15; // fp13
     float *v16; // r11
-    float v17[8]; // [sp+60h] [-A0h] BYREF
-    float v18[6][2]; // [sp+80h] [-80h] BYREF
+    float vDists[8]; // [sp+60h] [-A0h] BYREF
+    float vNormals[6][2]; // [sp+80h] [-80h] BYREF
 
-    if (!self)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\actor.cpp", 4442, 0, "%s", "self");
-    if (!vBadPos)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\actor.cpp", 4443, 0, "%s", "vBadPos");
+    iassert(self);
+    iassert(vBadPos);
+
     Actor_ClearPath(self);
-    if (a8)
-        SuppressionPlanes = Actor_GetSuppressionPlanes(self, v18, v17);
+
+    if (bAllowNegotiationLinks)
+        SuppressionPlanes = Actor_GetSuppressionPlanes(self, vNormals, vDists);
     else
         SuppressionPlanes = 0;
+
     if (dist != 0.0)
     {
         v15 = bSuppressable[1];
-        v16 = v18[SuppressionPlanes];
+        v16 = vNormals[SuppressionPlanes];
         *v16 = *bSuppressable;
-        v17[SuppressionPlanes++] = dist;
+        vDists[SuppressionPlanes++] = dist;
         v16[1] = v15;
     }
     Path_FindPathAwayNotCrossPlanes(
         &self->Path,
         self->sentient->eTeam,
         self->ent->r.currentOrigin,
-        vBadPos,
+        (float*)vBadPos,
         fMinSafeDist,
-        (float (*)[2])self->sentient,
-        v18[0],
-        (int)v17,
-        SuppressionPlanes);
+        (float(*)[2])vNormals[0],
+        vDists,
+        SuppressionPlanes,
+        bAllowNegotiationLinks);
 }
 
 void __cdecl Actor_BadPlacesChanged()
@@ -4975,22 +5010,14 @@ void __cdecl Actor_UpdateGoalPos(actor_s *self)
     v5 = self->codeGoal.pos[2];
     if (!self->useEnemyGoal)
     {
-        if (EntHandle::isDefined(&self->scriptGoalEnt))
+        if (self->scriptGoalEnt.isDefined())
         {
-            if (!EntHandle::ent(&self->scriptGoalEnt)->r.inuse)
-                MyAssertHandler(
-                    "c:\\trees\\cod3\\cod3src\\src\\game\\actor.cpp",
-                    5622,
-                    0,
-                    "%s",
-                    "self->scriptGoalEnt.ent()->r.inuse");
-            if (self->scriptGoal.node)
-                MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\actor.cpp", 5624, 0, "%s", "!self->scriptGoal.node");
-            if (self->scriptGoal.volume)
-                MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\actor.cpp", 5625, 0, "%s", "!self->scriptGoal.volume");
+            iassert(self->scriptGoalEnt.ent()->r.inuse);
+            iassert(!self->scriptGoal.node);
+            iassert(!self->scriptGoal.volume);
             self->codeGoal.node = 0;
             self->codeGoal.volume = 0;
-            sentient = EntHandle::ent(&self->scriptGoalEnt)->sentient;
+            sentient = self->scriptGoalEnt.ent()->sentient;
             if (sentient
                 && sentient->eTeam != Sentient_EnemyTeam(self->sentient->eTeam)
                 && self->iFollowMin <= self->iFollowMax)
@@ -5016,7 +5043,7 @@ void __cdecl Actor_UpdateGoalPos(actor_s *self)
                 Actor_SetGoalHeight(&self->codeGoal, self->scriptGoal.height);
                 goto LABEL_25;
             }
-            v13 = EntHandle::ent(&self->scriptGoalEnt);
+            v13 = self->scriptGoalEnt.ent();
             p_codeGoal->pos[0] = v13->r.currentOrigin[0];
             self->codeGoal.pos[1] = v13->r.currentOrigin[1];
             self->codeGoal.pos[2] = v13->r.currentOrigin[2];
@@ -5591,7 +5618,8 @@ int __cdecl Actor_PhysicsAndDodge(actor_s *self)
         }
         if (level.gentities[iHitEntnum].sentient)
         {
-            LOWORD(v24) = iHitEntnum;
+            //LOWORD(v24) = iHitEntnum;
+            v24 = iHitEntnum;
         }
         else
         {
@@ -5766,7 +5794,7 @@ void __cdecl Actor_DoMove(actor_s *self)
     if (eAnimMode == AI_ANIM_MOVE_CODE
         && self->moveMode
         && Actor_HasPath(self)
-        && !EntHandle::isDefined(&self->pCloseEnt))
+        && !self->pCloseEnt.isDefined())
     {
     try_path:
         if (!Actor_PhysicsAndDodge(self)
@@ -6245,7 +6273,8 @@ int __cdecl Actor_CheckStop(actor_s *self, bool canUseEnemyGoal, pathnode_t *nod
     Actor_UpdateGoalPos(self);
     pClaimedNode = self->sentient->pClaimedNode;
     if (pClaimedNode && (unsigned __int8)Actor_PointAtGoal(pClaimedNode->constant.vOrigin, &self->codeGoal))
-        return (_cntlzw((char *)self->sentient->pClaimedNode - (char *)node) & 0x20) == 0;
+        return ((char *)self->sentient->pClaimedNode - (char *)node) != 0;
+        //return (_cntlzw((char *)self->sentient->pClaimedNode - (char *)node) & 0x20) == 0;
     if (!node)
         return 1;
     v18 = Actor_PointAtGoal(node->constant.vOrigin, &self->codeGoal);

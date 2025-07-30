@@ -40,19 +40,19 @@ void __cdecl TRACK_actor_aim()
     track_static_alloc_internal(g_accuGraphBuf, 0x10000, "g_accuGraphBuf", 0);
 }
 
-void __cdecl Actor_DrawDebugAccuracy(const float *pos, double scale, double rowHeight, int a4, const char *a5)
+void __cdecl Actor_DrawDebugAccuracy(const float *pos, double scale, double rowHeight)
 {
     const float *v8; // r30
     char *v9; // r31
 
-    if (!pos)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\actor_aim.cpp", 88, 0, "%s", "pos");
+    iassert(pos);
+
     v8 = debugAccuracyColors[0];
     v9 = debugAccuracyStrings[0];
 
     for (int i = 0; i < 8; i++)
     {
-        G_AddDebugString(pos, debugAccuracyColors[i], scale, a5);
+        G_AddDebugString(pos, debugAccuracyColors[i], scale, debugAccuracyStrings[i]);
         *((float *)pos + 2) = pos[2] - (float)rowHeight;
     }
     //do

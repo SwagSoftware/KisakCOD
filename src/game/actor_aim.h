@@ -27,7 +27,7 @@ struct DevGraph;
 
 
 void __cdecl TRACK_actor_aim();
-void __cdecl Actor_DrawDebugAccuracy(const float *pos, double scale, double rowHeight, int a4, const char *a5);
+void __cdecl Actor_DrawDebugAccuracy(const float *pos, double scale, double rowHeight);
 void __cdecl Actor_DebugAccuracyMsg(
     unsigned int msgIndex,
     const char *msg,

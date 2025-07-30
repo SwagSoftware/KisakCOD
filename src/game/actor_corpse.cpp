@@ -304,7 +304,7 @@ void __cdecl G_PruneLoadedCorpses()
     _BYTE v11[24]; // [sp+50h] [-90h] BYREF
     char v12; // [sp+68h] [-78h] BYREF
 
-    v0 = v11;
+    v0 = (_QWORD*)v11;
     v1 = 8;
     do
     {
@@ -313,7 +313,7 @@ void __cdecl G_PruneLoadedCorpses()
     } while (v1);
     v2 = 0;
     v3 = 0;
-    v4 = v11;
+    v4 = (unsigned int*)v11;
     p_entnum = &g_scr_data.actorCorpseInfo[0].entnum;
     do
     {
@@ -531,10 +531,10 @@ float __cdecl Actor_SetBodyPlantAngle(
 }
 
 void __cdecl Actor_GetBodyPlantAngles(
-    float *iEntNum,
+    int iEntNum,
     int iClipMask,
     float *vOrigin,
-    double fYaw,
+    float fYaw,
     float *pfPitch,
     float *pfRoll,
     float *pfHeight)
@@ -550,7 +550,7 @@ void __cdecl Actor_GetBodyPlantAngles(
     float v23; // [sp+60h] [-80h] BYREF
     float v24; // [sp+64h] [-7Ch]
     float v25; // [sp+68h] [-78h]
-    float v26[4]; // [sp+70h] [-70h] BYREF
+    float right[4]; // [sp+70h] [-70h] BYREF
     float v27[4]; // [sp+80h] [-60h] BYREF
 
     iassert(pfPitch);
@@ -562,8 +562,8 @@ void __cdecl Actor_GetBodyPlantAngles(
     v22 = (float)v15 + (float)30.0;
     v24 = v21;
     v25 = (float)v15 - (float)30.0;
-    YawVectors(fYaw, iEntNum, v26);
-    v16 = Actor_SetBodyPlantAngle((int)iEntNum, iClipMask, vOrigin, vOrigin, v26, pfPitch);
+    YawVectors(fYaw, NULL, right); // KISAKTODO: "right" might not be right
+    v16 = Actor_SetBodyPlantAngle((int)iEntNum, iClipMask, vOrigin, vOrigin, right, pfPitch);
     if (pfHeight)
     {
         if (fabsf(*pfPitch) >= 30.0)
@@ -613,81 +613,65 @@ void __cdecl Actor_OrientCorpseToGround(gentity_s *self, int bLerp)
 {
     int eType; // r11
     actor_prone_info_s *p_proneInfo; // r30
-    double yaw; // fp1
-    double pitch; // fp1
-    float *entNum; // r3
+    double currentYaw; // fp1
+    float pitch; // fp1
+    int entNum; // r3
     float *origin; // r5
     unsigned int clipMask; // r4
-    double v12; // fp29
-    double v15; // fp0
-    double v16; // fp29
-    double fWaistPitch; // fp2
-    double v18; // fp1
-    double v21; // fp13
-    double fBodyHeight; // fp0
-    double v23; // fp11
-    float v26; // [sp+50h] [-50h] BYREF
-    float v27; // [sp+54h] [-4Ch] BYREF
-    float v28[4]; // [sp+58h] [-48h] BYREF
+    float pitch; // [sp+50h] [-50h] BYREF
+    float roll; // [sp+54h] [-4Ch] BYREF
+    float height; //v28
 
     eType = self->s.eType;
-    if (eType != 16 && eType != 14)
-        MyAssertHandler(
-            "c:\\trees\\cod3\\cod3src\\src\\game\\actor_corpse.cpp",
-            472,
-            0,
-            "%s",
-            "(self->s.eType == ET_ACTOR_CORPSE) || (self->s.eType == ET_ACTOR)");
-    if (self->s.eType == 16)
+
+    iassert((self->s.eType == ET_ACTOR_CORPSE) || (self->s.eType == ET_ACTOR));
+
+    if (self->s.eType == ET_ACTOR_CORPSE)
         p_proneInfo = &g_scr_data.actorCorpseInfo[G_GetActorCorpseIndex(self)].proneInfo;
     else
         p_proneInfo = &self->actor->ProneInfo;
+
     if (p_proneInfo->bCorpseOrientation)
     {
-        yaw = self->r.currentAngles[YAW];
-        entNum = (float *)self->s.number;
+        currentYaw = self->r.currentAngles[YAW];
+        entNum = self->s.number;
         origin = self->r.currentOrigin;
         clipMask = self->clipmask & 0xFDFF3FFF;
         if (bLerp)
         {
-            Actor_GetBodyPlantAngles(entNum, clipMask, origin, yaw, a4, &v26, &v27, v28);
-            v12 = v26;
-            _FP1 = AngleSubtract(v26, p_proneInfo->fTorsoPitch);
-            if (I_fabs(_FP1) <= 6.0)
+            Actor_GetBodyPlantAngles(entNum, clipMask, origin, currentYaw, &pitch, &roll, &height);
+
+            float pitchDiff = AngleSubtract(pitch, p_proneInfo->fTorsoPitch);
+            if (I_fabs(pitchDiff) <= 6.0f)
             {
-                v15 = v12;
+                p_proneInfo->fTorsoPitch = pitch;
             }
             else
             {
-                __asm { fsel      f13, f1, f31, f30 }
-                v15 = (float)((float)((float)_FP13 * (float)6.0) + p_proneInfo->fTorsoPitch);
+                float sign = (pitchDiff >= 0.0f) ? 1.0f : -1.0f;
+                p_proneInfo->fTorsoPitch += (pitchDiff * 6.0f * sign);
             }
-            v16 = v27;
-            fWaistPitch = p_proneInfo->fWaistPitch;
-            v18 = v27;
-            p_proneInfo->fTorsoPitch = v15;
-            _FP1 = AngleSubtract(v18, fWaistPitch);
-            if (I_fabs(_FP1) <= 6.0)
+
+            float waistPitchDiff = AngleSubtract(roll, p_proneInfo->fWaistPitch);
+            if (I_fabs(waistPitchDiff) <= 6.0)
             {
-                v21 = v16;
+                p_proneInfo->fWaistPitch = roll;
             }
             else
             {
-                __asm { fsel      f13, f1, f31, f30 }
-                v21 = (float)((float)((float)_FP13 * 6.0) + p_proneInfo->fWaistPitch);
+                float sign = (waistPitchDiff >= 0.0f) ? 1.0f : -1.0f;
+                p_proneInfo->fWaistPitch += (waistPitchDiff * 6.0f);
             }
-            fBodyHeight = p_proneInfo->fBodyHeight;
-            v23 = v28[0];
-            p_proneInfo->fWaistPitch = v21;
-            _FP13 = (float)((float)v23 - (float)fBodyHeight);
-            if (I_fabs(_FP13) <= 0.60000002)
+
+            float heightDiff = height - p_proneInfo->fBodyHeight;
+            if (I_fabs(heightDiff) <= 0.6f)
             {
-                p_proneInfo->fBodyHeight = v23;
+                p_proneInfo->fBodyHeight = height;
             }
             else
             {
-                __asm { fsel      f13, f13, f31, f30 }
-                p_proneInfo->fBodyHeight = (float)((float)_FP13 * 0.60000002) + (float)fBodyHeight;
+                float sign = (heightDiff >= 0.0f) ? 1.0f : -1.0f;
+                p_proneInfo->fBodyHeight += (heightDiff * 6.0f);
             }
         }
         else
@@ -696,8 +680,7 @@ void __cdecl Actor_OrientCorpseToGround(gentity_s *self, int bLerp)
                 entNum,
                 clipMask,
                 origin,
-                yaw,
-                a4,
+                currentYaw,
                 &p_proneInfo->fTorsoPitch,
                 &p_proneInfo->fWaistPitch,
                 &p_proneInfo->fBodyHeight);
@@ -708,64 +691,57 @@ void __cdecl Actor_OrientCorpseToGround(gentity_s *self, int bLerp)
 void __cdecl Actor_OrientPitchToGround(gentity_s *self, int bLerp)
 {
     actor_prone_info_s *p_ProneInfo; // r30
-    double v7; // fp1
-    float *number; // r3
-    unsigned int v9; // r4
+    float yaw; // fp1
+    int number; // r3
+    unsigned int clipMask; // r4
     float *currentOrigin; // r5
-    double v11; // fp31
-    double v14; // fp13
-    double fBodyHeight; // fp0
-    double v16; // fp9
-    float v19; // [sp+50h] [-30h] BYREF
-    float v20; // [sp+54h] [-2Ch] BYREF
+    float pitch; // [sp+50h] [-30h] BYREF
+    float height; // [sp+54h] [-2Ch] BYREF
 
     iassert(self->s.eType == ET_ACTOR);
 
     p_ProneInfo = &self->actor->ProneInfo;
     if (self->actor->ProneInfo.orientPitch)
     {
-        v7 = self->r.currentAngles[1];
-        number = (float *)self->s.number;
-        v9 = self->clipmask & 0xFDFF3FFF;
+        yaw = self->r.currentAngles[YAW];
+        number = self->s.number;
+        clipMask = self->clipmask & 0xFDFF3FFF;
         currentOrigin = self->r.currentOrigin;
         if (bLerp)
         {
-            Actor_GetBodyPlantAngles(number, v9, currentOrigin, v7, a4, &v19, 0, &v20);
-            v11 = v19;
-            _FP1 = AngleSubtract(v19, p_ProneInfo->fTorsoPitch);
-            if (I_fabs(_FP1) <= 6.0)
+            Actor_GetBodyPlantAngles(number, clipMask, currentOrigin, yaw, &pitch, NULL, &height);
+
+            float diff = AngleSubtract(pitch, p_ProneInfo->fTorsoPitch);
+            if (I_fabs(diff) <= 6.0)
             {
-                v14 = v11;
+                p_ProneInfo->fTorsoPitch = pitch;
             }
             else
             {
-                __asm { fsel      f13, f1, f11, f10 }
-                v14 = (float)((float)((float)_FP13 * (float)6.0) + p_ProneInfo->fTorsoPitch);
+                float sign = (diff >= 0.0f) ? 1.0f : -1.0f;
+                p_ProneInfo->fTorsoPitch += (diff * 6.0f * sign);
             }
-            fBodyHeight = p_ProneInfo->fBodyHeight;
-            v16 = v20;
-            p_ProneInfo->fTorsoPitch = v14;
-            _FP13 = (float)((float)v16 - (float)fBodyHeight);
-            if (I_fabs(_FP13) <= 0.60000002)
+
+            float delta = height - p_ProneInfo->fBodyHeight;
+            if (fabsf(delta) <= 0.6f)
             {
-                p_ProneInfo->fBodyHeight = v16;
+                p_ProneInfo->fBodyHeight = height;
             }
             else
             {
-                __asm { fsel      f13, f13, f11, f10 }
-                p_ProneInfo->fBodyHeight = (float)((float)_FP13 * 0.60000002) + (float)fBodyHeight;
+                float sign = (delta >= 0.0f) ? 1.0f : -1.0f;
+                p_ProneInfo->fBodyHeight += (delta * 0.6f * sign);
             }
         }
         else
         {
             Actor_GetBodyPlantAngles(
                 number,
-                v9,
+                clipMask,
                 currentOrigin,
-                v7,
-                a4,
+                yaw,
                 &self->actor->ProneInfo.fTorsoPitch,
-                0,
+                NULL,
                 &self->actor->ProneInfo.fBodyHeight);
         }
     }

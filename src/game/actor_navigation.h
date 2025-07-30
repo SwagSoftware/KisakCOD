@@ -84,8 +84,8 @@ bool __cdecl Path_HasNegotiationNode(const path_t *path);
 unsigned int __cdecl Path_AllowsObstacleNegotiation(const path_t *pPath);
 void __cdecl Path_GetObstacleNegotiationScript(const path_t *pPath, scr_animscript_t *animscript);
 int __cdecl Path_NeedsReevaluation(const path_t *pPath);
-int __cdecl Path_EncroachesPoint2D(path_t *pPath, const float *vStart, const float *vPoint, double fMinDistSqrd);
-int __cdecl Path_DistanceGreaterThan(path_t *pPath, double fDist);
+int __cdecl Path_EncroachesPoint2D(path_t *pPath, const float *vStart, const float *vPoint, float fMinDistSqrd);
+int __cdecl Path_DistanceGreaterThan(path_t *pPath, float fDist);
 void __cdecl Path_ReduceLookaheadAmount(path_t *pPath, double maxLookaheadAmountIfReduce);
 bool __cdecl Path_FailedLookahead(path_t *pPath);
 void __cdecl Path_IncreaseLookaheadAmount(path_t *pPath);
@@ -123,14 +123,14 @@ int __cdecl Path_FindPathFromTo(
     const float *vStartPos,
     pathnode_t *pNodeTo,
     const float *vGoalPos,
-    int bAllowNegotiationLinks);
+    bool bAllowNegotiationLinks);
 void __cdecl Path_TrimLastNodes(path_t *pPath, const int iNodeCount, bool bMaintainGoalPos);
 int __cdecl Path_ClipToGoal(path_t *pPath, const actor_goal_s *goal);
 int __cdecl Path_TrimToSeePoint(
     path_t *pPath,
     path_trim_t *pTrim,
     actor_s *pActor,
-    double fMaxDistSqrd,
+    float fMaxDistSqrd,
     int iIgnoreEntityNum,
     const float *vPoint);
 PredictionTraceResult __cdecl Path_PredictionTraceCheckForEntities(
@@ -163,20 +163,20 @@ int __cdecl Path_FindPath(
     team_t eTeam,
     const float *vStartPos,
     float *vGoalPos,
-    int bAllowNegotiationLinks);
+    bool bAllowNegotiationLinks);
 pathnode_t *__cdecl Path_FindPathFrom(
     path_t *pPath,
     team_t eTeam,
     pathnode_t *pNodeFrom,
     float *vStartPos,
     const float *vGoalPos,
-    int bAllowNegotiationLinks);
+    bool bAllowNegotiationLinks);
 void __cdecl Path_UpdateLookahead(
     path_t *pPath,
     float *vStartPos,
-    int bReduceLookaheadAmount,
-    int bTrimAmount,
-    int bAllowBacktrack);
+    bool bReduceLookaheadAmount,
+    bool bTrimAmount,
+    bool bAllowBacktrack);
 void __cdecl Path_SetLookaheadToStart(path_t *pPath, float *vStartPos, int bTrimAmount);
 void __cdecl Path_TransferLookahead(path_t *pPath, float *vStartPos);
 int __cdecl Path_GeneratePath(
@@ -186,8 +186,8 @@ int __cdecl Path_GeneratePath(
     float *vGoalPos,
     pathnode_t *pNodeFrom,
     pathnode_t *pNodeTo,
-    int bIncludeGoalPos,
-    int bAllowNegotiationLinks);
+    bool bIncludeGoalPos,
+    bool bAllowNegotiationLinks);
 void __cdecl Path_UpdateLookahead_NonCodeMove(path_t *pPath, const float *vPrevPos, float *vStartPos);
 int __cdecl Path_AttemptDodge(
     path_t *pPath,
@@ -204,7 +204,7 @@ pathnode_t *__cdecl Path_FindCloseNode(
     team_t eTeam,
     pathnode_t *pNodeFrom,
     const float *vGoalPos,
-    int bAllowNegotiationLinks);
+    bool bAllowNegotiationLinks);
 int __cdecl Path_FindPathFromToWithWidth(
     path_t *pPath,
     team_t eTeam,
@@ -212,7 +212,7 @@ int __cdecl Path_FindPathFromToWithWidth(
     const float *vStartPos,
     pathnode_t *pNodeTo,
     const float *vGoalPos,
-    int bAllowNegotiationLinks,
+    bool bAllowNegotiationLinks,
     double width,
     float *perp);
 int __cdecl Path_FindPathFromToNotCrossPlanes(
@@ -225,46 +225,45 @@ int __cdecl Path_FindPathFromToNotCrossPlanes(
     float (*vNormal)[2],
     float *fDist,
     int iPlaneCount,
-    int bAllowNegotiationLinks);
+    bool bAllowNegotiationLinks);
 int __cdecl Path_FindPathFromAway(
     path_t *pPath,
     team_t eTeam,
     pathnode_t *pNodeFrom,
     float *vStartPos,
     float *vAwayFromPos,
-    double fDistAway,
-    int bAllowNegotiationLinks,
-    int a8);
+    float fDistAway,
+    bool bAllowNegotiationLinks);
 int __cdecl Path_FindPathFromAwayNotCrossPlanes(
     path_t *pPath,
     team_t eTeam,
     pathnode_t *pNodeFrom,
     float *vStartPos,
     float *vAwayFromPos,
-    double fDistAway,
+    float fDistAway,
     float (*vNormal)[2],
     float *fDist,
     int iPlaneCount,
-    int bAllowNegotiationLinks);
+    bool bAllowNegotiationLinks);
 int __cdecl Path_FindPathInCylinderWithLOS(
     path_t *pPath,
     team_t eTeam,
     const float *vStartPos,
     float *vGoalPos,
     const actor_goal_s *goal,
-    double fWithinDistSqrd,
-    int bAllowNegotiationLinks);
+    float fWithinDistSqrd,
+    bool bAllowNegotiationLinks);
 int __cdecl Path_FindPathInCylinderWithLOSNotCrossPlanes(
     path_t *pPath,
     team_t eTeam,
     const float *vStartPos,
     float *vGoalPos,
     const actor_goal_s *goal,
-    double fWithinDistSqrd,
+    float fWithinDistSqrd,
     float (*vNormal)[2],
     float *fDist,
-    float *iPlaneCount,
-    int bAllowNegotiationLinks);
+    int iPlaneCount,
+    bool bAllowNegotiationLinks);
 pathnode_t *__cdecl Path_FindPathFromInCylinder(
     path_t *pPath,
     team_t eTeam,
@@ -272,9 +271,9 @@ pathnode_t *__cdecl Path_FindPathFromInCylinder(
     float *vStartPos,
     const float *vGoalPos,
     float *vOrigin,
-    double fRadiusSqrd,
-    double fHalfHeightSqrd,
-    int bAllowNegotiationLinks);
+    float fRadiusSqrd,
+    float fHalfHeightSqrd,
+    bool bAllowNegotiationLinks);
 int __cdecl Path_FindPathFromInCylinderNotCrossPlanes(
     path_t *pPath,
     team_t eTeam,
@@ -282,12 +281,12 @@ int __cdecl Path_FindPathFromInCylinderNotCrossPlanes(
     const float *vStartPos,
     const float *vGoalPos,
     float *vOrigin,
-    double fRadiusSqrd,
-    double fHalfHeightSqrd,
+    float fRadiusSqrd,
+    float fHalfHeightSqrd,
     float (*vNormal)[2],
     float *fDist,
     int iPlaneCount,
-    int bAllowNegotiationLinks);
+    bool bAllowNegotiationLinks);
 const pathnode_t *__cdecl Path_FindFacingNode(sentient_s *pSelf, sentient_s *pOther, sentient_info_t *pInfo);
 int __cdecl Path_FindPathGetCloseAsPossible(
     path_t *pPath,
@@ -296,13 +295,13 @@ int __cdecl Path_FindPathGetCloseAsPossible(
     float *vStartPos,
     pathnode_t *pNodeTo,
     const float *vGoalPos,
-    int bAllowNegotiationLinks);
+    bool bAllowNegotiationLinks);
 int __cdecl Path_FindPathWithWidth(
     path_t *pPath,
     team_t eTeam,
     const float *vStartPos,
     float *vGoalPos,
-    int bAllowNegotiationLinks,
+    bool bAllowNegotiationLinks,
     double width,
     float *perp);
 int __cdecl Path_FindPathNotCrossPlanes(
@@ -312,8 +311,8 @@ int __cdecl Path_FindPathNotCrossPlanes(
     float *vGoalPos,
     float (*vNormal)[2],
     float *fDist,
-    int *iPlaneCount,
-    int bAllowNegotiationLinks);
+    int iPlaneCount,
+    bool bAllowNegotiationLinks);
 pathnode_t *__cdecl Path_FindPathFromNotCrossPlanes(
     path_t *pPath,
     team_t eTeam,
@@ -322,22 +321,22 @@ pathnode_t *__cdecl Path_FindPathFromNotCrossPlanes(
     const float *vGoalPos,
     float (*vNormal)[2],
     float *fDist,
-    int *iPlaneCount,
-    int bAllowNegotiationLinks);
+    int iPlaneCount,
+    bool bAllowNegotiationLinks);
 pathnode_t *__cdecl Path_FindPathAway(
     path_t *pPath,
     team_t eTeam,
     float *vStartPos,
     float *vAwayFromPos,
-    double fDistAway,
-    int bAllowNegotiationLinks);
+    float fDistAway,
+    bool bAllowNegotiationLinks);
 pathnode_t *__cdecl Path_FindPathAwayNotCrossPlanes(
     path_t *pPath,
     team_t eTeam,
     float *vStartPos,
     float *vAwayFromPos,
-    double fDistAway,
+    float fDistAway,
     float (*vNormal)[2],
     float *fDist,
     int iPlaneCount,
-    int *bAllowNegotiationLinks);
+    bool bAllowNegotiationLinks);

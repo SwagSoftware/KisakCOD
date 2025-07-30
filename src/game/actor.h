@@ -555,8 +555,7 @@ void __cdecl Actor_FindPathInGoalWithLOS(
     actor_s *self,
     const float *vGoalPos,
     double fWithinDistSqrd,
-    bool ignoreSuppression,
-    char a5);
+    bool ignoreSuppression);
 void __cdecl Actor_FindPathAway(
     actor_s *self,
     const float *vBadPos,
@@ -569,8 +568,7 @@ void __cdecl Actor_FindPathAwayNotCrossPlanes(
     float *normal,
     double dist,
     float *bSuppressable,
-    int bAllowNegotiationLinks,
-    int a8);
+    int bAllowNegotiationLinks);
 void __cdecl Actor_BadPlacesChanged();
 void __cdecl Actor_UpdateAnglesAndDelta(actor_s *self);
 void __cdecl Actor_UpdatePileUp(actor_s *self);

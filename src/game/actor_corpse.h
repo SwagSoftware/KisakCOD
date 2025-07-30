@@ -24,10 +24,10 @@ float __cdecl Actor_SetBodyPlantAngle(
     const float *vDir,
     float *pfAngle);
 void __cdecl Actor_GetBodyPlantAngles(
-    float *iEntNum,
+    int iEntNum,
     int iClipMask,
     float *vOrigin,
-    double fYaw,
+    float fYaw,
     float *pfPitch,
     float *pfRoll,
     float *pfHeight);

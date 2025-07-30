@@ -253,8 +253,8 @@ void __cdecl Path_AddTrimmedAmount(path_t *pPath, const float *vStartPos)
     double v13; // fp31
     pathpoint_t *v14; // r31
     double DistToPathSegment; // fp31
-    double fOrigLength; // fp1
-    double fCurrLength; // fp2
+    float fOrigLength; // fp1
+    float fCurrLength; // fp2
     double v18; // fp31
 
     v4 = pPath->wPathLen - 1;
@@ -357,8 +357,8 @@ void __cdecl Path_SubtractTrimmedAmount(path_t *pPath, const float *vStartPos)
     int wPathLen; // r11
     pathpoint_t *v5; // r30
     double DistToPathSegment; // fp31
-    double fOrigLength; // fp1
-    double fCurrLength; // fp2
+    float fOrigLength; // fp1
+    float fCurrLength; // fp2
     int v9; // r29
     double v10; // fp31
     float *p_fOrigLength; // r30
@@ -479,7 +479,7 @@ unsigned int __cdecl Path_AttemptedCompleteLookahead(const path_t *pPath)
 bool __cdecl Path_UsesObstacleNegotiation(const path_t *pPath)
 {
     int wPathLen; // r11
-    double fCurrLength; // fp1
+    float fCurrLength; // fp1
     double v4; // fp2
     const char *v5; // r3
 
@@ -547,7 +547,7 @@ unsigned int __cdecl Path_AllowsObstacleNegotiation(const path_t *pPath)
 void __cdecl Path_GetObstacleNegotiationScript(const path_t *pPath, scr_animscript_t *animscript)
 {
     int wPathLen; // r11
-    double fCurrLength; // fp1
+    float fCurrLength; // fp1
     double v6; // fp2
     const char *v7; // r3
     pathnode_t *v8; // r3
@@ -615,13 +615,13 @@ int __cdecl Path_NeedsReevaluation(const path_t *pPath)
     return v2;
 }
 
-int __cdecl Path_EncroachesPoint2D(path_t *pPath, const float *vStart, const float *vPoint, double fMinDistSqrd)
+int __cdecl Path_EncroachesPoint2D(path_t *pPath, const float *vStart, const float *vPoint, float fMinDistSqrd)
 {
     double v8; // fp0
     double v9; // fp13
     double v10; // fp12
     double v11; // fp12
-    double fLookaheadDistToNextNode; // fp28
+    float fLookaheadDistToNextNode; // fp28
     float *vOrigPoint; // r30
     double v15; // fp30
     double v16; // fp31
@@ -766,10 +766,10 @@ int __cdecl Path_EncroachesPoint2D(path_t *pPath, const float *vStart, const flo
     return 0;
 }
 
-int __cdecl Path_DistanceGreaterThan(path_t *pPath, double fDist)
+int __cdecl Path_DistanceGreaterThan(path_t *pPath, float fDist)
 {
     int wPathLen; // r11
-    double fCurrLength; // fp1
+    float fCurrLength; // fp1
     double v6; // fp2
     const char *v7; // r3
     double v8; // fp31
@@ -923,7 +923,7 @@ bool __cdecl Path_PredictionTrace(
     double v18; // fp13
     double v19; // fp10
     double v20; // fp8
-    double fraction; // fp0
+    float fraction; // fp0
     double v22; // fp11
     double v23; // fp12
     gentity_s *v24; // r11
@@ -1056,7 +1056,7 @@ bool __cdecl Path_PredictionTrace(
 int __cdecl Path_IsTrimmed(path_t *pPath)
 {
     int wPathLen; // r11
-    double fCurrLength; // fp1
+    float fCurrLength; // fp1
     double v4; // fp2
     const char *v5; // r3
     int v6; // r10
@@ -1129,7 +1129,7 @@ void __cdecl Path_RemoveCompletedPathPoints(path_t *pPath, __int16 pathPointInde
     __int16 v12; // r10
     int v13; // r10
     int v14; // r11
-    double fCurrLength; // fp1
+    float fCurrLength; // fp1
     double v16; // fp2
     const char *v17; // r3
     int *v18; // r11
@@ -1222,7 +1222,7 @@ void __cdecl Path_RemoveCompletedPathPoints(path_t *pPath, __int16 pathPointInde
 void __cdecl Path_TrimCompletedPath(path_t *pPath, const float *vStartPos)
 {
     int wPathLen; // r11
-    double fCurrLength; // fp1
+    float fCurrLength; // fp1
     double v6; // fp2
     const char *v7; // r3
     int v8; // r10
@@ -1231,7 +1231,7 @@ void __cdecl Path_TrimCompletedPath(path_t *pPath, const float *vStartPos)
     double v11; // fp28
     pathpoint_t *vCurrPoint; // r25
     const char *v13; // r3
-    double fraction; // fp29
+    float fraction; // fp29
     const char *v15; // r3
     const char *v16; // r3
     double v17; // fp31
@@ -1387,7 +1387,7 @@ void __cdecl Path_BacktrackCompletedPath(path_t *pPath, const float *vStartPos)
     double v7; // fp26
     double v8; // fp31
     double v9; // fp30
-    double fCurrLength; // fp1
+    float fCurrLength; // fp1
     double v11; // fp2
     double v12; // fp25
     double v13; // fp27
@@ -1896,7 +1896,7 @@ void __cdecl Path_UpdateForwardLookahead_IncompletePath(
 void __cdecl Path_UpdateForwardLookahead(path_t *pPath, const float *vStartPos)
 {
     int wPathLen; // r11
-    double fCurrLength; // fp1
+    float fCurrLength; // fp1
     double v6; // fp2
     const char *v7; // r3
     double v8; // fp27
@@ -1908,8 +1908,8 @@ void __cdecl Path_UpdateForwardLookahead(path_t *pPath, const float *vStartPos)
     pathpoint_t *v14; // r25
     double v15; // fp0
     double v16; // fp13
-    double fLength; // fp31
-    double fraction; // fp28
+    float fLength; // fp31
+    float fraction; // fp28
     const char *v19; // r3
     const char *v20; // r3
     double lookaheadAmount; // fp30
@@ -2082,7 +2082,7 @@ void __cdecl Path_UpdateForwardLookahead(path_t *pPath, const float *vStartPos)
 
 void __cdecl Path_DebugDraw(path_t *pPath, float *vStartPos, int bDrawLookahead)
 {
-    double fLookaheadDist; // fp0
+    float fLookaheadDist; // fp0
     double v6; // fp10
     double v7; // fp13
     double v8; // fp9
@@ -2244,7 +2244,7 @@ bool __cdecl Path_WithinApproxDist(path_t *pPath, double checkDist)
 ai_stance_e __cdecl Path_AllowedStancesForPath(path_t *pPath)
 {
     int wPathLen; // r11
-    double fCurrLength; // fp1
+    float fCurrLength; // fp1
     double v4; // fp2
     const char *v5; // r3
     int v6; // r31
@@ -2383,7 +2383,7 @@ void __cdecl Path_DodgeDrawRaisedLine(float *start, float *end, const float *col
 int __cdecl Path_MayFaceEnemy(path_t *pPath, float *vEnemyDir, float *vOrg)
 {
     int wPathLen; // r11
-    double fCurrLength; // fp1
+    float fCurrLength; // fp1
     double v7; // fp2
     const char *v8; // r3
     int result; // r3
@@ -2478,7 +2478,7 @@ int __cdecl Path_FindPathFromTo(
     const float *vStartPos,
     pathnode_t *pNodeTo,
     const float *vGoalPos,
-    int bAllowNegotiationLinks)
+    bool bAllowNegotiationLinks)
 {
     CustomSearchInfo_FindPath v15; // [sp+50h] [-70h] BYREF
 
@@ -2519,7 +2519,7 @@ int __cdecl Path_FindPathFromTo(
 void __cdecl Path_TrimLastNodes(path_t *pPath, const int iNodeCount, bool bMaintainGoalPos)
 {
     int wPathLen; // r11
-    double fCurrLength; // fp1
+    float fCurrLength; // fp1
     double v8; // fp2
     const char *v9; // r3
     __int16 v10; // r9
@@ -2743,7 +2743,7 @@ int __cdecl Path_TrimToSeePoint(
     path_t *pPath,
     path_trim_t *pTrim,
     actor_s *pActor,
-    double fMaxDistSqrd,
+    float fMaxDistSqrd,
     int iIgnoreEntityNum,
     const float *vPoint)
 {
@@ -2929,13 +2929,13 @@ void __cdecl Path_UpdateLookaheadAmount(
     double v18; // fp0
     int v19; // r9
     int v20; // r11
-    double fOrigLength; // fp0
+    float fOrigLength; // fp0
     int v22; // r4
     double v23; // fp1
     double v24; // fp0
     __int16 wNegotiationStartNode; // r10
     int wPathLen; // r11
-    double fCurrLength; // fp1
+    float fCurrLength; // fp1
     double v28; // fp2
     const char *v29; // r3
 
@@ -3133,16 +3133,16 @@ void __cdecl Path_CalcLookahead_Completed(
 void __cdecl Path_CalcLookahead(path_t *pPath, float *vStartPos, int bReduceLookaheadAmount, int a4, int a5)
 {
     int wPathLen; // r11
-    double fCurrLength; // fp1
+    float fCurrLength; // fp1
     double v10; // fp2
     const char *v11; // r3
-    double fLookaheadAmount; // fp28
+    float fLookaheadAmount; // fp28
     double v13; // fp30
     int v14; // r27
     int v15; // r29
     const pathpoint_t *v16; // r31
     double DistToPathSegment; // fp29
-    double fOrigLength; // fp31
+    float fOrigLength; // fp31
     double v19; // fp2
     double v20; // fp30
     const float *vOrigPoint; // r11
@@ -3327,7 +3327,7 @@ int __cdecl Path_FindPath(
     team_t eTeam,
     const float *vStartPos,
     float *vGoalPos,
-    int bAllowNegotiationLinks)
+    bool bAllowNegotiationLinks)
 {
     pathnode_t *v10; // r30
     int *v11; // r6
@@ -3348,7 +3348,7 @@ pathnode_t *__cdecl Path_FindPathFrom(
     pathnode_t *pNodeFrom,
     float *vStartPos,
     const float *vGoalPos,
-    int bAllowNegotiationLinks)
+    bool bAllowNegotiationLinks)
 {
     pathnode_t *result; // r3
     _BYTE v13[16]; // [sp+50h] [-350h] BYREF
@@ -3370,14 +3370,14 @@ pathnode_t *__cdecl Path_FindPathFrom(
 void __cdecl Path_UpdateLookahead(
     path_t *pPath,
     float *vStartPos,
-    int bReduceLookaheadAmount,
-    int bTrimAmount,
-    int bAllowBacktrack)
+    bool bReduceLookaheadAmount,
+    bool bTrimAmount,
+    bool bAllowBacktrack)
 {
     int v10; // r7
     int v11; // r6
     int wPathLen; // r11
-    double fCurrLength; // fp1
+    float fCurrLength; // fp1
     double v14; // fp2
     const char *v15; // r3
     int wNegotiationStartNode; // r10
@@ -3502,10 +3502,10 @@ void __cdecl Path_SetLookaheadToStart(path_t *pPath, float *vStartPos, int bTrim
 void __cdecl Path_TransferLookahead(path_t *pPath, float *vStartPos)
 {
     int wPathLen; // r11
-    double fCurrLength; // fp1
+    float fCurrLength; // fp1
     double v6; // fp2
     const char *v7; // r3
-    double fLookaheadAmount; // fp21
+    float fLookaheadAmount; // fp21
     double v9; // fp23
     double v10; // fp28
     double v11; // fp30
@@ -3721,8 +3721,8 @@ int __cdecl Path_GeneratePath(
     float *vGoalPos,
     pathnode_t *pNodeFrom,
     pathnode_t *pNodeTo,
-    int bIncludeGoalPos,
-    int bAllowNegotiationLinks)
+    bool bIncludeGoalPos,
+    bool bAllowNegotiationLinks)
 {
     int v16; // r25
     int wPathLen; // r11
@@ -3740,11 +3740,11 @@ int __cdecl Path_GeneratePath(
     pathpoint_t *v30; // r30
     float *fDir2D; // r29
     int v32; // r28
-    double fOrigLength; // fp0
-    double fLookaheadAmount; // fp0
+    float fOrigLength; // fp0
+    float fLookaheadAmount; // fp0
     double v35; // fp0
     int v36; // r11
-    double fCurrLength; // fp1
+    float fCurrLength; // fp1
     double v38; // fp2
     const char *v39; // r3
     int *v40; // r11
@@ -4101,11 +4101,11 @@ int __cdecl Path_AttemptDodge(
     path_t *v54; // r31
     int v55; // r11
     int v56; // r29
-    double fLookaheadDistToNextNode; // fp31
+    float fLookaheadDistToNextNode; // fp31
     pathpoint_t *v58; // r29
     double v59; // fp0
     double v60; // fp13
-    double fOrigLength; // fp12
+    float fOrigLength; // fp12
     bool v62; // cr58
     int v63; // r11
     float *vOrigPoint; // r4
@@ -4119,7 +4119,7 @@ int __cdecl Path_AttemptDodge(
     double v72; // fp0
     int flags; // r10
     int wPathLen; // r11
-    double fCurrLength; // fp1
+    float fCurrLength; // fp1
     double v76; // fp2
     const char *v77; // r3
     int *v78; // r11
@@ -4553,7 +4553,7 @@ pathnode_t *__cdecl Path_FindCloseNode(
     team_t eTeam,
     pathnode_t *pNodeFrom,
     const float *vGoalPos,
-    int bAllowNegotiationLinks)
+    bool bAllowNegotiationLinks)
 {
     CustomSearchInfo_FindCloseNode v9; // [sp+50h] [-50h] BYREF
 
@@ -4592,7 +4592,7 @@ int __cdecl Path_FindPathFromToWithWidth(
     const float *vStartPos,
     pathnode_t *pNodeTo,
     const float *vGoalPos,
-    int bAllowNegotiationLinks,
+    bool bAllowNegotiationLinks,
     double width,
     float *perp)
 {
@@ -4642,7 +4642,7 @@ int __cdecl Path_FindPathFromToNotCrossPlanes(
     float (*vNormal)[2],
     float *fDist,
     int iPlaneCount,
-    int bAllowNegotiationLinks)
+    bool bAllowNegotiationLinks)
 {
     CustomSearchInfo_FindPathNotCrossPlanes v39[4]; // [sp+50h] [-80h] BYREF
 
@@ -4697,9 +4697,8 @@ int __cdecl Path_FindPathFromAway(
     pathnode_t *pNodeFrom,
     float *vStartPos,
     float *vAwayFromPos,
-    double fDistAway,
-    int bAllowNegotiationLinks,
-    int a8)
+    float fDistAway,
+    bool bAllowNegotiationLinks)
 {
     double v15; // fp13
     double v16; // fp10
@@ -4766,11 +4765,11 @@ int __cdecl Path_FindPathFromAwayNotCrossPlanes(
     pathnode_t *pNodeFrom,
     float *vStartPos,
     float *vAwayFromPos,
-    double fDistAway,
+    float fDistAway,
     float (*vNormal)[2],
     float *fDist,
     int iPlaneCount,
-    int bAllowNegotiationLinks)
+    bool bAllowNegotiationLinks)
 {
     pathnode_t *m_pBestNode; // r30
     int Path; // r31
@@ -4840,8 +4839,8 @@ int __cdecl Path_FindPathInCylinderWithLOS(
     const float *vStartPos,
     float *vGoalPos,
     const actor_goal_s *goal,
-    double fWithinDistSqrd,
-    int bAllowNegotiationLinks)
+    float fWithinDistSqrd,
+    bool bAllowNegotiationLinks)
 {
     int *v15; // r6
     pathnode_t *v17; // r6
@@ -4878,11 +4877,11 @@ int __cdecl Path_FindPathInCylinderWithLOSNotCrossPlanes(
     const float *vStartPos,
     float *vGoalPos,
     const actor_goal_s *goal,
-    double fWithinDistSqrd,
+    float fWithinDistSqrd,
     float (*vNormal)[2],
     float *fDist,
-    float *iPlaneCount,
-    int bAllowNegotiationLinks)
+    int iPlaneCount,
+    bool bAllowNegotiationLinks)
 {
     pathnode_t *v40; // r6
     nearestNodeHeightCheck v41; // [sp+8h] [-3F8h]
@@ -4933,9 +4932,9 @@ pathnode_t *__cdecl Path_FindPathFromInCylinder(
     float *vStartPos,
     const float *vGoalPos,
     float *vOrigin,
-    double fRadiusSqrd,
-    double fHalfHeightSqrd,
-    int bAllowNegotiationLinks)
+    float fRadiusSqrd,
+    float fHalfHeightSqrd,
+    bool bAllowNegotiationLinks)
 {
     unsigned __int16 spawnflags; // r10
     pathnode_t *result; // r3
@@ -4983,12 +4982,12 @@ int __cdecl Path_FindPathFromInCylinderNotCrossPlanes(
     const float *vStartPos,
     const float *vGoalPos,
     float *vOrigin,
-    double fRadiusSqrd,
-    double fHalfHeightSqrd,
+    float fRadiusSqrd,
+    float fHalfHeightSqrd,
     float (*vNormal)[2],
     float *fDist,
     int iPlaneCount,
-    int bAllowNegotiationLinks)
+    bool bAllowNegotiationLinks)
 {
     unsigned __int16 spawnflags; // r10
     pathnode_t *v45; // r11
@@ -5081,7 +5080,7 @@ int __cdecl Path_FindPathGetCloseAsPossible(
     float *vStartPos,
     pathnode_t *pNodeTo,
     const float *vGoalPos,
-    int bAllowNegotiationLinks)
+    bool bAllowNegotiationLinks)
 {
     pathnode_t *m_pBestNode; // r31
     CustomSearchInfo_FindPathClosestPossible v16; // [sp+50h] [-60h] BYREF
@@ -5146,7 +5145,7 @@ int __cdecl Path_FindPathWithWidth(
     team_t eTeam,
     const float *vStartPos,
     float *vGoalPos,
-    int bAllowNegotiationLinks,
+    bool bAllowNegotiationLinks,
     double width,
     float *perp)
 {
@@ -5219,8 +5218,8 @@ int __cdecl Path_FindPathNotCrossPlanes(
     float *vGoalPos,
     float (*vNormal)[2],
     float *fDist,
-    int *iPlaneCount,
-    int bAllowNegotiationLinks)
+    int iPlaneCount,
+    bool bAllowNegotiationLinks)
 {
     pathnode_t *v16; // r26
     float *v17; // r6
@@ -5320,8 +5319,8 @@ pathnode_t *__cdecl Path_FindPathFromNotCrossPlanes(
     const float *vGoalPos,
     float (*vNormal)[2],
     float *fDist,
-    int *iPlaneCount,
-    int bAllowNegotiationLinks)
+    int iPlaneCount,
+    bool bAllowNegotiationLinks)
 {
     pathnode_t *result; // r3
     nearestNodeHeightCheck v37; // [sp+8h] [-3B8h]
@@ -5399,8 +5398,8 @@ pathnode_t *__cdecl Path_FindPathAway(
     team_t eTeam,
     float *vStartPos,
     float *vAwayFromPos,
-    double fDistAway,
-    int bAllowNegotiationLinks)
+    float fDistAway,
+    bool bAllowNegotiationLinks)
 {
     int v13; // r8
     pathnode_t *result; // r3
@@ -5418,11 +5417,11 @@ pathnode_t *__cdecl Path_FindPathAwayNotCrossPlanes(
     team_t eTeam,
     float *vStartPos,
     float *vAwayFromPos,
-    double fDistAway,
+    float fDistAway,
     float (*vNormal)[2],
     float *fDist,
     int iPlaneCount,
-    int *bAllowNegotiationLinks)
+    bool bAllowNegotiationLinks)
 {
     float *v37; // r8
     pathnode_t *pNodeTo; // r3
