@@ -1009,6 +1009,46 @@ void __cdecl SV_LoadDemo(SaveGame *save, void *fileHandle)
     MemFile_CopySegments(&MemoryFile->memFile, 0, buf);
 }
 
+void Cmd_Echo_f()
+{
+    int i; // r28
+    int nesting; // r7
+    const char *v2; // r3
+
+    for (i = 1; ; ++i)
+    {
+        nesting = sv_cmd_args.nesting;
+        if (sv_cmd_args.nesting >= 8u)
+        {
+            MyAssertHandler(
+                "c:\\trees\\cod3\\cod3src\\src\\qcommon\\cmd.h",
+                167,
+                0,
+                "sv_cmd_args.nesting doesn't index CMD_MAX_NESTING\n\t%i not in [0, %i)",
+                sv_cmd_args.nesting,
+                8);
+            nesting = sv_cmd_args.nesting;
+        }
+        if (i >= sv_cmd_args.argc[nesting])
+            break;
+        v2 = SV_Cmd_Argv(i);
+        Com_Printf(0, "^3%s ", v2);
+    }
+    Com_Printf(0, "\n");
+    if (SV_RecordingDemo())
+    {
+        if (sv_cmd_args.nesting >= 8u)
+            MyAssertHandler(
+                "c:\\trees\\cod3\\cod3src\\src\\qcommon\\cmd.h",
+                203,
+                0,
+                "sv_cmd_args.nesting doesn't index CMD_MAX_NESTING\n\t%i not in [0, %i)",
+                sv_cmd_args.nesting,
+                8);
+        Con_CloseConsole(0);
+    }
+}
+
 bool __cdecl SV_RecordingDemo()
 {
     return sv.demo.recording;

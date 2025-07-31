@@ -390,72 +390,52 @@ void __cdecl SaveMemory_CreateHeader(
     bool suppressPlayerNotify,
     unsigned int saveType,
     int saveId,
-    SaveGame *save,
-    int a10,
-    int a11,
-    int a12,
-    int a13,
-    int a14,
-    int a15,
-    int a16,
-    int a17,
-    int a18,
-    int a19,
-    int a20,
-    int a21,
-    int a22,
-    int a23,
-    int a24,
-    int a25,
-    int a26,
-    int a27,
-    int a28)
+    SaveGame *save)
 {
     const dvar_s *v36; // r3
     const char *BuildNumber; // r3
-    unsigned int v38; // r4
-    const void *v39; // r3
+    unsigned int bytesUsed; // r4
+    unsigned __int8 *buffer; // r3
     const dvar_s *v40; // r3
     __int64 v41; // r11 OVERLAPPED
-    unsigned int *v42; // r9
+    _DWORD *v42; // r9
     int v43; // r11
-    unsigned int v44[2]; // [sp+50h] [-70h] BYREF
+    _DWORD v44[2]; // [sp+50h] [-70h] BYREF
     __int64 v45; // [sp+58h] [-68h]
 
-    if (!cleanUserName)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\savememory.cpp", 622, 0, "%s", "cleanUserName");
-    if (!a28)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\savememory.cpp", 623, 0, "%s", "save");
-    if (*(unsigned int *)(a28 + 28) != 3)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\savememory.cpp", 624, 0, "%s", "save->saveState == SAVING");
-    memset((void *)(a28 + 32), 0, 0x454u);
-    *(_BYTE *)(a28 + 1143) = suppressPlayerNotify;
-    *(_BYTE *)(a28 + 1097) = demoPlayback;
-    *(unsigned int *)(a28 + 32) = 287;
-    *(_BYTE *)(a28 + 1096) = (_cntlzw(saveType) & 0x20) != 0;
+    iassert(cleanUserName);
+    iassert(save);
+    iassert(save->saveState == SAVING);
+
+    memset(&save->header, 0, sizeof(save->header));
+    save->suppressPlayerNotify = suppressPlayerNotify;
+    save->header.demoPlayback = demoPlayback;
+    save->header.saveVersion = 287;
+    //save->header.internalSave = (_cntlzw(saveType) & 0x20) != 0;
+    save->header.internalSave = saveType != 0;
     v36 = Dvar_RegisterString("mapname", "", 0x44u, "The current map name");
-    *(unsigned int *)(a28 + 44) = saveId;
-    I_strncpyz((char *)(a28 + 64), v36->current.string, 256);
+    save->header.saveId = saveId;
+    I_strncpyz(save->header.mapName, v36->current.string, 256);
     BuildNumber = getBuildNumber();
-    I_strncpyz((char *)(a28 + 320), BuildNumber, 128);
-    v38 = *(unsigned int *)(a28 + 8);
-    v39 = *(const void **)a28;
-    *(unsigned int *)(a28 + 36) = checksum;
-    *(unsigned int *)(a28 + 40) = Com_BlockChecksumKey32(v39, v38, 0);
-    Scr_GetChecksum((int *)(a28 + 52));
+    I_strncpyz(save->header.buildNumber, BuildNumber, 128);
+    bytesUsed = save->memFile.bytesUsed;
+    buffer = save->memFile.buffer;
+    save->header.gameCheckSum = checksum;
+    save->header.saveCheckSum = Com_BlockChecksumKey32(buffer, bytesUsed, 0);
+    Scr_GetChecksum((unsigned int*)save->header.scrCheckSum);
     v40 = Dvar_RegisterString("ui_campaign", "american", 0x1000u, "The current campaign");
-    I_strncpyz((char *)(a28 + 448), v40->current.string, 256);
+    I_strncpyz(save->header.campaign, v40->current.string, 256);
     if (screenshot)
-        I_strncpyz((char *)(a28 + 704), screenshot, 64);
+        I_strncpyz(save->header.screenShotName, screenshot, 64);
     else
-        *(_BYTE *)(a28 + 704) = 0;
-    I_strncpyz((char *)(a28 + 1024), cleanUserName, 64);
+        save->header.screenShotName[0] = 0;
+    I_strncpyz(save->header.filename, cleanUserName, 64);
     if (description)
-        I_strncpyz((char *)(a28 + 768), description, 256);
+        I_strncpyz(save->header.description, description, 256);
     else
-        *(_BYTE *)(a28 + 768) = 0;
+        save->header.description[0] = 0;
     if (g_entities[0].health
-        && (LODWORD(v41) = g_entities[0].client->pers.maxHealth, (unsigned int)v41)
+        && (LODWORD(v41) = g_entities[0].client->pers.maxHealth, (_DWORD)v41)
         && (HIDWORD(v41) = 100 * g_entities[0].health,
             v45 = v41,
             v42 = v44,
@@ -471,11 +451,11 @@ void __cdecl SaveMemory_CreateHeader(
     {
         v43 = 1;
     }
-    *(unsigned int *)(a28 + 1088) = v43;
-    *(unsigned int *)(a28 + 1092) = sv_gameskill->current.integer;
-    Com_RealTime((qtime_s *)(a28 + 1100));
-    *(unsigned int *)(a28 + 1136) = MemFile_CopySegments((MemoryFile *)a28, 0, 0);
-    *(_BYTE *)(a28 + 1142) = 0;
+    save->header.health = v43;
+    save->header.skill = sv_gameskill->current.integer;
+    Com_RealTime(&save->header.time);
+    save->header.bodySize = (int32_t)MemFile_CopySegments(&save->memFile, 0, 0);
+    save->isWrittenToDevice = 0;
 }
 
 const SaveHeader *__cdecl SaveMemory_GetHeader(SaveGame *save)

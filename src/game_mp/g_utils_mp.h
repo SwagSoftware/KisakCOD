@@ -7,7 +7,7 @@ void __cdecl TRACK_g_utils();
 int __cdecl G_FindConfigstringIndex(char *name, int start, int max, int create, const char *errormsg);
 int __cdecl G_LocalizedStringIndex(char *string);
 int __cdecl G_MaterialIndex(const char *name);
-int __cdecl G_ModelIndex(char *name);
+int __cdecl G_ModelIndex(const char *name);
 bool __cdecl G_GetModelBounds(int index, float *outMins, float *outMaxs);
 XModel *__cdecl G_GetModel(int index);
 bool __cdecl G_XModelBad(int index);

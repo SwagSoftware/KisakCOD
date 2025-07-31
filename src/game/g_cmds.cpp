@@ -3,6 +3,16 @@
 #endif
 
 #include "g_local.h"
+#include "g_main.h"
+#include <server/sv_game.h>
+#include <qcommon/cmd.h>
+#include "actor_corpse.h"
+
+#include <xanim/xanim.h>
+#include <script/scr_vm.h>
+#include <server/sv_public.h>
+#include <script/scr_const.h>
+#include "actor_fields.h"
 
 int g_allowRemoveCorpse;
 bool g_godModeRemoteInputValid;
@@ -44,6 +54,7 @@ int __cdecl CheatsOk(gentity_s *ent)
     return ok;
 }
 
+char line[1024];
 char *__cdecl ConcatArgs(int start)
 {
     size_t v2; // r30
@@ -181,7 +192,7 @@ void __cdecl Cmd_SetSoundLength_f()
         v3 = atol(v5);
         if (v2 > 0x87F)
         {
-            Com_Error(ERR_DROP, byte_8202D290, v2);
+            Com_Error(ERR_DROP, "client command received with entnum %i", v2);
         }
         else
         {
@@ -196,7 +207,7 @@ void __cdecl Cmd_SetSoundLength_f()
     else
     {
         v1 = SV_Cmd_Argc();
-        Com_Error(ERR_DROP, byte_8202D2C0, v1);
+        Com_Error(ERR_DROP, "client command received with %i parameters instead of 2", v1);
     }
 }
 
@@ -660,11 +671,12 @@ void __cdecl Cmd_Where_f(gentity_s *ent)
     if (client)
     {
         v3 = vtos(client->ps.origin);
-        v4 = va(aPrint_0, v3);
+        v4 = va("print \"%s\"", v3);
         SV_GameSendServerCommand(ent - g_entities, v4);
     }
 }
 
+const char *aPrintGameUsage_0 = "print \"GAME_USAGE\x15: setviewpos x y z [yaw] [pitch]\"";
 void __cdecl Cmd_SetViewpos_f(gentity_s *ent)
 {
     int ok; // r31
@@ -741,6 +753,9 @@ void __cdecl Cmd_SetViewpos_f(gentity_s *ent)
 LABEL_20:
     SV_GameSendServerCommand(ent - g_entities, v4);
 }
+
+const char *aPrintGameUsage = "print \"GAME_USAGE\x15: jumptonode nodenum\n\"";
+const char *aPrint = "print \"\x15nodenum must be >= 0 and < %i\n\"";
 
 void __cdecl Cmd_JumpToNode_f(gentity_s *ent)
 {
@@ -994,7 +1009,7 @@ void __cdecl ClientCommand(int clientNum, const char *s)
     g_allowRemoveCorpse = 1;
     if (!v3->client)
         MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\g_cmds.cpp", 883, 0, "%s", "ent->client");
-    SV_Cmd_TokenizeString(s);
+    SV_Cmd_TokenizeString((char*)s);
     SV_Cmd_ArgvBuffer(0, v7, 1024);
     if (!I_stricmp(v7, "fogswitch"))
     {
@@ -1125,7 +1140,7 @@ void __cdecl ClientCommand(int clientNum, const char *s)
             SV_Cmd_EndTokenizedString();
             return;
         }
-        v6 = va(aPrintGameUnkno, v7);
+        v6 = va("print \"GAME_UNKNOWNCLIENTCOMMAND %s\"", v7);
         SV_GameSendServerCommand(clientNum, v6);
     }
     SV_Cmd_EndTokenizedString();

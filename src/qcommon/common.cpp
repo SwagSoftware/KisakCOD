@@ -9,13 +9,11 @@
 #include <win32/win_net_debug.h>
 #include <bgame/bg_local.h>
 #include <script/scr_debugger.h>
-#include <client_mp/client_mp.h>
 #include "com_bsp.h"
 #include "com_playerprofile.h"
 #include <universal/com_files.h>
 #include <stringed/stringed_hooks.h>
 #include "files.h"
-#include <server_mp/server_mp.h>
 #include <gfx_d3d/r_rendercmds.h>
 #include <script/scr_vm.h>
 #include <gfx_d3d/r_init.h>
@@ -28,7 +26,6 @@
 #include <win32/win_net.h>
 #include <xanim/dobj.h>
 #include <sound/snd_local.h>
-#include <game_mp/g_public_mp.h>
 #include <script/scr_animtree.h>
 #include <gfx_d3d/r_scene.h>
 #include <ragdoll/ragdoll.h>
@@ -41,6 +38,19 @@
 #include <universal/profile.h>
 
 #include <setjmp.h>
+
+
+#ifdef KISAK_SP
+#include <game/g_local.h>
+#include <server/sv_public.h>
+#include <universal/q_parse.h>
+#include <ui/ui.h>
+#include <client/cl_demo.h>
+#elif KISAK_MP
+#include <game_mp/g_public_mp.h>
+#include <client_mp/client_mp.h>
+#include <server_mp/server_mp.h>
+#endif
 
 int marker_common;
 
@@ -157,6 +167,7 @@ void QDECL Com_PrintMessage(int channel, const char* msg, int error)
 	{
 		if (channel != 6)
 		{
+#ifdef KISAK_MP
 			Sys_EnterCriticalSection(CRITSECT_RD_BUFFER);
 			if (strlen(rd_buffer) + strlen(msg) > rd_buffersize - 1)
 			{
@@ -165,6 +176,7 @@ void QDECL Com_PrintMessage(int channel, const char* msg, int error)
 			}
 			I_strncat(rd_buffer, rd_buffersize, msg);
 			Sys_LeaveCriticalSection(CRITSECT_RD_BUFFER);
+#endif
 		}
 	}
 	else
@@ -452,6 +464,7 @@ void __cdecl Com_Shutdown(const char* finalmsg)
 
 void __cdecl CL_ShutdownDemo()
 {
+#ifdef KISAK_MP
     clientConnection_t *clc; // [esp+0h] [ebp-4h]
 
     clc = CL_GetLocalClientConnection(0);
@@ -462,6 +475,35 @@ void __cdecl CL_ShutdownDemo()
         clc->demoplaying = 0;
         clc->demorecording = 0;
     }
+#elif KISAK_SP
+    int demofile; // r3
+    void *demobuf; // r3
+
+    demofile = cls.demofile;
+    if (cls.demofile)
+    {
+        if (cls.demoplaying)
+        {
+            G_ClearDemoEntities();
+            demofile = cls.demofile;
+        }
+        FS_FCloseFile(demofile);
+        cls.demofile = 0;
+        cls.demoplaying = 0;
+        if (cls.demorecording)
+        {
+            cls.demorecording = 0;
+            demobuf = cls.demobuf;
+            if (!cls.demobuf)
+            {
+                MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\client\\cl_main.cpp", 417, 0, "%s", "cls.demobuf");
+                demobuf = cls.demobuf;
+            }
+            Z_VirtualFree(demobuf);
+            cls.demobuf = 0;
+        }
+    }
+#endif
 }
 
 void __cdecl Com_ShutdownInternal(const char* finalmsg)
@@ -779,6 +821,7 @@ unsigned int* __cdecl Com_AllocEvent(int size)
     return (unsigned int *)Z_Malloc(size, "Com_AllocEvent", 10);
 }
 
+#ifdef KISAK_MP
 unsigned __int8 clientCommonMsgBuf[131072];
 void __cdecl Com_ClientPacketEvent()
 {
@@ -837,6 +880,7 @@ void __cdecl Com_ServerPacketEvent()
             SV_PacketEvent(adr, &netmsg);
     }
 }
+#endif
 
 void __cdecl Com_EventLoop()
 {
@@ -1153,8 +1197,10 @@ void __cdecl Com_Init_Try_Block_Function(char* commandLine)
     Com_StartupVariable(0);
     if (!useFastFile->current.enabled)
         SEH_UpdateLanguageInfo();
+#ifdef KISAK_MP
     if (com_dedicated->current.integer)
         CL_InitDedicated();
+#endif
     Com_InitHunkMemory();
     Hunk_InitDebugMemory();
     dvar_modifiedFlags &= ~1u;
@@ -1303,15 +1349,17 @@ const char *s_lockThreadNames[4] = { "none", "minimal", "all" };
 
 void Com_InitDvars()
 {
-#if !defined(DEDICATED) && !defined(KISAK_DEDICATED)
-    com_dedicated = Dvar_RegisterEnum("dedicated", g_dedicatedEnumNames, 0, DVAR_LATCH, "True if this is a dedicated server");
-#else
-    com_dedicated = Dvar_RegisterEnum("dedicated", g_dedicatedEnumNames, 2, DVAR_LATCH, "True if this is a dedicated server");
-#endif
+#ifdef KISAK_MP
+    #if !defined(DEDICATED) && !defined(KISAK_DEDICATED)
+        com_dedicated = Dvar_RegisterEnum("dedicated", g_dedicatedEnumNames, 0, DVAR_LATCH, "True if this is a dedicated server");
+    #else
+        com_dedicated = Dvar_RegisterEnum("dedicated", g_dedicatedEnumNames, 2, DVAR_LATCH, "True if this is a dedicated server");
+    #endif
 
-#if !defined(DEDICATED) && !defined(KISAK_DEDICATED)
-    if (com_dedicated->current.integer)
-        Dvar_RegisterEnum("dedicated", g_dedicatedEnumNames, 0, DVAR_ROM, "True if this is a dedicated server");
+    #if !defined(DEDICATED) && !defined(KISAK_DEDICATED)
+        if (com_dedicated->current.integer)
+            Dvar_RegisterEnum("dedicated", g_dedicatedEnumNames, 0, DVAR_ROM, "True if this is a dedicated server");
+    #endif
 #endif
 
     com_maxfps = Dvar_RegisterInt("com_maxfps", 85, 0, 1000, DVAR_ARCHIVE, "Cap frames per second");
@@ -1481,6 +1529,7 @@ void __cdecl Com_AdjustMaxFPS(int* maxFPS)
     }
 }
 
+#ifdef KISAK_MP
 void Com_DedicatedModified()
 {
     int localClientNum; // [esp+0h] [ebp-4h]
@@ -1524,18 +1573,87 @@ void Com_DedicatedModified()
         }
     }
 }
+#elif KISAK_SP
+static void Com_AttractMode(int localClientNum)
+{
+    // KISAKTODO
+    //const char *TopActiveMenuName; // r3
+    //const char *v3; // r11
+    //const char *v4; // r9
+    //const char *v5; // r10
+    //int v6; // r7
+    //const char *v7; // r9
+    //const char *v8; // r10
+    //int v9; // r7
+    //const char *v10; // r10
+    //int v11; // r8
+    //int LastGamePadEventTime; // r3
+    //
+    //if (!Live_IsSystemUiActive()
+    //    && com_attractmode->current.enabled
+    //    && CL_GetLocalClientConnectionState(localClientNum) == CA_DISCONNECTED
+    //    && !Con_IsActive(localClientNum))
+    //{
+    //    TopActiveMenuName = UI_GetTopActiveMenuName(localClientNum);
+    //    v3 = TopActiveMenuName;
+    //    if (TopActiveMenuName)
+    //    {
+    //        v4 = "main";
+    //        v5 = TopActiveMenuName;
+    //        do
+    //        {
+    //            v6 = *(unsigned __int8 *)v5 - *(unsigned __int8 *)v4;
+    //            if (!*v5)
+    //                break;
+    //            ++v5;
+    //            ++v4;
+    //        } while (!v6);
+    //        if (!v6)
+    //            goto LABEL_18;
+    //        v7 = "main_lockout";
+    //        v8 = TopActiveMenuName;
+    //        do
+    //        {
+    //            v9 = *(unsigned __int8 *)v8 - *(unsigned __int8 *)v7;
+    //            if (!*v8)
+    //                break;
+    //            ++v8;
+    //            ++v7;
+    //        } while (!v9);
+    //        if (!v9)
+    //            goto LABEL_18;
+    //        v10 = "main_text";
+    //        do
+    //        {
+    //            v11 = *(unsigned __int8 *)v3 - *(unsigned __int8 *)v10;
+    //            if (!*v3)
+    //                break;
+    //            ++v3;
+    //            ++v10;
+    //        } while (!v11);
+    //        if (!v11)
+    //        {
+    //        LABEL_18:
+    //            LastGamePadEventTime = CL_GetLastGamePadEventTime();
+    //            if (LastGamePadEventTime > 0
+    //                && com_frameTime > LastGamePadEventTime
+    //                && com_frameTime - LastGamePadEventTime > 1000 * com_attractmodeduration->current.integer)
+    //            {
+    //                CL_ResetLastGamePadEventTime();
+    //                CIN_PlayAttractModeMovie();
+    //            }
+    //        }
+    //    }
+    //}
+}
+#endif
 
 void __cdecl Com_Frame_Try_Block_Function()
 {
-    unsigned int v0; // ecx
-    int v1; // eax
-    int v2; // eax
     float deltaTime; // [esp+4h] [ebp-78h]
     int v4; // [esp+8h] [ebp-74h]
     int lastFrameIndex; // [esp+68h] [ebp-14h]
     int msec; // [esp+6Ch] [ebp-10h]
-    int mseca; // [esp+6Ch] [ebp-10h]
-    int msecb; // [esp+6Ch] [ebp-10h]
     int localClientNum; // [esp+70h] [ebp-Ch]
     netsrc_t localClientNuma; // [esp+70h] [ebp-Ch]
     int minMsec; // [esp+74h] [ebp-8h]
@@ -1544,7 +1662,10 @@ void __cdecl Com_Frame_Try_Block_Function()
     iassert(cmd_args.nesting == -1);
 
     Com_WriteConfiguration(0);
-    SetAnimCheck(com_animCheck->current.color[0]);
+#ifdef KISAK_SP
+    CL_CheckStartPlayingDemo();
+#endif
+    SetAnimCheck(com_animCheck->current.enabled);
     minMsec = 1;
     maxFPS = com_maxfps->current.integer;
     Com_AdjustMaxFPS(&maxFPS);
@@ -1557,11 +1678,14 @@ void __cdecl Com_Frame_Try_Block_Function()
     }
     Win_UpdateThreadLock();
     iassert(minMsec > 0);
-    v0 = com_lastFrameIndex & 0x80000000;
+
+    lastFrameIndex = com_lastFrameIndex & 0x80000000;
     if (com_lastFrameIndex < 0)
-        v0 = 0;
-    lastFrameIndex = v0;
+        lastFrameIndex = 0;
+
     ++com_lastFrameIndex;
+
+#ifdef KISAK_MP
     if (com_dedicated->current.integer)
     {
         PROF_SCOPED("MaxFPSSpin");
@@ -1579,6 +1703,7 @@ void __cdecl Com_Frame_Try_Block_Function()
         com_lastFrameTime[lastFrameIndex] = com_frameTime;
     }
     else
+#endif
     {
         KISAK_NULLSUB();
         PROF_SCOPED("MaxFPSSpin");
@@ -1590,7 +1715,7 @@ void __cdecl Com_Frame_Try_Block_Function()
                 com_lastFrameTime[lastFrameIndex] = com_frameTime;
             if (com_frameTime - com_lastFrameTime[lastFrameIndex] > 0)
                 break;
-            NET_Sleep(1u);
+            NET_Sleep(1);
         }
 
         if (com_frameTime - com_lastFrameTime[lastFrameIndex] < minMsec)
@@ -1605,38 +1730,79 @@ void __cdecl Com_Frame_Try_Block_Function()
 
     Cbuf_Execute(0, CL_ControllerIndexFromClientNum(0));
     iassert(msec > 0);
-    mseca = Com_ModifyMsec(msec);
+    msec = Com_ModifyMsec(msec);
     iassert(msec > 0);
-    msecb = SV_Frame(mseca);
+    msec = SV_Frame(msec);
+
+#ifdef KISAK_MP
     Com_DedicatedModified();
 
     if (!com_dedicated->current.integer)
+#endif
     {
         R_SetEndTime(com_lastFrameTime[lastFrameIndex]);
-        KISAK_NULLSUB();
-        CL_RunOncePerClientFrame(0, msecb);
-        Com_EventLoop();
-        for (localClientNum = 0; localClientNum < 1; ++localClientNum)
+
         {
-            Cbuf_Execute(localClientNum, CL_ControllerIndexFromClientNum(localClientNum));
+            PROF_SCOPED("pre frame");
+            CL_RunOncePerClientFrame(0, msec);
+            Com_EventLoop();
+#ifdef KISAK_MP
+            for (localClientNum = 0; localClientNum < 1; ++localClientNum)
+            {
+                Cbuf_Execute(localClientNum, CL_ControllerIndexFromClientNum(localClientNum));
+            }
+#elif KISAK_SP
+            Cbuf_Execute(0, CL_ControllerIndexFromClientNum(0));
+            Com_AttractMode(0);
+            //if (!cl_multi_gamepads_enabled) // KISAKTODO?
+            //{
+            //    v20 = 2;
+            //    v21 = com_gamePadCheats;
+            //    do
+            //    {
+            //        Com_UpdateGamePadCheat(0, v21);
+            //        --v20;
+            //        ++v21;
+            //    } while (v20);
+            //}
+#endif
         }
-        //KISAK_NULLSUB();
+
         {
             PROF_SCOPED("CL_Frame");
+#ifdef KISAK_MP
             for (localClientNuma = NS_CLIENT1; localClientNuma < NS_SERVER; ++localClientNuma)
                 CL_Frame(localClientNuma);
+#elif KISAK_SP
+            CL_Frame(0, msec);
+#endif
         }
+
+#ifdef KISAK_MP
         dvar_modifiedFlags &= ~2u;
         Com_UpdateMenu();
+#endif
         SCR_UpdateScreen();
-        Ragdoll_Update(msecb);
+        Ragdoll_Update(msec);
         iassert(Sys_IsMainThread());
-        KISAK_NULLSUB();
-        deltaTime = (double)cls.frametime * EQUAL_EPSILON;
+#ifdef KISAK_SP
+        //SCR_UpdateRumble(); // KISAKTODO
+#endif
+        deltaTime = cls.frametime * EQUAL_EPSILON;
         DevGui_Update(0, deltaTime);
         Com_Statmon();
         R_WaitEndTime();
     }
+
+#ifdef KISAK_SP
+    //if (g_launchData.startupText[0])
+    //{
+    //    I_strncpyz(v35, g_launchData.startupText, 2048);
+    //    memset(g_launchData.startupText, 0, sizeof(g_launchData.startupText));
+    //    XSetLaunchData(&g_launchData, 0x3D8u);
+    //    Com_Error(ERR_DROP, v35);
+    //}
+#endif
 }
 
 void __cdecl Com_WriteConfiguration(int localClientNum)
@@ -1732,7 +1898,11 @@ int Com_UpdateMenu()
     connstate_t clcState; // [esp+4h] [ebp-4h]
 
     clcState = clientUIActives[0].connectionState;
+#ifdef KISAK_MP
     result = UI_IsFullscreen(0);
+#elif KISAK_SP
+    result = UI_IsFullscreen();
+#endif
     if (!result && clcState == CA_DISCONNECTED)
     {
         MenuScreen = (uiMenuCommand_t)UI_GetMenuScreen();
@@ -1752,7 +1922,11 @@ void __cdecl Com_AssetLoadUI()
         zoneInfo.freeFlags = 104;
         DB_LoadXAssets(&zoneInfo, 1u, 0);
     }
+#ifdef KISAK_MP
     UI_SetMap((char*)"", (char*)"");
+#elif KISAK_SP
+    UI_SetMap((char *)"");
+#endif
     R_BeginRemoteScreenUpdate();
     CL_StartHunkUsers();
     R_EndRemoteScreenUpdate();
@@ -2016,10 +2190,27 @@ void Com_CheckError()
 }
 
 #ifdef KISAK_SP
+#include <script/scr_memorytree.h>
+
 void Com_ResetFrametime()
 {
     com_lastFrameTime[0] = Sys_Milliseconds();
     com_lastFrameTime[1] = com_lastFrameTime[0];
     com_lastFrameTime[2] = com_lastFrameTime[0];
+}
+
+void Com_XAnimFreeSmallTree(XAnimTree_s *animtree)
+{
+    XAnimFreeTree(animtree, (void(*)(void*,int))MT_Free);
+}
+
+static void *MT_AllocAnimTree(int size)
+{
+    return MT_Alloc(size, 5);
+}
+
+XAnimTree_s *Com_XAnimCreateSmallTree(XAnim_s *anims)
+{
+    return XAnimCreateTree(anims, MT_AllocAnimTree);
 }
 #endif

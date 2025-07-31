@@ -1,8 +1,15 @@
 #include "game_public.h"
 #include <server/sv_game.h>
-#include <game_mp/g_utils_mp.h>
+
 #include <server/sv_world.h>
 #include <script/scr_vm.h>
+#ifdef KISAK_MP
+#include <game_mp/g_utils_mp.h>
+#elif KISAK_SP
+#include <server/sv_public.h>
+#include "g_local.h"
+#include "g_main.h"
+#endif
 
 
 //Line 53050:  0006 : 0053ff60       int32_t *itemRegistered     82ceff60     g_items.obj

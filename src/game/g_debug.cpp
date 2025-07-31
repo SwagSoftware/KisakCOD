@@ -205,6 +205,7 @@ void G_DebugDrawBrush_r(cLeafBrushNode_s *node, const float *color)
     } while (v4 < node->leafBrushCount);
 }
 
+#ifdef KISAK_SP
 void G_DebugDrawBrushModel(gentity_s *entity, const float *color, int depthTest, int duration)
 {
     unsigned int v8; // r29
@@ -212,9 +213,9 @@ void G_DebugDrawBrushModel(gentity_s *entity, const float *color, int depthTest,
 
     iassert(entity);
 
-    v8 = *(unsigned __int16 *)entity->s.index;
+    v8 = entity->s.index.item;
 
-    if (*(_WORD *)entity->s.index)
+    if (entity->s.index.item)
     {
         g_debugDrawBrushInfo.depthTest = depthTest;
         g_debugDrawBrushInfo.duration = duration;
@@ -228,6 +229,7 @@ void G_DebugDrawBrushModel(gentity_s *entity, const float *color, int depthTest,
         G_DebugDrawBrush_r(&cm.leafbrushNodes[v9->leaf.leafBrushNode], color);
     }
 }
+#endif
 
 void G_DebugPlane(
     const float * const normal,

@@ -2,7 +2,6 @@
 #include <cstdint>
 
 #include <bgame/bg_local.h>
-#include "bullet.h"
 
 static uint8_t bulletPriorityMap[20] =
 {

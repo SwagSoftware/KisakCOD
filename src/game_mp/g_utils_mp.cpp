@@ -188,7 +188,7 @@ int __cdecl G_MaterialIndex(const char *name)
     return G_FindConfigstringIndex(shaderName, 2002, 256, level.initializing, "material");
 }
 
-int __cdecl G_ModelIndex(char *name)
+int __cdecl G_ModelIndex(const char *name)
 {
     const char *v2; // eax
     unsigned int nameString; // [esp+68h] [ebp-10h]
@@ -254,7 +254,7 @@ int __cdecl G_ModelIndex(char *name)
             MyAssertHandler(".\\game_mp\\g_utils_mp.cpp", 298, 0, "i doesn't index MAX_MODELS\n\t%i not in [0, %i)", i, 512);
         if (i == 512)
             Com_Error(ERR_DROP, "G_ModelIndex: overflow");
-        cached_models[i] = SV_XModelGet(name);
+        cached_models[i] = SV_XModelGet((char*)name);
         SV_SetConfigstring(i + 830, name);
         return i;
     }

@@ -771,7 +771,7 @@ void __cdecl ClientThink_real(gentity_s *ent, long double a2)
     {
         if ((v29 & 0x10000) != 0)
         {
-            LOBYTE(v29) = p_cmd->selectedLocation[1];
+            v29 = p_cmd->selectedLocation[1];
             v30 = p_cmd->selectedLocation[0];
             v36[2] = 0.0;
             LODWORD(v29) = (char)v29;

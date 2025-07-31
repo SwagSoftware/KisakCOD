@@ -100,3 +100,9 @@ void Cmd_UnregisterAllNotifications();
 #endif
 
 extern CmdArgs sv_cmd_args;
+
+
+
+bool __cdecl SV_RecordingDemo();
+
+void Cmd_Echo_f();

@@ -376,36 +376,18 @@ void __cdecl G_DamageNotify(
     int damage,
     int mod,
     unsigned int modelIndex,
-    unsigned int partName,
-    int a10,
-    int a11,
-    int a12,
-    int a13,
-    int a14,
-    int a15,
-    int a16,
-    int a17,
-    int a18,
-    int a19,
-    int a20,
-    int a21,
-    int a22,
-    int a23,
-    int a24,
-    int a25,
-    int a26,
-    int a27,
-    unsigned int a28)
+    unsigned int partName)
 {
     unsigned int v36; // r27
-    unsigned int ConfigstringConst; // r31
+    unsigned int modelName; // r31
     const float *v38; // r3
     const float *v39; // r3
 
-    if (a28)
-        Scr_AddConstString(a28);
+    if (partName)
+        Scr_AddConstString(partName);
     else
         Scr_AddString("");
+
     if (modelIndex)
     {
         v36 = 2 * (modelIndex + 272);
@@ -416,11 +398,11 @@ void __cdecl G_DamageNotify(
                 0,
                 "%s",
                 "targ->attachTagNames[modelIndex - 1]");
-        ConfigstringConst = SV_GetConfigstringConst(*((unsigned __int16 *)&targ->scripted + modelIndex + 1) + 1155);
-        if (!ConfigstringConst)
+        modelName = SV_GetConfigstringConst(*((unsigned __int16 *)&targ->scripted + modelIndex + 1) + 1155);
+        if (!modelName)
             MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\g_combat.cpp", 469, 1, "%s", "modelName");
         Scr_AddConstString(*(unsigned __int16 *)(&targ->s.eType + v36));
-        Scr_AddConstString(ConfigstringConst);
+        Scr_AddConstString(modelName);
     }
     else
     {
@@ -605,19 +587,17 @@ void __cdecl G_Damage(
     unsigned int modelIndex,
     unsigned int partName)
 {
-    int v34; // r29
+    int damage; // r29
     unsigned int WeaponIndexForEntity; // r19
     const gentity_s *v43; // r3
     unsigned int NumWeapons; // r3
     gclient_s *client; // r24
     __int64 v46; // r10
-    const dvar_s *v47; // r11
+    const dvar_s *dmgDvar; // r11
     __int64 v48; // fp13
     unsigned int v49; // r20
     double WeaponHitLocationMultiplier; // fp1
     actor_s *actor; // r3
-    unsigned int v52; // r27
-    unsigned int v53; // r26
     int v54; // r3
     int v55; // r30
     int health; // r11
@@ -654,8 +634,7 @@ void __cdecl G_Damage(
     float v87; // [sp+6Ch] [-94h]
     float v88; // [sp+70h] [-90h]
 
-    v34 = damage;
-    a22 = damage;
+    damage = damage;
 
     iassert(targ);
 
@@ -669,9 +648,9 @@ void __cdecl G_Damage(
         iassert(targ->r.inuse);
         iassert(attacker->r.inuse);
         
-        WeaponIndexForEntity = a28;
+        WeaponIndexForEntity = weapon;
 
-        if (a28 == -1)
+        if (weapon == -1)
         {
             v43 = inflictor;
             if (!inflictor)
@@ -704,35 +683,36 @@ void __cdecl G_Damage(
                 }
                 if (mod != 11)
                 {
-                    LODWORD(v46) = v34;
+                    LODWORD(v46) = damage;
                     if ((dflags & 1) != 0)
                     {
-                        v47 = player_radiusDamageMultiplier;
+                        dmgDvar = player_radiusDamageMultiplier;
                         v48 = v46;
                     }
                     else
                     {
                         if (mod == 7)
-                            v47 = player_meleeDamageMultiplier;
+                            dmgDvar = player_meleeDamageMultiplier;
                         else
-                            v47 = player_damageMultiplier;
+                            dmgDvar = player_damageMultiplier;
                         v48 = v46;
                     }
-                    a22 = (int)(float)(v47->current.value * (float)v48);
-                    v34 = a22;
+                    //a22 = (int)(float)(dmgDvar->current.value * (float)v48);
+                    //damage = a22;
+                    damage = (int)(float)(dmgDvar->current.value * (float)v48);
                 }
-                if (v34 <= 0)
+                if (damage <= 0)
                 {
-                    v34 = 1;
-                    a22 = 1;
+                    damage = 1;
+                    //a22 = 1;
                 }
             }
             if (!G_ShouldTakeBulletDamage(targ, attacker))
                 return;
-            v49 = a30;
+            v49 = hitLoc;
             if (targ->actor && mod != 7)
             {
-                if (a30 > 0x12)
+                if (hitLoc > 0x12)
                     MyAssertHandler(
                         "c:\\trees\\cod3\\cod3src\\src\\game\\g_combat.cpp",
                         744,
@@ -742,29 +722,29 @@ void __cdecl G_Damage(
                 WeaponHitLocationMultiplier = G_GetWeaponHitLocationMultiplier(v49, WeaponIndexForEntity);
                 if (WeaponHitLocationMultiplier == 0.0)
                     return;
-                a22 = (int)(float)((float)__SPAIR64__(&a22, v34) * (float)WeaponHitLocationMultiplier);
-                v34 = a22;
-                if (a22 <= 0)
-                    v34 = 1;
+                //a22 = (int)(float)((float)__SPAIR64__(&a22, damage) * (float)WeaponHitLocationMultiplier);
+                damage = damage * WeaponHitLocationMultiplier;
+                if (damage <= 0)
+                    damage = 1;
             }
             v86 = 0.0;
             v87 = 0.0;
             v88 = 0.0;
-            G_DamageKnockback(targ, attacker, dir, &v86, __SPAIR64__(v34, dflags), mod);
+            G_DamageKnockback(targ, attacker, dir, &v86, __SPAIR64__(damage, dflags), mod);
             if ((targ->flags & 1) == 0)
             {
-                if (v34 < 1)
-                    v34 = 1;
+                if (damage < 1)
+                    damage = 1;
                 actor = targ->actor;
-                v52 = a34;
-                v53 = a32;
+                //v52 = a34;
+                //v53 = a32;
                 if (actor)
                 {
-                    v54 = Actor_CheckDeathAllowed(actor, v34);
+                    v54 = Actor_CheckDeathAllowed(actor, damage);
                     v55 = v54;
-                    v34 -= v54;
+                    damage -= v54;
                     if (g_debugDamage->current.enabled)
-                        Com_Printf(15, "client:%i health:%i damage:%i armor:%i\n", targ->s.number, targ->health, v34, v54);
+                        Com_Printf(15, "client:%i health:%i damage:%i armor:%i\n", targ->s.number, targ->health, damage, v54);
                     if (v55)
                         G_DamageNotify(
                             scr_const.damage_notdone,
@@ -772,33 +752,14 @@ void __cdecl G_Damage(
                             attacker,
                             dir,
                             point,
-                            v55,
+                            damage,
                             mod,
-                            v53,
-                            v67,
-                            v68,
-                            v69,
-                            v70,
-                            v71,
-                            v72,
-                            v73,
-                            v74,
-                            v75,
-                            v76,
-                            v77,
-                            v78,
-                            v79,
-                            v80,
-                            v81,
-                            v82,
-                            v83,
-                            v84,
-                            v85,
-                            v52);
+                            modelIndex,
+                            partName);
                 }
                 if (client)
                 {
-                    client->damage_blood += v34;
+                    client->damage_blood += damage;
                     if (dir)
                     {
                         client->damage_from[0] = v86;
@@ -814,16 +775,16 @@ void __cdecl G_Damage(
                         client->damage_fromWorld = 1;
                     }
                 }
-                if (v34)
+                if (damage)
                 {
                     if ((targ->flags & 2) != 0)
                     {
                         health = targ->health;
-                        if (health - v34 <= 0)
-                            v34 = health - 1;
+                        if (health - damage <= 0)
+                            damage = health - 1;
                     }
                     v57 = targ->health;
-                    targ->health = v57 - v34;
+                    targ->health = v57 - damage;
                     if (client && client->invulnerableEnabled)
                         handleDeathInvulnerability(targ, v57, mod);
                     G_DamageNotify(
@@ -832,35 +793,17 @@ void __cdecl G_Damage(
                         attacker,
                         dir,
                         point,
-                        v34,
+                        damage,
                         mod,
-                        v53,
-                        v67,
-                        v68,
-                        v69,
-                        v70,
-                        v71,
-                        v72,
-                        v73,
-                        v74,
-                        v75,
-                        v76,
-                        v77,
-                        v78,
-                        v79,
-                        v80,
-                        v81,
-                        v82,
-                        v83,
-                        v84,
-                        v85,
-                        v52);
+                        modelIndex,
+                        partName
+                    );
                     v58 = targ->health;
                     if (v58 > 0)
                     {
                         pain = entityHandlers[targ->handler].pain;
                         if (pain)
-                            pain(targ, attacker, v34, point, mod, &v86, (const hitLocation_t)v49, WeaponIndexForEntity);
+                            pain(targ, attacker, damage, point, mod, &v86, (const hitLocation_t)v49, WeaponIndexForEntity);
                         goto LABEL_85;
                     }
                     if (client)
@@ -900,7 +843,7 @@ void __cdecl G_Damage(
                     if (die)
                     {
                         v64 = G_GetWeaponIndexForEntity(inflictor);
-                        die(targ, inflictor, attacker, v34, mod, v64, &v86, (const hitLocation_t)v49);
+                        die(targ, inflictor, attacker, damage, mod, v64, &v86, (const hitLocation_t)v49);
                     }
                     if (targ->r.inuse)
                     {
@@ -1493,29 +1436,23 @@ float __cdecl EntDistToPoint(float *origin, gentity_s *ent)
 
 void __cdecl GetEntListForRadius(
     const float *origin,
-    double radius_max,
-    double radius_min,
+    float radius_max,
+    float radius_min,
     int *entList,
-    int *entListCount,
-    int *a6,
-    unsigned int *a7)
+    int *entListCount)
 {
-    double v7; // fp13
-    double v8; // fp12
-    double v9; // fp11
-    float v10[4]; // [sp+50h] [-30h] BYREF
-    float v11[4]; // [sp+60h] [-20h] BYREF
+    float mins[3]; // [esp+0h] [ebp-20h] BYREF
+    float boxradius; // [esp+Ch] [ebp-14h]
+    float maxs[3]; // [esp+10h] [ebp-10h] BYREF
+    int i; // [esp+1Ch] [ebp-4h]
 
-    v7 = *origin;
-    v8 = origin[1];
-    v9 = origin[2];
-    v10[0] = *origin - (float)((float)radius_max * (float)1.4142135);
-    v11[0] = (float)v7 + (float)((float)radius_max * (float)1.4142135);
-    v10[1] = (float)v8 - (float)((float)radius_max * (float)1.4142135);
-    v11[1] = (float)v8 + (float)((float)radius_max * (float)1.4142135);
-    v10[2] = (float)v9 - (float)((float)radius_max * (float)1.4142135);
-    v11[2] = (float)v9 + (float)((float)radius_max * (float)1.4142135);
-    *a7 = CM_AreaEntities(v10, v11, a6, 2176, -1);
+    boxradius = 1.4142135 * radius_max;
+    for (i = 0; i < 3; ++i)
+    {
+        mins[i] = origin[i] - boxradius;
+        maxs[i] = origin[i] + boxradius;
+    }
+    *entListCount = CM_AreaEntities(mins, maxs, entList, MAX_GENTITIES, -1);
 }
 
 void __cdecl AddScrTeamName(team_t team)
@@ -1627,33 +1564,10 @@ int __cdecl G_CanRadiusDamage(
     double radius,
     double coneAngleCos,
     float *coneDirection,
-    float *contentMask,
-    float *a8,
-    int a9)
+    int contentMask)
 {
-    int v17; // [sp+8h] [-98h]
-    int v18; // [sp+Ch] [-94h]
-    int v19; // [sp+10h] [-90h]
-    int v20; // [sp+14h] [-8Ch]
-    int v21; // [sp+18h] [-88h]
-    int v22; // [sp+1Ch] [-84h]
-    int v23; // [sp+20h] [-80h]
-    int v24; // [sp+24h] [-7Ch]
-    int v25; // [sp+28h] [-78h]
-    int v26; // [sp+2Ch] [-74h]
-    int v27; // [sp+30h] [-70h]
-    int v28; // [sp+34h] [-6Ch]
-    int v29; // [sp+38h] [-68h]
-    int v30; // [sp+3Ch] [-64h]
-    int v31; // [sp+40h] [-60h]
-    int v32; // [sp+44h] [-5Ch]
-    int v33; // [sp+48h] [-58h]
-    int v34; // [sp+4Ch] [-54h]
-    int v35; // [sp+50h] [-50h]
-    int v36; // [sp+58h] [-48h]
+    iassert(targ);
 
-    if (!targ)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\g_combat.cpp", 895, 0, "%s", "targ");
     return G_CanRadiusDamageFromPos(
         targ,
         targ->r.currentOrigin,
@@ -1661,33 +1575,10 @@ int __cdecl G_CanRadiusDamage(
         centerPos,
         radius,
         coneAngleCos,
-        contentMask,
+        coneDirection,
         0.0,
-        (bool)a8,
-        a8,
-        1,
-        v17,
-        v18,
-        v19,
-        v20,
-        v21,
-        v22,
-        v23,
-        v24,
-        v25,
-        v26,
-        v27,
-        v28,
-        v29,
-        v30,
-        v31,
-        v32,
-        v33,
-        v34,
-        v35,
-        1,
-        v36,
-        a9);
+        true,
+        contentMask);
 }
 
 void __cdecl FlashbangBlastEnt(
@@ -1696,9 +1587,7 @@ void __cdecl FlashbangBlastEnt(
     double radius_max,
     double radius_min,
     gentity_s *attacker,
-    team_t team,
-    gentity_s *a7,
-    team_t a8)
+    team_t team)
 {
     float *v14; // r7
     float *v15; // r6
@@ -1718,7 +1607,7 @@ void __cdecl FlashbangBlastEnt(
         v16 = EntDistToPoint(blastOrigin, ent);
         if (v16 <= radius_max)
         {
-            if (G_CanRadiusDamage(ent, a7, blastOrigin, radius_max, 1.0, v15, v14, 0, 10241))
+            if (G_CanRadiusDamage(ent, attacker, blastOrigin, radius_max, 1.0, 0, 10241))
             {
                 if (v16 > radius_min)
                     v17 = (float)((float)1.0
@@ -1753,9 +1642,9 @@ void __cdecl FlashbangBlastEnt(
                 v20 = (float)((float)((float)((float)(v21 * v25[0]) + (float)((float)(v25[2] * v23) + (float)(v25[1] * v22)))
                     + (float)1.0)
                     * (float)0.5);
-                AddScrTeamName(a8);
-                if (a7)
-                    Scr_AddEntity(a7);
+                AddScrTeamName(team);
+                if (attacker)
+                    Scr_AddEntity(attacker);
                 else
                     Scr_AddUndefined();
                 Scr_AddFloat(v20);
@@ -1771,40 +1660,24 @@ void __cdecl G_FlashbangBlast(
     double radius_max,
     double radius_min,
     gentity_s *attacker,
-    int *team,
-    gentity_s *a6,
-    team_t a7)
+    team_t team)
 {
-    double v7; // fp31
-    double v9; // fp30
-    team_t v12; // r6
-    gentity_s *v13; // r5
-    int v14; // r29
-    int *v15; // r30
-    gentity_s *v16; // r31
-    unsigned int v17[4]; // [sp+50h] [-2280h] BYREF
-    int v18[156]; // [sp+60h] [-2270h] BYREF
+    int entList[MAX_GENTITIES];
+    int entListCount;
 
-    v7 = radius_min;
-    v9 = radius_max;
     if (radius_min < 1.0)
-        v7 = 1.0;
-    if (radius_max < v7)
-        v9 = v7;
-    GetEntListForRadius(origin, v9, v7, (int *)attacker, team, v18, v17);
-    v14 = v17[0];
-    if (v17[0] > 0)
+        radius_min = 1.0f;
+    if (radius_min > radius_max)
+        radius_max = radius_min;
+
+    GetEntListForRadius(origin, radius_max, radius_min, entList, &entListCount);
+
+    for (int i = 0; i < entListCount; i++)
     {
-        v15 = v18;
-        do
-        {
-            v16 = &g_entities[*v15];
-            if (!v16)
-                MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\g_combat.cpp", 1286, 0, "%s", "ent");
-            FlashbangBlastEnt(v16, origin, v9, v7, v13, v12, a6, a7);
-            --v14;
-            ++v15;
-        } while (v14);
+        gentity_s *ent = &g_entities[entList[i]];
+        iassert(ent);
+
+        FlashbangBlastEnt(ent, origin, radius_max, radius_min, attacker, team);
     }
 }
 
@@ -1819,32 +1692,7 @@ int __cdecl G_RadiusDamage(
     float *coneDirection,
     gentity_s *ignore,
     int mod,
-    int weapon,
-    float *a12,
-    int a13,
-    int a14,
-    int a15,
-    int a16,
-    int a17,
-    int a18,
-    int a19,
-    int a20,
-    int a21,
-    int a22,
-    int a23,
-    int a24,
-    int a25,
-    int a26,
-    int a27,
-    int a28,
-    int a29,
-    int a30,
-    int a31,
-    gentity_s *a32,
-    int a33,
-    int a34,
-    int a35,
-    unsigned int a36)
+    int weapon)
 {
     int v44; // r18
     double v45; // fp12
@@ -1853,11 +1701,11 @@ int __cdecl G_RadiusDamage(
     int v48; // r3
     int *v49; // r23
     int v50; // r19
-    gentity_s *v51; // r31
+    gentity_s *ent; // r31
     float *v52; // r7
     float *v53; // r6
     double RadiusDamageDistanceSquared; // fp1
-    double v55; // fp30
+    double damage; // fp30
     double v56; // fp11
     double v57; // fp10
     double v58; // fp0
@@ -1865,26 +1713,8 @@ int __cdecl G_RadiusDamage(
     hitLocation_t v61; // [sp+Ch] [-2364h]
     unsigned int v62; // [sp+10h] [-2360h]
     unsigned int v63; // [sp+14h] [-235Ch]
-    int v64; // [sp+18h] [-2358h]
-    int v65; // [sp+1Ch] [-2354h]
-    int v66; // [sp+20h] [-2350h]
-    int v67; // [sp+24h] [-234Ch]
-    int v68; // [sp+28h] [-2348h]
-    int v69; // [sp+2Ch] [-2344h]
-    int v70; // [sp+30h] [-2340h]
-    int v71; // [sp+34h] [-233Ch]
-    int v72; // [sp+38h] [-2338h]
-    int v73; // [sp+3Ch] [-2334h]
-    int v74; // [sp+40h] [-2330h]
-    int v75; // [sp+44h] [-232Ch]
-    int v76; // [sp+48h] [-2328h]
-    int v77; // [sp+4Ch] [-2324h]
-    int v78; // [sp+50h] [-2320h]
-    int v79; // [sp+58h] [-2318h]
-    int v80; // [sp+60h] [-2310h]
-    int v81; // [sp+68h] [-2308h]
     float v82[4]; // [sp+78h] [-22F8h] BYREF
-    float v83[4]; // [sp+88h] [-22E8h] BYREF
+    float dir[4]; // [sp+88h] [-22E8h] BYREF
     float v84[6]; // [sp+98h] [-22D8h] BYREF
     int v85[176]; // [sp+B0h] [-22C0h] BYREF
 
@@ -1908,61 +1738,41 @@ int __cdecl G_RadiusDamage(
         v50 = v48;
         do
         {
-            v51 = &g_entities[*v49];
-            if (v51 != a32 && v51->takedamage && (!v51->client || !level.bPlayerIgnoreRadiusDamage))
+            ent = &g_entities[*v49];
+            if (ent != ignore && ent->takedamage && (!ent->client || !level.bPlayerIgnoreRadiusDamage))
             {
-                RadiusDamageDistanceSquared = G_GetRadiusDamageDistanceSquared(origin, v51);
-                if (RadiusDamageDistanceSquared < (float)((float)radius * (float)radius))
+                RadiusDamageDistanceSquared = G_GetRadiusDamageDistanceSquared(origin, ent);
+                if (RadiusDamageDistanceSquared < (radius * radius))
                 {
-                    v55 = (float)((float)((float)((float)1.0
+                    damage = (float)((float)((float)((float)1.0
                         //- (float)((float)sqrtf(RadiusDamageDistanceSquared) / (float)radius))
                         - (float)((float)sqrtf(RadiusDamageDistanceSquared) / (float)radius))
                         * (float)((float)fInnerDamage - (float)fOuterDamage))
                         + (float)fOuterDamage);
-                    if (G_CanRadiusDamage(v51, inflictor, origin, radius, coneAngleCos, v53, v52, a12, 8396817))
+                    if (G_CanRadiusDamage(ent, inflictor, origin, radius, coneAngleCos, coneDirection, 8396817))
                     {
-                        if (attacker && LogAccuracyHit(v51, attacker))
+                        if (attacker && LogAccuracyHit(ent, attacker))
                             v44 = 1;
                         v56 = origin[1];
-                        v57 = v51->r.currentOrigin[1];
-                        v58 = (float)(v51->r.currentOrigin[2] - origin[2]);
-                        v83[0] = v51->r.currentOrigin[0] - *origin;
-                        v83[1] = (float)v57 - (float)v56;
-                        v83[2] = (float)v58 + (float)24.0;
+                        v57 = ent->r.currentOrigin[1];
+                        v58 = (float)(ent->r.currentOrigin[2] - origin[2]);
+
+                        dir[0] = ent->r.currentOrigin[0] - *origin;
+                        dir[1] = (float)v57 - (float)v56;
+                        dir[2] = (float)v58 + (float)24.0;
+
                         G_Damage(
-                            v51,
+                            ent,
                             inflictor,
                             attacker,
-                            v83,
+                            dir,
                             origin,
-                            (int)v55,
-                            5u,
-                            a34,
-                            v60,
-                            v61,
-                            v62,
-                            v63,
-                            v64,
-                            v65,
-                            v66,
-                            v67,
-                            v68,
-                            v69,
-                            v70,
-                            v71,
-                            v72,
-                            v73,
-                            v74,
-                            v75,
-                            v76,
-                            v77,
-                            v78,
-                            a36,
-                            v79,
+                            (int)damage,
+                            5, // dflags
+                            mod,
+                            weapon,
+                            HITLOC_NONE,
                             0,
-                            v80,
-                            0,
-                            v81,
                             0);
                     }
                 }

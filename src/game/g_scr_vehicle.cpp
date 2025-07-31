@@ -1,7 +1,13 @@
 #include "game_public.h"
 
+#ifdef KISAK_MP
 #include <game_mp/g_public_mp.h>
 #include <game_mp/g_utils_mp.h>
+#elif KISAK_SP
+#include "g_main.h"
+#include "g_local.h"
+
+#endif
 
 #include <script/scr_const.h>
 #include <script/scr_vm.h>
@@ -2562,7 +2568,8 @@ void VEH_SetupCollmap(gentity_s *ent)
     }
 }
 
-void G_UpdateVehicleTags(gentity_s *ent)
+#ifdef KISAK_SP
+static void G_UpdateVehicleTags(gentity_s *ent)
 {
     scr_vehicle_s *scr_vehicle; // r30
     int *flash; // r28
@@ -2598,6 +2605,235 @@ void G_UpdateVehicleTags(gentity_s *ent)
         *wheel++ = v8;
     } while ((int)v7 < (int)s_flashTags);
 }
+
+static const char *s_vehicleTypeNames[6] = { "4 wheel", "tank", "plane", "boat", "artillery", "helicopter" };
+
+int VEH_ParseSpecificField(unsigned __int8 *pStruct, const char *pValue, int fieldType)
+{
+    const char *v6; // r3
+    int v8; // r30
+    const char **v9; // r31
+
+    if (fieldType == 12)
+    {
+        v8 = 0;
+        v9 = (const char **)s_vehicleTypeNames;
+        while (I_stricmp(pValue, *v9))
+        {
+            ++v9;
+            ++v8;
+            if ((int)v9 >= (int)s_wheelTags)
+                goto LABEL_10;
+        }
+        *((_WORD *)pStruct + 32) = v8;
+    LABEL_10:
+        if (v8 == 6)
+            Com_Error(ERR_DROP, "Unknown vehicle type [%s]", pValue); // lwss: omg iw forgot the % here. wow what an epic find.
+        return 1;
+    }
+    else
+    {
+        if (!alwaysfails)
+        {
+            v6 = va("Bad vehicle field type %i\n", fieldType);
+            MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\g_scr_vehicle.cpp", 437, 0, v6);
+        }
+        Com_Error(ERR_DROP, "Bad vehicle field type %i", fieldType);
+        return 0;
+    }
+}
+
+static void VEH_Strcpy(unsigned char *pMember, const char *pKeyValue)
+{
+    int v2; // r10
+    int v3; // r11
+
+    v2 = pMember - (unsigned char *)pKeyValue;
+    do
+    {
+        v3 = *(unsigned char *)pKeyValue;
+        ((char*)pKeyValue++)[v2] = v3;
+    } while (v3);
+}
+
+int __fastcall G_LoadVehicle(const char *name)
+{
+    const char *InfoString; // r28
+    int v3; // r27
+    vehicle_info_t *v4; // r31
+    char *v5; // r11
+    int v6; // r9
+    int result; // r3
+    double collisionSpeed; // fp12
+    unsigned __int16 *sndIndices; // r30
+    double maxSpeed; // fp11
+    int v11; // r28
+    double engineSndSpeed; // fp10
+    const char *v13; // r31
+    char v14[64]; // [sp+50h] [-2080h] BYREF
+    char v15[64]; // [sp+90h] [-2040h] BYREF
+
+    if (!name)
+        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\g_scr_vehicle.cpp", 489, 0, "%s", "name");
+    sprintf(v14, "vehicles/%s", name);
+    InfoString = Com_LoadInfoString(v14, "vehicle file", "VEHICLEFILE", v15);
+    v3 = s_numVehicleInfos;
+    v4 = &s_vehicleInfos[s_numVehicleInfos];
+    memset(v4, 0, sizeof(vehicle_info_t));
+    v5 = (char*)name;
+    do
+    {
+        v6 = *(unsigned __int8 *)v5;
+        (v5++)[(char *)v4 - name] = v6;
+    } while (v6);
+    if (!ParseConfigStringToStruct(
+        (unsigned __int8 *)v4,
+        s_vehicleFields,
+        33,
+        (char*)InfoString,
+        13,
+        VEH_ParseSpecificField,
+        VEH_Strcpy))
+        return -1;
+    collisionSpeed = v4->collisionSpeed;
+    sndIndices = (unsigned short*)v4->sndIndices;
+    maxSpeed = v4->maxSpeed;
+    v11 = 6;
+    engineSndSpeed = v4->engineSndSpeed;
+    v4->accel = v4->accel * (float)17.6;
+    v4->collisionSpeed = (float)collisionSpeed * (float)17.6;
+    v4->maxSpeed = (float)maxSpeed * (float)17.6;
+    v4->engineSndSpeed = (float)engineSndSpeed * (float)17.6;
+    v13 = v4->sndNames[0];
+    do
+    {
+        if (*v13)
+            *sndIndices = G_SoundAliasIndexPermanent(v13);
+        else
+            *sndIndices = 0;
+        --v11;
+        ++sndIndices;
+        v13 += 64;
+    } while (v11);
+    result = v3;
+    ++s_numVehicleInfos;
+    return result;
+}
+int __fastcall VEH_GetVehicleInfoFromName(const char *name)
+{
+    int v2; // r30
+    vehicle_info_t *v3; // r29
+    int result; // r3
+    vehicle_info_t *v5; // r29
+
+    if (!name || !*name)
+        return -1;
+    v2 = 0;
+    if (s_numVehicleInfos > 0)
+    {
+        v3 = s_vehicleInfos;
+        while (I_stricmp(name, v3->name))
+        {
+            ++v2;
+            ++v3;
+            if (v2 >= s_numVehicleInfos)
+                goto LABEL_7;
+        }
+        return v2;
+    }
+LABEL_7:
+    result = G_LoadVehicle(name);
+    if (result < 0)
+    {
+        Com_PrintWarning(15, "WARNING: couldn't find vehicle info for '%s', attempting to use 'defaultvehicle'.\n", name);
+        v2 = 0;
+        if (s_numVehicleInfos > 0)
+        {
+            v5 = s_vehicleInfos;
+            while (I_stricmp("defaultvehicle", v5->name))
+            {
+                ++v2;
+                ++v5;
+                if (v2 >= s_numVehicleInfos)
+                    goto LABEL_12;
+            }
+            return v2;
+        }
+    LABEL_12:
+        result = G_LoadVehicle("defaultvehicle");
+        if (result < 0)
+        {
+            Com_Error(ERR_DROP, "Cannot find vehicle info for 'defaultvehicle'");
+            return -1;
+        }
+    }
+    return result;
+}
+
+static int VEH_DObjHasRequiredTags(gentity_s *ent, int infoIdx)
+{
+    int type; // r11
+    int v4; // r30
+    int v5; // r29
+    unsigned __int16 **i; // r31
+
+    type = s_vehicleInfos[infoIdx].type;
+    if (s_vehicleInfos[infoIdx].type && type != 1)
+        return 1;
+    v4 = 0;
+    v5 = type == 0 ? 4 : 6;
+    if (v5 <= 0)
+        return 1;
+    for (i = s_wheelTags; SV_DObjGetBoneIndex(ent, **i) >= 0; ++i)
+    {
+        if (++v4 >= v5)
+            return 1;
+    }
+    return 0;
+}
+static void VEH_InitModelAndValidateTags(gentity_s *ent, int *infoIdx)
+{
+    int VehicleInfoFromName; // r28
+    char v5; // r27
+    unsigned int v6; // r3
+    const char *v7; // r3
+
+    VehicleInfoFromName = VEH_GetVehicleInfoFromName("defaultvehicle");
+    v5 = 0;
+    if (*infoIdx == VehicleInfoFromName)
+    {
+        v5 = 1;
+        G_SetModel(ent, "defaultvehicle");
+    LABEL_6:
+        *infoIdx = VehicleInfoFromName;
+        goto LABEL_7;
+    }
+    if (ent->model && G_XModelBad(ent->model))
+    {
+        v5 = 1;
+        G_OverrideModel(ent->model, "defaultvehicle");
+        goto LABEL_6;
+    }
+LABEL_7:
+    G_DObjUpdate(ent);
+    if (!VEH_DObjHasRequiredTags(ent, *infoIdx))
+    {
+        if (v5)
+            Com_Error(ERR_DROP, "ERROR: default vehicle is missing a required tag!");
+        v6 = G_ModelName(ent->model);
+        v7 = SL_ConvertToString(v6);
+        Com_PrintWarning(
+            15,
+            "WARNING: vehicle '%s' is missing a required tag! switching to default vehicle model and info.\n",
+            v7);
+        G_SetModel(ent, "defaultvehicle");
+        *infoIdx = VehicleInfoFromName;
+        G_DObjUpdate(ent);
+        if (!VEH_DObjHasRequiredTags(ent, *infoIdx))
+            Com_Error(ERR_DROP, "ERROR: default vehicle is missing a required tag!");
+    }
+}
+#endif
 
 void G_SpawnVehicle(gentity_s *ent, const char *typeName, int load)
 {
@@ -2706,6 +2942,15 @@ bool G_IsVehicleUsable(gentity_s *ent, gentity_s *player)
     {
         return ((unsigned int)ent->r.contents >> 21) & 1;
     }
+}
+
+void __fastcall G_PrecacheDefaultVehicle()
+{
+    int VehicleInfoFromName; // r3
+
+    G_ModelIndex("defaultvehicle");
+    VehicleInfoFromName = VEH_GetVehicleInfoFromName("defaultvehicle");
+    G_GetWeaponIndexForName(s_vehicleInfos[VehicleInfoFromName].turretWeapon);
 }
 
 #endif

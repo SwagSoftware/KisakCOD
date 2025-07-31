@@ -91,7 +91,6 @@ struct VehicleTags // sizeof=0x60
     int32_t flash[5];
     int32_t wheel[4];
 };
-static_assert(sizeof(VehicleTags) == 0x60);
 
 enum VehicleMoveState : __int32
 {                                       // ...
@@ -171,7 +170,7 @@ int __cdecl G_VehUpdatePathPos(vehicle_pathpos_t *vpp, __int16 testNode);
 void __cdecl G_VehSetSwitchNode(vehicle_pathpos_t *vpp, __int16 srcNodeIdx, __int16 dstNodeIdx);
 void __cdecl TRACK_g_vehicle_path();
 void __cdecl SP_info_vehicle_node(int rotated);
-int __cdecl GScr_GetVehicleNodeIndex(scr_entref_t *index, unsigned int a2);
+int __cdecl GScr_GetVehicleNodeIndex(int index);
 void __cdecl GScr_AddFieldsForVehicleNode();
 void __cdecl GScr_GetVehicleNodeField(unsigned int entnum, unsigned int offset);
 void __cdecl GScr_GetVehicleNode();

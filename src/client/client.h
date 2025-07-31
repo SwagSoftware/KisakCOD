@@ -1322,4 +1322,8 @@ extern int cl_multi_gamepads_enabled;
 extern int cl_controller_in_use;
 extern int cl_last_controller_input;
 
+// cl_scrn
+extern int scr_initialized;
+extern bool updateScreenCalled;
+
 #endif

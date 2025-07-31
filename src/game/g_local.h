@@ -196,13 +196,7 @@ void __cdecl G_InitGame(
     int checksum,
     int loadScripts,
     int savegame,
-    SaveGame **save,
-    int a7,
-    int a8,
-    int a9,
-    int a10,
-    int a11,
-    unsigned int a12);
+    SaveGame **save);
 void __cdecl G_ShutdownGame(int clearScripts);
 void G_ChangeLevel();
 bool __cdecl G_IsNextMapWaiting();
@@ -446,26 +440,7 @@ void __cdecl G_DamageNotify(
     int damage,
     int mod,
     unsigned int modelIndex,
-    unsigned int partName,
-    int a10,
-    int a11,
-    int a12,
-    int a13,
-    int a14,
-    int a15,
-    int a16,
-    int a17,
-    int a18,
-    int a19,
-    int a20,
-    int a21,
-    int a22,
-    int a23,
-    int a24,
-    int a25,
-    int a26,
-    int a27,
-    unsigned int a28);
+    unsigned int partName);
 int __cdecl G_GetWeaponIndexForEntity(const gentity_s *ent);
 void __cdecl G_DamageKnockback(
     gentity_s *targ,
@@ -502,12 +477,10 @@ int __cdecl G_CanRadiusDamageFromPos(
 float __cdecl EntDistToPoint(float *origin, gentity_s *ent);
 void __cdecl GetEntListForRadius(
     const float *origin,
-    double radius_max,
-    double radius_min,
+    float radius_max,
+    float radius_min,
     int *entList,
-    int *entListCount,
-    int *a6,
-    unsigned int *a7);
+    int *entListCount);
 void __cdecl AddScrTeamName(team_t team);
 float __cdecl G_GetRadiusDamageDistanceSquared(float *damageOrigin, gentity_s *ent);
 bool __cdecl G_WithinDamageRadius(float *damageOrigin, double radiusSquared, gentity_s *ent, gentity_s *a4);
@@ -520,26 +493,20 @@ int __cdecl G_CanRadiusDamage(
     double radius,
     double coneAngleCos,
     float *coneDirection,
-    float *contentMask,
-    float *a8,
-    int a9);
+    int contentMask);
 void __cdecl FlashbangBlastEnt(
     gentity_s *ent,
     float *blastOrigin,
     double radius_max,
     double radius_min,
     gentity_s *attacker,
-    team_t team,
-    gentity_s *a7,
-    team_t a8);
+    team_t team);
 void __cdecl G_FlashbangBlast(
     float *origin,
     double radius_max,
     double radius_min,
     gentity_s *attacker,
-    int *team,
-    gentity_s *a6,
-    team_t a7);
+    team_t team);
 int __cdecl G_RadiusDamage(
     float *origin,
     gentity_s *inflictor,
@@ -551,32 +518,7 @@ int __cdecl G_RadiusDamage(
     float *coneDirection,
     gentity_s *ignore,
     int mod,
-    int weapon,
-    float *a12,
-    int a13,
-    int a14,
-    int a15,
-    int a16,
-    int a17,
-    int a18,
-    int a19,
-    int a20,
-    int a21,
-    int a22,
-    int a23,
-    int a24,
-    int a25,
-    int a26,
-    int a27,
-    int a28,
-    int a29,
-    int a30,
-    int a31,
-    gentity_s *a32,
-    int a33,
-    int a34,
-    int a35,
-    unsigned int a36);
+    int weapon);
 
 
 // g_spawn
@@ -756,8 +698,7 @@ bool __cdecl G_SlideMove(
     const float *maxs,
     const float *gravity,
     unsigned __int8 passEntityNum,
-    int clipMask,
-    int a9);
+    int clipMask);
 void __cdecl G_StepSlideMove(
     double deltaT,
     float *origin,
@@ -766,8 +707,7 @@ void __cdecl G_StepSlideMove(
     const float *maxs,
     const float *gravity,
     unsigned __int8 passEntityNum,
-    int clipMask,
-    int a9);
+    int clipMask);
 void __cdecl G_SafeDObjFree(gentity_s *ent);
 int __cdecl G_DObjUpdateServerTime(gentity_s *ent, int bNotify);
 void __cdecl G_DObjCalcPose(gentity_s *ent, int *partBits);

@@ -270,8 +270,8 @@ bool __cdecl Path_IsBadPlaceLink(unsigned int nodeNumFrom, unsigned int nodeNumT
 unsigned int Path_InitLinkCounts();
 void Path_InitLinkInfoArray();
 void __cdecl Path_InitNodeDynamic(pathnode_t *loadNode);
-void __cdecl Path_InitNodesDynamic(float *a1);
-void __cdecl Path_PreSpawnInitPaths(float *a1);
+void __cdecl Path_InitNodesDynamic();
+void __cdecl Path_PreSpawnInitPaths();
 void __cdecl Path_DrawDebugNoLinks(const pathnode_t *node, const float (*color)[4], int duration);
 void __cdecl Path_DrawDebugLink(const pathnode_t *node, const int i, bool bShowAll);
 float __cdecl Path_GetDebugStringScale(const float *cameraPos, const float *origin);

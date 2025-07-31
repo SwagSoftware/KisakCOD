@@ -19,6 +19,9 @@
 #include <aim_assist/aim_target.h>
 #include <script/scr_vm.h>
 #include "actor_threat.h"
+#include <script/scr_const.h>
+#include "g_vehicle_path.h"
+#include "turret.h"
 
 const char *g_helicopterYawAltitudeControlsNames[4] =
 {

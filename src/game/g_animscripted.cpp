@@ -91,7 +91,7 @@ void __cdecl G_Animscripted_DeathPlant(
     int v17; // r8
     double v18; // fp0
     float *pPitch; // r6
-    float *v20; // r3
+    int num; // r3
     float v21; // [sp+50h] [-160h] BYREF
     float v22; // [sp+54h] [-15Ch]
     float v23; // [sp+58h] [-158h]
@@ -164,11 +164,11 @@ void __cdecl G_Animscripted_DeathPlant(
     }
     else
     {
-        v20 = (float *)ent->s.number;
+        num = ent->s.number;
         vOrigin[0] = (float)((float)(v24 - v21) * v38[0].fraction) + v21;
         vOrigin[1] = (float)((float)(v25 - v22) * v38[0].fraction) + v22;
         vOrigin[2] = (float)((float)(v26 - v23) * v38[0].fraction) + v23;
-        Actor_GetBodyPlantAngles(v20, 8519697, vOrigin, yaw, &scripted->fEndPitch, &scripted->fEndRoll, NULL);
+        Actor_GetBodyPlantAngles(num, 8519697, vOrigin, yaw, &scripted->fEndPitch, &scripted->fEndRoll, NULL);
     }
     if (XAnimGetLength(anims, anim) >= 1.0)
         scripted->fOrientLerp = 0.0;

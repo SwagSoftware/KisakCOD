@@ -14,6 +14,8 @@
 #include "savememory.h"
 #include "actor_senses.h"
 
+#include <algorithm>
+
 //Line 37928:  0006 : 00006700       char const **nodeStringTable  82696700     pathnode.obj
 
 path_t *g_pPath;
@@ -881,7 +883,7 @@ void __cdecl Path_InitNodeDynamic(pathnode_t *loadNode)
     loadNode->dynamic.turretEntNumber = -1;
 }
 
-void __cdecl Path_InitNodesDynamic(float *a1)
+void __cdecl Path_InitNodesDynamic()
 {
     unsigned int v1; // r28
     int v2; // r30
@@ -915,7 +917,7 @@ void __cdecl Path_InitNodesDynamic(float *a1)
                 p_transient = (pathnode_transient_t *)((char *)p_transient + 4);
                 --v7;
             } while (v7);
-            YawVectors(v3->constant.fAngle, a1, v8);
+            YawVectors(v3->constant.fAngle, NULL, v8);
             v3->constant.forward[0] = v8[0];
             ++v1;
             ++v2;
@@ -925,9 +927,9 @@ void __cdecl Path_InitNodesDynamic(float *a1)
     }
 }
 
-void __cdecl Path_PreSpawnInitPaths(float *a1)
+void __cdecl Path_PreSpawnInitPaths()
 {
-    Path_InitNodesDynamic(a1);
+    Path_InitNodesDynamic();
     Path_InitLinkCounts();
 }
 
@@ -1367,7 +1369,7 @@ LABEL_11:
     v19[0] = (float)((float)(perp[1] * (float)5000.0) + v15) + (float)(perp[0] * width);
     v19[1] = (float)(v16 - (float)(perp[0] * (float)5000.0)) + (float)(perp[1] * width);
     G_DebugLine(v18, v19, colorCyan, 0);
-    if (Path_FindPathWithWidth((path_t *)g_pPath, TEAM_FREE, vStartPos, vGoalPos, 1, width, v5, perp)
+    if (Path_FindPathWithWidth((path_t *)g_pPath, TEAM_FREE, vStartPos, vGoalPos, 1, width, perp)
         && Path_Exists((const path_t *)g_pPath))
     {
     LABEL_30:
@@ -3077,7 +3079,6 @@ void __cdecl Scr_SetTurretNode()
 {
     unsigned int v0; // r4
     pathnode_t *Pathnode; // r30
-    unsigned int v2; // r4
     gentity_s *Entity; // r31
 
     if (Scr_GetNumParam() == 2)
@@ -3085,7 +3086,7 @@ void __cdecl Scr_SetTurretNode()
         Pathnode = Scr_GetPathnode(0);
         if (Pathnode->constant.type == NODE_TURRET)
         {
-            Entity = Scr_GetEntity((scr_entref_t *)1, v2);
+            Entity = Scr_GetEntity(1);
             if (!Entity->pTurretInfo)
                 Scr_Error("Entity is not a turret");
             Pathnode->dynamic.turretEntNumber = Entity->s.number;
@@ -4259,7 +4260,7 @@ pathnode_t *__cdecl Path_NearestNodeNotCrossPlanes(
 {
     int v39; // r5
     pathsort_t *v40; // r4
-    float *pOrigin; // r3
+    const float *pOrigin; // r3
     double maxHeight; // fp2
     int numNodes; // r28
     int v44; // r24
@@ -4270,8 +4271,8 @@ pathnode_t *__cdecl Path_NearestNodeNotCrossPlanes(
     double v49; // fp13
     double v50; // fp13
     int v51; // r9
-    float *v52; // r10
-    float *v53; // r11
+    int v52; // r10
+    const float *v53; // r11
     int v54; // r30
     unsigned int *v55; // r31
     const float *v56; // r7
@@ -4282,7 +4283,7 @@ pathnode_t *__cdecl Path_NearestNodeNotCrossPlanes(
     unsigned int v62[256]; // [sp+90h] [-480h] BYREF
 
     //Profile_Begin(232);
-    if (a31)
+    if (heightCheck)
     {
         pOrigin = vOrigin;
         maxHeight = 1000000000.0;
@@ -4295,12 +4296,13 @@ pathnode_t *__cdecl Path_NearestNodeNotCrossPlanes(
         pOrigin = v61;
         maxHeight = 184.0;
     }
-    numNodes = Path_NodesInCylinder(pOrigin, fMaxDist, maxHeight, nodes, a29, typeFlags);
-    std::_Sort<pathsort_t *, int, bool(__cdecl *)(pathsort_t const &, pathsort_t const &)>(
-        nodes,
-        &nodes[(unsigned int)v43],
-        12 * (int)v43 / 12,
-        (bool(__cdecl *)(const pathsort_t *, const pathsort_t *))Path_CompareNodesIncreasing);
+    numNodes = Path_NodesInCylinder((float*)pOrigin, fMaxDist, maxHeight, nodes, maxNodes, typeFlags);
+    //std::_Sort<pathsort_t *, int, bool(__cdecl *)(pathsort_t const &, pathsort_t const &)>(
+    //    nodes,
+    //    &nodes[(unsigned int)v43],
+    //    12 * (int)v43 / 12,
+    //    (bool(__cdecl *)(const pathsort_t *, const pathsort_t *))Path_CompareNodesIncreasing);
+    std::sort(nodes, &nodes[numNodes], Path_CompareNodesIncreasing);
     v44 = 0;
     v45 = 0;
     v59[0] = -15.0;
@@ -4308,7 +4310,7 @@ pathnode_t *__cdecl Path_NearestNodeNotCrossPlanes(
     v60[0] = 15.0;
     v60[1] = 15.0;
     v60[2] = 72.0;
-    *maxNodes = numNodes;
+    maxNodes = numNodes;
     v59[2] = (float)0.0 + (float)17.0;
     if ((int)numNodes > 0)
     {
@@ -4352,7 +4354,7 @@ pathnode_t *__cdecl Path_NearestNodeNotCrossPlanes(
         }
         v52 = iPlaneCount;
         v53 = fDist;
-        while ((float)((float)(v53[1] * node->constant.vOrigin[1]) + (float)(node->constant.vOrigin[0] * *v53)) <= (double)*v52)
+        while ((float)((float)(v53[1] * node->constant.vOrigin[1]) + (float)(node->constant.vOrigin[0] * *v53)) <= (double)v52)
         {
             ++v51;
             v53 += 2;

@@ -3,9 +3,39 @@
 #endif
 
 #include "g_local.h"
+#include <server/sv_public.h>
+#include <script/scr_const.h>
+#include <script/scr_vm.h>
+#include <stringed/stringed_hooks.h>
+#include "g_main.h"
+#include <server/sv_game.h>
+#include "turret.h"
+#include "actor_corpse.h"
+#include <script/scr_animtree.h>
+#include <database/database.h>
 
-char const **entityTypeNames;
+const char *entityTypeNames[17] =
+{
+  "ET_GENERAL",
+  "ET_PLAYER",
+  "ET_ITEM",
+  "ET_MISSILE",
+  "ET_INVISIBLE",
+  "ET_SCRIPTMOVER",
+  "ET_SOUND_BLEND",
+  "ET_FX",
+  "ET_LOOP_FX",
+  "ET_PRIMARY_LIGHT",
+  "ET_MG42",
+  "ET_VEHICLE",
+  "ET_VEHICLE_CORPSE",
+  "ET_VEHICLE_COLLMAP",
+  "ET_ACTOR",
+  "ET_ACTOR_SPAWNER",
+  "ET_ACTOR_CORPSE"
+};
 
+XModel *cached_models[512]{ NULL };
 
 void __cdecl TRACK_g_utils()
 {
@@ -13,6 +43,7 @@ void __cdecl TRACK_g_utils()
     track_static_alloc_internal(cached_models, 2048, "cached_models", 9);
 }
 
+static bool dumpedOnce = false;
 void __cdecl G_DumpConfigStrings(int start, int max)
 {
     int v4; // r31
@@ -73,7 +104,7 @@ int __cdecl G_FindConfigstringIndex(const char *name, int start, int max, int cr
     if (i == max)
     {
         G_DumpConfigStrings(start, max);
-        v16 = va(byte_8203F37C, start, name);
+        v16 = va("G_FindConfigstringIndex overflow (%d) : %s", start, name);
         Com_Error(ERR_DROP, v16);
     }
     SV_SetConfigstring(i + start, name);
@@ -82,6 +113,7 @@ LABEL_16:
     return i;
 }
 
+static const char *origErrorMsg = "localized string";
 int __cdecl G_LocalizedStringIndex(const char *string)
 {
     const char *v3; // r29
@@ -139,7 +171,7 @@ int __cdecl G_LocalizedStringIndex(const char *string)
         if (i == 1023)
         {
             G_DumpConfigStrings(91, 1023);
-            v9 = va(byte_8203F37C, 91, string);
+            v9 = va("G_LocalizedStringIndex: overflow (%d) : %s", 91, string);
             Com_Error(ERR_DROP, v9);
         }
         SV_SetConfigstring(i + 91, string);
@@ -173,7 +205,7 @@ LABEL_24:
         if (i == 1023)
         {
             G_DumpConfigStrings(91, 1023);
-            v12 = va(byte_8203F37C, 91, string);
+            v12 = va("G_LocalizedStringIndex: overflow (%d) : %s", 91, string);
             Com_Error(ERR_DROP, v12);
         }
         SV_SetConfigstring(i + 91, string);
@@ -189,15 +221,14 @@ LABEL_24:
 
 int __cdecl G_MaterialIndex(const char *name)
 {
-    const char *v2; // r11
+    char *v2; // r11
     int v3; // r10
     char v5[96]; // [sp+50h] [-60h] BYREF
 
-    if (!name)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\g_utils.cpp", 214, 0, "%s", "name");
-    if (!*name)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\g_utils.cpp", 215, 0, "%s", "name[0]");
-    v2 = name;
+    iassert(name);
+    iassert(name[0]);
+
+    v2 = (char*)name;
     do
     {
         v3 = *(unsigned __int8 *)v2;
@@ -217,7 +248,7 @@ void __cdecl G_SetModelIndex(int modelIndex, const char *name)
             "%s\n\t(modelIndex) = %i",
             "(modelIndex > 0 && modelIndex < (1 << 9))",
             modelIndex);
-    cached_models[modelIndex] = SV_XModelGet(name);
+    cached_models[modelIndex] = SV_XModelGet((char*)name);
     SV_SetConfigstring(modelIndex + 1155, name);
 }
 
@@ -251,7 +282,7 @@ int __cdecl G_ModelIndex(const char *name)
                 Scr_Error(v6);
             }
             if (v4 == 512)
-                Com_Error(ERR_DROP, byte_8203F47C);
+                Com_Error(ERR_DROP, "G_ModelIndex: overflow");
             G_SetModelIndex(v4, name);
             goto LABEL_14;
         }
@@ -292,8 +323,9 @@ bool __cdecl G_GetModelBounds(int index, float *outMins, float *outMaxs)
     Model = G_GetModel(index);
     if (!Model)
         MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\g_utils.cpp", 296, 0, "%s", "xmodel");
-    AxisClear(v8);
-    return (_cntlzw(XModelGetStaticBounds(Model, v8, outMins, outMaxs)) & 0x20) == 0;
+    AxisClear((mat3x3&)v8);
+    //return (_cntlzw(XModelGetStaticBounds(Model, (mat3x3&)v8, outMins, outMaxs)) & 0x20) == 0;
+    return XModelGetStaticBounds(Model, (mat3x3&)v8, outMins, outMaxs) != 0;
 }
 
 int __cdecl G_XModelBad(int index)
@@ -330,7 +362,7 @@ void __cdecl G_EntityCentroidWithBounds(const gentity_s *ent, const float *mins,
     v10[0] = (float)(*mins + *maxs) * (float)0.5;
     v10[1] = v9;
     v10[2] = (float)v8 * (float)0.5;
-    MatrixTransformVector(v10, v11, centroid);
+    MatrixTransformVector(v10, (const mat3x3&)v11, centroid);
     *centroid = ent->r.currentOrigin[0] + *centroid;
     centroid[1] = ent->r.currentOrigin[1] + centroid[1];
     centroid[2] = ent->r.currentOrigin[2] + centroid[2];
@@ -353,7 +385,7 @@ void __cdecl G_EntityCentroid(const gentity_s *ent, float *centroid)
     v6[0] = (float)(ent->r.mins[0] + ent->r.maxs[0]) * (float)0.5;
     v6[2] = (float)((float)v4 + ent->r.maxs[2]) * (float)0.5;
     v6[1] = (float)v5 * (float)0.5;
-    MatrixTransformVector(v6, v7, centroid);
+    MatrixTransformVector(v6, (const mat3x3 &)v7, centroid);
     *centroid = ent->r.currentOrigin[0] + *centroid;
     centroid[1] = ent->r.currentOrigin[1] + centroid[1];
     centroid[2] = ent->r.currentOrigin[2] + centroid[2];
@@ -517,7 +549,7 @@ unsigned int __cdecl G_SoundAliasIndexTransient(const char *name)
                     level.soundAliasFirst);
             v14 = (unsigned __int16)(v13 + 1);
             if (v14 >= 0x200)
-                LOWORD(v14) = v14 - 256;
+                v14 = v14 - 256;
             if ((unsigned __int16)v14 < 0x100u || (unsigned __int16)v14 >= 0x200u)
                 MyAssertHandler(
                     "c:\\trees\\cod3\\cod3src\\src\\game\\g_utils.cpp",
@@ -546,7 +578,7 @@ unsigned int __cdecl G_SoundAliasIndexTransient(const char *name)
                 level.soundAliasLast);
         v16 = (unsigned __int16)(v15 + 1);
         if (v16 >= 0x200)
-            LOWORD(v16) = v16 - 256;
+            v16 = v16 - 256;
         if ((unsigned __int16)v16 < 0x100u || (unsigned __int16)v16 >= 0x200u)
             MyAssertHandler(
                 "c:\\trees\\cod3\\cod3src\\src\\game\\g_utils.cpp",
@@ -624,7 +656,7 @@ void __cdecl G_SetClientDemoServerSnapTime(int time)
 void __cdecl G_ClearDemoEntities()
 {
     int v0; // r20
-    gentity_s *i; // r31
+    gentity_s *ent; // r31
     XAnimTree_s *Tree; // r3
     XAnimTree_s *pAnimTree; // r3
     actor_s *actor; // r3
@@ -639,50 +671,38 @@ void __cdecl G_ClearDemoEntities()
     else
     {
         v0 = 0;
-        for (i = level.gentities; v0 < level.num_entities; ++i)
+        for (ent = level.gentities; v0 < level.num_entities; ++ent)
         {
-            if (i->r.inuse)
+            if (ent->r.inuse)
             {
-                Tree = SV_DObjGetTree(i);
+                Tree = SV_DObjGetTree(ent);
                 if (Tree)
                     XAnimClearTree(Tree);
-                Com_SafeServerDObjFree(i->s.number);
-                pAnimTree = i->pAnimTree;
+                Com_SafeServerDObjFree(ent->s.number);
+                pAnimTree = ent->pAnimTree;
                 if (pAnimTree)
                 {
                     Com_XAnimFreeSmallTree(pAnimTree);
-                    i->pAnimTree = 0;
+                    ent->pAnimTree = 0;
                 }
-                actor = i->actor;
+                actor = ent->actor;
                 if (actor)
                     Actor_Free(actor);
-                scr_vehicle = i->scr_vehicle;
+                scr_vehicle = ent->scr_vehicle;
                 if (scr_vehicle)
                 {
                     scr_vehicle->entNum = 2175;
-                    if (EntHandle::isDefined(&i->scr_vehicle->idleSndEnt))
-                        MyAssertHandler(
-                            "c:\\trees\\cod3\\cod3src\\src\\game\\g_utils.cpp",
-                            494,
-                            0,
-                            "%s",
-                            "!ent->scr_vehicle->idleSndEnt.isDefined()");
-                    if (EntHandle::isDefined(&i->scr_vehicle->engineSndEnt))
-                        MyAssertHandler(
-                            "c:\\trees\\cod3\\cod3src\\src\\game\\g_utils.cpp",
-                            495,
-                            0,
-                            "%s",
-                            "!ent->scr_vehicle->engineSndEnt.isDefined()");
-                    i->scr_vehicle = 0;
+                    iassert(!ent->scr_vehicle->idleSndEnt.isDefined());
+                    iassert(!ent->scr_vehicle->engineSndEnt.isDefined());
+                    ent->scr_vehicle = 0;
                 }
-                pTurretInfo = i->pTurretInfo;
+                pTurretInfo = ent->pTurretInfo;
                 if (pTurretInfo)
                 {
                     if (!pTurretInfo->inuse)
                         MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\g_utils.cpp", 501, 0, "%s", "ent->pTurretInfo->inuse");
-                    G_FreeTurret(i);
-                    if (i->pTurretInfo)
+                    G_FreeTurret(ent);
+                    if (ent->pTurretInfo)
                         MyAssertHandler(
                             "c:\\trees\\cod3\\cod3src\\src\\game\\g_utils.cpp",
                             503,
@@ -690,18 +710,18 @@ void __cdecl G_ClearDemoEntities()
                             "%s",
                             "ent->pTurretInfo == NULL");
                 }
-                i->r.inuse = 0;
+                ent->r.inuse = 0;
             }
-            if (i->actor)
+            if (ent->actor)
                 MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\g_utils.cpp", 509, 0, "%s", "ent->actor == NULL");
-            if (i->sentient && !i->client)
+            if (ent->sentient && !ent->client)
                 MyAssertHandler(
                     "c:\\trees\\cod3\\cod3src\\src\\game\\g_utils.cpp",
                     510,
                     0,
                     "%s",
                     "(ent->sentient == NULL) || (ent->client != NULL)");
-            if (i->scr_vehicle)
+            if (ent->scr_vehicle)
                 MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\g_utils.cpp", 511, 0, "%s", "ent->scr_vehicle == NULL");
             ++v0;
         }
@@ -1073,13 +1093,13 @@ void __cdecl G_CheckDObjUpdate(gentity_s *ent)
                     0,
                     "%s",
                     "!dobjModels[numModels].boneName || (dobjModels[numModels].boneName == ent->attachTagNames[i] )");
-            if (*((_BYTE *)v8 + 2) != ((_cntlzw((1 << (v7 - 1)) & ent->attachIgnoreCollision) & 0x20) == 0))
-                MyAssertHandler(
-                    "c:\\trees\\cod3\\cod3src\\src\\game\\g_utils.cpp",
-                    832,
-                    0,
-                    "%s",
-                    "dobjModels[numModels].ignoreCollision == ((ent->attachIgnoreCollision & (1 << i)) != 0)");
+            //if (*((_BYTE *)v8 + 2) != ((_cntlzw((1 << (v7 - 1)) & ent->attachIgnoreCollision) & 0x20) == 0))
+            //    MyAssertHandler(
+            //        "c:\\trees\\cod3\\cod3src\\src\\game\\g_utils.cpp",
+            //        832,
+            //        0,
+            //        "%s",
+            //        "dobjModels[numModels].ignoreCollision == ((ent->attachIgnoreCollision & (1 << i)) != 0)");
             ++v7;
             ++attachTagNames;
             v8 += 2;

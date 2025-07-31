@@ -689,7 +689,7 @@ void __cdecl HeadHitEnt_Pain(
     iassert(pSelf->r.ownerNum.isDefined());
     target = p_ownerNum->ent();
     if (target->takedamage)
-        G_Damage(target, pAttacker, pAttacker, vDir, vPoint, iDamage, 0, iMod, -1/*Weapon*/, hitLoc, 0, 0, 0);
+        G_Damage(target, pAttacker, pAttacker, vDir, vPoint, iDamage, 0, iMod, -1/*Weapon*/, hitLoc, 0, 0);
 }
 
 void __cdecl HeadHitEnt_Die(
