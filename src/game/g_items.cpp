@@ -3,6 +3,8 @@
 
 #include <server/sv_world.h>
 #include <script/scr_vm.h>
+#include <script/scr_const.h>
+
 #ifdef KISAK_MP
 #include <game_mp/g_utils_mp.h>
 #elif KISAK_SP
@@ -137,17 +139,19 @@ void __cdecl Touch_Item(gentity_s *ent, gentity_s *other, int32_t touched)
                 item = &bg_itemlist[ent->s.index.brushmodel];
                 if (BG_CanItemBeGrabbed(&ent->s, &other->client->ps, touched))
                 {
+#ifdef KISAK_MP
                     I_strncpyz(cleanname, other->client->sess.cs.name, 64);
                     I_CleanStr(cleanname);
                     szInternalName = BG_GetWeaponDef(weapIndex)->szInternalName;
                     number = other->s.number;
                     Guid = SV_GetGuid(other->s.number);
                     G_LogPrintf("Weapon;%s;%d;%s;%s\n", Guid, number, cleanname, szInternalName);
-                    if (!item)
-                        MyAssertHandler(".\\game\\g_items.cpp", 609, 0, "%s", "item");
-                    if (item->giType != IT_WEAPON)
-                        MyAssertHandler(".\\game\\g_items.cpp", 610, 0, "%s", "item->giType == IT_WEAPON");
+#endif
+                    iassert(item);  
+                    iassert(item->giType == IT_WEAPON);
                     pickedUp = WeaponPickup(ent, other, &pickupEvent, touched);
+
+#ifdef KISAK_MP
                     if (pickupEvent)
                     {
                         if (other->client->sess.predictItemPickup)
@@ -161,6 +165,16 @@ void __cdecl Touch_Item(gentity_s *ent, gentity_s *other, int32_t touched)
                             Scr_Notify(ent, scr_const.death, 0);
                         G_FreeEntity(ent);
                     }
+#elif KISAK_SP
+                    if (pickupEvent)
+                        G_AddEvent(other, pickupEvent, weapIndex);
+                    if (pickedUp)
+                    {
+                        if (ent->s.eType == 3)
+                            Scr_Notify(ent, scr_const.death, 0);
+                        G_FreeEntity(ent);
+                    }
+#endif
                 }
                 else
                 {
@@ -341,9 +355,14 @@ LABEL_12:
     }
     else
     {
+#ifdef KISAK_MP
         v6 = va("%c \"GAME_CANT_GET_PRIMARY_WEAP_MESSAGE\"", 102);
         SV_GameSendServerCommand(other - g_entities, SV_CMD_CAN_IGNORE, v6);
         return 0;
+#elif KISAK_SP
+        SV_GameSendServerCommand(other - g_entities, va("gm \"GAME_CANT_GET_PRIMARY_WEAP_MESSAGE\""));
+        return 0;
+#endif
     }
 }
 
@@ -446,15 +465,23 @@ void __cdecl PrintPlayerPickupMessage(gentity_s *player, uint32_t weapIdx, Weapo
 {
     const char *v3; // eax
 
-    if (!player)
-        MyAssertHandler(".\\game\\g_items.cpp", 272, 0, "%s", "player");
-    if (!weapDef)
-        MyAssertHandler(".\\game\\g_items.cpp", 273, 0, "%s", "weapDef");
+    iassert(player);
+    iassert(weapDef);
+
+#ifdef KISAK_MP
     if (BG_WeaponIsClipOnly(weapIdx))
         v3 = va("*WARNING* One or more selections were skipped as they could not be interpreted as c data", 102, weapDef->szDisplayName);
     else
         v3 = va("*WARNING* One or more selections were skipped as they could not be interpreted as c data", 102, weapDef->szDisplayName);
     SV_GameSendServerCommand(player - g_entities, SV_CMD_CAN_IGNORE, v3);
+#elif KISAK_SP
+    const char *v8;
+    if (BG_WeaponIsClipOnly(weapIdx))
+        v8 = va("gm \"GAME_PICKUP_CLIPONLY_AMMO %s\"", weapDef->szDisplayName);
+    else
+        v8 = va("gm \"GAME_PICKUP_AMMO %s\"", weapDef->szDisplayName);
+    SV_GameSendServerCommand(player - g_entities, v8);
+#endif
 }
 
 void __cdecl WeaponPickup_AddAmmoForNewWeapon(gentity_s *weaponEnt, gentity_s *player)
@@ -538,40 +565,57 @@ void __cdecl PrintMessage_CannotGrabItem(gentity_s *ent, gentity_s *player, int3
 {
     WeaponDef *WeaponDef; // eax
     const char *v6; // eax
-    gclient_s *client; // [esp+0h] [ebp-4h]
+    gclient_s *ps; // [esp+0h] [ebp-4h]
 
-    if (!ent)
-        MyAssertHandler(".\\game\\g_items.cpp", 534, 0, "%s", "ent");
-    if (!player)
-        MyAssertHandler(".\\game\\g_items.cpp", 535, 0, "%s", "player");
-    if (!player->client)
-        MyAssertHandler(".\\game\\g_items.cpp", 536, 0, "%s", "player->client");
-    if (!item)
-        MyAssertHandler(".\\game\\g_items.cpp", 537, 0, "%s", "item");
-    if (!touched && ent->s.clientNum != player->s.number)
+    iassert(ent);
+    iassert(player);
+    iassert(player->client);
+    iassert(item);
+
+    if (!touched)
     {
-        if (item->giType != IT_WEAPON)
-            MyAssertHandler(".\\game\\g_items.cpp", 544, 0, "%s", "item->giType == IT_WEAPON");
-        client = player->client;
-        if (!client)
-            MyAssertHandler("c:\\trees\\cod3\\src\\bgame\\../bgame/bg_weapons.h", 229, 0, "%s", "ps");
-        if (Com_BitCheckAssert(client->ps.weapons, weapIndex, 16))
+#ifdef KISAK_MP
+        if (ent->s.clientNum != player->s.number)
+#endif
         {
-            WeaponDef = BG_GetWeaponDef(weapIndex);
-            v6 = va("%c \"GAME_PICKUP_CANTCARRYMOREAMMO", 102, WeaponDef->szDisplayName);
+            iassert(item->giType == IT_WEAPON);
+
+#ifdef KISAK_MP
+            ps = player->client;
+            iassert(ps);
+            if (Com_BitCheckAssert(ps->ps.weapons, weapIndex, 16))
+            {
+                WeaponDef = BG_GetWeaponDef(weapIndex);
+                v6 = va("%c \"GAME_PICKUP_CANTCARRYMOREAMMO", 102, WeaponDef->szDisplayName);
+            }
+            else
+            {
+                v6 = va("%c \"GAME_CANT_GET_PRIMARY_WEAP_MESSAGE\"", 102);
+            }
+            SV_GameSendServerCommand(player - g_entities, SV_CMD_CAN_IGNORE, v6);
+#elif KISAK_SP
+            const char *v10;
+            if (BG_PlayerHasWeapon(&player->client->ps, weapIndex))
+            {
+                WeaponDef = BG_GetWeaponDef(weapIndex);
+                v10 = va("gm \"GAME_PICKUP_CANTCARRYMOREAMMO %s\"", WeaponDef->szDisplayName);
+            }
+            else
+            {
+                v10 = va("gm \"GAME_CANT_GET_PRIMARY_WEAP_MESSAGE\"");
+            }
+            SV_GameSendServerCommand(player - g_entities, v10);
+#endif
         }
-        else
-        {
-            v6 = va("%c \"GAME_CANT_GET_PRIMARY_WEAP_MESSAGE\"", 102);
-        }
-        SV_GameSendServerCommand(player - g_entities, SV_CMD_CAN_IGNORE, v6);
     }
 }
 
+#ifdef KISAK_MP
 void __cdecl DroppedItemClearOwner(gentity_s *pSelf)
 {
     pSelf->s.clientNum = 64;
 }
+#endif
 
 void __cdecl G_GetItemClassname(const gitem_s *item, uint16_t *out)
 {
@@ -591,8 +635,10 @@ gentity_s *__cdecl Drop_Item(gentity_s *ent, const gitem_s *item, float angle, i
 
     angles[0] = ent->r.currentAngles[0];
     angles[1] = ent->r.currentAngles[1] + angle;
+
     angles[0] = 0.0;
     angles[2] = 0.0;
+
     if (novelocity)
     {
         velocity[0] = 0.0;
@@ -602,15 +648,29 @@ gentity_s *__cdecl Drop_Item(gentity_s *ent, const gitem_s *item, float angle, i
     else
     {
         AngleVectors(angles, velocity, 0, 0);
+#ifdef KISAK_MP
         Vec3Scale(velocity, g_dropForwardSpeed->current.value, velocity);
         velocity[2] = crandom() * g_dropUpSpeedRand->current.value + g_dropUpSpeedBase->current.value + velocity[2];
         velocity[0] = crandom() * g_dropHorzSpeedRand->current.value + velocity[0];
         velocity[1] = crandom() * g_dropHorzSpeedRand->current.value + velocity[1];
+#elif KISAK_SP
+        Vec3Scale(velocity, 150.0f, velocity);
+        velocity[2] = (float)((float)((float)(G_crandom() * (float)50.0) + velocity[2]) + (float)200.0);
+#endif
     }
+
+#ifdef KISAK_MP
     vPos[0] = ent->r.currentOrigin[0];
     vPos[1] = ent->r.currentOrigin[1];
     vPos[2] = ent->r.currentOrigin[2];
     vPos[2] = (ent->r.maxs[2] - ent->r.mins[2]) * 0.5 + vPos[2];
+#elif KISAK_SP
+    float v8 = (float)(ent->r.maxs[2] - ent->r.mins[2]);
+    vPos[0] = ent->r.currentOrigin[0];
+    vPos[2] = (float)((float)((float)v8 * (float)0.5) + ent->r.currentOrigin[2]);
+    vPos[1] = ent->r.currentOrigin[1];
+#endif
+
     return LaunchItem(item, vPos, angles, velocity, ent->s.number);
 }
 
@@ -623,30 +683,10 @@ gentity_s *__cdecl LaunchItem(const gitem_s *item, float *origin, float *angles,
     uint8_t weapModel; // [esp+43h] [ebp-5h]
     WeaponDef *weapDef; // [esp+44h] [ebp-4h]
 
-    if (!item)
-        MyAssertHandler(".\\game\\g_items.cpp", 755, 0, "%s", "item");
-    if ((COERCE_UNSIGNED_INT(*origin) & 0x7F800000) == 0x7F800000
-        || (COERCE_UNSIGNED_INT(origin[1]) & 0x7F800000) == 0x7F800000
-        || (COERCE_UNSIGNED_INT(origin[2]) & 0x7F800000) == 0x7F800000)
-    {
-        MyAssertHandler(
-            ".\\game\\g_items.cpp",
-            757,
-            0,
-            "%s",
-            "!IS_NAN((origin)[0]) && !IS_NAN((origin)[1]) && !IS_NAN((origin)[2])");
-    }
-    if ((COERCE_UNSIGNED_INT(*velocity) & 0x7F800000) == 0x7F800000
-        || (COERCE_UNSIGNED_INT(velocity[1]) & 0x7F800000) == 0x7F800000
-        || (COERCE_UNSIGNED_INT(velocity[2]) & 0x7F800000) == 0x7F800000)
-    {
-        MyAssertHandler(
-            ".\\game\\g_items.cpp",
-            758,
-            0,
-            "%s",
-            "!IS_NAN((velocity)[0]) && !IS_NAN((velocity)[1]) && !IS_NAN((velocity)[2])");
-    }
+    iassert(item);
+    iassert(!IS_NAN((origin)[0]) && !IS_NAN((origin)[1]) && !IS_NAN((origin)[2]));
+    iassert(!IS_NAN((velocity)[0]) && !IS_NAN((velocity)[1]) && !IS_NAN((velocity)[2]));
+
     itemIndex = ((char *)item - (char *)bg_itemlist) >> 2;
     dropped = G_Spawn();
     dropIdx = GetFreeDropCueIdx();
@@ -655,49 +695,58 @@ gentity_s *__cdecl LaunchItem(const gitem_s *item, float *origin, float *angles,
     dropped->s.index.brushmodel = itemIndex;
     G_GetItemClassname(item, &dropped->classname);
     dropped->item[0].index = itemIndex;
-    if (item->giType != IT_WEAPON)
-        MyAssertHandler(".\\game\\g_items.cpp", 777, 0, "%s", "item->giType == IT_WEAPON");
+
+    iassert(item->giType == IT_WEAPON);
+
     dropped->r.mins[0] = -1.0;
     dropped->r.mins[1] = -1.0;
     dropped->r.mins[2] = -1.0;
+
     dropped->r.maxs[0] = 1.0;
     dropped->r.maxs[1] = 1.0;
     dropped->r.maxs[2] = 1.0;
+
+#ifdef KISAK_MP
     dropped->r.contents = 1079771400;
     dropped->r.contents |= 0x200000u;
     dropped->s.clientNum = ownerNum;
+#elif KISAK_SP
+    dropped->r.contents = 1081868552;
+#endif
     weapModel = itemIndex / 128;
     weapDef = BG_GetWeaponDef(itemIndex % 128);
-    if (!weapDef)
-        MyAssertHandler(".\\game\\g_items.cpp", 793, 0, "%s", "weapDef");
+
+    iassert(weapDef);
+
     if (weapDef->worldModel[weapModel])
     {
         Name = (char *)XModelGetName(weapDef->worldModel[weapModel]);
         G_SetModel(dropped, Name);
     }
+
     G_DObjUpdate(dropped);
+#ifdef KISAK_MP
     dropped->handler = 16;
+#elif KISAK_SP
+    dropped->handler = 12;
+#endif
     G_SetOrigin(dropped, origin);
     dropped->s.lerp.pos.trType = TR_GRAVITY;
     dropped->s.lerp.pos.trTime = level.time;
-    dropped->s.lerp.pos.trDelta[0] = *velocity;
+    dropped->s.lerp.pos.trDelta[0] = velocity[0];
     dropped->s.lerp.pos.trDelta[1] = velocity[1];
     dropped->s.lerp.pos.trDelta[2] = velocity[2];
+
     G_SetAngle(dropped, angles);
-    if ((COERCE_UNSIGNED_INT(dropped->s.lerp.pos.trDelta[0]) & 0x7F800000) == 0x7F800000
-        || (COERCE_UNSIGNED_INT(dropped->s.lerp.pos.trDelta[1]) & 0x7F800000) == 0x7F800000
-        || (COERCE_UNSIGNED_INT(dropped->s.lerp.pos.trDelta[2]) & 0x7F800000) == 0x7F800000)
-    {
-        MyAssertHandler(
-            ".\\game\\g_items.cpp",
-            807,
-            0,
-            "%s",
-            "!IS_NAN((dropped->s.lerp.pos.trDelta)[0]) && !IS_NAN((dropped->s.lerp.pos.trDelta)[1]) && !IS_NAN((dropped->s.lerp"
-            ".pos.trDelta)[2])");
-    }
+
+    iassert(!IS_NAN((dropped->s.lerp.pos.trDelta)[0]) && !IS_NAN((dropped->s.lerp.pos.trDelta)[1]) && !IS_NAN((dropped->s.lerp.pos.trDelta)[2]));
+
+#ifdef KISAK_MP
     dropped->flags = 16;
     dropped->nextthink = level.time + 1000;
+#elif KISAK_SP
+    dropped->flags = 2112;
+#endif
     SV_LinkEntity(dropped);
     return dropped;
 }
@@ -715,23 +764,21 @@ int32_t __cdecl GetFreeDropCueIdx()
     gclient_s *pClient; // [esp+28h] [ebp-10h]
     float fClientDistSqrd; // [esp+2Ch] [ebp-Ch]
     gentity_s *ent; // [esp+30h] [ebp-8h]
-    int32_t i; // [esp+34h] [ebp-4h]
 
+#ifdef KISAK_MP
     maxDroppedWeapon = g_maxDroppedWeapons->current.integer;
-    if (maxDroppedWeapon < 1 || maxDroppedWeapon > 32)
-        MyAssertHandler(
-            ".\\game\\g_items.cpp",
-            651,
-            0,
-            "%s\n\t(maxDroppedWeapon) = %i",
-            "(maxDroppedWeapon >= 1 && maxDroppedWeapon <= 32)",
-            maxDroppedWeapon);
+    iassert(maxDroppedWeapon >= 1 && maxDroppedWeapon <= 32);
+#elif KISAK_SP
+    maxDroppedWeapon = 32; // LWSS Hack. There is no dvar on SP, but the array is len 32
+#endif
+
     iBest = -1;
     fBestDistSqrd = -1.0;
-    for (i = 0; i < maxDroppedWeapon; ++i)
+    for (int i = 0; i < maxDroppedWeapon; ++i)
     {
         if (!level.droppedWeaponCue[i].isDefined())
             return i;
+
         ent = level.droppedWeaponCue[i].ent();
         if ((ent->flags & 0x1000000) == 0)
         {
@@ -745,7 +792,9 @@ int32_t __cdecl GetFreeDropCueIdx()
                 for (j = 0; j < level.maxclients; ++j)
                 {
                     pClient = &level.clients[j];
+#ifdef KISAK_MP
                     if (pClient->sess.connected == CON_CONNECTED && pClient->sess.sessionState == SESS_STATE_PLAYING)
+#endif
                     {
                         Vec3Sub(ent->r.currentOrigin, g_entities[j].r.currentOrigin, diff);
                         fClientDistSqrd = Vec3LengthSq(diff);
@@ -763,10 +812,7 @@ int32_t __cdecl GetFreeDropCueIdx()
     }
     if (iBest == -1)
     {
-        Com_PrintWarning(
-            16,
-            "Could not find a suitable weapon entity to free out of %i possible.  Using index zero.\n",
-            maxDroppedWeapon);
+        Com_PrintWarning(16, "Could not find a suitable weapon entity to free out of %i possible.  Using index zero.\n", maxDroppedWeapon);
         iBest = 0;
     }
     ent = level.droppedWeaponCue[iBest].ent();
@@ -1062,6 +1108,7 @@ void __cdecl ClearRegisteredItems()
     itemRegistered[0] = 1;
 }
 
+#ifdef KISAK_MP
 void __cdecl SaveRegisteredWeapons()
 {
     char dest[8196]; // [esp+0h] [ebp-2010h] BYREF
@@ -1080,6 +1127,7 @@ void __cdecl SaveRegisteredWeapons()
     }
     SV_SetConfigstring(2258, dest);
 }
+#endif
 
 void __cdecl SaveRegisteredItems()
 {
@@ -1129,7 +1177,10 @@ void __cdecl G_RegisterWeapon(uint32_t weapIndex)
         MyAssertHandler(".\\game\\g_items.cpp", 1301, 0, "%s", "!itemRegistered[weapIndex]");
     itemRegistered[weapIndex] = 1;
     level.bRegisterItems = 1;
+#ifdef KISAK_MP
     level.registerWeapons = 1;
+#endif
+
     weapDef = BG_GetWeaponDef(weapIndex);
     if (*weapDef->szUseHintString
         && !G_GetHintStringIndex(&weapDef->iUseHintStringIndex, (char *)weapDef->szUseHintString))
@@ -1153,6 +1204,15 @@ void __cdecl G_RegisterWeapon(uint32_t weapIndex)
         v2 = (char *)XModelGetName(weapDef->projectileModel);
         G_ModelIndex(v2);
     }
+    //fireRumble = v4->fireRumble;
+    //if (fireRumble && *fireRumble)
+    //    G_RumbleIndex(fireRumble);
+    //meleeImpactRumble = v4->meleeImpactRumble;
+    //if (meleeImpactRumble)
+    //{
+    //    if (*meleeImpactRumble)
+    //        G_RumbleIndex(meleeImpactRumble);
+    //}
 }
 
 int32_t __cdecl IsItemRegistered(uint32_t iItemIndex)
@@ -1173,29 +1233,43 @@ void __cdecl G_SpawnItem(gentity_s *ent, const gitem_s *item)
     weapIndex = ent->item[0].index % 128;
     weapModel = ent->item[0].index / 128;
     weapDef = BG_GetWeaponDef(weapIndex);
-    if (!weapDef)
-        MyAssertHandler(".\\game\\g_items.cpp", 1375, 0, "%s", "weapDef");
+    
+    iassert(weapDef);
+
     if (weapDef->worldModel[weapModel])
     {
         Name = (char *)XModelGetName(weapDef->worldModel[weapModel]);
         G_SetModel(ent, Name);
     }
-    if (item->giType != IT_WEAPON)
-        MyAssertHandler(".\\game\\g_items.cpp", 1379, 0, "%s", "item->giType == IT_WEAPON");
+
+    iassert(item->giType == IT_WEAPON);
+
     ent->r.mins[0] = -1.0;
     ent->r.mins[1] = -1.0;
     ent->r.mins[2] = -1.0;
+
     ent->r.maxs[0] = 1.0;
     ent->r.maxs[1] = 1.0;
     ent->r.maxs[2] = 1.0;
+
+#ifdef KISAK_MP
     ent->r.contents = 1079771400;
     ent->r.contents |= 0x200000u;
     ent->s.eType = 3;
     ent->s.index.brushmodel = LOWORD(ent->missile.travelDist);
+#elif KISAK_SP
+    ent->r.contents = 1081868552;
+    ent->s.eType = 2;
+    ent->s.index.item = ent->item->index;
+#endif
     TransferRandomAmmoToWeaponEntity(ent, weapIndex);
     G_DObjUpdate(ent);
+#ifdef KISAK_MP
     ent->s.clientNum = 64;
     ent->flags |= 0x1000u;
+#elif KISAK_SP
+    ent->flags |= 0x800;
+#endif
     if (level.spawnVar.spawnVarsValid)
     {
         G_SetAngle(ent, ent->r.currentAngles);
@@ -1208,8 +1282,7 @@ void __cdecl G_SpawnItem(gentity_s *ent, const gitem_s *item)
         if ((ent->spawnflags & 1) == 0)
         {
             ent->s.groundEntityNum = 1023;
-            if (item->giType != IT_WEAPON)
-                MyAssertHandler(".\\game\\g_items.cpp", 1415, 0, "%s", "item->giType == IT_WEAPON");
+            iassert(item->giType == IT_WEAPON);
             ent->r.currentAngles[2] = ent->r.currentAngles[2] + 90.0;
         }
         G_SetAngle(ent, ent->r.currentAngles);

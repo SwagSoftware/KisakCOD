@@ -12,8 +12,27 @@
 
 unsigned char *bulletPriorityMap;
 unsigned char *riflePriorityMap;
-unsigned short **modNames;
 float *g_fHitLocDamageMult;
+
+unsigned __int16 *modNames[16] =
+{
+    &scr_const.mod_unknown,
+    &scr_const.mod_pistol_bullet,
+    &scr_const.mod_rifle_bullet,
+    &scr_const.mod_grenade,
+    &scr_const.mod_grenade_splash,
+    &scr_const.mod_projectile,
+    &scr_const.mod_projectile_splash,
+    &scr_const.mod_melee,
+    &scr_const.mod_head_shot,
+    &scr_const.mod_crush,
+    &scr_const.mod_telefrag,
+    &scr_const.mod_falling,
+    &scr_const.mod_suicide,
+    &scr_const.mod_trigger_hurt,
+    &scr_const.mod_explosive,
+    &scr_const.mod_impact,
+};
 
 const char *g_HitLocNames[19] =
 {

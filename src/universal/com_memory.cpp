@@ -967,6 +967,12 @@ uint8_t* __cdecl Hunk_AllocXModelPrecacheColl(uint32_t size)
     return Hunk_Alloc(size, "Hunk_AllocXModelPrecacheColl", 27);
 }
 
+int Hunk_SetMarkLow()
+{
+    iassert(Sys_IsMainThread());
+    Hunk_CheckTempMemoryClear();
+    return hunk_low.permanent;
+}
 
 
 

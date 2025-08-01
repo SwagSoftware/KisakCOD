@@ -11,6 +11,7 @@
 
 #include <bgame/bg_local.h>
 #include "actor_animapi.h"
+#include "actor.h"
 
 struct scr_data_t_tag
 {

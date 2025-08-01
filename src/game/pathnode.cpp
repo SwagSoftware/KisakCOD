@@ -4664,3 +4664,22 @@ void __cdecl Path_DrawDebug()
     }
 }
 
+void Path_CallFunctionForNodes(void(*function)(pathnode_t *, void *), void *data)
+{
+    unsigned int nodeCount; // r31
+    int v5; // r30
+
+    if (!function)
+        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\pathnode.cpp", 617, 0, "%s", "function");
+    nodeCount = gameWorldSp.path.nodeCount;
+    if (gameWorldSp.path.nodeCount)
+    {
+        v5 = 0;
+        do
+        {
+            function(&gameWorldSp.path.nodes[v5], data);
+            --nodeCount;
+            ++v5;
+        } while (nodeCount);
+    }
+}

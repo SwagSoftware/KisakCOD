@@ -3,12 +3,19 @@
 #endif
 
 #include "g_local.h"
+#include <server/sv_public.h>
+#include "g_main.h"
+#include <script/scr_vm.h>
+#include <server/sv_game.h>
+#include <script/scr_const.h>
 
+//TargetGlob targGlob;
+TargetGlob targGlob;
 
 void __cdecl G_InitTargets()
 {
     int v0; // r30
-    $B58785F5B634FAE9AC7F95D8A521EE83 *v1; // r31
+    TargetGlob *v1; // r31
 
     v0 = 0;
     v1 = &targGlob;
@@ -17,7 +24,7 @@ void __cdecl G_InitTargets()
     {
         v1->targets[0].ent = 0;
         SV_SetConfigstring(v0 + 27, 0);
-        v1 = ($B58785F5B634FAE9AC7F95D8A521EE83 *)((char *)v1 + 28);
+        v1 = (TargetGlob *)((char *)v1 + 28);
         ++v0;
     } while ((int)v1 < (int)&targGlob.targetCount);
 }
@@ -58,7 +65,7 @@ void __cdecl G_LoadTargets()
                         "entNum doesn't index MAX_GENTITIES\n\t%i not in [0, %i)",
                         v4,
                         2176);
-                *((unsigned int *)v1 - 3) = &level.gentities[atol(v3)];
+                *((unsigned int *)v1 - 3) = (unsigned int)&level.gentities[atol(v3)];
             }
             else
             {
@@ -89,7 +96,7 @@ void __cdecl G_LoadTargets()
         }
         v1 += 7;
         ++v0;
-    } while ((int)v1 < (int)&cached_models[1]);
+    } while ((uintptr_t)v1 < (uintptr_t)&targGlob.targets[32]);
 }
 
 void __cdecl Scr_Target_SetShader()
@@ -109,7 +116,7 @@ void __cdecl Scr_Target_SetShader()
 
     if (Scr_GetNumParam() < 2)
         Scr_Error("Too few arguments\n");
-    Entity = Scr_GetEntity(0, v0);
+    Entity = Scr_GetEntity(0);
     v2 = 0;
     v3 = &targGlob.targets[1];
     v4 = 0;
@@ -176,7 +183,7 @@ void __cdecl Scr_Target_SetOffscreenShader()
 
     if (Scr_GetNumParam() < 2)
         Scr_Error("Too few arguments\n");
-    Entity = Scr_GetEntity(0, v0);
+    Entity = Scr_GetEntity(0);
     v2 = 0;
     v3 = &targGlob.targets[1];
     v4 = 0;
@@ -229,7 +236,7 @@ void __cdecl Scr_Target_SetOffscreenShader()
 void __cdecl Scr_Target_GetArray()
 {
     int v0; // r30
-    $B58785F5B634FAE9AC7F95D8A521EE83 *v1; // r31
+    TargetGlob *v1; // r31
 
     Scr_MakeArray();
     v0 = 32;
@@ -242,14 +249,14 @@ void __cdecl Scr_Target_GetArray()
             Scr_AddArray();
         }
         --v0;
-        v1 = ($B58785F5B634FAE9AC7F95D8A521EE83 *)((char *)v1 + 28);
+        v1 = (TargetGlob *)((char *)v1 + 28);
     } while (v0);
 }
 
 int __cdecl TargetIndex(gentity_s *ent)
 {
     int v1; // r9
-    $B58785F5B634FAE9AC7F95D8A521EE83 *v2; // r11
+    TargetGlob *v2; // r11
     unsigned int v3; // r10
 
     v1 = 0;
@@ -259,7 +266,7 @@ int __cdecl TargetIndex(gentity_s *ent)
     {
         v3 += 28;
         ++v1;
-        v2 = ($B58785F5B634FAE9AC7F95D8A521EE83 *)((char *)v2 + 28);
+        v2 = (TargetGlob *)((char *)v2 + 28);
         if (v3 >= 0x380)
             return 32;
     }
@@ -271,12 +278,12 @@ void __cdecl Scr_Target_IsTarget()
     unsigned int v0; // r4
     gentity_s *Entity; // r3
     int v2; // r9
-    $B58785F5B634FAE9AC7F95D8A521EE83 *v3; // r11
+    TargetGlob *v3; // r11
     unsigned int v4; // r10
 
     if (!Scr_GetNumParam())
         Scr_Error("Too few arguments\n");
-    Entity = Scr_GetEntity(0, v0);
+    Entity = Scr_GetEntity(0);
     v2 = 0;
     v3 = &targGlob;
     v4 = 0;
@@ -284,7 +291,7 @@ void __cdecl Scr_Target_IsTarget()
     {
         v4 += 28;
         ++v2;
-        v3 = ($B58785F5B634FAE9AC7F95D8A521EE83 *)((char *)v3 + 28);
+        v3 = (TargetGlob *)((char *)v3 + 28);
         if (v4 >= 0x380)
             goto LABEL_6;
     }
@@ -320,7 +327,7 @@ void __cdecl Scr_Target_Set()
 
     if (!Scr_GetNumParam())
         Scr_Error("Too few arguments\n");
-    Entity = Scr_GetEntity(0, v0);
+    Entity = Scr_GetEntity(0);
     v2 = Entity;
     v3 = 0;
     v4 = &targGlob.targets[1];
@@ -430,12 +437,12 @@ int __cdecl Targ_Remove(gentity_s *ent)
 {
     int v1; // r31
     unsigned int v2; // r10
-    $B58785F5B634FAE9AC7F95D8A521EE83 *i; // r11
+    TargetGlob *i; // r11
     unsigned int v5; // r7
 
     v1 = 0;
     v2 = 0;
-    for (i = &targGlob; i->targets[0].ent != ent; i = ($B58785F5B634FAE9AC7F95D8A521EE83 *)((char *)i + 28))
+    for (i = &targGlob; i->targets[0].ent != ent; i = (TargetGlob *)((char *)i + 28))
     {
         v2 += 28;
         ++v1;
@@ -460,7 +467,7 @@ int __cdecl Targ_Remove(gentity_s *ent)
 void __cdecl Targ_RemoveAll()
 {
     int v0; // r29
-    $B58785F5B634FAE9AC7F95D8A521EE83 *v1; // r31
+    TargetGlob *v1; // r31
     int v2; // r28
     unsigned int v3; // r7
 
@@ -486,7 +493,7 @@ void __cdecl Targ_RemoveAll()
         }
         --v2;
         ++v0;
-        v1 = ($B58785F5B634FAE9AC7F95D8A521EE83 *)((char *)v1 + 28);
+        v1 = (TargetGlob *)((char *)v1 + 28);
     } while (v2);
 }
 
@@ -498,7 +505,7 @@ void __cdecl Scr_Target_Remove()
 
     if (!Scr_GetNumParam())
         Scr_Error("Too few arguments\n");
-    Entity = Scr_GetEntity(0, v0);
+    Entity = Scr_GetEntity(0);
     if (!(unsigned __int8)Targ_Remove(Entity))
     {
         v2 = va("Entity %i is not a target", Entity->s.number);
@@ -526,7 +533,7 @@ int __cdecl G_WorldDirToScreenPos(
     if (fov_x <= 0.0)
         MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\g_targets.cpp", 360, 0, "%s", "fov_x > 0");
     AnglesToAxis(player->s.lerp.apos.trBase, v17);
-    MatrixTransposeTransformVector(outScreenPos, v17, v16);
+    MatrixTransposeTransformVector(outScreenPos, (const mat3x3&)v17, v16);
     if (v16[0] <= 0.0)
         return 0;
     *(double *)&v9 = (float)((float)((float)fov_x * (float)0.017453292) * (float)0.5);
@@ -567,8 +574,8 @@ int __cdecl ScrGetTargetScreenPos(float *screenPos)
 
     if (Scr_GetNumParam() < 2)
         Scr_Error("Too few arguments\n");
-    Entity = Scr_GetEntity(0, v2);
-    v5 = Scr_GetEntity((scr_entref_t *)1, v4);
+    Entity = Scr_GetEntity(0);
+    v5 = Scr_GetEntity(1);
     v6 = v5;
     if (!v5->client)
     {
@@ -651,7 +658,7 @@ void __cdecl Scr_Target_IsInRect()
     Scr_AddBool(v2);
 }
 
-void __cdecl Scr_Target_StartLockOn(int a1, unsigned int a2)
+void __cdecl Scr_Target_StartLockOn()
 {
     gentity_s *Entity; // r31
     double Float; // fp1
@@ -659,7 +666,7 @@ void __cdecl Scr_Target_StartLockOn(int a1, unsigned int a2)
     const char *v5; // r3
     int v6; // [sp+50h] [-20h]
 
-    Entity = Scr_GetEntity(0, a2);
+    Entity = Scr_GetEntity(0);
     Float = Scr_GetFloat(1u);
     number = Entity->s.number;
     v6 = (int)(float)((float)Float * (float)1000.0);
@@ -678,7 +685,7 @@ void __cdecl Scr_Target_ClearLockOn()
 int __cdecl GetTargetIdx(const gentity_s *ent)
 {
     int v1; // r9
-    $B58785F5B634FAE9AC7F95D8A521EE83 *v2; // r11
+    TargetGlob *v2; // r11
     unsigned int v3; // r10
 
     if (!ent)
@@ -690,7 +697,7 @@ int __cdecl GetTargetIdx(const gentity_s *ent)
     {
         v3 += 28;
         ++v1;
-        v2 = ($B58785F5B634FAE9AC7F95D8A521EE83 *)((char *)v2 + 28);
+        v2 = (TargetGlob *)((char *)v2 + 28);
         if (v3 >= 0x380)
             return 32;
     }
@@ -747,7 +754,7 @@ void __cdecl Scr_Target_SetAttackMode()
 
     if (Scr_GetNumParam() < 2)
         Scr_Error("Too few arguments\n");
-    Entity = Scr_GetEntity(0, v0);
+    Entity = Scr_GetEntity(0);
     TargetIdx = GetTargetIdx(Entity);
     if (TargetIdx == 32)
     {
@@ -790,7 +797,7 @@ void __cdecl Scr_Target_SetJavelinOnly()
 
     if (Scr_GetNumParam() < 2)
         Scr_Error("Too few arguments\n");
-    Entity = Scr_GetEntity(0, v0);
+    Entity = Scr_GetEntity(0);
     TargetIdx = GetTargetIdx(Entity);
     if (TargetIdx == 32)
     {

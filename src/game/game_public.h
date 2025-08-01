@@ -642,6 +642,9 @@ void G_SpawnVehicle(gentity_s *ent, const char *typeName, int load);
 const char *G_GetVehicleInfoName(__int16 index);
 int G_GetVehicleInfoIndex(const char *name);
 bool G_IsVehicleUsable(gentity_s *ent, gentity_s *player);
+void G_PrecacheDefaultVehicle();
+void G_FreeVehicleRefs(gentity_s *ent);
+gentity_s *G_GetPlayerVehicle(const gentity_s *player);
 
 
 // g_weapon

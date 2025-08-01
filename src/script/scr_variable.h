@@ -490,6 +490,10 @@ void Scr_GetChecksum(unsigned int *checksum);
 void Scr_CopyEntityNum(int fromEntnum, int toEntnum, unsigned int classnum);
 void CopyEntity(unsigned int parentId, unsigned int newParentId);
 
+unsigned int Scr_InitStringSet();
+void Scr_ShutdownStringSet(unsigned int setId);
+int Scr_AddStringSet(unsigned int setId, const char *string);
+
 extern scr_classStruct_t g_classMap[4];
 extern scrStringDebugGlob_t *scrStringDebugGlob;
 extern scrMemTreePub_t scrMemTreePub;

@@ -617,6 +617,11 @@ void __cdecl Dvar_ResetDvars(unsigned __int16 filter, DvarSetSource setSource);
 int __cdecl Com_LoadDvarsFromBuffer(const char **dvarnames, unsigned int numDvars, char *buffer, char *filename);
 int __cdecl Com_SaveDvarsToBuffer(const char **dvarnames, unsigned int numDvars, char *buffer, unsigned int bufsize);
 
+#ifdef KISAK_SP
+void Dvar_SaveDvars(struct MemoryFile *memFile, unsigned __int16 filter);
+void Dvar_LoadDvars(struct MemoryFile *memFile);
+#endif
+
 // dvar_cmds
 void __cdecl TRACK_dvar_cmds();
 void __cdecl Dvar_GetCombinedString(char *combined, int first);
@@ -821,7 +826,7 @@ int __cdecl CM_ContentsOfModel(unsigned int handle);
 void __cdecl CM_BoxTrace(
     trace_t *results,
     const float *start,
-    float *end,
+    const float *end,
     const float *mins,
     const float *maxs,
     unsigned int model,
@@ -829,7 +834,7 @@ void __cdecl CM_BoxTrace(
 void __cdecl CM_Trace(
     trace_t *results,
     const float *start,
-    float *end,
+    const float *end,
     const float *mins,
     const float *maxs,
     unsigned int model,

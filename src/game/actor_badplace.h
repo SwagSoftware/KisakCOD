@@ -70,3 +70,6 @@ int __cdecl Actor_BadPlace_FindSafeNodeOutsideBadPlace(
 int __cdecl Actor_BadPlace_AttemptEscape(actor_s *self);
 bool __cdecl Actor_BadPlace_Flee_Start(actor_s *self, ai_state_t ePrevState);
 actor_think_result_t __cdecl Actor_BadPlace_Flee_Think(actor_s *self);
+
+
+extern badplace_t g_badplaces[32];

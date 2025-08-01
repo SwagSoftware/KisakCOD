@@ -4,6 +4,9 @@
 #error This file is for SinglePlayer only 
 #endif
 
+struct gentity_s;
+struct actor_s;
+
 void __cdecl TRACK_turret();
 void __cdecl G_InitTurrets();
 int __cdecl Turret_GetRemainingConvergenceTime(const TurretInfo *turretInfo, unsigned int type);

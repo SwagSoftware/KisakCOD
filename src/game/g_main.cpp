@@ -22,6 +22,11 @@
 #include <script/scr_const.h>
 #include "g_vehicle_path.h"
 #include "turret.h"
+#include "actor_event_listeners.h"
+#include "actor_grenade.h"
+#include "actor_corpse.h"
+#include <universal/profile.h>
+#include <qcommon/cmd.h>
 
 const char *g_helicopterYawAltitudeControlsNames[4] =
 {
@@ -1208,7 +1213,7 @@ void __cdecl G_InitGame(
     int v28; // r4
     const char *v29; // r5
     int v30; // r4
-    bool v31[2]; // [sp+50h] [-70h] BYREF
+    int v31[2]; // [sp+50h] [-70h] BYREF
     int v32[26]; // [sp+58h] [-68h] BYREF
 
     a12 = randomSeed;
@@ -1261,7 +1266,8 @@ void __cdecl G_InitGame(
     level.currentScriptIOLineMark[0].backup_text = 0;
     level.soundAliasFirst = 256;
     level.soundAliasLast = 256;
-    level.loading = ((_cntlzw((unsigned int)*save) & 0x20) == 0) + 1;
+    //level.loading = ((_cntlzw((unsigned int)*save) & 0x20) == 0) + 1;
+    level.loading = (loading_t)((((uintptr_t)*save) != 0) + 1);
     if (level.loading == LOADING_SAVEGAME)
     {
         if (!*save)
@@ -1396,8 +1402,6 @@ LABEL_43:
 void __cdecl G_ShutdownGame(int clearScripts)
 {
     unsigned __int8 v2; // r11
-    int v3; // r4
-    int v4; // r3
 
     SV_ResetDemo();
     Com_DPrintf(15, "ShutdownGame:\n");
@@ -1421,11 +1425,11 @@ void __cdecl G_ShutdownGame(int clearScripts)
     if (!clearScripts || (v2 = 0, !level.savepersist))
         v2 = 1;
     Scr_ShutdownSystem(1u, v2);
-    CL_ClearState(v4, v3);
+    CL_ClearState();
     if (clearScripts)
         G_ClearLowHunk();
     if (level.openScriptIOFileBuffers[0])
-        Z_VirtualFree(level.openScriptIOFileBuffers[0], 10);
+        Z_VirtualFree(level.openScriptIOFileBuffers[0]);
     level.openScriptIOFileBuffers[0] = 0;
     if (level.openScriptIOFileHandles[0])
         FS_FCloseFile(level.openScriptIOFileHandles[0]);
@@ -1620,10 +1624,12 @@ void __cdecl G_RunThink(gentity_s *ent)
         ent->nextthink = 0;
         think = entityHandlers[handler].think;
         if (!think)
-            Com_Error(ERR_DROP, byte_820329E0);
-        //Profile_Begin(265);
-        think(ent);
-        //Profile_EndInternal(0);
+            Com_Error(ERR_DROP, "NULL ent think");
+
+        {
+            PROF_SCOPED("ent think");
+            think(ent);
+        }
     }
 }
 
@@ -1748,7 +1754,7 @@ LABEL_8:
     SV_GameSendServerCommand(-1, "closedeadscreen");
     level.absoluteReloadDelayTime = 0;
     Dvar_SetInt(g_reloading, 0);
-    level.loading = LOADING;
+    level.loading = LOADING_DONE;
 }
 
 void __cdecl G_XAnimUpdateEnt(gentity_s *ent)
@@ -1905,72 +1911,14 @@ void __cdecl G_RunFrameForEntity(gentity_s *ent)
         ent->processedFrame = level.framenum;
         if (tagInfo)
         {
-            if (!tagInfo->parent)
-                MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\g_main.cpp", 2389, 0, "%s", "ent->tagInfo->parent");
+            iassert(ent->tagInfo->parent);
             G_RunFrameForEntity(ent->tagInfo->parent);
         }
-        if ((ent->r.svFlags & 6) == 6)
-            MyAssertHandler(
-                "c:\\trees\\cod3\\cod3src\\src\\game\\g_main.cpp",
-                2393,
-                0,
-                "%s\n\t(ent->s.number) = %i",
-                "((ent->r.svFlags & ((1<<1) | (1<<2))) != ((1<<1) | (1<<2)))",
-                ent->s.number);
-        if (ent->r.maxs[0] < (double)ent->r.mins[0])
-        {
-            v3 = SL_ConvertToString(ent->classname);
-            v4 = va(
-                "entnum: %d, origin: %g %g %g, classname: %s",
-                (unsigned int)HIDWORD(COERCE_UNSIGNED_INT64(ent->r.currentOrigin[0])),
-                (unsigned int)COERCE_UNSIGNED_INT64(ent->r.currentOrigin[0]),
-                (unsigned int)COERCE_UNSIGNED_INT64(ent->r.currentOrigin[1]),
-                (unsigned int)COERCE_UNSIGNED_INT64(ent->r.currentOrigin[2]),
-                v3);
-            MyAssertHandler(
-                "c:\\trees\\cod3\\cod3src\\src\\game\\g_main.cpp",
-                2395,
-                0,
-                "%s\n\t%s",
-                "ent->r.maxs[0] >= ent->r.mins[0]",
-                v4);
-        }
-        if (ent->r.maxs[1] < (double)ent->r.mins[1])
-        {
-            v5 = SL_ConvertToString(ent->classname);
-            v6 = va(
-                "entnum: %d, origin: %g %g %g, classname: %s",
-                (unsigned int)HIDWORD(COERCE_UNSIGNED_INT64(ent->r.currentOrigin[0])),
-                (unsigned int)COERCE_UNSIGNED_INT64(ent->r.currentOrigin[0]),
-                (unsigned int)COERCE_UNSIGNED_INT64(ent->r.currentOrigin[1]),
-                (unsigned int)COERCE_UNSIGNED_INT64(ent->r.currentOrigin[2]),
-                v5);
-            MyAssertHandler(
-                "c:\\trees\\cod3\\cod3src\\src\\game\\g_main.cpp",
-                2396,
-                0,
-                "%s\n\t%s",
-                "ent->r.maxs[1] >= ent->r.mins[1]",
-                v6);
-        }
-        if (ent->r.maxs[2] < (double)ent->r.mins[2])
-        {
-            v7 = SL_ConvertToString(ent->classname);
-            v8 = va(
-                "entnum: %d, origin: %g %g %g, classname: %s",
-                (unsigned int)HIDWORD(COERCE_UNSIGNED_INT64(ent->r.currentOrigin[0])),
-                (unsigned int)COERCE_UNSIGNED_INT64(ent->r.currentOrigin[0]),
-                (unsigned int)COERCE_UNSIGNED_INT64(ent->r.currentOrigin[1]),
-                (unsigned int)COERCE_UNSIGNED_INT64(ent->r.currentOrigin[2]),
-                v7);
-            MyAssertHandler(
-                "c:\\trees\\cod3\\cod3src\\src\\game\\g_main.cpp",
-                2397,
-                0,
-                "%s\n\t%s",
-                "ent->r.maxs[2] >= ent->r.mins[2]",
-                v8);
-        }
+        iassert(((ent->r.svFlags & ((1 << 1) | (1 << 2))) != ((1 << 1) | (1 << 2))));
+        iassert(ent->r.maxs[0] >= ent->r.mins[0]);
+        iassert(ent->r.maxs[1] >= ent->r.mins[1]);
+        iassert(ent->r.maxs[2] >= ent->r.mins[2]);
+        
         scr_vehicle = ent->scr_vehicle;
         if (scr_vehicle)
         {
@@ -2120,19 +2068,19 @@ void __cdecl G_SendClientMessages()
     actor_prone_info_s *v11; // r9
     int *p_entnum; // r11
     int v13; // r4
-    unsigned int *v14; // r8
+    int *v14; // r8
     actor_prone_info_s *v15; // r7
     int v16; // ctr
     int v17; // r5
-    unsigned int *v18; // r8
+    int *v18; // r8
     actor_prone_info_s *v19; // r7
     int v20; // ctr
     int v21; // r6
-    unsigned int *v22; // r8
+    int *v22; // r8
     actor_prone_info_s *v23; // r7
     int v24; // ctr
     int v25; // r6
-    unsigned int *v26; // r8
+    int *v26; // r8
     actor_prone_info_s *v27; // r7
     int v28; // ctr
     int v29; // r8
@@ -2174,7 +2122,8 @@ void __cdecl G_SendClientMessages()
                     "%s",
                     "actorFriendlyIndex == -1 || actorFriendlyIndex == i");
             v9 = &level.cgData_actorTeam[v0];
-            *(v9 - 32) = (_cntlzw(v8 + 1) & 0x20) == 0;
+            //*(v9 - 32) = (_cntlzw(v8 + 1) & 0x20) == 0;
+            *(v9 - 32) = (v8 + 1) != 0;
             *v9 = v3->sentient->eTeam;
             if (level.cgData_actorTeam[v0] != v3->sentient->eTeam)
                 MyAssertHandler(
@@ -2396,6 +2345,7 @@ void __cdecl G_AddDebugStringWithDuration(
     CL_AddDebugString(xyz, color, scale, pszText, duration, 1);
 }
 
+static int lastEntTime;
 void __cdecl ShowEntityInfo()
 {
     int integer; // r11
@@ -2443,7 +2393,7 @@ void __cdecl ShowEntityInfo()
                     v8 = 8413312;
             }
             SV_SetupIgnoreEntParams(&v20, 0);
-            SV_Trace(v21, v17, vec3_origin, vec3_origin, v19, &v20, v8, 0, v15, v16);
+            SV_Trace(v21, v17, (float*)vec3_origin, (float *)vec3_origin, v19, &v20, v8, 0, v15, v16);
             EntityHitId = Trace_GetEntityHitId(v21);
             if (entityHandlers[g_entities[EntityHitId].handler].entinfo)
             {
@@ -2528,7 +2478,7 @@ int __cdecl G_RunFrame(ServerFrameExtent extent, int timeCap)
     int v17; // r10
     int v18; // r10
     int v19; // r3
-    gentity_s *PlayerVehicle; // r3
+    gentity_s *vehEnt; // r3
     gentity_s *v21; // r30
     int currentEntityThink; // r5
     int v23; // r11
@@ -2551,238 +2501,228 @@ int __cdecl G_RunFrame(ServerFrameExtent extent, int timeCap)
     unsigned __int16 *p_classname; // r31
     const char *v41; // r3
 
-    if (extent)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\g_main.cpp", 2596, 0, "%s", "extent == SV_FRAME_DO_ALL");
-    if (timeCap)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\g_main.cpp", 2597, 0, "%s", "!timeCap");
-    PIXBeginNamedEvent_Copy_NoVarArgs(0xFFFFFFFF, "update player");
-    G_UpdatePlayer(level.gentities);
-    G_UpdatePlayerTriggers(level.gentities);
-    G_CheckReloadStatus();
-    if (level.actorPredictDepth)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\g_main.cpp", 2615, 0, "%s", "!level.actorPredictDepth");
-    level.currentIndex = 1;
-    PIXEndNamedEvent();
-    PIXBeginNamedEvent_Copy_NoVarArgs(0xFFFFFFFF, "update anim1");
-    //Profile_Begin(324);
-    currentIndex = level.currentIndex;
-    num_entities = level.num_entities;
-    for (i = &g_entities[level.currentIndex]; currentIndex < num_entities; ++i)
+    iassert(extent == SV_FRAME_DO_ALL);
+    iassert(!timeCap);
+
     {
-        if (i->r.inuse)
+        PROF_SCOPED("update player");
+        G_UpdatePlayer(level.gentities);
+        G_UpdatePlayerTriggers(level.gentities);
+        G_CheckReloadStatus();
+        iassert(!level.actorPredictDepth);
+        level.currentIndex = 1;
+    }
+    {
+        PROF_SCOPED("update anim1");
+        currentIndex = level.currentIndex;
+        num_entities = level.num_entities;
+        for (i = &g_entities[level.currentIndex]; currentIndex < num_entities; ++i)
         {
-            number = i->s.number;
-            if (number != currentIndex)
+            if (i->r.inuse)
             {
-                v7 = va(
-                    "s.number = %i, level.currentIndex = %i, classname = %s",
-                    number,
-                    currentIndex,
-                    (const char *)i->classname);
-                MyAssertHandler(
-                    "c:\\trees\\cod3\\cod3src\\src\\game\\g_main.cpp",
-                    2643,
-                    0,
-                    "%s\n\t%s",
-                    "ent->s.number == level.currentIndex",
-                    v7);
+                number = i->s.number;
+                if (number != currentIndex)
+                {
+                    v7 = va(
+                        "s.number = %i, level.currentIndex = %i, classname = %s",
+                        number,
+                        currentIndex,
+                        (const char *)i->classname);
+                    MyAssertHandler(
+                        "c:\\trees\\cod3\\cod3src\\src\\game\\g_main.cpp",
+                        2643,
+                        0,
+                        "%s\n\t%s",
+                        "ent->s.number == level.currentIndex",
+                        v7);
+                }
+                SV_DObjInitServerTime(i, 0.05f);
+                currentIndex = ++level.currentIndex;
+                num_entities = level.num_entities;
             }
-            SV_DObjInitServerTime(i, 0.050000001);
-            currentIndex = ++level.currentIndex;
-            num_entities = level.num_entities;
-        }
-        else
-        {
-            level.currentIndex = ++currentIndex;
+            else
+            {
+                level.currentIndex = ++currentIndex;
+            }
         }
     }
-    //Profile_EndInternal(0);
-    PIXEndNamedEvent();
-    PIXBeginNamedEvent_Copy_NoVarArgs(0xFFFFFFFF, "script threads1");
-    memset(level.entTriggerIndex, 0, sizeof(level.entTriggerIndex));
-    level.triggerIndex = 0;
-    if (level.currentTriggerListSize)
-        MyAssertHandler(
-            "c:\\trees\\cod3\\cod3src\\src\\game\\g_main.cpp",
-            2668,
-            0,
-            "%s",
-            "level.currentTriggerListSize == 0");
-    Com_Memcpy(level.currentTriggerList, level.pendingTriggerList, 12 * level.pendingTriggerListSize);
-    level.currentTriggerListSize = level.pendingTriggerListSize;
-    level.pendingTriggerListSize = 0;
-    do
     {
-        v8 = NotifyTriggers();
-        G_ProcessCommandNotifies();
-        Scr_RunCurrentThreads();
-    } while (v8);
-    if (level.currentTriggerListSize)
-        MyAssertHandler(
-            "c:\\trees\\cod3\\cod3src\\src\\game\\g_main.cpp",
-            2700,
-            0,
-            "%s",
-            "level.currentTriggerListSize == 0");
-    v9 = g_entities;
-    v10 = 0;
-    level.currentIndex = 1;
-    level.checkAnimChange = 0;
-    for (j = level.maxclients; v10 < j; ++v9)
-    {
-        if (v9->r.inuse)
+        PROF_SCOPED("script threads1");
+        memset(level.entTriggerIndex, 0, sizeof(level.entTriggerIndex));
+        level.triggerIndex = 0;
+        iassert(level.currentTriggerListSize == 0);
+        Com_Memcpy(level.currentTriggerList, level.pendingTriggerList, 12 * level.pendingTriggerListSize);
+        level.currentTriggerListSize = level.pendingTriggerListSize;
+        level.pendingTriggerListSize = 0;
+        do
         {
-            G_ClientDoPerFrameNotifies(v9);
-            j = level.maxclients;
+            v8 = NotifyTriggers();
+            G_ProcessCommandNotifies();
+            Scr_RunCurrentThreads();
+        } while (v8);
+        iassert(level.currentTriggerListSize == 0);
+        v9 = g_entities;
+        v10 = 0;
+        level.currentIndex = 1;
+        level.checkAnimChange = 0;
+        for (j = level.maxclients; v10 < j; ++v9)
+        {
+            if (v9->r.inuse)
+            {
+                G_ClientDoPerFrameNotifies(v9);
+                j = level.maxclients;
+            }
+            ++v10;
         }
-        ++v10;
     }
-    PIXEndNamedEvent();
-    PIXBeginNamedEvent_Copy_NoVarArgs(0xFFFFFFFF, "update anim2");
-    //Profile_Begin(324);
-    v12 = level.currentIndex;
-    for (k = &g_entities[level.currentIndex]; v12 < level.num_entities; level.currentIndex = v12)
     {
-        if (k->r.inuse)
+        PROF_SCOPED("update anim2");
+        v12 = level.currentIndex;
+        for (k = &g_entities[level.currentIndex]; v12 < level.num_entities; level.currentIndex = v12)
+        {
+            if (k->r.inuse)
+            {
+                do
+                {
+                    if ((k->flags & 0x1000) != 0)
+                        break;
+                    if (!G_DObjUpdateServerTime(k, 1))
+                        break;
+                    Scr_RunCurrentThreads();
+                    inuse = k->r.inuse;
+                    level.checkAnimChange = 1;
+                } while (inuse);
+                v12 = level.currentIndex;
+            }
+            ++v12;
+            ++k;
+        }
+        if (level.checkAnimChange)
         {
             do
             {
-                if ((k->flags & 0x1000) != 0)
-                    break;
-                if (!G_DObjUpdateServerTime(k, 1))
-                    break;
-                Scr_RunCurrentThreads();
-                inuse = k->r.inuse;
-                level.checkAnimChange = 1;
-            } while (inuse);
-            v12 = level.currentIndex;
-        }
-        ++v12;
-        ++k;
-    }
-    if (level.checkAnimChange)
-    {
-        do
-        {
-            checkAnimChange = 0;
-            level.currentIndex = 1;
-            level.checkAnimChange = 0;
-            if (level.num_entities > 1)
-            {
-                p_inuse = &g_entities[1].r.inuse;
-                do
+                checkAnimChange = 0;
+                level.currentIndex = 1;
+                level.checkAnimChange = 0;
+                if (level.num_entities > 1)
                 {
-                    if (*p_inuse)
+                    p_inuse = &g_entities[1].r.inuse;
+                    do
                     {
-                        do
+                        if (*p_inuse)
                         {
-                            v17 = *((unsigned int *)p_inuse + 34);
-                            if ((v17 & 0x40000) == 0 || (v17 & 0x1000) != 0)
-                                break;
-                            if (!G_DObjUpdateServerTime((gentity_s *)(p_inuse - 168), 1))
+                            do
                             {
-                                checkAnimChange = level.checkAnimChange;
-                                break;
-                            }
-                            Scr_RunCurrentThreads();
-                            checkAnimChange = 1;
-                            v18 = *p_inuse;
-                            level.checkAnimChange = 1;
-                        } while (v18);
-                    }
-                    p_inuse += 628;
-                    ++level.currentIndex;
-                } while (level.currentIndex < level.num_entities);
-            }
-        } while (checkAnimChange);
+                                v17 = *((unsigned int *)p_inuse + 34);
+                                if ((v17 & 0x40000) == 0 || (v17 & 0x1000) != 0)
+                                    break;
+                                if (!G_DObjUpdateServerTime((gentity_s *)(p_inuse - 168), 1))
+                                {
+                                    checkAnimChange = level.checkAnimChange;
+                                    break;
+                                }
+                                Scr_RunCurrentThreads();
+                                checkAnimChange = 1;
+                                v18 = *p_inuse;
+                                level.checkAnimChange = 1;
+                            } while (v18);
+                        }
+                        p_inuse += 628;
+                        ++level.currentIndex;
+                    } while (level.currentIndex < level.num_entities);
+                }
+            } while (checkAnimChange);
+        }
     }
-    //Profile_EndInternal(0);
-    PIXEndNamedEvent();
-    PIXBeginNamedEvent_Copy_NoVarArgs(0xFFFFFFFF, "script threads2");
-    if (g_recordScriptPlace->current.enabled || (v19 = 0, g_dumpAnimsCommands->current.integer > 0))
-        v19 = 1;
-    Scr_SetRecordScriptPlace(v19);
-    Scr_IncTime();
-    SV_ResetSkeletonCache();
-    PIXEndNamedEvent();
-    PIXBeginNamedEvent_Copy_NoVarArgs(0xFFFFFFFF, "bad places");
-    Path_RunBadPlaces();
-    PIXEndNamedEvent();
-    PIXBeginNamedEvent_Copy_NoVarArgs(0xFFFFFFFF, "update player");
-    G_UpdatePlayer(level.gentities);
-    AimTarget_ClearTargetList();
-    PlayerVehicle = G_GetPlayerVehicle(level.gentities);
-    v21 = PlayerVehicle;
-    if (PlayerVehicle)
     {
-        if (!PlayerVehicle->r.inuse)
-            MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\g_main.cpp", 2811, 0, "%s", "vehEnt->r.inuse");
-        G_RunFrameForEntity(v21);
+        PROF_SCOPED("script threads2");
+        if (g_recordScriptPlace->current.enabled || (v19 = 0, g_dumpAnimsCommands->current.integer > 0))
+            v19 = 1;
+        Scr_SetRecordScriptPlace(v19);
+        Scr_IncTime();
+        SV_ResetSkeletonCache();
     }
-    PIXEndNamedEvent();
-    if (level.currentEntityThink != -1)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\g_main.cpp", 2817, 0, "%s", "level.currentEntityThink == -1");
+    {
+        PROF_SCOPED("bad places");
+        Path_RunBadPlaces();
+    }
+    {
+        PROF_SCOPED("update player");
+        G_UpdatePlayer(level.gentities);
+        AimTarget_ClearTargetList();
+        vehEnt = G_GetPlayerVehicle(level.gentities);
+        v21 = vehEnt;
+        if (vehEnt)
+        {
+            if (!vehEnt->r.inuse)
+                MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\g_main.cpp", 2811, 0, "%s", "vehEnt->r.inuse");
+            G_RunFrameForEntity(v21);
+        }
+    }
+    iassert(level.currentEntityThink == -1);
     level.currentEntityThink = 0;
-    PIXBeginNamedEvent_Copy_NoVarArgs(0xFFFFFFFF, "update ents");
-    //Profile_Begin(264);
-    currentEntityThink = level.currentEntityThink;
-    v23 = level.num_entities;
-    for (m = &g_entities[level.currentEntityThink]; currentEntityThink < v23; ++m)
     {
-        if (m->r.inuse)
+        PROF_SCOPED("update ents");
+        currentEntityThink = level.currentEntityThink;
+        v23 = level.num_entities;
+        for (m = &g_entities[level.currentEntityThink]; currentEntityThink < v23; ++m)
         {
-            v25 = m->s.number;
-            if (v25 != currentEntityThink)
+            if (m->r.inuse)
             {
-                v26 = va(
-                    "s.number = %i, level.currentEntityThink = %i, classname = %s",
-                    v25,
-                    currentEntityThink,
-                    (const char *)m->classname);
-                MyAssertHandler(
-                    "c:\\trees\\cod3\\cod3src\\src\\game\\g_main.cpp",
-                    2844,
-                    0,
-                    "%s\n\t%s",
-                    "ent->s.number == level.currentEntityThink",
-                    v26);
+                v25 = m->s.number;
+                if (v25 != currentEntityThink)
+                {
+                    v26 = va(
+                        "s.number = %i, level.currentEntityThink = %i, classname = %s",
+                        v25,
+                        currentEntityThink,
+                        (const char *)m->classname);
+                    MyAssertHandler(
+                        "c:\\trees\\cod3\\cod3src\\src\\game\\g_main.cpp",
+                        2844,
+                        0,
+                        "%s\n\t%s",
+                        "ent->s.number == level.currentEntityThink",
+                        v26);
+                }
+                G_RunFrameForEntity(m);
+                currentEntityThink = ++level.currentEntityThink;
+                v23 = level.num_entities;
             }
-            G_RunFrameForEntity(m);
-            currentEntityThink = ++level.currentEntityThink;
-            v23 = level.num_entities;
-        }
-        else
-        {
-            level.currentEntityThink = ++currentEntityThink;
+            else
+            {
+                level.currentEntityThink = ++currentEntityThink;
+            }
         }
     }
-    PIXEndNamedEvent();
     level.currentEntityThink = -1;
-    //Profile_EndInternal(0);
     if (level.actorPredictDepth)
-        Com_Error(ERR_DROP, byte_82032CCC);
-    PIXBeginNamedEvent_Copy_NoVarArgs(0xFFFFFFFF, "update client");
-    maxclients = level.maxclients;
-    v28 = 0;
-    if (level.maxclients > 0)
+        Com_Error(ERR_DROP, "unmatching beginPrediction and endPrediction");
+
     {
-        p_client = &g_entities[0].client;
-        do
+        PROF_SCOPED("update client");
+        maxclients = level.maxclients;
+        v28 = 0;
+        if (level.maxclients > 0)
         {
-            if (*((_BYTE *)p_client - 88))
+            p_client = &g_entities[0].client;
+            do
             {
-                HudElem_UpdateClient(*p_client);
-                ClientEndFrame((gentity_s *)(p_client - 64));
-                maxclients = level.maxclients;
-            }
-            ++v28;
-            p_client += 157;
-        } while (v28 < maxclients);
+                if (*((_BYTE *)p_client - 88))
+                {
+                    HudElem_UpdateClient(*p_client);
+                    ClientEndFrame((gentity_s *)(p_client - 64));
+                    maxclients = level.maxclients;
+                }
+                ++v28;
+                p_client += 157;
+            } while (v28 < maxclients);
+        }
     }
-    PIXEndNamedEvent();
-    PIXBeginNamedEvent_Copy_NoVarArgs(0xFFFFFFFF, "update corpses");
-    G_UpdateActorCorpses();
-    PIXEndNamedEvent();
+    {
+        PROF_SCOPED("update corpses");
+        G_UpdateActorCorpses();
+    }
     Path_DrawDebug();
     G_DrawVehiclePaths();
     G_DrawEntityBBoxes(v33, v32, v31, v30);

@@ -26,20 +26,20 @@ DObj_s *__cdecl SV_LocationalSightTraceDObj(const sightpointtrace_t *clip, const
 void __cdecl SV_SetupIgnoreEntParams(IgnoreEntParams *ignoreEntParams, int baseEntity);
 void __cdecl SV_Trace(
     trace_t *results,
-    float *start,
-    float *mins,
-    float *maxs,
-    float *end,
+    const float *start,
+    const float *mins,
+    const float *maxs,
+    const float *end,
     const IgnoreEntParams *ignoreEntParams,
     int contentmask,
     int locational,
     unsigned __int8 *priorityMap,
     int staticmodels);
 int __cdecl SV_TracePassed(
-    float *start,
-    float *mins,
-    float *maxs,
-    float *end,
+    const float *start,
+    const float *mins,
+    const float *maxs,
+    const float *end,
     int passEntityNum0,
     int passEntityNum1,
     int contentmask,

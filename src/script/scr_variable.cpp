@@ -4685,3 +4685,40 @@ void Scr_CopyEntityNum(int fromEntnum, int toEntnum, unsigned int classnum)
 		CopyEntity(entID, Scr_GetEntityId(toEntnum, classnum));
 	}
 }
+
+int Scr_AddStringSet(unsigned int setId, const char *string)
+{
+	unsigned int LowercaseString; // r31
+	unsigned int VariableIndexInternal; // r10
+	unsigned int v6; // r3
+	unsigned int id; // r31
+	VariableValue v8; // [sp+50h] [-30h] BYREF
+
+	LowercaseString = SL_GetLowercaseString(string, 0);
+	if (scrVarGlob.variableList[FindVariableIndexInternal(setId, LowercaseString) + 32770].hash.id)
+	{
+		SL_RemoveRefToString(LowercaseString);
+		return 0;
+	}
+	else
+	{
+		VariableIndexInternal = GetVariableIndexInternal(setId, LowercaseString);
+		v6 = LowercaseString;
+		id = scrVarGlob.variableList[VariableIndexInternal + 32770].hash.id;
+		SL_RemoveRefToString(v6);
+		v8.type = VAR_INTEGER;
+		v8.u.intValue = 0;
+		SetVariableValue(id, &v8);
+		return 1;
+	}
+}
+
+unsigned int Scr_InitStringSet()
+{
+	return Scr_AllocArray();
+}
+
+void Scr_ShutdownStringSet(unsigned int setId)
+{
+	RemoveRefToObject(setId);
+}

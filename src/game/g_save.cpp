@@ -11,10 +11,81 @@
 #include "g_main.h"
 #include <script/scr_readwrite.h>
 #include <script/scr_animtree.h>
+#include "actor_threat.h"
+#include "actor_event_listeners.h"
+#include <server/sv_public.h>
 
 bool g_useDevSaveArea;
 
 gclient_s tempClient;
+
+const char *monthStr[12] =
+{
+  "JAN",
+  "FEB",
+  "MAR",
+  "APR",
+  "MAY",
+  "JUN",
+  "JUL",
+  "AUG",
+  "SEP",
+  "OCT",
+  "NOV",
+  "DEC"
+};
+
+const saveField_t badplaceFields[2] = { { 8, SF_STRING }, { 0, SF_NONE } };
+const saveField_t badplaceBrushParmsFields[2] = { { 0, SF_ENTITY }, { 0, SF_NONE } };
+const saveField_t badplaceDefaultParmsFields[1] = { { 0, SF_NONE } };
+const saveField_t pathnodeFields[2] = { { 0, SF_SENTIENTHANDLE }, { 0, SF_NONE } };
+const saveField_t turretFields[4] =
+{
+  { 20, SF_ENTHANDLE },
+  { 16, SF_ENTHANDLE },
+  { 100, SF_SENTIENTHANDLE },
+  { 0, SF_NONE }
+};
+
+const saveField_t vehicleFields[14] =
+{
+  { 56, SF_STRING },
+  { 58, SF_STRING },
+  { 60, SF_STRING },
+  { 62, SF_STRING },
+  { 124, SF_STRING },
+  { 126, SF_STRING },
+  { 128, SF_STRING },
+  { 130, SF_STRING },
+  { 576, SF_STRING },
+  { 578, SF_STRING },
+  { 728, SF_ENTHANDLE },
+  { 732, SF_ENTHANDLE },
+  { 636, SF_ENTHANDLE },
+  { 0, SF_NONE }
+};
+
+const saveField_t threatGroupFields[17] =
+{
+  { 0, SF_STRING },
+  { 2, SF_STRING },
+  { 4, SF_STRING },
+  { 6, SF_STRING },
+  { 8, SF_STRING },
+  { 10, SF_STRING },
+  { 12, SF_STRING },
+  { 14, SF_STRING },
+  { 16, SF_STRING },
+  { 18, SF_STRING },
+  { 20, SF_STRING },
+  { 22, SF_STRING },
+  { 24, SF_STRING },
+  { 26, SF_STRING },
+  { 28, SF_STRING },
+  { 30, SF_STRING },
+  { 0, SF_NONE }
+};
+
 
 const saveField_t gentityFields[86] =
 {
@@ -1396,28 +1467,27 @@ void __cdecl WriteBadPlaces(SaveGame *save)
 
 void __cdecl ReadBadPlaces(SaveGame *save)
 {
-    int v2; // r27
-    unsigned __int8 *v3; // r31
+    int loops; // r27
+    badplace_t *badplace; // r31
     const saveField_t *v4; // r3
 
-    if (!save)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\g_save.cpp", 1662, 0, "%s", "save");
-    v2 = 32;
-    v3 = (unsigned __int8 *)g_badplaces;
+    iassert(save);
+    loops = ARRAY_COUNT(g_badplaces);
+    badplace = g_badplaces;
     do
     {
-        G_ReadStruct(badplaceFields, v3, 12, save);
-        if (!v3)
+        G_ReadStruct(badplaceFields, (unsigned __int8 *)badplace, 12, save);
+        if (!badplace)
             MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\g_save.cpp", 1618, 0, "%s", "badplace");
         v4 = badplaceDefaultParmsFields;
-        if (v3[10] == 2)
+        if (badplace->type == 2)
             v4 = badplaceBrushParmsFields;
-        G_ReadStruct(v4, v3 + 12, 28, save);
-        if (v3[10])
-            Path_UpdateBadPlaceCount((badplace_t *)v3, 1);
-        --v2;
-        v3 += 40;
-    } while (v2);
+        G_ReadStruct(v4, (unsigned __int8 *)&badplace->parms, 28, save);
+        if (badplace->type)
+            Path_UpdateBadPlaceCount(badplace, 1);
+        --loops;
+        ++badplace;
+    } while (loops);
 }
 
 void __cdecl WriteThreatBiasGroups(SaveGame *save)
@@ -1674,7 +1744,7 @@ void __cdecl G_SaveWeaponCue(SaveGame *save)
                 "(!number || g_entities[number - 1].r.inuse)",
                 number - 1);
         if (droppedWeaponCue->number)
-            v4 = EntHandle::entnum(droppedWeaponCue) + 1;
+            v4 = droppedWeaponCue->entnum() + 1;
         else
             v4 = 0;
         SaveMemory_SaveWrite(&v4, 4, save);
@@ -1715,12 +1785,12 @@ void __cdecl G_LoadWeaponCue(SaveGame *save)
         v4 = v6;
         if (v6 > 2176 || (v5 = v6 == 0, v6 < 0))
         {
-            Com_Error(ERR_DROP, byte_82034FD8);
+            Com_Error(ERR_DROP, "G_LoadWeaponCue: entity out of range (%i)", v6);
             v4 = v6;
             v5 = v6 == 0;
         }
         if (!v5)
-            EntHandle::setEnt(droppedWeaponCue, &g_entities[v4 - 1]);
+            droppedWeaponCue->setEnt(&g_entities[v4 - 1]);
         ++droppedWeaponCue;
     } while ((int)droppedWeaponCue < (int)&level.changelevel);
 }

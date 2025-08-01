@@ -2944,7 +2944,7 @@ bool G_IsVehicleUsable(gentity_s *ent, gentity_s *player)
     }
 }
 
-void __fastcall G_PrecacheDefaultVehicle()
+void G_PrecacheDefaultVehicle()
 {
     int VehicleInfoFromName; // r3
 
@@ -2953,4 +2953,66 @@ void __fastcall G_PrecacheDefaultVehicle()
     G_GetWeaponIndexForName(s_vehicleInfos[VehicleInfoFromName].turretWeapon);
 }
 
-#endif
+void G_FreeVehicleRefs(gentity_s *ent)
+{
+    int *p_targetEnt; // r11
+
+    if ((ent->flags & 0x800000) != 0)
+    {
+        p_targetEnt = &s_vehicles[0].targetEnt;
+        do
+        {
+            if (*(p_targetEnt - 49) != 2175 && *p_targetEnt == ent->s.number)
+            {
+                *p_targetEnt = 2175;
+                *(p_targetEnt - 5) = 0;
+            }
+            if (p_targetEnt[157] != 2175 && p_targetEnt[206] == ent->s.number)
+            {
+                p_targetEnt[206] = 2175;
+                p_targetEnt[201] = 0;
+            }
+            if (p_targetEnt[363] != 2175 && p_targetEnt[412] == ent->s.number)
+            {
+                p_targetEnt[412] = 2175;
+                p_targetEnt[407] = 0;
+            }
+            if (p_targetEnt[569] != 2175 && p_targetEnt[618] == ent->s.number)
+            {
+                p_targetEnt[618] = 2175;
+                p_targetEnt[613] = 0;
+            }
+            p_targetEnt += 824;
+        } while ((uintptr_t)p_targetEnt < (uintptr_t)&s_vehicles[64]);
+    }
+}
+
+gentity_s *G_GetPlayerVehicle(const gentity_s *player)
+{
+    gclient_s *client; // r28
+    const EntHandle *p_ownerNum; // r29
+    gentity_s *v5; // r29
+
+    if (!player)
+        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\g_scr_vehicle.cpp", 3976, 0, "%s", "player");
+    client = player->client;
+    if (!client)
+        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\g_scr_vehicle.cpp", 3979, 0, "%s", "client");
+    if ((client->ps.eFlags & 0x20000) == 0)
+        return 0;
+    p_ownerNum = &player->r.ownerNum;
+    iassert(player->r.ownerNum.isDefined());
+    v5 = p_ownerNum->ent();
+    if (!v5->scr_vehicle)
+        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\g_scr_vehicle.cpp", 3988, 0, "%s", "vehEnt->scr_vehicle");
+    if ((v5->scr_vehicle->flags & 1) == 0)
+        MyAssertHandler(
+            "c:\\trees\\cod3\\cod3src\\src\\game\\g_scr_vehicle.cpp",
+            3989,
+            0,
+            "%s",
+            "vehEnt->scr_vehicle->flags & VEHFLAG_PLAYER");
+    return v5;
+}
+
+#endif // KISAK_SP

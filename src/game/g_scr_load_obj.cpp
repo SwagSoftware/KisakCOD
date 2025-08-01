@@ -3,8 +3,11 @@
 #endif
 
 #include "g_scr_load_obj.h"
-
-#if 0
+#include "g_scr_main.h"
+#include "g_local.h"
+#include "g_main.h"
+#include <script/scr_main.h>
+#include <xanim/xanim.h>
 
 int __cdecl GScr_LoadScriptAndLabel(const char *filename, const char *label, ScriptFunctions *functions)
 {
@@ -117,10 +120,11 @@ void __cdecl GScr_LoadScriptsForPathNode(pathnode_t *loadNode, ScriptFunctions *
             {
                 Com_PrintError(
                     1,
-                    (const char *)(const char *)HIDWORD(COERCE_UNSIGNED_INT64(loadNode->constant.vOrigin[0])),
-                    (unsigned int)COERCE_UNSIGNED_INT64(loadNode->constant.vOrigin[0]),
-                    (unsigned int)COERCE_UNSIGNED_INT64(loadNode->constant.vOrigin[1]),
-                    (unsigned int)COERCE_UNSIGNED_INT64(loadNode->constant.vOrigin[2]));
+                    "ERROR: Pathnode (Begin) at (%g %g %g) has no animscript specified\n",
+                    loadNode->constant.vOrigin[0],
+                    loadNode->constant.vOrigin[1],
+                    loadNode->constant.vOrigin[2]
+                );
                 loadNode->constant.type = NODE_BADNODE;
             }
         }
@@ -161,7 +165,7 @@ void __cdecl GScr_LoadScriptsForEntities(ScriptFunctions *functions)
 
     v2 = 0;
     if (!G_ParseSpawnVars(&v10))
-        Com_Error(ERR_DROP, byte_8203560C);
+        Com_Error(ERR_DROP, "GScr_LoadScriptsForEntities: no entities");
     inited = Scr_InitStringSet();
     while (G_ParseSpawnVars(&v10))
     {
@@ -220,7 +224,7 @@ void __cdecl GScr_LoadEntities()
     SpawnVar v2; // [sp+60h] [-A40h] BYREF
 
     if (!G_ParseSpawnVars(&v2))
-        Com_Error(ERR_DROP, byte_8203560C);
+        Com_Error(ERR_DROP, "GScr_LoadEntities: no entities");
     while (G_ParseSpawnVars(&v2))
     {
         G_SpawnString(&v2, "classname", "", &v0);
@@ -261,5 +265,3 @@ void __cdecl GScr_LoadScripts(const char *mapname, ScriptFunctions *functions)
     Scr_ShutdownStringSet(inited);
     Scr_PostCompileScripts();
 }
-
-#endif

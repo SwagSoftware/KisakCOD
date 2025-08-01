@@ -3,6 +3,10 @@
 #endif
 
 #include "g_local.h"
+#include "g_main.h"
+#include <script/scr_vm.h>
+#include <script/scr_const.h>
+#include <server/sv_game.h>
 
 void __cdecl G_Trigger(gentity_s *self, gentity_s *other)
 {
@@ -13,7 +17,7 @@ void __cdecl G_Trigger(gentity_s *self, gentity_s *other)
         MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\g_trigger.cpp", 10, 0, "%s", "self->r.inuse");
     if (!other->r.inuse)
         MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\g_trigger.cpp", 11, 0, "%s", "other->r.inuse");
-    if (Scr_IsSystemActive(1u))
+    if (Scr_IsSystemActive())
     {
         pendingTriggerListSize = level.pendingTriggerListSize;
         if (level.pendingTriggerListSize == 256)
@@ -53,10 +57,11 @@ int __cdecl InitTrigger(gentity_s *self)
     {
         Com_PrintError(
             1,
-            (const char *)(const char *)HIDWORD(COERCE_UNSIGNED_INT64(self->s.lerp.pos.trBase[0])),
-            (unsigned int)COERCE_UNSIGNED_INT64(self->s.lerp.pos.trBase[0]),
-            (unsigned int)COERCE_UNSIGNED_INT64(self->s.lerp.pos.trBase[1]),
-            (unsigned int)COERCE_UNSIGNED_INT64(self->s.lerp.pos.trBase[2]));
+            "Killing trigger at (%f %f %f) because the brush model is invalid.\n",
+            self->s.lerp.pos.trBase[0],
+            self->s.lerp.pos.trBase[1],
+            self->s.lerp.pos.trBase[2]
+        );
         G_FreeEntity(self);
         return 0;
     }
@@ -129,19 +134,21 @@ void __cdecl SP_trigger_radius(gentity_s *ent)
         if (!G_SpawnFloat("radius", "", &Float))
         {
             v2 = va(
-                (const char *)(const char *)HIDWORD(COERCE_UNSIGNED_INT64(ent->r.currentOrigin[0])),
-                (unsigned int)COERCE_UNSIGNED_INT64(ent->r.currentOrigin[0]),
-                (unsigned int)COERCE_UNSIGNED_INT64(ent->r.currentOrigin[1]),
-                (unsigned int)COERCE_UNSIGNED_INT64(ent->r.currentOrigin[2]));
+                "radius not specified for trigger_radius at (%g %g %g)",
+                ent->r.currentOrigin[0],
+                ent->r.currentOrigin[1],
+                ent->r.currentOrigin[2]
+            );
             Com_Error(ERR_DROP, v2);
         }
         if (!G_SpawnFloat("height", "", &v8))
         {
             v3 = va(
-                (const char *)(const char *)HIDWORD(COERCE_UNSIGNED_INT64(ent->r.currentOrigin[0])),
-                (unsigned int)COERCE_UNSIGNED_INT64(ent->r.currentOrigin[0]),
-                (unsigned int)COERCE_UNSIGNED_INT64(ent->r.currentOrigin[1]),
-                (unsigned int)COERCE_UNSIGNED_INT64(ent->r.currentOrigin[2]));
+                "height not specified for trigger_radius at (%g %g %g)",
+                ent->r.currentOrigin[0],
+                ent->r.currentOrigin[1],
+                ent->r.currentOrigin[2]
+            );
             Com_Error(ERR_DROP, v3);
         }
     }
@@ -177,10 +184,11 @@ void __cdecl SP_trigger_disk(gentity_s *ent)
     if (!G_SpawnFloat("radius", "", v4))
     {
         v2 = va(
-            (const char *)(const char *)HIDWORD(COERCE_UNSIGNED_INT64(ent->r.currentOrigin[0])),
-            (unsigned int)COERCE_UNSIGNED_INT64(ent->r.currentOrigin[0]),
-            (unsigned int)COERCE_UNSIGNED_INT64(ent->r.currentOrigin[1]),
-            (unsigned int)COERCE_UNSIGNED_INT64(ent->r.currentOrigin[2]));
+            "radius not specified for trigger_radius at (%g %g %g)",
+            ent->r.currentOrigin[0],
+            ent->r.currentOrigin[1],
+            ent->r.currentOrigin[2]
+        );
         Com_Error(ERR_DROP, v2);
     }
     v3 = (float)(v4[0] + (float)64.0);
@@ -213,7 +221,7 @@ void __cdecl SP_trigger_friendlychain(gentity_s *ent)
     target = ent->target;
     ent->handler = 5;
     if (!target)
-        Com_Error(ERR_DROP, byte_8203F0F8);
+        Com_Error(ERR_DROP, "trigger_friendlychain must target a friendly chain node");
     if ((unsigned __int8)InitTrigger(ent))
     {
         InitSentientTrigger(ent);
@@ -223,7 +231,6 @@ void __cdecl SP_trigger_friendlychain(gentity_s *ent)
 
 void __cdecl hurt_touch(gentity_s *self, gentity_s *other, int bTouched)
 {
-    int v5; // r11
     int v6; // [sp+8h] [-88h]
     hitLocation_t v7; // [sp+Ch] [-84h]
     unsigned int v8; // [sp+10h] [-80h]
@@ -250,8 +257,7 @@ void __cdecl hurt_touch(gentity_s *self, gentity_s *other, int bTouched)
     if (other->takedamage && ((self->spawnflags & 2) == 0 || !other->actor) && self->item[0].index <= level.time)
     {
         G_Trigger(self, other);
-        v5 = (self->spawnflags & 0x10) != 0 ? level.time + 1000 : level.time + 50;
-        self->item[0].index = v5;
+        self->item[0].index = (self->spawnflags & 0x10) != 0 ? level.time + 1000 : level.time + 50;
         G_Damage(
             other,
             self,
@@ -259,33 +265,11 @@ void __cdecl hurt_touch(gentity_s *self, gentity_s *other, int bTouched)
             0,
             0,
             self->damage,
-            0,
-            13,
-            v6,
-            v7,
-            v8,
-            v9,
-            v10,
-            v11,
-            v12,
-            v13,
-            v14,
-            v15,
-            v16,
-            v17,
-            v18,
-            v19,
-            v20,
-            v21,
-            v22,
-            v23,
-            v24,
+            0, // dflags
+            13, // mod
             0xFFFFFFFF,
-            v25,
+            HITLOC_NONE,
             0,
-            v26,
-            0,
-            v27,
             0);
         if ((self->spawnflags & 0x20) != 0)
         {
@@ -450,8 +434,8 @@ void __cdecl Die_trigger_damage(
 
 void __cdecl SP_trigger_damage(gentity_s *pSelf)
 {
-    G_SpawnInt("accumulate", "0", &pSelf->item[0].clipAmmoCount);
-    G_SpawnInt("threshold", "0", (int *)&pSelf->352);
+    G_SpawnInt("accumulate", "0", &pSelf->trigger.accumulate);
+    G_SpawnInt("threshold", "0", &pSelf->trigger.threshold);
     pSelf->health = 32000;
     pSelf->takedamage = 1;
     pSelf->handler = 8;
@@ -509,10 +493,20 @@ void __cdecl G_CheckHitTriggerDamage(
     AddPointToBounds(vEnd, v23, v24);
     v13 = (float)(vEnd[1] - vStart[1]);
     v14 = (float)(vEnd[2] - vStart[2]);
-    _FP9 = -sqrtf((float)((float)((float)(*vEnd - *vStart) * (float)(*vEnd - *vStart))
-        + (float)((float)((float)v14 * (float)v14) + (float)((float)v13 * (float)v13))));
-    __asm { fsel      f11, f9, f10, f11 }
-    v17 = (float)((float)1.0 / (float)_FP11);
+
+    // aislop
+    //_FP9 = -sqrtf((float)((float)((float)(*vEnd - *vStart) * (float)(*vEnd - *vStart))
+    //    + (float)((float)((float)v14 * (float)v14) + (float)((float)v13 * (float)v13))));
+    //__asm { fsel      f11, f9, f10, f11 }
+    //v17 = (float)((float)1.0 / (float)_FP11);
+
+    {
+        float dx = *vEnd - *vStart;
+        float _FP9 = -sqrtf(dx * dx + v14 * v14 + v13 * v13);
+        float _FP11 = (_FP9 > 0.0f) ? _FP9 : 0.0f;
+        v17 = 1.0f / _FP11;
+    }
+
     v18 = (float)((float)v17 * (float)(*vEnd - *vStart));
     v25[1] = (float)(vEnd[1] - vStart[1]) * (float)v17;
     v25[0] = v18;
@@ -526,7 +520,7 @@ void __cdecl G_CheckHitTriggerDamage(
         {
             v22 = &g_entities[*v20];
             if (v22->classname == scr_const.trigger_damage
-                && SV_SightTraceToEntity(vStart, vec3_origin, vec3_origin, vEnd, v22->s.number, -1))
+                && SV_SightTraceToEntity((float*)vStart, (float *)vec3_origin, (float *)vec3_origin, (float *)vEnd, v22->s.number, -1))
             {
                 Scr_AddConstString(*modNames[iMOD]);
                 Scr_AddVector(vec3_origin);
@@ -579,10 +573,23 @@ void __cdecl G_GrenadeTouchTriggerDamage(
     AddPointToBounds(vEnd, v23, v24);
     v13 = (float)(vEnd[1] - vStart[1]);
     v14 = (float)(vEnd[2] - vStart[2]);
-    _FP9 = -sqrtf((float)((float)((float)(*vEnd - *vStart) * (float)(*vEnd - *vStart))
-        + (float)((float)((float)v14 * (float)v14) + (float)((float)v13 * (float)v13))));
-    __asm { fsel      f11, f9, f10, f11 }
-    v17 = (float)((float)1.0 / (float)_FP11);
+
+    // aislop
+    //_FP9 = -sqrtf((float)((float)((float)(*vEnd - *vStart) * (float)(*vEnd - *vStart))
+    //    + (float)((float)((float)v14 * (float)v14) + (float)((float)v13 * (float)v13))));
+    //__asm { fsel      f11, f9, f10, f11 }
+    //v17 = (float)((float)1.0 / (float)_FP11);
+    {
+        float _FP9 = -sqrtf(
+            (*vEnd - *vStart) * (*vEnd - *vStart) +
+            v14 * v14 +
+            v13 * v13
+        );
+
+        float _FP11 = (_FP9 > 0.0f) ? _FP9 : 0.0f;
+        v17 = 1.0f / _FP11;
+    }
+
     v18 = (float)((float)v17 * (float)(*vEnd - *vStart));
     v25[1] = (float)(vEnd[1] - vStart[1]) * (float)v17;
     v25[0] = v18;
@@ -597,7 +604,7 @@ void __cdecl G_GrenadeTouchTriggerDamage(
             v22 = &g_entities[*v20];
             if (v22->classname == scr_const.trigger_damage
                 && (v22->flags & 0x4000) != 0
-                && SV_SightTraceToEntity(vStart, vec3_origin, vec3_origin, vEnd, v22->s.number, -1))
+                && SV_SightTraceToEntity((float*)vStart, (float *)vec3_origin, (float *)vec3_origin, (float *)vEnd, v22->s.number, -1))
             {
                 Scr_AddConstString(*modNames[iMOD]);
                 Scr_AddVector(vec3_origin);
@@ -635,10 +642,11 @@ void __cdecl SP_trigger_lookat(gentity_s *self)
     {
         Com_PrintError(
             1,
-            (const char *)(const char *)HIDWORD(COERCE_UNSIGNED_INT64(self->s.lerp.pos.trBase[0])),
-            (unsigned int)COERCE_UNSIGNED_INT64(self->s.lerp.pos.trBase[0]),
-            (unsigned int)COERCE_UNSIGNED_INT64(self->s.lerp.pos.trBase[1]),
-            (unsigned int)COERCE_UNSIGNED_INT64(self->s.lerp.pos.trBase[2]));
+            "Killing trigger_lookat at (%f %f %f) because the brush model is invalid.\n",
+            self->s.lerp.pos.trBase[0],
+            self->s.lerp.pos.trBase[1],
+            self->s.lerp.pos.trBase[2]
+        );
         G_FreeEntity(self);
     }
 }

@@ -183,6 +183,7 @@ void __cdecl Svcmd_EntityList_f()
 
 int __cdecl ConsoleCommand()
 {
+#ifdef KISAK_MP
     char *v1; // eax
     const char *v2; // eax
     const char *cmd; // [esp+0h] [ebp-4h]
@@ -231,5 +232,30 @@ int __cdecl ConsoleCommand()
         Svcmd_EntityList_f();
         return 1;
     }
+#elif KISAK_SP
+    int nesting; // r7
+    const char *v1; // r3
+
+    nesting = cmd_args.nesting;
+    if (cmd_args.nesting >= 8u)
+    {
+        MyAssertHandler(
+            "c:\\trees\\cod3\\cod3src\\src\\game\\../qcommon/cmd.h",
+            174,
+            0,
+            "cmd_args.nesting doesn't index CMD_MAX_NESTING\n\t%i not in [0, %i)",
+            cmd_args.nesting,
+            8);
+        nesting = cmd_args.nesting;
+    }
+    if (cmd_args.argc[nesting] <= 0)
+        v1 = "";
+    else
+        v1 = *cmd_args.argv[nesting];
+    if (I_stricmp(v1, "entitylist"))
+        return 0;
+    Svcmd_EntityList_f();
+    return 1;
+#endif
 }
 

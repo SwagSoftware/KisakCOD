@@ -903,10 +903,10 @@ void __cdecl SV_SetupIgnoreEntParams(IgnoreEntParams *ignoreEntParams, int baseE
 
 void __cdecl SV_Trace(
     trace_t *results,
-    float *start,
-    float *mins,
-    float *maxs,
-    float *end,
+    const float *start,
+    const float *mins,
+    const float *maxs,
+    const float *end,
     const IgnoreEntParams *ignoreEntParams,
     int contentmask,
     int locational,
@@ -1090,10 +1090,10 @@ void __cdecl SV_Trace(
 }
 
 int __cdecl SV_TracePassed(
-    float *start,
-    float *mins,
-    float *maxs,
-    float *end,
+    const float *start,
+    const float *mins,
+    const float *maxs,
+    const float *end,
     int passEntityNum0,
     int passEntityNum1,
     int contentmask,

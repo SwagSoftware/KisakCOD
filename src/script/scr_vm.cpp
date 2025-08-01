@@ -5294,4 +5294,13 @@ unsigned int Scr_GetFunc(unsigned int index)
     return 0;
 }
 
+void Scr_SetRecordScriptPlace(int on)
+{
+    bool v1; // r11
+
+    if (on != 1 || (v1 = 1, !scrVarPub.developer))
+        v1 = 0;
+    scrVmGlob.recordPlace = v1;
+}
+
 #pragma warning(pop)

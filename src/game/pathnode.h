@@ -84,7 +84,7 @@ struct pathnodeRange_t
 };
 struct pathsort_t
 {
-    pathnode_t *node;
+    struct pathnode_t *node;
     float metric;
     float distMetric;
 };
@@ -392,4 +392,7 @@ pathnode_t *__cdecl Path_NearestNode(
 void __cdecl Path_DrawDebugNearestNode(float *vOrigin, int numNodes);
 void __cdecl Path_DrawDebugClaimedNodes(float *origin, int numNodes);
 void __cdecl Path_DrawDebug();
+
+void Path_CallFunctionForNodes(void(*function)(pathnode_t *, void *), void *data);
+
 #endif

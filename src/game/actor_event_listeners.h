@@ -29,3 +29,5 @@ void __cdecl Actor_EventListener_NotifyToListener(
     const float *position);
 void __cdecl Actor_DumpEventListners();
 int __cdecl Actor_EventListener_First(int event, int teamFlags);
+
+extern AIEventListener g_AIEVlisteners[32];

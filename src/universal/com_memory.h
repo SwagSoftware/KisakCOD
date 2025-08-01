@@ -128,6 +128,7 @@ void* __cdecl Hunk_FindDataForFileInternal(int type, const char* name, int hash)
 bool __cdecl Hunk_DataOnHunk(unsigned __int8* data);
 char* __cdecl Hunk_SetDataForFile(int type, const char* name, void* data, void* (__cdecl* alloc)(int));
 void __cdecl Hunk_AddData(int type, void* data, void* (__cdecl* alloc)(int));
+int Hunk_SetMarkLow();
 
 char *__cdecl TempMalloc(unsigned int len);
 void __cdecl TempMemorySetPos(char *pos);

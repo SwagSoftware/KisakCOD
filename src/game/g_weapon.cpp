@@ -663,18 +663,21 @@ unsigned int __cdecl G_GetWeaponIndexForName(const char *name)
 
 void __cdecl G_SelectWeaponIndex(int clientNum, int iWeaponIndex)
 {
-    const char *v2; // eax
-
-    v2 = va("%c %i", 97, iWeaponIndex);
-    SV_GameSendServerCommand(clientNum, SV_CMD_RELIABLE, v2);
+#ifdef KISAK_MP
+    SV_GameSendServerCommand(clientNum, SV_CMD_RELIABLE, va("%c %i", 97, iWeaponIndex));
+#elif KISAK_SP
+    SV_GameSendServerCommand(clientNum, va("sw %i", iWeaponIndex));
+#endif
 }
 
 void __cdecl G_SetEquippedOffHand(int clientNum, unsigned int offHandIndex)
 {
-    const char *v2; // eax
-
+#ifdef KISAK_MP
     BG_AssertOffhandIndexOrNone(offHandIndex);
-    v2 = va("%c %i", 67, offHandIndex);
-    SV_GameSendServerCommand(clientNum, SV_CMD_RELIABLE, v2);
+    SV_GameSendServerCommand(clientNum, SV_CMD_RELIABLE, va("%c %i", 67, offHandIndex));
+#elif KISAK_SP
+    BG_AssertOffhandIndexOrNone(offHandIndex);
+    SV_GameSendServerCommand(clientNum, va("offhand %i", offHandIndex));
+#endif
 }
 

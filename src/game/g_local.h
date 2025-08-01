@@ -571,6 +571,21 @@ void __cdecl Scr_GetObjectField(unsigned int classnum, unsigned int entnum, unsi
 
 
 // g_targets
+struct target_t
+{
+    gentity_s *ent;
+    float offset[3];
+    int materialIndex;
+    int offscreenMaterialIndex;
+    int flags;
+};
+
+struct TargetGlob
+{
+    target_t targets[32];
+    unsigned int targetCount;
+};
+
 void __cdecl G_InitTargets();
 void __cdecl G_LoadTargets();
 void __cdecl Scr_Target_SetShader();
@@ -591,7 +606,7 @@ int __cdecl G_WorldDirToScreenPos(
 int __cdecl ScrGetTargetScreenPos(float *screenPos);
 void __cdecl Scr_Target_IsInCircle();
 void __cdecl Scr_Target_IsInRect();
-void __cdecl Scr_Target_StartLockOn(int a1, unsigned int a2);
+void __cdecl Scr_Target_StartLockOn();
 void __cdecl Scr_Target_ClearLockOn();
 int __cdecl GetTargetIdx(const gentity_s *ent);
 int __cdecl G_TargetGetOffset(const gentity_s *targ, float *result);
@@ -782,3 +797,6 @@ int __cdecl G_EntAttach(gentity_s *ent, const char *modelName, unsigned int tagN
 
 
 extern bool g_godModeRemoteInputValid;
+extern unsigned __int16 *modNames[16];
+
+extern TargetGlob targGlob;

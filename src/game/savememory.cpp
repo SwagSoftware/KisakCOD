@@ -471,6 +471,8 @@ void *__cdecl SaveMemory_ReadLoadFromDevice(
     int useLoadedSourceFiles,
     SaveGame **save)
 {
+    // KISAKSAVE
+#if 0
     __int64 v7; // r10
     __int64 v8; // r8
     __int64 v9; // r6
@@ -619,6 +621,7 @@ void *__cdecl SaveMemory_ReadLoadFromDevice(
     (*save)->isWrittenToDevice = 0;
     memcpy(&(*save)->header, v37, sizeof((*save)->header));
     return v36;
+#endif
 }
 
 bool __cdecl SaveMemory_IsRecentlyLoaded()
@@ -761,7 +764,7 @@ int __cdecl SaveMemory_WriteSaveToDevice(SaveGame *save)
         if (save->isWrittenToDevice)
             Com_Printf(10, "** Save was already written to a device; it is being saved again.  This is not an error.\n");
         v4 = Sys_Milliseconds();
-        v5 = WriteSaveToDevice(save->memFile.buffer, &save->header, save->suppressPlayerNotify);
+        //v5 = WriteSaveToDevice(save->memFile.buffer, &save->header, save->suppressPlayerNotify); // KISAKSAVE
         v6 = Sys_Milliseconds();
         Com_Printf(10, "time to write: %i  ms\n", v6 - v4);
         if (!v5)

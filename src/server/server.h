@@ -121,26 +121,6 @@ struct MantleState
     int flags;
 };
 
-enum ActionSlotType : __int32
-{
-    ACTIONSLOTTYPE_DONOTHING = 0x0,
-    ACTIONSLOTTYPE_SPECIFYWEAPON = 0x1,
-    ACTIONSLOTTYPE_ALTWEAPONTOGGLE = 0x2,
-    ACTIONSLOTTYPE_NIGHTVISION = 0x3,
-    ACTIONSLOTTYPECOUNT = 0x4,
-};
-
-struct ActionSlotParam_SpecifyWeapon
-{
-    unsigned int index;
-};
-
-/* 9179 */
-struct ActionSlotParam
-{
-    ActionSlotParam_SpecifyWeapon specifyWeapon;
-};
-
 enum clientConnected_t : __int32
 {
     CON_DISCONNECTED = 0x0,
@@ -351,6 +331,8 @@ void __cdecl SV_AddToPlayerScore(int amount);
 
 
 // sv_demo
+struct SaveGame;
+
 void __cdecl TRACK_sv_demo();
 unsigned int __cdecl SV_GetHistoryIndex(server_demo_history_t *history);
 int __cdecl SV_GetBufferIndex(unsigned __int8 *ptr);

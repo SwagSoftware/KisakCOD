@@ -13,6 +13,8 @@
 #include "actor_corpse.h"
 #include <script/scr_animtree.h>
 #include <database/database.h>
+#include <cgame/cg_ents.h>
+#include <xanim/dobj_utils.h>
 
 const char *entityTypeNames[17] =
 {
@@ -1444,9 +1446,14 @@ bool __cdecl G_SlideMove(
                 v43 = (float *)v74;
                 v44 = mins[1];
                 v45 = *mins;
-                _FP5 = -sqrtf((float)((float)(v68 * v68) + (float)((float)(v70 * v70) + (float)(v69 * v69))));
-                __asm { fsel      f12, f5, f31, f12 }
-                v48 = (float)((float)1.0 / (float)_FP12);
+
+                {
+                    float _FP5 = -sqrtf((float)((float)(v68 * v68) + (float)((float)(v70 * v70) + (float)(v69 * v69))));
+                    //__asm { fsel      f12, f5, f31, f12 }
+                    float _FP12 = (_FP5 > 0.0f) ? _FP5 : 0.0f;
+                    v48 = (float)((float)1.0 / (float)_FP12);
+                }
+
                 v49 = (float)(v70 * (float)v48);
                 v69 = v69 * (float)v48;
                 v68 = v68 * (float)v48;
@@ -1492,7 +1499,8 @@ bool __cdecl G_SlideMove(
         mins[1] = v57;
         mins[2] = v58;
     }
-    return (_cntlzw(v19) & 0x20) == 0;
+    //return (_cntlzw(v19) & 0x20) == 0;
+    return v19 != 0;
 }
 
 void __cdecl G_StepSlideMove(
@@ -1665,8 +1673,8 @@ void __cdecl G_DObjGetWorldBoneIndexMatrix(const gentity_s *ent, int boneIndex, 
     v8[10] = ent->r.currentOrigin[1];
     v8[11] = ent->r.currentOrigin[2];
     LocalConvertQuatToMat(v6, v7);
-    MatrixMultiply(v7, (const float (*)[3])v8, tagMat);
-    MatrixTransformVector43(v6->trans, (const float (*)[3])v8, &(*tagMat)[9]);
+    MatrixMultiply((const mat3x3&)v7, (const mat3x3&)v8, (mat3x3&)tagMat);
+    MatrixTransformVector43(v6->trans, (const mat4x3&)v8, &(*tagMat)[9]);
 }
 
 void __cdecl G_DObjGetWorldBoneIndexPos(const gentity_s *ent, int boneIndex, float *pos)
@@ -1682,7 +1690,7 @@ void __cdecl G_DObjGetWorldBoneIndexPos(const gentity_s *ent, int boneIndex, flo
     v7[9] = ent->r.currentOrigin[0];
     v7[10] = ent->r.currentOrigin[1];
     v7[11] = ent->r.currentOrigin[2];
-    MatrixTransformVector43(MatrixArray[boneIndex].trans, (const float (*)[3])v7, pos);
+    MatrixTransformVector43(MatrixArray[boneIndex].trans, (const mat4x3&)v7, pos);
 }
 
 DObjAnimMat *__cdecl G_DObjGetLocalTagMatrix(const gentity_s *ent, unsigned int tagName)
@@ -1726,7 +1734,7 @@ int __cdecl G_DObjGetWorldTagPos(const gentity_s *ent, unsigned int tagName, flo
     v8[9] = ent->r.currentOrigin[0];
     v8[10] = ent->r.currentOrigin[1];
     v8[11] = ent->r.currentOrigin[2];
-    MatrixTransformVector43(MatrixArray[BoneIndex].trans, (const float (*)[3])v8, pos);
+    MatrixTransformVector43(MatrixArray[BoneIndex].trans, (const mat4x3&)v8, pos);
     return 1;
 }
 
@@ -1796,8 +1804,7 @@ void __cdecl G_InitGentity(gentity_s *e)
     e->s.number = v3;
     if (v3 != e - g_entities)
         MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\g_utils.cpp", 2220, 0, "%s", "e->s.number == e - g_entities");
-    if (EntHandle::isDefined(&e->r.ownerNum))
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\g_utils.cpp", 2221, 0, "%s", "!e->r.ownerNum.isDefined()");
+    iassert(!e->r.ownerNum.isDefined());
     e->r.eventType = 0;
     e->r.eventTime = 0;
     e->angleLerpRate = 540.0;
@@ -1890,7 +1897,7 @@ gentity_s *__cdecl G_Spawn()
         {
             G_PrintEntities();
             Scr_Error("G_Spawn: no free entities");
-            Com_Error(ERR_DROP, byte_8203FD04);
+            Com_Error(ERR_DROP, "G_Spawn: no free entities");
             num_entities = level.num_entities;
         }
         level.num_entities = num_entities + 1;

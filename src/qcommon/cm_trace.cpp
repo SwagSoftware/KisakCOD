@@ -129,7 +129,7 @@ int __cdecl CM_ContentsOfModel(unsigned int handle)
 void __cdecl CM_BoxTrace(
     trace_t *results,
     const float *start,
-    float *end,
+    const float *end,
     const float *mins,
     const float *maxs,
     unsigned int model,
@@ -143,7 +143,7 @@ void __cdecl CM_BoxTrace(
 void __cdecl CM_Trace(
     trace_t *results,
     const float *start,
-    float *end,
+    const float *end,
     const float *mins,
     const float *maxs,
     unsigned int model,
