@@ -23,6 +23,7 @@
 #include "actor_grenade.h"
 #include "bullet.h"
 #include <server/sv_public.h>
+#include <universal/com_sndalias.h>
 
 
 const BuiltinMethodDef methods[104] =
@@ -2080,30 +2081,39 @@ void ScrCmd_SetTimeScale()
     Dvar_SetFloat(com_timescale, Float);
 }
 
+// aislop
 void ScrCmd_SetPhysicsGravityDir()
 {
-    double v2; // fp0
-    double v3; // r4
-    const char *v4; // r3
-    double v5; // [sp+20h] [-50h]
-    double v6; // [sp+28h] [-48h]
-    float v7; // [sp+50h] [-20h] BYREF
-    float v8; // [sp+54h] [-1Ch]
-    float v9; // [sp+58h] [-18h]
+    // Declare local variables
+    float v7, v8, v9;
+    double v2, v5, v6;
+    const char *v4;
 
+    // Get vector from parameter 0
     Scr_GetVector(0, &v7);
-    _FP9 = -sqrtf((float)((float)(v9 * v9) + (float)((float)(v7 * v7) + (float)(v8 * v8))));
-    __asm { fsel      f0, f9, f10, f0 }
-    v2 = (float)((float)1.0 / (float)_FP0);
-    v5 = (float)((float)v2 * v8);
-    v6 = (float)((float)v2 * v9);
-    v8 = (float)v2 * v8;
-    v3 = (float)((float)v2 * v7);
-    v7 = (float)v2 * v7;
-    v9 = (float)v2 * v9;
-    v4 = va((const char *)HIDWORD(v3), LODWORD(v3), LODWORD(v5), LODWORD(v6));
+
+    // Compute the magnitude (length) of the vector
+    float magnitude = sqrtf(v7 * v7 + v8 * v8 + v9 * v9);
+
+    // Avoid division by zero
+    if (magnitude == 0.0f) {
+        Scr_Error("Zero vector length detected, cannot normalize.");
+        return;
+    }
+
+    // Normalize the vector
+    float invMagnitude = 1.0f / magnitude;
+    v7 *= invMagnitude;
+    v8 *= invMagnitude;
+    v9 *= invMagnitude;
+
+    // Prepare the formatted string for the server command
+    v4 = va("phys_grav %f %f %f\n", v7, v8, v9);
+
+    // Send the command to the server
     SV_GameSendServerCommand(-1, v4);
 }
+
 
 void __cdecl ScrCmd_PlayerSetGroundReferenceEnt(scr_entref_t *entref)
 {
@@ -2126,246 +2136,150 @@ void __cdecl ScrCmd_PlayerSetGroundReferenceEnt(scr_entref_t *entref)
     Entity->client->groundTiltEntNum = number;
 }
 
+// aislop
 void __cdecl ScrCmd_PlayerLinkTo(scr_entref_t *entref)
 {
-    gentity_s *Entity; // r31
-    gentity_s *v2; // r26
-    int NumParam; // r30
-    unsigned int ConstLowercaseString; // r29
-    double Float; // fp1
-    bool v6; // r11
-    double v7; // fp1
-    double v12; // fp1
-    double v17; // fp1
-    double v22; // fp1
-    gclient_s *client; // r11
-    float v28[4][3]; // [sp+50h] [-80h] BYREF
-
-    Entity = GetEntity(entref);
+    gentity_s *Entity = GetEntity(entref);
     if (Scr_GetType(0) != 1 || Scr_GetPointerType(0) != 20)
         Scr_ParamError(0, "not an entity");
+
     if (!Entity->client)
         Scr_ObjectError("not a player entity");
+
     if ((Entity->flags & 0x800) == 0)
         MyAssertHandler(
             "c:\\trees\\cod3\\cod3src\\src\\game\\g_scr_main.cpp",
-            2680,
-            0,
-            "%s",
-            "ent->flags & FL_SUPPORTS_LINKTO");
-    v2 = Scr_GetEntity(0);
-    NumParam = Scr_GetNumParam();
-    ConstLowercaseString = 0;
-    if (NumParam > 1)
-    {
-        if (Scr_GetType(1u))
-        {
-            ConstLowercaseString = Scr_GetConstLowercaseString(1u);
-            if (ConstLowercaseString == scr_const._)
-                ConstLowercaseString = 0;
-        }
-    }
-    if (NumParam <= 2)
-        Float = 0.0;
-    else
-        Float = Scr_GetFloat(2u);
-    Entity->client->linkAnglesFrac = Float;
+            2680, 0, "%s", "ent->flags & FL_SUPPORTS_LINKTO"
+        );
+
+    gentity_s *v2 = Scr_GetEntity(0);
+    int NumParam = Scr_GetNumParam();
+    unsigned int ConstLowercaseString = 0;
+
+    // Set ConstLowercaseString if valid
+    if (NumParam > 1 && Scr_GetType(1) && Scr_GetConstLowercaseString(1) != scr_const._)
+        ConstLowercaseString = Scr_GetConstLowercaseString(1);
+
+    // Default value for linkAnglesFrac
+    float linkAnglesFrac = (NumParam > 2) ? Scr_GetFloat(2) : 0.0f;
+    Entity->client->linkAnglesFrac = linkAnglesFrac;
     Entity->client->linkAnglesLocked = 0;
     Entity->client->link_rotationMovesEyePos = 0;
     Entity->client->link_useTagAnglesForViewAngles = 1;
-    v6 = NumParam > 7 && (_cntlzw(Scr_GetInt(7u)) & 0x20) == 0;
-    Entity->client->link_doCollision = v6;
-    if (NumParam <= 3)
-        v7 = 180.0;
-    else
-        v7 = Scr_GetFloat(3u);
-    _FP0 = (float)((float)v7 - (float)180.0);
-    _FP13 = -v7;
-    __asm
-    {
-        fsel      f0, f0, f31, f1
-        fsel      f0, f13, f30, f0
+
+    // Set link_doCollision based on parameter 7
+    //bool linkDoCollision = (NumParam > 7 && (_cntlzw(Scr_GetInt(7)) & 0x20) == 0);
+    bool linkDoCollision = (NumParam > 7 && Scr_GetInt(7));
+    Entity->client->link_doCollision = linkDoCollision;
+
+    // Set min/max clamp values
+    float clampAngles[4] = { 180.0f, 180.0f, 180.0f, 180.0f };
+    for (int i = 3; i < NumParam && i < 7; i++) {
+        clampAngles[i - 3] = Scr_GetFloat(i);
     }
-    Entity->client->linkAnglesMinClamp[1] = -_FP0;
-    if (NumParam <= 4)
-        v12 = 180.0;
-    else
-        v12 = Scr_GetFloat(4u);
-    _FP0 = (float)((float)v12 - (float)180.0);
-    _FP13 = -v12;
-    __asm
-    {
-        fsel      f0, f0, f31, f1
-        fsel      f0, f13, f30, f0
+
+    // Apply clamping angles
+    for (int i = 0; i < 2; i++) {
+        float angle = clampAngles[i];
+        angle -= 180.0f;  // Adjust angle
+        Entity->client->linkAnglesMinClamp[i] = -angle;
+        Entity->client->linkAnglesMaxClamp[i] = angle;
     }
-    Entity->client->linkAnglesMaxClamp[1] = _FP0;
-    if (NumParam <= 5)
-        v17 = 180.0;
-    else
-        v17 = Scr_GetFloat(5u);
-    _FP0 = (float)((float)v17 - (float)180.0);
-    _FP13 = -v17;
-    __asm
-    {
-        fsel      f0, f0, f31, f1
-        fsel      f0, f13, f30, f0
-    }
-    Entity->client->linkAnglesMinClamp[0] = -_FP0;
-    if (NumParam <= 6)
-        v22 = 180.0;
-    else
-        v22 = Scr_GetFloat(6u);
-    _FP0 = (float)((float)v22 - (float)180.0);
-    _FP13 = -v22;
-    __asm
-    {
-        fsel      f0, f0, f31, f1
-        fsel      f0, f13, f30, f0
-    }
-    Entity->client->linkAnglesMaxClamp[0] = _FP0;
+
+    // Update view angle clamp
     G_UpdateViewAngleClamp(Entity->client, v2->r.currentAngles);
+
+    // Reset player flags
     Entity->client->ps.pm_flags &= ~0x1000000u;
     Entity->client->prevLinkAnglesSet = 0;
-    if (G_EntLinkTo(Entity, v2, ConstLowercaseString))
-    {
-        client = Entity->client;
-        if (client->link_useTagAnglesForViewAngles)
-        {
+
+    // Link entities
+    if (G_EntLinkTo(Entity, v2, ConstLowercaseString)) {
+        gclient_s *client = Entity->client;
+        if (client->link_useTagAnglesForViewAngles) {
+            float v28[4][3];
             G_CalcTagParentAxis(Entity, v28);
-            AxisToAngles(v28, Entity->client->ps.linkAngles);
+            AxisToAngles((const mat3x3&)v28, client->ps.linkAngles);
         }
-        else
-        {
-            client->ps.linkAngles[0] = 0.0;
-            client->ps.linkAngles[1] = 0.0;
-            client->ps.linkAngles[2] = 0.0;
+        else {
+            client->ps.linkAngles[0] = client->ps.linkAngles[1] = client->ps.linkAngles[2] = 0.0f;
         }
     }
-    else
-    {
+    else {
         Scr_Error("failed to link entity");
     }
 }
 
+
+//aislop
 void __cdecl ScrCmd_PlayerLinkToDelta(scr_entref_t *entref)
 {
-    gentity_s *Entity; // r31
-    gentity_s *v2; // r27
-    int NumParam; // r30
-    unsigned int ConstLowercaseString; // r29
-    double Float; // fp1
-    double v6; // fp1
-    double v11; // fp1
-    double v16; // fp1
-    double v21; // fp1
-    bool v26; // r11
-    gclient_s *client; // r11
-    float v28[4][3]; // [sp+50h] [-70h] BYREF
-
-    Entity = GetEntity(entref);
+    gentity_s *Entity = GetEntity(entref);
     if (Scr_GetType(0) != 1 || Scr_GetPointerType(0) != 20)
         Scr_ParamError(0, "not an entity");
+
     if (!Entity->client)
         Scr_ObjectError("not a player entity");
+
     if ((Entity->flags & 0x800) == 0)
         MyAssertHandler(
             "c:\\trees\\cod3\\cod3src\\src\\game\\g_scr_main.cpp",
-            2760,
-            0,
-            "%s",
-            "ent->flags & FL_SUPPORTS_LINKTO");
-    v2 = Scr_GetEntity(0);
-    NumParam = Scr_GetNumParam();
-    ConstLowercaseString = 0;
-    if (NumParam > 1)
-    {
-        if (Scr_GetType(1u))
-        {
-            ConstLowercaseString = Scr_GetConstLowercaseString(1u);
-            if (ConstLowercaseString == scr_const._)
-                ConstLowercaseString = 0;
-        }
-    }
-    if (NumParam <= 2)
-        Float = 0.0;
-    else
-        Float = Scr_GetFloat(2u);
-    Entity->client->linkAnglesFrac = Float;
+            2760, 0, "%s", "ent->flags & FL_SUPPORTS_LINKTO"
+        );
+
+    gentity_s *v2 = Scr_GetEntity(0);
+    int NumParam = Scr_GetNumParam();
+    unsigned int ConstLowercaseString = 0;
+
+    if (NumParam > 1 && Scr_GetType(1) && Scr_GetConstLowercaseString(1) != scr_const._)
+        ConstLowercaseString = Scr_GetConstLowercaseString(1);
+
+    float linkAnglesFrac = (NumParam > 2) ? Scr_GetFloat(2) : 0.0f;
+    Entity->client->linkAnglesFrac = linkAnglesFrac;
     Entity->client->linkAnglesLocked = 0;
     Entity->client->link_rotationMovesEyePos = 1;
-    if (NumParam <= 3)
-        v6 = 180.0;
-    else
-        v6 = Scr_GetFloat(3u);
-    _FP0 = (float)((float)v6 - (float)180.0);
-    _FP13 = -v6;
-    __asm
-    {
-        fsel      f0, f0, f31, f1
-        fsel      f0, f13, f30, f0
+
+    // Set link angles clamp
+    float clampAngles[4] = { 180.0f, 180.0f, 180.0f, 180.0f };
+    for (int i = 3; i < NumParam && i < 7; i++) {
+        clampAngles[i - 3] = Scr_GetFloat(i);
     }
-    Entity->client->linkAnglesMinClamp[1] = -_FP0;
-    if (NumParam <= 4)
-        v11 = 180.0;
-    else
-        v11 = Scr_GetFloat(4u);
-    _FP0 = (float)((float)v11 - (float)180.0);
-    _FP13 = -v11;
-    __asm
-    {
-        fsel      f0, f0, f31, f1
-        fsel      f0, f13, f30, f0
+
+    // Set min and max clamping angles
+    for (int i = 0; i < 2; i++) {
+        float angle = clampAngles[i];
+        angle -= 180.0f;  // Adjust angle
+        Entity->client->linkAnglesMinClamp[i] = -angle;
+        Entity->client->linkAnglesMaxClamp[i] = angle;
     }
-    Entity->client->linkAnglesMaxClamp[1] = _FP0;
-    if (NumParam <= 5)
-        v16 = 180.0;
-    else
-        v16 = Scr_GetFloat(5u);
-    _FP0 = (float)((float)v16 - (float)180.0);
-    _FP13 = -v16;
-    __asm
-    {
-        fsel      f0, f0, f31, f1
-        fsel      f0, f13, f30, f0
-    }
-    Entity->client->linkAnglesMinClamp[0] = -_FP0;
-    if (NumParam <= 6)
-        v21 = 180.0;
-    else
-        v21 = Scr_GetFloat(6u);
-    _FP0 = (float)((float)v21 - (float)180.0);
-    _FP13 = -v21;
-    __asm
-    {
-        fsel      f0, f0, f31, f1
-        fsel      f0, f13, f30, f0
-    }
-    Entity->client->linkAnglesMaxClamp[0] = _FP0;
+
+    // Update the view angle clamp
     G_UpdateViewAngleClamp(Entity->client, v2->r.currentAngles);
-    v26 = NumParam > 7 && (_cntlzw(Scr_GetInt(7u)) & 0x20) == 0;
-    Entity->client->link_useTagAnglesForViewAngles = v26;
+
+    // Link angles flag for view angles
+    //bool useTagAnglesForViewAngles = (NumParam > 7 && (_cntlzw(Scr_GetInt(7)) & 0x20) == 0);
+    bool useTagAnglesForViewAngles = (NumParam > 7 && Scr_GetInt(7));
+    Entity->client->link_useTagAnglesForViewAngles = useTagAnglesForViewAngles;
     Entity->client->ps.pm_flags &= ~0x1000000u;
     Entity->client->prevLinkAnglesSet = 0;
-    if (G_EntLinkTo(Entity, v2, ConstLowercaseString))
-    {
-        client = Entity->client;
-        if (client->link_useTagAnglesForViewAngles)
-        {
+
+    // Link entities
+    if (G_EntLinkTo(Entity, v2, ConstLowercaseString)) {
+        gclient_s *client = Entity->client;
+        if (client->link_useTagAnglesForViewAngles) {
+            float v28[4][3];
             G_CalcTagParentAxis(Entity, v28);
-            AxisToAngles(v28, Entity->client->ps.linkAngles);
+            AxisToAngles((const mat3x3&)v28, client->ps.linkAngles);
         }
-        else
-        {
-            client->ps.linkAngles[0] = 0.0;
-            client->ps.linkAngles[1] = 0.0;
-            client->ps.linkAngles[2] = 0.0;
+        else {
+            client->ps.linkAngles[0] = client->ps.linkAngles[1] = client->ps.linkAngles[2] = 0.0f;
         }
     }
-    else
-    {
+    else {
         Scr_Error("failed to link entity");
     }
 }
+
 
 void __cdecl ScrCmd_PlayerLinkToAbsolute(scr_entref_t *entref)
 {
@@ -2683,7 +2597,7 @@ void __cdecl ScrCmd_ItemWeaponSetAmmo(scr_entref_t *entref)
     Entity = GetEntity(entref);
     if (Entity->s.eType != 2)
         Scr_Error("Entity is not an item.");
-    if (*(itemType_t *)((char *)&bg_itemlist[0].giType + __ROL4__(*(unsigned __int16 *)Entity->s.index, 2)) != IT_WEAPON)
+    if (*(itemType_t *)((char *)&bg_itemlist[0].giType + __ROL4__(Entity->s.index.item, 2)) != IT_WEAPON)
         Scr_Error("Item entity is not a weapon.");
     Int = Scr_GetInt(0);
     if (Int < 0)
@@ -2820,45 +2734,50 @@ void __cdecl ScrCmd_MagicGrenadeManual(scr_entref_t *entref)
     }
 }
 
+// aislop
 void __cdecl Scr_BulletSpread()
 {
-    double Float; // fp31
-    double v3; // fp11
-    float *v4; // r4
-    float v5; // [sp+50h] [-70h] BYREF
-    float v6; // [sp+54h] [-6Ch]
-    float v7; // [sp+58h] [-68h]
-    float v8; // [sp+60h] [-60h] BYREF
-    float v9; // [sp+64h] [-5Ch]
-    float v10; // [sp+68h] [-58h]
-    float v11; // [sp+70h] [-50h] BYREF
-    float v12; // [sp+74h] [-4Ch]
-    float v13; // [sp+78h] [-48h]
-    float v14[3]; // [sp+7Ch] [-44h] BYREF
-    float v15[10]; // [sp+88h] [-38h] BYREF
+    float src[3], dst[3], dir[3], basis[3][3];
+    float spread;
+    float *weaponDef;
+    float magnitude, invMag;
+    float delta[3];
 
-    Scr_GetVector(0, &v8);
-    Scr_GetVector(1u, &v5);
-    Float = Scr_GetFloat(2u);
-    LODWORD(v15[9]) = BG_GetWeaponDef(0);
-    v15[5] = v10;
-    v15[3] = v8;
-    v15[4] = v9;
-    _FP9 = -sqrtf((float)((float)((float)(v5 - v8) * (float)(v5 - v8))
-        + (float)((float)((float)(v7 - v10) * (float)(v7 - v10))
-            + (float)((float)(v6 - v9) * (float)(v6 - v9)))));
-    __asm { fsel      f11, f9, f10, f11 }
-    v3 = (float)((float)1.0 / (float)_FP11);
-    v11 = (float)v3 * (float)(v5 - v8);
-    v15[6] = v11;
-    v12 = (float)(v6 - v9) * (float)v3;
-    v13 = (float)(v7 - v10) * (float)v3;
-    v15[7] = v12;
-    v15[8] = v13;
-    Vec3Basis_LeftHanded(&v11, v14, v15);
-    Bullet_Endpos(level.time, Float, v4, &v5, 0, 8192.0);
-    Scr_AddVector(&v5);
+    // Get vectors and spread value from script arguments
+    Scr_GetVector(0, src);        // Source point
+    Scr_GetVector(1, dst);        // Destination point
+    spread = Scr_GetFloat(2);     // Spread amount
+
+    // Compute delta = dst - src
+    delta[0] = dst[0] - src[0];
+    delta[1] = dst[1] - src[1];
+    delta[2] = dst[2] - src[2];
+
+    // Normalize direction
+    magnitude = sqrtf(delta[0] * delta[0] + delta[1] * delta[1] + delta[2] * delta[2]);
+    if (magnitude == 0.0f) {
+        Scr_Error("Zero-length vector in bullet spread calculation.");
+        return;
+    }
+
+    invMag = 1.0f / magnitude;
+    dir[0] = delta[0] * invMag;
+    dir[1] = delta[1] * invMag;
+    dir[2] = delta[2] * invMag;
+
+    // Get weapon definition (placeholder index 0 used)
+    weaponDef = (float *)BG_GetWeaponDef(0);
+
+    // Build a left-handed basis for bullet spread
+    Vec3Basis_LeftHanded(dir, basis[0], basis[1]);
+
+    // Compute the final end position of the bullet
+    Bullet_Endpos(level.time, spread, weaponDef, dst, 0, 8192.0f);
+
+    // Return the final vector to the script
+    Scr_AddVector(dst);
 }
+
 
 void __cdecl Scr_BulletTracer()
 {
@@ -2873,121 +2792,117 @@ void __cdecl Scr_BulletTracer()
     v0->s.lerp.u.turret.gunAngles[0] = v2[0];
     v0->s.lerp.u.turret.gunAngles[1] = v2[1];
     v0->s.lerp.u.turret.gunAngles[2] = v2[2];
-    v1 = Scr_GetNumParam() == 3 && (_cntlzw(Scr_GetInt(2u)) & 0x20) == 0;
+    //v1 = Scr_GetNumParam() == 3 && (_cntlzw(Scr_GetInt(2u)) & 0x20) == 0;
+    v1 = Scr_GetNumParam() == 3 && Scr_GetInt(2);
     v0->s.eventParm = v1;
 }
 
+// aislop
 void __cdecl Scr_MagicBullet()
 {
-    const char *String; // r31
-    int WeaponIndexForName; // r30
-    const char *v2; // r3
-    double v3; // fp31
-    double v4; // fp30
-    double v5; // fp29
-    weaponParms *v6; // r5
-    const weaponParms *v7; // r4
-    WeaponDef *WeaponDef; // r3
-    WeaponDef *weapDef; // r11
-    double v12; // fp11
-    weapType_t weapType; // r3
-    const char *WeaponTypeName; // r3
-    const char *v15; // r3
-    weapClass_t weapClass; // r11
-    gentity_s *v17; // r31
-    float v18; // [sp+50h] [-90h] BYREF
-    float v19; // [sp+54h] [-8Ch]
-    float v20; // [sp+58h] [-88h]
-    float v21; // [sp+60h] [-80h] BYREF
-    float v22; // [sp+64h] [-7Ch]
-    float v23; // [sp+68h] [-78h]
-    weaponParms v24; // [sp+70h] [-70h] BYREF
-
-    if (Scr_GetNumParam() != 3)
+    if (Scr_GetNumParam() != 3) {
         Scr_Error("MagicBullet weaponName sourceLoc destLoc.\n");
-    String = Scr_GetString(0);
-    WeaponIndexForName = G_GetWeaponIndexForName(String);
-    if (!WeaponIndexForName)
-    {
-        v2 = va("MagicBullet called with unknown weapon name %s\n", String);
-        Scr_Error(v2);
+        return;
     }
-    Scr_GetVector(1u, &v18);
-    v21 = v18;
-    v22 = v19;
-    v23 = v20;
-    Scr_GetVector(2u, &v18);
-    v3 = v18;
-    v4 = v19;
-    v5 = v20;
-    WeaponDef = BG_GetWeaponDef(WeaponIndexForName);
-    v24.muzzleTrace[2] = v23;
-    weapDef = WeaponDef;
-    v24.muzzleTrace[0] = v21;
-    v24.muzzleTrace[1] = v22;
-    v24.right[0] = 0.0;
-    v24.right[1] = 0.0;
-    v24.weapDef = WeaponDef;
-    v24.right[2] = 0.0;
-    v24.up[0] = 0.0;
-    v24.up[1] = 0.0;
-    v24.up[2] = 0.0;
-    _FP9 = -sqrtf((float)((float)((float)((float)v3 - v21) * (float)((float)v3 - v21))
-        + (float)((float)((float)((float)v5 - v23) * (float)((float)v5 - v23))
-            + (float)((float)((float)v4 - v22) * (float)((float)v4 - v22)))));
-    __asm { fsel      f11, f9, f10, f11 }
-    v12 = (float)((float)1.0 / (float)_FP11);
-    v24.forward[0] = (float)v12 * (float)((float)v3 - v21);
-    v24.forward[1] = (float)((float)v4 - v22) * (float)v12;
-    v24.forward[2] = (float)((float)v5 - v23) * (float)v12;
-    if (WeaponDef->weapType == WEAPTYPE_GRENADE)
-    {
+
+    const char *weaponName = Scr_GetString(0);
+    int weaponIndex = G_GetWeaponIndexForName(weaponName);
+    if (!weaponIndex) {
+        Scr_Error(va("MagicBullet called with unknown weapon name %s\n", weaponName));
+        return;
+    }
+
+    float src[3], dst[3];
+    Scr_GetVector(1, src);  // Source
+    Scr_GetVector(2, dst);  // Destination
+
+    // Prepare weapon parameters
+    WeaponDef *weapDef = BG_GetWeaponDef(weaponIndex);
+    weaponParms parms = { 0 };
+    parms.weapDef = weapDef;
+
+    // Set muzzle trace to source
+    parms.muzzleTrace[0] = src[0];
+    parms.muzzleTrace[1] = src[1];
+    parms.muzzleTrace[2] = src[2];
+
+    // Compute normalized direction vector (dst - src)
+    float dx = dst[0] - src[0];
+    float dy = dst[1] - src[1];
+    float dz = dst[2] - src[2];
+    float dist = sqrtf(dx * dx + dy * dy + dz * dz);
+
+    if (dist == 0.0f) {
+        Scr_Error("MagicBullet(): Source and destination are the same.\n");
+        return;
+    }
+
+    float invDist = 1.0f / dist;
+    parms.forward[0] = dx * invDist;
+    parms.forward[1] = dy * invDist;
+    parms.forward[2] = dz * invDist;
+
+    // Reject unsupported grenade-type weapons
+    if (weapDef->weapType == WEAPTYPE_GRENADE) {
         Scr_Error("MagicBullet() does not work with grenade-type weapons.\n");
-        weapDef = v24.weapDef;
+        return;
     }
-    weapType = weapDef->weapType;
-    if (weapType)
-    {
-        if (weapType == WEAPTYPE_PROJECTILE)
-        {
-            weapClass = weapDef->weapClass;
-            if (weapClass == WEAPCLASS_GRENADE)
-            {
-                Weapon_GrenadeLauncher_Fire(&g_entities[2174], WeaponIndexForName, 0, &v24);
-            }
-            else if (weapClass == WEAPCLASS_ROCKETLAUNCHER)
-            {
-                Weapon_RocketLauncher_Fire(
-                    &g_entities[2174],
-                    WeaponIndexForName,
-                    0.0,
-                    v6,
-                    v24.forward,
-                    (gentity_s *)vec3_origin,
-                    0);
-            }
-            else
-            {
-                Scr_Error("MagicBullet(): Unhandled projectile weapClass.\n");
-            }
+
+    // Fire based on weapon type and class
+    switch (weapDef->weapType) {
+    case WEAPTYPE_BULLET:
+        Bullet_Fire(&g_entities[2174], 0.0f, &parms, NULL, level.time);
+        break;
+
+    case WEAPTYPE_PROJECTILE:
+        switch (weapDef->weapClass) {
+        case WEAPCLASS_GRENADE:
+            Weapon_GrenadeLauncher_Fire(&g_entities[2174], weaponIndex, 0, &parms);
+            break;
+
+        case WEAPCLASS_ROCKETLAUNCHER:
+            Weapon_RocketLauncher_Fire(
+                &g_entities[2174],
+                weaponIndex,
+                0.0f,
+                NULL,
+                parms.forward,
+                (gentity_s *)vec3_origin,
+                0
+            );
+            break;
+
+        default:
+            Scr_Error("MagicBullet(): Unhandled projectile weapClass.\n");
+            return;
         }
-        else
-        {
-            WeaponTypeName = BG_GetWeaponTypeName(weapType);
-            v15 = va("MagicBullet(): Unhandled weapType \"%s\".\n", WeaponTypeName);
-            Scr_Error(v15);
-        }
+        break;
+
+    default: {
+        const char *typeName = BG_GetWeaponTypeName(weapDef->weapType);
+        Scr_Error(va("MagicBullet(): Unhandled weapType \"%s\".\n", typeName));
+        return;
     }
-    else
-    {
-        Bullet_Fire(&g_entities[2174], 0.0, v7, (const gentity_s *)&v24);
     }
-    v17 = G_TempEntity(&v21, 26);
-    v17->s.weapon = WeaponIndexForName;
-    if ((unsigned __int8)WeaponIndexForName != WeaponIndexForName)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\g_scr_main.cpp", 3493, 0, "%s", "tempEnt->s.weapon == weapon");
-    v17->s.eventParms[v17->s.eventSequence & 3] = 0;
+
+    // Create temp entity for visual event tracking
+    gentity_s *tempEnt = G_TempEntity(src, 26);
+    tempEnt->s.weapon = weaponIndex;
+
+    // Sanity check: weapon ID must fit in a byte
+    if ((uint8_t)weaponIndex != weaponIndex) {
+        MyAssertHandler(
+            "c:\\trees\\cod3\\cod3src\\src\\game\\g_scr_main.cpp",
+            3493,
+            0,
+            "%s",
+            "tempEnt->s.weapon == weapon"
+        );
+    }
+
+    tempEnt->s.eventParms[tempEnt->s.eventSequence & 3] = 0;
 }
+
 
 void __cdecl GScr_IsFiringTurret(scr_entref_t *entref)
 {
@@ -3028,10 +2943,10 @@ void __cdecl GScr_SetFriendlyChain(scr_entref_t *entref)
         Path_ConvertNodeToIndex(Pathnode);
         v4 = va(
             "Node %d (%.2f, %.2f, %.2f) is not a friendly chain node.\n",
-            (unsigned int)HIDWORD(COERCE_UNSIGNED_INT64(v3[5])),
-            (unsigned int)COERCE_UNSIGNED_INT64(v3[5]),
-            (unsigned int)COERCE_UNSIGNED_INT64(v3[6]),
-            (unsigned int)COERCE_UNSIGNED_INT64(v3[7]));
+            v3[5],
+            v3[6],
+            v3[7]
+        );
         Scr_Error(v4);
     }
     Entity->sentient->pActualChainPos = (pathnode_t *)v3;
@@ -3103,7 +3018,7 @@ void __cdecl GScr_GetTagAngles(scr_entref_t *entref)
     Entity = GetEntity(entref);
     ConstLowercaseString = Scr_GetConstLowercaseString(0);
     GScr_UpdateTagInternal(Entity, ConstLowercaseString, &level.cachedTagMat, 1);
-    AxisToAngles(level.cachedTagMat.tagMat, v3);
+    AxisToAngles((const mat3x3&)level.cachedTagMat.tagMat, v3);
     Scr_AddVector(v3);
 }
 
@@ -3175,7 +3090,7 @@ void __cdecl ScrCmd_UseBy(scr_entref_t *entref)
 void __cdecl ScrCmd_IsTouching(scr_entref_t *entref)
 {
     gentity_s *Entity; // r3
-    gentity_s *v2; // r31
+    gentity_s *ent; // r31
     const gentity_s *v3; // r27
     gentity_s *v4; // r30
     gentity_s *v5; // r3
@@ -3190,12 +3105,12 @@ void __cdecl ScrCmd_IsTouching(scr_entref_t *entref)
     float v14[16]; // [sp+60h] [-40h] BYREF
 
     Entity = GetEntity(entref);
-    v2 = Entity;
+    ent = Entity;
     if (Entity->r.bmodel || (Entity->r.svFlags & 0x30) != 0)
     {
         v4 = Entity;
         v5 = Scr_GetEntity(0);
-        v2 = v5;
+        ent = v5;
         if (v5->r.bmodel || (v5->r.svFlags & 0x30) != 0)
             Scr_Error("istouching cannot be called on 2 brush/cylinder entities");
         v3 = v4;
@@ -3204,66 +3119,17 @@ void __cdecl ScrCmd_IsTouching(scr_entref_t *entref)
     {
         v3 = Scr_GetEntity(0);
     }
-    if (v2->r.maxs[0] < (double)v2->r.mins[0])
-    {
-        v6 = SL_ConvertToString(v2->classname);
-        v7 = va(
-            "entnum: %d, origin: %g %g %g, classname: %s",
-            (unsigned int)HIDWORD(COERCE_UNSIGNED_INT64(v2->r.currentOrigin[0])),
-            (unsigned int)COERCE_UNSIGNED_INT64(v2->r.currentOrigin[0]),
-            (unsigned int)COERCE_UNSIGNED_INT64(v2->r.currentOrigin[1]),
-            (unsigned int)COERCE_UNSIGNED_INT64(v2->r.currentOrigin[2]),
-            v6);
-        MyAssertHandler(
-            "c:\\trees\\cod3\\cod3src\\src\\game\\g_scr_main.cpp",
-            3761,
-            0,
-            "%s\n\t%s",
-            "ent->r.maxs[0] >= ent->r.mins[0]",
-            v7);
-    }
-    if (v2->r.maxs[1] < (double)v2->r.mins[1])
-    {
-        v8 = SL_ConvertToString(v2->classname);
-        v9 = va(
-            "entnum: %d, origin: %g %g %g, classname: %s",
-            (unsigned int)HIDWORD(COERCE_UNSIGNED_INT64(v2->r.currentOrigin[0])),
-            (unsigned int)COERCE_UNSIGNED_INT64(v2->r.currentOrigin[0]),
-            (unsigned int)COERCE_UNSIGNED_INT64(v2->r.currentOrigin[1]),
-            (unsigned int)COERCE_UNSIGNED_INT64(v2->r.currentOrigin[2]),
-            v8);
-        MyAssertHandler(
-            "c:\\trees\\cod3\\cod3src\\src\\game\\g_scr_main.cpp",
-            3762,
-            0,
-            "%s\n\t%s",
-            "ent->r.maxs[1] >= ent->r.mins[1]",
-            v9);
-    }
-    if (v2->r.maxs[2] < (double)v2->r.mins[2])
-    {
-        v10 = SL_ConvertToString(v2->classname);
-        v11 = va(
-            "entnum: %d, origin: %g %g %g, classname: %s",
-            (unsigned int)HIDWORD(COERCE_UNSIGNED_INT64(v2->r.currentOrigin[0])),
-            (unsigned int)COERCE_UNSIGNED_INT64(v2->r.currentOrigin[0]),
-            (unsigned int)COERCE_UNSIGNED_INT64(v2->r.currentOrigin[1]),
-            (unsigned int)COERCE_UNSIGNED_INT64(v2->r.currentOrigin[2]),
-            v10);
-        MyAssertHandler(
-            "c:\\trees\\cod3\\cod3src\\src\\game\\g_scr_main.cpp",
-            3763,
-            0,
-            "%s\n\t%s",
-            "ent->r.maxs[2] >= ent->r.mins[2]",
-            v11);
-    }
-    v14[0] = v2->r.currentOrigin[0] + v2->r.mins[0];
-    v14[1] = v2->r.currentOrigin[1] + v2->r.mins[1];
-    v14[2] = v2->r.currentOrigin[2] + v2->r.mins[2];
-    v13[0] = v2->r.currentOrigin[0] + v2->r.maxs[0];
-    v13[1] = v2->r.currentOrigin[1] + v2->r.maxs[1];
-    v13[2] = v2->r.currentOrigin[2] + v2->r.maxs[2];
+
+    iassert(ent->r.maxs[0] >= ent->r.mins[0]);
+    iassert(ent->r.maxs[1] >= ent->r.mins[1]);
+    iassert(ent->r.maxs[2] >= ent->r.mins[2]);
+
+    v14[0] = ent->r.currentOrigin[0] + ent->r.mins[0];
+    v14[1] = ent->r.currentOrigin[1] + ent->r.mins[1];
+    v14[2] = ent->r.currentOrigin[2] + ent->r.mins[2];
+    v13[0] = ent->r.currentOrigin[0] + ent->r.maxs[0];
+    v13[1] = ent->r.currentOrigin[1] + ent->r.maxs[1];
+    v13[2] = ent->r.currentOrigin[2] + ent->r.maxs[2];
     ExpandBoundsToWidth(v14, v13);
     v12 = SV_EntityContact(v14, v13, v3);
     Scr_AddInt(v12);
@@ -3485,21 +3351,19 @@ void __cdecl ScrCmd_SetShadowHint(scr_entref_t *entref)
 void __cdecl ScrCmd_GetNormalHealth(scr_entref_t *entref)
 {
     gentity_s *Entity; // r3
-    __int64 v3; // r11 OVERLAPPED
+    //__int64 v3; // r11 OVERLAPPED
+    gclient_s *client;
     __int64 v4; // r11
     __int64 v5; // [sp+50h] [-20h]
 
     Entity = GetEntity(entref);
-    HIDWORD(v3) = Entity->client;
-    if (HIDWORD(v3))
+    //HIDWORD(v3) = Entity->client;
+    client = Entity->client;
+    if (client)
     {
-        LODWORD(v3) = Entity->health;
-        if ((unsigned int)v3)
+        if (Entity->health)
         {
-            v5 = v3;
-            HIDWORD(v4) = *(unsigned int *)(HIDWORD(v3) + 45900);
-            LODWORD(v4) = HIDWORD(v4);
-            Scr_AddFloat((float)((float)v5 / (float)v4));
+            Scr_AddFloat(Entity->health / client->pers.maxHealth);
         }
         else
         {
@@ -3508,11 +3372,9 @@ void __cdecl ScrCmd_GetNormalHealth(scr_entref_t *entref)
     }
     else
     {
-        LODWORD(v3) = Entity->maxHealth;
-        if ((unsigned int)v3)
+        if (Entity->maxHealth)
         {
-            HIDWORD(v3) = Entity->health;
-            Scr_AddFloat((float)((float)*(__int64 *)((char *)&v3 + 4) / (float)v3));
+            Scr_AddFloat(Entity->health / Entity->maxHealth);
         }
         else
         {
@@ -3612,14 +3474,11 @@ void __cdecl ScrCmd_SetNormalHealth(scr_entref_t *entref)
 
 void __cdecl ScrCmd_DoDamage(scr_entref_t *entref)
 {
-    gentity_s *v2; // r27
-    gentity_s *Entity; // r26
+    gentity_s *attacker; // r27
+    gentity_s *inflictor; // r26
     unsigned int NumParam; // r3
-    gentity_s *v5; // r28
-    double Float; // fp31
-    double v7; // fp3
-    double v8; // fp2
-    double v9; // fp1
+    gentity_s *ent; // r28
+    double damage; // fp31
     const char *v10; // r3
     float *p_commandTime; // r11
     float *v12; // r11
@@ -3627,7 +3486,7 @@ void __cdecl ScrCmd_DoDamage(scr_entref_t *entref)
     double v14; // fp13
     double v15; // fp0
     double v16; // fp0
-    const float *v17; // r6
+    const float *dir; // r6
     double v18; // fp11
     bool v20; // mr_fpscr50
     double v22; // fp11
@@ -3653,18 +3512,14 @@ void __cdecl ScrCmd_DoDamage(scr_entref_t *entref)
     int v42; // [sp+58h] [-98h]
     int v43; // [sp+60h] [-90h]
     int v44; // [sp+68h] [-88h]
-    float v45; // [sp+78h] [-78h]
-    float v46; // [sp+78h] [-78h]
-    float v47; // [sp+78h] [-78h]
     float v48; // [sp+80h] [-70h] BYREF
     float v49; // [sp+84h] [-6Ch]
     float v50; // [sp+88h] [-68h]
-    float v51; // [sp+90h] [-60h] BYREF
-    float v52; // [sp+94h] [-5Ch]
-    float v53; // [sp+98h] [-58h]
+    float source[3]; // v50, v51, v52
+    float from[3]; // v45, v46, v47
 
-    v2 = 0;
-    Entity = 0;
+    attacker = 0;
+    inflictor = 0;
     NumParam = Scr_GetNumParam();
     if (NumParam != 2)
     {
@@ -3675,123 +3530,81 @@ void __cdecl ScrCmd_DoDamage(scr_entref_t *entref)
                 Scr_Error("Usage: doDamage( <health>, <source position>, <attacker>, <inflictor> )\n");
                 return;
             }
-            Entity = Scr_GetEntity(2u);
+            inflictor = Scr_GetEntity(2);
         }
-        v2 = Scr_GetEntity(2u);
+        attacker = Scr_GetEntity(2);
     }
-    v5 = GetEntity(entref);
-    Float = Scr_GetFloat(0);
-    Scr_GetVector(1u, &v51);
-    if ((LODWORD(v51) & 0x7F800000) == 0x7F800000
-        || (LODWORD(v52) & 0x7F800000) == 0x7F800000
-        || (LODWORD(v53) & 0x7F800000) == 0x7F800000)
+    ent = GetEntity(entref);
+    damage = Scr_GetFloat(0);
+    Scr_GetVector(1, source);
+
+    if (IS_NAN(source[0]) || IS_NAN(source[1]) || IS_NAN(source[2]))
     {
-        v10 = va("Source Damage vector is invalid : %f %f %f", v9, v8, v7);
-        Scr_Error(v10);
+        Scr_Error(va("Source Damage vector is invalid : %f %f %f", source[0], source[1], source[2]));
     }
-    p_commandTime = (float *)&v5->client->ps.commandTime;
-    if (p_commandTime)
+    if (ent->client)
     {
-        if ((COERCE_UNSIGNED_INT(p_commandTime[7]) & 0x7F800000) == 0x7F800000
-            || (COERCE_UNSIGNED_INT(p_commandTime[8]) & 0x7F800000) == 0x7F800000
-            || (COERCE_UNSIGNED_INT(p_commandTime[9]) & 0x7F800000) == 0x7F800000)
-        {
-            MyAssertHandler(
-                "c:\\trees\\cod3\\cod3src\\src\\game\\g_scr_main.cpp",
-                4282,
-                0,
-                "%s",
-                "!IS_NAN((ent->client->ps.origin)[0]) && !IS_NAN((ent->client->ps.origin)[1]) && !IS_NAN((ent->client->ps.origin)[2])");
-        }
-        v12 = (float *)&v5->client->ps.commandTime;
-        v13 = (float)(v12[7] - v51);
-        v48 = v12[7] - v51;
-        v14 = (float)(v12[8] - v52);
-        v49 = v12[8] - v52;
-        v15 = v12[9];
+        iassert(!IS_NAN((ent->client->ps.origin)[0]) && !IS_NAN((ent->client->ps.origin)[1]) && !IS_NAN((ent->client->ps.origin)[2]));
+        
+        Vec3Sub(ent->client->ps.origin, source, from);
+        //v12 = (float *)&ent->client->ps.commandTime;
+        //v13 = (float)(v12[7] - source);
+        //v48 = v12[7] - source;
+        //v14 = (float)(v12[8] - v52);
+        //v49 = v12[8] - v52;
+        //v15 = v12[9];
     }
     else
     {
-        if ((COERCE_UNSIGNED_INT(v5->r.currentOrigin[0]) & 0x7F800000) == 0x7F800000
-            || (COERCE_UNSIGNED_INT(v5->r.currentOrigin[1]) & 0x7F800000) == 0x7F800000
-            || (COERCE_UNSIGNED_INT(v5->r.currentOrigin[2]) & 0x7F800000) == 0x7F800000)
-        {
-            MyAssertHandler(
-                "c:\\trees\\cod3\\cod3src\\src\\game\\g_scr_main.cpp",
-                4287,
-                0,
-                "%s",
-                "!IS_NAN((ent->r.currentOrigin)[0]) && !IS_NAN((ent->r.currentOrigin)[1]) && !IS_NAN((ent->r.currentOrigin)[2])");
-        }
-        v13 = (float)(v5->r.currentOrigin[0] - v51);
-        v48 = v5->r.currentOrigin[0] - v51;
-        v14 = (float)(v5->r.currentOrigin[1] - v52);
-        v49 = v5->r.currentOrigin[1] - v52;
-        v15 = v5->r.currentOrigin[2];
+        iassert(!IS_NAN((ent->r.currentOrigin)[0]) && !IS_NAN((ent->r.currentOrigin)[1]) && !IS_NAN((ent->r.currentOrigin)[2]));
+        
+        Vec3Sub(ent->r.currentOrigin, source, from);
+        //v13 = (float)(ent->r.currentOrigin[0] - source);
+        //v48 = ent->r.currentOrigin[0] - source;
+        //v14 = (float)(ent->r.currentOrigin[1] - v52);
+        //v49 = ent->r.currentOrigin[1] - v52;
+        //v15 = ent->r.currentOrigin[2];
     }
-    v45 = v13;
-    v16 = (float)((float)v15 - v53);
-    v50 = v16;
-    if ((LODWORD(v45) & 0x7F800000) == 0x7F800000
-        || (v46 = v14, (LODWORD(v46) & 0x7F800000) == 0x7F800000)
-        || (v47 = v16, (LODWORD(v47) & 0x7F800000) == 0x7F800000))
+    //v45 = v13;
+    //v16 = (float)((float)v15 - v53);
+    //v50 = v16;
+
+    iassert(!IS_NAN((from)[0]) && !IS_NAN((from)[1]) && !IS_NAN((from)[2]));
+
+    //dir = 0;
+    //v18 = sqrtf((float)((float)((float)v13 * (float)v13)
+    //    + (float)((float)((float)v16 * (float)v16) + (float)((float)v14 * (float)v14))));
+    //_FP9 = -v18;
+    //v20 = v18 == 0.0;
+    //__asm { fsel      f11, f9, f10, f11 }
+    //v22 = (float)((float)1.0 / (float)_FP11);
+    //v48 = (float)v22 * (float)v13;
+    //v49 = (float)v22 * (float)v14;
+    //v50 = (float)v22 * (float)v16;
+    //if (!v20)
+    //    dir = &v48;
+
+    if (Vec3Normalize(from) == 0.0f)
     {
-        MyAssertHandler(
-            "c:\\trees\\cod3\\cod3src\\src\\game\\g_scr_main.cpp",
-            4291,
-            0,
-            "%s",
-            "!IS_NAN((from)[0]) && !IS_NAN((from)[1]) && !IS_NAN((from)[2])");
-        v16 = v50;
-        v14 = v49;
-        v13 = v48;
+        dir = NULL;
     }
-    v17 = 0;
-    v18 = sqrtf((float)((float)((float)v13 * (float)v13)
-        + (float)((float)((float)v16 * (float)v16) + (float)((float)v14 * (float)v14))));
-    _FP9 = -v18;
-    v20 = v18 == 0.0;
-    __asm { fsel      f11, f9, f10, f11 }
-    v22 = (float)((float)1.0 / (float)_FP11);
-    v48 = (float)v22 * (float)v13;
-    v49 = (float)v22 * (float)v14;
-    v50 = (float)v22 * (float)v16;
-    if (!v20)
-        v17 = &v48;
+    else
+    {
+        dir = from;
+    }
+
     G_Damage(
-        v5,
-        Entity,
-        v2,
-        v17,
-        &v51,
-        (int)Float,
+        ent,
+        inflictor,
+        attacker,
+        dir,
+        source,
+        (int)damage,
+        0, //dflags
+        0, // mod
+        0xFFFFFFFF, // weapon
+        HITLOC_HEAD, // KISAKTODO (weird?)
         0,
-        0,
-        v23,
-        v24,
-        v25,
-        v26,
-        v27,
-        v28,
-        v29,
-        v30,
-        v31,
-        v32,
-        v33,
-        v34,
-        v35,
-        v36,
-        v37,
-        v38,
-        v39,
-        v40,
-        v41,
-        0xFFFFFFFF,
-        v42,
-        2u,
-        v43,
-        0,
-        v44,
         0);
 }
 
@@ -4023,8 +3836,8 @@ void __cdecl GScr_GetTurretOwner(scr_entref_t *entref)
     if (v2->active)
     {
         p_ownerNum = &v2->r.ownerNum;
-        if (EntHandle::isDefined(p_ownerNum))
-            v6 = EntHandle::ent(p_ownerNum);
+        if (p_ownerNum->isDefined())
+            v6 = p_ownerNum->ent();
         else
             v6 = &g_entities[2175];
         Scr_AddEntity(v6);
@@ -4050,7 +3863,7 @@ void __cdecl GScr_SetTargetEntity(scr_entref_t *entref)
     if (!v2->pTurretInfo)
         MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\g_scr_main.cpp", 4650, 0, "%s", "ent->pTurretInfo");
     v5 = Scr_GetEntity(0);
-    EntHandle::setEnt(&v2->pTurretInfo->manualTarget, v5);
+    v2->pTurretInfo->manualTarget.setEnt(v5);
 }
 
 void __cdecl GScr_SetAiSpread(scr_entref_t *entref)
@@ -4192,7 +4005,7 @@ void __cdecl GScr_ClearTargetEntity(scr_entref_t *entref)
     }
     if (!v2->pTurretInfo)
         MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\g_scr_main.cpp", 4792, 0, "%s", "ent->pTurretInfo");
-    EntHandle::setEnt(&v2->pTurretInfo->manualTarget, 0);
+    v2->pTurretInfo->manualTarget.setEnt(NULL);
 }
 
 void __cdecl GScr_SetTurretTeam(scr_entref_t *entref)
@@ -4310,36 +4123,32 @@ void __cdecl GScr_SetTurretAccuracy(scr_entref_t *entref)
 void __cdecl GScr_GetTurretTarget(scr_entref_t *entref)
 {
     gentity_s *Entity; // r3
-    gentity_s *v2; // r31
-    const char *v3; // r3
-    const char *v4; // r3
+    gentity_s *ent; // r31
     TurretInfo *pTurretInfo; // r11
-    gentity_s *v6; // r3
 
     Entity = GetEntity(entref);
-    v2 = Entity;
+    ent = Entity;
+
     if (!Entity->pTurretInfo)
     {
-        v3 = SL_ConvertToString(Entity->classname);
-        v4 = va("entity type '%s' is not a turret", v3);
-        Scr_Error(v4);
+        Scr_Error(va("entity type '%s' is not a turret", SL_ConvertToString(Entity->classname)));
     }
-    if (!v2->pTurretInfo)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\g_scr_main.cpp", 4927, 0, "%s", "ent->pTurretInfo");
-    if (EntHandle::isDefined(&v2->pTurretInfo->target))
+
+    iassert(ent->pTurretInfo);
+
+    if (ent->pTurretInfo->target.isDefined())
     {
-        pTurretInfo = v2->pTurretInfo;
+        pTurretInfo = ent->pTurretInfo;
         if ((pTurretInfo->flags & 0x40) != 0)
         {
-            v6 = EntHandle::ent(&pTurretInfo->target);
-            Scr_AddEntity(v6);
+            Scr_AddEntity(pTurretInfo->target.ent());
         }
     }
 }
 
 void __cdecl GScr_SetCursorHint(scr_entref_t *entref)
 {
-    gentity_s *Entity; // r27
+    gentity_s *ent; // r27
     const char *String; // r3
     int classname; // r11
     const char *v4; // r26
@@ -4349,16 +4158,15 @@ void __cdecl GScr_SetCursorHint(scr_entref_t *entref)
     const char **v8; // r31
     const char *v9; // r3
 
-    Entity = GetEntity(entref);
-    if (Entity->s.eType == 3)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\g_scr_main.cpp", 4953, 0, "%s", "ent->s.eType != ET_MISSILE");
+    ent = GetEntity(entref);
+    iassert(ent->s.eType != ET_MISSILE);
     String = Scr_GetString(0);
-    classname = Entity->classname;
+    classname = ent->classname;
     v4 = String;
     if ((classname == scr_const.trigger_use || classname == scr_const.trigger_use_touch)
         && !I_stricmp(String, "HINT_INHERIT"))
     {
-        *(unsigned int *)Entity->s.un2 = -1;
+        *(unsigned int *)ent->s.un2 = -1;
     }
     else
     {
@@ -4368,14 +4176,14 @@ void __cdecl GScr_SetCursorHint(scr_entref_t *entref)
         {
             if (!I_stricmp(v4, *v6))
             {
-                *(unsigned int *)Entity->s.un2 = v5;
+                *(unsigned int *)ent->s.un2 = v5;
                 return;
             }
             ++v6;
             ++v5;
-        } while ((int)v6 < (int)WeaponStateNames_118);
+        } while ((uintptr_t)v6 < (uintptr_t)&hintStrings[4]);
         Com_Printf(23, "List of valid hint type strings\n");
-        v7 = Entity->classname;
+        v7 = ent->classname;
         if (v7 == scr_const.trigger_use || v7 == scr_const.trigger_use_touch)
             Com_Printf(23, "HINT_INHERIT (for trigger_use or trigger_use_touch entities only)\n");
         v8 = &hintStrings[1];

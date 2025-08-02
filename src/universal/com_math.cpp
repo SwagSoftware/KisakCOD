@@ -728,7 +728,7 @@ void __cdecl Vec3AddScalar(const float* a, float s, float* sum)
 
 void __cdecl Vec3Sub(const float *a, const float *b, float *diff)
 {
-    *diff = *a - *b;
+    diff[0] = a[0] - b[0];
     diff[1] = a[1] - b[1];
     diff[2] = a[2] - b[2];
 }
@@ -3423,4 +3423,10 @@ void MatrixRotationZ(float mat[3][3], float degree)
     mat[0][0] = c; mat[0][1] = -s; mat[0][2] = 0.0f;
     mat[1][0] = s; mat[1][1] = c; mat[1][2] = 0.0f;
     mat[2][0] = 0.0f; mat[2][1] = 0.0f; mat[2][2] = 1.0f;
+}
+
+void Vec3Basis_LeftHanded(const float *forward, float *right, float *up)
+{
+    PerpendicularVector(forward, up);
+    Vec3Cross(forward, up, right);
 }

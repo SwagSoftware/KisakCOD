@@ -195,6 +195,8 @@ void MatrixRotationX(float mat[3][3], float degree);
 void MatrixRotationY(float mat[3][3], float degree);
 void MatrixRotationZ(float mat[3][3], float degree);
 
+void Vec3Basis_LeftHanded(const float *forward, float *right, float *up);
+
 
 float __cdecl ColorNormalize(const float *in, float *out);
 
