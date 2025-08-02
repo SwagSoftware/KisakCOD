@@ -1980,3 +1980,19 @@ int CL_IsKeyPressed(int localClientNum, const char *keyName)
     
     return playerKeys[localClientNum].keys[keynum].down;
 }
+
+bool Key_IsValidGamePadChar(const char key)
+{
+    return key >= 1 && key <= 6 || key >= 14 && key <= 23 || key >= 28 && key <= 31;
+}
+
+const char *CL_GetCommandFromKey(const char *keyName)
+{
+    int v1; // r3
+
+    v1 = Key_StringToKeynum(keyName);
+    if (v1 >= 0)
+        return playerKeys[0].keys[v1].binding;
+    else
+        return 0;
+}

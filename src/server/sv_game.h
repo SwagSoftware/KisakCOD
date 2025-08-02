@@ -19,6 +19,7 @@ bool SV_SetBrushModel(gentity_s *ent);
 void SV_SetCheckSum(int checksum);
 int SV_DObjSetRotTransIndex(const gentity_s *ent, int *partBits, int boneIndex);
 DObjAnimMat *SV_DObjGetRotTransArray(const gentity_s *ent);
+const char *SV_Archived_Dvar_GetVariantString(const char *dvarName);
 
 #ifdef KISAK_MP
 void __cdecl SV_GameSendServerCommand(int clientNum, svscmd_type type, const char *text);

@@ -4,6 +4,7 @@
 #include <server/sv_world.h>
 #include <script/scr_vm.h>
 #include "bullet.h"
+#include <cgame/cg_local.h>
 
 struct AttractorRepulsor_t // sizeof=0x1C
 {                                       // ...
@@ -212,6 +213,8 @@ void __cdecl G_TimedObjectThink(gentity_s *ent)
     ent->s.lerp.eFlags &= ~0x80000u;
 }
 
+const float MY_STRAIGHTUPNORMAL[3] = { 0.0, 0.0, 1.0 };
+
 void __cdecl G_ExplodeMissile(gentity_s *ent)
 {
     int32_t v1; // eax
@@ -298,7 +301,7 @@ void __cdecl G_ExplodeMissile(gentity_s *ent)
         if (doEvent)
         {
             eventEnt = G_Spawn();
-            eventEnt->s.eType = 0;
+            eventEnt->s.eType = ET_GENERAL;
             eventEnt->s.lerp.eFlags = 32;
             eventEnt->s.weapon = ent->s.weapon;
             eventEnt->s.weaponModel = ent->s.weaponModel;
@@ -333,9 +336,13 @@ void __cdecl G_ExplodeMissile(gentity_s *ent)
                     ent->s.number,
                     2065);
                 if (weapDef->projExplosionEffectForceNormalUp)
+                {
                     normal = up;
+                }
                 else
+                {
                     normal = trace.normal;
+                }
                 eventEnt->s.surfType = (trace.surfaceFlags & 0x1F00000) >> 20;
             }
             if (weapDef->projExplosion && weapDef->projExplosion != WEAPPROJEXP_HEAVY)
@@ -2608,11 +2615,10 @@ void __cdecl G_InitGrenadeEntity(gentity_s *parent, gentity_s *grenade)
     weapDef = BG_GetWeaponDef(grenade->s.weapon);
     if (!weapDef)
         MyAssertHandler(".\\game\\g_missile.cpp", 2501, 0, "%s", "weapDef");
-    grenade->s.eType = 4;
+    grenade->s.eType = ET_MISSILE;
     grenade->s.lerp.eFlags = 0x1000000;
     grenade->s.lerp.u.missile.launchTime = level.time;
-    grenade->r.contents = 256;
-    grenade->r.contents |= 0x2000u;
+    grenade->r.contents = 0x2100;
     grenade->r.mins[0] = -1.5f;
     grenade->r.mins[1] = -1.5f;
     grenade->r.mins[2] = -1.5f;
@@ -2637,17 +2643,30 @@ void __cdecl G_InitGrenadeEntity(gentity_s *parent, gentity_s *grenade)
             grenade->parent.setEnt(NULL);
         }
     }
+#ifdef KISAK_MP
     grenade->clipmask = 0x2806891;
+#elif KISAK_SP
+    grenade->clipmask = 0x280E091;
+#endif
     grenade->handler = 7;
     grenade->missileTargetEnt.setEnt(NULL);
     G_BroadcastEntity(grenade);
     grenade->r.svFlags = 4;
     if (weapDef->offhandClass == OFFHAND_CLASS_FRAG_GRENADE)
         G_MakeMissilePickupItem(grenade);
+
     if (parent->client)
+    {
+#ifdef KISAK_MP
         grenade->missile.team = parent->client->sess.cs.team;
+#elif KISAK_SP
+        grenade->missile.team = parent->sentient->eTeam;
+#endif
+    }
     else
+    {
         grenade->missile.team = TEAM_FREE;
+    }
 }
 
 void __cdecl G_InitGrenadeMovement(gentity_s *grenade, const float *start, const float *dir, int32_t rotate)
@@ -2860,7 +2879,7 @@ gentity_s *__cdecl G_FireRocket(
     }
     bolt = G_Spawn();
     Scr_SetString(&bolt->classname, scr_const.rocket);
-    bolt->s.eType = 4;
+    bolt->s.eType = ET_MISSILE;
     bolt->s.lerp.eFlags |= 0x400u;
     bolt->s.weapon = (uint8_t)weaponIndex;
     bolt->s.weaponModel = 0;
@@ -2873,8 +2892,13 @@ gentity_s *__cdecl G_FireRocket(
     }
     bolt->r.ownerNum.setEnt(parent);
     bolt->parent.setEnt(parent);
+#ifdef KISAK_MP
     bolt->clipmask = 0x2806891;
     bolt->handler = 9;
+#elif KISAK_SP
+    bolt->clipmask = 0x280E091;
+    bolt->handler = 15;
+#endif
     InitRocketTimer(bolt, weapDef);
     bolt->mover.speed = 0.0;
     bolt->missileTargetEnt.setEnt(target);
@@ -2893,9 +2917,17 @@ gentity_s *__cdecl G_FireRocket(
         v18[2] = 0.0;
     }
     if (parent->client)
+    {
+#ifdef KISAK_MP
         bolt->missile.team = parent->client->sess.cs.team;
+#elif KISAK_SP
+        bolt->missile.team = parent->sentient->eTeam;
+#endif
+    }
     else
+    {
         bolt->missile.team = TEAM_FREE;
+    }
     G_BroadcastEntity(bolt);
     bolt->s.lerp.pos.trType = TR_LINEAR;
     if (weapDef->timeToAccelerate <= 0.0)

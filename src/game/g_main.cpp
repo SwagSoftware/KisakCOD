@@ -1191,13 +1191,7 @@ void __cdecl G_InitGame(
     int checksum,
     int loadScripts,
     int savegame,
-    SaveGame **save,
-    int a7,
-    int a8,
-    int a9,
-    int a10,
-    int a11,
-    unsigned int a12)
+    SaveGame **save)
 {
     int v17; // r30
     actorBackup_s *actorBackup; // r3
@@ -1216,7 +1210,7 @@ void __cdecl G_InitGame(
     int v31[2]; // [sp+50h] [-70h] BYREF
     int v32[26]; // [sp+58h] [-68h] BYREF
 
-    a12 = randomSeed;
+    //a12 = randomSeed;
     SV_ResetDemo();
     Swap_Init();
     EntHandle::Init();
@@ -1255,8 +1249,8 @@ void __cdecl G_InitGame(
     if (!SV_InitDemoSavegame(save) || *save)
         CM_LinkWorld();
     else
-        level.demoplaying = SV_InitDemo((int *)&a12);
-    G_srand(a12);
+        level.demoplaying = SV_InitDemo((int*)&randomSeed);
+    G_srand(randomSeed);
     level.openScriptIOFileHandles[0] = 0;
     level.openScriptIOFileBuffers[0] = 0;
     level.currentScriptIOLineMark[0].lines = 0;

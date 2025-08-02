@@ -211,8 +211,9 @@ struct ShouldNotRemoveJoint // sizeof=0x8
                 ++removedBodyCount;
             }
         }
-        if (removedBodyCount >= 3)
-            MyAssertHandler(".\\physics\\ode\\src\\util.cpp", 119, 0, "%s", "removedBodyCount < 3");
+
+        iassert(removedBodyCount < 3);
+
         if (removedBodyCount == 2)
         {
             joint->tag = 0;
@@ -237,10 +238,9 @@ void __cdecl ODE_BreakupIslandIfTooBig(
     ShouldNotRemoveJoint v4; // [esp+3Ch] [ebp-Ch]
     int oldBodyCount; // [esp+44h] [ebp-4h]
 
-    if (!body)
-        MyAssertHandler(".\\physics\\ode\\src\\util.cpp", 142, 0, "%s", "body");
-    if (!joint)
-        MyAssertHandler(".\\physics\\ode\\src\\util.cpp", 143, 0, "%s", "joint");
+    iassert(body);
+    iassert(joint);
+
     if (*bodyCount >= 14 || *jointCount >= 74)
     {
         oldBodyCount = *bodyCount;

@@ -150,9 +150,13 @@ int __cdecl ScriptMover_UpdateMove(
 
 void __cdecl InitScriptMover(gentity_s *pSelf)
 {
-    pSelf->handler = 5;
     pSelf->r.svFlags = 0;
-    pSelf->s.eType = 6;
+#ifdef KISAK_MP
+    pSelf->handler = 5;
+#elif KISAK_SP
+    pSelf->handler = 12;
+#endif
+    pSelf->s.eType = ET_SCRIPTMOVER;
     pSelf->s.lerp.pos.trBase[0] = pSelf->r.currentOrigin[0];
     pSelf->s.lerp.pos.trBase[1] = pSelf->r.currentOrigin[1];
     pSelf->s.lerp.pos.trBase[2] = pSelf->r.currentOrigin[2];
@@ -161,7 +165,11 @@ void __cdecl InitScriptMover(gentity_s *pSelf)
     pSelf->s.lerp.apos.trBase[1] = pSelf->r.currentAngles[1];
     pSelf->s.lerp.apos.trBase[2] = pSelf->r.currentAngles[2];
     pSelf->s.lerp.apos.trType = TR_STATIONARY;
+#ifdef KISAK_MP
     pSelf->flags |= 0x1000u;
+#elif KISAK_SP
+    pSelf->flags |= 0x800;
+#endif
 }
 
 void __cdecl SP_script_brushmodel(gentity_s *self)

@@ -646,6 +646,12 @@ void G_PrecacheDefaultVehicle();
 void G_FreeVehicleRefs(gentity_s *ent);
 gentity_s *G_GetPlayerVehicle(const gentity_s *player);
 
+void G_InitScrVehicles();
+void G_SetupScrVehicles();
+void G_FreeScrVehicles();
+void G_RestartScrVehicleInfo();
+void G_ParseScrVehicleInfo();
+
 
 // g_weapon
 struct AntilagClientStore // sizeof=0x340

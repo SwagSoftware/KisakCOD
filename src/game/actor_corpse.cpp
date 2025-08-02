@@ -801,7 +801,7 @@ int __cdecl Actor_BecomeCorpse(gentity_s *self)
     p_pos = &self->s.lerp.pos;
     self->handler = 3;
     self->r.contents = 0x4000000;
-    self->s.eType = 16;
+    self->s.eType = ET_ACTOR_CORPSE;
     self->clipmask = 8519697;
     IsRagdollTrajectory = Com_IsRagdollTrajectory(&self->s.lerp.pos);
     currentOrigin = self->r.currentOrigin;

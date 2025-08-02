@@ -95,7 +95,7 @@ void __cdecl SP_light(gentity_s *self)
         self->r.maxs[2] = radius;
         self->r.maxs[1] = radius;
         contents = self->r.contents;
-        self->s.eType = 9;
+        self->s.eType = ET_PRIMARY_LIGHT;
         if (contents)
             MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\g_misc.cpp", 217, 1, "%s", "self->r.contents == 0");
         self->handler = 26;
@@ -147,7 +147,7 @@ void __cdecl SP_sound_blend(gentity_s *self)
 {
     self->s.lerp.u.turret.gunAngles[0] = 0.0;
     self->r.contents = 0;
-    self->s.eType = 6;
+    self->s.eType = ET_SOUND_BLEND;
     self->s.lerp.pos.trType = TR_STATIONARY;
     self->s.lerp.apos.trType = TR_STATIONARY;
     self->s.eventParms[0] = 0;
@@ -165,7 +165,7 @@ gentity_s *__cdecl G_SpawnSoundBlend()
     result = v0;
     v0->s.lerp.u.turret.gunAngles[0] = 0.0;
     v0->r.contents = 0;
-    v0->s.eType = 6;
+    v0->s.eType = ET_SOUND_BLEND;
     v0->s.lerp.pos.trType = TR_STATIONARY;
     v0->s.lerp.apos.trType = TR_STATIONARY;
     v0->s.eventParms[0] = 0;

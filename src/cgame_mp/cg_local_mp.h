@@ -23,9 +23,6 @@
 
 #define MAX_COMPASS_ACTORS 64
 
-const float up[3] = { 0.0f, 0.0f, 1.0f };
-
-
 struct snapshot_s // sizeof=0x2307C
 {                                       // ...
     int32_t snapFlags;

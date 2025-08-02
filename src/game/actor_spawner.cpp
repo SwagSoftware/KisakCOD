@@ -11,6 +11,7 @@
 #include "actor_events.h"
 #include "actor_senses.h"
 #include "actor_threat.h"
+#include <cgame/cg_local.h>
 
 const float g_vSpawnCheckPoints[11][3] =
 {
@@ -280,7 +281,7 @@ int __cdecl SP_actor_spawner(gentity_s *pEnt)
     pEnt->clipmask = 0;
     pEnt->r.contents = 0;
     pEnt->r.svFlags = 1;
-    pEnt->s.eType = 15;
+    pEnt->s.eType = ET_ACTOR_SPAWNER;
     pEnt->item[0].clipAmmoCount = -1;
     pEnt->item[0].ammoCount = 0;
     if (!count)

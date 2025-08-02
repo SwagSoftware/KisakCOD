@@ -393,3 +393,5 @@ void Scr_AddExecEntThreadNum(int entnum, unsigned int classnum, int handle, unsi
 
 extern scrVmPub_t scrVmPub;
 extern scrVmDebugPub_t scrVmDebugPub;
+
+extern const dvar_s *logScriptTimes;

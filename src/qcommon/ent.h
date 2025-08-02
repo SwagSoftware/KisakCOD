@@ -226,7 +226,7 @@ union entityState_s_type_index
 
 struct entityState_s
 {
-    unsigned __int8 eType; // entityType_t
+    entityType_t eType; // entityType_t
     unsigned __int8 surfType;
     unsigned __int8 weapon;
     unsigned __int8 weaponModel;

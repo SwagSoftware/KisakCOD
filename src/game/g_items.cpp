@@ -691,7 +691,7 @@ gentity_s *__cdecl LaunchItem(const gitem_s *item, float *origin, float *angles,
     dropped = G_Spawn();
     dropIdx = GetFreeDropCueIdx();
     level.droppedWeaponCue[dropIdx].setEnt(dropped);
-    dropped->s.eType = 3;
+    dropped->s.eType = ET_ITEM;
     dropped->s.index.brushmodel = itemIndex;
     G_GetItemClassname(item, &dropped->classname);
     dropped->item[0].index = itemIndex;
@@ -1252,14 +1252,13 @@ void __cdecl G_SpawnItem(gentity_s *ent, const gitem_s *item)
     ent->r.maxs[1] = 1.0;
     ent->r.maxs[2] = 1.0;
 
+    ent->s.eType = ET_ITEM;
 #ifdef KISAK_MP
     ent->r.contents = 1079771400;
     ent->r.contents |= 0x200000u;
-    ent->s.eType = 3;
     ent->s.index.brushmodel = LOWORD(ent->missile.travelDist);
 #elif KISAK_SP
     ent->r.contents = 1081868552;
-    ent->s.eType = 2;
     ent->s.index.item = ent->item->index;
 #endif
     TransferRandomAmmoToWeaponEntity(ent, weapIndex);

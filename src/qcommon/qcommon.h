@@ -271,7 +271,8 @@ unsigned __int8 *__cdecl CM_Hunk_Alloc(unsigned int size, const char *name, int 
 
 #ifdef KISAK_SP
 void Com_ResetFrametime();
-XAnimTree_s *Com_XAnimCreateSmallTree(struct XAnim_s *anims);
+struct XAnimTree_s *Com_XAnimCreateSmallTree(struct XAnim_s *anims);
+bool Com_IsRunningMenuLevel();
 void Com_XAnimFreeSmallTree(struct XAnimTree_s *animtree);
 #endif
 

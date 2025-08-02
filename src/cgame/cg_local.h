@@ -35,6 +35,8 @@ struct ScreenPlacement;
 
 #define PRIMARY_LIGHT_NONE 0
 
+static const float up[3] = { 0.0f, 0.0f, 1.0f };
+
 enum $73E480FCE7B67BAA29FC24DF5A08B1FF : __int32
 {
     WEAP_ANIM_VIEWMODEL_START = 0x0,

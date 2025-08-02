@@ -5148,7 +5148,7 @@ int __cdecl SP_actor(gentity_s *ent)
         ent->r.maxs[2] = 72.0;
         ent->clipmask = 42074129;
         ent->r.contents = 0x4000;
-        ent->s.eType = 14;
+        ent->s.eType = ET_ACTOR;
         G_SetOrigin(ent, ent->r.currentOrigin);
         v3->ent = ent;
         v3->sentient = v5;

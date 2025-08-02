@@ -497,6 +497,8 @@ void __cdecl Key_AddCatcher(int32_t localClientNum, int32_t orMask);
 void __cdecl Key_RemoveCatcher(int32_t localClientNum, int32_t andMask);
 void __cdecl Key_SetCatcher(int32_t localClientNum, int32_t catcher);
 int CL_IsKeyPressed(int localClientNum, const char *keyName);
+bool Key_IsValidGamePadChar(const char key);
+const char *CL_GetCommandFromKey(const char *keyName);
 
 extern field_t g_consoleField;
 

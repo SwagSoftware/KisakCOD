@@ -16,6 +16,13 @@
 #include "g_vehicle_path.h"
 #include "g_main.h"
 #include <stringed/stringed_hooks.h>
+#include <script/scr_const.h>
+#include "turret.h"
+#include <xanim/dobj_utils.h>
+#include "actor_spawner.h"
+#include "actor_grenade.h"
+#include "bullet.h"
+#include <server/sv_public.h>
 
 
 const BuiltinMethodDef methods[104] =
@@ -414,10 +421,10 @@ gentity_s *__cdecl GetPlayerEntity(scr_entref_t *entref)
         v3 = SL_ConvertToString(Entity->classname);
         v4 = va(
             "only valid on players; called on entity %i at %.0f %.0f %.0f classname %s targetname %s\n",
-            (unsigned int)HIDWORD(COERCE_UNSIGNED_INT64(Entity->r.currentOrigin[0])),
-            (unsigned int)COERCE_UNSIGNED_INT64(Entity->r.currentOrigin[0]),
-            (unsigned int)COERCE_UNSIGNED_INT64(Entity->r.currentOrigin[1]),
-            (unsigned int)COERCE_UNSIGNED_INT64(Entity->r.currentOrigin[2]),
+            0, // KISAKTODO ent %i
+            Entity->r.currentOrigin[0],
+            Entity->r.currentOrigin[1],
+            Entity->r.currentOrigin[2],
             v3,
             v2);
         Scr_Error(v4);
@@ -1524,45 +1531,41 @@ LABEL_6:
     Scr_AddString(Name);
 }
 
-void __cdecl GScr_GetAnimLength(int a1, int a2, XAnimTree_s *a3)
+void __cdecl GScr_GetAnimLength()
 {
-    XAnim_s *Anims; // r31
-    double Length; // fp1
-    scr_anim_s *Anim; // [sp+50h] [-20h]
+    XAnim_s *anims; // r31
+    scr_anim_s anim; // [sp+50h] [-20h]
 
-    Anim = Scr_GetAnim(0, 0, a3);
-    Anims = Scr_GetAnims((unsigned __int16)Anim);
-    if (!XAnimIsPrimitive(Anims, HIWORD(Anim)))
+    anim = Scr_GetAnim(0, 0);
+    anims = Scr_GetAnims(anim.tree);
+    if (!XAnimIsPrimitive(anims, anim.index))
         Scr_ParamError(0, "non-primitive animation has no concept of length");
-    Length = XAnimGetLength(Anims, HIWORD(Anim));
-    Scr_AddFloat(Length);
+    Scr_AddFloat(XAnimGetLength(anims, anim.index));
 }
 
-void __cdecl GScr_AnimHasNotetrack(int a1, int a2, XAnimTree_s *a3)
+void __cdecl GScr_AnimHasNotetrack()
 {
     unsigned int ConstString; // r31
     const XAnim_s *Anims; // r3
-    bool v5; // r3
-    scr_anim_s *Anim; // [sp+50h] [-20h]
+    scr_anim_s Anim; // [sp+50h] [-20h]
 
-    Anim = Scr_GetAnim(0, 0, a3);
-    ConstString = Scr_GetConstString(1u);
-    Anims = Scr_GetAnims((unsigned __int16)Anim);
-    v5 = XAnimNotetrackExists(Anims, HIWORD(Anim), ConstString);
-    Scr_AddBool(v5);
+    Anim = (scr_anim_s)Scr_GetAnim(0, 0);
+    ConstString = Scr_GetConstString(1);
+    Anims = Scr_GetAnims(Anim.tree);
+    Scr_AddBool(XAnimNotetrackExists(Anims, Anim.index, ConstString));
 }
 
-void __cdecl GScr_GetNotetrackTimes(int a1, int a2, XAnimTree_s *a3)
+void __cdecl GScr_GetNotetrackTimes()
 {
     unsigned int ConstString; // r31
     const XAnim_s *Anims; // r3
-    scr_anim_s *Anim; // [sp+50h] [-20h]
+    scr_anim_s Anim; // [sp+50h] [-20h]
 
-    Anim = Scr_GetAnim(0, 0, a3);
-    ConstString = Scr_GetConstString(1u);
+    Anim = (scr_anim_s)Scr_GetAnim(0, 0);
+    ConstString = Scr_GetConstString(1);
     Scr_MakeArray();
-    Anims = Scr_GetAnims((unsigned __int16)Anim);
-    XAnimAddNotetrackTimesToScriptArray(Anims, HIWORD(Anim), ConstString);
+    Anims = Scr_GetAnims(Anim.tree);
+    XAnimAddNotetrackTimesToScriptArray(Anims, Anim.index, ConstString);
 }
 
 void GScr_GetBrushModelCenter()

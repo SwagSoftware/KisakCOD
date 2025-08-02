@@ -6,7 +6,7 @@
 #elif KISAK_SP
 #include "g_main.h"
 #include "g_local.h"
-
+#include "g_vehicle_path.h"
 #endif
 
 #include <script/scr_const.h>
@@ -3013,6 +3013,81 @@ gentity_s *G_GetPlayerVehicle(const gentity_s *player)
             "%s",
             "vehEnt->scr_vehicle->flags & VEHFLAG_PLAYER");
     return v5;
+}
+
+void G_InitScrVehicles()
+{
+    int i; // r31
+
+    for (i = 0; i < 64; i = (__int16)(i + 1))
+    {
+        G_VehInitPathPos(&s_vehicles[i].pathPos);
+        s_vehicles[i].entNum = 2175;
+    }
+    level.vehicles = s_vehicles;
+}
+
+void G_SetupScrVehicles()
+{
+    int i; // r31
+    int entNum; // r3
+    gentity_s *Vehicle; // r3
+
+    for (i = 0; i < 64; i = (__int16)(i + 1))
+    {
+        entNum = s_vehicles[i].entNum;
+        if (entNum != 2175)
+        {
+            Vehicle = VEH_GetVehicle(entNum);
+            VEH_SetupCollmap(Vehicle);
+        }
+    }
+}
+
+void G_FreeScrVehicles()
+{
+    int i; // r31
+
+    for (i = 0; i < 64; i = (__int16)(i + 1))
+        G_VehFreePathPos(&s_vehicles[i].pathPos);
+}
+
+void G_RestartScrVehicleInfo()
+{
+    int v0; // r27
+    char *v1; // r28
+    _WORD *v2; // r31
+    const char *v3; // r30
+    int v4; // r29
+
+    v0 = 0;
+    if (s_numVehicleInfos > 0)
+    {
+        v1 = s_vehicleInfos[0].sndNames[0];
+        do
+        {
+            //v2 = v1 + 384;
+            v2 = (_WORD*)(v1 + 380);
+            v3 = v1;
+            v4 = 6;
+            do
+            {
+                if (*v2)
+                    *v2 = G_SoundAliasIndexPermanent(v3);
+                --v4;
+                ++v2;
+                v3 += 64;
+            } while (v4);
+            ++v0;
+            //v1 += 628;
+            v1 += sizeof(vehicle_info_t);
+        } while (v0 < s_numVehicleInfos);
+    }
+}
+
+void G_ParseScrVehicleInfo()
+{
+    s_numVehicleInfos = 0;
 }
 
 #endif // KISAK_SP

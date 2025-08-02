@@ -2213,4 +2213,10 @@ XAnimTree_s *Com_XAnimCreateSmallTree(XAnim_s *anims)
 {
     return XAnimCreateTree(anims, MT_AllocAnimTree);
 }
-#endif
+
+bool Com_IsRunningMenuLevel()
+{
+    return com_sv_running->current.enabled && I_strnicmp(sv_mapname->current.string, "menu_", 5) == 0;
+}
+
+#endif // KISAK_SP

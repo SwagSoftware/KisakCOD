@@ -666,6 +666,17 @@ DObjAnimMat *SV_DObjGetRotTransArray(const gentity_s *ent)
     return DObjGetRotTransArray(obj);
 }
 
+const char *SV_Archived_Dvar_GetVariantString(const char *dvarName)
+{
+    const char *VariantString; // r31
+
+    if (sv.demo.playing)
+        return SV_Demo_Dvar_GetVariantString();
+    VariantString = Dvar_GetVariantString(dvarName);
+    SV_Record_Dvar_GetVariantString(VariantString);
+    return VariantString;
+}
+
 #endif
 
 #ifdef KISAK_MP

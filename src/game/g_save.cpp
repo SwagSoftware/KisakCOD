@@ -327,21 +327,7 @@ void __cdecl Scr_FreeSentientFields(sentient_s *sentient)
 }
 
 // local variable allocation has failed, the output may be wrong!
-void G_SaveError(
-    errorParm_t code,
-    SaveErrorType errorType,
-    __int64 fmt,
-    __int64 a4,
-    __int64 a5,
-    int a6,
-    int a7,
-    int a8,
-    int a9,
-    int a10,
-    int a11,
-    int a12,
-    int a13,
-    ...)
+void G_SaveError(errorParm_t code, SaveErrorType errorType, const char *fmt, ...)
 {
     const char *v15; // r31
     char v16[544]; // [sp+60h] [-220h] BYREF
@@ -1032,11 +1018,11 @@ void __cdecl G_WriteStruct(
         WriteField1(i, source, original);
     MemoryFile = SaveMemory_GetMemoryFile(save);
     UsedSize = MemFile_GetUsedSize(MemoryFile);
-    ProfMem_Begin("writestruct struct", UsedSize);
+    //ProfMem_Begin("writestruct struct", UsedSize);
     SaveMemory_SaveWrite(source, sourcesize, save);
     v13 = SaveMemory_GetMemoryFile(save);
     v14 = MemFile_GetUsedSize(v13);
-    ProfMem_End(v14);
+    //ProfMem_End(v14);
     for (; fields->type; ++fields)
         WriteField2(fields, original, save);
 }

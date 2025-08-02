@@ -59,6 +59,8 @@ struct SaveGame
     bool suppressPlayerNotify;
 };
 
+struct actor_s;
+
 // g_save
 void __cdecl TRACK_g_save();
 void __cdecl Scr_FreeFields(const saveField_t *fields, unsigned __int8 *base);
@@ -69,17 +71,7 @@ void __cdecl Scr_FreeSentientFields(sentient_s *sentient);
 void G_SaveError(
     errorParm_t code,
     SaveErrorType errorType,
-    __int64 fmt,
-    __int64 a4,
-    __int64 a5,
-    int a6,
-    int a7,
-    int a8,
-    int a9,
-    int a10,
-    int a11,
-    int a12,
-    int a13,
+    const char *fmt,
     ...);
 void __cdecl WriteCStyleString(const char *psz, int maxlen, SaveGame *save);
 void __cdecl ReadCStyleString(char *psz, int maxlen, SaveGame *save);
