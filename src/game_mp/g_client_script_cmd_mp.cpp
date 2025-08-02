@@ -406,7 +406,7 @@ void __cdecl PlayerCmd_hasWeapon(scr_entref_t entref)
     if (!client)
         MyAssertHandler("c:\\trees\\cod3\\src\\bgame\\../bgame/bg_weapons.h", 229, 0, "%s", "ps");
     if (Com_BitCheckAssert(client->ps.weapons, iWeaponIndex, 16))
-        Scr_AddBool(1u);
+        Scr_AddBool(1);
     else
         LABEL_13:
     Scr_AddBool(0);
@@ -446,7 +446,7 @@ void __cdecl PlayerCmd_switchToWeapon(scr_entref_t entref)
     if (Com_BitCheckAssert(client->ps.weapons, iWeaponIndex, 16))
     {
         G_SelectWeaponIndex(entref.entnum, iWeaponIndex);
-        Scr_AddBool(1u);
+        Scr_AddBool(1);
     }
     else
     {
@@ -487,7 +487,7 @@ void __cdecl PlayerCmd_switchToOffhand(scr_entref_t entref)
     if (Com_BitCheckAssert(client->ps.weapons, iWeaponIndex, 16))
     {
         G_SetEquippedOffHand(entref.entnum, iWeaponIndex);
-        Scr_AddBool(1u);
+        Scr_AddBool(1);
     }
     else
     {
@@ -1267,17 +1267,17 @@ void __cdecl PlayerCmd_finishPlayerDamage(scr_entref_t entref)
         {
             if (Scr_GetType(0) && Scr_GetPointerType(0) == 20)
                 inflictor = Scr_GetEntity(0);
-            if (Scr_GetType(1u) && Scr_GetPointerType(1u) == 20)
-                attacker = Scr_GetEntity(1u);
+            if (Scr_GetType(1) && Scr_GetPointerType(1) == 20)
+                attacker = Scr_GetEntity(1);
             dflags = Scr_GetInt(3);
             mod = (meansOfDeath_t)G_MeansOfDeathFromScriptParam(4);
             iWeapon = G_GetWeaponIndexForName(Scr_GetString(5));
-            if (Scr_GetType(6u))
+            if (Scr_GetType(6))
             {
                 Scr_GetVector(6u, vPoint);
                 point = vPoint;
             }
-            if (Scr_GetType(7u))
+            if (Scr_GetType(7))
             {
                 Scr_GetVector(7u, vDir);
                 dir = vDir;
@@ -2133,7 +2133,7 @@ void __cdecl PlayerCmd_SetClientDvar(scr_entref_t entref)
         }
     }
     pszDvar = Scr_GetString(0);
-    if (Scr_GetType(1u) == 3)
+    if (Scr_GetType(1) == 3)
     {
         NumParam = Scr_GetNumParam();
         Scr_ConstructMessageString(1, NumParam - 1, "Client Dvar Value", szString, 0x400u);
@@ -2141,7 +2141,7 @@ void __cdecl PlayerCmd_SetClientDvar(scr_entref_t entref)
     }
     else
     {
-        pszText = Scr_GetString(1u);
+        pszText = Scr_GetString(1);
     }
     strlen(pszText);
     if (Dvar_IsValidName(pszDvar))
@@ -2430,7 +2430,7 @@ LABEL_6:
                 "nt fading to the next lowest active reverb priority level in seconds\n");
             return;
         }
-        Float = Scr_GetFloat(1u);
+        Float = Scr_GetFloat(1);
     }
     ConstString = Scr_GetConstString(0);
     if (ConstString != scr_const.snd_enveffectsprio_level && ConstString != scr_const.snd_enveffectsprio_shellshock)
@@ -2472,7 +2472,7 @@ void __cdecl PlayerCmd_SetChannelVolumes(scr_entref_t entref)
                 "llshock\", fadetime is in sec\n");
             return;
         }
-        fadetime = Scr_GetFloat(2u);
+        fadetime = Scr_GetFloat(2);
     }
     shockIndex = G_FindConfigstringIndex((char*)Scr_GetString(1), 1954, 16, 0, 0);
     prio_name = Scr_GetConstString(0);
@@ -2535,7 +2535,7 @@ LABEL_6:
                 "llshock\", fadetime is the time spent fading to the next lowest active reverb priority level in seconds\n");
             return;
         }
-        Float = Scr_GetFloat(1u);
+        Float = Scr_GetFloat(1);
     }
     ConstString = Scr_GetConstString(0);
     if (ConstString != scr_const.snd_channelvolprio_holdbreath
@@ -2980,7 +2980,7 @@ void __cdecl PlayerCmd_BeginLocationSelection(scr_entref_t entref)
     }
     else
     {
-        radius = Scr_GetFloat(1u);
+        radius = Scr_GetFloat(1);
         if (radius <= 0.0f)
             Scr_ParamError(1u, "Radius of location selector must be greater than zero\n");
         if (level.compassMapWorldSize[1] <= 0.0f || radius <= 0.0f)

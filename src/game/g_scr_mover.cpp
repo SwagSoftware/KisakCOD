@@ -213,7 +213,7 @@ void __cdecl ScriptEntCmdGetCommandTimes(float *pfTotalTime, float *pfAccelTime,
     float fTotalTimeRoundedUp; // [esp+0h] [ebp-8h]
     int iNumParms; // [esp+4h] [ebp-4h]
 
-    *pfTotalTime = Scr_GetFloat(1u);
+    *pfTotalTime = Scr_GetFloat(1);
     if (*pfTotalTime <= 0.0)
         Scr_ParamError(1u, "total time must be positive");
     if (*pfTotalTime < EQUAL_EPSILON)
@@ -226,7 +226,7 @@ void __cdecl ScriptEntCmdGetCommandTimes(float *pfTotalTime, float *pfAccelTime,
     }
     else
     {
-        *pfAccelTime = Scr_GetFloat(2u);
+        *pfAccelTime = Scr_GetFloat(2);
         if (*pfAccelTime < 0.0f)
             Scr_ParamError(2u, "accel time must be nonnegative");
         if (iNumParms <= 3)
@@ -235,7 +235,7 @@ void __cdecl ScriptEntCmdGetCommandTimes(float *pfTotalTime, float *pfAccelTime,
         }
         else
         {
-            *pfDecelTime = Scr_GetFloat(3u);
+            *pfDecelTime = Scr_GetFloat(3);
             if (*pfDecelTime < 0.0f)
                 Scr_ParamError(3u, "decel time must be nonnegative");
         }
@@ -491,7 +491,7 @@ void __cdecl ScriptEntCmd_GravityMove(scr_entref_t entref)
         v2 = va("invalid velocity parameter in movegravity command: %f %f %f", velocity[0], velocity[1], velocity[2]);
         Scr_Error(v2);
     }
-    fTotalTime = Scr_GetFloat(1u);
+    fTotalTime = Scr_GetFloat(1);
     ScriptMover_GravityMove(pSelf, velocity, fTotalTime);
 }
 
@@ -822,9 +822,9 @@ void __cdecl ScriptEntCmd_Vibrate(scr_entref_t entref)
     if (Scr_GetNumParam() == 4)
     {
         Scr_GetVector(0, impulseVector);
-        amplitude = Scr_GetFloat(1u);
-        period = Scr_GetFloat(2u);
-        time = Scr_GetFloat(3u);
+        amplitude = Scr_GetFloat(1);
+        period = Scr_GetFloat(2);
+        time = Scr_GetFloat(3);
         Vec3Normalize(impulseVector);
         Vec3Scale(impulseVector, amplitude, scaledImpulseVector);
         AnglesToAxis(pSelf->r.currentAngles, axis);

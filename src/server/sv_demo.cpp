@@ -427,7 +427,7 @@ int __cdecl SV_AddDemoSave(SaveGame *savehandle, server_demo_save_t *save, int c
     }
     if (save->buf)
         MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\server\\sv_demo.cpp", 837, 0, "%s", "!save->buf");
-    v7 = SaveMemory_GetSaveHandle(1u);
+    v7 = SaveMemory_GetSaveHandle(1);
     if (!v7)
         MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\server\\sv_demo.cpp", 841, 0, "%s", "demohandle");
     if (savehandle == v7)
@@ -559,7 +559,7 @@ void __cdecl SV_InitReadDemoSavegame(SaveGame **saveHandle)
         MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\server\\sv_demo.cpp", 1088, 0, "%s", "save->buf");
     if (*saveHandle)
         SaveMemory_FinalizeLoad(*saveHandle);
-    v3 = SaveMemory_GetSaveHandle(1u);
+    v3 = SaveMemory_GetSaveHandle(1);
     SaveMemory_InitializeLoadFromBuffer(v3, p_save->buf, p_save->bufLen);
     MemoryFile = SaveMemory_GetMemoryFile(v3);
     Dvar_LoadDvars(&MemoryFile->memFile);
@@ -793,7 +793,7 @@ void __cdecl SV_SaveDemo(const char *demoName, const char *description, unsigned
         SV_GetFreeDemoName("replay", 50, v28);
         v3 = v28;
     }
-    SaveHandle = SaveMemory_GetSaveHandle(1u);
+    SaveHandle = SaveMemory_GetSaveHandle(1);
     if (!SaveHandle)
         MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\server\\sv_demo.cpp", 1750, 0, "%s", "save");
     SaveMemory_InitializeDemoSave(SaveHandle);
@@ -851,7 +851,7 @@ void __cdecl SV_AutoSaveDemo(const char *baseName, const char *description, int 
 
     if (!Sys_IsDatabaseThread() && sv.state == SS_GAME && sv.demo.msg.data && (force || sv.demo.changed))
     {
-        SaveHandle = SaveMemory_GetSaveHandle(1u);
+        SaveHandle = SaveMemory_GetSaveHandle(1);
         if (!(unsigned __int8)SaveMemory_IsSaving(SaveHandle))
         {
             SV_GetFreeDemoName(baseName, demoCount, v9);

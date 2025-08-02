@@ -310,7 +310,7 @@ void Load_XAssetListCustom()
     varXAssetList = &g_varXAssetList;
     
     DB_LoadXFileData((uint8_t *)&g_varXAssetList, sizeof(XAssetList));
-    DB_PushStreamPos(4u);
+    DB_PushStreamPos(4);
     varScriptStringList = &varXAssetList->stringList;
     Load_ScriptStringList(0);
     DB_PopStreamPos();

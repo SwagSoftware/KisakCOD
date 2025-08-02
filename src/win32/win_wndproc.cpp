@@ -276,7 +276,7 @@ LRESULT WINAPI MainWndProc(
 	tagRECT r;
 	int style;
 
-	SetThreadExecutionState(2u);
+	SetThreadExecutionState(2);
 
 	if (uMsg == MSH_MOUSEWHEEL)
 	{

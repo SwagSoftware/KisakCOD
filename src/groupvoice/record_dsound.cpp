@@ -190,7 +190,7 @@ HRESULT __cdecl DSOUNDRecord_Start(dsound_sample_t *pRecSample)
     {
         pRecSample->dwCaptureOffset = 0;
         pRecSample->dwBufferSize = dscbd.dwBufferBytes;
-        hra = pRecSample->DSCB->Start(1u);
+        hra = pRecSample->DSCB->Start(1);
         if (hra < 0)
         {
             Com_PrintError(9, "error: Unable to Read to Buffer\n");

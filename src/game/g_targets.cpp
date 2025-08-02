@@ -148,9 +148,9 @@ void __cdecl Scr_Target_SetShader()
         v5 = va("Entity %i is not a target", Entity->s.number);
         Scr_Error(v5);
     }
-    if (*Scr_GetString(1u))
+    if (*Scr_GetString(1))
     {
-        String = Scr_GetString(1u);
+        String = Scr_GetString(1);
         v7 = G_MaterialIndex(String);
     }
     else
@@ -215,9 +215,9 @@ void __cdecl Scr_Target_SetOffscreenShader()
         v5 = va("Entity %i is not a target", Entity->s.number);
         Scr_Error(v5);
     }
-    if (*Scr_GetString(1u))
+    if (*Scr_GetString(1))
     {
-        String = Scr_GetString(1u);
+        String = Scr_GetString(1);
         v7 = G_MaterialIndex(String);
     }
     else
@@ -582,7 +582,7 @@ int __cdecl ScrGetTargetScreenPos(float *screenPos)
         v7 = va("entity %i is not a player", v5->s.number);
         Scr_ObjectError(v7);
     }
-    Float = Scr_GetFloat(2u);
+    Float = Scr_GetFloat(2);
     if (Float <= 0.0)
         Scr_ParamError(2u, "FOV must be positive");
     v10 = 0;
@@ -635,7 +635,7 @@ void __cdecl Scr_Target_IsInCircle()
     float v2; // [sp+50h] [-20h] BYREF
     float v3; // [sp+54h] [-1Ch]
 
-    Float = Scr_GetFloat(3u);
+    Float = Scr_GetFloat(3);
     if (!(unsigned __int8)ScrGetTargetScreenPos(&v2)
         || (v1 = 1, (float)((float)(v2 * v2) + (float)(v3 * v3)) >= (double)(float)((float)Float * (float)Float)))
     {
@@ -651,8 +651,8 @@ void __cdecl Scr_Target_IsInRect()
     int v2; // r3
     float v3[2]; // [sp+50h] [-20h] BYREF
 
-    Float = Scr_GetFloat(3u);
-    v1 = Scr_GetFloat(4u);
+    Float = Scr_GetFloat(3);
+    v1 = Scr_GetFloat(4);
     if (!(unsigned __int8)ScrGetTargetScreenPos(v3) || I_fabs(v3[0]) >= Float || (v2 = 1, I_fabs(v3[1]) >= v1))
         v2 = 0;
     Scr_AddBool(v2);
@@ -667,7 +667,7 @@ void __cdecl Scr_Target_StartLockOn()
     int v6; // [sp+50h] [-20h]
 
     Entity = Scr_GetEntity(0);
-    Float = Scr_GetFloat(1u);
+    Float = Scr_GetFloat(1);
     number = Entity->s.number;
     v6 = (int)(float)((float)Float * (float)1000.0);
     v5 = va("ret_lock_on %i %i", number, v6);
@@ -761,7 +761,7 @@ void __cdecl Scr_Target_SetAttackMode()
         v4 = va("Entity %i is not a target", *(unsigned __int16 *)(v3 + 118));
         Scr_Error(v4);
     }
-    ConstString = Scr_GetConstString(1u);
+    ConstString = Scr_GetConstString(1);
     if (ConstString == scr_const.top)
     {
         targGlob.targets[TargetIdx].flags |= 1u;
@@ -804,7 +804,7 @@ void __cdecl Scr_Target_SetJavelinOnly()
         v4 = va("Entity %i is not a target", *(unsigned __int16 *)(v3 + 118));
         Scr_Error(v4);
     }
-    Int = Scr_GetInt(1u);
+    Int = Scr_GetInt(1);
     p_flags = &targGlob.targets[TargetIdx].flags;
     v7 = *p_flags;
     if (Int)

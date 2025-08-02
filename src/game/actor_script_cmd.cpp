@@ -106,7 +106,7 @@ void __cdecl Actor_StartArrivalState(actor_s *self, ai_state_t newState)
     self->arrivalInfo.animscriptOverrideOriginError[0] = v6[0] - ent->r.currentOrigin[0];
     self->arrivalInfo.animscriptOverrideOriginError[1] = v6[1] - ent->r.currentOrigin[1];
     self->arrivalInfo.animscriptOverrideOriginError[2] = v6[2] - ent->r.currentOrigin[2];
-    Float = Scr_GetFloat(1u);
+    Float = Scr_GetFloat(1);
     self->Physics.vVelocity[0] = 0.0;
     self->Physics.vVelocity[1] = 0.0;
     self->Physics.vVelocity[2] = 0.0;
@@ -612,7 +612,7 @@ void __cdecl ActorCmd_SetLookAt(scr_entref_t entref)
         Scr_Error("LookAt Called without setLookAtAnimNodes being called first.");
     Scr_GetVector(0, v3);
     if (Scr_GetNumParam() > 1)
-        Float = Scr_GetFloat(1u);
+        Float = Scr_GetFloat(1);
     Actor_SetLookAt(v2, v3, Float);
 }
 
@@ -624,8 +624,8 @@ void __cdecl ActorCmd_SetLookAtYawLimits(scr_entref_t entref)
     double v4; // fp1
 
     v1 = Actor_Get(entref);
-    Float = Scr_GetFloat(2u);
-    v3 = Scr_GetFloat(1u);
+    Float = Scr_GetFloat(2);
+    v3 = Scr_GetFloat(1);
     v4 = Scr_GetFloat(0);
     Actor_SetLookAtYawLimits(v1, v4, v3, Float);
 }
@@ -734,8 +734,8 @@ void __cdecl ActorCmd_DropWeapon(scr_entref_t entref)
     String = Scr_GetString(0);
     if (I_stricmp(String, "none"))
     {
-        ConstString = Scr_GetConstString(1u);
-        Float = Scr_GetFloat(2u);
+        ConstString = Scr_GetConstString(1);
+        Float = Scr_GetFloat(2);
         WeaponIndexForName = G_GetWeaponIndexForName(String);
         if (!WeaponIndexForName)
         {
@@ -998,7 +998,7 @@ void __cdecl ActorCmd_MayMoveToPoint(scr_entref_t entref)
 
     v1 = Actor_Get(entref);
     Scr_GetVector(0, v7);
-    v2 = Scr_GetNumParam() <= 1 || Scr_GetInt(1u) != 0;
+    v2 = Scr_GetNumParam() <= 1 || Scr_GetInt(1) != 0;
     p_eType = (float *)&v1->ent->s.eType;
     if (v1->ent->tagInfo)
     {
@@ -1044,7 +1044,7 @@ void __cdecl ActorCmd_MayMoveFromPointToPoint(scr_entref_t entref)
     v1 = Actor_Get(entref);
     Scr_GetVector(0, v5);
     Scr_GetVector(1u, v4);
-    v2 = Scr_GetNumParam() <= 2 || Scr_GetInt(2u) != 0;
+    v2 = Scr_GetNumParam() <= 2 || Scr_GetInt(2) != 0;
     if (v1->ent->tagInfo)
     {
         if (ai_debugMayMove->current.enabled)
@@ -1336,8 +1336,8 @@ void __cdecl ActorCmd_CheckGrenadeThrow(scr_entref_t entref)
     if (!v1->sentient)
         MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\actor_script_cmd.cpp", 1687, 0, "%s", "self->sentient");
     Scr_GetVector(0, v8);
-    ConstString = Scr_GetConstString(1u);
-    Float = Scr_GetFloat(2u);
+    ConstString = Scr_GetConstString(1);
+    Float = Scr_GetFloat(2);
     if (Actor_GetTargetSentient(v1) && v1->iGrenadeAmmo > 0)
     {
         ent = v1->ent;
@@ -1389,7 +1389,7 @@ void __cdecl ActorCmd_CheckGrenadeThrowPos(scr_entref_t entref)
     self = Actor_Get(entref);
     iassert(self->sentient);
     Scr_GetVector(0, vHandOffset);
-    ConstString = Scr_GetConstString(1u);
+    ConstString = Scr_GetConstString(1);
     Scr_GetVector(2, vTargetPos);
     if (self->iGrenadeAmmo > 0)
     {
@@ -1736,7 +1736,7 @@ void __cdecl ActorCmd_AnimMode(scr_entref_t entref)
     v2 = 1;
     ConstString = Scr_GetConstString(0);
     if (Scr_GetNumParam() > 1)
-        v2 = Scr_GetInt(1u) != 0;
+        v2 = Scr_GetInt(1) != 0;
     if (ConstString != scr_const.none && v2)
         Actor_ClearPath(v1);
     ent = v1->ent;
@@ -1796,7 +1796,7 @@ void __cdecl ActorCmd_OrientMode(scr_entref_t entref)
     if (ConstString == scr_const.face_angle)
     {
         v1->ScriptOrient.eMode = AI_ORIENT_DONT_CHANGE;
-        Float = Scr_GetFloat(1u);
+        Float = Scr_GetFloat(1);
         Actor_SetDesiredAngles(&v1->ScriptOrient, 0.0, Float);
     }
     else if (ConstString == scr_const.face_current)
@@ -1851,7 +1851,7 @@ void __cdecl ActorCmd_OrientMode(scr_entref_t entref)
             "'face direction' and 'face point' take a second argument that is a vector giving the way to face\n"
             "'face angle' takes a second argument that is a yaw angle\n");
     }
-    if (Scr_GetNumParam() > 2 && Scr_GetInt(2u) > 0)
+    if (Scr_GetNumParam() > 2 && Scr_GetInt(2) > 0)
     {
         Actor_SetDesiredBodyAngle(&v1->CodeOrient, v1->ScriptOrient.fDesiredBodyYaw);
         Actor_SetBodyAngle(v1, v1->ScriptOrient.fDesiredBodyYaw);
@@ -2240,7 +2240,7 @@ void __cdecl ActorCmd_trackScriptState(scr_entref_t entref)
     Scr_SetString(&v1->lastScriptState, v1->scriptState);
     ConstString = Scr_GetConstString(0);
     Scr_SetString(&v1->scriptState, ConstString);
-    v3 = Scr_GetConstString(1u);
+    v3 = Scr_GetConstString(1);
     Scr_SetString(&v1->stateChangeReason, v3);
     lastScriptState = v1->lastScriptState;
     if (v1->scriptState == lastScriptState)
@@ -2368,8 +2368,8 @@ void __cdecl ActorCmd_CheckProne(scr_entref_t entref)
     v9 = entref.entnum;
     Actor_Get(entref);
     Scr_GetVector(0, v8);
-    Float = Scr_GetFloat(1u);
-    Int = Scr_GetInt(2u);
+    Float = Scr_GetFloat(1);
+    Int = Scr_GetInt(2);
     //v6 = BG_CheckProneValid(v9, v8, 15.0, 48.0, Float, v5, v4, v3, 0, 0, (_cntlzw(Int) & 0x20) == 0, v7, 50.0);
     v6 = BG_CheckProneValid(v9, v8, 15.0, 48.0, Float, v5, v4, v3, 0, 0, Int != 0, v7, 50.0);
     Scr_AddBool(v6);
@@ -2688,7 +2688,7 @@ void __cdecl ActorCmd_SetFlashBanged(scr_entref_t entref)
             Scr_Error(USAGEMSG);
             return;
         }
-        Float = Scr_GetFloat(1u);
+        Float = Scr_GetFloat(1);
     }
     Int = Scr_GetInt(0);
     Actor_SetFlashed(v1, Int, Float);
@@ -2724,7 +2724,7 @@ void __cdecl ActorCmd_SetEngagementMinDist(scr_entref_t entref)
 
     v1 = Actor_Get(entref);
     v1->engageMinDist = Scr_GetFloat(0);
-    Float = Scr_GetFloat(1u);
+    Float = Scr_GetFloat(1);
     engageMinDist = v1->engageMinDist;
     v1->engageMinFalloffDist = Float;
     if (Float > engageMinDist)
@@ -2743,7 +2743,7 @@ void __cdecl ActorCmd_SetEngagementMaxDist(scr_entref_t entref)
 
     v1 = Actor_Get(entref);
     v1->engageMaxDist = Scr_GetFloat(0);
-    Float = Scr_GetFloat(1u);
+    Float = Scr_GetFloat(1);
     engageMaxDist = v1->engageMaxDist;
     v1->engageMaxFalloffDist = Float;
     if (Float < engageMaxDist)
@@ -2762,7 +2762,7 @@ void __cdecl ActorCmd_IsKnownEnemyInRadius(scr_entref_t entref)
 
     v1 = Actor_Get(entref);
     Scr_GetVector(0, v4);
-    Float = Scr_GetFloat(1u);
+    Float = Scr_GetFloat(1);
     v3 = Actor_IsKnownEnemyInRegion(v1, 0, v4, Float) == 0;
     Scr_AddInt(v3);
 }

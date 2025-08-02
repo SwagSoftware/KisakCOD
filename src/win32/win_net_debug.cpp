@@ -240,7 +240,7 @@ int __cdecl Sys_ReadDebugSocketData(char *buffer, int len, int blocking)
 			if (!blocking)
 				return 0;
 			Sys_SendDebugReadBytesInternal();
-			NET_Sleep(1u);
+			NET_Sleep(1);
 		}
 		if (read == -1)
 			break;
@@ -362,7 +362,7 @@ void __cdecl Sys_DebugSend(int channel, const char *buf, int len, const char *na
 				return;
 			}
 			if (!Sys_DebugCanSend())
-				NET_Sleep(1u);
+				NET_Sleep(1);
 		}
 		if (!ip_debugSocket[channel])
 			MyAssertHandler(".\\win32\\win_net.cpp", 1911, 0, "%s", "ip_debugSocket[channel]");
@@ -375,7 +375,7 @@ void __cdecl Sys_DebugSend(int channel, const char *buf, int len, const char *na
 				Sys_DebugSocketError(v7);
 				return;
 			}
-			NET_Sleep(1u);
+			NET_Sleep(1);
 		}
 	}
 	else

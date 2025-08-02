@@ -111,7 +111,7 @@ const void **__cdecl DB_InsertPointer()
 {
     const void **pData; // [esp+0h] [ebp-4h]
 
-    DB_PushStreamPos(4u);
+    DB_PushStreamPos(4);
     pData = (const void **)DB_AllocStreamPos(3);
     DB_IncStreamPos(4);
     DB_PopStreamPos();

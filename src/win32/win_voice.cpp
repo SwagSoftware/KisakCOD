@@ -643,7 +643,7 @@ void __cdecl Voice_Shutdown()
     Encode_Shutdown();
     Decode_Shutdown();
     Sound_Shutdown();
-    mixerSetMicrophoneMute(1u);
+    mixerSetMicrophoneMute(1);
     mixerSetRecordLevel((char*)"Mic", mic_old_reclevel);
     mixerSetRecordSource(old_rec_source);
     g_voice_initialized = 0;

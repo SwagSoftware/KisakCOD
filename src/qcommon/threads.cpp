@@ -133,7 +133,7 @@ char __cdecl Sys_SpawnRenderThread(void(__cdecl* function)(unsigned int))
     if (!threadHandle[1])
         return 0;
 
-    Sys_ResumeThread(1u);
+    Sys_ResumeThread(1);
 
     return 1;
 }
@@ -229,7 +229,7 @@ char __cdecl Sys_SpawnDatabaseThread(void(__cdecl* function)(unsigned int))
         return 0;
 
     SetThreadPriority(threadHandle[6], s_cpuCount > 1 ? 1 : -1);
-    Sys_ResumeThread(6u);
+    Sys_ResumeThread(6);
 
     return 1;
 }
@@ -603,7 +603,7 @@ char __cdecl Sys_SpawnCinematicsThread(void(__cdecl* function)(unsigned int))
     Sys_CreateThread(function, 4u);
     if (!threadHandle[4])
         return 0;
-    Sys_ResumeThread(4u);
+    Sys_ResumeThread(4);
     return 1;
 }
 
@@ -762,7 +762,7 @@ int Sys_SpawnServerThread(void(*function)(unsigned int))
     if (threadHandle[5])
     {
         //XSetThreadProcessor(threadHandle[5], 3u);
-        Sys_ResumeThread(5u);
+        Sys_ResumeThread(5);
         return 1;
     }
 

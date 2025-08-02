@@ -1026,7 +1026,7 @@ void __cdecl Scr_AddFields_LoadObj(const char *path, const char *extension)
 	}
 	if (files)
 		FS_FreeFileList(files);
-	targetPos = TempMalloc(1u);
+	targetPos = TempMalloc(1);
 	*targetPos = 0;
 }
 

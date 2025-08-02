@@ -78,7 +78,7 @@ unsigned int __cdecl RB_CalcSunSpriteSamples()
     {
         if (r_logFile && r_logFile->current.integer)
             RB_LogPrint("occlusionQuery->Issue( (1 << 1) )\n");
-        v7 = occlusionQuery->Issue(2u);
+        v7 = occlusionQuery->Issue(2);
         if (v7 < 0)
         {
             do
@@ -226,7 +226,7 @@ void __cdecl RB_DrawSunQuerySprite(SunFlareDynamic *sunFlare)
         {
             RB_HW_BeginOcclusionQuery(sunFlare->sunQuery[queryIndex]);
             RB_EndTessSurface();
-            sunFlare->sunQuery[queryIndex]->Issue(1u);
+            sunFlare->sunQuery[queryIndex]->Issue(1);
             sunFlare->sunQueryIssued[queryIndex] = 1;
         }
     }
@@ -240,7 +240,7 @@ void __cdecl RB_HW_BeginOcclusionQuery(IDirect3DQuery9 *query)
 {
     if (!query)
         MyAssertHandler("c:\\trees\\cod3\\src\\gfx_d3d\\rb_query_d3d.h", 26, 0, "%s", "query");
-    query->Issue(2u);
+    query->Issue(2);
 }
 
 unsigned int __cdecl RB_HW_ReadOcclusionQuery(IDirect3DQuery9 *query)

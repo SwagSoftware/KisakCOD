@@ -283,7 +283,7 @@ void __cdecl HudElem_GetFlagForeground(game_hudelem_s *hud, int32_t offset)
     if (fields_0[offset].ofs != 156)
         MyAssertHandler(".\\game\\g_hudelem.cpp", 411, 0, "%s", "fields[offset].ofs == HEOFS( elem.flags )");
     if ((hud->elem.flags & 1) != 0)
-        Scr_AddBool(1u);
+        Scr_AddBool(1);
     else
         Scr_AddBool(0);
 }
@@ -306,7 +306,7 @@ void __cdecl HudElem_GetFlagHideWhenDead(game_hudelem_s *hud, int32_t offset)
     if (fields_0[offset].ofs != 156)
         MyAssertHandler(".\\game\\g_hudelem.cpp", 439, 0, "%s", "fields[offset].ofs == HEOFS( elem.flags )");
     if ((hud->elem.flags & 2) != 0)
-        Scr_AddBool(1u);
+        Scr_AddBool(1);
     else
         Scr_AddBool(0);
 }
@@ -329,7 +329,7 @@ void __cdecl HudElem_GetFlagHideWhenInMenu(game_hudelem_s *hud, int32_t offset)
     if (fields_0[offset].ofs != 156)
         MyAssertHandler(".\\game\\g_hudelem.cpp", 467, 0, "%s", "fields[offset].ofs == HEOFS( elem.flags )");
     if ((hud->elem.flags & 4) != 0)
-        Scr_AddBool(1u);
+        Scr_AddBool(1);
     else
         Scr_AddBool(0);
 }
@@ -1155,8 +1155,8 @@ void __cdecl HECmd_SetPulseFX(scr_entref_t entref)
     hud = (VariableUnion *)HECmd_GetHudElem(entref);
     hud[34].intValue = level.time;
     hud[35].intValue = GetIntGTZero(0).intValue;
-    hud[36].intValue = GetIntGTZero(1u).intValue;
-    hud[37].intValue = GetIntGTZero(2u).intValue;
+    hud[36].intValue = GetIntGTZero(1).intValue;
+    hud[37].intValue = GetIntGTZero(2).intValue;
     ps = &level.clients[hud[40].intValue];
     ++ps->ps.hudElemLastAssignedSoundID;
     ps->ps.hudElemLastAssignedSoundID %= 32;

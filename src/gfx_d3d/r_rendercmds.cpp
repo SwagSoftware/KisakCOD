@@ -1715,7 +1715,7 @@ void __cdecl R_EndRemoteScreenUpdate()
             if (r_glob.remoteScreenUpdateNesting == 1)
             {
                 while (!r_glob.screenUpdateNotify)
-                    NET_Sleep(1u);
+                    NET_Sleep(1);
                 r_glob.screenUpdateNotify = 0;
                 if (r_glob.remoteScreenUpdateNesting <= 0)
                     MyAssertHandler(".\\r_rendercmds.cpp", 2421, 0, "%s", "r_glob.remoteScreenUpdateNesting > 0");
@@ -1723,7 +1723,7 @@ void __cdecl R_EndRemoteScreenUpdate()
                 while (!r_glob.screenUpdateNotify)
                 {
                     ++g_mainThreadBlocked;
-                    NET_Sleep(1u);
+                    NET_Sleep(1);
                     --g_mainThreadBlocked;
                 }
                 r_glob.screenUpdateNotify = 0;

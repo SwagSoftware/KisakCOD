@@ -517,8 +517,8 @@ void __cdecl Scr_MissileCreateAttractorEnt()
     attractorIndex = Missile_GetFreeAttractor();
     attrGlob.attractors[attractorIndex].isAttractor = 1;
     ent = Scr_GetEntity(0);
-    attrGlob.attractors[attractorIndex].strength = Scr_GetFloat(1u);
-    attrGlob.attractors[attractorIndex].maxDist = Scr_GetFloat(2u);
+    attrGlob.attractors[attractorIndex].strength = Scr_GetFloat(1);
+    attrGlob.attractors[attractorIndex].maxDist = Scr_GetFloat(2);
     if (attrGlob.attractors[attractorIndex].maxDist <= 0.0)
         Scr_ParamError(2u, "maxDist must be greater than zero");
     attrGlob.attractors[attractorIndex].entnum = ent->s.number;
@@ -550,8 +550,8 @@ void __cdecl Scr_MissileCreateAttractorOrigin()
     attrGlob.attractors[attractorIndex].isAttractor = 1;
     attrGlob.attractors[attractorIndex].entnum = 1023;
     Scr_GetVector(0, attrGlob.attractors[attractorIndex].origin);
-    attrGlob.attractors[attractorIndex].strength = Scr_GetFloat(1u);
-    attrGlob.attractors[attractorIndex].maxDist = Scr_GetFloat(2u);
+    attrGlob.attractors[attractorIndex].strength = Scr_GetFloat(1);
+    attrGlob.attractors[attractorIndex].maxDist = Scr_GetFloat(2);
     if (attrGlob.attractors[attractorIndex].maxDist <= 0.0)
         Scr_ParamError(2u, "maxDist must be greater than zero");
     attrGlob.attractors[attractorIndex].inUse = 1;
@@ -565,8 +565,8 @@ void __cdecl Scr_MissileCreateRepulsorEnt()
     attractorIndex = Missile_GetFreeAttractor();
     attrGlob.attractors[attractorIndex].isAttractor = 0;
     attrGlob.attractors[attractorIndex].entnum = Scr_GetEntity(0)->s.number;
-    attrGlob.attractors[attractorIndex].strength = Scr_GetFloat(1u);
-    attrGlob.attractors[attractorIndex].maxDist = Scr_GetFloat(2u);
+    attrGlob.attractors[attractorIndex].strength = Scr_GetFloat(1);
+    attrGlob.attractors[attractorIndex].maxDist = Scr_GetFloat(2);
     if (attrGlob.attractors[attractorIndex].maxDist <= 0.0)
         Scr_ParamError(2u, "maxDist must be greater than zero");
     attrGlob.attractors[attractorIndex].inUse = 1;
@@ -581,8 +581,8 @@ void __cdecl Scr_MissileCreateRepulsorOrigin()
     attrGlob.attractors[attractorIndex].isAttractor = 0;
     attrGlob.attractors[attractorIndex].entnum = 1023;
     Scr_GetVector(0, attrGlob.attractors[attractorIndex].origin);
-    attrGlob.attractors[attractorIndex].strength = Scr_GetFloat(1u);
-    attrGlob.attractors[attractorIndex].maxDist = Scr_GetFloat(2u);
+    attrGlob.attractors[attractorIndex].strength = Scr_GetFloat(1);
+    attrGlob.attractors[attractorIndex].maxDist = Scr_GetFloat(2);
     if (attrGlob.attractors[attractorIndex].maxDist <= 0.0)
         Scr_ParamError(2u, "maxDist must be greater than zero");
     attrGlob.attractors[attractorIndex].inUse = 1;

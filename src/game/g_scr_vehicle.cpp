@@ -1855,7 +1855,7 @@ void __cdecl CMD_VEH_Script_SetSpeed(gentity_s *ent)
         veh->manualSpeed = 0.0f;
     }
     if (Scr_GetNumParam() > 1)
-        veh->manualAccel = Scr_GetFloat(1u) * 17.6f;
+        veh->manualAccel = Scr_GetFloat(1) * 17.6f;
     if (info->type == 5 && veh->speed < veh->manualSpeed && veh->manualAccel > veh->manualSpeed)
     {
         Com_PrintWarning(15, "WARNING: capping acceleration to speed / sec for vehicle '%d'\n", ent->s.number);
@@ -1864,7 +1864,7 @@ void __cdecl CMD_VEH_Script_SetSpeed(gentity_s *ent)
     if (Scr_GetNumParam() <= 2)
         veh->manualDecel = veh->manualAccel * 0.5f;
     else
-        veh->manualDecel = Scr_GetFloat(2u) * 17.6f;
+        veh->manualDecel = Scr_GetFloat(2) * 17.6f;
     if (veh->manualAccel <= 0.0 || veh->manualDecel <= 0.0f)
     {
         Scr_ParamError(1u, "Acceleration/deceleration must be > 0");
@@ -1903,14 +1903,14 @@ void __cdecl CMD_VEH_SetYawSpeed(scr_entref_t entref)
 
     veh = GScr_GetVehicle(entref)->scr_vehicle;
     veh->phys.maxAngleVel[1] = Scr_GetFloat(0);
-    veh->phys.yawAccel = Scr_GetFloat(1u);
+    veh->phys.yawAccel = Scr_GetFloat(1);
     if (Scr_GetNumParam() <= 2)
         veh->phys.yawDecel = veh->phys.yawAccel;
     else
-        veh->phys.yawDecel = Scr_GetFloat(2u);
+        veh->phys.yawDecel = Scr_GetFloat(2);
     if (Scr_GetNumParam() > 3)
     {
-        veh->yawOverShoot = Scr_GetFloat(3u);
+        veh->yawOverShoot = Scr_GetFloat(3);
         if (veh->yawOverShoot < 0.0f || veh->yawOverShoot > 1.0f)
             Scr_ParamError(3u, "Overshoot must be in 0 to 1 range");
     }
@@ -1928,7 +1928,7 @@ void __cdecl CMD_VEH_SetMaxPitchRoll(scr_entref_t entref)
     if (s_vehicleInfos[veh->infoIdx].type != 5)
         Scr_Error("Max Pitch Roll only valid for helicopters");
     veh->phys.maxPitchAngle = Scr_GetFloat(0);
-    veh->phys.maxRollAngle = Scr_GetFloat(1u);
+    veh->phys.maxRollAngle = Scr_GetFloat(1);
     if (veh->phys.maxPitchAngle < 0.0f)
         Scr_ParamError(0, "Cannot set negative max pitch");
     if (veh->phys.maxRollAngle < 0.0f)
@@ -1959,9 +1959,9 @@ void __cdecl CMD_VEH_SetHoverParams(scr_entref_t entref)
     veh->hover.hoverRadius = Scr_GetFloat(0);
     if (Scr_GetNumParam() > 1)
     {
-        veh->hover.hoverSpeed = Scr_GetFloat(1u);
+        veh->hover.hoverSpeed = Scr_GetFloat(1);
         if (Scr_GetNumParam() > 2)
-            veh->hover.hoverAccel = Scr_GetFloat(2u);
+            veh->hover.hoverAccel = Scr_GetFloat(2);
     }
 }
 
@@ -2350,7 +2350,7 @@ void __cdecl CMD_VEH_FireWeapon(scr_entref_t entref)
             if (Scr_GetNumParam() <= 1)
                 Entity = 0;
             else
-                Entity = Scr_GetEntity(1u);
+                Entity = Scr_GetEntity(1);
             target = Entity;
             if (Scr_GetNumParam() <= 2)
             {

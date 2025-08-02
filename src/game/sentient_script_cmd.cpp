@@ -113,7 +113,7 @@ void SentientCmd_GetThreatBias()
         Scr_ParamError(0, "getthreatbias [group for] [group against]");
     ConstString = Scr_GetConstString(0);
     ThreatBiasGroupIndex = Actor_FindThreatBiasGroupIndex(ConstString);
-    v2 = Scr_GetConstString(1u);
+    v2 = Scr_GetConstString(1);
     v3 = Actor_FindThreatBiasGroupIndex(v2);
     if (ThreatBiasGroupIndex >= 0)
     {
@@ -124,7 +124,7 @@ void SentientCmd_GetThreatBias()
         }
         else
         {
-            String = Scr_GetString(1u);
+            String = Scr_GetString(1);
             v7 = va("Invalid threat bias group '%s'.\n", String);
             Scr_Error(v7);
         }
@@ -153,9 +153,9 @@ void SentientCmd_SetThreatBias()
         Scr_ParamError(0, "setthreatbias [group for] [group against] [threat]");
     ConstString = Scr_GetConstString(0);
     ThreatBiasGroupIndex = Actor_FindThreatBiasGroupIndex(ConstString);
-    v2 = Scr_GetConstString(1u);
+    v2 = Scr_GetConstString(1);
     v3 = Actor_FindThreatBiasGroupIndex(v2);
-    Int = Scr_GetInt(2u);
+    Int = Scr_GetInt(2);
     if (ThreatBiasGroupIndex >= 0)
     {
         if (v3 >= 0)
@@ -164,7 +164,7 @@ void SentientCmd_SetThreatBias()
         }
         else
         {
-            String = Scr_GetString(1u);
+            String = Scr_GetString(1);
             v8 = va("Invalid threat bias group '%s'.\n", String);
             Scr_Error(v8);
         }
@@ -189,7 +189,7 @@ void SentientCmd_SetThreatBiasAgainstAll()
         Scr_ParamError(0, "setthreatbiasagainstall [group for] [threat]");
     ConstString = Scr_GetConstString(0);
     ThreatBiasGroupIndex = Actor_FindThreatBiasGroupIndex(ConstString);
-    Int = Scr_GetInt(1u);
+    Int = Scr_GetInt(1);
     if (ThreatBiasGroupIndex >= 0)
     {
         Actor_SetThreatBiasEntireGroup(ThreatBiasGroupIndex, Int);
@@ -217,7 +217,7 @@ void SentientCmd_SetIgnoreMeGroup()
         Scr_ParamError(0, "setignoremegroup [group for] [group ignoring]");
     ConstString = Scr_GetConstString(0);
     ThreatBiasGroupIndex = Actor_FindThreatBiasGroupIndex(ConstString);
-    v2 = Scr_GetConstString(1u);
+    v2 = Scr_GetConstString(1);
     v3 = Actor_FindThreatBiasGroupIndex(v2);
     if (ThreatBiasGroupIndex >= 0)
     {
@@ -227,7 +227,7 @@ void SentientCmd_SetIgnoreMeGroup()
         }
         else
         {
-            String = Scr_GetString(1u);
+            String = Scr_GetString(1);
             v7 = va("Invalid threat bias group '%s'.\n", String);
             Scr_Error(v7);
         }

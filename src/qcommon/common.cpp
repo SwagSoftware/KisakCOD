@@ -249,7 +249,7 @@ void __cdecl Debug_Frame(int localClientNum)
         msec = com_frameTime - com_lastFrameTime[lastFrameIndex];
         if (newEvent || newEvent2 || msec >= minMsec)
             break;
-        NET_Sleep(1u);
+        NET_Sleep(1);
     }
     com_lastFrameTime[lastFrameIndex] = com_frameTime;
     cls.realFrametime = Com_ModifyMsec(msec);
@@ -1698,7 +1698,7 @@ void __cdecl Com_Frame_Try_Block_Function()
             msec = com_frameTime - com_lastFrameTime[lastFrameIndex];
             if (msec >= minMsec)
                 break;
-            NET_Sleep(1u);
+            NET_Sleep(1);
         }
         com_lastFrameTime[lastFrameIndex] = com_frameTime;
     }

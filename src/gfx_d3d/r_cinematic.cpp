@@ -1182,7 +1182,7 @@ char __cdecl R_Cinematic_ThreadFinish(bool midBinkIsOkay)
     {
         while (2)
         {
-            if (Sys_WaitForCinematicsThreadOutstandingRequestEventTimeout(1u))
+            if (Sys_WaitForCinematicsThreadOutstandingRequestEventTimeout(1))
             {
                 switch (g_cinematicThreadState)
                 {

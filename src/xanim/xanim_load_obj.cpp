@@ -686,7 +686,7 @@ unsigned __int8 *__cdecl GetQuaternions(
                     quat[0] = -quat[0];
                     quat[1] = -quat[1];
                 }
-                part->quat = (XAnimPartQuat*)XAnimTempAlloc(8u);
+                part->quat = (XAnimPartQuat*)XAnimTempAlloc(8);
                 part->quat->u.frame0[0] = quat[0];
                 part->quat->u.frame0[1] = quat[1];
             }

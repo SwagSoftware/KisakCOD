@@ -163,7 +163,7 @@ void __cdecl Scr_EndLoadScripts()
     {
         Scr_EndLoadEvaluate();
         KISAK_NULLSUB();
-        SL_ShutdownSystem(2u);
+        SL_ShutdownSystem(2);
     }
     Scr_InitDebugger();
     scrCompilePub.script_loading = 0;
@@ -347,7 +347,7 @@ void __cdecl Scr_FreeScripts(unsigned __int8 sys)
     Scr_ShutdownDebugger();
     Scr_ShutdownDebuggerMain();
     Scr_ShutdownEvaluate();
-    SL_ShutdownSystem(1u);
+    SL_ShutdownSystem(1);
     Scr_ShutdownOpcodeLookup();
     if (scrVarPub.programHunkUser)
     {

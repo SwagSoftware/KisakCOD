@@ -3210,7 +3210,7 @@ void DB_FreeUnusedResources()
             }
         }
     }
-    SL_ShutdownSystem(8u);
+    SL_ShutdownSystem(8);
 }
 
 void DB_ExternalInitAssets()

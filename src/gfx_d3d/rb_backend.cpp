@@ -2907,7 +2907,7 @@ void __cdecl  RB_RenderThread(unsigned int threadContext)
     iassert(threadContext == THREAD_CONTEXT_BACKEND);
 
     while (r_glob.haveThreadOwnership)
-        NET_Sleep(1u);
+        NET_Sleep(1);
 
     while (1)
     {

@@ -1589,7 +1589,7 @@ void __cdecl GScr_GetVehicleNode()
     vehicle_node_t *v9; // r31
 
     ConstString = Scr_GetConstString(0);
-    String = Scr_GetString(1u);
+    String = Scr_GetString(1);
     Offset = Scr_GetOffset(3u, String);
     v3 = Offset;
     if (Offset >= 0)
@@ -1644,7 +1644,7 @@ void __cdecl GScr_GetVehicleNodeArray()
     vehicle_node_t *v7; // r31
 
     ConstString = Scr_GetConstString(0);
-    String = Scr_GetString(1u);
+    String = Scr_GetString(1);
     Offset = Scr_GetOffset(3u, String);
     v3 = Offset;
     if (Offset >= 0)

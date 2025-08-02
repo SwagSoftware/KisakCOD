@@ -326,7 +326,7 @@ void __cdecl R_LoadPrimaryLights(unsigned int bspVersion)
         if (!comWorld.isInUse)
             MyAssertHandler("c:\\trees\\cod3\\src\\gfx_d3d\\../qcommon/com_bsp_api.h", 23, 0, "%s", "comWorld.isInUse");
         s_world.primaryLightCount = comWorld.primaryLightCount;
-        s_world.sunPrimaryLightIndex = comWorld.primaryLightCount > 1 && Com_GetPrimaryLight(1u)->type == 1;
+        s_world.sunPrimaryLightIndex = comWorld.primaryLightCount > 1 && Com_GetPrimaryLight(1)->type == 1;
         for (lightIndex = 0; lightIndex < s_world.primaryLightCount; ++lightIndex)
         {
             primaryLight = Com_GetPrimaryLight(lightIndex);

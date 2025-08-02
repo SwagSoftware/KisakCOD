@@ -843,7 +843,7 @@ void __cdecl G_ShutdownGame(int32_t freeScripts)
     {
         Mantle_ShutdownAnims();
         GScr_FreeScripts();
-        Scr_FreeScripts(1u);
+        Scr_FreeScripts(1);
         G_FreeAnimTreeInstances();
         Com_FreeWeaponInfoMemory(1);
         Hunk_ClearToMarkLow(0);

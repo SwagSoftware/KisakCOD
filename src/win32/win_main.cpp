@@ -375,7 +375,7 @@ void Sys_SpawnQuitProcess()
 void __cdecl  Sys_Quit()
 {
 	Sys_EnterCriticalSection(CRITSECT_COM_ERROR);
-	timeEndPeriod(1u);
+	timeEndPeriod(1);
 	Sys_SpawnQuitProcess();
 	IN_Shutdown();
 	Key_Shutdown();
@@ -410,7 +410,7 @@ char *__cdecl Sys_GetClipboardData()
 	data = 0;
 	if (OpenClipboard(0))
 	{
-		hClipboardData = GetClipboardData(1u);
+		hClipboardData = GetClipboardData(1);
 		if (hClipboardData)
 		{
 			cliptext = (char *)GlobalLock(hClipboardData);
@@ -527,7 +527,7 @@ void __cdecl Sys_Init()
 {
 	// _OSVERSIONINFOA osversion; // [esp+14h] [ebp-A0h] BYREF
 
-	timeBeginPeriod(1u);
+	timeBeginPeriod(1);
 	Cmd_AddCommandInternal("in_restart", Sys_In_Restart_f, &Sys_In_Restart_f_VAR);
 	Cmd_AddCommandInternal("net_restart", Sys_Net_Restart_f, &Sys_Net_Restart_f_VAR);
 	Cmd_AddCommandInternal("net_listen", Sys_Listen_f, &Sys_Listen_f_VAR);

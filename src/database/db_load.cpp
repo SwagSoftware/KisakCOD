@@ -641,7 +641,7 @@ void __cdecl Load_XStringPtr(bool atStreamStart)
 void __cdecl Load_ScriptStringList(bool atStreamStart)
 {
     Load_Stream(atStreamStart, (uint8_t *)varScriptStringList, 8);
-    DB_PushStreamPos(4u);
+    DB_PushStreamPos(4);
     if (varScriptStringList->strings)
     {
         varScriptStringList->strings = (const char **)AllocLoad_FxElemVisStateSample();
@@ -919,7 +919,7 @@ void __cdecl Load_XAnimNotifyInfoArray(bool atStreamStart, int32_t count)
 void __cdecl Load_XAnimParts(bool atStreamStart)
 {
     Load_Stream(atStreamStart, (uint8_t *)varXAnimParts, 88);
-    DB_PushStreamPos(4u);
+    DB_PushStreamPos(4);
     varXString = &varXAnimParts->name;
     Load_XString(0);
     if (varXAnimParts->names)
@@ -1127,7 +1127,7 @@ void __cdecl Load_MssSound(bool atStreamStart)
 void __cdecl Load_LoadedSound(bool atStreamStart)
 {
     Load_Stream(atStreamStart, (uint8_t *)varLoadedSound, 44);
-    DB_PushStreamPos(4u);
+    DB_PushStreamPos(4);
     varXString = &varLoadedSound->name;
     Load_XString(0);
     varMssSound = &varLoadedSound->sound;
@@ -1197,7 +1197,7 @@ void __cdecl Load_SoundFile(bool atStreamStart)
 void __cdecl Load_SndCurve(bool atStreamStart)
 {
     Load_Stream(atStreamStart, (uint8_t *)varSndCurve, 72);
-    DB_PushStreamPos(4u);
+    DB_PushStreamPos(4);
     varXString = &varSndCurve->filename;
     Load_XString(0);
     DB_PopStreamPos();
@@ -1300,7 +1300,7 @@ void __cdecl Load_snd_alias_tArray(bool atStreamStart, int32_t count)
 void __cdecl Load_snd_alias_list_t(bool atStreamStart)
 {
     Load_Stream(atStreamStart, (uint8_t *)varsnd_alias_list_t, 12);
-    DB_PushStreamPos(4u);
+    DB_PushStreamPos(4);
     varXString = &varsnd_alias_list_t->aliasName;
     Load_XString(0);
     if (varsnd_alias_list_t->head)
@@ -1624,7 +1624,7 @@ void __cdecl Load_XSurface(bool atStreamStart)
     Load_XZoneHandle(0);
     varXSurfaceVertexInfo = &varXSurface->vertInfo;
     Load_XSurfaceVertexInfo(0);
-    DB_PushStreamPos(7u);
+    DB_PushStreamPos(7);
     if (varXSurface->verts0)
     {
         if (varXSurface->verts0 == (GfxPackedVertex *)-1)
@@ -1652,7 +1652,7 @@ void __cdecl Load_XSurface(bool atStreamStart)
             DB_ConvertOffsetToPointer((uint32_t*)&varXSurface->vertList);
         }
     }
-    DB_PushStreamPos(8u);
+    DB_PushStreamPos(8);
     if (varXSurface->triIndices)
     {
         if (varXSurface->triIndices == (uint16_t *)-1)
@@ -1741,7 +1741,7 @@ void __cdecl Load_GfxImageLoadDef(bool atStreamStart)
 void __cdecl Load_GfxImage(bool atStreamStart)
 {
     Load_Stream(atStreamStart, (uint8_t *)varGfxImage, 36);
-    DB_PushStreamPos(4u);
+    DB_PushStreamPos(4);
     varXString = &varGfxImage->name;
     Load_XString(0);
     varGfxTextureLoad = &varGfxImage->texture;
@@ -2146,7 +2146,7 @@ void __cdecl Load_MaterialTechniquePtrArray(bool atStreamStart, int32_t count)
 void __cdecl Load_MaterialTechniqueSet(bool atStreamStart)
 {
     Load_Stream(atStreamStart, (uint8_t *)varMaterialTechniqueSet, 148);
-    DB_PushStreamPos(4u);
+    DB_PushStreamPos(4);
     varXString = &varMaterialTechniqueSet->name;
     Load_XString(0);
     varMaterialTechniquePtr = varMaterialTechniqueSet->techniques;
@@ -2188,7 +2188,7 @@ void __cdecl Load_MaterialTechniqueSetPtr(bool atStreamStart)
 void __cdecl Load_Material(bool atStreamStart)
 {
     Load_Stream(atStreamStart, (uint8_t *)varMaterial, 80);
-    DB_PushStreamPos(4u);
+    DB_PushStreamPos(4);
     varMaterialInfo = &varMaterial->info;
     Load_MaterialInfo(0);
     varMaterialTechniqueSetPtr = &varMaterial->techniqueSet;
@@ -2372,7 +2372,7 @@ void __cdecl Load_GfxLightImage(bool atStreamStart)
 void __cdecl Load_GfxLightDef(bool atStreamStart)
 {
     Load_Stream(atStreamStart, (uint8_t *)varGfxLightDef, 16);
-    DB_PushStreamPos(4u);
+    DB_PushStreamPos(4);
     varXString = &varGfxLightDef->name;
     Load_XString(0);
     varGfxLightImage = &varGfxLightDef->attenuation;
@@ -2537,7 +2537,7 @@ void __cdecl Mark_GfxLightmapArrayArray(int32_t count)
 void __cdecl Load_PhysPreset(bool atStreamStart)
 {
     Load_Stream(atStreamStart, (uint8_t *)varPhysPreset, 44);
-    DB_PushStreamPos(4u);
+    DB_PushStreamPos(4);
     varXString = &varPhysPreset->name;
     Load_XString(0);
     varXString = &varPhysPreset->sndAliasPrefix;
@@ -2751,7 +2751,7 @@ void __cdecl Load_PhysGeomList(bool atStreamStart)
 void __cdecl Load_XModel(bool atStreamStart)
 {
     Load_Stream(atStreamStart, (uint8_t *)varXModel, 220);
-    DB_PushStreamPos(4u);
+    DB_PushStreamPos(4);
     varXString = &varXModel->name;
     Load_XString(0);
     if (varXModel->boneNames)
@@ -3227,7 +3227,7 @@ void __cdecl Load_PathData(bool atStreamStart)
         varpathnode_t = varPathData->nodes;
         Load_pathnode_tArray(1, varPathData->nodeCount);
     }
-    DB_PushStreamPos(1u);
+    DB_PushStreamPos(1);
     if (varPathData->basenodes)
     {
         varPathData->basenodes = (pathbasenode_t *)AllocLoad_GfxPackedVertex0();
@@ -3264,7 +3264,7 @@ void __cdecl Load_PathData(bool atStreamStart)
 void __cdecl Load_GameWorldSp(bool atStreamStart)
 {
     Load_Stream(atStreamStart, (uint8_t *)varGameWorldSp, 44);
-    DB_PushStreamPos(4u);
+    DB_PushStreamPos(4);
     varXString = &varGameWorldSp->name;
     Load_XString(0);
     varPathData = &varGameWorldSp->path;
@@ -3275,7 +3275,7 @@ void __cdecl Load_GameWorldSp(bool atStreamStart)
 void __cdecl Load_GameWorldMp(bool atStreamStart)
 {
     Load_Stream(atStreamStart, (uint8_t *)varGameWorldMp, 4);
-    DB_PushStreamPos(4u);
+    DB_PushStreamPos(4);
     varXString = &varGameWorldMp->name;
     Load_XString(0);
     DB_PopStreamPos();
@@ -3601,7 +3601,7 @@ void __cdecl Load_FxElemDefArray(bool atStreamStart, int32_t count)
 void __cdecl Load_FxEffectDef(bool atStreamStart)
 {
     Load_Stream(atStreamStart, (uint8_t *)varFxEffectDef, 32);
-    DB_PushStreamPos(4u);
+    DB_PushStreamPos(4);
     varXString = &varFxEffectDef->name;
     Load_XString(0);
     if (varFxEffectDef->elemDefs)
@@ -3817,7 +3817,7 @@ void __cdecl Mark_DynEntityDefArray(int32_t count)
 void __cdecl Load_MapEnts(bool atStreamStart)
 {
     Load_Stream(atStreamStart, (uint8_t *)varMapEnts, 12);
-    DB_PushStreamPos(4u);
+    DB_PushStreamPos(4);
     varXString = &varMapEnts->name;
     Load_XString(0);
     if (varMapEnts->entityString)
@@ -4098,7 +4098,7 @@ void __cdecl Load_LeafBrushArray(bool atStreamStart, int32_t count)
 void __cdecl Load_clipMap_t(bool atStreamStart)
 {
     Load_Stream(atStreamStart, (uint8_t *)varclipMap_t, 284);
-    DB_PushStreamPos(4u);
+    DB_PushStreamPos(4);
     varXString = &varclipMap_t->name;
     Load_XString(0);
     if (varclipMap_t->planes)
@@ -4249,7 +4249,7 @@ void __cdecl Load_clipMap_t(bool atStreamStart)
         varDynEntityDef = varclipMap_t->dynEntDefList[1];
         Load_DynEntityDefArray(1, varclipMap_t->dynEntCount[1]);
     }
-    DB_PushStreamPos(1u);
+    DB_PushStreamPos(1);
     if (varclipMap_t->dynEntPoseList[0])
     {
         varclipMap_t->dynEntPoseList[0] = (DynEntityPose *)AllocLoad_FxElemVisStateSample();
@@ -4257,7 +4257,7 @@ void __cdecl Load_clipMap_t(bool atStreamStart)
         Load_DynEntityPoseArray(1, varclipMap_t->dynEntCount[0]);
     }
     DB_PopStreamPos();
-    DB_PushStreamPos(1u);
+    DB_PushStreamPos(1);
     if (varclipMap_t->dynEntPoseList[1])
     {
         varclipMap_t->dynEntPoseList[1] = (DynEntityPose *)AllocLoad_FxElemVisStateSample();
@@ -4265,7 +4265,7 @@ void __cdecl Load_clipMap_t(bool atStreamStart)
         Load_DynEntityPoseArray(1, varclipMap_t->dynEntCount[1]);
     }
     DB_PopStreamPos();
-    DB_PushStreamPos(1u);
+    DB_PushStreamPos(1);
     if (varclipMap_t->dynEntClientList[0])
     {
         varclipMap_t->dynEntClientList[0] = (DynEntityClient *)AllocLoad_FxElemVisStateSample();
@@ -4273,7 +4273,7 @@ void __cdecl Load_clipMap_t(bool atStreamStart)
         Load_DynEntityClientArray(1, varclipMap_t->dynEntCount[0]);
     }
     DB_PopStreamPos();
-    DB_PushStreamPos(1u);
+    DB_PushStreamPos(1);
     if (varclipMap_t->dynEntClientList[1])
     {
         varclipMap_t->dynEntClientList[1] = (DynEntityClient *)AllocLoad_FxElemVisStateSample();
@@ -4281,7 +4281,7 @@ void __cdecl Load_clipMap_t(bool atStreamStart)
         Load_DynEntityClientArray(1, varclipMap_t->dynEntCount[1]);
     }
     DB_PopStreamPos();
-    DB_PushStreamPos(1u);
+    DB_PushStreamPos(1);
     if (varclipMap_t->dynEntCollList[0])
     {
         varclipMap_t->dynEntCollList[0] = (DynEntityColl *)AllocLoad_FxElemVisStateSample();
@@ -4289,7 +4289,7 @@ void __cdecl Load_clipMap_t(bool atStreamStart)
         Load_DynEntityCollArray(1, varclipMap_t->dynEntCount[0]);
     }
     DB_PopStreamPos();
-    DB_PushStreamPos(1u);
+    DB_PushStreamPos(1);
     if (varclipMap_t->dynEntCollList[1])
     {
         varclipMap_t->dynEntCollList[1] = (DynEntityColl *)AllocLoad_FxElemVisStateSample();
@@ -4407,7 +4407,7 @@ void __cdecl Load_ComPrimaryLightArray(bool atStreamStart, int32_t count)
 void __cdecl Load_ComWorld(bool atStreamStart)
 {
     Load_Stream(atStreamStart, (uint8_t *)varComWorld, 16);
-    DB_PushStreamPos(4u);
+    DB_PushStreamPos(4);
     varXString = &varComWorld->name;
     Load_XString(0);
     if (varComWorld->primaryLights)
@@ -4765,7 +4765,7 @@ void __cdecl Load_itemDef_ptrArray(bool atStreamStart, int32_t count)
 void __cdecl Load_menuDef_t(bool atStreamStart)
 {
     Load_Stream(atStreamStart, (uint8_t *)varmenuDef_t, 284);
-    DB_PushStreamPos(4u);
+    DB_PushStreamPos(4);
     varWindow = &varmenuDef_t->window;
     Load_Window(0);
     varXString = &varmenuDef_t->font;
@@ -4850,7 +4850,7 @@ void __cdecl Load_menuDef_ptrArray(bool atStreamStart, int32_t count)
 void __cdecl Load_MenuList(bool atStreamStart)
 {
     Load_Stream(atStreamStart, (uint8_t *)varMenuList, 12);
-    DB_PushStreamPos(4u);
+    DB_PushStreamPos(4);
     varXString = &varMenuList->name;
     Load_XString(0);
     if (varMenuList->menus)
@@ -5019,7 +5019,7 @@ void __cdecl Mark_MenuListPtr()
 void __cdecl Load_LocalizeEntry(bool atStreamStart)
 {
     Load_Stream(atStreamStart, (uint8_t *)varLocalizeEntry, 8);
-    DB_PushStreamPos(4u);
+    DB_PushStreamPos(4);
     varXString = &varLocalizeEntry->value;
     Load_XString(0);
     varXString = &varLocalizeEntry->name;
@@ -5094,7 +5094,7 @@ void __cdecl Load_FxImpactEntryArray(bool atStreamStart, int32_t count)
 void __cdecl Load_FxImpactTable(bool atStreamStart)
 {
     Load_Stream(atStreamStart, (uint8_t *)varFxImpactTable, 8);
-    DB_PushStreamPos(4u);
+    DB_PushStreamPos(4);
     varXString = &varFxImpactTable->name;
     Load_XString(0);
     if (varFxImpactTable->table)
@@ -5181,7 +5181,7 @@ void __cdecl Mark_FxImpactTablePtr()
 void __cdecl Load_WeaponDef(bool atStreamStart)
 {
     Load_Stream(atStreamStart, (uint8_t *)varWeaponDef, 2168);
-    DB_PushStreamPos(4u);
+    DB_PushStreamPos(4);
     varXString = &varWeaponDef->szInternalName;
     Load_XString(0);
     varXString = &varWeaponDef->szDisplayName;
@@ -5643,7 +5643,7 @@ void __cdecl Mark_WeaponDefPtr()
 void __cdecl Load_RawFile(bool atStreamStart)
 {
     Load_Stream(atStreamStart, (uint8_t *)varRawFile, 12);
-    DB_PushStreamPos(4u);
+    DB_PushStreamPos(4);
     varXString = &varRawFile->name;
     Load_XString(0);
     if (varRawFile->buffer)
@@ -6169,7 +6169,7 @@ void __cdecl Load_GfxLightRegionArray(bool atStreamStart, int32_t count)
 void __cdecl Load_GfxWorldDpvsDynamic(bool atStreamStart)
 {
     Load_Stream(atStreamStart, (uint8_t *)varGfxWorldDpvsDynamic, 48);
-    DB_PushStreamPos(1u);
+    DB_PushStreamPos(1);
     if (varGfxWorldDpvsDynamic->dynEntCellBits[0])
     {
         varGfxWorldDpvsDynamic->dynEntCellBits[0] = (uint32_t *)AllocLoad_FxElemVisStateSample();
@@ -6177,7 +6177,7 @@ void __cdecl Load_GfxWorldDpvsDynamic(bool atStreamStart)
         Load_raw_uintArray(1, varGfxWorld->dpvsPlanes.cellCount * varGfxWorldDpvsDynamic->dynEntClientWordCount[0]);
     }
     DB_PopStreamPos();
-    DB_PushStreamPos(1u);
+    DB_PushStreamPos(1);
     if (varGfxWorldDpvsDynamic->dynEntCellBits[1])
     {
         varGfxWorldDpvsDynamic->dynEntCellBits[1] = (uint32_t *)AllocLoad_FxElemVisStateSample();
@@ -6185,7 +6185,7 @@ void __cdecl Load_GfxWorldDpvsDynamic(bool atStreamStart)
         Load_raw_uintArray(1, varGfxWorld->dpvsPlanes.cellCount * varGfxWorldDpvsDynamic->dynEntClientWordCount[1]);
     }
     DB_PopStreamPos();
-    DB_PushStreamPos(1u);
+    DB_PushStreamPos(1);
     if (varGfxWorldDpvsDynamic->dynEntVisData[0][0])
     {
         varGfxWorldDpvsDynamic->dynEntVisData[0][0] = (uint8_t *)AllocLoad_GfxPackedVertex0();
@@ -6193,7 +6193,7 @@ void __cdecl Load_GfxWorldDpvsDynamic(bool atStreamStart)
         Load_raw_byte16Array(1, 32 * varGfxWorldDpvsDynamic->dynEntClientWordCount[0]);
     }
     DB_PopStreamPos();
-    DB_PushStreamPos(1u);
+    DB_PushStreamPos(1);
     if (varGfxWorldDpvsDynamic->dynEntVisData[1][0])
     {
         varGfxWorldDpvsDynamic->dynEntVisData[1][0] = (uint8_t *)AllocLoad_GfxPackedVertex0();
@@ -6201,7 +6201,7 @@ void __cdecl Load_GfxWorldDpvsDynamic(bool atStreamStart)
         Load_raw_byte16Array(1, 32 * varGfxWorldDpvsDynamic->dynEntClientWordCount[1]);
     }
     DB_PopStreamPos();
-    DB_PushStreamPos(1u);
+    DB_PushStreamPos(1);
     if (varGfxWorldDpvsDynamic->dynEntVisData[0][1])
     {
         varGfxWorldDpvsDynamic->dynEntVisData[0][1] = (uint8_t *)AllocLoad_GfxPackedVertex0();
@@ -6209,7 +6209,7 @@ void __cdecl Load_GfxWorldDpvsDynamic(bool atStreamStart)
         Load_raw_byte16Array(1, 32 * varGfxWorldDpvsDynamic->dynEntClientWordCount[0]);
     }
     DB_PopStreamPos();
-    DB_PushStreamPos(1u);
+    DB_PushStreamPos(1);
     if (varGfxWorldDpvsDynamic->dynEntVisData[1][1])
     {
         varGfxWorldDpvsDynamic->dynEntVisData[1][1] = (uint8_t *)AllocLoad_GfxPackedVertex0();
@@ -6217,7 +6217,7 @@ void __cdecl Load_GfxWorldDpvsDynamic(bool atStreamStart)
         Load_raw_byte16Array(1, 32 * varGfxWorldDpvsDynamic->dynEntClientWordCount[1]);
     }
     DB_PopStreamPos();
-    DB_PushStreamPos(1u);
+    DB_PushStreamPos(1);
     if (varGfxWorldDpvsDynamic->dynEntVisData[0][2])
     {
         varGfxWorldDpvsDynamic->dynEntVisData[0][2] = (uint8_t *)AllocLoad_GfxPackedVertex0();
@@ -6225,7 +6225,7 @@ void __cdecl Load_GfxWorldDpvsDynamic(bool atStreamStart)
         Load_raw_byte16Array(1, 32 * varGfxWorldDpvsDynamic->dynEntClientWordCount[0]);
     }
     DB_PopStreamPos();
-    DB_PushStreamPos(1u);
+    DB_PushStreamPos(1);
     if (varGfxWorldDpvsDynamic->dynEntVisData[1][2])
     {
         varGfxWorldDpvsDynamic->dynEntVisData[1][2] = (uint8_t *)AllocLoad_GfxPackedVertex0();
@@ -6238,7 +6238,7 @@ void __cdecl Load_GfxWorldDpvsDynamic(bool atStreamStart)
 void __cdecl Load_GfxWorldDpvsStatic(bool atStreamStart)
 {
     Load_Stream(atStreamStart, (uint8_t *)varGfxWorldDpvsStatic, 104);
-    DB_PushStreamPos(1u);
+    DB_PushStreamPos(1);
     if (varGfxWorldDpvsStatic->smodelVisData[0])
     {
         varGfxWorldDpvsStatic->smodelVisData[0] = AllocLoad_raw_byte();
@@ -6246,7 +6246,7 @@ void __cdecl Load_GfxWorldDpvsStatic(bool atStreamStart)
         Load_raw_byteArray(1, varGfxWorldDpvsStatic->smodelCount);
     }
     DB_PopStreamPos();
-    DB_PushStreamPos(1u);
+    DB_PushStreamPos(1);
     if (varGfxWorldDpvsStatic->smodelVisData[1])
     {
         varGfxWorldDpvsStatic->smodelVisData[1] = AllocLoad_raw_byte();
@@ -6254,7 +6254,7 @@ void __cdecl Load_GfxWorldDpvsStatic(bool atStreamStart)
         Load_raw_byteArray(1, varGfxWorldDpvsStatic->smodelCount);
     }
     DB_PopStreamPos();
-    DB_PushStreamPos(1u);
+    DB_PushStreamPos(1);
     if (varGfxWorldDpvsStatic->smodelVisData[2])
     {
         varGfxWorldDpvsStatic->smodelVisData[2] = AllocLoad_raw_byte();
@@ -6262,7 +6262,7 @@ void __cdecl Load_GfxWorldDpvsStatic(bool atStreamStart)
         Load_raw_byteArray(1, varGfxWorldDpvsStatic->smodelCount);
     }
     DB_PopStreamPos();
-    DB_PushStreamPos(1u);
+    DB_PushStreamPos(1);
     if (varGfxWorldDpvsStatic->surfaceVisData[0])
     {
         varGfxWorldDpvsStatic->surfaceVisData[0] = AllocLoad_raw_byte();
@@ -6270,7 +6270,7 @@ void __cdecl Load_GfxWorldDpvsStatic(bool atStreamStart)
         Load_raw_byteArray(1, varGfxWorldDpvsStatic->staticSurfaceCount);
     }
     DB_PopStreamPos();
-    DB_PushStreamPos(1u);
+    DB_PushStreamPos(1);
     if (varGfxWorldDpvsStatic->surfaceVisData[1])
     {
         varGfxWorldDpvsStatic->surfaceVisData[1] = AllocLoad_raw_byte();
@@ -6278,7 +6278,7 @@ void __cdecl Load_GfxWorldDpvsStatic(bool atStreamStart)
         Load_raw_byteArray(1, varGfxWorldDpvsStatic->staticSurfaceCount);
     }
     DB_PopStreamPos();
-    DB_PushStreamPos(1u);
+    DB_PushStreamPos(1);
     if (varGfxWorldDpvsStatic->surfaceVisData[2])
     {
         varGfxWorldDpvsStatic->surfaceVisData[2] = AllocLoad_raw_byte();
@@ -6286,7 +6286,7 @@ void __cdecl Load_GfxWorldDpvsStatic(bool atStreamStart)
         Load_raw_byteArray(1, varGfxWorldDpvsStatic->staticSurfaceCount);
     }
     DB_PopStreamPos();
-    DB_PushStreamPos(1u);
+    DB_PushStreamPos(1);
     if (varGfxWorldDpvsStatic->lodData)
     {
         varGfxWorldDpvsStatic->lodData = (uint32_t *)AllocLoad_raw_uint128();
@@ -6324,7 +6324,7 @@ void __cdecl Load_GfxWorldDpvsStatic(bool atStreamStart)
         varGfxStaticModelDrawInst = varGfxWorldDpvsStatic->smodelDrawInsts;
         Load_GfxStaticModelDrawInstArray(1, varGfxWorldDpvsStatic->smodelCount);
     }
-    DB_PushStreamPos(1u);
+    DB_PushStreamPos(1);
     if (varGfxWorldDpvsStatic->surfaceMaterials)
     {
         varGfxWorldDpvsStatic->surfaceMaterials = (GfxDrawSurf *)AllocLoad_FxElemVisStateSample();
@@ -6332,7 +6332,7 @@ void __cdecl Load_GfxWorldDpvsStatic(bool atStreamStart)
         Load_GfxDrawSurfArray(1, varGfxWorldDpvsStatic->staticSurfaceCount);
     }
     DB_PopStreamPos();
-    DB_PushStreamPos(1u);
+    DB_PushStreamPos(1);
     if (varGfxWorldDpvsStatic->surfaceCastsSunShadow)
     {
         varGfxWorldDpvsStatic->surfaceCastsSunShadow = (uint32_t *)AllocLoad_raw_uint128();
@@ -6364,7 +6364,7 @@ void __cdecl Load_GfxWorldDpvsPlanes(bool atStreamStart)
         varushort = varGfxWorldDpvsPlanes->nodes;
         Load_ushortArray(1, varGfxWorld->nodeCount);
     }
-    DB_PushStreamPos(1u);
+    DB_PushStreamPos(1);
     if (varGfxWorldDpvsPlanes->sceneEntCellBits)
     {
         varGfxWorldDpvsPlanes->sceneEntCellBits = (uint32_t *)AllocLoad_FxElemVisStateSample();
@@ -6377,7 +6377,7 @@ void __cdecl Load_GfxWorldDpvsPlanes(bool atStreamStart)
 void __cdecl Load_GfxWorld(bool atStreamStart)
 {
     Load_Stream(atStreamStart, (uint8_t *)varGfxWorld, 732);
-    DB_PushStreamPos(4u);
+    DB_PushStreamPos(4);
     varXString = &varGfxWorld->name;
     Load_XString(0);
     varXString = &varGfxWorld->baseName;
@@ -6415,7 +6415,7 @@ void __cdecl Load_GfxWorld(bool atStreamStart)
         varGfxReflectionProbe = varGfxWorld->reflectionProbes;
         Load_GfxReflectionProbeArray(1, varGfxWorld->reflectionProbeCount);
     }
-    DB_PushStreamPos(1u);
+    DB_PushStreamPos(1);
     if (varGfxWorld->reflectionProbeTextures)
     {
         varGfxWorld->reflectionProbeTextures = (GfxTexture *)AllocLoad_FxElemVisStateSample();
@@ -6439,7 +6439,7 @@ void __cdecl Load_GfxWorld(bool atStreamStart)
     }
     varGfxLightGrid = &varGfxWorld->lightGrid;
     Load_GfxLightGrid(0);
-    DB_PushStreamPos(1u);
+    DB_PushStreamPos(1);
     if (varGfxWorld->lightmapPrimaryTextures)
     {
         varGfxWorld->lightmapPrimaryTextures = (GfxTexture *)AllocLoad_FxElemVisStateSample();
@@ -6447,7 +6447,7 @@ void __cdecl Load_GfxWorld(bool atStreamStart)
         Load_GfxRawTextureArray(1, varGfxWorld->lightmapCount);
     }
     DB_PopStreamPos();
-    DB_PushStreamPos(1u);
+    DB_PushStreamPos(1);
     if (varGfxWorld->lightmapSecondaryTextures)
     {
         varGfxWorld->lightmapSecondaryTextures = (GfxTexture *)AllocLoad_FxElemVisStateSample();
@@ -6475,7 +6475,7 @@ void __cdecl Load_GfxWorld(bool atStreamStart)
     Load_sunflare_t(0);
     varGfxImagePtr = &varGfxWorld->outdoorImage;
     Load_GfxImagePtr(0);
-    DB_PushStreamPos(1u);
+    DB_PushStreamPos(1);
     if (varGfxWorld->cellCasterBits)
     {
         varGfxWorld->cellCasterBits = (uint32_t *)AllocLoad_FxElemVisStateSample();
@@ -6483,7 +6483,7 @@ void __cdecl Load_GfxWorld(bool atStreamStart)
         Load_raw_uintArray(1, varGfxWorld->dpvsPlanes.cellCount * ((varGfxWorld->dpvsPlanes.cellCount + 31) >> 5));
     }
     DB_PopStreamPos();
-    DB_PushStreamPos(1u);
+    DB_PushStreamPos(1);
     if (varGfxWorld->sceneDynModel)
     {
         varGfxWorld->sceneDynModel = (GfxSceneDynModel *)AllocLoad_FxElemVisStateSample();
@@ -6491,7 +6491,7 @@ void __cdecl Load_GfxWorld(bool atStreamStart)
         Load_GfxSceneDynModelArray(1, varGfxWorld->dpvsDyn.dynEntClientCount[0]);
     }
     DB_PopStreamPos();
-    DB_PushStreamPos(1u);
+    DB_PushStreamPos(1);
     if (varGfxWorld->sceneDynBrush)
     {
         varGfxWorld->sceneDynBrush = (GfxSceneDynBrush *)AllocLoad_FxElemVisStateSample();
@@ -6499,7 +6499,7 @@ void __cdecl Load_GfxWorld(bool atStreamStart)
         Load_GfxSceneDynBrushArray(1, varGfxWorld->dpvsDyn.dynEntClientCount[1]);
     }
     DB_PopStreamPos();
-    DB_PushStreamPos(1u);
+    DB_PushStreamPos(1);
     if (varGfxWorld->primaryLightEntityShadowVis)
     {
         varGfxWorld->primaryLightEntityShadowVis = (uint32_t *)AllocLoad_FxElemVisStateSample();
@@ -6507,7 +6507,7 @@ void __cdecl Load_GfxWorld(bool atStreamStart)
         Load_raw_uintArray(1, (varGfxWorld->primaryLightCount - (varGfxWorld->sunPrimaryLightIndex + 1)) << 12);
     }
     DB_PopStreamPos();
-    DB_PushStreamPos(1u);
+    DB_PushStreamPos(1);
     if (varGfxWorld->primaryLightDynEntShadowVis[0])
     {
         varGfxWorld->primaryLightDynEntShadowVis[0] = (uint32_t *)AllocLoad_FxElemVisStateSample();
@@ -6518,7 +6518,7 @@ void __cdecl Load_GfxWorld(bool atStreamStart)
             * (varGfxWorld->primaryLightCount - (varGfxWorld->sunPrimaryLightIndex + 1)));
     }
     DB_PopStreamPos();
-    DB_PushStreamPos(1u);
+    DB_PushStreamPos(1);
     if (varGfxWorld->primaryLightDynEntShadowVis[1])
     {
         varGfxWorld->primaryLightDynEntShadowVis[1] = (uint32_t *)AllocLoad_FxElemVisStateSample();
@@ -6529,7 +6529,7 @@ void __cdecl Load_GfxWorld(bool atStreamStart)
             * (varGfxWorld->primaryLightCount - (varGfxWorld->sunPrimaryLightIndex + 1)));
     }
     DB_PopStreamPos();
-    DB_PushStreamPos(1u);
+    DB_PushStreamPos(1);
     if (varGfxWorld->nonSunPrimaryLightForModelDynEnt)
     {
         varGfxWorld->nonSunPrimaryLightForModelDynEnt = AllocLoad_raw_byte();
@@ -6671,7 +6671,7 @@ void __cdecl Load_GlyphArray(bool atStreamStart, int32_t count)
 void __cdecl Load_Font(bool atStreamStart)
 {
     Load_Stream(atStreamStart, (uint8_t *)varFont, 24);
-    DB_PushStreamPos(4u);
+    DB_PushStreamPos(4);
     varXString = &varFont->fontName;
     Load_XString(0);
     varMaterialHandle = &varFont->material;

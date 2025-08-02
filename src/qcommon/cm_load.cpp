@@ -32,7 +32,7 @@ void CM_InitAllThreadData()
     unsigned int workerIndex; // [esp+0h] [ebp-4h]
 
     CM_InitThreadData(0);
-    CM_InitThreadData(1u);
+    CM_InitThreadData(1);
     for (workerIndex = 0; workerIndex < 2; ++workerIndex)
         CM_InitThreadData(workerIndex + 2);
 }

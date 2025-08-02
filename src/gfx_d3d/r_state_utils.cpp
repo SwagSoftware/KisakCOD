@@ -617,7 +617,7 @@ void __cdecl R_InitCmdBufState(GfxCmdBufState *state)
     R_SetDefaultStateBits(state->refStateBits);
     R_SetCompleteState(device, state->activeStateBits);
     R_SetDefaultAlphaTestFunction(state);
-    forceSamplerState = R_DecodeSamplerState(1u);
+    forceSamplerState = R_DecodeSamplerState(1);
     for (samplerIndex = 0; samplerIndex < 0x10; ++samplerIndex)
     {
         R_HW_ForceSamplerState(state->prim.device, samplerIndex, forceSamplerState);

@@ -1114,7 +1114,7 @@ void __cdecl R_WaitEndTime()
     PROF_SCOPED("MaxFPSSpin");
 
     while ((int)(Sys_Milliseconds() - rg.endTime) < 0)
-        NET_Sleep(1u);
+        NET_Sleep(1);
 }
 
 void __cdecl R_InitScene()

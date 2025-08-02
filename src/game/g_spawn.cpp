@@ -753,7 +753,7 @@ void __cdecl Scr_GetEnt()
     if (Scr_GetNumParam() != 2)
         Scr_Error("illegal call to getent()\n");
     ConstString = Scr_GetConstString(0);
-    String = Scr_GetString(1u);
+    String = Scr_GetString(1);
     Offset = Scr_GetOffset(0, String);
     if (Offset >= 0)
     {
@@ -810,7 +810,7 @@ void __cdecl Scr_GetEntArray()
     if (Scr_GetNumParam())
     {
         ConstString = Scr_GetConstString(0);
-        String = Scr_GetString(1u);
+        String = Scr_GetString(1);
         Offset = Scr_GetOffset(0, String);
         if (Offset >= 0)
         {

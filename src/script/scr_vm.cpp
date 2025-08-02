@@ -365,7 +365,7 @@ int __cdecl Scr_GetStringUsage()
 
 void __cdecl Scr_ShutdownGameStrings()
 {
-    SL_ShutdownSystem(1u);
+    SL_ShutdownSystem(1);
 }
 
 void __cdecl TRACK_scr_vm()

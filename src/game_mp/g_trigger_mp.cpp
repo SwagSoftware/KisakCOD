@@ -140,8 +140,8 @@ void __cdecl SP_trigger_radius(gentity_s *ent)
     {
         if (Scr_GetNumParam() < 5)
             Scr_Error("USAGE: spawn( \"trigger_radius\", <origin>, <spawnflags>, <radius>, <height> )");
-        radius = Scr_GetFloat(3u);
-        height = Scr_GetFloat(4u);
+        radius = Scr_GetFloat(3);
+        height = Scr_GetFloat(4);
     }
     ent->handler = 1;
     ent->r.mins[0] = -radius;

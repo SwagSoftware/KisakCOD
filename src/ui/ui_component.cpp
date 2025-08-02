@@ -526,7 +526,7 @@ void Scr_ScriptWatch::AddElement(Scr_WatchElement_s *element, char *text)
         scrVarPub.evaluate = 0;
         Scr_ExecCode(*(const char**)(scriptExpr.parseData.type + 4), this->localId);
         scrVarPub.evaluate = 1;
-        SL_ShutdownSystem(2u);
+        SL_ShutdownSystem(2);
         Scr_FreeDebugExpr(&scriptExpr);
         Scr_ScriptWatch::Evaluate();
     }

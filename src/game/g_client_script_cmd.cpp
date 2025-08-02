@@ -2182,7 +2182,7 @@ void __cdecl PlayerCmd_SetEQLerp(scr_entref_t entref)
                 SV_GameSendServerCommand(v1, v8);
                 return;
             }
-            Int = Scr_GetInt(1u);
+            Int = Scr_GetInt(1);
             if (Int <= 1)
             {
                 if (Int == 1)
@@ -2229,9 +2229,9 @@ void __cdecl PlayerCmd_SetEQ(scr_entref_t entref)
     if (Scr_GetNumParam() == 7)
     {
         String = Scr_GetString(0);
-        Int = Scr_GetInt(1u);
-        v5 = Scr_GetInt(2u);
-        v6 = Scr_GetString(3u);
+        Int = Scr_GetInt(1);
+        v5 = Scr_GetInt(2);
+        v6 = Scr_GetString(3);
         if (I_stricmp(v6, "lowpass")
             && I_stricmp(v6, "highpass")
             && I_stricmp(v6, "lowshelf")
@@ -2240,9 +2240,9 @@ void __cdecl PlayerCmd_SetEQ(scr_entref_t entref)
             if (I_stricmp(v6, "bell"))
                 Scr_Error("Unknown eq filter type\n");
         }
-        Float = Scr_GetFloat(4u);
-        Scr_GetFloat(5u);
-        v9 = Scr_GetFloat(6u);
+        Float = Scr_GetFloat(4);
+        Scr_GetFloat(5);
+        v9 = Scr_GetFloat(6);
         v8 = va("eq \"%s\" %i %i %i %g %g %g", String, Int, v5, Float, v9);
         SV_GameSendServerCommand(v1, v8);
     }
@@ -2295,7 +2295,7 @@ void __cdecl PlayerCmd_DeactivateEq(scr_entref_t entref)
         v5 = Int;
         if (NumParam == 2)
         {
-            String = Scr_GetString(1u);
+            String = Scr_GetString(1);
             v10 = va("deactivateeq %i \"%s\"", v5, String);
             SV_GameSendServerCommand(v1, v10);
         }
@@ -2303,8 +2303,8 @@ void __cdecl PlayerCmd_DeactivateEq(scr_entref_t entref)
         {
             if (NumParam == 3)
             {
-                v7 = Scr_GetInt(2u);
-                v8 = Scr_GetString(1u);
+                v7 = Scr_GetInt(2);
+                v8 = Scr_GetString(1);
                 v6 = va("deactivateeq %i \"%s\" %i", v5, v8, v7);
             }
             else
@@ -2358,13 +2358,13 @@ void __cdecl PlayerCmd_SetReverb(scr_entref_t entref)
     case 4u:
         goto LABEL_10;
     case 5u:
-        Float = Scr_GetFloat(4u);
+        Float = Scr_GetFloat(4);
     LABEL_10:
-        v5 = Scr_GetFloat(3u);
+        v5 = Scr_GetFloat(3);
     LABEL_11:
-        v4 = Scr_GetFloat(2u);
+        v4 = Scr_GetFloat(2);
     LABEL_12:
-        Scr_GetString(1u);
+        Scr_GetString(1);
         ConstString = Scr_GetConstString(0);
         v7 = 1;
         if (ConstString != scr_const.snd_enveffectsprio_level)
@@ -2422,7 +2422,7 @@ void __cdecl PlayerCmd_DeactivateReverb(scr_entref_t entref)
             Scr_Error("Incorrect number of parameters\n");
             return;
         }
-        Float = Scr_GetFloat(1u);
+        Float = Scr_GetFloat(1);
     }
     ConstString = Scr_GetConstString(0);
     if (ConstString != scr_const.snd_enveffectsprio_level && ConstString != scr_const.snd_enveffectsprio_shellshock)
@@ -2470,9 +2470,9 @@ void __cdecl PlayerCmd_SetChannelVolumes(scr_entref_t entref)
             Scr_Error("Incorrect number of parameters\n");
             return;
         }
-        Float = Scr_GetFloat(2u);
+        Float = Scr_GetFloat(2);
     }
-    String = Scr_GetString(1u);
+    String = Scr_GetString(1);
     G_FindConfigstringIndex(String, 2535, 16, 0, 0);
     ConstString = Scr_GetConstString(0);
     v7 = 2;
@@ -2535,7 +2535,7 @@ void __cdecl PlayerCmd_DeactivateChannelVolumes(scr_entref_t entref)
             Scr_Error("Incorrect number of parameters\n");
             return;
         }
-        Float = Scr_GetFloat(1u);
+        Float = Scr_GetFloat(1);
     }
     ConstString = Scr_GetConstString(0);
     if (ConstString != scr_const.snd_channelvolprio_holdbreath
@@ -2772,9 +2772,9 @@ void __cdecl ScrCmd_PlayLocalSound(scr_entref_t entref)
                 Scr_Error("Sound Error");
                 return;
             }
-            Int = Scr_GetInt(2u);
+            Int = Scr_GetInt(2);
         }
-        ConstString = Scr_GetConstString(1u);
+        ConstString = Scr_GetConstString(1);
         G_RegisterSoundWait(v2, v6, ConstString, Int);
         v10 = va("ls %i %i", v6, v2->s.number);
         SV_GameSendServerCommand(v1, v10);
@@ -2889,7 +2889,7 @@ void __cdecl PlayerCmd_SetWeaponAmmoClip(scr_entref_t entref)
         }
     }
     String = Scr_GetString(0);
-    Int = Scr_GetInt(1u);
+    Int = Scr_GetInt(1);
     WeaponIndexForName = G_GetWeaponIndexForName(String);
     Scr_VerifyWeaponIndex(WeaponIndexForName, String);
     v6 = BG_ClipForWeapon(WeaponIndexForName);
@@ -2948,7 +2948,7 @@ void __cdecl PlayerCmd_SetWeaponAmmoStock(scr_entref_t entref)
     }
     p_ps = &v1->client->ps;
     String = Scr_GetString(0);
-    Int = Scr_GetInt(1u);
+    Int = Scr_GetInt(1);
     WeaponIndexForName = G_GetWeaponIndexForName(String);
     Scr_VerifyWeaponIndex(WeaponIndexForName, String);
     WeaponDef = BG_GetWeaponDef(WeaponIndexForName);
@@ -3163,7 +3163,7 @@ void __cdecl PlayerCmd_SetClientDvar(scr_entref_t entref)
         Scr_ObjectError(v2);
     }
     String = Scr_GetString(0);
-    if (Scr_GetType(1u) == 3)
+    if (Scr_GetType(1) == 3)
     {
         NumParam = Scr_GetNumParam();
         Scr_ConstructMessageString(1, NumParam - 1, "Client Dvar Value", v8, 0x400u);
@@ -3171,7 +3171,7 @@ void __cdecl PlayerCmd_SetClientDvar(scr_entref_t entref)
     }
     else
     {
-        v5 = Scr_GetString(1u);
+        v5 = Scr_GetString(1);
     }
     if (Dvar_IsValidName(String))
     {
@@ -3292,7 +3292,7 @@ void __cdecl PlayerCmd_BeginLocationSelection(scr_entref_t entref)
     }
     else
     {
-        Float = Scr_GetFloat(1u);
+        Float = Scr_GetFloat(1);
         if (Float <= 0.0)
             Scr_ParamError(1u, "Radius of location selector must be greater than zero\n");
         if (level.compassMapWorldSize[1] <= 0.0)
@@ -3607,7 +3607,7 @@ void __cdecl PlayerCmd_SetActionSlot(scr_entref_t entref)
     else
     {
         v4 = Int - 1;
-        String = Scr_GetString(1u);
+        String = Scr_GetString(1);
         if (I_stricmp(String, "weapon"))
         {
             if (I_stricmp(String, "altmode"))
@@ -3631,7 +3631,7 @@ void __cdecl PlayerCmd_SetActionSlot(scr_entref_t entref)
         }
         else
         {
-            v6 = Scr_GetString(2u);
+            v6 = Scr_GetString(2);
             WeaponIndexForName = BG_GetWeaponIndexForName(v6, 0);
             Scr_VerifyWeaponIndex(WeaponIndexForName, v6);
             v1->client->ps.actionSlotType[v4] = ACTIONSLOTTYPE_SPECIFYWEAPON;
@@ -3930,7 +3930,7 @@ void __cdecl PlayerCmd_ForceViewmodelAnimation(scr_entref_t entref)
     String = Scr_GetString(0);
     WeaponIndexForName = G_GetWeaponIndexForName(String);
     Scr_VerifyWeaponIndex(WeaponIndexForName, String);
-    v5 = Scr_GetString(1u);
+    v5 = Scr_GetString(1);
     if (!I_stricmp(v5, "reload"))
     {
         v6 = 7;
@@ -4053,7 +4053,7 @@ void __cdecl PlayerCmd_UploadScore(scr_entref_t entref)
     if (Scr_GetNumParam() == 2)
     {
         Int = Scr_GetInt(0);
-        v5 = Scr_GetInt(1u);
+        v5 = Scr_GetInt(1);
         v6 = va("upscore %i %i", Int, v5);
         SV_GameSendServerCommand(v1, v6);
     }
@@ -4095,7 +4095,7 @@ void __cdecl PlayerCmd_UploadTime(scr_entref_t entref)
     if (Scr_GetNumParam() == 2)
     {
         Int = Scr_GetInt(0);
-        Float = Scr_GetFloat(1u);
+        Float = Scr_GetFloat(1);
         if (Float >= 0.0)
         {
             v6 = va("upscore %i %i", Int, (int)(float)((float)Float * (float)-100.0));

@@ -790,7 +790,7 @@ void __cdecl Scr_CompileTextInternal(const char *text, ScriptExpression_t *scrip
                 Com_PrintError(23, "%s\n", scrVarPub.error_message);
             Scr_ClearErrorMessage();
             scriptExpr->parseData = debugger_node0((debugger_sval_s *)0x54);
-            SL_ShutdownSystem(2u);
+            SL_ShutdownSystem(2);
         }
         else
         {
@@ -806,7 +806,7 @@ void __cdecl Scr_CompileTextInternal(const char *text, ScriptExpression_t *scrip
                 scrVarPub.varUsagePos = varUsagePos;
                 if (scrVarPub.error_message)
                     MyAssertHandler(".\\script\\scr_evaluate.cpp", 2137, 0, "%s", "!scrVarPub.error_message");
-                SL_ShutdownSystem(2u);
+                SL_ShutdownSystem(2);
             }
             else
             {
@@ -821,7 +821,7 @@ void __cdecl Scr_CompileTextInternal(const char *text, ScriptExpression_t *scrip
                     Com_PrintError(23, "%s\n", scrVarPub.error_message);
                     Scr_ClearErrorMessage();
                     scriptExpr->parseData = debugger_node0((debugger_sval_s *)0x55);
-                    SL_ShutdownSystem(2u);
+                    SL_ShutdownSystem(2);
                 }
                 else
                 {

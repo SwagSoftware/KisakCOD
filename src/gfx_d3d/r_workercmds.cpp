@@ -646,7 +646,7 @@ void __cdecl R_AddWorkerCmd(int type, unsigned __int8 *data)
         if (g_cmdOutputBusy[type])
         {
             while (g_cmdOutputBusy[type](data))
-                NET_Sleep(1u);
+                NET_Sleep(1);
         }
     }
 

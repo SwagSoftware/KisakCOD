@@ -261,7 +261,7 @@ int __cdecl CheckForSaveGame(char *mapname, char *filename)
     sv_save_filename[0] = 0;
     if ((unsigned __int8)SaveMemory_IsCommittedSaveAvailable(filename, sv.checksum))
     {
-        SaveHandle = SaveMemory_GetSaveHandle(2u);
+        SaveHandle = SaveMemory_GetSaveHandle(2);
         if (!SaveHandle)
             MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\server\\sv_ccmds.cpp", 406, 0, "%s", "lastCommittedSave");
         Header = SaveMemory_GetHeader(SaveHandle);

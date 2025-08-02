@@ -3020,7 +3020,7 @@ void __cdecl Scr_SetNodePriority()
     if (Scr_GetNumParam() == 2)
     {
         Pathnode = Scr_GetPathnode(0);
-        Int = Scr_GetInt(1u);
+        Int = Scr_GetInt(1);
         v3 = 0;
         v4 = priorityAllowedNodes;
         while (Pathnode->constant.type != v4->type)
@@ -3248,7 +3248,7 @@ void __cdecl Scr_GetNode()
     unsigned int v9; // r3
 
     ConstString = Scr_GetConstString(0);
-    String = Scr_GetString(1u);
+    String = Scr_GetString(1);
     Offset = Scr_GetOffset(2u, String);
     v3 = Offset;
     if (Offset >= 0)
@@ -3307,7 +3307,7 @@ void __cdecl Scr_GetNodeArray()
     unsigned int v8; // r3
 
     ConstString = Scr_GetConstString(0);
-    String = Scr_GetString(1u);
+    String = Scr_GetString(1);
     Offset = Scr_GetOffset(2u, String);
     if (Offset < 0)
     {

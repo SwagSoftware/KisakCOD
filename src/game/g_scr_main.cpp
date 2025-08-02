@@ -802,18 +802,18 @@ void GScr_print3d()
     case 5u:
         goto LABEL_3;
     case 6u:
-        Scr_GetInt(5u);
+        Scr_GetInt(5);
     LABEL_3:
-        Float = Scr_GetFloat(4u);
+        Float = Scr_GetFloat(4);
     LABEL_4:
-        v8 = Scr_GetFloat(3u);
+        v8 = Scr_GetFloat(3);
     LABEL_5:
         Scr_GetVector(2u, v3);
         v5 = v3[0];
         v6 = v3[1];
         v7 = v3[2];
     LABEL_6:
-        String = Scr_GetString(1u);
+        String = Scr_GetString(1);
         Scr_GetVector(0, v4);
         G_AddDebugStringWithDuration(v4, &v5, Float, v2, (int)String);
         break;
@@ -852,11 +852,11 @@ void GScr_line()
     case 5u:
         goto LABEL_3;
     case 6u:
-        Int = Scr_GetInt(5u);
+        Int = Scr_GetInt(5);
     LABEL_3:
-        v1 = Scr_GetInt(4u);
+        v1 = Scr_GetInt(4);
     LABEL_4:
-        Float = Scr_GetFloat(3u);
+        Float = Scr_GetFloat(3);
     LABEL_5:
         Scr_GetVector(2u, v2);
         v5 = v2[0];
@@ -886,7 +886,7 @@ void assertexCmd()
 
     if (!Scr_GetInt(0))
     {
-        String = Scr_GetString(1u);
+        String = Scr_GetString(1);
         v1 = va("assert fail: %s", String);
         Scr_Error(v1);
     }
@@ -1123,7 +1123,7 @@ void GScr_SetDvar()
     char v11[1056]; // [sp+450h] [-420h] BYREF
 
     String = Scr_GetString(0);
-    if (Scr_GetType(1u) == 3)
+    if (Scr_GetType(1) == 3)
     {
         NumParam = Scr_GetNumParam();
         Scr_ConstructMessageString(1, NumParam - 1, "Dvar Value", v11, 0x400u);
@@ -1131,7 +1131,7 @@ void GScr_SetDvar()
     }
     else
     {
-        v2 = (char *)Scr_GetString(1u);
+        v2 = (char *)Scr_GetString(1);
     }
     v3 = v10;
     for (i = 0; i < 1023; ++i)
@@ -1198,7 +1198,7 @@ void GScr_SetSavedDvar()
     char v10[1056]; // [sp+450h] [-420h] BYREF
 
     String = Scr_GetString(0);
-    if (Scr_GetType(1u) == 3)
+    if (Scr_GetType(1) == 3)
     {
         NumParam = Scr_GetNumParam();
         Scr_ConstructMessageString(1, NumParam - 1, "Dvar Value", v10, 0x400u);
@@ -1206,7 +1206,7 @@ void GScr_SetSavedDvar()
     }
     else
     {
-        v2 = (char *)Scr_GetString(1u);
+        v2 = (char *)Scr_GetString(1);
     }
     memset(v9, 0, sizeof(v9));
     for (i = 0; i < 0x2000; ++i)
@@ -1381,7 +1381,7 @@ actor_s *Scr_GetAISpeciesArray()
     }
     else
     {
-        ConstString = Scr_GetConstString(1u);
+        ConstString = Scr_GetConstString(1);
         Species = Scr_GetSpecies(ConstString);
     }
     Scr_MakeArray();
@@ -1479,7 +1479,7 @@ void Scr_GetWeaponModel()
     {
         if (Scr_GetNumParam() == 2)
         {
-            Int = Scr_GetInt(1u);
+            Int = Scr_GetInt(1);
             if (Int > 0xFF || !BG_GetWeaponDef(WeaponIndexForName)->worldModel[Int])
                 Int = 0;
         }
@@ -1618,7 +1618,7 @@ void GScr_Spawn()
     if (Scr_GetNumParam() <= 2)
         Int = 0;
     else
-        Int = Scr_GetInt(2u);
+        Int = Scr_GetInt(2);
     v2 = G_Spawn();
     Scr_SetString(&v2->classname, ConstString);
     v2->r.currentOrigin[0] = v5[0];
@@ -1648,8 +1648,8 @@ void GScr_SpawnVehicle()
     float v6[16]; // [sp+60h] [-40h] BYREF
 
     String = Scr_GetString(0);
-    ConstString = Scr_GetConstString(1u);
-    v2 = Scr_GetConstString(2u);
+    ConstString = Scr_GetConstString(1);
+    v2 = Scr_GetConstString(2);
     Scr_GetVector(3u, v5);
     Scr_GetVector(4u, v6);
     v3 = G_Spawn();
@@ -1676,7 +1676,7 @@ void GScr_SpawnTurret()
 
     ConstString = Scr_GetConstString(0);
     Scr_GetVector(1u, v3);
-    String = Scr_GetString(2u);
+    String = Scr_GetString(2);
     v2 = G_Spawn();
     Scr_SetString(&v2->classname, ConstString);
     v2->r.currentOrigin[0] = v3[0];
@@ -1736,11 +1736,11 @@ void __cdecl ScrCmd_attach(scr_entref_t *entref)
     if (Scr_GetNumParam() < 2)
         ConstLowercaseString = scr_const._;
     else
-        ConstLowercaseString = Scr_GetConstLowercaseString(1u);
+        ConstLowercaseString = Scr_GetConstLowercaseString(1);
     if (Scr_GetNumParam() < 3)
         Int = 0;
     else
-        Int = Scr_GetInt(2u);
+        Int = Scr_GetInt(2);
     if (G_EntDetach(Entity, String, ConstLowercaseString))
     {
         v5 = SL_ConvertToString(ConstLowercaseString);
@@ -1773,7 +1773,7 @@ void __cdecl ScrCmd_detach(scr_entref_t *entref)
     if (Scr_GetNumParam() < 2)
         ConstLowercaseString = scr_const._;
     else
-        ConstLowercaseString = Scr_GetConstLowercaseString(1u);
+        ConstLowercaseString = Scr_GetConstLowercaseString(1);
     if (!G_EntDetach(Entity, String, ConstLowercaseString))
     {
         Com_Printf(23, "Current attachments:\n");
@@ -1905,7 +1905,7 @@ void __cdecl ScrCmd_hidepart(scr_entref_t *entref)
     }
     else
     {
-        String = Scr_GetString(1u);
+        String = Scr_GetString(1);
         if (!DObjGetModelBoneIndex(ServerDObj, String, ConstLowercaseString, v8))
         {
             v7 = SL_ConvertToString(ConstLowercaseString);
@@ -1948,7 +1948,7 @@ void __cdecl ScrCmd_showpart(scr_entref_t *entref)
     }
     else
     {
-        String = Scr_GetString(1u);
+        String = Scr_GetString(1);
         if (!DObjGetModelBoneIndex(ServerDObj, String, ConstLowercaseString, v8))
         {
             v7 = SL_ConvertToString(ConstLowercaseString);
@@ -2013,7 +2013,7 @@ void __cdecl ScrCmd_LinkTo(scr_entref_t *entref)
     ConstLowercaseString = 0;
     if (NumParam < 2)
         goto LABEL_10;
-    ConstLowercaseString = Scr_GetConstLowercaseString(1u);
+    ConstLowercaseString = Scr_GetConstLowercaseString(1);
     if (ConstLowercaseString == scr_const._)
         ConstLowercaseString = 0;
     if (NumParam > 2)
@@ -2304,9 +2304,9 @@ void __cdecl ScrCmd_PlayerLinkToAbsolute(scr_entref_t *entref)
     ConstLowercaseString = 0;
     if ((int)Scr_GetNumParam() > 1)
     {
-        if (Scr_GetType(1u))
+        if (Scr_GetType(1))
         {
-            ConstLowercaseString = Scr_GetConstLowercaseString(1u);
+            ConstLowercaseString = Scr_GetConstLowercaseString(1);
             if (ConstLowercaseString == scr_const._)
                 ConstLowercaseString = 0;
         }
@@ -2418,7 +2418,7 @@ void __cdecl ScrCmd_dospawn(scr_entref_t *entref)
             Int = Scr_GetInt(0);
         ConstString = 0;
         if (Scr_GetNumParam() >= 2)
-            ConstString = Scr_GetConstString(1u);
+            ConstString = Scr_GetConstString(1);
         v11 = SpawnActor(v2, ConstString, CHECK_SPAWN, Int == 0);
         if (v11)
         {
@@ -2472,7 +2472,7 @@ void __cdecl ScrCmd_StalingradSpawn(scr_entref_t *entref)
             Int = Scr_GetInt(0);
         ConstString = 0;
         if (Scr_GetNumParam() >= 2)
-            ConstString = Scr_GetConstString(1u);
+            ConstString = Scr_GetConstString(1);
         v11 = SpawnActor(v2, ConstString, FORCE_SPAWN, Int == 0);
         if (v11)
         {
@@ -2602,13 +2602,13 @@ void __cdecl ScrCmd_ItemWeaponSetAmmo(scr_entref_t *entref)
     Int = Scr_GetInt(0);
     if (Int < 0)
         Scr_ParamError(0, "Ammo count must not be negative");
-    v3 = Scr_GetInt(1u);
+    v3 = Scr_GetInt(1);
     if (v3 < 0)
         Scr_ParamError(1u, "Ammo count must not be negative");
     v4 = 0;
     if (Scr_GetNumParam() > 2)
     {
-        v4 = Scr_GetInt(2u);
+        v4 = Scr_GetInt(2);
         if (v4 >= 2)
         {
             v5 = va("Value out of range.  Allowed values: 0 to %i", 2);
@@ -2665,7 +2665,7 @@ void __cdecl ScrCmd_MagicGrenade(scr_entref_t *entref)
             || Actor_Grenade_CheckGrenadeHintToss(actor, v6, v10, v11))
         {
             if (Scr_GetNumParam() == 3)
-                v3 = (int)(float)(Scr_GetFloat(2u) * (float)1000.0);
+                v3 = (int)(float)(Scr_GetFloat(2) * (float)1000.0);
             else
                 v3 = 5000;
             if (!actor->iGrenadeWeaponIndex)
@@ -2717,7 +2717,7 @@ void __cdecl ScrCmd_MagicGrenadeManual(scr_entref_t *entref)
         v9[1] = v7;
         v9[2] = v8;
         if (Scr_GetNumParam() == 3)
-            v3 = (int)(float)(Scr_GetFloat(2u) * (float)1000.0);
+            v3 = (int)(float)(Scr_GetFloat(2) * (float)1000.0);
         else
             v3 = 5000;
         if (!actor->iGrenadeWeaponIndex)
@@ -2792,7 +2792,7 @@ void __cdecl Scr_BulletTracer()
     v0->s.lerp.u.turret.gunAngles[0] = v2[0];
     v0->s.lerp.u.turret.gunAngles[1] = v2[1];
     v0->s.lerp.u.turret.gunAngles[2] = v2[2];
-    //v1 = Scr_GetNumParam() == 3 && (_cntlzw(Scr_GetInt(2u)) & 0x20) == 0;
+    //v1 = Scr_GetNumParam() == 3 && (_cntlzw(Scr_GetInt(2)) & 0x20) == 0;
     v1 = Scr_GetNumParam() == 3 && Scr_GetInt(2);
     v0->s.eventParm = v1;
 }
@@ -3166,9 +3166,9 @@ void __cdecl ParsePlaySoundCmd(scr_entref_t *entref, int event, int notifyevent)
                 Scr_Error("Sound Error");
                 return;
             }
-            Int = Scr_GetInt(2u);
+            Int = Scr_GetInt(2);
         }
-        ConstString = Scr_GetConstString(1u);
+        ConstString = Scr_GetConstString(1);
     }
     G_PlaySoundAliasWithNotify(Entity, v8, ConstString, Int, event, notifyevent);
 }
@@ -3933,7 +3933,7 @@ void __cdecl GScr_SetConvergenceTime(scr_entref_t *entref)
     v5 = 1;
     if ((int)Scr_GetNumParam() > 1)
     {
-        String = Scr_GetString(1u);
+        String = Scr_GetString(1);
         v7 = "yaw";
         v8 = String;
         do
@@ -4458,10 +4458,10 @@ int Scr_Objective_Add()
     }
     v3 = Int + 11;
     SV_GetConfigstring(Int + 11, v29, 1024);
-    ConstString = Scr_GetConstString(1u);
+    ConstString = Scr_GetConstString(1);
     if (!ObjectiveStateIndexFromString(&v27, ConstString))
     {
-        String = Scr_GetString(1u);
+        String = Scr_GetString(1);
         v6 = va(
             "Illegal objective state \"%s\". Valid states are \"empty\", \"active\", \"invisible\", \"done\", \"current\", \"failed\"\n",
             String);
@@ -4475,9 +4475,9 @@ int Scr_Objective_Add()
     }
     else
     {
-        if (Scr_GetType(2u) == 3)
+        if (Scr_GetType(2) == 3)
         {
-            IString = Scr_GetIString(2u);
+            IString = Scr_GetIString(2);
             v9 = IString;
             v10 = IString;
             while (*(unsigned __int8 *)v10++)
@@ -4499,7 +4499,7 @@ int Scr_Objective_Add()
         }
         else
         {
-            v15 = Scr_GetString(2u);
+            v15 = Scr_GetString(2);
             v9 = v15;
             v16 = v15;
             while (*(unsigned __int8 *)v16++)
@@ -4588,10 +4588,10 @@ int Scr_Objective_State()
     }
     v2 = Int + 11;
     SV_GetConfigstring(v2, v9, 1024);
-    ConstString = Scr_GetConstString(1u);
+    ConstString = Scr_GetConstString(1);
     if (!ObjectiveStateIndexFromString(v8, ConstString))
     {
-        String = Scr_GetString(1u);
+        String = Scr_GetString(1);
         v5 = va(
             "Illegal objective state \"%s\". Valid states are \"empty\", \"active\", \"invisible\", \"done\", \"current\", \"failed\"\n",
             String);
@@ -4766,7 +4766,7 @@ void Scr_Objective_AdditionalPosition()
         v1 = va("index %i is an illegal objective index. Valid indexes are 0 to %i\n", Int, 15);
         Scr_Error(v1);
     }
-    v2 = Scr_GetInt(1u);
+    v2 = Scr_GetInt(1);
     if (v2 >= 8)
     {
         v3 = va("index %i is an illegal position index. Valid indexes are 0 to %i\n", v2, 7);
@@ -4982,10 +4982,10 @@ void Scr_BulletTrace()
     v1 = 42002481;
     Scr_GetVector(0, &v7);
     Scr_GetVector(1u, &v10);
-    if (!Scr_GetInt(2u))
+    if (!Scr_GetInt(2))
         v1 = 8398897;
-    if (Scr_GetType(3u) == 1 && Scr_GetPointerType(3u) == 20)
-        number = Scr_GetEntity(3u)->s.number;
+    if (Scr_GetType(3) == 1 && Scr_GetPointerType(3) == 20)
+        number = Scr_GetEntity(3)->s.number;
     G_LocationalTrace(&v15, &v7, &v10, number, v1, 0);
     Scr_MakeArray();
     Scr_AddFloat(v15.fraction);
@@ -5037,10 +5037,10 @@ void Scr_BulletTracePassed()
     v1 = 42002481;
     Scr_GetVector(0, v4);
     Scr_GetVector(1u, v3);
-    if (!Scr_GetInt(2u))
+    if (!Scr_GetInt(2))
         v1 = 8398897;
-    if (Scr_GetType(3u) == 1 && Scr_GetPointerType(3u) == 20)
-        number = Scr_GetEntity(3u)->s.number;
+    if (Scr_GetType(3) == 1 && Scr_GetPointerType(3) == 20)
+        number = Scr_GetEntity(3)->s.number;
     v2 = G_LocationalTracePassed(v4, v3, number, 2175, v1, 0);
     Scr_AddBool(v2);
 }
@@ -5057,10 +5057,10 @@ void __cdecl Scr_SightTracePassed()
     v1 = 41998339;
     Scr_GetVector(0, v4);
     Scr_GetVector(1u, v3);
-    if (!Scr_GetInt(2u))
+    if (!Scr_GetInt(2))
         v1 = 8394755;
-    if (Scr_GetType(3u) == 1 && Scr_GetPointerType(3u) == 20)
-        number = Scr_GetEntity(3u)->s.number;
+    if (Scr_GetType(3) == 1 && Scr_GetPointerType(3) == 20)
+        number = Scr_GetEntity(3)->s.number;
     G_SightTrace(v2, v4, v3, number, v1);
     if (!v2[0])
         v2[0] = SV_FX_GetVisibility(v4, v3) < 0.2;
@@ -5139,7 +5139,7 @@ void Scr_RandomIntRange()
     int v3; // r3
 
     Int = Scr_GetInt(0);
-    v1 = Scr_GetInt(1u);
+    v1 = Scr_GetInt(1);
     v2 = v1;
     if (v1 <= Int)
     {
@@ -5157,7 +5157,7 @@ void Scr_RandomFloatRange()
     double v2; // fp1
 
     Float = Scr_GetFloat(0);
-    v1 = Scr_GetFloat(1u);
+    v1 = Scr_GetFloat(1);
     if (v1 <= Float)
     {
         Com_Printf(23, (const char *)HIDWORD(Float), LODWORD(Float), LODWORD(v1));
@@ -5302,7 +5302,7 @@ void GScr_min()
 {
     double Float; // fp31
 
-    Float = Scr_GetFloat(1u);
+    Float = Scr_GetFloat(1);
     _FP0 = (float)((float)Float - Scr_GetFloat(0));
     __asm { fsel      f1, f0, f1, f31# value }
     Scr_AddFloat(_FP1);
@@ -5312,7 +5312,7 @@ void GScr_max()
 {
     double Float; // fp31
 
-    Float = Scr_GetFloat(1u);
+    Float = Scr_GetFloat(1);
     _FP0 = (float)(Scr_GetFloat(0) - (float)Float);
     __asm { fsel      f1, f0, f1, f31# value }
     Scr_AddFloat(_FP1);
@@ -5601,7 +5601,7 @@ void Scr_VectorLerp()
         Scr_Error("wrong number of arguments to vectorlerp");
     Scr_GetVector(0, &v1);
     Scr_GetVector(1u, v4);
-    Float = Scr_GetFloat(2u);
+    Float = Scr_GetFloat(2);
     v5[0] = (float)((float)(v4[0] - v1) * (float)Float) + v1;
     v5[1] = (float)((float)(v4[1] - v2) * (float)Float) + v2;
     v5[2] = (float)((float)(v4[2] - v3) * (float)Float) + v3;
@@ -5664,7 +5664,7 @@ void Scr_IsSubStr()
     const char *v1; // r3
     char *v2; // r3
 
-    String = Scr_GetString(1u);
+    String = Scr_GetString(1);
     v1 = Scr_GetString(0);
     v2 = strstr(v1, String);
     Scr_AddBool(v2 != 0);
@@ -5680,11 +5680,11 @@ void Scr_GetSubStr()
     char v5[1088]; // [sp+50h] [-440h] BYREF
 
     String = Scr_GetString(0);
-    Int = Scr_GetInt(1u);
+    Int = Scr_GetInt(1);
     if (Scr_GetNumParam() < 3)
         v2 = 0x7FFFFFFF;
     else
-        v2 = Scr_GetInt(2u);
+        v2 = Scr_GetInt(2);
     v3 = 0;
     if (Int < v2)
     {
@@ -5745,7 +5745,7 @@ void Scr_StrTok()
     char v11[1104]; // [sp+50h] [-450h] BYREF
 
     ConstString = Scr_GetConstString(0);
-    v1 = Scr_GetConstString(1u);
+    v1 = Scr_GetConstString(1);
     v2 = SL_ConvertToString(ConstString);
     v3 = SL_ConvertToString(v1);
     SL_AddRefToString(ConstString);
@@ -5810,7 +5810,7 @@ void Scr_SetBlur()
     const char *v2; // r3
 
     Float = Scr_GetFloat(0);
-    v1 = Scr_GetFloat(1u);
+    v1 = Scr_GetFloat(1);
     if (v1 < 0.0)
         Scr_ParamError(1u, "Time must be positive");
     if (Float < 0.0)
@@ -5828,7 +5828,7 @@ void Scr_MusicPlay()
     const char *v4; // r3
     const char *v5; // r3
 
-    if (!chaplinCheat->current.enabled || Scr_GetNumParam() >= 3 && Scr_GetInt(2u))
+    if (!chaplinCheat->current.enabled || Scr_GetNumParam() >= 3 && Scr_GetInt(2))
     {
         Int = 1;
         NumParam = Scr_GetNumParam();
@@ -5840,7 +5840,7 @@ void Scr_MusicPlay()
                 Scr_Error(v5);
                 return;
             }
-            Int = Scr_GetInt(1u);
+            Int = Scr_GetInt(1);
         }
         String = Scr_GetString(0);
         if (!Com_FindSoundAlias(String))
@@ -5863,7 +5863,7 @@ void Scr_MusicStop()
     const char *v5; // r3
     const char *v6; // r3
 
-    if (!chaplinCheat->current.enabled || Scr_GetNumParam() >= 2 && Scr_GetInt(1u))
+    if (!chaplinCheat->current.enabled || Scr_GetNumParam() >= 2 && Scr_GetInt(1))
     {
         NumParam = Scr_GetNumParam();
         if (NumParam)
@@ -5899,7 +5899,7 @@ void Scr_SoundFade()
 
     Float = Scr_GetFloat(0);
     if (Scr_GetNumParam() > 1)
-        Scr_GetFloat(1u);
+        Scr_GetFloat(1);
     v1 = va("snd_fade %f %i\n", Float, LODWORD(Float));
     SV_GameSendServerCommand(-1, v1);
 }
@@ -5933,7 +5933,7 @@ void Scr_Amplify()
             Scr_Error(v1);
             return;
         }
-        Float = Scr_GetFloat(5u);
+        Float = Scr_GetFloat(5);
         if (Float < 0.0)
         {
             v3 = va("amplify: falloff parameter must be >= 0: %f\n", Float);
@@ -5941,27 +5941,27 @@ void Scr_Amplify()
         }
     }
     Scr_GetVector(0, v16);
-    Int = Scr_GetInt(1u);
+    Int = Scr_GetInt(1);
     v5 = Int;
     if (Int < 0)
     {
         v6 = va("amplify: min_range parameter must be >= 0: %i\n", Int);
         Scr_ParamError(1u, v6);
     }
-    v7 = Scr_GetInt(2u);
+    v7 = Scr_GetInt(2);
     if (v7 < v5)
     {
         v8 = va("amplify: max_range parameter must be >= min_range: %i >= %i\n", v7, v5);
         Scr_ParamError(2u, v8);
     }
-    v9 = Scr_GetFloat(3u);
+    v9 = Scr_GetFloat(3);
     v10 = v9;
     if (v9 < 0.0)
     {
         v11 = va("amplify: min_vol parameter must be >= 0: %f\n", v9);
         Scr_ParamError(3u, v11);
     }
-    v12 = Scr_GetFloat(4u);
+    v12 = Scr_GetFloat(4);
     v13 = v12;
     if (v12 < v10)
     {
@@ -6168,7 +6168,7 @@ void Scr_AmbientPlay()
             Scr_Error(v2);
             return;
         }
-        *(double *)&v3 = (float)((float)(Scr_GetFloat(1u) * (float)1000.0) + (float)0.5);
+        *(double *)&v3 = (float)((float)(Scr_GetFloat(1) * (float)1000.0) + (float)0.5);
         v4 = floor(v3);
         v0 = (int)(float)*(double *)&v4;
     }
@@ -6275,12 +6275,12 @@ void Scr_SaveGame()
         v3 = "auto";
     NumParam = Scr_GetNumParam();
     if (NumParam > 1)
-        IString = Scr_GetIString(1u);
+        IString = Scr_GetIString(1);
     if (NumParam <= 2)
         v7 = "$default";
     else
-        v7 = Scr_GetString(2u);
-    v8 = NumParam > 3 && Scr_GetInt(3u) != 0;
+        v7 = Scr_GetString(2);
+    v8 = NumParam > 3 && Scr_GetInt(3) != 0;
     if (I_stricmp(v3, "levelstart"))
         Com_sprintf(v10, 64, "autosave\\%s-%s", String, v3);
     else
@@ -6333,12 +6333,12 @@ void Scr_SaveGameNoCommit()
         v3 = "auto";
     NumParam = Scr_GetNumParam();
     if (NumParam > 1)
-        IString = Scr_GetIString(1u);
+        IString = Scr_GetIString(1);
     if (NumParam <= 2)
         v7 = "$default";
     else
-        v7 = Scr_GetString(2u);
-    v8 = NumParam > 3 && Scr_GetInt(3u) != 0;
+        v7 = Scr_GetString(2);
+    v8 = NumParam > 3 && Scr_GetInt(3) != 0;
     if (I_stricmp(v3, "levelstart"))
         Com_sprintf(v11, 64, "autosave\\%s-%s", String, v3);
     else
@@ -6470,19 +6470,19 @@ void __cdecl GScr_RadiusDamageInternal(gentity_s *inflictor)
     float v34[4]; // [sp+70h] [-50h] BYREF
 
     Scr_GetVector(0, v34);
-    Float = Scr_GetFloat(1u);
-    v3 = Scr_GetFloat(2u);
-    v4 = Scr_GetFloat(3u);
+    Float = Scr_GetFloat(1);
+    v3 = Scr_GetFloat(2);
+    v4 = Scr_GetFloat(3);
     Entity = &g_entities[2174];
-    if (Scr_GetNumParam() > 4 && Scr_GetType(4u))
-        Entity = Scr_GetEntity(4u);
+    if (Scr_GetNumParam() > 4 && Scr_GetType(4))
+        Entity = Scr_GetEntity(4);
     v6 = 14;
-    if (Scr_GetNumParam() > 5 && Scr_GetType(5u))
-        v6 = G_MeansOfDeathFromScriptParam(5u);
+    if (Scr_GetNumParam() > 5 && Scr_GetType(5))
+        v6 = G_MeansOfDeathFromScriptParam(5);
     WeaponIndexForName = -1;
-    if (Scr_GetNumParam() > 6 && Scr_GetType(6u))
+    if (Scr_GetNumParam() > 6 && Scr_GetType(6))
     {
-        String = Scr_GetString(6u);
+        String = Scr_GetString(6);
         WeaponIndexForName = G_GetWeaponIndexForName(String);
     }
     level.bPlayerIgnoreRadiusDamage = level.bPlayerIgnoreRadiusDamageLatched;
@@ -6606,7 +6606,7 @@ void __cdecl GScr_DamageConeTraceInternal(scr_entref_t *entref, int contentMask)
     Entity = GetEntity(entref);
     v4 = 0;
     if (Scr_GetNumParam())
-        v4 = Scr_GetEntity(1u);
+        v4 = Scr_GetEntity(1);
     Scr_GetVector(0, v27);
     if (G_CanRadiusDamageFromPos(
         Entity,
@@ -6681,13 +6681,13 @@ void GScr_ChangeLevel()
         {
             if (NumParam != 2)
             {
-                *(double *)&v2 = (float)((float)(Scr_GetFloat(2u) * (float)1000.0) + (float)0.5);
+                *(double *)&v2 = (float)((float)(Scr_GetFloat(2) * (float)1000.0) + (float)0.5);
                 v3 = floor(v2);
                 level.exitTime = (int)(float)*(double *)&v3;
                 if ((int)(float)*(double *)&v3 < 0)
                     Scr_ParamError(1u, "exitTime cannot be negative");
             }
-            level.savepersist = Scr_GetInt(1u);
+            level.savepersist = Scr_GetInt(1);
         }
         String = Scr_GetString(0);
         if (Scr_GetNumParam() > 2 && g_changelevel_time->current.value > 0.0)
@@ -6772,7 +6772,7 @@ void __cdecl GScr_SetMissionDvar()
         type = Var->type;
         if (type == 5)
         {
-            Int = Scr_GetInt(1u);
+            Int = Scr_GetInt(1);
             Dvar_SetIntByName(String, Int);
             VariantString = Dvar_GetVariantString(String);
             Com_Printf(16, " * SetMissionDvar(): \"%s\" set to \"%s\".\n", String, VariantString);
@@ -6786,7 +6786,7 @@ void __cdecl GScr_SetMissionDvar()
         if (!*++v1)
             goto LABEL_12;
     }
-    v12 = Scr_GetString(1u);
+    v12 = Scr_GetString(1);
     Dvar_SetStringByName(String, v12);
     v13 = Dvar_GetVariantString(String);
     Com_Printf(16, " * SetMissionDvar(): \"%s\" set to \"%s\".\n", String, v13);
@@ -6804,7 +6804,7 @@ void GScr_Cinematic()
     {
         if (Scr_GetNumParam() != 1)
         {
-            *(double *)&v0 = (float)((float)(Scr_GetFloat(1u) * (float)1000.0) + (float)0.5);
+            *(double *)&v0 = (float)((float)(Scr_GetFloat(1) * (float)1000.0) + (float)0.5);
             v1 = floor(v0);
             level.exitTime = (int)(float)*(double *)&v1;
             if ((int)(float)*(double *)&v1 < 0)
@@ -6892,11 +6892,11 @@ void GScr_Earthquake()
     float v6[4]; // [sp+58h] [-38h] BYREF
 
     Float = Scr_GetFloat(0);
-    *(double *)&v1 = (float)((float)(Scr_GetFloat(1u) * (float)1000.0) + (float)0.5);
+    *(double *)&v1 = (float)((float)(Scr_GetFloat(1) * (float)1000.0) + (float)0.5);
     v2 = floor(v1);
     v5 = (int)(float)*(double *)&v2;
     Scr_GetVector(2u, v6);
-    v3 = Scr_GetFloat(3u);
+    v3 = Scr_GetFloat(3);
     if (Float <= 0.0)
         Scr_ParamError(0, "Scale must be greater than 0");
     if (v5 <= 0)
@@ -7209,12 +7209,12 @@ void GScr_GetMoveDelta()
     {
         if (NumParam != 2)
         {
-            Float = Scr_GetFloat(2u);
+            Float = Scr_GetFloat(2);
             v1 = Float;
             if (Float < 0.0 || Float > 1.0)
                 Scr_ParamError(2u, "end time must be between 0 and 1");
         }
-        v5 = Scr_GetFloat(1u);
+        v5 = Scr_GetFloat(1);
         v0 = v5;
         if (v5 < 0.0 || v5 > 1.0)
             Scr_ParamError(1u, "start time must be between 0 and 1");
@@ -7246,12 +7246,12 @@ void GScr_GetAngleDelta()
     {
         if (NumParam != 2)
         {
-            Float = Scr_GetFloat(2u);
+            Float = Scr_GetFloat(2);
             v1 = Float;
             if (Float < 0.0 || Float > 1.0)
                 Scr_ParamError(2u, "end time must be between 0 and 1");
         }
-        v5 = Scr_GetFloat(1u);
+        v5 = Scr_GetFloat(1);
         v0 = v5;
         if (v5 < 0.0 || v5 > 1.0)
             Scr_ParamError(1u, "start time must be between 0 and 1");
@@ -7486,10 +7486,10 @@ void Scr_PlayFXOnTag()
         v2 = va("effect id %i is invalid\n", Int);
         Scr_ParamError(0, v2);
     }
-    Entity = Scr_GetEntity(1u);
+    Entity = Scr_GetEntity(1);
     if (!Entity->model)
         Scr_ParamError(1u, "cannot play fx on entity with no model");
-    ConstLowercaseString = Scr_GetConstLowercaseString(2u);
+    ConstLowercaseString = Scr_GetConstLowercaseString(2);
     v5 = SL_ConvertToString(ConstLowercaseString);
     if (strchr(v5, 34))
         Scr_ParamError(2u, "cannot use \" characters in tag names\n");
@@ -7576,10 +7576,10 @@ void Scr_PlayLoopedFX()
             Scr_FxParamError(4u, "playLoopedFx called with (0 0 0) forward direction", Int);
         ++v0;
     }
-    Float = Scr_GetFloat(3u);
+    Float = Scr_GetFloat(3);
 LABEL_13:
     Scr_GetVector(2u, v18);
-    *(double *)&v14 = (float)((float)(Scr_GetFloat(1u) * (float)1000.0) + (float)0.5);
+    *(double *)&v14 = (float)((float)(Scr_GetFloat(1) * (float)1000.0) + (float)0.5);
     v15 = floor(v14);
     v16 = (int)(float)*(double *)&v15;
     if (v16 <= 0)
@@ -7698,7 +7698,7 @@ void Scr_TriggerFX()
         Scr_ParamError(0, "entity wasn't created with 'newFx'");
     if (Scr_GetNumParam() == 2)
     {
-        *(double *)&v1 = (float)((float)(Scr_GetFloat(1u) * (float)1000.0) + (float)0.5);
+        *(double *)&v1 = (float)((float)(Scr_GetFloat(1) * (float)1000.0) + (float)0.5);
         v2 = floor(v1);
         Entity->s.time2 = (int)(float)*(double *)&v2;
     }
@@ -7731,15 +7731,15 @@ void Scr_PhysicsExplosionSphere()
         Scr_Error("Incorrect number of parameters");
     Scr_GetVector(0, v3);
     v0 = G_TempEntity(v3, 61);
-    v0->s.eventParm = Scr_GetInt(1u);
-    Float = Scr_GetFloat(2u);
+    v0->s.eventParm = Scr_GetInt(1);
+    Float = Scr_GetFloat(2);
     v0->s.lerp.u.turret.gunAngles[0] = Float;
     if (Float < 0.0)
         Scr_ParamError(2u, "Radius is negative");
     LODWORD(v1) = v0->s.eventParm;
     if (v0->s.lerp.u.turret.gunAngles[0] > (double)(float)v1)
         Scr_Error("Inner radius is outside the outer radius");
-    v0->s.lerp.u.turret.gunAngles[1] = Scr_GetFloat(3u);
+    v0->s.lerp.u.turret.gunAngles[1] = Scr_GetFloat(3);
 }
 
 void Scr_PhysicsRadiusJolt()
@@ -7754,8 +7754,8 @@ void Scr_PhysicsRadiusJolt()
         Scr_Error("Incorrect number of parameters");
     Scr_GetVector(0, v4);
     v0 = G_TempEntity(v4, 63);
-    v0->s.eventParm = Scr_GetInt(1u);
-    Float = Scr_GetFloat(2u);
+    v0->s.eventParm = Scr_GetInt(1);
+    Float = Scr_GetFloat(2);
     v0->s.lerp.u.turret.gunAngles[0] = Float;
     if (Float < 0.0)
         Scr_ParamError(2u, "Radius is negative");
@@ -7781,16 +7781,16 @@ void Scr_PhysicsRadiusJitter()
         Scr_Error("Incorrect number of parameters");
     Scr_GetVector(0, v5);
     v0 = G_TempEntity(v5, 64);
-    v0->s.eventParm = Scr_GetInt(1u);
-    Float = Scr_GetFloat(2u);
+    v0->s.eventParm = Scr_GetInt(1);
+    Float = Scr_GetFloat(2);
     v0->s.lerp.u.turret.gunAngles[0] = Float;
     if (Float < 0.0)
         Scr_ParamError(2u, "Radius is negative");
     LODWORD(v1) = v0->s.eventParm;
     if (v0->s.lerp.u.turret.gunAngles[0] > (double)(float)v1)
         Scr_Error("Inner radius is outside the outer radius");
-    v0->s.lerp.u.turret.gunAngles[1] = Scr_GetFloat(3u);
-    v3 = Scr_GetFloat(4u);
+    v0->s.lerp.u.turret.gunAngles[1] = Scr_GetFloat(3);
+    v3 = Scr_GetFloat(4);
     v4 = v0->s.lerp.u.turret.gunAngles[1];
     v0->s.lerp.u.turret.gunAngles[2] = v3;
     if (v4 > v3)
@@ -7808,15 +7808,15 @@ void Scr_PhysicsExplosionCylinder()
         Scr_Error("Incorrect number of parameters");
     Scr_GetVector(0, v3);
     v0 = G_TempEntity(v3, 62);
-    v0->s.eventParm = Scr_GetInt(1u);
-    Float = Scr_GetFloat(2u);
+    v0->s.eventParm = Scr_GetInt(1);
+    Float = Scr_GetFloat(2);
     v0->s.lerp.u.turret.gunAngles[0] = Float;
     if (Float < 0.0)
         Scr_ParamError(2u, "Radius is negative");
     LODWORD(v1) = v0->s.eventParm;
     if (v0->s.lerp.u.turret.gunAngles[0] > (double)(float)v1)
         Scr_Error("Inner radius is outside the outer radius");
-    v0->s.lerp.u.turret.gunAngles[1] = Scr_GetFloat(3u);
+    v0->s.lerp.u.turret.gunAngles[1] = Scr_GetFloat(3);
 }
 
 void __cdecl Scr_SetFog(const char *cmd, double start, double density, double r, double g, double b, double time)
@@ -7872,14 +7872,14 @@ void Scr_SetExponentialFog()
     Float = Scr_GetFloat(0);
     if (Float < 0.0)
         Scr_Error("setExpFog: startDist must be greater or equal to 0");
-    v1 = Scr_GetFloat(1u);
+    v1 = Scr_GetFloat(1);
     if (v1 <= 0.0)
         Scr_Error("setExpFog: halfwayDist must be greater than 0");
     v2 = (float)((float)0.69314718 / (float)v1);
-    v3 = Scr_GetFloat(2u);
-    v4 = Scr_GetFloat(3u);
-    v5 = Scr_GetFloat(4u);
-    v6 = Scr_GetFloat(5u);
+    v3 = Scr_GetFloat(2);
+    v4 = Scr_GetFloat(3);
+    v5 = Scr_GetFloat(4);
+    v6 = Scr_GetFloat(5);
     Dvar_SetColor(g_fogColorReadOnly, v3, v4, v5, 1.0);
     Dvar_SetFloat(g_fogStartDistReadOnly, Float);
     Dvar_SetFloat(g_fogHalfDistReadOnly, v1);
@@ -7912,7 +7912,7 @@ void Scr_VisionSetNaked()
             Scr_Error("USAGE: VisionSetNaked( <visionset name>, <transition time> )\n");
             return;
         }
-        *(double *)&v1 = (float)((float)(Scr_GetFloat(1u) * (float)1000.0) + (float)0.5);
+        *(double *)&v1 = (float)((float)(Scr_GetFloat(1) * (float)1000.0) + (float)0.5);
         v2 = floor(v1);
         v5 = (int)(float)*(double *)&v2;
     }
@@ -7939,7 +7939,7 @@ void Scr_VisionSetNight()
             Scr_Error("USAGE: VisionSetNight( <visionset name>, <transition time> )\n");
             return;
         }
-        *(double *)&v1 = (float)((float)(Scr_GetFloat(1u) * (float)1000.0) + (float)0.5);
+        *(double *)&v1 = (float)((float)(Scr_GetFloat(1) * (float)1000.0) + (float)0.5);
         v2 = floor(v1);
         v5 = (int)(float)*(double *)&v2;
     }
@@ -7982,8 +7982,8 @@ void Scr_SetSunLight()
 
     if (Scr_GetNumParam() != 3)
         Scr_Error("Incorrect number of parameters\n");
-    Float = Scr_GetFloat(2u);
-    v1 = Scr_GetFloat(1u);
+    Float = Scr_GetFloat(2);
+    v1 = Scr_GetFloat(1);
     v3 = Scr_GetFloat(0);
     v2 = va((const char *)HIDWORD(v3), HIDWORD(v1), Float);
     SV_SetConfigstring(7, v2);
@@ -8046,7 +8046,7 @@ void Scr_LerpSunDirection()
         Scr_Error("Incorrect number of parameters\n");
     Scr_GetVector(0, &v10);
     Scr_GetVector(1u, &v7);
-    Float = Scr_GetFloat(2u);
+    Float = Scr_GetFloat(2);
     _FP5 = -sqrtf((float)((float)(v12 * v12) + (float)((float)(v10 * v10) + (float)(v11 * v11))));
     _FP4 = -sqrtf((float)((float)(v9 * v9) + (float)((float)(v7 * v7) + (float)(v8 * v8))));
     __asm
@@ -8121,12 +8121,12 @@ void Scr_BadPlace_Cylinder()
             ConstString = Scr_GetConstString(0);
         else
             ConstString = 0;
-        *(double *)&v1 = (float)(Scr_GetFloat(1u) * (float)1000.0);
+        *(double *)&v1 = (float)(Scr_GetFloat(1) * (float)1000.0);
         v2 = ceil(v1);
         v7 = (int)(float)*(double *)&v2;
         Scr_GetVector(2u, v8.origin);
-        v8.radius = Scr_GetFloat(3u);
-        Float = Scr_GetFloat(4u);
+        v8.radius = Scr_GetFloat(3);
+        Float = Scr_GetFloat(4);
         v8.angle0 = 0.0;
         v8.angle1 = 360.0;
         v8.halfheight = (float)Float * (float)0.5;
@@ -8162,18 +8162,18 @@ void Scr_BadPlace_Arc()
             ConstString = Scr_GetConstString(0);
         else
             ConstString = 0;
-        *(double *)&v1 = (float)(Scr_GetFloat(1u) * (float)1000.0);
+        *(double *)&v1 = (float)(Scr_GetFloat(1) * (float)1000.0);
         v2 = ceil(v1);
         v9 = (int)(float)*(double *)&v2;
         Scr_GetVector(2u, v11.origin);
-        v11.radius = Scr_GetFloat(3u);
-        v11.halfheight = Scr_GetFloat(4u) * (float)0.5;
+        v11.radius = Scr_GetFloat(3);
+        v11.halfheight = Scr_GetFloat(4) * (float)0.5;
         Scr_GetVector(5u, v10);
         v3 = vectoyaw(v10);
-        v11.angle0 = (float)v3 - Scr_GetFloat(6u);
+        v11.angle0 = (float)v3 - Scr_GetFloat(6);
         if (v11.angle0 > v3)
             Scr_Error("left angle < 0 in badplace_arc\n");
-        Float = Scr_GetFloat(7u);
+        Float = Scr_GetFloat(7);
         angle1 = (float)((float)Float + (float)v3);
         v11.angle1 = (float)Float + (float)v3;
         if (angle1 < v3)
@@ -8217,10 +8217,10 @@ void Scr_BadPlace_Brush()
             ConstString = Scr_GetConstString(0);
         else
             ConstString = 0;
-        *(double *)&v1 = (float)(Scr_GetFloat(1u) * (float)1000.0);
+        *(double *)&v1 = (float)(Scr_GetFloat(1) * (float)1000.0);
         v2 = ceil(v1);
         v5 = (int)(float)*(double *)&v2;
-        Entity = Scr_GetEntity(2u);
+        Entity = Scr_GetEntity(2);
         TeamFlags = Scr_GetTeamFlags(3u, "badplace_brush");
         if (!TeamFlags)
             TeamFlags = 14;
@@ -8265,7 +8265,7 @@ void __cdecl GScr_GetPartName()
         Scr_Error("Incorrect usage for getpartname()");
     String = Scr_GetString(0);
     v1 = SV_XModelGet(String);
-    Int = Scr_GetInt(1u);
+    Int = Scr_GetInt(1);
     v3 = XModelNumBones(v1);
     if (Int >= v3)
     {
@@ -8354,7 +8354,7 @@ void __cdecl Scr_AnimRelative(scr_entref_t *entref)
     v5 = 0;
     if (Scr_GetNumParam() > 4)
     {
-        ConstString = Scr_GetConstString(4u);
+        ConstString = Scr_GetConstString(4);
         v5 = ConstString;
         if (ConstString != scr_const.normal && ConstString != scr_const.deathplant)
         {
@@ -8461,7 +8461,7 @@ void __cdecl GScr_ClearAnim(scr_entref_t *entref)
     Entity = GetEntity(entref);
     EntAnimTree = GScr_GetEntAnimTree(Entity);
     v4 = (unsigned int)Scr_GetAnim(0, (unsigned int)EntAnimTree, v3) >> 16;
-    Float = Scr_GetFloat(1u);
+    Float = Scr_GetFloat(1);
     v6 = Float;
     if (g_dumpAnimsCommands->current.integer == Entity->s.number)
         DumpAnimCommand("ClearAnim", EntAnimTree, v4, -1, 0.0, Float, 1.0);
@@ -8522,15 +8522,15 @@ void __cdecl GScr_SetAnimKnobInternal(scr_entref_t *entref, unsigned int flags)
     default:
         Scr_Error("too many parameters");
     LABEL_3:
-        Float = Scr_GetFloat(3u);
+        Float = Scr_GetFloat(3);
         if (Float < 0.0)
             Scr_ParamError(3u, "must set nonnegative rate");
     LABEL_5:
-        v6 = Scr_GetFloat(2u);
+        v6 = Scr_GetFloat(2);
         if (v6 < 0.0)
             Scr_ParamError(2u, "must set nonnegative goal time");
     LABEL_7:
-        v5 = Scr_GetFloat(1u);
+        v5 = Scr_GetFloat(1);
         if (v5 < 0.0)
             Scr_ParamError(1u, "must set nonnegative weight");
     LABEL_9:
@@ -8633,15 +8633,15 @@ void __cdecl GScr_SetAnimKnobAllInternal(scr_entref_t *entref, unsigned int flag
     default:
         Scr_Error("incorrect number of parameters");
     LABEL_3:
-        Float = Scr_GetFloat(4u);
+        Float = Scr_GetFloat(4);
         if (Float < 0.0)
             Scr_ParamError(4u, "must set nonnegative rate");
     LABEL_5:
-        v6 = Scr_GetFloat(3u);
+        v6 = Scr_GetFloat(3);
         if (v6 < 0.0)
             Scr_ParamError(3u, "must set nonnegative goal time");
     LABEL_7:
-        v5 = Scr_GetFloat(2u);
+        v5 = Scr_GetFloat(2);
         if (v5 < 0.0)
             Scr_ParamError(2u, "must set nonnegative weight");
     LABEL_9:
@@ -8748,15 +8748,15 @@ void __cdecl GScr_SetAnimInternal(scr_entref_t *entref, unsigned int flags)
     default:
         Scr_Error("too many parameters");
     LABEL_3:
-        Float = Scr_GetFloat(3u);
+        Float = Scr_GetFloat(3);
         if (Float < 0.0)
             Scr_ParamError(3u, "must set nonnegative rate");
     LABEL_5:
-        v6 = Scr_GetFloat(2u);
+        v6 = Scr_GetFloat(2);
         if (v6 < 0.0)
             Scr_ParamError(2u, "must set nonnegative goal time");
     LABEL_7:
-        v5 = Scr_GetFloat(1u);
+        v5 = Scr_GetFloat(1);
         if (v5 < 0.0)
             Scr_ParamError(1u, "must set nonnegative weight");
     LABEL_9:
@@ -8892,15 +8892,15 @@ void __cdecl GScr_SetFlaggedAnimKnobInternal(scr_entref_t *entref, unsigned int 
     default:
         Scr_Error("too many parameters");
     LABEL_3:
-        Float = Scr_GetFloat(4u);
+        Float = Scr_GetFloat(4);
         if (Float < 0.0)
             Scr_ParamError(4u, "must set nonnegative rate");
     LABEL_5:
-        v6 = Scr_GetFloat(3u);
+        v6 = Scr_GetFloat(3);
         if (v6 < 0.0)
             Scr_ParamError(3u, "must set nonnegative goal time");
     LABEL_7:
-        v5 = Scr_GetFloat(2u);
+        v5 = Scr_GetFloat(2);
         if (v5 <= 0.0)
             Scr_ParamError(2u, "must set positive weight");
     LABEL_9:
@@ -9009,15 +9009,15 @@ void __cdecl GScr_SetFlaggedAnimKnobAllInternal(scr_entref_t *entref, unsigned i
     default:
         Scr_Error(usage);
     LABEL_3:
-        Float = Scr_GetFloat(5u);
+        Float = Scr_GetFloat(5);
         if (Float < 0.0)
             Scr_ParamError(5u, "must set nonnegative rate");
     LABEL_5:
-        v8 = Scr_GetFloat(4u);
+        v8 = Scr_GetFloat(4);
         if (v8 < 0.0)
             Scr_ParamError(4u, "must set nonnegative goal time");
     LABEL_7:
-        v7 = Scr_GetFloat(3u);
+        v7 = Scr_GetFloat(3);
         if (v7 <= 0.0)
             Scr_ParamError(3u, "must set positive weight");
     LABEL_9:
@@ -9118,15 +9118,15 @@ void __cdecl GScr_SetFlaggedAnimInternal(scr_entref_t *entref, unsigned int flag
     default:
         Scr_Error("incorrect number of parameters");
     LABEL_3:
-        Float = Scr_GetFloat(4u);
+        Float = Scr_GetFloat(4);
         if (Float < 0.0)
             Scr_ParamError(4u, "must set nonnegative rate");
     LABEL_5:
-        v6 = Scr_GetFloat(3u);
+        v6 = Scr_GetFloat(3);
         if (v6 < 0.0)
             Scr_ParamError(3u, "must set nonnegative goal time");
     LABEL_7:
-        v5 = Scr_GetFloat(2u);
+        v5 = Scr_GetFloat(2);
         if (v5 <= 0.0)
             Scr_ParamError(2u, "must set positive weight");
     LABEL_9:
@@ -9219,7 +9219,7 @@ void __cdecl GScr_SetAnimTime(scr_entref_t *entref)
     {
         if (NumParam != 2)
             Scr_Error("too many parameters");
-        Float = Scr_GetFloat(1u);
+        Float = Scr_GetFloat(1);
         v2 = Float;
         if (Float >= 0.0)
         {
@@ -9273,7 +9273,7 @@ void __cdecl GScr_ShellShock(scr_entref_t *entref)
     PlayerEntity = GetPlayerEntity(entref);
     if (Scr_GetNumParam() < 2)
         Scr_Error("USAGE: <player> shellshock(<shellshockname>, <duration>)\n");
-    if (!chaplinCheat->current.enabled || Scr_GetNumParam() >= 3 && Scr_GetInt(2u))
+    if (!chaplinCheat->current.enabled || Scr_GetNumParam() >= 3 && Scr_GetInt(2))
     {
         String = Scr_GetString(0);
         v3 = 1;
@@ -9289,7 +9289,7 @@ void __cdecl GScr_ShellShock(scr_entref_t *entref)
                 return;
             }
         }
-        *(double *)&v5 = (float)((float)(Scr_GetFloat(1u) * (float)1000.0) + (float)0.5);
+        *(double *)&v5 = (float)((float)(Scr_GetFloat(1) * (float)1000.0) + (float)0.5);
         v7 = floor(v5);
         v8 = (int)(float)*(double *)&v7;
         if (v8 > 0xEA60)
@@ -9335,11 +9335,11 @@ void __cdecl GScr_SetDepthOfField(scr_entref_t *entref)
     if (Scr_GetNumParam() != 6)
         Scr_Error("Incorrect number of parameters\n");
     Float = Scr_GetFloat(0);
-    v3 = Scr_GetFloat(1u);
-    v4 = Scr_GetFloat(2u);
-    v5 = Scr_GetFloat(3u);
-    v6 = Scr_GetFloat(4u);
-    v7 = Scr_GetFloat(5u);
+    v3 = Scr_GetFloat(1);
+    v4 = Scr_GetFloat(2);
+    v5 = Scr_GetFloat(3);
+    v6 = Scr_GetFloat(4);
+    v7 = Scr_GetFloat(5);
     if (Float < 0.0)
         Scr_ParamError(0, "near start must be >= 0");
     if (v3 < 0.0)
@@ -9390,7 +9390,7 @@ void __cdecl GScr_SetViewModelDepthOfField(scr_entref_t *entref)
 
     PlayerEntity = GetPlayerEntity(entref);
     Float = Scr_GetFloat(0);
-    v3 = Scr_GetFloat(1u);
+    v3 = Scr_GetFloat(1);
     if (Float < 0.0)
         Scr_ParamError(0, "start must be >= 0");
     if (v3 < 0.0)
@@ -9560,9 +9560,9 @@ void __cdecl GScr_SetSoundBlend(scr_entref_t *entref)
         Scr_Error("Entity is not a sound_blend\n");
     String = Scr_GetString(0);
     v3 = G_SoundAliasIndexPermanent(String);
-    v4 = Scr_GetString(1u);
+    v4 = Scr_GetString(1);
     v5 = G_SoundAliasIndexPermanent(v4);
-    Float = Scr_GetFloat(2u);
+    Float = Scr_GetFloat(2);
     v7 = Float;
     if (Float < 0.0 || Float > 1.0)
         Scr_Error("Lerp must be between 0.0f and 1.0f\n");
@@ -9698,7 +9698,7 @@ void __cdecl GScr_SetLookatText(scr_entref_t *entref)
     Scr_SetString(&Entity->lookAtText0, ConstString);
     if (Scr_GetNumParam())
     {
-        ConstIString = Scr_GetConstIString(1u);
+        ConstIString = Scr_GetConstIString(1);
         Scr_SetString(&Entity->lookAtText1, ConstIString);
     }
 }
@@ -9974,7 +9974,7 @@ void GScr_OpenFile()
     if (Scr_GetNumParam() > 1)
     {
         String = Scr_GetString(0);
-        v1 = Scr_GetString(1u);
+        v1 = Scr_GetString(1);
         v2 = 0;
         openScriptIOFileHandles = level.openScriptIOFileHandles;
         while (*openScriptIOFileHandles)
@@ -10249,7 +10249,7 @@ void GScr_FGetArg()
         return;
     }
     Int = Scr_GetInt(0);
-    v1 = Scr_GetInt(1u);
+    v1 = Scr_GetInt(1);
     v2 = v1;
     if (Int > 1)
     {
@@ -10402,10 +10402,10 @@ void GScr_SetMiniMap()
     if (Scr_GetNumParam() != 5)
         Scr_Error("Expecting 5 arguments");
     Scr_GetString(0);
-    Float = Scr_GetFloat(1u);
-    v1 = Scr_GetFloat(2u);
-    v2 = Scr_GetFloat(3u);
-    v3 = Scr_GetFloat(4u);
+    Float = Scr_GetFloat(1);
+    v1 = Scr_GetFloat(2);
+    v2 = Scr_GetFloat(3);
+    v3 = Scr_GetFloat(4);
     v4 = -(float)(level.compassNorth[0] * (float)((float)v2 - (float)Float));
     level.compassMapWorldSize[0] = (float)(level.compassNorth[1] * (float)((float)v2 - (float)Float))
         - (float)(level.compassNorth[0] * (float)((float)v3 - (float)v1));
@@ -10466,9 +10466,9 @@ void Scr_TableLookup()
         Scr_Error("USAGE: tableLookup( filename, searchColumnNum, searchValue, returnValueColumnNum )\n");
     String = Scr_GetString(0);
     StringTable_GetAsset(String, &v5);
-    Int = Scr_GetInt(1u);
-    v2 = Scr_GetString(2u);
-    v3 = Scr_GetInt(3u);
+    Int = Scr_GetInt(1);
+    v2 = Scr_GetString(2);
+    v3 = Scr_GetInt(3);
     v4 = StringTable_Lookup(v5, Int, v2, v3);
     Scr_AddString(v4);
 }
@@ -10486,9 +10486,9 @@ void Scr_TableLookupIString()
         Scr_Error("USAGE: tableLookupIString( filename, searchColumnNum, searchValue, returnValueColumnNum )\n");
     String = Scr_GetString(0);
     StringTable_GetAsset(String, &v5);
-    Int = Scr_GetInt(1u);
-    v2 = Scr_GetString(2u);
-    v3 = Scr_GetInt(3u);
+    Int = Scr_GetInt(1);
+    v2 = Scr_GetString(2);
+    v3 = Scr_GetInt(3);
     v4 = StringTable_Lookup(v5, Int, v2, v3);
     Scr_AddIString(v4);
 }
@@ -10841,7 +10841,7 @@ void __cdecl GScr_SetLightFovRange(scr_entref_t *entref)
     }
     if (Scr_GetNumParam() == 2)
     {
-        *(double *)&v11 = Scr_GetFloat(1u);
+        *(double *)&v11 = Scr_GetFloat(1);
         v12 = *(double *)&v11;
         if (*(double *)&v11 < -0.001 || *(double *)&v11 >= (float)((float)v4 + (float)0.001))
             Scr_ParamError(1u, "inner fov must be in the range of 0 to outer fov");
@@ -11282,7 +11282,7 @@ void __cdecl ScrCmd_animscriptedInternal(scr_entref_t entref, int bDelayForActor
     Anim = 0;
     if (Scr_GetNumParam() > 4)
     {
-        ConstString = Scr_GetConstString(4u);
+        ConstString = Scr_GetConstString(4);
         v8 = ConstString;
         if (ConstString != scr_const.normal && ConstString != scr_const.deathplant)
         {

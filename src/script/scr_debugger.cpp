@@ -1773,7 +1773,7 @@ void __cdecl Scr_AddAssignmentPos(char *codePos)
     if (scrCompilePub.developer_statement != 2 && scrDebuggerGlob.assignHeadCodePos != codePos)
     {
         scrDebuggerGlob.assignHeadCodePos = codePos;
-        v1 = (Scr_OpcodeList_s *)Hunk_AllocDebugMem(8u);
+        v1 = (Scr_OpcodeList_s *)Hunk_AllocDebugMem(8);
         v1->codePos = codePos;
         v1->next = scrDebuggerGlob.assignHead;
         scrDebuggerGlob.assignHead = v1;
@@ -2437,7 +2437,7 @@ int __cdecl Scr_UpdateDebugSocket()
         LABEL_43:
             Sys_FlushDebugSocketData();
             if (Sys_IsRemoteDebugClient())
-                NET_Sleep(1u);
+                NET_Sleep(1);
             return newEvent;
         }
     }
