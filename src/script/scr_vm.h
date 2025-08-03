@@ -252,6 +252,8 @@ void __cdecl Scr_ErrorOnDefaultAsset(XAssetType type, const char* assetName);
 void(__cdecl* __cdecl Scr_GetFunction(const char** pName, int* type))();
 unsigned int Scr_GetFunc(unsigned int index);
 void Scr_SetRecordScriptPlace(int on);
+void Scr_GetLastScriptPlace(int *line, const char **filename);
+struct XAnim_s *Scr_GetAnimTree(unsigned int index);
 void(__cdecl *__cdecl Scr_GetMethod(const char **pName, int *type))(scr_entref_t);
 void(__cdecl *__cdecl BuiltIn_GetMethod(const char **pName, int *type))(scr_entref_t);
 void __cdecl GScr_AddVector(const float* vVec);

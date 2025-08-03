@@ -150,4 +150,7 @@ bool __cdecl R_Cinematic_IsUnderrun();
 
 void __cdecl R_Cinematic_BeginLostDevice();
 void __cdecl R_Cinematic_EndLostDevice();
+
 void __cdecl R_Cinematic_SetPaused(CinematicEnum paused);
+void R_Cinematic_SetNextPlayback(const char *name, unsigned int playbackFlags);
+void R_Cinematic_UnsetNextPlayback();

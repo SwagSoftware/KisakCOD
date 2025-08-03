@@ -652,6 +652,8 @@ void G_FreeScrVehicles();
 void G_RestartScrVehicleInfo();
 void G_ParseScrVehicleInfo();
 
+void(*ScriptVehicle_GetMethod(const char **pName))(scr_entref_t);
+
 
 // g_weapon
 struct AntilagClientStore // sizeof=0x340

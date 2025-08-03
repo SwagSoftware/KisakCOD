@@ -20,6 +20,7 @@
 #include <xanim/xanim.h>
 
 #include "bullet.h"
+#include "g_public.h"
 
 //Line 51763:  0006 : 00006554       unsigned short **s_flashTags      827b6554     g_scr_vehicle.obj
 
@@ -3088,6 +3089,170 @@ void G_RestartScrVehicleInfo()
 void G_ParseScrVehicleInfo()
 {
     s_numVehicleInfos = 0;
+}
+
+void  VEH_ResetWheels(gentity_s *ent, vehicle_physic_t *phys)
+{
+    float *wheelZPos; // r31
+    int v5; // r29
+    int *wheel; // r30
+    float v7[16]; // [sp+50h] [-40h] BYREF
+
+    if (!ent)
+        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\g_scr_vehicle.cpp", 643, 0, "%s", "ent");
+    if (!ent->scr_vehicle)
+        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\g_scr_vehicle.cpp", 644, 0, "%s", "ent->scr_vehicle");
+    if (!phys)
+        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\g_scr_vehicle.cpp", 645, 0, "%s", "phys");
+    wheelZPos = phys->wheelZPos;
+    v5 = 6;
+    wheel = ent->scr_vehicle->boneIndex.wheel;
+    do
+    {
+        if (*wheel >= 0)
+        {
+            G_DObjGetWorldBoneIndexPos(ent, *wheel, v7);
+            *wheelZPos = v7[2];
+        }
+        --v5;
+        ++wheel;
+        ++wheelZPos;
+    } while (v5);
+}
+
+void __fastcall CMD_VEH_AttachPath(scr_entref_t *entref)
+{
+    gentity_s *Vehicle; // r28
+    unsigned int v2; // r4
+    scr_vehicle_s *scr_vehicle; // r30
+    vehicle_info_t *v4; // r26
+    __int16 VehicleNodeIndex; // r3
+
+    if ((_WORD)entref)
+    {
+        Scr_ObjectError("not an entity");
+        Vehicle = 0;
+    }
+    else
+    {
+        Vehicle = VEH_GetVehicle(HIWORD(entref));
+    }
+    scr_vehicle = Vehicle->scr_vehicle;
+    v4 = &s_vehicleInfos[scr_vehicle->infoIdx];
+    VehicleNodeIndex = GScr_GetVehicleNodeIndex(0, v2);
+    G_VehSetUpPathPos(&scr_vehicle->pathPos, VehicleNodeIndex);
+    scr_vehicle->phys.origin[0] = scr_vehicle->pathPos.origin[0];
+    scr_vehicle->phys.origin[1] = scr_vehicle->pathPos.origin[1];
+    scr_vehicle->phys.origin[2] = scr_vehicle->pathPos.origin[2];
+    scr_vehicle->phys.angles[0] = scr_vehicle->pathPos.angles[0];
+    scr_vehicle->phys.angles[1] = scr_vehicle->pathPos.angles[1];
+    scr_vehicle->phys.angles[2] = scr_vehicle->pathPos.angles[2];
+    VEH_SetPosition(Vehicle, scr_vehicle->phys.origin, scr_vehicle->phys.vel, scr_vehicle->phys.angles);
+    scr_vehicle->phys.prevOrigin[0] = scr_vehicle->phys.origin[0];
+    scr_vehicle->phys.prevOrigin[1] = scr_vehicle->phys.origin[1];
+    scr_vehicle->phys.prevOrigin[2] = scr_vehicle->phys.origin[2];
+    scr_vehicle->phys.prevAngles[0] = scr_vehicle->phys.angles[0];
+    scr_vehicle->phys.prevAngles[1] = scr_vehicle->phys.angles[1];
+    scr_vehicle->phys.prevAngles[2] = scr_vehicle->phys.angles[2];
+    VEH_ResetWheels(Vehicle, &scr_vehicle->phys);
+    if (!v4->type || v4->type == 1)
+        VEH_GroundPlant(Vehicle, &scr_vehicle->phys, 0);
+    VEH_SetPosition(Vehicle, scr_vehicle->phys.origin, scr_vehicle->phys.vel, scr_vehicle->phys.angles);
+    scr_vehicle->phys.prevOrigin[0] = scr_vehicle->phys.origin[0];
+    scr_vehicle->phys.prevOrigin[1] = scr_vehicle->phys.origin[1];
+    scr_vehicle->phys.prevOrigin[2] = scr_vehicle->phys.origin[2];
+    scr_vehicle->phys.prevAngles[0] = scr_vehicle->phys.angles[0];
+    scr_vehicle->phys.prevAngles[1] = scr_vehicle->phys.angles[1];
+    scr_vehicle->phys.prevAngles[2] = scr_vehicle->phys.angles[2];
+}
+
+const BuiltinMethodDef s_methods[50] =
+{
+  { "attachpath", CMD_VEH_AttachPath, 0 },
+  { "getattachpos", CMD_VEH_GetAttachPos, 0 },
+  { "startpath", CMD_VEH_StartPath, 0 },
+  { "setswitchnode", CMD_VEH_SetSwitchNode, 0 },
+  { "setwaitnode", CMD_VEH_SetWaitNode, 0 },
+  { "setwaitspeed", CMD_VEH_SetWaitSpeed, 0 },
+  { "setspeed", CMD_VEH_SetSpeed, 0 },
+  { "setspeedimmediate", CMD_VEH_SetSpeedImmediate, 0 },
+  { "getspeed", CMD_VEH_GetSpeed, 0 },
+  { "getspeedmph", CMD_VEH_GetSpeedMPH, 0 },
+  { "getgoalspeedmph", CMD_VEH_GetGoalSpeedMPH, 0 },
+  { "setacceleration", CMD_VEH_SetAcceleration, 0 },
+  { "setdeceleration", CMD_VEH_SetDeceleration, 0 },
+  { "resumespeed", CMD_VEH_ResumeSpeed, 0 },
+  { "setyawspeed", CMD_VEH_SetYawSpeed, 0 },
+  { "setmaxpitchroll", CMD_VEH_SetMaxPitchRoll, 0 },
+  { "setturningability", CMD_VEH_SetTurningAbility, 0 },
+  { "setairresistance", CMD_VEH_SetAirResitance, 0 },
+  { "setjitterparams", CMD_VEH_SetJitterParams, 0 },
+  { "sethoverparams", CMD_VEH_SetHoverParams, 0 },
+  { "joltbody", CMD_VEH_JoltBody, 0 },
+  { "freevehicle", CMD_VEH_FreeVehicle, 0 },
+  { "getwheelsurface", CMD_VEH_GetWheelSurface, 0 },
+  { "getvehicleowner", CMD_VEH_GetVehicleOwner, 0 },
+  { "startenginesound", CMD_VEH_StartEngineSound, 0 },
+  { "stopenginesound", CMD_VEH_StopEngineSound, 0 },
+  { "setenginevolume", CMD_VEH_SetEngineVolume, 0 },
+  { "getenginevolume", CMD_VEH_GetEngineVolume, 0 },
+  { "makevehicleusable", CMD_VEH_MakeVehicleUsable, 0 },
+  { "makevehicleunusable", CMD_VEH_MakeVehicleUnusable, 0 },
+  { "addvehicletocompass", CMD_VEH_AddVehicleToCompass, 0 },
+  { "removevehiclefromcompass", CMD_VEH_RemoveVehicleFromCompass, 0 },
+  { "setvehiclelookattext", CMD_VEH_SetVehicleLookatText, 0 },
+  { "setvehicleteam", CMD_VEH_SetVehicleTeam, 0 },
+  { "setneargoalnotifydist", CMD_VEH_NearGoalNotifyDist, 0 },
+  { "setvehgoalpos", CMD_VEH_SetGoalPos, 0 },
+  { "setgoalyaw", CMD_VEH_SetGoalYaw, 0 },
+  { "cleargoalyaw", CMD_VEH_ClearGoalYaw, 0 },
+  { "settargetyaw", CMD_VEH_SetTargetYaw, 0 },
+  { "cleartargetyaw", CMD_VEH_ClearTargetYaw, 0 },
+  { "setlookatent", CMD_VEH_SetLookAtEnt, 0 },
+  { "clearlookatent", CMD_VEH_ClearLookAtEnt, 0 },
+  { "returnplayercontrol", CMD_VEH_ReturnPlayerControl, 0 },
+  { "setturrettargetvec", CMD_VEH_SetTurretTargetVec, 0 },
+  { "setturrettargetent", CMD_VEH_SetTurretTargetEnt, 0 },
+  { "clearturrettarget", CMD_VEH_ClearTurretTargetEnt, 0 },
+  { "setvehweapon", CMD_VEH_SetWeapon, 0 },
+  { "fireweapon", CMD_VEH_FireWeapon, 0 },
+  { "isturretready", CMD_VEH_IsTurretReady, 0 },
+  { "vehforcematerialspeed", CMD_VEH_ForceMaterialSpeed, 0 }
+};
+
+
+void(* ScriptVehicle_GetMethod(const char **pName))(scr_entref_t)
+{
+    int v1; // r6
+    unsigned int v2; // r5
+    const BuiltinMethodDef *i; // r7
+    const char *actionString; // r10
+    const char *v5; // r11
+    int v6; // r8
+
+    v1 = 0;
+    v2 = 0;
+    for (i = s_methods; ; ++i)
+    {
+        actionString = i->actionString;
+        v5 = *pName;
+        do
+        {
+            v6 = (unsigned __int8)*v5 - *(unsigned __int8 *)actionString;
+            if (!*v5)
+                break;
+            ++v5;
+            ++actionString;
+        } while (!v6);
+        if (!v6)
+            break;
+        v2 += 12;
+        ++v1;
+        if (v2 >= 0x258)
+            return 0;
+    }
+    *pName = s_methods[v1].actionString;
+    return s_methods[v1].actionFunc;
 }
 
 #endif // KISAK_SP

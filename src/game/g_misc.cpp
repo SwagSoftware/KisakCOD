@@ -339,3 +339,14 @@ void __cdecl EntInfo_Item(gentity_s *self, float *source)
     }
 }
 
+int ByteFromFloatColor(float from)
+{
+    int value = (int)(from * 255.0 + 0.5);
+
+    if (value < 0)
+        return 0;
+    if (value > 255)
+        return 255;
+
+    return value;
+}

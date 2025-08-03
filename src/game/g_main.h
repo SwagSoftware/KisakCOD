@@ -98,7 +98,7 @@ struct level_locals_t
 	float priorityNodeBias;
 	//void *openScriptIOFileHandles[1];
 	int openScriptIOFileHandles[1];
-	char *openScriptIOFileBuffers[1];
+	unsigned char *openScriptIOFileBuffers[1];
 	com_parse_mark_t currentScriptIOLineMark[1];
 	int scriptPrintChannel;
 	float compassMapUpperLeft[2];

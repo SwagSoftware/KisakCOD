@@ -187,7 +187,7 @@ struct XAnimEntry // sizeof=0x8
     unsigned __int16 parent;
     union //$7F333398CC08E12E110886895274CBFC
     {
-        XAnimParts * parts;
+        XAnimParts *parts;
         XAnimParent animParent;
     };
 };
@@ -1208,7 +1208,9 @@ void __cdecl XAnimFree(XAnimParts *parts);
 XAnimTree_s* __cdecl XAnimCreateTree(XAnim_s* anims, void* (__cdecl* Alloc)(int));
 void __cdecl XAnimFreeTree(XAnimTree_s* tree, void(__cdecl* Free)(void*, int));
 void XAnimCheckTreeLeak();
+int XAnimGetAssetType(XAnimTree_s *tree, unsigned int index);
 XAnim_s* __cdecl XAnimGetAnims(const XAnimTree_s* tree);
+bool XAnimIsLeafNode(const XAnim_s *anims, unsigned int animIndex);
 void XAnimResetAnimMap(const DObj_s* obj, unsigned int infoIndex);
 void __cdecl XAnimInitModelMap(XModel* const* models, unsigned int numModels, XModelNameMap* modelMap);
 void __cdecl XAnimResetAnimMap_r(XModelNameMap* modelMap, unsigned int infoIndex);
@@ -1354,6 +1356,15 @@ int __cdecl XAnimSetCompleteGoalWeightNode(
     float rate,
     unsigned int notifyName,
     unsigned int notifyType);
+int XAnimSetCompleteGoalWeightKnobAll(
+    DObj_s *obj,
+    unsigned int animIndex,
+    unsigned int rootIndex,
+    double goalWeight,
+    double goalTime,
+    double rate,
+    int notifyName,
+    int bRestart);
 int __cdecl XAnimSetGoalWeightKnobAll(
     DObj_s* obj,
     unsigned int animIndex,
@@ -1361,6 +1372,14 @@ int __cdecl XAnimSetGoalWeightKnobAll(
     float goalWeight,
     float goalTime,
     float rate,
+    unsigned int notifyName,
+    int bRestart);
+int XAnimSetCompleteGoalWeightKnob(
+    DObj_s *obj,
+    unsigned int animIndex,
+    double goalWeight,
+    double goalTime,
+    double rate,
     unsigned int notifyName,
     int bRestart);
 int __cdecl XAnimSetGoalWeightKnob(

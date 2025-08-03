@@ -378,11 +378,31 @@ void XAnimCheckTreeLeak()
     }
 }
 
+int XAnimGetAssetType(XAnimTree_s *tree, unsigned int index)
+{
+    XAnimEntry *node; // r30
+
+    iassert(tree);
+    iassert(tree->anims);
+    iassert(index < tree->anims->size);
+    node = &tree->anims->entries[index];
+    iassert(node);
+    iassert(node->parts);
+    iassert(IsLeafNode(node));
+    return node->parts->assetType;
+}
+
 XAnim_s* __cdecl XAnimGetAnims(const XAnimTree_s* tree)
 {
     iassert(tree);
 
     return tree->anims;
+}
+
+bool XAnimIsLeafNode(const XAnim_s *anims, unsigned int animIndex)
+{
+    iassert(anims);
+    return anims->entries[animIndex].numAnims == 0;
 }
 
 void XAnimResetAnimMap(const DObj_s *obj, unsigned int infoIndex)
@@ -3337,6 +3357,57 @@ int __cdecl XAnimSetCompleteGoalWeightNode(
     return error;
 }
 
+int XAnimSetCompleteGoalWeightKnobAll(
+    DObj_s *obj,
+    unsigned int animIndex,
+    unsigned int rootIndex,
+    double goalWeight,
+    double goalTime,
+    double rate,
+    int notifyName,
+    int bRestart)
+{
+    int v18; // r24
+    XAnimTree_s *tree; // r29
+    unsigned int InfoIndex; // r31
+    unsigned int parent; // r31
+    unsigned int v22; // r6
+    unsigned int v23; // r5
+
+    if (animIndex == rootIndex)
+        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\xanim\\xanim.cpp", 3509, 0, "%s", "animIndex != rootIndex");
+    if (!obj)
+        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\xanim\\xanim.cpp", 3510, 0, "%s", "obj");
+    v18 = XAnimSetGoalWeightKnob(obj, animIndex, goalWeight, goalTime, rate, rootIndex, notifyName);
+    Profile_Begin(332);
+    tree = obj->tree;
+    InfoIndex = XAnimGetInfoIndex(obj->tree, animIndex);
+    if (!InfoIndex)
+        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\xanim\\xanim.cpp", 3519, 0, "%s", "infoIndex");
+    parent = g_xAnimInfo[InfoIndex].parent;
+    if (parent)
+    {
+        while (g_xAnimInfo[parent].animIndex != rootIndex)
+        {
+            if (bRestart)
+                parent = XAnimRestart(tree, parent, goalTime);
+            XAnimClearGoalWeightKnobInternal(tree, parent, 1.0, goalTime);
+            XAnimSetCompleteGoalWeightNode(tree, parent, 1.0, goalTime, 1.0, v23, v22);
+            parent = g_xAnimInfo[parent].parent;
+            if (!parent)
+                goto LABEL_12;
+        }
+        Profile_EndInternal(0);
+        return v18;
+    }
+    else
+    {
+    LABEL_12:
+        Profile_EndInternal(0);
+        return 1;
+    }
+}
+
 int __cdecl XAnimSetGoalWeightKnobAll(
     DObj_s* obj,
     unsigned int animIndex,
@@ -3375,6 +3446,57 @@ int __cdecl XAnimSetGoalWeightKnobAll(
     }
 
     return error;
+}
+
+int XAnimSetCompleteGoalWeightKnob(
+    DObj_s *obj,
+    unsigned int animIndex,
+    double goalWeight,
+    double goalTime,
+    double rate,
+    unsigned int notifyName,
+    int bRestart)
+{
+    XAnimTree_s *tree; // r28
+    unsigned int InfoIndex; // r3
+    unsigned int v18; // r31
+    XAnimInfo *v19; // r11
+    XAnimState *p_state; // r10
+    int v21; // ctr
+    unsigned int v22; // r6
+    unsigned int v23; // r5
+
+    if (!obj)
+        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\xanim\\xanim.cpp", 3436, 0, "%s", "obj");
+    if (goalWeight < 0.001)
+        goalWeight = 0.0;
+    tree = obj->tree;
+    InfoIndex = XAnimGetInfoIndex(obj->tree, animIndex);
+    v18 = InfoIndex;
+    if (InfoIndex)
+    {
+        if (bRestart)
+            v18 = XAnimRestart(tree, InfoIndex, goalTime);
+    }
+    else
+    {
+        v18 = XAnimAllocInfoIndex(obj, animIndex, 0);
+        v19 = &g_xAnimInfo[v18];
+        p_state = &g_xAnimInfo[v18].state;
+        v21 = 8;
+        do
+        {
+            p_state->currentAnimTime = 0.0;
+            p_state = (XAnimState *)((char *)p_state + 4);
+            --v21;
+        } while (v21);
+        v19->notifyName = 0;
+        v19->notifyChild = 0;
+        v19->notifyType = 0;
+        v19->notifyIndex = -1;
+    }
+    XAnimClearGoalWeightKnobInternal(tree, v18, goalWeight, goalTime);
+    return XAnimSetCompleteGoalWeightNode(tree, v18, goalWeight, goalTime, rate, v23, v22);
 }
 
 int __cdecl XAnimSetGoalWeightKnob(

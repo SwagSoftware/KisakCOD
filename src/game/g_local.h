@@ -11,6 +11,28 @@
 
 #define MAX_HUDELEMS_TOTAL 0x100
 
+// MOD = Means of Death
+enum meansOfDeath_t : __int32
+{
+    MOD_UNKNOWN = 0x0,
+    MOD_PISTOL_BULLET = 0x1,
+    MOD_RIFLE_BULLET = 0x2,
+    MOD_GRENADE = 0x3,
+    MOD_GRENADE_SPLASH = 0x4,
+    MOD_PROJECTILE = 0x5,
+    MOD_PROJECTILE_SPLASH = 0x6,
+    MOD_MELEE = 0x7,
+    MOD_HEAD_SHOT = 0x8,
+    MOD_CRUSH = 0x9,
+    MOD_TELEFRAG = 0xA,
+    MOD_FALLING = 0xB,
+    MOD_SUICIDE = 0xC,
+    MOD_TRIGGER_HURT = 0xD,
+    MOD_EXPLOSIVE = 0xE,
+    MOD_IMPACT = 0xF,
+    MOD_NUM = 0x10,
+};
+
 struct SpawnFuncEntry
 {
     const char *classname;
@@ -281,6 +303,7 @@ float __cdecl G_GetSoundBlendVolumeScale(gentity_s *ent);
 void __cdecl EntinfoPosAndScale(gentity_s *self, float *source, float *pos, float *textScale, float *dist);
 void __cdecl misc_EntInfo(gentity_s *self, float *source);
 void __cdecl EntInfo_Item(gentity_s *self, float *source);
+int ByteFromFloatColor(float from);
 
 
 // g_client_script_cmd
@@ -470,10 +493,10 @@ int __cdecl G_CanRadiusDamageFromPos(
     const float *centerPos,
     double radius,
     double coneAngleCos,
-    float *coneDirection,
+    const float *coneDirection,
     double maxHeight,
     bool useEyeOffset,
-    float *contentMask);
+    int contentMask);
 float __cdecl EntDistToPoint(float *origin, gentity_s *ent);
 void __cdecl GetEntListForRadius(
     const float *origin,

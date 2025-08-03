@@ -224,6 +224,8 @@ void R_LerpSunDirectionOverride(float *sunDirBegin, float *sunDirEnd, int lerpBe
 void R_ResetSunDirectionOverride();
 void R_ResetSunLightParseParams();
 
+unsigned int R_GetDebugReflectionProbeLocs(float (*locArray)[3], unsigned int maxCount);
+
 extern GfxWorld s_world;
 extern r_globals_load_t rgl;
 

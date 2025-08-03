@@ -289,3 +289,29 @@ void R_ResetSunLightParseParams()
 {
     R_UpdateLightsFromDvars();
 }
+
+unsigned int R_GetDebugReflectionProbeLocs(float (*locArray)[3], unsigned int maxCount)
+{
+    unsigned int result; // r3
+    int v4; // r9
+    unsigned int v5; // r10
+    GfxReflectionProbe *v6; // r8
+
+    result = maxCount;
+    if (s_world.reflectionProbeCount - 1 < maxCount)
+        result = s_world.reflectionProbeCount - 1;
+    if (result)
+    {
+        v4 = 0;
+        v5 = result;
+        do
+        {
+            --v5;
+            v6 = &s_world.reflectionProbes[++v4];
+            (*locArray)[0] = v6->origin[0];
+            (*locArray)[1] = v6->origin[1];
+            (*locArray++)[2] = v6->origin[2];
+        } while (v5);
+    }
+    return result;
+}

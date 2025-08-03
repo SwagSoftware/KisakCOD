@@ -1396,4 +1396,23 @@ void __cdecl R_Cinematic_SetPaused(CinematicEnum paused) {}
 //            paused);
 //    cinematicGlob.targetPaused = paused;
 //}
+
+void R_Cinematic_SetNextPlayback(const char *name, unsigned int playbackFlags) {}
+//{
+//    Sys_EnterCriticalSection(CRITSECT_CINEMATIC);
+//    I_strncpyz(cinematicGlob.nextCinematicName, name, 256);
+//    cinematicGlob.nextCinematicPlaybackFlags = playbackFlags;
+//    Sys_LeaveCriticalSection(CRITSECT_CINEMATIC);
+//}
+
+void R_Cinematic_UnsetNextPlayback() {}
+//{
+//    Sys_EnterCriticalSection(CRITSECT_CINEMATIC);
+//    Sys_EnterCriticalSection(CRITSECT_CINEMATIC);
+//    I_strncpyz(cinematicGlob.nextCinematicName, byte_82003CDD, 256);
+//    cinematicGlob.nextCinematicPlaybackFlags = 0;
+//    Sys_LeaveCriticalSection(CRITSECT_CINEMATIC);
+//    Sys_LeaveCriticalSection(CRITSECT_CINEMATIC);
+//}
+
 #endif

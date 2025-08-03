@@ -838,7 +838,7 @@ const char *__cdecl StringTable_Lookup(
 int __cdecl StringTable_LookupRowNumForValue(const StringTable *table, int comparisonColumn, const char *value);
 
 union XAssetHeader;
-void __cdecl StringTable_GetAsset(const char *filename, XAssetHeader *tablePtr);
+void __cdecl StringTable_GetAsset(const char *filename, StringTable **tablePtr);
 
 
 extern TraceThreadInfo g_traceThreadInfo[7];

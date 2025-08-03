@@ -5303,4 +5303,59 @@ void Scr_SetRecordScriptPlace(int on)
     scrVmGlob.recordPlace = v1;
 }
 
+void Scr_GetLastScriptPlace(int *line, const char **filename)
+{
+    const char *lastFileName; // r11
+
+    *line = scrVmGlob.lastLine;
+    lastFileName = scrVmGlob.lastFileName;
+    if (!scrVmGlob.lastFileName)
+        lastFileName = "";
+    *filename = lastFileName;
+}
+
+XAnim_s * Scr_GetAnimTree(unsigned int index)
+{
+    VariableValue *v3; // r29
+    int type; // r11
+    VariableUnion *v5; // r11
+    int v7; // r4
+    int v8; // r3
+    const char *v9; // r3
+    const char *v10; // r4
+
+    if (index < scrVmPub.outparamcount)
+    {
+        v3 = &scrVmPub.top[-index];
+        type = v3->type;
+        if (type == 6)
+        {
+            if (v3->u.intValue <= scrAnimPub.xanim_num[1])
+            {
+                v5 = (VariableUnion *)(4 * v3->u.intValue);
+                if (*(unsigned int *)((char *)&scrAnimPub.xanim_num[-128] + (_DWORD)v5))
+                    return *(XAnim_s **)((char *)&scrAnimPub.xanim_num[-128] + (_DWORD)v5);
+            }
+            scrVarPub.error_message = "bad anim tree";
+        }
+        else
+        {
+            scrVarPub.error_message = va("type %s is not an animtree", var_typename[type]);
+        }
+        RemoveRefToValue(v3);
+        v3->type = VAR_UNDEFINED;
+        scrVarPub.error_index = index + 1;
+        Scr_ErrorInternal();
+    }
+    v9 = va("parameter %d does not exist", index + 1);
+    v10 = v9;
+    if (!scrVarPub.error_message)
+    {
+        I_strncpyz(error_message, v9, 1024);
+        scrVarPub.error_message = error_message;
+    }
+    Scr_ErrorInternal();
+    return scrAnimPub.xanim_lookup[1][0].anims;
+}
+
 #pragma warning(pop)
