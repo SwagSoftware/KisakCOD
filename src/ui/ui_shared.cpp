@@ -122,7 +122,7 @@ void __cdecl Script_StatClearPerkNew(UiContext *dc, itemDef_s *item, const char 
     int v6; // [esp-8h] [ebp-420h]
     int v7; // [esp-4h] [ebp-41Ch]
     unsigned int v8; // [esp-4h] [ebp-41Ch]
-    const StringTable *table; // [esp+4h] [ebp-414h] BYREF
+    StringTable *table; // [esp+4h] [ebp-414h] BYREF
     int perkIndex; // [esp+8h] [ebp-410h]
     int statValue; // [esp+Ch] [ebp-40Ch]
     char refString[1028]; // [esp+10h] [ebp-408h] BYREF
@@ -130,7 +130,7 @@ void __cdecl Script_StatClearPerkNew(UiContext *dc, itemDef_s *item, const char 
     if (useFastFile->current.enabled)
     {
         Script_StatClearPerkGetArg(dc, item, args, refString, 1024);
-        StringTable_GetAsset("mp/statstable.csv", (XAssetHeader *)&table);
+        StringTable_GetAsset("mp/statstable.csv", &table);
         v3 = StringTable_Lookup(table, 4, refString, 1);
         perkIndex = atoi(v3);
         if (perkIndex >= 150 && perkIndex <= 298)
@@ -810,7 +810,7 @@ void __cdecl Script_StatSetUsingStatsTable(UiContext *dc, itemDef_s *item, const
     unsigned int v9; // [esp-4h] [ebp-820h]
     char searchValue[1024]; // [esp+4h] [ebp-818h] BYREF
     int statNum; // [esp+404h] [ebp-418h]
-    const StringTable *table; // [esp+408h] [ebp-414h] BYREF
+    StringTable *table; // [esp+408h] [ebp-414h] BYREF
     int returnValueColumn; // [esp+40Ch] [ebp-410h]
     int comparisonColumn; // [esp+410h] [ebp-40Ch]
     char arg[1024]; // [esp+414h] [ebp-408h] BYREF
@@ -825,7 +825,7 @@ void __cdecl Script_StatSetUsingStatsTable(UiContext *dc, itemDef_s *item, const
         String_Parse(args, arg, 1024);
         while (!I_stricmp(arg, "tablelookup") || !I_stricmp(arg, ",") || !I_stricmp(arg, "("))
             String_Parse(args, arg, 1024);
-        StringTable_GetAsset(arg, (XAssetHeader *)&table);
+        StringTable_GetAsset(arg, &table);
         String_Parse(args, arg, 1024);
         while (!I_stricmp(arg, ","))
             String_Parse(args, arg, 1024);

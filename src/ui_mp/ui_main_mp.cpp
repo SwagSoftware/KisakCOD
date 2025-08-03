@@ -4607,7 +4607,7 @@ void __cdecl CL_SelectStringTableEntryInDvar_f()
     const char *v4; // eax
     char *ColumnValueForRow; // [esp-4h] [ebp-18h]
     double rowCount; // [esp+4h] [ebp-10h]
-    const StringTable *table; // [esp+Ch] [ebp-8h] BYREF
+    StringTable *table; // [esp+Ch] [ebp-8h] BYREF
     int row; // [esp+10h] [ebp-4h]
 
     if (!r_reflectionProbeGenerate->current.enabled)
@@ -4615,7 +4615,7 @@ void __cdecl CL_SelectStringTableEntryInDvar_f()
         if (Cmd_Argc() >= 4)
         {
             v0 = Cmd_Argv(1);
-            StringTable_GetAsset(v0, (XAssetHeader *)&table);
+            StringTable_GetAsset(v0, &table);
             v1 = Sys_Milliseconds();
             srand(v1);
             rowCount = (double)table->rowCount;

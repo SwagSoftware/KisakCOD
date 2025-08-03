@@ -11,13 +11,13 @@ int __cdecl CL_GetRankForXp(int xp)
   const char *v2; // eax
   const char *v3; // eax
   int toprow; // [esp+0h] [ebp-18h]
-  const StringTable *table; // [esp+4h] [ebp-14h] BYREF
+  StringTable *table; // [esp+4h] [ebp-14h] BYREF
   int maxxp; // [esp+8h] [ebp-10h]
   int row; // [esp+Ch] [ebp-Ch]
   int bottomrow; // [esp+10h] [ebp-8h]
   int minxp; // [esp+14h] [ebp-4h]
 
-  StringTable_GetAsset("mp/rankTable.csv", (XAssetHeader *)&table);
+  StringTable_GetAsset("mp/rankTable.csv", &table);
   toprow = table->rowCount - 1;
   bottomrow = 0;
   row = toprow / 2;
@@ -49,7 +49,7 @@ int __cdecl CL_GetRankForXp(int xp)
 
 const char *__cdecl CL_GetRankData(int rank, rankTableColumns_t column)
 {
-  const StringTable *table; // [esp+4h] [ebp-8h] BYREF
+  StringTable *table; // [esp+4h] [ebp-8h] BYREF
   char level[4]; // [esp+8h] [ebp-4h] BYREF
 
   if ( (unsigned int)column >= MP_RANKTABLE_COUNT )
@@ -60,7 +60,7 @@ const char *__cdecl CL_GetRankData(int rank, rankTableColumns_t column)
       "column doesn't index MP_RANKTABLE_COUNT\n\t%i not in [0, %i)",
       column,
       15);
-  StringTable_GetAsset("mp/rankTable.csv", (XAssetHeader *)&table);
+  StringTable_GetAsset("mp/rankTable.csv", &table);
   if ( !table )
     MyAssertHandler(".\\client_mp\\cl_rank.cpp", 56, 0, "%s", "table");
   Com_sprintf(level, 4u, "%i", rank);
@@ -69,7 +69,7 @@ const char *__cdecl CL_GetRankData(int rank, rankTableColumns_t column)
 
 void __cdecl CL_GetRankIcon(int rank, int prestige, Material **handle)
 {
-  const StringTable *table; // [esp+0h] [ebp-Ch] BYREF
+  StringTable *table; // [esp+0h] [ebp-Ch] BYREF
   const char *rankIconName; // [esp+4h] [ebp-8h]
   char id[4]; // [esp+8h] [ebp-4h] BYREF
 
@@ -79,7 +79,7 @@ void __cdecl CL_GetRankIcon(int rank, int prestige, Material **handle)
     MyAssertHandler(".\\client_mp\\cl_rank.cpp", 72, 0, "%s\n\t(prestige) = %i", "(prestige >= 0)", prestige);
   if ( !handle )
     MyAssertHandler(".\\client_mp\\cl_rank.cpp", 73, 0, "%s", "handle");
-  StringTable_GetAsset("mp/rankIconTable.csv", (XAssetHeader *)&table);
+  StringTable_GetAsset("mp/rankIconTable.csv", &table);
   if ( !table )
     MyAssertHandler(".\\client_mp\\cl_rank.cpp", 76, 0, "%s", "table");
   Com_sprintf(id, 4u, "%i", rank);

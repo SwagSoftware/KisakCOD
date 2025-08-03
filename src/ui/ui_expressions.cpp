@@ -2252,14 +2252,14 @@ void __cdecl TableLookup(int localClientNum, OperandList *list, Operand *operand
     operandInternalDataUnion v9; // [esp-8h] [ebp-Ch]
     int intVal; // [esp-4h] [ebp-8h]
     const char *string; // [esp-4h] [ebp-8h]
-    const StringTable *table; // [esp+0h] [ebp-4h] BYREF
+    StringTable *table; // [esp+0h] [ebp-4h] BYREF
 
     if (useFastFile->current.enabled)
     {
         if (list->operandCount == 4)
         {
             SourceString = GetSourceString(list->operands[0]);
-            StringTable_GetAsset(SourceString, (XAssetHeader *)&table);
+            StringTable_GetAsset(SourceString, &table);
             operandResult->dataType = VAL_STRING;
             intVal = GetSourceInt(&list->operands[3]).intVal;
             v8 = GetSourceString(list->operands[2]);

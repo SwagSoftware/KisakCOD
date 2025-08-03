@@ -4576,7 +4576,7 @@ void Scr_TableLookup()
     const char *stringValue; // [esp+4h] [ebp-18h]
     const char *filename; // [esp+8h] [ebp-14h]
     const char *returnValue; // [esp+Ch] [ebp-10h]
-    const StringTable *table; // [esp+10h] [ebp-Ch] BYREF
+    StringTable *table; // [esp+10h] [ebp-Ch] BYREF
     int32_t returnValueColumn; // [esp+14h] [ebp-8h]
     int32_t comparisonColumn; // [esp+18h] [ebp-4h]
 
@@ -4585,7 +4585,7 @@ void Scr_TableLookup()
         if (Scr_GetNumParam() < 3)
             Scr_Error("USAGE: tableLookup( filename, searchColumnNum, searchValue, returnValueColumnNum )\n");
         filename = Scr_GetString(0);
-        StringTable_GetAsset(filename, (XAssetHeader *)&table);
+        StringTable_GetAsset(filename, &table);
         comparisonColumn = Scr_GetInt(1);
         stringValue = Scr_GetString(2);
         returnValueColumn = Scr_GetInt(3);
@@ -4604,7 +4604,7 @@ void Scr_TableLookupIString()
     const char *stringValue; // [esp+4h] [ebp-18h]
     const char *filename; // [esp+8h] [ebp-14h]
     const char *returnValue; // [esp+Ch] [ebp-10h]
-    const StringTable *table; // [esp+10h] [ebp-Ch] BYREF
+    StringTable *table; // [esp+10h] [ebp-Ch] BYREF
     int32_t returnValueColumn; // [esp+14h] [ebp-8h]
     int32_t comparisonColumn; // [esp+18h] [ebp-4h]
 
@@ -4613,7 +4613,7 @@ void Scr_TableLookupIString()
         if (Scr_GetNumParam() < 3)
             Scr_Error("USAGE: tableLookupIString( filename, searchColumnNum, searchValue, returnValueColumnNum )\n");
         filename = Scr_GetString(0);
-        StringTable_GetAsset(filename, (XAssetHeader *)&table);
+        StringTable_GetAsset(filename, &table);
         comparisonColumn = Scr_GetInt(1);
         stringValue = Scr_GetString(2);
         returnValueColumn = Scr_GetInt(3);

@@ -7,6 +7,7 @@
 #include "g_main.h"
 #include "g_local.h"
 #include "g_vehicle_path.h"
+#include "g_public.h"
 #endif
 
 #include <script/scr_const.h>
@@ -20,7 +21,6 @@
 #include <xanim/xanim.h>
 
 #include "bullet.h"
-#include "g_public.h"
 
 //Line 51763:  0006 : 00006554       unsigned short **s_flashTags      827b6554     g_scr_vehicle.obj
 
