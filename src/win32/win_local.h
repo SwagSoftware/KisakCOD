@@ -20,7 +20,11 @@
 #endif
 #include <universal/q_shared.h>
 #include <qcommon/qcommon.h>
+#ifdef KISAK_MP
 #include <qcommon/net_chan_mp.h>
+#elif KISAK_SP
+#include <qcommon/net_chan.h>
+#endif
 
 void	IN_MouseEvent (int mstate);
 

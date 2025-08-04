@@ -410,7 +410,6 @@ float __cdecl Actor_GetFinalAccuracy(actor_s *self, weaponParms *wp, double accu
     double PlayerMovementAccuracy; // fp1
     double playerSightAccuracy; // fp27
     double v14; // fp28
-    double accuracy; // fp31
     const float *v16; // r5
     const float *v17; // r5
     const float *v18; // r5

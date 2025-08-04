@@ -275,7 +275,7 @@ extern const dvar_t *pickupPrints;
 extern const dvar_t *ai_playerLOSMinTime;
 extern const dvar_t *player_radiusDamageMultiplier;
 
-extern entityHandler_t *entityHandlers;
+extern struct entityHandler_t *entityHandlers;
 extern gentity_s g_entities[MAX_GENTITIES];
 extern sentient_s *g_sentients;
 extern char *g_nextMap;

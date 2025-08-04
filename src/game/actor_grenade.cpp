@@ -1006,7 +1006,7 @@ bool __cdecl Actor_GrenadeLauncher_CheckPos(
     return Actor_Grenade_IsValidTrajectory(self, vVelOut, a8, vTargetPos);
 }
 
-int __fastcall Actor_Grenade_IsSafeTarget(actor_s *self, const float *vTargetPos, unsigned int iWeapID)
+int Actor_Grenade_IsSafeTarget(actor_s *self, const float *vTargetPos, unsigned int iWeapID)
 {
     WeaponDef *weapDef; // r28
     float explosionCutoff; // fp31

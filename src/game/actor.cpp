@@ -1630,7 +1630,7 @@ int __cdecl Actor_InFixedNodeExposedCombat(actor_s *self)
 
     float distance = 64.0f - self->codeGoal.radius;
     float clampedDistance = (distance >= 0.0f) ? distance : 0.0f;
-    bool v7 = Actor_PointNearPoint(self->ent->r.currentOrigin, self->codeGoal.pos, clampedDistance);
+    v7 = Actor_PointNearPoint(self->ent->r.currentOrigin, self->codeGoal.pos, clampedDistance);
 
 
     v8 = 1;

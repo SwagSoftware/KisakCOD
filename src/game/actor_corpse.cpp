@@ -618,7 +618,6 @@ void __cdecl Actor_OrientCorpseToGround(gentity_s *self, int bLerp)
     int entNum; // r3
     float *origin; // r5
     unsigned int clipMask; // r4
-    float pitch; // [sp+50h] [-50h] BYREF
     float roll; // [sp+54h] [-4Ch] BYREF
     float height; //v28
 

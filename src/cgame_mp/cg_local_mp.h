@@ -7,6 +7,7 @@
 #include "cg_public_mp.h"
 
 #include <cgame/cg_local.h>
+#include <bgame/bg_local.h>
 
 #include <gfx_d3d/r_gfx.h>
 #include <gfx_d3d/r_reflection_probe.h>

@@ -70,6 +70,8 @@ struct sentient_info_t
     pathnode_t *pLastKnownNode;
 };
 
+struct SaveGame;
+
 sentient_s *__cdecl Sentient_Alloc();
 void __cdecl Sentient_DissociateSentient(sentient_s *self, sentient_s *other, team_t eOtherTeam);
 void __cdecl Sentient_GetOrigin(const sentient_s *self, float *vOriginOut);

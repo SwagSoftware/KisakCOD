@@ -63,7 +63,7 @@ struct pathlocal_t_tag
     float maxDistSq;
     float maxHeightSq;
     int typeFlags;
-    pathsort_t *nodes;
+    struct pathsort_t *nodes;
     int maxNodes;
     int nodeCount;
 };
@@ -242,7 +242,7 @@ void __cdecl G_UpdateTrackExtraNodes();
 void __cdecl GScr_AddFieldsForPathnode();
 pathnode_t *__cdecl Scr_GetPathnode(unsigned int index);
 void __cdecl G_FreePathnodesScriptInfo();
-bool __cdecl Path_CompareNodesIncreasing(const pathsort_t *ps1, const pathsort_t *ps2);
+bool __cdecl Path_CompareNodesIncreasing(const pathsort_t &ps1, const pathsort_t &ps2);
 unsigned int __cdecl Path_ConvertNodeToIndex(const pathnode_t *node);
 pathnode_t *__cdecl Path_ConvertIndexToNode(unsigned int index);
 unsigned int __cdecl Path_NodeCount();

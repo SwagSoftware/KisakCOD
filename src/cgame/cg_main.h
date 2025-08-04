@@ -14,7 +14,7 @@ struct dvar_s;
 struct playerState_s;
 struct snd_alias_list_t;
 struct PhysPreset;
-struct SndEntHandle;
+union SndEntHandle;
 
 struct cgs_t
 {

@@ -10,117 +10,6 @@
 
 #include <bgame/bg_local.h>
 
-enum he_type_t : __int32
-{
-    HE_TYPE_FREE = 0x0,
-    HE_TYPE_TEXT = 0x1,
-    HE_TYPE_VALUE = 0x2,
-    HE_TYPE_MATERIAL = 0x3,
-    HE_TYPE_TIMER_DOWN = 0x4,
-    HE_TYPE_TIMER_UP = 0x5,
-    HE_TYPE_TENTHS_TIMER_DOWN = 0x6,
-    HE_TYPE_TENTHS_TIMER_UP = 0x7,
-    HE_TYPE_CLOCK_DOWN = 0x8,
-    HE_TYPE_CLOCK_UP = 0x9,
-    HE_TYPE_WAYPOINT = 0xA,
-    HE_TYPE_COUNT = 0xB,
-};
-
-union hudelem_color_t
-{
-    //$0D0CB43DF22755AD856C77DD3F304010 __s0;
-    struct
-    {
-        unsigned __int8 r;
-        unsigned __int8 g;
-        unsigned __int8 b;
-        unsigned __int8 a;
-    };
-    int rgba;
-};
-
-struct hudelem_s
-{
-    he_type_t type;
-    float x;
-    float y;
-    float z;
-    int targetEntNum;
-    float fontScale;
-    float fromFontScale;
-    int fontScaleStartTime;
-    int fontScaleTime;
-    int font;
-    int alignOrg;
-    int alignScreen;
-    hudelem_color_t color;
-    hudelem_color_t fromColor;
-    int fadeStartTime;
-    int fadeTime;
-    int label;
-    int width;
-    int height;
-    int materialIndex;
-    int offscreenMaterialIdx;
-    int fromWidth;
-    int fromHeight;
-    int scaleStartTime;
-    int scaleTime;
-    float fromX;
-    float fromY;
-    int fromAlignOrg;
-    int fromAlignScreen;
-    int moveStartTime;
-    int moveTime;
-    int time;
-    int duration;
-    float value;
-    int text;
-    float sort;
-    hudelem_color_t glowColor;
-    int fxBirthTime;
-    int fxLetterTime;
-    int fxDecayStartTime;
-    int fxDecayDuration;
-    int soundID;
-    int flags;
-};
-
-struct game_hudelem_s
-{
-    hudelem_s elem;
-};
-
-struct playerState_s_hud
-{
-    hudelem_s elem[256];
-};
-
-enum ViewLockTypes : __int32
-{
-    PLAYERVIEWLOCK_NONE = 0x0,
-    PLAYERVIEWLOCK_FULL = 0x1,
-    PLAYERVIEWLOCK_WEAPONJITTER = 0x2,
-    PLAYERVIEWLOCKCOUNT = 0x3,
-};
-
-struct SprintState
-{
-    int sprintButtonUpRequired;
-    int sprintDelay;
-    int lastSprintStart;
-    int lastSprintEnd;
-    int sprintStartMaxLength;
-};
-
-struct MantleState
-{
-    float yaw;
-    int timer;
-    int transIndex;
-    int flags;
-};
-
 enum clientConnected_t : __int32
 {
     CON_DISCONNECTED = 0x0,
@@ -187,21 +76,6 @@ struct gclient_s
     bool previouslyFiring;
     bool previouslyUsingNightVision;
     int groundTiltEntNum;
-};
-
-
-struct serverCommandsHeader_t
-{
-    int rover;
-    int sequence;
-    int sent;
-};
-
-struct serverCommands_s
-{
-    serverCommandsHeader_t header;
-    char buf[8192];
-    int commands[256];
 };
 
 struct client_t

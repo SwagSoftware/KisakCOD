@@ -48,17 +48,6 @@ struct saveField_t
     saveFieldtype_t type;
 };
 
-struct SaveGame
-{
-    MemoryFile memFile;
-    SaveBufferState saveState;
-    SaveHeader header;
-    bool isUsingGlobalBuffer;
-    bool isDirectWriteActive;
-    bool isWrittenToDevice;
-    bool suppressPlayerNotify;
-};
-
 struct actor_s;
 
 // g_save

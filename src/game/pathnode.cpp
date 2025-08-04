@@ -480,18 +480,18 @@ void __cdecl G_FreePathnodesScriptInfo()
     }
 }
 
-bool __cdecl Path_CompareNodesIncreasing(const pathsort_t *ps1, const pathsort_t *ps2)
+bool __cdecl Path_CompareNodesIncreasing(const pathsort_t &ps1, const pathsort_t &ps2)
 {
-    if (ps1->node->dynamic.wLinkCount)
+    if (ps1.node->dynamic.wLinkCount)
     {
-        if (!ps2->node->dynamic.wLinkCount)
+        if (!ps2.node->dynamic.wLinkCount)
             return 1;
     }
-    else if (ps2->node->dynamic.wLinkCount)
+    else if (ps2.node->dynamic.wLinkCount)
     {
         return 0;
     }
-    return ps1->metric < (double)ps2->metric;
+    return ps1.metric < ps2.metric;
 }
 
 unsigned int __cdecl Path_ConvertNodeToIndex(const pathnode_t *node)

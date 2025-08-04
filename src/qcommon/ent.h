@@ -2,6 +2,52 @@
 
 #include <universal/q_shared.h>
 
+#ifdef KISAK_MP
+enum entityType_t : __int32
+{                                       // ...
+    ET_GENERAL = 0x0,
+    ET_PLAYER = 0x1,
+    ET_PLAYER_CORPSE = 0x2,
+    ET_ITEM = 0x3,
+    ET_MISSILE = 0x4,
+    ET_INVISIBLE = 0x5,
+    ET_SCRIPTMOVER = 0x6,
+    ET_SOUND_BLEND = 0x7,
+    ET_FX = 0x8,
+    ET_LOOP_FX = 0x9,
+    ET_PRIMARY_LIGHT = 0xA,
+    ET_MG42 = 0xB,
+    ET_HELICOPTER = 0xC,
+    ET_PLANE = 0xD,
+    ET_VEHICLE = 0xE,
+    ET_VEHICLE_COLLMAP = 0xF,
+    ET_VEHICLE_CORPSE = 0x10,
+    ET_EVENTS = 0x11,
+};
+#elif KISAK_SP
+enum entityType_t : __int32
+{
+    ET_GENERAL = 0x0,
+    ET_PLAYER = 0x1,
+    ET_ITEM = 0x2,
+    ET_MISSILE = 0x3,
+    ET_INVISIBLE = 0x4,
+    ET_SCRIPTMOVER = 0x5,
+    ET_SOUND_BLEND = 0x6,
+    ET_FX = 0x7,
+    ET_LOOP_FX = 0x8,
+    ET_PRIMARY_LIGHT = 0x9,
+    ET_MG42 = 0xA,
+    ET_VEHICLE = 0xB,
+    ET_VEHICLE_COLLMAP = 0xC,
+    ET_VEHICLE_CORPSE = 0xD,
+    ET_ACTOR = 0xE,
+    ET_ACTOR_SPAWNER = 0xF,
+    ET_ACTOR_CORPSE = 0x10,
+    ET_EVENTS = 0x11,
+};
+#endif
+
 struct LerpEntityStateTurret // sizeof=0xC
 {                                       // XREF: LerpEntityStateTypeUnion/r
     float gunAngles[3];

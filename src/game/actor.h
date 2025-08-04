@@ -11,10 +11,10 @@
 #include "actor_animapi.h"
 #include "actor_physics.h"
 #include "actor_navigation.h"
+#include "actor_suppression.h"
 
 #include "sentient.h"
 #include "teams.h"
-#include "actor_suppression.h"
 
 enum AISpecies : __int32
 {
@@ -22,18 +22,6 @@ enum AISpecies : __int32
     AI_SPECIES_DOG = 0x1,
     MAX_AI_SPECIES = 0x2,
     AI_SPECIES_ALL = 0x2,
-};
-
-struct potential_threat_t
-{
-    bool isEnabled;
-    float direction[2];
-};
-
-struct ai_transition_cmd_t
-{
-    ai_state_transition_t eTransition;
-    ai_state_t eState;
 };
 
 enum ai_state_t : __int32
@@ -138,6 +126,17 @@ inline ai_stance_e &operator|=(ai_stance_e &a, ai_stance_e b)
     return a;
 }
 
+struct potential_threat_t
+{
+    bool isEnabled;
+    float direction[2];
+};
+
+struct ai_transition_cmd_t
+{
+    ai_state_transition_t eTransition;
+    ai_state_t eState;
+};
 
 struct ActorCoverArrivalInfo
 {

@@ -539,6 +539,7 @@ struct hudElemSoundInfo_t // sizeof=0x4
 };
 static_assert(sizeof(hudElemSoundInfo_t) == 0x4);
 
+#ifdef KISAK_MP
 enum he_type_t : __int32
 {                                       // XREF: hudelem_s/r
     HE_TYPE_FREE = 0x0,
@@ -557,6 +558,23 @@ enum he_type_t : __int32
     HE_TYPE_WAYPOINT = 0xD,
     HE_TYPE_COUNT = 0xE,
 };
+#elif KISAK_SP
+enum he_type_t : __int32
+{
+    HE_TYPE_FREE = 0x0,
+    HE_TYPE_TEXT = 0x1,
+    HE_TYPE_VALUE = 0x2,
+    HE_TYPE_MATERIAL = 0x3,
+    HE_TYPE_TIMER_DOWN = 0x4,
+    HE_TYPE_TIMER_UP = 0x5,
+    HE_TYPE_TENTHS_TIMER_DOWN = 0x6,
+    HE_TYPE_TENTHS_TIMER_UP = 0x7,
+    HE_TYPE_CLOCK_DOWN = 0x8,
+    HE_TYPE_CLOCK_UP = 0x9,
+    HE_TYPE_WAYPOINT = 0xA,
+    HE_TYPE_COUNT = 0xB,
+};
+#endif
 
 #ifdef KISAK_MP
 struct hudelem_s // sizeof=0xA0

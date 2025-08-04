@@ -8,6 +8,7 @@
 #include <client_mp/client_mp.h>
 #elif KISAK_SP
 #include <server/server.h>
+#include <bgame/bg_local.h>
 #endif
 
 #include <script/scr_stringlist.h>

@@ -4,7 +4,8 @@
 #error This file is for SinglePlayer only 
 #endif
 
-#include "actor.h"
+struct actor_s;
+struct sentient_s;
 
 struct ai_suppression_t
 {

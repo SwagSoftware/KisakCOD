@@ -62,6 +62,7 @@ struct actor_goal_s
 };
 
 struct actor_s;
+enum ai_stance_e : __int32;
 
 bool __cdecl Path_IsPathStanceNode(const pathnode_t *node);
 float __cdecl Path_GetPathDir(float *delta, const float *vFrom, const float *vTo);
@@ -286,7 +287,7 @@ int __cdecl Path_FindPathFromInCylinderNotCrossPlanes(
     float *fDist,
     int iPlaneCount,
     bool bAllowNegotiationLinks);
-const pathnode_t *__cdecl Path_FindFacingNode(sentient_s *pSelf, sentient_s *pOther, sentient_info_t *pInfo);
+const pathnode_t *__cdecl Path_FindFacingNode(sentient_s *pSelf, sentient_s *pOther, struct sentient_info_t *pInfo);
 int __cdecl Path_FindPathGetCloseAsPossible(
     path_t *pPath,
     team_t eTeam,

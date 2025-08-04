@@ -551,7 +551,7 @@ struct gentity_s
     struct gclient_s *client;
     struct actor_s *actor;
     sentient_s *sentient;
-    scr_vehicle_s *scr_vehicle;
+    struct scr_vehicle_s *scr_vehicle;
     TurretInfo *pTurretInfo;
     unsigned __int8 physicsObject;
     unsigned __int8 takedamage;

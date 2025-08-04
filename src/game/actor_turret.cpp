@@ -139,7 +139,6 @@ bool __cdecl Actor_Turret_Start(actor_s *self, ai_state_t ePrevState)
 void __cdecl Actor_DetachTurret(actor_s *self)
 {
     gentity_s *pTurret; // r11
-    gentity_s *pTurret; // r28
     gentity_s *ent; // r3
     TurretInfo *pTurretInfo; // r31
 

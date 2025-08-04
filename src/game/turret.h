@@ -6,6 +6,8 @@
 
 struct gentity_s;
 struct actor_s;
+struct ScriptFunctions;
+struct weaponParms;
 
 void __cdecl TRACK_turret();
 void __cdecl G_InitTurrets();

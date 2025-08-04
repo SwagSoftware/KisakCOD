@@ -1,5 +1,4 @@
 #pragma once
-#include <cstdint>
 #include <universal/q_shared.h>
 #include <qcommon/graph.h>
 

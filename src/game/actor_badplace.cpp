@@ -783,7 +783,7 @@ int __cdecl Actor_BadPlace_FindSafeNodeOutsideBadPlace(
             //    &potentialNodes[v9],
             //    12 * v9 / 12,
             //    Path_CompareNodesIncreasing);
-            std::sort(&potentialNodes[0], &potentialNodes[nodesWritten], Path_CompareNodesIncreasing);
+            std::sort(potentialNodes, potentialNodes + nodesWritten, Path_CompareNodesIncreasing);
         }
     }
 
