@@ -18,8 +18,8 @@ struct ScreenPlacement;
 
 #define ACTIONSLOTS_NUM 3
 
-#define ENTITYNUM_WORLD 1022
-#define ENTITYNUM_NONE 1023 // SP/MP same
+#define ENTITYNUM_WORLD (MAX_GENTITIES - 2)
+#define ENTITYNUM_NONE (MAX_GENTITIES - 1)
 #define SURF_TYPECOUNT 29
 
 #define WEAPON_HINT_OFFSET 4

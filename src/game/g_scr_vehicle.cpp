@@ -21,6 +21,7 @@
 #include <xanim/xanim.h>
 
 #include "bullet.h"
+#include <universal/surfaceflags.h>
 
 //Line 51763:  0006 : 00006554       unsigned short **s_flashTags      827b6554     g_scr_vehicle.obj
 
@@ -159,7 +160,7 @@ void __cdecl VEH_InitVehicle(gentity_s *ent, scr_vehicle_s *veh, __int16 infoIdx
     veh->turret.turretState = VEH_TURRET_STOPPED;
     veh->turret.barrelOffset = 0.0f;
     veh->turret.barrelBlocked = 0;
-    Com_Memset((uint32_t *)&veh->jitter, 0, 60);
+    Com_Memset(&veh->jitter, 0, sizeof(VehicleJitter));
     veh->drawOnCompass = 0;
     veh->lookAtText0 = 0;
     veh->lookAtText1 = 0;
@@ -3120,26 +3121,560 @@ void  VEH_ResetWheels(gentity_s *ent, vehicle_physic_t *phys)
     } while (v5);
 }
 
-void __fastcall CMD_VEH_AttachPath(scr_entref_t *entref)
+void __fastcall VEH_GetWheelOrigin(gentity_s *ent, int idx, float *origin)
+{
+    int v5; // r28
+    scr_vehicle_s *scr_vehicle; // r29
+    DObjAnimMat *mtx; // r30
+    double v10; // fp11
+    int flags; // r11
+    double v12; // fp12
+    double v13; // fp0
+    double v15; // fp9
+    double v17; // fp0
+    double v18; // fp13
+    double v19; // fp12
+    double v20; // fp0
+    double v21; // fp11
+    double v22; // fp0
+
+    v5 = 4 * (idx + 198);
+    scr_vehicle = ent->scr_vehicle;
+    if (*(int *)((char *)&scr_vehicle->pathPos.nodeIdx + v5) < 0)
+    {
+        Com_Error(ERR_DROP, "Script vehicle [%s] needs [%s]", SL_ConvertToString(ent->targetname), SL_ConvertToString(*s_wheelTags[idx]));
+    }
+    mtx = G_DObjGetLocalBoneIndexMatrix(ent, *(_DWORD *)((char *)&scr_vehicle->pathPos.nodeIdx + v5));
+    if (!mtx)
+        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\g_scr_vehicle.cpp", 619, 0, "%s", "mtx");
+    *origin = mtx->trans[0];
+    origin[1] = mtx->trans[1];
+    v10 = mtx->trans[2];
+    origin[2] = mtx->trans[2];
+    flags = scr_vehicle->flags;
+    if ((flags & 8) == 0 && (flags & 1) != 0)
+    {
+        v12 = origin[1];
+        v13 = (float)((float)((float)v10 * (float)v10) + (float)((float)(*origin * *origin) + (float)(origin[1] * origin[1])));
+        if (v13 > (float)(scr_vehicle->phys.maxs[0] * scr_vehicle->phys.maxs[0]))
+        {
+            // aislop
+            //float _FP11 = -__fsqrts(v13);
+            //__asm { fsel      f0, f11, f13, f0 }
+            //v17 = (float)((float)1.0 / (float)_FP0);
+            {
+                float _FP0, _FP11, v17;
+                float f13 = 1.0f;
+
+                _FP11 = -sqrtf(v13);  // same as -__fsqrts(v13)
+                _FP0 = (_FP11 >= 0.0f) ? f13 : _FP11;  // emulate fsel
+                v17 = 1.0f / _FP0;
+            }
+
+            v15 = origin[2];
+            v18 = (float)(*origin * (float)v17);
+            *origin = *origin * (float)v17;
+            v19 = (float)((float)v12 * (float)v17);
+            origin[1] = v19;
+            v20 = (float)((float)v17 * (float)v15);
+            origin[2] = v20;
+            v21 = v20;
+            v22 = (float)(scr_vehicle->phys.maxs[0] - (float)2.0);
+            *origin = (float)v18 * (float)(scr_vehicle->phys.maxs[0] - (float)2.0);
+            origin[1] = (float)v19 * (float)v22;
+            origin[2] = (float)v22 * (float)v21;
+        }
+    }
+}
+
+// KISAKTODO: my god, just merge these with the MP version
+void __fastcall VEH_GroundPlant(gentity_s *ent, vehicle_physic_t *phys, int gravity)
+{
+    scr_vehicle_s *scr_vehicle; // r19
+    vehicle_info_t *v7; // r20
+    int v8; // r23
+    int v9; // r28
+    float *angles; // r24
+    int v11; // r29
+    float *v12; // r30
+    float *wheelZVel; // r31
+    const float *v14; // r6
+    const dvar_s *v15; // r11
+    const float *v16; // r6
+    double fraction; // fp0
+    double v18; // fp13
+    double v19; // fp10
+    double v20; // fp12
+    double v21; // fp9
+    double v22; // fp11
+    double v23; // fp8
+    double v24; // fp10
+    double v25; // fp12
+    double v26; // fp0
+    double v27; // fp13
+    double v28; // fp11
+    double v29; // fp13
+    const dvar_s *v30; // r11
+    double v31; // fp0
+    double v32; // fp12
+    double v33; // fp13
+    double v34; // fp9
+    double v35; // fp11
+    double v36; // fp8
+    double v39; // fp10
+    double v40; // fp0
+    double v43; // fp0
+    double v44; // fp27
+    int v45; // r10
+    double v46; // fp29
+    double v47; // fp28
+    double v48; // fp30
+    double suspensionTravel; // fp0
+    float *v50; // r11
+    unsigned int v51; // r9
+    int v52; // r9
+    float *v53; // r11
+    double v56; // fp0
+    double v59; // fp0
+    double v60; // fp1
+    int flags; // r11
+    const dvar_s *v70; // r11
+    float v71; // [sp+50h] [-2A0h] BYREF
+    float v72; // [sp+54h] [-29Ch]
+    float v73; // [sp+58h] [-298h]
+    float v74; // [sp+60h] [-290h] BYREF
+    float v75; // [sp+64h] [-28Ch]
+    float v76; // [sp+68h] [-288h]
+    float v77; // [sp+70h] [-280h] BYREF
+    float v78; // [sp+74h] [-27Ch]
+    float v79; // [sp+78h] [-278h]
+    float v80; // [sp+7Ch] [-274h]
+    float v81; // [sp+80h] [-270h] BYREF
+    float v82; // [sp+84h] [-26Ch]
+    float v83; // [sp+88h] [-268h]
+    float v84; // [sp+90h] [-260h] BYREF
+    float v85; // [sp+94h] [-25Ch]
+    float v86; // [sp+98h] [-258h]
+    float v87; // [sp+A0h] [-250h] BYREF
+    float v88; // [sp+A4h] [-24Ch]
+    float v89; // [sp+A8h] [-248h]
+    float v90[3]; // [sp+B0h] [-240h] BYREF
+    float v91; // [sp+BCh] [-234h] BYREF
+    float v92; // [sp+C0h] [-230h]
+    float v93; // [sp+C4h] [-22Ch]
+    float v94; // [sp+D4h] [-21Ch]
+    float v95; // [sp+D8h] [-218h]
+    float v96; // [sp+DCh] [-214h]
+    float v97[3]; // [sp+E0h] [-210h] BYREF
+    float v98[3]; // [sp+ECh] [-204h] BYREF
+    float v99[3]; // [sp+F8h] [-1F8h] BYREF
+    float v100[3]; // [sp+104h] [-1ECh] BYREF
+    float v101; // [sp+110h] [-1E0h] BYREF
+    float v102; // [sp+114h] [-1DCh]
+    float v103; // [sp+118h] [-1D8h] BYREF
+    float v104; // [sp+11Ch] [-1D4h]
+    float v105; // [sp+120h] [-1D0h]
+    float v106; // [sp+124h] [-1CCh] BYREF
+    float v107; // [sp+128h] [-1C8h]
+    float v108; // [sp+12Ch] [-1C4h]
+    float v109; // [sp+130h] [-1C0h]
+    float v110; // [sp+134h] [-1BCh]
+    float v111; // [sp+138h] [-1B8h]
+    float v112; // [sp+13Ch] [-1B4h]
+    float v113[6]; // [sp+158h] [-198h] BYREF
+    float v114[4]; // [sp+170h] [-180h] BYREF
+    float v115[4]; // [sp+180h] [-170h] BYREF
+    float v116[4]; // [sp+190h] [-160h] BYREF
+    float v117[4]; // [sp+1A0h] [-150h] BYREF
+    float v118[4]; // [sp+1B0h] [-140h] BYREF
+    float v119[4]; // [sp+1C0h] [-130h] BYREF
+    float v120[4]; // [sp+1D0h] [-120h] BYREF
+    float v121[4]; // [sp+1E0h] [-110h] BYREF
+    float v122[4]; // [sp+1F0h] [-100h] BYREF
+    trace_t v123; // [sp+200h] [-F0h] BYREF
+
+    if (!ent)
+        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\g_scr_vehicle.cpp", 1548, 0, "%s", "ent");
+    if (!ent->scr_vehicle)
+        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\g_scr_vehicle.cpp", 1549, 0, "%s", "ent->scr_vehicle");
+    if (!phys)
+        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\g_scr_vehicle.cpp", 1550, 0, "%s", "phys");
+    scr_vehicle = ent->scr_vehicle;
+    v7 = &s_vehicleInfos[scr_vehicle->infoIdx];
+    if (v7->type && v7->type != 1)
+        MyAssertHandler(
+            "c:\\trees\\cod3\\cod3src\\src\\game\\g_scr_vehicle.cpp",
+            1555,
+            0,
+            "%s",
+            "(info->type == VEH_WHEELS_4) || (info->type == VEH_TANK)");
+    v8 = 529;
+    v9 = v7->type == 0 ? 4 : 6;
+    if ((scr_vehicle->flags & 1) != 0)
+        v8 = 66065;
+    angles = phys->angles;
+    v94 = phys->origin[0];
+    v95 = phys->origin[1];
+    v96 = phys->prevOrigin[2];
+    AnglesToAxis(phys->angles, (float (*)[3])v90);
+    v11 = 0;
+    if (v9 > 0)
+    {
+        v12 = &v101;
+        wheelZVel = phys->wheelZVel;
+        do
+        {
+            VEH_GetWheelOrigin(ent, v11, v122);
+            MatrixTransformVector43(v122, (const mat4x3&)v90, &v74);
+            v15 = g_vehicleDebug;
+            if (g_vehicleDebug->current.enabled)
+            {
+                v114[0] = 1.0;
+                v114[1] = 0.0;
+                v114[2] = 0.0;
+                v114[3] = 1.0;
+                v113[0] = -2.0;
+                v113[1] = -2.0;
+                v113[2] = -2.0;
+                v77 = 2.0;
+                v78 = 2.0;
+                v79 = 2.0;
+                G_DebugBox(&v74, v113, &v77, 0.0, v14, (int)v114, 1);
+                v15 = g_vehicleDebug;
+            }
+            v87 = v74;
+            v71 = v74;
+            v88 = v75;
+            v72 = v75;
+            v89 = v76 + (float)64.0;
+            v73 = v76 - (float)256.0;
+            if (v15->current.enabled)
+            {
+                v120[0] = 0.0;
+                v120[1] = 0.0;
+                v120[2] = 1.0;
+                v120[3] = 1.0;
+                G_DebugLine(&v87, &v71, v120, 1);
+            }
+            G_TraceCapsule(&v123, &v87, vec3_origin, vec3_origin, &v71, ent->s.number, v8);
+            fraction = v123.fraction;
+            if (v123.fraction >= 1.0)
+            {
+                v24 = v71;
+                wheelZVel[12] = 0.0;
+                v25 = v72;
+                v26 = v73;
+            }
+            else
+            {
+                v18 = v87;
+                v19 = (float)(v71 - v87);
+                v20 = v88;
+                v21 = (float)(v72 - v88);
+                v22 = v89;
+                v23 = (float)(v73 - v89);
+                *((_DWORD *)wheelZVel + 12) = (v123.surfaceFlags >> 20) & 0x1F;
+                v24 = (float)((float)((float)v19 * (float)fraction) + (float)v18);
+                v25 = (float)((float)((float)v21 * (float)fraction) + (float)v20);
+                v26 = (float)((float)((float)v23 * (float)fraction) + (float)v22);
+            }
+            v76 = v26;
+            v75 = v25;
+            v74 = v24;
+            if (!gravity
+                || (v27 = (float)(*wheelZVel - (float)40.0),
+                    v28 = wheelZVel[6],
+                    *wheelZVel = *wheelZVel - (float)40.0,
+                    v29 = (float)((float)((float)v27 * (float)0.050000001) + (float)v28),
+                    wheelZVel[6] = v29,
+                    v29 < v26))
+            {
+                *wheelZVel = 0.0;
+                wheelZVel[6] = v26;
+            }
+            v30 = g_vehicleDebug;
+            v31 = wheelZVel[6];
+            *v12 = v24;
+            v12[1] = v25;
+            v12[2] = v31;
+            if (v30->current.enabled)
+            {
+                v116[0] = 0.0;
+                v116[1] = 1.0;
+                v116[2] = 0.0;
+                v116[3] = 1.0;
+                v84 = -2.0;
+                v85 = -2.0;
+                v86 = -2.0;
+                v81 = 2.0;
+                v82 = 2.0;
+                v83 = 2.0;
+                G_DebugBox(v12, &v84, &v81, 0.0, v16, (int)v116, 1);
+            }
+            ++v11;
+            ++wheelZVel;
+            v12 += 3;
+        } while (v11 < v9);
+    }
+
+    // aislop
+    //v32 = (float)((float)((float)(v112 + v106) * (float)0.5) - (float)((float)(v109 + v103) * (float)0.5));
+    //v33 = (float)((float)((float)(v104 + v110) * (float)0.5) - (float)((float)(v107 + v101) * (float)0.5));
+    //v34 = (float)((float)((float)(v106 + v103) * (float)0.5) - (float)((float)(v109 + v112) * (float)0.5));
+    //v35 = (float)((float)((float)(v111 + v105) * (float)0.5) - (float)((float)(v108 + v102) * (float)0.5));
+    //v36 = (float)((float)((float)(v105 + v102) * (float)0.5) - (float)((float)(v108 + v111) * (float)0.5));
+    //_FP0 = -__fsqrts((float)((float)((float)v35 * (float)v35)
+    //    + (float)((float)((float)v33 * (float)v33) + (float)((float)v32 * (float)v32))));
+    //__asm { fsel      f0, f0, f31, f10 }
+    //v39 = (float)((float)((float)(v104 + v101) * (float)0.5) - (float)((float)(v107 + v110) * (float)0.5));
+    //v40 = (float)((float)1.0 / (float)_FP0);
+    //v81 = (float)v40 * (float)((float)((float)(v104 + v110) * (float)0.5) - (float)((float)(v107 + v101) * (float)0.5));
+    //v82 = (float)((float)((float)(v111 + v105) * (float)0.5) - (float)((float)(v108 + v102) * (float)0.5)) * (float)v40;
+    //v83 = (float)((float)((float)(v112 + v106) * (float)0.5) - (float)((float)(v109 + v103) * (float)0.5)) * (float)v40;
+    //_FP13 = -__fsqrts((float)((float)((float)v36 * (float)v36)
+    //    + (float)((float)((float)v39 * (float)v39) + (float)((float)v34 * (float)v34))));
+    //__asm { fsel      f0, f13, f31, f0 }
+    //v43 = (float)((float)1.0 / (float)_FP0);
+    //v84 = (float)v43 * (float)((float)((float)(v104 + v101) * (float)0.5) - (float)((float)(v107 + v110) * (float)0.5));
+    //v85 = (float)((float)((float)(v105 + v102) * (float)0.5) - (float)((float)(v108 + v111) * (float)0.5)) * (float)v43;
+    //v86 = (float)((float)((float)(v106 + v103) * (float)0.5) - (float)((float)(v109 + v112) * (float)0.5)) * (float)v43;
+    //Vec3Cross(&v81, &v84, &v77);
+    {
+        // Compute vector components
+        v32 = ((v112 + v106) * 0.5f) - ((v109 + v103) * 0.5f);
+        v33 = ((v104 + v110) * 0.5f) - ((v107 + v101) * 0.5f);
+        v34 = ((v106 + v103) * 0.5f) - ((v109 + v112) * 0.5f);
+        v35 = ((v111 + v105) * 0.5f) - ((v108 + v102) * 0.5f);
+        v36 = ((v105 + v102) * 0.5f) - ((v108 + v111) * 0.5f);
+
+        // Length of first vector
+        float _FP0 = -sqrtf(v35 * v35 + v33 * v33 + v32 * v32);
+
+        // Replace fsel: f0 = (f0 >= 0.0f) ? f31 : f10
+        // Assuming f31 = 0.0f and f10 = _FP0 from previous step
+        _FP0 = (_FP0 >= 0.0f) ? 0.0f : _FP0;
+
+        // Normalize factor
+        v39 = ((v104 + v101) * 0.5f) - ((v107 + v110) * 0.5f);
+        v40 = 1.0f / _FP0;
+
+        // Normalized components (v81, v82, v83)
+        v81 = v40 * (((v104 + v110) * 0.5f) - ((v107 + v101) * 0.5f));
+        v82 = v40 * (((v111 + v105) * 0.5f) - ((v108 + v102) * 0.5f));
+        v83 = v40 * (((v112 + v106) * 0.5f) - ((v109 + v103) * 0.5f));
+
+        // Length of second vector
+        float _FP13 = -sqrtf(v36 * v36 + v39 * v39 + v34 * v34);
+
+        // Replace fsel: f0 = (f13 >= 0.0f) ? f31 : f0
+        // Assuming f31 = 0.0f
+        _FP0 = (_FP13 >= 0.0f) ? 0.0f : _FP0;
+
+        // Normalize again using updated _FP0
+        v43 = 1.0f / _FP0;
+
+        // Normalized components (v84, v85, v86)
+        v84 = v43 * (((v104 + v101) * 0.5f) - ((v107 + v110) * 0.5f));
+        v85 = v43 * (((v105 + v102) * 0.5f) - ((v108 + v111) * 0.5f));
+        v86 = v43 * (((v106 + v103) * 0.5f) - ((v109 + v112) * 0.5f));
+
+        // Cross product of vectors
+        Vec3Cross(&v81, &v84, &v77);
+
+    }
+
+    v44 = v79;
+    v45 = 1;
+    v46 = v78;
+    v47 = v77;
+    v48 = (float)((float)(v101 * v77) + (float)((float)(v102 * v78) + (float)(v103 * v79)));
+    v80 = (float)(v101 * v77) + (float)((float)(v102 * v78) + (float)(v103 * v79));
+    if (v9 - 1 >= 4)
+    {
+        suspensionTravel = v7->suspensionTravel;
+        v50 = &v106;
+        v51 = ((unsigned int)(v9 - 5) >> 2) + 1;
+        v45 = 4 * v51 + 1;
+        do
+        {
+            if ((float)((float)((float)(*v50 * v79) + (float)((float)(*(v50 - 1) * v78) + (float)(*(v50 - 2) * v77)))
+                - (float)v48) > suspensionTravel)
+                v48 = (float)((float)((float)(*v50 * v79) + (float)((float)(*(v50 - 1) * v78) + (float)(*(v50 - 2) * v77)))
+                    - v7->suspensionTravel);
+            if ((float)((float)((float)(v50[3] * v79) + (float)((float)(v50[2] * v78) + (float)(v50[1] * v77))) - (float)v48) > suspensionTravel)
+                v48 = (float)((float)((float)(v50[3] * v79) + (float)((float)(v50[2] * v78) + (float)(v50[1] * v77)))
+                    - v7->suspensionTravel);
+            if ((float)((float)((float)(v50[6] * v79) + (float)((float)(v50[5] * v78) + (float)(v50[4] * v77))) - (float)v48) > suspensionTravel)
+                v48 = (float)((float)((float)(v50[6] * v79) + (float)((float)(v50[5] * v78) + (float)(v50[4] * v77)))
+                    - v7->suspensionTravel);
+            if ((float)((float)((float)(v50[9] * v79) + (float)((float)(v50[8] * v78) + (float)(v50[7] * v77))) - (float)v48) > suspensionTravel)
+                v48 = (float)((float)((float)(v50[9] * v79) + (float)((float)(v50[8] * v78) + (float)(v50[7] * v77)))
+                    - v7->suspensionTravel);
+            --v51;
+            v50 += 12;
+        } while (v51);
+        v80 = v48;
+    }
+    if (v45 < v9)
+    {
+        v52 = v9 - v45;
+        v53 = &v103 + 3 * v45;
+        do
+        {
+            if ((float)((float)((float)(*v53 * v79) + (float)((float)(*(v53 - 1) * v78) + (float)(*(v53 - 2) * v77)))
+                - (float)v48) > (double)v7->suspensionTravel)
+                v48 = (float)((float)((float)(*v53 * v79) + (float)((float)(*(v53 - 1) * v78) + (float)(*(v53 - 2) * v77)))
+                    - v7->suspensionTravel);
+            --v52;
+            v53 += 3;
+        } while (v52);
+        v80 = v48;
+    }
+    // aislop
+    //Vec3Cross(&v77, v90, &v91);
+    //_FP10 = -__fsqrts((float)((float)(v93 * v93) + (float)((float)(v91 * v91) + (float)(v92 * v92))));
+    //__asm { fsel      f0, f10, f31, f0 }
+    //v56 = (float)((float)1.0 / (float)_FP0);
+    //v91 = v91 * (float)v56;
+    //v92 = v92 * (float)v56;
+    //v93 = v93 * (float)v56;
+    //Vec3Cross(&v91, &v77, v90);
+    //_FP10 = -__fsqrts((float)((float)(v90[1] * v90[1]) + (float)((float)(v90[0] * v90[0]) + (float)(v90[2] * v90[2]))));
+    //__asm { fsel      f0, f10, f31, f0 }
+    //v59 = (float)((float)1.0 / (float)_FP0);
+    //v90[0] = v90[0] * (float)v59;
+    //v90[1] = v90[1] * (float)v59;
+    //v90[2] = v90[2] * (float)v59;
+    //AxisToAngles((const float (*)[3])v90, v121);
+    //*angles = DiffTrackAngle(v121[0], phys->prevAngles[0], 6.0, 0.050000001);
+    //v60 = DiffTrackAngle(v121[2], phys->prevAngles[2], 6.0, 0.050000001);
+    //_FP11 = (float)(*angles - (float)60.0);
+    //_FP10 = (float)((float)-60.0 - *angles);
+    //__asm { fsel      f12, f11, f0, f12 }
+    //_FP11 = (float)((float)-60.0 - (float)v60);
+    //__asm { fsel      f12, f10, f13, f12 }
+    //*angles = _FP12;
+    //_FP12 = (float)((float)v60 - (float)60.0);
+    //__asm
+    //{
+    //    fsel      f0, f12, f0, f1
+    //    fsel      f0, f11, f13, f0
+    //}
+    //phys->angles[2] = _FP0;
+
+    {
+        Vec3Cross(&v77, v90, &v91);
+
+        // Replace __fsqrts with sqrtf
+        float _FP10 = -sqrtf((v93 * v93) + (v91 * v91) + (v92 * v92));
+
+        // Replace fsel with ternary: f0 = (f10 >= 0) ? f31 : f0
+        float _FP0 = (_FP10 >= 0.0f) ? 0.0f : _FP10;
+
+        v56 = 1.0f / _FP0;
+        v91 = v91 * v56;
+        v92 = v92 * v56;
+        v93 = v93 * v56;
+
+        Vec3Cross(&v91, &v77, v90);
+
+        _FP10 = -sqrtf((v90[1] * v90[1]) + (v90[0] * v90[0]) + (v90[2] * v90[2]));
+        _FP0 = (_FP10 >= 0.0f) ? 0.0f : _FP10;
+
+        v59 = 1.0f / _FP0;
+        v90[0] = v90[0] * v59;
+        v90[1] = v90[1] * v59;
+        v90[2] = v90[2] * v59;
+
+        AxisToAngles((const mat3x3&)v90, v121);
+
+        *angles = DiffTrackAngle(v121[0], phys->prevAngles[0], 6.0f, 0.05f);
+        v60 = DiffTrackAngle(v121[2], phys->prevAngles[2], 6.0f, 0.05f);
+
+        float _FP11 = *angles - 60.0f;
+        _FP10 = -60.0f - *angles;
+
+        float _FP12 = (_FP11 >= 0.0f) ? 0.0f : ((_FP10 >= 0.0f) ? -60.0f : *angles);
+        *angles = _FP12;
+
+        _FP12 = v60 - 60.0f;
+        _FP11 = -60.0f - v60;
+
+        _FP0 = (_FP12 >= 0.0f) ? 0.0f : ((_FP11 >= 0.0f) ? -60.0f : v60);
+
+        phys->angles[2] = _FP0;
+    }
+
+    flags = scr_vehicle->flags;
+    if (((flags & 8) != 0 || (flags & 1) == 0) && v44 != 0.0)
+        phys->origin[2] = (float)((float)((float)(phys->origin[0] * (float)v47) + (float)((float)v46 * phys->origin[1]))
+            - (float)v48)
+        * (float)((float)-1.0 / (float)v44);
+    AnglesSubtract(phys->angles, phys->prevAngles, phys->rotVel);
+    v70 = g_vehicleDebug;
+    phys->rotVel[0] = phys->rotVel[0] * (float)20.0;
+    phys->rotVel[1] = phys->rotVel[1] * (float)20.0;
+    phys->rotVel[2] = phys->rotVel[2] * (float)20.0;
+    if (v70->current.enabled)
+    {
+        v97[1] = v102;
+        v97[0] = v101;
+        v98[1] = v105;
+        v98[0] = v104;
+        v99[0] = v107;
+        v99[1] = v108;
+        v100[0] = v110;
+        v100[1] = v111;
+        v117[0] = 1.0;
+        v117[1] = 1.0;
+        v117[2] = 0.0;
+        v117[3] = 1.0;
+        v97[2] = (float)((float)((float)(v102 * (float)v46) + (float)(v101 * (float)v47)) - (float)v48)
+            * (float)((float)-1.0 / (float)v44);
+        v98[2] = (float)((float)((float)(v105 * (float)v46) + (float)(v104 * (float)v47)) - (float)v48)
+            * (float)((float)-1.0 / (float)v44);
+        v99[2] = (float)((float)((float)(v108 * (float)v46) + (float)(v107 * (float)v47)) - (float)v48)
+            * (float)((float)-1.0 / (float)v44);
+        v100[2] = (float)((float)((float)(v111 * (float)v46) + (float)(v110 * (float)v47)) - (float)v48)
+            * (float)((float)-1.0 / (float)v44);
+        G_DebugLine(v97, v98, v117, 1);
+        v118[0] = 1.0;
+        v118[1] = 1.0;
+        v118[2] = 0.0;
+        v118[3] = 1.0;
+        G_DebugLine(v98, v100, v118, 1);
+        v119[0] = 1.0;
+        v119[1] = 1.0;
+        v119[2] = 0.0;
+        v119[3] = 1.0;
+        G_DebugLine(v100, v99, v119, 1);
+        v115[0] = 1.0;
+        v115[1] = 1.0;
+        v115[2] = 0.0;
+        v115[3] = 1.0;
+        G_DebugLine(v99, v97, v115, 1);
+    }
+}
+
+void CMD_VEH_AttachPath(scr_entref_t entref)
 {
     gentity_s *Vehicle; // r28
-    unsigned int v2; // r4
     scr_vehicle_s *scr_vehicle; // r30
     vehicle_info_t *v4; // r26
     __int16 VehicleNodeIndex; // r3
 
-    if ((_WORD)entref)
+    if (entref.classnum)
     {
         Scr_ObjectError("not an entity");
         Vehicle = 0;
     }
     else
     {
-        Vehicle = VEH_GetVehicle(HIWORD(entref));
+        Vehicle = VEH_GetVehicle(entref.entnum);
     }
     scr_vehicle = Vehicle->scr_vehicle;
     v4 = &s_vehicleInfos[scr_vehicle->infoIdx];
-    VehicleNodeIndex = GScr_GetVehicleNodeIndex(0, v2);
+    VehicleNodeIndex = GScr_GetVehicleNodeIndex(0);
     G_VehSetUpPathPos(&scr_vehicle->pathPos, VehicleNodeIndex);
     scr_vehicle->phys.origin[0] = scr_vehicle->pathPos.origin[0];
     scr_vehicle->phys.origin[1] = scr_vehicle->pathPos.origin[1];
@@ -3164,6 +3699,993 @@ void __fastcall CMD_VEH_AttachPath(scr_entref_t *entref)
     scr_vehicle->phys.prevAngles[0] = scr_vehicle->phys.angles[0];
     scr_vehicle->phys.prevAngles[1] = scr_vehicle->phys.angles[1];
     scr_vehicle->phys.prevAngles[2] = scr_vehicle->phys.angles[2];
+}
+
+void CMD_VEH_GetAttachPos(scr_entref_t entref)
+{
+    gentity_s *Vehicle; // r30
+    unsigned int v2; // r4
+    scr_vehicle_s *scr_vehicle; // r31
+    vehicle_info_t *v4; // r29
+    __int16 VehicleNodeIndex; // r3
+    vehicle_physic_t v6; // [sp+50h] [-1E0h] BYREF
+    vehicle_pathpos_t v7; // [sp+150h] [-E0h] BYREF
+
+    if (entref.classnum)
+    {
+        Scr_ObjectError("not an entity");
+        Vehicle = 0;
+    }
+    else
+    {
+        Vehicle = VEH_GetVehicle(entref.entnum);
+    }
+    scr_vehicle = Vehicle->scr_vehicle;
+    v4 = &s_vehicleInfos[scr_vehicle->infoIdx];
+    VehicleNodeIndex = GScr_GetVehicleNodeIndex(0);
+    G_VehSetUpPathPos(&v7, VehicleNodeIndex);
+    Com_Memcpy(&v6, &scr_vehicle->phys, 244);
+    v6.origin[0] = v7.origin[0];
+    v6.origin[1] = v7.origin[1];
+    v6.origin[2] = v7.origin[2];
+    v6.angles[0] = v7.angles[0];
+    v6.angles[1] = v7.angles[1];
+    v6.angles[2] = v7.angles[2];
+    VEH_ResetWheels(Vehicle, &v6);
+    if (!v4->type || v4->type == 1)
+        VEH_GroundPlant(Vehicle, &v6, 0);
+    Scr_MakeArray();
+    Scr_AddVector(v6.origin);
+    Scr_AddArray();
+    Scr_AddVector(v6.angles);
+    Scr_AddArray();
+}
+
+void CMD_VEH_StartPath(scr_entref_t entref)
+{
+    gentity_s *Vehicle; // r31
+    scr_vehicle_s *scr_vehicle; // r30
+    const char *v3; // r3
+
+    if (entref.classnum)
+    {
+        Scr_ObjectError("not an entity");
+        Vehicle = 0;
+    }
+    else
+    {
+        Vehicle = VEH_GetVehicle(entref.entnum);
+    }
+    scr_vehicle = Vehicle->scr_vehicle;
+    if ((unsigned __int16)scr_vehicle->pathPos.nodeIdx >= 0x8000u)
+    {
+        v3 = va("Can't start path on a vehicle that hasn't been attached");
+        Scr_Error(v3);
+    }
+    scr_vehicle->flags |= 8u;
+    Vehicle->s.lerp.eFlags |= 0x100000u;
+}
+
+void CMD_VEH_SetSwitchNode(scr_entref_t entref)
+{
+    gentity_s *Vehicle; // r11
+    vehicle_pathpos_t *p_pathPos; // r31
+    __int16 VehicleNodeIndex; // r30
+    __int16 v6; // r3
+
+    if (entref.classnum)
+    {
+        Scr_ObjectError("not an entity");
+        Vehicle = 0;
+    }
+    else
+    {
+        Vehicle = VEH_GetVehicle(entref.entnum);
+    }
+    p_pathPos = &Vehicle->scr_vehicle->pathPos;
+    VehicleNodeIndex = GScr_GetVehicleNodeIndex(0);
+    v6 = GScr_GetVehicleNodeIndex(1);
+    G_VehSetSwitchNode(p_pathPos, VehicleNodeIndex, v6);
+}
+
+void CMD_VEH_SetWaitNode(scr_entref_t entref)
+{
+    gentity_s *Vehicle; // r11
+    unsigned int v2; // r4
+    scr_vehicle_s *scr_vehicle; // r31
+
+    if (entref.classnum)
+    {
+        Scr_ObjectError("not an entity");
+        Vehicle = 0;
+    }
+    else
+    {
+        Vehicle = VEH_GetVehicle(entref.entnum);
+    }
+    scr_vehicle = Vehicle->scr_vehicle;
+    scr_vehicle->waitNode = GScr_GetVehicleNodeIndex(0);
+}
+
+void CMD_VEH_SetWaitSpeed(scr_entref_t entref)
+{
+    gentity_s *Vehicle; // r11
+    scr_vehicle_s *scr_vehicle; // r31
+    double volume; // fp1
+
+    if (entref.classnum)
+    {
+        Scr_ObjectError("not an entity");
+        Vehicle = 0;
+    }
+    else
+    {
+        Vehicle = VEH_GetVehicle(entref.entnum);
+    }
+    scr_vehicle = Vehicle->scr_vehicle;
+    volume = Scr_GetFloat(0);
+    scr_vehicle->waitSpeed = (float)volume * (float)17.6;
+    if ((float)((float)volume * (float)17.6) < 0.0)
+        Scr_ParamError(0, "Cannot have a negative wait speed on a vehicle");
+}
+
+void CMD_VEH_SetSpeedImmediate(scr_entref_t entref)
+{
+    gentity_s *Vehicle; // r30
+    float *p_nodeIdx; // r31
+    double v3; // fp12
+    double _FP8; // fp8
+    double _FP11; // fp11
+    double v6; // fp11
+    double v7; // fp0
+    double v8; // fp13
+    double v9; // fp12
+    double v10; // fp0
+    float v11; // [sp+50h] [-30h] BYREF
+    float v12; // [sp+54h] [-2Ch]
+    float v13; // [sp+58h] [-28h]
+
+    if (entref.classnum)
+    {
+        Scr_ObjectError("not an entity");
+        Vehicle = 0;
+    }
+    else
+    {
+        Vehicle = VEH_GetVehicle(entref.entnum);
+    }
+    p_nodeIdx = (float *)&Vehicle->scr_vehicle->pathPos.nodeIdx;
+    CMD_VEH_Script_SetSpeed(Vehicle);
+    v11 = 0.0;
+    v12 = 0.0;
+    v13 = 0.0;
+    if (p_nodeIdx[150] <= 0.0 && p_nodeIdx[167] == 0.0 && p_nodeIdx[168] == 0.0 && p_nodeIdx[169] == 0.0)
+        goto LABEL_11;
+    v11 = p_nodeIdx[167] - Vehicle->r.currentOrigin[0];
+    v12 = p_nodeIdx[168] - Vehicle->r.currentOrigin[1];
+    v3 = (float)(p_nodeIdx[169] - Vehicle->r.currentOrigin[2]);
+    _FP8 = -sqrtf((float)((float)(v11 * v11) + (float)((float)((float)v3 * (float)v3) + (float)(v12 * v12))));
+    //__asm { fsel      f11, f8, f10, f11 }
+    if (_FP8 >= 0.0f)
+    {
+        _FP11 = 1.0f;
+    }
+    else
+    {
+        _FP11 = _FP8;
+    }
+    v6 = (float)((float)1.0 / (float)_FP11);
+    v7 = (float)((float)v6 * v11);
+    v11 = (float)v6 * v11;
+    v8 = (float)(v12 * (float)v6);
+    v12 = v12 * (float)v6;
+    v9 = (float)((float)v3 * (float)v6);
+    v13 = v9;
+    if (v7 == 0.0 && v8 == 0.0 && v9 == 0.0)
+        LABEL_11:
+    AngleVectors(Vehicle->r.currentAngles, &v11, 0, 0);
+    v10 = p_nodeIdx[146];
+    p_nodeIdx[150] = p_nodeIdx[146];
+    p_nodeIdx[71] = (float)v10 * v11;
+    p_nodeIdx[72] = v12 * (float)v10;
+    p_nodeIdx[73] = v13 * (float)v10;
+}
+
+void CMD_VEH_GetGoalSpeedMPH(scr_entref_t entref)
+{
+    gentity_s *Vehicle; // r3
+
+    if (entref.classnum)
+    {
+        Scr_ObjectError("not an entity");
+        Vehicle = 0;
+    }
+    else
+    {
+        Vehicle = VEH_GetVehicle(entref.entnum);
+    }
+    Scr_AddFloat((float)(Vehicle->scr_vehicle->manualSpeed * (float)0.05681818));
+}
+
+void CMD_VEH_SetAcceleration(scr_entref_t entref)
+{
+    gentity_s *Vehicle; // r29
+    scr_vehicle_s *scr_vehicle; // r29
+
+    if (entref.classnum)
+    {
+        Scr_ObjectError("not an entity");
+        Vehicle = 0;
+    }
+    else
+    {
+        Vehicle = VEH_GetVehicle(entref.entnum);
+        if (Vehicle)
+            goto LABEL_4;
+    }
+    MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\g_scr_vehicle.cpp", 5044, 0, "%s", "ent");
+LABEL_4:
+    scr_vehicle = Vehicle->scr_vehicle;
+    if (!scr_vehicle)
+        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\g_scr_vehicle.cpp", 5047, 0, "%s", "veh");
+    scr_vehicle->manualAccel = Scr_GetFloat(0) * (float)17.6;
+}
+
+void CMD_VEH_SetDeceleration(scr_entref_t entref)
+{
+    gentity_s *Vehicle; // r29
+    scr_vehicle_s *scr_vehicle; // r29
+
+    if (entref.classnum)
+    {
+        Scr_ObjectError("not an entity");
+        Vehicle = 0;
+    }
+    else
+    {
+        Vehicle = VEH_GetVehicle(entref.entnum);
+        if (Vehicle)
+            goto LABEL_4;
+    }
+    MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\g_scr_vehicle.cpp", 5067, 0, "%s", "ent");
+LABEL_4:
+    scr_vehicle = Vehicle->scr_vehicle;
+    if (!scr_vehicle)
+        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\g_scr_vehicle.cpp", 5070, 0, "%s", "veh");
+    scr_vehicle->manualDecel = Scr_GetFloat(0) * (float)17.6;
+}
+
+void CMD_VEH_SetJitterParams(scr_entref_t entref)
+{
+    gentity_s *Vehicle; // r3
+    scr_vehicle_s *scr_vehicle; // r31
+    double volume; // fp1
+    double v4; // fp1
+
+    if (entref.classnum)
+    {
+        Scr_ObjectError("not an entity");
+        Vehicle = 0;
+    }
+    else
+    {
+        Vehicle = VEH_GetVehicle(entref.entnum);
+    }
+    scr_vehicle = Vehicle->scr_vehicle;
+    Scr_GetVector(0, scr_vehicle->jitter.jitterOffsetRange);
+    if (Scr_GetNumParam() <= 1)
+        volume = 0.5;
+    else
+        volume = Scr_GetFloat(1u);
+    scr_vehicle->jitter.jitterPeriodMin = (int)(float)((float)volume * (float)1000.0);
+    if (Scr_GetNumParam() <= 2)
+        v4 = 1.0;
+    else
+        v4 = Scr_GetFloat(2u);
+    scr_vehicle->jitter.jitterEndTime = 0;
+    scr_vehicle->jitter.jitterPeriodMax = (int)(float)((float)v4 * (float)1000.0);
+}
+
+void VEH_UpdateSounds(gentity_s *ent)
+{
+    scr_vehicle_s *scr_vehicle; // r31
+    unsigned __int16 *sndIndices; // r28
+    BOOL v4; // r27
+    gentity_s *v5; // r3
+    double idleSndLerp; // fp1
+    unsigned __int16 v7; // r5
+    unsigned __int16 v8; // r4
+    gentity_s *v9; // r3
+    VehicleTurretState turretState; // r10
+
+    scr_vehicle = ent->scr_vehicle;
+    sndIndices = (unsigned short*)s_vehicleInfos[scr_vehicle->infoIdx].sndIndices;
+    v4 = ent->health <= 0;
+    iassert(ent->r.inuse);
+    ent->s.loopSound = 0;
+    if (scr_vehicle->idleSndEnt.isDefined())
+    {
+        v5 = scr_vehicle->idleSndEnt.ent();
+        if (v4 || !scr_vehicle->playEngineSound)
+        {
+            v7 = 0;
+            idleSndLerp = 0.0;
+            v8 = 0;
+        }
+        else
+        {
+            idleSndLerp = scr_vehicle->idleSndLerp;
+            v7 = sndIndices[1];
+            v8 = *sndIndices;
+        }
+        G_SetSoundBlend(v5, v8, v7, idleSndLerp);
+    }
+    if (!scr_vehicle->engineSndEnt.isDefined())
+    {
+    LABEL_14:
+        if (v4)
+            return;
+        goto LABEL_15;
+    }
+    v9 = scr_vehicle->engineSndEnt.ent();
+    if (v4 || !scr_vehicle->playEngineSound)
+    {
+        G_SetSoundBlend(v9, 0, 0, 0.0);
+        goto LABEL_14;
+    }
+    G_SetSoundBlend(v9, sndIndices[2], sndIndices[3], scr_vehicle->engineSndLerp);
+LABEL_15:
+    turretState = scr_vehicle->turret.turretState;
+    if (turretState == VEH_TURRET_MOVING && sndIndices[4])
+    {
+        ent->s.loopSound = sndIndices[4];
+    }
+    else if (turretState == VEH_TURRET_STOPPING)
+    {
+        if (sndIndices[5])
+            G_PlaySoundAlias(ent, sndIndices[5]);
+    }
+}
+
+void __fastcall G_FreeVehicle(gentity_s *ent)
+{
+    scr_vehicle_s *scr_vehicle; // r11
+
+    iassert(ent->scr_vehicle->entNum != ENTITYNUM_NONE);
+    ent->health = 0;
+    VEH_UpdateSounds(ent);
+
+    if (ent->scr_vehicle->idleSndEnt.isDefined())
+    {
+        G_FreeEntity(ent->scr_vehicle->idleSndEnt.ent());
+    }
+    if (ent->scr_vehicle->engineSndEnt.isDefined())
+    {
+        G_FreeEntity(ent->scr_vehicle->engineSndEnt.ent());
+    }
+    Scr_SetString(&ent->scr_vehicle->lookAtText0, 0);
+    Scr_SetString(&ent->scr_vehicle->lookAtText1, 0);
+    ent->scr_vehicle->lookAtEnt.setEnt(NULL);
+    ent->scr_vehicle->idleSndEnt.setEnt(NULL);
+    ent->scr_vehicle->engineSndEnt.setEnt(NULL);
+    scr_vehicle = ent->scr_vehicle;
+    ent->nextthink = 0;
+    ent->takedamage = 0;
+    ent->active = 0;
+    ent->handler = 11;
+    ent->s.lerp.eFlags = 0;
+    ent->s.lerp.pos.trType = TR_STATIONARY;
+    ent->s.lerp.apos.trType = TR_STATIONARY;
+    VP_ClearNode(scr_vehicle->pathPos.switchNode);
+    VP_ClearNode(&ent->scr_vehicle->pathPos.switchNode[1]);
+    ent->scr_vehicle->entNum = 2175;
+    ent->scr_vehicle = 0;
+}
+
+void CMD_VEH_JoltBody(scr_entref_t entref)
+{
+    gentity_s *Vehicle; // r30
+    int NumParam; // r31
+    double volume; // fp27
+    double v4; // fp1
+    double v5; // fp30
+    double v6; // fp31
+    double v7; // fp13
+    double v10; // fp11
+    double v11; // fp12
+    float v12; // [sp+50h] [-60h] BYREF
+    float v13; // [sp+54h] [-5Ch]
+    float v14; // [sp+58h] [-58h]
+    float v15[14]; // [sp+60h] [-50h] BYREF
+
+    if (entref.classnum)
+    {
+        Scr_ObjectError("not an entity");
+        Vehicle = 0;
+    }
+    else
+    {
+        Vehicle = VEH_GetVehicle(entref.entnum);
+    }
+    NumParam = Scr_GetNumParam();
+    Scr_GetVector(0, &v12);
+    volume = Scr_GetFloat(1u);
+    if (NumParam <= 2)
+    {
+        v5 = 0.0;
+        v6 = 0.0;
+    }
+    else
+    {
+        v4 = Scr_GetFloat(2);
+        v5 = v4;
+        if (v4 < 0.0 || v4 > 1.0)
+            Scr_ParamError(2u, "Speed fraction must be between [0,1]");
+        v6 = (float)(Scr_GetFloat(3u) * (float)17.6);
+        if (v6 < 0.0)
+            Scr_ParamError(3u, "Deceleration can't be negative");
+    }
+    v7 = (float)(Vehicle->r.currentOrigin[2] - v14);
+    float _FP10 = -sqrtf((float)((float)((float)(Vehicle->r.currentOrigin[0] - v12)
+        * (float)(Vehicle->r.currentOrigin[0] - v12))
+        + (float)((float)((float)(Vehicle->r.currentOrigin[2] - v14)
+            * (float)(Vehicle->r.currentOrigin[2] - v14))
+            + (float)((float)(Vehicle->r.currentOrigin[1] - v13)
+                * (float)(Vehicle->r.currentOrigin[1] - v13)))));
+    float _FP11;
+    //__asm { fsel      f11, f10, f29, f11 }
+    if (_FP10 >= 0.0f)
+    {
+        _FP11 = 1.0f;
+    }
+    else
+    {
+        _FP11 = _FP10;
+    }
+    v10 = (float)((float)1.0 / (float)_FP11);
+    v11 = (float)((float)v10 * (float)(Vehicle->r.currentOrigin[0] - v12));
+    v15[1] = (float)(Vehicle->r.currentOrigin[1] - v13) * (float)v10;
+    v15[0] = v11;
+    v15[2] = (float)v7 * (float)v10;
+    VEH_JoltBody(Vehicle, v15, volume, v5, v6);
+}
+
+void CMD_VEH_FreeVehicle(scr_entref_t entref)
+{
+    gentity_s *Vehicle; // r31
+    const char *v2; // r3
+
+    if (entref.classnum)
+    {
+        Scr_ObjectError("not an entity");
+        Vehicle = 0;
+    }
+    else
+    {
+        Vehicle = VEH_GetVehicle(entref.entnum);
+    }
+    if ((Vehicle->scr_vehicle->flags & 1) != 0)
+    {
+        v2 = va("Can't free vehicle that a player is using");
+        Scr_Error(v2);
+    }
+    G_FreeVehicle(Vehicle);
+    Vehicle->s.eType = ET_VEHICLE_CORPSE;
+    Scr_SetString(&Vehicle->classname, scr_const.script_vehicle_corpse);
+    Scr_Notify(Vehicle, scr_const.death, 0);
+}
+
+void CMD_VEH_GetWheelSurface(scr_entref_t entref)
+{
+    gentity_s *Vehicle; // r3
+    scr_vehicle_s *scr_vehicle; // r28
+    vehicle_info_t *v3; // r30
+    unsigned int ConstString; // r31
+    int v5; // r29
+    const char *v6; // r3
+    int v7; // r3
+    const char *v8; // r3
+
+    if (entref.classnum)
+    {
+        Scr_ObjectError("not an entity");
+        Vehicle = 0;
+    }
+    else
+    {
+        Vehicle = VEH_GetVehicle(entref.entnum);
+    }
+    scr_vehicle = Vehicle->scr_vehicle;
+    v3 = &s_vehicleInfos[scr_vehicle->infoIdx];
+    ConstString = Scr_GetConstString(0);
+    v5 = 0;
+    if (v3->type != 1 && v3->type)
+    {
+        v6 = va("Vehicle type [%s] has no wheels\n", v3->name);
+        Scr_Error(v6);
+    }
+    if (ConstString == scr_const.front_left)
+    {
+        v5 = 0;
+    }
+    else if (ConstString == scr_const.front_right)
+    {
+        v5 = 1;
+    }
+    else if (ConstString == scr_const.back_left)
+    {
+        v5 = 2;
+    }
+    else if (ConstString == scr_const.back_right)
+    {
+        v5 = 3;
+    }
+    else if (ConstString == scr_const.middle_left)
+    {
+        v5 = 4;
+    }
+    else if (ConstString == scr_const.middle_right)
+    {
+        v5 = 5;
+    }
+    else
+    {
+        Scr_ParamError(
+            0,
+            "Valid wheel names are: [front_left, front_right, back_left, back_right, middle_left, middle_right]\n");
+    }
+    if (!v3->type && v5 > 3)
+        Scr_ParamError(0, "Vehicle has no middle wheels\n");
+    v7 = scr_vehicle->phys.wheelSurfType[v5];
+    if (v7)
+    {
+        v8 = Com_SurfaceTypeToName(v7);
+        Scr_AddString(v8);
+    }
+    else
+    {
+        Scr_AddString("none");
+    }
+}
+
+void CMD_VEH_GetVehicleOwner(scr_entref_t entref)
+{
+    gentity_s *Vehicle; // r3
+    EntHandle *p_ownerNum; // r31
+    gentity_s *v3; // r3
+
+    if (entref.classnum)
+    {
+        Scr_ObjectError("not an entity");
+        Vehicle = 0;
+    }
+    else
+    {
+        Vehicle = VEH_GetVehicle(entref.entnum);
+    }
+    p_ownerNum = &Vehicle->r.ownerNum;
+    if (Vehicle->r.ownerNum.isDefined())
+    {
+        v3 = p_ownerNum->ent();
+        Scr_AddEntity(v3);
+    }
+}
+
+void CMD_VEH_StartEngineSound(scr_entref_t entref)
+{
+    gentity_s *Vehicle; // r3
+
+    if (entref.classnum)
+    {
+        Scr_ObjectError("not an entity");
+        Vehicle = 0;
+    }
+    else
+    {
+        Vehicle = VEH_GetVehicle(entref.entnum);
+    }
+    Vehicle->scr_vehicle->playEngineSound = 1;
+}
+
+void CMD_VEH_StopEngineSound(scr_entref_t entref)
+{
+    gentity_s *Vehicle; // r3
+
+    if (entref.classnum)
+    {
+        Scr_ObjectError("not an entity");
+        Vehicle = 0;
+    }
+    else
+    {
+        Vehicle = VEH_GetVehicle(entref.entnum);
+    }
+    Vehicle->scr_vehicle->playEngineSound = 0;
+}
+
+void CMD_VEH_SetEngineVolume(scr_entref_t entref)
+{
+    gentity_s *Vehicle; // r11
+    scr_vehicle_s *scr_vehicle; // r30
+    float volume; // fp1
+    float _FP12; // fp12
+    float _FP13; // fp13
+    float _FP31; // fp31
+    gentity_s *v8; // r3
+    gentity_s *v9; // r3
+
+    if (entref.classnum)
+    {
+        Scr_ObjectError("not an entity");
+        Vehicle = 0;
+    }
+    else
+    {
+        Vehicle = VEH_GetVehicle(entref.entnum);
+    }
+    scr_vehicle = Vehicle->scr_vehicle;
+    volume = Scr_GetFloat(0);
+
+    _FP12 = -volume;
+    _FP13 = (float)((float)volume - (float)1.0);
+
+    if (_FP13 >= 0.0f)
+    {
+        _FP13 = 1.0f;
+    }
+    else
+    {
+        _FP13 = volume;
+    }
+    //__asm { fsel      f13, f13, f0, f1 }
+
+    if (_FP12 >= 0.0f)
+    {
+        _FP31 = 1.0f;
+    }
+    else
+    {
+        _FP31 = _FP13;
+    }
+
+    //__asm { fsel      f31, f12, f0, f13 }
+
+    if (scr_vehicle->idleSndEnt.isDefined())
+    {
+        v8 = scr_vehicle->idleSndEnt.ent();
+        G_SetSoundBlendVolumeScale(v8, _FP31);
+    }
+    if (scr_vehicle->engineSndEnt.isDefined())
+    {
+        v9 = scr_vehicle->engineSndEnt.ent();
+        G_SetSoundBlendVolumeScale(v9, _FP31);
+    }
+}
+
+void CMD_VEH_GetEngineVolume(scr_entref_t entref)
+{
+    gentity_s *Vehicle; // r3
+    scr_vehicle_s *scr_vehicle; // r31
+    double SoundBlendVolumeScale; // fp31
+    EntHandle *v4; // r3
+    EntHandle *v5; // r31
+    gentity_s *v6; // r3
+
+    if (entref.classnum)
+    {
+        Scr_ObjectError("not an entity");
+        Vehicle = 0;
+    }
+    else
+    {
+        Vehicle = VEH_GetVehicle(entref.entnum);
+    }
+    scr_vehicle = Vehicle->scr_vehicle;
+    SoundBlendVolumeScale = 0.0;
+    if (scr_vehicle->engineSndEnt.isDefined())
+    {
+        v4 = &scr_vehicle->engineSndEnt;
+    LABEL_8:
+        v6 = v4->ent();
+        SoundBlendVolumeScale = G_GetSoundBlendVolumeScale(v6);
+        goto LABEL_9;
+    }
+    v5 = &scr_vehicle->idleSndEnt;
+    if (v5->isDefined())
+    {
+        v4 = v5;
+        goto LABEL_8;
+    }
+LABEL_9:
+    Scr_AddFloat(SoundBlendVolumeScale);
+}
+
+void CMD_VEH_MakeVehicleUsable(scr_entref_t entref)
+{
+    gentity_s *Vehicle; // r3
+    int v2; // r10
+
+    if (entref.classnum)
+    {
+        Scr_ObjectError("not an entity");
+        Vehicle = 0;
+    }
+    else
+    {
+        Vehicle = VEH_GetVehicle(entref.entnum);
+    }
+    v2 = Vehicle->r.contents | 0x200000;
+    Vehicle->spawnflags |= 1u;
+    Vehicle->r.contents = v2;
+}
+
+void CMD_VEH_MakeVehicleUnusable(scr_entref_t entref)
+{
+    gentity_s *Vehicle; // r31
+    unsigned int v3; // r10
+
+    if (entref.classnum)
+    {
+        Scr_ObjectError("not an entity");
+        Vehicle = 0;
+    }
+    else
+    {
+        Vehicle = VEH_GetVehicle(entref.entnum);
+    }
+    if (Vehicle->r.ownerNum.isDefined())
+    {
+        Scr_Error(va("Vehicle is already in use"));
+    }
+    v3 = Vehicle->r.contents & 0xFFDFFFFF;
+    Vehicle->spawnflags &= ~1u;
+    Vehicle->r.contents = v3;
+}
+
+void CMD_VEH_AddVehicleToCompass(scr_entref_t entref)
+{
+    gentity_s *Vehicle; // r30
+    const char *String; // r31
+    scr_vehicle_s *scr_vehicle; // r11
+    const char *v4; // r3
+
+    if (entref.classnum)
+    {
+        Scr_ObjectError("not an entity");
+        Vehicle = 0;
+    }
+    else
+    {
+        Vehicle = VEH_GetVehicle(entref.entnum);
+    }
+    if (!Scr_GetNumParam())
+    {
+        Com_PrintWarning(24, "Script AddVehicleToCompass(); Was not passed a compassIconType, defaulting to \"tank\".");
+        Vehicle->s.un1.scale = 1;
+        return;
+    }
+    String = Scr_GetString(0);
+    if (!I_stricmp(String, "tank"))
+        goto LABEL_15;
+    if (!I_stricmp(String, "helicopter"))
+    {
+        Vehicle->s.un1.scale = 2;
+        Vehicle->scr_vehicle->drawOnCompass = 1;
+        return;
+    }
+    if (!I_stricmp(String, "plane"))
+    {
+        Vehicle->s.un1.scale = 3;
+        Vehicle->scr_vehicle->drawOnCompass = 1;
+        return;
+    }
+    if (!I_stricmp(String, "automobile"))
+    {
+        Vehicle->s.un1.scale = 4;
+        Vehicle->scr_vehicle->drawOnCompass = 1;
+        return;
+    }
+    if (!*String)
+    {
+        Com_PrintWarning(24, "Script AddVehicleToCompass(); Was not passed a compassIconType, defaulting to \"tank\".");
+    LABEL_15:
+        scr_vehicle = Vehicle->scr_vehicle;
+        Vehicle->s.un1.scale = 1;
+        scr_vehicle->drawOnCompass = 1;
+        return;
+    }
+    v4 = va("Unrecognized vehicle type given, \"%s\".", String);
+    Scr_Error(v4);
+    Vehicle->scr_vehicle->drawOnCompass = 1;
+}
+
+void CMD_VEH_RemoveVehicleFromCompass(scr_entref_t entref)
+{
+    gentity_s *Vehicle; // r3
+
+    if (entref.classnum)
+    {
+        Scr_ObjectError("not an entity");
+        Vehicle = 0;
+    }
+    else
+    {
+        Vehicle = VEH_GetVehicle(entref.entnum);
+    }
+    Vehicle->scr_vehicle->drawOnCompass = 0;
+    Vehicle->s.un1.scale = 0;
+}
+
+void CMD_VEH_SetVehicleLookatText(scr_entref_t entref)
+{
+    gentity_s *Vehicle; // r11
+    scr_vehicle_s *scr_vehicle; // r31
+    unsigned int ConstString; // r3
+    unsigned int ConstIString; // r3
+
+    if (entref.classnum)
+    {
+        Scr_ObjectError("not an entity");
+        Vehicle = 0;
+    }
+    else
+    {
+        Vehicle = VEH_GetVehicle(entref.entnum);
+    }
+    scr_vehicle = Vehicle->scr_vehicle;
+    ConstString = Scr_GetConstString(0);
+    Scr_SetString(&scr_vehicle->lookAtText0, ConstString);
+    if (Scr_GetNumParam() > 1)
+    {
+        ConstIString = Scr_GetConstIString(1u);
+        Scr_SetString(&scr_vehicle->lookAtText1, ConstIString);
+    }
+}
+
+vehicle_info_t *VEH_GetVehicleInfo(__int16 index)
+{
+    int v1; // r31
+
+    v1 = index;
+    if (index < 0)
+        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\g_scr_vehicle.cpp", 530, 0, "%s", "index >= 0");
+    if (v1 >= s_numVehicleInfos)
+        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\g_scr_vehicle.cpp", 531, 0, "%s", "index < s_numVehicleInfos");
+    return &s_vehicleInfos[v1];
+}
+
+void HELI_CancelAIMove(gentity_s *ent)
+{
+    scr_vehicle_s *scr_vehicle; // r11
+    float *origin; // r31
+    double value; // fp0
+    double v5; // fp13
+    double v6; // fp11
+    float v7[4]; // [sp+50h] [-80h] BYREF
+    float v8[4]; // [sp+60h] [-70h] BYREF
+    float v9[3]; // [sp+70h] [-60h] BYREF
+    float v10[3]; // [sp+7Ch] [-54h] BYREF
+    float v11[8]; // [sp+88h] [-48h] BYREF
+
+    if (!ent)
+        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\g_helicopter.cpp", 341, 0, "%s", "ent");
+    if (!ent->scr_vehicle)
+        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\g_helicopter.cpp", 342, 0, "%s", "ent->scr_vehicle");
+    scr_vehicle = ent->scr_vehicle;
+    origin = scr_vehicle->phys.origin;
+    VEH_GetVehicleInfo(scr_vehicle->infoIdx);
+    v7[0] = 0.0;
+    v7[1] = origin[7];
+    v7[2] = 0.0;
+    AngleVectors(v7, v9, v10, v11);
+    v11[3] = 0.0;
+    v11[4] = 0.0;
+    v11[5] = 0.0;
+    value = vehHelicopterMaxPitch->current.value;
+    if (value <= 0.0)
+        value = 1.0;
+    v5 = vehHelicopterMaxRoll->current.value;
+    if (v5 <= 0.0)
+        v5 = 1.0;
+    v6 = origin[8];
+    v8[0] = origin[6] / (float)value;
+    v8[1] = (float)v6 / (float)v5;
+    v8[2] = 0.0;
+    MatrixTransformVector(v8, (const mat3x3&)v9, origin + 55);
+    origin[58] = 0.0;
+    origin[59] = 0.0;
+    origin[60] = 0.0;
+}
+
+void VEH_CancelAIMove(gentity_s *ent)
+{
+    scr_vehicle_s *scr_vehicle; // r11
+    int infoIdx; // r9
+
+    if (!ent)
+        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\g_scr_vehicle.cpp", 3146, 0, "%s", "ent");
+    if (!ent->scr_vehicle)
+        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\g_scr_vehicle.cpp", 3147, 0, "%s", "ent->scr_vehicle");
+    scr_vehicle = ent->scr_vehicle;
+    infoIdx = scr_vehicle->infoIdx;
+    scr_vehicle->flags &= ~2u;
+    if (s_vehicleInfos[infoIdx].type == 5)
+        HELI_CancelAIMove(ent);
+}
+
+void CMD_VEH_ReturnPlayerControl(scr_entref_t entref)
+{
+    gentity_s *Vehicle; // r31
+
+    if (entref.classnum)
+    {
+        Scr_ObjectError("not an entity");
+        Vehicle = 0;
+    }
+    else
+    {
+        Vehicle = VEH_GetVehicle(entref.entnum);
+    }
+    if (Vehicle->r.ownerNum.isDefined())
+        VEH_CancelAIMove(Vehicle);
+}
+
+void CMD_VEH_IsTurretReady(scr_entref_t entref)
+{
+    gentity_s *Vehicle; // r3
+    scr_vehicle_s *scr_vehicle; // r31
+    const char *v3; // r3
+
+    if (entref.classnum)
+    {
+        Scr_ObjectError("not an entity");
+        Vehicle = 0;
+    }
+    else
+    {
+        Vehicle = VEH_GetVehicle(entref.entnum);
+    }
+    scr_vehicle = Vehicle->scr_vehicle;
+    if ((scr_vehicle->flags & 1) == 0)
+    {
+        v3 = va("Must be called on a player controlled vehicle");
+        Scr_Error(v3);
+    }
+    Scr_AddInt(scr_vehicle->turret.fireTime <= 0);
+}
+
+void CMD_VEH_ForceMaterialSpeed(scr_entref_t entref)
+{
+    gentity_s *Vehicle; // r3
+    scr_vehicle_s *scr_vehicle; // r31
+    unsigned int v3; // r11
+    double Float; // fp1
+    int flags; // r11
+
+    if (entref.classnum)
+    {
+        Scr_ObjectError("not an entity");
+        Vehicle = 0;
+    }
+    else
+    {
+        Vehicle = VEH_GetVehicle(entref.entnum);
+    }
+    scr_vehicle = Vehicle->scr_vehicle;
+    if (!scr_vehicle)
+        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\g_scr_vehicle.cpp", 6301, 0, "%s", "veh");
+    if (Scr_GetInt(0))
+    {
+        Float = Scr_GetFloat(1u);
+        flags = scr_vehicle->flags;
+        scr_vehicle->forcedMaterialSpeed = Float;
+        v3 = flags | 4;
+    }
+    else
+    {
+        v3 = scr_vehicle->flags & 0xFFFFFFFB;
+    }
+    scr_vehicle->flags = v3;
 }
 
 const BuiltinMethodDef s_methods[50] =
