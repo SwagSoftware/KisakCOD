@@ -2934,10 +2934,7 @@ void __cdecl Vec3Copy(const vec3r from, vec3r to)
 
 float __cdecl Vec3Length(const vec3r v)
 {
-    float v3; // [esp+4h] [ebp-4h]
-
-    v3 = v[2] * v[2] + v[1] * v[1] + *v * *v;
-    return (float)sqrt(v3);
+    return sqrtf((v[2] * v[2]) + (v[1] * v[1]) + (v[0] * v[0]));
 }
 
 float __cdecl Vec3Dot(const vec3r a, const vec3r b)
@@ -3429,4 +3426,14 @@ void Vec3Basis_LeftHanded(const float *forward, float *right, float *up)
 {
     PerpendicularVector(forward, up);
     Vec3Cross(forward, up, right);
+}
+
+float Vec3DistanceSq(const float *p1, const float *p2)
+{
+    float v_4; // [esp+4h] [ebp-8h]
+    float v_8; // [esp+8h] [ebp-4h]
+
+    v_4 = p2[1] - p1[1];
+    v_8 = p2[2] - p1[2];
+    return v_8 * v_8 + v_4 * v_4 + (float)(*p2 - *p1) * (float)(*p2 - *p1);
 }

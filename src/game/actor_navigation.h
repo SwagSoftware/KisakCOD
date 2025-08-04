@@ -1,5 +1,6 @@
 #pragma once
 #include "teams.h"
+#include "sentient.h"
 
 #ifndef KISAK_SP 
 #error This file is for SinglePlayer only 
@@ -62,6 +63,7 @@ struct actor_goal_s
 };
 
 struct actor_s;
+struct pathnode_t;
 enum ai_stance_e : __int32;
 
 bool __cdecl Path_IsPathStanceNode(const pathnode_t *node);
@@ -82,7 +84,7 @@ unsigned int __cdecl Path_AttemptedCompleteLookahead(const path_t *pPath);
 bool __cdecl Path_UsesObstacleNegotiation(const path_t *pPath);
 bool __cdecl Path_HasNegotiationNode(const path_t *path);
 unsigned int __cdecl Path_AllowsObstacleNegotiation(const path_t *pPath);
-void __cdecl Path_GetObstacleNegotiationScript(const path_t *pPath, scr_animscript_t *animscript);
+void __cdecl Path_GetObstacleNegotiationScript(const path_t *pPath, struct scr_animscript_t *animscript);
 int __cdecl Path_NeedsReevaluation(const path_t *pPath);
 int __cdecl Path_EncroachesPoint2D(path_t *pPath, const float *vStart, const float *vPoint, float fMinDistSqrd);
 int __cdecl Path_DistanceGreaterThan(path_t *pPath, float fDist);
@@ -116,7 +118,7 @@ ai_stance_e __cdecl Path_AllowedStancesForPath(path_t *pPath);
 void __cdecl Path_DodgeDrawRaisedLine(float *start, float *end, const float *color);
 int __cdecl Path_MayFaceEnemy(path_t *pPath, float *vEnemyDir, float *vOrg);
 void __cdecl Path_Restore(path_t *path);
-int __cdecl Path_FindPathFromTo(
+bool __cdecl Path_FindPathFromTo(
     path_t *pPath,
     team_t eTeam,
     pathnode_t *pNodeFrom,
@@ -155,7 +157,7 @@ void __cdecl Path_CalcLookahead_Completed(
     float *vStartPos,
     int bReduceLookaheadAmount,
     double totalArea);
-void __cdecl Path_CalcLookahead(path_t *pPath, float *vStartPos, int bReduceLookaheadAmount, int a4, int a5);
+void __cdecl Path_CalcLookahead(path_t *pPath, float *vStartPos, int bReduceLookaheadAmount);
 void __cdecl Path_CheckNodeCountForDodge(path_t *pPath, int numNeeded, pathpoint_t **pt, int *startIndex);
 void __cdecl Path_TrimToBadPlaceLink(path_t *pPath, team_t eTeam);
 int __cdecl Path_FindPath(
@@ -205,7 +207,7 @@ pathnode_t *__cdecl Path_FindCloseNode(
     pathnode_t *pNodeFrom,
     const float *vGoalPos,
     bool bAllowNegotiationLinks);
-int __cdecl Path_FindPathFromToWithWidth(
+bool __cdecl Path_FindPathFromToWithWidth(
     path_t *pPath,
     team_t eTeam,
     pathnode_t *pNodeFrom,
@@ -215,7 +217,7 @@ int __cdecl Path_FindPathFromToWithWidth(
     bool bAllowNegotiationLinks,
     double width,
     float *perp);
-int __cdecl Path_FindPathFromToNotCrossPlanes(
+bool __cdecl Path_FindPathFromToNotCrossPlanes(
     path_t *pPath,
     team_t eTeam,
     pathnode_t *pNodeFrom,
@@ -226,7 +228,7 @@ int __cdecl Path_FindPathFromToNotCrossPlanes(
     float *fDist,
     int iPlaneCount,
     bool bAllowNegotiationLinks);
-int __cdecl Path_FindPathFromAway(
+bool __cdecl Path_FindPathFromAway(
     path_t *pPath,
     team_t eTeam,
     pathnode_t *pNodeFrom,
@@ -234,7 +236,7 @@ int __cdecl Path_FindPathFromAway(
     float *vAwayFromPos,
     float fDistAway,
     bool bAllowNegotiationLinks);
-int __cdecl Path_FindPathFromAwayNotCrossPlanes(
+bool __cdecl Path_FindPathFromAwayNotCrossPlanes(
     path_t *pPath,
     team_t eTeam,
     pathnode_t *pNodeFrom,
@@ -245,7 +247,7 @@ int __cdecl Path_FindPathFromAwayNotCrossPlanes(
     float *fDist,
     int iPlaneCount,
     bool bAllowNegotiationLinks);
-int __cdecl Path_FindPathInCylinderWithLOS(
+bool __cdecl Path_FindPathInCylinderWithLOS(
     path_t *pPath,
     team_t eTeam,
     const float *vStartPos,
@@ -253,7 +255,7 @@ int __cdecl Path_FindPathInCylinderWithLOS(
     const actor_goal_s *goal,
     float fWithinDistSqrd,
     bool bAllowNegotiationLinks);
-int __cdecl Path_FindPathInCylinderWithLOSNotCrossPlanes(
+bool __cdecl Path_FindPathInCylinderWithLOSNotCrossPlanes(
     path_t *pPath,
     team_t eTeam,
     const float *vStartPos,
@@ -264,7 +266,7 @@ int __cdecl Path_FindPathInCylinderWithLOSNotCrossPlanes(
     float *fDist,
     int iPlaneCount,
     bool bAllowNegotiationLinks);
-pathnode_t *__cdecl Path_FindPathFromInCylinder(
+bool __cdecl Path_FindPathFromInCylinder(
     path_t *pPath,
     team_t eTeam,
     pathnode_t *pNodeFrom,
@@ -288,7 +290,7 @@ int __cdecl Path_FindPathFromInCylinderNotCrossPlanes(
     int iPlaneCount,
     bool bAllowNegotiationLinks);
 const pathnode_t *__cdecl Path_FindFacingNode(sentient_s *pSelf, sentient_s *pOther, struct sentient_info_t *pInfo);
-int __cdecl Path_FindPathGetCloseAsPossible(
+bool __cdecl Path_FindPathGetCloseAsPossible(
     path_t *pPath,
     team_t eTeam,
     pathnode_t *pNodeFrom,
@@ -296,7 +298,7 @@ int __cdecl Path_FindPathGetCloseAsPossible(
     pathnode_t *pNodeTo,
     const float *vGoalPos,
     bool bAllowNegotiationLinks);
-int __cdecl Path_FindPathWithWidth(
+bool __cdecl Path_FindPathWithWidth(
     path_t *pPath,
     team_t eTeam,
     const float *vStartPos,
@@ -304,7 +306,7 @@ int __cdecl Path_FindPathWithWidth(
     bool bAllowNegotiationLinks,
     double width,
     float *perp);
-int __cdecl Path_FindPathNotCrossPlanes(
+bool __cdecl Path_FindPathNotCrossPlanes(
     path_t *pPath,
     team_t eTeam,
     const float *vStartPos,
@@ -313,7 +315,7 @@ int __cdecl Path_FindPathNotCrossPlanes(
     float *fDist,
     int iPlaneCount,
     bool bAllowNegotiationLinks);
-pathnode_t *__cdecl Path_FindPathFromNotCrossPlanes(
+bool __cdecl Path_FindPathFromNotCrossPlanes(
     path_t *pPath,
     team_t eTeam,
     pathnode_t *pNodeFrom,

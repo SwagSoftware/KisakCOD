@@ -4,17 +4,18 @@
 #error This file is for SinglePlayer only 
 #endif
 
-#include <bgame/bg_local.h>
-#include "pathnode.h"
-#include <bgame/bg_actor_prone.h>
-
 #include "actor_animapi.h"
 #include "actor_physics.h"
 #include "actor_navigation.h"
 #include "actor_suppression.h"
 
+#include "pathnode.h"
+
 #include "sentient.h"
 #include "teams.h"
+
+#include <bgame/bg_local.h>
+#include <bgame/bg_actor_prone.h>
 
 enum AISpecies : __int32
 {
@@ -183,6 +184,7 @@ struct ActorAnimSets
     unsigned __int16 animProneLevel;
     unsigned __int16 animProneHigh;
 };
+
 
 
 struct ai_orient_t
@@ -608,3 +610,5 @@ extern const char *g_entinfoAITextNames[6];
 
 // actor_function_table
 extern const ai_funcs_t *AIFuncTable[2];
+
+extern float g_pathAttemptGoalPos[3];

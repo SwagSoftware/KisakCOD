@@ -8,33 +8,38 @@
 #include "game_public.h"
 #include "actor_senses.h"
 #include <server/sv_game.h>
-
-//   int const __cdecl Path_AStarAlgorithm<class CustomSearchInfo_FindCloseNode>(struct path_t *, enum team_t, float const *const, struct pathnode_t *, float const *const, int, int, class CustomSearchInfo_FindCloseNode &) 82202a88 f   actor_navigation.obj
-//   int const __cdecl Path_AStarAlgorithm<class CustomSearchInfo_FindPathWithWidth>(struct path_t *, enum team_t, float const *const, struct pathnode_t *, float const *const, int, int, class CustomSearchInfo_FindPathWithWidth &) 82202dd0 f   actor_navigation.obj
-//   int const __cdecl Path_AStarAlgorithm<class CustomSearchInfo_FindPathNotCrossPlanes>(struct path_t *, enum team_t, float const *const, struct pathnode_t *, float const *const, int, int, class CustomSearchInfo_FindPathNotCrossPlanes &) 82203188 f   actor_navigation.obj
-//   int const __cdecl Path_AStarAlgorithm<class CustomSearchInfo_FindPathAway>(struct path_t *, enum team_t, float const *const, struct pathnode_t *, float const *const, int, int, class CustomSearchInfo_FindPathAway &) 822035a0 f   actor_navigation.obj
-//   int const __cdecl Path_AStarAlgorithm<class CustomSearchInfo_FindPathAwayNotCrossPlanes>(struct path_t *, enum team_t, float const *const, struct pathnode_t *, float const *const, int, int, class CustomSearchInfo_FindPathAwayNotCrossPlanes &) 822039d8 f   actor_navigation.obj
-//   int const __cdecl Path_AStarAlgorithm<class CustomSearchInfo_FindPathInCylinderWithLOS>(struct path_t *, enum team_t, float const *const, struct pathnode_t *, float const *const, int, int, class CustomSearchInfo_FindPathInCylinderWithLOS &) 82203e78 f   actor_navigation.obj
-//   int const __cdecl Path_AStarAlgorithm<class CustomSearchInfo_FindPathInCylinderWithLOSNotCrossPlanes>(struct path_t *, enum team_t, float const *const, struct pathnode_t *, float const *const, int, int, class CustomSearchInfo_FindPathInCylinderWithLOSNotCrossPlanes &) 82204298 f   actor_navigation.obj
-//   int const __cdecl Path_AStarAlgorithm<class CustomSearchInfo_FindPathFromInCylinder>(struct path_t *, enum team_t, float const *const, struct pathnode_t *, float const *const, int, int, class CustomSearchInfo_FindPathFromInCylinder &) 822046b8 f   actor_navigation.obj
-//   int const __cdecl Path_AStarAlgorithm<class CustomSearchInfo_FindPathFromInCylinderNotCrossPlanes>(struct path_t *, enum team_t, float const *const, struct pathnode_t *, float const *const, int, int, class CustomSearchInfo_FindPathFromInCylinderNotCrossPlanes &) 82204ac0 f   actor_navigation.obj
-//   int const __cdecl Path_AStarAlgorithm<class CustomSearchInfo_CouldAttack>(struct path_t *, enum team_t, float const *const, struct pathnode_t *, float const *const, int, int, class CustomSearchInfo_CouldAttack &) 82204e88 f   actor_navigation.obj
-//   int const __cdecl Path_AStarAlgorithm<class CustomSearchInfo_FindPathClosestPossible>
-//   int const __cdecl Path_AStarAlgorithm<class CustomSearchInfo_FindPath>(struct path_t *, enum team_t, float const *const, struct pathnode_t *, float const *const, int, int, class CustomSearchInfo_FindPath &) 821fef98 f   actor_navigation.obj
-
-// Line 26290:  0004 : 000f6960       public: float const __cdecl CustomSearchInfo_FindPath::EvaluateHeuristic(struct pathnode_t *, float const *const) 82206960 f i actor_navigation.obj
-// Line 26291 : 0004 : 000f6a00       public: float const __cdecl CustomSearchInfo_FindPathWithWidth::EvaluateHeuristic(struct pathnode_t *, float const *const) 82206a00 f i actor_navigation.obj
-// Line 26292 : 0004 : 000f6a98       public: BOOL const __cdecl CustomSearchInfo_FindPathNotCrossPlanes::IgnoreNode(struct pathnode_t *) 82206a98 f i actor_navigation.obj
-// Line 26293 : 0004 : 000f6af8       public: BOOL const __cdecl CustomSearchInfo_FindPathAwayNotCrossPlanes::IgnoreNode(struct pathnode_t *) 82206af8 f i actor_navigation.obj
-// Line 26294 : 0004 : 000f6b58       public: float const __cdecl CustomSearchInfo_FindPathWithLOS::EvaluateHeuristic(struct pathnode_t *, float const *const) 82206b58 f i actor_navigation.obj
-// Line 26295 : 0004 : 000f6bf8       public: BOOL const __cdecl CustomSearchInfo_FindPathInCylinderWithLOSNotCrossPlanes::IgnoreNode(struct pathnode_t *) 82206bf8 f i actor_navigation.obj
-// Line 26296 : 0004 : 000f6ca0       public: BOOL const __cdecl CustomSearchInfo_FindPathFromInCylinderNotCrossPlanes::IgnoreNode(struct pathnode_t *) 82206ca0 f i actor_navigation.obj
+#include <universal/profile.h>
 
 struct CustomSearchInfo_FindCloseNode
 {
     float goalPos[3];
     pathnode_t *closestNode;
     float closestDistSq;
+
+    float EvaluateHeuristic(pathnode_t *pSuccessor, const float *vGoalPos)
+    {
+        return Vec2Distance(pSuccessor->constant.vOrigin, vGoalPos);
+    }
+
+    bool IgnoreNode(pathnode_t *pNode)
+    {
+        float v3; // [esp+Ch] [ebp-Ch]
+        float heightDist; // [esp+10h] [ebp-8h]
+        float distSq; // [esp+14h] [ebp-4h]
+
+        v3 = this->goalPos[1] - pNode->constant.vOrigin[1];
+        distSq = (float)((float)(this->goalPos[0] - pNode->constant.vOrigin[0])
+            * (float)(this->goalPos[0] - pNode->constant.vOrigin[0]))
+            + (float)(v3 * v3);
+        if (distSq >= this->closestDistSq)
+            return 1;
+        heightDist = pNode->constant.vOrigin[2] - this->goalPos[2];
+        if ((float)(heightDist * heightDist) > 6400.0)
+            return 1;
+        this->closestDistSq = distSq;
+        this->closestNode = pNode;
+        return 0;
+    }
 };
 
 struct CustomSearchInfo_FindPath
@@ -42,6 +47,22 @@ struct CustomSearchInfo_FindPath
     pathnode_t *m_pNodeTo;
     float startPos[3];
     float negotiationOverlapCost;
+
+    float EvaluateHeuristic(pathnode_t *pSuccessor, const float *vGoalPos)
+    {
+        float v[2]; // [esp+18h] [ebp-Ch] BYREF
+        float dist; // [esp+20h] [ebp-4h]
+
+        v[0] = vGoalPos[0] - pSuccessor->constant.vOrigin[0];
+        v[1] = vGoalPos[1] - pSuccessor->constant.vOrigin[1];
+        dist = Vec2Length(v);
+        dist = (float)((float)pSuccessor->dynamic.userCount * this->negotiationOverlapCost) + dist;
+        if (pSuccessor->constant.minUseDistSq > 1.0 && pSuccessor->constant.minUseDistSq > Vec3DistanceSq(pSuccessor->constant.vOrigin, this->startPos))
+        {
+            return (float)(dist + this->negotiationOverlapCost);
+        }
+        return dist;
+    }
 };
 /* 10044 */
 struct CustomSearchInfo_FindPathWithWidth
@@ -49,6 +70,55 @@ struct CustomSearchInfo_FindPathWithWidth
     pathnode_t *m_pNodeTo;
     float width;
     float perp[2];
+
+    float EvaluateHeuristic(pathnode_t *pSuccessor, const float *vGoalPos)
+    {
+        double v5; // fp31
+        double v6; // fp30
+        double v8; // fp1
+
+        // KISAKTODO: better logic
+        float a4 = (float)((float)fabsf((float)((float)((float)(this->perp[1]
+            * (float)(pSuccessor->constant.vOrigin[1] - vGoalPos[1]))
+            + (float)((float)(pSuccessor->constant.vOrigin[0] - *vGoalPos)
+                * this->perp[0]))
+            - this->width))
+            * (float)0.0069077001);
+
+        v5 = (float)(pSuccessor->constant.vOrigin[0] - vGoalPos[0]);
+        v6 = (float)(pSuccessor->constant.vOrigin[1] - vGoalPos[1]);
+        float v7 = exp(a4);
+
+        pSuccessor->transient.costFactor = v7;
+
+        v8 = (float)((float)sqrtf((float)((float)((float)v6 * (float)v6) + (float)((float)v5 * (float)v5))) * (float)*(double *)&v7);
+        return v8;
+
+        //double v4; // xmm0_8
+        //long double v6; // [esp-18h] [ebp-3Ch]
+        //float v7; // [esp+8h] [ebp-1Ch] BYREF
+        //float dist; // [esp+Ch] [ebp-18h]
+        //float *vOrigin; // [esp+10h] [ebp-14h]
+        //float delta[3]; // [esp+14h] [ebp-10h]
+        //float retaddr; // [esp+24h] [ebp+0h]
+        //
+        //delta[1] = a2;
+        //delta[2] = retaddr;
+        //LODWORD(delta[0]) = this;
+        //vOrigin = pSuccessor->constant.vOrigin;
+        //v7 = pSuccessor->constant.vOrigin[0] - vGoalPos[0];
+        //dist = pSuccessor->constant.vOrigin[1] - vGoalPos[1];
+        //v4 = (float)(COERCE_FLOAT(
+        //    COERCE_UNSIGNED_INT((float)((float)(this->perp[0] * v7) 
+        //        + (float)(this->perp[1] * dist)) - this->width)
+        //    & _mask__AbsFloat_)
+        //    * 0.0069077001);
+        ////__libm_sse2_exp(v6);
+        //exp(v6);
+        ////*(float *)&v4 = v4;
+        //pSuccessor->transient.costFactor = *(float *)&v4;
+        //return Vec2Length(&v7) * *(float *)&v4;
+    }
 };
 
 /* 10045 */
@@ -57,6 +127,20 @@ struct  CustomSearchInfo_FindPathNotCrossPlanes : CustomSearchInfo_FindPath
     int m_iPlaneCount;
     float (*m_vNormal)[2];
     float *m_fDist;
+
+    // Inherits EvaluateHeuristic()
+
+    bool IgnoreNode(pathnode_t *pNode)
+    {
+        int i; // [esp+Ch] [ebp-4h]
+
+        for (i = 0; i < this->m_iPlaneCount; ++i)
+        {
+            if ((float)((float)(pNode->constant.vOrigin[0] * this->m_vNormal[i][0]) + (float)(pNode->constant.vOrigin[1] * this->m_vNormal[i][1])) > this->m_fDist[i])
+                return 1;
+        }
+        return 0;
+    }
 };
 
 /* 10046 */
@@ -68,6 +152,13 @@ struct  CustomSearchInfo_FindPathAway
     float m_fInitialDistAwaySq;
     float m_fBestScore;
     pathnode_t *m_pBestNode;
+
+    float EvaluateHeuristic(pathnode_t *pSuccessor, const float *vGoalPos)
+    {
+        float diff[3];
+        Vec3Sub(pSuccessor->constant.vOrigin, this->m_vAwayFromPos, diff);
+        return this->m_fDistAway - (Vec3Length(diff));
+    }
 };
 
 /* 10047 */
@@ -76,6 +167,30 @@ struct  CustomSearchInfo_FindPathAwayNotCrossPlanes : CustomSearchInfo_FindPathA
     int m_iPlaneCount;
     float (*m_vNormal)[2];
     float *m_fDist;
+
+    bool IgnoreNode(pathnode_t *pNode)
+    {
+        int planeCount; // r8
+        int v3; // r9
+        float *fDist; // r10
+        float *i; // r11
+
+        planeCount = this->m_iPlaneCount;
+        v3 = 0;
+        if (planeCount <= 0)
+            return 0;
+        fDist = this->m_fDist;
+        for (i = (float *)this->m_vNormal;
+            (float)((float)(i[1] * pNode->constant.vOrigin[1]) + (float)(pNode->constant.vOrigin[0] * *i)) <= (double)*fDist;
+            i += 2)
+        {
+            ++v3;
+            ++fDist;
+            if (v3 >= planeCount)
+                return 0;
+        }
+        return 1;
+    }
 };
 
 /* 10048 */
@@ -85,12 +200,45 @@ struct CustomSearchInfo_FindPathWithLOS
     float m_fWithinDistSqrd;
     float startPos[3];
     float negotiationOverlapCost;
+
+    float EvaluateHeuristic(pathnode_t *pSuccessor, const float *vGoalPos)
+    {
+        float v[2]; // [esp+18h] [ebp-Ch] BYREF
+        float dist; // [esp+20h] [ebp-4h]
+
+        v[0] = vGoalPos[0] - pSuccessor->constant.vOrigin[0];
+        v[1] = vGoalPos[1] - pSuccessor->constant.vOrigin[1];
+        dist = Vec2Length(v);
+        dist = (float)((float)pSuccessor->dynamic.userCount * this->negotiationOverlapCost) + dist;
+        if (pSuccessor->constant.minUseDistSq > 1.0
+            && pSuccessor->constant.minUseDistSq > Vec3DistanceSq(pSuccessor->constant.vOrigin, this->startPos))
+        {
+            return (float)(dist + this->negotiationOverlapCost);
+        }
+        return dist;
+    }
 };
 
 /* 10049 */
 struct  CustomSearchInfo_FindPathInCylinderWithLOS : CustomSearchInfo_FindPathWithLOS
 {
     const actor_goal_s *goal;
+
+    float EvaluateHeuristic(pathnode_t *pSuccessor, const float *vGoalPos)
+    {
+        float v[2]; // [esp+18h] [ebp-Ch] BYREF
+        float dist; // [esp+20h] [ebp-4h]
+
+        v[0] = vGoalPos[0] - pSuccessor->constant.vOrigin[0];
+        v[1] = vGoalPos[1] - pSuccessor->constant.vOrigin[1];
+        dist = Vec2Length(v);
+        dist = (float)((float)pSuccessor->dynamic.userCount * this->negotiationOverlapCost) + dist;
+        if (pSuccessor->constant.minUseDistSq > 1.0 && pSuccessor->constant.minUseDistSq > Vec3DistanceSq(pSuccessor->constant.vOrigin, this->startPos))
+        {
+            return (float)(dist + this->negotiationOverlapCost);
+        }
+        return dist;
+    }
 };
 
 /* 10050 */
@@ -100,6 +248,54 @@ struct  CustomSearchInfo_FindPathInCylinderWithLOSNotCrossPlanes : CustomSearchI
     int m_iPlaneCount;
     float (*m_vNormal)[2];
     float *m_fDist;
+
+    // inherits EvaluateHeuristic()
+
+    float EvaluateHeuristic(pathnode_t *pSuccessor, const float *vGoalPos)
+    {
+        float v[2]; // [esp+18h] [ebp-Ch] BYREF
+        float dist; // [esp+20h] [ebp-4h]
+
+        v[0] = vGoalPos[0] - pSuccessor->constant.vOrigin[0];
+        v[1] = vGoalPos[1] - pSuccessor->constant.vOrigin[1];
+        dist = Vec2Length(v);
+        dist = (float)((float)pSuccessor->dynamic.userCount * this->negotiationOverlapCost) + dist;
+        if (pSuccessor->constant.minUseDistSq > 1.0 && pSuccessor->constant.minUseDistSq > Vec3DistanceSq(pSuccessor->constant.vOrigin, this->startPos))
+        {
+            return (float)(dist + this->negotiationOverlapCost);
+        }
+        return dist;
+    }
+
+    bool IgnoreNode(pathnode_t *pNode)
+    {
+        float *vOrigin; // r30
+        int planeCount; // r8
+        int v6; // r9
+        float *fDist; // r10
+        float *i; // r11
+
+        vOrigin = pNode->constant.vOrigin;
+        if (!Actor_PointAtGoal(pNode->constant.vOrigin, this->goal))
+            return 1;
+        planeCount = this->m_iPlaneCount;
+        v6 = 0;
+        if (planeCount > 0)
+        {
+            fDist = this->m_fDist;
+            for (i = (float *)this->m_vNormal;
+                (float)((float)(i[1] * vOrigin[1]) + (float)(*vOrigin * *i)) <= (double)*fDist;
+                i += 2)
+            {
+                ++v6;
+                ++fDist;
+                if (v6 >= planeCount)
+                    return 0;
+            }
+            return 1;
+        }
+        return 0;
+    }
 };
 
 /* 10051 */
@@ -108,6 +304,8 @@ struct  CustomSearchInfo_FindPathFromInCylinder : CustomSearchInfo_FindPath
     float m_vOrigin[2];
     float m_fRadiusSqrd;
     float m_fHalfHeightSqrd;
+
+    // inherits EvaluateHeuristic()
 };
 
 /* 10052 */
@@ -119,6 +317,44 @@ struct  CustomSearchInfo_FindPathFromInCylinderNotCrossPlanes : CustomSearchInfo
     int m_iPlaneCount;
     float (*m_vNormal)[2];
     float *m_fDist;
+
+    // inherits EvaluateHeuristic()
+
+    bool IgnoreNode(pathnode_t *pNode)
+    {
+        double v2; // fp0
+        double v4; // fp0
+        double v5; // fp13
+        int planeCount; // r8
+        int v7; // r9
+        float *fDist; // r10
+        float *i; // r11
+
+        v2 = (float)(pNode->constant.vOrigin[2] - this->m_fRadiusSqrd);
+        if ((float)((float)v2 * (float)v2) > (double)this->m_fHalfHeightSqrd)
+            return 1;
+        v4 = (float)(pNode->constant.vOrigin[0] - this->m_vOrigin[0]);
+        v5 = (float)(pNode->constant.vOrigin[1] - this->m_vOrigin[1]);
+        if ((float)((float)((float)v5 * (float)v5) + (float)((float)v4 * (float)v4)) > (double)this->m_fRadiusSqrd)
+            return 1;
+        planeCount = this->m_iPlaneCount;
+        v7 = 0;
+        if (planeCount > 0)
+        {
+            fDist = this->m_fDist;
+            for (i = (float *)this->m_vNormal;
+                (float)((float)(i[1] * pNode->constant.vOrigin[1]) + (float)(pNode->constant.vOrigin[0] * *i)) <= (double)*fDist;
+                i += 2)
+            {
+                ++v7;
+                ++fDist;
+                if (v7 >= planeCount)
+                    return 0;
+            }
+            return 1;
+        }
+        return 0;
+    }
 };
 
 /* 10053 */
@@ -126,6 +362,11 @@ struct CustomSearchInfo_CouldAttack
 {
     pathnode_t *m_pNodeTo;
     pathnode_t *attackNode;
+
+    float EvaluateHeuristic(pathnode_t *pSuccessor, const float *vGoalPos)
+    {
+        return 0.0f;
+    }
 };
 
 /* 10054 */
@@ -135,6 +376,17 @@ struct  CustomSearchInfo_FindPathClosestPossible
     pathnode_t *m_pBestNode;
     pathnode_t *m_pNodeTo;
     float negotiationOverlapCost;
+
+    float EvaluateHeuristic(pathnode_t *pSuccessor, const float *vGoalPos)
+    {
+        float v[2]; // [esp+Ch] [ebp-Ch] BYREF
+        float dist; // [esp+14h] [ebp-4h]
+
+        v[0] = vGoalPos[0] - pSuccessor->constant.vOrigin[0];
+        v[1] = vGoalPos[1] - pSuccessor->constant.vOrigin[1];
+        dist = Vec2Length(v);
+        return (float)((float)((float)pSuccessor->dynamic.userCount * this->negotiationOverlapCost) + dist);
+    }
 };
 
 path_t pathBackup;
@@ -2471,7 +2723,183 @@ void __cdecl Path_Restore(path_t *path)
         Path_IncrementNodeUserCount(path);
 }
 
-int __cdecl Path_FindPathFromTo(
+template <typename T, bool USE_IGNORE = false, bool CHECK_NODETO = true>
+static bool Path_AStarAlgorithm(
+    path_t *pPath,
+    team_t eTeam,
+    const float *vStartPos,
+    pathnode_t *pNodeFrom,
+    const float *vGoalPos,
+    int bIncludeGoalInPath,
+    int bAllowNegotiationLinks,
+    T *custom)
+{
+    pathnode_t *nodeTo; // r8
+    pathnode_t *pCurrent; // r30
+    int v19; // r28
+    int i; // r29
+    pathlink_s *v21; // r11
+    pathnode_t *pSuccessor; // r31
+    double v23; // fp0
+    pathnode_t *pPrevOpen; // r11
+    pathnode_t *v25; // r11
+    double fApproxTotalCost; // fp0
+    pathnode_t *pInsert; // r11
+    pathnode_t *next; // r10
+    int Path; // r31
+    pathnode_t topParent;
+    pathnode_t *pNextOpen; // [sp+B8h] [-A8h]
+
+    //Profile_Begin(231);
+    PROF_SCOPED("Path_AStarAlgorithm");
+    iassert(vGoalPos || !bIncludeGoalInPath);
+    bcassert((unsigned int)eTeam, ARRAY_COUNT(((pathlink_s *)0)->ubBadPlaceCount));
+
+    if (vGoalPos)
+    {
+        g_pathAttemptGoalPos[0] = vGoalPos[0];
+        g_pathAttemptGoalPos[1] = vGoalPos[1];
+        g_pathAttemptGoalPos[2] = vGoalPos[2];
+    }
+    else
+    {
+        g_pathAttemptGoalPos[0] = 0.0;
+        g_pathAttemptGoalPos[1] = 0.0;
+        g_pathAttemptGoalPos[2] = 0.0;
+    }
+
+    nodeTo = pNodeFrom;
+    pNextOpen = pNodeFrom;
+    pNodeFrom->transient.fCost = 0.0;
+    pNodeFrom->transient.iSearchFrame = ++level.iSearchFrame;
+    pNodeFrom->transient.pParent = &topParent;
+    pNodeFrom->transient.pNextOpen = 0;
+    pNodeFrom->transient.pPrevOpen = &topParent;
+
+    while (1)
+    {
+        pCurrent = nodeTo;
+        if constexpr (CHECK_NODETO)
+        {
+            if (nodeTo == custom->m_pNodeTo)
+                break;
+        }
+        pNextOpen = nodeTo->transient.pNextOpen;
+        if (pNextOpen)
+            pNextOpen->transient.pPrevOpen = &topParent;
+        v19 = 0;
+        if (nodeTo->dynamic.wLinkCount > 0)
+        {
+            i = 0;
+            while (1)
+            {
+                v21 = &pCurrent->constant.Links[i];
+                if (v21->ubBadPlaceCount[eTeam])
+                    goto LABEL_33;
+                pSuccessor = Path_ConvertIndexToNode(v21->nodeNum);
+
+                iassert(pSuccessor != pCurrent);
+
+                if (pCurrent->constant.type == NODE_NEGOTIATION_BEGIN
+                    && pSuccessor->constant.type == NODE_NEGOTIATION_END
+                    && (pCurrent->dynamic.wOverlapCount || pSuccessor->dynamic.wOverlapCount))
+                {
+                    goto LABEL_33;
+                }
+
+                if constexpr (USE_IGNORE)
+                {
+                    if (custom->IgnoreNode(pSuccessor))
+                    {
+                        goto LABEL_33;
+                    }
+                }
+
+                if (pSuccessor->transient.iSearchFrame != level.iSearchFrame)
+                    break;
+
+                v23 = (float)(pCurrent->constant.Links[i].fDist + pCurrent->transient.fCost);
+
+                if (pSuccessor->transient.fCost > v23)
+                {
+                    pPrevOpen = pSuccessor->transient.pPrevOpen;
+                    if (pPrevOpen)
+                    {
+                        pPrevOpen->transient.pNextOpen = pSuccessor->transient.pNextOpen;
+                        v25 = pSuccessor->transient.pNextOpen;
+                        if (v25)
+                            v25->transient.pPrevOpen = pSuccessor->transient.pPrevOpen;
+                    }
+                    goto LABEL_28;
+                }
+            LABEL_33:
+                ++v19;
+                ++i;
+                if (v19 >= pCurrent->dynamic.wLinkCount)
+                    goto LABEL_34;
+            }
+            pSuccessor->transient.iSearchFrame = level.iSearchFrame;
+            //pSuccessor->transient.fHeuristic = CustomSearchInfo_FindPath::EvaluateHeuristic(custom, pSuccessor, vGoalPos);
+            //pSuccessor->transient.fHeuristic = T::EvaluateHeuristic(custom, pSuccessor, vGoalPos);
+            pSuccessor->transient.fHeuristic = custom->EvaluateHeuristic(pSuccessor, vGoalPos);
+            v23 = (float)(pCurrent->constant.Links[i].fDist + pCurrent->transient.fCost);
+        LABEL_28:
+            pSuccessor->transient.fCost = v23;
+            pSuccessor->transient.pParent = pCurrent;
+
+            fApproxTotalCost = pSuccessor->transient.fCost + pSuccessor->transient.fHeuristic;
+            pInsert = &topParent;
+            if (pNextOpen)
+            {
+                do
+                {
+                    next = pInsert->transient.pNextOpen;
+                    if ((float)(next->transient.fHeuristic + next->transient.fCost) >= fApproxTotalCost)
+                        break;
+                    pInsert = pInsert->transient.pNextOpen;
+                } while (next->transient.pNextOpen);
+            }
+            pSuccessor->transient.pPrevOpen = pInsert;
+            pSuccessor->transient.pNextOpen = pInsert->transient.pNextOpen;
+            pInsert->transient.pNextOpen = pSuccessor;
+
+            if (pSuccessor->transient.pNextOpen)
+                pSuccessor->transient.pNextOpen->transient.pPrevOpen = pSuccessor;
+
+            goto LABEL_33;
+        }
+    LABEL_34:
+        pCurrent->transient.pPrevOpen = 0;
+        nodeTo = pNextOpen;
+        if (!pNextOpen)
+        {
+            return 0;
+        }
+    }
+    if (pPath)
+    {
+        int success = Path_GeneratePath(
+            pPath,
+            eTeam,
+            (float*)vStartPos,
+            (float*)vGoalPos,
+            pNodeFrom,
+            nodeTo,
+            bIncludeGoalInPath,
+            bAllowNegotiationLinks);
+
+        iassert(pPath->wPathLen <= pPath->wOrigPathLen);
+        iassert(success || !pPath->wOrigPathLen);
+
+        return success;
+    }
+    else
+    {
+        return 1;
+    }
+}
+
+bool __cdecl Path_FindPathFromTo(
     path_t *pPath,
     team_t eTeam,
     pathnode_t *pNodeFrom,
@@ -2480,31 +2908,20 @@ int __cdecl Path_FindPathFromTo(
     const float *vGoalPos,
     bool bAllowNegotiationLinks)
 {
-    CustomSearchInfo_FindPath v15; // [sp+50h] [-70h] BYREF
+    CustomSearchInfo_FindPath info; // [sp+50h] [-70h] BYREF
 
-    v15.negotiationOverlapCost = ai_pathNegotiationOverlapCost->current.value;
-    if (!pNodeFrom)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\actor_navigation.cpp", 958, 0, "%s", "pNodeFrom");
-    if (!pNodeTo)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\actor_navigation.cpp", 959, 0, "%s", "pNodeTo");
-    if ((pNodeFrom->constant.spawnflags & 1) != 0)
-        MyAssertHandler(
-            "c:\\trees\\cod3\\cod3src\\src\\game\\actor_navigation.cpp",
-            960,
-            0,
-            "%s",
-            "(pNodeFrom->constant.spawnflags & PNF_DONTLINK) == 0");
-    if ((pNodeTo->constant.spawnflags & 1) != 0)
-        MyAssertHandler(
-            "c:\\trees\\cod3\\cod3src\\src\\game\\actor_navigation.cpp",
-            961,
-            0,
-            "%s",
-            "(pNodeTo->constant.spawnflags & PNF_DONTLINK) == 0");
-    v15.startPos[0] = *vStartPos;
-    v15.startPos[1] = vStartPos[1];
-    v15.startPos[2] = vStartPos[2];
-    v15.m_pNodeTo = pNodeTo;
+    info.negotiationOverlapCost = ai_pathNegotiationOverlapCost->current.value;
+    
+    iassert(pNodeFrom);
+    iassert(pNodeTo);
+    iassert((pNodeFrom->constant.spawnflags & PNF_DONTLINK) == 0);
+    iassert((pNodeTo->constant.spawnflags & PNF_DONTLINK) == 0);
+
+    info.startPos[0] = vStartPos[0];
+    info.startPos[1] = vStartPos[1];
+    info.startPos[2] = vStartPos[2];
+    info.m_pNodeTo = pNodeTo;
+
     return Path_AStarAlgorithm<CustomSearchInfo_FindPath>(
         pPath,
         eTeam,
@@ -2513,7 +2930,7 @@ int __cdecl Path_FindPathFromTo(
         vGoalPos,
         1,
         bAllowNegotiationLinks,
-        &v15);
+        &info);
 }
 
 void __cdecl Path_TrimLastNodes(path_t *pPath, const int iNodeCount, bool bMaintainGoalPos)
@@ -2747,8 +3164,7 @@ int __cdecl Path_TrimToSeePoint(
     int iIgnoreEntityNum,
     const float *vPoint)
 {
-    int iDelta; // r11
-    int v13; // r31
+    int i; // r31
     int v14; // r6
     bool v15; // r28
     float *vOrigPoint; // r11
@@ -2764,32 +3180,25 @@ int __cdecl Path_TrimToSeePoint(
     float v26; // [sp+64h] [-6Ch]
     float v27; // [sp+68h] [-68h]
 
-    if (!pPath)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\actor_navigation.cpp", 2040, 0, "%s", "pPath");
-    if (!pTrim)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\actor_navigation.cpp", 2041, 0, "%s", "pTrim");
-    if (!pActor)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\actor_navigation.cpp", 2042, 0, "%s", "pActor");
-    if (!a7)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\actor_navigation.cpp", 2043, 0, "%s", "vPoint");
+    iassert(pPath);
+    iassert(pTrim);
+    iassert(pActor);
+    iassert(vPoint);
+
     if (pPath->wPathLen <= 0)
         return 0;
-    iDelta = pTrim->iDelta;
-    if (iDelta != -2 && iDelta != -1 && iDelta != 1)
-        MyAssertHandler(
-            "c:\\trees\\cod3\\cod3src\\src\\game\\actor_navigation.cpp",
-            2053,
-            0,
-            "%s",
-            "pTrim->iDelta == -2 || pTrim->iDelta == -1 || pTrim->iDelta == +1");
-    v13 = pTrim->iIndex + pTrim->iDelta;
-    if (v13 < 0)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\actor_navigation.cpp", 2056, 0, "%s", "i >= 0");
-    if (v13 >= pPath->wPathLen)
+
+    iassert(pTrim->iDelta == -2 || pTrim->iDelta == -1 || pTrim->iDelta == +1);
+
+    i = pTrim->iIndex + pTrim->iDelta;
+    iassert(i >= 0);
+
+    if (i >= pPath->wPathLen)
         return 0;
+
     Actor_GetEyeOffset(pActor, &v22);
-    v15 = pPath->wPathLen - 1 == v13;
-    if (pPath->wPathLen - 1 == v13)
+    v15 = pPath->wPathLen - 1 == i;
+    if (pPath->wPathLen - 1 == i)
     {
         v18 = (float)(pPath->vCurrPoint[1] + v23);
         v25 = v22 + pPath->vCurrPoint[0];
@@ -2798,24 +3207,24 @@ int __cdecl Path_TrimToSeePoint(
     }
     else
     {
-        vOrigPoint = pPath->pts[v13].vOrigPoint;
+        vOrigPoint = pPath->pts[i].vOrigPoint;
         v25 = *vOrigPoint + v22;
         v26 = vOrigPoint[1] + v23;
         v17 = vOrigPoint[2];
     }
     v27 = (float)v17 + v24;
-    CanSeePointFrom = Actor_CanSeePointFrom(pActor, &v25, a7, fMaxDistSqrd, v14);
+    CanSeePointFrom = Actor_CanSeePointFrom(pActor, &v25, vPoint, fMaxDistSqrd, v14);
     v20 = pTrim->iDelta;
     if (CanSeePointFrom)
     {
         if (v20 == -2 && !v15)
         {
-            pTrim->iIndex = v13;
+            pTrim->iIndex = i;
             result = 1;
             pTrim->iDelta = 1;
             return result;
         }
-        Path_TrimLastNodes(pPath, v13, 0);
+        Path_TrimLastNodes(pPath, i, 0);
         return 0;
     }
     if (v20 == 1)
@@ -2823,12 +3232,12 @@ int __cdecl Path_TrimToSeePoint(
         Path_TrimLastNodes(pPath, pTrim->iIndex, 0);
         return 0;
     }
-    else if (v13)
+    else if (i)
     {
         if (v20 != -2)
             MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\actor_navigation.cpp", 2109, 0, "%s", "pTrim->iDelta == -2");
-        pTrim->iIndex = v13;
-        if (v13 == 1)
+        pTrim->iIndex = i;
+        if (i == 1)
             pTrim->iDelta = -1;
         return 1;
     }
@@ -2866,7 +3275,7 @@ PredictionTraceResult __cdecl Path_PredictionTraceCheckForEntities(
     v22[1] = vEndPos[1];
     v21 = 0.0;
     if (entityCount <= 0)
-        return (PredictionTraceResult)!Path_PredictionTrace(vStartPos, vEndPos, entityIgnore, mask, vTraceEndPos, 18.0, mask, 1);
+        return (PredictionTraceResult)!Path_PredictionTrace(vStartPos, vEndPos, entityIgnore, mask, vTraceEndPos, 18.0, 1);
     while (1)
     {
         v15 = SV_GentityNum(*entities);
@@ -2881,7 +3290,7 @@ PredictionTraceResult __cdecl Path_PredictionTraceCheckForEntities(
         ++v13;
         ++entities;
         if (v13 >= entityCount)
-            return (PredictionTraceResult)!Path_PredictionTrace(vStartPos, vEndPos, entityIgnore, mask, vTraceEndPos, 18.0, mask, 1);
+            return (PredictionTraceResult)!Path_PredictionTrace(vStartPos, vEndPos, entityIgnore, mask, vTraceEndPos, 18.0, 1);
     }
     result = PTR_HIT_ENTITY;
     *vTraceEndPos = *vStartPos;
@@ -2933,7 +3342,6 @@ void __cdecl Path_UpdateLookaheadAmount(
     int v22; // r4
     double v23; // fp1
     double v24; // fp0
-    __int16 wNegotiationStartNode; // r10
     int wPathLen; // r11
     float fCurrLength; // fp1
     double v28; // fp2
@@ -2969,38 +3377,15 @@ void __cdecl Path_UpdateLookaheadAmount(
             v24 = 0.0;
         else
             v24 = (float)(pPath->lookaheadDir[2] / (float)v23);
-        wNegotiationStartNode = pPath->wNegotiationStartNode;
         pPath->lookaheadDir[2] = v24;
         pPath->fLookaheadDistToNextNode = dist;
-        pPath->lookaheadNextNode = a8;
-        if (wNegotiationStartNode > a8)
-            MyAssertHandler(
-                "c:\\trees\\cod3\\cod3src\\src\\game\\actor_navigation.cpp",
-                2758,
-                0,
-                "%s",
-                "pPath->wNegotiationStartNode <= pPath->lookaheadNextNode");
-        if (pPath->lookaheadNextNode >= pPath->wPathLen)
-            MyAssertHandler(
-                "c:\\trees\\cod3\\cod3src\\src\\game\\actor_navigation.cpp",
-                2759,
-                0,
-                "%s",
-                "pPath->lookaheadNextNode < pPath->wPathLen");
-        if (pPath->pts[pPath->lookaheadNextNode].fOrigLength <= 0.0)
-            MyAssertHandler(
-                "c:\\trees\\cod3\\cod3src\\src\\game\\actor_navigation.cpp",
-                2760,
-                0,
-                "%s",
-                "pPath->pts[pPath->lookaheadNextNode].fOrigLength > 0");
-        if (pPath->fLookaheadDistToNextNode > (double)pPath->pts[pPath->lookaheadNextNode].fOrigLength)
-            MyAssertHandler(
-                "c:\\trees\\cod3\\cod3src\\src\\game\\actor_navigation.cpp",
-                2761,
-                0,
-                "%s",
-                "pPath->fLookaheadDistToNextNode <= pPath->pts[pPath->lookaheadNextNode].fOrigLength");
+        pPath->lookaheadNextNode = lookaheadNextNode;
+
+        iassert(pPath->wNegotiationStartNode <= pPath->lookaheadNextNode);
+        iassert(pPath->lookaheadNextNode < pPath->wPathLen);
+        iassert(pPath->pts[pPath->lookaheadNextNode].fOrigLength > 0);
+        iassert(pPath->fLookaheadDistToNextNode <= pPath->pts[pPath->lookaheadNextNode].fOrigLength);
+
         wPathLen = pPath->wPathLen;
         if (wPathLen > 1)
         {
@@ -3018,20 +3403,10 @@ void __cdecl Path_UpdateLookaheadAmount(
                     v29);
             }
         }
-        if (pPath->fLookaheadDistToNextNode != 0.0 && pPath->lookaheadNextNode >= pPath->wPathLen - 1)
-            MyAssertHandler(
-                "c:\\trees\\cod3\\cod3src\\src\\game\\actor_navigation.cpp",
-                2763,
-                0,
-                "%s",
-                "!pPath->fLookaheadDistToNextNode || (pPath->lookaheadNextNode < pPath->wPathLen - 1)");
-        if (pPath->lookaheadNextNode >= pPath->wPathLen)
-            MyAssertHandler(
-                "c:\\trees\\cod3\\cod3src\\src\\game\\actor_navigation.cpp",
-                2764,
-                0,
-                "%s",
-                "pPath->lookaheadNextNode < pPath->wPathLen");
+
+        iassert(!pPath->fLookaheadDistToNextNode || (pPath->lookaheadNextNode < pPath->wPathLen - 1));
+        iassert(pPath->lookaheadNextNode < pPath->wPathLen);
+
         if (pPath->fLookaheadDistToNextNode != 0.0 && pPath->lookaheadNextNode >= pPath->wPathLen - 1)
         {
             v22 = 2765;
@@ -3039,18 +3414,12 @@ void __cdecl Path_UpdateLookaheadAmount(
         }
         return;
     }
-    if (Path_LookaheadPredictionTrace(pPath, vStartPos, vLookaheadPos, bReduceLookaheadAmount, lookaheadNextNode, a8))
+    if (Path_LookaheadPredictionTrace(pPath, vStartPos, vLookaheadPos))
     {
         Path_IncreaseLookaheadAmount(pPath);
         goto LABEL_28;
     }
-    if ((unsigned __int16)pPath->lookaheadNextNode >= 0x8000u)
-        MyAssertHandler(
-            "c:\\trees\\cod3\\cod3src\\src\\game\\actor_navigation.cpp",
-            2732,
-            0,
-            "%s",
-            "pPath->lookaheadNextNode >= 0");
+    iassert(pPath->lookaheadNextNode >= 0);
     v19 = pPath->wPathLen;
     v20 = pPath->lookaheadNextNode;
     if (v20 == v19 - 2)
@@ -3063,13 +3432,7 @@ void __cdecl Path_UpdateLookaheadAmount(
         goto LABEL_28;
     }
     Path_ReduceLookaheadAmount(pPath, maxLookaheadAmountIfReduce);
-    if (pPath->lookaheadNextNode >= pPath->wPathLen)
-        MyAssertHandler(
-            "c:\\trees\\cod3\\cod3src\\src\\game\\actor_navigation.cpp",
-            2738,
-            0,
-            "%s",
-            "pPath->lookaheadNextNode < pPath->wPathLen");
+    iassert(pPath->lookaheadNextNode < pPath->wPathLen);
     if (pPath->fLookaheadDistToNextNode != 0.0 && pPath->lookaheadNextNode >= pPath->wPathLen - 1)
     {
         v22 = 2739;
@@ -3093,8 +3456,7 @@ void __cdecl Path_CalcLookahead_Completed(
     int v11; // r11
     float *vCurrPoint; // r5
 
-    if (!pPath)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\actor_navigation.cpp", 3156, 0, "%s", "pPath");
+    iassert(pPath);
     wNegotiationStartNode = pPath->wNegotiationStartNode;
     v11 = pPath->wPathLen - 1;
     pPath->flags |= 0x41u;
@@ -3108,9 +3470,8 @@ void __cdecl Path_CalcLookahead_Completed(
         vCurrPoint,
         bReduceLookaheadAmount,
         0.0,
-        a6,
-        totalArea,
-        wNegotiationStartNode);
+        wNegotiationStartNode,
+        totalArea);
 
     // aislop
     //_FP12 = (float)((float)totalArea - (float)32768.0);
@@ -3130,7 +3491,7 @@ void __cdecl Path_CalcLookahead_Completed(
     }
 }
 
-void __cdecl Path_CalcLookahead(path_t *pPath, float *vStartPos, int bReduceLookaheadAmount, int a4, int a5)
+void __cdecl Path_CalcLookahead(path_t *pPath, float *vStartPos, int bReduceLookaheadAmount)
 {
     int wPathLen; // r11
     float fCurrLength; // fp1
@@ -3139,36 +3500,23 @@ void __cdecl Path_CalcLookahead(path_t *pPath, float *vStartPos, int bReduceLook
     float fLookaheadAmount; // fp28
     double v13; // fp30
     int v14; // r27
-    int v15; // r29
-    const pathpoint_t *v16; // r31
+    int i; // r29
+    const pathpoint_t *pt; // r31
     double DistToPathSegment; // fp29
-    float fOrigLength; // fp31
+    float fLength; // fp31
     double v19; // fp2
-    double v20; // fp30
+    double dist; // fp30
     const float *vOrigPoint; // r11
     double v22; // fp0
     double v23; // fp0
     double v24; // fp13
-    float v25[16]; // [sp+60h] [-A0h] BYREF
+    float lookaheadPos[16]; // [sp+60h] [-A0h] BYREF
 
-    if (!pPath)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\actor_navigation.cpp", 3237, 0, "%s", "pPath");
-    if (pPath->wPathLen <= 0)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\actor_navigation.cpp", 3238, 0, "%s", "pPath->wPathLen > 0");
-    if ((unsigned __int16)pPath->wNegotiationStartNode >= 0x8000u)
-        MyAssertHandler(
-            "c:\\trees\\cod3\\cod3src\\src\\game\\actor_navigation.cpp",
-            3239,
-            0,
-            "%s",
-            "pPath->wNegotiationStartNode >= 0");
-    if (pPath->wNegotiationStartNode >= pPath->wPathLen)
-        MyAssertHandler(
-            "c:\\trees\\cod3\\cod3src\\src\\game\\actor_navigation.cpp",
-            3240,
-            0,
-            "%s",
-            "pPath->wNegotiationStartNode < pPath->wPathLen");
+    iassert(pPath);
+    iassert(pPath->wPathLen > 0);
+    iassert(pPath->wNegotiationStartNode >= 0);
+    iassert(pPath->wNegotiationStartNode < pPath->wPathLen);
+
     wPathLen = pPath->wPathLen;
     if (wPathLen > 1)
     {
@@ -3204,69 +3552,59 @@ void __cdecl Path_CalcLookahead(path_t *pPath, float *vStartPos, int bReduceLook
             HIDWORD(fLookaheadAmount),
             LODWORD(fLookaheadAmount));
     v14 = 1;
-    v15 = pPath->wPathLen - 2;
-    if (v15 < pPath->wNegotiationStartNode)
+    i = pPath->wPathLen - 2;
+    if (i < pPath->wNegotiationStartNode)
     {
     LABEL_32:
-        Path_CalcLookahead_Completed(pPath, vStartPos, bReduceLookaheadAmount, v13, a4, a5);
+        Path_CalcLookahead_Completed(pPath, vStartPos, bReduceLookaheadAmount, v13);
     }
     else
     {
-        v16 = &pPath->pts[v15];
+        pt = &pPath->pts[i];
         while (1)
         {
-            if ((COERCE_UNSIGNED_INT(v16->vOrigPoint[0]) & 0x7F800000) == 0x7F800000
-                || (COERCE_UNSIGNED_INT(v16->vOrigPoint[1]) & 0x7F800000) == 0x7F800000
-                || (COERCE_UNSIGNED_INT(v16->vOrigPoint[2]) & 0x7F800000) == 0x7F800000)
-            {
-                MyAssertHandler(
-                    "c:\\trees\\cod3\\cod3src\\src\\game\\actor_navigation.cpp",
-                    3259,
-                    0,
-                    "%s",
-                    "!IS_NAN((pt->vOrigPoint)[0]) && !IS_NAN((pt->vOrigPoint)[1]) && !IS_NAN((pt->vOrigPoint)[2])");
-            }
-            DistToPathSegment = Path_GetDistToPathSegment(vStartPos, v16);
+            iassert(!IS_NAN((pt->vOrigPoint)[0]) && !IS_NAN((pt->vOrigPoint)[1]) && !IS_NAN((pt->vOrigPoint)[2]));
+            
+            DistToPathSegment = Path_GetDistToPathSegment(vStartPos, pt);
             if (v14)
-                fOrigLength = pPath->fCurrLength;
+                fLength = pPath->fCurrLength;
             else
-                fOrigLength = v16->fOrigLength;
-            if (fOrigLength <= 0.0)
-                MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\actor_navigation.cpp", 3263, 0, "%s", "fLength > 0");
-            v13 = (float)((float)((float)fOrigLength * (float)DistToPathSegment) + (float)v13);
+                fLength = pt->fOrigLength;
+            iassert(fLength > 0);
+            v13 = (float)((float)((float)fLength * (float)DistToPathSegment) + (float)v13);
             if (pPath->minLookAheadNodes == 2)
-                PathCalcLookahead_CheckMinLookaheadNodes(pPath, v16, v15);
-            if (pPath->minLookAheadNodes + v15 <= pPath->wPathLen - 2 && v13 >= fLookaheadAmount)
+                PathCalcLookahead_CheckMinLookaheadNodes(pPath, pt, i);
+            if (pPath->minLookAheadNodes + i <= pPath->wPathLen - 2 && v13 >= fLookaheadAmount)
                 break;
-            --v15;
-            --v16;
+            --i;
+            --pt;
             v14 = 0;
-            if (v15 < pPath->wNegotiationStartNode)
+            if (i < pPath->wNegotiationStartNode)
                 goto LABEL_32;
         }
-        v19 = v16->fOrigLength;
-        v20 = (float)((float)((float)v13 - (float)fLookaheadAmount) / (float)DistToPathSegment);
-        if (fOrigLength > v19)
+        v19 = pt->fOrigLength;
+        dist = (float)((float)((float)v13 - (float)fLookaheadAmount) / (float)DistToPathSegment);
+        if (fLength > v19)
             MyAssertHandler(
                 "c:\\trees\\cod3\\cod3src\\src\\game\\actor_navigation.cpp",
                 3281,
                 0,
-                (const char *)HIDWORD(fOrigLength),
-                LODWORD(fOrigLength),
+                (const char *)HIDWORD(fLength),
+                LODWORD(fLength),
                 LODWORD(v19));
-        if (v20 > fOrigLength)
-            v20 = fOrigLength;
-        vOrigPoint = v16[1].vOrigPoint;
-        v22 = (float)((float)(v16->fDir2D[1] * (float)-v20) + v16->vOrigPoint[1]);
-        v25[0] = (float)((float)-v20 * v16->fDir2D[0]) + v16->vOrigPoint[0];
-        v25[1] = v22;
+        if (dist > fLength)
+            dist = fLength;
+        vOrigPoint = pt[1].vOrigPoint;
+        v22 = (float)((float)(pt->fDir2D[1] * (float)-dist) + pt->vOrigPoint[1]);
+        lookaheadPos[0] = (float)((float)-dist * pt->fDir2D[0]) + pt->vOrigPoint[0];
+        lookaheadPos[1] = v22;
         if (v14)
             vOrigPoint = pPath->vCurrPoint;
-        v23 = v16->vOrigPoint[2];
-        v24 = (float)(v16->vOrigPoint[2] - vOrigPoint[2]);
+        v23 = pt->vOrigPoint[2];
+        v24 = (float)(pt->vOrigPoint[2] - vOrigPoint[2]);
         pPath->flags &= 0xFFFFFFBE;
-        v25[2] = -(float)((float)((float)((float)v24 / (float)fOrigLength) * (float)v20) - (float)v23);
-        Path_UpdateLookaheadAmount(pPath, vStartPos, v25, bReduceLookaheadAmount, v20, a5, fLookaheadAmount, v15);
+        lookaheadPos[2] = -(float)((float)((float)((float)v24 / (float)fLength) * (float)dist) - (float)v23);
+        Path_UpdateLookaheadAmount(pPath, vStartPos, lookaheadPos, bReduceLookaheadAmount, dist, i, fLookaheadAmount);
     }
 }
 
@@ -3451,7 +3789,7 @@ void __cdecl Path_UpdateLookahead(
         if (bAllowBacktrack && pPath->fLookaheadAmount >= 64.0)
             Path_BacktrackCompletedPath(pPath, vStartPos);
     LABEL_20:
-        Path_CalcLookahead(pPath, vStartPos, bReduceLookaheadAmount, v11, v10);
+        Path_CalcLookahead(pPath, vStartPos, bReduceLookaheadAmount);
         goto LABEL_25;
     }
     v18 = Path_NeedsReevaluation(pPath);
@@ -3467,7 +3805,7 @@ void __cdecl Path_UpdateLookahead(
     if (!bTrimAmount)
         goto LABEL_20;
     Path_SubtractTrimmedAmount(pPath, vStartPos);
-    Path_CalcLookahead(pPath, vStartPos, bReduceLookaheadAmount, v21, v20);
+    Path_CalcLookahead(pPath, vStartPos, bReduceLookaheadAmount);
 LABEL_25:
     Path_UpdateForwardLookahead(pPath, vStartPos);
     //Profile_EndInternal(0);
@@ -3840,7 +4178,10 @@ LABEL_18:
         v16 = 32;
         pPath->flags |= 4u;
         if (v20 < 0)
-            LOWORD(v20) = 0;
+        {
+            //LOWORD(v20) = 0;
+            v20 = 0;
+        }
     }
     v26 = v16 - 1;
     if (v16 - 1 > 0)
@@ -4082,244 +4423,177 @@ int __cdecl Path_AttemptDodge(
     int mask,
     int bCheckLookahead)
 {
-    int v30; // r28
-    int v38; // r24
-    int v39; // r11
-    int wDodgeCount; // r11
-    int v41; // r27
-    int v42; // r29
-    pathpoint_t *v43; // r31
-    int v44; // r10
+    int maxIndex; // r27
+    pathpoint_t *point; // r31
     __int16 lookaheadNextNode; // r11
     unsigned int wNegotiationStartNode; // r10
-    int v48; // r28
-    double v49; // fp0
-    PredictionTraceResult v50; // r3
-    double v51; // fp0
-    pathpoint_t *v52; // r31
-    unsigned int v53; // r11
-    path_t *v54; // r31
-    int v55; // r11
-    int v56; // r29
-    float fLookaheadDistToNextNode; // fp31
-    pathpoint_t *v58; // r29
-    double v59; // fp0
-    double v60; // fp13
-    float fOrigLength; // fp12
-    bool v62; // cr58
-    int v63; // r11
-    float *vOrigPoint; // r4
-    float *v65; // r3
-    double v66; // fp13
-    unsigned int v67; // r11
-    double v68; // fp0
-    unsigned int v69; // r11
-    double v70; // fp0
-    double v71; // fp13
-    double v72; // fp0
-    int flags; // r10
-    int wPathLen; // r11
-    float fCurrLength; // fp1
-    double v76; // fp2
-    const char *v77; // r3
-    int *v78; // r11
-    pathpoint_t *v79[2]; // [sp+50h] [-100h] BYREF
-    float v80; // [sp+58h] [-F8h] BYREF
-    float v81; // [sp+5Ch] [-F4h]
-    float v82; // [sp+60h] [-F0h] BYREF
-    float v83; // [sp+64h] [-ECh]
-    float v84; // [sp+68h] [-E8h]
-    float v85; // [sp+70h] [-E0h] BYREF
-    float v86; // [sp+74h] [-DCh]
-    float v87; // [sp+78h] [-D8h]
-    float v88; // [sp+80h] [-D0h] BYREF
-    float v89; // [sp+84h] [-CCh]
-    float v90; // [sp+88h] [-C8h]
-    float v91[6]; // [sp+90h] [-C0h] BYREF
+    PredictionTraceResult result; // r3
+    float dist; // fp31
+    pathpoint_t *pt; // [sp+50h] [-100h] BYREF
+    float vDelta[2]; // [sp+58h] [-F8h] BYREF
+    float vNewDodgeEnd[3]; // [sp+60h] [-F0h] BYREF
+    float vNewDodgeStart[3]; // [sp+70h] [-E0h] BYREF
+    float vEnd[3]; // [sp+80h] [-D0h] BYREF
+    float vTraceEndPos[3]; // [sp+90h] [-C0h] BYREF
+    float pathDir;
 
-    v30 = startIndex;
-    a20 = startIndex;
-    if (!pPath)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\actor_navigation.cpp", 3789, 0, "%s", "pPath");
-    if (pPath->wPathLen <= 0)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\actor_navigation.cpp", 3790, 0, "%s", "pPath->wPathLen > 0");
-    if (*vDodgeStart == *vDodgeEnd && vDodgeStart[1] == vDodgeEnd[1])
-        MyAssertHandler(
-            "c:\\trees\\cod3\\cod3src\\src\\game\\actor_navigation.cpp",
-            3791,
-            0,
-            "%s",
-            "!(vDodgeStart[0] == vDodgeEnd[0] && vDodgeStart[1] == vDodgeEnd[1])");
-    if (v30 > pPath->lookaheadNextNode)
-        MyAssertHandler(
-            "c:\\trees\\cod3\\cod3src\\src\\game\\actor_navigation.cpp",
-            3792,
-            0,
-            "%s",
-            "startIndex <= pPath->lookaheadNextNode");
-    if (pPath->lookaheadNextNode >= pPath->wPathLen)
-        MyAssertHandler(
-            "c:\\trees\\cod3\\cod3src\\src\\game\\actor_navigation.cpp",
-            3793,
-            0,
-            "%s",
-            "pPath->lookaheadNextNode < pPath->wPathLen");
-    v38 = a28;
-    Path_PredictionTraceCheckForEntities(vOrg, vDodgeStart, entities, entityCount, entityIgnore, a28, &v85);
-    Path_PredictionTraceCheckForEntities(&v85, vDodgeEnd, entities, entityCount, entityIgnore, v38, &v82);
-    v39 = ai_showDodge->current.color[0];
-    v79[0] = &pPath->pts[v30];
-    if (v39)
+    //a20 = startIndex;
+    iassert(pPath);
+    iassert(pPath->wPathLen > 0);
+    iassert(!(vDodgeStart[0] == vDodgeEnd[0] && vDodgeStart[1] == vDodgeEnd[1]));
+    iassert(startIndex <= pPath->lookaheadNextNode);
+    iassert(pPath->lookaheadNextNode < pPath->wPathLen);
+    
+    //v38 = a28;
+    Path_PredictionTraceCheckForEntities(vOrg, vDodgeStart, entities, entityCount, entityIgnore, mask, vNewDodgeStart);
+    Path_PredictionTraceCheckForEntities(vNewDodgeStart, vDodgeEnd, entities, entityCount, entityIgnore, mask, vNewDodgeEnd);
+
+    pt = &pPath->pts[startIndex];
+
+    if (ai_showDodge->current.enabled)
     {
-        G_DebugLineWithDuration(vDodgeStart, &v85, colorYellow, 0, 25);
-        G_DebugLineWithDuration(&v85, &v82, colorYellow, 0, 25);
-        G_DebugLineWithDuration(&v82, pPath->pts[v30].vOrigPoint, colorYellow, 0, 25);
+        G_DebugLineWithDuration(vDodgeStart, vNewDodgeStart, colorYellow, 0, 25);
+        G_DebugLineWithDuration(vNewDodgeStart, vNewDodgeEnd, colorYellow, 0, 25);
+        G_DebugLineWithDuration(vNewDodgeEnd, pPath->pts[startIndex].vOrigPoint, colorYellow, 0, 25);
     }
-    if (v30 < pPath->wNegotiationStartNode)
+
+    if (startIndex < pPath->wNegotiationStartNode)
         goto LABEL_103;
+
     if (Path_PredictionTraceCheckForEntities(
-        &v82,
-        pPath->pts[v30].vOrigPoint,
+        vNewDodgeEnd,
+        pt->vOrigPoint,
         entities,
         entityCount,
         entityIgnore,
-        v38,
-        v91))
+        mask,
+        vTraceEndPos))
     {
-        wDodgeCount = pPath->wDodgeCount;
-        v41 = pPath->wPathLen - 2;
-        if (wDodgeCount > 0)
-            v41 -= wDodgeCount;
-        if (v30 >= v41)
+        maxIndex = pPath->wPathLen - 2;
+        if (pPath->wDodgeCount > 0)
+            maxIndex -= pPath->wDodgeCount;
+
+        if (startIndex >= maxIndex)
             goto LABEL_103;
-        v42 = v30 + 1;
-        v43 = &pPath->pts[v30 + 1];
+
+        point = &pPath->pts[++startIndex + 1];
         do
         {
-            ++v43;
-            ++v30;
-            ++v42;
-        } while (Vec2DistanceSq(v43->vOrigPoint, vOrg) >= 1406.25 && v42 < v41);
-        a20 = v30;
-        v44 = ai_showDodge->current.color[0];
-        v79[0] = &pPath->pts[v30];
-        if (v44)
-            G_DebugLineWithDuration(&v82, pPath->pts[v30].vOrigPoint, colorMagenta, 0, 25);
+            ++point;
+            ++startIndex;
+        } while (Vec2DistanceSq(point->vOrigPoint, vOrg) >= 1406.25 && startIndex < maxIndex); // KISAKTODO: check startIndex here
+
+        //a20 = startingIndex;
+        //v44 = ai_showDodge->current.color[0];
+
+        pt = &pPath->pts[startIndex];
+
+        if (ai_showDodge->current.enabled)
+            G_DebugLineWithDuration(vNewDodgeEnd, pPath->pts[startIndex].vOrigPoint, colorMagenta, 0, 25);
+
         if (Path_PredictionTraceCheckForEntities(
-            &v82,
-            pPath->pts[v30].vOrigPoint,
+            vNewDodgeEnd,
+            pt->vOrigPoint,
             entities,
             entityCount,
             entityIgnore,
-            v38,
-            v91))
+            mask,
+            vTraceEndPos))
         {
-        LABEL_103:
-            if (a30)
+        LABEL_103: // fail_2
+            if (bCheckLookahead)
             {
-                v80 = v82 - v85;
-                v81 = v83 - v86;
-                if (Vec2Normalize(&v80) > 15.0)
+                vDelta[0] = vNewDodgeEnd[0] - vNewDodgeStart[0];
+                vDelta[1] = vNewDodgeEnd[1] = vNewDodgeStart[1];
+
+                if (Vec2Normalize(vDelta) > 15.0f)
                 {
-                    v82 = -(float)((float)(v80 * (float)15.0) - v82);
-                    v83 = -(float)((float)(v81 * (float)15.0) - v83);
+                    vNewDodgeEnd[0] = (float)(-15.0 * vDelta[0]) + vNewDodgeEnd[0];
+                    vNewDodgeEnd[1] = (float)(-15.0 * vDelta[1]) + vNewDodgeEnd[1];
                 }
                 else
                 {
-                    v82 = v85;
-                    v83 = v86;
-                    v84 = v87;
+                    vNewDodgeEnd[0] = vNewDodgeStart[0];
+                    vNewDodgeEnd[1] = vNewDodgeStart[1];
+                    vNewDodgeEnd[2] = vNewDodgeStart[2];
                 }
+
                 lookaheadNextNode = pPath->lookaheadNextNode;
                 wNegotiationStartNode = (unsigned __int16)pPath->wNegotiationStartNode;
-                v48 = lookaheadNextNode;
-                a20 = lookaheadNextNode;
-                if (wNegotiationStartNode >= 0x8000)
-                    MyAssertHandler(
-                        "c:\\trees\\cod3\\cod3src\\src\\game\\actor_navigation.cpp",
-                        3858,
-                        0,
-                        "%s",
-                        "pPath->wNegotiationStartNode >= 0");
-                if (pPath->wNegotiationStartNode > v48)
-                    MyAssertHandler(
-                        "c:\\trees\\cod3\\cod3src\\src\\game\\actor_navigation.cpp",
-                        3859,
-                        0,
-                        "%s",
-                        "pPath->wNegotiationStartNode <= startIndex");
-                if (v48 >= pPath->wPathLen - 1)
-                    MyAssertHandler(
-                        "c:\\trees\\cod3\\cod3src\\src\\game\\actor_navigation.cpp",
-                        3860,
-                        0,
-                        "%s",
-                        "startIndex < pPath->wPathLen - 1");
-                v49 = (float)((float)(pPath->lookaheadDir[1] * pPath->fLookaheadDist) + vOrg[1]);
-                v88 = (float)(pPath->lookaheadDir[0] * pPath->fLookaheadDist) + *vOrg;
-                v89 = v49;
-                v90 = pPath->pts[v48].vOrigPoint[2];
-                v79[0] = &pPath->pts[v48];
+
+                //v48 = lookaheadNextNode;
+                //a20 = lookaheadNextNode;
+                iassert(pPath->wNegotiationStartNode >= 0);
+                iassert(pPath->wNegotiationStartNode <= startIndex);
+                iassert(startIndex < pPath->wPathLen - 1);
+
+                vEnd[0] = (float)(pPath->lookaheadDir[0] * pPath->fLookaheadDist) + vOrg[0];
+                vEnd[1] = (float)((float)(pPath->lookaheadDir[1] * pPath->fLookaheadDist) + vOrg[1]);
+                vEnd[2] = pPath->pts[startIndex].vOrigPoint[2];
+
+                pt = &pPath->pts[startIndex];
+
                 if (ai_showDodge->current.enabled)
-                    G_DebugLineWithDuration(&v82, &v88, colorRed, 0, 25);
-                v50 = Path_PredictionTraceCheckForEntities(&v82, &v88, entities, entityCount, entityIgnore, v38, v91);
-                if (v50 != PTR_HIT_WORLD)
+                    G_DebugLineWithDuration(vNewDodgeEnd, vEnd, colorRed, 0, 25);
+
+                result = Path_PredictionTraceCheckForEntities(vNewDodgeEnd, vEnd, entities, entityCount, entityIgnore, mask, vTraceEndPos);
+
+                if (result != PTR_HIT_WORLD)
                 {
-                    if (v50 == PTR_HIT_ENTITY)
+                    if (result == PTR_HIT_ENTITY)
                     {
-                        v51 = (float)((float)(pPath->lookaheadDir[1]
-                            * (float)((float)((float)(pPath->lookaheadDir[1] * (float)(v83 - vOrg[1]))
-                                + (float)(pPath->lookaheadDir[0] * (float)(v82 - *vOrg)))
-                                + (float)15.0))
-                            + vOrg[1]);
-                        v88 = (float)((float)((float)((float)(pPath->lookaheadDir[1] * (float)(v83 - vOrg[1]))
-                            + (float)(pPath->lookaheadDir[0] * (float)(v82 - *vOrg)))
+                        vEnd[0] = (float)((float)((float)((float)(pPath->lookaheadDir[1] * (float)(vNewDodgeEnd[1] - vOrg[1]))
+                            + (float)(pPath->lookaheadDir[0] * (float)(vNewDodgeEnd[0] - vOrg[0])))
                             + (float)15.0)
                             * pPath->lookaheadDir[0])
                             + *vOrg;
-                        v89 = v51;
+                        vEnd[1] = (float)((float)(pPath->lookaheadDir[1]
+                            * (float)((float)((float)(pPath->lookaheadDir[1] * (float)(vNewDodgeEnd[1] - vOrg[1]))
+                                + (float)(pPath->lookaheadDir[0] * (float)(vNewDodgeEnd[0] - *vOrg)))
+                                + (float)15.0))
+                            + vOrg[1]);
+
                         if (ai_showDodge->current.enabled)
-                            G_DebugLineWithDuration(&v82, &v88, colorCyan, 0, 25);
-                        if (Path_PredictionTraceCheckForEntities(&v82, &v88, entities, entityCount, entityIgnore, v38, v91) == PTR_SUCCESS)
+                            G_DebugLineWithDuration(vNewDodgeEnd, vEnd, colorCyan, 0, 25);
+
+                        if (Path_PredictionTraceCheckForEntities(vNewDodgeEnd, vEnd, entities, entityCount, entityIgnore, mask, vTraceEndPos) == PTR_SUCCESS)
                         {
-                            if (pPath->wNegotiationStartNode > v48)
-                                MyAssertHandler(
-                                    "c:\\trees\\cod3\\cod3src\\src\\game\\actor_navigation.cpp",
-                                    3891,
-                                    0,
-                                    "%s",
-                                    "pPath->wNegotiationStartNode <= startIndex");
+                            iassert(pPath->wNegotiationStartNode <= startIndex);
+
                             if (ai_showDodge->current.enabled)
-                                G_DebugLineWithDuration(&v88, pPath->pts[v48].vOrigPoint, colorCyan, 0, 25);
+                                G_DebugLineWithDuration(vEnd, pPath->pts[startIndex].vOrigPoint, colorCyan, 0, 25);
+
                             if (Path_PredictionTraceCheckForEntities(
-                                &v88,
-                                pPath->pts[v48].vOrigPoint,
+                                vEnd,
+                                pPath->pts[startIndex].vOrigPoint,
                                 entities,
                                 entityCount,
                                 entityIgnore,
-                                v38,
-                                v91) == PTR_SUCCESS)
+                                mask,
+                                vTraceEndPos) == PTR_SUCCESS)
                             {
-                                Path_CheckNodeCountForDodge(pPath, 3, v79, &a20);
-                                v52 = v79[0];
-                                *(float *)v79 = Path_GetPathDir(v79[0]->fDir2D, &v88, v79[0]->vOrigPoint);
-                                v53 = (unsigned int)v79[0];
-                                v52->fOrigLength = *(float *)v79;
-                                if ((v53 & 0x7F800000) == 0x7F800000)
-                                    MyAssertHandler(
-                                        "c:\\trees\\cod3\\cod3src\\src\\game\\actor_navigation.cpp",
-                                        3904,
-                                        0,
-                                        "%s",
-                                        "!IS_NAN(pt->fOrigLength)");
-                                v54 = (path_t *)&v52[1];
-                                v55 = a20;
-                                v54->pts[0].vOrigPoint[0] = v88;
-                                v56 = v55 + 1;
-                                v54->pts[0].vOrigPoint[1] = v89;
-                                v54->pts[0].vOrigPoint[2] = v90;
-                                v54->pts[0].iNodeNum = -1;
-                                Path_DodgeDrawRaisedLine(&v54[-1].fCurrLength, (float *)v54, colorBlue);
+                                Path_CheckNodeCountForDodge(pPath, 3, &pt, &startIndex);
+                                //v52 = pt[0];
+                                pt->fOrigLength = Path_GetPathDir(pt->fDir2D, vEnd, pt->vOrigPoint);
+                                //v53 = (unsigned int)pt[0];
+                                //v52->fOrigLength = *(float *)pt;
+                                iassert(!IS_NAN(pt->fOrigLength));
+
+                                pt++;
+                                startIndex++;
+                                //v54 = (path_t *)&v52[1];
+                                //v55 = a20;
+                                //v54->pts[0].vOrigPoint[0] = vEnd;
+                                //v56 = v55 + 1;
+                                //v54->pts[0].vOrigPoint[1] = v89;
+                                //v54->pts[0].vOrigPoint[2] = v90;
+                                //v54->pts[0].iNodeNum = -1;
+                                pt->vOrigPoint[0] = vEnd[0];
+                                pt->vOrigPoint[1] = vEnd[1];
+                                pt->vOrigPoint[2] = vEnd[2];
+                                pt->iNodeNum = -1;
+                                //Path_DodgeDrawRaisedLine(&v54[-1].fCurrLength, (float *)v54, colorBlue);
+                                Path_DodgeDrawRaisedLine(pt[-1].vOrigPoint, pt->vOrigPoint, colorBlue);
                                 goto done;
                             }
                         }
@@ -4327,86 +4601,58 @@ int __cdecl Path_AttemptDodge(
                     else
                     {
                         if (ai_showDodge->current.enabled)
-                            G_DebugLineWithDuration(&v88, pPath->pts[v48].vOrigPoint, colorMdGrey, 0, 25);
+                            G_DebugLineWithDuration(vEnd, pPath->pts[startIndex].vOrigPoint, colorMdGrey, 0, 25);
+
                         if (Path_PredictionTraceCheckForEntities(
-                            &v88,
-                            pPath->pts[v48].vOrigPoint,
+                            vEnd,
+                            pt->vOrigPoint,
                             entities,
                             entityCount,
                             entityIgnore,
-                            v38,
-                            v91) == PTR_SUCCESS)
+                            mask,
+                            vTraceEndPos) == PTR_SUCCESS)
                         {
-                            Path_CheckNodeCountForDodge(pPath, 3, v79, &a20);
-                            fLookaheadDistToNextNode = pPath->fLookaheadDistToNextNode;
-                            if (fLookaheadDistToNextNode <= 0.0)
-                                MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\actor_navigation.cpp", 3930, 0, "%s", "dist > 0");
-                            v58 = v79[0];
-                            v79[0] = (pathpoint_t *)LODWORD(v79[0]->fOrigLength);
-                            if (((int)v79[0] & 0x7F800000) == 0x7F800000)
-                                MyAssertHandler(
-                                    "c:\\trees\\cod3\\cod3src\\src\\game\\actor_navigation.cpp",
-                                    3932,
-                                    0,
-                                    "%s",
-                                    "!IS_NAN(pt->fOrigLength)");
-                            if (v58->fOrigLength <= 0.0)
-                                MyAssertHandler(
-                                    "c:\\trees\\cod3\\cod3src\\src\\game\\actor_navigation.cpp",
-                                    3933,
-                                    0,
-                                    "%s",
-                                    "pt->fOrigLength > 0");
-                            if (v58->fDir2D[0] == 0.0 && v58->fDir2D[1] == 0.0)
-                                MyAssertHandler(
-                                    "c:\\trees\\cod3\\cod3src\\src\\game\\actor_navigation.cpp",
-                                    3934,
-                                    0,
-                                    "%s",
-                                    "pt->fDir2D[0] || pt->fDir2D[1]");
-                            if (fLookaheadDistToNextNode > v58->fOrigLength)
-                                MyAssertHandler(
-                                    "c:\\trees\\cod3\\cod3src\\src\\game\\actor_navigation.cpp",
-                                    3935,
-                                    0,
-                                    "%s",
-                                    "dist <= pt->fOrigLength");
-                            v54 = (path_t *)&v58[1];
-                            v58[1].vOrigPoint[0] = -(float)((float)(v58->fDir2D[0] * (float)fLookaheadDistToNextNode)
-                                - v58->vOrigPoint[0]);
-                            v58[1].vOrigPoint[1] = -(float)((float)(v58->fDir2D[1] * (float)fLookaheadDistToNextNode)
-                                - v58->vOrigPoint[1]);
-                            v59 = v58->vOrigPoint[2];
-                            v60 = (float)(v58->vOrigPoint[2] - v58[1].vOrigPoint[2]);
-                            fOrigLength = v58->fOrigLength;
-                            *(float *)v79 = fLookaheadDistToNextNode;
-                            v62 = ((int)v79[0] & 0x7F800000) == 2139095040;
-                            v58[1].vOrigPoint[2] = -(float)((float)((float)((float)v60 / (float)fOrigLength)
-                                * (float)fLookaheadDistToNextNode)
-                                - (float)v59);
-                            v58->fOrigLength = fLookaheadDistToNextNode;
-                            if (v62)
-                                MyAssertHandler(
-                                    "c:\\trees\\cod3\\cod3src\\src\\game\\actor_navigation.cpp",
-                                    3942,
-                                    0,
-                                    "%s",
-                                    "!IS_NAN(pt->fOrigLength)");
-                            if (v58->fOrigLength <= 0.0)
-                                MyAssertHandler(
-                                    "c:\\trees\\cod3\\cod3src\\src\\game\\actor_navigation.cpp",
-                                    3943,
-                                    0,
-                                    "%s",
-                                    "pt->fOrigLength > 0");
-                            v63 = a20;
-                            vOrigPoint = v58[1].vOrigPoint;
-                            v65 = (float *)v58;
+                            Path_CheckNodeCountForDodge(pPath, 3, &pt, &startIndex);
+                            dist = pPath->fLookaheadDistToNextNode;
+                            iassert(dist > 0);
+                            //v58 = pt;
+                            //pt[0] = (pathpoint_t *)LODWORD(pt[0]->fOrigLength);
+                            iassert(!IS_NAN(pt->fOrigLength));
+                            iassert(pt->fOrigLength > 0);
+                            iassert(pt->fDir2D[0] || pt->fDir2D[1]);
+                            iassert(dist <= pt->fOrigLength);
+
+                            //v54 = (path_t *)&v58[1];
+                            //v58[1].vOrigPoint[0] = -(float)((float)(v58->fDir2D[0] * (float)dist) - v58->vOrigPoint[0]);
+                            //v58[1].vOrigPoint[1] = -(float)((float)(v58->fDir2D[1] * (float)dist) - v58->vOrigPoint[1]);
+                            //v59 = v58->vOrigPoint[2];
+                            //v60 = (float)(v58->vOrigPoint[2] - v58[1].vOrigPoint[2]);
+                            //fOrigLength = v58->fOrigLength;
+
+                            pt[1].vOrigPoint[0] = pt->vOrigPoint[0] - (float)(pt->fDir2D[0] * dist);
+                            pt[1].vOrigPoint[1] = pt->vOrigPoint[1] - (float)(pt->fDir2D[1] * dist);
+                            pt[1].vOrigPoint[2] = pt->vOrigPoint[2] - (float)((float)((float)(pt->vOrigPoint[2] - pt[1].vOrigPoint[2]) * dist) / pt->fOrigLength);
+
+                            //*(float *)pt = dist;
+                            pt->fOrigLength = dist;
+                            //v62 = ((int)pt[0] & 0x7F800000) == 2139095040;
+                            //v58[1].vOrigPoint[2] = -(float)((float)((float)((float)v60 / (float)fOrigLength)
+                            //    * (float)dist)
+                            //    - (float)v59);
+                            //v58->fOrigLength = dist;
+                            iassert(!IS_NAN(pt->fOrigLength));
+                            iassert(pt->fOrigLength > 0);
+
+                            pt++;
+                            //v63 = a20;
+                            //vOrigPoint = v58[1].vOrigPoint;
+                            //v65 = (float *)v58;
+                            pPath->lookaheadNextNode = ++startIndex;
                             pPath->fLookaheadDistToNextNode = 0.0;
-                            v56 = v63 + 1;
-                            pPath->lookaheadNextNode = v63 + 1;
-                            v54->pts[0].iNodeNum = -1;
-                            Path_DodgeDrawRaisedLine(v65, vOrigPoint, colorGreen);
+                            //v56 = v63 + 1;
+                            //v54->pts[0].iNodeNum = -1;
+                            pt->iNodeNum = -1;
+                            Path_DodgeDrawRaisedLine(pt[-1].vOrigPoint, pt->vOrigPoint, colorGreen);
                             goto done;
                         }
                     }
@@ -4415,137 +4661,85 @@ int __cdecl Path_AttemptDodge(
             return 0;
         }
     }
-    Path_CheckNodeCountForDodge(pPath, 2, v79, &a20);
-    v56 = a20;
-    v54 = (path_t *)v79[0];
+    Path_CheckNodeCountForDodge(pPath, 2, &pt, &startIndex);
+    //v56 = a20;
+    //v54 = (path_t *)pt[0];
 done:
-    if (v54 != (path_t *)&pPath->pts[v56])
-        MyAssertHandler(
-            "c:\\trees\\cod3\\cod3src\\src\\game\\actor_navigation.cpp",
-            3959,
-            0,
-            "%s",
-            "pt == &pPath->pts[startIndex]");
-    v66 = v82;
+    iassert(pt == &pPath->pts[startIndex]);
+    //v66 = vNewDodgeEnd;
     pPath->wDodgeCount = 0;
-    if (v54->pts[0].vOrigPoint[0] != v66 || v54->pts[0].vOrigPoint[1] != v83)
+    //if (v54->pts[0].vOrigPoint[0] != v66 || v54->pts[0].vOrigPoint[1] != v83)
+    if (pt->vOrigPoint[0] != vNewDodgeEnd[0] || pt->vOrigPoint[1] != vNewDodgeEnd[1])
     {
-        *(float *)v79 = Path_GetPathDir(v54->pts[0].fDir2D, &v82, (const float *)v54);
-        v67 = (unsigned int)v79[0];
-        v54->pts[0].fOrigLength = *(float *)v79;
-        if ((v67 & 0x7F800000) == 0x7F800000)
-            MyAssertHandler(
-                "c:\\trees\\cod3\\cod3src\\src\\game\\actor_navigation.cpp",
-                3965,
-                0,
-                "%s",
-                "!IS_NAN(pt->fOrigLength)");
-        v54 = (path_t *)((char *)v54 + 28);
-        v68 = v82;
-        LOWORD(v56) = v56 + 1;
+        //pt->fOrigLength = Path_GetPathDir(v54->pts[0].fDir2D, &vNewDodgeEnd, (const float *)v54);
+        pt->fOrigLength = Path_GetPathDir(pt->fDir2D, vNewDodgeEnd, pt->vOrigPoint);
+        //v67 = (unsigned int)pt[0];
+        //v54->pts[0].fOrigLength = *(float *)pt;
+        iassert(!IS_NAN(pt->fOrigLength));
+        //v54 = (path_t *)((char *)v54 + 28);
+        //v68 = vNewDodgeEnd;
+        //LOWORD(v56) = v56 + 1;
+        pt++;
+        startIndex++;
         ++pPath->wDodgeCount;
-        v54->pts[0].vOrigPoint[0] = v68;
-        v54->pts[0].vOrigPoint[1] = v83;
-        v54->pts[0].vOrigPoint[2] = v84;
-        v54->pts[0].iNodeNum = -1;
-        Path_DodgeDrawRaisedLine(&v54[-1].fCurrLength, (float *)v54, colorLtGreen);
+        //v54->pts[0].vOrigPoint[0] = v68;
+        //v54->pts[0].vOrigPoint[1] = v83;
+        //v54->pts[0].vOrigPoint[2] = v84;
+        pt->vOrigPoint[0] = vNewDodgeEnd[0];
+        pt->vOrigPoint[1] = vNewDodgeEnd[1];
+        pt->vOrigPoint[2] = vNewDodgeEnd[2];
+        //v54->pts[0].iNodeNum = -1;
+        pt->iNodeNum = -1;
+        //Path_DodgeDrawRaisedLine(&v54[-1].fCurrLength, (float *)v54, colorLtGreen);
+        Path_DodgeDrawRaisedLine(pt[-1].vOrigPoint, pt->vOrigPoint, colorLtGreen);
     }
-    if (v85 != v82 || v86 != v83)
+    //if (vNewDodgeStart != vNewDodgeEnd || v86 != v83)
+    if (vNewDodgeStart[0] != vNewDodgeEnd[0] || vNewDodgeStart[1] != vNewDodgeEnd[1])
     {
-        *(float *)v79 = Path_GetPathDir(v54->pts[0].fDir2D, &v85, &v82);
-        v69 = (unsigned int)v79[0];
-        v54->pts[0].fOrigLength = *(float *)v79;
-        if ((v69 & 0x7F800000) == 0x7F800000)
-            MyAssertHandler(
-                "c:\\trees\\cod3\\cod3src\\src\\game\\actor_navigation.cpp",
-                3982,
-                0,
-                "%s",
-                "!IS_NAN(pt->fOrigLength)");
-        v54 = (path_t *)((char *)v54 + 28);
-        v70 = v85;
-        LOWORD(v56) = v56 + 1;
+        //pt->fOrigLength = Path_GetPathDir(v54->pts[0].fDir2D, &vNewDodgeStart, &vNewDodgeEnd);
+        pt->fOrigLength = Path_GetPathDir(pt->fDir2D, vNewDodgeStart, vNewDodgeEnd);
+        //v69 = (unsigned int)pt[0];
+        //v54->pts[0].fOrigLength = *(float *)pt;
+        iassert(!IS_NAN(pt->fOrigLength));
+        //v54 = (path_t *)((char *)v54 + 28);
+        //v70 = vNewDodgeStart;
+        //LOWORD(v56) = v56 + 1;
+        pt++;
+        startIndex++;
         ++pPath->wDodgeCount;
-        v54->pts[0].vOrigPoint[0] = v70;
-        v54->pts[0].vOrigPoint[1] = v86;
-        v54->pts[0].vOrigPoint[2] = v87;
-        v54->pts[0].iNodeNum = -1;
-        Path_DodgeDrawRaisedLine(&v54[-1].fCurrLength, (float *)v54, colorMdYellow);
+        //v54->pts[0].vOrigPoint[0] = v70;
+        //v54->pts[0].vOrigPoint[1] = v86;
+        //v54->pts[0].vOrigPoint[2] = v87;
+        //v54->pts[0].iNodeNum = -1;
+        //Path_DodgeDrawRaisedLine(&v54[-1].fCurrLength, (float *)v54, colorMdYellow);
+        pt->vOrigPoint[0] = vNewDodgeStart[0];
+        pt->vOrigPoint[1] = vNewDodgeStart[1];
+        pt->vOrigPoint[2] = vNewDodgeStart[2];
+        pt->iNodeNum = -1;
+        Path_DodgeDrawRaisedLine(pt[-1].vOrigPoint, pt->vOrigPoint, colorMdYellow);
     }
-    v71 = v85;
-    pPath->fCurrLength = v54[-1].pathEndAnimDistSq;
-    pPath->vCurrPoint[0] = v71;
-    v72 = v87;
-    pPath->vCurrPoint[1] = v86;
-    pPath->vCurrPoint[2] = v72;
-    v54->pts[0].fOrigLength = 0.0;
-    v54->pts[0].fDir2D[0] = 0.0;
-    v54->pts[0].fDir2D[1] = 0.0;
-    flags = pPath->flags;
-    pPath->wPathLen = v56 + 1;
-    pPath->wOrigPathLen = v56 + 1;
-    pPath->flags = flags & 0xFFFFFDBC;
+    //v71 = vNewDodgeStart;
+    pPath->fCurrLength = pt[-1].fOrigLength;
+    pPath->vCurrPoint[0] = vNewDodgeStart[0];
+    pPath->vCurrPoint[1] = vNewDodgeStart[1];
+    pPath->vCurrPoint[2] = vNewDodgeStart[2];
+    pt->fOrigLength = 0.0f;
+    pt->fDir2D[0] = 0.0f;
+    pt->fDir2D[1] = 0.0f;
+    //flags = pPath->flags;
+    pPath->flags &= 0xFFFFFDBC;
+    pPath->wPathLen = startIndex + 1;
+    pPath->wOrigPathLen = pPath->wPathLen;
     Path_TransferLookahead(pPath, vOrg);
-    if (pPath->wNegotiationStartNode > pPath->lookaheadNextNode)
-        MyAssertHandler(
-            "c:\\trees\\cod3\\cod3src\\src\\game\\actor_navigation.cpp",
-            4010,
-            0,
-            "%s",
-            "pPath->wNegotiationStartNode <= pPath->lookaheadNextNode");
-    if (pPath->lookaheadNextNode >= pPath->wPathLen)
-        MyAssertHandler(
-            "c:\\trees\\cod3\\cod3src\\src\\game\\actor_navigation.cpp",
-            4011,
-            0,
-            "%s",
-            "pPath->lookaheadNextNode < pPath->wPathLen");
-    if (pPath->fLookaheadDistToNextNode > (double)pPath->pts[pPath->lookaheadNextNode].fOrigLength)
-        MyAssertHandler(
-            "c:\\trees\\cod3\\cod3src\\src\\game\\actor_navigation.cpp",
-            4012,
-            0,
-            "%s",
-            "pPath->fLookaheadDistToNextNode <= pPath->pts[pPath->lookaheadNextNode].fOrigLength");
-    wPathLen = pPath->wPathLen;
-    if (wPathLen > 1)
-    {
-        fCurrLength = pPath->fCurrLength;
-        v76 = *((float *)&pPath->pts[wPathLen - 1] - 2);
-        if (fCurrLength > v76)
-        {
-            v77 = va((const char *)HIDWORD(fCurrLength), LODWORD(fCurrLength), LODWORD(v76));
-            MyAssertHandler(
-                "c:\\trees\\cod3\\cod3src\\src\\game\\actor_navigation.cpp",
-                4013,
-                0,
-                "%s\n\t%s",
-                "pPath->wPathLen <= 1 || pPath->fCurrLength <= pPath->pts[pPath->wPathLen - 2].fOrigLength",
-                v77);
-        }
-    }
-    if (pPath->wPathLen)
-    {
-        if (pPath->wNegotiationStartNode)
-        {
-            v78 = (int *)&pPath->pts[pPath->wNegotiationStartNode];
-            if (v78[6] < 0 || *(v78 - 1) < 0)
-                MyAssertHandler(
-                    "c:\\trees\\cod3\\cod3src\\src\\game\\actor_navigation.cpp",
-                    4014,
-                    0,
-                    "%s",
-                    "!pPath->wPathLen || !pPath->wNegotiationStartNode || (pPath->pts[pPath->wNegotiationStartNode].iNodeNum >= 0 &"
-                    "& pPath->pts[pPath->wNegotiationStartNode - 1].iNodeNum >= 0)");
-        }
-    }
-    if (pPath->fLookaheadDistToNextNode != 0.0 && pPath->lookaheadNextNode >= pPath->wPathLen - 1)
-        MyAssertHandler(
-            "c:\\trees\\cod3\\cod3src\\src\\game\\actor_navigation.cpp",
-            4015,
-            0,
-            "%s",
-            "!pPath->fLookaheadDistToNextNode || (pPath->lookaheadNextNode < pPath->wPathLen - 1)");
+
+    iassert(pPath->wNegotiationStartNode <= pPath->lookaheadNextNode);
+    iassert(pPath->lookaheadNextNode < pPath->wPathLen);
+    iassert(pPath->fLookaheadDistToNextNode <= pPath->pts[pPath->lookaheadNextNode].fOrigLength);
+
+    iassert(pPath->wPathLen <= 1 || pPath->fCurrLength <= pPath->pts[pPath->wPathLen - 2].fOrigLength);
+    iassert(!pPath->wPathLen || !pPath->wNegotiationStartNode || (pPath->pts[pPath->wNegotiationStartNode].iNodeNum >= 0 && pPath->pts[pPath->wNegotiationStartNode - 1].iNodeNum >= 0));
+    iassert(!pPath->fLookaheadDistToNextNode || (pPath->lookaheadNextNode < pPath->wPathLen - 1));
+
     return 1;
 }
 
@@ -4555,25 +4749,19 @@ pathnode_t *__cdecl Path_FindCloseNode(
     const float *vGoalPos,
     bool bAllowNegotiationLinks)
 {
-    CustomSearchInfo_FindCloseNode v9; // [sp+50h] [-50h] BYREF
+    CustomSearchInfo_FindCloseNode info; // [sp+50h] [-50h] BYREF
 
-    if (!pNodeFrom)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\actor_navigation.cpp", 827, 0, "%s", "pNodeFrom");
-    if ((pNodeFrom->constant.spawnflags & 1) != 0)
-        MyAssertHandler(
-            "c:\\trees\\cod3\\cod3src\\src\\game\\actor_navigation.cpp",
-            828,
-            0,
-            "%s",
-            "(pNodeFrom->constant.spawnflags & PNF_DONTLINK) == 0");
-    if (!vGoalPos)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\actor_navigation.cpp", 829, 0, "%s", "vGoalPos");
-    v9.goalPos[0] = *vGoalPos;
-    v9.goalPos[1] = vGoalPos[1];
-    v9.closestNode = pNodeFrom;
-    v9.goalPos[2] = vGoalPos[2];
-    v9.closestDistSq = Vec2DistanceSq(pNodeFrom->constant.vOrigin, vGoalPos);
-    Path_AStarAlgorithm<CustomSearchInfo_FindCloseNode>(
+    iassert(pNodeFrom);
+    iassert((pNodeFrom->constant.spawnflags & PNF_DONTLINK) == 0);
+    iassert(vGoalPos);
+
+    info.goalPos[0] = vGoalPos[0];
+    info.goalPos[1] = vGoalPos[1];
+    info.goalPos[2] = vGoalPos[2];
+    info.closestNode = pNodeFrom;
+    info.closestDistSq = Vec2DistanceSq(pNodeFrom->constant.vOrigin, vGoalPos);
+
+    Path_AStarAlgorithm<CustomSearchInfo_FindCloseNode, true, false>(
         0,
         eTeam,
         pNodeFrom->constant.vOrigin,
@@ -4581,11 +4769,11 @@ pathnode_t *__cdecl Path_FindCloseNode(
         vGoalPos,
         1,
         bAllowNegotiationLinks,
-        &v9);
-    return v9.closestNode;
+        &info);
+    return info.closestNode;
 }
 
-int __cdecl Path_FindPathFromToWithWidth(
+bool __cdecl Path_FindPathFromToWithWidth(
     path_t *pPath,
     team_t eTeam,
     pathnode_t *pNodeFrom,
@@ -4596,31 +4784,20 @@ int __cdecl Path_FindPathFromToWithWidth(
     double width,
     float *perp)
 {
-    CustomSearchInfo_FindPathWithWidth v38; // [sp+50h] [-70h] BYREF
+    CustomSearchInfo_FindPathWithWidth info; // [sp+50h] [-70h] BYREF
 
-    if (!pNodeFrom)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\actor_navigation.cpp", 1058, 0, "%s", "pNodeFrom");
-    if (!pNodeTo)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\actor_navigation.cpp", 1059, 0, "%s", "pNodeTo");
-    if ((pNodeFrom->constant.spawnflags & 1) != 0)
-        MyAssertHandler(
-            "c:\\trees\\cod3\\cod3src\\src\\game\\actor_navigation.cpp",
-            1060,
-            0,
-            "%s",
-            "(pNodeFrom->constant.spawnflags & PNF_DONTLINK) == 0");
-    if ((pNodeTo->constant.spawnflags & 1) != 0)
-        MyAssertHandler(
-            "c:\\trees\\cod3\\cod3src\\src\\game\\actor_navigation.cpp",
-            1061,
-            0,
-            "%s",
-            "(pNodeTo->constant.spawnflags & PNF_DONTLINK) == 0");
-    v38.width = width;
-    v38.m_pNodeTo = pNodeTo;
-    v38.perp[0] = *a29;
-    v38.perp[1] = a29[1];
-    pNodeFrom->transient.costFactor = 0.0;
+    iassert(pNodeFrom);
+    iassert(pNodeTo);
+    iassert((pNodeFrom->constant.spawnflags & PNF_DONTLINK) == 0);
+    iassert((pNodeTo->constant.spawnflags & PNF_DONTLINK) == 0);
+   
+    info.width = width;
+    info.m_pNodeTo = pNodeTo;
+    info.perp[0] = perp[0];
+    info.perp[1] = perp[1];
+
+    pNodeFrom->transient.costFactor = 0.0f;
+
     return Path_AStarAlgorithm<CustomSearchInfo_FindPathWithWidth>(
         pPath,
         eTeam,
@@ -4629,10 +4806,10 @@ int __cdecl Path_FindPathFromToWithWidth(
         vGoalPos,
         1,
         bAllowNegotiationLinks,
-        &v38);
+        &info);
 }
 
-int __cdecl Path_FindPathFromToNotCrossPlanes(
+bool __cdecl Path_FindPathFromToNotCrossPlanes(
     path_t *pPath,
     team_t eTeam,
     pathnode_t *pNodeFrom,
@@ -4644,36 +4821,25 @@ int __cdecl Path_FindPathFromToNotCrossPlanes(
     int iPlaneCount,
     bool bAllowNegotiationLinks)
 {
-    CustomSearchInfo_FindPathNotCrossPlanes v39[4]; // [sp+50h] [-80h] BYREF
+    CustomSearchInfo_FindPathNotCrossPlanes info; // [sp+50h] [-80h] BYREF
 
-    v39[0].negotiationOverlapCost = ai_pathNegotiationOverlapCost->current.value;
-    if (!pNodeFrom)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\actor_navigation.cpp", 1168, 0, "%s", "pNodeFrom");
-    if (!pNodeTo)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\actor_navigation.cpp", 1169, 0, "%s", "pNodeTo");
-    if ((pNodeFrom->constant.spawnflags & 1) != 0)
-        MyAssertHandler(
-            "c:\\trees\\cod3\\cod3src\\src\\game\\actor_navigation.cpp",
-            1170,
-            0,
-            "%s",
-            "(pNodeFrom->constant.spawnflags & PNF_DONTLINK) == 0");
-    if ((pNodeTo->constant.spawnflags & 1) != 0)
-        MyAssertHandler(
-            "c:\\trees\\cod3\\cod3src\\src\\game\\actor_navigation.cpp",
-            1171,
-            0,
-            "%s",
-            "(pNodeTo->constant.spawnflags & PNF_DONTLINK) == 0");
-    v39[0].startPos[0] = *vStartPos;
-    v39[0].startPos[1] = vStartPos[1];
-    v39[0].m_pNodeTo = pNodeTo;
-    v39[0].startPos[2] = vStartPos[2];
-    v39[0].m_vNormal = vNormal;
-    v39[0].m_iPlaneCount = a28;
-    v39[0].m_fDist = fDist;
-    if (CustomSearchInfo_FindPathNotCrossPlanes::IgnoreNode(v39, pNodeFrom)
-        || CustomSearchInfo_FindPathNotCrossPlanes::IgnoreNode(v39, pNodeTo))
+    info.negotiationOverlapCost = ai_pathNegotiationOverlapCost->current.value;
+
+    iassert(pNodeFrom);
+    iassert(pNodeTo);
+    iassert((pNodeFrom->constant.spawnflags & PNF_DONTLINK) == 0);
+    iassert((pNodeTo->constant.spawnflags & PNF_DONTLINK) == 0);
+
+    info.m_pNodeTo = pNodeTo;
+    info.m_iPlaneCount = iPlaneCount;
+    info.m_vNormal = vNormal;
+    info.m_fDist = fDist;
+
+    info.startPos[0] = vStartPos[0];
+    info.startPos[1] = vStartPos[1];
+    info.startPos[2] = vStartPos[2];
+
+    if (info.IgnoreNode(pNodeFrom) || info.IgnoreNode(pNodeTo))
     {
         return 0;
     }
@@ -4686,12 +4852,12 @@ int __cdecl Path_FindPathFromToNotCrossPlanes(
             pNodeFrom,
             vGoalPos,
             1,
-            a30,
-            v39);
+            bAllowNegotiationLinks,
+            &info);
     }
 }
 
-int __cdecl Path_FindPathFromAway(
+bool __cdecl Path_FindPathFromAway(
     path_t *pPath,
     team_t eTeam,
     pathnode_t *pNodeFrom,
@@ -4700,66 +4866,47 @@ int __cdecl Path_FindPathFromAway(
     float fDistAway,
     bool bAllowNegotiationLinks)
 {
-    double v15; // fp13
-    double v16; // fp10
-    double v17; // fp11
-    double v18; // fp12
-    double v19; // fp9
     pathnode_t *m_pBestNode; // r29
-    int Path; // r31
-    CustomSearchInfo_FindPathAway v23; // [sp+50h] [-70h] BYREF
+    int success; // r31
+    CustomSearchInfo_FindPathAway info; // [sp+50h] [-70h] BYREF
 
-    v23.m_fBestScore = -1.0;
-    v23.m_pBestNode = 0;
-    if (!pNodeFrom)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\actor_navigation.cpp", 1276, 0, "%s", "pNodeFrom");
-    v15 = vAwayFromPos[2];
-    v16 = (float)(vAwayFromPos[2] - vStartPos[2]);
-    v17 = *vStartPos;
-    v23.m_vAwayFromPos[0] = *vAwayFromPos;
-    v18 = vAwayFromPos[1];
-    v19 = (float)(vAwayFromPos[1] - vStartPos[1]);
-    v23.m_fDistAway = fDistAway;
-    v23.m_fDistAwaySqrd = (float)fDistAway * (float)fDistAway;
-    v23.m_vAwayFromPos[1] = v18;
-    v23.m_vAwayFromPos[2] = v15;
-    v23.m_fInitialDistAwaySq = (float)((float)v19 * (float)v19)
-        + (float)((float)((float)(v23.m_vAwayFromPos[0] - (float)v17)
-            * (float)(v23.m_vAwayFromPos[0] - (float)v17))
-            + (float)((float)v16 * (float)v16));
-    if (Path_AStarAlgorithm<CustomSearchInfo_FindPathAway>(pPath, eTeam, vStartPos, pNodeFrom, 0, 0, a8, &v23))
+    iassert(pNodeFrom);
+
+    info.m_fBestScore = -1.0;
+    info.m_pBestNode = 0;
+    info.m_fDistAway = fDistAway;
+    info.m_fDistAwaySqrd = (float)fDistAway * (float)fDistAway;
+    info.m_vAwayFromPos[0] = vAwayFromPos[0];
+    info.m_vAwayFromPos[1] = vAwayFromPos[1];
+    info.m_vAwayFromPos[2] = vAwayFromPos[2];
+    info.m_fInitialDistAwaySq = (float)((float)(vAwayFromPos[1] - vStartPos[1]) * (float)(vAwayFromPos[1] - vStartPos[1]))
+        + (float)((float)((float)(info.m_vAwayFromPos[0] - (float)vStartPos[0])
+            * (float)(info.m_vAwayFromPos[0] - (float)vStartPos[0]))
+            + (float)((float)(vAwayFromPos[2] - vStartPos[2]) * (float)(vAwayFromPos[2] - vStartPos[2])));
+
+    if (Path_AStarAlgorithm<CustomSearchInfo_FindPathAway, false, false>(pPath, eTeam, vStartPos, pNodeFrom, 0, 0, bAllowNegotiationLinks, &info))
         return 1;
-    m_pBestNode = v23.m_pBestNode;
-    if (!v23.m_pBestNode)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\actor_navigation.cpp", 1287, 0, "%s", "info.m_pBestNode");
+
+    m_pBestNode = info.m_pBestNode;
+    iassert(info.m_pBestNode);
+
     if (m_pBestNode == pNodeFrom)
         return 0;
+
     if (!pPath)
         return 1;
+
     //Profile_Begin(231);
-    Path = Path_GeneratePath(pPath, eTeam, vStartPos, 0, pNodeFrom, m_pBestNode, 0, a8);
-    if (pPath->wPathLen > pPath->wOrigPathLen)
-        MyAssertHandler(
-            "c:\\trees\\cod3\\cod3src\\src\\game\\actor_navigation.cpp",
-            1298,
-            0,
-            "%s",
-            "pPath->wPathLen <= pPath->wOrigPathLen");
-    if (!Path)
-    {
-        if (pPath->wOrigPathLen)
-            MyAssertHandler(
-                "c:\\trees\\cod3\\cod3src\\src\\game\\actor_navigation.cpp",
-                1299,
-                0,
-                "%s",
-                "success || !pPath->wOrigPathLen");
-    }
+    success = Path_GeneratePath(pPath, eTeam, vStartPos, 0, pNodeFrom, m_pBestNode, 0, bAllowNegotiationLinks);
+
+    iassert(pPath->wPathLen <= pPath->wOrigPathLen);
+    iassert(success || !pPath->wOrigPathLen);
+
     //Profile_EndInternal(0);
-    return Path;
+    return success;
 }
 
-int __cdecl Path_FindPathFromAwayNotCrossPlanes(
+bool __cdecl Path_FindPathFromAwayNotCrossPlanes(
     path_t *pPath,
     team_t eTeam,
     pathnode_t *pNodeFrom,
@@ -4772,68 +4919,55 @@ int __cdecl Path_FindPathFromAwayNotCrossPlanes(
     bool bAllowNegotiationLinks)
 {
     pathnode_t *m_pBestNode; // r30
-    int Path; // r31
-    CustomSearchInfo_FindPathAwayNotCrossPlanes v42; // [sp+50h] [-90h] BYREF
+    int success; // r31
+    CustomSearchInfo_FindPathAwayNotCrossPlanes info; // [sp+50h] [-90h] BYREF
 
-    v42.m_fBestScore = -1.0;
-    v42.m_pBestNode = 0;
-    if (!pNodeFrom)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\actor_navigation.cpp", 1370, 0, "%s", "pNodeFrom");
-    v42.m_vAwayFromPos[0] = *vAwayFromPos;
-    v42.m_vAwayFromPos[1] = vAwayFromPos[1];
-    v42.m_vNormal = (float (*)[2])fDist;
-    v42.m_vAwayFromPos[2] = vAwayFromPos[2];
-    v42.m_fDist = fDist;
-    v42.m_fDistAway = fDistAway;
-    v42.m_iPlaneCount = iPlaneCount;
-    v42.m_fDistAwaySqrd = (float)fDistAway * (float)fDistAway;
+    iassert(pNodeFrom);
+    info.m_fBestScore = -1.0;
+    info.m_pBestNode = 0;
+    info.m_vAwayFromPos[0] = vAwayFromPos[0];
+    info.m_vAwayFromPos[1] = vAwayFromPos[1];
+    info.m_vAwayFromPos[2] = vAwayFromPos[2];
+    info.m_vNormal = vNormal;
+    info.m_fDist = fDist;
+    info.m_fDistAway = fDistAway;
+    info.m_iPlaneCount = iPlaneCount;
+    info.m_fDistAwaySqrd = fDistAway * fDistAway;
 
-    if (CustomSearchInfo_FindPathAwayNotCrossPlanes::IgnoreNode(&v42, pNodeFrom))
+    if (info.IgnoreNode(pNodeFrom))
         return 0;
 
-    if (Path_AStarAlgorithm<CustomSearchInfo_FindPathAwayNotCrossPlanes>(
+    if (Path_AStarAlgorithm<CustomSearchInfo_FindPathAwayNotCrossPlanes, false, false>(
         pPath,
         eTeam,
         vStartPos,
         pNodeFrom,
         0,
         0,
-        a31,
-        &v42))
+        bAllowNegotiationLinks,
+        &info))
     {
         return 1;
     }
-    m_pBestNode = v42.m_pBestNode;
-    if (!v42.m_pBestNode)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\actor_navigation.cpp", 1385, 0, "%s", "info.m_pBestNode");
+
+    m_pBestNode = info.m_pBestNode;
+    iassert(info.m_pBestNode);
+
     if (m_pBestNode == pNodeFrom || Path_NodesVisible(m_pBestNode, pNodeFrom))
         return 0;
+
     if (!pPath)
         return 1;
+
     //Profile_Begin(231);
-    Path = Path_GeneratePath(pPath, eTeam, vStartPos, 0, pNodeFrom, m_pBestNode, 0, a31);
-    if (pPath->wPathLen > pPath->wOrigPathLen)
-        MyAssertHandler(
-            "c:\\trees\\cod3\\cod3src\\src\\game\\actor_navigation.cpp",
-            1399,
-            0,
-            "%s",
-            "pPath->wPathLen <= pPath->wOrigPathLen");
-    if (!Path)
-    {
-        if (pPath->wOrigPathLen)
-            MyAssertHandler(
-                "c:\\trees\\cod3\\cod3src\\src\\game\\actor_navigation.cpp",
-                1400,
-                0,
-                "%s",
-                "success || !pPath->wOrigPathLen");
-    }
+    success = Path_GeneratePath(pPath, eTeam, vStartPos, 0, pNodeFrom, m_pBestNode, 0, bAllowNegotiationLinks);
+    iassert(pPath->wPathLen <= pPath->wOrigPathLen);
+    iassert(success || !pPath->wOrigPathLen);
     //Profile_EndInternal(0);
-    return Path;
+    return success;
 }
 
-int __cdecl Path_FindPathInCylinderWithLOS(
+bool __cdecl Path_FindPathInCylinderWithLOS(
     path_t *pPath,
     team_t eTeam,
     const float *vStartPos,
@@ -4842,36 +4976,40 @@ int __cdecl Path_FindPathInCylinderWithLOS(
     float fWithinDistSqrd,
     bool bAllowNegotiationLinks)
 {
-    int *v15; // r6
-    pathnode_t *v17; // r6
-    _BYTE v18[16]; // [sp+50h] [-380h] BYREF
-    CustomSearchInfo_FindPathInCylinderWithLOS v19; // [sp+60h] [-370h] BYREF
-    pathsort_t v20[64]; // [sp+80h] [-350h] BYREF
+    pathnode_t *pNodeFrom; // r6
+    CustomSearchInfo_FindPathInCylinderWithLOS info; // [sp+60h] [-370h] BYREF
+    pathsort_t nodes[64]; // [sp+80h] [-350h] BYREF
+    int nodeCount;
 
-    v19.negotiationOverlapCost = ai_pathNegotiationOverlapCost->current.value;
-    v19.m_pNodeTo = Path_NearestNode(vGoalPos, v20, -2, 192.0, (int *)vGoalPos, (int)v18, (nearestNodeHeightCheck)64);
-    if (!v19.m_pNodeTo)
-        return 0;
-    v17 = Path_NearestNode(vStartPos, v20, -2, 192.0, v15, (int)v18, (nearestNodeHeightCheck)64);
-    if (!v17)
-        return 0;
-    v19.startPos[0] = *vStartPos;
-    v19.startPos[1] = vStartPos[1];
-    v19.startPos[2] = vStartPos[2];
-    v19.m_fWithinDistSqrd = fWithinDistSqrd;
-    v19.goal = goal;
+    info.negotiationOverlapCost = ai_pathNegotiationOverlapCost->current.value;
+    info.m_pNodeTo = Path_NearestNode(vGoalPos, nodes, -2, 192.0, &nodeCount, 64, NEAREST_NODE_DO_HEIGHT_CHECK);
+
+    if (!info.m_pNodeTo)
+        return NULL;
+
+    pNodeFrom = Path_NearestNode(vStartPos, nodes, -2, 192.0, &nodeCount, 64, NEAREST_NODE_DO_HEIGHT_CHECK);
+
+    if (!pNodeFrom)
+        return NULL;
+
+    info.startPos[0] = vStartPos[0];
+    info.startPos[1] = vStartPos[1];
+    info.startPos[2] = vStartPos[2];
+    info.m_fWithinDistSqrd = fWithinDistSqrd;
+    info.goal = goal;
+
     return Path_AStarAlgorithm<CustomSearchInfo_FindPathInCylinderWithLOS>(
         pPath,
         eTeam,
         vStartPos,
-        v17,
+        pNodeFrom,
         vGoalPos,
         0,
-        a8,
-        &v19);
+        bAllowNegotiationLinks,
+        &info);
 }
 
-int __cdecl Path_FindPathInCylinderWithLOSNotCrossPlanes(
+bool __cdecl Path_FindPathInCylinderWithLOSNotCrossPlanes(
     path_t *pPath,
     team_t eTeam,
     const float *vStartPos,
@@ -4883,49 +5021,54 @@ int __cdecl Path_FindPathInCylinderWithLOSNotCrossPlanes(
     int iPlaneCount,
     bool bAllowNegotiationLinks)
 {
-    pathnode_t *v40; // r6
-    nearestNodeHeightCheck v41; // [sp+8h] [-3F8h]
-    _BYTE v42[16]; // [sp+60h] [-3A0h] BYREF
-    CustomSearchInfo_FindPathInCylinderWithLOSNotCrossPlanes v43; // [sp+70h] [-390h] BYREF
-    pathsort_t v44[64]; // [sp+A0h] [-360h] BYREF
+    pathnode_t *pNodeFrom; // r6
+    CustomSearchInfo_FindPathInCylinderWithLOSNotCrossPlanes info; // [sp+70h] [-390h] BYREF
+    pathsort_t nodes[64]; // [sp+A0h] [-360h] BYREF
+    int nodeCount;
 
-    v43.negotiationOverlapCost = ai_pathNegotiationOverlapCost->current.value;
-    v43.m_pNodeTo = Path_NearestNode(vGoalPos, v44, -2, 192.0, (int *)vGoalPos, (int)v42, (nearestNodeHeightCheck)64);
-    if (!v43.m_pNodeTo)
-        return 0;
-    v40 = Path_NearestNodeNotCrossPlanes(
+    info.negotiationOverlapCost = ai_pathNegotiationOverlapCost->current.value;
+    info.m_pNodeTo = Path_NearestNode(vGoalPos, nodes, -2, 192.0, &nodeCount, 64, NEAREST_NODE_DO_HEIGHT_CHECK);
+
+    if (!info.m_pNodeTo)
+        return NULL;
+
+    pNodeFrom = Path_NearestNodeNotCrossPlanes(
         vStartPos,
-        v44,
+        nodes,
         -2,
         192.0,
-        (float (*)[2])0x40,
+        vNormal,
         fDist,
-        (int)iPlaneCount,
-        a29,
-        (int)v42,
-        v41);
-    if (!v40)
-        return 0;
-    v43.startPos[0] = *vStartPos;
-    v43.startPos[1] = vStartPos[1];
-    v43.startPos[2] = vStartPos[2];
-    v43.goal = goal;
-    v43.m_fWithinDistSqrd = fWithinDistSqrd;
-    v43.m_iPlaneCount = (int)a29;
-    v43.m_vNormal = (float (*)[2])fDist;
-    v43.m_fDist = iPlaneCount;
+        iPlaneCount,
+        &nodeCount,
+        64,
+        NEAREST_NODE_DO_HEIGHT_CHECK
+    );
+
+    if (!pNodeFrom)
+        return NULL;
+
+    info.startPos[0] = vStartPos[0];
+    info.startPos[1] = vStartPos[1];
+    info.startPos[2] = vStartPos[2];
+    info.goal = goal;
+    info.m_fWithinDistSqrd = fWithinDistSqrd;
+    info.m_iPlaneCount = iPlaneCount;
+    info.m_vNormal = vNormal;
+    info.m_fDist = fDist;
+
     return Path_AStarAlgorithm<CustomSearchInfo_FindPathInCylinderWithLOSNotCrossPlanes>(
         pPath,
         eTeam,
         vStartPos,
-        v40,
+        pNodeFrom,
         vGoalPos,
-        0,
-        a31,
-        &v43);
+        false,
+        bAllowNegotiationLinks,
+        &info);
 }
 
-pathnode_t *__cdecl Path_FindPathFromInCylinder(
+bool __cdecl Path_FindPathFromInCylinder(
     path_t *pPath,
     team_t eTeam,
     pathnode_t *pNodeFrom,
@@ -4936,43 +5079,40 @@ pathnode_t *__cdecl Path_FindPathFromInCylinder(
     float fHalfHeightSqrd,
     bool bAllowNegotiationLinks)
 {
-    unsigned __int16 spawnflags; // r10
-    pathnode_t *result; // r3
-    CustomSearchInfo_FindPathFromInCylinder v40; // [sp+50h] [-380h] BYREF
-    _BYTE v41[12]; // [sp+74h] [-35Ch] BYREF
-    pathsort_t v42[64]; // [sp+80h] [-350h] BYREF
+    pathnode_t *pNodeTo; // r3
+    CustomSearchInfo_FindPathFromInCylinder info; // [sp+50h] [-380h] BYREF
+    pathsort_t nodes[64]; // [sp+80h] [-350h] BYREF
+    int nodeCount;
 
-    spawnflags = pNodeFrom->constant.spawnflags;
-    v40.negotiationOverlapCost = ai_pathNegotiationOverlapCost->current.value;
-    if ((spawnflags & 1) != 0)
-        MyAssertHandler(
-            "c:\\trees\\cod3\\cod3src\\src\\game\\actor_navigation.cpp",
-            1611,
-            0,
-            "%s",
-            "(pNodeFrom->constant.spawnflags & PNF_DONTLINK) == 0");
-    result = Path_NearestNode(vGoalPos, v42, -2, 192.0, (int *)vStartPos, (int)v41, (nearestNodeHeightCheck)64);
-    if (result)
+    info.negotiationOverlapCost = ai_pathNegotiationOverlapCost->current.value;
+    iassert((pNodeFrom->constant.spawnflags & PNF_DONTLINK) == 0);
+    pNodeTo = Path_NearestNode(vGoalPos, nodes, -2, 192.0, &nodeCount, 64, NEAREST_NODE_DO_HEIGHT_CHECK);
+
+    if (pNodeTo)
     {
-        v40.m_vOrigin[0] = *vOrigin;
-        v40.m_vOrigin[1] = vOrigin[1];
-        v40.startPos[0] = *vStartPos;
-        v40.startPos[1] = vStartPos[1];
-        v40.startPos[2] = vStartPos[2];
-        v40.m_pNodeTo = result;
-        v40.m_fRadiusSqrd = fRadiusSqrd;
-        v40.m_fHalfHeightSqrd = fHalfHeightSqrd;
-        return (pathnode_t *)Path_AStarAlgorithm<CustomSearchInfo_FindPathFromInCylinder>(
+        info.m_vOrigin[0] = vOrigin[0];
+        info.m_vOrigin[1] = vOrigin[1];
+
+        info.startPos[0] = vStartPos[0];
+        info.startPos[1] = vStartPos[1];
+        info.startPos[2] = vStartPos[2];
+
+        info.m_pNodeTo = pNodeTo;
+        info.m_fRadiusSqrd = fRadiusSqrd;
+        info.m_fHalfHeightSqrd = fHalfHeightSqrd;
+
+        return Path_AStarAlgorithm<CustomSearchInfo_FindPathFromInCylinder>(
             pPath,
             eTeam,
             vStartPos,
             pNodeFrom,
             vGoalPos,
             1,
-            a30,
-            &v40);
+            bAllowNegotiationLinks,
+            &info);
     }
-    return result;
+
+    return NULL;
 }
 
 int __cdecl Path_FindPathFromInCylinderNotCrossPlanes(
@@ -4989,37 +5129,34 @@ int __cdecl Path_FindPathFromInCylinderNotCrossPlanes(
     int iPlaneCount,
     bool bAllowNegotiationLinks)
 {
-    unsigned __int16 spawnflags; // r10
-    pathnode_t *v45; // r11
+    pathnode_t *pNodeTo; // r11
     nearestNodeHeightCheck v47; // [sp+8h] [-3F8h]
-    CustomSearchInfo_FindPathFromInCylinderNotCrossPlanes v48; // [sp+60h] [-3A0h] BYREF
+    CustomSearchInfo_FindPathFromInCylinderNotCrossPlanes info; // [sp+60h] [-3A0h] BYREF
     _BYTE v49[16]; // [sp+90h] [-370h] BYREF
-    pathsort_t v50[64]; // [sp+A0h] [-360h] BYREF
+    pathsort_t nodes[64]; // [sp+A0h] [-360h] BYREF
+    int nodeCount;
 
-    spawnflags = pNodeFrom->constant.spawnflags;
-    v48.negotiationOverlapCost = ai_pathNegotiationOverlapCost->current.value;
-    if ((spawnflags & 1) != 0)
-        MyAssertHandler(
-            "c:\\trees\\cod3\\cod3src\\src\\game\\actor_navigation.cpp",
-            1682,
-            0,
-            "%s",
-            "(pNodeFrom->constant.spawnflags & PNF_DONTLINK) == 0");
-    v45 = Path_NearestNodeNotCrossPlanes(vGoalPos, v50, -2, 192.0, 0, a30, (int)a32, a34, (int)v49, v47);
-    if (!v45)
+    info.negotiationOverlapCost = ai_pathNegotiationOverlapCost->current.value;
+    iassert((pNodeFrom->constant.spawnflags & PNF_DONTLINK) == 0);
+
+    pNodeTo = Path_NearestNodeNotCrossPlanes(vGoalPos, nodes, -2, 192.0, vNormal, fDist, iPlaneCount, &nodeCount, 64, NEAREST_NODE_DO_HEIGHT_CHECK);
+
+    if (!pNodeTo)
         return 0;
-    v48.m_vOrigin[0] = *vOrigin;
-    v48.m_vOrigin[1] = vOrigin[1];
-    v48.m_pNodeTo = v45;
-    v48.m_iPlaneCount = (int)a34;
-    v48.startPos[0] = *vStartPos;
-    v48.m_vNormal = (float (*)[2])a30;
-    v48.m_fDist = a32;
-    v48.startPos[1] = vStartPos[1];
-    v48.startPos[2] = vStartPos[2];
-    v48.m_fRadiusSqrd = fRadiusSqrd;
-    v48.m_fHalfHeightSqrd = fHalfHeightSqrd;
-    if (CustomSearchInfo_FindPathFromInCylinderNotCrossPlanes::IgnoreNode(&v48, pNodeFrom))
+
+    info.m_vOrigin[0] = vOrigin[0];
+    info.m_vOrigin[1] = vOrigin[1];
+    info.m_pNodeTo = pNodeTo;
+    info.m_iPlaneCount = iPlaneCount;
+    info.m_vNormal = vNormal;
+    info.m_fDist = fDist;
+    info.startPos[0] = vStartPos[0];
+    info.startPos[1] = vStartPos[1];
+    info.startPos[2] = vStartPos[2];
+    info.m_fRadiusSqrd = fRadiusSqrd;
+    info.m_fHalfHeightSqrd = fHalfHeightSqrd;
+
+    if (info.IgnoreNode(pNodeFrom))
         return 0;
     else
         return Path_AStarAlgorithm<CustomSearchInfo_FindPathFromInCylinderNotCrossPlanes>(
@@ -5029,8 +5166,8 @@ int __cdecl Path_FindPathFromInCylinderNotCrossPlanes(
             pNodeFrom,
             vGoalPos,
             1,
-            a36,
-            &v48);
+            bAllowNegotiationLinks,
+            &info);
 }
 
 const pathnode_t *__cdecl Path_FindFacingNode(sentient_s *pSelf, sentient_s *pOther, sentient_info_t *pInfo)
@@ -5073,7 +5210,7 @@ const pathnode_t *__cdecl Path_FindFacingNode(sentient_s *pSelf, sentient_s *pOt
     return result;
 }
 
-int __cdecl Path_FindPathGetCloseAsPossible(
+bool __cdecl Path_FindPathGetCloseAsPossible(
     path_t *pPath,
     team_t eTeam,
     pathnode_t *pNodeFrom,
@@ -5082,24 +5219,17 @@ int __cdecl Path_FindPathGetCloseAsPossible(
     const float *vGoalPos,
     bool bAllowNegotiationLinks)
 {
-    pathnode_t *m_pBestNode; // r31
-    CustomSearchInfo_FindPathClosestPossible v16; // [sp+50h] [-60h] BYREF
+    CustomSearchInfo_FindPathClosestPossible info; // [sp+50h] [-60h] BYREF
 
-    v16.negotiationOverlapCost = ai_pathNegotiationOverlapCost->current.value;
-    v16.m_fBestScore = FLT_MAX;
-    v16.m_pBestNode = 0;
-    if (!pNodeTo)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\actor_navigation.cpp", 1862, 0, "%s", "pNodeTo");
-    if (!pNodeFrom)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\actor_navigation.cpp", 1863, 0, "%s", "pNodeFrom");
-    if ((pNodeFrom->constant.spawnflags & 1) != 0)
-        MyAssertHandler(
-            "c:\\trees\\cod3\\cod3src\\src\\game\\actor_navigation.cpp",
-            1864,
-            0,
-            "%s",
-            "(pNodeFrom->constant.spawnflags & PNF_DONTLINK) == 0");
-    v16.m_pNodeTo = pNodeTo;
+    iassert(pNodeTo);
+    iassert(pNodeFrom);
+    iassert((pNodeFrom->constant.spawnflags & PNF_DONTLINK) == 0);
+
+    info.negotiationOverlapCost = ai_pathNegotiationOverlapCost->current.value;
+    info.m_fBestScore = FLT_MAX;
+    info.m_pBestNode = 0;
+    info.m_pNodeTo = pNodeTo;
+
     if (Path_AStarAlgorithm<CustomSearchInfo_FindPathClosestPossible>(
         pPath,
         eTeam,
@@ -5108,39 +5238,34 @@ int __cdecl Path_FindPathGetCloseAsPossible(
         vGoalPos,
         1,
         bAllowNegotiationLinks,
-        &v16))
+        &info))
     {
         return 1;
     }
-    m_pBestNode = v16.m_pBestNode;
-    if (!v16.m_pBestNode)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\actor_navigation.cpp", 1872, 0, "%s", "info.m_pBestNode");
+
+    iassert(info.m_pBestNode);
+
     //Profile_Begin(231);
     if (Path_GeneratePath(
         pPath,
         eTeam,
         vStartPos,
-        m_pBestNode->constant.vOrigin,
+        info.m_pBestNode->constant.vOrigin,
         pNodeFrom,
-        m_pBestNode,
+        info.m_pBestNode,
         1,
         bAllowNegotiationLinks))
     {
-        if (pPath->wPathLen > pPath->wOrigPathLen)
-            MyAssertHandler(
-                "c:\\trees\\cod3\\cod3src\\src\\game\\actor_navigation.cpp",
-                1877,
-                0,
-                "%s",
-                "pPath->wPathLen <= pPath->wOrigPathLen");
+        iassert(pPath->wPathLen <= pPath->wOrigPathLen);
         //Profile_EndInternal(0);
         return 1;
     }
+
     //Profile_EndInternal(0);
     return 0;
 }
 
-int __cdecl Path_FindPathWithWidth(
+bool __cdecl Path_FindPathWithWidth(
     path_t *pPath,
     team_t eTeam,
     const float *vStartPos,
@@ -5149,69 +5274,29 @@ int __cdecl Path_FindPathWithWidth(
     double width,
     float *perp)
 {
-    pathnode_t *v15; // r30
-    int *v16; // r6
-    float *v18; // r10
-    pathnode_t *v19; // r5
-    int v20; // [sp+8h] [-3B8h]
-    int v21; // [sp+Ch] [-3B4h]
-    int v22; // [sp+10h] [-3B0h]
-    int v23; // [sp+14h] [-3ACh]
-    int v24; // [sp+18h] [-3A8h]
-    int v25; // [sp+1Ch] [-3A4h]
-    int v26; // [sp+20h] [-3A0h]
-    int v27; // [sp+24h] [-39Ch]
-    int v28; // [sp+28h] [-398h]
-    int v29; // [sp+2Ch] [-394h]
-    int v30; // [sp+30h] [-390h]
-    int v31; // [sp+34h] [-38Ch]
-    int v32; // [sp+38h] [-388h]
-    int v33; // [sp+3Ch] [-384h]
-    int v34; // [sp+40h] [-380h]
-    int v35; // [sp+44h] [-37Ch]
-    int v36; // [sp+48h] [-378h]
-    int v37; // [sp+4Ch] [-374h]
-    int v38; // [sp+50h] [-370h]
-    _BYTE v39[16]; // [sp+60h] [-360h] BYREF
-    pathsort_t v40[64]; // [sp+70h] [-350h] BYREF
+    pathnode_t *pNodeTo; // r30
+    pathnode_t *pNodeFrom; // r5
+    pathsort_t nodes[64]; // [sp+70h] [-350h] BYREF
+    int nodeCount;
 
-    v15 = Path_NearestNode(vGoalPos, v40, -2, 192.0, (int *)vGoalPos, (int)v39, (nearestNodeHeightCheck)64);
-    if (v15 && (v19 = Path_NearestNode(vStartPos, v40, -2, 192.0, v16, (int)v39, (nearestNodeHeightCheck)64)) != 0)
+    pNodeTo = Path_NearestNode(vGoalPos, nodes, -2, 192.0, &nodeCount, 64, NEAREST_NODE_DO_HEIGHT_CHECK);
+
+    if (pNodeTo && (pNodeFrom = Path_NearestNode(vStartPos, nodes, -2, 192.0, &nodeCount, 64, NEAREST_NODE_DO_HEIGHT_CHECK)))
         return Path_FindPathFromToWithWidth(
             pPath,
             eTeam,
-            v19,
+            pNodeFrom,
             vStartPos,
-            v15,
+            pNodeTo,
             vGoalPos,
             bAllowNegotiationLinks,
             width,
-            v18,
-            v20,
-            v21,
-            v22,
-            v23,
-            v24,
-            v25,
-            v26,
-            v27,
-            v28,
-            v29,
-            v30,
-            v31,
-            v32,
-            v33,
-            v34,
-            v35,
-            v36,
-            v37,
-            v38,
-            a8);
+            perp);
     else
         return 0;
 }
 
-int __cdecl Path_FindPathNotCrossPlanes(
+bool __cdecl Path_FindPathNotCrossPlanes(
     path_t *pPath,
     team_t eTeam,
     const float *vStartPos,
@@ -5221,97 +5306,55 @@ int __cdecl Path_FindPathNotCrossPlanes(
     int iPlaneCount,
     bool bAllowNegotiationLinks)
 {
-    pathnode_t *v16; // r26
-    float *v17; // r6
-    pathnode_t *v19; // r5
-    nearestNodeHeightCheck v20; // [sp+8h] [-3D8h]
-    nearestNodeHeightCheck v21; // [sp+8h] [-3D8h]
-    int v22; // [sp+8h] [-3D8h]
-    int v23; // [sp+Ch] [-3D4h]
-    int v24; // [sp+10h] [-3D0h]
-    int v25; // [sp+14h] [-3CCh]
-    int v26; // [sp+18h] [-3C8h]
-    int v27; // [sp+1Ch] [-3C4h]
-    int v28; // [sp+20h] [-3C0h]
-    int v29; // [sp+24h] [-3BCh]
-    int v30; // [sp+28h] [-3B8h]
-    int v31; // [sp+2Ch] [-3B4h]
-    int v32; // [sp+30h] [-3B0h]
-    int v33; // [sp+34h] [-3ACh]
-    int v34; // [sp+38h] [-3A8h]
-    int v35; // [sp+3Ch] [-3A4h]
-    int v36; // [sp+40h] [-3A0h]
-    int v37; // [sp+44h] [-39Ch]
-    int v38; // [sp+48h] [-398h]
-    int v39; // [sp+4Ch] [-394h]
-    int v40; // [sp+50h] [-390h]
-    int v41; // [sp+58h] [-388h]
-    _BYTE v42[16]; // [sp+60h] [-380h] BYREF
-    pathsort_t v43[64]; // [sp+70h] [-370h] BYREF
+    pathnode_t *pNodeTo; // r26
+    pathnode_t *pNodeFrom; // r5
+    pathsort_t nodes[64]; // [sp+70h] [-370h] BYREF
+    int nodeCount;
 
-    v16 = Path_NearestNodeNotCrossPlanes(
+    pNodeTo = Path_NearestNodeNotCrossPlanes(
         vGoalPos,
-        v43,
+        nodes,
         -2,
         192.0,
-        (float (*)[2])vGoalPos,
-        (float *)vNormal,
-        (int)fDist,
+        vNormal,
+        fDist,
         iPlaneCount,
-        (int)v42,
-        v20);
-    if (v16
-        && (v19 = Path_NearestNodeNotCrossPlanes(
+        &nodeCount,
+        64,
+        NEAREST_NODE_DO_HEIGHT_CHECK
+    );
+
+    if (pNodeTo && (pNodeFrom = Path_NearestNodeNotCrossPlanes(
             vStartPos,
-            v43,
+            nodes,
             -2,
             192.0,
-            (float (*)[2])v17,
-            (float *)vNormal,
-            (int)fDist,
+            vNormal,
+            fDist,
             iPlaneCount,
-            (int)v42,
-            v21)) != 0)
+            &nodeCount,
+            64,
+            NEAREST_NODE_DO_HEIGHT_CHECK)))
     {
         return Path_FindPathFromToNotCrossPlanes(
             pPath,
             eTeam,
-            v19,
+            pNodeFrom,
             vStartPos,
-            v16,
+            pNodeTo,
             vGoalPos,
             vNormal,
             fDist,
-            v22,
-            v23,
-            v24,
-            v25,
-            v26,
-            v27,
-            v28,
-            v29,
-            v30,
-            v31,
-            v32,
-            v33,
-            v34,
-            v35,
-            v36,
-            v37,
-            v38,
-            v39,
-            v40,
-            (int)iPlaneCount,
-            v41,
+            iPlaneCount,
             bAllowNegotiationLinks);
     }
     else
     {
-        return 0;
+        return NULL;
     }
 }
 
-pathnode_t *__cdecl Path_FindPathFromNotCrossPlanes(
+bool __cdecl Path_FindPathFromNotCrossPlanes(
     path_t *pPath,
     team_t eTeam,
     pathnode_t *pNodeFrom,
@@ -5322,75 +5365,38 @@ pathnode_t *__cdecl Path_FindPathFromNotCrossPlanes(
     int iPlaneCount,
     bool bAllowNegotiationLinks)
 {
-    pathnode_t *result; // r3
-    nearestNodeHeightCheck v37; // [sp+8h] [-3B8h]
-    int v38; // [sp+8h] [-3B8h]
-    int v39; // [sp+Ch] [-3B4h]
-    int v40; // [sp+10h] [-3B0h]
-    int v41; // [sp+14h] [-3ACh]
-    int v42; // [sp+18h] [-3A8h]
-    int v43; // [sp+1Ch] [-3A4h]
-    int v44; // [sp+20h] [-3A0h]
-    int v45; // [sp+24h] [-39Ch]
-    int v46; // [sp+28h] [-398h]
-    int v47; // [sp+2Ch] [-394h]
-    int v48; // [sp+30h] [-390h]
-    int v49; // [sp+34h] [-38Ch]
-    int v50; // [sp+38h] [-388h]
-    int v51; // [sp+3Ch] [-384h]
-    int v52; // [sp+40h] [-380h]
-    int v53; // [sp+44h] [-37Ch]
-    int v54; // [sp+48h] [-378h]
-    int v55; // [sp+4Ch] [-374h]
-    int v56; // [sp+50h] [-370h]
-    int v57; // [sp+58h] [-368h]
-    _BYTE v58[16]; // [sp+60h] [-360h] BYREF
-    pathsort_t v59[70]; // [sp+70h] [-350h] BYREF
+    pathnode_t *nodeTo; // r3
+    int nodeCount; // [sp+60h] [-360h] BYREF
+    pathsort_t nodes[64]; // [sp+70h] [-350h] BYREF
 
-    result = Path_NearestNodeNotCrossPlanes(
+    nodeTo = Path_NearestNodeNotCrossPlanes(
         vGoalPos,
-        v59,
+        nodes,
         -2,
         192.0,
-        0,
-        (float *)vNormal,
-        (int)fDist,
+        vNormal,
+        fDist,
         iPlaneCount,
-        (int)v58,
-        v37);
-    if (result)
-        return (pathnode_t *)Path_FindPathFromToNotCrossPlanes(
+        &nodeCount,
+        64,
+        NEAREST_NODE_DO_HEIGHT_CHECK);
+
+    if (nodeTo)
+    {
+        return Path_FindPathFromToNotCrossPlanes(
             pPath,
             eTeam,
             pNodeFrom,
             vStartPos,
-            result,
+            nodeTo,
             vGoalPos,
             vNormal,
             fDist,
-            v38,
-            v39,
-            v40,
-            v41,
-            v42,
-            v43,
-            v44,
-            v45,
-            v46,
-            v47,
-            v48,
-            v49,
-            v50,
-            v51,
-            v52,
-            v53,
-            v54,
-            v55,
-            v56,
-            (int)iPlaneCount,
-            v57,
-            a28);
-    return result;
+            iPlaneCount,
+            bAllowNegotiationLinks);
+    }
+
+    return NULL;
 }
 
 pathnode_t *__cdecl Path_FindPathAway(
@@ -5404,11 +5410,11 @@ pathnode_t *__cdecl Path_FindPathAway(
     int v13; // r8
     pathnode_t *result; // r3
     _BYTE v15[16]; // [sp+50h] [-350h] BYREF
-    pathsort_t v16[64]; // [sp+60h] [-340h] BYREF
+    pathsort_t nodes[64]; // [sp+60h] [-340h] BYREF
 
-    result = Path_NearestNode(vStartPos, v16, -2, 192.0, (int *)vAwayFromPos, (int)v15, (nearestNodeHeightCheck)64);
+    result = Path_NearestNode(vStartPos, nodes, -2, 192.0, (int *)vAwayFromPos, (int)v15, (nearestNodeHeightCheck)64);
     if (result)
-        return (pathnode_t *)Path_FindPathFromAway(pPath, eTeam, result, vStartPos, vAwayFromPos, fDistAway, v13, a7);
+        return (pathnode_t *)Path_FindPathFromAway(pPath, eTeam, result, vStartPos, vAwayFromPos, fDistAway, bAllowNegotiationLinks);
     return result;
 }
 

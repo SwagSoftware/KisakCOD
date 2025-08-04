@@ -4,6 +4,7 @@
 #include <bgame/bg_local.h>
 
 #define PNF_PRIORITY 0x40
+#define PNF_DONTLINK 1
 
 #define MAX_NODES_IN_BRUSH 0x200
 
@@ -150,13 +151,12 @@ struct pathnode_dynamic_t
 #endif
 
 
-struct pathnode_t;
 struct pathnode_transient_t // sizeof=0x1C
 {
     int iSearchFrame;
-    pathnode_t *pNextOpen;
-    pathnode_t *pPrevOpen;
-    pathnode_t *pParent;
+    struct pathnode_t *pNextOpen;
+    struct pathnode_t *pPrevOpen;
+    struct pathnode_t *pParent;
     float fCost;
     float fHeuristic;
     float costFactor;
