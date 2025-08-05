@@ -1,8 +1,14 @@
 #include "game_public.h"
 #include <script/scr_vm.h>
-#include <game_mp/g_public_mp.h>
 #include <script/scr_const.h>
+
+#ifdef KISAK_MP
+#include <game_mp/g_public_mp.h>
 #include <game_mp/g_utils_mp.h>
+#elif KISAK_SP
+#include "g_main.h"
+#include "g_local.h"
+#endif
 
 
 void __cdecl VEH_CheckForPredictedCrash(gentity_s *ent)

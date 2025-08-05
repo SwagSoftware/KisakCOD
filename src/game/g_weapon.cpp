@@ -1,13 +1,20 @@
 #include "game_public.h"
-#include <server_mp/server_mp.h>
 #include <server/sv_world.h>
-#include <game_mp/g_utils_mp.h>
 #include <DynEntity/DynEntity_client.h>
 #include <script/scr_const.h>
 #include <server/sv_game.h>
 #include "bullet.h"
 
+#ifdef KISAK_MP
+#include <game_mp/g_utils_mp.h>
+#include <server_mp/server_mp.h>
+#elif KISAK_SP
+#include "g_main.h"
+#include "g_local.h"
+#endif
 
+
+#ifdef KISAK_MP
 void __cdecl G_AntiLagRewindClientPos(int gameTime, AntilagClientStore *antilagStore)
 {
     const char *v2; // eax
@@ -89,6 +96,7 @@ void __cdecl G_AntiLagRewindClientPos(int gameTime, AntilagClientStore *antilagS
     }
 }
 
+
 void __cdecl G_AntiLag_RestoreClientPos(AntilagClientStore *antilagStore)
 {
     const char *v1; // eax
@@ -134,6 +142,7 @@ void __cdecl G_AntiLag_RestoreClientPos(AntilagClientStore *antilagStore)
         }
     }
 }
+#endif
 
 gentity_s *__cdecl Weapon_Melee(gentity_s *ent, weaponParms *wp, float range, float width, float height, int gametime)
 {
@@ -200,8 +209,12 @@ gentity_s *__cdecl Weapon_Melee_internal(gentity_s *ent, weaponParms *wp, float 
         0xFFFFFFFF,
         partGroup,
         modelIndex,
-        partName,
-        0);
+        partName
+#ifdef KISAK_MP
+        , 0);
+#elif KISAK_SP
+        );
+#endif
     return traceEnt;
 }
 
@@ -432,10 +445,9 @@ void __cdecl gunrandom(float *x, float *y)
 
 bool __cdecl LogAccuracyHit(gentity_s *target, gentity_s *attacker)
 {
-    if (!target)
-        MyAssertHandler(".\\game\\g_weapon.cpp", 389, 0, "%s", "target");
-    if (!attacker)
-        MyAssertHandler(".\\game\\g_weapon.cpp", 390, 0, "%s", "attacker");
+    iassert(target);
+    iassert(attacker);
+
     if (!target->takedamage)
         return 0;
     if (target == attacker)
@@ -444,8 +456,15 @@ bool __cdecl LogAccuracyHit(gentity_s *target, gentity_s *attacker)
         return 0;
     if (!attacker->client)
         return 0;
+#ifdef KISAK_MP
     if (target->client->ps.pm_type < PM_DEAD)
         return !OnSameTeam(target, attacker);
+#elif KISAK_SP
+    if (target->client->ps.stats[0] <= 0)
+    {
+        return 0;
+    }
+#endif
     return 0;
 }
 

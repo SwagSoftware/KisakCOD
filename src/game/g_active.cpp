@@ -215,7 +215,8 @@ void __cdecl G_DoTouchTriggers(gentity_s *ent)
                     v2 = 0x100000;
                     break;
                 default:
-                    goto LABEL_34;
+                    return;
+                    //goto LABEL_34;
                 }
             }
         }
@@ -290,7 +291,7 @@ void __cdecl G_DoTouchTriggers(gentity_s *ent)
             ++v18;
         }
     }
-LABEL_34:
+//LABEL_34:
     //Profile_EndInternal(0);
 }
 
@@ -611,7 +612,7 @@ void __cdecl G_PlayerStateToEntityStateExtrapolate(playerState_s *ps, entityStat
     ps->oldEventSequence = ps->eventSequence;
     s->weapon = weapon;
     groundEntityNum = ps->groundEntityNum;
-    s->eType = 1;
+    s->eType = ET_PLAYER;
     s->groundEntityNum = groundEntityNum;
 }
 

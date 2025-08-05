@@ -1,8 +1,12 @@
 #include "enthandle.h"
 
+#ifdef KISAK_MP
 #include <game_mp/g_main_mp.h>
-
 #include <cgame_mp/cg_local_mp.h>
+#elif KISAK_SP
+#include <cgame/cg_local.h>
+#include "g_main.h"
+#endif
 
 #include <bgame/bg_public.h>
 

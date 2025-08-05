@@ -6,6 +6,7 @@
 
 #include <universal/memfile.h>
 #include <client/client.h>
+#include <server/server.h>
 
 enum saveFieldtype_t : __int32
 {
@@ -49,6 +50,10 @@ struct saveField_t
 };
 
 struct actor_s;
+struct gclient_s;
+struct scr_vehicle_s;
+struct TurretInfo;
+struct badplace_t;
 
 // g_save
 void __cdecl TRACK_g_save();

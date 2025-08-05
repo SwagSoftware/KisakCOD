@@ -117,7 +117,6 @@ struct VehiclePhysicsBackup // sizeof=0x1B8
     vehicle_pathpos_t pathPos;
     vehicle_physic_t phys;              // ...
 };
-static_assert(sizeof(VehiclePhysicsBackup) == 0x1B8);
 
 void __cdecl ClientScr_ReadOnly(gclient_s *pSelf, const client_fields_s *pField);
 void __cdecl ClientScr_SetSessionTeam(gclient_s *pSelf, const client_fields_s *pField);
@@ -652,6 +651,9 @@ void G_SetupScrVehicles();
 void G_FreeScrVehicles();
 void G_RestartScrVehicleInfo();
 void G_ParseScrVehicleInfo();
+void G_FreeVehicle(gentity_s *ent);
+
+vehicle_info_t *VEH_GetVehicleInfo(__int16 index);
 
 void(*ScriptVehicle_GetMethod(const char **pName))(scr_entref_t);
 

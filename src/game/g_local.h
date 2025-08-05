@@ -506,7 +506,7 @@ void __cdecl GetEntListForRadius(
     int *entListCount);
 void __cdecl AddScrTeamName(team_t team);
 float __cdecl G_GetRadiusDamageDistanceSquared(float *damageOrigin, gentity_s *ent);
-bool __cdecl G_WithinDamageRadius(float *damageOrigin, double radiusSquared, gentity_s *ent, gentity_s *a4);
+bool __cdecl G_WithinDamageRadius(float *damageOrigin, double radiusSquared, gentity_s *ent);
 bool __cdecl G_ClientFlashbanged(gclient_s *client);
 int __cdecl G_GetHitLocationString(unsigned int hitLoc);
 int __cdecl G_CanRadiusDamage(

@@ -1,11 +1,18 @@
 #include "game_public.h"
 #include <qcommon/cmd.h>
 #include <server/sv_game.h>
+
+#ifdef KISAK_MP
 #include <game_mp/g_utils_mp.h>
+#elif KISAK_SP
+#include "g_main.h"
+#include "g_local.h"
+#endif
 
 ipFilter_s ipFilters[1024];
 int numIPFilters;
 
+#ifdef KISAK_MP
 void __cdecl G_ProcessIPBans()
 {
     char *v0; // eax
@@ -48,6 +55,7 @@ void __cdecl AddIP(char *str)
         ipFilters[i].compare = -1;
     UpdateIPBans();
 }
+#endif
 
 int __cdecl StringToFilter(char *s, ipFilter_s *f)
 {
@@ -87,6 +95,7 @@ int __cdecl StringToFilter(char *s, ipFilter_s *f)
     return 1;
 }
 
+#ifdef KISAK_MP
 void UpdateIPBans()
 {
     unsigned int b; // [esp+20h] [ebp-410h]
@@ -156,6 +165,8 @@ void __cdecl Svcmd_RemoveIP_f()
         Com_Printf(0, "Usage:  sv removeip <ip-mask>\n");
     }
 }
+
+#endif
 
 void __cdecl Svcmd_EntityList_f()
 {

@@ -39,7 +39,7 @@ const ent_field_t fields_1[16] =
 void SP_script_vehicle_collmap(gentity_s *pSelf)
 {
     pSelf->r.contents = 0;
-    pSelf->s.eType = 12;
+    pSelf->s.eType = ET_VEHICLE_COLLMAP;
 }
 
 const SpawnFuncEntry s_bspOrDynamicSpawns[9] =
@@ -1016,7 +1016,7 @@ void __cdecl G_ParseEntityField(const char *key, const char *value, gentity_s *e
             *(_WORD *)(&ent->s.eType + v5->ofs) = atol(value);
             break;
         case F_BYTE:
-            *(&ent->s.eType + v5->ofs) = atol(value);
+            *(&ent->s.eType + v5->ofs) = (entityType_t)atol(value);
             break;
         case F_FLOAT:
             v10 = atof(value);
@@ -1506,7 +1506,7 @@ int __cdecl Scr_SetEntityField(unsigned int entnum, unsigned int offset)
         if (callback)
             callback(v11, offset);
         else
-            Scr_SetGenericField(&v11->s.eType, v12->type, v12->ofs);
+            Scr_SetGenericField((unsigned char*)&v11->s.eType, v12->type, v12->ofs);
         return 1;
     }
 }
@@ -1607,7 +1607,7 @@ void __cdecl Scr_GetEntityField(unsigned int entnum, unsigned int offset)
                 0,
                 "%s",
                 "(unsigned)offset < ARRAY_COUNT( fields ) - 1");
-        Scr_GetGenericField(&g_entities[entnum].s.eType, fields_1[offset].type, fields_1[offset].ofs);
+        Scr_GetGenericField((unsigned char*)&g_entities[entnum].s.eType, fields_1[offset].type, fields_1[offset].ofs);
         break;
     }
 }

@@ -1,10 +1,16 @@
 #include "game_public.h"
 #include <script/scr_const.h>
-#include <game_mp/g_utils_mp.h>
 #include <server/sv_world.h>
 #include <script/scr_vm.h>
 #include "bullet.h"
 #include <cgame/cg_local.h>
+
+#ifdef KISAK_MP
+#include <game_mp/g_utils_mp.h>
+#elif KISAK_SP
+#include "g_local.h"
+#include "g_main.h"
+#endif
 
 struct AttractorRepulsor_t // sizeof=0x1C
 {                                       // ...
@@ -1063,8 +1069,12 @@ void __cdecl MissileImpact(gentity_s *ent, trace_t *trace, float *dir, float *en
                         ent->s.weapon,
                         hitLocation,
                         trace->modelIndex,
-                        trace->partName,
-                        0);
+                        trace->partName
+#ifdef KISAK_MP
+                        , 0);
+#elif KISAK_SP
+                        );
+#endif
                 }
                 else
                 {
@@ -1080,8 +1090,12 @@ void __cdecl MissileImpact(gentity_s *ent, trace_t *trace, float *dir, float *en
                         ent->s.weapon,
                         hitLocation,
                         trace->modelIndex,
-                        trace->partName,
-                        0);
+                        trace->partName
+#ifdef KISAK_MP
+                        , 0);
+#elif KISAK_SP
+                        );
+#endif
                 }
             }
         }
@@ -1671,8 +1685,12 @@ void __cdecl Missile_PenetrateGlass(
                             ent->s.weapon,
                             hitLoc,
                             results->modelIndex,
-                            results->partName,
-                            0);
+                            results->partName
+#ifdef KISAK_MP
+                            , 0);
+#elif KISAK_SP
+                            );
+#endif
                     }
                     contents = hitEnt->r.contents;
                     hitEnt->r.contents = 0;
@@ -1925,7 +1943,7 @@ void __cdecl RunMissile_CreateWaterSplash(const gentity_s *missile, const trace_
     Vec3NormalizeTo(missile->s.lerp.pos.trDelta, reflect);
     if (reflect[2] < 0.0f)
         reflect[2] = reflect[2] * -1.0f;
-    tent = G_TempEntity(missile->r.currentOrigin, 44);
+    tent = G_TempEntity((float*)missile->r.currentOrigin, 44);
     tent->s.eventParm = DirToByte(trace->normal);
     tent->s.un1.scale = 0;
     tent->s.surfType = (trace->surfaceFlags & 0x1F00000) >> 20;

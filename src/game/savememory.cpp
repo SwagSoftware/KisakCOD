@@ -621,6 +621,8 @@ void *__cdecl SaveMemory_ReadLoadFromDevice(
     (*save)->isWrittenToDevice = 0;
     memcpy(&(*save)->header, v37, sizeof((*save)->header));
     return v36;
+#else
+    return NULL;
 #endif
 }
 

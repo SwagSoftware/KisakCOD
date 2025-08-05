@@ -1,12 +1,21 @@
 #include "bullet.h"
 
+#include "game_public.h"
+#include <client/client.h>
+#include <xanim/xanim.h>
+
+#ifdef KISAK_MP
 #include <cgame_mp/cg_local_mp.h>
 #include <game_mp/g_main_mp.h>
-#include "game_public.h"
 #include <game_mp/g_public_mp.h>
-#include <client/client.h>
 #include <server_mp/server_mp.h>
 #include <game_mp/g_utils_mp.h>
+#elif KISAK_SP
+#include "g_local.h"
+#include "g_main.h"
+#include "actor_events.h"
+#include <script/scr_const.h>
+#endif
 
 char __cdecl Bullet_Trace(
     const BulletFireParams *bp,
@@ -304,12 +313,17 @@ void __cdecl Bullet_FireExtended(BulletFireParams *bp, const WeaponDef *weapDef,
             }
             else
             {
+#ifdef KISAK_MP
                 if (!weapDef->bRifleBullet
                     || !br.hitEnt->client
                     || !Dvar_GetInt("scr_friendlyfire") && OnSameTeam(br.hitEnt, attacker))
                 {
                     return;
                 }
+#elif KISAK_SP
+                if (!weapDef->bRifleBullet || !br.hitEnt->sentient)
+                    return;
+#endif
                 bp->damageMultiplier = bp->damageMultiplier * 0.5f;
                 BG_AdvanceTrace(bp, &br, 0.0f);
             }
@@ -330,6 +344,80 @@ bool __cdecl Bullet_IgnoreHitEntity(const BulletFireParams *bp, const BulletTrac
     return br->hitEnt == attacker;
 }
 
+#ifdef KISAK_SP
+static void Bullet_NofifyActor(
+    const BulletFireParams *bp,
+    gentity_s *attacker,
+    const float *start,
+    const float *end,
+    const WeaponDef *weapDef)
+{
+    char v10; // r31
+    double v11; // fp8
+    double v12; // fp12
+    double v13; // fp11
+    double v16; // fp10
+    double v17; // fp12
+    double v18; // fp13
+    int v19; // r5
+    float v20[4]; // [sp+50h] [-60h] BYREF
+
+    iassert(bp);
+    iassert(attacker);
+    iassert(attacker->sentient);
+    iassert(start);
+    iassert(end);
+    iassert(weapDef);
+
+    v10 = Sentient_EnemyTeam(attacker->sentient->eTeam);
+    if (bp->damageMultiplier == 1.0)
+        Actor_BroadcastPointEvent(
+            attacker,
+            //(ai_event_t)(((_cntlzw(weapDef->silenced) & 0x20) == 0) + 10),
+            (ai_event_t)(((weapDef->silenced != 0) + 10)),
+            1 << v10,
+            start,
+            0.0);
+    v11 = start[2];
+    v12 = (float)(start[2] - end[2]);
+    v13 = (float)(start[1] - end[1]);
+
+    float _FP6 = -sqrtf((float)((float)((float)v13 * (float)v13)
+        + (float)((float)((float)v12 * (float)v12)
+            + (float)((float)(*start - *end) * (float)(*start - *end)))));
+    float _FP10;
+    if (_FP6 >= 0.0f)
+    {
+        _FP10 = 1.0f;
+    }
+    else
+    {
+        _FP10 = _FP6;
+    }
+    //__asm { fsel      f10, f6, f31, f10 }
+    v16 = (float)((float)1.0 / (float)_FP10);
+
+    v17 = (float)((float)(start[2] - end[2]) * (float)v16);
+    v18 = (float)((float)((float)((float)v16 * (float)(start[1] - end[1])) * (float)200.0) + start[1]);
+    v20[0] = (float)((float)((float)v16 * (float)(*start - *end)) * (float)200.0) + *start;
+    v20[1] = v18;
+    v20[2] = (float)((float)v17 * (float)200.0) + (float)v11;
+    if (ai_friendlySuppression->current.enabled)
+    {
+        v19 = 14;
+    }
+    else if (attacker->client)
+    {
+        v19 = (1 << attacker->sentient->eTeam) | (1 << v10);
+    }
+    else
+    {
+        v19 = 1 << v10;
+    }
+    Actor_BroadcastLineEvent(attacker, AI_EV_BULLET, v19, v20, end, 0.0);
+}
+#endif
+
 void __cdecl Bullet_Process(
     const BulletFireParams *bp,
     BulletTraceResults *br,
@@ -348,35 +436,41 @@ void __cdecl Bullet_Process(
     gentity_s *bulletEffectTempEnt; // [esp+1Ch] [ebp-8h] BYREF
     uint16_t hitEntId; // [esp+20h] [ebp-4h]
 
-    if (!bp)
-        MyAssertHandler(".\\game\\bullet.cpp", 490, 0, "%s", "bp");
-    if (!br)
-        MyAssertHandler(".\\game\\bullet.cpp", 491, 0, "%s", "br");
-    if (br->trace.hitType == TRACE_HITTYPE_NONE)
-        MyAssertHandler(".\\game\\bullet.cpp", 492, 0, "%s", "br->trace.hitType != TRACE_HITTYPE_NONE");
-    if (!weapDef)
-        MyAssertHandler(".\\game\\bullet.cpp", 493, 0, "%s", "weapDef");
-    if (!attacker)
-        MyAssertHandler(".\\game\\bullet.cpp", 494, 0, "%s", "attacker");
+    iassert(bp);
+    iassert(br);
+    iassert(br->trace.hitType != TRACE_HITTYPE_NONE);
+    iassert(weapDef);
+    iassert(attacker);
+
     *outImpactFlags = 0;
+#ifdef KISAK_SP
+    if (attacker->sentient)
+        Bullet_NofifyActor(bp, attacker, bp->start, br->hitPos, weapDef);
+#endif
     damage = Bullet_GetDamage(bp, br, weapDef, attacker);
     G_CheckHitTriggerDamage(attacker, (float*)bp->start, br->hitPos, damage, bp->methodOfDeath);
     bulletEffectTempEnt = 0;
+
     if (processFx)
         Bullet_ImpactEffect(bp, br, br->trace.normal, weapDef, attacker, 0, &bulletEffectTempEnt);
+
     hitEntId = Trace_GetDynEntHitId(&br->trace, &drawType);
+
     if (br->hitEnt && br->hitEnt->takedamage && !br->ignoreHitEnt)
     {
         if (weapDef->armorPiercing)
             dFlags |= 2u;
-        if (!br->hitEnt->r.inuse)
-            MyAssertHandler(".\\game\\bullet.cpp", 528, 0, "%s", "br->hitEnt->r.inuse");
+
+        iassert(br->hitEnt->r.inuse);
         targetWasAlive = br->hitEnt->health > 0;
         hitLoc = (hitLocation_t)br->trace.partGroup;
         if (hitLoc == HITLOC_HEAD || hitLoc == HITLOC_HELMET)
             *outImpactFlags |= 1u;
+
         if (g_debugLocDamage->current.enabled)
             CL_AddDebugStar(br->hitPos, colorRed, 100, 1);
+
+#ifdef KISAK_MP
         G_Damage(
             br->hitEnt,
             attacker,
@@ -391,6 +485,22 @@ void __cdecl Bullet_Process(
             br->trace.modelIndex,
             br->trace.partName,
             level.time - gameTime);
+#elif KISAK_SP
+        G_Damage(
+            br->hitEnt,
+            attacker,
+            attacker,
+            bp->dir,
+            br->hitPos,
+            damage,
+            dFlags,
+            bp->methodOfDeath,
+            0xFFFFFFFF,
+            hitLoc,
+            br->trace.modelIndex,
+            br->trace.partName);
+#endif
+
         v8 = br->hitEnt->r.inuse && br->hitEnt->health > 0;
         if (targetWasAlive && !v8)
             *outImpactFlags |= 2u;
@@ -470,32 +580,26 @@ void __cdecl Bullet_ImpactEffect(
     uint8_t impactEffectFlags,
     gentity_s **outTempEnt)
 {
-    bool v7; // [esp+Ch] [ebp-1Ch]
+#ifdef KISAK_MP
     gentity_s *tempEnt; // [esp+10h] [ebp-18h]
     float reflect[3]; // [esp+14h] [ebp-14h] BYREF
     bool createEffect; // [esp+23h] [ebp-5h]
     float dot; // [esp+24h] [ebp-4h]
 
-    if (!bp)
-        MyAssertHandler(".\\game\\bullet.cpp", 272, 0, "%s", "bp");
-    if (!br)
-        MyAssertHandler(".\\game\\bullet.cpp", 273, 0, "%s", "br");
-    if (br->trace.hitType == TRACE_HITTYPE_NONE)
-        MyAssertHandler(".\\game\\bullet.cpp", 274, 0, "%s", "br->trace.hitType != TRACE_HITTYPE_NONE");
-    if (!weapDef)
-        MyAssertHandler(".\\game\\bullet.cpp", 275, 0, "%s", "weapDef");
-    if (!attacker)
-        MyAssertHandler(".\\game\\bullet.cpp", 276, 0, "%s", "attacker");
-    if (!outTempEnt)
-        MyAssertHandler(".\\game\\bullet.cpp", 277, 0, "%s", "outTempEnt");
+    iassert(bp);
+    iassert(br);
+    iassert(br->trace.hitType != TRACE_HITTYPE_NONE);
+    iassert(weapDef);
+    iassert(attacker);
+    iassert(outTempEnt);
+
     if (br->ignoreHitEnt)
     {
         *outTempEnt = 0;
     }
     else
     {
-        v7 = (br->trace.surfaceFlags & 4) == 0 && br->trace.fraction < 1.0;
-        createEffect = v7;
+        createEffect = (br->trace.surfaceFlags & 4) == 0 && br->trace.fraction < 1.0;
         if (br->hitEnt)
             createEffect &= br->hitEnt->client == 0;
         if (createEffect)
@@ -508,7 +612,7 @@ void __cdecl Bullet_ImpactEffect(
             }
             else
             {
-                tempEnt = G_TempEntity(br->hitPos, 41);
+                tempEnt = G_TempEntity((float*)br->hitPos, 41);
                 tempEnt->s.weapon = (uint8_t)BG_GetWeaponIndex(weapDef);
                 tempEnt->s.eventParm = DirToByte(normal);
                 tempEnt->s.un1.scale = impactEffectFlags;
@@ -522,6 +626,114 @@ void __cdecl Bullet_ImpactEffect(
             *outTempEnt = 0;
         }
     }
+#elif KISAK_SP
+    char v14; // r11
+    gentity_s *hitEnt; // r10
+    char v16; // r9
+    sentient_s *sentient; // r11
+    char v18; // r11
+    bool v19; // zf
+    gentity_s *tempEnt; // r31
+    gentity_s *v21; // r11
+    __int16 number; // r11
+    unsigned __int8 WeaponIndex; // r3
+    gentity_s *v24; // r11
+    __int16 v25; // r11
+
+    iassert(bp);
+    iassert(br);
+    iassert(br->trace.hitType != TRACE_HITTYPE_NONE);
+    iassert(weapDef);
+    iassert(attacker);
+    iassert(outTempEnt);
+
+    if (br->ignoreHitEnt)
+    {
+        *outTempEnt = 0;
+        return;
+    }
+    if ((br->trace.surfaceFlags & 4) != 0 || (v14 = 1, br->trace.fraction >= 1.0))
+        v14 = 0;
+    hitEnt = br->hitEnt;
+    v16 = v14;
+    if (hitEnt)
+    {
+        sentient = hitEnt->sentient;
+        if (!sentient || !attacker->actor || (v19 = sentient->eTeam == attacker->sentient->eTeam, v18 = 0, !v19))
+            v18 = 1;
+        v16 &= v18;
+    }
+    if (!v16)
+    {
+        *outTempEnt = 0;
+        return;
+    }
+    if (hitEnt && hitEnt->client)
+    {
+        //tempEnt = G_TempEntity((float*)br->hitPos, ((_cntlzw(weapDef->bRifleBullet) & 0x20) == 0) + 46);
+        tempEnt = G_TempEntity((float*)br->hitPos, ((weapDef->bRifleBullet != 0) + 46));
+        tempEnt->s.lerp.u.turret.gunAngles[0] = bp->start[0];
+        tempEnt->s.lerp.u.turret.gunAngles[1] = bp->start[1];
+        tempEnt->s.lerp.u.turret.gunAngles[2] = bp->start[2];
+        tempEnt->s.weapon = BG_GetWeaponIndex(weapDef);
+        tempEnt->s.surfType = (br->trace.surfaceFlags >> 20) & 0x1F;
+        tempEnt->s.otherEntityNum = bp->weaponEntIndex;
+        v21 = br->hitEnt;
+        if (v21)
+            number = v21->s.number;
+        else
+            number = 2175;
+        tempEnt->s.groundEntityNum = number;
+        if (tempEnt->s.otherEntityNum != bp->weaponEntIndex)
+        {
+            MyAssertHandler(
+                "c:\\trees\\cod3\\cod3src\\src\\game\\bullet.cpp",
+                314,
+                0,
+                "%s",
+                "tempEnt->s.otherEntityNum == bp->weaponEntIndex");
+            *outTempEnt = tempEnt;
+            return;
+        }
+    }
+    else
+    {
+        tempEnt = G_TempEntity((float*)br->hitPos, 45);
+        WeaponIndex = BG_GetWeaponIndex(weapDef);
+        tempEnt->s.eventParm = 0;
+        tempEnt->s.weapon = WeaponIndex;
+        G_SetAngle(tempEnt, (float*)normal);
+        tempEnt->s.un1.eventParm2 = impactEffectFlags;
+        tempEnt->s.surfType = (br->trace.surfaceFlags >> 20) & 0x1F;
+        tempEnt->s.lerp.u.turret.gunAngles[0] = bp->start[0];
+        tempEnt->s.lerp.u.turret.gunAngles[1] = bp->start[1];
+        tempEnt->s.lerp.u.turret.gunAngles[2] = bp->start[2];
+        tempEnt->s.otherEntityNum = bp->weaponEntIndex;
+        v24 = br->hitEnt;
+        if (v24)
+            v25 = v24->s.number;
+        else
+            v25 = 2175;
+        tempEnt->s.groundEntityNum = v25;
+        if (tempEnt->s.otherEntityNum != bp->weaponEntIndex)
+            MyAssertHandler(
+                "c:\\trees\\cod3\\cod3src\\src\\game\\bullet.cpp",
+                345,
+                0,
+                "%s",
+                "tempEnt->s.otherEntityNum == bp->weaponEntIndex");
+        if (br->hitEnt)
+        {
+            if (!attacker->r.inuse)
+                MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\bullet.cpp", 349, 0, "%s", "attacker->r.inuse");
+            if (!br->hitEnt->r.inuse)
+                MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\bullet.cpp", 350, 0, "%s", "br->hitEnt->r.inuse");
+            Scr_AddEntity(attacker);
+            Scr_Notify(br->hitEnt, scr_const.bullethit, 1u);
+        }
+    }
+    *outTempEnt = tempEnt;
+#endif 
 }
 
 void __cdecl Bullet_FirePenetrate(BulletFireParams *bp, const WeaponDef *weapDef, gentity_s *attacker, int32_t gameTime)

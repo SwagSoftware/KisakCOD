@@ -273,6 +273,7 @@ void __cdecl YawVectors(float yaw, float* forward, float* right);
 void __cdecl AngleVectors(const float* angles, float* forward, float* right, float* up);
 void __cdecl AnglesToAxis(const float* angles, float axis[3][3]);
 void __cdecl AxisToQuat(const float (*mat)[3], float* out);
+void __cdecl AxisToSignedAngles(const float (*axis)[3], float *angles);
 
 float __cdecl PointToBoxDistSq(const float* pt, const float* mins, const float* maxs);
 
@@ -423,6 +424,7 @@ void __cdecl UnitQuatToForward(const float* quat, float* forward);
 void __cdecl QuatSlerp(const float* from, const float* to, float frac, float* result);
 void __cdecl QuatMultiply(const float* in1, const float* in2, float* out);
 void __cdecl QuatLerp(const float* qa, const float* qb, float frac, float* out);
+void QuatInverse(const float *in, float *out);
 
 // == MISC ==
 char __cdecl ClampChar(int i);

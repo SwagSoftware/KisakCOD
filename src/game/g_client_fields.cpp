@@ -1,11 +1,14 @@
 #include "game_public.h"
 #include <script/scr_vm.h>
 #include <script/scr_const.h>
-#include <game_mp/g_public_mp.h>
-#include <server_mp/server_mp.h>
 
+#ifdef KISAK_SP
+#include "g_local.h"
+#endif
 
 #ifdef KISAK_MP
+#include <game_mp/g_public_mp.h>
+#include <server_mp/server_mp.h>
 
 const client_fields_s fields[18] =
 {

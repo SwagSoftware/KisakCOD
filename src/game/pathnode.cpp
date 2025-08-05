@@ -18,8 +18,13 @@
 
 //Line 37928:  0006 : 00006700       char const **nodeStringTable  82696700     pathnode.obj
 
-path_t *g_pPath;
-path_t some_path; // idk name
+struct node_field_t
+{
+    const char *name;
+    int ofs;
+    fieldtype_t type;
+    void(*getter)(struct pathnode_t *, int);
+};
 
 node_field_t fields_3[12] =
 {
@@ -37,14 +42,8 @@ node_field_t fields_3[12] =
   { NULL, 0, F_INT, NULL }
 };
 
-struct node_field_t
-{
-    const char *name;
-    int ofs;
-    fieldtype_t type;
-    void(*getter)(struct pathnode_t *, int);
-};
-
+path_t *g_pPath;
+path_t some_path; // idk name
 pathlocal_t g_path;
 
 const float nodeColorTable[20][4] =

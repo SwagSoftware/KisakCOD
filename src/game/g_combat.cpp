@@ -606,7 +606,6 @@ void __cdecl G_Damage(
     unsigned int modelIndex,
     unsigned int partName)
 {
-    int damage; // r29
     unsigned int WeaponIndexForEntity; // r19
     const gentity_s *v43; // r3
     unsigned int NumWeapons; // r3
@@ -1553,11 +1552,10 @@ float __cdecl G_GetRadiusDamageDistanceSquared(float *damageOrigin, gentity_s *e
     return *((float *)&v12 + 1);
 }
 
-bool __cdecl G_WithinDamageRadius(float *damageOrigin, double radiusSquared, gentity_s *ent, gentity_s *a4)
+bool __cdecl G_WithinDamageRadius(float *damageOrigin, double radiusSquared, gentity_s *ent)
 {
-    if (!a4)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\g_combat.cpp", 1333, 0, "%s", "ent");
-    return G_GetRadiusDamageDistanceSquared(damageOrigin, a4) < radiusSquared;
+    iassert(ent);
+    return G_GetRadiusDamageDistanceSquared(damageOrigin, ent) < radiusSquared;
 }
 
 bool __cdecl G_ClientFlashbanged(gclient_s *client)

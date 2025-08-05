@@ -4047,7 +4047,7 @@ LABEL_15:
     }
 }
 
-void __fastcall G_FreeVehicle(gentity_s *ent)
+void G_FreeVehicle(gentity_s *ent)
 {
     scr_vehicle_s *scr_vehicle; // r11
 

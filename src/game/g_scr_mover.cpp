@@ -2,8 +2,15 @@
 #include <server/sv_world.h>
 #include <script/scr_const.h>
 #include <server/sv_game.h>
-#include <game_mp/g_utils_mp.h>
 #include <script/scr_vm.h>
+
+#ifdef KISAK_MP
+#include <game_mp/g_utils_mp.h>
+#elif KISAK_SP
+#include "g_main.h"
+#include "g_local.h"
+#include "g_public.h"
+#endif
 
 
 void __cdecl Reached_ScriptMover(gentity_s *pEnt)

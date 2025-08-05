@@ -98,6 +98,7 @@ enum entity_event_t : __int32
     EV_MAX_EVENTS = 0x87,
 };
 
+#ifdef KISAK_MP
 static const char *entityTypeNames[17] =
 {
     "ET_GENERAL",
@@ -118,6 +119,28 @@ static const char *entityTypeNames[17] =
     "ET_VEHICLE_COLLMAP",
     "ET_VEHICLE_CORPSE"
 };
+#elif KISAK_SP
+const char *entityTypeNames[17] =
+{
+  "ET_GENERAL",
+  "ET_PLAYER",
+  "ET_ITEM",
+  "ET_MISSILE",
+  "ET_INVISIBLE",
+  "ET_SCRIPTMOVER",
+  "ET_SOUND_BLEND",
+  "ET_FX",
+  "ET_LOOP_FX",
+  "ET_PRIMARY_LIGHT",
+  "ET_MG42",
+  "ET_VEHICLE",
+  "ET_VEHICLE_CORPSE",
+  "ET_VEHICLE_COLLMAP",
+  "ET_ACTOR",
+  "ET_ACTOR_SPAWNER",
+  "ET_ACTOR_CORPSE"
+};
+#endif
 
 static const char *eventnames[135] =
 {

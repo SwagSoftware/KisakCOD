@@ -1629,6 +1629,14 @@ void __cdecl QuatMultiply(const float* in1, const float* in2, float* out)
     out[3] = in1[3] * in2[3] - *in1 * *in2 - in1[1] * in2[1] - in1[2] * in2[2];
 }
 
+void QuatInverse(const float *in, float *out)
+{
+    out[0] = -in[0];
+    out[1] = -in[1];
+    out[2] = -in[2];
+    out[3] = in[3];
+}
+
 float __cdecl RotationToYaw(const float *rot)
 {
     float v2; // [esp+0h] [ebp-18h]
@@ -2463,6 +2471,55 @@ void __cdecl AxisToQuat(const float (*mat)[3], float *out)
     v2 = sqrt(testSizeSq);
     invLength = 1.0 / v2;
     Vec4Scale(test[best], invLength, out);
+}
+
+void __cdecl AxisToSignedAngles(const float (*axis)[3], float *angles)
+{
+    float v2; // [esp+0h] [ebp-38h]
+    float rad; // [esp+18h] [ebp-20h]
+    float rada; // [esp+18h] [ebp-20h]
+    float right[3]; // [esp+1Ch] [ebp-1Ch] BYREF
+    float temp; // [esp+28h] [ebp-10h]
+    float pitch; // [esp+2Ch] [ebp-Ch]
+    float fCos; // [esp+30h] [ebp-8h]
+    float fSin; // [esp+34h] [ebp-4h]
+
+    vectosignedangles((const float *)axis, angles);
+    right[0] = (*axis)[3];
+    right[1] = (*axis)[4];
+    right[2] = (*axis)[5];
+    //rad = COERCE_FLOAT(*((_DWORD *)angles + 1) ^ _mask__NegFloat_) * 0.017453292;
+    rad = (float)((float)-angles[1] * (float)0.017453292);
+    fCos = cos(rad);
+    fSin = sin(rad);
+    temp = (float)(fCos * right[0]) - (float)(fSin * right[1]);
+    right[1] = (float)(fSin * right[0]) + (float)(fCos * right[1]);
+    //rada = COERCE_FLOAT(*(_DWORD *)angles ^ _mask__NegFloat_) * 0.017453292;
+    rada = (float)((float)-*angles * (float)0.017453292);
+    fCos = cos(rada);
+    fSin = sin(rada);
+    right[0] = (float)(fSin * right[2]) + (float)(fCos * temp);
+    right[2] = (float)(fCos * right[2]) - (float)(fSin * temp);
+    pitch = vectosignedpitch(right);
+    if (right[1] >= 0.0)
+    {
+        //*((_DWORD *)angles + 2) = LODWORD(pitch) ^ _mask__NegFloat_;
+        angles[2] = -pitch;
+    }
+    else
+    {
+        if (pitch >= 0.0)
+        {
+            //v2 = FLOAT_N180_0;
+            v2 = -180.0f;
+        }
+        else
+        {
+            //v2 = FLOAT_180_0;
+            v2 = 180.0f;
+        }
+        angles[2] = pitch + v2;
+    }
 }
 
 void __cdecl QuatLerp(const float *qa, const float *qb, float frac, float *out)

@@ -1,10 +1,20 @@
 #include "game_public.h"
 #include <qcommon/mem_track.h>
 #include <script/scr_vm.h>
+#include <server/sv_game.h>
+
+#ifdef KISAK_MP
 #include <game_mp/g_utils_mp.h>
 #include <game_mp/g_public_mp.h>
 #include <server_mp/server_mp.h>
-#include <server/sv_game.h>
+#elif KISAK_SP
+#include "g_main.h"
+#include "g_local.h"
+#include "g_public.h"
+#include "g_scr_main.h"
+#include <server/sv_public.h>
+#include <bgame/bg_local.h>
+#endif
 
 const char *g_he_font[6] = { "default", "bigfixed", "smallfixed", "objective", "big", "small" }; // idb
 const char *g_he_alignx[3] = { "left", "center", "right" };
@@ -1066,6 +1076,8 @@ void __cdecl HECmd_Destroy(scr_entref_t entref)
     HudElem_Free(hud);
 }
 
+#ifdef KISAK_MP
+
 void __cdecl HECmd_SetPlayerNameString(scr_entref_t entref)
 {
     game_hudelem_s *hud; // [esp+0h] [ebp-8h]
@@ -1144,6 +1156,7 @@ void __cdecl HECmd_SetMapNameString(scr_entref_t entref)
         Com_Printf(23, "Invalid mapname passed to hudelem setmapnamestring()\n");
     }
 }
+#endif
 
 void __cdecl HECmd_SetPulseFX(scr_entref_t entref)
 {

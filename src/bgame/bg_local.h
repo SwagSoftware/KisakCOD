@@ -1182,6 +1182,7 @@ struct turretInfo_s // sizeof=0x48
 };
 static_assert(sizeof(turretInfo_s) == 0x48);
 
+#ifdef KISAK_MP
 struct VehicleRideSlot_t // sizeof=0xC
 {                                       // ...
     uint32_t tagName;
@@ -1189,8 +1190,9 @@ struct VehicleRideSlot_t // sizeof=0xC
     int32_t entNum;
 };
 static_assert(sizeof(VehicleRideSlot_t) == 0xC);
+#endif
 
-struct vehicle_node_t // sizeof=0x44
+struct vehicle_node_t // sizeof=0x44 // (SP/MP Same)
 {                                       // ...
     uint16_t name;
     uint16_t target;
@@ -1211,7 +1213,7 @@ struct vehicle_node_t // sizeof=0x44
 };
 static_assert(sizeof(vehicle_node_t) == 0x44);
 
-struct vehicle_pathpos_t // sizeof=0xC0
+struct vehicle_pathpos_t // sizeof=0xC0 // (SP/MP Same)
 {                                       // ...
     int16_t nodeIdx;
     int16_t endOfPath;
@@ -1226,6 +1228,7 @@ struct vehicle_pathpos_t // sizeof=0xC0
 };
 static_assert(sizeof(vehicle_pathpos_t) == 0xC0);
 
+#ifdef KISAK_MP
 struct vehicle_physic_t // sizeof=0xF8
 {                                       // ...
     float origin[3];
@@ -1258,6 +1261,31 @@ struct vehicle_physic_t // sizeof=0xF8
     float worldTiltVel[3];
 };
 static_assert(sizeof(vehicle_physic_t) == 0xF8);
+#elif KISAK_SP
+struct vehicle_physic_t
+{
+    float origin[3];
+    float prevOrigin[3];
+    float angles[3];
+    float prevAngles[3];
+    float maxAngleVel[3];
+    float yawAccel;
+    float yawDecel;
+    float mins[3];
+    float maxs[3];
+    float vel[3];
+    float bodyVel[3];
+    float rotVel[3];
+    float accel[3];
+    float maxPitchAngle;
+    float maxRollAngle;
+    float wheelZVel[6];
+    float wheelZPos[6];
+    int wheelSurfType[6];
+    float worldTilt[3];
+    float worldTiltVel[3];
+};
+#endif
 
 #ifdef KISAK_MP
 struct VehicleTags // sizeof=0x60
@@ -1302,7 +1330,7 @@ enum VehicleTurretState : __int32
     VEH_TURRET_MOVING = 0x2,
 };
 
-struct VehicleTurret // sizeof=0x14
+struct VehicleTurret // sizeof=0x14 // (SP/MP Same)
 {                                       // ...
     int32_t fireTime;
     int32_t fireBarrel;
@@ -1312,7 +1340,7 @@ struct VehicleTurret // sizeof=0x14
 };
 static_assert(sizeof(VehicleTurret) == 0x14);
 
-struct VehicleJitter // sizeof=0x3C
+struct VehicleJitter // sizeof=0x3C // (SP/MP Same)
 {                                       // ...
     int32_t jitterPeriodMin;
     int32_t jitterPeriodMax;
@@ -1324,7 +1352,7 @@ struct VehicleJitter // sizeof=0x3C
 };
 static_assert(sizeof(VehicleJitter) == 0x3C);
 
-struct VehicleHover // sizeof=0x1C
+struct VehicleHover // sizeof=0x1C // (SP/MP same)
 {                                       // ...
     float hoverRadius;
     float hoverSpeed;

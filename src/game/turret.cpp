@@ -2593,7 +2593,7 @@ void __cdecl G_SpawnTurret(gentity_s *self, const char *weaponinfoname)
     flags = self->flags;
     self->clipmask = 1;
     self->r.svFlags = 0;
-    self->s.eType = 10;
+    self->s.eType = ET_MG42;
     self->r.contents = 2097156;
     self->flags = flags | 0x800;
     G_DObjUpdate(self);

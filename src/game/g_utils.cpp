@@ -15,27 +15,9 @@
 #include <database/database.h>
 #include <cgame/cg_ents.h>
 #include <xanim/dobj_utils.h>
-
-const char *entityTypeNames[17] =
-{
-  "ET_GENERAL",
-  "ET_PLAYER",
-  "ET_ITEM",
-  "ET_MISSILE",
-  "ET_INVISIBLE",
-  "ET_SCRIPTMOVER",
-  "ET_SOUND_BLEND",
-  "ET_FX",
-  "ET_LOOP_FX",
-  "ET_PRIMARY_LIGHT",
-  "ET_MG42",
-  "ET_VEHICLE",
-  "ET_VEHICLE_CORPSE",
-  "ET_VEHICLE_COLLMAP",
-  "ET_ACTOR",
-  "ET_ACTOR_SPAWNER",
-  "ET_ACTOR_CORPSE"
-};
+#include <script/scr_memorytree.h>
+#include "actor_turret.h"
+#include "actor_event_listeners.h"
 
 XModel *cached_models[512]{ NULL };
 
@@ -1781,7 +1763,7 @@ gentity_s *__cdecl G_Find(gentity_s *from, int fieldofs, unsigned __int16 match)
     v4 = &g_entities[level.num_entities];
     if (result >= v4)
         return 0;
-    for (i = &result->s.eType + fieldofs; !i[168 - fieldofs] || !*(_WORD *)i || *(unsigned __int16 *)i != match; i += 628)
+    for (i = (unsigned char*)&result->s.eType + fieldofs; !i[168 - fieldofs] || !*(_WORD *)i || *(unsigned __int16 *)i != match; i += 628)
     {
         if (++result >= v4)
             return 0;
@@ -1963,24 +1945,29 @@ void __cdecl G_FreeAllEntityRefs()
     }
     droppedWeaponCue = level.droppedWeaponCue;
     do
-        EntHandle::setEnt(droppedWeaponCue++, 0);
-    while ((int)droppedWeaponCue < (int)&level.changelevel);
+        droppedWeaponCue++->setEnt(0);
+    while ((int)droppedWeaponCue < (int)&level.droppedWeaponCue[32]);
     Targ_RemoveAll();
 }
 
 void __cdecl G_FreeEntityDelay(gentity_s *ed)
 {
-    int delete; // r4
-    unsigned __int16 v3; // r3
+    unsigned __int16 hThread; // [esp+0h] [ebp-4h]
 
-    delete = g_scr_data.delete_;
-    if (!g_scr_data.delete_)
-    {
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\g_utils.cpp", 2529, 0, "%s", "g_scr_data.delete_");
-        delete = g_scr_data.delete_;
-    }
-    v3 = Scr_ExecEntThread(ed, delete, 0);
-    Scr_FreeThread(v3);
+    iassert(g_scr_data.delete_);
+    hThread = Scr_ExecEntThread(ed, g_scr_data.delete_, 0);
+    Scr_FreeThread(hThread);
+    //int delete; // r4
+    //unsigned __int16 v3; // r3
+    //
+    //delete = g_scr_data.delete_;
+    //if (!g_scr_data.delete_)
+    //{
+    //    MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\g_utils.cpp", 2529, 0, "%s", "g_scr_data.delete_");
+    //    delete = g_scr_data.delete_;
+    //}
+    //v3 = Scr_ExecEntThread(ed, delete, 0);
+    //Scr_FreeThread(v3);
 }
 
 void __cdecl G_BroadcastEntity(gentity_s *ent)
@@ -2001,8 +1988,8 @@ int __cdecl G_SaveFreeEntities(unsigned __int8 *buf)
 
     if (buf)
     {
-        *(unsigned int *)buf = level.firstFreeEnt;
-        *((unsigned int *)buf + 1) = level.lastFreeEnt;
+        *(unsigned int *)buf = (unsigned int)level.firstFreeEnt;
+        *((unsigned int *)buf + 1) = (unsigned int)level.lastFreeEnt;
     }
     firstFreeEnt = level.firstFreeEnt;
     result = 8;
@@ -2261,6 +2248,8 @@ const char *__cdecl G_GetEntityTypeName(const gentity_s *ent)
     return *(const char **)((char *)entityTypeNames + __ROL4__(ent->s.eType, 2));
 }
 
+unsigned int holdrand;
+
 void __cdecl G_SetPM_MPViewer(bool setting)
 {
     level.mpviewer = setting;
@@ -2276,60 +2265,86 @@ unsigned int __cdecl G_GetRandomSeed()
     return holdrand;
 }
 
+//unsigned int __cdecl G_rand()
+//{
+//    unsigned int result; // r3
+//
+//    result = (214013 * holdrand + 2531011) >> 17;
+//    holdrand = 214013 * holdrand + 2531011;
+//    return result;
+//}
+
 unsigned int __cdecl G_rand()
 {
-    unsigned int result; // r3
-
-    result = (214013 * holdrand + 2531011) >> 17;
     holdrand = 214013 * holdrand + 2531011;
-    return result;
+    return holdrand >> 17;
 }
 
-float __cdecl G_flrand(double min, double max)
+//float __cdecl G_flrand(double min, double max)
+//{
+//    __int64 v2; // r11
+//    double v3; // fp1
+//
+//    HIDWORD(v2) = _xri_a;
+//    holdrand = 214013 * holdrand + 2531011;
+//    LODWORD(v2) = holdrand >> 17;
+//    v3 = (float)((float)((float)((float)v2 * (float)((float)max - (float)min)) * (float)0.000030517578) + (float)min);
+//    return *((float *)&v3 + 1);
+//}
+
+float __cdecl G_flrand(float min, float max)
 {
-    __int64 v2; // r11
-    double v3; // fp1
-
-    HIDWORD(v2) = _xri_a;
-    holdrand = 214013 * holdrand + 2531011;
-    LODWORD(v2) = holdrand >> 17;
-    v3 = (float)((float)((float)((float)v2 * (float)((float)max - (float)min)) * (float)0.000030517578) + (float)min);
-    return *((float *)&v3 + 1);
+    return (float)G_rand() * (max - min) / 32768.0f + min;
 }
+
+//int __cdecl G_irand(int min, int max)
+//{
+//    __int128 v2; // r11
+//
+//    DWORD1(v2) = 214013;
+//    holdrand = 214013 * holdrand + 2531011;
+//    DWORD2(v2) = max - min;
+//    LODWORD(v2) = holdrand >> 17;
+//    return ((__int64)(v2 * *(_QWORD *)((char *)&v2 + 4)) >> 15) + min;
+//}
 
 int __cdecl G_irand(int min, int max)
 {
-    __int128 v2; // r11
-
-    DWORD1(v2) = 214013;
-    holdrand = 214013 * holdrand + 2531011;
-    DWORD2(v2) = max - min;
-    LODWORD(v2) = holdrand >> 17;
-    return ((__int64)(v2 * *(_QWORD *)((char *)&v2 + 4)) >> 15) + min;
+    return ((G_rand() * (__int64)(max - min)) >> 15) + min;
 }
+
+//float __cdecl G_random()
+//{
+//    __int64 v0; // r11
+//    double v1; // fp1
+//
+//    HIDWORD(v0) = _xri_a;
+//    holdrand = 214013 * holdrand + 2531011;
+//    LODWORD(v0) = holdrand >> 17;
+//    v1 = (float)((float)v0 * (float)0.000030517578);
+//    return *((float *)&v1 + 1);
+//}
 
 float __cdecl G_random()
 {
-    __int64 v0; // r11
-    double v1; // fp1
-
-    HIDWORD(v0) = _xri_a;
-    holdrand = 214013 * holdrand + 2531011;
-    LODWORD(v0) = holdrand >> 17;
-    v1 = (float)((float)v0 * (float)0.000030517578);
-    return *((float *)&v1 + 1);
+    return (float)G_rand() / 32768.0f;
 }
+
+//float __cdecl G_crandom()
+//{
+//    __int64 v0; // r11
+//    double v1; // fp1
+//
+//    HIDWORD(v0) = _xri_a;
+//    holdrand = 214013 * holdrand + 2531011;
+//    LODWORD(v0) = holdrand >> 17;
+//    v1 = (float)((float)((float)v0 * (float)0.000061035156) - (float)1.0);
+//    return *((float *)&v1 + 1);
+//}
 
 float __cdecl G_crandom()
 {
-    __int64 v0; // r11
-    double v1; // fp1
-
-    HIDWORD(v0) = _xri_a;
-    holdrand = 214013 * holdrand + 2531011;
-    LODWORD(v0) = holdrand >> 17;
-    v1 = (float)((float)((float)v0 * (float)0.000061035156) - (float)1.0);
-    return *((float *)&v1 + 1);
+    return G_random() * 2.0 - 1.0;
 }
 
 void __cdecl G_CalcTagParentAxis(gentity_s *ent, float (*parentAxis)[3])
@@ -2367,9 +2382,9 @@ void __cdecl G_CalcTagParentAxis(gentity_s *ent, float (*parentAxis)[3])
         G_DObjCalcBone(parent, tagInfo->index);
         v7 = &SV_DObjGetMatrixArray(parent)[tagInfo->index];
         LocalConvertQuatToMat(v7, v9);
-        MatrixMultiply(v9, (const float (*)[3])v10, parentAxis);
+        MatrixMultiply((const mat3x3&)v9, (const mat3x3&)v10, (mat3x3&)parentAxis);
         v8 = &(*parentAxis)[9];
-        MatrixTransformVector43(v7->trans, (const float (*)[3])v10, &(*parentAxis)[9]);
+        MatrixTransformVector43(v7->trans, (const mat4x3&)v10, &(*parentAxis)[9]);
     }
     if ((COERCE_UNSIGNED_INT((*parentAxis)[0]) & 0x7F800000) == 0x7F800000
         || (COERCE_UNSIGNED_INT((*parentAxis)[1]) & 0x7F800000) == 0x7F800000
@@ -2427,7 +2442,7 @@ void __cdecl G_CalcTagParentRelAxis(gentity_s *ent, float (*parentRelAxis)[3])
     if (!tagInfo)
         MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\g_utils.cpp", 1419, 0, "%s", "tagInfo");
     G_CalcTagParentAxis(ent, v5);
-    MatrixMultiply43(tagInfo->parentInvAxis, v5, parentRelAxis);
+    MatrixMultiply43(tagInfo->parentInvAxis, (const mat4x3&)v5, (mat4x3&)parentRelAxis);
 }
 
 void __cdecl G_CalcTagAxis(gentity_s *ent, int bAnglesOnly)
@@ -2444,16 +2459,16 @@ void __cdecl G_CalcTagAxis(gentity_s *ent, int bAnglesOnly)
         MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\g_utils.cpp", 1443, 0, "%s", "tagInfo");
     if (bAnglesOnly)
     {
-        MatrixTranspose(v7, v6);
-        MatrixMultiply((const float (*)[3])v5, v6, tagInfo->axis);
+        MatrixTranspose((const mat3x3&)v7, (mat3x3&)v6);
+        MatrixMultiply((const mat3x3&)v5, (const mat3x3&)v6, (mat3x3&)tagInfo->axis);
     }
     else
     {
-        MatrixInverseOrthogonal43(v7, v6);
+        MatrixInverseOrthogonal43((const mat4x3&)v7, v6);
         v5[9] = ent->r.currentOrigin[0];
         v5[10] = ent->r.currentOrigin[1];
         v5[11] = ent->r.currentOrigin[2];
-        MatrixMultiply43((const float (*)[3])v5, v6, tagInfo->axis);
+        MatrixMultiply43((const mat4x3&)v5, v6, tagInfo->axis);
     }
 }
 
@@ -2480,7 +2495,7 @@ void __cdecl G_SetFixedLink(gentity_s *ent, unsigned int eAngles)
     {
         if (eAngles == 1)
         {
-            MatrixMultiply43(tagInfo->axis, v15, v11);
+            MatrixMultiply43(tagInfo->axis, (const mat4x3&)v15, (mat4x3&)v11);
             v7 = v13;
             v8 = v14;
             ent->r.currentOrigin[0] = v12;
@@ -2490,7 +2505,7 @@ void __cdecl G_SetFixedLink(gentity_s *ent, unsigned int eAngles)
         }
         else if (eAngles < 3)
         {
-            MatrixTransformVector43(tagInfo->axis[3], v15, &v12);
+            MatrixTransformVector43(tagInfo->axis[3], (const mat4x3&)v15, &v12);
             v5 = v13;
             v6 = v14;
             ent->r.currentOrigin[0] = v12;
@@ -2500,7 +2515,7 @@ void __cdecl G_SetFixedLink(gentity_s *ent, unsigned int eAngles)
     }
     else
     {
-        MatrixMultiply43(tagInfo->axis, v15, v11);
+        MatrixMultiply43(tagInfo->axis, (const mat4x3&)v15, (mat4x3&)v11);
         v9 = v13;
         v10 = v14;
         ent->r.currentOrigin[0] = v12;
@@ -2604,8 +2619,8 @@ void __cdecl G_SetPlayerFixedLink(gentity_s *ent)
         AnglesToAxis(client->ps.viewangles, v40);
         AxisToQuat(v40, v35);
         QuatMultiply(v35, v21, v36);
-        QuatToAxis(v36, v39);
-        AxisToAngles(v39, v25);
+        QuatToAxis(v36, (mat3x3&)v39);
+        AxisToAngles((const mat3x3&)v39, v25);
         v6 = v25;
         v7 = 2;
         do
@@ -2630,8 +2645,8 @@ void __cdecl G_SetPlayerFixedLink(gentity_s *ent)
             AnglesToAxis(client->ps.linkAngles, v38);
             AxisToQuat(v38, v37);
             QuatMultiply(v37, v21, v34);
-            QuatToAxis(v34, v38);
-            AxisToAngles(v38, client->ps.linkAngles);
+            QuatToAxis(v34, (mat3x3&)v38);
+            AxisToAngles((const mat3x3&)v38, client->ps.linkAngles);
         }
     }
     v16 = ent->client;
@@ -2641,7 +2656,7 @@ void __cdecl G_SetPlayerFixedLink(gentity_s *ent)
         v29[0] = 0.0;
         v29[1] = 0.0;
         v29[2] = viewHeightCurrent;
-        MatrixTransformVector43(v29, v32, v27);
+        MatrixTransformVector43(v29, (const mat4x3&)v32, v27);
         currentOrigin = v27;
         v28 = v28 - client->ps.viewHeightCurrent;
     }
@@ -2678,19 +2693,17 @@ void __cdecl G_GeneralLink(gentity_s *ent)
     float v5[12]; // [sp+50h] [-90h] BYREF
     float v6[8][3]; // [sp+80h] [-60h] BYREF
 
-    if (!ent->tagInfo)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\g_utils.cpp", 1885, 0, "%s", "ent->tagInfo");
+    iassert(ent->tagInfo);
     G_CalcTagParentAxis(ent, v6);
     tagInfo = ent->tagInfo;
-    if (!tagInfo)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\g_utils.cpp", 1473, 0, "%s", "tagInfo");
-    MatrixMultiply43(tagInfo->axis, v6, (float (*)[3])v5);
+    iassert(tagInfo);
+    MatrixMultiply43(tagInfo->axis, (const mat4x3&)v6, (mat4x3&)v5);
     v3 = v5[10];
     v4 = v5[11];
     ent->r.currentOrigin[0] = v5[9];
     ent->r.currentOrigin[1] = v3;
     ent->r.currentOrigin[2] = v4;
-    AxisToAngles((const float (*)[3])v5, ent->r.currentAngles);
+    AxisToAngles((const mat3x3&)v5, ent->r.currentAngles);
     G_SetOrigin(ent, ent->r.currentOrigin);
     ent->s.lerp.apos.trBase[0] = ent->r.currentAngles[0];
     ent->s.lerp.apos.trBase[1] = ent->r.currentAngles[1];
@@ -2717,7 +2730,7 @@ gentity_s *__cdecl G_TempEntity(float *origin, int event)
     float v8[6]; // [sp+50h] [-30h] BYREF
 
     v4 = G_Spawn();
-    v4->s.eType = event + 17;
+    v4->s.eType = (entityType_t)(event + 17);
     v6 = (unsigned __int8)(event + 17) == event + 17;
     v5 = v4;
     if (!v6)
@@ -2773,20 +2786,20 @@ void __cdecl G_EntUnlink(gentity_s *ent)
         if (scripted)
         {
             G_CalcTagParentRelAxis(ent, v16);
-            MatrixTranspose(v16, v17);
-            MatrixMultiply43(scripted->axis, v16, (float (*)[3])v15);
-            AxisCopy((const float (*)[3])v15, scripted->axis);
+            MatrixTranspose((const mat3x3&)v16, (mat3x3&)v17);
+            MatrixMultiply43(scripted->axis, v16, (mat4x3&)v15);
+            AxisCopy((const mat3x3&)v15, (mat3x3&)scripted->axis);
             scripted->axis[3][0] = v15[9];
             scripted->axis[3][1] = v15[10];
             scripted->axis[3][2] = v15[11];
             v14[0] = scripted->originError[0];
             v14[1] = scripted->originError[1];
             v14[2] = scripted->originError[2];
-            MatrixTransformVector(v14, v16, scripted->originError);
+            MatrixTransformVector(v14, (const mat3x3&)v16, scripted->originError);
             anglesError = scripted->anglesError;
             AnglesToAxis(anglesError, v13);
-            MatrixMultiply(v17, v13, (float (*)[3])v15);
-            MatrixMultiply((const float (*)[3])v15, v16, v13);
+            MatrixMultiply((const mat3x3&)v17, v13, (mat3x3&)v15);
+            MatrixMultiply((const mat3x3&)v15, (const mat3x3&)v16, v13);
             AxisToSignedAngles(v13, anglesError);
         }
         G_SetOrigin(ent, ent->r.currentOrigin);
@@ -2836,17 +2849,17 @@ void __cdecl G_EntUnlink(gentity_s *ent)
         if (v10)
         {
             pm_type = v10->ps.pm_type;
-            if (pm_type == 1)
+            if (pm_type == PM_NORMAL_LINKED)
             {
-                v10->ps.pm_type = 0;
+                v10->ps.pm_type = PM_NORMAL;
             }
-            else if (pm_type == 6)
+            else if (pm_type == PM_DEAD_LINKED)
             {
-                v10->ps.pm_type = 5;
+                v10->ps.pm_type = PM_DEAD;
             }
         }
         Scr_SetString(&tagInfo->name, 0);
-        MT_Free(tagInfo, 112);
+        MT_Free((unsigned char *)tagInfo, 112);
     }
     //Profile_EndInternal(0);
 }
@@ -2903,7 +2916,7 @@ void __cdecl G_EntUnlinkFree(gentity_s *ent)
     scripted = ent->scripted;
     if (scripted)
     {
-        MT_Free(scripted, 96);
+        MT_Free((unsigned char *)scripted, 96);
         ent->scripted = 0;
     }
     G_EntUnlink(ent);
@@ -2933,7 +2946,7 @@ void __cdecl G_FreeEntity(gentity_s *ed)
     scripted = ed->scripted;
     if (scripted)
     {
-        MT_Free(scripted, 96);
+        MT_Free((unsigned char*)scripted, 96);
         ed->scripted = 0;
     }
     G_EntUnlink(ed);
@@ -2943,7 +2956,7 @@ void __cdecl G_FreeEntity(gentity_s *ed)
         v4 = tagChildren->scripted;
         if (v4)
         {
-            MT_Free(v4, 96);
+            MT_Free((unsigned char *)v4, 96);
             tagChildren->scripted = 0;
         }
         G_EntUnlink(tagChildren);
@@ -3119,7 +3132,7 @@ LABEL_17:
                 "%s",
                 "numModels < DOBJ_MAX_SUBMODELS");
         v13 = G_GetModel(v12);
-        *((unsigned int *)v10 - 1) = v13;
+        *((unsigned int *)v10 - 1) = (unsigned int)v13;
         if (!v13)
             MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\g_utils.cpp", 762, 0, "%s", "dobjModels[numModels].model");
         if (!*attachTagNames)
@@ -3128,7 +3141,8 @@ LABEL_17:
         attachIgnoreCollision = ent->attachIgnoreCollision;
         *(_WORD *)v10 = *attachTagNames++;
         v15 = (1 << v8++) & attachIgnoreCollision;
-        v10[2] = (_cntlzw(v15) & 0x20) == 0;
+        //v10[2] = (_cntlzw(v15) & 0x20) == 0;
+        v10[2] = v15 != 0;
         v10 += 8;
     } while (v8 < 31);
     Com_ServerDObjCreate(&v16, v9, pAnimTree, ent->s.number);
@@ -3317,7 +3331,7 @@ int __cdecl G_EntLinkToInternal(gentity_s *ent, gentity_s *parent, unsigned int 
             if (scripted)
             {
                 G_CalcTagParentAxis(ent, v16);
-                MatrixInverseOrthogonal43(v16, v10->parentInvAxis);
+                MatrixInverseOrthogonal43((const mat4x3&)v16, v10->parentInvAxis);
             }
             else
             {
@@ -3329,16 +3343,16 @@ int __cdecl G_EntLinkToInternal(gentity_s *ent, gentity_s *parent, unsigned int 
                 pm_type = client->ps.pm_type;
                 if (pm_type)
                 {
-                    if (pm_type == 5)
+                    if (pm_type == PM_DEAD)
                     {
                         result = 1;
-                        client->ps.pm_type = 6;
+                        client->ps.pm_type = PM_DEAD_LINKED;
                         return result;
                     }
                 }
                 else
                 {
-                    client->ps.pm_type = 1;
+                    client->ps.pm_type = PM_NORMAL_LINKED;
                 }
             }
             return 1;

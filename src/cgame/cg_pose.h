@@ -7,7 +7,6 @@
 #include <xanim/dobj.h>
 #include <bgame/bg_local.h>
 
-void __cdecl QuatMultiply(float *in1, float *in2, float *out);
 void __cdecl PitchToQuat(double pitch, float *quat, float *a3);
 void __cdecl RollToQuat(double roll, float *quat, float *a3);
 void __cdecl LocalMatrixTransformVectorQuatTrans(const float *in, const DObjAnimMat *mat, float *out);

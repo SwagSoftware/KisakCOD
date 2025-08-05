@@ -1,10 +1,14 @@
 #include "game_public.h"
 #include <qcommon/mem_track.h>
 #include <server/sv_world.h>
-#include <game_mp/g_utils_mp.h>
 #include <server/sv_game.h>
-#ifdef KISAK_SP
+
+#ifdef KISAK_MP
+#include <game_mp/g_utils_mp.h>
+#elif KISAK_SP
 #include <server/sv_public.h>
+#include "g_main.h"
+#include "g_local.h"
 #endif
 
 struct pushed_t // sizeof=0x2C
@@ -445,7 +449,11 @@ char __cdecl G_MoverPush(gentity_s *pusher, float *move, float *amove, gentity_s
                 v18 = 0;
                 break;
             }
+#ifdef KISAK_MP
             G_Damage(ent, pusher, pusher, 0, 0, 99999, 0, 9, 0xFFFFFFFF, HITLOC_NONE, 0, 0, 0);
+#elif KISAK_SP
+            G_Damage(ent, pusher, pusher, 0, 0, 99999, 0, 9, 0xFFFFFFFF, HITLOC_NONE, 0, 0);
+#endif
         }
     }
     for (j = 0; j < v10; ++j)

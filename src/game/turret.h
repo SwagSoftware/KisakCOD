@@ -5,9 +5,11 @@
 #endif
 
 struct gentity_s;
+struct sentient_s;
 struct actor_s;
 struct ScriptFunctions;
 struct weaponParms;
+struct TurretInfo;
 
 void __cdecl TRACK_turret();
 void __cdecl G_InitTurrets();
