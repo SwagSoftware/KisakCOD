@@ -1639,14 +1639,14 @@ void __cdecl BG_PlayerToEntitySetMisc(playerState_s *ps, entityState_s *s)
     if ((ps->eFlags & 0x300) != 0)
         s->otherEntityNum = ps->viewlocked_entNum;
     if ((ps->otherFlags & 6) != 0)
-        s->eType = 1;
+        s->eType = ET_PLAYER;
     else
-        s->eType = 5;
+        s->eType = ET_INVISIBLE;
     s->weapon = LOBYTE(ps->weapon);
     s->weaponModel = ps->weaponmodels[ps->weapon];
     s->groundEntityNum = LOWORD(ps->groundEntityNum);
 #elif KISAK_SP
-    s->eType = 1;
+    s->eType = ET_PLAYER;
     s->weapon = ps->weapon;
     s->weaponModel = ps->weaponmodels[ps->weapon];
     s->groundEntityNum = ps->groundEntityNum;

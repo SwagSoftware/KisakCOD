@@ -1,8 +1,13 @@
 #include "bg_public.h"
 #include "bg_local.h"
-#include <game_mp/g_main_mp.h>
 #include <universal/profile.h>
 #include <xanim/dobj_utils.h>
+
+#ifdef KISAK_MP
+#include <game_mp/g_main_mp.h>
+#elif KISAK_SP
+
+#endif
 
 const scriptAnimMoveTypes_t moveAnimTable[6][2][2] =
 {
@@ -597,47 +602,55 @@ void __cdecl PM_UpdateViewAngles(playerState_s *ps, float msec, usercmd_s *cmd, 
     float temp; // [esp+14h] [ebp-Ch]
     float oldViewYaw; // [esp+18h] [ebp-8h]
 
-    if (ps->pm_type != PM_INTERMISSION)
+#ifdef KISAK_MP
+    if (ps->pm_type = PM_INTERMISSION)
     {
-        if (ps->pm_type >= PM_DEAD)
-        {
-            if (ps->stats[1] == 999)
-            {
-                angle = (double)cmd->angles[1] * 0.0054931640625 + ps->delta_angles[1];
-                temp = AngleNormalize360(angle);
-                ps->stats[1] = (int)(temp * 0.0054931640625);
-            }
-        LABEL_21:
-            PM_UpdateLean(
-                ps,
-                msec,
-                cmd,
-                (void(__cdecl *)(trace_t *, float *, float *, float *, float *, int))pmoveHandlers[handler].trace);
-            return;
-        }
-        oldViewYaw = ps->viewangles[1];
-        PM_UpdateViewAngles_Clamp(ps, cmd);
-        if ((ps->eFlags & 0x300) != 0)
-        {
-            PM_UpdateViewAngles_RangeLimited(ps, oldViewYaw);
-            return;
-        }
-        if ((ps->pm_flags & 4) != 0)
-        {
-            Mantle_CapView(ps);
-            return;
-        }
-        if ((ps->pm_flags & 8) != 0 && ps->groundEntityNum == 1023 && bg_ladder_yawcap->current.value != 0.0)
-            PM_UpdateViewAngles_LadderClamp(ps);
-        if ((ps->pm_flags & 1) != 0)
-        {
-            if ((ps->eFlags & 0x300) != 0)
-                MyAssertHandler(".\\bgame\\bg_pmove.cpp", 4241, 0, "%s", "!(ps->eFlags & EF_TURRET_ACTIVE)");
-            PM_UpdateViewAngles_Prone(ps, msec, cmd, handler, oldViewYaw);
-        }
-        if (ps->pm_type != PM_UFO && ps->pm_type != PM_NOCLIP && ps->pm_type != PM_SPECTATOR)
-            goto LABEL_21;
+        return;
     }
+#endif
+    if (ps->pm_type >= PM_DEAD)
+    {
+        if (ps->stats[1] == 999)
+        {
+            angle = (double)cmd->angles[1] * 0.0054931640625 + ps->delta_angles[1];
+            temp = AngleNormalize360(angle);
+            ps->stats[1] = (int)(temp * 0.0054931640625);
+        }
+    LABEL_21:
+        PM_UpdateLean(
+            ps,
+            msec,
+            cmd,
+            (void(__cdecl *)(trace_t *, float *, float *, float *, float *, int))pmoveHandlers[handler].trace);
+        return;
+    }
+    oldViewYaw = ps->viewangles[1];
+    PM_UpdateViewAngles_Clamp(ps, cmd);
+    if ((ps->eFlags & 0x300) != 0)
+    {
+        PM_UpdateViewAngles_RangeLimited(ps, oldViewYaw);
+        return;
+    }
+    if ((ps->pm_flags & 4) != 0)
+    {
+        Mantle_CapView(ps);
+        return;
+    }
+    if ((ps->pm_flags & 8) != 0 && ps->groundEntityNum == 1023 && bg_ladder_yawcap->current.value != 0.0)
+        PM_UpdateViewAngles_LadderClamp(ps);
+    if ((ps->pm_flags & 1) != 0)
+    {
+        if ((ps->eFlags & 0x300) != 0)
+            MyAssertHandler(".\\bgame\\bg_pmove.cpp", 4241, 0, "%s", "!(ps->eFlags & EF_TURRET_ACTIVE)");
+        PM_UpdateViewAngles_Prone(ps, msec, cmd, handler, oldViewYaw);
+    }
+#ifdef KISAK_MP
+    if (ps->pm_type != PM_UFO && ps->pm_type != PM_NOCLIP && ps->pm_type != PM_SPECTATOR)
+        goto LABEL_21;
+#elif KISAK_SP
+    if (ps->pm_type != PM_UFO && ps->pm_type != PM_NOCLIP && ps->pm_type != PM_MPVIEWER)
+        goto LABEL_21;
+#endif
 }
 
 void __cdecl PM_UpdateViewAngles_Clamp(playerState_s *ps, usercmd_s *cmd)
@@ -1405,14 +1418,19 @@ void __cdecl PmoveSingle(pmove_t *pm)
         v1 = ps->eFlags & 0xFFDFFFFF;
     ps->eFlags = v1;
     ps->eFlags &= ~0x40u;
-    if (ps->pm_type != PM_INTERMISSION
-        && (ps->pm_flags & 0x400) == 0
+
+    if (
+#ifdef KISAK_MP
+        ps->pm_type != PM_INTERMISSION && 
+#endif
+        (ps->pm_flags & 0x400) == 0
         && (!ps->weaponstate || ps->weaponstate == 5)
         && PM_WeaponAmmoAvailable(ps)
         && (pm->cmd.buttons & 1) != 0)
     {
         ps->eFlags |= 0x40u;
     }
+
     if (ps->pm_type < PM_DEAD && (pm->cmd.buttons & 0x101) == 0)
         ps->pm_flags &= ~0x400u;
     memset((uint8_t *)&pml, 0, sizeof(pml));
@@ -1447,7 +1465,11 @@ void __cdecl PmoveSingle(pmove_t *pm)
     {
         ps->pm_flags |= 0x20u;
     }
+#ifdef KISAK_MP
     if (ps->pm_type >= PM_LASTSTAND)
+#elif KISAK_SP
+    if (ps->pm_type >= PM_DEAD)
+#endif
     {
         pm->cmd.forwardmove = 0;
         pm->cmd.rightmove = 0;
@@ -1574,8 +1596,16 @@ void __cdecl PmoveSingle(pmove_t *pm)
             {
                 PM_UpdatePronePitch(pm, &pml);
                 PM_DropTimers(ps, &pml);
+
+#ifdef KISAK_MP
                 if (ps->pm_type >= PM_LASTSTAND)
+#elif KISAK_SP
+                if (ps->pm_type >= PM_DEAD)
+#endif
+                {
                     PM_DeadMove(ps, &pml);
+                }
+
                 PM_CheckLadderMove(pm, &pml);
 
                 {
@@ -1862,8 +1892,10 @@ void __cdecl PM_Friction(playerState_s *ps, pml_t *pml)
             }
             drop = control * friction->current.value * pml->frametime + drop;
         }
+#ifdef KISAK_MP
         if (ps->pm_type == PM_SPECTATOR)
             drop = speed * 5.0 * pml->frametime + drop;
+#endif
         newspeed = speed - drop;
         if (newspeed < 0.0)
             newspeed = 0.0;
@@ -2028,8 +2060,10 @@ double __cdecl PM_MoveScale(playerState_s *ps, float fmove, float rmove, float u
     if (ps->pm_type == PM_UFO)
         scalea = scalea * 6.0;
 
+#ifdef KISAK_MP
     if (ps->pm_type == PM_SPECTATOR)
         return (float)(scalea * player_spectateSpeedScale->current.value);
+#endif
 
     return scalea;
 }
@@ -2060,8 +2094,10 @@ double __cdecl PM_CmdScale(playerState_s *ps, usercmd_s *cmd)
         scalea = scalea * 3.0;
     if (ps->pm_type == PM_UFO)
         scalea = scalea * 6.0;
+#ifdef KISAK_MP
     if (ps->pm_type == PM_SPECTATOR)
         return (float)(scalea * player_spectateSpeedScale->current.value);
+#endif
     return scalea;
 }
 
@@ -2221,10 +2257,12 @@ void __cdecl PM_WalkMove(pmove_t *pm, pml_t *pml)
         smove = (float)pm->cmd.rightmove;
         memcpy(&cmd, &pm->cmd, sizeof(cmd));
         scale = PM_CmdScale_Walk(pm, &cmd);
+#ifdef KISAK_MP
         scale = PM_DamageScale_Walk(ps->damageTimer) * scale;
         ps->damageTimer -= (int)(pml->frametime * 1000.0);
         if (ps->damageTimer <= 0)
             ps->damageTimer = 0;
+#endif
         pml->forward[2] = 0.0;
         pml->right[2] = 0.0;
         Vec2Normalize(pml->forward);
@@ -2961,7 +2999,12 @@ void __cdecl PM_CheckDuck(pmove_t *pm, pml_t *pml)
     if (!ps)
         MyAssertHandler(".\\bgame\\bg_pmove.cpp", 2512, 0, "%s", "ps");
     pm->proneChange = 0;
+
+#ifdef KISAK_MP
     if (ps->pm_type == PM_SPECTATOR)
+#elif KISAK_SP
+    if (ps->pm_type == PM_DEAD)
+#endif
     {
         pm->mins[0] = -8.0;
         pm->mins[1] = -8.0;
@@ -2973,7 +3016,7 @@ void __cdecl PM_CheckDuck(pmove_t *pm, pml_t *pml)
         if ((pm->cmd.buttons & 0x100) != 0)
         {
             pm->cmd.buttons &= ~0x100u;
-            BG_AddPredictableEventToPlayerstate(6u, 0, ps);
+            BG_AddPredictableEventToPlayerstate(6, 0, ps);
         }
         ps->viewHeightTarget = 0;
         ps->viewHeightCurrent = 0.0;
@@ -3032,12 +3075,14 @@ void __cdecl PM_CheckDuck(pmove_t *pm, pml_t *pml)
             }
             else if ((ps->pm_flags & 0xC00) == 0 && !PM_IsPlayerFrozenByWeapon(ps))
             {
+#ifdef KISAK_MP
                 if (ps->pm_type == PM_LASTSTAND)
                 {
                     ps->pm_flags &= ~1u;
                     ps->pm_flags |= 2u;
                 }
                 else
+#endif
                 {
                     if ((ps->pm_flags & 8) != 0 && (pm->cmd.buttons & 0x300) != 0)
                     {
@@ -3157,11 +3202,15 @@ void __cdecl PM_CheckDuck(pmove_t *pm, pml_t *pml)
             }
             if (!ps->viewHeightLerpTime)
             {
+#ifdef KISAK_MP
                 if (ps->pm_type == PM_LASTSTAND)
                 {
                     ps->viewHeightTarget = 22;
                 }
                 else if ((ps->pm_flags & 1) != 0)
+#elif KISAK_SP
+                if ((ps->pm_flags & 1) != 0)
+#endif
                 {
                     if (ps->viewHeightTarget == 60)
                     {
@@ -3470,10 +3519,12 @@ void __cdecl PM_ViewHeightAdjust(pmove_t *pm, pml_t *pml)
             }
         }
     }
+#ifdef KISAK_MP
     else if (ps->pm_type == PM_SPECTATOR)
     {
         ps->viewHeightCurrent = 0.0;
     }
+#endif
     else
     {
         ps->viewHeightCurrent = (float)ps->viewHeightTarget;
@@ -3648,6 +3699,10 @@ void __cdecl PM_Footstep_LadderMove(pmove_t *pm, pml_t *pml)
 
 void __cdecl PM_Footsteps_NotMoving(pmove_t *pm, int32_t stance)
 {
+#ifdef KISAK_SP
+    if (pm->xyspeed < 1.0)
+        pm->ps->bobCycle = 0;
+#elif KISAK_MP
     int32_t EffectiveStance; // eax
     scriptAnimMoveTypes_t flinch_anim; // [esp+0h] [ebp-18h]
     int32_t turnAdjust; // [esp+4h] [ebp-14h]
@@ -3705,6 +3760,7 @@ void __cdecl PM_Footsteps_NotMoving(pmove_t *pm, int32_t stance)
             BG_AnimScriptAnimation(ps, AISTATE_COMBAT, ANIM_MT_IDLE, 0);
         }
     }
+#endif
 }
 
 uint32_t __cdecl PM_GetFlinchAnim(uint32_t flinchAnimDir)
@@ -3771,6 +3827,7 @@ scriptAnimMoveTypes_t __cdecl PM_GetNotMovingAnim(int32_t stance, int32_t turnAd
     return notMovingAnims[stance][turn];
 }
 
+#ifdef KISAK_MP
 bool __cdecl PM_ShouldFlinch(playerState_s *ps)
 {
     int32_t flinch_end_time; // [esp+0h] [ebp-4h]
@@ -3780,6 +3837,7 @@ bool __cdecl PM_ShouldFlinch(playerState_s *ps)
         flinch_end_time = 0;
     return ps->damageTimer > flinch_end_time;
 }
+#endif
 
 double __cdecl PM_GetMaxSpeed(pmove_t *pm, int32_t walking, int32_t sprinting)
 {
@@ -3858,6 +3916,7 @@ int32_t __cdecl PM_GetStanceIdleAnim(char stanceFlag)
     return 1;
 }
 
+#ifdef KISAK_MP
 int32_t __cdecl PM_GetMoveAnim(playerState_s *ps, PmStanceFrontBack stance, int32_t walking, int32_t sprinting)
 {
     scriptAnimMoveTypes_t moveAnim; // [esp+0h] [ebp-Ch]
@@ -3871,6 +3930,7 @@ int32_t __cdecl PM_GetMoveAnim(playerState_s *ps, PmStanceFrontBack stance, int3
         return ps->damageTimer > stumble_end_time ? 42 : 20;
     return moveAnim;
 }
+#endif
 
 void __cdecl PM_SetStrafeCondition(pmove_t *pm)
 {
@@ -3973,6 +4033,31 @@ void __cdecl PM_FoliageSounds(pmove_t *pm)
 
 void __cdecl PM_DropTimers(playerState_s *ps, pml_t *pml)
 {
+#ifdef KISAK_SP
+    int pm_time; // r11
+    int msec; // r10
+    unsigned int v6; // r11
+
+    if (!ps)
+        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\bgame\\bg_pmove.cpp", 3679, 0, "%s", "ps");
+    pm_time = ps->pm_time;
+    if (pm_time)
+    {
+        msec = pml->msec;
+        if (msec < pm_time)
+        {
+            ps->pm_time = pm_time - msec;
+        }
+        else
+        {
+            if ((ps->pm_flags & 0x4000) != 0)
+                Jump_ClearState(ps);
+            v6 = ps->pm_flags & 0xFFFFBE7F;
+            ps->pm_time = 0;
+            ps->pm_flags = v6;
+        }
+    }
+#elif KISAK_MP
     if (!ps)
         MyAssertHandler(".\\bgame\\bg_pmove.cpp", 3686, 0, "%s", "ps");
     if (ps->pm_time)
@@ -4009,6 +4094,7 @@ void __cdecl PM_DropTimers(playerState_s *ps, pml_t *pml)
                 Com_Printf(19, "end torso\n");
         }
     }
+#endif
 }
 
 void __cdecl PM_UpdatePlayerWalkingFlag(pmove_t *pm)

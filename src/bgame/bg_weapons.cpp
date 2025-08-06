@@ -4,10 +4,15 @@
 #include <qcommon/mem_track.h>
 #include <universal/surfaceflags.h>
 #include <aim_assist/aim_assist.h>
-#include <game_mp/g_main_mp.h>
 #include <xanim/xanim.h>
 #include <universal/com_files.h>
+
+#ifdef KISAK_MP
+#include <game_mp/g_main_mp.h>
 #include <cgame_mp/cg_local_mp.h>
+#elif KISAK_SP
+#include <game/g_local.h>
+#endif
 
 //struct WeaponDef **bg_weaponDefs 82800908     bg_weapons.obj
 //float (*)[29] penetrationDepthTable 82800f10     bg_weapons.obj
@@ -1226,6 +1231,7 @@ int32_t __cdecl PM_GetWeaponFireButton(uint32_t weapon)
 
 void __cdecl PM_Weapon_Idle(playerState_s *ps)
 {
+#ifdef KISAK_MP
     ps->weapFlags &= ~2u;
     ps->pm_flags &= ~0x200u;
     if (G_IsServerGameSystem(ps->clientNum))
@@ -1234,6 +1240,22 @@ void __cdecl PM_Weapon_Idle(playerState_s *ps)
     ps->weaponDelay = 0;
     ps->weaponstate = 0;
     PM_StartWeaponAnim(ps, 0);
+#elif KISAK_SP
+    unsigned int v1; // r10
+    int pm_type; // r8
+    unsigned int v3; // r9
+
+    v1 = ps->weapFlags & 0xFFFFFFFD;
+    pm_type = ps->pm_type;
+    v3 = ps->pm_flags & 0xFFFFFDFF;
+    ps->weaponTime = 0;
+    ps->weaponDelay = 0;
+    ps->weapFlags = v1;
+    ps->pm_flags = v3;
+    ps->weaponstate = 0;
+    if (pm_type < 5)
+        ps->weapAnim = ~(unsigned __int16)ps->weapAnim & 0x200;
+#endif
 }
 
 void __cdecl PM_Weapon(pmove_t *pm, pml_t *pml)
@@ -2263,8 +2285,10 @@ int __cdecl PM_Weapon_WeaponTimeAdjust(pmove_t *pm, pml_t *pml)
                     || ps->weaponstate == 10
                     || ps->weaponstate == 8)
                 {
+#ifdef KISAK_MP 
                     if (G_IsServerGameSystem(ps->clientNum))
                         Com_Printf(19, "end weapon (timeout)\n");
+#endif
                     ps->weaponTime = 0;
                     ps->weaponShotCount = 0;
                 }
@@ -2284,8 +2308,10 @@ int __cdecl PM_Weapon_WeaponTimeAdjust(pmove_t *pm, pml_t *pml)
             }
             else
             {
+#ifdef KISAK_MP
                 if (G_IsServerGameSystem(ps->clientNum))
                     Com_Printf(19, "end weapon (timeout)\n");
+#endif
                 if (((pm->cmd.buttons & 1) == 0 || (ps->weapFlags & 0x100) != 0) && !BurstFirePending(ps))
                     ps->weaponShotCount = 0;
                 ps->weaponTime = 0;
@@ -2487,8 +2513,10 @@ void __cdecl PM_BeginWeaponChange(playerState_s *ps, uint32_t newweapon, bool qu
             else
             {
             LABEL_55:
+#ifdef KISAK_MP 
                 if (G_IsServerGameSystem(ps->clientNum))
                     Com_Printf(19, "end weapon (begin weapon change)\n");
+#endif
                 ps->weaponTime = 0;
                 ps->weaponstate = quick + 3;
                 ps->grenadeTimeLeft = 0;
@@ -2581,10 +2609,10 @@ void __cdecl PM_WeaponUseAmmo(playerState_s *ps, uint32_t wp, int32_t amount)
     int32_t v3; // [esp+0h] [ebp-Ch]
     int32_t idx; // [esp+8h] [ebp-4h]
 
-#ifndef DEDICATED
-    if (!player_sustainAmmo->current.enabled || !CG_ShouldPlaySoundOnLocalClient())
+#if KISAK_SP
+    if (!player_sustainAmmo->current.enabled )// || !WeaponValidForSustainAmmoCheat(wp))
 #else
-    if (!player_sustainAmmo->current.enabled)
+    if (!player_sustainAmmo->current.enabled || !CG_ShouldPlaySoundOnLocalClient())
 #endif
     {
         idx = BG_ClipForWeapon(wp);
@@ -2644,8 +2672,10 @@ void __cdecl PM_Weapon_StartFiring(playerState_s *ps, int32_t delayedAction)
     }
     ps->weaponDelay = weapDef->iHoldFireTime;
     ps->weaponTime = 0;
+#ifdef KISAK_MP
     if (G_IsServerGameSystem(ps->clientNum))
         Com_Printf(19, "end weapon (start fire)\n");
+#endif
 LABEL_20:
     ps->weaponstate = 5;
     PM_SetProneMovementOverride(ps);
@@ -2885,8 +2915,10 @@ void __cdecl PM_Weapon_OffHandHold(playerState_s *ps)
     ps->weapFlags |= 2u;
     if (!BG_ThrowingBackGrenade(ps))
         ps->grenadeTimeLeft = BG_GetWeaponDef(ps->offHandIndex)->fuseTime;
+#ifdef KISAK_MP
     if (G_IsServerGameSystem(ps->clientNum))
         Com_Printf(19, "end weapon (offhand hold)\n");
+#endif
 }
 
 void __cdecl PM_Weapon_OffHandStart(pmove_t *pm)
@@ -2955,8 +2987,10 @@ void __cdecl PM_Weapon_OffHandEnd(playerState_s *ps)
     {
         ps->weaponTime = 0;
         ps->weaponDelay = 1;
+#ifdef KISAK_MP
         if (G_IsServerGameSystem(ps->clientNum))
             Com_Printf(19, "end weapon (offhand end)\n");
+#endif
     }
     ps->throwBackGrenadeTimeLeft = 0;
     ps->throwBackGrenadeOwner = 1023;
