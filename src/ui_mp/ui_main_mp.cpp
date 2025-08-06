@@ -1233,7 +1233,7 @@ XModelPiece *__cdecl GetMenuBuffer_FastFile(const char *filename)
     return 0;
 }
 
-int __cdecl Load_ScriptMenu(int localClientNum, char *pszMenu, int imageTrack)
+int __cdecl Load_ScriptMenu(int localClientNum, const char *pszMenu, int imageTrack)
 {
     MenuList *menuList; // [esp+4h] [ebp-4h]
 
@@ -1252,7 +1252,7 @@ int __cdecl Load_ScriptMenu(int localClientNum, char *pszMenu, int imageTrack)
     return 1;
 }
 
-MenuList *__cdecl Load_ScriptMenuInternal(char *pszMenu, int imageTrack)
+MenuList *__cdecl Load_ScriptMenuInternal(const char *pszMenu, int imageTrack)
 {
     char szMenuFile[260]; // [esp+0h] [ebp-108h] BYREF
 
@@ -2197,7 +2197,7 @@ void __cdecl UI_SelectCurrentMap(int localClientNum)
 {
     const char *v1; // eax
     int iCount; // [esp+0h] [ebp-C60h]
-    char *info; // [esp+4h] [ebp-C5Ch]
+    const char *info; // [esp+4h] [ebp-C5Ch]
     char szMap[68]; // [esp+8h] [ebp-C58h] BYREF
     int i; // [esp+4Ch] [ebp-C14h]
     uiClientState_s cstate; // [esp+50h] [ebp-C10h] BYREF
@@ -4028,8 +4028,7 @@ int __cdecl UI_FeederCount(int localClientNum, float feederID)
 
 void __cdecl UI_BuildPlayerList(int localClientNum)
 {
-    const char *v1; // eax
-    char *info; // [esp+0h] [ebp-C44h]
+    const char *info; // [esp+0h] [ebp-C44h]
     uiClientState_s state; // [esp+4h] [ebp-C40h] BYREF
     char szName[40]; // [esp+C10h] [ebp-34h] BYREF
     int n; // [esp+C3Ch] [ebp-8h]
@@ -4037,8 +4036,7 @@ void __cdecl UI_BuildPlayerList(int localClientNum)
 
     CL_GetClientState(localClientNum, &state);
     info = CL_GetConfigString(localClientNum, 0);
-    v1 = Info_ValueForKey(info, "sv_maxclients");
-    count = atoi(v1);
+    count = atoi(Info_ValueForKey(info, "sv_maxclients"));
     memset((unsigned __int8 *)sharedUiInfo.playerClientNums, 0xFFu, sizeof(sharedUiInfo.playerClientNums));
     sharedUiInfo.playerCount = 0;
     for (n = 0; n < count; ++n)

@@ -131,7 +131,7 @@ struct sharedUiInfo_t // sizeof=0x1C5B0
 
 
 XModelPiece *__cdecl GetMenuBuffer_FastFile(const char *filename);
-MenuList *__cdecl Load_ScriptMenuInternal(char *pszMenu, int imageTrack);
+MenuList *__cdecl Load_ScriptMenuInternal(const char *pszMenu, int imageTrack);
 char *__cdecl UI_GetMapDisplayName(const char *pszMap);
 char *__cdecl UI_GetMapDisplayNameFromPartialLoadNameMatch(const char *mapName, int *mapLoadNameLen);
 char *__cdecl UI_GetGameTypeDisplayName(const char *pszGameType);
@@ -144,7 +144,7 @@ void __cdecl UI_DrawBuildNumber(int localClientNum);
 void __cdecl UI_Refresh(int localClientNum);
 void __cdecl UI_Shutdown(int localClientNum);
 char *__cdecl GetMenuBuffer(char *filename);
-int __cdecl Load_ScriptMenu(int localClientNum, char *pszMenu, int imageTrack);
+int __cdecl Load_ScriptMenu(int localClientNum, const char *pszMenu, int imageTrack);
 void __cdecl UI_DrawMapLevelshot(int localClientNum);
 void __cdecl UI_LoadIngameMenus(int localClientNum);
 void __cdecl UI_SetMap(char *mapname, char *gametype);

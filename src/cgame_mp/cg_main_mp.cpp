@@ -1417,7 +1417,7 @@ void __cdecl CG_AddAudioPhysicsClass(PhysPreset *physPreset, char (*classes)[64]
 void __cdecl CG_StartAmbient(int32_t localClientNum)
 {
     int32_t fadetime; // [esp+10h] [ebp-18h]
-    char *pszInfoString; // [esp+14h] [ebp-14h]
+    const char *pszInfoString; // [esp+14h] [ebp-14h]
     const char *pszFadeTime; // [esp+18h] [ebp-10h]
     const char *aliasName; // [esp+1Ch] [ebp-Ch]
     int32_t time; // [esp+20h] [ebp-8h]
@@ -1652,11 +1652,7 @@ void __cdecl CG_RestartSmokeGrenades(int32_t localClientNum)
 
 void __cdecl CG_InitVote(int32_t localClientNum)
 {
-    char *ConfigString; // eax
-    char *v2; // eax
-    char *v3; // eax
-    char *v4; // eax
-    char *v5; // eax
+    const char *ConfigString; // eax
     clientActive_t *LocalClientGlobals; // [esp+0h] [ebp-10h]
     int32_t time; // [esp+8h] [ebp-8h] BYREF
     int32_t serverId; // [esp+Ch] [ebp-4h] BYREF
@@ -1668,13 +1664,9 @@ void __cdecl CG_InitVote(int32_t localClientNum)
     ConfigString = CL_GetConfigString(localClientNum, 0xDu);
     if (sscanf(ConfigString, "%d %d", &time, &serverId) == 2 && serverId == LocalClientGlobals->serverId)
         cgs->voteTime = time;
-    v2 = CL_GetConfigString(localClientNum, 0xFu);
-    cgs->voteYes = atoi(v2);
-    v3 = CL_GetConfigString(localClientNum, 0x10u);
-    cgs->voteNo = atoi(v3);
-    v4 = CL_GetConfigString(localClientNum, 0xEu);
-    v5 = SEH_LocalizeTextMessage(v4, "vote string", LOCMSG_SAFE);
-    I_strncpyz(cgs->voteString, v5, 256);
+    cgs->voteYes = atoi(CL_GetConfigString(localClientNum, 0xF));
+    cgs->voteNo = atoi(CL_GetConfigString(localClientNum, 0x10));
+    I_strncpyz(cgs->voteString, SEH_LocalizeTextMessage(CL_GetConfigString(localClientNum, 0xE), "vote string", LOCMSG_SAFE), 256);
 }
 
 uint16_t __cdecl CG_GetWeaponAttachBone(clientInfo_t *ci, weapType_t weapType)
@@ -1698,7 +1690,7 @@ void __cdecl CL_LoadSoundAliases(const char *loadspec)
 
 void __cdecl CG_Init(int32_t localClientNum, int32_t serverMessageNum, int32_t serverCommandSequence, int32_t clientNum)
 {
-    char *s; // [esp+24h] [ebp-4Ch]
+    const char *s; // [esp+24h] [ebp-4Ch]
     char mapname[68]; // [esp+28h] [ebp-48h] BYREF
 
     iassert(Sys_IsMainThread());
@@ -1778,7 +1770,7 @@ void __cdecl CG_Init(int32_t localClientNum, int32_t serverMessageNum, int32_t s
     CG_AntiBurnInHUD_RegisterDvars();
     CG_InitConsoleCommands();
     CG_InitViewDimensions(localClientNum);
-    s = CL_GetConfigString(localClientNum, 2u);
+    s = CL_GetConfigString(localClientNum, 2);
     if (strcmp(s, "cod"))
         Com_Error(ERR_DROP, "Client/Server game mismatch: %s/%s", "cod", s);
     SCR_UpdateLoadScreen();
@@ -1873,9 +1865,9 @@ clientConnection_t *__cdecl CL_GetLocalClientConnection(int32_t localClientNum)
 void __cdecl CG_RegisterGraphics(int32_t localClientNum, const char *mapname)
 {
     shellshock_parms_t *ShellshockParms; // eax
-    char *shellshock; // [esp+0h] [ebp-14h]
-    char *effectname; // [esp+4h] [ebp-10h]
-    char *modelName; // [esp+8h] [ebp-Ch]
+    const char *shellshock; // [esp+0h] [ebp-14h]
+    const char *effectname; // [esp+4h] [ebp-10h]
+    const char *modelName; // [esp+8h] [ebp-Ch]
     int32_t i; // [esp+10h] [ebp-4h]
     int32_t ia; // [esp+10h] [ebp-4h]
     int32_t ib; // [esp+10h] [ebp-4h]

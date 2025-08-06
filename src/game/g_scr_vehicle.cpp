@@ -8,6 +8,7 @@
 #include "g_local.h"
 #include "g_vehicle_path.h"
 #include "g_public.h"
+#include "savememory.h"
 #endif
 
 #include <script/scr_const.h>
@@ -4775,6 +4776,62 @@ void(* ScriptVehicle_GetMethod(const char **pName))(scr_entref_t)
     }
     *pName = s_methods[v1].actionString;
     return s_methods[v1].actionFunc;
+}
+
+void G_SaveVehicleInfo(SaveGame *save)
+{
+    int v2; // r28
+    unsigned __int16 *sndIndices; // r29
+    unsigned __int16 *v4; // r31
+    int v5; // r30
+
+    v2 = 0;
+    if (s_numVehicleInfos > 0)
+    {
+        sndIndices = (unsigned short*)s_vehicleInfos[0].sndIndices;
+        do
+        {
+            v4 = sndIndices;
+            v5 = 6;
+            do
+            {
+                if (*v4)
+                    SaveMemory_SaveWrite(v4, 2, save);
+                --v5;
+                ++v4;
+            } while (v5);
+            ++v2;
+            sndIndices += 314;
+        } while (v2 < s_numVehicleInfos);
+    }
+}
+
+void G_LoadVehicleInfo(SaveGame *save)
+{
+    int v2; // r28
+    unsigned __int16 *sndIndices; // r29
+    unsigned __int16 *v4; // r31
+    int v5; // r30
+
+    v2 = 0;
+    if (s_numVehicleInfos > 0)
+    {
+        sndIndices = (unsigned short*)s_vehicleInfos[0].sndIndices;
+        do
+        {
+            v4 = sndIndices;
+            v5 = 6;
+            do
+            {
+                if (*v4)
+                    SaveMemory_LoadRead(v4, 2, save);
+                --v5;
+                ++v4;
+            } while (v5);
+            ++v2;
+            sndIndices += 314;
+        } while (v2 < s_numVehicleInfos);
+    }
 }
 
 #endif // KISAK_SP

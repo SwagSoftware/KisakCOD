@@ -5,11 +5,7 @@
 #error This file is for SinglePlayer only
 #endif
 
-enum CompassType : __int32
-{
-    COMPASS_TYPE_PARTIAL = 0x0,
-    COMPASS_TYPE_FULL = 0x1,
-};
+enum CompassType : __int32;
 
 struct __declspec(align(4)) CompassActor
 {

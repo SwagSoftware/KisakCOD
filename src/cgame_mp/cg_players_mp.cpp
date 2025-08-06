@@ -38,7 +38,7 @@ void __cdecl CG_AddPlayerSpriteDrawSurfs(int32_t localClientNum, const centity_s
     Material *hMaterial; // [esp+18h] [ebp-10h]
     team_t iTeam; // [esp+1Ch] [ebp-Ch]
     playerState_s *ps; // [esp+20h] [ebp-8h]
-    char *pszIcon; // [esp+24h] [ebp-4h]
+    const char *pszIcon; // [esp+24h] [ebp-4h]
     int32_t savedregs; // [esp+28h] [ebp+0h] BYREF
     cg_s *cgameGlob;
 

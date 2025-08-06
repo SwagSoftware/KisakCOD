@@ -731,7 +731,7 @@ void __cdecl CL_Vid_Restart_f()
     uint8_t *v0; // eax
     const char *v1; // eax
     BOOL v2; // [esp+0h] [ebp-D4h]
-    char *info; // [esp+4h] [ebp-D0h]
+    const char *info; // [esp+4h] [ebp-D0h]
     XZoneInfo zoneInfo[1]; // [esp+8h] [ebp-CCh] BYREF
     char zoneName[64]; // [esp+14h] [ebp-C0h] BYREF
     char mapname[64]; // [esp+54h] [ebp-80h] BYREF
@@ -912,7 +912,7 @@ void __cdecl CL_DownloadsComplete(int32_t localClientNum)
     char *v1; // eax
     const char *v2; // eax
     const char *v3; // eax
-    char *info; // [esp+10h] [ebp-98h]
+    const char *info; // [esp+10h] [ebp-98h]
     char *fn; // [esp+14h] [ebp-94h]
     char gametype[68]; // [esp+18h] [ebp-90h] BYREF
     clientConnection_t *clc; // [esp+5Ch] [ebp-4Ch]
@@ -3304,9 +3304,7 @@ void __cdecl CL_UpdateLevelHunkUsage()
 
 void __cdecl CL_OpenScriptMenu_f()
 {
-    int32_t Int; // eax
-    const char *v1; // eax
-    char *menuName; // [esp+0h] [ebp-10h]
+    const char *menuName; // [esp+0h] [ebp-10h]
     const char *menuResponse; // [esp+4h] [ebp-Ch]
     int32_t menuIndex; // [esp+8h] [ebp-8h]
     const char *parentMenuName; // [esp+Ch] [ebp-4h]
@@ -3334,9 +3332,7 @@ void __cdecl CL_OpenScriptMenu_f()
                         }
                         if (menuIndex == 32)
                             menuIndex = -1;
-                        Int = Dvar_GetInt("sv_serverId");
-                        v1 = va("cmd mr %i %i %s\n", Int, menuIndex, menuResponse);
-                        Cbuf_AddText(0, v1);
+                        Cbuf_AddText(0, va("cmd mr %i %i %s\n", Dvar_GetInt("sv_serverId"), menuIndex, menuResponse));
                     }
                 }
             }

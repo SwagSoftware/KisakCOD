@@ -335,7 +335,7 @@ void __cdecl CG_MiniMapChanged(int32_t localClientNum)
 void __cdecl CG_NorthDirectionChanged(int32_t localClientNum)
 {
     float v1; // [esp+8h] [ebp-Ch]
-    char *pszString; // [esp+10h] [ebp-4h]
+    const char *pszString; // [esp+10h] [ebp-4h]
     cg_s *cgameGlob;
 
     pszString = CL_GetConfigString(localClientNum, 0x336u);

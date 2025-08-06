@@ -6,6 +6,7 @@
 
 #include "g_local.h"
 #include "savememory.h"
+#include "game_public.h"
 
 #include <xanim/xanim.h>
 #include "g_main.h"
@@ -14,10 +15,25 @@
 #include "actor_threat.h"
 #include "actor_event_listeners.h"
 #include <server/sv_public.h>
+#include <server/sv_game.h>
+#include <gfx_d3d/r_cinematic.h>
+#include <script/scr_memorytree.h>
+#include <aim_assist/aim_target.h>
+#include <DynEntity/DynEntity_client.h>
+#include <xanim/dobj_utils.h>
+#include <cgame/cg_ents.h>
+#include "actor_corpse.h"
+#include <qcommon/cmd.h>
+#include <script/scr_vm.h>
+#include "g_vehicle_path.h"
+#include <xanim/xanim_readwrite.h>
+#include "savedevice.h"
 
 bool g_useDevSaveArea;
 
 gclient_s tempClient;
+
+char g_pendingLoadName[64]{ 0 };
 
 const char *monthStr[12] =
 {
@@ -33,6 +49,19 @@ const char *monthStr[12] =
   "OCT",
   "NOV",
   "DEC"
+};
+
+const saveField_t tagInfoFields[4] ={ { 0, SF_ENTITY }, { 4, SF_ENTITY }, { 8, SF_STRING }, { 0, SF_NONE } };
+
+const saveField_t animscriptedFields[1] = { { 0, SF_NONE } };
+
+const saveField_t gclientFields[5] =
+{
+  { 45984, SF_ENTITY },
+  { 45988, SF_ENTHANDLE },
+  { 46044, SF_ENTHANDLE },
+  { 224, SF_MODELINT },
+  { 0, SF_NONE }
 };
 
 const saveField_t badplaceFields[2] = { { 8, SF_STRING }, { 0, SF_NONE } };
@@ -313,7 +342,7 @@ void __cdecl Scr_FreeFields(const saveField_t *fields, unsigned __int8 *base)
 
 void __cdecl Scr_FreeEntityFields(gentity_s *ent)
 {
-    Scr_FreeFields(gentityFields, &ent->s.eType);
+    Scr_FreeFields(gentityFields, (unsigned char*)&ent->s.eType);
 }
 
 void __cdecl Scr_FreeActorFields(actor_s *pActor)
@@ -329,47 +358,48 @@ void __cdecl Scr_FreeSentientFields(sentient_s *sentient)
 // local variable allocation has failed, the output may be wrong!
 void G_SaveError(errorParm_t code, SaveErrorType errorType, const char *fmt, ...)
 {
-    const char *v15; // r31
-    char v16[544]; // [sp+60h] [-220h] BYREF
-    __int64 v17; // [sp+2A8h] [+28h] BYREF
-    va_list va; // [sp+2A8h] [+28h]
-    __int64 v19; // [sp+2B0h] [+30h]
-    __int64 v20; // [sp+2B8h] [+38h]
-    __int64 v21; // [sp+2C0h] [+40h]
-    __int64 v22; // [sp+2C8h] [+48h]
-    va_list va1; // [sp+2D0h] [+50h] BYREF
-
-    va_start(va1, a13);
-    va_start(va, a13);
-    va_arg(va1, unsigned int);
-    va_arg(va1, unsigned int);
-    va_arg(va1, unsigned int);
-    va_arg(va1, unsigned int);
-    va_arg(va1, unsigned int);
-    va_arg(va1, unsigned int);
-    va_arg(va1, unsigned int);
-    va_arg(va1, unsigned int);
-    va_arg(va1, unsigned int);
-    va_arg(va1, unsigned int);
-    v17 = fmt;
-    v19 = *(__int64 *)((char *)&a4 + 4);
-    v20 = a4;
-    v21 = *(__int64 *)((char *)&a5 + 4);
-    v22 = a5;
-    vsnprintf(v16, 0x200u, (const char *)HIDWORD(fmt), va);
-    v15 = v16;
-    v16[511] = 0;
-    if (errorType)
-    {
-        if (errorType == SAVE_ERROR_CORRUPT_SAVE)
-            v15 = "PLATFORM_ERR_SAVEGAME_BAD";
-    }
-    else
-    {
-        v15 = "PLATFORM_UNABLE_TO_READ_FROM_DEVICE";
-    }
-    Com_PrintError(10, v16);
-    Com_Error(code, v15);
+    iassert(0); // KISAKTODO
+    //const char *v15; // r31
+    //char v16[544]; // [sp+60h] [-220h] BYREF
+    //__int64 v17; // [sp+2A8h] [+28h] BYREF
+    //va_list va; // [sp+2A8h] [+28h]
+    //__int64 v19; // [sp+2B0h] [+30h]
+    //__int64 v20; // [sp+2B8h] [+38h]
+    //__int64 v21; // [sp+2C0h] [+40h]
+    //__int64 v22; // [sp+2C8h] [+48h]
+    //va_list va1; // [sp+2D0h] [+50h] BYREF
+    //
+    //va_start(va1, a13);
+    //va_start(va, a13);
+    //va_arg(va1, unsigned int);
+    //va_arg(va1, unsigned int);
+    //va_arg(va1, unsigned int);
+    //va_arg(va1, unsigned int);
+    //va_arg(va1, unsigned int);
+    //va_arg(va1, unsigned int);
+    //va_arg(va1, unsigned int);
+    //va_arg(va1, unsigned int);
+    //va_arg(va1, unsigned int);
+    //va_arg(va1, unsigned int);
+    //v17 = fmt;
+    //v19 = *(__int64 *)((char *)&a4 + 4);
+    //v20 = a4;
+    //v21 = *(__int64 *)((char *)&a5 + 4);
+    //v22 = a5;
+    //vsnprintf(v16, 0x200u, (const char *)HIDWORD(fmt), va);
+    //v15 = v16;
+    //v16[511] = 0;
+    //if (errorType)
+    //{
+    //    if (errorType == SAVE_ERROR_CORRUPT_SAVE)
+    //        v15 = "PLATFORM_ERR_SAVEGAME_BAD";
+    //}
+    //else
+    //{
+    //    v15 = "PLATFORM_UNABLE_TO_READ_FROM_DEVICE";
+    //}
+    //Com_PrintError(10, v16);
+    //Com_Error(code, v15);
 }
 
 void __cdecl WriteCStyleString(const char *psz, int maxlen, SaveGame *save)
@@ -591,7 +621,7 @@ void __cdecl WriteField1(const saveField_t *field, const unsigned __int8 *base, 
             v3->number = 1;
         break;
     case SF_ENTITY:
-        if (*v3)
+        if (*(unsigned int *)v3)
         {
             v4 = (*(unsigned int *)v3 - (int)g_entities) / 628 + 1;
             if (v4 > 0x880)
@@ -600,7 +630,7 @@ void __cdecl WriteField1(const saveField_t *field, const unsigned __int8 *base, 
         }
         else
         {
-            *v3 = 0;
+            *(unsigned int *)v3 = 0;
         }
         break;
     case SF_ENTHANDLE:
@@ -615,11 +645,11 @@ void __cdecl WriteField1(const saveField_t *field, const unsigned __int8 *base, 
         }
         else
         {
-            *v3 = 0;
+            *(unsigned int *)v3 = 0;
         }
         break;
     case SF_CLIENT:
-        if (*v3)
+        if (*(unsigned int *)v3)
         {
             v7 = (signed int)(*(unsigned int *)v3 - (unsigned int)level.clients) / 46104 + 1;
             if (v7 >= 2)
@@ -628,11 +658,11 @@ void __cdecl WriteField1(const saveField_t *field, const unsigned __int8 *base, 
         }
         else
         {
-            *v3 = 0;
+            *(unsigned int *)v3 = 0;
         }
         break;
     case SF_ACTOR:
-        if (*v3)
+        if (*(unsigned int *)v3)
         {
             v8 = (signed int)(*(unsigned int *)v3 - (unsigned int)level.actors) / 7824 + 1;
             if (v8 > 0x20)
@@ -641,11 +671,11 @@ void __cdecl WriteField1(const saveField_t *field, const unsigned __int8 *base, 
         }
         else
         {
-            *v3 = 0;
+            *(unsigned int *)v3 = 0;
         }
         break;
     case SF_SENTIENT:
-        if (*v3)
+        if (*(unsigned int *)v3)
         {
             v9 = (signed int)(*(unsigned int *)v3 - (unsigned int)level.sentients) / 116 + 1;
             if (v9 >= 0x22)
@@ -654,7 +684,7 @@ void __cdecl WriteField1(const saveField_t *field, const unsigned __int8 *base, 
         }
         else
         {
-            *v3 = 0;
+            *(unsigned int *)v3 = 0;
         }
         break;
     case SF_SENTIENTHANDLE:
@@ -669,11 +699,11 @@ void __cdecl WriteField1(const saveField_t *field, const unsigned __int8 *base, 
         }
         else
         {
-            *v3 = 0;
+            *(unsigned int *)v3 = 0;
         }
         break;
     case SF_VEHICLE:
-        if (*v3)
+        if (*(unsigned int *)v3)
         {
             v11 = (signed int)(*(unsigned int *)v3 - (unsigned int)level.vehicles) / 824 + 1;
             if (v11 > 0x40)
@@ -682,11 +712,11 @@ void __cdecl WriteField1(const saveField_t *field, const unsigned __int8 *base, 
         }
         else
         {
-            *v3 = 0;
+            *(unsigned int *)v3 = 0;
         }
         break;
     case SF_TURRETINFO:
-        if (*v3)
+        if (*(unsigned int *)v3)
         {
             v12 = (signed int)(*(unsigned int *)v3 - (unsigned int)level.turrets) / 188 + 1;
             if (v12 > 0x20)
@@ -695,15 +725,15 @@ void __cdecl WriteField1(const saveField_t *field, const unsigned __int8 *base, 
         }
         else
         {
-            *v3 = 0;
+            *(unsigned int *)v3 = 0;
         }
         break;
     case SF_THREAD:
         v3->number = Scr_ConvertThreadToSave(v3->number);
         break;
     case SF_ANIMSCRIPT:
-        v13 = (unsigned __int8 *)*v3;
-        if (*v3)
+        v13 = (unsigned __int8 *)*(unsigned int *)v3;
+        if (*(unsigned int *)v3)
         {
             if (v13 == original + 504)
             {
@@ -726,14 +756,14 @@ void __cdecl WriteField1(const saveField_t *field, const unsigned __int8 *base, 
         }
         else
         {
-            *v3 = 0;
+            *(unsigned int *)v3 = 0;
         }
         break;
     case SF_PATHNODE:
         *v3 = (EntHandle)Path_SaveIndex(*(const pathnode_t **)v3);
         break;
     case SF_ANIMTREE:
-        if (*v3)
+        if (*(unsigned int *)v3)
         {
             anims = XAnimGetAnims(*(const XAnimTree_s **)v3);
             iassert(anims);
@@ -743,12 +773,13 @@ void __cdecl WriteField1(const saveField_t *field, const unsigned __int8 *base, 
         }
         else
         {
-            *v3 = 0;
+            *(unsigned int *)v3 = 0;
         }
         break;
     case SF_TYPE_TAG_INFO:
     case SF_TYPE_SCRIPTED:
-        *v3 = (EntHandle)((_cntlzw((unsigned int)*v3) & 0x20) == 0);
+        //*v3 = (EntHandle)((_cntlzw((unsigned int)*v3) & 0x20) == 0);
+        *v3 = (EntHandle)((*(unsigned int *)v3 != 0));
         break;
     case SF_MODELUSHORT:
     case SF_MODELINT:
@@ -769,7 +800,7 @@ void __cdecl WriteField2(const saveField_t *field, unsigned __int8 *base, SaveGa
     const void *v11; // r4
     MemoryFile *v12; // r3
     unsigned int v13; // r3
-    MemoryFile *MemoryFile; // r3
+    MemoryFile *memFile; // r3
     unsigned int UsedSize; // r3
     const char *v16; // r30
     MemoryFile *v17; // r3
@@ -785,8 +816,8 @@ void __cdecl WriteField2(const saveField_t *field, unsigned __int8 *base, SaveGa
     switch (type)
     {
     case SF_STRING:
-        MemoryFile = SaveMemory_GetMemoryFile(save);
-        UsedSize = MemFile_GetUsedSize(MemoryFile);
+        memFile = SaveMemory_GetMemoryFile(save);
+        UsedSize = MemFile_GetUsedSize(memFile);
         //ProfMem_Begin("string", UsedSize);
         if (*(_WORD *)&base[ofs])
         {
@@ -843,7 +874,7 @@ void __cdecl ReadField(const saveField_t *field, unsigned __int8 *base, SaveGame
     bool v21; // cr58
     EntHandle v22; // r30
     int v23; // r30
-    XAnim_s *Anims; // r30
+    XAnim_s *anims; // r30
     unsigned __int8 *v25; // r3
     unsigned __int8 *v26; // r3
 
@@ -851,6 +882,9 @@ void __cdecl ReadField(const saveField_t *field, unsigned __int8 *base, SaveGame
         MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\g_save.cpp", 1022, 0, "%s", "save");
     v6 = field->type - 1;
     v7 = (EntHandle *)&base[field->ofs];
+
+    SentientHandle *senthand;
+
     switch (v6)
     {
     case 0:
@@ -862,128 +896,131 @@ void __cdecl ReadField(const saveField_t *field, unsigned __int8 *base, SaveGame
         }
         break;
     case 1:
-        v10 = (int)*v7;
+        v10 = *(int*)v7;
         if (*(unsigned int *)v7 > 2176 || (v11 = v10 == 0, v10 < 0))
         {
-            Com_Error(ERR_DROP, byte_82034F04, *v7);
+            Com_Error(ERR_DROP, "ReadField: entity out of range (%i)", *v7);
             v11 = v10 == 0;
         }
         if (v11)
             goto LABEL_58;
-        *v7 = (EntHandle)&g_entities[v10 - 1];
+        *v7 = (EntHandle)(uintptr_t)&g_entities[v10 - 1];
         break;
     case 2:
-        v12 = (int)*v7;
+        v12 = (int)*(int *)v7;
         if (*(unsigned int *)v7 > 2176 || v12 < 0)
-            Com_Error(ERR_DROP, byte_82034F04, *v7);
-        *v7 = 0;
+            Com_Error(ERR_DROP, "ReadField: entity out of range (%i)", *v7);
+        *(int*)v7 = 0;
         if (v12)
-            EntHandle::setEnt(v7, &g_entities[v12 - 1]);
+            v7->setEnt(&g_entities[v12 - 1]);
         break;
     case 3:
-        v13 = (int)*v7;
+        v13 = (int)*(int*)v7;
         if (*(unsigned int *)v7 > 1 || (v14 = v13 == 0, v13 < 0))
         {
-            Com_Error(ERR_DROP, byte_82034EDC, *v7);
+            Com_Error(ERR_DROP, "ReadField: client out of range (%i)", *v7);
             v14 = v13 == 0;
         }
         if (v14)
             goto LABEL_58;
-        *v7 = (EntHandle)&level.clients[v13 - 1];
+        *v7 = (EntHandle)(uintptr_t)&level.clients[v13 - 1];
         break;
     case 4:
-        v15 = (int)*v7;
+        v15 = (int)*(int*)v7;
         if (*(unsigned int *)v7 > 32 || (v16 = v15 == 0, v15 < 0))
         {
-            Com_Error(ERR_DROP, byte_82034EB8, *v7);
+            Com_Error(ERR_DROP, "ReadField: actor out of range (%i)", *v7);
             v16 = v15 == 0;
         }
         if (v16)
             goto LABEL_58;
-        *v7 = (EntHandle)&level.actors[v15 - 1];
+        *v7 = (EntHandle)(uintptr_t)&level.actors[v15 - 1];
         break;
     case 5:
-        v17 = (int)*v7;
+        v17 = (int)*(int*)v7;
         if (*(unsigned int *)v7 > 33 || (v18 = v17 == 0, v17 < 0))
         {
-            Com_Error(ERR_DROP, byte_82034E90, *v7);
+            Com_Error(ERR_DROP, "ReadField: sentient out of range (%i)", *v7);
             v18 = v17 == 0;
         }
         if (v18)
             goto LABEL_58;
-        *v7 = (EntHandle)&level.sentients[v17 - 1];
+        *v7 = (EntHandle)(uintptr_t)&level.sentients[v17 - 1];
         break;
     case 6:
-        v19 = (int)*v7;
+        v19 = (int)*(int*)v7;
         if (*(unsigned int *)v7 > 33 || v19 < 0)
-            Com_Error(ERR_DROP, byte_82034E90, *v7);
-        *v7 = 0;
+            Com_Error(ERR_DROP, "ReadField: sentient out of range (%i)", *v7);
+        *v7 = (EntHandle)0;
         if (v19)
-            SentientHandle::setSentient((SentientHandle *)v7, &level.sentients[v19 - 1]);
+        {
+            senthand = (SentientHandle *)v7;
+            senthand->setSentient(&level.sentients[v19 - 1]);
+            //SentientHandle::setSentient((SentientHandle *)v7, &level.sentients[v19 - 1]);
+        }
         break;
     case 7:
-        v20 = (int)*v7;
+        v20 = (int)*(int*)v7;
         if (*(unsigned int *)v7 > 64 || (v21 = v20 == 0, v20 < 0))
         {
-            Com_Error(ERR_DROP, byte_82034E68, *v7);
+            Com_Error(ERR_DROP, "ReadField: vehicle out of range (%i)", *v7);
             v21 = v20 == 0;
         }
         if (v21)
             goto LABEL_58;
-        *v7 = (EntHandle)&level.vehicles[v20 - 1];
+        *v7 = (EntHandle)(uintptr_t)&level.vehicles[v20 - 1];
         break;
     case 8:
         v22 = *v7;
         if (*(unsigned int *)v7 > 0x40u)
-            Com_Error(ERR_DROP, byte_82034E40, *v7);
+            Com_Error(ERR_DROP, "ReadField: turret out of range (%i)", *v7);
         if (!*(unsigned int *)&v22)
             goto LABEL_58;
-        *v7 = (EntHandle)&level.turrets[*(unsigned int *)&v22 - 1];
+        *v7 = (EntHandle)(uintptr_t)&level.turrets[*(unsigned int *)&v22 - 1];
         break;
     case 9:
         v7->number = Scr_ConvertThreadFromLoad(v7->number);
         break;
     case 10:
-        v23 = (int)*v7;
+        v23 = (int)*(int*)v7;
         if (*(unsigned int *)v7 > 298 || v23 < -1)
-            Com_Error(ERR_DROP, byte_82034E14, *v7);
+            Com_Error(ERR_DROP, "ReadField: animscript out of range (%i)", *v7);
         if (!v23)
             goto LABEL_58;
         if (v23 == -1)
-            *v7 = (EntHandle)(base + 504);
+            *v7 = (EntHandle)(uintptr_t)(base + 504);
         else
-            *v7 = (EntHandle)(&g_scr_data.scripted_init + 2 * v23);
+            *v7 = (EntHandle)(uintptr_t)(&g_scr_data.scripted_init + 2 * v23);
         break;
     case 11:
-        *v7 = (EntHandle)Path_LoadNode((unsigned int)*v7);
+        *v7 = (EntHandle)(uintptr_t)Path_LoadNode(*(unsigned int*)v7);
         break;
     case 12:
-        if (*v7)
+        if (*(unsigned int*)v7)
         {
-            Anims = Scr_GetAnims((unsigned int)*v7);
-            if (!Anims)
-                MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\g_save.cpp", 1141, 0, "%s", "anims");
-            *v7 = (EntHandle)Com_XAnimCreateSmallTree(Anims);
+            anims = Scr_GetAnims((unsigned int)*(unsigned int*)v7);
+            iassert(anims);
+            *v7 = (EntHandle)(uintptr_t)Com_XAnimCreateSmallTree(anims);
         }
         else
         {
         LABEL_58:
-            *v7 = 0;
+            *(unsigned int*)v7 = 0;
         }
         break;
     case 13:
-        if (*v7)
+        if (*(unsigned int *)v7)
         {
             v25 = (unsigned __int8 *)MT_Alloc(112, 17);
-            *v7 = (EntHandle)v25;
+            *v7 = (EntHandle)(uintptr_t)v25;
             G_ReadStruct(tagInfoFields, v25, 112, save);
         }
         break;
     case 14:
-        if (*v7)
+        if (*(unsigned int *)v7)
         {
             v26 = (unsigned __int8 *)MT_Alloc(96, 17);
-            *v7 = (EntHandle)v26;
+            *v7 = (EntHandle)(uintptr_t)v26;
             G_ReadStruct(animscriptedFields, v26, 96, save);
         }
         break;
@@ -994,7 +1031,7 @@ void __cdecl ReadField(const saveField_t *field, unsigned __int8 *base, SaveGame
         *v7 = (EntHandle)level.modelMap[*(unsigned int *)v7];
         break;
     default:
-        Com_Error(ERR_DROP, byte_82034DF4);
+        Com_Error(ERR_DROP, "ReadField: unknown field type");
         break;
     }
 }
@@ -1007,7 +1044,7 @@ void __cdecl G_WriteStruct(
     SaveGame *save)
 {
     const saveField_t *i; // r30
-    MemoryFile *MemoryFile; // r3
+    MemoryFile *memFile; // r3
     unsigned int UsedSize; // r3
     MemoryFile *v13; // r3
     unsigned int v14; // r3
@@ -1016,8 +1053,8 @@ void __cdecl G_WriteStruct(
         MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\g_save.cpp", 1190, 0, "%s", "save");
     for (i = fields; i->type; ++i)
         WriteField1(i, source, original);
-    MemoryFile = SaveMemory_GetMemoryFile(save);
-    UsedSize = MemFile_GetUsedSize(MemoryFile);
+    memFile = SaveMemory_GetMemoryFile(save);
+    UsedSize = MemFile_GetUsedSize(memFile);
     //ProfMem_Begin("writestruct struct", UsedSize);
     SaveMemory_SaveWrite(source, sourcesize, save);
     v13 = SaveMemory_GetMemoryFile(save);
@@ -1088,13 +1125,12 @@ void WriteEntity(gentity_s *ent, SaveGame *save)
     unsigned int v7; // r3
     unsigned __int8 v8[632]; // [sp+50h] [-290h] BYREF
 
-    if (!save)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\g_save.cpp", 1286, 0, "%s", "save");
+    iassert(save);
     memcpy(v8, ent, 0x274u);
     memFile = SaveMemory_GetMemoryFile(save);
     UsedSize = MemFile_GetUsedSize(memFile);
     //ProfMem_Begin("WriteStruct", UsedSize);
-    G_WriteStruct(gentityFields, &ent->s.eType, v8, 628, save);
+    G_WriteStruct(gentityFields, (unsigned char *)&ent->s.eType, v8, 628, save);
     v6 = SaveMemory_GetMemoryFile(save);
     v7 = MemFile_GetUsedSize(v6);
     //ProfMem_End(v7);
@@ -1110,9 +1146,8 @@ void __cdecl ReadEntity(gentity_s *ent, SaveGame *save)
 {
     _BYTE v4[8]; // [sp+50h] [-20h] BYREF
 
-    if (!save)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\g_save.cpp", 1308, 0, "%s", "save");
-    G_ReadStruct(gentityFields, &ent->s.eType, 628, save);
+    iassert(save);
+    G_ReadStruct(gentityFields, (unsigned char*)&ent->s.eType, 628, save);
     if (ent->s.weapon)
     {
         ent->s.weapon = ReadWeaponIndex(save);
@@ -1229,11 +1264,11 @@ void __cdecl WriteVehicle(scr_vehicle_s *pVehicle, SaveGame *save)
     unsigned __int8 v5[824]; // [sp+60h] [-350h] BYREF
 
     memcpy(v5, pVehicle, sizeof(v5));
-    v4[0] = (_cntlzw(pVehicle->entNum - 2175) & 0x20) == 0;
-    if (!save)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\g_save.cpp", 1462, 0, "%s", "save");
+    //v4[0] = (_cntlzw(pVehicle->entNum - 2175) & 0x20) == 0;
+    iassert(save);
     SaveMemory_SaveWrite(v4, 4, save);
-    if (v4[0])
+    //if (v4[0])
+    if (pVehicle->entNum - 2175 == 0)
     {
         G_WriteStruct(vehicleFields, (unsigned __int8 *)pVehicle, v5, 824, save);
         WriteVehicleIndex(pVehicle->infoIdx, save);
@@ -1432,7 +1467,7 @@ void __cdecl WriteBadPlaces(SaveGame *save)
         } while (v6);
         G_WriteStruct(badplaceFields, v3, v12, 12, save);
         v7 = v11;
-        v8 = v3 + 12;
+        v8 = (unsigned int*)(v3 + 12);
         v9 = 7;
         do
         {
@@ -1910,7 +1945,7 @@ void __cdecl G_SaveInitState(SaveGame *save)
 
 void __cdecl G_SaveMainState(bool savegame, SaveGame *save)
 {
-    MemoryFile *MemoryFile; // r3
+    MemoryFile *memFile; // r3
     unsigned int UsedSize; // r3
     MemoryFile *v6; // r3
     unsigned int v7; // r3
@@ -1971,12 +2006,12 @@ void __cdecl G_SaveMainState(bool savegame, SaveGame *save)
     unsigned int v62[4]; // [sp+60h] [-4A0h] BYREF
     unsigned __int8 v63[1168]; // [sp+70h] [-490h] BYREF
 
-    MemoryFile = SaveMemory_GetMemoryFile(save);
-    UsedSize = MemFile_GetUsedSize(MemoryFile);
-    ProfMem_Begin("SaveMainState", UsedSize);
+    memFile = SaveMemory_GetMemoryFile(save);
+    UsedSize = MemFile_GetUsedSize(memFile);
+    //ProfMem_Begin("SaveMainState", UsedSize);
     v6 = SaveMemory_GetMemoryFile(save);
     v7 = MemFile_GetUsedSize(v6);
-    ProfMem_Begin("level state, dvars, hudelems", v7);
+    //ProfMem_Begin("level state, dvars, hudelems", v7);
     if (!save)
         MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\g_save.cpp", 2140, 0, "%s", "save");
     v8 = SaveMemory_GetMemoryFile(save);
@@ -2011,10 +2046,10 @@ void __cdecl G_SaveMainState(bool savegame, SaveGame *save)
     SaveMemory_SaveWrite(g_hudelems, 44032, save);
     v10 = SaveMemory_GetMemoryFile(save);
     v11 = MemFile_GetUsedSize(v10);
-    ProfMem_End(v11);
+    //ProfMem_End(v11);
     v12 = SaveMemory_GetMemoryFile(save);
     v13 = MemFile_GetUsedSize(v12);
-    ProfMem_Begin("misc", v13);
+    //ProfMem_Begin("misc", v13);
     SaveMemory_SaveWrite(&level.fFogOpaqueDist, 4, save);
     SaveMemory_SaveWrite(&level.fFogOpaqueDistSqrd, 4, save);
     SaveMemory_SaveWrite(&level.bDrawCompassFriendlies, 4, save);
@@ -2025,19 +2060,19 @@ void __cdecl G_SaveMainState(bool savegame, SaveGame *save)
     Scr_SavePre(1);
     v14 = SaveMemory_GetMemoryFile(save);
     v15 = MemFile_GetUsedSize(v14);
-    ProfMem_End(v15);
+    //ProfMem_End(v15);
     v16 = SaveMemory_GetMemoryFile(save);
     v17 = MemFile_GetUsedSize(v16);
-    ProfMem_Begin("path nodes", v17);
+    //ProfMem_Begin("path nodes", v17);
     SaveMemory_StartSegment(save, 3);
     Path_ValidateAllNodes();
     WritePathNodes(save);
     v18 = SaveMemory_GetMemoryFile(save);
     v19 = MemFile_GetUsedSize(v18);
-    ProfMem_End(v19);
+    //ProfMem_End(v19);
     v20 = SaveMemory_GetMemoryFile(save);
     v21 = MemFile_GetUsedSize(v20);
-    ProfMem_Begin("entities", v21);
+    //ProfMem_Begin("entities", v21);
     SaveMemory_SaveWrite(&level.num_entities, 4, save);
     v22 = 0;
     i = 0;
@@ -2056,10 +2091,10 @@ void __cdecl G_SaveMainState(bool savegame, SaveGame *save)
     SaveMemory_SaveWrite(&i, 4, save);
     v24 = SaveMemory_GetMemoryFile(save);
     v25 = MemFile_GetUsedSize(v24);
-    ProfMem_End(v25);
+    //ProfMem_End(v25);
     v26 = SaveMemory_GetMemoryFile(save);
     v27 = MemFile_GetUsedSize(v26);
-    ProfMem_Begin("misc: clients, actors, vehicles", v27);
+    //ProfMem_Begin("misc: clients, actors, vehicles", v27);
     WriteBadPlaces(save);
     v28 = 0;
     i = 0;
@@ -2135,18 +2170,18 @@ void __cdecl G_SaveMainState(bool savegame, SaveGame *save)
     Cmd_SaveNotifications(v8);
     v35 = SaveMemory_GetMemoryFile(save);
     v36 = MemFile_GetUsedSize(v35);
-    ProfMem_End(v36);
+    //ProfMem_End(v36);
     v37 = SaveMemory_GetMemoryFile(save);
     v38 = MemFile_GetUsedSize(v37);
-    ProfMem_Begin("Script", v38);
+    //ProfMem_Begin("Script", v38);
     SaveMemory_StartSegment(save, 4);
     Scr_SavePost(v8);
     v39 = SaveMemory_GetMemoryFile(save);
     v40 = MemFile_GetUsedSize(v39);
-    ProfMem_End(v40);
+    //ProfMem_End(v40);
     v41 = SaveMemory_GetMemoryFile(save);
     v42 = MemFile_GetUsedSize(v41);
-    ProfMem_Begin("Animtree", v42);
+    //ProfMem_Begin("Animtree", v42);
     SaveMemory_StartSegment(save, 5);
     v43 = 0;
     i = 0;
@@ -2176,21 +2211,21 @@ void __cdecl G_SaveMainState(bool savegame, SaveGame *save)
     } while (v43 < 2176);
     v48 = SaveMemory_GetMemoryFile(save);
     v49 = MemFile_GetUsedSize(v48);
-    ProfMem_End(v49);
+    //ProfMem_End(v49);
     Scr_SaveShutdown(savegame);
     G_CheckAllEntities();
     SV_BeginSaveGame();
     v50 = SaveMemory_GetMemoryFile(save);
     v51 = MemFile_GetUsedSize(v50);
-    ProfMem_Begin("client", v51);
+    //ProfMem_Begin("client", v51);
     v52 = SaveMemory_GetMemoryFile(save);
     v53 = MemFile_GetUsedSize(v52);
-    ProfMem_Begin("clientState", v53);
+    //ProfMem_Begin("clientState", v53);
     CG_SaveEntities(save);
     CL_ArchiveClientState(v8, 6);
     v54 = SaveMemory_GetMemoryFile(save);
     v55 = MemFile_GetUsedSize(v54);
-    ProfMem_End(v55);
+    //ProfMem_End(v55);
     CL_ArchiveServerCommands(v8);
     SV_SaveServerCommands(save);
     CG_SaveViewModelAnimTrees(save);
@@ -2198,15 +2233,15 @@ void __cdecl G_SaveMainState(bool savegame, SaveGame *save)
     SV_EndSaveGame();
     v56 = SaveMemory_GetMemoryFile(save);
     v57 = MemFile_GetUsedSize(v56);
-    ProfMem_End(v57);
+    //ProfMem_End(v57);
     v58 = SaveMemory_GetMemoryFile(save);
     v59 = MemFile_GetUsedSize(v58);
-    ProfMem_End(v59);
+    //ProfMem_End(v59);
 }
 
 void __cdecl G_SaveState(bool savegame, SaveGame *save)
 {
-    CM_ValidateWorld();
+    CM_ValidateWorld(); // LWSS: note stubbed for now!
     if (!save)
         MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\g_save.cpp", 2398, 0, "%s", "save");
     G_SaveInitState(save);
@@ -2227,7 +2262,7 @@ int __cdecl G_IsSavePossible(SaveType saveType)
 
 int __cdecl G_WriteGame(const PendingSave *pendingSave, int checksum, SaveGame *save)
 {
-    MemoryFile *MemoryFile; // r3
+    MemoryFile *memFile; // r3
     unsigned int UsedSize; // r3
     MemoryFile *v8; // r3
     MemoryFile *v9; // r3
@@ -2248,9 +2283,9 @@ int __cdecl G_WriteGame(const PendingSave *pendingSave, int checksum, SaveGame *
     if (!save)
         MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\g_save.cpp", 2438, 0, "%s", "save");
     SaveMemory_InitializeGameSave(save);
-    MemoryFile = SaveMemory_GetMemoryFile(save);
-    UsedSize = MemFile_GetUsedSize(MemoryFile);
-    ProfMem_Begin("Game Save", UsedSize);
+    memFile = SaveMemory_GetMemoryFile(save);
+    UsedSize = MemFile_GetUsedSize(memFile);
+    //ProfMem_Begin("Game Save", UsedSize);
     v8 = SaveMemory_GetMemoryFile(save);
     Scr_SaveSource(v8);
     G_SaveState(1, save);
@@ -2271,8 +2306,8 @@ int __cdecl G_WriteGame(const PendingSave *pendingSave, int checksum, SaveGame *
         //Profile_EndInternal(0);
         v12 = SaveMemory_GetMemoryFile(save);
         v13 = MemFile_GetUsedSize(v12);
-        ProfMem_End(v13);
-        ProfMem_PrintTree();
+        //ProfMem_End(v13);
+        //ProfMem_PrintTree();
         return 1;
     }
     else
@@ -2281,9 +2316,9 @@ int __cdecl G_WriteGame(const PendingSave *pendingSave, int checksum, SaveGame *
         //Profile_EndInternal(0);
         v9 = SaveMemory_GetMemoryFile(save);
         v10 = MemFile_GetUsedSize(v9);
-        ProfMem_End(v10);
-        ProfMem_PrintTree();
+        //ProfMem_End(v10);
         return 0;
+        //ProfMem_PrintTree();
     }
 }
 
@@ -2311,7 +2346,7 @@ void __cdecl G_PrepareSaveMemoryForWrite(char commitLevel)
     if (!SaveHandle)
         MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\g_save.cpp", 2509, 0, "%s", "save");
     v3 = g_entities[0].health <= 0;
-    Memcard_CheckOngoingTasks();
+    //Memcard_CheckOngoingTasks();
     if (SaveMemory_IsWaitingForCommit(SaveHandle) && !v3 && (commitLevel & 6) != 0)
         SaveMemory_ForceCommitSave(SaveHandle);
     if (SaveMemory_IsCurrentCommittedSaveValid() && (commitLevel & 4) != 0 && !SaveMemory_IsWrittenToDevice(SaveHandle))
@@ -2331,11 +2366,11 @@ int __cdecl G_ProcessCommitActions(const PendingSave *pendingSave, SaveGame *sav
         SaveMemory_ForceCommitSave(save);
     if ((pendingSave->commitLevel & 4) != 0)
     {
-        if (pendingSave->saveType != SAVE_TYPE_AUTOSAVE)
-            MemCard_SetUseDevDrive(1);
+        //if (pendingSave->saveType != SAVE_TYPE_AUTOSAVE)
+        //    MemCard_SetUseDevDrive(1);
         v4 = SaveMemory_WriteSaveToDevice(save);
-        if (pendingSave->saveType != SAVE_TYPE_AUTOSAVE)
-            MemCard_SetUseDevDrive(0);
+        //if (pendingSave->saveType != SAVE_TYPE_AUTOSAVE)
+        //    MemCard_SetUseDevDrive(0);
     }
     return v4;
 }
@@ -2394,7 +2429,7 @@ void __cdecl G_PreLoadGame(int checksum, int *useLoadedSourceFiles, SaveGame **s
 {
     void *LoadFromDevice; // r28
     const SaveHeader *Header; // r26
-    MemoryFile *MemoryFile; // r3
+    MemoryFile *memFile; // r3
     MemoryFile *v9; // r3
     MemoryFile *v10; // r3
     __int64 v11; // r10
@@ -2408,12 +2443,12 @@ void __cdecl G_PreLoadGame(int checksum, int *useLoadedSourceFiles, SaveGame **s
     int v19; // [sp+1Ch] [-B4h]
     int v20; // [sp+20h] [-B0h]
     int v21; // [sp+24h] [-ACh]
-    int v22[24]; // [sp+70h] [-60h] BYREF
+    unsigned int v22[24]; // [sp+70h] [-60h] BYREF
 
     if (!save)
         MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\g_save.cpp", 2660, 0, "%s", "save");
     //Profile_Begin(244);
-    MemCard_SetUseDevDrive(g_useDevSaveArea);
+    //MemCard_SetUseDevDrive(g_useDevSaveArea);
     if (SaveMemory_IsCommittedSaveAvailable(g_pendingLoadName, checksum))
     {
         LoadFromDevice = 0;
@@ -2429,8 +2464,8 @@ void __cdecl G_PreLoadGame(int checksum, int *useLoadedSourceFiles, SaveGame **s
     SaveMemory_InitializeLoad(*save, Header->bodySize);
     if (Header->demoPlayback)
     {
-        MemoryFile = SaveMemory_GetMemoryFile(*save);
-        Dvar_LoadDvars(MemoryFile);
+        memFile = SaveMemory_GetMemoryFile(*save);
+        Dvar_LoadDvars(memFile);
     }
     if (*useLoadedSourceFiles
         && (!LoadFromDevice
@@ -2456,8 +2491,7 @@ void __cdecl G_PreLoadGame(int checksum, int *useLoadedSourceFiles, SaveGame **s
     SaveMemory_MoveToSegment(*save, -1);
     if (!SaveMemory_IsSuccessful(*save))
     {
-        HIDWORD(v13) = &unk_82035194;
-        G_SaveError(ERR_DROP, SAVE_ERROR_CORRUPT_SAVE, v13, v12, v11, v14, v15, v16, v17, v18, v19, v20, v21);
+        G_SaveError(ERR_DROP, SAVE_ERROR_CORRUPT_SAVE, "The save file has become corrupted.");
     }
     if (Header->demoPlayback)
     {
@@ -2467,7 +2501,7 @@ void __cdecl G_PreLoadGame(int checksum, int *useLoadedSourceFiles, SaveGame **s
     }
     if (LoadFromDevice)
         CloseDevice(LoadFromDevice);
-    MemCard_SetUseDevDrive(0);
+    //MemCard_SetUseDevDrive(0);
     //Profile_EndInternal(0);
 }
 
@@ -2511,7 +2545,7 @@ void __cdecl G_InitLoadGame(SaveGame *save)
 
 void __cdecl G_LoadMainState(SaveGame *save)
 {
-    MemoryFile *MemoryFile; // r21
+    MemoryFile *memFile; // r21
     MemoryFile *v3; // r3
     int i; // r5
     gentity_s *lastFreeEnt; // r10
@@ -2547,9 +2581,9 @@ void __cdecl G_LoadMainState(SaveGame *save)
     G_FreeVehiclePathsScriptInfo();
     Actor_ClearThreatBiasGroups();
     Cmd_UnregisterAllNotifications();
-    Scr_ShutdownSystem(1u, 1);
+    Scr_ShutdownSystem(1, 1);
     Path_ValidateAllNodes();
-    MemoryFile = SaveMemory_GetMemoryFile(save);
+    memFile = SaveMemory_GetMemoryFile(save);
     level.initializing = 1;
     SaveMemory_MoveToSegment(save, 2);
     SaveMemory_LoadRead(&level.time, 4, save);
@@ -2575,8 +2609,7 @@ void __cdecl G_LoadMainState(SaveGame *save)
             "%s",
             "!level.bPlayerIgnoreRadiusDamage");
     SaveMemory_LoadRead(&level.bPlayerIgnoreRadiusDamageLatched, 4, save);
-    if (!save)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\g_save.cpp", 2013, 0, "%s", "save");
+    iassert(save);
     v3 = SaveMemory_GetMemoryFile(save);
     Dvar_LoadDvars(v3);
     SaveMemory_LoadRead(g_hudelems, 44032, save);
@@ -2590,7 +2623,7 @@ void __cdecl G_LoadMainState(SaveGame *save)
     Sentient_ReadGlob(save);
     AimTarget_ReadSaveGame(save);
     SaveMemory_MoveToSegment(save, 4);
-    Scr_LoadPre(1, MemoryFile);
+    Scr_LoadPre(1, memFile);
     SaveMemory_MoveToSegment(save, 3);
     ReadPathNodes(save);
     if (level.num_entities)
@@ -2599,9 +2632,9 @@ void __cdecl G_LoadMainState(SaveGame *save)
     SaveMemory_LoadRead(&j, 4, save);
     for (i = j; j >= 0; i = j)
     {
-        if (i >= 2176)
+        if (i >= MAX_GENTITIES)
         {
-            Com_Error(ERR_DROP, byte_8200713C);
+            Com_Error(ERR_DROP, "G_LoadMainState: entitynum out of range (%i, MAX = %i)", i, MAX_GENTITIES);
             i = j;
         }
         ReadEntity(&g_entities[i], save);
@@ -2641,12 +2674,12 @@ void __cdecl G_LoadMainState(SaveGame *save)
     {
         if (k > 1)
         {
-            Com_Error(ERR_DROP, byte_820351E8);
+            Com_Error(ERR_DROP, "G_LoadMainState: clientnum out of range");
             k = j;
         }
         v10 = &level.clients[k];
         if (v10->pers.connected == CON_DISCONNECTED)
-            Com_Error(ERR_DROP, byte_8203520C);
+            Com_Error(ERR_DROP, "G_LoadMainState: client mis-match in savegame");
         ReadClient(v10, save);
         SaveMemory_LoadRead(&j, 4, save);
     }
@@ -2690,7 +2723,7 @@ void __cdecl G_LoadMainState(SaveGame *save)
         v16 = j + 1;
     }
     level.actorCorpseCount = 16;
-    DynEnt_LoadEntities(MemoryFile);
+    DynEnt_LoadEntities();
     G_ReadStruct(threatGroupFields, (unsigned __int8 *)&g_threatBias, 1060, save);
     if (Actor_EventListener_GetCount())
         MyAssertHandler(
@@ -2717,8 +2750,8 @@ void __cdecl G_LoadMainState(SaveGame *save)
     G_LoadConfigstrings(27, 32, save);
     G_LoadConfigstrings(59, 32, save);
     G_LoadTargets();
-    Missile_LoadAttractors(MemoryFile);
-    Cmd_LoadNotifications(MemoryFile);
+    Missile_LoadAttractors(memFile);
+    Cmd_LoadNotifications(memFile);
     SaveMemory_MoveToSegment(save, 5);
     v17 = 0;
     j = 0;
@@ -2749,12 +2782,12 @@ void __cdecl G_LoadMainState(SaveGame *save)
             v23 = ServerDObj;
             if (ServerDObj)
             {
-                XAnimLoadAnimTree(ServerDObj, MemoryFile);
+                XAnimLoadAnimTree(ServerDObj, memFile);
                 v24 = v28;
                 v25 = 4;
                 do
                 {
-                    MemFile_ReadData(MemoryFile, 4, v27);
+                    MemFile_ReadData(memFile, 4, (unsigned char*)v27);
                     --v25;
                     *v24++ = v27[0];
                 } while (v25);
@@ -2766,11 +2799,11 @@ void __cdecl G_LoadMainState(SaveGame *save)
     } while (v17 < 2176);
     SV_SendGameState();
     CG_LoadEntities(save);
-    CL_ArchiveClientState(MemoryFile, 6);
+    CL_ArchiveClientState(memFile, 6);
     CL_LoadServerCommands(save);
     SV_LoadServerCommands(save);
     CG_LoadViewModelAnimTrees(save, &level.clients->ps);
-    Phys_ArchiveState(MemoryFile);
+    Phys_ArchiveState(memFile);
     SaveMemory_MoveToSegment(save, -1);
     Scr_LoadShutdown();
     SV_LocateGameData(level.gentities, level.num_entities, 628, &level.clients->ps, 46104);
@@ -2779,40 +2812,30 @@ void __cdecl G_LoadMainState(SaveGame *save)
 
 void __cdecl G_LoadGame(int checksum, SaveGame *save)
 {
-    const SaveHeader *Header; // r31
+    const SaveHeader *header; // r31
     __int64 v4; // r10
     __int64 v5; // r8
     __int64 v6; // r6
-    long double v7; // fp2
-    int v8; // [sp+8h] [-A8h]
-    int v9; // [sp+Ch] [-A4h]
-    int v10; // [sp+10h] [-A0h]
-    int v11; // [sp+14h] [-9Ch]
-    int v12; // [sp+18h] [-98h]
-    int v13; // [sp+1Ch] [-94h]
-    int v14; // [sp+20h] [-90h]
-    int v15; // [sp+24h] [-8Ch]
     unsigned int RandomSeed; // [sp+70h] [-40h] BYREF
-    int v17[14]; // [sp+78h] [-38h] BYREF
+    unsigned int v17[14]; // [sp+78h] [-38h] BYREF
 
     Com_Printf(10, "=== G_LoadGame ===\n");
     //Profile_Begin(244);
     R_Cinematic_UnsetNextPlayback();
-    if (!save)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\g_save.cpp", 3067, 0, "%s", "save");
-    Header = SaveMemory_GetHeader(save);
-    if (!Header)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\g_save.cpp", 3069, 0, "%s", "header");
-    if (Header->isUsingScriptChecksum)
+    iassert(save);
+    header = SaveMemory_GetHeader(save);
+    iassert(header);
+
+    if (header->isUsingScriptChecksum)
     {
         Scr_GetChecksum(v17);
-        if (v17[0] != Header->scrCheckSum[0] || v17[1] != Header->scrCheckSum[1] || v17[2] != Header->scrCheckSum[2])
-            Com_Error(ERR_DROP, byte_82035250, Header->filename, Header->buildNumber);
+        if (v17[0] != header->scrCheckSum[0] || v17[1] != header->scrCheckSum[1] || v17[2] != header->scrCheckSum[2])
+            Com_Error(ERR_DROP, "G_LoadGame: savegame '%s' was saved with different script files %s", header->filename, header->buildNumber);
     }
-    if (Header->saveCheckSum != SaveMemory_CalculateChecksum(save))
+    if (header->saveCheckSum != SaveMemory_CalculateChecksum(save))
     {
-        HIDWORD(v6) = &unk_82035194;
-        G_SaveError(ERR_DROP, SAVE_ERROR_CORRUPT_SAVE, v6, v5, v4, v8, v9, v10, v11, v12, v13, v14, v15);
+        //HIDWORD(v6) = &unk_82035194;
+        G_SaveError(ERR_DROP, SAVE_ERROR_CORRUPT_SAVE, "The save file has become corrupted.");
     }
     G_LoadMainState(save);
     SaveMemory_FinalizeLoad(save);
@@ -2822,7 +2845,7 @@ void __cdecl G_LoadGame(int checksum, SaveGame *save)
     if (!SV_UsingDemoSave())
     {
         SV_GetUsercmd(0, &level.clients->pers.cmd);
-        InitClientDeltaAngles(level.clients, v7);
+        InitClientDeltaAngles(level.clients);
     }
     G_PruneLoadedCorpses();
     //Profile_EndInternal(0);

@@ -2746,4 +2746,21 @@ void Phys_SetGravityDir(float *down)
     physGlob.gravityDirection[2] = down[2];
     Sys_LeaveCriticalSection(CRITSECT_PHYSICS);
 }
+
+void Phys_ArchiveState(MemoryFile *memFile)
+{
+    if (MemFile_IsWriting(memFile))
+    {
+        MemFile_WriteData(memFile, 612, physGlob.worldData);
+        MemFile_WriteData(memFile, 12, physGlob.gravityDirection);
+    }
+    else
+    {
+        MemFile_ReadData(memFile, 612, (unsigned char*)physGlob.worldData);
+        MemFile_ReadData(memFile, 12, (unsigned char*)physGlob.gravityDirection);
+    }
+}
+
+
+
 #endif

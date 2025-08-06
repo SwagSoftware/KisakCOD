@@ -283,6 +283,7 @@ DynEntityPose *__cdecl DynEnt_GetClientPose(uint16_t dynEntId, DynEntityDrawType
 DynEntityClient *__cdecl DynEnt_GetClientEntity(uint16_t dynEntId, DynEntityDrawType drawType);
 DynEntityColl *__cdecl DynEnt_GetEntityColl(DynEntityCollType collType, uint16_t dynEntId);
 int32_t __cdecl DynEnt_GetXModelUsageCount(const XModel *xModel);
+void DynEnt_SaveEntities(struct MemoryFile *memFile);
 
 
 

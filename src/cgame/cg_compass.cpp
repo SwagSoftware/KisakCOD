@@ -1227,7 +1227,7 @@ void __cdecl CG_CompassDrawPlayerMapLocationSelector(
     float h; // [esp+34h] [ebp-60h]
     float texMax; // [esp+3Ch] [ebp-58h]
     float texMax_4; // [esp+40h] [ebp-54h]
-    char *mtlName; // [esp+44h] [ebp-50h]
+    const char *mtlName; // [esp+44h] [ebp-50h]
     int32_t mtlIndex; // [esp+48h] [ebp-4Ch]
     float radius; // [esp+50h] [ebp-44h]
     Material *selectorMaterial; // [esp+54h] [ebp-40h]

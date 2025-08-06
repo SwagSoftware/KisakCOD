@@ -2746,7 +2746,7 @@ const dvar_s *__cdecl Dvar_SetFromStringByNameFromSource(const char *dvarName, c
     return dvar;
 }
 
-void __cdecl Dvar_SetFromStringByName(const char *dvarName, char *string)
+void __cdecl Dvar_SetFromStringByName(const char *dvarName, const char *string)
 {
     Dvar_SetFromStringByNameFromSource(dvarName, string, DVAR_SOURCE_INTERNAL);
 }

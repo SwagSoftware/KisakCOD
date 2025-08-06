@@ -730,3 +730,41 @@ int32_t __cdecl DynEnt_GetXModelUsageCount(const XModel *xModel)
     return count;
 }
 
+void DynEnt_SaveEntities(MemoryFile *memFile)
+{
+    int v2; // r26
+    unsigned __int16 *dynEntCount; // r27
+    DynEntityClient **dynEntClientList; // r29
+    unsigned int v5; // r31
+    bool v6; // [sp+50h] [-40h] BYREF
+
+    iassert(memFile);
+    v2 = 2;
+    dynEntCount = cm.dynEntCount;
+    dynEntClientList = cm.dynEntClientList;
+    do
+    {
+        MemFile_WriteData(memFile, 2, dynEntCount);
+        if (*dynEntCount)
+        {
+            MemFile_WriteData(memFile, 32 * *dynEntCount, *(dynEntClientList - 2));
+            MemFile_WriteData(memFile, 4 * (*dynEntCount + __ROL4__(*dynEntCount, 1)), *dynEntClientList);
+            if (*dynEntCount)
+            {
+                v5 = 0;
+                do
+                {
+                    //v6 = (_cntlzw((*dynEntClientList)[v5].physObjId) & 0x20) == 0;
+                    v6 = (*dynEntClientList)[v5].physObjId != 0;
+                    MemFile_WriteData(memFile, 1, &v6);
+                    if (v6)
+                        Phys_ObjSave((dxBody*)(*dynEntClientList)[v5].physObjId, memFile);
+                    v5 = (unsigned __int16)(v5 + 1);
+                } while (v5 < *dynEntCount);
+            }
+        }
+        --v2;
+        ++dynEntClientList;
+        ++dynEntCount;
+    } while (v2);
+}

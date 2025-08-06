@@ -3381,3 +3381,59 @@ LABEL_48:
     else
         return time;
 }
+
+
+#ifdef KISAK_SP
+void Missile_LoadAttractors(MemoryFile *memFile)
+{
+    AttractorRepulsor_t *v2; // r31
+    int v3; // r30
+    char v4; // [sp+50h] [-30h] BYREF
+
+    v2 = &attrGlob.attractors[0];
+    memset(&attrGlob, 0, sizeof(attrGlob));
+    v3 = ARRAY_COUNT(attrGlob.attractors);
+    do
+    {
+        MemFile_ReadData(memFile, 1, (unsigned char*)&v4);
+        if (v4)
+            MemFile_ReadData(memFile, 24, (unsigned char*)v2);
+        --v3;
+        ++v2;
+    } while (v3);
+}
+
+void Missile_SaveAttractors(MemoryFile *memFile)
+{
+    AttractorRepulsor_t *v2; // r31
+    int v3; // r29
+    AttractorRepulsor_t *v4; // r5
+    int v5; // r4
+    MemoryFile *v6; // r3
+    _BYTE v7[64]; // [sp+50h] [-40h] BYREF
+
+    v2 = &attrGlob.attractors[0];
+    v3 = ARRAY_COUNT(attrGlob.attractors);
+    do
+    {
+        v4 = (AttractorRepulsor_t *)v7;
+        v5 = 1;
+        v6 = memFile;
+        if (v2->inUse)
+        {
+            v7[0] = 1;
+            MemFile_WriteData(memFile, 1, v7);
+            v4 = v2;
+            v5 = 24;
+            v6 = memFile;
+        }
+        else
+        {
+            v7[0] = 0;
+        }
+        MemFile_WriteData(v6, v5, v4);
+        --v3;
+        ++v2;
+    } while (v3);
+}
+#endif

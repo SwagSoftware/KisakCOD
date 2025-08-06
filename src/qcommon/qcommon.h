@@ -596,7 +596,7 @@ inline void __cdecl Dvar_SetStringByName(const char *dvarName, const char *value
     Dvar_SetStringByName(dvarName, (char *)value);
 }
 const dvar_s *__cdecl Dvar_SetFromStringByNameFromSource(const char *dvarName, const char *string, DvarSetSource source);
-void __cdecl Dvar_SetFromStringByName(const char *dvarName, char *string);
+void __cdecl Dvar_SetFromStringByName(const char *dvarName, const char *string);
 void __cdecl Dvar_SetCommand(const char *dvarName, char *string);
 void __cdecl Dvar_SetDomainFunc(dvar_s *dvar, bool(__cdecl *customFunc)(dvar_s *, DvarValue));
 void __cdecl Dvar_AddFlags(dvar_s *dvar, int flags);
@@ -1106,6 +1106,7 @@ int __cdecl CM_PointSightTraceToEntities_r(
     const float *p2);
 
 int CM_SaveWorld(unsigned __int8 *buf);
+void CM_ValidateWorld();
 
 // cm_load
 void __cdecl TRACK_cm_load();

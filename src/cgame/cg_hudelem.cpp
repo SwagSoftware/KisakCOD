@@ -507,8 +507,6 @@ void __cdecl DrawSingleHudElem2d(int32_t localClientNum, const hudelem_s *elem)
 
 void __cdecl GetHudElemInfo(int32_t localClientNum, const hudelem_s *elem, cg_hudelem_t *cghe, char *hudElemString)
 {
-    char *ConfigString; // eax
-    char *v5; // eax
     char *v6; // eax
     char *v7; // eax
     float v8; // [esp+10h] [ebp-30h]
@@ -575,12 +573,10 @@ void __cdecl GetHudElemInfo(int32_t localClientNum, const hudelem_s *elem, cg_hu
         }
         break;
     case HE_TYPE_MAPNAME:
-        ConfigString = CL_GetConfigString(localClientNum, 0x11u);
-        I_strncpyz(cghe->hudElemText, ConfigString, 256);
+        I_strncpyz(cghe->hudElemText, CL_GetConfigString(localClientNum, 0x11), 256);
         break;
     case HE_TYPE_GAMETYPE:
-        v5 = CL_GetConfigString(localClientNum, 0x12u);
-        I_strncpyz(cghe->hudElemText, v5, 256);
+        I_strncpyz(cghe->hudElemText, CL_GetConfigString(localClientNum, 0x12), 256);
         break;
     case HE_TYPE_TIMER_DOWN:
     case HE_TYPE_TIMER_UP:
@@ -612,14 +608,11 @@ void __cdecl GetHudElemInfo(int32_t localClientNum, const hudelem_s *elem, cg_hu
 
 void __cdecl SafeTranslateHudElemString(int32_t localClientNum, int32_t index, char *hudElemString)
 {
-    char *ConfigString; // eax
+    iassert(hudElemString);
 
-    if (!hudElemString)
-        MyAssertHandler(".\\cgame\\cg_hudelem.cpp", 301, 0, "%s", "hudElemString");
     if (index)
     {
-        ConfigString = CL_GetConfigString(localClientNum, index + 309);
-        CG_TranslateHudElemMessage(localClientNum, ConfigString, "hudelem string", hudElemString);
+        CG_TranslateHudElemMessage(localClientNum, CL_GetConfigString(localClientNum, index + 309), "hudelem string", hudElemString);
     }
 }
 

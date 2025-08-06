@@ -1548,7 +1548,7 @@ void __cdecl CG_EntityEffects(int32_t localClientNum, centity_s *cent)
 
 void __cdecl CG_AddEntityLoopSound(int32_t localClientNum, const centity_s *cent)
 {
-    char *ConfigString; // eax
+    const char *ConfigString; // eax
     char *v3; // eax
     float midpoint[3]; // [esp+0h] [ebp-1Ch] BYREF
     float origin[3]; // [esp+Ch] [ebp-10h] BYREF
@@ -1564,8 +1564,11 @@ void __cdecl CG_AddEntityLoopSound(int32_t localClientNum, const centity_s *cent
     }
     else
     {
-        v3 = CL_GetConfigString(localClientNum, cent->nextState.loopSound + 1342);
-        CG_PlaySoundAliasByName(localClientNum, cent->nextState.number, cent->pose.origin, v3);
+        CG_PlaySoundAliasByName(localClientNum,
+            cent->nextState.number, 
+            cent->pose.origin, 
+            CL_GetConfigString(localClientNum, cent->nextState.loopSound + 1342)
+        );
     }
 }
 
@@ -1695,8 +1698,7 @@ void __cdecl CG_ScriptMover(int32_t localClientNum, centity_s *cent)
 
 void __cdecl CG_SoundBlend(int32_t localClientNum, centity_s *cent)
 {
-    char *ConfigString; // eax
-    char *v3; // eax
+    const char *ConfigString; // eax
     float lerp; // [esp+24h] [ebp-18h]
     snd_alias_t *alias1; // [esp+2Ch] [ebp-10h]
     snd_alias_t *alias0; // [esp+30h] [ebp-Ch]
@@ -1710,8 +1712,7 @@ void __cdecl CG_SoundBlend(int32_t localClientNum, centity_s *cent)
             {
                 ConfigString = CL_GetConfigString(localClientNum, cent->nextState.eventParms[0] + 1342);
                 alias0 = CL_PickSoundAlias(ConfigString);
-                v3 = CL_GetConfigString(localClientNum, cent->nextState.eventParms[1] + 1342);
-                alias1 = CL_PickSoundAlias(v3);
+                alias1 = CL_PickSoundAlias(CL_GetConfigString(localClientNum, cent->nextState.eventParms[1] + 1342));
                 if (alias0)
                 {
                     if (alias1)

@@ -56,7 +56,7 @@ void __cdecl CG_PlayBoltedEffect(
 
 void __cdecl CG_EntityEvent(int32_t localClientNum, centity_s *cent, int32_t event)
 {
-    char *ConfigString; // eax
+    const char *ConfigString; // eax
     char *v4; // eax
     float innerRadius_4; // [esp+4h] [ebp-150h]
     float innerRadius_4a; // [esp+4h] [ebp-150h]
@@ -192,8 +192,11 @@ void __cdecl CG_EntityEvent(int32_t localClientNum, centity_s *cent, int32_t eve
             case EV_SOUND_ALIAS_AS_MASTER:
                 if (ent->eventParm)
                 {
-                    v4 = CL_GetConfigString(localClientNum, ent->eventParm + 1342);
-                    CG_PlaySoundAliasAsMasterByName(localClientNum, ent->number, ent->lerp.pos.trBase, v4);
+                    CG_PlaySoundAliasAsMasterByName(localClientNum, 
+                        ent->number, 
+                        ent->lerp.pos.trBase, 
+                        CL_GetConfigString(localClientNum, ent->eventParm + 1342)
+                    );
                 }
                 return;
             case EV_STOPSOUNDS:

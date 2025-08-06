@@ -444,6 +444,9 @@ gentity_s *__cdecl G_FireRocket(
 void __cdecl InitRocketTimer(gentity_s *bolt, WeaponDef *weapDef);
 int G_PredictMissile(gentity_s *ent, int duration, float *vLandPos, int allowBounce, int *timeAtRest);
 
+void Missile_LoadAttractors(struct MemoryFile *memFile);
+void Missile_SaveAttractors(struct MemoryFile *memFile);
+
 
 
 
@@ -656,6 +659,8 @@ void G_FreeVehicle(gentity_s *ent);
 vehicle_info_t *VEH_GetVehicleInfo(__int16 index);
 
 void(*ScriptVehicle_GetMethod(const char **pName))(scr_entref_t);
+void G_SaveVehicleInfo(struct SaveGame *save);
+void G_LoadVehicleInfo(SaveGame *save);
 
 
 // g_weapon

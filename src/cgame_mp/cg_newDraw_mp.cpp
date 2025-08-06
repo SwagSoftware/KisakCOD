@@ -191,8 +191,8 @@ void __cdecl CG_ResetLowHealthOverlay(cg_s *cgameGlob)
 int32_t __cdecl CG_ServerMaterialName(int32_t localClientNum, int32_t index, char *materialName, uint32_t maxLen)
 {
     char v5; // cl
-    char *v7; // [esp+Ch] [ebp-18h]
-    char *string; // [esp+20h] [ebp-4h]
+    const char *v7; // [esp+Ch] [ebp-18h]
+    const char *string; // [esp+20h] [ebp-4h]
 
     if (index <= 0 || index >= 256)
         return 0;
@@ -2100,7 +2100,7 @@ char *__cdecl CG_GetWeaponUseString(int32_t localClientNum, const char **seconda
 
 char *__cdecl CG_GetUseString(int32_t localClientNum)
 {
-    char *displayString; // [esp+4h] [ebp-10Ch]
+    const char *displayString; // [esp+4h] [ebp-10Ch]
     char binding[260]; // [esp+8h] [ebp-108h] BYREF
     const cg_s *cgameGlob;
 

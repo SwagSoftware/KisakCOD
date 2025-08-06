@@ -1242,3 +1242,10 @@ int CM_SaveWorld(unsigned __int8 *buf)
     }
     return 12290;
 }
+
+void CM_ValidateWorld()
+{
+    // KISAKTODO
+    //CM_ValidateTree(1u);
+    //DynEnt_ValidateCollWorld();
+}

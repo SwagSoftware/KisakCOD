@@ -4,6 +4,8 @@
 
 #include "savedevice.h"
 
+char const *const CONSOLE_DEFAULT_SAVE_NAME;
+
 // void __cdecl SaveDevice_Init(void)    8227fb88 f   savedevice_xenon.obj
 // void __cdecl SV_DisplaySaveErrorUI(void) 8227fba8 f   savedevice_xenon.obj
 // BOOL __cdecl BuildCleanSavePath(char *, unsigned int, char const *, enum SaveType) 8227fbf8 f   savedevice_xenon.obj
@@ -25,3 +27,4 @@
 // void __cdecl BeginScreenUpdateIfSupported(void) 82280218 f   savedevice_xenon.obj
 // void __cdecl EndScreenUpdateIfSupported(void) 82280220 f   savedevice_xenon.obj
 // void *__cdecl SaveExists_OpenContextFile(char const *) 82280228 f   savedevice_xenon.obj
+

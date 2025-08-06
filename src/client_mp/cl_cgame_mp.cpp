@@ -487,7 +487,7 @@ void __cdecl CL_SubtitlePrint(int32_t localClientNum, const char *text, int32_t 
     CL_ConsolePrint(localClientNum, 4, translationa, duration, lineWidth, 0);
 }
 
-char *__cdecl CL_GetConfigString(int32_t localClientNum, uint32_t configStringIndex)
+const char *__cdecl CL_GetConfigString(int32_t localClientNum, uint32_t configStringIndex)
 {
     clientActive_t *LocalClientGlobals; // [esp+0h] [ebp-4h]
 

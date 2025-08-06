@@ -23,6 +23,9 @@
 #elif KISAK_SP
 #include "cg_servercmds.h"
 #include "cg_ents.h"
+#include <game/savememory.h>
+#include <xanim/xanim_readwrite.h>
+#include <gfx_d3d/r_model.h>
 #endif
 
 const float MYLERP_START = 0.3f;
@@ -3578,9 +3581,9 @@ void __cdecl CG_SetupWeaponDef(int32_t localClientNum)
 {
     char v1; // [esp+3h] [ebp-2225h]
     _BYTE *v2; // [esp+8h] [ebp-2220h]
-    char *v3; // [esp+Ch] [ebp-221Ch]
+    const char *v3; // [esp+Ch] [ebp-221Ch]
     _DWORD dst[129]; // [esp+10h] [ebp-2218h] BYREF
-    char *ConfigString; // [esp+214h] [ebp-2014h]
+    const char *ConfigString; // [esp+214h] [ebp-2014h]
     int32_t iNumFiles; // [esp+218h] [ebp-2010h]
     _BYTE *v7; // [esp+21Ch] [ebp-200Ch]
     _BYTE v8[8196]; // [esp+220h] [ebp-2008h] BYREF
@@ -3732,3 +3735,134 @@ void CG_DisplayViewmodelAnim(int localClientNum)
         DObjDisplayAnim(LocalClientWeaponInfo->viewModelDObj, "");
     }
 }
+
+#ifdef KISAK_SP
+void CG_SaveViewModelAnimTrees(SaveGame *save)
+{
+    MemoryFile *MemoryFile; // r27
+    unsigned int v3; // r31
+    weaponInfo_s *v4; // r30
+    unsigned int NumWeapons; // [sp+50h] [-40h] BYREF
+
+    if (!save)
+        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\cgame\\cg_weapons.cpp", 1049, 0, "%s", "save");
+    NumWeapons = BG_GetNumWeapons();
+    SaveMemory_SaveWrite(&NumWeapons, 4, save);
+    MemoryFile = SaveMemory_GetMemoryFile(save);
+    v3 = 1;
+    if (NumWeapons > 1)
+    {
+        v4 = &cg_weaponsArray[0][1];
+        do
+        {
+            if (v3 >= 0x80)
+                MyAssertHandler(
+                    "c:\\trees\\cod3\\cod3src\\src\\cgame\\cg_weapons.cpp",
+                    1057,
+                    0,
+                    "weapIndex doesn't index ARRAY_COUNT( cg_weaponsArray[0] )\n\t%i not in [0, %i)",
+                    v3,
+                    128);
+            if (v4->hasAnimTree)
+            {
+                if (!v4->viewModelDObj)
+                    Com_Error(ERR_DROP, "CG_SaveViewModelAnimTrees: viewmodel has no dobj");
+                XAnimSaveAnimTree(v4->viewModelDObj, MemoryFile);
+            }
+            ++v3;
+            ++v4;
+        } while (v3 < NumWeapons);
+    }
+}
+
+void CG_LoadViewModelAnimTrees(SaveGame *save, const playerState_s *ps)
+{
+    unsigned int NumWeapons; // r3
+    int viewmodelIndex; // r11
+    const char *ConfigString; // r3
+    const char *v7; // r31
+    XModel *v8; // r22
+    MemoryFile *MemoryFile; // r23
+    unsigned int v10; // r29
+    weaponInfo_s *v11; // r31
+    WeaponDef *WeaponDef; // r30
+    XAnimTree_s *Tree; // r30
+    unsigned int v14; // [sp+50h] [-70h] BYREF
+
+    if (!save)
+        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\cgame\\cg_weapons.cpp", 1083, 0, "%s", "save");
+    if (!ps)
+        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\cgame\\cg_weapons.cpp", 1084, 0, "%s", "ps");
+    SaveMemory_LoadRead(&v14, 4, save);
+    if (v14 > BG_GetNumWeapons())
+    {
+        NumWeapons = BG_GetNumWeapons();
+        MyAssertHandler(
+            "c:\\trees\\cod3\\cod3src\\src\\cgame\\cg_weapons.cpp",
+            1087,
+            0,
+            "numWeapons <= BG_GetNumWeapons()\n\t%i, %i",
+            v14,
+            NumWeapons);
+    }
+    viewmodelIndex = ps->viewmodelIndex;
+    if (viewmodelIndex <= 0)
+    {
+        v8 = 0;
+    }
+    else
+    {
+        ConfigString = CL_GetConfigString(0, viewmodelIndex + 1155);
+        v7 = ConfigString;
+        if (!ConfigString || !*ConfigString)
+            MyAssertHandler(
+                "c:\\trees\\cod3\\cod3src\\src\\cgame\\cg_weapons.cpp",
+                1094,
+                0,
+                "%s",
+                "handModelName && handModelName[0]");
+        v8 = R_RegisterModel(v7);
+    }
+    MemoryFile = SaveMemory_GetMemoryFile(save);
+    v10 = 1;
+    if (v14 > 1)
+    {
+        v11 = &cg_weaponsArray[0][1];
+        do
+        {
+            if (v11->hasAnimTree)
+            {
+                CG_RegisterWeapon(0, v10);
+                if (!v11->viewModelDObj)
+                {
+                    if (v8)
+                        ChangeViewmodelDobj(
+                            0,
+                            v10,
+                            ps->weaponmodels[v10],
+                            v8,
+                            v11->gogglesModel,
+                            v11->rocketModel,
+                            v11->knifeModel,
+                            1);
+                    if (!v11->viewModelDObj)
+                    {
+                        WeaponDef = BG_GetWeaponDef(v10);
+                        if (!WeaponDef)
+                            MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\cgame\\cg_weapons.cpp", 1119, 0, "%s", "weapDef");
+                        Com_Error(ERR_DROP, "CG_LoadViewModelAnimTrees: viewmodel '%s' has no dobj", WeaponDef->szInternalName);
+                    }
+                }
+                Tree = DObjGetTree(v11->viewModelDObj);
+                if (!Tree)
+                    MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\cgame\\cg_weapons.cpp", 1124, 0, "%s", "animTree");
+                XAnimClearTree(Tree);
+                XAnimLoadAnimTree(v11->viewModelDObj, MemoryFile);
+            }
+            ++v10;
+            ++v11;
+        } while (v10 < v14);
+    }
+}
+
+#endif

@@ -464,6 +464,7 @@ void __cdecl Phys_AddJitterRegion(
 void __cdecl Phys_ObjSetContactCentroid(dxBody *id, const float *worldPos);
 #ifdef KISAK_SP
 void Phys_SetGravityDir(float *down);
+void Phys_ArchiveState(struct MemoryFile *memFile);
 #endif
 
 // phys_world_collision

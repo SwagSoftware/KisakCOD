@@ -498,6 +498,11 @@ char __cdecl Bullet_Trace(
     BulletTraceResults *br,
     uint32_t lastSurfaceType);
 
+#ifdef KISAK_SP
+void CG_SaveViewModelAnimTrees(struct SaveGame *save);
+void CG_LoadViewModelAnimTrees(struct SaveGame *save, const struct playerState_s *ps);
+#endif
+
 
 
 // cg_localents

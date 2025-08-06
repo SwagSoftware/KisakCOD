@@ -815,7 +815,7 @@ void __cdecl CL_CM_LoadMap(char *mapname);
 void __cdecl CL_ShutdownCGame(int32_t localClientNum);
 bool __cdecl CL_DObjCreateSkelForBone(DObj_s *obj, int32_t boneIndex);
 void __cdecl CL_SubtitlePrint(int32_t localClientNum, const char *text, int32_t duration, int32_t lineWidth);
-char *__cdecl CL_GetConfigString(int32_t localClientNum, uint32_t configStringIndex);
+const char *__cdecl CL_GetConfigString(int32_t localClientNum, uint32_t configStringIndex);
 snd_alias_t *__cdecl CL_PickSoundAlias(const char *aliasname);
 void __cdecl CL_RenderScene(const refdef_s *fd);
 void __cdecl CL_DrawStretchPicPhysical(

@@ -488,6 +488,7 @@ int __cdecl SV_GameCommand()
 #include <client/cl_demo.h>
 #include "sv_public.h"
 #include <win32/win_local.h>
+#include <client/cl_input.h>
 
 void __cdecl SV_CheckLoadLevel(SaveGame *save)
 {
@@ -677,7 +678,12 @@ const char *SV_Archived_Dvar_GetVariantString(const char *dvarName)
     return VariantString;
 }
 
-#endif
+void SV_SetUsercmdButtonsWeapons(int buttons, int weapon, int offhand)
+{
+    CL_SetUsercmdButtonsWeapons(buttons, weapon, offhand);
+}
+
+#endif // KISAK_SP
 
 #ifdef KISAK_MP
 bool __cdecl SV_inSnapshot(const float *origin, int iEntityNum)
@@ -905,4 +911,4 @@ void __cdecl SV_RestartGameProgs(int savepersist)
     SV_InitGameVM(1, savepersist);
 }
 
-#endif
+#endif // KISAK_MP

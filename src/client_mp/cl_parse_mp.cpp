@@ -246,7 +246,7 @@ void __cdecl CL_SystemInfoChanged(int localClientNum)
 
 void __cdecl CL_ParseMapCenter(int localClientNum)
 {
-    char *mapCenterString; // [esp+0h] [ebp-4h]
+    const char *mapCenterString; // [esp+0h] [ebp-4h]
 
     mapCenterString = CL_GetConfigString(localClientNum, 0xCu);
     sscanf(mapCenterString, "%f %f %f", cls.mapCenter, &cls.mapCenter[1], &cls.mapCenter[2]);

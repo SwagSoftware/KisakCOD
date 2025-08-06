@@ -1608,7 +1608,7 @@ void __cdecl Script_ConditionalResponseHandler(
     int Int; // eax
     const char *v5; // eax
     int iIndex; // [esp+0h] [ebp-C10h]
-    char *pszName; // [esp+4h] [ebp-C0Ch]
+    const char *pszName; // [esp+4h] [ebp-C0Ch]
     char testValue[1024]; // [esp+8h] [ebp-C08h] BYREF
     char dvarName[1024]; // [esp+408h] [ebp-808h] BYREF
     char command[1024]; // [esp+808h] [ebp-408h] BYREF
@@ -1787,7 +1787,7 @@ void __cdecl Script_ScriptMenuResponse(UiContext *dc, itemDef_s *item, const cha
     int Int; // eax
     const char *v4; // eax
     int iIndex; // [esp+0h] [ebp-410h]
-    char *pszName; // [esp+4h] [ebp-40Ch]
+    const char *pszName; // [esp+4h] [ebp-40Ch]
     char val[1028]; // [esp+8h] [ebp-408h] BYREF
 
     if (UI_AllowScriptMenuResponse(dc->localClientNum) && String_Parse(args, val, 1024))

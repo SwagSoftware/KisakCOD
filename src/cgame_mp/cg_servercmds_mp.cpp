@@ -33,7 +33,7 @@ $59835072FC2CD3936CE4A4C9F556010B cg_waitingScriptMenu[1];
 
 void __cdecl CG_ParseServerInfo(int32_t localClientNum)
 {
-    char *info; // [esp+0h] [ebp-Ch]
+    const char *info; // [esp+0h] [ebp-Ch]
     const char *mapname; // [esp+8h] [ebp-4h]
     cgs_t *cgs;
     info = CL_GetConfigString(localClientNum, 0);
@@ -51,9 +51,9 @@ void __cdecl CG_ParseServerInfo(int32_t localClientNum)
 
 void __cdecl CG_ParseCodInfo(int32_t localClientNum)
 {
-    char *key; // [esp+4h] [ebp-Ch]
+    const char *key; // [esp+4h] [ebp-Ch]
     int32_t i; // [esp+8h] [ebp-8h]
-    char *value; // [esp+Ch] [ebp-4h]
+    const char *value; // [esp+Ch] [ebp-4h]
     cgs_t *cgs;
 
     cgs = CG_GetLocalClientStaticGlobals(localClientNum);
@@ -126,10 +126,7 @@ void __cdecl CG_ParseFog(int32_t localClientNum)
 
 void __cdecl CG_SetConfigValues(int32_t localClientNum)
 {
-    char *ConfigString; // eax
-    char *v2; // eax
-    char *v3; // eax
-    char *v4; // eax
+    const char *ConfigString; // eax
     int32_t i; // [esp+8h] [ebp-4h]
     int32_t ia; // [esp+8h] [ebp-4h]
     int32_t ib; // [esp+8h] [ebp-4h]
@@ -141,8 +138,7 @@ void __cdecl CG_SetConfigValues(int32_t localClientNum)
     CL_ParseMapCenter(localClientNum);
     ConfigString = CL_GetConfigString(localClientNum, 4u);
     cgameGlob->teamScores[1] = atoi(ConfigString);
-    v2 = CL_GetConfigString(localClientNum, 5u);
-    cgameGlob->teamScores[2] = atoi(v2);
+    cgameGlob->teamScores[2] = atoi(CL_GetConfigString(localClientNum, 5));
     if (localClientNum)
         MyAssertHandler(
             "c:\\trees\\cod3\\src\\cgame_mp\\cg_local_mp.h",
@@ -156,13 +152,11 @@ void __cdecl CG_SetConfigValues(int32_t localClientNum)
         CG_PrecacheScriptMenu(localClientNum, i);
     for (ia = 2259; ia < 2267; ++ia)
     {
-        v3 = CL_GetConfigString(localClientNum, ia);
-        Material_RegisterHandle(v3, 7);
+        Material_RegisterHandle(CL_GetConfigString(localClientNum, ia), 7);
     }
     for (ib = 2267; ib < 2282; ++ib)
     {
-        v4 = CL_GetConfigString(localClientNum, ib);
-        Material_RegisterHandle(v4, 7);
+        Material_RegisterHandle(CL_GetConfigString(localClientNum, ib), 7);
     }
     for (ic = 2003; ic < 2258; ++ic)
         CG_RegisterServerMaterial(localClientNum, ic);
@@ -173,7 +167,7 @@ void __cdecl CG_SetConfigValues(int32_t localClientNum)
 
 void __cdecl CG_ParseGameEndTime(int32_t localClientNum)
 {
-    char *ConfigString; // eax
+    const char *ConfigString; // eax
 
     ConfigString = CL_GetConfigString(localClientNum, 0xBu);
     CG_GetLocalClientStaticGlobals(localClientNum)->gameEndTime = atoi(ConfigString);
@@ -181,7 +175,7 @@ void __cdecl CG_ParseGameEndTime(int32_t localClientNum)
 
 void __cdecl CG_PrecacheScriptMenu(int32_t localClientNum, int32_t configStringIndex)
 {
-    char *configString; // [esp+0h] [ebp-4h]
+    const char *configString; // [esp+0h] [ebp-4h]
 
     if (configStringIndex < 1970 || configStringIndex >= 2002)
         MyAssertHandler(
@@ -200,7 +194,7 @@ void __cdecl CG_PrecacheScriptMenu(int32_t localClientNum, int32_t configStringI
 
 void __cdecl CG_RegisterServerMaterial(int32_t localClientNum, int32_t configStringIndex)
 {
-    char *materialName; // [esp+0h] [ebp-4h]
+    const char *materialName; // [esp+0h] [ebp-4h]
 
     if (configStringIndex < 2002 || configStringIndex >= 2258)
         MyAssertHandler(
@@ -711,7 +705,7 @@ void __cdecl CG_ParseScores(int32_t localClientNum)
     int32_t i; // [esp+18h] [ebp-Ch]
     int32_t ia; // [esp+18h] [ebp-Ch]
     int32_t clientNum; // [esp+1Ch] [ebp-8h]
-    char *pszIcon; // [esp+20h] [ebp-4h]
+    const char *pszIcon; // [esp+20h] [ebp-4h]
     cg_s *cgameGlob;
 
     cgameGlob = CG_GetLocalClientGlobals(localClientNum);
@@ -858,7 +852,6 @@ void __cdecl CG_ConfigStringModified(int32_t localClientNum)
 {
     const char *v1; // eax
     shellshock_parms_t *ShellshockParms; // eax
-    char *ConfigString; // eax
     clientActive_t *LocalClientGlobals; // [esp+0h] [ebp-1Ch]
     int32_t time; // [esp+4h] [ebp-18h] BYREF
     int32_t serverId; // [esp+8h] [ebp-14h] BYREF
@@ -929,8 +922,7 @@ void __cdecl CG_ConfigStringModified(int32_t localClientNum)
                             {
                                 if (num >= 2259 && num < 2267 || num >= 2267 && num < 2282)
                                 {
-                                    ConfigString = CL_GetConfigString(localClientNum, num);
-                                    Material_RegisterHandle(ConfigString, 7);
+                                    Material_RegisterHandle(CL_GetConfigString(localClientNum, num), 7);
                                 }
                                 else if (num < 2002 || num >= 2258)
                                 {
@@ -1093,30 +1085,24 @@ void __cdecl CG_AddToTeamChat(int32_t localClientNum, const char *str)
 
 void __cdecl CG_OpenScriptMenu(int32_t localClientNum)
 {
-    const char *v1; // eax
-    const char *v2; // eax
-    const char *v3; // eax
     int32_t v4; // eax
     const char *v5; // eax
-    char *menuName; // [esp+10h] [ebp-10h]
+    const char *menuName; // [esp+10h] [ebp-10h]
     uint32_t menuIndex; // [esp+14h] [ebp-Ch]
     bool useMouse; // [esp+1Bh] [ebp-5h]
 
-    v1 = Cmd_Argv(1);
-    menuIndex = atoi(v1);
+    menuIndex = atoi(Cmd_Argv(1));
     if (menuIndex >= 0x20)
     {
         Com_Printf(14, "Server tried to open a bad script menu index: %i\n", menuIndex);
-        v2 = va("cmd mr %i bad\n", menuIndex);
-        Cbuf_AddText(localClientNum, v2);
+        Cbuf_AddText(localClientNum, va("cmd mr %i bad\n", menuIndex));
         return;
     }
     menuName = CL_GetConfigString(localClientNum, menuIndex + 1970);
     if (!*menuName)
     {
         Com_Printf(14, "Server tried to open a non-loaded script menu index: %i\n", menuIndex);
-        v3 = va("cmd mr %i bad\n", menuIndex);
-        Cbuf_AddText(localClientNum, v3);
+        Cbuf_AddText(localClientNum, va("cmd mr %i bad\n", menuIndex));
         return;
     }
     if (Cmd_Argc() > 2 && Cmd_Argv(2) && *Cmd_Argv(2))
@@ -1316,16 +1302,14 @@ void CG_DeactivateChannelVolCmd()
 
 char __cdecl LocalSound(int32_t localClientNum)
 {
-    const char *v2; // eax
-    char *aliasName; // [esp+0h] [ebp-Ch]
+    const char *aliasName; // [esp+0h] [ebp-Ch]
     int32_t index; // [esp+4h] [ebp-8h]
     int32_t argc; // [esp+8h] [ebp-4h]
 
     argc = Cmd_Argc();
     if (argc == 2)
     {
-        v2 = Cmd_Argv(1);
-        index = atoi(v2);
+        index = atoi(Cmd_Argv(1));
         if (index > 0 && index <= 256)
         {
             aliasName = CL_GetConfigString(localClientNum, index + 1342);
@@ -1347,14 +1331,12 @@ char __cdecl LocalSound(int32_t localClientNum)
 
 void __cdecl LocalSoundStop(int32_t localClientNum)
 {
-    const char *v1; // eax
-    char *aliasName; // [esp+0h] [ebp-8h]
+    const char *aliasName; // [esp+0h] [ebp-8h]
     int32_t index; // [esp+4h] [ebp-4h]
 
     if (Cmd_Argc() == 2)
     {
-        v1 = Cmd_Argv(1);
-        index = atoi(v1);
+        index = atoi(Cmd_Argv(1));
         if (index > 0 && index <= 256)
         {
             aliasName = CL_GetConfigString(localClientNum, index + 1342);
