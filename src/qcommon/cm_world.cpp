@@ -39,9 +39,10 @@ struct cm_world_t // sizeof=0x701C
 {                                       // ...
     float mins[3];                      // ...
     float maxs[3];                      // ...
+#ifdef KISAK_SP
+    bool lockTree;
+#endif
     unsigned __int16 freeHead;          // ...
-    // padding byte
-    // padding byte
     worldSector_s sectors[1024];        // ...
 };
 
@@ -1243,9 +1244,40 @@ int CM_SaveWorld(unsigned __int8 *buf)
     return 12290;
 }
 
+#ifdef KISAK_SP
+
 void CM_ValidateWorld()
 {
     // KISAKTODO
     //CM_ValidateTree(1u);
     //DynEnt_ValidateCollWorld();
 }
+
+void CM_LoadWorld(unsigned __int8 *buf)
+{
+    unsigned __int8 *v2; // r29
+    worldTree_s *p_tree; // r31
+    void *v4; // r3
+
+    if (!buf)
+        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\qcommon\\cm_world.cpp", 225, 0, "%s", "buf");
+    CM_ClearWorld();
+    v2 = buf + 2;
+    cm_world.freeHead = *(_WORD *)buf;
+    p_tree = &cm_world.sectors[0].tree;
+    do
+    {
+        v4 = memcpy(p_tree, v2, sizeof(worldTree_s));
+        p_tree = (worldTree_s *)((char *)p_tree + 28);
+        v2 += 12;
+    } while ((int)p_tree < (int)&cmd_args.localClientNum[2]);
+    cm_world.lockTree = 1; // KISAKTODOSP more lockTree xref?
+    CM_LinkAllStaticModels();
+}
+
+void CM_UnlockTree()
+{
+    cm_world.lockTree = 0;
+}
+
+#endif // KISAK_SP

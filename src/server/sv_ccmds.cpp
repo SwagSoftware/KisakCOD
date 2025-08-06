@@ -3,9 +3,204 @@
 #endif
 
 #include "server.h"
+#include <qcommon/cmd.h>
+#include <game/g_local.h>
+#include <game/savememory.h>
+#include "sv_game.h"
+#include <game/g_main.h>
+#include <sound/snd_public.h>
+#include <qcommon/com_playerprofile.h>
+#include <script/scr_vm.h>
+#include <script/scr_memorytree.h>
+#include <game/savedevice.h>
+#include <ui/ui.h>
+#include <universal/com_files.h>
+#include "sv_public.h"
 
 int sv_loadScripts;
 int sv_map_restart;
+
+char sv_save_filename[64];
+
+const char ERRMSG_PLURAL[85] =
+{
+  '\x15',
+  '\"',
+  '%',
+  's',
+  '\"',
+  '\n',
+  '-',
+  '\n',
+  'T',
+  'h',
+  'e',
+  'r',
+  'e',
+  ' ',
+  'w',
+  'e',
+  'r',
+  'e',
+  ' ',
+  '%',
+  'u',
+  ' ',
+  'e',
+  'r',
+  'r',
+  'o',
+  'r',
+  's',
+  ' ',
+  'w',
+  'h',
+  'e',
+  'n',
+  ' ',
+  'l',
+  'o',
+  'a',
+  'd',
+  'i',
+  'n',
+  'g',
+  ' ',
+  't',
+  'h',
+  'i',
+  's',
+  ' ',
+  'm',
+  'a',
+  'p',
+  '.',
+  '\n',
+  'S',
+  'e',
+  'e',
+  ' ',
+  't',
+  'h',
+  'e',
+  ' ',
+  'c',
+  'o',
+  'n',
+  's',
+  'o',
+  'l',
+  'e',
+  ' ',
+  'l',
+  'o',
+  'g',
+  ' ',
+  'f',
+  'o',
+  'r',
+  ' ',
+  'd',
+  'e',
+  't',
+  'a',
+  'i',
+  'l',
+  's',
+  '.',
+  '\0'
+};
+
+
+
+const char ERRMSG_SINGLE[83] =
+{
+  '\x15',
+  '\"',
+  '%',
+  's',
+  '\"',
+  '\n',
+  '-',
+  '\n',
+  'T',
+  'h',
+  'e',
+  'r',
+  'e',
+  ' ',
+  'w',
+  'a',
+  's',
+  ' ',
+  '%',
+  'u',
+  ' ',
+  'e',
+  'r',
+  'r',
+  'o',
+  'r',
+  ' ',
+  'w',
+  'h',
+  'e',
+  'n',
+  ' ',
+  'l',
+  'o',
+  'a',
+  'd',
+  'i',
+  'n',
+  'g',
+  ' ',
+  't',
+  'h',
+  'i',
+  's',
+  ' ',
+  'm',
+  'a',
+  'p',
+  '.',
+  '\n',
+  'S',
+  'e',
+  'e',
+  ' ',
+  't',
+  'h',
+  'e',
+  ' ',
+  'c',
+  'o',
+  'n',
+  's',
+  'o',
+  'l',
+  'e',
+  ' ',
+  'l',
+  'o',
+  'g',
+  ' ',
+  'f',
+  'o',
+  'r',
+  ' ',
+  'd',
+  'e',
+  't',
+  'a',
+  'i',
+  'l',
+  's',
+  '.',
+  '\0'
+};
+
+
 
 void __cdecl SV_SetValuesFromSkill()
 {
@@ -85,41 +280,44 @@ void SV_DifficultyFu()
 
 int __cdecl ReadSaveHeader(const char *filename, SaveHeader *header)
 {
-    int v5; // r31
-    void *v6; // [sp+50h] [-20h] BYREF
-
-    if (!filename)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\server\\sv_ccmds.cpp", 143, 0, "%s", "filename");
-    MemCard_SetUseDevDrive(g_useDevSaveArea);
-    if (OpenDevice(filename, &v6) >= 0)
-    {
-        v5 = ReadFromDevice(header, 1108, v6);
-        CloseDevice(v6);
-        MemCard_SetUseDevDrive(0);
-        if (v5 == 1108)
-        {
-            if (header->saveVersion == 287)
-            {
-                return 1;
-            }
-            else
-            {
-                Com_Printf(15, "Bad save version %d, expecting %d\n", header->saveVersion, 287);
-                return 0;
-            }
-        }
-        else
-        {
-            Com_Printf(15, "Bad save read.\n");
-            return 0;
-        }
-    }
-    else
-    {
-        MemCard_SetUseDevDrive(0);
-        Com_Printf(15, "Can't find savegame %s\n", filename);
-        return 0;
-    }
+// KISAKSAVE
+    //int v5; // r31
+    //void *v6; // [sp+50h] [-20h] BYREF
+    //
+    //if (!filename)
+    //    MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\server\\sv_ccmds.cpp", 143, 0, "%s", "filename");
+    //MemCard_SetUseDevDrive(g_useDevSaveArea);
+    //if (OpenDevice(filename, &v6) >= 0)
+    //{
+    //    v5 = ReadFromDevice(header, 1108, v6);
+    //    CloseDevice(v6);
+    //    MemCard_SetUseDevDrive(0);
+    //    if (v5 == 1108)
+    //    {
+    //        if (header->saveVersion == 287)
+    //        {
+    //            return 1;
+    //        }
+    //        else
+    //        {
+    //            Com_Printf(15, "Bad save version %d, expecting %d\n", header->saveVersion, 287);
+    //            return 0;
+    //        }
+    //    }
+    //    else
+    //    {
+    //        Com_Printf(15, "Bad save read.\n");
+    //        return 0;
+    //    }
+    //}
+    //else
+    //{
+    //    MemCard_SetUseDevDrive(0);
+    //    Com_Printf(15, "Can't find savegame %s\n", filename);
+    //    return 0;
+    //}
+    Com_Printf(15, "##KISAKSAVE n");
+    return 0;
 }
 
 int __cdecl ExtractMapStringFromSaveGame(const char *filename, char *mapname)
@@ -212,7 +410,8 @@ void __cdecl SV_MapRestart(int savegame, int loadScripts)
         if (loadScripts)
             Con_Close(0);
         v5 = Sys_Milliseconds();
-        SV_RestartGameProgs(v5, savegame, &v6, loadScripts);
+        //SV_RestartGameProgs(v5, savegame, &v6, loadScripts);
+        SV_RestartGameProgs(level.savepersist);
         CL_Restart();
         SV_CheckLoadLevel(v6);
         Dvar_SetInt(cl_paused, integer);
@@ -240,8 +439,8 @@ int __cdecl CheckForSaveGame(char *mapname, char *filename)
 {
     char *v4; // r11
     int v5; // r10
-    SaveGame *SaveHandle; // r31
-    const SaveHeader *Header; // r31
+    SaveGame *lastCommittedSave; // r31
+    const SaveHeader *lastCommittedHeader; // r31
     char *v8; // r11
     int v9; // r10
     char *v11; // r11
@@ -261,17 +460,17 @@ int __cdecl CheckForSaveGame(char *mapname, char *filename)
     sv_save_filename[0] = 0;
     if ((unsigned __int8)SaveMemory_IsCommittedSaveAvailable(filename, sv.checksum))
     {
-        SaveHandle = SaveMemory_GetSaveHandle(2);
-        if (!SaveHandle)
+        lastCommittedSave = SaveMemory_GetSaveHandle(2);
+        if (!lastCommittedSave)
             MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\server\\sv_ccmds.cpp", 406, 0, "%s", "lastCommittedSave");
-        Header = SaveMemory_GetHeader(SaveHandle);
-        if (!Header)
+        lastCommittedHeader = SaveMemory_GetHeader(lastCommittedSave);
+        if (!lastCommittedHeader)
             MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\server\\sv_ccmds.cpp", 408, 0, "%s", "lastCommittedHeader");
-        v8 = Header->mapName;
+        v8 = (char*)lastCommittedHeader->mapName;
         do
         {
             v9 = (unsigned __int8)*v8;
-            (v8++)[mapname - Header->mapName] = v9;
+            (v8++)[mapname - lastCommittedHeader->mapName] = v9;
         } while (v9);
         G_SetPendingLoadName(filename);
         return 1;
@@ -378,7 +577,7 @@ void __cdecl SV_NextLevel_f()
 void __cdecl SV_LoadGame_f()
 {
     int nesting; // r7
-    char *v1; // r31
+    const char *v1; // r31
     int v2; // r11
     char *v3; // r11
     unsigned int v5; // r3
@@ -439,104 +638,108 @@ void __cdecl SV_LoadGame_f()
 
 void __cdecl SV_ForceSelectSaveDevice_f()
 {
-    int v0; // r31
-
-    v0 = CL_ControllerIndexFromClientNum(0);
-    if (Gamer//Profile_IsProfileLoggedIn(v0) )
-        {
-          UI_ShowReadingSaveDevicePopup();
-          Memcard_SelectSaveDevice(v0, 1, 1572864);
-          UI_HideReadingSaveDevicePopup();
-        }
+    // KISAKSAVE?
+    //int v0; // r31
+    //
+    //v0 = CL_ControllerIndexFromClientNum(0);
+    //if (GamerProfile_IsProfileLoggedIn(v0) )
+    //{
+    //    UI_ShowReadingSaveDevicePopup();
+    //    Memcard_SelectSaveDevice(v0, 1, 1572864);
+    //    UI_HideReadingSaveDevicePopup();
+    //}
 }
 
 void __cdecl SV_SelectSaveDevice_f()
 {
-    int v0; // r30
-    bool v1; // r3
-
-    v0 = CL_ControllerIndexFromClientNum(0);
-    Dvar_SetBool(sv_saveGameAvailable, 0);
-    if (Gamer//Profile_IsProfileLoggedIn(v0) )
-        {
-          if (CL_IsLocalClientInGame(0))
-          {
-            Com_Printf(
-              0,
-              "select_save_device is not available while a game is running - use force_select_save_device instead\n");
-          }
-          else
-          {
-            UI_ShowReadingSaveDevicePopup();
-            if (Memcard_IsDeviceAvailable(v0))
-            {
-              v1 = SaveExists(CONSOLE_DEFAULT_SAVE_NAME);
-              Dvar_SetBool(sv_saveGameAvailable, v1);
-            }
-            else
-            {
-              Memcard_SelectSaveDevice(v0, 0, 1572864);
-              Memcard_WaitForSaveDeviceSelection();
-            }
-            UI_HideReadingSaveDevicePopup();
-          }
-        }
+    // KISAKSAVE?
+    //int v0; // r30
+    //bool v1; // r3
+    //
+    //v0 = CL_ControllerIndexFromClientNum(0);
+    //Dvar_SetBool(sv_saveGameAvailable, 0);
+    //if (GamerProfile_IsProfileLoggedIn(v0) )
+    //    {
+    //      if (CL_IsLocalClientInGame(0))
+    //      {
+    //        Com_Printf(
+    //          0,
+    //          "select_save_device is not available while a game is running - use force_select_save_device instead\n");
+    //      }
+    //      else
+    //      {
+    //        UI_ShowReadingSaveDevicePopup();
+    //        if (Memcard_IsDeviceAvailable(v0))
+    //        {
+    //          v1 = SaveExists(CONSOLE_DEFAULT_SAVE_NAME);
+    //          Dvar_SetBool(sv_saveGameAvailable, v1);
+    //        }
+    //        else
+    //        {
+    //          Memcard_SelectSaveDevice(v0, 0, 1572864);
+    //          Memcard_WaitForSaveDeviceSelection();
+    //        }
+    //        UI_HideReadingSaveDevicePopup();
+    //      }
+    //    }
 }
 
 void __cdecl CheckSaveExists(const char *filename)
 {
-    __int64 v2; // r10
-    __int64 v3; // r8
-    __int64 v4; // r6
-    int v5; // [sp+8h] [-58h]
-    int v6; // [sp+Ch] [-54h]
-    int v7; // [sp+10h] [-50h]
-    int v8; // [sp+14h] [-4Ch]
-    int v9; // [sp+18h] [-48h]
-    int v10; // [sp+1Ch] [-44h]
-    int v11; // [sp+20h] [-40h]
-    int v12; // [sp+24h] [-3Ch]
-
-    if (!(unsigned __int8)SaveMemory_IsCommittedSaveAvailable(filename, sv.checksum) && !SaveExists(filename))
-    {
-        HIDWORD(v4) = &unk_8207A214;
-        sv_save_filename[0] = 0;
-        sv_map_restart = 0;
-        LODWORD(v2) = &g_msgBuf[632];
-        sv_loadScripts = 0;
-        G_SaveError(ERR_DROP, SAVE_ERROR_MISSING_DEVICE, v4, v3, v2, v5, v6, v7, v8, v9, v10, v11, v12);
-    }
+    // KISAKSAVE
+    //__int64 v2; // r10
+    //__int64 v3; // r8
+    //__int64 v4; // r6
+    //int v5; // [sp+8h] [-58h]
+    //int v6; // [sp+Ch] [-54h]
+    //int v7; // [sp+10h] [-50h]
+    //int v8; // [sp+14h] [-4Ch]
+    //int v9; // [sp+18h] [-48h]
+    //int v10; // [sp+1Ch] [-44h]
+    //int v11; // [sp+20h] [-40h]
+    //int v12; // [sp+24h] [-3Ch]
+    //
+    //if (!(unsigned __int8)SaveMemory_IsCommittedSaveAvailable(filename, sv.checksum) && !SaveExists(filename))
+    //{
+    //    HIDWORD(v4) = &unk_8207A214;
+    //    sv_save_filename[0] = 0;
+    //    sv_map_restart = 0;
+    //    LODWORD(v2) = &g_msgBuf[632];
+    //    sv_loadScripts = 0;
+    //    G_SaveError(ERR_DROP, SAVE_ERROR_MISSING_DEVICE, v4, v3, v2, v5, v6, v7, v8, v9, v10, v11, v12);
+    //}
 }
 
 void __cdecl SV_LoadGameContinue_f()
 {
-    __int64 v0; // r10
-    __int64 v1; // r8
-    __int64 v2; // r6
-    int v3; // [sp+8h] [-58h]
-    int v4; // [sp+Ch] [-54h]
-    int v5; // [sp+10h] [-50h]
-    int v6; // [sp+14h] [-4Ch]
-    int v7; // [sp+18h] [-48h]
-    int v8; // [sp+1Ch] [-44h]
-    int v9; // [sp+20h] [-40h]
-    int v10; // [sp+24h] [-3Ch]
-
-    if (SV_IsDemoPlaying() && SV_DemoHasMark())
-    {
-        SV_DemoRestart_f();
-    }
-    else
-    {
-        g_useDevSaveArea = 0;
-        I_strncpyz(sv_save_filename, CONSOLE_DEFAULT_SAVE_NAME, 64);
-        CheckSaveExists(sv_save_filename);
-        if (!com_sv_running->current.enabled && !SV_CheckLoadGame())
-        {
-            HIDWORD(v2) = &unk_8207A214;
-            G_SaveError(ERR_DROP, SAVE_ERROR_MISSING_DEVICE, v2, v1, v0, v3, v4, v5, v6, v7, v8, v9, v10);
-        }
-    }
+    // KISAKSAVE
+    //__int64 v0; // r10
+    //__int64 v1; // r8
+    //__int64 v2; // r6
+    //int v3; // [sp+8h] [-58h]
+    //int v4; // [sp+Ch] [-54h]
+    //int v5; // [sp+10h] [-50h]
+    //int v6; // [sp+14h] [-4Ch]
+    //int v7; // [sp+18h] [-48h]
+    //int v8; // [sp+1Ch] [-44h]
+    //int v9; // [sp+20h] [-40h]
+    //int v10; // [sp+24h] [-3Ch]
+    //
+    //if (SV_IsDemoPlaying() && SV_DemoHasMark())
+    //{
+    //    SV_DemoRestart_f();
+    //}
+    //else
+    //{
+    //    g_useDevSaveArea = 0;
+    //    I_strncpyz(sv_save_filename, CONSOLE_DEFAULT_SAVE_NAME, 64);
+    //    CheckSaveExists(sv_save_filename);
+    //    if (!com_sv_running->current.enabled && !SV_CheckLoadGame())
+    //    {
+    //        HIDWORD(v2) = &unk_8207A214;
+    //        G_SaveError(ERR_DROP, SAVE_ERROR_MISSING_DEVICE, v2, v1, v0, v3, v4, v5, v6, v7, v8, v9, v10);
+    //    }
+    //}
 }
 
 // attributes: thunk
@@ -745,7 +948,7 @@ LABEL_2:
     Scr_DumpScriptVariables(v0, v25, v26, v3, v2, v5, v6, v4);
 }
 
-void SV_Script//Profile_f()
+void SV_ScriptProfile_f()
 {
   int nesting; // r7
   const char *v1; // r3
@@ -800,13 +1003,13 @@ void SV_ScriptBuiltin_f()
 void SV_ScriptProfileReset_f()
 {
     //Profile_ClearScriptCounters();
-    Scr_ScriptProfileTimesReset();
+    //Scr_ScriptProfileTimesReset();
 }
 
 // attributes: thunk
 void __cdecl SV_ScriptProfileFile_f()
 {
-    Scr_PrintScriptProfileTimesForScriptFile();
+    //Scr_PrintScriptProfileTimesForScriptFile();
 }
 
 // attributes: thunk
@@ -915,8 +1118,8 @@ void SV_Map_f()
         I_strncpyz(v15, v14, 64);
         if (!(unsigned __int8)ExtractMapStringFromSaveGame(v15, v14))
         {
-            HIDWORD(v4) = &unk_8207A5B4;
-            G_SaveError(ERR_DROP, SAVE_ERROR_MISSING_DEVICE, v4, v3, v2, v6, v7, v8, v9, v10, v11, v12, v13);
+            //HIDWORD(v4) = &unk_8207A5B4;
+            G_SaveError(ERR_DROP, SAVE_ERROR_MISSING_DEVICE, "Unable to extract map string name from save");
         }
     }
     Dvar_SetBool(sv_cheats, 1);
@@ -926,6 +1129,75 @@ void SV_Map_f()
     ShowLoadErrorsSummary(v14, com_errorPrintsCount, v5);
 }
 
+cmd_function_s SV_NextLevel_f_VAR;
+cmd_function_s SV_NextLevel_f_VAR_SERVER;
+cmd_function_s SV_SelectSaveDevice_f_VAR;
+cmd_function_s SV_SelectSaveDevice_f_VAR_SERVER;
+cmd_function_s SV_ForceSelectSaveDevice_f_VAR;
+cmd_function_s SV_ForceSelectSaveDevice_f_VAR_SERVER;
+cmd_function_s SV_LoadGameContinue_f_VAR;
+cmd_function_s SV_LoadGameContinue_f_VAR_SERVER;
+cmd_function_s SV_ScriptUsage_f_VAR;
+cmd_function_s SV_ScriptUsage_f_VAR_SERVER;
+cmd_function_s SV_ScriptVarUsage_f_VAR;
+cmd_function_s SV_ScriptVarUsage_f_VAR_SERVER;
+cmd_function_s SV_DifficultyEasy_VAR;
+cmd_function_s SV_DifficultyEasy_VAR_SERVER;
+cmd_function_s SV_DifficultyMedium_VAR;
+cmd_function_s SV_DifficultyMedium_VAR_SERVER;
+cmd_function_s SV_DifficultyHard_VAR;
+cmd_function_s SV_DifficultyHard_VAR_SERVER;
+cmd_function_s SV_DifficultyFu_VAR;
+cmd_function_s SV_DifficultyFu_VAR_SERVER;
+cmd_function_s SV_ScriptProfile_f_VAR;
+cmd_function_s SV_ScriptProfile_f_VAR_SERVER;
+cmd_function_s SV_ScriptBuiltin_f_VAR;
+cmd_function_s SV_ScriptBuiltin_f_VAR_SERVER;
+cmd_function_s SV_ScriptProfileReset_f_VAR;
+cmd_function_s SV_ScriptProfileReset_f_VAR_SERVER;
+cmd_function_s SV_ScriptProfileFile_f_VAR;
+cmd_function_s SV_ScriptProfileFile_f_VAR_SERVER;
+cmd_function_s SV_StringUsage_f_VAR;
+cmd_function_s SV_StringUsage_f_VAR_SERVER;
+cmd_function_s SV_SaveGame_f_VAR;
+cmd_function_s SV_SaveGame_f_VAR_SERVER;
+cmd_function_s SV_SaveGameLastCommit_f_VAR;
+cmd_function_s SV_SaveGameLastCommit_f_VAR_SERVER;
+cmd_function_s SV_SaveDemo_f_VAR;
+cmd_function_s SV_SaveDemo_f_VAR_SERVER;
+cmd_function_s SV_DemoRestart_f_VAR;
+cmd_function_s SV_DemoRestart_f_VAR_SERVER;
+cmd_function_s SV_DemoMark_f_VAR;
+cmd_function_s SV_DemoMark_f_VAR_SERVER;
+cmd_function_s SV_DemoGoto_f_VAR;
+cmd_function_s SV_DemoGoto_f_VAR_SERVER;
+cmd_function_s SV_DemoBack_f_VAR;
+cmd_function_s SV_DemoBack_f_VAR_SERVER;
+cmd_function_s SV_DemoForward_f_VAR;
+cmd_function_s SV_DemoForward_f_VAR_SERVER;
+cmd_function_s SV_DemoFullForward_f_VAR;
+cmd_function_s SV_DemoFullForward_f_VAR_SERVER;
+cmd_function_s SV_DemoLive_f_VAR;
+cmd_function_s SV_DemoLive_f_VAR_SERVER;
+cmd_function_s SV_DemoInfo_f_VAR;
+cmd_function_s SV_DemoInfo_f_VAR_SERVER;
+cmd_function_s SV_LoadGame_f_VAR_SERVER;
+cmd_function_s SV_LoadGame_f_VAR;
+cmd_function_s SV_Map_f_VAR_SERVER;
+cmd_function_s SV_Map_f_VAR;
+cmd_function_s SV_Map_f_VAR_SERVER_0;
+cmd_function_s SV_Map_f_VAR_0;
+cmd_function_s SV_Map_f_VAR_SERVER_1;
+cmd_function_s SV_Map_f_VAR_SERVER_2;
+cmd_function_s SV_Map_f_VAR_2;
+cmd_function_s SV_Map_f_VAR_1;
+cmd_function_s SV_MapRestart_f_VAR_SERVER;
+cmd_function_s SV_MapRestart_f_VAR;
+cmd_function_s SV_FastRestart_f_VAR_SERVER;
+cmd_function_s SV_FastRestart_f_VAR;
+
+
+static int initialized_0 = 0;
 void __cdecl SV_AddOperatorCommands()
 {
     if (!initialized_0)
@@ -955,10 +1227,7 @@ void __cdecl SV_AddOperatorCommands()
         Cmd_AddCommandInternal("select_save_device", Cbuf_AddServerText_f, &SV_SelectSaveDevice_f_VAR);
         Cmd_AddServerCommandInternal("select_save_device", SV_SelectSaveDevice_f, &SV_SelectSaveDevice_f_VAR_SERVER);
         Cmd_AddCommandInternal("force_select_save_device", Cbuf_AddServerText_f, &SV_ForceSelectSaveDevice_f_VAR);
-        Cmd_AddServerCommandInternal(
-            "force_select_save_device",
-            SV_ForceSelectSaveDevice_f,
-            &SV_ForceSelectSaveDevice_f_VAR_SERVER);
+        Cmd_AddServerCommandInternal("force_select_save_device", SV_ForceSelectSaveDevice_f,&SV_ForceSelectSaveDevice_f_VAR_SERVER);
         Cmd_AddCommandInternal("loadgame_continue", Cbuf_AddServerText_f, &SV_LoadGameContinue_f_VAR);
         Cmd_AddServerCommandInternal("loadgame_continue", SV_LoadGameContinue_f, &SV_LoadGameContinue_f_VAR_SERVER);
         Cmd_AddCommandInternal("scriptUsage", Cbuf_AddServerText_f, &SV_ScriptUsage_f_VAR);
@@ -973,17 +1242,14 @@ void __cdecl SV_AddOperatorCommands()
         Cmd_AddServerCommandInternal("difficultyHard", SV_DifficultyHard, &SV_DifficultyHard_VAR_SERVER);
         Cmd_AddCommandInternal("difficultyFu", Cbuf_AddServerText_f, &SV_DifficultyFu_VAR);
         Cmd_AddServerCommandInternal("difficultyFu", SV_DifficultyFu, &SV_DifficultyFu_VAR_SERVER);
-        Cmd_AddCommandInternal("scriptProfile", Cbuf_AddServerText_f, &SV_Script//Profile_f_VAR);
-            Cmd_AddServerCommandInternal("scriptProfile", SV_Script//Profile_f, &SV_Script//Profile_f_VAR_SERVER);
-                Cmd_AddCommandInternal("scriptBuiltin", Cbuf_AddServerText_f, &SV_ScriptBuiltin_f_VAR);
+        Cmd_AddCommandInternal("scriptProfile", Cbuf_AddServerText_f, &SV_ScriptProfile_f_VAR);
+        Cmd_AddServerCommandInternal("scriptProfile", SV_ScriptProfile_f, &SV_ScriptProfile_f_VAR_SERVER);
+        Cmd_AddCommandInternal("scriptBuiltin", Cbuf_AddServerText_f, &SV_ScriptBuiltin_f_VAR);
         Cmd_AddServerCommandInternal("scriptBuiltin", SV_ScriptBuiltin_f, &SV_ScriptBuiltin_f_VAR_SERVER);
         Cmd_AddCommandInternal("profile_script_reset", Cbuf_AddServerText_f, &SV_ScriptProfileReset_f_VAR);
         Cmd_AddServerCommandInternal("profile_script_reset", SV_ScriptProfileReset_f, &SV_ScriptProfileReset_f_VAR_SERVER);
         Cmd_AddCommandInternal("profile_script_by_file_dump", Cbuf_AddServerText_f, &SV_ScriptProfileFile_f_VAR);
-        Cmd_AddServerCommandInternal(
-            "profile_script_by_file_dump",
-            SV_ScriptProfileFile_f,
-            &SV_ScriptProfileFile_f_VAR_SERVER);
+        Cmd_AddServerCommandInternal("profile_script_by_file_dump", SV_ScriptProfileFile_f, &SV_ScriptProfileFile_f_VAR_SERVER);
         Cmd_AddCommandInternal("stringUsage", Cbuf_AddServerText_f, &SV_StringUsage_f_VAR);
         Cmd_AddServerCommandInternal("stringUsage", SV_StringUsage_f, &SV_StringUsage_f_VAR_SERVER);
         Cmd_AddCommandInternal("devsave", Cbuf_AddServerText_f, &SV_SaveGame_f_VAR);

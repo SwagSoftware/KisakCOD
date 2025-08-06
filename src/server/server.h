@@ -289,7 +289,7 @@ void __cdecl SV_DemoBack_f();
 void __cdecl SV_DemoForward_f();
 void __cdecl SV_DemoFullForward_f();
 void __cdecl SV_DemoLive_f();
-void __cdecl SV_DemoInfo_f(int a1, int a2, int a3);
+void __cdecl SV_DemoInfo_f();
 int __cdecl SV_GetDemoStartTime();
 int __cdecl SV_GetDemoEndTime();
 int __cdecl SV_CheckAutoSaveHistory(int setTooSoon);
@@ -304,7 +304,7 @@ bool __cdecl SV_ReadPacket(int framePos);
 float __cdecl SV_DemoFxVisibility();
 int __cdecl SV_DemoCheatsOk();
 bool __cdecl SV_DemoIsRecentlyLoaded();
-char *__cdecl SV_Demo_Dvar_GetVariantString();
+const char *__cdecl SV_Demo_Dvar_GetVariantString();
 int __cdecl SV_DemoButtonPressed();
 
 

@@ -1,8 +1,14 @@
 #include "sv_world.h"
 #include "sv_game.h"
 #include <xanim/dobj.h>
-#include <game_mp/g_utils_mp.h>
 #include <universal/profile.h>
+
+#ifdef KISAK_MP
+#include <game_mp/g_utils_mp.h>
+#elif KISAK_SP
+#include <bgame/bg_public.h>
+#include <game/g_local.h>
+#endif
 
 
 unsigned int __cdecl SV_ClipHandleForEntity(const gentity_s *ent)

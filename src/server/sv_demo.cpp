@@ -15,6 +15,9 @@
 #include <qcommon/com_playerprofile.h>
 #include <qcommon/cmd.h>
 #include <client/cl_input.h>
+#include <script/scr_readwrite.h>
+#include <cgame/cg_main.h> // replay_time
+#include <game/savedevice.h>
 
 unsigned __int8 g_buf[2][3145728];
 unsigned __int8 g_msgBuf[10485760];
@@ -395,100 +398,101 @@ void __cdecl SV_ShutdownDemo()
 
 int __cdecl SV_AddDemoSave(SaveGame *savehandle, server_demo_save_t *save, int createSave)
 {
-    server_demo_history_t *v6; // r26
-    SaveGame *v7; // r31
-    SaveGame *MemoryFile; // r3
-    SaveGame *v9; // r3
-    SaveGame *v10; // r3
-    bool IsSuccessful; // zf
-    SaveGame *v13; // r3
-    int v14; // r30
-    unsigned __int8 *v15; // r29
-    SaveGame *v16; // r3
-    int v17; // r4
-    unsigned __int8 *v18; // r5
-    SaveGame *v19; // r3
-    int v20; // r30
-    SaveGame *v21; // r3
-    int v22; // r29
-    unsigned __int8 *buf; // r26
-    SaveGame *v24; // r3
-    unsigned __int8 *v25; // r30
-
-    if (g_history)
-    {
-        v6 = g_history;
-    }
-    else
-    {
-        if (g_historySaving)
-            MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\server\\sv_demo.cpp", 830, 0, "%s", "!g_historySaving");
-        v6 = g_historyBuffers;
-    }
-    if (save->buf)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\server\\sv_demo.cpp", 837, 0, "%s", "!save->buf");
-    v7 = SaveMemory_GetSaveHandle(1);
-    if (!v7)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\server\\sv_demo.cpp", 841, 0, "%s", "demohandle");
-    if (savehandle == v7)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\server\\sv_demo.cpp", 842, 0, "%s", "savehandle != demohandle");
-    SaveMemory_InitializeDemoSave(v7);
-    MemoryFile = SaveMemory_GetMemoryFile(v7);
-    Dvar_SaveDvars(&MemoryFile->memFile, 4u);
-    v9 = SaveMemory_GetMemoryFile(v7);
-    Scr_SaveSource(&v9->memFile);
-    if (savehandle)
-    {
-        SaveMemory_StartSegment(v7, -1);
-        IsSuccessful = !SaveMemory_IsSuccessful(v7);
-        v10 = v7;
-        if (!IsSuccessful)
-        {
-            v19 = SaveMemory_GetMemoryFile(v7);
-            v20 = MemFile_CopySegments(&v19->memFile, 0, 0);
-            v21 = SaveMemory_GetMemoryFile(savehandle);
-            v22 = v20 + MemFile_CopySegments(&v21->memFile, 1, 0);
-            IsSuccessful = SV_HistoryAlloc(v6, &save->buf, v22) == 0;
-            v10 = v7;
-            if (!IsSuccessful)
-            {
-                buf = save->buf;
-                save->bufLen = v22;
-                v24 = SaveMemory_GetMemoryFile(v7);
-                MemFile_CopySegments(&v24->memFile, 0, buf);
-                v25 = &save->buf[v20];
-                v16 = SaveMemory_GetMemoryFile(savehandle);
-                v17 = 1;
-                v18 = v25;
-                goto LABEL_22;
-            }
-        }
-    LABEL_16:
-        SaveMemory_FinalizeSave(v10);
-        return 0;
-    }
-    if (createSave)
-        G_SaveState(0, v7);
-    SaveMemory_StartSegment(v7, -1);
-    IsSuccessful = SaveMemory_IsSuccessful(v7);
-    v10 = v7;
-    if (!IsSuccessful)
-        goto LABEL_16;
-    v13 = SaveMemory_GetMemoryFile(v7);
-    v14 = MemFile_CopySegments(&v13->memFile, 0, 0);
-    IsSuccessful = SV_HistoryAlloc(v6, &save->buf, v14) == 0;
-    v10 = v7;
-    if (IsSuccessful)
-        goto LABEL_16;
-    v15 = save->buf;
-    save->bufLen = v14;
-    v16 = SaveMemory_GetMemoryFile(v7);
-    v17 = 0;
-    v18 = v15;
-LABEL_22:
-    MemFile_CopySegments(&v16->memFile, v17, v18);
-    SaveMemory_FinalizeSave(v7);
-    return 1;
+    return 0; // KISAKSAVE
+//    server_demo_history_t *v6; // r26
+//    SaveGame *v7; // r31
+//    SaveGame *MemoryFile; // r3
+//    SaveGame *v9; // r3
+//    SaveGame *v10; // r3
+//    bool IsSuccessful; // zf
+//    SaveGame *v13; // r3
+//    int v14; // r30
+//    unsigned __int8 *v15; // r29
+//    SaveGame *v16; // r3
+//    int v17; // r4
+//    unsigned __int8 *v18; // r5
+//    SaveGame *v19; // r3
+//    int v20; // r30
+//    SaveGame *v21; // r3
+//    int v22; // r29
+//    unsigned __int8 *buf; // r26
+//    SaveGame *v24; // r3
+//    unsigned __int8 *v25; // r30
+//
+//    if (g_history)
+//    {
+//        v6 = g_history;
+//    }
+//    else
+//    {
+//        if (g_historySaving)
+//            MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\server\\sv_demo.cpp", 830, 0, "%s", "!g_historySaving");
+//        v6 = g_historyBuffers;
+//    }
+//    if (save->buf)
+//        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\server\\sv_demo.cpp", 837, 0, "%s", "!save->buf");
+//    v7 = SaveMemory_GetSaveHandle(1);
+//    if (!v7)
+//        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\server\\sv_demo.cpp", 841, 0, "%s", "demohandle");
+//    if (savehandle == v7)
+//        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\server\\sv_demo.cpp", 842, 0, "%s", "savehandle != demohandle");
+//    SaveMemory_InitializeDemoSave(v7);
+//    MemoryFile = SaveMemory_GetMemoryFile(v7);
+//    Dvar_SaveDvars(&MemoryFile->memFile, 4u);
+//    v9 = SaveMemory_GetMemoryFile(v7);
+//    Scr_SaveSource(&v9->memFile);
+//    if (savehandle)
+//    {
+//        SaveMemory_StartSegment(v7, -1);
+//        IsSuccessful = !SaveMemory_IsSuccessful(v7);
+//        v10 = v7;
+//        if (!IsSuccessful)
+//        {
+//            v19 = SaveMemory_GetMemoryFile(v7);
+//            v20 = MemFile_CopySegments(&v19->memFile, 0, 0);
+//            v21 = SaveMemory_GetMemoryFile(savehandle);
+//            v22 = v20 + MemFile_CopySegments(&v21->memFile, 1, 0);
+//            IsSuccessful = SV_HistoryAlloc(v6, &save->buf, v22) == 0;
+//            v10 = v7;
+//            if (!IsSuccessful)
+//            {
+//                buf = save->buf;
+//                save->bufLen = v22;
+//                v24 = SaveMemory_GetMemoryFile(v7);
+//                MemFile_CopySegments(&v24->memFile, 0, buf);
+//                v25 = &save->buf[v20];
+//                v16 = SaveMemory_GetMemoryFile(savehandle);
+//                v17 = 1;
+//                v18 = v25;
+//                goto LABEL_22;
+//            }
+//        }
+//    LABEL_16:
+//        SaveMemory_FinalizeSave(v10);
+//        return 0;
+//    }
+//    if (createSave)
+//        G_SaveState(0, v7);
+//    SaveMemory_StartSegment(v7, -1);
+//    IsSuccessful = SaveMemory_IsSuccessful(v7);
+//    v10 = v7;
+//    if (!IsSuccessful)
+//        goto LABEL_16;
+//    v13 = SaveMemory_GetMemoryFile(v7);
+//    v14 = MemFile_CopySegments(&v13->memFile, 0, 0);
+//    IsSuccessful = SV_HistoryAlloc(v6, &save->buf, v14) == 0;
+//    v10 = v7;
+//    if (IsSuccessful)
+//        goto LABEL_16;
+//    v15 = save->buf;
+//    save->bufLen = v14;
+//    v16 = SaveMemory_GetMemoryFile(v7);
+//    v17 = 0;
+//    v18 = v15;
+//LABEL_22:
+//    MemFile_CopySegments(&v16->memFile, v17, v18);
+//    SaveMemory_FinalizeSave(v7);
+//    return 1;
 }
 
 _iobuf *__cdecl SV_DemoOpenFile(const char *fileName)
@@ -535,47 +539,48 @@ void __cdecl SV_InitWriteDemo(int randomSeed)
 
 void __cdecl SV_InitReadDemoSavegame(SaveGame **saveHandle)
 {
-    server_demo_save_t *p_save; // r28
-    SaveGame *v3; // r31
-    SaveGame *MemoryFile; // r3
-    SaveGame *v5; // r3
-    SaveGame *v6; // r3
-
-    if (!saveHandle)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\server\\sv_demo.cpp", 1074, 0, "%s", "saveHandle");
-    if (!sv.demo.nextLevelplaying)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\server\\sv_demo.cpp", 1075, 0, "%s", "sv.demo.nextLevelplaying");
-    if (sv.demo.nextLevelSave)
-        p_save = &sv.demo.nextLevelSave->save;
-    else
-        p_save = &sv.demo.save;
-    if (*saveHandle)
-    {
-        SV_TruncateHistoryTimeCache(0);
-        g_numFileMarkSkips = 0;
-        FS_FileSeek(g_fileMarkHistory, 0, 2);
-    }
-    if (!p_save->buf)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\server\\sv_demo.cpp", 1088, 0, "%s", "save->buf");
-    if (*saveHandle)
-        SaveMemory_FinalizeLoad(*saveHandle);
-    v3 = SaveMemory_GetSaveHandle(1);
-    SaveMemory_InitializeLoadFromBuffer(v3, p_save->buf, p_save->bufLen);
-    MemoryFile = SaveMemory_GetMemoryFile(v3);
-    Dvar_LoadDvars(&MemoryFile->memFile);
-    v5 = SaveMemory_GetMemoryFile(v3);
-    Scr_SkipSource(&v5->memFile, 0);
-    v6 = SaveMemory_GetMemoryFile(v3);
-    if (MemFile_AtEnd(&v6->memFile))
-    {
-        SaveMemory_MoveToSegment(v3, -1);
-        SaveMemory_FinalizeLoad(v3);
-        *saveHandle = 0;
-    }
-    else
-    {
-        *saveHandle = v3;
-    }
+    // KISAKSAVE
+    //server_demo_save_t *p_save; // r28
+    //SaveGame *v3; // r31
+    //SaveGame *MemoryFile; // r3
+    //SaveGame *v5; // r3
+    //SaveGame *v6; // r3
+    //
+    //if (!saveHandle)
+    //    MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\server\\sv_demo.cpp", 1074, 0, "%s", "saveHandle");
+    //if (!sv.demo.nextLevelplaying)
+    //    MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\server\\sv_demo.cpp", 1075, 0, "%s", "sv.demo.nextLevelplaying");
+    //if (sv.demo.nextLevelSave)
+    //    p_save = &sv.demo.nextLevelSave->save;
+    //else
+    //    p_save = &sv.demo.save;
+    //if (*saveHandle)
+    //{
+    //    SV_TruncateHistoryTimeCache(0);
+    //    g_numFileMarkSkips = 0;
+    //    FS_FileSeek(g_fileMarkHistory, 0, 2);
+    //}
+    //if (!p_save->buf)
+    //    MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\server\\sv_demo.cpp", 1088, 0, "%s", "save->buf");
+    //if (*saveHandle)
+    //    SaveMemory_FinalizeLoad(*saveHandle);
+    //v3 = SaveMemory_GetSaveHandle(1);
+    //SaveMemory_InitializeLoadFromBuffer(v3, p_save->buf, p_save->bufLen);
+    //MemoryFile = SaveMemory_GetMemoryFile(v3);
+    //Dvar_LoadDvars(&MemoryFile->memFile);
+    //v5 = SaveMemory_GetMemoryFile(v3);
+    //Scr_SkipSource(&v5->memFile, 0);
+    //v6 = SaveMemory_GetMemoryFile(v3);
+    //if (MemFile_AtEnd(&v6->memFile))
+    //{
+    //    SaveMemory_MoveToSegment(v3, -1);
+    //    SaveMemory_FinalizeLoad(v3);
+    //    *saveHandle = 0;
+    //}
+    //else
+    //{
+    //    *saveHandle = v3;
+    //}
 }
 
 int __cdecl SV_InitDemoSavegame(SaveGame **save)
@@ -690,39 +695,40 @@ void __cdecl SV_RecordButtonPressed(int buttonPressed)
 
 void __cdecl SV_GetFreeDemoName(const char *baseName, int demoCount, char *testDemoName)
 {
-    int i; // r30
-    int Remote; // r3
-    int v8; // r27
-    void *v9[4]; // [sp+50h] [-150h] BYREF
-    char v10[320]; // [sp+60h] [-140h] BYREF
-
-    for (i = 1; !demoCount || i < demoCount; ++i)
-    {
-        Com_sprintf(testDemoName, 64, "%s%i", baseName, i);
-        Com_BuildPlayerProfilePath(v10, 256, "save/%s.svg", testDemoName);
-        if (FS_IsUsingRemotePCSharing())
-            Remote = FS_FOpenFileReadRemote(v10, 0, v9);
-        else
-            Remote = FS_FOpenFileReadCurrentThread(v10, v9);
-        v8 = Remote;
-        FS_FCloseFile(v9[0]);
-        if (v8 <= 0)
-            goto LABEL_10;
-    }
-    i = 0;
-LABEL_10:
-    if (demoCount)
-    {
-        __twllei(demoCount, 0);
-        __twlgei(demoCount & ~(__ROL4__(i + 1, 1) - 1), 0xFFFFFFFF);
-        Com_sprintf(testDemoName, 64, "%s%i", baseName, (i + 1) % demoCount);
-        Com_BuildPlayerProfilePath(v10, 256, "save/%s.svg", testDemoName);
-        //if (FS_IsUsingRemotePCSharing())
-        //    FS_DeleteRemote(v10);
-        //else
-            FS_Delete(v10);
-        Com_sprintf(testDemoName, 64, "%s%i", baseName, i);
-    }
+    // KISAKSAVE
+//    int i; // r30
+//    int Remote; // r3
+//    int v8; // r27
+//    void *v9[4]; // [sp+50h] [-150h] BYREF
+//    char v10[320]; // [sp+60h] [-140h] BYREF
+//
+//    for (i = 1; !demoCount || i < demoCount; ++i)
+//    {
+//        Com_sprintf(testDemoName, 64, "%s%i", baseName, i);
+//        Com_BuildPlayerProfilePath(v10, 256, "save/%s.svg", testDemoName);
+//        if (FS_IsUsingRemotePCSharing())
+//            Remote = FS_FOpenFileReadRemote(v10, 0, v9);
+//        else
+//            Remote = FS_FOpenFileReadCurrentThread(v10, v9);
+//        v8 = Remote;
+//        FS_FCloseFile(v9[0]);
+//        if (v8 <= 0)
+//            goto LABEL_10;
+//    }
+//    i = 0;
+//LABEL_10:
+//    if (demoCount)
+//    {
+//        __twllei(demoCount, 0);
+//        __twlgei(demoCount & ~(__ROL4__(i + 1, 1) - 1), 0xFFFFFFFF);
+//        Com_sprintf(testDemoName, 64, "%s%i", baseName, (i + 1) % demoCount);
+//        Com_BuildPlayerProfilePath(v10, 256, "save/%s.svg", testDemoName);
+//        //if (FS_IsUsingRemotePCSharing())
+//        //    FS_DeleteRemote(v10);
+//        //else
+//            FS_Delete(v10);
+//        Com_sprintf(testDemoName, 64, "%s%i", baseName, i);
+//    }
 }
 
 void __cdecl SV_SaveDemoImmediate(SaveImmediate *save)
@@ -755,24 +761,6 @@ void __cdecl SV_SaveDemo(const char *demoName, const char *description, unsigned
     SaveGame *v7; // r3
     bool v8; // zf
     SaveGame *v9; // [sp+8h] [-108h]
-    int v10; // [sp+Ch] [-104h]
-    int v11; // [sp+10h] [-100h]
-    int v12; // [sp+14h] [-FCh]
-    int v13; // [sp+18h] [-F8h]
-    int v14; // [sp+1Ch] [-F4h]
-    int v15; // [sp+20h] [-F0h]
-    int v16; // [sp+24h] [-ECh]
-    int v17; // [sp+28h] [-E8h]
-    int v18; // [sp+2Ch] [-E4h]
-    int v19; // [sp+30h] [-E0h]
-    int v20; // [sp+34h] [-DCh]
-    int v21; // [sp+38h] [-D8h]
-    int v22; // [sp+3Ch] [-D4h]
-    int v23; // [sp+40h] [-D0h]
-    int v24; // [sp+44h] [-CCh]
-    int v25; // [sp+48h] [-C8h]
-    int v26; // [sp+4Ch] [-C4h]
-    int v27; // [sp+50h] [-C0h]
     char v28[64]; // [sp+60h] [-B0h] BYREF
     char v29[112]; // [sp+A0h] [-70h] BYREF
 
@@ -819,29 +807,10 @@ void __cdecl SV_SaveDemo(const char *demoName, const char *description, unsigned
         0,
         saveType,
         0,
-        v9,
-        v10,
-        v11,
-        v12,
-        v13,
-        v14,
-        v15,
-        v16,
-        v17,
-        v18,
-        v19,
-        v20,
-        v21,
-        v22,
-        v23,
-        v24,
-        v25,
-        v26,
-        v27,
-        (int)SaveHandle);
-    MemCard_SetUseDevDrive(1);
+        SaveHandle);
+    //MemCard_SetUseDevDrive(1);
     SaveMemory_FinalizeSaveToDisk(SaveHandle);
-    MemCard_SetUseDevDrive(0);
+    //MemCard_SetUseDevDrive(0);
 }
 
 void __cdecl SV_AutoSaveDemo(const char *baseName, const char *description, int demoCount, bool force)
@@ -963,7 +932,7 @@ void __cdecl SV_LoadDemo(SaveGame *save, void *fileHandle)
     const SaveHeader *Header; // r30
     int bodySize; // r5
     unsigned __int8 *buf; // r31
-    SaveGame *MemoryFile; // r3
+    MemoryFile *MemoryFile; // r3
     unsigned int v8; // [sp+50h] [-40h] BYREF
 
     if (!save)
@@ -1006,7 +975,7 @@ void __cdecl SV_LoadDemo(SaveGame *save, void *fileHandle)
         Sys_OutOfMemErrorInternal("c:\\trees\\cod3\\cod3src\\src\\server\\sv_demo.cpp", 1944);
     buf = sv.demo.save.buf;
     MemoryFile = SaveMemory_GetMemoryFile(save);
-    MemFile_CopySegments(&MemoryFile->memFile, 0, buf);
+    MemFile_CopySegments(MemoryFile, 0, buf);
 }
 
 void Cmd_Echo_f()
@@ -1212,21 +1181,22 @@ void __cdecl  SV_SaveHistoryLoop(unsigned int threadContext)
             11);
     while (1)
     {
-        Sys_WaitForSaveHistory();
-        //__lwsync();
-        if (!g_historySaving)
-            MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\server\\sv_demo.cpp", 2114, 0, "%s", "g_historySaving");
-        v1 = g_historySaving;
-        //Profile_Begin(406);
-        if (v1->manual)
-            SV_SaveHistoryMark(v1);
-        else
-            SV_SaveHistoryTime(v1);
-        //Profile_EndInternal(0);
-        SV_FreeHistoryData(g_historySaving);
-        g_historySaving = 0;
-        //__lwsync();
-        Sys_SetSaveHistoryDoneEvent();
+        // KISAKSAVE
+        //Sys_WaitForSaveHistory();
+        ////__lwsync();
+        //if (!g_historySaving)
+        //    MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\server\\sv_demo.cpp", 2114, 0, "%s", "g_historySaving");
+        //v1 = g_historySaving;
+        ////Profile_Begin(406);
+        //if (v1->manual)
+        //    SV_SaveHistoryMark(v1);
+        //else
+        //    SV_SaveHistoryTime(v1);
+        ////Profile_EndInternal(0);
+        //SV_FreeHistoryData(g_historySaving);
+        //g_historySaving = 0;
+        ////__lwsync();
+        //Sys_SetSaveHistoryDoneEvent();
     }
 }
 
@@ -1548,7 +1518,8 @@ bool __cdecl SV_ReadHistory(_iobuf *fileHistory, server_demo_history_t *history)
         v10 = FS_FileRead(history->freeEntBuf, freeEntBufLen, fileHistory) == freeEntBufLen;
     else
         v10 = 0;
-    return (_cntlzw(v10) & 0x20) == 0;
+    //return (_cntlzw(v10) & 0x20) == 0;
+    return v10 != 0;
 }
 
 bool __cdecl SV_DemoLoadHistory(_iobuf *fileHistory, int fileOffset)
@@ -1871,7 +1842,7 @@ void __cdecl SV_DemoLive_f()
         Com_Printf(0, "Not playing replay.\n");
 }
 
-void __cdecl SV_DemoInfo_f(int a1, int a2, int a3)
+void __cdecl SV_DemoInfo_f()
 {
     FileSkip *v3; // r31
     int v4; // r29
@@ -1883,7 +1854,7 @@ void __cdecl SV_DemoInfo_f(int a1, int a2, int a3)
     {
         if (!g_fileMarkHistory)
             MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\server\\sv_demo.cpp", 2726, 0, "%s", "g_fileMarkHistory");
-        Com_Printf(0, "Named Marks(%d):\n", a3);
+        Com_Printf(0, "Named Marks(%d):\n", g_numFileSkips);
         v4 = 0;
         if (g_numFileMarkSkips > 0)
         {
@@ -1900,7 +1871,7 @@ void __cdecl SV_DemoInfo_f(int a1, int a2, int a3)
     {
         if (!g_fileTimeHistory)
             MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\server\\sv_demo.cpp", 2738, 0, "%s", "g_fileTimeHistory");
-        Com_Printf(0, "Time Marks(%d):\n", a3);
+        Com_Printf(0, "Time Marks(%d):\n", g_numFileSkips);
         for (i = 0; i < g_numFileSkips; ++v3)
         {
             Com_Printf(0, "\t%d:%d\n", v3->time, v3->fileEndOffset);
@@ -2254,7 +2225,7 @@ bool __cdecl SV_DemoIsRecentlyLoaded()
     return v1;
 }
 
-char *__cdecl SV_Demo_Dvar_GetVariantString()
+const char *__cdecl SV_Demo_Dvar_GetVariantString()
 {
     char v1[1032]; // [sp+50h] [-420h] BYREF
 

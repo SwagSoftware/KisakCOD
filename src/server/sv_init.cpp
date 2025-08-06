@@ -11,6 +11,10 @@
 #include "sv_game.h"
 #include <qcommon/com_bsp.h>
 #include <client/cl_demo.h>
+#include <game/savedevice.h>
+#include <game/savememory.h>
+#include <game/g_main.h>
+#include <cgame/cg_main.h>
 
 const dvar_t *sv_clientFrameRateFix;
 const dvar_t *sv_loadMyChanges;
@@ -182,7 +186,7 @@ void __cdecl SV_Init()
     const char *v0; // r5
     unsigned __int16 v1; // r4
 
-    Memcard_InitializeSystem();
+    //Memcard_InitializeSystem(); KISAKSAVE KISAKMEMCARD
     SaveDevice_Init();
     SV_AddOperatorCommands();
     sv_gameskill = Dvar_RegisterInt("g_gameskill", 1, 0, 3, 0x64u, "Game skill level");
@@ -449,7 +453,8 @@ void __cdecl SV_SpawnServer(const char *server, int savegame)
     SCR_UpdateLoadScreen();
     SaveMemory_InitializeSaveSystem();
     SaveMemory_ClearDemoSave();
-    SV_InitGameProgs(v7, savegame, &v11);
+    //SV_InitGameProgs(v7, savegame, &v11);
+    SV_InitGameProgs(level.savepersist);
     CL_SetSkipRendering(1);
     if (CL_DemoPlaying())
         CL_FinishLoadingDemo();

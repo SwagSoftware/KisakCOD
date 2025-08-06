@@ -143,3 +143,24 @@ char *__cdecl UI_ReplaceConversionInts(
     __int64 a7);
 int __cdecl UI_Popup(int localClientNum, const char *menu);
 void __cdecl UI_DrawLoggedInUser(rectDef_s *rect, Font_s *font, double scale, float *color, int textStyle);
+
+extern const dvar_t *ui_showList;
+extern const dvar_t *ui_isSaving;
+extern const dvar_t *ui_startupActiveController;
+extern const dvar_t *ui_skipMainLockout;
+extern const dvar_t *ui_useSuggestedWeapons;
+extern const dvar_t *ui_saveMessageMinTime;
+extern const dvar_t *ui_showMenuOnly;
+extern const dvar_t *ui_bigFont;
+extern const dvar_t *ui_cinematicsTimestamp;
+extern const dvar_t *ui_mousePitch;
+extern const dvar_t *ui_extraBigFont;
+extern const dvar_t *ui_nextMission;
+extern const dvar_t *uiscript_debug;
+extern const dvar_t *ui_autoContinue;
+extern const dvar_t *ui_smallFont;
+extern const dvar_t *ui_hideMap;
+extern const dvar_t *ui_savegame;
+extern const dvar_t *ui_drawCrosshairNames;
+extern const dvar_t *ui_borderLowLightScale;
+extern const dvar_t *ui_campaign;

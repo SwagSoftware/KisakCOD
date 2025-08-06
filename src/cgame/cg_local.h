@@ -1304,28 +1304,3 @@ bool __cdecl CG_IsShowingProgress_FastFile();
 extern const dvar_t *nightVisionFadeInOutTime;
 extern const dvar_t *nightVisionPowerOnTime;
 extern const dvar_t *nightVisionDisableEffects;
-
-
-#ifdef KISAK_SP
-#include "cg_main.h"
-
-inline int CG_GetEntityIndex(const centity_s *cent)
-{
-    iassert(cent->nextState.number == (cent - &cg_entitiesArray[0][0]) % MAX_GENTITIES);
-
-    return cent->nextState.number;
-}
-
-inline int CG_GetLocalClientTime(int localClientNum)
-{
-    if (localClientNum)
-        MyAssertHandler(
-            "c:\\trees\\cod3\\cod3src\\src\\cgame\\cg_local.h",
-            910,
-            0,
-            "%s\n\t(localClientNum) = %i",
-            "(localClientNum == 0)",
-            localClientNum);
-    return cgArray[localClientNum].time;
-}
-#endif 

@@ -16,6 +16,7 @@
 #include <win32/win_local.h>
 #include <universal/profile.h>
 #include <client/cl_scrn.h>
+#include <game/savedevice.h>
 
 server_t sv;
 serverStatic_t svs;
@@ -1080,8 +1081,10 @@ int __cdecl SV_ForwardFrame()
     Com_Printf(
         15,
         "\n=== Replay moved forward %d msec from time %g. ===\n\n",
-        (unsigned int)HIDWORD(COERCE_UNSIGNED_INT64((float)((float)v1 * (float)0.001))),
-        (float)((float)v1 * (float)0.001));
+        v6,
+        v1 * 0.001f);
+        //(unsigned int)HIDWORD(COERCE_UNSIGNED_INT64((float)((float)v1 * (float)0.001))),
+        //(float)((float)v1 * (float)0.001));
     sv.demo.forwardMsec -= v6;
     if (sv.demo.forwardMsec < 0)
         sv.demo.forwardMsec = 0;
@@ -1124,8 +1127,8 @@ int __cdecl SV_ClientFrameRateFix(int msec)
         serverExecTime = 200;
     v6 = __ROL4__(50 * v4, 1);
     v5 = 50 * v4 / serverExecTime;
-    __twllei(serverExecTime, 0);
-    __twlgei(serverExecTime & ~(v6 - 1), 0xFFFFFFFF);
+    //__twllei(serverExecTime, 0); // LWSS: I think these instructions are just traps for bad values?
+    //__twlgei(serverExecTime & ~(v6 - 1), 0xFFFFFFFF);
     if (msec >= v5)
         msec = v5;
     result = 1;

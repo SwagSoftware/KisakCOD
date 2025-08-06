@@ -95,41 +95,24 @@ void __cdecl SV_AddEntToSnapshot(int entnum)
 
 void __cdecl SV_AddEntitiesVisibleFromPoint(int clientNum)
 {
-    int i; // r30
-    gentity_s *v3; // r3
+    int e; // r30
+    gentity_s *ent; // r3
     gentity_s *v4; // r31
     int number; // r4
     const char *v6; // r3
 
     if (sv.state)
     {
-        for (i = 0; i < sv.num_entities; ++i)
+        for (e = 0; e < sv.num_entities; ++e)
         {
-            v3 = SV_GentityNum(i);
-            v4 = v3;
-            if (v3->r.linked)
+            ent = SV_GentityNum(e);
+            v4 = ent;
+            if (ent->r.linked)
             {
-                number = v3->s.number;
-                if (number != i)
-                {
-                    v6 = va(
-                        "entnum: %d vs %d, eType: %d, origin: %f %f %f",
-                        number,
-                        i,
-                        (unsigned int)HIDWORD(COERCE_UNSIGNED_INT64(v3->r.currentOrigin[0])),
-                        (unsigned int)COERCE_UNSIGNED_INT64(v3->r.currentOrigin[0]),
-                        (unsigned int)COERCE_UNSIGNED_INT64(v3->r.currentOrigin[1]),
-                        (unsigned int)COERCE_UNSIGNED_INT64(v3->r.currentOrigin[2]));
-                    MyAssertHandler(
-                        "c:\\trees\\cod3\\cod3src\\src\\server\\sv_snapshot.cpp",
-                        121,
-                        0,
-                        "%s\n\t%s",
-                        "ent->s.number == e",
-                        v6);
-                }
-                if ((v4->r.svFlags & 1) == 0 && i != clientNum)
-                    SV_AddEntToSnapshot(i);
+                number = ent->s.number;
+                iassert(ent->s.number == 3);
+                if ((v4->r.svFlags & 1) == 0 && e != clientNum)
+                    SV_AddEntToSnapshot(e);
             }
         }
     }

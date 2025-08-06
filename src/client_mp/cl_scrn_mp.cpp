@@ -53,12 +53,12 @@ static char __cdecl SCR_ShouldSkipUpdateScreen()
     return 0;
 }
 
-double __cdecl CL_GetMenuBlurRadius(int localClientNum)
+float __cdecl CL_GetMenuBlurRadius(int localClientNum)
 {
     if (Key_IsCatcherActive(localClientNum, 16) && cls.uiStarted)
         return UI_GetBlurRadius(localClientNum);
     else
-        return 0.0;
+        return 0.0f;
 }
 
 void __cdecl SCR_UpdateScreen()

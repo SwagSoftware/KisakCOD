@@ -1107,6 +1107,8 @@ int __cdecl CM_PointSightTraceToEntities_r(
 
 int CM_SaveWorld(unsigned __int8 *buf);
 void CM_ValidateWorld();
+void CM_LoadWorld(unsigned __int8 *buf);
+void CM_UnlockTree();
 
 // cm_load
 void __cdecl TRACK_cm_load();
@@ -1424,10 +1426,10 @@ void __cdecl StatMon_Warning(int type, int duration, const char *materialName);
 void __cdecl StatMon_GetStatsArray(const statmonitor_s **array, int *count);
 void __cdecl StatMon_Reset();
 
-// cl_scrn_mp
+// cl_scrn_mp (KISAKTODO: move out or merge with SP)
 void __cdecl SCR_DrawSmallStringExt(int x, int y, char *string, const float *setColor);
 void __cdecl SCR_Init();
-double __cdecl CL_GetMenuBlurRadius(int localClientNum);
+float __cdecl CL_GetMenuBlurRadius(int localClientNum);
 void __cdecl SCR_UpdateScreen();
 void SCR_UpdateFrame();
 int __cdecl CL_CGameRendering(int localClientNum);

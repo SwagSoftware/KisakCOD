@@ -4,13 +4,18 @@
 #include <xanim/dobj.h>
 #include <xanim/dobj_utils.h>
 #include "sv_world.h"
-#include <game_mp/g_main_mp.h>
 #include <client/client.h>
 #include <universal/com_files.h>
 #include <universal/com_sndalias.h>
-#include <game_mp/g_public_mp.h>
 #include <qcommon/com_bsp.h>
 #include <qcommon/threads.h>
+
+#ifdef KISAK_MP
+#include <game_mp/g_main_mp.h>
+#include <game_mp/g_public_mp.h>
+#elif KISAK_SP
+#include <game/game_public.h>
+#endif
 
 #ifdef KISAK_MP
 #define SKEL_MEMORY_SIZE 0x40000
@@ -535,42 +540,10 @@ void __cdecl SV_ShutdownGameProgs()
         iassert(!sv.state);
     }
 }
-void __cdecl SV_RestartGameProgs(unsigned int randomSeed, int savegame, SaveGame **save, int loadScripts)
-{
-    iassert(Sys_IsMainThread());
-    iassert(gameInitialized);
-    R_BeginRemoteScreenUpdate();
-    SV_ShutdownGameVM(loadScripts);
-    iassert(save);
-
-    if (loadScripts)
-        Com_SetScriptSettings();
-
-    com_fixedConsolePosition = 0;
-    R_EndRemoteScreenUpdate();
-    SV_InitGameVM(randomSeed, 1, savegame, save, loadScripts);
-}
-
-void __cdecl SV_InitGameProgs(unsigned int randomSeed, int savegame, SaveGame **save)
-{
-    iassert(save);
-    gameInitialized = 1;
-    SV_InitGameVM(randomSeed, 0, savegame, save, 1);
-}
-
-
 
 void __cdecl SV_InitGameVM(unsigned int randomSeed, int restart, int savegame, SaveGame **save, int loadScripts)
 {
-    int v10; // r10
-    int v11; // r9
-    int v12; // [sp+8h] [-88h]
-    int v13; // [sp+Ch] [-84h]
-    int v14; // [sp+10h] [-80h]
-    unsigned int v15; // [sp+14h] [-7Ch]
-
-    if (!save)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\server\\sv_game.cpp", 1130, 0, "%s", "save");
+    iassert(save);
     ProfLoad_Begin("Start map");
     SV_StartMap(randomSeed);
     ProfLoad_End();
@@ -582,7 +555,7 @@ void __cdecl SV_InitGameVM(unsigned int randomSeed, int restart, int savegame, S
     SND_ErrorCleanup();
     ProfLoad_Begin("Init game");
     Sys_LoadingKeepAlive();
-    G_InitGame(randomSeed, restart, sv.checksum, loadScripts, savegame, save, v11, v10, v12, v13, v14, v15);
+    G_InitGame(randomSeed, restart, sv.checksum, loadScripts, savegame, save);
     Sys_LoadingKeepAlive();
     ProfLoad_End();
     ProfLoad_Begin("Settle game");
@@ -608,6 +581,30 @@ void __cdecl SV_InitGameVM(unsigned int randomSeed, int restart, int savegame, S
         R_EndRemoteScreenUpdate();
     }
 }
+
+void __cdecl SV_RestartGameProgs(unsigned int randomSeed, int savegame, SaveGame **save, int loadScripts)
+{
+    iassert(Sys_IsMainThread());
+    iassert(gameInitialized);
+    R_BeginRemoteScreenUpdate();
+    SV_ShutdownGameVM(loadScripts);
+    iassert(save);
+
+    if (loadScripts)
+        Com_SetScriptSettings();
+
+    com_fixedConsolePosition = 0;
+    R_EndRemoteScreenUpdate();
+    SV_InitGameVM(randomSeed, 1, savegame, save, loadScripts);
+}
+
+void __cdecl SV_InitGameProgs(unsigned int randomSeed, int savegame, SaveGame **save)
+{
+    iassert(save);
+    gameInitialized = 1;
+    SV_InitGameVM(randomSeed, 0, savegame, save, 1);
+}
+
 
 bool SV_SetBrushModel(gentity_s *ent)
 {
