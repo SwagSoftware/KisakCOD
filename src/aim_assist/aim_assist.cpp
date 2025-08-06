@@ -3,10 +3,17 @@
 #include <universal/com_math.h>
 #include <qcommon/cmd.h>
 #include <client/client.h>
-#include <client_mp/client_mp.h>
 #include <script/scr_const.h>
-#include <cgame_mp/cg_local_mp.h>
 #include <universal/profile.h>
+
+#ifdef KISAK_MP
+#include <cgame_mp/cg_local_mp.h>
+#include <client_mp/client_mp.h>
+#elif KISAK_SP
+#include <cgame/cg_main.h>
+#include <cgame/cg_ents.h>
+#include <xanim/xanim.h>
+#endif
 
 //float const *const vec2_origin        82000d78     aim_assist.obj
 //float const *const vec3_origin        82000d80     aim_assist.obj

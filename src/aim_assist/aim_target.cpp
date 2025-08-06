@@ -481,6 +481,7 @@ LABEL_32:
         return;
     }
 LABEL_35:
+    ; // LWSS: this is only here so the goto works
     //Profile_EndInternal(0);
 }
 
