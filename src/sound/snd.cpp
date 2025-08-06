@@ -4,12 +4,17 @@
 #include <universal/q_shared.h>
 #include <qcommon/qcommon.h>
 #include <qcommon/cmd.h>
-#include <cgame_mp/cg_local_mp.h>
 #include <universal/com_sndalias.h>
 #include <database/database.h>
 #include <universal/q_parse.h>
 #include <client/client.h>
 #include <universal/profile.h>
+
+#ifdef KISAK_MP
+#include <cgame_mp/cg_local_mp.h>
+#elif KISAK_SP
+#include <cgame/cg_main.h>
+#endif 
 
 struct AsyncPlaySound // sizeof=0x14
 {                                       // ...

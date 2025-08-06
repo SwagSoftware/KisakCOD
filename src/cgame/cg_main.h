@@ -313,8 +313,8 @@ const dvar_s *CG_RegisterDvars();
 void __cdecl TRACK_cg_main();
 void __cdecl CG_GetDObjOrientation(int localClientNum, int dobjHandle, float (*axis)[3], float *origin);
 void __cdecl CG_CopyEntityOrientation(int localClientNum, int entIndex, float *origin_out, float (*axis_out)[3]);
-void __cdecl CG_GetSoundEntityOrientation(const SndEntHandle *sndEnt, float *origin_out, float (*axis_out)[3]);
-unsigned int __cdecl CG_SoundEntityUseEq(const SndEntHandle *sndEnt);
+void __cdecl CG_GetSoundEntityOrientation(SndEntHandle sndEnt, float *origin_out, float (*axis_out)[3]);
+unsigned int __cdecl CG_SoundEntityUseEq(SndEntHandle sndEnt);
 const playerState_s *__cdecl CG_GetPredictedPlayerState(int localClientNum);
 int __cdecl CG_IsValidRemoteInputState(int localClientNum);
 void __cdecl CG_SetTime(int serverTime);
@@ -335,7 +335,7 @@ void __cdecl CG_StopSoundsOnEnt(const int localClientNum, SndEntHandle entitynum
 void __cdecl CG_StopSoundAliasByName(int localClientNum, SndEntHandle entityNum, const char *aliasName);
 void __cdecl CG_StopClientSoundAliasByName(int localClientNum, const char *aliasName);
 //void __cdecl CG_SubtitlePrint(int msec, snd_alias_t *alias);
-void __cdecl CG_SubtitleSndLengthNotify(int msec, snd_alias_t *lengthNotifyData);
+void __cdecl CG_SubtitleSndLengthNotify(int msec, const snd_alias_t *lengthNotifyData);
 void __cdecl CG_ScriptNotifySndLengthNotify(int msec, void *lengthNotifyData);
 void __cdecl CG_AddFXSoundAlias(int localClientNum, const float *origin, snd_alias_list_t *aliasList);
 int __cdecl CG_PlaySoundAlias(int localClientNum, SndEntHandle entitynum, const float *origin, snd_alias_list_t *aliasList);
@@ -572,4 +572,11 @@ inline int CG_GetLocalClientTime(int localClientNum)
             "(localClientNum == 0)",
             localClientNum);
     return cgArray[localClientNum].time;
+}
+
+
+// LWSS: this isn't really in SP
+inline float __cdecl CG_BannerScoreboardScaleMultiplier()
+{
+    return 1.0f;
 }

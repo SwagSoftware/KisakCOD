@@ -885,24 +885,20 @@ void __cdecl CG_CopyEntityOrientation(int localClientNum, int entIndex, float *o
     AnglesToAxis(Entity->pose.angles, axis_out);
 }
 
-void __cdecl CG_GetSoundEntityOrientation(const SndEntHandle *sndEnt, float *origin_out, float (*axis_out)[3])
+void __cdecl CG_GetSoundEntityOrientation(SndEntHandle sndEnt, float *origin_out, float (*axis_out)[3])
 {
-    CG_CopyEntityOrientation(0, (int)sndEnt, origin_out, axis_out);
+    CG_CopyEntityOrientation(0, sndEnt.field.entIndex, origin_out, axis_out);
 }
 
-unsigned int __cdecl CG_SoundEntityUseEq(const SndEntHandle *sndEnt)
+unsigned int __cdecl CG_SoundEntityUseEq(SndEntHandle sndEnt)
 {
-    if (sndEnt == (const SndEntHandle *)0xFFFF)
+    unsigned int entityIndex = sndEnt.field.entIndex;
+
+    if (entityIndex == 0xFFFF)
         return 1;
-    if ((unsigned int)sndEnt >= 0x880)
-        MyAssertHandler(
-            "c:\\trees\\cod3\\cod3src\\src\\cgame\\cg_local.h",
-            932,
-            0,
-            "entityIndex doesn't index MAX_GENTITIES\n\t%i not in [0, %i)",
-            sndEnt,
-            2176);
-    return ((unsigned int)~cg_entitiesArray[0][(unsigned int)sndEnt].currentState.eFlags >> 21) & 1;
+
+    bcassert(entityIndex, MAX_GENTITIES);
+    return ((unsigned int)~cg_entitiesArray[0][entityIndex].currentState.eFlags >> 21) & 1;
 }
 
 const playerState_s *__cdecl CG_GetPredictedPlayerState(int localClientNum)
@@ -1346,7 +1342,7 @@ void __cdecl CG_StopClientSoundAliasByName(int localClientNum, const char *alias
     SND_StopSoundAliasOnEnt((SndEntHandle)cgArray[0].nextSnap->ps.clientNum, aliasName);
 }
 
-static void __cdecl CG_SubtitlePrint(int msec, snd_alias_t *alias)
+static void __cdecl CG_SubtitlePrint(int msec, const snd_alias_t *alias)
 {
     const dvar_s *v5; // r10
     const dvar_s *v6; // r11
@@ -1382,7 +1378,7 @@ static void __cdecl CG_SubtitlePrint(int msec, snd_alias_t *alias)
 }
 
 // attributes: thunk
-void __cdecl CG_SubtitleSndLengthNotify(int msec, snd_alias_t *lengthNotifyData)
+void __cdecl CG_SubtitleSndLengthNotify(int msec, const snd_alias_t *lengthNotifyData)
 {
     CG_SubtitlePrint(msec, lengthNotifyData);
 }

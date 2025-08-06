@@ -796,7 +796,7 @@ int32_t __cdecl CG_DrawScoreboard(int32_t localClientNum);
 void __cdecl CG_DrawScoreboard_Backdrop(int32_t localClientNum, float alpha);
 double __cdecl CG_BackdropLeft(int32_t localClientNum);
 double __cdecl CG_BackdropTop();
-double __cdecl CG_BannerScoreboardScaleMultiplier();
+float __cdecl CG_BannerScoreboardScaleMultiplier();
 void __cdecl CG_DrawScoreboard_ScoresList(int32_t localClientNum, float alpha);
 double __cdecl CG_DrawScoreboard_ListColumnHeaders(
     int32_t localClientNum,

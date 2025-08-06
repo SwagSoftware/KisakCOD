@@ -6,8 +6,13 @@
 #include <universal/com_files.h>
 #include <gfx_d3d/r_cinematic.h>
 #include <universal/com_sndalias.h>
-#include <cgame_mp/cg_local_mp.h>
 #include <universal/profile.h>
+
+#ifdef KISAK_MP
+#include <cgame_mp/cg_local_mp.h>
+#elif KISAK_SP
+#include <cgame/cg_main.h>
+#endif 
 
 MssLocal milesGlob;
 

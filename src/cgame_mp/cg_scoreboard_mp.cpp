@@ -279,7 +279,7 @@ double __cdecl CG_BackdropTop()
         return (float)0.0;
 }
 
-double __cdecl CG_BannerScoreboardScaleMultiplier()
+float __cdecl CG_BannerScoreboardScaleMultiplier()
 {
     return 1.0;
 }
