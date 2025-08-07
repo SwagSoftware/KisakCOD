@@ -51,7 +51,7 @@ void __cdecl TRACK_cl_cgame()
     track_static_alloc_internal((void *)g_color_table, 128, "g_color_table", 10);
 }
 
-void __cdecl CL_GetScreenDimensions(unsigned int *width, unsigned int *height, float *aspect)
+void __cdecl CL_GetScreenDimensions(int *width, int *height, float *aspect)
 {
     iassert(width);
     iassert(height);

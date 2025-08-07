@@ -603,7 +603,7 @@ void __cdecl PM_UpdateViewAngles(playerState_s *ps, float msec, usercmd_s *cmd, 
     float oldViewYaw; // [esp+18h] [ebp-8h]
 
 #ifdef KISAK_MP
-    if (ps->pm_type = PM_INTERMISSION)
+    if (ps->pm_type == PM_INTERMISSION)
     {
         return;
     }

@@ -110,32 +110,14 @@ void __cdecl CG_DrawCenterString(
                 s_centerPrint[localClientNum].text,
                 0x7FFFFFFF,
                 font,
-                (float)(rect->x - (float)v18),
-                rect->y,
-                (int)&v37,
-                68 * localClientNum,
+                (float)(rect->x - (float)v18), // x
+                rect->y, // y
+                rect->horzAlign,
+                rect->vertAlign,
                 fontscale,
-                (const float *)rect->horzAlign,
-                SHIDWORD(v18),
-                v23,
-                v22,
-                v21,
-                v20,
-                v19,
-                v24,
-                v25,
-                v26,
-                v27,
-                v28,
-                v29,
-                v30,
-                v31,
-                v32,
-                v33,
-                v34,
-                v35,
-                v36,
-                *(float *)&v18);
+                colorLtCyan, //KISAKTODO: args not correct
+                0 // style
+            );
         }
         else
         {
@@ -146,7 +128,7 @@ void __cdecl CG_DrawCenterString(
 
 int __cdecl CG_DrawFriendlyFire(const cg_s *cgameGlob)
 {
-    playerState_s *p_predictedPlayerState; // r31
+    const playerState_s *p_predictedPlayerState; // r31
     double fWeaponPosFrac; // fp30
     int weapFlags; // r11
     unsigned int ViewmodelWeaponIndex; // r3
@@ -191,6 +173,7 @@ int __cdecl CG_DrawFriendlyFire(const cg_s *cgameGlob)
 }
 
 // local variable allocation has failed, the output may be wrong!
+static int lastTime;
 void __cdecl CG_DrawFlashFade(int localClientNum)
 {
     ScreenFade *v2; // r31
@@ -426,62 +409,29 @@ void __cdecl CG_CheckForPlayerInput(int localClientNum)
 {
     int CurrentCmdNumber; // r3
     int v3; // r30
-    char buttons; // r30
+    int buttons; // r30
     int v5; // r28
-    int v6; // r10 OVERLAPPED
-    __int128 v7; // r9 OVERLAPPED
-    int v8; // r29
-    __int64 v9; // [sp+8h] [-128h]
-    __int64 v10; // [sp+10h] [-120h]
-    __int64 v11; // [sp+18h] [-118h]
-    __int64 v12; // [sp+20h] [-110h]
-    __int64 v13; // [sp+28h] [-108h]
-    __int64 v14; // [sp+30h] [-100h]
-    __int64 v15; // [sp+38h] [-F8h]
-    __int64 v16; // [sp+40h] [-F0h]
-    __int64 v17; // [sp+48h] [-E8h]
-    __int64 v18; // [sp+50h] [-E0h]
-    int v19[12]; // [sp+58h] [-D8h] BYREF
-    usercmd_s v20; // [sp+90h] [-A0h] BYREF
-    usercmd_s v21; // [sp+D0h] [-60h] BYREF
+    int v6; // r29
+    _BYTE v7[48]; // [sp+58h] [-D8h] BYREF
+    usercmd_s v8; // [sp+90h] [-A0h] BYREF
+    usercmd_s v9; // [sp+D0h] [-60h] BYREF
 
     CurrentCmdNumber = CL_GetCurrentCmdNumber(localClientNum);
     v3 = CurrentCmdNumber;
     if (CurrentCmdNumber > 1)
     {
-        CL_GetUserCmd(localClientNum, CurrentCmdNumber - 1, &v20);
-        CL_GetUserCmd(localClientNum, v3, &v21);
-        buttons = v21.buttons;
-        v5 = v21.buttons ^ v20.buttons;
-        memcpy(v19, v21.angles, sizeof(v19));
-        v6 = v21.buttons;
-        DWORD1(v7) = LODWORD(v20.gunYOfs);
-        *((_QWORD *)&v7 + 1) = *(_QWORD *)&v20.meleeChargeYaw;
-        v8 = CG_CheckPlayerMovement(
-            __SPAIR64__(v20.angles[0], v20.angles[2]),
-            __SPAIR64__(*(unsigned int *)&v20.upmove, LODWORD(v20.gunYaw)),
-            *(__int64 *)((char *)&v7 + 4),
-            *(__int64 *)&v6,
-            v9,
-            v10,
-            v11,
-            v12,
-            v13,
-            v14,
-            v15,
-            v16,
-            v17,
-            v18,
-            v19[0],
-            v19[1],
-            v19[2],
-            v19[3]);
+        CL_GetUserCmd(localClientNum, CurrentCmdNumber - 1, &v8);
+        CL_GetUserCmd(localClientNum, v3, &v9);
+        buttons = v9.buttons;
+        v5 = v9.buttons ^ v8.buttons;
+        memcpy(v7, v9.angles, sizeof(v7));
+        v6 = CG_CheckPlayerMovement(*(usercmd_s *)v8.angles[0], *(usercmd_s *)v8.angles[2]);
         if (CG_CheckPlayerWeaponUsage(localClientNum, buttons))
-            v8 = 1;
-        if ((v21.buttons & 0xC000) != 0)
+            v6 = 1;
+        if ((v9.buttons & 0xC000) != 0)
         {
             CG_MenuShowNotify(localClientNum, 4);
-            v8 = 1;
+            v6 = 1;
         }
         if ((v5 & 0x1300) != 0)
         {
@@ -490,9 +440,9 @@ void __cdecl CG_CheckForPlayerInput(int localClientNum)
         }
         else
         {
-            if ((v21.buttons & 0x1300) != 0)
+            if ((v9.buttons & 0x1300) != 0)
                 CG_MenuShowNotify(localClientNum, 3);
-            if (v8 || (v5 & 0xFFFFECFF) != 0)
+            if (v6 || (v5 & 0xFFFFECFF) != 0)
                 CG_MenuShowNotify(localClientNum, 2);
         }
     }
@@ -824,10 +774,12 @@ void __cdecl CG_ScreenBlur(int localClientNum)
     int timeEnd; // r11
     __int64 v6; // r11
     int v7; // r11
-    __int128 v8; // r11
+    int v8[4]; // r11
     double v9; // fp31
     double end; // fp0
     double v11; // fp31
+    double _FP12; // fp12
+    double _FP0; // fp0
 
     if (localClientNum)
         MyAssertHandler(
@@ -875,10 +827,10 @@ void __cdecl CG_ScreenBlur(int localClientNum)
                     "%s",
                     "scrBlur->timeEnd - scrBlur->timeStart > 0.0f");
             v7 = v2->timeStart;
-            DWORD1(v8) = time - v7;
-            DWORD2(v8) = time - v7;
-            LODWORD(v8) = v2->timeEnd - v7;
-            v9 = (float)((float)*(__int64 *)((char *)&v8 + 4) / (float)(__int64)v8);
+            v8[1] = time - v7;
+            v8[2] = time - v7;
+            v8[3] = v2->timeEnd - v7;
+            v9 = (float)((float)*(__int64 *)&v8[1] / (float)*(__int64 *)&v8[2]);
             if (v9 < 0.0 || v9 >= 1.0)
                 MyAssertHandler(
                     "c:\\trees\\cod3\\cod3src\\src\\cgame\\cg_draw.cpp",
@@ -890,21 +842,41 @@ void __cdecl CG_ScreenBlur(int localClientNum)
             end = v2->end;
             v11 = (float)((float)((float)((float)1.0 - (float)v9) * v2->start) + (float)(v2->end * (float)v9));
         }
-        _FP12 = (float)((float)end - v2->start);
-        __asm { fsel      f12, f12, f13, f0 }
-        if (v11 < _FP12)
-            goto LABEL_21;
-        _FP12 = (float)(v2->start - (float)end);
-        __asm { fsel      f0, f12, f13, f0 }
-        if (v11 > _FP0)
-            LABEL_21:
-        MyAssertHandler(
-            "c:\\trees\\cod3\\cod3src\\src\\cgame\\cg_draw.cpp",
-            668,
-            0,
-            "%s\n\t(blur) = %g",
-            HIDWORD(v11),
-            LODWORD(v11));
+
+        // fsel f0, f1, f2, f3  --------  f0 = ( f1 >= 0 ? f2 : f3 )
+
+        //_FP12 = (float)((float)end - v2->start);
+        //__asm { fsel      f12, f12, f13, f0 }
+        //
+        //if (v11 < _FP12)
+        //    goto LABEL_21;
+        //
+        //_FP12 = (float)(v2->start - (float)end);
+        //__asm { fsel      f0, f12, f13, f0 }
+        //
+        //if (v11 > _FP0)
+        //    LABEL_21:
+
+        float _FP12 = ((float)end - v2->start);
+        _FP12 = (_FP12 >= 0.0f) ? v2->start : end;
+
+        //if (v11 < _FP12)
+        //    goto LABEL_21;
+
+        float _FP0 = (v2->start - (float)end);
+        _FP0 = (_FP0 >= 0.0f) ? v2->start : end;
+
+        //if (v11 > _FP0)
+        //    LABEL_21:
+
+
+        //MyAssertHandler(
+        //    "c:\\trees\\cod3\\cod3src\\src\\cgame\\cg_draw.cpp",
+        //    668,
+        //    0,
+        //    "%s\n\t(blur) = %g",
+        //    HIDWORD(v11),
+        //    LODWORD(v11));
         v2->radius = v11;
     }
 }
@@ -959,7 +931,7 @@ void __cdecl CG_DrawFadeInCinematic(int localClientNum)
     if (v2)
     {
         if (cg_cinematicFullscreen->current.enabled)
-            R_Cinematic_DrawStretchPic_Letterboxed(localClientNum);
+            R_Cinematic_DrawStretchPic_Letterboxed();
     }
 }
 
@@ -968,11 +940,11 @@ void __cdecl CG_DrawFriendOverlay(int localClientNum)
     cg_s *LocalClientGlobals; // r30
     const char *ConfigString; // r3
     const char *v4; // r31
-    const char *v5; // r25
+    const char *friendName; // r25
     int v6; // r4
     const dvar_s *v7; // r11
     const dvar_s *v8; // r10
-    const ScreenPlacement *v9; // r31
+    const ScreenPlacement *place; // r31
     Font_s *FontHandle; // r27
     int v11; // r7
     double v12; // fp8
@@ -982,57 +954,6 @@ void __cdecl CG_DrawFriendOverlay(int localClientNum)
     double v16; // fp4
     const char *v17; // r3
     const char *v18; // r28
-    char *v19; // r3
-    double v20; // fp8
-    double v21; // fp7
-    double v22; // fp6
-    double v23; // fp5
-    double v24; // fp4
-    const float *v25; // [sp+8h] [-E8h]
-    const float *v26; // [sp+8h] [-E8h]
-    bool v27; // [sp+Fh] [-E1h]
-    bool v28; // [sp+Fh] [-E1h]
-    bool v29; // [sp+13h] [-DDh]
-    bool v30; // [sp+13h] [-DDh]
-    int v31; // [sp+14h] [-DCh]
-    int v32; // [sp+14h] [-DCh]
-    int v33; // [sp+18h] [-D8h]
-    int v34; // [sp+18h] [-D8h]
-    int v35; // [sp+1Ch] [-D4h]
-    int v36; // [sp+1Ch] [-D4h]
-    int v37; // [sp+20h] [-D0h]
-    int v38; // [sp+20h] [-D0h]
-    int v39; // [sp+24h] [-CCh]
-    int v40; // [sp+24h] [-CCh]
-    int v41; // [sp+28h] [-C8h]
-    int v42; // [sp+28h] [-C8h]
-    int v43; // [sp+2Ch] [-C4h]
-    int v44; // [sp+2Ch] [-C4h]
-    int v45; // [sp+30h] [-C0h]
-    int v46; // [sp+30h] [-C0h]
-    float v47; // [sp+38h] [-B8h]
-    float v48; // [sp+38h] [-B8h]
-    int v49; // [sp+40h] [-B0h]
-    int v50; // [sp+40h] [-B0h]
-    float v51; // [sp+48h] [-A8h]
-    float v52; // [sp+48h] [-A8h]
-    int v53; // [sp+50h] [-A0h]
-    int v54; // [sp+50h] [-A0h]
-    int v55; // [sp+54h] [-9Ch]
-    int v56; // [sp+54h] [-9Ch]
-    int v57; // [sp+58h] [-98h]
-    int v58; // [sp+58h] [-98h]
-    int v59; // [sp+60h] [-90h]
-    int v60; // [sp+60h] [-90h]
-    int v61; // [sp+68h] [-88h]
-    int v62; // [sp+68h] [-88h]
-    int v63; // [sp+70h] [-80h]
-    int v64; // [sp+70h] [-80h]
-    int v65; // [sp+74h] [-7Ch]
-    int v66; // [sp+74h] [-7Ch]
-    int v67; // [sp+78h] [-78h]
-    int v68; // [sp+78h] [-78h]
-    int v69; // [sp+7Ch] [-74h]
     int v70; // [sp+7Ch] [-74h]
     int integer; // [sp+80h] [-70h] BYREF
     float v72; // [sp+84h] [-6Ch]
@@ -1049,7 +970,7 @@ void __cdecl CG_DrawFriendOverlay(int localClientNum)
         {
             if (*ConfigString && I_stricmp(ConfigString, "none") && !hud_missionFailed->current.enabled)
             {
-                v5 = SEH_LocalizeTextMessage(v4, "Friend Name", LOCMSG_SAFE);
+                friendName = SEH_LocalizeTextMessage(v4, "Friend Name", LOCMSG_SAFE);
                 v6 = !friendlyNameFontObjective->current.enabled ? 0 : 6;
                 if ((LocalClientGlobals->predictedPlayerState.weapFlags & 0x10) != 0)
                 {
@@ -1069,112 +990,49 @@ void __cdecl CG_DrawFriendOverlay(int localClientNum)
                 *(float *)&v75.info.gameFlags = v8->current.vector[1];
                 *(float *)&v75.info.drawSurf.fields = v8->current.vector[2];
                 *((float *)&v75.info.drawSurf.packed + 1) = v8->current.vector[3];
-                v9 = &scrPlaceView[localClientNum];
-                FontHandle = UI_GetFontHandle(v9, v6, friendlyNameFontSize->current.value);
-                LOBYTE(v69) = 0;
-                LOBYTE(v65) = 0;
+                place = &scrPlaceView[localClientNum];
+                FontHandle = UI_GetFontHandle(place, v6, friendlyNameFontSize->current.value);
                 UI_DrawTextWithGlow(
-                    v9,
-                    v5,
+                    place,
+                    friendName,
                     0x7FFFFFFF,
                     FontHandle,
-                    25.0,
-                    -2.0,
-                    v11,
-                    (int)&v75,
+                    25.0, // x
+                    -2.0, // y
+                    2, // KISAKTODO: args bad
+                    2,
                     friendlyNameFontSize->current.value,
                     (const float *)2,
                     2,
-                    v16,
-                    v15,
-                    v14,
-                    v13,
-                    v12,
-                    v25,
-                    v27,
-                    v29,
-                    v31,
-                    v33,
-                    v35,
-                    v37,
-                    v39,
-                    v41,
-                    v43,
-                    v45,
-                    v47,
-                    v49,
-                    v51,
-                    v53,
-                    v55,
-                    v57,
-                    (int)&integer,
-                    v59,
-                    3,
-                    v61,
-                    &v75,
-                    v63,
-                    v65,
-                    v67,
-                    v69,
-                    integer,
-                    SLOBYTE(v72));
+                    colorBlue,
+                    false,
+                    false);
                 v17 = CL_GetConfigString(localClientNum, 0xAu);
                 v18 = v17;
                 if (v17 && *v17)
                 {
                     if (I_stricmp(v17, "none"))
                     {
-                        v19 = UI_SafeTranslateString(v18);
-                        LOBYTE(v70) = 0;
-                        LOBYTE(v66) = 0;
-                        v72 = 1.0;
-                        v73 = 1.0;
-                        v74 = 0.69999999;
+                        //LOBYTE(v70) = 0;
+                        //LOBYTE(v66) = 0;
+                        //v72 = 1.0;
+                        //v73 = 1.0;
+                        //v74 = 0.69999999;
                         UI_DrawTextWithGlow(
-                            v9,
-                            v19,
+                            place,
+                            UI_SafeTranslateString(v18),
                             0x7FFFFFFF,
                             FontHandle,
-                            25.0,
-                            20.0,
-                            (int)&integer,
-                            (int)&v75,
-                            friendlyNameFontSize->current.value,
-                            (const float *)2,
+                            25.0, // x
+                            20.0, // y
                             2,
-                            v24,
-                            v23,
-                            v22,
-                            v21,
-                            v20,
-                            v26,
-                            v28,
-                            v30,
-                            v32,
-                            v34,
-                            v36,
-                            v38,
-                            v40,
-                            v42,
-                            v44,
-                            v46,
-                            v48,
-                            v50,
-                            v52,
-                            v54,
-                            v56,
-                            v58,
-                            (int)&integer,
-                            v60,
-                            3,
-                            v62,
-                            &v75,
-                            v64,
-                            v66,
-                            v68,
-                            v70,
-                            COERCE_INT(1.0),
-                            SLOBYTE(v72));
+                            2,
+                            friendlyNameFontSize->current.value,
+                            colorLtCyan,
+                            0,
+                            colorBlue,
+                            false,
+                            false); // KISAKTODO: args bad
                     }
                 }
             }
@@ -1214,7 +1072,7 @@ void __cdecl CG_UpdateTimeScale(cg_s *cgameGlob)
     int *p_timeScaleTimeStart; // r28
     __int64 v5; // r11
     int *p_timeScaleTimeEnd; // r30
-    __int128 v7; // r11
+    int v7[4]; // r11
     double timeScaleEnd; // fp1
 
     v2 = Sys_Milliseconds();
@@ -1242,14 +1100,14 @@ void __cdecl CG_UpdateTimeScale(cg_s *cgameGlob)
                     0,
                     "%s",
                     "cgameGlob->timeScaleTimeEnd - cgameGlob->timeScaleTimeStart > 0.0f");
-            DWORD1(v7) = *p_timeScaleTimeEnd;
-            DWORD2(v7) = v3 - *p_timeScaleTimeStart;
-            LODWORD(v7) = *p_timeScaleTimeEnd - *p_timeScaleTimeStart;
+            v7[1] = *p_timeScaleTimeEnd;
+            v7[2] = v3 - *p_timeScaleTimeStart;
+            v7[3] = *p_timeScaleTimeEnd - *p_timeScaleTimeStart;
             Com_SetTimeScale((float)((float)((float)((float)1.0
-                - (float)((float)*(__int64 *)((char *)&v7 + 4) / (float)(__int64)v7))
+                - (float)((float)*(__int64 *)&v7[1] / (float)*(__int64 *)&v7[2]))
                 * cgameGlob->timeScaleStart)
                 + (float)(cgameGlob->timeScaleEnd
-                    * (float)((float)*(__int64 *)((char *)&v7 + 4) / (float)(__int64)v7))));
+                    * (float)((float)*(__int64 *)&v7[1] / (float)*(__int64 *)&v7[2]))));
         }
     }
 }
@@ -1275,315 +1133,80 @@ const char strButtons[17] =
   '\0'
 };
 
-void __cdecl DrawFontTest(int localClientNum)
+void DrawFontTest(int localClientNum)
 {
     const ScreenPlacement *v1; // r31
     Font_s *FontHandle; // r25
-    int v3; // r8
-    int v4; // r7
-    double v5; // fp8
-    double v6; // fp7
-    double v7; // fp6
-    double v8; // fp5
-    double v9; // fp4
-    Font_s *v10; // r23
-    int v11; // r8
-    int v12; // r7
-    double v13; // fp8
-    double v14; // fp7
-    double v15; // fp6
-    double v16; // fp5
-    double v17; // fp4
-    Font_s *v18; // r23
-    int v19; // r8
-    int v20; // r7
-    double v21; // fp8
-    double v22; // fp7
-    double v23; // fp6
-    double v24; // fp5
-    double v25; // fp4
-    Font_s *v26; // r23
-    int v27; // r8
-    int v28; // r7
-    double v29; // fp8
-    double v30; // fp7
-    double v31; // fp6
-    double v32; // fp5
-    double v33; // fp4
-    Font_s *v34; // r23
-    int v35; // r8
-    int v36; // r7
-    double v37; // fp8
-    double v38; // fp7
-    double v39; // fp6
-    double v40; // fp5
-    double v41; // fp4
-    float v42; // [sp+8h] [-2B8h]
-    float v43; // [sp+8h] [-2B8h]
-    float v44; // [sp+8h] [-2B8h]
-    float v45; // [sp+8h] [-2B8h]
-    float v46; // [sp+8h] [-2B8h]
-    float v47; // [sp+10h] [-2B0h]
-    float v48; // [sp+10h] [-2B0h]
-    float v49; // [sp+10h] [-2B0h]
-    float v50; // [sp+10h] [-2B0h]
-    float v51; // [sp+10h] [-2B0h]
-    float v52; // [sp+18h] [-2A8h]
-    float v53; // [sp+18h] [-2A8h]
-    float v54; // [sp+18h] [-2A8h]
-    float v55; // [sp+18h] [-2A8h]
-    float v56; // [sp+18h] [-2A8h]
-    float v57; // [sp+20h] [-2A0h]
-    float v58; // [sp+20h] [-2A0h]
-    float v59; // [sp+20h] [-2A0h]
-    float v60; // [sp+20h] [-2A0h]
-    float v61; // [sp+20h] [-2A0h]
-    float v62; // [sp+28h] [-298h]
-    float v63; // [sp+28h] [-298h]
-    float v64; // [sp+28h] [-298h]
-    float v65; // [sp+28h] [-298h]
-    float v66; // [sp+28h] [-298h]
-    float v67; // [sp+30h] [-290h]
-    float v68; // [sp+30h] [-290h]
-    float v69; // [sp+30h] [-290h]
-    float v70; // [sp+30h] [-290h]
-    float v71; // [sp+30h] [-290h]
-    float v72; // [sp+38h] [-288h]
-    float v73; // [sp+38h] [-288h]
-    float v74; // [sp+38h] [-288h]
-    float v75; // [sp+38h] [-288h]
-    float v76; // [sp+38h] [-288h]
-    float v77; // [sp+40h] [-280h]
-    float v78; // [sp+40h] [-280h]
-    float v79; // [sp+40h] [-280h]
-    float v80; // [sp+40h] [-280h]
-    float v81; // [sp+40h] [-280h]
-    float v82; // [sp+48h] [-278h]
-    float v83; // [sp+48h] [-278h]
-    float v84; // [sp+48h] [-278h]
-    float v85; // [sp+48h] [-278h]
-    float v86; // [sp+48h] [-278h]
-    float v87; // [sp+50h] [-270h]
-    float v88; // [sp+50h] [-270h]
-    float v89; // [sp+50h] [-270h]
-    float v90; // [sp+50h] [-270h]
-    float v91; // [sp+50h] [-270h]
-    float v92; // [sp+58h] [-268h]
-    float v93; // [sp+58h] [-268h]
-    float v94; // [sp+58h] [-268h]
-    float v95; // [sp+58h] [-268h]
-    float v96; // [sp+58h] [-268h]
-    float v97; // [sp+60h] [-260h]
-    float v98; // [sp+60h] [-260h]
-    float v99; // [sp+60h] [-260h]
-    float v100; // [sp+60h] [-260h]
-    float v101; // [sp+60h] [-260h]
-    float v102; // [sp+68h] [-258h]
-    float v103; // [sp+68h] [-258h]
-    float v104; // [sp+68h] [-258h]
-    float v105; // [sp+68h] [-258h]
-    float v106; // [sp+68h] [-258h]
-    float v107[148]; // [sp+70h] [-250h] BYREF
+
+    char txt[512]; // [sp+70h] [-250h] BYREF
+
+    const float MY_X = -25.0f;
 
     v1 = &scrPlaceView[localClientNum];
     FontHandle = UI_GetFontHandle(v1, 1, 0.40000001);
     Com_sprintf(
-        (char *)v107,
+        txt,
         512,
         "%s: %s All those moments will be lost in time, like tears in rain.",
         FontHandle->fontName,
         strButtons);
-    UI_FilterStringForButtonAnimation((char *)v107, 0x200u);
-    UI_DrawText(
-        v1,
-        (const char *)v107,
-        0x7FFFFFFF,
-        FontHandle,
-        -25.0,
-        10.0,
-        v4,
-        v3,
-        0.40000001,
-        (const float *)1,
-        1,
-        v9,
-        v8,
-        v7,
-        v6,
-        v5,
-        v42,
-        v47,
-        v52,
-        v57,
-        v62,
-        v67,
-        v72,
-        v77,
-        v82,
-        v87,
-        v92,
-        v97,
-        v102,
-        v107[0]);
-    v10 = UI_GetFontHandle(v1, 2, 0.40000001);
-    Com_sprintf(
-        (char *)v107,
-        512,
-        "%s: %s All those moments will be lost in time, like tears in rain.",
-        v10->fontName,
-        strButtons);
-    UI_FilterStringForButtonAnimation((char *)v107, 0x200u);
-    UI_DrawText(
-        v1,
-        (const char *)v107,
-        0x7FFFFFFF,
-        v10,
-        -25.0,
-        35.0,
-        v12,
-        v11,
-        0.40000001,
-        (const float *)1,
-        1,
-        v17,
-        v16,
-        v15,
-        v14,
-        v13,
-        v43,
-        v48,
-        v53,
-        v58,
-        v63,
-        v68,
-        v73,
-        v78,
-        v83,
-        v88,
-        v93,
-        v98,
-        v103,
-        v107[0]);
-    v18 = UI_GetFontHandle(v1, 3, 0.40000001);
-    Com_sprintf(
-        (char *)v107,
-        512,
-        "%s: %s All those moments will be lost in time, like tears in rain.",
-        v18->fontName,
-        strButtons);
-    UI_FilterStringForButtonAnimation((char *)v107, 0x200u);
-    UI_DrawText(
-        v1,
-        (const char *)v107,
-        0x7FFFFFFF,
-        v18,
-        -25.0,
-        60.0,
-        v20,
-        v19,
-        0.40000001,
-        (const float *)1,
-        1,
-        v25,
-        v24,
-        v23,
-        v22,
-        v21,
-        v44,
-        v49,
-        v54,
-        v59,
-        v64,
-        v69,
-        v74,
-        v79,
-        v84,
-        v89,
-        v94,
-        v99,
-        v104,
-        v107[0]);
-    v26 = UI_GetFontHandle(v1, 5, 0.40000001);
-    Com_sprintf(
-        (char *)v107,
-        512,
-        "%s: %s All those moments will be lost in time, like tears in rain.",
-        v26->fontName,
-        strButtons);
-    UI_FilterStringForButtonAnimation((char *)v107, 0x200u);
-    UI_DrawText(
-        v1,
-        (const char *)v107,
-        0x7FFFFFFF,
-        v26,
-        -25.0,
-        85.0,
-        v28,
-        v27,
-        0.40000001,
-        (const float *)1,
-        1,
-        v33,
-        v32,
-        v31,
-        v30,
-        v29,
-        v45,
-        v50,
-        v55,
-        v60,
-        v65,
-        v70,
-        v75,
-        v80,
-        v85,
-        v90,
-        v95,
-        v100,
-        v105,
-        v107[0]);
-    v34 = UI_GetFontHandle(v1, 6, 0.40000001);
-    Com_sprintf(
-        (char *)v107,
-        512,
-        "%s: %s All those moments will be lost in time, like tears in rain.",
-        v34->fontName,
-        strButtons);
-    UI_FilterStringForButtonAnimation((char *)v107, 0x200u);
-    UI_DrawText(
-        v1,
-        (const char *)v107,
-        0x7FFFFFFF,
-        v34,
-        -25.0,
-        110.0,
-        v36,
-        v35,
-        0.40000001,
-        (const float *)1,
-        1,
-        v41,
-        v40,
-        v39,
-        v38,
-        v37,
-        v46,
-        v51,
-        v56,
-        v61,
-        v66,
-        v71,
-        v76,
-        v81,
-        v86,
-        v91,
-        v96,
-        v101,
-        v106,
-        v107[0]);
+
+    int horzAlign = 0;
+    int vertAlign = 0;
+
+    UI_FilterStringForButtonAnimation(txt, 0x200u);
+    UI_DrawText(v1, txt, 0x7FFFFFFF, FontHandle, MY_X, 10.0f, horzAlign, vertAlign, 0.4f, colorWhite, 1);
+    Font_s *v5 = UI_GetFontHandle(v1, 2, 0.4f);
+    Com_sprintf(txt, 512, "%s: %s All those moments will be lost in time, like tears in rain.", v5->fontName, strButtons);
+    UI_FilterStringForButtonAnimation(txt, 0x200u);
+    UI_DrawText(v1, txt, 0x7FFFFFFF, v5, MY_X, 35.0f, horzAlign, vertAlign, 0.4f, colorWhite, 1);
+    Font_s *v8 = UI_GetFontHandle(v1, 3, 0.4f);
+    Com_sprintf(txt, 512, "%s: %s All those moments will be lost in time, like tears in rain.", v8->fontName, strButtons);
+    UI_FilterStringForButtonAnimation(txt, 0x200u);
+    UI_DrawText(v1, txt, 0x7FFFFFFF, v8, MY_X, 60.0f, horzAlign, vertAlign, 0.4f, colorWhite, 1);
+    Font_s *v11 = UI_GetFontHandle(v1, 5, 0.40000001);
+    Com_sprintf(txt, 512, "%s: %s All those moments will be lost in time, like tears in rain.", v11->fontName, strButtons);
+    UI_FilterStringForButtonAnimation(txt, 0x200u);
+    UI_DrawText(v1, txt, 0x7FFFFFFF, v11, MY_X, 85.0f, horzAlign, vertAlign, 0.4f, colorWhite, 1);
+    Font_s *v14 = UI_GetFontHandle(v1, 6, 0.4f);
+    Com_sprintf(txt, 512, "%s: %s All those moments will be lost in time, like tears in rain.", v14->fontName, strButtons);
+    UI_FilterStringForButtonAnimation(txt, 0x200u);
+    UI_DrawText(v1, txt, 0x7FFFFFFF, v14, MY_X, 110.0f, horzAlign, vertAlign, 0.4f, colorWhite, 1);
 }
 
-void __cdecl DrawViewmodelInfo(int localClientNum)
+static const char *WeaponStateNames_8[27] =
+{
+  "WEAPON_READY",
+  "WEAPON_RAISING",
+  "WEAPON_RAISING_ALTSWITCH",
+  "WEAPON_DROPPING",
+  "WEAPON_DROPPING_QUICK",
+  "WEAPON_FIRING",
+  "WEAPON_RECHAMBERING",
+  "WEAPON_RELOADING",
+  "WEAPON_RELOADING_INTERUPT",
+  "WEAPON_RELOAD_START",
+  "WEAPON_RELOAD_START_INTERUPT",
+  "WEAPON_RELOAD_END",
+  "WEAPON_MELEE_INIT",
+  "WEAPON_MELEE_FIRE",
+  "WEAPON_MELEE_END",
+  "WEAPON_OFFHAND_INIT",
+  "WEAPON_OFFHAND_PREPARE",
+  "WEAPON_OFFHAND_HOLD",
+  "WEAPON_OFFHAND_START",
+  "WEAPON_OFFHAND",
+  "WEAPON_OFFHAND_END",
+  "WEAPON_DETONATING",
+  "WEAPON_SPRINT_RAISE",
+  "WEAPON_SPRINT_LOOP",
+  "WEAPON_SPRINT_DROP",
+  "WEAPON_NIGHTVISION_WEAR",
+  "WEAPON_NIGHTVISION_REMOVE"
+};
+
+
+void DrawViewmodelInfo(int localClientNum)
 {
     int ViewmodelWeaponIndex; // r31
     Font_s *FontHandle; // r24
@@ -1597,30 +1220,11 @@ void __cdecl DrawViewmodelInfo(int localClientNum)
     const char *v11; // r10
     const char **v12; // r11
     const char *v13; // r9
-    float *v14; // r11
-    int v15; // r9
+    char *v14; // r11
     int v16; // r7
-    double v17; // fp8
-    double v18; // fp7
-    double v19; // fp6
-    double v20; // fp5
-    double v21; // fp4
-    const char *v22; // [sp+8h] [-8B8h]
-    float v23; // [sp+8h] [-8B8h]
-    const char *v24; // [sp+Ch] [-8B4h]
-    float v25; // [sp+10h] [-8B0h]
-    float v26; // [sp+18h] [-8A8h]
-    float v27; // [sp+20h] [-8A0h]
-    float v28; // [sp+28h] [-898h]
-    float v29; // [sp+30h] [-890h]
-    float v30; // [sp+38h] [-888h]
-    float v31; // [sp+40h] [-880h]
-    float v32; // [sp+48h] [-878h]
-    float v33; // [sp+50h] [-870h]
-    float v34; // [sp+58h] [-868h]
-    double fWeaponPosFrac; // [sp+60h] [-860h]
-    float v36; // [sp+68h] [-858h]
-    float v37[532]; // [sp+70h] [-850h] BYREF
+    const char *v17; // [sp+8h] [-8B8h]
+    const char *v18; // [sp+Ch] [-8B4h]
+    char v19[2128]; // [sp+70h] [-850h] BYREF
 
     if (localClientNum)
         MyAssertHandler(
@@ -1655,10 +1259,8 @@ void __cdecl DrawViewmodelInfo(int localClientNum)
             v13 = "none";
         if (name)
             v9 = name;
-        v36 = *(float *)&ViewFov;
-        fWeaponPosFrac = cgArray[0].predictedPlayerState.fWeaponPosFrac;
         Com_sprintf(
-            (char *)v37,
+            v19,
             2048,
             "^6%s\n"
             "^7Weapon: ^2%s^7 - ^5%s\n"
@@ -1674,52 +1276,19 @@ void __cdecl DrawViewmodelInfo(int localClientNum)
             v9,
             v13,
             v11,
-            v22,
-            v24,
+            v17,
+            v18,
             cgArray[0].predictedPlayerState.fWeaponPosFrac,
             ViewFov);
-        v14 = v37;
-        do
-        {
-            v15 = *(unsigned __int8 *)v14;
-            v14 = (float *)((char *)v14 + 1);
-        } while (v15);
+        v14 = v19;
+        while (*v14++)
+            ;
         DObjDisplayAnimToBuffer(
             LocalClientWeaponInfo->viewModelDObj,
             "",
-            (char *)v37 + (char *)v14 - (char *)v37 - 1,
-            2048 - ((char *)v14 - (char *)v37 - 1));
-        UI_DrawText(
-            &scrPlaceView[localClientNum],
-            (const char *)v37,
-            2048,
-            FontHandle,
-            0.0,
-            20.0,
-            v16,
-            3,
-            0.25,
-            (const float *)1,
-            1,
-            v21,
-            v20,
-            v19,
-            v18,
-            v17,
-            v23,
-            v25,
-            v26,
-            v27,
-            v28,
-            v29,
-            v30,
-            v31,
-            v32,
-            v33,
-            v34,
-            *(float *)&fWeaponPosFrac,
-            v36,
-            v37[0]);
+            &v19[v14 - v19 - 1],
+            2048 - (v14 - v19 - 1));
+        UI_DrawText(&scrPlaceView[localClientNum], v19, 2048, FontHandle, 0.0, 20.0, v16, 3, 0.25, (const float *)1, 1);
     }
 }
 

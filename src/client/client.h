@@ -889,7 +889,7 @@ struct clientConnection_t
 
 void __cdecl CL_SetLocalClientConnectionState(int32_t localClientNum, connstate_t connstate);
 void __cdecl TRACK_cl_cgame();
-void __cdecl CL_GetScreenDimensions(uint32_t *width, uint32_t *height, float *aspect);
+void __cdecl CL_GetScreenDimensions(int32_t *width, int32_t *height, float *aspect);
 float __cdecl CL_GetScreenAspectRatioDisplayPixel();
 int32_t __cdecl CL_GetUserCmd(int32_t localClientNum, int32_t cmdNumber, usercmd_s *ucmd);
 int32_t __cdecl CL_GetCurrentCmdNumber(int32_t localClientNum);

@@ -2,11 +2,16 @@
 #include "cg_public.h"
 
 #include <client/client.h>
-#include <client_mp/client_mp.h>
-#include <cgame_mp/cg_local_mp.h>
 
 #include <gfx_d3d/r_rendercmds.h>
 #include <universal/q_parse.h>
+
+#ifdef KISAK_MP
+#include <client_mp/client_mp.h>
+#include <cgame_mp/cg_local_mp.h>
+#elif KISAK_SP
+#include "cg_main.h"
+#endif
 
 const float sign[4][2] =
 {
@@ -515,6 +520,7 @@ void __cdecl CG_TeamColor(int32_t team, const char *prefix, float *color)
     }
 }
 
+#ifdef KISAK_MP
 void __cdecl CG_RelativeTeamColor(int32_t clientNum, const char *prefix, float *color, int32_t localClientNum)
 {
     char dvarName[32]; // [esp+Ch] [ebp-28h] BYREF
@@ -542,4 +548,4 @@ void __cdecl CG_RelativeTeamColor(int32_t clientNum, const char *prefix, float *
     Dvar_GetUnpackedColorByName(dvarName, color);
     color[3] = savedAlpha;
 }
-
+#endif

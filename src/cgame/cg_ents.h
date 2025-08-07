@@ -21,7 +21,6 @@ struct GfxSceneEntity;
 
 int __cdecl CompressUnit(double unit);
 void __cdecl LocalConvertQuatToMat(const DObjAnimMat *mat, float (*axis)[3]);
-unsigned int __cdecl Com_GetPrimaryLightCount();
 const ComPrimaryLight *__cdecl Com_GetPrimaryLight(unsigned int primaryLightIndex);
 void __cdecl CG_LockLightingOrigin(centity_s *cent, float *lightingOrigin);
 int __cdecl CG_GetRenderFlagForRefEntity(__int16 eFlags);

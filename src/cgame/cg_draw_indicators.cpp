@@ -1,10 +1,16 @@
 #include "cg_local.h"
 #include "cg_public.h"
 
-#include <cgame_mp/cg_local_mp.h>
 #include <client/client.h>
-#include <client_mp/client_mp.h>
 #include <gfx_d3d/r_rendercmds.h>
+
+#ifdef KISAK_MP
+#include <client_mp/client_mp.h>
+#include <cgame_mp/cg_local_mp.h>
+#elif KISAK_SP
+#include <cgame/cg_main.h>
+#include <xanim/xanim.h>
+#endif
 
 uint32_t g_hudGrenadeCount;
 HudGrenade g_hudGrenades[32];
@@ -286,8 +292,10 @@ void __cdecl CG_DrawGrenadeIndicators(int32_t localClientNum)
 
     cgameGlob = CG_GetLocalClientGlobals(localClientNum);
     if (cgameGlob->nextSnap
+#ifdef KISAK_MP
         && cgameGlob->predictedPlayerState.pm_type != PM_SPECTATOR
         && (cgameGlob->predictedPlayerState.otherFlags & 2) == 0
+#endif
         && g_hudGrenadeCount)
     {
         if (CG_GetWeapReticleZoom(cgameGlob, &angle))
@@ -315,16 +323,19 @@ void __cdecl CG_DrawGrenadeIndicators(int32_t localClientNum)
             v6 = cg_hudGrenadePointerPulseFreq->current.value * ((double)cgameGlob->time * 0.006283185444772243);
             v4 = sin(v6);
             color[3] = v4 * amplitude + bias;
+
             v3 = color[3] - 1.0;
             if (v3 < 0.0)
                 v5 = color[3];
             else
                 v5 = 1.0;
+
             v2 = 0.0 - color[3];
             if (v2 < 0.0)
                 v1 = v5;
             else
                 v1 = 0.0;
+
             color[3] = v1;
             CG_DrawGrenadePointer(localClientNum, centerX, centerY, grenadeOffset, color);
             CG_DrawGrenadeIcon(localClientNum, centerX, centerY, grenadeOffset, color, g_hudGrenades[entityIndex].material);

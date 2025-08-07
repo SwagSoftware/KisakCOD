@@ -77,13 +77,6 @@ void __cdecl LocalConvertQuatToMat(const DObjAnimMat *mat, float (*axis)[3])
     (*axis)[8] = (float)1.0 - (float)v12;
 }
 
-unsigned int __cdecl Com_GetPrimaryLightCount()
-{
-    if (!comWorld.isInUse)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\cgame\\../qcommon/com_bsp_api.h", 23, 0, "%s", "comWorld.isInUse");
-    return comWorld.primaryLightCount;
-}
-
 const ComPrimaryLight *__cdecl Com_GetPrimaryLight(unsigned int primaryLightIndex)
 {
     if (!comWorld.isInUse)

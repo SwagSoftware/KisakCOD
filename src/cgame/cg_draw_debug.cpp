@@ -1,10 +1,8 @@
 #include "cg_local.h"
 #include "cg_public.h"
-#include <cgame_mp/cg_local_mp.h>
 #include <universal/physicalmemory.h>
 #include <physics/phys_local.h>
 #include <gfx_d3d/r_init.h>
-#include <server_mp/server_mp.h>
 
 #include <qcommon/mem_track.h>
 #include <client/client.h>
@@ -17,6 +15,16 @@
 #include <script/scr_vm.h>
 #include <sound/snd_local.h>
 #include <sound/snd_public.h>
+
+#ifdef KISAK_MP
+#include <cgame_mp/cg_local_mp.h>
+#include <server_mp/server_mp.h>
+#elif KISAK_SP
+#include "cg_main.h"
+#include <server/server.h>
+#include <game/g_local.h>
+#endif
+
 
 int32_t previous;
 int32_t fps_previousTimes[32];
@@ -170,6 +178,7 @@ double __cdecl CG_DrawFPS(const ScreenPlacement *scrPlace, float y, meminfo_t *m
     mspf = (double)total / 32.0;
     s = va("(%i-%i) %1.2f", minTime, maxTime, mspf);
     ya = CG_CornerDebugPrint(scrPlace, farRight, yf, v10, s, (char *)" cg ms/frame", colorWhite) + yf;
+#ifdef KISAK_MP
     if (sv.profile.frameTime > 0.0)
     {
         s = va("(%.0f-%.0f) %.2f", sv.serverFrameTimeMin, sv.serverFrameTimeMax, sv.profile.frameTime);
@@ -177,6 +186,8 @@ double __cdecl CG_DrawFPS(const ScreenPlacement *scrPlace, float y, meminfo_t *m
         s = va("(%.2f) %.2f", 50.0 / sv.profile.wallClockTime, sv.profile.wallClockTime);
         ya = CG_CornerDebugPrint(scrPlace, farRight, yg, v10, s, (char *)" wall clock", colorWhite) + yg;
     }
+#endif
+
     freeMem = (double)PMem_GetFreeAmount() / 1024.0 / 1024.0;
     if (freeMem >= 5.0)
     {
@@ -304,23 +315,78 @@ double __cdecl CG_CornerDebugPrintCaption(
     return (float)((float)yDelta * 0.75);
 }
 
+#ifdef KISAK_SP
+float DrawReplayTime(const ScreenPlacement *scrPlace, double posY)
+{
+    double v4; // fp30
+    __int64 v5; // r11
+    double v6; // fp29
+    int DemoEndTime; // r28
+    int v8; // r28
+    int Time; // r27
+    int DemoStartTime; // r3
+    const float *v11; // r6
+    char *v12; // r5
+    char *v13; // r4
+    double v14; // fp1
+
+    v4 = (float)((float)(scrPlace->virtualViewableMax[0] - scrPlace->virtualViewableMin[0])
+        + cg_debugInfoCornerOffset->current.value);
+    LODWORD(v5) = R_TextWidth(" replay time", 0, cgMedia.smallDevFont);
+    v6 = (float)(cg_small_dev_string_fontscale->current.value * (float)((float)v5 * (float)0.75));
+    DemoEndTime = SV_GetDemoEndTime();
+    v8 = (DemoEndTime - SV_GetDemoStartTime()) / 1000;
+    Time = G_GetTime();
+    DemoStartTime = SV_GetDemoStartTime();
+    va("%i / %i", (Time - DemoStartTime) / 1000, v8);
+    v14 = (float)(CG_CornerDebugPrint(scrPlace, v4, posY, v6, v13, v12, v11) + (float)posY);
+    return *((float *)&v14 + 1);
+}
+#endif
+
 void __cdecl CG_DrawUpperRightDebugInfo(int32_t localClientNum)
 {
+#ifdef KISAK_MP
     meminfo_t meminfo; // [esp+8h] [ebp-A8h] BYREF
     float y; // [esp+ACh] [ebp-4h]
 
     track_getbasicinfo(&meminfo);
     R_TrackStatistics(0);
     y = cg_debugInfoCornerOffset->current.vector[1];
+
     if (cg_drawFPS->current.integer)
         y = CG_DrawFPS(&scrPlaceFull, y, &meminfo);
+
     if (com_statmon->current.enabled)
         y = CG_DrawStatmon(&scrPlaceFull, y, &meminfo);
+
     if (cg_drawSnapshot->current.enabled)
         CG_DrawSnapshot(localClientNum, y);
+#elif KISAK_SP
+    double y; // fp1
+    meminfo_t v4; // [sp+50h] [-B0h] BYREF
+
+    track_getbasicinfo(&v4);
+    if (CG_GetPredictedPlayerState(localClientNum)->pm_type != PM_MPVIEWER)
+    {
+        R_TrackStatistics(0);
+
+        y = cg_debugInfoCornerOffset->current.vector[1];
+
+        if (cg_drawFPS->current.integer)
+            y = CG_DrawFPS(&scrPlaceFull, y, &v4);
+
+        if (com_statmon->current.enabled)
+            y = CG_DrawStatmon(&scrPlaceFull, y, &v4);
+
+        if (replay_time->current.enabled)
+            DrawReplayTime(&scrPlaceFull, y);
+    }
+#endif
 }
 
-double __cdecl CG_DrawSnapshot(int32_t localClientNum, float posY)
+#ifdef KISAK_MP
+float __cdecl CG_DrawSnapshot(int32_t localClientNum, float posY)
 {
     char *v2; // eax
     char *v3; // eax
@@ -347,6 +413,7 @@ double __cdecl CG_DrawSnapshot(int32_t localClientNum, float posY)
     str = va("%i", cgs->serverCommandSequence);
     return (float)(CG_CornerDebugPrint(scrPlace, posX, posYc, v5, str, (char *)" cmd", colorWhite) + posYc);
 }
+#endif
 
 double __cdecl CG_DrawStatmon(const ScreenPlacement *scrPlace, float y, meminfo_t *meminfo)
 {

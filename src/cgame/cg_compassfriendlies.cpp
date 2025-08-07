@@ -305,7 +305,7 @@ void __cdecl CG_CompassDrawActors(
     double v25; // fp0
     double v26; // fp0
     __int64 v27; // r11
-    const char *v28; // r3
+    const char *text; // r3
     int v29; // r8
     int v30; // r7
     double v31; // fp8
@@ -342,8 +342,8 @@ void __cdecl CG_CompassDrawActors(
     float v62; // [sp+74h] [-14Ch] BYREF
     float v63; // [sp+78h] [-148h]
     const char *v64; // [sp+7Ch] [-144h]
-    float v65; // [sp+80h] [-140h] BYREF
-    float v66; // [sp+84h] [-13Ch]
+    float x; // [sp+80h] [-140h] BYREF
+    float y; // [sp+84h] [-13Ch]
     float v67[2]; // [sp+88h] [-138h] BYREF
     unsigned __int64 v68; // [sp+90h] [-130h]
     unsigned __int64 v69; // [sp+98h] [-128h]
@@ -398,12 +398,12 @@ void __cdecl CG_CompassDrawActors(
             if (v15->lastUpdate > cgArray[0].time)
                 v15->lastUpdate = 0;
             if (v15->lastUpdate >= cgArray[0].time - 800
-                && (!CG_WorldPosToCompass(compassType, cgArray, v76, v67, cgArray[0].refdef.vieworg, v15->lastPos, 0, &v65)
+                && (!CG_WorldPosToCompass(compassType, cgArray, v76, v67, cgArray[0].refdef.vieworg, v15->lastPos, 0, &x)
                     || *(_BYTE *)(*(unsigned int *)(LODWORD(v63) - 17812) + 12)))
             {
                 CalcCompassFriendlySize(compassType, &v61, &v62);
-                v65 = v65 - (float)((float)(v61 * (float)0.5) - (float)v12);
-                v66 = v66 - (float)((float)(v62 * (float)0.5) - (float)v13);
+                x = x - (float)((float)(v61 * (float)0.5) - (float)v12);
+                y = y - (float)((float)(v62 * (float)0.5) - (float)v13);
                 if (compassType || !compassRotation->current.enabled)
                     v16 = 171408;
                 else
@@ -442,52 +442,26 @@ void __cdecl CG_CompassDrawActors(
                     v75 = v11;
                 }
                 if (!compassping_friendlyfiring || v26 != 1.0)
-                    CG_DrawRotatedPic(&scrPlaceView[localClientNum], v65, v66, v61, v62, v20, v19, v21, v18, v17);
+                    CG_DrawRotatedPic(&scrPlaceView[localClientNum], x, y, v61, v62, v20, v19, v21, v18, v17);
                 if (compassping_friendlyfiring)
-                    CG_DrawRotatedPic(&scrPlaceView[localClientNum], v65, v66, v61, v62, v20, v19, v23, v18, v17);
+                    CG_DrawRotatedPic(&scrPlaceView[localClientNum], x, y, v61, v62, v20, v19, v23, v18, v17);
                 if (compassDebug->current.enabled)
                 {
                     lastYaw = v15->lastYaw;
-                    v28 = va((const char *)HIDWORD(lastYaw), LODWORD(lastYaw), LODWORD(v23));
+                    text = va("yaw: %3.2f - final:%3.2f", lastYaw, v23);
                     CL_DrawText(
                         &scrPlaceView[localClientNum],
-                        v28,
+                        text,
                         0x7FFFFFFF,
                         cgMedia.smallDevFont,
-                        v65,
-                        (float)(v66 + (float)15.0),
-                        v30,
-                        v29,
-                        0.69999999,
-                        0.69999999,
-                        (const float *)rect->horzAlign,
+                        x,
+                        (float)(y + (float)15.0),
+                        rect->horzAlign,
                         rect->vertAlign,
-                        v34,
-                        v33,
-                        v32,
-                        v31,
-                        v49,
-                        v50,
-                        *(float *)&lastYaw,
-                        *(float *)&v23,
-                        v52,
-                        v53,
-                        v54,
-                        v55,
-                        v56,
-                        v57,
-                        v58,
-                        v59,
-                        v60,
-                        v61,
-                        v63,
-                        v65,
-                        v67[0],
-                        *(float *)&v68,
-                        *(float *)&v69,
-                        *(float *)&v70,
-                        v71,
-                        v72);
+                        0.7f,
+                        0.7f,
+                        v18, // KISAKTODO: args
+                        0);
                 }
             }
             --v14;
@@ -525,15 +499,15 @@ void __cdecl CG_CompassDrawActors(
                         cgArray[0].refdef.vieworg,
                         (const float *)p_beginFadeTime - 3,
                         0,
-                        &v65)
+                        &x)
                         || *(_BYTE *)(*(unsigned int *)(LODWORD(v63) - 17812) + 12)))
                 {
                     CalcCompassFriendlySize(compassType, &v61, &v62);
                     v44 = *p_beginFadeTime;
-                    v45 = (float)(v65 - (float)((float)(v61 * (float)0.5) - (float)v12));
-                    v46 = (float)(v66 - (float)((float)(v62 * (float)0.5) - (float)v13));
-                    v65 = v65 - (float)((float)(v61 * (float)0.5) - (float)v12);
-                    v66 = v66 - (float)((float)(v62 * (float)0.5) - (float)v13);
+                    v45 = (float)(x - (float)((float)(v61 * (float)0.5) - (float)v12));
+                    v46 = (float)(y - (float)((float)(v62 * (float)0.5) - (float)v13));
+                    x = x - (float)((float)(v61 * (float)0.5) - (float)v12);
+                    y = y - (float)((float)(v62 * (float)0.5) - (float)v13);
                     if (v44 < cgArray[0].time)
                     {
                         LODWORD(v48) = cgArray[0].time - v44;

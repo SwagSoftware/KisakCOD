@@ -3,7 +3,6 @@
 
 #include <bgame/bg_public.h>
 
-#include <cgame_mp/cg_local_mp.h>
 #include <script/scr_const.h>
 #include <xanim/dobj.h>
 #include <EffectsCore/fx_system.h>
@@ -11,7 +10,17 @@
 #include <DynEntity/DynEntity_client.h>
 #include <ragdoll/ragdoll.h>
 #include <client/client.h>
+
+#ifdef KISAK_MP
+#include <cgame_mp/cg_local_mp.h>
 #include <server_mp/server_mp.h>
+#elif KISAK_SP
+#include "cg_main.h"
+#include "cg_ents.h"
+#include <client/cl_input.h>
+#include "cg_servercmds.h"
+#include "cg_compassfriendlies.h"
+#endif
 
 
 int32_t __cdecl CG_GetBoneIndex(
@@ -113,9 +122,12 @@ void __cdecl CG_EntityEvent(int32_t localClientNum, centity_s *cent, int32_t eve
         nextSnap = cgameGlob->nextSnap;
         v23 = (nextSnap->ps.otherFlags & 6) != 0 && ent->number == nextSnap->ps.clientNum;
         isPlayerView = v23;
+
         if (cg_debugEvents->current.enabled)
             Com_Printf(21, "ent:%3i  event:%3i ", ent->number, event);
+
         iassert(event > 0 && event < EV_MAX_EVENTS);
+
         if (cg_debugEvents->current.enabled)
             Com_Printf(21, "CG_EntityEvent:%s\n", eventnames[event]);
 
@@ -123,12 +135,20 @@ void __cdecl CG_EntityEvent(int32_t localClientNum, centity_s *cent, int32_t eve
             weaponIdx = cgameGlob->predictedPlayerState.weapon;
         else
             weaponIdx = ent->weapon;
-        clientNum = ent->clientNum;
 
+#ifdef KISAK_MP
+        clientNum = ent->clientNum;
         if ((uint32_t)clientNum >= 64)
             clientNum = 0;
+#elif KISAK_SP
+        clientNum = cent->nextState.number;
+
+        if (weaponIdx && !CG_GetLocalClientWeaponInfo(localClientNum, weaponIdx)->registered)
+            Com_Error(ERR_DROP, "Calling event on an unregistered weapon. Make sure that the weapon has been precached.");
+#endif
 
         weaponDef = BG_GetWeaponDef(weaponIdx);
+
         if ((cgameGlob->bgs.clientinfo[clientNum].perks & 0x100) != 0)
             offset = 29;
         else

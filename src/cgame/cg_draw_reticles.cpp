@@ -3,11 +3,15 @@
 
 #include <database/database.h>
 
-#include <cgame_mp/cg_local_mp.h>
 #include <client/client.h>
-
-#include <client_mp/client_mp.h>
 #include <universal/profile.h>
+
+#ifdef KISAK_MP
+#include <cgame_mp/cg_local_mp.h>
+#include <client_mp/client_mp.h>
+#elif KISAK_SP
+#include <cgame/cg_main.h>
+#endif
 
 void __cdecl CG_CalcCrosshairPosition(const cg_s *cgameGlob, float *x, float *y)
 {
@@ -132,9 +136,16 @@ void __cdecl CG_DrawCrosshair(int32_t localClientNum)
     iassert(cg_drawGun);
     iassert(cg_crosshairDynamic);
 
+#ifdef KISAK_MP
     if (!cgameGlob->renderingThirdPerson)
+#endif
     {
+#ifdef KISAK_MP
         drawHud = CG_ShouldDrawHud(localClientNum);
+#elif KISAK_SP
+        iassert(cg_paused);
+        drawHud = (cg_paused->current.integer == 0);
+#endif
         posLerp = ps->fWeaponPosFrac;
         transScale = 1.0;
         transShift = 0.0;
@@ -479,6 +490,7 @@ void __cdecl CG_CalcCrosshairColor(int32_t localClientNum, float alpha, float *c
     WeaponDef *weapDef; // [esp+14h] [ebp-4h]
     cg_s *cgameGlob;
     cgs_t *cgsGlob;
+
     iassert(cg_crosshairAlpha);
     iassert(cg_crosshairEnemyColor);
     iassert(alpha >= 0.0f && alpha <= 1.0f);
@@ -491,26 +503,36 @@ void __cdecl CG_CalcCrosshairColor(int32_t localClientNum, float alpha, float *c
     iassert(weapDef);
 
     if (!weapDef->crosshairColorChange)
+    {
         goto LABEL_21;
+    }
 
     if ((cgameGlob->predictedPlayerState.weapFlags & 8) == 0)
     {
         if ((cgameGlob->predictedPlayerState.weapFlags & 0x10) != 0
+#ifdef KISAK_MP
             && cg_crosshairEnemyColor->current.enabled
-            && cgameGlob->crosshairClientLastTime - cgameGlob->crosshairClientStartTime >= cg_enemyNameFadeIn->current.integer)
+            && cgameGlob->crosshairClientLastTime - cgameGlob->crosshairClientStartTime >= cg_enemyNameFadeIn->current.integer
+#endif
+            )
         {
+#ifdef KISAK_MP
             Dvar_GetUnpackedColorByName("g_TeamColor_EnemyTeam", color);
+#endif
             goto LABEL_22;
         }
     LABEL_21:
-        *color = 1.0;
-        color[1] = 1.0;
-        color[2] = 1.0;
+        color[0] = 1.0f;
+        color[1] = 1.0f;
+        color[2] = 1.0f;
         goto LABEL_22;
     }
+
+#ifdef KISAK_MP
     if (cgameGlob->crosshairClientLastTime - cgameGlob->crosshairClientStartTime < cg_friendlyNameFadeIn->current.integer)
         goto LABEL_21;
     Dvar_GetUnpackedColorByName("g_TeamColor_MyTeam", color);
+#endif
 LABEL_22:
     color[3] = alpha * cg_crosshairAlpha->current.value;
 }
@@ -599,7 +621,11 @@ char __cdecl AllowedToDrawCrosshair(int32_t localClientNum, const playerState_s 
 
 bool __cdecl CG_IsReticleTurnedOff()
 {
+#ifdef KISAK_MP
     return !cg_drawCrosshair->current.enabled || !UI_ShouldDrawCrosshair();
+#elif KISAK_SP
+    return !cg_drawCrosshair->current.enabled;
+#endif
 }
 
 void __cdecl CG_DrawAdsAimIndicator(

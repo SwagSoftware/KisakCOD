@@ -2219,4 +2219,10 @@ bool Com_IsRunningMenuLevel()
     return com_sv_running->current.enabled && I_strnicmp(sv_mapname->current.string, "menu_", 5) == 0;
 }
 
+void Com_SetTimeScale(float timescale)
+{
+    iassert(timescale > 0);
+    com_codeTimeScale = timescale;
+}
+
 #endif // KISAK_SP

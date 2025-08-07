@@ -1,8 +1,13 @@
 #include "cg_local.h"
 #include "cg_public.h"
 
-#include <cgame_mp/cg_local_mp.h>
 #include <qcommon/mem_track.h>
+
+#ifdef KISAK_MP
+#include <cgame_mp/cg_local_mp.h>
+#elif KISAK_SP
+#include "cg_main.h"
+#endif
 
 
 CameraShakeSet s_cameraShakeSet[1];

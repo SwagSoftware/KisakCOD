@@ -1,10 +1,18 @@
 #include "cg_local.h"
 #include "cg_public.h"
 
-#include <cgame_mp/cg_local_mp.h>
 #include <client/client.h>
-#include <client_mp/client_mp.h>
 #include <database/database.h>
+
+#ifdef KISAK_MP
+#include <cgame_mp/cg_local_mp.h>
+#include <client_mp/client_mp.h>
+#elif KISAK_SP
+#include "cg_main.h"
+#include "cg_newdraw.h"
+
+#endif
+
 
 const dvar_t *compassObjectiveArrowWidth;
 const dvar_t *compassObjectiveTextScale;
@@ -1211,7 +1219,9 @@ void __cdecl CG_CompassDrawPlayerMap(
                 color,
                 cgameGlob->compassMapMaterial);
         }
+#ifdef KISAK_MP
         CG_CompassDrawRadarEffects(localClientNum, compassType, parentRect, rect, color);
+#endif
     }
 }
 
@@ -1638,7 +1648,11 @@ void __cdecl CG_CompassDrawTickertape(
     float iconW; // [esp+9Ch] [ebp-40h] BYREF
     float iconH; // [esp+A0h] [ebp-3Ch] BYREF
     int32_t objIdx; // [esp+A4h] [ebp-38h]
+#ifdef KISAK_MP
     const objective_t *objective; // [esp+A8h] [ebp-34h]
+#elif KISAK_SP
+    const objectiveInfo_t *objective;
+#endif
     float x; // [esp+ACh] [ebp-30h] BYREF
     float y; // [esp+B0h] [ebp-2Ch] BYREF
     float tapeRotation; // [esp+B4h] [ebp-28h]
@@ -1657,7 +1671,7 @@ void __cdecl CG_CompassDrawTickertape(
     {
         if (color[3] < (double)defAlpha)
             defAlpha = color[3];
-        colorMod[0] = *color;
+        colorMod[0] = color[0];
         colorMod[1] = color[1];
         colorMod[2] = color[2];
         colorMod[3] = defAlpha;
@@ -1692,9 +1706,14 @@ void __cdecl CG_CompassDrawTickertape(
             nearestDistHeightDelta = 0.0;
             for (objIdx = 0; objIdx < 16; ++objIdx)
             {
+#ifdef KISAK_MP
                 objective = &cgameGlob->nextSnap->ps.objective[objIdx];
+#elif KISAK_SP
+                objective = cgArray[0].objectives;
+#endif
                 if (objective->state == OBJST_CURRENT || objective->state == OBJST_ACTIVE)
                 {
+#ifdef KISAK_MP
                     if (objective->entNum == 1023)
                     {
                         goalOrig = objective->origin;
@@ -1704,8 +1723,12 @@ void __cdecl CG_CompassDrawTickertape(
                         cent = CG_GetEntity(localClientNum, objective->entNum);
                         goalOrig = cent->pose.origin;
                     }
+#elif KISAK_SP
+                    goalOrig = (const float*)objective->origin;
+#endif
+
                     colorMod[3] = defAlpha;
-                    if (*goalOrig != 0.0 || goalOrig[1] != 0.0 || goalOrig[2] != 0.0)
+                    if (goalOrig[0] != 0.0 || goalOrig[1] != 0.0 || goalOrig[2] != 0.0)
                     {
                         posDelta[0] = *goalOrig - cgameGlob->refdef.vieworg[0];
                         posDelta[1] = goalOrig[1] - cgameGlob->refdef.vieworg[1];
@@ -1733,7 +1756,11 @@ void __cdecl CG_CompassDrawTickertape(
                             percent = 0.0;
                         }
                         textAlpha = defAlpha;
+#ifdef KISAK_MP
                         iconMaterial = CG_ObjectiveIcon(localClientNum, objective->icon, 0);
+#elif KISAK_SP
+                        iconMaterial = CG_ObjectiveIcon(objective->icon, 0);
+#endif
                         iconX = w * percent + x;
                         iconDrawX = iconX - iconW * 0.5;
                         CL_DrawStretchPic(
@@ -1765,8 +1792,12 @@ void __cdecl CG_CompassDrawTickertape(
                     }
                 }
             }
-            if (compassObjectiveNearbyDist->current.value >= (double)nearestDist)
+
+            if (compassObjectiveNearbyDist->current.value >= nearestDist)
+            {
+                //DrawNearObjectiveText()
                 KISAK_NULLSUB();
+            }
         }
     }
 }
@@ -1871,6 +1902,7 @@ void __cdecl CalcCompassFriendlySize(CompassType compassType, float *w, float *h
     }
 }
 
+#ifdef KISAK_MP
 void __cdecl CG_CompassDrawPlayerPointers_MP(
     int32_t localClientNum,
     CompassType compassType,
@@ -2039,6 +2071,202 @@ void __cdecl CG_CompassDrawPlayerPointers_MP(
         }
     }
 }
+#elif KISAK_SP
+void CG_CompassDrawPlayerPointers_SP(
+    int localClientNum,
+    CompassType compassType,
+    const rectDef_s *parentRect,
+    const rectDef_s *rect,
+    Material *material,
+    float *color)
+{
+    double v11; // fp14
+    float *v12; // r3
+    double x; // fp18
+    double y; // fp17
+    double v15; // fp16
+    double v16; // fp15
+    objectiveInfo_t *objectives; // r25
+    float *v18; // r28
+    int v19; // r18
+    double v20; // fp0
+    double v21; // fp13
+    double v22; // fp0
+    double value; // fp13
+    double v24; // fp0
+    double v25; // fp26
+    double v26; // fp31
+    double v27; // fp20
+    double v28; // fp19
+    Material *v29; // r7
+    const float *v30; // r6
+    int v31; // r5
+    int v32; // r4
+    double v33; // fp30
+    double v34; // fp29
+    double v35; // fp0
+    double v36; // fp25
+    double v37; // fp28
+    double v38; // fp24
+    double v39; // fp27
+    double v40; // fp0
+    double v41; // fp3
+    float v42; // [sp+60h] [-160h] BYREF
+    float v43; // [sp+64h] [-15Ch] BYREF
+    float v44; // [sp+68h] [-158h] BYREF
+    float v45; // [sp+6Ch] [-154h]
+    float v46; // [sp+70h] [-150h] BYREF
+    float v47; // [sp+74h] [-14Ch]
+    float v48[5]; // [sp+78h] [-148h] BYREF
+    float v49; // [sp+8Ch] [-134h]
+    rectDef_s v50[7]; // [sp+90h] [-130h] BYREF
+
+    if (localClientNum)
+        MyAssertHandler(
+            "c:\\trees\\cod3\\cod3src\\src\\cgame\\cg_local.h",
+            910,
+            0,
+            "%s\n\t(localClientNum) = %i",
+            "(localClientNum == 0)",
+            localClientNum);
+    v11 = CG_FadeCompass(localClientNum, cgArray[0].compassFadeTime, compassType);
+    if (v11 != 0.0)
+    {
+        CG_CompassCalcDimensions(compassType, cgArray, parentRect, rect, &v50[0].x, &v50[0].y, &v50[0].w, &v50[0].h);
+        x = v50[0].x;
+        y = v50[0].y;
+        v15 = (float)((float)(v50[0].w * (float)0.5) + v50[0].x);
+        v16 = (float)((float)(v50[0].h * (float)0.5) + v50[0].y);
+        if (compassRotation->current.enabled)
+        {
+            YawVectors2D(cgArray[0].refdefViewAngles[1], v12, v48);
+        }
+        else
+        {
+            v48[0] = cgArray[0].compassNorth[0];
+            v48[1] = cgArray[0].compassNorth[1];
+        }
+        objectives = cgArray[0].objectives;
+        do
+        {
+            if (objectives->state == OBJST_CURRENT)
+            {
+                v18 = objectives->origin[0];
+                v19 = 8;
+                do
+                {
+                    if (*v18 != 0.0 || v18[1] != 0.0 || v18[2] != 0.0)
+                    {
+                        v20 = (float)(*v18 - cgArray[0].refdef.vieworg[0]);
+                        v21 = (float)(v18[1] - cgArray[0].refdef.vieworg[1]);
+                        v48[2] = *color;
+                        v48[3] = color[1];
+                        v48[4] = color[2];
+                        v22 = sqrtf((float)((float)((float)v21 * (float)v21) + (float)((float)v20 * (float)v20)));
+                        v49 = v22;
+                        value = compassObjectiveMaxRange->current.value;
+                        if (v22 > value || (value = compassMaxRange->current.value, v22 < value))
+                        {
+                            v22 = value;
+                            v49 = value;
+                        }
+                        if ((float)(compassObjectiveMaxRange->current.value - compassMaxRange->current.value) == 0.0)
+                        {
+                            v49 = 0.0;
+                        }
+                        else
+                        {
+                            v49 = (float)v22 - compassMaxRange->current.value;
+                            v24 = (float)(v49 / (float)(compassObjectiveMaxRange->current.value - compassMaxRange->current.value));
+                            v49 = v49 / (float)(compassObjectiveMaxRange->current.value - compassMaxRange->current.value);
+                            v49 = (float)((float)(compassObjectiveMinAlpha->current.value - (float)1.0) * (float)v24) + (float)1.0;
+                        }
+                        v46 = 0.0;
+                        v47 = 0.0;
+                        CG_WorldPosToCompass(compassType, cgArray, v50, v48, cgArray[0].refdef.vieworg, v18, &v44, &v46);
+                        v25 = (float)(v44 + (float)v15);
+                        v26 = (float)(v45 + (float)v16);
+                        v27 = (float)(v46 + (float)v15);
+                        v44 = v44 + (float)v15;
+                        v45 = v45 + (float)v16;
+                        v28 = (float)(v47 + (float)v16);
+                        CalcCompassPointerSize(compassType, &v42, &v43);
+                        CG_ObjectiveIcon(objectives->icon, 0);
+                        v33 = v49;
+                        if (v11 < v49)
+                        {
+                            v33 = v11;
+                            v49 = v11;
+                        }
+                        v34 = v42;
+                        v35 = 0.0;
+                        v36 = (float)(v42 * (float)0.5);
+                        v37 = v43;
+                        v38 = (float)(v43 * (float)0.5);
+                        if ((float)((float)((float)x - (float)((float)v25 - (float)(v42 * (float)0.5))) * (float)((float)1.0 / v42)) > 0.0)
+                            v35 = (float)((float)((float)x - (float)((float)v25 - (float)(v42 * (float)0.5)))
+                                * (float)((float)1.0 / v42));
+                        if ((float)((float)((float)y - (float)((float)v26 - (float)(v43 * (float)0.5))) * (float)((float)1.0 / v43)) > v35)
+                            v35 = (float)((float)((float)y - (float)((float)v26 - (float)(v43 * (float)0.5)))
+                                * (float)((float)1.0 / v43));
+                        v39 = (float)(v50[0].w + (float)x);
+                        if ((float)((float)((float)((float)((float)v25 - (float)(v42 * (float)0.5)) + v42)
+                            - (float)(v50[0].w + (float)x))
+                            * (float)((float)1.0 / v42)) > v35)
+                            v35 = (float)((float)((float)((float)((float)v25 - (float)(v42 * (float)0.5)) + v42)
+                                - (float)(v50[0].w + (float)x))
+                                * (float)((float)1.0 / v42));
+                        if ((float)((float)((float)((float)((float)v26 - (float)(v43 * (float)0.5)) + v43)
+                            - (float)(v50[0].h + (float)y))
+                            * (float)((float)1.0 / v43)) > v35)
+                            v35 = (float)((float)((float)((float)((float)v26 - (float)(v43 * (float)0.5)) + v43)
+                                - (float)(v50[0].h + (float)y))
+                                * (float)((float)1.0 / v43));
+                        if (v35 > 1.0)
+                            v35 = 1.0;
+                        v40 = (float)((float)1.0 - (float)v35);
+                        if (v40 > 0.5 && compassObjectiveDrawLines->current.enabled)
+                        {
+                            v41 = 2.0;
+                            v49 = (float)((float)((float)v40 - (float)0.5) * (float)v33) * 2.0;
+                            if (v26 >= y && v26 <= (float)(v50[0].h + (float)y))
+                            {
+                                UI_DrawHandlePic(
+                                    &scrPlaceView[localClientNum],
+                                    x,
+                                    (float)((float)v26 - (float)1.0),
+                                    v50[0].w,
+                                    2.0,
+                                    v32,
+                                    v31,
+                                    v30,
+                                    v29);
+                                v41 = 2.0;
+                            }
+                            if (v25 >= x && v25 <= v39)
+                                CG_DrawVLine(&scrPlaceView[localClientNum], v25, y, v41, v50[0].h, v32, v31, v30, v29);
+                            v49 = v33;
+                        }
+                        UI_DrawHandlePic(
+                            &scrPlaceView[localClientNum],
+                            (float)((float)v27 - (float)v36),
+                            (float)((float)v28 - (float)v38),
+                            v34,
+                            v37,
+                            v32,
+                            v31,
+                            v30,
+                            v29);
+                    }
+                    --v19;
+                    v18 += 3;
+                } while (v19);
+            }
+            ++objectives;
+        } while ((int)objectives < (int)cgArray[0].targets);
+    }
+}
+#endif
 
 double __cdecl GetObjectiveFade(const rectDef_s *clipRect, float x, float y, float width, float height)
 {

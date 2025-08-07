@@ -1,10 +1,16 @@
 #include "cg_local.h"
 #include "cg_public.h"
 
-#include <cgame_mp/cg_local_mp.h>
-
 #include <client/client.h>
+
+#ifdef KISAK_MP
+#include <cgame_mp/cg_local_mp.h>
 #include <client_mp/client_mp.h>
+#elif KISAK_SP
+#include "cg_main.h"
+#include "cg_newdraw.h"
+#include <xanim/xanim.h>
+#endif
 
 #include <stringed/stringed_hooks.h>
 

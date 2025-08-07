@@ -948,7 +948,9 @@ double __cdecl CG_CornerDebugPrintCaption(
     char *text,
     const float *color);
 void __cdecl CG_DrawUpperRightDebugInfo(int32_t localClientNum);
-double __cdecl CG_DrawSnapshot(int32_t localClientNum, float posY);
+#ifdef KISAK_MP
+float __cdecl CG_DrawSnapshot(int32_t localClientNum, float posY);
+#endif
 double __cdecl CG_DrawStatmon(const ScreenPlacement *scrPlace, float y, meminfo_t *meminfo);
 void __cdecl CG_DrawPerformanceWarnings();
 void __cdecl CG_DrawDebugOverlays(int32_t localClientNum);
@@ -1098,6 +1100,13 @@ void __cdecl CG_CompassDrawPlayerPointers_MP(
     const rectDef_s *rect,
     Material *material,
     const float *color);
+void CG_CompassDrawPlayerPointers_SP(
+    int localClientNum,
+    CompassType compassType,
+    const rectDef_s *parentRect,
+    const rectDef_s *rect,
+    Material *material,
+    float *color);
 double __cdecl GetObjectiveFade(const rectDef_s *clipRect, float x, float y, float width, float height);
 
 

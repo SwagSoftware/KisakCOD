@@ -273,6 +273,7 @@ unsigned __int8 *__cdecl CM_Hunk_Alloc(unsigned int size, const char *name, int 
 void Com_ResetFrametime();
 struct XAnimTree_s *Com_XAnimCreateSmallTree(struct XAnim_s *anims);
 bool Com_IsRunningMenuLevel();
+void Com_SetTimeScale(float timescale);
 void Com_XAnimFreeSmallTree(struct XAnimTree_s *animtree);
 #endif
 

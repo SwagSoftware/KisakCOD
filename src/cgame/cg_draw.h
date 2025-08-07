@@ -6,6 +6,19 @@
 #error This file is for SinglePlayer only
 #endif
 
+enum BlurTime : __int32
+{
+    BLUR_TIME_RELATIVE = 0x0,
+    BLUR_TIME_ABSOLUTE = 0x1,
+};
+
+enum BlurPriority : __int32
+{
+    BLUR_PRIORITY_NONE = 0x0,
+    BLUR_PRIORITY_SCRIPT = 0x1,
+    BLUR_PRIORITY_CODE = 0x2,
+};
+
 struct CenterPrint
 {
     int time;
@@ -29,19 +42,6 @@ struct ScreenFade
     float alphaCurrent;
     int startTime;
     int duration;
-};
-
-enum BlurTime : __int32
-{
-    BLUR_TIME_RELATIVE = 0x0,
-    BLUR_TIME_ABSOLUTE = 0x1,
-};
-
-enum BlurPriority : __int32
-{
-    BLUR_PRIORITY_NONE = 0x0,
-    BLUR_PRIORITY_SCRIPT = 0x1,
-    BLUR_PRIORITY_CODE = 0x2,
 };
 
 weaponInfo_s *__cdecl CG_GetLocalClientWeaponInfo(int localClientNum, int weaponIndex);
