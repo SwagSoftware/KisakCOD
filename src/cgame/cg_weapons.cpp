@@ -3865,4 +3865,152 @@ void CG_LoadViewModelAnimTrees(SaveGame *save, const playerState_s *ps)
     }
 }
 
-#endif
+void CG_ArchiveWeaponInfo(MemoryFile *memFile)
+{
+    BOOL IsWriting; // r22
+    float v3; // r30
+    unsigned int NumWeapons; // r3
+    int v5; // r28
+    int *p_hasAnimTree; // r30
+    const DObj_s *v7; // r3
+    float v8[24]; // [sp+50h] [-60h] BYREF
+
+    if (!memFile)
+        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\cgame\\cg_weapons.cpp", 1144, 0, "%s", "memFile");
+    IsWriting = MemFile_IsWriting(memFile);
+    if (IsWriting)
+    {
+        v3 = COERCE_FLOAT(BG_GetNumWeapons());
+        v8[0] = v3;
+        MemFile_WriteData(memFile, 4, v8);
+    }
+    else
+    {
+        MemFile_ReadData(memFile, 4, v8);
+        v3 = v8[0];
+        if (LODWORD(v3) > BG_GetNumWeapons())
+        {
+            NumWeapons = BG_GetNumWeapons();
+            MyAssertHandler(
+                "c:\\trees\\cod3\\cod3src\\src\\cgame\\cg_weapons.cpp",
+                1155,
+                0,
+                "numWeapons <= BG_GetNumWeapons()\n\t%i, %i",
+                v3,
+                NumWeapons);
+        }
+    }
+    if (LODWORD(v3) > 1)
+    {
+        v5 = LODWORD(v3) - 1;
+        p_hasAnimTree = &cg_weaponsArray[0][1].hasAnimTree;
+        do
+        {
+            if (IsWriting)
+            {
+                v7 = (const DObj_s *)*(p_hasAnimTree - 11);
+                *p_hasAnimTree = v7 && DObjGetTree(v7);
+            }
+            if (!memFile)
+                MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\cgame\\../universal/memfile.h", 188, 0, "%s", "memFile");
+            if (!memFile->archiveProc)
+                MyAssertHandler(
+                    "c:\\trees\\cod3\\cod3src\\src\\cgame\\../universal/memfile.h",
+                    189,
+                    0,
+                    "%s",
+                    "memFile->archiveProc");
+            memFile->archiveProc(memFile, 4, p_hasAnimTree);
+            if (!memFile->archiveProc)
+                MyAssertHandler(
+                    "c:\\trees\\cod3\\cod3src\\src\\cgame\\../universal/memfile.h",
+                    189,
+                    0,
+                    "%s",
+                    "memFile->archiveProc");
+            memFile->archiveProc(memFile, 4, p_hasAnimTree - 1);
+            --v5;
+            p_hasAnimTree += 18;
+        } while (v5);
+    }
+    if (!memFile)
+        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\cgame\\../universal/memfile.h", 188, 0, "%s", "memFile");
+    if (!memFile->archiveProc)
+        MyAssertHandler(
+            "c:\\trees\\cod3\\cod3src\\src\\cgame\\../universal/memfile.h",
+            189,
+            0,
+            "%s",
+            "memFile->archiveProc");
+    memFile->archiveProc(memFile, 4, &cgArray[0].prevViewmodelWeapon);
+    if (!memFile->archiveProc)
+        MyAssertHandler(
+            "c:\\trees\\cod3\\cod3src\\src\\cgame\\../universal/memfile.h",
+            189,
+            0,
+            "%s",
+            "memFile->archiveProc");
+    memFile->archiveProc(memFile, 4, &cgArray[0].weaponSelect);
+    if (!memFile->archiveProc)
+        MyAssertHandler(
+            "c:\\trees\\cod3\\cod3src\\src\\cgame\\../universal/memfile.h",
+            189,
+            0,
+            "%s",
+            "memFile->archiveProc");
+    memFile->archiveProc(memFile, 4, &cgArray[0].weaponSelectTime);
+    if (!memFile->archiveProc)
+        MyAssertHandler(
+            "c:\\trees\\cod3\\cod3src\\src\\cgame\\../universal/memfile.h",
+            189,
+            0,
+            "%s",
+            "memFile->archiveProc");
+    memFile->archiveProc(memFile, 4, &cgArray[0].equippedOffHand);
+    if (!memFile->archiveProc)
+        MyAssertHandler(
+            "c:\\trees\\cod3\\cod3src\\src\\cgame\\../universal/memfile.h",
+            189,
+            0,
+            "%s",
+            "memFile->archiveProc");
+    memFile->archiveProc(memFile, 96, cgArray[0].viewDamage);
+    if (!memFile->archiveProc)
+        MyAssertHandler(
+            "c:\\trees\\cod3\\cod3src\\src\\cgame\\../universal/memfile.h",
+            189,
+            0,
+            "%s",
+            "memFile->archiveProc");
+    memFile->archiveProc(memFile, 4, &cgArray[0].holdBreathTime);
+    if (!memFile->archiveProc)
+        MyAssertHandler(
+            "c:\\trees\\cod3\\cod3src\\src\\cgame\\../universal/memfile.h",
+            189,
+            0,
+            "%s",
+            "memFile->archiveProc");
+    memFile->archiveProc(memFile, 4, &cgArray[0].holdBreathInTime);
+    if (!memFile->archiveProc)
+        MyAssertHandler(
+            "c:\\trees\\cod3\\cod3src\\src\\cgame\\../universal/memfile.h",
+            189,
+            0,
+            "%s",
+            "memFile->archiveProc");
+    memFile->archiveProc(memFile, 4, &cgArray[0].holdBreathDelay);
+    if (!memFile->archiveProc)
+        MyAssertHandler(
+            "c:\\trees\\cod3\\cod3src\\src\\cgame\\../universal/memfile.h",
+            189,
+            0,
+            "%s",
+            "memFile->archiveProc");
+    memFile->archiveProc(memFile, 4, &cgArray[0].holdBreathFrac);
+    v8[0] = cgArray[0].holdBreathFrac;
+    if ((LODWORD(cgArray[0].holdBreathFrac) & 0x7F800000) == 0x7F800000)
+        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\cgame\\../universal/memfile.h", 234, 0, "%s", "!IS_NAN(*value)");
+}
+
+#endif // KISAK_SP
+

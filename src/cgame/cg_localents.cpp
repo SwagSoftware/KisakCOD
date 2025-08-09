@@ -3,8 +3,13 @@
 #include <qcommon/mem_track.h>
 #include <aim_assist/aim_assist.h>
 
-#include <cgame_mp/cg_local_mp.h>
 #include <universal/profile.h>
+
+#ifdef KISAK_MP
+#include <cgame_mp/cg_local_mp.h>
+#elif KISAK_SP
+#include "cg_main.h"
+#endif
 
 localEntity_s cg_localEntities[1][128];
 localEntity_s cg_activeLocalEntities[1];

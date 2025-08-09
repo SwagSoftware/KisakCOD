@@ -1,10 +1,17 @@
 #include "cg_local.h"
 #include <sound/snd_public.h>
-#include <cgame_mp/cg_local_mp.h>
 #include <client/client.h>
 #include <database/database.h>
-#include <client_mp/client_mp.h>
 
+#ifdef KISAK_MP
+#include <cgame_mp/cg_local_mp.h>
+#include <client_mp/client_mp.h>
+#elif KISAK_SP
+#include "cg_main.h"
+#include <ui/ui.h>
+#endif
+
+#ifdef KISAK_MP
 void __cdecl CG_LoadingString(int32_t localClientNum, const char *s)
 {
     CG_GetLocalClientGlobals(localClientNum)->isLoading = *s != 0;
@@ -14,14 +21,18 @@ void __cdecl CG_LoadingString(int32_t localClientNum, const char *s)
     }
     SCR_UpdateLoadScreen();
 }
+#endif
 
 BOOL __cdecl CG_IsShowingProgress_LoadObj()
 {
     return com_expectedHunkUsage > 0;
 }
 
+static bool drawInformationCalled = false;
+static int lastDraw = 0;
 void __cdecl CG_DrawInformation(int32_t localClientNum)
 {
+#ifdef KISAK_MP
     int32_t v1; // [esp+20h] [ebp-30h]
     uint8_t (*v2)(void); // [esp+24h] [ebp-2Ch]
     bool serverLoading; // [esp+2Bh] [ebp-25h]
@@ -80,6 +91,30 @@ void __cdecl CG_DrawInformation(int32_t localClientNum)
         x = (640.0 - width) * 0.5;
         UI_DrawText(&scrPlaceView[localClientNum], sa, 0x7FFFFFFF, font, x, 439.0, 0, 0, fontScale, colorWhite, 3);
     }
+#elif KISAK_SP
+    int v2; // r3
+
+    iassert(drawInformationCalled);
+    if (localClientNum)
+        MyAssertHandler(
+            "c:\\trees\\cod3\\cod3src\\src\\cgame\\cg_local.h",
+            910,
+            0,
+            "%s\n\t(localClientNum) = %i",
+            "(localClientNum == 0)",
+            localClientNum);
+    if (!cgArray[0].loaded)
+    {
+        v2 = Sys_Milliseconds();
+        if (lastDraw > v2 || lastDraw <= v2 - 100)
+        {
+            lastDraw = v2;
+            drawInformationCalled = 1;
+            UI_Popup(localClientNum, "briefing");
+            drawInformationCalled = 0;
+        }
+    }
+#endif
 }
 
 bool __cdecl CG_IsShowingProgress_FastFile()

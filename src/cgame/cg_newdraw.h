@@ -14,27 +14,24 @@ int __cdecl CG_CheckPlayerForLowAmmo(const cg_s *cgameGlob);
 // local variable allocation has failed, the output may be wrong!
 int __cdecl CG_CheckPlayerForLowClipSpecific(const cg_s *cgameGlob, unsigned int weapIndex);
 int __cdecl CG_CheckPlayerForLowClip(const cg_s *cgameGlob);
-void __cdecl CG_CalcPlayerSprintColor(const cg_s *cgameGlob, const playerState_s *ps, DvarValue *color);
+void __cdecl CG_CalcPlayerSprintColor(const cg_s *cgameGlob, const playerState_s *ps, float *color);
 void __cdecl CG_DrawStanceIcon(
-    int localClientNum,
+    int32_t localClientNum,
     const rectDef_s *rect,
     float *drawColor,
-    double x,
-    double y,
-    double fadeAlpha,
-    const float *a7);
-// local variable allocation has failed, the output may be wrong!
+    float x,
+    float y,
+    float fadeAlpha);
 void __cdecl CG_DrawStanceHintPrints(
-    int localClientNum,
+    int32_t localClientNum,
     const rectDef_s *rect,
-    double x,
+    float x,
     const float *color,
-    double fadeAlpha,
+    float fadeAlpha,
     Font_s *font,
-    double scale,
-    int textStyle,
-    Font_s *a9);
-float __cdecl CG_CalcPlayerHealth(const playerState_s *ps);
+    float scale,
+    int32_t textStyle);
+float CG_CalcPlayerHealth(const playerState_s *ps); 
 float __cdecl CG_FadeLowHealthOverlay(const cg_s *cgameGlob);
 void __cdecl CG_PulseLowHealthOverlay(cg_s *cgameGlob, double healthRatio);
 void __cdecl CG_DrawPlayerLowHealthOverlay(
@@ -48,16 +45,17 @@ void __cdecl CG_UpdateCursorHints(int localClientNum);
 char *__cdecl CG_GetWeaponUseString(int localClientNum, const char **secondaryString);
 char *__cdecl CG_GetUseString(int localClientNum);
 void __cdecl CG_DrawCursorhint(
-    int localClientNum,
+    int32_t localClientNum,
     const rectDef_s *rect,
     Font_s *font,
-    double fontscale,
-    int textStyle);
+    float fontscale,
+    float *color,
+    int32_t textStyle);
 void __cdecl CG_DrawHoldBreathHint(
     int localClientNum,
     const rectDef_s *rect,
     Font_s *font,
-    double fontscale,
+    float fontscale,
     int textStyle);
 void __cdecl CG_DrawMantleHint(
     int localClientNum,
@@ -112,91 +110,53 @@ void __cdecl CG_DrawPlayerWeaponNameBack(
     Font_s *font,
     double scale,
     float *color,
-    Material *material,
-    int a7);
+    Material *material);
 // local variable allocation has failed, the output may be wrong!
 void __cdecl CG_DrawPlayerStance(
-    int localClientNum,
+    int32_t localClientNum,
     const rectDef_s *rect,
-    Font_s *color,
+    const float *color,
     Font_s *font,
-    double scale,
-    int textStyle);
+    float scale,
+    int32_t textStyle);
 void __cdecl CG_DrawPlayerSprintBack(
     int localClientNum,
     const rectDef_s *rect,
     Material *material,
-    float *color,
-    long double a5);
+    float *color);
 void __cdecl CG_DrawPlayerSprintMeter(
     int localClientNum,
     const rectDef_s *rect,
     Material *material,
-    DvarValue *color,
-    long double a5);
+    float *color);
 void __cdecl CG_DrawPlayerBarHealth(int localClientNum, const rectDef_s *rect, Material *material, float *color);
 // local variable allocation has failed, the output may be wrong!
 void __cdecl CG_DrawPlayerBarHealthBack(
     int localClientNum,
     const rectDef_s *rect,
     Material *material,
-    float *color,
-    long double a5);
-// local variable allocation has failed, the output may be wrong!
-void __cdecl CG_OwnerDraw(
-    rectDef_s *parentRect,
-    double x,
-    double y,
-    double w,
-    double h,
-    __int64 vertAlign,
-    double text_x,
-    double text_y,
-    int ownerDraw,
-    int ownerDrawFlags,
-    int align,
-    double special,
+    float *color);
+void CG_OwnerDraw(
+    int32_t localClientNum,
+    rectDef_s parentRect,
+    float x,
+    float y,
+    float w,
+    float h,
+    int32_t horzAlign,
+    int32_t vertAlign,
+    float text_x,
+    float text_y,
+    int32_t ownerDraw,
+    int32_t ownerDrawFlags,
+    int32_t align,
+    float special,
     Font_s *font,
-    double scale,
+    float scale,
     float *color,
     Material *material,
-    __int64 textAlignMode,
-    __int64 a18,
-    __int64 a19,
-    int a20,
-    int a21,
-    int a22,
-    int a23,
-    int a24,
-    int a25,
-    int a26,
-    int a27,
-    int a28,
-    int a29,
-    int a30,
-    Material *a31,
-    int a32,
-    int a33,
-    int a34,
-    int a35,
-    int a36,
-    int a37,
-    int a38,
-    int vertAlign_0,
-    int a40,
-    int a41,
-    int a42,
-    int a43,
-    int a44,
-    int ownerDraw_0,
-    int a46,
-    int ownerDrawFlags_0,
-    int a48,
-    int align_0,
-    int a50,
-    Material *a51,
-    int a52,
-    Font_s *font_0);
+    int32_t textStyle,
+    char textAlignMode);
 
 
 extern const dvar_t *hud_fade_sprint;

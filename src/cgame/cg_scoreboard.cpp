@@ -34,21 +34,14 @@ float __cdecl CG_FadeObjectives(const cg_s *cgameGlob)
 
 void __cdecl CG_DrawObjectiveBackdrop(const cg_s *cgameGlob, const float *color)
 {
-    __int64 v2; // r10
-    const float *v3; // r3
-    unsigned int v4; // [sp+50h] [-40h] BYREF
-    unsigned int v5; // [sp+54h] [-3Ch] BYREF
-    float v6[2]; // [sp+58h] [-38h] BYREF
-    unsigned __int64 v7; // [sp+60h] [-30h]
-    __int64 v8; // [sp+68h] [-28h]
+    int height; // [sp+50h] [-40h] BYREF
+    int width; // [sp+54h] [-3Ch] BYREF
+    float aspect[2]; // [sp+58h] [-38h] BYREF
 
     if (CG_FadeObjectives(cgameGlob) != 0.0)
     {
-        CL_GetScreenDimensions(&v5, &v4, v6);
-        LODWORD(v2) = v5;
-        v7 = __PAIR64__(v5, v4);
-        v8 = v2;
-        UI_FillRectPhysical(0.0, 0.0, (float)v2, (float)__SPAIR64__(v5, v4), v3);
+        CL_GetScreenDimensions(&width, &height, aspect);
+        UI_FillRectPhysical(0.0, 0.0, width, height, color);
     }
 }
 
@@ -298,7 +291,7 @@ void __cdecl CG_DrawObjectiveList(
 
     v9 = "%s\n\t(localClientNum) = %i";
     v11 = "(localClientNum == 0)";
-    HIDWORD(v66) = "%s\n\t(localClientNum) = %i";
+    HIDWORD(v66) = (uintptr_t)"%s\n\t(localClientNum) = %i";
     v65 = "(localClientNum == 0)";
     if (localClientNum)
         MyAssertHandler(
@@ -367,35 +360,21 @@ void __cdecl CG_DrawObjectiveList(
             LABEL_17:
                 if (checkbox_active)
                 {
-                    v22 = (float)((float)y - rect->h);
+                    //v22 = (float)((float)y - rect->h);
                     CL_DrawStretchPic(
                         &scrPlaceView[localClientNum],
                         rect->x,
-                        v22,
+                        y - rect->h,
                         rect->w,
                         rect->h,
-                        v16,
-                        v15,
-                        0.0,
-                        0.0,
-                        1.0,
-                        1.0,
-                        v14,
-                        v24,
                         rect->horzAlign,
                         rect->vertAlign,
-                        v50,
-                        v51,
-                        v52,
-                        v53,
-                        v54,
-                        v55,
-                        v56,
-                        v57,
-                        v58,
-                        v59,
-                        v60,
-                        v61);
+                        0.0,
+                        0.0,
+                        1.0,
+                        1.0,
+                        colorWhite,// KISAKTODO: arg bad
+                        v24);
                 }
                 v27 = SEH_LocalizeTextMessage((const char *)p_icon - 1032, "objective text", LOCMSG_SAFE);
                 v28 = (float)((float)(rect->w + rect->x) + (float)12.0);

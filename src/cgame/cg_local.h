@@ -198,14 +198,14 @@ double __cdecl HudElemStringWidth(const char *string, const cg_hudelem_t *cghe);
 char *__cdecl HudElemTimerString(const hudelem_s *elem, int32_t timeNow);
 int32_t __cdecl GetHudElemTime(const hudelem_s *elem, int32_t timeNow);
 char *__cdecl HudElemTenthsTimerString(const hudelem_s *elem, int32_t timeNow);
-double __cdecl HudElemWidth(const ScreenPlacement *scrPlace, const hudelem_s *elem, const cg_hudelem_t *cghe);
+float __cdecl HudElemWidth(const ScreenPlacement *scrPlace, const hudelem_s *elem, const cg_hudelem_t *cghe);
 double __cdecl HudElemMaterialWidth(const ScreenPlacement *scrPlace, const hudelem_s *elem, const cg_hudelem_t *cghe);
 double __cdecl HudElemMaterialSpecifiedWidth(
     const ScreenPlacement *scrPlace,
     char alignScreen,
     int32_t sizeVirtual,
     const cg_hudelem_t *cghe);
-double __cdecl HudElemHeight(const ScreenPlacement *scrPlace, const hudelem_s *elem, const cg_hudelem_t *cghe);
+float __cdecl HudElemHeight(const ScreenPlacement *scrPlace, const hudelem_s *elem, const cg_hudelem_t *cghe);
 double __cdecl HudElemMaterialHeight(const ScreenPlacement *scrPlace, const hudelem_s *elem, const cg_hudelem_t *cghe);
 double __cdecl HudElemMaterialSpecifiedHeight(
     const ScreenPlacement *scrPlace,
@@ -501,6 +501,7 @@ char __cdecl Bullet_Trace(
 #ifdef KISAK_SP
 void CG_SaveViewModelAnimTrees(struct SaveGame *save);
 void CG_LoadViewModelAnimTrees(struct SaveGame *save, const struct playerState_s *ps);
+void CG_ArchiveWeaponInfo(struct MemoryFile *memFile);
 #endif
 
 
@@ -1108,6 +1109,13 @@ void CG_CompassDrawPlayerPointers_SP(
     Material *material,
     float *color);
 double __cdecl GetObjectiveFade(const rectDef_s *clipRect, float x, float y, float width, float height);
+void CG_CompassDrawGoalDistance(
+    int localClientNum,
+    const rectDef_s *rect,
+    Font_s *font,
+    double scale,
+    float *color,
+    int textStyle);
 
 
 
@@ -1188,6 +1196,9 @@ void __cdecl CG_StartShakeCamera(int32_t localClientNum, float p, int32_t durati
 int32_t __cdecl CG_UpdateCameraShake(const cg_s *cgameGlob, CameraShake *shake);
 void __cdecl CG_ShakeCamera(int32_t localClientNum);
 void __cdecl CG_ClearCameraShakes(int32_t localClientNum);
+#ifdef KISAK_SP
+void CG_ArchiveCameraShake(int localClientNum, struct MemoryFile *memFile);
+#endif
 
 
 

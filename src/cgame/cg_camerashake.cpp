@@ -211,3 +211,9 @@ void __cdecl CG_ClearCameraShakes(int32_t localClientNum)
     memset((uint8_t *)&s_cameraShakeSet[localClientNum], 0, 0x90u);
 }
 
+#ifdef KISAK_SP
+void CG_ArchiveCameraShake(int localClientNum, MemoryFile *memFile)
+{
+    MemFile_ArchiveData(memFile, 148, &s_cameraShakeSet[localClientNum]);
+}
+#endif // KISAK_SP

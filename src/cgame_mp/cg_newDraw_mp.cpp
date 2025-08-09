@@ -156,26 +156,24 @@ bool __cdecl CG_CheckPlayerForLowClip(const cg_s *cgameGlob)
     return CG_CheckPlayerForLowClipSpecific(cgameGlob, weapIndex);
 }
 
-double __cdecl CG_CalcPlayerHealth(const playerState_s *ps)
+float CG_CalcPlayerHealth(const playerState_s *ps)
 {
-    float v3; // [esp+4h] [ebp-10h]
-    float v4; // [esp+8h] [ebp-Ch]
     float v5; // [esp+Ch] [ebp-8h]
     float health; // [esp+10h] [ebp-4h]
 
     if (!ps->stats[0] || !ps->stats[2] || ps->pm_type == PM_DEAD)
         return 0.0;
     health = (double)ps->stats[0] / (double)ps->stats[2];
-    v4 = health - 1.0;
-    if (v4 < 0.0)
+
+    if ((health - 1.0f) < 0.0)
         v5 = (double)ps->stats[0] / (double)ps->stats[2];
     else
         v5 = 1.0;
-    v3 = 0.0 - health;
-    if (v3 < 0.0)
+
+    if (0.0f - health < 0.0)
         return v5;
     else
-        return (float)0.0;
+        return 0.0f;
 }
 
 void __cdecl CG_ResetLowHealthOverlay(cg_s *cgameGlob)
@@ -259,17 +257,10 @@ void __cdecl CG_OwnerDraw(
     const playerState_s *ps; // [esp+40h] [ebp-4h]
 
     ps = CG_GetPredictedPlayerState(localClientNum);
-    if (!ps)
-        MyAssertHandler(".\\cgame_mp\\cg_newDraw_mp.cpp", 1748, 0, "%s", "ps");
+    iassert(ps);
     if (ps->offhandSecondary)
     {
-        if (ps->offhandSecondary != PLAYER_OFFHAND_SECONDARY_FLASH)
-            MyAssertHandler(
-                ".\\cgame_mp\\cg_newDraw_mp.cpp",
-                1756,
-                0,
-                "%s",
-                "ps->offhandSecondary == PLAYER_OFFHAND_SECONDARY_FLASH");
+        iassert(ps->offhandSecondary == PLAYER_OFFHAND_SECONDARY_FLASH);
         offSecond = OFFHAND_CLASS_FLASH_GRENADE;
     }
     else
@@ -683,13 +674,13 @@ void __cdecl CG_DrawPlayerAmmoValue(
                 }
                 if (lowAmmo)
                 {
-                    ammoColor[0] = 0.88999999f;
-                    ammoColor[1] = 0.18000001f;
-                    ammoColor[2] = 0.0099999998f;
+                    ammoColor[0] = 0.89f;
+                    ammoColor[1] = 0.18f;
+                    ammoColor[2] = 0.01f;
                 }
                 else
                 {
-                    ammoColor[0] = *color;
+                    ammoColor[0] = color[0];
                     ammoColor[1] = color[1];
                     ammoColor[2] = color[2];
                 }
@@ -929,9 +920,6 @@ void __cdecl CG_DrawPlayerStance(
     float scale,
     int32_t textStyle)
 {
-    float v6; // [esp+0h] [ebp-78h]
-    float v7; // [esp+1Ch] [ebp-5Ch]
-    float v8; // [esp+20h] [ebp-58h]
     float v9; // [esp+24h] [ebp-54h]
     float v10; // [esp+38h] [ebp-40h]
     float halfWidth; // [esp+4Ch] [ebp-2Ch]
@@ -963,7 +951,7 @@ void __cdecl CG_DrawPlayerStance(
         x = (compassSize->current.value - 1.0f) * cgs->compassWidth * 0.699999988079071f + rect->x;
         y = rect->y;
         KISAK_NULLSUB();
-        drawColor[0] = *color;
+        drawColor[0] = color[0];
         drawColor[1] = color[1];
         drawColor[2] = color[2];
         if ((cgameGlob->predictedPlayerState.pm_flags & 0x1000) != 0 && cgameGlob->proneBlockedEndTime < cgameGlob->time)
@@ -976,17 +964,14 @@ void __cdecl CG_DrawPlayerStance(
                 proneStr = UI_SafeTranslateString("CGAME_PRONE_BLOCKED");
             halfWidth = UI_TextWidth(proneStr, 0, font, scale) * 0.5;
             deltaTime = (cgameGlob->proneBlockedEndTime - cgameGlob->time);
-            v9 = deltaTime / 1500.0f * 540.0f * 0.01745329238474369f;
-            v8 = sin(v9);
-            v7 = I_fabs(v8);
-            drawColor[3] = v7;
-            v6 = -halfWidth;
+            v9 = deltaTime / 1500.0f * 540.0f * (M_PI / 180.0f);
+            drawColor[3] = I_fabs(sin(v9));
             UI_DrawText(
                 &scrPlaceView[localClientNum],
                 proneStr,
                 0x7FFFFFFF,
                 font,
-                v6,
+                -halfWidth,
                 cg_hudProneY->current.value,
                 7,
                 3,
@@ -1293,7 +1278,7 @@ void __cdecl CG_DrawPlayerSprintMeter(int32_t localClientNum, const rectDef_s *r
         sprintLeft = PM_GetSprintLeft(ps, cgameGlob->time);
         maxSprint = BG_GetMaxSprintTime(ps);
         sprint = sprintLeft / maxSprint;
-        if (sprint > 0.0)
+        if (sprint > 0.0f)
         {
             x = rect->x;
             y = rect->y;
@@ -1335,7 +1320,7 @@ void __cdecl CG_CalcPlayerSprintColor(const cg_s *cgameGlob, const playerState_s
     if (ps->pm_type == PM_DEAD || !maxSprint)
     {
         p_current = &cg_sprintMeterFullColor->current;
-        *color = cg_sprintMeterFullColor->current.value;
+        color[0] = p_current->vector[0];
         color[1] = p_current->vector[1];
         color[2] = p_current->vector[2];
     }
@@ -1347,12 +1332,15 @@ void __cdecl CG_CalcPlayerSprintColor(const cg_s *cgameGlob, const playerState_s
             sprintLeft = PM_GetSprintLeftLastTime(ps);
         if (sprintLeft)
         {
-            frac = (double)sprintLeft / (double)maxSprint;
+            frac = (float)sprintLeft / (float)maxSprint;
             Vec4Lerp(&cg_sprintMeterEmptyColor->current.value, &cg_sprintMeterFullColor->current.value, frac, color);
         }
         else
         {
-            *(DvarValue *)color = cg_sprintMeterDisabledColor->current;
+            //*(DvarValue *)color = cg_sprintMeterDisabledColor->current;
+            color[0] = cg_sprintMeterDisabledColor->current.vector[0];
+            color[1] = cg_sprintMeterDisabledColor->current.vector[1];
+            color[2] = cg_sprintMeterDisabledColor->current.vector[2];
         }
     }
 }
@@ -1398,7 +1386,8 @@ void __cdecl CG_DrawPlayerBarHealth(int32_t localClientNum, const rectDef_s *rec
                 v4 = v7;
             else
                 v4 = 0.0;
-            if (health > 0.0)
+
+            if (health > 0.0f)
             {
                 x = rect->x;
                 y = rect->y;
@@ -1406,13 +1395,13 @@ void __cdecl CG_DrawPlayerBarHealth(int32_t localClientNum, const rectDef_s *rec
                 h = rect->h;
                 if (v4 <= 0.5)
                 {
-                    color[1] = (v4 + 0.2000000029802322) * color[1];
-                    color[1] = color[1] + 0.300000011920929;
+                    color[1] = (v4 + 0.2f) * color[1];
+                    color[1] = color[1] + 0.3f;
                 }
                 else
                 {
-                    *color = (1.0 - v4 + 1.0 - v4) * *color;
-                    color[2] = (1.0 - v4 + 1.0 - v4) * color[2];
+                    color[0] = (1.0f - v4 + 1.0f - v4) * color[0];
+                    color[2] = (1.0f - v4 + 1.0f - v4) * color[2];
                 }
                 CL_DrawStretchPic(
                     &scrPlaceView[localClientNum],
@@ -1444,7 +1433,7 @@ void __cdecl CG_DrawPlayerBarHealth(int32_t localClientNum, const rectDef_s *rec
                 }
                 else
                 {
-                    cgameGlob->lastHealth = cgameGlob->lastHealth - cgameGlob->frametime * 0.0012000001;
+                    cgameGlob->lastHealth = cgameGlob->lastHealth - cgameGlob->frametime * 0.0012f;
                     if (health >= cgameGlob->lastHealth)
                     {
                         cgameGlob->lastHealth = health;
@@ -1464,9 +1453,9 @@ void __cdecl CG_DrawPlayerBarHealth(int32_t localClientNum, const rectDef_s *rec
                 ya = rect->y;
                 wa = (cgameGlob->lastHealth - health) * rect->w;
                 ha = rect->h;
-                *color = 1.0;
-                color[1] = 0.0;
-                color[2] = 0.0;
+                color[0] = 1.0f;
+                color[1] = 0.0f;
+                color[2] = 0.0f;
                 CL_DrawStretchPic(
                     &scrPlaceView[localClientNum],
                     xa,
@@ -1476,9 +1465,9 @@ void __cdecl CG_DrawPlayerBarHealth(int32_t localClientNum, const rectDef_s *rec
                     rect->horzAlign,
                     rect->vertAlign,
                     health,
-                    0.0,
+                    0.0f,
                     cgameGlob->lastHealth,
-                    1.0,
+                    1.0f,
                     color,
                     material);
             }
@@ -1488,9 +1477,6 @@ void __cdecl CG_DrawPlayerBarHealth(int32_t localClientNum, const rectDef_s *rec
 
 void __cdecl CG_DrawPlayerBarHealthBack(int32_t localClientNum, const rectDef_s *rect, Material *material, float *color)
 {
-    float v4; // [esp+34h] [ebp-54h]
-    float v5; // [esp+44h] [ebp-44h]
-    float v6; // [esp+58h] [ebp-30h]
     int32_t flashTime; // [esp+68h] [ebp-20h]
     float health; // [esp+70h] [ebp-18h]
     float x; // [esp+74h] [ebp-14h]
@@ -1523,14 +1509,14 @@ void __cdecl CG_DrawPlayerBarHealthBack(int32_t localClientNum, const rectDef_s 
                 h,
                 rect->horzAlign,
                 rect->vertAlign,
-                0.0,
-                0.0,
-                1.0,
-                1.0,
+                0.0f,
+                0.0f,
+                1.0f,
+                1.0f,
                 color,
                 material);
             health = CG_CalcPlayerHealth(&cgameGlob->nextSnap->ps);
-            if (health != 0.0)
+            if (health != 0.0f)
             {
                 if (hud_health_startpulse_critical->current.value <= health)
                 {
@@ -1554,9 +1540,9 @@ void __cdecl CG_DrawPlayerBarHealthBack(int32_t localClientNum, const rectDef_s 
                     {
                         cgameGlob->lastHealthPulseTime = cgameGlob->time;
                     }
-                    *color = 0.88999999f;
-                    color[1] = 0.18000001f;
-                    color[2] = 0.0099999998f;
+                    color[0] = 0.89f;
+                    color[1] = 0.18f;
+                    color[2] = 0.01f;
                     color[3] = (flashTime + cgameGlob->lastHealthPulseTime - cgameGlob->time) / flashTime;
                     if (color[3] > fadeAlpha)
                         color[3] = fadeAlpha;
@@ -1649,7 +1635,6 @@ double __cdecl CG_FadeLowHealthOverlay(const cg_s *cgameGlob)
 
 void __cdecl CG_PulseLowHealthOverlay(cg_s *cgameGlob, float healthRatio)
 {
-    const char *v2; // eax
     float v3; // [esp+0h] [ebp-58h]
     float v4; // [esp+4h] [ebp-54h]
     float v5; // [esp+8h] [ebp-50h]
@@ -1666,7 +1651,7 @@ void __cdecl CG_PulseLowHealthOverlay(cg_s *cgameGlob, float healthRatio)
     float v16; // [esp+34h] [ebp-24h]
     float v17; // [esp+38h] [ebp-20h]
     float v18; // [esp+3Ch] [ebp-1Ch]
-    float pulseMags[4] = { 1.0f, 0.80000001f, 0.60000002f, 0.30000001f };
+    float pulseMags[4] = { 1.0f, 0.8f, 0.6f, 0.3f };
 
     if (cgameGlob->healthOverlayOldHealth > (double)healthRatio
         && hud_healthOverlay_pulseStart->current.value > (double)healthRatio)
@@ -1719,8 +1704,7 @@ void __cdecl CG_PulseLowHealthOverlay(cg_s *cgameGlob, float healthRatio)
                         * pulseMags[cgameGlob->healthOverlayPulseIndex];
                     v5 = v13 - 1.0f;
                     if (v5 < 0.0f)
-                        v14 = hud_healthOverlay_phaseThree_toAlphaMultiplier->current.value
-                        * pulseMags[cgameGlob->healthOverlayPulseIndex];
+                        v14 = hud_healthOverlay_phaseThree_toAlphaMultiplier->current.value * pulseMags[cgameGlob->healthOverlayPulseIndex];
                     else
                         v14 = 1.0f;
                     v4 = 0.0f - v13;
@@ -1741,8 +1725,7 @@ void __cdecl CG_PulseLowHealthOverlay(cg_s *cgameGlob, float healthRatio)
                 }
                 else if (!alwaysfails)
                 {
-                    v2 = va("Invalid health overlay pulse phase: %i", cgameGlob->healthOverlayPulsePhase);
-                    MyAssertHandler(".\\cgame_mp\\cg_newDraw_mp.cpp", 1134, 0, v2);
+                    MyAssertHandler(".\\cgame_mp\\cg_newDraw_mp.cpp", 1134, 0, va("Invalid health overlay pulse phase: %i", cgameGlob->healthOverlayPulsePhase));
                 }
             }
             else
@@ -1970,25 +1953,30 @@ void __cdecl CG_DrawCursorhint(
                             secondaryLength = UI_TextWidth(secondaryString, 0, font, fontscale);
                             x = (length + secondaryLength) * -0.5;
                             y = rect->y - rect->h * 0.5 * heightScale;
-                            v22 = height * 0.5 + rect->y;
                             UI_DrawText(
                                 scrPlace,
                                 displayString,
                                 0x7FFFFFFF,
                                 font,
                                 x,
-                                v22,
+                                height * 0.5f + rect->y,
                                 rect->horzAlign,
                                 rect->vertAlign,
                                 fontscale,
                                 color,
                                 textStyle);
-                            vertAlign = rect->vertAlign;
-                            h = rect->horzAlign;
-                            v21 = height * 0.5 + rect->y;
-                            v20 = x + length;
-                            v8 = va(" %s", secondaryString);
-                            UI_DrawText(scrPlace, v8, 0x7FFFFFFF, font, v20, v21, h, vertAlign, fontscale, color, textStyle);
+                            UI_DrawText(scrPlace, 
+                                va(" %s", secondaryString),
+                                0x7FFFFFFF,
+                                font,
+                                x + length,
+                                height * 0.5f + rect->y,
+                                rect->horzAlign,
+                                rect->vertAlign,
+                                fontscale, 
+                                color, 
+                                textStyle);
+
                             x = (rect->w * widthScale + scale) * -0.5;
                             v19 = rect->h * heightScale + scale;
                             w = rect->w * widthScale + scale;
@@ -2245,7 +2233,6 @@ void __cdecl CG_DrawInvalidCmdHint(
     float *color,
     int32_t textStyle)
 {
-    float v6; // [esp+2Ch] [ebp-20h]
     char *string; // [esp+40h] [ebp-Ch]
     float x; // [esp+44h] [ebp-8h]
     int32_t blinkInterval; // [esp+48h] [ebp-4h]

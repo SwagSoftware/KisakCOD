@@ -53,7 +53,7 @@ void __cdecl CG_DrawCenterString(
     Font_s *font,
     double fontscale,
     float *color,
-    float *textStyle);
+    int textStyle);
 int __cdecl CG_DrawFriendlyFire(const cg_s *cgameGlob);
 void __cdecl CG_DrawFlashFade(int localClientNum);
 int __cdecl CG_CheckPlayerMovement(

@@ -1455,15 +1455,13 @@ void __cdecl CG_GenerateSceneVerts(int32_t localClientNum)
 
 void __cdecl CG_GetViewAxisProjections(const refdef_s *refdef, const float *worldPoint, float *projections)
 {
-    double v3; // st7
     float eyeDelta[3]; // [esp+0h] [ebp-10h] BYREF
     int32_t i; // [esp+Ch] [ebp-4h]
 
     Vec3Sub(worldPoint, refdef->vieworg, eyeDelta);
     for (i = 0; i < 3; ++i)
     {
-        v3 = Vec3Dot(eyeDelta, refdef->viewaxis[i]);
-        projections[i] = v3;
+        projections[i] = Vec3Dot(eyeDelta, refdef->viewaxis[i]);
     }
 }
 

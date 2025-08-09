@@ -544,7 +544,7 @@ bool __cdecl CG_CheckPlayerForLowAmmoSpecific(const cg_s *cgameGlob, uint32_t we
 bool __cdecl CG_CheckPlayerForLowAmmo(const cg_s *cgameGlob);
 bool __cdecl CG_CheckPlayerForLowClipSpecific(const cg_s *cgameGlob, uint32_t weapIndex);
 bool __cdecl CG_CheckPlayerForLowClip(const cg_s *cgameGlob);
-double __cdecl CG_CalcPlayerHealth(const playerState_s *ps);
+float CG_CalcPlayerHealth(const playerState_s *ps);
 void __cdecl CG_ResetLowHealthOverlay(cg_s *cgameGlob);
 int32_t __cdecl CG_ServerMaterialName(int32_t localClientNum, int32_t index, char *materialName, uint32_t maxLen);
 Material *__cdecl CG_ObjectiveIcon(int32_t localClientNum, int32_t icon, int32_t type);

@@ -2089,7 +2089,7 @@ void CG_CompassDrawPlayerPointers_SP(
     objectiveInfo_t *objectives; // r25
     float *v18; // r28
     int v19; // r18
-    double v20; // fp0
+    double x; // fp0
     double v21; // fp13
     double v22; // fp0
     double value; // fp13
@@ -2157,12 +2157,12 @@ void CG_CompassDrawPlayerPointers_SP(
                 {
                     if (*v18 != 0.0 || v18[1] != 0.0 || v18[2] != 0.0)
                     {
-                        v20 = (float)(*v18 - cgArray[0].refdef.vieworg[0]);
+                        x = (float)(*v18 - cgArray[0].refdef.vieworg[0]);
                         v21 = (float)(v18[1] - cgArray[0].refdef.vieworg[1]);
                         v48[2] = *color;
                         v48[3] = color[1];
                         v48[4] = color[2];
-                        v22 = sqrtf((float)((float)((float)v21 * (float)v21) + (float)((float)v20 * (float)v20)));
+                        v22 = sqrtf((float)((float)((float)v21 * (float)v21) + (float)((float)x * (float)x)));
                         v49 = v22;
                         value = compassObjectiveMaxRange->current.value;
                         if (v22 > value || (value = compassMaxRange->current.value, v22 < value))
@@ -2294,3 +2294,205 @@ double __cdecl GetObjectiveFade(const rectDef_s *clipRect, float x, float y, flo
     return (float)(1.0 - maxclip);
 }
 
+#ifdef KISAK_SP
+static float MYFLASHTERM_0 = 45.0f;
+static void NearTargetTextColor(const cg_s *cgameGlob, float *color)
+{
+    __int64 v4; // r11
+    long double v5; // fp2
+    double v6; // fp12
+    double v7; // fp11
+    double v8; // fp10
+
+    HIDWORD(v4) = 108044;
+    LODWORD(v4) = cgameGlob->time;
+    v5 = sin((float)((float)v4 / (float)(MYFLASHTERM_0 * (float)3.1415927)));
+    v6 = color[1];
+    v7 = color[2];
+    v8 = (float)((float)1.0 - color[1]);
+    *color = (float)((float)((float)0.89999998 - *color)
+        * (float)((float)((float)*(double *)&v5 + (float)1.0) * (float)0.5))
+        + *color;
+    color[1] = (float)((float)v8 * (float)((float)((float)*(double *)&v5 + (float)1.0) * (float)0.5)) + (float)v6;
+    color[2] = (float)((float)((float)0.1 - (float)v7) * (float)((float)((float)*(double *)&v5 + (float)1.0) * (float)0.5))
+        + (float)v7;
+}
+
+static float DistanceToNearestGoal(cg_s *cgameGlob, float *heightDelta)
+{
+    char v4; // r27
+    objectiveInfo_t *objectives; // r25
+    int v6; // r24
+    double v7; // fp31
+    double v8; // fp29
+    float *v9; // r31
+    int v10; // r28
+    double v11; // fp1
+    float v12[2]; // fp1
+
+    if (!cgameGlob)
+        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\cgame\\cg_compass.cpp", 1354, 0, "%s", "cgameGlob");
+    v4 = 0;
+    objectives = cgameGlob->objectives;
+    v6 = 16;
+    v7 = 9999999.0;
+    v8 = 0.0;
+    do
+    {
+        if (objectives->state == OBJST_CURRENT)
+        {
+            v9 = &objectives->origin[0][2];
+            v10 = 8;
+            do
+            {
+                if (*(v9 - 2) != 0.0 || *(v9 - 1) != 0.0 || *v9 != 0.0)
+                {
+                    v11 = Vec2Distance(v9 - 2, cgameGlob->refdef.vieworg);
+                    if (v11 < v7)
+                    {
+                        v4 = 1;
+                        v7 = v11;
+                        v8 = (float)(cgameGlob->refdef.vieworg[2] - *v9);
+                    }
+                }
+                --v10;
+                v9 += 3;
+            } while (v10);
+        }
+        --v6;
+        ++objectives;
+    } while (v6);
+    if (v4)
+    {
+        if (heightDelta)
+            *heightDelta = v8;
+        *(double *)v12 = v7;
+    }
+    else
+    {
+        *(double *)v12 = -1.0;
+    }
+    return v12[1];
+}
+
+// local variable allocation has failed, the output may be wrong!
+void CG_CompassDrawGoalDistance(
+    int localClientNum,
+    const rectDef_s *rect,
+    Font_s *font,
+    double scale,
+    float *color,
+    int textStyle)
+{
+    int compassFadeTime; // r27
+    long double v12; // fp2
+    long double v13; // fp2
+    double v14; // fp1
+    double v15; // fp0
+    bool v16; // mr_fpscr48
+    double v17; // fp0
+    double v18; // fp1
+    __int64 v19; // r11
+    double x; // fp31
+    int v21; // r3
+    int v22; // r8
+    __int64 v23; // r11
+    const float *horzAlign; // r9
+    double y; // fp2
+    const ScreenPlacement *v26; // r30
+    double v27; // fp31
+    double v28; // fp30
+    int v29; // r7
+    __int64 v30; // [sp+70h] [-C0h] BYREF
+    float v31[3]; // [sp+80h] [-B0h] BYREF
+    float v32; // [sp+8Ch] [-A4h]
+    char v33[64]; // [sp+90h] [-A0h] BYREF
+
+    if (localClientNum)
+        MyAssertHandler(
+            "c:\\trees\\cod3\\cod3src\\src\\cgame\\cg_local.h",
+            910,
+            0,
+            "%s\n\t(localClientNum) = %i",
+            "(localClientNum == 0)",
+            localClientNum);
+    compassFadeTime = cgArray[0].compassFadeTime;
+    *(double *)&v12 = (float)((float)(hud_fade_compass->current.value * (float)1000.0) + (float)0.5);
+    v13 = floor(v12);
+    HIDWORD(v30) = (int)(float)*(double *)&v13;
+    v14 = CG_FadeHudMenu(localClientNum, hud_fade_compass, compassFadeTime, SHIDWORD(v30));
+    if (v14 != 0.0)
+    {
+        v15 = color[3];
+        v32 = color[3];
+        v16 = v14 < v15;
+        v31[1] = color[1];
+        v17 = color[2];
+        v31[0] = color[0];
+        v31[2] = v17;
+        if (v16)
+            v32 = v14;
+        v18 = (float)(DistanceToNearestGoal(cgArray, (float *)&v30) * (float)0.0254);
+        if (v18 >= 0.0)
+        {
+            if (v18 >= compassObjectiveNearbyDist->current.value)
+            {
+                Com_sprintf(v33, 64, "%.0f", v18);
+                v21 = UI_TextWidth(v33, 20, font, scale);
+                v22 = 68 * localClientNum;
+                HIDWORD(v23) = rect->vertAlign;
+                horzAlign = (const float *)rect->horzAlign;
+                y = rect->y;
+                v26 = &scrPlaceView[localClientNum];
+                LODWORD(v23) = v21;
+                v27 = (float)v23;
+                v28 = (float)((float)((float)(rect->w - (float)v23) * (float)0.5) + rect->x);
+                v30 = v23;
+                UI_DrawText(v26, v33, 0x7FFFFFFF, font, v28, y, (int)v31, v22, scale, horzAlign, SHIDWORD(v23));
+                UI_DrawText(
+                    v26,
+                    "m",
+                    0x7FFFFFFF,
+                    font,
+                    (float)((float)((float)v27 + (float)v28) + (float)4.0),
+                    rect->y,
+                    v29,
+                    (int)v31,
+                    scale,
+                    (const float *)rect->horzAlign,
+                    rect->vertAlign);
+            }
+            else
+            {
+                if (*(float *)&v30 <= (double)compassObjectiveMaxHeight->current.value)
+                {
+                    if (*(float *)&v30 >= (double)compassObjectiveMinHeight->current.value)
+                        Com_sprintf(v33, 64, "Nearby", LODWORD(v18));
+                    else
+                        Com_sprintf(v33, 64, "Above", LODWORD(v18));
+                }
+                else
+                {
+                    Com_sprintf(v33, 64, "Below", LODWORD(v18));
+                }
+                LODWORD(v19) = UI_TextWidth(v33, 20, font, scale);
+                x = (float)((float)((float)(rect->w - (float)v19) * (float)0.5) + rect->x);
+                v30 = v19;
+                NearTargetTextColor(cgArray, v31);
+                UI_DrawText(
+                    &scrPlaceView[localClientNum],
+                    v33,
+                    0x7FFFFFFF,
+                    font,
+                    x,
+                    rect->y,
+                    rect->horzAlign,
+                    rect->vertAlign,
+                    scale,
+                    color,
+                    textStyle);
+            }
+        }
+    }
+}
+#endif

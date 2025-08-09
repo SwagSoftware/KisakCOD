@@ -1,9 +1,15 @@
 #include "cg_local.h"
 #include "cg_public.h"
 #include <xanim/dobj.h>
-#include <cgame_mp/cg_local_mp.h>
 #include <script/scr_const.h>
 #include <EffectsCore/fx_system.h>
+
+#ifdef KISAK_MP
+#include <cgame_mp/cg_local_mp.h>
+#elif KISAK_SP
+#include "cg_ents.h"
+#include "cg_main.h"
+#endif
 
 
 

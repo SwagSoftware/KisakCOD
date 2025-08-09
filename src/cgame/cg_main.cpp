@@ -495,7 +495,6 @@ const dvar_s *CG_RegisterDvars()
         "Show the grenade indicator for flash grenades");
     cg_hudGrenadePointerHeight = Dvar_RegisterFloat("cg_hudGrenadePointerHeight", 12.0, 0.0, 512.0, v31, v30);
     cg_hudGrenadePointerWidth = Dvar_RegisterFloat("cg_hudGrenadePointerWidth", 25.0, 0.0, 512.0, v33, v32);
-    DvarLimits limits;
     limits.value.min = 0.0f;
     limits.value.max = 512.0f;
     //cg_hudGrenadePointerPivot = Dvar_RegisterVec2("cg_hudGrenadePointerPivot", 12.0, 27.0, 0.0, 512.0, v35, v34);
@@ -761,7 +760,6 @@ const dvar_s *CG_RegisterDvars()
         0,
         "Use the objective font for friendly prints.");
     friendlyNameFontSize = Dvar_RegisterFloat("friendlyNameFontSize", 0.30000001, 0.0099999998, 100.0, v159, v158);
-    DvarLimits limits;
     limits.value.min = 0.0f;
     limits.value.max = 1.0f;
     friendlyNameFontColor = Dvar_RegisterVec4(
@@ -1484,10 +1482,7 @@ void __cdecl CG_InitViewDimensions(int localClientNum)
             "(localClientNum == 0)",
             localClientNum);
     cgsArray[0].viewX = 0;
-    CL_GetScreenDimensions(
-        (unsigned int *)&cgsArray[0].viewWidth,
-        (unsigned int *)&cgsArray[0].viewHeight,
-        &cgsArray[0].viewAspect);
+    CL_GetScreenDimensions(&cgsArray[0].viewWidth,&cgsArray[0].viewHeight, &cgsArray[0].viewAspect);
     if (cgsArray[0].viewWidth <= 0)
         MyAssertHandler(
             "c:\\trees\\cod3\\cod3src\\src\\cgame\\cg_main.cpp",

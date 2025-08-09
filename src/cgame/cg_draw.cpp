@@ -48,7 +48,7 @@ void __cdecl CG_DrawCenterString(
     Font_s *font,
     double fontscale,
     float *color,
-    float *textStyle)
+    int textStyle)
 {
     CenterPrint *v11; // r30
     int time; // r4

@@ -149,10 +149,16 @@ void __cdecl CG_EntityEvent(int32_t localClientNum, centity_s *cent, int32_t eve
 
         weaponDef = BG_GetWeaponDef(weaponIdx);
 
+#ifdef KISAK_MP
         if ((cgameGlob->bgs.clientinfo[clientNum].perks & 0x100) != 0)
+        {
             offset = 29;
+        }
         else
+#endif
+        {
             offset = 0;
+        }
 
         if (event > EV_LANDING_FIRST && event < EV_LANDING_LAST)
         {
@@ -900,6 +906,7 @@ void __cdecl CG_EntityEvent(int32_t localClientNum, centity_s *cent, int32_t eve
     }
 }
 
+#ifdef KISAK_MP
 void __cdecl CG_Obituary(int32_t localClientNum, const entityState_s *ent)
 {
     const char *v2; // eax
@@ -1089,7 +1096,7 @@ void __cdecl CG_Obituary(int32_t localClientNum, const entityState_s *ent)
         }
     }
 }
-
+#endif
 void __cdecl CG_ItemPickup(int32_t localClientNum, int32_t weapIndex)
 {
     WeaponDef *weapDef;
@@ -1114,6 +1121,7 @@ void __cdecl CG_ItemPickup(int32_t localClientNum, int32_t weapIndex)
 
 void __cdecl CG_EquipmentSound(int32_t localClientNum, int32_t entNum, bool isPlayerView, EquipmentSound_t type)
 {
+#ifdef KISAK_MP
     if (isPlayerView)
     {
         switch (type)
@@ -1166,6 +1174,42 @@ void __cdecl CG_EquipmentSound(int32_t localClientNum, int32_t entNum, bool isPl
             break;
         }
     }
+#elif KISAK_SP
+    snd_alias_list_t *runningEquipmentSoundPlayer; // r5
+
+    if (isPlayerView)
+    {
+        if (type == EQS_RUNNING)
+        {
+            runningEquipmentSoundPlayer = cgMedia.runningEquipmentSoundPlayer;
+        }
+        else if (type == EQS_SPRINTING)
+        {
+            runningEquipmentSoundPlayer = cgMedia.sprintingEquipmentSoundPlayer;
+        }
+        else
+        {
+            if (type)
+                MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\cgame\\cg_event.cpp", 265, 0, "%s", "type == EQS_WALKING");
+            runningEquipmentSoundPlayer = cgMedia.walkingEquipmentSoundPlayer;
+        }
+    }
+    else if (type == EQS_RUNNING)
+    {
+        runningEquipmentSoundPlayer = cgMedia.runningEquipmentSound;
+    }
+    else if (type == EQS_SPRINTING)
+    {
+        runningEquipmentSoundPlayer = cgMedia.sprintingEquipmentSound;
+    }
+    else
+    {
+        if (type)
+            MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\cgame\\cg_event.cpp", 296, 0, "%s", "type == EQS_WALKING");
+        runningEquipmentSoundPlayer = cgMedia.walkingEquipmentSound;
+    }
+    CG_PlayEntitySoundAlias(localClientNum, entNum, runningEquipmentSoundPlayer);
+#endif
 }
 
 void __cdecl CG_PlayFx(int32_t localClientNum, centity_s *cent, const float *angles)

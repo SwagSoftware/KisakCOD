@@ -4,11 +4,19 @@
 #include <stringed/stringed_hooks.h>
 
 #include <string.h>
-#include <client_mp/client_mp.h>
 #include <client/client.h>
-#include <cgame_mp/cg_local_mp.h>
 #include <EffectsCore/fx_system.h>
 #include <universal/profile.h>
+
+#ifdef KISAK_MP
+#include <client_mp/client_mp.h>
+#include <cgame_mp/cg_local_mp.h>
+#elif KISAK_SP
+#include <ui/ui.h>
+#include "cg_main.h"
+#include "cg_newdraw.h"
+#endif
+
 
 const float s_alignScale[4] = { 0.0, 0.5, 1.0, 0.0 }; // idb
 float glowColor[4]; // KISAKTODO: check for duplicates more
@@ -475,6 +483,7 @@ void __cdecl DrawSingleHudElem2d(int32_t localClientNum, const hudelem_s *elem)
                 DrawHudElemString(localClientNum, &scrPlaceView[localClientNum], cghe.hudElemLabel, elem, &cghe);
                 cghe.x = cghe.x + cghe.labelWidth;
             }
+#ifdef KISAK_MP
             switch (elem->type)
             {
             case HE_TYPE_TEXT:
@@ -501,6 +510,31 @@ void __cdecl DrawSingleHudElem2d(int32_t localClientNum, const hudelem_s *elem)
                     MyAssertHandler(".\\cgame\\cg_hudelem.cpp", 1387, 0, "invalid case");
                 break;
             }
+#elif KISAK_SP
+            switch (elem->type)
+            {
+            case HE_TYPE_TEXT:
+            case HE_TYPE_VALUE:
+            case HE_TYPE_TIMER_DOWN:
+            case HE_TYPE_TIMER_UP:
+            case HE_TYPE_TENTHS_TIMER_DOWN:
+            case HE_TYPE_TENTHS_TIMER_UP:
+                if (cghe.hudElemText[0])
+                    DrawHudElemString(localClientNum, &scrPlaceView[localClientNum], cghe.hudElemText, elem, &cghe);
+                break;
+            case HE_TYPE_MATERIAL:
+                DrawHudElemMaterial(localClientNum, elem, &cghe);
+                break;
+            case HE_TYPE_CLOCK_DOWN:
+            case HE_TYPE_CLOCK_UP:
+                DrawHudElemClock(localClientNum, elem, &cghe);
+                break;
+            default:
+                if (!alwaysfails)
+                    MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\cgame\\cg_hudelem.cpp", 1383, 0, "invalid case");
+                break;
+            }
+#endif
         }
     }
 }
@@ -525,7 +559,7 @@ void __cdecl GetHudElemInfo(int32_t localClientNum, const hudelem_s *elem, cg_hu
         fontEnum = 4;
         break;
     case 2:
-        baseFontScale = 0.33333334f;
+        baseFontScale = (1.0f / 3.0f);
         fontEnum = 5;
         break;
     case 3:
@@ -556,6 +590,8 @@ void __cdecl GetHudElemInfo(int32_t localClientNum, const hudelem_s *elem, cg_hu
     if (elem->label)
         SafeTranslateHudElemString(localClientNum, elem->label, cghe->hudElemLabel);
     cghe->hudElemText[0] = 0;
+
+#ifdef KISAK_MP
     switch (elem->type)
     {
     case HE_TYPE_TEXT:
@@ -591,6 +627,32 @@ void __cdecl GetHudElemInfo(int32_t localClientNum, const hudelem_s *elem, cg_hu
     default:
         break;
     }
+#elif KISAK_SP
+    switch (elem->type)
+    {
+    case HE_TYPE_TEXT:
+        if (elem->text)
+            SafeTranslateHudElemString(localClientNum, elem->text, cghe->hudElemText);
+        break;
+    case HE_TYPE_VALUE:
+        Com_sprintf(
+            cghe->hudElemText,
+            256,
+            "%g",
+            elem->value);
+        break;
+    case HE_TYPE_TIMER_DOWN:
+    case HE_TYPE_TIMER_UP:
+        CopyStringToHudElemString(HudElemTimerString(elem, cghe->timeNow), cghe->hudElemText);
+        break;
+    case HE_TYPE_TENTHS_TIMER_DOWN:
+    case HE_TYPE_TENTHS_TIMER_UP:
+        CopyStringToHudElemString(HudElemTenthsTimerString(elem, cghe->timeNow), cghe->hudElemText);
+        break;
+    default:
+        break;
+    }
+#endif
     if (cghe->hudElemLabel[0] && cghe->hudElemText[0])
         ConsolidateHudElemText(cghe, hudElemString);
     if (cghe->hudElemLabel[0])
@@ -694,12 +756,13 @@ char *__cdecl HudElemTenthsTimerString(const hudelem_s *elem, int32_t timeNow)
         return va("%i:%02i.%i", minutes, seconds, tenths);
 }
 
-double __cdecl HudElemWidth(const ScreenPlacement *scrPlace, const hudelem_s *elem, const cg_hudelem_t *cghe)
+float __cdecl HudElemWidth(const ScreenPlacement *scrPlace, const hudelem_s *elem, const cg_hudelem_t *cghe)
 {
-    double result; // st7
+    float result; // st7
     float v4; // [esp+0h] [ebp-Ch]
     float v5; // [esp+4h] [ebp-8h]
 
+#ifdef KISAK_MP
     switch (elem->type)
     {
     case HE_TYPE_TEXT:
@@ -721,7 +784,7 @@ double __cdecl HudElemWidth(const ScreenPlacement *scrPlace, const hudelem_s *el
         result = v4;
         break;
     case HE_TYPE_WAYPOINT:
-        result = (double)elem->width;
+        result = (float)elem->width;
         break;
     default:
         if (!alwaysfails)
@@ -729,6 +792,33 @@ double __cdecl HudElemWidth(const ScreenPlacement *scrPlace, const hudelem_s *el
         result = 0.0;
         break;
     }
+#elif KISAK_SP
+    switch (elem->type)
+    {
+    case HE_TYPE_TEXT:
+    case HE_TYPE_VALUE:
+    case HE_TYPE_TIMER_DOWN:
+    case HE_TYPE_TIMER_UP:
+    case HE_TYPE_TENTHS_TIMER_DOWN:
+    case HE_TYPE_TENTHS_TIMER_UP:
+        result = (float)(cghe->textWidth + cghe->labelWidth);
+        break;
+    case HE_TYPE_MATERIAL:
+    case HE_TYPE_CLOCK_DOWN:
+    case HE_TYPE_CLOCK_UP:
+        result = (float)(HudElemMaterialWidth(scrPlace, elem, cghe) + cghe->labelWidth);
+        break;
+    case HE_TYPE_WAYPOINT:
+        result = (float)elem->width;
+        break;
+    default:
+        if (!alwaysfails)
+            MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\cgame\\cg_hudelem.cpp", 490, 0, "invalid case");
+        result = 0.0;
+        break;
+    }
+#endif
+
     return result;
 }
 
@@ -775,11 +865,12 @@ double __cdecl HudElemMaterialSpecifiedWidth(
         return (float)(scrPlace->scaleVirtualToReal[0] * (double)sizeVirtual);
 }
 
-double __cdecl HudElemHeight(const ScreenPlacement *scrPlace, const hudelem_s *elem, const cg_hudelem_t *cghe)
+float __cdecl HudElemHeight(const ScreenPlacement *scrPlace, const hudelem_s *elem, const cg_hudelem_t *cghe)
 {
-    double result; // st7
+    float result; // st7
     float height; // [esp+4h] [ebp-4h]
 
+#ifdef KISAK_MP
     switch (elem->type)
     {
     case HE_TYPE_TEXT:
@@ -799,7 +890,7 @@ double __cdecl HudElemHeight(const ScreenPlacement *scrPlace, const hudelem_s *e
         height = HudElemMaterialHeight(scrPlace, elem, cghe);
         goto LABEL_8;
     case HE_TYPE_WAYPOINT:
-        height = (float)elem->height;
+        height = elem->height;
     LABEL_8:
         if (cghe != (const cg_hudelem_t *)-16 && cghe->fontHeight > (double)height)
             height = cghe->fontHeight;
@@ -811,6 +902,36 @@ double __cdecl HudElemHeight(const ScreenPlacement *scrPlace, const hudelem_s *e
         result = 0.0;
         break;
     }
+#elif KISAK_SP
+    switch (elem->type)
+    {
+    case HE_TYPE_TEXT:
+    case HE_TYPE_VALUE:
+    case HE_TYPE_TIMER_DOWN:
+    case HE_TYPE_TIMER_UP:
+    case HE_TYPE_TENTHS_TIMER_DOWN:
+    case HE_TYPE_TENTHS_TIMER_UP:
+        result = cghe->fontHeight;
+        goto LABEL_5;
+    case HE_TYPE_MATERIAL:
+    case HE_TYPE_CLOCK_DOWN:
+    case HE_TYPE_CLOCK_UP:
+        result = HudElemMaterialHeight(scrPlace, elem, cghe);
+        goto LABEL_5;
+    case HE_TYPE_WAYPOINT:
+        result = (float)elem->height;
+    LABEL_5:
+        if (cghe != (const cg_hudelem_t *)-16 && result < cghe->fontHeight)
+            result = cghe->fontHeight;
+        break;
+    default:
+        if (!alwaysfails)
+            MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\cgame\\cg_hudelem.cpp", 526, 0, "invalid case");
+        result = 0.0;
+        break;
+    }
+#endif
+
     return result;
 }
 
@@ -1400,6 +1521,20 @@ void __cdecl DrawOffscreenViewableWaypoint(int32_t localClientNum, const hudelem
     }
 }
 
+#ifdef KISAK_SP
+static void __cdecl CG_GetViewAxisProjections(const refdef_s *refdef, const float *worldPoint, float *projections)
+{
+    float eyeDelta[3]; // [esp+0h] [ebp-10h] BYREF
+    int32_t i; // [esp+Ch] [ebp-4h]
+
+    Vec3Sub(worldPoint, refdef->vieworg, eyeDelta);
+    for (i = 0; i < 3; ++i)
+    {
+        projections[i] = Vec3Dot(eyeDelta, refdef->viewaxis[i]);
+    }
+}
+#endif
+
 char __cdecl WorldPosToScreenPos(int32_t localClientNum, const float *worldPos, float *outScreenPos)
 {
     float v4; // [esp+0h] [ebp-64h]
@@ -1645,13 +1780,21 @@ int32_t __cdecl GetSortedHudElems(int32_t localClientNum, hudelem_s **elems)
     const cg_s *clientGlob;
 
     clientGlob = CG_GetLocalClientGlobals(localClientNum);
+
     if (!clientGlob->nextSnap)
         return 0;
+
     ps = &clientGlob->nextSnap->ps;
     elemCount = 0;
+
+#ifdef KISAK_MP
     CopyInUseHudElems(elems, &elemCount, ps->hud.current, 31);
     CopyInUseHudElems(elems, &elemCount, ps->hud.archival, 31);
-    qsort(elems, elemCount, 4u, compare_hudelems);
+#elif KISAK_SP
+    CopyInUseHudElems(elems, &elemCount, ps->hud.elem, 256);
+#endif
+
+    qsort(elems, elemCount, 4, compare_hudelems);
     return elemCount;
 }
 
@@ -1669,7 +1812,9 @@ void __cdecl CG_AddDrawSurfsFor3dHudElems(int32_t localClientNum)
     hudelem_s *elems[62]; // [esp+4h] [ebp-100h] BYREF
     int32_t elemCount; // [esp+100h] [ebp-4h]
 
+#ifdef KISAK_MP
     if (CG_ShouldDrawHud(localClientNum))
+#endif
     {
         elemCount = GetSortedHudElems(localClientNum, elems);
         if ((unsigned int)elemCount >= 0x3E)
