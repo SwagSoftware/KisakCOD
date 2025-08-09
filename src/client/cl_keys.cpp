@@ -4,15 +4,23 @@
 #include <qcommon/qcommon.h>
 #include <qcommon/cmd.h>
 #include <universal/com_memory.h>
-#include <client_mp/client_mp.h>
 #include <cgame/cg_local.h>
 #include <stringed/stringed_hooks.h>
 #include <win32/win_local.h>
 #include <universal/com_files.h>
-#include <cgame_mp/cg_local_mp.h>
 #include <devgui/devgui.h>
-#include <server_mp/server_mp.h>
 #include <script/scr_debugger.h>
+
+#ifdef KISAK_MP
+#include <client_mp/client_mp.h>
+#include <cgame_mp/cg_local_mp.h>
+#include <server_mp/server_mp.h>
+#elif KISAK_SP
+#include <cgame/cg_main.h>
+#include <cgame/cg_modelpreviewer.h>
+#include "cl_ui.h"
+#endif
+
 
 keyname_t keynames[96] =
 {
@@ -1064,10 +1072,12 @@ bool __cdecl Console_IsRconCmd(const char *commandString)
     return I_strncmp(commandString, "rcon", strlen("rcon")) == 0;
 }
 
-char __cdecl Console_IsClientDisconnected()
+#ifdef KISAK_MP
+bool __cdecl Console_IsClientDisconnected()
 {
     return CL_AllLocalClientsDisconnected();
 }
+#endif
 
 int32_t __cdecl Key_GetOverstrikeMode(int32_t localClientNum)
 {
@@ -1452,6 +1462,7 @@ bool __cdecl CL_IsConsoleKey(int32_t key)
     return (key == '`' || key == '^' || key == 184 || key == '~');
 }
 
+#ifdef KISAK_MP
 void __cdecl CL_KeyEvent(int32_t localClientNum, int32_t key, int32_t down, uint32_t time)
 {
     const char *v4; // eax
@@ -1736,6 +1747,310 @@ void __cdecl CL_KeyEvent(int32_t localClientNum, int32_t key, int32_t down, uint
         }
     }
 }
+#elif KISAK_SP
+void __cdecl CL_KeyEvent(int32_t localClientNum, int32_t key, int32_t down, uint32_t time)
+{
+    int v5; // r28
+    int v6; // r31
+    KeyState *keys; // r24
+    KeyState *v10; // r30
+    int v11; // r11
+    int v12; // r10
+    const char *binding; // r3
+    const char *v14; // r11
+    const char *v15; // r10
+    int v16; // r8
+    connstate_t LocalClientConnectionState; // r3
+    int v18; // r30
+    char keyCatchers; // r11
+    uiMenuCommand_t ActiveMenu; // r3
+    const char *v21; // r10
+    const char *v22; // r6
+    char v23; // r3
+    keyname_t *v24; // r11
+    int v25; // r11
+    char v26; // r9
+    char v27; // r11
+    char v28; // r11
+    char v29[1120]; // [sp+50h] [-460h] BYREF
+
+    v5 = localClientNum;
+    v6 = key;
+    keys = playerKeys[localClientNum].keys;
+    v10 = &keys[key];
+    v10->down = down;
+    if (down)
+    {
+        v11 = v10->repeats + 1;
+        v10->repeats = v11;
+        if (v11 == 1)
+            ++playerKeys[v5].anyKeyDown;
+    }
+    else
+    {
+        v10->repeats = 0;
+        v12 = playerKeys[v5].anyKeyDown - 1;
+        playerKeys[v5].anyKeyDown = v12;
+        if (v12 < 0)
+            playerKeys[v5].anyKeyDown = 0;
+    }
+    CG_ModelPreviewerHandleKeyEvents(localClientNum, key, down, time);
+    if (localClientNum)
+        MyAssertHandler(
+            "c:\\trees\\cod3\\cod3src\\src\\client\\client.h",
+            548,
+            0,
+            "%s\n\t(localClientNum) = %i",
+            "(localClientNum == 0)",
+            localClientNum);
+    if (v6 == 96 || v6 == 126 || (clientUIActives[0].keyCatchers & 1) != 0)
+    {
+        if (DevGui_IsActive())
+            DevGui_Toggle();
+    }
+    else
+    {
+        binding = v10->binding;
+        if (binding && !I_stricmp(binding, "devgui") && down && v10->repeats == 1)
+        {
+            Cbuf_AddText(localClientNum, v10->binding);
+            return;
+        }
+        if (DevGui_IsActive())
+        {
+            if (down)
+            {
+                if (v10->repeats == 1)
+                    DevGui_KeyPressed(v6);
+            }
+            return;
+        }
+    }
+    if (down && v10->repeats > 1)
+    {
+        if ((clientUIActives[0].keyCatchers & 0x21) == 0)
+        {
+            if ((clientUIActives[0].keyCatchers & 0x10) != 0)
+            {
+                switch (v6)
+                {
+                case 154:
+                case 155:
+                case 163:
+                case 164:
+                    goto LABEL_27;
+                default:
+                    return;
+                }
+            }
+            return;
+        }
+    LABEL_27:
+        if (v6 == 96 || v6 == 126 || v6 == 27)
+            return;
+    }
+    if (!con_restricted->current.enabled || (clientUIActives[0].keyCatchers & 1) != 0)
+    {
+        if (v6 == 96 || v6 == 126)
+        {
+            if (!down)
+                return;
+            if (keys[160].down)
+            {
+                if (!Con_IsActive(localClientNum))
+                    Con_ToggleConsole();
+                Con_ToggleConsoleOutput();
+                return;
+            }
+        LABEL_35:
+            Con_ToggleConsole();
+            return;
+        }
+    }
+    else if (v6 == 165)
+    {
+        if (down && keys[127].down)
+            goto LABEL_35;
+    }
+    else if (v6 == 96 || v6 == 126)
+    {
+        return;
+    }
+    if ((clientUIActives[0].keyCatchers & 8) != 0 && down > 0)
+    {
+        if (v6 == 27)
+        {
+            playerKeys[v5].locSelInputState = LOC_SEL_INPUT_CANCEL;
+        }
+        else
+        {
+            v14 = v10->binding;
+            if (v14)
+            {
+                v15 = "+attack";
+                do
+                {
+                    v16 = *(unsigned __int8 *)v14 - *(unsigned __int8 *)v15;
+                    if (!*v14)
+                        break;
+                    ++v14;
+                    ++v15;
+                } while (!v16);
+                if (!v16)
+                    playerKeys[v5].locSelInputState = LOC_SEL_INPUT_CONFIRM;
+            }
+        }
+        return;
+    }
+    playerKeys[v5].locSelInputState = LOC_SEL_INPUT_NONE;
+    LocalClientConnectionState = CL_GetLocalClientConnectionState(localClientNum);
+    v18 = LocalClientConnectionState;
+    if (down
+        && v6 < 128
+        && (cls.demoplaying || LocalClientConnectionState == CA_CINEMATIC || LocalClientConnectionState == CA_LOGO))
+    {
+        keyCatchers = clientUIActives[0].keyCatchers;
+        if (clientUIActives[0].keyCatchers)
+            goto LABEL_60;
+        Dvar_SetString(nextdemo, "");
+        v6 = 27;
+    }
+    keyCatchers = clientUIActives[0].keyCatchers;
+LABEL_60:
+    if ((keyCatchers & 0x10) != 0)
+    {
+        ActiveMenu = UI_GetActiveMenu(localClientNum);
+        keyCatchers = clientUIActives[0].keyCatchers;
+    }
+    else
+    {
+        ActiveMenu = UIMENU_NONE;
+    }
+    if (v6 == 27)
+    {
+        if (down)
+        {
+            if ((keyCatchers & 1) != 0)
+            {
+                Con_CancelAutoComplete();
+                keyCatchers = clientUIActives[0].keyCatchers;
+            }
+            if ((keyCatchers & 0x10) != 0)
+            {
+                UI_KeyEvent(localClientNum, 27, down);
+            }
+            else if (v18 > 0)
+            {
+                if (v18 <= 2)
+                {
+                    CL_StopLogoOrCinematic(localClientNum);
+                }
+                else if (v18 == 4)
+                {
+                    UI_SetActiveMenu(localClientNum, UIMENU_INGAME);
+                }
+            }
+            return;
+        }
+        goto LABEL_75;
+    }
+    if (!down)
+    {
+    LABEL_75:
+        v21 = keys[v6].binding;
+        if (v21 && *v21 == 43)
+        {
+            Com_sprintf(v29, 1024, "-%s %i %i\n", v21 + 1, v6, time);
+            Cbuf_AddText(localClientNum, v29);
+            keyCatchers = clientUIActives[0].keyCatchers;
+        }
+        if ((keyCatchers & 0x10) != 0 && cls.uiStarted)
+            UI_KeyEvent(localClientNum, v6, down);
+        return;
+    }
+    if ((keyCatchers & 1) != 0)
+        goto LABEL_89;
+    if ((keyCatchers & 0x10) == 0)
+    {
+        if (v18)
+        {
+            v22 = keys[v6].binding;
+            if (v22)
+            {
+                if (*v22 == 43)
+                {
+                    Com_sprintf(v29, 1024, "%s %i %i\n", v22, v6, time);
+                    Cbuf_AddText(localClientNum, v29);
+                }
+                else
+                {
+                    Cbuf_AddText(localClientNum, v22);
+                    Cbuf_AddText(localClientNum, "\n");
+                }
+                return;
+            }
+            if (v6 < 207)
+                return;
+            if ((unsigned int)v6 > 0xFF)
+            {
+                Com_Printf(14, "%s is unbound, use controls menu to set.\n", "<OUT OF RANGE>");
+                return;
+            }
+            if ((unsigned int)(v6 - 33) > 0x5D)
+            {
+                v24 = keynames;
+                if (keynames[0].name)
+                {
+                    while (v6 != v24->keynum)
+                    {
+                        ++v24;
+                        if (!v24->name)
+                            goto LABEL_98;
+                    }
+                    Com_Printf(14, "%s is unbound, use controls menu to set.\n", v24->name);
+                    return;
+                }
+            LABEL_98:
+                v25 = v6 >> 4;
+                v26 = v6 & 0xF;
+                tinystr[0] = 48;
+                tinystr[1] = 120;
+                if (v6 >> 4 <= 9)
+                    v27 = v25 + 48;
+                else
+                    v27 = v25 + 87;
+                tinystr[2] = v27;
+                v28 = v26 + 87;
+                if ((v6 & 0xFu) <= 9)
+                    v28 = v26 + 48;
+                tinystr[3] = v28;
+                tinystr[4] = 0;
+            }
+            else
+            {
+                v23 = toupper(v6);
+                tinystr[1] = 0;
+                tinystr[0] = v23;
+            }
+            Com_Printf(14, "%s is unbound, use controls menu to set.\n", tinystr);
+            return;
+        }
+    LABEL_89:
+        Console_Key(localClientNum, v6);
+        return;
+    }
+    if (ActiveMenu == UIMENU_CLIPBOARD)
+    {
+        v6 = 27;
+    }
+    else if (ActiveMenu == UIMENU_PREGAME)
+    {
+        return;
+    }
+    if (cls.uiStarted)
+        UI_KeyEvent(localClientNum, v6, down);
+}
+#endif
 
 void __cdecl Message_Key(int32_t localClientNum, int32_t key)
 {
@@ -1787,6 +2102,9 @@ void __cdecl Message_Key(int32_t localClientNum, int32_t key)
 
 bool __cdecl CL_MouseInputShouldBypassMenus(int32_t localClientNum, int32_t key)
 {
+#ifdef KISAK_SP
+    return false; //KISAKTODO: Is this proper for PC?
+#elif KISAK_MP
     if (UI_GetActiveMenu(localClientNum) == 10)
         return 1;
     if (!cl_bypassMouseInput || !cl_bypassMouseInput->current.enabled)
@@ -1794,6 +2112,7 @@ bool __cdecl CL_MouseInputShouldBypassMenus(int32_t localClientNum, int32_t key)
     if (key == 200 || key == 201 || key == 202)
         return 1;
     return cls.uiStarted && !UI_CheckExecKey(localClientNum, key);
+#endif
 }
 
 void __cdecl CL_CharEvent(int32_t localClientNum, int32_t key)

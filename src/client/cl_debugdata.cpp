@@ -1,7 +1,11 @@
 #include "client.h"
 
 #include <gfx_d3d/r_debug.h>
+
+#ifdef KISAK_MP
 #include <client_mp/client_mp.h>
+#elif KISAK_SP
+#endif
 
 void CL_RecordServerDebugData()
 {

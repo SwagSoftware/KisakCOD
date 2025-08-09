@@ -1,5 +1,8 @@
 #include "client.h"
+
+#ifdef KISAK_MP
 #include <client_mp/client_mp.h>
+#endif
 
 ScreenPlacement scrPlaceView[1];
 ScreenPlacement scrPlaceFull;

@@ -541,3 +541,44 @@ void __cdecl DObjUnlock(DObj_s *obj)
     obj->locked = 0;
 }
 
+// seems blops specific
+//int __cdecl DObjGetChildBones(const DObj_s *obj, unsigned __int8 parentBone, unsigned __int8 *children, int maxChildren)
+//{
+//    unsigned __int8 child_index; // [esp+7h] [ebp-1Dh]
+//    int j; // [esp+8h] [ebp-1Ch]
+//    unsigned __int8 modelBoneIndex; // [esp+Fh] [ebp-15h]
+//    XModel *model; // [esp+14h] [ebp-10h]
+//    int numChildBones; // [esp+18h] [ebp-Ch]
+//    unsigned __int8 childBoneIndexStart; // [esp+1Fh] [ebp-5h]
+//
+//    iassert(obj);
+//    iassert(parentBone < obj->numBones);
+//    iassert(children);
+//
+//    numChildBones = 0;
+//    modelBoneIndex = parentBone;
+//    childBoneIndexStart = 0;
+//
+//    for (j = 0; ; ++j)
+//    {
+//        if (j >= obj->numModels)
+//            return 0;
+//        model = obj->localModels[j];
+//        if (modelBoneIndex < (int)model->numBones)
+//            break;
+//        modelBoneIndex -= model->numBones;
+//        childBoneIndexStart += model->numBones;
+//    }
+//
+//    for (child_index = 0; child_index < (int)model->numBones; ++child_index)
+//    {
+//        if (modelBoneIndex == child_index - model->localParentList[child_index - model->numRootBones])
+//        {
+//            children[numChildBones] = child_index + childBoneIndexStart;
+//            if (++numChildBones == maxChildren)
+//                return numChildBones;
+//        }
+//    }
+//
+//    return numChildBones;
+//}

@@ -1,11 +1,16 @@
 #include "cg_local.h"
 #include "cg_public.h"
 
-#include <client_mp/client_mp.h>
-#include <cgame_mp/cg_local_mp.h>
-
 #include <gfx_d3d/r_rendercmds.h>
 #include <sound/snd_public.h>
+
+#ifdef KISAK_MP
+#include <client_mp/client_mp.h>
+#include <cgame_mp/cg_local_mp.h>
+#elif KISAK_SP
+#include <cgame/cg_main.h>
+#include "cg_view.h"
+#endif
 
 const float cg_perturbations[131][2] =
 {

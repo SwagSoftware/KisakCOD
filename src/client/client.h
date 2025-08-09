@@ -464,7 +464,7 @@ void CompleteDvarArgument();
 void __cdecl UpdateMatches(bool searchCmds, int32_t *matchLenAfterCmds, int32_t *matchLenAfterDvars);
 void __cdecl FindMatches(char *s);
 bool __cdecl Console_IsRconCmd(const char *commandString);
-char __cdecl Console_IsClientDisconnected();
+bool __cdecl Console_IsClientDisconnected();
 int32_t __cdecl Key_GetOverstrikeMode(int32_t localClientNum);
 void __cdecl Key_SetOverstrikeMode(int32_t localClientNum, int32_t state);
 int32_t __cdecl Key_IsDown(int32_t localClientNum, int32_t keynum);
@@ -1068,8 +1068,8 @@ void __cdecl CL_InitRef();
 void __cdecl CL_VoidCommand();
 void __cdecl CL_startMultiplayer_f();
 void __cdecl CL_ShellExecute_URL_f();
-void __cdecl CL_IncAnimWeight_f(int32_t a1, int32_t a2, int32_t a3, int32_t a4, int32_t a5, int32_t a6, __int64 a7);
-void __cdecl CL_DecAnimWeight_f(int32_t a1, int32_t a2, int32_t a3, int32_t a4, int32_t a5, int32_t a6, __int64 a7);
+void __cdecl CL_IncAnimWeight_f();
+void __cdecl CL_DecAnimWeight_f();
 void __cdecl CL_StopLogo(int32_t localClientNum);
 void __cdecl CL_PlayLogo_f();
 void __cdecl CL_StopLogoOrCinematic(int32_t localClientNum);
@@ -1081,20 +1081,20 @@ void __cdecl CL_DrawTextPhysical(
     const char *text,
     int32_t maxChars,
     Font_s *font,
-    double x,
-    double y,
-    double xScale,
-    double yScale,
+    float x,
+    float y,
+    float xScale,
+    float yScale,
     const float *color,
     int32_t style);
 void __cdecl CL_DrawTextPhysicalWithEffects(
     const char *text,
     int32_t maxChars,
     Font_s *font,
-    double x,
-    double y,
-    double xScale,
-    double yScale,
+    float x,
+    float y,
+    float xScale,
+    float yScale,
     const float *color,
     int32_t style,
     const float *glowColor,
@@ -1109,12 +1109,12 @@ void __cdecl CL_DrawText(
     const char *text,
     int32_t maxChars,
     Font_s *font,
-    double x,
-    double y,
+    float x,
+    float y,
     int32_t horzAlign,
     int32_t vertAlign,
-    double xScale,
-    double yScale,
+    float xScale,
+    float yScale,
     const float *color,
     int32_t style);
 void __cdecl CL_DrawTextRotate(
@@ -1122,23 +1122,23 @@ void __cdecl CL_DrawTextRotate(
     const char *text,
     int32_t maxChars,
     Font_s *font,
-    double x,
-    double y,
-    double rotation,
+    float x,
+    float y,
+    float rotation,
     int32_t horzAlign,
     int32_t vertAlign,
-    double xScale,
-    double yScale,
+    float xScale,
+    float yScale,
     const float *color,
     int32_t style);
 void __cdecl CL_DrawTextPhysicalWithCursor(
-    const char *text,
+    char *text,
     int32_t maxChars,
     Font_s *font,
-    double x,
-    double y,
-    double xScale,
-    double yScale,
+    float x,
+    float y,
+    float xScale,
+    float yScale,
     const float *color,
     int32_t style,
     int32_t cursorPos,
@@ -1148,18 +1148,14 @@ void __cdecl CL_DrawTextWithCursor(
     const char *text,
     int32_t maxChars,
     Font_s *font,
-    double x,
-    double y,
+    float x,
+    float y,
     int32_t horzAlign,
     int32_t vertAlign,
-    double xScale,
-    double yScale,
+    float xScale,
+    float yScale,
     const float *color,
     int32_t style,
-    double a13,
-    double a14,
-    double a15,
-    double a16,
     int32_t cursorPos,
     char cursor);
 Font_s *__cdecl CL_RegisterFont(const char *fontName, int32_t imageTrack);
@@ -1215,4 +1211,13 @@ extern int cl_last_controller_input;
 extern int scr_initialized;
 extern bool updateScreenCalled;
 
-#endif
+
+inline clientActive_t *__cdecl CL_GetLocalClientGlobals(int32_t localClientNum)
+{
+    iassert(clients);
+    iassert(localClientNum == 0);
+
+    return &clients[localClientNum];
+}
+
+#endif // KISAK_SP

@@ -1151,7 +1151,7 @@ void __cdecl CL_ShellExecute_URL_f()
     }
 }
 
-void __cdecl CL_IncAnimWeight_f(int a1, int a2, int a3, int a4, int a5, int a6, __int64 a7)
+void __cdecl CL_IncAnimWeight_f()
 {
     const dvar_s *v7; // r3
     double v8; // fp0
@@ -1167,15 +1167,14 @@ void __cdecl CL_IncAnimWeight_f(int a1, int a2, int a3, int a4, int a5, int a6, 
         v7 = cl_testAnimWeight;
         v8 = com_timescaleValue;
     }
-    LODWORD(a7) = cls.frametime;
-    v10 = (float)((float)((float)((float)a7 / (float)v8) * (float)0.0020000001) + (float)value);
+    v10 = (float)((float)((float)((float)cls.frametime / (float)v8) * (float)0.0020000001) + (float)value);
     if (v10 > 1.0)
         v10 = 1.0;
     Dvar_SetFloat(v7, v10);
     Com_Printf(0, (const char *)HIDWORD(v10), LODWORD(v10));
 }
 
-void __cdecl CL_DecAnimWeight_f(int a1, int a2, int a3, int a4, int a5, int a6, __int64 a7)
+void __cdecl CL_DecAnimWeight_f()
 {
     const dvar_s *v7; // r3
     double v8; // fp0
@@ -1191,8 +1190,7 @@ void __cdecl CL_DecAnimWeight_f(int a1, int a2, int a3, int a4, int a5, int a6, 
         v7 = cl_testAnimWeight;
         v8 = com_timescaleValue;
     }
-    LODWORD(a7) = cls.frametime;
-    v10 = (float)-(float)((float)((float)((float)a7 / (float)v8) * (float)0.0020000001) - (float)value);
+    v10 = (float)-(float)((float)((float)((float)cls.frametime / (float)v8) * (float)0.0020000001) - (float)value);
     if (v10 < 0.0)
         v10 = 0.0;
     Dvar_SetFloat(v7, v10);
@@ -1448,41 +1446,36 @@ void __cdecl CL_Shutdown(int localClientNum)
 
 void __cdecl CL_DrawTextPhysical(
     const char *text,
-    int maxChars,
+    int32_t maxChars,
     Font_s *font,
-    double x,
-    double y,
-    double xScale,
-    double yScale,
+    float x,
+    float y,
+    float xScale,
+    float yScale,
     const float *color,
-    int style)
+    int32_t style)
 {
     R_AddCmdDrawText(text, maxChars, font, x, y, xScale, yScale, 0.0, color, style);
 }
 
 void __cdecl CL_DrawTextPhysicalWithEffects(
     const char *text,
-    int maxChars,
+    int32_t maxChars,
     Font_s *font,
-    double x,
-    double y,
-    double xScale,
-    double yScale,
+    float x,
+    float y,
+    float xScale,
+    float yScale,
     const float *color,
-    int style,
+    int32_t style,
     const float *glowColor,
     Material *fxMaterial,
     Material *fxMaterialGlow,
-    int fxBirthTime,
-    int fxLetterTime,
-    int fxDecayStartTime,
-    int fxDecayDuration)
+    int32_t fxBirthTime,
+    int32_t fxLetterTime,
+    int32_t fxDecayStartTime,
+    int32_t fxDecayDuration)
 {
-    int v16; // [sp+8h] [-98h]
-    int v17; // [sp+Ch] [-94h]
-    int v18; // [sp+10h] [-90h]
-    int v19; // [sp+14h] [-8Ch]
-
     R_AddCmdDrawTextWithEffects(
         text,
         maxChars,
@@ -1497,127 +1490,60 @@ void __cdecl CL_DrawTextPhysicalWithEffects(
         glowColor,
         fxMaterial,
         fxMaterialGlow,
-        v16,
-        v17,
-        v18,
-        v19);
+        fxBirthTime,
+        fxLetterTime,
+        fxDecayStartTime,
+        fxDecayDuration);
 }
 
 void __cdecl CL_DrawText(
     const ScreenPlacement *scrPlace,
     const char *text,
-    int maxChars,
+    int32_t maxChars,
     Font_s *font,
-    double x,
-    double y,
-    int horzAlign,
-    int vertAlign,
-    double xScale,
-    double yScale,
+    float x,
+    float y,
+    int32_t horzAlign,
+    int32_t vertAlign,
+    float xScale,
+    float yScale,
     const float *color,
-    int style,
-    double a13,
-    double a14,
-    double a15,
-    double a16,
-    float a17,
-    float a18,
-    float a19,
-    float a20,
-    float a21,
-    float a22,
-    float a23,
-    float a24,
-    float a25,
-    float a26,
-    float a27,
-    float a28,
-    float a29,
-    float a30,
-    float a31,
-    float a32,
-    float a33,
-    float a34,
-    float a35,
-    float a36,
-    float a37,
-    float a38)
+    int32_t style)
 {
-    int v41; // r7
-    const float *v42; // r6
-
-    a28 = x;
-    a30 = y;
-    a36 = xScale;
-    a38 = yScale;
-    ScrPlace_ApplyRect(scrPlace, &a28, &a30, &a36, &a38, (int)color, style);
-    R_AddCmdDrawText(text, maxChars, font, a28, a30, a36, a38, 0.0, v42, v41);
+    ScrPlace_ApplyRect(scrPlace, &x, &y, &xScale, &yScale, horzAlign, vertAlign);
+    R_AddCmdDrawText(text, maxChars, font, x, y, xScale, yScale, 0.0, color, style);
 }
 
 void __cdecl CL_DrawTextRotate(
     const ScreenPlacement *scrPlace,
     const char *text,
-    int maxChars,
+    int32_t maxChars,
     Font_s *font,
-    double x,
-    double y,
-    double rotation,
-    int horzAlign,
-    int vertAlign,
-    double xScale,
-    double yScale,
+    float x,
+    float y,
+    float rotation,
+    int32_t horzAlign,
+    int32_t vertAlign,
+    float xScale,
+    float yScale,
     const float *color,
-    int style,
-    double a14,
-    double a15,
-    double a16,
-    float a17,
-    float a18,
-    float a19,
-    float a20,
-    float a21,
-    float a22,
-    float a23,
-    float a24,
-    float a25,
-    float a26,
-    float a27,
-    float a28,
-    float a29,
-    float a30,
-    float a31,
-    float a32,
-    float a33,
-    float a34,
-    float a35,
-    int a36,
-    float a37,
-    float a38,
-    float a39,
-    float a40)
+    int32_t style)
 {
-    int v44; // r7
-    const float *v45; // r6
-
-    a28 = x;
-    a30 = y;
-    a38 = xScale;
-    a40 = yScale;
-    ScrPlace_ApplyRect(scrPlace, &a28, &a30, &a38, &a40, style, a36);
-    R_AddCmdDrawText(text, maxChars, font, a28, a30, a38, a40, rotation, v45, v44);
+    ScrPlace_ApplyRect(scrPlace, &x, &y, &xScale, &yScale, horzAlign, vertAlign);
+    R_AddCmdDrawText(text, maxChars, font, x, y, xScale, yScale, rotation, color, style);
 }
 
 void __cdecl CL_DrawTextPhysicalWithCursor(
-    const char *text,
-    int maxChars,
+    char *text,
+    int32_t maxChars,
     Font_s *font,
-    double x,
-    double y,
-    double xScale,
-    double yScale,
+    float x,
+    float y,
+    float xScale,
+    float yScale,
     const float *color,
-    int style,
-    int cursorPos,
+    int32_t style,
+    int32_t cursorPos,
     char cursor)
 {
     R_AddCmdDrawTextWithCursor(text, maxChars, font, x, y, xScale, yScale, 0.0, color, style, cursorPos, cursor);

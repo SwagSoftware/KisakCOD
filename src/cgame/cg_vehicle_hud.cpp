@@ -3,6 +3,8 @@
 #endif
 
 #include "cg_vehicle_hud.h"
+#include "cg_local.h"
+#include <client/client.h>
 
 bool __cdecl ClampScreenPosToEdges(
     const float *localClientNum,

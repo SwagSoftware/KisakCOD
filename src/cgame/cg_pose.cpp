@@ -137,7 +137,8 @@ void __cdecl CG_mg42_DoControllers(const cpose_t *pose, const DObj_s *obj, int *
     else
     {
         roll = pose->actor.roll;
-        v15 = (float)(pose->turret.$51809EA76892896F64281DFB626CE797::angles.pitch - pose->actor.roll);
+        //v15 = (float)(pose->turret.$51809EA76892896F64281DFB626CE797::angles.pitch - pose->actor.roll);
+        v15 = (float)(pose->turret.angles.pitch - pose->actor.roll);
         pitch = pose->actor.pitch;
         v16 = v15;
         v19[0] = roll;
@@ -147,7 +148,7 @@ void __cdecl CG_mg42_DoControllers(const cpose_t *pose, const DObj_s *obj, int *
     DObjSetControlTagAngles((DObj_s*)obj, partBits, pose->turret.tag_flash, v19);
 }
 
-// local variable allocation has failed, the output may be wrong!
+#if 0
 void __cdecl CG_Vehicle_DoControllers(const cpose_t *pose, const DObj_s *obj, int *partBits)
 {
     __int64 v3; // r28
@@ -209,9 +210,9 @@ void __cdecl CG_Vehicle_DoControllers(const cpose_t *pose, const DObj_s *obj, in
     v43[0] = (float)(__int64)v7 * (float)0.0054931641;
     v42[1] = (float)*(__int64 *)((char *)&v7 + 4) * (float)0.0054931641;
     v40 = (float)v3 * (float)0.0054931641;
-    DObjSetLocalTag(obj, partBits, tag_body, vec3_origin, v44);
-    DObjSetLocalTag(obj, partBits, pose->vehicle.tag_turret, vec3_origin, v42);
-    DObjSetLocalTag(obj, partBits, pose->vehicle.tag_barrel, vec3_origin, v43);
+    DObjSetLocalTag((DObj_s*)obj, partBits, tag_body, vec3_origin, v44);
+    DObjSetLocalTag((DObj_s*)obj, partBits, pose->vehicle.tag_turret, vec3_origin, v42);
+    DObjSetLocalTag((DObj_s*)obj, partBits, pose->vehicle.tag_barrel, vec3_origin, v43);
     height = pose->actor.height;
     AnglesToAxis(pose->angles, (float (*)[3])v47);
     v51[0] = pose->origin[0];
@@ -224,7 +225,7 @@ void __cdecl CG_Vehicle_DoControllers(const cpose_t *pose, const DObj_s *obj, in
     _R27 = 16;
     _R9 = v49;
     _R8 = v51;
-    __asm { lvx128    v13, r0, r11 }
+    __asm { lvx128    trans, r0, r11 }
     _R11 = v47;
     _R7 = v51;
     __asm
@@ -239,39 +240,39 @@ void __cdecl CG_Vehicle_DoControllers(const cpose_t *pose, const DObj_s *obj, in
     _R11 = &v50;
     __asm
     {
-        vsldoi128 v126, v127, v13, 0xC
+        vsldoi128 v126, v127, trans, 0xC
         vrlimi128 v127, v0, 1, 3
         lvlx      v5, r0, r7
-        lvx128    v11, r0, r11
+        lvx128    angles, r0, r11
     }
     __asm
     {
-        vsldoi128 v125, v13, v11, 8
-        vrlimi128 v0, v11, 0xE, 1
+        vsldoi128 v125, trans, angles, 8
+        vrlimi128 v0, angles, 0xE, 1
     }
     _R11 = &g_one;
     __asm
     {
-        vor       v11, v7, v8
+        vor       angles, v7, v8
         vor       v8, v5, v6
         vrlimi128 v126, v10, 1, 3
         vrlimi128 v125, v9, 1, 3
         vmr128    v123, v0
-        lvx128    v13, r0, r11
+        lvx128    trans, r0, r11
     }
-    __asm { vmrghw128 v0, v126, v13 }
+    __asm { vmrghw128 v0, v126, trans }
     _R28 = &g_keepXYZ;
     __asm
     {
         lvx128    v12, r0, r28
-        vand128   v124, v11, v12
-        vmrglw128 v11, v127, v125
+        vand128   v124, angles, v12
+        vmrglw128 angles, v127, v125
         vand128   v122, v8, v12
-        vmrglw128 v12, v126, v13
-        vmrghw128 v13, v127, v125
-        vmrghw128 v119, v11, v12
-        vmrghw128 v121, v13, v0
-        vmrglw128 v120, v13, v0
+        vmrglw128 v12, v126, trans
+        vmrghw128 trans, v127, v125
+        vmrghw128 v119, angles, v12
+        vmrghw128 v121, trans, v0
+        vmrglw128 v120, trans, v0
     }
     Model = DObjGetModel(obj, 0);
     XModelNumBones(Model);
@@ -296,20 +297,20 @@ void __cdecl CG_Vehicle_DoControllers(const cpose_t *pose, const DObj_s *obj, in
             __asm
             {
                 lvlx      v12, r0, r11
-                lvrx      v13, r27, r11
+                lvrx      trans, r27, r11
             }
             _R11 = v52;
-            __asm { vor       v13, v12, v13 }
+            __asm { vor       trans, v12, trans }
             *(float *)&v37 = 40.0;
             __asm
             {
-                vand      v0, v13, v0
-                vspltw    v13, v0, 2
+                vand      v0, trans, v0
+                vspltw    trans, v0, 2
                 vspltw    v12, v0, 1
-                vspltw    v11, v0, 0
-                vmaddfp128 v10, v125, v13, v10
+                vspltw    angles, v0, 0
+                vmaddfp128 v10, v125, trans, v10
                 vmaddfp128 v10, v12, v126, v10
-                vmaddfp128 v10, v11, v127, v10
+                vmaddfp128 v10, angles, v127, v10
             }
             _FP12 = (float)((float)((float)((float)((float)height + (float)40.0) * (float)_R10) * (float)0.000015259022)
                 - (float)((float)40.0 - (float)height));
@@ -318,19 +319,19 @@ void __cdecl CG_Vehicle_DoControllers(const cpose_t *pose, const DObj_s *obj, in
             *(float *)&v36 = -_FP0;
             __asm
             {
-                lvlx      v13, r0, r9
-                vspltw    v13, v13, 0
+                lvlx      trans, r0, r9
+                vspltw    trans, trans, 0
                 lvlx      v12, r0, r10
                 vspltw    v12, v12, 0
-                vmaddfp128 v10, v13, v124, v10
+                vmaddfp128 v10, trans, v124, v10
                 vmaddfp128 v10, v12, v124, v10
-                vsubfp128 v13, v10, v122
-                vspltw    v12, v13, 2
-                vspltw    v11, v13, 1
-                vspltw    v13, v13, 0
+                vsubfp128 trans, v10, v122
+                vspltw    v12, trans, 2
+                vspltw    angles, trans, 1
+                vspltw    trans, trans, 0
                 vmulfp128 v12, v12, v119
-                vmaddfp128 v12, v11, v120, v12
-                vmaddfp128 v12, v13, v121, v12
+                vmaddfp128 v12, angles, v120, v12
+                vmaddfp128 v12, trans, v121, v12
                 vsubfp    v0, v12, v0
                 stvx128   v0, r0, r11
             }
@@ -343,6 +344,357 @@ void __cdecl CG_Vehicle_DoControllers(const cpose_t *pose, const DObj_s *obj, in
         ++v25;
         v26 = (CEntFx *)((char *)v26 + 2);
     } while (v25 < 6);
+}
+#endif
+
+void CG_Vehicle_DoControllers(const cpose_t *pose, const DObj_s *obj, int *partBits)
+{
+    int v5; // xmm0_4
+    float v6[3]; // [esp-Ch] [ebp-2A8h] BYREF
+    float angles[3]; // [esp+0h] [ebp-29Ch]
+    int ChildBones; // [esp+Ch] [ebp-290h]
+    unsigned __int8 v9[4]; // [esp+10h] [ebp-28Ch] BYREF
+    float v10; // [esp+14h] [ebp-288h]
+    float v12; // [esp+1Ch] [ebp-280h]
+    float trans[3]; // [esp+20h] [ebp-27Ch]
+    float v14; // [esp+24h] [ebp-278h]
+    float v15[3]; // [esp+28h] [ebp-274h] BYREF
+    int k; // [esp+38h] [ebp-264h]
+    int n; // [esp+40h] [ebp-25Ch]
+    int m; // [esp+44h] [ebp-258h]
+    DObjAnimMat *skel; // [esp+48h] [ebp-254h]
+    unsigned __int8 v22[4]; // [esp+4Ch] [ebp-250h] BYREF
+    int j; // [esp+50h] [ebp-24Ch] BYREF
+    int numChildren; // [esp+54h] [ebp-248h]
+    unsigned __int8 children[4]; // [esp+58h] [ebp-244h]
+    float offset[4]; // [esp+5Ch] [ebp-240h]
+    float v27; // [esp+6Ch] [ebp-230h]
+    float v28; // [esp+70h] [ebp-22Ch]
+    int v29; // [esp+74h] [ebp-228h]
+    int v30; // [esp+78h] [ebp-224h]
+    int v31; // [esp+7Ch] [ebp-220h]
+    float v32; // [esp+80h] [ebp-21Ch]
+    float dist; // [esp+84h] [ebp-218h]
+    float v34; // [esp+88h] [ebp-214h]
+    float v35; // [esp+8Ch] [ebp-210h]
+    float v36; // [esp+90h] [ebp-20Ch]
+    float v37; // [esp+94h] [ebp-208h]
+    float v38; // [esp+98h] [ebp-204h]
+    float v39; // [esp+9Ch] [ebp-200h]
+    float v40; // [esp+A0h] [ebp-1FCh]
+    float4 partPos; // [esp+A4h] [ebp-1F8h]
+    //float4 trans; // [esp+B4h] [ebp-1E8h]
+    centity_s *Entity; // [esp+C4h] [ebp-1D8h]
+    const DObjAnimMat *mtx; // [esp+C8h] [ebp-1D4h]
+    unsigned int boneIndex; // [esp+CCh] [ebp-1D0h]
+    centity_s *cent; // [esp+D0h] [ebp-1CCh]
+    const DObjAnimMat *boneMtxList; // [esp+D4h] [ebp-1C8h]
+    const DObjAnimMat *remote_boneMtxList; // [esp+D8h] [ebp-1C4h]
+    unsigned int boneCount; // [esp+DCh] [ebp-1C0h]
+    XModel *model; // [esp+E0h] [ebp-1BCh]
+    vector4 invAxis; // [esp+E4h] [ebp-1B8h]
+    float4 axisW; // [esp+124h] [ebp-178h]
+    float v53; // [esp+134h] [ebp-168h]
+    float4 axisZ; // [esp+138h] [ebp-164h]
+    float v55; // [esp+148h] [ebp-154h]
+    vector4 axis; // [esp+14Ch] [ebp-150h]
+    float *v57; // [esp+18Ch] [ebp-110h]
+    float v58[3]; // [esp+190h] [ebp-10Ch] BYREF
+    float tempAxis[4][3]; // [esp+19Ch] [ebp-100h] BYREF
+    float suspTravel; // [esp+1CCh] [ebp-D0h]
+    float minigunAngles[3]; // [esp+1D0h] [ebp-CCh] BYREF
+    float barrelOffset[5]; // [esp+1DCh] [ebp-C0h] BYREF
+    float gunnerTurretAngles[4][3]; // [esp+1F0h] [ebp-ACh] BYREF
+    float gunnerBarrelAngles[4][3]; // [esp+224h] [ebp-78h] BYREF
+    int i; // [esp+254h] [ebp-48h]
+    float steerYaw; // [esp+258h] [ebp-44h]
+    float steerAnglesPitch[3]; // [esp+25Ch] [ebp-40h] BYREF
+    float steerAnglesYaw[3]; // [esp+268h] [ebp-34h] BYREF
+    float bodyAngles[3]; // [esp+274h] [ebp-28h] BYREF
+    float barrelAngles[3]; // [esp+280h] [ebp-1Ch] BYREF
+    float turretAngles[4]; // [esp+28Ch] [ebp-10h]
+    float retaddr; // [esp+29Ch] [ebp+0h]
+
+    //turretAngles[1] = a1;
+    //turretAngles[2] = retaddr;
+    iassert(obj);
+
+    memset(barrelAngles, 0, sizeof(barrelAngles));
+    memset(bodyAngles, 0, sizeof(bodyAngles));
+    memset(steerAnglesYaw, 0, sizeof(steerAnglesYaw));
+    memset(steerAnglesPitch, 0, sizeof(steerAnglesPitch));
+
+    //gunnerBarrelAngles[3][2] = 0.0f;
+
+    //i = *(_DWORD *)&FLOAT_0_0;
+    steerYaw = 0.0f;
+    steerAnglesYaw[0] = (float)pose->vehicle.pitch * 0.0054931641;
+    steerAnglesYaw[2] = (float)pose->vehicle.roll * 0.0054931641;
+    bodyAngles[0] = (float)pose->vehicle.barrelPitch * 0.0054931641;
+    barrelAngles[1] = (float)pose->vehicle.yaw * 0.0054931641;
+    //gunnerBarrelAngles[3][0] = 0.0f;
+    //gunnerBarrelAngles[3][1] = (float)pose->vehicle.steerYaw * 0.0054931641;
+    //gunnerBarrelAngles[3][2] = (float)pose->vehicle.steerPitch * 0.0054931641;
+    //
+    //for (gunnerBarrelAngles[3][0] = 0.0; SLODWORD(gunnerBarrelAngles[3][0]) < 4; ++LODWORD(gunnerBarrelAngles[3][0]))
+    //{
+    //    LODWORD(gunnerTurretAngles[3][0]) = &gunnerTurretAngles[LODWORD(gunnerBarrelAngles[3][0]) + 3][1];
+    //    *(_DWORD *)LODWORD(gunnerTurretAngles[3][0]) = *(_DWORD *)&FLOAT_0_0;
+    //    *(_DWORD *)(LODWORD(gunnerTurretAngles[3][0]) + 4) = *(_DWORD *)&FLOAT_0_0;
+    //    *(_DWORD *)(LODWORD(gunnerTurretAngles[3][0]) + 8) = *(_DWORD *)&FLOAT_0_0;
+    //
+    //    LODWORD(barrelOffset[1]) = &barrelOffset[3 * LODWORD(gunnerBarrelAngles[3][0]) + 2];
+    //    *(_DWORD *)LODWORD(barrelOffset[1]) = *(_DWORD *)&FLOAT_0_0;
+    //    *(_DWORD *)(LODWORD(barrelOffset[1]) + 4) = *(_DWORD *)&FLOAT_0_0;
+    //    *(_DWORD *)(LODWORD(barrelOffset[1]) + 8) = *(_DWORD *)&FLOAT_0_0;
+    //
+    //    barrelOffset
+    //    gunnerTurretAngles[LODWORD(gunnerBarrelAngles[3][0]) + 3][1] = (float)pose->vehicle.gunnerPitch[LODWORD(gunnerBarrelAngles[3][0])]
+    //        * 0.0054931641;
+    //    barrelOffset[3 * LODWORD(gunnerBarrelAngles[3][0]) + 3] = (float)pose->vehicle.gunnerYaw[LODWORD(gunnerBarrelAngles[3][0])]
+    //        * 0.0054931641;
+    //}
+
+    DObjSetLocalTag((DObj_s*)obj, partBits, pose->vehicle.tag_body, vec3_origin, steerAnglesYaw);
+    DObjSetLocalTag((DObj_s*)obj, partBits, pose->vehicle.tag_turret, vec3_origin, barrelAngles);
+    DObjSetLocalTag((DObj_s*)obj, partBits, pose->vehicle.tag_barrel, vec3_origin, bodyAngles);
+
+    //if (pose->vehicle.barrelRecoil > 0.0)
+    //{
+    //    barrelOffset[0] = pose->vehicle.barrelRecoil;
+    //    minigunAngles[0] = barrelOffset[0] * recoilVec[0];
+    //    minigunAngles[1] = barrelOffset[0] * *(float *)&dword_E03414;
+    //    minigunAngles[2] = barrelOffset[0] * *(float *)&dword_E03418;
+    //    DObjSetLocalTag(obj, partBits, pose->vehicle.tag_barrel_recoil, minigunAngles, vec3_origin);
+    //}
+    //for (gunnerBarrelAngles[3][0] = 0.0; SLODWORD(gunnerBarrelAngles[3][0]) < 4; ++LODWORD(gunnerBarrelAngles[3][0]))
+    //{
+    //    DObjSetLocalTag(
+    //        obj,
+    //        partBits,
+    //        pose->vehicle.tag_gunner_turret[LODWORD(gunnerBarrelAngles[3][0])],
+    //        vec3_origin,
+    //        &barrelOffset[3 * LODWORD(gunnerBarrelAngles[3][0]) + 2]);
+    //    DObjSetLocalTag(
+    //        obj,
+    //        partBits,
+    //        pose->vehicle.tag_gunner_barrel[LODWORD(gunnerBarrelAngles[3][0])],
+    //        vec3_origin,
+    //        &gunnerTurretAngles[LODWORD(gunnerBarrelAngles[3][0]) + 3][1]);
+    //}
+    //if (pose->vehicle.tag_minigun_spin != 254)
+    //{
+    //    tempAxis[3][1] = *(float *)&FLOAT_0_0;
+    //    tempAxis[3][2] = *(float *)&FLOAT_0_0;
+    //    suspTravel = (float)pose->vehicle.minigun_rotation * 0.0054931641;
+    //    DObjSetLocalTag(obj, partBits, pose->vehicle.tag_minigun_spin, vec3_origin, &tempAxis[3][1]);
+    //}
+    //tempAxis[3][0] = pose->vehicle.time;
+
+    AnglesToAxis(pose->angles, tempAxis);
+    //v51[2] = tempAxis[3];
+    //v51[1] = pose->origin;
+    tempAxis[3][0] = pose->origin[0];
+    tempAxis[3][1] = pose->origin[1];
+    tempAxis[3][2] = pose->origin[2];
+    //v51[0] = tempAxis;
+    axis.x.v[0] = tempAxis[0][0];
+    axis.x.v[1] = tempAxis[0][1];
+    axis.x.v[2] = tempAxis[0][2];
+    axis.x.v[3] = 0.0f;
+
+    axis.y.v[0] = tempAxis[1][0];
+    axis.y.v[1] = tempAxis[1][1];
+    axis.y.v[2] = tempAxis[1][2];
+    axis.y.v[3] = 0.0f;
+
+    axis.z.v[0] = tempAxis[2][0];
+    axis.z.v[1] = tempAxis[2][1];
+    axis.z.v[2] = tempAxis[2][2];
+    axis.z.v[3] = 0.0f;
+
+    axis.w.v[0] = tempAxis[3][0];
+    axis.w.v[1] = tempAxis[3][1];
+    axis.w.v[2] = tempAxis[3][2];
+    axis.w.v[3] = 1.0f;
+
+    //v49 = tempAxis[2];
+    //v47 = tempAxis[3];
+
+    axisZ.v[0] = tempAxis[2][0];
+    axisZ.v[1] = tempAxis[2][1];
+    axisZ.v[2] = tempAxis[2][2];
+    axisZ.v[3] = 0.0f;
+
+    axisW.v[0] = tempAxis[3][0];
+    axisW.v[1] = tempAxis[3][1];
+    axisW.v[2] = tempAxis[3][2];
+    axisW.v[3] = 0.0f;
+
+    invAxis.x.v[0] = tempAxis[0][0];
+    invAxis.x.v[1] = tempAxis[1][0];
+    invAxis.x.v[2] = tempAxis[2][0];
+    invAxis.x.v[3] = 1.0f;
+
+    invAxis.y.v[0] = tempAxis[0][1];
+    invAxis.y.v[1] = tempAxis[1][1];
+    invAxis.y.v[2] = tempAxis[2][1];
+    invAxis.y.v[3] = 1.0f;
+
+    invAxis.z.v[0] = tempAxis[0][2];
+    invAxis.z.v[1] = tempAxis[1][2];
+    invAxis.z.v[2] = tempAxis[2][2];
+    invAxis.z.v[3] = 1.0f;
+
+    model = DObjGetModel(obj, 0);
+    boneCount = XModelNumBones(model);
+    remote_boneMtxList = XModelGetBasePose(model);
+    boneMtxList = remote_boneMtxList;
+
+    //cent = CG_GetEntity(pose->localClientNum, DObjGetEntNum(obj) - 1);
+
+    //if (cent->nitrousVeh)
+    {
+        if (DObjGetRotTransArray(obj))
+        {
+            for (k = 0; k < 6; ++k)
+            {
+                boneIndex = pose->vehicle.wheelBoneIndex[k];
+                if (boneIndex < 0xFE && DObjSetRotTransIndex((DObj_s*)obj, partBits, boneIndex))
+                {
+                    //trans[0] = 0.0f;
+                    //trans[1] = 0.0f;
+                    //trans[2] = pose->vehicle.wheelHeight[k];
+                    //
+                    //angles[0] = 0.0f;
+                    //angles[1] = pose->vehicle.nitrousWheelYaw[k];
+                    //angles[2] = 0.0f;
+                    //
+                    //DObjSetLocalTagInternal(obj, trans, angles, boneIndex);
+                    //
+                    //angles[0] = pose->vehicle.nitrousWheelRotation[k];
+                    //angles[1] = 0.0f;
+                    //angles[2] = 0.0f;
+
+
+                    // KISAKTODO: very scuffed logic
+
+                    trans[0] = 0.0f;
+                    trans[1] = 0.0f;
+                    trans[2] = pose->actor.height;
+
+                    angles[0] = 0.0f;
+                    //angles[1] = pose->vehicle.nitrousWheelYaw[k];
+                    angles[1] = 0.0f;
+                    angles[2] = 0.0f;
+
+                    DObjSetLocalTagInternal(obj, trans, angles, boneIndex);
+
+                    //ChildBones = DObjGetChildBones(obj, boneIndex, v9, 4);
+                    //for (int bone = 0; bone < ChildBones; bone++)
+                    //{
+                    //    if (DObjSetRotTransIndex((DObj_s*)obj, partBits, v9[bone]))
+                    //    {
+                    //        DObjSetLocalTagInternal(obj, vec3_origin, angles, v9[bone]);
+                    //    }
+                    //}
+
+                    DObjSetRotTransIndex((DObj_s *)obj, partBits, boneIndex);
+                }
+            }
+            //for (angles[1] = 0.0; SLODWORD(angles[1]) < 4; ++LODWORD(angles[1]))
+            //{
+            //    boneIndex = pose->vehicle.tag_extra_tank_wheels[LODWORD(angles[1])];
+            //    if (boneIndex < 0xFE)
+            //    {
+            //        angles[0] = pose->vehicle.nitrousWheelRotation[LODWORD(angles[1])] * pose->vehicle.extra_wheel_rot_scale;
+            //        v6[0] = angles[0];
+            //        v6[1] = *(float *)&FLOAT_0_0;
+            //        v6[2] = *(float *)&FLOAT_0_0;
+            //        if (DObjSetRotTransIndex(obj, partBits, boneIndex))
+            //            DObjSetLocalTagInternal(obj, vec3_origin, v6, boneIndex);
+            //    }
+            //}
+        }
+    }
+    //else
+    //{
+    //    for (gunnerBarrelAngles[3][0] = 0.0; SLODWORD(gunnerBarrelAngles[3][0]) < 6; ++LODWORD(gunnerBarrelAngles[3][0]))
+    //    {
+    //        trans.u[3] = pose->vehicle.wheelBoneIndex[LODWORD(gunnerBarrelAngles[3][0])];
+    //        if (trans.u[3] < 0xFE && DObjSetRotTransIndex(obj, partBits, trans.u[3]))
+    //        {
+    //            trans.u[2] = (unsigned int)&mtx[trans.u[3]];
+    //            trans.u[1] = trans.u[2] + 16;
+    //            *(_QWORD *)&partPos.unitVec[1].packed = *(_QWORD *)(trans.u[2] + 16);
+    //            partPos.u[3] = *(_DWORD *)(trans.u[2] + 24);
+    //            trans.u[0] = *(_DWORD *)&FLOAT_0_0;
+    //            v34 = (float)((float)((float)(partPos.v[1] * axisZ.v[2]) + (float)(partPos.v[2] * axis.x.v[1]))
+    //                + (float)(partPos.v[3] * axis.y.v[1]))
+    //                + axis.z.v[1];
+    //            v35 = (float)((float)((float)(partPos.v[1] * axisZ.v[3]) + (float)(partPos.v[2] * axis.x.v[2]))
+    //                + (float)(partPos.v[3] * axis.y.v[2]))
+    //                + axis.z.v[2];
+    //            v36 = (float)((float)((float)(partPos.v[1] * v55) + (float)(partPos.v[2] * axis.x.v[3]))
+    //                + (float)(partPos.v[3] * axis.y.v[3]))
+    //                + axis.z.v[3];
+    //            v37 = (float)((float)((float)(partPos.v[1] * axis.x.v[0]) + (float)(partPos.v[2] * axis.y.v[0]))
+    //                + (float)(partPos.v[3] * axis.z.v[0]))
+    //                + axis.w.v[0];
+    //            v38 = v34;
+    //            v39 = v35;
+    //            v40 = v36;
+    //            partPos.v[0] = v37;
+    //            dist = (float)(tempAxis[3][0] + 40.0) * pose->vehicle.wheelHeight[LODWORD(gunnerBarrelAngles[3][0])];
+    //            v32 = 40.0 - tempAxis[3][0];
+    //            v5 = (float)(dist - (float)(40.0 - tempAxis[3][0])) < 0.0 ? LODWORD(v32) : LODWORD(dist);
+    //            v31 = v5;
+    //            v30 = v5;
+    //            v38 = (float)(40.0 * axisW.v[2]) + v38;
+    //            v39 = (float)(40.0 * axisW.v[3]) + v39;
+    //            v40 = (float)(40.0 * v53) + v40;
+    //            v29 = v5 ^ _mask__NegFloat_;
+    //            v38 = (float)(COERCE_FLOAT(v5 ^ _mask__NegFloat_) * axisW.v[2]) + v38;
+    //            v39 = (float)(COERCE_FLOAT(v5 ^ _mask__NegFloat_) * axisW.v[3]) + v39;
+    //            v40 = (float)(COERCE_FLOAT(v5 ^ _mask__NegFloat_) * v53) + v40;
+    //            v38 = v38 - invAxis.w.v[1];
+    //            v39 = v39 - invAxis.w.v[2];
+    //            v40 = v40 - invAxis.w.v[3];
+    //            offset[2] = (float)((float)(v38 * *(float *)&remote_boneMtxList) + (float)(v39 * invAxis.x.v[1]))
+    //                + (float)(v40 * invAxis.y.v[1]);
+    //            offset[3] = (float)((float)(v38 * *(float *)&boneCount) + (float)(v39 * invAxis.x.v[2]))
+    //                + (float)(v40 * invAxis.y.v[2]);
+    //            v27 = (float)((float)(v38 * *(float *)&model) + (float)(v39 * invAxis.x.v[3])) + (float)(v40 * invAxis.y.v[3]);
+    //            v28 = (float)((float)(v38 * invAxis.x.v[0]) + (float)(v39 * invAxis.y.v[0])) + (float)(v40 * invAxis.z.v[0]);
+    //            v38 = offset[2] - partPos.v[1];
+    //            v39 = offset[3] - partPos.v[2];
+    //            v40 = v27 - partPos.v[3];
+    //            partPos.v[0] = v28 - trans.v[0];
+    //            *(float *)&j = offset[2] - partPos.v[1];
+    //            *(float *)&numChildren = offset[3] - partPos.v[2];
+    //            *(float *)children = v27 - partPos.v[3];
+    //            offset[0] = v28 - trans.v[0];
+    //            steerAnglesPitch[1] = LODWORD(gunnerBarrelAngles[3][0]) > 1 ? *(float *)&FLOAT_0_0 : gunnerBarrelAngles[3][1];
+    //            DObjSetLocalTagInternal(obj, (const float *)&j, steerAnglesPitch, trans.u[3]);
+    //            if (gunnerBarrelAngles[3][2] != 0.0)
+    //            {
+    //                skel = (DObjAnimMat *)DObjGetChildBones(obj, trans.unitVec[3].array[0], v22, 4);
+    //                for (m = 0; m < (int)skel; ++m)
+    //                {
+    //                    if (DObjSetRotTransIndex(obj, partBits, v22[m]))
+    //                        DObjSetLocalTagInternal(obj, vec3_origin, &gunnerBarrelAngles[3][2], v22[m]);
+    //                }
+    //            }
+    //        }
+    //    }
+    //    gunnerBarrelAngles[3][2] = gunnerBarrelAngles[3][2] * pose->vehicle.extra_wheel_rot_scale;
+    //    for (n = 0; n < 4; ++n)
+    //    {
+    //        trans.u[3] = pose->vehicle.tag_extra_tank_wheels[n];
+    //        if (trans.u[3] < 254 && DObjSetRotTransIndex(obj, partBits, trans.u[3]))
+    //            DObjSetLocalTagInternal(obj, vec3_origin, &gunnerBarrelAngles[3][2], trans.u[3]);
+    //    }
+    //}
 }
 
 void __cdecl CG_Actor_DoControllers(const cpose_t *pose, const DObj_s *obj, int *partBits)
@@ -429,7 +781,7 @@ void __cdecl CG_DoBaseOriginController(const cpose_t *pose, const DObj_s *obj, i
     int v37; // [sp+70h] [-B0h]
     int v38; // [sp+74h] [-ACh]
     int v39; // [sp+78h] [-A8h]
-    unsigned int v40[5]; // [sp+7Ch] [-A4h] BYREF
+    int v40[5]; // [sp+7Ch] [-A4h] BYREF
     DObjAnimMat v41[2]; // [sp+90h] [-90h] BYREF
 
     RootBoneCount = DObjGetRootBoneCount(obj);

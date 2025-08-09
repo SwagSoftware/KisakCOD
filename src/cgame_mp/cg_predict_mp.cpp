@@ -439,9 +439,11 @@ void __cdecl CG_InterpolatePlayerState(int32_t localClientNum, int32_t grabAngle
     if (nextSnap->serverTime > prevSnap->serverTime)
     {
         f = cgameGlob->frameInterpolation;
+
         i = nextSnap->ps.bobCycle;
         if (i < prevSnap->ps.bobCycle)
             i += 256;
+
         out->bobCycle = prevSnap->ps.bobCycle + (int)((double)(i - prevSnap->ps.bobCycle) * f);
         out->aimSpreadScale = (nextSnap->ps.aimSpreadScale - prevSnap->ps.aimSpreadScale) * f + prevSnap->ps.aimSpreadScale;
         Vec3Lerp(prevSnap->ps.origin, nextSnap->ps.origin, f, out->origin);

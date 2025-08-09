@@ -7,6 +7,9 @@
 #include "cg_main.h"
 #include "cg_ents.h"
 
+#include <bgame/bg_public.h>
+#include <client/cl_input.h>
+
 pmove_t cg_pmove;
 
 void __cdecl TRACK_cg_predict()
@@ -14,14 +17,173 @@ void __cdecl TRACK_cg_predict()
     track_static_alloc_internal(&cg_pmove, 292, "cg_pmove", 9);
 }
 
+char __cdecl CG_ShouldInterpolatePlayerStateViewClamp(int localClientNum, const snapshot_s *prevSnap)
+{
+    //const vehicle_info_t *vehInfo; // [esp+8h] [ebp-8h]
+    centity_s *cent; // [esp+Ch] [ebp-4h]
+
+    if (prevSnap->ps.pm_type == 1)
+        return 1;
+    if ((prevSnap->ps.eFlags & 0x300) != 0)
+        return 1;
+    //if ((prevSnap->ps.eFlags & 0x4000) != 0)
+    //{
+    //    cent = CG_GetEntity(localClientNum, prevSnap->ps.viewlocked_entNum);
+    //    if (cent)
+    //    {
+    //        if (((*((_DWORD *)cent + 201) >> 1) & 1) != 0)
+    //        {
+    //            vehInfo = CG_GetVehicleInfo(cent->nextState.un2.vehicleState.vehicleInfoIndex);
+    //            if (!vehInfo
+    //                && !Assert_MyHandler(
+    //                    "C:\\projects_pc\\cod\\codsrc\\src\\cgame_mp\\cg_predict_mp.cpp",
+    //                    171,
+    //                    0,
+    //                    "%s",
+    //                    "vehInfo"))
+    //            {
+    //                __debugbreak();
+    //            }
+    //            if (vehInfo->turretClampPlayerView)
+    //                return 1;
+    //        }
+    //    }
+    //}
+    return 0;
+}
+
+// taken from blops, modified
+static void __cdecl CG_InterpolatePlayerStateViewAngles(int localClientNum, playerState_s *out, usercmd_s *cmd)
+{
+    const char *v3; // eax
+    float v4; // [esp+10h] [ebp-F0h]
+    float v5; // [esp+20h] [ebp-E0h]
+    float frameInterpolation; // [esp+28h] [ebp-D8h]
+    float resultMat[3][3]; // [esp+30h] [ebp-D0h] BYREF
+    float centerAngles[3]; // [esp+54h] [ebp-ACh] BYREF
+    float viewYawAngles[3]; // [esp+60h] [ebp-A0h] BYREF
+    float viewMat[3][3]; // [esp+6Ch] [ebp-94h] BYREF
+    float vehMat[3][3]; // [esp+90h] [ebp-70h] BYREF
+    float v12; // [esp+B4h] [ebp-4Ch]
+    float fc; // [esp+B8h] [ebp-48h]
+    int clampCount; // [esp+BCh] [ebp-44h]
+    float yawOffset; // [esp+C0h] [ebp-40h]
+    float pitchClamp; // [esp+C4h] [ebp-3Ch]
+    float (*gunnerClamps)[2]; // [esp+C8h] [ebp-38h]
+    centity_s *vehCent; // [esp+CCh] [ebp-34h]
+    float vehAngles[3]; // [esp+D0h] [ebp-30h] BYREF
+    float yawFrac; // [esp+DCh] [ebp-24h]
+    int vehicleType; // [esp+E0h] [ebp-20h]
+    unsigned __int16 vehType; // [esp+E4h] [ebp-1Ch]
+    const char *vehicleTypeStr[2]; // [esp+E8h] [ebp-18h]
+    cg_s *cgameGlob; // [esp+F0h] [ebp-10h]
+    const snapshot_s *prevSnap; // [esp+F4h] [ebp-Ch]
+    const snapshot_s *nextSnap; // [esp+F8h] [ebp-8h]
+    int i; // [esp+FCh] [ebp-4h]
+
+    cgameGlob = CG_GetLocalClientGlobals(localClientNum);
+    prevSnap = cgameGlob->snap;
+    nextSnap = cgameGlob->nextSnap;
+
+    iassert(prevSnap);
+    iassert(nextSnap);
+
+    if (CG_ShouldInterpolatePlayerStateViewClamp(localClientNum, prevSnap))
+    {
+        for (i = 0; i < 2; ++i)
+        {
+            v5 = prevSnap->ps.viewAngleClampBase[i];
+            frameInterpolation = cgameGlob->frameInterpolation;
+            out->viewAngleClampBase[i] = AngleNormalize180(nextSnap->ps.viewAngleClampBase[i] - v5) * frameInterpolation + v5;
+            out->viewAngleClampRange[i] = (float)((float)(nextSnap->ps.viewAngleClampRange[i]
+                - prevSnap->ps.viewAngleClampRange[i])
+                * cgameGlob->frameInterpolation)
+                + prevSnap->ps.viewAngleClampRange[i];
+        }
+    }
+
+    //if (cmd)
+    //{
+    //    if ((prevSnap->ps.eFlags & 0x4000) != 0
+    //        && prevSnap->ps.vehiclePos == nextSnap->ps.vehiclePos
+    //        && prevSnap->ps.vehiclePos >= 1
+    //        && prevSnap->ps.vehiclePos <= 4)
+    //    {
+    //        vehCent = CG_GetEntity(localClientNum, out->viewlocked_entNum);
+    //        vehicleTypeStr[0] = "t34";
+    //        vehicleTypeStr[1] = "panzer";
+    //        vehType = CG_GetVehicleTypeString(cgameGlob->clientNum, out->viewlocked_entNum);
+    //        if (vehType)
+    //        {
+    //            for (vehicleType = 0; vehicleType < 2; ++vehicleType)
+    //            {
+    //                v3 = SL_ConvertToString(vehType);
+    //                if (!I_stricmp(vehicleTypeStr[vehicleType], v3))
+    //                    break;
+    //            }
+    //            if (vehicleType < 2)
+    //            {
+    //                pitchClamp = 360.0f;
+    //                vehAngles[0] = vehCent->pose.angles[0];
+    //                vehAngles[1] = vehCent->pose.angles[1];
+    //                vehAngles[2] = vehCent->pose.angles[2];
+    //                if (prevSnap->ps.vehiclePos)
+    //                {
+    //                    gunnerClamps = gunnerClampArrays[vehicleType];
+    //                    vehAngles[1] = (float)((float)vehCent->pose.vehicle.yaw * 0.0054931641) + vehAngles[1];
+    //                }
+    //                else
+    //                {
+    //                    gunnerClamps = driverClampArrays[vehicleType];
+    //                }
+    //                yawOffset = AngleNormalize360((float)((float)((float)cmd->angles[1] * 0.0054931641) + out->delta_angles[1]) - vehAngles[1]);
+    //                if (prevSnap->ps.vehiclePos)
+    //                    clampCount = gunnerClampCounts[vehicleType];
+    //                else
+    //                    clampCount = driverClampCounts[vehicleType];
+    //                for (i = 0; i < clampCount && gunnerClamps[i][1] <= yawOffset; ++i)
+    //                    ;
+    //                v4 = (float)((float)((float)(yawOffset - gunnerClamps[i - 1][1])
+    //                    / (float)(gunnerClamps[i][1] - gunnerClamps[i - 1][1]))
+    //                    * 3.1415927)
+    //                    - 1.5707964;
+    //                fc = cos(v4);
+    //                v12 = sin(v4);
+    //                yawFrac = (float)(v12 + 1.0) / 2.0;
+    //                pitchClamp = (float)((float)(gunnerClamps[i][0] - gunnerClamps[i - 1][0]) * yawFrac) + gunnerClamps[i - 1][0];
+    //                if (prevSnap->ps.vehiclePos)
+    //                {
+    //                    out->viewAngleClampBase[0] = (float)(pitchClamp - out->viewAngleClampRange[0]) / 2.0;
+    //                    out->viewAngleClampRange[0] = (float)(pitchClamp + out->viewAngleClampRange[0]) / 2.0;
+    //                    out->viewAngleClampBase[0] = out->viewAngleClampBase[0] + cgameGlob->gunnerPitchOffset;
+    //                }
+    //                else
+    //                {
+    //                    AnglesToAxis(vehAngles, vehMat);
+    //                    viewYawAngles[0] = 0.0f;
+    //                    viewYawAngles[1] = yawOffset;
+    //                    viewYawAngles[2] = 0.0f;
+    //                    AnglesToAxis(viewYawAngles, viewMat);
+    //                    MatrixMultiply(viewMat, vehMat, resultMat);
+    //                    AxisToAngles(resultMat, centerAngles);
+    //                    out->viewAngleClampBase[0] = (float)((float)(pitchClamp - out->viewAngleClampRange[0]) / 2.0)
+    //                        + centerAngles[0];
+    //                    out->viewAngleClampRange[0] = (float)(pitchClamp + out->viewAngleClampRange[0]) / 2.0;
+    //                }
+    //            }
+    //        }
+    //    }
+    //}
+}
+
 void __cdecl CG_InterpolatePlayerState(int localClientNum, int grabAngles, int grabStance)
 {
     snapshot_s *nextSnap; // r27
-    snapshot_s *snap; // r31
+    snapshot_s *prevSnap; // r31
     int CurrentCmdNumber; // r3
     usercmd_s *v9; // r4
-    double frameInterpolation; // fp31
-    int bobCycle; // r10
+    double f; // fp31
+    int i; // r10
     int v12; // r11
     __int64 v13; // r10
     float *linkAngles; // r28
@@ -35,101 +197,130 @@ void __cdecl CG_InterpolatePlayerState(int localClientNum, int grabAngles, int g
     int v22; // r29
     char *v23; // r31
     unsigned int v24[4]; // [sp+50h] [-C0h] BYREF
-    usercmd_s v25; // [sp+60h] [-B0h] BYREF
+    usercmd_s cmd; // [sp+60h] [-B0h] BYREF
 
-    if (localClientNum)
-        MyAssertHandler(
-            "c:\\trees\\cod3\\cod3src\\src\\cgame\\cg_local.h",
-            910,
-            0,
-            "%s\n\t(localClientNum) = %i",
-            "(localClientNum == 0)",
-            localClientNum);
-    nextSnap = cgArray[0].nextSnap;
-    snap = cgArray[0].snap;
-    if (!cgArray[0].nextSnap)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\cgame\\cg_predict.cpp", 58, 0, "%s", "nextSnap");
+    cg_s *cgameGlob;
+    cgameGlob = CG_GetLocalClientGlobals(localClientNum);
+
+    playerState_s *out;
+    out = &cgameGlob->predictedPlayerState;
+
+    nextSnap = cgameGlob->nextSnap;
+    prevSnap = cgameGlob->snap;
+
+    iassert(nextSnap);
+
     memcpy(&cgArray[0].predictedPlayerState, &nextSnap->ps, sizeof(cgArray[0].predictedPlayerState));
+
     if (grabAngles)
     {
         CurrentCmdNumber = CL_GetCurrentCmdNumber(localClientNum);
-        CL_GetUserCmd(localClientNum, CurrentCmdNumber, &v25);
-        PM_UpdateViewAngles(&cgArray[0].predictedPlayerState, 0.0, v9, (unsigned __int8)&v25);
+        CL_GetUserCmd(localClientNum, CurrentCmdNumber, &cmd);
+        PM_UpdateViewAngles(&cgArray[0].predictedPlayerState, 0.0, v9, (unsigned __int8)&cmd);
     }
-    if (nextSnap->serverTime > snap->serverTime)
+
+    if (nextSnap->serverTime > prevSnap->serverTime)
     {
-        frameInterpolation = cgArray[0].frameInterpolation;
+        f = cgArray[0].frameInterpolation;
+
         if (grabStance)
         {
-            bobCycle = nextSnap->ps.bobCycle;
-            if (bobCycle < snap->ps.bobCycle)
-                bobCycle += 256;
-            v12 = snap->ps.bobCycle;
-            HIDWORD(v13) = v24;
-            LODWORD(v13) = bobCycle - v12;
-            v24[1] = v13;
-            v24[0] = (int)(float)((float)v13 * cgArray[0].frameInterpolation);
-            cgArray[0].predictedPlayerState.bobCycle = v24[0] + v12;
-            cgArray[0].predictedPlayerState.leanf = (float)((float)(nextSnap->ps.leanf - snap->ps.leanf)
+            i = nextSnap->ps.bobCycle;
+            if (i < prevSnap->ps.bobCycle)
+                i += 256;
+
+            //v12 = prevSnap->ps.bobCycle;
+            //HIDWORD(v13) = v24;
+            //LODWORD(v13) = i - v12;
+            //v24[1] = v13;
+            //v24[0] = (int)(float)((float)v13 * cgArray[0].frameInterpolation);
+            //cgArray[0].predictedPlayerState.bobCycle = v24[0] + v12;
+            out->bobCycle = prevSnap->ps.bobCycle + (int)((double)(i - prevSnap->ps.bobCycle) * f);
+            out->leanf = (float)((float)(nextSnap->ps.leanf - prevSnap->ps.leanf)
                 * cgArray[0].frameInterpolation)
-                + snap->ps.leanf;
-            cgArray[0].predictedPlayerState.aimSpreadScale = (float)((float)(nextSnap->ps.aimSpreadScale
-                - snap->ps.aimSpreadScale)
+                + prevSnap->ps.leanf;
+            out->aimSpreadScale = (float)((float)(nextSnap->ps.aimSpreadScale
+                - prevSnap->ps.aimSpreadScale)
                 * cgArray[0].frameInterpolation)
-                + snap->ps.aimSpreadScale;
-            cgArray[0].predictedPlayerState.fWeaponPosFrac = (float)((float)(nextSnap->ps.fWeaponPosFrac
-                - snap->ps.fWeaponPosFrac)
+                + prevSnap->ps.aimSpreadScale;
+            out->fWeaponPosFrac = (float)((float)(nextSnap->ps.fWeaponPosFrac
+                - prevSnap->ps.fWeaponPosFrac)
                 * cgArray[0].frameInterpolation)
-                + snap->ps.fWeaponPosFrac;
-            cgArray[0].predictedPlayerState.viewHeightCurrent = (float)((float)(nextSnap->ps.viewHeightCurrent
-                - snap->ps.viewHeightCurrent)
+                + prevSnap->ps.fWeaponPosFrac;
+            out->viewHeightCurrent = (float)((float)(nextSnap->ps.viewHeightCurrent
+                - prevSnap->ps.viewHeightCurrent)
                 * cgArray[0].frameInterpolation)
-                + snap->ps.viewHeightCurrent;
+                + prevSnap->ps.viewHeightCurrent;
         }
-        linkAngles = nextSnap->ps.linkAngles;
-        origin = snap->ps.origin;
-        v16 = (char *)nextSnap - (char *)snap;
-        v17 = (char *)((char *)&cgArray[0].oldTime - (char *)snap);
-        v18 = (char *)((char *)&cgArray[0].predictedPlayerState.weaponrechamber[1] - (char *)snap);
-        v19 = 3;
-        do
+
+        //linkAngles = nextSnap->ps.linkAngles;
+        //origin = prevSnap->ps.origin;
+        //v16 = (char *)nextSnap - (char *)prevSnap;
+        //v17 = (char *)((char *)&cgArray[0].oldTime - (char *)prevSnap);
+        //v18 = (char *)((char *)&out->weaponrechamber[1] - (char *)prevSnap);
+        //v19 = 3;
+        //do
+        //{
+        //    *(float *)&v17[(unsigned int)origin] = (float)((float)(*(float *)((char *)origin + v16) - *origin)
+        //        * (float)f)
+        //        + *origin;
+        //    if (!grabAngles)
+        //        *(float *)((char *)origin + (char *)&out->offhandSecondary - (char *)prevSnap) = LerpAngle(origin[50], *(linkAngles - 294), f);
+        //    *(float *)((char *)origin + (char *)&out->pm_type - (char *)prevSnap) = (float)((float)(*(linkAngles - 341) - origin[3]) * (float)f) + origin[3];
+        //    if (prevSnap->ps.pm_type == 1)
+        //        *(float *)&v18[(unsigned int)origin] = LerpAngle(origin[344], *linkAngles, f);
+        //    else
+        //        *(float *)&v18[(unsigned int)origin] = *linkAngles;
+        //    if (nextSnap->ps.pm_type == 1 && (nextSnap->ps.eFlags & 0x20000) == 0)
+        //        *(float *)((char *)origin + (char *)&out->weaponDelay - (char *)prevSnap) = LerpAngle(origin[18], *(linkAngles - 326), f);
+        //    --v19;
+        //    ++origin;
+        //    ++linkAngles;
+        //} while (v19);
+
+        for (int link = 0; link < 3; ++link)
         {
-            *(float *)&v17[(unsigned int)origin] = (float)((float)(*(float *)((char *)origin + v16) - *origin)
-                * (float)frameInterpolation)
-                + *origin;
-            if (!grabAngles)
-                *(float *)((char *)origin + (char *)&cgArray[0].predictedPlayerState.offhandSecondary - (char *)snap) = LerpAngle(origin[50], *(linkAngles - 294), frameInterpolation);
-            *(float *)((char *)origin + (char *)&cgArray[0].predictedPlayerState.pm_type - (char *)snap) = (float)((float)(*(linkAngles - 341) - origin[3]) * (float)frameInterpolation) + origin[3];
-            if (snap->ps.pm_type == 1)
-                *(float *)&v18[(unsigned int)origin] = LerpAngle(origin[344], *linkAngles, frameInterpolation);
-            else
-                *(float *)&v18[(unsigned int)origin] = *linkAngles;
-            if (nextSnap->ps.pm_type == 1 && (nextSnap->ps.eFlags & 0x20000) == 0)
-                *(float *)((char *)origin + (char *)&cgArray[0].predictedPlayerState.weaponDelay - (char *)snap) = LerpAngle(origin[18], *(linkAngles - 326), frameInterpolation);
-            --v19;
-            ++origin;
-            ++linkAngles;
-        } while (v19);
-        if (snap->ps.pm_type == 1 || (snap->ps.eFlags & 0x300) != 0)
-        {
-            viewAngleClampBase = snap->ps.viewAngleClampBase;
-            viewAngleClampRange = nextSnap->ps.viewAngleClampRange;
-            v22 = 2;
-            v23 = (char *)((char *)&cgArray[0].predictedPlayerState - (char *)snap);
-            do
+            float v7 = prevSnap->ps.viewangles[link];
+            float v2 = AngleNormalize180(nextSnap->ps.viewangles[link] - v7);
+            out->viewangles[link] = v2 * f + v7;
+
+            float v6 = prevSnap->ps.delta_angles[link];
+            float v3 = AngleNormalize180(nextSnap->ps.delta_angles[link] - v6);
+            out->delta_angles[link] = v3 * f + v6;
+
+            if (prevSnap->ps.pm_type == 1)
             {
-                *(float *)&v17[(unsigned int)viewAngleClampBase] = LerpAngle(
-                    *viewAngleClampBase,
-                    *(float *)((char *)viewAngleClampBase + v16),
-                    frameInterpolation);
-                --v22;
-                *(float *)((char *)viewAngleClampBase + (unsigned int)v23) = (float)((float)(*viewAngleClampRange++
-                    - viewAngleClampBase[2])
-                    * (float)frameInterpolation)
-                    + viewAngleClampBase[2];
-                ++viewAngleClampBase;
-            } while (v22);
+                float v5 = prevSnap->ps.linkAngles[link];
+                float v4 = AngleNormalize180(nextSnap->ps.linkAngles[link] - v5);
+                out->linkAngles[link] = v4 * f + v5;
+            }
+            else
+            {
+                out->linkAngles[link] = nextSnap->ps.linkAngles[link];
+            }
         }
+
+        CG_InterpolatePlayerStateViewAngles(localClientNum, out, 0);
+        //if (prevSnap->ps.pm_type == PM_NORMAL_LINKED || (prevSnap->ps.eFlags & 0x300) != 0)
+        //{
+        //    viewAngleClampBase = prevSnap->ps.viewAngleClampBase;
+        //    viewAngleClampRange = nextSnap->ps.viewAngleClampRange;
+        //    v22 = 2;
+        //    v23 = (char *)((char *)&cgArray[0].predictedPlayerState - (char *)prevSnap);
+        //    do
+        //    {
+        //        *(float *)&v17[(unsigned int)viewAngleClampBase] = LerpAngle(
+        //            *viewAngleClampBase,
+        //            *(float *)((char *)viewAngleClampBase + v16),
+        //            f);
+        //        --v22;
+        //        *(float *)((char *)viewAngleClampBase + (unsigned int)v23) = (float)((float)(*viewAngleClampRange++
+        //            - viewAngleClampBase[2])
+        //            * (float)f)
+        //            + viewAngleClampBase[2];
+        //        ++viewAngleClampBase;
+        //    } while (v22);
+        //}
     }
 }
 
@@ -182,7 +373,7 @@ void __cdecl CG_UpdateFreeMove(cg_s *cgameGlob)
     v3 = 3;
     if (v2->current.integer == 1)
         v3 = 2;
-    cgameGlob->predictedPlayerState.pm_type = v3;
+    cgameGlob->predictedPlayerState.pm_type = (pmtype_t)v3;
     cgameGlob->predictedPlayerState.eFlags = 0;
     cgameGlob->predictedPlayerState.pm_flags = 0;
     cgameGlob->predictedPlayerState.aimSpreadScale = 0.0;
@@ -275,7 +466,7 @@ void __cdecl CG_PredictPlayerState_Internal(int localClientNum)
     double v28; // fp0
     __int64 v29; // fp13
     __int64 v30; // r11
-    LargeLocal v31; // [sp+58h] [-118h] BYREF
+    LargeLocal v31(45784); // [sp+58h] [-118h] BYREF
     __int64 v32; // [sp+60h] [-110h]
     float v33; // [sp+68h] [-108h] BYREF
     float v34; // [sp+6Ch] [-104h]
@@ -284,8 +475,10 @@ void __cdecl CG_PredictPlayerState_Internal(int localClientNum)
     float v37[6]; // [sp+88h] [-E8h] BYREF
     usercmd_s v38; // [sp+A0h] [-D0h] BYREF
 
-    LargeLocal::LargeLocal(&v31, 45784);
-    Buf = (playerState_s *)LargeLocal::GetBuf(&v31);
+    //LargeLocal::LargeLocal(&v31, 45784);
+    //Buf = (playerState_s *)LargeLocal::GetBuf(&v31);
+    Buf = (playerState_s *)v31.GetBuf();
+    
     //Profile_Begin(326);
     if (localClientNum)
         MyAssertHandler(
@@ -452,7 +645,7 @@ void __cdecl CG_PredictPlayerState_Internal(int localClientNum)
         }
         if (!i && v19->current.integer)
             Com_Printf(17, "no prediction run\n");
-        CG_TransitionPlayerState(localClientNum, &cgArray[0].predictedPlayerState, Buf);
+        CG_TransitionPlayerState(localClientNum, &cgArray[0].predictedPlayerState, (const transPlayerState_t*)Buf);
         if ((cgArray[0].predictedPlayerState.pm_flags & 0x400) != 0)
             CL_SetStance(localClientNum, CL_STANCE_STAND);
         if (cg_pmove.viewChange == 0.0
@@ -489,13 +682,15 @@ void __cdecl CG_PredictPlayerState_Internal(int localClientNum)
                         }
                     }
                 }
-                v24 = (float)(cg_pmove.viewChange + (float)v22);
-                if (v24 <= 0.0)
-                    _FP12 = (float)((float)-cg_viewZSmoothingMax->current.value - (float)v24);
-                else
-                    _FP12 = (float)((float)v24 - cg_viewZSmoothingMax->current.value);
-                __asm { fsel      f0, f12, f13, f0 }
-                cgArray[0].stepViewChange = _FP0;
+
+                //v24 = (float)(cg_pmove.viewChange + (float)v22);
+                //if (v24 <= 0.0)
+                //    _FP12 = (float)((float)-cg_viewZSmoothingMax->current.value - (float)v24);
+                //else
+                //    _FP12 = (float)((float)v24 - cg_viewZSmoothingMax->current.value);
+                //__asm { fsel      f0, f12, f13, f0 }
+                cgArray[0].stepViewChange = max(cg_pmove.viewChange + v22, cg_viewZSmoothingMax->current.value);
+
                 cgArray[0].stepViewStart = cg_pmove.viewChangeTime;
                 goto LABEL_81;
             }
@@ -509,6 +704,7 @@ void __cdecl CG_PredictPlayerState_Internal(int localClientNum)
             cgArray[0].stepViewChange = 0.0;
     }
 LABEL_81:
+    ; // goto
     //Profile_EndInternal(0);
     //LargeLocal::~LargeLocal(&v31);
 }

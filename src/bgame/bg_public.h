@@ -281,6 +281,23 @@ static const char *eventnames[135] =
   "EV_LANDING_PAIN_PAINTEDMETAL"
 };
 
+#ifdef KISAK_SP
+struct __declspec(align(4)) pmove_t
+{
+    playerState_s *ps;
+    usercmd_s cmd;
+    usercmd_s oldcmd;
+    int tracemask;
+    int numtouch;
+    int touchents[32];
+    float mins[3];
+    float maxs[3];
+    float xyspeed;
+    int viewChangeTime;
+    float viewChange;
+    unsigned __int8 handler;
+};
+#elif KISAK_MP
 struct pmove_t // sizeof=0x110
 {                                       // ...
     playerState_s *ps;                  // ...
@@ -307,6 +324,7 @@ struct pmove_t // sizeof=0x110
     // padding byte
     // padding byte
 };
+#endif
 
 struct pmoveHandler_t // sizeof=0x8
 {

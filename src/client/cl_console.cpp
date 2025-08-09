@@ -4,11 +4,18 @@
 #include <qcommon/cmd.h>
 #include <stringed/stringed_hooks.h>
 #include <win32/win_local.h>
-#include <cgame_mp/cg_local_mp.h>
 #include <gfx_d3d/r_rendercmds.h>
 #include <qcommon/threads.h>
 #include <universal/com_files.h>
 #include <buildnumber.h>
+
+#ifdef KISAK_MP
+#include <cgame_mp/cg_local_mp.h>
+#elif KISAK_SP
+#include <cgame/cg_main.h>
+#endif
+#include <sound/snd_public.h>
+
 
 const dvar_t *con_typewriterColorGlowFailed;
 const dvar_t *con_typewriterColorGlowCompleted;
@@ -216,6 +223,7 @@ void __cdecl Con_ResetMessageWindowTimes(MessageWindow *msgwnd, int32_t serverTi
     }
 }
 
+#ifdef KISAK_MP
 void __cdecl Con_TimeNudged(int32_t localClientNum, int32_t serverTimeNudge)
 {
     uint32_t gameWindowIndex; // [esp+0h] [ebp-8h]
@@ -231,6 +239,7 @@ void __cdecl Con_TimeNudged(int32_t localClientNum, int32_t serverTimeNudge)
     Con_NudgeMessageWindowTimes((MessageWindow *)&con.color[4630 * localClientNum - 1122], serverTimeNudge, serverTime);
     Con_NudgeMessageWindowTimes((MessageWindow *)&con.color[4630 * localClientNum - 53], serverTimeNudge, serverTime);
 }
+#endif
 
 void __cdecl Con_NudgeMessageWindowTimes(MessageWindow *msgwnd, int32_t serverTimeNudge, int32_t serverTime)
 {
@@ -3497,7 +3506,11 @@ void __cdecl Con_DrawOutputText(float x, float y)
     int32_t lineIndex; // [esp+38h] [ebp-8h]
     int32_t rowIndex; // [esp+3Ch] [ebp-4h]
 
-    CL_LookupColor(0, 0x37u, color);
+#ifdef KISAK_SP
+    CL_LookupColor(0x37u, color);
+#elif KISAK_MP
+    CL_LookupColor(0, 0x37, color);
+#endif
     if (!con.fontHeight)
         MyAssertHandler(".\\client\\cl_console.cpp", 2877, 0, "%s", "con.fontHeight");
     rowCount = con.visibleLineCount;

@@ -44,7 +44,6 @@ const dvar_t *waypointDistScaleSmallest;
 const dvar_t *waypointOffscreenPadLeft;
 const dvar_t *waypointOffscreenPointerDistance;
 const dvar_t *waypointOffscreenDistanceThresholdAlpha;
-
 const dvar_t *hudElemPausedBrightness;
 
 

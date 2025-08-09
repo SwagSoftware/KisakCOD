@@ -1,10 +1,13 @@
 #include "client.h"
-#include <client_mp/client_mp.h>
 #include <qcommon/cmd.h>
 #include <gfx_d3d/r_devgui.h>
 #include <universal/com_files.h>
 #include <cgame/cg_local.h>
 #include <universal/com_sndalias.h>
+
+#ifdef KISAK_MP
+#include <client_mp/client_mp.h>
+#endif
 
 struct ClGuiGlob // $1629A71A7F425F55F16AD3AC356BC9AE // sizeof=0x248
 {                                       // ...

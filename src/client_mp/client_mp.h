@@ -780,7 +780,7 @@ inline clientActive_t *__cdecl CL_GetLocalClientGlobals(int32_t localClientNum)
     iassert(clients);
     iassert(localClientNum == 0);
 
-    return clients;
+    return &clients[localClientNum];
 }
 
 // cl_cgame_mp

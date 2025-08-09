@@ -487,7 +487,7 @@ void __cdecl CG_DrawPausedMenuLine(
         *(double *)&v16 = (float)(v14->scaleVirtualToReal[0] + (float)0.5);
         v17 = (float)((float)y - (float)v12);
         v18 = floor(v16);
-        HIDWORD(v19) = &v28;
+        HIDWORD(v19) = (uint32_t)&v28;
         v20 = (float)(rect->h * (float)v15);
         v21 = (float)*(double *)&v18;
         *(double *)&v18 = (float)(rect->x - (float)6.0);
