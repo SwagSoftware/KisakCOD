@@ -370,7 +370,7 @@ struct server_t
     cmodel_t *models[512];
     unsigned __int16 emptyConfigString;
     unsigned __int16 configstrings[MAX_CONFIGSTRINGS];
-    svEntity_s svEntities[2176];
+    svEntity_s svEntities[MAX_GENTITIES];
     gentity_s *gentities;
     int gentitySize;
     int num_entities;

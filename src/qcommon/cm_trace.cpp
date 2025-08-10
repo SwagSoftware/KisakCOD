@@ -10,11 +10,11 @@ unsigned __int16 __cdecl Trace_GetEntityHitId(const trace_t *trace)
     if (!trace)
         MyAssertHandler(".\\qcommon\\cm_trace.cpp", 13, 0, "%s", "trace");
     if (trace->hitType == TRACE_HITTYPE_DYNENT_MODEL || trace->hitType == TRACE_HITTYPE_DYNENT_BRUSH)
-        return 1022;
+        return ENTITYNUM_WORLD;
     if (trace->hitType == TRACE_HITTYPE_ENTITY)
         return trace->hitId;
     else
-        return 1023;
+        return ENTITYNUM_NONE;
 }
 
 unsigned __int16 __cdecl Trace_GetDynEntHitId(const trace_t *trace, DynEntityDrawType *drawType)

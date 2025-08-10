@@ -1,7 +1,12 @@
 #include "devgui.h"
-#include <client_mp/client_mp.h>
 #include <cgame/cg_local.h>
 #include <gfx_d3d/r_rendercmds.h>
+
+#ifdef KISAK_MP
+#include <client_mp/client_mp.h>
+#elif KISAK_SP
+#include <client/client.h>
+#endif
 
 
 uint32_t __cdecl DevGui_GetScreenWidth()

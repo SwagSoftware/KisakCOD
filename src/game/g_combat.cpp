@@ -265,7 +265,7 @@ void __cdecl player_die(
         Scr_Notify(self, scr_const.death, 3u);
         self->client->ps.pm_type = (pmtype_t)((self->client->ps.pm_type == 1) + 5);
         if (!attacker || (number = attacker->s.number) != 0)
-            number = 2174;
+            number = ENTITYNUM_WORLD;
         self->sentient->lastAttacker = attacker;
         v22 = self->client;
         self->takedamage = 1;
@@ -455,7 +455,7 @@ int __cdecl G_GetWeaponIndexForEntity(const gentity_s *ent)
     {
         if ((client->ps.eFlags & 0x20300) != 0)
         {
-            if (client->ps.viewlocked_entNum == 2175)
+            if (client->ps.viewlocked_entNum == ENTITYNUM_NONE)
                 MyAssertHandler(
                     "c:\\trees\\cod3\\cod3src\\src\\game\\g_combat.cpp",
                     509,
@@ -659,9 +659,9 @@ void __cdecl G_Damage(
     if (targ->takedamage)
     {
         if (!inflictor)
-            inflictor = &g_entities[2174];
+            inflictor = &g_entities[ENTITYNUM_WORLD];
         if (!attacker)
-            attacker = &g_entities[2174];
+            attacker = &g_entities[ENTITYNUM_WORLD];
 
         iassert(targ->r.inuse);
         iassert(attacker->r.inuse);
@@ -994,7 +994,7 @@ int __cdecl G_CanRadiusDamageFromPos(
     if (inflictor)
         number = inflictor->s.number;
     else
-        number = 2175;
+        number = ENTITYNUM_NONE;
     sentient = targ->sentient;
     if (sentient)
     {
@@ -1748,7 +1748,7 @@ int __cdecl G_RadiusDamage(
     v82[1] = (float)v45 + (float)((float)radius * (float)1.4142135);
     v84[2] = (float)v46 - (float)((float)radius * (float)1.4142135);
     v82[2] = (float)v46 + (float)((float)radius * (float)1.4142135);
-    v48 = CM_AreaEntities(v84, v82, v85, 2176, -1);
+    v48 = CM_AreaEntities(v84, v82, v85, MAX_GENTITIES, -1);
     if (v48 > 0)
     {
         v49 = v85;

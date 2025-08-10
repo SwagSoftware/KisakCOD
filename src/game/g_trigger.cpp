@@ -511,7 +511,7 @@ void __cdecl G_CheckHitTriggerDamage(
     v25[1] = (float)(vEnd[1] - vStart[1]) * (float)v17;
     v25[0] = v18;
     v25[2] = (float)v14 * (float)v17;
-    v19 = CM_AreaEntities(v23, v24, v26, 2176, 0x400000);
+    v19 = CM_AreaEntities(v23, v24, v26, MAX_GENTITIES, 0x400000);
     if (v19 > 0)
     {
         v20 = v26;
@@ -594,7 +594,7 @@ void __cdecl G_GrenadeTouchTriggerDamage(
     v25[1] = (float)(vEnd[1] - vStart[1]) * (float)v17;
     v25[0] = v18;
     v25[2] = (float)v14 * (float)v17;
-    v19 = CM_AreaEntities(v23, v24, v26, 2176, 0x400000);
+    v19 = CM_AreaEntities(v23, v24, v26, MAX_GENTITIES, 0x400000);
     if (v19 > 0)
     {
         v20 = v26;

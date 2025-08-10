@@ -3446,7 +3446,7 @@ void __cdecl DebugDrawWorldSound3D(
         }
     }
     origZ = org[2];
-    if (chaninfo->sndEnt.field.entIndex == 1022)
+    if (chaninfo->sndEnt.field.entIndex == ENTITYNUM_WORLD)
     {
         starColor = colorGreen;
     }
@@ -3476,7 +3476,7 @@ void __cdecl DebugDrawWorldSound3D(
                     &buffer[&buffer[strlen(buffer) + 1] - &buffer[1]],
                     256 - (&buffer[strlen(buffer) + 1] - &buffer[1]));
                 CL_AddDebugString(org, colorWhiteFaded, fontsize, buffer, 0, 1);
-                if (chaninfo->sndEnt.field.entIndex == 1022)
+                if (chaninfo->sndEnt.field.entIndex == ENTITYNUM_WORLD)
                 {
                     org[2] = org[2] - fontsize * 12.0;
                     text = va("Owner: World");
@@ -3527,7 +3527,7 @@ void SND_UpdatePhysics()
         for (i = 0; i < count; ++i)
         {
             alias = Com_PickSoundAliasFromList(g_sndPhysics.info[i].aliasList);
-            SND_PlaySoundAlias(alias, (SndEntHandle)1022, g_sndPhysics.info[i].org, 0, SASYS_CGAME);
+            SND_PlaySoundAlias(alias, (SndEntHandle)ENTITYNUM_WORLD, g_sndPhysics.info[i].org, 0, SASYS_CGAME);
         }
     }
     Sys_LeaveCriticalSection(CRITSECT_AUDIO_PHYSICS);

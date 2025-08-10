@@ -667,10 +667,10 @@ void __cdecl SP_worldspawn()
         level.compassNorth[1] = 0.0;
     }
     G_LevelSpawnString("spawnflags", "0", &s);
-    g_entities[1022].spawnflags = atoi(s);
-    g_entities[1022].s.number = 1022;
-    Scr_SetString(&g_entities[1022].classname, scr_const.worldspawn);
-    g_entities[1022].r.inuse = 1;
+    g_entities[ENTITYNUM_WORLD].spawnflags = atoi(s);
+    g_entities[ENTITYNUM_WORLD].s.number = ENTITYNUM_WORLD;
+    Scr_SetString(&g_entities[ENTITYNUM_WORLD].classname, scr_const.worldspawn);
+    g_entities[ENTITYNUM_WORLD].r.inuse = 1;
 
     iassert(!g_entities[ENTITYNUM_WORLD].r.ownerNum.isDefined());
 }

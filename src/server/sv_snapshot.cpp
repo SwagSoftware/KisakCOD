@@ -64,7 +64,7 @@ void __cdecl SV_WriteSnapshotToClient(client_t *client, msg_t *msg)
             ++snapshotEntities;
         } while (v6 < sv.entityNumbers.numSnapshotEntities);
     }
-    MSG_WriteBits(msg, 2175, 12);
+    MSG_WriteBits(msg, ENTITYNUM_NONE, 12);
 }
 
 void __cdecl SV_UpdateServerCommandsToClient(client_t *client)

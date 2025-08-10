@@ -433,7 +433,7 @@ void __cdecl G_VehUnlinkPlayer(gentity_s *ent, gentity_s *player)
     player->r.ownerNum.setEnt(NULL);
     client->ps.pm_flags &= ~0x100000u;
     client->ps.weapFlags &= ~0x80u;
-    client->ps.viewlocked_entNum = 1023;
+    client->ps.viewlocked_entNum = ENTITYNUM_NONE;
 }
 
 void __cdecl VehicleClearRideSlotForPlayer(gentity_s *ent, int32_t playerEntNum)
@@ -446,7 +446,7 @@ void __cdecl VehicleClearRideSlotForPlayer(gentity_s *ent, int32_t playerEntNum)
     {
         if (ent->scr_vehicle->boneIndex.riderSlots[i].entNum == playerEntNum)
         {
-            ent->scr_vehicle->boneIndex.riderSlots[i].entNum = 1023;
+            ent->scr_vehicle->boneIndex.riderSlots[i].entNum = ENTITYNUM_NONE;
             return;
         }
     }
@@ -459,7 +459,7 @@ void __cdecl G_VehiclesInit(int32_t restarting)
 
     InitInfos(restarting);
     for (i = 0; i < 8; ++i)
-        s_vehicles[i].entNum = 1023;
+        s_vehicles[i].entNum = ENTITYNUM_NONE;
     level.vehicles = s_vehicles;
 }
 
@@ -494,7 +494,7 @@ void __cdecl G_VehiclesSetupSpawnedEnts()
 
     for (i = 0; i < 8; ++i)
     {
-        if (s_vehicles[i].entNum != 1023)
+        if (s_vehicles[i].entNum != ENTITYNUM_NONE)
         {
             ent = &g_entities[s_vehicles[i].entNum];
             if (ent->classname != scr_const.script_vehicle)
@@ -566,7 +566,7 @@ void __cdecl SpawnVehicle(gentity_s *ent, const char *typeName)
     for (i = 0; i < 8; ++i)
     {
         veh = &s_vehicles[i];
-        if (veh->entNum == 1023)
+        if (veh->entNum == ENTITYNUM_NONE)
             break;
     }
     if (i == 8)
@@ -782,7 +782,7 @@ void __cdecl InitVehicleTags(gentity_s *ent)
         ridetag = &veh->boneIndex.riderSlots[i];
         ridetag->tagName = BG_VehiclesGetSlotTagName(i);
         ridetag->boneIdx = SV_DObjGetBoneIndex(ent, ridetag->tagName);
-        ridetag->entNum = 1023;
+        ridetag->entNum = ENTITYNUM_NONE;
     }
     veh->boneIndex.detach = SV_DObjGetBoneIndex(ent, scr_const.tag_detach);
     veh->boneIndex.popout = SV_DObjGetBoneIndex(ent, scr_const.tag_popout);
@@ -913,8 +913,7 @@ void __cdecl G_VehFreeEntity(gentity_s *vehEnt)
     scr_vehicle_s *scr_vehicle; // [esp+0h] [ebp-4h]
 
     scr_vehicle = vehEnt->scr_vehicle;
-    if (scr_vehicle->entNum == 1023)
-        MyAssertHandler(".\\game_mp\\g_vehicles_mp.cpp", 2967, 0, "%s", "scr_vehicle->entNum != ENTITYNUM_NONE");
+    iassert(scr_vehicle->entNum != ENTITYNUM_NONE);
     vehEnt->health = 0;
     VEH_UpdateSounds(vehEnt);
     Scr_SetString(&scr_vehicle->lookAtText0, 0);
@@ -928,7 +927,7 @@ void __cdecl G_VehFreeEntity(gentity_s *vehEnt)
     vehEnt->s.lerp.eFlags = 0;
     vehEnt->s.lerp.pos.trType = TR_STATIONARY;
     vehEnt->s.lerp.apos.trType = TR_STATIONARY;
-    scr_vehicle->entNum = 1023;
+    scr_vehicle->entNum = ENTITYNUM_NONE;
     vehEnt->scr_vehicle = 0;
 }
 
@@ -961,7 +960,7 @@ char __cdecl VehicleHasSeatFree(gentity_s *ent)
     for (i = 0; i < 3; ++i)
     {
         if (ent->scr_vehicle->boneIndex.riderSlots[i].boneIdx != -1
-            && ent->scr_vehicle->boneIndex.riderSlots[i].entNum == 1023)
+            && ent->scr_vehicle->boneIndex.riderSlots[i].entNum == ENTITYNUM_NONE)
         {
             return 1;
         }
@@ -1305,7 +1304,7 @@ void __cdecl G_VehEntHandler_Think(gentity_s *pSelf)
         memset((uint8_t *)&s_phys_0, 0, sizeof(s_phys_0));
         for (rideTag = RideTagFirst(pSelf); rideTag; rideTag = RideTagNext(pSelf, rideTag->riderSlots))
         {
-            if (rideTag->riderSlots[0].entNum != 1023 && g_entities[rideTag->riderSlots[0].entNum].health <= 0)
+            if (rideTag->riderSlots[0].entNum != ENTITYNUM_NONE && g_entities[rideTag->riderSlots[0].entNum].health <= 0)
                 G_EntUnlink(&g_entities[rideTag->riderSlots[0].entNum]);
         }
         VEH_UpdateClients(pSelf);
@@ -1400,8 +1399,8 @@ void __cdecl InflictDamage(gentity_s *vehEnt, gentity_s *target, float *dir, int
     if (!target)
         MyAssertHandler(".\\game_mp\\g_vehicles_mp.cpp", 1328, 0, "%s", "target");
     attackerNum = VehicleEntDriver(vehEnt);
-    if (attackerNum == 1023)
-        attackerNum = 1022;
+    if (attackerNum == ENTITYNUM_NONE)
+        attackerNum = ENTITYNUM_WORLD;
     if (vehDebugServer->current.enabled)
     {
         float dmg = (float)damage;
@@ -1436,7 +1435,7 @@ void __cdecl UpdateTurret(gentity_s *ent)
     gentity_s *player; // [esp+4h] [ebp-4h]
 
     playerEntNum = VehicleEntGunner(ent);
-    if (playerEntNum == 1023)
+    if (playerEntNum == ENTITYNUM_NONE)
     {
         ent->s.lerp.u.vehicle.gunYaw = 0.0;
         ent->s.lerp.u.primaryLight.cosHalfFovInner = 0.0;
@@ -1546,7 +1545,7 @@ void __cdecl VEH_UpdateWeapon(gentity_s *ent)
     if (!ent)
         MyAssertHandler(".\\game_mp\\g_vehicles_mp.cpp", 1777, 0, "%s", "ent");
     playerEntNum = VehicleEntGunner(ent);
-    if (playerEntNum != 1023 && ent->s.weapon)
+    if (playerEntNum != ENTITYNUM_NONE && ent->s.weapon)
     {
         veh = ent->scr_vehicle;
         if (!veh)
@@ -1658,7 +1657,7 @@ void __cdecl VEH_UpdateClientDriver(gentity_s *ent)
     veh->phys.inputAccelerationOLD = 0;
     veh->phys.inputTurning = 0;
     playerEntNum = VehicleEntDriver(ent);
-    if (playerEntNum == 1023)
+    if (playerEntNum == ENTITYNUM_NONE)
     {
         veh->phys.inputAccelerationOLD = 0;
         veh->phys.inputTurning = 0;
@@ -2632,7 +2631,7 @@ void __cdecl LinkPlayerToVehicle(gentity_s *ent, gentity_s *player)
     for (i = 0; i < 3; ++i)
     {
         rideTag = &veh->boneIndex.riderSlots[i];
-        if (veh->boneIndex.riderSlots[i].boneIdx != -1 && rideTag->entNum == 1023)
+        if (veh->boneIndex.riderSlots[i].boneIdx != -1 && rideTag->entNum == ENTITYNUM_NONE)
         {
             G_DObjGetWorldBoneIndexPos(ent, rideTag->boneIdx, pos);
             Vec3Sub(pos, player->r.currentOrigin, diff);
@@ -2686,7 +2685,7 @@ void __cdecl G_VehEntHandler_Die(
 
     for (rideTag = RideTagFirst(pSelf); rideTag; rideTag = RideTagNext(pSelf, rideTag->riderSlots))
     {
-        if (rideTag->riderSlots[0].entNum != 1023)
+        if (rideTag->riderSlots[0].entNum != ENTITYNUM_NONE)
             G_EntUnlink(&g_entities[rideTag->riderSlots[0].entNum]);
     }
     if (pAttacker)

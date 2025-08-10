@@ -92,7 +92,7 @@ void __cdecl SV_Startup()
         Com_Error(ERR_FATAL, "SV_Startup() - already initialized");
 
     svs.clients = g_sv_clients;
-    svs.numSnapshotEntities = 2176;
+    svs.numSnapshotEntities = MAX_GENTITIES;
     svs.initialized = 1;
     Dvar_SetBool(com_sv_running, 1);
 }

@@ -761,7 +761,7 @@ void G_RegisterDebugDvars()
         "ai_debugCoverEntityNum",
         -1,
         -1,
-        2175,
+        ENTITYNUM_NONE,
         0x80u,
         "Display debug info for cover");
     ai_showBadPlaces = Dvar_RegisterBool("ai_showBadPlaces", 0, 0x80u, "Display debug information for 'bad places'");
@@ -781,7 +781,7 @@ void G_RegisterDebugDvars()
         "ai_showSuppression",
         -1,
         -1,
-        2175,
+        ENTITYNUM_NONE,
         0x80u,
         "Draw the suppression planes for this entity");
     ai_eventDistFootstep = Dvar_RegisterFloat("ai_eventDistFootstep", 512.0, 0.0, FLT_MAX, v11, v10);
@@ -816,7 +816,7 @@ void G_RegisterDebugDvars()
         "ai_debugAnimDeltas",
         0,
         0,
-        2175,
+        ENTITYNUM_NONE,
         0x80u,
         "Display animation delta debug information");
     ai_debugGrenadeFailSafe = Dvar_RegisterBool(
@@ -860,25 +860,25 @@ void G_RegisterDebugDvars()
         "ai_showVolume",
         -1,
         -1,
-        2175,
+        ENTITYNUM_NONE,
         0x80u,
         "Draw the goal volume and fixed node safe volume for an AI");
-    ai_debugEntIndex = Dvar_RegisterInt("ai_debugEntIndex", -1, -1, 2175, 0, "Entity index of an entity to debug");
+    ai_debugEntIndex = Dvar_RegisterInt("ai_debugEntIndex", -1, -1, ENTITYNUM_NONE, 0, "Entity index of an entity to debug");
     g_NoScriptSpam = Dvar_RegisterBool("g_no_script_spam", 0, 0, "Turn off script debugging information");
     g_recordScriptPlace = Dvar_RegisterBool(
         "g_recordScriptPlace",
         0,
         0,
         "Records the file and line of the current script command");
-    g_dumpAnims = Dvar_RegisterInt("g_dumpAnims", -1, -1, 2175, 0x80u, "Write animation debug info for this entity");
+    g_dumpAnims = Dvar_RegisterInt("g_dumpAnims", -1, -1, ENTITYNUM_NONE, 0x80u, "Write animation debug info for this entity");
     g_dumpAnimsCommands = Dvar_RegisterInt(
         "g_dumpAnimsCommands",
         -1,
         -1,
-        2175,
+        ENTITYNUM_NONE,
         0x80u,
         "Write animation commands debug info for this entity");
-    g_dumpAIEvents = Dvar_RegisterInt("g_aiEventDump", -1, -1, 2175, 0x80u, "Print AI events happening for this entity");
+    g_dumpAIEvents = Dvar_RegisterInt("g_aiEventDump", -1, -1, ENTITYNUM_NONE, 0x80u, "Print AI events happening for this entity");
     g_dumpAIEventListeners = Dvar_RegisterBool(
         "g_aiEventListenerDump",
         0,
@@ -973,16 +973,10 @@ void __cdecl G_FreeEntities()
         }
         ++v0;
     }
-    if (g_entities[2174].r.inuse)
-        G_FreeEntity(&g_entities[2174]);
+    if (g_entities[ENTITYNUM_WORLD].r.inuse)
+        G_FreeEntity(&g_entities[ENTITYNUM_WORLD]);
     G_FreeAllEntityRefs();
-    if (g_entities[2175].r.inuse)
-        MyAssertHandler(
-            "c:\\trees\\cod3\\cod3src\\src\\game\\g_main.cpp",
-            1137,
-            0,
-            "%s",
-            "!g_entities[ENTITYNUM_NONE].r.inuse");
+    iassert(!g_entities[ENTITYNUM_NONE].r.inuse);
     level.num_entities = 0;
     level.firstFreeEnt = 0;
     level.lastFreeEnt = 0;
@@ -1216,8 +1210,8 @@ void __cdecl G_InitGame(
     EntHandle::Init();
     SentientHandle::Init();
     memset(&level, 0, sizeof(level));
-    level.cachedTagMat.entnum = 2175;
-    level.cachedEntTargetTagMat.entnum = 2175;
+    level.cachedTagMat.entnum = ENTITYNUM_NONE;
+    level.cachedEntTargetTagMat.entnum = ENTITYNUM_NONE;
     level.currentEntityThink = -1;
     level.initializing = 1;
     level.scriptPrintChannel = 24;
@@ -1318,7 +1312,7 @@ void __cdecl G_InitGame(
     ProfLoad_End();
     memset(g_entities, 0, sizeof(g_entities));
     level.gentities = g_entities;
-    g_entities[2175].flags |= 0x400u;
+    g_entities[ENTITYNUM_NONE].flags |= 0x400u;
     level.maxclients = 1;
     memset(g_clients, 0, sizeof(g_clients));
     level.clients = g_clients;
@@ -1923,7 +1917,7 @@ void __cdecl G_RunFrameForEntity(gentity_s *ent)
                     0,
                     "%s",
                     "(unsigned)( ent->scr_vehicle - level.vehicles ) < MAX_VEHICLES");
-            if (ent->scr_vehicle->entNum != 2175)
+            if (ent->scr_vehicle->entNum != ENTITYNUM_NONE)
                 goto LABEL_24;
             v10 = 2404;
             v11 = "ent->scr_vehicle->entNum != ENTITYNUM_NONE";
@@ -2203,16 +2197,16 @@ void __cdecl G_SendClientMessages()
     do
     {
         entNum = level.vehicles[v30].entNum;
-        if (entNum != 2175)
+        if (entNum != ENTITYNUM_NONE)
             level.specialIndex[entNum] = v29 - 2;
         v32 = level.vehicles[v30 + 1].entNum;
-        if (v32 != 2175)
+        if (v32 != ENTITYNUM_NONE)
             level.specialIndex[v32] = v29 - 1;
         v33 = level.vehicles[v30 + 2].entNum;
-        if (v33 != 2175)
+        if (v33 != ENTITYNUM_NONE)
             level.specialIndex[v33] = v29;
         v34 = level.vehicles[v30 + 3].entNum;
-        if (v34 != 2175)
+        if (v34 != ENTITYNUM_NONE)
             level.specialIndex[v34] = v29 + 1;
         v29 += 4;
         v30 += 4;
@@ -2269,7 +2263,7 @@ int __cdecl G_TraceCapsuleComplete(
     unsigned __int8 *v7; // [sp+8h] [-68h]
     int v8; // [sp+Ch] [-64h]
 
-    return SV_TracePassed(start, mins, maxs, end, passEntityNum, 2175, contentmask, 0, v7, v8);
+    return SV_TracePassed(start, mins, maxs, end, passEntityNum, ENTITYNUM_NONE, contentmask, 0, v7, v8);
 }
 
 void __cdecl G_LocationalTrace(
@@ -2321,7 +2315,7 @@ int __cdecl G_LocationalTracePassed(
 
 void __cdecl G_SightTrace(int *hitNum, const float *start, const float *end, int passEntityNum, int contentmask)
 {
-    SV_SightTrace(hitNum, start, vec3_origin, vec3_origin, end, passEntityNum, 2175, contentmask);
+    SV_SightTrace(hitNum, start, vec3_origin, vec3_origin, end, passEntityNum, ENTITYNUM_NONE, contentmask);
 }
 
 void __cdecl G_AddDebugString(const float *xyz, const float *color, double scale, const char *pszText)

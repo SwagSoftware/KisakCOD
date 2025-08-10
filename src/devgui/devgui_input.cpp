@@ -1,7 +1,12 @@
 #include "devgui.h"
 #include <qcommon/cmd.h>
 #include <client/client.h>
+
+#ifdef KISAK_MP
 #include <client_mp/client_mp.h>
+#elif KISAK_SP
+#include <client/cl_input.h>
+#endif
 
 int32_t s_butMapsKey[11] = { 154, 155, 156, 157, 13, 27, 9, 32, 161, 162, 171 }; // idb
 

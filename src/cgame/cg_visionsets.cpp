@@ -3,10 +3,12 @@
 #include <database/database.h>
 #include <devgui/devgui.h>
 #include <universal/q_parse.h>
+
 #ifdef KISAK_MP
 #include <client_mp/client_mp.h>
 #include <cgame_mp/cg_local_mp.h>
 #elif KISAK_SP
+#include "cg_main.h"
 #endif
 
 const dvar_t *nightVisionFadeInOutTime;

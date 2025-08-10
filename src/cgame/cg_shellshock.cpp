@@ -346,7 +346,7 @@ void __cdecl EndShellShockSound(int32_t localClientNum)
     {
         cgameGlob->shellshock.loopEndTime = 0;
         alias = CL_PickSoundAlias("shellshock_end_abort");
-        SND_PlaySoundAlias(alias, (SndEntHandle)1023, vec3_origin, 0, SASYS_CGAME);
+        SND_PlaySoundAlias(alias, (SndEntHandle)ENTITYNUM_NONE, vec3_origin, 0, SASYS_CGAME);
     }
 }
 
@@ -427,7 +427,7 @@ void __cdecl UpdateShellShockSound(int32_t localClientNum, const shellshock_parm
                 fade = 1.0 - (double)dta * 1.0 / (double)parms->sound.loopFadeTime;
             else
                 fade = 0.0;
-            SND_PlayBlendedSoundAliases(alias0, alias1, fade, 1.0, (SndEntHandle)1023, vec3_origin, 0, SASYS_CGAME);
+            SND_PlayBlendedSoundAliases(alias0, alias1, fade, 1.0, (SndEntHandle)ENTITYNUM_NONE, vec3_origin, 0, SASYS_CGAME);
         }
         if (localClientNum)
             MyAssertHandler(
@@ -445,14 +445,14 @@ void __cdecl UpdateShellShockSound(int32_t localClientNum, const shellshock_parm
                 cgameGlob->shellshock.loopEndTime = end;
                 wetlevel = cgameGlob->time - end;
                 v5 = CL_PickSoundAlias(parms->sound.end);
-                SND_PlaySoundAlias(v5, (SndEntHandle)1023, vec3_origin, wetlevel, SASYS_CGAME);
+                SND_PlaySoundAlias(v5, (SndEntHandle)ENTITYNUM_NONE, vec3_origin, wetlevel, SASYS_CGAME);
             }
         }
         else if (cgameGlob->shellshock.loopEndTime)
         {
             cgameGlob->shellshock.loopEndTime = 0;
             v4 = CL_PickSoundAlias(parms->sound.endAbort);
-            SND_PlaySoundAlias(v4, (SndEntHandle)1023, vec3_origin, 0, SASYS_CGAME);
+            SND_PlaySoundAlias(v4, (SndEntHandle)ENTITYNUM_NONE, vec3_origin, 0, SASYS_CGAME);
         }
     }
     else

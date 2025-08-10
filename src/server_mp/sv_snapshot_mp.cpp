@@ -326,7 +326,7 @@ void __cdecl SV_EmitPacketEntities(
         }
     }
     SV_PacketDataIsHeader(snapInfo->clientNum, msg);
-    MSG_WriteEntityIndex(snapInfo, msg, 1023, 10);
+    MSG_WriteEntityIndex(snapInfo, msg, ENTITYNUM_NONE, 10);
     SV_TrackPacketData(snapInfo->clientNum, ANALYZE_SNAPSHOT_ALLENTITIES, 0, 0, bitsStart, msg);
 }
 
@@ -808,7 +808,7 @@ cachedSnapshot_t *__cdecl SV_GetCachedSnapshotInternal(int archivedFrame)
         while (1)
         {
             newnumc = MSG_ReadEntityIndex(&msg, 0xAu);
-            if (newnumc == 1023)
+            if (newnumc == ENTITYNUM_NONE)
                 break;
             if (msg.overflowed)
                 Com_Error(ERR_DROP, "SV_GetCachedSnapshot: end of message");
@@ -926,7 +926,7 @@ cachedSnapshot_t *__cdecl SV_GetCachedSnapshotInternal(int archivedFrame)
         while (1)
         {
             newnuma = MSG_ReadEntityIndex(&msg, 0xAu);
-            if (newnuma == 1023)
+            if (newnuma == ENTITYNUM_NONE)
                 break;
             if (msg.overflowed)
                 Com_Error(ERR_DROP, "SV_GetCachedSnapshot: end of message");
@@ -1720,59 +1720,15 @@ void __cdecl SV_SetServerStaticHeader()
 
 void __cdecl SV_GetServerStaticHeader()
 {
-    if (svsHeader.clients != svs.clients)
-        MyAssertHandler(".\\server_mp\\sv_snapshot_mp.cpp", 2165, 0, "%s", "svsHeader.clients == svs.clients");
-    if (svsHeader.snapFlagServerBit != svs.snapFlagServerBit)
-        MyAssertHandler(
-            ".\\server_mp\\sv_snapshot_mp.cpp",
-            2167,
-            0,
-            "%s",
-            "svsHeader.snapFlagServerBit == svs.snapFlagServerBit");
-    if (svsHeader.numSnapshotEntities != svs.numSnapshotEntities)
-        MyAssertHandler(
-            ".\\server_mp\\sv_snapshot_mp.cpp",
-            2168,
-            0,
-            "%s",
-            "svsHeader.numSnapshotEntities == svs.numSnapshotEntities");
-    if (svsHeader.numSnapshotClients != svs.numSnapshotClients)
-        MyAssertHandler(
-            ".\\server_mp\\sv_snapshot_mp.cpp",
-            2169,
-            0,
-            "%s",
-            "svsHeader.numSnapshotClients == svs.numSnapshotClients");
-    if (svsHeader.nextSnapshotEntities != svs.nextSnapshotEntities)
-        MyAssertHandler(
-            ".\\server_mp\\sv_snapshot_mp.cpp",
-            2170,
-            0,
-            "%s",
-            "svsHeader.nextSnapshotEntities == svs.nextSnapshotEntities");
-    if (svsHeader.nextSnapshotClients != svs.nextSnapshotClients)
-        MyAssertHandler(
-            ".\\server_mp\\sv_snapshot_mp.cpp",
-            2171,
-            0,
-            "%s",
-            "svsHeader.nextSnapshotClients == svs.nextSnapshotClients");
-    if (svsHeader.snapshotEntities != svs.snapshotEntities)
-        MyAssertHandler(
-            ".\\server_mp\\sv_snapshot_mp.cpp",
-            2172,
-            0,
-            "%s",
-            "svsHeader.snapshotEntities == svs.snapshotEntities");
-    if (svsHeader.snapshotClients != svs.snapshotClients)
-        MyAssertHandler(
-            ".\\server_mp\\sv_snapshot_mp.cpp",
-            2173,
-            0,
-            "%s",
-            "svsHeader.snapshotClients == svs.snapshotClients");
-    if (svsHeader.svEntities != sv.svEntities)
-        MyAssertHandler(".\\server_mp\\sv_snapshot_mp.cpp", 2174, 0, "%s", "svsHeader.svEntities == sv.svEntities");
+    iassert(svsHeader.clients == svs.clients);
+    iassert(svsHeader.snapFlagServerBit == svs.snapFlagServerBit);
+    iassert(svsHeader.numSnapshotEntities == svs.numSnapshotEntities);
+    iassert(svsHeader.numSnapshotClients == svs.numSnapshotClients);
+    iassert(svsHeader.nextSnapshotEntities == svs.nextSnapshotEntities);
+    iassert(svsHeader.nextSnapshotClients == svs.nextSnapshotClients);
+    iassert(svsHeader.snapshotEntities == svs.snapshotEntities);
+    iassert(svsHeader.snapshotClients == svs.snapshotClients);
+    iassert(svsHeader.svEntities == sv.svEntities);
     if (svsHeader.mapCenter[0] != svs.mapCenter[0]
         || svsHeader.mapCenter[1] != svs.mapCenter[1]
         || svsHeader.mapCenter[2] != svs.mapCenter[2])

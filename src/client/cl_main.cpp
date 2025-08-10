@@ -1092,8 +1092,8 @@ void __cdecl CL_InitRef()
     Com_Printf(14, "----- Initializing Renderer ----\n");
     v0.maxClientViews = 1;
     v0.entCount = 2208;
-    v0.entnumNone = 2175;
-    v0.entnumOrdinaryEnd = 2174;
+    v0.entnumNone = ENTITYNUM_NONE;
+    v0.entnumOrdinaryEnd = ENTITYNUM_WORLD;
     v0.threadContextCount = 12;
     v0.critSectCount = 32;
     R_ConfigureRenderer(&v0);
@@ -1933,8 +1933,8 @@ void __cdecl CL_Init(int localClientNum)
     Com_Printf(14, "----- Initializing Renderer ----\n");
     v28.maxClientViews = 1;
     v28.entCount = 2208;
-    v28.entnumNone = 2175;
-    v28.entnumOrdinaryEnd = 2174;
+    v28.entnumNone = ENTITYNUM_NONE;
+    v28.entnumOrdinaryEnd = ENTITYNUM_WORLD;
     v28.threadContextCount = 12;
     v28.critSectCount = 32;
     R_ConfigureRenderer(&v28);

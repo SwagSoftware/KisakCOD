@@ -285,7 +285,7 @@ void __cdecl CG_PredictPlayerState_Internal(int32_t localClientNum)
             if (!cgameGlob->predictedPlayerState.cursorHint)
             {
                 cgameGlob->predictedPlayerState.cursorHintString = -1;
-                cgameGlob->predictedPlayerState.cursorHintEntIndex = 1023;
+                cgameGlob->predictedPlayerState.cursorHintEntIndex = ENTITYNUM_NONE;
             }
             if (cg_pmove[localClientNum].viewChange == 0.0
                 || cg_pmove[localClientNum].viewChangeTime == cgameGlob->stepViewStart
@@ -475,7 +475,7 @@ void __cdecl CG_InterpolatePlayerState(int32_t localClientNum, int32_t grabAngle
         if (!nextSnap->ps.cursorHint)
         {
             out->cursorHintString = -1;
-            out->cursorHintEntIndex = 1023;
+            out->cursorHintEntIndex = ENTITYNUM_NONE;
         }
     }
 }

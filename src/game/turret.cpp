@@ -42,7 +42,7 @@ void __cdecl G_InitTurrets()
 int __cdecl Turret_GetRemainingConvergenceTime(const TurretInfo *turretInfo, unsigned int type)
 {
     if (type >= 2)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\turret.cpp", 65, 0, "%s", "type == PITCH || type == YAW");
+        MyAssertHandler("c:\\trees\\cod3\\ENTITYNUM_NONE\\src\\game\\turret.cpp", 65, 0, "%s", "type == PITCH || type == YAW");
     return turretInfo->convergenceTime[type] + turretInfo->targetTime - level.time;
 }
 
@@ -185,7 +185,7 @@ void __cdecl Fire_Lead(gentity_s *ent, gentity_s *activator, int bUseAccuracy)
 
     //Profile_Begin(239);
     if (!activator)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\turret.cpp", 146, 0, "%s", "activator");
+        MyAssertHandler("c:\\trees\\cod3\\ENTITYNUM_NONE\\src\\game\\turret.cpp", 146, 0, "%s", "activator");
     v6 = activator;
     if (activator == &g_entities[2175])
         v6 = ent;
@@ -194,7 +194,7 @@ void __cdecl Fire_Lead(gentity_s *ent, gentity_s *activator, int bUseAccuracy)
     pTurretInfo = ent->pTurretInfo;
     wp.weapDef = WeaponDef;
     if (!pTurretInfo)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\turret.cpp", 155, 0, "%s", "turretInfo");
+        MyAssertHandler("c:\\trees\\cod3\\ENTITYNUM_NONE\\src\\game\\turret.cpp", 155, 0, "%s", "turretInfo");
     v11 = pTurretInfo->targetPos[0];
     v31[0] = pTurretInfo->targetPos[0];
     v12 = pTurretInfo->targetPos[1];
@@ -375,9 +375,9 @@ void turret_clientaim(gentity_s *self, gentity_s *other)
 void __cdecl turret_shoot_internal(gentity_s *self, gentity_s *other)
 {
     if (!self->pTurretInfo)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\turret.cpp", 297, 0, "%s", "self->pTurretInfo");
+        MyAssertHandler("c:\\trees\\cod3\\ENTITYNUM_NONE\\src\\game\\turret.cpp", 297, 0, "%s", "self->pTurretInfo");
     if (!other)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\turret.cpp", 298, 0, "%s", "other");
+        MyAssertHandler("c:\\trees\\cod3\\ENTITYNUM_NONE\\src\\game\\turret.cpp", 298, 0, "%s", "other");
     if ((self->pTurretInfo->flags & 0x4000) == 0)
     {
         self->pTurretInfo->fireSndDelay = 3 * BG_GetWeaponDef(self->s.weapon)->iFireTime;
@@ -611,7 +611,7 @@ bool __cdecl turret_IsFiring(gentity_s *self)
 
     pTurretInfo = self->pTurretInfo;
     if (!pTurretInfo)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\turret.cpp", 604, 0, "%s", "pTurretInfo");
+        MyAssertHandler("c:\\trees\\cod3\\ENTITYNUM_NONE\\src\\game\\turret.cpp", 604, 0, "%s", "pTurretInfo");
     return pTurretInfo->state != 0;
 }
 
@@ -650,7 +650,7 @@ int __cdecl turret_ReturnToDefaultPos(gentity_s *self, int bManned)
 
     pTurretInfo = self->pTurretInfo;
     if (!pTurretInfo)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\turret.cpp", 651, 0, "%s", "pTurretInfo");
+        MyAssertHandler("c:\\trees\\cod3\\ENTITYNUM_NONE\\src\\game\\turret.cpp", 651, 0, "%s", "pTurretInfo");
     if (bManned)
         v7[0] = 0.0;
     else
@@ -666,7 +666,7 @@ void __cdecl turret_SetDefaultDropPitch(gentity_s *self, double pitch)
 
     pTurretInfo = self->pTurretInfo;
     if (!pTurretInfo)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\turret.cpp", 666, 0, "%s", "pTurretInfo");
+        MyAssertHandler("c:\\trees\\cod3\\ENTITYNUM_NONE\\src\\game\\turret.cpp", 666, 0, "%s", "pTurretInfo");
     pTurretInfo->dropPitch = pitch;
 }
 
@@ -706,7 +706,7 @@ int __cdecl turret_CanTargetPoint(const gentity_s *self, const float *vPoint, fl
     {
         pTurretInfo = self->pTurretInfo;
         if (!pTurretInfo)
-            MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\turret.cpp", 693, 0, "%s", "pTurretInfo");
+            MyAssertHandler("c:\\trees\\cod3\\ENTITYNUM_NONE\\src\\game\\turret.cpp", 693, 0, "%s", "pTurretInfo");
         v21[0] = *vPoint - v18;
         v21[1] = vPoint[1] - v19;
         v21[2] = vPoint[2] - v20;
@@ -788,7 +788,7 @@ int __cdecl turret_CanTargetSentient(
     {
         pTurretInfo = self->pTurretInfo;
         if (!pTurretInfo)
-            MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\turret.cpp", 727, 0, "%s", "pTurretInfo");
+            MyAssertHandler("c:\\trees\\cod3\\ENTITYNUM_NONE\\src\\game\\turret.cpp", 727, 0, "%s", "pTurretInfo");
         v36 = *targetPosition - v33;
         v37 = targetPosition[1] - v34;
         v38 = targetPosition[2] - v35;
@@ -913,7 +913,7 @@ void __cdecl turret_aimat_vector_internal(gentity_s *self, float *origin, int bS
 
     pTurretInfo = self->pTurretInfo;
     if (!pTurretInfo)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\turret.cpp", 826, 0, "%s", "turretInfo");
+        MyAssertHandler("c:\\trees\\cod3\\ENTITYNUM_NONE\\src\\game\\turret.cpp", 826, 0, "%s", "turretInfo");
     if (!bShoot)
     {
         v12 = 0;
@@ -964,7 +964,7 @@ int __cdecl turret_aimat_vector(gentity_s *self, float *origin, int bShoot, floa
     else
     {
         if (!self->pTurretInfo)
-            MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\turret.cpp", 879, 0, "%s", "self->pTurretInfo");
+            MyAssertHandler("c:\\trees\\cod3\\ENTITYNUM_NONE\\src\\game\\turret.cpp", 879, 0, "%s", "self->pTurretInfo");
         result = 0;
         self->pTurretInfo->flags &= ~0x40u;
     }
@@ -1030,13 +1030,13 @@ int __cdecl turret_aimat_Sentient_Internal(
     float v38[22]; // [sp+80h] [-A0h] BYREF
 
     if (missTime < 0)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\turret.cpp", 935, 0, "%s", "missTime >= 0");
+        MyAssertHandler("c:\\trees\\cod3\\ENTITYNUM_NONE\\src\\game\\turret.cpp", 935, 0, "%s", "missTime >= 0");
     turret_SetTargetEnt(self, enemy->ent);
     if (!turret_CanTargetSentient(self, enemy, &v35, (float *)&v33, desiredAngles))
         return 0;
     pTurretInfo = self->pTurretInfo;
     if (!pTurretInfo)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\turret.cpp", 943, 0, "%s", "pTurretInfo");
+        MyAssertHandler("c:\\trees\\cod3\\ENTITYNUM_NONE\\src\\game\\turret.cpp", 943, 0, "%s", "pTurretInfo");
     targetTime = pTurretInfo->targetTime;
     if (pTurretInfo->convergenceTime[1] - level.time + targetTime > 0)
     {
@@ -1211,9 +1211,9 @@ int __cdecl turret_isTargetTooCloseToPlayer(
 
     Player = G_GetPlayer();
     if (!Player->sentient)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\turret.cpp", 1099, 0, "%s", "player->sentient");
+        MyAssertHandler("c:\\trees\\cod3\\ENTITYNUM_NONE\\src\\game\\turret.cpp", 1099, 0, "%s", "player->sentient");
     if (!turret->pTurretInfo)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\turret.cpp", 1100, 0, "%s", "turret->pTurretInfo");
+        MyAssertHandler("c:\\trees\\cod3\\ENTITYNUM_NONE\\src\\game\\turret.cpp", 1100, 0, "%s", "turret->pTurretInfo");
     if (Player->sentient->eTeam != turret->pTurretInfo->eTeam)
         return 0;
     v7 = (float)((float)(Player->r.currentOrigin[1] + (float)((float)(Player->r.maxs[1] + Player->r.mins[1]) * (float)0.5))
@@ -1312,12 +1312,12 @@ int __cdecl turret_isTargetVisible(gentity_s *self, const gentity_s *target, flo
     float v15[4]; // [sp+70h] [-50h] BYREF
 
     if (!target)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\turret.cpp", 1143, 0, "%s", "target");
+        MyAssertHandler("c:\\trees\\cod3\\ENTITYNUM_NONE\\src\\game\\turret.cpp", 1143, 0, "%s", "target");
     if (!self)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\turret.cpp", 1144, 0, "%s", "self");
+        MyAssertHandler("c:\\trees\\cod3\\ENTITYNUM_NONE\\src\\game\\turret.cpp", 1144, 0, "%s", "self");
     pTurretInfo = self->pTurretInfo;
     if (!pTurretInfo)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\turret.cpp", 1147, 0, "%s", "turretInfo");
+        MyAssertHandler("c:\\trees\\cod3\\ENTITYNUM_NONE\\src\\game\\turret.cpp", 1147, 0, "%s", "turretInfo");
     if (target->client && G_IsPlayerDrivingVehicle(target))
         return 0;
     v8 = (float)(target->r.currentOrigin[0] - self->r.currentOrigin[0]);
@@ -1369,7 +1369,7 @@ sentient_s *__cdecl turret_findBestTarget(gentity_s *self)
 
     pTurretInfo = self->pTurretInfo;
     if (!pTurretInfo)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\turret.cpp", 1205, 0, "%s", "pTurretInfo");
+        MyAssertHandler("c:\\trees\\cod3\\ENTITYNUM_NONE\\src\\game\\turret.cpp", 1205, 0, "%s", "pTurretInfo");
     sentient = 0;
     if ((pTurretInfo->flags & 0x40) != 0 && pTurretInfo->target.isDefined() && pTurretInfo->target.ent()->sentient)
     {
@@ -1422,10 +1422,10 @@ void __cdecl turret_think_auto_nonai(gentity_s *self)
     float v7[16]; // [sp+50h] [-40h] BYREF
 
     if (!self)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\turret.cpp", 1272, 0, "%s", "self");
+        MyAssertHandler("c:\\trees\\cod3\\ENTITYNUM_NONE\\src\\game\\turret.cpp", 1272, 0, "%s", "self");
     pTurretInfo = self->pTurretInfo;
     if (!pTurretInfo)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\turret.cpp", 1275, 0, "%s", "turretInfo");
+        MyAssertHandler("c:\\trees\\cod3\\ENTITYNUM_NONE\\src\\game\\turret.cpp", 1275, 0, "%s", "turretInfo");
     BestTarget = turret_findBestTarget(self);
     if (pTurretInfo->manualTarget.isDefined())
         v4 = pTurretInfo->manualTarget.ent();
@@ -1453,7 +1453,7 @@ void __cdecl turret_think_auto_nonai(gentity_s *self)
     LABEL_17:
         turret_ClearTargetEnt(self);
         if (!self->pTurretInfo)
-            MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\turret.cpp", 651, 0, "%s", "pTurretInfo");
+            MyAssertHandler("c:\\trees\\cod3\\ENTITYNUM_NONE\\src\\game\\turret.cpp", 651, 0, "%s", "pTurretInfo");
         v7[0] = 0.0;
         v7[1] = 0.0;
         turret_SetState(self, 0);
@@ -1509,7 +1509,7 @@ int __cdecl turret_think_auto(gentity_s *self, actor_s *actor)
 
     pTurretInfo = self->pTurretInfo;
     if (!pTurretInfo)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\turret.cpp", 1337, 0, "%s", "pTurretInfo");
+        MyAssertHandler("c:\\trees\\cod3\\ENTITYNUM_NONE\\src\\game\\turret.cpp", 1337, 0, "%s", "pTurretInfo");
     if ((pTurretInfo->flags & 0x20) == 0
         || pTurretInfo->originError[0] != 0.0
         || pTurretInfo->originError[1] != 0.0
@@ -1517,7 +1517,7 @@ int __cdecl turret_think_auto(gentity_s *self, actor_s *actor)
     {
         v35 = self->pTurretInfo;
         if (!v35)
-            MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\turret.cpp", 651, 0, "%s", "pTurretInfo");
+            MyAssertHandler("c:\\trees\\cod3\\ENTITYNUM_NONE\\src\\game\\turret.cpp", 651, 0, "%s", "pTurretInfo");
         v37[0] = v35->dropPitch;
         v37[1] = 0.0;
         turret_SetState(self, 0);
@@ -1735,7 +1735,7 @@ int __cdecl turret_think_manual(gentity_s *self, actor_s *actor)
 
     pTurretInfo = self->pTurretInfo;
     if (!pTurretInfo)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\turret.cpp", 1543, 0, "%s", "pTurretInfo");
+        MyAssertHandler("c:\\trees\\cod3\\ENTITYNUM_NONE\\src\\game\\turret.cpp", 1543, 0, "%s", "pTurretInfo");
     if (!actor)
         goto LABEL_15;
     if ((pTurretInfo->flags & 0x20) != 0
@@ -1807,7 +1807,7 @@ int __cdecl turret_think_manual(gentity_s *self, actor_s *actor)
     }
     v20 = self->pTurretInfo;
     if (!v20)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\turret.cpp", 651, 0, "%s", "pTurretInfo");
+        MyAssertHandler("c:\\trees\\cod3\\ENTITYNUM_NONE\\src\\game\\turret.cpp", 651, 0, "%s", "pTurretInfo");
     v22[0] = v20->dropPitch;
     v22[1] = 0.0;
     turret_SetState(self, 0);
@@ -1837,7 +1837,7 @@ void __cdecl turret_RestoreDefaultDropPitch(gentity_s *self)
 
     pTurretInfo = self->pTurretInfo;
     if (!pTurretInfo)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\turret.cpp", 1637, 0, "%s", "pTurretInfo");
+        MyAssertHandler("c:\\trees\\cod3\\ENTITYNUM_NONE\\src\\game\\turret.cpp", 1637, 0, "%s", "pTurretInfo");
     LocalTagMatrix = G_DObjGetLocalTagMatrix(self, scr_const.tag_aim);
     if (LocalTagMatrix)
     {
@@ -1889,7 +1889,7 @@ void __cdecl turret_think(gentity_s *self)
 
     pTurretInfo = self->pTurretInfo;
     if (!pTurretInfo)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\turret.cpp", 1688, 0, "%s", "pTurretInfo");
+        MyAssertHandler("c:\\trees\\cod3\\ENTITYNUM_NONE\\src\\game\\turret.cpp", 1688, 0, "%s", "pTurretInfo");
     tagInfo = self->tagInfo;
     self->nextthink = level.time + 50;
     self->s.lerp.u.turret.gunAngles[2] = 0.0;
@@ -1930,7 +1930,7 @@ void __cdecl turret_think(gentity_s *self)
     }
     if ((flags & 2) != 0)
         MyAssertHandler(
-            "c:\\trees\\cod3\\cod3src\\src\\game\\turret.cpp",
+            "c:\\trees\\cod3\\ENTITYNUM_NONE\\src\\game\\turret.cpp",
             1726,
             0,
             "%s",
@@ -1946,13 +1946,13 @@ bool __cdecl Actor_IsTurretCloserThenCurrent(actor_s *actor, gentity_s *turret)
     double v4; // fp31
 
     if (!turret)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\turret.cpp", 1745, 0, "%s", "turret");
+        MyAssertHandler("c:\\trees\\cod3\\ENTITYNUM_NONE\\src\\game\\turret.cpp", 1745, 0, "%s", "turret");
     if (!actor)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\turret.cpp", 1746, 0, "%s", "actor");
+        MyAssertHandler("c:\\trees\\cod3\\ENTITYNUM_NONE\\src\\game\\turret.cpp", 1746, 0, "%s", "actor");
     if (!actor->pTurret)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\turret.cpp", 1747, 0, "%s", "actor->pTurret");
+        MyAssertHandler("c:\\trees\\cod3\\ENTITYNUM_NONE\\src\\game\\turret.cpp", 1747, 0, "%s", "actor->pTurret");
     if (actor->pTurret == turret)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\turret.cpp", 1748, 0, "%s", "actor->pTurret != turret");
+        MyAssertHandler("c:\\trees\\cod3\\ENTITYNUM_NONE\\src\\game\\turret.cpp", 1748, 0, "%s", "actor->pTurret != turret");
     v4 = Vec2DistanceSq(actor->ent->r.currentOrigin, turret->r.currentOrigin);
     return Vec2DistanceSq(actor->ent->r.currentOrigin, actor->pTurret->r.currentOrigin) < v4;
 }
@@ -2041,9 +2041,9 @@ bool __cdecl turret_canuse_manual(gentity_s *self, actor_s *actor)
     double v8; // fp12
 
     if (!actor)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\turret.cpp", 1852, 0, "%s", "actor");
+        MyAssertHandler("c:\\trees\\cod3\\ENTITYNUM_NONE\\src\\game\\turret.cpp", 1852, 0, "%s", "actor");
     if (!self->pTurretInfo)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\turret.cpp", 1855, 0, "%s", "pTurretInfo");
+        MyAssertHandler("c:\\trees\\cod3\\ENTITYNUM_NONE\\src\\game\\turret.cpp", 1855, 0, "%s", "pTurretInfo");
     TargetSentient = Actor_GetTargetSentient(actor);
     result = !TargetSentient
         || (v6 = (float)(actor->ent->r.currentOrigin[0] - TargetSentient->ent->r.currentOrigin[0]),
@@ -2060,12 +2060,12 @@ bool __cdecl turret_canuse(actor_s *actor, gentity_s *pTurret)
     TurretInfo *pTurretInfo; // r27
 
     if (!pTurret)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\turret.cpp", 1878, 0, "%s", "pTurret");
+        MyAssertHandler("c:\\trees\\cod3\\ENTITYNUM_NONE\\src\\game\\turret.cpp", 1878, 0, "%s", "pTurret");
     if (!actor)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\turret.cpp", 1879, 0, "%s", "actor");
+        MyAssertHandler("c:\\trees\\cod3\\ENTITYNUM_NONE\\src\\game\\turret.cpp", 1879, 0, "%s", "actor");
     pTurretInfo = pTurret->pTurretInfo;
     if (!pTurretInfo)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\turret.cpp", 1882, 0, "%s", "pTurretInfo");
+        MyAssertHandler("c:\\trees\\cod3\\ENTITYNUM_NONE\\src\\game\\turret.cpp", 1882, 0, "%s", "pTurretInfo");
     if ((unsigned __int8)Actor_IsUsingTurret(actor) && actor->pTurret == pTurret)
         return 1;
     if (pTurret->active)
@@ -2094,7 +2094,7 @@ void __cdecl turret_controller(const gentity_s *self, int *partBits)
     v11 = 0.0;
     ServerDObj = Com_GetServerDObj(number);
     if (!ServerDObj)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\turret.cpp", 1906, 0, "%s", "obj");
+        MyAssertHandler("c:\\trees\\cod3\\ENTITYNUM_NONE\\src\\game\\turret.cpp", 1906, 0, "%s", "obj");
     v8[0] = -2;
     DObjGetBoneIndex(ServerDObj, scr_const.tag_aim, v8);
     DObjSetControlTagAngles(ServerDObj, partBits, v8[0], &v9);
@@ -2192,7 +2192,7 @@ bool __cdecl G_IsTurretUsable(gentity_s *self, gentity_s *owner)
 
     pTurretInfo = self->pTurretInfo;
     if (!pTurretInfo)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\turret.cpp", 2015, 0, "%s", "pTurretInfo");
+        MyAssertHandler("c:\\trees\\cod3\\ENTITYNUM_NONE\\src\\game\\turret.cpp", 2015, 0, "%s", "pTurretInfo");
     if ((pTurretInfo->flags & 0x1000) != 0
         && !self->active
         && self->pTurretInfo
@@ -2616,14 +2616,14 @@ void __cdecl G_SpawnTurret(gentity_s *self, const char *weaponinfoname)
     number = self->r.ownerNum.number;
     if (self->r.ownerNum.number && !g_entities[number - 1].r.inuse)
         MyAssertHandler(
-            "c:\\trees\\cod3\\cod3src\\src\\game\\g_public.h",
+            "c:\\trees\\cod3\\ENTITYNUM_NONE\\src\\game\\g_public.h",
             336,
             0,
             "%s\n\t(number - 1) = %i",
             "(!number || g_entities[number - 1].r.inuse)",
             number - 1);
     if (self->r.ownerNum.number)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\turret.cpp", 2308, 0, "%s", "!self->r.ownerNum.isDefined()");
+        MyAssertHandler("c:\\trees\\cod3\\ENTITYNUM_NONE\\src\\game\\turret.cpp", 2308, 0, "%s", "!self->r.ownerNum.isDefined()");
     SV_LinkEntity(self);
 }
 
@@ -2689,7 +2689,7 @@ void __cdecl turret_think_client(gentity_s *self)
     if (owner->active == 1 && owner->health > 0)
     {
         if (!self->active)
-            MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\turret.cpp", 501, 0, "%s", "self->active");
+            MyAssertHandler("c:\\trees\\cod3\\ENTITYNUM_NONE\\src\\game\\turret.cpp", 501, 0, "%s", "self->active");
         turret_track(self, owner);
         turret_UpdateSound(self);
     }
@@ -2705,10 +2705,10 @@ void __cdecl turret_think_init(gentity_s *self)
     int time; // r11
 
     if (!self)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\turret.cpp", 1611, 0, "%s", "self");
+        MyAssertHandler("c:\\trees\\cod3\\ENTITYNUM_NONE\\src\\game\\turret.cpp", 1611, 0, "%s", "self");
     if (self->handler != 20)
         MyAssertHandler(
-            "c:\\trees\\cod3\\cod3src\\src\\game\\turret.cpp",
+            "c:\\trees\\cod3\\ENTITYNUM_NONE\\src\\game\\turret.cpp",
             1612,
             0,
             "%s",
@@ -2721,7 +2721,7 @@ void __cdecl turret_think_init(gentity_s *self)
     if (tagInfo)
         G_GeneralLink(self);
     if (!self->pTurretInfo)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\turret.cpp", 1621, 0, "%s", "self->pTurretInfo");
+        MyAssertHandler("c:\\trees\\cod3\\ENTITYNUM_NONE\\src\\game\\turret.cpp", 1621, 0, "%s", "self->pTurretInfo");
     if (self->pTurretInfo->dropPitch == -90.0)
         turret_RestoreDefaultDropPitch(self);
 }
@@ -2740,7 +2740,7 @@ void __cdecl G_FreeTurret(gentity_s *self)
         v3 = &g_entities[2175];
     pTurretInfo = self->pTurretInfo;
     if (!pTurretInfo)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\turret.cpp", 1992, 0, "%s", "pTurretInfo");
+        MyAssertHandler("c:\\trees\\cod3\\ENTITYNUM_NONE\\src\\game\\turret.cpp", 1992, 0, "%s", "pTurretInfo");
     if (v3->client)
     {
         G_ClientStopUsingTurret(self);

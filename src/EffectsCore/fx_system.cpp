@@ -1586,7 +1586,7 @@ void __cdecl FX_SpawnElem(
         case 9u:
             if (effect->boltAndSortOrder.boneIndex != 0x7FF || effect->boltAndSortOrder.dobjHandle == 0xFFF)
             {
-                FX_CreateImpactMark(system->localClientNum, elemDef, effectFrameWhenPlayed, randomSeed, 0x3FFu);
+                FX_CreateImpactMark(system->localClientNum, elemDef, effectFrameWhenPlayed, randomSeed, ENTITYNUM_NONE);
             }
             else
             {
@@ -1752,7 +1752,7 @@ void __cdecl FX_SpawnRunner(
                 2047,
                 v6,
                 effect->owner,
-                0x3FFu);
+                ENTITYNUM_NONE);
         else
             spawnedEffect = FX_SpawnEffect(
                 system,
@@ -1778,7 +1778,7 @@ void __cdecl FX_SpawnRunner(
             effect->boltAndSortOrder.boneIndex,
             v6,
             effect->owner,
-            0x3FFu);
+            ENTITYNUM_NONE);
     }
     if (spawnedEffect)
         FX_DelRefToEffect(system, spawnedEffect);
@@ -1903,7 +1903,7 @@ void __cdecl FX_SpawnSound(
         if (SND_AnyActiveListeners())
         {
             if (Sys_IsMainThread())
-                CG_PlaySoundAlias(localClientNumber, 1022, spawnOrigin, alias_list);
+                CG_PlaySoundAlias(localClientNumber, ENTITYNUM_WORLD, spawnOrigin, alias_list);
             else
                 CG_AddFXSoundAlias(localClientNumber, spawnOrigin, alias_list);
         }

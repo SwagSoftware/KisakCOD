@@ -127,10 +127,8 @@ void __cdecl G_GetPlayerViewOrigin(const playerState_s *ps, float *origin)
 {
     if ((ps->eFlags & 0x300) != 0)
     {
-        if (ps->viewlocked == PLAYERVIEWLOCK_NONE)
-            MyAssertHandler(".\\game_mp\\g_client_mp.cpp", 97, 0, "%s", "ps->viewlocked");
-        if (ps->viewlocked_entNum == 1023)
-            MyAssertHandler(".\\game_mp\\g_client_mp.cpp", 98, 0, "%s", "ps->viewlocked_entNum != ENTITYNUM_NONE");
+        iassert(ps->viewlocked);
+        iassert(ps->viewlocked_entNum != ENTITYNUM_NONE);
         if (!G_DObjGetWorldTagPos(&g_entities[ps->viewlocked_entNum], scr_const.tag_player, origin))
             Com_Error(ERR_DROP, "G_GetPlayerViewOrigin: Couldn't find [tag_player] on turret");
     }
@@ -354,7 +352,7 @@ void __cdecl ClientSpawn(gentity_s *ent, const float *spawn_origin, const float 
     G_EntUnlink(ent);
     if (ent->r.linked)
         SV_UnlinkEntity(ent);
-    ent->s.groundEntityNum = 1023;
+    ent->s.groundEntityNum = ENTITYNUM_NONE;
     Scr_SetString(&ent->classname, scr_const.player);
     ent->clipmask = 0x2810011;
     ent->r.svFlags |= 1u;
@@ -381,9 +379,9 @@ void __cdecl ClientSpawn(gentity_s *ent, const float *spawn_origin, const float 
     client->ps.stats[2] = client->sess.maxHealth;
     client->ps.eFlags = iFlags;
     client->sess.cs.clientIndex = index;
-    client->sess.cs.attachedVehEntNum = 1023;
+    client->sess.cs.attachedVehEntNum = ENTITYNUM_NONE;
     client->ps.clientNum = index;
-    client->ps.viewlocked_entNum = 1023;
+    client->ps.viewlocked_entNum = ENTITYNUM_NONE;
     SV_GetUsercmd(client - level.clients, &client->sess.cmd);
     client->ps.eFlags ^= 2u;
     client->ps.viewHeightTarget = 60;
@@ -394,7 +392,7 @@ void __cdecl ClientSpawn(gentity_s *ent, const float *spawn_origin, const float 
     client->ps.spreadOverride = 0;
     client->ps.spreadOverrideState = 0;
     client->ps.throwBackGrenadeTimeLeft = 0;
-    client->ps.throwBackGrenadeOwner = 1023;
+    client->ps.throwBackGrenadeOwner = ENTITYNUM_NONE;
     G_SetOrigin(ent, spawn_origin);
     client->ps.origin[0] = *spawn_origin;
     client->ps.origin[1] = spawn_origin[1];
@@ -477,7 +475,7 @@ uint32_t __cdecl G_GetNonPVSPlayerInfo(gentity_s *pSelf, float *vPosition, int32
     v4 = g_compassShowEnemies->current.enabled || level.teamHasRadar[team] || pSelf->client->hasRadar;
     if (team == TEAM_FREE && !v4)
         return 0;
-    if (iLastUpdateEnt == 1023)
+    if (iLastUpdateEnt == ENTITYNUM_NONE)
         iBaseEnt = 0;
     else
         iBaseEnt = iLastUpdateEnt + 1;

@@ -489,7 +489,7 @@ void __cdecl CG_EntityEvent(int32_t localClientNum, centity_s *cent, int32_t eve
                         ent->surfType,
                         29);
                 if (weaponDef->bounceSound)
-                    CG_PlaySoundAlias(localClientNum, 1022, position, weaponDef->bounceSound[ent->surfType]);
+                    CG_PlaySoundAlias(localClientNum, ENTITYNUM_WORLD, position, weaponDef->bounceSound[ent->surfType]);
                 if (cgMedia.fx->table[8].nonflesh[ent->surfType])
                 {
                     ByteToDir(ent->eventParm, axis[0]);
@@ -530,11 +530,11 @@ void __cdecl CG_EntityEvent(int32_t localClientNum, centity_s *cent, int32_t eve
                 if (fx)
                     FX_PlayOrientedEffect(localClientNum, fx, cgameGlob->time, position, axis);
                 if (snd)
-                    CG_PlaySoundAlias(localClientNum, 1022, position, snd);
+                    CG_PlaySoundAlias(localClientNum, ENTITYNUM_WORLD, position, snd);
                 if (weaponDef->projExplosionEffect)
                     FX_PlayOrientedEffect(localClientNum, weaponDef->projExplosionEffect, cgameGlob->time, position, axis);
                 if (weaponDef->projExplosionSound)
-                    CG_PlaySoundAlias(localClientNum, 1022, position, weaponDef->projExplosionSound);
+                    CG_PlaySoundAlias(localClientNum, ENTITYNUM_WORLD, position, weaponDef->projExplosionSound);
                 return;
             case EV_ROCKET_EXPLODE:
                 goto $LN48_1;
@@ -568,11 +568,11 @@ void __cdecl CG_EntityEvent(int32_t localClientNum, centity_s *cent, int32_t eve
                 if (outFx)
                     FX_PlayOrientedEffect(localClientNum, outFx, cgameGlob->time, position, axis);
                 if (outSnd)
-                    CG_PlaySoundAlias(localClientNum, 1022, position, outSnd);
+                    CG_PlaySoundAlias(localClientNum, ENTITYNUM_WORLD, position, outSnd);
                 if (weaponDef->projExplosionEffect)
                     FX_PlayOrientedEffect(localClientNum, weaponDef->projExplosionEffect, cgameGlob->time, position, axis);
                 if (weaponDef->projExplosionSound)
-                    CG_PlaySoundAlias(localClientNum, 1022, position, weaponDef->projExplosionSound);
+                    CG_PlaySoundAlias(localClientNum, ENTITYNUM_WORLD, position, weaponDef->projExplosionSound);
                 cgameGlob->nomarks = 0;
                 return;
             case EV_FLASHBANG_EXPLODE:
@@ -581,7 +581,7 @@ void __cdecl CG_EntityEvent(int32_t localClientNum, centity_s *cent, int32_t eve
                 if (weaponDef->projExplosionEffect)
                     FX_PlayOrientedEffect(localClientNum, weaponDef->projExplosionEffect, cgameGlob->time, position, axis);
                 if (weaponDef->projExplosionSound)
-                    CG_PlaySoundAlias(localClientNum, 1022, position, weaponDef->projExplosionSound);
+                    CG_PlaySoundAlias(localClientNum, ENTITYNUM_WORLD, position, weaponDef->projExplosionSound);
                 return;
             case EV_CUSTOM_EXPLODE:
                 goto $LN37_1;
@@ -607,7 +607,7 @@ void __cdecl CG_EntityEvent(int32_t localClientNum, centity_s *cent, int32_t eve
                 if (def)
                     FX_PlayOrientedEffect(localClientNum, def, cgameGlob->time, position, axis);
                 if (v30)
-                    CG_PlaySoundAlias(localClientNum, 1022, position, v30);
+                    CG_PlaySoundAlias(localClientNum, ENTITYNUM_WORLD, position, v30);
                 if (weaponDef->projExplosionEffect)
                 {
                     Com_Printf(
@@ -627,7 +627,7 @@ void __cdecl CG_EntityEvent(int32_t localClientNum, centity_s *cent, int32_t eve
                 if (weaponDef->projExplosionSound
                     && ((ent->lerp.eFlags & 0x10000) == 0 || cgameGlob->time - ent->lerp.u.missile.launchTime < 200))
                 {
-                    CG_PlaySoundAlias(localClientNum, 1022, position, weaponDef->projExplosionSound);
+                    CG_PlaySoundAlias(localClientNum, ENTITYNUM_WORLD, position, weaponDef->projExplosionSound);
                 }
                 cgameGlob->nomarks = 0;
                 return;
@@ -650,7 +650,7 @@ void __cdecl CG_EntityEvent(int32_t localClientNum, centity_s *cent, int32_t eve
                         29);
                 ByteToDir(ent->eventParm, axis[0]);
                 Vec3Basis_RightHanded(axis[0], axis[1], axis[2]);
-                CG_PlaySoundAlias(localClientNum, 1022, position, cgMedia.bulletHitLargeSound[ent->surfType]);
+                CG_PlaySoundAlias(localClientNum, ENTITYNUM_WORLD, position, cgMedia.bulletHitLargeSound[ent->surfType]);
                 if (cgMedia.fx->table[11].nonflesh[ent->surfType])
                     FX_PlayOrientedEffect(
                         localClientNum,
@@ -661,11 +661,11 @@ void __cdecl CG_EntityEvent(int32_t localClientNum, centity_s *cent, int32_t eve
                 if (weaponDef->projExplosionEffect)
                     FX_PlayOrientedEffect(localClientNum, weaponDef->projExplosionEffect, cgameGlob->time, position, axis);
                 if (weaponDef->projExplosionSound)
-                    CG_PlaySoundAlias(localClientNum, 1022, position, weaponDef->projExplosionSound);
+                    CG_PlaySoundAlias(localClientNum, ENTITYNUM_WORLD, position, weaponDef->projExplosionSound);
                 if (weaponDef->projDudEffect)
                     FX_PlayOrientedEffect(localClientNum, weaponDef->projDudEffect, cgameGlob->time, position, axis);
                 if (weaponDef->projDudSound)
-                    CG_PlaySoundAlias(localClientNum, 1022, position, weaponDef->projDudSound);
+                    CG_PlaySoundAlias(localClientNum, ENTITYNUM_WORLD, position, weaponDef->projDudSound);
                 return;
             case EV_DUD_IMPACT:
                 if (ent->surfType >= 0x1Du)
@@ -678,7 +678,7 @@ void __cdecl CG_EntityEvent(int32_t localClientNum, centity_s *cent, int32_t eve
                         29);
                 ByteToDir(ent->eventParm, axis[0]);
                 Vec3Basis_RightHanded(axis[0], axis[1], axis[2]);
-                CG_PlaySoundAlias(localClientNum, 1022, position, cgMedia.bulletHitLargeSound[ent->surfType]);
+                CG_PlaySoundAlias(localClientNum, ENTITYNUM_WORLD, position, cgMedia.bulletHitLargeSound[ent->surfType]);
                 if (cgMedia.fx->table[11].nonflesh[ent->surfType])
                     FX_PlayOrientedEffect(
                         localClientNum,
@@ -689,7 +689,7 @@ void __cdecl CG_EntityEvent(int32_t localClientNum, centity_s *cent, int32_t eve
                 if (weaponDef->projDudEffect)
                     FX_PlayOrientedEffect(localClientNum, weaponDef->projDudEffect, cgameGlob->time, position, axis);
                 if (weaponDef->projDudSound)
-                    CG_PlaySoundAlias(localClientNum, 1022, position, weaponDef->projDudSound);
+                    CG_PlaySoundAlias(localClientNum, ENTITYNUM_WORLD, position, weaponDef->projDudSound);
                 return;
             case EV_PLAY_FX:
                 CG_PlayFx(localClientNum, cent, ent->lerp.apos.trBase);
@@ -1052,7 +1052,7 @@ void __cdecl CG_Obituary(int32_t localClientNum, const entityState_s *ent)
             }
             else
             {
-                attacker = 1022;
+                attacker = ENTITYNUM_WORLD;
                 attackerCI = 0;
                 attackerName[0] = 0;
                 attackerColor = 55;

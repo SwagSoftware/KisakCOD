@@ -1001,10 +1001,9 @@ int __cdecl BG_ParseWeaponDefSpecificFieldType(unsigned __int8 *pStruct, const c
     const char *token; // [esp+8Ch] [ebp-8h]
     WeaponDef *weapDef; // [esp+90h] [ebp-4h]
 
-    if (!pStruct)
-        MyAssertHandler(".\\bgame\\bg_weapons_load_obj.cpp", 1023, 0, "%s", "pStruct");
-    if (!pValue)
-        MyAssertHandler(".\\bgame\\bg_weapons_load_obj.cpp", 1024, 0, "%s", "pValue");
+    iassert(pStruct);
+    iassert(pValue);
+
     weapDef = (WeaponDef *)pStruct;
     switch (iFieldType)
     {

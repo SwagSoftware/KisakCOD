@@ -1714,7 +1714,7 @@ void __cdecl CG_CompassDrawTickertape(
                 if (objective->state == OBJST_CURRENT || objective->state == OBJST_ACTIVE)
                 {
 #ifdef KISAK_MP
-                    if (objective->entNum == 1023)
+                    if (objective->entNum == ENTITYNUM_NONE)
                     {
                         goalOrig = objective->origin;
                     }
@@ -1971,7 +1971,7 @@ void __cdecl CG_CompassDrawPlayerPointers_MP(
                 obj = &ps->objective[objNum];
                 if (obj->state == OBJST_CURRENT || obj->state == OBJST_ACTIVE)
                 {
-                    if (obj->entNum == 1023)
+                    if (obj->entNum == ENTITYNUM_NONE)
                     {
                         origin[0] = obj->origin[0];
                         origin[1] = obj->origin[1];

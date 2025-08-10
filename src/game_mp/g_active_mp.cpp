@@ -383,7 +383,7 @@ void __cdecl HandleClientEvent(gclient_s *client, gentity_s *ent, int32_t event,
         {
             ent->health = 0;
             ent->client->ps.stats[0] = 0;
-            if (ent->client->ps.throwBackGrenadeOwner == 1023)
+            if (ent->client->ps.throwBackGrenadeOwner == ENTITYNUM_NONE)
             {
                 player_die(ent, ent, ent, 100000, 12, eventParm, 0, HITLOC_NONE, 0);
             }
@@ -440,7 +440,7 @@ void __cdecl AttemptLiveGrenadePickup(gentity_s *clientEnt)
                 if (grenadeEnt->parent.isDefined())
                     clientEnt->client->ps.throwBackGrenadeOwner = grenadeEnt->parent.entnum();
                 else
-                    clientEnt->client->ps.throwBackGrenadeOwner = 1022;
+                    clientEnt->client->ps.throwBackGrenadeOwner = ENTITYNUM_WORLD;
                 clientEnt->client->ps.grenadeTimeLeft = clientEnt->client->ps.throwBackGrenadeTimeLeft;
                 touch(grenadeEnt, clientEnt, 0);
                 if (!clientEnt->client->ps.throwBackGrenadeTimeLeft)
@@ -931,7 +931,7 @@ void __cdecl SpectatorClientEndFrame(gentity_s *ent)
             if (SV_GetArchivedClientInfo(client->sess.forceSpectatorClient, &pArchiveTime, &ps, &v3))
             {
                 if (client->sess.killCamEntity == -1)
-                    ps.killCamEntity = 1023;
+                    ps.killCamEntity = ENTITYNUM_NONE;
                 else
                     ps.killCamEntity = client->sess.killCamEntity;
                 if ((ps.otherFlags & 4) == 0)
@@ -1258,7 +1258,7 @@ void __cdecl ClientEndFrame(gentity_s *ent)
             }
             else
             {
-                client->iLastCompassPlayerInfoEnt = 1023;
+                client->iLastCompassPlayerInfoEnt = ENTITYNUM_NONE;
             }
             if (ent->s.eType == 1)
             {
@@ -1295,15 +1295,8 @@ void __cdecl ClientEndFrame(gentity_s *ent)
                 }
                 if ((client->ps.otherFlags & 4) != 0 && (client->ps.eFlags & 0x300) != 0)
                 {
-                    if (client->ps.clientNum != ent->s.number)
-                        MyAssertHandler(".\\game_mp\\g_active_mp.cpp", 1691, 0, "%s", "client->ps.clientNum == ent->s.number");
-                    if (client->ps.viewlocked_entNum == 1023)
-                        MyAssertHandler(
-                            ".\\game_mp\\g_active_mp.cpp",
-                            1692,
-                            0,
-                            "%s",
-                            "client->ps.viewlocked_entNum != ENTITYNUM_NONE");
+                    iassert(client->ps.clientNum == ent->s.number);
+                    iassert(client->ps.viewlocked_entNum != ENTITYNUM_NONE);
                     if (!level.gentities[client->ps.viewlocked_entNum].r.ownerNum.isDefined() || level.gentities[client->ps.viewlocked_entNum].r.ownerNum.ent() != ent)
                     {
                         if (level.gentities[client->ps.viewlocked_entNum].r.ownerNum.isDefined())
@@ -1320,7 +1313,7 @@ void __cdecl ClientEndFrame(gentity_s *ent)
                             v4 = va(
                                 "viewlocked_entNum is %i, ownerNum is %i, ent->s.number is %i",
                                 client->ps.viewlocked_entNum,
-                                1023,
+                                ENTITYNUM_NONE,
                                 ent->s.number);
                         }
                         MyAssertHandler(
@@ -1472,13 +1465,13 @@ int32_t __cdecl G_UpdateClientInfo(gentity_s *ent)
         else
         {
             Com_PrintWarning(16, "G_UpdateClientInfo(): Veh attached, but no ownerNum\n");
-            client->sess.cs.attachedVehEntNum = 1023;
+            client->sess.cs.attachedVehEntNum = ENTITYNUM_NONE;
             client->sess.cs.attachedVehSlotIndex = 0;
         }
     }
     else
     {
-        client->sess.cs.attachedVehEntNum = 1023;
+        client->sess.cs.attachedVehEntNum = ENTITYNUM_NONE;
         client->sess.cs.attachedVehSlotIndex = 0;
     }
     return bChanged;

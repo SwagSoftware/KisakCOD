@@ -94,8 +94,8 @@ int Cmd_LocalClientNum();
 #ifdef KISAK_SP
 void Cmd_RegisterNotification(const char *commandString, const char *notifyString);
 void Cmd_CheckNotify();
-void Cmd_LoadNotifications(MemoryFile *memFile);
-void Cmd_SaveNotifications(MemoryFile *memFile);
+void Cmd_LoadNotifications(struct MemoryFile *memFile);
+void Cmd_SaveNotifications(struct MemoryFile *memFile);
 void Cmd_UnregisterAllNotifications();
 #endif
 

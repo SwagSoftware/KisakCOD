@@ -155,6 +155,9 @@ typedef int		clipHandle_t;
 #define	MAX_GENTITIES		(1024) // 0x400
 #endif
 
+#define ENTITYNUM_WORLD (MAX_GENTITIES - 2)
+#define ENTITYNUM_NONE (MAX_GENTITIES - 1)
+
 // paramters for command buffer stuffing
 typedef enum {
 	EXEC_NOW,			// don't return until completed, a VM should NEVER use this,

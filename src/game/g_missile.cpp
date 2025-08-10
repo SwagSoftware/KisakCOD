@@ -259,7 +259,7 @@ void __cdecl G_ExplodeMissile(gentity_s *ent)
     weapDef = BG_GetWeaponDef(ent->s.weapon);
     if (!weapDef)
         MyAssertHandler(".\\game\\g_missile.cpp", 739, 0, "%s", "weapDef");
-    if (weapDef->offhandClass == OFFHAND_CLASS_SMOKE_GRENADE && ent->s.groundEntityNum == 1023)
+    if (weapDef->offhandClass == OFFHAND_CLASS_SMOKE_GRENADE && ent->s.groundEntityNum == ENTITYNUM_NONE)
     {
         if (level.time - ent->item[0].clipAmmoCount <= 60000)
         {
@@ -322,7 +322,7 @@ void __cdecl G_ExplodeMissile(gentity_s *ent)
             else
             {
                 G_SetOrigin(eventEnt, ent->r.currentOrigin);
-                if (weapDef->stickiness == WEAPSTICKINESS_ALL && ent->s.groundEntityNum != 1023)
+                if (weapDef->stickiness == WEAPSTICKINESS_ALL && ent->s.groundEntityNum != ENTITYNUM_NONE)
                 {
                     Vec3Mad(ent->r.currentOrigin, -16.0, &ent->mover.aSpeed, end);
                 }
@@ -554,7 +554,7 @@ void __cdecl Scr_MissileCreateAttractorOrigin()
 
     attractorIndex = Missile_GetFreeAttractor();
     attrGlob.attractors[attractorIndex].isAttractor = 1;
-    attrGlob.attractors[attractorIndex].entnum = 1023;
+    attrGlob.attractors[attractorIndex].entnum = ENTITYNUM_NONE;
     Scr_GetVector(0, attrGlob.attractors[attractorIndex].origin);
     attrGlob.attractors[attractorIndex].strength = Scr_GetFloat(1);
     attrGlob.attractors[attractorIndex].maxDist = Scr_GetFloat(2);
@@ -585,7 +585,7 @@ void __cdecl Scr_MissileCreateRepulsorOrigin()
 
     attractorIndex = Missile_GetFreeAttractor();
     attrGlob.attractors[attractorIndex].isAttractor = 0;
-    attrGlob.attractors[attractorIndex].entnum = 1023;
+    attrGlob.attractors[attractorIndex].entnum = ENTITYNUM_NONE;
     Scr_GetVector(0, attrGlob.attractors[attractorIndex].origin);
     attrGlob.attractors[attractorIndex].strength = Scr_GetFloat(1);
     attrGlob.attractors[attractorIndex].maxDist = Scr_GetFloat(2);
@@ -687,7 +687,7 @@ void __cdecl G_RunMissile(gentity_s *ent)
     weapDef = BG_GetWeaponDef(ent->s.weapon);
     if (!weapDef)
         MyAssertHandler(".\\game\\g_missile.cpp", 2088, 0, "%s", "weapDef");
-    if (ent->s.groundEntityNum != 1023 && ent->s.groundEntityNum != 1022 && weapDef->stickiness == WEAPSTICKINESS_ALL)
+    if (ent->s.groundEntityNum != ENTITYNUM_NONE && ent->s.groundEntityNum != ENTITYNUM_WORLD && weapDef->stickiness == WEAPSTICKINESS_ALL)
     {
         groundEnt = &g_entities[ent->s.groundEntityNum];
         if (groundEnt->scr_vehicle)
@@ -698,7 +698,7 @@ void __cdecl G_RunMissile(gentity_s *ent)
             return;
         }
     }
-    if (ent->s.lerp.pos.trType == TR_STATIONARY && ent->s.groundEntityNum != 1022)
+    if (ent->s.lerp.pos.trType == TR_STATIONARY && ent->s.groundEntityNum != ENTITYNUM_WORLD)
     {
         currentOrigin = ent->r.currentOrigin;
         origin[0] = ent->r.currentOrigin[0];
@@ -712,7 +712,7 @@ void __cdecl G_RunMissile(gentity_s *ent)
         }
         else
         {
-            G_MissileTrace(&tr, ent->r.currentOrigin, origin, 1023, ent->clipmask);
+            G_MissileTrace(&tr, ent->r.currentOrigin, origin, ENTITYNUM_NONE, ent->clipmask);
         }
         if (tr.fraction == 1.0f)
         {
@@ -751,7 +751,7 @@ void __cdecl G_RunMissile(gentity_s *ent)
         }
         else
         {
-            G_MissileTrace(&tr, ent->r.currentOrigin, origin, 1023, ent->clipmask);
+            G_MissileTrace(&tr, ent->r.currentOrigin, origin, ENTITYNUM_NONE, ent->clipmask);
         }
     }
     else if (ent->r.ownerNum.isDefined())
@@ -760,7 +760,7 @@ void __cdecl G_RunMissile(gentity_s *ent)
     }
     else
     {
-        G_MissileTrace(&tr, ent->r.currentOrigin, origin, 1023, ent->clipmask | 0x20);
+        G_MissileTrace(&tr, ent->r.currentOrigin, origin, ENTITYNUM_NONE, ent->clipmask | 0x20);
     }
     if ((tr.surfaceFlags & 0x1F00000) == 0x1400000)
     {
@@ -771,7 +771,7 @@ void __cdecl G_RunMissile(gentity_s *ent)
         }
         else
         {
-            G_MissileTrace(&tr, ent->r.currentOrigin, origin, 1023, ent->clipmask);
+            G_MissileTrace(&tr, ent->r.currentOrigin, origin, ENTITYNUM_NONE, ent->clipmask);
         }
     }
     if ((char *)(tr.surfaceFlags & 0x1F00000) == " (%i) exceeded\n")
@@ -798,7 +798,7 @@ void __cdecl G_RunMissile(gentity_s *ent)
                 }
                 else
                 {
-                    G_MissileTrace(&trDown, traceStart, origin, 1023, ent->clipmask);
+                    G_MissileTrace(&trDown, traceStart, origin, ENTITYNUM_NONE, ent->clipmask);
                 }
                 if (trDown.fraction != 1.0f)
                 {
@@ -828,7 +828,7 @@ void __cdecl G_RunMissile(gentity_s *ent)
             }
             else
             {
-                G_MissileTrace(&trDown, traceStart, origin, 1023, ent->clipmask);
+                G_MissileTrace(&trDown, traceStart, origin, ENTITYNUM_NONE, ent->clipmask);
             }
             if (trDown.fraction != 1.0)
             {
@@ -861,7 +861,7 @@ void __cdecl G_RunMissile(gentity_s *ent)
     {
         if (Vec3Length(ent->s.lerp.pos.trDelta) != 0.0)
         {
-            ent->s.groundEntityNum = 1023;
+            ent->s.groundEntityNum = ENTITYNUM_NONE;
             if (weapDef->weapType == WEAPTYPE_PROJECTILE
                 && (ent->flags & 0x20000) == 0
                 && weapDef->guidedMissileType == MISSILE_GUIDANCE_NONE)
@@ -886,7 +886,7 @@ void __cdecl G_RunMissile(gentity_s *ent)
                 radius = 10.0f;
                 if (attrGlob.attractors[attractorIndex].inUse)
                 {
-                    if (attrGlob.attractors[attractorIndex].entnum == 1023)
+                    if (attrGlob.attractors[attractorIndex].entnum == ENTITYNUM_NONE)
                     {
                         center = attrGlob.attractors[attractorIndex].origin[0];
                         v23 = attrGlob.attractors[attractorIndex].origin[1];
@@ -1045,7 +1045,7 @@ void __cdecl MissileImpact(gentity_s *ent, trace_t *trace, float *dir, float *en
             }
             else
             {
-                v5 = LogAccuracyHit(other, &g_entities[1023]);
+                v5 = LogAccuracyHit(other, &g_entities[ENTITYNUM_NONE]);
             }
             if (v5)
                 hitClient = 1;
@@ -1120,7 +1120,7 @@ void __cdecl MissileImpact(gentity_s *ent, trace_t *trace, float *dir, float *en
         }
         else
         {
-            G_CheckHitTriggerDamage(&g_entities[1022], ent->r.currentOrigin, endpos, damage, methodOfDeath);
+            G_CheckHitTriggerDamage(&g_entities[ENTITYNUM_WORLD], ent->r.currentOrigin, endpos, damage, methodOfDeath);
         }
     }
     v29 = hitClient || trace->partName;
@@ -1655,7 +1655,7 @@ void __cdecl Missile_PenetrateGlass(
     if (!end)
         MyAssertHandler(".\\game\\g_missile.cpp", 946, 0, "%s", "end");
     hitEntId = Trace_GetEntityHitId(results);
-    if (hitEntId < 0x3FEu)
+    if (hitEntId < ENTITYNUM_WORLD)
     {
         hitEnt = &g_entities[hitEntId];
         if (hitEnt->takedamage)
@@ -1701,7 +1701,7 @@ void __cdecl Missile_PenetrateGlass(
                     }
                     else
                     {
-                        G_MissileTrace(results, start, end, 1023, ent->clipmask);
+                        G_MissileTrace(results, start, end, ENTITYNUM_NONE, ent->clipmask);
                     }
                     hitEnt->r.contents = contents;
                 }
@@ -1847,7 +1847,7 @@ void __cdecl Missile_ApplyAttractorsRepulsors(gentity_s *missile)
     {
         if (attrGlob.attractors[attractorIndex].inUse)
         {
-            if (attrGlob.attractors[attractorIndex].entnum == 1023)
+            if (attrGlob.attractors[attractorIndex].entnum == ENTITYNUM_NONE)
             {
                 attractorOrigin[0] = attrGlob.attractors[attractorIndex].origin[0];
                 attractorOrigin[1] = attrGlob.attractors[attractorIndex].origin[1];
@@ -2393,7 +2393,7 @@ void __cdecl JavelinClimbOffset(gentity_s *ent, float *targetPos)
         if (ent->r.ownerNum.isDefined())
             v2 = ent->r.ownerNum.ent();
         else
-            v2 = &g_entities[1023];
+            v2 = &g_entities[ENTITYNUM_NONE];
 
         iassert(ent->missileTargetEnt.isDefined());
 
@@ -2643,7 +2643,7 @@ void __cdecl G_InitGrenadeEntity(gentity_s *parent, gentity_s *grenade)
     grenade->r.maxs[0] = 1.5f;
     grenade->r.maxs[1] = 1.5f;
     grenade->r.maxs[2] = 1.5f;
-    if (!parent->client || parent->client->ps.grenadeTimeLeft >= 0 || parent->client->ps.throwBackGrenadeOwner == 1023)
+    if (!parent->client || parent->client->ps.grenadeTimeLeft >= 0 || parent->client->ps.throwBackGrenadeOwner == ENTITYNUM_NONE)
     {
         grenade->r.ownerNum.setEnt(parent);
         grenade->parent.setEnt(parent);
@@ -3237,7 +3237,7 @@ int G_PredictMissile(gentity_s *ent, int duration, float *vLandPos, int allowBou
         if (p_ownerNum->number)
             v17 = ent->r.ownerNum.entnum();
         else
-            v17 = 2175;
+            v17 = ENTITYNUM_NONE;
         G_LocationalTrace(&v42, &v33, &v30, v17, ent->clipmask, bulletPriorityMap);
         if (v42.startsolid)
         {
@@ -3293,14 +3293,14 @@ int G_PredictMissile(gentity_s *ent, int duration, float *vLandPos, int allowBou
                 if (ent->r.ownerNum.isDefined())
                     v22 = ent->r.ownerNum.entnum();
                 else
-                    v22 = 2175;
+                    v22 = ENTITYNUM_NONE;
                 G_MissileTrace(&v42, &v39, &v30, v22, ent->clipmask);
                 v36 = (float)((float)(v30 - v39) * v42.fraction) + v39;
                 v37 = (float)((float)(v31 - v40) * v42.fraction) + v40;
                 v38 = (float)((float)(v32 - v41) * v42.fraction) + v41;
                 if (v42.fraction == 1.0)
                     goto LABEL_36;
-                if (Trace_GetEntityHitId(&v42) == 2174)
+                if (Trace_GetEntityHitId(&v42) == ENTITYNUM_WORLD)
                 {
                     v33 = (float)(v36 - v30) + v36;
                     v34 = (float)(v37 - v31) + v37;
@@ -3320,7 +3320,7 @@ int G_PredictMissile(gentity_s *ent, int duration, float *vLandPos, int allowBou
             if (ent->r.ownerNum.isDefined())
                 v23 = ent->r.ownerNum.entnum();
             else
-                v23 = 2175;
+                v23 = ENTITYNUM_NONE;
             G_MissileTrace(&v42, &v39, &v30, v23, ent->clipmask);
             fraction = v42.fraction;
             v37 = (float)((float)(v31 - v40) * v42.fraction) + v40;

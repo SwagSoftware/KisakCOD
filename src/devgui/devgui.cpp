@@ -2,9 +2,12 @@
 #include <qcommon/mem_track.h>
 #include <qcommon/qcommon.h>
 #include <qcommon/cmd.h>
-#include <client_mp/client_mp.h>
 #include <client/client.h>
 #include <cgame/cg_local.h>
+
+#ifdef KISAK_MP
+#include <client_mp/client_mp.h>
+#endif
 
 
 const dvar_t *devgui_colorTextGray;

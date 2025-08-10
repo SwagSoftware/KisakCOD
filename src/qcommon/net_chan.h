@@ -13,6 +13,14 @@ enum netadrtype_t : __int32
 	NA_IP = 0x4,
 };
 
+enum netsrc_t : __int32
+{
+	NS_CLIENT1 = 0x0,
+	NS_SERVER = 0x1,
+	NS_MAXCLIENTS = 0x1,
+	NS_PACKET = 0x2,
+};
+
 struct __declspec(align(4)) netadr_t
 {
 	netadrtype_t type;

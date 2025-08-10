@@ -1174,7 +1174,7 @@ gentity_s *__cdecl G_Spawn()
     }
     else
     {
-        if (level.num_entities == 1022)
+        if (level.num_entities >= ENTITYNUM_WORLD)
         {
             G_PrintEntities();
             Com_Error(ERR_DROP, "G_Spawn: no free entities");
@@ -1190,7 +1190,7 @@ bool __cdecl G_MaySpawnEntity(gentity_s *e)
 {
     if (!e)
         return 0;
-    return level.time - e->eventTime >= 500 || level.num_entities >= 1022;
+    return level.time - e->eventTime >= 500 || level.num_entities >= ENTITYNUM_WORLD;
 }
 
 gentity_s *__cdecl G_SpawnPlayerClone()
@@ -1242,7 +1242,7 @@ void __cdecl G_FreeEntityRefs(gentity_s *ed)
             if (othera->r.inuse)
             {
                 if (othera->s.groundEntityNum == entnum)
-                    othera->s.groundEntityNum = 1023;
+                    othera->s.groundEntityNum = ENTITYNUM_NONE;
             }
         }
     }
@@ -1256,7 +1256,7 @@ void __cdecl G_FreeEntityRefs(gentity_s *ed)
                 if (!pClient)
                     MyAssertHandler(".\\game_mp\\g_utils_mp.cpp", 1473, 0, "%s", "pClient");
                 if (pClient->ps.cursorHintEntIndex == entnum)
-                    pClient->ps.cursorHintEntIndex = 1023;
+                    pClient->ps.cursorHintEntIndex = ENTITYNUM_NONE;
             }
         }
     }

@@ -2472,9 +2472,9 @@ void __cdecl SetupGfxConfig(GfxConfiguration *config)
     if (!config)
         MyAssertHandler(".\\client_mp\\cl_main_mp.cpp", 4453, 0, "%s", "config");
     config->maxClientViews = 1;
-    config->entCount = 1024;
-    config->entnumNone = 1023;
-    config->entnumOrdinaryEnd = 1022;
+    config->entCount = MAX_GENTITIES;
+    config->entnumNone = ENTITYNUM_NONE;
+    config->entnumOrdinaryEnd = ENTITYNUM_WORLD;
     config->threadContextCount = 7;
     config->critSectCount = 22;
 }

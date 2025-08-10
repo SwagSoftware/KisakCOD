@@ -567,12 +567,12 @@ void __cdecl StopFollowing(gentity_s *ent)
         vMaxs[0] = 8.0;
         vMaxs[1] = 8.0;
         vMaxs[2] = 8.0;
-        G_TraceCapsule(&trace, vPos, vMins, vMaxs, vEnd, 1023, 0x810011);
+        G_TraceCapsule(&trace, vPos, vMins, vMaxs, vEnd, ENTITYNUM_NONE, 0x810011);
         Vec3Lerp(vPos, vEnd, trace.fraction, vPos);
         client->ps.clientNum = ent - g_entities;
         client->ps.eFlags &= 0xFFFFFCFF;
         client->ps.viewlocked = PLAYERVIEWLOCK_NONE;
-        client->ps.viewlocked_entNum = 1023;
+        client->ps.viewlocked_entNum = ENTITYNUM_NONE;
         client->ps.pm_flags &= 0xFFFEFFEF;
         client->ps.weapFlags &= ~0x40u;
         client->ps.otherFlags &= ~2u;

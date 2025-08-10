@@ -2309,7 +2309,7 @@ void __cdecl ScrCmd_PlayerSetGroundReferenceEnt(scr_entref_t entref)
     }
     else
     {
-        number = 2175;
+        number = ENTITYNUM_NONE;
     }
     Entity->client->groundTiltEntNum = number;
 }
@@ -3029,18 +3029,18 @@ void __cdecl Scr_MagicBullet()
     // Fire based on weapon type and class
     switch (weapDef->weapType) {
     case WEAPTYPE_BULLET:
-        Bullet_Fire(&g_entities[2174], 0.0f, &parms, NULL, level.time);
+        Bullet_Fire(&g_entities[ENTITYNUM_WORLD], 0.0f, &parms, NULL, level.time);
         break;
 
     case WEAPTYPE_PROJECTILE:
         switch (weapDef->weapClass) {
         case WEAPCLASS_GRENADE:
-            Weapon_GrenadeLauncher_Fire(&g_entities[2174], weaponIndex, 0, &parms);
+            Weapon_GrenadeLauncher_Fire(&g_entities[ENTITYNUM_WORLD], weaponIndex, 0, &parms);
             break;
 
         case WEAPCLASS_ROCKETLAUNCHER:
             Weapon_RocketLauncher_Fire(
-                &g_entities[2174],
+                &g_entities[ENTITYNUM_WORLD],
                 weaponIndex,
                 0.0f,
                 NULL,
@@ -4017,7 +4017,7 @@ void __cdecl GScr_GetTurretOwner(scr_entref_t entref)
         if (p_ownerNum->isDefined())
             v6 = p_ownerNum->ent();
         else
-            v6 = &g_entities[2175];
+            v6 = &g_entities[ENTITYNUM_NONE];
         Scr_AddEntity(v6);
     }
 }
@@ -5156,7 +5156,7 @@ void Scr_BulletTrace()
     float v14[4]; // [sp+80h] [-60h] BYREF
     trace_t v15; // [sp+90h] [-50h] BYREF
 
-    number = 2175;
+    number = ENTITYNUM_NONE;
     v1 = 42002481;
     Scr_GetVector(0, &v7);
     Scr_GetVector(1u, &v10);
@@ -5174,7 +5174,7 @@ void Scr_BulletTrace()
     Scr_AddVector(v13);
     Scr_AddArrayStringIndexed(scr_const.position);
     EntityHitId = Trace_GetEntityHitId(&v15);
-    if (EntityHitId == 2175 || EntityHitId == 2174)
+    if (EntityHitId == ENTITYNUM_NONE || EntityHitId == ENTITYNUM_WORLD)
         Scr_AddUndefined();
     else
         Scr_AddEntity(&g_entities[EntityHitId]);
@@ -5227,7 +5227,7 @@ void Scr_BulletTracePassed()
     float v3[4]; // [sp+50h] [-40h] BYREF
     float v4[6]; // [sp+60h] [-30h] BYREF
 
-    number = 2175;
+    number = ENTITYNUM_NONE;
     v1 = 42002481;
     Scr_GetVector(0, v4);
     Scr_GetVector(1u, v3);
@@ -5235,7 +5235,7 @@ void Scr_BulletTracePassed()
         v1 = 8398897;
     if (Scr_GetType(3) == 1 && Scr_GetPointerType(3) == 20)
         number = Scr_GetEntity(3)->s.number;
-    v2 = G_LocationalTracePassed(v4, v3, number, 2175, v1, 0);
+    v2 = G_LocationalTracePassed(v4, v3, number, ENTITYNUM_NONE, v1, 0);
     Scr_AddBool(v2);
 }
 
@@ -5247,7 +5247,7 @@ void __cdecl Scr_SightTracePassed()
     float v3[4]; // [sp+58h] [-38h] BYREF
     float v4[4]; // [sp+68h] [-28h] BYREF
 
-    number = 2175;
+    number = ENTITYNUM_NONE;
     v1 = 41998339;
     Scr_GetVector(0, v4);
     Scr_GetVector(1u, v3);
@@ -5272,7 +5272,7 @@ void Scr_PhysicsTrace()
 
     Scr_GetVector(0, &v0);
     Scr_GetVector(1u, v3);
-    G_TraceCapsule(&v5, &v0, vec3_origin, vec3_origin, v3, 2175, 8519697);
+    G_TraceCapsule(&v5, &v0, vec3_origin, vec3_origin, v3, ENTITYNUM_NONE, 8519697);
     v4[0] = (float)((float)(v3[0] - v0) * v5.fraction) + v0;
     v4[1] = (float)((float)(v3[1] - v1) * v5.fraction) + v1;
     v4[2] = (float)((float)(v3[2] - v2) * v5.fraction) + v2;
@@ -5290,7 +5290,7 @@ void Scr_PlayerPhysicsTrace()
 
     Scr_GetVector(0, &v0);
     Scr_GetVector(1u, v3);
-    G_TraceCapsule(&v5, &v0, playerMins, playerMaxs, v3, 2175, 8519697);
+    G_TraceCapsule(&v5, &v0, playerMins, playerMaxs, v3, ENTITYNUM_NONE, 8519697);
     v4[0] = (float)((float)(v3[0] - v0) * v5.fraction) + v0;
     v4[1] = (float)((float)(v3[1] - v1) * v5.fraction) + v1;
     v4[2] = (float)((float)(v3[2] - v2) * v5.fraction) + v2;
@@ -6661,7 +6661,7 @@ void __cdecl GScr_RadiusDamageInternal(gentity_s *inflictor)
     range = Scr_GetFloat(1);
     maxDamage = Scr_GetFloat(2);
     minDamage = Scr_GetFloat(3);
-    attacker = &g_entities[2174];
+    attacker = &g_entities[ENTITYNUM_WORLD];
     if (Scr_GetNumParam() > 4 && Scr_GetType(4))
         attacker = Scr_GetEntity(4);
     mod = MOD_EXPLOSIVE;
@@ -6710,7 +6710,7 @@ void __cdecl GScr_Detonate(scr_entref_t entref)
         }
         else
         {
-            v3 = &g_entities[2174];
+            v3 = &g_entities[ENTITYNUM_WORLD];
         }
         Entity->parent.setEnt(v3);
     }
@@ -9835,19 +9835,18 @@ void __cdecl GScr_MakeFakeAI(scr_entref_t entref)
 
 void __cdecl GScr_SetLookatText(scr_entref_t entref)
 {
-    gentity_s *Entity; // r31
+    gentity_s *ent; // r31
     unsigned int ConstString; // r3
     unsigned int ConstIString; // r3
 
-    Entity = GetEntity(entref);
-    if (!Entity)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\g_scr_main.cpp", 12175, 0, "%s", "ent");
+    ent = GetEntity(entref);
+    iassert(ent);
     ConstString = Scr_GetConstString(0);
-    Scr_SetString(&Entity->lookAtText0, ConstString);
+    Scr_SetString(&ent->lookAtText0, ConstString);
     if (Scr_GetNumParam())
     {
         ConstIString = Scr_GetConstIString(1);
-        Scr_SetString(&Entity->lookAtText1, ConstIString);
+        Scr_SetString(&ent->lookAtText1, ConstIString);
     }
 }
 

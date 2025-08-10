@@ -297,7 +297,7 @@ void __cdecl CL_ParsePacketEntities(clientActive_t *cl, msg_t *msg, clSnapshot_t
     parseEntitiesNum = cl->parseEntitiesNum;
     newframe->numEntities = 0;
     newframe->parseEntitiesNum = parseEntitiesNum;
-    for (i = MSG_ReadBits(msg, 12); i != 2175; i = MSG_ReadBits(msg, 12))
+    for (i = MSG_ReadBits(msg, 12); i != ENTITYNUM_NONE; i = MSG_ReadBits(msg, 12))
     {
         if (i >= 0x880)
             MyAssertHandler(

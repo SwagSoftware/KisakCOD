@@ -364,8 +364,8 @@ extern cg_s cgArray[1];
 extern cgMedia_t cgMedia;
 
 extern weaponInfo_s cg_weaponsArray[1][128];
-extern centity_s cg_entitiesArray[1][2176];
-extern float cg_entityOriginArray[1][2176][3];
+extern centity_s cg_entitiesArray[1][MAX_GENTITIES];
+extern float cg_entityOriginArray[1][MAX_GENTITIES][3];
 
 extern const dvar_t *cg_hudGrenadeIconEnabledFlash;
 extern const dvar_t *vehHelicopterHeadSwayOnRollVert;

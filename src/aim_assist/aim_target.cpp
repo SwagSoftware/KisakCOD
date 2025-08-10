@@ -525,7 +525,7 @@ int __cdecl AimTarget_GetBestTarget(const float *start, const float *viewDir)
             0,
             "%s",
             "Vec3IsNormalized( viewDir )");
-    result = 2175;
+    result = ENTITYNUM_NONE;
     v5 = 0.9659;
     v6 = &atGlob;
     if (atGlob.targetCount > 0)

@@ -80,7 +80,7 @@ char __cdecl Player_ActivateCmd(gentity_s *ent)
     {
         if (ent->client->ps.cursorHint)
         {
-            if (ent->client->ps.cursorHintEntIndex == 1023)
+            if (ent->client->ps.cursorHintEntIndex == ENTITYNUM_NONE)
             {
                 return 0;
             }
@@ -199,7 +199,7 @@ void __cdecl Player_UpdateCursorHints(gentity_s *ent)
         {
             if (ps->pm_type == 6)
             {
-                ps->cursorHintEntIndex = 1023;
+                ps->cursorHintEntIndex = ENTITYNUM_NONE;
             }
             else if (!ent->client->bFrozen)
             {
@@ -224,7 +224,7 @@ void __cdecl Player_UpdateCursorHints(gentity_s *ent)
                                 if (self->classname != scr_const.trigger_use && self->classname != scr_const.trigger_use_touch)
                                     goto LABEL_49;
                                 if (self->team && self->team != ent->client->sess.cs.team
-                                    || self->item[1].ammoCount != 1023 && self->item[1].ammoCount != ent->client->ps.clientNum)
+                                    || self->item[1].ammoCount != ENTITYNUM_NONE && self->item[1].ammoCount != ent->client->ps.clientNum)
                                 {
                                     goto LABEL_21;
                                 }
@@ -268,9 +268,9 @@ void __cdecl Player_UpdateCursorHints(gentity_s *ent)
                                 }
                                 else
                                 {
-                                    ps->cursorHintEntIndex = 1023;
+                                    ps->cursorHintEntIndex = ENTITYNUM_NONE;
                                 }
-                                if (ps->cursorHintEntIndex != 1023 && !g_entities[ps->cursorHintEntIndex].r.inuse)
+                                if (ps->cursorHintEntIndex != ENTITYNUM_NONE && !g_entities[ps->cursorHintEntIndex].r.inuse)
                                     MyAssertHandler(
                                         ".\\game_mp\\player_use_mp.cpp",
                                         661,
@@ -497,14 +497,14 @@ void __cdecl Player_SetTurretDropHint(gentity_s *ent)
     ps = ent->client;
     if ((ps->ps.eFlags & 0x300) == 0)
         MyAssertHandler(".\\game_mp\\player_use_mp.cpp", 477, 0, "%s", "ps->eFlags & EF_TURRET_ACTIVE");
-    if (ps->ps.viewlocked_entNum == 1023)
+    if (ps->ps.viewlocked_entNum == ENTITYNUM_NONE)
         MyAssertHandler(".\\game_mp\\player_use_mp.cpp", 478, 0, "%s", "ps->viewlocked_entNum != ENTITYNUM_NONE");
     turret = &level.gentities[ps->ps.viewlocked_entNum];
     if (turret->s.eType != 11)
         MyAssertHandler(".\\game_mp\\player_use_mp.cpp", 481, 0, "%s", "turret->s.eType == ET_MG42");
     if (*BG_GetWeaponDef(turret->s.weapon)->dropHintString)
     {
-        ps->ps.cursorHintEntIndex = 1023;
+        ps->ps.cursorHintEntIndex = ENTITYNUM_NONE;
         ps->ps.cursorHint = turret->s.weapon + 4;
         ps->ps.cursorHintString = BG_GetWeaponDef(turret->s.weapon)->dropHintStringIndex;
     }

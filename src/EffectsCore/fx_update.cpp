@@ -548,7 +548,7 @@ void __cdecl FX_StartNewEffect(FxSystem* system, FxEffect* effect)
 
 bool __cdecl FX_GetBoltTemporalBits(int32_t localClientNum, int32_t dobjHandle)
 {
-    return dobjHandle < 1022 && (CG_GetEntity(localClientNum, dobjHandle)->nextState.lerp.eFlags & 2) != 0;
+    return dobjHandle < ENTITYNUM_WORLD && (CG_GetEntity(localClientNum, dobjHandle)->nextState.lerp.eFlags & 2) != 0;
 }
 
 char __cdecl FX_GetBoneOrientation(int32_t localClientNum, uint32_t dobjHandle, int32_t boneIndex, orientation_t *orient)
@@ -692,7 +692,7 @@ char __cdecl FX_GetBoneOrientation(int32_t localClientNum, uint32_t dobjHandle, 
 
 bool __cdecl FX_GetBoneOrientation_IsDObjEntityValid(int32_t localClientNum, int32_t dobjHandle)
 {
-    return dobjHandle >= 1022 || CG_GetEntity(localClientNum, dobjHandle)->nextValid;
+    return dobjHandle >= ENTITYNUM_WORLD || CG_GetEntity(localClientNum, dobjHandle)->nextValid;
 }
 
 void __cdecl FX_UpdateEffectPartial(
@@ -1624,7 +1624,7 @@ void __cdecl FX_SpawnImpactEffect(
         2047,
         255,
         update->effect->owner,
-        0x3FFu);
+        ENTITYNUM_NONE);
     if (effect)
         FX_DelRefToEffect(system, effect);
 }
@@ -1688,7 +1688,7 @@ void __cdecl FX_SpawnDeathEffect(FxSystem* system, FxUpdateElem* update)
         2047,
         255,
         update->effect->owner,
-        0x3FFu);
+        ENTITYNUM_NONE);
     if (effect)
         FX_DelRefToEffect(system, effect);
 }
@@ -1870,7 +1870,7 @@ uint8_t __cdecl FX_ProcessEmitting(
             2047,
             255,
             update->effect->owner,
-            0x3FFu);
+            ENTITYNUM_NONE);
         if (effect)
             FX_DelRefToEffect(system, effect);
         elemDef = FX_GetUpdateElemDef(update);

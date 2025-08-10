@@ -413,7 +413,7 @@ void __cdecl CG_DrawVehicleTargets(int localClientNum, rectDef_s *rect, float *c
     v6 = &cgArray[0].targets[0].offset[2];
     do
     {
-        if (*((unsigned int *)v6 - 3) != 2175 && (((unsigned int)v6[3] & 2) == 0 || CG_JavelinADS(localClientNum)))
+        if (*((unsigned int *)v6 - 3) != ENTITYNUM_NONE && (((unsigned int)v6[3] & 2) == 0 || CG_JavelinADS(localClientNum)))
         {
             Entity = CG_GetEntity(localClientNum, *((unsigned int *)v6 - 3));
             if (!Entity)
@@ -557,7 +557,7 @@ void __cdecl CG_DrawJavelinTargets(int localClientNum, rectDef_s *rect, float *c
     v7 = PredictedPlayerState;
     if ((PredictedPlayerState->weapLockFlags & 2) != 0)
     {
-        if (PredictedPlayerState->weapLockedEntnum == 2175)
+        if (PredictedPlayerState->weapLockedEntnum == ENTITYNUM_NONE)
             MyAssertHandler(
                 "c:\\trees\\cod3\\cod3src\\src\\cgame\\cg_vehicle_hud.cpp",
                 271,
@@ -895,7 +895,7 @@ void __cdecl CG_InitVehicleReticle(int localClientNum)
             "%s\n\t(localClientNum) = %i",
             "(localClientNum == 0)",
             localClientNum);
-    cgArray[0].vehReticleLockOnEntNum = 2175;
+    cgArray[0].vehReticleLockOnEntNum = ENTITYNUM_NONE;
     cgArray[0].vehReticleOffset[0] = 0.0;
     cgArray[0].vehReticleOffset[1] = 0.0;
     cgArray[0].vehReticleVel[0] = 0.0;
@@ -1015,7 +1015,7 @@ void __cdecl CG_DrawBouncingDiamond(int localClientNum, rectDef_s *rect, float *
             localClientNum);
     v6 = *(float *)(dword_827DD9C4 + 12);
     vehReticleLockOnEntNum = cgArray[0].vehReticleLockOnEntNum;
-    if (cgArray[0].vehReticleLockOnEntNum == 2175)
+    if (cgArray[0].vehReticleLockOnEntNum == ENTITYNUM_NONE)
     {
         v11 = 0.0;
         v22 = 0.0;
@@ -1188,7 +1188,7 @@ void __cdecl CG_DrawVehicleReticle(int localClientNum, rectDef_s *rect, float *c
             "(localClientNum == 0)",
             localClientNum);
     if ((cgArray[0].predictedPlayerState.eFlags & 0x20000) != 0
-        && cgArray[0].predictedPlayerState.viewlocked_entNum != 2175)
+        && cgArray[0].predictedPlayerState.viewlocked_entNum != ENTITYNUM_NONE)
     {
         Entity = CG_GetEntity(localClientNum, cgArray[0].predictedPlayerState.viewlocked_entNum);
         if (!Entity)
@@ -1251,7 +1251,7 @@ void __cdecl CG_TargetsChanged(int localClientNum, unsigned int num)
         if (*v9)
             v8->entNum = atol(v9);
         else
-            v8->entNum = 2175;
+            v8->entNum = ENTITYNUM_NONE;
         v10 = Info_ValueForKey(v6, "offs");
         v8->offset[0] = 0.0;
         v8->offset[1] = 0.0;
@@ -1279,7 +1279,7 @@ void __cdecl CG_TargetsChanged(int localClientNum, unsigned int num)
     }
     else
     {
-        v8->entNum = 2175;
+        v8->entNum = ENTITYNUM_NONE;
     }
 }
 

@@ -358,7 +358,7 @@ void __cdecl G_SpawnHelicopter(gentity_s *ent, gentity_s *owner, const char *veh
     ent->s.eType = 12;
     veh = ent->scr_vehicle;
     s_vehicleInfos[veh->infoIdx].type = 5;
-    veh->targetEnt = 1023;
+    veh->targetEnt = ENTITYNUM_NONE;
 
     iassert(!veh->lookAtEnt.isDefined());
     iassert(!veh->idleSndEnt.isDefined());

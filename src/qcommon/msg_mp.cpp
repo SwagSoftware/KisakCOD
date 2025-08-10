@@ -6,6 +6,7 @@
 #include "sv_msg_write_mp.h"
 #include <server_mp/server_mp.h>
 #include <client_mp/client_mp.h>
+#include <cgame/cg_local.h>
 
 #define NETF_OBJ(x) NETF_BASE(objective_t, x)
 
@@ -1249,7 +1250,7 @@ int __cdecl MSG_ReadDeltaGroundEntity(msg_t *msg)
     int value; // [esp+10h] [ebp-4h]
 
     if (MSG_ReadBit(msg) == 1)
-        return 1022;
+        return ENTITYNUM_WORLD;
     if (MSG_ReadBit(msg) == 1)
         return 0;
     value = MSG_ReadBits(msg, 2u);

@@ -347,7 +347,7 @@ char *__cdecl CG_ParseEffect(int32_t localClientNum, char *line)
     {
         fxDef = FX_Register(fxDefFileName);
         AnglesToAxis(angles, axis);
-        FX_SpawnOrientedEffect(localClientNum, fxDef, (int)(delay * 1000.0), origin, axis, 0x3FFu);
+        FX_SpawnOrientedEffect(localClientNum, fxDef, (int)(delay * 1000.0), origin, axis, ENTITYNUM_NONE);
     }
     return linei;
 }

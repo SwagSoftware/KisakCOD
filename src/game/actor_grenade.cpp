@@ -232,7 +232,7 @@ LABEL_39:
                 v46[1] = v22;
                 ent = self->ent;
                 v46[2] = (float)((float)((float)(g_gravity->current.value * (float)v11) * (float)v11) * (float)1.5) + vFrom[2];
-                SV_SightTrace(&v36, vFrom, v47, v44, v46, ent->s.number, 2175, 42004625);
+                SV_SightTrace(&v36, vFrom, v47, v44, v46, ent->s.number, ENTITYNUM_NONE, 42004625);
                 if (g_drawGrenadeHints->current.integer > 0)
                     G_DebugLineWithDuration(vFrom, v46, colorCyan, 1, 200);
                 if (v36)
@@ -242,7 +242,7 @@ LABEL_39:
                 v38 = (float)(*vVelocity * (float)v9) + *vFrom;
                 v39 = v25;
                 v40 = (float)((float)((float)(g_gravity->current.value * (float)v9) * (float)v9) * (float)v10) + vFrom[2];
-                SV_SightTrace(&v36, v46, v47, v44, &v38, v24->s.number, 2175, 42004625);
+                SV_SightTrace(&v36, v46, v47, v44, &v38, v24->s.number, ENTITYNUM_NONE, 42004625);
                 if (g_drawGrenadeHints->current.integer > 0)
                     G_DebugLineWithDuration(v46, &v38, colorCyan, 1, 200);
                 if (v36)
@@ -260,7 +260,7 @@ LABEL_39:
             v43 = (float)((float)-(float)((float)((float)(g_gravity->current.value * (float)v18) * (float)v10) - vVelocity[2])
                 * (float)v18)
                 + vFrom[2];
-            SV_SightTrace(&v36, &v38, v47, v44, &v41, v29->s.number, 2175, 42004625);
+            SV_SightTrace(&v36, &v38, v47, v44, &v41, v29->s.number, ENTITYNUM_NONE, 42004625);
             if (g_drawGrenadeHints->current.integer > 0)
                 G_DebugLineWithDuration(&v38, &v41, colorCyan, 1, 200);
             if (!v36)
@@ -271,7 +271,7 @@ LABEL_39:
                 if (v48[0].fraction == 1.0)
                     return 1;
                 EntityHitId = Trace_GetEntityHitId(v48);
-                if (EntityHitId == 2174)
+                if (EntityHitId == ENTITYNUM_WORLD)
                 {
                     v31 = (float)((float)((float)((float)(vGoal[1] - v42) * v48[0].fraction) + v42) - vGoal[1]);
                     v32 = (float)((float)((float)((float)(vGoal[2] - v43) * v48[0].fraction) + v43) - vGoal[2]);
@@ -343,7 +343,7 @@ void __cdecl Actor_Grenade_GetTossPositions(
     v16 = (float)v8 + (float)1.0;
     v17[1] = v15;
     v17[2] = (float)v8 - (float)1.0;
-    G_MissileTrace(&v18, &v14, v17, 2175, 2065);
+    G_MissileTrace(&v18, &v14, v17, ENTITYNUM_NONE, 2065);
 
     if (v18.fraction == 1.0)
         v9 = 0;
@@ -1722,7 +1722,7 @@ bool __cdecl Actor_Grenade_CheckTossPos(
         v56 = G_flrand((float)((float)v40 - (float)randomRange), v41);
     }
     Actor_Grenade_GetTossFromPosition(self, vStandPos, vOffset, vPosOut);
-    G_MissileTrace(&v61, vPosOut, &v55, 2175, 2065);
+    G_MissileTrace(&v61, vPosOut, &v55, ENTITYNUM_NONE, 2065);
     TossPositionsFromHints = 0;
     if (v61.fraction == 1.0)
     {
@@ -2342,7 +2342,7 @@ actor_think_result_t __cdecl Actor_Grenade_Acquire(actor_s *self)
             Actor_SetSubState(self, STATE_GRENADE_COWER);
         return ACTOR_THINK_REPEAT;
     }
-    if (self->Physics.iHitEntnum != 2175)
+    if (self->Physics.iHitEntnum != ENTITYNUM_NONE)
     {
         Actor_Grenade_AttemptEscape(self, 1);
         if (self->eSubState[self->stateLevel] == STATE_GRENADE_ACQUIRE)

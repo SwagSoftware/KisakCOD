@@ -464,7 +464,7 @@ void __cdecl CG_AdjustPositionForMover(
         outDeltaAngles[1] = 0.0;
         outDeltaAngles[2] = 0.0;
     }
-    if (moverNum > 0 && moverNum < 1022)
+    if (moverNum > 0 && moverNum < ENTITYNUM_WORLD)
     {
         cent = CG_GetEntity(localClientNum, moverNum);
         if (cent->nextState.eType == 6 || cent->nextState.eType == 13)
@@ -706,7 +706,7 @@ int32_t __cdecl CG_AddPacketEntities(int32_t localClientNum)
     if ((cgameGlob->predictedPlayerState.eFlags & 0x300) != 0)
         viewlocked_entNum = cgameGlob->predictedPlayerState.viewlocked_entNum;
     else
-        viewlocked_entNum = 1023;
+        viewlocked_entNum = ENTITYNUM_NONE;
     lockedViewEntNum = viewlocked_entNum;
     lockedView = 0;
     linkedPlayerCount = 0;
@@ -1773,7 +1773,7 @@ FxEffect *__cdecl CG_StartFx(int32_t localClientNum, centity_s *cent, int32_t st
     cgs = CG_GetLocalClientStaticGlobals(localClientNum);
     fxDef = cgs->fxs[fxId];
     iassert(fxDef);
-    return FX_SpawnOrientedEffect(localClientNum, fxDef, startAtTime, cent->pose.origin, axis, 0x3FFu);
+    return FX_SpawnOrientedEffect(localClientNum, fxDef, startAtTime, cent->pose.origin, axis, ENTITYNUM_NONE);
 }
 
 void __cdecl CG_LoopFx(int32_t localClientNum, centity_s *cent)

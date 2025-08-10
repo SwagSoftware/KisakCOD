@@ -26,6 +26,7 @@
 
 #include <setjmp.h>
 #include <game/g_bsp.h>
+#include <cgame/cg_local.h>
 
 GfxWorld s_world;
 MaterialGlobals materialGlobals;
@@ -618,7 +619,11 @@ void *DB_XAssetPool[33] =
   &cm,
   &comWorld,
   NULL,
+#ifdef KISAK_MP
   &gameWorldMp,
+#elif KISAK_SP
+  &gameWorldSp,
+#endif
   &g_MapEntsPool,
   &s_world,
   &g_GfxLightDefPool,
@@ -638,6 +643,46 @@ void *DB_XAssetPool[33] =
   &g_RawFilePool,
   &g_StringTablePool
 }; // idb
+
+//void *DB_XAssetPool[34] =
+//{
+//  &g_XModelPiecesPool,
+//  &g_PhysPresetPool,
+//  &g_XAnimPartsPool,
+//  &g_XModelPool,
+//  &g_MaterialPool,
+//  &g_MaterialPixelShaderPool,
+//  &g_MaterialTechniqueSetPool,
+//  &g_GfxImagePool,
+//  &g_SoundPool,
+//  &g_SndCurvePool,
+//  &g_LoadedSoundPool,
+//  &cm,
+//  &cm,
+//  &comWorld,
+//  &gameWorldSp,
+//  NULL,
+//  &g_MapEntsPool,
+//  &s_world,
+//  &g_GfxLightDefPool,
+//  NULL,
+//  &g_FontPool,
+//  &g_MenuListPool,
+//  &g_MenuPool,
+//  &g_LocalizeEntryPool,
+//  &g_WeaponDefPool,
+//  &g_SndDriverGlobalsPool,
+//  &g_FxEffectDefPool,
+//  &g_FxImpactTablePool,
+//  NULL,
+//  NULL,
+//  NULL,
+//  NULL,
+//  &g_RawFilePool,
+//  &g_StringTablePool
+//};
+
+
 
 void __cdecl TRACK_db_registry()
 {

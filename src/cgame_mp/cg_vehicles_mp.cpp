@@ -91,10 +91,10 @@ void __cdecl CG_VehGunnerPOV(int32_t localClientNum, float *resultOrigin, float 
     float tagMtx[3][3]; // [esp+8h] [ebp-24h] BYREF
 
     ci = ClientInfoForLocalClient(localClientNum);
-    if (!ci)
-        MyAssertHandler(".\\cgame_mp\\cg_vehicles_mp.cpp", 169, 0, "%s", "ci");
-    if (ci->attachedVehEntNum == 1023)
-        MyAssertHandler(".\\cgame_mp\\cg_vehicles_mp.cpp", 170, 0, "%s", "ci->attachedVehEntNum != ENTITYNUM_NONE");
+
+    iassert(ci);
+    iassert(ci->attachedVehEntNum != ENTITYNUM_NONE);
+
     GetTagMatrix(localClientNum, ci->attachedVehEntNum, scr_const.tag_gunner_pov, tagMtx, resultOrigin);
     AxisToAngles(tagMtx, resultAngles);
 }
@@ -142,9 +142,10 @@ bool __cdecl CG_VehLocalClientUsingVehicle(int32_t localClientNum)
     clientInfo_t *ci; // [esp+0h] [ebp-4h]
 
     ci = ClientInfoForLocalClient(localClientNum);
-    if (!ci)
-        MyAssertHandler(".\\cgame_mp\\cg_vehicles_mp.cpp", 193, 0, "%s", "ci");
-    return ci->attachedVehEntNum != 1023;
+    
+    iassert(ci);
+
+    return ci->attachedVehEntNum != ENTITYNUM_NONE;
 }
 
 bool __cdecl CG_VehLocalClientDriving(int32_t localClientNum)
@@ -152,9 +153,10 @@ bool __cdecl CG_VehLocalClientDriving(int32_t localClientNum)
     clientInfo_t *ci; // [esp+0h] [ebp-4h]
 
     ci = ClientInfoForLocalClient(localClientNum);
-    if (!ci)
-        MyAssertHandler(".\\cgame_mp\\cg_vehicles_mp.cpp", 210, 0, "%s", "ci");
-    return ci->attachedVehEntNum != 1023 && ci->attachedVehSlotIndex == 0;
+    
+    iassert(ci);
+
+    return ci->attachedVehEntNum != ENTITYNUM_NONE && ci->attachedVehSlotIndex == 0;
 }
 
 bool __cdecl CG_VehEntityUsingVehicle(int32_t localClientNum, uint32_t entNum)
@@ -162,7 +164,8 @@ bool __cdecl CG_VehEntityUsingVehicle(int32_t localClientNum, uint32_t entNum)
     clientInfo_t *ci; // [esp+0h] [ebp-4h]
 
     ci = ClientInfoForEntity(localClientNum, entNum);
-    return ci && ci->attachedVehEntNum != 1023;
+
+    return ci && ci->attachedVehEntNum != ENTITYNUM_NONE;
 }
 
 clientInfo_t *__cdecl ClientInfoForEntity(int32_t localClientNum, uint32_t entNum)
@@ -190,10 +193,10 @@ int32_t __cdecl CG_VehLocalClientVehicleSlot(int32_t localClientNum)
     clientInfo_t *ci; // [esp+0h] [ebp-4h]
 
     ci = ClientInfoForLocalClient(localClientNum);
-    if (!ci)
-        MyAssertHandler(".\\cgame_mp\\cg_vehicles_mp.cpp", 258, 0, "%s", "ci");
-    if (ci->attachedVehEntNum == 1023)
-        MyAssertHandler(".\\cgame_mp\\cg_vehicles_mp.cpp", 259, 0, "%s", "ci->attachedVehEntNum != ENTITYNUM_NONE");
+    
+    iassert(ci);
+    iassert(ci->attachedVehEntNum != ENTITYNUM_NONE);
+
     return ci->attachedVehSlotIndex;
 }
 
@@ -202,10 +205,10 @@ int32_t __cdecl CG_VehPlayerVehicleSlot(int32_t localClientNum, uint32_t entNum)
     clientInfo_t *ci; // [esp+0h] [ebp-4h]
 
     ci = ClientInfoForEntity(localClientNum, entNum);
-    if (!ci)
-        MyAssertHandler(".\\cgame_mp\\cg_vehicles_mp.cpp", 270, 0, "%s", "ci");
-    if (ci->attachedVehEntNum == 1023)
-        MyAssertHandler(".\\cgame_mp\\cg_vehicles_mp.cpp", 271, 0, "%s", "ci->attachedVehEntNum != ENTITYNUM_NONE");
+
+    iassert(ci);
+    iassert(ci->attachedVehEntNum);
+
     return ci->attachedVehSlotIndex;
 }
 
@@ -229,10 +232,9 @@ void __cdecl CG_VehSeatTransformForPlayer(
 
 void __cdecl SeatTransformForClientInfo(int32_t localClientNum, clientInfo_t *ci, float *resultOrigin, float *resultAngles)
 {
-    if (!ci)
-        MyAssertHandler(".\\cgame_mp\\cg_vehicles_mp.cpp", 181, 0, "%s", "ci");
-    if (ci->attachedVehEntNum == 1023)
-        MyAssertHandler(".\\cgame_mp\\cg_vehicles_mp.cpp", 182, 0, "%s", "ci->attachedVehEntNum != ENTITYNUM_NONE");
+    iassert(ci);
+    iassert(ci->attachedVehEntNum != ENTITYNUM_NONE);
+
     SeatTransformForSlot(localClientNum, ci->attachedVehEntNum, ci->attachedVehSlotIndex, resultOrigin, resultAngles);
 }
 

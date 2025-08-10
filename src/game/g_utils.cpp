@@ -675,7 +675,7 @@ void __cdecl G_ClearDemoEntities()
                 scr_vehicle = ent->scr_vehicle;
                 if (scr_vehicle)
                 {
-                    scr_vehicle->entNum = 2175;
+                    scr_vehicle->entNum = ENTITYNUM_NONE;
                     iassert(!ent->scr_vehicle->idleSndEnt.isDefined());
                     iassert(!ent->scr_vehicle->engineSndEnt.isDefined());
                     ent->scr_vehicle = 0;
@@ -1210,7 +1210,7 @@ void __cdecl G_UpdateGroundTilt(gclient_s *client)
     gentity_s *v2; // r11
 
     groundTiltEntNum = client->groundTiltEntNum;
-    if (groundTiltEntNum == 2175)
+    if (groundTiltEntNum == ENTITYNUM_NONE)
     {
         client->ps.groundTiltAngles[0] = 0.0;
         client->ps.groundTiltAngles[1] = 0.0;
@@ -1584,9 +1584,9 @@ void __cdecl G_StepSlideMove(
 void __cdecl G_SafeDObjFree(gentity_s *ent)
 {
     if (ent->s.number == level.cachedTagMat.entnum)
-        level.cachedTagMat.entnum = 2175;
+        level.cachedTagMat.entnum = ENTITYNUM_NONE;
     if (ent->s.number == level.cachedEntTargetTagMat.entnum)
-        level.cachedEntTargetTagMat.entnum = 2175;
+        level.cachedEntTargetTagMat.entnum = ENTITYNUM_NONE;
     Com_SafeServerDObjFree(ent->s.number);
 }
 
@@ -1875,7 +1875,7 @@ gentity_s *__cdecl G_Spawn()
     else
     {
         num_entities = level.num_entities;
-        if (level.num_entities == 2174)
+        if (level.num_entities == ENTITYNUM_WORLD)
         {
             G_PrintEntities();
             Scr_Error("G_Spawn: no free entities");
@@ -1905,7 +1905,7 @@ void __cdecl G_FreeEntityRefs(gentity_s *ed)
         do
         {
             if (*((_BYTE *)p_groundEntityNum + 46) && *p_groundEntityNum == number)
-                *p_groundEntityNum = 2175;
+                *p_groundEntityNum = ENTITYNUM_NONE;
             --num_entities;
             p_groundEntityNum += 314;
         } while (num_entities);
@@ -1916,7 +1916,7 @@ void __cdecl G_FreeEntityRefs(gentity_s *ed)
         if (!g_entities[0].client)
             MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\g_utils.cpp", 2338, 0, "%s", "pClient");
         if (client->ps.cursorHintEntIndex == number)
-            client->ps.cursorHintEntIndex = 2175;
+            client->ps.cursorHintEntIndex = ENTITYNUM_NONE;
     }
     G_FreeVehicleRefs(ed);
     if ((ed->flags & 0x1000000) != 0)
@@ -2963,9 +2963,9 @@ void __cdecl G_FreeEntity(gentity_s *ed)
     }
     SV_UnlinkEntity(ed);
     if (ed->s.number == level.cachedTagMat.entnum)
-        level.cachedTagMat.entnum = 2175;
+        level.cachedTagMat.entnum = ENTITYNUM_NONE;
     if (ed->s.number == level.cachedEntTargetTagMat.entnum)
-        level.cachedEntTargetTagMat.entnum = 2175;
+        level.cachedEntTargetTagMat.entnum = ENTITYNUM_NONE;
     Tree = SV_DObjGetTree(ed);
     if (Tree)
         XAnimClearTree(Tree);
@@ -3076,9 +3076,9 @@ void __cdecl G_DObjUpdate(gentity_s *ent)
 
     //Profile_Begin(251);
     if (ent->s.number == level.cachedTagMat.entnum)
-        level.cachedTagMat.entnum = 2175;
+        level.cachedTagMat.entnum = ENTITYNUM_NONE;
     if (ent->s.number == level.cachedEntTargetTagMat.entnum)
-        level.cachedEntTargetTagMat.entnum = 2175;
+        level.cachedEntTargetTagMat.entnum = ENTITYNUM_NONE;
     Com_SafeServerDObjFree(ent->s.number);
     model = ent->model;
     if (!ent->model)

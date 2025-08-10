@@ -17,6 +17,8 @@
 #include <script/scr_const.h>
 #endif
 
+#include <cgame/cg_local.h>
+
 char __cdecl Bullet_Trace(
     const BulletFireParams *bp,
     const WeaponDef *weapDef,
@@ -51,7 +53,7 @@ char __cdecl Bullet_Trace(
     if (br->trace.hitType == TRACE_HITTYPE_NONE)
         return 0;
     hitEntId = Trace_GetEntityHitId(&br->trace);
-    if (hitEntId == 1022)
+    if (hitEntId == ENTITYNUM_WORLD)
         v7 = 0;
     else
         v7 = &g_entities[hitEntId];
@@ -263,7 +265,7 @@ void __cdecl Bullet_Fire(
         if (weaponEnt)
             number = weaponEnt->s.number;
         else
-            number = 1022;
+            number = ENTITYNUM_WORLD;
         v9.weaponEntIndex = number;
         v9.ignoreEntIndex = number;
         v9.damageMultiplier = 1.0f;
@@ -682,7 +684,7 @@ void __cdecl Bullet_ImpactEffect(
         if (v21)
             number = v21->s.number;
         else
-            number = 2175;
+            number = ENTITYNUM_NONE;
         tempEnt->s.groundEntityNum = number;
         if (tempEnt->s.otherEntityNum != bp->weaponEntIndex)
         {
@@ -713,7 +715,7 @@ void __cdecl Bullet_ImpactEffect(
         if (v24)
             v25 = v24->s.number;
         else
-            v25 = 2175;
+            v25 = ENTITYNUM_NONE;
         tempEnt->s.groundEntityNum = v25;
         if (tempEnt->s.otherEntityNum != bp->weaponEntIndex)
             MyAssertHandler(

@@ -502,7 +502,7 @@ ai_teammove_t __cdecl Actor_TeamMoveNoDodge(team_move_context_t *context, ai_tea
         if (!context->self->Path.wDodgeCount)
             goto LABEL_14;
         wDodgeEntity = context->self->Path.wDodgeEntity;
-        if (wDodgeEntity == 2175)
+        if (wDodgeEntity == ENTITYNUM_NONE)
             goto LABEL_14;
         if (context->self->Path.wDodgeCount >= 0 || (v8 = 1, context->self->Path.fLookaheadDist >= 37.5))
             v8 = 0;
@@ -511,9 +511,9 @@ ai_teammove_t __cdecl Actor_TeamMoveNoDodge(team_move_context_t *context, ai_tea
         LABEL_14:
             if ((unsigned __int16)p_Path->wDodgeCount >= 0x8000u)
                 p_Path->wDodgeCount = 0;
-            if (p_Path->wDodgeEntity != 2175)
+            if (p_Path->wDodgeEntity != ENTITYNUM_NONE)
             {
-                p_Path->wDodgeEntity = 2175;
+                p_Path->wDodgeEntity = ENTITYNUM_NONE;
                 if (!self->moveMode && level.time >= self->iTeamMoveDodgeTime)
                     return AI_TEAMMOVE_WAIT;
             }
@@ -723,7 +723,7 @@ void __cdecl Actor_DodgeDebug(
         if (otherActor)
             number = otherActor->ent->s.number;
         else
-            number = 2175;
+            number = ENTITYNUM_NONE;
         Com_Printf(18, debugString, self->ent->s.number, number, a5, a6, a7, otherActor);
     }
 }
@@ -941,7 +941,7 @@ ai_teammove_t __cdecl Actor_GetTeamMoveStatus(actor_s *self, bool bUseInterval, 
             if (actor)
                 number = actor->ent->s.number;
             else
-                number = 2175;
+                number = ENTITYNUM_NONE;
             Com_Printf(18, "AI %d failed right dodge pathing AI %d\n", self->ent->s.number, number);
         }
         v26 = self->ent;
@@ -966,7 +966,7 @@ ai_teammove_t __cdecl Actor_GetTeamMoveStatus(actor_s *self, bool bUseInterval, 
                 if (actor)
                     v36 = actor->ent->s.number;
                 else
-                    v36 = 2175;
+                    v36 = ENTITYNUM_NONE;
                 Com_Printf(18, "AI %d left dodge succeed AI %d\n", self->ent->s.number, v36);
             }
             goto LABEL_114;
@@ -976,7 +976,7 @@ ai_teammove_t __cdecl Actor_GetTeamMoveStatus(actor_s *self, bool bUseInterval, 
             if (actor)
                 v27 = actor->ent->s.number;
             else
-                v27 = 2175;
+                v27 = ENTITYNUM_NONE;
             Com_Printf(18, "AI %d failed left dodge pathing AI %d\n", self->ent->s.number, v27);
         }
     failed_dodge:
@@ -1086,7 +1086,7 @@ ai_teammove_t __cdecl Actor_GetTeamMoveStatus(actor_s *self, bool bUseInterval, 
         if (actor)
             v37 = actor->ent->s.number;
         else
-            v37 = 2175;
+            v37 = ENTITYNUM_NONE;
         Com_Printf(18, "AI %d right dodge succeed AI %d\n", self->ent->s.number, v37);
     }
 LABEL_114:

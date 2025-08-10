@@ -1264,11 +1264,11 @@ void __cdecl WriteVehicle(scr_vehicle_s *pVehicle, SaveGame *save)
     unsigned __int8 v5[824]; // [sp+60h] [-350h] BYREF
 
     memcpy(v5, pVehicle, sizeof(v5));
-    //v4[0] = (_cntlzw(pVehicle->entNum - 2175) & 0x20) == 0;
+    //v4[0] = (_cntlzw(pVehicle->entNum - ENTITYNUM_NONE) & 0x20) == 0;
     iassert(save);
     SaveMemory_SaveWrite(v4, 4, save);
     //if (v4[0])
-    if (pVehicle->entNum - 2175 == 0)
+    if (pVehicle->entNum - ENTITYNUM_NONE == 0)
     {
         G_WriteStruct(vehicleFields, (unsigned __int8 *)pVehicle, v5, 824, save);
         WriteVehicleIndex(pVehicle->infoIdx, save);

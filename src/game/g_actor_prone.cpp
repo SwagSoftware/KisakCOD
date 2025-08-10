@@ -27,8 +27,7 @@ actor_prone_info_s *__cdecl G_GetActorProneInfoFromEntNum(int iEntNum)
     int number; // r11
     int v6; // r31
 
-    if (iEntNum >= 2176)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\g_actor_prone.cpp", 24, 0, "%s", "iEntNum < MAX_GENTITIES");
+    iassert(iEntNum < MAX_GENTITIES);
     v2 = &g_entities[iEntNum];
     actor = v2->actor;
     if (actor)

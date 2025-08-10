@@ -723,7 +723,7 @@ int __cdecl Actor_CanShootEnemy(actor_s *self)
 
 int __cdecl Actor_CanSeePoint(actor_s *self, const float *vPoint)
 {
-    return Actor_CanSeePointEx(self, vPoint, self->fovDot, self->fMaxSightDistSqrd, 2175);
+    return Actor_CanSeePointEx(self, vPoint, self->fovDot, self->fMaxSightDistSqrd, ENTITYNUM_NONE);
 }
 
 int __cdecl Actor_CanSeeEntityPoint(actor_s *self, const float *vPoint, const gentity_s *ent)

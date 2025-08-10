@@ -7,6 +7,7 @@
 #include "net_chan_mp.h"
 #include <server_mp/server_mp.h>
 #include <universal/profile.h>
+#include <cgame/cg_local.h>
 
 netFieldOrderInfo_t orderInfo;
 
@@ -1989,7 +1990,7 @@ void __cdecl MSG_WriteGroundEntityNum(int clientNum, msg_t *msg, int groundEntit
 
     if (msg->readOnly)
         MyAssertHandler(".\\qcommon\\sv_msg_write_mp.cpp", 596, 0, "%s", "!msg->readOnly");
-    if (groundEntityNum == 1022 || (SV_PacketDataIsOverhead(clientNum, msg), MSG_WriteBit0(msg), !groundEntityNum))
+    if (groundEntityNum == ENTITYNUM_WORLD || (SV_PacketDataIsOverhead(clientNum, msg), MSG_WriteBit0(msg), !groundEntityNum))
     {
         SV_PacketDataIsGroundEntity(clientNum, msg);
         MSG_WriteBit1(msg);
@@ -2579,7 +2580,7 @@ bool __cdecl MSG_ShouldSendPSField(
         }
         else
         {
-            return ((oldPs->eFlags ^ ps->eFlags) & 2) != 0 || ps->viewlocked_entNum != 1023 || ps->pm_type == PM_INTERMISSION;
+            return ((oldPs->eFlags ^ ps->eFlags) & 2) != 0 || ps->viewlocked_entNum != ENTITYNUM_NONE || ps->pm_type == PM_INTERMISSION;
         }
     }
     else if (field->changeHints != 3 || snapInfo->archived)

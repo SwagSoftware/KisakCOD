@@ -181,7 +181,7 @@ int __cdecl Actor_droptofloor(gentity_s *ent)
     v9[1] = -15.0;
     v10[0] = 15.0;
     v10[1] = 15.0;
-    G_TraceCapsule(&v11, ent->r.currentOrigin, v9, v10, &v6, 2175, 42074129);
+    G_TraceCapsule(&v11, ent->r.currentOrigin, v9, v10, &v6, ENTITYNUM_NONE, 42074129);
     if (v11.startsolid)
         return 1;
     result = 0;
@@ -931,9 +931,9 @@ void __cdecl Actor_InitMove(actor_s *self)
     if (ent->health <= 0)
         MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\actor.cpp", 2377, 0, "%s", "self->ent->health > 0");
     v4 = self->ent;
-    self->Physics.iHitEntnum = 2175;
+    self->Physics.iHitEntnum = ENTITYNUM_NONE;
     self->Physics.iTraceMask = 42074129;
-    self->Physics.groundEntNum = 2174;
+    self->Physics.groundEntNum = ENTITYNUM_WORLD;
     self->Physics.vMins[0] = v4->r.mins[0];
     self->Physics.vMins[1] = v4->r.mins[1];
     self->Physics.vMins[2] = v4->r.mins[2];
@@ -950,7 +950,7 @@ bool __cdecl Actor_IsDodgeEntity(actor_s *self, int entnum)
     bool result; // r3
 
     gentities = level.gentities;
-    if ((level.gentities[2175].flags & 0x400) == 0)
+    if ((level.gentities[ENTITYNUM_NONE].flags & 0x400) == 0)
     {
         MyAssertHandler(
             "c:\\trees\\cod3\\cod3src\\src\\game\\actor.cpp",
@@ -1714,7 +1714,7 @@ bool __cdecl Actor_SkipPathEndActions(actor_s *self)
         MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\actor.cpp", 4567, 0, "%s", "self");
     if (self->Path.iPathEndTime)
         return 0;
-    if (!self->Physics.bHasGroundPlane && self->Physics.groundEntNum == 2175
+    if (!self->Physics.bHasGroundPlane && self->Physics.groundEntNum == ENTITYNUM_NONE
         || !Path_AttemptedCompleteLookahead(&self->Path))
     {
         return 1;
@@ -2467,8 +2467,7 @@ unsigned int __cdecl G_GetActorFriendlyIndex(int iEntNum)
 
     if (!level.bDrawCompassFriendlies)
         return -1;
-    if (iEntNum >= 2176)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\actor.cpp", 5398, 0, "%s", "iEntNum < MAX_GENTITIES");
+    iassert(iEntNum < MAX_GENTITIES);
     v2 = &g_entities[iEntNum];
     actor = v2->actor;
     if (!actor || !actor->bDrawOnCompass || v2->sentient->eTeam != TEAM_ALLIES)
@@ -2872,9 +2871,9 @@ void __cdecl Actor_Free(actor_s *actor)
         if (level.actors[i].inuse)
         {
             if (v8->Path.wDodgeEntity == number)
-                v8->Path.wDodgeEntity = 2175;
+                v8->Path.wDodgeEntity = ENTITYNUM_NONE;
             if (v8->Physics.iHitEntnum == number)
-                v8->Physics.iHitEntnum = 2175;
+                v8->Physics.iHitEntnum = ENTITYNUM_NONE;
             if (v8->pPileUpActor == actor)
             {
                 v8->pPileUpActor = 0;
@@ -4291,11 +4290,11 @@ int __cdecl Actor_PhysicsMoveAway(actor_s *self)
     v18 = (float)((float)v15 * (float)0.25);
     if (Actor_Physics(&self->Physics))
     {
-        if (!Actor_PhysicsCheckMoveAwayNoWorse(self, v11, 0, v14, v18) && self->Physics.groundEntNum != 2175)
+        if (!Actor_PhysicsCheckMoveAwayNoWorse(self, v11, 0, v14, v18) && self->Physics.groundEntNum != ENTITYNUM_NONE)
         {
             for (i = 0; i < 2; ++i)
             {
-                if (self->Physics.iHitEntnum == 2175)
+                if (self->Physics.iHitEntnum == ENTITYNUM_NONE)
                     break;
                 Vec2Normalize(self->Physics.vHitNormal);
                 v16 = (float)((float)v16 * (float)0.75);
@@ -5530,7 +5529,7 @@ int __cdecl Actor_PhysicsAndDodge(actor_s *self)
         return result;
     }
     iHitEntnum = self->Physics.iHitEntnum;
-    if (iHitEntnum == 2175)
+    if (iHitEntnum == ENTITYNUM_NONE)
     {
         result = 1;
         self->ent->flags &= 0xFFFFFFE7;
@@ -5604,7 +5603,7 @@ int __cdecl Actor_PhysicsAndDodge(actor_s *self)
         v21 = 0;
     }
     self->ent->flags |= v12;
-    if (self->Physics.iHitEntnum != 2175)
+    if (self->Physics.iHitEntnum != ENTITYNUM_NONE)
     {
         if (!v21)
         {
@@ -5643,7 +5642,7 @@ int __cdecl Actor_PhysicsAndDodge(actor_s *self)
         if (!v21)
         {
             result = 1;
-            self->Physics.iHitEntnum = 2175;
+            self->Physics.iHitEntnum = ENTITYNUM_NONE;
             return result;
         }
         if (!level.gentities[iHitEntnum].sentient)
@@ -5810,7 +5809,7 @@ void __cdecl Actor_DoMove(actor_s *self)
             self->Physics.vOrigin[1] = v13->r.currentOrigin[1] + self->Physics.vWishDelta[1];
             self->Physics.vOrigin[2] = v13->r.currentOrigin[2] + self->Physics.vWishDelta[2];
             fLookaheadAmount = self->Path.fLookaheadAmount;
-            self->Path.wDodgeEntity = 2175;
+            self->Path.wDodgeEntity = ENTITYNUM_NONE;
             self->Physics.vVelocity[2] = 0.0;
             if (fLookaheadAmount < 64.0)
                 self->Path.fLookaheadAmount = 64.0;
@@ -6089,7 +6088,7 @@ bool __cdecl Actor_FindPathToGoalDirectInternal(actor_s *self)
         v17 = 18.0;
     CloseNode = Path_FindCloseNode(eTeam, v8, v30, 1);
     vOrigin = CloseNode->constant.vOrigin;
-    Path_PredictionTrace(CloseNode->constant.vOrigin, v30, 2175, 8519697, &v26, v17, v20);
+    Path_PredictionTrace(CloseNode->constant.vOrigin, v30, ENTITYNUM_NONE, 8519697, &v26, v17, v20);
     if ((unsigned __int8)Actor_PointAtGoal(&v26, p_codeGoal))
     {
         v10 = CloseNode;

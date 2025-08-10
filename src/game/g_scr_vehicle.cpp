@@ -174,7 +174,7 @@ void __cdecl VEH_InitVehicle(gentity_s *ent, scr_vehicle_s *veh, __int16 infoIdx
     veh->maxDragSpeed = 17.6f * 60.0f;
     veh->turningAbility = 0.5f;
     veh->hasTarget = 0;
-    veh->targetEnt = 1023;
+    veh->targetEnt = ENTITYNUM_NONE;
     iassert(!veh->lookAtEnt.isDefined());
     veh->targetOrigin[0] = 0.0f;
     veh->targetOrigin[1] = 0.0f;
@@ -546,7 +546,7 @@ void __cdecl VEH_MoveTrace(gentity_s *ent)
             if (size[dimIndex] > (float)size[2])
                 maxs[2] = size[dimIndex] - size[2] + maxs[2];
             G_TraceCapsule(&trace, phys->prevOrigin, ent->r.mins, maxs, phys->origin, ent->s.number, contents);
-            if (trace.fraction < 1.0f && Trace_GetEntityHitId(&trace) == 1022)
+            if (trace.fraction < 1.0f && Trace_GetEntityHitId(&trace) == ENTITYNUM_WORLD)
             {
                 Scr_AddVector(trace.normal);
                 Scr_Notify(ent, scr_const.script_vehicle_collision, 1u);
@@ -784,7 +784,7 @@ void __cdecl VEH_UpdateAim(gentity_s *ent)
     tgtEnt = 0;
     if (veh->hasTarget && ent->health > 0)
     {
-        if (veh->targetEnt == 1023)
+        if (veh->targetEnt == ENTITYNUM_NONE)
         {
             tgtEnt = 0;
             tgtPos[0] = veh->targetOrigin[0];
@@ -2081,7 +2081,7 @@ void __cdecl CMD_VEH_SetTurretTargetVec(scr_entref_t entref)
         Scr_Error(v2);
     }
     veh->hasTarget = 1;
-    veh->targetEnt = 1023;
+    veh->targetEnt = ENTITYNUM_NONE;
     Scr_GetVector(0, tgtPos);
     veh->targetOrigin[0] = tgtPos[0];
     veh->targetOrigin[1] = tgtPos[1];
@@ -2111,7 +2111,7 @@ void __cdecl CMD_VEH_SetTurretTargetEnt(scr_entref_t entref)
     if (tgtEnt)
         number = tgtEnt->s.number;
     else
-        number = 1023;
+        number = ENTITYNUM_NONE;
     veh->targetEnt = number;
     if (tgtEnt)
         tgtEnt->flags |= 0x80000u;
@@ -2137,7 +2137,7 @@ void __cdecl CMD_VEH_ClearTurretTargetEnt(scr_entref_t entref)
     veh = GScr_GetVehicle(entref)->scr_vehicle;
     if ((veh->flags & 1) == 0)
         veh->hasTarget = 0;
-    veh->targetEnt = 1023;
+    veh->targetEnt = ENTITYNUM_NONE;
     veh->targetOrigin[0] = 0.0f;
     veh->targetOrigin[1] = 0.0f;
     veh->targetOrigin[2] = 0.0f;
@@ -2282,7 +2282,7 @@ void __cdecl CMD_VEH_FireWeapon(scr_entref_t entref)
         if (ent->r.ownerNum.isDefined()
             && numBarrels == 1
             && !veh->turret.barrelBlocked
-            && veh->targetEnt == 1023)
+            && veh->targetEnt == ENTITYNUM_NONE)
         {
             player = ent->r.ownerNum.ent();
             if (!player->client)
@@ -2857,7 +2857,7 @@ void G_SpawnVehicle(gentity_s *ent, const char *typeName, int load)
     for (i = 0; i < ARRAY_COUNT(s_vehicles); i++)
     {
         veh = &s_vehicles[i];
-        if (veh->entNum == 2175)
+        if (veh->entNum == ENTITYNUM_NONE)
         {
             break;
         }
@@ -2882,7 +2882,7 @@ void G_SpawnVehicle(gentity_s *ent, const char *typeName, int load)
         }
     }
     memset(veh, 0, sizeof(scr_vehicle_s));
-    veh->targetEnt = 2175;
+    veh->targetEnt = ENTITYNUM_NONE;
     number = veh->lookAtEnt.number;
     iassert(!number || g_entities[number - 1].r.inuse);
     iassert(!veh->lookAtEnt.isDefined());
@@ -2965,24 +2965,24 @@ void G_FreeVehicleRefs(gentity_s *ent)
         p_targetEnt = &s_vehicles[0].targetEnt;
         do
         {
-            if (*(p_targetEnt - 49) != 2175 && *p_targetEnt == ent->s.number)
+            if (*(p_targetEnt - 49) != ENTITYNUM_NONE && *p_targetEnt == ent->s.number)
             {
-                *p_targetEnt = 2175;
+                *p_targetEnt = ENTITYNUM_NONE;
                 *(p_targetEnt - 5) = 0;
             }
-            if (p_targetEnt[157] != 2175 && p_targetEnt[206] == ent->s.number)
+            if (p_targetEnt[157] != ENTITYNUM_NONE && p_targetEnt[206] == ent->s.number)
             {
-                p_targetEnt[206] = 2175;
+                p_targetEnt[206] = ENTITYNUM_NONE;
                 p_targetEnt[201] = 0;
             }
-            if (p_targetEnt[363] != 2175 && p_targetEnt[412] == ent->s.number)
+            if (p_targetEnt[363] != ENTITYNUM_NONE && p_targetEnt[412] == ent->s.number)
             {
-                p_targetEnt[412] = 2175;
+                p_targetEnt[412] = ENTITYNUM_NONE;
                 p_targetEnt[407] = 0;
             }
-            if (p_targetEnt[569] != 2175 && p_targetEnt[618] == ent->s.number)
+            if (p_targetEnt[569] != ENTITYNUM_NONE && p_targetEnt[618] == ent->s.number)
             {
-                p_targetEnt[618] = 2175;
+                p_targetEnt[618] = ENTITYNUM_NONE;
                 p_targetEnt[613] = 0;
             }
             p_targetEnt += 824;
@@ -3025,7 +3025,7 @@ void G_InitScrVehicles()
     for (i = 0; i < 64; i = (__int16)(i + 1))
     {
         G_VehInitPathPos(&s_vehicles[i].pathPos);
-        s_vehicles[i].entNum = 2175;
+        s_vehicles[i].entNum = ENTITYNUM_NONE;
     }
     level.vehicles = s_vehicles;
 }
@@ -3039,7 +3039,7 @@ void G_SetupScrVehicles()
     for (i = 0; i < 64; i = (__int16)(i + 1))
     {
         entNum = s_vehicles[i].entNum;
-        if (entNum != 2175)
+        if (entNum != ENTITYNUM_NONE)
         {
             Vehicle = VEH_GetVehicle(entNum);
             VEH_SetupCollmap(Vehicle);
@@ -4079,7 +4079,7 @@ void G_FreeVehicle(gentity_s *ent)
     ent->s.lerp.apos.trType = TR_STATIONARY;
     VP_ClearNode(scr_vehicle->pathPos.switchNode);
     VP_ClearNode(&ent->scr_vehicle->pathPos.switchNode[1]);
-    ent->scr_vehicle->entNum = 2175;
+    ent->scr_vehicle->entNum = ENTITYNUM_NONE;
     ent->scr_vehicle = 0;
 }
 

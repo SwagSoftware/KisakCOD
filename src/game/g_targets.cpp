@@ -678,7 +678,7 @@ void __cdecl Scr_Target_ClearLockOn()
 {
     const char *v0; // r3
 
-    v0 = va("ret_lock_on %i %i", 2175, 0);
+    v0 = va("ret_lock_on %i %i", ENTITYNUM_NONE, 0);
     SV_GameSendServerCommand(-1, v0);
 }
 

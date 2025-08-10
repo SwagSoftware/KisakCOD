@@ -1,6 +1,7 @@
 #include "qcommon.h"
 #include <xanim/xmodel.h>
 #include <xanim/xanim.h>
+#include <cgame/cg_local.h>
 
 void __cdecl CM_TraceStaticModel(
     cStaticModel_s *sm,
@@ -23,7 +24,7 @@ void __cdecl CM_TraceStaticModel(
         if (!results)
             MyAssertHandler("c:\\trees\\cod3\\src\\qcommon\\cm_public.h", 135, 0, "%s", "trace");
         results->hitType = TRACE_HITTYPE_ENTITY;
-        results->hitId = 1022;
+        results->hitId = ENTITYNUM_WORLD;
         MatrixTransposeTransformVector(results->normal, sm->invScaledAxis, normal);
         Vec3Normalize(normal);
         results->normal[0] = normal[0];

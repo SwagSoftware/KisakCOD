@@ -40,7 +40,7 @@ void __cdecl AIPhys_AddTouchEnt(int entityNum)
     int v3; // r9
     int *iTouchEnts; // r10
 
-    if (entityNum != 2174)
+    if (entityNum != ENTITYNUM_WORLD)
     {
         v1 = g_pPhys;
         iNumTouch = g_pPhys->iNumTouch;
@@ -247,7 +247,7 @@ SlideMoveResult __cdecl AIPhys_SlideMove(int gravity, int zonly)
             goto LABEL_11;
     LABEL_15:
         v11->bDeflected = 1;
-        if (!v86.walkable && v11->iHitEntnum == 2175 && (v86.normal[0] != 0.0 || v86.normal[1] != 0.0))
+        if (!v86.walkable && v11->iHitEntnum == ENTITYNUM_NONE && (v86.normal[0] != 0.0 || v86.normal[1] != 0.0))
         {
             EntityHitId = Trace_GetEntityHitId(&v86);
             v21 = g_pPhys;
@@ -282,7 +282,7 @@ SlideMoveResult __cdecl AIPhys_SlideMove(int gravity, int zonly)
                 goto LABEL_25;
         }
         v11 = g_pPhys;
-        if (v86.fraction == 0.0 && g_pPhys->iHitEntnum == 2175 && (v26 != 0.0 || v24 != 0.0))
+        if (v86.fraction == 0.0 && g_pPhys->iHitEntnum == ENTITYNUM_NONE && (v26 != 0.0 || v24 != 0.0))
         {
             v28 = Trace_GetEntityHitId(&v86);
             v11 = g_pPhys;
@@ -355,7 +355,7 @@ SlideMoveResult __cdecl AIPhys_SlideMove(int gravity, int zonly)
                     if (v41 >= v12)
                     {
                         v11 = g_pPhys;
-                        if (g_pPhys->iHitEntnum == 2175)
+                        if (g_pPhys->iHitEntnum == ENTITYNUM_NONE)
                         {
                             v64 = (float)((float)v42 - g_pPhys->vVelocity[0]);
                             v65 = (float)((float)v40 - g_pPhys->vVelocity[1]);
@@ -486,7 +486,7 @@ SlideMoveResult __cdecl AIPhys_SlideMove(int gravity, int zonly)
     g_pPhys->vVelocity[2] = 0.0;
     if (!v15 && g_apl.groundTrace.startsolid)
         return SLIDEMOVE_FAIL;
-    if (v68->iHitEntnum == 2175)
+    if (v68->iHitEntnum == ENTITYNUM_NONE)
     {
         v69 = Trace_GetEntityHitId(&v86);
         v70 = g_pPhys;
@@ -562,7 +562,7 @@ int AIPhys_StepSlideMove(int gravity, int zonly)
     actor_physics_local_t aplBackup;
     memcpy(&aplBackup, &g_apl, sizeof(actor_physics_local_t));
 
-    g_pPhys->iHitEntnum = 2175;  // Magic number (entity hit)
+    g_pPhys->iHitEntnum = ENTITYNUM_NONE;
     g_apl.bGroundPlane = 0;
 
     // Move up fraction of stepHeight
@@ -759,7 +759,7 @@ void AIPhys_GroundTrace()
     v10 = g_pPhys->vOrigin[1];
     v12[1] = v10;
     v11 = (float)v0 + (float)0.25;
-    if (v2 <= 0.0 && g_pPhys->groundEntNum != 2175)
+    if (v2 <= 0.0 && g_pPhys->groundEntNum != ENTITYNUM_NONE)
         stepheight = g_apl.stepheight;
     v13 = (float)v0 - (float)stepheight;
     //Profile_Begin(226);
@@ -801,7 +801,7 @@ void AIPhys_GroundTrace()
             && (float)((float)(v14.normal[0] * g_pPhys->vVelocity[0])
                 + (float)((float)(g_pPhys->vVelocity[2] * v14.normal[2]) + (float)(g_pPhys->vVelocity[1] * v14.normal[1]))) > 10.0)
         {
-            g_pPhys->groundEntNum = 2175;
+            g_pPhys->groundEntNum = ENTITYNUM_NONE;
             g_apl.bGroundPlane = 0;
             g_apl.bIsWalking = 0;
         }
@@ -820,10 +820,10 @@ void AIPhys_GroundTrace()
         }
         else
         {
-            g_pPhys->groundEntNum = 2175;
+            g_pPhys->groundEntNum = ENTITYNUM_NONE;
             g_apl.bGroundPlane = 1;
             g_apl.bIsWalking = 0;
-            if (v4->iHitEntnum == 2175 && (v14.normal[0] != 0.0 || v14.normal[1] != 0.0))
+            if (v4->iHitEntnum == ENTITYNUM_NONE && (v14.normal[0] != 0.0 || v14.normal[1] != 0.0))
             {
                 v5 = Trace_GetEntityHitId(&v14);
                 v6 = g_pPhys;
@@ -852,7 +852,7 @@ void AIPhys_Footsteps()
     groundEntNum = g_pPhys->groundEntNum;
     iFootstepTimer = g_pPhys->iFootstepTimer;
     g_pPhys->iFootstepTimer = 0;
-    if (groundEntNum != 2175)
+    if (groundEntNum != ENTITYNUM_NONE)
     {
         ePhysicsType = v0->ePhysicsType;
         if (ePhysicsType == AIPHYS_NORMAL_ABSOLUTE
@@ -948,9 +948,9 @@ int __cdecl Actor_Physics(actor_physics_t *pPhys)
     v3 = pPhys;
     pPhys->iNumTouch = 0;
     pPhys->bDeflected = 0;
-    pPhys->iHitEntnum = 2175;
+    pPhys->iHitEntnum = ENTITYNUM_NONE;
     g_pPhys = pPhys;
-    if (groundEntNum == 2174 && pPhys->vWishDelta[0] == 0.0 && pPhys->vWishDelta[1] == 0.0 && pPhys->vWishDelta[2] == 0.0)
+    if (groundEntNum == ENTITYNUM_WORLD && pPhys->vWishDelta[0] == 0.0 && pPhys->vWishDelta[1] == 0.0 && pPhys->vWishDelta[2] == 0.0)
     {
         pPhys->vVelocity[0] = 0.0;
         pPhys->vVelocity[1] = 0.0;

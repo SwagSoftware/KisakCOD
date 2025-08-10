@@ -3,11 +3,16 @@
 #include "dynentity_client.h"
 #include <gfx_d3d/r_scene.h>
 #include <cgame/cg_local.h>
-#include <cgame_mp/cg_local_mp.h>
 #include <EffectsCore/fx_system.h>
-#include <server_mp/server_mp.h>
 #include <gfx_d3d/r_shadowcookie.h>
 #include <universal/profile.h>
+
+#ifdef KISAK_MP
+#include <cgame_mp/cg_local_mp.h>
+#include <server_mp/server_mp.h>
+#elif KISAK_SP
+#include <cgame/cg_main.h>
+#endif
 
 #include <algorithm>
 
@@ -984,7 +989,7 @@ void __cdecl DynEntCl_EntityImpactEvent(
             Vec3Sub(hitPos, start, hitDir);
             Vec3Normalize(hitDir);
             if (isMelee)
-                CG_PlaySoundAlias(localClientNum, 1022, hitPos, cgMedia.meleeKnifeHitOther);
+                CG_PlaySoundAlias(localClientNum, ENTITYNUM_WORLD, hitPos, cgMedia.meleeKnifeHitOther);
             else
                 DynEntCl_PlayImpactEffects(
                     localClientNum,
@@ -1070,7 +1075,7 @@ void __cdecl DynEntCl_PlayImpactEffects(
         DynEntCl_PlayEventFx(hitFx, hitPos, axis);
     }
     if (hitSound)
-        CG_PlaySoundAlias(localClientNum, 1022, hitPos, hitSound);
+        CG_PlaySoundAlias(localClientNum, ENTITYNUM_WORLD, hitPos, hitSound);
 }
 
 void __cdecl DynEntCl_PlayEventFx(const FxEffectDef *def, const float *origin, const float (*axis)[3])
@@ -1133,8 +1138,10 @@ char __cdecl DynEntCl_DynEntImpactEvent(
         MyAssertHandler(".\\DynEntity\\DynEntity_client.cpp", 1060, 0, "%s\n\t(damage) = %i", "((damage >= 0))", damage);
     if (!DynEntCl_EventNeedsProcessed(localClientNum, sourceEntityNum))
         return 0;
+#ifdef KISAK_MP
     if (!sv_clientSideBullets->current.enabled)
         DynEntCl_TestPhysicsEntities(localClientNum, sourceEntityNum, start, end, isMelee);
+#endif
     memset((uint8_t *)&trace, 0, sizeof(trace));
     trace.fraction = 1.0;
     clip.extents.start[0] = *start;
@@ -1145,7 +1152,7 @@ char __cdecl DynEntCl_DynEntImpactEvent(
     clip.extents.end[2] = end[2];
     CM_CalcTraceExtents(&clip.extents);
     clip.ignoreEntParams = 0;
-    clip.contentmask = 0x802013;
+    clip.contentmask = 0x802013; // same in SP
     clip.bLocational = 1;
     clip.priorityMap = 0;
     DynEntCl_PointTrace(&clip, &trace);
@@ -1160,14 +1167,18 @@ char __cdecl DynEntCl_DynEntImpactEvent(
     Vec3Sub(end, start, hitDir);
     Vec3Normalize(hitDir);
     if (isMelee)
-        CG_PlaySoundAlias(localClientNum, 1022, hitPos, cgMedia.meleeKnifeHitOther);
+    {
+        CG_PlaySoundAlias(localClientNum, ENTITYNUM_WORLD, hitPos, cgMedia.meleeKnifeHitOther);
+    }
     else
+    {
         DynEntCl_PlayImpactEffects(
             localClientNum,
             sourceEntityNum,
             (trace.surfaceFlags & 0x1F00000) >> 20,
             hitPos,
             trace.normal);
+    }
     if (DynEnt_GetEntityProps(dynEntDef->type)->usePhysics)
     {
         dynEntPose = DynEnt_GetClientPose(dynEntId, drawType);
@@ -1404,7 +1415,7 @@ void __cdecl DynEntCl_ExplosionEvent(
     iassert(innerDamage >= 0);
     iassert(outerDamage >= 0);
 
-    if (DynEntCl_EventNeedsProcessed(localClientNum, 1023) && outerRadius != 0.0)
+    if (DynEntCl_EventNeedsProcessed(localClientNum, ENTITYNUM_NONE) && outerRadius != 0.0)
     {
          outerRadiusSqr = outerRadius * outerRadius;
          innerRadiusSqr = innerRadius * innerRadius;
@@ -1587,7 +1598,7 @@ void __cdecl DynEntCl_JitterEvent(
         MyAssertHandler(".\\DynEntity\\DynEntity_client.cpp", 1373, 0, "%s", "innerRadius >= 0.0f");
     if (innerRadius > (double)outerRadius)
         MyAssertHandler(".\\DynEntity\\DynEntity_client.cpp", 1374, 0, "%s", "outerRadius >= innerRadius");
-    if (DynEntCl_EventNeedsProcessed(localClientNum, 1023) && outerRadius != 0.0)
+    if (DynEntCl_EventNeedsProcessed(localClientNum, ENTITYNUM_NONE) && outerRadius != 0.0)
     {
         s = -(outerRadius * 1.414213538169861);
         Vec3AddScalar(origin, s, sum);
@@ -1668,7 +1679,7 @@ void __cdecl DynEntCl_DestroyEvent(
         MyAssertHandler(".\\DynEntity\\DynEntity_client.cpp", 1455, 0, "%s", "hitPos");
     if (!hitDir)
         MyAssertHandler(".\\DynEntity\\DynEntity_client.cpp", 1456, 0, "%s", "hitDir");
-    if (DynEntCl_EventNeedsProcessed(localClientNum, 1023))
+    if (DynEntCl_EventNeedsProcessed(localClientNum, ENTITYNUM_NONE))
     {
         if (localClientNum)
             MyAssertHandler(
@@ -1764,7 +1775,7 @@ void DynEntCl_WakeUpAroundPlayer(int localClientNum)
                     if (DynEnt_GetEntityProps(EntityDef->type)->usePhysics && !ClientEntity->physObjId)
                     {
                         ClientPose = DynEnt_GetClientPose(*v7, v2);
-                        ClientEntity->physObjId = DynEntCl_CreatePhysObj(EntityDef, &ClientPose->pose);
+                        ClientEntity->physObjId = (int32_t)DynEntCl_CreatePhysObj(EntityDef, &ClientPose->pose);
                     }
                     --v8;
                     ++v7;

@@ -157,7 +157,7 @@ void __cdecl G_ClientStopUsingTurret(gentity_s *self)
     TeleportPlayer(owner, pTurretInfo->userOrigin, owner->r.currentAngles);
     owner->client->ps.eFlags &= 0xFFFFFCFF;
     owner->client->ps.viewlocked = PLAYERVIEWLOCK_NONE;
-    owner->client->ps.viewlocked_entNum = 1023;
+    owner->client->ps.viewlocked_entNum = ENTITYNUM_NONE;
     owner->active = 0;
     owner->s.otherEntityNum = 0;
     self->active = 0;
@@ -574,9 +574,9 @@ void __cdecl Fire_Lead(gentity_s *ent, gentity_s *activator)
     gentity_s *v2; // [esp+14h] [ebp-4Ch]
     weaponParms wp; // [esp+20h] [ebp-40h] BYREF
 
-    if (!activator)
-        MyAssertHandler(".\\game_mp\\g_misc_mp.cpp", 158, 0, "%s", "activator");
-    if (activator == &g_entities[1023])
+
+    iassert(activator);
+    if (activator == &g_entities[ENTITYNUM_NONE])
         v2 = ent;
     else
         v2 = activator;
@@ -647,7 +647,7 @@ void __cdecl turret_think(gentity_s *self)
     if (self->r.ownerNum.isDefined())
         v1 = self->r.ownerNum.ent();
     else
-        v1 = &g_entities[1023];
+        v1 = &g_entities[ENTITYNUM_NONE];
     if (!v1->client)
     {
         turret_UpdateSound(self);
@@ -864,7 +864,7 @@ void __cdecl G_FreeTurret(gentity_s *self)
     if (self->r.ownerNum.isDefined())
         v1 = self->r.ownerNum.ent();
     else
-        v1 = &g_entities[1023];
+        v1 = &g_entities[ENTITYNUM_NONE];
     if (!self->pTurretInfo)
         MyAssertHandler(".\\game_mp\\g_misc_mp.cpp", 900, 0, "%s", "pTurretInfo");
     if (v1->client)
@@ -882,7 +882,7 @@ bool __cdecl G_IsTurretUsable(gentity_s *self, gentity_s *owner)
         return 0;
     if (owner->client->ps.grenadeTimeLeft)
         return 0;
-    return owner->client->ps.groundEntityNum != 1023;
+    return owner->client->ps.groundEntityNum != ENTITYNUM_NONE;
 }
 
 bool __cdecl turret_behind(gentity_s *self, gentity_s *other)

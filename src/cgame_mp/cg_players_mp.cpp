@@ -289,7 +289,7 @@ void __cdecl CG_PlayerTurretPositionAndBlend(int32_t localClientNum, centity_s *
     float vDelta[3]; // [esp+1B8h] [ebp-Ch] BYREF
     cg_s *cgameGlob;
 
-    if (cent->nextState.otherEntityNum >= 64 && cent->nextState.otherEntityNum != 1023)
+    if (cent->nextState.otherEntityNum >= 64 && cent->nextState.otherEntityNum != ENTITYNUM_NONE)
     {
         cgameGlob = CG_GetLocalClientGlobals(localClientNum);
         clientNum = cent->nextState.clientNum;

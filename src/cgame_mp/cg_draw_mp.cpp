@@ -1262,7 +1262,7 @@ bool __cdecl CG_CanSeeFriendlyHead(int32_t localClientNum, const centity_s *cent
         return 0;
     CG_TraceCapsule(&trace, start, (float *)vec3_origin, (float *)vec3_origin, end, ps->clientNum, 0x2803001);
     hitEntId = Trace_GetEntityHitId(&trace);
-    if (hitEntId != 1023 && hitEntId != cent->nextState.clientNum)
+    if (hitEntId != ENTITYNUM_NONE && hitEntId != cent->nextState.clientNum)
         return 0;
     Vec3Lerp(start, end, trace.fraction, contactEnd);
     vis = FX_GetClientVisibility(localClientNum, start, contactEnd);

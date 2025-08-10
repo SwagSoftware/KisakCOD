@@ -578,7 +578,7 @@ void __cdecl CG_AddPlayerWeapon(
                 lightingOrigin[2] = ps->origin[2];
                 lightingOrigin[2] = lightingOrigin[2] + ps->viewHeightCurrent;
                 AddLeanToPosition(lightingOrigin, ps->viewangles[1], ps->leanf, 16.0, 20.0);
-                R_AddDObjToScene(weapInfo->viewModelDObj, &cgameGlob->viewModelPose, 0x3FFu, 3u, lightingOrigin, 0.0);
+                R_AddDObjToScene(weapInfo->viewModelDObj, &cgameGlob->viewModelPose, ENTITYNUM_NONE, 3u, lightingOrigin, 0.0);
                 weapDef = BG_GetWeaponDef(weaponNum);
                 iassert(weapDef);
                 v7 = CG_LookingThroughNightVision(localClientNum) && weapDef->laserSightDuringNightvision;
@@ -2311,7 +2311,7 @@ void __cdecl DrawBulletImpacts(
             v5 = (maxSpread - minSpread) * aimSpreadScale + minSpread;
         aimSpreadAmount = v5;
         memset((uint8_t *)&dst, 0, sizeof(dst));
-        dst.weaponEntIndex = 1022;
+        dst.weaponEntIndex = ENTITYNUM_WORLD;
         dst.ignoreEntIndex = ent->nextState.number;
         dst.damageMultiplier = 1.0;
         dst.methodOfDeath = (weaponDef->bRifleBullet != 0) + 1;
@@ -2684,7 +2684,7 @@ char __cdecl BulletTrace(
     if (br->trace.hitType == TRACE_HITTYPE_NONE)
         return 0;
     hitEntId = Trace_GetEntityHitId(&br->trace);
-    if (hitEntId == 1022)
+    if (hitEntId == ENTITYNUM_WORLD)
         Entity = 0;
     else
         Entity = CG_GetEntity(localClientNum, hitEntId);
@@ -3381,7 +3381,7 @@ void __cdecl CG_BulletHitEvent_Internal(
         fx = cgMedia.fxNoBloodFleshHit;
 
     if (hitSound)
-        CG_PlaySoundAlias(localClientNum, 1022, position, hitSound);
+        CG_PlaySoundAlias(localClientNum, ENTITYNUM_WORLD, position, hitSound);
 
     iassert(localClientNum == 0);
 
@@ -3396,7 +3396,7 @@ void __cdecl CG_BulletHitEvent_Internal(
         {
             nextSnap = cgameGlob->nextSnap;
             if ((nextSnap->ps.otherFlags & 6) == 0 || sourceEntityNum != nextSnap->ps.clientNum)
-                targetEntityNum = 1023;
+                targetEntityNum = ENTITYNUM_NONE;
         }
         FX_PlayOrientedEffectWithMarkEntity(localClientNum, fx, cgameGlob->time, position, axis, targetEntityNum);
     }
@@ -3468,7 +3468,7 @@ void __cdecl WhizbySound(int32_t localClientNum, const float *start, const float
         if (soundRadius >= (double)viewRadius)
         {
             Vec3Mad(projPos, -16.0f, dir, projPos);
-            CG_PlaySoundAlias(localClientNum, 1022, projPos, cgMedia.bulletWhizby);
+            CG_PlaySoundAlias(localClientNum, ENTITYNUM_WORLD, projPos, cgMedia.bulletWhizby);
         }
     }
 }
@@ -3508,19 +3508,15 @@ void __cdecl CG_BulletHitClientEvent(
 {
     const char *v7; // eax
 
-    if (sourceEntityNum < 0)
-        MyAssertHandler(".\\cgame\\cg_weapons.cpp", 4556, 0, "%s", "sourceEntityNum >= 0");
-    if (sourceEntityNum == 1023)
-        MyAssertHandler(".\\cgame\\cg_weapons.cpp", 4557, 0, "%s", "sourceEntityNum != ENTITYNUM_NONE");
-    if (!position)
-        MyAssertHandler(".\\cgame\\cg_weapons.cpp", 4558, 0, "%s", "position");
-    if (surfType > 0x1C)
-        MyAssertHandler(".\\cgame\\cg_weapons.cpp", 4559, 0, "%s", "surfType >= 0 && surfType < SURF_TYPECOUNT");
-    if (damage < 0)
-        MyAssertHandler(".\\cgame\\cg_weapons.cpp", 4560, 0, "%s\n\t(damage) = %i", "(damage >= 0)", damage);
+    iassert(sourceEntityNum >= 0);
+    iassert(sourceEntityNum != ENTITYNUM_NONE);
+    iassert(position);
+    iassert(surfType >= 0 && surfType < SURF_TYPECOUNT);
+    iassert(damage >= 0);
+
     if (event == 42)
     {
-        CG_PlaySoundAlias(localClientNum, 1022, position, cgMedia.bulletHitSmallSound[surfType]);
+        CG_PlaySoundAlias(localClientNum, ENTITYNUM_WORLD, position, cgMedia.bulletHitSmallSound[surfType]);
     LABEL_19:
         BulletTrajectoryEffects(
             localClientNum,
@@ -3535,7 +3531,7 @@ void __cdecl CG_BulletHitClientEvent(
     }
     if (event == 43)
     {
-        CG_PlaySoundAlias(localClientNum, 1022, position, cgMedia.bulletHitLargeSound[surfType]);
+        CG_PlaySoundAlias(localClientNum, ENTITYNUM_WORLD, position, cgMedia.bulletHitLargeSound[surfType]);
         goto LABEL_19;
     }
     if (!alwaysfails)

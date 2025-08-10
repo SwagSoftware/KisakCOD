@@ -300,7 +300,7 @@ int __cdecl Actor_Exposed_ReacquireStepMove(actor_s *self, double fDist)
             v30[0] = (float)(v22 * (float)v13) + v26;
             v30[1] = (float)(v23 * (float)v13) + v27;
             v17 = prone ? 10.0 : 18.0;
-            if (Path_PredictionTrace(&v26, v30, 2175, self->Physics.iTraceMask | 4, v32, v17, v15))
+            if (Path_PredictionTrace(&v26, v30, ENTITYNUM_NONE, self->Physics.iTraceMask | 4, v32, v17, v15))
             {
                 if ((unsigned __int8)Actor_PointAtGoal(v32, &self->codeGoal))
                 {

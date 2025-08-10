@@ -687,7 +687,7 @@ void __cdecl Path_Begin(path_t *pPath)
 {
     memset(pPath, 0, sizeof(path_t));
     pPath->fLookaheadAmount = 32768.0;
-    pPath->wDodgeEntity = 2175;
+    pPath->wDodgeEntity = ENTITYNUM_NONE;
 }
 
 void __cdecl Path_Clear(path_t *pPath)
@@ -3310,17 +3310,17 @@ bool __cdecl Path_LookaheadPredictionTrace(path_t *pPath, float *vStartPos, floa
     if (pPath->wDodgeCount)
     {
         wDodgeEntity = pPath->wDodgeEntity;
-        if (wDodgeEntity != 2175)
+        if (wDodgeEntity != ENTITYNUM_NONE)
         {
             if (level.gentities[wDodgeEntity].actor)
             {
                 checkentities = pPath->wDodgeEntity;
-                return Path_PredictionTraceCheckForEntities(vStartPos, vEndPos, &checkentities, 1, 2175, 8519697, endpos) == PTR_SUCCESS;
+                return Path_PredictionTraceCheckForEntities(vStartPos, vEndPos, &checkentities, 1, ENTITYNUM_NONE, 8519697, endpos) == PTR_SUCCESS;
             }
             mask = 42074129;
         }
     }
-    return Path_PredictionTrace(vStartPos, vEndPos, 2175, mask, endpos, 18.0, 1);
+    return Path_PredictionTrace(vStartPos, vEndPos, ENTITYNUM_NONE, mask, endpos, 18.0, 1);
 }
 
 void __cdecl Path_UpdateLookaheadAmount(

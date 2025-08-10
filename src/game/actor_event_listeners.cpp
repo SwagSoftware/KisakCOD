@@ -58,7 +58,7 @@ void __cdecl Actor_EventListener_Init()
     p_events = &g_AIEVlisteners[0].events;
     do
     {
-        *(p_events - 1) = 2175;
+        *(p_events - 1) = ENTITYNUM_NONE;
         *p_events = 0;
         p_events += 2;
     } while ((int)p_events < (int)&g_AIEVlisteners[32]);
@@ -173,7 +173,7 @@ void __cdecl RemoveSwapWithLast(unsigned int listenerIndex)
         g_AIEVlisteners[v5].events = g_AIEVlisteners[v3].events;
     }
     v6 = v2;
-    g_AIEVlisteners[v6].entIndex = 2175;
+    g_AIEVlisteners[v6].entIndex = ENTITYNUM_NONE;
     g_AIEVlisteners[v6].events = 0;
 }
 

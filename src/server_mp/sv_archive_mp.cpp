@@ -305,7 +305,7 @@ void __cdecl SV_ArchiveSnapshot(msg_t *msg)
     if (++svsHeader.nextCachedSnapshotFrames >= 2147483646)
         Com_Error(ERR_FATAL, "svsHeader.nextCachedSnapshotFrames wrapped");
 skipDelta:
-    MSG_WriteEntityIndex(&snapInfo, msg, 1023, 10);
+    MSG_WriteEntityIndex(&snapInfo, msg, ENTITYNUM_NONE, 10);
     SV_PacketDataIsUnknown(clientNum, msg);
 }
 

@@ -1412,7 +1412,7 @@ void __cdecl PlayerCmd_isOnGround(scr_entref_t entref)
     client = v1->client;
     v4 = 1;
     if ((client->ps.eFlags & 0x300) == 0)
-        v4 = client->ps.groundEntityNum != 2175;
+        v4 = client->ps.groundEntityNum != ENTITYNUM_NONE;
     Scr_AddInt(v4);
 }
 
@@ -3475,7 +3475,7 @@ void __cdecl PlayerCmd_WeaponLockFree(scr_entref_t entref)
     }
     v1->client->ps.weapLockFlags &= ~1u;
     v1->client->ps.weapLockFlags &= ~2u;
-    v1->client->ps.weapLockedEntnum = 2175;
+    v1->client->ps.weapLockedEntnum = ENTITYNUM_NONE;
     v1->client->ps.weapLockFlags &= ~4u;
     v1->client->ps.weapLockFlags &= ~8u;
 }

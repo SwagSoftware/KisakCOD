@@ -865,7 +865,7 @@ void __cdecl CG_CalcVehicleViewValues(int localClientNum)
         v18[10] = v28[1];
         v18[11] = v28[2];
         if ((cgArray[0].predictedPlayerState.eFlags & 0x20000) == 0
-            || cgArray[0].predictedPlayerState.viewlocked_entNum == 2175)
+            || cgArray[0].predictedPlayerState.viewlocked_entNum == ENTITYNUM_NONE)
         {
             if (cgArray[0].predictedPlayerState.vehicleType != 5)
                 MatrixTranspose((const float (*)[3])v18, cgArray[0].prevVehicleInvAxis);
@@ -985,7 +985,7 @@ void CalcTurretViewValues(int localClientNum)
         if (cgArray[0].predictedPlayerState.viewlocked == PLAYERVIEWLOCK_NONE)
             MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\cgame\\cg_view.cpp", 860, 0, "%s", "ps->viewlocked");
         viewlocked_entNum = cgArray[0].predictedPlayerState.viewlocked_entNum;
-        if (cgArray[0].predictedPlayerState.viewlocked_entNum == 2175)
+        if (cgArray[0].predictedPlayerState.viewlocked_entNum == ENTITYNUM_NONE)
         {
             MyAssertHandler(
                 "c:\\trees\\cod3\\cod3src\\src\\cgame\\cg_view.cpp",
@@ -1349,7 +1349,7 @@ void __cdecl GetCeilingHeight(cg_s *cgameGlob)
     v4[0] = cgameGlob->predictedPlayerState.origin[0];
     v5 = cgameGlob->predictedPlayerState.origin[2] + (float)1024.0;
     v4[1] = cgameGlob->predictedPlayerState.origin[1];
-    CG_TraceCapsule(&v6, cgameGlob->predictedPlayerState.origin, playerMins, playerMaxs, v4, 2175, 1);
+    CG_TraceCapsule(&v6, cgameGlob->predictedPlayerState.origin, playerMins, playerMaxs, v4, ENTITYNUM_NONE, 1);
     if (v6.fraction < 1.0)
         v3 = (float)((float)((float)((float)(v5 - origin[2]) * v6.fraction) + origin[2])
             - cgameGlob->predictedPlayerState.origin[2]);
@@ -1824,7 +1824,7 @@ int __cdecl CG_DrawActiveFrame(
     if (CG_AddPacketEntities(localClientNum))
         viewlocked_entNum = cgArray[0].predictedPlayerState.viewlocked_entNum;
     else
-        viewlocked_entNum = 2175;
+        viewlocked_entNum = ENTITYNUM_NONE;
     //CG_UpdateRumble(localClientNum); // KISAKTODO 
     if (!cgArray[0].predictedPlayerState.locationSelectionInfo)
     {
@@ -1872,7 +1872,7 @@ int __cdecl CG_DrawActiveFrame(
             "%s",
             "cgameGlob->nextSnap->serverTime == G_GetServerSnapTime()");
     CG_ProcessEntity(localClientNum, &cgArray[0].predictedPlayerEntity);
-    if (viewlocked_entNum != 2175)
+    if (viewlocked_entNum != ENTITYNUM_NONE)
         CG_AddPacketEntity(localClientNum, viewlocked_entNum);
     GetCeilingHeight(cgArray);
     DumpAnims(localClientNum);

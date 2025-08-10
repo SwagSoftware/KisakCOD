@@ -333,9 +333,9 @@ void __cdecl AimAssist_Setup(int32_t localClientNum)
     aaGlob->fovScaleInv = 1.0;
     aaGlob->screenWidth = scrPlaceView[localClientNum].realViewportSize[0];
     aaGlob->screenHeight = scrPlaceView[localClientNum].realViewportSize[1];
-    aaGlob->autoAimTargetEnt = 1023;
-    aaGlob->autoMeleeTargetEnt = 1023;
-    aaGlob->lockOnTargetEnt = 1023;
+    aaGlob->autoAimTargetEnt = ENTITYNUM_NONE;
+    aaGlob->autoMeleeTargetEnt = ENTITYNUM_NONE;
+    aaGlob->lockOnTargetEnt = ENTITYNUM_NONE;
 }
 
 void __cdecl AimAssist_UpdateScreenTargets(
@@ -752,11 +752,11 @@ void __cdecl AimAssist_ClearEntityReference(int32_t localClientNum, int32_t entI
 
     aaGlob = &aaGlobArray[localClientNum];
     if (aaGlob->autoAimTargetEnt == entIndex)
-        aaGlob->autoAimTargetEnt = 1023;
+        aaGlob->autoAimTargetEnt = ENTITYNUM_NONE;
     if (aaGlob->autoMeleeTargetEnt == entIndex)
-        aaGlob->autoMeleeTargetEnt = 1023;
+        aaGlob->autoMeleeTargetEnt = ENTITYNUM_NONE;
     if (aaGlob->lockOnTargetEnt == entIndex)
-        aaGlob->lockOnTargetEnt = 1023;
+        aaGlob->lockOnTargetEnt = ENTITYNUM_NONE;
 }
 
 void __cdecl AimAssist_UpdateTweakables(const AimInput *input)
@@ -835,33 +835,17 @@ uint32_t __cdecl AimAssist_GetWeaponIndex(int32_t localClientNum, const playerSt
 
     if ((ps->eFlags & 0x300) != 0)
     {
-        if (ps->viewlocked_entNum == 1023)
-            MyAssertHandler(".\\aim_assist\\aim_assist.cpp", 554, 0, "%s", "ps->viewlocked_entNum != ENTITYNUM_NONE");
-        if (ps->viewlocked_entNum >= 0x400u)
-            MyAssertHandler(
-                ".\\aim_assist\\aim_assist.cpp",
-                555,
-                0,
-                "%s\n\t(ps->viewlocked_entNum) = %i",
-                "((ps->viewlocked_entNum >= 0) && (ps->viewlocked_entNum < (1<<10)))",
-                ps->viewlocked_entNum);
+        iassert(ps->viewlocked_entNum != ENTITYNUM_NONE);
+        iassert(((ps->viewlocked_entNum >= 0) && (ps->viewlocked_entNum < (1 << 10))));
         weapIndex = CG_GetEntity(localClientNum, ps->viewlocked_entNum)->nextState.weapon;
     }
     else
     {
         weapIndex = BG_GetViewmodelWeaponIndex(ps);
     }
-    if (weapIndex >= BG_GetNumWeapons())
-    {
-        NumWeapons = BG_GetNumWeapons();
-        MyAssertHandler(
-            ".\\aim_assist\\aim_assist.cpp",
-            564,
-            0,
-            "weapIndex doesn't index BG_GetNumWeapons()\n\t%i not in [0, %i)",
-            weapIndex,
-            NumWeapons);
-    }
+
+    bcassert(weapIndex, BG_GetNumWeapons());
+
     return weapIndex;
 }
 
@@ -916,15 +900,17 @@ const AimScreenTarget *__cdecl AimAssist_GetTargetFromEntity(const AimAssistGlob
 {
     int32_t targetIndex; // [esp+4h] [ebp-4h]
 
-    if (!aaGlob)
-        MyAssertHandler(".\\aim_assist\\aim_assist.cpp", 818, 0, "%s", "aaGlob");
-    if (entIndex == 1023)
+    iassert(aaGlob);
+
+    if (entIndex == ENTITYNUM_NONE)
         return 0;
+
     for (targetIndex = 0; targetIndex < aaGlob->screenTargetCount; ++targetIndex)
     {
         if (aaGlob->screenTargets[targetIndex].entIndex == entIndex)
             return &aaGlob->screenTargets[targetIndex];
     }
+
     return 0;
 }
 
@@ -995,9 +981,9 @@ void __cdecl AimAssist_ApplyAutoMelee(const AimInput *input, AimOutput *output)
 
 void __cdecl AimAssist_ClearAutoMeleeTarget(AimAssistGlobals *aaGlob)
 {
-    if (!aaGlob)
-        MyAssertHandler(".\\aim_assist\\aim_assist.cpp", 1264, 0, "%s", "aaGlob");
-    aaGlob->autoMeleeTargetEnt = 1023;
+    iassert(aaGlob);
+
+    aaGlob->autoMeleeTargetEnt = ENTITYNUM_NONE;
     aaGlob->autoMeleeActive = 0;
     aaGlob->autoMeleePitch = 0.0;
     aaGlob->autoMeleePitchTarget = 0.0;

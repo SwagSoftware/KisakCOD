@@ -70,7 +70,7 @@ void CM_ClearWorld()
     memset((unsigned __int8 *)&cm_world, 0, sizeof(cm_world));
     CM_ModelBounds(0, cm_world.mins, cm_world.maxs);
     cm_world.freeHead = 2;
-    for (i = 2; i < 0x3FF; ++i)
+    for (i = 2; i < 1023; ++i)
         cm_world.sectors[i].tree.u.parent = i + 1;
     cm_world.sectors[1023].tree.u.parent = 0;
     size = cm_world.maxs[0] - cm_world.mins[0];

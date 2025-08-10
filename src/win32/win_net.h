@@ -1,6 +1,10 @@
 #pragma once
 
+#ifdef KISAK_MP
 #include <qcommon/net_chan_mp.h>
+#elif KISAK_SP
+#include <qcommon/net_chan.h>
+#endif
 
 void		NET_Init(void);
 void		NET_Shutdown(void);

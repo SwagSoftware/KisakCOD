@@ -610,7 +610,7 @@ const dvar_s *CG_RegisterDvars()
         640,
         0,
         "The amount of on-screen length to wrap an objective in wide-screen mode");
-    cg_dumpAnims = Dvar_RegisterInt("cg_dumpAnims", -1, -1, 2175, 0x80u, "Output animation info for the given entity id");
+    cg_dumpAnims = Dvar_RegisterInt("cg_dumpAnims", -1, -1, ENTITYNUM_NONE, 0x80u, "Output animation info for the given entity id");
     cg_developer = Dvar_RegisterInt("developer", 0, 0, 2, 0, "Turn on Development systems");
     cg_minicon = Dvar_RegisterBool("con_minicon", 0, 1u, "Display the mini console on screen");
     cg_subtitleMinTime = Dvar_RegisterFloat("cg_subtitleMinTime", 3.0, 0.0, FLT_MAX, v127, v126);
@@ -1399,7 +1399,7 @@ void __cdecl CG_AddFXSoundAlias(int localClientNum, const float *origin, snd_ali
     if (v4)
     {
         Snd_AssertAliasValid(v4);
-        SND_AddPlayFXSoundAlias(v5, (SndEntHandle)2174, origin);
+        SND_AddPlayFXSoundAlias(v5, (SndEntHandle)ENTITYNUM_WORLD, origin);
     }
 }
 

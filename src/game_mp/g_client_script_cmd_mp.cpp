@@ -994,7 +994,7 @@ void __cdecl PlayerCmd_isOnGround(scr_entref_t entref)
             Scr_ObjectError(v1);
         }
     }
-    if ((pSelf->client->ps.eFlags & 0x300) != 0 || pSelf->client->ps.groundEntityNum != 1023)
+    if ((pSelf->client->ps.eFlags & 0x300) != 0 || pSelf->client->ps.groundEntityNum != ENTITYNUM_NONE)
         Scr_AddInt(1);
     else
         Scr_AddInt(0);
@@ -1240,8 +1240,8 @@ void __cdecl PlayerCmd_finishPlayerDamage(scr_entref_t entref)
     const float *point; // [esp+ACh] [ebp-8h]
     float time_per_point; // [esp+B0h] [ebp-4h]
 
-    inflictor = &g_entities[1022];
-    attacker = &g_entities[1022];
+    inflictor = &g_entities[ENTITYNUM_WORLD];
+    attacker = &g_entities[ENTITYNUM_WORLD];
     dir = 0;
     point = 0;
     if (entref.classnum)
@@ -2080,7 +2080,7 @@ void __cdecl PlayerCmd_ClonePlayer(scr_entref_t entref)
     memcpy(&corpseInfo->ci, &level_bgs.clientinfo[client->ps.clientNum], sizeof(corpseInfo->ci));
     corpseInfo->ci.pXAnimTree = corpseInfo->tree;
     XAnimCloneAnimTree(tree, corpseInfo->tree);
-    body->s.groundEntityNum = 1023;
+    body->s.groundEntityNum = ENTITYNUM_NONE;
     if (body->r.svFlags)
         MyAssertHandler(".\\game_mp\\g_client_script_cmd_mp.cpp", 1559, 0, "%s", "!body->r.svFlags");
     body->r.svFlags = 2;

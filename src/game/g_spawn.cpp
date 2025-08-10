@@ -906,9 +906,9 @@ void __cdecl SP_worldspawn()
         level.compassNorth[0] = 1.0;
         level.compassNorth[1] = 0.0;
     }
-    g_entities[2174].s.number = 2174;
-    Scr_SetString(&g_entities[2174].classname, scr_const.worldspawn);
-    g_entities[2174].r.inuse = 1;
+    g_entities[ENTITYNUM_WORLD].s.number = ENTITYNUM_WORLD;
+    Scr_SetString(&g_entities[ENTITYNUM_WORLD].classname, scr_const.worldspawn);
+    g_entities[ENTITYNUM_WORLD].r.inuse = 1;
     iassert(!g_entities[ENTITYNUM_WORLD].r.ownerNum.isDefined());
     G_SpawnString(&level.spawnVar, "ambient", "0", v14);
     v6 = atof(v14[0]);

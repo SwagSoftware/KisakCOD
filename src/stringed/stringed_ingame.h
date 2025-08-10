@@ -518,7 +518,7 @@ struct CStringEdPackage // sizeof=0x78
                             }
                             memset(sThisLanguage, 0, sizeof(sThisLanguage));
                             v13 = i - v11;
-                            if (v13 > 0x3FF)
+                            if (v13 > 1023)
                                 v13 = 1023;
                             strncpy(sThisLanguage, (char*)v11, v13);
                             CStringEdPackage::InsideQuotes(&v19, (const char *)&v11[strlen(sThisLanguage)]);

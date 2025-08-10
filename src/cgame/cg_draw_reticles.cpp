@@ -156,7 +156,7 @@ void __cdecl CG_DrawCrosshair(int32_t localClientNum)
             {
                 CG_DrawAdsOverlay(localClientNum, weapDefTurret, colorWhite, vec2_origin);
             }
-            else if (!CG_Flashbanged(localClientNum) && drawHud && ps->viewlocked_entNum != 1023)
+            else if (!CG_Flashbanged(localClientNum) && drawHud && ps->viewlocked_entNum != ENTITYNUM_NONE)
             {
                 CG_DrawTurretCrossHair(localClientNum);
             }

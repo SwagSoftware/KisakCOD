@@ -189,7 +189,7 @@ gentity_s *__cdecl Weapon_Melee_internal(gentity_s *ent, weaponParms *wp, float 
     tent->s.eventParm = v10;
     tent->s.weapon = ent->s.weapon;
     tent->s.weaponModel = ent->s.weaponModel;
-    if (traceEnt->s.number == 1022)
+    if (traceEnt->s.number == ENTITYNUM_WORLD)
         return 0;
     if (!traceEnt->takedamage)
         return 0;

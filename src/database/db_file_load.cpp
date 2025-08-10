@@ -2,7 +2,6 @@
 
 #include <qcommon/threads.h>
 #include <win32/win_local.h>
-#include <client_mp/client_mp.h>
 #include <universal/com_files.h>
 
 #include <gfx_d3d/r_image.h>

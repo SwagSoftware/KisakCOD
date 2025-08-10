@@ -191,14 +191,13 @@ void __cdecl G_FreeEntities()
             G_FreeEntity(e);
         ++e;
     }
-    if (g_entities[1022].r.inuse)
-        G_FreeEntity(&g_entities[1022]);
+    if (g_entities[ENTITYNUM_WORLD].r.inuse)
+        G_FreeEntity(&g_entities[ENTITYNUM_WORLD]);
     for (ia = 0; ia < 32; ++ia)
     {
         level.droppedWeaponCue[ia].setEnt(NULL);
     }
-    if (g_entities[1023].r.inuse)
-        MyAssertHandler(".\\game_mp\\g_main_mp.cpp", 826, 0, "%s", "!g_entities[ENTITYNUM_NONE].r.inuse");
+    iassert(!g_entities[ENTITYNUM_NONE].r.inuse);
     level.num_entities = 0;
     level.firstFreeEnt = 0;
     level.lastFreeEnt = 0;
@@ -1612,7 +1611,7 @@ int32_t __cdecl G_TraceCapsuleComplete(
     int32_t passEntityNum,
     int32_t contentmask)
 {
-    return SV_TracePassed(start, mins, maxs, end, passEntityNum, 1023, contentmask, 0, 0, 0);
+    return SV_TracePassed(start, mins, maxs, end, passEntityNum, ENTITYNUM_NONE, contentmask, 0, 0, 0);
 }
 
 void __cdecl G_LocationalTrace(
@@ -1687,7 +1686,7 @@ int32_t __cdecl G_LocationalTracePassed(
 
 void __cdecl G_SightTrace(int32_t *hitNum, float *start, float *end, int32_t passEntityNum, int32_t contentmask)
 {
-    SV_SightTrace(hitNum, start, (float *)vec3_origin, (float *)vec3_origin, end, passEntityNum, 1023, contentmask);
+    SV_SightTrace(hitNum, start, (float *)vec3_origin, (float *)vec3_origin, end, passEntityNum, ENTITYNUM_NONE, contentmask);
 }
 
 void __cdecl G_AddDebugString(const float *xyz, const float *color, float scale, const char *text, int32_t duration)

@@ -463,7 +463,7 @@ void __cdecl FX_ImpactMark_Generate_AddEntityModel(
     float summedRadius; // [esp+68h] [ebp-8h]
     DObj_s *dObj; // [esp+6Ch] [ebp-4h]
 
-    if (entityIndex != 1023)
+    if (entityIndex != ENTITYNUM_NONE)
     {
         PROF_SCOPED("FX_ImpactMark_Generate_AddEntityModels");
 

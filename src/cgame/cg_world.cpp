@@ -322,7 +322,7 @@ void __cdecl CG_Trace(
         if (!results)
             MyAssertHandler("c:\\trees\\cod3\\src\\cgame\\../qcommon/cm_public.h", 135, 0, "%s", "trace");
         results->hitType = TRACE_HITTYPE_ENTITY;
-        results->hitId = 1022;
+        results->hitId = ENTITYNUM_WORLD;
     }
     if (results->fraction == 0.0)
         goto LABEL_45;

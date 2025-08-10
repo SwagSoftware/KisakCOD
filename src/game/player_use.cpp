@@ -106,7 +106,7 @@ int __cdecl Player_ActivateCmd(gentity_s *ent)
             if (weaponstate < 15 || weaponstate > 20)
             {
                 cursorHintEntIndex = client->ps.cursorHintEntIndex;
-                if (cursorHintEntIndex == 2175)
+                if (cursorHintEntIndex == ENTITYNUM_NONE)
                     return 0;
                 if (!g_entities[cursorHintEntIndex].r.inuse)
                     MyAssertHandler(
@@ -286,7 +286,7 @@ int __cdecl Player_GetUseList(gentity_s *ent, useList_t *useList, int prevHintEn
         v51[2] = v44 + 96.0f;
     }
 
-    v10 = CM_AreaEntities(v55, v51, v56, 2176, 2113536);
+    v10 = CM_AreaEntities(v55, v51, v56, MAX_GENTITIES, 2113536);
     v11 = 0;
     if (v10 > 0)
     {
@@ -594,7 +594,7 @@ void __cdecl Player_SetTurretDropHint(gentity_s *ent)
             0,
             "%s",
             "ps->eFlags & EF_TURRET_ACTIVE");
-    if (client->ps.viewlocked_entNum == 2175)
+    if (client->ps.viewlocked_entNum == ENTITYNUM_NONE)
         MyAssertHandler(
             "c:\\trees\\cod3\\cod3src\\src\\game\\player_use.cpp",
             550,
@@ -606,7 +606,7 @@ void __cdecl Player_SetTurretDropHint(gentity_s *ent)
         MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\player_use.cpp", 553, 0, "%s", "turret->s.eType == ET_MG42");
     if (*BG_GetWeaponDef(v3->s.weapon)->dropHintString)
     {
-        client->ps.cursorHintEntIndex = 2175;
+        client->ps.cursorHintEntIndex = ENTITYNUM_NONE;
         client->ps.cursorHint = v3->s.weapon + 4;
         client->ps.cursorHintString = BG_GetWeaponDef(v3->s.weapon)->dropHintStringIndex;
     }
@@ -642,7 +642,7 @@ void __cdecl Player_UpdateCursorHints(gentity_s *ent)
     cursorHintEntIndex = client->ps.cursorHintEntIndex;
     client->ps.cursorHint = 0;
     client->ps.cursorHintString = -1;
-    client->ps.cursorHintEntIndex = 2175;
+    client->ps.cursorHintEntIndex = ENTITYNUM_NONE;
     if (!BG_ThrowingBackGrenade(&client->ps))
         client->ps.throwBackGrenadeTimeLeft = 0;
     if (!g_reloading->current.integer && ent->health > 0)
@@ -740,9 +740,10 @@ void __cdecl Player_UpdateCursorHints(gentity_s *ent)
                                         client->ps.cursorHint = v11;
                                         client->ps.cursorHintString = scale;
                                         if (!v11)
-                                            client->ps.cursorHintEntIndex = 2175;
+                                            client->ps.cursorHintEntIndex = ENTITYNUM_NONE;
                                         v19 = client->ps.cursorHintEntIndex;
-                                        if (v19 != 2175 && !g_entities[v19].r.inuse)
+
+                                        if (v19 != ENTITYNUM_NONE && !g_entities[v19].r.inuse)
                                             MyAssertHandler(
                                                 "c:\\trees\\cod3\\cod3src\\src\\game\\player_use.cpp",
                                                 710,
@@ -1003,7 +1004,7 @@ void __cdecl Player_BlockFriendliesInADS(gentity_s *ent, double dist, const floa
         MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\player_use.cpp", 887, 0, "%s", "ent->client");
     BestTarget = AimTarget_GetBestTarget(dir, (const float *)a5);
     client = ent->client;
-    if (BestTarget == 2175)
+    if (BestTarget == ENTITYNUM_NONE)
     {
         if (level.time - client->playerADSTargetTime > ai_playerADSTargetTime->current.integer)
             return;
@@ -1102,7 +1103,7 @@ void __cdecl Player_UpdateLookAtEntity(gentity_s *ent)
     G_GetPlayerViewDirection(ent, &v35, 0, 0);
     if ((client->ps.eFlags & 0x20300) != 0)
     {
-        if (client->ps.viewlocked_entNum == 2175)
+        if (client->ps.viewlocked_entNum == ENTITYNUM_NONE)
             MyAssertHandler(
                 "c:\\trees\\cod3\\cod3src\\src\\game\\player_use.cpp",
                 963,

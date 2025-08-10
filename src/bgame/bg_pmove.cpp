@@ -8,6 +8,7 @@
 #elif KISAK_SP
 
 #endif
+#include <cgame/cg_local.h>
 
 const scriptAnimMoveTypes_t moveAnimTable[6][2][2] =
 {
@@ -178,7 +179,7 @@ void __cdecl PM_AddTouchEnt(pmove_t *pm, int32_t entityNum)
 {
     int32_t i; // [esp+0h] [ebp-4h]
 
-    if (entityNum != 1022)
+    if (entityNum != ENTITYNUM_WORLD)
     {
         if (!pm)
             MyAssertHandler(".\\bgame\\bg_pmove.cpp", 277, 0, "%s", "pm");
@@ -376,7 +377,7 @@ bool __cdecl PlayerProneAllowed(pmove_t *pm)
         return 0;
     if ((ps->pm_flags & 1) != 0)
         return 1;
-    return ps->groundEntityNum != 1023
+    return ps->groundEntityNum != ENTITYNUM_NONE
         && BG_CheckProne(
             ps->clientNum,
             ps->origin,
@@ -386,7 +387,7 @@ bool __cdecl PlayerProneAllowed(pmove_t *pm)
             &ps->fTorsoPitch,
             &ps->fWaistPitch,
             0,
-            ps->groundEntityNum != 1023,
+            ps->groundEntityNum != ENTITYNUM_NONE,
             1,
             pm->handler,
             PCT_CLIENT,
@@ -411,7 +412,7 @@ void __cdecl PM_FootstepEvent(pmove_t *pm, pml_t *pml, char iOldBobCycle, char i
         MyAssertHandler(".\\bgame\\bg_pmove.cpp", 2993, 0, "%s", "ps");
     if ((((uint8_t)(iNewBobCycle + 64) ^ (uint8_t)(iOldBobCycle + 64)) & 0x80) != 0)
     {
-        if (ps->groundEntityNum == 1023)
+        if (ps->groundEntityNum == ENTITYNUM_NONE)
         {
             if (bFootStep && (ps->pm_flags & 8) != 0)
             {
@@ -519,7 +520,7 @@ void __cdecl PM_UpdateLean(
     if ((cmd->buttons & 0xC0) != 0
         && (ps->pm_flags & 0x800) == 0
         && ps->pm_type < PM_DEAD
-        && (ps->groundEntityNum != 1023 || ps->pm_type == PM_NORMAL_LINKED))
+        && (ps->groundEntityNum != ENTITYNUM_NONE || ps->pm_type == PM_NORMAL_LINKED))
     {
         if ((cmd->buttons & 0x40) != 0)
             --leaning;
@@ -636,7 +637,7 @@ void __cdecl PM_UpdateViewAngles(playerState_s *ps, float msec, usercmd_s *cmd, 
         Mantle_CapView(ps);
         return;
     }
-    if ((ps->pm_flags & 8) != 0 && ps->groundEntityNum == 1023 && bg_ladder_yawcap->current.value != 0.0)
+    if ((ps->pm_flags & 8) != 0 && ps->groundEntityNum == ENTITYNUM_NONE && bg_ladder_yawcap->current.value != 0.0)
         PM_UpdateViewAngles_LadderClamp(ps);
     if ((ps->pm_flags & 1) != 0)
     {
@@ -874,7 +875,7 @@ void __cdecl PM_UpdateViewAngles_Prone(
             0,
             0,
             1,
-            ps->groundEntityNum != 1023,
+            ps->groundEntityNum != ENTITYNUM_NONE,
             1,
             handler,
             PCT_CLIENT,
@@ -891,7 +892,7 @@ void __cdecl PM_UpdateViewAngles_Prone(
                 0,
                 0,
                 1,
-                ps->groundEntityNum != 1023,
+                ps->groundEntityNum != ENTITYNUM_NONE,
                 1,
                 handler,
                 PCT_CLIENT,
@@ -920,7 +921,7 @@ LABEL_33:
                 0,
                 0,
                 1,
-                ps->groundEntityNum != 1023,
+                ps->groundEntityNum != ENTITYNUM_NONE,
                 1,
                 handler,
                 PCT_CLIENT,
@@ -984,7 +985,7 @@ int32_t __cdecl BG_CheckProneTurned(playerState_s *ps, float newProneYaw, uint8_
         &ps->fTorsoPitch,
         &ps->fWaistPitch,
         1,
-        ps->groundEntityNum != 1023,
+        ps->groundEntityNum != ENTITYNUM_NONE,
         1,
         handler,
         PCT_CLIENT,
@@ -1120,7 +1121,7 @@ void __cdecl PM_UpdatePronePitch(pmove_t *pm, pml_t *pml)
         MyAssertHandler(".\\bgame\\bg_pmove.cpp", 4282, 0, "%s", "ps");
     if ((ps->pm_flags & 1) != 0)
     {
-        if (ps->groundEntityNum == 1023)
+        if (ps->groundEntityNum == ENTITYNUM_NONE)
         {
             if (pml->groundPlane)
                 v2 = BG_CheckProne(
@@ -1132,7 +1133,7 @@ void __cdecl PM_UpdatePronePitch(pmove_t *pm, pml_t *pml)
                     &ps->fTorsoPitch,
                     &ps->fWaistPitch,
                     1,
-                    ps->groundEntityNum != 1023,
+                    ps->groundEntityNum != ENTITYNUM_NONE,
                     pml->groundTrace.walkable,
                     pm->handler,
                     PCT_CLIENT,
@@ -1147,7 +1148,7 @@ void __cdecl PM_UpdatePronePitch(pmove_t *pm, pml_t *pml)
                     &ps->fTorsoPitch,
                     &ps->fWaistPitch,
                     1,
-                    ps->groundEntityNum != 1023,
+                    ps->groundEntityNum != ENTITYNUM_NONE,
                     1,
                     pm->handler,
                     PCT_CLIENT,
@@ -1486,7 +1487,7 @@ void __cdecl PmoveSingle(pmove_t *pm)
     case 1:
     case 8:
         PM_ClearLadderFlag(ps);
-        ps->groundEntityNum = 1023;
+        ps->groundEntityNum = ENTITYNUM_NONE;
         memset(&pml.walking, 0, 12);
         v14 = ps->velocity;
         ps->velocity[0] = 0.0;
@@ -1543,7 +1544,7 @@ void __cdecl PmoveSingle(pmove_t *pm)
         if ((ps->eFlags & 0x300) != 0)
         {
             PM_ClearLadderFlag(ps);
-            ps->groundEntityNum = 1023;
+            ps->groundEntityNum = ENTITYNUM_NONE;
             memset(&pml.walking, 0, 12);
             v13 = ps->velocity;
             ps->velocity[0] = 0.0;
@@ -1579,7 +1580,7 @@ void __cdecl PmoveSingle(pmove_t *pm)
             if ((ps->pm_flags & 4) != 0)
             {
                 PM_ClearLadderFlag(ps);
-                ps->groundEntityNum = 1023;
+                ps->groundEntityNum = ENTITYNUM_NONE;
                 pml.groundPlane = 0;
                 pml.walking = 0;
                 PM_UpdateAimDownSightFlag(pm, &pml);
@@ -2179,7 +2180,7 @@ void __cdecl PM_SetMovementDir(pmove_t *pm, pml_t *pml)
         {
             Vec3Sub(ps->origin, pml->previous_origin, moved);
             if (!pm->cmd.forwardmove && !pm->cmd.rightmove
-                || ps->groundEntityNum == 1023
+                || ps->groundEntityNum == ENTITYNUM_NONE
                 || (speed = Vec3Length(moved), speed == 0.0)
                 || speed <= pml->frametime * 5.0)
             {
@@ -2631,7 +2632,7 @@ void __cdecl PM_GroundTrace(pmove_t *pm, pml_t *pml)
             PM_playerTrace(pm, &trace, start, pm->mins, pm->maxs, point, ps->clientNum, pm->tracemask);
             if (trace.startsolid)
             {
-                ps->groundEntityNum = 1023;
+                ps->groundEntityNum = ENTITYNUM_NONE;
                 pml->groundPlane = 0;
                 pml->almostGroundPlane = 0;
                 pml->walking = 0;
@@ -2659,7 +2660,7 @@ void __cdecl PM_GroundTrace(pmove_t *pm, pml_t *pml)
                     pml->groundPlane = 1;
                     pml->almostGroundPlane = 1;
                     pml->walking = 1;
-                    if (ps->groundEntityNum == 1023)
+                    if (ps->groundEntityNum == ENTITYNUM_NONE)
                         PM_CrashLand(ps, pml);
                     EntityHitId = Trace_GetEntityHitId(&trace);
                     ps->groundEntityNum = EntityHitId;
@@ -2667,7 +2668,7 @@ void __cdecl PM_GroundTrace(pmove_t *pm, pml_t *pml)
                 }
                 else
                 {
-                    ps->groundEntityNum = 1023;
+                    ps->groundEntityNum = ENTITYNUM_NONE;
                     pml->groundPlane = 1;
                     pml->almostGroundPlane = 1;
                     pml->walking = 0;
@@ -2681,7 +2682,7 @@ void __cdecl PM_GroundTrace(pmove_t *pm, pml_t *pml)
                 else
                     BG_AnimScriptEvent(ps, ANIM_ET_JUMP, 0, 0);
                 pml->almostGroundPlane = 0;
-                ps->groundEntityNum = 1023;
+                ps->groundEntityNum = ENTITYNUM_NONE;
                 pml->groundPlane = 0;
                 pml->walking = 0;
             }
@@ -2892,7 +2893,7 @@ int32_t __cdecl PM_CorrectAllSolid(pmove_t *pm, pml_t *pml, trace_t *trace)
             return 1;
         }
     }
-    ps->groundEntityNum = 1023;
+    ps->groundEntityNum = ENTITYNUM_NONE;
     pml->groundPlane = 0;
     pml->almostGroundPlane = 0;
     pml->walking = 0;
@@ -2911,7 +2912,7 @@ void __cdecl PM_GroundTraceMissed(pmove_t *pm, pml_t *pml)
     ps = pm->ps;
     if (!ps)
         MyAssertHandler(".\\bgame\\bg_pmove.cpp", 1934, 0, "%s", "ps");
-    if (ps->groundEntityNum == 1023)
+    if (ps->groundEntityNum == ENTITYNUM_NONE)
     {
         point[0] = ps->origin[0];
         point[1] = ps->origin[1];
@@ -2940,7 +2941,7 @@ void __cdecl PM_GroundTraceMissed(pmove_t *pm, pml_t *pml)
             pml->almostGroundPlane = trace.fraction < 0.015625;
         }
     }
-    ps->groundEntityNum = 1023;
+    ps->groundEntityNum = ENTITYNUM_NONE;
     pml->groundPlane = 0;
     pml->walking = 0;
 }
@@ -3187,7 +3188,7 @@ void __cdecl PM_CheckDuck(pmove_t *pm, pml_t *pml)
                         ps->pm_flags |= 1u;
                         ps->pm_flags &= ~2u;
                     }
-                    else if (ps->groundEntityNum != 1023)
+                    else if (ps->groundEntityNum != ENTITYNUM_NONE)
                     {
                         ps->pm_flags |= 0x1000u;
                         if ((pm->cmd.buttons & 0x1000) == 0)
@@ -3554,8 +3555,7 @@ double __cdecl PM_ViewHeightTableLerp(int32_t iFrac, viewLerpWaypoint_s *pTable,
             if (pCurr->iFrac > iFrac)
             {
                 pPrev = &pTable[i - 1];
-                if (pCurr->iFrac - pPrev->iFrac <= 0)
-                    MyAssertHandler(".\\bgame\\bg_pmove.cpp", 2174, 0, "%s", "(pCurr->iFrac - pPrev->iFrac) > 0");
+                iassert((pCurr->iFrac - pPrev->iFrac) > 0);
                 fEntryFrac = (double)(iFrac - pPrev->iFrac) / (double)(pCurr->iFrac - pPrev->iFrac);
                 *pfPosOfs = (double)pPrev->iOffset + (double)(pCurr->iOffset - pPrev->iOffset) * fEntryFrac;
                 return (float)((pCurr->fViewHeight - pPrev->fViewHeight) * fEntryFrac + pPrev->fViewHeight);
@@ -3614,7 +3614,7 @@ void __cdecl PM_Footsteps(pmove_t *pm, pml_t *pml)
         else
         {
             iStance = PM_GetEffectiveStance(ps);
-            if (ps->groundEntityNum != 1023 || ps->pm_type == PM_NORMAL_LINKED)
+            if (ps->groundEntityNum != ENTITYNUM_NONE || ps->pm_type == PM_NORMAL_LINKED)
             {
                 v5 = (ps->pm_flags & 0x40) != 0 || ps->leanf != 0.0;
                 walking = v5;
@@ -4156,7 +4156,7 @@ void __cdecl PM_CheckLadderMove(pmove_t *pm, pml_t *pml)
             tracedist = 8.0;
         else
             tracedist = 30.0;
-        v2 = (ps->pm_flags & 8) != 0 && ps->groundEntityNum == 1023;
+        v2 = (ps->pm_flags & 8) != 0 && ps->groundEntityNum == ENTITYNUM_NONE;
         fellOffLadderInAir = v2;
         if (v2)
         {
@@ -4230,7 +4230,7 @@ void __cdecl PM_CheckLadderMove(pmove_t *pm, pml_t *pml)
         }
         else
         {
-            ps->groundEntityNum = 1023;
+            ps->groundEntityNum = ENTITYNUM_NONE;
             pml->groundPlane = 0;
             pml->almostGroundPlane = 0;
             pml->walking = 0;

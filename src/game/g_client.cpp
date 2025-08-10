@@ -112,7 +112,7 @@ int __cdecl SpotWouldTelefrag(gentity_s *spot)
     v8[0] = spot->r.currentOrigin[0] + (float)15.0;
     v8[1] = (float)v1 + (float)15.0;
     v8[2] = spot->r.currentOrigin[2] + (float)70.0;
-    v2 = CM_AreaEntities(v9, v8, v10, 2176, 33603584);
+    v2 = CM_AreaEntities(v9, v8, v10, MAX_GENTITIES, 33603584);
     v3 = 0;
     if (v2 <= 0)
         return 0;
@@ -393,7 +393,7 @@ void __cdecl G_GetPlayerViewOrigin(const playerState_s *ps, float *origin)
     {
         if (ps->viewlocked == PLAYERVIEWLOCK_NONE)
             MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\g_client.cpp", 382, 0, "%s", "ps->viewlocked");
-        if (ps->viewlocked_entNum == 2175)
+        if (ps->viewlocked_entNum == ENTITYNUM_NONE)
             MyAssertHandler(
                 "c:\\trees\\cod3\\cod3src\\src\\game\\g_client.cpp",
                 383,
@@ -601,10 +601,10 @@ void __cdecl ClientSpawn(gentity_s *ent)
     client->ps.viewmodelIndex = viewmodelIndex;
     client->ps.eFlags = v4;
     maxHealth = client->pers.maxHealth;
-    client->ps.viewlocked_entNum = 2175;
-    client->groundTiltEntNum = 2175;
+    client->ps.viewlocked_entNum = ENTITYNUM_NONE;
+    client->groundTiltEntNum = ENTITYNUM_NONE;
     client->ps.stats[2] = maxHealth;
-    ent->s.groundEntityNum = 2175;
+    ent->s.groundEntityNum = ENTITYNUM_NONE;
     ent->takedamage = 1;
     Scr_SetString(&ent->classname, scr_const.player);
     ent->r.contents = 0x2000000;
@@ -625,7 +625,7 @@ void __cdecl ClientSpawn(gentity_s *ent)
     client->ps.spreadOverride = 0;
     client->ps.spreadOverrideState = 0;
     client->ps.throwBackGrenadeTimeLeft = 0;
-    client->ps.throwBackGrenadeOwner = 2175;
+    client->ps.throwBackGrenadeOwner = ENTITYNUM_NONE;
     client->ps.stats[0] = v7;
     ent->health = v7;
     G_SetOrigin(ent, v12);

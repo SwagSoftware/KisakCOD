@@ -57,7 +57,7 @@ gentity_s *__cdecl G_TestEntityPosition(gentity_s *ent, float *vOrigin)
         }
         else
         {
-            G_TraceCapsule(&tr, vOrigin, ent->r.mins, ent->r.maxs, vOrigin, 1023, mask);
+            G_TraceCapsule(&tr, vOrigin, ent->r.mins, ent->r.maxs, vOrigin, ENTITYNUM_NONE, mask);
         }
     }
     else
@@ -136,7 +136,7 @@ int __cdecl G_TryPushingEntity(gentity_s *check, gentity_s *pusher, float *move,
             }
             else
             {
-                check->s.groundEntityNum = 1023;
+                check->s.groundEntityNum = ENTITYNUM_NONE;
                 return 1;
             }
         }
@@ -184,7 +184,7 @@ int __cdecl G_TryPushingEntity(gentity_s *check, gentity_s *pusher, float *move,
                     break;
             }
             if (check->s.groundEntityNum != pusher->s.number)
-                check->s.groundEntityNum = 1023;
+                check->s.groundEntityNum = ENTITYNUM_NONE;
             check->r.currentOrigin[0] = org2[0];
             check->r.currentOrigin[1] = org2[1];
             check->r.currentOrigin[2] = org2[2];
@@ -208,7 +208,7 @@ int __cdecl G_TryPushingEntity(gentity_s *check, gentity_s *pusher, float *move,
     else
     {
         if (check->s.groundEntityNum != pusher->s.number)
-            check->s.groundEntityNum = 1023;
+            check->s.groundEntityNum = ENTITYNUM_NONE;
         check->r.currentOrigin[0] = vOrigin[0];
         check->r.currentOrigin[1] = vOrigin[1];
         check->r.currentOrigin[2] = vOrigin[2];
@@ -495,7 +495,7 @@ void __cdecl trigger_use_shared(gentity_s *self)
     {
         self->r.contents = 0x200000;
         SV_LinkEntity(self);
-        self->item[1].ammoCount = 1023;
+        self->item[1].ammoCount = ENTITYNUM_NONE;
         self->s.lerp.pos.trType = TR_STATIONARY;
         self->s.lerp.pos.trBase[0] = self->r.currentOrigin[0];
         self->s.lerp.pos.trBase[1] = self->r.currentOrigin[1];

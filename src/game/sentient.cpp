@@ -66,7 +66,7 @@ void __cdecl Sentient_DissociateSentient(sentient_s *self, sentient_s *other, te
         Actor_DissociateSentient(self->ent->actor, other, eOtherTeam);
     client = self->ent->client;
     if (client && client->ps.throwBackGrenadeOwner == other->ent->s.number)
-        client->ps.throwBackGrenadeOwner = 2174;
+        client->ps.throwBackGrenadeOwner = ENTITYNUM_WORLD;
     if (self->targetEnt.isDefined() && self->targetEnt.ent()->sentient == other && actor)
         actor->lastEnemySightPosValid = 0;
     meleeAttackerSpot = self->meleeAttackerSpot;

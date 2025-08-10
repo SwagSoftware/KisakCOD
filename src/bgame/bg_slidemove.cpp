@@ -80,7 +80,7 @@ void __cdecl PM_StepSlideMove(pmove_t *pm, pml_t *pml, int32_t gravity)
         fStepSize = 10.0;
     else
         fStepSize = 18.0;
-    if (ps->groundEntityNum != 1023)
+    if (ps->groundEntityNum != ENTITYNUM_NONE)
         goto LABEL_26;
     if ((ps->pm_flags & 0x4000) != 0 && ps->pm_time)
         Jump_ClearState(ps);
@@ -230,7 +230,7 @@ void __cdecl PM_StepSlideMove(pmove_t *pm, pml_t *pml, int32_t gravity)
                             fSpeedScale = 1.0 - (float)0.80000001 + (1.0 - v3 / fStepSize) * (float)0.80000001;
                             Vec3Scale(ps->velocity, fSpeedScale, ps->velocity);
                             pm->xyspeed = Vec2Length(ps->velocity);
-                            if ((int)abs(iDelta) > 3 && ps->groundEntityNum != 1023 && PM_ShouldMakeFootsteps(pm))
+                            if ((int)abs(iDelta) > 3 && ps->groundEntityNum != ENTITYNUM_NONE && PM_ShouldMakeFootsteps(pm))
                             {
                                 iDeltaa = (int)abs(iDelta) / 2;
                                 if (iDeltaa > 4)

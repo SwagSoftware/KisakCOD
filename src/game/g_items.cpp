@@ -325,7 +325,7 @@ LABEL_12:
                 }
                 else
                 {
-                    G_TraceCapsule(&trace, ent->r.currentOrigin, droppedEnt->r.mins, droppedEnt->r.maxs, up, 1023, mask);
+                    G_TraceCapsule(&trace, ent->r.currentOrigin, droppedEnt->r.mins, droppedEnt->r.maxs, up, ENTITYNUM_NONE, mask);
                 }
                 if (trace.allsolid)
                 {
@@ -340,7 +340,7 @@ LABEL_12:
                     }
                     else
                     {
-                        G_TraceCapsule(&trace, up, droppedEnt->r.mins, droppedEnt->r.maxs, ent->r.currentOrigin, 1023, mask);
+                        G_TraceCapsule(&trace, up, droppedEnt->r.mins, droppedEnt->r.maxs, ent->r.currentOrigin, ENTITYNUM_NONE, mask);
                     }
                     Vec3Lerp(up, ent->r.currentOrigin, trace.fraction, up);
                     G_SetOrigin(droppedEnt, up);
@@ -1280,7 +1280,7 @@ void __cdecl G_SpawnItem(gentity_s *ent, const gitem_s *item)
         ent->handler = 18;
         if ((ent->spawnflags & 1) == 0)
         {
-            ent->s.groundEntityNum = 1023;
+            ent->s.groundEntityNum = ENTITYNUM_NONE;
             iassert(item->giType == IT_WEAPON);
             ent->r.currentAngles[2] = ent->r.currentAngles[2] + 90.0;
         }
@@ -1313,7 +1313,7 @@ void __cdecl G_RunItem(gentity_s *ent)
 
     if (ent->s.eType == 2)
         MyAssertHandler(".\\game\\g_items.cpp", 1465, 0, "%s", "ent->s.eType != ET_PLAYER_CORPSE");
-    if ((ent->s.groundEntityNum == 1023 || level.gentities[ent->s.groundEntityNum].s.lerp.pos.trType)
+    if ((ent->s.groundEntityNum == ENTITYNUM_NONE || level.gentities[ent->s.groundEntityNum].s.lerp.pos.trType)
         && ent->s.lerp.pos.trType != TR_GRAVITY
         && ent->s.lerp.pos.trType != TR_RAGDOLL_GRAVITY
         && (ent->spawnflags & 1) == 0)
@@ -1382,7 +1382,7 @@ void __cdecl G_RunItem(gentity_s *ent)
         }
         else
         {
-            G_TraceCapsule(&tr, ent->r.currentOrigin, ent->r.mins, ent->r.maxs, origin, 1023, mask);
+            G_TraceCapsule(&tr, ent->r.currentOrigin, ent->r.mins, ent->r.maxs, origin, ENTITYNUM_NONE, mask);
         }
         if (tr.fraction >= 1.0)
         {
@@ -1404,7 +1404,7 @@ void __cdecl G_RunItem(gentity_s *ent)
                 }
                 else
                 {
-                    G_TraceCapsule(&tr, endpos, ent->r.mins, ent->r.maxs, origin, 1023, mask);
+                    G_TraceCapsule(&tr, endpos, ent->r.mins, ent->r.maxs, origin, ENTITYNUM_NONE, mask);
                 }
                 Vec3Lerp(endpos, origin, tr.fraction, endpos);
             }

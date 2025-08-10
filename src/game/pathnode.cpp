@@ -121,13 +121,7 @@ void __cdecl TurretNode_GetAngles(const pathnode_t *node, float *angleMin, float
     turretEntNumber = node->dynamic.turretEntNumber;
     if (turretEntNumber >= 0)
     {
-        if (turretEntNumber >= 2176)
-            MyAssertHandler(
-                "c:\\trees\\cod3\\cod3src\\src\\game\\pathnode.cpp",
-                525,
-                0,
-                "%s",
-                "node->dynamic.turretEntNumber < MAX_GENTITIES");
+        iassert(node->dynamic.turretEntNumber < MAX_GENTITIES);
         v7 = &g_entities[node->dynamic.turretEntNumber];
         if (!v7->pTurretInfo)
             MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\pathnode.cpp", 527, 0, "%s", "ent->pTurretInfo");
@@ -349,7 +343,7 @@ void __cdecl node_droptofloor(pathnode_t *node)
     v7 = v3;
     v8 = v4;
     v9 = (float)v2 + (float)1.0;
-    G_TraceCapsule(&v15, &v7, v13, v14, &v10, 2175, 8519697);
+    G_TraceCapsule(&v15, &v7, v13, v14, &v10, ENTITYNUM_NONE, 8519697);
     if (v15.startsolid || v15.allsolid)
     {
     LABEL_8:
@@ -367,7 +361,7 @@ void __cdecl node_droptofloor(pathnode_t *node)
         v7 = (float)((float)(v10 - v7) * v15.fraction) + v7;
         v8 = (float)((float)(v11 - v8) * v15.fraction) + v8;
         v9 = (float)((float)(v12 - v9) * v15.fraction) + v9;
-        G_TraceCapsule(&v15, &v7, actorMins, actorMaxs, &v7, 2175, 8519697);
+        G_TraceCapsule(&v15, &v7, actorMins, actorMaxs, &v7, ENTITYNUM_NONE, 8519697);
         if (!v15.startsolid && !v15.allsolid)
         {
             v5 = v8;
@@ -4342,7 +4336,7 @@ pathnode_t *__cdecl Path_NearestNodeNotCrossPlanes(
                 break;
         LABEL_17:
             v58[0] = 0;
-            SV_SightTrace(v58, vOrigin, v59, v60, node->constant.vOrigin, 2175, 2175, 8519697);
+            SV_SightTrace(v58, vOrigin, v59, v60, node->constant.vOrigin, ENTITYNUM_NONE, ENTITYNUM_NONE, 8519697);
             if (!v58[0])
                 goto LABEL_25;
         LABEL_18:
@@ -4382,7 +4376,7 @@ LABEL_19:
         {
             v56 = (const float *)(*v55 + 20);
             v58[0] = 0;
-            SV_SightTrace(v58, vOrigin, v59, v60, v56, 2175, 2175, 8519697);
+            SV_SightTrace(v58, vOrigin, v59, v60, v56, ENTITYNUM_NONE, ENTITYNUM_NONE, 8519697);
             if (!v58[0])
                 break;
             ++v54;

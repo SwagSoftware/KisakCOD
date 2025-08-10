@@ -235,7 +235,7 @@ void __cdecl G_DoTouchTriggers(gentity_s *ent)
     v26 = v7;
     v28 = ent->r.absmax[2] + (float)20.0;
     v27 = v8;
-    v9 = CM_AreaEntities(&v23, &v26, v29, 2176, v2);
+    v9 = CM_AreaEntities(&v23, &v26, v29, MAX_GENTITIES, v2);
     v10 = ent->r.currentOrigin[1];
     v11 = (float)(ent->r.maxs[0] + ent->r.currentOrigin[0]);
     v12 = ent->r.maxs[1];
@@ -351,7 +351,7 @@ void __cdecl AttemptLiveGrenadePickup(gentity_s *clientEnt)
                 if (v2->parent.isDefined())
                     clientEnt->client->ps.throwBackGrenadeOwner = v2->parent.entnum();
                 else
-                    clientEnt->client->ps.throwBackGrenadeOwner = 2174;
+                    clientEnt->client->ps.throwBackGrenadeOwner = ENTITYNUM_WORLD;
                 clientEnt->client->ps.grenadeTimeLeft = clientEnt->client->ps.throwBackGrenadeTimeLeft;
                 touch(v2, clientEnt, 0);
                 if (!clientEnt->client->ps.throwBackGrenadeTimeLeft)
@@ -861,7 +861,7 @@ void __cdecl ClientEndFrame(gentity_s *ent)
     client = ent->client;
     if ((client->ps.eFlags & 0x300) != 0)
     {
-        if (client->ps.viewlocked_entNum == 2175)
+        if (client->ps.viewlocked_entNum == ENTITYNUM_NONE)
             MyAssertHandler(
                 "c:\\trees\\cod3\\cod3src\\src\\game\\g_active.cpp",
                 867,

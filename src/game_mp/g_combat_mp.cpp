@@ -339,10 +339,10 @@ uint32_t __cdecl G_GetWeaponIndexForEntity(const gentity_s *ent)
         return ent->s.weapon;
     if ((client->ps.eFlags & 0x300) == 0 && (client->ps.pm_flags & 0x100000) == 0)
         return BG_GetViewmodelWeaponIndex(&client->ps);
-    if (client->ps.viewlocked == PLAYERVIEWLOCK_NONE)
-        MyAssertHandler(".\\game_mp\\g_combat_mp.cpp", 429, 0, "%s", "ps->viewlocked");
-    if (client->ps.viewlocked_entNum == 1023)
-        MyAssertHandler(".\\game_mp\\g_combat_mp.cpp", 430, 0, "%s", "ps->viewlocked_entNum != ENTITYNUM_NONE");
+
+    iassert(client->ps.viewlocked);
+    iassert(client->ps.viewlocked_entNum != ENTITYNUM_NONE);
+
     return g_entities[client->ps.viewlocked_entNum].s.weapon;
 }
 
@@ -373,9 +373,9 @@ void __cdecl G_Damage(
     else if (targ->takedamage)
     {
         if (!inflictor)
-            inflictor = &g_entities[1022];
+            inflictor = &g_entities[ENTITYNUM_WORLD];
         if (!attacker)
-            attacker = &g_entities[1022];
+            attacker = &g_entities[ENTITYNUM_WORLD];
         if (weapon == -1)
             weapon = G_GetWeaponIndexForEntity(inflictor);
         if (weapon >= BG_GetNumWeapons())
@@ -525,7 +525,7 @@ double __cdecl CanDamage(
     if (inflictor)
         inflictorNum = inflictor->s.number;
     else
-        inflictorNum = 1023;
+        inflictorNum = ENTITYNUM_NONE;
     if (targ->client)
     {
         halfWidth = 15.0;

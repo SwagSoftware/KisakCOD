@@ -150,7 +150,7 @@ void __cdecl G_RunCorpseMove(gentity_s *ent)
         }
         else
         {
-            G_TraceCapsule(&tr, ent->r.currentOrigin, ent->r.mins, ent->r.maxs, origin, 1023, mask);
+            G_TraceCapsule(&tr, ent->r.currentOrigin, ent->r.mins, ent->r.maxs, origin, ENTITYNUM_NONE, mask);
         }
         Vec3Lerp(ent->r.currentOrigin, origin, tr.fraction, endpos);
         ent->r.currentOrigin[0] = endpos[0];
@@ -182,7 +182,7 @@ void __cdecl G_RunCorpseMove(gentity_s *ent)
                     }
                     else
                     {
-                        v1 = G_TraceCapsuleComplete(ent->r.currentOrigin, ent->r.mins, ent->r.maxs, origin, 1023, mask);
+                        v1 = G_TraceCapsuleComplete(ent->r.currentOrigin, ent->r.mins, ent->r.maxs, origin, ENTITYNUM_NONE, mask);
                     }
                     if (v1)
                     {
@@ -219,7 +219,7 @@ void __cdecl G_RunCorpseMove(gentity_s *ent)
                     }
                     else
                     {
-                        G_TraceCapsule(&tr, start, ent->r.mins, ent->r.maxs, origin, 1023, mask & 0xFFFEFFFF);
+                        G_TraceCapsule(&tr, start, ent->r.mins, ent->r.maxs, origin, ENTITYNUM_NONE, mask & 0xFFFEFFFF);
                     }
                     if (!tr.allsolid)
                     {

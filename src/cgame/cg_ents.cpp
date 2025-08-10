@@ -983,24 +983,13 @@ void __cdecl CG_DObjUpdateInfo(const cg_s *cgameGlob, DObj_s *obj, bool notify)
 
 centity_s *__cdecl CG_GetPose(int localClientNum, int handle)
 {
-    if ((unsigned int)handle >= 0x900)
-        MyAssertHandler(
-            "c:\\trees\\cod3\\cod3src\\src\\cgame\\cg_ents.cpp",
-            755,
-            0,
-            "%s\n\t(handle) = %i",
-            "(handle >= 0 && handle < (((2176)) + 128))",
-            handle);
-    if (handle < 2176)
+    iassert((handle >= 0 && handle < (((MAX_GENTITIES)) + 128)));
+
+    if (handle < MAX_GENTITIES)
         return CG_GetEntity(localClientNum, handle);
-    if (handle - 2176 >= 128)
-        MyAssertHandler(
-            "c:\\trees\\cod3\\cod3src\\src\\cgame\\cg_ents.cpp",
-            763,
-            0,
-            "%s\n\t(handle) = %i",
-            "(handle >= ((2176)) && handle - ((2176)) < 128)",
-            handle);
+
+    iassert((handle >= ((MAX_GENTITIES)) && handle - ((MAX_GENTITIES)) < 128));
+
     if (localClientNum)
         MyAssertHandler(
             "c:\\trees\\cod3\\cod3src\\src\\cgame\\cg_local.h",
@@ -2339,7 +2328,7 @@ int __cdecl CG_AddPacketEntities(int localClientNum)
     if ((cgArray[0].predictedPlayerState.eFlags & 0x300) != 0)
         viewlocked_entNum = cgArray[0].predictedPlayerState.viewlocked_entNum;
     else
-        viewlocked_entNum = 2175;
+        viewlocked_entNum = ENTITYNUM_NONE;
     v3 = 0;
     nextSnap = cgArray[0].nextSnap;
     v5 = 0;

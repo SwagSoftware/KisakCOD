@@ -1400,7 +1400,7 @@ void __cdecl ActorCmd_CheckGrenadeThrowPos(scr_entref_t entref)
         v32[0] = vTargetPos[0];
         v32[1] = vTargetPos[1];
         v32[2] = vTargetPos[2] - (float)1.0;
-        G_TraceCapsule(v33, vTargetPos, vec3_origin, vec3_origin, v32, 2175, 2065);
+        G_TraceCapsule(v33, vTargetPos, vec3_origin, vec3_origin, v32, ENTITYNUM_NONE, 2065);
 
         if (v33[0].fraction > 0.5)
             Com_Printf(18, "targetPos for checkGrenadeThrowPos not at ground level\n");
@@ -2104,7 +2104,7 @@ void __cdecl ActorCmd_LerpPosition(scr_entref_t entref)
     p_eType[56] = v3;
     p_eType[57] = v4;
     p_eType[58] = v5;
-    v1->Physics.groundEntNum = 2175;
+    v1->Physics.groundEntNum = ENTITYNUM_NONE;
 }
 
 void __cdecl ActorCmd_PredictOriginAndAngles(scr_entref_t entref)
@@ -2146,7 +2146,7 @@ void __cdecl Actor_GetEntType(int entnum)
 {
     unsigned __int16 obstacle; // r11
 
-    if (entnum == 2175)
+    if (entnum == ENTITYNUM_NONE)
     {
         Scr_AddConstString(scr_const.none);
     }
@@ -2166,7 +2166,7 @@ void __cdecl ActorCmd_GetHitEntType(scr_entref_t entref)
     unsigned __int16 obstacle; // r11
 
     iHitEntnum = Actor_Get(entref)->Physics.iHitEntnum;
-    if (iHitEntnum == 2175)
+    if (iHitEntnum == ENTITYNUM_NONE)
     {
         Scr_AddConstString(scr_const.none);
     }
@@ -2187,7 +2187,7 @@ void __cdecl ActorCmd_GetHitYaw(scr_entref_t entref)
     float v3[4]; // [sp+50h] [-20h] BYREF
 
     v1 = Actor_Get(entref);
-    if (v1->Physics.iHitEntnum == 2175)
+    if (v1->Physics.iHitEntnum == ENTITYNUM_NONE)
         Scr_Error("nothing was hit");
     v3[0] = -v1->Physics.vHitNormal[0];
     v3[1] = -v1->Physics.vHitNormal[1];
@@ -2202,7 +2202,7 @@ void __cdecl ActorCmd_GetGroundEntType(scr_entref_t entref)
     unsigned __int16 obstacle; // r11
 
     groundEntNum = Actor_Get(entref)->Physics.groundEntNum;
-    if (groundEntNum == 2175)
+    if (groundEntNum == ENTITYNUM_NONE)
     {
         Scr_AddConstString(scr_const.none);
     }

@@ -1533,7 +1533,7 @@ void __cdecl CG_AddFXSoundAlias(int32_t localClientNum, const float *origin, snd
     if (alias)
     {
         Snd_AssertAliasValid(alias);
-        SND_AddPlayFXSoundAlias(alias, (SndEntHandle)1022, origin);
+        SND_AddPlayFXSoundAlias(alias, (SndEntHandle)ENTITYNUM_WORLD, origin);
     }
 }
 

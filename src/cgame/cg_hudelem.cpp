@@ -1417,7 +1417,7 @@ void __cdecl DrawOffscreenViewableWaypoint(int32_t localClientNum, const hudelem
             padTop = waypointOffscreenPadTop->current.value * scrPlace->scaleVirtualToReal[1] + padding;
             padBottom = waypointOffscreenPadBottom->current.value * scrPlace->scaleVirtualToReal[1] + padding;
             tweak2dY = waypointTweakY->current.value * scrPlace->scaleVirtualToReal[1];
-            if (elem->targetEntNum == 1023)
+            if (elem->targetEntNum == ENTITYNUM_NONE)
             {
                 v9 = elem->y;
                 z = elem->z;

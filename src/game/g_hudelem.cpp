@@ -803,7 +803,7 @@ void __cdecl HECmd_SetTargetEnt(scr_entref_t entref)
 
 void __cdecl HECmd_ClearTargetEnt(scr_entref_t entref)
 {
-    HECmd_GetHudElem(entref)->elem.targetEntNum = 1023;
+    HECmd_GetHudElem(entref)->elem.targetEntNum = ENTITYNUM_NONE;
 }
 
 void __cdecl HECmd_SetTimer(scr_entref_t entref)
@@ -1262,7 +1262,7 @@ void __cdecl HudElem_UpdateClient(gclient_s *client, int32_t clientNum, hudelem_
     {
         if (hud->elem.type
             && (!hud->team || hud->team == client->sess.cs.team)
-            && (hud->clientNum == 1023 || hud->clientNum == clientNum))
+            && (hud->clientNum == ENTITYNUM_NONE || hud->clientNum == clientNum))
         {
             if (hud->archived)
             {

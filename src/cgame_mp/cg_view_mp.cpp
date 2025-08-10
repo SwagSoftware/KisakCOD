@@ -396,15 +396,9 @@ void __cdecl CG_UpdateHelicopterKillCam(int32_t localClientNum)
 
     cgameGlob = CG_GetLocalClientGlobals(localClientNum);
 
-    if (cgameGlob->predictedPlayerState.killCamEntity == 1023)
-        MyAssertHandler(
-            ".\\cgame_mp\\cg_view_mp.cpp",
-            941,
-            0,
-            "%s",
-            "cgameGlob->predictedPlayerState.killCamEntity != ENTITYNUM_NONE");
-    if (!cgameGlob->inKillCam)
-        MyAssertHandler(".\\cgame_mp\\cg_view_mp.cpp", 942, 0, "%s", "cgameGlob->inKillCam");
+    iassert(cgameGlob->predictedPlayerState.killCamEntity != ENTITYNUM_NONE);
+    iassert(cgameGlob->inKillCam);
+
     centHelicopter = CG_GetEntity(localClientNum, cgameGlob->predictedPlayerState.killCamEntity);
     if (!centHelicopter->nextValid)
         MyAssertHandler(".\\cgame_mp\\cg_view_mp.cpp", 945, 0, "%s", "centHelicopter->nextValid");
@@ -951,10 +945,11 @@ void __cdecl CG_CalcTurretViewValues(int32_t localClientNum)
     
     if ((cgameGlob->predictedPlayerState.eFlags & 0x300) != 0)
     {
-        if (cgameGlob->predictedPlayerState.viewlocked == PLAYERVIEWLOCK_NONE)
-            MyAssertHandler(".\\cgame_mp\\cg_view_mp.cpp", 701, 0, "%s", "ps->viewlocked");
-        if (cgameGlob->predictedPlayerState.viewlocked_entNum == 1023)
-            MyAssertHandler(".\\cgame_mp\\cg_view_mp.cpp", 702, 0, "%s", "ps->viewlocked_entNum != ENTITYNUM_NONE");
+        const playerState_s *ps = &cgameGlob->predictedPlayerState;
+
+        iassert(ps->viewlocked);
+        iassert(ps->viewlocked_entNum != ENTITYNUM_NONE);
+
         cent = CG_GetEntity(localClientNum, cgameGlob->predictedPlayerState.viewlocked_entNum);
         obj = Com_GetClientDObj(cent->nextState.number, localClientNum);
         if (obj)
@@ -1135,12 +1130,16 @@ bool __cdecl CG_HelicopterKillCamEnabled(int32_t localClientNum)
     cg_s *cgameGlob;
 
     cgameGlob = CG_GetLocalClientGlobals(localClientNum);
+
     if (!cgameGlob->inKillCam)
         return 0;
-    if (cgameGlob->predictedPlayerState.killCamEntity == 1023)
+
+    if (cgameGlob->predictedPlayerState.killCamEntity == ENTITYNUM_NONE)
         return 0;
+
     cent = CG_GetEntity(localClientNum, cgameGlob->predictedPlayerState.killCamEntity);
-    return cent->nextValid && cent->pose.eType == 12;
+
+    return cent->nextValid && cent->pose.eType == ET_HELICOPTER;
 }
 
 bool __cdecl CG_AirstrikeKillCamEnabled(int32_t localClientNum)
@@ -1148,10 +1147,13 @@ bool __cdecl CG_AirstrikeKillCamEnabled(int32_t localClientNum)
     cg_s *cgameGlob;
 
     cgameGlob = CG_GetLocalClientGlobals(localClientNum);
+
     if (!cgameGlob->inKillCam)
         return 0;
-    if (cgameGlob->predictedPlayerState.killCamEntity == 1023)
+
+    if (cgameGlob->predictedPlayerState.killCamEntity == ENTITYNUM_NONE)
         return 0;
+
     return CG_GetEntity(localClientNum, cgameGlob->predictedPlayerState.killCamEntity)->nextValid;
 }
 
@@ -1178,8 +1180,10 @@ bool __cdecl CG_KillCamEntityEnabled(int32_t localClientNum)
 
     if (!cgameGlob->inKillCam)
         return 0;
-    if (cgameGlob->predictedPlayerState.killCamEntity == 1023)
+
+    if (cgameGlob->predictedPlayerState.killCamEntity == ENTITYNUM_NONE)
         return 0;
+
     return CG_GetEntity(localClientNum, cgameGlob->predictedPlayerState.killCamEntity)->nextValid;
 }
 
@@ -1373,7 +1377,7 @@ int32_t __cdecl CG_DrawActiveFrame(
                 if (CG_AddPacketEntities(localClientNum))
                     viewlocked_entNum = cgameGlob->predictedPlayerState.viewlocked_entNum;
                 else
-                    viewlocked_entNum = 1023;
+                    viewlocked_entNum = ENTITYNUM_NONE;
                 if (!cgameGlob->predictedPlayerState.locationSelectionInfo
                     || (cgameGlob->predictedPlayerState.otherFlags & 2) != 0)
                 {
@@ -1433,7 +1437,7 @@ int32_t __cdecl CG_DrawActiveFrame(
                         cgameGlob->predictedPlayerEntity.pose.player.tag[i] = -2;
                     CG_ProcessEntity(localClientNum, &cgameGlob->predictedPlayerEntity);
                 }
-                if (viewlocked_entNum != 1023)
+                if (viewlocked_entNum != ENTITYNUM_NONE)
                     CG_AddPacketEntity(localClientNum, viewlocked_entNum);
                 GetCeilingHeight(cgameGlob);
                 if (!localClientNum)
@@ -1626,7 +1630,7 @@ void __cdecl GetCeilingHeight(cg_s *cgameGlob)
         (float *)playerMins,
         (float *)playerMaxs,
         endPos,
-        1023,
+        ENTITYNUM_NONE,
         1);
     if (result.fraction < 1.0)
     {

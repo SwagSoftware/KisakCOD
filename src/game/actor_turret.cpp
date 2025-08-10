@@ -635,7 +635,7 @@ LABEL_60:
     G_TouchEnts(ent, self->Physics.iNumTouch, self->Physics.iTouchEnts);
     G_CalcTagAxis(ent, 0);
     iHitEntnum = self->Physics.iHitEntnum;
-    if (iHitEntnum == 2175)
+    if (iHitEntnum == ENTITYNUM_NONE)
         goto success;
     if (level.time - self->iStateTime < 1000)
         goto success;

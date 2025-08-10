@@ -487,7 +487,7 @@ void __cdecl SV_PointTraceToEntity(const pointtrace_t *clip, svEntity_s *check, 
     touch = SV_GentityNum(entnum);
     if ((touch->r.contents & clip->contentmask) == 0
         || clip->ignoreEntParams
-        && clip->ignoreEntParams->baseEntity != 1023
+        && clip->ignoreEntParams->baseEntity != ENTITYNUM_NONE
         && (clip->ignoreEntParams->ignoreSelf && entnum == clip->ignoreEntParams->baseEntity
             || clip->ignoreEntParams->ignoreParent && entnum == clip->ignoreEntParams->parentEntity
             || touch->r.ownerNum.isDefined()
@@ -643,7 +643,7 @@ void __cdecl SV_ClipMoveToEntity(const moveclip_t *clip, svEntity_s *check, trac
     entnum = check - sv.svEntities;
     touch = SV_GentityNum(entnum);
     if ((touch->r.contents & clip->contentmask) != 0
-        && (clip->passEntityNum == 1023
+        && (clip->passEntityNum == ENTITYNUM_NONE
             || entnum != clip->passEntityNum
             && (!touch->r.ownerNum.isDefined()
                 || touch->r.ownerNum.entnum() != clip->passEntityNum
@@ -718,7 +718,7 @@ int __cdecl SV_PointSightTraceToEntity(const sightpointtrace_t *clip, svEntity_s
         return 0;
     for (passEntityIdx = 0; passEntityIdx < 2; ++passEntityIdx)
     {
-        if (clip->passEntityNum[passEntityIdx] != 1023)
+        if (clip->passEntityNum[passEntityIdx] != ENTITYNUM_NONE)
         {
             if (entnum == clip->passEntityNum[passEntityIdx])
                 return 0;
@@ -835,14 +835,14 @@ int __cdecl SV_ClipSightToEntity(const sightclip_t *clip, svEntity_s *check)
     touch = SV_GentityNum(entnum);
     if ((touch->r.contents & clip->contentmask) == 0)
         return 0;
-    if (clip->passEntityNum[0] != 1023)
+    if (clip->passEntityNum[0] != ENTITYNUM_NONE)
     {
         if (entnum == clip->passEntityNum[0])
             return 0;
         if (touch->r.ownerNum.isDefined() && touch->r.ownerNum.entnum() == clip->passEntityNum[0])
             return 0;
     }
-    if (clip->passEntityNum[1] == 1023)
+    if (clip->passEntityNum[1] == ENTITYNUM_NONE)
         goto LABEL_15;
     if (entnum == clip->passEntityNum[1])
         return 0;
@@ -888,7 +888,7 @@ void __cdecl SV_SetupIgnoreEntParams(IgnoreEntParams *ignoreEntParams, int baseE
     gentity_s *base; // [esp+0h] [ebp-4h]
 
     ignoreEntParams->baseEntity = baseEntity;
-    if (baseEntity == 1023)
+    if (baseEntity == ENTITYNUM_NONE)
     {
         ignoreEntParams->parentEntity = -1;
     }
@@ -962,7 +962,7 @@ void __cdecl SV_Trace(
         if (!results)
             MyAssertHandler("c:\\trees\\cod3\\src\\server_mp\\../qcommon/cm_public.h", 135, 0, "%s", "trace");
         results->hitType = TRACE_HITTYPE_ENTITY;
-        results->hitId = 1022;
+        results->hitId = ENTITYNUM_WORLD;
     }
     if (results->fraction == 0.0)
         goto LABEL_35;
@@ -994,7 +994,7 @@ void __cdecl SV_Trace(
         clip.ignoreEntParams = ignoreEntParams;
         clip.bLocational = locational;
         clip.priorityMap = priorityMap;
-        if (ignoreEntParams->baseEntity != 1023 && ignoreEntParams->parentEntity != -1)
+        if (ignoreEntParams->baseEntity != ENTITYNUM_NONE && ignoreEntParams->parentEntity != -1)
         {
             v10 = SV_GentityNum(ignoreEntParams->baseEntity);
             if (!v10->r.ownerNum.isDefined()
@@ -1018,7 +1018,7 @@ void __cdecl SV_Trace(
                         "base: %d; parent: %d; base's parent: %d\n",
                         ignoreEntParams->baseEntity,
                         ignoreEntParams->parentEntity,
-                        1023);
+                        ENTITYNUM_NONE);
                 }
                 MyAssertHandler(
                     ".\\server\\sv_world.cpp",
@@ -1041,7 +1041,7 @@ void __cdecl SV_Trace(
             MyAssertHandler(".\\server\\sv_world.cpp", 799, 0, "%s", "!locational");
         result.contentmask = contentmask;
         result.passEntityNum = ignoreEntParams->baseEntity;
-        if (ignoreEntParams->baseEntity != 1023 && ignoreEntParams->parentEntity != -1)
+        if (ignoreEntParams->baseEntity != ENTITYNUM_NONE && ignoreEntParams->parentEntity != -1)
         {
             v15 = SV_GentityNum(ignoreEntParams->baseEntity);
             if (!v15->r.ownerNum.isDefined() || (v16 = SV_GentityNum(ignoreEntParams->baseEntity), ignoreEntParams->parentEntity != v16->r.ownerNum.entnum()))
@@ -1063,7 +1063,7 @@ void __cdecl SV_Trace(
                         "base: %d; parent: %d; base's parent: %d\n",
                         ignoreEntParams->baseEntity,
                         ignoreEntParams->parentEntity,
-                        1023);
+                        ENTITYNUM_NONE);
                 }
                 MyAssertHandler(
                     ".\\server\\sv_world.cpp",

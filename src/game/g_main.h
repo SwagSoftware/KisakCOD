@@ -89,8 +89,8 @@ struct level_locals_t
 	trigger_info_t currentTriggerList[256];
 	int pendingTriggerListSize;
 	int currentTriggerListSize;
-	unsigned __int8 entTriggerIndex[2176];
-	unsigned __int8 specialIndex[2176];
+	unsigned __int8 entTriggerIndex[MAX_GENTITIES];
+	unsigned __int8 specialIndex[MAX_GENTITIES];
 	actor_prone_info_s cgData_actorProneInfo[48];
 	unsigned __int8 cgData_actorOnCompass[32];
 	unsigned __int8 cgData_actorTeam[32];

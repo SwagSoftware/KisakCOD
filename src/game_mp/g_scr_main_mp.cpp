@@ -2220,7 +2220,7 @@ void __cdecl ClearObjective(objective_t *obj)
     obj->origin[0] = 0.0;
     obj->origin[1] = 0.0;
     obj->origin[2] = 0.0;
-    obj->entNum = 1023;
+    obj->entNum = ENTITYNUM_NONE;
     obj->teamNum = 0;
     obj->icon = 0;
 }
@@ -2259,7 +2259,7 @@ void Scr_Objective_Add()
         obj->origin[1] = (float)(int)obj->origin[1];
         obj->origin[2] = (float)(int)obj->origin[2];
         result = obj;
-        obj->entNum = 1023;
+        obj->entNum = ENTITYNUM_NONE;
         if (numParam >= 4)
             SetObjectiveIcon(obj, 3u);
     }
@@ -2270,12 +2270,12 @@ void __cdecl ClearObjective_OnEntity(objective_t *obj)
 {
     gentity_s *pEnt; // [esp+0h] [ebp-4h]
 
-    if (obj->entNum != 1023)
+    if (obj->entNum != ENTITYNUM_NONE)
     {
         pEnt = &g_entities[obj->entNum];
         if (pEnt->r.inuse)
             pEnt->r.svFlags &= ~0x10u;
-        obj->entNum = 1023;
+        obj->entNum = ENTITYNUM_NONE;
     }
 }
 
@@ -2481,7 +2481,7 @@ void GScr_LogPrint()
 
 void GScr_WorldEntNumber()
 {
-    Scr_AddInt(1022);
+    Scr_AddInt(ENTITYNUM_WORLD);
 }
 
 int32_t GScr_Obituary()
@@ -2502,7 +2502,7 @@ int32_t GScr_Obituary()
     if (Scr_GetType(1) == 1 && Scr_GetPointerType(1) == 20)
         pEnt->s.attackerEntityNum = Scr_GetEntity(1)->s.number;
     else
-        pEnt->s.attackerEntityNum = 1022;
+        pEnt->s.attackerEntityNum = ENTITYNUM_WORLD;
     pEnt->r.svFlags = 8;
     if (iMODNum == 15 || iMODNum == 7 || iMODNum == 8 || iMODNum == 12 || iMODNum == 11 || iMODNum == 9)
     {
@@ -2959,7 +2959,7 @@ void Scr_BulletTrace()
     uint16_t hitEntId; // [esp+84h] [ebp-4h]
 
     pIgnoreEnt = 0;
-    iIgnoreEntNum = 1023;
+    iIgnoreEntNum = ENTITYNUM_NONE;
     iClipMask = 0x2806831;
     Scr_GetVector(0, vStart);
     Scr_GetVector(1u, vEnd);
@@ -2978,7 +2978,7 @@ void Scr_BulletTrace()
     Scr_AddVector(endpos);
     Scr_AddArrayStringIndexed(scr_const.position);
     hitEntId = Trace_GetEntityHitId(&trace);
-    if (hitEntId == 1023 || hitEntId == 1022)
+    if (hitEntId == ENTITYNUM_NONE || hitEntId == ENTITYNUM_WORLD)
         Scr_AddUndefined();
     else
         Scr_AddEntity(&g_entities[hitEntId]);
@@ -3013,7 +3013,7 @@ void Scr_BulletTracePassed()
     float vStart[3]; // [esp+1Ch] [ebp-Ch] BYREF
 
     pIgnoreEnt = 0;
-    iIgnoreEntNum = 1023;
+    iIgnoreEntNum = ENTITYNUM_NONE;
     iClipMask = 0x2806831;
     Scr_GetVector(0, vStart);
     Scr_GetVector(1u, vEnd);
@@ -3024,7 +3024,7 @@ void Scr_BulletTracePassed()
         pIgnoreEnt = Scr_GetEntity(3);
         iIgnoreEntNum = pIgnoreEnt->s.number;
     }
-    v0 = G_LocationalTracePassed(vStart, vEnd, iIgnoreEntNum, 1023, iClipMask, 0);
+    v0 = G_LocationalTracePassed(vStart, vEnd, iIgnoreEntNum, ENTITYNUM_NONE, iClipMask, 0);
     Scr_AddBool(v0);
 }
 
@@ -3038,7 +3038,7 @@ void __cdecl Scr_SightTracePassed()
     float vStart[3]; // [esp+20h] [ebp-Ch] BYREF
 
     pIgnoreEnt = 0;
-    iIgnoreEntNum = 1023;
+    iIgnoreEntNum = ENTITYNUM_NONE;
     iClipMask = 0x2801803;
     Scr_GetVector(0, vStart);
     Scr_GetVector(1u, vEnd);
@@ -3062,7 +3062,7 @@ void Scr_PhysicsTrace()
 
     Scr_GetVector(0, start);
     Scr_GetVector(1u, end);
-    G_TraceCapsule(&trace, start, (float *)vec3_origin, (float *)vec3_origin, end, 1023, 0x820011);
+    G_TraceCapsule(&trace, start, (float *)vec3_origin, (float *)vec3_origin, end, ENTITYNUM_NONE, 0x820011);
     Vec3Lerp(start, end, trace.fraction, endpos);
     Scr_AddVector(endpos);
 }
@@ -3076,7 +3076,7 @@ void Scr_PlayerPhysicsTrace()
 
     Scr_GetVector(0, start);
     Scr_GetVector(1u, end);
-    G_TraceCapsule(&trace, start, (float *)playerMins, (float *)playerMaxs, end, 1023, 0x820011);
+    G_TraceCapsule(&trace, start, (float *)playerMins, (float *)playerMaxs, end, ENTITYNUM_NONE, 0x820011);
     Vec3Lerp(start, end, trace.fraction, endpos);
     Scr_AddVector(endpos);
 }
@@ -3890,7 +3890,7 @@ void Scr_GrenadeExplosionEffect()
     vEnd[0] = vPos[0];
     vEnd[1] = vPos[1];
     vEnd[2] = vPos[2] - 17.0;
-    G_TraceCapsule(&trace, vPos, (float *)vec3_origin, (float *)vec3_origin, vEnd, 1023, 2065);
+    G_TraceCapsule(&trace, vPos, (float *)vec3_origin, (float *)vec3_origin, vEnd, ENTITYNUM_NONE, 2065);
     result = (trace.surfaceFlags & 0x1F00000) >> 20;
     pEnt->s.surfType = result;
 }
@@ -3914,7 +3914,7 @@ void __cdecl GScr_RadiusDamageInternal(gentity_s *inflictor)
     range = Scr_GetFloat(1);
     max_damage = Scr_GetFloat(2);
     min_damage = Scr_GetFloat(3);
-    attacker = &g_entities[1022];
+    attacker = &g_entities[ENTITYNUM_WORLD];
     if (Scr_GetNumParam() > 4 && Scr_GetType(4))
         attacker = Scr_GetEntity(4);
     mod = MOD_EXPLOSIVE;
@@ -5869,7 +5869,7 @@ void __cdecl GScr_ClientClaimTrigger(scr_entref_t entref)
     {
         Scr_Error(va("clientclaimtrigger: trigger entity must be of type %s or %s", SL_ConvertToString(scr_const.trigger_use), SL_ConvertToString(scr_const.trigger_use_touch)));
     }
-    if (triggerEnt->item[1].ammoCount == 1023 || triggerEnt->item[1].ammoCount == clientEnt->client->ps.clientNum)
+    if (triggerEnt->item[1].ammoCount == ENTITYNUM_NONE || triggerEnt->item[1].ammoCount == clientEnt->client->ps.clientNum)
         triggerEnt->item[1].ammoCount = clientEnt->client->ps.clientNum;
 }
 
@@ -5887,7 +5887,7 @@ void __cdecl GScr_ClientReleaseTrigger(scr_entref_t entref)
         Scr_Error(va("clientreleasetrigger: trigger entity must be of type %s or %s", SL_ConvertToString(scr_const.trigger_use), SL_ConvertToString(scr_const.trigger_use_touch)));
     }
     if (triggerEnt->item[1].ammoCount == clientEnt->client->ps.clientNum)
-        triggerEnt->item[1].ammoCount = 1023;
+        triggerEnt->item[1].ammoCount = ENTITYNUM_NONE;
 }
 
 void __cdecl GScr_ReleaseClaimedTrigger(scr_entref_t entref)
@@ -5899,7 +5899,7 @@ void __cdecl GScr_ReleaseClaimedTrigger(scr_entref_t entref)
     {
         Scr_Error(va("releaseclaimedtrigger: trigger entity must be of type %s or %s", SL_ConvertToString(scr_const.trigger_use), SL_ConvertToString(scr_const.trigger_use_touch)));
     }
-    triggerEnt->item[1].ammoCount = 1023;
+    triggerEnt->item[1].ammoCount = ENTITYNUM_NONE;
 }
 
 void GScr_SetMapCenter()

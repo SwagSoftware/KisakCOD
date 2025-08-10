@@ -105,7 +105,7 @@ char __cdecl BG_AdvanceTrace(BulletFireParams *bp, BulletTraceResults *br, float
     if (br->trace.hitType == TRACE_HITTYPE_NONE)
         MyAssertHandler(".\\bgame\\bg_weapons.cpp", 136, 0, "%s", "br->trace.hitType != TRACE_HITTYPE_NONE");
     bp->ignoreEntIndex = Trace_GetEntityHitId(&br->trace);
-    if (bp->ignoreEntIndex == 1022 && dist > 0.0)
+    if (bp->ignoreEntIndex == ENTITYNUM_WORLD && dist > 0.0)
     {
         dot = -Vec3Dot(br->trace.normal, bp->dir);
         if (dot < 0.125)
@@ -1093,7 +1093,7 @@ void __cdecl PM_AdjustAimSpreadScale(pmove_t *pm, pml_t *pml)
     {
         spreadOverrideScale = ((double)ps->spreadOverride - weapDef->fHipSpreadStandMin)
             / (weapDef->hipSpreadStandMax - weapDef->fHipSpreadStandMin);
-        if (ps->groundEntityNum != 1023 || ps->pm_type == PM_NORMAL_LINKED)
+        if (ps->groundEntityNum != ENTITYNUM_NONE || ps->pm_type == PM_NORMAL_LINKED)
         {
             if ((ps->eFlags & 8) != 0)
             {
@@ -1148,7 +1148,7 @@ void __cdecl PM_AdjustAimSpreadScale(pmove_t *pm, pml_t *pml)
                         viewchange = weapDef->fHipSpreadMoveAdd * v3 / (double)ps->speed + viewchange;
                     }
                 }
-                if (ps->groundEntityNum == 1023 && ps->pm_type != PM_NORMAL_LINKED)
+                if (ps->groundEntityNum == ENTITYNUM_NONE && ps->pm_type != PM_NORMAL_LINKED)
                 {
                     for (ia = 0; ia < 2; ++ia)
                         viewchange = (float)0.0099999998 * 128.0 + viewchange;
@@ -2538,7 +2538,7 @@ int32_t __cdecl PM_Weapon_ShouldBeFiring(pmove_t *pm, int32_t delayedAction)
         MyAssertHandler(".\\bgame\\bg_weapons.cpp", 2768, 0, "%s", "ps");
     weapDef = BG_GetWeaponDef(ps->weapon);
     shouldStartFiring = (pm->cmd.buttons & PM_GetWeaponFireButton(ps->weapon)) != 0;
-    if (weapDef->freezeMovementWhenFiring && ps->groundEntityNum == 1023)
+    if (weapDef->freezeMovementWhenFiring && ps->groundEntityNum == ENTITYNUM_NONE)
         shouldStartFiring = 0;
     v3 = delayedAction || BurstFirePending(ps);
     if (shouldStartFiring || v3)
@@ -2993,7 +2993,7 @@ void __cdecl PM_Weapon_OffHandEnd(playerState_s *ps)
 #endif
     }
     ps->throwBackGrenadeTimeLeft = 0;
-    ps->throwBackGrenadeOwner = 1023;
+    ps->throwBackGrenadeOwner = ENTITYNUM_NONE;
     ps->weaponstate = 20;
     ps->weapFlags &= ~2u;
     ps->pm_flags &= ~0x200u;
@@ -3098,7 +3098,7 @@ void __cdecl PM_Weapon_CheckForOffHand(pmove_t *pm)
                 Com_Error(ERR_DROP, "[%s] Only grenades are currently supported for off hand use\n", pWeapDef3->szInternalName);
             if (pWeapDef4->offhandClass == OFFHAND_CLASS_NONE)
                 Com_Error(ERR_DROP, "[%s] No offhand class set\n", pWeapDef4->szInternalName);
-            if (ps->cursorHintEntIndex == 1023 && (!ps->weapon || ps->weaponstate == 20))
+            if (ps->cursorHintEntIndex == ENTITYNUM_NONE && (!ps->weapon || ps->weaponstate == 20))
                 PM_Weapon_OffHandPrepare(ps);
             else
                 PM_Weapon_OffHandInit(ps);
@@ -3119,7 +3119,7 @@ void __cdecl PM_Weapon_OffHandInit(playerState_s *ps)
     ps->weaponstate = 15;
     ps->weaponDelay = 0;
     ps->weapFlags &= ~2u;
-    ps->throwBackGrenadeOwner = 1023;
+    ps->throwBackGrenadeOwner = ENTITYNUM_NONE;
     PM_ExitAimDownSight(ps);
     if (ps->weapon)
     {
@@ -4440,7 +4440,7 @@ bool __cdecl BG_ThrowingBackGrenade(const playerState_s *ps)
 {
     if (!ps)
         MyAssertHandler(".\\bgame\\bg_weapons.cpp", 5068, 0, "%s", "ps");
-    return ps->throwBackGrenadeOwner != 1023;
+    return ps->throwBackGrenadeOwner != ENTITYNUM_NONE;
 }
 
 WeaponDef *__cdecl BG_LoadWeaponDef(const char *name)

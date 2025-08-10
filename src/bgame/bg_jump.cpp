@@ -240,7 +240,7 @@ void __cdecl Jump_Start(pmove_t *pm, pml_t *pml, float height)
     pml->groundPlane = 0;
     pml->almostGroundPlane = 0;
     pml->walking = 0;
-    ps->groundEntityNum = 1023;
+    ps->groundEntityNum = ENTITYNUM_NONE;
     ps->jumpTime = pm->cmd.serverTime;
     ps->jumpOriginZ = ps->origin[2];
     v3 = sqrt(velocitySqrd);

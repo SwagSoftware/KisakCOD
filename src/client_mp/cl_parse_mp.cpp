@@ -694,7 +694,7 @@ void __cdecl CL_ParsePacketEntities(
         newnum = MSG_ReadEntityIndex(msg, 0xAu);
         vassert(newnum >= 0 && newnum < (1 << 10), "(newnum) = %i", newnum);
 
-        if (newnum == 1023)
+        if (newnum == ENTITYNUM_NONE)
             break;
         if (msg->readcount > msg->cursize)
             Com_Error(ERR_DROP, "CL_ParsePacketEntities: end of message");
