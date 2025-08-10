@@ -889,15 +889,9 @@ void __cdecl Com_EventLoop()
 
     PROF_SCOPED("Com_EventLoop");
 
-#ifdef _DEBUG
-    int eventCount = 0;
-#endif
-
     while (1)
     {
         ev = *Sys_GetEvent(&result);
-
-        eventCount++;
 
         switch (ev.evType)
         {
@@ -937,7 +931,6 @@ void __cdecl Com_EventLoop()
     }
 
 END:
-    ZoneTextF("Events Processed in Loop: %d", eventCount);
     return;
 }
 
