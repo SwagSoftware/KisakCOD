@@ -690,6 +690,7 @@ struct XAnimTree_s;
 
 void __cdecl TRACK_dobj_management();
 DObj_s *__cdecl Com_GetClientDObj(unsigned int handle, int localClientNum);
+DObj_s * Com_GetClientDObjBuffered(unsigned int handle, int localClientNum);
 DObj_s *__cdecl Com_GetServerDObj(unsigned int handle);
 DObj_s *__cdecl Com_ClientDObjCreate(
 	DObjModel_s *dobjModels,
@@ -710,7 +711,10 @@ void __cdecl Com_InitDObj();
 void __cdecl Com_ShutdownDObj();
 void __cdecl DB_SaveDObjs();
 void __cdecl DB_LoadDObjs();
-
+DObj_s *Com_DObjCloneToBuffer(unsigned int entnum);
+void Com_ServerDObjClean(int handle);
+bool Com_ServerDObjDirty(int handle);
+void Com_DObjCloneFromBuffer(unsigned int entnum);
 
 /*
 ==============================================================

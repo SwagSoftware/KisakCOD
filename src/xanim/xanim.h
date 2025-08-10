@@ -1440,6 +1440,8 @@ void __cdecl XAnimCloneAnimTree_r(
 XAnimInfo* __cdecl GetAnimInfo(int infoIndex);
 void XAnimDisableLeakCheck();
 void XAnimFreeAnims(XAnim_s *anims, void(*Free)(void *, int));
+void XAnimCloneClientAnimTree(const XAnimTree_s *from, XAnimTree_s *to);
+void DObjTransfer(const DObj_s *fromObj, DObj_s *toObj, double dtime);
 
 
 // xanim_load_obj

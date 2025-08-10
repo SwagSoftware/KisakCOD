@@ -74,13 +74,6 @@ void __cdecl CG_Respawn(int32_t localClientNum)
 #endif
 }
 
-int32_t __cdecl CG_TransitionPlayerState(int32_t localClientNum, playerState_s *ps, const transPlayerState_t *ops)
-{
-    if (ps->damageEvent != ops->damageEvent && ps->damageCount)
-        CG_DamageFeedback(localClientNum, ps->damageYaw, ps->damagePitch, ps->damageCount);
-    return CG_CheckPlayerstateEvents(localClientNum, ps, ops);
-}
-
 void __cdecl CG_DamageFeedback(int32_t localClientNum, int32_t yawByte, int32_t pitchByte, int32_t damage)
 {
     double v4; // st7
@@ -141,6 +134,14 @@ void __cdecl CG_DamageFeedback(int32_t localClientNum, int32_t yawByte, int32_t 
     CG_MenuShowNotify(localClientNum, 0);
 }
 
+#ifdef KISAK_MP
+int32_t __cdecl CG_TransitionPlayerState(int32_t localClientNum, playerState_s *ps, const transPlayerState_t *ops)
+{
+    if (ps->damageEvent != ops->damageEvent && ps->damageCount)
+        CG_DamageFeedback(localClientNum, ps->damageYaw, ps->damagePitch, ps->damageCount);
+    return CG_CheckPlayerstateEvents(localClientNum, ps, ops);
+}
+
 int32_t __cdecl CG_CheckPlayerstateEvents(int32_t localClientNum, playerState_s* ps, const transPlayerState_t* ops)
 {
     int32_t v4; // [esp+4h] [ebp-18h]
@@ -167,3 +168,56 @@ int32_t __cdecl CG_CheckPlayerstateEvents(int32_t localClientNum, playerState_s*
     }
     return eventSequence;
 }
+#elif KISAK_SP
+int32_t __cdecl CG_TransitionPlayerState(int32_t localClientNum, playerState_s *ps, const playerState_s *ops)
+{
+    if (ps->damageEvent != ops->damageEvent && ps->damageCount)
+        CG_DamageFeedback(localClientNum, ps->damageYaw, ps->damagePitch, ps->damageCount);
+    return CG_CheckPlayerstateEvents(localClientNum, ps, ops);
+}
+
+int32_t __cdecl CG_CheckPlayerstateEvents(int32_t localClientNum, playerState_s *ps, const playerState_s *ops)
+{
+    int eventSequence; // r29
+    int v6; // r8
+    int v7; // r7
+    int v8; // r10
+    int v9; // r31
+    int v10; // r27
+    int v11; // r26
+    int v12; // r5
+    _DWORD v13[20]; // [sp+50h] [-50h] BYREF
+
+    eventSequence = ops->eventSequence;
+    v6 = ops->events[1];
+    v7 = ops->events[2];
+    v8 = ops->events[3];
+    v13[0] = ops->events[0];
+    v13[1] = v6;
+    v13[2] = v7;
+    v13[3] = v8;
+    if (localClientNum)
+        MyAssertHandler(
+            "c:\\trees\\cod3\\cod3src\\src\\cgame\\cg_local.h",
+            910,
+            0,
+            "%s\n\t(localClientNum) = %i",
+            "(localClientNum == 0)",
+            localClientNum);
+    v9 = ps->eventSequence - 4;
+    v10 = v9 - eventSequence;
+    v11 = eventSequence - v9;
+    do
+    {
+        if (v10 >= 0 || v11 < 4 && ps->events[v9 & 3] != v13[v9 & 3])
+        {
+            v12 = ps->events[v9 & 3];
+            cgArray[0].predictedPlayerEntity.nextState.eventParm = ps->eventParms[v9 & 3];
+            CG_EntityEvent(localClientNum, &cgArray[0].predictedPlayerEntity, v12);
+        }
+        ++v9;
+        ++v10;
+        --v11;
+    } while (v9 != ps->eventSequence);
+}
+#endif

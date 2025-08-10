@@ -548,4 +548,52 @@ void __cdecl CG_RelativeTeamColor(int32_t clientNum, const char *prefix, float *
     Dvar_GetUnpackedColorByName(dvarName, color);
     color[3] = savedAlpha;
 }
-#endif
+#endif // KISAK_MP
+
+void CG_Draw2DLine( 
+    const ScreenPlacement *scrPlace,
+    float p1x,
+    float p1y,
+    float p2x,
+    float p2y,
+    float lineWidth,
+    int horzAlign,
+    int vertAlign,
+    const float *color,
+    Material *material)
+{
+    double v40; // fp31
+    int v41; // r4
+    double v42; // fp30
+    int v43; // r4
+    double v44; // fp29
+    int v45; // r4
+    double v46; // fp28
+    double v47; // fp13
+    float v48; // [sp+50h] [-80h] BYREF
+    float v49; // [sp+54h] [-7Ch]
+    float v50[22]; // [sp+58h] [-78h] BYREF
+
+    if (p1x != p2x || p1y != p2y)
+    {
+        v40 = ScrPlace_ApplyX(scrPlace, p1x, horzAlign);
+        v42 = ScrPlace_ApplyX(scrPlace, p2x, v41);
+        v44 = ScrPlace_ApplyY(scrPlace, p1y, v43);
+        v46 = ScrPlace_ApplyY(scrPlace, p2y, v45);
+        v50[0] = (float)v42 - (float)v40;
+        v50[1] = (float)v46 - (float)v44;
+        Vec2NormalizeTo(v50, &v48);
+        v47 = (float)((float)((float)lineWidth * (float)0.5) * v48);
+        v48 = (float)((float)lineWidth * (float)0.5) * (float)-v49;
+        v49 = v47;
+        v50[2] = v48 + (float)v40;
+        v50[3] = (float)v47 + (float)v44;
+        v50[4] = v48 + (float)v42;
+        v50[5] = (float)v47 + (float)v46;
+        v50[6] = (float)v42 - v48;
+        v50[8] = (float)v40 - v48;
+        v50[7] = (float)v46 - (float)v47;
+        v50[9] = (float)v44 - (float)v47;
+        R_AddCmdDrawQuadPic((const float (*)[2]) & v50[2], color, material);
+    }
+}

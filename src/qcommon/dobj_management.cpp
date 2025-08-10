@@ -3,8 +3,14 @@
 #include "threads.h"
 #include <xanim/dobj.h>
 
+#ifdef KISAK_MP
 #define CLIENT_DOBJ_HANDLE_MAX 1152 // 0x480
 #define SERVER_DOBJ_HANDLE_MAX 1024 // 0x400
+#elif KISAK_SP
+#define CLIENT_DOBJ_HANDLE_MAX 2304
+#define SERVER_DOBJ_HANDLE_MAX 2176
+#endif
+
 #define DOBJ_HANDLE_MAX 2048
 
 static DObj_s objBuf[DOBJ_HANDLE_MAX];
@@ -13,6 +19,10 @@ static __int16 clientObjMap[CLIENT_DOBJ_HANDLE_MAX];
 static __int16 serverObjMap[SERVER_DOBJ_HANDLE_MAX];
 static int objFreeCount;
 static int com_lastDObjIndex;
+
+// LWSS: used in SP (KISAKTODO: could MP use this?)
+static __int16 clientObjMapBuffered[CLIENT_DOBJ_HANDLE_MAX];
+static unsigned __int8 serverObjDirty[272];
 
 void __cdecl TRACK_dobj_management()
 {
@@ -38,6 +48,52 @@ DObj_s *__cdecl Com_GetClientDObj(unsigned int handle, int localClientNum)
         return 0;
 }
 
+DObj_s *Com_GetClientDObjBuffered(unsigned int handle, int localClientNum)
+{
+    unsigned int v4; // r31
+    unsigned int v5; // r31
+
+    if (handle >= 0x900)
+        MyAssertHandler(
+            "c:\\trees\\cod3\\cod3src\\src\\qcommon\\dobj_management.cpp",
+            115,
+            0,
+            "%s\n\t(handle) = %i",
+            "(handle >= 0 && handle < (((2176)) + 128))",
+            handle);
+    if (localClientNum)
+        MyAssertHandler(
+            "c:\\trees\\cod3\\cod3src\\src\\qcommon\\dobj_management.cpp",
+            116,
+            0,
+            "localClientNum doesn't index MAX_LOCAL_CLIENTS\n\t%i not in [0, %i)",
+            localClientNum,
+            1);
+    v4 = 2304 * localClientNum + handle;
+    if (v4 >= 0x900)
+        MyAssertHandler(
+            "c:\\trees\\cod3\\cod3src\\src\\qcommon\\dobj_management.cpp",
+            120,
+            0,
+            "%s\n\t(handle) = %i",
+            "((unsigned)handle < (sizeof( clientObjMapBuffered ) / (sizeof( clientObjMapBuffered[0] ) * (sizeof( clientObjMapBu"
+            "ffered ) != 4 || sizeof( clientObjMapBuffered[0] ) <= 4))))",
+            v4);
+    v5 = v4;
+    if ((unsigned __int16)clientObjMapBuffered[v5] >= 0x800u)
+        MyAssertHandler(
+            "c:\\trees\\cod3\\cod3src\\src\\qcommon\\dobj_management.cpp",
+            121,
+            0,
+            "%s",
+            "(unsigned)clientObjMapBuffered[handle] < DOBJ_HANDLE_MAX");
+
+    if (clientObjMapBuffered[v5])
+        return &objBuf[clientObjMapBuffered[v5]];
+    else
+        return 0;
+}
+
 DObj_s *__cdecl Com_GetServerDObj(unsigned int handle)
 {
     iassert(((unsigned)handle < (sizeof(serverObjMap) / (sizeof(serverObjMap[0]) * (sizeof(serverObjMap) != 4 || sizeof(serverObjMap[0]) <= 4)))));
@@ -47,6 +103,18 @@ DObj_s *__cdecl Com_GetServerDObj(unsigned int handle)
         return &objBuf[serverObjMap[handle]];
     else
         return 0;
+}
+
+void Com_ServerDObjClean(int handle)
+{
+    iassert((unsigned)handle < SERVER_DOBJ_HANDLE_MAX);
+    serverObjDirty[handle >> 3] &= ~(1 << (handle & 7));
+}
+
+bool Com_ServerDObjDirty(int handle)
+{
+    iassert((unsigned)handle < SERVER_DOBJ_HANDLE_MAX);
+    return ((1 << (handle & 7)) & serverObjDirty[handle >> 3]) != 0;
 }
 
 DObj_s *__cdecl Com_ClientDObjCreate(
@@ -148,6 +216,10 @@ DObj_s *__cdecl Com_ServerDObjCreate(
 
     iassert((unsigned)handle < SERVER_DOBJ_HANDLE_MAX);
 
+#ifdef KISAK_SP
+    serverObjDirty[(int)handle >> 3] |= 1 << (handle & 7);
+#endif
+
     serverObjMap[handle] = index;
 
     iassert((unsigned)index < DOBJ_HANDLE_MAX);
@@ -195,6 +267,10 @@ void __cdecl Com_SafeServerDObjFree(unsigned int handle)
     {
         serverObjMap[handle] = 0;
 
+#ifdef KISAK_SP
+        serverObjDirty[(int)handle >> 3] |= 1 << (handle & 7);
+#endif
+
         iassert((unsigned)index < DOBJ_HANDLE_MAX);
         iassert(Sys_IsMainThread());
 
@@ -207,10 +283,13 @@ void __cdecl Com_SafeServerDObjFree(unsigned int handle)
 static int g_bDObjInited;
 void __cdecl Com_InitDObj()
 {
-    Com_Memset(objAlloced, 0, 2048);
-    objFreeCount = 2047;
-    Com_Memset(clientObjMap, 0, 2304);
-    Com_Memset(serverObjMap, 0, 2048);
+    Com_Memset(objAlloced, 0, ARRAY_COUNT(objAlloced) * sizeof(bool));
+    objFreeCount = ARRAY_COUNT(objAlloced) - 1;
+#ifdef KISAK_SP
+    Com_Memset(serverObjDirty, 0, 272);
+#endif
+    Com_Memset(clientObjMap, 0, ARRAY_COUNT(clientObjMap) * sizeof(__int16));
+    Com_Memset(serverObjMap, 0, ARRAY_COUNT(serverObjMap) * sizeof(__int16));
     com_lastDObjIndex = 1;
     g_bDObjInited = 1;
 }
@@ -223,18 +302,120 @@ void __cdecl Com_ShutdownDObj()
     if (g_bDObjInited)
     {
         g_bDObjInited = 0;
-        for (int i = 0; i < 0x800; ++i)
+        for (int i = 0; i < DOBJ_HANDLE_MAX; ++i)
         {
             iassert(!objAlloced[i]);
         }
-        for (int i = 0; i < 0x480; ++i)
+        for (int i = 0; i < CLIENT_DOBJ_HANDLE_MAX; ++i)
         {
             iassert(!clientObjMap[i]);
         }
-        for (int i = 0; i < 0x400; ++i)
+#ifdef KISAK_SP
+        for (int i = 0; i < CLIENT_DOBJ_HANDLE_MAX; ++i)
+        {
+            iassert(!clientObjMapBuffered[i]);
+        }
+#endif
+        for (int i = 0; i < SERVER_DOBJ_HANDLE_MAX; ++i)
         {
             iassert(!serverObjMap[i]);
         }
         iassert((objFreeCount == (sizeof(objAlloced) / (sizeof(objAlloced[0]) * (sizeof(objAlloced) != 4 || sizeof(objAlloced[0]) <= 4))) - 1));
+    }
+}
+
+DObj_s *Com_DObjCloneToBuffer(unsigned int entnum)
+{
+    unsigned int v2; // r27
+    __int16 v3; // r11
+    unsigned int v4; // r26
+    unsigned int FreeDObjIndex; // r30
+
+    if (entnum >= 0x880)
+        MyAssertHandler(
+            "c:\\trees\\cod3\\cod3src\\src\\qcommon\\dobj_management.cpp",
+            325,
+            0,
+            "%s",
+            "(unsigned)entnum < ARRAY_COUNT( serverObjMap )");
+    v2 = entnum;
+    v3 = serverObjMap[entnum];
+    v4 = v3;
+    if (!v3)
+        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\qcommon\\dobj_management.cpp", 327, 0, "%s", "serverDobjIndex");
+    if (entnum >= 0x900)
+        MyAssertHandler(
+            "c:\\trees\\cod3\\cod3src\\src\\qcommon\\dobj_management.cpp",
+            329,
+            0,
+            "%s",
+            "(unsigned)entnum < ARRAY_COUNT( clientObjMapBuffered )");
+    if (clientObjMapBuffered[v2])
+        MyAssertHandler(
+            "c:\\trees\\cod3\\cod3src\\src\\qcommon\\dobj_management.cpp",
+            330,
+            0,
+            "%s",
+            "!clientObjMapBuffered[entnum]");
+    FreeDObjIndex = Com_GetFreeDObjIndex();
+    if (entnum >= 0x900)
+        MyAssertHandler(
+            "c:\\trees\\cod3\\cod3src\\src\\qcommon\\dobj_management.cpp",
+            334,
+            0,
+            "entnum doesn't index ARRAY_COUNT( clientObjMapBuffered )\n\t%i not in [0, %i)",
+            entnum,
+            2304);
+
+    clientObjMapBuffered[v2] = FreeDObjIndex;
+
+    if (v4 >= 0x800)
+        MyAssertHandler(
+            "c:\\trees\\cod3\\cod3src\\src\\qcommon\\dobj_management.cpp",
+            337,
+            0,
+            "%s\n\t(serverDobjIndex) = %i",
+            "((unsigned)serverDobjIndex < 2048)",
+            v4);
+    if (FreeDObjIndex >= 0x800)
+        MyAssertHandler(
+            "c:\\trees\\cod3\\cod3src\\src\\qcommon\\dobj_management.cpp",
+            338,
+            0,
+            "%s\n\t(clientDobjIndex) = %i",
+            "((unsigned)clientDobjIndex < 2048)",
+            FreeDObjIndex);
+    DObjClone(&objBuf[v4], &objBuf[FreeDObjIndex]);
+    if (!objFreeCount)
+        Com_Error(ERR_DROP, "No free DObjs");
+
+    return &objBuf[FreeDObjIndex];
+}
+
+void Com_DObjCloneFromBuffer(unsigned int entnum)
+{
+    unsigned int v2; // r31
+
+    if (entnum >= 0x900)
+        MyAssertHandler(
+            "c:\\trees\\cod3\\cod3src\\src\\qcommon\\dobj_management.cpp",
+            356,
+            0,
+            "%s",
+            "(unsigned)entnum < ARRAY_COUNT( clientObjMap )");
+    v2 = entnum;
+    if (clientObjMap[entnum])
+        MyAssertHandler(
+            "c:\\trees\\cod3\\cod3src\\src\\qcommon\\dobj_management.cpp",
+            357,
+            0,
+            "%s\n\t(entnum) = %i",
+            "(!clientObjMap[entnum])",
+            entnum);
+
+    if (clientObjMapBuffered[v2])
+    {
+        clientObjMap[v2] = clientObjMapBuffered[v2];
+        clientObjMapBuffered[v2] = 0;
     }
 }

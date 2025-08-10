@@ -7,6 +7,15 @@
 #include <gfx_d3d/r_material.h>
 #include <qcommon/qcommon.h>
 
+enum Clip_t : __int32
+{
+    CLIP_NONE = 0x0,
+    CLIP_TOP = 0x1,
+    CLIP_BOTTOM = 0x2,
+    CLIP_RIGHT = 0x3,
+    CLIP_LEFT = 0x4,
+};
+
 bool __cdecl ClampScreenPosToEdges(
     const float *localClientNum,
     Material *point,
@@ -28,7 +37,6 @@ void __cdecl CG_DrawPipOnAStickReticle(int localClientNum, rectDef_s *rect, floa
 void __cdecl CG_InitVehicleReticle(int localClientNum);
 void __cdecl CG_ReticleStartLockOn(int localClientNum, int targetEntNum, int msecDuration);
 int __cdecl CG_GetTargetPos(int localClientNum, int targetEntNum, float *outPos);
-// local variable allocation has failed, the output may be wrong!
-void __cdecl CG_DrawBouncingDiamond(int localClientNum, rectDef_s *rect, float *color, const float *a4);
+void __cdecl CG_DrawBouncingDiamond(int localClientNum, rectDef_s *rect, float *color);
 void __cdecl CG_DrawVehicleReticle(int localClientNum, rectDef_s *rect, float *color);
 void __cdecl CG_TargetsChanged(int localClientNum, unsigned int num);

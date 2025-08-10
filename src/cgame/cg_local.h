@@ -158,6 +158,17 @@ void __cdecl CG_DebugCircle(
     int32_t duration);
 void __cdecl CG_TeamColor(int32_t team, const char *prefix, float *color);
 void __cdecl CG_RelativeTeamColor(int32_t clientNum, const char *prefix, float *color, int32_t localClientNum);
+void CG_Draw2DLine(
+    const ScreenPlacement *scrPlace,
+    float p1x,
+    float p1y,
+    float p2x,
+    float p2y,
+    float lineWidth,
+    int horzAlign,
+    int vertAlign,
+    const float *color,
+    Material *material);
 
 
 
@@ -751,16 +762,22 @@ void __cdecl CG_CullIn(cpose_t *pose);
 
 
 // cg_playerstate
+#ifdef KISAK_MP
 struct transPlayerState_t // sizeof=0x18
 {                                       // ...
     int32_t damageEvent;
     int32_t eventSequence;
     int32_t events[4];
 };
-void __cdecl CG_Respawn(int32_t localClientNum);
 int32_t __cdecl CG_TransitionPlayerState(int32_t localClientNum, playerState_s *ps, const transPlayerState_t *ops);
-void __cdecl CG_DamageFeedback(int32_t localClientNum, int32_t yawByte, int32_t pitchByte, int32_t damage);
 int32_t __cdecl CG_CheckPlayerstateEvents(int32_t localClientNum, playerState_s *ps, const transPlayerState_t *ops);
+#elif KISAK_SP
+int32_t __cdecl CG_TransitionPlayerState(int32_t localClientNum, playerState_s *ps, const playerState_s *ops);
+int32_t __cdecl CG_CheckPlayerstateEvents(int32_t localClientNum, playerState_s *ps, const playerState_s *ops);
+#endif
+
+void __cdecl CG_Respawn(int32_t localClientNum);
+void __cdecl CG_DamageFeedback(int32_t localClientNum, int32_t yawByte, int32_t pitchByte, int32_t damage);
 
 
 

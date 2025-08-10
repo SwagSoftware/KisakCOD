@@ -5,6 +5,27 @@
 #include "cg_vehicle_hud.h"
 #include "cg_local.h"
 #include <client/client.h>
+#include "cg_main.h"
+#include "cg_newdraw.h"
+
+#include <xanim/xanim.h>
+#include <script/scr_const.h>
+#include "cg_ents.h"
+
+const dvar_t *vehHudReticlePipOnAStickCenterCircle;
+const dvar_t *vehHudReticlePipOnAStickMovingCircle;
+const dvar_t *vehHudReticlePipOnAStickCenterCircleBuffer;
+const dvar_t *vehHudReticlePipOnAStickMovingCircleBuffer;
+const dvar_t *vehHudLineWidth;
+const dvar_t *vehHudDrawPipOnStickWhenFreelooking;
+const dvar_t *vehHudTargetSize;
+const dvar_t *vehHudTargetScreenEdgeClampBufferLeft;
+const dvar_t *vehHudTargetScreenEdgeClampBufferRight;
+const dvar_t *vehHudTargetScreenEdgeClampBufferTop;
+const dvar_t *vehHudTargetScreenEdgeClampBufferBottom;
+const dvar_t *vehHudReticleBouncingDiamondSize;
+const dvar_t *vehHudReticleBouncingRadius;
+const dvar_t *vehHudReticleBouncingSpeed;
 
 bool __cdecl ClampScreenPosToEdges(
     const float *localClientNum,
@@ -217,72 +238,97 @@ LABEL_40:
         a11[1] = v57 - *(float *)&point->info.gameFlags;
         Vec2Normalize(a11);
     }
-    return (_cntlzw(v22) & 0x20) == 0;
+    //return (_cntlzw(v22) & 0x20) == 0;
+    return v22 != 0;
 }
 
 void __cdecl CG_VehicleHudRegisterDvars()
 {
-    const char *v3; // r5
-    unsigned __int16 v4; // r4
-    const char *v5; // r5
-    unsigned __int16 v6; // r4
-    const char *v7; // r5
-    unsigned __int16 v8; // r4
-    const char *v9; // r5
-    unsigned __int16 v10; // r4
-    const char *v11; // r5
-    unsigned __int16 v12; // r4
-    const char *v13; // r5
-    unsigned __int16 v14; // r4
-    const char *v15; // r5
-    unsigned __int16 v16; // r4
-    const char *v17; // r5
-    unsigned __int16 v18; // r4
-    const char *v19; // r5
-    unsigned __int16 v20; // r4
-    const char *v21; // r5
-    unsigned __int16 v22; // r4
-    const char *v23; // r5
-    unsigned __int16 v24; // r4
-    const char *v25; // r5
-    unsigned __int16 v26; // r4
-
-    dword_827DD9BC = (int)Dvar_RegisterFloat("vehHudReticlePipOnAStickCenterCircle", 8.0, 0.0099999998, 10000.0, a2, a3);
-    dword_827DD99C = (int)Dvar_RegisterFloat("vehHudReticlePipOnAStickMovingCircle", 32.0, 0.0099999998, 10000.0, v4, v3);
-    dword_827DD9B4 = (int)Dvar_RegisterFloat(
+    // KISAKTODO: grab descriptions from the assembly (enjoy!)
+    vehHudReticlePipOnAStickCenterCircle = (dvar_t *)Dvar_RegisterFloat(
+        "vehHudReticlePipOnAStickCenterCircle",
+        8.0,
+        0.0099999998,
+        10000.0,
+        0,
+        0);
+    vehHudReticlePipOnAStickMovingCircle = (dvar_t *)Dvar_RegisterFloat(
+        "vehHudReticlePipOnAStickMovingCircle",
+        32.0,
+        0.0099999998,
+        10000.0,
+        0,
+        0);
+    vehHudReticlePipOnAStickCenterCircleBuffer = (dvar_t *)Dvar_RegisterFloat(
         "vehHudReticlePipOnAStickCenterCircleBuffer",
         0.25,
         -10000.0,
         10000.0,
-        v6,
-        v5);
-    dword_827DD9A0 = (int)Dvar_RegisterFloat("vehHudReticlePipOnAStickMovingCircleBuffer", 1.0, -10000.0, 10000.0, v8, v7);
-    vehHudLineWidth = Dvar_RegisterFloat("vehHudLineWidth", 8.0, 0.0099999998, 10000.0, v10, v9);
-    dword_827DD9B8 = (int)Dvar_RegisterBool(
+        0,
+        0);
+    vehHudReticlePipOnAStickMovingCircleBuffer = (dvar_t *)Dvar_RegisterFloat(
+        "vehHudReticlePipOnAStickMovingCircleBuffer",
+        1.0,
+        -10000.0,
+        10000.0,
+        0,
+        0);
+    vehHudLineWidth = Dvar_RegisterFloat("vehHudLineWidth", 8.0, 0.0099999998, 10000.0, 0, 0);
+    vehHudDrawPipOnStickWhenFreelooking = (dvar_t *)Dvar_RegisterBool(
         "vehHudDrawPipOnStickWhenFreelooking",
         1,
         0,
         "Set to 0 to not draw the pip-on-a-stick reticle when the player is freelooking");
-    vehHudTargetSize = Dvar_RegisterFloat("vehHudTargetSize", 30.0, 0.0099999998, 10000.0, v12, v11);
-    dword_827DD994 = (int)Dvar_RegisterFloat("vehHudTargetScreenEdgeClampBufferLeft", 0.0, -10000.0, 10000.0, v14, v13);
-    dword_827DD998 = (int)Dvar_RegisterFloat("vehHudTargetScreenEdgeClampBufferRight", 0.0, -10000.0, 10000.0, v16, v15);
+    vehHudTargetSize = Dvar_RegisterFloat("vehHudTargetSize", 30.0, 0.0099999998, 10000.0, 0, 0);
+    vehHudTargetScreenEdgeClampBufferLeft = (dvar_t *)Dvar_RegisterFloat(
+        "vehHudTargetScreenEdgeClampBufferLeft",
+        0.0,
+        -10000.0,
+        10000.0,
+        0,
+        0);
+    vehHudTargetScreenEdgeClampBufferRight = (dvar_t *)Dvar_RegisterFloat(
+        "vehHudTargetScreenEdgeClampBufferRight",
+        0.0,
+        -10000.0,
+        10000.0,
+        0,
+        0);
     vehHudTargetScreenEdgeClampBufferTop = Dvar_RegisterFloat(
         "vehHudTargetScreenEdgeClampBufferTop",
         0.0,
         -10000.0,
         10000.0,
-        v18,
-        v17);
-    dword_827DD9A4 = (int)Dvar_RegisterFloat("vehHudTargetScreenEdgeClampBufferBottom", 0.0, -10000.0, 10000.0, v20, v19);
+        0,
+        0);
+    vehHudTargetScreenEdgeClampBufferBottom = (dvar_t *)Dvar_RegisterFloat(
+        "vehHudTargetScreenEdgeClampBufferBottom",
+        0.0,
+        -10000.0,
+        10000.0,
+        0,
+        0);
     vehHudReticleBouncingDiamondSize = Dvar_RegisterFloat(
         "vehHudReticleBouncingDiamondSize",
         24.0,
         0.0,
         1000000.0,
-        v22,
-        v21);
-    dword_827DD9C4 = (int)Dvar_RegisterFloat("vehHudReticleBouncingRadius", 80.0, 0.0, 1000000.0, v24, v23);
-    dword_827DD9C0 = (int)Dvar_RegisterFloat("vehHudReticleBouncingSpeed", 400.0, 0.0, 1000000.0, v26, v25);
+        0,
+        0);
+    vehHudReticleBouncingRadius = (dvar_t *)Dvar_RegisterFloat(
+        "vehHudReticleBouncingRadius",
+        80.0,
+        0.0,
+        1000000.0,
+        0,
+        0);
+    vehHudReticleBouncingSpeed = (dvar_t *)Dvar_RegisterFloat(
+        "vehHudReticleBouncingSpeed",
+        400.0,
+        0.0,
+        1000000.0,
+        0,
+        0);
 }
 
 int __cdecl WorldDirToScreenPos(int localClientNum, const float *worldDir, float *outScreenPos)
@@ -309,7 +355,7 @@ int __cdecl WorldDirToScreenPos(int localClientNum, const float *worldDir, float
             "(localClientNum == 0)",
             localClientNum);
     AnglesToAxis(cgArray[0].refdefViewAngles, v16);
-    MatrixTransposeTransformVector(worldDir, v16, &v13);
+    MatrixTransposeTransformVector(worldDir, (const mat3x3&)v16, &v13);
     v5 = (float)(cls.vidConfig.aspectRatioWindow * (float)480.0);
     if (v13 <= 0.0)
     {
@@ -367,6 +413,92 @@ int __cdecl WorldDirToScreenPos(int localClientNum, const float *worldDir, float
         *outScreenPos = (float)((float)((float)v6 / cgArray[0].refdef.tanHalfFovX) * (float)v5) * (float)-0.5;
         outScreenPos[1] = (float)((float)v7 / cgArray[0].refdef.tanHalfFovY) * (float)-240.0;
     }
+    return result;
+}
+
+static Clip_t ClampScreenPosToEdges_0(int localClientNum, float *point)
+{
+    int v4; // r10
+    double value; // fp9
+    double v6; // fp10
+    double v7; // fp13
+    double v8; // fp12
+    double v9; // fp8
+    double v10; // fp0
+    double v11; // fp12
+    double v12; // fp0
+    Clip_t result; // r3
+    double v14; // fp9
+    double v15; // fp10
+    double v16; // fp13
+    double v17; // fp12
+    double v18; // fp0
+    double v19; // fp13
+    double v20; // fp12
+
+    if (localClientNum)
+        MyAssertHandler(
+            "c:\\trees\\cod3\\cod3src\\src\\cgame\\cg_local.h",
+            910,
+            0,
+            "%s\n\t(localClientNum) = %i",
+            "(localClientNum == 0)",
+            localClientNum);
+    value = vehHudTargetScreenEdgeClampBufferTop->current.value;
+    v6 = vehHudTargetScreenEdgeClampBufferBottom->current.value;
+    v7 = scrPlaceView[localClientNum].virtualViewableMin[0];
+    v8 = (float)(vehHudTargetScreenEdgeClampBufferLeft->current.value
+        + (float)(scrPlaceView[localClientNum].scaleRealToVirtual[0] * scrPlaceView[localClientNum].subScreenLeft));
+    v9 = (float)(vehHudTargetScreenEdgeClampBufferRight->current.value
+        + (float)(scrPlaceView[localClientNum].scaleRealToVirtual[0] * scrPlaceView[localClientNum].subScreenLeft));
+    if (v8 < v7)
+        v8 = scrPlaceView[localClientNum].virtualViewableMin[0];
+    if (v9 < v7)
+        v9 = scrPlaceView[localClientNum].virtualViewableMin[0];
+    v4 = localClientNum;
+    v10 = scrPlaceView[localClientNum].virtualViewableMin[1];
+    if (value < v10)
+        value = scrPlaceView[v4].virtualViewableMin[1];
+    if (v6 < v10)
+        v6 = scrPlaceView[v4].virtualViewableMin[1];
+    v11 = (float)((float)v8 - (float)((float)(cls.vidConfig.aspectRatioWindow * (float)480.0) * (float)0.5));
+    v12 = *point;
+    result = CLIP_NONE;
+    v14 = (float)((float)value - (float)240.0);
+    v15 = (float)((float)240.0 - (float)v6);
+    if (v12 >= v11)
+    {
+        if (v12 <= (float)((float)((float)(cls.vidConfig.aspectRatioWindow * (float)480.0) * (float)0.5) - (float)v9))
+            goto LABEL_16;
+        v16 = (float)((float)((float)((float)(cls.vidConfig.aspectRatioWindow * (float)480.0) * (float)0.5) - (float)v9)
+            / *point);
+        result = CLIP_RIGHT;
+    }
+    else
+    {
+        v16 = (float)((float)v11 / *point);
+        result = CLIP_LEFT;
+    }
+    v17 = point[1];
+    *point = *point * (float)v16;
+    point[1] = (float)v17 * (float)v16;
+LABEL_16:
+    v18 = point[1];
+    if (v18 >= v14)
+    {
+        if (v18 <= v15)
+            return result;
+        v19 = (float)((float)v15 / point[1]);
+        result = CLIP_BOTTOM;
+    }
+    else
+    {
+        v19 = (float)((float)v14 / point[1]);
+        result = CLIP_TOP;
+    }
+    v20 = (float)(*point * (float)v19);
+    point[1] = point[1] * (float)v19;
+    *point = v20;
     return result;
 }
 
@@ -668,64 +800,40 @@ void __cdecl CG_DrawJavelinTargets(int localClientNum, rectDef_s *rect, float *c
     }
 }
 
-void __cdecl CG_DrawPipOnAStickReticle(int localClientNum, rectDef_s *rect, float *color)
+void CG_DrawPipOnAStickReticle(int localClientNum, rectDef_s *rect, float *color)
 {
     centity_s *Entity; // r31
     DObj_s *ClientDObj; // r29
     WeaponDef *WeaponDef; // r25
-    __int64 v8; // r11
-    double v9; // fp12
-    double v10; // fp0
-    double v11; // fp28
-    double v12; // fp27
-    double v13; // fp26
-    double v14; // fp25
-    Material *v15; // r7
-    const float *v16; // r6
-    int v17; // r5
-    int v18; // r4
-    double v19; // fp1
-    int v20; // r11
-    double v21; // fp31
-    double v22; // fp30
-    Material *v23; // r7
-    const float *v24; // r6
-    int v25; // r5
-    int v26; // r4
-    float v27; // [sp+8h] [-168h]
-    float v28; // [sp+8h] [-168h]
-    float v29; // [sp+10h] [-160h]
-    float v30; // [sp+10h] [-160h]
-    float v31; // [sp+18h] [-158h]
-    float v32; // [sp+18h] [-158h]
-    float v33; // [sp+20h] [-150h]
-    float v34; // [sp+20h] [-150h]
-    float v35; // [sp+28h] [-148h]
-    float v36; // [sp+28h] [-148h]
-    float v37; // [sp+30h] [-140h]
-    float v38; // [sp+30h] [-140h]
-    float v39; // [sp+38h] [-138h]
-    float v40; // [sp+38h] [-138h]
-    float v41; // [sp+40h] [-130h]
-    float v42; // [sp+40h] [-130h]
-    float v43; // [sp+48h] [-128h]
-    float v44; // [sp+48h] [-128h]
-    float v45; // [sp+50h] [-120h]
-    float v46; // [sp+50h] [-120h]
-    float v47; // [sp+58h] [-118h]
-    float v48; // [sp+58h] [-118h]
-    float v49; // [sp+60h] [-110h]
-    float v50; // [sp+60h] [-110h]
-    float v51; // [sp+80h] [-F0h] BYREF
-    float v52; // [sp+84h] [-ECh]
-    __int64 v53; // [sp+88h] [-E8h] BYREF
-    float v54; // [sp+90h] [-E0h] BYREF
-    float v55; // [sp+94h] [-DCh]
-    float v56; // [sp+98h] [-D8h] BYREF
-    float v57; // [sp+9Ch] [-D4h]
-    float v58; // [sp+A0h] [-D0h]
-    float v59[9]; // [sp+B0h] [-C0h] BYREF
-    float v60[21]; // [sp+D4h] [-9Ch] BYREF
+    __int64 v7; // r11
+    double v8; // fp12
+    double v9; // fp0
+    double v10; // fp28
+    double v11; // fp27
+    double v12; // fp26
+    double v13; // fp25
+    Material *v14; // r7
+    const float *v15; // r6
+    int v16; // r5
+    int v17; // r4
+    double v18; // fp1
+    const dvar_t *v19; // r11
+    double v20; // fp31
+    double v21; // fp30
+    Material *v22; // r7
+    const float *v23; // r6
+    int v24; // r5
+    int v25; // r4
+    float v26; // [sp+80h] [-F0h] BYREF
+    float v27; // [sp+84h] [-ECh]
+    __int64 v28; // [sp+88h] [-E8h] BYREF
+    float v29; // [sp+90h] [-E0h] BYREF
+    float v30; // [sp+94h] [-DCh]
+    float v31; // [sp+98h] [-D8h] BYREF
+    float v32; // [sp+9Ch] [-D4h]
+    float v33; // [sp+A0h] [-D0h]
+    float v34[9]; // [sp+B0h] [-C0h] BYREF
+    float v35[21]; // [sp+D4h] [-9Ch] BYREF
 
     if (localClientNum)
         MyAssertHandler(
@@ -738,30 +846,32 @@ void __cdecl CG_DrawPipOnAStickReticle(int localClientNum, rectDef_s *rect, floa
     Entity = CG_GetEntity(localClientNum, cgArray[0].predictedPlayerState.viewlocked_entNum);
     ClientDObj = Com_GetClientDObj(Entity->nextState.number, 0);
     WeaponDef = BG_GetWeaponDef(Entity->nextState.weapon);
-    if (ClientDObj && (*(float *)(dword_827DD9B8 + 12) != 0.0 || (cgArray[0].predictedPlayerState.eFlags & 0x40000) != 0))
+    if (ClientDObj
+        && (vehHudDrawPipOnStickWhenFreelooking->current.value != 0.0
+            || (cgArray[0].predictedPlayerState.eFlags & 0x40000) != 0))
     {
-        if (CG_DObjGetWorldTagMatrix(&Entity->pose, ClientDObj, scr_const.tag_body, (float (*)[3])v59, v60))
+        if (CG_DObjGetWorldTagMatrix(&Entity->pose, ClientDObj, scr_const.tag_body, (float (*)[3])v34, v35))
         {
-            WorldDirToScreenPos(localClientNum, v59, &v54);
-            LODWORD(v8) = WeaponDef->iProjectileSpeed;
-            HIDWORD(v8) = 108032;
-            v53 = v8;
-            v56 = v59[0] * (float)v8;
-            v57 = (float)v8 * v59[1];
-            v58 = v59[2] * (float)v8;
-            v9 = (float)((float)((float)(Entity->currentState.pos.trDelta[1] - Entity->currentState.pos.trDelta[1])
+            WorldDirToScreenPos(localClientNum, v34, &v29);
+            LODWORD(v7) = WeaponDef->iProjectileSpeed;
+            HIDWORD(v7) = 108032;
+            v28 = v7;
+            v31 = v34[0] * (float)v7;
+            v32 = (float)v7 * v34[1];
+            v33 = v34[2] * (float)v7;
+            v8 = (float)((float)((float)(Entity->currentState.pos.trDelta[1] - Entity->currentState.pos.trDelta[1])
                 * cgArray[0].frameInterpolation)
                 + Entity->currentState.pos.trDelta[1]);
-            v10 = (float)((float)((float)(Entity->currentState.pos.trDelta[2] - Entity->currentState.pos.trDelta[2])
+            v9 = (float)((float)((float)(Entity->currentState.pos.trDelta[2] - Entity->currentState.pos.trDelta[2])
                 * cgArray[0].frameInterpolation)
                 + Entity->currentState.pos.trDelta[2]);
-            v56 = (float)((float)((float)(Entity->currentState.pos.trDelta[0] - Entity->currentState.pos.trDelta[0])
+            v31 = (float)((float)((float)(Entity->currentState.pos.trDelta[0] - Entity->currentState.pos.trDelta[0])
                 * cgArray[0].frameInterpolation)
                 + Entity->currentState.pos.trDelta[0])
-                + v56;
-            v57 = (float)v9 + v57;
-            v58 = (float)v10 + v58;
-            if ((unsigned __int8)WorldDirToScreenPos(localClientNum, &v56, (float *)&v53))
+                + v31;
+            v32 = (float)v8 + v32;
+            v33 = (float)v9 + v33;
+            if (WorldDirToScreenPos(localClientNum, &v31, (float *)&v28))
             {
                 if (!cgMedia.vehCenterCircle)
                     MyAssertHandler(
@@ -784,102 +894,74 @@ void __cdecl CG_DrawPipOnAStickReticle(int localClientNum, rectDef_s *rect, floa
                         0,
                         "%s",
                         "cgMedia.vehHudLine");
-                v11 = *(float *)&v53;
-                v12 = v54;
-                v13 = *((float *)&v53 + 1);
-                v14 = v55;
-                v51 = *(float *)&v53 - v54;
-                v52 = *((float *)&v53 + 1) - v55;
-                v19 = Vec2Normalize(&v51);
-                v20 = dword_827DD9BC;
-                v21 = (float)(*(float *)(dword_827DD99C + 12) * (float)0.5);
-                v22 = (float)(*(float *)(dword_827DD9BC + 12) * (float)0.5);
-                if (v19 > (float)((float)((float)((float)(*(float *)(dword_827DD9BC + 12) * (float)0.5)
-                    + (float)(*(float *)(dword_827DD99C + 12) * (float)0.5))
-                    - *(float *)(dword_827DD9B4 + 12))
-                    - *(float *)(dword_827DD9A0 + 12)))
+                v10 = *(float *)&v28;
+                v11 = v29;
+                v12 = *((float *)&v28 + 1);
+                v13 = v30;
+                v26 = *(float *)&v28 - v29;
+                v27 = *((float *)&v28 + 1) - v30;
+                v18 = Vec2Normalize(&v26);
+                v19 = vehHudReticlePipOnAStickCenterCircle;
+                v20 = (float)(vehHudReticlePipOnAStickMovingCircle->current.value * (float)0.5);
+                v21 = (float)(vehHudReticlePipOnAStickCenterCircle->current.value * (float)0.5);
+                if (v18 > (float)((float)((float)((float)(vehHudReticlePipOnAStickCenterCircle->current.value * (float)0.5)
+                    + (float)(vehHudReticlePipOnAStickMovingCircle->current.value * (float)0.5))
+                    - vehHudReticlePipOnAStickCenterCircleBuffer->current.value)
+                    - vehHudReticlePipOnAStickMovingCircleBuffer->current.value))
                 {
                     CG_Draw2DLine(
                         &scrPlaceView[localClientNum],
-                        (float)((float)(v51
-                            * (float)((float)(*(float *)(dword_827DD9BC + 12) * (float)0.5)
-                                - *(float *)(dword_827DD9B4 + 12)))
-                            + (float)v12),
-                        (float)((float)(v52
-                            * (float)((float)(*(float *)(dword_827DD9BC + 12) * (float)0.5)
-                                - *(float *)(dword_827DD9B4 + 12)))
-                            + (float)v14),
-                        (float)((float)((float)(*(float *)(dword_827DD9A0 + 12)
-                            - (float)(*(float *)(dword_827DD99C + 12) * (float)0.5))
-                            * v51)
+                        (float)((float)(v26
+                            * (float)((float)(vehHudReticlePipOnAStickCenterCircle->current.value * (float)0.5)
+                                - vehHudReticlePipOnAStickCenterCircleBuffer->current.value))
                             + (float)v11),
-                        (float)((float)(v52
-                            * (float)(*(float *)(dword_827DD9A0 + 12)
-                                - (float)(*(float *)(dword_827DD99C + 12) * (float)0.5)))
+                        (float)((float)(v27
+                            * (float)((float)(vehHudReticlePipOnAStickCenterCircle->current.value * (float)0.5)
+                                - vehHudReticlePipOnAStickCenterCircleBuffer->current.value))
                             + (float)v13),
+                        (float)((float)((float)(vehHudReticlePipOnAStickMovingCircleBuffer->current.value
+                            - (float)(vehHudReticlePipOnAStickMovingCircle->current.value * (float)0.5))
+                            * v26)
+                            + (float)v10),
+                        (float)((float)(v27
+                            * (float)(vehHudReticlePipOnAStickMovingCircleBuffer->current.value
+                                - (float)(vehHudReticlePipOnAStickMovingCircle->current.value * (float)0.5)))
+                            + (float)v12),
                         vehHudLineWidth->current.value,
-                        v18,
                         v17,
                         v16,
-                        v15);
-                    v20 = dword_827DD9BC;
+                        v15,
+                        v14);
+                    v19 = vehHudReticlePipOnAStickCenterCircle;
                 }
-                CL_DrawStretchPic(
-                    &scrPlaceView[localClientNum],
-                    (float)((float)v12 - (float)v22),
-                    (float)((float)v14 - (float)v22),
-                    *(float *)(v20 + 12),
-                    *(float *)(v20 + 12),
-                    v18,
-                    v17,
-                    0.0,
-                    0.0,
-                    1.0,
-                    1.0,
-                    v16,
-                    v15,
-                    rect->horzAlign,
-                    rect->vertAlign,
-                    v27,
-                    v29,
-                    v31,
-                    v33,
-                    v35,
-                    v37,
-                    v39,
-                    v41,
-                    v43,
-                    v45,
-                    v47,
-                    v49);
                 CL_DrawStretchPic(
                     &scrPlaceView[localClientNum],
                     (float)((float)v11 - (float)v21),
                     (float)((float)v13 - (float)v21),
-                    *(float *)(dword_827DD99C + 12),
-                    *(float *)(dword_827DD99C + 12),
-                    v26,
+                    v19->current.value,
+                    v19->current.value,
+                    v17,
+                    v16,
+                    0.0,
+                    0.0,
+                    1.0,
+                    1.0,
+                    v15,
+                    v14);
+                CL_DrawStretchPic(
+                    &scrPlaceView[localClientNum],
+                    (float)((float)v10 - (float)v20),
+                    (float)((float)v12 - (float)v20),
+                    vehHudReticlePipOnAStickMovingCircle->current.value,
+                    vehHudReticlePipOnAStickMovingCircle->current.value,
                     v25,
-                    0.0,
-                    0.0,
-                    1.0,
-                    1.0,
                     v24,
+                    0.0,
+                    0.0,
+                    1.0,
+                    1.0,
                     v23,
-                    rect->horzAlign,
-                    rect->vertAlign,
-                    v28,
-                    v30,
-                    v32,
-                    v34,
-                    v36,
-                    v38,
-                    v40,
-                    v42,
-                    v44,
-                    v46,
-                    v48,
-                    v50);
+                    v22);
             }
         }
     }
@@ -954,56 +1036,42 @@ int __cdecl CG_GetTargetPos(int localClientNum, int targetEntNum, float *outPos)
 }
 
 // local variable allocation has failed, the output may be wrong!
-void __cdecl CG_DrawBouncingDiamond(int localClientNum, rectDef_s *rect, float *color, const float *a4)
+void __fastcall CG_DrawBouncingDiamond(int localClientNum, rectDef_s *rect, float *color)
 {
-    double v6; // fp29
+    double value; // fp29
     int vehReticleLockOnEntNum; // r4
     centity_s *Entity; // r30
-    double v9; // fp13
-    __int64 v10; // r10 OVERLAPPED
-    double v11; // fp28
-    int v12; // r11
-    double v17; // fp0
-    double v22; // fp12
-    double v23; // fp11
-    double v24; // fp13
-    double v25; // fp0
-    double v26; // fp13
-    double v27; // fp0
-    unsigned __int8 v28; // r11
-    double v29; // fp31
-    double v30; // fp30
-    __int64 v31; // r11
-    double v32; // fp29
+    double v8; // fp13
+    __int64 v9; // r10 OVERLAPPED
+    double v10; // fp28
+    int v11; // r11
+    double v16; // fp0
+    double v21; // fp12
+    double v22; // fp11
+    double v23; // fp13
+    double v24; // fp0
+    double v25; // fp13
+    double v26; // fp0
+    unsigned __int8 v27; // r11
+    double v28; // fp31
+    double v29; // fp30
+    double v31; // fp29
+    long double v32; // fp2
     long double v33; // fp2
-    long double v34; // fp2
-    double v35; // fp0
-    double v36; // fp29
-    long double v37; // fp2
-    double v38; // fp10
-    double v39; // fp11
-    double v40; // fp12
-    double v41; // fp9
-    double v42; // fp11
-    double v43; // fp10
-    float v44; // [sp+8h] [-108h]
-    float v45; // [sp+10h] [-100h]
-    float v46; // [sp+18h] [-F8h]
-    float v47; // [sp+20h] [-F0h]
-    float v48; // [sp+28h] [-E8h]
-    float v49; // [sp+30h] [-E0h]
-    float v50; // [sp+38h] [-D8h]
-    float v51; // [sp+40h] [-D0h]
-    float v52; // [sp+48h] [-C8h]
-    float v53; // [sp+50h] [-C0h]
-    float v54; // [sp+58h] [-B8h]
-    float v55; // [sp+60h] [-B0h]
-    float v56[2]; // [sp+80h] [-90h] BYREF
-    __int64 v57; // [sp+88h] [-88h]
-    __int64 v58; // [sp+90h] [-80h]
-    float v59; // [sp+98h] [-78h] BYREF
-    float v60; // [sp+9Ch] [-74h]
-    float v61; // [sp+A0h] [-70h]
+    double v34; // fp0
+    double v35; // fp29
+    long double v36; // fp2
+    double v37; // fp10
+    double v38; // fp11
+    double v39; // fp12
+    double v40; // fp9
+    double v41; // fp11
+    double v42; // fp10
+    float v43[2]; // [sp+80h] [-90h] BYREF
+    __int64 v44; // [sp+88h] [-88h]
+    float v46; // [sp+98h] [-78h] BYREF
+    float v47; // [sp+9Ch] [-74h]
+    float v48; // [sp+A0h] [-70h]
 
     if (localClientNum)
         MyAssertHandler(
@@ -1013,43 +1081,43 @@ void __cdecl CG_DrawBouncingDiamond(int localClientNum, rectDef_s *rect, float *
             "%s\n\t(localClientNum) = %i",
             "(localClientNum == 0)",
             localClientNum);
-    v6 = *(float *)(dword_827DD9C4 + 12);
+    value = vehHudReticleBouncingRadius->current.value;
     vehReticleLockOnEntNum = cgArray[0].vehReticleLockOnEntNum;
-    if (cgArray[0].vehReticleLockOnEntNum == ENTITYNUM_NONE)
+    if (cgArray[0].vehReticleLockOnEntNum == 2175)
     {
-        v11 = 0.0;
+        v10 = 0.0;
+        v21 = 0.0;
         v22 = 0.0;
-        v23 = 0.0;
     }
     else
     {
-        if ((unsigned __int8)CG_GetTargetPos(localClientNum, cgArray[0].vehReticleLockOnEntNum, &v59))
+        if (CG_GetTargetPos(localClientNum, cgArray[0].vehReticleLockOnEntNum, &v46))
         {
-            v9 = v61;
+            v8 = v48;
         }
         else
         {
             Entity = CG_GetEntity(localClientNum, cgArray[0].vehReticleLockOnEntNum);
             if (!Entity)
                 MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\cgame\\cg_vehicle_hud.cpp", 442, 0, "%s", "targetEnt");
-            v59 = Entity->pose.origin[0];
-            v60 = Entity->pose.origin[1];
-            v9 = Entity->pose.origin[2];
+            v46 = Entity->pose.origin[0];
+            v47 = Entity->pose.origin[1];
+            v8 = Entity->pose.origin[2];
         }
-        v59 = v59 - cgArray[0].refdef.vieworg[0];
-        v60 = v60 - cgArray[0].refdef.vieworg[1];
-        v61 = (float)v9 - cgArray[0].refdef.vieworg[2];
-        WorldDirToScreenPos(localClientNum, &v59, v56);
-        LODWORD(v10) = cgArray[0].vehReticleLockOnDuration;
-        v11 = 0.0;
+        v46 = v46 - cgArray[0].refdef.vieworg[0];
+        v47 = v47 - cgArray[0].refdef.vieworg[1];
+        v48 = (float)v8 - cgArray[0].refdef.vieworg[2];
+        WorldDirToScreenPos(localClientNum, &v46, v43);
+        LODWORD(v9) = cgArray[0].vehReticleLockOnDuration;
+        v10 = 0.0;
         if (cgArray[0].vehReticleLockOnDuration)
         {
-            HIDWORD(v10) = cgArray[0].time;
-            v57 = v10;
-            v12 = cgArray[0].time - cgArray[0].vehReticleLockOnStartTime;
-            v58 = *(__int64 *)((char *)&v10 - 4);
-            _FP13 = (float)((float)((float)*(__int64 *)((char *)&v10 - 4) / (float)v10) - (float)1.0);
-            _FP12 = -(float)((float)*(__int64 *)((char *)&v10 - 4) / (float)v10);
+            HIDWORD(v9) = cgArray[0].time;
+            v44 = v9;
+            v11 = cgArray[0].time - cgArray[0].vehReticleLockOnStartTime;
+            v45 = *(__int64 *)((char *)&v9 - 4);
+            _FP13 = (float)((float)((float)*(__int64 *)((char *)&v9 - 4) / (float)v9) - (float)1.0);
+            _FP12 = -(float)((float)*(__int64 *)((char *)&v9 - 4) / (float)v9);
             __asm
             {
                 fsel      f0, f13, f27, f0
@@ -1060,124 +1128,110 @@ void __cdecl CG_DrawBouncingDiamond(int localClientNum, rectDef_s *rect, float *
         {
             _FP13 = 1.0;
         }
-        v6 = (float)-(float)((float)((float)_FP13 * (float)v6) - (float)v6);
-        v17 = (float)((float)_FP13 * (float)2.0);
+        value = (float)-(float)((float)((float)_FP13 * (float)value) - (float)value);
+        v16 = (float)((float)_FP13 * (float)2.0);
         _FP13 = (float)((float)((float)_FP13 * (float)2.0) - (float)1.0);
-        _FP10 = -v17;
+        _FP10 = -v16;
         __asm
         {
             fsel      f0, f13, f27, f0
             fsel      f0, f10, f28, f0
         }
-        v22 = (float)(v56[0] * (float)_FP0);
-        v23 = (float)(v56[1] * (float)_FP0);
+        v21 = (float)(v43[0] * (float)_FP0);
+        v22 = (float)(v43[1] * (float)_FP0);
     }
-    if (v6 == v11)
+    if (value == v10)
     {
+        v23 = v21;
         v24 = v22;
-        v25 = v23;
-        cgArray[0].vehReticleOffset[0] = v22;
+        cgArray[0].vehReticleOffset[0] = v21;
     }
     else
     {
-        v26 = cgArray[0].vehReticleVel[0];
-        v27 = cgArray[0].vehReticleVel[1];
-        if (cgArray[0].vehReticleVel[0] != v11 || (v28 = 1, v27 != v11))
-            v28 = 0;
-        v29 = (float)(cgArray[0].vehReticleOffset[1] - (float)v23);
-        v30 = (float)(cgArray[0].vehReticleOffset[0] - (float)v22);
-        HIDWORD(v31) = v28;
-        if (v28
-            || (float)((float)((float)(cgArray[0].vehReticleOffset[1] - (float)v23)
-                * (float)(cgArray[0].vehReticleOffset[1] - (float)v23))
-                + (float)((float)(cgArray[0].vehReticleOffset[0] - (float)v22)
-                    * (float)(cgArray[0].vehReticleOffset[0] - (float)v22))) > (double)(float)((float)v6 * (float)v6))
+        v25 = cgArray[0].vehReticleVel[0];
+        v26 = cgArray[0].vehReticleVel[1];
+        if (cgArray[0].vehReticleVel[0] != v10 || (v27 = 1, v26 != v10))
+            v27 = 0;
+        v28 = (float)(cgArray[0].vehReticleOffset[1] - (float)v22);
+        v29 = (float)(cgArray[0].vehReticleOffset[0] - (float)v21);
+        HIDWORD(v30) = v27;
+        if (v27
+            || (float)((float)((float)(cgArray[0].vehReticleOffset[1] - (float)v22)
+                * (float)(cgArray[0].vehReticleOffset[1] - (float)v22))
+                + (float)((float)(cgArray[0].vehReticleOffset[0] - (float)v21)
+                    * (float)(cgArray[0].vehReticleOffset[0] - (float)v21))) > (double)(float)((float)value
+                        * (float)value))
         {
-            v32 = (float)((float)(random() * (float)360.0) * (float)0.017453292);
-            *(double *)&v33 = v32;
-            v34 = sin(v33);
-            v35 = *(double *)&v34;
-            *(double *)&v34 = v32;
-            v36 = (float)v35;
-            v37 = cos(v34);
-            cgArray[0].vehReticleVel[0] = v36;
-            cgArray[0].vehReticleVel[1] = *(double *)&v37;
-            v27 = (float)(*(float *)(dword_827DD9C0 + 12) * (float)*(double *)&v37);
-            v26 = (float)(*(float *)(dword_827DD9C0 + 12) * (float)v36);
-            v38 = -v27;
-            v39 = v26;
-            cgArray[0].vehReticleVel[0] = *(float *)(dword_827DD9C0 + 12) * (float)v36;
-            cgArray[0].vehReticleVel[1] = v27;
-            v40 = (float)((float)((float)v29 * (float)v27) + (float)((float)v30 * (float)v26));
-            v41 = (float)((float)((float)v29 * (float)v26) + (float)((float)v30 * (float)-v27));
-            if (v41 < v40)
+            v31 = (float)((float)(random() * (float)360.0) * (float)0.017453292);
+            *(double *)&v32 = v31;
+            v33 = sin(v32);
+            v34 = *(double *)&v33;
+            *(double *)&v33 = v31;
+            v35 = (float)v34;
+            v36 = cos(v33);
+            cgArray[0].vehReticleVel[0] = v35;
+            cgArray[0].vehReticleVel[1] = *(double *)&v36;
+            v26 = (float)(vehHudReticleBouncingSpeed->current.value * (float)*(double *)&v36);
+            v25 = (float)(vehHudReticleBouncingSpeed->current.value * (float)v35);
+            v37 = -v26;
+            v38 = v25;
+            cgArray[0].vehReticleVel[0] = vehHudReticleBouncingSpeed->current.value * (float)v35;
+            cgArray[0].vehReticleVel[1] = v26;
+            v39 = (float)((float)((float)v28 * (float)v26) + (float)((float)v29 * (float)v25));
+            v40 = (float)((float)((float)v28 * (float)v25) + (float)((float)v29 * (float)-v26));
+            if (v40 < v39)
             {
-                v26 = -v27;
-                v27 = v39;
-                v40 = v41;
-                cgArray[0].vehReticleVel[0] = v38;
-                cgArray[0].vehReticleVel[1] = v39;
-            }
-            v42 = -v39;
-            if ((float)((float)((float)v29 * (float)v38) + (float)((float)v30 * (float)v42)) < v40)
-            {
-                v26 = v42;
-                v27 = v38;
-                v40 = (float)((float)((float)v29 * (float)v38) + (float)((float)v30 * (float)v42));
-                cgArray[0].vehReticleVel[0] = v42;
+                v25 = -v26;
+                v26 = v38;
+                v39 = v40;
+                cgArray[0].vehReticleVel[0] = v37;
                 cgArray[0].vehReticleVel[1] = v38;
             }
-            v43 = -v38;
-            if ((float)((float)((float)v29 * (float)v42) + (float)((float)v30 * (float)v43)) < v40)
+            v41 = -v38;
+            if ((float)((float)((float)v28 * (float)v37) + (float)((float)v29 * (float)v41)) < v39)
             {
-                v26 = v43;
-                v27 = v42;
-                cgArray[0].vehReticleVel[0] = v43;
-                cgArray[0].vehReticleVel[1] = v42;
+                v25 = v41;
+                v26 = v37;
+                v39 = (float)((float)((float)v28 * (float)v37) + (float)((float)v29 * (float)v41));
+                cgArray[0].vehReticleVel[0] = v41;
+                cgArray[0].vehReticleVel[1] = v37;
+            }
+            v42 = -v37;
+            if ((float)((float)((float)v28 * (float)v41) + (float)((float)v29 * (float)v42)) < v39)
+            {
+                v25 = v42;
+                v26 = v41;
+                cgArray[0].vehReticleVel[0] = v42;
+                cgArray[0].vehReticleVel[1] = v41;
             }
         }
-        LODWORD(v31) = cgArray[0].frametime;
-        v58 = v31;
-        v24 = (float)((float)((float)v26 * (float)((float)v31 * (float)0.001)) + cgArray[0].vehReticleOffset[0]);
-        cgArray[0].vehReticleOffset[0] = v24;
-        v25 = (float)((float)((float)v27 * (float)((float)v31 * (float)0.001)) + cgArray[0].vehReticleOffset[1]);
+        //LODWORD(v30) = cgArray[0].frametime;
+        //v45 = v30;
+        v23 = (float)((float)((float)v25 * (float)((float)cgArray[0].frametime * (float)0.001)) + cgArray[0].vehReticleOffset[0]);
+        cgArray[0].vehReticleOffset[0] = v23;
+        v24 = (float)((float)((float)v26 * (float)((float)cgArray[0].frametime * (float)0.001)) + cgArray[0].vehReticleOffset[1]);
     }
-    cgArray[0].vehReticleOffset[1] = v25;
+    cgArray[0].vehReticleOffset[1] = v24;
     CL_DrawStretchPic(
         &scrPlaceView[localClientNum],
-        (float)((float)v24 - (float)(vehHudReticleBouncingDiamondSize->current.value * (float)0.5)),
-        (float)((float)v25 - (float)(vehHudReticleBouncingDiamondSize->current.value * (float)0.5)),
+        (float)((float)v23 - (float)(vehHudReticleBouncingDiamondSize->current.value * 0.5f)),
+        (float)((float)v24 - (float)(vehHudReticleBouncingDiamondSize->current.value * 0.5f)),
         vehHudReticleBouncingDiamondSize->current.value,
         vehHudReticleBouncingDiamondSize->current.value,
         vehReticleLockOnEntNum,
         (int)color,
-        v11,
-        v11,
+        v10,
+        v10,
         1.0,
         1.0,
         a4,
-        (Material *)(68 * localClientNum),
-        rect->horzAlign,
-        rect->vertAlign,
-        v44,
-        v45,
-        v46,
-        v47,
-        v48,
-        v49,
-        v50,
-        v51,
-        v52,
-        v53,
-        v54,
-        v55);
+        (Material *)(68 * localClientNum));
 }
 
 void __cdecl CG_DrawVehicleReticle(int localClientNum, rectDef_s *rect, float *color)
 {
-    centity_s *Entity; // r30
+    centity_s *vehicle; // r30
     activeReticleType_t activeReticleType; // r11
-    const float *v8; // r6
 
     if (localClientNum)
         MyAssertHandler(
@@ -1190,19 +1244,19 @@ void __cdecl CG_DrawVehicleReticle(int localClientNum, rectDef_s *rect, float *c
     if ((cgArray[0].predictedPlayerState.eFlags & 0x20000) != 0
         && cgArray[0].predictedPlayerState.viewlocked_entNum != ENTITYNUM_NONE)
     {
-        Entity = CG_GetEntity(localClientNum, cgArray[0].predictedPlayerState.viewlocked_entNum);
-        if (!Entity)
+        vehicle = CG_GetEntity(localClientNum, cgArray[0].predictedPlayerState.viewlocked_entNum);
+        if (!vehicle)
             MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\cgame\\cg_vehicle_hud.cpp", 521, 0, "%s", "vehicle");
-        if (Entity->nextState.weapon)
+        if (vehicle->nextState.weapon)
         {
-            activeReticleType = BG_GetWeaponDef(Entity->nextState.weapon)->activeReticleType;
+            activeReticleType = BG_GetWeaponDef(vehicle->nextState.weapon)->activeReticleType;
             if (activeReticleType == VEH_ACTIVE_RETICLE_PIP_ON_A_STICK)
             {
                 CG_DrawPipOnAStickReticle(localClientNum, rect, color);
             }
             else if (activeReticleType == VEH_ACTIVE_RETICLE_BOUNCING_DIAMOND)
             {
-                CG_DrawBouncingDiamond(localClientNum, rect, color, v8);
+                CG_DrawBouncingDiamond(localClientNum, rect, color);
             }
         }
     }
