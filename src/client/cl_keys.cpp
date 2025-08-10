@@ -20,6 +20,7 @@
 #include <cgame/cg_modelpreviewer.h>
 #include "cl_ui.h"
 #endif
+#include <universal/profile.h>
 
 
 keyname_t keynames[96] =
@@ -1465,6 +1466,8 @@ bool __cdecl CL_IsConsoleKey(int32_t key)
 #ifdef KISAK_MP
 void __cdecl CL_KeyEvent(int32_t localClientNum, int32_t key, int32_t down, uint32_t time)
 {
+    PROF_SCOPED("CL_KeyEvent");
+
     const char *v4; // eax
     bool v6; // [esp+2Fh] [ebp-421h]
     KeyState *keys; // [esp+34h] [ebp-41Ch]
@@ -2117,6 +2120,8 @@ bool __cdecl CL_MouseInputShouldBypassMenus(int32_t localClientNum, int32_t key)
 
 void __cdecl CL_CharEvent(int32_t localClientNum, int32_t key)
 {
+    PROF_SCOPED("CL_CharEvent");
+
     if (DevGui_IsActive() || key == '`' || key == '~')
         return;
     if (localClientNum)

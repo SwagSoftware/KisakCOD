@@ -84,6 +84,8 @@ static void Win_RegisterClass()
 
 sysEvent_t* __cdecl Win_GetEvent(sysEvent_t* result)
 {
+	PROF_SCOPED("Win_GetEvent");
+
 	size_t v2; // [esp+0h] [ebp-50h]
 	char* b; // [esp+10h] [ebp-40h]
 	tagMSG msg; // [esp+18h] [ebp-38h] BYREF
@@ -93,22 +95,31 @@ sysEvent_t* __cdecl Win_GetEvent(sysEvent_t* result)
 	Sys_EnterCriticalSection(CRITSECT_SYS_EVENT_QUEUE);
 	if (eventHead <= eventTail)
 	{
-		while (PeekMessageA(&msg, 0, 0, 0, 0))
 		{
-			if (!GetMessageA(&msg, 0, 0, 0))
-				Com_Quit_f();
-			g_wv.sysMsgTime = msg.time;
-			TranslateMessage(&msg);
-			DispatchMessageA(&msg);
+			PROF_SCOPED("Message Pump");
+
+			while (PeekMessageA(&msg, 0, 0, 0, 0))
+			{
+				if (!GetMessageA(&msg, 0, 0, 0))
+					Com_Quit_f();
+				g_wv.sysMsgTime = msg.time;
+				TranslateMessage(&msg);
+				DispatchMessageA(&msg);
+			}
 		}
-		s = Sys_ConsoleInput();
-		if (s)
+
 		{
-			v2 = strlen(s);
-			b = (char*)Com_AllocEvent(v2 + 1);
-			I_strncpyz(b, s, v2);
-			Sys_QueEvent(0, SE_CONSOLE, 0, 0, v2 + 1, b);
+			PROF_SCOPED("Console Input");
+			s = Sys_ConsoleInput();
+			if (s)
+			{
+				v2 = strlen(s);
+				b = (char *)Com_AllocEvent(v2 + 1);
+				I_strncpyz(b, s, v2);
+				Sys_QueEvent(0, SE_CONSOLE, 0, 0, v2 + 1, b);
+			}
 		}
+
 		if (eventHead <= eventTail)
 		{
 			memset(&ev, 0, sizeof(ev));
@@ -515,6 +526,8 @@ void __cdecl Sys_LoadingKeepAlive()
 
 sysEvent_t *__cdecl Sys_GetEvent(sysEvent_t *result)
 {
+	PROF_SCOPED("Sys_GetEvent");
+
 	sysEvent_t v2; // [esp+0h] [ebp-30h] BYREF
 	sysEvent_t v3; // [esp+18h] [ebp-18h]
 

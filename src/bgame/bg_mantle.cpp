@@ -399,15 +399,16 @@ void __cdecl Mantle_Start(pmove_t *pm, playerState_s *ps, MantleResults *mresult
     mantleTime = Mantle_GetOverLength(mstate) + UpLength;
     Mantle_GetAnimDelta(mstate, mantleTime, trans);
     Vec3Sub(mresults->endPos, trans, ps->origin);
-    if ((ps->pm_flags & 4) != 0)
-        MyAssertHandler(".\\bgame\\bg_mantle.cpp", 401, 0, "%s", "!( ps->pm_flags & PMF_MANTLE )");
+    iassert(!(ps->pm_flags & PMF_MANTLE));
     ps->pm_flags |= 4u;
+#ifdef KISAK_MP
     ps->eFlags |= 0x8000u;
     pm->mantleEndPos[0] = mresults->endPos[0];
     pm->mantleEndPos[1] = mresults->endPos[1];
     pm->mantleEndPos[2] = mresults->endPos[2];
     pm->mantleDuration = mantleTime;
     pm->mantleStarted = 1;
+#endif
 }
 
 int __cdecl Mantle_GetUpLength(MantleState *mstate)
@@ -592,10 +593,9 @@ void __cdecl Mantle_Move(pmove_t *pm, playerState_s *ps, pml_t *pml)
     int deltaTime; // [esp+34h] [ebp-8h]
     int mantleLength; // [esp+38h] [ebp-4h]
 
-    if ((ps->pm_flags & 4) == 0)
-        MyAssertHandler(".\\bgame\\bg_mantle.cpp", 745, 0, "%s", "ps->pm_flags & PMF_MANTLE");
-    if (pml->msec < 0)
-        MyAssertHandler(".\\bgame\\bg_mantle.cpp", 746, 0, "%s\n\t(pml->msec) = %i", "(pml->msec >= 0)", pml->msec);
+    iassert(ps->pm_flags & PMF_MANTLE);
+    iassert(pml->msec >= 0);
+
     if (mantle_enable->current.enabled)
     {
         mstate = &ps->mantleState;
@@ -619,12 +619,16 @@ void __cdecl Mantle_Move(pmove_t *pm, playerState_s *ps, pml_t *pml)
         Vec3Scale(trans, scale, ps->velocity);
         if (mstate->timer == mantleLength)
         {
-            if ((ps->pm_flags & 4) == 0)
-                MyAssertHandler(".\\bgame\\bg_mantle.cpp", 786, 0, "%s", "( ps->pm_flags & PMF_MANTLE )");
+            iassert(ps->pm_flags & PMF_MANTLE);
             ps->pm_flags &= ~4u;
+
+#ifdef KISAK_MP
             pm->mantleStarted = 0;
+#endif
+
             if ((mstate->flags & 1) != 0)
                 BG_AnimScriptEvent(ps, ANIM_ET_JUMP, 0, 1);
+
             if ((mstate->flags & 4) != 0)
             {
                 BG_AddPredictableEventToPlayerstate(6u, 0, ps);

@@ -885,44 +885,60 @@ void __cdecl Com_ServerPacketEvent()
 void __cdecl Com_EventLoop()
 {
     sysEvent_t result; // [esp+4h] [ebp-48h] BYREF
-    sysEvent_t v1; // [esp+1Ch] [ebp-30h]
     sysEvent_t ev; // [esp+34h] [ebp-18h]
+
+    PROF_SCOPED("Com_EventLoop");
+
+#ifdef _DEBUG
+    int eventCount = 0;
+#endif
 
     while (1)
     {
-        v1 = *Sys_GetEvent(&result);
-        ev = v1;
-        switch (v1.evType)
+        ev = *Sys_GetEvent(&result);
+
+        eventCount++;
+
+        switch (ev.evType)
         {
         case SE_NONE:
+        {
             iassert(!ev.evPtr);
             Com_ClientPacketEvent();
             Com_ServerPacketEvent();
-            return;
+            goto END;
+        }
         case SE_KEY:
-            if (ev.evPtr)
-                MyAssertHandler(".\\qcommon\\common.cpp", 2164, 0, "%s", "!ev.evPtr");
+        {
+            iassert(!ev.evPtr);
             CL_KeyEvent(0, ev.evValue, ev.evValue2, ev.evTime);
             break;
+        }
         case SE_CHAR:
-            if (ev.evPtr)
-                MyAssertHandler(".\\qcommon\\common.cpp", 2170, 0, "%s", "!ev.evPtr");
+        {
+            iassert(!ev.evPtr);
             CL_CharEvent(0, ev.evValue);
             break;
+        }
         case SE_CONSOLE:
-            if (!ev.evPtr)
-                MyAssertHandler(".\\qcommon\\common.cpp", 2184, 0, "%s", "ev.evPtr");
-            Cbuf_AddText(0, (const char*)ev.evPtr);
-            Com_FreeEvent((char*)ev.evPtr);
+        {
+            iassert(ev.evPtr);
+            Cbuf_AddText(0, (const char *)ev.evPtr);
+            Com_FreeEvent((char *)ev.evPtr);
             Cbuf_AddText(0, "\n");
             break;
+        }
+
         default:
-            if (ev.evPtr)
-                MyAssertHandler(".\\qcommon\\common.cpp", 2146, 0, "%s", "!ev.evPtr");
+            iassert(!ev.evPtr);
             Com_Error(ERR_FATAL, "Com_EventLoop: bad event type %i", ev.evType);
             break;
         }
     }
+
+END:
+    ZoneTextF("Events Processed in Loop: %d", eventCount);
+    return;
 }
 
 void __cdecl Com_SetScriptSettings()

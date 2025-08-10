@@ -767,7 +767,7 @@ struct playerState_s // sizeof=0x2F64
     int32_t commandTime;
     pmtype_t pm_type;
     int32_t bobCycle;                       // XREF: R_ChangeState_1(GfxCmdBufState *,uint)+2AB/o
-    int32_t pm_flags;
+    int32_t pm_flags; // LWSS: See "#define PMF_"
     int32_t weapFlags;
     int32_t otherFlags;                     // XREF: SpectatorClientEndFrame(gentity_s *):loc_4F9901/r
     // SpectatorClientEndFrame(gentity_s *):loc_4F990E/r ...

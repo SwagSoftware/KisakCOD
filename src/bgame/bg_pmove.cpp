@@ -2994,12 +2994,13 @@ void __cdecl PM_CheckDuck(pmove_t *pm, pml_t *pml)
     trace_t trace; // [esp+40h] [ebp-30h] BYREF
     playerState_s *ps; // [esp+6Ch] [ebp-4h]
 
-    if (!pm)
-        MyAssertHandler(".\\bgame\\bg_pmove.cpp", 2509, 0, "%s", "pm");
+    iassert(pm);
     ps = pm->ps;
-    if (!ps)
-        MyAssertHandler(".\\bgame\\bg_pmove.cpp", 2512, 0, "%s", "ps");
+    iassert(ps);
+
+#ifdef KISAK_MP
     pm->proneChange = 0;
+#endif
 
 #ifdef KISAK_MP
     if (ps->pm_type == PM_SPECTATOR)
@@ -3220,7 +3221,9 @@ void __cdecl PM_CheckDuck(pmove_t *pm, pml_t *pml)
                     else if (ps->viewHeightTarget != 11)
                     {
                         ps->viewHeightTarget = 11;
+#ifdef KISAK_MP
                         pm->proneChange = 1;
+#endif
                         BG_PlayAnim(ps, 0, ANIM_BP_TORSO, 0, 0, 1, 1);
                         Jump_ActivateSlowdown(ps);
                     }
@@ -3228,7 +3231,9 @@ void __cdecl PM_CheckDuck(pmove_t *pm, pml_t *pml)
                 else if (ps->viewHeightTarget == 11)
                 {
                     ps->viewHeightTarget = 40;
+#ifdef KISAK_MP
                     pm->proneChange = 1;
+#endif
                     BG_PlayAnim(ps, 0, ANIM_BP_TORSO, 0, 0, 1, 1);
                 }
                 else if ((ps->pm_flags & 2) != 0)

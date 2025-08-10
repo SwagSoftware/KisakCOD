@@ -9,6 +9,7 @@
 #include <direct.h>
 #include <io.h>
 #include "com_memory.h"
+#include "profile.h"
 
 
 _RTL_CRITICAL_SECTION s_criticalSections[CRITSECT_COUNT];
@@ -22,6 +23,8 @@ void Sys_InitializeCriticalSections()
 
 void Sys_EnterCriticalSection(int critSect)
 {
+    PROF_SCOPED("Sys_EnterCriticalSection");
+
 	iassert(critSect >= 0 && critSect < CRITSECT_COUNT);
 	EnterCriticalSection(&s_criticalSections[critSect]);
 }

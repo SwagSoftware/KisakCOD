@@ -2039,8 +2039,7 @@ void __cdecl PM_Weapon_CheckForReload(pmove_t *pm)
 
     doReload = 0;
     ps = pm->ps;
-    if (!pm->ps)
-        MyAssertHandler(".\\bgame\\bg_weapons.cpp", 2274, 0, "%s", "ps");
+    iassert(ps);
     weapDef = BG_GetWeaponDef(ps->weapon);
     if ((ps->weaponstate < 15 || ps->weaponstate > 20)
         && ps->weaponstate != 12
@@ -2081,11 +2080,13 @@ void __cdecl PM_Weapon_CheckForReload(pmove_t *pm)
         case 9:
         case 0xA:
         case 0xB:
+#ifdef KISAK_MP
             if (pm->proneChange)
             {
                 if (!BG_WeaponIsClipOnly(ps->weapon))
                     BG_AnimScriptEvent(ps, ANIM_ET_RELOAD, 0, 1);
             }
+#endif
             break;
         default:
             clipWeap = BG_ClipForWeapon(ps->weapon);
