@@ -3,8 +3,12 @@
 #include <gfx_d3d/r_drawsurf.h>
 #include <gfx_d3d/r_scene.h>
 
-#include <client_mp/client_mp.h>
+#ifdef KISAK_MP
 #include <cgame_mp/cg_local_mp.h>
+#include <client_mp/client_mp.h>
+#elif KISAK_SP
+#include <cgame/cg_main.h>
+#endif
 
 FxSpriteInfo g_spriteInfo;
 

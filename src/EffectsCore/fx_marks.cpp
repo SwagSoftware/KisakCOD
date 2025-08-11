@@ -10,14 +10,18 @@
 #include <xanim/dobj.h>
 #include <xanim/dobj_utils.h>
 
+#ifdef KISAK_MP
+#include <cgame_mp/cg_local_mp.h>
 #include <client_mp/client_mp.h>
+#elif KISAK_SP
+#include <cgame/cg_main.h>
+#endif
 
 #include <win32/win_local.h>
 
 #include <algorithm>
 #include <aim_assist/aim_assist.h>
 #include <universal/profile.h>
-#include <cgame_mp/cg_local_mp.h>
 
 FxMarkPoint g_fxMarkPoints[765];
 

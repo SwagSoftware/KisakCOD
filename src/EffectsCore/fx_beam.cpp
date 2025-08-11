@@ -1,11 +1,15 @@
 #include "fx_system.h"
 
-#include <client_mp/client_mp.h>
-
 #include <gfx_d3d/r_drawsurf.h>
 
 #include <gfx_d3d/r_scene.h>
+
+#ifdef KISAK_MP
+#include <client_mp/client_mp.h>
 #include <cgame_mp/cg_local_mp.h>
+#elif KISAK_SP
+#include <cgame/cg_main.h>
+#endif
 
 const unsigned __int16 templateIndices[12] = { 0u, 2u, 1u, 2u, 4u, 1u, 1u, 4u, 3u, 3u, 4u, 5u }; // idb
 

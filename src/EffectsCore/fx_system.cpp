@@ -9,11 +9,16 @@
 
 #include <universal/com_sndalias.h>
 
+#ifdef KISAK_MP
+#include <cgame_mp/cg_local_mp.h>
 #include <client_mp/client_mp.h>
+#elif KISAK_SP
+#include <cgame/cg_main.h>
+#endif
 
 #include <win32/win_local.h>
 #include <gfx_d3d/r_model.h>
-#include <cgame_mp/cg_local_mp.h>
+
 #include <universal/profile.h>
 
 int32_t fx_maxLocalClients;

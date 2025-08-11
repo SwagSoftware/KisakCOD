@@ -6,12 +6,16 @@
 
 #include <aim_assist/aim_assist.h>
 
-#include <cgame_mp/cg_local_mp.h>
-
 #include <physics/phys_local.h>
 
 #include <win32/win_local.h>
 #include <universal/profile.h>
+
+#ifdef KISAK_MP
+#include <cgame_mp/cg_local_mp.h>
+#elif KISAK_SP
+#include <cgame/cg_main.h>
+#endif
 
 void __cdecl FX_EvaluateVisAlpha(FxElemPreVisualState *preVisState, FxElemVisualState *visState)
 {
