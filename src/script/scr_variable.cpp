@@ -4704,7 +4704,7 @@ int Scr_AddStringSet(unsigned int setId, const char *string)
 	{
 		VariableIndexInternal = GetVariableIndexInternal(setId, LowercaseString);
 		v6 = LowercaseString;
-		id = scrVarGlob.variableList[VariableIndexInternal + 32770].hash.id;
+		id = scrVarGlob.variableList[VariableIndexInternal + VARIABLELIST_CHILD_BEGIN].hash.id;
 		SL_RemoveRefToString(v6);
 		v8.type = VAR_INTEGER;
 		v8.u.intValue = 0;

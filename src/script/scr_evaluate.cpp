@@ -6,7 +6,6 @@
 #include "scr_parser.h"
 #include "scr_parsetree.h"
 #include <qcommon/qcommon.h>
-#include <game_mp/g_public_mp.h>
 #include "scr_yacc.h"
 #include "scr_compiler.h"
 

@@ -497,3 +497,4 @@ int Scr_AddStringSet(unsigned int setId, const char *string);
 extern scr_classStruct_t g_classMap[4];
 extern scrStringDebugGlob_t *scrStringDebugGlob;
 extern scrMemTreePub_t scrMemTreePub;
+extern scrVarGlob_t scrVarGlob;;

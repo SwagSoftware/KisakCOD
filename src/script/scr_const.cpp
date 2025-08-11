@@ -1,9 +1,10 @@
 #include "scr_const.h"
-#include <game_mp/g_public_mp.h>
 
 scr_const_t scr_const;
 
 #ifdef KISAK_MP
+#include <game_mp/g_public_mp.h>
+
 void __cdecl GScr_LoadConsts()
 {
 	scr_const._ = GScr_AllocString("").prev;
@@ -198,6 +199,8 @@ void __cdecl GScr_LoadConsts()
 }
 
 #elif KISAK_SP
+#include <game/g_scr_main.h>
+
 void GScr_LoadConsts()
 {
 	scr_const._ = GScr_AllocString("");

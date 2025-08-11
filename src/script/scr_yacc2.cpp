@@ -11,8 +11,11 @@
 #include "scr_compiler.h"
 
 #include "scr_yacc_structs.h"
-#include <client_mp/client_mp.h>
 #include "scr_vm.h"
+
+#ifdef KISAK_MP
+#include <client_mp/client_mp.h>
+#endif
 
 #pragma GCC push_options
 #pragma GCC optimize ("O0")

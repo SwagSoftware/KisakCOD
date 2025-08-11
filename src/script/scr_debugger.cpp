@@ -9,8 +9,6 @@
 
 #include <bgame/bg_local.h>
 
-#include <game_mp/g_public_mp.h>
-
 #include <qcommon/mem_track.h>
 
 #include <universal/com_memory.h>
@@ -24,6 +22,10 @@
 #include <qcommon/cmd.h>
 #include <win32/win_net.h>
 #include "scr_compiler.h"
+
+#ifdef KISAK_MP
+#include <game_mp/g_public_mp.h>
+#endif
 
 scrDebuggerGlob_t scrDebuggerGlob;
 Scr_Breakpoint g_breakpoints[128];
@@ -1388,7 +1390,7 @@ bool __cdecl Scr_RefToVariable(unsigned int id, int isObject)
     if (isObject)
         ida = id + 1;
     else
-        ida = id + 32770;
+        ida = id + VARIABLELIST_CHILD_BEGIN;
     if (scrDebuggerGlob.removeId)
         return scrDebuggerGlob.removeId == ida;
     if (!scrDebuggerGlob.currentElement)
@@ -1819,11 +1821,13 @@ void __cdecl Scr_RunDebugger()
 // KISAKTODO: move in client somewhere
 void __cdecl CL_EndScriptDebugger(int timeSpentInDebugger)
 {
+#ifdef KISAK_MP
     if (clientUIActives[0].connectionState == CA_ACTIVE)
     {
         Con_TimeNudged(0, timeSpentInDebugger);
         CL_AdjustTimeDelta(0);
     }
+#endif
 }
 
 void __cdecl Scr_ShutdownRemoteClient(int restart)
@@ -3140,7 +3144,7 @@ retry_15:
         scrDebuggerGlob.objectId = scrVarPub.animId + 1;
         break;
     case 20:
-        scrDebuggerGlob.objectId = scrVarPub.gameId + 32770;
+        scrDebuggerGlob.objectId = scrVarPub.gameId + VARIABLELIST_CHILD_BEGIN;
         break;
     case 33:
     case 34:

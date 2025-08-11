@@ -10,7 +10,14 @@
 
 #include <bgame/bg_local.h>
 
+#ifdef KISAK_MP
 #include <game_mp/g_public_mp.h>
+#elif KISAK_SP
+#include <game/g_scr_main.h>
+#include <game/g_main.h>
+#include <game/g_local.h>
+#include <game/actor_script_cmd.h>
+#endif
 
 #include <universal/com_memory.h>
 #include <universal/com_files.h>
@@ -27,6 +34,7 @@
 #include "scr_compiler.h"
 
 #include <setjmp.h>
+
 
 void Log(char const *format, ...)
 {
@@ -115,26 +123,43 @@ void(__cdecl *__cdecl BuiltIn_GetMethod(const char **pName, int *type))(scr_entr
 
 void(__cdecl *__cdecl Scr_GetMethod(const char **pName, int *type))(scr_entref_t)
 {
-    void(__cdecl * method)(scr_entref_t); // [esp+0h] [ebp-4h]
-    void(__cdecl * methoda)(scr_entref_t); // [esp+0h] [ebp-4h]
-    void(__cdecl * methodb)(scr_entref_t); // [esp+0h] [ebp-4h]
-    void(__cdecl * methodc)(scr_entref_t); // [esp+0h] [ebp-4h]
+    void(__cdecl *method)(scr_entref_t); // [esp+0h] [ebp-4h]
 
     *type = 0;
+
+#ifdef KISAK_SP
+    method = Actor_GetMethod(pName);
+    if (method)
+        return method;
+    method = Sentient_GetMethod(pName);
+    if (method)
+        return method;
+#endif
+
     method = Player_GetMethod(pName);
     if (method)
         return method;
-    methoda = ScriptEnt_GetMethod(pName);
-    if (methoda)
-        return methoda;
-    methodb = HudElem_GetMethod(pName);
-    if (methodb)
-        return methodb;
-    methodc = Helicopter_GetMethod(pName);
-    if (methodc)
-        return methodc;
-    else
-        return BuiltIn_GetMethod(pName, type);
+    method = ScriptEnt_GetMethod(pName);
+    if (method)
+        return method;
+
+#ifdef KISAK_SP
+    method = ScriptVehicle_GetMethod(pName);
+    if (method)
+        return method;
+#endif
+
+    method = HudElem_GetMethod(pName);
+    if (method)
+        return method;
+
+#ifdef KISAK_MP
+    method = Helicopter_GetMethod(pName);
+    if (method)
+        return method;
+#endif
+
+    return BuiltIn_GetMethod(pName, type);
 }
 
 void(__cdecl* __cdecl Scr_GetFunction(const char** pName, int* type))()

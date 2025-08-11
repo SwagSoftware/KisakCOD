@@ -12,6 +12,7 @@
 #include <bgame/bg_local.h>
 #include "actor_animapi.h"
 #include "actor.h"
+#include "g_public.h"
 
 struct scr_data_t_tag
 {
@@ -598,3 +599,7 @@ static const char *nodeStringTable[20] =
 
 
 extern scr_data_t g_scr_data;
+
+extern const BuiltinMethodDef methods[104];
+extern const BuiltinMethodDef methods_2[166];
+extern BuiltinFunctionDef *functions;

@@ -6,12 +6,14 @@
 #include <universal/q_shared.h>
 #include <qcommon/qcommon.h>
 
-#include <client_mp/client_mp.h>
-
 #include "scr_memorytree.h"
 #include <universal/profile.h>
 #include <universal/com_constantconfigstrings.h>
 #include "scr_variable.h"
+
+#ifdef KISAK_MP
+#include <client_mp/client_mp.h>
+#endif
 
 scrStringDebugGlob_t* scrStringDebugGlob;
 static scrStringDebugGlob_t scrStringDebugGlobBuf;

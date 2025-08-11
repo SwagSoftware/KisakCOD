@@ -9,11 +9,11 @@
 #include "scr_parser.h"
 #include "scr_evaluate.h"
 #include "scr_vm.h"
-#include <game_mp/g_public_mp.h>
 #include "scr_animtree.h"
-#include <universal/profile.h>
 #include "scr_parsetree.h"
 #include "scr_yacc.h"
+
+#include <universal/profile.h>
 
 void EmitStatement(sval_u val, bool lastStatement, unsigned int endSourcePos, scr_block_s *block);
 void EmitOpcode(unsigned int op, int offset, int callType);
