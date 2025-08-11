@@ -1,6 +1,5 @@
 #include "phys_local.h"
 
-#include <cgame_mp/cg_local_mp.h>
 #include "ode/common.h"
 #include "ode/collision_kernel.h"
 #include <ode/objects.h>
@@ -10,11 +9,18 @@
 #include <cgame/cg_local.h>
 #include "ode/odeext.h"
 #include <universal/profile.h>
-#include <game_mp/g_main_mp.h>
+
 #include "ode/collision_std.h"
 #include "phys_coll_local.h"
 
 #include <bgame/bg_public.h>
+
+#ifdef KISAK_MP
+#include <game_mp/g_main_mp.h>
+#include <cgame_mp/cg_local_mp.h>
+#elif KISAK_SP
+#include <game/g_main.h>
+#endif
 
 // LWSS HACK - unfk some types
 #define float dReal

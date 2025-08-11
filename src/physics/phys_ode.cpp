@@ -10,9 +10,15 @@
 #include <win32/win_local.h>
 #include <gfx_d3d/r_dpvs.h>
 #include "ode/odeext.h"
-#include <cgame_mp/cg_local_mp.h>
 #include <universal/profile.h>
 #include "ode/collision_transform.h"
+
+#ifdef KISAK_MP
+#include <cgame_mp/cg_local_mp.h>
+#elif KISAK_SP
+#include <cgame/cg_main.h>
+#endif
+
 //int *g_phys_msecStep    827c0304     phys_ode.obj
 //struct PhysGlob physGlob   85513d50     phys_ode.obj
 
