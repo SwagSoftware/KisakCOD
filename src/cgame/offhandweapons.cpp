@@ -1,9 +1,20 @@
 #include "cg_local.h"
 #include "cg_public.h"
 
-#include <cgame_mp/cg_local_mp.h>
 #include <client/client.h>
 #include <script/scr_const.h>
+
+#ifdef KISAK_MP
+#include <cgame_mp/cg_local_mp.h>
+#elif KISAK_SP
+#include "cg_main.h"
+#include "cg_newdraw.h"
+#include <xanim/xanim.h>
+#include <ui/ui.h>
+#include "cg_ents.h"
+#include "cg_servercmds.h"
+#endif
+
 
 const dvar_t *hud_flash_time_offhand;
 const dvar_t *hud_flash_period_offhand;

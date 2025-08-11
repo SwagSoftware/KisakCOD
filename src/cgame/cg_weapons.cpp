@@ -23,9 +23,11 @@
 #elif KISAK_SP
 #include "cg_servercmds.h"
 #include "cg_ents.h"
+#include "cg_main.h"
 #include <game/savememory.h>
 #include <xanim/xanim_readwrite.h>
 #include <gfx_d3d/r_model.h>
+#include "cg_compassfriendlies.h"
 #endif
 
 const float MYLERP_START = 0.3f;
@@ -539,7 +541,6 @@ void __cdecl CG_AddPlayerWeapon(
     centity_s* cent,
     int32_t bDrawGun)
 {
-    uint32_t v5; // eax
     uint32_t fLeanDist; // [esp+Ch] [ebp-48h]
     bool v7; // [esp+10h] [ebp-44h]
     BOOL v8; // [esp+14h] [ebp-40h]
@@ -554,11 +555,15 @@ void __cdecl CG_AddPlayerWeapon(
 
     nextSnap = cgameGlob->nextSnap;
     v9 = (nextSnap->ps.otherFlags & 6) != 0 && cent->nextState.number == nextSnap->ps.clientNum;
+#ifdef KISAK_MP
     v8 = v9 && !cgameGlob->renderingThirdPerson;
+#endif
+
     if (ps)
         weaponNum = BG_GetViewmodelWeaponIndex(ps);
     else
         weaponNum = cent->nextState.weapon;
+
     if (weaponNum > 0 && (cent->nextState.lerp.eFlags & 0x300) == 0)
     {
         iassert(localClientNum == 0);
@@ -594,7 +599,11 @@ void __cdecl CG_AddPlayerWeapon(
             }
             HoldBreathUpdate(localClientNum);
         }
-        if (cent->bMuzzleFlash && (!v8 || ps))
+        if (cent->bMuzzleFlash 
+#ifdef KISAK_MP
+            && (!v8 || ps)
+#endif
+            )
         {
             cent->bMuzzleFlash = 0;
             if (bDrawGun)
@@ -602,8 +611,7 @@ void __cdecl CG_AddPlayerWeapon(
                 if (ps)
                 {
                     fLeanDist = scr_const.tag_flash;
-                    v5 = CG_WeaponDObjHandle(weaponNum);
-                    WeaponFlash(localClientNum, v5, weaponNum, 1, fLeanDist);
+                    WeaponFlash(localClientNum, CG_WeaponDObjHandle(weaponNum), weaponNum, 1, fLeanDist);
                 }
                 else
                 {
@@ -917,18 +925,17 @@ void __cdecl StartWeaponAnim(
 {
     float rate; // [esp+20h] [ebp-1Ch]
     XAnim_s* anims; // [esp+2Ch] [ebp-10h]
-    int32_t i; // [esp+30h] [ebp-Ch]
     WeaponDef* weapDef; // [esp+34h] [ebp-8h]
     const cg_s *cgameGlob;
 
     iassert((animIndex > WEAP_ANIM_VIEWMODEL_START) && (animIndex < WEAP_ANIM_VIEWMODEL_END));
-    iassert(localClientNum == 0);
+
     anims = XAnimGetAnims(cg_weaponsArray[0][weaponNum].tree);
-    if (!anims)
-        MyAssertHandler(".\\cgame\\cg_weapons.cpp", 163, 0, "%s", "anims");
+    iassert(anims);
     weapDef = BG_GetWeaponDef(weaponNum);
     rate = GetWeaponAnimRate(weapDef, anims, animIndex);
     
+#ifdef KISAK_MP
     cgameGlob = CG_GetLocalClientGlobals(localClientNum);
 
     if ((cgameGlob->predictedPlayerState.weaponstate == 7
@@ -950,7 +957,9 @@ void __cdecl StartWeaponAnim(
         else
             rate = rate / perk_weapRateMultiplier->current.value;
     }
-    for (i = 1; i < 31; ++i)
+#endif
+
+    for (int i = 1; i < 31; ++i)
     {
         if (animIndex == i)
             XAnimSetGoalWeight(obj, i, 1.0, transitionTime, rate, 0, 1u, 1);
@@ -1186,6 +1195,8 @@ void __cdecl PlayNoteMappedSoundAliases(int32_t localClientNum, const char *note
         }
     }
 }
+
+// KISAKTODO: would like to this function more like blops, it's cleaner
 void __cdecl CG_AddViewWeapon(int32_t localClientNum)
 {
     double v1; // st7
@@ -1214,7 +1225,11 @@ void __cdecl CG_AddViewWeapon(int32_t localClientNum)
     ps = &cgameGlob->predictedPlayerState;
     cgameGlob->refdef.dof.viewModelStart = 0.0f;
     cgameGlob->refdef.dof.viewModelEnd = 0.0f;
+#ifdef KISAK_MP
     if (ps->pm_type != PM_SPECTATOR && ps->pm_type != PM_INTERMISSION && !cgameGlob->renderingThirdPerson)
+#elif KISAK_SP
+    if (ps->pm_type != PM_UFO && ps->pm_type != PM_NOCLIP && ps->pm_type != PM_MPVIEWER)
+#endif
     {
         if (cgameGlob->cubemapShot || !cg_drawGun->current.enabled || CG_GetWeapReticleZoom(cgameGlob, &fZoom))
             drawgun = 0;
@@ -1237,6 +1252,7 @@ void __cdecl CG_AddViewWeapon(int32_t localClientNum)
                 Vec3Mad(placement.base.origin, cg_gun_x->current.value, cgameGlob->viewModelAxis[0], placement.base.origin);
                 Vec3Mad(placement.base.origin, cg_gun_y->current.value, cgameGlob->viewModelAxis[1], placement.base.origin);
                 Vec3Mad(placement.base.origin, cg_gun_z->current.value, cgameGlob->viewModelAxis[2], placement.base.origin);
+
                 pe = &cgameGlob->playerEntity;
                 ws.ps = ps;
                 ws.xyspeed = cgameGlob->xyspeed;
@@ -1245,6 +1261,8 @@ void __cdecl CG_AddViewWeapon(int32_t localClientNum)
                 ws.vLastMoveAng[1] = cgameGlob->playerEntity.vLastMoveAng[1];
                 ws.vLastMoveAng[2] = cgameGlob->playerEntity.vLastMoveAng[2];
                 ws.fLastIdleFactor = cgameGlob->playerEntity.fLastIdleFactor;
+
+#ifdef KISAK_MP
                 ws.time = cgameGlob->time - ps->deltaTime;
 
                 if (cgameGlob->damageTime)
@@ -1252,6 +1270,7 @@ void __cdecl CG_AddViewWeapon(int32_t localClientNum)
                 else
                     v3 = 0;
                 ws.damageTime = v3;
+#endif
 
                 ws.v_dmg_pitch = cgameGlob->v_dmg_pitch;
                 ws.v_dmg_roll = cgameGlob->v_dmg_roll;
@@ -1269,7 +1288,10 @@ void __cdecl CG_AddViewWeapon(int32_t localClientNum)
                 AnglesToAxis(angles, vAxis);
                 AnglesToAxis(ps->viewangles, vAxis2);
                 MatrixMultiply(vAxis, vAxis2, axis);
+
                 AxisToQuat(axis, placement.base.quat);
+
+
                 weapDef = BG_GetWeaponDef(weaponIndex);
                 if (!BG_IsAimDownSightWeapon(ps->weapon) || ps->fWeaponPosFrac == 0.0 || weapDef->overlayReticle)
                 {
@@ -1295,7 +1317,8 @@ void __cdecl CG_AddViewWeapon(int32_t localClientNum)
                 cgameGlob->vGunSpeed[0] = ws.vGunSpeed[0];
                 vGunSpeed[1] = ws.vGunSpeed[1];
                 vGunSpeed[2] = ws.vGunSpeed[2];
-                placement.scale = 1.0;
+
+                placement.scale = 1.0f;
                 CG_AddPlayerWeapon(localClientNum, &placement, ps, &cgameGlob->predictedPlayerEntity, drawgun);
             }
         }
@@ -2062,28 +2085,33 @@ void __cdecl CG_FireWeapon(
     int32_t isPlayer; // [esp+34h] [ebp-14h]
     cg_s *cgameGlob; // [esp+38h] [ebp-10h]
     const WeaponDef *weaponDef; // [esp+3Ch] [ebp-Ch]
-    const entityState_s *ent; // [esp+40h] [ebp-8h]
+    const entityState_s *p_nextState; // [esp+40h] [ebp-8h]
     int32_t playerUsingTurret; // [esp+44h] [ebp-4h]
 
-    ent = &cent->nextState;
+    p_nextState = &cent->nextState;
     if (!weapon)
-        weapon = ent->weapon;
+        weapon = p_nextState->weapon;
     if (weapon)
     {
         if (weapon < BG_GetNumWeapons())
         {
             iassert(localClientNum == 0);
-            weapInfo = &cg_weaponsArray[0][weapon];
+            weapInfo = CG_GetLocalClientWeaponInfo(0, weapon);
             weaponDef = BG_GetWeaponDef(weapon);
             iassert(weaponDef);
             cent->bMuzzleFlash = 1;
             iassert(localClientNum == 0);
             cgameGlob = CG_GetLocalClientGlobals(localClientNum);;
             nextSnap = cgameGlob->nextSnap;
-            isPlayer = (nextSnap->ps.otherFlags & 6) != 0 && ent->number == nextSnap->ps.clientNum;
+
+#ifdef KISAK_MP
+            isPlayer = (nextSnap->ps.otherFlags & 6) != 0 && p_nextState->number == nextSnap->ps.clientNum;
 
             if (sv_clientSideBullets->current.enabled)
                 DrawBulletImpacts(localClientNum, cent, weaponDef, tagName, ps);
+#elif KISAK_SP
+            isPlayer = cgameGlob->nextSnap->ps.clientNum == p_nextState->number;
+#endif
 
             if (isPlayer)
             {
@@ -2092,27 +2120,29 @@ void __cdecl CG_FireWeapon(
             }
 
             playerUsingTurret = 0;
-            if (ent->eType == 11 && (ps->eFlags & 0x300) != 0 && ps->viewlocked_entNum == ent->number)
+            if (p_nextState->eType == ET_MG42 && (ps->eFlags & 0x300) != 0 && ps->viewlocked_entNum == p_nextState->number)
             {
                 playerUsingTurret = 1;
                 isPlayer = 1;
             }
 
-            if (ent->eType == 11)
-                WeaponFlash(localClientNum, ent->number, weapon, playerUsingTurret, tagName);
+            if (p_nextState->eType == ET_MG42)
+                WeaponFlash(localClientNum, p_nextState->number, weapon, playerUsingTurret, tagName);
 
-            if (ent->eType == 12)
+#ifdef KISAK_MP
+            if (p_nextState->eType == ET_HELICOPTER)
             {
-                WeaponFlash(localClientNum, ent->number, weapon, 0, tagName);
-                CG_EjectWeaponBrass(localClientNum, ent, event);
-                Veh_IncTurretBarrelRoll(localClientNum, ent->number, heli_barrelRotation->current.value);
+                WeaponFlash(localClientNum, p_nextState->number, weapon, 0, tagName);
+                CG_EjectWeaponBrass(localClientNum, p_nextState, event);
+                Veh_IncTurretBarrelRoll(localClientNum, p_nextState->number, heli_barrelRotation->current.value);
             }
+#endif
 
             firesound = weaponDef->fireSound;
             if (isPlayer && weaponDef->fireSoundPlayer)
                 firesound = weaponDef->fireSoundPlayer;
 
-            if (event == 27)
+            if (event == 27) // SAME IN SP
             {
                 if (isPlayer && weaponDef->fireLastSoundPlayer)
                 {
@@ -2129,16 +2159,16 @@ void __cdecl CG_FireWeapon(
                 {
                     if (!weapInfo->viewModelDObj || !CG_DObjGetWorldTagPos(&cgameGlob->viewModelPose, weapInfo->viewModelDObj, tagName, origin))
                     {
-                        BG_EvaluateTrajectory(&ent->lerp.pos, cgameGlob->time, origin);
+                        BG_EvaluateTrajectory(&p_nextState->lerp.pos, cgameGlob->time, origin);
                     }
                 }
                 else
                 {
-                    obj = Com_GetClientDObj(ent->number, localClientNum);
+                    obj = Com_GetClientDObj(p_nextState->number, localClientNum);
                     if (!obj || !CG_DObjGetWorldTagPos(&cent->pose, obj, tagName, origin))
-                        BG_EvaluateTrajectory(&ent->lerp.pos, cgameGlob->time, origin);
+                        BG_EvaluateTrajectory(&p_nextState->lerp.pos, cgameGlob->time, origin);
                 }
-                playbackId = CG_PlaySoundAlias(localClientNum, ent->number, origin, firesound);
+                playbackId = CG_PlaySoundAlias(localClientNum, p_nextState->number, origin, firesound);
                 if (cent->nextState.eType == 1 && !weaponDef->silenced && weaponDef->weapType != WEAPTYPE_GRENADE)
                 {
                     SND_GetKnownLength(playbackId, &msec);
@@ -2146,7 +2176,7 @@ void __cdecl CG_FireWeapon(
                 }
             }
             if (!BG_GetWeaponDef(weapon)->bBoltAction)
-                CG_EjectWeaponBrass(localClientNum, ent, event);
+                CG_EjectWeaponBrass(localClientNum, p_nextState, event);
             if (isPlayer)
                 TakeClipOnlyWeaponIfEmpty(localClientNum, &cgameGlob->predictedPlayerState);
         }
@@ -2157,6 +2187,7 @@ void __cdecl CG_FireWeapon(
     }
 }
 
+#ifdef KISAK_MP
 void __cdecl DrawBulletImpacts(
     int32_t localClientNum,
     const centity_s *ent,
@@ -2652,6 +2683,7 @@ void __cdecl FireBulletPenetrate(
     }
 }
 
+
 char __cdecl BulletTrace(
     int32_t localClientNum,
     const BulletFireParams *bp,
@@ -2707,6 +2739,8 @@ char __cdecl BulletTrace(
     }
     return 1;
 }
+
+#endif
 
 bool __cdecl ShouldIgnoreHitEntity(int32_t attackerNum, int32_t hitEntNum)
 {
@@ -3038,6 +3072,7 @@ void __cdecl CG_GetViewDirection(int32_t localClientNum, int32_t entityNum, floa
     }
     else
     {
+#ifdef KISAK_MP
         clientNum = CG_GetEntity(localClientNum, entityNum)->nextState.clientNum;
 
         bcassert(clientNum, MAX_CLIENTS);
@@ -3045,6 +3080,9 @@ void __cdecl CG_GetViewDirection(int32_t localClientNum, int32_t entityNum, floa
 
         iassert(ci->infoValid);
         AngleVectors(ci->playerAngles, forward, right, up);
+#elif KISAK_SP
+        AngleVectors(CG_GetEntity(localClientNum, entityNum)->pose.angles, forward, right, up);
+#endif
     }
 }
 
@@ -3236,6 +3274,7 @@ void __cdecl CG_BulletHitEvent(
     int32_t damage,
     __int16 hitContents)
 {
+#ifdef KISAK_MP
     char hasMuzzlePoint; // [esp+3h] [ebp-29h]
     float muzzle[3]; // [esp+10h] [ebp-1Ch] BYREF
     float exitDir[3]; // [esp+20h] [ebp-Ch] BYREF
@@ -3269,6 +3308,7 @@ void __cdecl CG_BulletHitEvent(
                 damage,
                 hitContents);
     }
+#endif
     CG_BulletHitEvent_Internal(
         localClientNum,
         sourceEntityNum,
@@ -3423,17 +3463,22 @@ void __cdecl BulletTrajectoryEffects(
 {
     float muzzle[3]; // [esp+0h] [ebp-Ch] BYREF
 
-    if (sourceEntityNum < 0)
-        MyAssertHandler(".\\cgame\\cg_weapons.cpp", 4312, 0, "%s", "sourceEntityNum >= 0");
-    if (damage < 0)
-        MyAssertHandler(".\\cgame\\cg_weapons.cpp", 4313, 0, "%s\n\t(damage) = %i", "(damage >= 0)", damage);
+    iassert(sourceEntityNum >= 0);
+    iassert(damage >= 0);
+
     if (CalcMuzzlePoint(localClientNum, sourceEntityNum, muzzle, flashTag))
     {
         if (ShouldSpawnTracer(localClientNum, sourceEntityNum))
             CG_SpawnTracer(localClientNum, muzzle, position);
         WhizbySound(localClientNum, muzzle, position);
-        if ((impactFlags & 4) == 0 && !sv_clientSideBullets->current.enabled)
+        if ((impactFlags & 4) == 0
+#ifdef KISAK_MP
+            && !sv_clientSideBullets->current.enabled
+#endif
+            )
+        {
             DynEntCl_DynEntImpactEvent(localClientNum, sourceEntityNum, startPos, position, damage, 0);
+        }
     }
 }
 
@@ -3882,7 +3927,7 @@ void CG_ArchiveWeaponInfo(MemoryFile *memFile)
     }
     else
     {
-        MemFile_ReadData(memFile, 4, v8);
+        MemFile_ReadData(memFile, 4, (unsigned char*)v8);
         v3 = v8[0];
         if (LODWORD(v3) > BG_GetNumWeapons())
         {
@@ -3916,7 +3961,7 @@ void CG_ArchiveWeaponInfo(MemoryFile *memFile)
                     0,
                     "%s",
                     "memFile->archiveProc");
-            memFile->archiveProc(memFile, 4, p_hasAnimTree);
+            memFile->archiveProc(memFile, 4, (byte*)p_hasAnimTree);
             if (!memFile->archiveProc)
                 MyAssertHandler(
                     "c:\\trees\\cod3\\cod3src\\src\\cgame\\../universal/memfile.h",
@@ -3924,7 +3969,7 @@ void CG_ArchiveWeaponInfo(MemoryFile *memFile)
                     0,
                     "%s",
                     "memFile->archiveProc");
-            memFile->archiveProc(memFile, 4, p_hasAnimTree - 1);
+            memFile->archiveProc(memFile, 4, (byte *)p_hasAnimTree - 1);
             --v5;
             p_hasAnimTree += 18;
         } while (v5);
@@ -3938,7 +3983,7 @@ void CG_ArchiveWeaponInfo(MemoryFile *memFile)
             0,
             "%s",
             "memFile->archiveProc");
-    memFile->archiveProc(memFile, 4, &cgArray[0].prevViewmodelWeapon);
+    memFile->archiveProc(memFile, 4, (byte*)&cgArray[0].prevViewmodelWeapon);
     if (!memFile->archiveProc)
         MyAssertHandler(
             "c:\\trees\\cod3\\cod3src\\src\\cgame\\../universal/memfile.h",
@@ -3946,7 +3991,7 @@ void CG_ArchiveWeaponInfo(MemoryFile *memFile)
             0,
             "%s",
             "memFile->archiveProc");
-    memFile->archiveProc(memFile, 4, &cgArray[0].weaponSelect);
+    memFile->archiveProc(memFile, 4, (byte *)&cgArray[0].weaponSelect);
     if (!memFile->archiveProc)
         MyAssertHandler(
             "c:\\trees\\cod3\\cod3src\\src\\cgame\\../universal/memfile.h",
@@ -3954,7 +3999,7 @@ void CG_ArchiveWeaponInfo(MemoryFile *memFile)
             0,
             "%s",
             "memFile->archiveProc");
-    memFile->archiveProc(memFile, 4, &cgArray[0].weaponSelectTime);
+    memFile->archiveProc(memFile, 4, (byte *)&cgArray[0].weaponSelectTime);
     if (!memFile->archiveProc)
         MyAssertHandler(
             "c:\\trees\\cod3\\cod3src\\src\\cgame\\../universal/memfile.h",
@@ -3962,7 +4007,7 @@ void CG_ArchiveWeaponInfo(MemoryFile *memFile)
             0,
             "%s",
             "memFile->archiveProc");
-    memFile->archiveProc(memFile, 4, &cgArray[0].equippedOffHand);
+    memFile->archiveProc(memFile, 4, (byte *)&cgArray[0].equippedOffHand);
     if (!memFile->archiveProc)
         MyAssertHandler(
             "c:\\trees\\cod3\\cod3src\\src\\cgame\\../universal/memfile.h",
@@ -3970,7 +4015,7 @@ void CG_ArchiveWeaponInfo(MemoryFile *memFile)
             0,
             "%s",
             "memFile->archiveProc");
-    memFile->archiveProc(memFile, 96, cgArray[0].viewDamage);
+    memFile->archiveProc(memFile, 96, (byte *)cgArray[0].viewDamage);
     if (!memFile->archiveProc)
         MyAssertHandler(
             "c:\\trees\\cod3\\cod3src\\src\\cgame\\../universal/memfile.h",
@@ -3978,7 +4023,7 @@ void CG_ArchiveWeaponInfo(MemoryFile *memFile)
             0,
             "%s",
             "memFile->archiveProc");
-    memFile->archiveProc(memFile, 4, &cgArray[0].holdBreathTime);
+    memFile->archiveProc(memFile, 4, (byte *)&cgArray[0].holdBreathTime);
     if (!memFile->archiveProc)
         MyAssertHandler(
             "c:\\trees\\cod3\\cod3src\\src\\cgame\\../universal/memfile.h",
@@ -3986,7 +4031,7 @@ void CG_ArchiveWeaponInfo(MemoryFile *memFile)
             0,
             "%s",
             "memFile->archiveProc");
-    memFile->archiveProc(memFile, 4, &cgArray[0].holdBreathInTime);
+    memFile->archiveProc(memFile, 4, (byte *)&cgArray[0].holdBreathInTime);
     if (!memFile->archiveProc)
         MyAssertHandler(
             "c:\\trees\\cod3\\cod3src\\src\\cgame\\../universal/memfile.h",
@@ -3994,7 +4039,7 @@ void CG_ArchiveWeaponInfo(MemoryFile *memFile)
             0,
             "%s",
             "memFile->archiveProc");
-    memFile->archiveProc(memFile, 4, &cgArray[0].holdBreathDelay);
+    memFile->archiveProc(memFile, 4, (byte *)&cgArray[0].holdBreathDelay);
     if (!memFile->archiveProc)
         MyAssertHandler(
             "c:\\trees\\cod3\\cod3src\\src\\cgame\\../universal/memfile.h",
@@ -4002,7 +4047,7 @@ void CG_ArchiveWeaponInfo(MemoryFile *memFile)
             0,
             "%s",
             "memFile->archiveProc");
-    memFile->archiveProc(memFile, 4, &cgArray[0].holdBreathFrac);
+    memFile->archiveProc(memFile, 4, (byte *)&cgArray[0].holdBreathFrac);
     v8[0] = cgArray[0].holdBreathFrac;
     if ((LODWORD(cgArray[0].holdBreathFrac) & 0x7F800000) == 0x7F800000)
         MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\cgame\\../universal/memfile.h", 234, 0, "%s", "!IS_NAN(*value)");

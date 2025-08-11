@@ -512,9 +512,8 @@ void __cdecl CG_DrawVehicleTargets(int localClientNum, rectDef_s *rect, float *c
     const float *v11; // r6
     int v12; // r5
     int v13; // r4
-    double value; // fp4
     double v15; // fp0
-    double v16; // fp5
+    double angle; // fp5
     float v17; // [sp+8h] [-178h]
     float v18; // [sp+10h] [-170h]
     float v19; // [sp+18h] [-168h]
@@ -530,8 +529,8 @@ void __cdecl CG_DrawVehicleTargets(int localClientNum, rectDef_s *rect, float *c
     float v29; // [sp+80h] [-100h] BYREF
     float v30; // [sp+84h] [-FCh]
     float v31; // [sp+88h] [-F8h]
-    float v32; // [sp+90h] [-F0h] BYREF
-    float v33; // [sp+94h] [-ECh]
+    float screenpos[2]; // [sp+90h] [-F0h] BYREF
+    //float v33; // [sp+94h] [-ECh]
     char v34[120]; // [sp+A0h] [-E0h] BYREF
 
     if (localClientNum)
@@ -556,72 +555,57 @@ void __cdecl CG_DrawVehicleTargets(int localClientNum, rectDef_s *rect, float *c
             v29 = v29 - cgArray[0].refdef.vieworg[0];
             v30 = v30 - cgArray[0].refdef.vieworg[1];
             v31 = (float)v8 - cgArray[0].refdef.vieworg[2];
-            WorldDirToScreenPos(localClientNum, &v29, &v32);
-            v9 = ClampScreenPosToEdges_0(localClientNum, &v32);
+            WorldDirToScreenPos(localClientNum, &v29, screenpos);
+            v9 = ClampScreenPosToEdges_0(localClientNum, screenpos);
             if (v9 && (v13 = *((unsigned int *)v6 + 2), v13 != -1) || (v13 = *((unsigned int *)v6 + 1), v13 != -1))
             {
                 if (CG_ServerMaterialName(localClientNum, v13, v34, 0x40u))
                     Material_RegisterHandle(v34, 7);
             }
-            value = vehHudTargetSize->current.value;
             v15 = (float)(vehHudTargetSize->current.value * (float)0.5);
             if (v9 == CLIP_NONE || *((unsigned int *)v6 + 2) == -1)
             {
                 CL_DrawStretchPic(
                     &scrPlaceView[localClientNum],
-                    (float)(v32 - (float)v15),
-                    (float)(v33 - (float)v15),
-                    value,
-                    value,
-                    v13,
-                    v12,
-                    0.0,
-                    0.0,
-                    1.0,
-                    1.0,
-                    v11,
-                    v10,
+                    (float)(screenpos[0] - (float)v15),
+                    (float)(screenpos[1] - (float)v15),
+                    vehHudTargetSize->current.value,
+                    vehHudTargetSize->current.value,
                     rect->horzAlign,
                     rect->vertAlign,
-                    v17,
-                    v18,
-                    v19,
-                    v20,
-                    v21,
-                    v22,
-                    v23,
-                    v24,
-                    v25,
-                    v26,
-                    v27,
-                    v28);
+                    0.0,
+                    0.0,
+                    1.0,
+                    1.0,
+                    color,
+                    defaultMaterial); // KISAKTODO: args sus
             }
             else
             {
-                v16 = 0.0;
+                angle = 0.0;
                 switch (v9)
                 {
                 case CLIP_BOTTOM:
-                    v16 = 180.0;
+                    angle = 180.0;
                     break;
                 case CLIP_RIGHT:
-                    v16 = 90.0;
+                    angle = 90.0;
                     break;
                 case CLIP_LEFT:
-                    v16 = 270.0;
+                    angle = 270.0;
                     break;
                 }
                 CG_DrawRotatedPic(
                     &scrPlaceView[localClientNum],
-                    (float)(v32 - (float)v15),
-                    (float)(v33 - (float)v15),
-                    value,
-                    value,
-                    v13,
-                    v12,
-                    v16,
-                    v11,
-                    v10);
+                    (float)(screenpos[0] - (float)v15),
+                    (float)(screenpos[1] - (float)v15),
+                    vehHudTargetSize->current.value,
+                    vehHudTargetSize->current.value,
+                    rect->horzAlign,
+                    rect->vertAlign,
+                    angle,
+                    color,
+                    defaultMaterial); // KISAKTODO: sus args
             }
         }
         v6 += 7;
@@ -635,7 +619,7 @@ void __cdecl CG_DrawJavelinTargets(int localClientNum, rectDef_s *rect, float *c
     int weapLockedEntnum; // r4
     int v9; // r29
     targetInfo_t *v10; // r11
-    centity_s *Entity; // r30
+    centity_s *targetEnt; // r30
     float *offset; // r11
     double v13; // fp12
     double v14; // fp0
@@ -675,7 +659,7 @@ void __cdecl CG_DrawJavelinTargets(int localClientNum, rectDef_s *rect, float *c
     float v48; // [sp+80h] [-90h] BYREF
     float v49; // [sp+84h] [-8Ch]
     float v50; // [sp+88h] [-88h]
-    float v51[6]; // [sp+90h] [-80h] BYREF
+    float screenpos[6]; // [sp+90h] [-80h] BYREF
 
     if (localClientNum)
         MyAssertHandler(
@@ -723,78 +707,50 @@ void __cdecl CG_DrawJavelinTargets(int localClientNum, rectDef_s *rect, float *c
         }
         if (v9 != 32)
         {
-            Entity = CG_GetEntity(localClientNum, weapLockedEntnum);
-            if (!Entity)
+            targetEnt = CG_GetEntity(localClientNum, weapLockedEntnum);
+            if (!targetEnt)
                 MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\cgame\\cg_vehicle_hud.cpp", 283, 0, "%s", "targetEnt");
             offset = cgArray[0].targets[v9].offset;
             v13 = offset[1];
-            v14 = (float)(*offset + Entity->pose.origin[0]);
+            v14 = (float)(*offset + targetEnt->pose.origin[0]);
             v15 = offset[2];
-            v48 = *offset + Entity->pose.origin[0];
-            v49 = Entity->pose.origin[1] + (float)v13;
-            v16 = Entity->pose.origin[2];
+            v48 = *offset + targetEnt->pose.origin[0];
+            v49 = targetEnt->pose.origin[1] + (float)v13;
+            v16 = targetEnt->pose.origin[2];
             v48 = (float)v14 - cgArray[0].refdef.vieworg[0];
             v49 = v49 - cgArray[0].refdef.vieworg[1];
             v50 = (float)((float)v16 + (float)v15) - cgArray[0].refdef.vieworg[2];
-            WorldDirToScreenPos(localClientNum, &v48, v51);
-            if (ClampScreenPosToEdges_0(localClientNum, v51) == CLIP_NONE)
+            WorldDirToScreenPos(localClientNum, &v48, screenpos);
+            if (ClampScreenPosToEdges_0(localClientNum, screenpos) == CLIP_NONE)
             {
                 CL_DrawStretchPic(
                     &scrPlaceView[localClientNum],
-                    v51[0],
-                    -240.0,
-                    2.0,
-                    480.0,
-                    v19,
-                    v18,
-                    0.0,
-                    0.0,
-                    1.0,
-                    1.0,
-                    v17,
-                    (Material *)0x82000000,
+                    screenpos[0], // x
+                    -240.0, // y
+                    2.0, // w
+                    480.0, // height
                     rect->horzAlign,
                     rect->vertAlign,
-                    v24,
-                    v26,
-                    v28,
-                    v30,
-                    v32,
-                    v34,
-                    v36,
-                    v38,
-                    v40,
-                    v42,
-                    v44,
-                    v46);
+                    0.0,
+                    0.0,
+                    1.0,
+                    1.0,
+                    color,
+                    defaultMaterial); // KISAKTODO: again sus args
                 CL_DrawStretchPic(
                     &scrPlaceView[localClientNum],
-                    -320.0,
-                    v51[1],
-                    640.0,
-                    2.0,
-                    v23,
-                    v22,
-                    0.0,
-                    0.0,
-                    1.0,
-                    1.0,
-                    v21,
-                    v20,
+                    -320.0, // x
+                    screenpos[1], // y
+                    640.0, // w
+                    2.0, // h
                     rect->horzAlign,
                     rect->vertAlign,
-                    v25,
-                    v27,
-                    v29,
-                    v31,
-                    v33,
-                    v35,
-                    v37,
-                    v39,
-                    v41,
-                    v43,
-                    v45,
-                    v47);
+                    0.0,
+                    0.0,
+                    1.0,
+                    1.0,
+                    color,
+                    defaultMaterial); // KISAKTODO: ^^
             }
         }
     }
@@ -1035,45 +991,10 @@ int __cdecl CG_GetTargetPos(int localClientNum, int targetEntNum, float *outPos)
     return result;
 }
 
-// local variable allocation has failed, the output may be wrong!
-void __fastcall CG_DrawBouncingDiamond(int localClientNum, rectDef_s *rect, float *color)
+// aislop
+void CG_DrawBouncingDiamond(int localClientNum, rectDef_s *rect, float *color)
 {
-    double value; // fp29
-    int vehReticleLockOnEntNum; // r4
-    centity_s *Entity; // r30
-    double v8; // fp13
-    __int64 v9; // r10 OVERLAPPED
-    double v10; // fp28
-    int v11; // r11
-    double v16; // fp0
-    double v21; // fp12
-    double v22; // fp11
-    double v23; // fp13
-    double v24; // fp0
-    double v25; // fp13
-    double v26; // fp0
-    unsigned __int8 v27; // r11
-    double v28; // fp31
-    double v29; // fp30
-    double v31; // fp29
-    long double v32; // fp2
-    long double v33; // fp2
-    double v34; // fp0
-    double v35; // fp29
-    long double v36; // fp2
-    double v37; // fp10
-    double v38; // fp11
-    double v39; // fp12
-    double v40; // fp9
-    double v41; // fp11
-    double v42; // fp10
-    float v43[2]; // [sp+80h] [-90h] BYREF
-    __int64 v44; // [sp+88h] [-88h]
-    float v46; // [sp+98h] [-78h] BYREF
-    float v47; // [sp+9Ch] [-74h]
-    float v48; // [sp+A0h] [-70h]
-
-    if (localClientNum)
+    if (localClientNum != 0) {
         MyAssertHandler(
             "c:\\trees\\cod3\\cod3src\\src\\cgame\\cg_local.h",
             910,
@@ -1081,152 +1002,124 @@ void __fastcall CG_DrawBouncingDiamond(int localClientNum, rectDef_s *rect, floa
             "%s\n\t(localClientNum) = %i",
             "(localClientNum == 0)",
             localClientNum);
-    value = vehHudReticleBouncingRadius->current.value;
-    vehReticleLockOnEntNum = cgArray[0].vehReticleLockOnEntNum;
-    if (cgArray[0].vehReticleLockOnEntNum == 2175)
-    {
-        v10 = 0.0;
-        v21 = 0.0;
-        v22 = 0.0;
     }
-    else
-    {
-        if (CG_GetTargetPos(localClientNum, cgArray[0].vehReticleLockOnEntNum, &v46))
-        {
-            v8 = v48;
-        }
-        else
-        {
-            Entity = CG_GetEntity(localClientNum, cgArray[0].vehReticleLockOnEntNum);
-            if (!Entity)
+
+    float bounceRadius = vehHudReticleBouncingRadius->current.value;
+    int targetEntNum = cgArray[0].vehReticleLockOnEntNum;
+
+    float screenX = 0.0f, screenY = 0.0f;
+
+    if (targetEntNum != 2175) {
+        float worldPos[3];
+
+        if (!CG_GetTargetPos(localClientNum, targetEntNum, &worldPos[0])) {
+            centity_s *ent = CG_GetEntity(localClientNum, targetEntNum);
+            if (!ent) {
                 MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\cgame\\cg_vehicle_hud.cpp", 442, 0, "%s", "targetEnt");
-            v46 = Entity->pose.origin[0];
-            v47 = Entity->pose.origin[1];
-            v8 = Entity->pose.origin[2];
-        }
-        v46 = v46 - cgArray[0].refdef.vieworg[0];
-        v47 = v47 - cgArray[0].refdef.vieworg[1];
-        v48 = (float)v8 - cgArray[0].refdef.vieworg[2];
-        WorldDirToScreenPos(localClientNum, &v46, v43);
-        LODWORD(v9) = cgArray[0].vehReticleLockOnDuration;
-        v10 = 0.0;
-        if (cgArray[0].vehReticleLockOnDuration)
-        {
-            HIDWORD(v9) = cgArray[0].time;
-            v44 = v9;
-            v11 = cgArray[0].time - cgArray[0].vehReticleLockOnStartTime;
-            v45 = *(__int64 *)((char *)&v9 - 4);
-            _FP13 = (float)((float)((float)*(__int64 *)((char *)&v9 - 4) / (float)v9) - (float)1.0);
-            _FP12 = -(float)((float)*(__int64 *)((char *)&v9 - 4) / (float)v9);
-            __asm
-            {
-                fsel      f0, f13, f27, f0
-                fsel      f13, f12, f28, f0
             }
+            worldPos[0] = ent->pose.origin[0];
+            worldPos[1] = ent->pose.origin[1];
+            worldPos[2] = ent->pose.origin[2];
         }
-        else
-        {
-            _FP13 = 1.0;
+
+        // Convert to view space
+        worldPos[0] -= cgArray[0].refdef.vieworg[0];
+        worldPos[1] -= cgArray[0].refdef.vieworg[1];
+        worldPos[2] -= cgArray[0].refdef.vieworg[2];
+
+        float screenPos[2];
+        WorldDirToScreenPos(localClientNum, worldPos, screenPos);
+
+        float lockDuration = (float)cgArray[0].vehReticleLockOnDuration;
+        float interp = 1.0f;
+
+        if (lockDuration > 0.0f) {
+            int timeElapsed = cgArray[0].time - cgArray[0].vehReticleLockOnStartTime;
+            float progress = (float)timeElapsed / lockDuration;
+            interp = (progress > 1.0f) ? 1.0f : -progress + 1.0f;
         }
-        value = (float)-(float)((float)((float)_FP13 * (float)value) - (float)value);
-        v16 = (float)((float)_FP13 * (float)2.0);
-        _FP13 = (float)((float)((float)_FP13 * (float)2.0) - (float)1.0);
-        _FP10 = -v16;
-        __asm
-        {
-            fsel      f0, f13, f27, f0
-            fsel      f0, f10, f28, f0
-        }
-        v21 = (float)(v43[0] * (float)_FP0);
-        v22 = (float)(v43[1] * (float)_FP0);
+
+        // Apply interpolated position
+        float bounceScale = (1.0f - interp) * bounceRadius;
+
+        screenX = screenPos[0] * bounceScale;
+        screenY = screenPos[1] * bounceScale;
     }
-    if (value == v10)
-    {
-        v23 = v21;
-        v24 = v22;
-        cgArray[0].vehReticleOffset[0] = v21;
+
+    float x, y;
+    if (bounceRadius == 0.0f) {
+        x = screenX;
+        y = screenY;
+        cgArray[0].vehReticleOffset[0] = x;
     }
-    else
-    {
-        v25 = cgArray[0].vehReticleVel[0];
-        v26 = cgArray[0].vehReticleVel[1];
-        if (cgArray[0].vehReticleVel[0] != v10 || (v27 = 1, v26 != v10))
-            v27 = 0;
-        v28 = (float)(cgArray[0].vehReticleOffset[1] - (float)v22);
-        v29 = (float)(cgArray[0].vehReticleOffset[0] - (float)v21);
-        HIDWORD(v30) = v27;
-        if (v27
-            || (float)((float)((float)(cgArray[0].vehReticleOffset[1] - (float)v22)
-                * (float)(cgArray[0].vehReticleOffset[1] - (float)v22))
-                + (float)((float)(cgArray[0].vehReticleOffset[0] - (float)v21)
-                    * (float)(cgArray[0].vehReticleOffset[0] - (float)v21))) > (double)(float)((float)value
-                        * (float)value))
-        {
-            v31 = (float)((float)(random() * (float)360.0) * (float)0.017453292);
-            *(double *)&v32 = v31;
-            v33 = sin(v32);
-            v34 = *(double *)&v33;
-            *(double *)&v33 = v31;
-            v35 = (float)v34;
-            v36 = cos(v33);
-            cgArray[0].vehReticleVel[0] = v35;
-            cgArray[0].vehReticleVel[1] = *(double *)&v36;
-            v26 = (float)(vehHudReticleBouncingSpeed->current.value * (float)*(double *)&v36);
-            v25 = (float)(vehHudReticleBouncingSpeed->current.value * (float)v35);
-            v37 = -v26;
-            v38 = v25;
-            cgArray[0].vehReticleVel[0] = vehHudReticleBouncingSpeed->current.value * (float)v35;
-            cgArray[0].vehReticleVel[1] = v26;
-            v39 = (float)((float)((float)v28 * (float)v26) + (float)((float)v29 * (float)v25));
-            v40 = (float)((float)((float)v28 * (float)v25) + (float)((float)v29 * (float)-v26));
-            if (v40 < v39)
-            {
-                v25 = -v26;
-                v26 = v38;
-                v39 = v40;
-                cgArray[0].vehReticleVel[0] = v37;
-                cgArray[0].vehReticleVel[1] = v38;
+    else {
+        float offsetX = cgArray[0].vehReticleOffset[0];
+        float offsetY = cgArray[0].vehReticleOffset[1];
+        float velX = cgArray[0].vehReticleVel[0];
+        float velY = cgArray[0].vehReticleVel[1];
+
+        bool reset = (velX == 0.0f && velY == 0.0f);
+
+        float dx = offsetX - screenX;
+        float dy = offsetY - screenY;
+        float distSqr = dx * dx + dy * dy;
+
+        if (reset || distSqr > bounceRadius * bounceRadius) {
+            float angle = random() * 360.0f * (float)(M_PI / 180.0);
+            float sinA = sinf(angle);
+            float cosA = cosf(angle);
+
+            velX = vehHudReticleBouncingSpeed->current.value * sinA;
+            velY = vehHudReticleBouncingSpeed->current.value * cosA;
+
+            float dot1 = dx * velY + dy * velX;
+            float dot2 = dx * velX - dy * velY;
+
+            if (dot2 < dot1) {
+                velX = -velY;
+                velY = velX;
             }
-            v41 = -v38;
-            if ((float)((float)((float)v28 * (float)v37) + (float)((float)v29 * (float)v41)) < v39)
-            {
-                v25 = v41;
-                v26 = v37;
-                v39 = (float)((float)((float)v28 * (float)v37) + (float)((float)v29 * (float)v41));
-                cgArray[0].vehReticleVel[0] = v41;
-                cgArray[0].vehReticleVel[1] = v37;
+
+            float negVelX = -velX;
+            float dot3 = dx * negVelX + dy * -velY;
+
+            if (dot3 < dot1) {
+                velX = -velY;
+                velY = -velX;
             }
-            v42 = -v37;
-            if ((float)((float)((float)v28 * (float)v41) + (float)((float)v29 * (float)v42)) < v39)
-            {
-                v25 = v42;
-                v26 = v41;
-                cgArray[0].vehReticleVel[0] = v42;
-                cgArray[0].vehReticleVel[1] = v41;
-            }
+
+            cgArray[0].vehReticleVel[0] = velX;
+            cgArray[0].vehReticleVel[1] = velY;
         }
-        //LODWORD(v30) = cgArray[0].frametime;
-        //v45 = v30;
-        v23 = (float)((float)((float)v25 * (float)((float)cgArray[0].frametime * (float)0.001)) + cgArray[0].vehReticleOffset[0]);
-        cgArray[0].vehReticleOffset[0] = v23;
-        v24 = (float)((float)((float)v26 * (float)((float)cgArray[0].frametime * (float)0.001)) + cgArray[0].vehReticleOffset[1]);
+
+        float deltaTime = cgArray[0].frametime * 0.001f;
+
+        x = offsetX + velX * deltaTime;
+        y = offsetY + velY * deltaTime;
+
+        cgArray[0].vehReticleOffset[0] = x;
+        cgArray[0].vehReticleOffset[1] = y;
     }
-    cgArray[0].vehReticleOffset[1] = v24;
+
+    float size = vehHudReticleBouncingDiamondSize->current.value;
+    float halfSize = size * 0.5f;
+
     CL_DrawStretchPic(
         &scrPlaceView[localClientNum],
-        (float)((float)v23 - (float)(vehHudReticleBouncingDiamondSize->current.value * 0.5f)),
-        (float)((float)v24 - (float)(vehHudReticleBouncingDiamondSize->current.value * 0.5f)),
-        vehHudReticleBouncingDiamondSize->current.value,
-        vehHudReticleBouncingDiamondSize->current.value,
-        vehReticleLockOnEntNum,
-        (int)color,
-        v10,
-        v10,
-        1.0,
-        1.0,
-        a4,
-        (Material *)(68 * localClientNum));
+        x - halfSize,
+        y - halfSize,
+        size,
+        size,
+        rect->horzAlign,
+        rect->vertAlign,
+        0.0f,
+        0.0f,
+        1.0f,
+        1.0f,
+        color,
+        cgMedia.vehBouncingDiamondReticle);
 }
+
 
 void __cdecl CG_DrawVehicleReticle(int localClientNum, rectDef_s *rect, float *color)
 {

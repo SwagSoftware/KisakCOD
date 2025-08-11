@@ -1,14 +1,19 @@
 #include "cg_local.h"
 #include "cg_public.h"
 
-#include <client_mp/client_mp.h>
-#include <cgame_mp/cg_local_mp.h>
-
 #include <qcommon/threads.h>
 #include <xanim/dobj.h>
 #include <DynEntity/DynEntity_client.h>
 #include <xanim/dobj_utils.h>
 #include <universal/profile.h>
+
+#ifdef KISAK_MP
+#include <client_mp/client_mp.h>
+#include <cgame_mp/cg_local_mp.h>
+#elif KISAK_SP
+#include "cg_main.h"
+#include "cg_pose.h"
+#endif
 
 bool __cdecl CG_IsEntityLinked(int32_t localClientNum, uint32_t entIndex)
 {

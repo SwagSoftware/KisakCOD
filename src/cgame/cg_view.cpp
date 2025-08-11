@@ -868,22 +868,22 @@ void __cdecl CG_CalcVehicleViewValues(int localClientNum)
             || cgArray[0].predictedPlayerState.viewlocked_entNum == ENTITYNUM_NONE)
         {
             if (cgArray[0].predictedPlayerState.vehicleType != 5)
-                MatrixTranspose((const float (*)[3])v18, cgArray[0].prevVehicleInvAxis);
+                MatrixTranspose((const mat3x3&)v18, cgArray[0].prevVehicleInvAxis);
         }
         else
         {
             if (cgArray[0].vehicleInitView)
             {
-                MatrixTranspose((const float (*)[3])v18, cgArray[0].prevVehicleInvAxis);
+                MatrixTranspose((const mat3x3 &)v18, cgArray[0].prevVehicleInvAxis);
                 cgArray[0].vehicleInitView = 0;
             }
-            MatrixMultiply(cgArray[0].prevVehicleInvAxis, (const float (*)[3])v18, (float (*)[3])v27);
-            MatrixTranspose((const float (*)[3])v18, cgArray[0].prevVehicleInvAxis);
+            MatrixMultiply(cgArray[0].prevVehicleInvAxis, (const mat3x3 &)v18, (mat3x3 &)v27);
+            MatrixTranspose((const mat3x3 &)v18, cgArray[0].prevVehicleInvAxis);
             if (cgArray[0].predictedPlayerState.vehicleType == 5)
             {
                 if ((cgArray[0].predictedPlayerState.eFlags & 0x40000) != 0)
                 {
-                    AxisToAngles((const float (*)[3])v18, &v16);
+                    AxisToAngles((const mat3x3 &)v18, &v16);
                     if (!cgArray[0].vehicleViewLocked)
                     {
                         cgArray[0].vehicleViewLockedAngles[0] = AngleSubtract(cgArray[0].predictedPlayerState.viewangles[0], v16);
@@ -895,7 +895,7 @@ void __cdecl CG_CalcVehicleViewValues(int localClientNum)
                     v19[0] = Entity->nextState.lerp.pos.trBase[0] - Entity->currentState.pos.trBase[0];
                     v19[1] = Entity->nextState.lerp.pos.trBase[1] - Entity->currentState.pos.trBase[1];
                     v19[2] = Entity->nextState.lerp.pos.trBase[2] - Entity->currentState.pos.trBase[2];
-                    MatrixTransposeTransformVector(v19, (const float (*)[3])v23, v29);
+                    MatrixTransposeTransformVector(v19, (const mat3x3 &)v23, v29);
                     v6 = Entity->pose.angles[0];
                     v7 = Entity->pose.angles[2];
                     LODWORD(v8) = cgArray[0].frametime;
@@ -924,10 +924,10 @@ void __cdecl CG_CalcVehicleViewValues(int localClientNum)
                     v14 = cgArray[0].predictedPlayerState.viewangles[1] - cgArray[0].predictedPlayerState.delta_angles[1];
                     v15 = cgArray[0].predictedPlayerState.viewangles[2] - cgArray[0].predictedPlayerState.delta_angles[2];
                     CL_SetViewAngles(localClientNum, &v13);
-                    MatrixTranspose((const float (*)[3])v18, v30);
+                    MatrixTranspose((const mat3x3 &)v18, (mat3x3 &)v30);
                     AnglesToAxis(cgArray[0].predictedPlayerState.viewangles, v26);
-                    MatrixMultiply(v26, v30, v25);
-                    AxisToAngles(v25, &v13);
+                    MatrixMultiply((const mat3x3 &)v26, (const mat3x3 &)v30, (mat3x3 &)v25);
+                    AxisToAngles((const mat3x3 &)v25, &v13);
                     cgArray[0].predictedPlayerState.viewangles[2] = -v15;
                     return;
                 }
@@ -939,10 +939,10 @@ void __cdecl CG_CalcVehicleViewValues(int localClientNum)
             v20[3] = 1.0;
             AxisToQuat((const float (*)[3])v27, v21);
             QuatLerp(v20, v21, cg_viewVehicleInfluence->current.value, v11);
-            QuatToAxis(v21, (float (*)[3])v27);
+            QuatToAxis(v21, (mat3x3 &)v27);
             AnglesToAxis(cgArray[0].predictedPlayerState.viewangles, v26);
-            MatrixMultiply(v26, (const float (*)[3])v27, v25);
-            AxisToAngles(v25, &v13);
+            MatrixMultiply((const mat3x3 &)v26, (const mat3x3 &)v27, (mat3x3 &)v25);
+            AxisToAngles((const mat3x3 &)v25, &v13);
             cgArray[0].predictedPlayerState.viewangles[0] = v13;
             if (cgArray[0].predictedPlayerState.vehicleType == 5 || (cgArray[0].predictedPlayerState.eFlags & 0x40000) != 0)
             {
@@ -957,8 +957,8 @@ void __cdecl CG_CalcVehicleViewValues(int localClientNum)
             v14 = (float)v12 - cgArray[0].predictedPlayerState.delta_angles[1];
             v15 = cgArray[0].predictedPlayerState.viewangles[2] - cgArray[0].predictedPlayerState.delta_angles[2];
             CL_SetViewAngles(localClientNum, &v13);
-            MatrixMultiply(v26, cgArray[0].prevVehicleInvAxis, v25);
-            AxisToAngles(v25, &v13);
+            MatrixMultiply((const mat3x3 &)v26, cgArray[0].prevVehicleInvAxis, (mat3x3 &)v25);
+            AxisToAngles((const mat3x3 &)v25, &v13);
             cgArray[0].predictedPlayerState.viewangles[2] = -v15;
         }
     }
@@ -1079,7 +1079,7 @@ void __cdecl CG_ApplyViewAnimation(int localClientNum)
                 cgArray[0].viewModelAxis[3][0] = cgArray[0].refdef.vieworg[0];
                 cgArray[0].viewModelAxis[3][1] = cgArray[0].refdef.vieworg[1];
                 cgArray[0].viewModelAxis[3][2] = cgArray[0].refdef.vieworg[2];
-                CG_UpdateViewModelPose(LocalClientWeaponInfo->viewModelDObj);
+                CG_UpdateViewModelPose(LocalClientWeaponInfo->viewModelDObj, 0);
                 if (CG_DObjGetWorldTagMatrix(
                     &cgArray[0].viewModelPose,
                     *p_viewModelDObj,
@@ -1472,7 +1472,7 @@ void __cdecl UpdateTurretScopeZoom(cg_s *cgameGlob)
 {
     unsigned int v2; // r3
     int CurrentCmdNumber; // r3
-    __int128 v4; // r11
+    int v4[4]; // r11
     double value; // fp31
     const dvar_s *v6; // r3
     double v7; // fp0
@@ -1488,14 +1488,14 @@ void __cdecl UpdateTurretScopeZoom(cg_s *cgameGlob)
         {
             CurrentCmdNumber = CL_GetCurrentCmdNumber(cgameGlob->localClientNum);
             CL_GetUserCmd(cgameGlob->localClientNum, CurrentCmdNumber, &v11);
-            DWORD1(v4) = (unsigned __int8)v11.forwardmove;
-            DWORD2(v4) = cgameGlob->frametime;
+            v4[1] = (unsigned __int8)v11.forwardmove;
+            v4[2] = cgameGlob->frametime;
             value = turretScopeZoom->current.value;
-            LODWORD(v4) = v11.forwardmove;
+            v4[3] = v11.forwardmove;
             Dvar_SetFloat(
                 turretScopeZoom,
-                (float)((float)((float)((float)((float)*(__int64 *)((char *)&v4 + 4) * (float)0.001)
-                    * (float)((float)(__int64)v4 * (float)-0.0078740157))
+                (float)((float)((float)((float)((float)*(__int64 *)&v4[1] * (float)0.001)
+                    * (float)((float)*(__int64 *)&v4[2] * (float)-0.0078740157))
                     * turretScopeZoomRate->current.value)
                     + turretScopeZoom->current.value));
             v6 = turretScopeZoom;
@@ -1506,7 +1506,7 @@ void __cdecl UpdateTurretScopeZoom(cg_s *cgameGlob)
                 Dvar_SetFloat(turretScopeZoom, v8);
                 v6 = turretScopeZoom;
             }
-            if (fabs((float)(v6->current.value - (float)value)) > 0.0)
+            if (fabsf((float)(v6->current.value - (float)value)) > 0.0f)
             {
                 v9 = CG_PlayerTurretWeaponIdx(cgameGlob->localClientNum);
                 fireStopSoundPlayer = BG_GetWeaponDef(v9)->fireStopSoundPlayer;
