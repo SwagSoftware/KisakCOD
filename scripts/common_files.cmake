@@ -377,7 +377,7 @@ set(QCOMMON
     "${SRC_DIR}/qcommon/cmd.cpp"
     "${SRC_DIR}/qcommon/cmd.h"
     "${SRC_DIR}/qcommon/cm_load.cpp"
-    "${SRC_DIR}/qcommon/cm_load_obj.cpp"
+#    "${SRC_DIR}/qcommon/cm_load_obj.cpp"
     "${SRC_DIR}/qcommon/cm_mesh.cpp"
     "${SRC_DIR}/qcommon/cm_showcollision.cpp"
     "${SRC_DIR}/qcommon/cm_staticmodel.cpp"

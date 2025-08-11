@@ -512,10 +512,12 @@ void __cdecl Com_ShutdownInternal(const char* finalmsg)
 
     for (localClientNum = 0; localClientNum < 1; ++localClientNum)
         CL_Disconnect(localClientNum);
-    KISAK_NULLSUB();
+//    KISAK_NULLSUB();
     CL_ShutdownAll();
     CL_ShutdownDemo();
+#ifdef KISAK_MP
     FakeLag_Shutdown();
+#endif
     SV_Shutdown(finalmsg);
     Com_Restart();
 }
@@ -678,7 +680,11 @@ void __cdecl  Com_Quit_f()
         Sys_DestroySplashWindow();
         for (localClientNum = 0; localClientNum < 1; ++localClientNum)
             CL_Shutdown(localClientNum);
+#ifdef KISAK_MP
         FakeLag_Shutdown();
+#endif
+        //LB_EndOngoingTasks();
+        // KISAKTODO: could be missing more here for SP
         SV_Shutdown("EXE_SERVERQUIT");
         CL_ShutdownRef();
         Com_Close();
@@ -1231,7 +1237,9 @@ void __cdecl Com_Init_Try_Block_Function(char* commandLine)
     Dvar_SetString(version, s);
     shortversion = Dvar_RegisterString("shortversion", "1.0", DVAR_ROM | DVAR_SERVERINFO, "Short game version");
     Sys_Init();
+#ifdef KISAK_MP
     Netchan_Init(__rdtsc());
+#endif
     Scr_InitVariables();
     Scr_Init();
     Com_SetScriptSettings();
@@ -2065,9 +2073,11 @@ void __cdecl Com_Restart()
         DB_ReleaseXAssets();
     Com_SetScriptSettings();
     com_fixedConsolePosition = 0;
+#ifdef KISAK_MP
     if (Sys_IsRemoteDebugClient())
         NET_RestartDebug();
     FakeLag_Init();
+#endif
     XAnimInit();
     DObjInit();
     Com_InitDObj();

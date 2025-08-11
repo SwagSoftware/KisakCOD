@@ -11,7 +11,6 @@
 #include <universal/com_files.h>
 #include <script/scr_debugger.h>
 #include <server/sv_game.h>
-#include <server_mp/server_mp.h>
 #include <universal/profile.h>
 
 static cmd_function_s* cmd_functions = NULL;

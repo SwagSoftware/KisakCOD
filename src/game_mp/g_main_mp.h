@@ -1,5 +1,9 @@
 #pragma once
 
+#ifdef KISAK_SP
+#error This file is for Multi-Player only
+#endif
+
 #include <qcommon/qcommon.h>
 #include <universal/q_parse.h>
 

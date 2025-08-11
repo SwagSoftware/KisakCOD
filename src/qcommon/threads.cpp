@@ -4,10 +4,15 @@
 
 #include <universal/assertive.h>
 
-#include <client_mp/client_mp.h>
 #include <gfx_d3d/rb_drawprofile.h>
 #include <gfx_d3d/r_init.h>
 #include <win32/win_local.h>
+
+#ifdef KISAK_MP
+#include <client_mp/client_mp.h>
+#elif KISAK_SP
+#include <client/client.h>
+#endif
 
 unsigned int Win_InitThreads();
 

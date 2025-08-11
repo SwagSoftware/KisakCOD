@@ -618,7 +618,8 @@ float __cdecl MSG_ReadAngle16(msg_t *msg)
     }
     else
     {
-        LOWORD(v1) = *(_WORD *)&msg->data[v1];
+        //LOWORD(v1) = *(_WORD *)&msg->data[v1];
+        v1 = (v1 & 0xFFFF0000) | (*(_WORD *)&msg->data[v1]);
         msg->readcount = HIDWORD(v1);
         LODWORD(v1) = (__int16)v1;
     }
@@ -2244,7 +2245,8 @@ void __cdecl MSG_ReadDeltaPlayerstate(msg_t *msg, playerState_s *to)
                 }
                 else
                 {
-                    LOWORD(v31) = *(_WORD *)&msg->data[v29];
+                    //LOWORD(v31) = *(_WORD *)&msg->data[v29];
+                    v31 = (v31 & 0xFFFF0000) | (*(_WORD *)&msg->data[v29]);
                     msg->readcount = v30;
                     v31 = (__int16)v31;
                 }
@@ -2261,7 +2263,8 @@ void __cdecl MSG_ReadDeltaPlayerstate(msg_t *msg, playerState_s *to)
                 }
                 else
                 {
-                    LOWORD(v34) = *(_WORD *)&msg->data[v32];
+                    //LOWORD(v34) = *(_WORD *)&msg->data[v32];
+                    v34 = (v34 & 0xFFFF0000) | (*(_WORD *)&msg->data[v32]);
                     msg->readcount = v33;
                     v34 = (__int16)v34;
                 }
@@ -2278,7 +2281,8 @@ void __cdecl MSG_ReadDeltaPlayerstate(msg_t *msg, playerState_s *to)
                 }
                 else
                 {
-                    LOWORD(v37) = *(_WORD *)&msg->data[v35];
+                    //LOWORD(v37) = *(_WORD *)&msg->data[v35];
+                    v37 = (v37 & 0xFFFF0000) | (*(_WORD *)&msg->data[v35]);
                     msg->readcount = v36;
                     v37 = (__int16)v37;
                 }
@@ -2295,7 +2299,8 @@ void __cdecl MSG_ReadDeltaPlayerstate(msg_t *msg, playerState_s *to)
                 }
                 else
                 {
-                    LOWORD(v40) = *(_WORD *)&msg->data[v38];
+                    //LOWORD(v40) = *(_WORD *)&msg->data[v38];
+                    v40 = (v40 & 0xFFFF0000) | (*(_WORD *)&msg->data[v38]);
                     msg->readcount = v39;
                     v40 = (__int16)v40;
                 }
@@ -2339,7 +2344,8 @@ void __cdecl MSG_ReadDeltaPlayerstate(msg_t *msg, playerState_s *to)
                         }
                         else
                         {
-                            LOWORD(v49) = *(_WORD *)&msg->data[v47];
+                            //LOWORD(v49) = *(_WORD *)&msg->data[v47];
+                            v49 = (v49 & 0xFFFF0000) | (*(_WORD *)&msg->data[v47]);
                             msg->readcount = v48;
                             v49 = (__int16)v49;
                         }
@@ -2356,7 +2362,8 @@ void __cdecl MSG_ReadDeltaPlayerstate(msg_t *msg, playerState_s *to)
                         }
                         else
                         {
-                            LOWORD(v52) = *(_WORD *)&msg->data[v50];
+                            //LOWORD(v52) = *(_WORD *)&msg->data[v50];
+                            v52 = (v52 & 0xFFFF0000) | (*(_WORD *)&msg->data[v50]);
                             msg->readcount = v51;
                             v52 = (__int16)v52;
                         }
@@ -2373,7 +2380,8 @@ void __cdecl MSG_ReadDeltaPlayerstate(msg_t *msg, playerState_s *to)
                         }
                         else
                         {
-                            LOWORD(v55) = *(_WORD *)&msg->data[v53];
+                            //LOWORD(v55) = *(_WORD *)&msg->data[v53];
+                            v55 = (v55 & 0xFFFF0000) | (*(_WORD *)&msg->data[v53]);
                             msg->readcount = v54;
                             v55 = (__int16)v55;
                         }
@@ -2390,7 +2398,8 @@ void __cdecl MSG_ReadDeltaPlayerstate(msg_t *msg, playerState_s *to)
                         }
                         else
                         {
-                            LOWORD(v58) = *(_WORD *)&msg->data[v56];
+                            //LOWORD(v58) = *(_WORD *)&msg->data[v56];
+                            v58 = (v58 & 0xFFFF0000) | (*(_WORD *)&msg->data[v56]);
                             msg->readcount = v57;
                             v58 = (__int16)v58;
                         }
@@ -2432,7 +2441,8 @@ void __cdecl MSG_ReadDeltaPlayerstate(msg_t *msg, playerState_s *to)
                     }
                     else
                     {
-                        LOWORD(v67) = *(_WORD *)&msg->data[v65];
+                        //LOWORD(v67) = *(_WORD *)&msg->data[v65];
+                        v67 = (v67 & 0xFFFF0000) | (*(_WORD *)&msg->data[v65]);
                         msg->readcount = v66;
                         v67 = (__int16)v67;
                     }
@@ -2449,7 +2459,8 @@ void __cdecl MSG_ReadDeltaPlayerstate(msg_t *msg, playerState_s *to)
                     }
                     else
                     {
-                        LOWORD(v70) = *(_WORD *)&msg->data[v68];
+                        //LOWORD(v70) = *(_WORD *)&msg->data[v68];
+                        v70 = (v70 & 0xFFFF0000) | (*(_WORD *)&msg->data[v68]);
                         msg->readcount = v69;
                         v70 = (__int16)v70;
                     }
@@ -2466,7 +2477,8 @@ void __cdecl MSG_ReadDeltaPlayerstate(msg_t *msg, playerState_s *to)
                     }
                     else
                     {
-                        LOWORD(v73) = *(_WORD *)&msg->data[v71];
+                        //LOWORD(v73) = *(_WORD *)&msg->data[v71];
+                        v73 = (v73 & 0xFFFF0000) | (*(_WORD *)&msg->data[v71]);
                         msg->readcount = v72;
                         v73 = (__int16)v73;
                     }
@@ -2483,7 +2495,8 @@ void __cdecl MSG_ReadDeltaPlayerstate(msg_t *msg, playerState_s *to)
                     }
                     else
                     {
-                        LOWORD(v76) = *(_WORD *)&msg->data[v74];
+                        //LOWORD(v76) = *(_WORD *)&msg->data[v74];
+                        v76 = (v76 & 0xFFFF0000) | (*(_WORD *)&msg->data[v74]);
                         msg->readcount = v75;
                         v76 = (__int16)v76;
                     }

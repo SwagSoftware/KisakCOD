@@ -1,6 +1,5 @@
 #include "qcommon.h"
 #include "mem_track.h"
-#include <server_mp/server_mp.h>
 #include <server/sv_world.h>
 #include <xanim/xmodel.h>
 #include <server/sv_game.h>
@@ -8,6 +7,8 @@
 
 #include <bgame/bg_public.h>
 #include "cmd.h"
+
+#include <xanim/xanim.h>
 
 struct worldContents_s // sizeof=0x10
 {                                       // ...

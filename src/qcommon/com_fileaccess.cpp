@@ -1,4 +1,5 @@
 #include "com_fileaccess.h"
+
 #include "qcommon.h"
 
 int __cdecl FS_FileGetFileSize(FILE *file)
@@ -135,6 +136,7 @@ int __cdecl FileWrapper_GetFileSize(FILE *h)
 }
 
 #ifdef KISAK_SP
+#include <Windows.h>
 #include <fileapi.h>
 unsigned int FS_FileTell(FILE *file)
 {
@@ -142,7 +144,9 @@ unsigned int FS_FileTell(FILE *file)
 
     ProfLoad_BeginTrackedValue(MAP_PROFILE_FILE_SEEK);
     v2.QuadPart = 0;
-    SetFilePointerEx(0, (LARGE_INTEGER)0, &v2, 1u);
+    LARGE_INTEGER move;
+    move.QuadPart = 0;
+    SetFilePointerEx(0, move, &v2, 1u);
     ProfLoad_EndTrackedValue(MAP_PROFILE_FILE_SEEK);
     return v2.LowPart;
 }

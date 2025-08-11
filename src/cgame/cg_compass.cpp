@@ -2089,7 +2089,7 @@ void CG_CompassDrawPlayerPointers_SP(
     objectiveInfo_t *objectives; // r25
     float *v18; // r28
     int v19; // r18
-    double x; // fp0
+    //double x; // fp0
     double v21; // fp13
     double v22; // fp0
     double value; // fp13
