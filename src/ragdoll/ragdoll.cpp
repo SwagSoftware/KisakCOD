@@ -3,9 +3,15 @@
 #include <qcommon/mem_track.h>
 #include <cgame/cg_local.h>
 #include <client/client.h>
+
+#include <qcommon/cmd.h>
+
+#ifdef KISAK_MP
 #include <cgame_mp/cg_local_mp.h>
 #include <client_mp/client_mp.h>
-#include <qcommon/cmd.h>
+#elif KISAK_SP
+#include <cgame/cg_ents.h>
+#endif
 
 const dvar_t *ragdoll_self_collision_scale;
 const dvar_t *ragdoll_bullet_force;

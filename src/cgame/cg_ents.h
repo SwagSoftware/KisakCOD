@@ -44,7 +44,7 @@ void __cdecl CG_AdjustPositionForMover(
     float *outDeltaAngles);
 void __cdecl CG_SetFrameInterpolation(int localClientNum);
 void __cdecl CG_DObjUpdateInfo(const cg_s *cgameGlob, DObj_s *obj, bool notify);
-centity_s *__cdecl CG_GetPose(int localClientNum, int handle);
+struct cpose_t *__cdecl CG_GetPose(int localClientNum, int handle);
 void __cdecl CG_Vehicle_PreControllers(int localClientNum, const DObj_s *obj, centity_s *cent);
 void __cdecl CG_Vehicle(int localClientNum, centity_s *cent);
 void __cdecl CG_SoundBlend(int localClientNum, centity_s *cent);

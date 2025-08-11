@@ -2,9 +2,16 @@
 #include <xanim/dobj.h>
 #include <physics/phys_local.h>
 #include <qcommon/threads.h>
-#include <cgame_mp/cg_local_mp.h>
 #include <xanim/dobj_utils.h>
 #include <universal/profile.h>
+
+#ifdef KISAK_MP
+#include <cgame_mp/cg_local_mp.h>
+#elif KISAK_SP
+#include <cgame/cg_ents.h>
+#include <cgame/cg_main.h>
+#endif
+
 
 
 //Line 53622:  0006 : 03066908       int ragdollTime          85816908     ragdoll_update.obj

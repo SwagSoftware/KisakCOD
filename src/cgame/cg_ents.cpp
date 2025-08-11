@@ -981,12 +981,12 @@ void __cdecl CG_DObjUpdateInfo(const cg_s *cgameGlob, DObj_s *obj, bool notify)
     DObjUpdateClientInfo(obj, (float)((float)v3 * (float)0.001), (bool)obj);
 }
 
-centity_s *__cdecl CG_GetPose(int localClientNum, int handle)
+cpose_t *__cdecl CG_GetPose(int localClientNum, int handle)
 {
     iassert((handle >= 0 && handle < (((MAX_GENTITIES)) + 128)));
 
     if (handle < MAX_GENTITIES)
-        return CG_GetEntity(localClientNum, handle);
+        return &CG_GetEntity(localClientNum, handle)->pose;
 
     iassert((handle >= ((MAX_GENTITIES)) && handle - ((MAX_GENTITIES)) < 128));
 
@@ -998,7 +998,7 @@ centity_s *__cdecl CG_GetPose(int localClientNum, int handle)
             "%s\n\t(localClientNum) = %i",
             "(localClientNum == 0)",
             localClientNum);
-    return (centity_s *)&cgArray[0].viewModelPose;
+    return &cgArray[0].viewModelPose;
 }
 
 unsigned __int16 *g_wheelTags[6] =

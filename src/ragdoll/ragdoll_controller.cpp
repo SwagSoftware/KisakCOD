@@ -1,12 +1,17 @@
 #include "ragdoll.h"
 
-#include <client_mp/client_mp.h>
-
 #include <gfx_d3d/r_scene.h>
 
 #include <xanim/dobj.h>
 #include <xanim/dobj_utils.h>
+
+#ifdef KISAK_MP
+#include <client_mp/client_mp.h>
 #include <cgame_mp/cg_local_mp.h>
+#elif KISAK_SP
+#include <client/client.h>
+#include <cgame/cg_main.h>
+#endif
 
 RagdollBody *__cdecl Ragdoll_HandleBody(int ragdollHandle)
 {
@@ -67,19 +72,27 @@ void __cdecl Ragdoll_DoControllers(const cpose_t *pose, DObj_s *obj, int *partBi
     int i; // [esp+40h] [ebp-8h]
     Bone *bone; // [esp+44h] [ebp-4h]
 
-    if (!pose)
-        MyAssertHandler(".\\ragdoll\\ragdoll_controller.cpp", 69, 0, "%s", "pose");
-    if (!obj)
-        MyAssertHandler(".\\ragdoll\\ragdoll_controller.cpp", 70, 0, "%s", "obj");
+    iassert(pose);
+    iassert(obj);
+
+#ifdef KISAK_MP
     if (pose->isRagdoll && (pose->ragdollHandle || pose->killcamRagdollHandle))
+#elif KISAK_SP
+    if (pose->isRagdoll && pose->ragdollHandle)
+#endif
     {
+#ifdef KISAK_MP
         if (pose->killcamRagdollHandle)
-            v3 = Ragdoll_HandleBody(pose->killcamRagdollHandle);
+        {
+            body = Ragdoll_HandleBody(pose->killcamRagdollHandle);
+        }
         else
-            v3 = Ragdoll_HandleBody(pose->ragdollHandle);
-        body = v3;
-        if (!v3)
-            MyAssertHandler("c:\\trees\\cod3\\src\\ragdoll\\ragdoll.h", 271, 0, "%s", "body");
+#endif
+        {
+            body = Ragdoll_HandleBody(pose->ragdollHandle);
+        }
+
+        iassert(body);
         if (body->state >= BS_TUNNEL_TEST)
         {
             skel = DObjGetRotTransArray(obj);
