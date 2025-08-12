@@ -4483,5 +4483,9 @@ void __cdecl R_MakeDedicated(const GfxConfiguration *config)
 
 int R_IsHiDef()
 {
+#ifdef KISAK_SP
     return vidConfig.isHiDef;
+#elif KISAK_MP
+    return 1;
+#endif
 }

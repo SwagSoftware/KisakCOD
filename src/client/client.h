@@ -741,7 +741,7 @@ struct clientLogo_t
     Material *material[2];
 };
 
-struct __declspec(align(4)) vidConfig_t
+struct vidConfig_t
 {
     uint32_t sceneWidth;
     uint32_t sceneHeight;
