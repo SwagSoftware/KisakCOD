@@ -615,6 +615,7 @@ void __cdecl Material_PreventOverrideTechniqueGeneration();
 
 void __cdecl Material_UpdatePicmipAll();
 void __cdecl R_Cmd_ReloadMaterialTextures();
+Material *Material_RegisterRawImage(const char *name, int imageTrack);
 
 struct GfxMtlFeatureMap // sizeof=0x10
 {                                       // ...

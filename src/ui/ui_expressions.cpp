@@ -1,12 +1,20 @@
 #include <qcommon/qcommon.h>
 
 #include "ui_shared.h"
-#include <cgame_mp/cg_local_mp.h>
 #include <client/client.h>
 #include <stringed/stringed_hooks.h>
-#include <game_mp/g_main_mp.h>
+
 #include <win32/win_storage.h>
 #include <universal/profile.h>
+
+#ifdef KISAK_MP
+#include <cgame_mp/cg_local_mp.h>
+#include <game_mp/g_main_mp.h>
+#elif KISAK_SP
+#include <cgame/cg_main.h>
+#include "ui.h"
+#include <game/g_local.h>
+#endif
 
 int s_operatorPrecedence[81] =
 {
@@ -602,6 +610,7 @@ char __cdecl GetOperandList(OperandStack *dataStack, OperandList *list)
     }
 }
 
+#ifdef KISAK_MP
 BOOL __cdecl CG_IsIntermission(int localClientNum)
 {
     return CG_GetLocalClientGlobals(localClientNum)->nextSnap->ps.pm_type == PM_INTERMISSION;
@@ -614,6 +623,8 @@ void __cdecl GetIsIntermission(int localClientNum, Operand *result)
     if (uiscript_debug->current.integer)
         Com_Printf(13, "isIntermission() = %i\n", result->internals.intVal);
 }
+#endif
+
 
 void __cdecl RunOp(int localClientNum, OperatorStack *opStack, OperandStack *dataStack)
 {
@@ -992,10 +1003,12 @@ void __cdecl RunOp(int localClientNum, OperatorStack *opStack, OperandStack *dat
         GetHudFade(localClientNum, &data1, &operandResult);
         AddOperandToStack(dataStack, &operandResult);
         return;
+#ifdef KISAK_MP
     case OP_ISINTERMISSION:
         GetIsIntermission(localClientNum, &operandResult);
         AddOperandToStack(dataStack, &operandResult);
         return;
+#endif
     default:
         if (!alwaysfails)
         {
@@ -1263,7 +1276,9 @@ void __cdecl GetPlayerField(int localClientNum, Operand *source, Operand *result
     operandInternalDataUnion *OurClientScore; // [esp+0h] [ebp-10h]
     operandInternalDataUnion *v5; // [esp+4h] [ebp-Ch]
     operandInternalDataUnion *v6; // [esp+8h] [ebp-8h]
+#ifdef KISAK_MP
     const score_t *score; // [esp+Ch] [ebp-4h]
+#endif
 
     if (source->dataType == VAL_STRING)
     {
@@ -1291,11 +1306,15 @@ void __cdecl GetPlayerField(int localClientNum, Operand *source, Operand *result
                                         }
                                         else
                                         {
+#ifdef KISAK_MP
                                             OurClientScore = (operandInternalDataUnion *)UI_GetOurClientScore(localClientNum);
                                             if (OurClientScore)
                                                 result->internals = OurClientScore[2];
                                             else
+#endif
+                                            {
                                                 result->internals.intVal = 0;
+                                            }
                                             result->dataType = VAL_INT;
                                             if (uiscript_debug->current.integer)
                                                 Com_Printf(13, "player( %s ) = %i\n", source->internals.string, result->internals.intVal);
@@ -1303,11 +1322,17 @@ void __cdecl GetPlayerField(int localClientNum, Operand *source, Operand *result
                                     }
                                     else
                                     {
+#ifdef KISAK_MP
                                         v5 = (operandInternalDataUnion *)UI_GetOurClientScore(localClientNum);
                                         if (v5)
+                                        {
                                             result->internals = v5[5];
+                                        }
                                         else
+#endif
+                                        {
                                             result->internals.intVal = 0;
+                                        }
                                         result->dataType = VAL_INT;
                                         if (uiscript_debug->current.integer)
                                             Com_Printf(13, "player( %s ) = %i\n", source->internals.string, result->internals.intVal);
@@ -1315,11 +1340,17 @@ void __cdecl GetPlayerField(int localClientNum, Operand *source, Operand *result
                                 }
                                 else
                                 {
+#ifdef KISAK_MP
                                     v6 = (operandInternalDataUnion *)UI_GetOurClientScore(localClientNum);
                                     if (v6)
+                                    {
                                         result->internals = v6[3];
+                                    }
                                     else
+#endif
+                                    {
                                         result->internals.intVal = 0;
+                                    }
                                     result->dataType = VAL_INT;
                                     if (uiscript_debug->current.integer)
                                         Com_Printf(13, "player( %s ) = %i\n", source->internals.string, result->internals.intVal);
@@ -1327,11 +1358,17 @@ void __cdecl GetPlayerField(int localClientNum, Operand *source, Operand *result
                             }
                             else
                             {
+#ifdef KISAK_MP
                                 score = UI_GetOurClientScore(localClientNum);
                                 if (score)
+                                {
                                     result->internals.intVal = score->score;
+                                }
                                 else
+#endif
+                                {
                                     result->internals.intVal = 0;
+                                }
                                 result->dataType = VAL_INT;
                                 if (uiscript_debug->current.integer)
                                     Com_Printf(13, "player( %s ) = %i\n", source->internals.string, result->internals.intVal);
@@ -1388,6 +1425,7 @@ void __cdecl GetPlayerField(int localClientNum, Operand *source, Operand *result
 
 void __cdecl GetOtherTeamField(int localClientNum, Operand *fieldName, Operand *result)
 {
+#ifdef KISAK_MP
     team_t team; // [esp+8h] [ebp-8h]
     cg_s *cgameGlob;
 
@@ -1412,6 +1450,9 @@ void __cdecl GetOtherTeamField(int localClientNum, Operand *fieldName, Operand *
         GetFieldForTeam(localClientNum, TEAM_FREE, fieldName, result);
         break;
     }
+#elif KISAK_SP
+    GetFieldForTeam(localClientNum, TEAM_AXIS, fieldName, result);
+#endif
 }
 
 void __cdecl GetFieldForTeam(int localClientNum, team_t team, Operand *fieldName, Operand *result)
@@ -1440,7 +1481,11 @@ void __cdecl GetFieldForTeam(int localClientNum, team_t team, Operand *fieldName
         else
         {
             result->dataType = VAL_INT;
+#ifdef KISAK_MP
             result->internals.intVal = cgameGlob->teamScores[team];
+#elif KISAK_SP
+            result->internals.intVal = 0;
+#endif
             if (uiscript_debug->current.integer)
                 Com_Printf(13, "team(%i)( %s ) = %i\n", team, fieldName->internals.string, result->internals.intVal);
         }
@@ -1456,12 +1501,16 @@ void __cdecl GetFieldForTeam(int localClientNum, team_t team, Operand *fieldName
 
 void __cdecl GetTeamField(int localClientNum, Operand *fieldName, Operand *result)
 {
+#ifdef KISAK_MP
     cg_s *cgameGlob = CG_GetLocalClientGlobals(localClientNum);
 
     if (cgameGlob->bgs.clientinfo[cgameGlob->clientNum].infoValid)
         GetFieldForTeam(localClientNum, cgameGlob->bgs.clientinfo[cgameGlob->clientNum].team, fieldName, result);
     else
         GetFieldForTeam(localClientNum, TEAM_FREE, fieldName, result);
+#elif KISAK_SP
+    GetFieldForTeam(localClientNum, TEAM_ALLIES, fieldName, result);
+#endif
 }
 
 void __cdecl GetTeamMarinesField(int localClientNum, Operand *fieldName, Operand *result)
@@ -1501,8 +1550,12 @@ void __cdecl GetScoped(int localClientNum, Operand *result)
 void __cdecl InKillcam(int localClientNum, Operand *result)
 {
     result->dataType = VAL_INT;
+#ifdef KISAK_MP
     cg_s *cgameGlob = CG_GetLocalClientGlobals(localClientNum);
     result->internals.intVal = cgameGlob->inKillCam;
+#elif KISAK_SP
+    result->internals.intVal = 0;
+#endif
     if (uiscript_debug->current.integer)
         Com_Printf(13, "InKillcam() = %i\n", result->internals.intVal);
 }
@@ -1510,7 +1563,11 @@ void __cdecl InKillcam(int localClientNum, Operand *result)
 void __cdecl GetScoreboardVisible(int localClientNum, Operand *result)
 {
     result->dataType = VAL_INT;
+#ifdef KISAK_MP
     result->internals.intVal = CG_IsScoreboardDisplayed(localClientNum);
+#elif KISAK_SP
+    result->internals.intVal = 0;
+#endif
     if (uiscript_debug->current.integer)
         Com_Printf(13, "scoreboard_visible() = %i\n", result->internals.intVal);
 }
@@ -2032,6 +2089,7 @@ void __cdecl SecondsToCountdownDisplay(int localClientNum, int seconds, Operand 
 
 void __cdecl GetTimeLeft(int localClientNum, Operand *result)
 {
+#ifdef KISAK_MP
     operandInternalDataUnion timeLeft; // [esp+0h] [ebp-Ch]
     cgs_t *cgs;
     cg_s *cgameGlob;
@@ -2057,10 +2115,15 @@ void __cdecl GetTimeLeft(int localClientNum, Operand *result)
         timeLeft.intVal = 0;
     result->dataType = VAL_INT;
     result->internals = timeLeft;
+#elif KISAK_SP
+    result->dataType = VAL_INT;
+    result->internals.intVal = 0;
+#endif
 }
 
 void __cdecl GetGametypeObjective(int localClientNum, Operand *result)
 {
+#ifdef KISAK_MP
     result->dataType = VAL_STRING;
     if (localClientNum)
         MyAssertHandler(
@@ -2088,10 +2151,15 @@ void __cdecl GetGametypeObjective(int localClientNum, Operand *result)
     {
         result->internals.intVal = (int)"";
     }
+#elif KISAK_SP
+    result->dataType = VAL_STRING;
+    result->internals.intVal = (int)"";
+#endif
 }
 
 void __cdecl GetGametypeName(int localClientNum, Operand *result)
 {
+#ifdef KISAK_MP
     cgs_t *cgs;
 
     result->dataType = VAL_STRING;
@@ -2118,10 +2186,16 @@ void __cdecl GetGametypeName(int localClientNum, Operand *result)
     }
     if (!result->internals.intVal)
         result->internals.intVal = (int)"";
+
+#elif KISAK_SP
+    result->dataType = VAL_STRING;
+    result->internals.intVal = (int)"";
+#endif
 }
 
 void __cdecl GetGametypeInternal(int localClientNum, Operand *result)
 {
+#ifdef KISAK_MP
     cgs_t *cgs = CG_GetLocalClientStaticGlobals(localClientNum);
 
     result->dataType = VAL_STRING;
@@ -2139,10 +2213,16 @@ void __cdecl GetGametypeInternal(int localClientNum, Operand *result)
         result->internals.intVal = g_gametype->current.integer;
     if (!result->internals.intVal)
         result->internals.intVal = (int)"";
+
+#elif KISAK_SP
+    result->dataType = VAL_STRING;
+    result->internals.intVal = (int)"";
+#endif
 }
 
 void __cdecl GetScore(int localClientNum, Operand *source, Operand *result)
 {
+#ifdef KISAK_MP
     const char *NameForValueType; // eax
     const score_t *score; // [esp+0h] [ebp-4h]
 
@@ -2163,6 +2243,11 @@ void __cdecl GetScore(int localClientNum, Operand *source, Operand *result)
     {
         Com_PrintError(13, "Error: rank must be > 0: %i\n", source->internals.intVal);
     }
+
+#elif KISAK_SP
+    result->dataType = VAL_INT;
+    result->internals.intVal = 0;
+#endif
 }
 
 void __cdecl GetGameMessageWindowActive(int localClientNum, Operand *source, Operand *result)

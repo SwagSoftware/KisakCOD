@@ -397,6 +397,8 @@ void __cdecl R_MakeDedicated(const GfxConfiguration *config);
 
 void __cdecl R_UpdateGpuSyncType();
 
+int R_IsHiDef();
+
 extern DxGlobals dx;
 extern r_global_permanent_t rgp;
 extern int g_disableRendering;

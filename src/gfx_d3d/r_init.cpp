@@ -4480,3 +4480,8 @@ void __cdecl R_MakeDedicated(const GfxConfiguration *config)
     Dvar_MakeLatchedValueCurrent((dvar_s*)r_loadForRenderer);
     R_LoadGraphicsAssets();
 }
+
+int R_IsHiDef()
+{
+    return vidConfig.isHiDef;
+}

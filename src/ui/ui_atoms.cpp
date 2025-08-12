@@ -1,8 +1,13 @@
 #include "ui_shared.h"
-#include <client_mp/client_mp.h>
 
 #include <database/database.h>
 #include <universal/profile.h>
+
+#ifdef KISAK_MP
+#include <client_mp/client_mp.h>
+#elif KISAK_SP
+#include "ui.h"
+#endif
 
 double __cdecl UI_LoadBarProgress_LoadObj()
 {

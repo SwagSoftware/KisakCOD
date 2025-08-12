@@ -164,3 +164,6 @@ extern const dvar_t *ui_savegame;
 extern const dvar_t *ui_drawCrosshairNames;
 extern const dvar_t *ui_borderLowLightScale;
 extern const dvar_t *ui_campaign;
+
+extern sharedUiInfo_t sharedUiInfo;
+extern SaveTimeGlob ui_saveTimeGlob;

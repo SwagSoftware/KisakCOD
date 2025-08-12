@@ -1009,3 +1009,11 @@ void __cdecl R_Cmd_ReloadMaterialTextures()
         Com_Printf(8, "Usage: reloadmaterialtextures <materialname>\n");
     }
 }
+
+Material *Material_RegisterRawImage(const char *name, int imageTrack)
+{
+    iassert(name);
+    iassert(rgp.defaultMaterial);
+
+    return rgp.defaultMaterial;
+}

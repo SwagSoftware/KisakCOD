@@ -1,6 +1,5 @@
 #include "ui_shared.h"
 #include <universal/q_parse.h>
-#include <client_mp/client_mp.h>
 #include <client/client.h>
 #include <qcommon/cmd.h>
 #include <stringed/stringed_hooks.h>
@@ -11,6 +10,16 @@
 
 #include <algorithm>
 #include <universal/profile.h>
+
+#ifdef KISAK_MP
+#include <client_mp/client_mp.h>
+#elif KISAK_SP
+#include "ui.h"
+#include <game/savedevice.h>
+#include <game/savememory.h>
+#include <game/g_local.h>
+#endif
+
 
 int g_waitingForKey;
 int g_editingField;
@@ -25,51 +34,237 @@ struct commandDef_t // sizeof=0x8
     void(__cdecl *handler)(UiContext *, itemDef_s *, const char **); // ...
 };
 
+#ifdef KISAK_MP
 const commandDef_t commandList[42] =
 {
-  { "fadein", &Script_FadeIn },
-  { "fadeout", &Script_FadeOut },
-  { "show", &Script_Show },
-  { "hide", &Script_Hide },
-  { "showMenu", &Script_ShowMenu },
-  { "hideMenu", &Script_HideMenu },
-  { "setcolor", &Script_SetColor },
-  { "open", &Script_Open },
-  { "close", &Script_Close },
-  { "ingameopen", &Script_InGameOpen },
-  { "ingameclose", &Script_InGameClose },
-  { "setbackground", &Script_SetBackground },
-  { "setitemcolor", &Script_SetItemColor },
-  { "focusfirst", &Script_FocusFirstInMenu},
-  { "setfocus", &Script_SetFocus },
-  { "setfocusbydvar", &Script_SetFocusByDvar },
-  { "setdvar", &Script_SetDvar },
-  { "exec", &Script_Exec },
-  { "execnow", &Script_ExecNow },
-  { "execOnDvarStringValue", &Script_ExecOnDvarStringValue },
-  { "execOnDvarIntValue", &Script_ExecOnDvarIntValue },
-  { "execOnDvarFloatValue", &Script_ExecOnDvarFloatValue },
-  { "execNowOnDvarStringValue", &Script_ExecNowOnDvarStringValue },
-  { "execNowOnDvarIntValue", &Script_ExecNowOnDvarIntValue },
-  { "execNowOnDvarFloatValue", &Script_ExecNowOnDvarFloatValue },
-  { "play", &Script_Play },
-  { "scriptmenuresponse", &Script_ScriptMenuResponse },
-  { "scriptMenuRespondOnDvarStringValue", &Script_RespondOnDvarStringValue },
-  { "scriptMenuRespondOnDvarIntValue", &Script_RespondOnDvarIntValue },
-  { "scriptMenuRespondOnDvarFloatValue", &Script_RespondOnDvarFloatValue },
-  { "setLocalVarBool", &Script_SetLocalVarBool },
-  { "setLocalVarInt", &Script_SetLocalVarInt },
-  { "setLocalVarFloat", &Script_SetLocalVarFloat },
-  { "setLocalVarString", &Script_SetLocalVarString },
-  { "feederTop",  &Script_FeederTop },
-  { "feederBottom",  &Script_FeederBottom },
-  { "openforgametype", &Script_OpenForGameType },
-  { "closeforgametype", &Script_CloseForGameType },
-  { "statclearperknew", &Script_StatClearPerkNew },
-  { "statsetusingtable", &Script_StatSetUsingStatsTable },
-  { "statclearbitmask", &Script_StatClearBitMask },
-  { "getautoupdate", &Script_GetAutoUpdate }
+  { "fadein", Script_FadeIn },
+  { "fadeout", Script_FadeOut },
+  { "show", Script_Show },
+  { "hide", Script_Hide },
+  { "showMenu", Script_ShowMenu },
+  { "hideMenu", Script_HideMenu },
+  { "setcolor", Script_SetColor },
+  { "open", Script_Open },
+  { "close", Script_Close },
+  { "ingameopen", Script_InGameOpen },
+  { "ingameclose", Script_InGameClose },
+  { "setbackground", Script_SetBackground },
+  { "setitemcolor", Script_SetItemColor },
+  { "focusfirst", Script_FocusFirstInMenu},
+  { "setfocus", Script_SetFocus },
+  { "setfocusbydvar", Script_SetFocusByDvar },
+  { "setdvar", Script_SetDvar },
+  { "exec", Script_Exec },
+  { "execnow", Script_ExecNow },
+  { "execOnDvarStringValue", Script_ExecOnDvarStringValue },
+  { "execOnDvarIntValue", Script_ExecOnDvarIntValue },
+  { "execOnDvarFloatValue", Script_ExecOnDvarFloatValue },
+  { "execNowOnDvarStringValue", Script_ExecNowOnDvarStringValue },
+  { "execNowOnDvarIntValue", Script_ExecNowOnDvarIntValue },
+  { "execNowOnDvarFloatValue", Script_ExecNowOnDvarFloatValue },
+  { "play", Script_Play },
+  { "scriptmenuresponse", Script_ScriptMenuResponse },
+  { "scriptMenuRespondOnDvarStringValue", Script_RespondOnDvarStringValue },
+  { "scriptMenuRespondOnDvarIntValue", Script_RespondOnDvarIntValue },
+  { "scriptMenuRespondOnDvarFloatValue", Script_RespondOnDvarFloatValue },
+  { "setLocalVarBool", Script_SetLocalVarBool },
+  { "setLocalVarInt", Script_SetLocalVarInt },
+  { "setLocalVarFloat", Script_SetLocalVarFloat },
+  { "setLocalVarString", Script_SetLocalVarString },
+  { "feederTop",  Script_FeederTop },
+  { "feederBottom",  Script_FeederBottom },
+  { "openforgametype", Script_OpenForGameType },
+  { "closeforgametype", Script_CloseForGameType },
+  { "statclearperknew", Script_StatClearPerkNew },
+  { "statsetusingtable", Script_StatSetUsingStatsTable },
+  { "statclearbitmask", Script_StatClearBitMask },
+  { "getautoupdate", Script_GetAutoUpdate }
 }; // idb
+#elif KISAK_SP
+static const char *CONSOLE_DEFAULT_SAVE_NAME = "savegame.svg";
+void Script_SaveGameHide(UiContext *dc, itemDef_s *item, const char **args)
+{
+    //const char **v6; // r3
+    //unsigned int v7; // r11
+    //int v8; // r31
+    //char v9[1056]; // [sp+50h] [-420h] BYREF
+    //
+    //v7 = _cntlzw(SaveExists(CONSOLE_DEFAULT_SAVE_NAME));
+    //v6 = args;
+    //v8 = (v7 >> 5)  1;
+    //if (String_Parse(v6, v9, 1024))
+    //    Menu_ShowItemByName(dc->localClientNum, item->parent, v9, (unsigned __int8)v8);
+
+    char parsedName[1024];
+    int saveExists = SaveExists(CONSOLE_DEFAULT_SAVE_NAME);
+    int shouldHide = !saveExists;  // 1 if save does not exist, 0 otherwise
+
+    if (String_Parse(args, parsedName, sizeof(parsedName))) {
+        Menu_ShowItemByName(dc->localClientNum, item->parent, parsedName, (unsigned char)shouldHide);
+    }
+}
+void Script_SaveGameShow(UiContext *dc, itemDef_s *item, const char **args)
+{
+    const char **v6; // r3
+    int v7; // r11
+    bool v8; // r31
+    char v9[1056]; // [sp+50h] [-420h] BYREF
+
+    v7 = SaveExists(CONSOLE_DEFAULT_SAVE_NAME) - 1;
+    v6 = args;
+    v8 = v7 == 0;
+    if (String_Parse(v6, v9, 1024))
+        Menu_ShowItemByName(dc->localClientNum, item->parent, v9, v8);
+}
+void Script_ProfileHide(UiContext *dc, itemDef_s *item, const char **args)
+{
+    //int v6; // r3
+    //const char **v7; // r3
+    //unsigned int v8; // r11
+    //int v9; // r30
+    //char v10[1056]; // [sp+50h] [-420h] BYREF
+    //
+    //v6 = CL_ControllerIndexFromClientNum(dc->localClientNum);
+    //v8 = _cntlzw(GamerProfile_IsProfileLoggedIn(v6));
+    //v7 = args;
+    //v9 = (v8 >> 5) & 1;
+    //if (String_Parse(v7, v10, 1024))
+    //    Menu_ShowItemByName(dc->localClientNum, item->parent, v10, (unsigned __int8)v9);
+}
+void Script_ProfileShow(UiContext *dc, itemDef_s *item, const char **args)
+{
+    //int v6; // r3
+    //bool IsProfileLoggedIn; // r28
+    //char v8[1072]; // [sp+50h] [-430h] BYREF
+    //
+    //v6 = CL_ControllerIndexFromClientNum(dc->localClientNum);
+    //IsProfileLoggedIn = GamerProfile_IsProfileLoggedIn(v6);
+    //if (String_Parse(args, v8, 1024))
+    //    Menu_ShowItemByName(dc->localClientNum, item->parent, v8, IsProfileLoggedIn);
+}
+
+void Script_NoSaveHide(UiContext *dc, itemDef_s *item, const char **args)
+{
+    int localClientNum; // r30
+    bool IsProfileLoggedIn; // r30
+    int v8; // r3
+    char v9[1072]; // [sp+50h] [-430h] BYREF
+
+    localClientNum = dc->localClientNum;
+    //if (SaveMemory_IsCurrentCommittedSaveValid())
+    //{
+    //    v8 = CL_ControllerIndexFromClientNum(localClientNum);
+    //    IsProfileLoggedIn = GamerProfile_IsProfileLoggedIn(v8);
+    //}
+    //else
+    {
+        IsProfileLoggedIn = 0;
+    }
+    if (String_Parse(args, v9, 1024))
+        Menu_ShowItemByName(dc->localClientNum, item->parent, v9, IsProfileLoggedIn);
+}
+
+void Script_SaveAvailableHide(UiContext *dc, itemDef_s *item, const char **args)
+{
+    int localClientNum; // r30
+    bool IsProfileLoggedIn; // r30
+    int v8; // r3
+    char v9[1072]; // [sp+50h] [-430h] BYREF
+
+    localClientNum = dc->localClientNum;
+    //if (SaveMemory_IsCurrentCommittedSaveValid())
+    //{
+    //    v8 = CL_ControllerIndexFromClientNum(localClientNum);
+    //    IsProfileLoggedIn = GamerProfile_IsProfileLoggedIn(v8);
+    //}
+    //else
+    {
+        IsProfileLoggedIn = 0;
+    }
+    if (String_Parse(args, v9, 1024))
+        Menu_ShowItemByName(dc->localClientNum, item->parent, v9, !IsProfileLoggedIn);
+}
+
+void Script_DisplaySaveMessage(UiContext *dc, itemDef_s *item, const char **args)
+{
+    iassert(item);
+    iassert(item->parent);
+    iassert(item->parent->window.name);
+
+    Dvar_SetBool(ui_isSaving, 1);
+    ui_saveTimeGlob.isSaving = 1;
+    ui_saveTimeGlob.saveTime = Sys_Milliseconds();
+    ui_saveTimeGlob.hasfirstFrameShown = 0;
+    ui_saveTimeGlob.saveMenuName = item->parent->window.name;
+    Com_Printf(13, "Save message opened: %i\n", ui_saveTimeGlob.saveTime);
+}
+
+void Script_WriteSave(UiContext *dc, itemDef_s *item, const char **args)
+{
+    ui_saveTimeGlob.callWrite = 1;
+}
+
+void Script_SetSaveExecOnSuccess(UiContext *dc, itemDef_s *item, const char **args)
+{
+    ui_saveTimeGlob.hasExecOnSuccess = 1;
+    String_Parse(args, ui_saveTimeGlob.execOnSuccess, 256);
+}
+
+void Script_ScriptNextLevel(UiContext *dc, itemDef_s *item, const char **args)
+{
+    G_LoadNextMap();
+}
+
+const commandDef_t commandList[46] =
+{
+  { "fadein", Script_FadeIn },
+  { "fadeout", Script_FadeOut },
+  { "show", Script_Show },
+  { "hide", Script_Hide },
+  { "showMenu", Script_ShowMenu },
+  { "hideMenu", Script_HideMenu },
+  { "setcolor", Script_SetColor },
+  { "open", Script_Open },
+  { "close", Script_Close },
+  { "ingameopen", Script_InGameOpen },
+  { "ingameclose", Script_InGameClose },
+  { "setbackground", Script_SetBackground },
+  { "setitemcolor", Script_SetItemColor },
+  { "focusfirst", Script_FocusFirstInMenu },
+  { "setfocus", Script_SetFocus },
+  { "setfocusbydvar", Script_SetFocusByDvar },
+  { "setdvar", Script_SetDvar },
+  { "exec", Script_Exec },
+  { "execnow", Script_ExecNow },
+  { "execOnDvarStringValue", Script_ExecOnDvarStringValue },
+  { "execOnDvarIntValue", Script_ExecOnDvarIntValue },
+  { "execOnDvarFloatValue", Script_ExecOnDvarFloatValue },
+  { "execNowOnDvarStringValue", Script_ExecNowOnDvarStringValue },
+  { "execNowOnDvarIntValue", Script_ExecNowOnDvarIntValue },
+  { "execNowOnDvarFloatValue", Script_ExecNowOnDvarFloatValue },
+  { "play", Script_Play },
+  { "scriptmenuresponse", Script_ScriptMenuResponse },
+  { "scriptMenuRespondOnDvarStringValue", Script_RespondOnDvarStringValue },
+  { "scriptMenuRespondOnDvarIntValue", Script_RespondOnDvarIntValue },
+  { "scriptMenuRespondOnDvarFloatValue", Script_RespondOnDvarFloatValue },
+  { "setLocalVarBool", Script_SetLocalVarBool },
+  { "setLocalVarInt", Script_SetLocalVarInt },
+  { "setLocalVarFloat", Script_SetLocalVarFloat },
+  { "setLocalVarString", Script_SetLocalVarString },
+  { "feederTop", Script_FeederTop },
+  { "feederBottom", Script_FeederBottom },
+  { "savegamehide", Script_SaveGameHide },
+  { "savegameshow", Script_SaveGameShow },
+  { "profilehide", Script_ProfileHide },
+  { "profileshow", Script_ProfileShow },
+  { "nosavehide", Script_NoSaveHide },
+  { "saveAvailableHide", Script_SaveAvailableHide },
+  { "saveDelay", Script_DisplaySaveMessage },
+  { "writeSave", Script_WriteSave },
+  { "setSaveExecOnSuccess", Script_SetSaveExecOnSuccess },
+  { "nextlevel", Script_ScriptNextLevel }
+};
+#endif
 
 bool __cdecl Window_IsVisible(int localClientNum, const windowDef_t *w)
 {
@@ -86,10 +281,12 @@ bool __cdecl Window_IsVisible(int localClientNum, const windowDef_t *w)
     return (w->dynamicFlags[localClientNum] & 4) != 0;
 }
 
+#ifdef KISAK_MP
 void __cdecl Script_GetAutoUpdate(UiContext *dc, itemDef_s *item, const char **args)
 {
     CL_GetAutoUpdate();
 }
+#endif
 
 void __cdecl Script_StatClearPerkGetArg(
     UiContext *dc,

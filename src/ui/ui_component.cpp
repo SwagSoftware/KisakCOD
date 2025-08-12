@@ -1,5 +1,4 @@
 #include "ui_shared.h"
-#include <client_mp/client_mp.h>
 #include <win32/win_net_debug.h>
 #include <script/scr_parser.h>
 #include <script/scr_main.h>
@@ -9,6 +8,17 @@
 #include <script/scr_vm.h>
 #include <universal/com_files.h>
 #include <client/client.h>
+
+#ifdef KISAK_MP
+#include <client_mp/client_mp.h>
+#elif KISAK_SP
+#include "ui.h"
+// LWSS: helper function (SP lacks the 1st arg)
+static void CL_LookupColor(int localClientNum, int num, float *color)
+{
+    CL_LookupColor(num, color);
+}
+#endif
 
 #undef DrawText
 

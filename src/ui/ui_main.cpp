@@ -5,6 +5,14 @@
 // KISAKTODO: Cleanup SP UI after 'client/` is done
 
 #include "ui.h"
+#include <qcommon/cmd.h>
+#include <game/savedevice.h>
+#include <gfx_d3d/r_cinematic.h>
+#include <stringed/stringed_hooks.h>
+#include <client/cl_demo.h>
+#include <cgame/cg_newdraw.h>
+#include <game/savememory.h>
+#include <gfx_d3d/r_init.h>
 
 const dvar_t *ui_showList;
 const dvar_t *ui_isSaving;
@@ -35,6 +43,8 @@ static bool g_ingameMenusLoaded;
 uiInfo_s uiInfo;
 sharedUiInfo_t sharedUiInfo;
 SaveTimeGlob ui_saveTimeGlob;
+
+uiMenuCommand_t g_currentMenuType;
 
 
 UILocalVarContext *__cdecl UI_GetLocalVarsContext(int localClientNum)
@@ -604,7 +614,7 @@ void __cdecl UI_DrawTextWithCursor(
     *(double *)&v37 = (float)(a30 + (float)0.5);
     v38 = floor(v37);
     a30 = *(double *)&v38;
-    CL_DrawTextPhysicalWithCursor(text, maxChars, font, a28, (float)*(double *)&v38, v44[0], v43, v42, v41, v40, v39);
+    CL_DrawTextPhysicalWithCursor((char*)text, maxChars, font, a28, (float)*(double *)&v38, v44[0], v43, v42, v41, v40, v39);
 }
 
 Font_s *__cdecl UI_GetFontHandle(const ScreenPlacement *scrPlace, int fontEnum, double scale)
@@ -694,7 +704,7 @@ void __cdecl UI_UpdateTime(int realtime)
         if (!v2)
             v2 = 1;
         HIDWORD(v3) = 4000;
-        __twllei(v2, 0);
+        //__twllei(v2, 0);
         LODWORD(v3) = 4000 / v2;
         uiInfo.uiDC.FPS = (float)v3;
     }
@@ -801,7 +811,7 @@ LABEL_14:
 
 void UI_DrawCinematic()
 {
-    R_Cinematic_DrawStretchPic_Letterboxed(0);
+    R_Cinematic_DrawStretchPic_Letterboxed();
 }
 
 void __cdecl UI_LoadIngameMenus()
@@ -927,39 +937,34 @@ void __cdecl UI_Update(const char *name)
 
 void UI_SaveComplete()
 {
-    int v0; // r3
-    const char *v1; // r3
-
     if (SaveDevice_IsSaveSuccessful())
     {
-        if (Live_HasAcceptedInvitation())
-        {
-            v0 = CL_ControllerIndexFromClientNum(0);
-            Live_ConfirmAcceptInvitation(v0);
-        }
-        else
+        //if (Live_HasAcceptedInvitation())
+        //{
+        //    Live_ConfirmAcceptInvitation(CL_ControllerIndexFromClientNum(0));
+        //}
+        //else
         {
             if (ui_saveTimeGlob.hasExecOnSuccess)
             {
-                v1 = va("%s\n", ui_saveTimeGlob.execOnSuccess);
-                Cbuf_AddText(0, v1);
+                Cbuf_AddText(0, va("%s\n", ui_saveTimeGlob.execOnSuccess));
             }
             memset(ui_saveTimeGlob.execOnSuccess, 0, sizeof(ui_saveTimeGlob.execOnSuccess));
             ui_saveTimeGlob.hasExecOnSuccess = 0;
         }
     }
-    else if (Live_HasAcceptedInvitation())
-    {
-        Live_DeclineInvitation();
-    }
+    //else if (Live_HasAcceptedInvitation())
+    //{
+    //    Live_DeclineInvitation();
+    //}
 }
 
 void *UI_SaveRevert()
 {
     void *result; // r3
 
-    if (Live_HasAcceptedInvitation())
-        Live_DeclineInvitation();
+    //if (Live_HasAcceptedInvitation())
+    //    Live_DeclineInvitation();
     result = memset(ui_saveTimeGlob.execOnSuccess, 0, sizeof(ui_saveTimeGlob.execOnSuccess));
     ui_saveTimeGlob.hasExecOnSuccess = 0;
     return result;
@@ -1084,41 +1089,42 @@ bool __cdecl UI_AutoContinue()
 
 void __cdecl UI_OverrideCursorPos(int localClientNum, itemDef_s *item)
 {
-    listBoxDef_s *ListBoxDef; // r29
-    int v5; // r3
-
-    if (item->special == 30.0)
-    {
-        ListBoxDef = Item_GetListBoxDef(item);
-        if (!ListBoxDef)
-            MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\ui\\ui_main.cpp", 1942, 0, "%s", "listPtr");
-        v5 = Item_ListBox_Viewmax(item);
-        LB_OverrideCursorPos(v5, &item->cursorPos[localClientNum], &ListBoxDef->startPos[localClientNum]);
-    }
+    //listBoxDef_s *ListBoxDef; // r29
+    //int v5; // r3
+    //
+    //if (item->special == 30.0)
+    //{
+    //    ListBoxDef = Item_GetListBoxDef(item);
+    //    if (!ListBoxDef)
+    //        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\ui\\ui_main.cpp", 1942, 0, "%s", "listPtr");
+    //    v5 = Item_ListBox_Viewmax(item);
+    //    LB_OverrideCursorPos(v5, &item->cursorPos[localClientNum], &ListBoxDef->startPos[localClientNum]);
+    //}
 }
 
 int __cdecl UI_FeederCount(int localClientNum, double feederID)
 {
-    if (feederID == 30.0)
-        return LB_FeederCount(localClientNum);
-    else
+    //if (feederID == 30.0)
+    //    return LB_FeederCount(localClientNum);
+    //else
         return 0;
 }
 
-char *__cdecl UI_FeederItemText(
+const char *__cdecl UI_FeederItemText(
     int localClientNum,
     itemDef_s *item,
-    double feederID,
+    const float feederID,
     int index,
-    int column,
-    Material **handle,
-    Material **a7)
+    unsigned int column,
+    Material **handle)
 {
-    *a7 = 0;
-    if (feederID == 30.0)
-        return (char *)LB_FeederItemText(localClientNum, column, (int)handle, a7);
-    else
-        return "";
+    //*a7 = 0;
+    //if (feederID == 30.0)
+    //    return (char *)LB_FeederItemText(localClientNum, column, (int)handle, a7);
+    //else
+    //    return "";
+
+    return "";
 }
 
 int __cdecl UI_FeederItemEnabled(int localClientNum, double feederID, int index)
@@ -1148,8 +1154,8 @@ void __cdecl UI_FeederItemColor(
 
 void __cdecl UI_FeederSelection(int localClientNum, double feederID, int index, int a4)
 {
-    if (feederID == 30.0)
-        LB_FeederSelection(localClientNum, a4);
+    //if (feederID == 30.0)
+    //    LB_FeederSelection(localClientNum, a4);
 }
 
 const char *__cdecl UI_GetSavegameInfo()
@@ -1199,6 +1205,9 @@ void __cdecl UI_CloseMenu(int localClientNum, const char *menuName)
 }
 
 // local variable allocation has failed, the output may be wrong!
+cmd_function_s UI_OpenMenu_f_VAR;
+cmd_function_s UI_CloseMenu_f_VAR;
+
 void __cdecl UI_Init()
 {
     __int64 v0; // r10 OVERLAPPED
@@ -1232,13 +1241,13 @@ void __cdecl UI_Init()
     }
     uiInfo.uiDC.bias = v2;
     Sys_Milliseconds();
-    Menus = UI_LoadMenus("ui/code.txt", 3);
+    Menus = UI_LoadMenus((char*)"ui/code.txt", 3);
     UI_AddMenuList(&uiInfo.uiDC, Menus);
     memset(&ui_saveTimeGlob, 0, sizeof(ui_saveTimeGlob));
     Dvar_SetBool(ui_isSaving, 0);
     if (!g_mapname[0])
     {
-        v4 = UI_LoadMenus("ui/menus.txt", 3);
+        v4 = UI_LoadMenus((char*)"ui/menus.txt", 3);
         UI_AddMenuList(&uiInfo.uiDC, v4);
     }
     UI_AssetCache();
@@ -1326,6 +1335,7 @@ float __cdecl UI_GetBlurRadius()
     return *((float *)&blurRadiusOut + 1);
 }
 
+static char errorString[1024];
 char *__cdecl UI_SafeTranslateString(const char *reference)
 {
     const char *v1; // r30
@@ -1333,7 +1343,7 @@ char *__cdecl UI_SafeTranslateString(const char *reference)
     char *v3; // r10
     const char *v4; // r11
     int v5; // ctr
-    const char *v6; // r11
+    char *v6; // r11
     int v7; // r10
 
     v1 = reference;
@@ -1366,7 +1376,7 @@ char *__cdecl UI_SafeTranslateString(const char *reference)
     }
     else
     {
-        v6 = v1;
+        v6 = (char*)v1;
         do
         {
             v7 = *(unsigned __int8 *)v6;
@@ -1594,7 +1604,7 @@ void UI_PlayerStart()
             "(UI_GetActiveMenu( 0 ) == UIMENU_PREGAME || UI_GetActiveMenu( 0 ) == UIMENU_MAIN)",
             g_currentMenuType);
     CL_SetSkipRendering(0);
-    UI_SetActiveMenu(0, 0);
+    UI_SetActiveMenu(0, UIMENU_NONE);
     if (R_Cinematic_IsNextReady())
         R_Cinematic_StartNextPlayback();
     else
@@ -1708,6 +1718,7 @@ void __cdecl UI_DrawKeyBindStatus(rectDef_s *rect, Font_s *font, double scale, f
 
 void __cdecl UI_DrawLoggedInUserName(rectDef_s *rect, Font_s *font, double scale, float *color, int textStyle)
 {
+#if 0
     int v8; // r8
     int v9; // r7
     const char *LocalClientName; // r4
@@ -1820,6 +1831,7 @@ void __cdecl UI_DrawLoggedInUserName(rectDef_s *rect, Font_s *font, double scale
                 v41);
         }
     }
+#endif
 }
 
 void __cdecl UI_SavegameSort(int column, int force)
@@ -1916,7 +1928,7 @@ void __cdecl UI_RunMenuScript(int localClientNum, const char **args, const char 
     if (!I_stricmp(v13, "Quit"))
     {
         v10 = CL_ControllerIndexFromClientNum(0);
-        Cmd_ExecuteSingleCommand(0, v10, "quit");
+        Cmd_ExecuteSingleCommand(0, v10, (char*)"quit");
         return;
     }
     if (!I_stricmp(v13, "Controls"))
@@ -1975,13 +1987,17 @@ void __cdecl UI_RunMenuScript(int localClientNum, const char **args, const char 
                     if (I_stricmp(v13, "RefreshLeaderboards"))
                     {
                         if (I_stricmp(v13, "ViewGamerCard"))
+                        {
                             Com_Printf(13, "unknown UI script %s in block:\n%s\n", v13, actualScript);
+                        }
                         else
-                            LB_OnSelect(localClientNum);
+                        {
+                            //LB_OnSelect(localClientNum);
+                        }
                     }
                     else
                     {
-                        LB_ForceRefresh();
+                        //LB_ForceRefresh();
                     }
                 }
                 else if ((unsigned __int8)UI_GetOpenOrCloseMenuOnDvarArgs(args, v13, v16, v17, v18))
@@ -2140,19 +2156,19 @@ void __cdecl UI_DrawConnectScreen()
 
 char *__cdecl UI_ReplaceConversionString(const char *sourceString, const char *replaceString)
 {
-    __int64 v2; // r10
+    int v2[2]; // r10
     ConversionArguments v4; // [sp+50h] [-440h] BYREF
     char v5[1032]; // [sp+80h] [-410h] BYREF
 
-    LODWORD(v2) = 0;
-    HIDWORD(v2) = replaceString;
-    *(_QWORD *)&v4.args[1] = v2;
-    *(_QWORD *)&v4.args[3] = v2;
-    *(_QWORD *)&v4.args[5] = v2;
-    *(_QWORD *)&v4.args[7] = v2;
+    v2[1] = 0;
+    v2[0] = (int)replaceString;
+    *(_QWORD *)&v4.args[1] = *(_QWORD *)v2;
+    *(_QWORD *)&v4.args[3] = *(_QWORD *)v2;
+    *(_QWORD *)&v4.args[5] = *(_QWORD *)v2;
+    *(_QWORD *)&v4.args[7] = *(_QWORD *)v2;
     v4.args[0] = replaceString;
     v4.argCount = 1;
-    UI_ReplaceConversions(sourceString, &v4, v5, 0x400u);
+    UI_ReplaceConversions(sourceString, &v4, v5, 1024);
     return va(v5);
 }
 
@@ -2251,6 +2267,7 @@ int __cdecl UI_Popup(int localClientNum, const char *menu)
 
 void __cdecl UI_DrawLoggedInUser(rectDef_s *rect, Font_s *font, double scale, float *color, int textStyle)
 {
+#if 0
     const char *LocalClientName; // r27
     int vertAlign; // r27
     double y; // fp30
@@ -2367,127 +2384,84 @@ void __cdecl UI_DrawLoggedInUser(rectDef_s *rect, Font_s *font, double scale, fl
                 v43);
         }
     }
+#endif
 }
 
 void __cdecl UI_OwnerDraw(
     int localClientNum,
-    double x,
-    double y,
-    double w,
-    double h,
+    float x,
+    float y,
+    float w,
+    float h,
     int horzAlign,
     int vertAlign,
-    double text_x,
-    double text_y,
+    float text_x,
+    float text_y,
     int ownerDraw,
     int ownerDrawFlags,
-    float *align,
-    double special,
+    int align,
+    float special,
     Font_s *font,
-    double scale,
+    float scale,
     float *color,
     Material *material,
     int textStyle,
-    rectDef_s *parentRect,
-    int textAlignMode,
-    int a21,
-    int a22,
-    int a23,
-    int a24,
-    int a25,
-    int a26,
-    int a27,
-    int a28,
-    int a29,
-    int a30,
-    int a31,
-    int a32,
-    int a33,
-    int a34,
-    int a35,
-    int a36,
-    int a37,
-    int a38,
-    int a39,
-    int a40,
-    int a41,
-    int a42,
-    int a43,
-    int a44,
-    int a45,
-    Font_s *ownerDraw_0,
-    int a47,
-    int ownerDrawFlags_0,
-    int a49,
-    int align_0,
-    int a51,
-    int a52,
-    int a53,
-    Font_s *font_0,
-    int a55,
-    int a56,
-    rectDef_s *a57,
-    float *color_0,
-    int a59,
-    Material *materiala)
+    rectDef_s parentRect,
+    char textAlignMode)
 {
-    Font_s *v70; // r9
-    int v71; // r8
-    int v72; // r7
-    int v73; // r6
-    float *v74; // r5
-    float *v75; // r4
-    Material *v76; // [sp+8h] [-148h]
-    int v77; // [sp+Ch] [-144h]
-    int v78; // [sp+10h] [-140h]
-    rectDef_s v79[3]; // [sp+C0h] [-90h] BYREF
+    rectDef_s rect; // [sp+C0h] [-90h] BYREF
 
     if (CL_IsCgameInitialized(localClientNum))
+    {
         CG_OwnerDraw(
-            a57,
+            localClientNum,
+            parentRect,
             x,
             y,
             w,
             h,
-            a59,
-            (int)materiala,
+            horzAlign,
+            vertAlign,
             text_x,
             text_y,
-            v73,
-            v72,
-            v71,
-            special,
-            v70,
-            scale,
+            ownerDraw,
+            ownerDrawFlags,
             align,
-            v76,
-            v77,
-            v78);
-    v79[0].x = (float)x + (float)text_x;
-    v79[0].y = (float)y + (float)text_y;
-    v79[0].horzAlign = (int)align;
-    v79[0].w = w;
-    v79[0].vertAlign = (int)font;
-    v79[0].h = h;
-    switch (a38)
+            special,
+            font,
+            scale,
+            color,
+            material,
+            textStyle,
+            textAlignMode);
+    }
+
+    rect.x = (float)x + (float)text_x;
+    rect.y = (float)y + (float)text_y;
+    rect.horzAlign = (int)align;
+    rect.w = w;
+    rect.vertAlign = (int)font;
+    rect.h = h;
+
+    switch (ownerDraw)
     {
     case 250:
-        UI_DrawKeyBindStatus(v79, ownerDraw_0, scale, v74, align_0);
+        UI_DrawKeyBindStatus(&rect, font, scale, color, textStyle);
         break;
     case 258:
-        UI_DrawSaveGameShot(v79, scale, v75);
+        UI_DrawSaveGameShot(&rect, scale, color);
         break;
     case 264:
-        ProfLoad_DrawOverlay(v79);
+        ProfLoad_DrawOverlay(&rect);
         break;
     case 272:
-        UI_DrawLoggedInUser(v79, ownerDraw_0, scale, v74, align_0);
+        UI_DrawLoggedInUser(&rect, font, scale, color, textStyle);
         break;
     case 276:
-        UI_DrawLoggedInUserName(v79, ownerDraw_0, scale, v74, align_0);
+        UI_DrawLoggedInUserName(&rect, font, scale, color, textStyle);
         break;
     case 277:
-        R_Cinematic_DrawStretchPic_Letterboxed(0);
+        R_Cinematic_DrawStretchPic_Letterboxed();
         break;
     default:
         return;
