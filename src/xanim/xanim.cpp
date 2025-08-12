@@ -2,7 +2,6 @@
 #include "xanim_calc.h"
 
 #include "dobj.h"
-#include <cgame_mp/cg_local_mp.h>
 
 #include <qcommon/qcommon.h>
 #include <database/database.h>
@@ -10,6 +9,12 @@
 #include <universal/profile.h>
 #include <script/scr_vm.h>
 #include <universal/com_files.h>
+
+#ifdef KISAK_MP
+#include <cgame_mp/cg_local_mp.h>
+#elif KISAK_SP
+
+#endif
 
 
 static int g_info_usage;
