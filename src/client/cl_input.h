@@ -126,6 +126,10 @@ void __cdecl CL_ClearKeys(int localClientNum);
 void IN_MLookUp();
 void __cdecl CL_InitInput();
 
+// LWSS ADD - Mouse from PC (MP)
+int __cdecl CL_MouseEvent(int x, int y, int dx, int dy);
+// LWSS END
+
 extern const dvar_t *cl_stanceHoldTime;
 extern const dvar_t *cl_analog_attack_threshold;
 extern const dvar_t *cl_yawspeed;

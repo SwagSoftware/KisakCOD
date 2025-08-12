@@ -4,7 +4,9 @@
 #include <qcommon/qcommon.h>
 
 #include <client/client.h>
+#ifdef KISAK_MP
 #include <client_mp/client_mp.h>
+#endif
 
 #include <ui/keycodes.h>
 

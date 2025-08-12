@@ -10,6 +10,7 @@
 #include <aim_assist/aim_assist.h>
 #include <win32/win_local.h>
 #include <qcommon/msg.h>
+#include <devgui/devgui.h>
 
 const dvar_t *cl_stanceHoldTime;
 const dvar_t *cl_analog_attack_threshold;
@@ -2010,3 +2011,53 @@ void __cdecl CL_InitInput()
     cl_freemoveScale = Dvar_RegisterFloat("cl_freemoveScale", 1.0, 0.0, 5.0, v3, v2);
 }
 
+
+// LWSS ADD - the SP build is from XBox, and we need mouse controls so I'm pasting over the mouse stuff from MP
+
+static void __cdecl Scr_MouseEvent(int x, int y)
+{
+    UI_Component::MouseEvent(x, y);
+}
+
+static void __cdecl CL_ShowSystemCursor(bool show)
+{
+    IN_ShowSystemCursor(show);
+}
+
+int __cdecl CL_MouseEvent(int x, int y, int dx, int dy)
+{
+    clientActive_t *LocalClientGlobals; // [esp+0h] [ebp-8h]
+
+    if (DevGui_IsActive())
+    {
+        DevGui_MouseEvent(dx, dy);
+        return 1;
+    }
+    else if (Key_IsCatcherActive(0, 2))
+    {
+        Scr_MouseEvent(x, y);
+        CL_ShowSystemCursor(1);
+        return 0;
+    }
+    else
+    {
+        // KISAKTODO: bit more involved here with ui cursor, let's get the rest working first
+        //LocalClientGlobals = CL_GetLocalClientGlobals(0);
+        //if ((clientUIActives[0].keyCatchers & 0x10) == 0
+        //    || UI_GetActiveMenu(0) == UIMENU_SCOREBOARD
+        //    || cl_bypassMouseInput->current.enabled)
+        //{
+        //    CL_ShowSystemCursor(0);
+        //    LocalClientGlobals->mouseDx[LocalClientGlobals->mouseIndex] += dx;
+        //    LocalClientGlobals->mouseDy[LocalClientGlobals->mouseIndex] += dy;
+        //    return 1;
+        //}
+        //else
+        //{
+        //    UI_MouseEvent(0, x, y);
+        //    return 0;
+        //}
+    }
+}
+
+// LWSS END

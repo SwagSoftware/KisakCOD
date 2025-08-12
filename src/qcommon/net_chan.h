@@ -32,3 +32,7 @@ struct netchan_t
 {
 	int outgoingSequence;
 };
+
+
+// LWSS: taken from MP to use for PC
+const char *NET_AdrToString(netadr_t a);

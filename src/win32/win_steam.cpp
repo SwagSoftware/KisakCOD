@@ -18,8 +18,11 @@
 #include <atomic>
 #include <mutex>
 #include <vector>
-#include <server_mp/server_mp.h>
 #include <qcommon/cmd.h>
+
+#ifdef KISAK_MP
+#include <server_mp/server_mp.h>
+#endif
 
 #include <functional>
 
@@ -101,6 +104,7 @@ void SteamCallbackHandler::Callback_BeginAuthResponse(ValidateAuthTicketResponse
 
 void Steam_CheckClients()
 {
+#ifdef KISAK_MP
 	SteamAPI_RunCallbacks();
 
 	std::lock_guard<std::mutex> _(kickPlayerMutex);
@@ -130,6 +134,7 @@ void Steam_CheckClients()
 	}
 
 	steamIDsToKick.clear();
+#endif
 }
 
 

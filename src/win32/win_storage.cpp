@@ -1,6 +1,5 @@
 #include "win_storage.h"
 #include <qcommon/qcommon.h>
-#include <client_mp/client_mp.h>
 #include <stringed/stringed_hooks.h>
 #include <qcommon/com_playerprofile.h>
 #include <universal/com_files.h>
@@ -8,6 +7,11 @@
 #include <qcommon/md4.h>
 #include <qcommon/com_bsp.h>
 #include "win_net_debug.h"
+
+#ifdef KISAK_MP
+#include <client_mp/client_mp.h>
+#elif KISAK_SP
+#endif
 
 const dvar_t *debugStats;
 const dvar_t *stat_version;
@@ -127,7 +131,11 @@ void __cdecl LiveStorage_ValidateCaCStat(int controllerIndex, int index, int val
     if (index < 200 || index >= 250)
         Com_Error(ERR_DROP, "trying to set invalid create-a-class stat.  You can't set stat %d.\n", index);
     xp = LiveStorage_GetStat(controllerIndex, 2301);
+#ifdef KISAK_MP
     rank = CL_GetRankForXp(xp);
+#elif KISAK_SP
+    rank = 0;
+#endif
     switch (index % 10)
     {
     case 1:
@@ -448,6 +456,7 @@ bool __cdecl LiveStorage_DecryptAndCheck(StatsFile *statsFile, const char *stats
 
 void __cdecl LiveStorage_GetCryptKey(unsigned int nonce, unsigned __int8 *outKey)
 {
+#ifdef KISAK_MP
     unsigned int hashR[4]; // [esp+0h] [ebp-44h] BYREF
     unsigned int keyHash[4]; // [esp+10h] [ebp-34h] BYREF
     unsigned int ipad[4]; // [esp+20h] [ebp-24h] BYREF
@@ -462,6 +471,7 @@ void __cdecl LiveStorage_GetCryptKey(unsigned int nonce, unsigned __int8 *outKey
     }
     Com_BlockChecksum128Cat((unsigned __int8 *)ipad, 0x10u, (unsigned __int8 *)&nonce, 4u, (unsigned __int8 *)hashR);
     Com_BlockChecksum128Cat((unsigned __int8 *)opad, 0x10u, (unsigned __int8 *)hashR, 0x10u, outKey);
+#endif
 }
 
 int __cdecl LiveStorage_ChecksumGamerStats(unsigned __int8 *buffer, int len)

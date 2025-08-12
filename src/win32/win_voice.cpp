@@ -1,6 +1,9 @@
+#ifdef KISAK_MP
 #include "win_local.h"
-#include <server_mp/server_mp.h>
 #include <groupvoice/directsound.h>
+
+#include <server_mp/server_mp.h>
+
 
 const dvar_t *winvoice_mic_mute;
 const dvar_t *winvoice_mic_reclevel;
@@ -816,3 +819,4 @@ char __cdecl Voice_StopRecording()
     return 1;
 }
 
+#endif

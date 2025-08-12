@@ -3,10 +3,16 @@
 //#include "../qcommon/exe_headers.h"
 
 #include "win_local.h"
-#include <qcommon/net_chan_mp.h>
 #include "win_net.h"
 #include "win_net_debug.h"
 #include <qcommon/mem_track.h>
+
+#ifdef KISAK_MP
+#include <qcommon/net_chan_mp.h>
+#elif KISAK_SP
+#include <qcommon/net_chan.h>
+#include <qcommon/msg.h>
+#endif
 
 static WSADATA	winsockdata;
 static qboolean	winsockInitialized = qfalse;
@@ -108,20 +114,21 @@ void NetadrToSockadr( netadr_t *a, struct sockaddr *s ) {
 		((struct sockaddr_in *)s)->sin_addr.s_addr = *(int *)&a->ip;
 		((struct sockaddr_in *)s)->sin_port = a->port;
 	}
-#ifndef _XBOX
-	else if( a->type == NA_IPX ) {
-		((struct sockaddr_ipx *)s)->sa_family = AF_IPX;
-		memcpy( ((struct sockaddr_ipx *)s)->sa_netnum, &a->ipx[0], 4 );
-		memcpy( ((struct sockaddr_ipx *)s)->sa_nodenum, &a->ipx[4], 6 );
-		((struct sockaddr_ipx *)s)->sa_socket = a->port;
-	}
-	else if( a->type == NA_BROADCAST_IPX ) {
-		((struct sockaddr_ipx *)s)->sa_family = AF_IPX;
-		memset( ((struct sockaddr_ipx *)s)->sa_netnum, 0, 4 );
-		memset( ((struct sockaddr_ipx *)s)->sa_nodenum, 0xff, 6 );
-		((struct sockaddr_ipx *)s)->sa_socket = a->port;
-	}
-#endif //_XBOX
+	// LWSS: remove IPX, noone uses this
+//#ifndef _XBOX
+//	else if( a->type == NA_IPX ) {
+//		((struct sockaddr_ipx *)s)->sa_family = AF_IPX;
+//		memcpy( ((struct sockaddr_ipx *)s)->sa_netnum, &a->ipx[0], 4 );
+//		memcpy( ((struct sockaddr_ipx *)s)->sa_nodenum, &a->ipx[4], 6 );
+//		((struct sockaddr_ipx *)s)->sa_socket = a->port;
+//	}
+//	else if( a->type == NA_BROADCAST_IPX ) {
+//		((struct sockaddr_ipx *)s)->sa_family = AF_IPX;
+//		memset( ((struct sockaddr_ipx *)s)->sa_netnum, 0, 4 );
+//		memset( ((struct sockaddr_ipx *)s)->sa_nodenum, 0xff, 6 );
+//		((struct sockaddr_ipx *)s)->sa_socket = a->port;
+//	}
+//#endif //_XBOX
 }
 
 
@@ -131,14 +138,15 @@ void SockadrToNetadr( struct sockaddr *s, netadr_t *a ) {
 		*(int *)&a->ip = ((struct sockaddr_in *)s)->sin_addr.s_addr;
 		a->port = ((struct sockaddr_in *)s)->sin_port;
 	}
-#ifndef _XBOX
-	else if( s->sa_family == AF_IPX ) {
-		a->type = NA_IPX;
-		memcpy( &a->ipx[0], ((struct sockaddr_ipx *)s)->sa_netnum, 4 );
-		memcpy( &a->ipx[4], ((struct sockaddr_ipx *)s)->sa_nodenum, 6 );
-		a->port = ((struct sockaddr_ipx *)s)->sa_socket;
-	}
-#endif //_XBOX
+	// LWSS: remove IPX, noone uses this
+//#ifndef _XBOX
+//	else if( s->sa_family == AF_IPX ) {
+//		a->type = NA_IPX;
+//		memcpy( &a->ipx[0], ((struct sockaddr_ipx *)s)->sa_netnum, 4 );
+//		memcpy( &a->ipx[4], ((struct sockaddr_ipx *)s)->sa_nodenum, 6 );
+//		a->port = ((struct sockaddr_ipx *)s)->sa_socket;
+//	}
+//#endif //_XBOX
 }
 
 
@@ -403,12 +411,13 @@ char __cdecl Sys_SendPacket(int length, unsigned __int8 *data, netadr_t to)
 	case NA_IP:
 		net_socket = ip_socket;
 		break;
-	case NA_IPX:
-		net_socket = ipx_socket;
-		break;
-	case NA_BROADCAST_IPX:
-		net_socket = ipx_socket;
-		break;
+// LWSS: remove IPX, noone uses this
+	//case NA_IPX:
+	//	net_socket = ipx_socket;
+	//	break;
+	//case NA_BROADCAST_IPX:
+	//	net_socket = ipx_socket;
+	//	break;
 	default:
 		Com_Error(ERR_FATAL, "Sys_SendPacket: bad address type");
 		break;
@@ -436,7 +445,8 @@ char __cdecl Sys_SendPacket(int length, unsigned __int8 *data, netadr_t to)
 	err = WSAGetLastError();
 	if (err == 10035)
 		return 1;
-	if (err == 10049 && (to.type == NA_BROADCAST || to.type == NA_BROADCAST_IPX))
+//	if (err == 10049 && (to.type == NA_BROADCAST || to.type == NA_BROADCAST_IPX))
+	if (err == 10049 && (to.type == NA_BROADCAST))
 		return 1;
 	v4 = NET_ErrorString();
 	Com_PrintError(16, "Sys_SendPacket: %s\n", v4);
@@ -454,8 +464,8 @@ bool __cdecl Sys_IsLANAddress_IgnoreSubnet(netadr_t adr)
 		return 1;
 	case NA_BOT:
 		return 1;
-	case NA_IPX:
-		return 1;
+//	case NA_IPX:
+//		return 1;
 	}
 	if (adr.type != NA_IP)
 		return 0;

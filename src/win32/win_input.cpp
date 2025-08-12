@@ -5,8 +5,13 @@
 
 #include "../client/client.h"
 #include "win_local.h"
-#include <client_mp/client_mp.h>
 #include <gfx_d3d/r_dvars.h>
+
+#ifdef KISAK_MP
+#include <client_mp/client_mp.h>
+#elif KISAK_SP
+#include <client/cl_input.h>
+#endif
 
 
 struct WinMouseVars_t // sizeof=0x10
