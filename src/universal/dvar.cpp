@@ -7,12 +7,16 @@
 #include "com_memory.h"
 #include <stringed/stringed_hooks.h>
 #include "q_parse.h"
-#include <client_mp/client_mp.h>
 #include <gfx_d3d/r_dvars.h>
 #include <win32/win_net.h>
 #include <devgui/devgui.h>
+#include "com_math.h"
 
 #include <algorithm>
+
+#ifdef KISAK_MP
+#include <client_mp/client_mp.h>
+#endif
 
 const dvar_s *dvar_cheats;
 int dvar_modifiedFlags;
@@ -158,11 +162,13 @@ char *__cdecl Dvar_InfoString(int localClientNum, char bit)
 
     info1[0] = 0;
     Dvar_ForEach((void(__cdecl *)(const dvar_s *, void *))Dvar_InfoStringSingle, &bit);
+#ifdef KISAK_MP
     if ((bit & 2) != 0)
     {
         UsernameForLocalClient = CL_GetUsernameForLocalClient();
         Info_SetValueForKey(info1, "name", UsernameForLocalClient);
     }
+#endif
     return info1;
 }
 

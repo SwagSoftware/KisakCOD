@@ -3,8 +3,12 @@
 #include <qcommon/cmd.h>
 #include "com_files.h"
 
+#ifdef KISAK_MP
 #include <server_mp/server_mp.h>
 #include <client_mp/client_mp.h>
+#elif KISAK_SP
+
+#endif
 
 #include <stringed/stringed_hooks.h>
 
@@ -471,6 +475,7 @@ void __cdecl SV_SetConfig(int start, int max, int bit)
     Dvar_ForEach((void(__cdecl *)(const dvar_s *, void *))SV_SetConfigDvar, &info);
 }
 
+#ifdef KISAK_MP
 void __cdecl SV_SetConfigDvar(const dvar_s *dvar, int *userData)
 {
     char *v2; // eax
@@ -481,6 +486,7 @@ void __cdecl SV_SetConfigDvar(const dvar_s *dvar, int *userData)
         SV_SetConfigValueForKey(*userData, userData[1], (char *)dvar->name, v2);
     }
 }
+#endif
 
 cmd_function_s Dvar_Toggle_f_VAR;
 cmd_function_s Dvar_TogglePrint_f_VAR;
