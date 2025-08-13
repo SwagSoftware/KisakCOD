@@ -23,6 +23,7 @@
 #include "cl_input.h"
 #include <cgame/cg_main.h>
 #include <ragdoll/ragdoll.h>
+#include "cl_scrn.h"
 
 enum MovieToPlayScriptOp : __int32
 {
@@ -287,37 +288,6 @@ void __cdecl CL_ShutdownHunkUsers()
     CL_ShutdownUI();
     if (cls.uiStarted)
         MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\client\\cl_main.cpp", 383, 0, "%s", "!cls.uiStarted");
-}
-
-void __cdecl CL_ShutdownDemo()
-{
-    int demofile; // r3
-    void *demobuf; // r3
-
-    demofile = cls.demofile;
-    if (cls.demofile)
-    {
-        if (cls.demoplaying)
-        {
-            G_ClearDemoEntities();
-            demofile = cls.demofile;
-        }
-        FS_FCloseFile(demofile);
-        cls.demofile = 0;
-        cls.demoplaying = 0;
-        if (cls.demorecording)
-        {
-            cls.demorecording = 0;
-            demobuf = cls.demobuf;
-            if (!cls.demobuf)
-            {
-                MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\client\\cl_main.cpp", 417, 0, "%s", "cls.demobuf");
-                demobuf = cls.demobuf;
-            }
-            Z_VirtualFree(demobuf);
-            cls.demobuf = 0;
-        }
-    }
 }
 
 void __cdecl CL_SaveSettings(MemoryFile *memFile)
@@ -1552,56 +1522,22 @@ void __cdecl CL_DrawTextPhysicalWithCursor(
 void __cdecl CL_DrawTextWithCursor(
     const ScreenPlacement *scrPlace,
     const char *text,
-    int maxChars,
+    int32_t maxChars,
     Font_s *font,
-    double x,
-    double y,
-    int horzAlign,
-    int vertAlign,
-    double xScale,
-    double yScale,
+    float x,
+    float y,
+    int32_t horzAlign,
+    int32_t vertAlign,
+    float xScale,
+    float yScale,
     const float *color,
-    int style,
-    double a13,
-    double a14,
-    double a15,
-    double a16,
-    int cursorPos,
-    char cursor,
-    int a19,
-    int a20,
-    int a21,
-    int a22,
-    int a23,
-    int a24,
-    int a25,
-    int a26,
-    int a27,
-    float a28,
-    int a29,
-    float a30,
-    int a31,
-    int a32,
-    int a33,
-    int a34,
-    int a35,
-    float a36,
-    int a37,
-    float a38)
+    int32_t style,
+    int32_t cursorPos,
+    char cursor)
 {
-    char v44; // r9
-    int v45; // r8
-    int v46; // r7
-    const float *v47; // r6
-
-    a28 = x;
-    a30 = y;
-    a36 = xScale;
-    a38 = yScale;
-    if (maxChars <= 0)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\client\\cl_main.cpp", 2102, 0, "%s", "maxChars > 0");
-    ScrPlace_ApplyRect(scrPlace, &a28, &a30, &a36, &a38, (int)color, style);
-    R_AddCmdDrawTextWithCursor(text, maxChars, font, a28, a30, a36, a38, 0.0, v47, v46, v45, v44);
+    iassert(maxChars > 0);
+    ScrPlace_ApplyRect(scrPlace, &x, &y, &xScale, &yScale, horzAlign, vertAlign);
+    R_AddCmdDrawTextWithCursor(text, maxChars, font, x, y, xScale, yScale, 0.0, color, style, cursorPos, cursor);
 }
 
 // attributes: thunk

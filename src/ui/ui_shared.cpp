@@ -2011,7 +2011,7 @@ void __cdecl Item_RunScript(UiContext *dc, itemDef_s *item, char *s)
     unsigned __int8 dst[5120]; // [esp+4h] [ebp-1810h] BYREF
     char out[1028]; // [esp+1404h] [ebp-410h] BYREF
     unsigned int i; // [esp+180Ch] [ebp-8h]
-    char *p; // [esp+1810h] [ebp-4h] BYREF
+    const char *p; // [esp+1810h] [ebp-4h] BYREF
 
     memset(dst, 0, sizeof(dst));
     if (item && s && *s)

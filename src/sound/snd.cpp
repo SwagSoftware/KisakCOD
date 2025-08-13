@@ -3706,7 +3706,9 @@ void __cdecl SND_Init()
     Cmd_AddCommandInternal("snd_setEqType", SND_SetEqType_f, &SND_SetEqType_f_VAR);
     Cmd_AddCommandInternal("snd_deactivateEq", SND_DeactivateEq_f, &SND_DeactivateEq_f_VAR);
     Com_Printf(9, "------- sound system successfully initialized -------\n");
+#ifdef KISAK_MP
     Voice_Init();
+#endif
 }
 
 void __cdecl SND_PlayLocal_f()
@@ -3945,7 +3947,9 @@ char __cdecl SND_BooleanFromString(const char *value, const char *trueValue, con
 
 void __cdecl SND_Shutdown()
 {
+#ifdef KISAK_MP
     Voice_Shutdown();
+#endif
     if (g_snd.Initialized2d)
     {
         SND_StopSounds(SND_STOP_ALL);

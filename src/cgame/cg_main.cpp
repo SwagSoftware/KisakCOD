@@ -19,6 +19,7 @@
 #include <aim_assist/aim_assist.h>
 #include "cg_modelpreviewer.h"
 #include <game/g_local.h>
+#include <client/cl_scrn.h>
 
 UiContext cgDC;
 

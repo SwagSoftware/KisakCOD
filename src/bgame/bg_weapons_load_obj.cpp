@@ -648,6 +648,7 @@ const char *__cdecl BG_GetWeaponInventoryTypeName(weapInventoryType_t type)
     return szWeapInventoryTypeNames[type];
 }
 
+#ifdef KISAK_MP
 void __cdecl BG_LoadWeaponStrings()
 {
     unsigned int i; // [esp+0h] [ebp-4h]
@@ -655,6 +656,7 @@ void __cdecl BG_LoadWeaponStrings()
     for (i = 0; i < g_playerAnimTypeNamesCount; ++i)
         BG_InitWeaponString(i, g_playerAnimTypeNames[i]);
 }
+#endif
 
 void __cdecl BG_LoadPlayerAnimTypes()
 {

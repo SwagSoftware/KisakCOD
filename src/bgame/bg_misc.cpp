@@ -1537,9 +1537,11 @@ void __cdecl BG_PlayerToEntityProcessEvents(playerState_s *ps, entityState_s *s,
     for (i = ps->oldEventSequence; i != ps->eventSequence; ++i)
     {
         event = ps->events[i & 3];
+#ifdef KISAK_MP
         playerEvent = pmoveHandlers[handler].playerEvent;
         if (playerEvent)
             playerEvent(s->number, event);
+#endif
         for (j = 0; serverOnlyEvents[j] > 0 && serverOnlyEvents[j] != event; ++j)
             ;
         if (serverOnlyEvents[j] < 0)

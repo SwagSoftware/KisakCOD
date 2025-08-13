@@ -666,14 +666,16 @@ int VEH_GetVehicleInfoFromName(const char *name);
 
 
 // g_weapon
+struct weaponParms;
+#ifdef KISAK_MP
 struct AntilagClientStore // sizeof=0x340
 {                                       // ...
     float realClientPositions[64][3];
     bool clientMoved[64];
 };
-struct weaponParms;
 void __cdecl G_AntiLagRewindClientPos(int32_t gameTime, AntilagClientStore *antilagStore);
 void __cdecl G_AntiLag_RestoreClientPos(AntilagClientStore *antilagStore);
+#endif
 gentity_s *__cdecl Weapon_Melee(gentity_s *ent, weaponParms *wp, float range, float width, float height, int32_t gametime);
 gentity_s *__cdecl Weapon_Melee_internal(gentity_s *ent, weaponParms *wp, float range, float width, float height);
 char __cdecl Melee_Trace(
@@ -755,11 +757,11 @@ void __cdecl G_DebugCircleEx(
     const float *color,
     int32_t depthTest,
     int32_t duration);
-void G_DebugArc(
+void __cdecl G_DebugArc(
     const float *center,
-    double radius,
-    double angle0,
-    double angle1,
+    float radius,
+    float angle0,
+    float angle1,
     const float *color,
     int depthTest,
     int duration);

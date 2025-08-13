@@ -105,9 +105,8 @@ void __cdecl DebugDrawNodeSelectionOverlay()
 }
 
 // aislop
-void DebugDrawNodePicking(const char *msg, actor_s *self, __int64 color, __int64 a4, __int64 a5)
+void DebugDrawNodePicking(const char *msg, actor_s *self, const pathnode_t *node, float *color)
 {
-    pathnode_t *node = (pathnode_t *)(color >> 32);
     float *colorVec = (float *)&color;
 
     if (ai_debugCoverSelection->current.enabled && ai_debugEntIndex->current.integer == self->ent->s.number)
@@ -139,7 +138,7 @@ void DebugDrawNodePicking(const char *msg, actor_s *self, __int64 color, __int64
         }
 
         // Store node and color for debugging
-        debugCoverNode[debugNodeIndex] = node;
+        debugCoverNode[debugNodeIndex] = (pathnode_t*)node;
 
         float *destColor = debugCoverNodeColors[debugNodeIndex];
         destColor[0] = colorVec[0];

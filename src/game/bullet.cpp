@@ -237,19 +237,19 @@ void __cdecl Bullet_Fire(
     int32_t number; // [esp+14h] [ebp-3A4h]
     int32_t shotCount; // [esp+20h] [ebp-398h]
     float range; // [esp+24h] [ebp-394h]
+#ifdef KISAK_MP
     AntilagClientStore antilagClients; // [esp+28h] [ebp-390h] BYREF
+#endif
     BulletFireParams v9; // [esp+370h] [ebp-48h] BYREF
     int32_t shotIndex; // [esp+3B4h] [ebp-4h]
 
-    if (!attacker)
-        MyAssertHandler(".\\game\\bullet.cpp", 752, 0, "%s", "attacker");
-    if (!wp)
-        MyAssertHandler(".\\game\\bullet.cpp", 753, 0, "%s", "wp");
-    if (!wp->weapDef)
-        MyAssertHandler(".\\game\\bullet.cpp", 754, 0, "%s", "wp->weapDef");
-    if (wp->weapDef->weapType)
-        MyAssertHandler(".\\game\\bullet.cpp", 755, 0, "%s", "wp->weapDef->weapType == WEAPTYPE_BULLET");
+    iassert(attacker);
+    iassert(wp);
+    iassert(wp->weapDef);
+    iassert(wp->weapDef->weapType == WEAPTYPE_BULLET);
+#ifdef KISAK_MP
     G_AntiLagRewindClientPos(gameTime, &antilagClients);
+#endif
     if (wp->weapDef->weapClass == WEAPCLASS_SPREAD)
     {
         shotCount = wp->weapDef->shotCount;
@@ -260,6 +260,7 @@ void __cdecl Bullet_Fire(
         shotCount = 1;
         range = 8192.0f;
     }
+
     for (shotIndex = 0; shotIndex < shotCount; ++shotIndex)
     {
         if (weaponEnt)
@@ -282,7 +283,9 @@ void __cdecl Bullet_Fire(
         else
             Bullet_FireExtended(&v9, wp->weapDef, attacker, gameTime);
     }
+#ifdef KISAK_MP
     G_AntiLag_RestoreClientPos(&antilagClients);
+#endif
 }
 
 void __cdecl Bullet_FireExtended(BulletFireParams *bp, const WeaponDef *weapDef, gentity_s *attacker, int32_t gameTime)

@@ -19,6 +19,7 @@
 #include <cgame/cg_main.h>
 #include <cgame/cg_modelpreviewer.h>
 #include "cl_ui.h"
+#include "cl_scrn.h"
 #endif
 #include <universal/profile.h>
 
@@ -1073,12 +1074,14 @@ bool __cdecl Console_IsRconCmd(const char *commandString)
     return I_strncmp(commandString, "rcon", strlen("rcon")) == 0;
 }
 
-#ifdef KISAK_MP
 bool __cdecl Console_IsClientDisconnected()
 {
+#ifdef KISAK_MP
     return CL_AllLocalClientsDisconnected();
-}
+#elif KISAK_SP
+    return clientUIActives[0].connectionState == CA_DISCONNECTED;
 #endif
+}
 
 int32_t __cdecl Key_GetOverstrikeMode(int32_t localClientNum)
 {

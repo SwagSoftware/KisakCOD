@@ -13,6 +13,8 @@
 #include <cgame/cg_newdraw.h>
 #include <game/savememory.h>
 #include <gfx_d3d/r_init.h>
+#include <universal/profile.h>
+#include <client/cl_scrn.h>
 
 const dvar_t *ui_showList;
 const dvar_t *ui_isSaving;
@@ -132,233 +134,227 @@ Font_s *UI_AssetCache()
 
 void __cdecl UI_DrawSides(
     const ScreenPlacement *scrPlace,
-    double x,
-    double y,
-    double w,
-    double h,
+    float x,
+    float y,
+    float w,
+    float h,
     int horzAlign,
     int vertAlign,
-    double size,
-    const float *color,
-    Material *a10)
+    float size,
+    const float *color)
 {
-    Material *v16; // r7
-    const float *v17; // r6
-    int v18; // r5
-    int v19; // r4
+    float v9; // [esp+30h] [ebp-4h]
 
-    CL_DrawStretchPic(scrPlace, x, y, size, h, horzAlign, vertAlign, 0.0, 0.0, 0.0, 0.0, color, a10);
     CL_DrawStretchPic(
         scrPlace,
-        (float)((float)((float)x + (float)w) - (float)size),
+        x,
         y,
         size,
         h,
-        v19,
-        v18,
+        horzAlign,
+        vertAlign,
         0.0,
         0.0,
         0.0,
         0.0,
-        v17,
-        v16);
+        color,
+        sharedUiInfo.assets.whiteMaterial);
+    v9 = x + w - size;
+    CL_DrawStretchPic(
+        scrPlace,
+        v9,
+        y,
+        size,
+        h,
+        horzAlign,
+        vertAlign,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        color,
+        sharedUiInfo.assets.whiteMaterial);
 }
 
 void __cdecl UI_DrawTopBottom(
     const ScreenPlacement *scrPlace,
-    double x,
-    double y,
-    double w,
-    double h,
+    float x,
+    float y,
+    float w,
+    float h,
     int horzAlign,
     int vertAlign,
-    double size,
-    const float *color,
-    Material *a10)
+    float size,
+    const float *color)
 {
-    Material *v16; // r7
-    const float *v17; // r6
-    int v18; // r5
-    int v19; // r4
+    float v9; // [esp+30h] [ebp-4h]
 
-    CL_DrawStretchPic(scrPlace, x, y, w, size, horzAlign, vertAlign, 0.0, 0.0, 0.0, 0.0, color, a10);
     CL_DrawStretchPic(
         scrPlace,
         x,
-        (float)((float)((float)y + (float)h) - (float)size),
+        y,
         w,
         size,
-        v19,
-        v18,
+        horzAlign,
+        vertAlign,
         0.0,
         0.0,
         0.0,
         0.0,
-        v17,
-        v16);
+        color,
+        sharedUiInfo.assets.whiteMaterial);
+    v9 = y + h - size;
+    CL_DrawStretchPic(
+        scrPlace,
+        x,
+        v9,
+        w,
+        size,
+        horzAlign,
+        vertAlign,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        color,
+        sharedUiInfo.assets.whiteMaterial);
 }
+
 
 void __cdecl UI_DrawRect(
     const ScreenPlacement *scrPlace,
-    double x,
-    double y,
-    double width,
-    double height,
+    float x,
+    float y,
+    float width,
+    float height,
     int horzAlign,
     int vertAlign,
-    double size,
-    const float *color,
-    Material *a10)
+    float size,
+    const float *color)
 {
-    Material *v16; // r7
-    const float *v17; // r6
-    int v18; // r5
-    int v19; // r4
+    PROF_SCOPED("UI_DrawRect");
 
-    UI_DrawTopBottom(scrPlace, x, y, width, height, horzAlign, vertAlign, size, color, a10);
-    UI_DrawSides(
-        scrPlace,
-        x,
-        (float)((float)y + (float)size),
-        width,
-        (float)-(float)((float)((float)size * (float)2.0) - (float)height),
-        v19,
-        v18,
-        size,
-        v17,
-        v16);
+    float v9; // [esp+20h] [ebp-8h]
+    float h; // [esp+24h] [ebp-4h]
+
+    UI_DrawTopBottom(scrPlace, x, y, width, height, horzAlign, vertAlign, size, color);
+    h = height - (size + size);
+    v9 = y + size;
+    UI_DrawSides(scrPlace, x, v9, width, h, horzAlign, vertAlign, size, color);
 }
 
 void __cdecl UI_DrawHighlightRect(
     const ScreenPlacement *scrPlace,
-    double x,
-    double y,
-    double w,
-    double h,
+    float x,
+    float y,
+    float w,
+    float h,
     int horzAlign,
     int vertAlign,
-    double size,
+    float size,
     const float *hiColor,
-    const float *loColor,
-    int a11,
-    int a12,
-    double a13,
-    double a14,
-    double a15,
-    int a16,
-    float a17,
-    float a18,
-    float a19,
-    float a20,
-    float a21,
-    float a22,
-    float a23,
-    float a24,
-    float a25,
-    float a26,
-    float a27,
-    float a28,
-    float a29,
-    float a30,
-    float a31,
-    float a32,
-    float a33,
-    float a34,
-    float a35,
-    const float *a36,
-    float a37,
-    const float *a38)
+    const float *loColor)
 {
-    const float *v41; // r30
-    const float *v42; // r30
-    float v43; // [sp+50h] [-60h] BYREF
-    float v44; // [sp+54h] [-5Ch] BYREF
-    float v45; // [sp+58h] [-58h] BYREF
-    float v46; // [sp+5Ch] [-54h] BYREF
-    float v47[2]; // [sp+60h] [-50h] BYREF
-    float v48; // [sp+68h] [-48h]
-    float v49; // [sp+6Ch] [-44h]
-    float v50; // [sp+70h] [-40h]
-    float v51; // [sp+74h] [-3Ch]
-    float v52; // [sp+78h] [-38h]
-    float v53; // [sp+7Ch] [-34h]
+    float v10; // [esp+8h] [ebp-D8h]
+    float v11; // [esp+10h] [ebp-D0h]
+    float v12; // [esp+14h] [ebp-CCh]
+    float v13; // [esp+20h] [ebp-C0h]
+    float v14; // [esp+24h] [ebp-BCh]
+    float v15; // [esp+30h] [ebp-B0h]
+    float v16; // [esp+3Ch] [ebp-A4h]
+    float v17; // [esp+48h] [ebp-98h]
+    float v18; // [esp+4Ch] [ebp-94h]
+    float v19; // [esp+54h] [ebp-8Ch]
+    float v20; // [esp+60h] [ebp-80h]
+    float v21; // [esp+6Ch] [ebp-74h]
+    float v22; // [esp+74h] [ebp-6Ch]
+    float v23; // [esp+78h] [ebp-68h]
+    float v24; // [esp+88h] [ebp-58h]
+    float v25; // [esp+94h] [ebp-4Ch]
+    float v26; // [esp+98h] [ebp-48h]
+    float v27; // [esp+A0h] [ebp-40h]
+    float v28; // [esp+B0h] [ebp-30h] BYREF
+    float dummyY; // [esp+B4h] [ebp-2Ch] BYREF
+    float verts[4][2]; // [esp+B8h] [ebp-28h] BYREF
+    float dummyX; // [esp+D8h] [ebp-8h] BYREF
+    float dy; // [esp+DCh] [ebp-4h] BYREF
 
-    a22 = x;
-    a24 = y;
-    a26 = w;
-    a28 = h;
-    v44 = size;
-    v43 = size;
-    ScrPlace_ApplyRect(scrPlace, &a22, &a24, &a26, &a28, a11, a12);
-    v46 = 0.0;
-    v45 = 0.0;
-    ScrPlace_ApplyRect(scrPlace, &v46, &v45, &v44, &v43, a11, a12);
-    v47[1] = a24;
-    v49 = a24;
-    v41 = a36;
-    v47[0] = a22;
-    v52 = v44 + a22;
-    v48 = a22 + a26;
-    v51 = v43 + a24;
-    v53 = v51;
-    v50 = v48 - v44;
-    R_AddCmdDrawQuadPic((const float (*)[2])v47, a36, sharedUiInfo.assets.whiteMaterial);
-    v47[0] = a22;
-    v47[1] = a24;
-    v52 = a22;
-    v49 = v43 + a24;
-    v48 = v44 + a22;
-    v50 = v48;
-    v53 = a24 + a28;
-    v51 = v53 - v43;
-    R_AddCmdDrawQuadPic((const float (*)[2])v47, v41, sharedUiInfo.assets.whiteMaterial);
-    v42 = a38;
-    v47[0] = a22;
-    v48 = v44 + a22;
-    v47[1] = a24 + a28;
-    v50 = (float)(a22 + a26) - v44;
-    v52 = a22 + a26;
-    v53 = v47[1];
-    v49 = v47[1] - v43;
-    v51 = v49;
-    R_AddCmdDrawQuadPic((const float (*)[2])v47, a38, sharedUiInfo.assets.whiteMaterial);
-    v47[1] = a24;
-    v53 = v43 + a24;
-    v47[0] = a22 + a26;
-    v48 = v47[0];
-    v49 = a24 + a28;
-    v50 = v47[0] - v44;
-    v52 = v50;
-    v51 = v49 - v43;
-    R_AddCmdDrawQuadPic((const float (*)[2])v47, v42, sharedUiInfo.assets.whiteMaterial);
+    ScrPlace_ApplyRect(scrPlace, &x, &y, &w, &h, horzAlign, vertAlign);
+    dummyX = 0.0;
+    dummyY = 0.0;
+    v28 = size;
+    dy = size;
+    ScrPlace_ApplyRect(scrPlace, &dummyX, &dummyY, &v28, &dy, horzAlign, vertAlign);
+    verts[0][0] = x;
+    verts[0][1] = y;
+    v27 = w + x;
+    verts[1][0] = v27;
+    verts[1][1] = y;
+    v25 = w + x - v28;
+    v26 = dy + y;
+    verts[2][0] = v25;
+    verts[2][1] = v26;
+    v24 = v28 + x;
+    verts[3][0] = v24;
+    verts[3][1] = v26;
+    R_AddCmdDrawQuadPic(verts, hiColor, sharedUiInfo.assets.whiteMaterial);
+    verts[0][0] = x;
+    verts[0][1] = y;
+    v22 = v28 + x;
+    v23 = dy + y;
+    verts[1][0] = v22;
+    verts[1][1] = v23;
+    v21 = h + y - dy;
+    verts[2][0] = v22;
+    verts[2][1] = v21;
+    v20 = h + y;
+    verts[3][0] = x;
+    verts[3][1] = v20;
+    R_AddCmdDrawQuadPic(verts, hiColor, sharedUiInfo.assets.whiteMaterial);
+    v19 = h + y;
+    verts[0][0] = x;
+    verts[0][1] = v19;
+    v17 = v28 + x;
+    v18 = h + y - dy;
+    verts[1][0] = v17;
+    verts[1][1] = v18;
+    v16 = w + x - v28;
+    verts[2][0] = v16;
+    verts[2][1] = v18;
+    v15 = w + x;
+    verts[3][0] = v15;
+    verts[3][1] = v19;
+    R_AddCmdDrawQuadPic(verts, loColor, sharedUiInfo.assets.whiteMaterial);
+    v14 = w + x;
+    verts[0][0] = v14;
+    verts[0][1] = y;
+    v13 = h + y;
+    verts[1][0] = v14;
+    verts[1][1] = v13;
+    v11 = w + x - v28;
+    v12 = h + y - dy;
+    verts[2][0] = v11;
+    verts[2][1] = v12;
+    v10 = dy + y;
+    verts[3][0] = v11;
+    verts[3][1] = v10;
+    R_AddCmdDrawQuadPic(verts, loColor, sharedUiInfo.assets.whiteMaterial);
 }
 
-int __cdecl UI_TextWidth(const char *text, int maxChars, Font_s *font, double scale)
+int __cdecl UI_TextWidth(const char *text, int maxChars, Font_s *font, float scale)
 {
-    double v7; // fp31
-    __int64 v8; // r11
-    long double v9; // fp2
-    long double v10; // fp2
+    float actualScale; // [esp+8h] [ebp-4h]
 
-    v7 = R_NormalizedTextScale(font, scale);
-    LODWORD(v8) = R_TextWidth(text, maxChars, font);
-    *(double *)&v9 = (float)((float)((float)v8 * (float)v7) + (float)0.5);
-    v10 = floor(v9);
-    return (int)(float)*(double *)&v10;
+    actualScale = R_NormalizedTextScale(font, scale);
+    return (int)((double)R_TextWidth(text, maxChars, font) * actualScale);
 }
 
-int __cdecl UI_TextHeight(Font_s *font, double scale)
+int __cdecl UI_TextHeight(Font_s *font, float scale)
 {
-    double v3; // fp31
-    __int64 v4; // r11
-    long double v5; // fp2
-    long double v6; // fp2
+    float actualScale; // [esp+8h] [ebp-4h]
 
-    v3 = R_NormalizedTextScale(font, scale);
-    LODWORD(v4) = R_TextHeight(font);
-    *(double *)&v5 = (float)((float)((float)v4 * (float)v3) + (float)0.5);
-    v6 = floor(v5);
-    return (int)(float)*(double *)&v6;
+    actualScale = R_NormalizedTextScale(font, scale);
+    return (int)((double)R_TextHeight(font) * actualScale);
 }
 
 void __cdecl UI_DrawText(
@@ -366,53 +362,33 @@ void __cdecl UI_DrawText(
     const char *text,
     int maxChars,
     Font_s *font,
-    double x,
-    double y,
+    float x,
+    float y,
     int horzAlign,
     int vertAlign,
-    double scale,
+    float scale,
     const float *color,
-    int style,
-    double a12,
-    double a13,
-    double a14,
-    double a15,
-    double a16,
-    float a17,
-    float a18,
-    float a19,
-    float a20,
-    float a21,
-    float a22,
-    float a23,
-    float a24,
-    float a25,
-    float a26,
-    float a27,
-    float a28,
-    float a29,
-    float a30)
+    int style)
 {
-    long double v36; // fp2
-    long double v37; // fp2
-    long double v38; // fp2
-    int v39; // r7
-    const float *v40; // r6
-    float v41; // [sp+60h] [-50h] BYREF
-    float v42[3]; // [sp+64h] [-4Ch] BYREF
+    PROF_SCOPED("UI_DrawText");
 
-    a28 = x;
-    a30 = y;
-    v42[0] = R_NormalizedTextScale(font, scale);
-    v41 = v42[0];
-    ScrPlace_ApplyRect(scrPlace, &a28, &a30, v42, &v41, (int)color, style);
-    *(double *)&v36 = (float)(a28 + (float)0.5);
-    v37 = floor(v36);
-    a28 = *(double *)&v37;
-    *(double *)&v37 = (float)(a30 + (float)0.5);
-    v38 = floor(v37);
-    a30 = *(double *)&v38;
-    CL_DrawTextPhysical(text, maxChars, font, a28, (float)*(double *)&v38, v42[0], v41, v40, v39);
+    float v11; // [esp+18h] [ebp-18h]
+    float v12; // [esp+1Ch] [ebp-14h]
+    float v13; // [esp+20h] [ebp-10h]
+    float v14; // [esp+24h] [ebp-Ch]
+    float xScale; // [esp+28h] [ebp-8h] BYREF
+    float yScale; // [esp+2Ch] [ebp-4h] BYREF
+
+    xScale = R_NormalizedTextScale(font, scale);
+    yScale = xScale;
+    ScrPlace_ApplyRect(scrPlace, &x, &y, &xScale, &yScale, horzAlign, vertAlign);
+    v14 = x + 0.5;
+    v12 = floor(v14);
+    x = v12;
+    v13 = y + 0.5;
+    v11 = floor(v13);
+    y = v11;
+    CL_DrawTextPhysical(text, maxChars, font, x, v11, xScale, yScale, color, style);
 }
 
 void __cdecl UI_DrawTextWithGlow(
@@ -420,100 +396,53 @@ void __cdecl UI_DrawTextWithGlow(
     const char *text,
     int maxChars,
     Font_s *font,
-    double x,
-    double y,
+    float x,
+    float y,
     int horzAlign,
     int vertAlign,
-    double scale,
+    float scale,
     const float *color,
     int style,
-    double a12,
-    double a13,
-    double a14,
-    double a15,
-    double a16,
     const float *glowColor,
     bool subtitle,
-    bool cinematic,
-    int a20,
-    int a21,
-    int a22,
-    int a23,
-    int a24,
-    int a25,
-    int a26,
-    int a27,
-    float a28,
-    int a29,
-    float a30,
-    int a31,
-    int a32,
-    int a33,
-    int a34,
-    int a35,
-    int a36,
-    int a37,
-    Material *a38,
-    int a39,
-    int a40,
-    int a41,
-    int a42,
-    int a43,
-    char a44)
+    bool cinematic)
 {
-    long double v50; // fp2
-    long double v51; // fp2
-    Material *v52; // r9
-    const float *v53; // r8
-    int v54; // r7
-    const float *v55; // r6
-    long double v56; // fp2
-    double v57; // fp2
-    double v58; // fp4
-    double v59; // fp3
-    double v60; // fp1
-    int v61; // [sp+8h] [-D8h]
-    int v62; // [sp+Ch] [-D4h]
-    int v63; // [sp+10h] [-D0h]
-    int v64; // [sp+14h] [-CCh]
-    float v65; // [sp+90h] [-50h] BYREF
-    float v66[3]; // [sp+94h] [-4Ch] BYREF
+    float v14; // [esp+34h] [ebp-18h]
+    float v15; // [esp+38h] [ebp-14h]
+    float v16; // [esp+3Ch] [ebp-10h]
+    float v17; // [esp+40h] [ebp-Ch]
+    float xScale; // [esp+44h] [ebp-8h] BYREF
+    float yScale; // [esp+48h] [ebp-4h] BYREF
 
-    a28 = x;
-    a30 = y;
-    v66[0] = R_NormalizedTextScale(font, scale);
-    v65 = v66[0];
-    ScrPlace_ApplyRect(scrPlace, &a28, &a30, v66, &v65, (int)color, style);
-    *(double *)&v50 = (float)(a28 + (float)0.5);
-    v51 = floor(v50);
-    a28 = *(double *)&v51;
-    *(double *)&v51 = (float)(a30 + (float)0.5);
-    v56 = floor(v51);
-    v57 = (float)*(double *)&v56;
-    v58 = v65;
-    v59 = v66[0];
-    a30 = *(double *)&v56;
-    v60 = a28;
-    if (a44)
-        R_AddCmdDrawTextSubtitle(text, maxChars, font, v60, v57, v59, v58, 0.0, v55, v54, v53, (bool)v52);
+    xScale = R_NormalizedTextScale(font, scale);
+    yScale = xScale;
+    ScrPlace_ApplyRect(scrPlace, &x, &y, &xScale, &yScale, horzAlign, vertAlign);
+    v17 = x + 0.5;
+    v15 = floor(v17);
+    x = v15;
+    v16 = y + 0.5;
+    v14 = floor(v16);
+    y = v14;
+    if (subtitle)
+        R_AddCmdDrawTextSubtitle(text, maxChars, font, x, y, xScale, yScale, 0.0, color, style, glowColor, cinematic);
     else
         CL_DrawTextPhysicalWithEffects(
             text,
             maxChars,
             font,
-            v60,
-            v57,
-            v59,
-            v58,
-            v55,
-            v54,
-            v53,
-            v52,
-            a38,
-            v61,
-            v62,
-            v63,
-            v64);
+            x,
+            y,
+            xScale,
+            yScale,
+            color,
+            style,
+            glowColor,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0);
 }
 
 void __cdecl UI_DrawTextNoSnap(
@@ -521,44 +450,21 @@ void __cdecl UI_DrawTextNoSnap(
     const char *text,
     int maxChars,
     Font_s *font,
-    double x,
-    double y,
+    float x,
+    float y,
     int horzAlign,
     int vertAlign,
-    double scale,
+    float scale,
     const float *color,
-    int style,
-    double a12,
-    double a13,
-    double a14,
-    double a15,
-    double a16,
-    float a17,
-    float a18,
-    float a19,
-    float a20,
-    float a21,
-    float a22,
-    float a23,
-    float a24,
-    float a25,
-    float a26,
-    float a27,
-    float a28,
-    float a29,
-    float a30)
+    int style)
 {
-    int v36; // r7
-    const float *v37; // r6
-    float v38; // [sp+60h] [-40h] BYREF
-    float v39[15]; // [sp+64h] [-3Ch] BYREF
+    float xScale; // [esp+18h] [ebp-8h] BYREF
+    float yScale; // [esp+1Ch] [ebp-4h] BYREF
 
-    a28 = x;
-    a30 = y;
-    v39[0] = R_NormalizedTextScale(font, scale);
-    v38 = v39[0];
-    ScrPlace_ApplyRect(scrPlace, &a28, &a30, v39, &v38, (int)color, style);
-    CL_DrawTextPhysical(text, maxChars, font, a28, a30, v39[0], v38, v37, v36);
+    xScale = R_NormalizedTextScale(font, scale);
+    yScale = xScale;
+    ScrPlace_ApplyRect(scrPlace, &x, &y, &xScale, &yScale, horzAlign, vertAlign);
+    CL_DrawTextPhysical(text, maxChars, font, x, y, xScale, yScale, color, style);
 }
 
 void __cdecl UI_DrawTextWithCursor(
@@ -566,60 +472,38 @@ void __cdecl UI_DrawTextWithCursor(
     const char *text,
     int maxChars,
     Font_s *font,
-    double x,
-    double y,
+    float x,
+    float y,
     int horzAlign,
     int vertAlign,
-    double scale,
+    float scale,
     const float *color,
     int style,
-    double a12,
-    double a13,
-    double a14,
-    double a15,
-    double a16,
     int cursorPos,
-    char cursor,
-    int a19,
-    int a20,
-    int a21,
-    int a22,
-    int a23,
-    int a24,
-    int a25,
-    int a26,
-    int a27,
-    float a28,
-    int a29,
-    float a30)
+    char cursor)
 {
-    long double v36; // fp2
-    long double v37; // fp2
-    long double v38; // fp2
-    char v39; // r9
-    int v40; // r8
-    int v41; // r7
-    const float *v42; // r6
-    float v43; // [sp+70h] [-50h] BYREF
-    float v44[3]; // [sp+74h] [-4Ch] BYREF
+    float v13; // [esp+20h] [ebp-18h]
+    float v14; // [esp+24h] [ebp-14h]
+    float v15; // [esp+28h] [ebp-10h]
+    float v16; // [esp+2Ch] [ebp-Ch]
+    float xScale; // [esp+30h] [ebp-8h] BYREF
+    float yScale; // [esp+34h] [ebp-4h] BYREF
 
-    a28 = x;
-    a30 = y;
-    v44[0] = R_NormalizedTextScale(font, scale);
-    v43 = v44[0];
-    ScrPlace_ApplyRect(scrPlace, &a28, &a30, v44, &v43, (int)color, style);
-    *(double *)&v36 = (float)(a28 + (float)0.5);
-    v37 = floor(v36);
-    a28 = *(double *)&v37;
-    *(double *)&v37 = (float)(a30 + (float)0.5);
-    v38 = floor(v37);
-    a30 = *(double *)&v38;
-    CL_DrawTextPhysicalWithCursor((char*)text, maxChars, font, a28, (float)*(double *)&v38, v44[0], v43, v42, v41, v40, v39);
+    xScale = R_NormalizedTextScale(font, scale);
+    yScale = xScale;
+    ScrPlace_ApplyRect(scrPlace, &x, &y, &xScale, &yScale, horzAlign, vertAlign);
+    v16 = x + 0.5;
+    v14 = floor(v16);
+    x = v14;
+    v15 = y + 0.5;
+    v13 = floor(v15);
+    y = v13;
+    CL_DrawTextPhysicalWithCursor((char *)text, maxChars, font, x, v13, xScale, yScale, color, style, cursorPos, cursor);
 }
 
-Font_s *__cdecl UI_GetFontHandle(const ScreenPlacement *scrPlace, int fontEnum, double scale)
+Font_s *__cdecl UI_GetFontHandle(const ScreenPlacement *scrPlace, int fontEnum, float scale)
 {
-    double value; // fp0
+    float scalea; // [esp+10h] [ebp+10h]
 
     switch (fontEnum)
     {
@@ -632,26 +516,39 @@ Font_s *__cdecl UI_GetFontHandle(const ScreenPlacement *scrPlace, int fontEnum, 
     case 6:
         return sharedUiInfo.assets.objectiveFont;
     }
-    if (R_IsHiDef())
-        scale = (float)((float)scale * (float)1.5);
-    value = ui_smallFont->current.value;
+    scalea = scrPlace->scaleVirtualToReal[1] * scale;
     if (fontEnum == 4)
     {
-        if (scale > value)
+        if (ui_smallFont->current.value < (double)scalea)
         {
-            if (scale >= ui_bigFont->current.value)
+            if (ui_bigFont->current.value > (double)scalea)
+                return sharedUiInfo.assets.textFont;
+            else
                 return sharedUiInfo.assets.boldFont;
-            return sharedUiInfo.assets.textFont;
         }
+        else
+        {
+            return sharedUiInfo.assets.smallFont;
+        }
+    }
+    else if (ui_smallFont->current.value < (double)scalea)
+    {
+        if (ui_extraBigFont->current.value > (double)scalea)
+        {
+            if (ui_bigFont->current.value > (double)scalea)
+                return sharedUiInfo.assets.textFont;
+            else
+                return sharedUiInfo.assets.bigFont;
+        }
+        else
+        {
+            return sharedUiInfo.assets.extraBigFont;
+        }
+    }
+    else
+    {
         return sharedUiInfo.assets.smallFont;
     }
-    if (scale <= value)
-        return sharedUiInfo.assets.smallFont;
-    if (scale >= ui_extraBigFont->current.value)
-        return sharedUiInfo.assets.extraBigFont;
-    if (scale >= ui_bigFont->current.value)
-        return sharedUiInfo.assets.bigFont;
-    return sharedUiInfo.assets.textFont;
 }
 
 void UI_UpdateSaveUI()
@@ -1102,7 +999,7 @@ void __cdecl UI_OverrideCursorPos(int localClientNum, itemDef_s *item)
     //}
 }
 
-int __cdecl UI_FeederCount(int localClientNum, double feederID)
+int __cdecl UI_FeederCount(int localClientNum, float feederID)
 {
     //if (feederID == 30.0)
     //    return LB_FeederCount(localClientNum);
@@ -1140,19 +1037,18 @@ Material *__cdecl UI_FeederItemImage(double feederID, int index)
 void __cdecl UI_FeederItemColor(
     int localClientNum,
     itemDef_s *item,
-    double feederID,
+    float feederID,
     int index,
     int column,
-    float *color,
-    float *a7)
+    float *color)
 {
-    *a7 = item->window.foreColor[0];
-    a7[1] = item->window.foreColor[1];
-    a7[2] = item->window.foreColor[2];
-    a7[3] = item->window.foreColor[3];
+    color[0] = item->window.foreColor[0];
+    color[1] = item->window.foreColor[1];
+    color[2] = item->window.foreColor[2];
+    color[3] = item->window.foreColor[3];
 }
 
-void __cdecl UI_FeederSelection(int localClientNum, double feederID, int index, int a4)
+void __cdecl UI_FeederSelection(int localClientNum, float feederID, int index)
 {
     //if (feederID == 30.0)
     //    LB_FeederSelection(localClientNum, a4);
@@ -1644,76 +1540,31 @@ int __cdecl UI_OwnerDrawWidth(int ownerDraw, Font_s *font, double scale)
     }
 }
 
-void __cdecl UI_DrawKeyBindStatus(rectDef_s *rect, Font_s *font, double scale, float *color, int textStyle)
+void __cdecl UI_DrawKeyBindStatus(
+    int localClientNum,
+    rectDef_s *rect,
+    Font_s *font,
+    float scale,
+    float *color,
+    int textStyle)
 {
-    const char *v8; // r3
-    int vertAlign; // r27
-    const float *horzAlign; // r26
-    double y; // fp30
-    double x; // fp29
-    char *v13; // r3
-    int v14; // r8
-    int v15; // r7
-    double v16; // fp8
-    double v17; // fp7
-    double v18; // fp6
-    double v19; // fp5
-    double v20; // fp4
-    float v21; // [sp+8h] [-B8h]
-    float v22; // [sp+10h] [-B0h]
-    float v23; // [sp+18h] [-A8h]
-    float v24; // [sp+20h] [-A0h]
-    float v25; // [sp+28h] [-98h]
-    float v26; // [sp+30h] [-90h]
-    float v27; // [sp+38h] [-88h]
-    float v28; // [sp+40h] [-80h]
-    float v29; // [sp+48h] [-78h]
-    float v30; // [sp+50h] [-70h]
-    float v31; // [sp+58h] [-68h]
-    float v32; // [sp+60h] [-60h]
-    float v33; // [sp+68h] [-58h]
-    float v34; // [sp+70h] [-50h]
+    char *v6; // eax
+    float x; // [esp+0h] [ebp-24h]
+    float y; // [esp+4h] [ebp-20h]
+    int horzAlign; // [esp+8h] [ebp-1Ch]
+    int vertAlign; // [esp+Ch] [ebp-18h]
+    const char *v11; // [esp+1Ch] [ebp-8h]
 
     if (Display_KeyBindPending())
-        v8 = "EXE_KEYWAIT";
+        v11 = "EXE_KEYWAIT";
     else
-        v8 = "EXE_KEYCHANGE";
+        v11 = "EXE_KEYCHANGE";
     vertAlign = rect->vertAlign;
-    horzAlign = (const float *)rect->horzAlign;
+    horzAlign = rect->horzAlign;
     y = rect->y;
     x = rect->x;
-    v13 = UI_SafeTranslateString(v8);
-    UI_DrawText(
-        &scrPlaceFull,
-        v13,
-        0x7FFFFFFF,
-        font,
-        x,
-        y,
-        v15,
-        v14,
-        scale,
-        horzAlign,
-        vertAlign,
-        v20,
-        v19,
-        v18,
-        v17,
-        v16,
-        v21,
-        v22,
-        v23,
-        v24,
-        v25,
-        v26,
-        v27,
-        v28,
-        v29,
-        v30,
-        v31,
-        v32,
-        v33,
-        v34);
+    v6 = UI_SafeTranslateString(v11);
+    UI_DrawText(&scrPlaceView[localClientNum], v6, 0x7FFFFFFF, font, x, y, horzAlign, vertAlign, scale, color, textStyle);
 }
 
 void __cdecl UI_DrawLoggedInUserName(rectDef_s *rect, Font_s *font, double scale, float *color, int textStyle)
@@ -2446,7 +2297,7 @@ void __cdecl UI_OwnerDraw(
     switch (ownerDraw)
     {
     case 250:
-        UI_DrawKeyBindStatus(&rect, font, scale, color, textStyle);
+        UI_DrawKeyBindStatus(localClientNum, &rect, font, scale, color, textStyle);
         break;
     case 258:
         UI_DrawSaveGameShot(&rect, scale, color);

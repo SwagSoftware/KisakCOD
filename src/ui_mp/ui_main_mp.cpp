@@ -2749,7 +2749,7 @@ void UI_SelectCurrentGameType()
     }
 }
 
-void __cdecl UI_RunMenuScript(int localClientNum, char **args, const char *actualScript)
+void __cdecl UI_RunMenuScript(int localClientNum, const char **args, const char *actualScript)
 {
     char *v3; // eax
     const char *v4; // eax

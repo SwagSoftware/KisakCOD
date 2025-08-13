@@ -1192,7 +1192,8 @@ VariableUnion __cdecl GetIntGTZero(uint32_t index)
     return (VariableUnion)number;
 }
 
-const BuiltinMethodDef methods_0[22] =
+#ifdef KISAK_MP
+static const BuiltinMethodDef methods_0[22] =
 {
   { "settext", &HECmd_SetText, 0 },
   { "clearalltextafterhudelem", &HECmd_ClearAllTextAfterHudElem, 0 },
@@ -1217,6 +1218,94 @@ const BuiltinMethodDef methods_0[22] =
   { "setmapnamestring", &HECmd_SetMapNameString, 0 },
   { "setgametypestring", &HECmd_SetGameTypeString, 0 }
 };
+#elif KISAK_SP
+static void BG_LerpFontScale(const hudelem_s *elem, int time, float *toScale) // this belongs in bg_misc but is only used here..
+{
+    __int64 v3; // r11 OVERLAPPED
+    double v6; // fp31
+    double fontScale; // fp0
+
+    LODWORD(v3) = elem->fontScaleTime;
+    HIDWORD(v3) = time - elem->fontScaleStartTime;
+    if ((int)v3 <= 0 || SHIDWORD(v3) >= (int)v3)
+    {
+        fontScale = elem->fontScale;
+    }
+    else
+    {
+        if (v3 < 0)
+            HIDWORD(v3) = 0;
+        v6 = (float)((float)*(__int64 *)((char *)&v3 + 4) / (float)v3);
+        if (v6 < 0.0 || v6 > 1.0)
+            MyAssertHandler(
+                "c:\\trees\\cod3\\cod3src\\src\\bgame\\bg_misc.cpp",
+                1848,
+                0,
+                "%s\n\t(lerp) = %g",
+                HIDWORD(v6),
+                LODWORD(v6));
+        fontScale = (float)((float)((float)(elem->fontScale - elem->fromFontScale) * (float)v6) + elem->fromFontScale);
+    }
+    *toScale = fontScale;
+}
+void HECmd_ChangeFontScaleOverTime(scr_entref_t entref)
+{
+    game_hudelem_s *HudElem; // r31
+    double Float; // fp1
+    double v3; // fp31
+    const char *v4; // r3
+    long double v5; // fp2
+    long double v6; // fp2
+
+    HudElem = HECmd_GetHudElem(entref);
+    Float = Scr_GetFloat(0);
+    v3 = Float;
+    if (Float <= 0.0)
+    {
+        v4 = va("scale time %g <= 0", Float);
+    LABEL_5:
+        Scr_ParamError(0, v4);
+        goto LABEL_6;
+    }
+    if (Float > 60.0)
+    {
+        v4 = va("scale time %g > 60", Float);
+        goto LABEL_5;
+    }
+LABEL_6:
+    BG_LerpFontScale(&HudElem->elem, level.time, &HudElem->elem.fromFontScale);
+    HudElem->elem.fontScaleStartTime = level.time;
+    *(double *)&v5 = (float)((float)((float)v3 * (float)1000.0) + (float)0.5);
+    v6 = floor(v5);
+    HudElem->elem.fontScaleTime = (int)(float)*(double *)&v6;
+}
+
+static const BuiltinMethodDef methods_0[20] =
+{
+  { "settext", &HECmd_SetText, 0 },
+  { "clearalltextafterhudelem", &HECmd_ClearAllTextAfterHudElem, 0 },
+  { "setshader", &HECmd_SetMaterial, 0 },
+  { "settargetent", &HECmd_SetTargetEnt, 0 },
+  { "cleartargetent", &HECmd_ClearTargetEnt, 0 },
+  { "settimer", &HECmd_SetTimer, 0 },
+  { "settimerup", &HECmd_SetTimerUp, 0 },
+  { "settenthstimer", &HECmd_SetTenthsTimer, 0 },
+  { "settenthstimerup", &HECmd_SetTenthsTimerUp, 0 },
+  { "setclock", &HECmd_SetClock, 0 },
+  { "setclockup", &HECmd_SetClockUp, 0 },
+  { "setvalue", &HECmd_SetValue, 0 },
+  { "setwaypoint", &HECmd_SetWaypoint, 0 },
+  { "fadeovertime", &HECmd_FadeOverTime, 0 },
+  { "scaleovertime", &HECmd_ScaleOverTime, 0 },
+  { "moveovertime", &HECmd_MoveOverTime, 0 },
+  { "reset", &HECmd_Reset, 0 },
+  { "destroy", &HECmd_Destroy, 0 },
+  { "setpulsefx", &HECmd_SetPulseFX, 0 },
+  { "changefontscaleovertime", &HECmd_ChangeFontScaleOverTime, 0 }
+};
+
+
+#endif
 
 void(__cdecl *__cdecl HudElem_GetMethod(const char **pName))(scr_entref_t)
 {

@@ -128,7 +128,7 @@ static const char *entityTypeNames[17] =
     "ET_VEHICLE_CORPSE"
 };
 #elif KISAK_SP
-const char *entityTypeNames[17] =
+static const char *entityTypeNames[17] =
 {
   "ET_GENERAL",
   "ET_PLAYER",
@@ -334,11 +334,18 @@ struct pmove_t // sizeof=0x110
 };
 #endif
 
+#ifdef KISAK_MP
 struct pmoveHandler_t // sizeof=0x8
 {
     void(__cdecl *trace)(trace_t *, const float *, const float *, const float *, const float *, int, int);
     void(__cdecl *playerEvent)(int, int);
 };
+#elif KISAK_SP
+struct pmoveHandler_t
+{
+    void(*trace)(trace_t *, const float *, const float *, const float *, const float *, int, int);
+};
+#endif
 
 struct tagInfo_s // sizeof=0x70  (SP/MP same)
 {
@@ -662,7 +669,9 @@ void __cdecl G_TraceCapsule(
     int passEntityNum,
     int contentmask);
 
+#ifdef KISAK_MP
 void __cdecl G_PlayerEvent(int clientNum, int event);
+#endif
 void __cdecl CG_TraceCapsule(
     trace_t *results,
     const float *start,
@@ -672,11 +681,11 @@ void __cdecl CG_TraceCapsule(
     int passEntityNum,
     int contentMask);
 
-//#ifdef DEDICATED
-//static const pmoveHandler_t pmoveHandlers[2] = { { G_TraceCapsule, NULL}, {&G_TraceCapsule, &G_PlayerEvent} }; // idb
-//#else
-static const pmoveHandler_t pmoveHandlers[2] = { { CG_TraceCapsule, NULL}, {&G_TraceCapsule, &G_PlayerEvent} }; // idb
-//#endif
+#ifdef KISAK_MP
+static const pmoveHandler_t pmoveHandlers[2] = { { CG_TraceCapsule, NULL}, {G_TraceCapsule, G_PlayerEvent} }; // idb
+#elif KISAK_SP
+static const pmoveHandler_t pmoveHandlers[2] = { { CG_TraceCapsule }, { G_TraceCapsule } };
+#endif
 
 // bg_jump
 extern const dvar_t *jump_height;

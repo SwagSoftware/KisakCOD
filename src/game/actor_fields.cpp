@@ -182,7 +182,7 @@ const actor_fields_s *__cdecl FindFieldForName(const actor_fields_s *fields, con
     return &fields[v4];
 }
 
-void __cdecl ActorScr_SetSpecies(actor_s *pSelf)
+void __cdecl ActorScr_SetSpecies(actor_s *pSelf, const actor_fields_s *pField)
 {
     unsigned int type; // [esp+4h] [ebp-4h]
 

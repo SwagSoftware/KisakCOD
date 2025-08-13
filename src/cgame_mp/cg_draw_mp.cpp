@@ -111,14 +111,6 @@ void __cdecl CG_DrawCenterString(
     }
 }
 
-void __cdecl Vec4Mul(const float *a, const float *b, float *product)
-{
-    *product = *a * *b;
-    product[1] = a[1] * b[1];
-    product[2] = a[2] * b[2];
-    product[3] = a[3] * b[3];
-}
-
 void __cdecl CG_ClearOverheadFade()
 {
     memset((uint8_t *)overheadFade, 0, sizeof(overheadFade));

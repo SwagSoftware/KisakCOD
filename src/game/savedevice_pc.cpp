@@ -26,3 +26,70 @@
 // void __cdecl EndScreenUpdateIfSupported(void) 82280220 f   savedevice_xenon.obj
 // void *__cdecl SaveExists_OpenContextFile(char const *) 82280228 f   savedevice_xenon.obj
 
+// KISAKSAVE
+
+void __cdecl SaveDevice_Init(void)
+{
+
+}
+void __cdecl SV_DisplaySaveErrorUI(void)
+{
+
+}
+bool __cdecl BuildCleanSavePath(char *, unsigned int, char const *, enum SaveType)
+{
+	return false;
+}
+bool __cdecl SaveDevice_IsAccessingDevice(void)
+{
+	return false;
+}
+void __cdecl WriteSaveToDeviceCleanup(void)
+{
+
+}
+bool __cdecl SaveDevice_IsSaveSuccessful(void)
+{
+	return true;
+}
+int __cdecl ReadFromDevice(void *, int, void *)
+{
+	return 0;
+}
+int __cdecl OpenDevice(char const *, void **)
+{
+	return 0;
+}
+void __cdecl CloseDevice(void *)
+{
+	
+}
+bool __cdecl SaveExists(char const *)
+{
+	return false;
+}
+int __cdecl WriteSaveToDevice(unsigned char *, struct SaveHeader const *, bool)
+{
+	return 0;
+}
+
+bool __cdecl SaveDevice_CheckForError(struct MemcardError const *)
+{
+	return false;
+}
+int __cdecl WriteSaveToDeviceInternal(struct SaveHeader const *)
+{
+	return 0;
+}
+void __cdecl BeginScreenUpdateIfSupported(void)
+{
+
+}
+void __cdecl EndScreenUpdateIfSupported(void)
+{
+
+}
+void *__cdecl SaveExists_OpenContextFile(char const *)
+{
+	return 0;
+}

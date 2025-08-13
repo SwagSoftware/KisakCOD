@@ -156,7 +156,6 @@ set(QCOMMON
     "${SRC_DIR}/qcommon/net_chan_mp.h"
     "${SRC_DIR}/qcommon/sv_msg_write_mp.cpp"
     "${SRC_DIR}/qcommon/sv_msg_write_mp.h"
-	"${SRC_DIR}/qcommon/cm_load_obj.cpp"
 )
 
 set(SERVER_MP

@@ -13,6 +13,7 @@
 #include <cgame_mp/cg_local_mp.h>
 #elif KISAK_SP
 #include <cgame/cg_main.h>
+#include "cl_scrn.h"
 #endif
 #include <sound/snd_public.h>
 

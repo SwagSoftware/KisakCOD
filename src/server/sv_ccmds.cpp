@@ -410,8 +410,7 @@ void __cdecl SV_MapRestart(int savegame, int loadScripts)
         if (loadScripts)
             Con_Close(0);
         v5 = Sys_Milliseconds();
-        //SV_RestartGameProgs(v5, savegame, &v6, loadScripts);
-        SV_RestartGameProgs(level.savepersist);
+        SV_RestartGameProgs(v5, savegame, &v6, loadScripts);
         CL_Restart();
         SV_CheckLoadLevel(v6);
         Dvar_SetInt(cl_paused, integer);

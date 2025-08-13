@@ -8,11 +8,6 @@
 #include <server/server.h> // gentity_s 
 #include "actor_cover_arrival.h"
 
-bool __cdecl Actor_AtDifferentElevation(float *vOrgSelf, float *vOrgOther)
-{
-    return fabsf((float)(vOrgSelf[2] - vOrgOther[2])) >= 80.0f;
-}
-
 void __cdecl Actor_TeamMoveBlocked(actor_s *self)
 {
     self->iTeamMoveWaitTime = level.time + 500;

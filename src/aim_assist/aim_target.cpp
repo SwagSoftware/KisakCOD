@@ -491,12 +491,11 @@ void __cdecl AimTarget_UpdateClientTargets()
     memcpy(atGlob.clientTargets, &atGlob, 44 * atGlob.targetCount);
 }
 
-void __cdecl AimTarget_GetClientTargetList(AimTarget **targetList, int *targetCount)
+void __cdecl AimTarget_GetClientTargetList(int32_t localClientNum, AimTarget **targetList, int *targetCount)
 {
-    if (!targetList)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\aim_assist\\aim_target.cpp", 526, 0, "%s", "targetList");
-    if (!targetCount)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\aim_assist\\aim_target.cpp", 527, 0, "%s", "targetCount");
+    iassert(targetList);
+    iassert(targetCount);
+
     *targetList = atGlob.clientTargets;
     *targetCount = atGlob.clientTargetCount;
 }

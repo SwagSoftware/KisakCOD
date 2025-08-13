@@ -13,3 +13,6 @@ struct BuiltinMethodDef
 };
 
 extern const BuiltinMethodDef methods[104];
+
+// mission_dvarlist
+extern const char *missionDvarList[3];

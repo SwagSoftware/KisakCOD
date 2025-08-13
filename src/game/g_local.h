@@ -787,7 +787,7 @@ void __cdecl G_SetPM_MPViewer(bool setting);
 void __cdecl G_srand(unsigned int seed);
 unsigned int __cdecl G_GetRandomSeed();
 unsigned int __cdecl G_rand();
-float __cdecl G_flrand(double min, double max);
+float __cdecl G_flrand(float min, float max);
 int __cdecl G_irand(int min, int max);
 float __cdecl G_random();
 float __cdecl G_crandom();

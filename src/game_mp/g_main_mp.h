@@ -27,19 +27,6 @@ struct entityHandler_t // sizeof=0x28
 };
 static_assert(sizeof(entityHandler_t) == 0x28);
 
-struct SpawnVar // sizeof=0xA0C
-{                                       // ...
-    bool spawnVarsValid;                // ...
-    // padding byte
-    // padding byte
-    // padding byte
-    int32_t numSpawnVars;                   // ...
-    char *spawnVars[64][2];             // ...
-    int32_t numSpawnVarChars;
-    char spawnVarChars[2048];
-};
-static_assert(sizeof(SpawnVar) == 0xA0C);
-
 struct trigger_info_t // sizeof=0xC
 {                                       // ...
     uint16_t entnum;

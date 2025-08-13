@@ -65,6 +65,7 @@ void __cdecl track_static_alloc_internal(void* ptr, int size, const char* name, 
 
 void __cdecl CG_track_init()
 {
+#if 0
     g_mem_track_filename = "cg_memtrack";
     TRACK_g_memtrack();
     g_mem_track_filename = "cg_main";
@@ -89,6 +90,7 @@ void __cdecl CG_track_init()
     TRACK_aim_assist();
     g_mem_track_filename = "aim_target";
     TRACK_aim_target();
+#endif
 }
 
 void __cdecl TRACK_g_memtrack()
@@ -99,6 +101,7 @@ void __cdecl TRACK_g_memtrack()
 
 void __cdecl G_track_init()
 {
+#if 0
     g_mem_track_filename = "g_memtrack";
     TRACK_g_memtrack();
     g_mem_track_filename = "g_main";
@@ -123,6 +126,7 @@ void __cdecl G_track_init()
     TRACK_g_hudelem();
     g_mem_track_filename = "bg_animation_mp";
     TRACK_bg_animation_mp();
+#endif
 }
 
 void __cdecl TRACK_memtrack()

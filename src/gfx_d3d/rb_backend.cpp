@@ -35,6 +35,9 @@
 #include <universal/timing.h>
 
 #include <setjmp.h>
+#ifdef KISAK_SP
+#include <client/cl_scrn.h>
+#endif
 
 void(__cdecl *const RB_RenderCommandTable[22])(GfxRenderCommandExecState *) =
 {

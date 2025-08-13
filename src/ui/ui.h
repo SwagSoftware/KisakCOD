@@ -71,7 +71,7 @@ struct sharedUiInfo_t // sizeof=0x1C5B0
 // LWSS: one of the main differences is that SP doesn't have `localClientNum` because there is no splitscreen
 Font_s *UI_AssetCache();
 
-Font_s *__cdecl UI_GetFontHandle(const ScreenPlacement *scrPlace, int fontEnum, double scale);
+Font_s *__cdecl UI_GetFontHandle(const ScreenPlacement *scrPlace, int fontEnum, float scale);
 void UI_UpdateSaveUI();
 void __cdecl UI_UpdateTime(int realtime);
 void __cdecl UI_Shutdown();
@@ -127,7 +127,13 @@ int __cdecl UI_PopupScriptMenu(const char *menuName, bool useMouse);
 void UI_PlayerStart();
 void __cdecl UI_Refresh();
 int __cdecl UI_OwnerDrawWidth(int ownerDraw, Font_s *font, double scale);
-void __cdecl UI_DrawKeyBindStatus(rectDef_s *rect, Font_s *font, double scale, float *color, int textStyle);
+void __cdecl UI_DrawKeyBindStatus(
+    int localClientNum,
+    rectDef_s *rect,
+    Font_s *font,
+    float scale,
+    float *color,
+    int textStyle);
 void __cdecl UI_DrawLoggedInUserName(rectDef_s *rect, Font_s *font, double scale, float *color, int textStyle);
 void __cdecl UI_SavegameSort(int column, int force);
 void __cdecl UI_DrawConnectScreen();

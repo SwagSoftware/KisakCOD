@@ -9,7 +9,7 @@
 #include "g_main.h"
 #endif
 
-void __cdecl G_DebugLine(const float *start, const float *end, const float *color, int depthTest)
+void __cdecl G_DebugLine(const float *start, const float *end, const float *color, int32_t depthTest)
 {
     CL_AddDebugLine(start, end, color, depthTest, 0, 1);
 }
@@ -18,8 +18,8 @@ void __cdecl G_DebugLineWithDuration(
     const float *start,
     const float *end,
     const float *color,
-    int depthTest,
-    int duration)
+    int32_t depthTest,
+    int32_t duration)
 {
     CL_AddDebugLine(start, end, color, depthTest, duration, 1);
 }
@@ -45,8 +45,8 @@ void __cdecl G_DebugBox(
     const float *maxs,
     float yaw,
     const float *color,
-    int depthTest,
-    int duration)
+    int32_t depthTest,
+    int32_t duration)
 {
     float v7; // [esp+0h] [ebp-94h]
     float v8; // [esp+10h] [ebp-84h]
@@ -86,9 +86,9 @@ void __cdecl G_DebugCircle(
     const float *center,
     float radius,
     const float *color,
-    int depthTest,
-    int onGround,
-    int duration)
+    int32_t depthTest,
+    int32_t onGround,
+    int32_t duration)
 {
     float eyepos[3]; // [esp+18h] [ebp-18h] BYREF
     float dir[3]; // [esp+24h] [ebp-Ch] BYREF
@@ -115,8 +115,8 @@ void __cdecl G_DebugCircleEx(
     float radius,
     const float *dir,
     const float *color,
-    int depthTest,
-    int duration)
+    int32_t depthTest,
+    int32_t duration)
 {
     float fAngle; // [esp+1Ch] [ebp-F4h]
     float fCos; // [esp+20h] [ebp-F0h]
@@ -205,7 +205,6 @@ void G_DebugDrawBrush_r(cLeafBrushNode_s *node, const float *color)
     } while (v4 < node->leafBrushCount);
 }
 
-#ifdef KISAK_SP
 void G_DebugDrawBrushModel(gentity_s *entity, const float *color, int depthTest, int duration)
 {
     unsigned int v8; // r29
@@ -229,7 +228,6 @@ void G_DebugDrawBrushModel(gentity_s *entity, const float *color, int depthTest,
         G_DebugDrawBrush_r(&cm.leafbrushNodes[v9->leaf.leafBrushNode], color);
     }
 }
-#endif
 
 void G_DebugPlane(
     const float * const normal,
@@ -293,4 +291,40 @@ void G_DebugPlane(
     v29[2] = v23[2] - (float)size;
     CL_AddDebugLine(v23, v29, color, depthTest, duration, 1);
 }
-#endif
+
+void __cdecl G_DebugArc(
+    const float *center,
+    float radius,
+    float angle0,
+    float angle1,
+    const float *color,
+    int depthTest,
+    int duration)
+{
+    float fAngle; // [esp+10h] [ebp-D4h]
+    float fCos; // [esp+14h] [ebp-D0h]
+    float fSin; // [esp+18h] [ebp-CCh]
+    unsigned int i; // [esp+1Ch] [ebp-C8h]
+    unsigned int ia; // [esp+1Ch] [ebp-C8h]
+    float scale; // [esp+20h] [ebp-C4h]
+    float v[16][3]; // [esp+24h] [ebp-C0h] BYREF
+
+    scale = (float)(angle1 - angle0) / 15.0;
+    if (scale < 0.0)
+    {
+        angle0 = angle0 - 360.0;
+        scale = (float)(angle1 - angle0) / 15.0;
+    }
+    for (i = 0; i < 0x10; ++i)
+    {
+        fAngle = ((double)i * scale + angle0) * 0.017453292;
+        fCos = cos(fAngle);
+        fSin = sin(fAngle);
+        v[i][0] = (float)(fCos * radius) + *center;
+        v[i][1] = (float)(fSin * radius) + center[1];
+        v[i][2] = center[2];
+    }
+    for (ia = 0; ia < 0xF; ++ia)
+        CL_AddDebugLine(v[ia], v[ia + 1], color, depthTest, duration, 1);
+}
+#endif // KISAK_SP

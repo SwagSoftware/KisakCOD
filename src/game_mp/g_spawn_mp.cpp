@@ -798,6 +798,11 @@ void __cdecl G_ParseEntityField(const char *key, char *value, gentity_s *ent)
     }
 }
 
+void __cdecl GScr_SetDynamicEntityField(gentity_s *ent, unsigned int index)
+{
+    Scr_SetDynamicEntityField(ent->s.number, 0, index);
+}
+
 void __cdecl G_SetEntityScriptVariable(const char *key, char *value, gentity_s *ent)
 {
     uint32_t index; // [esp+0h] [ebp-4h]

@@ -24,6 +24,7 @@
 #include <cgame_mp/cg_local_mp.h>
 #elif KISAK_SP
 #include <cgame/cg_ents.h>
+#include <client/cl_scrn.h>
 #endif
 
 r_globals_load_t rgl;

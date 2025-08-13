@@ -200,8 +200,8 @@ void __cdecl BG_ClearWeaponDef()
 {
     int itemIdx; // [esp+0h] [ebp-4h]
 
-    if (bg_lastParsedWeaponIndex)
-        MyAssertHandler(".\\bgame\\bg_weapons.cpp", 381, 0, "%s", "bg_lastParsedWeaponIndex == 0");
+    iassert(bg_lastParsedWeaponIndex == 0);
+
     bg_weaponDefs[0] = BG_LoadDefaultWeaponDef();
     bg_weapAmmoTypes[0] = bg_weaponDefs[0];
     bg_numAmmoTypes = 1;
@@ -212,7 +212,9 @@ void __cdecl BG_ClearWeaponDef()
     for (itemIdx = 1; itemIdx < 2048; ++itemIdx)
         bg_itemlist[itemIdx].giType = IT_BAD;
     BG_LoadPlayerAnimTypes();
+#ifdef KISAK_MP
     BG_InitWeaponStrings();
+#endif
 }
 
 void __cdecl BG_FillInAllWeaponItems()
@@ -824,10 +826,12 @@ void __cdecl PM_UpdateAimDownSightFlag(pmove_t *pm, pml_t *pml)
                 MyAssertHandler(".\\bgame\\bg_weapons.cpp", 1153, 0, "%s", "ps->otherFlags & POF_PLAYER");
         }
     }
+#ifdef KISAK_MP
     if ((ps->pm_flags & 0x10) != 0)
         BG_SetConditionValue(ps->clientNum, 7u, 1u);
     else
         BG_SetConditionValue(ps->clientNum, 7u, 0);
+#endif
 }
 
 bool __cdecl PM_IsAdsAllowed(playerState_s *ps, pml_t *pml)
@@ -1676,14 +1680,17 @@ void __cdecl PM_Weapon_FinishWeaponChange(pmove_t *pm, bool quick)
                     PM_AddEvent(ps, 0x16u);
                 else
                     PM_AddEvent(ps, 0x15u);
+#ifdef KISAK_MP
                 BG_AnimScriptEvent(ps, ANIM_ET_RAISEWEAPON, 0, 0);
+#endif
             }
         }
         PM_Weapon_BeginWeaponRaise(ps, anim, weapontime, aimspread, altswitch);
-        if (!weapDef)
-            MyAssertHandler(".\\bgame\\bg_weapons.cpp", 2030, 0, "%s", "weapDef");
+#ifdef KISAK_MP
+        iassert(weapDef);
         BG_SetConditionBit(ps->clientNum, 0, weapDef[74]);
         BG_SetConditionBit(ps->clientNum, 1, weapDef[76]);
+#endif
         BG_TakeClipOnlyWeaponIfEmpty(ps, oldweapon);
     }
 }
@@ -2119,8 +2126,10 @@ void __cdecl PM_BeginWeaponReload(playerState_s *ps)
         && ps->weapon
         && ps->weapon < BG_GetNumWeapons())
     {
+#ifdef KISAK_MP
         if (!BG_WeaponIsClipOnly(ps->weapon))
             BG_AnimScriptEvent(ps, ANIM_ET_RELOAD, 0, 1);
+#endif
         ps->weaponShotCount = 0;
         PM_AddEvent(ps, 0xEu);
         PM_AddEvent(ps, 0x13u);
@@ -2490,8 +2499,10 @@ void __cdecl PM_BeginWeaponChange(playerState_s *ps, uint32_t newweapon, bool qu
                         }
                     }
                 }
+#ifdef KISAK_MP
                 if (!altswitch && (ps->pm_flags & 4) == 0)
                     BG_AnimScriptEvent(ps, ANIM_ET_DROPWEAPON, 0, 1);
+#endif
                 ps->weaponstate = quick + 3;
                 PM_SetProneMovementOverride(ps);
                 if (altswitch)
@@ -2662,7 +2673,9 @@ void __cdecl PM_Weapon_StartFiring(playerState_s *ps, int32_t delayedAction)
     if (delayedAction)
     {
     LABEL_19:
+#ifdef KISAK_MP
         BG_AnimScriptEvent(ps, ANIM_ET_FIREWEAPON, 0, 1);
+#endif
         goto LABEL_20;
     }
     if (PM_WeaponAmmoAvailable(ps))
@@ -2852,6 +2865,7 @@ void __cdecl PM_Weapon_MeleeInit(playerState_s *ps)
         ps->weaponDelay = weapDef->iMeleeDelay;
         PM_StartWeaponAnim(ps, 8);
     }
+#ifdef KISAK_MP
     if (weapDef->knifeModel && v1)
     {
         BG_AnimScriptEvent(ps, ANIM_ET_KNIFE_MELEE_CHARGE, 0, 1);
@@ -2864,6 +2878,7 @@ void __cdecl PM_Weapon_MeleeInit(playerState_s *ps)
     {
         BG_AnimScriptEvent(ps, ANIM_ET_MELEEATTACK, 0, 1);
     }
+#endif
     ps->weaponstate = 12;
     PM_AddEvent(ps, 0x1Eu);
     PM_SetProneMovementOverride(ps);
@@ -2927,13 +2942,10 @@ void __cdecl PM_Weapon_OffHandStart(pmove_t *pm)
     WeaponDef *weapDef; // [esp+0h] [ebp-8h]
     playerState_s *ps; // [esp+4h] [ebp-4h]
 
-    if (!pm)
-        MyAssertHandler(".\\bgame\\bg_weapons.cpp", 3315, 0, "%s", "pm");
+    iassert(pm);
     ps = pm->ps;
-    if (!pm->ps)
-        MyAssertHandler(".\\bgame\\bg_weapons.cpp", 3319, 0, "%s", "ps");
-    if (!ps->offHandIndex)
-        MyAssertHandler(".\\bgame\\bg_weapons.cpp", 3320, 0, "%s", "ps->offHandIndex != WP_NONE");
+    iassert(ps);
+    iassert(ps->offHandIndex != WP_NONE);
     weapDef = BG_GetWeaponDef(ps->offHandIndex);
     if (!weapDef->holdButtonToThrow && (pm->oldcmd.buttons & 0xC000) != 0 && (pm->cmd.buttons & 0xC000) != 0)
     {
@@ -2946,7 +2958,9 @@ void __cdecl PM_Weapon_OffHandStart(pmove_t *pm)
         ps->weaponDelay = weapDef->iFireDelay;
         ps->weapFlags |= 2u;
         PM_StartWeaponAnim(ps, 2);
+#ifdef KISAK_MP
         BG_AnimScriptEvent(ps, ANIM_ET_FIREWEAPON, 0, 1);
+#endif
     }
 }
 

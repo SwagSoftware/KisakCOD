@@ -18,7 +18,7 @@ void __cdecl CG_DoBaseOriginController(const cpose_t *pose, const DObj_s *obj, i
 void __cdecl CG_DoControllers(const cpose_t *pose, const DObj_s *obj, int *partBits);
 DObjAnimMat *__cdecl CG_DObjCalcPose(const cpose_t *pose, const DObj_s *obj, int *partBits);
 
-int __cdecl CompressUnit(double unit)
+inline int __cdecl CompressUnit(double unit)
 {
     if (unit < 0.0 || unit > 1.0)
         MyAssertHandler(

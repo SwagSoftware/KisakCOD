@@ -1328,9 +1328,10 @@ void __cdecl PmoveSingle(pmove_t *pm)
     playerState_s *ps; // [esp+1C0h] [ebp-4h]
 
     ps = pm->ps;
-    if (!ps)
-        MyAssertHandler(".\\bgame\\bg_pmove.cpp", 4839, 0, "%s", "ps");
+    iassert(ps);
+#ifdef KISAK_MP
     BG_AnimUpdatePlayerStateConditions(pm);
+#endif
     if ((ps->pm_flags & 0x20000) != 0)
         pm->cmd.forwardmove = 127;
     if ((ps->pm_flags & 0x800) != 0)
@@ -2646,13 +2647,8 @@ void __cdecl PM_GroundTrace(pmove_t *pm, pml_t *pml)
         }
         else
         {
-            if (trace.normal[0] == 0.0 && trace.normal[1] == 0.0 && trace.normal[2] == 0.0)
-                MyAssertHandler(
-                    ".\\bgame\\bg_pmove.cpp",
-                    2047,
-                    0,
-                    "%s",
-                    "trace.normal[0] || trace.normal[1] || trace.normal[2]");
+            iassert(trace.normal[0] || trace.normal[1] || trace.normal[2]);
+
             if ((ps->pm_flags & 8) != 0 || ps->velocity[2] <= 0.0 || Vec3Dot(ps->velocity, trace.normal) <= 10.0)
             {
                 if (trace.walkable)
@@ -2675,6 +2671,7 @@ void __cdecl PM_GroundTrace(pmove_t *pm, pml_t *pml)
                     Jump_ClearState(ps);
                 }
             }
+#ifdef KISAK_MP
             else
             {
                 if (pm->cmd.forwardmove < 0)
@@ -2686,6 +2683,7 @@ void __cdecl PM_GroundTrace(pmove_t *pm, pml_t *pml)
                 pml->groundPlane = 0;
                 pml->walking = 0;
             }
+#endif
         }
     }
 }
@@ -2767,7 +2765,9 @@ void __cdecl PM_CrashLand(playerState_s *ps, pml_t *pml)
             viewDip = (int)((fallHeight - 12.0f) / 26.0f * 4.0f + 4.0f);
             if (viewDip > 24)
                 viewDip = 24;
+#ifdef KISAK_MP
             BG_AnimScriptEvent(ps, ANIM_ET_LAND, 0, 1);
+#endif
         }
         else
         {
@@ -2907,11 +2907,10 @@ void __cdecl PM_GroundTraceMissed(pmove_t *pm, pml_t *pml)
     playerState_s *ps; // [esp+3Ch] [ebp-10h]
     float point[3]; // [esp+40h] [ebp-Ch] BYREF
 
-    if (!pm)
-        MyAssertHandler(".\\bgame\\bg_pmove.cpp", 1931, 0, "%s", "pm");
+    iassert(pm);
     ps = pm->ps;
-    if (!ps)
-        MyAssertHandler(".\\bgame\\bg_pmove.cpp", 1934, 0, "%s", "ps");
+    iassert(ps);
+#ifdef KISAK_MP
     if (ps->groundEntityNum == ENTITYNUM_NONE)
     {
         point[0] = ps->origin[0];
@@ -2941,6 +2940,7 @@ void __cdecl PM_GroundTraceMissed(pmove_t *pm, pml_t *pml)
             pml->almostGroundPlane = trace.fraction < 0.015625;
         }
     }
+#endif
     ps->groundEntityNum = ENTITYNUM_NONE;
     pml->groundPlane = 0;
     pml->walking = 0;
@@ -3111,18 +3111,22 @@ void __cdecl PM_CheckDuck(pmove_t *pm, pml_t *pml)
                                     if ((pm->cmd.buttons & 0x1000) == 0)
                                         BG_AddPredictableEventToPlayerstate(8u, 2u, ps);
                                 }
+#ifdef KISAK_MP
                                 else
                                 {
                                     BG_AnimScriptEvent(ps, ANIM_ET_PRONE_TO_CROUCH, 0, 0);
                                     ps->pm_flags &= ~1u;
                                     ps->pm_flags |= 2u;
                                 }
+#endif
                             }
+#ifdef KISAK_MP
                             else
                             {
                                 BG_AnimScriptEvent(ps, ANIM_ET_STAND_TO_CROUCH, 0, 0);
                                 ps->pm_flags |= 2u;
                             }
+#endif
                         }
                         else if ((ps->pm_flags & 1) != 0)
                         {
@@ -3156,11 +3160,13 @@ void __cdecl PM_CheckDuck(pmove_t *pm, pml_t *pml)
                                     ps->pm_flags |= 2u;
                                 }
                             }
+#ifdef KISAK_MP
                             else
                             {
                                 BG_AnimScriptEvent(ps, ANIM_ET_PRONE_TO_STAND, 0, 0);
                                 ps->pm_flags &= 0xFFFFFFFC;
                             }
+#endif
                         }
                         else if ((ps->pm_flags & 2) != 0)
                         {
@@ -3177,11 +3183,13 @@ void __cdecl PM_CheckDuck(pmove_t *pm, pml_t *pml)
                                 if ((pm->cmd.buttons & 0x1000) == 0)
                                     BG_AddPredictableEventToPlayerstate(7u, 1u, ps);
                             }
+#ifdef KISAK_MP
                             else
                             {
                                 BG_AnimScriptEvent(ps, ANIM_ET_CROUCH_TO_STAND, 0, 0);
                                 ps->pm_flags &= ~2u;
                             }
+#endif
                         }
                     }
                     else if (PlayerProneAllowed(pm))
@@ -3223,8 +3231,8 @@ void __cdecl PM_CheckDuck(pmove_t *pm, pml_t *pml)
                         ps->viewHeightTarget = 11;
 #ifdef KISAK_MP
                         pm->proneChange = 1;
-#endif
                         BG_PlayAnim(ps, 0, ANIM_BP_TORSO, 0, 0, 1, 1);
+#endif
                         Jump_ActivateSlowdown(ps);
                     }
                 }
@@ -3233,8 +3241,8 @@ void __cdecl PM_CheckDuck(pmove_t *pm, pml_t *pml)
                     ps->viewHeightTarget = 40;
 #ifdef KISAK_MP
                     pm->proneChange = 1;
-#endif
                     BG_PlayAnim(ps, 0, ANIM_BP_TORSO, 0, 0, 1, 1);
+#endif
                 }
                 else if ((ps->pm_flags & 2) != 0)
                 {
@@ -3600,21 +3608,22 @@ void __cdecl PM_Footsteps(pmove_t *pm, pml_t *pml)
     int32_t old; // [esp+38h] [ebp-8h]
     PmStanceFrontBack stanceFrontBack; // [esp+3Ch] [ebp-4h]
 
-    if (!pm)
-        MyAssertHandler(".\\bgame\\bg_pmove.cpp", 3526, 0, "%s", "pm");
+    iassert(pm);
     ps = pm->ps;
-    if (!pm->ps)
-        MyAssertHandler(".\\bgame\\bg_pmove.cpp", 3529, 0, "%s", "ps");
+    iassert(ps);
+#ifdef KISAK_MP
     BG_CheckThread();
-    if (!bgs)
-        MyAssertHandler(".\\bgame\\bg_pmove.cpp", 3537, 0, "%s", "bgs");
+    iassert(bgs);
+#endif
     if (ps->pm_type < PM_DEAD)
     {
         pm->xyspeed = Vec2Length(ps->velocity);
         if ((ps->eFlags & 0x300) != 0)
         {
+#ifdef KISAK_MP
             StanceIdleAnim = (scriptAnimMoveTypes_t)PM_GetStanceIdleAnim(ps->pm_flags);
             BG_AnimScriptAnimation(ps, AISTATE_COMBAT, StanceIdleAnim, 0);
+#endif
         }
         else
         {
@@ -3634,10 +3643,12 @@ void __cdecl PM_Footsteps(pmove_t *pm, pml_t *pml)
                 else if (pm->cmd.forwardmove || pm->cmd.rightmove)
                 {
                     stanceFrontBack = (PmStanceFrontBack)PM_GetStanceEx(iStance, ps->pm_flags & 0x20);
+#ifdef KISAK_MP
                     PM_SetStrafeCondition(pm);
                     moveAnim = (scriptAnimMoveTypes_t)PM_GetMoveAnim(ps, stanceFrontBack, walking, sprinting);
                     if (BG_AnimScriptAnimation(ps, AISTATE_COMBAT, moveAnim, 0) < 0)
                         BG_AnimScriptAnimation(ps, AISTATE_COMBAT, ANIM_MT_IDLE, 0);
+#endif
                     fMaxSpeed = PM_GetMaxSpeed(pm, walking, sprinting);
                     bobmove = PM_GetBobMove(stanceFrontBack, pm->xyspeed, fMaxSpeed, walking, sprinting);
                     old = ps->bobCycle;
@@ -3645,10 +3656,12 @@ void __cdecl PM_Footsteps(pmove_t *pm, pml_t *pml)
                     Footsteps = PM_ShouldMakeFootsteps(pm);
                     PM_FootstepEvent(pm, pml, old, ps->bobCycle, Footsteps);
                 }
+#ifdef KISAK_MP
                 else
                 {
                     PM_Footstep_NotTryingToMove(pm);
                 }
+#endif
             }
             else
             {
@@ -3687,15 +3700,19 @@ void __cdecl PM_Footstep_LadderMove(pmove_t *pm, pml_t *pml)
     if ((pm->ps->pm_flags & 8) != 0 && pm->cmd.serverTime - ps->jumpTime >= 300)
     {
         fLadderSpeed = ps->velocity[2];
-        fMaxSpeed = 0.5 * 1.5 * 127.0;
+        fMaxSpeed = 0.5f * 1.5f * 127.0f;
+
         if ((ps->pm_flags & 0x40) == 0 && ps->leanf == 0.0)
             bobmove = fLadderSpeed / (fMaxSpeed * 1.0) * 0.449999988079071;
         else
             bobmove = fLadderSpeed / (fMaxSpeed * 0.4000000059604645) * 0.3499999940395355;
+#ifdef KISAK_MP
         if (fLadderSpeed < 0.0)
             BG_AnimScriptAnimation(ps, AISTATE_COMBAT, ANIM_MT_CLIMBDOWN, 0);
         else
             BG_AnimScriptAnimation(ps, AISTATE_COMBAT, ANIM_MT_CLIMBUP, 0);
+#endif
+
         old = ps->bobCycle;
         ps->bobCycle = (uint8_t)(int)((double)old + (double)pml->msec * bobmove);
         PM_FootstepEvent(pm, pml, old, ps->bobCycle, 1);
@@ -3781,6 +3798,7 @@ uint32_t __cdecl PM_GetFlinchAnim(uint32_t flinchAnimDir)
     return flinchAnimDir + 32;
 }
 
+#ifdef KISAK_MP
 int32_t __cdecl PM_Footsteps_TurnAnim(clientInfo_t *ci)
 {
     int32_t turnAdjust; // [esp+0h] [ebp-4h]
@@ -3820,7 +3838,7 @@ int32_t __cdecl PM_Footsteps_TurnAnim(clientInfo_t *ci)
     }
     return turnAdjust;
 }
-
+#endif
 scriptAnimMoveTypes_t __cdecl PM_GetNotMovingAnim(int32_t stance, int32_t turnAdjust)
 {
     int32_t turn; // [esp+0h] [ebp-4h]
@@ -3935,7 +3953,6 @@ int32_t __cdecl PM_GetMoveAnim(playerState_s *ps, PmStanceFrontBack stance, int3
         return ps->damageTimer > stumble_end_time ? 42 : 20;
     return moveAnim;
 }
-#endif
 
 void __cdecl PM_SetStrafeCondition(pmove_t *pm)
 {
@@ -3988,6 +4005,7 @@ void __cdecl PM_Footstep_NotTryingToMove(pmove_t *pm)
         }
     }
 }
+#endif // KISAK_MP
 
 void __cdecl PM_FoliageSounds(pmove_t *pm)
 {
@@ -4228,8 +4246,10 @@ void __cdecl PM_CheckLadderMove(pmove_t *pm, pml_t *pml)
                 {
                 LABEL_45:
                     PM_ClearLadderFlag(ps);
+#ifdef KISAK_MP
                     if (fellOffLadderInAir)
                         BG_AnimScriptEvent(ps, ANIM_ET_JUMP, 0, 1);
+#endif
                 }
             }
         }

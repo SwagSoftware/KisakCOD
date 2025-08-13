@@ -49,10 +49,10 @@ float __cdecl Actor_GetPlayerMovementAccuracy(const actor_s *self, const sentien
 float __cdecl Actor_GetPlayerSightAccuracy(actor_s *self, const sentient_s *enemy);
 float __cdecl Actor_GetFinalAccuracy(actor_s *self, weaponParms *wp, double accuracyMod);
 void __cdecl Actor_FillWeaponParms(actor_s *self, weaponParms *wp);
-void __cdecl Actor_HitSentient(weaponParms *wp, sentient_s *enemy, double accuracy);
+void __cdecl Actor_HitSentient(weaponParms *wp, sentient_s *enemy, float accuracy);
 void __cdecl Actor_HitTarget(const weaponParms *wp, const float *target, float *forward);
 void __cdecl Actor_HitEnemy(actor_s *self, weaponParms *wp, double accuracy);
-void __cdecl Actor_MissSentient(weaponParms *wp, sentient_s *enemy, double accuracy);
+void __cdecl Actor_MissSentient(weaponParms *wp, sentient_s *enemy, float accuracy);
 void __cdecl Actor_MissTarget(const weaponParms *wp, const float *target, float *forward);
 void __cdecl Actor_MissEnemy(actor_s *self, weaponParms *wp, double accuracy);
 void __cdecl Actor_ShootNoEnemy(actor_s *self, weaponParms *wp);

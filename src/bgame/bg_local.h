@@ -1544,6 +1544,7 @@ void __cdecl Jump_PushOffLadder(playerState_s *ps, pml_t *pml);
 void __cdecl Jump_AddSurfaceEvent(playerState_s *ps, pml_t *pml);
 
 // bg_animation_mp
+#ifdef KISAK_MP
 void __cdecl TRACK_bg_animation_mp();
 void BG_AnimParseError(const char *msg, ...);
 uint32_t __cdecl BG_AnimationIndexForString(const char *string);
@@ -1553,6 +1554,20 @@ void __cdecl BG_InitWeaponString(int32_t index, const char *name);
 void __cdecl BG_InitWeaponStrings();
 void __cdecl BG_ParseCommands(const char **input, animScriptItem_t *scriptItem, animScriptData_t *scriptData);
 int32_t __cdecl GetValueForBitfield(uint32_t bitfield);
+
+int32_t __cdecl BG_ExecuteCommand(
+    playerState_s *ps,
+    animScriptCommand_t *scriptCommand,
+    int32_t setTimer,
+    int32_t isContinue,
+    int32_t force);
+animScriptItem_t *__cdecl BG_FirstValidItem(uint32_t client, animScript_t *script);
+int32_t __cdecl BG_EvaluateConditions(clientInfo_t *ci, animScriptItem_t *scriptItem);
+const char *__cdecl GetMoveTypeName(int32_t type);
+const char *__cdecl GetWeaponTypeName(int32_t type);
+const char *__cdecl GetBodyPart(int32_t bodypart);
+int32_t __cdecl BG_AnimScriptAnimation(playerState_s *ps, aistateEnum_t state, scriptAnimMoveTypes_t movetype, int32_t force);
+int32_t __cdecl BG_AnimScriptEvent(playerState_s *ps, scriptAnimEventTypes_t event, int32_t isContinue, int32_t force);
 int32_t __cdecl BG_PlayAnim(
     playerState_s *ps,
     int32_t animNum,
@@ -1561,19 +1576,6 @@ int32_t __cdecl BG_PlayAnim(
     int32_t setTimer,
     int32_t isContinue,
     int32_t force);
-int32_t __cdecl BG_ExecuteCommand(
-    playerState_s *ps,
-    animScriptCommand_t *scriptCommand,
-    int32_t setTimer,
-    int32_t isContinue,
-    int32_t force);
-int32_t __cdecl BG_AnimScriptAnimation(playerState_s *ps, aistateEnum_t state, scriptAnimMoveTypes_t movetype, int32_t force);
-animScriptItem_t *__cdecl BG_FirstValidItem(uint32_t client, animScript_t *script);
-int32_t __cdecl BG_EvaluateConditions(clientInfo_t *ci, animScriptItem_t *scriptItem);
-const char *__cdecl GetMoveTypeName(int32_t type);
-const char *__cdecl GetWeaponTypeName(int32_t type);
-const char *__cdecl GetBodyPart(int32_t bodypart);
-int32_t __cdecl BG_AnimScriptEvent(playerState_s *ps, scriptAnimEventTypes_t event, int32_t isContinue, int32_t force);
 void __cdecl BG_SetConditionValue(uint32_t client, uint32_t condition, uint64_t value);
 const char *__cdecl BG_GetConditionString(int32_t condition, uint32_t value);
 void __cdecl BG_SetConditionBit(uint32_t client, int32_t condition, int32_t value);
@@ -1635,6 +1637,9 @@ void BG_FindAnimTrees();
 scr_animtree_t __cdecl BG_FindAnimTree(const char *filename, int32_t bEnforceExists);
 
 extern bgs_t *bgs;
+
+#endif // KISAK_MP
+
 
 // bg_misc
 struct WeaponDef;
@@ -1945,7 +1950,9 @@ double __cdecl PM_GetBobMove(PmStanceFrontBack stance, float xyspeed, float fMax
 int32_t __cdecl PM_GetStanceIdleAnim(char stanceFlag);
 int32_t __cdecl PM_GetMoveAnim(playerState_s *ps, PmStanceFrontBack stance, int32_t walking, int32_t sprinting);
 void __cdecl PM_SetStrafeCondition(pmove_t *pm);
+#ifdef KISAK_MP
 void __cdecl PM_Footstep_NotTryingToMove(pmove_t *pm);
+#endif
 void __cdecl PM_FoliageSounds(pmove_t *pm);
 void __cdecl PM_DropTimers(playerState_s *ps, pml_t *pml);
 void __cdecl PM_UpdatePlayerWalkingFlag(pmove_t *pm);

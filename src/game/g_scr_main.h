@@ -97,7 +97,7 @@ void *__cdecl GScr_AnimscriptAlloc(int size);
 void __cdecl GScr_SetScriptsForPathNode(pathnode_t *loadNode, ScriptFunctions *data);
 void __cdecl GScr_SetScriptsForPathNodes(ScriptFunctions *functions);
 scr_animtree_t __cdecl GScr_FindAnimTree(const char *filename, int bEnforceExists);
-void __cdecl GScr_FindAnimTrees(int a1, const char *a2);
+void __cdecl GScr_FindAnimTrees();
 void __cdecl GScr_SetSingleAnimScript(ScriptFunctions *functions, scr_animscript_t *pAnim, const char *name);
 void __cdecl GScr_SetAnimScripts(ScriptFunctions *functions);
 void __cdecl GScr_SetDogAnimScripts(ScriptFunctions *functions);

@@ -15,6 +15,7 @@
 #include <game/savememory.h>
 #include <game/g_main.h>
 #include <cgame/cg_main.h>
+#include <client/cl_scrn.h>
 
 const dvar_t *sv_clientFrameRateFix;
 const dvar_t *sv_loadMyChanges;
@@ -453,8 +454,7 @@ void __cdecl SV_SpawnServer(const char *server, int savegame)
     SCR_UpdateLoadScreen();
     SaveMemory_InitializeSaveSystem();
     SaveMemory_ClearDemoSave();
-    //SV_InitGameProgs(v7, savegame, &v11);
-    SV_InitGameProgs(level.savepersist);
+    SV_InitGameProgs(v7, savegame, &v11);
     CL_SetSkipRendering(1);
     if (CL_DemoPlaying())
         CL_FinishLoadingDemo();

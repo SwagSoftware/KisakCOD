@@ -211,10 +211,12 @@ char __cdecl Jump_Check(pmove_t *pm, pml_t *pml)
         Jump_AddSurfaceEvent(ps, pml);
         if ((ps->pm_flags & 8) != 0)
             Jump_PushOffLadder(ps, pml);
+#ifdef KISAK_MP
         if (pm->cmd.forwardmove < 0)
             BG_AnimScriptEvent(ps, ANIM_ET_JUMPBK, 0, 1);
         else
             BG_AnimScriptEvent(ps, ANIM_ET_JUMP, 0, 1);
+#endif
         return 1;
     }
 }

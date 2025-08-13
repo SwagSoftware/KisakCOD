@@ -5,7 +5,5 @@
 #include <universal/q_shared.h>
 
 
-
-const char *missionDvarList[] =
-{ "mis_01", "mis_difficulty", NULL };
+const char *missionDvarList[3] = { "mis_01", "mis_difficulty", NULL };
 

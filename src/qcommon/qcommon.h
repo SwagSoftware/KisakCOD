@@ -93,6 +93,8 @@ static const char *WeaponStateNames[27] =
 
 extern int marker_common;
 
+extern int com_expectedHunkUsage;
+
 extern int com_skelTimeStamp;
 extern unsigned int com_errorPrintsCount;
 
@@ -1129,6 +1131,19 @@ int __cdecl CM_LeafCluster(unsigned int leafnum);
 void __cdecl CM_ModelBounds(unsigned int model, float *mins, float *maxs);
 
 // cm_load_obj
+struct SpawnVar // sizeof=0xA0C
+{                                       // ...
+    bool spawnVarsValid;                // ...
+    // padding byte
+    // padding byte
+    // padding byte
+    int32_t numSpawnVars;                   // ...
+    char *spawnVars[64][2];             // ...
+    int32_t numSpawnVarChars;
+    char spawnVarChars[2048];
+};
+static_assert(sizeof(SpawnVar) == 0xA0C);
+
 void __cdecl CM_LoadMapData_LoadObj(const char *name);
 struct cplane_s *__cdecl CM_GetPlanes();
 int __cdecl CM_GetPlaneCount();
@@ -1432,6 +1447,7 @@ void __cdecl StatMon_GetStatsArray(const statmonitor_s **array, int *count);
 void __cdecl StatMon_Reset();
 
 // cl_scrn_mp (KISAKTODO: move out or merge with SP)
+#ifdef KISAK_MP
 void __cdecl SCR_DrawSmallStringExt(int x, int y, char *string, const float *setColor);
 void __cdecl SCR_Init();
 float __cdecl CL_GetMenuBlurRadius(int localClientNum);
@@ -1446,7 +1462,7 @@ void SCR_ClearScreen();
 void __cdecl SCR_UpdateLoadScreen();
 void __cdecl CL_CubemapShot_f();
 void CL_CubemapShotUsage();
-
+#endif
 
 
 /**

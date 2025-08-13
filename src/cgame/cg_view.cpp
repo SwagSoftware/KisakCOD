@@ -21,6 +21,7 @@
 #include <client/cl_input.h>
 #include <game/g_local.h>
 #include "cg_snapshot.h"
+#include <client/cl_scrn.h>
 
 ClientViewParams clientViewParamsArray[1][1] = { { { 0.0, 0.0, 1.0, 1.0 } } };
 TestEffect s_testEffect[1];

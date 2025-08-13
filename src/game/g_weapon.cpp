@@ -146,6 +146,7 @@ void __cdecl G_AntiLag_RestoreClientPos(AntilagClientStore *antilagStore)
 
 gentity_s *__cdecl Weapon_Melee(gentity_s *ent, weaponParms *wp, float range, float width, float height, int gametime)
 {
+#ifdef KISAK_MP
     AntilagClientStore antilagClients; // [esp+Ch] [ebp-348h] BYREF
     gentity_s *traceEnt; // [esp+350h] [ebp-4h]
 
@@ -153,6 +154,9 @@ gentity_s *__cdecl Weapon_Melee(gentity_s *ent, weaponParms *wp, float range, fl
     traceEnt = Weapon_Melee_internal(ent, wp, range, width, height);
     G_AntiLag_RestoreClientPos(&antilagClients);
     return traceEnt;
+#elif KISAK_SP
+    return Weapon_Melee_internal(ent, wp, range, width, height);
+#endif
 }
 
 gentity_s *__cdecl Weapon_Melee_internal(gentity_s *ent, weaponParms *wp, float range, float width, float height)

@@ -909,3 +909,17 @@ void __cdecl SV_RestartGameProgs(int savepersist)
 }
 
 #endif // KISAK_MP
+
+#ifdef KISAK_SP
+void SV_GameSendServerCommand(int clientNum, const char *text)
+{
+    if (clientNum == -1)
+    {
+        SV_SendServerCommand(0, "%s", text);
+    }
+    else if (!clientNum)
+    {
+        SV_SendServerCommand(svs.clients, "%s", text);
+    }
+}
+#endif // KISAK_SP

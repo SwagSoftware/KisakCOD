@@ -1301,9 +1301,6 @@ void __cdecl UI_FillRect(
     int vertAlign,
     const float *color);
 
-extern int com_expectedHunkUsage;
-
-
 
 // ui_expressions_logicfunctions
 int __cdecl compare_impact_files(const char **pe0, const char **pe1);
@@ -1988,11 +1985,11 @@ bool __cdecl UI_AnyMenuVisible(int localClientNum);
 bool __cdecl Menu_IsMenuOpenAndVisible(int localClientNum, const char *menuName);
 void __cdecl UI_ClosePopupScriptMenu(int localClientNum, bool allowResponse);
 bool __cdecl UI_AllowScriptMenuResponse(int localClientNum);
-void __cdecl UI_RunMenuScript(int localClientNum, char **args, const char *actualScript);
+void __cdecl UI_RunMenuScript(int localClientNum, const char **args, const char *actualScript);
 int __cdecl UI_SetActiveMenu(int localClientNum, uiMenuCommand_t menu);
 int __cdecl UI_Popup(int localClientNum, const char *menu);
 
-Font_s *__cdecl UI_GetFontHandle(const ScreenPlacement *scrPlace, int fontEnum, float scale);
+struct Font_s *__cdecl UI_GetFontHandle(const struct ScreenPlacement *scrPlace, int fontEnum, float scale);
 
 UILocalVarContext *__cdecl UI_GetLocalVarsContext(int localClientNum);
 

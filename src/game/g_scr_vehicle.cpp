@@ -2572,7 +2572,7 @@ void VEH_SetupCollmap(gentity_s *ent)
 }
 
 #ifdef KISAK_SP
-static void G_UpdateVehicleTags(gentity_s *ent)
+void G_UpdateVehicleTags(gentity_s *ent)
 {
     scr_vehicle_s *scr_vehicle; // r30
     int *flash; // r28
@@ -4833,6 +4833,96 @@ LABEL_7:
         }
     }
     return result;
+}
+
+void __cdecl VEH_SetPosition(gentity_s *ent, const float *origin, const float *vel, const float *angles)
+{
+    scr_vehicle_s *scr_vehicle; // r26
+    double v9; // fp12
+    double v10; // fp13
+    double v11; // fp0
+    double v12; // fp12
+    double v13; // fp13
+    double v14; // fp0
+    gentity_s *v15; // r31
+    gentity_s *v16; // r31
+
+    scr_vehicle = ent->scr_vehicle;
+    v9 = *origin;
+    if (ent->r.currentOrigin[0] != v9
+        || (v10 = origin[1], ent->r.currentOrigin[1] != v10)
+        || (v11 = origin[2], ent->r.currentOrigin[2] != v11)
+        || ent->s.lerp.pos.trBase[0] != v9
+        || ent->s.lerp.pos.trBase[1] != v10
+        || ent->s.lerp.pos.trBase[2] != v11
+        || (v12 = *angles, ent->r.currentAngles[0] != v12)
+        || (v13 = angles[1], ent->r.currentAngles[1] != v13)
+        || (v14 = angles[2], ent->r.currentAngles[2] != v14)
+        || ent->s.lerp.apos.trBase[0] != v12
+        || ent->s.lerp.apos.trBase[1] != v13
+        || ent->s.lerp.apos.trBase[2] != v14)
+    {
+        G_SetOrigin(ent, (float*)origin);
+        G_SetAngle(ent, (float*)angles);
+        ent->s.lerp.pos.trType = TR_INTERPOLATE;
+        ent->s.lerp.apos.trType = TR_INTERPOLATE;
+        ent->s.lerp.pos.trDelta[0] = *vel;
+        ent->s.lerp.pos.trDelta[1] = vel[1];
+        ent->s.lerp.pos.trDelta[2] = vel[2];
+        SV_LinkEntity(ent);
+        if (scr_vehicle->idleSndEnt.isDefined())
+        {
+            v15 = scr_vehicle->idleSndEnt.ent();
+            G_SetOrigin(v15, (float*)origin);
+            G_SetAngle(v15, (float *)angles);
+            v15->s.lerp.pos.trType = TR_INTERPOLATE;
+            v15->s.lerp.apos.trType = TR_INTERPOLATE;
+            SV_LinkEntity(v15);
+        }
+        if (scr_vehicle->engineSndEnt.isDefined())
+        {
+            v16 = scr_vehicle->engineSndEnt.ent();
+            G_SetOrigin(v16, (float*)origin);
+            G_SetAngle(v16, (float*)angles);
+            v16->s.lerp.pos.trType = TR_INTERPOLATE;
+            v16->s.lerp.apos.trType = TR_INTERPOLATE;
+            SV_LinkEntity(v16);
+        }
+    }
+}
+
+void __cdecl VEH_JoltBody(gentity_s *ent, const float *dir, float intensity, float speedFrac, float decel)
+{
+    float v5; // [esp+0h] [ebp-40h]
+    float v6; // [esp+4h] [ebp-3Ch]
+    float v7; // [esp+8h] [ebp-38h]
+    float v8; // [esp+Ch] [ebp-34h]
+    vehicle_info_t *info; // [esp+14h] [ebp-2Ch]
+    scr_vehicle_s *veh; // [esp+18h] [ebp-28h]
+    float axis[3][3]; // [esp+1Ch] [ebp-24h] BYREF
+
+    veh = ent->scr_vehicle;
+    info = &s_vehicleInfos[veh->infoIdx];
+    v7 = intensity - 1.0;
+    if (v7 < 0.0)
+        v8 = intensity;
+    else
+        v8 = 1.0;
+    v6 = 0.0 - intensity;
+    if (v6 < 0.0)
+        v5 = v8;
+    else
+        v5 = 0.0;
+    AnglesToAxis(veh->phys.angles, axis);
+    veh->joltDir[0] = Vec3Dot(dir, axis[0]);
+    veh->joltDir[1] = -Vec3Dot(dir, axis[1]);
+    veh->joltTime = 1.0;
+    veh->joltWave = 0.0;
+    Vec2Normalize(veh->joltDir);
+    veh->joltDir[0] = info->maxBodyPitch * v5 * veh->joltDir[0];
+    veh->joltDir[1] = info->maxBodyRoll * v5 * veh->joltDir[1];
+    veh->joltSpeed = veh->speed * speedFrac;
+    veh->joltDecel = decel;
 }
 
 #endif // KISAK_SP

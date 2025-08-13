@@ -465,6 +465,7 @@ void __cdecl Dvar_Dump_f()
     }
 }
 
+#ifdef KISAK_MP
 void __cdecl SV_SetConfig(int start, int max, int bit)
 {
     DvarSetConfigInfo info; // [esp+0h] [ebp-Ch] BYREF
@@ -475,7 +476,6 @@ void __cdecl SV_SetConfig(int start, int max, int bit)
     Dvar_ForEach((void(__cdecl *)(const dvar_s *, void *))SV_SetConfigDvar, &info);
 }
 
-#ifdef KISAK_MP
 void __cdecl SV_SetConfigDvar(const dvar_s *dvar, int *userData)
 {
     char *v2; // eax

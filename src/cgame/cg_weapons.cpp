@@ -28,6 +28,7 @@
 #include <xanim/xanim_readwrite.h>
 #include <gfx_d3d/r_model.h>
 #include "cg_compassfriendlies.h"
+#include <client/cl_scrn.h>
 #endif
 
 const float MYLERP_START = 0.3f;

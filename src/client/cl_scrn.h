@@ -7,14 +7,17 @@
 void __cdecl TRACK_cl_srcn();
 void __cdecl SCR_DrawSmallStringExt(unsigned int x, int y, const char *string, const float *setColor);
 void __cdecl SCR_Init();
-bool __cdecl CL_IsCGameRendering();
+float __cdecl CL_GetMenuBlurRadius(int localClientNum);
+void __cdecl SCR_UpdateScreen();
+void SCR_UpdateFrame();
 int __cdecl CL_CGameRendering();
+
+
+bool __cdecl CL_IsCGameRendering();
 void CL_DrawScreen();
 void __cdecl SCR_ClearScreen(int a1, int a2, unsigned __int8 a3);
 void __cdecl SCR_DrawScreenField(int refreshedUI);
 void __cdecl SCR_UpdateRumble();
-void SCR_UpdateFrame();
-void __cdecl SCR_UpdateScreen();
 void __cdecl SCR_UpdateLoadScreen();
 void CL_CubemapShotUsage();
 void __cdecl CL_CubemapShot_f();

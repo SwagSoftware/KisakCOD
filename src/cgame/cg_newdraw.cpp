@@ -3356,7 +3356,7 @@ void __cdecl CG_OwnerDraw(
         CG_CompassDrawPlayerBack(localClientNum, COMPASS_TYPE_PARTIAL, &parentRect, &rect, material, color);
         break;
     case 152:
-        CG_CompassDrawPlayerPointers_MP(localClientNum, COMPASS_TYPE_PARTIAL, &parentRect, &rect, material, color);
+        CG_CompassDrawPlayerPointers_SP(localClientNum, COMPASS_TYPE_PARTIAL, &parentRect, &rect, material, color);
         break;
     case 153:
         CG_CompassDrawActors(localClientNum, COMPASS_TYPE_PARTIAL, &parentRect, &rect, material, color);

@@ -1049,8 +1049,7 @@ void __cdecl Actor_PhysicsRestoreInputs(actor_s *self, PhysicsInputs *inputs)
 
 bool __cdecl Actor_AtDifferentElevation(float *vOrgSelf, float *vOrgOther)
 {
-    //return I_fabs((float)(vOrgSelf[2] - vOrgOther[2])) >= 80.0;
-    return fabsf((float)(vOrgSelf[2] - vOrgOther[2])) >= 80.0f;
+    return I_fabs((float)(vOrgSelf[2] - vOrgOther[2])) >= 80.0;
 }
 
 float __cdecl Actor_CalcultatePlayerPushDelta(const actor_s *self, const gentity_s *pusher, float *pushDir)

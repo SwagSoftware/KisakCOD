@@ -46,6 +46,7 @@
 #include <universal/q_parse.h>
 #include <ui/ui.h>
 #include <client/cl_demo.h>
+#include <client/cl_scrn.h>
 #elif KISAK_MP
 #include <game_mp/g_public_mp.h>
 #include <client_mp/client_mp.h>
@@ -53,6 +54,8 @@
 #endif
 
 int marker_common;
+
+int com_expectedHunkUsage;
 
 int com_skelTimeStamp;
 unsigned int com_errorPrintsCount;
@@ -904,8 +907,10 @@ void __cdecl Com_EventLoop()
         case SE_NONE:
         {
             iassert(!ev.evPtr);
+#ifdef KISAK_MP
             Com_ClientPacketEvent();
             Com_ServerPacketEvent();
+#endif
             goto END;
         }
         case SE_KEY:
@@ -1133,7 +1138,9 @@ void Com_ErrorCleanup()
         if (errorcode == ERR_DROP && QuitOnError())
             Com_Quit_f();
     }
+#ifdef KISAK_MP
     bgs = 0;
+#endif
     com_fixedConsolePosition = 0;
     NET_RestartDebug();
     com_errorEntered = 0;

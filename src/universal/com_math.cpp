@@ -1681,7 +1681,7 @@ float __cdecl AngleNormalize360(float angle)
         return (result - 360.0);
 }
 
-float AngleNormalize180Fast(float angle)
+float AngleNormalize180(float angle)
 {
     angle = fmodf(angle + 180.0f, 360.0f);
     if (angle < 0.0f)
@@ -3002,6 +3002,14 @@ float __cdecl Vec3Dot(const vec3r a, const vec3r b)
 float __cdecl Vec4Dot(const float *a, const float *b)
 {
     return (float)(*a * *b + a[1] * b[1] + a[2] * b[2] + a[3] * b[3]);
+}
+
+void __cdecl Vec4Mul(const float *a, const float *b, float *product)
+{
+    *product = *a * *b;
+    product[1] = a[1] * b[1];
+    product[2] = a[2] * b[2];
+    product[3] = a[3] * b[3];
 }
 
 void __cdecl MatrixForViewer(mat4x4 &mtx, const vec3r origin, const mat3x3 &axis)

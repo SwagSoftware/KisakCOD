@@ -39,8 +39,6 @@
 #include "actor_state.h"
 #include <script/scr_memorytree.h>
 
-const char *missionDvarList[] = { "mis_01", "mis_difficulty", NULL };
-
 const BuiltinMethodDef methods[104] =
 {
   { "startscriptedanim", ActorCmd_StartScriptedAnim, 0 },
@@ -11583,9 +11581,6 @@ void __cdecl GScr_SetScriptsAndAnimsForEntities(ScriptFunctions *functions)
 
 void __cdecl GScr_SetScripts(ScriptFunctions *functions)
 {
-    const char *v2; // r4
-    int v3; // r3
-
     g_scr_data.delete_ = GScr_SetScriptAndLabel(functions, "codescripts/delete", "main", 1);
     g_scr_data.initstructs = GScr_SetScriptAndLabel(functions, "codescripts/struct", "initstructs", 1);
     g_scr_data.createstruct = GScr_SetScriptAndLabel(functions, "codescripts/struct", "createstruct", 1);
@@ -11598,7 +11593,7 @@ void __cdecl GScr_SetScripts(ScriptFunctions *functions)
     if (!(unsigned __int8)G_ExitAfterConnectPaths())
     {
         Scr_PrecacheAnimTrees(Hunk_AllocXAnimCreate, 1);
-        GScr_FindAnimTrees(v3, v2);
+        GScr_FindAnimTrees();
     }
     Scr_EndLoadAnimTrees();
 }

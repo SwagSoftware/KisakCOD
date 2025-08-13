@@ -803,9 +803,11 @@ void __cdecl CG_EntityEvent(int32_t localClientNum, centity_s *cent, int32_t eve
                 else
                     CG_PlayEntitySoundAlias(localClientNum, ent->number, weaponDef->nightVisionRemoveSound);
                 return;
+#ifdef KISAK_MP
             case EV_OBITUARY:
                 CG_Obituary(localClientNum, ent);
                 return;
+#endif
             case EV_NO_FRAG_GRENADE_HINT:
                 v28 = cgameGlob->nextSnap;
                 if ((v28->ps.otherFlags & 6) != 0 && ent->number == v28->ps.clientNum)

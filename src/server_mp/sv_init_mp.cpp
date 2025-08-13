@@ -19,8 +19,6 @@
 #include <client/client.h>
 
 
-int com_expectedHunkUsage;
-
 //Line 53332:  0006 : 00cf4d5c       int sv_serverId_value    834a4d5c     sv_init_mp.obj
 
 const dvar_t *sv_punkbuster;

@@ -77,119 +77,12 @@ int opcode;
 int caseCount;
 int thread_count;
 
-void GScr_GetAnimLength()
-{
-    float value; // [esp+0h] [ebp-10h]
-    scr_anim_s anim; // [esp+8h] [ebp-8h]
-    XAnim_s* anims; // [esp+Ch] [ebp-4h]
-
-    anim = Scr_GetAnim(0, 0);
-    anims = Scr_GetAnims(anim.tree);
-    if (!XAnimIsPrimitive(anims, anim.index))
-        Scr_ParamError(0, "non-primitive animation has no concept of length");
-    value = XAnimGetLength(anims, anim.index);
-    Scr_AddFloat(value);
-}
-
-void __cdecl Scr_ErrorOnDefaultAsset(XAssetType type, const char* assetName)
-{
-    const char* XAssetTypeName; // eax
-    const char* v3; // eax
-
-    DB_FindXAssetHeader(type, assetName);
-    if (DB_IsXAssetDefault(type, assetName))
-    {
-        XAssetTypeName = DB_GetXAssetTypeName(type);
-        v3 = va("precache %s '%s' failed", XAssetTypeName, assetName);
-        Scr_NeverTerminalError(v3);
-    }
-}
-
-void(__cdecl *__cdecl BuiltIn_GetMethod(const char **pName, int *type))(scr_entref_t)
-{
-    unsigned int i; // [esp+18h] [ebp-4h]
-
-    for (i = 0; i < 0x52; ++i)
-    {
-        if (!strcmp(*pName, methods_2[i].actionString))
-        {
-            *pName = methods_2[i].actionString;
-            *type = methods_2[i].type;
-            return methods_2[i].actionFunc;
-        }
-    }
-    return 0;
-}
-
-void(__cdecl *__cdecl Scr_GetMethod(const char **pName, int *type))(scr_entref_t)
-{
-    void(__cdecl *method)(scr_entref_t); // [esp+0h] [ebp-4h]
-
-    *type = 0;
-
-#ifdef KISAK_SP
-    method = Actor_GetMethod(pName);
-    if (method)
-        return method;
-    method = Sentient_GetMethod(pName);
-    if (method)
-        return method;
-#endif
-
-    method = Player_GetMethod(pName);
-    if (method)
-        return method;
-    method = ScriptEnt_GetMethod(pName);
-    if (method)
-        return method;
-
-#ifdef KISAK_SP
-    method = ScriptVehicle_GetMethod(pName);
-    if (method)
-        return method;
-#endif
-
-    method = HudElem_GetMethod(pName);
-    if (method)
-        return method;
-
-#ifdef KISAK_MP
-    method = Helicopter_GetMethod(pName);
-    if (method)
-        return method;
-#endif
-
-    return BuiltIn_GetMethod(pName, type);
-}
-
-void(__cdecl* __cdecl Scr_GetFunction(const char** pName, int* type))()
-{
-    unsigned int i; // [esp+18h] [ebp-4h]
-
-    for (i = 0; i < 0xCD; ++i)
-    {
-        if (!strcmp(*pName, functions[i].actionString))
-        {
-            *pName = functions[i].actionString;
-            *type = functions[i].type;
-            return functions[i].actionFunc;
-        }
-    }
-    return 0;
-}
-
 void __cdecl GScr_AddVector(const float* vVec)
 {
     if (vVec)
         Scr_AddVector(vVec);
     else
         Scr_AddUndefined();
-}
-
-void __cdecl GScr_Shutdown()
-{
-    if (level.cachedTagMat.name)
-        Scr_SetString(&level.cachedTagMat.name, 0);
 }
 
 void __cdecl Scr_GetObjectField(unsigned int classnum, int entnum, int offset)
@@ -212,11 +105,6 @@ void __cdecl Scr_GetObjectField(unsigned int classnum, int entnum, int offset)
     {
         Scr_GetEntityField(entnum, offset);
     }
-}
-
-void __cdecl GScr_SetDynamicEntityField(gentity_s *ent, unsigned int index)
-{
-    Scr_SetDynamicEntityField(ent->s.number, 0, index);
 }
 
 //void __cdecl Scr_InitFromChildBlocks(scr_block_s** childBlocks, int childCount, scr_block_s* block)

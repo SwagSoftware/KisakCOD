@@ -725,142 +725,89 @@ void __cdecl CL_DrawStretchPicPhysicalFlipST(
 
 void __cdecl CL_DrawStretchPic(
     const ScreenPlacement *scrPlace,
-    double x,
-    double y,
-    double w,
-    double h,
-    int horzAlign,
-    int vertAlign,
-    double s1,
-    double t1,
-    double s2,
-    double t2,
+    float x,
+    float y,
+    float w,
+    float h,
+    int32_t horzAlign,
+    int32_t vertAlign,
+    float s1,
+    float t1,
+    float s2,
+    float t2,
     const float *color,
-    Material *material,
-    int a14,
-    int a15,
-    float a16,
-    float a17,
-    float a18,
-    float a19,
-    float a20,
-    float a21,
-    float a22,
-    float a23,
-    float a24,
-    float a25,
-    float a26,
-    float a27)
+    Material *material)
 {
-    Material *v31; // r4
-    const float *v32; // r3
-
-    a21 = x;
-    a23 = y;
-    a25 = w;
-    a27 = h;
-    ScrPlace_ApplyRect(scrPlace, &a21, &a23, &a25, &a27, a14, a15);
-    R_AddCmdDrawStretchPic(a21, a23, a25, a27, s1, t1, s2, t2, v32, v31);
+    ScrPlace_ApplyRect(scrPlace, &x, &y, &w, &h, horzAlign, vertAlign);
+    CL_DrawStretchPicPhysical(x, y, w, h, s1, t1, s2, t2, color, material);
 }
 
 void __cdecl CL_DrawStretchPicPhysicalRotateXY(
-    double x,
-    double y,
-    double w,
-    double h,
-    double s1,
-    double t1,
-    double s2,
-    double t2,
+    float x,
+    float y,
+    float w,
+    float h,
+    float s1,
+    float t1,
+    float s2,
+    float t2,
+    float angle,
     const float *color,
-    Material *material,
-    float angle)
+    Material *material)
 {
-    float v11; // [sp+8h] [-68h]
-
-    R_AddCmdDrawStretchPicRotateXY(x, y, w, h, s1, t1, s2, t2, v11, color, material);
+    R_AddCmdDrawStretchPicRotateXY(x, y, w, h, s1, t1, s2, t2, angle, color, material);
 }
 
 void __cdecl CL_DrawStretchPicFlipST(
     const ScreenPlacement *scrPlace,
-    double x,
-    double y,
-    double w,
-    double h,
-    int horzAlign,
-    int vertAlign,
-    double s1,
-    double t1,
-    double s2,
-    double t2,
+    float x,
+    float y,
+    float w,
+    float h,
+    int32_t horzAlign,
+    int32_t vertAlign,
+    float s1,
+    float t1,
+    float s2,
+    float t2,
     const float *color,
-    Material *material,
-    int a14,
-    int a15,
-    float a16,
-    float a17,
-    float a18,
-    float a19,
-    float a20,
-    float a21,
-    float a22,
-    float a23,
-    float a24,
-    float a25,
-    float a26,
-    float a27)
+    Material *material)
 {
-    Material *v31; // r4
-    const float *v32; // r3
-
-    a21 = x;
-    a23 = y;
-    a25 = w;
-    a27 = h;
-    ScrPlace_ApplyRect(scrPlace, &a21, &a23, &a25, &a27, a14, a15);
-    R_AddCmdDrawStretchPicFlipST(a21, a23, a25, a27, s1, t1, s2, t2, v32, v31);
+    ScrPlace_ApplyRect(scrPlace, &x, &y, &w, &h, horzAlign, vertAlign);
+    CL_DrawStretchPicPhysicalFlipST(x, y, w, h, s1, t1, s2, t2, color, material);
 }
 
 void __cdecl CL_DrawStretchPicRotatedST(
     const ScreenPlacement *scrPlace,
-    double x,
-    double y,
-    double w,
-    double h,
-    int horzAlign,
-    int vertAlign,
-    double centerS,
-    double centerT,
-    double radiusST,
-    double scaleFinalS,
-    const float *color,
-    Material *material,
-    int a14,
-    int a15,
+    float x,
+    float y,
+    float w,
+    float h,
+    int32_t horzAlign,
+    int32_t vertAlign,
+    float centerS,
+    float centerT,
+    float radiusST,
+    float scaleFinalS,
     float scaleFinalT,
-    float a17,
     float angle,
-    float a19,
-    float a20,
-    float a21,
-    float a22,
-    float a23,
-    float a24,
-    float a25,
-    float a26,
-    float a27)
+    const float *color,
+    Material *material)
 {
-    Material *v31; // r4
-    const float *v32; // r3
-    float v33; // [sp+8h] [-A8h]
-    float v34; // [sp+10h] [-A0h]
-
-    a21 = x;
-    a23 = y;
-    a25 = w;
-    a27 = h;
-    ScrPlace_ApplyRect(scrPlace, &a21, &a23, &a25, &a27, a14, a15);
-    R_AddCmdDrawStretchPicRotateST(a21, a23, a25, a27, centerS, centerT, radiusST, scaleFinalS, v33, v34, v32, v31);
+    ScrPlace_ApplyRect(scrPlace, &x, &y, &w, &h, horzAlign, vertAlign);
+    R_AddCmdDrawStretchPicRotateST(
+        x,
+        y,
+        w,
+        h,
+        centerS,
+        centerT,
+        radiusST,
+        scaleFinalS,
+        scaleFinalT,
+        angle,
+        color,
+        material);
 }
 
 // attributes: thunk

@@ -612,7 +612,9 @@ void __cdecl Mantle_Move(pmove_t *pm, playerState_s *ps, pml_t *pml)
         Mantle_GetAnimDelta(mstate, prevTime, prevTrans);
         Mantle_GetAnimDelta(mstate, mstate->timer, trans);
         animIndex = Mantle_GetAnim(mstate);
+#ifdef KISAK_MP
         BG_AnimScriptAnimation(ps, AISTATE_COMBAT, (scriptAnimMoveTypes_t)(animIndex + 21), 1);
+#endif
         Vec3Sub(trans, prevTrans, trans);
         Vec3Add(trans, ps->origin, ps->origin);
         scale = 1.0 / ((double)deltaTime * EQUAL_EPSILON);
@@ -624,10 +626,10 @@ void __cdecl Mantle_Move(pmove_t *pm, playerState_s *ps, pml_t *pml)
 
 #ifdef KISAK_MP
             pm->mantleStarted = 0;
-#endif
 
             if ((mstate->flags & 1) != 0)
                 BG_AnimScriptEvent(ps, ANIM_ET_JUMP, 0, 1);
+#endif
 
             if ((mstate->flags & 4) != 0)
             {

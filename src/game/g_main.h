@@ -23,15 +23,6 @@ struct trigger_info_t
 	int otherUseCount;
 };
 
-struct SpawnVar
-{
-	bool spawnVarsValid;
-	int numSpawnVars;
-	char *spawnVars[64][2];
-	int numSpawnVarChars;
-	char spawnVarChars[2048];
-};
-
 struct level_locals_t
 {
 	gclient_s *clients;

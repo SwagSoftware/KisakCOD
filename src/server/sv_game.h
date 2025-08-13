@@ -65,9 +65,14 @@ int __cdecl SV_GetClientPing(int clientNum);
 bool __cdecl SV_IsLocalClient(int clientNum);
 void __cdecl SV_ShutdownGameProgs();
 void __cdecl SV_SetGametype();
-void __cdecl SV_RestartGameProgs(int savepersist);
-void __cdecl SV_InitGameVM(int restart, int savepersist);
+#ifdef KISAK_MP
 void __cdecl SV_InitGameProgs(int savepersist);
+void __cdecl SV_RestartGameProgs(int savepersist);
+#elif KISAK_SP
+void __cdecl SV_InitGameProgs(unsigned int randomSeed, int savegame, SaveGame **save);
+void __cdecl SV_RestartGameProgs(unsigned int randomSeed, int savegame, SaveGame **save, int loadScripts);
+#endif
+void __cdecl SV_InitGameVM(int restart, int savepersist);
 int __cdecl SV_GameCommand();
 
 #ifdef KISAK_SP
