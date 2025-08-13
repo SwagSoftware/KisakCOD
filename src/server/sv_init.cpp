@@ -192,7 +192,7 @@ void __cdecl SV_Init()
     SV_AddOperatorCommands();
     sv_gameskill = Dvar_RegisterInt("g_gameskill", 1, 0, 3, 0x64u, "Game skill level");
     sv_player_maxhealth = Dvar_RegisterInt("g_player_maxhealth", 100, 10, 2000, 2u, "Maximum player health");
-    sv_player_damageMultiplier = Dvar_RegisterFloat("player_damageMultiplier", 1.0, 0.0, 1000.0, v1, v0);
+    sv_player_damageMultiplier = Dvar_RegisterFloat("player_damageMultiplier", 1.0, 0.0, 1000.0, 0, 0);
     player_healthEasy = Dvar_RegisterInt("player_healthEasy", 500, 10, 2000, 2u, "Player health on easy mode");
     player_healthMedium = Dvar_RegisterInt("player_healthMedium", 275, 10, 2000, 2u, "Player health in medium mode");
     player_healthHard = Dvar_RegisterInt("player_healthHard", 165, 10, 2000, 2u, "Player health in challenging mode");

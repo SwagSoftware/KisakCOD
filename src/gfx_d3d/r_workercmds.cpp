@@ -680,9 +680,9 @@ LABEL_9:
             {
                 Dvar_ClearModified((dvar_s*)r_smp_worker_thread[workerIter]);
                 if (r_smp_worker_thread[workerIter]->current.enabled)
-                    Sys_ResumeThread(workerIter + 2);
+                    Sys_ResumeThread((ThreadContext_t)(workerIter + 2));
                 else
-                    Sys_SuspendThread(workerIter + 2);
+                    Sys_SuspendThread((ThreadContext_t)(workerIter + 2));
             }
         }
         R_ReleaseThreadOwnership();

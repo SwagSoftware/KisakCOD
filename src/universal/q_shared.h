@@ -697,7 +697,6 @@ struct va_info_t
 	char va_string[2][1024];
 	int index;
 };
-extern va_info_t va_info[7];
 
 
 struct TraceCheckCount
@@ -843,10 +842,6 @@ int __cdecl StringTable_LookupRowNumForValue(const StringTable *table, int compa
 union XAssetHeader;
 void __cdecl StringTable_GetAsset(const char *filename, StringTable **tablePtr);
 
-
-extern TraceThreadInfo g_traceThreadInfo[7];
-
-extern jmp_buf g_com_error[7];
 
 extern const dvar_t *useFastFile;
 

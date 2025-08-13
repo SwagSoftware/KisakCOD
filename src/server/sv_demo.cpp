@@ -1171,14 +1171,8 @@ void __cdecl  SV_SaveHistoryLoop(unsigned int threadContext)
 {
     server_demo_history_t *volatile v1; // r31
 
-    if (threadContext != 11)
-        MyAssertHandler(
-            "c:\\trees\\cod3\\cod3src\\src\\server\\sv_demo.cpp",
-            2105,
-            0,
-            "threadContext == THREAD_CONTEXT_SERVER_DEMO\n\t%i, %i",
-            threadContext,
-            11);
+    iassert(threadContext == THREAD_CONTEXT_SERVER_DEMO);
+
     while (1)
     {
         // KISAKSAVE

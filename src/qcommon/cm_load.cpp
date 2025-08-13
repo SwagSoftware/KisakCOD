@@ -4,6 +4,7 @@
 #include <database/database.h>
 #include <win32/win_local.h>
 #include "com_bsp.h"
+#include <gfx_d3d/rb_backend.h>
 
 //Line 53199 : 0006 : 006e75b8       struct clipMap_t cm        82e975b8     cm_load.obj
 clipMap_t cm;
@@ -37,6 +38,7 @@ void CM_InitAllThreadData()
         CM_InitThreadData(workerIndex + 2);
 }
 
+extern TraceThreadInfo g_traceThreadInfo[THREAD_CONTEXT_COUNT];
 void __cdecl CM_InitThreadData(unsigned int threadContext)
 {
     TraceThreadInfo *traceThreadInfo; // [esp+8h] [ebp-4h]

@@ -1,6 +1,7 @@
 #pragma once
 
 #include <Windows.h> // literally just for some of the extern types at the bottom
+#include <gfx_d3d/rb_backend.h> // THREAD_CONTEXT_COUNT
 
 enum ThreadOwner : __int32
 {                                       // ...
@@ -12,12 +13,12 @@ enum ThreadOwner : __int32
 unsigned int __cdecl Sys_GetCpuCount();
 void __cdecl Sys_InitMainThread();
 unsigned int __cdecl Sys_GetCurrentThreadId();
-void __cdecl Sys_InitThread(int threadContext);
+void __cdecl Sys_InitThread(ThreadContext_t threadContext);
 char __cdecl Sys_SpawnRenderThread(void(__cdecl* function)(unsigned int));
 void __cdecl Sys_CreateEvent(bool manualReset, bool initialState, void** event);
-void __cdecl Sys_CreateThread(void(__cdecl* function)(unsigned int), unsigned int threadContext);
+void __cdecl Sys_CreateThread(void(__cdecl* function)(unsigned int), ThreadContext_t threadContext);
 void __cdecl SetThreadName(unsigned int threadId, const char* threadName);
-unsigned int __stdcall Sys_ThreadMain(int parameter);
+unsigned int __stdcall Sys_ThreadMain(ThreadContext_t parameter);
 char __cdecl Sys_SpawnDatabaseThread(void(__cdecl* function)(unsigned int));
 void __cdecl Sys_SuspendDatabaseThread(ThreadOwner owner);
 void __cdecl Sys_ResetEvent(void** event);
@@ -27,8 +28,8 @@ bool __cdecl Sys_HaveSuspendedDatabaseThread(ThreadOwner owner);
 void __cdecl Sys_WaitDatabaseThread();
 void __cdecl Sys_WaitForSingleObject(void** event);
 bool __cdecl Sys_SpawnWorkerThread(void(__cdecl* function)(unsigned int), unsigned int threadIndex);
-void __cdecl Sys_SuspendThread(unsigned int threadContext);
-void __cdecl Sys_ResumeThread(unsigned int threadContext);
+void __cdecl Sys_SuspendThread(ThreadContext_t threadContext);
+void __cdecl Sys_ResumeThread(ThreadContext_t threadContext);
 void *__cdecl Sys_RendererSleep();
 int __cdecl Sys_RendererReady();
 void __cdecl Sys_RenderCompleted();
@@ -114,9 +115,9 @@ WinThreadLock __cdecl Win_GetThreadLock();
 void Win_UpdateThreadLock();
 
 
-extern void *g_threadValues[7][4];
-extern DWORD threadId[7];
-extern HANDLE threadHandle[7];
+extern void *g_threadValues[THREAD_CONTEXT_COUNT][4];
+extern DWORD threadId[THREAD_CONTEXT_COUNT];
+extern HANDLE threadHandle[THREAD_CONTEXT_COUNT];
 extern unsigned int s_affinityMaskForProcess;
 extern unsigned int s_cpuCount;
 extern unsigned int s_affinityMaskForCpu[4];

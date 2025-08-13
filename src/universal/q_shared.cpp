@@ -144,9 +144,9 @@ char* QDECL va(const char* format, ...) {
     return buf;
 }
 
-va_info_t va_info[7];
-jmp_buf g_com_error[7];
-TraceThreadInfo g_traceThreadInfo[7];
+va_info_t va_info[THREAD_CONTEXT_COUNT];
+jmp_buf g_com_error[THREAD_CONTEXT_COUNT];
+TraceThreadInfo g_traceThreadInfo[THREAD_CONTEXT_COUNT];
 
 static char value1[2][2][8192];
 

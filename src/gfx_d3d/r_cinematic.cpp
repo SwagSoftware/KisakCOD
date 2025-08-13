@@ -158,14 +158,7 @@ unsigned int *R_Cinematic_ReserveMemory()
 
 void __cdecl  R_Cinematic_Thread(unsigned int threadContext)
 {
-    if (threadContext != 4)
-        MyAssertHandler(
-            ".\\r_cinematic.cpp",
-            1815,
-            0,
-            "threadContext == THREAD_CONTEXT_CINEMATIC\n\t%i, %i",
-            threadContext,
-            4);
+    iassert(threadContext == THREAD_CONTEXT_CINEMATIC);
     while (1)
     {
         R_CinematicThread_WaitForHostEvent();

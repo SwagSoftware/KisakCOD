@@ -13,6 +13,7 @@
 #elif KISAK_SP
 #include <client/client.h>
 #endif
+#include <gfx_d3d/rb_backend.h>
 
 unsigned int Win_InitThreads();
 
@@ -20,8 +21,6 @@ unsigned int Win_InitThreads();
 // NOTE(mrsteyk): keep in mind this is 4 elements long.
 static thread_local void **g_threadLocals;
 
-//static int threadId[7];
-//static HANDLE threadHandle[7];
 //static unsigned int s_affinityMaskForProcess;
 //static unsigned int s_cpuCount;
 //static unsigned int s_affinityMaskForCpu[4];
@@ -41,11 +40,11 @@ volatile int g_timeout;
 #endif
 
 typedef void (*ThreadFuncFn)(unsigned int);
-static ThreadFuncFn threadFunc[7];
+static ThreadFuncFn threadFunc[THREAD_CONTEXT_COUNT];
 
-void *g_threadValues[7][4];
-DWORD threadId[7];
-HANDLE threadHandle[7];
+void *g_threadValues[THREAD_CONTEXT_COUNT][4];
+DWORD threadId[THREAD_CONTEXT_COUNT];
+HANDLE threadHandle[THREAD_CONTEXT_COUNT];
 unsigned int s_affinityMaskForProcess;
 unsigned int s_cpuCount;
 unsigned int s_affinityMaskForCpu[4];
@@ -67,7 +66,8 @@ static void *ackendEvent;
 static void *updateSpotLightEffectEvent;
 static void *updateEffectsEvent;
 
-static const char* s_threadNames[7] =
+#ifdef KISAK_MP
+static const char* s_threadNames[THREAD_CONTEXT_COUNT] =
 {
     "Main",
     "Backend",
@@ -77,6 +77,24 @@ static const char* s_threadNames[7] =
     "Titleserver",
     "Database",
 };
+#elif KISAK_SP
+static const char *s_threadNames[THREAD_CONTEXT_COUNT] =
+{
+    "MAIN",
+    "BACKEND",
+    "WORKER0",
+    "WORKER1",
+    "WORKER2",
+    "SERVER",
+    "CINEMATIC",
+    "TITLE_SERVER",
+    "DATABASE",
+    "STREAM",
+    "SNDSTREAMPACKETCALLBACK",
+    "SERVER_DEMO"
+};
+#endif
+
 unsigned int __cdecl Sys_GetCpuCount()
 {
     return s_cpuCount;
@@ -84,9 +102,8 @@ unsigned int __cdecl Sys_GetCpuCount()
 
 void __cdecl Sys_EndLoadThreadPriorities()
 {
-    if (!Sys_IsMainThread())
-        MyAssertHandler(".\\qcommon\\threads.cpp", 700, 0, "%s", "Sys_IsMainThread()");
-    SetThreadPriority(threadHandle[0], 0);
+    iassert(Sys_IsMainThread());
+    SetThreadPriority(threadHandle[THREAD_CONTEXT_MAIN], 0);
 }
 
 int __cdecl Sys_IsRendererReady()
@@ -99,13 +116,13 @@ void __cdecl Sys_InitMainThread()
     HANDLE process; // [esp+0h] [ebp-8h]
     HANDLE pseudoHandle; // [esp+4h] [ebp-4h]
 
-    threadId[0] = Sys_GetCurrentThreadId();
+    threadId[THREAD_CONTEXT_MAIN] = Sys_GetCurrentThreadId();
     process = GetCurrentProcess();
     pseudoHandle = GetCurrentThread();
-    DuplicateHandle(process, pseudoHandle, process, threadHandle, 0, 0, 2u);
+    DuplicateHandle(process, pseudoHandle, process, threadHandle, 0, 0, 2);
     Win_InitThreads();
     //*(unsigned int*)(*((unsigned int*)NtCurrentTeb()->ThreadLocalStoragePointer + _tls_index) + 4) = g_threadValues;
-    g_threadLocals = g_threadValues[0];
+    g_threadLocals = g_threadValues[THREAD_CONTEXT_MAIN];
     Com_InitThreadData(0);
 }
 
@@ -114,7 +131,7 @@ unsigned int __cdecl Sys_GetCurrentThreadId()
     return GetCurrentThreadId();
 }
 
-void __cdecl Sys_InitThread(int threadContext)
+void __cdecl Sys_InitThread(ThreadContext_t threadContext)
 {
     //*(unsigned int*)(*((unsigned int*)NtCurrentTeb()->ThreadLocalStoragePointer + _tls_index) + 4) = g_threadValues[threadContext];
     g_threadLocals = g_threadValues[threadContext];
@@ -133,12 +150,12 @@ char __cdecl Sys_SpawnRenderThread(void(__cdecl* function)(unsigned int))
     Sys_CreateEvent(1, 1, &updateSpotLightEffectEvent);
     Sys_CreateEvent(1, 1, &updateEffectsEvent);
 
-    Sys_CreateThread(function, 1u);
+    Sys_CreateThread(function, THREAD_CONTEXT_BACKEND);
 
-    if (!threadHandle[1])
+    if (!threadHandle[THREAD_CONTEXT_BACKEND])
         return 0;
 
-    Sys_ResumeThread(1);
+    Sys_ResumeThread(THREAD_CONTEXT_BACKEND);
 
     return 1;
 }
@@ -148,12 +165,11 @@ void __cdecl Sys_CreateEvent(bool manualReset, bool initialState, void** event)
     *event = CreateEventA(0, manualReset, initialState, 0);
 }
 
-void __cdecl Sys_CreateThread(void(__cdecl* function)(unsigned int), unsigned int threadContext)
+void __cdecl Sys_CreateThread(void(__cdecl* function)(unsigned int), ThreadContext_t threadContext)
 {
     if (threadFunc[threadContext])
         MyAssertHandler(".\\qcommon\\threads.cpp", 805, 0, "%s", "threadFunc[threadContext] == NULL");
-    if (threadContext >= 7)
-        MyAssertHandler(".\\qcommon\\threads.cpp", 806, 0, "%s", "threadContext < THREAD_CONTEXT_COUNT");
+    iassert(threadContext < THREAD_CONTEXT_COUNT);
     threadFunc[threadContext] = function;
     threadHandle[threadContext] = CreateThread(
         0,
@@ -196,21 +212,13 @@ void __cdecl SetThreadName(unsigned int threadId, const char* threadName)
     }
 }
 
-unsigned int __stdcall Sys_ThreadMain(int parameter)
+unsigned int __stdcall Sys_ThreadMain(ThreadContext_t threadContext)
 {
-    if ((unsigned int)parameter >= 7)
-        MyAssertHandler(
-            ".\\qcommon\\threads.cpp",
-            787,
-            0,
-            "threadContext doesn't index THREAD_CONTEXT_COUNT\n\t%i not in [0, %i)",
-            parameter,
-            7);
-    if (!threadFunc[parameter])
-        MyAssertHandler(".\\qcommon\\threads.cpp", 788, 0, "%s", "threadFunc[threadContext]");
-    SetThreadName(0xFFFFFFFF, s_threadNames[parameter]);
-    Sys_InitThread(parameter);
-    threadFunc[parameter](parameter);
+    bcassert(threadContext, THREAD_CONTEXT_COUNT);
+    iassert(threadFunc[threadContext]);
+    SetThreadName(0xFFFFFFFF, s_threadNames[threadContext]);
+    Sys_InitThread(threadContext);
+    threadFunc[threadContext](threadContext);
     return 0;
 }
 
@@ -228,13 +236,13 @@ char __cdecl Sys_SpawnDatabaseThread(void(__cdecl* function)(unsigned int))
     Sys_CreateEvent(1, 1, &databaseCompletedEvent2);
     Sys_CreateEvent(1, 1, &resumedDatabaseEvent);
 
-    Sys_CreateThread(function, 6);
+    Sys_CreateThread(function, THREAD_CONTEXT_DATABASE);
 
-    if (!threadHandle[6])
+    if (!threadHandle[THREAD_CONTEXT_DATABASE])
         return 0;
 
-    SetThreadPriority(threadHandle[6], s_cpuCount > 1 ? 1 : -1);
-    Sys_ResumeThread(6);
+    SetThreadPriority(threadHandle[THREAD_CONTEXT_DATABASE], s_cpuCount > 1 ? 1 : -1);
+    Sys_ResumeThread(THREAD_CONTEXT_DATABASE);
 
     return 1;
 }
@@ -303,9 +311,9 @@ void __cdecl Sys_WaitForSingleObject(void** event)
 
 bool __cdecl Sys_SpawnWorkerThread(void(__cdecl* function)(unsigned int), unsigned int threadIndex)
 {
-    unsigned int threadContext; // [esp+0h] [ebp-4h]
+    ThreadContext_t threadContext; // [esp+0h] [ebp-4h]
 
-    threadContext = threadIndex + 2;
+    threadContext = (ThreadContext_t)(threadIndex + 2);
     if (threadHandle[threadIndex + 2])
         MyAssertHandler(
             ".\\qcommon\\threads.cpp",
@@ -318,14 +326,14 @@ bool __cdecl Sys_SpawnWorkerThread(void(__cdecl* function)(unsigned int), unsign
     return threadHandle[threadContext] != 0;
 }
 
-void __cdecl Sys_SuspendThread(unsigned int threadContext)
+void __cdecl Sys_SuspendThread(ThreadContext_t threadContext)
 {
     if (!threadHandle[threadContext])
         MyAssertHandler(".\\qcommon\\threads.cpp", 1136, 0, "%s", "threadHandle[threadContext]");
     SuspendThread(threadHandle[threadContext]);
 }
 
-void __cdecl Sys_ResumeThread(unsigned int threadContext)
+void __cdecl Sys_ResumeThread(ThreadContext_t threadContext)
 {
     if (!threadHandle[threadContext])
         MyAssertHandler(".\\qcommon\\threads.cpp", 1148, 0, "%s", "threadHandle[threadContext]");
@@ -500,17 +508,17 @@ void __cdecl Sys_StartRenderer()
 
 bool __cdecl Sys_IsRenderThread()
 {
-    return Sys_GetCurrentThreadId() == threadId[1];
+    return Sys_GetCurrentThreadId() == threadId[THREAD_CONTEXT_BACKEND];
 }
 
 bool __cdecl Sys_IsDatabaseThread()
 {
-    return Sys_GetCurrentThreadId() == threadId[6];
+    return Sys_GetCurrentThreadId() == threadId[THREAD_CONTEXT_DATABASE];
 }
 
 bool __cdecl Sys_IsMainThread()
 {
-    return Sys_GetCurrentThreadId() == threadId[0];
+    return Sys_GetCurrentThreadId() == threadId[THREAD_CONTEXT_MAIN];
 }
 
 void __cdecl Sys_SetValue(int valueIndex, void* data)
@@ -578,7 +586,7 @@ void __cdecl Sys_SuspendOtherThreads()
     unsigned int currentThreadId; // [esp+4h] [ebp-4h]
 
     currentThreadId = Sys_GetCurrentThreadId();
-    for (threadIndex = 0; threadIndex < 7; ++threadIndex)
+    for (threadIndex = 0; threadIndex < THREAD_CONTEXT_COUNT; ++threadIndex)
     {
         if (threadHandle[threadIndex] && threadId[threadIndex] && threadId[threadIndex] != currentThreadId)
             SuspendThread(threadHandle[threadIndex]);
@@ -605,10 +613,10 @@ char __cdecl Sys_SpawnCinematicsThread(void(__cdecl* function)(unsigned int))
 {
     Sys_CreateEvent(1, 1, &g_cinematicsThreadOutstandingRequestEvent);
     Sys_CreateEvent(1, 0, &g_cinematicsHostOutstandingRequestEvent);
-    Sys_CreateThread(function, 4u);
-    if (!threadHandle[4])
+    Sys_CreateThread(function, THREAD_CONTEXT_CINEMATIC);
+    if (!threadHandle[THREAD_CONTEXT_CINEMATIC])
         return 0;
-    Sys_ResumeThread(4);
+    Sys_ResumeThread(THREAD_CONTEXT_CINEMATIC);
     return 1;
 }
 
@@ -647,37 +655,38 @@ void __cdecl Win_SetThreadLock(WinThreadLock threadLock)
     if (s_cpuCount != 1 && threadLock != s_threadLock)
     {
         s_threadLock = threadLock;
-        if (s_cpuCount < 2)
-            MyAssertHandler(".\\qcommon\\threads.cpp", 2419, 1, "s_cpuCount >= 2\n\t%i, %i", s_cpuCount, 2);
+        iassert(s_cpuCount >= 2);
+
         if (threadLock)
-            SetThreadAffinityMask(threadHandle[0], s_affinityMaskForCpu[0]);
+            SetThreadAffinityMask(threadHandle[THREAD_CONTEXT_MAIN], s_affinityMaskForCpu[0]);
         else
-            SetThreadAffinityMask(threadHandle[0], s_affinityMaskForProcess);
+            SetThreadAffinityMask(threadHandle[THREAD_CONTEXT_MAIN], s_affinityMaskForProcess);
+
         if (threadLock)
-            SetThreadAffinityMask(threadHandle[1], s_affinityMaskForCpu[1]);
+            SetThreadAffinityMask(threadHandle[THREAD_CONTEXT_BACKEND], s_affinityMaskForCpu[1]);
         else
-            SetThreadAffinityMask(threadHandle[1], s_affinityMaskForProcess);
+            SetThreadAffinityMask(threadHandle[THREAD_CONTEXT_BACKEND], s_affinityMaskForProcess);
         if (threadLock == THREAD_LOCK_ALL)
-            SetThreadAffinityMask(threadHandle[6], s_affinityMaskForCpu[2 - (s_cpuCount < 3)]);
+            SetThreadAffinityMask(threadHandle[THREAD_CONTEXT_DATABASE], s_affinityMaskForCpu[2 - (s_cpuCount < 3)]);
         else
-            SetThreadAffinityMask(threadHandle[6], s_affinityMaskForProcess);
+            SetThreadAffinityMask(threadHandle[THREAD_CONTEXT_DATABASE], s_affinityMaskForProcess);
         if (threadLock == THREAD_LOCK_ALL)
-            SetThreadAffinityMask(threadHandle[4], s_affinityMaskForCpu[s_cpuCount - 1]);
+            SetThreadAffinityMask(threadHandle[THREAD_CONTEXT_TRACE_COUNT], s_affinityMaskForCpu[s_cpuCount - 1]);
         else
-            SetThreadAffinityMask(threadHandle[4], s_affinityMaskForProcess);
+            SetThreadAffinityMask(threadHandle[THREAD_CONTEXT_TRACE_COUNT], s_affinityMaskForProcess);
         if (s_cpuCount >= 3)
         {
             if (threadLock == THREAD_LOCK_ALL)
-                SetThreadAffinityMask(threadHandle[2], s_affinityMaskForCpu[2]);
+                SetThreadAffinityMask(threadHandle[THREAD_CONTEXT_WORKER0], s_affinityMaskForCpu[2]);
             else
-                SetThreadAffinityMask(threadHandle[2], s_affinityMaskForProcess);
+                SetThreadAffinityMask(threadHandle[THREAD_CONTEXT_WORKER0], s_affinityMaskForProcess);
         }
         if (s_cpuCount >= 4)
         {
             if (threadLock == THREAD_LOCK_ALL)
-                SetThreadAffinityMask(threadHandle[3], s_affinityMaskForCpu[3]);
+                SetThreadAffinityMask(threadHandle[THREAD_CONTEXT_WORKER1], s_affinityMaskForCpu[3]);
             else
-                SetThreadAffinityMask(threadHandle[3], s_affinityMaskForProcess);
+                SetThreadAffinityMask(threadHandle[THREAD_CONTEXT_WORKER1], s_affinityMaskForProcess);
         }
     }
 }
@@ -708,9 +717,8 @@ void Win_UpdateThreadLock()
 
 void __cdecl Sys_BeginLoadThreadPriorities()
 {
-    if (!Sys_IsMainThread())
-        MyAssertHandler(".\\qcommon\\threads.cpp", 715, 0, "%s", "Sys_IsMainThread()");
-    SetThreadPriority(threadHandle[0], -1);
+    iassert(Sys_IsMainThread());
+    SetThreadPriority(threadHandle[THREAD_CONTEXT_MAIN], -1);
 }
 
 #ifdef KISAK_SP
@@ -761,13 +769,13 @@ int Sys_SpawnServerThread(void(*function)(unsigned int))
     allowSendClientMessagesEvent = CreateEventA(0, 1, 0, 0);
     serverSnapshotEvent = CreateEventA(0, 0, 0, 0);
     clientMessageReceived = CreateEventA(0, 1, 1, 0);
-    Sys_CreateThread(function, 5);
-    result = (int)threadHandle[5];
+    Sys_CreateThread(function, THREAD_CONTEXT_SERVER);
+    result = (int)threadHandle[THREAD_CONTEXT_SERVER];
 
-    if (threadHandle[5])
+    if (threadHandle[THREAD_CONTEXT_SERVER])
     {
         //XSetThreadProcessor(threadHandle[5], 3u);
-        Sys_ResumeThread(5);
+        Sys_ResumeThread(THREAD_CONTEXT_SERVER);
         return 1;
     }
 
@@ -923,12 +931,12 @@ int Sys_SpawnServerDemoThread(void(*function)(unsigned int))
 
     g_saveHistoryEvent = CreateEventA(0, 0, 0, 0);
     g_saveHistoryDoneEvent = CreateEventA(0, 0, 0, 0);
-    Sys_CreateThread(function, 0xBu);
-    result = (int)threadHandle[11];
-    if (threadHandle[11])
+    Sys_CreateThread(function, THREAD_CONTEXT_SERVER_DEMO);
+    result = (int)threadHandle[THREAD_CONTEXT_SERVER_DEMO];
+    if (threadHandle[THREAD_CONTEXT_SERVER_DEMO])
     {
         //XSetThreadProcessor(threadHandle[11], 2u);
-        Sys_ResumeThread(0xBu);
+        Sys_ResumeThread(THREAD_CONTEXT_SERVER_DEMO);
         return 1;
     }
     return result;

@@ -3775,7 +3775,7 @@ char __cdecl R_InitHardware(const GfxWindowParms *wndParms)
             MyAssertHandler(".\\r_init.cpp", 1593, 0, "%s", "r_smp_worker_thread[workerIndex]");
         Dvar_ClearModified((dvar_s*)r_smp_worker_thread[workerIndex]);
         if (r_smp_worker_thread[workerIndex]->current.enabled)
-            Sys_ResumeThread(workerIndex + 2);
+            Sys_ResumeThread((ThreadContext_t)(workerIndex + 2));
     }
     return 1;
 }

@@ -2451,14 +2451,7 @@ void __cdecl  DB_Thread(uint32_t threadContext)
 {
     jmp_buf *Value; // eax
 
-    if (threadContext != 6)
-        MyAssertHandler(
-            ".\\database\\db_registry.cpp",
-            3790,
-            0,
-            "threadContext == THREAD_CONTEXT_DATABASE\n\t%i, %i",
-            threadContext,
-            6);
+    iassert(threadContext == THREAD_CONTEXT_DATABASE);
     Value = (jmp_buf *)Sys_GetValue(2);
     if (_setjmp(*Value))
     {

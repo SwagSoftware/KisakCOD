@@ -492,14 +492,7 @@ void __cdecl  SV_ServerThread(unsigned int threadContext)
     int v5; // r28
     int v6; // r29
 
-    if (threadContext != 5)
-        MyAssertHandler(
-            "c:\\trees\\cod3\\cod3src\\src\\server\\sv_main.cpp",
-            731,
-            0,
-            "threadContext == THREAD_CONTEXT_SERVER\n\t%i, %i",
-            threadContext,
-            5);
+    iassert(threadContext == THREAD_CONTEXT_SERVER);
     Value = Sys_GetValue(2);
     if (setjmp((int*)Value))
     {
