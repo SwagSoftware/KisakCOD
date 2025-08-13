@@ -1999,7 +1999,8 @@ void __cdecl CL_InitInput()
     Cmd_AddCommandInternal("-sprint", IN_SprintUp, &IN_SprintUp_VAR);
     Cmd_AddCommandInternal("+nightvision", IN_NightVisionDown, &IN_NightVisionDown_VAR);
     Cmd_AddCommandInternal("-nightvision", IN_NightVisionUp, &IN_NightVisionUp_VAR);
-    cl_analog_attack_threshold = Dvar_RegisterFloat("cl_analog_attack_threshold", 0.80000001, 0.000099999997, 1.0, v1, v0);
+    //cl_analog_attack_threshold = Dvar_RegisterFloat("cl_analog_attack_threshold", 0.80000001, 0.000099999997, 1.0, v1, v0);
+    cl_analog_attack_threshold = Dvar_RegisterFloat("cl_analog_attack_threshold", 0.80000001, 0.000099999997, 1.0, 0, 0);
     cl_stanceHoldTime = Dvar_RegisterInt(
         "cl_stanceHoldTime",
         300,
@@ -2008,7 +2009,8 @@ void __cdecl CL_InitInput()
         0,
         "The time to hold the stance button before the player goes prone");
     cl_freemove = Dvar_RegisterInt("cl_freemove", 0, 0, 3, 0x80u, "Fly about the level");
-    cl_freemoveScale = Dvar_RegisterFloat("cl_freemoveScale", 1.0, 0.0, 5.0, v3, v2);
+    //cl_freemoveScale = Dvar_RegisterFloat("cl_freemoveScale", 1.0, 0.0, 5.0, v3, v2);
+    cl_freemoveScale = Dvar_RegisterFloat("cl_freemoveScale", 1.0, 0.0, 5.0, 0, 0);
 }
 
 

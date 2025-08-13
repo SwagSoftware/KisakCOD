@@ -586,7 +586,7 @@ void __cdecl  SV_ServerThread(unsigned int threadContext)
 
 void __cdecl SV_InitServerThread()
 {
-    if (!Sys_SpawnServerThread((void(__cdecl *)(unsigned int))SV_ServerThread))
+    if (!Sys_SpawnServerThread(SV_ServerThread))
         Sys_Error("Failed to create server thread");
 }
 

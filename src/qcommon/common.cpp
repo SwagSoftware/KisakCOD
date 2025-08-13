@@ -1178,7 +1178,6 @@ void __cdecl Com_Init_Try_Block_Function(char* commandLine)
 {
     int v1; // eax
     const char* BuildNumber; // eax
-    unsigned int v3; // eax
     int localClientNum; // [esp+10h] [ebp-Ch]
     int localClientNuma; // [esp+10h] [ebp-Ch]
     char* s; // [esp+14h] [ebp-8h]
@@ -1227,6 +1226,16 @@ void __cdecl Com_Init_Try_Block_Function(char* commandLine)
     Hunk_InitDebugMemory();
     dvar_modifiedFlags &= ~1u;
     com_codeTimeScale = 1.0;
+    // (SP)
+    //com_attractmode = Dvar_RegisterBool("com_attractmode", 1, 1u, "Run attract mode");
+    //com_attractmodeduration = Dvar_RegisterInt(
+    //    "com_attractmodeduration",
+    //    90,
+    //    0,
+    //    120,
+    //    0,
+    //    "Time when controller is unused before attract mode is enabled");
+    //Live_Init();
     ProfLoad_Init();
     if (com_developer->current.integer)
     {
@@ -1254,6 +1263,8 @@ void __cdecl Com_Init_Try_Block_Function(char* commandLine)
     DObjInit();
     SV_Init();
     NET_Init();
+
+#ifdef KISAK_MP
     Dvar_ClearModified((dvar_s*)com_dedicated);
     if (!com_dedicated->current.integer)
     {
@@ -1262,29 +1273,54 @@ void __cdecl Com_Init_Try_Block_Function(char* commandLine)
         for (localClientNuma = 0; localClientNuma < 1; ++localClientNuma)
             CL_Init(localClientNuma);
     }
+#elif KISAK_SP
+    CL_InitOnceForAllClients();
+    CL_Init(0);
+#endif
     com_frameTime = Sys_Milliseconds();
     Com_StartupVariable(0);
 
+#ifdef KISAK_MP
     if (!com_dedicated->current.integer)
+#endif
     {
         SND_InitDriver();
         R_InitThreads();
-        KISAK_NULLSUB();
+        //KISAK_NULLSUB();
         CL_InitRenderer();
-        KISAK_NULLSUB();
-        if (cls.soundStarted)
-            MyAssertHandler(".\\qcommon\\common.cpp", 3357, 0, "%s", "!cls.soundStarted");
+        //KISAK_NULLSUB();
+        iassert(!cls.soundStarted);
         cls.soundStarted = 1;
         SND_Init();
     }
+
+#ifdef KISAK_SP
+    //Sys_LoadingKeepAlive();
+    //Live_InitSigninState();
+    SV_InitServerThread();
+    //ui_skipMainLockout = Dvar_RegisterBool(
+    //    "ui_skipMainLockout",
+    //    0,
+    //    0,
+    //    "True if the page that restricts player control to a single controller is skipped");
+    //v8 = Dvar_RegisterInt("ui_startupActiveController", 0, 0, 4, 0, "default active game pad on start up");
+    //ui_startupActiveController = v8;
+    //if ((g_launchData.activeController & 4) != 0)
+    //{
+    //    Dvar_SetBoolByName("ui_skipMainLockout", 1);
+    //    cl_last_controller_input = g_launchData.activeController & 0xFB;
+    //    Dvar_SetIntByName("ui_startupActiveController", cl_last_controller_input);
+    //    g_launchData.activeController = 0;
+    //    v8 = (const dvar_s *)XSetLaunchData(&g_launchData, 0x3D8u);
+    //}
+#endif
 
     COM_PlayIntroMovies();
     if (useFastFile->current.enabled)
     {
         PMem_EndAlloc(comInitAllocName, 1u);
         DB_SetInitializing(0);
-        v3 = Sys_Milliseconds();
-        Com_Printf(16, "end $init %d ms\n", v3 - initStartTime);
+        Com_Printf(16, "end $init %d ms\n", Sys_Milliseconds() - initStartTime);
     }
     com_fullyInitialized = 1;
     Com_Printf(16, "--- Common Initialization Complete ---\n");
