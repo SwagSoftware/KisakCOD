@@ -645,7 +645,7 @@ void __cdecl CG_PredictPlayerState_Internal(int localClientNum)
         }
         if (!i && v19->current.integer)
             Com_Printf(17, "no prediction run\n");
-        CG_TransitionPlayerState(localClientNum, &cgArray[0].predictedPlayerState, (const transPlayerState_t*)Buf);
+        CG_TransitionPlayerState(localClientNum, &cgArray[0].predictedPlayerState, Buf);
         if ((cgArray[0].predictedPlayerState.pm_flags & 0x400) != 0)
             CL_SetStance(localClientNum, CL_STANCE_STAND);
         if (cg_pmove.viewChange == 0.0

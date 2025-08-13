@@ -772,8 +772,8 @@ struct transPlayerState_t // sizeof=0x18
 int32_t __cdecl CG_TransitionPlayerState(int32_t localClientNum, playerState_s *ps, const transPlayerState_t *ops);
 int32_t __cdecl CG_CheckPlayerstateEvents(int32_t localClientNum, playerState_s *ps, const transPlayerState_t *ops);
 #elif KISAK_SP
-int32_t __cdecl CG_TransitionPlayerState(int32_t localClientNum, playerState_s *ps, const playerState_s *ops);
-int32_t __cdecl CG_CheckPlayerstateEvents(int32_t localClientNum, playerState_s *ps, const playerState_s *ops);
+void __cdecl CG_TransitionPlayerState(int32_t localClientNum, playerState_s *ps, const playerState_s *ops);
+void __cdecl CG_CheckPlayerstateEvents(int32_t localClientNum, playerState_s *ps, const playerState_s *ops);
 #endif
 
 void __cdecl CG_Respawn(int32_t localClientNum);

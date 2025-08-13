@@ -1,5 +1,4 @@
 #include "r_bsp.h"
-#include <cgame_mp/cg_local_mp.h>
 #include "r_init.h"
 #include "r_light.h"
 #include "r_primarylights.h"
@@ -20,6 +19,12 @@
 #include "r_staticmodel.h"
 #include "r_dpvs.h"
 #include "r_outdoor.h"
+
+#ifdef KISAK_MP
+#include <cgame_mp/cg_local_mp.h>
+#elif KISAK_SP
+#include <cgame/cg_ents.h>
+#endif
 
 r_globals_load_t rgl;
 

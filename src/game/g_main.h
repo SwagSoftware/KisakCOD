@@ -282,3 +282,5 @@ extern char *g_nextMap;
 extern level_locals_t level;
 extern gclient_s g_clients[1];
 extern actor_s g_actors[32];
+
+extern scr_vehicle_s s_vehicles[64];

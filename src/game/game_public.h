@@ -661,6 +661,8 @@ vehicle_info_t *VEH_GetVehicleInfo(__int16 index);
 void(*ScriptVehicle_GetMethod(const char **pName))(scr_entref_t);
 void G_SaveVehicleInfo(struct SaveGame *save);
 void G_LoadVehicleInfo(SaveGame *save);
+int VEH_GetVehicleInfoFromName(const char *name);
+
 
 
 // g_weapon

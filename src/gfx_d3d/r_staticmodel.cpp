@@ -5,7 +5,11 @@
 #include <universal/com_files.h>
 #include <xanim/xmodel.h>
 #include "r_xsurface.h"
+#ifdef KISAK_MP
 #include <cgame_mp/cg_local_mp.h>
+#elif KISAK_SP
+#include <cgame/cg_ents.h>
+#endif
 
 
 void __cdecl R_StaticModelWriteInfoHeader(int fileHandle)

@@ -3,10 +3,17 @@
 #include "r_gfx.h"
 #include "r_init.h"
 #include <xanim/dobj_utils.h>
-#include <cgame_mp/cg_local_mp.h>
 #include <EffectsCore/fx_system.h>
 #include "r_model_skin.h"
 #include <universal/profile.h>
+
+#ifdef KISAK_MP
+#include <cgame_mp/cg_local_mp.h>
+#elif KISAK_SP
+#include <cgame/cg_pose.h>
+#include <cgame/cg_ents.h>
+#endif
+
 
 void  R_BoxSurfaces(
     const float *mins,

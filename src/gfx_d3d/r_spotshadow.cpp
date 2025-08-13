@@ -19,7 +19,7 @@
 
 #ifdef KISAK_MP
 #include <cgame_mp/cg_local_mp.h>
-#elif
+#elif KISAK_SP
 #include <cgame/cg_local.h>
 #endif
 

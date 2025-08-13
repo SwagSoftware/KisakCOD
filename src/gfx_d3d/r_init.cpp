@@ -23,11 +23,14 @@
 #include "r_rendertarget.h"
 #include "r_buffers.h"
 #include "rb_sky.h"
-#include <game_mp/g_public_mp.h>
 #include "r_bsp.h"
 #include "r_utils.h"
 #include "r_draw_method.h"
 #include "r_model.h"
+
+#ifdef KISAK_MP
+#include <game_mp/g_public_mp.h>
+#endif
 
 enum DxCapsResponse : __int32
 {                                       // ...

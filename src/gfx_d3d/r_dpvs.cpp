@@ -13,9 +13,14 @@
 #include "r_light.h"
 #include <devgui/devgui.h>
 #include <cgame/cg_local.h>
-#include <cgame_mp/cg_local_mp.h>
 #include "rb_light.h"
 #include <universal/profile.h>
+
+#ifdef KISAK_MP
+#include <cgame_mp/cg_local_mp.h>
+#elif KISAK_SP
+#include <cgame/cg_ents.h>
+#endif
 
 
 DpvsGlobals dpvsGlob;

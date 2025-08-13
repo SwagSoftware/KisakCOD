@@ -572,6 +572,10 @@ void __cdecl G_SetAnimTree(gentity_s *ent, scr_animtree_t *animtree);
 void __cdecl GScr_UseAnimTree(scr_entref_t entref);
 void __cdecl GScr_StopUseAnimTree(scr_entref_t entref);
 
+// more functions
+void GScr_GetNumVehicles();
+void GScr_PrecacheVehicle();
+
 
 static const char *nodeStringTable[20] =
 {
@@ -602,4 +606,4 @@ extern scr_data_t g_scr_data;
 
 extern const BuiltinMethodDef methods[104];
 extern const BuiltinMethodDef methods_2[166];
-extern BuiltinFunctionDef *functions;
+extern BuiltinFunctionDef functions[250];

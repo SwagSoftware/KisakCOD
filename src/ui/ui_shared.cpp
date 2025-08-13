@@ -81,7 +81,6 @@ const commandDef_t commandList[42] =
   { "getautoupdate", Script_GetAutoUpdate }
 }; // idb
 #elif KISAK_SP
-static const char *CONSOLE_DEFAULT_SAVE_NAME = "savegame.svg";
 void Script_SaveGameHide(UiContext *dc, itemDef_s *item, const char **args)
 {
     //const char **v6; // r3

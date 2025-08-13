@@ -331,7 +331,7 @@ void(__cdecl *__cdecl Sentient_GetMethod(const char **pName))(scr_entref_t)
 }
 
 
-static const BuiltinFunctionDef functions[6] =
+static const BuiltinFunctionDef sentfunctions[6] =
 {
   { "createthreatbiasgroup", SentientCmd_CreateThreatBiasGroup, 0 },
   { "threatbiasgroupexists", SentientCmd_ThreatBiasGroupExists, 0 },
@@ -353,7 +353,7 @@ void(__cdecl *__cdecl Sentient_GetFunction(const char **pName))()
 
     v1 = 0;
     v2 = 0;
-    for (i = functions; ; ++i)
+    for (i = sentfunctions; ; ++i)
     {
         actionString = i->actionString;
         v5 = *pName;
@@ -372,7 +372,7 @@ void(__cdecl *__cdecl Sentient_GetFunction(const char **pName))()
         if (v2 >= 0x48)
             return 0;
     }
-    *pName = functions[v1].actionString;
-    return functions[v1].actionFunc;
+    *pName = sentfunctions[v1].actionString;
+    return sentfunctions[v1].actionFunc;
 }
 

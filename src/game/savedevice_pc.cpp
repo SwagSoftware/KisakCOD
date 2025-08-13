@@ -4,8 +4,6 @@
 
 #include "savedevice.h"
 
-char const *const CONSOLE_DEFAULT_SAVE_NAME;
-
 // void __cdecl SaveDevice_Init(void)    8227fb88 f   savedevice_xenon.obj
 // void __cdecl SV_DisplaySaveErrorUI(void) 8227fba8 f   savedevice_xenon.obj
 // BOOL __cdecl BuildCleanSavePath(char *, unsigned int, char const *, enum SaveType) 8227fbf8 f   savedevice_xenon.obj

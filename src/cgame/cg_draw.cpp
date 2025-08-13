@@ -50,78 +50,43 @@ void __cdecl CG_DrawCenterString(
     float *color,
     int textStyle)
 {
-    CenterPrint *v11; // r30
-    int time; // r4
-    int v13; // r5
-    float *v14; // r3
-    __int64 v15; // r11
-    long double v16; // fp2
-    long double v17; // fp2
-    __int64 v18; // r11
-    double v19; // fp8
-    double v20; // fp7
-    double v21; // fp6
-    double v22; // fp5
-    double v23; // fp4
-    float v24; // [sp+8h] [-B8h]
-    float v25; // [sp+10h] [-B0h]
-    float v26; // [sp+18h] [-A8h]
-    float v27; // [sp+20h] [-A0h]
-    float v28; // [sp+28h] [-98h]
-    float v29; // [sp+30h] [-90h]
-    float v30; // [sp+38h] [-88h]
-    float v31; // [sp+40h] [-80h]
-    float v32; // [sp+48h] [-78h]
-    float v33; // [sp+50h] [-70h]
-    float v34; // [sp+58h] [-68h]
-    float v35; // [sp+60h] [-60h]
-    float v36; // [sp+68h] [-58h]
-    __int64 v37; // [sp+70h] [-50h] BYREF
+    float v6; // [esp+24h] [ebp-20h]
+    CenterPrint *centerPrint; // [esp+34h] [ebp-10h]
+    float *fadeColor; // [esp+38h] [ebp-Ch]
+    int32_t time; // [esp+3Ch] [ebp-8h]
+    float x; // [esp+40h] [ebp-4h]
 
-    if (localClientNum)
-        MyAssertHandler(
-            "c:\\trees\\cod3\\cod3src\\src\\cgame\\cg_local.h",
-            910,
-            0,
-            "%s\n\t(localClientNum) = %i",
-            "(localClientNum == 0)",
-            localClientNum);
-    v11 = &s_centerPrint[localClientNum];
-    time = v11->time;
-    if (v11->time && !cg_paused->current.integer)
+    const cg_s *cgameGlob;
+
+    cgameGlob = CG_GetLocalClientGlobals(0);
+
+    time = cgameGlob->time;
+    centerPrint = &s_centerPrint[localClientNum];
+    if (centerPrint->time > cgameGlob->time)
+        centerPrint->time = 0;
+    if (centerPrint->time)
     {
-        v13 = (int)(float)(cg_centertime->current.value * (float)1000.0);
-        HIDWORD(v37) = v13;
-        v14 = CG_FadeColor(cgArray[0].time, time, v13, 100);
-        if (v14)
+        fadeColor = CG_FadeColor(time, centerPrint->time, (int)(cg_centertime->current.value * 1000.0), 100);
+        if (fadeColor)
         {
-            *textStyle = *textStyle * *v14;
-            textStyle[1] = v14[1] * textStyle[1];
-            textStyle[2] = v14[2] * textStyle[2];
-            textStyle[3] = v14[3] * textStyle[3];
-            LODWORD(v15) = UI_TextWidth(s_centerPrint[localClientNum].text, 0, font, fontscale);
-            v37 = v15;
-            *(double *)&v16 = (float)((float)((float)v15 * (float)0.5) + (float)0.5);
-            v17 = floor(v16);
-            LODWORD(v18) = (int)(float)*(double *)&v17;
-            HIDWORD(v18) = rect->vertAlign;
+            Vec4Mul(color, fadeColor, color);
+            x = rect->x - (double)(int)(UI_TextWidth(centerPrint->text, 0, font, fontscale) * 0.5f);
             UI_DrawText(
                 &scrPlaceView[localClientNum],
-                s_centerPrint[localClientNum].text,
+                centerPrint->text,
                 0x7FFFFFFF,
                 font,
-                (float)(rect->x - (float)v18), // x
-                rect->y, // y
+                x,
+                rect->y,
                 rect->horzAlign,
                 rect->vertAlign,
                 fontscale,
-                colorLtCyan, //KISAKTODO: args not correct
-                0 // style
-            );
+                color,
+                textStyle);
         }
         else
         {
-            v11->time = 0;
+            centerPrint->time = 0;
         }
     }
 }
@@ -186,8 +151,8 @@ void __cdecl CG_DrawFlashFade(int localClientNum)
     double v10; // fp0
     __int64 v11; // r10
     const float *v12; // r3
-    unsigned int v13; // [sp+50h] [-50h] BYREF
-    unsigned int v14; // [sp+54h] [-4Ch] BYREF
+    int v13; // [sp+50h] [-50h] BYREF
+    int v14; // [sp+54h] [-4Ch] BYREF
     float v15[2]; // [sp+58h] [-48h] BYREF
     __int64 v16; // [sp+60h] [-40h]
     unsigned __int64 v17; // [sp+68h] [-38h]

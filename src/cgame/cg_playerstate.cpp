@@ -169,14 +169,14 @@ int32_t __cdecl CG_CheckPlayerstateEvents(int32_t localClientNum, playerState_s*
     return eventSequence;
 }
 #elif KISAK_SP
-int32_t __cdecl CG_TransitionPlayerState(int32_t localClientNum, playerState_s *ps, const playerState_s *ops)
+void __cdecl CG_TransitionPlayerState(int32_t localClientNum, playerState_s *ps, const playerState_s *ops)
 {
     if (ps->damageEvent != ops->damageEvent && ps->damageCount)
         CG_DamageFeedback(localClientNum, ps->damageYaw, ps->damagePitch, ps->damageCount);
-    return CG_CheckPlayerstateEvents(localClientNum, ps, ops);
+    CG_CheckPlayerstateEvents(localClientNum, ps, ops);
 }
 
-int32_t __cdecl CG_CheckPlayerstateEvents(int32_t localClientNum, playerState_s *ps, const playerState_s *ops)
+void __cdecl CG_CheckPlayerstateEvents(int32_t localClientNum, playerState_s *ps, const playerState_s *ops)
 {
     int eventSequence; // r29
     int v6; // r8

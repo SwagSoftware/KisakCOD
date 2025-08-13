@@ -27,7 +27,6 @@ struct GfxAssets // sizeof=0x4
     IDirect3DQuery9 *pixelCountQuery;   // ...
 };
 
-#ifdef KISAK_MP
 struct GfxConfiguration // sizeof=0x30
 {                                       // ...
     uint32_t maxClientViews;        // ...
@@ -43,17 +42,6 @@ struct GfxConfiguration // sizeof=0x30
     const char *localizedCommonFastFileName; // ...
     const char *modFastFileName;        // ...
 };
-#elif KISAK_SP
-struct GfxConfiguration
-{
-    unsigned int maxClientViews;
-    unsigned int entCount;
-    unsigned int entnumNone;
-    unsigned int entnumOrdinaryEnd;
-    int threadContextCount;
-    int critSectCount;
-};
-#endif
 
 struct GfxMetrics // sizeof=0x28
 {                                       // ...

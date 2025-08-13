@@ -323,9 +323,269 @@ const BuiltinMethodDef methods_2[166] =
   { "logstring", ScrCmd_LogString, 0 }
 };
 
+BuiltinFunctionDef functions[250] =
+{
+  { "createprintchannel", GScr_CreatePrintChannel, 1 },
+  { "setprintchannel", GScr_printChannelSet, 1 },
+  { "print", print, 1 },
+  { "println", println, 1 },
+  { "iprintln", iprintln, 0 },
+  { "iprintlnbold", iprintlnbold, 0 },
+  { "print3d", GScr_print3d, 1 },
+  { "line", GScr_line, 1 },
+  { "getent", Scr_GetEnt, 0 },
+  { "getentarray", Scr_GetEntArray, 0 },
+  { "getnode", Scr_GetNode, 0 },
+  { "getnodearray", Scr_GetNodeArray, 0 },
+  { "getallnodes", Scr_GetAllNodes, 0 },
+  { "getreflectionlocs", Scr_GetReflectionLocs, 1 },
+  { "logstring", Scr_LogString, 0 },
+  { "getvehiclenode", GScr_GetVehicleNode, 0 },
+  { "getvehiclenodearray", GScr_GetVehicleNodeArray, 0 },
+  { "getallvehiclenodes", GScr_GetAllVehicleNodes, 0 },
+  { "getnumvehicles", GScr_GetNumVehicles, 0 },
+  { "precachevehicle", GScr_PrecacheVehicle, 0 },
+  { "precacheturret", (void(*)())GScr_PrecacheTurret, 0 },
+  { "spawn", GScr_Spawn, 0 },
+  { "spawnvehicle", GScr_SpawnVehicle, 0 },
+  { "spawnturret", GScr_SpawnTurret, 0 },
+  { "canspawnturret", GScr_CanSpawnTurret, 0 },
+  { "spawnstruct", Scr_AddStruct, 0 },
+  { "assert", assertCmd, 1 },
+  { "assertex", assertexCmd, 1 },
+  { "assertmsg", assertmsgCmd, 1 },
+  { "isdefined", GScr_IsDefined, 0 },
+  { "isstring", GScr_IsString, 0 },
+  { "isarray", GScr_IsArray, 0 },
+  { "isalive", GScr_IsAlive, 0 },
+  { "isplayer", GScr_IsPlayer, 0 },
+  { "isai", GScr_IsAI, 0 },
+  { "issentient", GScr_IsSentient, 0 },
+  { "isgodmode", GScr_IsGodMode, 0 },
+  { "getdvar", GScr_GetDvar, 0 },
+  { "getdvarint", GScr_GetDvarInt, 0 },
+  { "getdvarfloat", GScr_GetDvarFloat, 0 },
+  { "getdebugdvar", GScr_GetDebugDvar, 1 },
+  { "getdebugdvarint", GScr_GetDebugDvarInt, 1 },
+  { "getdebugdvarfloat", GScr_GetDebugDvarFloat, 1 },
+  { "setdvar", GScr_SetDvar, 0 },
+  { "setsaveddvar", GScr_SetSavedDvar, 0 },
+  { "gettime", GScr_GetTime, 0 },
+  { "getdifficulty", GScr_GetDifficulty, 0 },
+  { "getentbynum", Scr_GetEntByNum, 1 },
+  { "getaiarray", (void(*)())Scr_GetAIArray, 0 },
+  { "getaispeciesarray", (void(*)())Scr_GetAISpeciesArray, 0 },
+  { "getspawnerarray", Scr_GetSpawnerArray, 0 },
+  { "getspawnerteamarray", Scr_GetSpawnerTeamArray, 0 },
+  { "getweaponmodel", Scr_GetWeaponModel, 0 },
+  { "getweaponclipmodel", Scr_GetWeaponClipModel, 0 },
+  { "getanimlength", GScr_GetAnimLength, 0 },
+  { "animhasnotetrack", GScr_AnimHasNotetrack, 0 },
+  { "getnotetracktimes", GScr_GetNotetrackTimes, 0 },
+  { "getbrushmodelcenter", GScr_GetBrushModelCenter, 0 },
+  { "getkeybinding", GScr_GetKeyBinding, 0 },
+  { "getcommandfromkey", GScr_GetCommandFromKey, 0 },
+  { "objective_add", (void(*)())Scr_Objective_Add, 0 },
+  { "objective_delete", Scr_Objective_Delete, 0 },
+  { "objective_state", (void(*)())Scr_Objective_State, 0 },
+  { "objective_string", Scr_Objective_String, 0 },
+  { "objective_string_nomessage", Scr_Objective_String_NoMessage, 0 },
+  { "objective_icon", Scr_Objective_Icon, 0 },
+  { "objective_position", Scr_Objective_Position, 0 },
+  { "objective_additionalposition", Scr_Objective_AdditionalPosition, 0 },
+  { "objective_current", (void(*)())Scr_Objective_Current, 0 },
+  { "objective_additionalcurrent", (void(*)())Scr_Objective_AdditionalCurrent, 0 },
+  { "objective_ring", Scr_Objective_Ring, 0 },
+  { "target_set", Scr_Target_Set, 0 },
+  { "target_remove", Scr_Target_Remove, 0 },
+  { "target_setshader", Scr_Target_SetShader, 0 },
+  { "target_setoffscreenshader", Scr_Target_SetOffscreenShader, 0 },
+  { "target_isinrect", Scr_Target_IsInRect, 0 },
+  { "target_isincircle", Scr_Target_IsInCircle, 0 },
+  { "target_startreticlelockon", Scr_Target_StartLockOn, 0 },
+  { "target_clearreticlelockon", Scr_Target_ClearLockOn, 0 },
+  { "target_getarray", Scr_Target_GetArray, 0 },
+  { "target_istarget", Scr_Target_IsTarget, 0 },
+  { "target_setattackmode", Scr_Target_SetAttackMode, 0 },
+  { "target_setjavelinonly", Scr_Target_SetJavelinOnly, 0 },
+  { "missile_createattractorent", Scr_MissileCreateAttractorEnt, 0 },
+  { "missile_createattractororigin", Scr_MissileCreateAttractorOrigin, 0 },
+  { "missile_createrepulsorent", Scr_MissileCreateRepulsorEnt, 0 },
+  { "missile_createrepulsororigin", Scr_MissileCreateRepulsorOrigin, 0 },
+  { "missile_deleteattractor", Scr_MissileDeleteAttractor, 0 },
+  { "bullettrace", Scr_BulletTrace, 0 },
+  { "bullettracepassed", Scr_BulletTracePassed, 0 },
+  { "sighttracepassed", Scr_SightTracePassed, 0 },
+  { "physicstrace", Scr_PhysicsTrace, 0 },
+  { "playerphysicstrace", Scr_PlayerPhysicsTrace, 0 },
+  { "getstartorigin", GScr_GetStartOrigin, 0 },
+  { "getstartangles", GScr_GetStartAngles, 0 },
+  { "getcycleoriginoffset", GScr_GetCycleOriginOffset, 0 },
+  { "getmovedelta", GScr_GetMoveDelta, 0 },
+  { "getangledelta", GScr_GetAngleDelta, 0 },
+  { "getnorthyaw", GScr_GetNorthYaw, 0 },
+  { "randomint", Scr_RandomInt, 0 },
+  { "randomfloat", Scr_RandomFloat, 0 },
+  { "randomintrange", Scr_RandomIntRange, 0 },
+  { "randomfloatrange", Scr_RandomFloatRange, 0 },
+  { "sin", GScr_sin, 0 },
+  { "cos", GScr_cos, 0 },
+  { "tan", GScr_tan, 0 },
+  { "asin", GScr_asin, 0 },
+  { "acos", GScr_acos, 0 },
+  { "atan", GScr_atan, 0 },
+  { "int", GScr_CastInt, 0 },
+  { "abs", GScr_abs, 0 },
+  { "min", GScr_min, 0 },
+  { "max", GScr_max, 0 },
+  { "floor", GScr_floor, 0 },
+  { "ceil", GScr_ceil, 0 },
+  { "sqrt", GScr_sqrt, 0 },
+  { "vectorfromlinetopoint", GScr_VectorFromLineToPoint, 0 },
+  { "pointonsegmentnearesttopoint", GScr_PointOnSegmentNearestToPoint, 0 },
+  { "distance", Scr_Distance, 0 },
+  { "distance2d", Scr_Distance2D, 0 },
+  { "distancesquared", Scr_DistanceSquared, 0 },
+  { "length", Scr_Length, 0 },
+  { "lengthsquared", Scr_LengthSquared, 0 },
+  { "closer", Scr_Closer, 0 },
+  { "vectordot", Scr_VectorDot, 0 },
+  { "vectornormalize", Scr_VectorNormalize, 0 },
+  { "vectortoangles", Scr_VectorToAngles, 0 },
+  { "vectorlerp", Scr_VectorLerp, 0 },
+  { "anglestoup", Scr_AnglesToUp, 0 },
+  { "anglestoright", Scr_AnglesToRight, 0 },
+  { "anglestoforward", Scr_AnglesToForward, 0 },
+  { "combineangles", Scr_CombineAngles, 0 },
+  { "issubstr", Scr_IsSubStr, 0 },
+  { "getsubstr", Scr_GetSubStr, 0 },
+  { "tolower", Scr_ToLower, 0 },
+  { "strtok", Scr_StrTok, 0 },
+  { "setblur", Scr_SetBlur, 0 },
+  { "musicplay", Scr_MusicPlay, 0 },
+  { "musicstop", Scr_MusicStop, 0 },
+  { "soundfade", Scr_SoundFade, 0 },
+  { "amplify", Scr_Amplify, 0 },
+  { "amplifystop", Scr_AmplifyStop, 0 },
+  { "ambientplay", Scr_AmbientPlay, 0 },
+  { "ambientstop", Scr_AmbientStop, 0 },
+  { "precachemodel", (void(*)())Scr_PrecacheModel, 0 },
+  { "precacheshellshock", Scr_PrecacheShellShock, 0 },
+  { "precacheitem", Scr_PrecacheItem, 0 },
+  { "precacheshader", (void(*)())Scr_PrecacheMaterial, 0 },
+  { "precachestring", Scr_PrecacheString, 0 },
+  { "precachemenu", GScr_PrecacheMenu, 0 },
+  { "precacherumble", (void(*)())Scr_PrecacheRumble, 0 },
+  { "precachelocationselector", GScr_PrecacheLocationSelector, 0 },
+  { "precachenightvisioncodeassets", Scr_PrecacheNightvisionCodeAssets, 0 },
+  { "savegame", Scr_SaveGame, 0 },
+  { "issavesuccessful", Scr_IsSaveSuccessful, 0 },
+  { "issaverecentlyloaded", Scr_IsRecentlyLoaded, 0 },
+  { "savegamenocommit", Scr_SaveGameNoCommit, 0 },
+  { "commitsave", Scr_CommitSave, 0 },
+  { "loadfx", Scr_LoadFX, 0 },
+  { "playfx", Scr_PlayFX, 0 },
+  { "playfxontag", Scr_PlayFXOnTag, 0 },
+  { "playloopedfx", Scr_PlayLoopedFX, 0 },
+  { "spawnfx", Scr_SpawnFX, 0 },
+  { "triggerfx", Scr_TriggerFX, 0 },
+  { "getfxvisibility", Scr_GetFXVis, 0 },
+  { "physicsexplosionsphere", Scr_PhysicsExplosionSphere, 0 },
+  { "physicsexplosioncylinder", Scr_PhysicsExplosionCylinder, 0 },
+  { "physicsjolt", Scr_PhysicsRadiusJolt, 0 },
+  { "physicsjitter", Scr_PhysicsRadiusJitter, 0 },
+  { "setexpfog", Scr_SetExponentialFog, 0 },
+  { "setculldist", Scr_SetCullDist, 0 },
+  { "visionsetnaked", Scr_VisionSetNaked, 0 },
+  { "visionsetnight", Scr_VisionSetNight, 0 },
+  { "getmapsunlight", Scr_GetMapSunLight, 0 },
+  { "setsunlight", Scr_SetSunLight, 0 },
+  { "resetsunlight", Scr_ResetSunLight, 0 },
+  { "getmapsundirection", Scr_GetMapSunDirection, 0 },
+  { "setsundirection", Scr_SetSunDirection, 0 },
+  { "lerpsundirection", Scr_LerpSunDirection, 0 },
+  { "resetsundirection", Scr_ResetSunDirection, 0 },
+  { "radiusdamage", GScr_RadiusDamage, 0 },
+  { "setplayerignoreradiusdamage", (void(*)())GScr_SetPlayerIgnoreRadiusDamage, 0 },
+  { "changelevel", GScr_ChangeLevel, 0 },
+  { "missionsuccess", GScr_MissionSuccess, 0 },
+  { "missionfailed", GScr_MissionFailed, 0 },
+  { "setmissiondvar", GScr_SetMissionDvar, 0 },
+  { "cinematic", GScr_Cinematic, 0 },
+  { "cinematicingame", GScr_CinematicInGame, 0 },
+  { "cinematicingamesync", GScr_CinematicInGameSync, 0 },
+  { "cinematicingameloop", GScr_CinematicInGameLoop, 0 },
+  { "cinematicingameloopresident", GScr_CinematicInGameLoopResident, 0 },
+  {
+    "cinematicingameloopfromfastfile",
+    GScr_CinematicInGameLoopFromFastfile,
+    0
+  },
+  { "stopcinematicingame", GScr_StopCinematicInGame, 0 },
+  { "earthquake", GScr_Earthquake, 0 },
+  { "drawcompassfriendlies", (void(*)())GScr_DrawCompassFriendlies, 0 },
+  { "bulletspread", Scr_BulletSpread, 0 },
+  { "bullettracer", Scr_BulletTracer, 0 },
+  { "magicbullet", Scr_MagicBullet, 0 },
+  { "getnumparts", GScr_GetNumParts, 0 },
+  { "getpartname", GScr_GetPartName, 0 },
+  { "weaponfiretime", GScr_WeaponFireTime, 0 },
+  { "weaponclipsize", GScr_WeaponClipSize, 0 },
+  { "weaponissemiauto", GScr_WeaponIsSemiAuto, 0 },
+  { "weaponisboltaction", GScr_WeaponIsBoltAction, 0 },
+  { "weapontype", GScr_WeaponType, 0 },
+  { "weaponclass", GScr_WeaponClass, 0 },
+  { "weaponinventorytype", GScr_WeaponInventoryType, 0 },
+  { "weaponstartammo", GScr_WeaponStartAmmo, 0 },
+  { "weaponmaxammo", GScr_WeaponMaxAmmo, 0 },
+  { "weaponaltweaponname", GScr_WeaponAltWeaponName, 0 },
+  { "weaponfightdist", GScr_WeaponFightDist, 0 },
+  { "weaponmaxdist", GScr_WeaponMaxDist, 0 },
+  { "isturretactive", GScr_IsTurretActive, 0 },
+  { "isweaponcliponly", GScr_IsWeaponClipOnly, 0 },
+  { "isweapondetonationtimed", GScr_IsWeaponDetonationTimed, 0 },
+  { "badplace_delete", Scr_BadPlace_Delete, 0 },
+  { "badplace_cylinder", Scr_BadPlace_Cylinder, 0 },
+  { "badplace_arc", Scr_BadPlace_Arc, 0 },
+  { "badplace_brush", Scr_BadPlace_Brush, 0 },
+  { "clearallcorpses", Scr_ClearAllCorpses, 0 },
+  { "newhudelem", GScr_NewHudElem, 0 },
+  { "resettimeout", Scr_ResetTimeout, 0 },
+  { "setturretnode", Scr_SetTurretNode, 0 },
+  { "unsetturretnode", Scr_UnsetTurretNode, 0 },
+  { "setnodepriority", Scr_SetNodePriority, 0 },
+  { "isnodeoccupied", Scr_IsNodeOccupied, 0 },
+  { "setdebugorigin", GScr_SetDebugOrigin, 1 },
+  { "setdebugangles", GScr_SetDebugAngles, 1 },
+  { "playrumbleonposition", (void(*)())Scr_PlayRumbleOnPosition, 0 },
+  { "playrumblelooponposition", (void(*)())Scr_PlayRumbleLoopOnPosition, 0 },
+  { "stopallrumbles", (void(*)())Scr_StopAllRumbles, 0 },
+  { "soundexists", ScrCmd_SoundExists, 0 },
+  { "giveachievement", ScrCmd_GiveAchievement, 0 },
+  { "updategamerprofile", ScrCmd_UpdateGamerProfile, 0 },
+  { "openfile", GScr_OpenFile, 1 },
+  { "closefile", GScr_CloseFile, 1 },
+  { "fprintln", GScr_FPrintln, 1 },
+  { "fprintfields", GScr_FPrintFields, 1 },
+  { "freadln", GScr_FReadLn, 1 },
+  { "fgetarg", GScr_FGetArg, 1 },
+  { "setminimap", GScr_SetMiniMap, 0 },
+  { "getarraykeys", GScr_GetArrayKeys, 0 },
+  { "clearlocalizedstrings", GScr_ClearLocalizedStrings, 0 },
+  { "setphysicsgravitydir", ScrCmd_SetPhysicsGravityDir, 0 },
+  { "gettimescale", ScrCmd_GetTimeScale, 0 },
+  { "settimescale", ScrCmd_SetTimeScale, 0 },
+  { "tablelookup", Scr_TableLookup, 0 },
+  { "tablelookupistring", Scr_TableLookupIString, 0 },
+  { "refreshhudcompass", Scr_RefreshHudCompass, 0 },
+  { "refreshhudammocounter", Scr_RefreshHudAmmoCounter, 0 }
+};
+
+
+
+
 bool g_archiveGetDvar;
 char **difficultyStrings;
-BuiltinFunctionDef *functions;
 scr_data_t g_scr_data;
 
 unsigned int __cdecl GScr_AllocString(const char *s)
@@ -11626,3 +11886,42 @@ void __cdecl GScr_StopUseAnimTree(scr_entref_t entref)
     G_SetAnimTree(Entity, 0);
 }
 
+void GScr_GetNumVehicles()
+{
+    int v0; // r3
+    int *p_entNum; // r11
+
+    v0 = 0;
+    p_entNum = &s_vehicles[1].entNum;
+    do
+    {
+        if (*(p_entNum - 206) != ENTITYNUM_NONE)
+            ++v0;
+        if (*p_entNum != ENTITYNUM_NONE)
+            ++v0;
+        if (p_entNum[206] != ENTITYNUM_NONE)
+            ++v0;
+        if (p_entNum[412] != ENTITYNUM_NONE)
+            ++v0;
+        p_entNum += 824;
+    } while ((uintptr_t)p_entNum < (uintptr_t)&s_vehicles[64]);
+    Scr_AddInt(v0);
+}
+
+void GScr_PrecacheVehicle()
+{
+    const char *String; // r31
+    int VehicleInfoFromName; // r30
+    const char *v2; // r3
+
+    String = Scr_GetString(0);
+    if (!level.initializing)
+        Scr_Error("precacheVehicle must be called before any wait statements in the level script\n");
+    VehicleInfoFromName = VEH_GetVehicleInfoFromName(String);
+    if (VehicleInfoFromName < 0)
+    {
+        v2 = va("Cannot find vehicle info for [%s]\n", String);
+        Scr_Error(v2);
+    }
+    G_GetWeaponIndexForName(s_vehicleInfos[VehicleInfoFromName].turretWeapon);
+}

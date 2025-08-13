@@ -2722,56 +2722,6 @@ int __fastcall G_LoadVehicle(const char *name)
     ++s_numVehicleInfos;
     return result;
 }
-int __fastcall VEH_GetVehicleInfoFromName(const char *name)
-{
-    int v2; // r30
-    vehicle_info_t *v3; // r29
-    int result; // r3
-    vehicle_info_t *v5; // r29
-
-    if (!name || !*name)
-        return -1;
-    v2 = 0;
-    if (s_numVehicleInfos > 0)
-    {
-        v3 = s_vehicleInfos;
-        while (I_stricmp(name, v3->name))
-        {
-            ++v2;
-            ++v3;
-            if (v2 >= s_numVehicleInfos)
-                goto LABEL_7;
-        }
-        return v2;
-    }
-LABEL_7:
-    result = G_LoadVehicle(name);
-    if (result < 0)
-    {
-        Com_PrintWarning(15, "WARNING: couldn't find vehicle info for '%s', attempting to use 'defaultvehicle'.\n", name);
-        v2 = 0;
-        if (s_numVehicleInfos > 0)
-        {
-            v5 = s_vehicleInfos;
-            while (I_stricmp("defaultvehicle", v5->name))
-            {
-                ++v2;
-                ++v5;
-                if (v2 >= s_numVehicleInfos)
-                    goto LABEL_12;
-            }
-            return v2;
-        }
-    LABEL_12:
-        result = G_LoadVehicle("defaultvehicle");
-        if (result < 0)
-        {
-            Com_Error(ERR_DROP, "Cannot find vehicle info for 'defaultvehicle'");
-            return -1;
-        }
-    }
-    return result;
-}
 
 static int VEH_DObjHasRequiredTags(gentity_s *ent, int infoIdx)
 {
@@ -4832,6 +4782,57 @@ void G_LoadVehicleInfo(SaveGame *save)
             sndIndices += 314;
         } while (v2 < s_numVehicleInfos);
     }
+}
+
+int VEH_GetVehicleInfoFromName(const char *name)
+{
+    int v2; // r30
+    vehicle_info_t *v3; // r29
+    int result; // r3
+    vehicle_info_t *v5; // r29
+
+    if (!name || !*name)
+        return -1;
+    v2 = 0;
+    if (s_numVehicleInfos > 0)
+    {
+        v3 = s_vehicleInfos;
+        while (I_stricmp(name, v3->name))
+        {
+            ++v2;
+            ++v3;
+            if (v2 >= s_numVehicleInfos)
+                goto LABEL_7;
+        }
+        return v2;
+    }
+LABEL_7:
+    result = G_LoadVehicle(name);
+    if (result < 0)
+    {
+        Com_PrintWarning(15, "WARNING: couldn't find vehicle info for '%s', attempting to use 'defaultvehicle'.\n", name);
+        v2 = 0;
+        if (s_numVehicleInfos > 0)
+        {
+            v5 = s_vehicleInfos;
+            while (I_stricmp("defaultvehicle", v5->name))
+            {
+                ++v2;
+                ++v5;
+                if (v2 >= s_numVehicleInfos)
+                    goto LABEL_12;
+            }
+            return v2;
+        }
+    LABEL_12:
+        result = G_LoadVehicle("defaultvehicle");
+        if (result < 0)
+        {
+            Com_Error(ERR_DROP, "cannot find vehicle info for 'defaultvehicle' this is a default vehicile info that you should have.");
+            return -1;
+        }
+    }
+    return result;
 }
 
 #endif // KISAK_SP

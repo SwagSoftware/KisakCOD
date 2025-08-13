@@ -17,10 +17,12 @@ static void __cdecl R_FlagXModelAsSkinned(GfxSceneEntity *sceneEnt, unsigned int
     sceneEnt->cull.state = surfaceCount + 4;
 }
 
+#ifdef KISAK_MP
 static GfxSkinCacheEntry *__cdecl CG_GetSkinCacheEntry(cpose_t *pose)
 {
     return &pose->skinCacheEntry;
 }
+#endif
 
 static int __cdecl R_AllocSkinnedCachedVerts(int vertCount)
 {
@@ -237,6 +239,7 @@ int  R_SkinSceneDObjModels(
                 return 0;
             }
             unsigned int oldSkinnedCachedOffset = 0x80000001;
+#ifdef KISAK_MP
             if (gfxBuf.fastSkin)
             {
                 GfxSkinCacheEntry *skinCacheEntry = CG_GetSkinCacheEntry(sceneEnt->info.pose);
@@ -256,6 +259,7 @@ int  R_SkinSceneDObjModels(
                 iassert(skinCacheEntry->numSkinnedVerts == numSkinnedVerts);
                 skinCacheEntry->skinnedCachedOffset = skinnedCachedOffset;
             }
+#endif
             GfxModelSkinnedSurface *surfPos2 = (GfxModelSkinnedSurface *)surfsBuffer;
             for (unsigned int offset = 0; offset < totalSurfaceCount; ++offset)
             {
