@@ -574,7 +574,6 @@ void __cdecl CL_DevGuiCmd_f();
 void __cdecl CL_DevGuiOpen_f();
 int32_t __cdecl CL_ScaledMilliseconds();
 void __cdecl CL_InitRef();
-void __cdecl SetupGfxConfig(GfxConfiguration *config);
 void __cdecl CL_startSingleplayer_f();
 void __cdecl CL_DrawLogo(int32_t localClientNum);
 void __cdecl CL_StopLogo(int32_t localClientNum);

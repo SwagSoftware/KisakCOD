@@ -68,7 +68,9 @@ int com_consoleLogOpenFailed;
 int com_missingAssetOpenFailed;
 int com_frameTime;
 
+#ifdef KISAK_MP
 const dvar_t *com_dedicated;
+#endif
 const dvar_t *com_hiDef;
 const dvar_t *com_animCheck;
 const dvar_t *com_developer_script;
@@ -184,7 +186,11 @@ void QDECL Com_PrintMessage(int channel, const char* msg, int error)
 	}
 	else
 	{
-		if (channel != 6 && com_dedicated && !com_dedicated->current.integer)
+		if (channel != 6 
+#ifdef KISAK_MP
+            && com_dedicated && !com_dedicated->current.integer
+#endif
+            )
 		{
 			if (channel == 2 || channel == 3 || channel == 4)
 				MyAssertHandler(".\\qcommon\\common.cpp", 625, 0, "%s", "!Con_IsNotifyChannel( channel )");
@@ -458,7 +464,9 @@ void Com_PrintWarning(int channel, const char *fmt, ...)
 void __cdecl Com_Shutdown(const char* finalmsg)
 {
     Com_ShutdownInternal(finalmsg);
+#ifdef KISAK_MP
     if (!com_dedicated->current.integer)
+#endif
     {
         CL_InitRenderer();
         Com_AssetLoadUI();
@@ -626,9 +634,8 @@ void Com_Error(errorParm_t code, const char* fmt, ...)
             return;
         }
         code = ERR_DROP;
-    LABEL_27:
-        if (!com_errorEntered)
-            MyAssertHandler(".\\qcommon\\common.cpp", 1456, 0, "%s", "com_errorEntered");
+    ERR_JMP:
+        iassert(com_errorEntered);
         errorcode = code;
         Sys_LeaveCriticalSection(CRITSECT_COM_ERROR);
         Value = (jmp_buf *)Sys_GetValue(2);
@@ -639,12 +646,12 @@ void Com_Error(errorParm_t code, const char* fmt, ...)
         com_fixedConsolePosition = 1;
         CL_ConsoleFixPosition();
         code = ERR_DROP;
-        goto LABEL_27;
+        goto ERR_JMP;
     }
     if (code != ERR_MAPLOADERRORSUMMARY)
     {
         com_fixedConsolePosition = 0;
-        goto LABEL_27;
+        goto ERR_JMP;
     }
     com_fixedConsolePosition = 1;
     CL_ConsoleFixPosition();
@@ -657,8 +664,12 @@ void Com_Error(errorParm_t code, const char* fmt, ...)
     }
     else
     {
+#ifdef KISAK_MP
         if (!com_dedicated->current.integer)
-            goto LABEL_27;
+#endif
+        {
+            goto ERR_JMP;
+        }
         Sys_Print((char*)"\n==========================\n");
         Sys_Print(com_errorMessage);
         Sys_Print((char*)"\n==========================\n");
@@ -998,19 +1009,24 @@ void __cdecl Com_Init(char* commandLine)
     if (com_errorEntered)
         Com_ErrorCleanup();
 
-    if (!com_sv_running->current.enabled && !com_dedicated->current.integer)
+    if (!com_sv_running->current.enabled)
     {
-        v4 = (jmp_buf *)Sys_GetValue(2);
-        //if (_setjmp3(v4, 0))
-        if (_setjmp(*v4))
+#ifdef KISAK_MP
+        if (!com_dedicated->current.integer)
+#endif
         {
-            Sys_Error(va("Error during initialization:\n%s\n", com_errorMessage));
+            v4 = (jmp_buf *)Sys_GetValue(2);
+            //if (_setjmp3(v4, 0))
+            if (_setjmp(*v4))
+            {
+                Sys_Error(va("Error during initialization:\n%s\n", com_errorMessage));
+            }
+            if (!cls.rendererStarted)
+                CL_InitRenderer();
+            R_BeginRemoteScreenUpdate();
+            CL_StartHunkUsers();
+            R_EndRemoteScreenUpdate();
         }
-        if (!cls.rendererStarted)
-            CL_InitRenderer();
-        R_BeginRemoteScreenUpdate();
-        CL_StartHunkUsers();
-        R_EndRemoteScreenUpdate();
     }
 }
 
@@ -1047,8 +1063,12 @@ void Com_ErrorCleanup()
     LargeLocalReset();
     R_PopRemoteScreenUpdate();
     Com_SyncThreads();
+#ifdef KISAK_MP
     if (!com_dedicated->current.enabled)
+#endif
+    {
         R_ComErrorCleanup();
+    }
     Cmd_ComErrorCleanup();
     Dvar_SetInAutoExec(0);
     if (useFastFile->current.enabled)
@@ -1397,11 +1417,16 @@ void __cdecl Com_Assert_f()
 
 void COM_PlayIntroMovies()
 {
-    if (!com_dedicated->current.integer && !com_introPlayed->current.enabled)
+#ifdef KISAK_MP
+    if (!com_dedicated->current.integer)
+#endif
     {
-        Cbuf_AddText(0, "cinematic IW_logo\n");
-        Dvar_SetString((dvar_s*)nextmap, (char*)"cinematic atvi; set nextmap cinematic cod_intro");
-        Dvar_SetBool((dvar_s*)com_introPlayed, 1);
+        if (!com_introPlayed->current.enabled)
+        {
+            Cbuf_AddText(0, "cinematic IW_logo\n");
+            Dvar_SetString((dvar_s *)nextmap, (char *)"cinematic atvi; set nextmap cinematic cod_intro");
+            Dvar_SetBool((dvar_s *)com_introPlayed, 1);
+        }
     }
 }
 
@@ -1729,12 +1754,17 @@ void __cdecl Com_Frame_Try_Block_Function()
     minMsec = 1;
     maxFPS = com_maxfps->current.integer;
     Com_AdjustMaxFPS(&maxFPS);
-    if (maxFPS > 0 && !com_dedicated->current.integer)
+    if (maxFPS > 0)
     {
-        minMsec = 1000 / maxFPS;
-        iassert(minMsec >= 0);
-        if (!minMsec)
-            minMsec = 1;
+#ifdef KISAK_MP
+        if (!com_dedicated->current.integer)
+#endif
+        {
+            minMsec = 1000 / maxFPS;
+            iassert(minMsec >= 0);
+            if (!minMsec)
+                minMsec = 1;
+        }
     }
     Win_UpdateThreadLock();
     iassert(minMsec > 0);
@@ -1882,7 +1912,6 @@ void __cdecl Com_WriteConfiguration(int localClientNum)
 
 int __cdecl Com_ModifyMsec(int msec)
 {
-    double v2; // [esp+0h] [ebp-24h]
     int clampTime; // [esp+18h] [ebp-Ch]
     int originalMsec; // [esp+1Ch] [ebp-8h]
     bool useTimescale; // [esp+23h] [ebp-1h]
@@ -1902,8 +1931,11 @@ int __cdecl Com_ModifyMsec(int msec)
         msec = (int)(dev_timescale->current.value * (com_codeTimeScale * (com_timescale->current.value * (double)msec)));
         useTimescale = 1;
     }
+
     if (msec < 1)
         msec = 1;
+
+#ifdef KISAK_MP
     if (com_dedicated->current.integer)
     {
         if (msec > 500 && msec < 500000)
@@ -1911,6 +1943,9 @@ int __cdecl Com_ModifyMsec(int msec)
         clampTime = 5000;
     }
     else if (com_sv_running->current.enabled)
+#elif KISAK_SP
+    if (com_sv_running->current.enabled)
+#endif
     {
         clampTime = com_maxFrameTime->current.integer;
     }
@@ -1918,13 +1953,14 @@ int __cdecl Com_ModifyMsec(int msec)
     {
         clampTime = 5000;
     }
+
     if (msec > clampTime)
         msec = clampTime;
     if (useTimescale && originalMsec)
-        v2 = (double)msec / (double)originalMsec;
+        com_timescaleValue = (float)msec / (float)originalMsec;
     else
-        v2 = 1.0;
-    com_timescaleValue = v2;
+        com_timescaleValue = 1.0f;
+
     return msec;
 }
 
@@ -2029,7 +2065,9 @@ void __cdecl Com_Frame()
     {
         Com_ErrorCleanup();
         Sys_LeaveCriticalSection(CRITSECT_COM_ERROR);
+#ifdef KISAK_MP
         if (!com_dedicated->current.integer)
+#endif
         {
             CL_InitRenderer();
             Com_StartHunkUsers();

@@ -306,7 +306,7 @@ GfxMetrics gfxMetrics;
 //int marker_r_init        85827c18     gfx_d3d : r_init.obj
 //BOOL g_allocateMinimalResources 85827c1c     gfx_d3d : r_init.obj
 bool g_allocateMinimalResources;
-GfxConfiguration gfxCfg;
+GfxConfiguration gfxCfg{ 0 };
 GfxGlobals r_glob;
 
 int g_disableRendering;
@@ -2824,31 +2824,17 @@ void __cdecl R_GammaCorrect(unsigned __int8 *buffer, int bufSize)
 
 void __cdecl SetGfxConfig(const GfxConfiguration *config)
 {
-    const char *v1; // eax
+    iassert(config);
+    bcassert(config->maxClientViews, GFX_MAX_CLIENT_VIEWS);
+    iassert(config->critSectCount == CRITSECT_COUNT);
 
-    if (!config)
-        MyAssertHandler(".\\r_init.cpp", 807, 0, "%s", "config");
-    if (!config->maxClientViews || config->maxClientViews > 4)
-        MyAssertHandler(
-            ".\\r_init.cpp",
-            808,
-            0,
-            "config->maxClientViews not in [1, GFX_MAX_CLIENT_VIEWS]\n\t%i not in [%i, %i]",
-            config->maxClientViews,
-            1,
-            4);
-    if (config->critSectCount != 22)
-    {
-        v1 = va("%d != %d", config->critSectCount, 22);
-        MyAssertHandler(".\\r_init.cpp", 810, 0, "%s\n\t%s", "config->critSectCount == CRITSECT_COUNT", v1);
-    }
     memcpy(&gfxCfg, config, sizeof(gfxCfg));
 }
 
 void __cdecl R_InitThreads()
 {
-    if (r_glob.isRenderingRemoteUpdate)
-        MyAssertHandler(".\\r_init.cpp", 2315, 0, "%s", "!r_glob.isRenderingRemoteUpdate");
+    iassert(!r_glob.isRenderingRemoteUpdate);
+
     R_InitRenderThread();
     R_InitWorkerThreads();
 }
@@ -3681,7 +3667,7 @@ char __cdecl R_CreateGameWindow(GfxWindowParms *wndParms)
 
 void R_LoadGraphicsAssets()
 {
-    XZoneInfo zoneInfo[6]; // [esp+0h] [ebp-50h] BYREF
+    XZoneInfo zoneInfo[6]{ 0 }; // [esp+0h] [ebp-50h] BYREF
     unsigned int zoneCount; // [esp+4Ch] [ebp-4h]
 
     zoneInfo[0].name = gfxCfg.codeFastFileName;

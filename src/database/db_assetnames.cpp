@@ -5,6 +5,7 @@
 
 const char *(__cdecl *DB_XAssetGetNameHandler[33])(const XAssetHeader *) =
 {
+    // KISAKTODO: these got Identical COMDAT folded into 1 function because name is usually the 1st field.
     DB_StringTableGetName,
     DB_StringTableGetName,
     DB_StringTableGetName,
@@ -186,8 +187,6 @@ void __cdecl DB_StringTableSetName(XAssetHeader *header, const char *name)
 
 const char *__cdecl DB_ImageGetName(const XAssetHeader *header)
 {
-    //return header->xmodelPieces[2].pieces;
-    //return header->xmodelPieces->name; // KISAKTODO: this functionality is custom and probably different
     return header->image->name;
 }
 
@@ -215,21 +214,20 @@ void __cdecl DB_LocalizeEntrySetName(XAssetHeader *header, const char *name)
 
 const char *__cdecl DB_GetXAssetHeaderName(int32_t type, const XAssetHeader *header)
 {
-    const char *v2; // eax
     const char *name; // [esp+0h] [ebp-4h]
 
-    if (!header)
-        MyAssertHandler(".\\database\\db_assetnames.cpp", 590, 0, "%s", "header");
-    if (!DB_XAssetGetNameHandler[type])
-        MyAssertHandler(".\\database\\db_assetnames.cpp", 591, 0, "%s", "DB_XAssetGetNameHandler[type]");
-    if (!header->data)
-        MyAssertHandler(".\\database\\db_assetnames.cpp", 592, 0, "%s", "header->data");
+    iassert(header);
+    iassert(DB_XAssetGetNameHandler[type]);
+    iassert(header->data);
+
     name = DB_XAssetGetNameHandler[type](header);
-    if (!name)
-    {
-        v2 = va("Name not found for asset type %s\n", g_assetNames[type]);
-        MyAssertHandler(".\\database\\db_assetnames.cpp", 594, 0, "%s\n\t%s", "name", v2);
-    }
+
+    iassert(name);
+    //if (!name)
+    //{
+    //    MyAssertHandler(".\\database\\db_assetnames.cpp", 594, 0, "%s\n\t%s", "name", 
+    //      va("Name not found for asset type %s\n", g_assetNames[type]));
+    //}
     return name;
 }
 

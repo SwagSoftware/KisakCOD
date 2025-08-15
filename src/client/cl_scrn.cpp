@@ -115,14 +115,13 @@ void CL_DrawScreen()
     DevGui_Draw(0);
 }
 
-void __cdecl SCR_ClearScreen(int a1, int a2, unsigned __int8 a3)
+static void SCR_ClearScreen()
 {
-    R_AddCmdClearScreen(15, colorBlack, 0.0, a3);
+    R_AddCmdClearScreen(1, colorBlack, 1.0, 0);
 }
 
 void __cdecl SCR_DrawScreenField(int refreshedUI)
 {
-    unsigned __int8 v2; // r5
     connstate_t connectionState; // r31
     Material *v4; // r4
     const float *v5; // r3
@@ -133,7 +132,7 @@ void __cdecl SCR_DrawScreenField(int refreshedUI)
         || (connectionState = clientUIActives[0].connectionState, clientUIActives[0].connectionState == CA_MAP_RESTART))
     {
     LABEL_2:
-        R_AddCmdClearScreen(15, colorBlack, 0.0, v2);
+        SCR_ClearScreen();
     }
     else
     {
@@ -145,15 +144,15 @@ void __cdecl SCR_DrawScreenField(int refreshedUI)
             case CA_DISCONNECTED:
                 goto LABEL_2;
             case CA_CINEMATIC:
-                R_AddCmdClearScreen(15, colorBlack, 0.0, v2);
+                SCR_ClearScreen();
                 SCR_DrawCinematic(0);
                 goto LABEL_12;
             case CA_LOGO:
-                R_AddCmdClearScreen(15, colorBlack, 0.0, v2);
+                SCR_ClearScreen();
                 CL_DrawLogo();
                 goto LABEL_12;
             case CA_LOADING:
-                R_AddCmdClearScreen(15, colorBlack, 0.0, v2);
+                SCR_ClearScreen();
                 goto LABEL_14;
             case CA_ACTIVE:
                 goto LABEL_12;
@@ -166,7 +165,7 @@ void __cdecl SCR_DrawScreenField(int refreshedUI)
         case CA_DISCONNECTED:
         case CA_LOGO:
         case CA_LOADING:
-            R_AddCmdClearScreen(15, colorBlack, 0.0, v2);
+            SCR_ClearScreen();
             break;
         case CA_CINEMATIC:
         case CA_ACTIVE:

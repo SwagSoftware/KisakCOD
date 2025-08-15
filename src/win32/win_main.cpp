@@ -325,19 +325,24 @@ void Sys_Error(const char *error, ...)
 	// random gamma crap we don't care about
 	// FixWindowsDesktop();
 
-	if (com_dedicated->current.integer && Sys_IsMainThread())
+#ifdef KISAK_MP
+	if (com_dedicated->current.integer)
+#endif
 	{
-		Sys_ShowConsole();
-		Conbuf_AppendText("\n\n");
-		Conbuf_AppendText(string);
-		Conbuf_AppendText("\n");
-		Sys_SetErrorText(string);
-		while (GetMessageA(&Msg, 0, 0, 0))
+		if (Sys_IsMainThread())
 		{
-			TranslateMessage(&Msg);
-			DispatchMessageA(&Msg);
+			Sys_ShowConsole();
+			Conbuf_AppendText("\n\n");
+			Conbuf_AppendText(string);
+			Conbuf_AppendText("\n");
+			Sys_SetErrorText(string);
+			while (GetMessageA(&Msg, 0, 0, 0))
+			{
+				TranslateMessage(&Msg);
+				DispatchMessageA(&Msg);
+			}
+			exit(0);
 		}
-		exit(0);
 	}
 
 	Sys_SetErrorText(string);
@@ -793,8 +798,12 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 			// LWSS END
 			Com_Init(sys_cmdline);
 
+#ifdef KISAK_MP
 			if (!com_dedicated->current.integer)
+#endif
+			{
 				Cbuf_AddText(0, "readStats\n");
+			}
 
 			PrintWorkingDir();
 
@@ -812,7 +821,12 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 			// main game loop
 			while (1) {
 				// if not running as a game client, sleep a bit
-				if (g_wv.isMinimized || (com_dedicated && com_dedicated->current.integer)) {
+#ifdef KISAK_MP
+				if (g_wv.isMinimized || (com_dedicated && com_dedicated->current.integer)) 
+#elif KISAK_SP
+				if (g_wv.isMinimized)
+#endif
+				{
 					Sleep(5);
 				}
 

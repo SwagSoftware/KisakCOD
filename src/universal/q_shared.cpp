@@ -1027,7 +1027,9 @@ bool __cdecl ParseConfigStringToStructCustomSize(
                     *(unsigned int *)&pStruct[v20->iOffset] = (int)(v15 * 1000.0);
                     break;
                 case 8:
+#ifdef KISAK_MP
                     if (!com_dedicated->current.integer)
+#endif
                     {
                         v9 = FX_Register(src);
                         *(unsigned int *)&pStruct[v20->iOffset] = (unsigned int)v9;
@@ -1041,7 +1043,9 @@ bool __cdecl ParseConfigStringToStructCustomSize(
                         v18 = 1;
                     break;
                 case 0xA:
+#ifdef KISAK_MP
                     if (!com_dedicated->current.integer)
+#endif
                     {
                         v10 = Material_RegisterHandle(src, 0);
                         *(unsigned int *)&pStruct[v20->iOffset] = (unsigned int)v10;

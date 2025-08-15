@@ -107,7 +107,9 @@ extern int com_consoleLogOpenFailed;
 extern int com_missingAssetOpenFailed;
 extern int com_frameTime;
 
+#ifdef KISAK_MP
 extern const dvar_t *com_dedicated;
+#endif
 extern const dvar_t *com_hiDef;
 extern const dvar_t *com_animCheck;
 extern const dvar_t *com_developer_script;

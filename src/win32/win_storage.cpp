@@ -528,8 +528,7 @@ void __cdecl LiveStorage_HandleCorruptStats(char *filename)
 {
     char corruptName[276]; // [esp+0h] [ebp-118h] BYREF
 
-    if (!filename)
-        MyAssertHandler(".\\win32\\win_storage.cpp", 242, 0, "%s", "filename");
+    iassert(filename);
     Com_sprintf(corruptName, 0x10Eu, "%s.%s", filename, "corrupt");
     FS_DeleteInDir(corruptName, (char*)"players");
     FS_Rename(filename, (char *)"players", corruptName, (char *)"players");

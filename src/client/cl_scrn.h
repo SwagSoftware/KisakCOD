@@ -15,7 +15,6 @@ int __cdecl CL_CGameRendering();
 
 bool __cdecl CL_IsCGameRendering();
 void CL_DrawScreen();
-void __cdecl SCR_ClearScreen(int a1, int a2, unsigned __int8 a3);
 void __cdecl SCR_DrawScreenField(int refreshedUI);
 void __cdecl SCR_UpdateRumble();
 void __cdecl SCR_UpdateLoadScreen();

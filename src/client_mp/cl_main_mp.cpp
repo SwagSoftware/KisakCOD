@@ -2444,7 +2444,7 @@ int32_t __cdecl CL_ScaledMilliseconds()
     return cls.realtime;
 }
 
-void __cdecl CL_SetFastFileNames(GfxConfiguration *config, bool dedicatedServer)
+static void CL_SetFastFileNames(GfxConfiguration *config, bool dedicatedServer)
 {
     iassert(config);
 
@@ -2453,10 +2453,24 @@ void __cdecl CL_SetFastFileNames(GfxConfiguration *config, bool dedicatedServer)
     config->commonFastFileName = "common_mp";
     config->localizedCodeFastFileName = "localized_code_post_gfx_mp";
     config->localizedCommonFastFileName = "localized_common_mp";
-    config->modFastFileName = DB_ModFileExists() != 0 ? "mod" : 0;
+    config->modFastFileName = DB_ModFileExists() != 0 ? "mod" : NULL;
 }
 
-void __cdecl CL_InitRef()
+
+
+static void SetupGfxConfig(GfxConfiguration *config)
+{
+    iassert(config);
+
+    config->maxClientViews = 1;
+    config->entCount = MAX_GENTITIES;
+    config->entnumNone = ENTITYNUM_NONE;
+    config->entnumOrdinaryEnd = ENTITYNUM_WORLD;
+    config->threadContextCount = THREAD_CONTEXT_COUNT;
+    config->critSectCount = CRITSECT_COUNT;
+}
+
+void CL_InitRef()
 {
     GfxConfiguration config; // [esp+0h] [ebp-30h] BYREF
 
@@ -2464,19 +2478,7 @@ void __cdecl CL_InitRef()
     SetupGfxConfig(&config);
     CL_SetFastFileNames(&config, 0);
     R_ConfigureRenderer(&config);
-    Dvar_SetInt((dvar_s *)cl_paused, 0);
-}
-
-void __cdecl SetupGfxConfig(GfxConfiguration *config)
-{
-    if (!config)
-        MyAssertHandler(".\\client_mp\\cl_main_mp.cpp", 4453, 0, "%s", "config");
-    config->maxClientViews = 1;
-    config->entCount = MAX_GENTITIES;
-    config->entnumNone = ENTITYNUM_NONE;
-    config->entnumOrdinaryEnd = ENTITYNUM_WORLD;
-    config->threadContextCount = 7;
-    config->critSectCount = 22;
+    Dvar_SetInt(cl_paused, 0);
 }
 
 void __cdecl CL_startSingleplayer_f()

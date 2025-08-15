@@ -443,11 +443,11 @@ union itemDefData_t // sizeof=0x4
 struct itemDef_s // sizeof=0x174
 {                                       // ...
     windowDef_t window;
-#ifdef KISAK_MP
+//#ifdef KISAK_MP
     rectDef_s textRect[1];
-#elif KISAK_SP
-    rectDef_s textRect[4];
-#endif
+//#elif KISAK_SP
+//    rectDef_s textRect[4];
+//#endif
     int type;
     int dataType;
     int alignment;
@@ -477,11 +477,11 @@ struct itemDef_s // sizeof=0x174
     int dvarFlags;
     snd_alias_list_t *focusSound;
     float special;
-#ifdef KISAK_MP
+//#ifdef KISAK_MP
     int cursorPos[1];
-#elif KISAK_SP
-    int cursorPos[4];
-#endif
+//#elif KISAK_SP
+//    int cursorPos[4];
+//#endif
     itemDefData_t typeData;
     int imageTrack;
     statement_s visibleExp;
@@ -501,11 +501,11 @@ struct menuDef_t // sizeof=0x11C
     int fullScreen;
     int itemCount;
     int fontIndex;
-#ifdef KISAK_MP
+//#ifdef KISAK_MP
     int cursorItem[1];
-#elif KISAK_SP
-    int cursorItem[4];
-#endif
+//#elif KISAK_SP
+//    int cursorItem[4];
+//#endif
     int fadeCycle;
     float fadeClamp;
     float fadeAmount;
@@ -1842,7 +1842,7 @@ void __cdecl UI_Component_Init();
 
 // (shared between ui.h and ui_mp.h)
 void __cdecl TRACK_ui_main();
-const dvar_s *UI_RegisterDvars();
+void UI_RegisterDvars();
 void __cdecl UI_DrawSides(
     const ScreenPlacement *scrPlace,
     float x,

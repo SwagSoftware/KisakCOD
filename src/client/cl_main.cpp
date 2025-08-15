@@ -1055,18 +1055,37 @@ int __cdecl CL_ScaledMilliseconds()
     return cls.realtime;
 }
 
+static void SetupGfxConfig(GfxConfiguration *config)
+{
+    config->maxClientViews = 1;
+    config->entCount = 2208;
+    config->entnumNone = ENTITYNUM_NONE;
+    config->entnumOrdinaryEnd = ENTITYNUM_WORLD;
+    config->threadContextCount = THREAD_CONTEXT_COUNT;
+    config->critSectCount = CRITSECT_COUNT;
+}
+
+
+static void CL_SetFastFileNames(GfxConfiguration *config, bool dedicatedServer)
+{
+    iassert(config);
+
+    config->codeFastFileName = "code_post_gfx";
+    config->uiFastFileName = "ui";
+    config->commonFastFileName = "common";
+    config->localizedCodeFastFileName = NULL;
+    config->localizedCommonFastFileName = NULL;
+    config->modFastFileName = DB_ModFileExists() != 0 ? "mod" : NULL;
+}
+
 void __cdecl CL_InitRef()
 {
-    GfxConfiguration v0; // [sp+50h] [-20h] BYREF
+    GfxConfiguration config; // [sp+50h] [-20h] BYREF
 
     Com_Printf(14, "----- Initializing Renderer ----\n");
-    v0.maxClientViews = 1;
-    v0.entCount = 2208;
-    v0.entnumNone = ENTITYNUM_NONE;
-    v0.entnumOrdinaryEnd = ENTITYNUM_WORLD;
-    v0.threadContextCount = 12;
-    v0.critSectCount = 32;
-    R_ConfigureRenderer(&v0);
+    SetupGfxConfig(&config);
+    CL_SetFastFileNames(&config, 0);
+    R_ConfigureRenderer(&config);
     Dvar_SetInt(cl_paused, 0);
 }
 
@@ -1722,25 +1741,6 @@ cmd_function_s CL_StopControllerRumbles_VAR;
 
 void __cdecl CL_Init(int localClientNum)
 {
-    unsigned int v2; // r3
-    const char *v3; // r5
-    unsigned __int16 v4; // r4
-    const char *v5; // r5
-    unsigned __int16 v6; // r4
-    const char *v7; // r5
-    unsigned __int16 v8; // r4
-    const char *v9; // r5
-    unsigned __int16 v10; // r4
-    const char *v11; // r5
-    unsigned __int16 v12; // r4
-    const char *v13; // r5
-    unsigned __int16 v14; // r4
-    const char *v15; // r5
-    unsigned __int16 v16; // r4
-    const char *v17; // r5
-    unsigned __int16 v18; // r4
-    const char *v19; // r5
-    unsigned __int16 v20; // r4
     int v21; // r28
     const dvar_s **v22; // r29
     const char *v23; // r5
@@ -1748,12 +1748,10 @@ void __cdecl CL_Init(int localClientNum)
     const char *v25; // r3
     const char *v26; // r5
     unsigned __int16 v27; // r4
-    GfxConfiguration v28; // [sp+50h] [-B0h] BYREF
     char v29[80]; // [sp+70h] [-90h] BYREF
 
     Com_Printf(14, "----- Client Initialization -----\n");
-    v2 = Sys_MillisecondsRaw();
-    srand(v2);
+    srand(Sys_MillisecondsRaw());
     Con_Init();
     if (localClientNum)
         MyAssertHandler(
@@ -1771,11 +1769,11 @@ void __cdecl CL_Init(int localClientNum)
     cl_shownet = Dvar_RegisterInt("cl_shownet", 0, -2, 4, 0, "Display network debugging information");
     cl_avidemo = Dvar_RegisterInt("cl_avidemo", 0, 0, 0x7FFFFFFF, 0, "AVI demo frames per second");
     cl_forceavidemo = Dvar_RegisterBool("cl_forceavidemo", 0, 0, "Record AVI demo even if client is not active");
-    cl_yawspeed = Dvar_RegisterFloat("cl_yawspeed", 140.0, -FLT_MAX, FLT_MAX, v4, v3);
-    cl_pitchspeed = Dvar_RegisterFloat("cl_pitchspeed", 140.0, -FLT_MAX, FLT_MAX, v6, v5);
-    cl_anglespeedkey = Dvar_RegisterFloat("cl_anglespeedkey", 1.5, 0.0, FLT_MAX, v8, v7);
-    cl_sensitivity = Dvar_RegisterFloat("sensitivity", 5.0, 0.0099999998, 100.0, v10, v9);
-    cl_mouseAccel = Dvar_RegisterFloat("cl_mouseAccel", 0.0, 0.0, 100.0, v12, v11);
+    cl_yawspeed = Dvar_RegisterFloat("cl_yawspeed", 140.0, -FLT_MAX, FLT_MAX, 0, "Max yaw speed in degrees for game pad and keyboard");
+    cl_pitchspeed = Dvar_RegisterFloat("cl_pitchspeed", 140.0, -FLT_MAX, FLT_MAX, 0, "Max pitch speed in degrees for game pad and keyboard");
+    cl_anglespeedkey = Dvar_RegisterFloat("cl_anglespeedkey", 1.5, 0.0, FLT_MAX, 0, "Multiplier for max angle speed for gamepad and keyboard");
+    cl_sensitivity = Dvar_RegisterFloat("sensitivity", 5.0, 0.01f, 100.0, 0, "Mouse sensitivity");
+    cl_mouseAccel = Dvar_RegisterFloat("cl_mouseAccel", 0.0, 0.0, 100.0, 0, "Mouse acceleration");
     cl_freelook = Dvar_RegisterBool("cl_freelook", 1, 1u, "Enable looking with mouse");
     cl_showMouseRate = Dvar_RegisterBool(
         "cl_showmouserate",
@@ -1783,10 +1781,10 @@ void __cdecl CL_Init(int localClientNum)
         0,
         "Print mouse rate debugging information to the console");
     cl_inGameVideo = Dvar_RegisterBool("r_inGameVideo", 1, 1u, "Allow in game cinematics");
-    m_pitch = Dvar_RegisterFloat("m_pitch", 0.022, -1.0, 1.0, v14, v13);
-    m_yaw = Dvar_RegisterFloat("m_yaw", 0.022, -1.0, 1.0, v16, v15);
-    m_forward = Dvar_RegisterFloat("m_forward", 0.25, -1.0, 1.0, v18, v17);
-    m_side = Dvar_RegisterFloat("m_side", 0.25, -1.0, 1.0, v20, v19);
+    m_pitch = Dvar_RegisterFloat("m_pitch", 0.022, -1.0, 1.0, 0, "Default pitch");
+    m_yaw = Dvar_RegisterFloat("m_yaw", 0.022, -1.0, 1.0, 0, "Default yaw");
+    m_forward = Dvar_RegisterFloat("m_forward", 0.25, -1.0, 1.0, 0, "Forward speed in units per second");
+    m_side = Dvar_RegisterFloat("m_side", 0.25, -1.0, 1.0, 0, "Sideways motion in units per second");
     m_filter = Dvar_RegisterBool("m_filter", 0, 1u, "Allow mouse movement smoothing");
     cg_drawCrosshair = Dvar_RegisterBool("cg_drawCrosshair", 1, 1u, "Turn on weapon crosshair");
     cg_subtitles = Dvar_RegisterBool("cg_subtitles", 1, 1u, "Turn on subtitles");
@@ -1812,8 +1810,6 @@ void __cdecl CL_Init(int localClientNum)
         0x7FFFFFFF,
         0x4001u,
         "Used by script for keeping track of cheats");
-    v21 = 0;
-    v22 = arcadeScore;
     cheat_items_set2 = Dvar_RegisterInt(
         "cheat_items_set2",
         0,
@@ -1821,14 +1817,18 @@ void __cdecl CL_Init(int localClientNum)
         0x7FFFFFFF,
         0x4001u,
         "Used by script for keeping track of cheats");
+
+    v21 = 0;
+    v22 = arcadeScore;
     do
     {
         Com_sprintf(v29, 32, "s%d", v21);
         *v22++ = Dvar_RegisterInt(v29, 0, 0, 0x7FFFFFFF, 0x4001u, "Used by script for keeping track of arcade scores");
         ++v21;
-    } while ((int)v22 < (int)&cl_freemove);
+    } while ((int)v22 < (int)&arcadeScore[19]);
+
     input_invertPitch = Dvar_RegisterBool("input_invertPitch", 0, 0x400u, "Invert gamepad pitch");
-    input_viewSensitivity = Dvar_RegisterFloat("input_viewSensitivity", 1.0, 0.000099999997, 5.0, v24, v23);
+    input_viewSensitivity = Dvar_RegisterFloat("input_viewSensitivity", 1.0, 0.000099999997, 5.0, 0, 0);
     input_autoAim = Dvar_RegisterBool("input_autoAim", 1, 0x400u, "Turn on auto aim for consoles");
     v25 = SEH_SafeTranslateString((char*)"PLATFORM_NOMOTD");
     motd = Dvar_RegisterString("motd", v25, 0, "Message of the day");
@@ -1861,20 +1861,15 @@ void __cdecl CL_Init(int localClientNum)
     Cmd_AddCommandInternal("shellExecute", CL_ShellExecute_URL_f, &CL_ShellExecute_URL_f_VAR);
     Cmd_AddCommandInternal("+incAnimWeight", (void(__cdecl *)())CL_IncAnimWeight_f, &CL_IncAnimWeight_f_VAR);
     Cmd_AddCommandInternal("+decAnimWeight", (void(__cdecl *)())CL_DecAnimWeight_f, &CL_DecAnimWeight_f_VAR);
-    cl_testAnimWeight = Dvar_RegisterFloat("cl_testAnimWeight", 0.0, 0.0, 1.0, v27, v26);
+    cl_testAnimWeight = Dvar_RegisterFloat("cl_testAnimWeight", 0.0, 0.0, 1.0, 0, "test animation weighting");
     Cmd_AddCommandInternal("modelDumpInfo", XModelDumpInfo, &XModelDumpInfo_VAR);
     //CL_Xenon_RegisterDvars();
     //CL_Xenon_RegisterCommands();
     Cmd_AddCommandInternal("stopControllerRumble", CL_StopControllerRumbles, &CL_StopControllerRumbles_VAR);
     Com_Printf(14, "----- Initializing Renderer ----\n");
-    v28.maxClientViews = 1;
-    v28.entCount = 2208;
-    v28.entnumNone = ENTITYNUM_NONE;
-    v28.entnumOrdinaryEnd = ENTITYNUM_WORLD;
-    v28.threadContextCount = 12;
-    v28.critSectCount = 32;
-    R_ConfigureRenderer(&v28);
-    Dvar_SetInt(cl_paused, 0);
+
+    CL_InitRef();
+
     SCR_Init();
     Cbuf_Execute(0, cl_controller_in_use);
     clientUIActives[0].isRunning = 1;

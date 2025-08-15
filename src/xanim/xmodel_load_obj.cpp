@@ -1359,7 +1359,11 @@ char __cdecl XModelLoadConfigFile(const char *name, unsigned __int8 *pos, XModel
 
 bool __cdecl XModelAllowLoadMesh()
 {
+#ifdef KISAK_MP
     return com_dedicated->current.integer == 0;
+#elif KISAK_SP
+    return true;
+#endif
 }
 
 static XModelPartsLoad *__cdecl XModelPartsFindData(const char *name)

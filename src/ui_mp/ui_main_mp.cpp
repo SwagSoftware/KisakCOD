@@ -4779,9 +4779,8 @@ void __cdecl UI_Init(int localClientNum)
         "spam debug info for the ui script");
 }
 
-const dvar_s *UI_RegisterDvars()
+void UI_RegisterDvars()
 {
-    const dvar_s *result; // eax
     DvarLimits min; // [esp+10h] [ebp-10h]
     DvarLimits mina; // [esp+10h] [ebp-10h]
     DvarLimits minb; // [esp+10h] [ebp-10h]
@@ -4949,9 +4948,7 @@ const dvar_s *UI_RegisterDvars()
         0,
         DVAR_CHEAT,
         "Whether the UI should allow changing class");
-    result = Dvar_RegisterBool("ui_allow_teamchange", 0, DVAR_CHEAT, "Whether the UI should allow changing team");
-    ui_allow_teamchange = result;
-    return result;
+    ui_allow_teamchange = Dvar_RegisterBool("ui_allow_teamchange", 0, DVAR_CHEAT, "Whether the UI should allow changing team");
 }
 
 Font_s *UI_AssetCache()

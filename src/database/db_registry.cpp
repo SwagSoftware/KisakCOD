@@ -228,7 +228,7 @@ const char *g_defaultAssetName[33] =
   "mp/defaultStringTable.csv"
 }; // idb
 
-const char *g_assetNames[33] =
+const char *g_assetNames[33] = // SP/MP same
 {
   "xmodelpieces",
   "physpreset",

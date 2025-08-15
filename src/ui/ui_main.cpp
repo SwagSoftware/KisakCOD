@@ -54,28 +54,14 @@ UILocalVarContext *__cdecl UI_GetLocalVarsContext(int localClientNum)
     return &uiInfo.uiDC.localVars;
 }
 
-const dvar_s *UI_RegisterDvars()
+void UI_RegisterDvars()
 {
-    double Float; // fp1
-    const char *v1; // r5
-    unsigned __int16 v2; // r4
-    const char *v3; // r5
-    unsigned __int16 v4; // r4
-    const char *v5; // r5
-    unsigned __int16 v6; // r4
-    const char *v7; // r5
-    unsigned __int16 v8; // r4
-    const char *v9; // r5
-    unsigned __int16 v10; // r4
-    const dvar_s *result; // r3
-
     Dvar_RegisterBool("cg_brass", 1, 1u, 0);
     Dvar_RegisterBool("fx_marks", 1, 1u, 0);
-    Float = Dvar_GetFloat("m_pitch");
-    Dvar_RegisterBool("ui_mousePitch", Float < 0.0, 0x201u, "Invert mouse pitch");
-    ui_smallFont = Dvar_RegisterFloat("ui_smallFont", 0.25, 0.0, 1.0, v2, v1);
-    ui_bigFont = Dvar_RegisterFloat("ui_bigFont", 0.4f, 0.0, 1.0, v4, v3);
-    ui_extraBigFont = Dvar_RegisterFloat("ui_extraBigFont", 0.55000001, 0.0, 1.0, v6, v5);
+    Dvar_RegisterBool("ui_mousePitch", Dvar_GetFloat("m_pitch") < 0.0, 0x201u, "Invert mouse pitch");
+    ui_smallFont = Dvar_RegisterFloat("ui_smallFont", 0.25, 0.0, 1.0, 0, "Small font scale");
+    ui_bigFont = Dvar_RegisterFloat("ui_bigFont", 0.4f, 0.0, 1.0, 0, "Big font scale");
+    ui_extraBigFont = Dvar_RegisterFloat("ui_extraBigFont", 0.55f, 0.0, 1.0, 0, "Extra large font scale");
     ui_campaign = Dvar_RegisterString("ui_campaign", "american", 0x1000u, "Current campaign");
     ui_nextMission = Dvar_RegisterInt("ui_nextMission", 0, 0, 3, 0x1000u, "Next mission");
     ui_savegame = Dvar_RegisterString("ui_savegame", "", 0, "Save game name");
@@ -96,11 +82,9 @@ const dvar_s *UI_RegisterDvars()
         0x1000u,
         "Meant to be set by script and referenced by menu files to determine if minimap should be drawn.");
     ui_isSaving = Dvar_RegisterBool("ui_isSaving", 0, 0x40u, "True if the game is currently saving");
-    ui_saveMessageMinTime = Dvar_RegisterFloat("ui_saveMessageMinTime", 1.0, 0.0, 3.0, v8, v7);
-    ui_borderLowLightScale = Dvar_RegisterFloat("ui_borderLowLightScale", 0.6f, 0.0, 1.0, v10, v9);
-    result = Dvar_RegisterBool("ui_cinematicsTimestamp", 0, 0, "Shows cinematics timestamp on subtitle UI elements.");
-    ui_cinematicsTimestamp = result;
-    return result;
+    ui_saveMessageMinTime = Dvar_RegisterFloat("ui_saveMessageMinTime", 1.0, 0.0, 3.0, 0, "Minumum time for the save message to be on screen in seconds");
+    ui_borderLowLightScale = Dvar_RegisterFloat("ui_borderLowLightScale", 0.6f, 0.0, 1.0, 0, "Scales the border color for the lowlight color on certain UI borders");
+    ui_cinematicsTimestamp = Dvar_RegisterBool("ui_cinematicsTimestamp", 0, 0, "Shows cinematics timestamp on subtitle UI elements.");
 }
 
 void __cdecl TRACK_ui_main()

@@ -63,6 +63,7 @@ LRESULT __stdcall ConWndProc(HWND__ *hWnd, UINT uMsg, WPARAM wParam, LPARAM lPar
 			SetFocus(s_wcd.hwndInputLine);
 		return DefWindowProcA(hWnd, uMsg, wParam, lParam);
 	case 0x10u:
+#ifdef KISAK_MP
 		if (com_dedicated && com_dedicated->current.integer)
 		{
 			cmdString = (char*)Com_AllocEvent(5);
@@ -70,6 +71,7 @@ LRESULT __stdcall ConWndProc(HWND__ *hWnd, UINT uMsg, WPARAM wParam, LPARAM lPar
 			Sys_QueEvent(0, SE_CONSOLE, 0, 0, strlen(cmdString) + 1, cmdString);
 		}
 		else
+#endif
 		{
 			PostQuitMessage(0);
 		}
