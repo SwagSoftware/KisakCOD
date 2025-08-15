@@ -575,7 +575,7 @@ void __cdecl CL_MapLoading_CalcMovieToPlay_FastFile(const char *inMapName, char 
     CL_MapLoading_CalcMovieToPlay((const char *)asset.xmodelPieces->pieces, inMapName, outMovieName);
 }
 
-void __cdecl CL_MapLoading_StartCinematic(const char *mapname, double volume, int a3, const char *a4)
+void __cdecl CL_MapLoading_StartCinematic(const char *mapname, float volume)
 {
     XAssetHeader asset; // r30
     char v7[264]; // [sp+50h] [-130h] BYREF
@@ -591,35 +591,22 @@ void __cdecl CL_MapLoading_StartCinematic(const char *mapname, double volume, in
 
 void __cdecl CL_MapLoading(const char *mapname)
 {
-    const char *v2; // r5
-    int v3; // r4
-    int v4; // r3
-
     if (!clientUIActives[0].isRunning)
         MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\client\\cl_main.cpp", 677, 0, "%s", "clUI->isRunning");
     Con_Close(0);
     clientUIActives[0].keyCatchers = 0;
     clientUIActives[0].displayHUDWithKeycatchUI = 0;
     I_strncpyz(cls.servername, "localhost", 256);
-    if (clientUIActives[0].connectionState != CA_MAP_RESTART)
-        MyAssertHandler(
-            "c:\\trees\\cod3\\cod3src\\src\\client\\cl_main.cpp",
-            684,
-            0,
-            "%s\n\t(CL_GetLocalClientConnectionState( 0 )) = %i",
-            "(CL_GetLocalClientConnectionState( 0 ) == CA_MAP_RESTART)",
-            clientUIActives[0].connectionState);
+    
+    iassert(CL_GetLocalClientConnectionState(0) == CA_MAP_RESTART);
+
     clientUIActives[0].connectionState = CA_LOADING;
-    CL_MapLoading_StartCinematic(
-        mapname,
-        (float)(snd_cinematicVolumeScale->current.value * snd_volume->current.value),
-        v3,
-        v2);
+    CL_MapLoading_StartCinematic(mapname, (float)(snd_cinematicVolumeScale->current.value * snd_volume->current.value)),
     UI_DrawConnectScreen();
     //Live_SetCurrentMapname(mapname);
     if (cl_multi_gamepads_enabled)
         Cmd_ExecuteSingleCommand(0, cl_controller_in_use, (char*)"nosplitscreen\n");
-    SND_FadeAllSounds(0.0, v4);
+    SND_FadeAllSounds(0.0, 0);
 }
 
 void __cdecl CL_ResetSkeletonCache()

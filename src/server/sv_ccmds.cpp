@@ -1107,8 +1107,8 @@ void SV_Map_f()
 
     com_errorPrintsCount = 0;
     SV_Cmd_ArgvBuffer(1, v14, 64);
-    if (!ui_skipMainLockout->current.enabled)
-        SV_SelectSaveDevice_f();
+    //if (!ui_skipMainLockout->current.enabled)
+    //    SV_SelectSaveDevice_f();
     I_strlwr(v14);
     v0 = strstr(v14, ".svg");
     v1 = v0 != 0;

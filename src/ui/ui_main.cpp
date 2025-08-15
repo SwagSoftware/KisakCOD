@@ -15,6 +15,7 @@
 #include <gfx_d3d/r_init.h>
 #include <universal/profile.h>
 #include <client/cl_scrn.h>
+#include <client/cl_input.h>
 
 const dvar_t *ui_showList;
 const dvar_t *ui_isSaving;
@@ -105,6 +106,9 @@ Font_s *UI_AssetCache()
     sharedUiInfo.assets.scrollBarThumb = Material_RegisterHandle("ui_scrollbar_thumb", 3);
     sharedUiInfo.assets.sliderBar = Material_RegisterHandle("ui_slider2", 3);
     sharedUiInfo.assets.sliderThumb = Material_RegisterHandle("ui_sliderbutt_1", 3);
+    // LWSS ADD - Cursor icon
+    sharedUiInfo.assets.cursor = Material_RegisterHandle("ui_cursor", 0);
+    // LWSS END
     sharedUiInfo.assets.bigFont = CL_RegisterFont("fonts/bigfont", 0);
     sharedUiInfo.assets.smallFont = CL_RegisterFont("fonts/smallfont", 0);
     sharedUiInfo.assets.consoleFont = CL_RegisterFont("fonts/consolefont", 0);
@@ -1505,6 +1509,20 @@ void __cdecl UI_Refresh()
                     UI_PlayerStart();
             }
         }
+
+        // LWSS ADD - draw cursor icon
+        if (uiInfo.uiDC.isCursorVisible)
+        {
+            //if (!Dvar_GetBool("cl_bypassMouseInput"))
+            {
+                float w = scrPlaceFull.scaleVirtualToReal[0] * 32.0 / scrPlaceFull.scaleVirtualToFull[0];
+                float h = scrPlaceFull.scaleVirtualToReal[1] * 32.0 / scrPlaceFull.scaleVirtualToFull[1];
+                float y = uiInfo.uiDC.cursor.y - h * 0.5;
+                float x = uiInfo.uiDC.cursor.x - w * 0.5;
+                UI_DrawHandlePic(&scrPlaceView[0], x, y, w, h, 4, 4, 0, sharedUiInfo.assets.cursor);
+            }
+        }
+        // LWSS END
     }
 }
 
@@ -2303,3 +2321,23 @@ void __cdecl UI_OwnerDraw(
     }
 }
 
+void __cdecl UI_MouseEvent(int localClientNum, int x, int y)
+{
+    uiInfo.uiDC.cursor.x = x / scrPlaceFull.scaleVirtualToFull[0];
+    uiInfo.uiDC.cursor.y = y / scrPlaceFull.scaleVirtualToFull[1];
+
+    bool cursorInBounds = uiInfo.uiDC.cursor.x >= 0.0
+        && uiInfo.uiDC.cursor.x <= 640.0
+        && uiInfo.uiDC.cursor.y >= 0.0
+        && uiInfo.uiDC.cursor.y <= 480.0;
+
+    uiInfo.uiDC.isCursorVisible = cursorInBounds;
+
+    CL_ShowSystemCursor(uiInfo.uiDC.isCursorVisible == 0);
+
+    if (uiInfo.uiDC.isCursorVisible)
+    {
+        if (Menu_Count(&uiInfo.uiDC) > 0)
+            Display_MouseMove(&uiInfo.uiDC);
+    }
+}

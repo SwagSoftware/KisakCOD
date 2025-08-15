@@ -149,6 +149,7 @@ char *__cdecl UI_ReplaceConversionInts(
     __int64 a7);
 int __cdecl UI_Popup(int localClientNum, const char *menu);
 void __cdecl UI_DrawLoggedInUser(rectDef_s *rect, Font_s *font, double scale, float *color, int textStyle);
+void __cdecl UI_MouseEvent(int localClientNum, int x, int y);
 
 extern const dvar_t *ui_showList;
 extern const dvar_t *ui_isSaving;

@@ -11,6 +11,7 @@
 #include <win32/win_local.h>
 #include <qcommon/msg.h>
 #include <devgui/devgui.h>
+#include <ui/ui.h>
 
 const dvar_t *cl_stanceHoldTime;
 const dvar_t *cl_analog_attack_threshold;
@@ -2021,7 +2022,7 @@ static void __cdecl Scr_MouseEvent(int x, int y)
     UI_Component::MouseEvent(x, y);
 }
 
-static void __cdecl CL_ShowSystemCursor(bool show)
+void __cdecl CL_ShowSystemCursor(bool show)
 {
     IN_ShowSystemCursor(show);
 }
@@ -2044,21 +2045,22 @@ int __cdecl CL_MouseEvent(int x, int y, int dx, int dy)
     else
     {
         // KISAKTODO: bit more involved here with ui cursor, let's get the rest working first
-        //LocalClientGlobals = CL_GetLocalClientGlobals(0);
-        //if ((clientUIActives[0].keyCatchers & 0x10) == 0
-        //    || UI_GetActiveMenu(0) == UIMENU_SCOREBOARD
-        //    || cl_bypassMouseInput->current.enabled)
-        //{
-        //    CL_ShowSystemCursor(0);
-        //    LocalClientGlobals->mouseDx[LocalClientGlobals->mouseIndex] += dx;
-        //    LocalClientGlobals->mouseDy[LocalClientGlobals->mouseIndex] += dy;
-        //    return 1;
-        //}
-        //else
-        //{
-        //    UI_MouseEvent(0, x, y);
-        //    return 0;
-        //}
+        LocalClientGlobals = CL_GetLocalClientGlobals(0);
+        if ((clientUIActives[0].keyCatchers & 0x10) == 0
+//            || UI_GetActiveMenu(0) == UIMENU_SCOREBOARD
+//            || cl_bypassMouseInput->current.enabled
+            )
+        {
+            CL_ShowSystemCursor(0);
+            LocalClientGlobals->mouseDx[LocalClientGlobals->mouseIndex] += dx;
+            LocalClientGlobals->mouseDy[LocalClientGlobals->mouseIndex] += dy;
+            return 1;
+        }
+        else
+        {
+            UI_MouseEvent(0, x, y);
+            return 0;
+        }
     }
 }
 

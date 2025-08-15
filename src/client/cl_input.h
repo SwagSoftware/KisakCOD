@@ -127,6 +127,7 @@ void IN_MLookUp();
 void __cdecl CL_InitInput();
 
 // LWSS ADD - Mouse from PC (MP)
+void __cdecl CL_ShowSystemCursor(bool show);
 int __cdecl CL_MouseEvent(int x, int y, int dx, int dy);
 // LWSS END
 
