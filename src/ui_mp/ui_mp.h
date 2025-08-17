@@ -252,7 +252,7 @@ void __cdecl UI_ListMenus_f();
 void __cdecl CL_SelectStringTableEntryInDvar_f();
 void __cdecl UI_CloseMenu_f();
 void __cdecl UI_Init(int localClientNum);
-Font_s *UI_AssetCache();
+void UI_AssetCache();
 int __cdecl UI_IsFullscreen(int localClientNum);
 void __cdecl UI_DrawConnectScreen(int localClientNum);
 void __cdecl Text_PaintCenter(

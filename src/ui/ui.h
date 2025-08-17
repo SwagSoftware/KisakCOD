@@ -69,7 +69,7 @@ struct sharedUiInfo_t // sizeof=0x1C5B0
 };
 
 // LWSS: one of the main differences is that SP doesn't have `localClientNum` because there is no splitscreen
-Font_s *UI_AssetCache();
+void UI_AssetCache();
 
 Font_s *__cdecl UI_GetFontHandle(const ScreenPlacement *scrPlace, int fontEnum, float scale);
 void UI_UpdateSaveUI();

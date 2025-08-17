@@ -93,10 +93,8 @@ void __cdecl TRACK_ui_main()
     track_static_alloc_internal(&uiInfo, 37664, "uiInfo", 34);
 }
 
-Font_s *UI_AssetCache()
+void UI_AssetCache()
 {
-    Font_s *result; // r3
-
     sharedUiInfo.assets.whiteMaterial = Material_RegisterHandle("white", 3);
     sharedUiInfo.assets.scrollBar = Material_RegisterHandle("ui_scrollbar", 3);
     sharedUiInfo.assets.scrollBarArrowDown = Material_RegisterHandle("ui_scrollbar_arrow_dwn_a", 3);
@@ -115,9 +113,7 @@ Font_s *UI_AssetCache()
     sharedUiInfo.assets.boldFont = CL_RegisterFont("fonts/boldfont", 0);
     sharedUiInfo.assets.textFont = CL_RegisterFont("fonts/normalfont", 0);
     sharedUiInfo.assets.extraBigFont = CL_RegisterFont("fonts/extrabigfont", 0);
-    result = CL_RegisterFont("fonts/objectivefont", 0);
-    sharedUiInfo.assets.objectiveFont = result;
-    return result;
+    sharedUiInfo.assets.objectiveFont = CL_RegisterFont("fonts/objectivefont", 0);
 }
 
 void __cdecl UI_DrawSides(

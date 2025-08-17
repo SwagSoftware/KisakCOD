@@ -216,7 +216,11 @@ const char *g_defaultAssetName[33] =
   "ui/default.menu",
   "default_menu",
   "CGAME_UNKNOWN",
+#ifdef KISAK_MP
   "defaultweapon_mp",
+#elif KISAK_SP
+  "defaultweapon",
+#endif
   "",
   "misc/missing_fx",
   "default",
