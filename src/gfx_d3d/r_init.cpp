@@ -3674,33 +3674,43 @@ void R_LoadGraphicsAssets()
     zoneInfo[0].allocFlags = 2;
     zoneInfo[0].freeFlags = 0;
     zoneCount = 1;
+
     if (gfxCfg.localizedCodeFastFileName)
     {
         zoneInfo[zoneCount].name = gfxCfg.localizedCodeFastFileName;
         zoneInfo[zoneCount].allocFlags = 0;
-        zoneInfo[zoneCount++].freeFlags = 0;
+        zoneInfo[zoneCount].freeFlags = 0;
+        zoneCount++;
     }
     if (gfxCfg.uiFastFileName)
     {
         zoneInfo[zoneCount].name = gfxCfg.uiFastFileName;
         zoneInfo[zoneCount].allocFlags = 8;
-        zoneInfo[zoneCount++].freeFlags = 0;
+        zoneInfo[zoneCount].freeFlags = 0;
+        zoneCount++;
     }
+
     zoneInfo[zoneCount].name = gfxCfg.commonFastFileName;
     zoneInfo[zoneCount].allocFlags = 4;
-    zoneInfo[zoneCount++].freeFlags = 0;
+    zoneInfo[zoneCount].freeFlags = 0;
+    zoneCount++;
+
     if (gfxCfg.localizedCommonFastFileName)
     {
         zoneInfo[zoneCount].name = gfxCfg.localizedCommonFastFileName;
         zoneInfo[zoneCount].allocFlags = 1;
-        zoneInfo[zoneCount++].freeFlags = 0;
+        zoneInfo[zoneCount].freeFlags = 0;
+        zoneCount++;
     }
+
     if (gfxCfg.modFastFileName)
     {
         zoneInfo[zoneCount].name = gfxCfg.modFastFileName;
         zoneInfo[zoneCount].allocFlags = 16;
-        zoneInfo[zoneCount++].freeFlags = 0;
+        zoneInfo[zoneCount].freeFlags = 0;
+        zoneCount++;
     }
+
     DB_LoadXAssets(zoneInfo, zoneCount, 0);
 }
 

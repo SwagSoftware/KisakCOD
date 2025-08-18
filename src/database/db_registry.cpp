@@ -1683,8 +1683,8 @@ uint32_t __cdecl DB_HashForName(const char *name, XAssetType type)
     while (1)
     {
         c = tolower(*name);
-        if (c == 92)
-            c = 47;
+        if (c == '\\')
+            c = '/';
         if (!c)
             break;
         out_val = c + 31 * out_val;
@@ -1722,8 +1722,8 @@ XAssetEntry *__cdecl DB_CreateDefaultEntry(XAssetType type, char *name)
     DB_CloneXAssetInternal(&asset, &newEntry->asset);
     if (type == ASSET_TYPE_SOUND)
     {
-        newEntry->asset.header.xmodelPieces->pieces = 0;
-        newEntry->asset.header.xmodelPieces->numpieces = 0;
+        newEntry->asset.header.sound->count = 0;
+        newEntry->asset.header.sound->head = NULL;
     }
     newEntry->nextHash = db_hashTable[DB_HashForName(name, type)];
     db_hashTable[DB_HashForName(name, type)] = ((char *)newEntry - (char *)g_assetEntryPool) >> 4;
@@ -2890,7 +2890,6 @@ void __cdecl DB_UnloadXZone(uint32_t zoneIndex, bool createDefault)
 {
     uint32_t hash; // [esp+4h] [ebp-28h]
     uint16_t *pAssetEntryIndex; // [esp+8h] [ebp-24h]
-    XAssetEntryPoolEntry *overrideAssetEntrya; // [esp+Ch] [ebp-20h]
     XAssetEntryPoolEntry *overrideAssetEntry; // [esp+Ch] [ebp-20h]
     XAsset asset; // [esp+14h] [ebp-18h] BYREF
     const char *name; // [esp+1Ch] [ebp-10h]
@@ -2898,13 +2897,24 @@ void __cdecl DB_UnloadXZone(uint32_t zoneIndex, bool createDefault)
     uint16_t *pOverrideAssetEntryIndex; // [esp+24h] [ebp-8h]
     uint32_t overrideAssetEntryIndex; // [esp+28h] [ebp-4h]
 
-    if (!zoneIndex)
-        MyAssertHandler(".\\database\\db_registry.cpp", 3839, 0, "%s", "zoneIndex");
+    iassert(zoneIndex);
     hash = 0;
+
+    //Com_Printf(16, "Unloading assets from fastfile '%s' ", g_zoneNames[zoneIndex]) // KISAKTODO: would be nice
+    Com_Printf(16, "Unloading assets from fastfile '%i' ", zoneIndex);
+    
+    if (createDefault)
+    {
+        Com_Printf(16, "and creating default assets stubs\n");
+    }
+    else
+    {
+        Com_Printf(16, "and deleting all assets\n");
+    }
+
 LABEL_4:
     if (hash < 0x8000)
     {
-        //pAssetEntryIndex = (uint16_t *)(2 * hash + 17442712);
         pAssetEntryIndex = &db_hashTable[hash];
         while (1)
         {
@@ -2923,8 +2933,7 @@ LABEL_4:
                 while (*pOverrideAssetEntryIndex)
                 {
                     overrideAssetEntry = &g_assetEntryPool[*pOverrideAssetEntryIndex];
-                    if (overrideAssetEntry->entry.inuse)
-                        MyAssertHandler(".\\database\\db_registry.cpp", 3908, 0, "%s", "!overrideAssetEntry->inuse");
+                    iassert(!overrideAssetEntry->entry.inuse);
                     if (overrideAssetEntry->entry.zoneIndex == zoneIndex)
                     {
                         DB_RemoveXAsset(&overrideAssetEntry->entry.asset);
@@ -2947,10 +2956,10 @@ LABEL_4:
             overrideAssetEntryIndex = assetEntry->nextOverride;
             if (overrideAssetEntryIndex)
             {
-                overrideAssetEntrya = &g_assetEntryPool[overrideAssetEntryIndex];
-                DB_CloneXAssetEntry(&overrideAssetEntrya->entry, assetEntry);
-                assetEntry->nextOverride = overrideAssetEntrya->entry.nextOverride;
-                DB_FreeXAssetEntry(overrideAssetEntrya);
+                overrideAssetEntry = &g_assetEntryPool[overrideAssetEntryIndex];
+                DB_CloneXAssetEntry(&overrideAssetEntry->entry, assetEntry);
+                assetEntry->nextOverride = overrideAssetEntry->entry.nextOverride;
+                DB_FreeXAssetEntry(overrideAssetEntry);
                 goto LABEL_24;
             }
             if (createDefault)
@@ -2966,20 +2975,20 @@ LABEL_4:
                     DB_SetXAssetName(&assetEntry->asset, name);
                     goto LABEL_24;
                 }
-                if (assetEntry->nextOverride)
-                    MyAssertHandler(".\\database\\db_registry.cpp", 3874, 0, "%s", "!assetEntry->nextOverride");
+                
+                iassert(!assetEntry->nextOverride);
                 *pAssetEntryIndex = assetEntry->nextHash;
                 DB_FreeXAssetEntry((XAssetEntryPoolEntry *)assetEntry);
                 if (*g_defaultAssetName[asset.type])
                 {
                     Sys_UnlockWrite(&db_hashCritSect);
+                    asset.header = DB_FindXAssetDefaultHeaderInternal(asset.type);
                     Sys_Error("Could not load default asset for asset type '%s'", g_assetNames[asset.type]);
                 }
             }
             else
             {
-                if (assetEntry->nextOverride)
-                    MyAssertHandler(".\\database\\db_registry.cpp", 3863, 0, "%s", "!assetEntry->nextOverride");
+                iassert(!assetEntry->nextOverride);
                 *pAssetEntryIndex = assetEntry->nextHash;
                 DB_FreeXAssetEntry((XAssetEntryPoolEntry *)assetEntry);
             }

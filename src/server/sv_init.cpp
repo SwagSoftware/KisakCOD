@@ -16,6 +16,7 @@
 #include <game/g_main.h>
 #include <cgame/cg_main.h>
 #include <client/cl_scrn.h>
+#include <universal/profile.h>
 
 const dvar_t *sv_clientFrameRateFix;
 const dvar_t *sv_loadMyChanges;
@@ -163,17 +164,20 @@ int __cdecl SV_SaveImmediately(const char *levelName)
 
 void __cdecl SV_LoadLevelAssets(const char *mapname)
 {
-    int v1; // r3
-    XZoneInfo v2; // [sp+50h] [-20h] BYREF
+    XZoneInfo zoneInfo; // [sp+50h] [-20h] BYREF
 
-    v2.name = mapname;
-    v2.allocFlags = 2;
-    v2.freeFlags = 2;
-    DB_LoadXAssets(&v2, 1u, 0);
+    zoneInfo.name = mapname;
+    //zoneInfo.allocFlags = 2;
+    //zoneInfo.freeFlags = 2;
+    // LWSS: I am changing the flags here 2 -> 8. This is accurate to SP on PC.
+    // Unloading one of the other zones causes an error with mp/defaultstringtable not being found.
+    // That file is the default stringtable file, but is only located in `code_post_gfx_mp` which is not loaded at all in SP
+    zoneInfo.allocFlags = 8;
+    zoneInfo.freeFlags = 8;
+    DB_LoadXAssets(&zoneInfo, 1, 0);
     if (sv_loadMyChanges->current.enabled)
     {
-        v1 = CL_ControllerIndexFromClientNum(0);
-        Cbuf_ExecuteBuffer(0, v1, "loadzone mychanges\n");
+        Cbuf_ExecuteBuffer(0, CL_ControllerIndexFromClientNum(0), "loadzone mychanges\n");
     }
 }
 
@@ -370,84 +374,96 @@ void SV_SaveSystemInfo()
 
 void __cdecl SV_SpawnServer(const char *server, int savegame)
 {
-    int v4; // r21
-    const char *v5; // r3
-    int v6; // r3
+    int startTime; // r21
+    //const char *v5; // r3
+    //int v6; // r3
     int v7; // r22
-    unsigned __int16 *configstrings; // r29
     int v9; // r30
-    int v10; // r3
     SaveGame *v11; // [sp+50h] [-B0h] BYREF
     char v12[160]; // [sp+60h] [-A0h] BYREF
 
     Com_SyncThreads();
-    v4 = Sys_Milliseconds();
+    startTime = Sys_Milliseconds();
     DB_ResetZoneSize(0);
     CL_InitLoad(server);
-    v5 = va("loading map: %s", server);
+    //v5 = va("loading map: %s", server);
     //LSP_LogString(cl_controller_in_use, v5);
     CL_MapLoading(server);
     R_BeginRemoteScreenUpdate();
-    v6 = CL_ControllerIndexFromClientNum(0);
+    //v6 = CL_ControllerIndexFromClientNum(0);
     //Live_Frame(v6, 0);
-    ProfLoad_Activate();
-    ProfLoad_Begin("Clear load game");
-    SV_ClearLoadGame();
-    if (!sv_gameskill)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\server\\sv_init.cpp", 545, 0, "%s", "sv_gameskill");
-    ProfLoad_End();
-    ProfLoad_Begin("Shutdown systems");
-    R_EndRemoteScreenUpdate();
-    R_BeginRemoteScreenUpdate();
-    R_EndRemoteScreenUpdate();
-    SCR_UpdateLoadScreen();
-    CL_ShutdownAll();
-    SV_ShutdownGameProgs();
-    SaveMemory_CleanupSaveMemory();
-    SaveMemory_ShutdownSaveSystem();
-    Com_Printf(15, "------ Server Initialization ------\n");
-    Com_Printf(15, "Server: %s\n", server);
-    SV_ClearServer();
-    ProfLoad_End();
-    ProfLoad_Begin("Shutdown file system");
-    v7 = Sys_MillisecondsRaw();
-    Com_Restart();
-    if (!com_sv_running->current.enabled)
-        SV_Startup();
-    ProfLoad_End();
-    ProfLoad_Begin("After file system restart");
-    ProfLoad_Begin("Start loading");
-    CL_StartLoading(server);
-    ProfLoad_End();
-    if (*server)
+    //ProfLoad_Activate();
+
     {
-        ProfLoad_Begin("Load fast file");
-        SV_LoadLevelAssets(server);
-        ProfLoad_End();
+        PROF_SCOPED("Clear load game");
+        SV_ClearLoadGame();
+        iassert(sv_gameskill);
     }
-    R_BeginRemoteScreenUpdate();
-    UI_LoadIngameMenus();
-    svs.nextSnapshotEntities = 0;
-    Dvar_SetString(nextmap, "map_restart");
-    if (strchr(server, 92))
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\server\\sv_init.cpp", 648, 0, "%s", "!strchr( server, '\\\\' )");
-    Dvar_SetString(sv_mapname, server);
-    ProfLoad_End();
-    ProfLoad_Begin("allocate empty config strings");
-    configstrings = sv.configstrings;
-    sv.emptyConfigString = SL_GetString_("", 0, 19);
-    do
+    
     {
-        if (*configstrings)
-            MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\server\\sv_init.cpp", 659, 0, "%s", "!sv.configstrings[i]");
-        *configstrings++ = SL_GetString_("", 0, 19);
-    } while ((int)configstrings < (int)&sv.svEntities[0].worldSector);
-    SCR_UpdateLoadScreen();
-    ProfLoad_End();
+        PROF_SCOPED("Shutdown systems");
+        R_EndRemoteScreenUpdate();
+        R_BeginRemoteScreenUpdate();
+        R_EndRemoteScreenUpdate();
+        SCR_UpdateLoadScreen();
+        CL_ShutdownAll();
+        SV_ShutdownGameProgs();
+        SaveMemory_CleanupSaveMemory();
+        SaveMemory_ShutdownSaveSystem();
+        Com_Printf(15, "------ Server Initialization ------\n");
+        Com_Printf(15, "Server: %s\n", server);
+        SV_ClearServer();
+    }
+
+
+    {
+        PROF_SCOPED("Shutdown file system");
+        v7 = Sys_MillisecondsRaw();
+        Com_Restart();
+        if (!com_sv_running->current.enabled)
+            SV_Startup();
+    }
+    
+    {
+        PROF_SCOPED("After file system restart");
+        {
+            PROF_SCOPED("Start loading");
+            CL_StartLoading(server);
+        }
+
+        if (*server)
+        {
+            PROF_SCOPED("Load fast file");
+            SV_LoadLevelAssets(server);
+        }
+
+        R_BeginRemoteScreenUpdate();
+        UI_LoadIngameMenus();
+        svs.nextSnapshotEntities = 0;
+        Dvar_SetString(nextmap, "map_restart");
+
+        iassert(!strstr(server, "\\"));
+        Dvar_SetString(sv_mapname, server);
+    }
+
+    {
+        PROF_SCOPED("allocate empty config strings");
+        sv.emptyConfigString = SL_GetString_((char *)"", 0, 19);
+        for (int i = 0; i < MAX_CONFIGSTRINGS; ++i)
+        {
+            iassert(!sv.configstrings[i]);
+            sv.configstrings[i] = SL_GetString_((char *)"", 0, 19);
+        }
+
+        SCR_UpdateLoadScreen();
+    }
+
     Com_GetBspFilename(v12, 64, server);
-    ProfLoad_Begin("Load collision (server)");
-    CM_LoadMap(v12, &sv.checksum);
-    ProfLoad_End();
+    {
+        PROF_SCOPED("Load collision (server)");
+        CM_LoadMap(v12, &sv.checksum);
+    }
+
     Com_LoadWorld(v12);
     //Live_SetCurrentMapname(server);
     SCR_UpdateLoadScreen();
@@ -459,48 +475,61 @@ void __cdecl SV_SpawnServer(const char *server, int savegame)
     if (CL_DemoPlaying())
         CL_FinishLoadingDemo();
     SCR_UpdateLoadScreen();
-    ProfLoad_Begin("Save system info");
-    SV_SaveSystemInfo();
-    ProfLoad_End();
+    {
+        PROF_SCOPED("Save system info");
+        SV_SaveSystemInfo();
+    }
+
     Com_Printf(15, "-----------------------------------\n");
+
     SCR_UpdateLoadScreen();
-    ProfLoad_Begin("Send client game state");
-    SV_SendClientGameState(svs.clients);
-    ProfLoad_End();
+    {
+        PROF_SCOPED("Send client game state");
+        SV_SendClientGameState(svs.clients);
+    }
+    
     SCR_UpdateLoadScreen();
-    ProfLoad_Begin("Init client");
-    CL_InitCGame(0, v11 != 0);
-    ProfLoad_End();
+    {
+        PROF_SCOPED("Init client");
+        CL_InitCGame(0, v11 != 0);
+    }
+
     SCR_UpdateLoadScreen();
-    ProfLoad_Begin("Check load level");
-    SV_CheckLoadLevel(v11);
-    ProfLoad_End();
+    {
+        PROF_SCOPED("Check load level");
+        SV_CheckLoadLevel(v11);
+    }
+
     SCR_UpdateLoadScreen();
-    ProfLoad_Begin("Event loop");
-    Com_EventLoop();
-    ProfLoad_End();
+    {
+        PROF_SCOPED("Event loop");
+        Com_EventLoop();
+    }
+
     SCR_UpdateLoadScreen();
+
     Dvar_SetInt(cl_paused, 1);
     SV_InitSnapshot();
     v9 = 0;
     if (!savegame)
     {
-        ProfLoad_Begin("Save game");
+        PROF_SCOPED("Save game");
         v9 = SV_SaveImmediately(server);
-        ProfLoad_End();
     }
-    ProfLoad_Begin("Register sounds");
-    CG_RegisterSounds();
-    ProfLoad_End();
+
+    {
+        PROF_SCOPED("Register sounds");
+        CG_RegisterSounds();
+    }
+
     R_EndRemoteScreenUpdate();
     DB_SyncXAssets();
-    ProfLoad_Deactivate();
+    //ProfLoad_Deactivate();
     UI_SetActiveMenu(0, UIMENU_PREGAME);
     if (v9)
         SV_DisplaySaveErrorUI();
     CL_SetActive();
-    v10 = Sys_Milliseconds();
-    Com_Printf(15, "Load time: %d msec\n", v10 - v4);
+    Com_Printf(15, "Load time: %d msec\n", Sys_Milliseconds() - startTime);
     Com_ResetFrametime();
 }
 
