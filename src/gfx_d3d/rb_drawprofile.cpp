@@ -17,6 +17,7 @@ void __cdecl TRACK_rb_drawprofile()
 
 void __cdecl RB_AddProfileThread(int threadContext)
 {
+#if 0
     ProfileStack *prof_stack; // [esp+10h] [ebp-14h]
     ProfileReadableGlobal *global; // [esp+14h] [ebp-10h]
     int profEnum; // [esp+18h] [ebp-Ch]
@@ -38,10 +39,13 @@ void __cdecl RB_AddProfileThread(int threadContext)
         global->totalClks = (double)prof_stack->prof_array[profEnum].read.total.value[0] + global->totalClks;
         global->read.hits += prof_stack->prof_array[profEnum].read.hits;
     }
+#endif
 }
 
 char __cdecl RB_IsUsingAnyProfile()
 {
+    return false;
+#if 0
     unsigned int probeIter; // [esp+0h] [ebp-4h]
 
     if (profile->current.integer)
@@ -52,10 +56,12 @@ char __cdecl RB_IsUsingAnyProfile()
             return 1;
     }
     return 0;
+#endif
 }
 
 void __cdecl RB_DrawSlowProfileOverlay(int(__cdecl *compare)(const void *, const void *))
 {
+#if 0
     int row; // [esp+8h] [ebp-10h]
     int probeIndex; // [esp+Ch] [ebp-Ch]
     DWORD currTime; // [esp+10h] [ebp-8h]
@@ -76,10 +82,12 @@ void __cdecl RB_DrawSlowProfileOverlay(int(__cdecl *compare)(const void *, const
     g_tally = 0.0;
     for (row = 0; row < profile_rowcount->current.integer; ++row)
         y = RB_DrawProfileRow(drawProfGlob.sortedProbeIndices[row], 0, y);
+#endif
 }
 
 void __cdecl RB_DrawProfile()
 {
+#if 0
     ProfileReadable *p_read; // edx
     ProfileReadableGlobal *global; // [esp+8h] [ebp-14h]
     int profEnum; // [esp+Ch] [ebp-10h]
@@ -171,10 +179,12 @@ void __cdecl RB_DrawProfile()
         if (tess.indexCount)
             RB_EndTessSurface();
     }
+#endif
 }
 
 void __cdecl RB_DrawProfileHistory(const ProfileSettings *profSettings)
 {
+#if 0
     int ProfileHistoryProbeIndex; // eax
     int historyProfEnum[5]; // [esp+18h] [ebp-28h]
     int profEnum; // [esp+2Ch] [ebp-14h]
@@ -210,10 +220,12 @@ void __cdecl RB_DrawProfileHistory(const ProfileSettings *profSettings)
             x = x + 124.0;
         }
     }
+#endif
 }
 
 void __cdecl RB_DrawProfileHistoryGraph(const ProfileReadable *read, int parity, int probeIndex, float x, float y)
 {
+#if 0
     float v5; // [esp+14h] [ebp-44h]
     float v6; // [esp+1Ch] [ebp-3Ch]
     float v7; // [esp+24h] [ebp-34h]
@@ -264,15 +276,19 @@ void __cdecl RB_DrawProfileHistoryGraph(const ProfileReadable *read, int parity,
             drawProfGlob.sortedProbeIndices[362 * probeIndex - 1806 + 3 * (ja % 120)],
             (GfxColor)-65536);
     }
+#endif
 }
 
 void __cdecl RB_DrawProfileRect(float x, float y, float width, float height, GfxColor color)
 {
+#if 0
     RB_DrawStretchPic(rgp.whiteMaterial, x, y, width, height, 0.0, 0.0, 1.0, 1.0, color.packed, GFX_PRIM_STATS_DEBUG);
+#endif
 }
 
 void __cdecl RB_DrawProfileBar(float x, float y, float pixelsPerClock, unsigned int clockCount, GfxColor color)
 {
+#if 0
     float v5; // [esp+14h] [ebp-10h]
     float height; // [esp+20h] [ebp-4h]
 
@@ -288,10 +304,12 @@ void __cdecl RB_DrawProfileBar(float x, float y, float pixelsPerClock, unsigned 
     }
     v5 = y + 64.0 - height;
     RB_DrawProfileRect(x, v5, 1.0, height, color);
+#endif
 }
 
 void __cdecl RB_DrawProfileHistoryLabel(int profEnum, float x, float y)
 {
+#if 0
     float v3; // [esp+10h] [ebp-94h]
     unsigned int charLimit; // [esp+20h] [ebp-84h]
     char label[120]; // [esp+24h] [ebp-80h] BYREF
@@ -302,10 +320,13 @@ void __cdecl RB_DrawProfileHistoryLabel(int profEnum, float x, float y)
     iassert(charLimit <= ARRAY_COUNT(label));
     I_strncpyz(label, (char *)name, charLimit);
     RB_DrawText(label, drawProfGlob.font, x, y, drawProfGlob.textColor);
+#endif
 }
 
 int __cdecl RB_GetProfileHistoryProbeIndex(int historyIndex, const ProfileSettings *profSettings)
 {
+    return 0;
+
     if (prof_probe[historyIndex]->current.integer)
         return prof_probe[historyIndex]->current.integer;
     if (profSettings)
@@ -315,6 +336,8 @@ int __cdecl RB_GetProfileHistoryProbeIndex(int historyIndex, const ProfileSettin
 
 int RB_DrawProfileOverlay()
 {
+    return 0;
+
     int result; // eax
     const ProfileSettings *profSettings; // [esp+4h] [ebp-10h]
     int i; // [esp+Ch] [ebp-8h]
@@ -335,6 +358,7 @@ int RB_DrawProfileOverlay()
 
 void __cdecl RB_DrawAllProfileBackgrounds(const ProfileSettings *profSettings, int rowCount)
 {
+#if 0
     float y; // [esp+4h] [ebp-8h]
     int rowIndex; // [esp+8h] [ebp-4h]
 
@@ -353,10 +377,12 @@ void __cdecl RB_DrawAllProfileBackgrounds(const ProfileSettings *profSettings, i
         if (!profSettings || profSettings->profDrawInfo[rowIndex].probeIndex)
             RB_DrawProfileBackground(y);
     }
+#endif
 }
 
 void __cdecl RB_DrawProfileBackground(float y)
 {
+#if 0
     float v1; // [esp+28h] [ebp-18h]
     float h; // [esp+2Ch] [ebp-14h]
     float width; // [esp+34h] [ebp-Ch]
@@ -367,6 +393,7 @@ void __cdecl RB_DrawProfileBackground(float y)
     h = drawProfGlob.fontHeight - 2.0;
     v1 = y + 1.0;
     RB_DrawStretchPic(rgp.whiteMaterial, x, v1, width, h, 0.0, 0.0, 1.0, 1.0, 0x55000000u, GFX_PRIM_STATS_DEBUG);
+#endif
 }
 
 double __cdecl RB_DrawProfileLabels()

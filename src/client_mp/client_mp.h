@@ -526,7 +526,7 @@ const char *__cdecl CL_GetUsernameForLocalClient();
 void __cdecl CL_AddReliableCommand(int32_t localClientNum, const char *cmd);
 void __cdecl CL_ShutdownDevGui();
 void __cdecl CL_ShutdownHunkUsers();
-void __cdecl CL_ShutdownAll();
+void __cdecl CL_ShutdownAll(bool destroyWindow);
 char __cdecl CL_AnyLocalClientsRunning();
 void __cdecl CL_MapLoading(const char *mapname);
 void __cdecl CL_ResetSkeletonCache(int32_t localClientNum);

@@ -988,12 +988,14 @@ static char* __cdecl Z_TryMallocGarbage(int32_t size, const char* name, int32_t 
 {
     char* buf; // [esp+0h] [ebp-4h]
 
-    buf = (char*)malloc(size + 32);
-    if (buf)
-    {
-        buf += 32;
-        track_z_alloc(size + 72, name, type, buf, 0, 32); // KISAKMEMTRACK
-    }
+    buf = (char*)malloc(size);
+    // LWSS: remove this +32. Not needed
+    //buf = (char*)malloc(size + 32);
+    //if (buf)
+    //{
+    //    buf += 32;
+    //    track_z_alloc(size + 72, name, type, buf, 0, 32); // KISAKMEMTRACK
+    //}
     return buf;
 }
 
@@ -1019,8 +1021,8 @@ void* Z_Malloc(int32_t size, const char* name, int32_t type)
 
     buf = Z_TryMalloc(size, name, type);
 
-    if (!buf)
-        Z_MallocFailed(size + 32);
+    //if (!buf)
+    //    Z_MallocFailed(size + 32);
 
     return buf;
 }
@@ -1030,7 +1032,8 @@ void __cdecl Z_Free(void *ptr, int32_t type)
     if (ptr)
     {
        // track_z_free(type, ptr, 32);
-        free((char*)ptr - 32);
+       //free((char*)ptr - 32);
+       free(ptr);
     }
 }
 
@@ -1040,8 +1043,8 @@ char *__cdecl Z_MallocGarbage(int32_t size, const char *name, int32_t type)
     char *buf; // [esp+0h] [ebp-4h]
 
     buf = Z_TryMallocGarbage(size, name, type);
-    if (!buf)
-        Z_MallocFailed(size + 32);
+    //if (!buf)
+    //    Z_MallocFailed(size + 32);
     return buf;
 }
 

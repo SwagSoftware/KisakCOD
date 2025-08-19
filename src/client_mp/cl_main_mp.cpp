@@ -275,16 +275,17 @@ void __cdecl CL_ShutdownHunkUsers()
     }
 }
 
-void __cdecl CL_ShutdownAll()
+void __cdecl CL_ShutdownAll(bool destroyWindow)
 {
     R_SyncRenderThread();
     CL_ShutdownHunkUsers();
+
     if (cls.rendererStarted)
     {
-        CL_ShutdownRenderer(0);
-        if (cls.rendererStarted)
-            MyAssertHandler(".\\client_mp\\cl_main_mp.cpp", 1346, 0, "%s", "!cls.rendererStarted");
+        CL_ShutdownRenderer(destroyWindow);
+        iassert(!cls.rendererStarted);
     }
+
     track_shutdown(3);
 }
 
@@ -965,7 +966,7 @@ void __cdecl CL_DownloadsComplete(int32_t localClientNum)
             LoadMapLoadscreen(mapname);
         UI_SetMap(mapname, gametype);
         SCR_UpdateScreen();
-        CL_ShutdownAll();
+        CL_ShutdownAll(false);
         Com_Restart();
         if (cls.hunkUsersStarted)
             MyAssertHandler(".\\client_mp\\cl_main_mp.cpp", 2640, 0, "%s", "!cls.hunkUsersStarted");
@@ -2322,8 +2323,7 @@ void __cdecl CL_InitRenderer()
 
 void __cdecl CL_ShutdownRenderer(int32_t destroyWindow)
 {
-    if (!cls.rendererStarted && !destroyWindow)
-        MyAssertHandler(".\\client_mp\\cl_main_mp.cpp", 4313, 0, "%s", "cls.rendererStarted || destroyWindow");
+    iassert(cls.rendererStarted || destroyWindow);
     cls.rendererStarted = 0;
     Com_ShutdownWorld();
     if (useFastFile->current.enabled && destroyWindow)
@@ -2332,7 +2332,7 @@ void __cdecl CL_ShutdownRenderer(int32_t destroyWindow)
     cls.whiteMaterial = 0;
     cls.consoleMaterial = 0;
     cls.consoleFont = 0;
-    KISAK_NULLSUB();
+    //Con_ShutdownClientAssets(); (NULLSUB)
 }
 
 void __cdecl CL_StartHunkUsers()

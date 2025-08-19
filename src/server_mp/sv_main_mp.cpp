@@ -987,10 +987,10 @@ void __cdecl SV_RunFrame()
 
     CL_FlushDebugServerData();
     G_RunFrame(svs.time);
-    Scr_ProfileUpdate();
-    Scr_ProfileBuiltinUpdate();
-    Profile_ResetCounters(1);
-    Profile_ResetScriptCounters();
+    //Scr_ProfileUpdate();
+    //Scr_ProfileBuiltinUpdate();
+    //Profile_ResetCounters(1);
+    //Profile_ResetScriptCounters();
     CL_UpdateDebugServerData();
 
     if (Win_GetThreadLock() == THREAD_LOCK_ALL)

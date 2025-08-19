@@ -4982,6 +4982,7 @@ void __cdecl Scr_StackClear()
 
 void __cdecl Scr_ProfileUpdate()
 {
+#if 0
     int total; // [esp+4h] [ebp-Ch] BYREF
     int totalNonBuiltIn; // [esp+8h] [ebp-8h] BYREF
     const char* profileString; // [esp+Ch] [ebp-4h]
@@ -5011,10 +5012,12 @@ void __cdecl Scr_ProfileUpdate()
     {
         scrVarPub.bScriptProfile = 1;
     }
+#endif
 }
 
 void __cdecl Scr_ProfileBuiltinUpdate()
 {
+#if 0
     int i; // [esp+4h] [ebp-4h]
 
     if (scrVarPub.bScriptProfileBuiltin)
@@ -5030,22 +5033,29 @@ void __cdecl Scr_ProfileBuiltinUpdate()
             scrVmDebugPub.func_table[i].prof = 0;
         }
     }
+#endif
 }
 
 void __cdecl Scr_DoProfile(float minTime)
 {
+#if 0
     scrVarPub.bScriptProfile = 1;
     scrVarPub.scriptProfileMinTime = minTime;
+#endif
 }
 
 void __cdecl Scr_DoProfileBuiltin(float minTime)
 {
+#if 0
     scrVarPub.bScriptProfileBuiltin = 1;
     scrVarPub.scriptProfileBuiltinMinTime = minTime;
+#endif
 }
 
 char __cdecl Scr_PrintProfileBuiltinTimes(float minTime)
 {
+    return 0;
+#if 0
     float v2; // [esp+10h] [ebp-20h]
     int j; // [esp+20h] [ebp-10h]
     int* order; // [esp+24h] [ebp-Ch]
@@ -5099,6 +5109,7 @@ char __cdecl Scr_PrintProfileBuiltinTimes(float minTime)
         }
         return 0;
     }
+#endif
 }
 
 int __cdecl Scr_BuiltinCompare(_DWORD* a, _DWORD* b)

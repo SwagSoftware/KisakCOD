@@ -392,7 +392,7 @@ void __cdecl SV_SpawnServer(char *mapname)
     client_t *clienta; // [esp+1Ch] [ebp-ACh]
     char filename[68]; // [esp+20h] [ebp-A8h] BYREF
     int checksum; // [esp+64h] [ebp-64h] BYREF
-    XZoneInfo zoneInfo[1]; // [esp+68h] [ebp-60h] BYREF
+    XZoneInfo zoneInfo; // [esp+68h] [ebp-60h] BYREF
     int savepersist; // [esp+74h] [ebp-54h]
     char zoneName[64]; // [esp+78h] [ebp-50h] BYREF
     int i; // [esp+BCh] [ebp-Ch]
@@ -406,24 +406,29 @@ void __cdecl SV_SpawnServer(char *mapname)
     {
         DB_ResetZoneSize(0);
         Com_sprintf(zoneName, 0x40u, "%s_load", mapname);
-        zoneInfo[0].name = zoneName;
-        zoneInfo[0].allocFlags = 32;
-        zoneInfo[0].freeFlags = 96;
-        DB_LoadXAssets(zoneInfo, 1u, 0);
+        zoneInfo.name = zoneName;
+        zoneInfo.allocFlags = 32;
+        zoneInfo.freeFlags = 96;
+        DB_LoadXAssets(&zoneInfo, 1, 0);
     }
     Scr_ParseGameTypeList();
     SV_SetGametype();
+
     if (!mapIsPreloaded)
         CL_InitLoad(mapname, sv_gametype->current.string);
+
     if (useFastFile->current.enabled && !mapIsPreloaded)
     {
         DB_SyncXAssets();
         DB_UpdateDebugZone();
     }
+
     R_BeginRemoteScreenUpdate();
     if (fs_debug->current.integer == 2)
         Dvar_SetInt((dvar_s *)fs_debug, 0);
+
     ProfLoad_Activate();
+
     if (com_sv_running->current.enabled)
     {
         savepersist = G_GetSavePersist();
@@ -458,7 +463,7 @@ void __cdecl SV_SpawnServer(char *mapname)
             CL_MapLoading(mapname);
             R_BeginRemoteScreenUpdate();
             R_EndRemoteScreenUpdate();
-            CL_ShutdownAll();
+            CL_ShutdownAll(false);
         }
         SV_ShutdownGameProgs();
         Com_Printf(15, "------ Server Initialization ------\n");
@@ -503,10 +508,10 @@ void __cdecl SV_SpawnServer(char *mapname)
         if (useFastFile->current.enabled)
         {
             PROF_SCOPED("Load fast file");
-            zoneInfo[0].name = mapname;
-            zoneInfo[0].allocFlags = 8;
-            zoneInfo[0].freeFlags = 8;
-            DB_LoadXAssets(zoneInfo, 1, 0);
+            zoneInfo.name = mapname;
+            zoneInfo.allocFlags = 8;
+            zoneInfo.freeFlags = 8;
+            DB_LoadXAssets(&zoneInfo, 1, 0);
             iassert(sv_loadMyChanges);
             if (sv_loadMyChanges->current.enabled)
             {

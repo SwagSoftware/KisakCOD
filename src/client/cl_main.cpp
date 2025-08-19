@@ -24,6 +24,7 @@
 #include <cgame/cg_main.h>
 #include <ragdoll/ragdoll.h>
 #include "cl_scrn.h"
+#include <qcommon/com_bsp.h>
 
 enum MovieToPlayScriptOp : __int32
 {
@@ -863,8 +864,7 @@ bool __cdecl CL_IsUIActive(const int localClientNum)
 
 void __cdecl CL_InitRenderer()
 {
-    if (cls.rendererStarted)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\client\\cl_main.cpp", 1199, 0, "%s", "!cls.rendererStarted");
+    iassert(!cls.rendererStarted);
     cls.rendererStarted = 1;
     R_BeginRegistration(&cls.vidConfig);
     ScrPlace_SetupUnsafeViewport(&scrPlaceFullUnsafe, 0, 0, cls.vidConfig.displayWidth, cls.vidConfig.displayHeight);
@@ -879,23 +879,6 @@ void __cdecl CL_InitRenderer()
     g_consoleField.fixedSize = 1;
     StatMon_Reset();
     Con_InitClientAssets();
-}
-
-void __cdecl CL_ShutdownRenderer(int destroyWindow)
-{
-    if (!cls.rendererStarted && !destroyWindow)
-        MyAssertHandler(
-            "c:\\trees\\cod3\\cod3src\\src\\client\\cl_main.cpp",
-            1233,
-            0,
-            "%s",
-            "cls.rendererStarted || destroyWindow");
-    cls.rendererStarted = 0;
-    R_Shutdown(destroyWindow);
-    cls.whiteMaterial = 0;
-    cls.consoleMaterial = 0;
-    cls.consoleFont = 0;
-    //Con_ShutdownClientAssets(); // nullsub
 }
 
 void CL_DevGuiDvar_f()
@@ -1572,25 +1555,35 @@ void __cdecl CL_UpdateSound()
     //PIXEndNamedEvent();
 }
 
-void __cdecl CL_ShutdownAll()
+
+void __cdecl CL_ShutdownRenderer(int destroyWindow)
 {
-    R_SyncRenderThread();
-    CL_ShutdownHunkUsers();
-    if (!cls.rendererStarted)
-        MyAssertHandler(
-            "c:\\trees\\cod3\\cod3src\\src\\client\\cl_main.cpp",
-            1233,
-            0,
-            "%s",
-            "cls.rendererStarted || destroyWindow");
+    iassert(cls.rendererStarted || destroyWindow);
+
     cls.rendererStarted = 0;
-    R_Shutdown(0);
+    // MP ADD
+    Com_ShutdownWorld();
+    if (useFastFile->current.enabled && destroyWindow)
+        CM_Shutdown();
+    // MP END
+    R_Shutdown(destroyWindow);
     cls.whiteMaterial = 0;
     cls.consoleMaterial = 0;
     cls.consoleFont = 0;
     //Con_ShutdownClientAssets(); // nullsub
+}
+
+void __cdecl CL_ShutdownAll(bool destroyWindow)
+{
+    R_SyncRenderThread();
+    CL_ShutdownHunkUsers();
+
     if (cls.rendererStarted)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\client\\cl_main.cpp", 394, 0, "%s", "!cls.rendererStarted");
+    {
+        CL_ShutdownRenderer(destroyWindow);
+        iassert(!cls.rendererStarted);
+    }
+
     track_shutdown(3);
 }
 

@@ -17,6 +17,8 @@
 #include <cgame/cg_main.h>
 #include <client/cl_scrn.h>
 #include <universal/profile.h>
+#include <qcommon/threads.h>
+#include <universal/com_files.h>
 
 const dvar_t *sv_clientFrameRateFix;
 const dvar_t *sv_loadMyChanges;
@@ -372,11 +374,9 @@ void SV_SaveSystemInfo()
     dvar_modifiedFlags &= ~4u;
 }
 
-void __cdecl SV_SpawnServer(const char *server, int savegame)
+void __cdecl SV_SpawnServer(const char *mapname, int savegame)
 {
     int startTime; // r21
-    //const char *v5; // r3
-    //int v6; // r3
     int v7; // r22
     int v9; // r30
     SaveGame *v11; // [sp+50h] [-B0h] BYREF
@@ -384,15 +384,41 @@ void __cdecl SV_SpawnServer(const char *server, int savegame)
 
     Com_SyncThreads();
     startTime = Sys_Milliseconds();
-    DB_ResetZoneSize(0);
-    CL_InitLoad(server);
-    //v5 = va("loading map: %s", server);
-    //LSP_LogString(cl_controller_in_use, v5);
-    CL_MapLoading(server);
+    Sys_BeginLoadThreadPriorities(); // (FROM MP)
+
+    // MP ADD
+    if (useFastFile->current.enabled)
+    {
+        char zoneName[64];
+        XZoneInfo zoneInfo;
+
+        DB_ResetZoneSize(0);
+        Com_sprintf(zoneName, 0x40u, "%s_load", mapname);
+        zoneInfo.name = zoneName;
+        zoneInfo.allocFlags = 32;
+        zoneInfo.freeFlags = 96;
+        DB_LoadXAssets(&zoneInfo, 1, 0);
+    }
+    // MP END
+
+
+    CL_InitLoad(mapname);
+    // MP ADD
+    if (useFastFile->current.enabled)
+    {
+        DB_SyncXAssets();
+        DB_UpdateDebugZone();
+    }
+    // MP END
+
+    //LSP_LogString(cl_controller_in_use, va("loading map: %s", server));
+    CL_MapLoading(mapname);
     R_BeginRemoteScreenUpdate();
-    //v6 = CL_ControllerIndexFromClientNum(0);
-    //Live_Frame(v6, 0);
-    //ProfLoad_Activate();
+    if (fs_debug->current.integer == 2)
+        Dvar_SetInt((dvar_s *)fs_debug, 0);
+    //Live_Frame(CL_ControllerIndexFromClientNum(0), 0);
+    
+    ProfLoad_Activate();
 
     {
         PROF_SCOPED("Clear load game");
@@ -405,13 +431,13 @@ void __cdecl SV_SpawnServer(const char *server, int savegame)
         R_EndRemoteScreenUpdate();
         R_BeginRemoteScreenUpdate();
         R_EndRemoteScreenUpdate();
-        SCR_UpdateLoadScreen();
-        CL_ShutdownAll();
+        //SCR_UpdateLoadScreen(); // NULLSUB
+        CL_ShutdownAll(false);
         SV_ShutdownGameProgs();
         SaveMemory_CleanupSaveMemory();
         SaveMemory_ShutdownSaveSystem();
         Com_Printf(15, "------ Server Initialization ------\n");
-        Com_Printf(15, "Server: %s\n", server);
+        Com_Printf(15, "Server: %s\n", mapname);
         SV_ClearServer();
     }
 
@@ -428,13 +454,13 @@ void __cdecl SV_SpawnServer(const char *server, int savegame)
         PROF_SCOPED("After file system restart");
         {
             PROF_SCOPED("Start loading");
-            CL_StartLoading(server);
+            CL_StartLoading(mapname);
         }
 
-        if (*server)
+        if (*mapname)
         {
             PROF_SCOPED("Load fast file");
-            SV_LoadLevelAssets(server);
+            SV_LoadLevelAssets(mapname);
         }
 
         R_BeginRemoteScreenUpdate();
@@ -442,8 +468,8 @@ void __cdecl SV_SpawnServer(const char *server, int savegame)
         svs.nextSnapshotEntities = 0;
         Dvar_SetString(nextmap, "map_restart");
 
-        iassert(!strstr(server, "\\"));
-        Dvar_SetString(sv_mapname, server);
+        iassert(!strstr(mapname, "\\"));
+        Dvar_SetString(sv_mapname, mapname);
     }
 
     {
@@ -458,7 +484,7 @@ void __cdecl SV_SpawnServer(const char *server, int savegame)
         SCR_UpdateLoadScreen();
     }
 
-    Com_GetBspFilename(v12, 64, server);
+    Com_GetBspFilename(v12, 64, mapname);
     {
         PROF_SCOPED("Load collision (server)");
         CM_LoadMap(v12, &sv.checksum);
@@ -514,7 +540,7 @@ void __cdecl SV_SpawnServer(const char *server, int savegame)
     if (!savegame)
     {
         PROF_SCOPED("Save game");
-        v9 = SV_SaveImmediately(server);
+        v9 = SV_SaveImmediately(mapname);
     }
 
     {

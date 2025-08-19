@@ -524,7 +524,7 @@ void __cdecl Com_ShutdownInternal(const char* finalmsg)
     for (localClientNum = 0; localClientNum < 1; ++localClientNum)
         CL_Disconnect(localClientNum);
 //    KISAK_NULLSUB();
-    CL_ShutdownAll();
+    CL_ShutdownAll(false);
     CL_ShutdownDemo();
 #ifdef KISAK_MP
     FakeLag_Shutdown();

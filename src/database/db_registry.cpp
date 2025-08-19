@@ -31,7 +31,7 @@
 GfxWorld s_world;
 MaterialGlobals materialGlobals;
 ImgGlobals imageGlobals;
-r_globals_t rg;
+r_globals_t rg{ 0 };
 
 struct DBReorderAssetEntry // sizeof=0x10
 {                                       // ...
@@ -41,41 +41,75 @@ struct DBReorderAssetEntry // sizeof=0x10
     const char *assetName;
 };
 
-int32_t g_poolSize[33] =
+#define POOLSIZE_XMODELPIECES   64
+#define POOLSIZE_PHYSPRESET     64
+#define POOLSIZE_XANIMPARTS     4096
+#define POOLSIZE_XMODEL         1000
+#define POOLSIZE_MATERIAL       2048
+#define POOLSIZE_TECHNIQUE_SET  1024 // 512 on SP (XBox?)
+#define POOLSIZE_IMAGE          2400
+#define POOLSIZE_SOUND          16'000
+#define POOLSIZE_SOUND_CURVE    64
+#define POOLSIZE_LOADED_SOUND   1200
+#define POOLSIZE_CLIPMAP        1
+#define POOLSIZE_CLIPMAP_PVS    1
+#define POOLSIZE_COMWORLD       1
+#define POOLSIZE_GAMEWORLD_SP   1
+#define POOLSIZE_GAMEWORLD_MP   1
+#define POOLSIZE_MAP_ENTS       2
+#define POOLSIZE_GFXWORLD       1
+#define POOLSIZE_LIGHT_DEF      32
+#define POOLSIZE_UI_MAP         0
+#define POOLSIZE_FONT           16
+#define POOLSIZE_MENULIST       128
+#define POOLSIZE_MENU           640 // 512 on SP
+#define POOLSIZE_LOCALIZE_ENTRY 6144
+#define POOLSIZE_WEAPON         128
+#define POOLSIZE_SNDDRIVER_GLOBALS 1
+#define POOLSIZE_FX             400
+#define POOLSIZE_IMPACT_FX      4
+#define POOLSIZE_AITYPE         0
+#define POOLSIZE_MPTYPE         0
+#define POOLSIZE_CHARACTER      0
+#define POOLSIZE_XMODELALIAS    0
+#define POOLSIZE_RAWFILE        1024
+#define POOLSIZE_STRINGTABLE    50
+
+int32_t g_poolSize[ASSET_TYPE_COUNT] =
 {
-  64,
-  64,
-  4096,
-  1000,
-  2048,
-  1024,
-  2400,
-  16000,
-  64,
-  1200,
-  1,
-  1,
-  1,
-  1,
-  1,
-  2,
-  1,
-  32,
-  0,
-  16,
-  128,
-  640,
-  6144,
-  128,
-  1,
-  400,
-  4,
-  0,
-  0,
-  0,
-  0,
-  1024,
-  50
+    POOLSIZE_XMODELPIECES,
+    POOLSIZE_PHYSPRESET,
+    POOLSIZE_XANIMPARTS,
+    POOLSIZE_XMODEL,
+    POOLSIZE_MATERIAL,
+    POOLSIZE_TECHNIQUE_SET,
+    POOLSIZE_IMAGE,
+    POOLSIZE_SOUND,
+    POOLSIZE_SOUND_CURVE,
+    POOLSIZE_LOADED_SOUND,
+    POOLSIZE_CLIPMAP,
+    POOLSIZE_CLIPMAP_PVS,
+    POOLSIZE_COMWORLD,
+    POOLSIZE_GAMEWORLD_SP,
+    POOLSIZE_GAMEWORLD_MP,
+    POOLSIZE_MAP_ENTS,
+    POOLSIZE_GFXWORLD,
+    POOLSIZE_LIGHT_DEF,
+    POOLSIZE_UI_MAP,
+    POOLSIZE_FONT,
+    POOLSIZE_MENULIST,
+    POOLSIZE_MENU,
+    POOLSIZE_LOCALIZE_ENTRY,
+    POOLSIZE_WEAPON,
+    POOLSIZE_SNDDRIVER_GLOBALS,
+    POOLSIZE_FX,
+    POOLSIZE_IMPACT_FX,
+    POOLSIZE_AITYPE,
+    POOLSIZE_MPTYPE,
+    POOLSIZE_CHARACTER,
+    POOLSIZE_XMODELALIAS,
+    POOLSIZE_RAWFILE,
+    POOLSIZE_STRINGTABLE,
 }; // idb
 
 bool g_archiveBuf;
@@ -103,7 +137,7 @@ static XAssetHeader __cdecl DB_AllocXAsset_StringTable_(void *arg)
 }
 
 
-XAssetHeader(__cdecl *DB_AllocXAssetHeaderHandler[33])(void *) =
+XAssetHeader(__cdecl *DB_AllocXAssetHeaderHandler[ASSET_TYPE_COUNT])(void *) =
 {
   &DB_AllocXAsset_StringTable_,
   &DB_AllocXAsset_StringTable_,
@@ -154,7 +188,7 @@ void NULLSUB(void *crap, XAssetHeader head)
 {
 }
 
-void(__cdecl *DB_FreeXAssetHeaderHandler[33])(void *, XAssetHeader) =
+void(__cdecl *DB_FreeXAssetHeaderHandler[ASSET_TYPE_COUNT])(void *, XAssetHeader) =
 {
   DB_FreeXAssetHeader_StringTable_,
   DB_FreeXAssetHeader_StringTable_,
@@ -191,7 +225,7 @@ void(__cdecl *DB_FreeXAssetHeaderHandler[33])(void *, XAssetHeader) =
   DB_FreeXAssetHeader_StringTable_
 }; // idb
 
-const char *g_defaultAssetName[33] =
+const char *g_defaultAssetName[ASSET_TYPE_COUNT] =
 {
   "",
   "default",
@@ -232,7 +266,7 @@ const char *g_defaultAssetName[33] =
   "mp/defaultStringTable.csv"
 }; // idb
 
-const char *g_assetNames[33] = // SP/MP same
+const char *g_assetNames[ASSET_TYPE_COUNT] = // SP/MP same
 {
   "xmodelpieces",
   "physpreset",
@@ -301,30 +335,31 @@ XAssetEntryPoolEntry *g_freeAssetEntryHead;
 uint16_t db_hashTable[32768];
 XAssetEntry *g_copyInfo[0x800];
 uint32_t g_copyInfoCount;
-XZone g_zones[33]{ 0 };
+XZone g_zones[ASSET_TYPE_COUNT]{ 0 };
 uint8_t g_zoneHandles[32];
 char g_zoneNameList[2080];
-XAssetPool<XModelPieces, 64> g_XModelPiecesPool;
-XAssetPool<PhysPreset, 64> g_PhysPresetPool;
-XAssetPool<XAnimParts, 4096> g_XAnimPartsPool;
-XAssetPool<XModel, 1000> g_XModelPool;
-XAssetPool<Material, 2048> g_MaterialPool;
-XAssetPool<MaterialTechniqueSet, 1024> g_MaterialTechniqueSetPool;
-XAssetPool<GfxImage, 2400> g_GfxImagePool;
-XAssetPool<snd_alias_list_t, 16000> g_SoundPool;
-XAssetPool<SndCurve, 64> g_SndCurvePool;
-XAssetPool<LoadedSound, 1200> g_LoadedSoundPool;
-XAssetPool<MapEnts, 2> g_MapEntsPool;
-XAssetPool<GfxLightDef, 32> g_GfxLightDefPool;
-XAssetPool<Font_s, 16> g_FontPool;
-XAssetPool<MenuList, 128> g_MenuListPool;
-XAssetPool<menuDef_t, 640> g_MenuPool;
-XAssetPool<LocalizeEntry, 6144> g_LocalizeEntryPool;
-XAssetPool<WeaponDef, 128> g_WeaponDefPool;
-XAssetPool<FxEffectDef, 400> g_FxEffectDefPool;
-XAssetPool<FxImpactTable, 4> g_FxImpactTablePool;
-XAssetPool<RawFile, 1024> g_RawFilePool;
-XAssetPool<StringTable, 50> g_StringTablePool;
+XAssetPool<XModelPieces, POOLSIZE_XMODELPIECES> g_XModelPiecesPool;
+XAssetPool<PhysPreset, POOLSIZE_PHYSPRESET> g_PhysPresetPool;
+XAssetPool<XAnimParts, POOLSIZE_XANIMPARTS> g_XAnimPartsPool;
+XAssetPool<XModel, POOLSIZE_XMODEL> g_XModelPool;
+XAssetPool<Material, POOLSIZE_MATERIAL> g_MaterialPool;
+XAssetPool<MaterialTechniqueSet, POOLSIZE_TECHNIQUE_SET> g_MaterialTechniqueSetPool;
+XAssetPool<GfxImage, POOLSIZE_IMAGE> g_GfxImagePool;
+XAssetPool<snd_alias_list_t, POOLSIZE_SOUND> g_SoundPool;
+XAssetPool<SndCurve, POOLSIZE_SOUND_CURVE> g_SndCurvePool;
+XAssetPool<LoadedSound, POOLSIZE_LOADED_SOUND> g_LoadedSoundPool;
+XAssetPool<MapEnts, POOLSIZE_MAP_ENTS> g_MapEntsPool;
+XAssetPool<GfxLightDef, POOLSIZE_LIGHT_DEF> g_GfxLightDefPool;
+XAssetPool<Font_s, POOLSIZE_FONT> g_FontPool;
+XAssetPool<MenuList, POOLSIZE_MENULIST> g_MenuListPool;
+XAssetPool<menuDef_t, POOLSIZE_MENU> g_MenuPool;
+XAssetPool<LocalizeEntry, POOLSIZE_LOCALIZE_ENTRY> g_LocalizeEntryPool;
+XAssetPool<WeaponDef, POOLSIZE_WEAPON> g_WeaponDefPool;
+XAssetPool<FxEffectDef, POOLSIZE_FX> g_FxEffectDefPool;
+XAssetPool<FxImpactTable, POOLSIZE_IMPACT_FX> g_FxImpactTablePool;
+XAssetPool<RawFile, POOLSIZE_RAWFILE> g_RawFilePool;
+XAssetPool<StringTable, POOLSIZE_STRINGTABLE> g_StringTablePool;
+
 XAssetEntryPoolEntry g_assetEntryPool[32768];
 uint8_t g_fileBuf[524288];
 
@@ -415,9 +450,11 @@ void __cdecl Hunk_OverrideDataForFile(int32_t type, const char *name, void *data
         MyAssertHandler(".\\universal\\com_memory.cpp", 1554, 0, "Hunk_OverrideDataForFile: could not find data");
 }
 
-void __cdecl DB_InitPool_RawFile_(void *arg, int32_t size)
+template <typename T>
+void __cdecl DB_InitPool(void *arg, int32_t size)
 {
-    XAssetPool<RawFile, 69> *pool = (XAssetPool<RawFile, 69>*)arg;
+    //XAssetPool<RawFile, POOLSIZE_RAWFILE> *pool = (XAssetPool<RawFile, POOLSIZE_RAWFILE>*)arg;
+    T *pool = (T *)arg;
     pool->freeHead = &pool->entries[0];
     for (int32_t i = 0; i < size - 1; i++)
     {
@@ -426,188 +463,44 @@ void __cdecl DB_InitPool_RawFile_(void *arg, int32_t size)
     pool->entries[size - 1].next = NULL;
 }
 
-void __cdecl DB_InitPool_LoadedSound_(void *arg, int32_t size)
+void(__cdecl *DB_InitPoolHeaderHandler[ASSET_TYPE_COUNT])(void *, int) =
 {
-    XAssetPool<LoadedSound, 69> *pool = (XAssetPool<LoadedSound, 69>*)arg;
-    pool->freeHead = &pool->entries[0];
-    for (int32_t i = 0; i < size - 1; i++)
-    {
-        pool->entries[i].next = &pool->entries[i + 1];
-    }
-    pool->entries[size - 1].next = NULL;
-}
-
-void __cdecl DB_InitPool_XAnimParts_(void *arg, int32_t size)
-{
-    XAssetPool<XAnimParts, 69> *pool = (XAssetPool<XAnimParts, 69>*)arg;
-    pool->freeHead = &pool->entries[0];
-    for (int32_t i = 0; i < size - 1; i++)
-    {
-        pool->entries[i].next = &pool->entries[i + 1];
-    }
-    pool->entries[size - 1].next = NULL;
-}
-
-void __cdecl DB_InitPool_XModel_(void *arg, int32_t size)
-{
-    XAssetPool<XModel, 69> *pool = (XAssetPool<XModel, 69>*)arg;
-    pool->freeHead = &pool->entries[0];
-    for (int32_t i = 0; i < size - 1; i++)
-    {
-        pool->entries[i].next = &pool->entries[i + 1];
-    }
-    pool->entries[size - 1].next = NULL;
-}
-
-void __cdecl DB_InitPool_Material_(void *arg, int32_t size)
-{
-    XAssetPool<Material, 69> *pool = (XAssetPool<Material, 69>*)arg;
-    pool->freeHead = &pool->entries[0];
-    for (int32_t i = 0; i < size - 1; i++)
-    {
-        pool->entries[i].next = &pool->entries[i + 1];
-    }
-    pool->entries[size - 1].next = NULL;
-}
-
-void __cdecl DB_InitPool_MaterialTechniqueSet_(void *arg, int32_t size)
-{
-    XAssetPool<MaterialTechniqueSet, 69> *pool = (XAssetPool<MaterialTechniqueSet, 69>*)arg;
-    pool->freeHead = &pool->entries[0];
-    for (int32_t i = 0; i < size - 1; i++)
-    {
-        pool->entries[i].next = &pool->entries[i + 1];
-    }
-    pool->entries[size - 1].next = NULL;
-}
-
-void __cdecl DB_InitPool_GfxImage_(void *arg, int32_t size)
-{
-    XAssetPool<GfxImage, 69> *pool = (XAssetPool<GfxImage, 69>*)arg;
-    pool->freeHead = &pool->entries[0];
-    for (int32_t i = 0; i < size - 1; i++)
-    {
-        pool->entries[i].next = &pool->entries[i + 1];
-    }
-    pool->entries[size - 1].next = NULL;
-}
-
-void __cdecl DB_InitPool_SndCurve_(void *arg, int32_t size)
-{
-    XAssetPool<SndCurve, 69> *pool = (XAssetPool<SndCurve, 69>*)arg;
-    pool->freeHead = &pool->entries[0];
-    for (int32_t i = 0; i < size - 1; i++)
-    {
-        pool->entries[i].next = &pool->entries[i + 1];
-    }
-    pool->entries[size - 1].next = NULL;
-}
-
-void __cdecl DB_InitPool_StringTable_(void *arg, int32_t size)
-{
-    XAssetPool<StringTable, 69> *pool = (XAssetPool<StringTable, 69>*)arg;
-    pool->freeHead = &pool->entries[0];
-    for (int32_t i = 0; i < size - 1; i++)
-    {
-        pool->entries[i].next = &pool->entries[i + 1];
-    }
-    pool->entries[size - 1].next = NULL;
-}
-
-void __cdecl DB_InitPool_Font_s_(void *arg, int32_t size)
-{
-    XAssetPool<Font_s, 69> *pool = (XAssetPool<Font_s, 69>*)arg;
-    pool->freeHead = &pool->entries[0];
-    for (int32_t i = 0; i < size - 1; i++)
-    {
-        pool->entries[i].next = &pool->entries[i + 1];
-    }
-    pool->entries[size - 1].next = NULL;
-}
-
-void __cdecl DB_InitPool_menuDef_t_(void *arg, int32_t size)
-{
-    XAssetPool<menuDef_t, 640> *pool = (XAssetPool<menuDef_t, 640>*)arg;
-
-    pool->freeHead = &pool->entries[0];
-    for (int32_t i = 0; i < size - 1; ++i)
-    {
-        pool->entries[i].next = &pool->entries[i + 1];
-    }
-    pool->entries[size - 1].next = NULL;
-}
-
-void __cdecl DB_InitPool_FxImpactTable_(void *arg, int32_t size)
-{
-    XAssetPool<FxImpactTable, 69> *pool = (XAssetPool<FxImpactTable, 69>*)arg;
-    pool->freeHead = &pool->entries[0];
-    for (int32_t i = 0; i < size - 1; i++)
-    {
-        pool->entries[i].next = &pool->entries[i + 1];
-    }
-    pool->entries[size - 1].next = NULL;
-}
-
-void __cdecl DB_InitPool_WeaponDef_(void *arg, int32_t size)
-{
-    XAssetPool<WeaponDef, 69> *pool = (XAssetPool<WeaponDef, 69>*)arg;
-    pool->freeHead = &pool->entries[0];
-    for (int32_t i = 0; i < size - 1; i++)
-    {
-        pool->entries[i].next = &pool->entries[i + 1];
-    }
-    pool->entries[size - 1].next = NULL;
-}
-
-void __cdecl DB_InitPool_FxEffectDef_(void *arg, int32_t size)
-{
-    XAssetPool<FxEffectDef, 69> *pool = (XAssetPool<FxEffectDef, 69>*)arg;
-    pool->freeHead = &pool->entries[0];
-    for (int32_t i = 0; i < size - 1; i++)
-    {
-        pool->entries[i].next = &pool->entries[i + 1];
-    }
-    pool->entries[size - 1].next = NULL;
-}
-
-void(__cdecl *DB_InitPoolHeaderHandler[33])(void *, int) =
-{
-  &DB_InitPool_RawFile_,
-  &DB_InitPool_LoadedSound_,
-  &DB_InitPool_XAnimParts_,
-  &DB_InitPool_XModel_,
-  &DB_InitPool_Material_,
-  &DB_InitPool_MaterialTechniqueSet_,
-  &DB_InitPool_GfxImage_,
-  &DB_InitPool_RawFile_,
-  &DB_InitPool_SndCurve_,
-  &DB_InitPool_LoadedSound_,
+  DB_InitPool<XAssetPool<XModelPieces, POOLSIZE_XMODELPIECES>>,
+  DB_InitPool<XAssetPool<PhysPreset, POOLSIZE_PHYSPRESET>>,
+  DB_InitPool<XAssetPool<XAnimParts, POOLSIZE_XANIMPARTS>>,
+  DB_InitPool<XAssetPool<XModel, POOLSIZE_XMODEL>>,
+  DB_InitPool<XAssetPool<Material, POOLSIZE_MATERIAL>>,
+  DB_InitPool<XAssetPool<MaterialTechniqueSet, POOLSIZE_TECHNIQUE_SET>>,
+  DB_InitPool<XAssetPool<GfxImage, POOLSIZE_IMAGE>>,
+  DB_InitPool<XAssetPool<snd_alias_list_t, POOLSIZE_SOUND>>,
+  DB_InitPool<XAssetPool<SndCurve, POOLSIZE_SOUND_CURVE>>,
+  DB_InitPool<XAssetPool<LoadedSound, POOLSIZE_LOADED_SOUND>>,
   &DB_InitSingleton,
   &DB_InitSingleton,
   &DB_InitSingleton,
   &DB_InitSingleton,
   &DB_InitSingleton,
-  &DB_InitPool_RawFile_,
+  DB_InitPool<XAssetPool<MapEnts, POOLSIZE_MAP_ENTS>>,
   &DB_InitSingleton,
-  &DB_InitPool_StringTable_,
+  DB_InitPool<XAssetPool<GfxLightDef, POOLSIZE_LIGHT_DEF>>,
   NULL,
-  &DB_InitPool_Font_s_,
-  &DB_InitPool_RawFile_,
-  &DB_InitPool_menuDef_t_,
-  &DB_InitPool_FxImpactTable_,
-  &DB_InitPool_WeaponDef_,
-  NULL,
-  &DB_InitPool_FxEffectDef_,
-  &DB_InitPool_FxImpactTable_,
-  NULL,
-  NULL,
+  DB_InitPool<XAssetPool<Font_s, POOLSIZE_FONT>>,
+  DB_InitPool<XAssetPool<MenuList, POOLSIZE_MENULIST>>,
+  DB_InitPool<XAssetPool<menuDef_t, POOLSIZE_MENU>>,
+  DB_InitPool<XAssetPool<LocalizeEntry, POOLSIZE_LOCALIZE_ENTRY>>,
+  DB_InitPool<XAssetPool<WeaponDef, POOLSIZE_WEAPON>>,
+  DB_InitPool<XAssetPool<SndDriverGlobals, POOLSIZE_SNDDRIVER_GLOBALS>>,
+  DB_InitPool<XAssetPool<FxEffectDef, POOLSIZE_FX>>,
+  DB_InitPool<XAssetPool<FxImpactTable, POOLSIZE_IMPACT_FX>>,
   NULL,
   NULL,
-  &DB_InitPool_RawFile_,
-  &DB_InitPool_StringTable_
+  NULL,
+  NULL,
+  DB_InitPool<XAssetPool<RawFile, POOLSIZE_RAWFILE>>,
+  DB_InitPool<XAssetPool<StringTable, POOLSIZE_STRINGTABLE>>,
 }; // idb
 
-void *DB_XAssetPool[33] =
+void *DB_XAssetPool[ASSET_TYPE_COUNT] =
 {
   &g_XModelPiecesPool,
   &g_PhysPresetPool,
@@ -622,11 +515,12 @@ void *DB_XAssetPool[33] =
   &cm,
   &cm,
   &comWorld,
-  NULL,
 #ifdef KISAK_MP
-  &gameWorldMp,
+  NULL,         // GAMEWORLD_SP
+  &gameWorldMp, // GAMEWORLD_MP
 #elif KISAK_SP
-  &gameWorldSp,
+  &gameWorldSp, // GAMEWORLD_SP
+  NULL,         // GAMEWORLD_MP
 #endif
   &g_MapEntsPool,
   &s_world,
@@ -637,7 +531,7 @@ void *DB_XAssetPool[33] =
   &g_MenuPool,
   &g_LocalizeEntryPool,
   &g_WeaponDefPool,
-  NULL,
+  NULL, // &g_SndDriverGlobalsPool (Set in SP?)
   &g_FxEffectDefPool,
   &g_FxImpactTablePool,
   NULL,
@@ -647,46 +541,6 @@ void *DB_XAssetPool[33] =
   &g_RawFilePool,
   &g_StringTablePool
 }; // idb
-
-//void *DB_XAssetPool[34] =
-//{
-//  &g_XModelPiecesPool,
-//  &g_PhysPresetPool,
-//  &g_XAnimPartsPool,
-//  &g_XModelPool,
-//  &g_MaterialPool,
-//  &g_MaterialPixelShaderPool,
-//  &g_MaterialTechniqueSetPool,
-//  &g_GfxImagePool,
-//  &g_SoundPool,
-//  &g_SndCurvePool,
-//  &g_LoadedSoundPool,
-//  &cm,
-//  &cm,
-//  &comWorld,
-//  &gameWorldSp,
-//  NULL,
-//  &g_MapEntsPool,
-//  &s_world,
-//  &g_GfxLightDefPool,
-//  NULL,
-//  &g_FontPool,
-//  &g_MenuListPool,
-//  &g_MenuPool,
-//  &g_LocalizeEntryPool,
-//  &g_WeaponDefPool,
-//  &g_SndDriverGlobalsPool,
-//  &g_FxEffectDefPool,
-//  &g_FxImpactTablePool,
-//  NULL,
-//  NULL,
-//  NULL,
-//  NULL,
-//  &g_RawFilePool,
-//  &g_StringTablePool
-//};
-
-
 
 void __cdecl TRACK_db_registry()
 {
@@ -2127,7 +1981,7 @@ void __cdecl DB_CloneXAssetEntry(const XAssetEntry *from, XAssetEntry *to)
     to->zoneIndex = from->zoneIndex;
 }
 
-void(__cdecl *DB_DynamicCloneXAssetHandler[33])(XAssetHeader, XAssetHeader, int) =
+void(__cdecl *DB_DynamicCloneXAssetHandler[ASSET_TYPE_COUNT])(XAssetHeader, XAssetHeader, int) =
 {
     NULL, // 0
     NULL,
@@ -2378,9 +2232,11 @@ void __cdecl DB_LoadXAssets(XZoneInfo *zoneInfo, uint32_t zoneCount, int32_t syn
 
 void DB_Init()
 {
-    for (XAssetType type = ASSET_TYPE_XMODELPIECES; type < ASSET_TYPE_COUNT; ++type)
+    for (XAssetType type = (XAssetType)0; type < ASSET_TYPE_COUNT; ++type)
         DB_InitPoolHeader(type);
+
     g_freeAssetEntryHead = g_assetEntryPool + 16;
+
     for (int32_t i = 1; i < 0x7FFF; ++i)
         g_assetEntryPool[i].next = &g_assetEntryPool[i + 1];
 
@@ -2996,7 +2852,7 @@ LABEL_4:
     }
 }
 
-void(__cdecl *DB_RemoveXAssetHandler[33])(XAssetHeader) =
+void(__cdecl *DB_RemoveXAssetHandler[ASSET_TYPE_COUNT])(XAssetHeader) =
 {
   NULL,
   NULL,

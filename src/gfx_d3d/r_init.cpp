@@ -2854,7 +2854,7 @@ void __cdecl R_ShutdownMaterialUsage()
     unsigned __int16 hashIndex; // [esp+4h] [ebp-8h]
     VertUsage *nextVertUsage; // [esp+8h] [ebp-4h]
 
-    for (hashIndex = 0; hashIndex < 0x800u; ++hashIndex)
+    for (hashIndex = 0; hashIndex < ARRAY_COUNT(rg.materialUsage); ++hashIndex)
     {
         for (vertUsage = rg.materialUsage[hashIndex].verts; vertUsage; vertUsage = nextVertUsage)
         {
@@ -2871,8 +2871,7 @@ void __cdecl R_Shutdown(int destroyWindow)
     {
         R_SyncRenderThread();
         rg.registered = 0;
-        if (!r_glob.haveThreadOwnership)
-            MyAssertHandler(".\\r_init.cpp", 2413, 0, "%s", "r_glob.haveThreadOwnership");
+        iassert(r_glob.haveThreadOwnership);
         r_glob.startedRenderThread = 0;
         R_ShutdownStreams();
         R_ShutdownMaterialUsage();
@@ -2956,18 +2955,13 @@ void __cdecl R_UnloadWorld()
 
 void __cdecl R_BeginRegistration(vidConfig_t *vidConfigOut)
 {
-    if (rg.registered)
-        MyAssertHandler(".\\r_init.cpp", 2478, 0, "%s", "!rg.registered");
+    iassert(!rg.registered);
     R_Init();
-    if (!dx.d3d9 || !dx.device)
-        MyAssertHandler(".\\r_init.cpp", 2484, 0, "%s", "dx.d3d9 && dx.device");
-    if (!rg.registered)
-        MyAssertHandler(".\\r_init.cpp", 2486, 1, "%s", "rg.registered == true");
-    if (!vidConfigOut)
-        MyAssertHandler(".\\r_init.cpp", 2496, 0, "%s", "vidConfigOut");
+    iassert(dx.d3d9 && dx.device);
+    iassert(rg.registered == true);
+    iassert(vidConfigOut);
     memcpy(vidConfigOut, &vidConfig, sizeof(vidConfig_t));
-    if (r_glob.startedRenderThread)
-        MyAssertHandler(".\\r_init.cpp", 2500, 0, "%s", "!r_glob.startedRenderThread");
+    iassert(!r_glob.startedRenderThread);
     r_glob.startedRenderThread = 1;
     R_ReleaseThreadOwnership();
 }

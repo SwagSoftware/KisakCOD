@@ -507,6 +507,7 @@ const char *g_profile_thread_values[9] =
 
 void Profile_Init()
 {
+#if 0
     const char *v0; // eax
     unsigned int profPageIter; // [esp+14h] [ebp-4h]
 
@@ -535,11 +536,13 @@ void Profile_Init()
     profile = Dvar_RegisterEnum("profile", prof_pageNames, 0, DVAR_NOFLAG, "Type of profiling");
     profile_thread = Dvar_RegisterEnum("profile_thread", g_profile_thread_values, 7, DVAR_NOFLAG, "Thread being profiled");
     profile_rowcount = Dvar_RegisterInt("profile_rowcount", 20, (DvarLimits)0x2800000000LL, DVAR_NOFLAG, "Profile row count");
+#endif
 }
 
 #ifndef TRACY_ENABLE
 void __cdecl Profile_Unguard(int id)
 {
+#if 0
     const char *v1; // eax
     ProfileStack *prof_stack; // [esp+0h] [ebp-4h]
 
@@ -564,16 +567,20 @@ void __cdecl Profile_Unguard(int id)
             "(prof_stack->prof_guardstack[prof_stack->prof_guardpos].ppStack == prof_stack->prof_ppStack)",
             v1);
     }
+#endif
 }
 
 void __cdecl Profile_SetTotal(int index, int total)
 {
+#if 0
     ProfileStack* prof_stack = (ProfileStack*)Sys_GetValue(0);
     prof_stack->prof_array[index].write.total.value[0] = total;
+#endif
 }
 
 void Profile_ResetScriptCounters()
 {
+#if 0
     int profileIndex; // [esp+10h] [ebp-4h]
 
     for (profileIndex = 0; profileIndex < 40; ++profileIndex)
@@ -589,10 +596,12 @@ void Profile_ResetScriptCounters()
                 + (float)profileScript.cumulative[profileIndex];
     }
     memset((unsigned __int8 *)&profileScript, 0, 0x1E0u);
+#endif
 }
 
 void __cdecl Profile_ResetCounters(int system)
 {
+#if 0
     ProfileStack *prof_stack; // [esp+30h] [ebp-Ch]
     int profileContext; // [esp+34h] [ebp-8h]
     unsigned int profileStackPos; // [esp+38h] [ebp-4h]
@@ -616,10 +625,12 @@ void __cdecl Profile_ResetCounters(int system)
     while (profileStackPos)
         Profile_Begin(g_profileStack[--profileStackPos]);
     ++prof_parity[system];
+#endif
 }
 
 void __cdecl Profile_Recover(int id)
 {
+#if 0
     ProfileStack *prof_stack; // [esp+0h] [ebp-4h]
 
     prof_stack = (ProfileStack *)Sys_GetValue(0);
@@ -653,10 +664,12 @@ void __cdecl Profile_Recover(int id)
     }
     if (!alwaysfails)
         MyAssertHandler("c:\\trees\\cod3\\src\\renderer\\../universal/profile.h", 372, 0, "Profile_Recover: id not found");
+#endif
 }
 
 void __cdecl Profile_InitContext(int profileContext)
 {
+#if 0
     ProfileStack *prof_stack; // [esp+50h] [ebp-18h]
     ProfileAtom uiStart; // [esp+54h] [ebp-14h]
     ProfileAtom uiStop; // [esp+58h] [ebp-10h]
@@ -698,10 +711,12 @@ void __cdecl Profile_InitContext(int profileContext)
     prof_stack->prof_timescale = qpc2msec;
     for (i = 0; i < 432; ++i)
         prof_stack->prof_array[i].write.nesting = -1;
+#endif
 }
 
 void __cdecl Profile_Guard(int id)
 {
+#if 0
     int i; // [esp+0h] [ebp-8h]
     ProfileStack *prof_stack; // [esp+4h] [ebp-4h]
 
@@ -736,6 +751,7 @@ void __cdecl Profile_Guard(int id)
     }
     prof_stack->prof_guardstack[prof_stack->prof_guardpos].id = id;
     prof_stack->prof_guardstack[prof_stack->prof_guardpos++].ppStack = prof_stack->prof_ppStack;
+#endif
 }
 
 ProfileStack *__cdecl Profile_GetStackForContext(int profileContext)
@@ -770,6 +786,7 @@ int __cdecl Profile_GetDisplayThread()
 
 void __cdecl Profile_EndScripts(unsigned int profileFlags)
 {
+#if 0
     int profileIndex; // [esp+10h] [ebp-4h]
 
     if (!profileFlags)
@@ -795,10 +812,12 @@ void __cdecl Profile_EndScripts(unsigned int profileFlags)
             profileIndex += 8;
         }
     } while (profileFlags);
+#endif
 }
 
 void __cdecl Profile_EndScript(int profileIndex)
 {
+#if 0
     ProfileScriptWritable *write; // [esp+8h] [ebp-8h]
     unsigned int endTime; // [esp+Ch] [ebp-4h]
 
@@ -813,6 +832,7 @@ void __cdecl Profile_EndScript(int profileIndex)
     write = &profileScript.write[profileIndex];
     if (!--write->refCount)
         write->totalTime += endTime - write->startTime;
+#endif
 }
 
 int __cdecl Profile_EndInternal(long double *duration)
@@ -892,6 +912,7 @@ void __cdecl Profile_BeginScripts(unsigned int profileFlags)
 
 void __cdecl Profile_BeginScript(int profileIndex)
 {
+#if 0
     // KISAKTODO: profiler
     ProfileScriptWritable* write; // [esp+8h] [ebp-4h]
 
@@ -906,6 +927,7 @@ void __cdecl Profile_BeginScript(int profileIndex)
     if (!write->refCount)
         write->startTime = __rdtsc();
     ++write->refCount;
+#endif
 }
 
 void __cdecl Profile_Begin(int index)
@@ -952,6 +974,7 @@ int __cdecl Profile_AddScriptName(char *profileName)
 
 void __cdecl Profile_ResetCountersForContext(int profileContext, int system)
 {
+#if 0
     int atomType; // [esp+8h] [ebp-Ch]
     profile_t *prof_array; // [esp+Ch] [ebp-8h]
     unsigned int i; // [esp+10h] [ebp-4h]
@@ -976,6 +999,7 @@ void __cdecl Profile_ResetCountersForContext(int profileContext, int system)
             prof_array[i].write.child.value[0] = 0;
         }
     }
+#endif
 }
 
 const char *__cdecl Profile_MissingEnd()
