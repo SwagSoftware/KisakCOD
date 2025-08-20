@@ -90,30 +90,32 @@ void __cdecl GScr_LoadLevelScript(const char *mapname, ScriptFunctions *function
     GScr_LoadScriptAndLabel(v3, "main", functions);
 }
 
-void __cdecl GScr_LoadScriptsForPathNode(pathnode_t *loadNode, ScriptFunctions **data)
+void __cdecl GScr_LoadScriptsForPathNode(pathnode_t *loadNode, void *data)
 {
-    ScriptFunctions *v2; // r28
-    unsigned int v3; // r27
-    const char *v5; // r31
+    ScriptFunctions *functions; // r28
+    unsigned int count; // r27
+    const char *animscript; // r31
     char v6[112]; // [sp+50h] [-70h] BYREF
 
-    v2 = *data;
-    v3 = (unsigned int)data[1];
-    if (!*data)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\g_scr_load_obj.cpp", 130, 0, "%s", "functions");
+    functions = (ScriptFunctions *)data;
+    count = functions->count;
+
+    iassert(functions);
+
     if (loadNode->constant.type)
     {
         if (loadNode->constant.type == NODE_NEGOTIATION_BEGIN)
         {
             if (loadNode->constant.animscript)
             {
-                v5 = SL_ConvertToString(loadNode->constant.animscript);
-                if (!v5)
-                    MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\g_scr_load_obj.cpp", 150, 0, "%s", "animscript");
-                if (Scr_AddStringSet(v3, v5))
+                animscript = SL_ConvertToString(loadNode->constant.animscript);
+
+                iassert(animscript);
+
+                if (Scr_AddStringSet(count, animscript))
                 {
-                    Com_sprintf(v6, 64, "animscripts/traverse/%s", v5);
-                    GScr_LoadScriptAndLabel(v6, "main", v2);
+                    Com_sprintf(v6, 64, "animscripts/traverse/%s", animscript);
+                    GScr_LoadScriptAndLabel(v6, "main", functions);
                 }
             }
             else
@@ -239,9 +241,8 @@ void __cdecl GScr_LoadEntities()
 
 void __cdecl GScr_LoadScripts(const char *mapname, ScriptFunctions *functions)
 {
-    ScriptFunctions *v4; // [sp+50h] [-80h] BYREF
     unsigned int inited; // [sp+54h] [-7Ch]
-    char v6[112]; // [sp+60h] [-70h] BYREF
+    char filename[112]; // [sp+60h] [-70h] BYREF
 
     Scr_BeginLoadScripts();
     ProfLoad_Begin("load misc scripts");
@@ -253,15 +254,14 @@ void __cdecl GScr_LoadScripts(const char *mapname, ScriptFunctions *functions)
     GScr_LoadAnimScripts(functions);
     ProfLoad_End();
     ProfLoad_Begin("load level script");
-    Com_sprintf(v6, 64, "maps/%s", mapname);
-    GScr_LoadScriptAndLabel(v6, "main", functions);
+    Com_sprintf(filename, 64, "maps/%s", mapname);
+    GScr_LoadScriptAndLabel(filename, "main", functions);
     ProfLoad_End();
     ProfLoad_Begin("load entity scripts");
     GScr_LoadScriptsForEntities(functions);
     ProfLoad_End();
     inited = Scr_InitStringSet();
-    v4 = functions;
-    Path_CallFunctionForNodes((void(__cdecl *)(pathnode_t *, void *))GScr_LoadScriptsForPathNode, &v4);
+    Path_CallFunctionForNodes(GScr_LoadScriptsForPathNode, functions);
     Scr_ShutdownStringSet(inited);
     Scr_PostCompileScripts();
 }

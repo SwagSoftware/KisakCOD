@@ -660,6 +660,7 @@ void __cdecl BG_LoadWeaponStrings()
 
 void __cdecl BG_LoadPlayerAnimTypes()
 {
+#ifdef KISAK_MP
     char v0; // [esp+3h] [ebp-29h]
     char *v1; // [esp+8h] [ebp-24h]
     const char *v2; // [esp+Ch] [ebp-20h]
@@ -695,6 +696,10 @@ void __cdecl BG_LoadPlayerAnimTypes()
     }
     Com_EndParseSession();
     Com_UnloadRawTextFile(buf);
+#elif KISAK_SP
+    g_playerAnimTypeNamesCount = 1;
+    g_playerAnimTypeNames[0] = (char*)"none";
+#endif
 }
 
 void __cdecl InitWeaponDef(WeaponDef *weapDef)

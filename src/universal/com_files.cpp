@@ -2085,7 +2085,11 @@ void __cdecl FS_Flush(int f)
 
 void __cdecl Com_GetBspFilename(char *filename, unsigned int size, const char *mapname)
 {
+#ifdef KISAK_MP
     Com_sprintf(filename, size, "maps/mp/%s.d3dbsp", mapname);
+#elif KISAK_SP
+    Com_sprintf(filename, size, "maps/%s.d3dbsp", mapname);
+#endif
 }
 
 void __cdecl FS_FreeFileList(const char **list)

@@ -13,6 +13,7 @@ const dvar_t *mantle_view_yawcap;
 
 XAnim_s *s_mantleAnims;
 
+#ifdef KISAK_MP
 const char *s_mantleAnimNames[11] =
 {
     "mp_mantle_root",
@@ -28,8 +29,24 @@ const char *s_mantleAnimNames[11] =
     //"mp_mantle_over_low" // LWSS: WOW! This was a horrible typo!!!! !!! ! ! !! ! !! ! ! ! ! mp_mantle_over_low lacks bDelta which throws off the results and is wrong. This is likely a hack the devs did
     "player_mantle_over_low"
 };
+#elif KISAK_SP
+const char *s_mantleAnimNames[11] =
+{
+  "player_mantle_root",
+  "player_mantle_up_57",
+  "player_mantle_up_51",
+  "player_mantle_up_45",
+  "player_mantle_up_39",
+  "player_mantle_up_33",
+  "player_mantle_up_27",
+  "player_mantle_up_21",
+  "player_mantle_over_high",
+  "player_mantle_over_mid",
+  "player_mantle_over_low"
+};
+#endif
 
-const MantleAnimTransition s_mantleTrans[7] =
+const MantleAnimTransition s_mantleTrans[7] = // SP/MP Same
 {
     {1, 8, 57.0f},
     {2, 8, 51.0f},
@@ -103,9 +120,8 @@ void __cdecl Mantle_CreateAnims(void *(__cdecl *xanimAlloc)(int32_t))
     if (!s_mantleAnims)
     {
         s_mantleAnims = XAnimCreateAnims("PLAYER_MANTLE", 0xBu, xanimAlloc);
-        if (!s_mantleAnims)
-            MyAssertHandler(".\\bgame\\bg_mantle.cpp", 530, 0, "%s", "s_mantleAnims");
-        XAnimBlend(s_mantleAnims, 0, s_mantleAnimNames[0], 1u, 0xAu, 0);
+        iassert(s_mantleAnims);
+        XAnimBlend(s_mantleAnims, 0, s_mantleAnimNames[0], 1, 0xAu, 0);
         for (animIndex = 1; animIndex < 11; ++animIndex)
             BG_CreateXAnim(s_mantleAnims, animIndex, (char*)s_mantleAnimNames[animIndex]);
         for (transIndex = 0; transIndex < 7; ++transIndex)
@@ -199,15 +215,15 @@ void __cdecl Mantle_Check(pmove_t *pm, pml_t *pml)
 
 void __cdecl Mantle_DebugPrint(const char *msg)
 {
-    if (!msg)
-        MyAssertHandler(".\\bgame\\bg_mantle.cpp", 185, 0, "%s", "msg");
+#ifdef _DEBUG
+    iassert(msg);
     if (mantle_debug->current.enabled)
         Com_Printf(17, "%s\n", msg);
+#endif
 }
 
 char __cdecl Mantle_CheckLedge(pmove_t *pm, pml_t *pml, MantleResults *mresults, float height)
 {
-    const char *v4; // eax
     float mins[3]; // [esp+18h] [ebp-60h] BYREF
     float start[3]; // [esp+24h] [ebp-54h] BYREF
     float end[3]; // [esp+30h] [ebp-48h] BYREF
@@ -216,10 +232,8 @@ char __cdecl Mantle_CheckLedge(pmove_t *pm, pml_t *pml, MantleResults *mresults,
     playerState_s *ps; // [esp+74h] [ebp-4h]
 
     ps = pm->ps;
-    if (!ps)
-        MyAssertHandler(".\\bgame\\bg_mantle.cpp", 429, 0, "%s", "ps");
-    v4 = va("Checking for ledge at %f units", height);
-    Mantle_DebugPrint(v4);
+    iassert(ps);
+    Mantle_DebugPrint(va("Checking for ledge at %f units", height));
     mins[0] = -(float)15.0;
     mins[1] = mins[0];
     mins[2] = 0.0;
@@ -330,8 +344,7 @@ void __cdecl Mantle_CalcEndPos(pmove_t *pm, MantleResults *mresults)
     playerState_s *ps; // [esp+88h] [ebp-4h]
 
     ps = pm->ps;
-    if (!ps)
-        MyAssertHandler(".\\bgame\\bg_mantle.cpp", 335, 0, "%s", "ps");
+    iassert(ps);
     if ((mresults->flags & 1) != 0)
     {
         mins[0] = -15.0;
@@ -426,7 +439,6 @@ int __cdecl Mantle_GetOverLength(MantleState *mstate)
 
 void __cdecl Mantle_GetAnimDelta(MantleState *mstate, int32_t time, float *delta)
 {
-    const char *v3; // eax
     float frac; // [esp+8h] [ebp-24h]
     float fraca; // [esp+8h] [ebp-24h]
     int32_t upTime; // [esp+Ch] [ebp-20h]
@@ -437,11 +449,9 @@ void __cdecl Mantle_GetAnimDelta(MantleState *mstate, int32_t time, float *delta
 
     upTime = Mantle_GetUpLength(mstate);
     overTime = Mantle_GetOverLength(mstate);
-    if (time < 0 || time > overTime + upTime)
-    {
-        v3 = va("time: %i, upTime: %i, overTime: %i", time, upTime, overTime);
-        MyAssertHandler(".\\bgame\\bg_mantle.cpp", 265, 0, "%s\n\t%s", "(time >= 0) && (time <= (upTime + overTime))", v3);
-    }
+
+    iassert((time >= 0) && (time <= (upTime + overTime)));
+
     if (time > upTime)
     {
         fraca = (double)(time - upTime) / (double)overTime;
@@ -472,8 +482,7 @@ int __cdecl Mantle_FindTransition(float curHeight, float goalHeight)
     float bestDiff; // [esp+28h] [ebp-4h]
 
     height = goalHeight - curHeight;
-    if (height <= 0.0)
-        MyAssertHandler(".\\bgame\\bg_mantle.cpp", 303, 0, "%s\n\t(height) = %g", "((height > 0))", height);
+    iassert(height > 0);
     bestIndex = 0;
     v6 = s_mantleTrans[0].height - height;
     v4 = I_fabs(v6);
@@ -511,8 +520,7 @@ char __cdecl Mantle_FindMantleSurface(pmove_t *pm, pml_t *pml, trace_t *trace, f
     float dot; // [esp+A0h] [ebp-4h]
 
     ps = pm->ps;
-    if (!ps)
-        MyAssertHandler(".\\bgame\\bg_mantle.cpp", 596, 0, "%s", "ps");
+    iassert(ps);
     playerRadius = 15.0;
     v9 = -mantle_check_radius->current.value;
     mins[0] = v9;
@@ -601,7 +609,7 @@ void __cdecl Mantle_Move(pmove_t *pm, playerState_s *ps, pml_t *pml)
         mstate = &ps->mantleState;
         ps->mantleState.flags &= ~8u;
         if ((mstate->flags & 2) != 0)
-            BG_AddPredictableEventToPlayerstate(7u, 0, ps);
+            BG_AddPredictableEventToPlayerstate(7, 0, ps);
         UpLength = Mantle_GetUpLength(mstate);
         mantleLength = Mantle_GetOverLength(mstate) + UpLength;
         prevTime = mstate->timer;
@@ -633,7 +641,7 @@ void __cdecl Mantle_Move(pmove_t *pm, playerState_s *ps, pml_t *pml)
 
             if ((mstate->flags & 4) != 0)
             {
-                BG_AddPredictableEventToPlayerstate(6u, 0, ps);
+                BG_AddPredictableEventToPlayerstate(6, 0, ps);
                 ps->eFlags &= ~0x8000u;
             }
             mstate->flags |= 0x10u;
@@ -648,13 +656,9 @@ int __cdecl Mantle_GetAnim(MantleState *mstate)
 
     upTime = Mantle_GetUpLength(mstate);
     overTime = Mantle_GetOverLength(mstate);
-    if (mstate->timer < 0 || mstate->timer > overTime + upTime)
-        MyAssertHandler(
-            ".\\bgame\\bg_mantle.cpp",
-            239,
-            0,
-            "%s",
-            "(mstate->timer >= 0) && (mstate->timer <= (upTime + overTime))");
+
+    iassert((mstate->timer >= 0) && (mstate->timer <= (upTime + overTime)));
+
     if (mstate->timer > upTime)
         return s_mantleTrans[mstate->transIndex].overAnimIndex;
     else
@@ -663,14 +667,12 @@ int __cdecl Mantle_GetAnim(MantleState *mstate)
 
 void __cdecl Mantle_CapView(playerState_s *ps)
 {
-    float v1; // [esp+8h] [ebp-10h]
     float value; // [esp+Ch] [ebp-Ch]
     float delta; // [esp+10h] [ebp-8h]
 
-    if (!ps)
-        MyAssertHandler(".\\bgame\\bg_mantle.cpp", 823, 0, "%s", "ps");
-    if ((ps->pm_flags & 4) == 0)
-        MyAssertHandler(".\\bgame\\bg_mantle.cpp", 824, 0, "%s", "ps->pm_flags & PMF_MANTLE");
+    iassert(ps);
+    iassert(ps->pm_flags & PMF_MANTLE);
+
     if (mantle_enable->current.enabled)
     {
         delta = AngleDelta(ps->mantleState.yaw, ps->viewangles[1]);
@@ -685,16 +687,14 @@ void __cdecl Mantle_CapView(playerState_s *ps)
             else
                 value = -mantle_view_yawcap->current.value;
             ps->delta_angles[1] = ps->delta_angles[1] + delta;
-            v1 = ps->mantleState.yaw + value;
-            ps->viewangles[1] = AngleNormalize360(v1);
+            ps->viewangles[1] = AngleNormalize360(ps->mantleState.yaw + value);
         }
     }
 }
 
 void __cdecl Mantle_ClearHint(playerState_s *ps)
 {
-    if (!ps)
-        MyAssertHandler(".\\bgame\\bg_mantle.cpp", 852, 0, "%s", "ps");
+    iassert(ps);
     ps->mantleState.flags &= ~8u;
 }
 
@@ -702,15 +702,9 @@ bool __cdecl Mantle_IsWeaponInactive(playerState_s *ps)
 {
     if (!mantle_enable->current.enabled)
         return 0;
-    if ((ps->pm_flags & 4) != 0)
+
+    if ((ps->pm_flags & PMF_MANTLE) != 0)
         return s_mantleTrans[ps->mantleState.transIndex].overAnimIndex != 10;
+
     return 0;
 }
-
-void __cdecl Vec3Negate(const float *from, float *to)
-{
-    *to = -*from;
-    to[1] = -from[1];
-    to[2] = -from[2];
-}
-

@@ -2890,6 +2890,13 @@ void __cdecl Vec3Mul(const float* a, const float* b, float* product)
     product[2] = a[2] * b[2];
 }
 
+void __cdecl Vec3Negate(const float *from, float *to)
+{
+    to[0] = -from[0];
+    to[1] = -from[1];
+    to[2] = -from[2];
+}
+
 void __cdecl Vec3Lerp(const float* start, const float* end, float fraction, float* endpos)
 {
     *endpos = (*end - *start) * fraction + *start;

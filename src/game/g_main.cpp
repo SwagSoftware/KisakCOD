@@ -64,7 +64,7 @@ const char *moveOrientModeStrings[7] =
 entityHandler_t *entityHandlers;
 gentity_s g_entities[MAX_GENTITIES];
 sentient_s *g_sentients;
-char *g_nextMap;
+char g_nextMap[64];
 level_locals_t level;
 gclient_s g_clients[1];
 actor_s g_actors[32];
@@ -240,166 +240,35 @@ const dvar_t *player_radiusDamageMultiplier;
 
 const dvar_s *G_RegisterServerDemoDvars()
 {
-    const char *v0; // r5
-    unsigned __int16 v1; // r4
-    const char *v2; // r5
-    unsigned __int16 v3; // r4
-    const char *v4; // r5
-    unsigned __int16 v5; // r4
-    const char *v6; // r5
-    unsigned __int16 v7; // r4
-    const char *v8; // r5
-    unsigned __int16 v9; // r4
-    const char *v10; // r5
-    unsigned __int16 v11; // r4
-    const char *v12; // r5
-    unsigned __int16 v13; // r4
-    const char *v14; // r5
-    unsigned __int16 v15; // r4
-    const char *v16; // r5
-    unsigned __int16 v17; // r4
-    const char *v18; // r5
-    unsigned __int16 v19; // r4
-    const char *v20; // r5
-    unsigned __int16 v21; // r4
-    const char *v22; // r5
-    unsigned __int16 v23; // r4
-    const char *v24; // r5
-    unsigned __int16 v25; // r4
-    const char *v26; // r5
-    unsigned __int16 v27; // r4
-    const char *v28; // r5
-    unsigned __int16 v29; // r4
-    const char *v30; // r5
-    unsigned __int16 v31; // r4
-    const char *v32; // r5
-    unsigned __int16 v33; // r4
-    const char *v34; // r5
-    unsigned __int16 v35; // r4
-    const char *v36; // r5
-    unsigned __int16 v37; // r4
-    const char *v38; // r5
-    unsigned __int16 v39; // r4
-    const char *v40; // r5
-    unsigned __int16 v41; // r4
-    const char *v42; // r5
-    unsigned __int16 v43; // r4
-    const char *v44; // r5
-    unsigned __int16 v45; // r4
-    const char *v46; // r5
-    unsigned __int16 v47; // r4
-    const char *v48; // r5
-    unsigned __int16 v49; // r4
-    const char *v50; // r5
-    unsigned __int16 v51; // r4
-    const char *v52; // r5
-    unsigned __int16 v53; // r4
-    const char *v54; // r5
-    unsigned __int16 v55; // r4
-    const char *v56; // r5
-    unsigned __int16 v57; // r4
-    const char *v58; // r5
-    unsigned __int16 v59; // r4
-    const char *v60; // r5
-    unsigned __int16 v61; // r4
-    const char *v62; // r5
-    unsigned __int16 v63; // r4
-    const char *v64; // r5
-    unsigned __int16 v65; // r4
-    const char *v66; // r5
-    unsigned __int16 v67; // r4
-    const char *v68; // r5
-    unsigned __int16 v69; // r4
-    const char *v70; // r5
-    unsigned __int16 v71; // r4
-    const char *v72; // r5
-    unsigned __int16 v73; // r4
-    const char *v74; // r5
-    unsigned __int16 v75; // r4
-    const char *v76; // r5
-    unsigned __int16 v77; // r4
-    const char *v78; // r5
-    unsigned __int16 v79; // r4
-    const char *v80; // r5
-    unsigned __int16 v81; // r4
-    const char *v82; // r5
-    unsigned __int16 v83; // r4
-    const char *v84; // r5
-    unsigned __int16 v85; // r4
-    const char *v86; // r5
-    unsigned __int16 v87; // r4
-    const char *v88; // r5
-    unsigned __int16 v89; // r4
-    const char *v90; // r5
-    unsigned __int16 v91; // r4
-    const char *v92; // r5
-    unsigned __int16 v93; // r4
-    const char *v94; // r5
-    unsigned __int16 v95; // r4
-    const char *v96; // r5
-    unsigned __int16 v97; // r4
-    const char *v98; // r5
-    unsigned __int16 v99; // r4
-    const char *v100; // r5
-    unsigned __int16 v101; // r4
-    const char *v102; // r5
-    unsigned __int16 v103; // r4
-    const char *v104; // r5
-    unsigned __int16 v105; // r4
-    const char *v106; // r5
-    unsigned __int16 v107; // r4
-    const char *v108; // r5
-    unsigned __int16 v109; // r4
-    const char *v110; // r5
-    unsigned __int16 v111; // r4
-    const char *v112; // r5
-    unsigned __int16 v113; // r4
-    const char *v114; // r5
-    unsigned __int16 v115; // r4
-    const char *v116; // r5
-    unsigned __int16 v117; // r4
-    const char *v118; // r5
-    unsigned __int16 v119; // r4
-    const char *v120; // r5
-    unsigned __int16 v121; // r4
-    const char *v122; // r5
-    unsigned __int16 v123; // r4
-    const char *v124; // r5
-    unsigned __int16 v125; // r4
-    const char *v126; // r5
-    unsigned __int16 v127; // r4
-    const char *v128; // r5
-    unsigned __int16 v129; // r4
-    const char *v130; // r5
-    unsigned __int16 v131; // r4
+    // KISAKTODO: missing some flags and descriptions (it is extremely tedious to extract these from the asm)
 
     Dvar_RegisterString("gamename", "main", 0x46u, "The name of the game");
     Dvar_RegisterString("gamedate", "Sep  7 2007", 0x42u, "The date compiled");
     Dvar_RegisterString("sv_mapname", "", 0x46u, "The current map name");
     Dvar_RegisterString("ui_campaign", "american", 0x1000u, "The current campaign");
-    compassMaxRange = Dvar_RegisterFloat("compassMaxRange", 3500.0, 0.0, FLT_MAX, v1, v0);
+    compassMaxRange = Dvar_RegisterFloat("compassMaxRange", 3500.0, 0.0, FLT_MAX, 0, "The maximum range from the player that objects will show on the compass");
     g_reloading = Dvar_RegisterInt("g_reloading", 0, 0, 4, 0x40u, "True if the game is reloading");
     g_player_maxhealth = Dvar_RegisterInt("g_player_maxhealth", 100, 10, 2000, 0x62u, "Player's maximum health");
-    player_damageMultiplier = Dvar_RegisterFloat("player_damageMultiplier", 1.0, 0.0, 1000.0, v3, v2);
-    player_radiusDamageMultiplier = Dvar_RegisterFloat("player_radiusDamageMultiplier", 1.0, 0.0, 1000.0, v5, v4);
-    player_meleeDamageMultiplier = Dvar_RegisterFloat("player_meleeDamageMultiplier", 1.0, 0.0, 1000.0, v7, v6);
-    player_maxGrenadeCatchHeight = Dvar_RegisterFloat("player_maxGrenadeCatchHeight", 80.0, 0.0, 200.0, v9, v8);
-    player_throwbackInnerRadius = Dvar_RegisterFloat("player_throwbackInnerRadius", 72.0, 0.0, FLT_MAX, v11, v10);
-    player_throwbackOuterRadius = Dvar_RegisterFloat("player_throwbackOuterRadius", 192.0, 0.0, FLT_MAX, v13, v12);
-    g_minGrenadeDamageSpeed = Dvar_RegisterFloat("g_minGrenadeDamageSpeed", 400.0, 0.0, FLT_MAX, v15, v14);
+    player_damageMultiplier = Dvar_RegisterFloat("player_damageMultiplier", 1.0, 0.0, 1000.0, 0, "Player damage is scaled by this amount; used by script for setting difficulty level");
+    player_radiusDamageMultiplier = Dvar_RegisterFloat("player_radiusDamageMultiplier", 1.0, 0.0, 1000.0, 0, "Radius damage to the player is scaled by this amount; used by script for setting difficulty level");
+    player_meleeDamageMultiplier = Dvar_RegisterFloat("player_meleeDamageMultiplier", 1.0, 0.0, 1000.0, 0, "Melee damage to the player is scaled by this amount; used by script for setting difficulty level");
+    player_maxGrenadeCatchHeight = Dvar_RegisterFloat("player_maxGrenadeCatchHeight", 80.0, 0.0, 200.0, 0, "The maximum height difference from grenade to player viewheight at which the player can catch a grenade");
+    player_throwbackInnerRadius = Dvar_RegisterFloat("player_throwbackInnerRadius", 72.0, 0.0, FLT_MAX, 0, "The radius to a live grenade player must be within initially to do a throwback");
+    player_throwbackOuterRadius = Dvar_RegisterFloat("player_throwbackOuterRadius", 192.0, 0.0, FLT_MAX, 0, "The radius player is allow to throwback a grenade once the player has been in the inner radius");
+    g_minGrenadeDamageSpeed = Dvar_RegisterFloat("g_minGrenadeDamageSpeed", 400.0, 0.0, FLT_MAX, 0, "Minimum speed at which getting hit be a grenade will do damage (not the grenade explosion damage)");
     g_speed = Dvar_RegisterInt("g_speed", 190, 0x80000000, 0x7FFFFFFF, 0x1002u, "Maximum player speed");
-    g_gravity = Dvar_RegisterFloat("g_gravity", 800.0, 1.0, FLT_MAX, v17, v16);
-    g_knockback = Dvar_RegisterFloat("g_knockback", 1000.0, -FLT_MAX, FLT_MAX, v19, v18);
+    g_gravity = Dvar_RegisterFloat("g_gravity", 800.0, 1.0, FLT_MAX, 0, "Game gravity in inches per second per second");
+    g_knockback = Dvar_RegisterFloat("g_knockback", 1000.0, -FLT_MAX, FLT_MAX, 0, "Maximum knockback");
     bullet_penetrationEnabled = Dvar_RegisterBool("bullet_penetrationEnabled", 1, 0x82u, "Enable/Disable bullet penetration.");
     g_ai = Dvar_RegisterBool("g_ai", 1, 0x82u, "Enable AI");
     g_spawnai = Dvar_RegisterBool("g_spawnai", 1, 0xA2u, "Enable AI spawning");
     ai_corpseCount = Dvar_RegisterInt("ai_corpseCount", 16, 0, 16, 3u, "Maximum number of AI corpses");
     ai_noDodge = Dvar_RegisterBool("ai_noDodge", 0, 0x82u, "AI won't dodge to the side");
-    ai_pathMomentum = Dvar_RegisterFloat("ai_pathMomentum", 0.77999997, 0.0, 0.89999998, v21, v20);
-    ai_pathNegotiationOverlapCost = Dvar_RegisterFloat("ai_pathNegotiationOverlapCost", 300.0, 0.0, 1000.0, v23, v22);
-    ai_playerADS_LOSRange = Dvar_RegisterFloat("ai_playerADS_LOSRange", 150.0, 0.0, 500.0, v25, v24);
-    ai_playerLOSRange = Dvar_RegisterFloat("ai_playerLOSRange", 150.0, 0.0, 500.0, v27, v26);
-    ai_playerLOSHalfWidth = Dvar_RegisterFloat("ai_playerLOSHalfWidth", 15.0, 0.0, 100.0, v29, v28);
+    ai_pathMomentum = Dvar_RegisterFloat("ai_pathMomentum", 0.77999997, 0.0, 0.89999998, 0, "Momentum factor for continuing motion in previous direction. 0 for no momentum carry over");
+    ai_pathNegotiationOverlapCost = Dvar_RegisterFloat("ai_pathNegotiationOverlapCost", 300.0, 0.0, 1000.0, 0, "The distance AI would travel around to avoid going to a negotiation being used. Multiplied by number of users of the negotiation");
+    ai_playerADS_LOSRange = Dvar_RegisterFloat("ai_playerADS_LOSRange", 150.0, 0.0, 500.0, 0, "Friendly AI will not get in front of player in ADS pointing at enemy");
+    ai_playerLOSRange = Dvar_RegisterFloat("ai_playerLOSRange", 150.0, 0.0, 500.0, 0, "Friendly AI will try not to claim cover nodes in this range of player's line of sight. They will also try not to get in front of player throwing grenade in this range.");
+    ai_playerLOSHalfWidth = Dvar_RegisterFloat("ai_playerLOSHalfWidth", 15.0, 0.0, 100.0, 0, 0);
     ai_playerLOSMinTime = Dvar_RegisterInt("ai_playerLOSMinTime", 1500, 0, 0x7FFFFFFF, 0x82u, "Player line of sight effect will take effect after player is almost stationary for this time (millisec)");
     ai_playerADSTargetTime = Dvar_RegisterInt("ai_playerADSTargetTime", 10000, 0,
         0x7FFFFFFF,
@@ -415,7 +284,7 @@ const dvar_s *G_RegisterServerDemoDvars()
         1,
         0x1082u,
         "Whether AI fire will suppression teammates or not.");
-    ai_friendlySuppressionDist = Dvar_RegisterFloat("ai_friendlySuppressionDist", 128.0, 0.0, 2048.0, v31, v30);
+    ai_friendlySuppressionDist = Dvar_RegisterFloat("ai_friendlySuppressionDist", 128.0, 0.0, 2048.0, 0, "Max distance at which AI suppress teammates");
     ai_friendlyFireBlockDuration = Dvar_RegisterInt(
         "ai_friendlyFireBlockDuration",
         2000,
@@ -423,10 +292,10 @@ const dvar_s *G_RegisterServerDemoDvars()
         0x7FFFFFFF,
         0x1082u,
         "Friendly fire movement block duration");
-    ai_playerNearAccuracy = Dvar_RegisterFloat("ai_playerNearAccuracy", 0.5, 0.0, 1.0, v33, v32);
-    ai_playerNearRange = Dvar_RegisterFloat("ai_playerNearRange", 800.0, 0.0, FLT_MAX, v35, v34);
-    ai_playerFarAccuracy = Dvar_RegisterFloat("ai_playerFarAccuracy", 0.1, 0.0, 1.0, v37, v36);
-    ai_playerFarRange = Dvar_RegisterFloat("ai_playerFarRange", 2000.0, 0.0, FLT_MAX, v39, v38);
+    ai_playerNearAccuracy = Dvar_RegisterFloat("ai_playerNearAccuracy", 0.5, 0.0, 1.0, 0, "Accuracy for an AI near to a player");
+    ai_playerNearRange = Dvar_RegisterFloat("ai_playerNearRange", 800.0, 0.0, FLT_MAX, 0, "Maximum range for AI to use 'near' accuracy");
+    ai_playerFarAccuracy = Dvar_RegisterFloat("ai_playerFarAccuracy", 0.1, 0.0, 1.0, 0, "Accuracy for an AI far from a player");
+    ai_playerFarRange = Dvar_RegisterFloat("ai_playerFarRange", 2000.0, 0.0, FLT_MAX, 0, "Minimum range for AI to use 'far' accuracy");
     ai_threatUpdateInterval = Dvar_RegisterInt(
         "ai_threatUpdateInterval",
         500,
@@ -434,16 +303,16 @@ const dvar_s *G_RegisterServerDemoDvars()
         0x7FFFFFFF,
         0x82u,
         "AI target threat update interval in milliseconds");
-    ai_foliageIngoreDist = Dvar_RegisterFloat("ai_foliageSeeThroughDist", 128.0, 0.0, FLT_MAX, v41, v40);
-    ai_coverScore_coverType = Dvar_RegisterFloat("ai_coverScore_coverType", 2.0, 0.0, FLT_MAX, v43, v42);
-    ai_coverScore_distance = Dvar_RegisterFloat("ai_coverScore_distance", 16.0, 0.0, FLT_MAX, v45, v44);
-    ai_coverScore_engagement = Dvar_RegisterFloat("ai_coverScore_engagement", 4.0, 0.0, FLT_MAX, v47, v46);
-    ai_coverScore_nodeAngle = Dvar_RegisterFloat("ai_coverScore_nodeAngle", 4.0, 0.0, FLT_MAX, v49, v48);
-    ai_coverScore_playerLos = Dvar_RegisterFloat("ai_coverScore_playerLos", 8.0, 0.0, FLT_MAX, v51, v50);
-    ai_coverScore_priority = Dvar_RegisterFloat("ai_coverScore_priority", 8.0, 0.0, FLT_MAX, v53, v52);
-    ai_coverScore_targetDir = Dvar_RegisterFloat("ai_coverScore_targetDir", 4.0, 0.0, FLT_MAX, v55, v54);
-    ai_coverScore_visibility = Dvar_RegisterFloat("ai_coverScore_visibility", 8.0, 0.0, FLT_MAX, v57, v56);
-    ai_accuracyDistScale = Dvar_RegisterFloat("ai_accuracyDistScale", 1.0, 1.1754944e-38, FLT_MAX, v59, v58);
+    ai_foliageIngoreDist = Dvar_RegisterFloat("ai_foliageSeeThroughDist", 128.0, 0.0, FLT_MAX, 0, "Maximum distance AI ignore foliage for sight trace to targets");
+    ai_coverScore_coverType = Dvar_RegisterFloat("ai_coverScore_coverType", 2.0, 0.0, FLT_MAX, 0, "Cover node score used when weighting based on concelament vs. cover nodes");
+    ai_coverScore_distance = Dvar_RegisterFloat("ai_coverScore_distance", 16.0, 0.0, FLT_MAX, 0, "Cover node score used when weighting based on distance to node");
+    ai_coverScore_engagement = Dvar_RegisterFloat("ai_coverScore_engagement", 4.0, 0.0, FLT_MAX, 0, "Cover node score used when weighting based on engagement distance to enemy");
+    ai_coverScore_nodeAngle = Dvar_RegisterFloat("ai_coverScore_nodeAngle", 4.0, 0.0, FLT_MAX, 0, "Cover node score used when weighting based on node angles to enemy");
+    ai_coverScore_playerLos = Dvar_RegisterFloat("ai_coverScore_playerLos", 8.0, 0.0, FLT_MAX, 0, "Cover node score used when weighting based on blocking the player's LOS");
+    ai_coverScore_priority = Dvar_RegisterFloat("ai_coverScore_priority", 8.0, 0.0, FLT_MAX, 0, "Cover node score used when weighting based on node priority flag");
+    ai_coverScore_targetDir = Dvar_RegisterFloat("ai_coverScore_targetDir", 4.0, 0.0, FLT_MAX, 0, "Cover node score used when weighting based on direction to enemy");
+    ai_coverScore_visibility = Dvar_RegisterFloat("ai_coverScore_visibility", 8.0, 0.0, FLT_MAX, 0, "Cover node score used when weighting based on visibilty to enemy node");
+    ai_accuracyDistScale = Dvar_RegisterFloat("ai_accuracyDistScale", 1.0, 1.1754944e-38, FLT_MAX, 0, "Distance scale for AI accuracy calculations. Higher = less accurate");
     g_playerTrailTime = Dvar_RegisterInt(
         "g_playerTrailTime",
         500,
@@ -452,10 +321,10 @@ const dvar_s *G_RegisterServerDemoDvars()
         0x82u,
         "Time for player 'trail' for AI missing");
     ai_disableSpawn = Dvar_RegisterBool("ai_disableSpawn", 0, 0x82u, "Do not spawn AI");
-    g_changelevel_time = Dvar_RegisterFloat("g_changelevel_time", 4.0, 0.0, FLT_MAX, v61, v60);
+    g_changelevel_time = Dvar_RegisterFloat("g_changelevel_time", 4.0, 0.0, FLT_MAX, 0, "Time for change level fade out");
     g_debugLocDamage = Dvar_RegisterBool("g_debugLocDamage", 0, 0x82u, "Display locational damage debug information");
-    g_friendlyNameDist = Dvar_RegisterFloat("g_friendlyNameDist", 15000.0, 0.0, 15000.0, v63, v62);
-    g_friendlyfireDist = Dvar_RegisterFloat("g_friendlyfireDist", 175.0, 0.0, 15000.0, v65, v64);
+    g_friendlyNameDist = Dvar_RegisterFloat("g_friendlyNameDist", 15000.0, 0.0, 15000.0, 0, "Maximum distance at which a friendly name shows when the crosshairs is over them");
+    g_friendlyfireDist = Dvar_RegisterFloat("g_friendlyfireDist", 175.0, 0.0, 15000.0, 0, "Maximum distance at which the player channot shoot while the crosshair is over a friendly");
     melee_debug = Dvar_RegisterBool("melee_debug", 0, 0x80u, "Turn on debug lines for melee traces");
     radius_damage_debug = Dvar_RegisterBool(
         "radius_damage_debug",
@@ -487,54 +356,54 @@ const dvar_s *G_RegisterServerDemoDvars()
         0x82u,
         "The player is invulnerable to projectile attacks during death invulnerability");
     Dvar_RegisterBool("hud_drawHUD", 1, 0x1000u, "Draw the HUD. Controlled from non-UI script");
-    vehHelicopterMaxSpeed = Dvar_RegisterFloat("vehHelicopterMaxSpeed", 150.0, 0.0099999998, FLT_MAX, v67, v66);
+    vehHelicopterMaxSpeed = Dvar_RegisterFloat("vehHelicopterMaxSpeed", 150.0, 0.0099999998, FLT_MAX, 0, "Maximum horizontal speed of the player helicopter (in MPH)");
     vehHelicopterMaxSpeedVertical = Dvar_RegisterFloat(
         "vehHelicopterMaxSpeedVertical",
         65.0,
         0.0099999998,
         FLT_MAX,
-        v69,
-        v68);
-    vehHelicopterMaxAccel = Dvar_RegisterFloat("vehHelicopterMaxAccel", 45.0, 0.0099999998, FLT_MAX, v71, v70);
+        0,
+        "Maximum vertical speed of the player helicopter (in MPH)");
+    vehHelicopterMaxAccel = Dvar_RegisterFloat("vehHelicopterMaxAccel", 45.0, 0.0099999998, FLT_MAX, 0, "Maximum horizontal acceleration of the player helicopter (in MPH per second)");
     vehHelicopterMaxAccelVertical = Dvar_RegisterFloat(
         "vehHelicopterMaxAccelVertical",
         30.0,
         0.0099999998,
         FLT_MAX,
-        v73,
-        v72);
-    vehHelicopterMaxYawRate = Dvar_RegisterFloat("vehHelicopterMaxYawRate", 120.0, 0.0099999998, FLT_MAX, v75, v74);
-    vehHelicopterMaxYawAccel = Dvar_RegisterFloat("vehHelicopterMaxYawAccel", 90.0, 0.0099999998, FLT_MAX, v77, v76);
-    vehHelicopterMaxPitch = Dvar_RegisterFloat("vehHelicopterMaxPitch", 10.0, 0.0099999998, FLT_MAX, v79, v78);
-    vehHelicopterMaxRoll = Dvar_RegisterFloat("vehHelicopterMaxRoll", 35.0, 0.0099999998, FLT_MAX, v81, v80);
+        0,
+        "Maximum vertical acceleration of the player helicopter (in MPH per second)");
+    vehHelicopterMaxYawRate = Dvar_RegisterFloat("vehHelicopterMaxYawRate", 120.0, 0.0099999998, FLT_MAX, 0, "Maximum yaw speed of the player helicopter");
+    vehHelicopterMaxYawAccel = Dvar_RegisterFloat("vehHelicopterMaxYawAccel", 90.0, 0.0099999998, FLT_MAX, 0, "Maximum yaw acceleration of the player helicopter");
+    vehHelicopterMaxPitch = Dvar_RegisterFloat("vehHelicopterMaxPitch", 10.0, 0.0099999998, FLT_MAX, 0, "Maximum pitch of the player helicopter");
+    vehHelicopterMaxRoll = Dvar_RegisterFloat("vehHelicopterMaxRoll", 35.0, 0.0099999998, FLT_MAX, 0, "Maximum roll of the player helicopter");
     vehHelicopterLookaheadTime = Dvar_RegisterFloat(
         "vehHelicopterLookaheadTime",
         1.0,
         0.0099999998,
         FLT_MAX,
-        v83,
-        v82);
+        0,
+        "How far ahead (in seconds) the player helicopter looks ahead, to avoid hard collisions.  (Like driving down the highway, you should keep 2 seconds distance between you and the vehicle in front of you)");
     vehHelicopterHoverSpeedThreshold = Dvar_RegisterFloat(
         "vehHelicopterHoverSpeedThreshold",
         400.0,
         0.0099999998,
         FLT_MAX,
-        v85,
-        v84);
+        0,
+        "The speed below which the player helicopter begins to jitter the tilt, for hovering");
     vehHelicopterRightStickDeadzone = Dvar_RegisterFloat(
         "vehHelicopterRightStickDeadzone",
         0.30000001,
         0.0099999998,
         1.0,
-        v87,
-        v86);
+        0,
+        "Dead-zone for the axes of the right thumbstick.  This helps to better control the two axes separately.");
     vehHelicopterStrafeDeadzone = Dvar_RegisterFloat(
         "vehHelicopterStrafeDeadzone",
         0.30000001,
         0.0099999998,
         1.0,
-        v89,
-        v88);
+        0,
+        "Dead-zone so that you can fly straight forward easily without accidentally strafing (and thus rolling).");
     vehHelicopterScaleMovement = Dvar_RegisterBool(
         "vehHelicopterScaleMovement",
         1,
@@ -551,64 +420,64 @@ const dvar_s *G_RegisterServerDemoDvars()
         0,
         0x80u,
         "Player helicopters have soft collisions (slow down before they collide).");
-    vehHelicopterDecelerationFwd = Dvar_RegisterFloat("vehHelicopterDecelerationFwd", 0.5, 0.0, FLT_MAX, v91, v90);
-    vehHelicopterDecelerationSide = Dvar_RegisterFloat("vehHelicopterDecelerationSide", 1.0, 0.0, FLT_MAX, v93, v92);
+    vehHelicopterDecelerationFwd = Dvar_RegisterFloat("vehHelicopterDecelerationFwd", 0.5, 0.0, FLT_MAX, 0, 0);
+    vehHelicopterDecelerationSide = Dvar_RegisterFloat("vehHelicopterDecelerationSide", 1.0, 0.0, FLT_MAX, 0, 0);
     vehHelicopterInvertUpDown = Dvar_RegisterBool(
         "vehHelicopterInvertUpDown",
         0,
         0x80u,
         "Invert the altitude control on the player helicopter.");
-    vehHelicopterYawOnLeftStick = Dvar_RegisterFloat("vehHelicopterYawOnLeftStick", 5.0, 0.0, FLT_MAX, v95, v94);
-    vehHelicopterTiltSpeed = Dvar_RegisterFloat("vehHelicopterTiltSpeed", 1.2, 0.0099999998, FLT_MAX, v97, v96);
+    vehHelicopterYawOnLeftStick = Dvar_RegisterFloat("vehHelicopterYawOnLeftStick", 5.0, 0.0, FLT_MAX, 0, 0);
+    vehHelicopterTiltSpeed = Dvar_RegisterFloat("vehHelicopterTiltSpeed", 1.2, 0.0099999998, FLT_MAX, 0, 0);
     vehHelicopterTiltFromAcceleration = Dvar_RegisterFloat(
         "vehHelicopterTiltFromAcceleration",
         2.0,
         0.0099999998,
         FLT_MAX,
-        v99,
-        v98);
+        0,
+        0);
     vehHelicopterTiltFromDeceleration = Dvar_RegisterFloat(
         "vehHelicopterTiltFromDeceleration",
         2.0,
         0.0,
         FLT_MAX,
-        v101,
-        v100);
+        0,
+        0);
     vehHelicopterTiltFromVelocity = Dvar_RegisterFloat(
         "vehHelicopterTiltFromVelocity",
         1.0,
         0.0,
         FLT_MAX,
-        v103,
-        v102);
+        0,
+        0);
     vehHelicopterTiltFromControllerAxes = Dvar_RegisterFloat(
         "vehHelicopterTiltFromControllerAxes",
         0.0,
         0.0,
         FLT_MAX,
-        v105,
-        v104);
+        0,
+        0);
     vehHelicopterTiltFromFwdAndYaw = Dvar_RegisterFloat(
         "vehHelicopterTiltFromFwdAndYaw",
         0.0,
         0.0,
         FLT_MAX,
-        v107,
-        v106);
+        0,
+        0);
     vehHelicopterTiltFromFwdAndYaw_VelAtMaxTilt = Dvar_RegisterFloat(
         "vehHelicopterTiltFromFwdAndYaw_VelAtMaxTilt",
         1.0,
         0.0,
         FLT_MAX,
-        v109,
-        v108);
+        0,
+        0);
     vehHelicopterJitterJerkyness = Dvar_RegisterFloat(
         "vehHelicopterJitterJerkyness",
         0.30000001,
         0.000099999997,
         FLT_MAX,
-        v111,
-        v110);
+        0,
+        0);
     vehHelicopterHeadSwayDontSwayTheTurret = Dvar_RegisterBool(
         "vehHelicopterHeadSwayDontSwayTheTurret",
         1,
@@ -620,91 +489,50 @@ const dvar_s *G_RegisterServerDemoDvars()
         0.40000001,
         0.000099999997,
         FLT_MAX,
-        v113,
-        v112);
-    g_vehHudTargetSize = Dvar_RegisterFloat("vehHudTargetSize", 30.0, 0.0099999998, 10000.0, v115, v114);
+        0,
+        0);
+    g_vehHudTargetSize = Dvar_RegisterFloat("vehHudTargetSize", 30.0, 0.0099999998, 10000.0, 0, 0);
     g_vehHudTargetScreenEdgeClampBufferLeft = Dvar_RegisterFloat(
         "vehHudTargetScreenEdgeClampBufferLeft",
         0.0,
         -10000.0,
         10000.0,
-        v117,
-        v116);
+        0,
+        0);
     g_vehHudTargetScreenEdgeClampBufferRight = Dvar_RegisterFloat(
         "vehHudTargetScreenEdgeClampBufferRight",
         0.0,
         -10000.0,
         10000.0,
-        v119,
-        v118);
+        0,
+        0);
     g_vehHudTargetScreenEdgeClampBufferTop = Dvar_RegisterFloat(
         "vehHudTargetScreenEdgeClampBufferTop",
         0.0,
         -10000.0,
         10000.0,
-        v121,
-        v120);
+        0,
+        0);
     g_vehHudTargetScreenEdgeClampBufferBottom = Dvar_RegisterFloat(
         "vehHudTargetScreenEdgeClampBufferBottom",
         0.0,
         -10000.0,
         10000.0,
-        v123,
-        v122);
-    turretPlayerAvoidScale = Dvar_RegisterFloat("turretPlayerAvoidScale", 1.7, 0.0, FLT_MAX, v125, v124);
+        0,
+        0);
+    turretPlayerAvoidScale = Dvar_RegisterFloat("turretPlayerAvoidScale", 1.7, 0.0, FLT_MAX, 0, 0);
     G_RegisterMissileDvars();
     BG_RegisterDvars();
-    g_fogColorReadOnly = Dvar_RegisterColor("g_fogColorReadOnly", 1.0, 0.0, 0.0, 1.0, v127, v126);
-    g_fogStartDistReadOnly = Dvar_RegisterFloat("g_fogStartDistReadOnly", 0.0, 0.0, FLT_MAX, v129, v128);
-    g_fogHalfDistReadOnly = Dvar_RegisterFloat("g_fogHalfDistReadOnly", 0.1, 0.0, FLT_MAX, v131, v130);
+    g_fogColorReadOnly = Dvar_RegisterColor("g_fogColorReadOnly", 1.0, 0.0, 0.0, 1.0, 0, 0);
+    g_fogStartDistReadOnly = Dvar_RegisterFloat("g_fogStartDistReadOnly", 0.0, 0.0, FLT_MAX, 0, 0);
+    g_fogHalfDistReadOnly = Dvar_RegisterFloat("g_fogHalfDistReadOnly", 0.1, 0.0, FLT_MAX, 0, 0);
     chaplinCheat = Dvar_RegisterBool("chaplinCheat", 0, 0x1080u, "");
     return Dvar_RegisterBool("scr_dof_enable", 1, 0x1082u, "enable dof");
 }
 
 void G_RegisterDebugDvars()
 {
-    const char *v0; // r5
-    unsigned __int16 v1; // r4
-    const char *v2; // r5
-    unsigned __int16 v3; // r4
-    const char *v4; // r5
-    unsigned __int16 v5; // r4
-    const char *v6; // r5
-    unsigned __int16 v7; // r4
-    const char *v8; // r5
-    unsigned __int16 v9; // r4
-    const char *v10; // r5
-    unsigned __int16 v11; // r4
-    const char *v12; // r5
-    unsigned __int16 v13; // r4
-    const char *v14; // r5
-    unsigned __int16 v15; // r4
-    const char *v16; // r5
-    unsigned __int16 v17; // r4
-    const char *v18; // r5
-    unsigned __int16 v19; // r4
-    const char *v20; // r5
-    unsigned __int16 v21; // r4
-    const char *v22; // r5
-    unsigned __int16 v23; // r4
-    const char *v24; // r5
-    unsigned __int16 v25; // r4
-    const char *v26; // r5
-    unsigned __int16 v27; // r4
-    const char *v28; // r5
-    unsigned __int16 v29; // r4
-    const char *v30; // r5
-    unsigned __int16 v31; // r4
-    const char *v32; // r5
-    unsigned __int16 v33; // r4
-    const char *v34; // r5
-    unsigned __int16 v35; // r4
-    const char *v36; // r5
-    unsigned __int16 v37; // r4
-    const char *v38; // r5
-    unsigned __int16 v39; // r4
-    const char *v40; // r5
-    unsigned __int16 v41; // r4
+    // KISAKTODO: missing some flags and descriptions (it is extremely tedious to extract these from the asm)
 
     g_cheats = Dvar_RegisterBool(
         "sv_cheats",
@@ -719,7 +547,7 @@ void G_RegisterDebugDvars()
         0x80u,
         "Turn on debug information for vehicle paths");
     g_vehicleDebug = Dvar_RegisterBool("g_vehicleDebug", 0, 0x80u, "Turn on debug information for vehicles");
-    g_vehicleTexScrollScale = Dvar_RegisterFloat("g_vehicleTexScrollScale", 0.0, 0.0, FLT_MAX, v1, v0);
+    g_vehicleTexScrollScale = Dvar_RegisterFloat("g_vehicleTexScrollScale", 0.0, 0.0, FLT_MAX, 0, 0);
     g_listEntity = Dvar_RegisterBool("g_listEntity", 0, 0, "list all of the current entities");
     g_entinfo = Dvar_RegisterEnum("g_entinfo", g_entinfoNames, 0, 0x80u, "Display entity information");
     g_entinfo_type = Dvar_RegisterEnum(
@@ -734,8 +562,8 @@ void G_RegisterDebugDvars()
         1,
         0x80u,
         "Type of text information for AI entinfo");
-    g_entinfo_maxdist = Dvar_RegisterFloat("g_entinfo_maxdist", 2048.0, 0.0, FLT_MAX, v3, v2);
-    g_entinfo_scale = Dvar_RegisterFloat("g_entinfo_scale", 1.2, 0.0, 10.0, v5, v4);
+    g_entinfo_maxdist = Dvar_RegisterFloat("g_entinfo_maxdist", 2048.0, 0.0, FLT_MAX, 0, 0);
+    g_entinfo_scale = Dvar_RegisterFloat("g_entinfo_scale", 1.2, 0.0, 10.0, 0, 0);
     g_drawEntBBoxes = Dvar_RegisterInt("g_drawEntBBoxes", 0, 0, 4, 0x80u, "Draw entity bounding boxes");
     g_drawGrenadeHints = Dvar_RegisterInt(
         "g_drawGrenadeHints",
@@ -746,7 +574,7 @@ void G_RegisterDebugDvars()
         "Draw debug information for grenades");
     g_deathDelay = Dvar_RegisterInt("g_deathDelay", 3000, 0, 0x7FFFFFFF, 1u, "Delay a level restart on death");
     ai_showNodes = Dvar_RegisterInt("ai_showNodes", 0, 0, 4, 0x80u, "Show AI navigation node debug information");
-    ai_showNodesDist = Dvar_RegisterFloat("ai_showNodesDist", 384.0, 0.0, FLT_MAX, v7, v6);
+    ai_showNodesDist = Dvar_RegisterFloat("ai_showNodesDist", 384.0, 0.0, FLT_MAX, 0, 0);
     ai_showNearestNode = Dvar_RegisterInt("ai_showNearestNode", 0, 0, 64, 0x80u, "Show nodes closest to AI");
     ai_showFriendlyChains = Dvar_RegisterInt(
         "ai_showFriendlyChains",
@@ -756,7 +584,7 @@ void G_RegisterDebugDvars()
         0x80u,
         "Display debug information for friendly chains");
     ai_showVisData = Dvar_RegisterInt("ai_showVisData", 0, 0, 2, 0x80u, "Display debug information for visibility data");
-    ai_showVisDataDist = Dvar_RegisterFloat("ai_showVisDataDist", 1000.0, 0.0, FLT_MAX, v9, v8);
+    ai_showVisDataDist = Dvar_RegisterFloat("ai_showVisDataDist", 1000.0, 0.0, FLT_MAX, 0, 0);
     ai_debugCoverEntityNum = Dvar_RegisterInt(
         "ai_debugCoverEntityNum",
         -1,
@@ -784,19 +612,19 @@ void G_RegisterDebugDvars()
         ENTITYNUM_NONE,
         0x80u,
         "Draw the suppression planes for this entity");
-    ai_eventDistFootstep = Dvar_RegisterFloat("ai_eventDistFootstep", 512.0, 0.0, FLT_MAX, v11, v10);
-    ai_eventDistFootstepLite = Dvar_RegisterFloat("ai_eventDistFootstepLite", 256.0, 0.0, FLT_MAX, v13, v12);
-    ai_eventDistNewEnemy = Dvar_RegisterFloat("ai_eventDistNewEnemy", 1024.0, 0.0, FLT_MAX, v15, v14);
-    ai_eventDistPain = Dvar_RegisterFloat("ai_eventDistPain", 512.0, 0.0, FLT_MAX, v17, v16);
-    ai_eventDistDeath = Dvar_RegisterFloat("ai_eventDistDeath", 1024.0, 0.0, FLT_MAX, v19, v18);
-    ai_eventDistExplosion = Dvar_RegisterFloat("ai_eventDistExplosion", 1024.0, 0.0, FLT_MAX, v21, v20);
-    ai_eventDistGrenadePing = Dvar_RegisterFloat("ai_eventDistGrenadePing", 512.0, 0.0, FLT_MAX, v23, v22);
-    ai_eventDistProjPing = Dvar_RegisterFloat("ai_eventDistProjPing", 128.0, 0.0, FLT_MAX, v25, v24);
-    ai_eventDistGunShot = Dvar_RegisterFloat("ai_eventDistGunShot", 2048.0, 0.0, FLT_MAX, v27, v26);
-    ai_eventDistSilencedShot = Dvar_RegisterFloat("ai_eventDistSilencedShot", 128.0, 0.0, FLT_MAX, v29, v28);
-    ai_eventDistBullet = Dvar_RegisterFloat("ai_eventDistBullet", 96.0, 0.0, FLT_MAX, v31, v30);
-    ai_eventDistProjImpact = Dvar_RegisterFloat("ai_eventDistProjImpact", 256.0, 0.0, FLT_MAX, v33, v32);
-    ai_eventDistBadPlace = Dvar_RegisterFloat("ai_eventDistBadPlace", 256.0, 0.0, FLT_MAX, v35, v34);
+    ai_eventDistFootstep = Dvar_RegisterFloat("ai_eventDistFootstep", 512.0, 0.0, FLT_MAX, 0, 0);
+    ai_eventDistFootstepLite = Dvar_RegisterFloat("ai_eventDistFootstepLite", 256.0, 0.0, FLT_MAX, 0, 0);
+    ai_eventDistNewEnemy = Dvar_RegisterFloat("ai_eventDistNewEnemy", 1024.0, 0.0, FLT_MAX, 0, 0);
+    ai_eventDistPain = Dvar_RegisterFloat("ai_eventDistPain", 512.0, 0.0, FLT_MAX, 0, 0);
+    ai_eventDistDeath = Dvar_RegisterFloat("ai_eventDistDeath", 1024.0, 0.0, FLT_MAX, 0, 0);
+    ai_eventDistExplosion = Dvar_RegisterFloat("ai_eventDistExplosion", 1024.0, 0.0, FLT_MAX, 0, 0);
+    ai_eventDistGrenadePing = Dvar_RegisterFloat("ai_eventDistGrenadePing", 512.0, 0.0, FLT_MAX, 0, 0);
+    ai_eventDistProjPing = Dvar_RegisterFloat("ai_eventDistProjPing", 128.0, 0.0, FLT_MAX, 0, 0);
+    ai_eventDistGunShot = Dvar_RegisterFloat("ai_eventDistGunShot", 2048.0, 0.0, FLT_MAX, 0, 0);
+    ai_eventDistSilencedShot = Dvar_RegisterFloat("ai_eventDistSilencedShot", 128.0, 0.0, FLT_MAX, 0, 0);
+    ai_eventDistBullet = Dvar_RegisterFloat("ai_eventDistBullet", 96.0, 0.0, FLT_MAX, 0, 0);
+    ai_eventDistProjImpact = Dvar_RegisterFloat("ai_eventDistProjImpact", 256.0, 0.0, FLT_MAX, 0, 0);
+    ai_eventDistBadPlace = Dvar_RegisterFloat("ai_eventDistBadPlace", 256.0, 0.0, FLT_MAX, 0, 0);
     ai_showPaths = Dvar_RegisterInt("ai_showPaths", 0, 0, 2, 0x80u, "Show AI navigation paths");
     ai_debugFindPath = Dvar_RegisterInt(
         "ai_debugFindPath",
@@ -810,7 +638,7 @@ void G_RegisterDebugDvars()
         0,
         0x80u,
         "Display AI 'find direct path' debugging information");
-    ai_debugFindPathWidth = Dvar_RegisterFloat("ai_debugFindPathWidth", 0.0, -FLT_MAX, FLT_MAX, v37, v36);
+    ai_debugFindPathWidth = Dvar_RegisterFloat("ai_debugFindPathWidth", 0.0, -FLT_MAX, FLT_MAX, 0, 0);
     ai_debugFindPathLock = Dvar_RegisterBool("ai_debugFindPathLock", 0, 0x80u, "Find path lock");
     ai_debugAnimDeltas = Dvar_RegisterInt(
         "ai_debugAnimDeltas",
@@ -824,7 +652,7 @@ void G_RegisterDebugDvars()
         0,
         0x80u,
         "Display grenade fail safe debug information");
-    ai_debugGrenadeHintArc = Dvar_RegisterFloat("ai_debugGrenadeHintArc", 150.0, 0.0, 180.0, v39, v38);
+    ai_debugGrenadeHintArc = Dvar_RegisterFloat("ai_debugGrenadeHintArc", 150.0, 0.0, 180.0, 0, 0);
     ai_ShowCanshootChecks = Dvar_RegisterBool(
         "ai_ShowCanshootChecks",
         0,
@@ -893,7 +721,7 @@ void G_RegisterDebugDvars()
         0x80u,
         "Minimum delay in (ms) beteewen entity eq updates");
     g_enteqEnable = Dvar_RegisterBool("g_enteqEnable", 1, 0x1080u, "Enable entity eq");
-    g_enteqDist = Dvar_RegisterFloat("g_enteqDist", 4000.0, 0.0, FLT_MAX, v41, v40);
+    g_enteqDist = Dvar_RegisterFloat("g_enteqDist", 4000.0, 0.0, FLT_MAX, 0, 0);
     pickupPrints = Dvar_RegisterBool(
         "pickupPrints",
         0,
@@ -1115,20 +943,22 @@ int __cdecl G_ExitAfterConnectPaths()
 
 void *GScr_LoadScriptsAndAnims()
 {
-    const char *String; // r3
-    ScriptFunctions v2; // [sp+50h] [-220h] BYREF
-    char v3; // [sp+60h] [-210h] BYREF
+    const char *mapname; // r3
+    ScriptFunctions functions; // [sp+50h] [-220h] BYREF
+    int address[128];
 
-    v2.count = 0;
-    v2.maxSize = 128;
-    v2.address = (int *)&v3;
-    String = Dvar_GetString("mapname");
-    GScr_LoadScripts(String, &v2);
-    v2.maxSize = v2.count;
-    v2.count = 0;
-    GScr_SetScripts(&v2);
-    if (v2.maxSize != v2.count)
+    functions.count = 0;
+    functions.maxSize = 128;
+    functions.address = address;
+    mapname = Dvar_GetString("mapname");
+    GScr_LoadScripts(mapname, &functions);
+    functions.maxSize = functions.count;
+    functions.count = 0;
+    GScr_SetScripts(&functions);
+
+    if (functions.maxSize != functions.count)
         Com_Error(ERR_DROP, "Script function count mismatch");
+
     return G_LoadAnimTreeInstances();
 }
 

@@ -4662,8 +4662,8 @@ void Path_CallFunctionForNodes(void(*function)(pathnode_t *, void *), void *data
     unsigned int nodeCount; // r31
     int v5; // r30
 
-    if (!function)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\pathnode.cpp", 617, 0, "%s", "function");
+    iassert(function);
+
     nodeCount = gameWorldSp.path.nodeCount;
     if (gameWorldSp.path.nodeCount)
     {

@@ -12,7 +12,7 @@ void __cdecl GScr_LoadSingleAnimScript(const char *name, ScriptFunctions *functi
 void __cdecl GScr_LoadAnimScripts(ScriptFunctions *functions);
 void __cdecl GScr_LoadDogAnimScripts(ScriptFunctions *functions);
 void __cdecl GScr_LoadLevelScript(const char *mapname, ScriptFunctions *functions);
-void __cdecl GScr_LoadScriptsForPathNode(pathnode_t *loadNode, ScriptFunctions **data);
+void __cdecl GScr_LoadScriptsForPathNode(pathnode_t *loadNode, void *data);
 void __cdecl GScr_LoadScriptsForPathNodes(ScriptFunctions *functions);
 void __cdecl GScr_LoadScriptsForEntities(ScriptFunctions *functions);
 void __cdecl GScr_LoadEntities();

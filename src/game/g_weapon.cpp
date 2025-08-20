@@ -671,7 +671,14 @@ void __cdecl G_SetupWeaponDef()
         Com_SetWeaponInfoMemory(1);
         ClearRegisteredItems();
         BG_ClearWeaponDef();
+#ifdef KISAK_MP
         G_GetWeaponIndexForName("defaultweapon_mp");
+#elif KISAK_SP
+        if (level.initializing)
+            BG_GetWeaponIndexForName("defaultweapon", G_RegisterWeapon);
+        else
+            BG_FindWeaponIndexForName("defaultweapon");
+#endif
     }
     Com_DPrintf(17, "----------------------\n");
 }

@@ -269,7 +269,7 @@ extern const dvar_t *player_radiusDamageMultiplier;
 extern struct entityHandler_t *entityHandlers;
 extern gentity_s g_entities[MAX_GENTITIES];
 extern sentient_s *g_sentients;
-extern char *g_nextMap;
+extern char g_nextMap[64];
 extern level_locals_t level;
 extern gclient_s g_clients[1];
 extern actor_s g_actors[32];
