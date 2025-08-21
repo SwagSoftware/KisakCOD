@@ -890,7 +890,7 @@ void __cdecl CG_CalcEntityLerpPositions(int32_t localClientNum, centity_s *cent)
             cent->pose.angles[2] = 0.0f;
             ci->lerpLean = cent->nextState.lerp.u.turret.gunAngles[0];
         }
-        else if (cent->nextState.eType == 2)
+        else if (cent->nextState.eType == ET_PLAYER_CORPSE)
         {
             corpseIndex = cent->nextState.number - 64;
             iassert((unsigned)corpseIndex < MAX_CLIENT_CORPSES);
@@ -1182,7 +1182,7 @@ void __cdecl CG_CreateRagdollObject(int32_t localClientNum, centity_s *cent)
         reset = 0;
     else
         reset = (cent->nextState.lerp.eFlags & 0x80000) != 0;
-    if (cent->nextState.eType == 2 && cent->nextState.clientNum == cgameGlob->clientNum && cgameGlob->inKillCam)
+    if (cent->nextState.eType == ET_PLAYER_CORPSE && cent->nextState.clientNum == cgameGlob->clientNum && cgameGlob->inKillCam)
     {
         shareRagdoll = 0;
         RagdollForDObj = Ragdoll_CreateRagdollForDObj(localClientNum, 0, cent->nextState.number, reset, 0);

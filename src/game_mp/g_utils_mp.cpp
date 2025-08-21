@@ -1292,7 +1292,7 @@ void __cdecl G_FreeEntity(gentity_s *ed)
         if (ed->scr_vehicle)
             MyAssertHandler(".\\game_mp\\g_utils_mp.cpp", 1522, 0, "%s", "ed->scr_vehicle == NULL");
     }
-    if (ed->s.eType == 2)
+    if (ed->s.eType == ET_PLAYER_CORPSE)
         PlayerCorpse_Free(ed);
     EntHandleDissociate(ed);
     ed->r.ownerNum.setEnt(NULL);

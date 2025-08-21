@@ -548,7 +548,7 @@ void __cdecl CG_TransitionKillcam(int localClientNum)
         {
             cent = CG_GetEntity(localClientNum, cgameGlob->nextSnap->entities[i].number);
             CG_ResetEntity(localClientNum, cent, 1);
-            if (cent->nextState.eType == 2)
+            if (cent->nextState.eType == ET_PLAYER_CORPSE)
             {
                 corpseIndex = cent->nextState.number - 64;
                 bcassert(corpseIndex, MAX_CLIENT_CORPSES);

@@ -6115,7 +6115,7 @@ void __cdecl GScr_GetCorpseAnim(scr_entref_t entref)
     corpseInfo_t *corpseInfo; // [esp+10h] [ebp-4h]
 
     ent = GetEntity(entref);
-    if (ent->s.eType == 2)
+    if (ent->s.eType == ET_PLAYER_CORPSE)
     {
         corpseInfo = &g_scr_data.playerCorpseInfo[G_GetPlayerCorpseIndex(ent)];
         anim.index = ent->s.legsAnim & 0xFDFF;

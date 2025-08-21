@@ -2724,7 +2724,7 @@ char __cdecl BulletTrace(
     Vec3Lerp(bp->start, bp->end, br->trace.fraction, br->hitPos);
     if (Entity)
     {
-        if ((Entity->nextState.eType == ET_PLAYER || Entity->nextState.eType == 2) && !br->trace.surfaceFlags)
+        if ((Entity->nextState.eType == ET_PLAYER || Entity->nextState.eType == ET_PLAYER_CORPSE) && !br->trace.surfaceFlags)
             br->trace.surfaceFlags = 0x700000;
         br->ignoreHitEnt = ShouldIgnoreHitEntity(attacker->nextState.number, hitEntId);
     }

@@ -61,7 +61,7 @@ char __cdecl Bullet_Trace(
     Vec3Lerp(bp->start, bp->end, br->trace.fraction, br->hitPos);
     if (br->hitEnt)
     {
-        if ((br->hitEnt->s.eType == ET_PLAYER || br->hitEnt->s.eType == 2) && !br->trace.surfaceFlags)
+        if ((br->hitEnt->s.eType == ET_PLAYER || br->hitEnt->s.eType == ET_PLAYER_CORPSE) && !br->trace.surfaceFlags)
             br->trace.surfaceFlags = 0x700000;
         br->ignoreHitEnt = Bullet_IgnoreHitEntity(bp, br, attacker);
     }
