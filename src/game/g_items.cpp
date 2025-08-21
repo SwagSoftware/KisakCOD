@@ -223,7 +223,7 @@ int32_t __cdecl WeaponPickup_Grab(gentity_s *weaponEnt, gentity_s *player, int32
     weapDef = BG_GetWeaponDef(weapIdx);
     if (weaponEnt->s.eType == 4)
     {
-        *pickupEvent = 10;
+        *pickupEvent = EV_AMMO_PICKUP;
         WeaponPickup_Notifies(weaponEnt, 0, player, weapDef);
         return 1;
     }
@@ -238,7 +238,7 @@ int32_t __cdecl WeaponPickup_Grab(gentity_s *weaponEnt, gentity_s *player, int32
         weaponEnt->flags &= ~0x1000000u;
         if (gotWeapon)
         {
-            *pickupEvent = 9;
+            *pickupEvent = EV_ITEM_PICKUP;
             WeaponPickup_AddAmmoForNewWeapon(weaponEnt, player);
             if (droppedEnt)
                 WeaponPickup_LeechFromWeaponEnt(droppedEnt, player, 0, 0, 1);

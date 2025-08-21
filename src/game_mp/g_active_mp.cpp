@@ -400,7 +400,7 @@ void __cdecl HandleClientEvent(gclient_s *client, gentity_s *ent, int32_t event,
         Scr_Notify(ent, scr_const.detonate, 0);
         break;
     default:
-        if (event >= 106 && event <= 134 && ent->s.eType == 1)
+        if (event >= EV_LANDING_PAIN_FIRST && event <= EV_LANDING_PAIN_LAST && ent->s.eType == 1)
         {
             damage = eventParm < 100 ? (double)eventParm * 0.009999999776482582 : 1.1;
             if (damage != 0.0)
