@@ -2264,7 +2264,7 @@ void __cdecl DrawBulletImpacts(
     }
     if (ent->nextState.eType != ET_PLAYER)
     {
-        if (ent->nextState.eType == 11)
+        if (ent->nextState.eType == ET_MG42)
         {
             minSpread = weaponDef->playerSpread;
             maxSpread = weaponDef->playerSpread;

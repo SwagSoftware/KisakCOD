@@ -499,7 +499,7 @@ void __cdecl turret_clientaim(gentity_s *self, gentity_s *other)
 
     if (!self)
         MyAssertHandler(".\\game_mp\\g_misc_mp.cpp", 392, 0, "%s", "self");
-    if (self->s.eType != 11)
+    if (self->s.eType != ET_MG42)
         MyAssertHandler(".\\game_mp\\g_misc_mp.cpp", 393, 0, "%s", "self->s.eType == ET_MG42");
     pTurretInfo = self->pTurretInfo;
     if (!pTurretInfo)
@@ -686,7 +686,7 @@ int32_t __cdecl turret_UpdateTargetAngles(gentity_s *self, float *desiredAngles,
     float fSpeed[2]; // [esp+24h] [ebp-Ch]
     int32_t i; // [esp+2Ch] [ebp-4h]
 
-    if (self->s.eType != 11)
+    if (self->s.eType != ET_MG42)
         MyAssertHandler(".\\game_mp\\g_misc_mp.cpp", 629, 0, "%s", "self->s.eType == ET_MG42");
     pTurretInfo = self->pTurretInfo;
     if (!pTurretInfo)
@@ -836,7 +836,7 @@ void __cdecl turret_controller(const gentity_s *self, int32_t *partBits)
     DObj_s *obj; // [esp+4h] [ebp-10h]
     float angles[3]; // [esp+8h] [ebp-Ch] BYREF
 
-    if (self->s.eType != 11)
+    if (self->s.eType != ET_MG42)
         MyAssertHandler(".\\game_mp\\g_misc_mp.cpp", 836, 0, "%s", "self->s.eType == ET_MG42");
     angles[1] = self->s.lerp.u.turret.gunAngles[1];
     angles[0] = self->s.lerp.u.turret.gunAngles[0];
@@ -962,7 +962,7 @@ void __cdecl turret_use(gentity_s *self, gentity_s *owner, gentity_s* activator)
 
     if (!self)
         MyAssertHandler(".\\game_mp\\g_misc_mp.cpp", 934, 0, "%s", "self");
-    if (self->s.eType != 11)
+    if (self->s.eType != ET_MG42)
         MyAssertHandler(".\\game_mp\\g_misc_mp.cpp", 935, 0, "%s", "self->s.eType == ET_MG42");
     pTurretInfo = self->pTurretInfo;
     if (!pTurretInfo)

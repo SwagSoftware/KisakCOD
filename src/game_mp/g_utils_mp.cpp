@@ -360,7 +360,7 @@ void __cdecl G_DObjUpdate(gentity_s *ent)
             dobjModels[0].boneName = 0;
             dobjModels[0].ignoreCollision = 0;
             numModels = 1;
-            if (!ent->s.eType || ent->s.eType == ET_SCRIPTMOVER || ent->s.eType == ET_PLANE || ent->s.eType == 11)
+            if (!ent->s.eType || ent->s.eType == ET_SCRIPTMOVER || ent->s.eType == ET_PLANE || ent->s.eType == ET_MG42)
             {
                 ent->s.index.brushmodel = modelIndex;
             }
@@ -1227,7 +1227,7 @@ void __cdecl G_FreeEntityRefs(gentity_s *ed)
             if (other->r.inuse
                 && other->r.ownerNum.isDefined()
                 && other->r.ownerNum.entnum() == entnum
-                && other->s.eType == 11)
+                && other->s.eType == ET_MG42)
             {
                 other->active = 0;
                 break;

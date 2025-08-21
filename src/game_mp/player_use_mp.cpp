@@ -152,7 +152,7 @@ void __cdecl Player_UseEntity(gentity_s *playerEnt, gentity_s *useEnt)
         if (touch)
             touch(useEnt, playerEnt, 0);
     }
-    else if (useEnt->s.eType != 11 || G_IsTurretUsable(useEnt, playerEnt))
+    else if (useEnt->s.eType != ET_MG42 || G_IsTurretUsable(useEnt, playerEnt))
     {
         Scr_AddEntity(playerEnt);
         Scr_Notify(useEnt, scr_const.trigger, 1u);
@@ -406,7 +406,7 @@ int32_t __cdecl Player_GetUseList(gentity_s *ent, useList_t *useList, int32_t pr
                             useList[num].score = useList[num].score - (v19 + v19);
                         if (gEnt->classname == scr_const.trigger_use)
                             useList[num].score = useList[num].score - v19;
-                        if (gEnt->s.eType == 11)
+                        if (gEnt->s.eType == ET_MG42)
                             useList[num].score = useList[num].score - v19 * 0.5f;
                         if (gEnt->s.eType == ET_ITEM && !BG_CanItemBeGrabbed(&gEnt->s, &ent->client->ps, 0))
                         {
@@ -431,7 +431,7 @@ int32_t __cdecl Player_GetUseList(gentity_s *ent, useList_t *useList, int32_t pr
         {
             Vec3Add(enta->r.absmin, enta->r.absmax, v);
             Vec3Scale(v, 0.5f, v);
-            if (enta->s.eType == 11)
+            if (enta->s.eType == ET_MG42)
                 G_DObjGetWorldTagPos(enta, scr_const.tag_aim, v);
             if (!G_TraceCapsuleComplete(origin, (float *)vec3_origin, (float *)vec3_origin, v, ps->clientNum, 17))
             {
@@ -500,7 +500,7 @@ void __cdecl Player_SetTurretDropHint(gentity_s *ent)
     if (ps->ps.viewlocked_entNum == ENTITYNUM_NONE)
         MyAssertHandler(".\\game_mp\\player_use_mp.cpp", 478, 0, "%s", "ps->viewlocked_entNum != ENTITYNUM_NONE");
     turret = &level.gentities[ps->ps.viewlocked_entNum];
-    if (turret->s.eType != 11)
+    if (turret->s.eType != ET_MG42)
         MyAssertHandler(".\\game_mp\\player_use_mp.cpp", 481, 0, "%s", "turret->s.eType == ET_MG42");
     if (*BG_GetWeaponDef(turret->s.weapon)->dropHintString)
     {
