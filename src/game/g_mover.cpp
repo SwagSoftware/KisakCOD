@@ -355,7 +355,7 @@ char __cdecl G_MoverPush(gentity_s *pusher, float *move, float *amove, gentity_s
     maxs[0] = pusher->r.maxs[0];
     maxs[1] = pusher->r.maxs[1];
     maxs[2] = pusher->r.maxs[2];
-    if (pusher->s.eType == 6 && pusher->model && G_GetModelBounds(pusher->model, outMins, outMaxs))
+    if (pusher->s.eType == ET_SCRIPTMOVER && pusher->model && G_GetModelBounds(pusher->model, outMins, outMaxs))
     {
         for (i = 0; i < 3; ++i)
         {

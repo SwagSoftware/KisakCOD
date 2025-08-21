@@ -1202,7 +1202,7 @@ void __cdecl VEH_TouchEntities_0(gentity_s *ent, float frameTime)
             target = &g_entities[entityList[i]];
             v24 = entityHandlers[target->handler].touch;
             if (target->s.number != ent->s.number
-                && (target->s.eType == ET_PLAYER || target->s.eType == 6 || target->s.eType == 14 || target->s.eType == ET_MISSILE)
+                && (target->s.eType == ET_PLAYER || target->s.eType == ET_SCRIPTMOVER || target->s.eType == 14 || target->s.eType == ET_MISSILE)
                 && (!target->r.ownerNum.isDefined() || target->s.eType == ET_MISSILE && target->r.ownerNum.ent() != ent))
             {
                 if (target->s.groundEntityNum == ent->s.number)
@@ -2545,7 +2545,7 @@ void __cdecl G_VehEntHandler_Touch(gentity_s *pSelf, gentity_s *pOther, int32_t 
         MyAssertHandler(".\\game_mp\\g_vehicles_mp.cpp", 3224, 0, "%s", "pOther");
     veh = pSelf->scr_vehicle;
     info = &s_vehicleInfos[veh->infoIdx];
-    if (pOther->s.eType == ET_PLAYER || pOther->s.eType == 6)
+    if (pOther->s.eType == ET_PLAYER || pOther->s.eType == ET_SCRIPTMOVER)
     {
         if (pOther->takedamage)
         {
@@ -2554,7 +2554,7 @@ void __cdecl G_VehEntHandler_Touch(gentity_s *pSelf, gentity_s *pOther, int32_t 
                 moveLen = Vec3NormalizeTo(veh->phys.vel, moveDir);
                 if (moveLen >= EQUAL_EPSILON)
                 {
-                    if (pOther->s.eType == 6)
+                    if (pOther->s.eType == ET_SCRIPTMOVER)
                     {
                         InflictDamage(pSelf, pOther, moveDir, 999999);
                     }

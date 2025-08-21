@@ -618,7 +618,7 @@ void __cdecl VEH_TouchEntities(gentity_s *ent)
         target = &g_entities[entityList[i]];
         v12 = entityHandlers[target->handler].touch;
         if (target->s.number != ent->s.number
-            && (target->s.eType == ET_PLAYER || target->s.eType == 6 || target->s.eType == ET_MISSILE || target->s.eType == 14)
+            && (target->s.eType == ET_PLAYER || target->s.eType == ET_SCRIPTMOVER || target->s.eType == ET_MISSILE || target->s.eType == 14)
             && target->s.eType == ET_MISSILE)
         {
             if (target->s.groundEntityNum == ent->s.number)
