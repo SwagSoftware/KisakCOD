@@ -416,8 +416,8 @@ void __cdecl CG_ResetEntity(int localClientNum, centity_s *cent, int newEntity)
     CG_UnlinkEntity(localClientNum, cent->nextState.number);
     switch (cent->nextState.eType)
     {
-    case 0:
-    case 4:
+    case ET_GENERAL:
+    case ET_MISSILE:
         if ((cent->nextState.lerp.eFlags & 0x10000) != 0
             && cgameGlob->time - cent->nextState.lerp.u.missile.launchTime > 200)
         {
@@ -428,7 +428,7 @@ void __cdecl CG_ResetEntity(int localClientNum, centity_s *cent, int newEntity)
             cent->previousEventSequence = 0;
         }
         goto LABEL_43;
-    case 1:
+    case ET_PLAYER:
         for (i = 0; i < 6; ++i)
             cent->pose.player.tag[i] = -2;
         cent->previousEventSequence = cent->nextState.eventSequence;
@@ -446,7 +446,7 @@ void __cdecl CG_ResetEntity(int localClientNum, centity_s *cent, int newEntity)
         if (obj)
             CG_Player_PreControllers(obj, cent);
         goto LABEL_43;
-    case 2:
+    case ET_PLAYER_CORPSE:
         corpseIndex = cent->nextState.number - 64;
         bcassert(cent->nextState.clientNum, MAX_CLIENTS);
         ci = &cgameGlob->bgs.clientinfo[cent->nextState.clientNum];
@@ -473,19 +473,19 @@ void __cdecl CG_ResetEntity(int localClientNum, centity_s *cent, int newEntity)
         }
         cgs->corpseinfo[corpseIndex].dobjDirty = 1;
         goto LABEL_43;
-    case 6:
-    case 0xD:
+    case ET_SCRIPTMOVER:
+    case ET_PLANE:
         cent->previousEventSequence = cent->nextState.eventSequence;
         if (cent->nextState.solid != 0xFFFFFF)
             goto LABEL_43;
         CG_UpdateBModelWorldBounds(localClientNum, cent, 1);
         break;
-    case 8:
-    case 9:
+    case ET_FX:
+    case ET_LOOP_FX:
         if (cent->pose.fx.effect)
             MyAssertHandler(".\\cgame_mp\\cg_snapshot_mp.cpp", 204, 0, "%s", "!cent->pose.fx.effect");
         goto LABEL_43;
-    case 0xB:
+    case ET_MG42:
         cent->previousEventSequence = cent->nextState.eventSequence;
         cent->pose.turret.tag_aim = -2;
         cent->pose.turret.tag_aim_animated = -2;

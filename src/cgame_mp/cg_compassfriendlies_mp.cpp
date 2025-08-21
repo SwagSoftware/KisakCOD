@@ -1053,7 +1053,7 @@ void __cdecl CG_CompassDrawVehicles(
                         xy);
                     if (!clipped || compassClampIcons->current.enabled)
                     {
-                        if (eType == 12)
+                        if (eType == ET_HELICOPTER)
                         {
                             w = compassSize->current.value * 40.0;
                             v8 = compassSize->current.value * 40.0;

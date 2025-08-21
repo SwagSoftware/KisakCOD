@@ -1370,7 +1370,7 @@ void __cdecl CG_CheckEvents(int32_t localClientNum, centity_s *cent)
             BG_GetEntityTypeName(cent->nextState.eType);
             KISAK_NULLSUB();
             CG_CalcEntityLerpPositions(localClientNum, cent);
-            CG_EntityEvent(localClientNum, cent, cent->nextState.eType - 17);
+            CG_EntityEvent(localClientNum, cent, cent->nextState.eType - ET_EVENTS);
         }
     }
 }

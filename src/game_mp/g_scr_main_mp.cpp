@@ -1203,12 +1203,12 @@ void GScr_SpawnPlane()
     if (G_CallSpawnEntity(ent))
     {
         Scr_AddEntity(ent);
-        ent->s.eType = 13;
+        ent->s.eType = ET_PLANE;
         ent->s.lerp.u.vehicle.teamAndOwnerIndex = team | (4 * ownerIndex);
     }
     else
     {
-        ent->s.eType = 13;
+        ent->s.eType = ET_PLANE;
         ent->s.lerp.u.vehicle.teamAndOwnerIndex = team | (4 * ownerIndex);
         Scr_Error(va("unable to spawn \"%s\" entity", SL_ConvertToString(classname)));
     }
@@ -4296,7 +4296,7 @@ LABEL_13:
     if (repeat <= 0)
         Scr_FxParamError(1u, "playLoopedFx called with repeat < 0.001 seconds", fxId);
     ent = G_Spawn();
-    ent->s.eType = 9;
+    ent->s.eType = ET_LOOP_FX;
     ent->r.svFlags |= 8u;
     ent->s.un1.scale = (uint8_t)fxId;
     if (ent->s.un1.scale != fxId)
@@ -4339,7 +4339,7 @@ void Scr_SpawnFX()
 LABEL_12:
     Scr_GetVector(1u, pos);
     ent = G_Spawn();
-    ent->s.eType = 8;
+    ent->s.eType = ET_FX;
     ent->r.svFlags |= 8u;
     ent->s.un1.scale = (uint8_t)fxId;
     if (ent->s.un1.scale != fxId)

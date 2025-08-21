@@ -588,7 +588,7 @@ void __cdecl CG_AddPacketEntity(int32_t localClientNum, int32_t entnum)
     angles[1] = cent->pose.angles[1];
     angles[2] = cent->pose.angles[2];
     entMoved = 0;
-    if ((eType == 6 || eType == 13) && cent->nextState.solid == 0xFFFFFF)
+    if ((eType == ET_SCRIPTMOVER || eType == ET_PLANE) && cent->nextState.solid == 0xFFFFFF)
     {
         CG_CalcEntityLerpPositions(localClientNum, cent);
         v4 = origin[0] == cent->pose.origin[0] && origin[1] == cent->pose.origin[1] && origin[2] == cent->pose.origin[2];
@@ -604,7 +604,7 @@ void __cdecl CG_AddPacketEntity(int32_t localClientNum, int32_t entnum)
     }
     else
     {
-        if (eType == 1 && CG_VehEntityUsingVehicle(localClientNum, entnum))
+        if (eType == ET_PLAYER && CG_VehEntityUsingVehicle(localClientNum, entnum))
         {
             CG_VehSeatTransformForPlayer(localClientNum, entnum, cent->pose.origin, newAngles);
             vehSlot = CG_VehPlayerVehicleSlot(localClientNum, entnum);
@@ -716,14 +716,14 @@ int32_t __cdecl CG_AddPacketEntities(int32_t localClientNum)
         entnum = cgameGlob->nextSnap->entities[num].number;
         cent = CG_GetEntity(localClientNum, entnum);
         eType = cent->nextState.eType;
-        if (eType < 0x11)
+        if (eType < ET_EVENTS)
         {
             if (entnum == lockedViewEntNum)
             {
                 lockedView = 1;
                 CG_CalcEntityLerpPositions(localClientNum, cent);
             }
-            else if (eType == 1 && CG_VehEntityUsingVehicle(localClientNum, entnum))
+            else if (eType == ET_PLAYER && CG_VehEntityUsingVehicle(localClientNum, entnum))
             {
                 bcassert(linkedPlayerCount, MAX_CLIENTS);
                 linkedPlayers[linkedPlayerCount++] = entnum;
@@ -1259,7 +1259,7 @@ DObj_s *__cdecl CG_PreProcess_GetDObj(int32_t localClientNum, int32_t entIndex, 
         *v6 = 131072.0f;
         v6[1] = 131072.0f;
         v6[2] = 131072.0f;
-        if (entType == 12)
+        if (entType == ET_HELICOPTER)
             XAnimSetCompleteGoalWeight(obj, 1u, 1.0f, 0.2f, 1.5f, 0, 0, 1);
     }
     return obj;
@@ -1270,12 +1270,12 @@ XAnim_s *__cdecl CG_GetAnimations(int32_t localClientNum, uint32_t entIndex, int
     centity_s *cent; // [esp+4h] [ebp-4h]
     centity_s *centa; // [esp+4h] [ebp-4h]
 
-    if (entType == 11)
+    if (entType == ET_MG42)
     {
         cent = CG_GetEntity(localClientNum, entIndex);
         return CG_GetMG42Anims(cent);
     }
-    else if (entType == 12)
+    else if (entType == ET_HELICOPTER)
     {
         centa = CG_GetEntity(localClientNum, entIndex);
         return CG_GetHelicopterAnims(centa);
@@ -1347,22 +1347,22 @@ void __cdecl CG_ClearUnion(int32_t localClientNum, centity_s *cent)
 {
     switch (cent->pose.eTypeUnion)
     {
-    case 1u:
+    case ET_PLAYER:
         *(_QWORD *)&cent->pose.player.control = 0;
         cent->pose.turret.barrelPitch = 0.0;
         break;
-    case 8u:
-    case 9u:
+    case ET_FX:
+    case ET_LOOP_FX:
         if (cent->pose.fx.effect)
             FX_ThroughWithEffect(localClientNum, cent->pose.fx.effect);
         *(_QWORD *)&cent->pose.player.control = 0;
         break;
-    case 0xBu:
+    case ET_MG42:
         *(_QWORD *)&cent->pose.player.control = 0;
         *((_QWORD *)&cent->pose.fx + 1) = 0;
         break;
-    case 0xCu:
-    case 0xEu:
+    case ET_HELICOPTER:
+    case ET_VEHICLE:
         *(_QWORD *)&cent->pose.player.control = 0;
         *((_QWORD *)&cent->pose.fx + 1) = 0;
         *((_QWORD *)&cent->pose.fx + 2) = 0;
@@ -1372,25 +1372,25 @@ void __cdecl CG_ClearUnion(int32_t localClientNum, centity_s *cent)
     default:
         break;
     }
-    cent->pose.eTypeUnion = 0;
+    cent->pose.eTypeUnion = ET_GENERAL;
 }
 
 void __cdecl CG_SetUnionType(int32_t localClientNum, centity_s *cent)
 {
     switch (cent->nextState.eType)
     {
-    case 1:
-    case 8:
-    case 9:
-    case 0xB:
-    case 0xC:
-    case 0xE:
+    case ET_PLAYER:
+    case ET_FX:
+    case ET_LOOP_FX:
+    case ET_MG42:
+    case ET_HELICOPTER:
+    case ET_VEHICLE:
         cent->pose.eTypeUnion = cent->nextState.eType;
         if (cent->pose.eTypeUnion != cent->nextState.eType)
             MyAssertHandler(".\\cgame_mp\\cg_ents_mp.cpp", 1674, 0, "%s", "cent->pose.eTypeUnion == cent->nextState.eType");
         break;
     default:
-        cent->pose.eTypeUnion = 0;
+        cent->pose.eTypeUnion = ET_GENERAL;
         break;
     }
 }
@@ -1408,46 +1408,46 @@ void __cdecl CG_ProcessEntity(int32_t localClientNum, centity_s *cent)
         CG_UpdatePoseUnion(localClientNum, cent);
     switch (cent->nextState.eType)
     {
-    case 0:
+    case ET_GENERAL:
         CG_General(localClientNum, cent);
         break;
-    case 1:
+    case ET_PLAYER:
         CG_Player(localClientNum, cent);
         break;
-    case 2:
+    case ET_PLAYER_CORPSE:
         CG_Corpse(localClientNum, cent);
         break;
-    case 3:
+    case ET_ITEM:
         CG_Item(localClientNum, cent);
         break;
-    case 4:
+    case ET_MISSILE:
         CG_Missile(localClientNum, cent);
         break;
-    case 5:
+    case ET_INVISIBLE:
         return;
-    case 6:
+    case ET_SCRIPTMOVER:
         goto $LN6_8;
-    case 7:
+    case ET_SOUND_BLEND:
         CG_SoundBlend(localClientNum, cent);
         break;
-    case 8:
+    case ET_FX:
         CG_Fx(localClientNum, cent);
         break;
-    case 9:
+    case ET_LOOP_FX:
         CG_LoopFx(localClientNum, cent);
         break;
-    case 0xA:
+    case ET_PRIMARY_LIGHT:
         CG_PrimaryLight(localClientNum, cent);
         break;
-    case 0xB:
+    case ET_MG42:
         CG_mg42(localClientNum, cent);
         break;
-    case 0xC:
-    case 0xE:
+    case ET_HELICOPTER:
+    case ET_VEHICLE:
         CG_VehProcessEntity(localClientNum, cent);
         CG_CompassUpdateVehicleInfo(localClientNum, cent->nextState.number);
         break;
-    case 0xD:
+    case ET_PLANE:
         CG_CompassUpdateVehicleInfo(localClientNum, cent->nextState.number);
     $LN6_8:
         CG_ScriptMover(localClientNum, cent);

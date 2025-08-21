@@ -60,7 +60,7 @@ void __cdecl SP_light(gentity_s *self)
         self->r.maxs[0] = radius;
         self->r.maxs[1] = radius;
         self->r.maxs[2] = radius;
-        self->s.eType = 10;
+        self->s.eType = ET_PRIMARY_LIGHT;
         if (self->r.contents)
             MyAssertHandler(".\\game_mp\\g_misc_mp.cpp", 58, 1, "%s", "self->r.contents == 0");
         self->handler = 20;
@@ -1143,7 +1143,7 @@ void __cdecl G_SpawnTurret(gentity_s *self, const char *weaponinfoname)
     self->clipmask = 1;
     self->r.contents = 2097156;
     self->r.svFlags = 0;
-    self->s.eType = 11;
+    self->s.eType = ET_MG42;
     self->flags |= 0x1000u;
     G_DObjUpdate(self);
     self->r.mins[0] = -32.0;

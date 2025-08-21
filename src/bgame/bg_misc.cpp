@@ -1022,7 +1022,7 @@ void __cdecl BG_RegisterDvars()
 
 char *__cdecl BG_GetEntityTypeName(int32_t eType)
 {
-    if (eType < 17)
+    if (eType < ET_EVENTS)
         return (char*)entityTypeNames[eType];
 
     iassert((eType - ET_EVENTS >= 0 && eType - ET_EVENTS < EV_MAX_EVENTS));

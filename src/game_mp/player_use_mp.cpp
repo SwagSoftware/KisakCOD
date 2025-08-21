@@ -220,7 +220,7 @@ void __cdecl Player_UpdateCursorHints(gentity_s *ent)
                                 MyAssertHandler(".\\game_mp\\player_use_mp.cpp", 583, 0, "%s", "traceEnt->r.inuse");
                             switch (self->s.eType)
                             {
-                            case 0:
+                            case ET_GENERAL:
                                 if (self->classname != scr_const.trigger_use && self->classname != scr_const.trigger_use_touch)
                                     goto LABEL_49;
                                 if (self->team && self->team != ent->client->sess.cs.team
@@ -232,24 +232,24 @@ void __cdecl Player_UpdateCursorHints(gentity_s *ent)
                                 if (self->s.un2.hintString && self->s.un1.scale != 255)
                                     scale = self->s.un1.scale;
                                 goto LABEL_49;
-                            case 3:
+                            case ET_ITEM:
                                 ItemCursorHint = Player_GetItemCursorHint(ent->client, self);
                                 if (!ItemCursorHint)
                                     goto LABEL_21;
                                 hintString = ItemCursorHint;
                                 goto LABEL_49;
-                            case 4:
+                            case ET_MISSILE:
                                 hintString = self->s.index.brushmodel % 128 + 4;
                                 ps->throwBackGrenadeTimeLeft = self->nextthink - level.time;
                                 goto LABEL_49;
-                            case 0xB:
+                            case ET_MG42:
                                 if (!G_IsTurretUsable(self, ent))
                                     goto LABEL_21;
                                 hintString = self->s.weapon + 4;
                                 if (*BG_GetWeaponDef(self->s.weapon)->szUseHintString)
                                     scale = BG_GetWeaponDef(self->s.weapon)->iUseHintStringIndex;
                                 goto LABEL_49;
-                            case 0xE:
+                            case ET_VEHICLE:
                                 if (!G_VehUsable(self, ent))
                                     goto LABEL_21;
                                 hintString = 1;
@@ -387,10 +387,10 @@ int32_t __cdecl Player_GetUseList(gentity_s *ent, useList_t *useList, int32_t pr
                     v6 >= v3))
             {
                 eType = gEnt->s.eType;
-                if (eType == 4)
+                if (eType == ET_MISSILE)
                     v23 = player_throwbackOuterRadius->current.value;
                 else
-                    v23 = eType == 11 ? player_MGUseRadius->current.value : 128.0f;
+                    v23 = eType == ET_MG42 ? player_MGUseRadius->current.value : 128.0f;
                 Vec3Add(gEnt->r.absmin, gEnt->r.absmax, v);
                 Vec3Scale(v, 0.5f, v);
                 Vec3Sub(v, origin, a);

@@ -2029,7 +2029,7 @@ void __cdecl CG_EjectWeaponBrass(int32_t localClientNum, const entityState_s *en
     const FxEffectDef *fxDef; // [esp+20h] [ebp-8h]
     const WeaponDef *weaponDef; // [esp+24h] [ebp-4h]
 
-    if (cg_brass->current.enabled && ent->eType < 17 && ent->weapon)
+    if (cg_brass->current.enabled && ent->eType < ET_EVENTS && ent->weapon)
     {
         if (ent->weapon < BG_GetNumWeapons())
         {

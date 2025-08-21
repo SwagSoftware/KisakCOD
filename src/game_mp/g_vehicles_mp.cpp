@@ -574,7 +574,7 @@ void __cdecl SpawnVehicle(gentity_s *ent, const char *typeName)
     infoIdx = VEH_GetVehicleInfoFromName(typeName);
     if (infoIdx < 0)
         Com_Error(ERR_DROP, "Can't find info for script vehicle [%s]", typeName);
-    ent->s.eType = 14;
+    ent->s.eType = ET_VEHICLE;
     VEH_InitModelAndValidateTags(ent, &infoIdx);
     if (!level.initializing)
     {
@@ -885,7 +885,7 @@ void __cdecl InitEntityVars(gentity_s *ent, scr_vehicle_s *veh, int32_t infoIdx)
             MyAssertHandler(".\\game_mp\\g_vehicles_mp.cpp", 2874, 0, "Initializing a usable vehicle!");
         ent->r.contents |= 0x200000u;
     }
-    ent->s.eType = 14;
+    ent->s.eType = ET_VEHICLE;
     ent->s.lerp.eFlags = 0;
     ent->s.lerp.pos.trType = TR_INTERPOLATE;
     ent->s.lerp.apos.trType = TR_INTERPOLATE;
@@ -2747,6 +2747,6 @@ void __cdecl G_VehSpawner(gentity_s *pSelf)
 void __cdecl G_VehCollmapSpawner(gentity_s *pSelf)
 {
     pSelf->r.contents = 0;
-    pSelf->s.eType = 15;
+    pSelf->s.eType = ET_VEHICLE_COLLMAP;
 }
 

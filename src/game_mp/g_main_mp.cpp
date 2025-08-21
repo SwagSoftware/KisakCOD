@@ -1447,7 +1447,7 @@ const dvar_s *ShowEntityInfo()
             result = (const dvar_s *)i;
             if (i >= level.num_entities)
                 break;
-            if (ent->s.eType < 17 && ent->r.inuse && ent->r.linked)
+            if (ent->s.eType < ET_EVENTS && ent->r.inuse && ent->r.linked)
             {
                 if (ent->s.eType == ET_ITEM)
                 {
@@ -1548,10 +1548,10 @@ void __cdecl G_RunFrameForEntity(gentity_s *ent)
         {
             switch (ent->s.eType)
             {
-            case 4:
+            case ET_MISSILE:
                 G_RunMissile(ent);
                 return;
-            case 3:
+            case ET_ITEM:
                 if (ent->tagInfo)
                 {
                     G_GeneralLink(ent);
@@ -1561,7 +1561,7 @@ void __cdecl G_RunFrameForEntity(gentity_s *ent)
             LABEL_33:
                 G_RunItem(ent);
                 return;
-            case 2:
+            case ET_PLAYER_CORPSE:
                 G_RunCorpse(ent);
                 return;
             }
@@ -1577,7 +1577,7 @@ void __cdecl G_RunFrameForEntity(gentity_s *ent)
             }
             else
             {
-                if (!ent->s.eType)
+                if (ent->s.eType == ET_GENERAL)
                 {
                     if (ent->tagInfo)
                         G_GeneralLink(ent);

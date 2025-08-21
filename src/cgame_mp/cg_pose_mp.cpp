@@ -216,14 +216,14 @@ void __cdecl CG_DoControllers(const cpose_t *pose, const DObj_s *obj, int32_t *p
     DObjGetSetBones(obj, setPartBits);
     switch (pose->eType)
     {
-    case 1:
+    case ET_PLAYER:
         CG_Player_DoControllers(pose, obj, partBits);
         break;
-    case 11:
+    case ET_MG42:
         CG_mg42_DoControllers(pose, obj, partBits);
         break;
-    case 12:
-    case 14:
+    case ET_HELICOPTER:
+    case ET_VEHICLE:
         CG_VehPoseControllers(pose, obj, partBits);
         break;
     default:
