@@ -3960,7 +3960,7 @@ void __cdecl GScr_Detonate(scr_entref_t entref)
 
     ent = GetEntity(entref);
     weapDef = BG_GetWeaponDef(ent->s.weapon);
-    if (ent->s.eType != 4 || !weapDef || weapDef->weapType != WEAPTYPE_GRENADE)
+    if (ent->s.eType != ET_MISSILE || !weapDef || weapDef->weapType != WEAPTYPE_GRENADE)
         Scr_ObjectError("entity is not a grenade");
     if (Scr_GetNumParam())
     {

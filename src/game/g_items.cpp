@@ -161,7 +161,7 @@ void __cdecl Touch_Item(gentity_s *ent, gentity_s *other, int32_t touched)
                     }
                     if (pickedUp)
                     {
-                        if (ent->s.eType == 4)
+                        if (ent->s.eType == ET_MISSILE)
                             Scr_Notify(ent, scr_const.death, 0);
                         G_FreeEntity(ent);
                     }
@@ -221,7 +221,7 @@ int32_t __cdecl WeaponPickup_Grab(gentity_s *weaponEnt, gentity_s *player, int32
     droppedEnt = 0;
     weaponModel = weaponEnt->s.index.brushmodel / 128;
     weapDef = BG_GetWeaponDef(weapIdx);
-    if (weaponEnt->s.eType == 4)
+    if (weaponEnt->s.eType == ET_MISSILE)
     {
         *pickupEvent = 10;
         WeaponPickup_Notifies(weaponEnt, 0, player, weapDef);

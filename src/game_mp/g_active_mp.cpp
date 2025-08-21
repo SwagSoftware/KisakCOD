@@ -200,7 +200,7 @@ void __cdecl G_TouchTriggers(gentity_s *ent)
         item = &g_entities[entityList[i]].s;
         if ((LODWORD(item[1].lerp.pos.trDelta[2]) & 0x405C0008) == 0)
             MyAssertHandler(".\\game_mp\\g_active_mp.cpp", 215, 0, "%s", "hit->r.contents & MASK_TRIGGER");
-        if (item->eType == 4)
+        if (item->eType == ET_MISSILE)
             MyAssertHandler(".\\game_mp\\g_active_mp.cpp", 216, 0, "%s", "hit->s.eType != ET_MISSILE");
         v6 = entityHandlers[BYTE2(item[1].attackerEntityNum)].touch;
         if (v6 || touch)
@@ -454,7 +454,7 @@ bool __cdecl IsLiveGrenade(gentity_s *ent)
 {
     WeaponDef *weapDef; // [esp+0h] [ebp-4h]
 
-    if (ent->s.eType != 4)
+    if (ent->s.eType != ET_MISSILE)
         return 0;
     weapDef = BG_GetWeaponDef(ent->s.index.brushmodel % 128);
     if (!weapDef)

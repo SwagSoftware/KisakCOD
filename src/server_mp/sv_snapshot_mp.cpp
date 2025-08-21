@@ -1061,7 +1061,7 @@ void __cdecl SV_BuildClientSnapshot(client_t *client)
                             v4->lerp.apos.trTime += v19;
                         if (v4->time2)
                             v4->time2 += v19;
-                        if (v4->eType == 4)
+                        if (v4->eType == ET_MISSILE)
                         {
                             v4->lerp.u.missile.launchTime += v19;
                         }

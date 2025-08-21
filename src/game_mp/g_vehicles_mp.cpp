@@ -1039,7 +1039,7 @@ bool __cdecl AttachedStickyMissile_0(gentity_s *vehicle, gentity_s *missile)
         MyAssertHandler(".\\game_mp\\g_vehicles_mp.cpp", 1346, 0, "%s", "missile");
     if (missile->s.groundEntityNum != vehicle->s.number)
         return 0;
-    if (missile->s.eType != 4)
+    if (missile->s.eType != ET_MISSILE)
         return 0;
     weapDef = BG_GetWeaponDef(missile->s.weapon);
     if (!weapDef)
@@ -1202,8 +1202,8 @@ void __cdecl VEH_TouchEntities_0(gentity_s *ent, float frameTime)
             target = &g_entities[entityList[i]];
             v24 = entityHandlers[target->handler].touch;
             if (target->s.number != ent->s.number
-                && (target->s.eType == ET_PLAYER || target->s.eType == 6 || target->s.eType == 14 || target->s.eType == 4)
-                && (!target->r.ownerNum.isDefined() || target->s.eType == 4 && target->r.ownerNum.ent() != ent))
+                && (target->s.eType == ET_PLAYER || target->s.eType == 6 || target->s.eType == 14 || target->s.eType == ET_MISSILE)
+                && (!target->r.ownerNum.isDefined() || target->s.eType == ET_MISSILE && target->r.ownerNum.ent() != ent))
             {
                 if (target->s.groundEntityNum == ent->s.number)
                     goto LABEL_18;

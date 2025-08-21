@@ -378,7 +378,7 @@ int32_t __cdecl Player_GetUseList(gentity_s *ent, useList_t *useList, int32_t pr
                     }
                 }
             }
-            else if (gEnt->s.eType != 4
+            else if (gEnt->s.eType != ET_MISSILE
                 || (prevHintEntIndex == gEnt->s.number
                     || (v13 = player_throwbackInnerRadius->current.value,
                         v13 * v13 >= Vec2DistanceSq(gEnt->r.currentOrigin, ent->r.currentOrigin)))
@@ -402,7 +402,7 @@ int32_t __cdecl Player_GetUseList(gentity_s *ent, useList_t *useList, int32_t pr
                     {
                         v26 = 1.0f - (v14 + 1.0f) * 0.5f;
                         useList[num].score = v26 * v19;
-                        if (gEnt->s.eType == 4)
+                        if (gEnt->s.eType == ET_MISSILE)
                             useList[num].score = useList[num].score - (v19 + v19);
                         if (gEnt->classname == scr_const.trigger_use)
                             useList[num].score = useList[num].score - v19;
