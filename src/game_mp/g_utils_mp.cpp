@@ -1376,7 +1376,7 @@ void __cdecl G_AddEvent(gentity_s *ent, unsigned int event, unsigned int eventPa
         MyAssertHandler(".\\game_mp\\g_utils_mp.cpp", 1714, 0, "event doesn't index 256\n\t%i not in [0, %i)", event, 256);
     if (eventParm >= 0xFF)
         MyAssertHandler(".\\game_mp\\g_utils_mp.cpp", 1715, 0, "%s", "eventParm < EVENT_PARM_MAX");
-    if (ent->s.eType >= 17)
+    if (ent->s.eType >= ET_EVENTS)
         MyAssertHandler(".\\game_mp\\g_utils_mp.cpp", 1716, 0, "%s", "ent->s.eType < ET_EVENTS");
     if (ent->client)
     {
@@ -1451,7 +1451,7 @@ void __cdecl G_SetConstString(unsigned __int16 *to, char *from)
 
 const char *__cdecl G_GetEntityTypeName(const gentity_s *ent)
 {
-    if (ent->s.eType >= 0x11u)
+    if (ent->s.eType >= ET_EVENTS)
         MyAssertHandler(".\\game_mp\\g_utils_mp.cpp", 1870, 0, "%s", "(unsigned)ent->s.eType < ET_EVENTS");
     return entityTypeNames[ent->s.eType];
 }
