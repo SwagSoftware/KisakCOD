@@ -364,7 +364,7 @@ void __cdecl G_DObjUpdate(gentity_s *ent)
             {
                 ent->s.index.brushmodel = modelIndex;
             }
-            else if (ent->s.eType == 14 || ent->s.eType == ET_HELICOPTER)
+            else if (ent->s.eType == ET_VEHICLE || ent->s.eType == ET_HELICOPTER)
             {
                 ent->s.un2.hintString = modelIndex;
             }

@@ -598,7 +598,7 @@ void __cdecl VehicleFXTest(int32_t localClientNum, const DObj_s *obj, centity_s 
     ns = &cent->nextState;
     cgameGlob = CG_GetLocalClientGlobals(localClientNum);
     speed = GetSpeed(localClientNum, cent);
-    if (cent->nextState.eType == 14)
+    if (cent->nextState.eType == ET_VEHICLE)
     {
         if (speed >= 0.050000001 && speed <= 0.60000002)
         {

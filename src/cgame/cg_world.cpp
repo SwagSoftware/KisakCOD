@@ -81,7 +81,7 @@ DObj_s *__cdecl CG_LocationalTraceDObj(int32_t localClientNum, uint32_t entIndex
     cent = CG_GetEntity(localClientNum, entIndex);
     if (cent->nextState.solid)
         return 0;
-    if (cent->nextState.eType == ET_SCRIPTMOVER || cent->nextState.eType == 14 || cent->nextState.eType == ET_HELICOPTER)
+    if (cent->nextState.eType == ET_SCRIPTMOVER || cent->nextState.eType == ET_VEHICLE || cent->nextState.eType == ET_HELICOPTER)
         return Com_GetClientDObj(entIndex, localClientNum);
     return 0;
 }

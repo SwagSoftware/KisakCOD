@@ -2280,7 +2280,7 @@ void __cdecl DrawBulletImpacts(
         }
         else
         {
-            if (ent->nextState.eType != 14 && ent->nextState.eType != ET_HELICOPTER)
+            if (ent->nextState.eType != ET_VEHICLE && ent->nextState.eType != ET_HELICOPTER)
             {
                 Com_PrintError(14, "Unknown eType %i in CG_DrawBulletImpacts()\n", ent->nextState.eType);
                 return;

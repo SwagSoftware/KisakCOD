@@ -1202,7 +1202,7 @@ void __cdecl VEH_TouchEntities_0(gentity_s *ent, float frameTime)
             target = &g_entities[entityList[i]];
             v24 = entityHandlers[target->handler].touch;
             if (target->s.number != ent->s.number
-                && (target->s.eType == ET_PLAYER || target->s.eType == ET_SCRIPTMOVER || target->s.eType == 14 || target->s.eType == ET_MISSILE)
+                && (target->s.eType == ET_PLAYER || target->s.eType == ET_SCRIPTMOVER || target->s.eType == ET_VEHICLE || target->s.eType == ET_MISSILE)
                 && (!target->r.ownerNum.isDefined() || target->s.eType == ET_MISSILE && target->r.ownerNum.ent() != ent))
             {
                 if (target->s.groundEntityNum == ent->s.number)
@@ -1263,7 +1263,7 @@ void __cdecl VEH_TouchEntities_0(gentity_s *ent, float frameTime)
                         VEH_PushEntity_0(ent, target, frameTime, out, diff, v3);
                         continue;
                     }
-                    if (target->s.eType == 14)
+                    if (target->s.eType == ET_VEHICLE)
                     {
                         if (!target->scr_vehicle)
                             MyAssertHandler(".\\game_mp\\g_vehicles_mp.cpp", 1604, 0, "%s", "hit->scr_vehicle");
