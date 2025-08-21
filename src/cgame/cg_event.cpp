@@ -459,7 +459,7 @@ void __cdecl CG_EntityEvent(int32_t localClientNum, centity_s *cent, int32_t eve
                     ent->otherEntityNum,
                     ent->groundEntityNum,
                     ent->weapon,
-                    ent->lerp.u.turret.gunAngles,
+                    &ent->lerp.u.bulletHit.start[0],
                     cent->pose.origin,
                     dir,
                     ent->surfType,
@@ -473,7 +473,7 @@ void __cdecl CG_EntityEvent(int32_t localClientNum, centity_s *cent, int32_t eve
                 CG_BulletHitClientEvent(
                     localClientNum,
                     ent->otherEntityNum,
-                    ent->lerp.u.turret.gunAngles,
+                    &ent->lerp.u.bulletHit.start[0],
                     cent->pose.origin,
                     ent->surfType,
                     event,
@@ -613,19 +613,19 @@ void __cdecl CG_EntityEvent(int32_t localClientNum, centity_s *cent, int32_t eve
                     Com_Printf(
                         14,
                         "Playing smoke grenade at %i at ( %f, %f, %f )\n",
-                        ent->lerp.u.missile.launchTime,
+                        ent->lerp.u.customExplode.startTime,
                         ent->lerp.pos.trBase[0],
                         ent->lerp.pos.trBase[1],
                         ent->lerp.pos.trBase[2]);
                     FX_PlayOrientedEffect(
                         localClientNum,
                         weaponDef->projExplosionEffect,
-                        ent->lerp.u.missile.launchTime,
+                        ent->lerp.u.customExplode.startTime,
                         ent->lerp.pos.trBase,
                         axis);
                 }
                 if (weaponDef->projExplosionSound
-                    && ((ent->lerp.eFlags & 0x10000) == 0 || cgameGlob->time - ent->lerp.u.missile.launchTime < 200))
+                    && ((ent->lerp.eFlags & 0x10000) == 0 || cgameGlob->time - ent->lerp.u.customExplode.startTime < 200))
                 {
                     CG_PlaySoundAlias(localClientNum, ENTITYNUM_WORLD, position, weaponDef->projExplosionSound);
                 }
@@ -703,19 +703,19 @@ void __cdecl CG_EntityEvent(int32_t localClientNum, centity_s *cent, int32_t eve
                     localClientNum,
                     0,
                     position,
-                    ent->lerp.u.turret.gunAngles[0],
+                    ent->lerp.u.explosion.innerRadius,
                     p_4c,
                     vec3_origin,
-                    ent->lerp.u.turret.gunAngles[1]);
+                    ent->lerp.u.explosion.magnitude);
                 innerRadius_4c = (float)ent->eventParm;
                 DynEntCl_ExplosionEvent(
                     localClientNum,
                     0,
                     position,
-                    ent->lerp.u.turret.gunAngles[0],
+                    ent->lerp.u.explosion.innerRadius,
                     innerRadius_4c,
                     (float *)vec3_origin,
-                    ent->lerp.u.turret.gunAngles[1],
+                    ent->lerp.u.explosion.magnitude,
                     0,
                     0);
                 return;
@@ -725,19 +725,19 @@ void __cdecl CG_EntityEvent(int32_t localClientNum, centity_s *cent, int32_t eve
                     localClientNum,
                     1,
                     position,
-                    ent->lerp.u.turret.gunAngles[0],
+                    ent->lerp.u.explosion.innerRadius,
                     p_4d,
                     vec3_origin,
-                    ent->lerp.u.turret.gunAngles[1]);
+                    ent->lerp.u.explosion.magnitude);
                 innerRadius_4d = (float)ent->eventParm;
                 DynEntCl_ExplosionEvent(
                     localClientNum,
                     1,
                     position,
-                    ent->lerp.u.turret.gunAngles[0],
+                    ent->lerp.u.explosion.innerRadius,
                     innerRadius_4d,
                     (float *)vec3_origin,
-                    ent->lerp.u.turret.gunAngles[1],
+                    ent->lerp.u.explosion.magnitude,
                     0,
                     0);
                 return;
@@ -747,18 +747,18 @@ void __cdecl CG_EntityEvent(int32_t localClientNum, centity_s *cent, int32_t eve
                     localClientNum,
                     1,
                     position,
-                    ent->lerp.u.turret.gunAngles[0],
+                    ent->lerp.u.explosionJolt.innerRadius,
                     p_4e,
-                    &ent->lerp.u.turret.gunAngles[1],
+                    &ent->lerp.u.explosionJolt.impulse[0],
                     1.0);
                 innerRadius_4e = (float)ent->eventParm;
                 DynEntCl_ExplosionEvent(
                     localClientNum,
                     1,
                     position,
-                    ent->lerp.u.turret.gunAngles[0],
+                    ent->lerp.u.explosionJolt.innerRadius,
                     innerRadius_4e,
-                    &ent->lerp.u.turret.gunAngles[1],
+                    &ent->lerp.u.explosionJolt.impulse[0],
                     1.0,
                     0,
                     0);
@@ -768,18 +768,18 @@ void __cdecl CG_EntityEvent(int32_t localClientNum, centity_s *cent, int32_t eve
                 DynEntCl_JitterEvent(
                     localClientNum,
                     position,
-                    ent->lerp.u.turret.gunAngles[0],
+                    ent->lerp.u.physicsJitter.innerRadius,
                     p_4f,
-                    ent->lerp.u.turret.gunAngles[1],
-                    ent->lerp.u.turret.gunAngles[2]);
+                    ent->lerp.u.physicsJitter.minDisplacement,
+                    ent->lerp.u.physicsJitter.maxDisplacement);
                 return;
             case EV_EARTHQUAKE:
                 CG_StartShakeCamera(
                     localClientNum,
-                    ent->lerp.u.turret.gunAngles[0],
+                    ent->lerp.u.earthquake.scale,
                     ent->lerp.u.earthquake.duration,
                     cent->pose.origin,
-                    ent->lerp.u.turret.gunAngles[1]);
+                    ent->lerp.u.earthquake.radius);
                 return;
             case EV_DETONATE:
                 if (isPlayerView)

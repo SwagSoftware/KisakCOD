@@ -1610,7 +1610,7 @@ void __cdecl CG_RestartSmokeGrenades(int32_t localClientNum)
             v3 = (int)&nextSnap->entities[i];
             if ((nextSnap->entities[i].lerp.eFlags & 0x10000) != 0
                 && nextSnap->entities[i].time2 >= cgameGlob->time
-                && nextSnap->entities[i].lerp.u.missile.launchTime <= cgameGlob->time)
+                && nextSnap->entities[i].lerp.u.customExplode.startTime <= cgameGlob->time)
             {
                 if (nextSnap->entities[i].eType)
                     MyAssertHandler(
@@ -1635,14 +1635,14 @@ void __cdecl CG_RestartSmokeGrenades(int32_t localClientNum)
                 Com_Printf(
                     14,
                     "Restarting smoke grenade at time %i at ( %f, %f, %f )\n",
-                    nextSnap->entities[i].lerp.u.missile.launchTime,
+                    nextSnap->entities[i].lerp.u.customExplode.startTime,
                     nextSnap->entities[i].lerp.pos.trBase[0],
                     nextSnap->entities[i].lerp.pos.trBase[1],
                     nextSnap->entities[i].lerp.pos.trBase[2]);
                 FX_PlayOrientedEffect(
                     localClientNum,
                     cgs->smokeGrenadeFx,
-                    nextSnap->entities[i].lerp.u.missile.launchTime,
+                    nextSnap->entities[i].lerp.u.customExplode.startTime,
                     nextSnap->entities[i].lerp.pos.trBase,
                     axis);
             }

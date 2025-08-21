@@ -677,9 +677,9 @@ void __cdecl Bullet_ImpactEffect(
     {
         //tempEnt = G_TempEntity((float*)br->hitPos, ((_cntlzw(weapDef->bRifleBullet) & 0x20) == 0) + 46);
         tempEnt = G_TempEntity((float*)br->hitPos, ((weapDef->bRifleBullet != 0) + 46));
-        tempEnt->s.lerp.u.turret.gunAngles[0] = bp->start[0];
-        tempEnt->s.lerp.u.turret.gunAngles[1] = bp->start[1];
-        tempEnt->s.lerp.u.turret.gunAngles[2] = bp->start[2];
+        tempEnt->s.lerp.u.bulletHit.start[0] = bp->start[0];
+        tempEnt->s.lerp.u.bulletHit.start[1] = bp->start[1];
+        tempEnt->s.lerp.u.bulletHit.start[2] = bp->start[2];
         tempEnt->s.weapon = BG_GetWeaponIndex(weapDef);
         tempEnt->s.surfType = (br->trace.surfaceFlags >> 20) & 0x1F;
         tempEnt->s.otherEntityNum = bp->weaponEntIndex;
@@ -710,9 +710,9 @@ void __cdecl Bullet_ImpactEffect(
         G_SetAngle(tempEnt, (float*)normal);
         tempEnt->s.un1.eventParm2 = impactEffectFlags;
         tempEnt->s.surfType = (br->trace.surfaceFlags >> 20) & 0x1F;
-        tempEnt->s.lerp.u.turret.gunAngles[0] = bp->start[0];
-        tempEnt->s.lerp.u.turret.gunAngles[1] = bp->start[1];
-        tempEnt->s.lerp.u.turret.gunAngles[2] = bp->start[2];
+        tempEnt->s.lerp.u.bulletHit.start[0] = bp->start[0];
+        tempEnt->s.lerp.u.bulletHit.start[1] = bp->start[1];
+        tempEnt->s.lerp.u.bulletHit.start[2] = bp->start[2];
         tempEnt->s.otherEntityNum = bp->weaponEntIndex;
         v24 = br->hitEnt;
         if (v24)

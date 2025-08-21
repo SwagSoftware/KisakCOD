@@ -4303,7 +4303,7 @@ LABEL_13:
         MyAssertHandler(".\\game_mp\\g_scr_main_mp.cpp", 4471, 0, "%s", "ent->s.un1.eventParm2 == fxId");
     G_SetOrigin(ent, pos);
     Scr_SetFxAngles(givenAxisCount, axis, ent->s.lerp.apos.trBase);
-    ent->s.lerp.u.turret.gunAngles[0] = cullDist;
+    ent->s.lerp.u.loopFx.cullDist = cullDist;
     ent->s.lerp.u.loopFx.period = repeat;
     SV_LinkEntity(ent);
     Scr_AddEntity(ent);
@@ -4401,14 +4401,14 @@ void Scr_PhysicsExplosionSphere()
     Scr_GetVector(0, pos);
     ent = G_TempEntity(pos, 57);
     ent->s.eventParm = Scr_GetInt(1);
-    ent->s.lerp.u.turret.gunAngles[0] = Scr_GetFloat(2);
-    if (ent->s.lerp.u.turret.gunAngles[0] < 0.0)
+    ent->s.lerp.u.explosion.innerRadius = Scr_GetFloat(2);
+    if (ent->s.lerp.u.explosion.innerRadius < 0.0)
         Scr_ParamError(2u, "Radius is negative");
-    if (ent->s.lerp.u.turret.gunAngles[0] > (double)ent->s.eventParm)
+    if (ent->s.lerp.u.explosion.innerRadius > (double)ent->s.eventParm)
         Scr_Error("Inner radius is outside the outer radius");
     Float = Scr_GetFloat(3);
     result = ent;
-    ent->s.lerp.u.turret.gunAngles[1] = Float;
+    ent->s.lerp.u.explosion.magnitude = Float;
 }
 
 void Scr_PhysicsRadiusJolt()
@@ -4421,17 +4421,17 @@ void Scr_PhysicsRadiusJolt()
     Scr_GetVector(0, pos);
     ent = G_TempEntity(pos, 59);
     ent->s.eventParm = Scr_GetInt(1);
-    ent->s.lerp.u.turret.gunAngles[0] = Scr_GetFloat(2);
-    if (ent->s.lerp.u.turret.gunAngles[0] < 0.0f)
+    ent->s.lerp.u.explosionJolt.innerRadius = Scr_GetFloat(2);
+    if (ent->s.lerp.u.explosionJolt.innerRadius < 0.0f)
         Scr_ParamError(2u, "Radius is negative");
-    if (ent->s.lerp.u.turret.gunAngles[0] > (float)ent->s.eventParm)
+    if (ent->s.lerp.u.explosionJolt.innerRadius > (float)ent->s.eventParm)
         Scr_Error("Inner radius is outside the outer radius");
-    Scr_GetVector(3u, &ent->s.lerp.u.turret.gunAngles[1]);
-    if (ent->s.lerp.u.turret.gunAngles[1] == 0.0f
-        && ent->s.lerp.u.turret.gunAngles[2] == 0.0f
-        && ent->s.lerp.u.primaryLight.cosHalfFovOuter == 0.0f)
+    Scr_GetVector(3u, &ent->s.lerp.u.explosionJolt.impulse[0]);
+    if (ent->s.lerp.u.explosionJolt.impulse[0] == 0.0f
+        && ent->s.lerp.u.explosionJolt.impulse[1] == 0.0f
+        && ent->s.lerp.u.explosionJolt.impulse[2] == 0.0f)
     {
-        ent->s.lerp.u.turret.gunAngles[1] = 1.1754944e-38f;
+        ent->s.lerp.u.explosionJolt.impulse[0] = 1.1754944e-38f;
     }
 }
 
@@ -4445,14 +4445,14 @@ void Scr_PhysicsRadiusJitter()
     Scr_GetVector(0, pos);
     ent = G_TempEntity(pos, 60);
     ent->s.eventParm = Scr_GetInt(1);
-    ent->s.lerp.u.turret.gunAngles[0] = Scr_GetFloat(2);
-    if (ent->s.lerp.u.turret.gunAngles[0] < 0.0f)
+    ent->s.lerp.u.physicsJitter.innerRadius = Scr_GetFloat(2);
+    if (ent->s.lerp.u.physicsJitter.innerRadius < 0.0f)
         Scr_ParamError(2u, "Radius is negative");
-    if (ent->s.lerp.u.turret.gunAngles[0] > (float)ent->s.eventParm)
+    if (ent->s.lerp.u.physicsJitter.innerRadius > (float)ent->s.eventParm)
         Scr_Error("Inner radius is outside the outer radius");
-    ent->s.lerp.u.turret.gunAngles[1] = Scr_GetFloat(3);
-    ent->s.lerp.u.turret.gunAngles[2] = Scr_GetFloat(4);
-    if (ent->s.lerp.u.turret.gunAngles[2] < (float)ent->s.lerp.u.turret.gunAngles[1])
+    ent->s.lerp.u.physicsJitter.minDisplacement = Scr_GetFloat(3);
+    ent->s.lerp.u.physicsJitter.maxDisplacement = Scr_GetFloat(4);
+    if (ent->s.lerp.u.physicsJitter.maxDisplacement < ent->s.lerp.u.physicsJitter.minDisplacement)
         Scr_Error("Maximum jitter is less than minimum jitter");
 }
 
@@ -4468,14 +4468,14 @@ void Scr_PhysicsExplosionCylinder()
     Scr_GetVector(0, pos);
     ent = G_TempEntity(pos, 58);
     ent->s.eventParm = Scr_GetInt(1);
-    ent->s.lerp.u.turret.gunAngles[0] = Scr_GetFloat(2);
-    if (ent->s.lerp.u.turret.gunAngles[0] < 0.0f)
+    ent->s.lerp.u.explosion.innerRadius = Scr_GetFloat(2);
+    if (ent->s.lerp.u.explosion.innerRadius < 0.0f)
         Scr_ParamError(2u, "Radius is negative");
-    if (ent->s.lerp.u.turret.gunAngles[0] > (float)ent->s.eventParm)
+    if (ent->s.lerp.u.explosion.innerRadius > (float)ent->s.eventParm)
         Scr_Error("Inner radius is outside the outer radius");
     Float = Scr_GetFloat(3);
     result = ent;
-    ent->s.lerp.u.turret.gunAngles[1] = Float;
+    ent->s.lerp.u.explosion.magnitude = Float;
 }
 
 void Scr_SetExponentialFog()
@@ -4901,10 +4901,10 @@ gentity_s *GScr_Earthquake()
     if (radius <= 0.0)
         Scr_ParamError(3u, "Radius must be greater than 0");
     tent = G_TempEntity(source, 61);
-    tent->s.lerp.u.turret.gunAngles[0] = scale;
+    tent->s.lerp.u.earthquake.scale = scale;
     tent->s.lerp.u.earthquake.duration = duration;
     result = tent;
-    tent->s.lerp.u.turret.gunAngles[1] = radius;
+    tent->s.lerp.u.earthquake.radius = radius;
     return result;
 }
 

@@ -367,7 +367,7 @@ void __cdecl G_ExplodeMissile(gentity_s *ent)
                 {
                     v5 = DirToByte(normal);
                     G_AddEvent(eventEnt, 0x31u, v5);
-                    eventEnt->s.lerp.u.missile.launchTime = level.time;
+                    eventEnt->s.lerp.u.customExplode.startTime = level.time;
                 }
             }
             else
@@ -382,7 +382,7 @@ void __cdecl G_ExplodeMissile(gentity_s *ent)
                 eventEnt->s.lerp.pos.trBase[2] = (float)(int)eventEnt->s.lerp.pos.trBase[2];
                 G_SetOrigin(eventEnt, eventEnt->s.lerp.pos.trBase);
                 eventEnt->s.lerp.eFlags |= 0x10000u;
-                eventEnt->s.lerp.u.missile.launchTime = level.time;
+                eventEnt->s.lerp.u.customExplode.startTime = level.time;
                 eventEnt->s.time2 = level.time + 61000;
                 eventEnt->s.lerp.eFlags |= 0x80000u;
                 eventEnt->handler = 8;

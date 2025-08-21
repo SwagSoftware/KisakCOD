@@ -889,16 +889,17 @@ void __cdecl InitEntityVars(gentity_s *ent, scr_vehicle_s *veh, int32_t infoIdx)
     ent->s.lerp.eFlags = 0;
     ent->s.lerp.pos.trType = TR_INTERPOLATE;
     ent->s.lerp.apos.trType = TR_INTERPOLATE;
-    ent->s.lerp.u.vehicle.materialTime = 0;
     ent->s.time2 = 0;
     ent->s.loopSound = 0;
     ent->s.weapon = G_GetWeaponIndexForName(s_vehicleInfos[infoIdx].turretWeapon);
     ent->s.weaponModel = 0;
-    ent->s.lerp.u.turret.gunAngles[2] = 0.0;
-    ent->s.lerp.u.turret.gunAngles[0] = 0.0;
-    ent->s.lerp.u.turret.gunAngles[1] = 0.0;
-    ent->s.lerp.u.primaryLight.cosHalfFovInner = 0.0;
-    ent->s.lerp.u.vehicle.gunYaw = 0.0;
+    ent->s.lerp.u.vehicle.bodyPitch = 0.0f;
+    ent->s.lerp.u.vehicle.bodyRoll = 0.0f;
+    ent->s.lerp.u.vehicle.steerYaw = 0.0f;
+    ent->s.lerp.u.vehicle.materialTime = 0;
+    ent->s.lerp.u.vehicle.gunPitch = 0.0f;
+    ent->s.lerp.u.vehicle.gunYaw = 0.0f;
+    ent->s.lerp.u.vehicle.teamAndOwnerIndex = 0;
     ent->scr_vehicle = veh;
     ent->nextthink = level.time + 50;
     ent->takedamage = 1;
@@ -1438,7 +1439,7 @@ void __cdecl UpdateTurret(gentity_s *ent)
     if (playerEntNum == ENTITYNUM_NONE)
     {
         ent->s.lerp.u.vehicle.gunYaw = 0.0;
-        ent->s.lerp.u.primaryLight.cosHalfFovInner = 0.0;
+        ent->s.lerp.u.vehicle.gunPitch = 0.0;
     }
     else
     {
@@ -1446,7 +1447,7 @@ void __cdecl UpdateTurret(gentity_s *ent)
         if (!player->client)
             MyAssertHandler(".\\game_mp\\g_vehicles_mp.cpp", 1635, 0, "%s", "player->client");
         ent->s.lerp.u.vehicle.gunYaw = player->client->ps.viewangles[1];
-        ent->s.lerp.u.primaryLight.cosHalfFovInner = player->client->ps.viewangles[0];
+        ent->s.lerp.u.vehicle.gunPitch = player->client->ps.viewangles[0];
     }
 }
 
@@ -1470,8 +1471,8 @@ void __cdecl VEH_UpdateBody(gentity_s *ent, float frameTime)
         v3 = veh->joltWave * 0.01745329238474369;
         v2 = sin(v3);
         intensity = veh->joltTime / 1.0 * v2;
-        ent->s.lerp.u.turret.gunAngles[0] = intensity * veh->joltDir[0];
-        ent->s.lerp.u.turret.gunAngles[1] = intensity * veh->joltDir[1];
+        ent->s.lerp.u.vehicle.bodyPitch = intensity * veh->joltDir[0];
+        ent->s.lerp.u.vehicle.bodyRoll = intensity * veh->joltDir[1];
         veh->joltTime = veh->joltTime - frameTime;
         veh->joltWave = (frameTime + frameTime) * 360.0 + veh->joltWave;
     }
@@ -1504,11 +1505,11 @@ void __cdecl VEH_UpdateSteering(gentity_s *ent)
             v1 = v4;
         else
             v1 = -45.0;
-        ent->s.lerp.u.turret.gunAngles[2] = v1;
+        ent->s.lerp.u.vehicle.steerYaw = v1;
     }
     else
     {
-        ent->s.lerp.u.turret.gunAngles[2] = 0.0;
+        ent->s.lerp.u.vehicle.steerYaw = 0.0;
     }
 }
 
@@ -2701,8 +2702,8 @@ void __cdecl G_VehEntHandler_Die(
 
 void __cdecl G_VehEntHandler_Controller(const gentity_s *pSelf, int32_t *partBits)
 {
-    float gunYaw; // [esp+4h] [ebp-38h]
-    float v3; // [esp+Ch] [ebp-30h]
+    //float gunYaw; // [esp+4h] [ebp-38h]
+    //float v3; // [esp+Ch] [ebp-30h]
     float barrelAngles[3]; // [esp+10h] [ebp-2Ch] BYREF
     DObj_s *obj; // [esp+1Ch] [ebp-20h]
     scr_vehicle_s *veh; // [esp+20h] [ebp-1Ch]
@@ -2717,17 +2718,17 @@ void __cdecl G_VehEntHandler_Controller(const gentity_s *pSelf, int32_t *partBit
     obj = Com_GetServerDObj(pSelf->s.number);
     if (!obj)
         MyAssertHandler(".\\game_mp\\g_vehicles_mp.cpp", 3341, 0, "%s", "obj");
-    v3 = pSelf->s.lerp.u.turret.gunAngles[1];
-    bodyAngles[0] = pSelf->s.lerp.u.turret.gunAngles[0];
+    //v3 = pSelf->s.lerp.u.turret.gunAngles[1];
+    bodyAngles[0] = pSelf->s.lerp.u.vehicle.bodyPitch;
     bodyAngles[1] = 0.0f;
-    bodyAngles[2] = v3;
+    bodyAngles[2] = pSelf->s.lerp.u.vehicle.bodyRoll;
     if (veh->boneIndex.body >= 0)
         DObjSetLocalBoneIndex(obj, partBits, veh->boneIndex.body, vec3_origin, bodyAngles);
-    gunYaw = pSelf->s.lerp.u.vehicle.gunYaw;
+    //gunYaw = pSelf->s.lerp.u.vehicle.gunYaw;
     turretAngles[0] = 0.0f;
-    turretAngles[1] = gunYaw;
+    turretAngles[1] = pSelf->s.lerp.u.vehicle.gunYaw;
     turretAngles[2] = 0.0f;
-    barrelAngles[0] = pSelf->s.lerp.u.primaryLight.cosHalfFovInner;
+    barrelAngles[0] = pSelf->s.lerp.u.vehicle.gunPitch;
     barrelAngles[1] = 0.0f;
     barrelAngles[2] = 0.0f;
     if (veh->boneIndex.turret >= 0)

@@ -882,13 +882,13 @@ void __cdecl CG_CalcEntityLerpPositions(int32_t localClientNum, centity_s *cent)
             bcassert(cent->nextState.clientNum, MAX_CLIENTS);
 
             ci = &cgameGlob->bgs.clientinfo[cent->nextState.clientNum];
-            ci->lerpMoveDir = (float)cent->nextState.lerp.u.loopFx.period;
+            ci->lerpMoveDir = (float)cent->nextState.lerp.u.player.movementDir;
             ci->playerAngles[0] = cent->pose.angles[0];
             ci->playerAngles[1] = cent->pose.angles[1];
             ci->playerAngles[2] = cent->pose.angles[2];
             cent->pose.angles[0] = 0.0f;
             cent->pose.angles[2] = 0.0f;
-            ci->lerpLean = cent->nextState.lerp.u.turret.gunAngles[0];
+            ci->lerpLean = cent->nextState.lerp.u.player.leanf;
         }
         else if (cent->nextState.eType == 2)
         {
@@ -896,13 +896,13 @@ void __cdecl CG_CalcEntityLerpPositions(int32_t localClientNum, centity_s *cent)
             iassert((unsigned)corpseIndex < MAX_CLIENT_CORPSES);
             cgs = CG_GetLocalClientStaticGlobals(localClientNum);
             cia = &cgs->corpseinfo[corpseIndex];
-            cgs->corpseinfo[corpseIndex].lerpMoveDir = (float)cent->nextState.lerp.u.loopFx.period;
+            cgs->corpseinfo[corpseIndex].lerpMoveDir = (float)cent->nextState.lerp.u.player.movementDir;
             cia->playerAngles[0] = cent->pose.angles[0];
             cia->playerAngles[1] = cent->pose.angles[1];
             cia->playerAngles[2] = cent->pose.angles[2];
             cent->pose.angles[0] = 0.0;
             cent->pose.angles[2] = 0.0;
-            cia->lerpLean = cent->nextState.lerp.u.turret.gunAngles[0];
+            cia->lerpLean = cent->nextState.lerp.u.player.leanf;
         }
         if (cent != &cgameGlob->predictedPlayerEntity)
             CG_AdjustPositionForMover(
@@ -943,7 +943,7 @@ void __cdecl CG_InterpolateEntityPosition(cg_s *cgameGlob, centity_s *cent)
     float v22; // [esp+58h] [ebp-64h]
     float v23; // [esp+60h] [ebp-5Ch]
     float *playerAngles; // [esp+64h] [ebp-58h]
-    float period; // [esp+6Ch] [ebp-50h]
+    float movementDir; // [esp+6Ch] [ebp-50h]
     float v26; // [esp+70h] [ebp-4Ch]
     float v27; // [esp+74h] [ebp-48h]
     float v28; // [esp+78h] [ebp-44h]
@@ -1001,22 +1001,22 @@ void __cdecl CG_InterpolateEntityPosition(cg_s *cgameGlob, centity_s *cent)
                 cent->nextState.clientNum,
                 64);
         ci = &cgameGlob->bgs.clientinfo[cent->nextState.clientNum];
-        period = (float)cent->currentState.u.loopFx.period;
-        v26 = (float)cent->nextState.lerp.u.loopFx.period;
-        v9 = v26 - period;
+        movementDir = (float)cent->currentState.u.player.movementDir;
+        v26 = (float)cent->nextState.lerp.u.player.movementDir;
+        v9 = v26 - movementDir;
         v27 = v9 * 0.002777777845039964;
         v8 = v27 + 0.5;
         v7 = floor(v8);
         v6 = (v27 - v7) * 360.0;
-        ci->lerpMoveDir = v6 * f + period;
+        ci->lerpMoveDir = v6 * f + movementDir;
         playerAngles = ci->playerAngles;
         ci->playerAngles[0] = cent->pose.angles[0];
         playerAngles[1] = cent->pose.angles[1];
         playerAngles[2] = cent->pose.angles[2];
         cent->pose.angles[0] = 0.0;
         cent->pose.angles[2] = 0.0;
-        v22 = cent->currentState.u.turret.gunAngles[0];
-        v5 = cent->nextState.lerp.u.turret.gunAngles[0] - v22;
+        v22 = cent->currentState.u.player.leanf;
+        v5 = cent->currentState.u.player.leanf - v22;
         v23 = v5 * 0.002777777845039964;
         v4 = v23 + 0.5;
         v3 = floor(v4);
@@ -1717,8 +1717,8 @@ void __cdecl CG_SoundBlend(int32_t localClientNum, centity_s *cent)
                 {
                     if (alias1)
                     {
-                        lerp = (cent->nextState.lerp.u.turret.gunAngles[0] - cent->currentState.u.turret.gunAngles[0]) * CG_GetLocalClientGlobals(localClientNum)->frameInterpolation
-                            + cent->currentState.u.turret.gunAngles[0];
+                        lerp = (cent->nextState.lerp.u.soundBlend.lerp - cent->currentState.u.soundBlend.lerp) * CG_GetLocalClientGlobals(localClientNum)->frameInterpolation
+                            + cent->currentState.u.soundBlend.lerp;
                         iassert((lerp >= 0.0f) && (lerp <= 1.0f));
                         SND_PlayBlendedSoundAliases(
                             alias0,
@@ -1785,7 +1785,7 @@ void __cdecl CG_LoopFx(int32_t localClientNum, centity_s *cent)
     float cullDist; // [esp+1Ch] [ebp-4h]
 
     cgameGlob = CG_GetLocalClientGlobals(localClientNum);
-    cullDist = cent->nextState.lerp.u.turret.gunAngles[0];
+    cullDist = cent->nextState.lerp.u.loopFx.cullDist;
     if (cullDist == 0.0
         || (Vec3Sub(cent->pose.origin, cgameGlob->predictedPlayerState.origin, diff),
             v2 = cullDist * cullDist,
@@ -1831,10 +1831,10 @@ void __cdecl CG_PrimaryLight(int32_t localClientNum, centity_s *cent)
     cgameGlob = CG_GetLocalClientGlobals(localClientNum);
     light = &cgameGlob->refdef.primaryLights[cent->nextState.index.brushmodel];
     refLight = Com_GetPrimaryLight(cent->nextState.index.brushmodel);
-    Byte4UnpackRgba((const unsigned __int8 *)&cent->currentState.u, oldColor);
-    Byte4UnpackRgba((const unsigned __int8 *)&cent->nextState.lerp.u, newColor);
-    Vec3Scale(oldColor, cent->currentState.u.turret.gunAngles[1], oldColor);
-    Vec3Scale(newColor, cent->nextState.lerp.u.turret.gunAngles[1], newColor);
+    Byte4UnpackRgba(&cent->currentState.u.primaryLight.colorAndExp[0], oldColor);
+    Byte4UnpackRgba(&cent->nextState.lerp.u.primaryLight.colorAndExp[0], newColor);
+    Vec3Scale(oldColor, cent->currentState.u.primaryLight.intensity, oldColor);
+    Vec3Scale(newColor, cent->nextState.lerp.u.primaryLight.intensity, newColor);
     Vec3Lerp(oldColor, newColor, cgameGlob->frameInterpolation, light->color);
 
     if (refLight->rotationLimit < 1.0)
@@ -1855,9 +1855,9 @@ void __cdecl CG_PrimaryLight(int32_t localClientNum, centity_s *cent)
         CG_ClampPrimaryLightOrigin(light, refLight);
     }
 
-    light->radius = (cent->nextState.lerp.u.turret.gunAngles[2] - cent->currentState.u.turret.gunAngles[2])
+    light->radius = (cent->nextState.lerp.u.primaryLight.radius - cent->currentState.u.primaryLight.radius)
         * cgameGlob->frameInterpolation
-        + cent->currentState.u.turret.gunAngles[2];
+        + cent->currentState.u.primaryLight.radius;
     light->cosHalfFovOuter = (cent->nextState.lerp.u.primaryLight.cosHalfFovOuter
         - cent->currentState.u.primaryLight.cosHalfFovOuter)
         * cgameGlob->frameInterpolation

@@ -40,10 +40,10 @@ void __cdecl SP_light(gentity_s *self)
                 "self->s.index.primaryLight == primaryLightIndex\n\t%i, %i",
                 self->s.index.brushmodel,
                 primaryLightIndex);
-        self->s.lerp.u.turret.gunAngles[1] = ColorNormalize((float*)light->color, normalizedColor);
-        Byte4PackRgba(normalizedColor, (uint8_t *)&self->s.lerp.u);
+        self->s.lerp.u.primaryLight.intensity = ColorNormalize(&light->color[0], normalizedColor);
+        Byte4PackRgba(normalizedColor, &self->s.lerp.u.primaryLight.colorAndExp[0]);
         self->s.lerp.u.primaryLight.colorAndExp[3] = light->exponent;
-        self->s.lerp.u.turret.gunAngles[2] = light->radius;
+        self->s.lerp.u.primaryLight.radius = light->radius;
         self->s.lerp.u.primaryLight.cosHalfFovOuter = light->cosHalfFovOuter;
         self->s.lerp.u.primaryLight.cosHalfFovInner = light->cosHalfFovInner;
         facingDir[0] = -light->dir[0];
