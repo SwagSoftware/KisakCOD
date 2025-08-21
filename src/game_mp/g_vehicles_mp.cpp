@@ -1119,7 +1119,7 @@ void __cdecl VEH_PushEntity_0(
         {
             dist = Vec3Length(deltaOrigin);
             mph = dist / frameTime * 0.056818184;
-            if (target->s.eType == 1 && target->s.groundEntityNum != ent->s.number && mph >= 10.0)
+            if (target->s.eType == ET_PLAYER && target->s.groundEntityNum != ent->s.number && mph >= 10.0)
             {
                 if (mph >= 50.0)
                 {
@@ -1202,7 +1202,7 @@ void __cdecl VEH_TouchEntities_0(gentity_s *ent, float frameTime)
             target = &g_entities[entityList[i]];
             v24 = entityHandlers[target->handler].touch;
             if (target->s.number != ent->s.number
-                && (target->s.eType == 1 || target->s.eType == 6 || target->s.eType == 14 || target->s.eType == 4)
+                && (target->s.eType == ET_PLAYER || target->s.eType == 6 || target->s.eType == 14 || target->s.eType == 4)
                 && (!target->r.ownerNum.isDefined() || target->s.eType == 4 && target->r.ownerNum.ent() != ent))
             {
                 if (target->s.groundEntityNum == ent->s.number)
@@ -1257,7 +1257,7 @@ void __cdecl VEH_TouchEntities_0(gentity_s *ent, float frameTime)
                         v24(target, ent, 1);
                     if (touch)
                         touch(ent, target, 1);
-                    if (target->s.eType == 1)
+                    if (target->s.eType == ET_PLAYER)
                     {
                     LABEL_18:
                         VEH_PushEntity_0(ent, target, frameTime, out, diff, v3);
@@ -2545,7 +2545,7 @@ void __cdecl G_VehEntHandler_Touch(gentity_s *pSelf, gentity_s *pOther, int32_t 
         MyAssertHandler(".\\game_mp\\g_vehicles_mp.cpp", 3224, 0, "%s", "pOther");
     veh = pSelf->scr_vehicle;
     info = &s_vehicleInfos[veh->infoIdx];
-    if (pOther->s.eType == 1 || pOther->s.eType == 6)
+    if (pOther->s.eType == ET_PLAYER || pOther->s.eType == 6)
     {
         if (pOther->takedamage)
         {

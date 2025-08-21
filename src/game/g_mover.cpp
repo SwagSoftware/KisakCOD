@@ -405,7 +405,7 @@ char __cdecl G_MoverPush(gentity_s *pusher, float *move, float *amove, gentity_s
     for (j = 0; j < v9; ++j)
     {
         ent = &g_entities[entityList[j]];
-        if ((ent->s.eType == 4 || ent->s.eType == 3 || ent->s.eType == 1 || ent->physicsObject)
+        if ((ent->s.eType == 4 || ent->s.eType == 3 || ent->s.eType == ET_PLAYER || ent->physicsObject)
             && (ent->s.groundEntityNum == pusher->s.number
                 || v19[0] > (double)ent->r.absmin[0]
                 && v19[1] > (double)ent->r.absmin[1]

@@ -877,7 +877,7 @@ void __cdecl CG_CalcEntityLerpPositions(int32_t localClientNum, centity_s *cent)
     {
         BG_EvaluateTrajectory(&cent->currentState.pos, cgameGlob->time, cent->pose.origin);
         BG_EvaluateTrajectory(&cent->currentState.apos, cgameGlob->time, cent->pose.angles);
-        if (cent->nextState.eType == 1)
+        if (cent->nextState.eType == ET_PLAYER)
         {
             bcassert(cent->nextState.clientNum, MAX_CLIENTS);
 
@@ -990,7 +990,7 @@ void __cdecl CG_InterpolateEntityPosition(cg_s *cgameGlob, centity_s *cent)
     v11 = floor(v12);
     v10 = (v29 - v11) * 360.0;
     cent->pose.angles[2] = v10 * f + v28;
-    if (cent->nextState.eType == 1)
+    if (cent->nextState.eType == ET_PLAYER)
     {
         if (cent->nextState.clientNum >= 0x40u)
             MyAssertHandler(

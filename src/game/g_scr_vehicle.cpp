@@ -618,7 +618,7 @@ void __cdecl VEH_TouchEntities(gentity_s *ent)
         target = &g_entities[entityList[i]];
         v12 = entityHandlers[target->handler].touch;
         if (target->s.number != ent->s.number
-            && (target->s.eType == 1 || target->s.eType == 6 || target->s.eType == 4 || target->s.eType == 14)
+            && (target->s.eType == ET_PLAYER || target->s.eType == 6 || target->s.eType == 4 || target->s.eType == 14)
             && target->s.eType == 4)
         {
             if (target->s.groundEntityNum == ent->s.number)
@@ -660,7 +660,7 @@ void __cdecl VEH_TouchEntities(gentity_s *ent)
                         v12(target, ent, 1);
                     if (touch)
                         touch(ent, target, 1);
-                    if (target->s.eType == 1)
+                    if (target->s.eType == ET_PLAYER)
                         VEH_PushEntity(ent, target, out, diff, v3);
                 }
             }

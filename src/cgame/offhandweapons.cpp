@@ -385,7 +385,7 @@ void __cdecl CG_PrepOffHand(int32_t localClientNum, const entityState_s *ent, ui
 {
     WeaponDef *weapDef; // [esp+0h] [ebp-4h]
 
-    if (ent->eType != 1)
+    if (ent->eType != ET_PLAYER)
         MyAssertHandler(".\\cgame\\offhandweapons.cpp", 339, 0, "%s", "ent->eType == ET_PLAYER");
     if (!weaponIndex || weaponIndex >= BG_GetNumWeapons())
         MyAssertHandler(

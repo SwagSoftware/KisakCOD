@@ -173,7 +173,7 @@ clientInfo_t *__cdecl ClientInfoForEntity(int32_t localClientNum, uint32_t entNu
     centity_s *cent; // [esp+0h] [ebp-4h]
 
     cent = CG_GetEntity(localClientNum, entNum);
-    if (cent->nextState.eType != 1)
+    if (cent->nextState.eType != ET_PLAYER)
         return 0;
     if (cent->nextState.eType >= 17)
         return 0;
@@ -223,7 +223,7 @@ void __cdecl CG_VehSeatTransformForPlayer(
 
     ci = ClientInfoForEntity(localClientNum, entNum);
     centPlayer = CG_GetEntity(localClientNum, entNum);
-    if (centPlayer->nextState.eType != 1)
+    if (centPlayer->nextState.eType != ET_PLAYER)
         MyAssertHandler(".\\cgame_mp\\cg_vehicles_mp.cpp", 285, 0, "%s", "centPlayer->nextState.eType == ET_PLAYER");
     if (centPlayer->nextState.eType >= 17)
         MyAssertHandler(".\\cgame_mp\\cg_vehicles_mp.cpp", 286, 0, "%s", "centPlayer->nextState.eType < ET_EVENTS");

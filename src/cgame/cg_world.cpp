@@ -666,7 +666,7 @@ int32_t __cdecl CG_GetEntityBModelContents(const centity_s *cent)
         MyAssertHandler(".\\cgame\\cg_world.cpp", 28, 0, "%s", "es->solid");
     if (cent->nextState.solid == 0xFFFFFF)
         return CM_ContentsOfModel(cent->nextState.index.brushmodel);
-    if (cent->nextState.eType == 1)
+    if (cent->nextState.eType == ET_PLAYER)
         return 0x2000000;
     return 1;
 }

@@ -1993,7 +1993,7 @@ void __cdecl Scr_SetStableMissile(scr_entref_t entref)
 
     ent = GetEntity(entref);
     stableMissile = Scr_GetInt(0);
-    if (ent->s.eType != 1)
+    if (ent->s.eType != ET_PLAYER)
         Scr_Error("Type should be a player");
     if (stableMissile)
         v1 = ent->flags | 0x20000;

@@ -400,7 +400,7 @@ void __cdecl HandleClientEvent(gclient_s *client, gentity_s *ent, int32_t event,
         Scr_Notify(ent, scr_const.detonate, 0);
         break;
     default:
-        if (event >= 106 && event <= 134 && ent->s.eType == 1)
+        if (event >= 106 && event <= 134 && ent->s.eType == ET_PLAYER)
         {
             damage = eventParm < 100 ? (double)eventParm * 0.009999999776482582 : 1.1;
             if (damage != 0.0)
@@ -1260,7 +1260,7 @@ void __cdecl ClientEndFrame(gentity_s *ent)
             {
                 client->iLastCompassPlayerInfoEnt = ENTITYNUM_NONE;
             }
-            if (ent->s.eType == 1)
+            if (ent->s.eType == ET_PLAYER)
             {
                 ent->handler = 2 * (ent->health <= 0) + 10;
                 clientNum = ent->s.clientNum;
