@@ -4375,7 +4375,7 @@ void Scr_TriggerFX()
     ent = Scr_GetEntity(0);
     if (!ent)
         MyAssertHandler(".\\game_mp\\g_scr_main_mp.cpp", 4537, 0, "%s", "ent");
-    if (ent->s.eType != 8)
+    if (ent->s.eType != ET_FX)
         Scr_ParamError(0, "entity wasn't created with 'newFx'");
     result = Scr_GetNumParam();
     if (result == 2)

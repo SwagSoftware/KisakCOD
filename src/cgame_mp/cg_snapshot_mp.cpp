@@ -295,7 +295,7 @@ void __cdecl CG_SetNextSnap(int localClientNum, snapshot_s *snap)
                 FX_MarkEntDetachAll(localClientNum, entnum);
                 cent = CG_GetEntity(localClientNum, entnum);
                 CG_ShutdownEntity(localClientNum, cent);
-                if (cent->nextState.eType == 8 || cent->nextState.eType == 9)
+                if (cent->nextState.eType == ET_FX || cent->nextState.eType == ET_LOOP_FX)
                 {
                     if (cent->pose.fx.effect)
                     {
