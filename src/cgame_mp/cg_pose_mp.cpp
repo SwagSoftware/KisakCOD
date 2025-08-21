@@ -89,7 +89,7 @@ void CG_VehPoseControllers(const cpose_t *pose, const DObj_s *obj, int32_t *part
     steerAngles[2] = roll * 0.0054931640625;
     suspTravel = pose->vehicle.barrelPitch;
     bodyAngles[0] = suspTravel * 0.0054931640625;
-    if (pose->eType == 12)
+    if (pose->eType == ET_HELICOPTER)
         bodyAngles[2] = pose->turret.barrelPitch;
     yaw = pose->vehicle.yaw;
     barrelAngles[1] = yaw * 0.0054931640625;

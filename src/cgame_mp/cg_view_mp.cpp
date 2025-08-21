@@ -402,7 +402,7 @@ void __cdecl CG_UpdateHelicopterKillCam(int32_t localClientNum)
     centHelicopter = CG_GetEntity(localClientNum, cgameGlob->predictedPlayerState.killCamEntity);
     if (!centHelicopter->nextValid)
         MyAssertHandler(".\\cgame_mp\\cg_view_mp.cpp", 945, 0, "%s", "centHelicopter->nextValid");
-    if (centHelicopter->pose.eType != 12)
+    if (centHelicopter->pose.eType != ET_HELICOPTER)
         MyAssertHandler(".\\cgame_mp\\cg_view_mp.cpp", 946, 0, "%s", "centHelicopter->pose.eType == ET_HELICOPTER");
     centTarget = CG_GetEntity(localClientNum, cgameGlob->clientNum);
     if (centTarget->pose.eType != ET_PLAYER)

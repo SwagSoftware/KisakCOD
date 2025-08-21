@@ -673,7 +673,7 @@ void __cdecl VehicleFXTest(int32_t localClientNum, const DObj_s *obj, centity_s 
         }
         return;
     }
-    if (cent->nextState.eType == 12)
+    if (cent->nextState.eType == ET_HELICOPTER)
     {
         entityNum = CG_GetEntityIndex(localClientNum, cent);
         vehFx = VehicleGetFxInfo(localClientNum, entityNum);
