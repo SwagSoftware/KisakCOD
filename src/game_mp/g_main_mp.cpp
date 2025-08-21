@@ -1567,7 +1567,7 @@ void __cdecl G_RunFrameForEntity(gentity_s *ent)
             }
             if (ent->physicsObject)
                 goto LABEL_33;
-            if (ent->s.eType == ET_SCRIPTMOVER || ent->s.eType == 13 || ent->s.eType == 10)
+            if (ent->s.eType == ET_SCRIPTMOVER || ent->s.eType == ET_PLANE || ent->s.eType == ET_PRIMARY_LIGHT)
             {
                 G_RunMover(ent);
             }

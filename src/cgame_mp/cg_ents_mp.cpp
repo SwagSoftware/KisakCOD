@@ -467,7 +467,7 @@ void __cdecl CG_AdjustPositionForMover(
     if (moverNum > 0 && moverNum < ENTITYNUM_WORLD)
     {
         cent = CG_GetEntity(localClientNum, moverNum);
-        if (cent->nextState.eType == ET_SCRIPTMOVER || cent->nextState.eType == 13)
+        if (cent->nextState.eType == ET_SCRIPTMOVER || cent->nextState.eType == ET_PLANE)
         {
             BG_EvaluateTrajectory(&cent->currentState.pos, fromTime, oldOrigin);
             BG_EvaluateTrajectory(&cent->currentState.apos, fromTime, oldAngles);

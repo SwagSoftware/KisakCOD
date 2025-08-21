@@ -360,7 +360,7 @@ void __cdecl G_DObjUpdate(gentity_s *ent)
             dobjModels[0].boneName = 0;
             dobjModels[0].ignoreCollision = 0;
             numModels = 1;
-            if (!ent->s.eType || ent->s.eType == ET_SCRIPTMOVER || ent->s.eType == 13 || ent->s.eType == 11)
+            if (!ent->s.eType || ent->s.eType == ET_SCRIPTMOVER || ent->s.eType == ET_PLANE || ent->s.eType == 11)
             {
                 ent->s.index.brushmodel = modelIndex;
             }
