@@ -36,16 +36,16 @@ int yy_init = 0;
 yy_buffer_state *yy_current_buffer;
 int yy_start;
 int yy_n_chars;
-char *yy_c_buf_p;
-char *yytext;
+unsigned char *yy_c_buf_p;
+unsigned char *yytext;
 FILE *yyin = 0;
 FILE *yyout = 0;
 char yy_hold_char;
-char ch_buf[YY_BUF_SIZE];
+unsigned char ch_buf[YY_BUF_SIZE];
 sval_u yaccResult;
 int yynerrs;
 int yy_last_accepting_state;
-char *yy_last_accepting_cpos;
+unsigned char *yy_last_accepting_cpos;
 int yy_did_buffer_switch_on_eof;
 stype_t yylval;
 unsigned int yyleng;
@@ -72,12 +72,12 @@ void __cdecl FloatValue(char *str)
 	sscanf(str, "%f", &yylval);
 }
 
-int StringValue(char *str, int len)
+int StringValue(unsigned char *str, int len)
 {
 	char c;
 	char string[8192];
 	char *pC1;
-	char *pC2;
+	unsigned char *pC2;
 	int n;
 
 	if (len < 0x2000)
@@ -187,7 +187,7 @@ int yy_get_previous_state()
 {
 	unsigned char yy_c;
 	int yy_current_state;
-	char *yy_cp;
+	unsigned char *yy_cp;
 
 	yy_current_state = yy_start;
 	for (yy_cp = yytext; yy_cp < yy_c_buf_p; ++yy_cp)
@@ -257,7 +257,7 @@ yy_buffer_state *yy_create_buffer()
 
 	b->yy_buf_size = YY_BUF_SIZE;
 	//b->yy_ch_buf = (char *)Z_TryMallocInternal(b->yy_buf_size + 2);
-	b->yy_ch_buf = (char*)yy_flex_alloc(b->yy_buf_size + 2);
+	b->yy_ch_buf = (unsigned char*)yy_flex_alloc(b->yy_buf_size + 2);
 	if (!b->yy_ch_buf)
 	{
 		yy_fatal_error("out of dynamic memory in yy_create_buffer()");
@@ -290,9 +290,9 @@ int yy_get_next_buffer()
 	int yy_c_buf_p_offset;
 	yy_buffer_state *b;
 	signed int num_to_read;
-	char *source;
+	unsigned char *source;
 	int ret_val;
-	char *dest;
+	unsigned char *dest;
 	int number_to_move;
 	int i;
 
@@ -337,7 +337,7 @@ int yy_get_next_buffer()
 						(yy_current_buffer)->yy_buf_size += (yy_current_buffer)->yy_buf_size >> 3;
 					}
 
-					b->yy_ch_buf = (char *)yy_flex_realloc(b->yy_ch_buf, b->yy_buf_size + 2);
+					b->yy_ch_buf = (unsigned char *)yy_flex_realloc(b->yy_ch_buf, b->yy_buf_size + 2);
 				}
 				else
 				{
@@ -397,10 +397,10 @@ int __cdecl yylex()
 	int yy_next_state; // [esp+8h] [ebp-1Ch]
 	int yy_amount_of_matched_text; // [esp+Ch] [ebp-18h]
 	unsigned __int8 yy_c; // [esp+13h] [ebp-11h]
-	char *yy_bp; // [esp+14h] [ebp-10h]
+	unsigned char *yy_bp; // [esp+14h] [ebp-10h]
 	int yy_current_state; // [esp+18h] [ebp-Ch]
 	int yy_act; // [esp+1Ch] [ebp-8h]
-	char *yy_cp; // [esp+20h] [ebp-4h]
+	unsigned char *yy_cp; // [esp+20h] [ebp-4h]
 
 	if (yy_init)
 	{
@@ -642,13 +642,13 @@ int __cdecl yylex()
 				yylval.pos = g_out_pos;
 				g_sourcePos = g_out_pos;
 				g_out_pos += yyleng;
-				IntegerValue(yytext);
+				IntegerValue((char*)yytext);
 				return 287;
 			case 36:
 				yylval.pos = g_out_pos;
 				g_sourcePos = g_out_pos;
 				g_out_pos += yyleng;
-				FloatValue(yytext);
+				FloatValue((char*)yytext);
 				return 288;
 			case 37:
 				yylval.pos = g_out_pos;
@@ -924,13 +924,13 @@ int __cdecl yylex()
 				yylval.pos = g_out_pos;
 				g_sourcePos = g_out_pos;
 				g_out_pos += yyleng;
-				TextValue(yytext, yyleng);
+				TextValue((char*)yytext, yyleng);
 				return 258;
 			case 92:
 				yylval.pos = g_out_pos;
 				g_sourcePos = g_out_pos;
 				g_out_pos += yyleng;
-				TextValue(yytext, yyleng);
+				TextValue((char*)yytext, yyleng);
 				return 324;
 			case 93:
 				yylval.pos = g_out_pos;

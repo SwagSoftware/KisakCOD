@@ -206,7 +206,6 @@ unsigned int SL_GetString_(const char* str, unsigned int user, int type)
 
 HashEntry_unnamed_type_u SL_GetStringOfSize(const char* str, unsigned int user, unsigned int len, int type)
 {
-	// KISAKFINISHFUNCTION
 	PROF_SCOPED("SL_GetStringOfSize");
 	iassert(str);
 
@@ -215,22 +214,28 @@ HashEntry_unnamed_type_u SL_GetStringOfSize(const char* str, unsigned int user, 
 	Sys_EnterCriticalSection(CRITSECT_SCRIPT_STRING);
 
 	RefString* refStr = NULL;
-	RefString* refStrA; // [esp+90h] [ebp-10h]
-	RefString* refStrB; // [esp+90h] [ebp-10h]
-	HashEntry_unnamed_type_u stringValue = 0;
 
-	unsigned int newIndexA; // [esp+88h] [ebp-18h]
-	unsigned int newIndexB; // [esp+88h] [ebp-18h]
+	unsigned int stringValue = 0;
 
-	if ((scrStringGlob.hashTable[hash].status_next & HASH_STAT_MASK) == HASH_STAT_HEAD)
+	unsigned int prev;
+	unsigned int next;
+	unsigned int newIndex;
+
+	HashEntry *entry = &scrStringGlob.hashTable[hash];
+	HashEntry *newEntry;
+
+	if ((entry->status_next & HASH_STAT_MASK) == HASH_STAT_HEAD)
 	{
-		refStr = GetRefString(scrStringGlob.hashTable[hash].u.prev);
-		if (HIBYTE(refStr->data) == (unsigned __int8)len && !memcmp(refStr->str, str, len))
+		refStr = GetRefString(entry->u.prev);
+
+		// Check if this string is already stored, if it matches the string at this particular hash lookup, and return existing entry if so
+		if (refStr->byteLen == len && !memcmp(refStr->str, str, len))
 		{
 			SL_AddUserInternal(refStr, user);
-			iassert((scrStringGlob.hashTable[hash].status_next & HASH_STAT_MASK) != HASH_STAT_FREE);
+
+			iassert((entry->status_next & HASH_STAT_MASK) != HASH_STAT_FREE);
 		
-			stringValue.prev = (unsigned int)scrStringGlob.hashTable[hash].u;
+			stringValue = entry->u.prev;
 
 			iassert(refStr->str == SL_ConvertToString(stringValue));
 			
@@ -238,28 +243,28 @@ HashEntry_unnamed_type_u SL_GetStringOfSize(const char* str, unsigned int user, 
 			return stringValue;
 		}
 
-		unsigned int prev = hash;
-		unsigned int newIndex = (unsigned __int16)scrStringGlob.hashTable[hash].status_next;
-		for (HashEntry* newEntry = &scrStringGlob.hashTable[newIndex];
-			newEntry != &scrStringGlob.hashTable[hash];
-			newEntry = &scrStringGlob.hashTable[newIndex]
-			)
+		prev = hash;
+		newIndex = (unsigned __int16)entry->status_next;
+
+		for (newEntry = &scrStringGlob.hashTable[newIndex]; newEntry != entry; newEntry = &scrStringGlob.hashTable[newIndex])
 		{
 			iassert((newEntry->status_next & HASH_STAT_MASK) == HASH_STAT_MOVABLE);
-			refStrA = GetRefString(newEntry->u.prev);
-			if (HIBYTE(refStrA->data) == (unsigned __int8)len && !memcmp(refStrA->str, str, len))
+
+			refStr = GetRefString(newEntry->u.prev);
+
+			if (refStr->byteLen == len && !memcmp(refStr->str, str, len))
 			{
 				scrStringGlob.hashTable[prev].status_next = (unsigned __int16)newEntry->status_next | scrStringGlob.hashTable[prev].status_next & 0x30000;
-				newEntry->status_next = (unsigned __int16)scrStringGlob.hashTable[hash].status_next | newEntry->status_next & 0x30000;
-				scrStringGlob.hashTable[hash].status_next = newIndex | scrStringGlob.hashTable[hash].status_next & 0x30000;
-				stringValue.prev = (unsigned int)newEntry->u;
-				newEntry->u.prev = scrStringGlob.hashTable[hash].u.prev;
-				scrStringGlob.hashTable[hash].u = stringValue;
-				SL_AddUserInternal(refStrA, user);
+				newEntry->status_next = (unsigned __int16)entry->status_next | newEntry->status_next & 0x30000;
+				entry->status_next = newIndex | entry->status_next & 0x30000;
+				stringValue = newEntry->u.prev;
+				newEntry->u.prev = entry->u.prev;
+				entry->u.prev = stringValue;
+				SL_AddUserInternal(refStr, user);
 
 				iassert((newEntry->status_next & HASH_STAT_MASK) != HASH_STAT_FREE);
-				iassert((scrStringGlob.hashTable[hash].status_next & HASH_STAT_MASK) != HASH_STAT_FREE);
-				iassert(refStrA->str == SL_ConvertToString(stringValue));
+				iassert((entry->status_next & HASH_STAT_MASK) != HASH_STAT_FREE);
+				iassert(refStr->str == SL_ConvertToString(stringValue));
 
 				Sys_LeaveCriticalSection(CRITSECT_SCRIPT_STRING);
 				return stringValue;
@@ -267,85 +272,100 @@ HashEntry_unnamed_type_u SL_GetStringOfSize(const char* str, unsigned int user, 
 			prev = newIndex;
 			newIndex = (unsigned __int16)newEntry->status_next;
 		} //for()
-		newIndexA = scrStringGlob.hashTable[0].status_next;
 
-		if (!scrStringGlob.hashTable[0].status_next)
+		newIndex = scrStringGlob.hashTable[0].status_next;
+
+		if (!newIndex)
 		{
 			// KISAKTODO?
 			//Scr_DumpScriptThreads();
 			//Scr_DumpScriptVariablesDefault();
 			Com_Error(ERR_DROP, "exceeded maximum number of script strings (increase STRINGLIST_SIZE)");
 		}
-		stringValue.prev = MT_AllocIndex(len + 4, type);
-		iassert((scrStringGlob.hashTable[newIndexA].status_next & HASH_STAT_MASK) == HASH_STAT_FREE);
+		stringValue = MT_AllocIndex(len + 4, type);
+		newEntry = &scrStringGlob.hashTable[newIndex];
+		iassert((newEntry->status_next & HASH_STAT_MASK) == HASH_STAT_FREE);
 
-		scrStringGlob.hashTable[0].status_next = (unsigned __int16)scrStringGlob.hashTable[newIndexA].status_next;
-		scrStringGlob.hashTable[scrStringGlob.hashTable[0].status_next].u.prev = 0;
-		scrStringGlob.hashTable[newIndexA].status_next = (unsigned __int16)scrStringGlob.hashTable[hash].status_next | 0x10000;
-		scrStringGlob.hashTable[hash].status_next = (unsigned __int16)newIndexA | scrStringGlob.hashTable[hash].status_next & 0x30000;
-		scrStringGlob.hashTable[newIndexA].u.prev = scrStringGlob.hashTable[hash].u.prev;
+		unsigned int newNext = newEntry->status_next;
+
+		scrStringGlob.hashTable[0].status_next = newNext;
+		scrStringGlob.hashTable[newNext].u.prev = 0;
+		newEntry->status_next = (unsigned __int16)entry->status_next | 0x10000;
+		entry->status_next = (unsigned __int16)newIndex | entry->status_next & 0x30000;
+		newEntry->u.prev = entry->u.prev;
 	}
 	else
 	{
 		if ((scrStringGlob.hashTable[hash].status_next & HASH_STAT_MASK) != 0)
 		{
-			iassert((scrStringGlob.hashTable[hash].status_next & HASH_STAT_MASK) == HASH_STAT_MOVABLE);
-			unsigned int next = (unsigned __int16)scrStringGlob.hashTable[hash].status_next;
+			iassert((entry->status_next & HASH_STAT_MASK) == HASH_STAT_MOVABLE);
+			
+			next = (unsigned __int16)entry->status_next;
 
-			unsigned int preva;
-			for (preva = next;
-				(unsigned __int16)scrStringGlob.hashTable[preva].status_next != hash;
-				preva = (unsigned __int16)scrStringGlob.hashTable[preva].status_next)
+			for (prev = next;
+				(unsigned __int16)scrStringGlob.hashTable[prev].status_next != hash;
+				prev = (unsigned __int16)scrStringGlob.hashTable[prev].status_next)
 			{
 				;
 			}
 
-			iassert(preva);
+			iassert(prev);
 
-			newIndexB = scrStringGlob.hashTable[0].status_next;
-			if (!scrStringGlob.hashTable[0].status_next)
+			newIndex = scrStringGlob.hashTable[0].status_next;
+
+			if (!newIndex)
 			{
 				// KISAKTODO?
 				//Scr_DumpScriptThreads();
 				//Scr_DumpScriptVariablesDefault();
 				Com_Error(ERR_DROP, "exceeded maximum number of script strings");
 			}
-			stringValue.prev = MT_AllocIndex(len + 4, type);
-			iassert((scrStringGlob.hashTable[newIndexB].status_next & HASH_STAT_MASK) == HASH_STAT_FREE);
-			scrStringGlob.hashTable[0].status_next = (unsigned __int16)scrStringGlob.hashTable[newIndexB].status_next;
-			scrStringGlob.hashTable[scrStringGlob.hashTable[0].status_next].u.prev = 0;
-			scrStringGlob.hashTable[preva].status_next = newIndexB | scrStringGlob.hashTable[preva].status_next & 0x30000;
-			scrStringGlob.hashTable[newIndexB].status_next = next | 0x10000;
-			scrStringGlob.hashTable[newIndexB].u.prev = scrStringGlob.hashTable[hash].u.prev;
+
+			stringValue = MT_AllocIndex(len + 4, type);
+			newEntry = &scrStringGlob.hashTable[newIndex];
+
+			iassert((newEntry->status_next & HASH_STAT_MASK) == HASH_STAT_FREE);
+
+			unsigned int newNext = (unsigned __int16)newEntry->status_next;
+
+			scrStringGlob.hashTable[0].status_next = newNext;
+			scrStringGlob.hashTable[newNext].u.prev = 0;
+			scrStringGlob.hashTable[prev].status_next = newIndex | scrStringGlob.hashTable[prev].status_next & 0x30000;
+			newEntry->status_next = next | 0x10000;
+			newEntry->u.prev = entry->u.prev;
 		}
 		else
 		{
-			stringValue.prev = MT_AllocIndex(len + 4, type);
-			unsigned int nextA = (unsigned __int16)scrStringGlob.hashTable[hash].status_next;
-			unsigned int v4 = (unsigned int)scrStringGlob.hashTable[hash].u;
-			scrStringGlob.hashTable[v4].status_next = nextA | scrStringGlob.hashTable[v4].status_next & 0x30000;
-			scrStringGlob.hashTable[nextA].u = v4;
+			stringValue = MT_AllocIndex(len + 4, type);
+			prev = entry->u.prev;
+			next = (unsigned __int16)entry->status_next;
+
+			scrStringGlob.hashTable[prev].status_next = next | scrStringGlob.hashTable[prev].status_next & 0x30000;
+			scrStringGlob.hashTable[next].u.prev = prev;
 		}
 		iassert(!(hash & HASH_STAT_MASK));
-		scrStringGlob.hashTable[hash].status_next = hash | 0x20000;
+		entry->status_next = hash | 0x20000;
 	}
 	iassert(stringValue);
-	scrStringGlob.hashTable[hash].u = stringValue;
+	entry->u.prev = stringValue;
 
-	refStrB = GetRefString(stringValue.prev);
-	memcpy((unsigned __int8*)refStrB->str, (unsigned __int8*)str, len);
-	refStrB->data = ((unsigned __int8)user << 16) | refStrB->data & 0xFF00FFFF;
-	iassert(refStrB->user == user);
-	refStrB->data = refStrB->data & 0xFFFF0000 | 1;
-	refStrB->data = (len << 24) | refStrB->data & 0xFFFFFF;
+	refStr = GetRefString(stringValue);
+	memcpy((unsigned __int8*)refStr->str, (unsigned __int8*)str, len);
+	refStr->data = ((unsigned __int8)user << 16) | refStr->data & 0xFF00FFFF;
+	iassert(refStr->user == user);
+	refStr->data = refStr->data & 0xFFFF0000 | 1;
+	refStr->data = (len << 24) | refStr->data & 0xFFFFFF;
+
 	if (scrStringDebugGlob)
 	{
 		InterlockedIncrement(&scrStringDebugGlob->totalRefCount);
-		InterlockedIncrement(&scrStringDebugGlob->refCount[stringValue.prev]);
+		InterlockedIncrement(&scrStringDebugGlob->refCount[stringValue]);
 	}
-	//iassert((scrStringGlob.hashTable[hash].status_next & 0x30000) == 0);
-	iassert(refStrB->str == SL_ConvertToString(stringValue));
-END_CLEANUP:
+
+	iassert((entry->status_next & HASH_STAT_MASK) != HASH_STAT_FREE);
+	iassert(refStr->str == SL_ConvertToString(stringValue));
+
+//END_CLEANUP:
 	Sys_LeaveCriticalSection(CRITSECT_SCRIPT_STRING);
 	return stringValue;
 }
@@ -387,7 +407,7 @@ int SL_GetStringLen(unsigned int stringValue)
 
 static HashEntry_unnamed_type_u FindStringOfSize(const char* str, unsigned int len)
 {
-	HashEntry_unnamed_type_u stringValue = 0;
+	unsigned int stringValue = 0;
 
 	PROF_SCOPED("FindStringOfSize");
 
@@ -396,38 +416,40 @@ static HashEntry_unnamed_type_u FindStringOfSize(const char* str, unsigned int l
 
 	Sys_EnterCriticalSection(CRITSECT_SCRIPT_STRING);
 
-	if ((scrStringGlob.hashTable[hash].status_next & HASH_STAT_MASK) != HASH_STAT_HEAD)
+	HashEntry *entry = &scrStringGlob.hashTable[hash];
+
+	if ((entry->status_next & HASH_STAT_MASK) != HASH_STAT_HEAD)
 	{
 		Sys_LeaveCriticalSection(CRITSECT_SCRIPT_STRING);
 		return 0;
 	}
 
-	RefString* refStr = GetRefString(scrStringGlob.hashTable[hash].u.prev);
+	RefString* refStr = GetRefString(entry->u.prev);
 
-	if ((unsigned __int8)HIBYTE(*(DWORD*)&refStr->data) != (unsigned __int8)len || memcmp(refStr->str, str, len))
+	if (refStr->byteLen != len || memcmp(refStr->str, str, len))
 	{
 		unsigned int prev = hash;
-		unsigned int newIndex = (word)scrStringGlob.hashTable[hash].status_next;
+		unsigned int newIndex = (unsigned __int16)entry->status_next;
 
 		for (HashEntry* newEntry = &scrStringGlob.hashTable[newIndex]; 
-			newEntry != &scrStringGlob.hashTable[hash]; 
+			newEntry != entry; 
 			newEntry = &scrStringGlob.hashTable[newIndex])
 		{
 			iassert((newEntry->status_next & HASH_STAT_MASK) == HASH_STAT_MOVABLE);
-			RefString* refStrA = GetRefString(newEntry->u.prev);
+			refStr = GetRefString(newEntry->u.prev);
 
-			if (HIBYTE(refStrA->data) == (unsigned __int8)len && !memcmp(refStrA->str, str, len))
+			if (refStr->byteLen == len && !memcmp(refStr->str, str, len))
 			{
-
 				scrStringGlob.hashTable[prev].status_next = (unsigned __int16)newEntry->status_next | scrStringGlob.hashTable[prev].status_next & 0x30000;
-				newEntry->status_next = (unsigned __int16)scrStringGlob.hashTable[hash].status_next | newEntry->status_next & 0x30000;
-				scrStringGlob.hashTable[hash].status_next = newIndex | scrStringGlob.hashTable[hash].status_next & 0x30000;
-				stringValue.prev = (unsigned int)newEntry->u;
-				newEntry->u.prev = scrStringGlob.hashTable[hash].u.prev;
-				scrStringGlob.hashTable[hash].u = stringValue;
+				newEntry->status_next = (unsigned __int16)entry->status_next | newEntry->status_next & 0x30000;
+				entry->status_next = newIndex | entry->status_next & 0x30000;
+				stringValue = newEntry->u.prev;
+				newEntry->u.prev = entry->u.prev;
+				entry->u.prev = stringValue;
+
 				iassert((newEntry->status_next & HASH_STAT_MASK) != HASH_STAT_FREE);
-				iassert((scrStringGlob.hashTable[hash].status_next & 0x30000) != HASH_STAT_FREE);
-				iassert(refStrA->str == SL_ConvertToString(stringValue.prev));
+				iassert((entry->status_next & HASH_STAT_MASK) != HASH_STAT_FREE);
+				iassert(refStr->str == SL_ConvertToString(stringValue));
 		
 				Sys_LeaveCriticalSection(CRITSECT_SCRIPT_STRING);
 				return stringValue;
@@ -438,10 +460,10 @@ static HashEntry_unnamed_type_u FindStringOfSize(const char* str, unsigned int l
 		Sys_LeaveCriticalSection(CRITSECT_SCRIPT_STRING);
 		return 0;
 	} //memcmp
-	iassert((scrStringGlob.hashTable[hash].status_next & 0x30000) != HASH_STAT_FREE);
 
-	stringValue.prev = scrStringGlob.hashTable[hash].u;
+	iassert((entry->status_next & HASH_STAT_MASK) != HASH_STAT_FREE);
 
+	stringValue = entry->u.prev;
 	iassert(refStr->str == SL_ConvertToString(stringValue));
 
 	Sys_LeaveCriticalSection(CRITSECT_SCRIPT_STRING);
@@ -455,40 +477,20 @@ unsigned int SL_FindString(const char* str)
 
 void __cdecl SL_TransferRefToUser(unsigned int stringValue, unsigned int user)
 {
-	const char *v2; // eax
-	const char *v3; // eax
 	volatile LONG Comperand; // [esp+20h] [ebp-28h]
 	RefString *refStr; // [esp+44h] [ebp-4h]
 
 	PROF_SCOPED("SL_TransferRefToUser");
 
 	refStr = GetRefString(stringValue);
-	if ((user & BYTE2(refStr->data)) != 0)
+	if ((user & refStr->user) != 0)
 	{
-		if (refStr->data <= 1u)
-		{
-			v2 = SL_DebugConvertToString(stringValue);
-			MyAssertHandler(
-				".\\script\\scr_stringlist.cpp",
-				803,
-				0,
-				"%s\n\t(SL_DebugConvertToString( stringValue )) = %s",
-				"(refStr->refCount > 1)",
-				v2);
-		}
+		iassert(refStr->refCount > 1);
+
 		if (scrStringDebugGlob)
 		{
-			if (!scrStringDebugGlob->refCount[stringValue])
-			{
-				v3 = SL_DebugConvertToString(stringValue);
-				MyAssertHandler(
-					".\\script\\scr_stringlist.cpp",
-					808,
-					0,
-					"%s\n\t(SL_DebugConvertToString( stringValue )) = %s",
-					"(scrStringDebugGlob->refCount[stringValue])",
-					v3);
-			}
+			iassert(scrStringDebugGlob->refCount[stringValue]);
+
 			InterlockedDecrement(&scrStringDebugGlob->totalRefCount);
 			InterlockedDecrement(&scrStringDebugGlob->refCount[stringValue]);
 		}
@@ -540,7 +542,7 @@ int SL_GetRefStringLen(RefString* refString)
 	return len;
 }
 
-static HashEntry_unnamed_type_u  GetLowercaseStringOfSize(
+static unsigned int GetLowercaseStringOfSize(
 	const char* str,
 	unsigned int user,
 	unsigned int len,
@@ -589,35 +591,38 @@ static void SL_FreeString(unsigned int stringValue, RefString* refStr, unsigned 
 	PROF_SCOPED("SL_FreeString");
 
 	unsigned int index = GetHashCode(refStr->str, len);
-	HashEntry* entry = &scrStringGlob.hashTable[index];
 
 	Sys_EnterCriticalSection(CRITSECT_SCRIPT_STRING);
 
-	if (refStr->data)
+	if (refStr->refCount)
 	{
 		Sys_LeaveCriticalSection(CRITSECT_SCRIPT_STRING);
+		return;
 	}
 	else
 	{
+		HashEntry *entry = &scrStringGlob.hashTable[index];
+
 		iassert(!refStr->user);
+
 		MT_FreeIndex(stringValue, len + 4);
 
 		iassert(((entry->status_next & HASH_STAT_MASK) == HASH_STAT_HEAD));
 
-		unsigned int newIndex = scrStringGlob.hashTable[index].status_next;
+		unsigned int newIndex = (unsigned __int16)entry->status_next;
 		HashEntry* newEntry = &scrStringGlob.hashTable[newIndex];
 
-		if (scrStringGlob.hashTable[index].u.prev == stringValue)
+		if (entry->u.prev == stringValue)
 		{
 			if (newEntry == entry)
 			{
-				newEntry = &scrStringGlob.hashTable[index];
+				newEntry = entry;
 				newIndex = index;
 			}
 			else
 			{
-				scrStringGlob.hashTable[index].status_next = (unsigned __int16)scrStringGlob.hashTable[newIndex].status_next | HASH_STAT_HEAD;
-				scrStringGlob.hashTable[index].u.prev = scrStringGlob.hashTable[newIndex].u.prev;
+				entry->status_next = (unsigned __int16)newEntry->status_next | HASH_STAT_HEAD;
+				entry->u.prev = newEntry->u.prev;
 				scrStringGlob.nextFreeEntry = &scrStringGlob.hashTable[index];
 			}
 		}
@@ -638,9 +643,11 @@ static void SL_FreeString(unsigned int stringValue, RefString* refStr, unsigned 
 			}
 			scrStringGlob.hashTable[prev].status_next = (unsigned __int16)newEntry->status_next | scrStringGlob.hashTable[prev].status_next & HASH_STAT_MASK;
 		}
-		//iassert((newEntry->status_next & HASH_STAT_MASK) != HASH_STAT_FREE);
+
+		iassert((newEntry->status_next & HASH_STAT_MASK) != HASH_STAT_FREE);
 		unsigned int newNext = scrStringGlob.hashTable[0].status_next;
 		iassert((newNext & HASH_STAT_MASK) == HASH_STAT_FREE);
+
 		newEntry->status_next = newNext;
 		newEntry->u.prev = 0;
 		scrStringGlob.hashTable[newNext].u.prev = newIndex;

@@ -63,7 +63,7 @@ void SL_BeginLoadScripts()
     scrVarPub.canonicalStrCount = 0;
 }
 
-int __cdecl Scr_ScanFile(char *buf, int max_size)
+int __cdecl Scr_ScanFile(unsigned char *buf, int max_size)
 {
     char c; // [esp+3h] [ebp-5h]
     int n; // [esp+4h] [ebp-4h]
@@ -250,7 +250,7 @@ unsigned int __cdecl Scr_LoadScriptInternal(const char *filename, PrecacheEntry 
     {
         scriptId = GetNewVariable(scrCompilePub.loadedscripts, name);
         SL_RemoveRefToString(name);
-        Com_sprintf(extFilename, 0x40u, "%s.gsc", SL_ConvertToString(name));
+        Com_sprintf(extFilename, 64, "%s.gsc", SL_ConvertToString(name));
         oldSourceBuf = scrParserPub.sourceBuf;
         ProfLoad_Begin("Scr_AddSourceBuffer");
         sourceBuffer = Scr_AddSourceBuffer(SL_ConvertToString(name), extFilename, TempMalloc(0), 1);

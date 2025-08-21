@@ -857,13 +857,19 @@ unsigned int __cdecl GetHashCode(const char *str, unsigned int len)
     unsigned int hash; // [esp+4h] [ebp-8h]
 
     if (len >= 0x100)
-        return (len >> 2) % 0x4E1F + 1;
-    hash = 0;
-    while (len)
     {
-        hash = *str++ + 31 * hash;
-        --len;
+        hash = len >> 2;
     }
+    else
+    {
+        hash = 0;
+        while (len)
+        {
+            hash = *str++ + 31 * hash;
+            --len;
+        }
+    }
+
     return hash % 0x4E1F + 1;
 }
 

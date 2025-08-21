@@ -20,8 +20,7 @@ scrMemTreeDebugGlob_t scrMemTreeDebugGlob = { 0 };
 
 void MT_Init()
 {
-	// KISAKFINISHFUNCTION
-	Sys_EnterCriticalSection(CRITSECT_ALLOC_MARK);
+	Sys_EnterCriticalSection(CRITSECT_MEMORY_TREE);
 
     scrMemTreePub.mt_buffer = (char*)&scrMemTreeGlob.nodes;
     MT_InitBits();
@@ -40,19 +39,15 @@ void MT_Init()
     memset(scrMemTreeDebugGlob.mt_usage, 0, sizeof(scrMemTreeDebugGlob.mt_usage));
     memset(scrMemTreeDebugGlob.mt_usage_size, 0, sizeof(scrMemTreeDebugGlob.mt_usage_size));
 
-	Sys_LeaveCriticalSection(CRITSECT_ALLOC_MARK);
+	Sys_LeaveCriticalSection(CRITSECT_MEMORY_TREE);
 }
 
 void MT_InitBits(void)
 {
     unsigned __int8 bits; // [esp+0h] [ebp-Ch]
-    unsigned __int8 bitsa; // [esp+0h] [ebp-Ch]
-    unsigned __int8 bitsb; // [esp+0h] [ebp-Ch]
     int temp; // [esp+4h] [ebp-8h]
-    int tempa; // [esp+4h] [ebp-8h]
-    int i; // [esp+8h] [ebp-4h]
 
-    for (i = 0; i < NUM_BUCKETS; ++i)
+    for (int i = 0; i < NUM_BUCKETS; ++i)
     {
         bits = 0;
         for (temp = i; temp; temp >>= 1)
@@ -62,15 +57,15 @@ void MT_InitBits(void)
         }
         scrMemTreeGlob.numBits[i] = bits;
 
-        for (bitsa = 8; (i & ((1 << bitsa) - 1)) != 0; --bitsa);
+        for (bits = 8; (i & ((1 << bits) - 1)) != 0; --bits);
 
-        scrMemTreeGlob.leftBits[i] = bitsa;
-        bitsb = 0;
-        for (tempa = i; tempa; tempa >>= 1)
+        scrMemTreeGlob.leftBits[i] = bits;
+        bits = 0;
+        for (temp = i; temp; temp >>= 1)
         {
-            ++bitsb;
+            ++bits;
         }
-        scrMemTreeGlob.logBits[i] = bitsb;
+        scrMemTreeGlob.logBits[i] = bits;
     }
 }
 
@@ -390,16 +385,10 @@ int MT_GetScore(int num)
 
 int MT_GetSubTreeSize(int nodeNum)
 {
-    int SubTreeSize; // esi
-
     if (!nodeNum)
         return 0;
 
-    return MT_GetSubTreeSize(scrMemTreeGlob.nodes[nodeNum].next) + MT_GetSubTreeSize(scrMemTreeGlob.nodes[nodeNum].prev) + 1;
-    //SubTreeSize = MT_GetSubTreeSize(scrMemTreeGlob.nodes[nodeNum].prev);
-    //SubTreeSize += MT_GetSubTreeSize(scrMemTreeGlob.nodes[nodeNum].next);
-    //return SubTreeSize + 1;
-    //return SubTreeSize + MT_GetSubTreeSize(*(unsigned __int16*)&scrMemTreeGlob.leftBits[0xC * nodeNum - 0xBFFFE]) + 1;
+    return MT_GetSubTreeSize(scrMemTreeGlob.nodes[nodeNum].prev) + MT_GetSubTreeSize(scrMemTreeGlob.nodes[nodeNum].next) + 1;
 }
 
 void MT_AddMemoryNode(int newNode, int size)

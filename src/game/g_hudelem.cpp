@@ -1305,13 +1305,13 @@ static const BuiltinMethodDef methods_0[20] =
 };
 
 
-#endif
+#endif // KISAK_SP
 
 void(__cdecl *__cdecl HudElem_GetMethod(const char **pName))(scr_entref_t)
 {
     uint32_t i; // [esp+18h] [ebp-4h]
 
-    for (i = 0; i < 0x16; ++i)
+    for (i = 0; i < ARRAY_COUNT(methods_0); ++i)
     {
         if (!strcmp(*pName, methods_0[i].actionString))
         {

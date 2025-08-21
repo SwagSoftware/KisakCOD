@@ -91,7 +91,7 @@ unsigned int SL_TransferToCanonicalString(unsigned int);
 unsigned int SL_GetCanonicalString(char const*);
 void Scr_BeginLoadScriptsRemote(void);
 void Scr_BeginLoadAnimTrees(int);
-int Scr_ScanFile(char*, int);
+int Scr_ScanFile(unsigned char*, int);
 unsigned int Scr_LoadScriptInternal(char const*, struct PrecacheEntry*, int);
 unsigned int Scr_LoadScript(char const*);
 void Scr_PostCompileScripts(void);

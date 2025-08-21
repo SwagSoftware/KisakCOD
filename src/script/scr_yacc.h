@@ -99,8 +99,8 @@ enum Enum_t : __int32
 typedef struct
 {
     FILE *yy_input_file;
-    char *yy_ch_buf;
-    char *yy_buf_pos;
+    unsigned char *yy_ch_buf;
+    unsigned char *yy_buf_pos;
     unsigned int yy_buf_size;
     int yy_n_chars;
     int yy_is_our_buffer;
@@ -113,7 +113,7 @@ typedef struct
 int __cdecl yyparse();
 int __cdecl yylex();
 void __cdecl TextValue(char *str, int len);
-int __cdecl StringValue(char *str, int len);
+int __cdecl StringValue(unsigned char *str, int len);
 void __cdecl IntegerValue(char *str);
 void __cdecl FloatValue(char *str);
 int __cdecl yy_get_next_buffer();
