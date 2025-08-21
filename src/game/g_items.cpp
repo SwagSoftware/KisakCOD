@@ -170,7 +170,7 @@ void __cdecl Touch_Item(gentity_s *ent, gentity_s *other, int32_t touched)
                         G_AddEvent(other, pickupEvent, weapIndex);
                     if (pickedUp)
                     {
-                        if (ent->s.eType == 3)
+                        if (ent->s.eType == ET_ITEM)
                             Scr_Notify(ent, scr_const.death, 0);
                         G_FreeEntity(ent);
                     }

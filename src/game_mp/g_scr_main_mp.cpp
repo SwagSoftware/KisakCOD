@@ -6142,7 +6142,7 @@ void __cdecl ScrCmd_ItemWeaponSetAmmo(scr_entref_t entref)
     gentity_s *itemEnt; // [esp+20h] [ebp-4h]
 
     itemEnt = GetEntity(entref);
-    if (itemEnt->s.eType != 3)
+    if (itemEnt->s.eType != ET_ITEM)
         Scr_Error("Entity is not an item.");
     if (bg_itemlist[itemEnt->s.index.brushmodel].giType != IT_WEAPON)
         Scr_Error("Item entity is not a weapon.");

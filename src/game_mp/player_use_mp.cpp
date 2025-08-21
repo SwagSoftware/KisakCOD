@@ -143,7 +143,7 @@ void __cdecl Player_UseEntity(gentity_s *playerEnt, gentity_s *useEnt)
         MyAssertHandler(".\\game_mp\\player_use_mp.cpp", 43, 0, "%s", "useEnt");
     if (!useEnt->r.inuse)
         MyAssertHandler(".\\game_mp\\player_use_mp.cpp", 45, 0, "%s", "useEnt->r.inuse");
-    if (useEnt->s.eType == 3)
+    if (useEnt->s.eType == ET_ITEM)
     {
         Scr_AddEntity(playerEnt);
         Scr_Notify(useEnt, scr_const.touch, 1u);
@@ -360,7 +360,7 @@ int32_t __cdecl Player_GetUseList(gentity_s *ent, useList_t *useList, int32_t pr
     for (i = 0; i < v32; ++i)
     {
         gEnt = &g_entities[entityList[i]];
-        if (ent != gEnt && (gEnt->s.eType == 3 || (gEnt->r.contents & 0x200000) != 0))
+        if (ent != gEnt && (gEnt->s.eType == ET_ITEM || (gEnt->r.contents & 0x200000) != 0))
         {
             if (gEnt->classname == scr_const.trigger_use_touch)
             {
@@ -408,7 +408,7 @@ int32_t __cdecl Player_GetUseList(gentity_s *ent, useList_t *useList, int32_t pr
                             useList[num].score = useList[num].score - v19;
                         if (gEnt->s.eType == 11)
                             useList[num].score = useList[num].score - v19 * 0.5f;
-                        if (gEnt->s.eType == 3 && !BG_CanItemBeGrabbed(&gEnt->s, &ent->client->ps, 0))
+                        if (gEnt->s.eType == ET_ITEM && !BG_CanItemBeGrabbed(&gEnt->s, &ent->client->ps, 0))
                         {
                             useList[num].score = useList[num].score + 10000.0f;
                             ++v31;

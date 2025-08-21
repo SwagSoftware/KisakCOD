@@ -45,7 +45,7 @@ void __cdecl CG_BuildItemList(int32_t localClientNum, const snapshot_s *nextSnap
     for (entIndex = 0; entIndex < nextSnap->numEntities; ++entIndex)
     {
         cent = CG_GetEntity(localClientNum, nextSnap->entities[entIndex].number);
-        if (cent->nextState.eType == 3)
+        if (cent->nextState.eType == ET_ITEM)
             cg_itemEntities[cg_itemEntityCount++] = cent;
     }
 }

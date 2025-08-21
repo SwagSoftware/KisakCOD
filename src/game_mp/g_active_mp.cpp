@@ -205,7 +205,7 @@ void __cdecl G_TouchTriggers(gentity_s *ent)
         v6 = entityHandlers[BYTE2(item[1].attackerEntityNum)].touch;
         if (v6 || touch)
         {
-            if (item->eType == 3)
+            if (item->eType == ET_ITEM)
             {
                 if (!BG_PlayerTouchesItem(&ent->client->ps, item, level.time))
                     continue;

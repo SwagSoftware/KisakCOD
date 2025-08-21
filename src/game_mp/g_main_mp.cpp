@@ -1449,7 +1449,7 @@ const dvar_s *ShowEntityInfo()
                 break;
             if (ent->s.eType < 17 && ent->r.inuse && ent->r.linked)
             {
-                if (ent->s.eType == 3)
+                if (ent->s.eType == ET_ITEM)
                 {
                     ShowEntityInfo_Items(ent);
                 }
