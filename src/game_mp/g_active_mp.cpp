@@ -1275,8 +1275,8 @@ void __cdecl ClientEndFrame(gentity_s *ent)
                 ci = &level_bgs.clientinfo[clientNum];
                 if (!ci->infoValid)
                     MyAssertHandler(".\\game_mp\\g_active_mp.cpp", 1671, 0, "%s", "ci->infoValid");
-                ci->lerpMoveDir = (float)ent->s.lerp.u.loopFx.period;
-                ci->lerpLean = ent->s.lerp.u.turret.gunAngles[0];
+                ci->lerpMoveDir = (float)ent->s.lerp.u.player.movementDir;
+                ci->lerpLean = ent->s.lerp.u.player.leanf;
                 playerAngles = ci->playerAngles;
                 viewangles = client->ps.viewangles;
                 ci->playerAngles[0] = client->ps.viewangles[0];

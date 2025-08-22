@@ -434,8 +434,8 @@ void __cdecl CG_ResetEntity(int localClientNum, centity_s *cent, int newEntity)
         cent->previousEventSequence = cent->nextState.eventSequence;
         bcassert(cent->nextState.clientNum, MAX_CLIENTS);
         cia = &cgameGlob->bgs.clientinfo[cent->nextState.clientNum];
-        cia->lerpMoveDir = (float)cent->nextState.lerp.u.loopFx.period;
-        cia->lerpLean = cent->nextState.lerp.u.turret.gunAngles[0];
+        cia->lerpMoveDir = (float)cent->nextState.lerp.u.player.movementDir;
+        cia->lerpLean = cent->nextState.lerp.u.player.leanf;
         cia->playerAngles[0] = cent->pose.angles[0];
         cia->playerAngles[1] = cent->pose.angles[1];
         cia->playerAngles[2] = cent->pose.angles[2];
