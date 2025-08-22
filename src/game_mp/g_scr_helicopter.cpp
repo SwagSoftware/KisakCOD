@@ -477,8 +477,8 @@ void __cdecl Helicopter_Die(
 
 void __cdecl Helicopter_Controller(const gentity_s *pSelf, int32_t *partBits)
 {
-    float gunYaw; // [esp+4h] [ebp-38h]
-    float v3; // [esp+Ch] [ebp-30h]
+    //float gunYaw; // [esp+4h] [ebp-38h]
+    //float v3; // [esp+Ch] [ebp-30h]
     float barrelAngles[3]; // [esp+10h] [ebp-2Ch] BYREF
     DObj_s *obj; // [esp+1Ch] [ebp-20h]
     scr_vehicle_s *veh; // [esp+20h] [ebp-1Ch]
@@ -493,17 +493,17 @@ void __cdecl Helicopter_Controller(const gentity_s *pSelf, int32_t *partBits)
     obj = Com_GetServerDObj(pSelf->s.number);
     if (!obj)
         MyAssertHandler(".\\game_mp\\g_scr_helicopter.cpp", 351, 0, "%s", "obj");
-    v3 = pSelf->s.lerp.u.turret.gunAngles[1];
-    bodyAngles[0] = pSelf->s.lerp.u.turret.gunAngles[0];
+    //v3 = pSelf->s.lerp.u.turret.gunAngles[1];
+    bodyAngles[0] = pSelf->s.lerp.u.vehicle.bodyPitch;
     bodyAngles[1] = 0.0f;
-    bodyAngles[2] = v3;
+    bodyAngles[2] = pSelf->s.lerp.u.vehicle.bodyRoll;
     if (veh->boneIndex.body >= 0)
         DObjSetLocalBoneIndex(obj, partBits, veh->boneIndex.body, vec3_origin, bodyAngles);
-    gunYaw = pSelf->s.lerp.u.vehicle.gunYaw;
+    //gunYaw = pSelf->s.lerp.u.vehicle.gunYaw;
     turretAngles[0] = 0.0f;
-    turretAngles[1] = gunYaw;
+    turretAngles[1] = pSelf->s.lerp.u.vehicle.gunYaw;
     turretAngles[2] = 0.0f;
-    barrelAngles[0] = pSelf->s.lerp.u.primaryLight.cosHalfFovInner;
+    barrelAngles[0] = pSelf->s.lerp.u.vehicle.gunPitch;
     barrelAngles[1] = 0.0f;
     barrelAngles[2] = 0.0f;
     if (veh->boneIndex.turret >= 0)

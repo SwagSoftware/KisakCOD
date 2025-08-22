@@ -1061,13 +1061,17 @@ void __cdecl SV_BuildClientSnapshot(client_t *client)
                             v4->lerp.apos.trTime += v19;
                         if (v4->time2)
                             v4->time2 += v19;
-                        if (v4->eType == ET_MISSILE)
+                        switch (v4->eType)
                         {
+                        case ET_GENERAL:
+                            v4->lerp.u.anonymous.data[0] += v19;
+                            break;
+                        case ET_MISSILE:
                             v4->lerp.u.missile.launchTime += v19;
-                        }
-                        else if (v4->eType == ET_GENERAL || v4->eType == ET_EVENTS + EV_CUSTOM_EXPLODE)
-                        {
-                            v4->lerp.u.missile.launchTime += v19;
+                            break;
+                        case ET_EVENTS + EV_CUSTOM_EXPLODE:
+                            v4->lerp.u.customExplode.startTime += v19;
+                            break;
                         }
                         if (++svs.nextSnapshotEntities >= 2147483646)
                             Com_Error(ERR_FATAL, "svs.nextSnapshotEntities wrapped");

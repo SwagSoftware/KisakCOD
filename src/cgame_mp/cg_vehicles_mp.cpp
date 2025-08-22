@@ -411,7 +411,7 @@ void __cdecl SetupPoseControllers(int32_t localClientNum, DObj_s *obj, centity_s
     float gunYaw; // [esp+CCh] [ebp-11Ch]
     float v47; // [esp+D8h] [ebp-110h]
     float v48; // [esp+DCh] [ebp-10Ch]
-    float cosHalfFovInner; // [esp+E0h] [ebp-108h]
+    float gunPitch; // [esp+E0h] [ebp-108h]
     float v50; // [esp+ECh] [ebp-FCh]
     float v51; // [esp+F0h] [ebp-F8h]
     float v52; // [esp+F4h] [ebp-F4h]
@@ -441,8 +441,8 @@ void __cdecl SetupPoseControllers(int32_t localClientNum, DObj_s *obj, centity_s
     fxInfo->soundEnabled = 0;
     for (tireIdx = 0; tireIdx < 4; ++tireIdx)
         fxInfo->tireActive[tireIdx] = 0;
-    v55 = p_currentState->u.turret.gunAngles[0];
-    v41 = ns->lerp.u.turret.gunAngles[0] - v55;
+    v55 = p_currentState->u.vehicle.bodyPitch;
+    v41 = ns->lerp.u.vehicle.bodyPitch - v55;
     v56 = v41 * 0.002777777845039964;
     v40 = v56 + 0.5;
     frameInterpolation = cgameGlob->frameInterpolation;
@@ -452,8 +452,8 @@ void __cdecl SetupPoseControllers(int32_t localClientNum, DObj_s *obj, centity_s
     v36 = v54 * 182.0444488525391 + 0.5;
     v35 = floor(v36);
     cent->pose.vehicle.pitch = (int)v35;
-    v52 = p_currentState->u.turret.gunAngles[1];
-    v34 = ns->lerp.u.turret.gunAngles[1] - v52;
+    v52 = p_currentState->u.vehicle.bodyRoll;
+    v34 = ns->lerp.u.vehicle.bodyRoll - v52;
     v53 = v34 * 0.002777777845039964;
     v33 = v53 + 0.5;
     v32 = cgameGlob->frameInterpolation;
@@ -463,14 +463,14 @@ void __cdecl SetupPoseControllers(int32_t localClientNum, DObj_s *obj, centity_s
     v29 = v51 * 182.0444488525391 + 0.5;
     v28 = floor(v29);
     cent->pose.vehicle.roll = (int)v28;
-    cosHalfFovInner = p_currentState->u.primaryLight.cosHalfFovInner;
-    v27 = ns->lerp.u.primaryLight.cosHalfFovInner - cosHalfFovInner;
+    gunPitch = p_currentState->u.vehicle.gunPitch;
+    v27 = ns->lerp.u.vehicle.gunPitch - gunPitch;
     v50 = v27 * 0.002777777845039964;
     v26 = v50 + 0.5;
     v25 = cgameGlob->frameInterpolation;
     v24 = floor(v26);
     v23 = (v50 - v24) * 360.0;
-    v48 = v23 * v25 + cosHalfFovInner;
+    v48 = v23 * v25 + gunPitch;
     v22 = v48 * 182.0444488525391 + 0.5;
     v21 = floor(v22);
     cent->pose.vehicle.barrelPitch = (int)v21;
@@ -486,8 +486,8 @@ void __cdecl SetupPoseControllers(int32_t localClientNum, DObj_s *obj, centity_s
     v14 = floor(v15);
     cent->pose.vehicle.yaw = (int)v14;
     cent->pose.turret.barrelPitch = Veh_GetTurretBarrelRoll(localClientNum, cent);
-    v43 = p_currentState->u.turret.gunAngles[2];
-    v13 = ns->lerp.u.turret.gunAngles[2] - v43;
+    v43 = p_currentState->u.vehicle.steerYaw;
+    v13 = ns->lerp.u.vehicle.steerYaw - v43;
     v44 = v13 * 0.002777777845039964;
     v12 = v44 + 0.5;
     v11 = cgameGlob->frameInterpolation;

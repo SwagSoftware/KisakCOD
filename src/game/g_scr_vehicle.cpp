@@ -129,16 +129,17 @@ void __cdecl VEH_InitEntity(gentity_s *ent, scr_vehicle_s *veh, int32_t infoIdx)
     ent->s.lerp.eFlags = 0;
     ent->s.lerp.pos.trType = TR_INTERPOLATE;
     ent->s.lerp.apos.trType = TR_INTERPOLATE;
-    ent->s.lerp.u.vehicle.materialTime = 0;
     ent->s.time2 = 0;
     ent->s.loopSound = 0;
     ent->s.weapon = (uint8_t)G_GetWeaponIndexForName(s_vehicleInfos[infoIdx].turretWeapon);
     ent->s.weaponModel = 0;
-    ent->s.lerp.u.turret.gunAngles[2] = 0.0;
-    ent->s.lerp.u.turret.gunAngles[0] = 0.0;
-    ent->s.lerp.u.turret.gunAngles[1] = 0.0;
-    ent->s.lerp.u.primaryLight.cosHalfFovInner = 0.0;
-    ent->s.lerp.u.vehicle.gunYaw = 0.0;
+    ent->s.lerp.u.vehicle.bodyPitch = 0.0f;
+    ent->s.lerp.u.vehicle.bodyRoll = 0.0f;
+    ent->s.lerp.u.vehicle.steerYaw = 0.0f;
+    ent->s.lerp.u.vehicle.materialTime = 0;
+    ent->s.lerp.u.vehicle.gunPitch = 0.0f;
+    ent->s.lerp.u.vehicle.gunYaw = 0.0f;
+    ent->s.lerp.u.vehicle.teamAndOwnerIndex = 0;
     ent->scr_vehicle = veh;
     ent->nextthink = level.time + 50;
     ent->takedamage = 1;
@@ -758,7 +759,7 @@ void __cdecl VEH_UpdateAim(gentity_s *ent)
     float v10; // [esp+3Ch] [ebp-154h]
     float turretHorizSpanLeft; // [esp+40h] [ebp-150h]
     float v12; // [esp+44h] [ebp-14Ch]
-    float cosHalfFovInner; // [esp+48h] [ebp-148h]
+    float gunPitch; // [esp+48h] [ebp-148h]
     float v14; // [esp+4Ch] [ebp-144h]
     float turretVertSpanDown; // [esp+50h] [ebp-140h]
     float v16; // [esp+54h] [ebp-13Ch]
@@ -832,7 +833,7 @@ void __cdecl VEH_UpdateAim(gentity_s *ent)
             MatrixTranspose(mtx, invMtx);
             MatrixMultiply(axis, invMtx, mtx);
             AxisToAngles(mtx, tgtAngles);
-            prevAngles[0] = ent->s.lerp.u.primaryLight.cosHalfFovInner;
+            prevAngles[0] = ent->s.lerp.u.vehicle.gunPitch;
             prevAngles[1] = ent->s.lerp.u.vehicle.gunYaw;
             prevAngles[2] = 0.0f;
             AnglesSubtract(tgtAngles, prevAngles, deltaAngles);
@@ -840,29 +841,29 @@ void __cdecl VEH_UpdateAim(gentity_s *ent)
             deltaAngles[0] = v8;
             v7 = I_fabs(deltaAngles[1]);
             deltaAngles[1] = v7;
-            ent->s.lerp.u.primaryLight.cosHalfFovInner = LinearTrackAngle(
+            ent->s.lerp.u.vehicle.gunPitch = LinearTrackAngle(
                 tgtAngles[0],
                 prevAngles[0],
                 info->turretRotRate,
                 0.050000001f);
             ent->s.lerp.u.vehicle.gunYaw = LinearTrackAngle(tgtAngles[1], prevAngles[1], info->turretRotRate, 0.050000001f);
-            stopAngles[0] = ent->s.lerp.u.primaryLight.cosHalfFovInner;
+            stopAngles[0] = ent->s.lerp.u.vehicle.gunPitch;
             stopAngles[1] = ent->s.lerp.u.vehicle.gunYaw;
             stopAngles[2] = 0.0f;
-            cosHalfFovInner = ent->s.lerp.u.primaryLight.cosHalfFovInner;
+            gunPitch = ent->s.lerp.u.vehicle.gunPitch;
             turretVertSpanDown = info->turretVertSpanDown;
-            v6 = cosHalfFovInner - turretVertSpanDown;
+            v6 = gunPitch - turretVertSpanDown;
             if (v6 < 0.0f)
-                v16 = cosHalfFovInner;
+                v16 = gunPitch;
             else
                 v16 = turretVertSpanDown;
             v14 = -info->turretVertSpanUp;
-            v5 = v14 - cosHalfFovInner;
+            v5 = v14 - gunPitch;
             if (v5 < 0.0f)
                 v4 = v16;
             else
                 v4 = -info->turretVertSpanUp;
-            ent->s.lerp.u.primaryLight.cosHalfFovInner = v4;
+            ent->s.lerp.u.vehicle.gunPitch = v4;
             gunYaw = ent->s.lerp.u.vehicle.gunYaw;
             turretHorizSpanLeft = info->turretHorizSpanLeft;
             v3 = gunYaw - turretHorizSpanLeft;
@@ -877,7 +878,7 @@ void __cdecl VEH_UpdateAim(gentity_s *ent)
             else
                 v1 = -info->turretHorizSpanRight;
             ent->s.lerp.u.vehicle.gunYaw = v1;
-            stopAngles[0] = AngleDelta(stopAngles[0], ent->s.lerp.u.primaryLight.cosHalfFovInner);
+            stopAngles[0] = AngleDelta(stopAngles[0], ent->s.lerp.u.vehicle.gunPitch);
             stopAngles[1] = AngleDelta(stopAngles[1], ent->s.lerp.u.vehicle.gunYaw);
             if (deltaAngles[0] >= 2.0f && stopAngles[0] == 0.0f || deltaAngles[1] >= 2.0f && stopAngles[1] == 0.0f)
             {

@@ -1636,7 +1636,7 @@ void __cdecl BG_PlayerToEntitySetMisc(playerState_s *ps, entityState_s *s)
 #ifdef KISAK_MP
     s->legsAnim = ps->legsAnim;
     s->torsoAnim = ps->torsoAnim;
-    s->lerp.u.turret.gunAngles[0] = ps->leanf;
+    s->lerp.u.player.leanf = ps->leanf;
     s->clientNum = ps->clientNum;
     if ((ps->eFlags & 0x300) != 0)
         s->otherEntityNum = ps->viewlocked_entNum;
@@ -1683,7 +1683,7 @@ void __cdecl BG_PlayerToEntitySetTrajectory(playerState_s *ps, entityState_s *s,
             "%s\n\t(ps->movementDir) = %i",
             "(ps->movementDir < 128 && ps->movementDir >= -128)",
             ps->movementDir);
-    s->lerp.u.loopFx.period = ps->movementDir;
+    s->lerp.u.player.movementDir = ps->movementDir;
     if (snap)
     {
         s->lerp.pos.trBase[0] = (float)(int)s->lerp.pos.trBase[0];
