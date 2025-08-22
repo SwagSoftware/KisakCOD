@@ -574,7 +574,7 @@ void __cdecl SpawnVehicle(gentity_s *ent, const char *typeName)
     infoIdx = VEH_GetVehicleInfoFromName(typeName);
     if (infoIdx < 0)
         Com_Error(ERR_DROP, "Can't find info for script vehicle [%s]", typeName);
-    ent->s.eType = 14;
+    ent->s.eType = ET_VEHICLE;
     VEH_InitModelAndValidateTags(ent, &infoIdx);
     if (!level.initializing)
     {
@@ -885,7 +885,7 @@ void __cdecl InitEntityVars(gentity_s *ent, scr_vehicle_s *veh, int32_t infoIdx)
             MyAssertHandler(".\\game_mp\\g_vehicles_mp.cpp", 2874, 0, "Initializing a usable vehicle!");
         ent->r.contents |= 0x200000u;
     }
-    ent->s.eType = 14;
+    ent->s.eType = ET_VEHICLE;
     ent->s.lerp.eFlags = 0;
     ent->s.lerp.pos.trType = TR_INTERPOLATE;
     ent->s.lerp.apos.trType = TR_INTERPOLATE;
@@ -1040,7 +1040,7 @@ bool __cdecl AttachedStickyMissile_0(gentity_s *vehicle, gentity_s *missile)
         MyAssertHandler(".\\game_mp\\g_vehicles_mp.cpp", 1346, 0, "%s", "missile");
     if (missile->s.groundEntityNum != vehicle->s.number)
         return 0;
-    if (missile->s.eType != 4)
+    if (missile->s.eType != ET_MISSILE)
         return 0;
     weapDef = BG_GetWeaponDef(missile->s.weapon);
     if (!weapDef)
@@ -1120,7 +1120,7 @@ void __cdecl VEH_PushEntity_0(
         {
             dist = Vec3Length(deltaOrigin);
             mph = dist / frameTime * 0.056818184;
-            if (target->s.eType == 1 && target->s.groundEntityNum != ent->s.number && mph >= 10.0)
+            if (target->s.eType == ET_PLAYER && target->s.groundEntityNum != ent->s.number && mph >= 10.0)
             {
                 if (mph >= 50.0)
                 {
@@ -1203,8 +1203,8 @@ void __cdecl VEH_TouchEntities_0(gentity_s *ent, float frameTime)
             target = &g_entities[entityList[i]];
             v24 = entityHandlers[target->handler].touch;
             if (target->s.number != ent->s.number
-                && (target->s.eType == 1 || target->s.eType == 6 || target->s.eType == 14 || target->s.eType == 4)
-                && (!target->r.ownerNum.isDefined() || target->s.eType == 4 && target->r.ownerNum.ent() != ent))
+                && (target->s.eType == ET_PLAYER || target->s.eType == ET_SCRIPTMOVER || target->s.eType == ET_VEHICLE || target->s.eType == ET_MISSILE)
+                && (!target->r.ownerNum.isDefined() || target->s.eType == ET_MISSILE && target->r.ownerNum.ent() != ent))
             {
                 if (target->s.groundEntityNum == ent->s.number)
                     goto LABEL_18;
@@ -1258,13 +1258,13 @@ void __cdecl VEH_TouchEntities_0(gentity_s *ent, float frameTime)
                         v24(target, ent, 1);
                     if (touch)
                         touch(ent, target, 1);
-                    if (target->s.eType == 1)
+                    if (target->s.eType == ET_PLAYER)
                     {
                     LABEL_18:
                         VEH_PushEntity_0(ent, target, frameTime, out, diff, v3);
                         continue;
                     }
-                    if (target->s.eType == 14)
+                    if (target->s.eType == ET_VEHICLE)
                     {
                         if (!target->scr_vehicle)
                             MyAssertHandler(".\\game_mp\\g_vehicles_mp.cpp", 1604, 0, "%s", "hit->scr_vehicle");
@@ -2546,7 +2546,7 @@ void __cdecl G_VehEntHandler_Touch(gentity_s *pSelf, gentity_s *pOther, int32_t 
         MyAssertHandler(".\\game_mp\\g_vehicles_mp.cpp", 3224, 0, "%s", "pOther");
     veh = pSelf->scr_vehicle;
     info = &s_vehicleInfos[veh->infoIdx];
-    if (pOther->s.eType == 1 || pOther->s.eType == 6)
+    if (pOther->s.eType == ET_PLAYER || pOther->s.eType == ET_SCRIPTMOVER)
     {
         if (pOther->takedamage)
         {
@@ -2555,7 +2555,7 @@ void __cdecl G_VehEntHandler_Touch(gentity_s *pSelf, gentity_s *pOther, int32_t 
                 moveLen = Vec3NormalizeTo(veh->phys.vel, moveDir);
                 if (moveLen >= EQUAL_EPSILON)
                 {
-                    if (pOther->s.eType == 6)
+                    if (pOther->s.eType == ET_SCRIPTMOVER)
                     {
                         InflictDamage(pSelf, pOther, moveDir, 999999);
                     }
@@ -2748,6 +2748,6 @@ void __cdecl G_VehSpawner(gentity_s *pSelf)
 void __cdecl G_VehCollmapSpawner(gentity_s *pSelf)
 {
     pSelf->r.contents = 0;
-    pSelf->s.eType = 15;
+    pSelf->s.eType = ET_VEHICLE_COLLMAP;
 }
 

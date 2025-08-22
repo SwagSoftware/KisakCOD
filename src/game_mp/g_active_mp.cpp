@@ -200,12 +200,12 @@ void __cdecl G_TouchTriggers(gentity_s *ent)
         item = &g_entities[entityList[i]].s;
         if ((LODWORD(item[1].lerp.pos.trDelta[2]) & 0x405C0008) == 0)
             MyAssertHandler(".\\game_mp\\g_active_mp.cpp", 215, 0, "%s", "hit->r.contents & MASK_TRIGGER");
-        if (item->eType == 4)
+        if (item->eType == ET_MISSILE)
             MyAssertHandler(".\\game_mp\\g_active_mp.cpp", 216, 0, "%s", "hit->s.eType != ET_MISSILE");
         v6 = entityHandlers[BYTE2(item[1].attackerEntityNum)].touch;
         if (v6 || touch)
         {
-            if (item->eType == 3)
+            if (item->eType == ET_ITEM)
             {
                 if (!BG_PlayerTouchesItem(&ent->client->ps, item, level.time))
                     continue;
@@ -400,7 +400,7 @@ void __cdecl HandleClientEvent(gclient_s *client, gentity_s *ent, int32_t event,
         Scr_Notify(ent, scr_const.detonate, 0);
         break;
     default:
-        if (event >= 106 && event <= 134 && ent->s.eType == 1)
+        if (event >= 106 && event <= 134 && ent->s.eType == ET_PLAYER)
         {
             damage = eventParm < 100 ? (double)eventParm * 0.009999999776482582 : 1.1;
             if (damage != 0.0)
@@ -454,7 +454,7 @@ bool __cdecl IsLiveGrenade(gentity_s *ent)
 {
     WeaponDef *weapDef; // [esp+0h] [ebp-4h]
 
-    if (ent->s.eType != 4)
+    if (ent->s.eType != ET_MISSILE)
         return 0;
     weapDef = BG_GetWeaponDef(ent->s.index.brushmodel % 128);
     if (!weapDef)
@@ -789,7 +789,7 @@ void __cdecl G_AddPlayerMantleBlockage(float *endPos, int32_t duration, pmove_t 
     ent->r.contents = 0x10000;
     ent->clipmask = 0x10000;
     ent->r.svFlags = 33;
-    ent->s.eType = 5;
+    ent->s.eType = ET_INVISIBLE;
     ent->handler = 21;
     ent->r.mins[0] = owner->r.mins[0];
     ent->r.mins[1] = owner->r.mins[1];
@@ -892,7 +892,7 @@ void __cdecl IntermissionClientEndFrame(gentity_s *ent)
     client->ps.eFlags &= ~0x200000u;
     client->ps.eFlags &= ~0x40u;
     client->ps.viewmodelIndex = 0;
-    ent->s.eType = 5;
+    ent->s.eType = ET_INVISIBLE;
     v1 = va("%i", level.teamScores[1]);
     SV_SetConfigstring(4, v1);
     v2 = va("%i", level.teamScores[2]);
@@ -915,7 +915,7 @@ void __cdecl SpectatorClientEndFrame(gentity_s *ent)
     ent->takedamage = 0;
     ent->r.contents = 0;
     client->ps.otherFlags &= ~4u;
-    ent->s.eType = 5;
+    ent->s.eType = ET_INVISIBLE;
     client->ps.viewmodelIndex = 0;
     client->fGunPitch = 0.0;
     client->fGunYaw = 0.0;
@@ -1260,7 +1260,7 @@ void __cdecl ClientEndFrame(gentity_s *ent)
             {
                 client->iLastCompassPlayerInfoEnt = ENTITYNUM_NONE;
             }
-            if (ent->s.eType == 1)
+            if (ent->s.eType == ET_PLAYER)
             {
                 ent->handler = 2 * (ent->health <= 0) + 10;
                 clientNum = ent->s.clientNum;

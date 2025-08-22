@@ -141,7 +141,7 @@ void __cdecl player_die(
     {
         if (bgs != &level_bgs)
             MyAssertHandler(".\\game_mp\\g_combat_mp.cpp", 328, 0, "%s\n\t(bgs) = %p", "(bgs == &level_bgs)", bgs);
-        if (attacker->s.eType == 11 && attacker->r.ownerNum.isDefined())
+        if (attacker->s.eType == ET_MG42 && attacker->r.ownerNum.isDefined())
             attacker = attacker->r.ownerNum.ent();
         DeathGrenadeDrop(self, meansOfDeath);
         Scr_AddEntity(attacker);

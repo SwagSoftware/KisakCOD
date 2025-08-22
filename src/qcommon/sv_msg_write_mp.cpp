@@ -892,8 +892,8 @@ const NetFieldList *__cdecl MSG_GetStateFieldListForEntityType(int eType)
 {
     int v2; // [esp+0h] [ebp-4h]
 
-    if (eType > 17)
-        v2 = 17;
+    if (eType > ET_EVENTS)
+        v2 = ET_EVENTS;
     else
         v2 = eType;
     return &s_netFieldList[v2];
@@ -1226,50 +1226,56 @@ PacketEntityType __cdecl MSG_GetPacketEntityTypeForEType(int eType)
 
     switch (eType)
     {
-    case 0:
+    case ET_GENERAL:
         result = ANALYZE_DATATYPE_ENTITYTYPE_GENERALENTITY;
         break;
-    case 1:
+    case ET_PLAYER:
         result = ANALYZE_DATATYPE_ENTITYTYPE_PLAYERENTITY;
         break;
-    case 2:
+    case ET_PLAYER_CORPSE:
         result = ANALYZE_DATATYPE_ENTITYTYPE_PLAYERCORPSEENTITY;
         break;
-    case 3:
+    case ET_ITEM:
         result = ANALYZE_DATATYPE_ENTITYTYPE_ITEMENTITY;
         break;
-    case 4:
+    case ET_MISSILE:
         result = ANALYZE_DATATYPE_ENTITYTYPE_MISSILEENTITY;
         break;
-    case 5:
+    case ET_INVISIBLE:
         result = ANALYZE_DATATYPE_ENTITYTYPE_INVISIBLEENTITY;
         break;
-    case 6:
+    case ET_SCRIPTMOVER:
         result = ANALYZE_DATATYPE_ENTITYTYPE_SCRIPTMOVERENTITY;
         break;
-    case 7:
+    case ET_SOUND_BLEND:
         result = ANALYZE_DATATYPE_ENTITYTYPE_SOUNDBLENDENTITY;
         break;
-    case 8:
+    case ET_FX:
         result = ANALYZE_DATATYPE_ENTITYTYPE_FXENTITY;
         break;
-    case 9:
+    case ET_LOOP_FX:
         result = ANALYZE_DATATYPE_ENTITYTYPE_LOOPFXENTITY;
         break;
-    case 11:
+    case ET_PRIMARY_LIGHT:
+        result = ANALYZE_DATATYPE_ENTITYTYPE_PRIMARYLIGHTENTITY;
+        break;
+    case ET_MG42:
         result = ANALYZE_DATATYPE_ENTITYTYPE_MG42ENTITY;
         break;
-    case 12:
+    case ET_HELICOPTER:
         result = ANALYZE_DATATYPE_ENTITYTYPE_HELICOPTER;
         break;
-    case 13:
+    case ET_PLANE:
         result = ANALYZE_DATATYPE_ENTITYTYPE_PLANE;
         break;
-    case 14:
+    case ET_VEHICLE:
         result = ANALYZE_DATATYPE_ENTITYTYPE_VEHICLE;
         break;
-    case 15:
+    case ET_VEHICLE_COLLMAP:
         result = ANALYZE_DATATYPE_ENTITYTYPE_VEHICLE_COLLMAP;
+        break;
+    case ET_VEHICLE_CORPSE:
+        result = ANALYZE_DATATYPE_ENTITYTYPE_VEHICLE_CORPSE;
         break;
     default:
         result = ANALYZE_DATATYPE_ENTITYTYPE_TEMPENTITY;

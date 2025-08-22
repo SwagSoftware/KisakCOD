@@ -700,7 +700,7 @@ int32_t __cdecl AimAssist_CalcAimPos(
         MyAssertHandler(".\\aim_assist\\aim_assist.cpp", 668, 0, "%s", "target");
     if (!aimPos)
         MyAssertHandler(".\\aim_assist\\aim_assist.cpp", 669, 0, "%s", "aimPos");
-    if (targetEnt->nextState.eType == 1)
+    if (targetEnt->nextState.eType == ET_PLAYER)
         return AimTarget_GetTagPos(localClientNum, targetEnt, scr_const.aim_bone, aimPos);
     Vec3Avg(target->mins, target->maxs, center);
     Vec3Add(targetEnt->pose.origin, center, aimPos);

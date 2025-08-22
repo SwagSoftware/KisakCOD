@@ -276,7 +276,7 @@ void __cdecl CG_ClearEntityFxHandles(int32_t localClientNum)
     for (num = 0; num < cgameGlob->snap->numEntities; ++num)
     {
         cent = CG_GetEntity(localClientNum, cgameGlob->snap->entities[num].number);
-        if (cent->nextState.eType == 8 || cent->nextState.eType == 9)
+        if (cent->nextState.eType == ET_FX || cent->nextState.eType == ET_LOOP_FX)
         {
             cent->pose.fx.effect = 0;
             cent->pose.fx.triggerTime = 0;

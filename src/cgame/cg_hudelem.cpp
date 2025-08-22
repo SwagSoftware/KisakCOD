@@ -1499,7 +1499,7 @@ void __cdecl DrawOffscreenViewableWaypoint(int32_t localClientNum, const hudelem
                 worldPos[0] = cent->pose.origin[0];
                 worldPos[1] = cent->pose.origin[1];
                 worldPos[2] = cent->pose.origin[2];
-                if (cent->nextState.eType == 1)
+                if (cent->nextState.eType == ET_PLAYER)
                 {
                     if ((cent->currentState.eFlags & 8) != 0)
                     {

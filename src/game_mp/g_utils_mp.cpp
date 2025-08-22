@@ -360,11 +360,11 @@ void __cdecl G_DObjUpdate(gentity_s *ent)
             dobjModels[0].boneName = 0;
             dobjModels[0].ignoreCollision = 0;
             numModels = 1;
-            if (!ent->s.eType || ent->s.eType == 6 || ent->s.eType == 13 || ent->s.eType == 11)
+            if (ent->s.eType == ET_GENERAL || ent->s.eType == ET_SCRIPTMOVER || ent->s.eType == ET_PLANE || ent->s.eType == ET_MG42)
             {
                 ent->s.index.brushmodel = modelIndex;
             }
-            else if (ent->s.eType == 14 || ent->s.eType == 12)
+            else if (ent->s.eType == ET_VEHICLE || ent->s.eType == ET_HELICOPTER)
             {
                 ent->s.un2.hintString = modelIndex;
             }
@@ -1227,7 +1227,7 @@ void __cdecl G_FreeEntityRefs(gentity_s *ed)
             if (other->r.inuse
                 && other->r.ownerNum.isDefined()
                 && other->r.ownerNum.entnum() == entnum
-                && other->s.eType == 11)
+                && other->s.eType == ET_MG42)
             {
                 other->active = 0;
                 break;
@@ -1292,7 +1292,7 @@ void __cdecl G_FreeEntity(gentity_s *ed)
         if (ed->scr_vehicle)
             MyAssertHandler(".\\game_mp\\g_utils_mp.cpp", 1522, 0, "%s", "ed->scr_vehicle == NULL");
     }
-    if (ed->s.eType == 2)
+    if (ed->s.eType == ET_PLAYER_CORPSE)
         PlayerCorpse_Free(ed);
     EntHandleDissociate(ed);
     ed->r.ownerNum.setEnt(NULL);
@@ -1376,7 +1376,7 @@ void __cdecl G_AddEvent(gentity_s *ent, unsigned int event, unsigned int eventPa
         MyAssertHandler(".\\game_mp\\g_utils_mp.cpp", 1714, 0, "event doesn't index 256\n\t%i not in [0, %i)", event, 256);
     if (eventParm >= 0xFF)
         MyAssertHandler(".\\game_mp\\g_utils_mp.cpp", 1715, 0, "%s", "eventParm < EVENT_PARM_MAX");
-    if (ent->s.eType >= 17)
+    if (ent->s.eType >= ET_EVENTS)
         MyAssertHandler(".\\game_mp\\g_utils_mp.cpp", 1716, 0, "%s", "ent->s.eType < ET_EVENTS");
     if (ent->client)
     {
@@ -1451,7 +1451,7 @@ void __cdecl G_SetConstString(unsigned __int16 *to, char *from)
 
 const char *__cdecl G_GetEntityTypeName(const gentity_s *ent)
 {
-    if (ent->s.eType >= 0x11u)
+    if (ent->s.eType >= ET_EVENTS)
         MyAssertHandler(".\\game_mp\\g_utils_mp.cpp", 1870, 0, "%s", "(unsigned)ent->s.eType < ET_EVENTS");
     return entityTypeNames[ent->s.eType];
 }

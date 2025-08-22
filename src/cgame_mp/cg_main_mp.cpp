@@ -1612,7 +1612,7 @@ void __cdecl CG_RestartSmokeGrenades(int32_t localClientNum)
                 && nextSnap->entities[i].time2 >= cgameGlob->time
                 && nextSnap->entities[i].lerp.u.customExplode.startTime <= cgameGlob->time)
             {
-                if (nextSnap->entities[i].eType)
+                if (nextSnap->entities[i].eType != ET_GENERAL)
                     MyAssertHandler(
                         ".\\cgame_mp\\cg_main_mp.cpp",
                         1584,
@@ -1711,7 +1711,7 @@ void __cdecl CG_Init(int32_t localClientNum, int32_t serverMessageNum, int32_t s
     Ragdoll_Init();
     Phys_Init();
     cgameGlob->localClientNum = localClientNum;
-    cgameGlob->viewModelPose.eType = 17;
+    cgameGlob->viewModelPose.eType = ET_EVENTS;
     cgameGlob->viewModelPose.localClientNum = localClientNum;
     iassert(cgameGlob->viewModelPose.localClientNum == localClientNum);
     CL_SetStance(localClientNum, CL_STANCE_STAND);

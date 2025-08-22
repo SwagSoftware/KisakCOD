@@ -996,7 +996,7 @@ void __cdecl CG_DrawFriendlyNames(int32_t localClientNum)
         for (entityIndex = 0; entityIndex < nextSnap->numEntities; ++entityIndex)
         {
             cent = CG_GetEntity(localClientNum, nextSnap->entities[entityIndex].number);
-            if (cent->nextState.eType == 1)
+            if (cent->nextState.eType == ET_PLAYER)
             {
                 v2 = cgameGlob->nextSnap;
                 v1 = (v2->ps.otherFlags & 6) != 0 && cent->nextState.number == v2->ps.clientNum;
@@ -1286,7 +1286,7 @@ void __cdecl CG_DrawCrosshairNames(int32_t localClientNum)
                     for (entityIndex = 0; entityIndex < nextSnap->numEntities; ++entityIndex)
                     {
                         cent = CG_GetEntity(localClientNum, nextSnap->entities[entityIndex].number);
-                        if (cent->nextState.eType == 1 && cent->nextState.clientNum == cgameGlob->crosshairClientNum)
+                        if (cent->nextState.eType == ET_PLAYER && cent->nextState.clientNum == cgameGlob->crosshairClientNum)
                         {
                             myTeam = cgameGlob->bgs.clientinfo[cgameGlob->nextSnap->ps.clientNum].team;
                             if (myTeam == TEAM_SPECTATOR

@@ -64,7 +64,7 @@ void __cdecl AimTarget_ProcessEntity(int32_t localClientNum, const centity_s *en
         return;
     }
 
-    if (ent->nextState.eType == 1)
+    if (ent->nextState.eType == ET_PLAYER)
     {
         visBone = scr_const.aim_vis_bone;
     }
@@ -104,7 +104,7 @@ char __cdecl AimTarget_IsTargetValid(const cg_s *cgameGlob, const centity_s *tar
             0,
             "%s",
             "targetEnt->nextState.number != cgameGlob->predictedPlayerState.clientNum");
-    if (targetEnt->nextState.eType == 1)
+    if (targetEnt->nextState.eType == ET_PLAYER)
     {
         if ((targetEnt->nextState.lerp.eFlags & 0x20000) != 0)
             MyAssertHandler(".\\aim_assist\\aim_target_mp.cpp", 268, 0, "%s", "!(targetEnt->nextState.lerp.eFlags & EF_DEAD)");
@@ -170,7 +170,7 @@ double __cdecl AimTarget_GetTargetRadius(const centity_s *targetEnt)
 
     if (!targetEnt)
         MyAssertHandler(".\\aim_assist\\aim_target_mp.cpp", 217, 0, "%s", "targetEnt");
-    if (targetEnt->nextState.eType == 1)
+    if (targetEnt->nextState.eType == ET_PLAYER)
         return aim_target_sentient_radius->current.value;
     AimTarget_GetTargetBounds(targetEnt, mins, maxs);
     return (float)RadiusFromBounds(mins, maxs);
@@ -186,7 +186,7 @@ void __cdecl AimTarget_GetTargetBounds(const centity_s *targetEnt, float *mins, 
         MyAssertHandler(".\\aim_assist\\aim_target_mp.cpp", 184, 0, "%s", "mins");
     if (!maxs)
         MyAssertHandler(".\\aim_assist\\aim_target_mp.cpp", 185, 0, "%s", "maxs");
-    if (targetEnt->nextState.eType == 1)
+    if (targetEnt->nextState.eType == ET_PLAYER)
     {
         AimTarget_GetTagPos(targetEnt, scr_const.aim_highest_bone, highBonePos);
         *mins = -aim_target_sentient_radius->current.value;

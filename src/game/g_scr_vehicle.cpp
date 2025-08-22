@@ -619,8 +619,8 @@ void __cdecl VEH_TouchEntities(gentity_s *ent)
         target = &g_entities[entityList[i]];
         v12 = entityHandlers[target->handler].touch;
         if (target->s.number != ent->s.number
-            && (target->s.eType == 1 || target->s.eType == 6 || target->s.eType == 4 || target->s.eType == 14)
-            && target->s.eType == 4)
+            && (target->s.eType == ET_PLAYER || target->s.eType == ET_SCRIPTMOVER || target->s.eType == ET_MISSILE || target->s.eType == ET_VEHICLE)
+            && target->s.eType == ET_MISSILE)
         {
             if (target->s.groundEntityNum == ent->s.number)
             {
@@ -661,7 +661,7 @@ void __cdecl VEH_TouchEntities(gentity_s *ent)
                         v12(target, ent, 1);
                     if (touch)
                         touch(ent, target, 1);
-                    if (target->s.eType == 1)
+                    if (target->s.eType == ET_PLAYER)
                         VEH_PushEntity(ent, target, out, diff, v3);
                 }
             }
@@ -693,7 +693,7 @@ bool __cdecl AttachedStickyMissile(gentity_s *vehicle, gentity_s *missile)
         MyAssertHandler(".\\game\\g_scr_vehicle.cpp", 1802, 0, "%s", "missile");
     if (missile->s.groundEntityNum != vehicle->s.number)
         return 0;
-    if (missile->s.eType != 4)
+    if (missile->s.eType != ET_MISSILE)
         return 0;
     weapDef = BG_GetWeaponDef(missile->s.weapon);
     if (!weapDef)

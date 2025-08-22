@@ -173,9 +173,9 @@ clientInfo_t *__cdecl ClientInfoForEntity(int32_t localClientNum, uint32_t entNu
     centity_s *cent; // [esp+0h] [ebp-4h]
 
     cent = CG_GetEntity(localClientNum, entNum);
-    if (cent->nextState.eType != 1)
+    if (cent->nextState.eType != ET_PLAYER)
         return 0;
-    if (cent->nextState.eType >= 17)
+    if (cent->nextState.eType >= ET_EVENTS)
         return 0;
     if (cent->nextState.clientNum >= 0x40u)
         MyAssertHandler(
@@ -223,9 +223,9 @@ void __cdecl CG_VehSeatTransformForPlayer(
 
     ci = ClientInfoForEntity(localClientNum, entNum);
     centPlayer = CG_GetEntity(localClientNum, entNum);
-    if (centPlayer->nextState.eType != 1)
+    if (centPlayer->nextState.eType != ET_PLAYER)
         MyAssertHandler(".\\cgame_mp\\cg_vehicles_mp.cpp", 285, 0, "%s", "centPlayer->nextState.eType == ET_PLAYER");
-    if (centPlayer->nextState.eType >= 17)
+    if (centPlayer->nextState.eType >= ET_EVENTS)
         MyAssertHandler(".\\cgame_mp\\cg_vehicles_mp.cpp", 286, 0, "%s", "centPlayer->nextState.eType < ET_EVENTS");
     SeatTransformForClientInfo(localClientNum, ci, resultOrigin, resultAngles);
 }
@@ -598,7 +598,7 @@ void __cdecl VehicleFXTest(int32_t localClientNum, const DObj_s *obj, centity_s 
     ns = &cent->nextState;
     cgameGlob = CG_GetLocalClientGlobals(localClientNum);
     speed = GetSpeed(localClientNum, cent);
-    if (cent->nextState.eType == 14)
+    if (cent->nextState.eType == ET_VEHICLE)
     {
         if (speed >= 0.050000001 && speed <= 0.60000002)
         {
@@ -673,7 +673,7 @@ void __cdecl VehicleFXTest(int32_t localClientNum, const DObj_s *obj, centity_s 
         }
         return;
     }
-    if (cent->nextState.eType == 12)
+    if (cent->nextState.eType == ET_HELICOPTER)
     {
         entityNum = CG_GetEntityIndex(localClientNum, cent);
         vehFx = VehicleGetFxInfo(localClientNum, entityNum);

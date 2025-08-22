@@ -1022,7 +1022,7 @@ void __cdecl BG_RegisterDvars()
 
 char *__cdecl BG_GetEntityTypeName(int32_t eType)
 {
-    if (eType < 17)
+    if (eType < ET_EVENTS)
         return (char*)entityTypeNames[eType];
 
     iassert((eType - ET_EVENTS >= 0 && eType - ET_EVENTS < EV_MAX_EVENTS));
@@ -1126,7 +1126,7 @@ char __cdecl WeaponEntCanBeGrabbed(
     weapDef = BG_GetWeaponDef(weapIdx);
     if (!BG_PlayerCanPickUpWeaponType(weapDef, ps))
         return 0;
-    if (weaponEntState->eType == 4 && weapDef->offhandClass == OFFHAND_CLASS_FRAG_GRENADE)
+    if (weaponEntState->eType == ET_MISSILE && weapDef->offhandClass == OFFHAND_CLASS_FRAG_GRENADE)
         return 1;
     if (touched)
     {

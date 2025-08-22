@@ -2044,7 +2044,7 @@ void __cdecl PlayerCmd_ClonePlayer(scr_entref_t entref)
             "%s",
             "!IS_NAN((body->s.lerp.pos.trDelta)[0]) && !IS_NAN((body->s.lerp.pos.trDelta)[1]) && !IS_NAN((body->s.lerp.pos.trDelta)[2])");
     }
-    body->s.eType = 2;
+    body->s.eType = ET_PLAYER_CORPSE;
     body->physicsObject = 1;
     dobj = Com_GetServerDObj(client->ps.clientNum);
     tree = DObjGetTree(dobj);
