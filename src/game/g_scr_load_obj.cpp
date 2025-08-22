@@ -8,6 +8,7 @@
 #include "g_main.h"
 #include <script/scr_main.h>
 #include <xanim/xanim.h>
+#include <universal/profile.h>
 
 int __cdecl GScr_LoadScriptAndLabel(const char *filename, const char *label, ScriptFunctions *functions)
 {
@@ -153,67 +154,83 @@ void __cdecl GScr_LoadScriptsForPathNodes(ScriptFunctions *functions)
 
 void __cdecl GScr_LoadScriptsForEntities(ScriptFunctions *functions)
 {
-    int v2; // r17
-    unsigned int inited; // r16
-    unsigned int WeaponIndexForName; // r3
+    int hadDog; // r17
+    unsigned int stringset; // r16
+    unsigned int animstringset; // r16
+    unsigned int weapIdx; // r3
     WeaponDef *WeaponDef; // r3
     const char *szScript; // r3
-    const char *v7; // [sp+50h] [-AF0h] BYREF
-    const char *v8; // [sp+54h] [-AECh] BYREF
-    char v9[64]; // [sp+60h] [-AE0h] BYREF
-    SpawnVar v10; // [sp+A0h] [-AA0h] BYREF
+    const char *classname; // [sp+50h] [-AF0h] BYREF
+    const char *weapName; // [sp+54h] [-AECh] BYREF
+    char filename[64]; // [sp+60h] [-AE0h] BYREF
+    SpawnVar spawnvar; // [sp+A0h] [-AA0h] BYREF
 
-    v2 = 0;
-    if (!G_ParseSpawnVars(&v10))
+    hadDog = 0;
+    if (!G_ParseSpawnVars(&spawnvar))
         Com_Error(ERR_DROP, "GScr_LoadScriptsForEntities: no entities");
-    inited = Scr_InitStringSet();
-    while (G_ParseSpawnVars(&v10))
+
+    stringset = Scr_InitStringSet();
+    animstringset = Scr_InitStringSet();
+
+    while (G_ParseSpawnVars(&spawnvar))
     {
-        G_SpawnString(&v10, "classname", "", &v7);
-        if (I_strnicmp(v7, "actor_", 6))
+        G_SpawnString(&spawnvar, "classname", "", &classname);
+
+        if (I_strnicmp(classname, "actor_", 6) == 0)
         {
-            if (!I_stricmp(v7, "misc_mg42") || !I_stricmp(v7, "misc_turret"))
+            classname += 6;
+            if (Scr_AddStringSet(stringset, classname))
             {
-                G_SpawnString(&v10, "weaponinfo", "", &v8);
-                WeaponIndexForName = G_GetWeaponIndexForName(v8);
-                if (WeaponIndexForName)
+                if (!hadDog && I_stristr(classname, "dog"))
                 {
-                    WeaponDef = BG_GetWeaponDef(WeaponIndexForName);
-                    if (WeaponDef->weapClass == WEAPCLASS_TURRET)
-                    {
-                        szScript = WeaponDef->szScript;
-                        if (*szScript)
-                            GScr_LoadSingleAnimScript(szScript, functions);
-                    }
-                    else
-                    {
-                        Com_PrintError(23, "ERROR: weapClass in weapon info '%s' for %s must be 'turret'\n", v8, v7);
-                    }
+                    hadDog = 1;
+                    GScr_LoadDogAnimScripts(functions);
+                }
+                Com_sprintf(filename, 64, "aitype/%s", classname);
+                GScr_LoadScriptAndLabel(filename, "main", functions);
+                GScr_LoadScriptAndLabel(filename, "precache", functions);
+                GScr_LoadScriptAndLabel(filename, "spawner", functions);
+            }
+        }
+        // LWSS ADD from SP PC bin
+        else if (!I_stricmp(classname, "node_negotiation_begin"))
+        {
+            const char *animscript;
+            G_SpawnString(&spawnvar, "animscript", "", &animscript);
+
+            if (animscript[0] && Scr_AddStringSet(animstringset, animscript))
+            {
+                Com_sprintf(filename, 64, "animscripts/traverse/%s", animscript); // Note the `/traverse/`!
+                GScr_LoadScriptAndLabel(filename, "main", functions);
+            }
+        }
+        // LWSS END
+        else if (!I_stricmp(classname, "misc_mg42") || !I_stricmp(classname, "misc_turret"))
+        {
+            G_SpawnString(&spawnvar, "weaponinfo", "", &weapName);
+            weapIdx = G_GetWeaponIndexForName(weapName);
+            if (weapIdx)
+            {
+                WeaponDef = BG_GetWeaponDef(weapIdx);
+                if (WeaponDef->weapClass == WEAPCLASS_TURRET)
+                {
+                    szScript = WeaponDef->szScript;
+                    if (*szScript)
+                        GScr_LoadSingleAnimScript(szScript, functions);
                 }
                 else
                 {
-                    Com_PrintError(23, "ERROR: could not find weapon info '%s' for %s\n", v8, v7);
+                    Com_PrintError(23, "ERROR: weapClass in weapon info '%s' for %s must be 'turret'\n", weapName, classname);
                 }
             }
-        }
-        else
-        {
-            v7 += 6;
-            if (Scr_AddStringSet(inited, v7))
+            else
             {
-                if (!v2 && I_stristr(v7, "dog"))
-                {
-                    v2 = 1;
-                    GScr_LoadDogAnimScripts(functions);
-                }
-                Com_sprintf(v9, 64, "aitype/%s", v7);
-                GScr_LoadScriptAndLabel(v9, "main", functions);
-                GScr_LoadScriptAndLabel(v9, "precache", functions);
-                GScr_LoadScriptAndLabel(v9, "spawner", functions);
+                Com_PrintError(23, "ERROR: could not find weapon info '%s' for %s\n", weapName, classname);
             }
         }
     }
-    Scr_ShutdownStringSet(inited);
+    Scr_ShutdownStringSet(stringset);
+    Scr_ShutdownStringSet(animstringset); // LWSS ADD
     G_ResetEntityParsePoint();
 }
 
@@ -243,23 +260,29 @@ void __cdecl GScr_LoadScripts(const char *mapname, ScriptFunctions *functions)
     char filename[112]; // [sp+60h] [-70h] BYREF
 
     Scr_BeginLoadScripts();
-    ProfLoad_Begin("load misc scripts");
-    GScr_LoadScriptAndLabel("codescripts/delete", "main", functions);
-    GScr_LoadScriptAndLabel("codescripts/struct", "initstructs", functions);
-    GScr_LoadScriptAndLabel("codescripts/struct", "createstruct", functions);
-    ProfLoad_End();
-    ProfLoad_Begin("load anim scripts");
-    GScr_LoadAnimScripts(functions);
-    ProfLoad_End();
-    ProfLoad_Begin("load level script");
-    Com_sprintf(filename, 64, "maps/%s", mapname);
-    GScr_LoadScriptAndLabel(filename, "main", functions);
-    ProfLoad_End();
-    ProfLoad_Begin("load entity scripts");
-    GScr_LoadScriptsForEntities(functions);
-    ProfLoad_End();
-    inited = Scr_InitStringSet();
-    Path_CallFunctionForNodes(GScr_LoadScriptsForPathNode, functions);
-    Scr_ShutdownStringSet(inited);
+
+    {
+        PROF_SCOPED("load misc scripts");
+        GScr_LoadScriptAndLabel("codescripts/delete", "main", functions);
+        GScr_LoadScriptAndLabel("codescripts/struct", "initstructs", functions);
+        GScr_LoadScriptAndLabel("codescripts/struct", "createstruct", functions);
+    }
+    {
+        PROF_SCOPED("load anim scripts");
+        GScr_LoadAnimScripts(functions);
+    }
+    {
+        PROF_SCOPED("load level script");
+        Com_sprintf(filename, 64, "maps/%s", mapname);
+        GScr_LoadScriptAndLabel(filename, "main", functions);
+    }
+    {
+        PROF_SCOPED("load entity scripts");
+        GScr_LoadScriptsForEntities(functions); // LWSS: function changed to register functions for `node_negotiation_begin`
+    }
+    // LWSS: Removing this. Don't see it in SP PC. There should be 57 functions here.
+    //inited = Scr_InitStringSet();
+    //Path_CallFunctionForNodes(GScr_LoadScriptsForPathNode, functions);
+    //Scr_ShutdownStringSet(inited);
     Scr_PostCompileScripts();
 }

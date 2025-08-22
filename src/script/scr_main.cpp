@@ -293,15 +293,8 @@ unsigned int __cdecl Scr_LoadScript(const char *filename)
 
 void __cdecl Scr_PostCompileScripts()
 {
-    if (scrCompilePub.programLen != TempMalloc(0) - scrVarPub.programBuffer)
-        MyAssertHandler(
-            ".\\script\\scr_main.cpp",
-            390,
-            0,
-            "%s",
-            "scrCompilePub.programLen == static_cast< uint >( TempMalloc( 0 ) - scrVarPub.programBuffer )");
-    if (scrAnimPub.animTreeNames)
-        MyAssertHandler(".\\script\\scr_main.cpp", 391, 0, "%s", "!scrAnimPub.animTreeNames");
+    iassert(scrCompilePub.programLen == static_cast<uint>(TempMalloc(0) - scrVarPub.programBuffer));
+    iassert(!scrAnimPub.animTreeNames);
 }
 
 void __cdecl Scr_PrecacheAnimTrees(void *(__cdecl *Alloc)(int), int user)

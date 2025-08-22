@@ -11492,32 +11492,67 @@ void __cdecl GScr_SetScriptsAndAnimsForEntities(ScriptFunctions *functions)
     int v10; // r11
     int v11; // r11
     int v12; // r31
-    const char *v13; // [sp+50h] [-F0h] BYREF
-    char v14[224]; // [sp+60h] [-E0h] BYREF
+    const char *classname; // [sp+50h] [-F0h] BYREF
+    char filename[224]; // [sp+60h] [-E0h] BYREF
 
     v2 = 0;
     if (!G_ParseSpawnVars(&level.spawnVar))
         Com_Error(ERR_DROP, "GScr_SetScriptsAndAnimsForEntities: no entities");
     while (G_ParseSpawnVars(&level.spawnVar))
     {
-        G_LevelSpawnString("classname", "", &v13);
-        if (I_strnicmp(v13, "actor_", 6))
+        G_LevelSpawnString("classname", "", &classname);
+        if (I_strnicmp(classname, "actor_", 6))
         {
-            if (!I_stricmp(v13, "misc_mg42") || !I_stricmp(v13, "misc_turret"))
-                SP_turret_XAnimPrecache(functions, v13);
+            if (!I_stricmp(classname, "misc_mg42") || !I_stricmp(classname, "misc_turret"))
+            {
+                SP_turret_XAnimPrecache(functions, classname);
+            }
+            // LWSS ADD
+            else if (!I_stricmp(classname, "node_negotiation_begin"))
+            {
+                const char *animscript;
+                G_LevelSpawnString("animscript", "", &animscript);
+
+                if (animscript[0])
+                {
+                    if (!Hunk_FindDataForFile(1, animscript))
+                    {
+                        int func;
+
+                        Com_sprintf(filename, 64, "animscripts/traverse/%s", animscript);
+                        if (G_ExitAfterConnectPaths())
+                        {
+                            func = 0;
+                        }
+                        else
+                        {
+                            if (functions->count >= functions->maxSize)
+                                Com_Error(ERR_DROP, "CODE ERROR: GScr_SetScriptAndLabel: functions->maxSize exceeded");
+                            count = functions->count;
+                            func = functions->address[count];
+                            functions->count = count + 1;
+                            if (!func)
+                                Com_Error(ERR_DROP, "Could not find label '%s' in script '%s'", "main", filename);
+                        }
+
+                        Hunk_SetDataForFile(1, animscript, (void*)func, GScr_AnimscriptAlloc);
+                    }
+                }
+            }
+            // LWSS END
         }
         else
         {
-            v13 += 6;
-            if (!Hunk_FindDataForFile(0, v13))
+            classname += 6;
+            if (!Hunk_FindDataForFile(0, classname))
             {
-                if (!v2 && I_stristr(v13, "dog"))
+                if (!v2 && I_stristr(classname, "dog"))
                 {
                     v2 = 1;
                     GScr_SetDogAnimScripts(functions);
                 }
                 v3 = (int *)Hunk_AllocLow(12, "GScr_SetScriptsAndAnimsForEntities", 5);
-                Com_sprintf(v14, 64, "aitype/%s", v13);
+                Com_sprintf(filename, 64, "aitype/%s", classname); // KISAKTODO: some of these sprintf's are only for error printing
                 if (G_ExitAfterConnectPaths())
                 {
                     v4 = 0;
@@ -11530,7 +11565,7 @@ void __cdecl GScr_SetScriptsAndAnimsForEntities(ScriptFunctions *functions)
                     v6 = functions->address[count];
                     functions->count = count + 1;
                     if (!v6)
-                        Com_Error(ERR_DROP, "Could not find label '%s' in script '%s'", "main", v14);
+                        Com_Error(ERR_DROP, "Could not find label '%s' in script '%s'", "main", filename);
                     v4 = v6;
                 }
                 *v3 = v4;
@@ -11546,7 +11581,7 @@ void __cdecl GScr_SetScriptsAndAnimsForEntities(ScriptFunctions *functions)
                     v9 = functions->address[v8];
                     functions->count = v8 + 1;
                     if (!v9)
-                        Com_Error(ERR_DROP, "Could not find label '%s' in script '%s'", "precache", v14);
+                        Com_Error(ERR_DROP, "Could not find label '%s' in script '%s'", "precache", filename);
                     v7 = v9;
                 }
                 v3[1] = v7;
@@ -11562,11 +11597,11 @@ void __cdecl GScr_SetScriptsAndAnimsForEntities(ScriptFunctions *functions)
                     v12 = functions->address[v11];
                     functions->count = v11 + 1;
                     if (!v12)
-                        Com_Error(ERR_DROP, "Could not find label '%s' in script '%s'", "spawner", v14);
+                        Com_Error(ERR_DROP, "Could not find label '%s' in script '%s'", "spawner", filename);
                     v10 = v12;
                 }
                 v3[2] = v10;
-                Hunk_SetDataForFile(0, v13, v3, GScr_AnimscriptAlloc);
+                Hunk_SetDataForFile(0, classname, v3, GScr_AnimscriptAlloc);
             }
         }
     }
