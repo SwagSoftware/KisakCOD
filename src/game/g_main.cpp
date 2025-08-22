@@ -936,9 +936,9 @@ void *__cdecl Hunk_AllocXAnimServer(int size)
     return Hunk_AllocLow(size, "Hunk_AllocXAnimServer", 11);
 }
 
-int __cdecl G_ExitAfterConnectPaths()
+bool __cdecl G_ExitAfterConnectPaths()
 {
-    return 0;
+    return false;
 }
 
 void *GScr_LoadScriptsAndAnims()

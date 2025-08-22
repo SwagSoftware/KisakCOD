@@ -13,35 +13,40 @@ int __cdecl GScr_LoadScriptAndLabel(const char *filename, const char *label, Scr
 {
     int FunctionHandle; // r3
 
-    if ((unsigned __int8)G_ExitAfterConnectPaths())
+    if (G_ExitAfterConnectPaths())
         return 1;
+
     if (functions->count >= functions->maxSize)
     {
         Com_PrintError(15, "CODE ERROR: GScr_LoadScriptAndLabel: functions->maxSize exceeded\n");
         return 0;
     }
+
     if (!Scr_LoadScript(filename))
     {
         functions->address[functions->count++] = 0;
         Com_Printf(15, "Could not find script '%s'\n", filename);
         return 0;
     }
+
     FunctionHandle = Scr_GetFunctionHandle(filename, label);
     functions->address[functions->count++] = FunctionHandle;
+
     if (FunctionHandle)
         return 1;
+
     Com_Printf(15, "Could not find label '%s' in script '%s'\n", label, filename);
     return 0;
 }
 
 void __cdecl GScr_LoadSingleAnimScript(const char *name, ScriptFunctions *functions)
 {
-    char v4[72]; // [sp+50h] [-60h] BYREF
+    char filename[72]; // [sp+50h] [-60h] BYREF
 
-    if (!name)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\g_scr_load_obj.cpp", 60, 0, "%s", "name");
-    Com_sprintf(v4, 64, "animscripts/%s", name);
-    GScr_LoadScriptAndLabel(v4, "main", functions);
+    iassert(name);
+
+    Com_sprintf(filename, 64, "animscripts/%s", name);
+    GScr_LoadScriptAndLabel(filename, "main", functions);
 }
 
 void __cdecl GScr_LoadAnimScripts(ScriptFunctions *functions)
@@ -84,10 +89,10 @@ void __cdecl GScr_LoadDogAnimScripts(ScriptFunctions *functions)
 
 void __cdecl GScr_LoadLevelScript(const char *mapname, ScriptFunctions *functions)
 {
-    char v3[64]; // [sp+50h] [-50h] BYREF
+    char filename[64]; // [sp+50h] [-50h] BYREF
 
-    Com_sprintf(v3, 64, "maps/%s", mapname);
-    GScr_LoadScriptAndLabel(v3, "main", functions);
+    Com_sprintf(filename, 64, "maps/%s", mapname);
+    GScr_LoadScriptAndLabel(filename, "main", functions);
 }
 
 void __cdecl GScr_LoadScriptsForPathNode(pathnode_t *loadNode, void *data)
@@ -95,7 +100,7 @@ void __cdecl GScr_LoadScriptsForPathNode(pathnode_t *loadNode, void *data)
     ScriptFunctions *functions; // r28
     unsigned int count; // r27
     const char *animscript; // r31
-    char v6[112]; // [sp+50h] [-70h] BYREF
+    char filename[112]; // [sp+50h] [-70h] BYREF
 
     functions = (ScriptFunctions *)data;
     count = functions->count;
@@ -114,8 +119,8 @@ void __cdecl GScr_LoadScriptsForPathNode(pathnode_t *loadNode, void *data)
 
                 if (Scr_AddStringSet(count, animscript))
                 {
-                    Com_sprintf(v6, 64, "animscripts/traverse/%s", animscript);
-                    GScr_LoadScriptAndLabel(v6, "main", functions);
+                    Com_sprintf(filename, 64, "animscripts/traverse/%s", animscript);
+                    GScr_LoadScriptAndLabel(filename, "main", functions);
                 }
             }
             else
@@ -130,26 +135,19 @@ void __cdecl GScr_LoadScriptsForPathNode(pathnode_t *loadNode, void *data)
                 loadNode->constant.type = NODE_BADNODE;
             }
         }
-        else if (loadNode->constant.animscript)
+        else
         {
-            MyAssertHandler(
-                "c:\\trees\\cod3\\cod3src\\src\\game\\g_scr_load_obj.cpp",
-                137,
-                0,
-                "%s",
-                "!loadNode->constant.animscript");
+            iassert(!loadNode->constant.animscript);
         }
     }
 }
 
 void __cdecl GScr_LoadScriptsForPathNodes(ScriptFunctions *functions)
 {
-    ScriptFunctions *v1; // [sp+50h] [-20h] BYREF
     unsigned int inited; // [sp+54h] [-1Ch]
 
-    v1 = functions;
     inited = Scr_InitStringSet();
-    Path_CallFunctionForNodes((void(__cdecl *)(pathnode_t *, void *))GScr_LoadScriptsForPathNode, &v1);
+    Path_CallFunctionForNodes(GScr_LoadScriptsForPathNode, functions);
     Scr_ShutdownStringSet(inited);
 }
 

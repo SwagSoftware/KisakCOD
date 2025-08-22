@@ -94,7 +94,7 @@ int __cdecl GScr_SetScriptAndLabel(
     int bEnforceExists);
 void __cdecl GScr_SetLevelScript(ScriptFunctions *functions);
 void *__cdecl GScr_AnimscriptAlloc(int size);
-void __cdecl GScr_SetScriptsForPathNode(pathnode_t *loadNode, ScriptFunctions *data);
+void __cdecl GScr_SetScriptsForPathNode(pathnode_t *loadNode, void *data);
 void __cdecl GScr_SetScriptsForPathNodes(ScriptFunctions *functions);
 scr_animtree_t __cdecl GScr_FindAnimTree(const char *filename, int bEnforceExists);
 void __cdecl GScr_FindAnimTrees();

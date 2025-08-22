@@ -206,7 +206,7 @@ void G_FreeAnimTreeInstances();
 void __cdecl G_ClearLowHunk();
 bool __cdecl G_DemoPlaying();
 void *__cdecl Hunk_AllocXAnimServer(int size);
-int __cdecl G_ExitAfterConnectPaths();
+bool __cdecl G_ExitAfterConnectPaths();
 void *GScr_LoadScriptsAndAnims();
 void ScriptIOFilesInit();
 void ScriptIOFilesShutdown();

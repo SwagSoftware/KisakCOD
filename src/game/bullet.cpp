@@ -15,6 +15,7 @@
 #include "g_main.h"
 #include "actor_events.h"
 #include <script/scr_const.h>
+#include <qcommon/ent.h>
 #endif
 
 #include <cgame/cg_local.h>
@@ -26,43 +27,43 @@ char __cdecl Bullet_Trace(
     BulletTraceResults *br,
     uint32_t lastSurfaceType)
 {
-    gentity_s *v7; // [esp+Ch] [ebp-10h]
     uint16_t hitEntId; // [esp+18h] [ebp-4h]
 
-    if (!bp)
-        MyAssertHandler(".\\game\\bullet.cpp", 427, 0, "%s", "bp");
-    if (!weapDef)
-        MyAssertHandler(".\\game\\bullet.cpp", 428, 0, "%s", "weapDef");
-    if (!attacker)
-        MyAssertHandler(".\\game\\bullet.cpp", 429, 0, "%s", "attacker");
-    if (!br)
-        MyAssertHandler(".\\game\\bullet.cpp", 430, 0, "%s", "br");
-    if (lastSurfaceType >= 0x1D)
-        MyAssertHandler(
-            ".\\game\\bullet.cpp",
-            431,
-            0,
-            "lastSurfaceType doesn't index SURF_TYPECOUNT\n\t%i not in [0, %i)",
-            lastSurfaceType,
-            29);
-    Com_Memset((uint32_t *)br, 0, 68);
+    iassert(bp);
+    iassert(weapDef);
+    iassert(attacker);
+    iassert(br);
+    bcassert(lastSurfaceType, SURF_TYPECOUNT);
+
+    Com_Memset(br, 0, sizeof(BulletTraceResults));
+
     if (weapDef->bRifleBullet)
         G_LocationalTraceAllowChildren(&br->trace, (float*)bp->start, (float *)bp->end, bp->ignoreEntIndex, 0x2806831, riflePriorityMap);
     else
         G_LocationalTraceAllowChildren(&br->trace, (float *)bp->start, (float *)bp->end, bp->ignoreEntIndex, 0x2806831, bulletPriorityMap);
+
     if (br->trace.hitType == TRACE_HITTYPE_NONE)
         return 0;
+
     hitEntId = Trace_GetEntityHitId(&br->trace);
+
     if (hitEntId == ENTITYNUM_WORLD)
-        v7 = 0;
+        br->hitEnt = 0;
     else
-        v7 = &g_entities[hitEntId];
-    br->hitEnt = v7;
+        br->hitEnt = &g_entities[hitEntId];
+
     Vec3Lerp(bp->start, bp->end, br->trace.fraction, br->hitPos);
+
     if (br->hitEnt)
     {
+#ifdef KISAK_MP
         if ((br->hitEnt->s.eType == ET_PLAYER || br->hitEnt->s.eType == ET_PLAYER_CORPSE) && !br->trace.surfaceFlags)
+#elif KISAK_SP
+        if (br->hitEnt->sentient && !br->trace.surfaceFlags)
+#endif
+        {
             br->trace.surfaceFlags = 0x700000;
+        }
         br->ignoreHitEnt = Bullet_IgnoreHitEntity(bp, br, attacker);
     }
     br->depthSurfaceType = (br->trace.surfaceFlags & 0x1F00000) >> 20;

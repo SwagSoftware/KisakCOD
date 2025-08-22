@@ -1675,14 +1675,9 @@ void __cdecl BG_PlayerToEntitySetTrajectory(playerState_s *ps, entityState_s *s,
     s->lerp.apos.trBase[0] = ps->viewangles[0];
     s->lerp.apos.trBase[1] = ps->viewangles[1];
     s->lerp.apos.trBase[2] = ps->viewangles[2];
-    if (ps->movementDir >= 128 || ps->movementDir < -128)
-        MyAssertHandler(
-            ".\\bgame\\bg_misc.cpp",
-            1352,
-            0,
-            "%s\n\t(ps->movementDir) = %i",
-            "(ps->movementDir < 128 && ps->movementDir >= -128)",
-            ps->movementDir);
+
+    iassert(ps->movementDir < 128 && ps->movementDir >= -128);
+#ifdef KISAK_MP
     s->lerp.u.player.movementDir = ps->movementDir;
     if (snap)
     {
@@ -1693,6 +1688,7 @@ void __cdecl BG_PlayerToEntitySetTrajectory(playerState_s *ps, entityState_s *s,
         s->lerp.apos.trBase[1] = (float)(int)s->lerp.apos.trBase[1];
         s->lerp.apos.trBase[2] = (float)(int)s->lerp.apos.trBase[2];
     }
+#endif
 }
 
 char __cdecl BG_CheckProneValid(

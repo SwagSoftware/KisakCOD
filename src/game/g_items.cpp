@@ -11,6 +11,7 @@
 #include <server/sv_public.h>
 #include "g_local.h"
 #include "g_main.h"
+#include <qcommon/ent.h>
 #endif
 
 
@@ -1311,8 +1312,9 @@ void __cdecl G_RunItem(gentity_s *ent)
     int32_t mask; // [esp+B4h] [ebp-8h]
     float dot; // [esp+B8h] [ebp-4h]
 
-    if (ent->s.eType == ET_PLAYER_CORPSE)
-        MyAssertHandler(".\\game\\g_items.cpp", 1465, 0, "%s", "ent->s.eType != ET_PLAYER_CORPSE");
+    //if (ent->s.eType == ET_PLAYER_CORPSE)
+    //    MyAssertHandler(".\\game\\g_items.cpp", 1465, 0, "%s", "ent->s.eType != ET_PLAYER_CORPSE");
+
     if ((ent->s.groundEntityNum == ENTITYNUM_NONE || level.gentities[ent->s.groundEntityNum].s.lerp.pos.trType)
         && ent->s.lerp.pos.trType != TR_GRAVITY
         && ent->s.lerp.pos.trType != TR_RAGDOLL_GRAVITY

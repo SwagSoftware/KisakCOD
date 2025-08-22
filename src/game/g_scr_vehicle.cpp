@@ -123,6 +123,7 @@ gentity_s *__cdecl VEH_GetVehicle(int32_t entNum)
 
 void __cdecl VEH_InitEntity(gentity_s *ent, scr_vehicle_s *veh, int32_t infoIdx)
 {
+#ifdef KISAK_MP
     ent->handler = 23;
     ent->r.svFlags = 4;
     ent->r.contents = 8320;
@@ -139,7 +140,6 @@ void __cdecl VEH_InitEntity(gentity_s *ent, scr_vehicle_s *veh, int32_t infoIdx)
     ent->s.lerp.u.vehicle.materialTime = 0;
     ent->s.lerp.u.vehicle.gunPitch = 0.0f;
     ent->s.lerp.u.vehicle.gunYaw = 0.0f;
-    ent->s.lerp.u.vehicle.teamAndOwnerIndex = 0;
     ent->scr_vehicle = veh;
     ent->nextthink = level.time + 50;
     ent->takedamage = 1;
@@ -147,6 +147,38 @@ void __cdecl VEH_InitEntity(gentity_s *ent, scr_vehicle_s *veh, int32_t infoIdx)
     ent->clipmask = 0x810211;
     SV_DObjGetBounds(ent, ent->r.mins, ent->r.maxs);
     SV_LinkEntity(ent);
+#elif KISAK_SP
+    int spawnflags = ent->spawnflags;
+    ent->handler = 9;
+    ent->r.svFlags = 4;
+    ent->r.contents = 8320;
+    if ((spawnflags & 1) != 0)
+        ent->r.contents = 0x202080;
+    ent->s.lerp.eFlags = 0;
+    ent->s.eType = ET_VEHICLE;
+    ent->s.lerp.pos.trType = TR_INTERPOLATE;
+    ent->s.lerp.apos.trType = TR_INTERPOLATE;
+    ent->s.lerp.u.vehicle.materialTime = 0;
+    ent->s.time2 = 0;
+    ent->s.loopSound = 0;
+    ent->s.weaponModel = 0;
+    ent->s.weapon = G_GetWeaponIndexForName(s_vehicleInfos[infoIdx].turretWeapon);
+    ent->s.lerp.u.turret.gunAngles[2] = 0.0;
+    if (s_vehicleInfos[infoIdx].type == 1)
+        ent->s.lerp.eFlags |= 0x10000u;
+    ent->s.lerp.u.turret.gunAngles[0] = 0.0;
+    ent->s.lerp.u.turret.gunAngles[1] = 0.0;
+    ent->scr_vehicle = veh;
+    ent->s.lerp.u.primaryLight.cosHalfFovInner = 0.0;
+    ent->s.lerp.u.vehicle.gunYaw = 0.0;
+    ent->takedamage = 1;
+    ent->active = 1;
+    ent->flags = ent->flags | 0x100;
+    ent->clipmask = 0x810211;
+    ent->nextthink = level.time + 50;
+    SV_DObjGetBounds(ent, ent->r.mins, ent->r.maxs);
+    SV_LinkEntity(ent);
+#endif
 }
 
 void __cdecl VEH_InitVehicle(gentity_s *ent, scr_vehicle_s *veh, __int16 infoIdx)

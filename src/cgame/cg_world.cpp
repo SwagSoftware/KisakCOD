@@ -13,6 +13,7 @@
 #elif KISAK_SP
 #include "cg_main.h"
 #include "cg_pose.h"
+#include <qcommon/ent.h>
 #endif
 
 bool __cdecl CG_IsEntityLinked(int32_t localClientNum, uint32_t entIndex)
@@ -81,8 +82,15 @@ DObj_s *__cdecl CG_LocationalTraceDObj(int32_t localClientNum, uint32_t entIndex
     cent = CG_GetEntity(localClientNum, entIndex);
     if (cent->nextState.solid)
         return 0;
+#ifdef KISAK_MP 
     if (cent->nextState.eType == ET_SCRIPTMOVER || cent->nextState.eType == ET_VEHICLE || cent->nextState.eType == ET_HELICOPTER)
+#elif KISAK_SP
+    if (cent->nextState.eType == ET_SCRIPTMOVER || cent->nextState.eType == ET_VEHICLE)
+#endif
+    {
         return Com_GetClientDObj(entIndex, localClientNum);
+    }
+
     return 0;
 }
 

@@ -614,21 +614,23 @@ int __cdecl GScr_SetScriptAndLabel(
     int bEnforceExists)
 {
     int count; // r11
-    int v10; // r30
+    int func; // r30
 
-    if ((unsigned __int8)G_ExitAfterConnectPaths())
+    if (G_ExitAfterConnectPaths())
         return 0;
+
     if (functions->count >= functions->maxSize)
         Com_Error(ERR_DROP, "CODE ERROR: GScr_SetScriptAndLabel: functions->maxSize exceeded");
+
     count = functions->count;
-    v10 = functions->address[count];
+    func = functions->address[count];
     functions->count = count + 1;
-    if (!v10)
+    if (!func)
     {
         if (bEnforceExists)
             Com_Error(ERR_DROP, "Could not find label '%s' in script %s", label, filename);
     }
-    return v10;
+    return func;
 }
 
 void __cdecl GScr_SetLevelScript(ScriptFunctions *functions)
@@ -653,45 +655,41 @@ void *__cdecl GScr_AnimscriptAlloc(int size)
     return Hunk_AllocLow(size, "GScr_AnimscriptAlloc", 5);
 }
 
-void __cdecl GScr_SetScriptsForPathNode(pathnode_t *loadNode, ScriptFunctions *data)
+void __cdecl GScr_SetScriptsForPathNode(pathnode_t *loadNode, void *data)
 {
-    const char *v4; // r30
-    void *DataForFile; // r3
-    void *v6; // r3
-    double v7; // [sp+28h] [-98h]
-    char v8[112]; // [sp+50h] [-70h] BYREF
+    const char *animscript; // r30
+    char filename[112]; // [sp+50h] [-70h] BYREF
 
-    if (!data)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\g_scr_main.cpp", 142, 0, "%s", "functions");
+    ScriptFunctions *functions = (ScriptFunctions *)data;
+
+    iassert(data);
+
     if (loadNode->constant.type)
     {
         if (loadNode->constant.type == NODE_NEGOTIATION_BEGIN)
         {
             if (loadNode->constant.animscript)
             {
-                v4 = SL_ConvertToString(loadNode->constant.animscript);
-                if (!v4)
-                    MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\g_scr_main.cpp", 161, 0, "%s", "animscript");
-                DataForFile = Hunk_FindDataForFile(1, v4);
-                loadNode->constant.animscriptfunc = (int)DataForFile;
-                if (!DataForFile)
+                animscript = SL_ConvertToString(loadNode->constant.animscript);
+                iassert(animscript);
+                loadNode->constant.animscriptfunc = (int)Hunk_FindDataForFile(1, animscript);
+                if (!loadNode->constant.animscriptfunc)
                 {
-                    Com_sprintf(v8, 64, "animscripts/traverse/%s", v4);
-                    v6 = (void *)GScr_SetScriptAndLabel(data, v8, "main", 1);
-                    loadNode->constant.animscriptfunc = (int)v6;
-                    Hunk_SetDataForFile(1, v4, v6, GScr_AnimscriptAlloc);
+                    Com_sprintf(filename, 64, "animscripts/traverse/%s", animscript);
+                    loadNode->constant.animscriptfunc = (int)GScr_SetScriptAndLabel(functions, filename, "main", 1);
+                    Hunk_SetDataForFile(1, animscript, (void*)loadNode->constant.animscriptfunc, GScr_AnimscriptAlloc);
                 }
                 if (!loadNode->constant.animscriptfunc)
                 {
-                    v7 = loadNode->constant.vOrigin[0];
                     Com_PrintError(
                         1,
                         "ERROR: Pathnode (%s) at (%g %g %g) cannot find animscript '%s'\n",
-                        *(const char **)((char *)nodeStringTable + HIDWORD(v7)),
-                        v7,
+                        nodeStringTable[loadNode->constant.type],
+                        loadNode->constant.vOrigin[0],
                         loadNode->constant.vOrigin[1],
                         loadNode->constant.vOrigin[2],
-                        (const char *)LODWORD(v7));
+                        animscript);
+
                     loadNode->constant.type = NODE_BADNODE;
                 }
             }
@@ -700,28 +698,24 @@ void __cdecl GScr_SetScriptsForPathNode(pathnode_t *loadNode, ScriptFunctions *d
                 Com_PrintError(
                     1,
                     "ERROR: Pathnode (%s) at (%g %g %g) has no animscript specified\n",
-                    nodeStringTable[16],
+                    nodeStringTable[NODE_NEGOTIATION_BEGIN],
                     loadNode->constant.vOrigin[0],
                     loadNode->constant.vOrigin[1],
                     loadNode->constant.vOrigin[2]);
+
                 loadNode->constant.type = NODE_BADNODE;
             }
         }
-        else if (loadNode->constant.animscript)
+        else
         {
-            MyAssertHandler(
-                "c:\\trees\\cod3\\cod3src\\src\\game\\g_scr_main.cpp",
-                149,
-                0,
-                "%s",
-                "!loadNode->constant.animscript");
+            iassert(!loadNode->constant.animscript);
         }
     }
 }
 
 void __cdecl GScr_SetScriptsForPathNodes(ScriptFunctions *functions)
 {
-    Path_CallFunctionForNodes((void(__cdecl *)(pathnode_t *, void *))GScr_SetScriptsForPathNode, functions);
+    Path_CallFunctionForNodes(GScr_SetScriptsForPathNode, functions);
 }
 
 scr_animtree_t GScr_FindAnimTree(const char *filename, int bEnforceExists)
@@ -11524,7 +11518,7 @@ void __cdecl GScr_SetScriptsAndAnimsForEntities(ScriptFunctions *functions)
                 }
                 v3 = (int *)Hunk_AllocLow(12, "GScr_SetScriptsAndAnimsForEntities", 5);
                 Com_sprintf(v14, 64, "aitype/%s", v13);
-                if ((unsigned __int8)G_ExitAfterConnectPaths())
+                if (G_ExitAfterConnectPaths())
                 {
                     v4 = 0;
                 }
@@ -11540,7 +11534,7 @@ void __cdecl GScr_SetScriptsAndAnimsForEntities(ScriptFunctions *functions)
                     v4 = v6;
                 }
                 *v3 = v4;
-                if ((unsigned __int8)G_ExitAfterConnectPaths())
+                if (G_ExitAfterConnectPaths())
                 {
                     v7 = 0;
                 }
@@ -11556,7 +11550,7 @@ void __cdecl GScr_SetScriptsAndAnimsForEntities(ScriptFunctions *functions)
                     v7 = v9;
                 }
                 v3[1] = v7;
-                if ((unsigned __int8)G_ExitAfterConnectPaths())
+                if (G_ExitAfterConnectPaths())
                 {
                     v10 = 0;
                 }
@@ -11587,10 +11581,10 @@ void __cdecl GScr_SetScripts(ScriptFunctions *functions)
     GScr_SetAnimScripts(functions);
     GScr_SetLevelScript(functions);
     GScr_SetScriptsAndAnimsForEntities(functions);
-    Path_CallFunctionForNodes((void(__cdecl *)(pathnode_t *, void *))GScr_SetScriptsForPathNode, functions);
+    Path_CallFunctionForNodes(GScr_SetScriptsForPathNode, functions);
     GScr_PostLoadScripts();
     Scr_EndLoadScripts();
-    if (!(unsigned __int8)G_ExitAfterConnectPaths())
+    if (!G_ExitAfterConnectPaths())
     {
         Scr_PrecacheAnimTrees(Hunk_AllocXAnimCreate, 1);
         GScr_FindAnimTrees();
