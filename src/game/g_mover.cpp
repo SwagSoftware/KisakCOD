@@ -48,7 +48,7 @@ gentity_s *__cdecl G_TestEntityPosition(gentity_s *ent, float *vOrigin)
     {
         mask = 2065;
     }
-    if (ent->s.eType == 4)
+    if (ent->s.eType == ET_MISSILE)
     {
         if (ent->r.ownerNum.isDefined())
         {
@@ -199,7 +199,7 @@ int __cdecl G_TryPushingEntity(gentity_s *check, gentity_s *pusher, float *move,
                 origin[1] = org2[1];
                 origin[2] = org2[2];
             }
-            if (check->s.eType == 4)
+            if (check->s.eType == ET_MISSILE)
                 G_RotatePoint(&check->mover.aSpeed, matrix);
             ++pushed_p;
             return 1;
@@ -223,7 +223,7 @@ int __cdecl G_TryPushingEntity(gentity_s *check, gentity_s *pusher, float *move,
             v6[1] = vOrigin[1];
             v6[2] = vOrigin[2];
         }
-        if (check->s.eType == 4)
+        if (check->s.eType == ET_MISSILE)
         {
             Vec3Add(check->r.currentAngles, amove, check->r.currentAngles);
             Vec3Add(check->s.lerp.apos.trBase, amove, check->s.lerp.apos.trBase);
@@ -308,7 +308,7 @@ void __cdecl G_MoverTeam(gentity_s *ent)
                         v2[1] = v3[1];
                         v2[2] = v3[2];
                     }
-                    if (check->s.eType == 4)
+                    if (check->s.eType == ET_MISSILE)
                         check->item[1] = *(item_ent_t *)p->surfaceNormal;
                     SV_LinkEntity(check);
                 }
@@ -355,7 +355,7 @@ char __cdecl G_MoverPush(gentity_s *pusher, float *move, float *amove, gentity_s
     maxs[0] = pusher->r.maxs[0];
     maxs[1] = pusher->r.maxs[1];
     maxs[2] = pusher->r.maxs[2];
-    if (pusher->s.eType == 6 && pusher->model && G_GetModelBounds(pusher->model, outMins, outMaxs))
+    if (pusher->s.eType == ET_SCRIPTMOVER && pusher->model && G_GetModelBounds(pusher->model, outMins, outMaxs))
     {
         for (i = 0; i < 3; ++i)
         {
@@ -405,7 +405,7 @@ char __cdecl G_MoverPush(gentity_s *pusher, float *move, float *amove, gentity_s
     for (j = 0; j < v9; ++j)
     {
         ent = &g_entities[entityList[j]];
-        if ((ent->s.eType == 4 || ent->s.eType == 3 || ent->s.eType == 1 || ent->physicsObject)
+        if ((ent->s.eType == ET_MISSILE || ent->s.eType == ET_ITEM || ent->s.eType == ET_PLAYER || ent->physicsObject)
             && (ent->s.groundEntityNum == pusher->s.number
                 || v19[0] > (double)ent->r.absmin[0]
                 && v19[1] > (double)ent->r.absmin[1]
@@ -435,9 +435,9 @@ char __cdecl G_MoverPush(gentity_s *pusher, float *move, float *amove, gentity_s
         origin[1] = currentOrigin[1];
         origin[2] = currentOrigin[2];
         pushed_p->deltayaw = amove[1];
-        if (ent->s.eType == 4)
+        if (ent->s.eType == ET_MISSILE)
             *(item_ent_t *)pushed_p->surfaceNormal = *(item_ent_t *)ent->missile.surfaceNormal;
-        if (G_TryPushingEntity(ent, pusher, move, amove) || ent->s.eType == 3 || ent->s.eType == 4)
+        if (G_TryPushingEntity(ent, pusher, move, amove) || ent->s.eType == ET_ITEM || ent->s.eType == ET_MISSILE)
         {
             SV_LinkEntity(ent);
         }
@@ -489,7 +489,7 @@ void __cdecl trigger_use_shared(gentity_s *self)
     const char *cursorhint; // [esp+43Ch] [ebp-8h] BYREF
     unsigned int i; // [esp+440h] [ebp-4h]
 
-    if (self->s.eType == 4)
+    if (self->s.eType == ET_MISSILE)
         MyAssertHandler(".\\game\\g_mover.cpp", 749, 0, "%s", "self->s.eType != ET_MISSILE");
     if (SV_SetBrushModel(self))
     {

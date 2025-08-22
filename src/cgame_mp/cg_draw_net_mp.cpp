@@ -127,12 +127,12 @@ void __cdecl CG_DrawSnapshotAnalysis(int32_t localClientNum)
                         if (bitsUsed)
                         {
                             eType = CG_GetEntity(localClientNum, entity)->nextState.eType;
-                            if (eType > 17)
-                                eType = 17;
+                            if (eType > ET_EVENTS)
+                                eType = ET_EVENTS;
                             cgameGlob->entBitsUsed[arrayFramea][eType] += bitsUsed;
                             ++cgameGlob->numEntsSent[arrayFramea][eType];
                             cgameGlob->numEntFields[arrayFramea][eType] += g_currentSnapshotFieldsPerEntity[client][entity];
-                            if (eType == 1)
+                            if (eType == ET_PLAYER)
                                 cgameGlob->numEntFields[arrayFramea][1] += g_currentSnapshotPlayerStateFields[client];
                         }
                     }
@@ -440,79 +440,79 @@ void __cdecl CG_DrawSnapshotEntityAnalysis(int32_t localClientNum)
                 3);
             x = graphx + width + 10.0f;
             y = (float)cg_packetAnalysisEntTextY->current.integer;
-            for (eType = 0; eType <= 17; ++eType)
+            for (eType = ET_GENERAL; eType <= ET_EVENTS; ++eType)
             {
                 switch (eType)
                 {
-                case 0:
+                case ET_GENERAL:
                     string = "General";
                     color = (const float (*)[4])colorOrange;
                     break;
-                case 1:
+                case ET_PLAYER:
                     string = "Players";
                     color = (const float (*)[4])colorRed;
                     break;
-                case 2:
+                case ET_PLAYER_CORPSE:
                     string = "Corpses";
                     color = (const float (*)[4])colorGreen;
                     break;
-                case 3:
+                case ET_ITEM:
                     string = "Items";
                     color = (const float (*)[4])colorBlue;
                     break;
-                case 4:
+                case ET_MISSILE:
                     string = "Missiles";
                     color = (const float (*)[4])colorLtGreen;
                     break;
-                case 5:
+                case ET_INVISIBLE:
                     string = "Invisible Ents";
                     color = (const float (*)[4])colorLtBlue;
                     break;
-                case 6:
+                case ET_SCRIPTMOVER:
                     string = "Scriptmover";
                     color = (const float (*)[4])colorMagenta;
                     break;
-                case 7:
+                case ET_SOUND_BLEND:
                     string = "Sound Blend";
                     color = (const float (*)[4])colorLtOrange;
                     break;
-                case 8:
+                case ET_FX:
                     string = "FX";
                     color = (const float (*)[4])colorLtGrey;
                     break;
-                case 9:
+                case ET_LOOP_FX:
                     string = "Loop FX";
                     color = (const float (*)[4])colorLtCyan;
                     break;
-                case 10:
+                case ET_PRIMARY_LIGHT:
                     string = "Primary Light";
                     color = (const float (*)[4])colorLtBlue;
                     break;
-                case 11:
+                case ET_MG42:
                     string = "MG42";
                     color = (const float (*)[4])colorMdYellow;
                     break;
-                case 12:
+                case ET_HELICOPTER:
                     string = "Helicopter";
                     color = (const float (*)[4])colorLtBlue;
                     break;
-                case 13:
+                case ET_PLANE:
                     string = "Plane";
                     color = (const float (*)[4])colorLtOrange;
                     break;
-                case 14:
+                case ET_VEHICLE:
                     string = "Vehicle";
                     color = (const float (*)[4])colorLtOrange;
                     break;
-                case 15:
+                case ET_VEHICLE_COLLMAP:
                     string = "Vehicle Collmap";
                     color = (const float (*)[4])colorLtBlue;
                     break;
-                case 16:
+                case ET_VEHICLE_CORPSE:
                     string = "Vehicle Corpse";
                     color = (const float (*)[4])colorLtBlue;
                     break;
-                case 17:
+                case ET_EVENTS:
                     string = "Events";
                     color = (const float (*)[4])colorYellow;
                     break;
@@ -603,55 +603,58 @@ void __cdecl CG_DrawSnapshotEntityAnalysis(int32_t localClientNum)
                     {
                         switch (eType)
                         {
-                        case 0:
+                        case ET_GENERAL:
                             color = (const float (*)[4])colorOrange;
                             break;
-                        case 1:
+                        case ET_PLAYER:
                             color = (const float (*)[4])colorRed;
                             break;
-                        case 2:
+                        case ET_PLAYER_CORPSE:
                             color = (const float (*)[4])colorGreen;
                             break;
-                        case 3:
+                        case ET_ITEM:
                             color = (const float (*)[4])colorBlue;
                             break;
-                        case 4:
+                        case ET_MISSILE:
                             color = (const float (*)[4])colorLtGreen;
                             break;
-                        case 5:
+                        case ET_INVISIBLE:
                             color = (const float (*)[4])colorLtBlue;
                             break;
-                        case 6:
+                        case ET_SCRIPTMOVER:
                             color = (const float (*)[4])colorMagenta;
                             break;
-                        case 7:
+                        case ET_SOUND_BLEND:
                             color = (const float (*)[4])colorLtOrange;
                             break;
-                        case 8:
+                        case ET_FX:
                             color = (const float (*)[4])colorLtGrey;
                             break;
-                        case 9:
+                        case ET_LOOP_FX:
                             color = (const float (*)[4])colorLtCyan;
                             break;
-                        case 10:
+                        case ET_PRIMARY_LIGHT:
                             color = (const float (*)[4])colorLtOrange;
                             break;
-                        case 11:
+                        case ET_MG42:
                             color = (const float (*)[4])colorMdYellow;
                             break;
-                        case 12:
+                        case ET_HELICOPTER:
                             color = (const float (*)[4])colorLtBlue;
                             break;
-                        case 13:
+                        case ET_PLANE:
                             color = (const float (*)[4])colorLtOrange;
                             break;
-                        case 14:
+                        case ET_VEHICLE:
                             color = (const float (*)[4])colorLtOrange;
                             break;
-                        case 15:
+                        case ET_VEHICLE_COLLMAP:
                             color = (const float (*)[4])colorLtBlue;
                             break;
-                        case 17:
+                        case ET_VEHICLE_CORPSE:
+                            color = (const float (*)[4])colorLtBlue;
+                            break;
+                        case ET_EVENTS:
                             color = (const float (*)[4])colorYellow;
                             break;
                         default:

@@ -129,7 +129,7 @@ void __cdecl SV_ClearPacketAnalysis()
 
 void __cdecl SV_TrackETypeBytes(unsigned int eType, int bits)
 {
-    if (eType >= 0x98)
+    if (eType >= ET_EVENTS + EV_MAX_EVENTS)
         MyAssertHandler(
             ".\\server_mp\\sv_snapshot_profile_mp.cpp",
             207,
@@ -654,7 +654,7 @@ void __cdecl SV_TrackFieldChange(int clientNum, int entityType, unsigned int fie
             "%s\n\t(field) = %i",
             "(field >= 0 && field < 160)",
             field);
-    if (entityType > 0x16)
+    if (entityType >= ET_EVENTS + EV_STANCE_FORCE_STAND)
         MyAssertHandler(
             ".\\server_mp\\sv_snapshot_profile_mp.cpp",
             685,
@@ -665,9 +665,9 @@ void __cdecl SV_TrackFieldChange(int clientNum, int entityType, unsigned int fie
     if (s_packetDataEnabled)
     {
         PROF_SCOPED("SV_TrackFieldChange");
-        if (entityType >= 18)
+        if (entityType > ET_EVENTS)
         {
-            if (entityType == 20)
+            if (entityType == ET_EVENTS + EV_SOUND_ALIAS)
                 ++g_currentSnapshotPlayerStateFields[clientNum];
         }
         else
@@ -721,13 +721,13 @@ void __cdecl SV_WriteEntityFieldNumbers()
     if (f)
     {
         totalData = bitsUsedForServerCommands + bitsUsedForPlayerstates[0];
-        for (i = 0; i < 0x97; ++i)
+        for (i = 0; i < ET_EVENTS + EV_MAX_EVENTS - 1; ++i)
             totalData += bitsUsedPerEType[i];
         if (!totalData)
             totalData = 1;
         FS_Printf(f, "Total data sent: %i\n", totalData);
         FS_Printf(f, "Bits used per entity type: (format: bitsUsed - entityType)\n");
-        for (i = 0; i < 0x97; ++i)
+        for (i = 0; i < ET_EVENTS + EV_MAX_EVENTS - 1; ++i)
         {
             if (bitsUsedPerEType[i])
             {

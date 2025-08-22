@@ -89,7 +89,7 @@ void CG_VehPoseControllers(const cpose_t *pose, const DObj_s *obj, int32_t *part
     steerAngles[2] = roll * 0.0054931640625;
     suspTravel = pose->vehicle.barrelPitch;
     bodyAngles[0] = suspTravel * 0.0054931640625;
-    if (pose->eType == 12)
+    if (pose->eType == ET_HELICOPTER)
         bodyAngles[2] = pose->turret.barrelPitch;
     yaw = pose->vehicle.yaw;
     barrelAngles[1] = yaw * 0.0054931640625;
@@ -216,14 +216,14 @@ void __cdecl CG_DoControllers(const cpose_t *pose, const DObj_s *obj, int32_t *p
     DObjGetSetBones(obj, setPartBits);
     switch (pose->eType)
     {
-    case 1:
+    case ET_PLAYER:
         CG_Player_DoControllers(pose, obj, partBits);
         break;
-    case 11:
+    case ET_MG42:
         CG_mg42_DoControllers(pose, obj, partBits);
         break;
-    case 12:
-    case 14:
+    case ET_HELICOPTER:
+    case ET_VEHICLE:
         CG_VehPoseControllers(pose, obj, partBits);
         break;
     default:

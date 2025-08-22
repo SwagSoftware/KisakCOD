@@ -255,7 +255,7 @@ void __cdecl SV_EmitPacketEntities(
         if (newnum == oldnum)
         {
             MSG_WriteEntity(snapInfo, msg, svsHeader.time, oldent, newent, 0);
-            if (newent->eType < 17)
+            if (newent->eType < ET_EVENTS)
                 bitsUsed = SV_TrackPacketData(
                     snapInfo->clientNum,
                     ANALYZE_SNAPSHOT_DELTAENTITY,
@@ -279,7 +279,7 @@ void __cdecl SV_EmitPacketEntities(
             if (newnum > oldnum)
             {
                 MSG_WriteEntity(snapInfo, msg, svsHeader.time, oldent, 0, 1);
-                if (oldent->eType < 17)
+                if (oldent->eType < ET_EVENTS)
                     bitsUsed = SV_TrackPacketData(
                         snapInfo->clientNum,
                         ANALYZE_SNAPSHOT_REMOVEDENTITY,
@@ -306,7 +306,7 @@ void __cdecl SV_EmitPacketEntities(
             snapInfo->fromBaseline = 1;
             MSG_WriteEntity(snapInfo, msg, svsHeader.time, (entityState_s *)baseline, newent, 1);
             snapInfo->fromBaseline = 0;
-            if (newent->eType < 17)
+            if (newent->eType < ET_EVENTS)
                 bitsUsed = SV_TrackPacketData(
                     snapInfo->clientNum,
                     ANALYZE_SNAPSHOT_NEWENTITY,
@@ -1061,11 +1061,11 @@ void __cdecl SV_BuildClientSnapshot(client_t *client)
                             v4->lerp.apos.trTime += v19;
                         if (v4->time2)
                             v4->time2 += v19;
-                        if (v4->eType == 4)
+                        if (v4->eType == ET_MISSILE)
                         {
                             v4->lerp.u.missile.launchTime += v19;
                         }
-                        else if (!v4->eType || v4->eType == 66)
+                        else if (v4->eType == ET_GENERAL || v4->eType == ET_EVENTS + EV_CUSTOM_EXPLODE)
                         {
                             v4->lerp.u.missile.launchTime += v19;
                         }

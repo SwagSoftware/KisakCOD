@@ -2029,7 +2029,7 @@ void __cdecl CG_EjectWeaponBrass(int32_t localClientNum, const entityState_s *en
     const FxEffectDef *fxDef; // [esp+20h] [ebp-8h]
     const WeaponDef *weaponDef; // [esp+24h] [ebp-4h]
 
-    if (cg_brass->current.enabled && ent->eType < 17 && ent->weapon)
+    if (cg_brass->current.enabled && ent->eType < ET_EVENTS && ent->weapon)
     {
         if (ent->weapon < BG_GetNumWeapons())
         {
@@ -2170,7 +2170,7 @@ void __cdecl CG_FireWeapon(
                         BG_EvaluateTrajectory(&p_nextState->lerp.pos, cgameGlob->time, origin);
                 }
                 playbackId = CG_PlaySoundAlias(localClientNum, p_nextState->number, origin, firesound);
-                if (cent->nextState.eType == 1 && !weaponDef->silenced && weaponDef->weapType != WEAPTYPE_GRENADE)
+                if (cent->nextState.eType == ET_PLAYER && !weaponDef->silenced && weaponDef->weapType != WEAPTYPE_GRENADE)
                 {
                     SND_GetKnownLength(playbackId, &msec);
                     CG_CompassAddWeaponPingInfo(localClientNum, cent, origin, msec);
@@ -2262,9 +2262,9 @@ void __cdecl DrawBulletImpacts(
         drawTracers = cg_firstPersonTracerChance->current.value * 32768.0 > (double)rand();
         goto LABEL_33;
     }
-    if (ent->nextState.eType != 1)
+    if (ent->nextState.eType != ET_PLAYER)
     {
-        if (ent->nextState.eType == 11)
+        if (ent->nextState.eType == ET_MG42)
         {
             minSpread = weaponDef->playerSpread;
             maxSpread = weaponDef->playerSpread;
@@ -2280,7 +2280,7 @@ void __cdecl DrawBulletImpacts(
         }
         else
         {
-            if (ent->nextState.eType != 14 && ent->nextState.eType != 12)
+            if (ent->nextState.eType != ET_VEHICLE && ent->nextState.eType != ET_HELICOPTER)
             {
                 Com_PrintError(14, "Unknown eType %i in CG_DrawBulletImpacts()\n", ent->nextState.eType);
                 return;
@@ -2496,7 +2496,7 @@ void __cdecl FireBulletPenetrate(
             for (penetrateIndex = 0; penetrateIndex < 5; ++penetrateIndex)
             {
                 maxDepth = BG_GetSurfacePenetrationDepth(weapDef, br.depthSurfaceType);
-                if (attacker->nextState.eType == 1)
+                if (attacker->nextState.eType == ET_PLAYER)
                 {
                     perks = cgameGlob->bgs.clientinfo[attacker->nextState.clientNum].perks;
                     if ((perks & 0x20) != 0)
@@ -2550,7 +2550,7 @@ void __cdecl FireBulletPenetrate(
 
                     if (revTraceHit)
                     {
-                        if (attacker->nextState.eType == 1
+                        if (attacker->nextState.eType == ET_PLAYER
                             && (v37 = cgameGlob->bgs.clientinfo[attacker->nextState.clientNum].perks, (v37 & 0x20) != 0))
                         {
                             value = perk_bulletPenetrationMultiplier->current.value;
@@ -2724,7 +2724,7 @@ char __cdecl BulletTrace(
     Vec3Lerp(bp->start, bp->end, br->trace.fraction, br->hitPos);
     if (Entity)
     {
-        if ((Entity->nextState.eType == 1 || Entity->nextState.eType == 2) && !br->trace.surfaceFlags)
+        if ((Entity->nextState.eType == ET_PLAYER || Entity->nextState.eType == ET_PLAYER_CORPSE) && !br->trace.surfaceFlags)
             br->trace.surfaceFlags = 0x700000;
         br->ignoreHitEnt = ShouldIgnoreHitEntity(attacker->nextState.number, hitEntId);
     }
@@ -2758,7 +2758,7 @@ bool __cdecl IsEntityAPlayer(int32_t localClientNum, uint32_t entityNum)
         MyAssertHandler(".\\cgame\\cg_weapons.cpp", 2350, 0, "%s", "cent");
         return 0;
     }
-    return cent->nextState.eType == 1;
+    return cent->nextState.eType == ET_PLAYER;
 }
 
 void __cdecl CG_BulletEndpos(
