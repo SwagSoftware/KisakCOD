@@ -143,7 +143,7 @@ void __cdecl Player_UseEntity(gentity_s *playerEnt, gentity_s *useEnt)
         MyAssertHandler(".\\game_mp\\player_use_mp.cpp", 43, 0, "%s", "useEnt");
     if (!useEnt->r.inuse)
         MyAssertHandler(".\\game_mp\\player_use_mp.cpp", 45, 0, "%s", "useEnt->r.inuse");
-    if (useEnt->s.eType == 3)
+    if (useEnt->s.eType == ET_ITEM)
     {
         Scr_AddEntity(playerEnt);
         Scr_Notify(useEnt, scr_const.touch, 1u);
@@ -152,7 +152,7 @@ void __cdecl Player_UseEntity(gentity_s *playerEnt, gentity_s *useEnt)
         if (touch)
             touch(useEnt, playerEnt, 0);
     }
-    else if (useEnt->s.eType != 11 || G_IsTurretUsable(useEnt, playerEnt))
+    else if (useEnt->s.eType != ET_MG42 || G_IsTurretUsable(useEnt, playerEnt))
     {
         Scr_AddEntity(playerEnt);
         Scr_Notify(useEnt, scr_const.trigger, 1u);
@@ -220,7 +220,7 @@ void __cdecl Player_UpdateCursorHints(gentity_s *ent)
                                 MyAssertHandler(".\\game_mp\\player_use_mp.cpp", 583, 0, "%s", "traceEnt->r.inuse");
                             switch (self->s.eType)
                             {
-                            case 0:
+                            case ET_GENERAL:
                                 if (self->classname != scr_const.trigger_use && self->classname != scr_const.trigger_use_touch)
                                     goto LABEL_49;
                                 if (self->team && self->team != ent->client->sess.cs.team
@@ -232,24 +232,24 @@ void __cdecl Player_UpdateCursorHints(gentity_s *ent)
                                 if (self->s.un2.hintString && self->s.un1.scale != 255)
                                     scale = self->s.un1.scale;
                                 goto LABEL_49;
-                            case 3:
+                            case ET_ITEM:
                                 ItemCursorHint = Player_GetItemCursorHint(ent->client, self);
                                 if (!ItemCursorHint)
                                     goto LABEL_21;
                                 hintString = ItemCursorHint;
                                 goto LABEL_49;
-                            case 4:
+                            case ET_MISSILE:
                                 hintString = self->s.index.brushmodel % 128 + 4;
                                 ps->throwBackGrenadeTimeLeft = self->nextthink - level.time;
                                 goto LABEL_49;
-                            case 0xB:
+                            case ET_MG42:
                                 if (!G_IsTurretUsable(self, ent))
                                     goto LABEL_21;
                                 hintString = self->s.weapon + 4;
                                 if (*BG_GetWeaponDef(self->s.weapon)->szUseHintString)
                                     scale = BG_GetWeaponDef(self->s.weapon)->iUseHintStringIndex;
                                 goto LABEL_49;
-                            case 0xE:
+                            case ET_VEHICLE:
                                 if (!G_VehUsable(self, ent))
                                     goto LABEL_21;
                                 hintString = 1;
@@ -360,7 +360,7 @@ int32_t __cdecl Player_GetUseList(gentity_s *ent, useList_t *useList, int32_t pr
     for (i = 0; i < v32; ++i)
     {
         gEnt = &g_entities[entityList[i]];
-        if (ent != gEnt && (gEnt->s.eType == 3 || (gEnt->r.contents & 0x200000) != 0))
+        if (ent != gEnt && (gEnt->s.eType == ET_ITEM || (gEnt->r.contents & 0x200000) != 0))
         {
             if (gEnt->classname == scr_const.trigger_use_touch)
             {
@@ -378,7 +378,7 @@ int32_t __cdecl Player_GetUseList(gentity_s *ent, useList_t *useList, int32_t pr
                     }
                 }
             }
-            else if (gEnt->s.eType != 4
+            else if (gEnt->s.eType != ET_MISSILE
                 || (prevHintEntIndex == gEnt->s.number
                     || (v13 = player_throwbackInnerRadius->current.value,
                         v13 * v13 >= Vec2DistanceSq(gEnt->r.currentOrigin, ent->r.currentOrigin)))
@@ -387,10 +387,10 @@ int32_t __cdecl Player_GetUseList(gentity_s *ent, useList_t *useList, int32_t pr
                     v6 >= v3))
             {
                 eType = gEnt->s.eType;
-                if (eType == 4)
+                if (eType == ET_MISSILE)
                     v23 = player_throwbackOuterRadius->current.value;
                 else
-                    v23 = eType == 11 ? player_MGUseRadius->current.value : 128.0f;
+                    v23 = eType == ET_MG42 ? player_MGUseRadius->current.value : 128.0f;
                 Vec3Add(gEnt->r.absmin, gEnt->r.absmax, v);
                 Vec3Scale(v, 0.5f, v);
                 Vec3Sub(v, origin, a);
@@ -402,13 +402,13 @@ int32_t __cdecl Player_GetUseList(gentity_s *ent, useList_t *useList, int32_t pr
                     {
                         v26 = 1.0f - (v14 + 1.0f) * 0.5f;
                         useList[num].score = v26 * v19;
-                        if (gEnt->s.eType == 4)
+                        if (gEnt->s.eType == ET_MISSILE)
                             useList[num].score = useList[num].score - (v19 + v19);
                         if (gEnt->classname == scr_const.trigger_use)
                             useList[num].score = useList[num].score - v19;
-                        if (gEnt->s.eType == 11)
+                        if (gEnt->s.eType == ET_MG42)
                             useList[num].score = useList[num].score - v19 * 0.5f;
-                        if (gEnt->s.eType == 3 && !BG_CanItemBeGrabbed(&gEnt->s, &ent->client->ps, 0))
+                        if (gEnt->s.eType == ET_ITEM && !BG_CanItemBeGrabbed(&gEnt->s, &ent->client->ps, 0))
                         {
                             useList[num].score = useList[num].score + 10000.0f;
                             ++v31;
@@ -431,7 +431,7 @@ int32_t __cdecl Player_GetUseList(gentity_s *ent, useList_t *useList, int32_t pr
         {
             Vec3Add(enta->r.absmin, enta->r.absmax, v);
             Vec3Scale(v, 0.5f, v);
-            if (enta->s.eType == 11)
+            if (enta->s.eType == ET_MG42)
                 G_DObjGetWorldTagPos(enta, scr_const.tag_aim, v);
             if (!G_TraceCapsuleComplete(origin, (float *)vec3_origin, (float *)vec3_origin, v, ps->clientNum, 17))
             {
@@ -500,7 +500,7 @@ void __cdecl Player_SetTurretDropHint(gentity_s *ent)
     if (ps->ps.viewlocked_entNum == ENTITYNUM_NONE)
         MyAssertHandler(".\\game_mp\\player_use_mp.cpp", 478, 0, "%s", "ps->viewlocked_entNum != ENTITYNUM_NONE");
     turret = &level.gentities[ps->ps.viewlocked_entNum];
-    if (turret->s.eType != 11)
+    if (turret->s.eType != ET_MG42)
         MyAssertHandler(".\\game_mp\\player_use_mp.cpp", 481, 0, "%s", "turret->s.eType == ET_MG42");
     if (*BG_GetWeaponDef(turret->s.weapon)->dropHintString)
     {

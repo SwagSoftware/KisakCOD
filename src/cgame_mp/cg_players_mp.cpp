@@ -26,7 +26,7 @@ void __cdecl CG_AddAllPlayerSpriteDrawSurfs(int32_t localClientNum)
     for (entityIndex = 0; entityIndex < nextSnap->numEntities; ++entityIndex)
     {
         cent = CG_GetEntity(localClientNum, nextSnap->entities[entityIndex].number);
-        if (cent->nextState.eType == 1)
+        if (cent->nextState.eType == ET_PLAYER)
             CG_AddPlayerSpriteDrawSurfs(localClientNum, cent);
     }
 }

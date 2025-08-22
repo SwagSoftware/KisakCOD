@@ -81,7 +81,7 @@ DObj_s *__cdecl CG_LocationalTraceDObj(int32_t localClientNum, uint32_t entIndex
     cent = CG_GetEntity(localClientNum, entIndex);
     if (cent->nextState.solid)
         return 0;
-    if (cent->nextState.eType == 6 || cent->nextState.eType == 14 || cent->nextState.eType == 12)
+    if (cent->nextState.eType == ET_SCRIPTMOVER || cent->nextState.eType == ET_VEHICLE || cent->nextState.eType == ET_HELICOPTER)
         return Com_GetClientDObj(entIndex, localClientNum);
     return 0;
 }
@@ -666,7 +666,7 @@ int32_t __cdecl CG_GetEntityBModelContents(const centity_s *cent)
         MyAssertHandler(".\\cgame\\cg_world.cpp", 28, 0, "%s", "es->solid");
     if (cent->nextState.solid == 0xFFFFFF)
         return CM_ContentsOfModel(cent->nextState.index.brushmodel);
-    if (cent->nextState.eType == 1)
+    if (cent->nextState.eType == ET_PLAYER)
         return 0x2000000;
     return 1;
 }

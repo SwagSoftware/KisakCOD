@@ -1203,12 +1203,12 @@ void GScr_SpawnPlane()
     if (G_CallSpawnEntity(ent))
     {
         Scr_AddEntity(ent);
-        ent->s.eType = 13;
+        ent->s.eType = ET_PLANE;
         ent->s.lerp.u.vehicle.teamAndOwnerIndex = team | (4 * ownerIndex);
     }
     else
     {
-        ent->s.eType = 13;
+        ent->s.eType = ET_PLANE;
         ent->s.lerp.u.vehicle.teamAndOwnerIndex = team | (4 * ownerIndex);
         Scr_Error(va("unable to spawn \"%s\" entity", SL_ConvertToString(classname)));
     }
@@ -1993,7 +1993,7 @@ void __cdecl Scr_SetStableMissile(scr_entref_t entref)
 
     ent = GetEntity(entref);
     stableMissile = Scr_GetInt(0);
-    if (ent->s.eType != 1)
+    if (ent->s.eType != ET_PLAYER)
         Scr_Error("Type should be a player");
     if (stableMissile)
         v1 = ent->flags | 0x20000;
@@ -3960,7 +3960,7 @@ void __cdecl GScr_Detonate(scr_entref_t entref)
 
     ent = GetEntity(entref);
     weapDef = BG_GetWeaponDef(ent->s.weapon);
-    if (ent->s.eType != 4 || !weapDef || weapDef->weapType != WEAPTYPE_GRENADE)
+    if (ent->s.eType != ET_MISSILE || !weapDef || weapDef->weapType != WEAPTYPE_GRENADE)
         Scr_ObjectError("entity is not a grenade");
     if (Scr_GetNumParam())
     {
@@ -4296,7 +4296,7 @@ LABEL_13:
     if (repeat <= 0)
         Scr_FxParamError(1u, "playLoopedFx called with repeat < 0.001 seconds", fxId);
     ent = G_Spawn();
-    ent->s.eType = 9;
+    ent->s.eType = ET_LOOP_FX;
     ent->r.svFlags |= 8u;
     ent->s.un1.scale = (uint8_t)fxId;
     if (ent->s.un1.scale != fxId)
@@ -4339,7 +4339,7 @@ void Scr_SpawnFX()
 LABEL_12:
     Scr_GetVector(1u, pos);
     ent = G_Spawn();
-    ent->s.eType = 8;
+    ent->s.eType = ET_FX;
     ent->r.svFlags |= 8u;
     ent->s.un1.scale = (uint8_t)fxId;
     if (ent->s.un1.scale != fxId)
@@ -4375,7 +4375,7 @@ void Scr_TriggerFX()
     ent = Scr_GetEntity(0);
     if (!ent)
         MyAssertHandler(".\\game_mp\\g_scr_main_mp.cpp", 4537, 0, "%s", "ent");
-    if (ent->s.eType != 8)
+    if (ent->s.eType != ET_FX)
         Scr_ParamError(0, "entity wasn't created with 'newFx'");
     result = Scr_GetNumParam();
     if (result == 2)
@@ -6115,7 +6115,7 @@ void __cdecl GScr_GetCorpseAnim(scr_entref_t entref)
     corpseInfo_t *corpseInfo; // [esp+10h] [ebp-4h]
 
     ent = GetEntity(entref);
-    if (ent->s.eType == 2)
+    if (ent->s.eType == ET_PLAYER_CORPSE)
     {
         corpseInfo = &g_scr_data.playerCorpseInfo[G_GetPlayerCorpseIndex(ent)];
         anim.index = ent->s.legsAnim & 0xFDFF;
@@ -6142,7 +6142,7 @@ void __cdecl ScrCmd_ItemWeaponSetAmmo(scr_entref_t entref)
     gentity_s *itemEnt; // [esp+20h] [ebp-4h]
 
     itemEnt = GetEntity(entref);
-    if (itemEnt->s.eType != 3)
+    if (itemEnt->s.eType != ET_ITEM)
         Scr_Error("Entity is not an item.");
     if (bg_itemlist[itemEnt->s.index.brushmodel].giType != IT_WEAPON)
         Scr_Error("Item entity is not a weapon.");

@@ -205,7 +205,7 @@ void __cdecl CG_AddHudGrenade(const cg_s *cgameGlob, const centity_s *grenadeEnt
     float maxSpeedSq; // [esp+20h] [ebp-8h]
     WeaponDef *weapDef; // [esp+24h] [ebp-4h]
 
-    if (grenadeEnt->nextState.eType != 4)
+    if (grenadeEnt->nextState.eType != ET_MISSILE)
         MyAssertHandler(
             ".\\cgame\\cg_draw_indicators.cpp",
             262,

@@ -682,7 +682,7 @@ void __cdecl G_RunMissile(gentity_s *ent)
 
     if (!ent)
         MyAssertHandler(".\\game\\g_missile.cpp", 2080, 0, "%s", "ent");
-    if (ent->s.eType != 4)
+    if (ent->s.eType != ET_MISSILE)
         MyAssertHandler(".\\game\\g_missile.cpp", 2081, 0, "%s", "ent->s.eType == ET_MISSILE");
     weapDef = BG_GetWeaponDef(ent->s.weapon);
     if (!weapDef)
@@ -927,7 +927,7 @@ void __cdecl G_RunMissile(gentity_s *ent)
         return;
     }
     MissileImpact(ent, &tr, dir, endpos);
-    if (ent->s.eType == 4)
+    if (ent->s.eType == ET_MISSILE)
         goto LABEL_70;
 }
 
@@ -986,7 +986,7 @@ void __cdecl MissileImpact(gentity_s *ent, trace_t *trace, float *dir, float *en
     hitClient = 0;
     if (!ent)
         MyAssertHandler(".\\game\\g_missile.cpp", 493, 0, "%s", "ent");
-    if (ent->s.eType != 4)
+    if (ent->s.eType != ET_MISSILE)
         MyAssertHandler(".\\game\\g_missile.cpp", 494, 0, "%s", "ent->s.eType == ET_MISSILE");
     if (!ent->s.weapon)
         MyAssertHandler(".\\game\\g_missile.cpp", 495, 0, "%s", "ent->s.weapon");
@@ -1151,7 +1151,7 @@ void __cdecl MissileImpact(gentity_s *ent, trace_t *trace, float *dir, float *en
     {
         normal = waterNormal;
     }
-    else if (ent->s.eType == 4
+    else if (ent->s.eType == ET_MISSILE
         && weapDef->guidedMissileType == MISSILE_GUIDANCE_JAVELIN
         && ent->missile.flightMode == MISSILEFLIGHTMODE_TOP
         && ent->missileTargetEnt.isDefined()
@@ -1344,7 +1344,7 @@ bool __cdecl BounceMissile(gentity_s *ent, trace_t *trace)
     }
     v3 = weapDef->stickiness == WEAPSTICKINESS_NONE || Trace_GetEntityHitId(trace) >= 0x40u;
     mayStop = v3;
-    if (g_entities[Trace_GetEntityHitId(trace)].s.eType == 4)
+    if (g_entities[Trace_GetEntityHitId(trace)].s.eType == ET_MISSILE)
         mayStop = 0;
     if (mayStop && (weapDef->stickiness == WEAPSTICKINESS_ALL || trace->normal[2] > 0.699999988079071))
     {
@@ -1618,7 +1618,7 @@ bool __cdecl JavelinProjectile(gentity_s *ent, WeaponDef *weapDef)
         MyAssertHandler(".\\game\\g_missile.cpp", 421, 0, "%s", "ent");
     if (!weapDef)
         MyAssertHandler(".\\game\\g_missile.cpp", 422, 0, "%s", "weapDef");
-    return ent->s.eType == 4 && weapDef->guidedMissileType == MISSILE_GUIDANCE_JAVELIN;
+    return ent->s.eType == ET_MISSILE && weapDef->guidedMissileType == MISSILE_GUIDANCE_JAVELIN;
 }
 
 bool __cdecl JavelinDud(gentity_s *ent, WeaponDef *weapDef)
@@ -1732,7 +1732,7 @@ void __cdecl RunMissile_Destabilize(gentity_s *missile)
 
     if (!missile)
         MyAssertHandler(".\\game\\g_missile.cpp", 1335, 0, "%s", "missile");
-    if (missile->s.eType != 4)
+    if (missile->s.eType != ET_MISSILE)
         MyAssertHandler(".\\game\\g_missile.cpp", 1336, 0, "%s", "missile->s.eType == ET_MISSILE");
     if ((missile->flags & 0x20000) != 0)
         MyAssertHandler(".\\game\\g_missile.cpp", 1337, 0, "%s", "!(missile->flags & FL_STABLE_MISSILES)");
@@ -2382,7 +2382,7 @@ void __cdecl JavelinClimbOffset(gentity_s *ent, float *targetPos)
 
     if (!ent)
         MyAssertHandler(".\\game\\g_missile.cpp", 1673, 0, "%s", "ent");
-    if (ent->s.eType != 4)
+    if (ent->s.eType != ET_MISSILE)
         MyAssertHandler(".\\game\\g_missile.cpp", 1674, 0, "%s", "ent->s.eType == ET_MISSILE");
     if (ent->missile.flightMode)
     {
@@ -2508,7 +2508,7 @@ double __cdecl JavelinMaxDPS(gentity_s *ent)
 {
     if (!ent)
         MyAssertHandler(".\\game\\g_missile.cpp", 1698, 0, "%s", "ent");
-    if (ent->s.eType != 4)
+    if (ent->s.eType != ET_MISSILE)
         MyAssertHandler(".\\game\\g_missile.cpp", 1699, 0, "%s", "ent->s.eType == ET_MISSILE");
     if (ent->missile.flightMode == MISSILEFLIGHTMODE_TOP)
         return missileJavTurnRateTop->current.value;
@@ -2531,7 +2531,7 @@ double __cdecl JavelinClimbCeiling(gentity_s *ent)
 {
     if (!ent)
         MyAssertHandler(".\\game\\g_missile.cpp", 1819, 0, "%s", "ent");
-    if (ent->s.eType != 4)
+    if (ent->s.eType != ET_MISSILE)
         MyAssertHandler(".\\game\\g_missile.cpp", 1820, 0, "%s", "ent->s.eType == ET_MISSILE");
     if (ent->missile.flightMode == MISSILEFLIGHTMODE_DIRECT)
         return missileJavClimbCeilingDirect->current.value;
@@ -2562,7 +2562,7 @@ char __cdecl JavelinClimbExceededAngle(gentity_s *ent, const float *targetPos)
 
     if (!ent)
         MyAssertHandler(".\\game\\g_missile.cpp", 1615, 0, "%s", "ent");
-    if (ent->s.eType != 4)
+    if (ent->s.eType != ET_MISSILE)
         MyAssertHandler(".\\game\\g_missile.cpp", 1616, 0, "%s", "ent->s.eType == ET_MISSILE");
     if (ent->missile.flightMode)
     {
@@ -2595,7 +2595,7 @@ char __cdecl JavelinClimbWithinDistance(gentity_s *ent, const float *targetPos)
 
     if (!ent)
         MyAssertHandler(".\\game\\g_missile.cpp", 1651, 0, "%s", "ent");
-    if (ent->s.eType != 4)
+    if (ent->s.eType != ET_MISSILE)
         MyAssertHandler(".\\game\\g_missile.cpp", 1652, 0, "%s", "ent->s.eType == ET_MISSILE");
     distance = Vec2Distance(ent->s.lerp.pos.trBase, targetPos);
     if (distance >= 400.0)
@@ -2612,7 +2612,7 @@ bool __cdecl JavelinClimbIsAboveCeiling(gentity_s *ent, const float *targetPos)
 
     if (!ent)
         MyAssertHandler(".\\game\\g_missile.cpp", 1839, 0, "%s", "ent");
-    if (ent->s.eType != 4)
+    if (ent->s.eType != ET_MISSILE)
         MyAssertHandler(".\\game\\g_missile.cpp", 1840, 0, "%s", "ent->s.eType == ET_MISSILE");
     height = ent->s.lerp.pos.trBase[2] - targetPos[2] - ent->mover.pos3[0];
     limit = JavelinClimbCeiling(ent);

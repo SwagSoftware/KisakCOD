@@ -112,7 +112,7 @@ void __cdecl CG_CompassRadarPingEnemyPlayers(int32_t localClientNum, float oldRa
                 if (actor->enemy)
                 {
                     cent = CG_GetEntity(localClientNum, actorIndex);
-                    if (!cent->nextValid || cent->nextState.eType == 1 && (cent->nextState.lerp.eFlags & 0x20000) == 0)
+                    if (!cent->nextValid || cent->nextState.eType == ET_PLAYER && (cent->nextState.lerp.eFlags & 0x20000) == 0)
                     {
                         if (DoLinesSurroundPoint(cgameGlob, radarLine1, radarLine2, actor->lastPos))
                             RadarPingEnemyPlayer(actor, cgameGlob->time);
@@ -400,7 +400,7 @@ void __cdecl CG_CompassUpdateActors(int32_t localClientNum)
                         actor->enemy = v2;
                         actor->perks = cgameGlob->bgs.clientinfo[num].perks;
                         cent = CG_GetEntity(localClientNum, index);
-                        if (cent->nextState.eType == 1 && (cent->nextState.lerp.eFlags & 0x20000) == 0)
+                        if (cent->nextState.eType == ET_PLAYER && (cent->nextState.lerp.eFlags & 0x20000) == 0)
                         {
                             iassert(cent->nextState.clientNum == index);
                             actor = &s_compassActors[clientIndex][index];
@@ -1053,7 +1053,7 @@ void __cdecl CG_CompassDrawVehicles(
                         xy);
                     if (!clipped || compassClampIcons->current.enabled)
                     {
-                        if (eType == 12)
+                        if (eType == ET_HELICOPTER)
                         {
                             w = compassSize->current.value * 40.0;
                             v8 = compassSize->current.value * 40.0;
