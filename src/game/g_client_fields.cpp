@@ -240,21 +240,21 @@ void __cdecl ClientScr_SetHeadIconTeam(gclient_s *pSelf, const client_fields_s *
     {
         pEnt->s.iHeadIconTeam = 0;
     }
-    else if (sTeam == scr_const.allies)
-    {
-        pEnt->s.iHeadIconTeam = 2;
-    }
     else if (sTeam == scr_const.axis)
     {
         pEnt->s.iHeadIconTeam = 1;
     }
+    else if (sTeam == scr_const.allies)
+    {
+        pEnt->s.iHeadIconTeam = 2;
+    }
     else if (sTeam == scr_const.spectator)
     {
-        Scr_Error(va("'%s' is an illegal head icon team string. Must be none, allies, axis, or spectator.", SL_ConvertToString(sTeam)));
+        pEnt->s.iHeadIconTeam = 3;
     }
     else
     {
-        pEnt->s.iHeadIconTeam = 3;
+        Scr_Error(va("'%s' is an illegal head icon team string. Must be none, allies, axis, or spectator.", SL_ConvertToString(sTeam)));
     }
 }
 

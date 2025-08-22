@@ -4125,7 +4125,7 @@ void Scr_PlayFX()
         Scr_Error("Incorrect number of parameters");
     fxId = Scr_GetInt(0);
     Scr_GetVector(1u, pos);
-    ent = G_TempEntity(pos, 55);
+    ent = G_TempEntity(pos, EV_PLAY_FX);
     iassert(ent->s.lerp.apos.trType == TR_STATIONARY);
     ent->s.eventParm = (uint8_t)fxId;
     if (numParams == 2)
@@ -4399,7 +4399,7 @@ void Scr_PhysicsExplosionSphere()
     if (Scr_GetNumParam() != 4)
         Scr_Error("Incorrect number of parameters");
     Scr_GetVector(0, pos);
-    ent = G_TempEntity(pos, 57);
+    ent = G_TempEntity(pos, EV_PHYS_EXPLOSION_SPHERE);
     ent->s.eventParm = Scr_GetInt(1);
     ent->s.lerp.u.explosion.innerRadius = Scr_GetFloat(2);
     if (ent->s.lerp.u.explosion.innerRadius < 0.0)
@@ -4419,7 +4419,7 @@ void Scr_PhysicsRadiusJolt()
     if (Scr_GetNumParam() != 4)
         Scr_Error("Incorrect number of parameters");
     Scr_GetVector(0, pos);
-    ent = G_TempEntity(pos, 59);
+    ent = G_TempEntity(pos, EV_PHYS_EXPLOSION_JOLT);
     ent->s.eventParm = Scr_GetInt(1);
     ent->s.lerp.u.explosionJolt.innerRadius = Scr_GetFloat(2);
     if (ent->s.lerp.u.explosionJolt.innerRadius < 0.0f)
@@ -4443,7 +4443,7 @@ void Scr_PhysicsRadiusJitter()
     if (Scr_GetNumParam() != 5)
         Scr_Error("Incorrect number of parameters");
     Scr_GetVector(0, pos);
-    ent = G_TempEntity(pos, 60);
+    ent = G_TempEntity(pos, EV_PHYS_JITTER);
     ent->s.eventParm = Scr_GetInt(1);
     ent->s.lerp.u.physicsJitter.innerRadius = Scr_GetFloat(2);
     if (ent->s.lerp.u.physicsJitter.innerRadius < 0.0f)
@@ -4466,7 +4466,7 @@ void Scr_PhysicsExplosionCylinder()
     if (Scr_GetNumParam() != 4)
         Scr_Error("Incorrect number of parameters");
     Scr_GetVector(0, pos);
-    ent = G_TempEntity(pos, 58);
+    ent = G_TempEntity(pos, EV_PHYS_EXPLOSION_CYLINDER);
     ent->s.eventParm = Scr_GetInt(1);
     ent->s.lerp.u.explosion.innerRadius = Scr_GetFloat(2);
     if (ent->s.lerp.u.explosion.innerRadius < 0.0f)

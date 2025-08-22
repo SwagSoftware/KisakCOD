@@ -225,10 +225,10 @@ void __cdecl CG_CompassAddWeaponPingInfo(int32_t localClientNum, const centity_s
 
     cgameGlob = CG_GetLocalClientGlobals(localClientNum);
     iassert(cent);
+    iassert(cent->nextState.eType == ET_PLAYER || cent->nextState.eType == ET_PLAYER_CORPSE);
 
-    if (cent->nextState.eType != ET_PLAYER_CORPSE)
+    if (cent->nextState.eType == ET_PLAYER)
     {
-        iassert(cent->nextState.eType == ET_PLAYER);
         bcassert(cent->nextState.number, MAX_CLIENTS);
         bcassert(cgameGlob->nextSnap->ps.clientNum, MAX_CLIENTS);
 

@@ -356,24 +356,24 @@ void __cdecl G_ExplodeMissile(gentity_s *ent)
                 if (weapDef->projExplosion == WEAPPROJEXP_ROCKET)
                 {
                     v3 = DirToByte(normal);
-                    G_AddEvent(eventEnt, 0x2Eu, v3);
+                    G_AddEvent(eventEnt, EV_ROCKET_EXPLODE, v3);
                 }
                 else if (weapDef->projExplosion == WEAPPROJEXP_FLASHBANG)
                 {
                     v4 = DirToByte(normal);
-                    G_AddEvent(eventEnt, 0x30u, v4);
+                    G_AddEvent(eventEnt, EV_FLASHBANG_EXPLODE, v4);
                 }
                 else
                 {
                     v5 = DirToByte(normal);
-                    G_AddEvent(eventEnt, 0x31u, v5);
+                    G_AddEvent(eventEnt, EV_CUSTOM_EXPLODE, v5);
                     eventEnt->s.lerp.u.customExplode.startTime = level.time;
                 }
             }
             else
             {
                 v2 = DirToByte(normal);
-                G_AddEvent(eventEnt, 0x2Du, v2);
+                G_AddEvent(eventEnt, EV_GRENADE_EXPLODE, v2);
             }
             if (weapDef->projExplosion == WEAPPROJEXP_SMOKE && weapDef->projExplosionEffect)
             {

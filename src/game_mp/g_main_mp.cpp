@@ -1075,7 +1075,7 @@ void __cdecl G_UpdateObjectiveToClients()
             if (!ent->client)
                 MyAssertHandler(".\\game_mp\\g_main_mp.cpp", 1544, 0, "%s", "ent->client");
             ps = &ent->client->ps;
-            team = ps[1].movementDir;
+            team = ent->client->sess.cs.team;
             for (objNum = 0; objNum < 16; ++objNum)
             {
                 obj = &level.objectives[objNum];
