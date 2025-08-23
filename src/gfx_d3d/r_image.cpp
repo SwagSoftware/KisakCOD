@@ -397,7 +397,7 @@ GfxImage *__cdecl Image_Register_FastFile(const char *imageName)
 
 char __cdecl Image_LoadFromFile(GfxImage *image)
 {
-    return Image_LoadFromFileWithReader(image, (int(__cdecl *)(const char *, int *))FS_FOpenFileReadDatabase);
+    return Image_LoadFromFileWithReader(image, FS_FOpenFileReadDatabase);
 }
 
 char __cdecl Image_ValidateHeader(GfxImageFileHeader *imageFile, const char *filepath)

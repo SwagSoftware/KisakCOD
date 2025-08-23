@@ -933,7 +933,7 @@ unsigned int __cdecl FS_FOpenFileReadForThread(const char *filename, int *file, 
     return zfi->cur_file_info.uncompressed_size;
 }
 
-unsigned int __cdecl FS_FOpenFileReadDatabase(const char *filename, int *file)
+int __cdecl FS_FOpenFileReadDatabase(const char *filename, int *file)
 {
     return FS_FOpenFileReadForThread(filename, file, FS_THREAD_DATABASE);
 }

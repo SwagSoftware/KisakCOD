@@ -741,7 +741,6 @@ void __cdecl G_ParseEntityFields(gentity_s *ent)
 
 void __cdecl G_ParseEntityField(const char *key, char *value, gentity_s *ent)
 {
-    float v3; // [esp+0h] [ebp-20h]
     const ent_field_t *f; // [esp+Ch] [ebp-14h]
     float vec[3]; // [esp+10h] [ebp-10h] BYREF
     int32_t modelIndex; // [esp+1Ch] [ebp-4h]
@@ -756,14 +755,14 @@ void __cdecl G_ParseEntityField(const char *key, char *value, gentity_s *ent)
         if (!I_stricmp(f->name, key))
             break;
     }
+
     switch (f->type)
     {
     case F_INT:
         *(int32_t *)((char *)&ent->s.number + f->ofs) = atoi(value);
         break;
     case F_FLOAT:
-        v3 = atof(value);
-        *(float *)((char *)&ent->s.number + f->ofs) = v3;
+        *(float *)((char *)&ent->s.number + f->ofs) = atof(value);
         break;
     case F_STRING:
         Scr_SetString((uint16_t *)((char *)ent + f->ofs), 0);

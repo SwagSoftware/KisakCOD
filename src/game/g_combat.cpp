@@ -12,7 +12,7 @@
 
 unsigned char *bulletPriorityMap;
 unsigned char *riflePriorityMap;
-float *g_fHitLocDamageMult;
+float g_fHitLocDamageMult[19]{ 0.0f };
 
 unsigned __int16 *modNames[16] =
 {

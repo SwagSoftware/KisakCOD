@@ -49,11 +49,19 @@ void __cdecl BG_LoadPenetrationDepthTable()
 
     if (!penetrationDepthTableLoaded)
     {
+#ifdef KISAK_MP
         buffer = Com_LoadInfoString(
             (char*)"info/bullet_penetration_mp",
             "bullet penetration table",
             "BULLET_PEN_TABLE",
             loadBuffer);
+#elif KISAK_SP
+        buffer = Com_LoadInfoString(
+            (char *)"info/bullet_penetration_sp",
+            "bullet penetration table",
+            "BULLET_PEN_TABLE",
+            loadBuffer);
+#endif
         Com_Memset((unsigned int *)penetrationDepthTable, 0, 464);
         BG_ParsePenetrationDepthTable("small", penetrationDepthTable[1], buffer);
         BG_ParsePenetrationDepthTable("medium", penetrationDepthTable[2], buffer);

@@ -852,53 +852,45 @@ void __cdecl GScr_SetDynamicEntityField(gentity_s *ent, unsigned int index)
 
 void __cdecl SP_worldspawn()
 {
-    const char *v0; // r4
-    long double v1; // fp2
-    long double v2; // fp2
-    double v3; // fp31
-    long double v4; // fp2
-    long double v5; // fp2
-    long double v6; // fp2
-    double v7; // fp31
-    long double v8; // fp2
-    double v9; // fp30
-    long double v10; // fp2
-    double v11; // fp29
-    const char *v14[2]; // [sp+50h] [-80h] BYREF
+    double ambient; // fp31
+    double diffuse; // fp30
+    double sunlight; // fp29
     float color[3]; // [sp+58h] [-78h] BYREF
-    float v18; // [sp+68h] [-68h] BYREF
-    char v19; // [sp+6Ch] [-64h] BYREF
-    char v20; // [sp+70h] [-60h] BYREF
 
-    G_SpawnString(&level.spawnVar, "classname", "", v14);
-    if (I_stricmp(v14[0], "worldspawn"))
+    const char *classname;
+
+    G_SpawnString(&level.spawnVar, "classname", "", &classname);
+
+    if (I_stricmp(classname, "worldspawn"))
         Com_Error(ERR_DROP, "SP_worldspawn: the first entity isn't worldspawn");
+
     SV_SetConfigstring(2, "cod-sp");
-    G_SpawnString(&level.spawnVar, "ambienttrack", "", v14);
-    if (*v14[0])
-        v0 = va("n\\%s", v14[0]);
+
+    const char *ambienttrack;
+    G_SpawnString(&level.spawnVar, "ambienttrack", "", &ambienttrack);
+    if (ambienttrack[0])
+        SV_SetConfigstring(1114, va("n\\%s", ambienttrack));
     else
-        v0 = "";
-    SV_SetConfigstring(1114, v0);
-    G_SpawnString(&level.spawnVar, "message", "", v14);
-    SV_SetConfigstring(3, v14[0]);
-    G_SpawnString(&level.spawnVar, "gravity", "800", v14);
-    if (!g_gravity)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\g_spawn.cpp", 1209, 0, "%s", "g_gravity");
-    v1 = atof(v14[0]);
-    Dvar_SetFloat(g_gravity, (float)*(double *)&v1);
-    G_SpawnString(&level.spawnVar, "northyaw", "", v14);
-    if (*v14[0])
+        SV_SetConfigstring(1114, "");
+
+    const char *message;
+    G_SpawnString(&level.spawnVar, "message", "", &message);
+    SV_SetConfigstring(3, message);
+
+    const char *gravity;
+    G_SpawnString(&level.spawnVar, "gravity", "800", &gravity);
+    iassert(g_gravity);
+    Dvar_SetFloat(g_gravity, atof(gravity));
+
+    const char *northyaw;
+    G_SpawnString(&level.spawnVar, "northyaw", "", &northyaw);
+    if (northyaw[0])
     {
-        SV_SetConfigstring(1147, v14[0]);
-        v2 = atof(v14[0]);
-        v3 = (float)((float)*(double *)&v2 * (float)0.017453292);
-        *(double *)&v2 = v3;
-        v4 = sin(v2);
-        level.compassNorth[1] = *(double *)&v4;
-        *(double *)&v4 = v3;
-        v5 = cos(v4);
-        level.compassNorth[0] = *(double *)&v5;
+        SV_SetConfigstring(1147, northyaw);
+
+        float v3 = atof(northyaw) * 0.017453292f;
+        level.compassNorth[1] = sin(v3);
+        level.compassNorth[0] = cos(v3);;
     }
     else
     {
@@ -910,18 +902,22 @@ void __cdecl SP_worldspawn()
     Scr_SetString(&g_entities[ENTITYNUM_WORLD].classname, scr_const.worldspawn);
     g_entities[ENTITYNUM_WORLD].r.inuse = 1;
     iassert(!g_entities[ENTITYNUM_WORLD].r.ownerNum.isDefined());
-    G_SpawnString(&level.spawnVar, "ambient", "0", v14);
-    v6 = atof(v14[0]);
-    v7 = (float)*(double *)&v6;
-    G_SpawnString(&level.spawnVar, "diffuseFraction", "0", v14);
-    v8 = atof(v14[0]);
-    v9 = (float)*(double *)&v8;
-    G_SpawnString(&level.spawnVar, "sunLight", "1", v14);
-    v10 = atof(v14[0]);
-    v11 = (float)*(double *)&v10;
-    G_SpawnString(&level.spawnVar, "sunColor", "1 1 1", v14);
 
-    sscanf(v14[0], "%g %g %g", &color[0], &color[1], &color[2]);
+    const char *ambientLight;
+    G_SpawnString(&level.spawnVar, "ambient", "0", &ambientLight);
+    ambient = atof(ambientLight);
+
+    const char *diffuseFraction;
+    G_SpawnString(&level.spawnVar, "diffuseFraction", "0", &diffuseFraction);
+    diffuse = atof(diffuseFraction);
+
+    const char *sunLight;
+    G_SpawnString(&level.spawnVar, "sunLight", "1", &sunLight);
+    sunlight = atof(sunLight);
+
+    const char *sunColor;
+    G_SpawnString(&level.spawnVar, "sunColor", "1 1 1", &sunColor);
+    sscanf(sunColor, "%g %g %g", &color[0], &color[1], &color[2]);
     ColorNormalize(color, color);
 
     //_FP13 = -(float)((float)((float)v11 - (float)v7) * (float)((float)1.0 - (float)v9));
@@ -930,16 +926,18 @@ void __cdecl SP_worldspawn()
     //level.mapSunColor[1] = color[1] * (float)_FP0;
     //level.mapSunColor[2] = color[2] * (float)_FP0;
 
-    float scale = (v11 - v7) * (1.0f - v9);
+    float scale = (sunlight - ambient) * (1.0f - diffuse);
     scale = (scale < 0.0f) ? 1.0f : scale;
 
     level.mapSunColor[0] = color[0] * scale;
     level.mapSunColor[1] = color[1] * scale;
     level.mapSunColor[2] = color[2] * scale;
 
-    G_SpawnString(&level.spawnVar, "sunDirection", "0 0 0", v14);
-    sscanf(v14[0], "%g %g %g", &v18, &v19, &v20);
-    AngleVectors(&v18, level.mapSunDirection, 0, 0);
+    const char *sunDirection;
+    float sunDir[3];
+    G_SpawnString(&level.spawnVar, "sunDirection", "0 0 0", &sunDirection);
+    sscanf(sunDirection, "%g %g %g", &sunDir[0], &sunDir[1], &sunDir[2]);
+    AngleVectors(sunDir, level.mapSunDirection, 0, 0);
 }
 
 void __cdecl G_LoadStructs()
@@ -987,88 +985,71 @@ void __cdecl G_SetEntityScriptVariable(const char *key, const char *value, genti
         Scr_SetDynamicEntityField(ent->s.number, 0, v4);
 }
 
+typedef unsigned __int16 modelNameIndex_t;
 void __cdecl G_ParseEntityField(const char *key, const char *value, gentity_s *ent, int ignoreModel)
 {
-    const ent_field_t *v5; // r31
-    unsigned int v9; // r5
-    long double v10; // fp2
-    int v11; // r3
-    __int16 v12; // r31
-    float v13; // [sp+50h] [-40h] BYREF
-    float v14; // [sp+54h] [-3Ch] BYREF
-    float v15; // [sp+58h] [-38h] BYREF
+    const ent_field_t *f; // r31
+    int modelIndex; // r3
+    float vec[3]; // [sp+50h] [-40h] BYREF
 
-    v5 = fields_1;
-    if ("classname")
+
+    for (f = fields_1; ; ++f)
     {
-        while (I_stricmp(v5->name, key))
+        if (!f->name)
         {
-            ++v5;
-            if (!v5->name)
-                goto LABEL_4;
-        }
-        switch (v5->type)
-        {
-        case F_INT:
-            *(unsigned int *)(&ent->s.eType + v5->ofs) = atol(value);
-            break;
-        case F_SHORT:
-            *(_WORD *)(&ent->s.eType + v5->ofs) = atol(value);
-            break;
-        case F_BYTE:
-            *(&ent->s.eType + v5->ofs) = (entityType_t)atol(value);
-            break;
-        case F_FLOAT:
-            v10 = atof(value);
-            *(float *)(&ent->s.eType + v5->ofs) = *(double *)&v10;
-            break;
-        case F_STRING:
-            Scr_SetString((unsigned __int16 *)(&ent->s.eType + v5->ofs), 0);
-            *(_WORD *)(&ent->s.eType + v5->ofs) = G_NewString(value);
-            break;
-        case F_VECTOR:
-            v13 = 0.0;
-            v14 = 0.0;
-            v15 = 0.0;
-            sscanf(value, "%f %f %f", &v13, &v14, &v15);
-            *(float *)(&ent->s.eType + v5->ofs) = v13;
-            *(float *)(&ent->s.un1.scale + v5->ofs) = v14;
-            *(float *)((char *)&ent->s.lerp.eFlags + v5->ofs) = v15;
-            break;
-        case F_MODEL:
-            if (!ignoreModel)
-            {
-                if (*value == 42)
-                {
-                    v11 = atol(value + 1);
-                    v12 = v11;
-                    if (v11 != (unsigned __int16)v11)
-                        MyAssertHandler(
-                            "c:\\trees\\cod3\\cod3src\\src\\game\\g_spawn.cpp",
-                            271,
-                            0,
-                            "%s",
-                            "modelIndex == (modelNameIndex_t)modelIndex");
-                    ent->s.index.item = v12;
-                }
-                else
-                {
-                    if (Com_IsLegacyXModelName(value))
-                        value += 7;
-                    G_SetModel(ent, value);
-                }
-            }
-            break;
-        default:
+            G_SetEntityScriptVariable(key, value, ent);
             return;
         }
+        if (!I_stricmp(f->name, key))
+            break;
     }
-    else
+
+    switch (f->type)
     {
-    LABEL_4:
-        v9 = G_SetEntityScriptVariableInternal(key, value);
-        if (v9)
-            Scr_SetDynamicEntityField(ent->s.number, 0, v9);
+    case F_INT:
+        *(int32_t *)((char *)&ent->s.number + f->ofs) = atoi(value);
+        break;
+    case F_SHORT:
+        *(_WORD *)((char*)&ent->s.eType + f->ofs) = atol(value);
+        break;
+    case F_BYTE:
+        *((char*)&ent->s.eType + f->ofs) = (entityType_t)atol(value);
+        break;
+    case F_FLOAT:
+        *(float *)((char *)&ent->s.number + f->ofs) = atof(value);
+        break;
+    case F_STRING:
+        Scr_SetString((uint16_t *)((char *)ent + f->ofs), 0);
+        *(_WORD *)((char *)&ent->s.number + f->ofs) = G_NewString(value).prev;
+        break;
+    case F_VECTOR:
+        vec[0] = 0.0;
+        vec[1] = 0.0;
+        vec[2] = 0.0;
+        sscanf(value, "%f %f %f", vec, &vec[1], &vec[2]);
+        *(float *)((char *)&ent->s.number + f->ofs) = vec[0];
+        *(float *)((char *)&ent->s.eType + f->ofs) = vec[1];
+        *(float *)((char *)&ent->s.lerp.eFlags + f->ofs) = vec[2];
+        break;
+    case F_MODEL:
+        if (!ignoreModel)
+        {
+            if (*value == 42)
+            {
+                modelIndex = atol(value + 1);
+                iassert(modelIndex == (modelNameIndex_t)modelIndex);
+                ent->s.index.item = modelIndex;
+            }
+            else
+            {
+                if (Com_IsLegacyXModelName(value))
+                    value += 7;
+                G_SetModel(ent, value);
+            }
+        }
+        break;
+    default:
+        return;
     }
 }
 
@@ -1104,7 +1085,7 @@ void G_CallSpawn()
     int v5; // r8
     gentity_s *v6; // r31
     const gitem_s *ItemForClassname; // r30
-    gentity_s *v8; // r31
+    gentity_s *ent; // r31
     int v9; // r6
     const SpawnFuncEntry *v10; // r7
     const char *classname; // r10
@@ -1117,19 +1098,19 @@ void G_CallSpawn()
     const char *v18; // r11
     int v19; // r8
     gentity_s *v20; // r30
-    const char *v21; // [sp+50h] [-20h] BYREF
+    const char *classnameStr; // [sp+50h] [-20h] BYREF
 
-    if (!level.spawnVar.spawnVarsValid)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\g_spawn.cpp", 434, 1, "%s", "level.spawnVar.spawnVarsValid");
-    G_SpawnString(&level.spawnVar, "classname", "", &v21);
-    if (v21)
+    iassert(level.spawnVar.spawnVarsValid);
+
+    G_SpawnString(&level.spawnVar, "classname", "", &classnameStr);
+    if (classnameStr)
     {
-        if (strncmp(v21, "dyn_", 4u))
+        if (strncmp(classnameStr, "dyn_", 4u))
         {
-            if (strncmp(v21, "node_", 5u))
+            if (strncmp(classnameStr, "node_", 5u))
             {
                 v0 = "info_vehicle_node";
-                v1 = v21;
+                v1 = classnameStr;
                 do
                 {
                     v2 = *(unsigned __int8 *)v0 - *(unsigned __int8 *)v1;
@@ -1140,7 +1121,7 @@ void G_CallSpawn()
                 } while (!v2);
                 if (v2)
                 {
-                    v3 = v21;
+                    v3 = classnameStr;
                     v4 = "info_vehicle_node_rotate";
                     do
                     {
@@ -1152,14 +1133,14 @@ void G_CallSpawn()
                     } while (!v5);
                     if (v5)
                     {
-                        if (strncmp(v21, "actor_", 6u))
+                        if (strncmp(classnameStr, "actor_", 6u))
                         {
-                            ItemForClassname = G_GetItemForClassname(v21, 0);
+                            ItemForClassname = G_GetItemForClassname(classnameStr, 0);
                             if (ItemForClassname)
                             {
-                                v8 = G_Spawn();
-                                G_ParseEntityFields(v8, 0);
-                                G_SpawnItem(v8, ItemForClassname);
+                                ent = G_Spawn();
+                                G_ParseEntityFields(ent, 0);
+                                G_SpawnItem(ent, ItemForClassname);
                             }
                             else
                             {
@@ -1168,7 +1149,7 @@ void G_CallSpawn()
                                 while (1)
                                 {
                                     classname = v10->classname;
-                                    v12 = v21;
+                                    v12 = classnameStr;
                                     do
                                     {
                                         v13 = *(unsigned __int8 *)v12 - *(unsigned __int8 *)classname;
@@ -1181,7 +1162,7 @@ void G_CallSpawn()
                                         break;
                                     ++v10;
                                     ++v9;
-                                    if ((int)v10 >= (int)"Tried to set a read only entity field")
+                                    if ((int)v10 >= ARRAY_COUNT(s_bspOrDynamicSpawns))
                                         goto LABEL_30;
                                 }
                                 callback = s_bspOrDynamicSpawns[v9].callback;
@@ -1193,7 +1174,7 @@ void G_CallSpawn()
                                 while (1)
                                 {
                                     v17 = v16->classname;
-                                    v18 = v21;
+                                    v18 = classnameStr;
                                     do
                                     {
                                         v19 = *(unsigned __int8 *)v18 - *(unsigned __int8 *)v17;
@@ -1213,7 +1194,7 @@ void G_CallSpawn()
                                 if (!callback)
                                 {
                                 LABEL_36:
-                                    Com_Printf(15, "%s doesn't have a spawn function\n", v21);
+                                    Com_Printf(15, "%s doesn't have a spawn function\n", classnameStr);
                                     return;
                                 }
                             LABEL_38:

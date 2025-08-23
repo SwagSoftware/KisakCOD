@@ -313,62 +313,60 @@ void __cdecl PathNode_OriginMatches(const char *value, const float *nodeOrigin)
 
 void __cdecl node_droptofloor(pathnode_t *node)
 {
-    double v2; // fp29
-    double v3; // fp31
-    double v4; // fp30
-    double v5; // fp13
-    double v6; // fp12
-    float v7; // [sp+50h] [-B0h] BYREF
-    float v8; // [sp+54h] [-ACh]
-    float v9; // [sp+58h] [-A8h]
-    float v10; // [sp+60h] [-A0h] BYREF
-    float v11; // [sp+64h] [-9Ch]
-    float v12; // [sp+68h] [-98h]
-    float v13[4]; // [sp+70h] [-90h] BYREF
-    float v14[4]; // [sp+80h] [-80h] BYREF
-    trace_t v15; // [sp+90h] [-70h] BYREF
+    float dropMaxs[3]; // [esp+D0h] [ebp-A4h] BYREF
+    float dropMins[3]; // [esp+DCh] [ebp-98h] BYREF
+    float endpos[3]; // [esp+E8h] [ebp-8Ch] BYREF
+    float vEnd[3]; // [esp+F4h] [ebp-80h]
+    float vOrigin[4]; // [esp+100h] [ebp-74h] BYREF
+    float startpos[3];
 
-    v2 = node->constant.vOrigin[2];
-    v14[0] = 15.0;
-    v3 = node->constant.vOrigin[0];
-    v14[1] = 15.0;
-    v13[0] = -15.0;
-    v4 = node->constant.vOrigin[1];
-    v13[2] = 0.0;
-    v13[1] = -15.0;
-    v10 = v3;
-    v11 = v4;
-    v14[2] = (float)((float)15.0 - (float)-15.0) + (float)0.0;
-    v12 = (float)v2 - (float)256.0;
-    v7 = v3;
-    v8 = v4;
-    v9 = (float)v2 + (float)1.0;
-    G_TraceCapsule(&v15, &v7, v13, v14, &v10, ENTITYNUM_NONE, 8519697);
-    if (v15.startsolid || v15.allsolid)
+    trace_t tr; // [sp+90h] [-70h] BYREF
+
+    memset(&tr, 0, sizeof(trace_t));
+
+    vEnd[0] = node->constant.vOrigin[0];
+    vEnd[1] = node->constant.vOrigin[1];
+    vEnd[2] = node->constant.vOrigin[2];
+    endpos[0] = vEnd[0];
+    endpos[1] = vEnd[1];
+    endpos[2] = vEnd[2] - 256.0f;
+    startpos[0] = vEnd[0];
+    startpos[1] = vEnd[1];
+    startpos[2] = vEnd[2] + 1.0f;
+    dropMins[0] = actorMins[0];
+    dropMins[1] = -15.0f;
+    dropMins[2] = 0.0f;
+    dropMaxs[0] = actorMaxs[0];
+    dropMaxs[1] = 15.0f;
+    dropMaxs[2] = (float)(15.0f - -15.0f) + 0.0f;
+
+    G_TraceCapsule(&tr, startpos, dropMins, dropMaxs, endpos, ENTITYNUM_NONE, 8519697);
+
+    if (tr.startsolid || tr.allsolid)
     {
     LABEL_8:
         Com_PrintError(
             1,
             "ERROR: Pathnode (%s) at (%g %g %g) is in solid\n",
             nodeStringTable[node->constant.type],
-            v3,
-            v4,
-            v2);
+            node->constant.vOrigin[0],
+            node->constant.vOrigin[1],
+            node->constant.vOrigin[2]
+        );
         goto LABEL_9;
     }
-    if (v15.fraction != 1.0)
+    if (tr.fraction != 1.0)
     {
-        v7 = (float)((float)(v10 - v7) * v15.fraction) + v7;
-        v8 = (float)((float)(v11 - v8) * v15.fraction) + v8;
-        v9 = (float)((float)(v12 - v9) * v15.fraction) + v9;
-        G_TraceCapsule(&v15, &v7, actorMins, actorMaxs, &v7, ENTITYNUM_NONE, 8519697);
-        if (!v15.startsolid && !v15.allsolid)
+        Vec3Lerp(startpos, endpos, tr.fraction, startpos);
+        //start[0] = (float)((float)(end - start) * tr.fraction) + start[0];
+        //start[1] = (float)((float)(end[1] - start[1]) * tr.fraction) + start[1];
+        //start[2] = (float)((float)(end[2] - start[2]) * tr.fraction) + start[2];
+        G_TraceCapsule(&tr, startpos, actorMins, actorMaxs, startpos, ENTITYNUM_NONE, 8519697);
+        if (!tr.startsolid && !tr.allsolid)
         {
-            v5 = v8;
-            v6 = v9;
-            node->constant.vOrigin[0] = v7;
-            node->constant.vOrigin[1] = v5;
-            node->constant.vOrigin[2] = v6;
+            node->constant.vOrigin[0] = startpos[0];
+            node->constant.vOrigin[1] = startpos[1];
+            node->constant.vOrigin[2] = startpos[2];
             return;
         }
         goto LABEL_8;
@@ -377,9 +375,10 @@ void __cdecl node_droptofloor(pathnode_t *node)
         1,
         "ERROR: Pathnode (%s) at (%g %g %g) is floating\n",
         nodeStringTable[node->constant.type],
-        v3,
-        v4,
-        v2);
+        node->constant.vOrigin[0],
+        node->constant.vOrigin[1],
+        node->constant.vOrigin[2]
+    );
 LABEL_9:
     node->constant.type = NODE_BADNODE;
 }
@@ -3656,9 +3655,8 @@ void __cdecl G_SpawnPathnodeDynamic()
     int v3; // ctr
     pathnode_transient_t *p_transient; // r11
     int v5; // ctr
-    float *v6; // r3
     nodeType type; // r30
-    float v8[6]; // [sp+50h] [-30h] BYREF
+    float forward[3];
 
     if (g_spawnai->current.enabled)
     {
@@ -3681,6 +3679,7 @@ void __cdecl G_SpawnPathnodeDynamic()
                         p_dynamic = (pathnode_dynamic_t *)((char *)p_dynamic + 4);
                         --v3;
                     } while (v3);
+
                     p_transient = &v1->transient;
                     v5 = 7;
                     do
@@ -3691,12 +3690,11 @@ void __cdecl G_SpawnPathnodeDynamic()
                     } while (v5);
                 }
                 G_ParsePathnodeScriptFields(v1);
-                YawVectors(v1->constant.fAngle, v6, v8);
-                v1->constant.forward[0] = v8[0];
-                v1->constant.forward[1] = v8[1];
+                YawVectors(v1->constant.fAngle, forward, NULL);
+                v1->constant.forward[0] = forward[0];
+                v1->constant.forward[1] = forward[1];
                 type = v1->constant.type;
-                if (v1->constant.type >= NODE_NUMTYPES)
-                    MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\pathnode.cpp", 931, 0, "%s", "type < NODE_NUMTYPES");
+                iassert(type < NODE_NUMTYPES);
                 if (type == NODE_TURRET)
                     v1->dynamic.turretEntNumber = -1;
             }

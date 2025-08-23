@@ -2607,7 +2607,7 @@ void VEH_SetupCollmap(gentity_s *ent)
 #ifdef KISAK_SP
 void G_UpdateVehicleTags(gentity_s *ent)
 {
-    scr_vehicle_s *scr_vehicle; // r30
+    scr_vehicle_s *veh; // r30
     int *flash; // r28
     unsigned __int16 **v4; // r29
     int BoneIndex; // r3
@@ -2618,28 +2618,30 @@ void G_UpdateVehicleTags(gentity_s *ent)
     iassert(ent);
     iassert(ent->scr_vehicle);
 
-    scr_vehicle = ent->scr_vehicle;
-    scr_vehicle->boneIndex.player = SV_DObjGetBoneIndex(ent, scr_const.tag_player);
-    scr_vehicle->boneIndex.detach = SV_DObjGetBoneIndex(ent, scr_const.tag_detach);
-    scr_vehicle->boneIndex.popout = SV_DObjGetBoneIndex(ent, scr_const.tag_popout);
-    scr_vehicle->boneIndex.body = SV_DObjGetBoneIndex(ent, scr_const.tag_body);
-    scr_vehicle->boneIndex.turret = SV_DObjGetBoneIndex(ent, scr_const.tag_turret);
-    scr_vehicle->boneIndex.barrel = SV_DObjGetBoneIndex(ent, scr_const.tag_barrel);
-    scr_vehicle->boneIndex.turret_base = SV_DObjGetBoneIndex(ent, scr_const.tag_turret_base);
-    flash = scr_vehicle->boneIndex.flash;
+    veh = ent->scr_vehicle;
+    veh->boneIndex.player = SV_DObjGetBoneIndex(ent, scr_const.tag_player);
+    veh->boneIndex.detach = SV_DObjGetBoneIndex(ent, scr_const.tag_detach);
+    veh->boneIndex.popout = SV_DObjGetBoneIndex(ent, scr_const.tag_popout);
+    veh->boneIndex.body = SV_DObjGetBoneIndex(ent, scr_const.tag_body);
+    veh->boneIndex.turret = SV_DObjGetBoneIndex(ent, scr_const.tag_turret);
+    veh->boneIndex.barrel = SV_DObjGetBoneIndex(ent, scr_const.tag_barrel);
+    veh->boneIndex.turret_base = SV_DObjGetBoneIndex(ent, scr_const.tag_turret_base);
+    flash = veh->boneIndex.flash;
+
     v4 = s_flashTags;
     do
     {
         BoneIndex = SV_DObjGetBoneIndex(ent, **v4++);
         *flash++ = BoneIndex;
-    } while ((int)v4 < (int)s_vehicleFields);
-    wheel = scr_vehicle->boneIndex.wheel;
+    } while ((int)v4 < (int)&s_flashTags[5]);
+
+    wheel = veh->boneIndex.wheel;
     v7 = s_wheelTags;
     do
     {
         v8 = SV_DObjGetBoneIndex(ent, **v7++);
         *wheel++ = v8;
-    } while ((int)v7 < (int)s_flashTags);
+    } while ((int)v7 < (int)&s_wheelTags[6]);
 }
 
 static const char *s_vehicleTypeNames[6] = { "4 wheel", "tank", "plane", "boat", "artillery", "helicopter" };

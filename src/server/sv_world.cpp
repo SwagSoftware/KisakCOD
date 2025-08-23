@@ -225,217 +225,168 @@ void __cdecl SV_LinkEntity(gentity_s *gEnt)
         CM_UnlinkEntity(ent);
     }
 #elif KISAK_SP
-    svEntity_s *v2; // r25
-    int v3; // r11
-    int v4; // r9
-    int v5; // r10
-    int v6; // r11
-    float *currentOrigin; // r30
-    double v8; // fp13
+    svEntity_s *k; // r25
+
+    float *origin; // r30
+    float *angles;
     float *maxs; // r28
     float *mins; // r29
-    double v11; // fp1
+    float radius2D; // fp1
     float *absmin; // r27
     float *absmax; // r26
-    double v14; // fp1
-    double v15; // fp13
-    double v16; // fp10
-    double v17; // fp12
-    double v18; // fp9
-    double v19; // fp11
+    float radius; // fp1
     int contents; // r5
-    unsigned int v21; // r29
+    unsigned int clipHandle; // r29
     const DObj_s *ServerDObj; // r3
-    double v23; // fp0
-    double v24; // fp13
-    float *v25; // r5
-    float *v26; // r4
-    double v27; // fp12
-    double v28; // fp0
-    double v29; // fp13
-    float v30; // [sp+58h] [-68h] BYREF
-    float v31; // [sp+5Ch] [-64h]
-    float v32; // [sp+68h] [-58h] BYREF
-    float v33; // [sp+6Ch] [-54h]
+    float *pAbsMax; // r5
+    float *pAbsMin; // r4
+    float tmpMax[3]; // [sp+58h] [-68h] BYREF
+    float tmpMin[3];
 
     iassert(gEnt->r.inuse);
-    v2 = SV_SvEntityForGentity(gEnt);
+
+    k = SV_SvEntityForGentity(gEnt);
+
     if (gEnt->r.bmodel)
     {
-        v3 = 0xFFFFFF;
+        gEnt->s.solid = 0xFFFFFF;
     }
     else if ((gEnt->r.contents & 0x200C001) != 0)
     {
-        v4 = (int)gEnt->r.maxs[0];
-        if (v4 >= 1)
-        {
-            if (v4 > 255)
-                v4 = 255;
-        }
-        else
-        {
-            v4 = 1;
-        }
-        v5 = (int)(float)((float)1.0 - gEnt->r.mins[2]);
-        if (v5 >= 1)
-        {
-            if (v5 > 255)
-                v5 = 255;
-        }
-        else
-        {
-            v5 = 1;
-        }
-        v6 = (int)(float)(gEnt->r.maxs[2] + (float)32.0);
-        if (v6 >= 1)
-        {
-            if (v6 > 255)
-                v6 = 255;
-            v3 = (((v6 << 8) | v5) << 8) | v4;
-        }
-        else
-        {
-            v3 = ((v5 | 0x100) << 8) | v4;
-        }
+        int p0 = CLAMP(gEnt->r.maxs[0], 1, 255);
+        int p1 = CLAMP(1.0f - gEnt->r.mins[2], 1, 255);
+        int p2 = CLAMP((int)(float)(gEnt->r.maxs[2] + 32.0f), 1, 255);
+
+        gEnt->s.solid = (unsigned int)p0 | ((unsigned int)p1 << 8) | (p2 << 16);
     }
     else
     {
-        v3 = 0;
+        gEnt->s.solid = 0;
     }
-    gEnt->s.solid = v3;
-    currentOrigin = gEnt->r.currentOrigin;
-    if ((COERCE_UNSIGNED_INT(gEnt->r.currentAngles[0]) & 0x7F800000) == 0x7F800000
-        || (COERCE_UNSIGNED_INT(gEnt->r.currentAngles[1]) & 0x7F800000) == 0x7F800000
-        || (COERCE_UNSIGNED_INT(gEnt->r.currentAngles[2]) & 0x7F800000) == 0x7F800000)
-    {
-        MyAssertHandler(
-            "c:\\trees\\cod3\\cod3src\\src\\server\\sv_world.cpp",
-            156,
-            0,
-            "%s",
-            "!IS_NAN((angles)[0]) && !IS_NAN((angles)[1]) && !IS_NAN((angles)[2])");
-    }
-    if ((COERCE_UNSIGNED_INT(*currentOrigin) & 0x7F800000) == 0x7F800000
-        || (COERCE_UNSIGNED_INT(gEnt->r.currentOrigin[1]) & 0x7F800000) == 0x7F800000
-        || (COERCE_UNSIGNED_INT(gEnt->r.currentOrigin[2]) & 0x7F800000) == 0x7F800000)
-    {
-        MyAssertHandler(
-            "c:\\trees\\cod3\\cod3src\\src\\server\\sv_world.cpp",
-            157,
-            0,
-            "%s",
-            "!IS_NAN((origin)[0]) && !IS_NAN((origin)[1]) && !IS_NAN((origin)[2])");
-    }
+
+    origin = gEnt->r.currentOrigin;
+    angles = gEnt->r.currentAngles;
+    iassert(!IS_NAN((angles)[0]) && !IS_NAN((angles)[1]) && !IS_NAN((angles)[2]));
+    iassert(!IS_NAN((origin)[0]) && !IS_NAN((origin)[1]) && !IS_NAN((origin)[2]));
+
+    // SnapAngles(currentAngles); Blops?
+
+    maxs = gEnt->r.maxs;
+    mins = gEnt->r.mins;
+    absmin = gEnt->r.absmin;
+    absmax = gEnt->r.absmax;
+
     if (gEnt->r.bmodel)
     {
-        v8 = gEnt->r.currentAngles[0];
-        if (v8 != 0.0)
+        if (gEnt->r.currentAngles[0] != 0.0)
         {
         LABEL_35:
-            maxs = gEnt->r.maxs;
-            mins = gEnt->r.mins;
-            v14 = RadiusFromBounds(gEnt->r.mins, gEnt->r.maxs);
-            gEnt->r.absmin[0] = *currentOrigin - (float)v14;
-            absmin = gEnt->r.absmin;
-            gEnt->r.absmax[0] = *currentOrigin + (float)v14;
-            absmax = gEnt->r.absmax;
-            gEnt->r.absmin[1] = gEnt->r.currentOrigin[1] - (float)v14;
-            gEnt->r.absmax[1] = gEnt->r.currentOrigin[1] + (float)v14;
-            gEnt->r.absmin[2] = gEnt->r.currentOrigin[2] - (float)v14;
-            gEnt->r.absmax[2] = gEnt->r.currentOrigin[2] + (float)v14;
+            radius = RadiusFromBounds(gEnt->r.mins, gEnt->r.maxs);
+
+            absmin[0] = origin[0] - radius;
+            absmin[1] = origin[1] - radius;
+            absmin[2] = origin[2] - radius;
+
+            absmax[0] = origin[0] + radius;
+            absmax[1] = origin[1] + radius;
+            absmax[2] = origin[2] + radius;
+
             goto LABEL_37;
         }
         if (gEnt->r.currentAngles[1] != 0.0 || gEnt->r.currentAngles[2] != 0.0)
         {
-            if (v8 == 0.0 && gEnt->r.currentAngles[2] == 0.0)
+            if (gEnt->r.currentAngles[0] == 0.0 && gEnt->r.currentAngles[2] == 0.0)
             {
-                maxs = gEnt->r.maxs;
-                mins = gEnt->r.mins;
-                v11 = RadiusFromBounds2D(gEnt->r.mins, gEnt->r.maxs);
-                gEnt->r.absmin[0] = *currentOrigin - (float)v11;
-                absmin = gEnt->r.absmin;
-                gEnt->r.absmax[0] = *currentOrigin + (float)v11;
-                absmax = gEnt->r.absmax;
-                gEnt->r.absmin[1] = gEnt->r.currentOrigin[1] - (float)v11;
-                gEnt->r.absmax[1] = gEnt->r.currentOrigin[1] + (float)v11;
-                gEnt->r.absmin[2] = gEnt->r.mins[2] + gEnt->r.currentOrigin[2];
-                gEnt->r.absmax[2] = gEnt->r.maxs[2] + gEnt->r.currentOrigin[2];
+                radius2D = RadiusFromBounds2D(gEnt->r.mins, gEnt->r.maxs);
+
+                absmin[0] = origin[0] - radius2D;
+                absmin[1] = origin[1] - radius2D;
+                absmin[2] = mins[2] + origin[2];
+
+                absmax[0] = origin[0] + radius2D;
+                absmax[1] = origin[1] + radius2D;
+                absmax[2] = maxs[2] + origin[2];
+
                 goto LABEL_37;
             }
             goto LABEL_35;
         }
     }
-    mins = gEnt->r.mins;
-    absmin = gEnt->r.absmin;
-    maxs = gEnt->r.maxs;
-    absmax = gEnt->r.absmax;
-    gEnt->r.absmin[0] = *currentOrigin + gEnt->r.mins[0];
-    gEnt->r.absmin[1] = gEnt->r.mins[1] + gEnt->r.currentOrigin[1];
-    gEnt->r.absmin[2] = gEnt->r.mins[2] + gEnt->r.currentOrigin[2];
-    gEnt->r.absmax[0] = *currentOrigin + gEnt->r.maxs[0];
-    gEnt->r.absmax[1] = gEnt->r.maxs[1] + gEnt->r.currentOrigin[1];
-    gEnt->r.absmax[2] = gEnt->r.maxs[2] + gEnt->r.currentOrigin[2];
-    LABEL_37:
-    v15 = (float)(gEnt->r.absmin[1] - (float)1.0);
-    v16 = gEnt->r.absmax[1];
-    v17 = (float)(gEnt->r.absmin[2] - (float)1.0);
-    v18 = gEnt->r.absmax[2];
-    v19 = (float)(*absmax + (float)1.0);
-    *absmin = *absmin - (float)1.0;
-    gEnt->r.absmin[1] = v15;
-    gEnt->r.absmin[2] = v17;
+
+    absmin[0] = origin[0] + mins[0];
+    absmin[1] = mins[1] + origin[1];
+    absmin[2] = mins[2] + origin[2];
+
+    absmax[0] = origin[0] + maxs[0];
+    absmax[1] = maxs[1] + origin[1];
+    absmax[2] = maxs[2] + origin[2];
+
+LABEL_37:
+    absmin[0] -= 1.0f;
+    absmin[1] -= 1.0f;
+    absmin[2] -= 1.0f;
+
     gEnt->r.linked = 1;
-    *absmax = v19;
-    gEnt->r.absmax[1] = (float)v16 + (float)1.0;
-    gEnt->r.absmax[2] = (float)v18 + (float)1.0;
-    Profile_Begin(42);
+
+    absmax[0] += 1.0f;
+    absmax[1] += 1.0f;
+    absmax[2] += 1.0f;
+
     contents = gEnt->r.contents;
+
     if (contents)
     {
         if (gEnt->r.bmodel)
-            v21 = gEnt->s.index.item;
+            clipHandle = gEnt->s.index.item;
         else
-            v21 = CM_TempBoxModel(mins, maxs, contents);
+            clipHandle = CM_TempBoxModel(mins, maxs, contents);
+
         ServerDObj = Com_GetServerDObj(gEnt->s.number);
+
         if (ServerDObj && (gEnt->r.svFlags & 6) != 0)
         {
             if ((gEnt->r.svFlags & 2) != 0)
             {
-                v23 = *currentOrigin;
-                v24 = gEnt->r.currentOrigin[1];
-                v25 = &v30;
-                v26 = &v32;
-                v27 = (float)(gEnt->r.currentOrigin[1] + actorLocationalMins[1]);
-                v32 = *currentOrigin + actorLocationalMins[0];
-                v33 = v27;
-                v30 = (float)v23 + actorLocationalMaxs[0];
-                v31 = (float)v24 + actorLocationalMaxs[1];
+                pAbsMax = tmpMax;
+                pAbsMin = tmpMin;
+
+                tmpMin[0] = origin[0] + actorLocationalMins[0];
+                tmpMin[1] = origin[1] + actorLocationalMins[1];
+                tmpMin[2] = origin[2] + actorLocationalMins[2];
+
+                tmpMax[0] = origin[0] + actorLocationalMaxs[0];
+                tmpMax[1] = origin[1] + actorLocationalMaxs[1];
+                tmpMax[2] = origin[2] + actorLocationalMaxs[2];
             }
             else
             {
-                DObjGetBounds(ServerDObj, &v32, &v30);
-                v28 = *currentOrigin;
-                v25 = &v30;
-                v32 = *currentOrigin + v32;
-                v29 = gEnt->r.currentOrigin[1];
-                v26 = &v32;
-                v33 = gEnt->r.currentOrigin[1] + v33;
-                v30 = (float)v28 + v30;
-                v31 = (float)v29 + v31;
+                pAbsMax = tmpMax;
+                pAbsMin = tmpMin;
+
+                float boundMin[3];
+                float boundMax[3];
+
+                DObjGetBounds(ServerDObj, boundMin, boundMax);
+
+                tmpMin[0] = origin[0] + boundMin[0];
+                tmpMin[1] = origin[1] + boundMin[1];
+                tmpMin[2] = origin[2] + boundMin[2];
+
+                tmpMax[0] = origin[0] + boundMax[0];
+                tmpMax[1] = origin[1] + boundMax[1];
+                tmpMax[2] = origin[2] + boundMax[2];
             }
         }
         else
         {
-            v25 = absmax;
-            v26 = absmin;
+            pAbsMax = absmax;
+            pAbsMin = absmin;
         }
-        CM_LinkEntity(v2, v26, v25, v21);
-        Profile_EndInternal(0);
+        CM_LinkEntity(k, pAbsMin, pAbsMax, clipHandle);
     }
     else
     {
-        CM_UnlinkEntity(v2);
-        Profile_EndInternal(0);
+        CM_UnlinkEntity(k);
     }
 #endif
 }

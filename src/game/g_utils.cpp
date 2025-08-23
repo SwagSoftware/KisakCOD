@@ -1773,19 +1773,12 @@ gentity_s *__cdecl G_Find(gentity_s *from, int fieldofs, unsigned __int16 match)
 
 void __cdecl G_InitGentity(gentity_s *e)
 {
-    int inuse; // r11
-    int v3; // r9
-
-    inuse = e->r.inuse;
     e->nextFree = 0;
-    if (inuse)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\g_utils.cpp", 2216, 0, "%s", "!e->r.inuse");
+    iassert(!e->r.inuse);
     e->r.inuse = 1;
     Scr_SetString(&e->classname, scr_const.noclass);
-    v3 = (unsigned __int16)(e - g_entities);
-    e->s.number = v3;
-    if (v3 != e - g_entities)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\g_utils.cpp", 2220, 0, "%s", "e->s.number == e - g_entities");
+    e->s.number = (unsigned __int16)(e - g_entities);
+    iassert(e->s.number == e - g_entities);
     iassert(!e->r.ownerNum.isDefined());
     e->r.eventType = 0;
     e->r.eventTime = 0;
@@ -1861,33 +1854,30 @@ void __cdecl G_PrintEntities()
 
 gentity_s *__cdecl G_Spawn()
 {
-    gentity_s *firstFreeEnt; // r30
-    int num_entities; // r11
+    gentity_s *e; // r30
 
-    firstFreeEnt = level.firstFreeEnt;
+    e = level.firstFreeEnt;
     if (level.firstFreeEnt)
     {
         level.firstFreeEnt = level.firstFreeEnt->nextFree;
         if (!level.firstFreeEnt)
             level.lastFreeEnt = 0;
-        firstFreeEnt->nextFree = 0;
+        e->nextFree = 0;
     }
     else
     {
-        num_entities = level.num_entities;
         if (level.num_entities == ENTITYNUM_WORLD)
         {
             G_PrintEntities();
             Scr_Error("G_Spawn: no free entities");
             Com_Error(ERR_DROP, "G_Spawn: no free entities");
-            num_entities = level.num_entities;
         }
-        level.num_entities = num_entities + 1;
-        firstFreeEnt = &level.gentities[num_entities];
-        SV_LocateGameData(level.gentities, num_entities + 1, 628, &level.clients->ps, 46104);
+        e = &level.gentities[level.num_entities++];
+        //SV_LocateGameData(level.gentities, level.num_entities, sizeof(gentity_s), &level.clients->ps, 46104);
+        SV_LocateGameData(level.gentities, level.num_entities, sizeof(gentity_s), &level.clients->ps, sizeof(playerState_s));
     }
-    G_InitGentity(firstFreeEnt);
-    return firstFreeEnt;
+    G_InitGentity(e);
+    return e;
 }
 
 void __cdecl G_FreeEntityRefs(gentity_s *ed)

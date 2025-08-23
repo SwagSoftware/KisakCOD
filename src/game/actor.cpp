@@ -156,40 +156,35 @@ void __cdecl SentientInfo_ForceCopy(sentient_info_t *pTo, const sentient_info_t 
 
 int __cdecl Actor_droptofloor(gentity_s *ent)
 {
-    float *currentOrigin; // r31
-    double v2; // fp12
-    double v3; // fp0
-    int result; // r3
-    double fraction; // fp0
-    float v6; // [sp+50h] [-70h] BYREF
-    float v7; // [sp+54h] [-6Ch]
-    float v8; // [sp+58h] [-68h]
-    float v9[4]; // [sp+60h] [-60h] BYREF
-    float v10[4]; // [sp+70h] [-50h] BYREF
-    trace_t v11; // [sp+80h] [-40h] BYREF
+    float vEnd[3]; // [sp+50h] [-70h] BYREF
+    float dropMins[4]; // [sp+60h] [-60h] BYREF
+    float dropMaxs[4]; // [sp+70h] [-50h] BYREF
+    trace_t trace; // [sp+80h] [-40h] BYREF
 
-    currentOrigin = ent->r.currentOrigin;
-    v2 = (float)(ent->r.currentOrigin[2] + (float)1.0);
-    v9[2] = 0.0;
-    v10[2] = 30.0;
-    v8 = ent->r.currentOrigin[2] - (float)128.0;
-    v6 = ent->r.currentOrigin[0];
-    v3 = ent->r.currentOrigin[1];
-    ent->r.currentOrigin[2] = v2;
-    v7 = v3;
-    v9[0] = -15.0;
-    v9[1] = -15.0;
-    v10[0] = 15.0;
-    v10[1] = 15.0;
-    G_TraceCapsule(&v11, ent->r.currentOrigin, v9, v10, &v6, ENTITYNUM_NONE, 42074129);
-    if (v11.startsolid)
+    vEnd[0] = ent->r.currentOrigin[0];
+    vEnd[1] = ent->r.currentOrigin[1];
+    vEnd[2] = ent->r.currentOrigin[2];
+
+    ent->r.currentOrigin[2] += 1.0;
+
+    vEnd[2] -= 128.0f;
+
+    dropMins[0] = actorMins[0];
+    dropMins[1] = actorMins[1];
+    dropMins[2] = 0.0;
+
+    dropMaxs[0] = actorMaxs[0];
+    dropMaxs[1] = actorMaxs[1];
+    dropMaxs[2] = (15.0f - -15.0f) + 0.0;
+
+    G_TraceCapsule(&trace, ent->r.currentOrigin, dropMins, dropMaxs, vEnd, ENTITYNUM_NONE, 0x2820011);
+
+    if (trace.startsolid)
         return 1;
-    result = 0;
-    fraction = v11.fraction;
-    *currentOrigin = (float)((float)(v6 - *currentOrigin) * v11.fraction) + *currentOrigin;
-    currentOrigin[1] = (float)((float)(v7 - currentOrigin[1]) * (float)fraction) + currentOrigin[1];
-    currentOrigin[2] = (float)((float)(v8 - currentOrigin[2]) * (float)fraction) + currentOrigin[2];
-    return result;
+
+    Vec3Lerp(ent->r.currentOrigin, vEnd, trace.fraction, ent->r.currentOrigin);
+
+    return 0;
 }
 
 int __cdecl Actor_IsDeletable(actor_s *actor)

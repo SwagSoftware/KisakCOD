@@ -602,6 +602,10 @@ struct spawner_ent_t
 
 struct gentity_s
 {
+    gentity_s()
+    {
+        memset(this, 0, sizeof(gentity_s));
+    }
     entityState_s s;
     entityShared_t r;
     struct gclient_s *client;

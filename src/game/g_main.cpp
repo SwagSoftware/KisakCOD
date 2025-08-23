@@ -50,7 +50,7 @@ const char *g_entinfoNames[7] =
 const char *g_entinfoTypeNames[4] =
 { "all", "AI only", "vehicle only", NULL };
 
-const char *moveOrientModeStrings[7] =
+const char *moveOrientModeStrings[8] =
 {
   "invalid",
   "dont_change",
@@ -58,12 +58,13 @@ const char *moveOrientModeStrings[7] =
   "enemy",
   "enemy_or_motion",
   "enemy_or_motion_sidestep",
-  "goal"
+  "goal",
+  NULL
 };
 
 entityHandler_t *entityHandlers;
 gentity_s g_entities[MAX_GENTITIES];
-sentient_s *g_sentients;
+sentient_s g_sentients[33];
 char g_nextMap[64];
 level_locals_t level;
 gclient_s g_clients[1];
@@ -2074,12 +2075,10 @@ void __cdecl G_TraceCapsule(
     int passEntityNum,
     int contentmask)
 {
-    unsigned __int8 *v13; // [sp+8h] [-A8h]
-    int v14; // [sp+Ch] [-A4h]
-    IgnoreEntParams v15[6]; // [sp+60h] [-50h] BYREF
+    IgnoreEntParams ignoreEntParams; // [esp+0h] [ebp-Ch] BYREF
 
-    SV_SetupIgnoreEntParams(v15, passEntityNum);
-    SV_Trace(results, start, mins, maxs, end, v15, contentmask, 0, v13, v14);
+    SV_SetupIgnoreEntParams(&ignoreEntParams, passEntityNum);
+    SV_Trace(results, start, mins, maxs, end, &ignoreEntParams, contentmask, 0, 0, 0);
 }
 
 int __cdecl G_TraceCapsuleComplete(
@@ -2090,10 +2089,7 @@ int __cdecl G_TraceCapsuleComplete(
     int passEntityNum,
     int contentmask)
 {
-    unsigned __int8 *v7; // [sp+8h] [-68h]
-    int v8; // [sp+Ch] [-64h]
-
-    return SV_TracePassed(start, mins, maxs, end, passEntityNum, ENTITYNUM_NONE, contentmask, 0, v7, v8);
+    return SV_TracePassed(start, mins, maxs, end, passEntityNum, ENTITYNUM_NONE, contentmask, 0, 0, 0);
 }
 
 void __cdecl G_LocationalTrace(
@@ -2104,12 +2100,20 @@ void __cdecl G_LocationalTrace(
     int contentmask,
     unsigned __int8 *priorityMap)
 {
-    unsigned __int8 *v10; // [sp+8h] [-98h]
-    int v11; // [sp+Ch] [-94h]
-    IgnoreEntParams v12[5]; // [sp+60h] [-40h] BYREF
+    IgnoreEntParams ignoreEntParams; // [esp+0h] [ebp-Ch] BYREF
 
-    SV_SetupIgnoreEntParams(v12, passEntityNum);
-    SV_Trace(results, start, vec3_origin, vec3_origin, end, v12, contentmask, 1, v10, v11);
+    SV_SetupIgnoreEntParams(&ignoreEntParams, passEntityNum);
+    SV_Trace(
+        results,
+        start,
+        (float *)vec3_origin,
+        (float *)vec3_origin,
+        end,
+        &ignoreEntParams,
+        contentmask,
+        1,
+        priorityMap,
+        1);
 }
 
 void __cdecl G_LocationalTraceAllowChildren(
@@ -2120,13 +2124,21 @@ void __cdecl G_LocationalTraceAllowChildren(
     int contentmask,
     unsigned __int8 *priorityMap)
 {
-    unsigned __int8 *v10; // [sp+8h] [-98h]
-    int v11; // [sp+Ch] [-94h]
-    IgnoreEntParams v12[5]; // [sp+60h] [-40h] BYREF
+    IgnoreEntParams ignoreEntParams; // [esp+0h] [ebp-Ch] BYREF
 
-    SV_SetupIgnoreEntParams(v12, passEntityNum);
-    v12[0].ignoreChildren = 0;
-    SV_Trace(results, start, vec3_origin, vec3_origin, end, v12, contentmask, 1, v10, v11);
+    SV_SetupIgnoreEntParams(&ignoreEntParams, passEntityNum);
+    ignoreEntParams.ignoreChildren = 0;
+    SV_Trace(
+        results,
+        start,
+        (float *)vec3_origin,
+        (float *)vec3_origin,
+        end,
+        &ignoreEntParams,
+        contentmask,
+        1,
+        priorityMap,
+        1);
 }
 
 int __cdecl G_LocationalTracePassed(
@@ -2137,10 +2149,17 @@ int __cdecl G_LocationalTracePassed(
     int contentmask,
     unsigned __int8 *priorityMap)
 {
-    unsigned __int8 *v7; // [sp+8h] [-68h]
-    int v8; // [sp+Ch] [-64h]
-
-    return SV_TracePassed(start, vec3_origin, vec3_origin, end, passEntityNum, passEntityNum1, contentmask, 1, v7, v8);
+    return SV_TracePassed(
+        start,
+        (float *)vec3_origin,
+        (float *)vec3_origin,
+        end,
+        passEntityNum,
+        passEntityNum1,
+        contentmask,
+        1,
+        priorityMap,
+        1);
 }
 
 void __cdecl G_SightTrace(int *hitNum, const float *start, const float *end, int passEntityNum, int contentmask)
@@ -2166,6 +2185,8 @@ void __cdecl G_AddDebugStringWithDuration(
 static int lastEntTime;
 void __cdecl ShowEntityInfo()
 {
+    // KISAKTODO: broken sv_trace
+#if 0
     int integer; // r11
     int v1; // r30
     int num_entities; // r10
@@ -2275,6 +2296,7 @@ void __cdecl ShowEntityInfo()
             }
         }
     }
+#endif
 }
 
 int __cdecl G_RunFrame(ServerFrameExtent extent, int timeCap)

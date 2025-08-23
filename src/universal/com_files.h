@@ -110,7 +110,7 @@ int __cdecl FS_FOpenTextFileWrite(const char *filename);
 int __cdecl FS_FOpenFileAppend(const char *filename);
 unsigned int __cdecl FS_FOpenFileReadStream(const char *filename, int *file);
 unsigned int __cdecl FS_FOpenFileReadForThread(const char *filename, int *file, FsThread thread);
-unsigned int __cdecl FS_FOpenFileReadDatabase(const char *filename, int *file);
+int __cdecl FS_FOpenFileReadDatabase(const char *filename, int *file);
 unsigned int __cdecl FS_FOpenFileRead(const char *filename, int *file);
 bool __cdecl FS_Delete(const char *filename);
 int __cdecl FS_FilenameCompare(const char *s1, const char *s2);

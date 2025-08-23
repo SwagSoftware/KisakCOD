@@ -18,7 +18,7 @@
 
 
 uint16_t g_HitLocConstNames[19]; // idb
-float g_fHitLocDamageMult[19]; // idb
+float g_fHitLocDamageMult[19]{ 0.0f }; // idb
 const char *g_HitLocNames[19] =
 {
   "none",

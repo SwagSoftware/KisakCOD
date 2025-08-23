@@ -259,12 +259,23 @@ void __cdecl CM_AddEntityToNode(svEntity_s *ent, unsigned __int16 childNodeIndex
     unsigned int entnum; // [esp+4h] [ebp-4h]
 
     entnum = ent - sv.svEntities;
-    for (prevEnt = &cm_world.sectors[childNodeIndex].contents.entities;
+    prevEnt = &cm_world.sectors[childNodeIndex].contents.entities;
+#ifdef KISAK_MP
+    for (;
         (unsigned int)*prevEnt - 1 <= entnum;
         prevEnt = &sv.configstrings[188 * *prevEnt + 2256])
     {
         ;
     }
+#elif KISAK_SP // KISAKTODO: hellish previous array abuse here
+    for (entnum = ent - sv.svEntities;
+        (unsigned int)*prevEnt - 1 <= entnum;
+        prevEnt = &sv.configstrings[4 * *prevEnt + 2804 + 4 * __ROL4__(*prevEnt, 1)])
+    {
+        ;
+    }
+#endif
+
     ent->worldSector = childNodeIndex;
     ent->nextEntityInWorldSector = *prevEnt;
     *prevEnt = entnum + 1;
