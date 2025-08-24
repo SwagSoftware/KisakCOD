@@ -202,15 +202,20 @@ int __cdecl G_MeansOfDeathFromScriptParam(unsigned int scrParam)
     return v3;
 }
 
+void use_trigger_use(gentity_s *ent, gentity_s *other, gentity_s *activator)
+{
+    ;
+}
+
 void __cdecl player_die(
     gentity_s *self,
     gentity_s *inflictor,
     gentity_s *attacker,
-    int damage,
-    int meansOfDeath,
-    unsigned int iWeapon,
+    const int damage,
+    const int meansOfDeath,
+    const int iWeapon,
     const float *vDir,
-    hitLocation_t hitLoc)
+    const hitLocation_t hitLoc)
 {
     gclient_s *client; // r11
     double v15; // fp1

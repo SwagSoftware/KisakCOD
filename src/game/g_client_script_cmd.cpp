@@ -959,7 +959,7 @@ void __cdecl PlayerCmd_setAngles(scr_entref_t entref)
         }
     }
     Scr_GetVector(0, v4);
-    SetClientViewAngle(v1, v4, v3);
+    SetClientViewAngle(v1, v4);
 }
 
 void __cdecl PlayerCmd_getAngles(scr_entref_t entref)

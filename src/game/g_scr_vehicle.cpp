@@ -4960,4 +4960,637 @@ void __cdecl VEH_JoltBody(gentity_s *ent, const float *dir, float intensity, flo
     veh->joltDecel = decel;
 }
 
+void Scr_Vehicle_Init(gentity_s *pSelf)
+{
+    scr_vehicle_s *scr_vehicle; // r26
+    vehicle_info_t *v3; // r25
+    int type; // r11
+    int v5; // r30
+    int *wheel; // r29
+    double info; // fp31
+    double v8; // fp13
+    double v9; // fp0
+    int dot2D; // r30
+    double damageScale; // fp31
+    int damage; // r29
+    double v13; // fp13
+    float *wheelZPos; // r30
+    int *v15; // r29
+    int v16; // r28
+    int v17; // r4
+    float v18; // [sp+50h] [-80h] BYREF
+    float v19; // [sp+54h] [-7Ch]
+    float v20; // [sp+58h] [-78h]
+    float v21; // [sp+60h] [-70h] BYREF
+    float v22; // [sp+64h] [-6Ch]
+    float v23; // [sp+68h] [-68h]
+
+    scr_vehicle = pSelf->scr_vehicle;
+    v3 = &s_vehicleInfos[scr_vehicle->infoIdx];
+    type = v3->type;
+    if (!v3->type || type == 1)
+    {
+        dot2D = 0;
+        damageScale = 0.0;
+        damage = type == 0 ? 4 : 6;
+        if (damage <= 0)
+            goto LABEL_16;
+        do
+        {
+            VEH_GetWheelOrigin(pSelf, dot2D, &v18);
+            if ((float)((float)(v18 * v18) + (float)((float)(v19 * v19) + (float)(v20 * v20))) > damageScale)
+                damageScale = (float)((float)(v18 * v18) + (float)((float)(v19 * v19) + (float)(v20 * v20)));
+            ++dot2D;
+        } while (dot2D < damage);
+        if (damageScale <= 0.0)
+            LABEL_16:
+        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\g_scr_vehicle.cpp", 4336, 0, "%s", "radius > 0.0f");
+        v13 = sqrtf(damageScale);
+        scr_vehicle->phys.mins[2] = 0.0;
+        v9 = (float)((float)v13 + (float)1.0);
+        scr_vehicle->phys.mins[0] = -v9;
+        scr_vehicle->phys.mins[1] = -v9;
+        scr_vehicle->phys.maxs[2] = (float)((float)v13 + (float)1.0) * (float)2.0;
+        goto LABEL_18;
+    }
+    if (type == 5)
+    {
+        v5 = 0;
+        wheel = scr_vehicle->boneIndex.wheel;
+        info = 0.0;
+        do
+        {
+            if (*wheel >= 0)
+            {
+                VEH_GetWheelOrigin(pSelf, v5, &v18);
+                if ((float)((float)(v18 * v18) + (float)((float)(v19 * v19) + (float)(v20 * v20))) > info)
+                    info = (float)((float)(v18 * v18) + (float)((float)(v19 * v19) + (float)(v20 * v20)));
+            }
+            ++v5;
+            ++wheel;
+        } while (v5 < 6);
+        if (info > 0.0)
+        {
+            v8 = sqrtf(info);
+            v9 = (float)((float)v8 + (float)1.0);
+            scr_vehicle->phys.mins[0] = -v9;
+            scr_vehicle->phys.mins[1] = -v9;
+            scr_vehicle->phys.mins[2] = -v9;
+            scr_vehicle->phys.maxs[2] = (float)v8 + (float)1.0;
+        LABEL_18:
+            scr_vehicle->phys.maxs[1] = v9;
+            scr_vehicle->phys.maxs[0] = v9;
+        }
+    }
+    wheelZPos = scr_vehicle->phys.wheelZPos;
+    v15 = scr_vehicle->boneIndex.wheel;
+    v16 = 6;
+    do
+    {
+        if (*v15 >= 0)
+        {
+            G_DObjGetWorldBoneIndexPos(pSelf, *v15, &v21);
+            *wheelZPos = v23;
+        }
+        --v16;
+        ++v15;
+        ++wheelZPos;
+    } while (v16);
+    v17 = scr_vehicle->boneIndex.flash[0];
+    if (v17 >= 0 && scr_vehicle->boneIndex.barrel >= 0)
+    {
+        G_DObjGetWorldBoneIndexPos(pSelf, v17, &v18);
+        G_DObjGetWorldBoneIndexPos(pSelf, scr_vehicle->boneIndex.barrel, &v21);
+        scr_vehicle->turret.barrelOffset = sqrtf((float)((float)((float)(v18 - v21) * (float)(v18 - v21))
+            + (float)((float)((float)(v20 - v23) * (float)(v20 - v23))
+                + (float)((float)(v19 - v22) * (float)(v19 - v22)))));
+    }
+    if (!v3->type || v3->type == 1)
+        VEH_GroundPlant(pSelf, &scr_vehicle->phys, 0);
+    VEH_SetPosition(pSelf, scr_vehicle->phys.origin, scr_vehicle->phys.vel, scr_vehicle->phys.angles);
+    scr_vehicle->phys.prevOrigin[0] = scr_vehicle->phys.origin[0];
+    scr_vehicle->phys.prevOrigin[1] = scr_vehicle->phys.origin[1];
+    scr_vehicle->phys.prevOrigin[2] = scr_vehicle->phys.origin[2];
+    scr_vehicle->phys.prevAngles[0] = scr_vehicle->phys.angles[0];
+    scr_vehicle->phys.prevAngles[1] = scr_vehicle->phys.angles[1];
+    scr_vehicle->phys.prevAngles[2] = scr_vehicle->phys.angles[2];
+    VEH_TouchEntities(pSelf);
+    G_DoTouchTriggers(pSelf);
+    if (pSelf->handler != 9)
+        MyAssertHandler(
+            "c:\\trees\\cod3\\cod3src\\src\\game\\g_scr_vehicle.cpp",
+            4398,
+            0,
+            "%s",
+            "pSelf->handler == ENT_HANDLER_VEHICLE_INIT");
+    pSelf->handler = 10;
+    pSelf->nextthink = level.time + 50;
+}
+
+void Scr_Vehicle_Touch(gentity_s *pSelf, gentity_s *pOther, int bTouched)
+{
+    scr_vehicle_s *scr_vehicle; // r30
+    int eType; // r11
+    vehicle_info_t *info; // r27
+    gclient_s *client; // r11
+    double dot2D; // fp31
+    double damageScale; // fp0
+    int damage; // r8
+    float moveDir[6]; // [sp+80h] [-70h] BYREF
+    float hitDir[2];
+
+    iassert(pSelf);
+    iassert(pSelf->scr_vehicle);
+    iassert(pOther);
+
+    scr_vehicle = pSelf->scr_vehicle;
+    eType = pOther->s.eType;
+    info = &s_vehicleInfos[scr_vehicle->infoIdx];
+    if ((eType == ET_PLAYER || eType == ET_ACTOR || eType == ET_SCRIPTMOVER)
+        && pOther->takedamage
+        && !pOther->tagInfo
+        && info->collisionDamage > 0.0
+        && Vec3NormalizeTo(scr_vehicle->phys.vel, moveDir) >= 0.001)
+    {
+        if (pOther->s.eType == ET_SCRIPTMOVER)
+        {
+            G_Damage(
+                pOther,
+                pSelf,
+                pSelf,
+                moveDir,
+                pOther->r.currentOrigin,
+                999999,
+                0,
+                9,
+                -1,
+                HITLOC_NONE,
+                0,
+                0);
+        }
+        else
+        {
+            hitDir[0] = pOther->r.currentOrigin[0] - pSelf->r.currentOrigin[0];
+            hitDir[1] = pOther->r.currentOrigin[1] - pSelf->r.currentOrigin[1];
+            Vec2Normalize(hitDir);
+
+            client = pOther->client;
+
+            if (client && (client->ps.pm_flags & 1) != 0)
+            {
+                G_Damage(
+                    pOther,
+                    pSelf,
+                    pSelf,
+                    moveDir,
+                    pOther->r.currentOrigin,
+                    999999,
+                    0,
+                    9,
+                    -1,
+                    HITLOC_NONE,
+                    0,
+                    0);
+            }
+            else
+            {
+                dot2D = (moveDir[0] * hitDir[0]) + (moveDir[1] * hitDir[1]);
+
+                if (dot2D >= 0.8f)
+                {
+                    iassert(info->collisionSpeed);
+
+                    damageScale = (float)(scr_vehicle->speed / info->collisionSpeed);
+                    if (damageScale > 1.0)
+                        damageScale = 1.0;
+                    damage = (int)(float)((float)((float)((float)((float)dot2D - (float)0.8f) * (float)damageScale) * (float)5.0f) * info->collisionDamage);
+                    if (damage > 0)
+                        G_Damage(
+                            pOther,
+                            pSelf,
+                            pSelf,
+                            moveDir,
+                            pOther->r.currentOrigin,
+                            damage,
+                            0,
+                            9,
+                            -1,
+                            HITLOC_NONE,
+                            0,
+                            0);
+                }
+            }
+        }
+    }
+}
+
+static void VEH_LinkPlayer(gentity_s *ent, gentity_s *player)
+{
+    gclient_s *client; // r31
+    scr_vehicle_s *scr_vehicle; // r28
+    vehicle_info_t *VehicleInfo; // r25
+    __int64 v7; // r10
+    __int64 v8; // r8
+    __int64 v9; // r6
+    __int64 v10; // r10
+    __int64 v11; // r8
+    __int64 v12; // r6
+    __int64 v13; // r10
+    __int64 v14; // r8
+    __int64 v15; // r6
+    int barrel; // r4
+    const float *v17; // r3
+    __int64 v18; // r10
+    __int64 v19; // r8
+    __int64 v20; // r6
+    __int16 type; // r10
+    int v22; // [sp+8h] [-F8h]
+    int v23; // [sp+Ch] [-F4h]
+    int v24; // [sp+10h] [-F0h]
+    int v25; // [sp+14h] [-ECh]
+    int v26; // [sp+18h] [-E8h]
+    int v27; // [sp+1Ch] [-E4h]
+    float v28[4]; // [sp+50h] [-B0h] BYREF
+    float v29[3][3]; // [sp+60h] [-A0h] BYREF
+    float v30[3]; // [sp+84h] [-7Ch] BYREF
+    float v31[9][3]; // [sp+90h] [-70h] BYREF
+
+    client = player->client;
+    scr_vehicle = ent->scr_vehicle;
+    if (!client)
+        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\g_scr_vehicle.cpp", 3484, 0, "%s", "client");
+    VehicleInfo = VEH_GetVehicleInfo(scr_vehicle->infoIdx);
+    if ((client->ps.eFlags & 0x20000) != 0)
+        Com_Error(ERR_DROP, "VEH_LinkPlayer: Player is already using a vehicle");
+    if (player->r.ownerNum.isDefined())
+        Com_Error(ERR_DROP, "VEH_LinkPlayer: Player already has an owner");
+    if (ent->r.ownerNum.isDefined())
+        Com_Error(ERR_DROP, "VEH_LinkPlayer: Vehicle already has an owner");
+    if (scr_vehicle->boneIndex.player < 0)
+        Com_Error(ERR_DROP, "VEH_LinkPlayer: Trying to use vehicle without a bone [tag_player]");
+    G_DObjGetWorldBoneIndexMatrix(ent, scr_vehicle->boneIndex.player, v29);
+    barrel = scr_vehicle->boneIndex.barrel;
+    if (barrel < 0)
+    {
+        v17 = v29[0];
+    }
+    else
+    {
+        G_DObjGetWorldBoneIndexMatrix(ent, barrel, v31);
+        v17 = v31[0];
+    }
+    AxisToAngles((const mat3x3&)v17, v28);
+    v28[2] = 0.0;
+    SetClientOrigin(player, v30);
+    SetClientViewAngle(player, v28);
+
+    if (!G_EntLinkToWithOffset(player, ent, scr_const.tag_player, (float*)vec3_origin, vec3_origin))
+        Com_Error(ERR_DROP, "VEH_LinkPlayer: cannot link to vehicle bone [tag_player]");
+
+    if (scr_vehicle->targetEnt == player->s.number)
+    {
+        scr_vehicle->hasTarget = 0;
+        scr_vehicle->targetEnt = ENTITYNUM_NONE;
+        scr_vehicle->lookAtEnt.setEnt(0);
+    }
+
+    scr_vehicle->flags |= 1u;
+    ent->s.lerp.eFlags |= 0x20000u;
+    ent->r.ownerNum.setEnt(player);
+    player->r.ownerNum.setEnt(ent);
+    client->ps.eFlags = client->ps.eFlags & 0xFFF1FFFF | 0x60000;
+    client->ps.viewlocked_entNum = ent->s.number;
+    type = VehicleInfo->type;
+    client->linkAnglesMinClamp[1] = -180.0;
+    client->linkAnglesMaxClamp[1] = 180.0;
+    client->link_rotationMovesEyePos = 1;
+    client->linkAnglesMinClamp[0] = -180.0;
+    client->linkAnglesMaxClamp[0] = 180.0;
+    client->ps.vehicleType = type;
+    G_UpdateViewAngleClamp(client, v28);
+}
+
+static void VEH_UnlinkPlayer(gentity_s *player)
+{
+    gclient_s *client; // r29
+    __int64 v7; // r10
+    __int64 v8; // r8
+    __int64 v9; // r6
+    gentity_s *v10; // r31
+    scr_vehicle_s *scr_vehicle; // r30
+    int detach; // r4
+    int eFlags; // r11
+    unsigned int v14; // r11
+    int v15; // [sp+8h] [-B8h]
+    int v16; // [sp+Ch] [-B4h]
+    int v17; // [sp+10h] [-B0h]
+    int v18; // [sp+14h] [-ACh]
+    int v19; // [sp+18h] [-A8h]
+    int v20; // [sp+1Ch] [-A4h]
+    float v21[4]; // [sp+50h] [-70h] BYREF
+    float v22[6]; // [sp+60h] [-60h] BYREF
+
+    client = player->client;
+    iassert(client);
+    if ((client->ps.eFlags & 0x20000) == 0)
+        Com_Error(ERR_DROP, "VEH_UnlinkPlayer: player is not using a vehicle");
+    if (!player->r.ownerNum.isDefined())
+        Com_Error(ERR_DROP, "VEH_UnlinkPlayer: player doesn't has an owner");
+    v10 = player->r.ownerNum.ent();
+    scr_vehicle = v10->scr_vehicle;
+    if (!scr_vehicle)
+        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\g_scr_vehicle.cpp", 3574, 0, "%s", "veh");
+    G_EntUnlink(player);
+    detach = scr_vehicle->boneIndex.detach;
+    if (detach >= 0)
+    {
+        G_DObjGetWorldBoneIndexPos(v10, detach, v21);
+    }
+    else
+    {
+        Com_PrintWarning(15, "VEH_UnlinkPlayer: Warning - no [tag_detach] on vehicle\n");
+        v21[0] = v10->r.currentOrigin[0];
+        v21[1] = v10->r.currentOrigin[1];
+        v21[2] = scr_vehicle->phys.maxs[2] + v10->r.currentOrigin[2];
+    }
+    scr_vehicle->flags &= ~1u;
+    v22[0] = client->ps.viewangles[0];
+    v22[1] = client->ps.viewangles[1];
+    v22[2] = 0.0;
+    SetClientOrigin(player, v21);
+    SetClientViewAngle(player, v22);
+    eFlags = v10->s.lerp.eFlags;
+    v10->r.currentAngles[0] = 0.0;
+    v10->s.lerp.eFlags = eFlags & 0xFFFDFFFF;
+    v10->r.ownerNum.setEnt(0);
+    player->r.ownerNum.setEnt(0);
+    v14 = client->ps.eFlags & 0xFFF1FFFF;
+    client->ps.viewlocked_entNum = 2175;
+    client->ps.eFlags = v14;
+    player->client->linkAnglesFrac = 0.0;
+}
+
+void Scr_Vehicle_Use(gentity_s *pEnt, gentity_s *pOther, gentity_s *pActivator)
+{
+    gclient_s *client; // r11
+
+    client = pOther->client;
+    if (client)
+    {
+        if ((client->ps.eFlags & 0x20000) != 0)
+            VEH_UnlinkPlayer(pOther);
+        else
+            VEH_LinkPlayer(pEnt, pOther);
+    }
+}
+
+void Scr_Vehicle_Pain(
+    gentity_s *pSelf,
+    gentity_s *pAttacker,
+    int damage,
+    const float *point,
+    const int mod,
+    const float *dir,
+    const hitLocation_t hitLoc,
+    const int weaponIdx)
+{
+    weapType_t weapType; // r11
+
+    if (pAttacker)
+    {
+        if (pAttacker->s.weapon)
+        {
+            weapType = BG_GetWeaponDef(pAttacker->s.weapon)->weapType;
+            if (weapType == WEAPTYPE_PROJECTILE || weapType == WEAPTYPE_GRENADE)
+                VEH_JoltBody(pSelf, dir, 1.0, 0.0, 0.0);
+        }
+    }
+}
+
+void Scr_Vehicle_Die(
+    gentity_s *pSelf,
+    gentity_s *pInflictor,
+    gentity_s *pAttacker,
+    const int damage,
+    const int mod,
+    const int weapon,
+    const float *dir,
+    const hitLocation_t hitLoc)
+{
+    EntHandle *p_ownerNum; // r31
+    weapType_t weapType; // r11
+
+    p_ownerNum = &pSelf->r.ownerNum;
+    if (pSelf->r.ownerNum.isDefined())
+    {
+        VEH_UnlinkPlayer(p_ownerNum->ent());
+    }
+    if (pAttacker)
+    {
+        if (pAttacker->s.weapon)
+        {
+            weapType = BG_GetWeaponDef(pAttacker->s.weapon)->weapType;
+            if (weapType == WEAPTYPE_PROJECTILE || weapType == WEAPTYPE_GRENADE)
+                VEH_JoltBody(pSelf, dir, 1.0, 0.0, 0.0);
+        }
+    }
+}
+
+void Vehicle_EntInfo(gentity_s *self, float *source)
+{
+    float *currentOrigin; // r30
+    double v5; // fp0
+    double v6; // fp13
+    double v7; // fp12
+    double value; // fp11
+    double v9; // fp31
+    scr_vehicle_s *scr_vehicle; // r31
+    const float *v11; // r28
+    const float *v12; // r4
+    gentity_s *v13; // r3
+    double v14; // fp31
+    double v15; // fp13
+    double v16; // fp12
+    const char *v17; // r5
+    double v18; // r6
+    const char *v19; // r5
+    double v20; // fp0
+    double v21; // fp13
+    double v22; // r4
+    double v23; // fp4
+    const char *v24; // r5
+    const char *v25; // r5
+    const char *v26; // r5
+    const char *v27; // r5
+    const char *v28; // r5
+    const char *v29; // r5
+    const char *v30; // r5
+    double v31; // [sp+18h] [-98h]
+    double v32; // [sp+18h] [-98h]
+    double v33; // [sp+20h] [-90h]
+    float v34; // [sp+50h] [-60h] BYREF
+    float v35; // [sp+54h] [-5Ch]
+    float v36; // [sp+58h] [-58h]
+
+    misc_EntInfo(self, source);
+    iassert(self);
+    currentOrigin = self->r.currentOrigin;
+    v5 = (float)(self->r.currentOrigin[1] - source[1]);
+    v6 = (float)(self->r.currentOrigin[2] - source[2]);
+    v7 = (float)(self->r.currentOrigin[0] - *source);
+    value = g_entinfo_maxdist->current.value;
+    v9 = sqrtf((float)((float)((float)v7 * (float)v7) + (float)((float)((float)v6 * (float)v6) + (float)((float)v5 * (float)v5))));
+    if (value <= 0.0 || v9 <= value)
+    {
+        scr_vehicle = self->scr_vehicle;
+        if (!scr_vehicle)
+            MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\g_scr_vehicle.cpp", 4182, 0, "%s", "veh");
+        if (g_entinfo->current.integer != 3)
+        {
+            if ((float)((float)(scr_vehicle->goalPosition[2] * scr_vehicle->goalPosition[2])
+                + (float)((float)(scr_vehicle->goalPosition[0] * scr_vehicle->goalPosition[0])
+                    + (float)(scr_vehicle->goalPosition[1] * scr_vehicle->goalPosition[1]))) > 0.0)
+            {
+                if ((scr_vehicle->flags & 2) != 0)
+                    v11 = colorMagenta;
+                else
+                    v11 = colorBlack;
+                v34 = scr_vehicle->goalPosition[0];
+                v35 = scr_vehicle->goalPosition[1];
+                v36 = scr_vehicle->goalPosition[2] + (float)16.0;
+                G_DebugLine(self->r.currentOrigin, &v34, v11, 0);
+                G_DebugCircle(&v34, 64.0, v12, (int)v11, 0, 1);
+            }
+            v34 = scr_vehicle->phys.vel[0] + *currentOrigin;
+            v35 = self->r.currentOrigin[1] + scr_vehicle->phys.vel[1];
+            v36 = self->r.currentOrigin[2] + scr_vehicle->phys.vel[2];
+            G_DebugLine(self->r.currentOrigin, &v34, colorBlue, 0);
+            v34 = (float)(scr_vehicle->phys.accel[0] * (float)5.0) + *currentOrigin;
+            v35 = (float)(scr_vehicle->phys.accel[1] * (float)5.0) + self->r.currentOrigin[1];
+            v36 = (float)(scr_vehicle->phys.accel[2] * (float)5.0) + self->r.currentOrigin[2];
+            G_DebugLine(self->r.currentOrigin, &v34, colorRed, 0);
+            if (scr_vehicle->lookAtEnt.isDefined())
+            {
+                v13 = scr_vehicle->lookAtEnt.ent();
+                G_DebugLine(self->r.currentOrigin, v13->r.currentOrigin, colorWhite, 0);
+            }
+        }
+        if (g_entinfo->current.integer <= 3)
+        {
+#if 0 // KISAKTODO: debug prints
+            v14 = (float)((float)(G_GetEntInfoScale() * (float)v9) * (float)0.001953125);
+            v15 = (float)(self->r.absmin[2] + self->r.absmax[2]);
+            v16 = (float)((float)(self->r.absmin[1] + self->r.absmax[1]) * (float)0.5);
+            v34 = (float)(self->r.absmin[0] + self->r.absmax[0]) * (float)0.5;
+            v35 = v16;
+            v36 = (float)((float)v15 * (float)0.5) - (float)((float)v14 * (float)12.0);
+            v31 = (float)((float)sqrtf((float)((float)(scr_vehicle->phys.vel[2] * scr_vehicle->phys.vel[2])
+                + (float)((float)(scr_vehicle->phys.vel[0] * scr_vehicle->phys.vel[0])
+                    + (float)(scr_vehicle->phys.vel[1] * scr_vehicle->phys.vel[1]))))
+                * (float)0.05681818);
+            va(
+                (const char *)HIDWORD(v31),
+                LODWORD(v31),
+                (unsigned int)COERCE_UNSIGNED_INT64((float)(scr_vehicle->manualSpeed * (float)0.05681818)));
+            G_AddDebugString(&v34, colorLtGrey, v14, v17);
+            v18 = (float)(scr_vehicle->manualDecel * (float)0.05681818);
+            v36 = v36 - (float)((float)v14 * (float)12.0);
+            v32 = sqrtf((float)((float)(scr_vehicle->phys.accel[2] * scr_vehicle->phys.accel[2])
+                + (float)((float)(scr_vehicle->phys.accel[0] * scr_vehicle->phys.accel[0])
+                    + (float)(scr_vehicle->phys.accel[1] * scr_vehicle->phys.accel[1]))));
+            va((const char *)HIDWORD(v32), LODWORD(v32), v18);
+            G_AddDebugString(&v34, colorLtGrey, v14, v19);
+            v20 = (float)(self->r.currentOrigin[1] - scr_vehicle->goalPosition[1]);
+            v21 = (float)(self->r.currentOrigin[2] - scr_vehicle->goalPosition[2]);
+            v33 = self->r.currentOrigin[1];
+            v22 = *currentOrigin;
+            v23 = sqrtf((float)((float)((float)(*currentOrigin - scr_vehicle->goalPosition[0])
+                * (float)(*currentOrigin - scr_vehicle->goalPosition[0]))
+                + (float)((float)((float)v21 * (float)v21) + (float)((float)v20 * (float)v20))));
+            v36 = v36 - (float)((float)v14 * (float)12.0);
+            va((const char *)HIDWORD(v22), LODWORD(v22), LODWORD(v33), HIDWORD(v23), LODWORD(v23));
+            G_AddDebugString(&v34, colorLtGrey, v14, v24);
+            v36 = v36 - (float)((float)v14 * (float)12.0);
+            va(
+                (const char *)(const char *)HIDWORD(COERCE_UNSIGNED_INT64(scr_vehicle->phys.rotVel[1])),
+                (unsigned int)COERCE_UNSIGNED_INT64(scr_vehicle->phys.rotVel[1]),
+                (unsigned int)COERCE_UNSIGNED_INT64(scr_vehicle->phys.maxAngleVel[1]));
+            G_AddDebugString(&v34, colorLtGrey, v14, v25);
+            v36 = v36 - (float)((float)v14 * (float)12.0);
+            va(
+                (const char *)(const char *)HIDWORD(COERCE_UNSIGNED_INT64(scr_vehicle->phys.yawAccel)),
+                (unsigned int)COERCE_UNSIGNED_INT64(scr_vehicle->phys.yawAccel),
+                (unsigned int)COERCE_UNSIGNED_INT64(scr_vehicle->phys.yawDecel));
+            G_AddDebugString(&v34, colorLtGrey, v14, v26);
+            if (scr_vehicle->hasTargetYaw)
+            {
+                v36 = v36 - (float)((float)v14 * (float)12.0);
+                va(
+                    (const char *)(const char *)HIDWORD(COERCE_UNSIGNED_INT64(scr_vehicle->targetYaw)),
+                    (unsigned int)COERCE_UNSIGNED_INT64(scr_vehicle->targetYaw),
+                    (unsigned int)COERCE_UNSIGNED_INT64(scr_vehicle->phys.angles[1]));
+                G_AddDebugString(&v34, colorLtGrey, v14, v27);
+            }
+            if (scr_vehicle->hasGoalYaw)
+            {
+                v36 = v36 - (float)((float)v14 * (float)12.0);
+                va(
+                    (const char *)(const char *)HIDWORD(COERCE_UNSIGNED_INT64(scr_vehicle->goalYaw)),
+                    (unsigned int)COERCE_UNSIGNED_INT64(scr_vehicle->goalYaw),
+                    (unsigned int)COERCE_UNSIGNED_INT64(scr_vehicle->phys.angles[1]));
+                G_AddDebugString(&v34, colorLtGrey, v14, v28);
+            }
+            v36 = v36 - (float)((float)v14 * (float)12.0);
+            va(
+                (const char *)(const char *)HIDWORD(COERCE_UNSIGNED_INT64(scr_vehicle->hover.hoverRadius)),
+                (unsigned int)COERCE_UNSIGNED_INT64(scr_vehicle->hover.hoverRadius),
+                (unsigned int)COERCE_UNSIGNED_INT64(scr_vehicle->hover.hoverSpeed),
+                (unsigned int)COERCE_UNSIGNED_INT64(scr_vehicle->hover.hoverAccel));
+            G_AddDebugString(&v34, colorLtGrey, v14, v29);
+            if (scr_vehicle->stopAtGoal)
+            {
+                v36 = v36 - (float)((float)v14 * (float)12.0);
+                G_AddDebugString(&v34, colorLtGrey, v14, v30);
+            }
+#endif
+        }
+    }
+}
+
+void Scr_Vehicle_Controller(const gentity_s *pSelf, int *partBits)
+{
+    scr_vehicle_s *scr_vehicle; // r27
+    DObj_s *obj; // r28
+    int body; // r5
+    int turret; // r5
+    int barrel; // r5
+    float v9[4]; // [sp+50h] [-70h] BYREF
+    float v10[4]; // [sp+60h] [-60h] BYREF
+    float v11[4]; // [sp+70h] [-50h] BYREF
+
+    iassert(pSelf);
+    iassert(pSelf->scr_vehicle);
+    scr_vehicle = pSelf->scr_vehicle;
+    obj = Com_GetServerDObj(pSelf->s.number);
+    iassert(obj);
+    v9[0] = pSelf->s.lerp.u.turret.gunAngles[0];
+    v9[2] = pSelf->s.lerp.u.turret.gunAngles[1];
+    v9[1] = 0.0;
+    body = scr_vehicle->boneIndex.body;
+    if (body >= 0)
+        DObjSetLocalBoneIndex(obj, partBits, body, vec3_origin, v9);
+    v10[1] = pSelf->s.lerp.u.vehicle.gunYaw;
+    v11[0] = pSelf->s.lerp.u.primaryLight.cosHalfFovInner;
+    v10[0] = 0.0;
+    v10[2] = 0.0;
+    v11[1] = 0.0;
+    v11[2] = 0.0;
+    turret = scr_vehicle->boneIndex.turret;
+    if (turret >= 0)
+        DObjSetLocalBoneIndex(obj, partBits, turret, vec3_origin, v10);
+    barrel = scr_vehicle->boneIndex.barrel;
+    if (barrel >= 0)
+        DObjSetLocalBoneIndex(obj, partBits, barrel, vec3_origin, v11);
+}
+
 #endif // KISAK_SP

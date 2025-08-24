@@ -564,6 +564,29 @@ int32_t __cdecl VEH_CorrectAllSolid(gentity_s *ent, trace_t *trace);
 void __cdecl VEH_ClearGround();
 bool __cdecl VEH_SlideMove(gentity_s *ent, int32_t gravity);
 void __cdecl VEH_ClipVelocity(float *in, float *normal, float *out);
+void Scr_Vehicle_Init(gentity_s *pSelf);
+void Scr_Vehicle_Touch(gentity_s *pSelf, gentity_s *pOther, int bTouched);
+void Scr_Vehicle_Use(gentity_s *pEnt, gentity_s *pOther, gentity_s *pActivator);
+void Scr_Vehicle_Pain(
+    gentity_s *pSelf,
+    gentity_s *pAttacker,
+    int damage,
+    const float *point,
+    const int mod,
+    const float *dir,
+    const hitLocation_t hitLoc,
+    const int weaponIdx);
+void Scr_Vehicle_Die(
+    gentity_s *pSelf,
+    gentity_s *pInflictor,
+    gentity_s *pAttacker,
+    const int damage,
+    const int mod,
+    const int weapon,
+    const float *dir,
+    const hitLocation_t hitLoc);
+void Vehicle_EntInfo(gentity_s *self, float *source);
+void Scr_Vehicle_Controller(const gentity_s *pSelf, int *partBits);
 void __cdecl Scr_Vehicle_Think(gentity_s *pSelf);
 void __cdecl VEH_MoveTrace(gentity_s *ent);
 void __cdecl VEH_BackupPosition(gentity_s *ent);

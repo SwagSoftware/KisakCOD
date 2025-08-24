@@ -314,7 +314,7 @@ void InitClientDeltaAngles(gclient_s *client)
 }
 
 
-void __cdecl SetClientViewAngle(gentity_s *ent, const float *angle, long double a3)
+void __cdecl SetClientViewAngle(gentity_s *ent, const float *angle)
 {
     double v4; // fp31
     double v5; // fp30
@@ -358,21 +358,21 @@ void __cdecl SetClientViewAngle(gentity_s *ent, const float *angle, long double 
             v5 = AngleNormalize360(v14);
         }
         v15 = AngleDelta(ent->client->ps.proneTorsoPitch, v4);
-        *(double *)&a3 = AngleNormalize180(v15);
-        if (*(double *)&a3 > 45.0 || *(double *)&a3 < -45.0)
+        float normalized = AngleNormalize180(v15);
+        if (normalized > 45.0 || normalized < -45.0)
         {
-            if (*(double *)&a3 <= 45.0)
-                v16 = (float)((float)*(double *)&a3 + (float)45.0);
+            if (normalized <= 45.0)
+                v16 = (float)((float)normalized + (float)45.0);
             else
-                v16 = (float)((float)*(double *)&a3 - (float)45.0);
+                v16 = (float)((float)normalized - (float)45.0);
             v17 = ent->client;
             v17->ps.delta_angles[0] = (float)v16 + v17->ps.delta_angles[0];
             if (v16 <= 0.0)
                 v18 = (float)(v17->ps.proneTorsoPitch + (float)45.0);
             else
                 v18 = (float)(v17->ps.proneTorsoPitch - (float)45.0);
-            *(double *)&a3 = AngleNormalize180(v18);
-            v4 = *(double *)&a3;
+            normalized = AngleNormalize180(v18);
+            v4 = normalized;
         }
     }
     v19 = ent->client;
@@ -634,7 +634,7 @@ void __cdecl ClientSpawn(gentity_s *ent)
     client->ps.origin[2] = v12[2];
     client->ps.pm_flags |= 0x400u;
     SV_GetUsercmd(client - level.clients, &client->pers.cmd);
-    SetClientViewAngle(ent, v13, v8);
+    SetClientViewAngle(ent, v13);
     SV_LinkEntity(ent);
     v9 = client->ps.pm_flags | 0x100;
     client->ps.pm_time = 100;

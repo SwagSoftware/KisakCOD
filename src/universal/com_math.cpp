@@ -3499,10 +3499,7 @@ void Vec3Basis_LeftHanded(const float *forward, float *right, float *up)
 
 float Vec3DistanceSq(const float *p1, const float *p2)
 {
-    float v_4; // [esp+4h] [ebp-8h]
-    float v_8; // [esp+8h] [ebp-4h]
-
-    v_4 = p2[1] - p1[1];
-    v_8 = p2[2] - p1[2];
-    return v_8 * v_8 + v_4 * v_4 + (float)(*p2 - *p1) * (float)(*p2 - *p1);
+    return (p2[2] - p1[2]) * (p2[2] - p1[2]) 
+         + (p2[1] - p1[1]) * (p2[1] - p1[1]) 
+         + (p2[0] - p1[0]) * (p2[0] - p1[0]);
 }

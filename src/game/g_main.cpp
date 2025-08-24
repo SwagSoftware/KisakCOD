@@ -62,7 +62,50 @@ const char *moveOrientModeStrings[8] =
   NULL
 };
 
-entityHandler_t *entityHandlers;
+// 0: void(*think)(gentity_s *);
+// 1: void(*reached)(gentity_s *);
+// 2: void(*blocked)(gentity_s *, gentity_s *);
+// 3: void(*touch)(gentity_s *, gentity_s *, int);
+// 4: void(*use)(gentity_s *, gentity_s *, gentity_s *);
+// 5: void(*pain)(gentity_s *, gentity_s *, int, const float *, const int, const float *, const hitLocation_t, const int);
+// 6: void(*die)(gentity_s *, gentity_s *, gentity_s *, const int, const int, const int, const float *, const hitLocation_t);
+// 7: void(*entinfo)(gentity_s *, float *);
+// 8: void(*controller)(const gentity_s *, int *);
+// 9: int methodOfDeath;
+// 10: int splashMethodOfDeath;
+
+entityHandler_t entityHandlers[27] =
+{
+  { NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 0, 0 },
+  { NULL, NULL, NULL, Actor_Touch, NULL, Actor_Pain, Actor_Die, Actor_EntInfo, actor_controller, 0, 0 },
+  { Actor_Think, NULL, NULL, Actor_Touch, NULL, Actor_Pain, Actor_Die, Actor_EntInfo, actor_controller, 0, 0 },
+  { Actor_CorpseThink, NULL, NULL, NULL, NULL, NULL, NULL, misc_EntInfo, NULL, 0, 0 },
+  { NULL, NULL, NULL, Touch_Multi, NULL, NULL, NULL, NULL, NULL, 0, 0 },
+  { NULL, NULL, NULL, Touch_FriendlyChain, NULL, NULL, NULL, NULL, NULL, 0, 0 },
+  { NULL, NULL, NULL, NULL, hurt_use, NULL, NULL, NULL, NULL, 0, 0 },
+  { NULL, NULL, NULL, hurt_touch, hurt_use, NULL, NULL, NULL, NULL, 0, 0 },
+  { NULL, NULL, NULL, NULL, Use_trigger_damage, Pain_trigger_damage, Die_trigger_damage, NULL, NULL, 0, 0 },
+  { Scr_Vehicle_Init, NULL, NULL, Scr_Vehicle_Touch, Scr_Vehicle_Use, Scr_Vehicle_Pain, Scr_Vehicle_Die, misc_EntInfo, Scr_Vehicle_Controller, 0, 0 },
+  { Scr_Vehicle_Think, NULL, NULL, Scr_Vehicle_Touch, Scr_Vehicle_Use, Scr_Vehicle_Pain, Scr_Vehicle_Die, Vehicle_EntInfo, Scr_Vehicle_Controller, 0, 0 },
+  { NULL, NULL, NULL, NULL, NULL, NULL, NULL, misc_EntInfo, NULL, 0, 0 },
+  { NULL, Reached_ScriptMover, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 0, 0 },
+  { NULL, Reached_ScriptMover, NULL, NULL, NULL, NULL, NULL, misc_EntInfo, NULL, 0, 0 },
+  { G_ExplodeMissile, NULL, NULL, Touch_Item_Auto, NULL, NULL, NULL, misc_EntInfo, NULL, 3, 4 },
+  { G_ExplodeMissile, NULL, NULL, NULL, NULL, NULL, NULL, misc_EntInfo, NULL, 5, 6 },
+  { G_FinishSetupSpawnPoint, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 0, 0 },
+  { NULL, NULL, NULL, Client_Touch, NULL, NULL, player_die, NULL, NULL, 0, 0 },
+  { NULL, NULL, NULL, Client_Touch, NULL, NULL, NULL, NULL, NULL, 0, 0 },
+  { NULL, NULL, NULL, NULL, NULL, HeadHitEnt_Pain, HeadHitEnt_Die, NULL, NULL, 0, 0 },
+  { turret_think_init, NULL, NULL, NULL, turret_use, NULL, NULL, misc_EntInfo, turret_controller, 0, 0 },
+  { turret_think, NULL, NULL, NULL, turret_use, NULL, NULL, misc_EntInfo, turret_controller, 0, 0 },
+  { NULL, NULL, NULL, Touch_Item_Auto, NULL, NULL, NULL, EntInfo_Item, NULL, 0, 0 },
+  { FinishSpawningItem, NULL, NULL, Touch_Item_Auto, NULL, NULL, NULL, EntInfo_Item, NULL, 0, 0 },
+  { NULL, NULL, NULL, Touch_Item_Auto, NULL, NULL, NULL, EntInfo_Item, NULL, 0, 0 },
+  { NULL, NULL, NULL, NULL, use_trigger_use, NULL, NULL, NULL, NULL, 0, 0 },
+  { NULL, Reached_ScriptMover, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 0, 0 }
+};
+
+
 gentity_s g_entities[MAX_GENTITIES];
 sentient_s g_sentients[33];
 char g_nextMap[64];
@@ -984,7 +1027,7 @@ void ScriptIOFilesShutdown()
     level.openScriptIOFileHandles[0] = 0;
 }
 
-void __cdecl G_PrintFastFileErrors(const char *fastfile, int a2, const char *a3)
+void __cdecl G_PrintFastFileErrors(const char *fastfile)
 {
     iassert(fastfile);
 
@@ -998,16 +1041,11 @@ void __cdecl G_PrintFastFileErrors(const char *fastfile, int a2, const char *a3)
     }
 }
 
-void __cdecl G_PrintAllFastFileErrors(int a1, int a2, const char *a3)
+void __cdecl G_PrintAllFastFileErrors()
 {
-    const char *v3; // r5
-    int v4; // r4
-    const char *v5; // r5
-    int v6; // r4
-
-    G_PrintFastFileErrors("code_post_gfx", a2, a3);
-    G_PrintFastFileErrors("common", v4, v3);
-    G_PrintFastFileErrors(sv_mapname->current.string, v6, v5);
+    G_PrintFastFileErrors("code_post_gfx");
+    G_PrintFastFileErrors("common");
+    G_PrintFastFileErrors(sv_mapname->current.string);
 }
 
 void __cdecl G_InitGame(
@@ -1212,9 +1250,9 @@ void __cdecl G_InitGame(
         goto LABEL_42;
 LABEL_43:
     Scr_FreeEntityList();
-    G_PrintFastFileErrors("code_post_gfx", v26, v25);
-    G_PrintFastFileErrors("common", v28, v27);
-    G_PrintFastFileErrors(sv_mapname->current.string, v30, v29);
+    G_PrintFastFileErrors("code_post_gfx");
+    G_PrintFastFileErrors("common");
+    G_PrintFastFileErrors(sv_mapname->current.string);
     level.initializing = 0;
 }
 
@@ -1370,63 +1408,57 @@ void __cdecl G_ApplyEntityEq(gentity_s *ent)
 {
     gentity_s *Player; // r3
     gclient_s *client; // r11
-    int v4; // r3
-    gclient_s *v5; // r11
-    int v6; // r11
-    float v7; // [sp+50h] [-40h] BYREF
-    float v8; // [sp+54h] [-3Ch]
-    float v9; // [sp+58h] [-38h]
-    float v10; // [sp+60h] [-30h] BYREF
-    float v11; // [sp+64h] [-2Ch]
-    float v12; // [sp+68h] [-28h]
+    int hitnum; // r3
+    float visBonePos[3]; // [sp+50h] [-40h] BYREF
+    float origin[3]; // [sp+60h] [-30h] BYREF
+    int eflags;
 
     if (g_enteqEnable->current.enabled && ent->nexteq <= level.time)
     {
-        //Profile_Begin(348);
+        PROF_SCOPED("ent Eq")
         Player = G_GetPlayer();
-        G_GetPlayerViewOrigin(&Player->client->ps, &v10);
-        if (!G_DObjGetWorldTagPos(ent, scr_const.aim_vis_bone, &v7))
+        G_GetPlayerViewOrigin(&Player->client->ps, origin);
+        if (!G_DObjGetWorldTagPos(ent, scr_const.aim_vis_bone, visBonePos))
         {
-            v7 = ent->r.currentOrigin[0];
-            v8 = ent->r.currentOrigin[1];
-            v9 = ent->r.currentOrigin[2];
+            visBonePos[0] = ent->r.currentOrigin[0];
+            visBonePos[1] = ent->r.currentOrigin[1];
+            visBonePos[2] = ent->r.currentOrigin[2];
         }
-        if ((float)((float)((float)(v8 - v11) * (float)(v8 - v11))
-            + (float)((float)((float)(v9 - v12) * (float)(v9 - v12)) + (float)((float)(v7 - v10) * (float)(v7 - v10)))) > (double)(float)(g_enteqDist->current.value * g_enteqDist->current.value))
+        
+        if (Vec3DistanceSq(origin, visBonePos) > (g_enteqDist->current.value * g_enteqDist->current.value))
         {
             client = ent->client;
             if (client)
                 client->ps.eFlags &= ~0x200000u;
             else
                 ent->s.lerp.eFlags &= ~0x200000u;
-            goto LABEL_18;
+            return;
         }
-        v4 = CM_BoxSightTrace(0, &v10, &v7, vec3_origin, vec3_origin, 0, 1);
-        v5 = ent->client;
-        if (v4)
+        hitnum = CM_BoxSightTrace(0, origin, visBonePos, vec3_origin, vec3_origin, 0, 1);
+        client = ent->client;
+        if (hitnum)
         {
-            if (v5)
+            if (client)
             {
-                v5->ps.eFlags &= ~0x200000u;
-                goto LABEL_17;
+                client->ps.eFlags &= ~0x200000u;
+                ent->nexteq = g_enteqDelay->current.integer + level.time;
+                return;
             }
-            v6 = ent->s.lerp.eFlags & 0xFFDFFFFF;
+            eflags = ent->s.lerp.eFlags & 0xFFDFFFFF;
         }
         else
         {
-            if (v5)
+            if (client)
             {
-                v5->ps.eFlags |= 0x200000u;
-            LABEL_17:
+                client->ps.eFlags |= 0x200000u;
                 ent->nexteq = g_enteqDelay->current.integer + level.time;
-            LABEL_18:
-                //Profile_EndInternal(0);
                 return;
             }
-            v6 = ent->s.lerp.eFlags | 0x200000;
+            eflags = ent->s.lerp.eFlags | 0x200000;
         }
-        ent->s.lerp.eFlags = v6;
-        goto LABEL_17;
+        ent->s.lerp.eFlags = eflags;
+        ent->nexteq = g_enteqDelay->current.integer + level.time;
+        return;
     }
 }
 
@@ -1452,7 +1484,7 @@ void __cdecl G_RunThink(gentity_s *ent)
     }
 }
 
-void __cdecl G_DrawEntityBBoxes(int a1, int a2, int a3, const float *a4)
+void __cdecl G_DrawEntityBBoxes()
 {
     const dvar_s *v4; // r9
     int v5; // r27
@@ -1467,6 +1499,7 @@ void __cdecl G_DrawEntityBBoxes(int a1, int a2, int a3, const float *a4)
     v4 = g_drawEntBBoxes;
     if (g_drawEntBBoxes->current.integer)
     {
+#if 0 // KISAKTODO
         v5 = 0;
         v12[0] = 1.0;
         v12[1] = 1.0;
@@ -1505,6 +1538,7 @@ void __cdecl G_DrawEntityBBoxes(int a1, int a2, int a3, const float *a4)
                 v7 += 157;
             } while (v5 < num_entities);
         }
+#endif
     }
 }
 
@@ -2191,10 +2225,10 @@ void __cdecl ShowEntityInfo()
     int v1; // r30
     int num_entities; // r10
     entityShared_t *p_r; // r31
-    int v4; // r11
-    float v5; // r11
+    int hitnum; // r11
+    float client; // r11
     void(__cdecl * v6)(gentity_s *, float *); // r11
-    int v7; // r11
+    int visBonePos; // r11
     int v8; // r31
     int EntityHitId; // r4
     int time; // r10
@@ -2220,15 +2254,15 @@ void __cdecl ShowEntityInfo()
             v19[0] = (float)(v18[0] * (float)16000.0) + v17[0];
             v19[1] = (float)(v18[1] * (float)16000.0) + v17[1];
             v19[2] = (float)(v18[2] * (float)16000.0) + v17[2];
-            v7 = g_entinfo_type->current.integer;
-            if (v7 == 1)
+            visBonePos = g_entinfo_type->current.integer;
+            if (visBonePos == 1)
             {
                 v8 = 0x4000;
             }
             else
             {
                 v8 = 0x800000;
-                if (v7 != 2)
+                if (visBonePos != 2)
                     v8 = 8413312;
             }
             SV_SetupIgnoreEntParams(&v20, 0);
@@ -2268,18 +2302,18 @@ void __cdecl ShowEntityInfo()
                 {
                     if (!p_r->inuse || !p_r->linked)
                         goto LABEL_16;
-                    v4 = g_entinfo_type->current.integer;
-                    if (v4 == 1)
+                    hitnum = g_entinfo_type->current.integer;
+                    if (hitnum == 1)
                     {
-                        v5 = *(float *)&p_r[1].inuse;
+                        client = *(float *)&p_r[1].inuse;
                     }
                     else
                     {
-                        if (v4 != 2)
+                        if (hitnum != 2)
                             goto LABEL_14;
-                        v5 = p_r[1].mins[1];
+                        client = p_r[1].mins[1];
                     }
-                    if (v5 != 0.0)
+                    if (client != 0.0)
                     {
                     LABEL_14:
                         v6 = entityHandlers[BYTE2(p_r[1].maxs[1])].entinfo;
@@ -2565,8 +2599,8 @@ int __cdecl G_RunFrame(ServerFrameExtent extent, int timeCap)
     }
     Path_DrawDebug();
     G_DrawVehiclePaths();
-    G_DrawEntityBBoxes(v33, v32, v31, v30);
-    G_DrawGrenadeHints(v38, v37, v36, v35, v34);
+    G_DrawEntityBBoxes();
+    G_DrawGrenadeHints();
     if (g_listEntity->current.enabled)
     {
         v39 = 0;

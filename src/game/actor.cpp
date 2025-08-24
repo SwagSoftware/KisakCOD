@@ -638,10 +638,10 @@ void __cdecl Actor_Pain(
     gentity_s *pAttacker,
     int iDamage,
     const float *vPoint,
-    int iMod,
-    float *vDir,
-    __int32 hitLoc,
-    unsigned int weaponIdx)
+    const int iMod,
+    const float *vDir,
+    hitLocation_t hitLoc,
+    const int weaponIdx)
 {
     actor_s *actor; // r31
     unsigned int stateLevel; // r7
@@ -740,11 +740,11 @@ void __cdecl Actor_Die(
     gentity_s *self,
     gentity_s *pInflictor,
     gentity_s *pAttacker,
-    int iDamage,
-    int iMod,
-    int iWeapon,
-    float *vDir,
-    hitLocation_t hitLoc)
+    const int iDamage,
+    const int iMod,
+    const int iWeapon,
+    const float *vDir,
+    const hitLocation_t hitLoc)
 {
     actor_s *actor; // r31
     int health; // r8

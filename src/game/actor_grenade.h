@@ -72,7 +72,7 @@ void __cdecl Actor_Grenade_CoverAttack(actor_s *self);
 void __cdecl Actor_Grenade_Flee(actor_s *self);
 void __cdecl Actor_Grenade_TakeCover(actor_s *self);
 actor_think_result_t __cdecl Actor_Grenade_ThrowBack(actor_s *self);
-void __cdecl G_DrawGrenadeHints(int a1, const float *a2, int a3, int a4, __int64 a5);
+void __cdecl G_DrawGrenadeHints();
 bool __cdecl Actor_Grenade_CheckTossPos(
     actor_s *self,
     float *vStandPos,

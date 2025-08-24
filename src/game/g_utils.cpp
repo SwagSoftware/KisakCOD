@@ -2811,7 +2811,7 @@ void __cdecl G_EntUnlink(gentity_s *ent)
             v12[0] = client->ps.viewangles[0];
             v12[1] = client->ps.viewangles[1];
             v12[2] = 0.0;
-            SetClientViewAngle(ent, v12, v5);
+            SetClientViewAngle(ent, v12);
             ent->r.currentAngles[0] = 0.0;
         }
         parent = tagInfo->parent;

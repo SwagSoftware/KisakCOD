@@ -418,19 +418,19 @@ void __cdecl Actor_Pain(
     gentity_s *pAttacker,
     int iDamage,
     const float *vPoint,
-    int iMod,
-    float *vDir,
-    __int32 hitLoc,
-    unsigned int weaponIdx);
+    const int iMod,
+    const float *vDir,
+    hitLocation_t hitLoc,
+    const int weaponIdx);
 void __cdecl Actor_Die(
     gentity_s *self,
     gentity_s *pInflictor,
     gentity_s *pAttacker,
-    int iDamage,
-    int iMod,
-    int iWeapon,
-    float *vDir,
-    hitLocation_t hitLoc);
+    const int iDamage,
+    const int iMod,
+    const int iWeapon,
+    const float *vDir,
+    const hitLocation_t hitLoc);
 bool __cdecl Actor_IsDying(const actor_s *self);
 bool __cdecl usingCodeGoal(actor_s *actor);
 gentity_s *__cdecl Actor_GetTargetEntity(actor_s *self);

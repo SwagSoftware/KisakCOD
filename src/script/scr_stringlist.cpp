@@ -711,26 +711,26 @@ void SL_RemoveRefToStringOfSize(unsigned int stringValue, unsigned int len)
 
 	if (InterlockedDecrement((volatile LONG*)refStr) << 16)
 	{
-		if (scrStringDebugGlob)
-		{
-			iassert(scrStringDebugGlob->totalRefCount && scrStringDebugGlob->refCount[stringValue]);
-			iassert(scrStringDebugGlob->refCount[stringValue]);
-
-			InterlockedDecrement(&scrStringDebugGlob->totalRefCount);
-			InterlockedDecrement(&scrStringDebugGlob->refCount[stringValue]);
-		}
+		//if (scrStringDebugGlob)
+		//{
+		//	iassert(scrStringDebugGlob->totalRefCount && scrStringDebugGlob->refCount[stringValue]);
+		//	iassert(scrStringDebugGlob->refCount[stringValue]);
+		//
+		//	InterlockedDecrement(&scrStringDebugGlob->totalRefCount);
+		//	InterlockedDecrement(&scrStringDebugGlob->refCount[stringValue]);
+		//}
 	}
 	else
 	{
 		SL_FreeString(stringValue, refStr, len);
-		if (scrStringDebugGlob)
-		{
-			iassert(scrStringDebugGlob->totalRefCount && scrStringDebugGlob->refCount[stringValue]);
-			iassert(scrStringDebugGlob->refCount[stringValue]);
-
-			InterlockedDecrement(&scrStringDebugGlob->totalRefCount);
-			InterlockedDecrement(&scrStringDebugGlob->refCount[stringValue]);
-		}
+		//if (scrStringDebugGlob)
+		//{
+		//	iassert(scrStringDebugGlob->totalRefCount && scrStringDebugGlob->refCount[stringValue]);
+		//	iassert(scrStringDebugGlob->refCount[stringValue]);
+		//
+		//	InterlockedDecrement(&scrStringDebugGlob->totalRefCount);
+		//	InterlockedDecrement(&scrStringDebugGlob->refCount[stringValue]);
+		//}
 	}
 }
 

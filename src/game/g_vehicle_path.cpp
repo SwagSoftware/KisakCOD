@@ -1014,177 +1014,72 @@ void __cdecl G_FreeVehiclePathsScriptInfo()
 
 void __cdecl G_SetupVehiclePaths()
 {
-    __int16 v0; // r5
-    int v1; // r7
-    int v2; // r6
-    vehicle_node_t *v3; // r8
-    __int16 v4; // r10
-    int v5; // r11
-    __int16 v6; // r10
-    int v7; // r11
-    int v8; // r31
-    vehicle_node_t *v9; // r11
-    int nextIdx; // r10
-    float *origin; // r10
-    double v12; // fp13
-    double v13; // fp12
-    double v14; // fp11
-    double v17; // fp10
-    int rotated; // r10
-    __int16 v19; // r30
-    int v20; // r29
-    vehicle_node_t *v21; // r31
-    __int16 v22; // r3
-    long double v23; // fp2
-    double speed; // fp0
-    double v25; // fp31
-    long double v26; // fp2
-    double v27; // fp30
-    double v28; // fp0
-    long double v29; // fp2
-    double v30; // fp31
-    double v31; // fp0
-    long double v32; // fp2
-    double v33; // fp0
+    // AKA G_SetupSplinePaths()
 
-    v0 = s_numNodes;
-    v1 = s_numNodes;
-    if (s_numNodes > 0)
+    for (int i = 0; i < s_numNodes; ++i)
     {
-        v2 = 0;
-        do
+        vehicle_node_t *node = &s_nodes[i];
+
+        if (node->target)
+            node->nextIdx = VP_GetNodeIndex(node->target, 0);
+        for (int j = 0; j < s_numNodes; ++j)
         {
-            v3 = &s_nodes[v2];
-            if (v3->target)
+            if (node->name && i != j && node->name == s_nodes[j].target)
             {
-                v4 = 0;
-                if (v1 <= 0)
-                {
-                LABEL_8:
-                    v4 = -1;
-                }
-                else
-                {
-                    v5 = 0;
-                    while (s_nodes[v5].name != v3->target)
-                    {
-                        v4 = v5 + 1;
-                        v5 = (__int16)(v5 + 1);
-                        if (v5 >= v1)
-                            goto LABEL_8;
-                    }
-                }
-                v3->nextIdx = v4;
+                node->prevIdx = j;
+                break;
             }
-            v6 = 0;
-            if (v1 > 0)
-            {
-                v7 = 0;
-                while (v2 == v7 || v3->name != s_nodes[v7].target)
-                {
-                    v6 = v7 + 1;
-                    v7 = (__int16)(v7 + 1);
-                    if (v7 >= v1)
-                        goto LABEL_17;
-                }
-                v3->prevIdx = v6;
-            }
-        LABEL_17:
-            if (v3->nextIdx == v2)
-                v3->nextIdx = -1;
-            if (v3->prevIdx == v2)
-                v3->prevIdx = -1;
-            v2 = (__int16)(v2 + 1);
-        } while (v2 < v1);
+        }
+        if (node->nextIdx == i)
+            node->nextIdx = -1;
+        if (node->prevIdx == i)
+            node->prevIdx = -1;
     }
-    if (v1 > 0)
+
+    for (int i = 0; i < s_numNodes; ++i)
     {
-        v8 = 0;
-        do
+        vehicle_node_t *node = &s_nodes[i];
+        if (node->nextIdx >= 0)
         {
-            v9 = &s_nodes[v8];
-            nextIdx = v9->nextIdx;
-            if (nextIdx >= 0)
+            float *origin = s_nodes[node->nextIdx].origin;
+            node->dir[0] = origin[0] - node->origin[0];
+            node->dir[1] = origin[1] - node->origin[1];
+            node->dir[2] = origin[2] - node->origin[2];
+            node->length = Vec3Normalize(node->dir);
+            if (!node->rotated)
             {
-                origin = s_nodes[nextIdx].origin;
-                v9->dir[0] = *origin - v9->origin[0];
-                v9->dir[1] = origin[1] - v9->origin[1];
-                v9->dir[2] = origin[2] - v9->origin[2];
-                v12 = v9->dir[1];
-                v13 = v9->dir[2];
-                v14 = sqrtf((float)((float)(v9->dir[2] * v9->dir[2]) + (float)((float)(v9->dir[0] * v9->dir[0]) + (float)(v9->dir[1] * v9->dir[1]))));
-
-                //_FP10 = -v14;
-                //__asm { fsel      f10, f10, f25, f11 }
-                //v17 = (float)((float)1.0 / (float)_FP10);
-                {
-                    float neg_v14 = -v14;
-                    float selected = (neg_v14 >= 0.0f) ? 0.0f : neg_v14;
-                    v17 = 1.0f / selected;
-                }
-
-                v9->dir[0] = v9->dir[0] * (float)v17;
-                v9->dir[1] = (float)v12 * (float)v17;
-                v9->dir[2] = (float)v13 * (float)v17;
-                rotated = v9->rotated;
-                v9->length = v14;
-                if (!rotated)
-                {
-                    vectoangles(v9->dir, v9->angles);
-                    v0 = s_numNodes;
-                }
+                vectoangles(node->dir, node->angles);
             }
-            v8 = (__int16)(v8 + 1);
-        } while (v8 < v0);
+        }
     }
-    v19 = 0;
-    if (v0 > 0)
+
+    for (int i = 0; i < s_numNodes; ++i)
     {
-        v20 = 0;
-        do
+        vehicle_node_t *node = &s_nodes[i];
+
+        node->speed = VP_CalcNodeSpeed(i);
+        node->lookAhead = VP_CalcNodeLookAhead(i);
+
+        if (node->speed < 0.0)
+            Com_Error(ERR_DROP, "Vehicle path node at (%f, %f, %f) has negative speed", node->origin[0], node->origin[1], node->origin[2]);
+
+        if (node->rotated)
+            VP_CalcNodeAngles(i, node->angles);
+
+        node->angles[0] = AngleNormalize180(node->angles[0]);
+        node->angles[1] = AngleNormalize180(node->angles[1]);
+        node->angles[2] = AngleNormalize180(node->angles[2]);
+
+        if (node->speed <= 0.0 || node->lookAhead <= 0.0)
+            node->nextIdx = -1;
+
+        if (node->nextIdx < 0)
         {
-            v21 = &s_nodes[v20];
-            v21->speed = VP_CalcNodeSpeed(v19);
-            *(double *)&v23 = VP_CalcNodeLookAhead(v22);
-            speed = v21->speed;
-            v21->lookAhead = *(double *)&v23;
-            if (speed < 0.0)
-                Com_Error(
-                    ERR_DROP,
-                    "Vehicle path node at (%f, %f, %f) has negative speed",
-                    v21->origin[0],
-                    v21->origin[1],
-                    v21->origin[2]
-                );
-            if (v21->rotated)
-                VP_CalcNodeAngles(v19, v21->angles);
-            v25 = (float)(v21->angles[0] * (float)0.0027777778);
-            *(double *)&v23 = (float)((float)(v21->angles[0] * (float)0.0027777778) + (float)0.5);
-            v26 = floor(v23);
-            v27 = (float)(v21->angles[1] * (float)0.0027777778);
-            v28 = (float)((float)((float)v25 - (float)*(double *)&v26) * (float)360.0);
-            *(double *)&v26 = (float)((float)(v21->angles[1] * (float)0.0027777778) + (float)0.5);
-            v21->angles[0] = v28;
-            v29 = floor(v26);
-            v30 = (float)(v21->angles[2] * (float)0.0027777778);
-            v31 = (float)((float)((float)v27 - (float)*(double *)&v29) * (float)360.0);
-            *(double *)&v29 = (float)((float)(v21->angles[2] * (float)0.0027777778) + (float)0.5);
-            v21->angles[1] = v31;
-            v32 = floor(v29);
-            v33 = v21->speed;
-            v21->angles[2] = (float)((float)v30 - (float)*(double *)&v32) * (float)360.0;
-            if (v33 <= 0.0 || v21->lookAhead <= 0.0)
-                v21->nextIdx = -1;
-            if ((unsigned __int16)v21->nextIdx >= 0x8000u)
-            {
-                if (v33 <= 0.0)
-                    v21->speed = 1.0;
-                if (v21->lookAhead <= 0.0)
-                    v21->lookAhead = 1.0;
-            }
-            v19 = v20 + 1;
-            v20 = (__int16)(v20 + 1);
-        } while (v20 < s_numNodes);
+            if (node->speed <= 0.0)
+                node->speed = 1.0f;
+            if (node->lookAhead <= 0.0)
+                node->lookAhead = 1.0f;
+        }
     }
 }
 

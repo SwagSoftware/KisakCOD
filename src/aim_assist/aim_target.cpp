@@ -31,11 +31,8 @@ const dvar_s *__cdecl AimTarget_RegisterDvars(int a1, unsigned __int16 a2, const
 
 void __cdecl AimTarget_Init()
 {
-    const char *v0; // r5
-    unsigned __int16 v1; // r4
-
     memset(&atGlob, 0, sizeof(atGlob));
-    aim_target_sentient_radius = Dvar_RegisterFloat("aim_target_sentient_radius", 10.0, 0.0, 128.0, v1, v0);
+    aim_target_sentient_radius = Dvar_RegisterFloat("aim_target_sentient_radius", 10.0, 0.0, 128.0, 0x82/*?*/, "The radius used to calculate target bounds for a sentient(actor or player)");
     Cbuf_InsertText(0, "exec devgui_aimassist\n");
 }
 

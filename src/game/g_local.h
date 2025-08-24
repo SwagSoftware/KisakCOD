@@ -69,8 +69,8 @@ struct entityHandler_t
     void(*blocked)(gentity_s *, gentity_s *);
     void(*touch)(gentity_s *, gentity_s *, int);
     void(*use)(gentity_s *, gentity_s *, gentity_s *);
-    void(*pain)(gentity_s *, gentity_s *, int, const float *, const int, const float *, const hitLocation_t, const int);
-    void(*die)(gentity_s *, gentity_s *, gentity_s *, const int, const int, const int, const float *, const hitLocation_t);
+    void(*pain)(gentity_s *, gentity_s *, int iDamage, const float * vPoint, const int iMod, const float * vDir, const hitLocation_t hitLoc, const int weaponIdx);
+    void(*die)(gentity_s *self, gentity_s *inflictor, gentity_s *attacker, const int iDamage, const int iMod, const int iWeapon, const float * vDir, const hitLocation_t hitLoc);
     void(*entinfo)(gentity_s *, float *);
     void(*controller)(const gentity_s *, int *);
     int methodOfDeath;
@@ -159,7 +159,7 @@ gentity_s *__cdecl SelectSpawnPoint(const float *avoidPoint, float *origin, floa
 gentity_s *__cdecl SelectInitialSpawnPoint(float *origin, float *angles);
 void __cdecl SetClientOrigin(gentity_s *ent, float *origin);
 void __cdecl InitClientDeltaAngles(gclient_s *client);
-void __cdecl SetClientViewAngle(gentity_s *ent, const float *angle, long double a3);
+void __cdecl SetClientViewAngle(gentity_s *ent, const float *angle);
 void __cdecl G_GetPlayerViewOrigin(const playerState_s *ps, float *origin);
 void __cdecl G_GetPlayerViewDirection(const gentity_s *ent, float *forward, float *right, float *up);
 int __cdecl Client_GetPushed(gentity_s *pSelf, gentity_s *pOther);
@@ -210,8 +210,8 @@ bool __cdecl G_ExitAfterConnectPaths();
 void *GScr_LoadScriptsAndAnims();
 void ScriptIOFilesInit();
 void ScriptIOFilesShutdown();
-void __cdecl G_PrintFastFileErrors(const char *fastfile, int a2, const char *a3);
-void __cdecl G_PrintAllFastFileErrors(int a1, int a2, const char *a3);
+void __cdecl G_PrintFastFileErrors(const char *fastfile);
+void __cdecl G_PrintAllFastFileErrors();
 void __cdecl G_InitGame(
     unsigned int randomSeed,
     int restart,
@@ -227,7 +227,7 @@ void __cdecl G_LoadNextMap();
 void __cdecl G_CheckReloadStatus();
 void __cdecl G_ApplyEntityEq(gentity_s *ent);
 void __cdecl G_RunThink(gentity_s *ent);
-void __cdecl G_DrawEntityBBoxes(int a1, int a2, int a3, const float *a4);
+void __cdecl G_DrawEntityBBoxes();
 void DebugDumpAnims();
 void DebugDumpAIEventListeners();
 void __cdecl G_CheckLoadGame(int checksum, SaveGame *save);
@@ -443,15 +443,16 @@ void __cdecl G_ParseHitLocDmgTable();
 void __cdecl TossClientItems(gentity_s *self);
 void __cdecl LookAtKiller(gentity_s *self, gentity_s *inflictor, gentity_s *attacker);
 int __cdecl G_MeansOfDeathFromScriptParam(unsigned int scrParam);
+void use_trigger_use(gentity_s *ent, gentity_s *other, gentity_s *activator);
 void __cdecl player_die(
     gentity_s *self,
     gentity_s *inflictor,
     gentity_s *attacker,
-    int damage,
-    int meansOfDeath,
-    unsigned int iWeapon,
+    const int damage,
+    const int meansOfDeath,
+    const int iWeapon,
     const float *vDir,
-    hitLocation_t hitLoc);
+    const hitLocation_t hitLoc);
 float __cdecl G_GetWeaponHitLocationMultiplier(unsigned int hitLoc, unsigned int weapon);
 void __cdecl handleDeathInvulnerability(gentity_s *targ, int prevHealth, int mod);
 void __cdecl G_DamageNotify(

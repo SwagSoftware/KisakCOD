@@ -935,7 +935,7 @@ struct playerState_s
     int jumpTime;
     float jumpOriginZ;
     int movementDir;
-    int eFlags;
+    int eFlags; // 0x20000 = USING_VEHICLE
     int eventSequence;
     int events[4];
     unsigned int eventParms[4];

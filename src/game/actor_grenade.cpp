@@ -1534,7 +1534,7 @@ actor_think_result_t __cdecl Actor_Grenade_ThrowBack(actor_s *self)
     }
 }
 
-void __cdecl G_DrawGrenadeHints(int a1, const float *a2, int a3, int a4, __int64 a5)
+void __cdecl G_DrawGrenadeHints()
 {
     gentity_s *gentities; // r9
     unsigned int v6; // r25
@@ -1569,9 +1569,9 @@ void __cdecl G_DrawGrenadeHints(int a1, const float *a2, int a3, int a4, __int64
     float v37; // [sp+94h] [-7Ch]
     float v38; // [sp+98h] [-78h]
 
-    LODWORD(a5) = g_drawGrenadeHints->current.integer;
-    if ((int)a5 > 0)
+    if (g_drawGrenadeHints->current.integer > 0)
     {
+#if 0 // KISAKTODO
         gentities = level.gentities;
         if (level.gentities->client)
         {
@@ -1654,6 +1654,7 @@ void __cdecl G_DrawGrenadeHints(int a1, const float *a2, int a3, int a4, __int64
                 } while (v6 < grenadeHintCount);
             }
         }
+#endif
     }
 }
 

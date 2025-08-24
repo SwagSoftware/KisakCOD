@@ -600,6 +600,38 @@ struct spawner_ent_t
     int timestamp;
 };
 
+enum EntHandler_t : unsigned __int8 // (not a real enum name)
+{
+    ENT_HANDLER_NULL = 0x0,
+    ENT_HANDLER_ACTOR_INIT = 0x1,
+    ENT_HANDLER_ACTOR = 0x2,
+    ENT_HANDLER_ACTOR_CORPSE = 0x3,
+    ENT_HANDLER_TRIGGER_MULTIPLE = 0x4,
+    ENT_HANDLER_FRIENDLYCHAIN = 0x5,
+    ENT_HANDLER_TRIGGER_HURT = 0x6,
+    ENT_HANDLER_TRIGGER_HURT_TOUCH = 0x7,
+    ENT_HANDLER_TRIGGER_DAMAGE = 0x8,
+    ENT_HANDLER_VEHICLE_INIT = 0x9,
+    ENT_HANDLER_VEHICLE = 0xA,
+    ENT_HANDLER_VEHICLE_FREE = 0xB,
+    ENT_HANDLER_SCRIPT_MOVER = 0xC,
+    ENT_HANDLER_SCRIPT_MODEL = 0xD,
+    ENT_HANDLER_GRENADE = 0xE,
+    ENT_HANDLER_ROCKET = 0xF,
+    ENT_HANDLER_SPAWN_POINT = 0x10,
+    ENT_HANDLER_CLIENT = 0x11,
+    ENT_HANDLER_CLIENT_DEAD = 0x12,
+    ENT_HANDLER_HEAD_HIT = 0x13,
+    ENT_HANDLER_TURRET_INIT = 0x14,
+    ENT_HANDLER_TURRET = 0x15,
+    ENT_HANDLER_DROPPED_ITEM = 0x16,
+    ENT_HANDLER_ITEM_INIT = 0x17,
+    ENT_HANDLER_ITEM = 0x18,
+    ENT_HANDLER_TRIGGER_USE = 0x19,
+    ENT_HANDLER_PRIMARY_LIGHT = 0x1A,
+    ENT_HANDLER_COUNT = 0x1B,
+};
+
 struct gentity_s
 {
     gentity_s()
@@ -618,7 +650,7 @@ struct gentity_s
     unsigned __int8 active;
     unsigned __int8 nopickup;
     unsigned __int16 model;
-    unsigned __int8 handler;
+    unsigned __int8 handler; // ENT_HANDLER_xxxxx
     unsigned __int16 classname;
     unsigned __int16 script_linkName;
     unsigned __int16 script_noteworthy;

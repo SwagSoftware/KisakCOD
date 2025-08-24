@@ -134,10 +134,8 @@ void __cdecl SP_info_volume(gentity_s *self)
 
 void __cdecl TeleportPlayer(gentity_s *player, float *origin, const float *angles)
 {
-    long double v5; // fp2
-
     SetClientOrigin(player, origin);
-    SetClientViewAngle(player, angles, v5);
+    SetClientViewAngle(player, angles);
     if (!player->tagInfo)
         player->r.currentAngles[0] = 0.0;
     SV_LinkEntity(player);
