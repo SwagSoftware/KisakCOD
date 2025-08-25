@@ -739,6 +739,7 @@ void __cdecl G_ParseEntityFields(gentity_s *ent)
     G_SetAngle(ent, ent->r.currentAngles);
 }
 
+typedef unsigned __int16 modelNameIndex_t;
 void __cdecl G_ParseEntityField(const char *key, char *value, gentity_s *ent)
 {
     const ent_field_t *f; // [esp+Ch] [ebp-14h]
@@ -759,30 +760,29 @@ void __cdecl G_ParseEntityField(const char *key, char *value, gentity_s *ent)
     switch (f->type)
     {
     case F_INT:
-        *(int32_t *)((char *)&ent->s.number + f->ofs) = atoi(value);
+        *(int32_t *)((char *)ent + f->ofs) = atoi(value);
         break;
     case F_FLOAT:
-        *(float *)((char *)&ent->s.number + f->ofs) = atof(value);
+        *(float *)((char *)ent + f->ofs) = atof(value);
         break;
     case F_STRING:
         Scr_SetString((uint16_t *)((char *)ent + f->ofs), 0);
-        *(_WORD *)((char *)&ent->s.number + f->ofs) = G_NewString(value).prev;
+        *(_WORD *)((char *)ent + f->ofs) = G_NewString(value).prev;
         break;
     case F_VECTOR:
         vec[0] = 0.0;
         vec[1] = 0.0;
         vec[2] = 0.0;
         sscanf(value, "%f %f %f", vec, &vec[1], &vec[2]);
-        *(float *)((char *)&ent->s.number + f->ofs) = vec[0];
-        *(float *)((char *)&ent->s.eType + f->ofs) = vec[1];
-        *(float *)((char *)&ent->s.lerp.eFlags + f->ofs) = vec[2];
+        *(float *)((char *)ent + f->ofs) = vec[0];
+        *(float *)((char *)ent + f->ofs + 4) = vec[1];
+        *(float *)((char *)ent + f->ofs + 8) = vec[2];
         break;
     case F_MODEL:
         if (*value == 42)
         {
             modelIndex = atoi(value + 1);
-            if (modelIndex != (uint16_t)modelIndex)
-                MyAssertHandler(".\\game_mp\\g_spawn_mp.cpp", 262, 0, "%s", "modelIndex == (modelNameIndex_t)modelIndex");
+            iassert(modelIndex == (modelNameIndex_t)modelIndex);
             ent->s.index.brushmodel = (uint16_t)modelIndex;
         }
         else

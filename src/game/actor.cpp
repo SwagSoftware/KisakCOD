@@ -3027,25 +3027,25 @@ void __cdecl Actor_FreeExpendable()
 
 void __cdecl Actor_FinishSpawningAll()
 {
-    gentity_s *v0; // r28
+    gentity_s *pEnt; // r28
     int i; // r22
     int eType; // r11
     const char *v3; // r31
-    unsigned int *DataForFile; // r31
-    unsigned __int16 v5; // r3
-    int v6; // r3
+    AITypeScript *typeScript; // r31
     unsigned __int16 v7; // r3
     actor_s *j; // r31
 
-    v0 = g_entities;
-    for (i = 0; i < level.num_entities; ++v0)
+    for (i = 0; i < level.num_entities; i++)
     {
-        if (v0->r.inuse)
+        pEnt = &g_entities[i];
+
+        if (pEnt->r.inuse)
         {
-            eType = v0->s.eType;
-            if (eType == 14 || eType == 15)
+            eType = pEnt->s.eType;
+            if (eType == ET_ACTOR || eType == ET_ACTOR_SPAWNER)
             {
-                v3 = SL_ConvertToString(v0->classname);
+                v3 = SL_ConvertToString(pEnt->classname);
+
                 if (strncmp(v3, "actor_", 6u))
                     MyAssertHandler(
                         "c:\\trees\\cod3\\cod3src\\src\\game\\actor.cpp",
@@ -3053,29 +3053,23 @@ void __cdecl Actor_FinishSpawningAll()
                         0,
                         "%s",
                         "!strncmp( classname, ACTOR_CLASSNAME_PREFIX, ACTOR_CLASSNAME_PREFIX_LEN )");
-                DataForFile = (unsigned int*)Hunk_FindDataForFile(0, v3 + 6);
-                if (!DataForFile)
-                    MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\actor.cpp", 829, 0, "%s", "typeScript");
-                if (!*DataForFile)
-                    MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\actor.cpp", 830, 0, "%s", "typeScript->main");
-                if (!DataForFile[2])
-                    MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\actor.cpp", 831, 0, "%s", "typeScript->spawner");
-                if (v0->s.eType == 15)
+                typeScript = (AITypeScript *)Hunk_FindDataForFile(0, v3 + 6);
+                iassert(typeScript);
+                iassert(typeScript->main);
+                iassert(typeScript->spawner);
+                if (pEnt->s.eType == 15)
                 {
-                    v5 = Scr_ExecEntThread(v0, DataForFile[2], 0);
-                    Scr_FreeThread(v5);
+                    Scr_FreeThread(Scr_ExecEntThread(pEnt, typeScript->spawner, 0));
                 }
-                v6 = DataForFile[1];
-                if (v6)
+                if (typeScript->precache)
                 {
-                    v7 = Scr_ExecThread(v6, 0);
-                    Scr_FreeThread(v7);
-                    DataForFile[1] = 0;
+                    Scr_FreeThread(Scr_ExecThread(typeScript->precache, 0));
+                    typeScript->precache = 0;
                 }
             }
         }
-        ++i;
     }
+
     for (j = Actor_FirstActor(-1); j; j = Actor_NextActor(j, -1))
     {
         Actor_FinishSpawning(j);

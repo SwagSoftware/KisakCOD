@@ -188,7 +188,7 @@ void __cdecl ActorScr_SetSpecies(actor_s *pSelf, const actor_fields_s *pField)
 
     iassert(pSelf);
     type = Scr_GetConstString(0);
-    for (int i = AI_SPECIES_DOG; i < MAX_AI_SPECIES; ++i)
+    for (int i = 0; i < MAX_AI_SPECIES; ++i)
     {
         if (type == *g_AISpeciesNames[i])
         {
@@ -1238,45 +1238,33 @@ void __cdecl GScr_AddFieldsForActor()
 
 void __cdecl Scr_SetActorField(actor_s *actor, unsigned int offset)
 {
-    const actor_fields_s *v4; // r4
+    const actor_fields_s *f; // r4
     void(__cdecl * setter)(actor_s *, const actor_fields_s *); // r11
 
-    if (!actor)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\actor_fields.cpp", 1283, 0, "%s", "actor");
-    if (offset >= 0x51)
-        MyAssertHandler(
-            "c:\\trees\\cod3\\cod3src\\src\\game\\actor_fields.cpp",
-            1284,
-            0,
-            "%s",
-            "(unsigned)offset < ARRAY_COUNT( aifields ) - 1");
-    v4 = &aifields[offset];
-    setter = v4->setter;
+    iassert(actor);
+    iassert((unsigned)offset < ARRAY_COUNT(aifields) - 1);
+
+    f = &aifields[offset];
+    setter = f->setter;
     if (setter)
-        ((void(__cdecl *)(actor_s *))setter)(actor);
+        (setter)(actor, f);
     else
-        Scr_SetGenericField((unsigned __int8 *)actor, v4->type, v4->ofs);
+        Scr_SetGenericField((unsigned __int8 *)actor, f->type, f->ofs);
 }
 
 void __cdecl Scr_GetActorField(actor_s *actor, unsigned int offset)
 {
-    const actor_fields_s *v4; // r4
+    const actor_fields_s *f; // r4
     void(__cdecl * getter)(actor_s *, const actor_fields_s *); // r11
 
-    if (!actor)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\actor_fields.cpp", 1306, 0, "%s", "actor");
-    if (offset >= 0x51)
-        MyAssertHandler(
-            "c:\\trees\\cod3\\cod3src\\src\\game\\actor_fields.cpp",
-            1307,
-            0,
-            "%s",
-            "(unsigned)offset < ARRAY_COUNT( aifields ) - 1");
-    v4 = &aifields[offset];
-    getter = v4->getter;
+    iassert(actor);
+    iassert((unsigned)offset < ARRAY_COUNT(aifields) - 1);
+
+    f = &aifields[offset];
+    getter = f->getter;
     if (getter)
-        ((void(__cdecl *)(actor_s *))getter)(actor);
+        (getter)(actor, f);
     else
-        Scr_GetGenericField((unsigned __int8 *)actor, v4->type, v4->ofs);
+        Scr_GetGenericField((unsigned __int8 *)actor, f->type, f->ofs);
 }
 

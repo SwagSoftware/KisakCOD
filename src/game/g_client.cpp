@@ -11,59 +11,43 @@
 
 void __cdecl G_FinishSetupSpawnPoint(gentity_s *ent)
 {
-    double v2; // fp13
-    int number; // r8
-    int v4; // r8
-    double v5; // fp12
     unsigned __int16 EntityHitId; // r3
-    double v7; // fp12
-    double v8; // fp9
-    double v9; // fp13
-    double v10; // fp11
-    double v11; // fp10
     double fraction; // fp0
-    double v13; // fp8
-    float v14; // [sp+58h] [-88h] BYREF
-    float v15; // [sp+5Ch] [-84h]
-    float v16; // [sp+60h] [-80h]
-    float v17; // [sp+68h] [-78h] BYREF
-    float v18; // [sp+6Ch] [-74h]
-    float v19; // [sp+70h] [-70h]
-    trace_t v20[2]; // [sp+80h] [-60h] BYREF
+    float start[3]; // [sp+58h] [-88h] BYREF
+    //float v15; // [sp+5Ch] [-84h]
+    //float v16; // [sp+60h] [-80h]
+    float end[3]; // [sp+68h] [-78h] BYREF
+    //float v18; // [sp+6Ch] [-74h]
+    //float v19; // [sp+70h] [-70h]
+    trace_t trace; // [sp+80h] [-60h] BYREF
 
-    v14 = ent->r.currentOrigin[0];
-    v2 = ent->r.currentOrigin[2];
-    number = ent->s.number;
-    v19 = ent->r.currentOrigin[2] + (float)128.0;
-    v15 = ent->r.currentOrigin[1];
-    v16 = v2;
-    v17 = ent->r.currentOrigin[0];
-    v18 = ent->r.currentOrigin[1];
-    G_TraceCapsule(v20, &v14, playerMins, playerMaxs, &v17, number, 42057745);
-    v4 = ent->s.number;
-    v14 = (float)((float)(v17 - v14) * v20[0].fraction) + v14;
-    v17 = v14;
-    v5 = (float)((float)((float)(v18 - v15) * v20[0].fraction) + v15);
-    v16 = (float)((float)(v19 - v16) * v20[0].fraction) + v16;
-    v18 = (float)((float)(v18 - v15) * v20[0].fraction) + v15;
-    v15 = v5;
-    v19 = v16 - (float)256.0;
-    G_TraceCapsule(v20, &v14, playerMins, playerMaxs, &v17, v4, 42057745);
-    EntityHitId = Trace_GetEntityHitId(v20);
-    v7 = v15;
-    v8 = (float)(v18 - v15);
-    v9 = v14;
-    v10 = v16;
-    v11 = (float)(v17 - v14);
-    fraction = v20[0].fraction;
-    v13 = (float)(v19 - v16);
+    start[0] = ent->r.currentOrigin[0];
+    start[1] = ent->r.currentOrigin[1];
+    start[2] = ent->r.currentOrigin[2];
+
+    end[0] = ent->r.currentOrigin[0];
+    end[1] = ent->r.currentOrigin[1];
+    end[2] = ent->r.currentOrigin[2] + 128.0f;
+
+    G_TraceCapsule(&trace, start, playerMins, playerMaxs, end, ent->s.number, 42057745);
+
+    start[0] = ((end[0] - start[0]) * trace.fraction) + start[0];
+    end[0] = start[0];
+    start[2] = ((end[2] - start[2]) * trace.fraction) + start[2];
+    end[1] = ((end[1] - start[1]) * trace.fraction) + start[1];
+    start[1] = (((end[1] - start[1]) * trace.fraction) + start[1]);
+    end[2] = start[2] - 256.0f;
+    G_TraceCapsule(&trace, start, playerMins, playerMaxs, end, ent->s.number, 42057745);
+    EntityHitId = Trace_GetEntityHitId(&trace);
+    fraction = trace.fraction;
     ent->s.groundEntityNum = EntityHitId;
-    v14 = (float)((float)v11 * (float)fraction) + (float)v9;
-    v15 = (float)((float)v8 * (float)fraction) + (float)v7;
-    v16 = (float)((float)v13 * (float)fraction) + (float)v10;
+    start[0] = ((end[0] - start[0]) * fraction) + start[0];
+    start[1] = ((end[1] - start[1]) * fraction) + start[1];
+    start[2] = ((end[2] - start[2]) * fraction) + start[2];
     g_entities[EntityHitId].flags |= 0x100000u;
-    G_TraceCapsule(v20, &v14, playerMins, playerMaxs, &v14, ent->s.number, 42057745);
-    if (v20[0].allsolid)
+    G_TraceCapsule(&trace, start, playerMins, playerMaxs, start, ent->s.number, 42057745);
+
+    if (trace.allsolid)
         Com_PrintWarning(
             15,
             "WARNING: Spawn point entity %i is in solid at (%i, %i, %i)\n",
@@ -71,7 +55,8 @@ void __cdecl G_FinishSetupSpawnPoint(gentity_s *ent)
             (int)ent->r.currentOrigin[0],
             (int)ent->r.currentOrigin[1],
             (int)ent->r.currentOrigin[2]);
-    G_SetOrigin(ent, &v14);
+
+    G_SetOrigin(ent, start);
 }
 
 void __cdecl G_SetupSpawnPoint(gentity_s *ent)
@@ -162,38 +147,43 @@ gentity_s *__cdecl SelectNearestDeathmatchSpawnPoint(const float *from)
 
 gentity_s *__cdecl SelectRandomDeathmatchSpawnPoint()
 {
-    signed int v0; // r30
-    gentity_s *v1; // r31
-    gentity_s **v2; // r29
-    int v4; // r3
-    unsigned int v5[140]; // [sp+50h] [-230h] BYREF
+    signed int numSpots; // r30
+    gentity_s *spot; // r31
+    gentity_s **ptr; // r29
+    int randnum; // r3
+    gentity_s *spotPtrs[140]; // [sp+50h] [-230h] BYREF
 
-    v0 = 0;
-    v1 = G_Find(0, 284, scr_const.info_player_deathmatch);
-    if (!v1)
+    numSpots = 0;
+    spot = G_Find(0, 284, scr_const.info_player_deathmatch);
+
+    if (!spot)
         return G_Find(0, 284, scr_const.info_player_deathmatch);
-    v2 = (gentity_s **)v5;
+
+    // Populate List of spots and count them
+    ptr = &spotPtrs[0];
     do
     {
-        if (!SpotWouldTelefrag(v1))
+        if (!SpotWouldTelefrag(spot))
         {
-            *v2 = v1;
-            ++v0;
-            ++v2;
+            *ptr = spot;
+            ++numSpots;
+            ++ptr;
         }
-        v1 = G_Find(v1, 284, scr_const.info_player_deathmatch);
-    } while (v1);
-    if (!v0)
+        spot = G_Find(spot, 284, scr_const.info_player_deathmatch);
+    } while (spot);
+
+    if (!numSpots)
         return G_Find(0, 284, scr_const.info_player_deathmatch);
-    v4 = G_rand();
+
+    randnum = G_rand();
     //__twllei(v0, 0);
     //__twlgei(v0 & ~(__ROL4__(v4, 1) - 1), 0xFFFFFFFF);
 
-    uint32_t rotated = (v4 << 1) | (v4 >> (32 - 1)); // rotate-left by 1
-    uint32_t mask = ~(rotated - 1);
-    v0 = v0 & mask;
+    //uint32_t rotated = (v4 << 1) | (v4 >> (32 - 1)); // rotate-left by 1
+    //uint32_t mask = ~(rotated - 1);
+    //v0 = v0 & mask;
 
-    return (gentity_s *)v5[v4 % v0];
+    return (gentity_s *)spotPtrs[randnum % numSpots];
 }
 
 gentity_s *__cdecl SelectSpawnPoint(const float *avoidPoint, float *origin, float *angles)

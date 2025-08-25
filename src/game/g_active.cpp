@@ -616,8 +616,7 @@ void __cdecl G_PlayerStateToEntityStateExtrapolate(playerState_s *ps, entityStat
     s->groundEntityNum = groundEntityNum;
 }
 
-// local variable allocation has failed, the output may be wrong!
-void __cdecl ClientThink_real(gentity_s *ent, long double a2)
+void __cdecl ClientThink_real(gentity_s *ent)
 {
     gclient_s *client; // r30
     usercmd_s *p_cmd; // r25
@@ -691,8 +690,7 @@ void __cdecl ClientThink_real(gentity_s *ent, long double a2)
             v6 += 5;
     }
     client->ps.pm_type = (pmtype_t)v6;
-    *(double *)&a2 = (float)(g_gravity->current.value + (float)0.5);
-    v7 = floor(a2);
+    v7 = floor((g_gravity->current.value + 0.5f));
     eventSequence = client->ps.eventSequence;
     v9 = (float)(client->ps.aimSpreadScale * (float)0.0039215689);
     client->ps.gravity = (int)(float)*(double *)&v7;
@@ -837,12 +835,11 @@ LABEL_35:
 void __cdecl ClientThink(int clientNum)
 {
     gentity_s *v2; // r31
-    long double v3; // fp2
 
     v2 = &g_entities[clientNum];
     memcpy(&v2->client->pers.oldcmd, &v2->client->pers.cmd, sizeof(v2->client->pers.oldcmd));
     SV_GetUsercmd(clientNum, &v2->client->pers.cmd);
-    ClientThink_real(v2, v3);
+    ClientThink_real(v2);
     if (v2->client->ps.leanf == 0.0)
         G_RemoveHeadHitEnt(v2);
     else

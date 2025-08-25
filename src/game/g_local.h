@@ -89,8 +89,7 @@ void __cdecl AttemptLiveGrenadePickup(gentity_s *clientEnt);
 void __cdecl ClientEvents(gentity_s *ent, int oldEventSequence);
 void __cdecl Client_ClaimNode(gentity_s *ent);
 void __cdecl G_PlayerStateToEntityStateExtrapolate(playerState_s *ps, entityState_s *s, int time, int snap);
-// local variable allocation has failed, the output may be wrong!
-void __cdecl ClientThink_real(gentity_s *ent, long double a2);
+void __cdecl ClientThink_real(gentity_s *ent);
 void __cdecl ClientThink(int clientNum);
 void __cdecl ClientEndFrame(gentity_s *ent);
 gentity_s *__cdecl G_GetPlayer();

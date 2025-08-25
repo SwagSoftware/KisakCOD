@@ -545,127 +545,61 @@ int __cdecl ExpandedNodeVisCacheEntry(int i, int j)
     return (i - 1) * g_path.actualNodeCount + j;
 }
 
+static void __cdecl Path_NodesInCylinder_process(pathnode_t *pnode)
+{
+    float distSq; // [esp+Ch] [ebp-4h]
+
+    //distSq = (float)((float)(pnode->constant.vOrigin[0] - g_path.circle.origin[0])
+    //    * (float)(pnode->constant.vOrigin[0] - g_path.circle.origin[0]))
+    //    + (float)((float)(pnode->constant.vOrigin[1] - g_path.circle.origin[1])
+    //        * (float)(pnode->constant.vOrigin[1] - g_path.circle.origin[1]));
+
+    distSq = Vec2DistanceSq(pnode->constant.vOrigin, g_path.circle.origin);
+
+    if (g_path.circle.maxDistSq >= distSq
+        && (g_path.circle.typeFlags & (1 << pnode->constant.type)) != 0
+        && ((pnode->constant.spawnflags & 1) == 0 || (g_path.circle.typeFlags & 1) != 0)
+        && (float)((float)(pnode->constant.vOrigin[2] - g_path.circle.origin[2])
+            * (float)(pnode->constant.vOrigin[2] - g_path.circle.origin[2])) <= g_path.circle.maxHeightSq)
+    {
+        iassert(g_path.circle.nodeCount < g_path.circle.maxNodes);
+        g_path.circle.nodes[g_path.circle.nodeCount].node = pnode;
+        g_path.circle.nodes[g_path.circle.nodeCount++].metric = distSq;
+    }
+}
+
 void __cdecl Path_NodesInCylinder_r(pathnode_tree_t *tree)
 {
-    pathnode_tree_t *v1; // r18
-    int axis; // r11
-    double maxDist; // fp13
-    double v4; // fp0
-    int v5; // r17
-    unsigned __int16 *nodes; // r27
-    int v7; // r11
-    int v8; // r28
-    float *v9; // r10
-    float *v10; // r29
-    double v11; // fp31
-    int v12; // r11
-    int v13; // r11
-
-    v1 = tree;
-    axis = tree->axis;
-    if (tree->axis >= 0)
+    float dist;
+    while (tree->axis >= 0)
     {
-        maxDist = g_path.circle.maxDist;
-        while (1)
+        dist = g_path.circle.origin[tree->axis] - tree->dist;
+        if (g_path.circle.maxDist < dist)
         {
-            v4 = (float)(g_path.circle.origin[axis] - v1->dist);
-            if (v4 > maxDist)
-                goto LABEL_7;
-            if (v4 >= -maxDist)
-                break;
-            v1 = v1->u.child[0];
-        LABEL_8:
-            axis = v1->axis;
-            if (v1->axis < 0)
-                goto LABEL_9;
+            tree = tree->u.child[1];
+            continue;
         }
-        Path_NodesInCylinder_r(v1->u.child[0]);
-        maxDist = g_path.circle.maxDist;
-    LABEL_7:
-        v1 = v1->u.child[1];
-        goto LABEL_8;
-    }
-LABEL_9:
-    v5 = 0;
-    if (v1->u.s.nodeCount > 0)
-    {
-        nodes = v1->u.s.nodes;
-        do
+
+        if (-g_path.circle.maxDist <= dist)
         {
-            v7 = *nodes;
-            v8 = __ROL4__(v7, 7);
-            v9 = (float *)((char *)gameWorldSp.path.nodes + v8);
-            v10 = (float *)((char *)gameWorldSp.path.basenodes->vOrigin + __ROL4__(v7, 4));
-            if (*v10 != *(float *)((char *)gameWorldSp.path.nodes->constant.vOrigin + v8)
-                || v10[1] != v9[6]
-                || v10[2] != v9[7])
-            {
-                MyAssertHandler(
-                    "c:\\trees\\cod3\\cod3src\\src\\game\\pathnode.cpp",
-                    1301,
-                    0,
-                    "%s",
-                    "Vec3Compare( node->vOrigin, gameWorldSp.path.nodes[leafNodes[i]].constant.vOrigin )");
-            }
-            v11 = (float)((float)((float)(v10[1] - g_path.circle.origin[1]) * (float)(v10[1] - g_path.circle.origin[1]))
-                + (float)((float)(*v10 - g_path.circle.origin[0]) * (float)(*v10 - g_path.circle.origin[0])));
-            if (v11 <= g_path.circle.maxDistSq)
-            {
-                v12 = (1 << *(nodeType *)((char *)&gameWorldSp.path.nodes->constant.type + __ROL4__(*nodes, 7)))
-                    & g_path.circle.typeFlags;
-                if (((unsigned int)v10[3] & g_path.circle.typeFlags) != 0)
-                {
-                    if (!v12)
-                        MyAssertHandler(
-                            "c:\\trees\\cod3\\cod3src\\src\\game\\pathnode.cpp",
-                            1314,
-                            0,
-                            "%s",
-                            "g_path.circle.typeFlags & (1 << gameWorldSp.path.nodes[leafNodes[i]].constant.type)");
-                    v13 = *(unsigned __int16 *)((_BYTE *)&gameWorldSp.path.nodes->constant.spawnflags + __ROL4__(*nodes, 7)) & 1;
-                    if (((unsigned int)v10[3] & 0x100000) == 0)
-                    {
-                        if (v13)
-                            MyAssertHandler(
-                                "c:\\trees\\cod3\\cod3src\\src\\game\\pathnode.cpp",
-                                1326,
-                                0,
-                                "%s",
-                                "!(gameWorldSp.path.nodes[leafNodes[i]].constant.spawnflags & PNF_DONTLINK)");
-                    LABEL_28:
-                        if ((float)((float)(v10[2] - g_path.circle.origin[2]) * (float)(v10[2] - g_path.circle.origin[2])) <= (double)g_path.circle.maxHeightSq)
-                        {
-                            if (g_path.circle.nodeCount == g_path.circle.maxNodes)
-                                return;
-                            g_path.circle.nodes[g_path.circle.nodeCount].node = (pathnode_t *)((char *)gameWorldSp.path.nodes + v8);
-                            g_path.circle.nodes[g_path.circle.nodeCount++].metric = v11;
-                        }
-                        goto LABEL_31;
-                    }
-                    if (!v13)
-                        MyAssertHandler(
-                            "c:\\trees\\cod3\\cod3src\\src\\game\\pathnode.cpp",
-                            1318,
-                            0,
-                            "%s",
-                            "gameWorldSp.path.nodes[leafNodes[i]].constant.spawnflags & PNF_DONTLINK");
-                    if ((g_path.circle.typeFlags & 1) != 0)
-                        goto LABEL_28;
-                }
-                else if (v12)
-                {
-                    MyAssertHandler(
-                        "c:\\trees\\cod3\\cod3src\\src\\game\\pathnode.cpp",
-                        1310,
-                        0,
-                        "%s",
-                        "!(g_path.circle.typeFlags & (1 << gameWorldSp.path.nodes[leafNodes[i]].constant.type))");
-                }
-            }
-        LABEL_31:
-            ++v5;
-            ++nodes;
-        } while (v5 < v1->u.s.nodeCount);
+            Path_NodesInCylinder_r(tree->u.child[0]);
+            tree = tree->u.child[1];
+        }
+        else
+        {
+            tree = tree->u.child[0];
+        }
+    }
+
+    pathnode_t *pnode;
+    unsigned __int16 *leafNodes = tree->u.s.nodes;
+    for (int i = 0; i < tree->u.s.nodeCount && g_path.circle.nodeCount < g_path.circle.maxNodes; i++)
+    {
+        //iassert(Vec3Compare(node->vOrigin, gameWorldSp.path.nodes[leafNodes[i]].constant.vOrigin));
+        //iassert(!(g_path.circle.typeFlags & (1 << gameWorldSp.path.nodes[leafNodes[i]].constant.type))); 
+        pnode = &gameWorldSp.path.nodes[leafNodes[i]];
+        Path_NodesInCylinder_process(pnode);
+        //iassert(gameWorldSp.path.nodes[leafNodes[i]].constant.spawnflags & PNF_DONTLINK);
     }
 }
 
@@ -677,23 +611,24 @@ int __cdecl Path_NodesInCylinder(
     int maxNodes,
     int typeFlags)
 {
-    if (gameWorldSp.path.nodeTree)
+    if (!gameWorldSp.path.nodeTree)
     {
-        g_path.circle.origin[0] = origin[0];
-        g_path.circle.origin[1] = origin[1];
-        g_path.circle.origin[2] = origin[2];
-        g_path.circle.maxDist = maxDist;
-        g_path.circle.maxDistSq = (float)maxDist * (float)maxDist;
-        g_path.circle.typeFlags = typeFlags;
-        g_path.circle.maxHeightSq = (float)maxHeight * (float)maxHeight;
-        g_path.circle.nodes = nodes;
-        g_path.circle.maxNodes = maxNodes;
-        g_path.circle.nodeCount = 0;
-        Path_NodesInCylinder_r(gameWorldSp.path.nodeTree);
-        return g_path.circle.nodeCount;
+        return 0;
     }
 
-    return 0;
+    g_path.circle.origin[0] = origin[0];
+    g_path.circle.origin[1] = origin[1];
+    g_path.circle.origin[2] = origin[2];
+    g_path.circle.maxDist = maxDist;
+    g_path.circle.maxDistSq = maxDist * maxDist;
+    g_path.circle.typeFlags = typeFlags;
+    g_path.circle.maxHeightSq = maxHeight * maxHeight;
+    g_path.circle.nodes = nodes;
+    g_path.circle.maxNodes = maxNodes;
+    g_path.circle.nodeCount = 0;
+    Path_NodesInCylinder_r(gameWorldSp.path.nodeTree);
+
+    return g_path.circle.nodeCount;
 }
 
 int __cdecl Path_NodesInRadius(
@@ -4268,8 +4203,8 @@ pathnode_t *__cdecl Path_NearestNodeNotCrossPlanes(
     unsigned int *v55; // r31
     const float *v56; // r7
     int v58[2]; // [sp+50h] [-4C0h] BYREF
-    float v59[4]; // [sp+58h] [-4B8h] BYREF
-    float v60[4]; // [sp+68h] [-4A8h] BYREF
+    float mins[3]; // [sp+58h] [-4B8h] BYREF
+    float maxs[3]; // [sp+68h] [-4A8h] BYREF
     float v61[6]; // [sp+78h] [-498h] BYREF
     unsigned int v62[256]; // [sp+90h] [-480h] BYREF
 
@@ -4296,95 +4231,72 @@ pathnode_t *__cdecl Path_NearestNodeNotCrossPlanes(
     std::sort(nodes, &nodes[numNodes], Path_CompareNodesIncreasing);
     v44 = 0;
     v45 = 0;
-    v59[0] = -15.0;
-    v59[1] = -15.0;
-    v60[0] = 15.0;
-    v60[1] = 15.0;
-    v60[2] = 72.0;
-    maxNodes = numNodes;
-    v59[2] = (float)0.0 + (float)17.0;
-    if ((int)numNodes > 0)
+
+    mins[0] = actorMins[0];
+    mins[1] = actorMins[1];
+    mins[2] = actorMins[2] + 17.0f;
+
+    maxs[0] = actorMaxs[0];
+    maxs[1] = actorMaxs[1];
+    maxs[2] = actorMaxs[2];
+
+    int failedNodeCount = 0;
+    pathnode_t *failedNodes[256];
+
+    *returnCount = numNodes;
+
+    for (int i = 0; i < numNodes; i++)
     {
-        v46 = (pathnode_t **)v62;
-        while (1)
+        pathnode_t *node = nodes[i].node;
+        if (node->dynamic.wLinkCount)
         {
-            node = nodes->node;
-            if (!nodes->node->dynamic.wLinkCount)
-                goto failed_node;
-            v48 = *vOrigin;
-            if (v48 > (float)((float)(node->constant.vOrigin[0] + -15.0) - (float)1.0)
-                && v48 < (float)((float)(node->constant.vOrigin[0] + 15.0) + (float)1.0))
+            if (vOrigin[0] > ((node->constant.vOrigin[0] + -15.0f) - 1.0f) && vOrigin[0] < ((node->constant.vOrigin[0] + 15.0f) + 1.0f) &&
+                vOrigin[1] > ((node->constant.vOrigin[1] + -15.0f) - 1.0f) && vOrigin[1] < ((node->constant.vOrigin[1] + 15.0f) + 1.0f) &&
+                vOrigin[2] > ((node->constant.vOrigin[2] + 0.0f) - 1.0f) && vOrigin[2] < ((node->constant.vOrigin[2] + 72.0f) + 1.0f)
+                )
             {
-                v49 = vOrigin[1];
-                if (v49 > (float)((float)(node->constant.vOrigin[1] + -15.0) - (float)1.0)
-                    && v49 < (float)((float)(node->constant.vOrigin[1] + 15.0) + (float)1.0))
+                return node;
+            }
+
+            for (int j = 0; j < iPlaneCount; j++)
+            {
+                if ((node->constant.vOrigin[0] * (*vNormal)[2 * j]) + (node->constant.vOrigin[1] * (*vNormal)[2 * j + 1]) > fDist[j])
                 {
-                    v50 = vOrigin[2];
-                    if (v50 > (float)((float)(node->constant.vOrigin[2] + 0.0) - (float)1.0)
-                        && v50 < (float)((float)(node->constant.vOrigin[2] + 72.0) + (float)1.0))
-                    {
-                    LABEL_25:
-                        //Profile_EndInternal(0);
-                        return node;
-                    }
+                    goto failed_node;
                 }
             }
-            v51 = 0;
-            if ((int)returnCount > 0)
-                break;
-        LABEL_17:
-            v58[0] = 0;
-            SV_SightTrace(v58, vOrigin, v59, v60, node->constant.vOrigin, ENTITYNUM_NONE, ENTITYNUM_NONE, 8519697);
-            if (!v58[0])
-                goto LABEL_25;
-        LABEL_18:
-            ++v45;
-            ++nodes;
-            if (v45 >= (int)numNodes)
-                goto LABEL_19;
+
         }
-        v52 = iPlaneCount;
-        v53 = fDist;
-        while ((float)((float)(v53[1] * node->constant.vOrigin[1]) + (float)(node->constant.vOrigin[0] * *v53)) <= (double)v52)
+        else
         {
-            ++v51;
-            v53 += 2;
-            ++v52;
-            if (v51 >= (int)returnCount)
-                goto LABEL_17;
+failed_node:
+            failedNodes[failedNodeCount++] = node;
         }
-    failed_node:
-        *v46 = node;
-        ++v44;
-        ++v46;
-        goto LABEL_18;
     }
-LABEL_19:
-    v54 = 0;
-    if (v44 <= 0)
+
+    for (int i = 0; i < failedNodeCount; i++)
     {
-    LABEL_23:
-        //Profile_EndInternal(0);
-        return 0;
-    }
-    else
-    {
-        v55 = v62;
-        while (1)
+        int hitnum = 0;
+        SV_SightTrace(&hitnum, vOrigin, mins, maxs, failedNodes[i]->constant.vOrigin, ENTITYNUM_NONE, ENTITYNUM_NONE, 8519697);
+        if (!hitnum)
         {
-            v56 = (const float *)(*v55 + 20);
-            v58[0] = 0;
-            SV_SightTrace(v58, vOrigin, v59, v60, v56, ENTITYNUM_NONE, ENTITYNUM_NONE, 8519697);
-            if (!v58[0])
-                break;
-            ++v54;
-            ++v55;
-            if (v54 >= v44)
-                goto LABEL_23;
+            return failedNodes[i];
         }
-        //Profile_EndInternal(0);
-        return (pathnode_t *)v62[v54];
     }
+
+    // Extra code from blops. I think technically it is supposed to return 0 here
+    //if (!zombiemode->current.enabled)
+    //    return 0;
+
+    pathnode_t *closestNode = 0;
+    for (int i = 0; i < numNodes; ++i)
+    {
+        node = nodes[i].node;
+        float distSq = Vec3DistanceSq(node->constant.vOrigin, vOrigin);
+        if (distSq < 3.4028235e38)
+            closestNode = node;
+    }
+    return closestNode;
 }
 
 pathnode_t *__cdecl Path_NearestNode(

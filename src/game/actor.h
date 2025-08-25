@@ -127,6 +127,13 @@ inline ai_stance_e &operator|=(ai_stance_e &a, ai_stance_e b)
     return a;
 }
 
+struct AITypeScript
+{
+    int main;
+    int precache;
+    int spawner;
+};
+
 struct potential_threat_t
 {
     bool isEnabled;
