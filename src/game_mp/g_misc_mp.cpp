@@ -63,7 +63,7 @@ void __cdecl SP_light(gentity_s *self)
         self->s.eType = ET_PRIMARY_LIGHT;
         if (self->r.contents)
             MyAssertHandler(".\\game_mp\\g_misc_mp.cpp", 58, 1, "%s", "self->r.contents == 0");
-        self->handler = 20;
+        self->handler = ENT_HANDLER_PRIMARY_LIGHT;
         SV_LinkEntity(self);
     }
     else
@@ -791,7 +791,7 @@ void __cdecl turret_think_init(gentity_s *self)
         MyAssertHandler(".\\game_mp\\g_misc_mp.cpp", 781, 0, "%s", "pTurretInfo");
     if (self->handler != 14)
         MyAssertHandler(".\\game_mp\\g_misc_mp.cpp", 783, 0, "%s", "self->handler == ENT_HANDLER_TURRET_INIT");
-    self->handler = 15;
+    self->handler = ENT_HANDLER_TURRET;
     self->nextthink = level.time + 50;
     if (!self->pTurretInfo)
         MyAssertHandler(".\\game_mp\\g_misc_mp.cpp", 790, 0, "%s", "self->pTurretInfo");
@@ -1157,7 +1157,7 @@ void __cdecl G_SpawnTurret(gentity_s *self, const char *weaponinfoname)
     self->s.lerp.u.turret.gunAngles[0] = 0.0;
     self->s.lerp.u.turret.gunAngles[1] = 0.0;
     self->s.lerp.u.turret.gunAngles[2] = 0.0;
-    self->handler = 14;
+    self->handler = ENT_HANDLER_TURRET_INIT;
     self->nextthink = level.time + 50;
     self->s.lerp.apos.trType = TR_LINEAR_STOP;
     self->takedamage = 0;

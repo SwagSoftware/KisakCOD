@@ -20,6 +20,7 @@
 #define PMF_JUMPING 0x4000
 #define PMF_VEHICLE_ATTACHED 0x100000
 
+#ifdef KISAK_MP
 enum entity_event_t : __int32
 {
     EV_NONE = 0x0,
@@ -105,6 +106,102 @@ enum entity_event_t : __int32
     EV_LANDING_PAIN_LAST = 0x86,
     EV_MAX_EVENTS = 0x87,
 };
+#elif KISAK_SP
+enum entity_event_t : __int32
+{
+    EV_NONE = 0x0,
+    EV_FOLIAGE_SOUND = 0x1,
+    EV_STOP_WEAPON_SOUND = 0x2,
+    EV_SOUND_ALIAS = 0x3,
+    EV_SOUND_ALIAS_AS_MASTER = 0x4,
+    EV_STOPSOUNDS = 0x5,
+    EV_STANCE_FORCE_STAND = 0x6,
+    EV_STANCE_FORCE_CROUCH = 0x7,
+    EV_STANCE_FORCE_PRONE = 0x8,
+    EV_ITEM_PICKUP = 0x9,
+    EV_AMMO_PICKUP = 0xA,
+    EV_NOAMMO = 0xB,
+    EV_EMPTYCLIP = 0xC,
+    EV_EMPTY_OFFHAND = 0xD,
+    EV_RESET_ADS = 0xE,
+    EV_RELOAD = 0xF,
+    EV_RELOAD_FROM_EMPTY = 0x10,
+    EV_RELOAD_START = 0x11,
+    EV_RELOAD_END = 0x12,
+    EV_RELOAD_START_NOTIFY = 0x13,
+    EV_RELOAD_ADDAMMO = 0x14,
+    EV_RAISE_WEAPON = 0x15,
+    EV_FIRST_RAISE_WEAPON = 0x16,
+    EV_PUTAWAY_WEAPON = 0x17,
+    EV_WEAPON_ALT = 0x18,
+    EV_PULLBACK_WEAPON = 0x19,
+    EV_FIRE_WEAPON = 0x1A,
+    EV_FIRE_WEAPON_LASTSHOT = 0x1B,
+    EV_RECHAMBER_WEAPON = 0x1C,
+    EV_EJECT_BRASS = 0x1D,
+    EV_MELEE_SWIPE = 0x1E,
+    EV_FIRE_MELEE = 0x1F,
+    EV_PREP_OFFHAND = 0x20,
+    EV_USE_OFFHAND = 0x21,
+    EV_SWITCH_OFFHAND = 0x22,
+    EV_MELEE_HIT = 0x23,
+    EV_MELEE_MISS = 0x24,
+    EV_MELEE_BLOOD = 0x25,
+    EV_FIRE_WEAPON_MG42 = 0x26,
+    EV_FIRE_QUADBARREL_1 = 0x27,
+    EV_FIRE_QUADBARREL_2 = 0x28,
+    EV_BULLET_TRACER = 0x29,
+    EV_SOUND_ALIAS_NOTIFY = 0x2A,
+    EV_SOUND_ALIAS_NOTIFY_AS_MASTER = 0x2B,
+    EV_SOUND_ALIAS_ADD_NOTIFY = 0x2C,
+    EV_BULLET_HIT = 0x2D,
+    EV_BULLET_HIT_CLIENT_SMALL = 0x2E,
+    EV_BULLET_HIT_CLIENT_LARGE = 0x2F,
+    EV_GRENADE_BOUNCE = 0x30,
+    EV_GRENADE_EXPLODE = 0x31,
+    EV_ROCKET_EXPLODE = 0x32,
+    EV_ROCKET_EXPLODE_NOMARKS = 0x33,
+    EV_FLASHBANG_EXPLODE = 0x34,
+    EV_CUSTOM_EXPLODE = 0x35,
+    EV_CUSTOM_EXPLODE_NOMARKS = 0x36,
+    EV_CHANGE_TO_DUD = 0x37,
+    EV_DUD_EXPLODE = 0x38,
+    EV_DUD_IMPACT = 0x39,
+    EV_BULLET = 0x3A,
+    EV_PLAY_FX = 0x3B,
+    EV_PLAY_FX_ON_TAG = 0x3C,
+    EV_PHYS_EXPLOSION_SPHERE = 0x3D,
+    EV_PHYS_EXPLOSION_CYLINDER = 0x3E,
+    EV_PHYS_EXPLOSION_JOLT = 0x3F,
+    EV_PHYS_JITTER = 0x40,
+    EV_EARTHQUAKE = 0x41,
+    EV_GRENADE_SUICIDE = 0x42,
+    EV_DETONATE = 0x43,
+    EV_NIGHTVISION_WEAR = 0x44,
+    EV_NIGHTVISION_REMOVE = 0x45,
+    EV_PLAY_RUMBLE_ON_ENT = 0x46,
+    EV_PLAY_RUMBLE_ON_POS = 0x47,
+    EV_PLAY_RUMBLELOOP_ON_ENT = 0x48,
+    EV_PLAY_RUMBLELOOP_ON_POS = 0x49,
+    EV_STOP_RUMBLE = 0x4A,
+    EV_STOP_ALL_RUMBLES = 0x4B,
+    EV_NO_FRAG_GRENADE_HINT = 0x4C,
+    EV_NO_SPECIAL_GRENADE_HINT = 0x4D,
+    EV_TARGET_TOO_CLOSE_HINT = 0x4E,
+    EV_TARGET_NOT_ENOUGH_CLEARANCE = 0x4F,
+    EV_LOCKON_REQUIRED_HINT = 0x50,
+    EV_FOOTSTEP_SPRINT = 0x51,
+    EV_FOOTSTEP_RUN = 0x52,
+    EV_FOOTSTEP_WALK = 0x53,
+    EV_FOOTSTEP_PRONE = 0x54,
+    EV_JUMP = 0x55,
+    EV_LANDING_FIRST = 0x56,
+    EV_LANDING_LAST = 0x72,
+    EV_LANDING_PAIN_FIRST = 0x73,
+    EV_LANDING_PAIN_LAST = 0x8F,
+    EV_MAX_EVENTS = 0x90,
+};
+#endif
 
 #ifdef KISAK_MP
 static const char *entityTypeNames[17] =
@@ -475,6 +572,35 @@ struct missile_ent_t // sizeof=0x3C
 };
 static_assert(sizeof(missile_ent_t) == 0x3C);
 
+enum EntHandler_t : uint8_t
+{
+    ENT_HANDLER_NULL = 0x0,
+    ENT_HANDLER_TRIGGER_MULTIPLE = 0x1,
+    ENT_HANDLER_TRIGGER_HURT = 0x2,
+    ENT_HANDLER_TRIGGER_HURT_TOUCH = 0x3,
+    ENT_HANDLER_TRIGGER_DAMAGE = 0x4,
+    ENT_HANDLER_SCRIPT_MOVER = 0x5,
+    ENT_HANDLER_SCRIPT_MODEL = 0x6,
+    ENT_HANDLER_GRENADE = 0x7,
+    ENT_HANDLER_TIMED_OBJECT = 0x8,
+    ENT_HANDLER_ROCKET = 0x9,
+    ENT_HANDLER_CLIENT = 0xA,
+    ENT_HANDLER_CLIENT_SPECTATOR = 0xB,
+    ENT_HANDLER_CLIENT_DEAD = 0xC,
+    ENT_HANDLER_PLAYER_CLONE = 0xD,
+    ENT_HANDLER_TURRET_INIT = 0xE,
+    ENT_HANDLER_TURRET = 0xF,
+    ENT_HANDLER_DROPPED_ITEM = 0x10,
+    ENT_HANDLER_ITEM_INIT = 0x11,
+    ENT_HANDLER_ITEM = 0x12,
+    ENT_HANDLER_TRIGGER_USE = 0x13,
+    ENT_HANDLER_PRIMARY_LIGHT = 0x14,
+    ENT_HANDLER_PLAYER_BLOCK = 0x15,
+    ENT_HANDLER_VEHICLE = 0x16,
+    ENT_HANDLER_HELICOPTER = 0x17,
+    ENT_HANDLER_COUNT = 0x18,
+};
+
 struct gentity_s // sizeof=0x274
 {                                       // ...
     entityState_s s;                    // ...
@@ -487,7 +613,7 @@ struct gentity_s // sizeof=0x274
     uint8_t takedamage;
     uint8_t active;
     uint8_t nopickup;
-    uint8_t handler;
+    EntHandler_t handler;
     uint8_t team;
     uint16_t classname;         // ...
     uint16_t target;
@@ -650,7 +776,7 @@ struct gentity_s
     unsigned __int8 active;
     unsigned __int8 nopickup;
     unsigned __int16 model;
-    unsigned __int8 handler; // ENT_HANDLER_xxxxx
+    EntHandler_t handler; // ENT_HANDLER_xxxxx
     unsigned __int16 classname;
     unsigned __int16 script_linkName;
     unsigned __int16 script_noteworthy;

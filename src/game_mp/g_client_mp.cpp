@@ -281,7 +281,7 @@ char *__cdecl ClientConnect(uint32_t clientNum, uint16_t scriptPersId)
     client->sess.forceSpectatorClient = -1;
     client->sess.killCamEntity = -1;
     G_InitGentity(ent);
-    ent->handler = 0;
+    ent->handler = ENT_HANDLER_NULL;
     ent->client = client;
     ent->s.clientNum = clientNum;
     client->sess.cs.clientIndex = clientNum;
@@ -358,7 +358,7 @@ void __cdecl ClientSpawn(gentity_s *ent, const float *spawn_origin, const float 
     ent->r.svFlags |= 1u;
     ent->takedamage = 0;
     G_SetClientContents(ent);
-    ent->handler = 11;
+    ent->handler = ENT_HANDLER_CLIENT_SPECTATOR;
     ent->flags = 4096;
     ent->r.mins[0] = -15.0f;
     ent->r.mins[1] = -15.0f;

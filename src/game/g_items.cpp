@@ -726,11 +726,7 @@ gentity_s *__cdecl LaunchItem(const gitem_s *item, float *origin, float *angles,
     }
 
     G_DObjUpdate(dropped);
-#ifdef KISAK_MP
-    dropped->handler = 16;
-#elif KISAK_SP
-    dropped->handler = 12;
-#endif
+    dropped->handler = ENT_HANDLER_DROPPED_ITEM;
     G_SetOrigin(dropped, origin);
     dropped->s.lerp.pos.trType = TR_GRAVITY;
     dropped->s.lerp.pos.trTime = level.time;
@@ -1037,7 +1033,8 @@ void __cdecl FinishSpawningItem(gentity_s *ent)
     float dest[3]; // [esp+BCh] [ebp-10h] BYREF
     int32_t clipMask; // [esp+C8h] [ebp-4h]
 
-    ent->handler = 18;
+    ent->handler = ENT_HANDLER_ITEM;
+
     if ((ent->spawnflags & 1) != 0)
     {
         G_SetOrigin(ent, ent->r.currentOrigin);
@@ -1274,11 +1271,11 @@ void __cdecl G_SpawnItem(gentity_s *ent, const gitem_s *item)
     {
         G_SetAngle(ent, ent->r.currentAngles);
         ent->nextthink = level.time + 100;
-        ent->handler = 17;
+        ent->handler = ENT_HANDLER_ITEM_INIT;
     }
     else
     {
-        ent->handler = 18;
+        ent->handler = ENT_HANDLER_ITEM;
         if ((ent->spawnflags & 1) == 0)
         {
             ent->s.groundEntityNum = ENTITYNUM_NONE;

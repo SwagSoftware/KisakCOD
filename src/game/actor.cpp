@@ -364,60 +364,24 @@ void __cdecl Actor_FinishSpawning(actor_s *self)
 void __cdecl Actor_InitAnimScript(actor_s *self)
 {
     gentity_s *ent; // r27
-    unsigned __int16 v3; // r3
     unsigned int stateLevel; // r8
-    ai_state_t v5; // r8
-    ai_state_t v6; // r8
     int time; // r11
 
-    if (!self->ent)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\actor.cpp", 777, 0, "%s", "self->ent");
-    if (self->ent->actor != self)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\actor.cpp", 778, 0, "%s", "self->ent->actor == self");
-    if (!self->sentient)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\actor.cpp", 779, 0, "%s", "self->sentient");
-    if (self->ent->sentient != self->sentient)
-        MyAssertHandler(
-            "c:\\trees\\cod3\\cod3src\\src\\game\\actor.cpp",
-            780,
-            0,
-            "%s",
-            "self->ent->sentient == self->sentient");
-    if (self->sentient->ent != self->ent)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\actor.cpp", 781, 0, "%s", "self->sentient->ent == self->ent");
+    iassert(self->ent);
+    iassert(self->ent->actor == self);
+    iassert(self->sentient);
+    iassert(self->ent->sentient == self->sentient);
+    iassert(self->sentient->ent == self->ent);
+
     ent = self->ent;
-    v3 = Scr_ExecEntThread(self->ent, g_animScriptTable[self->species]->init.func, 0);
-    Scr_FreeThread(v3);
+    Scr_FreeThread(Scr_ExecEntThread(self->ent, g_animScriptTable[self->species]->init.func, 0));
     stateLevel = self->stateLevel;
-    if (stateLevel)
-        MyAssertHandler(
-            "c:\\trees\\cod3\\cod3src\\src\\game\\actor.cpp",
-            790,
-            0,
-            "%s\n\t(self->stateLevel) = %i",
-            "(self->stateLevel == 0)",
-            stateLevel);
-    v5 = self->eState[0];
-    if (v5 <= AIS_INVALID || v5 >= AIS_COUNT)
-        MyAssertHandler(
-            "c:\\trees\\cod3\\cod3src\\src\\game\\actor.cpp",
-            791,
-            0,
-            "%s\n\t(self->eState[0]) = %i",
-            "(self->eState[0] > AIS_INVALID && self->eState[0] < AIS_COUNT)",
-            v5);
-    v6 = self->eState[0];
-    if (!AIFuncTable[self->species][v6].pfnStart)
-        MyAssertHandler(
-            "c:\\trees\\cod3\\cod3src\\src\\game\\actor.cpp",
-            792,
-            0,
-            "%s\n\t(self->eState[0]) = %i",
-            "(AIFuncTable[self->species][self->eState[0]].pfnStart)",
-            v6);
+    iassert(self->stateLevel == 0);
+    iassert((self->eState[0] > AIS_INVALID && self->eState[0] < AIS_COUNT));
+    iassert((AIFuncTable[self->species][self->eState[0]].pfnStart));
     AIFuncTable[self->species][self->eState[0]].pfnStart(self, AIS_INVALID);
     time = level.time;
-    ent->handler = 2;
+    ent->handler = ENT_HANDLER_ACTOR;
     ent->nextthink = time;
 }
 
@@ -5122,7 +5086,7 @@ int __cdecl SP_actor(gentity_s *ent)
         ent->actor = v3;
         ent->sentient = v4;
         ent->nextthink = 0;
-        ent->handler = 2;
+        ent->handler = ENT_HANDLER_ACTOR;
         if (eFlags)
             MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\actor.cpp", 259, 0, "%s", "!ent->s.lerp.eFlags");
         v7 = ent->r.svFlags | 2;

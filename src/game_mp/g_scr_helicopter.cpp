@@ -384,7 +384,7 @@ void __cdecl G_SpawnHelicopter(gentity_s *ent, gentity_s *owner, const char *veh
             team,
             4);
     ent->s.lerp.u.vehicle.teamAndOwnerIndex = team | (4 * (owner->client - level.clients));
-    ent->handler = 23;
+    ent->handler = ENT_HANDLER_HELICOPTER;
     ent->nextthink = level.time + 50;
     ent->r.svFlags |= 0x10u;
     Heli_InitFirstThink(ent);
@@ -423,7 +423,7 @@ void __cdecl Heli_InitFirstThink(gentity_s *pSelf)
     prevAngles[1] = angles[1];
     prevAngles[2] = angles[2];
     pSelf->health = 99999;
-    pSelf->handler = 23;
+    pSelf->handler = ENT_HANDLER_HELICOPTER;
     pSelf->nextthink = level.time + 50;
     veh->flags |= 8u;
 }

@@ -504,7 +504,7 @@ void __cdecl trigger_use_shared(gentity_s *self)
         self->s.lerp.eFlags |= 1u;
         if (!self->model)
             self->s.lerp.eFlags |= 0x20u;
-        self->handler = 19;
+        self->handler = ENT_HANDLER_TRIGGER_USE;
         self->s.un2.hintString = 1;
         if (G_LevelSpawnString("cursorhint", "", &cursorhint))
         {
@@ -589,7 +589,7 @@ void trigger_use_shared(gentity_s *self)
         if (!model)
             self->s.lerp.eFlags = v4 | 0x20;
         *(_DWORD *)self->s.un2 = 1;
-        self->handler = 25;
+        self->handler = ENT_HANDLER_TRIGGER_USE;
         if (G_LevelSpawnString("cursorhint", "", v10))
         {
             if (I_stricmp(v10[0], "HINT_INHERIT"))

@@ -304,7 +304,7 @@ void __cdecl player_die(
                 0,
                 "%s",
                 "self->handler == ENT_HANDLER_CLIENT");
-        self->handler = 18;
+        self->handler = ENT_HANDLER_CLIENT_DEAD;
         SV_TrackPlayerDied();
         if (p_szInternalName)
             v25 = *p_szInternalName;

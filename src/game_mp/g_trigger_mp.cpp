@@ -91,7 +91,7 @@ void __cdecl Touch_Multi(gentity_s *self, gentity_s *other, int32_t extra)
 
 void __cdecl SP_trigger_multiple(gentity_s *ent)
 {
-    ent->handler = 1;
+    ent->handler = ENT_HANDLER_TRIGGER_MULTIPLE;
     InitTriggerWait(ent, 16);
     if (InitTrigger(ent))
     {
@@ -143,7 +143,7 @@ void __cdecl SP_trigger_radius(gentity_s *ent)
         radius = Scr_GetFloat(3);
         height = Scr_GetFloat(4);
     }
-    ent->handler = 1;
+    ent->handler = ENT_HANDLER_TRIGGER_MULTIPLE;
     ent->r.mins[0] = -radius;
     ent->r.mins[1] = -radius;
     ent->r.mins[2] = 0.0;
@@ -170,7 +170,7 @@ void __cdecl SP_trigger_disk(gentity_s *ent)
             ent->r.currentOrigin[2]);
         Com_Error(ERR_DROP, v1);
     }
-    ent->handler = 1;
+    ent->handler = ENT_HANDLER_TRIGGER_MULTIPLE;
     radius = radius + 64.0;
     ent->r.mins[0] = -radius;
     ent->r.mins[1] = -radius;
@@ -195,22 +195,21 @@ void __cdecl hurt_touch(gentity_s *self, gentity_s *other, int32_t extra)
         {
             if (self->handler != 3)
                 MyAssertHandler(".\\game_mp\\g_trigger_mp.cpp", 236, 0, "%s", "self->handler == ENT_HANDLER_TRIGGER_HURT_TOUCH");
-            self->handler = 2;
+            self->handler = ENT_HANDLER_TRIGGER_HURT;
         }
     }
 }
 
 void __cdecl hurt_use(gentity_s *self, gentity_s *other, gentity_s *third)
 {
-    if (self->handler == 3)
+    if (self->handler == ENT_HANDLER_TRIGGER_HURT_TOUCH)
     {
-        self->handler = 2;
+        self->handler = ENT_HANDLER_TRIGGER_HURT;
     }
     else
     {
-        if (self->handler != 2)
-            MyAssertHandler(".\\game_mp\\g_trigger_mp.cpp", 250, 0, "%s", "self->handler == ENT_HANDLER_TRIGGER_HURT");
-        self->handler = 3;
+        iassert(self->handler == ENT_HANDLER_TRIGGER_HURT);
+        self->handler = ENT_HANDLER_TRIGGER_HURT_TOUCH;
     }
 }
 
@@ -225,15 +224,15 @@ void __cdecl SP_trigger_hurt(gentity_s *self)
             self->damage = 5;
         self->r.contents = 1079771144;
         if ((self->spawnflags & 1) != 0)
-            self->handler = 2;
+            self->handler = ENT_HANDLER_TRIGGER_HURT;
         else
-            self->handler = 3;
+            self->handler = ENT_HANDLER_TRIGGER_HURT_TOUCH;
     }
 }
 
 void __cdecl SP_trigger_once(gentity_s *ent)
 {
-    ent->handler = 1;
+    ent->handler = ENT_HANDLER_TRIGGER_MULTIPLE;
     ent->spawnflags |= 0x10u;
     if (InitTrigger(ent))
     {
@@ -308,7 +307,7 @@ void __cdecl SP_trigger_damage(gentity_s *pSelf)
     G_SpawnInt("threshold", "0", &pSelf->item[0].ammoCount);
     pSelf->health = 32000;
     pSelf->takedamage = 1;
-    pSelf->handler = 4;
+    pSelf->handler = ENT_HANDLER_TRIGGER_DAMAGE;
     InitTriggerWait(pSelf, 512);
     if (InitTrigger(pSelf))
         SV_LinkEntity(pSelf);

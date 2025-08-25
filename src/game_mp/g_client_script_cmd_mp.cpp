@@ -2102,7 +2102,7 @@ void __cdecl PlayerCmd_ClonePlayer(scr_entref_t entref)
     body->r.contents = 0x4004000;
     SV_LinkEntity(body);
     body->nextthink = deathAnimDuration + level.time;
-    body->handler = 13;
+    body->handler = ENT_HANDLER_PLAYER_CLONE;
     GScr_AddEntity(body);
 }
 

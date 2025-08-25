@@ -35,7 +35,6 @@ void __cdecl SP_light(gentity_s *self)
     bool v8; // cr58
     double v9; // fp0
     double radius; // fp0
-    int contents; // r10
     unsigned int ClosestPrimaryLight; // [sp+50h] [-80h] BYREF
     float v13[4]; // [sp+58h] [-78h] BYREF
     float v14[4]; // [sp+68h] [-68h] BYREF
@@ -94,11 +93,9 @@ void __cdecl SP_light(gentity_s *self)
         self->r.maxs[0] = PrimaryLight->radius;
         self->r.maxs[2] = radius;
         self->r.maxs[1] = radius;
-        contents = self->r.contents;
         self->s.eType = ET_PRIMARY_LIGHT;
-        if (contents)
-            MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\g_misc.cpp", 217, 1, "%s", "self->r.contents == 0");
-        self->handler = 26;
+        iassert(self->r.contents == 0);
+        self->handler = ENT_HANDLER_PRIMARY_LIGHT;
         SV_LinkEntity(self);
     }
     else

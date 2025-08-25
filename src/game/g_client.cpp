@@ -79,7 +79,7 @@ void __cdecl G_SetupSpawnPoint(gentity_s *ent)
     int time; // r11
 
     time = level.time;
-    ent->handler = 16;
+    ent->handler = ENT_HANDLER_SPAWN_POINT;
     ent->nextthink = time + 100;
 }
 
@@ -89,7 +89,7 @@ void __cdecl SP_info_player_start(gentity_s *ent)
 
     Scr_SetString(&ent->classname, scr_const.info_player_deathmatch);
     time = level.time;
-    ent->handler = 16;
+    ent->handler = ENT_HANDLER_SPAWN_POINT;
     ent->nextthink = time + 100;
 }
 
@@ -547,7 +547,7 @@ char *__cdecl ClientConnect(int clientNum)
     v2->pers.moveSpeedScaleMultiplier = 1.0;
     G_InitGentity(&g_entities[clientNum]);
     v3->client = v2;
-    v3->handler = 17;
+    v3->handler = ENT_HANDLER_CLIENT;
     v5 = Sentient_Alloc();
     if (!v5)
         Com_Error(ERR_DROP, "no sentient for player");
@@ -726,7 +726,7 @@ void __cdecl G_UpdateHeadHitEnt(gentity_s *pSelf)
         pHitHitEnt->r.maxs[2] = 8.0;
         pHitHitEnt->r.contents = 8320;
         pHitHitEnt->r.ownerNum.setEnt(pSelf);
-        pHitHitEnt->handler = 19;
+        pHitHitEnt->handler = ENT_HANDLER_HEAD_HIT;
         pHitHitEnt->health = 99999;
         pHitHitEnt->takedamage = 1;
     }

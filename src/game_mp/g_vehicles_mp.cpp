@@ -876,7 +876,7 @@ void __cdecl InitEntityVehicleVars(gentity_s *ent, scr_vehicle_s *veh, __int16 i
 
 void __cdecl InitEntityVars(gentity_s *ent, scr_vehicle_s *veh, int32_t infoIdx)
 {
-    ent->handler = 22;
+    ent->handler = ENT_HANDLER_VEHICLE;
     ent->r.svFlags = 4;
     ent->r.contents = 8320;
     if ((ent->spawnflags & 1) != 0)
@@ -2522,7 +2522,7 @@ void __cdecl InitFirstThink(gentity_s *pSelf)
     prevAngles[2] = angles[2];
     pSelf->health = 99999;
     VEH_TouchEntities_0(pSelf, 0.050000001f);
-    pSelf->handler = 22;
+    pSelf->handler = ENT_HANDLER_VEHICLE;
     pSelf->nextthink = level.time + 50;
     veh->flags |= 8u;
 }

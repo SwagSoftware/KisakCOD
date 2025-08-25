@@ -798,7 +798,7 @@ int __cdecl Actor_BecomeCorpse(gentity_s *self)
         MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\actor_corpse.cpp", 577, 0, "%s", "self->sentient == NULL");
     self->physicsObject = 1;
     p_pos = &self->s.lerp.pos;
-    self->handler = 3;
+    self->handler = ENT_HANDLER_ACTOR_CORPSE;
     self->r.contents = 0x4000000;
     self->s.eType = ET_ACTOR_CORPSE;
     self->clipmask = 8519697;

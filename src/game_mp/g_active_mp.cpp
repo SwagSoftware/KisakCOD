@@ -790,7 +790,7 @@ void __cdecl G_AddPlayerMantleBlockage(float *endPos, int32_t duration, pmove_t 
     ent->clipmask = 0x10000;
     ent->r.svFlags = 33;
     ent->s.eType = ET_INVISIBLE;
-    ent->handler = 21;
+    ent->handler = ENT_HANDLER_PLAYER_BLOCK;
     ent->r.mins[0] = owner->r.mins[0];
     ent->r.mins[1] = owner->r.mins[1];
     ent->r.mins[2] = owner->r.mins[2];
@@ -1153,7 +1153,7 @@ void __cdecl ClientEndFrame(gentity_s *ent)
         MyAssertHandler(".\\game_mp\\g_active_mp.cpp", 1489, 0, "%s", "client");
     if (client->sess.connected == CON_DISCONNECTED)
         MyAssertHandler(".\\game_mp\\g_active_mp.cpp", 1490, 0, "%s", "client->sess.connected != CON_DISCONNECTED");
-    ent->handler = 11;
+    ent->handler = ENT_HANDLER_CLIENT_SPECTATOR;
     client->ps.deltaTime = 0;
     client->ps.gravity = (int)g_gravity->current.value;
     client->ps.moveSpeedScaleMultiplier = ent->client->sess.moveSpeedScaleMultiplier;
@@ -1262,7 +1262,14 @@ void __cdecl ClientEndFrame(gentity_s *ent)
             }
             if (ent->s.eType == ET_PLAYER)
             {
-                ent->handler = 2 * (ent->health <= 0) + 10;
+                if (ent->health <= 0)
+                {
+                    ent->handler = ENT_HANDLER_CLIENT_DEAD;
+                }
+                else
+                {
+                    ent->handler = ENT_HANDLER_CLIENT;
+                }
                 clientNum = ent->s.clientNum;
                 if ((uint32_t)clientNum >= 0x40)
                     MyAssertHandler(

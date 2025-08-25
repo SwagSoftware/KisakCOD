@@ -2608,7 +2608,7 @@ void __cdecl G_SpawnTurret(gentity_s *self, const char *weaponinfoname)
     self->s.lerp.u.turret.gunAngles[0] = 0.0;
     self->s.lerp.u.turret.gunAngles[1] = 0.0;
     self->s.lerp.u.turret.gunAngles[2] = 0.0;
-    self->handler = 20;
+    self->handler = ENT_HANDLER_TURRET_INIT;
     time = level.time;
     self->s.lerp.apos.trType = TR_LINEAR_STOP;
     self->takedamage = 0;
@@ -2714,7 +2714,7 @@ void __cdecl turret_think_init(gentity_s *self)
             "%s",
             "self->handler == ENT_HANDLER_TURRET_INIT");
     tagInfo = self->tagInfo;
-    self->handler = 21;
+    self->handler = ENT_HANDLER_TURRET;
     time = level.time;
     self->s.lerp.u.turret.gunAngles[2] = 0.0;
     self->nextthink = time + 50;

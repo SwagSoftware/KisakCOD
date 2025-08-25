@@ -224,10 +224,6 @@ const float MY_STRAIGHTUPNORMAL[3] = { 0.0, 0.0, 1.0 };
 void __cdecl G_ExplodeMissile(gentity_s *ent)
 {
     int32_t v1; // eax
-    uint8_t v2; // al
-    uint8_t v3; // al
-    uint8_t v4; // al
-    uint8_t v5; // al
     float fInnerDamage; // [esp+0h] [ebp-E0h]
     float fOuterDamage; // [esp+4h] [ebp-DCh]
     float radius; // [esp+8h] [ebp-D8h]
@@ -252,13 +248,10 @@ void __cdecl G_ExplodeMissile(gentity_s *ent)
     WeaponDef *weapDef; // [esp+D8h] [ebp-8h]
     int32_t splashMethodOfDeath; // [esp+DCh] [ebp-4h]
 
-    if (!ent)
-        MyAssertHandler(".\\game\\g_missile.cpp", 736, 0, "%s", "ent");
-    if (!ent->s.weapon)
-        MyAssertHandler(".\\game\\g_missile.cpp", 737, 0, "%s", "ent->s.weapon");
+    iassert(ent);
+    iassert(ent->s.weapon);
     weapDef = BG_GetWeaponDef(ent->s.weapon);
-    if (!weapDef)
-        MyAssertHandler(".\\game\\g_missile.cpp", 739, 0, "%s", "weapDef");
+    iassert(weapDef);
     if (weapDef->offhandClass == OFFHAND_CLASS_SMOKE_GRENADE && ent->s.groundEntityNum == ENTITYNUM_NONE)
     {
         if (level.time - ent->item[0].clipAmmoCount <= 60000)
@@ -273,11 +266,10 @@ void __cdecl G_ExplodeMissile(gentity_s *ent)
     }
     else
     {
+
         BG_EvaluateTrajectory(&ent->s.lerp.pos, level.time, origin);
-        origin[0] = (float)(int)origin[0];
-        origin[1] = (float)(int)origin[1];
-        origin[2] = (float)(int)origin[2];
         G_SetOrigin(ent, origin);
+
         doEvent = 1;
         v1 = SV_PointContents(ent->r.currentOrigin, -1, 32);
         inWater = v1 != 0;
@@ -355,26 +347,23 @@ void __cdecl G_ExplodeMissile(gentity_s *ent)
             {
                 if (weapDef->projExplosion == WEAPPROJEXP_ROCKET)
                 {
-                    v3 = DirToByte(normal);
-                    G_AddEvent(eventEnt, EV_ROCKET_EXPLODE, v3);
+                    G_AddEvent(eventEnt, EV_ROCKET_EXPLODE, DirToByte(normal));
                 }
                 else if (weapDef->projExplosion == WEAPPROJEXP_FLASHBANG)
                 {
-                    v4 = DirToByte(normal);
-                    G_AddEvent(eventEnt, EV_FLASHBANG_EXPLODE, v4);
+                    G_AddEvent(eventEnt, EV_FLASHBANG_EXPLODE, DirToByte(normal));
                 }
                 else
                 {
-                    v5 = DirToByte(normal);
-                    G_AddEvent(eventEnt, EV_CUSTOM_EXPLODE, v5);
+                    G_AddEvent(eventEnt, EV_CUSTOM_EXPLODE, DirToByte(normal));
                     eventEnt->s.lerp.u.customExplode.startTime = level.time;
                 }
             }
             else
             {
-                v2 = DirToByte(normal);
-                G_AddEvent(eventEnt, EV_GRENADE_EXPLODE, v2);
+                G_AddEvent(eventEnt, EV_GRENADE_EXPLODE, DirToByte(normal));
             }
+#ifdef KISAK_MP
             if (weapDef->projExplosion == WEAPPROJEXP_SMOKE && weapDef->projExplosionEffect)
             {
                 eventEnt->s.lerp.pos.trBase[0] = (float)(int)eventEnt->s.lerp.pos.trBase[0];
@@ -385,7 +374,7 @@ void __cdecl G_ExplodeMissile(gentity_s *ent)
                 eventEnt->s.lerp.u.customExplode.startTime = level.time;
                 eventEnt->s.time2 = level.time + 61000;
                 eventEnt->s.lerp.eFlags |= 0x80000u;
-                eventEnt->handler = 8;
+                eventEnt->handler = ENT_HANDLER_TIMED_OBJECT;
                 eventEnt->nextthink = level.time + 1;
                 Com_Printf(
                     15,
@@ -396,6 +385,7 @@ void __cdecl G_ExplodeMissile(gentity_s *ent)
                     eventEnt->s.lerp.pos.trBase[2]);
             }
             else
+#endif
             {
                 G_FreeEntityAfterEvent(eventEnt);
             }
@@ -2624,15 +2614,11 @@ void __cdecl G_InitGrenadeEntity(gentity_s *parent, gentity_s *grenade)
     gentity_s *ent; // [esp+0h] [ebp-10h]
     WeaponDef *weapDef; // [esp+Ch] [ebp-4h]
 
-    if (!parent)
-        MyAssertHandler(".\\game\\g_missile.cpp", 2496, 0, "%s", "parent");
-    if (!grenade)
-        MyAssertHandler(".\\game\\g_missile.cpp", 2497, 0, "%s", "grenade");
-    if (!grenade->s.weapon)
-        MyAssertHandler(".\\game\\g_missile.cpp", 2499, 0, "%s", "grenade->s.weapon");
+    iassert(parent);
+    iassert(grenade);
+    iassert(grenade->s.weapon);
     weapDef = BG_GetWeaponDef(grenade->s.weapon);
-    if (!weapDef)
-        MyAssertHandler(".\\game\\g_missile.cpp", 2501, 0, "%s", "weapDef");
+    iassert(weapDef);
     grenade->s.eType = ET_MISSILE;
     grenade->s.lerp.eFlags = 0x1000000;
     grenade->s.lerp.u.missile.launchTime = level.time;
@@ -2666,7 +2652,8 @@ void __cdecl G_InitGrenadeEntity(gentity_s *parent, gentity_s *grenade)
 #elif KISAK_SP
     grenade->clipmask = 0x280E091;
 #endif
-    grenade->handler = 7;
+
+    grenade->handler = ENT_HANDLER_GRENADE;
     grenade->missileTargetEnt.setEnt(NULL);
     G_BroadcastEntity(grenade);
     grenade->r.svFlags = 4;
@@ -2912,11 +2899,10 @@ gentity_s *__cdecl G_FireRocket(
     bolt->parent.setEnt(parent);
 #ifdef KISAK_MP
     bolt->clipmask = 0x2806891;
-    bolt->handler = 9;
 #elif KISAK_SP
     bolt->clipmask = 0x280E091;
-    bolt->handler = 15;
 #endif
+    bolt->handler = ENT_HANDLER_ROCKET;
     InitRocketTimer(bolt, weapDef);
     bolt->mover.speed = 0.0;
     bolt->missileTargetEnt.setEnt(target);

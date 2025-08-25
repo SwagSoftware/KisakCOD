@@ -124,7 +124,7 @@ gentity_s *__cdecl VEH_GetVehicle(int32_t entNum)
 void __cdecl VEH_InitEntity(gentity_s *ent, scr_vehicle_s *veh, int32_t infoIdx)
 {
 #ifdef KISAK_MP
-    ent->handler = 23;
+    ent->handler = ENT_HANDLER_HELICOPTER;
     ent->r.svFlags = 4;
     ent->r.contents = 8320;
     ent->s.lerp.eFlags = 0;
@@ -149,7 +149,7 @@ void __cdecl VEH_InitEntity(gentity_s *ent, scr_vehicle_s *veh, int32_t infoIdx)
     SV_LinkEntity(ent);
 #elif KISAK_SP
     int spawnflags = ent->spawnflags;
-    ent->handler = 9;
+    ent->handler = ENT_HANDLER_VEHICLE_INIT;
     ent->r.svFlags = 4;
     ent->r.contents = 8320;
     if ((spawnflags & 1) != 0)
@@ -4058,7 +4058,7 @@ void G_FreeVehicle(gentity_s *ent)
     ent->nextthink = 0;
     ent->takedamage = 0;
     ent->active = 0;
-    ent->handler = 11;
+    ent->handler = ENT_HANDLER_VEHICLE_FREE;
     ent->s.lerp.eFlags = 0;
     ent->s.lerp.pos.trType = TR_STATIONARY;
     ent->s.lerp.apos.trType = TR_STATIONARY;
@@ -5083,7 +5083,7 @@ void Scr_Vehicle_Init(gentity_s *pSelf)
             0,
             "%s",
             "pSelf->handler == ENT_HANDLER_VEHICLE_INIT");
-    pSelf->handler = 10;
+    pSelf->handler = ENT_HANDLER_VEHICLE;
     pSelf->nextthink = level.time + 50;
 }
 

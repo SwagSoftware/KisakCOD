@@ -110,7 +110,7 @@ void __cdecl Touch_Multi(gentity_s *self, gentity_s *other, int bTouched)
 
 void __cdecl SP_trigger_multiple(gentity_s *ent)
 {
-    ent->handler = 4;
+    ent->handler = ENT_HANDLER_TRIGGER_MULTIPLE;
     InitTriggerWait(ent, 64);
     if ((unsigned __int8)InitTrigger(ent))
     {
@@ -165,7 +165,7 @@ void __cdecl SP_trigger_radius(gentity_s *ent)
     ent->r.maxs[1] = v4;
     v6 = v8;
     ent->r.mins[2] = 0.0;
-    ent->handler = 4;
+    ent->handler = ENT_HANDLER_TRIGGER_MULTIPLE;
     ent->r.maxs[2] = v6;
     ent->r.svFlags = 17;
     ent->r.mins[0] = v5;
@@ -192,7 +192,7 @@ void __cdecl SP_trigger_disk(gentity_s *ent)
         Com_Error(ERR_DROP, v2);
     }
     v3 = (float)(v4[0] + (float)64.0);
-    ent->handler = 4;
+    ent->handler = ENT_HANDLER_TRIGGER_MULTIPLE;
     v4[0] = v3;
     ent->r.svFlags = 33;
     ent->r.maxs[0] = v3;
@@ -219,7 +219,7 @@ void __cdecl SP_trigger_friendlychain(gentity_s *ent)
     int target; // r10
 
     target = ent->target;
-    ent->handler = 5;
+    ent->handler = ENT_HANDLER_FRIENDLYCHAIN;
     if (!target)
         Com_Error(ERR_DROP, "trigger_friendlychain must target a friendly chain node");
     if ((unsigned __int8)InitTrigger(ent))
@@ -280,31 +280,25 @@ void __cdecl hurt_touch(gentity_s *self, gentity_s *other, int bTouched)
                     0,
                     "%s",
                     "self->handler == ENT_HANDLER_TRIGGER_HURT_TOUCH");
-            self->handler = 6;
+            self->handler = ENT_HANDLER_TRIGGER_HURT;
         }
     }
 }
 
 void __cdecl hurt_use(gentity_s *self, gentity_s *other, gentity_s *activator)
 {
-    int handler; // r11
-    unsigned __int8 v5; // r11
+    EntHandler_t handler; // r11
+    EntHandler_t v5; // r11
 
     handler = self->handler;
-    if (handler == 7)
+    if (handler == ENT_HANDLER_TRIGGER_HURT_TOUCH)
     {
-        v5 = 6;
+        v5 = ENT_HANDLER_TRIGGER_HURT;
     }
     else
     {
-        if (handler != 6)
-            MyAssertHandler(
-                "c:\\trees\\cod3\\cod3src\\src\\game\\g_trigger.cpp",
-                333,
-                0,
-                "%s",
-                "self->handler == ENT_HANDLER_TRIGGER_HURT");
-        v5 = 7;
+        iassert(self->handler == ENT_HANDLER_TRIGGER_HURT);
+        v5 = ENT_HANDLER_TRIGGER_HURT_TOUCH;
     }
     self->handler = v5;
 }
@@ -312,17 +306,17 @@ void __cdecl hurt_use(gentity_s *self, gentity_s *other, gentity_s *activator)
 void __cdecl SP_trigger_hurt(gentity_s *self)
 {
     bool v2; // cr58
-    unsigned __int8 v3; // r11
+    EntHandler_t v3; // r11
 
     if ((unsigned __int8)InitTrigger(self))
     {
         if (!self->damage)
             self->damage = 5;
         v2 = (self->spawnflags & 1) == 0;
-        v3 = 7;
+        v3 = ENT_HANDLER_TRIGGER_HURT_TOUCH;
         self->r.contents = 1079771144;
         if (!v2)
-            v3 = 6;
+            v3 = ENT_HANDLER_TRIGGER_HURT;
         self->handler = v3;
     }
 }
@@ -332,7 +326,7 @@ void __cdecl SP_trigger_once(gentity_s *ent)
     int spawnflags; // r11
 
     spawnflags = ent->spawnflags;
-    ent->handler = 4;
+    ent->handler = ENT_HANDLER_TRIGGER_MULTIPLE;
     ent->spawnflags = spawnflags | 0x40;
     if ((unsigned __int8)InitTrigger(ent))
     {
@@ -438,7 +432,7 @@ void __cdecl SP_trigger_damage(gentity_s *pSelf)
     G_SpawnInt("threshold", "0", &pSelf->trigger.threshold);
     pSelf->health = 32000;
     pSelf->takedamage = 1;
-    pSelf->handler = 8;
+    pSelf->handler = ENT_HANDLER_TRIGGER_DAMAGE;
     InitTriggerWait(pSelf, 512);
     if ((unsigned __int8)InitTrigger(pSelf))
         SV_LinkEntity(pSelf);

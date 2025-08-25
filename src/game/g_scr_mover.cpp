@@ -158,11 +158,7 @@ int __cdecl ScriptMover_UpdateMove(
 void __cdecl InitScriptMover(gentity_s *pSelf)
 {
     pSelf->r.svFlags = 0;
-#ifdef KISAK_MP
-    pSelf->handler = 5;
-#elif KISAK_SP
-    pSelf->handler = 12;
-#endif
+    pSelf->handler = ENT_HANDLER_SCRIPT_MOVER;
     pSelf->s.eType = ET_SCRIPTMOVER;
     pSelf->s.lerp.pos.trBase[0] = pSelf->r.currentOrigin[0];
     pSelf->s.lerp.pos.trBase[1] = pSelf->r.currentOrigin[1];

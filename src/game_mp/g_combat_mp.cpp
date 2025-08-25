@@ -188,7 +188,7 @@ void __cdecl player_die(
             MyAssertHandler(".\\game_mp\\g_combat_mp.cpp", 381, 0, "%s", "self->r.maxs[2] >= self->r.mins[2]");
         SV_LinkEntity(self);
         self->health = 0;
-        self->handler = 12;
+        self->handler = ENT_HANDLER_CLIENT_DEAD;
         if (bgs != &level_bgs)
             MyAssertHandler(".\\game_mp\\g_combat_mp.cpp", 389, 0, "%s\n\t(bgs) = %p", "(bgs == &level_bgs)", bgs);
     }
