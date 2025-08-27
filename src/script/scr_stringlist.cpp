@@ -19,11 +19,12 @@ scrStringDebugGlob_t* scrStringDebugGlob;
 static scrStringDebugGlob_t scrStringDebugGlobBuf;
 static scrStringGlob_t scrStringGlob; // 0x244E300
 
+#define SCR_SYS_GAME 1
+
 HashEntry_unnamed_type_u __cdecl Scr_AllocString(char *s, int sys)
 {
-	if (sys != 1)
-		MyAssertHandler(".\\script\\scr_stringlist.cpp", 1030, 0, "%s", "sys == SCR_SYS_GAME");
-	return SL_GetString(s, 1u);
+	iassert(sys == SCR_SYS_GAME);
+	return SL_GetString(s, 1);
 }
 
 void SL_Init()
@@ -33,9 +34,10 @@ void SL_Init()
 	MT_Init();
 
 	Sys_EnterCriticalSection(CRITSECT_SCRIPT_STRING);
+
 	scrStringGlob.hashTable[0].status_next = 0;
 	unsigned int prev = 0;
-	for (unsigned int hash = 1; hash < 20'000; ++hash)
+	for (unsigned int hash = 1; hash < STRINGLIST_SIZE; ++hash)
 	{
 		iassert(!(hash & HASH_STAT_MASK));
 		scrStringGlob.hashTable[hash].status_next = 0;
@@ -43,6 +45,7 @@ void SL_Init()
 		scrStringGlob.hashTable[hash].u.prev = prev;
 		prev = hash;
 	}
+
 	scrStringGlob.hashTable[0].u.prev = prev;
 	SL_InitCheckLeaks();
 	scrStringGlob.inited = 1;
@@ -88,6 +91,7 @@ void SL_AddUserInternal(RefString* refStr, unsigned int user)
 void SL_AddRefToString(unsigned int stringValue)
 {
 	PROF_SCOPED("SL_AddRefToString");
+
 	if (scrStringDebugGlob)
 	{
 		iassert(scrStringDebugGlob->refCount[stringValue]);
@@ -96,6 +100,7 @@ void SL_AddRefToString(unsigned int stringValue)
 		InterlockedIncrement(&scrStringDebugGlob->totalRefCount);
 		InterlockedIncrement(&scrStringDebugGlob->refCount[stringValue]);
 	}
+
 	RefString* refStr = GetRefString(stringValue);
 	InterlockedIncrement((volatile LONG*)refStr);
 
@@ -116,13 +121,13 @@ static void SL_CheckLeaks()
 	{
 		if (!scrStringDebugGlob->ignoreLeaks)
 		{
-			for (int i = 1; i < 0x10000; ++i)
+			for (int i = 1; i < 65536; ++i)
 			{
 				iassert(!scrStringDebugGlob->refCount[i]);
 			}
 			iassert((!scrStringDebugGlob->totalRefCount));
 		}
-		scrStringDebugGlob = 0;
+		scrStringDebugGlob = NULL;
 	}
 }
 
@@ -141,12 +146,13 @@ void SL_ShutdownSystem(unsigned int user)
 
 	Sys_EnterCriticalSection(CRITSECT_SCRIPT_STRING);
 
-	for (unsigned int hash = 1; hash < 20'000; ++hash)
+	for (unsigned int hash = 1; hash < STRINGLIST_SIZE; ++hash)
 	{
 		do
 		{
-			if ((scrStringGlob.hashTable[hash].status_next & 0x30000) == 0)
+			if ((scrStringGlob.hashTable[hash].status_next & HASH_STAT_MASK) == 0)
 				break;
+
 			RefString* refStr = GetRefString(scrStringGlob.hashTable[hash].u.prev);
 
 			if (((unsigned __int8)user & refStr->user) == 0)
@@ -184,7 +190,8 @@ void SL_TransferSystem(unsigned int from, unsigned int to)
 	iassert(to);
 
 	Sys_EnterCriticalSection(CRITSECT_SCRIPT_STRING);
-	for (unsigned int hash = 1; hash < 20'000; ++hash)
+
+	for (unsigned int hash = 1; hash < STRINGLIST_SIZE; ++hash)
 	{
 		if ((scrStringGlob.hashTable[hash].status_next & HASH_STAT_MASK) != 0)
 		{
@@ -196,17 +203,19 @@ void SL_TransferSystem(unsigned int from, unsigned int to)
 			}
 		}
 	}
+
 	Sys_LeaveCriticalSection(CRITSECT_SCRIPT_STRING);
 }
 
 unsigned int SL_GetString_(const char* str, unsigned int user, int type)
 {
-	return (int)(SL_GetStringOfSize(str, user, strlen(str) + 1, type).prev); // LWSS: bit hacky here with the union
+	return SL_GetStringOfSize(str, user, strlen(str) + 1, type);
 }
 
 HashEntry_unnamed_type_u SL_GetStringOfSize(const char* str, unsigned int user, unsigned int len, int type)
 {
 	PROF_SCOPED("SL_GetStringOfSize");
+
 	iassert(str);
 
 	unsigned int hash = GetHashCode(str, len);
@@ -254,9 +263,9 @@ HashEntry_unnamed_type_u SL_GetStringOfSize(const char* str, unsigned int user, 
 
 			if (refStr->byteLen == len && !memcmp(refStr->str, str, len))
 			{
-				scrStringGlob.hashTable[prev].status_next = (unsigned __int16)newEntry->status_next | scrStringGlob.hashTable[prev].status_next & 0x30000;
-				newEntry->status_next = (unsigned __int16)entry->status_next | newEntry->status_next & 0x30000;
-				entry->status_next = newIndex | entry->status_next & 0x30000;
+				scrStringGlob.hashTable[prev].status_next = (unsigned __int16)newEntry->status_next | scrStringGlob.hashTable[prev].status_next & HASH_STAT_MASK;
+				newEntry->status_next = (unsigned __int16)entry->status_next | newEntry->status_next & HASH_STAT_MASK;
+				entry->status_next = newIndex | entry->status_next & HASH_STAT_MASK;
 				stringValue = newEntry->u.prev;
 				newEntry->u.prev = entry->u.prev;
 				entry->u.prev = stringValue;
@@ -282,6 +291,7 @@ HashEntry_unnamed_type_u SL_GetStringOfSize(const char* str, unsigned int user, 
 			//Scr_DumpScriptVariablesDefault();
 			Com_Error(ERR_DROP, "exceeded maximum number of script strings (increase STRINGLIST_SIZE)");
 		}
+
 		stringValue = MT_AllocIndex(len + 4, type);
 		newEntry = &scrStringGlob.hashTable[newIndex];
 		iassert((newEntry->status_next & HASH_STAT_MASK) == HASH_STAT_FREE);
@@ -290,8 +300,8 @@ HashEntry_unnamed_type_u SL_GetStringOfSize(const char* str, unsigned int user, 
 
 		scrStringGlob.hashTable[0].status_next = newNext;
 		scrStringGlob.hashTable[newNext].u.prev = 0;
-		newEntry->status_next = (unsigned __int16)entry->status_next | 0x10000;
-		entry->status_next = (unsigned __int16)newIndex | entry->status_next & 0x30000;
+		newEntry->status_next = (unsigned __int16)entry->status_next | HASH_STAT_MOVABLE;
+		entry->status_next = (unsigned __int16)newIndex | entry->status_next & HASH_STAT_MASK;
 		newEntry->u.prev = entry->u.prev;
 	}
 	else
@@ -330,8 +340,8 @@ HashEntry_unnamed_type_u SL_GetStringOfSize(const char* str, unsigned int user, 
 
 			scrStringGlob.hashTable[0].status_next = newNext;
 			scrStringGlob.hashTable[newNext].u.prev = 0;
-			scrStringGlob.hashTable[prev].status_next = newIndex | scrStringGlob.hashTable[prev].status_next & 0x30000;
-			newEntry->status_next = next | 0x10000;
+			scrStringGlob.hashTable[prev].status_next = newIndex | scrStringGlob.hashTable[prev].status_next & HASH_STAT_MASK;
+			newEntry->status_next = next | HASH_STAT_MOVABLE;
 			newEntry->u.prev = entry->u.prev;
 		}
 		else
@@ -340,11 +350,11 @@ HashEntry_unnamed_type_u SL_GetStringOfSize(const char* str, unsigned int user, 
 			prev = entry->u.prev;
 			next = (unsigned __int16)entry->status_next;
 
-			scrStringGlob.hashTable[prev].status_next = next | scrStringGlob.hashTable[prev].status_next & 0x30000;
+			scrStringGlob.hashTable[prev].status_next = next | scrStringGlob.hashTable[prev].status_next & HASH_STAT_MASK;
 			scrStringGlob.hashTable[next].u.prev = prev;
 		}
 		iassert(!(hash & HASH_STAT_MASK));
-		entry->status_next = hash | 0x20000;
+		entry->status_next = hash | HASH_STAT_HEAD;
 	}
 	iassert(stringValue);
 	entry->u.prev = stringValue;
@@ -405,7 +415,7 @@ int SL_GetStringLen(unsigned int stringValue)
 	return SL_GetRefStringLen(refString);
 }
 
-static HashEntry_unnamed_type_u FindStringOfSize(const char* str, unsigned int len)
+static unsigned int FindStringOfSize(const char* str, unsigned int len)
 {
 	unsigned int stringValue = 0;
 
@@ -472,7 +482,7 @@ static HashEntry_unnamed_type_u FindStringOfSize(const char* str, unsigned int l
 
 unsigned int SL_FindString(const char* str)
 {
-	return FindStringOfSize(str, strlen(str) + 1).prev;
+	return FindStringOfSize(str, strlen(str) + 1);
 }
 
 void __cdecl SL_TransferRefToUser(unsigned int stringValue, unsigned int user)
@@ -711,26 +721,26 @@ void SL_RemoveRefToStringOfSize(unsigned int stringValue, unsigned int len)
 
 	if (InterlockedDecrement((volatile LONG*)refStr) << 16)
 	{
-		//if (scrStringDebugGlob)
-		//{
-		//	iassert(scrStringDebugGlob->totalRefCount && scrStringDebugGlob->refCount[stringValue]);
-		//	iassert(scrStringDebugGlob->refCount[stringValue]);
-		//
-		//	InterlockedDecrement(&scrStringDebugGlob->totalRefCount);
-		//	InterlockedDecrement(&scrStringDebugGlob->refCount[stringValue]);
-		//}
+		if (scrStringDebugGlob)
+		{
+			iassert(scrStringDebugGlob->totalRefCount && scrStringDebugGlob->refCount[stringValue]);
+			iassert(scrStringDebugGlob->refCount[stringValue]);
+		
+			InterlockedDecrement(&scrStringDebugGlob->totalRefCount);
+			InterlockedDecrement(&scrStringDebugGlob->refCount[stringValue]);
+		}
 	}
 	else
 	{
 		SL_FreeString(stringValue, refStr, len);
-		//if (scrStringDebugGlob)
-		//{
-		//	iassert(scrStringDebugGlob->totalRefCount && scrStringDebugGlob->refCount[stringValue]);
-		//	iassert(scrStringDebugGlob->refCount[stringValue]);
-		//
-		//	InterlockedDecrement(&scrStringDebugGlob->totalRefCount);
-		//	InterlockedDecrement(&scrStringDebugGlob->refCount[stringValue]);
-		//}
+		if (scrStringDebugGlob)
+		{
+			iassert(scrStringDebugGlob->totalRefCount && scrStringDebugGlob->refCount[stringValue]);
+			iassert(scrStringDebugGlob->refCount[stringValue]);
+		
+			InterlockedDecrement(&scrStringDebugGlob->totalRefCount);
+			InterlockedDecrement(&scrStringDebugGlob->refCount[stringValue]);
+		}
 	}
 }
 
@@ -781,8 +791,8 @@ void __cdecl CreateCanonicalFilename(char *newFilename, const char *filename, in
 {
 	unsigned int c; // [esp+0h] [ebp-4h]
 	const int oldCount = count; // addition because the old assert was broken, lol
-	if (!count)
-		MyAssertHandler(".\\script\\scr_stringlist.cpp", 1146, 0, "%s", "count");
+
+	iassert(count);
 	do
 	{
 		do
@@ -830,7 +840,6 @@ void Scr_SetStringFromCharString(unsigned __int16 *to, const char *from)
 
 unsigned int SL_GetUser(unsigned int stringValue)
 {
-	//return *((unsigned __int8 *)&GetRefString(stringValue)->0 + 1);
 	return GetRefString(stringValue)->user;
 }
 
@@ -841,14 +850,7 @@ const char *SL_ConvertToStringSafe(unsigned int stringValue)
 
 	if (scrStringDebugGlob)
 	{
-		if (!scrStringDebugGlob->refCount[stringValue])
-			MyAssertHandler(
-				"c:\\trees\\cod3\\cod3src\\src\\script\\scr_stringlist.cpp",
-				180,
-				0,
-				"%s\n\t(stringValue) = %i",
-				"(!stringValue || !scrStringDebugGlob || scrStringDebugGlob->refCount[stringValue])",
-				stringValue);
+		iassert((!stringValue || !scrStringDebugGlob || scrStringDebugGlob->refCount[stringValue]));
 	}
 
 	return GetRefString(stringValue)->str;

@@ -7,6 +7,8 @@
 
 #define SL_MAX_STRING_INDEX 0x10000
 
+#define STRINGLIST_SIZE 20'000
+
 union HashEntry_unnamed_type_u
 {           
     HashEntry_unnamed_type_u()
