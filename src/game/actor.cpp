@@ -3025,12 +3025,15 @@ void __cdecl Actor_FreeExpendable()
         MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\actor.cpp", 628, 0, "%s", "!sentient->inuse");
 }
 
+#define ACTOR_CLASSNAME_PREFIX "actor_"
+#define ACTOR_CLASSNAME_PREFIX_LEN 6
+
 void __cdecl Actor_FinishSpawningAll()
 {
     gentity_s *pEnt; // r28
     int i; // r22
     int eType; // r11
-    const char *v3; // r31
+    const char *classname; // r31
     AITypeScript *typeScript; // r31
     unsigned __int16 v7; // r3
     actor_s *j; // r31
@@ -3044,16 +3047,10 @@ void __cdecl Actor_FinishSpawningAll()
             eType = pEnt->s.eType;
             if (eType == ET_ACTOR || eType == ET_ACTOR_SPAWNER)
             {
-                v3 = SL_ConvertToString(pEnt->classname);
+                classname = SL_ConvertToString(pEnt->classname);
 
-                if (strncmp(v3, "actor_", 6u))
-                    MyAssertHandler(
-                        "c:\\trees\\cod3\\cod3src\\src\\game\\actor.cpp",
-                        825,
-                        0,
-                        "%s",
-                        "!strncmp( classname, ACTOR_CLASSNAME_PREFIX, ACTOR_CLASSNAME_PREFIX_LEN )");
-                typeScript = (AITypeScript *)Hunk_FindDataForFile(0, v3 + 6);
+                iassert(!strncmp(classname, ACTOR_CLASSNAME_PREFIX, ACTOR_CLASSNAME_PREFIX_LEN));
+                typeScript = (AITypeScript *)Hunk_FindDataForFile(0, classname + ACTOR_CLASSNAME_PREFIX_LEN);
                 iassert(typeScript);
                 iassert(typeScript->main);
                 iassert(typeScript->spawner);

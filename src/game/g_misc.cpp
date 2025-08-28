@@ -26,32 +26,23 @@ void __cdecl SP_info_notnull(gentity_s *self)
 
 void __cdecl SP_light(gentity_s *self)
 {
-    const ComPrimaryLight *PrimaryLight; // r30
-    const float *origin; // r28
-    int v4; // r5
-    int v5; // r5
-    unsigned int v6; // r8
-    int v7; // r7
-    bool v8; // cr58
-    double v9; // fp0
-    double radius; // fp0
-    unsigned int ClosestPrimaryLight; // [sp+50h] [-80h] BYREF
-    float v13[4]; // [sp+58h] [-78h] BYREF
-    float v14[4]; // [sp+68h] [-68h] BYREF
-    float v15[6]; // [sp+78h] [-58h] BYREF
+    const ComPrimaryLight *light; // r30
+    unsigned int primaryLightIndex; // [sp+50h] [-80h] BYREF
+    float facingDir[4]; // [sp+58h] [-78h] BYREF
+    float normalizedColor[4]; // [sp+68h] [-68h] BYREF
+    float facingAngles[6]; // [sp+78h] [-58h] BYREF
 
-    if (!level.spawnVar.spawnVarsValid)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\g_misc.cpp", 178, 0, "%s", "level.spawnVar.spawnVarsValid");
-    if (G_SpawnInt("pl#", "0", (int *)&ClosestPrimaryLight))
+    iassert(level.spawnVar.spawnVarsValid);
+
+    if (G_SpawnInt("pl#", "0", (int *)&primaryLightIndex))
     {
-        PrimaryLight = Com_GetPrimaryLight(ClosestPrimaryLight);
-        origin = PrimaryLight->origin;
-        if (!VecNCompareCustomEpsilon(PrimaryLight->origin, self->r.currentOrigin, 1.0, v4))
+        light = Com_GetPrimaryLight(primaryLightIndex);
+
+        if (!VecNCompareCustomEpsilon(light->origin, self->r.currentOrigin, 1.0, 3))
         {
-            ClosestPrimaryLight = Com_FindClosestPrimaryLight(self->r.currentOrigin);
-            PrimaryLight = Com_GetPrimaryLight(ClosestPrimaryLight);
-            origin = PrimaryLight->origin;
-            if (!VecNCompareCustomEpsilon(PrimaryLight->origin, self->r.currentOrigin, 1.0, v5))
+            primaryLightIndex = Com_FindClosestPrimaryLight(self->r.currentOrigin);
+            light = Com_GetPrimaryLight(primaryLightIndex);
+            if (!VecNCompareCustomEpsilon(light->origin, self->r.currentOrigin, 1.0, 3))
                 Com_PrintError(
                     1,
                     "No primary light was found at (%.0f %.0f %.0f).  You may have added, deleted, or moved a primary light since the last full map compile.  You should recompile the map before using MyMapEnts to avoid issues with primary lights.\n",
@@ -60,41 +51,36 @@ void __cdecl SP_light(gentity_s *self)
                     self->r.currentOrigin[2]
                 );
         }
-        v6 = ClosestPrimaryLight;
-        v7 = ClosestPrimaryLight & 0xFFFF;
-        v8 = (ClosestPrimaryLight & 0xFFFF) == ClosestPrimaryLight;
-        //*(_WORD *)self->s.index = ClosestPrimaryLight;
-        self->s.index.item = ClosestPrimaryLight;
-        if (!v8)
-            MyAssertHandler(
-                "c:\\trees\\cod3\\cod3src\\src\\game\\g_misc.cpp",
-                198,
-                1,
-                "self->s.index.primaryLight == primaryLightIndex\n\t%i, %i",
-                v7,
-                v6);
-        self->s.lerp.u.turret.gunAngles[1] = ColorNormalize(PrimaryLight->color, v14);
-        Byte4PackRgba(v14, (unsigned __int8 *)&self->s.lerp.u);
-        self->s.lerp.u.primaryLight.colorAndExp[3] = PrimaryLight->exponent;
-        self->s.lerp.u.turret.gunAngles[2] = PrimaryLight->radius;
-        self->s.lerp.u.primaryLight.cosHalfFovOuter = PrimaryLight->cosHalfFovOuter;
-        self->s.lerp.u.primaryLight.cosHalfFovInner = PrimaryLight->cosHalfFovInner;
-        v13[0] = -PrimaryLight->dir[0];
-        v13[1] = -PrimaryLight->dir[1];
-        v13[2] = -PrimaryLight->dir[2];
-        vectoangles(v13, v15);
-        G_SetAngle(self, v15);
-        G_SetOrigin(self, (float*)origin);
-        v9 = -PrimaryLight->radius;
-        self->r.mins[0] = v9;
-        self->r.mins[2] = v9;
-        self->r.mins[1] = v9;
-        radius = PrimaryLight->radius;
-        self->r.maxs[0] = PrimaryLight->radius;
-        self->r.maxs[2] = radius;
-        self->r.maxs[1] = radius;
+
+        self->s.index.item = primaryLightIndex;
+
+        iassert(self->s.index.primaryLight == primaryLightIndex);
+
+        self->s.lerp.u.primaryLight.intensity = ColorNormalize(&light->color[0], normalizedColor);
+        Byte4PackRgba(normalizedColor, &self->s.lerp.u.primaryLight.colorAndExp[0]);
+        self->s.lerp.u.primaryLight.colorAndExp[3] = light->exponent;
+        self->s.lerp.u.primaryLight.radius = light->radius;
+        self->s.lerp.u.primaryLight.cosHalfFovOuter = light->cosHalfFovOuter;
+        self->s.lerp.u.primaryLight.cosHalfFovInner = light->cosHalfFovInner;
+        facingDir[0] = -light->dir[0];
+        facingDir[1] = -light->dir[1];
+        facingDir[2] = -light->dir[2];
+        vectoangles(facingDir, facingAngles);
+        G_SetAngle(self, facingAngles);
+        G_SetOrigin(self, (float*)light->origin);
+
+        self->r.mins[0] = -light->radius;
+        self->r.mins[1] = -light->radius;
+        self->r.mins[2] = -light->radius;
+
+        self->r.maxs[0] = light->radius;
+        self->r.maxs[1] = light->radius;
+        self->r.maxs[2] = light->radius;
+
         self->s.eType = ET_PRIMARY_LIGHT;
+
         iassert(self->r.contents == 0);
+
         self->handler = ENT_HANDLER_PRIMARY_LIGHT;
         SV_LinkEntity(self);
     }

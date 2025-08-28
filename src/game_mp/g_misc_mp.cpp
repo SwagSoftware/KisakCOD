@@ -18,28 +18,22 @@ void __cdecl SP_info_notnull(gentity_s *self)
 
 void __cdecl SP_light(gentity_s *self)
 {
-    float radius; // [esp+8h] [ebp-C4h]
-    float v2; // [esp+14h] [ebp-B8h]
     int32_t primaryLightIndex; // [esp+A0h] [ebp-2Ch] BYREF
     const ComPrimaryLight *light; // [esp+A4h] [ebp-28h]
     float facingDir[3]; // [esp+A8h] [ebp-24h] BYREF
     float facingAngles[3]; // [esp+B4h] [ebp-18h] BYREF
     float normalizedColor[3]; // [esp+C0h] [ebp-Ch] BYREF
 
-    if (!level.spawnVar.spawnVarsValid)
-        MyAssertHandler(".\\game_mp\\g_misc_mp.cpp", 29, 0, "%s", "level.spawnVar.spawnVarsValid");
+    iassert(level.spawnVar.spawnVarsValid);
+
     if (G_SpawnInt("pl#", "0", &primaryLightIndex))
     {
         light = Com_GetPrimaryLight(primaryLightIndex);
-        self->s.index.brushmodel = (uint16_t)primaryLightIndex;
-        if (self->s.index.brushmodel != primaryLightIndex)
-            MyAssertHandler(
-                ".\\game_mp\\g_misc_mp.cpp",
-                39,
-                1,
-                "self->s.index.primaryLight == primaryLightIndex\n\t%i, %i",
-                self->s.index.brushmodel,
-                primaryLightIndex);
+
+        self->s.index.primaryLight = (uint16_t)primaryLightIndex;
+
+        iassert(self->s.index.primaryLight == primaryLightIndex);
+
         self->s.lerp.u.primaryLight.intensity = ColorNormalize(&light->color[0], normalizedColor);
         Byte4PackRgba(normalizedColor, &self->s.lerp.u.primaryLight.colorAndExp[0]);
         self->s.lerp.u.primaryLight.colorAndExp[3] = light->exponent;
@@ -52,17 +46,19 @@ void __cdecl SP_light(gentity_s *self)
         vectoangles(facingDir, facingAngles);
         G_SetAngle(self, facingAngles);
         G_SetOrigin(self, light->origin);
-        v2 = -light->radius;
-        self->r.mins[0] = v2;
-        self->r.mins[1] = v2;
-        self->r.mins[2] = v2;
-        radius = light->radius;
-        self->r.maxs[0] = radius;
-        self->r.maxs[1] = radius;
-        self->r.maxs[2] = radius;
+
+        self->r.mins[0] = -light->radius;
+        self->r.mins[1] = -light->radius;
+        self->r.mins[2] = -light->radius;
+
+        self->r.maxs[0] = light->radius;
+        self->r.maxs[1] = light->radius;
+        self->r.maxs[2] = light->radius;
+
         self->s.eType = ET_PRIMARY_LIGHT;
-        if (self->r.contents)
-            MyAssertHandler(".\\game_mp\\g_misc_mp.cpp", 58, 1, "%s", "self->r.contents == 0");
+
+        iassert(self->r.contents == 0);
+
         self->handler = ENT_HANDLER_PRIMARY_LIGHT;
         SV_LinkEntity(self);
     }

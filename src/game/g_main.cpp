@@ -2626,52 +2626,61 @@ int __cdecl G_RunFrame(ServerFrameExtent extent, int timeCap)
 
 void __cdecl G_LoadLevel()
 {
-    if (level.loading != LOADING_LEVEL && level.loading != LOADING_SAVEGAME)
-        MyAssertHandler(
-            "c:\\trees\\cod3\\cod3src\\src\\game\\g_main.cpp",
-            2131,
-            0,
-            "%s",
-            "(level.loading == LOADING_LEVEL) || (level.loading == LOADING_SAVEGAME)");
+    iassert((level.loading == LOADING_LEVEL) || (level.loading == LOADING_SAVEGAME));
+
     level.initializing = 1;
-    ProfLoad_Begin("G_PrecacheDefaultModels");
-    G_PrecacheDefaultModels();
-    ProfLoad_End();
-    ProfLoad_Begin("Scr_InitSystem");
-    Scr_InitSystem(1);
-    ProfLoad_End();
-    ProfLoad_Begin("Scr_SetLoading");
-    Scr_SetLoading(1);
-    ProfLoad_End();
-    ProfLoad_Begin("Scr_AllocGameVariable");
-    Scr_AllocGameVariable();
-    ProfLoad_End();
-    ProfLoad_Begin("ClientBegin");
-    ClientBegin(0);
-    ProfLoad_End();
-    ProfLoad_Begin("G_LoadStructs");
-    G_LoadStructs();
-    ProfLoad_End();
-    ProfLoad_Begin("Actor_FinishSpawningAll");
-    Actor_FinishSpawningAll();
-    ProfLoad_End();
-    ProfLoad_Begin("Path_AutoDisconnectPaths");
-    Path_AutoDisconnectPaths();
-    ProfLoad_End();
-    ProfLoad_Begin("Scr_LoadLevel");
-    Scr_LoadLevel();
-    ProfLoad_End();
-    ProfLoad_Begin("G_RunFrame");
-    G_RunFrame(SV_FRAME_DO_ALL, 0);
-    ProfLoad_End();
-    ProfLoad_Begin("Scr_SetLoading");
-    Scr_SetLoading(0);
-    ProfLoad_End();
-    if (!level.gentities->client)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\g_main.cpp", 2180, 0, "%s", "level.gentities[0].client");
+
+    {
+        PROF_SCOPED("G_PrecacheDefaultModels");
+        G_PrecacheDefaultModels();
+    }
+    {
+        PROF_SCOPED("Scr_InitSystem");
+        Scr_InitSystem(1);
+    }
+    {
+        PROF_SCOPED("Scr_SetLoading");
+        Scr_SetLoading(1);
+    }
+    {
+        PROF_SCOPED("Scr_AllocGameVariable");
+        Scr_AllocGameVariable();
+    }
+    {
+        PROF_SCOPED("ClientBegin");
+        ClientBegin(0);
+    }
+    {
+        PROF_SCOPED("G_LoadStructs");
+        G_LoadStructs();
+    }
+    {
+        PROF_SCOPED("Actor_FinishSpawningAll");
+        Actor_FinishSpawningAll();
+    }
+    {
+        PROF_SCOPED("Path_AutoDisconnectPaths");
+        Path_AutoDisconnectPaths();
+    }
+    {
+        PROF_SCOPED("Scr_LoadLevel");
+        Scr_LoadLevel();
+    }
+    {
+        PROF_SCOPED("G_RunFrame");
+        G_RunFrame(SV_FRAME_DO_ALL, 0);
+    }
+    {
+        PROF_SCOPED("Scr_SetLoading");
+        Scr_SetLoading(0);
+    }
+
+    iassert(level.gentities[0].client);
     level.initializing = 0;
-    ProfLoad_Begin("G_SendClientMessages");
-    G_SendClientMessages();
-    ProfLoad_End();
+
+    {
+        PROF_SCOPED("G_SendClientMessages");
+        G_SendClientMessages();
+    }
 }
 

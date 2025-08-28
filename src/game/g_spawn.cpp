@@ -297,38 +297,17 @@ const gitem_s *__cdecl G_GetItemForClassname(const char *classname, unsigned __i
     return BG_FindItemForWeapon(v5, model);
 }
 
-void(__cdecl *__cdecl G_FindSpawnFunc(
-    const char *classname,
-    const SpawnFuncEntry *spawnFuncArray,
-    int spawnFuncCount))(gentity_s *)
+void(__cdecl *__cdecl G_FindSpawnFunc(const char *classname, const SpawnFuncEntry *spawnFuncArray, int spawnFuncCount))(gentity_s *)
 {
-    int v3; // r6
-    const SpawnFuncEntry *i; // r7
-    const char *v5; // r10
-    const char *v6; // r11
-    int v7; // r8
+    int spawnFuncIter; // [esp+14h] [ebp-4h]
 
-    v3 = 0;
-    if (spawnFuncCount <= 0)
-        return 0;
-    for (i = spawnFuncArray; ; ++i)
+    for (spawnFuncIter = 0; spawnFuncIter < spawnFuncCount; ++spawnFuncIter)
     {
-        v5 = i->classname;
-        v6 = classname;
-        do
-        {
-            v7 = *(unsigned __int8 *)v6 - *(unsigned __int8 *)v5;
-            if (!*v6)
-                break;
-            ++v6;
-            ++v5;
-        } while (!v7);
-        if (!v7)
-            break;
-        if (++v3 >= spawnFuncCount)
-            return 0;
+        if (!strcmp(classname, spawnFuncArray[spawnFuncIter].classname))
+            return spawnFuncArray[spawnFuncIter].callback;
     }
-    return spawnFuncArray[v3].callback;
+
+    return NULL;
 }
 
 void __cdecl G_PrintBadModelMessage(gentity_s *ent)
@@ -1077,154 +1056,69 @@ void __cdecl G_ParseEntityFields(gentity_s *ent, int ignoreModel)
 
 void G_CallSpawn()
 {
-    const char *v0; // r11
-    const char *v1; // r10
-    int v2; // r8
-    const char *v3; // r10
-    const char *v4; // r11
-    int v5; // r8
-    gentity_s *v6; // r31
-    const gitem_s *ItemForClassname; // r30
     gentity_s *ent; // r31
-    int v9; // r6
-    const SpawnFuncEntry *v10; // r7
-    const char *classname; // r10
-    const char *v12; // r11
-    int v13; // r8
-    void(__cdecl * callback)(gentity_s *); // r31
-    int v15; // r6
-    const SpawnFuncEntry *v16; // r7
-    const char *v17; // r10
-    const char *v18; // r11
-    int v19; // r8
-    gentity_s *v20; // r30
-    const char *classnameStr; // [sp+50h] [-20h] BYREF
+    const gitem_s *item; // r30
+    void(__cdecl * spawnFunc)(gentity_s *); // r31
+    const char *classname; // [sp+50h] [-20h] BYREF
 
     iassert(level.spawnVar.spawnVarsValid);
 
-    G_SpawnString(&level.spawnVar, "classname", "", &classnameStr);
-    if (classnameStr)
+    G_SpawnString(&level.spawnVar, "classname", "", &classname);
+
+    if (classname)
     {
-        if (strncmp(classnameStr, "dyn_", 4u))
+        if (!strncmp(classname, "dyn_", 4))
         {
-            if (strncmp(classnameStr, "node_", 5u))
+            return;
+        }
+
+        if (!strncmp(classname, "node_", 5))
+        {
+            //if (!useFastFile->current.enabled)
+            //    G_SpawnPathnodeStatic(spawnVar, classname);
+            G_SpawnPathnodeDynamic();
+        }
+        else if (!strcmp(classname, "info_vehicle_node"))
+        {
+            SP_info_vehicle_node(0);
+        }
+        else if (!strcmp(classname, "info_vehicle_node_rotate"))
+        {
+            SP_info_vehicle_node(1);
+        }
+        else if (!strncmp(classname, "actor_", 6))
+        {
+            ent = G_Spawn();
+            G_ParseEntityFields(ent, 1);
+            SP_actor(ent);
+        }
+        else
+        {
+            item = G_GetItemForClassname(classname, 0);
+            if (item)
             {
-                v0 = "info_vehicle_node";
-                v1 = classnameStr;
-                do
-                {
-                    v2 = *(unsigned __int8 *)v0 - *(unsigned __int8 *)v1;
-                    if (!*v0)
-                        break;
-                    ++v0;
-                    ++v1;
-                } while (!v2);
-                if (v2)
-                {
-                    v3 = classnameStr;
-                    v4 = "info_vehicle_node_rotate";
-                    do
-                    {
-                        v5 = *(unsigned __int8 *)v4 - *(unsigned __int8 *)v3;
-                        if (!*v4)
-                            break;
-                        ++v4;
-                        ++v3;
-                    } while (!v5);
-                    if (v5)
-                    {
-                        if (strncmp(classnameStr, "actor_", 6u))
-                        {
-                            ItemForClassname = G_GetItemForClassname(classnameStr, 0);
-                            if (ItemForClassname)
-                            {
-                                ent = G_Spawn();
-                                G_ParseEntityFields(ent, 0);
-                                G_SpawnItem(ent, ItemForClassname);
-                            }
-                            else
-                            {
-                                v9 = 0;
-                                v10 = s_bspOrDynamicSpawns;
-                                while (1)
-                                {
-                                    classname = v10->classname;
-                                    v12 = classnameStr;
-                                    do
-                                    {
-                                        v13 = *(unsigned __int8 *)v12 - *(unsigned __int8 *)classname;
-                                        if (!*v12)
-                                            break;
-                                        ++v12;
-                                        ++classname;
-                                    } while (!v13);
-                                    if (!v13)
-                                        break;
-                                    ++v10;
-                                    ++v9;
-                                    if ((int)v10 >= ARRAY_COUNT(s_bspOrDynamicSpawns))
-                                        goto LABEL_30;
-                                }
-                                callback = s_bspOrDynamicSpawns[v9].callback;
-                                if (callback)
-                                    goto LABEL_38;
-                            LABEL_30:
-                                v15 = 0;
-                                v16 = s_bspOnlySpawns;
-                                while (1)
-                                {
-                                    v17 = v16->classname;
-                                    v18 = classnameStr;
-                                    do
-                                    {
-                                        v19 = *(unsigned __int8 *)v18 - *(unsigned __int8 *)v17;
-                                        if (!*v18)
-                                            break;
-                                        ++v18;
-                                        ++v17;
-                                    } while (!v19);
-                                    if (!v19)
-                                        break;
-                                    ++v16;
-                                    ++v15;
-                                    if ((int)v16 >= (int)s_bspOrDynamicSpawns)
-                                        goto LABEL_36;
-                                }
-                                callback = s_bspOnlySpawns[v15].callback;
-                                if (!callback)
-                                {
-                                LABEL_36:
-                                    Com_Printf(15, "%s doesn't have a spawn function\n", classnameStr);
-                                    return;
-                                }
-                            LABEL_38:
-                                v20 = G_Spawn();
-                                G_ParseEntityFields(v20, 0);
-                                G_PrintBadModelMessage(v20);
-                                G_DObjUpdate(v20);
-                                callback(v20);
-                            }
-                        }
-                        else
-                        {
-                            v6 = G_Spawn();
-                            G_ParseEntityFields(v6, 1);
-                            SP_actor(v6);
-                        }
-                    }
-                    else
-                    {
-                        SP_info_vehicle_node(1);
-                    }
-                }
-                else
-                {
-                    SP_info_vehicle_node(0);
-                }
+                ent = G_Spawn();
+                G_ParseEntityFields(ent, 0);
+                G_SpawnItem(ent, item);
             }
             else
             {
-                G_SpawnPathnodeDynamic();
+                spawnFunc = G_FindSpawnFunc(classname, s_bspOrDynamicSpawns, ARRAY_COUNT(s_bspOrDynamicSpawns));
+                //   if ( !spawnFunc && level.spawnVar.spawnVarsValid )
+                if (!spawnFunc)
+                {
+                    spawnFunc = G_FindSpawnFunc(classname, s_bspOnlySpawns, 15);
+                }
+                if (!spawnFunc)
+                {
+                    Com_Printf(15, "%s doesn't have a spawn function\n", classname);
+                    return;
+                }
+                ent = G_Spawn();
+                G_ParseEntityFields(ent, 0);
+                G_PrintBadModelMessage(ent);
+                G_DObjUpdate(ent);
+                spawnFunc(ent);
             }
         }
     }

@@ -183,84 +183,40 @@ gentity_s *__cdecl SpawnActor(gentity_s *ent, unsigned int targetname, enumForce
 
 void __cdecl G_DropActorSpawnersToFloor()
 {
-    int v0; // r27
-    int num_entities; // r11
-    int v2; // r29
-    int *v3; // r28
-    gentity_s *v4; // r31
-    gentity_s *v5; // r3
-    int v6; // r28
-    int v7; // r29
-    gentity_s *v8; // r31
-    double v9; // fp31
-    double v10; // fp30
-    double v11; // fp29
-    int v12; // r7
-    int v13; // r9
-    int *v14; // r8
-    _BYTE v15[592]; // [sp+50h] [-2250h] BYREF
+    int entContents[MAX_GENTITIES + 1];
 
-    v0 = 0;
-    num_entities = level.num_entities;
-    if (level.num_entities > 0)
+    for (int i = 0; i < level.num_entities; ++i)
     {
-        v2 = 0;
-        v3 = (int *)v15;
-        do
+        gentity_s *ent = &level.gentities[i];
+        if (ent->r.inuse)
         {
-            v4 = &level.gentities[v2];
-            if (level.gentities[v2].r.inuse)
-            {
-                v5 = &level.gentities[v2];
-                *v3 = v4->r.contents;
-                if (Path_IsDynamicBlockingEntity(v5))
-                    v4->r.contents = 0;
-                num_entities = level.num_entities;
-            }
-            ++v0;
-            ++v2;
-            ++v3;
-        } while (v0 < num_entities);
+            entContents[i] = ent->r.contents;
+            if (Path_IsDynamicBlockingEntity(ent))
+                ent->r.contents = 0;
+        }
     }
-    v6 = 0;
-    if (num_entities > 0)
+
+    for (int i = 0; i < level.num_entities; ++i)
     {
-        v7 = 0;
-        do
+        gentity_s *ent = &level.gentities[i];
+        if (ent->r.inuse)
         {
-            v8 = &level.gentities[v7];
-            if (level.gentities[v7].r.inuse && v8->s.eType == 15)
+            if (ent->s.eType == ET_ACTOR_SPAWNER)
             {
-                v9 = v8->r.currentOrigin[0];
-                v10 = v8->r.currentOrigin[1];
-                v11 = v8->r.currentOrigin[2];
-                if (Actor_droptofloor(&level.gentities[v7]))
+                if (Actor_droptofloor(ent))
                 {
-                    Com_Printf(18, (const char *)HIDWORD(v9), LODWORD(v9), LODWORD(v10), LODWORD(v11));
-                    v8->r.svFlags &= ~1u;
+                    Com_Printf(18, "^3Spawner at (%g %g %g) is in solid\n", ent->r.currentOrigin[0], ent->r.currentOrigin[1], ent->r.currentOrigin[2]);
+                    ent->r.svFlags &= ~1u;
                 }
-                num_entities = level.num_entities;
             }
-            ++v6;
-            ++v7;
-        } while (v6 < num_entities);
+        }
     }
-    v12 = 0;
-    if (num_entities > 0)
+
+    for (int i = 0; i < level.num_entities; ++i)
     {
-        v13 = 0;
-        v14 = (int *)v15;
-        do
-        {
-            if (level.gentities[v13].r.inuse)
-            {
-                level.gentities[v13].r.contents = *v14;
-                num_entities = level.num_entities;
-            }
-            ++v12;
-            ++v13;
-            ++v14;
-        } while (v12 < num_entities);
+        gentity_s *ent = &level.gentities[i];
+        if (ent->r.inuse)
+            ent->r.contents = entContents[i];
     }
 }
 

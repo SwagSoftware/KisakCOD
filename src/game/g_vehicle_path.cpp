@@ -122,43 +122,39 @@ void __cdecl VP_AddDebugLine(float *start, float *end, int forceDraw)
 
 void __cdecl VP_SetScriptVariable(const char *key, const char *value, vehicle_node_t *node)
 {
-    unsigned int Field; // r30
-    long double v6; // fp2
-    int v7; // r3
-    const char *v8; // r3
-    int v9; // [sp+50h] [-40h] BYREF
-    float v10; // [sp+58h] [-38h] BYREF
-    float v11; // [sp+5Ch] [-34h] BYREF
-    float v12; // [sp+60h] [-30h] BYREF
+    unsigned int index; // r30
+    int type; // [sp+50h] [-40h] BYREF
+    float x; // [sp+58h] [-38h] BYREF
+    float y; // [sp+5Ch] [-34h] BYREF
+    float z; // [sp+60h] [-30h] BYREF
 
-    Field = Scr_FindField(key, &v9);
-    if (Field)
+    index = Scr_FindField(key, &type);
+    if (index)
     {
-        switch (v9)
+        switch (type)
         {
         case 2:
             Scr_AddString(value);
-            goto LABEL_7;
+            Scr_SetDynamicEntityField(node->index, 3, index);
+            break;
         case 4:
-            v10 = 0.0;
-            v11 = 0.0;
-            v12 = 0.0;
-            sscanf(value, "%f %f %f", &v10, &v11, &v12);
-            Scr_AddVector(&v10);
-            goto LABEL_7;
+            x = 0.0;
+            y = 0.0;
+            z = 0.0;
+            sscanf(value, "%f %f %f", &x, &y, &z);
+            Scr_AddVector(&x);
+            Scr_SetDynamicEntityField(node->index, 3, index);
+            break;
         case 5:
-            v6 = atof(value);
-            Scr_AddFloat((float)*(double *)&v6);
-            goto LABEL_7;
+            Scr_AddFloat(atof(value));
+            Scr_SetDynamicEntityField(node->index, 3, index);
+            break;
         case 6:
-            v7 = atol(value);
-            Scr_AddInt(v7);
-        LABEL_7:
-            Scr_SetDynamicEntityField(node->index, 3u, Field);
+            Scr_AddInt(atol(value));
+            Scr_SetDynamicEntityField(node->index, 3, index);
             break;
         default:
-            v8 = va("VP_SetScriptVariable: bad case %d", v9);
-            Scr_Error(v8);
+            Scr_Error(va("VP_SetScriptVariable: bad case %d", type));
             break;
         }
     }
@@ -166,55 +162,56 @@ void __cdecl VP_SetScriptVariable(const char *key, const char *value, vehicle_no
 
 void __cdecl VP_ParseField(const char *key, const char *value, vehicle_node_t *node)
 {
-    vn_field_t *v4; // r31
-    long double v7; // fp2
-    float v8; // [sp+50h] [-40h] BYREF
-    float v9; // [sp+54h] [-3Ch] BYREF
-    float v10; // [sp+58h] [-38h] BYREF
+    vn_field_t *f; // r31
+    float x; // [sp+50h] [-40h] BYREF
+    float y; // [sp+54h] [-3Ch] BYREF
+    float z; // [sp+58h] [-38h] BYREF
 
-    v4 = vn_fields;
+    f = vn_fields;
     if (vn_fields[0].name)
     {
-        while (I_stricmp(v4->name, key))
+        while (I_stricmp(f->name, key))
         {
-            ++v4;
-            if (!v4->name)
-                goto LABEL_4;
+            ++f;
+            if (!f->name)
+            {
+                VP_SetScriptVariable(key, value, node);
+                return;
+            }
         }
-        switch (v4->type)
+        switch (f->type)
         {
         case F_INT:
-            *(unsigned int *)((char *)&node->name + v4->ofs) = atol(value);
+            *(unsigned int *)((char *)&node->name + f->ofs) = atol(value);
             break;
         case F_SHORT:
-            *(unsigned __int16 *)((char *)&node->name + v4->ofs) = atol(value);
+            *(unsigned __int16 *)((char *)&node->name + f->ofs) = atol(value);
             break;
         case F_BYTE:
-            *((_BYTE *)&node->name + v4->ofs) = atol(value);
+            *((_BYTE *)&node->name + f->ofs) = atol(value);
             break;
         case F_FLOAT:
-            v7 = atof(value);
-            *(float *)((char *)&node->name + v4->ofs) = *(double *)&v7;
+            *(float *)((char *)&node->name + f->ofs) = atof(value);
             break;
         case F_STRING:
-            Scr_SetString((unsigned __int16 *)((char *)&node->name + v4->ofs), 0);
-            *(unsigned __int16 *)((char *)&node->name + v4->ofs) = G_NewString(value);
+            Scr_SetString((unsigned __int16 *)((char *)&node->name + f->ofs), 0);
+            *(unsigned __int16 *)((char *)&node->name + f->ofs) = G_NewString(value);
             break;
         case F_VECTOR:
-            v8 = 0.0;
-            v9 = 0.0;
-            v10 = 0.0;
-            sscanf(value, "%f %f %f", &v8, &v9, &v10);
-            *(float *)((char *)&node->name + v4->ofs) = v8;
-            *(float *)((char *)&node->script_linkname + v4->ofs) = v9;
-            *(float *)((char *)&node->index + v4->ofs) = v10;
+            x = 0.0f;
+            y = 0.0f;
+            z = 0.0f;
+            sscanf(value, "%f %f %f", &x, &y, &z);
+            *(float *)((char *)&node->name + f->ofs) = x;
+            *(float *)((char *)&node->name + f->ofs + 4) = y;
+            *(float *)((char *)&node->name + f->ofs + 8) = z;
             break;
         case F_VECTORHACK:
-            v8 = 0.0;
-            v9 = 0.0;
-            v10 = 0.0;
-            sscanf(value, "%f %f %f", &v8, &v9, &v10);
-            *(float *)((char *)&node->name + v4->ofs) = AngleNormalize360(v9);
+            x = 0.0;
+            y = 0.0;
+            z = 0.0;
+            sscanf(value, "%f %f %f", &x, &y, &z);
+            *(float *)((char *)&node->name + f->ofs) = AngleNormalize360(y);
             break;
         default:
             return;
@@ -222,33 +219,17 @@ void __cdecl VP_ParseField(const char *key, const char *value, vehicle_node_t *n
     }
     else
     {
-    LABEL_4:
         VP_SetScriptVariable(key, value, node);
     }
 }
 
 void __cdecl VP_ParseFields(vehicle_node_t *node)
 {
-    int v2; // r30
-    const char **v3; // r31
+    iassert(level.spawnVar.spawnVarsValid);
 
-    if (!level.spawnVar.spawnVarsValid)
-        MyAssertHandler(
-            "c:\\trees\\cod3\\cod3src\\src\\universal\\g_vehicle_path.cpp",
-            266,
-            0,
-            "%s",
-            "level.spawnVar.spawnVarsValid");
-    v2 = 0;
-    if (level.spawnVar.numSpawnVars > 0)
+    for (int i = 0; i < level.spawnVar.numSpawnVars; i++)
     {
-        v3 = (const char **)level.spawnVar.spawnVars[0];
-        do
-        {
-            VP_ParseField(*v3, v3[1], node);
-            ++v2;
-            v3 += 2;
-        } while (v2 < level.spawnVar.numSpawnVars);
+        VP_ParseField(level.spawnVar.spawnVars[i][0], level.spawnVar.spawnVars[i][1], node);
     }
 }
 
@@ -1350,10 +1331,7 @@ void __cdecl TRACK_g_vehicle_path()
 void __cdecl SP_info_vehicle_node(int rotated)
 {
     __int16 v2; // r11
-    double v3; // fp13
-    double v4; // fp12
-    double v5; // fp11
-    vehicle_node_t *v6; // r31
+    vehicle_node_t *node; // r31
     int name; // r11
 
     v2 = s_numNodes;
@@ -1362,43 +1340,40 @@ void __cdecl SP_info_vehicle_node(int rotated)
         Com_Error(ERR_DROP, "Hit max vehicle path node count [%d]", 4000);
         v2 = s_numNodes;
     }
-    v3 = s_invalidAngles[0];
-    v4 = s_invalidAngles[1];
-    v5 = s_invalidAngles[2];
-    v6 = &s_nodes[v2];
-    v6->speed = -1.0;
-    v6->name = 0;
-    v6->lookAhead = -1.0;
-    v6->target = 0;
-    v6->script_linkname = 0;
-    *(unsigned int *)&v6->script_noteworthy = (unsigned __int16)v2;
-    v6->rotated = 0;
-    v6->origin[0] = 0.0;
-    v6->origin[1] = 0.0;
+    node = &s_nodes[v2];
+    node->speed = -1.0;
+    node->name = 0;
+    node->lookAhead = -1.0;
+    node->target = 0;
+    node->script_linkname = 0;
+    *(unsigned int *)&node->script_noteworthy = (unsigned __int16)v2;
+    node->rotated = 0;
+    node->origin[0] = 0.0;
+    node->origin[1] = 0.0;
     s_numNodes = v2 + 1;
-    v6->origin[2] = 0.0;
-    v6->dir[0] = 0.0;
-    v6->dir[1] = 0.0;
-    v6->dir[2] = 0.0;
-    v6->angles[0] = v3;
-    v6->angles[1] = v4;
-    v6->angles[2] = v5;
-    v6->nextIdx = -1;
-    v6->length = 0.0;
-    v6->prevIdx = -1;
-    VP_ParseFields(v6);
-    name = v6->name;
-    v6->rotated = rotated;
+    node->origin[2] = 0.0;
+    node->dir[0] = 0.0;
+    node->dir[1] = 0.0;
+    node->dir[2] = 0.0;
+    node->angles[0] = s_invalidAngles[0];
+    node->angles[1] = s_invalidAngles[1];
+    node->angles[2] = s_invalidAngles[2];
+    node->nextIdx = -1;
+    node->length = 0.0;
+    node->prevIdx = -1;
+    VP_ParseFields(node);
+    name = node->name;
+    node->rotated = rotated;
     if (!name)
         Com_Error(
             ERR_DROP,
             "Vehicle path node (%f, %f, %f) found with no name",
-            v6->origin[0],
-            v6->origin[1],
-            v6->origin[2]
+            node->origin[0],
+            node->origin[1],
+            node->origin[2]
         );
-    if (v6->speed >= 0.0)
-        v6->speed = v6->speed * (float)17.6;
+    if (node->speed >= 0.0)
+        node->speed = node->speed * (float)17.6;
 }
 
 int __cdecl GScr_GetVehicleNodeIndex(int index)

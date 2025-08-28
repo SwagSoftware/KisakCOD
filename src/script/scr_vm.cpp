@@ -3591,8 +3591,7 @@ unsigned int __cdecl VM_Execute(unsigned int localId, const char *pos, unsigned 
     unsigned int localIda; // [esp+40h] [ebp+8h]
     unsigned int paramcounta; // [esp+48h] [ebp+10h]
 
-    if (paramcount > scrVmPub.inparamcount)
-        MyAssertHandler(".\\script\\scr_vm.cpp", 3915, 0, "%s", "paramcount <= scrVmPub.inparamcount");
+    iassert(paramcount <= scrVmPub.inparamcount);
     Scr_ClearOutParams();
     startTop = &scrVmPub.top[-paramcount];
     paramcounta = scrVmPub.inparamcount - paramcount;
@@ -3600,8 +3599,7 @@ unsigned int __cdecl VM_Execute(unsigned int localId, const char *pos, unsigned 
     {
         Scr_KillThread(localId);
         scrVmPub.inparamcount = paramcounta + 1;
-        if (scrVmPub.outparamcount)
-            MyAssertHandler(".\\script\\scr_vm.cpp", 3993, 0, "%s", "!scrVmPub.outparamcount");
+        iassert(!scrVmPub.outparamcount);
         while (paramcounta)
         {
             RemoveRefToValue(scrVmPub.top->type, scrVmPub.top->u);
@@ -3654,8 +3652,7 @@ unsigned int __cdecl VM_Execute(unsigned int localId, const char *pos, unsigned 
         startTop->type = (Vartype_t)type;
         scrVmPub.top = startTop + 1;
         scrVmPub.inparamcount = paramcounta + 1;
-        if (scrVmPub.outparamcount)
-            MyAssertHandler(".\\script\\scr_vm.cpp", 3978, 0, "%s", "!scrVmPub.outparamcount");
+        iassert(!scrVmPub.outparamcount);
         ClearVariableValue(scrVarPub.tempVariable);
         if (scrVmPub.function_count)
         {
