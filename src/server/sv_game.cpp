@@ -494,6 +494,7 @@ int __cdecl SV_GameCommand()
 #include "sv_public.h"
 #include <win32/win_local.h>
 #include <client/cl_input.h>
+#include <universal/profile.h>
 
 void __cdecl SV_CheckLoadLevel(SaveGame *save)
 {
@@ -544,40 +545,50 @@ void __cdecl SV_ShutdownGameProgs()
 void __cdecl SV_InitGameVM(unsigned int randomSeed, int restart, int savegame, SaveGame **save, int loadScripts)
 {
     iassert(save);
-    ProfLoad_Begin("Start map");
-    SV_StartMap(randomSeed);
-    ProfLoad_End();
+
+    {
+        PROF_SCOPED("Start map");
+        SV_StartMap(randomSeed);
+    }
+
     G_ResetEntityParsePoint();
     if (!++sv.skelTimeStamp)
         sv.skelTimeStamp = 1;
     sv.skelMemPos = 0;
     g_sv_skel_memory_start = (char *)((unsigned int)&g_sv_skel_memory[15] & 0xFFFFFFF0);
     SND_ErrorCleanup();
-    ProfLoad_Begin("Init game");
-    Sys_LoadingKeepAlive();
-    G_InitGame(randomSeed, restart, sv.checksum, loadScripts, savegame, save);
-    Sys_LoadingKeepAlive();
-    ProfLoad_End();
-    ProfLoad_Begin("Settle game");
-    SV_Settle();
-    ProfLoad_End();
-    ProfLoad_Begin("Connecting");
-    SV_DirectConnect();
-    CL_ConnectResponse();
-    SV_ClientEnterWorld(svs.clients);
-    ProfLoad_End();
+
+    {
+        PROF_SCOPED("Init game");
+        Sys_LoadingKeepAlive();
+        G_InitGame(randomSeed, restart, sv.checksum, loadScripts, savegame, save);
+        Sys_LoadingKeepAlive();
+    }
+    {
+        PROF_SCOPED("Settle game");
+        SV_Settle();
+    }
+    {
+        PROF_SCOPED("Connecting");
+        SV_DirectConnect();
+        CL_ConnectResponse();
+        SV_ClientEnterWorld(svs.clients);
+    }
+
     if (!restart || !*save)
     {
         R_BeginRemoteScreenUpdate();
         sv.demo.forwardMsec -= 50;
         if (sv.demo.forwardMsec < 0)
             sv.demo.forwardMsec = 0;
-        ProfLoad_Begin("Server pre-frame");
-        SV_PreFrame();
-        ProfLoad_End();
-        ProfLoad_Begin("Load game level");
-        G_LoadLevel();
-        ProfLoad_End();
+        {
+            PROF_SCOPED("Server pre-frame");
+            SV_PreFrame();
+        }
+        {
+            PROF_SCOPED("Load game level");
+            G_LoadLevel();
+        }
         R_EndRemoteScreenUpdate();
     }
 }

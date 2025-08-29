@@ -766,12 +766,20 @@ void __cdecl Mark_LoadedSoundAsset(LoadedSound *loadSnd)
 
 void __cdecl Load_ClipMapAsset(XAssetHeader *clipMap)
 {
-    clipMap->xmodelPieces = DB_AddXAsset(ASSET_TYPE_CLIPMAP_PVS, (XAssetHeader)clipMap->xmodelPieces).xmodelPieces;
+#ifdef KISAK_MP
+    clipMap->clipMap = DB_AddXAsset(ASSET_TYPE_CLIPMAP_PVS, (XAssetHeader)clipMap->clipMap).clipMap;
+#elif KISAK_SP
+    clipMap->clipMap = DB_AddXAsset(ASSET_TYPE_CLIPMAP, (XAssetHeader)clipMap->clipMap).clipMap;
+#endif
 }
 
 void __cdecl Mark_ClipMapAsset(clipMap_t *clipMap)
 {
+#ifdef KISAK_MP
     DB_GetXAsset(ASSET_TYPE_CLIPMAP_PVS, (XAssetHeader)clipMap);
+#elif KISAK_SP
+    DB_GetXAsset(ASSET_TYPE_CLIPMAP, (XAssetHeader)clipMap);
+#endif
 }
 
 void __cdecl DB_RemoveLoadedSound(XAssetHeader header)
@@ -1166,8 +1174,6 @@ void __cdecl DB_EnumXAssetsFor(
 
 XAssetHeader __cdecl DB_FindXAssetHeader(XAssetType type, const char *name)
 {
-    uint32_t v2; // eax
-    uint32_t v4; // eax
     const char *v5; // [esp-4h] [ebp-24h]
     int32_t suspendedThread; // [esp+10h] [ebp-10h]
     uint32_t start; // [esp+14h] [ebp-Ch]
@@ -1238,8 +1244,7 @@ LABEL_39:
         if (start)
         {
             v5 = g_assetNames[type];
-            v2 = Sys_Milliseconds();
-            Com_Printf(10, "Waited %i msec for asset '%s' of type '%s'.\n", v2 - start, name, v5);
+            Com_Printf(10, "Waited %i msec for asset '%s' of type '%s'.\n", Sys_Milliseconds() - start, name, v5);
             ProfLoad_End();
         }
         return assetEntry->asset.header;
@@ -1256,8 +1261,7 @@ LABEL_39:
     DB_LogMissingAsset(type, name);
     if (start)
     {
-        v4 = Sys_Milliseconds();
-        PrintWaitedError(type, name, v4 - start);
+        PrintWaitedError(type, name, Sys_Milliseconds() - start);
     }
     if (type == ASSET_TYPE_LOCALIZE_ENTRY || type == ASSET_TYPE_RAWFILE)
     {
@@ -1554,7 +1558,7 @@ XAssetEntry *__cdecl DB_CreateDefaultEntry(XAssetType type, char *name)
     XAssetEntry *newEntry; // [esp+14h] [ebp-4h]
 
     asset.header = DB_FindXAssetDefaultHeaderInternal(type);
-    if (!asset.header.xmodelPieces)
+    if (!asset.header.data)
     {
         Sys_UnlockWrite(&db_hashCritSect);
         if (type == ASSET_TYPE_CLIPMAP || type == ASSET_TYPE_CLIPMAP_PVS)

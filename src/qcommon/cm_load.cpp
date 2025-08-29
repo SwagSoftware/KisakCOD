@@ -70,8 +70,13 @@ void __cdecl CM_LoadMapData(const char *name)
 
 void __cdecl CM_LoadMapData_FastFile(const char *name)
 {
+#ifdef KISAK_MP
     if (DB_FindXAssetHeader(ASSET_TYPE_CLIPMAP_PVS, name).clipMap != &cm)
         MyAssertHandler(".\\qcommon\\cm_load.cpp", 133, 0, "%s", "clipMap == &cm");
+#elif KISAK_SP
+    if (DB_FindXAssetHeader(ASSET_TYPE_CLIPMAP, name).clipMap != &cm)
+        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\qcommon\\cm_load.cpp", 133, 0, "%s", "clipMap == &cm");
+#endif
 }
 
 void __cdecl CM_Shutdown()

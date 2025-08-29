@@ -564,38 +564,42 @@ void __cdecl CM_AreaEntities_r(unsigned int nodeIndex, areaParms_t *ap)
     unsigned int nextNodeIndex; // [esp+4h] [ebp-10h]
     gentity_s *gcheck; // [esp+8h] [ebp-Ch]
     unsigned int entnum; // [esp+Ch] [ebp-8h]
+    svEntity_s *svEnt;
 
-    while (1)
+    int n;
+    for (node = &cm_world.sectors[nodeIndex]; (node->contents.contentsEntities & ap->contentmask) != 0; node = &cm_world.sectors[nodeIndex])
     {
-        node = &cm_world.sectors[nodeIndex];
-        if ((ap->contentmask & node->contents.contentsEntities) == 0)
-            break;
-        for (entnum = node->contents.entities; entnum; entnum = sv.configstrings[188 * entnum + 2256])
+        for (entnum = node->contents.entities; entnum; entnum = svEnt->nextEntityInWorldSector)
         {
-            gcheck = SV_GEntityForSvEntity(&sv.svEntities[entnum - 1]);
+            svEnt = &sv.svEntities[entnum - 1];
+            gcheck = SV_GEntityForSvEntity(svEnt);
+
             if ((ap->contentmask & gcheck->r.contents) != 0
-                && *ap->maxs >= (double)gcheck->r.absmin[0]
-                && *ap->mins <= (double)gcheck->r.absmax[0]
-                && *((float *)ap->maxs + 1) >= (double)gcheck->r.absmin[1]
-                && *((float *)ap->mins + 1) <= (double)gcheck->r.absmax[1]
-                && *((float *)ap->maxs + 2) >= (double)gcheck->r.absmin[2]
-                && *((float *)ap->mins + 2) <= (double)gcheck->r.absmax[2])
+                && ap->maxs[0] >= gcheck->r.absmin[0]
+                && ap->mins[0] <= gcheck->r.absmax[0]
+                && ap->maxs[1] >= gcheck->r.absmin[1]
+                && ap->mins[1] <= gcheck->r.absmax[1]
+                && ap->maxs[2] >= gcheck->r.absmin[2]
+                && ap->mins[2] <= gcheck->r.absmax[2]
+                )
             {
-                if (ap->count == ap->maxcount)
+                if (ap->count >= ap->maxcount)
                 {
                     Com_DPrintf(16, "CM_AreaEntities: MAXCOUNT\n");
                     return;
                 }
-                ap->list[ap->count++] = (int)(376 * (entnum - 1)) / 376;
+
+                ap->list[ap->count] = svEnt - sv.svEntities;
+                ap->count++;
             }
         }
-        if (node->tree.dist >= (double)ap->maxs[node->tree.axis])
+        if (node->tree.dist >= ap->maxs[node->tree.axis])
         {
-            if (node->tree.dist <= (double)ap->mins[node->tree.axis])
+            if (node->tree.dist <= ap->mins[node->tree.axis])
                 return;
             nodeIndex = node->tree.child[1];
         }
-        else if (node->tree.dist <= (double)ap->mins[node->tree.axis])
+        else if (node->tree.dist <= ap->mins[node->tree.axis])
         {
             nodeIndex = node->tree.child[0];
         }
