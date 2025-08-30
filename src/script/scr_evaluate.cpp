@@ -391,34 +391,34 @@ void __cdecl Scr_EvalFieldVariable(unsigned int fieldName, VariableValue *value,
 
 void __cdecl Scr_CompileExpression(sval_u *expr)
 {
-    switch (*(unsigned int *)expr->type)
+    switch (expr->node[0].type)
     {
     case ENUM_primitive_expression:
         Scr_CompilePrimitiveExpression(&expr->node[1]);
-        expr->type = debugger_node1(ENUM_primitive_expression, expr->node[1]).type;
+        *expr = debugger_node1(ENUM_primitive_expression, expr->node[1]);
         break;
     case ENUM_bool_or:
     case ENUM_bool_and:
         Scr_CompileExpression(&expr->node[1]);
         Scr_CompileExpression(&expr->node[2]);
-        expr->type = debugger_node2(
+        *expr = debugger_node2(
             expr->node[0].type,
             expr->node[1],
-            expr->node[2]).type;
+            expr->node[2]);
         break;
     case ENUM_binary:
         Scr_CompileExpression(&expr->node[1]);
         Scr_CompileExpression(&expr->node[2]);
-        expr->type = debugger_node3(
+        *expr = debugger_node3(
             expr->node[0].type,
             expr->node[1],
             expr->node[2],
-            expr->node[3]).type;
+            expr->node[3]);
         break;
     case ENUM_bool_not:
     case ENUM_bool_complement:
         Scr_CompileExpression(&expr->node[1]);
-        expr->type = debugger_node1(expr->node[0].type, expr->node[1]).type;
+        *expr = debugger_node1(expr->node[0].type, expr->node[1]);
         break;
     default:
         return;
@@ -436,22 +436,22 @@ void __cdecl Scr_CompilePrimitiveExpression(sval_u *expr)
     case ENUM_float:
     case ENUM_minus_integer:
     case ENUM_minus_float:
-        expr->type = debugger_node1(expr->node[0].type, expr->node[1]).type;
+        *expr = debugger_node1(expr->node[0].type, expr->node[1]);
         break;
     case ENUM_string:
     case ENUM_istring:
-        expr->type = debugger_string(expr->node[0].type, (char *)SL_ConvertToString(*(unsigned int *)(expr->type + 4))).type;
+        *expr = debugger_string(expr->node[0].type, (char *)SL_ConvertToString(*(unsigned int *)(expr->type + 4)));
         break;
     case ENUM_variable:
         Scr_CompileVariableExpression(&expr->node[1]);
         tempVariableId.block = (scr_block_s*)AllocValue();
-        expr->type = debugger_node2(ENUM_variable, expr->node[1], tempVariableId).type;
+        *expr = debugger_node2(ENUM_variable, expr->node[1], tempVariableId);
         break;
     case ENUM_call_expression:
         if (!Scr_CompileCallExpression(&expr->node[1]))
             goto LABEL_13;
         tempVariableIda.block = (scr_block_s*)AllocValue();
-        expr->type = debugger_node2(ENUM_call_expression, expr->node[1], tempVariableIda).type;
+        *expr = debugger_node2(ENUM_call_expression, expr->node[1], tempVariableIda);
         break;
     case ENUM_undefined:
     case ENUM_level:
@@ -460,33 +460,33 @@ void __cdecl Scr_CompilePrimitiveExpression(sval_u *expr)
     case ENUM_empty_array:
     case ENUM_false:
     case ENUM_true:
-        expr->type = debugger_node0(expr->node[0].type).type;
+        *expr = debugger_node0(expr->node[0].type);
         break;
     case ENUM_self:
-        expr->type = debugger_node2(expr->node[0].type, 0, 0).type;
+        *expr = debugger_node2(expr->node[0].type, 0, 0);
         break;
     case ENUM_expression_list:
         Scr_CompilePrimitiveExpressionList(&expr->node[1]);
-        expr->type = debugger_node1(ENUM_expression_list, expr->node[1]).type;
+        *expr = debugger_node1(ENUM_expression_list, expr->node[1]);
         break;
     case ENUM_size_field:
         Scr_CompilePrimitiveExpression(&expr->node[1]);
-        expr->type = debugger_node1(ENUM_size_field, expr->node[1]).type;
+        *expr = debugger_node1(ENUM_size_field, expr->node[1]);
         break;
     case ENUM_breakon:
         ++scrVmDebugPub.checkBreakon;
         g_breakonExpr = 1;
         Scr_CompilePrimitiveExpression(&expr->node[1]);
         Scr_CompileExpression(&expr->node[2]);
-        expr->type = debugger_node3(
+        *expr = debugger_node3(
             expr->node[0].type,
             expr->node[1],
             expr->node[2],
-            0).type;
+            0);
         break;
     default:
     LABEL_13:
-        expr->type = debugger_node0(ENUM_bad_expression).type;
+        *expr = debugger_node0(ENUM_bad_expression);
         break;
     }
 }
@@ -501,36 +501,36 @@ void __cdecl Scr_CompileVariableExpression(sval_u *expr)
     sval_u entnum; // [esp+5Ch] [ebp-Ch]
     sval_u idValue; // [esp+64h] [ebp-4h]
 
-    switch (*(unsigned int *)expr->type)
+    switch (expr->node[0].type)
     {
     case ENUM_local_variable:
         *(unsigned int *)(expr->type + 4) = Scr_CompileCanonicalString(*(unsigned int *)(expr->type + 4));
         if (*(unsigned int *)(expr->type + 4))
         {
             tempVariableId.block = (scr_block_s*)AllocValue();
-            expr->type = debugger_node4(ENUM_local_variable, expr->node[1], 0, 0, tempVariableId).type;
+            *expr = debugger_node4(ENUM_local_variable, expr->node[1], 0, 0, tempVariableId);
         }
         else
         {
-            expr->type = debugger_node0(ENUM_unknown_variable).type;
+            *expr = debugger_node0(ENUM_unknown_variable);
         }
         break;
     case ENUM_array_variable:
         Scr_CompileExpression(&expr->node[2]);
         Scr_CompilePrimitiveExpression(&expr->node[1]);
-        expr->type = debugger_node2(ENUM_array_variable, expr->node[1], expr->node[2]).type;
+        *expr = debugger_node2(ENUM_array_variable, expr->node[1], expr->node[2]);
         break;
     case ENUM_field_variable:
         Scr_CompilePrimitiveExpressionFieldObject(&expr->node[1]);
         *(unsigned int *)(expr->type + 8) = Scr_CompileCanonicalString(*(unsigned int *)(expr->type + 8));
         if (*(unsigned int *)(expr->type + 8))
-            expr->type = debugger_node3(ENUM_field_variable, expr->node[1], expr->node[2], 0).type;
+            *expr = debugger_node3(ENUM_field_variable, expr->node[1], expr->node[2], 0);
         else
-            expr->type = debugger_node0(ENUM_unknown_field).type;
+            *expr = debugger_node0(ENUM_unknown_field);
         break;
     case ENUM_self_field:
         Scr_CompilePrimitiveExpression(&expr->node[1]);
-        expr->type = debugger_node1(ENUM_self_field, expr->node[1]).type;
+        *expr = debugger_node1(ENUM_self_field, expr->node[1]);
         break;
     case ENUM_object:
         s = SL_ConvertToString(*(unsigned int *)(expr->type + 4));
@@ -546,7 +546,7 @@ void __cdecl Scr_CompileVariableExpression(sval_u *expr)
             ObjectType = GetObjectType(idValue.stringValue);
             if (ObjectType < VAR_THREAD || ObjectType > VAR_CHILD_THREAD && ObjectType != VAR_DEAD_THREAD)
                 goto LABEL_28;
-            expr->type = debugger_node1(ENUM_thread_object, idValue).type;
+            *expr = debugger_node1(ENUM_thread_object, idValue);
             AddRefToObject(idValue.stringValue);
         }
         else if (*s == 97)
@@ -554,7 +554,7 @@ void __cdecl Scr_CompileVariableExpression(sval_u *expr)
             argumentIndex = atoi(s + 1);
             if (argumentIndex <= 0 && strcmp(s + 1, "0"))
                 goto LABEL_28;
-            expr->type = debugger_node1(ENUM_argument, (sval_u)argumentIndex).type;
+            *expr = debugger_node1(ENUM_argument, (sval_u)argumentIndex);
         }
         else
         {
@@ -564,12 +564,12 @@ void __cdecl Scr_CompileVariableExpression(sval_u *expr)
             entnum.intValue = atoi(s + 1);
             if (!entnum.type && s[1] != 48)
                 goto LABEL_28;
-            expr->type = debugger_node3(ENUM_object, classnum, entnum, 0).type;
+            *expr = debugger_node3(ENUM_object, classnum, entnum, 0);
         }
         break;
     default:
     LABEL_28:
-        expr->type = debugger_node0(ENUM_bad_expression).type;
+        *expr = debugger_node0(ENUM_bad_expression);
         break;
     }
 }
@@ -579,27 +579,27 @@ void __cdecl Scr_CompilePrimitiveExpressionFieldObject(sval_u *expr)
     sval_u tempVariableId; // [esp+18h] [ebp-8h]
     sval_u tempVariableIda; // [esp+18h] [ebp-8h]
 
-    switch (*(unsigned int *)expr->type)
+    switch (expr->node[0].type)
     {
     case ENUM_variable:
         Scr_CompileVariableExpression(&expr->node[1]);
         tempVariableId.block = (scr_block_s*)AllocValue();
-        expr->type = debugger_node2(ENUM_variable, expr->node[1], tempVariableId).type;
+        *expr = debugger_node2(ENUM_variable, expr->node[1], tempVariableId);
         break;
     case ENUM_call_expression:
         Scr_CompileCallExpression(&expr->node[1]);
         tempVariableIda.block = (scr_block_s*)AllocValue();
-        expr->type = debugger_node2(ENUM_call_expression, expr->node[1], tempVariableIda).type;
+        *expr = debugger_node2(ENUM_call_expression, expr->node[1], tempVariableIda);
         break;
     case ENUM_self:
-        expr->type = debugger_node2(expr->node[0].type, 0, 0).type;
+        *expr = debugger_node2(expr->node[0].type, 0, 0);
         break;
     case ENUM_level:
     case ENUM_anim:
-        expr->type = debugger_node0(expr->node[0].type).type;
+        *expr = debugger_node0(expr->node[0].type);
         break;
     default:
-        expr->type = debugger_node0(ENUM_bad_expression).type;
+        *expr = debugger_node0(ENUM_bad_expression);
         break;
     }
 }
@@ -655,18 +655,18 @@ char __cdecl Scr_CompileCallExpression(sval_u *expr)
     {
         if (Scr_CompileFunction(&expr->node[1], &expr->node[2]))
         {
-            expr->type = debugger_node2(ENUM_call, expr->node[1], expr->node[2]).type;
+            *expr = debugger_node2(ENUM_call, expr->node[1], expr->node[2]);
             return 1;
         }
     }
     else if (v2 == 24
         && Scr_CompileMethod(&expr->node[1], &expr->node[2], (sval_u *)(expr->type + 12)))
     {
-        expr->type = debugger_node3(
+        *expr = debugger_node3(
             ENUM_method,
             expr->node[1],
             expr->node[2],
-            expr->node[3]).type;
+            expr->node[3]);
         return 1;
     }
     return 0;
