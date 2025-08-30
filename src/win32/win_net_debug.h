@@ -16,6 +16,7 @@ void Sys_DebugSocketError(const char *message);
 
 int __cdecl Sys_ReadDebugSocketInt();
 void __cdecl Sys_WriteDebugSocketInt(int value);
+void __cdecl Sys_WriteDebugSocketString(char *text);
 int __cdecl Sys_ReadDebugSocketMessageType(unsigned __int8 *type, int blocking);
 int __cdecl Sys_UpdateDebugSocket();
 int __cdecl Sys_ReadDebugSocketData(char *buffer, int len, int blocking);

@@ -123,6 +123,33 @@ char *__cdecl Scr_GetElementArchiveText(Scr_WatchElement_s *element)
     return result;
 }
 
+void Scr_ScriptWatch::Init()
+{
+    const char *defaultWatchNames[5]; // [esp+4h] [ebp-18h]
+    int i; // [esp+18h] [ebp-4h]
+
+    defaultWatchNames[0] = "<locals>";
+    defaultWatchNames[1] = (char *)"self";
+    defaultWatchNames[2] = (char *)"level";
+    defaultWatchNames[3] = "anim";
+    defaultWatchNames[4] = (char *)"game";
+    this->elementHead = 0;
+    this->localId = 0;
+    this->elementId = 0;
+    UI_LinesComponent::Init();
+    this->size[0] = UI_Component::g.charWidth * 256.0;
+    this->size[1] = 0.0;
+    this->dirty = 0;
+
+    if (!Scr_ScriptWatch::ReadFromFile())
+    {
+        for (i = 0; (unsigned int)i < 5; ++i)
+        {
+            Scr_ScriptWatch::PasteElementInternal(0, (char*)defaultWatchNames[i], 0);
+        }
+    }
+}
+
 void Scr_ScriptWatch::Shutdown()
 {
     Scr_WatchElement_s *next; // [esp+14h] [ebp-Ch]
@@ -149,6 +176,39 @@ void Scr_ScriptWatch::Shutdown()
     }
     if (f)
         FS_FCloseFile(f);
+}
+
+void Scr_ScriptWatch::AddText(const char *text)
+{
+    Scr_WatchElement_s *element; // [esp+Ch] [ebp-4h]
+
+    if (UI_Component::g.consoleReason == 2)
+    {
+        element = Scr_ScriptWatch::GetSelectedElement();
+        if (element)
+        {
+            if (element->breakpoint)
+            {
+                Scr_ScriptWatch::PasteBreakpointElement(element, text, 1, element->breakpointType, 1);
+            }
+            else if (Sys_IsRemoteDebugClient())
+            {
+                Sys_WriteDebugSocketMessageType(4u);
+                Scr_WriteElement(element);
+                Sys_WriteDebugSocketString((char*)text);
+                Sys_EndWriteDebugSocket();
+            }
+            else
+            {
+                Scr_ScriptWatch::AddElement(element, (char*)text);
+            }
+        }
+    }
+    else
+    {
+        //UI_LinesComponent::AddText(this, text);
+        this->AddText(text);
+    }
 }
 
 void Scr_ScriptWatch::Draw(
@@ -185,6 +245,36 @@ void Scr_ScriptWatch::Draw(
         &currentY,
         compX,
         compY);
+}
+
+void Scr_ScriptWatch::CloneSelectedElement()
+{
+    Scr_Breakpoint *breakpoint; // [esp+4h] [ebp-8h]
+    Scr_WatchElement_s *element; // [esp+8h] [ebp-4h]
+    Scr_WatchElement_s *elementa; // [esp+8h] [ebp-4h]
+
+    element = Scr_ScriptWatch::GetSelectedElement();
+
+    if (element && !element->threadList && !element->endonList)
+    {
+        breakpoint = element->breakpoint;
+        if (breakpoint)
+        {
+            Scr_SelectScriptLine(breakpoint->bufferIndex, breakpoint->line);
+        }
+        else if (Sys_IsRemoteDebugClient())
+        {
+            Sys_WriteDebugSocketMessageType(0xEu);
+            Scr_WriteElement(element);
+            Sys_EndWriteDebugSocket();
+        }
+        else
+        {
+            elementa = Scr_ScriptWatch::CloneElement(element);
+            Scr_ScriptWatch::EvaluateWatchElement(elementa);
+            Scr_ScriptWatch::SetSelectedElement(elementa, 1);
+        }
+    }
 }
 
 Scr_WatchElement_s *__thiscall Scr_ScriptWatch::CloneElement(Scr_WatchElement_s *element)
@@ -618,6 +708,24 @@ void __thiscall Scr_ScriptWatch::ToggleWatchElementBreakpoint(
     }
 }
 
+void Scr_ScriptWatch::ToggleBreakpoint(Scr_WatchElement_s *element, unsigned __int8 type)
+{
+    if (element)
+    {
+        if (Sys_IsRemoteDebugClient())
+        {
+            Sys_WriteDebugSocketMessageType(0x1Au);
+            Scr_WriteElement(element);
+            Sys_WriteDebugSocketInt(type);
+            Sys_EndWriteDebugSocket();
+        }
+        else
+        {
+            Scr_ScriptWatch::ToggleBreakpointInternal(element, type);
+        }
+    }
+}
+
 void __thiscall Scr_ScriptWatch::ToggleBreakpointInternal(
     Scr_WatchElement_s *element,
     unsigned __int8 type)
@@ -764,6 +872,74 @@ Scr_WatchElement_s *Scr_ScriptWatch::GetElementPrev(Scr_WatchElement_s *element)
     return 0;
 }
 
+static int __cdecl Scr_GetElementDepth(Scr_WatchElement_s *element)
+{
+    int depth; // [esp+0h] [ebp-4h]
+
+    for (depth = 0; ; ++depth)
+    {
+        element = element->parent;
+        if (!element)
+            break;
+    }
+    return depth;
+}
+
+bool Scr_ScriptWatch::LeftMouseEvent(float *point)
+{
+    Scr_WatchElement_s *element; // [esp+8h] [ebp-4h]
+
+    this->SetSelectedLineFocus((int)(point[1] / UI_Component::g.charHeight), 1);
+    element = Scr_ScriptWatch::GetSelectedElement();
+
+    if (!element)
+        return 0;
+
+    if (Scr_GetElementDepth(element) != (int)((*point - UI_Component::g.charHeight) / UI_Component::g.charWidth))
+        return 0;
+
+    Scr_ScriptWatch::ExpandSelectedElement(!element->expand);
+
+    return 1;
+}
+
+void Scr_ScriptWatch::BackspaceElement()
+{
+    Scr_WatchElement_s *element; // [esp+4h] [ebp-4h]
+
+    element = Scr_ScriptWatch::GetSelectedElement();
+    if (element)
+    {
+        if (Sys_IsRemoteDebugClient())
+        {
+            Sys_WriteDebugSocketMessageType(0xCu);
+            Scr_WriteElement(element);
+            Sys_EndWriteDebugSocket();
+        }
+        else
+        {
+            Scr_ScriptWatch::BackspaceElementInternal(element);
+        }
+    }
+}
+
+void Scr_ScriptWatch::EditElement(Scr_ConsoleOpenMode openMode)
+{
+    Scr_WatchElement_s *element; // [esp+14h] [ebp-4h]
+
+    element = Scr_ScriptWatch::GetSelectedElement();
+    if (element)
+    {
+        UI_Component::g.consoleReason = 2;
+        Con_OpenConsole(0);
+        if (openMode == SCR_CONSOLE_INPUT_OUTPUT)
+            Con_OpenConsoleOutput(0);
+        I_strncpyz(g_consoleField.buffer, (char *)element->refText, 256);
+        g_consoleField.cursor = strlen(g_consoleField.buffer);
+        Field_AdjustScroll(&scrPlaceFull, &g_consoleField);
+    }
+}
+
 Scr_WatchElement_s *__thiscall Scr_ScriptWatch::BackspaceElementInternal(Scr_WatchElement_s *element)
 {
     Scr_WatchElement_s **pElement; // [esp+4h] [ebp-8h]
@@ -782,7 +958,51 @@ Scr_WatchElement_s *__thiscall Scr_ScriptWatch::BackspaceElementInternal(Scr_Wat
     return prevElement;
 }
 
-void __thiscall Scr_ScriptWatch::ToggleExpandElement(Scr_WatchElement_s *element)
+void Scr_ScriptWatch::ExpandElement(Scr_WatchElement_s *element, bool expand)
+{
+    Scr_WatchElement_s *childHead; // [esp+0h] [ebp-Ch]
+
+    if (Sys_IsRemoteDebugClient())
+        MyAssertHandler((char *)".\\script\\scr_debugger.cpp", 3848, 0, "%s", "!Sys_IsRemoteDebugClient()");
+    if (element->expand == expand)
+    {
+        if (expand)
+            childHead = element->childHead;
+        else
+            childHead = element->parent;
+        if (childHead)
+        {
+            Scr_ScriptWatch::SetSelectedElement(childHead, 0);
+        }
+    }
+    else
+    {
+        Scr_ScriptWatch::ToggleExpandElement(element);
+    }
+}
+
+void Scr_ScriptWatch::ExpandSelectedElement(bool expand)
+{
+    Scr_WatchElement_s *element; // [esp+4h] [ebp-4h]
+
+    element = Scr_ScriptWatch::GetSelectedElement();
+    if (element)
+    {
+        if (Sys_IsRemoteDebugClient())
+        {
+            Sys_WriteDebugSocketMessageType(0x10u);
+            Scr_WriteElement(element);
+            Sys_WriteDebugSocketInt(expand);
+            Sys_EndWriteDebugSocket();
+        }
+        else
+        {
+            Scr_ScriptWatch::ExpandElement(element, expand);
+        }
+    }
+}
+
+void Scr_ScriptWatch::ToggleExpandElement(Scr_WatchElement_s *element)
 {
     element->expand = !element->expand;
     if (element->expand)
@@ -791,8 +1011,7 @@ void __thiscall Scr_ScriptWatch::ToggleExpandElement(Scr_WatchElement_s *element
         {
             if (!Sys_IsRemoteDebugClient())
             {
-                //Scr_ScriptWatch::EvaluateWatchChildren(element);
-                this->EvaluateWatchChildren(element);
+                Scr_ScriptWatch::EvaluateWatchChildren(element);
             }
         }
         else
@@ -804,8 +1023,7 @@ void __thiscall Scr_ScriptWatch::ToggleExpandElement(Scr_WatchElement_s *element
         Scr_FreeWatchElementChildrenStrict(element);
     if (!Sys_IsRemoteDebugClient())
     {
-        //Scr_ScriptWatch::UpdateHeight();
-        this->UpdateHeight();
+        Scr_ScriptWatch::UpdateHeight();
     }
 }
 
@@ -942,6 +1160,16 @@ bool __thiscall Scr_ScriptWatch::SetSelectedElement_r(
     return 0;
 }
 
+void UI_LinesComponent::Init()
+{
+    UI_Component::Init();
+    this->selectedLine = -1;
+    this->numLines = 0;
+    this->focusOnSelectedLine = 0;
+    this->pos[0] = 0.0f;
+    this->pos[1] = 0.0f;
+}
+
 bool UI_LinesComponent::SetSelectedLineFocus(int newSelectedLine, bool user)
 {
     if (newSelectedLine >= user - 1 && newSelectedLine < this->numLines)
@@ -1028,6 +1256,43 @@ Scr_WatchElement_s *__thiscall Scr_ScriptWatch::CreateBreakpointElement(
     return newElement;
 }
 
+void Scr_ScriptWatch::UpdateBreakpoint(bool add)
+{
+    Scr_WatchElement_s *element; // [esp+8h] [ebp-4h]
+    Scr_WatchElement_s *elementa; // [esp+8h] [ebp-4h]
+
+    if (Sys_IsRemoteDebugClient())
+        MyAssertHandler((char *)".\\script\\scr_debugger.cpp", 7357, 0, "%s", "!Sys_IsRemoteDebugClient()");
+    for (element = this->elementHead; element; element = element->next)
+    {
+        if (element->breakpointType == 1 || element->breakpointType == 3)
+        {
+            if (element->breakpoint)
+                MyAssertHandler((char *)".\\script\\scr_debugger.cpp", 7365, 0, "%s", "!element->breakpoint");
+            if (!element->expr.exprHead)
+                MyAssertHandler((char *)".\\script\\scr_debugger.cpp", 7367, 0, "%s", "expr->exprHead");
+            scrDebuggerGlob.currentElement = element;
+            scrDebuggerGlob.removeId = 0;
+            scrDebuggerGlob.add = add;
+            if (element->valueDefined && element->value.type == 1)
+                Scr_RefToVariable(element->value.u.stringValue, 1);
+            Scr_RefScriptExpression(&element->expr);
+        }
+    }
+    if (add)
+    {
+        for (elementa = this->elementHead; elementa; elementa = elementa->next)
+        {
+            if (elementa->breakpointType == 1)
+            {
+                Scr_BreakOnAllAssignmentPos();
+                return;
+            }
+        }
+        Scr_UnbreakAllAssignmentPos();
+    }
+}
+
 void __thiscall Scr_ScriptWatch::SortHitBreakpointsTop()
 {
     Scr_WatchElement_s **pElement; // [esp+8h] [ebp-14h]
@@ -1076,31 +1341,198 @@ void __thiscall Scr_ScriptWatch::SortHitBreakpointsTop()
     }
 }
 
+bool Scr_ScriptWatch::KeyEvent(float *point, int key)
+{
+    char result; // al
+    Scr_WatchElement_s *v4; // eax
+    Scr_WatchElement_s *v5; // eax
+    Scr_WatchElement_s *v6; // eax
+    Scr_WatchElement_s *SelectedElement; // eax
+    Scr_WatchElement_s *v8; // eax
 
-bool __thiscall Scr_ScriptWatch::SetSelectedLineFocus(int newSelectedLine, bool user)
+    if (Key_IsDown(0, 158) || Key_IsDown(0, 159) || Key_IsDown(0, 160))
+    {
+        if (Key_IsDown(0, 158) || Key_IsDown(0, 159) || !Key_IsDown(0, 160))
+        {
+            if (Key_IsDown(0, 158) || !Key_IsDown(0, 159) || Key_IsDown(0, 160))
+            {
+                return UI_LinesComponent::KeyEvent(point, key);
+            }
+            else
+            {
+                switch (key)
+                {
+                case 99:
+                case 161:
+                    //Scr_ScriptWatch::CopyElement(this);
+                    this->CopyElement();
+                    result = 1;
+                    break;
+                case 118:
+                $LN12_30:
+                    //Scr_ScriptWatch::PasteElement(this);
+                    this->PasteElement();
+                    result = 1;
+                    break;
+                case 120:
+                $LN11_27:
+                    //Scr_ScriptWatch::CopyElement(this);
+                    this->CopyElement();
+                    //Scr_ScriptWatch::DeleteElement(this);
+                    this->DeleteElement();
+                    result = 1;
+                    break;
+                case 173:
+                    //SelectedElement = Scr_ScriptWatch::GetSelectedElement(this);
+                    SelectedElement = this->GetSelectedElement();
+                    //Scr_ScriptWatch::ToggleBreakpoint(this, SelectedElement, 7u);
+                    this->ToggleBreakpoint(SelectedElement, 7);
+                    result = 1;
+                    break;
+                case 175:
+                    //v8 = Scr_ScriptWatch::GetSelectedElement(this);
+                    v8 = this->GetSelectedElement();
+                    //Scr_ScriptWatch::ToggleBreakpoint(this, v8, 3u);
+                    this->ToggleBreakpoint(v8, 3);
+                    result = 1;
+                    break;
+                default:
+                    return UI_LinesComponent::KeyEvent(point, key);
+                }
+            }
+        }
+        else
+        {
+            switch (key)
+            {
+            case 96:
+            case 126:
+                //Scr_ScriptWatch::EditElement(this, SCR_CONSOLE_INPUT_OUTPUT);
+                this->EditElement(SCR_CONSOLE_INPUT_OUTPUT);
+                result = 1;
+                break;
+            case 161:
+                goto $LN12_30;
+            case 162:
+                goto $LN11_27;
+            default:
+                return UI_LinesComponent::KeyEvent(point, key);
+            }
+        }
+    }
+    else
+    {
+        switch (key)
+        {
+        case 13:
+        case 191:
+        case 223:
+            //Scr_ScriptWatch::CloneSelectedElement(this);
+            this->CloneSelectedElement();
+            result = 1;
+            break;
+        case 96:
+        case 126:
+            //Scr_ScriptWatch::EditElement(this, SCR_CONSOLE_INPUT_ONLY);
+            this->EditElement(SCR_CONSOLE_INPUT_ONLY);
+            result = 1;
+            break;
+        case 127:
+            //Scr_ScriptWatch::BackspaceElement(this);
+            this->BackspaceElement();
+            result = 1;
+            break;
+        case 156:
+            //Scr_ScriptWatch::ExpandSelectedElement(this, 0);
+            this->ExpandSelectedElement(false);
+            result = 1;
+            break;
+        case 157:
+            //Scr_ScriptWatch::ExpandSelectedElement(this, 1);
+            this->ExpandSelectedElement(true);
+            result = 1;
+            break;
+        case 161:
+            //Scr_ScriptWatch::InsertElement(this);
+            this->InsertElement();
+            result = 1;
+            break;
+        case 162:
+            //Scr_ScriptWatch::DeleteElement(this);
+            this->DeleteElement();
+            result = 1;
+            break;
+        case 173:
+            //v4 = Scr_ScriptWatch::GetSelectedElement(this);
+            v4 = this->GetSelectedElement();
+            //Scr_ScriptWatch::ToggleBreakpoint(this, v4, 6u);
+            this->ToggleBreakpoint(v4, 6);
+            result = 1;
+            break;
+        case 174:
+            //v5 = Scr_ScriptWatch::GetSelectedElement(this);
+            v5 = this->GetSelectedElement();
+            //Scr_ScriptWatch::ToggleBreakpoint(this, v5, 2u);
+            this->ToggleBreakpoint(v5, 2);
+            result = 1;
+            break;
+        case 175:
+            //v6 = Scr_ScriptWatch::GetSelectedElement(this);
+            v6 = this->GetSelectedElement();
+            //Scr_ScriptWatch::ToggleBreakpoint(this, v6, 1u);
+            this->ToggleBreakpoint(v6, 1);
+            result = 1;
+            break;
+        case 200:
+            //result = Scr_ScriptWatch::LeftMouseEvent(this, point);
+            result = this->LeftMouseEvent(point);
+            break;
+        default:
+            return UI_LinesComponent::KeyEvent(point, key);
+        }
+    }
+    return result;
+}
+
+bool Scr_ScriptWatch::SetSelectedLineFocus(int newSelectedLine, bool user)
 {
     Scr_WatchElement_s *element; // [esp+4h] [ebp-4h]
 
     if (!UI_LinesComponent::SetSelectedLineFocus(newSelectedLine, user))
         return 0;
+
     element = Scr_ScriptWatch::GetSelectedElement();
+
     if (!element)
         return 1;
+
     if (element->objectType != 14 && element->objectType != 22)
         return 1;
-    // KISAKTODO: meh
-    //if (Sys_IsRemoteDebugClient())
-    //{
-    //    Sys_WriteDebugSocketMessageType(0x27u);
-    //    Scr_WriteElement(element);
-    //    Sys_EndWriteDebugSocket();
-    //}
-    //else
+
+    if (Sys_IsRemoteDebugClient())
+    {
+        Sys_WriteDebugSocketMessageType(0x27u);
+        Scr_WriteElement(element);
+        Sys_EndWriteDebugSocket();
+    }
+    else
     {
         //Scr_ScriptWatch::DisplayThreadPos(this, element);
         DisplayThreadPos(element);
     }
     return 1;
+}
+
+void Scr_ScriptCallStack::Init()
+{
+    UI_LinesComponent::Init();
+    this->size[0] = UI_Component::g.charWidth * 128.0f + UI_Component::g.charHeight;
+    this->size[1] = 0.0;
+}
+
+bool Scr_ScriptCallStack::KeyEvent(float *point, int key)
+{
+    return UI_LinesComponent::KeyEvent(point, key);
 }
 
 bool __thiscall Scr_ScriptCallStack::SetSelectedLineFocus(int newSelectedLine, bool user)
@@ -1227,6 +1659,68 @@ void __thiscall Scr_ScriptCallStack::UpdateStack()
     }
 }
 
+bool Scr_OpenScriptList::KeyEvent(float *point, int key)
+{
+    bool result; // al
+
+    if (!Key_IsDown(0, 158) && !Key_IsDown(0, 159) && !Key_IsDown(0, 160))
+    {
+        if (key == 127)
+        {
+            Scr_AbstractScriptList::BackspaceEntry();
+            return 1;
+        }
+        if (key == 162)
+        {
+            Scr_AbstractScriptList::DeleteEntry();
+            return 1;
+        }
+        return UI_LinesComponent::KeyEvent(point, key);
+    }
+    if (!Key_IsDown(0, 158) && !Key_IsDown(0, 159) && Key_IsDown(0, 160))
+    {
+        if (key == 161)
+        {
+        LABEL_15:
+            Scr_AbstractScriptList::PasteEntry();
+            return 1;
+        }
+        if (key == 162)
+        {
+        LABEL_16:
+            Scr_AbstractScriptList::CopyEntry();
+            Scr_AbstractScriptList::DeleteEntry();
+            return 1;
+        }
+        return UI_LinesComponent::KeyEvent(point, key);
+    }
+    if (Key_IsDown(0, 158) || !Key_IsDown(0, 159) || Key_IsDown(0, 160))
+    {
+        return UI_LinesComponent::KeyEvent(point, key);
+    }
+    switch (key)
+    {
+    case 99:
+    case 161:
+        Scr_AbstractScriptList::CopyEntry();
+        result = 1;
+        break;
+    case 118:
+        goto LABEL_15;
+    case 120:
+        goto LABEL_16;
+    default:
+        return UI_LinesComponent::KeyEvent(point, key);
+    }
+    return result;
+}
+
+void Scr_OpenScriptList::Init()
+{
+    Scr_AbstractScriptList::Init();
+    Scr_OpenScriptList::ReadFromFile();
+}
+
 void Scr_OpenScriptList::Shutdown()
 {
     Scr_StringNode_s *node; // [esp+34h] [ebp-10h]
@@ -1267,6 +1761,69 @@ void Scr_OpenScriptList::Shutdown()
         FS_FCloseFile(f);
     }
     Scr_AbstractScriptList::Shutdown();
+}
+
+bool Scr_OpenScriptList::ReadFromFile()
+{
+    char v2; // [esp+3h] [ebp-55h]
+    char *v3; // [esp+8h] [ebp-50h]
+    const char *text; // [esp+Ch] [ebp-4Ch]
+    Scr_StringNode_s *node; // [esp+38h] [ebp-20h]
+    Scr_StringNode_s *nodea; // [esp+38h] [ebp-20h]
+    char *newText; // [esp+40h] [ebp-18h]
+    Scr_StringNode_s *head; // [esp+44h] [ebp-14h]
+    char *buf; // [esp+48h] [ebp-10h] BYREF
+    bool success; // [esp+4Fh] [ebp-9h]
+    int currentScript; // [esp+50h] [ebp-8h]
+    int i; // [esp+54h] [ebp-4h]
+
+    head = Scr_GetStringList("open_scripts.txt", &buf);
+    success = head != 0;
+    this->usedHead = 0;
+    currentScript = scrDebuggerGlob.scriptList.selectedLine;
+    if (head)
+    {
+        node = head->next;
+        for (i = 0; i < scrDebuggerGlob.scriptList.numLines; ++i)
+        {
+            //if (!strcmp(Scr_ScriptWindow::GetFilename(scrDebuggerGlob.scriptList.scriptWindows[i]), head->text))
+            if (!strcmp(scrDebuggerGlob.scriptList.scriptWindows[i]->GetFilename(), head->text))
+            {
+                currentScript = i;
+                break;
+            }
+        }
+        Hunk_FreeDebugMem();
+        head = node;
+    }
+    while (head)
+    {
+        nodea = head->next;
+        if (Scr_AbstractScriptList::AddEntryName(head->text, 0))
+        {
+            Hunk_FreeDebugMem();
+        }
+        else
+        {
+            newText = (char *)Hunk_AllocDebugMem(&head->text[strlen(head->text) + 1] - head->text);
+            text = head->text;
+            v3 = newText;
+            do
+            {
+                v2 = *text;
+                *v3++ = *text++;
+            } while (v2);
+            head->text = newText;
+            head->next = this->usedHead;
+            this->usedHead = head;
+        }
+        head = nodea;
+    }
+    //UI_LinesComponent::SetSelectedLineFocus(&scrDebuggerGlob.scriptList, currentScript, 0);
+    scrDebuggerGlob.scriptList.SetSelectedLineFocus(currentScript, 0);
+    if (buf)
+        Hunk_FreeDebugMem();
+    return success;
 }
 
 bool Scr_OpenScriptList::SetSelectedLineFocus(
@@ -1338,6 +1895,161 @@ void Scr_ScriptWatch::Evaluate()
     }
 
     Scr_ScriptWatch::LoadSelectedLine(&info);
+}
+
+void Scr_ScriptWatch::PasteBreakpointElement(
+    Scr_WatchElement_s *element,
+    const char *text,
+    bool overwrite,
+    unsigned __int8 breakpointType,
+    bool user)
+{
+    unsigned int bufferIndex; // [esp+4h] [ebp-14h]
+    int lineNum; // [esp+8h] [ebp-10h]
+    const char *name; // [esp+Ch] [ebp-Ch]
+    SourceBufferInfo *sourceBufData; // [esp+10h] [ebp-8h]
+    Scr_ScriptWindow *scriptWindow; // [esp+14h] [ebp-4h]
+
+    lineNum = atoi(text);
+    for (name = text; *name; ++name)
+    {
+        if (*name == 32)
+        {
+            ++name;
+            break;
+        }
+    }
+    for (bufferIndex = 0; bufferIndex < scrParserPub.sourceBufferLookupLen; ++bufferIndex)
+    {
+        sourceBufData = &scrParserPub.sourceBufferLookup[bufferIndex];
+        if (sourceBufData->buf && !I_stricmp(sourceBufData->buf, name))
+        {
+            scriptWindow = scrDebuggerGlob.scriptList.scriptWindows[sourceBufData->sortedIndex];
+            //if (scriptWindow->SetSelectedLineFocus(scriptWindow, lineNum - 1, 0))
+            if (scriptWindow->SetSelectedLineFocus(lineNum - 1, 0))
+            {
+                //Scr_ScriptWindow::ToggleBreakpoint(scriptWindow, element, 1, overwrite, breakpointType, user);
+                scriptWindow->ToggleBreakpoint(element, 1, overwrite, breakpointType, user);
+            }
+            return;
+        }
+    }
+}
+
+static unsigned __int8 __cdecl Scr_GetBreakpointType(const char **pText)
+{
+    switch (**pText)
+    {
+    case '#':
+        if (*++ * pText == 64)
+        {
+            ++*pText;
+            return 5;
+        }
+        else if (**pText == 35)
+        {
+            ++*pText;
+            return 4;
+        }
+        else
+        {
+            return 3;
+        }
+    case '@':
+        ++*pText;
+        return 1;
+    case '?':
+        ++*pText;
+        return 2;
+    case '+':
+        ++*pText;
+        return 6;
+    case '-':
+        ++*pText;
+        return 7;
+    default:
+        return 0;
+    }
+}
+
+void Scr_ScriptWatch::PasteElement()
+{
+    char *cbd; // [esp+4h] [ebp-8h]
+    Scr_WatchElement_s *element; // [esp+8h] [ebp-4h]
+
+    cbd = Sys_GetClipboardData();
+    if (cbd)
+    {
+        element = Scr_ScriptWatch::GetSelectedElement();
+        Scr_ScriptWatch::PasteElementInternal(element, cbd, 1);
+        Com_FreeEvent(cbd);
+    }
+}
+
+void Scr_ScriptWatch::InsertElement()
+{
+    Scr_WatchElement_s *element; // [esp+4h] [ebp-4h]
+
+    element = Scr_ScriptWatch::GetSelectedElement();
+    if (Sys_IsRemoteDebugClient())
+    {
+        Sys_WriteDebugSocketMessageType(8u);
+        Scr_WriteElement(element);
+        Sys_EndWriteDebugSocket();
+    }
+    else
+    {
+        //Scr_ScriptWatch::PasteNonBreakpointElement(this, element, (char *)&String, 1);
+        this->PasteNonBreakpointElement(element, (char *)"", 1);
+    }
+}
+
+void Scr_ScriptWatch::CopyElement()
+{
+    char *ElementArchiveText; // eax
+    Scr_WatchElement_s *element; // [esp+4h] [ebp-4h]
+
+    element = Scr_ScriptWatch::GetSelectedElement();
+    if (element)
+    {
+        ElementArchiveText = Scr_GetElementArchiveText(element);
+        Sys_SetClipboardData(ElementArchiveText);
+    }
+}
+
+void Scr_ScriptWatch::PasteElementInternal(
+    Scr_WatchElement_s *element,
+    char *text,
+    bool user)
+{
+    Scr_WatchElement_s *newElement; // [esp+8h] [ebp-8h]
+    unsigned __int8 type; // [esp+Fh] [ebp-1h]
+
+    type = Scr_GetBreakpointType((const char **)&text);
+    if (type < 4 || type > 7)
+    {
+        if (Sys_IsRemoteDebugClient())
+        {
+            Sys_WriteDebugSocketMessageType(6u);
+            Scr_WriteElement(element);
+            Sys_WriteDebugSocketString(text);
+            Sys_WriteDebugSocketInt(user);
+            Sys_WriteDebugSocketInt(type);
+            Sys_EndWriteDebugSocket();
+        }
+        else
+        {
+            newElement = Scr_ScriptWatch::PasteNonBreakpointElement(element, text, user);
+            if (type)
+            {
+                Scr_ScriptWatch::ToggleBreakpoint(newElement, type);
+            }
+        }
+    }
+    else
+    {
+        Scr_ScriptWatch::PasteBreakpointElement(element, text, 0, type, user);
+    }
 }
 
 Scr_WatchElement_s *__thiscall Scr_ScriptWatch::PasteNonBreakpointElement(
@@ -1874,6 +2586,142 @@ bool __thiscall Scr_ScriptWatch::PostEvaluateWatchElement(
     }
 }
 
+void Scr_ScriptWindow::SetScriptFile(const char *name)
+{
+    unsigned int i; // [esp+8h] [ebp-4h]
+
+    for (i = 0; i < scrParserPub.sourceBufferLookupLen; ++i)
+    {
+        if (scrParserPub.sourceBufferLookup[i].buf && !I_stricmp(scrParserPub.sourceBufferLookup[i].buf, name))
+        {
+            this->bufferIndex = i;
+            this->Init();
+            return;
+        }
+    }
+    this->bufferIndex = -1;
+    this->Init();
+}
+
+bool Scr_ScriptList::KeyEvent(float *point, int key)
+{
+    if (Key_IsDown(0, 158) || Key_IsDown(0, 159) || Key_IsDown(0, 160) || key != 13 && key != 191 && key != 223)
+    {
+        return UI_LinesComponent::KeyEvent(point, key);
+    }
+
+    if (this->selectedLine >= 0)
+    {
+        //Scr_AbstractScriptList::AddEntry(&scrDebuggerGlob.openScriptList, this->scriptWindows[this->selectedLine], 0);
+        scrDebuggerGlob.openScriptList.AddEntry(this->scriptWindows[this->selectedLine], 0);
+    }
+
+    return true;
+}
+
+void Scr_ScriptList::AddFile(const char *filename, Scr_AddFileInfo *info)
+{
+    Scr_ScriptWindow *v3; // [esp+4h] [ebp-18h]
+    Scr_ScriptWindow *v5; // [esp+14h] [ebp-8h]
+
+    //v5 = (Scr_ScriptWindow *)Scr_ScriptWindow::operator new(0x3Cu);
+    v5 = new Scr_ScriptWindow();
+    v3 = v5;
+
+    //if (v5)
+    //{
+    //    v5->__vftable = (Scr_ScriptWindow_vtbl *)&UI_Component::`vftable';
+    //        v5->__vftable = (Scr_ScriptWindow_vtbl *)&UI_LinesComponent::`vftable';
+    //        v5->__vftable = (Scr_ScriptWindow_vtbl *)&Scr_ScriptWindow::`vftable';
+    //        v3 = v5;
+    //}
+    //else
+    //{
+    //    v3 = 0;
+    //}
+
+    this->scriptWindows[info->to] = v3;
+    //Scr_ScriptWindow::SetScriptFile(v3, filename);
+    v3->SetScriptFile(filename);
+
+    if (v3->bufferIndex == -1)
+    {
+        if (v3)
+        {
+            //((void(__thiscall *)(Scr_ScriptWindow *, int))v3->~UI_Component)(v3, 1);
+            delete v3;
+        }
+        --this->numLines;
+    }
+    else
+    {
+        scrParserPub.sourceBufferLookup[v3->bufferIndex].sortedIndex = info->to++;
+        v3->selectionParent = &scrDebuggerGlob.scriptScrollPane;
+        if (v3->numCols > info->maxNumCols)
+            info->maxNumCols = v3->numCols;
+    }
+    ++info->from;
+}
+
+void Scr_ScriptList::Init()
+{
+    unsigned int VariableName; // eax
+    const char *v2; // eax
+    char filename[64]; // [esp+14h] [ebp-860h] BYREF
+    Scr_AddFileInfo info; // [esp+58h] [ebp-81Ch] BYREF
+    int numCols; // [esp+64h] [ebp-810h]
+    int numCurrCols; // [esp+68h] [ebp-80Ch]
+    const char *scriptWindowsNames[512]; // [esp+6Ch] [ebp-808h] BYREF
+    int i; // [esp+86Ch] [ebp-8h]
+    unsigned int id; // [esp+870h] [ebp-4h]
+
+    Scr_AbstractScriptList::Init();
+
+    ++this->numLines;
+    for (id = FindFirstSibling(scrCompilePub.loadedscripts); id; id = FindNextSibling(id))
+        ++this->numLines;
+    if (this->numLines > 512)
+        Com_Error(ERR_DROP, "MAX_SCRIPT_WINDOW_NAMES exceeded");
+    scriptWindowsNames[0] = "scriptdebugger/help.txt";
+    i = 1;
+    for (id = FindFirstSibling(scrCompilePub.loadedscripts); id; id = FindNextSibling(id))
+    {
+        VariableName = GetVariableName(id);
+        v2 = SL_ConvertToString(VariableName);
+        scriptWindowsNames[i++] = v2;
+    }
+    qsort(
+        &scriptWindowsNames[1],
+        this->numLines - 1,
+        4u,
+        (int(__cdecl *)(const void *, const void *))ConDrawInput_CompareStrings);
+    this->scriptWindows = (Scr_ScriptWindow **)Scr_AllocDebugMem(4 * this->numLines, "Scr_ScriptList::Init2");
+    memset(&info, 0, sizeof(info));
+    Hunk_CheckTempMemoryHighClear();
+    Scr_AddSourceBuffer(0, (char *)"scriptdebugger/help.txt", 0, 0);
+    Hunk_ClearTempMemoryHigh();
+    Scr_ScriptList::AddFile("scriptdebugger/help.txt", &info);
+    if (info.to)
+        this->selectedLine = 0;
+    for (id = FindFirstSibling(scrCompilePub.loadedscripts); id; id = FindNextSibling(id))
+    {
+        Com_sprintf(filename, 0x40u, "%s.gsc", scriptWindowsNames[info.from]);
+        Scr_ScriptList::AddFile(filename, &info);
+    }
+    scrDebuggerGlob.colBuf = (char *)Hunk_AllocDebugMem(info.maxNumCols + 1);
+    numCols = 0;
+    for (i = 0; i < this->numLines; ++i)
+    {
+        //numCurrCols = strlen(Scr_ScriptWindow::GetFilename(this->scriptWindows[i]));
+        numCurrCols = strlen(this->scriptWindows[i]->GetFilename());
+        if (numCurrCols > numCols)
+            numCols = numCurrCols;
+    }
+    this->size[0] = (double)numCols * UI_Component::g.charWidth;
+    //UI_LinesComponent::UpdateHeight(this);
+    this->UpdateHeight();
+}
+
 void Scr_ScriptList::Shutdown()
 {
     Scr_ScriptWindow *v2; // [esp+2Ch] [ebp-18h]
@@ -1995,6 +2843,13 @@ void Scr_ScriptWatch::UpdateBreakpoints(bool add)
     }
 }
 
+void Scr_AbstractScriptList::Init()
+{
+    UI_LinesComponent::Init();
+    this->numLines = 0;
+    this->scriptWindows = 0;
+}
+
 void Scr_AbstractScriptList::Shutdown()
 {
     if (this->scriptWindows)
@@ -2082,6 +2937,63 @@ bool Scr_AbstractScriptList::AddEntryName(const char *filename, bool select)
         }
     }
     return 0;
+}
+
+void Scr_AbstractScriptList::DeleteEntryInternal()
+{
+    if (this->selectedLine >= 0)
+    {
+        memmove(
+            (unsigned __int8 *)&this->scriptWindows[this->selectedLine],
+            (unsigned __int8 *)&this->scriptWindows[this->selectedLine + 1],
+            4 * (this->numLines - 1 - this->selectedLine));
+        --this->numLines;
+        UI_LinesComponent::UpdateHeight();
+    }
+}
+
+void Scr_AbstractScriptList::DeleteEntry()
+{
+    int newSelectedLine; // [esp+4h] [ebp-4h]
+
+    newSelectedLine = this->selectedLine;
+    Scr_AbstractScriptList::DeleteEntryInternal();
+    this->SetSelectedLineFocus(newSelectedLine, 1);
+}
+
+void Scr_AbstractScriptList::BackspaceEntry()
+{
+    int newSelectedLine; // [esp+4h] [ebp-4h]
+
+    newSelectedLine = this->selectedLine - 1;
+    Scr_AbstractScriptList::DeleteEntryInternal();
+    this->SetSelectedLineFocus(newSelectedLine, 1);
+}
+
+void Scr_AbstractScriptList::CopyEntry()
+{
+    char *Filename; // eax
+
+    if (this->selectedLine >= 0)
+    {
+        Filename = this->scriptWindows[this->selectedLine]->GetFilename();
+        Sys_SetClipboardData(Filename);
+    }
+}
+
+void Scr_AbstractScriptList::PasteEntry()
+{
+    char *cbd; // [esp+4h] [ebp-4h]
+
+    cbd = Sys_GetClipboardData();
+    if (cbd)
+    {
+        if (*cbd)
+        {
+            Scr_AbstractScriptList::AddEntryName(cbd, 1);
+        }
+        Com_FreeEvent(cbd);
+    }
 }
 
 void Scr_AbstractScriptList::AddEntry(Scr_ScriptWindow *scriptWindow, bool select)
@@ -2236,6 +3148,14 @@ void UI_ScrollPane::SetPos()
     }
     //UI_LinesComponent::ClearFocus(this->comp);
     this->comp->ClearFocus();
+}
+
+void UI_ScrollPane::AddText(const char *text)
+{
+    if (this->comp)
+    {
+        this->comp->AddText(text);
+    }
 }
 
 void UI_ScrollPane::Draw(
@@ -2510,6 +3430,12 @@ void UI_ScrollPane::CheckMouseScroll(int index, float *thumbPos, float *thumbSiz
     }
 }
 
+void UI_Component::Init()
+{
+    this->size[0] = 0.0f;
+    this->size[1] = 0.0f;
+    this->selectionParent = NULL;
+}
 void UI_Component::Shutdown()
 {
 }
@@ -2525,6 +3451,18 @@ void UI_Component::Draw(float one, float two, float three, float four, float fiv
 bool UI_Component::KeyEvent(float *pos, int key)
 {
     return false;
+}
+
+UI_Component *UI_Component::GetCompAtLocation(float *point)
+{
+    if (*point < 0.0 || this->size[0] <= *point || point[1] < 0.0 || this->size[1] <= point[1])
+        return 0;
+    else
+        return this;
+}
+
+void UI_Component::AddText(const char *text)
+{
 }
 
 void UI_Component::DrawPicRotate(
@@ -2736,6 +3674,14 @@ void Scr_ScriptWindow::Draw(float x,
     }
 }
 
+void UI_VerticalDivider::Init()
+{
+    UI_Component::Init();
+    this->topComp = 0;
+    this->bottomComp = 0;
+}
+
+
 UI_Component *UI_VerticalDivider::GetCompAtLocation(float *point)
 {
     if (this->topComp)
@@ -2897,6 +3843,52 @@ bool UI_ScrollPane::KeyEvent(float *point, int key)
     return result;
 }
 
+void UI_ScrollPane::Init()
+{
+    UI_Component::Init();
+    this->comp = 0;
+    this->forceHorScoll = 0;
+    this->mouseHeldScale[0] = 0.0f;
+    this->mouseHeldScale[1] = 0.0f;
+    this->mouseWasDown[0] = 0;
+    this->mouseWasDown[1] = 0;
+}
+
+UI_Component *UI_ScrollPane::GetCompAtLocation(float *point)
+{
+    UI_LinesComponent *comp; // edx
+    float innerSize[2]; // [esp+8h] [ebp-8h] BYREF
+
+    if (!this->comp)
+        return UI_Component::GetCompAtLocation(point);
+
+    UI_ScrollPane::GetInnerSize(innerSize);
+
+    if (innerSize[0] <= *point || innerSize[1] <= point[1])
+        return UI_Component::GetCompAtLocation(point);
+
+    comp = this->comp;
+    *point = *point + comp->pos[0];
+    point[1] = point[1] + comp->pos[1];
+    return this->comp->GetCompAtLocation(point);
+}
+
+bool UI_ScrollPane::GetInnerSize(float *innerSize)
+{
+    bool v3; // [esp+0h] [ebp-Ch]
+
+    if (!this->comp)
+        MyAssertHandler(".\\ui\\ui_component.cpp", 711, 0, "%s", "comp");
+    *innerSize = this->size[0] - UI_Component::g.scrollBarSize;
+    v3 = this->forceHorScoll || this->comp->pos[0] != 0.0 || *innerSize < this->comp->size[0];
+    if (*innerSize > this->comp->size[0])
+        this->comp->size[0] = *innerSize;
+    innerSize[1] = this->size[1];
+    if (v3)
+        innerSize[1] = innerSize[1] - UI_Component::g.scrollBarSize;
+    return v3;
+}
+
 int UI_ScrollPane::GetInnerLinesCount()
 {
     float innerSize[2]; // [esp+4h] [ebp-8h] BYREF
@@ -2951,6 +3943,17 @@ void UI_ScrollPane::DisplaySelectedLine()
     else
     {
         this->comp->selectedLine = firstLine;
+    }
+}
+
+void UI_LinesComponent::AddText(const char *text)
+{
+    int lineIndex; // [esp+8h] [ebp-4h]
+
+    if (!UI_Component::g.consoleReason)
+    {
+        lineIndex = atoi(text);
+        this->SetSelectedLineFocus(lineIndex - 1, 0);
     }
 }
 
@@ -3154,6 +4157,27 @@ void Scr_ScriptWindow::RunToCursor()
     }
 }
 
+bool Scr_ScriptWatch::ReadFromFile()
+{
+    Scr_StringNode_s *node; // [esp+4h] [ebp-10h]
+    Scr_StringNode_s *head; // [esp+8h] [ebp-Ch]
+    char *buf; // [esp+Ch] [ebp-8h] BYREF
+    bool success; // [esp+13h] [ebp-1h]
+
+    head = Scr_GetStringList("watch_window.txt", &buf);
+    success = head != 0;
+    while (head)
+    {
+        node = head->next;
+        Scr_ScriptWatch::PasteElementInternal(0, (char *)head->text, 0);
+        Hunk_FreeDebugMem();
+        head = node;
+    }
+    if (buf)
+        Hunk_FreeDebugMem();
+    return success;
+}
+
 Scr_WatchElement_s *__thiscall Scr_ScriptWatch::GetSelectedNonConditionalElement()
 {
     Scr_WatchElement_s *element; // [esp+4h] [ebp-4h]
@@ -3233,6 +4257,65 @@ void Scr_ScriptWindow::EnterCall()
         {
             Scr_ScriptWindow::EnterCallInternal();
         }
+    }
+}
+
+void Scr_ScriptWindow::Init()
+{
+    int v1; // [esp+0h] [ebp-20h]
+    SourceBufferInfo *sourceBufData; // [esp+10h] [ebp-10h]
+    const char *s; // [esp+14h] [ebp-Ch]
+    int i; // [esp+18h] [ebp-8h]
+    int col; // [esp+1Ch] [ebp-4h]
+
+    this->breakpointHead = 0;
+    this->builtinHead = 0;
+    UI_LinesComponent::Init();
+    this->currentTopLine = 0;
+    if (this->bufferIndex == -1)
+    {
+        this->currentBufPos = 0;
+        this->size[0] = 0.0;
+        this->size[1] = 0.0;
+    }
+    else
+    {
+        if (this->bufferIndex >= scrParserPub.sourceBufferLookupLen)
+            MyAssertHandler(
+                (char *)".\\script\\scr_debugger.cpp",
+                2153,
+                0,
+                "bufferIndex doesn't index scrParserPub.sourceBufferLookupLen\n\t%i not in [0, %i)",
+                this->bufferIndex,
+                scrParserPub.sourceBufferLookupLen);
+        sourceBufData = &scrParserPub.sourceBufferLookup[this->bufferIndex];
+        s = sourceBufData->sourceBuf;
+        this->numCols = 0;
+        col = 0;
+        for (i = 0; i < sourceBufData->len; ++i)
+        {
+            if (*s)
+            {
+                if (*s == 9)
+                    v1 = 4 - col % 4;
+                else
+                    v1 = 1;
+                col += v1;
+            }
+            else
+            {
+                if (col > this->numCols)
+                    this->numCols = col;
+                ++this->numLines;
+                col = 0;
+            }
+            ++s;
+        }
+        if (i && *(s - 1))
+            ++this->numLines;
+        this->size[0] = (double)this->numCols * UI_Component::g.charWidth + UI_Component::g.charHeight;
+        UI_LinesComponent::UpdateHeight();
+        this->currentBufPos = sourceBufData->sourceBuf;
     }
 }
 

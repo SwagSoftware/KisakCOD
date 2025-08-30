@@ -8,6 +8,12 @@
 
 struct Scr_WatchElement_s;
 
+enum Scr_ConsoleOpenMode : __int32
+{
+    SCR_CONSOLE_INPUT_ONLY = 0x0,
+    SCR_CONSOLE_INPUT_OUTPUT = 0x1,
+};
+
 #ifdef KISAK_MP
 enum operationEnum : __int32
 {                                       // ...
@@ -1459,26 +1465,13 @@ struct UI_Component // sizeof=0x10
 
     //UI_Component_vtbl *__vftable;
 
-    virtual void Init()
-    {
-        this->size[0] = 0.0f;
-        this->size[1] = 0.0f;
-        this->selectionParent = NULL;
-    }
+    virtual void Init();
     virtual void Shutdown();
     virtual ~UI_Component();
     virtual void Draw(float one, float two, float three, float four, float five, float six);
     virtual bool KeyEvent(float *, int);
-    virtual UI_Component *GetCompAtLocation(float *point)
-    {
-        if (*point < 0.0 || this->size[0] <= *point || point[1] < 0.0 || this->size[1] <= point[1])
-            return 0;
-        else
-            return this;
-    }
-    virtual void AddText(const char *text)
-    {
-    }
+    virtual UI_Component *GetCompAtLocation(float *point);
+    virtual void AddText(const char *text);
 
     void DrawText(float x, float y, float width, int fontEnum, const float *color, char *text);
 
@@ -1505,8 +1498,10 @@ struct UI_Component // sizeof=0x10
 
 struct UI_LinesComponent : UI_Component // sizeof=0x24
 {                                       // ...
+    virtual void Init();
     virtual bool SetSelectedLineFocus(int newSelectedLine, bool user);
     virtual bool KeyEvent(float *point, int key);
+    virtual void AddText(const char *text);
 
     int selectedLine;                   // ...
     bool focusOnSelectedLine;
@@ -1524,6 +1519,7 @@ struct UI_LinesComponent : UI_Component // sizeof=0x24
 
 struct UI_ScrollPane : UI_Component // sizeof=0x34
 {                                       // ...
+    virtual void Init();
     virtual void Draw(
         float x,
         float y,
@@ -1533,38 +1529,10 @@ struct UI_ScrollPane : UI_Component // sizeof=0x34
         float compY);
     virtual bool KeyEvent(float *point, int key);
 
-    virtual UI_Component *GetCompAtLocation(float *point)
-    {
-        UI_LinesComponent *comp; // edx
-        float innerSize[2]; // [esp+8h] [ebp-8h] BYREF
+    virtual UI_Component *GetCompAtLocation(float *point);
+    virtual void AddText(const char *text);
 
-        if (!this->comp)
-            return UI_Component::GetCompAtLocation(point);
-        //UI_ScrollPane::GetInnerSize(this, innerSize);
-        this->GetInnerSize(innerSize);
-
-        if (innerSize[0] <= *point || innerSize[1] <= point[1])
-            return UI_Component::GetCompAtLocation(point);
-        comp = this->comp;
-        *point = *point + comp->pos[0];
-        point[1] = point[1] + comp->pos[1];
-        return this->comp->GetCompAtLocation(point);
-    }
-    bool GetInnerSize(float *innerSize)
-    {
-        bool v3; // [esp+0h] [ebp-Ch]
-
-        if (!this->comp)
-            MyAssertHandler(".\\ui\\ui_component.cpp", 711, 0, "%s", "comp");
-        *innerSize = this->size[0] - UI_Component::g.scrollBarSize;
-        v3 = this->forceHorScoll || this->comp->pos[0] != 0.0 || *innerSize < this->comp->size[0];
-        if (*innerSize > this->comp->size[0])
-            this->comp->size[0] = *innerSize;
-        innerSize[1] = this->size[1];
-        if (v3)
-            innerSize[1] = innerSize[1] - UI_Component::g.scrollBarSize;
-        return v3;
-    }
+    bool GetInnerSize(float *innerSize);
     int GetInnerLinesCount();
     int GetFirstDisplayedLine();
     int GetLastDisplayedLine();
@@ -1589,6 +1557,15 @@ struct UI_ScrollPane : UI_Component // sizeof=0x34
 
 struct Scr_ScriptWindow : UI_LinesComponent // sizeof=0x3C
 {
+    //void *operator new(unsigned int size)
+    //{
+    //    return Hunk_AllocDebugMem(size);
+    //}
+    //void operator delete(void *mem)
+    //{
+    //    Hunk_FreeDebugMem();
+    //}
+
     virtual void Draw(
         float x,
         float y,
@@ -1597,6 +1574,7 @@ struct Scr_ScriptWindow : UI_LinesComponent // sizeof=0x3C
         float compX,
         float compY);
 
+    virtual void Init();
     virtual bool KeyEvent(float *point, int key);
 
     unsigned int bufferIndex;
@@ -1609,6 +1587,8 @@ struct Scr_ScriptWindow : UI_LinesComponent // sizeof=0x3C
     void EnterCallInternal();
     void EnterCall();
     void CopySelectedText();
+
+    void SetScriptFile(const char *name);
 
     void ToggleBreakpoint(
         Scr_WatchElement_s *element,
@@ -1653,6 +1633,7 @@ struct Scr_ScriptWindow : UI_LinesComponent // sizeof=0x3C
 
 struct Scr_AbstractScriptList : UI_LinesComponent // sizeof=0x28
 {                                       // ...
+    virtual void Init();
     virtual void Shutdown();
     virtual void Draw(
         float x,
@@ -1662,32 +1643,56 @@ struct Scr_AbstractScriptList : UI_LinesComponent // sizeof=0x28
         float compX,
         float compY);
 
-    Scr_ScriptWindow **scriptWindows;   // ...
-
     bool AddEntryName(const char *filename, bool select);
     void AddEntry(Scr_ScriptWindow *scriptWindow, bool select);
+
+    void DeleteEntryInternal();
+    void DeleteEntry();
+    void BackspaceEntry();
+    void CopyEntry();
+    void PasteEntry();
+
+    Scr_ScriptWindow **scriptWindows;   // ...
+};
+
+struct Scr_AddFileInfo
+{
+    int maxNumCols;
+    int to;
+    int from;
 };
 
 struct Scr_ScriptList : Scr_AbstractScriptList // sizeof=0x28
 {                                       // ...
+    virtual void Init();
     virtual void Shutdown();
 
+    virtual bool KeyEvent(float *point, int key);
+
+    void AddFile(const char *filename, Scr_AddFileInfo *info);
     void LoadScriptPos();
 };
 
 struct Scr_OpenScriptList : Scr_AbstractScriptList // sizeof=0x2C
 {                                       // ...
-    virtual bool SetSelectedLineFocus(int newSelectedLine, bool user);
+    virtual void Init();
     virtual void Shutdown();
+
+    virtual bool KeyEvent(float *point, int key);
+
+    virtual bool SetSelectedLineFocus(int newSelectedLine, bool user);
+
+    bool ReadFromFile();
 
     struct Scr_StringNode_s *usedHead;
 };
 
 struct Scr_ScriptWatch : UI_LinesComponent // sizeof=0x34
 {                                       // ...
+    virtual void Init();
     virtual void Shutdown();
     virtual bool SetSelectedLineFocus(int newSelectedLine, bool user);
-
+    virtual bool KeyEvent(float *point, int key);
     virtual void Draw(
         float x,
         float y,
@@ -1695,6 +1700,10 @@ struct Scr_ScriptWatch : UI_LinesComponent // sizeof=0x34
         float height,
         float compX,
         float compY);
+    virtual void AddText(const char *text);
+
+
+
 
     void Draw_r(Scr_WatchElement_s *element,
         float x,
@@ -1714,6 +1723,8 @@ struct Scr_ScriptWatch : UI_LinesComponent // sizeof=0x34
     unsigned int localId;               // ...
     int dirty;                          // ...
 
+    bool ReadFromFile();
+
     Scr_WatchElement_s *GetSelectedNonConditionalElement();
 
     Scr_WatchElement_s *GetElementWithId_r(Scr_WatchElement_s *element, int id);
@@ -1725,10 +1736,9 @@ struct Scr_ScriptWatch : UI_LinesComponent // sizeof=0x34
 
     void AddElement(Scr_WatchElement_s *element, char *text);
     Scr_WatchElement_s *CloneElement(Scr_WatchElement_s *element);
+    void CloneSelectedElement();
 
-    void DeleteElement();
-    void DeleteElementInternal(Scr_WatchElement_s *element);
-
+    void ToggleBreakpoint(Scr_WatchElement_s *element, unsigned __int8 type);
     void ToggleBreakpointInternal(Scr_WatchElement_s *element, unsigned __int8 type);
     void ToggleWatchElementBreakpoint(Scr_WatchElement_s *element, unsigned __int8 type);
 
@@ -1739,12 +1749,13 @@ struct Scr_ScriptWatch : UI_LinesComponent // sizeof=0x34
     Scr_WatchElement_s *GetElementPrev(Scr_WatchElement_s *element);
 
     void ToggleExpandElement(Scr_WatchElement_s *element);
-
-    Scr_WatchElement_s *BackspaceElementInternal(Scr_WatchElement_s *element);
+    void ExpandElement(Scr_WatchElement_s *element, bool expand);
+    void ExpandSelectedElement(bool expand);
 
     void UpdateHeight();
 
     void FreeWatchElement(Scr_WatchElement_s *element);
+
     Scr_WatchElement_s *AddBreakpoint(
         Scr_WatchElement_s *element,
         unsigned __int8 type);
@@ -1777,6 +1788,28 @@ struct Scr_ScriptWatch : UI_LinesComponent // sizeof=0x34
         char *text,
         bool user);
 
+    void PasteBreakpointElement(
+        Scr_WatchElement_s *element,
+        const char *text,
+        bool overwrite,
+        unsigned __int8 breakpointType,
+        bool user);
+
+    void PasteElement();
+    void PasteElementInternal(
+        Scr_WatchElement_s *element,
+        char *text,
+        bool user);
+    void InsertElement();
+    void CopyElement();
+    void DeleteElement();
+    void DeleteElementInternal(Scr_WatchElement_s *element);
+    Scr_WatchElement_s *BackspaceElementInternal(Scr_WatchElement_s *element);
+    void BackspaceElement();
+    void EditElement(Scr_ConsoleOpenMode openMode);
+
+    bool LeftMouseEvent(float *point);
+
     void UpdateBreakpoints(bool add);
 
     void DisplayThreadPos(Scr_WatchElement_s *element);
@@ -1793,6 +1826,8 @@ struct Scr_ScriptWatch : UI_LinesComponent // sizeof=0x34
         unsigned int bufferIndex,
         unsigned int sourcePos,
         bool user);
+
+    void UpdateBreakpoint(bool add);
 };
 
 struct Scr_SourcePos2_t // sizeof=0x8
@@ -1803,6 +1838,8 @@ struct Scr_SourcePos2_t // sizeof=0x8
 
 struct Scr_ScriptCallStack : UI_LinesComponent // sizeof=0x12C
 {                                       // ...
+    virtual void Init();
+    virtual bool KeyEvent(float *point, int key);
     virtual bool SetSelectedLineFocus(int newSelectedLine, bool user);
 
     virtual void Draw(
@@ -1813,13 +1850,14 @@ struct Scr_ScriptCallStack : UI_LinesComponent // sizeof=0x12C
         float compX,
         float compY);
 
-    Scr_SourcePos2_t stack[33];         // ...
-
     void UpdateStack();
+
+    Scr_SourcePos2_t stack[33];         // ...
 };
 
 struct UI_VerticalDivider : UI_Component // sizeof=0x1C
 {                                       // ...
+    virtual void Init();
     virtual UI_Component *GetCompAtLocation(float *point);
     virtual void Draw(
         float x,

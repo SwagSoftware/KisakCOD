@@ -19,7 +19,7 @@
 //  unsigned int g_breakonString      83043244     scr_evaluate.obj
 
 debugger_sval_s *g_debugExprHead;
-int g_breakonExpr;
+int g_breakonExpr; // thread_local in blops?
 int g_breakonHit;
 unsigned int g_breakonObject;
 unsigned int g_breakonString;
@@ -393,32 +393,32 @@ void __cdecl Scr_CompileExpression(sval_u *expr)
 {
     switch (*(unsigned int *)expr->type)
     {
-    case 6:
+    case ENUM_primitive_expression:
         Scr_CompilePrimitiveExpression(&expr->node[1]);
-        expr->type = debugger_node1((debugger_sval_s *)6, expr->node[1]).type;
+        expr->type = debugger_node1(ENUM_primitive_expression, expr->node[1]).type;
         break;
-    case 0x2F:
-    case 0x30:
+    case ENUM_bool_or:
+    case ENUM_bool_and:
         Scr_CompileExpression(&expr->node[1]);
         Scr_CompileExpression(&expr->node[2]);
         expr->type = debugger_node2(
-            *(debugger_sval_s **)expr->type,
+            expr->node[0].type,
             expr->node[1],
             expr->node[2]).type;
         break;
-    case 0x31:
+    case ENUM_binary:
         Scr_CompileExpression(&expr->node[1]);
         Scr_CompileExpression(&expr->node[2]);
         expr->type = debugger_node3(
-            *(debugger_sval_s **)expr->type,
+            expr->node[0].type,
             expr->node[1],
             expr->node[2],
             expr->node[3]).type;
         break;
-    case 0x32:
-    case 0x33:
+    case ENUM_bool_not:
+    case ENUM_bool_complement:
         Scr_CompileExpression(&expr->node[1]);
-        expr->type = debugger_node1(*(debugger_sval_s **)expr->type, expr->node[1]).type;
+        expr->type = debugger_node1(expr->node[0].type, expr->node[1]).type;
         break;
     default:
         return;
@@ -432,61 +432,61 @@ void __cdecl Scr_CompilePrimitiveExpression(sval_u *expr)
 
     switch (expr->node[0].idValue)
     {
-    case 7:
-    case 8:
-    case 9:
-    case 0xA:
-        expr->type = debugger_node1(*(debugger_sval_s **)expr->type, expr->node[1]).type;
+    case ENUM_integer:
+    case ENUM_float:
+    case ENUM_minus_integer:
+    case ENUM_minus_float:
+        expr->type = debugger_node1(expr->node[0].type, expr->node[1]).type;
         break;
-    case 0xB:
-    case 0xC:
-        expr->type = debugger_string(*(debugger_sval_s **)expr->type, (char*)SL_ConvertToString(*(unsigned int *)(expr->type + 4))).type;
+    case ENUM_string:
+    case ENUM_istring:
+        expr->type = debugger_string(expr->node[0].type, (char *)SL_ConvertToString(*(unsigned int *)(expr->type + 4))).type;
         break;
-    case 0x11:
+    case ENUM_variable:
         Scr_CompileVariableExpression(&expr->node[1]);
         tempVariableId.block = (scr_block_s*)AllocValue();
-        expr->type = debugger_node2((debugger_sval_s *)0x11, expr->node[1], tempVariableId).type;
+        expr->type = debugger_node2(ENUM_variable, expr->node[1], tempVariableId).type;
         break;
-    case 0x13:
+    case ENUM_call_expression:
         if (!Scr_CompileCallExpression(&expr->node[1]))
             goto LABEL_13;
         tempVariableIda.block = (scr_block_s*)AllocValue();
-        expr->type = debugger_node2((debugger_sval_s *)0x13, expr->node[1], tempVariableIda).type;
+        expr->type = debugger_node2(ENUM_call_expression, expr->node[1], tempVariableIda).type;
         break;
-    case 0x1F:
-    case 0x22:
-    case 0x23:
-    case 0x24:
-    case 0x42:
-    case 0x48:
-    case 0x49:
-        expr->type = debugger_node0(*(debugger_sval_s **)expr->type).type;
+    case ENUM_undefined:
+    case ENUM_level:
+    case ENUM_game:
+    case ENUM_anim:
+    case ENUM_empty_array:
+    case ENUM_false:
+    case ENUM_true:
+        expr->type = debugger_node0(expr->node[0].type).type;
         break;
-    case 0x20:
-        expr->type = debugger_node2(*(debugger_sval_s **)expr->type, 0, 0).type;
+    case ENUM_self:
+        expr->type = debugger_node2(expr->node[0].type, 0, 0).type;
         break;
-    case 0x2E:
+    case ENUM_expression_list:
         Scr_CompilePrimitiveExpressionList(&expr->node[1]);
-        expr->type = debugger_node1((debugger_sval_s *)0x2E, expr->node[1]).type;
+        expr->type = debugger_node1(ENUM_expression_list, expr->node[1]).type;
         break;
-    case 0x34:
+    case ENUM_size_field:
         Scr_CompilePrimitiveExpression(&expr->node[1]);
-        expr->type = debugger_node1((debugger_sval_s *)0x34, expr->node[1]).type;
+        expr->type = debugger_node1(ENUM_size_field, expr->node[1]).type;
         break;
-    case 0x4B:
+    case ENUM_breakon:
         ++scrVmDebugPub.checkBreakon;
         g_breakonExpr = 1;
         Scr_CompilePrimitiveExpression(&expr->node[1]);
         Scr_CompileExpression(&expr->node[2]);
         expr->type = debugger_node3(
-            *(debugger_sval_s **)expr->type,
+            expr->node[0].type,
             expr->node[1],
             expr->node[2],
             0).type;
         break;
     default:
     LABEL_13:
-        expr->type = debugger_node0((debugger_sval_s *)0x54).type;
+        expr->type = debugger_node0(ENUM_bad_expression).type;
         break;
     }
 }
@@ -503,36 +503,36 @@ void __cdecl Scr_CompileVariableExpression(sval_u *expr)
 
     switch (*(unsigned int *)expr->type)
     {
-    case 4:
+    case ENUM_local_variable:
         *(unsigned int *)(expr->type + 4) = Scr_CompileCanonicalString(*(unsigned int *)(expr->type + 4));
         if (*(unsigned int *)(expr->type + 4))
         {
             tempVariableId.block = (scr_block_s*)AllocValue();
-            expr->type = debugger_node4((debugger_sval_s *)4, expr->node[1], 0, 0, tempVariableId).type;
+            expr->type = debugger_node4(ENUM_local_variable, expr->node[1], 0, 0, tempVariableId).type;
         }
         else
         {
-            expr->type = debugger_node0((debugger_sval_s *)3).type;
+            expr->type = debugger_node0(ENUM_unknown_variable).type;
         }
         break;
-    case 0xD:
+    case ENUM_array_variable:
         Scr_CompileExpression(&expr->node[2]);
         Scr_CompilePrimitiveExpression(&expr->node[1]);
-        expr->type = debugger_node2((debugger_sval_s *)0xD, expr->node[1], expr->node[2]).type;
+        expr->type = debugger_node2(ENUM_array_variable, expr->node[1], expr->node[2]).type;
         break;
-    case 0xF:
+    case ENUM_field_variable:
         Scr_CompilePrimitiveExpressionFieldObject(&expr->node[1]);
         *(unsigned int *)(expr->type + 8) = Scr_CompileCanonicalString(*(unsigned int *)(expr->type + 8));
         if (*(unsigned int *)(expr->type + 8))
-            expr->type = debugger_node3((debugger_sval_s *)0xF, expr->node[1], expr->node[2], 0).type;
+            expr->type = debugger_node3(ENUM_field_variable, expr->node[1], expr->node[2], 0).type;
         else
-            expr->type = debugger_node0((debugger_sval_s *)0xE).type;
+            expr->type = debugger_node0(ENUM_unknown_field).type;
         break;
-    case 0x35:
+    case ENUM_self_field:
         Scr_CompilePrimitiveExpression(&expr->node[1]);
-        expr->type = debugger_node1((debugger_sval_s *)0x35, expr->node[1]).type;
+        expr->type = debugger_node1(ENUM_self_field, expr->node[1]).type;
         break;
-    case 0x50:
+    case ENUM_object:
         s = SL_ConvertToString(*(unsigned int *)(expr->type + 4));
         if (*s == 116)
         {
@@ -544,9 +544,9 @@ void __cdecl Scr_CompileVariableExpression(sval_u *expr)
             if (IsObjectFree(idValue.stringValue))
                 goto LABEL_28;
             ObjectType = GetObjectType(idValue.stringValue);
-            if (ObjectType < 14 || ObjectType > 17 && ObjectType != 22)
+            if (ObjectType < VAR_THREAD || ObjectType > VAR_CHILD_THREAD && ObjectType != VAR_DEAD_THREAD)
                 goto LABEL_28;
-            expr->type = debugger_node1((debugger_sval_s *)0x51, idValue).type;
+            expr->type = debugger_node1(ENUM_thread_object, idValue).type;
             AddRefToObject(idValue.stringValue);
         }
         else if (*s == 97)
@@ -554,7 +554,7 @@ void __cdecl Scr_CompileVariableExpression(sval_u *expr)
             argumentIndex = atoi(s + 1);
             if (argumentIndex <= 0 && strcmp(s + 1, "0"))
                 goto LABEL_28;
-            expr->type = debugger_node1((debugger_sval_s *)0x57, (sval_u)argumentIndex).type;
+            expr->type = debugger_node1(ENUM_argument, (sval_u)argumentIndex).type;
         }
         else
         {
@@ -564,12 +564,12 @@ void __cdecl Scr_CompileVariableExpression(sval_u *expr)
             entnum.intValue = atoi(s + 1);
             if (!entnum.type && s[1] != 48)
                 goto LABEL_28;
-            expr->type = debugger_node3((debugger_sval_s *)0x50, classnum, entnum, 0).type;
+            expr->type = debugger_node3(ENUM_object, classnum, entnum, 0).type;
         }
         break;
     default:
     LABEL_28:
-        expr->type = debugger_node0((debugger_sval_s *)0x54).type;
+        expr->type = debugger_node0(ENUM_bad_expression).type;
         break;
     }
 }
@@ -581,25 +581,25 @@ void __cdecl Scr_CompilePrimitiveExpressionFieldObject(sval_u *expr)
 
     switch (*(unsigned int *)expr->type)
     {
-    case 0x11:
+    case ENUM_variable:
         Scr_CompileVariableExpression(&expr->node[1]);
         tempVariableId.block = (scr_block_s*)AllocValue();
-        expr->type = debugger_node2((debugger_sval_s *)0x11, expr->node[1], tempVariableId).type;
+        expr->type = debugger_node2(ENUM_variable, expr->node[1], tempVariableId).type;
         break;
-    case 0x13:
+    case ENUM_call_expression:
         Scr_CompileCallExpression(&expr->node[1]);
         tempVariableIda.block = (scr_block_s*)AllocValue();
-        expr->type = debugger_node2((debugger_sval_s *)0x13, expr->node[1], tempVariableIda).type;
+        expr->type = debugger_node2(ENUM_call_expression, expr->node[1], tempVariableIda).type;
         break;
-    case 0x20:
-        expr->type = debugger_node2(*(debugger_sval_s **)expr->type, 0, 0).type;
+    case ENUM_self:
+        expr->type = debugger_node2(expr->node[0].type, 0, 0).type;
         break;
-    case 0x22:
-    case 0x24:
-        expr->type = debugger_node0(*(debugger_sval_s **)expr->type).type;
+    case ENUM_level:
+    case ENUM_anim:
+        expr->type = debugger_node0(expr->node[0].type).type;
         break;
     default:
-        expr->type = debugger_node0((debugger_sval_s *)0x54).type;
+        expr->type = debugger_node0(ENUM_bad_expression).type;
         break;
     }
 }
@@ -638,11 +638,11 @@ void __cdecl Scr_CompilePrimitiveExpressionList(sval_u *exprlist)
             Scr_CompileExpression(node->node);
             expr[i++] = (sval_u)node->node->type;
         }
-        exprlist->type = debugger_node3((debugger_sval_s *)0x4F, expr[0], expr[1], expr[2]).type;
+        exprlist->type = debugger_node3(ENUM_vector, expr[0], expr[1], expr[2]).type;
     }
     else
     {
-        exprlist->type = debugger_node0((debugger_sval_s *)0x54).type;
+        exprlist->type = debugger_node0(ENUM_bad_expression).type;
     }
 }
 
@@ -655,7 +655,7 @@ char __cdecl Scr_CompileCallExpression(sval_u *expr)
     {
         if (Scr_CompileFunction(&expr->node[1], &expr->node[2]))
         {
-            expr->type = debugger_node2((debugger_sval_s *)0x17, expr->node[1], expr->node[2]).type;
+            expr->type = debugger_node2(ENUM_call, expr->node[1], expr->node[2]).type;
             return 1;
         }
     }
@@ -663,7 +663,7 @@ char __cdecl Scr_CompileCallExpression(sval_u *expr)
         && Scr_CompileMethod(&expr->node[1], &expr->node[2], (sval_u *)(expr->type + 12)))
     {
         expr->type = debugger_node3(
-            (debugger_sval_s *)0x18,
+            ENUM_method,
             expr->node[1],
             expr->node[2],
             expr->node[3]).type;
@@ -720,7 +720,7 @@ void __cdecl Scr_CompileCallExpressionList(sval_u *exprlist)
     sval_u *node; // [esp+8h] [ebp-8h]
     sval_u expr; // [esp+Ch] [ebp-4h]
 
-    expr.type = debugger_node0(0).type;
+    expr.type = debugger_node0(ENUM_NOP).type;
     for (node = *(sval_u **)exprlist->type; node; node = node[1].node)
     {
         Scr_CompileExpression(node->node);
@@ -771,7 +771,7 @@ void __cdecl Scr_CompileTextInternal(const char *text, ScriptExpression_t *scrip
 
     if (!strcmp(text, "<locals>"))
     {
-        scriptExpr->parseData = debugger_node1((debugger_sval_s *)0x52, 0);
+        scriptExpr->parseData = debugger_node1(ENUM_local, 0);
     }
     else
     {
@@ -788,7 +788,7 @@ void __cdecl Scr_CompileTextInternal(const char *text, ScriptExpression_t *scrip
             if (*text)
                 Com_PrintError(23, "%s\n", scrVarPub.error_message);
             Scr_ClearErrorMessage();
-            scriptExpr->parseData = debugger_node0((debugger_sval_s *)0x54);
+            scriptExpr->parseData = debugger_node0(ENUM_bad_expression);
             SL_ShutdownSystem(2);
         }
         else
@@ -819,13 +819,13 @@ void __cdecl Scr_CompileTextInternal(const char *text, ScriptExpression_t *scrip
                 {
                     Com_PrintError(23, "%s\n", scrVarPub.error_message);
                     Scr_ClearErrorMessage();
-                    scriptExpr->parseData = debugger_node0((debugger_sval_s *)0x55);
+                    scriptExpr->parseData = debugger_node0(ENUM_bad_statement);
                     SL_ShutdownSystem(2);
                 }
                 else
                 {
                     end = TempMalloc(0);
-                    scriptExpr->parseData = debugger_buffer((debugger_sval_s *)0x53, start, end - start, 32);
+                    scriptExpr->parseData = debugger_buffer(ENUM_statement, start, end - start, 32);
                 }
                 Hunk_UserDestroy(user);
             }
@@ -851,18 +851,18 @@ bool __cdecl Scr_EvalScriptExpression(
 
 void __cdecl Scr_EvalExpression(sval_u expr, unsigned int localId, VariableValue *value)
 {
-    switch (expr.node[0].intValue)
+    switch (expr.node[0].type)
     {
-    case 6:
+    case ENUM_primitive_expression:
         Scr_EvalPrimitiveExpression(expr.node[1], localId, value);
         break;
-    case 0x2F:
+    case ENUM_bool_or:
         Scr_EvalBoolOrExpression(expr.node[1], expr.node[2], localId, value);
         break;
-    case 0x30:
+    case ENUM_bool_and:
         Scr_EvalBoolAndExpression(expr.node[1], expr.node[2], localId, value);
         break;
-    case 0x31:
+    case ENUM_binary:
         Scr_EvalBinaryOperatorExpression(
             expr.node[1],
             expr.node[2],
@@ -870,15 +870,15 @@ void __cdecl Scr_EvalExpression(sval_u expr, unsigned int localId, VariableValue
             localId,
             value);
         break;
-    case 0x32:
+    case ENUM_bool_not:
         Scr_EvalExpression(expr.node[1], localId, value);
         Scr_EvalBoolNot(value);
         break;
-    case 0x33:
+    case ENUM_bool_complement:
         Scr_EvalExpression(expr.node[1], localId, value);
         Scr_EvalBoolComplement(value);
         break;
-    case 0x4F:
+    case ENUM_vector:
         Scr_EvalVector(
             expr.node[1],
             expr.node[2],
@@ -886,7 +886,7 @@ void __cdecl Scr_EvalExpression(sval_u expr, unsigned int localId, VariableValue
             localId,
             value);
         break;
-    case 0x52:
+    case ENUM_local:
         if (scrEvaluateGlob.freezeScope)
             localId = expr.node[1].idValue;
         if (localId && Scr_IsThreadAlive(localId))
@@ -924,42 +924,42 @@ void __cdecl Scr_EvalPrimitiveExpression(sval_u expr, unsigned int localId, Vari
     VariableValue objectValue; // [esp+14h] [ebp-Ch] BYREF
     unsigned int selfId; // [esp+1Ch] [ebp-4h]
 
-    switch (*(unsigned int *)expr.type)
+    switch (expr.node[0].type)
     {
-    case 7:
+    case ENUM_integer:
         value->type = VAR_INTEGER;
         value->u.intValue = expr.node[1].intValue;
         break;
-    case 8:
+    case ENUM_float:
         value->type = VAR_FLOAT;
         value->u.floatValue = expr.node[1].floatValue;
         break;
-    case 9:
+    case ENUM_minus_integer:
         value->type = VAR_INTEGER;
         value->u.intValue = -expr.node[1].intValue;
         break;
-    case 0xA:
+    case ENUM_minus_float:
         value->type = VAR_FLOAT;
         value->u.floatValue = -expr.node[1].floatValue;
         break;
-    case 0xB:
+    case ENUM_string:
         value->type = VAR_STRING;
         value->u.stringValue = SL_GetString_(expr.node[1].debugString, 0, 20); // KISAKTODO is debugString the right union field????
         break;
-    case 0xC:
+    case ENUM_istring:
         value->type = VAR_ISTRING;
         value->u.stringValue = SL_GetString_(expr.node[1].debugString, 0, 20);
         break;
-    case 0x11:
+    case ENUM_variable:
         Scr_EvalVariableExpression(expr.node[1], localId, value);
         break;
-    case 0x13:
+    case ENUM_call_expression:
         Scr_EvalCallExpression(expr.node[1], localId, value);
         break;
-    case 0x1F:
+    case ENUM_undefined:
         value->type = VAR_UNDEFINED;
         break;
-    case 0x20:
+    case ENUM_self:
         if (scrEvaluateGlob.freezeScope)
             localId = expr.node[1].idValue;
         if (localId && Scr_IsThreadAlive(localId))
@@ -987,45 +987,45 @@ void __cdecl Scr_EvalPrimitiveExpression(sval_u expr, unsigned int localId, Vari
             expr.node[2].idValue = selfId;
         }
         break;
-    case 0x21:
+    case ENUM_self_frozen:
         iassert(expr.node[2].idValue);
         value->type = VAR_POINTER;
         value->u.intValue = expr.node[2].idValue;
         AddRefToObject(value->u.intValue);
         break;
-    case 0x22:
+    case ENUM_level:
         value->type = VAR_POINTER;
         value->u.intValue = scrVarPub.levelId;
         AddRefToObject(scrVarPub.levelId);
         break;
-    case 0x23:
+    case ENUM_game:
         *value = Scr_EvalVariable(scrVarPub.gameId);
         break;
-    case 0x24:
+    case ENUM_anim:
         value->type = VAR_POINTER;
         value->u.intValue = scrVarPub.animId;
         AddRefToObject(scrVarPub.animId);
         break;
-    case 0x2E:
+    case ENUM_expression_list:
         Scr_EvalExpression(expr.node[1], localId, value);
         break;
-    case 0x34:
+    case ENUM_size_field:
         Scr_EvalPrimitiveExpression(expr.node[1], localId, value);
         Scr_EvalSizeValue(value);
         break;
-    case 0x42:
+    case ENUM_empty_array:
         value->type = VAR_UNDEFINED;
         Scr_Error("cannot evaluate []");
         break;
-    case 0x48:
+    case ENUM_false:
         value->type = VAR_INTEGER;
         value->u.intValue = 0;
         break;
-    case 0x49:
+    case ENUM_true:
         value->type = VAR_INTEGER;
         value->u.intValue = 1;
         break;
-    case 0x4B:
+    case ENUM_breakon:
         Scr_EvalPrimitiveExpression(expr.node[1], localId, &objectValue);
         Scr_EvalExpression(expr.node[2], localId, &stringValue);
         if (objectValue.type == 1
@@ -1041,7 +1041,7 @@ void __cdecl Scr_EvalPrimitiveExpression(sval_u expr, unsigned int localId, Vari
         value->type = VAR_INTEGER;
         value->u.intValue = expr.node[3].intValue;
         break;
-    case 0x54:
+    case ENUM_bad_expression:
         value->type = VAR_UNDEFINED;
         Scr_Error("bad expression");
         break;

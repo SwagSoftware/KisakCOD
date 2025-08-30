@@ -958,10 +958,11 @@ END:
 
 void __cdecl Com_SetScriptSettings()
 {
-    bool v0; // [esp+0h] [ebp-Ch]
-
-    v0 = com_developer->current.integer || com_logfile->current.integer;
-    Scr_Settings(v0, com_developer_script->current.color[0], com_developer->current.integer);
+    Scr_Settings(
+        (com_developer->current.integer || com_logfile->current.integer), 
+        com_developer_script->current.integer,
+        com_developer->current.integer
+    );
 }
 
 void __cdecl Com_RunAutoExec(int localClientNum, int controllerIndex)

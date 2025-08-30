@@ -179,6 +179,15 @@ void __cdecl Sys_WriteDebugSocketData(unsigned __int8 *buffer, int len)
 	}
 }
 
+void __cdecl Sys_WriteDebugSocketString(char *text)
+{
+	int len; // [esp+10h] [ebp-4h] BYREF
+
+	len = strlen(text);
+	Sys_WriteDebugSocketData((unsigned __int8 *)&len, 4);
+	Sys_WriteDebugSocketData((unsigned __int8 *)text, len);
+}
+
 void __cdecl Sys_WriteDebugSocketInt(int value)
 {
 	Sys_WriteDebugSocketData((unsigned char*)&value, 4);

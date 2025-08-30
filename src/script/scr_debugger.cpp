@@ -1680,12 +1680,9 @@ void __cdecl Scr_InitDebuggerSystem()
         scrDebuggerGlob.breakpointPos.bufferIndex = -1;
         scrDebuggerGlob.atBreakpoint = 0;
         scrDebuggerGlob.run_debugger = 0;
-        //Scr_ScriptWatch::Init(&scrDebuggerGlob.scriptWatch);
         scrDebuggerGlob.scriptWatch.Init();
         scrDebuggerGlob.gainFocusTime = 0;
-        //Scr_ScriptList::LoadScriptPos(&scrDebuggerGlob.scriptList);
         scrDebuggerGlob.scriptList.LoadScriptPos();
-        //Scr_ScriptCallStack::Init(&scrDebuggerGlob.scriptCallStack);
         scrDebuggerGlob.scriptCallStack.Init();
         if (Sys_IsRemoteDebugClient())
         {
@@ -1710,7 +1707,6 @@ void __cdecl Scr_InitDebuggerSystem()
         Scr_SetSelectionComp(&scrDebuggerGlob.miscScrollPane);
         if (!Sys_IsRemoteDebugClient())
         {
-            //Scr_ScriptWatch::UpdateBreakpoints(&scrDebuggerGlob.scriptWatch, 1);
             scrDebuggerGlob.scriptWatch.UpdateBreakpoints(1);
         }
     }
