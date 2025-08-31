@@ -72,8 +72,7 @@ void __cdecl CM_InitStaticModel(cStaticModel_s *staticModel, float *origin, floa
             "%s",
             "!IS_NAN((angles)[0]) && !IS_NAN((angles)[1]) && !IS_NAN((angles)[2])");
     }
-    if ((LODWORD(scale) & 0x7F800000) == 0x7F800000)
-        MyAssertHandler(".\\qcommon\\cm_staticmodel_load_obj.cpp", 22, 0, "%s", "!IS_NAN(scale)");
+    iassert( !IS_NAN(scale) );
     staticModel->origin[0] = *origin;
     staticModel->origin[1] = origin[1];
     staticModel->origin[2] = origin[2];
@@ -162,8 +161,7 @@ char __cdecl CM_CreateStaticModel(cStaticModel_s *staticModel, char *name, float
             "%s",
             "!IS_NAN((angles)[0]) && !IS_NAN((angles)[1]) && !IS_NAN((angles)[2])");
     }
-    if ((LODWORD(scale) & 0x7F800000) == 0x7F800000)
-        MyAssertHandler(".\\qcommon\\cm_staticmodel_load_obj.cpp", 62, 0, "%s", "!IS_NAN(scale)");
+    iassert( !IS_NAN(scale) );
     if (!name || !*name)
         Com_Error(ERR_DROP, "Missing model name at %.0f %.0f %.0f", *origin, origin[1], origin[2]);
     if (scale == 0.0)
@@ -196,8 +194,7 @@ void __cdecl CM_LoadStaticModels()
     char value[68]; // [esp+D4h] [ebp-48h] BYREF
 
     ptr = Com_EntityString(0);
-    if (!ptr)
-        MyAssertHandler(".\\qcommon\\cm_staticmodel_load_obj.cpp", 100, 0, "%s", "ptr");
+    iassert( ptr );
     cm.numStaticModels = 0;
     cm.staticModelList = 0;
     numStaticModels = 0;
@@ -226,8 +223,7 @@ void __cdecl CM_LoadStaticModels()
     {
         cm.staticModelList = (cStaticModel_s *)CM_Hunk_Alloc(80 * numStaticModels, "CM_CreateStaticModel", 27);
         ptr = Com_EntityString(0);
-        if (!ptr)
-            MyAssertHandler(".\\qcommon\\cm_staticmodel_load_obj.cpp", 146, 0, "%s", "ptr");
+        iassert( ptr );
         ProfLoad_Begin("Create static model collision");
         while (1)
         {
@@ -377,8 +373,7 @@ void __cdecl CM_LoadMapData_LoadObj(const char *name)
 
 cplane_s *__cdecl CM_GetPlanes()
 {
-    if (!cm.planes)
-        MyAssertHandler(".\\qcommon\\cm_load_obj.cpp", 1412, 0, "%s", "cm.planes");
+    iassert( cm.planes );
     return cm.planes;
 }
 
@@ -597,10 +592,8 @@ char *CMod_LoadCollisionPartitions()
         out->borderCount = in[3];
         out->firstTri = *(in + 1);
         out->borders = &cm.borders[*(in + 2)];
-        if (out->firstTri + out->triCount > cm.triCount)
-            MyAssertHandler(".\\qcommon\\cm_load_obj.cpp", 1069, 0, "%s", "out->firstTri + out->triCount <= cm.triCount");
-        if (out->firstTri < 0)
-            MyAssertHandler(".\\qcommon\\cm_load_obj.cpp", 1070, 0, "%s", "out->firstTri >= 0");
+        iassert( out->firstTri + out->triCount <= cm.triCount );
+        iassert( out->firstTri >= 0 );
         ++index;
         result = in + 12;
         in += 12;
@@ -675,8 +668,7 @@ MapEnts *__cdecl MapEnts_GetFromString(char *name, const char *entityString, int
             mapEnts->numEntityChars += size;
         }
     }
-    if (mapEnts->numEntityChars >= numEntityChars)
-        MyAssertHandler(".\\qcommon\\cm_load_obj.cpp", 1211, 0, "%s", "mapEnts->numEntityChars < numEntityChars");
+    iassert( mapEnts->numEntityChars < numEntityChars );
     mapEnts->entityString[mapEnts->numEntityChars++] = 0;
     return mapEnts;
 }
@@ -876,8 +868,7 @@ void CMod_LoadSubmodelBrushNodes()
     int firstBrush; // [esp+20h] [ebp-4h]
 
     in = Com_GetBspLump(LUMP_MODELS, 0x30u, &count);
-    if (count != cm.numSubModels)
-        MyAssertHandler(".\\qcommon\\cm_load_obj.cpp", 451, 0, "count == cm.numSubModels\n\t%i, %i", count, cm.numSubModels);
+    iassert( count == cm.numSubModels );
     ina = (const DiskBrushModel*)(in + 48);
     for (bmodelIndex = 1; bmodelIndex < cm.numSubModels; ++bmodelIndex)
     {
@@ -999,8 +990,7 @@ cLeafBrushNode_s *__cdecl CMod_PartionLeafBrushes_r(
     int brushnum; // [esp+70h] [ebp-8h]
     float score; // [esp+74h] [ebp-4h]
 
-    if (!numLeafBrushes)
-        MyAssertHandler(".\\qcommon\\cm_load_obj.cpp", 222, 0, "%s", "numLeafBrushes");
+    iassert( numLeafBrushes );
     node = CMod_AllocLeafBrushNode();
     bestScore = 0.0;
     axis = -1;
@@ -1045,8 +1035,7 @@ cLeafBrushNode_s *__cdecl CMod_PartionLeafBrushes_r(
         if (numLeafBrushesChild)
         {
             returnNode = CMod_PartionLeafBrushes_r(leafBrushes, numLeafBrushesChild, mins, maxs);
-            if (returnNode != &node[1])
-                MyAssertHandler(".\\qcommon\\cm_load_obj.cpp", 297, 0, "%s", "returnNode == node + 1");
+            iassert( returnNode == node + 1 );
             node->leafBrushCount = -1;
             node->contents = returnNode->contents;
             leafBrushes += numLeafBrushesChild;
@@ -1066,8 +1055,7 @@ cLeafBrushNode_s *__cdecl CMod_PartionLeafBrushes_r(
         {
             if (k >= numLeafBrushes)
             {
-                if (!numLeafBrushesChild)
-                    MyAssertHandler(".\\qcommon\\cm_load_obj.cpp", 336, 0, "%s", "numLeafBrushesChild");
+                iassert( numLeafBrushesChild );
                 childMins[0] = *mins;
                 childMins[1] = mins[1];
                 childMins[2] = mins[2];
@@ -1126,8 +1114,7 @@ cLeafBrushNode_s *__cdecl CMod_PartionLeafBrushes_r(
         b = &cm.brushes[brushnum];
         node->contents |= b->contents;
     }
-    if (!node->contents)
-        MyAssertHandler(".\\qcommon\\cm_load_obj.cpp", 270, 0, "%s", "node->contents");
+    iassert( node->contents );
     node->data.leaf.brushes = leafBrushes;
     return node;
 }
@@ -1191,10 +1178,8 @@ double __cdecl CMod_GetPartitionScore(
                 max = b->mins[axis];
         }
     }
-    if (*dist < min)
-        MyAssertHandler(".\\qcommon\\cm_load_obj.cpp", 183, 0, "%s", "min <= *dist");
-    if (max < *dist)
-        MyAssertHandler(".\\qcommon\\cm_load_obj.cpp", 184, 0, "%s", "*dist <= max");
+    iassert( min <= *dist );
+    iassert( *dist <= max );
     if (rightBrushCount < leftBrushCount)
         v11 = rightBrushCount;
     else
@@ -1458,8 +1443,7 @@ const DiskLeaf *CMod_LoadLeafBrushNodes()
 
     result = (const DiskLeaf*)Com_GetBspLump(LUMP_LEAFS, 0x18u, &count);
     in = result;
-    if (count != cm.numLeafs)
-        MyAssertHandler(".\\qcommon\\cm_load_obj.cpp", 787, 0, "count == cm.numLeafs\n\t%i, %i", count, cm.numLeafs);
+    iassert( count == cm.numLeafs );
     out = cm.leafs;
     for (leafIter = 0; leafIter < cm.numLeafs; ++leafIter)
     {
@@ -1495,10 +1479,8 @@ char *CMod_LoadLeafBrushNodes_Version14()
 
     result = Com_GetBspLump(LUMP_LEAFS, 0x24u, &count);
     in = (const DiskLeaf_Version14*)result;
-    if (count != cm.numLeafs)
-        MyAssertHandler(".\\qcommon\\cm_load_obj.cpp", 830, 0, "count == cm.numLeafs\n\t%i, %i", count, cm.numLeafs);
-    if (!cm.numLeafs)
-        MyAssertHandler(".\\qcommon\\cm_load_obj.cpp", 832, 0, "%s", "cm.numLeafs > 0");
+    iassert( count == cm.numLeafs );
+    iassert( cm.numLeafs > 0 );
     out = cm.leafs;
     leafIter = 0;
     while (leafIter < cm.numLeafs)
@@ -1544,8 +1526,7 @@ unsigned int CMod_LoadLeafBrushes()
         *out = *in;
         if (*out != brushIndex)
             Com_Error(ERR_DROP, "CMod_LoadLeafBrushes: brushIndex exceeded");
-        if (*out >= cm.numBrushes)
-            MyAssertHandler(".\\qcommon\\cm_load_obj.cpp", 936, 0, "%s\n\t(*out) = %i", "(*out < cm.numBrushes)", *out);
+        iassert( (*out < cm.numBrushes) );
         in += 4;
         ++out;
     }

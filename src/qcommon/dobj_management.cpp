@@ -327,7 +327,7 @@ void __cdecl Com_ShutdownDObj()
 DObj_s *Com_DObjCloneToBuffer(unsigned int entnum)
 {
     unsigned int v2; // r27
-    __int16 v3; // r11
+    __int16 serverDobjIndex; // r11
     unsigned int v4; // r26
     unsigned int FreeDObjIndex; // r30
 
@@ -339,10 +339,9 @@ DObj_s *Com_DObjCloneToBuffer(unsigned int entnum)
             "%s",
             "(unsigned)entnum < ARRAY_COUNT( serverObjMap )");
     v2 = entnum;
-    v3 = serverObjMap[entnum];
-    v4 = v3;
-    if (!v3)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\qcommon\\dobj_management.cpp", 327, 0, "%s", "serverDobjIndex");
+    serverDobjIndex = serverObjMap[entnum];
+    v4 = serverDobjIndex;
+    iassert( serverDobjIndex );
     if (entnum >= 0x900)
         MyAssertHandler(
             "c:\\trees\\cod3\\cod3src\\src\\qcommon\\dobj_management.cpp",

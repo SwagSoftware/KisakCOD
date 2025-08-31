@@ -43,8 +43,7 @@ void __cdecl ProfLoad_BeginTrackedValue(MapProfileTrackedValue type)
 
 void __cdecl ProfLoad_BeginTrackedValueTicks(MapProfileElement *value, unsigned __int64 ticks)
 {
-    if (value->ticksStart)
-        MyAssertHandler(".\\qcommon\\com_profilemapload.cpp", 116, 0, "%s", "value->ticksStart == 0");
+    iassert( value->ticksStart == 0 );
     value->ticksStart = ticks;
 }
 
@@ -64,8 +63,7 @@ void __cdecl ProfLoad_EndTrackedValue(MapProfileTrackedValue type)
 
 void __cdecl ProfLoad_EndTrackedValueTicks(MapProfileElement *value, unsigned __int64 ticks)
 {
-    if (!value->ticksStart)
-        MyAssertHandler(".\\qcommon\\com_profilemapload.cpp", 145, 0, "%s", "value->ticksStart != 0");
+    iassert( value->ticksStart != 0 );
     value->ticksTotal += ticks - value->ticksStart;
     value->ticksStart = 0;
 }
@@ -78,8 +76,7 @@ void __cdecl ProfLoad_Init()
 
 void __cdecl ProfLoad_Activate()
 {
-    if (mapLoadProfile.isLoading)
-        MyAssertHandler(".\\qcommon\\com_profilemapload.cpp", 181, 0, "%s", "mapLoadProfile.isLoading == false");
+    iassert( mapLoadProfile.isLoading == false );
     memset((unsigned __int8 *)&mapLoadProfile, 0, sizeof(mapLoadProfile));
     mapLoadProfile.isLoading = 1;
     mapLoadProfile.ticksStart = __rdtsc();
@@ -89,8 +86,7 @@ void __cdecl ProfLoad_Activate()
 
 void __cdecl ProfLoad_Deactivate()
 {
-    if (!mapLoadProfile.isLoading)
-        MyAssertHandler(".\\qcommon\\com_profilemapload.cpp", 195, 0, "%s", "mapLoadProfile.isLoading == true");
+    iassert( mapLoadProfile.isLoading == true );
     mapLoadProfile.ticksFinish = __rdtsc();
     mapLoadProfile.isLoading = 0;
     ProfLoad_Print();
@@ -378,10 +374,8 @@ void __cdecl ProfLoad_End()
     if (mapLoadProfile.isLoading && Sys_IsMainThread())
     {
         entry = mapLoadProfile.currentEntry;
-        if (!mapLoadProfile.currentEntry)
-            MyAssertHandler(".\\qcommon\\com_profilemapload.cpp", 425, 0, "%s", "entry");
-        if (!entry->label)
-            MyAssertHandler(".\\qcommon\\com_profilemapload.cpp", 426, 0, "%s", "entry->label");
+        iassert( entry );
+        iassert( entry->label );
         mapLoadProfile.ticksFinish = __rdtsc();
         timeStepInTicks = mapLoadProfile.ticksFinish - entry->ticksStart;
         entry->ticksTotal += timeStepInTicks;

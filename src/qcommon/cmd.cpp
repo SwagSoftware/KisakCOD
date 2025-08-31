@@ -59,10 +59,8 @@ const char **__cdecl Cmd_GetAutoCompleteFileList(const char *cmdName, int32_t  *
 {
     cmd_function_s *cmd; // [esp+0h] [ebp-4h]
 
-    if (!cmdName)
-        MyAssertHandler(".\\qcommon\\cmd.cpp", 1170, 0, "%s", "cmdName");
-    if (!fileCount)
-        MyAssertHandler(".\\qcommon\\cmd.cpp", 1171, 0, "%s", "fileCount");
+    iassert( cmdName );
+    iassert( fileCount );
     *fileCount = 0;
     cmd = _Cmd_FindCommand(cmdName);
     if (cmd && cmd->autoCompleteDir && cmd->autoCompleteExt)
@@ -540,8 +538,7 @@ void __cdecl Cbuf_SV_Execute()
         }
         SV_WaitServer();
 
-        if (com_inServerFrame)
-            MyAssertHandler(".\\qcommon\\cmd.cpp", 419, 0, "%s", "!com_inServerFrame");
+        iassert( !com_inServerFrame );
 
         Cmd_ExecuteServerString(dst);
     }
@@ -551,8 +548,7 @@ void __cdecl Cmd_AddServerCommandInternal(const char *cmdName, void(__cdecl *fun
 {
     cmd_function_s *cmd; // [esp+14h] [ebp-4h]
 
-    if (!cmdName)
-        MyAssertHandler(".\\qcommon\\cmd.cpp", 436, 0, "%s", "cmdName");
+    iassert( cmdName );
     for (cmd = sv_cmd_functions; ; cmd = cmd->next)
     {
         if (!cmd)
@@ -566,8 +562,7 @@ void __cdecl Cmd_AddServerCommandInternal(const char *cmdName, void(__cdecl *fun
         if (!strcmp(cmdName, cmd->name))
             break;
     }
-    if (cmd != allocedCmd)
-        MyAssertHandler(".\\qcommon\\cmd.cpp", 443, 0, "%s", "cmd == allocedCmd");
+    iassert( cmd == allocedCmd );
     if (function)
         Com_Printf(16, "Cmd_AddServerCommand: %s already defined\n", cmdName);
 }
@@ -580,8 +575,7 @@ void __cdecl Cbuf_ExecuteBuffer(int32_t  localClientNum, int32_t  controllerInde
     uint32_t count; // [esp+1020h] [ebp-8h]
     uint8_t *src; // [esp+1024h] [ebp-4h]
 
-    if (!buffer)
-        MyAssertHandler(".\\qcommon\\cmd.cpp", 467, 0, "%s", "buffer");
+    iassert( buffer );
     src = (uint8_t *)buffer;
     v4 = strlen(buffer);
     while (v4)
@@ -721,10 +715,8 @@ void __cdecl Cmd_ArgsBuffer(int32_t  start, char *buffer, int32_t  bufLength)
     int32_t  argc; // [esp+10h] [ebp-4h]
     int32_t  bufLengtha; // [esp+24h] [ebp+10h]
 
-    if (!Sys_IsMainThread())
-        MyAssertHandler(".\\qcommon\\cmd.cpp", 773, 0, "%s", "Sys_IsMainThread()");
-    if (start < 0)
-        MyAssertHandler(".\\qcommon\\cmd.cpp", 774, 0, "%s", "start >= 0");
+    iassert( Sys_IsMainThread() );
+    iassert( start >= 0 );
     if (cmd_args.nesting >= 8u)
         MyAssertHandler(
             ".\\qcommon\\cmd.cpp",
@@ -733,10 +725,8 @@ void __cdecl Cmd_ArgsBuffer(int32_t  start, char *buffer, int32_t  bufLength)
             "cmd_args.nesting doesn't index CMD_MAX_NESTING\n\t%i not in [0, %i)",
             cmd_args.nesting,
             8);
-    if (!buffer)
-        MyAssertHandler(".\\qcommon\\cmd.cpp", 776, 0, "%s", "buffer");
-    if (bufLength < 2)
-        MyAssertHandler(".\\qcommon\\cmd.cpp", 777, 0, "%s", "bufLength >= 2");
+    iassert( buffer );
+    iassert( bufLength >= 2 );
     dst = buffer;
     bufLengtha = bufLength - 1;
     argc = cmd_args.argc[cmd_args.nesting];
@@ -813,8 +803,7 @@ int32_t  __cdecl Cmd_TokenizeStringInternal(char *text_in, int32_t  max_tokens, 
     const char *textb; // [esp+3Ch] [ebp-8h]
     int32_t  argc; // [esp+40h] [ebp-4h]
 
-    if (!text_in)
-        MyAssertHandler(".\\qcommon\\cmd.cpp", 858, 0, "%s", "text_in");
+    iassert( text_in );
     argc = 0;
     text = (uint8_t *)text_in;
     while (1)
@@ -910,8 +899,7 @@ int32_t  __cdecl Cmd_TokenizeStringInternal(char *text_in, int32_t  max_tokens, 
 
 bool __cdecl Cmd_IsWhiteSpaceChar(uint8_t letter)
 {
-    if (!letter)
-        MyAssertHandler(".\\qcommon\\cmd.cpp", 815, 1, "%s", "letter != '\\0'");
+    iassert( letter != '\\0' );
     return letter != 20 && letter != 21 && letter != 22 && letter <= 0x20u;
 }
 
@@ -1022,19 +1010,13 @@ void __cdecl Cmd_SetAutoComplete(const char *cmdName, const char *dir, const cha
 {
     cmd_function_s *cmd; // [esp+0h] [ebp-4h]
 
-    if (!cmdName)
-        MyAssertHandler(".\\qcommon\\cmd.cpp", 1128, 0, "%s", "cmdName");
-    if (!dir)
-        MyAssertHandler(".\\qcommon\\cmd.cpp", 1129, 0, "%s", "dir");
-    if (!ext)
-        MyAssertHandler(".\\qcommon\\cmd.cpp", 1130, 0, "%s", "ext");
+    iassert( cmdName );
+    iassert( dir );
+    iassert( ext );
     cmd = _Cmd_FindCommand(cmdName);
-    if (!cmd)
-        MyAssertHandler(".\\qcommon\\cmd.cpp", 1134, 0, "%s", "cmd");
-    if (cmd->autoCompleteDir)
-        MyAssertHandler(".\\qcommon\\cmd.cpp", 1135, 0, "%s", "cmd->autoCompleteDir == NULL");
-    if (cmd->autoCompleteExt)
-        MyAssertHandler(".\\qcommon\\cmd.cpp", 1136, 0, "%s", "cmd->autoCompleteExt == NULL");
+    iassert( cmd );
+    iassert( cmd->autoCompleteDir == NULL );
+    iassert( cmd->autoCompleteExt == NULL );
     cmd->autoCompleteDir = dir;
     cmd->autoCompleteExt = ext;
 }
@@ -1068,8 +1050,7 @@ void __cdecl Cmd_ExecuteSingleCommand(int32_t  localClientNum, int32_t  controll
     const char *arg0; // [esp+20h] [ebp-Ch]
     cmd_function_s *itr; // [esp+28h] [ebp-4h]
 
-    if (!Sys_IsMainThread())
-        MyAssertHandler(".\\qcommon\\cmd.cpp", 1331, 0, "%s", "Sys_IsMainThread()");
+    iassert( Sys_IsMainThread() );
     if (localClientNum)
         MyAssertHandler(
             ".\\qcommon\\cmd.cpp",
@@ -1098,8 +1079,7 @@ void __cdecl Cmd_ExecuteSingleCommand(int32_t  localClientNum, int32_t  controll
                         if (itr->function == Cbuf_AddServerText_f)
                         {
                             SV_WaitServer();
-                            if (com_inServerFrame)
-                                MyAssertHandler(".\\qcommon\\cmd.cpp", 1379, 0, "%s", "!com_inServerFrame");
+                            iassert( !com_inServerFrame );
                             Cmd_ExecuteServerString(text);
                         }
                         else

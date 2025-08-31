@@ -52,8 +52,7 @@ PackedUnitVec __cdecl Vec3PackUnitVec(const float *unitVec)
         }
         ++testEncoding[3];
     } while (testEncoding[3]);
-    if (!out.packed)
-        MyAssertHandler(".\\universal\\com_pack.cpp", 163, 0, "%s", "out.packed != 0");
+    iassert( out.packed != 0 );
     return out;
 }
 

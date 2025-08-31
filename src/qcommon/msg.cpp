@@ -225,8 +225,7 @@ void __cdecl MSG_WriteBit1(msg_t *msg)
     int v3; // r9
     unsigned __int8 *data; // r8
 
-    if (msg->readOnly)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\qcommon\\msg.cpp", 333, 0, "%s", "!msg->readOnly");
+    iassert( !msg->readOnly );
     cursize = msg->cursize;
     if (cursize < msg->maxsize)
     {
@@ -254,8 +253,7 @@ void __cdecl MSG_WriteBits(msg_t *msg, int value, unsigned int bits)
     unsigned __int8 *data; // r10
 
     v3 = bits;
-    if (bits > 0x20)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\qcommon\\msg.cpp", 357, 0, "%s", "(unsigned)bits <= 32");
+    iassert( (unsigned)bits <= 32 );
     if (msg->maxsize - msg->cursize >= 4)
     {
         for (; v3; ++msg->bit)
@@ -292,8 +290,7 @@ int __cdecl MSG_ReadBits(msg_t *msg, unsigned int bits)
     unsigned int v10; // r10
     int v11; // r10
 
-    if (bits > 0x20)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\qcommon\\msg.cpp", 390, 0, "%s", "(unsigned)bits <= 32");
+    iassert( (unsigned)bits <= 32 );
     result = 0;
     for (i = 0; i < (int)bits; result |= v11)
     {
@@ -417,8 +414,7 @@ void __cdecl MSG_WriteFloat(msg_t *sb, double f)
     int v3; // [sp+50h] [-20h]
 
     *(float *)&v3 = f;
-    if (*(float *)&v3 == NAN)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\qcommon\\msg.cpp", 509, 0, "%s", "dat.l != -1");
+    //iassert( dat.l != -1 );
     MSG_WriteBits(sb, v3, 0x20u);
 }
 
@@ -426,8 +422,7 @@ void __cdecl MSG_WriteString(msg_t *sb, char *s)
 {
     const char *v4; // r11
 
-    if (!s)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\qcommon\\msg.cpp", 518, 0, "%s", "s");
+    iassert( s );
     v4 = s;
     while (*(unsigned __int8 *)v4++)
         ;
@@ -2581,8 +2576,7 @@ int __cdecl MSG_GetByte(msg_t *msg, int where)
 {
     if (where < msg->cursize)
         return msg->data[where];
-    if (!msg->splitData)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\qcommon\\msg.cpp", 285, 0, "%s", "msg->splitData");
+    iassert( msg->splitData );
     return msg->splitData[where - msg->cursize];
 }
 
@@ -2600,8 +2594,7 @@ void __cdecl MSG_GetBytes(msg_t *msg, int where, unsigned __int8 *dest, int len)
         }
         else
         {
-            if (!msg->splitData)
-                MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\qcommon\\msg.cpp", 285, 0, "%s", "msg->splitData");
+            iassert( msg->splitData );
             data = &msg->splitData[-msg->cursize];
         }
         v10 = data[where++];

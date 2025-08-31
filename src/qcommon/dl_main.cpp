@@ -130,8 +130,7 @@ int __cdecl DL_BeginDownload(char *localName, char *remoteName)
     ptr = 0;
     if (dl_running)
     {
-        if (!dl_isMotd)
-            MyAssertHandler(".\\qcommon\\dl_main.cpp", 252, 0, "%s", "dl_isMotd");
+        iassert( dl_isMotd );
         DL_CancelDownload();
     }
     terminate_status = -1000;
@@ -231,8 +230,7 @@ int __cdecl DL_DownloadLoop()
 {
     return 0;
 #if 0
-    if (!dl_running)
-        MyAssertHandler(".\\qcommon\\dl_main.cpp", 450, 0, "%s", "dl_running");
+    iassert( dl_running );
     if (HTEventList_pump())
         return 0;
     HTEventList_unregisterAll();

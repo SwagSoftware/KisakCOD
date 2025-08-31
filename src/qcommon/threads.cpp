@@ -167,8 +167,7 @@ void __cdecl Sys_CreateEvent(bool manualReset, bool initialState, void** event)
 
 void __cdecl Sys_CreateThread(void(__cdecl* function)(unsigned int), ThreadContext_t threadContext)
 {
-    if (threadFunc[threadContext])
-        MyAssertHandler(".\\qcommon\\threads.cpp", 805, 0, "%s", "threadFunc[threadContext] == NULL");
+    iassert( threadFunc[threadContext] == NULL );
     iassert(threadContext < THREAD_CONTEXT_COUNT);
     threadFunc[threadContext] = function;
     threadHandle[threadContext] = CreateThread(
@@ -249,8 +248,7 @@ char __cdecl Sys_SpawnDatabaseThread(void(__cdecl* function)(unsigned int))
 
 void __cdecl Sys_SuspendDatabaseThread(ThreadOwner owner)
 {
-    if (owner == THREAD_OWNER_NONE)
-        MyAssertHandler(".\\qcommon\\threads.cpp", 1060, 0, "%s", "owner != THREAD_OWNER_NONE");
+    iassert( owner != THREAD_OWNER_NONE );
 
     if (g_databaseThreadOwner)
         MyAssertHandler(
@@ -272,8 +270,7 @@ void __cdecl Sys_ResetEvent(void** event)
 
 void __cdecl Sys_ResumeDatabaseThread(ThreadOwner owner)
 {
-    if (owner == THREAD_OWNER_NONE)
-        MyAssertHandler(".\\qcommon\\threads.cpp", 1072, 0, "%s", "owner != THREAD_OWNER_NONE");
+    iassert( owner != THREAD_OWNER_NONE );
     if (g_databaseThreadOwner != owner)
         MyAssertHandler(
             ".\\qcommon\\threads.cpp",
@@ -328,15 +325,13 @@ bool __cdecl Sys_SpawnWorkerThread(void(__cdecl* function)(unsigned int), unsign
 
 void __cdecl Sys_SuspendThread(ThreadContext_t threadContext)
 {
-    if (!threadHandle[threadContext])
-        MyAssertHandler(".\\qcommon\\threads.cpp", 1136, 0, "%s", "threadHandle[threadContext]");
+    iassert( threadHandle[threadContext] );
     SuspendThread(threadHandle[threadContext]);
 }
 
 void __cdecl Sys_ResumeThread(ThreadContext_t threadContext)
 {
-    if (!threadHandle[threadContext])
-        MyAssertHandler(".\\qcommon\\threads.cpp", 1148, 0, "%s", "threadHandle[threadContext]");
+    iassert( threadHandle[threadContext] );
     ResumeThread(threadHandle[threadContext]);
 }
 
@@ -385,8 +380,7 @@ void __cdecl Sys_FrontEndSleep()
 
 bool __cdecl Sys_WaitForSingleObjectTimeout(void** event, unsigned int msec)
 {
-    if (msec == -1)
-        MyAssertHandler(".\\qcommon\\threads.cpp", 234, 0, "%s", "msec != INFINITE");
+    iassert( msec != INFINITE );
     return WaitForSingleObject(*event, msec) == 0;
 }
 

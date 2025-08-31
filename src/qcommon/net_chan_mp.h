@@ -17,6 +17,8 @@
 
 #define	MAX_RELIABLE_COMMANDS	128			// max string commands buffered for restransmit
 
+#define FAKELATENCY_MAX_PACKETS_HELD 512
+
 enum netadrtype_t {
     NA_BOT,
     NA_BAD,					// an address lookup failed

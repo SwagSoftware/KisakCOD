@@ -7,8 +7,7 @@ BspGlob comBspGlob;
 
 unsigned int __cdecl Com_GetBspVersion()
 {
-    if (!Com_IsBspLoaded())
-        MyAssertHandler(".\\qcommon\\com_bsp_load_obj.cpp", 253, 0, "%s", "Com_IsBspLoaded()");
+    iassert( Com_IsBspLoaded() );
     return comBspGlob.header->version;
 }
 
@@ -48,8 +47,7 @@ void __cdecl Com_CleanupBsp()
     comBspGlob.loadedLumpData = 0;
     if (Com_IsBspLoaded())
         Com_UnloadBsp();
-    if (Com_IsBspLoaded())
-        MyAssertHandler(".\\qcommon\\com_bsp_load_obj.cpp", 368, 0, "%s", "!Com_IsBspLoaded()");
+    iassert( !Com_IsBspLoaded() );
 }
 
 bool __cdecl Com_BspHasLump(LumpType type)
@@ -65,8 +63,7 @@ char *__cdecl Com_GetBspLump(LumpType type, unsigned int elemSize, unsigned int 
     unsigned int chunkIter; // [esp+0h] [ebp-10h]
     unsigned int offset; // [esp+4h] [ebp-Ch]
 
-    if (!Com_IsBspLoaded())
-        MyAssertHandler(".\\qcommon\\com_bsp_load_obj.cpp", 92, 0, "%s", "Com_IsBspLoaded()");
+    iassert( Com_IsBspLoaded() );
     if (comBspGlob.header->version > 0x12)
     {
         offset = 8 * comBspGlob.header->chunkCount + 12;
@@ -110,12 +107,9 @@ void __cdecl Com_LoadBsp(char *filename)
     unsigned int len; // [esp+1Ch] [ebp-8h]
     int h; // [esp+20h] [ebp-4h] BYREF
 
-    if (!filename)
-        MyAssertHandler(".\\qcommon\\com_bsp_load_obj.cpp", 304, 0, "%s", "filename");
-    if (Com_IsBspLoaded())
-        MyAssertHandler(".\\qcommon\\com_bsp_load_obj.cpp", 305, 0, "%s", "!Com_IsBspLoaded()");
-    if (comBspGlob.loadedLumpData)
-        MyAssertHandler(".\\qcommon\\com_bsp_load_obj.cpp", 306, 0, "%s", "comBspGlob.loadedLumpData == NULL");
+    iassert( filename );
+    iassert( !Com_IsBspLoaded() );
+    iassert( comBspGlob.loadedLumpData == NULL );
     ProfLoad_Begin("Load bsp file");
     comBspGlob.fileSize = FS_FOpenFileRead(filename, &h);
     if (!h)
@@ -155,23 +149,19 @@ void __cdecl Com_LoadBsp(char *filename)
             "BspGlob.name[0] ) <= 4))))",
             v4);
     memcpy((unsigned __int8 *)&comBspGlob, (unsigned __int8 *)filename, len + 1);
-    if (!Com_IsBspLoaded())
-        MyAssertHandler(".\\qcommon\\com_bsp_load_obj.cpp", 340, 0, "%s", "Com_IsBspLoaded()");
+    iassert( Com_IsBspLoaded() );
 }
 
 void __cdecl Com_UnloadBsp()
 {
-    if (!Com_IsBspLoaded())
-        MyAssertHandler(".\\qcommon\\com_bsp_load_obj.cpp", 346, 0, "%s", "Com_IsBspLoaded()");
-    if (comBspGlob.loadedLumpData)
-        MyAssertHandler(".\\qcommon\\com_bsp_load_obj.cpp", 347, 0, "%s", "comBspGlob.loadedLumpData == NULL");
+    iassert( Com_IsBspLoaded() );
+    iassert( comBspGlob.loadedLumpData == NULL );
     ProfLoad_Begin("Unload bsp file");
     Z_Free((char *)comBspGlob.header, 10);
     comBspGlob.header = 0;
     comBspGlob.name[0] = 0;
     ProfLoad_End();
-    if (Com_IsBspLoaded())
-        MyAssertHandler(".\\qcommon\\com_bsp_load_obj.cpp", 357, 0, "%s", "!Com_IsBspLoaded()");
+    iassert( !Com_IsBspLoaded() );
 }
 
 unsigned int lumpsForVersion[13] =
@@ -200,8 +190,7 @@ char *__cdecl Com_ValidateBspLumpData(
     unsigned int elemSize,
     unsigned int *count)
 {
-    if (!count)
-        MyAssertHandler(".\\qcommon\\com_bsp_load_obj.cpp", 66, 0, "%s", "count");
+    iassert( count );
     if (length)
     {
         if (length + offset > comBspGlob.fileSize)
@@ -249,8 +238,7 @@ char *__cdecl Com_EntityString(int *numEntityChars)
     char *entityString; // [esp+0h] [ebp-8h]
     unsigned int count; // [esp+4h] [ebp-4h] BYREF
 
-    if (!Com_IsBspLoaded())
-        MyAssertHandler(".\\qcommon\\com_bsp_load_obj.cpp", 377, 0, "%s", "Com_IsBspLoaded()");
+    iassert( Com_IsBspLoaded() );
     entityString = Com_GetBspLump(LUMP_ENTITIES, 1u, &count);
     if (numEntityChars)
         *numEntityChars = count;
@@ -455,8 +443,7 @@ ComPrimaryLight *Com_LoadPrimaryLights()
 
 void __cdecl Com_LoadWorld_LoadObj(char *name)
 {
-    if (!Com_IsBspLoaded())
-        MyAssertHandler(".\\qcommon\\com_bsp_load_obj.cpp", 623, 0, "%s", "Com_IsBspLoaded()");
+    iassert( Com_IsBspLoaded() );
     Com_LoadPrimaryLights();
     comWorld.name = Com_GetHunkStringCopy(name);
     comWorld.isInUse = 1;
@@ -474,8 +461,7 @@ void __cdecl Com_LoadWorld_FastFile(const char *name)
 {
     if (DB_FindXAssetHeader(ASSET_TYPE_COMWORLD, name).comWorld != &comWorld)
         MyAssertHandler(".\\qcommon\\com_bsp_load_obj.cpp", 640, 0, "%s", "asset == &comWorld");
-    if (!comWorld.isInUse)
-        MyAssertHandler(".\\qcommon\\com_bsp_load_obj.cpp", 641, 0, "%s", "comWorld.isInUse");
+    iassert( comWorld.isInUse );
 }
 
 void __cdecl Com_ShutdownWorld()
@@ -499,10 +485,8 @@ void __cdecl Com_SaveLump(LumpType type, const void *newLump, unsigned int size,
     int h; // [esp+530h] [ebp-8h]
     unsigned int zeroCount; // [esp+534h] [ebp-4h]
 
-    if (!Com_IsBspLoaded())
-        MyAssertHandler(".\\qcommon\\com_bsp_load_obj.cpp", 399, 0, "%s", "Com_IsBspLoaded()");
-    if (comBspGlob.header->version != 22)
-        MyAssertHandler(".\\qcommon\\com_bsp_load_obj.cpp", 400, 0, "%s", "comBspGlob.header->version == BSP_VERSION");
+    iassert( Com_IsBspLoaded() );
+    iassert( comBspGlob.header->version == BSP_VERSION );
     if (comBspGlob.header->chunkCount > 0x64)
         MyAssertHandler(
             ".\\qcommon\\com_bsp_load_obj.cpp",

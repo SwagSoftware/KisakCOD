@@ -114,8 +114,7 @@ bool __cdecl CM_TraceSphere(const TraceExtents *extents, const float *origin, fl
     else
         v10 = 1.0;
     lengthSq = v10;
-    if (v10 == 0.0)
-        MyAssertHandler(".\\qcommon\\cm_tracebox.cpp", 100, 0, "%s", "lengthSq");
+    iassert( lengthSq );
     v4 = Vec3Dot(startOffset, delta);
     sphereFraction = v4 / lengthSq;
     v9 = sphereFraction - fraction;

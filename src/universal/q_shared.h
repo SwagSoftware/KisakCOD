@@ -719,6 +719,8 @@ enum TraceHitType : __int32
 	TRACE_HITTYPE_DYNENT_BRUSH = 0x3,
 };
 
+#define SURF_INVALID -1
+
 struct trace_t // sizeof=0x2C
 {   
 	trace_t()
@@ -849,6 +851,11 @@ void __cdecl StringTable_GetAsset(const char *filename, StringTable **tablePtr);
 
 
 extern const dvar_t *useFastFile;
+
+inline bool IsFastFileLoad()
+{
+	return useFastFile->current.enabled;
+}
 
 
 extern unsigned __int64(__cdecl *LittleLong64)(unsigned __int64);

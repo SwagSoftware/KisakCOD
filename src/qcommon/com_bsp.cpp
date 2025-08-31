@@ -11,8 +11,7 @@ char __cdecl Com_CanPrimaryLightAffectPoint(const ComPrimaryLight *light, const 
     float spotDotTimesDist; // [esp+28h] [ebp-8h]
     float distSq; // [esp+2Ch] [ebp-4h]
 
-    if (!light)
-        MyAssertHandler(".\\qcommon\\com_bsp.cpp", 24, 0, "%s", "light");
+    iassert( light );
     if (light->type != 2 && light->type != 3)
         MyAssertHandler(
             ".\\qcommon\\com_bsp.cpp",
@@ -21,8 +20,7 @@ char __cdecl Com_CanPrimaryLightAffectPoint(const ComPrimaryLight *light, const 
             "%s\n\t(light->type) = %i",
             "(light->type == GFX_LIGHT_TYPE_SPOT || light->type == GFX_LIGHT_TYPE_OMNI)",
             light->type);
-    if (!point)
-        MyAssertHandler(".\\qcommon\\com_bsp.cpp", 26, 0, "%s", "point");
+    iassert( point );
     Vec3Sub(light->origin, point, deltaToLight);
     distSq = Vec3LengthSq(deltaToLight);
     v3 = light->radius * light->radius;
@@ -60,8 +58,7 @@ double __cdecl CosOfSumOfArcCos(float cos0, float cos1)
 
 void __cdecl Com_UnloadWorld()
 {
-    if (!useFastFile->current.enabled)
-        MyAssertHandler(".\\qcommon\\com_bsp.cpp", 86, 0, "%s", "IsFastFileLoad()");
+    iassert( IsFastFileLoad() );
     if (comWorld.isInUse)
         Sys_Error("Cannot unload world while it is in use");
 }
@@ -92,8 +89,7 @@ unsigned int Com_FindClosestPrimaryLight(const float *origin)
     double v23; // fp11
     double v24; // fp13
 
-    if (!comWorld.isInUse)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\qcommon\\com_bsp.cpp", 64, 0, "%s", "comWorld.isInUse");
+    iassert( comWorld.isInUse );
     result = 0;
     v3 = FLT_MAX;
     v4 = 2;

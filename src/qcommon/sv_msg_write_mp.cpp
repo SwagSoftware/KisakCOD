@@ -935,8 +935,7 @@ void __cdecl MSG_WriteEntityIndex(SnapshotInfo_s *snapInfo, msg_t *msg, int inde
 {
     const char *v4; // eax
 
-    if (msg->readOnly)
-        MyAssertHandler(".\\qcommon\\sv_msg_write_mp.cpp", 419, 0, "%s", "!msg->readOnly");
+    iassert( !msg->readOnly );
     if (msg_printEntityNums->current.enabled && SV_IsPacketDataNetworkData())
         Com_Printf(15, "Writing entity num %i\n", index);
     if (index - msg->lastEntityRef <= 0)
@@ -990,8 +989,7 @@ void __cdecl MSG_WriteOriginFloat(const int clientNum, msg_t *msg, int bits, flo
     int index; // [esp+70h] [ebp-8h]
     int indexa; // [esp+70h] [ebp-8h]
 
-    if (msg->readOnly)
-        MyAssertHandler(".\\qcommon\\sv_msg_write_mp.cpp", 186, 0, "%s", "!msg->readOnly");
+    iassert( !msg->readOnly );
     roundedValue = (int)value;
     roundedOldValue = (int)oldValue;
     truncDelta = roundedValue - roundedOldValue;
@@ -1005,12 +1003,10 @@ void __cdecl MSG_WriteOriginFloat(const int clientNum, msg_t *msg, int bits, flo
         }
         else
         {
-            if (bits != -91)
-                MyAssertHandler(".\\qcommon\\sv_msg_write_mp.cpp", 249, 0, "%s", "bits == MSG_FIELD_ORIGINY");
+            iassert( bits == MSG_FIELD_ORIGINY );
             indexa = 1;
         }
-        if (!svsHeaderValid)
-            MyAssertHandler(".\\qcommon\\sv_msg_write_mp.cpp", 253, 0, "%s", "svsHeaderValid");
+        iassert( svsHeaderValid );
         roundedCentera = (svsHeader.mapCenter[indexa] + 0.5);
         roundedValuea = (roundedOldValue + 0x8000 - roundedCentera) ^ (roundedValue - roundedCentera + 0x8000);
         SV_PacketDataIsOrigin(clientNum, msg);
@@ -1060,12 +1056,10 @@ void __cdecl MSG_WriteOriginFloat(const int clientNum, msg_t *msg, int bits, flo
         }
         else
         {
-            if (bits != -91)
-                MyAssertHandler(".\\qcommon\\sv_msg_write_mp.cpp", 217, 0, "%s", "bits == MSG_FIELD_ORIGINY");
+            iassert( bits == MSG_FIELD_ORIGINY );
             index = 1;
         }
-        if (!svsHeaderValid)
-            MyAssertHandler(".\\qcommon\\sv_msg_write_mp.cpp", 221, 0, "%s", "svsHeaderValid");
+        iassert( svsHeaderValid );
         roundedCenter = (svsHeader.mapCenter[index] + 0.5);
         if (GetMinBitCountForNum((roundedOldValue + 0x8000 - roundedCenter) ^ (roundedValue - roundedCenter + 0x8000)) > 16)
         {
@@ -1110,8 +1104,7 @@ void __cdecl MSG_WriteOriginZFloat(const int clientNum, msg_t *msg, float value,
     int roundedCenter; // [esp+64h] [ebp-8h]
     int roundedCentera; // [esp+64h] [ebp-8h]
 
-    if (msg->readOnly)
-        MyAssertHandler(".\\qcommon\\sv_msg_write_mp.cpp", 286, 0, "%s", "!msg->readOnly");
+    iassert( !msg->readOnly );
     roundedValue = (int)value;
     roundedOldValue = (int)oldValue;
     truncDelta = roundedValue - roundedOldValue;
@@ -1119,8 +1112,7 @@ void __cdecl MSG_WriteOriginZFloat(const int clientNum, msg_t *msg, float value,
     if ((unsigned int)(roundedValue - roundedOldValue + 64) >= 0x80)
     {
         MSG_WriteBit1(msg);
-        if (!svsHeaderValid)
-            MyAssertHandler(".\\qcommon\\sv_msg_write_mp.cpp", 330, 0, "%s", "svsHeaderValid");
+        iassert( svsHeaderValid );
         roundedCentera = (svsHeader.mapCenter[2] + 0.5);
         roundedValuea = (roundedOldValue + 0x8000 - roundedCentera) ^ (roundedValue - roundedCentera + 0x8000);
         SV_PacketDataIsOrigin(clientNum, msg);
@@ -1144,8 +1136,7 @@ void __cdecl MSG_WriteOriginZFloat(const int clientNum, msg_t *msg, float value,
     {
         MSG_WriteBit0(msg);
         SV_PacketDataIsOriginDelta(clientNum, msg);
-        if (!svsHeaderValid)
-            MyAssertHandler(".\\qcommon\\sv_msg_write_mp.cpp", 304, 0, "%s", "svsHeaderValid");
+        iassert( svsHeaderValid );
         roundedCenter = (svsHeader.mapCenter[2] + 0.5);
         if (GetMinBitCountForNum((roundedOldValue + 0x8000 - roundedCenter) ^ (roundedValue - roundedCenter + 0x8000)) > 16)
             Com_Error(
@@ -1196,16 +1187,14 @@ void __cdecl MSG_WriteLastChangedField(msg_t *msg, int lastChangedFieldNum, unsi
 {
     unsigned int idealBits; // [esp+0h] [ebp-4h]
 
-    if (msg->readOnly)
-        MyAssertHandler(".\\qcommon\\sv_msg_write_mp.cpp", 471, 0, "%s", "!msg->readOnly");
+    iassert( !msg->readOnly );
     idealBits = GetMinBitCountForNum(numFields);
     MSG_WriteBits(msg, lastChangedFieldNum, idealBits);
 }
 
 void __cdecl MSG_WriteEventNum(int clientNum, msg_t *msg, unsigned __int8 eventNum)
 {
-    if (msg->readOnly)
-        MyAssertHandler(".\\qcommon\\sv_msg_write_mp.cpp", 651, 0, "%s", "!msg->readOnly");
+    iassert( !msg->readOnly );
     SV_PacketDataIsData(clientNum, msg);
     MSG_WriteByte(msg, eventNum);
     SV_PacketDataIsUnknown(clientNum, msg);
@@ -1213,8 +1202,7 @@ void __cdecl MSG_WriteEventNum(int clientNum, msg_t *msg, unsigned __int8 eventN
 
 void __cdecl MSG_WriteEventParam(int clientNum, msg_t *msg, unsigned __int8 eventParam)
 {
-    if (msg->readOnly)
-        MyAssertHandler(".\\qcommon\\sv_msg_write_mp.cpp", 665, 0, "%s", "!msg->readOnly");
+    iassert( !msg->readOnly );
     SV_PacketDataIsData(clientNum, msg);
     MSG_WriteByte(msg, eventParam);
     SV_PacketDataIsUnknown(clientNum, msg);
@@ -1388,8 +1376,7 @@ void __cdecl MSG_WriteEntity(
     }
     else
     {
-        if (!from)
-            MyAssertHandler(".\\qcommon\\sv_msg_write_mp.cpp", 1638, 0, "%s", "from");
+        iassert( from );
         if (sv_debugPacketContents->current.enabled)
         {
             EntityTypeName = BG_GetEntityTypeName(from->eType);
@@ -1407,10 +1394,8 @@ void __cdecl MSG_WriteEntityRemoval(
     int indexBits,
     bool changeBit)
 {
-    if (!from)
-        MyAssertHandler(".\\qcommon\\sv_msg_write_mp.cpp", 1557, 0, "%s", "from");
-    if (msg->readOnly)
-        MyAssertHandler(".\\qcommon\\sv_msg_write_mp.cpp", 1558, 0, "%s", "!msg->readOnly");
+    iassert( from );
+    iassert( !msg->readOnly );
     if (cl_shownet && (cl_shownet->current.integer >= 2 || cl_shownet->current.integer == -1))
         Com_Printf(16, "W|%3i: #%-3i remove\n", msg->cursize, *(unsigned int *)from);
     if (sv_debugPacketContents->current.enabled)
@@ -1438,8 +1423,7 @@ void __cdecl MSG_WriteEntityDeltaForEType(
     int bits; // [esp+0h] [ebp-8h]
     const NetFieldList *fieldList; // [esp+4h] [ebp-4h]
 
-    if (msg->readOnly)
-        MyAssertHandler(".\\qcommon\\sv_msg_write_mp.cpp", 1594, 0, "%s", "!msg->readOnly");
+    iassert( !msg->readOnly );
     fieldList = MSG_GetStateFieldListForEntityType(eType);
     snapInfo->fieldChanges = (int *)&orderInfo;
     bits = MSG_WriteEntityDelta(
@@ -1491,10 +1475,8 @@ int __cdecl MSG_WriteEntityDelta(
     int ia; // [esp+14h] [ebp-4h]
 
     startBits = MSG_GetUsedBitCount(msg);
-    if (msg->readOnly)
-        MyAssertHandler(".\\qcommon\\sv_msg_write_mp.cpp", 1446, 0, "%s", "!msg->readOnly");
-    if (!to)
-        MyAssertHandler(".\\qcommon\\sv_msg_write_mp.cpp", 1447, 0, "%s", "to");
+    iassert( !msg->readOnly );
+    iassert( to );
     if (*(unsigned int *)to >= (unsigned int)(1 << indexBits))
     {
         v9 = va("to = %i, bits = %i", *(unsigned int *)to, indexBits);
@@ -1515,16 +1497,14 @@ int __cdecl MSG_WriteEntityDelta(
         toF = (int *)&to[field->offset];
         if (!MSG_ValuesAreEqual(snapInfo, field->bits, fromF, toF))
         {
-            if (*fromF == *toF)
-                MyAssertHandler(".\\qcommon\\sv_msg_write_mp.cpp", 1459, 0, "%s", "*fromF != *toF");
+            iassert( *fromF != *toF );
             SV_TrackFieldChange(snapInfo->clientNum, snapInfo->packetEntityType, i);
             lc = i + 1;
         }
         ++i;
         ++field;
     }
-    if (lc < 0 || lc > numFields)
-        MyAssertHandler(".\\qcommon\\sv_msg_write_mp.cpp", 1466, 0, "%s\n\t(lc) = %i", "(lc >= 0 && lc <= numFields)", lc);
+    iassert( (lc >= 0 && lc <= numFields) );
     if (lc)
     {
         if (sv_debugPacketContents->current.enabled)
@@ -1607,8 +1587,7 @@ void __cdecl MSG_WriteDeltaField(
     int partialBits; // [esp+74h] [ebp-8h]
     int value; // [esp+78h] [ebp-4h] BYREF
 
-    if (msg->readOnly)
-        MyAssertHandler(".\\qcommon\\sv_msg_write_mp.cpp", 878, 0, "%s", "!msg->readOnly");
+    iassert( !msg->readOnly );
     fromF = (const int *)&from[field->offset];
     toF = (const int *)&to[field->offset];
     if (forceSend)
@@ -1625,8 +1604,7 @@ void __cdecl MSG_WriteDeltaField(
             SV_PacketDataIsUnknown(snapInfo->clientNum, msg);
             return;
         }
-        if (!forceSend && *fromF == *toF)
-            MyAssertHandler(".\\qcommon\\sv_msg_write_mp.cpp", 904, 0, "%s", "forceSend || *fromF != *toF");
+        iassert( forceSend || *fromF != *toF );
         if (field->changeHints == 1 && (!snapInfo->fromBaseline || fieldNum))
         {
             EntityTypeString = SV_GetEntityTypeString(snapInfo->packetEntityType);
@@ -1910,8 +1888,7 @@ LABEL_103:
 
 void __cdecl MSG_WriteDeltaTime(int clientNum, msg_t *msg, int timeBase, int time)
 {
-    if (msg->readOnly)
-        MyAssertHandler(".\\qcommon\\sv_msg_write_mp.cpp", 489, 0, "%s", "!msg->readOnly");
+    iassert( !msg->readOnly );
     if (time - timeBase > 0 || time - timeBase <= -256)
     {
         SV_PacketDataIsOverhead(clientNum, msg);
@@ -1937,11 +1914,9 @@ void __cdecl MSG_Write24BitFlag(int clientNum, msg_t *msg, int oldFlags, int new
     int flagDiff; // [esp+8h] [ebp-8h]
     int value; // [esp+Ch] [ebp-4h]
 
-    if (msg->readOnly)
-        MyAssertHandler(".\\qcommon\\sv_msg_write_mp.cpp", 532, 0, "%s", "!msg->readOnly");
+    iassert( !msg->readOnly );
     flagDiff = newFlags ^ oldFlags;
-    if (newFlags == oldFlags)
-        MyAssertHandler(".\\qcommon\\sv_msg_write_mp.cpp", 535, 0, "%s", "flagDiff");
+    iassert( flagDiff );
     if ((flagDiff & (flagDiff - 1)) != 0)
     {
         SV_PacketDataIsOverhead(clientNum, msg);
@@ -1983,8 +1958,7 @@ void __cdecl MSG_Write24BitFlag(int clientNum, msg_t *msg, int oldFlags, int new
         MSG_WriteBit0(msg);
         SV_PacketDataIs24BitFlagIndex(clientNum, msg);
         MSG_WriteBits(msg, changedBitIndex, 5u);
-        if (msg->overflowed)
-            MyAssertHandler(".\\qcommon\\sv_msg_write_mp.cpp", 581, 0, "%s", "!msg->overflowed");
+        iassert( !msg->overflowed );
     }
     SV_PacketDataIsUnknown(clientNum, msg);
 }
@@ -1994,8 +1968,7 @@ void __cdecl MSG_WriteGroundEntityNum(int clientNum, msg_t *msg, int groundEntit
     int bits; // [esp+0h] [ebp-Ch]
     int value; // [esp+8h] [ebp-4h]
 
-    if (msg->readOnly)
-        MyAssertHandler(".\\qcommon\\sv_msg_write_mp.cpp", 596, 0, "%s", "!msg->readOnly");
+    iassert( !msg->readOnly );
     if (groundEntityNum == ENTITYNUM_WORLD || (SV_PacketDataIsOverhead(clientNum, msg), MSG_WriteBit0(msg), !groundEntityNum))
     {
         SV_PacketDataIsGroundEntity(clientNum, msg);
@@ -2047,8 +2020,7 @@ void __cdecl MSG_WriteDeltaArchivedEntity(
     archivedEntity_s *to,
     int force)
 {
-    if (msg->readOnly)
-        MyAssertHandler(".\\qcommon\\sv_msg_write_mp.cpp", 1679, 0, "%s", "!msg->readOnly");
+    iassert( !msg->readOnly );
     snapInfo->packetEntityType = ANALYZE_DATATYPE_ENTITYTYPE_ARCHIVEDENTITY;
     snapInfo->fieldChanges = orderInfo.arcEntState;
     MSG_WriteDeltaStruct(
@@ -2085,10 +2057,8 @@ int __cdecl MSG_WriteDeltaStruct(
     int ia; // [esp+14h] [ebp-4h]
 
     startBits = MSG_GetUsedBitCount(msg);
-    if (msg->readOnly)
-        MyAssertHandler(".\\qcommon\\sv_msg_write_mp.cpp", 1313, 0, "%s", "!msg->readOnly");
-    if (!to)
-        MyAssertHandler(".\\qcommon\\sv_msg_write_mp.cpp", 1314, 0, "%s", "to");
+    iassert( !msg->readOnly );
+    iassert( to );
     if (*(unsigned int *)to >= (unsigned int)(1 << indexBits))
     {
         v10 = va("to = %i, bits = %i", *(unsigned int *)to, indexBits);
@@ -2113,8 +2083,7 @@ int __cdecl MSG_WriteDeltaStruct(
         ++i;
         ++field;
     }
-    if (lc < 0 || lc > numFields)
-        MyAssertHandler(".\\qcommon\\sv_msg_write_mp.cpp", 1332, 0, "%s\n\t(lc) = %i", "(lc >= 0 && lc <= numFields)", lc);
+    iassert( (lc >= 0 && lc <= numFields) );
     if (lc)
     {
         SV_PacketDataIsOverhead(snapInfo->clientNum, msg);
@@ -2184,8 +2153,7 @@ void __cdecl MSG_WriteDeltaClient(
     clientState_s dummy; // [esp+4h] [ebp-70h] BYREF
     int bits; // [esp+70h] [ebp-4h]
 
-    if (msg->readOnly)
-        MyAssertHandler(".\\qcommon\\sv_msg_write_mp.cpp", 1718, 0, "%s", "!msg->readOnly");
+    iassert( !msg->readOnly );
     if (!from)
     {
         from = &dummy;
@@ -2269,8 +2237,7 @@ void __cdecl MSG_WriteDeltaPlayerstate(
     {
         Vec3Sub(to->origin, snapInfo->client->predictedOrigin, diff);
         v13 = Vec3LengthSq(diff);
-        if (!svsHeaderValid)
-            MyAssertHandler(".\\qcommon\\sv_msg_write_mp.cpp", 1900, 0, "%s", "svsHeaderValid");
+        iassert( svsHeaderValid );
         if (from
             && svsHeader.clientArchive
             && v13 <= 0.009999999776482582
@@ -2616,8 +2583,7 @@ void __cdecl MSG_WriteDeltaFields(
     int i; // [esp+Ch] [ebp-4h]
     int ia; // [esp+Ch] [ebp-4h]
 
-    if (msg->readOnly)
-        MyAssertHandler(".\\qcommon\\sv_msg_write_mp.cpp", 1261, 0, "%s", "!msg->readOnly");
+    iassert( !msg->readOnly );
     if (force)
     {
     any_different:
@@ -2665,8 +2631,7 @@ void __cdecl MSG_WriteDeltaHudElems(
     unsigned int i; // [esp+24h] [ebp-8h]
     unsigned int inuse; // [esp+28h] [ebp-4h]
 
-    if (msg->readOnly)
-        MyAssertHandler(".\\qcommon\\sv_msg_write_mp.cpp", 1773, 0, "%s", "!msg->readOnly");
+    iassert( !msg->readOnly );
     if (count != 31)
         MyAssertHandler(
             ".\\qcommon\\sv_msg_write_mp.cpp",
@@ -2739,8 +2704,7 @@ void __cdecl MSG_WriteDeltaHudElems(
             toF = (int*)((char*)&to[i] + hudElemFields[j].offset);
             if (!MSG_ValuesAreEqual(snapInfo, hudElemFields[j].bits, fromF, toF))
             {
-                if (*fromF == *toF)
-                    MyAssertHandler(".\\qcommon\\sv_msg_write_mp.cpp", 1815, 0, "%s", "*fromF != *toF");
+                iassert( *fromF != *toF );
                 if (!snapInfo->archived && msg_hudelemspew->current.enabled)
                 {
                     bits = MSG_GetBitCount(hudElemFields[j].bits, &est, *fromF, *toF);

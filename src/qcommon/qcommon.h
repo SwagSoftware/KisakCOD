@@ -161,7 +161,7 @@ enum errorParm_t : __int32
     ERR_MAPLOADERRORSUMMARY = 0x7,
 };
 
-enum $6ABDC6367E3229B6421BFD1B2626A094 : __int32
+enum $6ABDC6367E3229B6421BFD1B2626A094 : __int32 // (SP/MP same)
 {
     CON_CHANNEL_DONT_FILTER = 0x0,
     CON_CHANNEL_ERROR = 0x1,
@@ -190,6 +190,11 @@ enum $6ABDC6367E3229B6421BFD1B2626A094 : __int32
     CON_CHANNEL_SCRIPT = 0x18,
     CON_BUILTIN_CHANNEL_COUNT = 0x19,
 };
+
+inline bool Con_IsNotifyChannel(int channel)
+{
+    return channel == (CON_CHANNEL_GAMENOTIFY || channel == CON_CHANNEL_BOLDGAME || channel == CON_CHANNEL_SUBTITLE);
+}
 
 void QDECL Com_Printf(int channel, const char* fmt, ...);
 void QDECL Com_Error(errorParm_t code, const char* fmt, ...);

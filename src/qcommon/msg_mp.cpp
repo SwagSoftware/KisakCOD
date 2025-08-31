@@ -63,8 +63,7 @@ void __cdecl MSG_Init(msg_t *buf, unsigned __int8 *data, int length)
 
 void __cdecl MSG_InitReadOnly(msg_t *buf, unsigned __int8 *data, int length)
 {
-    if (!data)
-        MyAssertHandler(".\\qcommon\\msg_mp.cpp", 79, 0, "%s", "data");
+    iassert( data );
     if (!msgInit)
         MSG_InitHuffman();
     buf->readOnly = 1;
@@ -77,10 +76,8 @@ void __cdecl MSG_InitReadOnly(msg_t *buf, unsigned __int8 *data, int length)
 
 void __cdecl MSG_InitReadOnlySplit(msg_t *buf, unsigned __int8 *data, int length, unsigned __int8 *data2, int length2)
 {
-    if (!data)
-        MyAssertHandler(".\\qcommon\\msg_mp.cpp", 96, 0, "%s", "data");
-    if (!data2)
-        MyAssertHandler(".\\qcommon\\msg_mp.cpp", 97, 0, "%s", "data2");
+    iassert( data );
+    iassert( data2 );
     if (!msgInit)
         MSG_InitHuffman();
     buf->readOnly = 1;
@@ -114,10 +111,8 @@ void __cdecl MSG_WriteBits(msg_t *msg, int value, unsigned int bits)
 {
     int bit; // [esp+4h] [ebp-4h]
 
-    if (bits > 0x20)
-        MyAssertHandler(".\\qcommon\\msg_mp.cpp", 168, 0, "%s", "(unsigned)bits <= 32");
-    if (msg->readOnly)
-        MyAssertHandler(".\\qcommon\\msg_mp.cpp", 169, 0, "%s", "!msg->readOnly");
+    iassert( (unsigned)bits <= 32 );
+    iassert( !msg->readOnly );
     if (msg->maxsize - msg->cursize >= 4)
     {
         while (bits)
@@ -143,8 +138,7 @@ void __cdecl MSG_WriteBits(msg_t *msg, int value, unsigned int bits)
 
 void __cdecl MSG_WriteBit0(msg_t *msg)
 {
-    if (msg->readOnly)
-        MyAssertHandler(".\\qcommon\\msg_mp.cpp", 200, 0, "%s", "!msg->readOnly");
+    iassert( !msg->readOnly );
     if ((msg->bit & 7) == 0)
     {
         if (msg->cursize >= msg->maxsize)
@@ -162,8 +156,7 @@ void __cdecl MSG_WriteBit1(msg_t *msg)
 {
     int bit; // [esp+4h] [ebp-4h]
 
-    if (msg->readOnly)
-        MyAssertHandler(".\\qcommon\\msg_mp.cpp", 223, 0, "%s", "!msg->readOnly");
+    iassert( !msg->readOnly );
     bit = msg->bit & 7;
     if (!bit)
     {
@@ -184,8 +177,7 @@ int __cdecl MSG_ReadBits(msg_t *msg, unsigned int bits)
     int i; // [esp+4h] [ebp-8h]
     int value; // [esp+8h] [ebp-4h]
 
-    if (bits > 0x20)
-        MyAssertHandler(".\\qcommon\\msg_mp.cpp", 250, 0, "%s", "(unsigned)bits <= 32");
+    iassert( (unsigned)bits <= 32 );
     value = 0;
     for (i = 0; i < (int)bits; ++i)
     {
@@ -209,8 +201,7 @@ int __cdecl MSG_GetByte(msg_t *msg, int where)
 {
     if (where < msg->cursize)
         return msg->data[where];
-    if (!msg->splitData)
-        MyAssertHandler(".\\qcommon\\msg_mp.cpp", 132, 0, "%s", "msg->splitData");
+    iassert( msg->splitData );
     return msg->splitData[where - msg->cursize];
 }
 
@@ -277,8 +268,7 @@ int __cdecl MSG_ReadBitsCompress(const unsigned __int8 *from, unsigned __int8 *t
 
 void __cdecl MSG_WriteByte(msg_t *msg, unsigned __int8 c)
 {
-    if (msg->readOnly)
-        MyAssertHandler(".\\qcommon\\msg_mp.cpp", 349, 0, "%s", "!msg->readOnly");
+    iassert( !msg->readOnly );
     if (msg->cursize >= msg->maxsize)
         msg->overflowed = 1;
     else
@@ -289,8 +279,7 @@ void __cdecl MSG_WriteData(msg_t *buf, unsigned __int8 *data, unsigned int lengt
 {
     int newsize; // [esp+0h] [ebp-4h]
 
-    if (buf->readOnly)
-        MyAssertHandler(".\\qcommon\\msg_mp.cpp", 365, 0, "%s", "!buf->readOnly");
+    iassert( !buf->readOnly );
     newsize = length + buf->cursize;
     if (newsize > buf->maxsize)
     {
@@ -307,8 +296,7 @@ void __cdecl MSG_WriteShort(msg_t *msg, __int16 c)
 {
     int newsize; // [esp+0h] [ebp-4h]
 
-    if (msg->readOnly)
-        MyAssertHandler(".\\qcommon\\msg_mp.cpp", 382, 0, "%s", "!msg->readOnly");
+    iassert( !msg->readOnly );
     newsize = msg->cursize + 2;
     if (newsize > msg->maxsize)
     {
@@ -325,8 +313,7 @@ void __cdecl MSG_WriteLong(msg_t *msg, int c)
 {
     int newsize; // [esp+0h] [ebp-4h]
 
-    if (msg->readOnly)
-        MyAssertHandler(".\\qcommon\\msg_mp.cpp", 400, 0, "%s", "!msg->readOnly");
+    iassert( !msg->readOnly );
     newsize = msg->cursize + 4;
     if (newsize > msg->maxsize)
     {
@@ -346,10 +333,8 @@ void __cdecl MSG_WriteString(msg_t *sb, const char *s)
     char string[1024]; // [esp+14h] [ebp-408h] BYREF
     int i; // [esp+418h] [ebp-4h]
 
-    if (!s)
-        MyAssertHandler(".\\qcommon\\msg_mp.cpp", 437, 0, "%s", "s");
-    if (sb->readOnly)
-        MyAssertHandler(".\\qcommon\\msg_mp.cpp", 438, 0, "%s", "!sb->readOnly");
+    iassert( s );
+    iassert( !sb->readOnly );
     l = strlen(s);
     if (l < 1024)
     {
@@ -375,10 +360,8 @@ void __cdecl MSG_WriteBigString(msg_t *sb, char *s)
     char dest[8192]; // [esp+14h] [ebp-2008h] BYREF
     int i; // [esp+2018h] [ebp-4h]
 
-    if (!s)
-        MyAssertHandler(".\\qcommon\\msg_mp.cpp", 462, 0, "%s", "s");
-    if (sb->readOnly)
-        MyAssertHandler(".\\qcommon\\msg_mp.cpp", 463, 0, "%s", "!sb->readOnly");
+    iassert( s );
+    iassert( !sb->readOnly );
     v3 = strlen(s);
     if (v3 < 0x2000)
     {
@@ -399,8 +382,7 @@ void __cdecl MSG_WriteBigString(msg_t *sb, char *s)
 
 void __cdecl MSG_WriteAngle16(msg_t *sb, float f)
 {
-    if (sb->readOnly)
-        MyAssertHandler(".\\qcommon\\msg_mp.cpp", 491, 0, "%s", "!sb->readOnly");
+    iassert( !sb->readOnly );
     MSG_WriteShort(sb, (int)(f * 182.0444488525391));
 }
 
@@ -590,8 +572,7 @@ void __cdecl MSG_ReadData(msg_t *msg, unsigned __int8 *data, int len)
 
 void __cdecl MSG_WriteDeltaKey(msg_t *msg, int key, int oldV, int newV, unsigned int bits)
 {
-    if (msg->readOnly)
-        MyAssertHandler(".\\qcommon\\msg_mp.cpp", 719, 0, "%s", "!msg->readOnly");
+    iassert( !msg->readOnly );
     if (oldV == newV)
     {
         MSG_WriteBit0(msg);
@@ -613,8 +594,7 @@ unsigned int __cdecl MSG_ReadDeltaKey(msg_t *msg, int key, int oldV, unsigned in
 
 void __cdecl MSG_WriteKey(msg_t *msg, int key, int newV, unsigned int bits)
 {
-    if (msg->readOnly)
-        MyAssertHandler(".\\qcommon\\msg_mp.cpp", 742, 0, "%s", "!msg->readOnly");
+    iassert( !msg->readOnly );
     MSG_WriteBits(msg, key ^ newV, bits);
 }
 
@@ -625,8 +605,7 @@ unsigned int __cdecl MSG_ReadKey(msg_t *msg, int key, unsigned int bits)
 
 void __cdecl MSG_WriteDeltaKeyByte(msg_t *msg, char key, char oldV, char newV)
 {
-    if (msg->readOnly)
-        MyAssertHandler(".\\qcommon\\msg_mp.cpp", 755, 0, "%s", "!msg->readOnly");
+    iassert( !msg->readOnly );
     if (oldV == newV)
     {
         MSG_WriteBit0(msg);
@@ -648,8 +627,7 @@ int __cdecl MSG_ReadDeltaKeyByte(msg_t *msg, unsigned __int8 key, int oldV)
 
 void __cdecl MSG_WriteDeltaKeyShort(msg_t *msg, __int16 key, __int16 oldV, __int16 newV)
 {
-    if (msg->readOnly)
-        MyAssertHandler(".\\qcommon\\msg_mp.cpp", 777, 0, "%s", "!msg->readOnly");
+    iassert( !msg->readOnly );
     if (oldV == newV)
     {
         MSG_WriteBit0(msg);
@@ -768,20 +746,13 @@ void __cdecl MSG_WriteDeltaUsercmdKey(msg_t *msg, int key, const usercmd_s *from
     int keyb; // [esp+1Ch] [ebp+Ch]
     int keya; // [esp+1Ch] [ebp+Ch]
 
-    if (msg->readOnly)
-        MyAssertHandler(".\\qcommon\\msg_mp.cpp", 912, 0, "%s", "!msg->readOnly");
-    if (from->buttons >= 0x200000)
-        MyAssertHandler(".\\qcommon\\msg_mp.cpp", 914, 0, "%s", "from->buttons < (1 << BUTTON_BIT_COUNT)");
-    if (to->buttons >= 0x200000)
-        MyAssertHandler(".\\qcommon\\msg_mp.cpp", 915, 0, "%s", "to->buttons < (1 << BUTTON_BIT_COUNT)");
-    if (from->weapon >= 0x80u)
-        MyAssertHandler(".\\qcommon\\msg_mp.cpp", 917, 0, "%s", "from->weapon < (1 << MAX_WEAPONS_BITS)");
-    if (to->weapon >= 0x80u)
-        MyAssertHandler(".\\qcommon\\msg_mp.cpp", 918, 0, "%s", "to->weapon < (1 << MAX_WEAPONS_BITS)");
-    if (from->offHandIndex >= 0x80u)
-        MyAssertHandler(".\\qcommon\\msg_mp.cpp", 920, 0, "%s", "from->offHandIndex < (1 << MAX_WEAPONS_BITS)");
-    if (to->offHandIndex >= 0x80u)
-        MyAssertHandler(".\\qcommon\\msg_mp.cpp", 921, 0, "%s", "to->offHandIndex < (1 << MAX_WEAPONS_BITS)");
+    iassert( !msg->readOnly );
+    iassert( from->buttons < (1 << BUTTON_BIT_COUNT) );
+    iassert( to->buttons < (1 << BUTTON_BIT_COUNT) );
+    iassert( from->weapon < (1 << MAX_WEAPONS_BITS) );
+    iassert( to->weapon < (1 << MAX_WEAPONS_BITS) );
+    iassert( from->offHandIndex < (1 << MAX_WEAPONS_BITS) );
+    iassert( to->offHandIndex < (1 << MAX_WEAPONS_BITS) );
     delta = to->serverTime - from->serverTime;
     if (delta >= 0x100)
     {
@@ -859,12 +830,9 @@ void __cdecl MSG_ReadDeltaUsercmdKey(msg_t *msg, int key, const usercmd_s *from,
     int keyb; // [esp+20h] [ebp+Ch]
     int keya; // [esp+20h] [ebp+Ch]
 
-    if (from->buttons >= 0x200000)
-        MyAssertHandler(".\\qcommon\\msg_mp.cpp", 1013, 0, "%s", "from->buttons < (1 << BUTTON_BIT_COUNT)");
-    if (from->weapon >= 0x80u)
-        MyAssertHandler(".\\qcommon\\msg_mp.cpp", 1014, 0, "%s", "from->weapon < (1 << MAX_WEAPONS_BITS)");
-    if (from->offHandIndex >= 0x80u)
-        MyAssertHandler(".\\qcommon\\msg_mp.cpp", 1015, 0, "%s", "from->offHandIndex < (1 << MAX_WEAPONS_BITS)");
+    iassert( from->buttons < (1 << BUTTON_BIT_COUNT) );
+    iassert( from->weapon < (1 << MAX_WEAPONS_BITS) );
+    iassert( from->offHandIndex < (1 << MAX_WEAPONS_BITS) );
     memcpy(to, from, sizeof(usercmd_s));
     if (MSG_ReadBit(msg))
         to->serverTime = from->serverTime + MSG_ReadByte(msg);
@@ -1017,15 +985,13 @@ void __cdecl MSG_ReadDeltaField(
     else
         fromF = (const int *)&from[field->offset];
     toF = (int *)&to[field->offset];
-    if (msg->overflowed)
-        MyAssertHandler(".\\qcommon\\msg_mp.cpp", 1353, 0, "%s", "!msg->overflowed");
+    iassert( !msg->overflowed );
     if (field->changeHints != 2 && !MSG_ReadBit(msg))
     {
         *toF = *fromF;
         return;
     }
-    if (msg->overflowed)
-        MyAssertHandler(".\\qcommon\\msg_mp.cpp", 1362, 0, "%s", "!msg->overflowed");
+    iassert( !msg->overflowed );
     switch (field->bits)
     {
     case 0:
@@ -1055,8 +1021,7 @@ void __cdecl MSG_ReadDeltaField(
         {
             Bit = MSG_ReadBit(msg);
             *toF = Bit << 31;
-            if (*(float *)toF != 0.0)
-                MyAssertHandler(".\\qcommon\\msg_mp.cpp", 1369, 0, "%s", "*reinterpret_cast< float * >( toF ) == 0.0f");
+            iassert( *reinterpret_cast< float * >( toF ) == 0.0f );
         }
         return;
     case 0xFFFFFFA7:
@@ -1113,8 +1078,7 @@ void __cdecl MSG_ReadDeltaField(
         else
         {
             *toF = 0;
-            if (*(float *)toF != 0.0)
-                MyAssertHandler(".\\qcommon\\msg_mp.cpp", 1444, 0, "%s", "*reinterpret_cast< float * >( toF ) == 0.0f");
+            iassert( *reinterpret_cast< float * >( toF ) == 0.0f );
         }
         if ((unsigned int)(__int64)(*(float *)toF + 2048.0) >= 0x1000)
             MyAssertHandler(
@@ -1215,8 +1179,7 @@ void __cdecl MSG_ReadDeltaField(
                 v23 = MSG_ReadByte(msg);
                 rawValue |= v23 << j;
             }
-            if (bits > 32)
-                MyAssertHandler(".\\qcommon\\msg_mp.cpp", 1578, 0, "%s\n\t(bits) = %i", "(bits <= 32)", bits);
+            iassert( (bits <= 32) );
             if (bits == 32)
                 mask = -1;
             else
@@ -1270,8 +1233,7 @@ int __cdecl MSG_Read24BitFlag(msg_t *msg, int oldFlags)
     int j; // [esp+4h] [ebp-Ch]
     int value; // [esp+Ch] [ebp-4h]
 
-    if (msg->overflowed)
-        MyAssertHandler(".\\qcommon\\msg_mp.cpp", 1174, 0, "%s", "!msg->overflowed");
+    iassert( !msg->overflowed );
     if (MSG_ReadBit(msg) == 1)
     {
         value = 0;
@@ -1307,8 +1269,7 @@ double __cdecl MSG_ReadOriginFloat(int bits, msg_t *msg, float oldValue)
         }
         else
         {
-            if (bits != -91)
-                MyAssertHandler(".\\qcommon\\msg_mp.cpp", 1223, 0, "%s", "bits == MSG_FIELD_ORIGINY");
+            iassert( bits == MSG_FIELD_ORIGINY );
             index = 1;
         }
         roundedCenter = (int)((*CL_GetMapCenter())[index] + 0.5);
@@ -1352,8 +1313,7 @@ int __cdecl MSG_ReadDeltaEntityStruct(msg_t *msg, int time, char *from, char *to
     unsigned int i; // [esp+54h] [ebp-4h]
     unsigned int ia; // [esp+54h] [ebp-4h]
 
-    if (number >= 0x400)
-        MyAssertHandler(".\\qcommon\\msg_mp.cpp", 1730, 0, "%s", "number < (1u << GENTITYNUM_BITS)");
+    iassert( number < (1 << GENTITYNUM_BITS) );
     if (MSG_ReadBit(msg) == 1)
     {
         if (cl_shownet && (cl_shownet->current.integer >= 2 || cl_shownet->current.integer == -1))
@@ -1488,8 +1448,7 @@ int __cdecl MSG_ReadDeltaStruct(
     int i; // [esp+14h] [ebp-4h]
     int ia; // [esp+14h] [ebp-4h]
 
-    if (number >= 1 << indexBits)
-        MyAssertHandler(".\\qcommon\\msg_mp.cpp", 1659, 0, "%s", "number < (1u << indexBits)");
+    iassert( number < (1u << indexBits) );
     if (MSG_ReadBit(msg) == 1)
     {
         if (cl_shownet && (cl_shownet->current.integer >= 2 || cl_shownet->current.integer == -1))

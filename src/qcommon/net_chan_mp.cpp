@@ -104,8 +104,7 @@ void __cdecl NetProf_AddPacket(netProfileStream_t *pProfStream, int iSize, int b
 {
     netProfilePacket_t *pPacket; // [esp+0h] [ebp-4h]
 
-    if (!net_iProfilingOn)
-        MyAssertHandler(".\\qcommon\\net_chan_mp.cpp", 242, 0, "%s", "net_iProfilingOn");
+    iassert( net_iProfilingOn );
     pProfStream->iCurrPacket = (pProfStream->iCurrPacket + 1) % 60;
     pPacket = &pProfStream->packets[pProfStream->iCurrPacket];
     pPacket->iTime = Sys_Milliseconds();
@@ -156,10 +155,8 @@ void __cdecl NetProf_UpdateStatistics(netProfileStream_t *pStream)
     int iNumPackets; // [esp+20h] [ebp-10h]
     int iOldestPacketTime; // [esp+2Ch] [ebp-4h]
 
-    if (!pStream)
-        MyAssertHandler(".\\qcommon\\net_chan_mp.cpp", 313, 0, "%s", "pStream");
-    if (!net_iProfilingOn)
-        MyAssertHandler(".\\qcommon\\net_chan_mp.cpp", 314, 0, "%s", "net_iProfilingOn");
+    iassert( pStream );
+    iassert( net_iProfilingOn );
     iNumPackets = 0;
     iNumFragments = 0;
     iOldestPacket = -1;
@@ -262,12 +259,9 @@ char __cdecl FakeLag_DestroyPacket(unsigned int packet)
 
 void __cdecl FakeLag_SendPacket_Real(unsigned int packet)
 {
-    if (packet >= 0x200)
-        MyAssertHandler(".\\qcommon\\net_chan_mp.cpp", 541, 0, "%s", "packet < FAKELATENCY_MAX_PACKETS_HELD");
-    if (!laggedPackets[packet].outbound)
-        MyAssertHandler(".\\qcommon\\net_chan_mp.cpp", 542, 0, "%s", "laggedPackets[ packet ].outbound");
-    if (!laggedPackets[packet].data)
-        MyAssertHandler(".\\qcommon\\net_chan_mp.cpp", 543, 0, "%s", "laggedPackets[ packet ].data");
+    iassert( packet < FAKELATENCY_MAX_PACKETS_HELD );
+    iassert( laggedPackets[ packet ].outbound );
+    iassert( laggedPackets[ packet ].data );
     NET_SendPacket(
         laggedPackets[packet].sock,
         laggedPackets[packet].length,
@@ -333,10 +327,8 @@ unsigned int __cdecl FakeLag_SendPacket(netsrc_t sock, int length, unsigned __in
     DWORD now; // [esp+24h] [ebp-10h]
     int change; // [esp+28h] [ebp-Ch]
 
-    if (length <= 0)
-        MyAssertHandler(".\\qcommon\\net_chan_mp.cpp", 676, 0, "%s", "length > 0");
-    if (!data)
-        MyAssertHandler(".\\qcommon\\net_chan_mp.cpp", 677, 0, "%s", "data != NULL");
+    iassert( length > 0 );
+    iassert( data != NULL );
     now = Sys_Milliseconds();
     if (fakelag_jitter->current.integer + fakelag_target->current.integer != fakelag_current->current.integer)
     {
@@ -415,10 +407,8 @@ unsigned int __cdecl FakeLag_QueueIncomingPacket(bool loopback, netsrc_t sock, n
     DWORD now; // [esp+2Ch] [ebp-Ch]
     int change; // [esp+30h] [ebp-8h]
 
-    if (msg->cursize <= 0)
-        MyAssertHandler(".\\qcommon\\net_chan_mp.cpp", 775, 0, "%s", "msg->cursize > 0");
-    if (!msg->data)
-        MyAssertHandler(".\\qcommon\\net_chan_mp.cpp", 776, 0, "%s", "msg->data != NULL");
+    iassert( msg->cursize > 0 );
+    iassert( msg->data != NULL );
     now = Sys_Milliseconds();
     if (fakelag_jitter->current.integer + fakelag_target->current.integer != fakelag_current->current.integer)
     {
@@ -747,8 +737,7 @@ void __cdecl Netchan_Setup(
     chan->sock = sock;
     chan->remoteAddress = adr;
     chan->qport = qport;
-    if (adr.type && !qport)
-        MyAssertHandler(".\\qcommon\\net_chan_mp.cpp", 1096, 0, "%s", "adr.type == NA_BOT || qport != 0");
+    iassert( adr.type == NA_BOT || qport != 0 );
     chan->incomingSequence = 0;
     chan->outgoingSequence = 1;
     chan->unsentBuffer = (unsigned __int8 *)outgoingBuffer;

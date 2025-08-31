@@ -1,6 +1,9 @@
 #pragma once
 
 #include <xanim/xanim.h>
+
+#define BSP_VERSION 22
+
 struct DiskPrimaryLight_Version16 // sizeof=0x60
 {
     unsigned __int16 falloffStart;

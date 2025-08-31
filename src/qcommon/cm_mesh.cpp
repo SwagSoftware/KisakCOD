@@ -540,14 +540,12 @@ void __cdecl CM_TraceSphereThroughVertex(
     if (b < 0.0)
     {
         deltaLenSq = Vec3Dot(delta, delta);
-        if (deltaLenSq <= 0.0)
-            MyAssertHandler(".\\qcommon\\cm_mesh.cpp", 344, 0, "%s\n\t(deltaLenSq) = %g", "(deltaLenSq > 0.0f)", deltaLenSq);
+        iassert( (deltaLenSq > 0.0f) );
         c = deltaLenSq - (tw->radius + 0.125) * (tw->radius + 0.125);
         if (c > 0.0)
         {
             a = tw->deltaLenSq;
-            if (a <= 0.0)
-                MyAssertHandler(".\\qcommon\\cm_mesh.cpp", 359, 0, "%s\n\t(a) = %g", "(a > 0.0f)", a);
+            iassert( (a > 0.0f) );
             bSquared = b * b;
             discriminant = bSquared - a * c;
             if (discriminant >= bSquared * EQUAL_EPSILON)
@@ -686,8 +684,7 @@ void __cdecl CM_TraceCapsuleThroughBorder(const traceWork_t *tw, CollisionBorder
                 v3 = va("tw->offsetZ: %f, tw->size[2]: %f, tw->radius: %f", tw->offsetZ, tw->size[2], tw->radius);
                 MyAssertHandler(".\\qcommon\\cm_mesh.cpp", 1209, 0, "%s\n\t%s", "tw->offsetZ == tw->size[2] - tw->radius", v3);
             }
-            if (tw->offsetZ < 0.0)
-                MyAssertHandler(".\\qcommon\\cm_mesh.cpp", 1210, 0, "%s", "tw->offsetZ >= 0");
+            iassert( tw->offsetZ >= 0 );
             v26 = edgePoint_8 - tw->extents.start[2];
             v20 = I_fabs(v26);
             if (tw->offsetZ >= (double)v20)
@@ -734,8 +731,7 @@ void __cdecl CM_TraceCapsuleThroughBorder(const traceWork_t *tw, CollisionBorder
             v7 = va("tw->offsetZ: %f, tw->size[2]: %f, tw->radius: %f", tw->offsetZ, tw->size[2], tw->radius);
             MyAssertHandler(".\\qcommon\\cm_mesh.cpp", 1278, 0, "%s\n\t%s", "tw->offsetZ == tw->size[2] - tw->radius", v7);
         }
-        if (tw->offsetZ < 0.0)
-            MyAssertHandler(".\\qcommon\\cm_mesh.cpp", 1279, 0, "%s", "tw->offsetZ >= 0");
+        iassert( tw->offsetZ >= 0 );
         if (tw->offsetZ >= (double)edgeZ)
         {
             if (edgeZ >= -tw->offsetZ)
@@ -802,8 +798,7 @@ void __cdecl CM_TraceCapsuleThroughBorder(const traceWork_t *tw, CollisionBorder
             v5 = va("tw->offsetZ: %f, tw->size[2]: %f, tw->radius: %f", tw->offsetZ, tw->size[2], tw->radius);
             MyAssertHandler(".\\qcommon\\cm_mesh.cpp", 1248, 0, "%s\n\t%s", "tw->offsetZ == tw->size[2] - tw->radius", v5);
         }
-        if (tw->offsetZ < 0.0)
-            MyAssertHandler(".\\qcommon\\cm_mesh.cpp", 1249, 0, "%s", "tw->offsetZ >= 0");
+        iassert( tw->offsetZ >= 0 );
         v24 = tw->extents.start[2] - edgePoint_8a;
         v17 = I_fabs(v24);
         if (tw->offsetZ >= (double)v17)
@@ -894,10 +889,8 @@ void __cdecl CM_MeshTestInLeaf(const traceWork_t *tw, cLeaf_t *leaf, trace_t *tr
     int k; // [esp+4h] [ebp-8h]
     CollisionAabbTree *aabbTree; // [esp+8h] [ebp-4h]
 
-    if (tw->isPoint)
-        MyAssertHandler(".\\qcommon\\cm_mesh.cpp", 1435, 0, "%s", "!tw->isPoint");
-    if (trace->allsolid)
-        MyAssertHandler(".\\qcommon\\cm_mesh.cpp", 1436, 0, "%s", "!trace->allsolid");
+    iassert( !tw->isPoint );
+    iassert( !trace->allsolid );
     for (k = 0; k < leaf->collAabbCount; ++k)
     {
         aabbTree = &cm.aabbTrees[k + leaf->firstCollAabbIndex];

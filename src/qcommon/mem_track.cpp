@@ -47,13 +47,11 @@ void __cdecl track_static_alloc_internal(void* ptr, int size, const char* name, 
 
     EnterCriticalSection(&g_crit);
 
-    if (g_mem_track_count >= 1024)
-        MyAssertHandler(".\\qcommon\\mem_track.cpp", 269, 0, "%s", "g_mem_track_count < MAX_MEM_TRACK");
+    iassert( g_mem_track_count < MAX_MEM_TRACK );
 
     mem_track = &g_mem_track[g_mem_track_count];
     mem_track->size = size;
-    if (!*name)
-        MyAssertHandler(".\\qcommon\\mem_track.cpp", 273, 0, "%s", "name[0]");
+    iassert( name[0] );
     mem_track->name = name;
     mem_track->type = type;
     mem_track->usageType = 0;
@@ -213,8 +211,7 @@ TempMemInfo* __cdecl GetTempMemInfo(
     {
         if (i >= count)
         {
-            if (!name)
-                MyAssertHandler(".\\qcommon\\mem_track.cpp", 318, 0, "%s", "name");
+            iassert( name );
             if (++*tempMemInfoCount >= 1024)
                 MyAssertHandler(
                     ".\\qcommon\\mem_track.cpp",
@@ -334,15 +331,12 @@ void __cdecl track_hunk_alloc(int size, int pos, const char* name, int type)
     {
         g_mem_track[1].size -= size;
         track_addbasicinfo(&g_info, 1, -size);
-        if (g_mem_track[1].size < 0)
-            MyAssertHandler(".\\qcommon\\mem_track.cpp", 631, 0, "%s", "g_mem_track[TRACK_FREE].size >= 0");
+        iassert( g_mem_track[TRACK_FREE].size >= 0 );
     }
-    if (g_hunk_track_count >= 0x80000)
-        MyAssertHandler(".\\qcommon\\mem_track.cpp", 634, 0, "%s", "g_hunk_track_count < MAX_HUNK_TRACK");
+    iassert( g_hunk_track_count < MAX_HUNK_TRACK );
     mem_track = &g_hunk_track[g_hunk_track_count];
     mem_track->size = size;
-    if (!*name)
-        MyAssertHandler(".\\qcommon\\mem_track.cpp", 638, 0, "%s", "name[0]");
+    iassert( name[0] );
     mem_track->name = name;
     mem_track->type = type;
     mem_track->usageType = 3;
@@ -362,15 +356,12 @@ void __cdecl track_hunk_allocLow(int size, int pos, const char* name, int type)
     {
         g_mem_track[1].size -= size;
         track_addbasicinfo(&g_info, 1, -size);
-        if (g_mem_track[1].size < 0)
-            MyAssertHandler(".\\qcommon\\mem_track.cpp", 665, 0, "%s", "g_mem_track[TRACK_FREE].size >= 0");
+        iassert( g_mem_track[TRACK_FREE].size >= 0 );
     }
-    if (g_hunklow_track_count >= 0x10000)
-        MyAssertHandler(".\\qcommon\\mem_track.cpp", 668, 0, "%s", "g_hunklow_track_count < MAX_HUNKLOW_TRACK");
+    iassert( g_hunklow_track_count < MAX_HUNKLOW_TRACK );
     mem_track = &g_hunklow_track[g_hunklow_track_count];
     mem_track->size = size;
-    if (!*name)
-        MyAssertHandler(".\\qcommon\\mem_track.cpp", 672, 0, "%s", "name[0]");
+    iassert( name[0] );
     mem_track->name = name;
     mem_track->type = type;
     mem_track->usageType = 3;
@@ -384,8 +375,7 @@ void __cdecl track_hunk_allocLow(int size, int pos, const char* name, int type)
 void __cdecl track_set_hunk_size(int size)
 {
     EnterCriticalSection(&g_crit);
-    if (g_mem_track[1].size)
-        MyAssertHandler(".\\qcommon\\mem_track.cpp", 692, 0, "%s", "!g_mem_track[TRACK_FREE].size");
+    iassert( !g_mem_track[TRACK_FREE].size );
     g_mem_track[1].size = size;
     track_addbasicinfo(&g_info, 1, size);
     LeaveCriticalSection(&g_crit);
@@ -648,8 +638,7 @@ void __cdecl track_getbasicinfo(meminfo_t* info)
 {
     int MinSpecImageMemory; // eax
 
-    if (!info)
-        MyAssertHandler(".\\qcommon\\mem_track.cpp", 1243, 0, "%s", "info");
+    iassert( info );
     EnterCriticalSection(&g_crit);
     memset((unsigned __int8*)info, 0, sizeof(meminfo_t));
     //MinSpecImageMemory = R_GetMinSpecImageMemory(); // KISAKTODO
@@ -759,8 +748,7 @@ void __cdecl track_PrintInfo()
             ++mem_track;
         }
         len += nodeCount;
-        if (len != len2)
-            MyAssertHandler(".\\qcommon\\mem_track.cpp", 1423, 0, "%s", "len == len2");
+        iassert( len == len2 );
         for (i = len - 1; i >= 0; --i)
         {
             for (j = i - 1; j >= 0; --j)
@@ -849,8 +837,7 @@ void __cdecl track_PrintInfo()
             type = mem_trackc->type;
             if (mem_trackc->size >= 0x2000)
             {
-                if (!*mem_trackc->name)
-                    MyAssertHandler(".\\qcommon\\mem_track.cpp", 1485, 0, "%s", "mem_track->name[0]");
+                iassert( mem_track->name[0] );
                 Com_Printf(
                     0,
                     "%s %s %7i  %-24s %s\n",
@@ -1033,8 +1020,7 @@ void __cdecl track_z_alloc(int size, const char* name, int type, char* pos, int 
     //        g_malloc_mem_high = g_malloc_mem_size;
     //}
     //node = (mem_track_node_s*)(pos - 32);
-    //if (!*name)
-    //    MyAssertHandler(".\\qcommon\\mem_track.cpp", 411, 0, "%s", "name[0]");
+    //iassert( name[0] );
     //node->data.name = name;
     //node->data.filename = "";
     //node->data.size = size;

@@ -86,14 +86,12 @@ void __cdecl CM_Shutdown()
     savedName = cm.name;
     Com_Memset((unsigned int *)&cm, 0, 284);
     cm.name = savedName;
-    if (cm.isInUse)
-        MyAssertHandler(".\\qcommon\\cm_load.cpp", 177, 0, "%s", "!cm.isInUse");
+    iassert( !cm.isInUse );
 }
 
 void __cdecl CM_Unload()
 {
-    if (!useFastFile->current.enabled)
-        MyAssertHandler(".\\qcommon\\cm_load.cpp", 190, 0, "%s", "IsFastFileLoad()");
+    iassert( IsFastFileLoad() );
     if (cm.isInUse)
         Sys_Error("Cannot unload collision while it is in use");
 }

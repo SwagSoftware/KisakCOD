@@ -36,6 +36,8 @@ struct worldSector_s // sizeof=0x1C
     worldTree_s tree;                   // ...
 };
 
+#define SECTOR_HEAD 1
+
 struct cm_world_t // sizeof=0x701C
 {                                       // ...
     float mins[3];                      // ...
@@ -76,12 +78,10 @@ void CM_ClearWorld()
     cm_world.sectors[1023].tree.u.parent = 0;
     size = cm_world.maxs[0] - cm_world.mins[0];
     size_4 = cm_world.maxs[1] - cm_world.mins[1];
-    cm_world.sectors[1].tree.axis = size_4 >= (double)size;
-    cm_world.sectors[1].tree.dist = (cm_world.maxs[size_4 >= (double)size] + cm_world.mins[size_4 >= (double)size]) * 0.5;
-    if (cm_world.sectors[1].tree.child[0])
-        MyAssertHandler(".\\qcommon\\cm_world.cpp", 168, 0, "%s", "!cm_world.sectors[SECTOR_HEAD].tree.child[0]");
-    if (cm_world.sectors[1].tree.child[1])
-        MyAssertHandler(".\\qcommon\\cm_world.cpp", 169, 0, "%s", "!cm_world.sectors[SECTOR_HEAD].tree.child[1]");
+    cm_world.sectors[SECTOR_HEAD].tree.axis = size_4 >= (double)size;
+    cm_world.sectors[SECTOR_HEAD].tree.dist = (cm_world.maxs[size_4 >= (double)size] + cm_world.mins[size_4 >= (double)size]) * 0.5;
+    iassert( !cm_world.sectors[SECTOR_HEAD].tree.child[0] );
+    iassert( !cm_world.sectors[SECTOR_HEAD].tree.child[1] );
 }
 
 void __cdecl CM_UnlinkEntity(svEntity_s *ent)
@@ -101,8 +101,7 @@ void __cdecl CM_UnlinkEntity(svEntity_s *ent)
     {
         node = &cm_world.sectors[nodeIndex];
         ent->worldSector = 0;
-        if (!node->contents.entities)
-            MyAssertHandler(".\\qcommon\\cm_world.cpp", 478, 0, "%s", "node->contents.entities");
+        iassert( node->contents.entities );
         if (&sv.svEntities[node->contents.entities - 1] == ent)
         {
             node->contents.entities = ent->nextEntityInWorldSector;
@@ -113,21 +112,18 @@ void __cdecl CM_UnlinkEntity(svEntity_s *ent)
                 &sv.svEntities[scan->nextEntityInWorldSector - 1] != ent;
                 scan = &sv.svEntities[scan->nextEntityInWorldSector - 1])
             {
-                if (!scan->nextEntityInWorldSector)
-                    MyAssertHandler(".\\qcommon\\cm_world.cpp", 493, 0, "%s", "scan->nextEntityInWorldSector");
+                iassert( scan->nextEntityInWorldSector );
             }
             scan->nextEntityInWorldSector = ent->nextEntityInWorldSector;
         }
         while (!node->contents.entities && !node->contents.staticModels && !node->tree.child[0] && !node->tree.child[1])
         {
-            if (node->contents.contentsStaticModels)
-                MyAssertHandler(".\\qcommon\\cm_world.cpp", 499, 0, "%s", "!node->contents.contentsStaticModels");
+            iassert( !node->contents.contentsStaticModels );
             node->contents.contentsEntities = 0;
             node->contents.linkcontentsEntities = 0;
             if (!node->tree.u.parent)
             {
-                if (nodeIndex != 1)
-                    MyAssertHandler(".\\qcommon\\cm_world.cpp", 505, 0, "%s", "nodeIndex == SECTOR_HEAD");
+                iassert( nodeIndex == SECTOR_HEAD );
                 goto LABEL_28;
             }
             parentNodeIndex = node->tree.u.parent;
@@ -140,8 +136,7 @@ void __cdecl CM_UnlinkEntity(svEntity_s *ent)
             }
             else
             {
-                if (node->tree.child[1] != nodeIndex)
-                    MyAssertHandler(".\\qcommon\\cm_world.cpp", 522, 0, "%s", "node->tree.child[1] == nodeIndex");
+                iassert( node->tree.child[1] == nodeIndex );
                 node->tree.child[1] = 0;
             }
             nodeIndex = parentNodeIndex;
@@ -192,8 +187,7 @@ void __cdecl CM_LinkEntity(svEntity_s *ent, float *absmin, float *absmax, unsign
     cmod = CM_ClipHandleToModel(clipHandle);
     leaf = &cmod->leaf;
     contents = SV_GEntityForSvEntity(ent)->r.contents;
-    if (!contents)
-        MyAssertHandler(".\\qcommon\\cm_world.cpp", 761, 0, "%s", "contents");
+    iassert( contents );
     v4 = *(_QWORD *)&leaf->brushContents == 0;
     linkcontents = leaf->terrainContents | leaf->brushContents;
     if (v4)
@@ -441,23 +435,16 @@ unsigned __int16 __cdecl CM_AllocWorldSector(float *mins, float *maxs)
     if (size[size[1] >= (double)size[0]] <= 512.0)
         return 0;
     node = &cm_world.sectors[cm_world.freeHead];
-    if (node->contents.contentsStaticModels)
-        MyAssertHandler(".\\qcommon\\cm_world.cpp", 124, 0, "%s", "!node->contents.contentsStaticModels");
-    if (node->contents.contentsEntities)
-        MyAssertHandler(".\\qcommon\\cm_world.cpp", 125, 0, "%s", "!node->contents.contentsEntities");
-    if (node->contents.linkcontentsEntities)
-        MyAssertHandler(".\\qcommon\\cm_world.cpp", 126, 0, "%s", "!node->contents.linkcontentsEntities");
-    if (node->contents.entities)
-        MyAssertHandler(".\\qcommon\\cm_world.cpp", 127, 0, "%s", "!node->contents.entities");
-    if (node->contents.staticModels)
-        MyAssertHandler(".\\qcommon\\cm_world.cpp", 128, 0, "%s", "!node->contents.staticModels");
+    iassert( !node->contents.contentsStaticModels );
+    iassert( !node->contents.contentsEntities );
+    iassert( !node->contents.linkcontentsEntities );
+    iassert( !node->contents.entities );
+    iassert( !node->contents.staticModels );
     cm_world.freeHead = node->tree.u.parent;
     node->tree.axis = axis;
     node->tree.dist = (maxs[axis] + mins[axis]) * 0.5;
-    if (node->tree.child[0])
-        MyAssertHandler(".\\qcommon\\cm_world.cpp", 135, 0, "%s", "!node->tree.child[0]");
-    if (node->tree.child[1])
-        MyAssertHandler(".\\qcommon\\cm_world.cpp", 136, 0, "%s", "!node->tree.child[1]");
+    iassert( !node->tree.child[0] );
+    iassert( !node->tree.child[1] );
     return nodeIndex;
 }
 
@@ -489,8 +476,7 @@ unsigned int CM_LinkAllStaticModels()
         result = i;
         if (i >= cm.numStaticModels)
             break;
-        if (!staticModel->xmodel)
-            MyAssertHandler(".\\qcommon\\cm_world.cpp", 913, 0, "%s", "staticModel->xmodel");
+        iassert( staticModel->xmodel );
         if (XModelGetContents(staticModel->xmodel))
             CM_LinkStaticModel(staticModel);
         ++i;
@@ -509,8 +495,7 @@ void __cdecl CM_LinkStaticModel(cStaticModel_s *staticModel)
     int axis; // [esp+20h] [ebp-4h]
 
     contents = XModelGetContents(staticModel->xmodel);
-    if (!contents)
-        MyAssertHandler(".\\qcommon\\cm_world.cpp", 855, 0, "%s", "contents");
+    iassert( contents );
     mins[0] = cm_world.mins[0];
     mins[1] = cm_world.mins[1];
     maxs[0] = cm_world.maxs[0];
@@ -683,13 +668,10 @@ void __cdecl CM_PointTraceStaticModels_r(
         {
             if (p1[3] >= (double)trace->fraction)
                 return;
-            if (t1 - t2 == 0.0)
-                MyAssertHandler(".\\qcommon\\cm_world.cpp", 1082, 0, "%s", "t1 - t2");
+            iassert( t1 - t2 );
             frac = t1 / (t1 - t2);
-            if (frac < 0.0)
-                MyAssertHandler(".\\qcommon\\cm_world.cpp", 1084, 0, "%s", "frac >= 0");
-            if (frac > 1.0)
-                MyAssertHandler(".\\qcommon\\cm_world.cpp", 1085, 0, "%s", "frac <= 1.f");
+            iassert( frac >= 0 );
+            iassert( frac <= 1.f );
             mid[0] = (*p2 - p1[0]) * frac + p1[0];
             mid[1] = (p2[1] - p1[1]) * frac + p1[1];
             mid[2] = (p2[2] - p1[2]) * frac + p1[2];
@@ -782,13 +764,10 @@ int __cdecl CM_PointTraceStaticModelsComplete_r(
                 v6 = t1;
             nodeIndex = node->tree.child[v6 < 0.0];
         }
-        if (t1 - t2 == 0.0)
-            MyAssertHandler(".\\qcommon\\cm_world.cpp", 1176, 0, "%s", "t1 - t2");
+        iassert( t1 - t2 );
         frac = t1 / (t1 - t2);
-        if (frac < 0.0)
-            MyAssertHandler(".\\qcommon\\cm_world.cpp", 1178, 0, "%s", "frac >= 0");
-        if (frac > 1.0)
-            MyAssertHandler(".\\qcommon\\cm_world.cpp", 1179, 0, "%s", "frac <= 1.f");
+        iassert( frac >= 0 );
+        iassert( frac <= 1.f );
         mid[0] = (*p2 - p1[0]) * frac + p1[0];
         mid[1] = (p2[1] - p1[1]) * frac + p1[1];
         mid[2] = (p2[2] - p1[2]) * frac + p1[2];
@@ -915,8 +894,7 @@ void __cdecl CM_ClipMoveToEntities_r(
                     frac = (v9 + offset) * invDist;
                     side = diff >= 0.0;
                 }
-                if (frac < 0.0)
-                    MyAssertHandler(".\\qcommon\\cm_world.cpp", 1299, 0, "%s", "frac >= 0");
+                iassert( frac >= 0 );
                 v8 = 1.0 - frac;
                 if (v8 < 0.0)
                     v7 = 1.0;
@@ -927,8 +905,7 @@ void __cdecl CM_ClipMoveToEntities_r(
                 mid[2] = (p2[2] - p[2]) * v7 + p[2];
                 mid[3] = (p2[3] - p[3]) * v7 + p[3];
                 CM_ClipMoveToEntities_r(clip, node->tree.child[side], p, mid, trace);
-                if (frac2 > 1.0)
-                    MyAssertHandler(".\\qcommon\\cm_world.cpp", 1309, 0, "%s\n\t(frac2) = %g", "(frac2 <= 1.f)", frac2);
+                iassert( (frac2 <= 1.f) );
                 v6 = frac2 - 0.0;
                 if (v6 < 0.0)
                     v5 = 0.0;
@@ -1049,8 +1026,7 @@ int __cdecl CM_ClipSightTraceToEntities_r(
             frac = (v9 + offset) * invDist;
             side = diff >= 0.0;
         }
-        if (frac < 0.0)
-            MyAssertHandler(".\\qcommon\\cm_world.cpp", 1422, 0, "%s", "frac >= 0");
+        iassert( frac >= 0 );
         v8 = 1.0 - frac;
         v7 = v8 < 0.0 ? 1.0 : frac;
         mid[0] = (*p2 - p[0]) * v7 + p[0];
@@ -1059,8 +1035,7 @@ int __cdecl CM_ClipSightTraceToEntities_r(
         hitNuma = CM_ClipSightTraceToEntities_r(clip, node->tree.child[side], p, mid);
         if (hitNuma)
             break;
-        if (frac2 > 1.0)
-            MyAssertHandler(".\\qcommon\\cm_world.cpp", 1433, 0, "%s\n\t(frac2) = %g", "(frac2 <= 1.f)", frac2);
+        iassert( (frac2 <= 1.f) );
         v6 = frac2 - 0.0;
         if (v6 < 0.0)
             v5 = 0.0;
@@ -1205,10 +1180,8 @@ int __cdecl CM_PointSightTraceToEntities_r(
     if (t1 * t2 < 0.0)
     {
         frac = t1 / (t1 - t2);
-        if (frac < 0.0)
-            MyAssertHandler(".\\qcommon\\cm_world.cpp", 1586, 0, "%s", "frac >= 0");
-        if (frac > 1.0)
-            MyAssertHandler(".\\qcommon\\cm_world.cpp", 1587, 0, "%s", "frac <= 1.f");
+        iassert( frac >= 0 );
+        iassert( frac <= 1.f );
         mid[0] = (*p2 - *p1) * frac + *p1;
         mid[1] = (p2[1] - p1[1]) * frac + p1[1];
         mid[2] = (p2[2] - p1[2]) * frac + p1[2];
@@ -1275,8 +1248,7 @@ void CM_LoadWorld(unsigned __int8 *buf)
     worldTree_s *p_tree; // r31
     void *v4; // r3
 
-    if (!buf)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\qcommon\\cm_world.cpp", 225, 0, "%s", "buf");
+    iassert( buf );
     CM_ClearWorld();
     v2 = buf + 2;
     cm_world.freeHead = *(_WORD *)buf;

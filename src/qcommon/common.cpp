@@ -137,6 +137,7 @@ int logfile;
 int com_numConsoleLines;
 char *com_consoleLines[32];
 
+#define WEAPMEMSOURCE_NONE 0
 int weaponInfoSource;
 
 errorParm_t errorcode;
@@ -192,8 +193,7 @@ void QDECL Com_PrintMessage(int channel, const char* msg, int error)
 #endif
             )
 		{
-			if (channel == 2 || channel == 3 || channel == 4)
-				MyAssertHandler(".\\qcommon\\common.cpp", 625, 0, "%s", "!Con_IsNotifyChannel( channel )");
+			iassert( !Con_IsNotifyChannel( channel ) );
 			CL_ConsolePrint(0, channel, msg, 0, 0, 32 * error);
 		}
 		if (*msg == 94 && msg[1])
@@ -222,8 +222,7 @@ void __cdecl Debug_Frame(int localClientNum)
     int minMsec; // [esp+10h] [ebp-8h]
     int newEvent2; // [esp+14h] [ebp-4h]
 
-    if (!Sys_IsMainThread())
-        MyAssertHandler(".\\qcommon\\common.cpp", 4297, 0, "%s", "Sys_IsMainThread()");
+    iassert( Sys_IsMainThread() );
     oldBgs = bgs;
     bgs = 0;
     IN_Frame();
@@ -237,8 +236,7 @@ void __cdecl Debug_Frame(int localClientNum)
         if (com_maxfps->current.integer > 0 && !com_dedicated->current.integer)
         {
             minMsec = 1000 / com_maxfps->current.integer;
-            if (minMsec < 0)
-                MyAssertHandler(".\\qcommon\\common.cpp", 4319, 0, "%s", "minMsec >= 0");
+            iassert( minMsec >= 0 );
             if (!minMsec)
                 minMsec = 1;
         }
@@ -270,8 +268,7 @@ void __cdecl Debug_Frame(int localClientNum)
         Scr_DrawScript();
         R_EndDebugFrame();
     }
-    if (bgs)
-        MyAssertHandler(".\\qcommon\\common.cpp", 4370, 0, "%s\n\t(bgs) = %p", "(bgs == 0)", bgs);
+    iassert( (bgs == 0) );
     bgs = oldBgs;
 #endif
 }
@@ -557,10 +554,8 @@ void __cdecl Com_SetErrorMessage(char* errorMessage)
     char* translation; // [esp+0h] [ebp-8h]
     const char* title; // [esp+4h] [ebp-4h]
 
-    if (!errorMessage)
-        MyAssertHandler(".\\qcommon\\common.cpp", 977, 0, "%s", "errorMessage");
-    if (!*errorMessage)
-        MyAssertHandler(".\\qcommon\\common.cpp", 978, 0, "%s", "errorMessage[0]");
+    iassert( errorMessage );
+    iassert( errorMessage[0] );
     if (errorcode == ERR_SERVERDISCONNECT || Com_ErrorIsNotice(errorMessage))
         title = "MENU_NOTICE";
     else
@@ -612,8 +607,7 @@ void Com_Error(errorParm_t code, const char* fmt, ...)
     com_errorEntered = 1;
     _vsnprintf(com_errorMessage, 0x1000u, fmt, va);
     com_errorMessage[4095] = 0;
-    if (!com_errorMessage[0])
-        MyAssertHandler(".\\qcommon\\common.cpp", 1343, 0, "%s", "com_errorMessage[0]");
+    iassert( com_errorMessage[0] );
     if (code == ERR_SCRIPT || code == ERR_LOCALIZATION)
     {
         if (!com_fixedConsolePosition)
@@ -719,8 +713,7 @@ void Com_ClearTempMemory()
 
 void __cdecl Com_ParseCommandLine(char* commandLine)
 {
-    if (!commandLine)
-        MyAssertHandler(".\\qcommon\\common.cpp", 1729, 0, "%s", "commandLine");
+    iassert( commandLine );
     com_consoleLines[0] = commandLine;
     com_numConsoleLines = 1;
     while (*commandLine)
@@ -1059,8 +1052,7 @@ void Com_ErrorCleanup()
     unsigned int v5; // [esp+18h] [ebp-100Ch]
     char finalmsg[4100]; // [esp+1Ch] [ebp-1008h] BYREF
 
-    if (!Sys_IsMainThread())
-        MyAssertHandler(".\\qcommon\\common.cpp", 1010, 0, "%s", "Sys_IsMainThread()");
+    iassert( Sys_IsMainThread() );
     LargeLocalReset();
     R_PopRemoteScreenUpdate();
     Com_SyncThreads();
@@ -1175,8 +1167,7 @@ void Com_AddStartupCommands()
 
     for (i = 0; i < com_numConsoleLines; ++i)
     {
-        if (!com_consoleLines[i])
-            MyAssertHandler(".\\qcommon\\common.cpp", 1847, 0, "%s", "com_consoleLines[i]");
+        iassert( com_consoleLines[i] );
         if (*com_consoleLines[i])
         {
             Com_sprintf(localBuffer, 0x401u, "%s\n", com_consoleLines[i]);
@@ -1622,8 +1613,7 @@ void Com_DedicatedModified()
 
     if ((com_dedicated->flags & 0x40) == 0)
     {
-        if ((com_dedicated->flags & 0x20) == 0)
-            MyAssertHandler(".\\qcommon\\common.cpp", 3727, 0, "%s", "com_dedicated->flags & DVAR_LATCH");
+        iassert( com_dedicated->flags & DVAR_LATCH );
         if (com_dedicated->latched.integer != com_dedicated->current.integer)
         {
             com_dedicated = Dvar_RegisterEnum(
@@ -2031,8 +2021,7 @@ void __cdecl Com_AssetLoadUI()
 
 void __cdecl Com_CheckSyncFrame()
 {
-    if (!Sys_IsMainThread())
-        MyAssertHandler(".\\qcommon\\common.cpp", 4195, 0, "%s", "Sys_IsMainThread()");
+    iassert( Sys_IsMainThread() );
     DB_Update();
 }
 
@@ -2174,8 +2163,7 @@ void __cdecl Com_SetWeaponInfoMemory(int source)
             0,
             "%s",
             "(source == WEAPMEMSOURCE_SERVER) || (source == WEAPMEMSOURCE_CLIENT)");
-    if (weaponInfoSource)
-        MyAssertHandler(".\\qcommon\\common.cpp", 4552, 0, "%s", "weaponInfoSource == WEAPMEMSOURCE_NONE");
+    iassert( weaponInfoSource == WEAPMEMSOURCE_NONE );
     weaponInfoSource = source;
 }
 
@@ -2263,8 +2251,7 @@ void __cdecl Com_LocalizedFloatToString(float f, char* buffer, unsigned int maxl
 
 void __cdecl Com_SyncThreads()
 {
-    if (!Sys_IsMainThread())
-        MyAssertHandler(".\\qcommon\\common.cpp", 4655, 0, "%s", "Sys_IsMainThread()");
+    iassert( Sys_IsMainThread() );
     R_SyncRenderThread();
     R_WaitWorkerCmds();
 }

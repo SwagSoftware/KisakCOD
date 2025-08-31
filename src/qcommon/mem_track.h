@@ -1,5 +1,11 @@
 #pragma once
 
+#define MAX_MEM_TRACK 1024
+#define MAX_HUNK_TRACK 0x80000
+#define MAX_HUNKLOW_TRACK 0x10000
+
+#define TRACK_FREE 1
+
 struct meminfo_t // sizeof=0xA0
 {                                       // ...
     int total;                          // ...

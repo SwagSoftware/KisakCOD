@@ -7,6 +7,12 @@
 #include "qcommon.h"
 #include "ent.h"
 
+#define BUTTON_BIT_COUNT 21
+#define MAX_WEAPONS_BITS 7
+#define GENTITYNUM_BITS 10
+
+#define MSG_FIELD_ORIGINY -91
+
 struct msg_t // sizeof=0x28
 {                                       // ...
     int overflowed;                     // ...

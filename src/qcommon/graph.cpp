@@ -13,10 +13,8 @@ void __cdecl GraphFloat_Load(GraphFloat *graph, char *fileName, float scale)
     char *InfoString; // eax
     char loadBuffer[8196]; // [esp+4h] [ebp-2008h] BYREF
 
-    if (!graph)
-        MyAssertHandler(".\\qcommon\\graph.cpp", 79, 0, "%s", "graph");
-    if (!fileName)
-        MyAssertHandler(".\\qcommon\\graph.cpp", 80, 0, "%s", "fileName");
+    iassert( graph );
+    iassert( fileName );
     Com_Memset((unsigned int *)graph, 0, 360);
     InfoString = Com_LoadInfoString(fileName, "graph", "GRAPH_FLOAT_FILE", loadBuffer);
     GraphFloat_ParseBuffer(graph, InfoString, fileName);
@@ -32,12 +30,9 @@ void __cdecl GraphFloat_ParseBuffer(GraphFloat *graph, const char *buffer, char 
     float knots; // [esp+8h] [ebp-8h]
     float knots_4; // [esp+Ch] [ebp-4h]
 
-    if (!graph)
-        MyAssertHandler(".\\qcommon\\graph.cpp", 29, 0, "%s", "graph");
-    if (!buffer)
-        MyAssertHandler(".\\qcommon\\graph.cpp", 30, 0, "%s", "buffer");
-    if (!fileName)
-        MyAssertHandler(".\\qcommon\\graph.cpp", 31, 0, "%s", "fileName");
+    iassert( graph );
+    iassert( buffer );
+    iassert( fileName );
     I_strncpyz(graph->name, fileName, 64);
     Com_BeginParseSession(fileName);
     tokenb = Com_Parse(&buffer);
@@ -66,10 +61,8 @@ void __cdecl GraphFloat_ParseBuffer(GraphFloat *graph, const char *buffer, char 
 
 void __cdecl GraphFloat_CreateDevGui(GraphFloat *graph, const char *devguiPath)
 {
-    if (!graph)
-        MyAssertHandler(".\\qcommon\\graph.cpp", 202, 0, "%s", "graph");
-    if (!devguiPath)
-        MyAssertHandler(".\\qcommon\\graph.cpp", 203, 0, "%s", "devguiPath");
+    iassert( graph );
+    iassert( devguiPath );
     graph->devguiGraph.knotCountMax = 32;
     graph->devguiGraph.knots = graph->knots;
     graph->devguiGraph.knotCount = &graph->knotCount;
@@ -81,10 +74,8 @@ void __cdecl GraphFloat_CreateDevGui(GraphFloat *graph, const char *devguiPath)
 
 void __cdecl GraphFloat_DevGuiCB_Event(const DevGraph *graph, DevEventType event)
 {
-    if (!graph)
-        MyAssertHandler(".\\qcommon\\graph.cpp", 166, 0, "%s", "graph");
-    if (!graph->data)
-        MyAssertHandler(".\\qcommon\\graph.cpp", 167, 0, "%s", "graph->data");
+    iassert( graph );
+    iassert( graph->data );
     if (event == EVENT_SAVE)
         GraphFloat_SaveToFile((const GraphFloat *)graph->data);
 }
@@ -97,13 +88,11 @@ void __cdecl GraphFloat_SaveToFile(const GraphFloat *graph)
     const char *basePath; // [esp+440h] [ebp-8h]
     int knotIndex; // [esp+444h] [ebp-4h]
 
-    if (!graph)
-        MyAssertHandler(".\\qcommon\\graph.cpp", 121, 0, "%s", "graph");
+    iassert( graph );
     fileHandle = FS_FOpenTextFileWrite(graph->name);
     if (fileHandle)
     {
-        if (!graph->knotCount)
-            MyAssertHandler(".\\qcommon\\graph.cpp", 135, 0, "%s", "graph->knotCount");
+        iassert( graph->knotCount );
         knotCount = graph->knotCount;
         Com_sprintf(buffer, 0x400u, "%s\n\n%d\n", "GRAPH_FLOAT_FILE", knotCount);
         FS_Write(buffer, &buffer[strlen(buffer) + 1] - &buffer[1], fileHandle);

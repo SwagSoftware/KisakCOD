@@ -23,8 +23,7 @@ void __cdecl CM_GetPlaneVec4Form(
 
     if (index >= 6)
     {
-        if (!sides)
-            MyAssertHandler(".\\qcommon\\cm_showcollision.cpp", 107, 0, "%s", "sides");
+        iassert( sides );
         plane = sides[index - 6].plane;
         *expandedPlane = plane->normal[0];
         expandedPlane[1] = plane->normal[1];
@@ -33,8 +32,7 @@ void __cdecl CM_GetPlaneVec4Form(
     }
     else
     {
-        if (!axialPlanes)
-            MyAssertHandler(".\\qcommon\\cm_showcollision.cpp", 102, 0, "%s", "axialPlanes");
+        iassert( axialPlanes );
         v5 = (float *)&(*axialPlanes)[4 * index];
         *expandedPlane = *v5;
         expandedPlane[1] = v5[1];
@@ -53,10 +51,8 @@ void __cdecl CM_ShowSingleBrushCollision(
     int sideIndex; // [esp+5038h] [ebp-64h]
     float axialPlanes[6][4]; // [esp+503Ch] [ebp-60h] BYREF
 
-    if (!brush)
-        MyAssertHandler(".\\qcommon\\cm_showcollision.cpp", 403, 0, "%s", "brush");
-    if (!color)
-        MyAssertHandler(".\\qcommon\\cm_showcollision.cpp", 404, 0, "%s", "color");
+    iassert( brush );
+    iassert( color );
     CM_BuildAxialPlanes(brush, &axialPlanes);
     ptCount = CM_ForEachBrushPlaneIntersection(brush, (float(*)[4])&axialPlanes, &brushPts);
     if (ptCount >= 4)
@@ -142,10 +138,8 @@ int __cdecl CM_ForEachBrushPlaneIntersection(
     __int16 sideIndex[4]; // [esp+5Ch] [ebp-10h] BYREF
     const cbrushside_t *sides; // [esp+68h] [ebp-4h]
 
-    if (!brush)
-        MyAssertHandler(".\\qcommon\\cm_showcollision.cpp", 125, 0, "%s", "brush");
-    if (!brushPts)
-        MyAssertHandler(".\\qcommon\\cm_showcollision.cpp", 126, 0, "%s", "brushPts");
+    iassert( brush );
+    iassert( brushPts );
     ptCount = 0;
     plane[0] = expandedPlane[0];
     plane[1] = expandedPlane[1];
@@ -194,10 +188,8 @@ int __cdecl CM_AddSimpleBrushPoint(
     unsigned int sideIndex; // [esp+Ch] [ebp-4h]
     unsigned int sideIndexa; // [esp+Ch] [ebp-4h]
 
-    if (!brush)
-        MyAssertHandler(".\\qcommon\\cm_showcollision.cpp", 67, 0, "%s", "brush");
-    if (!brushPts)
-        MyAssertHandler(".\\qcommon\\cm_showcollision.cpp", 68, 0, "%s", "brushPts");
+    iassert( brush );
+    iassert( brushPts );
     for (sideIndex = 0; sideIndex < 6; ++sideIndex)
     {
         dist = Vec3Dot(&(*axialPlanes)[4 * sideIndex], xyz) - (float)(*axialPlanes)[4 * sideIndex + 3];
@@ -245,12 +237,9 @@ char __cdecl CM_BuildBrushWindingForSide(
     int i; // [esp+3024h] [ebp-14h] BYREF
     float plane[4]; // [esp+3028h] [ebp-10h] BYREF
 
-    if (!winding)
-        MyAssertHandler(".\\qcommon\\cm_showcollision.cpp", 368, 0, "%s", "winding");
-    if (!planeNormal)
-        MyAssertHandler(".\\qcommon\\cm_showcollision.cpp", 369, 0, "%s", "planeNormal");
-    if (!pts)
-        MyAssertHandler(".\\qcommon\\cm_showcollision.cpp", 370, 0, "%s", "pts");
+    iassert( winding );
+    iassert( planeNormal );
+    iassert( pts );
     XyzList = CM_GetXyzList(sideIndex, pts, ptCount, (float (*)[3])xyz, 1024);
     if (XyzList < 3)
         return 0;
@@ -279,10 +268,8 @@ int __cdecl CM_GetXyzList(int sideIndex, const ShowCollisionBrushPt *pts, int pt
     int xyzCount; // [esp+8h] [ebp-8h]
     int ptIndex; // [esp+Ch] [ebp-4h]
 
-    if (!pts)
-        MyAssertHandler(".\\qcommon\\cm_showcollision.cpp", 185, 0, "%s", "pts");
-    if (!xyz)
-        MyAssertHandler(".\\qcommon\\cm_showcollision.cpp", 186, 0, "%s", "xyz");
+    iassert( pts );
+    iassert( xyz );
     xyzCount = 0;
     for (ptIndex = 0; ptIndex < ptCount; ++ptIndex)
     {
@@ -362,8 +349,7 @@ void __cdecl CM_AddExteriorPointToWindingProjected(winding_t *w, float *pt, int 
         }
         indexPrev = index;
     }
-    if (bestIndex < 0)
-        MyAssertHandler(".\\qcommon\\cm_showcollision.cpp", 286, 0, "%s", "bestIndex >= 0");
+    iassert( bestIndex >= 0 );
     if (bestSignedArea < -EQUAL_EPSILON)
     {
         memmove((unsigned __int8 *)w->p[bestIndex + 1], (unsigned __int8 *)w->p[bestIndex], 12 * (w->numpoints - bestIndex));
@@ -426,8 +412,7 @@ void __cdecl CM_AddColinearExteriorPointToWindingProjected(
     }
     if (delta <= 0.0)
     {
-        if (w->p[index1][axis] >= (double)w->p[index0][axis])
-            MyAssertHandler(".\\qcommon\\cm_showcollision.cpp", 257, 0, "%s", "w->p[index0][axis] > w->p[index1][axis]");
+        iassert( w->p[index0][axis] > w->p[index1][axis] );
         if (w->p[index0][axis] >= (double)pt[axis])
         {
             if (w->p[index1][axis] > (double)pt[axis])
@@ -448,8 +433,7 @@ void __cdecl CM_AddColinearExteriorPointToWindingProjected(
     }
     else
     {
-        if (w->p[index1][axis] <= (double)w->p[index0][axis])
-            MyAssertHandler(".\\qcommon\\cm_showcollision.cpp", 249, 0, "%s", "w->p[index0][axis] < w->p[index1][axis]");
+        iassert( w->p[index0][axis] < w->p[index1][axis] );
         if (w->p[index0][axis] <= (double)pt[axis])
         {
             if (w->p[index1][axis] < (double)pt[axis])
@@ -548,8 +532,7 @@ void __cdecl CM_ShowBrushCollision(
     cbrush_t *brush; // [esp+18h] [ebp-8h]
     int colorCounter; // [esp+1Ch] [ebp-4h]
 
-    if (!frustumPlanes)
-        MyAssertHandler(".\\qcommon\\cm_showcollision.cpp", 435, 0, "%s", "frustumPlanes");
+    iassert( frustumPlanes );
     colorCounter = 0;
     for (brushIndex = 0; brushIndex < cm.numBrushes; ++brushIndex)
     {
@@ -570,8 +553,7 @@ void __cdecl CM_GetShowCollisionColor(float *colorFloat, char colorCounter)
     float v3; // [esp+4h] [ebp-8h]
     float v4; // [esp+8h] [ebp-4h]
 
-    if (!colorFloat)
-        MyAssertHandler(".\\qcommon\\cm_showcollision.cpp", 36, 0, "%s", "colorFloat");
+    iassert( colorFloat );
     if ((colorCounter & 1) != 0)
         v4 = 1.0;
     else
@@ -595,8 +577,7 @@ char __cdecl CM_BrushInView(const cbrush_t *brush, cplane_s *frustumPlanes, int 
     int frustumPlaneIndex; // [esp+0h] [ebp-4h]
     int frustumPlaneIndexa; // [esp+0h] [ebp-4h]
 
-    if (!frustumPlanes)
-        MyAssertHandler(".\\qcommon\\cm_showcollision.cpp", 49, 0, "%s", "frustumPlanes");
+    iassert( frustumPlanes );
     for (frustumPlaneIndex = 0; frustumPlaneIndex < frustumPlaneCount; frustumPlaneIndex++)// = frustumPlaneIndexa + 1)
     {
         if ((BoxOnPlaneSide(

@@ -25,8 +25,7 @@ int __cdecl CM_PointLeafnum_r(const float *p, int num)
 
 int __cdecl CM_PointLeafnum(const float *p)
 {
-    if (!cm.numNodes)
-        MyAssertHandler(".\\qcommon\\cm_test.cpp", 37, 0, "%s", "cm.numNodes");
+    iassert( cm.numNodes );
     return CM_PointLeafnum_r(p, 0);
 }
 
@@ -35,10 +34,8 @@ void __cdecl CM_BoxLeafnums_r(leafList_s *ll, int nodenum)
     cNode_t *node; // [esp+0h] [ebp-Ch]
     int s; // [esp+8h] [ebp-4h]
 
-    if (!cm.nodes)
-        MyAssertHandler(".\\qcommon\\cm_test.cpp", 86, 0, "%s", "cm.nodes");
-    if (!ll)
-        MyAssertHandler(".\\qcommon\\cm_test.cpp", 87, 0, "%s", "ll");
+    iassert( cm.nodes );
+    iassert( ll );
     while (nodenum >= 0)
     {
         node = &cm.nodes[nodenum];
@@ -66,8 +63,7 @@ void __cdecl CM_StoreLeafs(leafList_s *ll, int nodenum)
         ll->lastLeaf = leafNum;
     if (ll->count < ll->maxcount)
     {
-        if ((unsigned __int16)leafNum != leafNum)
-            MyAssertHandler(".\\qcommon\\cm_test.cpp", 68, 0, "%s", "static_cast< ushort >( leafNum ) == leafNum");
+        iassert( static_cast< ushort >( leafNum ) == leafNum );
         ll->list[ll->count++] = leafNum;
     }
     else
@@ -101,8 +97,7 @@ int __cdecl CM_PointContents(const float *p, unsigned int model)
     cLeaf_t *leaf; // [esp+0h] [ebp-10h]
     int i; // [esp+Ch] [ebp-4h]
 
-    if (!cm.numNodes)
-        MyAssertHandler(".\\qcommon\\cm_test.cpp", 281, 0, "%s", "cm.numNodes");
+    iassert( cm.numNodes );
     if (model)
         leaf = &CM_ClipHandleToModel(model)->leaf;
     else
@@ -128,8 +123,7 @@ int __cdecl CM_PointContentsLeafBrushNode_r(const float *p, cLeafBrushNode_s *no
     int i; // [esp+14h] [ebp-8h]
     int ia; // [esp+14h] [ebp-8h]
 
-    if (!node)
-        MyAssertHandler(".\\qcommon\\cm_test.cpp", 220, 0, "%s", "node");
+    iassert( node );
     contents = 0;
     while (1)
     {
@@ -151,8 +145,7 @@ int __cdecl CM_PointContentsLeafBrushNode_r(const float *p, cLeafBrushNode_s *no
         }
         side = b->sides;
         ia = b->numsides;
-        if (ia < 0)
-            MyAssertHandler(".\\qcommon\\cm_test.cpp", 244, 0, "%s", "i >= 0");
+        iassert( i >= 0 );
         while (ia)
         {
             if (side->plane->dist < Vec3Dot(p, side->plane->normal))

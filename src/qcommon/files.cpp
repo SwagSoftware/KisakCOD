@@ -21,8 +21,7 @@ char *__cdecl FS_GetMapBaseName(char *mapname)
     int c; // [esp+10h] [ebp-8h]
     signed int len; // [esp+14h] [ebp-4h]
 
-    if (!mapname)
-        MyAssertHandler(".\\qcommon\\files.cpp", 1666, 0, "%s", "mapname");
+    iassert( mapname );
     if (!I_strnicmp(mapname, "maps/mp/", 8))
         mapname += 8;
     v2 = strlen(mapname);
@@ -206,8 +205,7 @@ int __cdecl FS_CompareFFs(char *neededFFs, int len, int dlstring)
         else
         {
             ffNamea = ffName + 1;
-            if (!*ffNamea)
-                MyAssertHandler(".\\qcommon\\files.cpp", 750, 0, "%s", "ffName[0]");
+            iassert( ffName[0] );
             v4 = DB_FileSize(ffNamea, 1);
         }
         fileSize = v4;
@@ -256,8 +254,7 @@ FS_SERVER_COMPARE_RESULT __cdecl FS_CompareWithServerFiles(char *neededFiles, in
     if (iwdCompareResult == NOT_DOWNLOADABLE)
         return (FS_SERVER_COMPARE_RESULT)2;
     neededIWDStrLen = strlen(neededFiles);
-    if (len < neededIWDStrLen)
-        MyAssertHandler(".\\qcommon\\files.cpp", 829, 0, "%s", "len >= neededIWDStrLen");
+    iassert( len >= neededIWDStrLen );
     ffCompareResult = (FS_SERVER_COMPARE_RESULT)FS_CompareFFs(&neededFiles[neededIWDStrLen], len - neededIWDStrLen, dlstring);
     if (ffCompareResult == NOT_DOWNLOADABLE)
         return (FS_SERVER_COMPARE_RESULT)2;
@@ -298,14 +295,10 @@ int __cdecl FS_ServerSetReferencedFiles(
     int i; // [esp+8h] [ebp-4h]
     int ia; // [esp+8h] [ebp-4h]
 
-    if (!fileSums)
-        MyAssertHandler(".\\qcommon\\files.cpp", 1580, 0, "%s", "fileSums");
-    if (!fileNames)
-        MyAssertHandler(".\\qcommon\\files.cpp", 1581, 0, "%s", "fileNames");
-    if (!maxFiles)
-        MyAssertHandler(".\\qcommon\\files.cpp", 1582, 0, "%s", "maxFiles");
-    if (!fs_sums)
-        MyAssertHandler(".\\qcommon\\files.cpp", 1583, 0, "%s", "fs_sums");
+    iassert( fileSums );
+    iassert( fileNames );
+    iassert( maxFiles );
+    iassert( fs_sums );
     Cmd_TokenizeString(fileSums);
     c = Cmd_Argc();
     if (c > maxFiles)
@@ -383,10 +376,8 @@ void __cdecl FS_PureServerSetLoadedIwds(char *iwdSums, char *iwdNames)
     int argIndex; // [esp+1010h] [ebp-1004h]
     const char *s0[1024]; // [esp+1014h] [ebp-1000h] BYREF
 
-    if (!iwdSums)
-        MyAssertHandler(".\\qcommon\\files.cpp", 1506, 0, "%s", "iwdSums");
-    if (!iwdNames)
-        MyAssertHandler(".\\qcommon\\files.cpp", 1507, 0, "%s", "iwdNames");
+    iassert( iwdSums );
+    iassert( iwdNames );
     Cmd_TokenizeString(iwdSums);
     v7 = Cmd_Argc();
     if (v7 > 1024)

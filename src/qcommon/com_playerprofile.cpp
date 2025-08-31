@@ -32,16 +32,11 @@ int __cdecl Com_BuildPlayerProfilePath_Internal(
     int nameLength; // [esp+4h] [ebp-8h]
     int prefixLength; // [esp+8h] [ebp-4h]
 
-    if (!path)
-        MyAssertHandler(".\\qcommon\\com_playerprofile.cpp", 157, 0, "%s", "path");
-    if (pathSize <= 0)
-        MyAssertHandler(".\\qcommon\\com_playerprofile.cpp", 158, 0, "%s\n\t(pathSize) = %i", "(pathSize > 0)", pathSize);
-    if (!playerName)
-        MyAssertHandler(".\\qcommon\\com_playerprofile.cpp", 159, 0, "%s", "playerName");
-    if (!*playerName)
-        MyAssertHandler(".\\qcommon\\com_playerprofile.cpp", 160, 0, "%s", "playerName[0]");
-    if (!format)
-        MyAssertHandler(".\\qcommon\\com_playerprofile.cpp", 161, 0, "%s", "format");
+    iassert( path );
+    iassert( (pathSize > 0) );
+    iassert( playerName );
+    iassert( playerName[0] );
+    iassert( format );
     prefixLength = Com_sprintf(path, pathSize, "profiles/%s/", playerName);
     if (prefixLength < 0 || prefixLength >= pathSize)
         return pathSize;
@@ -76,8 +71,7 @@ int __cdecl Com_BuildPlayerProfilePath_Internal(
 
 bool __cdecl Com_HasPlayerProfile()
 {
-    if (!com_playerProfile)
-        MyAssertHandler(".\\qcommon\\com_playerprofile.cpp", 146, 0, "%s", "com_playerProfile");
+    iassert( com_playerProfile );
     return *(char *)com_playerProfile->current.integer != 0;
 }
 
@@ -87,8 +81,7 @@ int Com_BuildPlayerProfilePath(char *path, int pathSize, const char *format, ...
     va_list va; // [esp+1Ch] [ebp+14h] BYREF
 
     va_start(va, format);
-    if (!com_playerProfile)
-        MyAssertHandler(".\\qcommon\\com_playerprofile.cpp", 204, 0, "%s", "com_playerProfile");
+    iassert( com_playerProfile );
     if (!Com_HasPlayerProfile())
         Com_Error(ERR_FATAL, "Tried to use a player profile before it was set.  This is probably a menu bug.\n");
     return Com_BuildPlayerProfilePath_Internal(path, pathSize, com_playerProfile->current.string, format, va);
@@ -109,8 +102,7 @@ bool __cdecl Com_IsValidPlayerProfileDir(const char *profileName)
     const char **dirs; // [esp+8h] [ebp-8h]
     int dirIndex; // [esp+Ch] [ebp-4h]
 
-    if (!profileName)
-        MyAssertHandler(".\\qcommon\\com_playerprofile.cpp", 29, 0, "%s", "profileName");
+    iassert( profileName );
     if (!*profileName)
         return 0;
     isValid = 0;
@@ -132,12 +124,9 @@ void __cdecl Com_SetPlayerProfile(int localClientNum, char *profileName)
     char configFile[64]; // [esp+0h] [ebp-48h] BYREF
     const char *name; // [esp+44h] [ebp-4h]
 
-    if (!profileName)
-        MyAssertHandler(".\\qcommon\\com_playerprofile.cpp", 53, 0, "%s", "profileName");
-    if (!*profileName)
-        MyAssertHandler(".\\qcommon\\com_playerprofile.cpp", 54, 0, "%s", "profileName[0]");
-    if (!com_playerProfile)
-        MyAssertHandler(".\\qcommon\\com_playerprofile.cpp", 55, 0, "%s", "com_playerProfile");
+    iassert( profileName );
+    iassert( profileName[0] );
+    iassert( com_playerProfile );
     Dvar_SetString((dvar_s *)com_playerProfile, profileName);
     Com_BuildPlayerProfilePath(configFile, 64, "config_mp.cfg");
     Com_ExecStartupConfigs(localClientNum, configFile);
@@ -286,8 +275,7 @@ void __cdecl Com_SetConfigureDvars(int dvarCount, const char (*dvarNames)[32], c
             &(*dvarValues)[32 * dvarIndex],
             DVAR_SOURCE_EXTERNAL);
         dvar = Dvar_FindVar(&(*dvarNames)[32 * dvarIndex]);
-        if (!dvar)
-            MyAssertHandler(".\\qcommon\\common.cpp", 2608, 0, "%s", "dvar");
+        iassert( dvar );
         Dvar_AddFlags(dvar, 1);
     }
 }
@@ -370,10 +358,8 @@ int __cdecl Com_GpuStringCompare(const char *wild, const char *s)
     int delta; // [esp+8h] [ebp-8h]
     char charRef; // [esp+Fh] [ebp-1h]
 
-    if (!wild)
-        MyAssertHandler(".\\qcommon\\common.cpp", 2466, 0, "%s", "wild");
-    if (!s)
-        MyAssertHandler(".\\qcommon\\common.cpp", 2467, 0, "%s", "s");
+    iassert( wild );
+    iassert( s );
     do
     {
         charWild = *wild++;
@@ -422,8 +408,7 @@ BOOL __cdecl Com_DoesGpuStringMatch(const char *find, const char *ref)
                 Com_Error(ERR_FATAL, "configure_mp.csv: \"find\" string is too long");
             continue;
         }
-        if (wildcardLen < 1)
-            MyAssertHandler(".\\qcommon\\common.cpp", 2517, 1, "%s\n\t(wildcardLen) = %i", "(wildcardLen >= 1)", wildcardLen);
+        iassert( (wildcardLen >= 1) );
         if (wildcardTemplate[wildcardLen - 1] != 32)
         {
             wildcardTemplate[wildcardLen] = 32;
@@ -647,10 +632,8 @@ void __cdecl Com_ChangePlayerProfile(int localClientNum, char *profileName)
 {
     char cachedName[68]; // [esp+10h] [ebp-48h] BYREF
 
-    if (!profileName)
-        MyAssertHandler(".\\qcommon\\com_playerprofile.cpp", 76, 0, "%s", "profileName");
-    if (!com_playerProfile)
-        MyAssertHandler(".\\qcommon\\com_playerprofile.cpp", 77, 0, "%s", "com_playerProfile");
+    iassert( profileName );
+    iassert( com_playerProfile );
     if (I_stricmp(profileName, com_playerProfile->current.string))
     {
         I_strncpyz(cachedName, profileName, 64);
