@@ -356,15 +356,13 @@ void __cdecl R_SkinGfxEntityCmd(GfxSceneEntity **data)
     GfxSceneEntity *sceneEnt; // [esp+Ch] [ebp-8h]
     GfxSceneEntity **pSceneEnt; // [esp+10h] [ebp-4h]
 
-    if (!data)
-        MyAssertHandler(".\\r_dobj_skin.cpp", 608, 0, "%s", "data");
+    iassert( data );
     pSceneEnt = data;
     sceneEnt = *data;
     boneMatrix = R_UpdateSceneEntBounds(sceneEnt, &localSceneEnt, &obj, 0);
     if (boneMatrix)
     {
-        if (!localSceneEnt)
-            MyAssertHandler(".\\r_dobj_skin.cpp", 615, 0, "%s", "localSceneEnt");
+        iassert( localSceneEnt );
         R_SkinSceneDObj(sceneEnt, localSceneEnt, obj, boneMatrix, 0);
     }
 }

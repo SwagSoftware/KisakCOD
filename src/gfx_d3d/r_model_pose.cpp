@@ -115,8 +115,7 @@ DObjAnimMat *R_UpdateSceneEntBounds(
                 *pLocalSceneEnt = sceneEnt;
                 obj = localSceneEnt->obj;
                 *pObj = obj;
-                if (!obj)
-                    MyAssertHandler(".\\r_model_pose.cpp", 269, 0, "%s", "obj");
+                iassert( obj );
                 return I_dmaGetDObjSkel(obj);
             }
         }
@@ -129,12 +128,10 @@ DObjAnimMat *R_UpdateSceneEntBounds(
     {
         localSceneEnt = sceneEnt;
         *pLocalSceneEnt = sceneEnt;
-        if (!localSceneEnt->obj)
-            MyAssertHandler(".\\r_model_pose.cpp", 282, 0, "%s", "localSceneEnt->obj");
+        iassert( localSceneEnt->obj );
         obj = localSceneEnt->obj;
         *pObj = obj;
-        if (!obj)
-            MyAssertHandler(".\\r_model_pose.cpp", 285, 0, "%s", "obj");
+        iassert( obj );
         DObjGetSurfaceData(
             obj,
             localSceneEnt->placement.base.origin,
@@ -330,14 +327,12 @@ void __cdecl R_UpdateGfxEntityBoundsCmd(GfxSceneEntity **data)
     GfxSceneEntity *sceneEnt; // [esp+8h] [ebp-8h]
     GfxSceneEntity **pSceneEnt; // [esp+Ch] [ebp-4h]
 
-    if (!data)
-        MyAssertHandler(".\\r_model_pose.cpp", 365, 0, "%s", "data");
+    iassert( data );
     pSceneEnt = data;
     sceneEnt = *data;
     if (R_UpdateSceneEntBounds(sceneEnt, &localSceneEnt, &obj, 0))
     {
-        if (!localSceneEnt)
-            MyAssertHandler(".\\r_model_pose.cpp", 372, 0, "%s", "localSceneEnt");
+        iassert( localSceneEnt );
     }
 }
 

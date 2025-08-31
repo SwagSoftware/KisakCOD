@@ -43,8 +43,7 @@ void __cdecl RB_PixelCost_BuildColorCodeMap(unsigned __int8 (*pixels)[4], int pi
     int codeIndex; // [esp+70h] [ebp-8h]
     int pixelIndex; // [esp+74h] [ebp-4h]
 
-    if (pixelCount != 256)
-        MyAssertHandler(".\\r_pixelcost_load_obj.cpp", 41, 0, "%s\n\t(pixelCount) = %i", "(pixelCount == 256)", pixelCount);
+    iassert( (pixelCount == 256) );
     codeIndex = -1;
     for (pixelIndex = 0; pixelIndex < 256; ++pixelIndex)
     {

@@ -300,8 +300,7 @@ void __cdecl R_DrawTrianglesLit(
                 }
             }
             triCount += tris->tris.triCount;
-            if (prepassPrimState)
-                MyAssertHandler(".\\r_draw_bsp.cpp", 448, 0, "%s", "!prepassPrimState");
+            iassert( !prepassPrimState );
         }
     }
     if (prevTris)
@@ -320,8 +319,7 @@ void __cdecl R_DrawBspTris(GfxCmdBufPrimState *state, const srfTriangles_t *tris
     args.baseIndex = R_SetIndexData(state, (unsigned __int8 *)&rgp.world->indices[tris->baseIndex], triCount);
     R_DrawIndexedPrimitive(state, &args);
     g_frameStatsCur.geoIndexCount += 3 * triCount;
-    if (!g_primStats)
-        MyAssertHandler(".\\r_draw_bsp.cpp", 167, 0, "%s", "g_primStats");
+    iassert( g_primStats );
     g_primStats->dynamicIndexCount += 3 * triCount;
 }
 
@@ -402,8 +400,7 @@ void __cdecl R_DrawPreTessTris(
     args.baseIndex = baseIndex;
     R_DrawIndexedPrimitive(state, &args);
     g_frameStatsCur.geoIndexCount += 3 * triCount;
-    if (!g_primStats)
-        MyAssertHandler(".\\r_draw_bsp.cpp", 190, 0, "%s", "g_primStats");
+    iassert( g_primStats );
     g_primStats->dynamicIndexCount += 3 * triCount;
 }
 

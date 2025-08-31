@@ -36,15 +36,14 @@ int(__cdecl *allowSurf_1[2])(int, void *) = { R_AllowBspSpotLight, R_AllowBspSpo
 
 void __cdecl R_EnumLightDefs(void(__cdecl *func)(GfxLightDef *, void *), void *data)
 {
-    GfxLightDef *header; // [esp+0h] [ebp-8h]
+    GfxLightDef *def; // [esp+0h] [ebp-8h]
     int defIndex; // [esp+4h] [ebp-4h]
 
     for (defIndex = 0; defIndex < lightGlob.defCount; ++defIndex)
     {
-        header = lightGlob.defs[defIndex];
-        if (!header)
-            MyAssertHandler(".\\r_light.cpp", 118, 0, "%s", "header.lightDef");
-        func(header, data);
+        def = lightGlob.defs[defIndex];
+        iassert( def );
+        func(def, data);
     }
 }
 
@@ -55,14 +54,11 @@ GfxLightDef *__cdecl R_RegisterLightDef_LoadObj(const char *name)
     int defIndex; // [esp+4h] [ebp-4h]
     int defIndexa; // [esp+4h] [ebp-4h]
 
-    if (!name)
-        MyAssertHandler(".\\r_light.cpp", 43, 0, "%s", "name");
+    iassert( name );
     for (defIndex = 0; defIndex < lightGlob.defCount; ++defIndex)
     {
-        if (!lightGlob.defs[defIndex])
-            MyAssertHandler(".\\r_light.cpp", 47, 0, "%s", "lightGlob.defs[defIndex]");
-        if (!lightGlob.defs[defIndex]->name)
-            MyAssertHandler(".\\r_light.cpp", 48, 0, "%s", "lightGlob.defs[defIndex]->name");
+        iassert( lightGlob.defs[defIndex] );
+        iassert( lightGlob.defs[defIndex]->name );
         if (!I_stricmp(name, lightGlob.defs[defIndex]->name))
             return lightGlob.defs[defIndex];
     }
@@ -107,8 +103,7 @@ GfxLightDef *__cdecl R_RegisterLightDef_FastFile(const char *name)
 
 void __cdecl R_InitLightDefs()
 {
-    if (lightGlob.defCount)
-        MyAssertHandler(".\\r_light.cpp", 95, 0, "%s", "lightGlob.defCount == 0");
+    iassert( lightGlob.defCount == 0 );
     rgp.dlightDef = R_RegisterLightDef("light_dynamic");
 }
 
@@ -137,14 +132,12 @@ int __cdecl R_GetPointLightPartitions(const GfxLight **visibleLights)
     {
         if (!scene.isAddedLightCulled[lightIndex])
         {
-            if (visibleCount > 32)
-                MyAssertHandler(".\\r_light.cpp", 236, 1, "%s\n\t(visibleCount) = %i", "(visibleCount <= 32)", visibleCount);
+            iassert( (visibleCount <= 32) );
             addedLights[visibleCount++] = &scene.addedLight[lightIndex];
         }
     }
     visibleLimit = r_dlightLimit->current.integer;
-    if (visibleLimit > 4)
-        MyAssertHandler(".\\r_light.cpp", 243, 0, "%s\n\t(visibleLimit) = %i", "(visibleLimit <= 4)", visibleLimit);
+    iassert( (visibleLimit <= 4) );
     if (visibleCount > visibleLimit)
     {
         R_MostImportantLights(addedLights, visibleCount, visibleLimit);
@@ -166,10 +159,8 @@ void __cdecl R_MostImportantLights(const GfxLight **lights, int lightCount, int 
     const GfxLight *swapCache; // [esp+60h] [ebp-4h]
     const GfxLight *swapCachea; // [esp+60h] [ebp-4h]
 
-    if (lightCount <= keepCount)
-        MyAssertHandler(".\\r_light.cpp", 154, 0, "%s", "lightCount > keepCount");
-    if (keepCount < 1)
-        MyAssertHandler(".\\r_light.cpp", 155, 0, "%s", "keepCount >= 1");
+    iassert( lightCount > keepCount );
+    iassert( keepCount >= 1 );
     while (1)
     {
         bot = 0;
@@ -177,8 +168,7 @@ void __cdecl R_MostImportantLights(const GfxLight **lights, int lightCount, int 
         pivot = *lights;
         while (1)
         {
-            if (top < bot)
-                MyAssertHandler(".\\r_light.cpp", 168, 1, "%s", "top >= bot");
+            iassert( top >= bot );
             do
                 ++bot;
             while (bot < top && R_LightImportanceGreaterEqual(lights[bot], pivot));
@@ -193,8 +183,7 @@ void __cdecl R_MostImportantLights(const GfxLight **lights, int lightCount, int 
             lights[bot] = lights[top];
             lights[top] = swapCache;
         }
-        if (bot != top + 1)
-            MyAssertHandler(".\\r_light.cpp", 190, 1, "%s", "bot == top + 1");
+        iassert( bot == top + 1 );
         if (bot == lightCount)
         {
             swapCachea = *lights;
@@ -204,8 +193,7 @@ void __cdecl R_MostImportantLights(const GfxLight **lights, int lightCount, int 
         }
         if (bot == keepCount)
             break;
-        if (lightCount <= bot)
-            MyAssertHandler(".\\r_light.cpp", 206, 1, "%s", "lightCount > bot");
+        iassert( lightCount > bot );
         if (bot >= keepCount)
         {
             lightCount = bot;
@@ -677,8 +665,7 @@ void __cdecl R_GetStaticModelLightSurfs(const GfxLight **visibleLights, int visi
     int smodelIndex; // [esp+8B0h] [ebp-4h]
     //int savedregs; // [esp+8B4h] [ebp+0h] BYREF
 
-    if (!visibleCount)
-        MyAssertHandler(".\\r_light.cpp", 708, 0, "%s", "visibleCount");
+    iassert( visibleCount );
     R_InitBspDrawSurf(&surfData);
     R_InitBspDrawSurf(&shadowSurfData);
     g_staticModelLightCallback.smodelVisData = rgp.world->dpvs.smodelVisData[0];
@@ -722,19 +709,16 @@ void __cdecl R_GetStaticModelLightSurfs(const GfxLight **visibleLights, int visi
             smodelDrawInst = &rgp.world->dpvs.smodelDrawInsts[smodelIndex];
             lod = (lodData[smodelIndex >> 4] >> (2 * (smodelIndex & 0xF))) & 3;
             surfaceCount = XModelGetSurfaces(smodelDrawInst->model, &surfaces, lod);
-            if (!surfaceCount)
-                MyAssertHandler(".\\r_light.cpp", 755, 0, "%s", "surfaceCount");
+            iassert( surfaceCount );
             staticModelId = R_GetStaticModelId(smodelIndex, lod);
             pMaterial = XModelGetSkins(smodelDrawInst->model, lod);
-            if (!pMaterial)
-                MyAssertHandler(".\\r_light.cpp", 762, 0, "%s", "pMaterial");
+            iassert( pMaterial );
             list[0] = staticModelId.objectId;
             surfaceIndex = 0;
             while (surfaceIndex < surfaceCount)
             {
                 material = *pMaterial;
-                if (!material)
-                    MyAssertHandler(".\\r_light.cpp", 775, 0, "%s", "material");
+                iassert( material );
                 if (rgp.sortedMaterials[material->info.drawSurf.fields.materialSortedIndex] != material)
                     MyAssertHandler(
                         ".\\r_light.cpp",
@@ -827,8 +811,7 @@ void __cdecl R_GetSceneEntLightSurfs(const GfxLight **visibleLights, int visible
     const GfxBrushModel *bmodel; // [esp+204h] [ebp-8h]
     GfxDrawSurf *lastDrawSurf; // [esp+208h] [ebp-4h]
 
-    if (visibleCount > 4)
-        MyAssertHandler(".\\r_light.cpp", 875, 0, "%s\n\t(visibleCount) = %i", "(visibleCount <= 4)", visibleCount);
+    iassert( (visibleCount <= 4) );
     for (lightIndex = 0; lightIndex < visibleCount; ++lightIndex)
     {
         light = visibleLights[lightIndex];
@@ -872,8 +855,7 @@ void __cdecl R_GetSceneEntLightSurfs(const GfxLight **visibleLights, int visible
             }
             else if (!R_SpotLightIsAttachedToDobj(sceneEnt->obj))
             {
-                if (light->type != 2)
-                    MyAssertHandler(".\\r_light.cpp", 917, 0, "%s", "light->type == GFX_LIGHT_TYPE_SPOT");
+                iassert( light->type == GFX_LIGHT_TYPE_SPOT );
                 if (R_BoxInPlanes(planes[lightIndex], bounds, bounds + 3)
                     && (frontEndDataOut->gfxEnts[sceneEnt->gfxEntIndex].renderFxFlags & 8) == 0)
                 {
@@ -931,8 +913,7 @@ void __cdecl R_GetSceneEntLightSurfs(const GfxLight **visibleLights, int visible
                         "light->type == GFX_LIGHT_TYPE_OMNI || light->type == GFX_LIGHT_TYPE_SPOT");
                 if (light->type == 3)
                     break;
-                if (light->type != 2)
-                    MyAssertHandler(".\\r_light.cpp", 974, 0, "%s", "light->type == GFX_LIGHT_TYPE_SPOT");
+                iassert( light->type == GFX_LIGHT_TYPE_SPOT );
                 if (R_SphereInPlanes(planes[lightIndex], sceneModel->placement.base.origin, sceneModel->radius))
                     goto LABEL_55;
             LABEL_43:
@@ -1005,8 +986,7 @@ void __cdecl R_GetSceneEntLightSurfs(const GfxLight **visibleLights, int visible
                         "light->type == GFX_LIGHT_TYPE_OMNI || light->type == GFX_LIGHT_TYPE_SPOT");
                 if (light->type == 3)
                     break;
-                if (light->type != 2)
-                    MyAssertHandler(".\\r_light.cpp", 1029, 0, "%s", "light->type == GFX_LIGHT_TYPE_SPOT");
+                iassert( light->type == GFX_LIGHT_TYPE_SPOT );
                 if (R_SphereInPlanes(planes[lightIndex], dynEntPose->pose.origin, dynEntPose->radius))
                     goto LABEL_80;
             LABEL_68:
@@ -1080,8 +1060,7 @@ void __cdecl R_GetSceneEntLightSurfs(const GfxLight **visibleLights, int visible
                         "light->type == GFX_LIGHT_TYPE_OMNI || light->type == GFX_LIGHT_TYPE_SPOT");
                 if (light->type == 3)
                     break;
-                if (light->type != 2)
-                    MyAssertHandler(".\\r_light.cpp", 1084, 0, "%s", "light->type == GFX_LIGHT_TYPE_SPOT");
+                iassert( light->type == GFX_LIGHT_TYPE_SPOT );
                 if (R_BoxInPlanes(planes[lightIndex], bmodel->writable.mins, bmodel->writable.maxs))
                     goto LABEL_105;
             LABEL_93:
@@ -1154,8 +1133,7 @@ void __cdecl R_GetSceneEntLightSurfs(const GfxLight **visibleLights, int visible
                         "light->type == GFX_LIGHT_TYPE_OMNI || light->type == GFX_LIGHT_TYPE_SPOT");
                 if (light->type == 3)
                     break;
-                if (light->type != 2)
-                    MyAssertHandler(".\\r_light.cpp", 1139, 0, "%s", "light->type == GFX_LIGHT_TYPE_SPOT");
+                iassert( light->type == GFX_LIGHT_TYPE_SPOT );
                 if (R_BoxInPlanes(planes[lightIndex], bmodel->writable.mins, bmodel->writable.maxs))
                     goto LABEL_130;
             LABEL_118:
@@ -1223,11 +1201,9 @@ bool __cdecl R_SpotLightIsAttachedToDobj(const DObj_s *obj)
     FxSystem *system; // [esp+0h] [ebp-8h]
     DObj_s *attachedDobj; // [esp+4h] [ebp-4h]
 
-    if (!obj)
-        MyAssertHandler(".\\r_light.cpp", 822, 0, "%s", "obj");
+    iassert( obj );
     system = FX_GetSystem(0);
-    if (!system)
-        MyAssertHandler(".\\r_light.cpp", 825, 0, "%s", "system");
+    iassert( system );
     if (!system->activeSpotLightEffectCount)
         return 0;
     if (system->activeSpotLightBoltDobj == -1)
@@ -1447,20 +1423,16 @@ int __cdecl R_GetTechniqueForLightType(const GfxLight *light, const GfxViewInfo 
 {
     const char *v3; // eax
 
-    if (!viewInfo)
-        MyAssertHandler(".\\r_light.cpp", 1172, 0, "%s", "viewInfo");
+    iassert( viewInfo );
     if (light->type == 2)
     {
         if (!r_spotLightShadows->current.enabled)
             return 21;
-        if (!comWorld.isInUse)
-            MyAssertHandler("c:\\trees\\cod3\\src\\gfx_d3d\\../qcommon/com_bsp_api.h", 23, 0, "%s", "comWorld.isInUse");
+        iassert( comWorld.isInUse );
         if (Com_BitCheckAssert(frontEndDataOut->shadowableLightHasShadowMap, comWorld.primaryLightCount, 32))
         {
-            if (viewInfo->emissiveSpotLightCount != 1)
-                MyAssertHandler(".\\r_light.cpp", 1181, 0, "%s", "viewInfo->emissiveSpotLightCount == 1");
-            if (!comWorld.isInUse)
-                MyAssertHandler("c:\\trees\\cod3\\src\\gfx_d3d\\../qcommon/com_bsp_api.h", 23, 0, "%s", "comWorld.isInUse");
+            iassert( viewInfo->emissiveSpotLightCount == 1 );
+            iassert( comWorld.isInUse );
             if (comWorld.primaryLightCount + 1 != viewInfo->shadowableLightCount)
                 MyAssertHandler(
                     ".\\r_light.cpp",

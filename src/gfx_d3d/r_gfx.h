@@ -8,6 +8,8 @@
 struct Material;
 struct XModel;
 
+#define NULL_VERTEX_BUFFER 0
+
 struct srfTriangles_t // sizeof=0x10
 {                                       // ...
     int vertexLayerData;

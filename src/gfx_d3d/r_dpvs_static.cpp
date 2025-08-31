@@ -216,8 +216,7 @@ void __cdecl R_AddCellStaticSurfacesInFrustum(DpvsStaticCellCmd *dpvsCell)
                 "%s\n\t(planes.count) = %i",
                 "(planes.count <= (10 + 4 + 2))",
                 planes.count);
-        if (!planes.count)
-            MyAssertHandler(".\\r_dpvs_static.cpp", 664, 0, "%s", "planes.count");
+        iassert( planes.count );
         planes.planes = dpvsCell->planes;
         for (planeIndex = 0; planeIndex < planes.count; ++planeIndex)
         {

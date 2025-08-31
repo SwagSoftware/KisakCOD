@@ -17,12 +17,10 @@
 
 void __cdecl R_ReloadWorld()
 {
-    if (s_world.vd.worldVb)
-        MyAssertHandler(".\\r_bsp.cpp", 439, 0, "%s", "s_world.vd.worldVb == NULL_VERTEX_BUFFER");
+    iassert( s_world.vd.worldVb == NULL_VERTEX_BUFFER );
     if (s_world.vertexCount)
         R_CreateWorldVertexBuffer(&s_world.vd.worldVb, (int *)s_world.vd.vertices, 44 * s_world.vertexCount);
-    if (s_world.vld.layerVb)
-        MyAssertHandler(".\\r_bsp.cpp", 443, 0, "%s", "s_world.vld.layerVb == NULL_VERTEX_BUFFER");
+    iassert( s_world.vld.layerVb == NULL_VERTEX_BUFFER );
     if (s_world.vertexLayerDataSize)
         R_CreateWorldVertexBuffer(&s_world.vld.layerVb, (int *)s_world.vld.data, s_world.vertexLayerDataSize);
 }
@@ -31,10 +29,8 @@ void __cdecl R_ShutdownWorld()
 {
     R_ReleaseWorld();
     rgp.world = 0;
-    if (s_world.vd.worldVb)
-        MyAssertHandler(".\\r_bsp.cpp", 391, 0, "%s", "s_world.vd.worldVb == NULL_VERTEX_BUFFER");
-    if (s_world.vld.layerVb)
-        MyAssertHandler(".\\r_bsp.cpp", 392, 0, "%s", "s_world.vld.layerVb == NULL_VERTEX_BUFFER");
+    iassert( s_world.vd.worldVb == NULL_VERTEX_BUFFER );
+    iassert( s_world.vld.layerVb == NULL_VERTEX_BUFFER );
     s_world.vertexCount = 0;
     s_world.vertexLayerDataSize = 0;
 }
@@ -48,22 +44,18 @@ void __cdecl R_ReleaseWorld()
     }
     if (s_world.vertexCount)
     {
-        if (!s_world.vd.worldVb)
-            MyAssertHandler(".\\r_bsp.cpp", 414, 0, "%s", "s_world.vd.worldVb != NULL_VERTEX_BUFFER");
+        iassert( s_world.vd.worldVb != NULL_VERTEX_BUFFER );
         R_FreeStaticVertexBuffer(s_world.vd.worldVb);
         s_world.vd.worldVb = 0;
     }
-    if (s_world.vd.worldVb)
-        MyAssertHandler(".\\r_bsp.cpp", 420, 0, "%s", "s_world.vd.worldVb == NULL_VERTEX_BUFFER");
+    iassert( s_world.vd.worldVb == NULL_VERTEX_BUFFER );
     if (s_world.vertexLayerDataSize)
     {
-        if (!s_world.vld.layerVb)
-            MyAssertHandler(".\\r_bsp.cpp", 424, 0, "%s", "s_world.vld.layerVb != NULL_VERTEX_BUFFER");
+        iassert( s_world.vld.layerVb != NULL_VERTEX_BUFFER );
         R_FreeStaticVertexBuffer(s_world.vld.layerVb);
         s_world.vld.layerVb = 0;
     }
-    if (s_world.vld.layerVb)
-        MyAssertHandler(".\\r_bsp.cpp", 430, 0, "%s", "s_world.vld.layerVb == NULL_VERTEX_BUFFER");
+    iassert( s_world.vld.layerVb == NULL_VERTEX_BUFFER );
 }
 
 void __cdecl R_InterpretSunLightParseParams(SunLightParseParams *sunParse)
@@ -71,10 +63,8 @@ void __cdecl R_InterpretSunLightParseParams(SunLightParseParams *sunParse)
     float *sunColorFromBsp; // [esp+0h] [ebp-8h]
     float *color; // [esp+4h] [ebp-4h]
 
-    if (!rgp.world)
-        MyAssertHandler(".\\r_bsp.cpp", 155, 0, "%s", "rgp.world");
-    if (!rgp.world->sunLight)
-        MyAssertHandler(".\\r_bsp.cpp", 156, 0, "%s", "rgp.world->sunLight");
+    iassert( rgp.world );
+    iassert( rgp.world->sunLight );
 
     R_InterpretSunLightParseParamsIntoLights(sunParse, rgp.world->sunLight);
 
@@ -147,8 +137,7 @@ void __cdecl R_LoadWorld(char *name, int *checksum, int savegame)
     unsigned int reflectionProbeIndex; // [esp+8Ch] [ebp-8h]
     int lightmapIndex; // [esp+90h] [ebp-4h]
 
-    if (rgp.world)
-        MyAssertHandler(".\\r_bsp.cpp", 303, 0, "%s", "!rgp.world");
+    iassert( !rgp.world );
     R_InitLightVisHistory(name);
     if (useFastFile->current.enabled)
         R_SetWorldPtr_FastFile(name);
@@ -228,8 +217,7 @@ void R_InitDynamicData()
 void __cdecl R_SetWorldPtr_LoadObj(const char *name)
 {
     rgp.world = R_LoadWorldInternal(name);
-    if (!rgp.world)
-        MyAssertHandler(".\\r_bsp.cpp", 275, 0, "%s", "rgp.world");
+    iassert( rgp.world );
 }
 
 void __cdecl R_SetWorldPtr_FastFile(const char *name)

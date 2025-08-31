@@ -134,12 +134,9 @@ void __cdecl R_InsertGpuFence()
 
 void RB_AbandonGpuFence()
 {
-    if (!dx.flushGpuQuery)
-        MyAssertHandler(".\\rb_backend.cpp", 2615, 0, "%s", "dx.flushGpuQuery");
-    if (!dx.flushGpuQueryIssued)
-        MyAssertHandler(".\\rb_backend.cpp", 2616, 0, "%s", "dx.flushGpuQueryIssued");
-    if (dx.flushGpuQueryCount != 1)
-        MyAssertHandler(".\\rb_backend.cpp", 2617, 0, "%s", "dx.flushGpuQueryCount == 1");
+    iassert( dx.flushGpuQuery );
+    iassert( dx.flushGpuQueryIssued );
+    iassert( dx.flushGpuQueryCount == 1 );
     dx.flushGpuQueryIssued = 0;
     --dx.flushGpuQueryCount;
 }
@@ -287,8 +284,7 @@ void __cdecl RB_DrawStretchPicFlipST(
     float v12; // [esp+20h] [ebp-8h]
     unsigned __int16 vertCount; // [esp+24h] [ebp-4h]
 
-    if (gfxCmdBufSourceState.viewMode != VIEW_MODE_2D)
-        MyAssertHandler(".\\rb_backend.cpp", 272, 0, "%s", "gfxCmdBufSourceState.viewMode == VIEW_MODE_2D");
+    iassert( gfxCmdBufSourceState.viewMode == VIEW_MODE_2D );
     RB_SetTessTechnique(material, TECHNIQUE_UNLIT);
     R_TrackPrims(&gfxCmdBufState, statsTarget);
     RB_CheckTessOverflow(4, 6);
@@ -371,14 +367,10 @@ void __cdecl RB_SplitScreenTexCoords(float x, float y, float w, float h, float *
     float wa; // [esp+18h] [ebp+10h]
     float ha; // [esp+1Ch] [ebp+14h]
 
-    if (!s0)
-        MyAssertHandler(".\\rb_backend.cpp", 367, 0, "%s", "s0");
-    if (!s1)
-        MyAssertHandler(".\\rb_backend.cpp", 368, 0, "%s", "s1");
-    if (!t0)
-        MyAssertHandler(".\\rb_backend.cpp", 369, 0, "%s", "t0");
-    if (!t1)
-        MyAssertHandler(".\\rb_backend.cpp", 370, 0, "%s", "t1");
+    iassert( s0 );
+    iassert( s1 );
+    iassert( t0 );
+    iassert( t1 );
     screenWidth = (float)gfxCmdBufSourceState.renderTargetWidth;
     screenHeight = (float)gfxCmdBufSourceState.renderTargetHeight;
     xa = x / screenWidth;
@@ -401,8 +393,7 @@ void __cdecl R_Resolve(GfxCmdBufContext context, GfxImage *image)
     int hr; // [esp+4h] [ebp-8h]
     IDirect3DSurface9 *imageSurface; // [esp+8h] [ebp-4h]
 
-    if (!image)
-        MyAssertHandler(".\\rb_backend.cpp", 660, 0, "%s", "image");
+    iassert( image );
     if (image->width != gfxRenderTargets[context.state->renderTargetId].width)
     {
         v2 = va("%s,%i", image->name, context.state->renderTargetId);
@@ -425,11 +416,9 @@ void __cdecl R_Resolve(GfxCmdBufContext context, GfxImage *image)
             "image->height == gfxRenderTargets[context.state->renderTargetId].height",
             v3);
     }
-    if (image == gfxRenderTargets[context.state->renderTargetId].image)
-        MyAssertHandler(".\\rb_backend.cpp", 667, 0, "%s", "image != gfxRenderTargets[context.state->renderTargetId].image");
+    iassert( image != gfxRenderTargets[context.state->renderTargetId].image );
     imageSurface = Image_GetSurface(image);
-    if (!imageSurface)
-        MyAssertHandler(".\\rb_backend.cpp", 670, 0, "%s", "imageSurface");
+    iassert( imageSurface );
     do
     {
         if (r_logFile && r_logFile->current.integer)
@@ -518,8 +507,7 @@ void __cdecl RB_StretchPicRotateXYCmd(GfxRenderCommandExecState *execState)
     float halfHeight; // [esp+74h] [ebp-4h]
 
     cmd = (const GfxCmdStretchPicRotateXY *)execState->cmd;
-    if (gfxCmdBufSourceState.viewMode != VIEW_MODE_2D)
-        MyAssertHandler(".\\rb_backend.cpp", 771, 0, "%s", "gfxCmdBufSourceState.viewMode == VIEW_MODE_2D");
+    iassert( gfxCmdBufSourceState.viewMode == VIEW_MODE_2D );
     RB_SetTessTechnique(cmd->material, TECHNIQUE_UNLIT);
     R_TrackPrims(&gfxCmdBufState, GFX_PRIM_STATS_HUD);
     RB_CheckTessOverflow(4, 6);
@@ -585,8 +573,7 @@ void __cdecl RB_StretchPicRotateSTCmd(GfxRenderCommandExecState *execState)
     float texT_12; // [esp+74h] [ebp-4h]
 
     cmd = (const GfxCmdStretchPicRotateST *)execState->cmd;
-    if (gfxCmdBufSourceState.viewMode != VIEW_MODE_2D)
-        MyAssertHandler(".\\rb_backend.cpp", 823, 0, "%s", "gfxCmdBufSourceState.viewMode == VIEW_MODE_2D");
+    iassert( gfxCmdBufSourceState.viewMode == VIEW_MODE_2D );
     RB_SetTessTechnique(cmd->material, TECHNIQUE_UNLIT);
     R_TrackPrims(&gfxCmdBufState, GFX_PRIM_STATS_HUD);
     vertCount = tess.vertexCount;
@@ -633,8 +620,7 @@ void __cdecl RB_DrawQuadPicCmd(GfxRenderCommandExecState *execState)
     const GfxCmdDrawQuadPic *cmd; // [esp+20h] [ebp-4h]
 
     cmd = (const GfxCmdDrawQuadPic *)execState->cmd;
-    if (gfxCmdBufSourceState.viewMode != VIEW_MODE_2D)
-        MyAssertHandler(".\\rb_backend.cpp", 875, 0, "%s", "gfxCmdBufSourceState.viewMode == VIEW_MODE_2D");
+    iassert( gfxCmdBufSourceState.viewMode == VIEW_MODE_2D );
     RB_SetTessTechnique(cmd->material, TECHNIQUE_UNLIT);
     R_TrackPrims(&gfxCmdBufState, GFX_PRIM_STATS_HUD);
     RB_CheckTessOverflow(4, 6);
@@ -899,12 +885,9 @@ void __cdecl RB_SetGammaRamp(const GfxGammaRamp *gammaTable)
     int colorIndex; // [esp+0h] [ebp-60Ch]
     _D3DGAMMARAMP d3dGammaRamp; // [esp+4h] [ebp-608h] BYREF
 
-    if (!gammaTable)
-        MyAssertHandler(".\\rb_backend.cpp", 1213, 0, "%s", "gammaTable != NULL");
-    if (!vidConfig.deviceSupportsGamma)
-        MyAssertHandler(".\\rb_backend.cpp", 1214, 0, "%s", "vidConfig.deviceSupportsGamma == true");
-    if (!dx.device)
-        MyAssertHandler(".\\rb_backend.cpp", 1215, 0, "%s", "dx.device != NULL");
+    iassert( gammaTable != NULL );
+    iassert( vidConfig.deviceSupportsGamma == true );
+    iassert( dx.device != NULL );
     for (colorIndex = 0; colorIndex < 256; ++colorIndex)
     {
         d3dGammaRamp.red[colorIndex] = gammaTable->entries[colorIndex];
@@ -968,8 +951,7 @@ void __cdecl RB_BlendSavedScreenBlurredCmd(GfxRenderCommandExecState *execState)
     float alpha; // [esp+6Ch] [ebp-4h]
 
     cmd = (const GfxCmdBlendSavedScreenBlurred *)execState->cmd;
-    if (*((int *)execState->cmd + 1) <= 0)
-        MyAssertHandler(".\\rb_backend.cpp", 1279, 0, "%s", "cmd->fadeMsec > 0");
+    iassert( cmd->fadeMsec > 0 );
     if (cmd->screenTimerId >= 4u)
         MyAssertHandler(
             ".\\rb_backend.cpp",
@@ -980,8 +962,7 @@ void __cdecl RB_BlendSavedScreenBlurredCmd(GfxRenderCommandExecState *execState)
             4);
     if (tess.indexCount)
         RB_EndTessSurface();
-    if (gfxCmdBufSourceState.viewMode != VIEW_MODE_2D)
-        MyAssertHandler(".\\rb_backend.cpp", 1283, 0, "%s", "gfxCmdBufSourceState.viewMode == VIEW_MODE_2D");
+    iassert( gfxCmdBufSourceState.viewMode == VIEW_MODE_2D );
     frameTime = gfxCmdBufSourceState.sceneDef.time - rgp.savedScreenTimes[cmd->screenTimerId];
     if (frameTime >= 0 && frameTime < cmd->fadeMsec)
     {
@@ -1032,8 +1013,7 @@ void __cdecl RB_BlendSavedScreenFlashedCmd(GfxRenderCommandExecState *execState)
     cmd = (const GfxCmdBlendSavedScreenFlashed *)execState->cmd;
     if (tess.indexCount)
         RB_EndTessSurface();
-    if (gfxCmdBufSourceState.viewMode != VIEW_MODE_2D)
-        MyAssertHandler(".\\rb_backend.cpp", 1316, 0, "%s", "gfxCmdBufSourceState.viewMode == VIEW_MODE_2D");
+    iassert( gfxCmdBufSourceState.viewMode == VIEW_MODE_2D );
     screenWidth = (double)gfxCmdBufSourceState.renderTargetWidth * cmd->ds;
     screenHeight = (double)gfxCmdBufSourceState.renderTargetHeight * cmd->dt;
     R_SetCodeImageTexture(&gfxCmdBufSourceState, 9u, gfxRenderTargets[0].image);
@@ -1089,8 +1069,7 @@ void __cdecl RB_DrawPoints2D(const GfxCmdDrawPoints *cmd)
     int pointIndex; // [esp+44h] [ebp-8h]
     const GfxPointVertex *v; // [esp+48h] [ebp-4h]
 
-    if (gfxCmdBufSourceState.viewMode != VIEW_MODE_2D)
-        MyAssertHandler(".\\rb_backend.cpp", 1338, 0, "%s", "gfxCmdBufSourceState.viewMode == VIEW_MODE_2D");
+    iassert( gfxCmdBufSourceState.viewMode == VIEW_MODE_2D );
     RB_SetTessTechnique(rgp.whiteMaterial, TECHNIQUE_UNLIT);
     R_TrackPrims(&gfxCmdBufState, GFX_PRIM_STATS_DEBUG);
     size = (double)cmd->size * 0.5;
@@ -1217,10 +1196,8 @@ void __cdecl RB_DrawLines2D(int count, int width, const GfxPointVertex *verts)
     int lineIndex; // [esp+40h] [ebp-Ch]
     const GfxPointVertex *v[2]; // [esp+44h] [ebp-8h]
 
-    if (count <= 0)
-        MyAssertHandler(".\\rb_backend.cpp", 1445, 0, "%s\n\t(count) = %i", "(count > 0)", count);
-    if (gfxCmdBufSourceState.viewMode != VIEW_MODE_2D)
-        MyAssertHandler(".\\rb_backend.cpp", 1447, 0, "%s", "gfxCmdBufSourceState.viewMode == VIEW_MODE_2D");
+    iassert( (count > 0) );
+    iassert( gfxCmdBufSourceState.viewMode == VIEW_MODE_2D );
     RB_SetTessTechnique(rgp.whiteMaterial, TECHNIQUE_UNLIT);
     R_TrackPrims(&gfxCmdBufState, GFX_PRIM_STATS_DEBUG);
     for (lineIndex = 0; lineIndex < count; ++lineIndex)
@@ -1649,10 +1626,8 @@ void __cdecl DrawText2D(
     float xa; // [esp+1FCh] [ebp+Ch]
     float ya; // [esp+200h] [ebp+10h]
 
-    if (!text)
-        MyAssertHandler(".\\rb_backend.cpp", 2130, 0, "%s", "text");
-    if (!font)
-        MyAssertHandler(".\\rb_backend.cpp", 2131, 0, "%s", "font");
+    iassert( text );
+    iassert( font );
     dropShadowColor.packed = 0;
     dropShadowColor.array[3] = color.array[3];
     randSeed = 1;
@@ -1660,8 +1635,7 @@ void __cdecl DrawText2D(
     monospaceWidth = GetMonospaceWidth(font, renderFlags);
     glowMaterial = 0;
     material = Material_FromHandle(font->material);
-    if (!material)
-        MyAssertHandler(".\\rb_backend.cpp", 2141, 0, "%s", "material");
+    iassert( material );
     if ((renderFlags & 0x40) != 0 && (!fxMaterial || !fxMaterial->techniqueSet))
         MyAssertHandler(
             ".\\rb_backend.cpp",
@@ -1694,16 +1668,13 @@ void __cdecl DrawText2D(
         if ((renderFlags & 0x10) != 0)
         {
             glowMaterial = Material_FromHandle(font->glowMaterial);
-            if (!glowMaterial)
-                MyAssertHandler(".\\rb_backend.cpp", 2154, 0, "%s", "glowMaterial");
+            iassert( glowMaterial );
             ++passCount;
         }
         if ((renderFlags & 0x40) != 0)
         {
-            if ((renderFlags & 0x10) != 0 && !fxMaterialGlow)
-                MyAssertHandler(".\\rb_backend.cpp", 2161, 0, "%s", "fxMaterialGlow");
-            if (!fxMaterial)
-                MyAssertHandler(".\\rb_backend.cpp", 2162, 0, "%s", "fxMaterial");
+            iassert( fxMaterialGlow );
+            iassert( fxMaterial );
         }
         startX = x - xScale * 0.5;
         startY = y - yScale * 0.5;
@@ -1850,8 +1821,7 @@ void __cdecl DrawText2D(
                                         xRot = xa + xAdj + resizeOffsX + (float)MY_OFFSETS_0[offIdx][0] * 2.0 * xScale;
                                         yRot = ya + yAdj + resizeOffsY + (float)MY_OFFSETS_0[offIdx][1] * 2.0 * yScale;
                                         RotateXY(cosAngle, sinAngle, startX, startY, xRot, yRot, &xRot, &yRot);
-                                        if (!glowMaterial)
-                                            MyAssertHandler(".\\rb_backend.cpp", 2385, 0, "%s", "glowMaterial");
+                                        iassert( glowMaterial );
                                         if (drawExtraFxChar)
                                         {
                                             v25 = (double)glyph->pixelHeight * yScale;
@@ -2056,8 +2026,7 @@ void __cdecl RB_DrawStretchPicRotate(
     int indexCount; // [esp+3Ch] [ebp-8h]
     unsigned __int16 vertCount; // [esp+40h] [ebp-4h]
 
-    if (gfxCmdBufSourceState.viewMode != VIEW_MODE_2D)
-        MyAssertHandler(".\\rb_backend.cpp", 305, 0, "%s", "gfxCmdBufSourceState.viewMode == VIEW_MODE_2D");
+    iassert( gfxCmdBufSourceState.viewMode == VIEW_MODE_2D );
     RB_SetTessTechnique(material, TECHNIQUE_UNLIT);
     R_TrackPrims(&gfxCmdBufState, statsTarget);
     RB_CheckTessOverflow(4, 6);
@@ -2105,8 +2074,7 @@ double __cdecl RB_DrawHudIcon(
     float w; // [esp+4Ch] [ebp-4h]
     float ya; // [esp+60h] [ebp+10h]
 
-    if (!text)
-        MyAssertHandler(".\\rb_backend.cpp", 1783, 0, "%s", "text");
+    iassert( text );
     if (*text == 1)
     {
         s0 = 0.0;
@@ -2114,18 +2082,15 @@ double __cdecl RB_DrawHudIcon(
     }
     else
     {
-        if (*text != 2)
-            MyAssertHandler(".\\rb_backend.cpp", 1792, 0, "text[0] == CONTXTCMD_TYPE_HUDICON_FLIP\n\t%i, %i", *text, 2);
+        iassert( text[0] == CONTXTCMD_TYPE_HUDICON_FLIP );
         s0 = 1.0;
         s1 = 0.0;
     }
     w = (double)((font->pixelHeight * (text[1] - 16) + 16) / 32) * xScale;
     h = (double)((font->pixelHeight * (text[2] - 16) + 16) / 32) * yScale;
     ya = y - ((double)font->pixelHeight * yScale + h) * 0.5;
-    if (w <= 0.0)
-        MyAssertHandler(".\\rb_backend.cpp", 1801, 0, "%s", "w > 0");
-    if (h <= 0.0)
-        MyAssertHandler(".\\rb_backend.cpp", 1802, 0, "%s", "h > 0");
+    iassert( w > 0 );
+    iassert( h > 0 );
     if (!IsValidMaterialHandle(*(Material *const *)(text + 3)))
         return 0.0;
     v9 = Material_FromHandle(*(Material **)(text + 3));
@@ -2151,8 +2116,7 @@ void __cdecl RB_DrawCursor(
     const Glyph *cursorGlyph; // [esp+58h] [ebp-8h]
     unsigned int newColor; // [esp+5Ch] [ebp-4h]
 
-    if (!font)
-        MyAssertHandler(".\\rb_backend.cpp", 1886, 0, "%s", "font");
+    iassert( font );
     if (((CL_ScaledMilliseconds() / 256) & 1) == 0)
     {
         cursorGlyph = R_GetCharacterGlyph(font, cursor);
@@ -2252,8 +2216,7 @@ char __cdecl SetupPulseFXVars(
         decaying = 0;
         decayTimeElapsed = 0;
         timeElapsed = gfxCmdBufSourceState.sceneDef.time - fxBirthTime;
-        if (gfxCmdBufSourceState.sceneDef.time - fxBirthTime < 0)
-            MyAssertHandler(".\\rb_backend.cpp", 1968, 0, "%s", "timeElapsed >= 0");
+        iassert( timeElapsed >= 0 );
         strLength = SEH_PrintStrlen(text);
         if (strLength > maxLength)
             strLength = maxLength;
@@ -2261,8 +2224,7 @@ char __cdecl SetupPulseFXVars(
         {
             if (timeElapsed < fxLetterTime * strLength)
             {
-                if (!fxLetterTime)
-                    MyAssertHandler(".\\rb_backend.cpp", 2003, 0, "%s", "fxLetterTime");
+                iassert( fxLetterTime );
                 maxLengtha = timeElapsed / fxLetterTime;
                 drawRandCharAtEnd = 1;
                 timeRemainder = timeElapsed % fxLetterTime;
@@ -2416,13 +2378,10 @@ void __cdecl RB_DrawTextInSpace(
     float dy[3]; // [esp+50h] [ebp-10h] BYREF
     unsigned int newColor; // [esp+5Ch] [ebp-4h]
 
-    if (!text)
-        MyAssertHandler(".\\rb_backend.cpp", 2464, 0, "%s", "text");
-    if (!font)
-        MyAssertHandler(".\\rb_backend.cpp", 2465, 0, "%s", "font");
+    iassert( text );
+    iassert( font );
     material = Material_FromHandle(font->material);
-    if (!material)
-        MyAssertHandler(".\\rb_backend.cpp", 2468, 0, "%s", "material");
+    iassert( material );
     if (tess.indexCount)
         RB_EndTessSurface();
     R_Set3D(&gfxCmdBufSourceState);
@@ -2431,8 +2390,7 @@ void __cdecl RB_DrawTextInSpace(
     while (*text)
     {
         letter = SEH_ReadCharFromString(&text, 0);
-        if (!text)
-            MyAssertHandler(".\\rb_backend.cpp", 2478, 0, "%s", "text");
+        iassert( text );
         glyph = R_GetCharacterGlyph(font, letter);
         newColor = LongNoSwap(color);
         scale = (float)glyph->x0;
@@ -2635,10 +2593,8 @@ void __cdecl RB_EndFrame(char drawType)
             RB_LogPrint("***************** RB_SwapBuffers *****************\n\n\n");
         RB_SwapBuffers();
         RB_UpdateLogging();
-        if (!r_gamma)
-            MyAssertHandler(".\\rb_backend.cpp", 2866, 0, "%s", "r_gamma");
-        if (!r_ignoreHwGamma)
-            MyAssertHandler(".\\rb_backend.cpp", 2867, 0, "%s", "r_ignoreHwGamma");
+        iassert( r_gamma );
+        iassert( r_ignoreHwGamma );
         if (r_gamma->modified || r_ignoreHwGamma->modified)
         {
             Dvar_ClearModified((dvar_s*)r_gamma);
@@ -2851,10 +2807,8 @@ void __cdecl RB_CallExecuteRenderCommands()
                 "%s\n\t(tess.indexCount) = %i",
                 "(!tess.indexCount)",
                 tess.indexCount);
-        if (!dx.device)
-            MyAssertHandler(".\\rb_backend.cpp", 3105, 0, "%s", "dx.device");
-        if (!dx.inScene)
-            MyAssertHandler(".\\rb_backend.cpp", 3106, 0, "%s", "dx.inScene");
+        iassert( dx.device );
+        iassert( dx.inScene );
         do
         {
             if (r_logFile && r_logFile->current.integer)
@@ -3025,8 +2979,7 @@ void __cdecl RB_RenderCommandFrame(const GfxBackEndData *data)
         RB_BeginFrame(data);
         RB_Draw3D();
         RB_CallExecuteRenderCommands();
-        if (backEndData != data)
-            MyAssertHandler(".\\rb_backend.cpp", 3181, 0, "%s", "backEndData == data");
+        iassert( backEndData == data );
         drawType = backEndData->drawType;
         backEndData = 0;
     }

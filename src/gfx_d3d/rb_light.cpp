@@ -135,8 +135,7 @@ int __cdecl R_SortedHistoryEntry(int x, int y, int z, GfxSortedHistoryAdd addMod
         else
             top = mid - 1;
     }
-    if (bot != top + 1)
-        MyAssertHandler(".\\rb_light.cpp", 210, 0, "%s", "bot == top + 1");
+    iassert( bot == top + 1 );
     if (addMode && R_AddSortedHistoryEntry(x, y, z, bot))
         return bot;
     else

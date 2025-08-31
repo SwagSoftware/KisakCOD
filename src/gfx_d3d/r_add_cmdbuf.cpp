@@ -37,8 +37,7 @@ int __cdecl R_AllocDrawSurf(
 {
     unsigned int primDrawSurfPos; // [esp+10h] [ebp-4h]
 
-    if (size >= 0x10000)
-        MyAssertHandler(".\\r_add_cmdbuf.cpp", 51, 0, "%s\n\t(size) = %i", "(size < (128 * 512))", size);
+    iassert( (size < (128 * 512)) );
     if (delayedCmdBuf->drawSurfKey.packed != drawSurf.packed)
         R_EndCmdBuf(delayedCmdBuf);
     if (delayedCmdBuf->primDrawSurfSize > size)
@@ -85,8 +84,7 @@ int __cdecl R_AllocDrawSurf(
 
 void __cdecl R_WritePrimDrawSurfInt(GfxDelayedCmdBuf *delayedCmdBuf, unsigned int value)
 {
-    if (!delayedCmdBuf->primDrawSurfSize)
-        MyAssertHandler(".\\r_add_cmdbuf.cpp", 144, 0, "%s", "delayedCmdBuf->primDrawSurfSize");
+    iassert( delayedCmdBuf->primDrawSurfSize );
     if (delayedCmdBuf->primDrawSurfPos < 0)
         MyAssertHandler(
             ".\\r_add_cmdbuf.cpp",
@@ -109,8 +107,7 @@ void __cdecl R_WritePrimDrawSurfData(GfxDelayedCmdBuf *delayedCmdBuf, unsigned _
             "%s\n\t(delayedCmdBuf->primDrawSurfSize) = %i",
             "(delayedCmdBuf->primDrawSurfSize >= count)",
             delayedCmdBuf->primDrawSurfSize);
-    if (delayedCmdBuf->primDrawSurfPos < 0)
-        MyAssertHandler(".\\r_add_cmdbuf.cpp", 163, 0, "%s", "delayedCmdBuf->primDrawSurfPos >= 0");
+    iassert( delayedCmdBuf->primDrawSurfPos >= 0 );
     delayedCmdBuf->primDrawSurfSize -= count;
     memcpy((unsigned __int8 *)&frontEndDataOut->primDrawSurfsBuf[delayedCmdBuf->primDrawSurfPos], data, 4 * count);
     delayedCmdBuf->primDrawSurfPos += count;

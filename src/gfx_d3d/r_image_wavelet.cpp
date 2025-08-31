@@ -14607,10 +14607,8 @@ void __cdecl Wavelet_DecompressLevel(unsigned __int8 *src, unsigned __int8 *dst,
 
 void __cdecl Wavelet_ConsumeBits(unsigned __int16 bitCount, WaveletDecode *decode)
 {
-    if (!bitCount || bitCount > 0x10u)
-        MyAssertHandler(".\\r_image_wavelet.cpp", 31, 0, "%s", "bitCount > 0 && bitCount <= 16");
-    if (decode->bit >= 8u)
-        MyAssertHandler(".\\r_image_wavelet.cpp", 32, 0, "%s", "decode->bit < 8");
+    iassert( bitCount > 0 && bitCount <= 16 );
+    iassert( decode->bit < 8 );
     decode->value >>= bitCount;
     decode->value |= ((*((unsigned __int8 *)decode->data + 3) << 24)
         | (*((unsigned __int8 *)decode->data + 2) << 16)
@@ -14631,10 +14629,8 @@ int __cdecl Wavelet_DecodeValue(
     int index; // [esp+0h] [ebp-8h]
     int value; // [esp+4h] [ebp-4h]
 
-    if ((1 << bitCount) - 1 < 2 * bias - 1)
-        MyAssertHandler(".\\r_image_wavelet.cpp", 48, 0, "%s", "(1 << bitCount) - 1 >= bias * 2 - 1");
-    if ((1 << (bitCount - 1)) - 1 >= 2 * bias - 1)
-        MyAssertHandler(".\\r_image_wavelet.cpp", 49, 0, "%s", "(1 << (bitCount - 1)) - 1 < bias * 2 - 1");
+    iassert( (1 << bitCount) - 1 >= bias * 2 - 1 );
+    iassert( (1 << (bitCount - 1)) - 1 < bias * 2 - 1 );
     index = decode->value & 0xFFF;
     Wavelet_ConsumeBits(decodeTable[index].bits, decode);
     value = decodeTable[index].value;

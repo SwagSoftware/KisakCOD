@@ -223,8 +223,7 @@ int __cdecl R_ProcessWorkerCmd(LONG type)
     workerCmds = &g_workerCmds[type];
     dataSize = workerCmds->dataSize;
     bufCount = workerCmds->bufCount;
-    if (workerCmds->bufSize % dataSize)
-        MyAssertHandler(".\\r_workercmds.cpp", 661, 0, "%s", "!(workerCmds->bufSize % dataSize)");
+    iassert( !(workerCmds->bufSize % dataSize) );
     while (InterlockedExchangeAdd((LONG*)&workerCmds->outSize, -1) <= 0)
     {
         if (InterlockedExchangeAdd((LONG*)&workerCmds->outSize, 1) < 0)
@@ -258,8 +257,7 @@ int __cdecl R_ProcessWorkerCmd(LONG type)
     }
     else
     {
-        if (g_cmdExecFailed[type])
-            MyAssertHandler(".\\r_workercmds.cpp", 711, 0, "%s", "!g_cmdExecFailed[type]");
+        iassert( !g_cmdExecFailed[type] );
         if (InterlockedExchangeAdd((LONG*)&workerCmds->outSize, -9) < 9)
         {
             InterlockedExchangeAdd((LONG*)&workerCmds->outSize, 9);
@@ -314,8 +312,7 @@ int __cdecl R_ProcessWorkerCmd(int type)
     workerCmds = &g_workerCmds[type];
     dataSize = workerCmds->dataSize;
     bufCount = workerCmds->bufCount;
-    if (workerCmds->bufSize % dataSize)
-        MyAssertHandler(".\\r_workercmds.cpp", 661, 0, "%s", "!(workerCmds->bufSize % dataSize)");
+    iassert( !(workerCmds->bufSize % dataSize) );
     while (InterlockedExchangeAdd((LONG*)&workerCmds->outSize, -1) <= 0)
     {
         if (InterlockedExchangeAdd((LONG*)&workerCmds->outSize, 1) < 0)
@@ -349,8 +346,7 @@ int __cdecl R_ProcessWorkerCmd(int type)
     }
     else
     {
-        if (g_cmdExecFailed[type])
-            MyAssertHandler(".\\r_workercmds.cpp", 711, 0, "%s", "!g_cmdExecFailed[type]");
+        iassert( !g_cmdExecFailed[type] );
         if (InterlockedExchangeAdd((LONG*)&workerCmds->outSize, -9) < 9)
         {
             InterlockedExchangeAdd((LONG*)&workerCmds->outSize, 9);
@@ -460,8 +456,7 @@ void R_InitWorkerThreads()
 {
     unsigned int workerThreadIndexa; // [esp+0h] [ebp-4h]
 
-    if (!Sys_IsMainThread())
-        MyAssertHandler(".\\r_workercmds.cpp", 970, 0, "%s", "Sys_IsMainThread()");
+    iassert( Sys_IsMainThread() );
     if (sys_smp_allowed->current.enabled)
     {
         R_InitWorkerCmds();
@@ -560,8 +555,7 @@ int R_InitWorkerCmdsPos()
         workerCmds->syncedEndPos = 0;
         workerCmds->inSize = 0;
         workerCmds->outSize = 0;
-        if (!workerCmds->dataSize)
-            MyAssertHandler(".\\r_workercmds.cpp", 367, 0, "%s", "workerCmds->dataSize");
+        iassert( workerCmds->dataSize );
         workerCmds->bufCount = workerCmds->bufSize / workerCmds->dataSize;
         if (workerCmds->dataSize > 0xC0)
             MyAssertHandler(
@@ -616,13 +610,11 @@ void __cdecl R_AddWorkerCmd(int type, unsigned __int8 *data)
         dataSize = workerCmds->dataSize;
         bufSize = workerCmds->bufSize;
         bufCount = workerCmds->bufCount;
-        if (bufSize % dataSize)
-            MyAssertHandler(".\\r_workercmds.cpp", 1007, 0, "%s", "!(bufSize % dataSize )");
+        iassert( !(bufSize % dataSize ) );
         if (InterlockedExchangeAdd((LONG*)&workerCmds->inSize, 1) < bufCount)
         {
             endPos = InterlockedExchangeAdd((LONG*)&workerCmds->endPos, dataSize) % bufSize;
-            if (endPos < 0)
-                MyAssertHandler(".\\r_workercmds.cpp", 1014, 0, "%s\n\t(endPos) = %i", "(endPos >= 0)", endPos);
+            iassert( (endPos >= 0) );
             if (!endPos)
                 InterlockedExchangeAdd((LONG*)&workerCmds->endPos, -bufSize);
             memcpy(&workerCmds->buf[endPos], data, dataSize);
@@ -659,8 +651,7 @@ void __cdecl R_UpdateActiveWorkerThreads()
     unsigned int i; // [esp+4h] [ebp-8h]
     unsigned int workerIter; // [esp+8h] [ebp-4h]
 
-    if (!Sys_IsMainThread())
-        MyAssertHandler(".\\r_workercmds.cpp", 1119, 0, "%s", "Sys_IsMainThread()");
+    iassert( Sys_IsMainThread() );
     for (i = 0; i < 2; ++i)
     {
         if (r_smp_worker_thread[i]->modified)

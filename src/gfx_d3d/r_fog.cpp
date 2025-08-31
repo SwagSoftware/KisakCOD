@@ -17,8 +17,7 @@ void __cdecl R_SetFogFromServer(float start, unsigned __int8 r, unsigned __int8 
 
 void __cdecl R_SwitchFog(unsigned int fogvar, int startTime, int transitionTime)
 {
-    if (fogvar > 4)
-        MyAssertHandler(".\\r_fog.cpp", 32, 0, "%s\n\t(fogvar) = %i", "(fogvar >= FOG_NONE && fogvar < FOG_COUNT)", fogvar);
+    iassert( (fogvar >= FOG_NONE && fogvar < FOG_COUNT) );
     rg.fogIndex = fogvar;
     if (rg.fogSettings[2].density == 0.0)
     {

@@ -39,8 +39,7 @@ const Glyph *__cdecl R_GetCharacterGlyph(Font_s *font, unsigned int letter)
     else
     {
         glyph = &font->glyphs[letter - 32];
-        if (glyph->letter != letter)
-            MyAssertHandler(".\\r_font.cpp", 51, 0, "%s", "glyph->letter == letter");
+        iassert( glyph->letter == letter );
         return glyph;
     }
 }
@@ -128,8 +127,7 @@ Font_s *__cdecl R_RegisterFont_LoadObj(const char *fontName, int imageTrack)
     Font_s *font; // [esp+0h] [ebp-8h]
     int fontIndex; // [esp+4h] [ebp-4h]
 
-    if (!rg.registered)
-        MyAssertHandler(".\\r_font.cpp", 101, 0, "%s", "rg.registered");
+    iassert( rg.registered );
     for (fontIndex = 0; fontIndex < registeredFontCount; ++fontIndex)
     {
         if (!I_stricmp(fontName, registeredFont[fontIndex]->fontName))
@@ -152,10 +150,8 @@ Font_s *__cdecl R_RegisterFont_LoadObj(const char *fontName, int imageTrack)
 
 double __cdecl R_NormalizedTextScale(Font_s *font, float scale)
 {
-    if (!font)
-        MyAssertHandler(".\\r_font.cpp", 158, 0, "%s", "font");
-    if (font->pixelHeight <= 0)
-        MyAssertHandler(".\\r_font.cpp", 159, 0, "%s", "font->pixelHeight > 0");
+    iassert( font );
+    iassert( font->pixelHeight > 0 );
     return (float)(scale * 48.0 / (double)font->pixelHeight);
 }
 
@@ -171,10 +167,8 @@ int __cdecl R_TextWidth(const char *text, int maxChars, Font_s *font)
     int maxWidth; // [esp+8h] [ebp-8h]
     int count; // [esp+Ch] [ebp-4h]
 
-    if (!text)
-        MyAssertHandler(".\\r_font.cpp", 177, 0, "%s", "text");
-    if (!font)
-        MyAssertHandler(".\\r_font.cpp", 178, 0, "%s", "font");
+    iassert( text );
+    iassert( font );
     lineWidth = 0;
     maxWidth = 0;
     if (maxChars <= 0)
@@ -204,8 +198,7 @@ int __cdecl R_TextWidth(const char *text, int maxChars, Font_s *font)
 
 int __cdecl R_TextHeight(Font_s *font)
 {
-    if (!font)
-        MyAssertHandler(".\\r_font.cpp", 214, 0, "%s", "font");
+    iassert( font );
     return font->pixelHeight;
 }
 
@@ -222,8 +215,7 @@ const char *__cdecl R_TextLineWrapPosition(
     const char *parsePos; // [esp+18h] [ebp-8h] BYREF
     unsigned int letter; // [esp+1Ch] [ebp-4h]
 
-    if (!text)
-        MyAssertHandler(".\\r_font.cpp", 233, 0, "%s", "text");
+    iassert( text );
     pixelsUsed = 0;
     if (bufferSize <= 0)
         bufferSize = 0x7FFFFFFF;
@@ -289,8 +281,7 @@ int __cdecl R_ConsoleTextWidth(const char *textPool, int poolSize, int firstChar
     int usedCharCount; // [esp+10h] [ebp-8h] BYREF
     int stopPos; // [esp+14h] [ebp-4h]
 
-    if ((poolSize & (poolSize - 1)) != 0)
-        MyAssertHandler(".\\r_font.cpp", 302, 0, "%s", "IsPowerOf2( poolSize )");
+    iassert( IsPowerOf2( poolSize ) );
     indexMask = poolSize - 1;
     stopPos = (poolSize - 1) & (charCount + firstChar);
     parsePos = firstChar;
@@ -322,8 +313,7 @@ int __cdecl R_ConsoleTextWidth(const char *textPool, int poolSize, int firstChar
 
 void __cdecl R_InitFonts()
 {
-    if (registeredFontCount)
-        MyAssertHandler(".\\r_font.cpp", 144, 0, "%s", "registeredFontCount == 0");
+    iassert( registeredFontCount == 0 );
 }
 
 void __cdecl R_ShutdownFonts()

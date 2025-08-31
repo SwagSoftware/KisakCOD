@@ -269,8 +269,7 @@ void __cdecl R_SkinXSurfaceWeight0(
 {
     int vertIndex; // [esp+1Ch] [ebp-4h]
 
-    if (!vertsOut)
-        MyAssertHandler(".\\r_model_skin.cpp", 632, 0, "%s", "vertsOut");
+    iassert( vertsOut );
     vertIndex = 0;
     while (vertIndex < vertCount)
     {
@@ -302,8 +301,7 @@ void __cdecl R_SkinXSurfaceWeight1(
     float boneWeight; // [esp+2Ch] [ebp-8h]
     int vertIndex; // [esp+30h] [ebp-4h]
 
-    if (!vertsOut)
-        MyAssertHandler(".\\r_model_skin.cpp", 655, 0, "%s", "vertsOut");
+    iassert( vertsOut );
     vertIndex = 0;
     while (vertIndex < vertCount)
     {
@@ -344,8 +342,7 @@ void __cdecl R_SkinXSurfaceWeight2(
     int vertIndex; // [esp+40h] [ebp-8h]
     float totalBoneWeight; // [esp+44h] [ebp-4h]
 
-    if (!vertsOut)
-        MyAssertHandler(".\\r_model_skin.cpp", 688, 0, "%s", "vertsOut");
+    iassert( vertsOut );
     vertIndex = 0;
     while (vertIndex < vertCount)
     {
@@ -392,8 +389,7 @@ void __cdecl R_SkinXSurfaceWeight3(
     int vertIndex; // [esp+44h] [ebp-8h]
     float totalBoneWeight; // [esp+48h] [ebp-4h]
 
-    if (!vertsOut)
-        MyAssertHandler(".\\r_model_skin.cpp", 727, 0, "%s", "vertsOut");
+    iassert( vertsOut );
     vertIndex = 0;
     while (vertIndex < vertCount)
     {

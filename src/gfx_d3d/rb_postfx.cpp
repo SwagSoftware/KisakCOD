@@ -10,8 +10,7 @@
 
 bool __cdecl R_UsingGlow(const GfxViewInfo *viewInfo)
 {
-    if (!viewInfo)
-        MyAssertHandler(".\\rb_postfx.cpp", 14, 0, "%s", "viewInfo");
+    iassert( viewInfo );
     return (r_glow_allowed->current.enabled || r_glow_allowed_script_forced->current.enabled)
         && viewInfo->glow.enabled
         && !r_fullbright->current.enabled
@@ -22,8 +21,7 @@ bool __cdecl R_UsingGlow(const GfxViewInfo *viewInfo)
 
 bool __cdecl R_UsingDepthOfField(const GfxViewInfo *viewInfo)
 {
-    if (!viewInfo)
-        MyAssertHandler(".\\rb_postfx.cpp", 21, 0, "%s", "viewInfo");
+    iassert( viewInfo );
     if (viewInfo->dof.viewModelEnd > viewInfo->dof.viewModelStart + 1.0)
         return 1;
     if (viewInfo->dof.nearEnd > viewInfo->dof.nearStart + 1.0)
@@ -33,8 +31,7 @@ bool __cdecl R_UsingDepthOfField(const GfxViewInfo *viewInfo)
 
 bool __cdecl RB_UsingColorManipulation(const GfxViewInfo *viewInfo)
 {
-    if (!viewInfo)
-        MyAssertHandler(".\\rb_postfx.cpp", 36, 0, "%s", "viewInfo");
+    iassert( viewInfo );
     if (!viewInfo->film.enabled)
         return 0;
     if (viewInfo->film.contrast != 1.0)
@@ -52,19 +49,15 @@ bool __cdecl RB_UsingColorManipulation(const GfxViewInfo *viewInfo)
 
 void __cdecl RB_ApplyColorManipulationFullscreen(const GfxViewInfo *viewInfo)
 {
-    if (!RB_UsingColorManipulation(viewInfo))
-        MyAssertHandler(".\\rb_postfx.cpp", 235, 0, "%s", "RB_UsingColorManipulation( viewInfo )");
-    if (!viewInfo->isRenderingFullScreen)
-        MyAssertHandler(".\\rb_postfx.cpp", 236, 0, "%s", "viewInfo->isRenderingFullScreen");
+    iassert( RB_UsingColorManipulation( viewInfo ) );
+    iassert( viewInfo->isRenderingFullScreen );
     RB_FullScreenFilter(rgp.postFxColorMaterial);
 }
 
 void __cdecl RB_ApplyColorManipulationSplitscreen(const GfxViewInfo *viewInfo)
 {
-    if (!RB_UsingColorManipulation(viewInfo))
-        MyAssertHandler(".\\rb_postfx.cpp", 244, 0, "%s", "RB_UsingColorManipulation( viewInfo )");
-    if (viewInfo->isRenderingFullScreen)
-        MyAssertHandler(".\\rb_postfx.cpp", 245, 0, "%s", "!viewInfo->isRenderingFullScreen");
+    iassert( RB_UsingColorManipulation( viewInfo ) );
+    iassert( !viewInfo->isRenderingFullScreen );
     RB_GetResolvedScene();
     RB_SplitScreenFilter(rgp.postFxColorMaterial, viewInfo);
 }
@@ -129,8 +122,7 @@ void __cdecl RB_ProcessPostEffects(const GfxViewInfo *viewInfo)
         if (RB_UsingBlur(viewInfo->blurRadius))
         {
             blurRadius = RB_GetBlurRadius(viewInfo->blurRadius);
-            if (blurRadius <= 0.0)
-                MyAssertHandler(".\\rb_postfx.cpp", 426, 1, "%s\n\t(blurRadius) = %g", "(blurRadius > 0.0f)", blurRadius);
+            iassert( (blurRadius > 0.0f) );
             RB_BlurScreen(viewInfo, blurRadius);
         }
     }
@@ -159,10 +151,8 @@ bool __cdecl RB_UsingPostEffects(const GfxViewInfo *viewInfo)
 
 void __cdecl RB_CalcGlowEffect(const GfxViewInfo *viewInfo)
 {
-    if (!viewInfo)
-        MyAssertHandler(".\\rb_postfx.cpp", 122, 0, "%s", "viewInfo");
-    if (viewInfo->glow.bloomIntensity == 0.0)
-        MyAssertHandler(".\\rb_postfx.cpp", 123, 0, "%s", "viewInfo->glow.bloomIntensity");
+    iassert( viewInfo );
+    iassert( viewInfo->glow.bloomIntensity );
     RB_GlowFilterImage(viewInfo->glow.radius);
 }
 
@@ -177,8 +167,7 @@ void __cdecl RB_ApplyGlowEffect(const GfxViewInfo *viewInfo)
             "gfxRenderTargets[gfxCmdBufState.renderTargetId].surface.color == gfxRenderTargets[R_RENDERTARGET_FRAME_BUFFER].surface.color");
     if (backEnd.glowCount > 0)
     {
-        if (backEnd.glowCount != 1)
-            MyAssertHandler(".\\rb_postfx.cpp", 148, 0, "%s", "backEnd.glowCount == 1");
+        iassert( backEnd.glowCount == 1 );
         RB_ApplyGlowEffectPass(viewInfo, backEnd.glowImage);
     }
     backEnd.glowCount = 0;
@@ -186,10 +175,8 @@ void __cdecl RB_ApplyGlowEffect(const GfxViewInfo *viewInfo)
 
 void __cdecl RB_ApplyGlowEffectPass(const GfxViewInfo *viewInfo, GfxImage *glowImage)
 {
-    if (!viewInfo)
-        MyAssertHandler(".\\rb_postfx.cpp", 132, 0, "%s", "viewInfo");
-    if (!rgp.world)
-        MyAssertHandler(".\\rb_postfx.cpp", 133, 0, "%s", "rgp.world");
+    iassert( viewInfo );
+    iassert( rgp.world );
     R_SetCodeImageTexture(&gfxCmdBufSourceState, 9u, glowImage);
     RB_FullScreenFilter(rgp.glowApplyBloomMaterial);
 }
@@ -213,8 +200,7 @@ void __cdecl RB_ApplyMergedPostEffects(const GfxViewInfo *viewInfo)
 
     if (R_UsingDepthOfField(viewInfo))
     {
-        if (!viewInfo->needsFloatZ)
-            MyAssertHandler(".\\rb_postfx.cpp", 321, 0, "%s", "viewInfo->needsFloatZ");
+        iassert( viewInfo->needsFloatZ );
         RB_GetSceneDepthOfFieldEquation(
             viewInfo->dof.nearStart,
             viewInfo->dof.nearEnd,
@@ -311,8 +297,7 @@ void __cdecl RB_GetSceneDepthOfFieldEquation(
     float v6; // [esp+14h] [ebp-Ch]
     float v7; // [esp+18h] [ebp-8h]
 
-    if (zNear == 0.0f)
-        MyAssertHandler(".\\rb_postfx.cpp", 175, 0, "%s", "zNear");
+    iassert( zNear );
     RB_GetNearDepthOfFieldEquation(nearOutOfFocus, nearInFocus, zNear, 1.0, dofEquation);
     v7 = zNear - farInFocus;
     if (v7 < 0.0f)
@@ -384,18 +369,15 @@ float __cdecl RB_GetDepthOfFieldBlurFraction(const GfxViewInfo *viewInfo, float 
 
 float __cdecl RB_GetBlurRadius(float blurRadiusFromCode)
 {
-    float v2; // [esp+8h] [ebp-14h]
-    float v3; // [esp+Ch] [ebp-10h]
+    float blurRadiusFinal; // [esp+8h] [ebp-14h]
     float blurRadiusSqFromDvar; // [esp+10h] [ebp-Ch]
     float blurRadiusSqFromCode; // [esp+18h] [ebp-4h]
 
     blurRadiusSqFromDvar = r_blur->current.value * r_blur->current.value;
     blurRadiusSqFromCode = blurRadiusFromCode * blurRadiusFromCode;
-    v3 = blurRadiusSqFromCode + blurRadiusSqFromDvar;
-    v2 = sqrt(v3);
-    if (v2 < 0.0)
-        MyAssertHandler(".\\rb_postfx.cpp", 370, 1, "%s\n\t(blurRadiusFinal) = %g", "(blurRadiusFinal >= 0.0f)", v2);
-    return v2;
+    blurRadiusFinal = sqrt(blurRadiusSqFromCode + blurRadiusSqFromDvar);
+    iassert( (blurRadiusFinal >= 0.0f) );
+    return blurRadiusFinal;
 }
 
 void __cdecl RB_BlurScreen(const GfxViewInfo *viewInfo, float blurRadius)
@@ -404,8 +386,7 @@ void __cdecl RB_BlurScreen(const GfxViewInfo *viewInfo, float blurRadius)
     float blurRadiusMin; // [esp+28h] [ebp-8h]
     unsigned int color; // [esp+2Ch] [ebp-4h]
 
-    if (!viewInfo)
-        MyAssertHandler(".\\rb_postfx.cpp", 381, 0, "%s", "viewInfo");
+    iassert( viewInfo );
     blurRadiusMin = 1440.0f / gfxCmdBufSourceState.sceneViewport.height;
     color = -1;
     if (blurRadiusMin > blurRadius)

@@ -237,8 +237,7 @@ void __cdecl RB_DrawProfileHistoryGraph(const ProfileReadable *read, int parity,
     unsigned int historyIndex; // [esp+4Ch] [ebp-Ch]
     int maxMsec; // [esp+50h] [ebp-8h]
 
-    if (!read)
-        MyAssertHandler(".\\rb_drawprofile.cpp", 175, 0, "%s", "read");
+    iassert( read );
     if (drawProfGlob.log[probeIndex].parity != parity)
     {
         historyIndex = drawProfGlob.sortedProbeIndices[362 * probeIndex - 1809] % 0x78u;
@@ -472,8 +471,7 @@ double __cdecl RB_DrawProfileRow(int probeIndex, int indentation, float y)
     {
         global = &drawProfGlob.global[probeIndex];
         col = indentation + 1;
-        if (!global->sequence)
-            MyAssertHandler(".\\rb_drawprofile.cpp", 380, 0, "%s", "global->sequence");
+        iassert( global->sequence );
         avgSelf = *((float *)Sys_GetValue(0) + 20782) * global->selfClks / (double)global->sequence;
         avgTotal = *((float *)Sys_GetValue(0) + 20782) * global->totalClks / (double)global->sequence;
         avgHits = (double)global->hits / (double)global->sequence;

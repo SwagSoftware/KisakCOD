@@ -250,10 +250,8 @@ void __cdecl R_LoadSunThroughDvars(const char *sunName, sunflare_t *sun)
     char *fullpath; // [esp+0h] [ebp-Ch]
     char *sunFile; // [esp+8h] [ebp-4h] BYREF
 
-    if (!sunName)
-        MyAssertHandler(".\\r_sky.cpp", 148, 0, "%s", "sunName");
-    if (!sun)
-        MyAssertHandler(".\\r_sky.cpp", 149, 0, "%s", "sun");
+    iassert( sunName );
+    iassert( sun );
     fullpath = va("sun/%s.sun", sunName);
     if (FS_ReadFile(fullpath, (void **)&sunFile) >= 0)
     {

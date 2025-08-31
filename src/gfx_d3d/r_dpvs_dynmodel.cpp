@@ -57,9 +57,9 @@ void __cdecl R_CullDynModelInCell(
             if ((v7 ^ 0x1Fu) >= 0x20)
                 break;
             dynEntIndex = indexLow + 32 * wordIndex;
-            if (((0x80000000 >> indexLow) & bits) == 0)
-                MyAssertHandler(".\\r_dpvs_dynmodel.cpp", 54, 0, "%s", "bits & bit");
-            bits &= ~(0x80000000 >> indexLow);
+            unsigned int bit = (0x80000000 >> indexLow);
+            iassert( bits & bit );
+            bits &= ~bit;
             if (!dynEntVisData[dynEntIndex])
             {
                 radius = dynModelList[dynEntIndex].radius;

@@ -1,6 +1,10 @@
 #pragma once
 #include "r_gfx.h"
 
+#define MAX_MAP_REFLECTION_PROBES 255
+
+#define REFLECTION_PROBE_INVALID 255
+
 struct DiskGfxReflectionProbe11 // sizeof=0x20004
 {
     float origin[3];

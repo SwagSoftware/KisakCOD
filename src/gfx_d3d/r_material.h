@@ -4,6 +4,27 @@
 
 #include "r_gfx.h"
 
+#define SAMPLER_INDEX_INVALID 255
+
+#define CUSTOM_SAMPLER_COUNT 3
+
+#define MTL_LAYER_LIMIT 5
+
+enum $74254F2FBB58A9D84A85080F50CF363D : __int32
+{
+    MTL_ARG_MATERIAL_VERTEX_CONST = 0x0,
+    MTL_ARG_LITERAL_VERTEX_CONST = 0x1,
+    MTL_ARG_MATERIAL_PIXEL_SAMPLER = 0x2,
+    MTL_ARG_CODE_PRIM_BEGIN = 0x3,
+    MTL_ARG_CODE_VERTEX_CONST = 0x3,
+    MTL_ARG_CODE_PIXEL_SAMPLER = 0x4,
+    MTL_ARG_CODE_PIXEL_CONST = 0x5,
+    MTL_ARG_CODE_PRIM_END = 0x6,
+    MTL_ARG_MATERIAL_PIXEL_CONST = 0x6,
+    MTL_ARG_LITERAL_PIXEL_CONST = 0x7,
+    MLT_ARG_COUNT = 0x8,
+};
+
 enum MaterialTextureSource : __int32
 {                                       // ...
     TEXTURE_SRC_CODE_BLACK = 0x0, // ...
@@ -695,3 +716,14 @@ void __cdecl Material_OriginalRemapTechniqueSet(MaterialTechniqueSet *techSet);
 void __cdecl Material_DirtyTechniqueSetOverrides();
 void __cdecl Material_ClearShaderUploadList();
 bool __cdecl Material_WouldTechniqueSetBeOverridden(const MaterialTechniqueSet *techSet);
+
+
+inline bool Material_UsesDepthBuffer(Material *mat)
+{
+    return (mat->stateFlags & 0x10);
+}
+
+inline bool R_IsModelSurfaceType(int surfType)
+{
+    return (surfType >= SF_BEGIN_XMODEL && surfType < SF_END_XMODEL);
+}

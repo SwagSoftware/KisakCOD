@@ -29,3 +29,9 @@ void __cdecl R_PixelCost_EndSurface(GfxCmdBufContext context);
 int RB_PixelCost_AccumulateMsec();
 void RB_PixelCost_EndTiming();
 GfxRenderTargetId __cdecl RB_PixelCost_OverrideRenderTarget(GfxRenderTargetId targetId);
+
+
+inline bool RB_PixelCost_IsAccumulating()
+{
+    return pixelCostMode > GFX_PIXEL_COST_MODE_MEASURE_MSEC;
+}

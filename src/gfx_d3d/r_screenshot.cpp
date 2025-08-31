@@ -10,6 +10,8 @@
 #include <qcommon/cmd.h>
 #include "r_reflection_probe.h"
 
+#define ratio 4
+
 struct $EF604BEDDA69129AF7FD28DC5064E1AD // sizeof=0x18
 {                                       // ...
     unsigned __int8 *pixels[6];         // ...
@@ -362,8 +364,7 @@ void __cdecl R_CubemapShotDownSample(unsigned __int8 *pixels, int baseRes, int d
 
     LODWORD(total[5]) = 4;
     LODWORD(total[4]) = 4;
-    if (baseRes != 4 * downSampleRes)
-        MyAssertHandler(".\\r_screenshot.cpp", 950, 0, "%s", "baseRes == ratio * downSampleRes");
+    iassert( baseRes == ratio * downSampleRes );
     for (y = 0; y < downSampleRes; ++y)
     {
         for (x = 0; x < downSampleRes; ++x)
@@ -385,8 +386,7 @@ void __cdecl R_CubemapShotDownSample(unsigned __int8 *pixels, int baseRes, int d
             for (i = 0; i < 4; ++i)
             {
                 total[i] = total[i] / 16.0;
-                if (total[i] < 0.0 || total[i] > 255.0)
-                    MyAssertHandler(".\\r_screenshot.cpp", 974, 1, "%s", "total[colIndex] >= 0.0f && total[colIndex] <= 255.0f");
+                iassert( total[colIndex] >= 0.0f && total[colIndex] <= 255.0f );
                 pixel[i] = total[i];
             }
         }
@@ -694,8 +694,7 @@ void __cdecl Image_CalcCubeMipMapTexel32(
                 Image_CalcCubeMipMapTexel32SubSample(face, u, v, dir, sourceFacePixels, sourceSize, blurDotMin, color, &weight);
         }
     }
-    if (weight <= 0.0)
-        MyAssertHandler(".\\r_cubemap_utils.cpp", 256, 1, "%s", "weight > 0.0f");
+    iassert( weight > 0.0f );
     for (j = 0; j < 4; ++j)
     {
         color[j] = color[j] / weight;
@@ -718,10 +717,8 @@ void __cdecl CubeMap_GenerateMipMap32(
     int v; // [esp+18h] [ebp-4h]
     int sizea; // [esp+28h] [ebp+Ch]
 
-    if (size <= 1)
-        MyAssertHandler(".\\r_cubemap_utils.cpp", 520, 0, "%s", "size > 1");
-    if (sourceSize != 64)
-        MyAssertHandler(".\\r_cubemap_utils.cpp", 522, 0, "%s", "sourceSize == CUBE_MAP_HIGH_MIP_SIZE");
+    iassert( size > 1 );
+    iassert( sourceSize == CUBE_MAP_HIGH_MIP_SIZE );
     sizea = size >> 1;
     blurDotMin = Image_CubeMipMapBlurDot(sizea);
     if (sizea == 1)
@@ -754,8 +751,7 @@ void __cdecl R_CreateReflectionRawDataFromCubemapShot(DiskGfxReflectionProbe *pr
     int scaledSize; // [esp+188h] [ebp-8h]
     int mipLevel; // [esp+18Ch] [ebp-4h]
 
-    if (downSampleRes > gfxMetrics.cubemapShotRes)
-        MyAssertHandler(".\\r_screenshot.cpp", 993, 0, "%s", "downSampleRes <= gfxMetrics.cubemapShotRes");
+    iassert( downSampleRes <= gfxMetrics.cubemapShotRes );
     for (imgIndex = 0; imgIndex < 6; ++imgIndex)
     {
         R_CubemapShotDownSample(cubeShotGlob.pixels[imgIndex], gfxMetrics.cubemapShotRes, downSampleRes);
@@ -772,8 +768,7 @@ void __cdecl R_CreateReflectionRawDataFromCubemapShot(DiskGfxReflectionProbe *pr
         memcpy(pixels[imgIndex][0], cubeShotGlob.pixels[imgIndex], mipmapLevelSize);
     }
     CubeMap_CacheHighMipDirs();
-    if (downSampleRes != 64)
-        MyAssertHandler(".\\r_screenshot.cpp", 1016, 0, "%s", "downSampleRes == CUBE_MAP_HIGH_MIP_SIZE");
+    iassert( downSampleRes == CUBE_MAP_HIGH_MIP_SIZE );
     for (imgIndex = 0; imgIndex < 6; ++imgIndex)
     {
         scaledSize = downSampleRes;
@@ -795,8 +790,7 @@ void __cdecl R_CreateReflectionRawDataFromCubemapShot(DiskGfxReflectionProbe *pr
     }
     for (mip = 0; mip < mipLevel; ++mip)
         CubeMap_BlendFaceEdges(pixels, mip, downSampleRes >> mip);
-    if (mipLevel < 1 || mipLevel >= 0xF)
-        MyAssertHandler(".\\r_screenshot.cpp", 1046, 1, "%s", "mipLevel >= 1 && mipLevel < ARRAY_COUNT( pixels[0] )");
+    iassert( mipLevel >= 1 && mipLevel < ARRAY_COUNT( pixels[0] ) );
     for (imgIndex = 0; imgIndex < 6; ++imgIndex)
         Z_VirtualFree(cubeShotGlob.pixels[imgIndex]);
     if (rawPixels - probeRawData->pixels != 131064)
@@ -907,8 +901,7 @@ char __cdecl R_GetFrontBufferData(int x, int y, int width, int height, int bytes
     {
         srcPixel = (const unsigned __int8 *)lockedRect.pBits;
         dstPixel = buffer;
-        if (bytesPerPixel != 3 && bytesPerPixel != 4)
-            MyAssertHandler(".\\r_screenshot.cpp", 346, 0, "%s", "bytesPerPixel == 3 || bytesPerPixel == 4");
+        iassert( bytesPerPixel == 3 || bytesPerPixel == 4 );
         if (bytesPerPixel == 3)
         {
             for (row = 0; row < height; ++row)
@@ -983,8 +976,7 @@ void __cdecl R_UpsamplePixelData(
     int forwardWeight; // [esp+A4h] [ebp-4h]
     unsigned __int8 *dsta; // [esp+C4h] [ebp+1Ch]
 
-    if (newSize <= oldSize)
-        MyAssertHandler(".\\r_screenshot.cpp", 175, 0, "%s", "newSize > oldSize");
+    iassert( newSize > oldSize );
     nextSample = bytesPerPixel * stride;
     currSrc = &src[bytesPerPixel * stride * (oldSize - 1)];
     dsta = &dst[bytesPerPixel * stride * (newSize - 1)];
@@ -1041,15 +1033,13 @@ void __cdecl R_DownsamplePixelData(
     int color_8; // [esp+54h] [ebp-4h]
     int color_8a; // [esp+54h] [ebp-4h]
 
-    if (newSize >= oldSize)
-        MyAssertHandler(".\\r_screenshot.cpp", 129, 0, "%s", "newSize < oldSize");
+    iassert( newSize < oldSize );
     colorScale = 1.0 / (double)oldSize;
     nextSample = bytesPerPixel * stride;
     residual = newSize;
     for (column = 0; column < newSize; ++column)
     {
-        if (residual <= 0)
-            MyAssertHandler(".\\r_screenshot.cpp", 137, 0, "%s", "residual > 0");
+        iassert( residual > 0 );
         color = residual * *src;
         color_4 = residual * src[1];
         color_8 = residual * src[2];
@@ -1271,8 +1261,7 @@ void __cdecl R_BeginCubemapShot(int pixelWidthHeight, int pixelBorder)
             "%s\n\t(pixelWidthHeight) = %i",
             "(pixelWidthHeight < 65536)",
             pixelWidthHeight);
-    if (pixelBorder < 0)
-        MyAssertHandler(".\\r_screenshot.cpp", 911, 0, "%s\n\t(pixelBorder) = %i", "(pixelBorder >= 0)", pixelBorder);
+    iassert( (pixelBorder >= 0) );
     if (pixelBorder >= pixelWidthHeight)
         MyAssertHandler(
             ".\\r_screenshot.cpp",
@@ -1346,23 +1335,22 @@ void __cdecl R_EndCubemapShot(CubemapShot shotIndex)
     R_CubemapShotRestoreState();
 }
 
-void __cdecl R_CopyCubemapShot(CubemapShot shotIndex)
+void __cdecl R_CopyCubemapShot(CubemapShot imgIndex)
 {
     int sizeInBytes; // [esp+4h] [ebp-4h]
 
-    if (shotIndex <= CUBEMAPSHOT_NONE || shotIndex >= CUBEMAPSHOT_COUNT)
+    if (imgIndex <= CUBEMAPSHOT_NONE || imgIndex >= CUBEMAPSHOT_COUNT)
         MyAssertHandler(
             ".\\r_screenshot.cpp",
             854,
             0,
             "%s\n\t(shotIndex) = %i",
             "(shotIndex > CUBEMAPSHOT_NONE && shotIndex < CUBEMAPSHOT_COUNT)",
-            shotIndex);
+            imgIndex);
     sizeInBytes = 4 * gfxMetrics.cubemapShotRes * gfxMetrics.cubemapShotRes;
-    cubeShotGlob.pixels[shotIndex - 1] = (unsigned __int8 *)Z_VirtualAlloc(sizeInBytes, "R_CopyCubemapShot", 22);
-    if (!cubeShotGlob.pixels[shotIndex - 1])
-        MyAssertHandler(".\\r_screenshot.cpp", 860, 1, "%s", "cubeShotGlob.pixels[imgIndex]");
-    R_CubemapShotCopySurfaceToBuffer(cubeShotGlob.pixels[shotIndex - 1], sizeInBytes);
+    cubeShotGlob.pixels[imgIndex - 1] = (unsigned __int8 *)Z_VirtualAlloc(sizeInBytes, "R_CopyCubemapShot", 22);
+    iassert( cubeShotGlob.pixels[imgIndex] );
+    R_CubemapShotCopySurfaceToBuffer(cubeShotGlob.pixels[imgIndex - 1], sizeInBytes);
 }
 
 char __cdecl R_GetBackBufferData(int x, int y, int width, int height, int bytesPerPixel, unsigned __int8 *buffer)
@@ -1426,8 +1414,7 @@ char __cdecl R_GetBackBufferData(int x, int y, int width, int height, int bytesP
                     {
                         srcPixel = (const unsigned __int8 *)lockedRect.pBits;
                         dstPixel = buffer;
-                        if (bytesPerPixel != 3 && bytesPerPixel != 4)
-                            MyAssertHandler(".\\r_screenshot.cpp", 453, 0, "%s", "bytesPerPixel == 3 || bytesPerPixel == 4");
+                        iassert( bytesPerPixel == 3 || bytesPerPixel == 4 );
                         if (bytesPerPixel == 3)
                         {
                             for (row = 0; row < height; ++row)
@@ -1533,8 +1520,7 @@ void __cdecl R_CubemapShotFlipVerticalBuffer(unsigned __int8 *buffer)
     int rowIndex; // [esp+Ch] [ebp-8h]
     int dstIndex; // [esp+10h] [ebp-4h]
 
-    if (!buffer)
-        MyAssertHandler(".\\r_screenshot.cpp", 748, 0, "%s", "buffer");
+    iassert( buffer );
     for (rowIndex = 0; rowIndex < gfxMetrics.cubemapShotRes / 2; ++rowIndex)
     {
         for (colIndex = 0; colIndex < gfxMetrics.cubemapShotRes; ++colIndex)
@@ -1550,8 +1536,7 @@ void __cdecl R_CubemapShotFlipVerticalBuffer(unsigned __int8 *buffer)
 
 void __cdecl R_CubemapShotCopySurfaceToBuffer(unsigned __int8 *buffer, int bufferSizeInBytes)
 {
-    if (!buffer)
-        MyAssertHandler(".\\r_screenshot.cpp", 769, 0, "%s", "buffer");
+    iassert( buffer );
     if (bufferSizeInBytes <= 0)
         MyAssertHandler(
             ".\\r_screenshot.cpp",
@@ -1589,8 +1574,7 @@ void __cdecl R_CubemapShotWriteTargaFile(char *filename, CubemapShot shotIndex, 
     int fileSize; // [esp+10h] [ebp-8h]
     unsigned __int8 *targa; // [esp+14h] [ebp-4h]
 
-    if (!filename)
-        MyAssertHandler(".\\r_screenshot.cpp", 871, 0, "%s", "filename");
+    iassert( filename );
     if (shotIndex <= CUBEMAPSHOT_NONE || shotIndex >= CUBEMAPSHOT_COUNT)
         MyAssertHandler(
             ".\\r_screenshot.cpp",
@@ -1602,8 +1586,7 @@ void __cdecl R_CubemapShotWriteTargaFile(char *filename, CubemapShot shotIndex, 
     imgIndex = shotIndex - 1;
     fileSize = 4 * gfxMetrics.cubemapShotRes * gfxMetrics.cubemapShotRes + 18;
     targa = (unsigned __int8 *)Z_VirtualAlloc(fileSize, "R_CubemapShotWriteTargaFile", 22);
-    if (!targa)
-        MyAssertHandler(".\\r_screenshot.cpp", 877, 1, "%s", "targa");
+    iassert( targa );
     R_CubemapShotWriteTargaHeader(gfxMetrics.cubemapShotRes, targa);
     R_CubemapShotCopyBufferToTarga(cubeShotGlob.pixels[imgIndex], targa);
     R_CubemapShotApplyFresnelToTarga(shotIndex, n0, n1, targa);
@@ -1614,10 +1597,8 @@ void __cdecl R_CubemapShotWriteTargaFile(char *filename, CubemapShot shotIndex, 
 
 void __cdecl R_CubemapShotWriteTargaHeader(int res, unsigned __int8 *fileBuffer)
 {
-    if (!fileBuffer)
-        MyAssertHandler(".\\r_screenshot.cpp", 785, 0, "%s", "fileBuffer");
-    if (res <= 0)
-        MyAssertHandler(".\\r_screenshot.cpp", 786, 0, "%s\n\t(res) = %i", "(res > 0)", res);
+    iassert( fileBuffer );
+    iassert( (res > 0) );
     *(unsigned int *)fileBuffer = 0;
     *((unsigned int *)fileBuffer + 1) = 0;
     *((unsigned int *)fileBuffer + 2) = 0;
@@ -1637,10 +1618,8 @@ void __cdecl R_CubemapShotCopyBufferToTarga(const unsigned __int8 *srcBuffer, un
     int rowIndex; // [esp+8h] [ebp-8h]
     int dstIndex; // [esp+Ch] [ebp-4h]
 
-    if (!srcBuffer)
-        MyAssertHandler(".\\r_screenshot.cpp", 808, 0, "%s", "srcBuffer");
-    if (!targa)
-        MyAssertHandler(".\\r_screenshot.cpp", 809, 0, "%s", "targa");
+    iassert( srcBuffer );
+    iassert( targa );
     for (rowIndex = 0; rowIndex < gfxMetrics.cubemapShotRes; ++rowIndex)
     {
         for (colIndex = 0; colIndex < gfxMetrics.cubemapShotRes; ++colIndex)
@@ -1661,8 +1640,7 @@ void __cdecl R_CubemapShotApplyFresnelToTarga(CubemapShot shotIndex, float n0, f
     int rowIndex; // [esp+Ch] [ebp-Ch]
     int dstIndex; // [esp+10h] [ebp-8h]
 
-    if (!targa)
-        MyAssertHandler(".\\r_screenshot.cpp", 834, 0, "%s", "targa");
+    iassert( targa );
     if (shotIndex <= CUBEMAPSHOT_NONE || shotIndex >= CUBEMAPSHOT_COUNT)
         MyAssertHandler(
             ".\\r_screenshot.cpp",
@@ -1711,8 +1689,7 @@ unsigned __int8 __cdecl R_CubemapShotCalcReflectionFactor(
             "%s\n\t(shotIndex) = %i",
             "(shotIndex < CUBEMAPSHOT_COUNT)",
             shotIndex);
-    if (colIndex < 0)
-        MyAssertHandler(".\\r_screenshot.cpp", 721, 0, "%s\n\t(colIndex) = %i", "(colIndex >= 0)", colIndex);
+    iassert( (colIndex >= 0) );
     if (colIndex >= gfxMetrics.cubemapShotRes)
         MyAssertHandler(
             ".\\r_screenshot.cpp",
@@ -1721,8 +1698,7 @@ unsigned __int8 __cdecl R_CubemapShotCalcReflectionFactor(
             "%s\n\t(colIndex) = %i",
             "(colIndex < gfxMetrics.cubemapShotRes)",
             colIndex);
-    if (rowIndex < 0)
-        MyAssertHandler(".\\r_screenshot.cpp", 723, 0, "%s\n\t(rowIndex) = %i", "(rowIndex >= 0)", rowIndex);
+    iassert( (rowIndex >= 0) );
     if (rowIndex >= gfxMetrics.cubemapShotRes)
         MyAssertHandler(
             ".\\r_screenshot.cpp",
@@ -1731,10 +1707,8 @@ unsigned __int8 __cdecl R_CubemapShotCalcReflectionFactor(
             "%s\n\t(rowIndex) = %i",
             "(rowIndex < gfxMetrics.cubemapShotRes)",
             rowIndex);
-    if (n0 == 0.0)
-        MyAssertHandler(".\\r_screenshot.cpp", 725, 0, "%s\n\t(n0) = %g", "(n0 != 0)", n0);
-    if (n1 == 0.0)
-        MyAssertHandler(".\\r_screenshot.cpp", 726, 0, "%s\n\t(n1) = %g", "(n1 != 0)", n1);
+    iassert( (n0 != 0) );
+    iassert( (n1 != 0) );
     scale = (double)gfxMetrics.cubemapShotRes * 0.5;
     Vec3Scale(cubemapShotAxis[shotIndex][0], scale, dir);
     v7 = (double)colIndex - (double)gfxMetrics.cubemapShotRes * 0.5 + 0.5;

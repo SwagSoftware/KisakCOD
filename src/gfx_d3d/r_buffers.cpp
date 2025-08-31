@@ -44,10 +44,8 @@ void *__cdecl R_AllocStaticVertexBuffer(IDirect3DVertexBuffer9 **vb, int sizeInB
     int hra; // [esp+0h] [ebp-8h]
     void *vertexBufferData; // [esp+4h] [ebp-4h] BYREF
 
-    if (!vb)
-        MyAssertHandler(".\\r_buffers.cpp", 184, 0, "%s", "vb");
-    if (sizeInBytes <= 0)
-        MyAssertHandler(".\\r_buffers.cpp", 185, 0, "%s\n\t(sizeInBytes) = %i", "(sizeInBytes > 0)", sizeInBytes);
+    iassert( vb );
+    iassert( (sizeInBytes > 0) );
     if (!r_loadForRenderer->current.enabled)
         return 0;
     hr = dx.device->CreateVertexBuffer(sizeInBytes, 8, 0, D3DPOOL_DEFAULT, vb, 0);
@@ -91,10 +89,8 @@ void *__cdecl R_AllocStaticIndexBuffer(IDirect3DIndexBuffer9 **ib, int sizeInByt
 {
     void *indexBufferData; // [esp+4h] [ebp-4h] BYREF
 
-    if (!ib)
-        MyAssertHandler(".\\r_buffers.cpp", 240, 0, "%s", "ib");
-    if (sizeInBytes <= 0)
-        MyAssertHandler(".\\r_buffers.cpp", 241, 0, "%s\n\t(sizeInBytes) = %i", "(sizeInBytes > 0)", sizeInBytes);
+    iassert( ib );
+    iassert( (sizeInBytes > 0) );
     if (!r_loadForRenderer->current.enabled)
         return 0;
     //if (((int(__thiscall *)(IDirect3DDevice9 *, IDirect3DDevice9 *, int, int, int, unsigned int, IDirect3DIndexBuffer9 **, unsigned int))dx.device->CreateIndexBuffer)(
@@ -142,20 +138,17 @@ void __cdecl R_InitDynamicVertexBufferState(GfxVertexBufferState *vb, int bytes)
 {
     unsigned __int8 *verts; // [esp+0h] [ebp-4h]
 
-    if (!vb)
-        MyAssertHandler(".\\r_buffers.cpp", 405, 0, "%s", "vb");
+    iassert( vb );
     vb->used = 0;
     vb->total = bytes;
     verts = (unsigned __int8 *)R_AllocDynamicVertexBuffer(&vb->buffer, bytes);
-    if (verts)
-        MyAssertHandler(".\\r_buffers.cpp", 416, 1, "%s", "verts == NULL");
+    iassert( verts == NULL );
     vb->verts = verts;
 }
 
 void __cdecl R_InitDynamicIndexBufferState(GfxIndexBufferState *ib, int indexCount)
 {
-    if (!ib)
-        MyAssertHandler(".\\r_buffers.cpp", 429, 0, "%s", "ib");
+    iassert( ib );
     ib->used = 0;
     ib->total = indexCount;
     if (R_AllocDynamicIndexBuffer(&ib->buffer, 2 * indexCount))
@@ -166,20 +159,17 @@ void __cdecl R_InitDynamicIndices(GfxDynamicIndices *ib, int indexCount)
 {
     unsigned __int16 *indices; // [esp+0h] [ebp-8h]
 
-    if (!ib)
-        MyAssertHandler(".\\r_buffers.cpp", 453, 0, "%s", "ib");
+    iassert( ib );
     ib->used = 0;
     ib->total = indexCount;
     indices = (unsigned __int16 *)Z_VirtualAlloc(2 * indexCount, "Dynamic Index Buffer", 18);
-    if (!indices)
-        MyAssertHandler(".\\r_buffers.cpp", 474, 1, "%s", "indices != NULL");
+    iassert( indices != NULL );
     ib->indices = indices;
 }
 
 void __cdecl R_ShutdownDynamicIndices(GfxDynamicIndices *ib)
 {
-    if (!ib->indices)
-        MyAssertHandler(".\\r_buffers.cpp", 557, 0, "%s", "ib->indices");
+    iassert( ib->indices );
     Z_VirtualFree(ib->indices);
     ib->indices = 0;
 }
@@ -333,8 +323,7 @@ void __cdecl R_FinishStaticVertexBuffer(IDirect3DVertexBuffer9 *vb)
 
 void __cdecl R_UnlockVertexBuffer(IDirect3DVertexBuffer9* handle)
 {
-    if (!handle)
-        MyAssertHandler(".\\r_buffers.cpp", 131, 0, "%s", "handle");
+    iassert( handle );
     handle->Unlock();
 }
 
@@ -343,10 +332,8 @@ void *__cdecl R_LockVertexBuffer(IDirect3DVertexBuffer9 *handle, int offset, int
     int hr; // [esp+0h] [ebp-8h]
     void *bufferData; // [esp+4h] [ebp-4h] BYREF
 
-    if (!handle)
-        MyAssertHandler(".\\r_buffers.cpp", 119, 0, "%s", "handle");
-    if (dx.deviceLost)
-        MyAssertHandler(".\\r_buffers.cpp", 120, 0, "%s", "!dx.deviceLost");
+    iassert( handle );
+    iassert( !dx.deviceLost );
     //hr = ((int(__thiscall *)(IDirect3DVertexBuffer9 *, IDirect3DVertexBuffer9 *, int, int, void **, int))handle->Lock)(
     //    handle,
     //    handle,
@@ -519,10 +506,8 @@ void *__cdecl R_LockIndexBuffer(IDirect3DIndexBuffer9 *handle, int offset, int b
     int hr; // [esp+0h] [ebp-8h]
     void *bufferData; // [esp+4h] [ebp-4h] BYREF
 
-    if (!handle)
-        MyAssertHandler(".\\r_buffers.cpp", 141, 0, "%s", "handle");
-    if (dx.deviceLost)
-        MyAssertHandler(".\\r_buffers.cpp", 142, 0, "%s", "!dx.deviceLost");
+    iassert( handle );
+    iassert( !dx.deviceLost );
     //hr = ((int(__thiscall *)(IDirect3DIndexBuffer9 *, IDirect3DIndexBuffer9 *, int, int, void **, int))handle->Lock)(
     //    handle,
     //    handle,
@@ -538,8 +523,7 @@ void *__cdecl R_LockIndexBuffer(IDirect3DIndexBuffer9 *handle, int offset, int b
 
 void __cdecl R_UnlockIndexBuffer(IDirect3DIndexBuffer9 *handle)
 {
-    if (!handle)
-        MyAssertHandler(".\\r_buffers.cpp", 153, 0, "%s", "handle");
+    iassert( handle );
     handle->Unlock();
 }
 
@@ -550,8 +534,7 @@ void __cdecl R_CreateWorldVertexBuffer(IDirect3DVertexBuffer9 **vb, int *srcData
 
     if (r_loadForRenderer->current.enabled)
     {
-        if ((srcData == 0) != (sizeInBytes == 0))
-            MyAssertHandler(".\\r_bsp_load_obj.cpp", 301, 0, "%s", "(srcData == NULL) == (sizeInBytes == 0)");
+        iassert( (srcData == NULL) == (sizeInBytes == 0) );
         if (!sizeInBytes)
         {
             dummyData = 0;

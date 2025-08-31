@@ -194,8 +194,7 @@ char __cdecl R_IsShaderMatrixUpToDate(
         return 1;
     *constant = newState;
     rowCount = routingData->u.codeConst.rowCount;
-    if (!routingData->u.codeConst.rowCount)
-        MyAssertHandler(".\\r_shade.cpp", 56, 0, "%s", "rowCount");
+    iassert( rowCount );
     for (rowCounta = rowCount - 1; rowCounta; --rowCounta)
     {
         ++constant;
@@ -212,15 +211,13 @@ char __cdecl R_IsShaderConstantUpToDate(
 {
     GfxShaderConstantState newState; // [esp+4h] [ebp-10h]
 
-    if (!source)
-        MyAssertHandler(".\\r_shade.cpp", 73, 0, "%s", "source");
+    iassert( source );
     newState.fields.codeConst = (MaterialArgumentCodeConst)routingData->u.codeSampler;
     newState.fields.version = source->constVersions[routingData->u.codeConst.index];
     if (constant->packed == newState.packed)
         return 1;
     *constant = newState;
-    if (routingData->u.codeConst.rowCount != 1)
-        MyAssertHandler(".\\r_shade.cpp", 82, 0, "%s", "routingData->u.codeConst.rowCount == 1");
+    iassert( routingData->u.codeConst.rowCount == 1 );
     return 0;
 }
 
@@ -299,8 +296,7 @@ int __cdecl R_IsPixelShaderConstantUpToDate(GfxCmdBufContext context, const Mate
             "%s\n\t(routingData->u.codeConst.rowCount) = %i",
             "(routingData->u.codeConst.rowCount == 1)",
             routingData->u.codeConst.rowCount);
-    if (!context.source)
-        MyAssertHandler(".\\r_shade.cpp", 125, 0, "%s", "context.source");
+    iassert( context.source );
     newState.fields.codeConst = (MaterialArgumentCodeConst)routingData->u.codeSampler;
     newState.fields.version = context.source->constVersions[routingData->u.codeConst.index];
     if (!context.source->constVersions[routingData->u.codeConst.index])
@@ -453,16 +449,12 @@ void __cdecl R_UpdateVertexDecl(GfxCmdBufState *state)
     const MaterialVertexShader *vertexShader; // [esp+44h] [ebp-4h]
 
     pass = state->pass;
-    if (!pass->vertexDecl)
-        MyAssertHandler(".\\r_shade.cpp", 721, 0, "%s", "pass->vertexDecl");
+    iassert( pass->vertexDecl );
     vertexShader = pass->vertexShader;
-    if (!vertexShader)
-        MyAssertHandler(".\\r_shade.cpp", 752, 0, "%s", "vertexShader");
+    iassert( vertexShader );
     R_SetVertexDecl(&state->prim, pass->vertexDecl);
-    if (!pass->pixelShader)
-        MyAssertHandler(".\\r_shade.cpp", 756, 0, "%s", "pass->pixelShader");
-    if (pass->vertexDecl == (MaterialVertexDeclaration *)-36)
-        MyAssertHandler(".\\r_shade.cpp", 759, 0, "%s", "pass->vertexDecl->routing.decl");
+    iassert( pass->pixelShader );
+    iassert( pass->vertexDecl->routing.decl );
     if (!pass->vertexDecl->routing.decl[state->prim.vertDeclType])
         Com_Error(
             ERR_FATAL,
@@ -500,8 +492,7 @@ void __cdecl R_SetupPass(GfxCmdBufContext context, unsigned int passIndex)
     refStateBits = &material->stateBitsTable[passIndex + material->stateBitsEntry[context.state->techType]];
     stateBits[0] = refStateBits->loadBits[0];
     stateBits[1] = refStateBits->loadBits[1];
-    if (context.source->viewMode == VIEW_MODE_NONE)
-        MyAssertHandler(".\\r_shade.cpp", 795, 0, "%s", "context.source->viewMode != VIEW_MODE_NONE");
+    iassert( context.source->viewMode != VIEW_MODE_NONE );
     R_SetState(context.state, stateBits);
     if (r_logFile->current.integer)
     {
@@ -513,8 +504,7 @@ void __cdecl R_SetupPass(GfxCmdBufContext context, unsigned int passIndex)
         v4 = va("---------- state bits: 0x%08x, 0x%08x\n", stateBits[0], stateBits[1]);
         RB_LogPrint(v4);
     }
-    if (!pass->pixelShader)
-        MyAssertHandler(".\\r_shade.cpp", 850, 0, "%s", "pass->pixelShader");
+    iassert( pass->pixelShader );
     R_SetPixelShader(context.state, pass->pixelShader);
     if (pass->stableArgCount)
         R_SetPassShaderStableArguments(
@@ -791,10 +781,8 @@ void __cdecl R_ChangeObjectPlacement(GfxCmdBufSourceState *source, const GfxScal
     float origin[3]; // [esp+3Ch] [ebp-30h] BYREF
     float axis[3][3]; // [esp+48h] [ebp-24h] BYREF
 
-    if (placement == source->objectPlacement)
-        MyAssertHandler(".\\r_state.cpp", 276, 0, "%s", "placement != source->objectPlacement");
-    if (!placement)
-        MyAssertHandler(".\\r_state.cpp", 277, 0, "%s", "placement");
+    iassert( placement != source->objectPlacement );
+    iassert( placement );
     UnitQuatToAxis(placement->base.quat, axis);
     if (!Vec3IsNormalized(axis[0]))
     {
@@ -849,15 +837,13 @@ int __cdecl R_SetVertexData(GfxCmdBufState *state, const void *data, int vertexC
             "%s",
             "gfxBuf.dynamicVertexBuffer->used + totalSize <= gfxBuf.dynamicVertexBuffer->total");
     vb = gfxBuf.dynamicVertexBuffer->buffer;
-    if (!vb)
-        MyAssertHandler(".\\r_shade.cpp", 899, 0, "%s", "vb");
+    iassert( vb );
     lockFlags = gfxBuf.dynamicVertexBuffer->used != 0 ? 4096 : 0x2000;
     {
         PROF_SCOPED("LockVertexBuffer");
         bufferData = R_LockVertexBuffer(vb, gfxBuf.dynamicVertexBuffer->used, totalSize, lockFlags);
     }
-    if (!bufferData)
-        MyAssertHandler(".\\r_shade.cpp", 910, 0, "%s", "bufferData");
+    iassert( bufferData );
     //Profile_Begin(167);
     //Profile_Begin(171);
     {

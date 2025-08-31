@@ -57,8 +57,7 @@ void __cdecl RB_ShowTess(GfxCmdBufContext context, const float *center, const ch
         break;
     case 2: // Techset
         techSet = Material_GetTechniqueSet(context.state->material);
-        if (!techSet)
-            MyAssertHandler(".\\rb_tess.cpp", 96, 0, "%s", "techSet");
+        iassert( techSet );
         infoString = techSet->name;
         infoIdString = "TS";
         break;
@@ -67,8 +66,7 @@ void __cdecl RB_ShowTess(GfxCmdBufContext context, const float *center, const ch
         infoIdString = "M";
         break;
     case 4: // VertexShader
-        if (!tech->passCount)
-            MyAssertHandler(".\\rb_tess.cpp", 75, 0, "%s", "tech->passCount > 0");
+        iassert( tech->passCount > 0 );
         if (tech->passArray[0].vertexShader)
             infoString = tech->passArray[0].vertexShader->name;
         else
@@ -78,8 +76,7 @@ void __cdecl RB_ShowTess(GfxCmdBufContext context, const float *center, const ch
         infoIdString = "VS";
         break;
     case 5: // PixelShader
-        if (!tech->passCount)
-            MyAssertHandler(".\\rb_tess.cpp", 85, 0, "%s", "tech->passCount > 0");
+        iassert( tech->passCount > 0 );
         if (tech->passArray[0].pixelShader)
             infoString = tech->passArray[0].pixelShader->name;
         else
@@ -512,11 +509,9 @@ unsigned int __cdecl R_TessParticleCloudList(const GfxDrawSurfListArgs *listArgs
     args.triCount = 2048;
     g_frameStatsCur.fxIndexCount += 6144;
     RB_TrackImmediatePrims(GFX_PRIM_STATS_FX);
-    if (!g_primStats)
-        MyAssertHandler(".\\rb_tess.cpp", 678, 0, "%s", "g_primStats");
+    iassert( g_primStats );
     R_DrawIndexedPrimitive(&context.state->prim, &args);
-    if (!g_primStats)
-        MyAssertHandler(".\\rb_tess.cpp", 684, 0, "%s", "g_primStats");
+    iassert( g_primStats );
     g_primStats->staticVertexCount += args.vertexCount;
     g_primStats->staticIndexCount += 3 * args.triCount;
     RB_EndTrackImmediatePrims();
@@ -533,8 +528,7 @@ void __cdecl R_SetParticleCloudConstants(GfxCmdBufSourceState *source, const Gfx
     float particleColor[4]; // [esp+78h] [ebp-1Ch] BYREF
     float worldUp[3]; // [esp+88h] [ebp-Ch] BYREF
 
-    if (!cloud)
-        MyAssertHandler(".\\rb_tess.cpp", 587, 0, "%s", "cloud");
+    iassert( cloud );
     if (cloud->radius[1] == cloud->radius[0]
         || VecNCompareCustomEpsilon(cloud->placement.base.origin, cloud->endpos, 0.001f, 3))
     {
@@ -756,8 +750,7 @@ unsigned int __cdecl R_TessXModelSkinnedDrawSurfList(
         }
         else
         {
-            if (prepassContext.state)
-                MyAssertHandler(".\\rb_tess.cpp", 992, 0, "%s", "prepassContext.state == NULL");
+            iassert( prepassContext.state == NULL );
             R_SetupPassPerObjectArgs(context);
             R_SetupPassPerPrimArgs(context);
             drawSurfKeya = drawSurf.packed & 0xE0000000;
@@ -837,8 +830,7 @@ unsigned int __cdecl R_TessXModelSkinnedDrawSurfList(
         }
     }
     RB_EndTrackImmediatePrims();
-    if (!drawSurfIndex)
-        MyAssertHandler(".\\rb_tess.cpp", 1136, 0, "%s", "drawSurfIndex");
+    iassert( drawSurfIndex );
     return drawSurfIndex;
 }
 
@@ -856,10 +848,8 @@ void __cdecl R_DrawXModelSkinnedUncached(GfxCmdBufContext context, XSurface *xsu
         v3 = va("--- R_DrawXModelSkinnedUncached( %s ) ---\n", context.state->material->info.name);
         RB_LogPrint(v3);
     }
-    if (!xsurf)
-        MyAssertHandler(".\\rb_tess.cpp", 776, 0, "%s", "xsurf");
-    if (!skinnedVert)
-        MyAssertHandler(".\\rb_tess.cpp", 777, 0, "%s", "skinnedVert");
+    iassert( xsurf );
+    iassert( skinnedVert );
     args.triCount = XSurfaceGetNumTris(xsurf);
     args.vertexCount = XSurfaceGetNumVerts(xsurf);
     g_frameStatsCur.geoIndexCount += 3 * args.triCount;
@@ -867,12 +857,10 @@ void __cdecl R_DrawXModelSkinnedUncached(GfxCmdBufContext context, XSurface *xsu
     R_CheckVertexDataOverflow(32 * args.vertexCount);
     vertexOffset = R_SetVertexData(context.state, skinnedVert, args.vertexCount, 32);
     vb = gfxBuf.dynamicVertexBuffer->buffer;
-    if (!vb)
-        MyAssertHandler(".\\rb_tess.cpp", 791, 0, "%s", "vb");
+    iassert( vb );
     R_SetStreamSource(&context.state->prim, vb, vertexOffset, 0x20u);
     R_DrawIndexedPrimitive(&context.state->prim, &args);
-    if (!g_primStats)
-        MyAssertHandler(".\\rb_tess.cpp", 798, 0, "%s", "g_primStats");
+    iassert( g_primStats );
     g_primStats->staticIndexCount += 3 * args.triCount;
     g_primStats->staticVertexCount += args.vertexCount;
     if (r_showTess->current.integer)
@@ -1014,18 +1002,15 @@ unsigned int __cdecl R_TessXModelRigidDrawSurfList(
         }
         else
         {
-            if (prepassContext.state)
-                MyAssertHandler(".\\rb_tess.cpp", 1252, 0, "%s", "prepassContext.state == NULL");
+            iassert( prepassContext.state == NULL );
             R_SetupPassPerObjectArgs(context);
             drawSurfIndex = R_DrawXModelRigidSurfCamera(drawSurfList, drawSurfCount, context);
         }
     }
     else
     {
-        if (prepassContext.state)
-            MyAssertHandler(".\\rb_tess.cpp", 1262, 0, "%s", "prepassContext.state == NULL");
-        if (baseTechType == TECHNIQUE_LIT_BEGIN)
-            MyAssertHandler(".\\rb_tess.cpp", 1263, 0, "%s", "baseTechType != TECHNIQUE_LIT");
+        iassert( prepassContext.state == NULL );
+        iassert( baseTechType != TECHNIQUE_LIT );
         R_SetupPassCriticalPixelShaderArgs(context);
         R_ChangeDepthHackNearClip(commonSource, 0);
         R_SetVertexDeclTypeNormal(context.state, VERTDECL_PACKED);
@@ -1035,8 +1020,7 @@ unsigned int __cdecl R_TessXModelRigidDrawSurfList(
         drawSurfIndex = R_DrawXModelRigidSurf(drawSurfList, drawSurfCount, context);
     }
     RB_EndTrackImmediatePrims();
-    if (!drawSurfIndex)
-        MyAssertHandler(".\\rb_tess.cpp", 1295, 0, "%s", "drawSurfIndex");
+    iassert( drawSurfIndex );
     return drawSurfIndex;
 }
 
@@ -1054,8 +1038,7 @@ unsigned int __cdecl R_TessStaticModelCachedList(const GfxDrawSurfListArgs *list
 
     context = listArgs->context;
     commonSource = listArgs->context.source;
-    if (prepassContext.state)
-        MyAssertHandler(".\\rb_tess.cpp", 1676, 0, "%s", "prepassContext.state == NULL");
+    iassert( prepassContext.state == NULL );
     info = listArgs->info;
     if (r_logFile->current.integer)
     {
@@ -1123,8 +1106,7 @@ unsigned int __cdecl R_TessStaticModelPreTessList(const GfxDrawSurfListArgs *lis
 
     context = listArgs->context;
     commonSource = listArgs->context.source;
-    if (prepassContext.state)
-        MyAssertHandler(".\\rb_tess.cpp", 1622, 0, "%s", "prepassContext.state == NULL");
+    iassert( prepassContext.state == NULL );
     info = listArgs->info;
     if (r_logFile->current.integer)
     {
@@ -1165,8 +1147,7 @@ unsigned int __cdecl R_TessStaticModelSkinnedDrawSurfList(
     PROF_SCOPED("TessXModRigid");
     context = listArgs->context;
     commonSource = listArgs->context.source;
-    if (prepassContext.state)
-        MyAssertHandler(".\\rb_tess.cpp", 1567, 0, "%s", "prepassContext.state == NULL");
+    iassert( prepassContext.state == NULL );
     info = listArgs->info;
     if (r_logFile->current.integer)
     {
@@ -1183,8 +1164,7 @@ unsigned int __cdecl R_TessStaticModelSkinnedDrawSurfList(
         R_ChangeDepthRange(context.state, depthRangeType);
     primDrawSurfPos = &commonSource->input.data->primDrawSurfsBuf[info->drawSurfs[listArgs->firstDrawSurfIndex].fields.objectId];
     RB_TrackImmediatePrims(GFX_PRIM_STATS_SMODELRIGID);
-    if (!g_primStats)
-        MyAssertHandler(".\\rb_tess.cpp", 1588, 0, "%s", "g_primStats");
+    iassert( g_primStats );
     if (baseTechType == TECHNIQUE_LIT_BEGIN)
         R_DrawStaticModelSkinnedSurfLit(primDrawSurfPos, context);
     else
@@ -1241,8 +1221,7 @@ unsigned int __cdecl R_TessStaticModelRigidDrawSurfList(
     }
     primDrawSurfPos = &commonSource->input.data->primDrawSurfsBuf[info->drawSurfs[listArgs->firstDrawSurfIndex].fields.objectId];
     RB_TrackImmediatePrims(GFX_PRIM_STATS_SMODELRIGID);
-    if (!g_primStats)
-        MyAssertHandler(".\\rb_tess.cpp", 1517, 0, "%s", "g_primStats");
+    iassert( g_primStats );
     if (baseTechType == TECHNIQUE_LIT_BEGIN)
     {
         R_SetCodeImageTexture(commonSource, 0x10u, rgp.whiteImage);
@@ -1253,8 +1232,7 @@ unsigned int __cdecl R_TessStaticModelRigidDrawSurfList(
     }
     else
     {
-        if (prepassContext.state)
-            MyAssertHandler(".\\rb_tess.cpp", 1532, 0, "%s", "prepassContext.state == NULL");
+        iassert( prepassContext.state == NULL );
         R_SetupPassPerObjectArgs(context);
         R_DrawStaticModelSurf(primDrawSurfPos, context);
     }
@@ -1322,8 +1300,7 @@ unsigned int __cdecl R_TessXModelRigidSkinnedDrawSurfList(
     drawSurf.packed = drawSurfList->packed;
     drawSurfKey = drawSurfList->packed & DRAWSURF_KEY_MASK;
     RB_TrackImmediatePrims(GFX_PRIM_STATS_XMODELRIGID);
-    if (!g_primStats)
-        MyAssertHandler(".\\rb_tess.cpp", 1369, 0, "%s", "g_primStats");
+    iassert( g_primStats );
     drawSurfIndex = 0;
     do
     {
@@ -1395,8 +1372,7 @@ unsigned int __cdecl R_TessTrianglesPreTessList(const GfxDrawSurfListArgs *listA
 
     context = listArgs->context;
     commonSource = listArgs->context.source;
-    if (prepassContext.state)
-        MyAssertHandler(".\\rb_tess.cpp", 1825, 0, "%s", "prepassContext.state == NULL");
+    iassert( prepassContext.state == NULL );
     info = listArgs->info;
     R_SetupPassCriticalPixelShaderArgs(context);
     baseTechType = info->baseTechType;

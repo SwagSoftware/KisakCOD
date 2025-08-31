@@ -616,8 +616,7 @@ char __cdecl MaterialTechniqueSet_FindHashLocation(const char *name, int *foundH
 {
     int hashIndex; // [esp+0h] [ebp-4h]
 
-    if (!name)
-        MyAssertHandler(".\\r_material.cpp", 816, 0, "%s", "name");
+    iassert( name );
     for (hashIndex = R_HashAssetName(name) & 0x3FF;
         materialGlobals.techniqueSetHashTable[hashIndex];
         hashIndex = ((_WORD)hashIndex + 1) & 0x3FF)
@@ -825,8 +824,7 @@ MaterialTechnique *__cdecl Material_FindTechnique(const char *name, GfxRenderer 
 {
     unsigned int hashIndex; // [esp+0h] [ebp-4h] BYREF
 
-    if (!name)
-        MyAssertHandler(".\\r_material_load_obj.cpp", 1453, 0, "%s", "name");
+    iassert( name );
     if (MaterialTechnique_FindHashLocation(name, renderer, &hashIndex))
         return mtlLoadGlob.techniqueHashTable[renderer][hashIndex];
     else
@@ -1267,10 +1265,8 @@ char __cdecl Material_GetVertexShaderHashIndex(
     unsigned int hashIndex; // [esp+14h] [ebp-8h]
     MaterialVertexShader **hashTable; // [esp+18h] [ebp-4h]
 
-    if (!shaderName)
-        MyAssertHandler(".\\r_material_load_obj.cpp", 4362, 0, "%s", "shaderName");
-    if (!foundHashIndex)
-        MyAssertHandler(".\\r_material_load_obj.cpp", 4363, 0, "%s", "foundHashIndex");
+    iassert( shaderName );
+    iassert( foundHashIndex );
     hashTable = mtlLoadGlob.vertexShaderHashTable[renderer];
     for (hashIndex = R_HashAssetName(shaderName) & 0x7FF; hashTable[hashIndex]; hashIndex = (hashIndex + 1) & 0x7FF)
     {
@@ -1609,8 +1605,7 @@ void __cdecl Material_DeleteDirectory(const char *dirname)
 
 void __cdecl Material_SubtractDays(_SYSTEMTIME *sysTime, unsigned __int16 daysOld)
 {
-    if (daysOld > 0x14u)
-        MyAssertHandler(".\\r_material_load_obj.cpp", 3357, 0, "%s", "daysOld <= 20");
+    iassert( daysOld <= 20 );
     if (sysTime->wDay <= daysOld)
     {
         sysTime->wDay = sysTime->wDay + 28 - daysOld;
@@ -1709,8 +1704,7 @@ char __cdecl Material_FindCachedShader(
             && fread(shaderLen, 4u, 1u, cacheFile) == 1)
         {
             *cachedShader = Z_Malloc(*shaderLen, "Material_FindCachedShader", 31);
-            if (!*cachedShader)
-                MyAssertHandler(".\\r_material_load_obj.cpp", 3533, 0, "%s", "*cachedShader");
+            iassert( *cachedShader );
             fread(*cachedShader, 1u, *shaderLen, cacheFile);
             Z_Free(cachedShaderText, 31);
             fclose(cacheFile);
@@ -1977,8 +1971,7 @@ MaterialVertexShader *__cdecl Material_LoadVertexShader(char *shaderName, int sh
     if (!shader)
         return 0;
     programSize = shader->GetBufferSize();
-    if (!programSize)
-        MyAssertHandler(".\\r_material_load_obj.cpp", 3795, 0, "%s\n\t(programSize) = %i", "(programSize > 0)", 0);
+    iassert( (programSize > 0) );
     nameSize = strlen(shaderName) + 1;
     totalSize = programSize + nameSize + 16;
     mtlShader = (MaterialVertexShader*)Material_Alloc(totalSize);
@@ -2077,8 +2070,7 @@ int __cdecl Material_GetArgUpdateFrequency(const MaterialShaderArgument *arg)
     MaterialUpdateFrequency updateFreq; // [esp+4h] [ebp-4h]
     MaterialUpdateFrequency updateFreqa; // [esp+4h] [ebp-4h]
 
-    if (!arg)
-        MyAssertHandler(".\\r_material_load_obj.cpp", 5024, 0, "%s", "arg");
+    iassert( arg );
     type = arg->type;
     switch (type)
     {
@@ -2141,10 +2133,8 @@ char __cdecl Material_GetPixelShaderHashIndex(
     unsigned int hashIndex; // [esp+14h] [ebp-8h]
     MaterialPixelShader **hashTable; // [esp+18h] [ebp-4h]
 
-    if (!shaderName)
-        MyAssertHandler(".\\r_material_load_obj.cpp", 4443, 0, "%s", "shaderName");
-    if (!foundHashIndex)
-        MyAssertHandler(".\\r_material_load_obj.cpp", 4444, 0, "%s", "foundHashIndex");
+    iassert( shaderName );
+    iassert( foundHashIndex );
     hashTable = mtlLoadGlob.pixelShaderHashTable[renderer];
     for (hashIndex = R_HashAssetName(shaderName) & 0x7FF; hashTable[hashIndex]; hashIndex = (hashIndex + 1) & 0x7FF)
     {
@@ -2177,8 +2167,7 @@ MaterialPixelShader *__cdecl Material_LoadPixelShader(char *shaderName, int shad
     if (!shader)
         return 0;
     programSize = shader->GetBufferSize();
-    if (!programSize)
-        MyAssertHandler(".\\r_material_load_obj.cpp", 3901, 0, "%s\n\t(programSize) = %i", "(programSize > 0)", 0);
+    iassert( (programSize > 0) );
     nameSize = strlen(shaderName) + 1;
     totalSize = programSize + nameSize + 16;
     mtlShader = (MaterialPixelShader*)Material_Alloc(totalSize);
@@ -2381,10 +2370,8 @@ char __cdecl Material_SetShaderArguments(
 {
     unsigned int usedCounta; // [esp+8h] [ebp+8h]
 
-    if (!args)
-        MyAssertHandler(".\\r_material_load_obj.cpp", 2998, 0, "%s", "args");
-    if (!argCount)
-        MyAssertHandler(".\\r_material_load_obj.cpp", 2999, 0, "%s", "argCount");
+    iassert( args );
+    iassert( argCount );
     if (!usedCount)
         return 1;
     if (*argCount + usedCount <= argLimit)
@@ -2492,14 +2479,10 @@ char __cdecl Material_DefaultSamplerSourceFromTable(
 {
     int sourceIndex; // [esp+14h] [ebp-4h]
 
-    if (!constantName)
-        MyAssertHandler(".\\r_material_load_obj.cpp", 2573, 0, "%s", "constantName");
-    if (!sourceTable)
-        MyAssertHandler(".\\r_material_load_obj.cpp", 2574, 0, "%s", "sourceTable");
-    if (!indexRange)
-        MyAssertHandler(".\\r_material_load_obj.cpp", 2575, 0, "%s", "indexRange");
-    if (!argSource)
-        MyAssertHandler(".\\r_material_load_obj.cpp", 2576, 0, "%s", "argSource");
+    iassert( constantName );
+    iassert( sourceTable );
+    iassert( indexRange );
+    iassert( argSource );
     for (sourceIndex = 0; sourceTable[sourceIndex].name; ++sourceIndex)
     {
         if (!sourceTable[sourceIndex].subtable
@@ -2529,10 +2512,8 @@ bool __cdecl Material_DefaultArgumentSource(
     const ShaderIndexRange *indexRange,
     ShaderArgumentSource *argSource)
 {
-    if (!constantName)
-        MyAssertHandler(".\\r_material_load_obj.cpp", 2851, 0, "%s", "constantName");
-    if (!argSource)
-        MyAssertHandler(".\\r_material_load_obj.cpp", 2852, 0, "%s", "argSource");
+    iassert( constantName );
+    iassert( argSource );
     if (paramType == SHADER_PARAM_FLOAT4)
         return Material_DefaultConstantSource(shaderType, constantName, indexRange, argSource);
     if (paramType > SHADER_PARAM_FLOAT4 && paramType <= SHADER_PARAM_SAMPLER_CUBE)
@@ -2719,8 +2700,7 @@ bool __cdecl Material_AddShaderArgument(
 
     if (argSource->indexRange.isImplicit)
     {
-        if (argSource->indexRange.first)
-            MyAssertHandler(".\\r_material_load_obj.cpp", 3158, 0, "%s", "argSource->indexRange.first == 0");
+        iassert( argSource->indexRange.first == 0 );
         if (argDest->indexRange.count > argSource->indexRange.count)
         {
             Com_ScriptError(
@@ -2746,10 +2726,8 @@ bool __cdecl Material_AddShaderArgument(
     case 6u:
         if (argDest->indexRange.count == 1)
         {
-            if (argSource->indexRange.first)
-                MyAssertHandler(".\\r_material_load_obj.cpp", 3224, 0, "%s", "argSource->indexRange.first == 0");
-            if (argSource->indexRange.count != 1)
-                MyAssertHandler(".\\r_material_load_obj.cpp", 3225, 0, "%s", "argSource->indexRange.count == 1");
+            iassert( argSource->indexRange.first == 0 );
+            iassert( argSource->indexRange.count == 1 );
             destc = Material_GetShaderArgumentDest(argDest->paramName, argDest->indexRange.first, paramTable, paramCount);
             if (destc)
             {
@@ -2892,8 +2870,7 @@ unsigned int __cdecl Material_ElemCountForParamName(
             *paramType = paramTable[paramIndex].type;
             if (count <= paramTable[paramIndex].index)
                 count = paramTable[paramIndex].index + 1;
-            if (!count)
-                MyAssertHandler(".\\r_material_load_obj.cpp", 2811, 0, "%s", "count > 0");
+            iassert( count > 0 );
         }
     }
     return count;
@@ -2965,12 +2942,9 @@ bool __cdecl Material_ParseVector(const char **text, int elemCount, float *vecto
 
 char __cdecl Material_ParseLiteral(const char **text, const char *token, float *literal)
 {
-    if (!text)
-        MyAssertHandler(".\\r_material_load_obj.cpp", 2626, 0, "%s", "text");
-    if (!token)
-        MyAssertHandler(".\\r_material_load_obj.cpp", 2627, 0, "%s", "token");
-    if (!literal)
-        MyAssertHandler(".\\r_material_load_obj.cpp", 2628, 0, "%s", "literal");
+    iassert( text );
+    iassert( token );
+    iassert( literal );
     *literal = 0.0;
     literal[1] = 0.0;
     literal[2] = 0.0;
@@ -3033,12 +3007,9 @@ bool __cdecl Material_ParseCodeConstantSource_r(
     int additionalOffset; // [esp+18h] [ebp-8h] BYREF
     const char *token; // [esp+1Ch] [ebp-4h]
 
-    if (!text)
-        MyAssertHandler(".\\r_material_load_obj.cpp", 2656, 0, "%s", "text");
-    if (!sourceTable)
-        MyAssertHandler(".\\r_material_load_obj.cpp", 2657, 0, "%s", "sourceTable");
-    if (!argSource)
-        MyAssertHandler(".\\r_material_load_obj.cpp", 2658, 0, "%s", "argSource");
+    iassert( text );
+    iassert( sourceTable );
+    iassert( argSource );
     if (!Material_MatchToken(text, "."))
         return 0;
     token = Com_Parse(text)->token;
@@ -3233,10 +3204,8 @@ bool __cdecl Material_CodeSamplerSource_r(
     int additionalOffset; // [esp+18h] [ebp-8h] BYREF
     const char *token; // [esp+1Ch] [ebp-4h]
 
-    if (!text)
-        MyAssertHandler(".\\r_material_load_obj.cpp", 2499, 0, "%s", "text");
-    if (!sourceTable)
-        MyAssertHandler(".\\r_material_load_obj.cpp", 2500, 0, "%s", "sourceTable");
+    iassert( text );
+    iassert( sourceTable );
     if (!Material_MatchToken(text, "."))
         return 0;
     token = Com_Parse(text)->token;
@@ -3331,14 +3300,10 @@ bool __cdecl Material_ParseArgumentSource(
 {
     const char *v6; // eax
 
-    if (!text)
-        MyAssertHandler(".\\r_material_load_obj.cpp", 2823, 0, "%s", "text");
-    if (!*text)
-        MyAssertHandler(".\\r_material_load_obj.cpp", 2824, 0, "%s", "*text");
-    if (!shaderName)
-        MyAssertHandler(".\\r_material_load_obj.cpp", 2825, 0, "%s", "shaderName");
-    if (!argSource)
-        MyAssertHandler(".\\r_material_load_obj.cpp", 2826, 0, "%s", "argSource");
+    iassert( text );
+    iassert( *text );
+    iassert( shaderName );
+    iassert( argSource );
     if (!Material_MatchToken(text, "="))
         return 0;
     if (paramType == SHADER_PARAM_FLOAT4)
@@ -3376,10 +3341,8 @@ char __cdecl Material_ParseShaderArguments(
     char registerUsage[32][64]; // [esp+238h] [ebp-808h] BYREF
 
     memset(registerUsage, 0, sizeof(registerUsage));
-    if (!techFlags)
-        MyAssertHandler(".\\r_material_load_obj.cpp", 3256, 0, "%s", "techFlags");
-    if (!paramTable)
-        MyAssertHandler(".\\r_material_load_obj.cpp", 3257, 0, "%s", "paramTable");
+    iassert( techFlags );
+    iassert( paramTable );
     usedCount = 0;
     if (!Material_MatchToken(text, "{"))
         return 0;
@@ -3565,8 +3528,7 @@ char __cdecl Material_SetPassShaderArguments_DX(
     hr = D3DXGetShaderConstantTable((const DWORD*)program, &constants);
     if (hr >= 0)
     {
-        if (!constants)
-            MyAssertHandler(".\\r_material_load_obj.cpp", 4764, 0, "%s", "constants");
+        iassert( constants );
         constantTable = (_D3DXSHADER_CONSTANTTABLE*)constants->GetBufferPointer();
         paramSet->uniformInputCount = Material_PrepareToParseShaderArguments(constantTable, paramSet->uniformInputs);
         success = Material_ParseShaderArguments(
@@ -3911,8 +3873,7 @@ MaterialVertexDeclaration *__cdecl Material_AllocVertexDecl(
     MaterialVertexDeclaration *mvd; // [esp+Ch] [ebp-8h]
     int routingIndex; // [esp+10h] [ebp-4h]
 
-    if (!streamCount)
-        MyAssertHandler(".\\r_material_load_obj.cpp", 1224, 0, "%s", "streamCount");
+    iassert( streamCount );
     hashIndex = Material_HashVertexDecl(routingData, streamCount);
     for (mvd = &mtlLoadGlob.vertexDeclHashTable[hashIndex];
         mvd->streamCount;
@@ -4025,8 +3986,7 @@ char __cdecl Material_LoadPassVertexDecl(
 
 char __cdecl Material_LoadDeclTypes(const char **text, MaterialPass *pass)
 {
-    if (!pass->vertexShader)
-        MyAssertHandler(".\\r_material_load_obj.cpp", 4842, 0, "%s", "pass->vertexShader");
+    iassert( pass->vertexShader );
     return 1;
 }
 
@@ -4087,8 +4047,7 @@ bool __cdecl Material_LoadPass(
                         "%s\n\t(customArg->type) = %i",
                         "(customArg->type == MTL_ARG_CODE_PIXEL_SAMPLER)",
                         customArg->type);
-                if (customArg->dest == 255)
-                    MyAssertHandler(".\\r_material_load_obj.cpp", 5137, 0, "%s", "customArg->dest != SAMPLER_INDEX_INVALID");
+                iassert( customArg->dest != SAMPLER_INDEX_INVALID );
                 for (customSamplerIndex = 0; customSamplerIndex < 3; ++customSamplerIndex)
                 {
                     if (customArg->u.codeSampler == g_customSamplerSrc[customSamplerIndex])
@@ -4111,8 +4070,7 @@ bool __cdecl Material_LoadPass(
                         break;
                     }
                 }
-                if (customSamplerIndex == 3)
-                    MyAssertHandler(".\\r_material_load_obj.cpp", 5150, 0, "%s", "customSamplerIndex != CUSTOM_SAMPLER_COUNT");
+                iassert( customSamplerIndex != CUSTOM_SAMPLER_COUNT );
                 ++customArgIndex;
                 ++customArg;
             }
@@ -4122,19 +4080,15 @@ bool __cdecl Material_LoadPass(
             arg = pass->args;
             for (argIndex = 0; argIndex < pass->perPrimArgCount; ++argIndex)
             {
-                if (arg->type < 3u)
-                    MyAssertHandler(".\\r_material_load_obj.cpp", 5166, 0, "%s", "arg->type >= MTL_ARG_CODE_PRIM_BEGIN");
-                if (arg->type >= 6u)
-                    MyAssertHandler(".\\r_material_load_obj.cpp", 5167, 0, "%s", "arg->type < MTL_ARG_CODE_PRIM_END");
+                iassert( arg->type >= MTL_ARG_CODE_PRIM_BEGIN );
+                iassert( arg->type < MTL_ARG_CODE_PRIM_END );
                 ++arg;
             }
             arg = &pass->args[pass->perPrimArgCount];
             for (argIndexa = 0; argIndexa < pass->perObjArgCount; ++argIndexa)
             {
-                if (arg->type < 3u)
-                    MyAssertHandler(".\\r_material_load_obj.cpp", 5173, 0, "%s", "arg->type >= MTL_ARG_CODE_PRIM_BEGIN");
-                if (arg->type >= 6u)
-                    MyAssertHandler(".\\r_material_load_obj.cpp", 5174, 0, "%s", "arg->type < MTL_ARG_CODE_PRIM_END");
+                iassert( arg->type >= MTL_ARG_CODE_PRIM_BEGIN );
+                iassert( arg->type < MTL_ARG_CODE_PRIM_END );
                 ++arg;
             }
             if (Material_ValidateShaderLinkage(
@@ -4248,8 +4202,7 @@ MaterialTechnique *__cdecl Material_LoadTechnique(char *name, GfxRenderer render
             for (passIndex = 0; passIndex < passCount; ++passIndex)
             {
                 vertexDecl = passes[passIndex].vertexDecl;
-                if (!vertexDecl)
-                    MyAssertHandler(".\\r_material_load_obj.cpp", 5293, 0, "%s", "vertexDecl");
+                iassert( vertexDecl );
                 if (vertexDecl->hasOptionalSource)
                 {
                     *(technique + 2) |= 8u;
@@ -4407,11 +4360,9 @@ void __cdecl Material_SetTechniqueSet(const char *name, MaterialTechniqueSet *te
 {
     int hashIndex; // [esp+0h] [ebp-4h] BYREF
 
-    if (!name)
-        MyAssertHandler(".\\r_material.cpp", 877, 0, "%s", "name");
+    iassert( name );
     MaterialTechniqueSet_FindHashLocation(name, &hashIndex);
-    if (!techniqueSet->name)
-        MyAssertHandler(".\\r_material.cpp", 879, 0, "%s", "techniqueSet->name");
+    iassert( techniqueSet->name );
     materialGlobals.techniqueSetHashTable[hashIndex] = techniqueSet;
 }
 
@@ -4585,24 +4536,20 @@ MaterialTechniqueSet *__cdecl Material_FindTechniqueSet_LoadObj(
     MaterialTechniqueSet *defaultTechSet; // [esp+0h] [ebp-8h]
     int hashIndex; // [esp+4h] [ebp-4h] BYREF
 
-    if (!name)
-        MyAssertHandler(".\\r_material.cpp", 839, 0, "%s", "name");
+    iassert( name );
     if (MaterialTechniqueSet_FindHashLocation(name, &hashIndex))
         return materialGlobals.techniqueSetHashTable[hashIndex];
     if (notFoundBehavior == MTL_TECHSET_NOT_FOUND_RETURN_NULL)
         return 0;
     defaultTechSet = Material_RegisterTechniqueSet("default");
-    if (!defaultTechSet)
-        MyAssertHandler(".\\r_material.cpp", 847, 0, "%s", "defaultTechSet");
+    iassert( defaultTechSet );
     return defaultTechSet;
 }
 
 void __cdecl Material_GetInfo(Material *handle, MaterialInfo *matInfo)
 {
-    if (!handle)
-        MyAssertHandler(".\\r_material_load_obj.cpp", 6907, 0, "%s", "handle");
-    if (!matInfo)
-        MyAssertHandler(".\\r_material_load_obj.cpp", 6908, 0, "%s", "matInfo");
+    iassert( handle );
+    iassert( matInfo );
     *matInfo = Material_FromHandle(handle)->info;
 }
 
@@ -4618,10 +4565,8 @@ Material *__cdecl Material_Duplicate(Material *mtlCopy, char *name)
     unsigned int textureTableSize; // [esp+30h] [ebp-8h]
     unsigned int stateBitsTableSize; // [esp+34h] [ebp-4h]
 
-    if (!mtlCopy)
-        MyAssertHandler(".\\r_material.cpp", 1110, 0, "%s", "mtlCopy");
-    if (!name)
-        MyAssertHandler(".\\r_material.cpp", 1111, 0, "%s", "name");
+    iassert( mtlCopy );
+    iassert( name );
     Material_GetHashIndex(name, hashIndex, &exists);
     if (exists)
     {
@@ -4673,8 +4618,7 @@ Material *__cdecl R_GetBspMaterial(unsigned int materialIndex)
             materialIndex,
             1224);
     name = &rgl.load.diskMaterials[materialIndex];
-    if (!name->material[0])
-        MyAssertHandler(".\\r_bsp_load_obj.cpp", 229, 0, "%s", "name[0]");
+    //iassert( name[0] );
     if (!strcmp(name->material, "noshader"))
         MyAssertHandler(".\\r_bsp_load_obj.cpp", 230, 0, "%s", "strcmp( name, \"noshader\" )");
     if (!strcmp(name->material, "$default"))
@@ -4694,8 +4638,7 @@ bool __cdecl Material_HasNormalMap(const Material *mtl)
     unsigned int texIndex; // [esp+14h] [ebp-8h]
     unsigned int normalMapNameHash; // [esp+18h] [ebp-4h]
 
-    if (!mtl)
-        MyAssertHandler(".\\r_material_load_obj.cpp", 6394, 0, "%s", "mtl");
+    iassert( mtl );
     normalMapNameHash = R_HashString("normalMap");
     for (texIndex = 0; ; ++texIndex)
     {
@@ -4704,10 +4647,8 @@ bool __cdecl Material_HasNormalMap(const Material *mtl)
         if (mtl->textureTable[texIndex].nameHash == normalMapNameHash)
             break;
     }
-    if (mtl->textureTable[texIndex].nameStart != 110)
-        MyAssertHandler(".\\r_material_load_obj.cpp", 6402, 0, "%s", "mtl->textureTable[texIndex].nameStart == 'n'");
-    if (mtl->textureTable[texIndex].nameEnd != 112)
-        MyAssertHandler(".\\r_material_load_obj.cpp", 6403, 0, "%s", "mtl->textureTable[texIndex].nameEnd == 'p'");
+    iassert( mtl->textureTable[texIndex].nameStart == 'n' );
+    iassert( mtl->textureTable[texIndex].nameEnd == 'p' );
     if (mtl->textureTable[texIndex].semantic != 5)
         MyAssertHandler(
             ".\\r_material_load_obj.cpp",
@@ -4891,8 +4832,7 @@ void __cdecl Material_GetLayeredStateBits(
     unsigned int layerEntry; // [esp+4h] [ebp-8h]
     unsigned int layerIndex; // [esp+8h] [ebp-4h]
 
-    if ((*layerMtl)->stateBitsEntry[techType] == 255)
-        MyAssertHandler(".\\r_material_load_obj.cpp", 6168, 0, "%s", "layerMtl[0]->stateBitsEntry[techType] != UCHAR_MAX");
+    iassert( layerMtl[0]->stateBitsEntry[techType] != UCHAR_MAX );
     srcStateBitsa = &(*layerMtl)->stateBitsTable[(*layerMtl)->stateBitsEntry[techType]];
     *stateBits = srcStateBitsa->loadBits[0];
     stateBits[1] = srcStateBitsa->loadBits[1];
@@ -4950,8 +4890,7 @@ unsigned __int8 __cdecl Material_AddStateBitsArrayToTable(
         &(*stateBitsForPass)[2 * partialMatchCount],
         8 * (passCount - partialMatchCount));
     *stateBitsCount += passCount - partialMatchCount;
-    if (scan != scan)
-        MyAssertHandler(".\\r_material_load_obj.cpp", 5703, 0, "scan == static_cast< byte >( scan )\n\t%i, %i", scan, scan);
+    iassert(scan == static_cast<byte>(scan));
     return scan;
 }
 
@@ -5208,8 +5147,7 @@ Material *__cdecl Material_LoadLayered(char *assetName)
     const Material *mtl[5]; // [esp+20h] [ebp-18h] BYREF
     MaterialTechniqueSet *techSet; // [esp+34h] [ebp-4h]
 
-    if (*assetName != 42)
-        MyAssertHandler(".\\r_material_load_obj.cpp", 6533, 0, "%s", "assetName[0] == '*'");
+    iassert( assetName[0] == '*' );
     name = assetName + 1;
     layerCount = 0;
     hasError = 0;
@@ -5219,8 +5157,7 @@ Material *__cdecl Material_LoadLayered(char *assetName)
         bspMaterialIndex = 0;
         while (isdigit(*name))
             bspMaterialIndex = 10 * bspMaterialIndex + *name++ - 48;
-        if (layerCount >= 5)
-            MyAssertHandler(".\\r_material_load_obj.cpp", 6547, 0, "%s", "layerCount < MTL_LAYER_LIMIT");
+        iassert( layerCount < MTL_LAYER_LIMIT );
         mtl[layerCount] = R_GetBspMaterial(bspMaterialIndex);
         if (bspVersion < 10)
         {
@@ -5273,8 +5210,7 @@ Material *__cdecl Material_LoadLayered(char *assetName)
         ++layerCount;
         if (!*name)
             break;
-        if (*name != 95)
-            MyAssertHandler(".\\r_material_load_obj.cpp", 6579, 0, "%s", "*name == '_'");
+        iassert( *name == '_' );
         ++name;
     }
     if (hasError)
@@ -5472,8 +5408,7 @@ BOOL __cdecl Material_FinishLoadingTexdef(
     unsigned int materialType,
     int imageTrack)
 {
-    if (!texdef)
-        MyAssertHandler(".\\r_material_load_obj.cpp", 5357, 0, "%s", "texdef");
+    iassert( texdef );
     if (material->info.sortKey == 4
         && R_IsWorldMaterialType(materialType)
         && (texdef->samplerState & 0x18) == 8
@@ -5501,8 +5436,7 @@ bool __cdecl Material_FinishLoadingInstance(
     MaterialTextureDefRaw *textureTable; // [esp+110h] [ebp-8h]
     int textureIndex; // [esp+114h] [ebp-4h]
 
-    if (!mtlRaw)
-        MyAssertHandler(".\\r_material_load_obj.cpp", 6111, 0, "%s", "mtlRaw");
+    iassert( mtlRaw );
     if (mtlRaw->info.sortKey >= 0x40u)
         MyAssertHandler(
             ".\\r_material_load_obj.cpp",
@@ -5595,8 +5529,7 @@ unsigned int __cdecl Material_GetCullFlags(Material *material)
 
     cullFlags = -1;
     techniqueSet = material->techniqueSet;
-    if (!techniqueSet)
-        MyAssertHandler(".\\r_material_load_obj.cpp", 5721, 0, "%s", "techniqueSet");
+    iassert( techniqueSet );
     for (techType = 7; techType < 0x15; ++techType)
     {
         if (techniqueSet->techniques[techType])
@@ -5635,8 +5568,7 @@ unsigned int __cdecl Material_GetCullShadowFlags(Material *material)
     MaterialTechniqueSet *techniqueSet; // [esp+Ch] [ebp-8h]
 
     techniqueSet = material->techniqueSet;
-    if (!techniqueSet)
-        MyAssertHandler(".\\r_material_load_obj.cpp", 5758, 0, "%s", "techniqueSet");
+    iassert( techniqueSet );
     if (!techniqueSet->techniques[2])
         return 0;
     cullBits = material->stateBitsTable[material->stateBitsEntry[2]].loadBits[0] & 0xC000;
@@ -5655,8 +5587,7 @@ int __cdecl Material_GetDecalFlags(const Material *mtl)
     if (!mtl->stateBitsTable)
         return 0;
     techniqueSet = mtl->techniqueSet;
-    if (!techniqueSet)
-        MyAssertHandler(".\\r_material_load_obj.cpp", 5786, 0, "%s", "techniqueSet");
+    iassert( techniqueSet );
     if (techniqueSet->techniques[4])
         v2 = mtl->stateBitsEntry[4];
     else
@@ -5672,8 +5603,7 @@ int __cdecl Material_GetWritesDepthFlags(const Material *mtl)
     if (!mtl->stateBitsTable)
         return 0;
     techniqueSet = mtl->techniqueSet;
-    if (!techniqueSet)
-        MyAssertHandler(".\\r_material_load_obj.cpp", 5802, 0, "%s", "techniqueSet");
+    iassert( techniqueSet );
     if (techniqueSet->techniques[4])
         v2 = mtl->stateBitsEntry[4];
     else
@@ -5690,8 +5620,7 @@ unsigned int __cdecl Material_GetUsesDepthBufferFlags(const Material *mtl)
     unsigned int passIndex; // [esp+10h] [ebp-4h]
 
     techniqueSet = mtl->techniqueSet;
-    if (!techniqueSet)
-        MyAssertHandler(".\\r_material_load_obj.cpp", 5818, 0, "%s", "techniqueSet");
+    iassert( techniqueSet );
     for (techType = 0; techType < 0x22; ++techType)
     {
         technique = techniqueSet->techniques[techType];
@@ -5718,8 +5647,7 @@ unsigned int __cdecl Material_GetUsesStencilBufferFlags(const Material *mtl)
     unsigned int passIndex; // [esp+10h] [ebp-4h]
 
     techniqueSet = mtl->techniqueSet;
-    if (!techniqueSet)
-        MyAssertHandler(".\\r_material_load_obj.cpp", 5849, 0, "%s", "techniqueSet");
+    iassert( techniqueSet );
     for (techType = 0; techType < 0x22; ++techType)
     {
         technique = techniqueSet->techniques[techType];
@@ -5817,8 +5745,7 @@ unsigned int __cdecl Material_GetTechniqueSetDrawRegion(MaterialTechniqueSet *te
     int techTypeIter; // [esp+4h] [ebp-Ch]
     unsigned int cameraRegion; // [esp+Ch] [ebp-4h]
 
-    if (!techniqueSet)
-        MyAssertHandler(".\\r_material_load_obj.cpp", 5488, 0, "%s", "techniqueSet");
+    iassert( techniqueSet );
     if (techniqueSet->techniques[7])
     {
         cameraRegion = 0;
@@ -5970,8 +5897,7 @@ Material *__cdecl Material_LoadRaw(const MaterialRaw *mtlRaw, unsigned int mater
     Material_SetMaterialDrawRegion(material);
     if (!Material_Validate(material))
         return 0;
-    if (!material->techniqueSet)
-        MyAssertHandler(".\\r_material_load_obj.cpp", 6778, 0, "%s", "material->techniqueSet");
+    iassert( material->techniqueSet );
     if ((material->info.gameFlags & 0x40) != 0)
         MyAssertHandler(
             ".\\r_material_load_obj.cpp",
@@ -5997,10 +5923,8 @@ Material *__cdecl Material_Load(char *assetName, int imageTrack)
     unsigned int materialType; // [esp+10h] [ebp-8h]
     unsigned int prefixLen; // [esp+14h] [ebp-4h]
 
-    if (!assetName)
-        MyAssertHandler(".\\r_material_load_obj.cpp", 6796, 0, "%s", "assetName");
-    if (!*assetName)
-        MyAssertHandler(".\\r_material_load_obj.cpp", 6797, 0, "%s", "assetName[0]");
+    iassert( assetName );
+    iassert( assetName[0] );
     if (*assetName == 42)
         return Material_LoadLayered(assetName);
     for (materialType = 1; materialType < 5; ++materialType)
@@ -6051,8 +5975,7 @@ void __cdecl Material_PreLoadSingleShaderText(const char *filename, const char *
 
     Com_sprintf(filepath, 0x40u, "shaders/%s%s", subdir, filename);
     fileSize = FS_FOpenFileRead(filepath, &fileHandle);
-    if (fileSize < 0)
-        MyAssertHandler(".\\r_material_load_obj.cpp", 6854, 0, "%s", "fileSize >= 0");
+    iassert( fileSize >= 0 );
     buffer = (char*)Hunk_AllocAlign(strlen(subdir) + fileSize + strlen(filename) + 2, 1, "Material_PreLoadSingleShaderText", 22);
     cached->name = buffer;
     buffera = &buffer[sprintf(buffer, "%s%s", subdir, filename) + 1];
@@ -6139,8 +6062,7 @@ void __cdecl Material_FreeAll()
 
 void __cdecl Material_GetVertexShaderName(char *dest, const MaterialPass *pass, int destsize)
 {
-    if (!pass->vertexShader)
-        MyAssertHandler(".\\r_material_load_obj.cpp", 6975, 0, "%s", "pass->vertexShader");
+    iassert( pass->vertexShader );
     I_strncpyz(dest, pass->vertexShader->name, destsize);
 }
 
@@ -6150,8 +6072,7 @@ unsigned int __cdecl R_DrawSurfStandardPrepassSortKey(const Material *material)
     const MaterialTechnique *prepassTech; // [esp+4h] [ebp-4h]
 
     techSet = material->techniqueSet;
-    if (!techSet)
-        MyAssertHandler(".\\r_material_load_obj.cpp", 6927, 0, "%s", "techSet");
+    iassert( techSet );
     prepassTech = techSet->techniques[0];
     if (prepassTech)
     {
@@ -6328,10 +6249,8 @@ int __cdecl Material_ComparePixelConsts(const Material *mtl0, const Material *mt
 
     techniqueLit[0] = Material_GetTechnique(mtl0, techType);
     techniqueLit[1] = Material_GetTechnique(mtl1, techType);
-    if (!techniqueLit[0])
-        MyAssertHandler(".\\r_material_load_obj.cpp", 6990, 0, "%s", "techniqueLit[0]");
-    if (!techniqueLit[1])
-        MyAssertHandler(".\\r_material_load_obj.cpp", 6991, 0, "%s", "techniqueLit[1]");
+    iassert( techniqueLit[0] );
+    iassert( techniqueLit[1] );
     mtl[0] = mtl0;
     mtl[1] = mtl1;
     pass[0] = techniqueLit[0]->passArray;
@@ -6359,14 +6278,11 @@ INT __cdecl Material_Compare(const void *arg0, const void *arg1)
     Material *mtl0 = *(Material **)arg0;
     Material *mtl1 = *(Material **)arg1;
 
-    if (!mtl0)
-        MyAssertHandler(".\\r_material_load_obj.cpp", 7022, 0, "%s", "mtl0");
-    if (!mtl1)
-        MyAssertHandler(".\\r_material_load_obj.cpp", 7023, 0, "%s", "mtl1");
+    iassert( mtl0 );
+    iassert( mtl1 );
     techSet[0] = Material_GetTechniqueSet(mtl0);
     techSet[1] = Material_GetTechniqueSet(mtl1);
-    if (!techSet[0] || !techSet[1])
-        MyAssertHandler(".\\r_material_load_obj.cpp", 7039, 0, "%s", "techSet[0] && techSet[1]");
+    iassert( techSet[0] && techSet[1] );
     techniqueLit = Material_GetTechnique(mtl0, TECHNIQUE_LIT_BEGIN);
     techniqueLit_4 = Material_GetTechnique(mtl1, TECHNIQUE_LIT_BEGIN);
     hasTechniqueLit[0] = techniqueLit != 0;
@@ -6382,10 +6298,8 @@ INT __cdecl Material_Compare(const void *arg0, const void *arg1)
     hasTechniqueEmissive[1] = techniqueEmissive_4 != 0;
     if (hasTechniqueLit[0])
     {
-        if (hasTechniqueEmissive[0])
-            MyAssertHandler(".\\r_material_load_obj.cpp", 7062, 0, "%s", "!hasTechniqueEmissive[0]");
-        if (hasTechniqueEmissive[1])
-            MyAssertHandler(".\\r_material_load_obj.cpp", 7063, 0, "%s", "!hasTechniqueEmissive[1]");
+        iassert( !hasTechniqueEmissive[0] );
+        iassert( !hasTechniqueEmissive[1] );
         comparison = mtl0->info.sortKey - mtl1->info.sortKey;
         if (comparison)
             return comparison < 0;
@@ -6395,10 +6309,8 @@ INT __cdecl Material_Compare(const void *arg0, const void *arg1)
     }
     else
     {
-        if (hasLightmap[0])
-            MyAssertHandler(".\\r_material_load_obj.cpp", 7076, 0, "%s", "!hasLightmap[0]");
-        if (hasLightmap[1])
-            MyAssertHandler(".\\r_material_load_obj.cpp", 7077, 0, "%s", "!hasLightmap[1]");
+        iassert( !hasLightmap[0] );
+        iassert( !hasLightmap[1] );
         comparison = hasTechniqueEmissive[1] - hasTechniqueEmissive[0];
         if (hasTechniqueEmissive[1] != hasTechniqueEmissive[0])
             return comparison < 0;
@@ -6452,11 +6364,9 @@ INT __cdecl Material_Compare(const void *arg0, const void *arg1)
     comparison = strcmp(techSet[0]->name, techSet[1]->name);
     if (comparison)
         return comparison < 0;
-    if (mtl0 == mtl1)
-        MyAssertHandler(".\\r_material_load_obj.cpp", 7145, 0, "%s", "mtl0 != mtl1");
+    iassert( mtl0 != mtl1 );
     comparison = strcmp(mtl0->info.name, mtl1->info.name);
-    if (!comparison)
-        MyAssertHandler(".\\r_material_load_obj.cpp", 7147, 0, "%s", "comparison");
+    iassert( comparison );
     return comparison < 0;
 }
 

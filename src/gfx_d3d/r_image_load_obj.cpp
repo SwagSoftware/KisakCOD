@@ -21,8 +21,7 @@ unsigned __int8 *__cdecl Image_AllocTempMemory(int bytes)
     if (!s_imageLoadBuf)
     {
         s_imageLoadBuf = (unsigned __int8 *)Z_VirtualAlloc(6291456, "Image_AllocTempMemory", 18);
-        if (!s_imageLoadBuf)
-            MyAssertHandler(".\\r_image_load_obj.cpp", 207, 0, "%s", "s_imageLoadBuf");
+        iassert( s_imageLoadBuf );
     }
     mem = &s_imageLoadBuf[s_imageLoadBytesUsed];
     s_imageLoadBytesUsed += bytesa;
@@ -31,18 +30,14 @@ unsigned __int8 *__cdecl Image_AllocTempMemory(int bytes)
 
 void __cdecl Image_FreeTempMemory(unsigned __int8 *mem, int bytes)
 {
-    unsigned int bytesa; // [esp+Ch] [ebp+Ch]
-
-    bytesa = (bytes + 3) & 0xFFFFFFFC;
-    if (&mem[bytesa] != &s_imageLoadBuf[s_imageLoadBytesUsed])
-        MyAssertHandler(".\\r_image_load_obj.cpp", 224, 0, "%s", "mem + bytes == s_imageLoadBuf + s_imageLoadBytesUsed");
-    s_imageLoadBytesUsed -= bytesa;
+    bytes = (bytes + 3) & 0xFFFFFFFC;
+    iassert( mem + bytes == s_imageLoadBuf + s_imageLoadBytesUsed );
+    s_imageLoadBytesUsed -= bytes;
 }
 
 void __cdecl Image_Generate2D(GfxImage *image, unsigned __int8 *pixels, int width, int height, _D3DFORMAT imageFormat)
 {
-    if (!pixels)
-        MyAssertHandler(".\\r_image_load_obj.cpp", 860, 0, "%s", "pixels");
+    iassert( pixels );
     if (width <= 0 || (width & (width - 1)) != 0)
         MyAssertHandler(
             ".\\r_image_load_obj.cpp",
@@ -60,19 +55,15 @@ void __cdecl Image_Generate2D(GfxImage *image, unsigned __int8 *pixels, int widt
             "(height > 0 && (((height) & ((height) - 1)) == 0))",
             height);
     Image_Setup(image, width, height, 1, 3, imageFormat);
-    if (image->cardMemory.platform[0] <= 0)
-        MyAssertHandler(".\\r_image_load_obj.cpp", 867, 0, "%s", "image->cardMemory.platform[PICMIP_PLATFORM_USED] > 0");
+    iassert( image->cardMemory.platform[PICMIP_PLATFORM_USED] > 0 );
     Image_UploadData(image, imageFormat, D3DCUBEMAP_FACE_POSITIVE_X, 0, pixels);
 }
 
 void __cdecl Image_ExpandBgr(const unsigned __int8 *src, unsigned int count, unsigned __int8 *dst)
 {
-    if (!src)
-        MyAssertHandler(".\\r_image_load_obj.cpp", 160, 0, "%s", "src");
-    if (!dst)
-        MyAssertHandler(".\\r_image_load_obj.cpp", 161, 0, "%s", "dst");
-    if (!count)
-        MyAssertHandler(".\\r_image_load_obj.cpp", 162, 0, "%s\n\t(count) = %i", "(count > 0)", 0);
+    iassert( src );
+    iassert( dst );
+    iassert( (count > 0) );
     do
     {
         *dst = *src;
@@ -239,10 +230,8 @@ void __cdecl Image_SetupFromFile(GfxImage *image, const GfxImageFileHeader *file
     unsigned int v5; // [esp+8h] [ebp-24h]
     unsigned __int8 picmip; // [esp+28h] [ebp-4h]
 
-    if (!image)
-        MyAssertHandler(".\\r_image_load_obj.cpp", 130, 0, "%s", "image");
-    if (!fileHeader)
-        MyAssertHandler(".\\r_image_load_obj.cpp", 131, 0, "%s", "fileHeader");
+    iassert( image );
+    iassert( fileHeader );
     picmip = image->picmip.platform[0];
     if ((int)((unsigned int)fileHeader->dimensions[0] >> picmip) > 1)
         v5 = (unsigned int)fileHeader->dimensions[0] >> picmip;
@@ -257,8 +246,7 @@ void __cdecl Image_SetupFromFile(GfxImage *image, const GfxImageFileHeader *file
     else
         v3 = 1;
     Image_Setup(image, v5, v4, v3, fileHeader->flags, imageFormat);
-    if (image->cardMemory.platform[0] <= 0)
-        MyAssertHandler(".\\r_image_load_obj.cpp", 142, 0, "%s", "image->cardMemory.platform[PICMIP_PLATFORM_USED] > 0");
+    iassert( image->cardMemory.platform[PICMIP_PLATFORM_USED] > 0 );
 }
 
 GfxImage *__cdecl Image_FindExisting_LoadObj(const char *name)
@@ -289,8 +277,7 @@ void __cdecl Image_Generate3D(
     int depth,
     _D3DFORMAT imageFormat)
 {
-    if (!pixels)
-        MyAssertHandler(".\\r_image_load_obj.cpp", 895, 0, "%s", "pixels");
+    iassert( pixels );
     if (width <= 0 || (width & (width - 1)) != 0)
         MyAssertHandler(
             ".\\r_image_load_obj.cpp",
@@ -316,8 +303,7 @@ void __cdecl Image_Generate3D(
             "(depth > 0 && (((depth) & ((depth) - 1)) == 0))",
             depth);
     Image_Setup(image, width, height, depth, 11, imageFormat);
-    if (image->cardMemory.platform[0] <= 0)
-        MyAssertHandler(".\\r_image_load_obj.cpp", 903, 0, "%s", "image->cardMemory.platform[PICMIP_PLATFORM_USED] > 0");
+    iassert( image->cardMemory.platform[PICMIP_PLATFORM_USED] > 0 );
     Image_UploadData(image, imageFormat, D3DCUBEMAP_FACE_POSITIVE_X, 0, pixels);
 }
 
@@ -333,20 +319,15 @@ void __cdecl Image_GenerateCube(
     unsigned int faceIndex; // [esp+8h] [ebp-8h]
     unsigned __int8 imageFlags; // [esp+Fh] [ebp-1h]
 
-    if (!pixels)
-        MyAssertHandler(".\\r_image_load_obj.cpp", 936, 0, "%s", "pixels");
-    if (edgeLen <= 0)
-        MyAssertHandler(".\\r_image_load_obj.cpp", 937, 0, "%s", "edgeLen > 0");
-    if ((edgeLen & (edgeLen - 1)) != 0)
-        MyAssertHandler(".\\r_image_load_obj.cpp", 938, 0, "%s", "IsPowerOf2( edgeLen )");
-    if (mipCount > 0xF)
-        MyAssertHandler(".\\r_image_load_obj.cpp", 939, 0, "%s", "mipCount <= 15");
+    iassert( pixels );
+    iassert( edgeLen > 0 );
+    iassert( IsPowerOf2( edgeLen ) );
+    iassert( mipCount <= 15 );
     imageFlags = 5;
     if (mipCount == 1)
         imageFlags = 7;
     Image_Setup(image, edgeLen, edgeLen, 1, imageFlags, imageFormat);
-    if (image->cardMemory.platform[0] <= 0)
-        MyAssertHandler(".\\r_image_load_obj.cpp", 948, 0, "%s", "image->cardMemory.platform[PICMIP_PLATFORM_USED] > 0");
+    iassert( image->cardMemory.platform[PICMIP_PLATFORM_USED] > 0 );
     for (faceIndex = 0; faceIndex < 6; ++faceIndex)
     {
         face = (_D3DCUBEMAP_FACES)Image_CubemapFace(faceIndex);
@@ -357,8 +338,7 @@ void __cdecl Image_GenerateCube(
 
 void __cdecl Image_BuildWaterMap(GfxImage *image)
 {
-    if (!image)
-        MyAssertHandler(".\\r_image_load_obj.cpp", 1149, 0, "%s", "image");
+    iassert( image );
     Image_SetupAndLoad(image, image->width, image->height, 1, 65537, D3DFMT_L8);
 }
 
@@ -378,12 +358,9 @@ void __cdecl Image_LoadDxtc(
     int mipLevel; // [esp+2Ch] [ebp-8h]
     int picmip; // [esp+30h] [ebp-4h]
 
-    if (!image)
-        MyAssertHandler(".\\r_image_load_obj.cpp", 385, 0, "%s", "image");
-    if (!fileHeader)
-        MyAssertHandler(".\\r_image_load_obj.cpp", 386, 0, "%s", "fileHeader");
-    if (!data)
-        MyAssertHandler(".\\r_image_load_obj.cpp", 387, 0, "%s", "data");
+    iassert( image );
+    iassert( fileHeader );
+    iassert( data );
     if (format != D3DFMT_DXT1 && format != D3DFMT_DXT3 && format != D3DFMT_DXT5)
         MyAssertHandler(
             ".\\r_image_load_obj.cpp",
@@ -391,8 +368,8 @@ void __cdecl Image_LoadDxtc(
             0,
             "%s",
             "format == GFX_PF_DXT1 || format == GFX_PF_DXT3 || format == GFX_PF_DXT5");
-    if (bytesPerBlock != 8 * (format != D3DFMT_DXT1) + 8)
-        MyAssertHandler(".\\r_image_load_obj.cpp", 393, 0, "%s", "bytesPerBlock == (format == GFX_PF_DXT1 ? 8 : 16)");
+    //iassert( bytesPerBlock == (format == GFX_PF_DXT1 ? 8 : 16) );
+    iassert( bytesPerBlock == (format == D3DFMT_DXT1 ? 8 : 16) );
     Image_SetupFromFile(image, fileHeader, format);
     if (image->mapType == MAPTYPE_CUBE)
         faceCount = 6;
@@ -426,10 +403,8 @@ static GfxImage *__cdecl Image_Load(char *name, unsigned __int8 semantic, unsign
     if (*name == 36)
         return Image_LoadBuiltin(name, semantic, imageTrack);
     image = Image_Alloc(name, 3u, semantic, imageTrack);
-    if (!image)
-        MyAssertHandler(".\\r_image_load_obj.cpp", 1136, 1, "%s", "image");
-    if (image->texture.basemap)
-        MyAssertHandler(".\\r_image_load_obj.cpp", 1138, 1, "%s", "image->texture.basemap == NULL");
+    iassert( image );
+    iassert( image->texture.basemap == NULL );
     if (Image_LoadFromFile(image))
         return image;
     else
@@ -453,12 +428,9 @@ char __cdecl Image_LoadFromFileWithReader(GfxImage *image, int(__cdecl *OpenFile
     int picmip; // [esp+7Ch] [ebp-8h]
     int readSize; // [esp+80h] [ebp-4h]
 
-    if (!image)
-        MyAssertHandler(".\\r_image_load_obj.cpp", 639, 0, "%s", "image");
-    if (image->category != 3)
-        MyAssertHandler(".\\r_image_load_obj.cpp", 641, 0, "%s", "image->category == IMG_CATEGORY_LOAD_FROM_FILE");
-    if (image->texture.basemap)
-        MyAssertHandler(".\\r_image_load_obj.cpp", 643, 0, "%s", "!image->texture.basemap");
+    iassert( image );
+    iassert( image->category == IMG_CATEGORY_LOAD_FROM_FILE );
+    iassert( !image->texture.basemap );
     if (Com_sprintf(filepath, 64, "%s%s%s", "images/", image->name, ".iwi") >= 0)
     {
         fileSize = OpenFileRead(filepath, &fileHandle);
@@ -555,12 +527,9 @@ void __cdecl Image_LoadBitmap(
     int picmip; // [esp+34h] [ebp-8h]
     unsigned int expandedSize; // [esp+38h] [ebp-4h]
 
-    if (!image)
-        MyAssertHandler(".\\r_image_load_obj.cpp", 328, 0, "%s", "image");
-    if (!fileHeader)
-        MyAssertHandler(".\\r_image_load_obj.cpp", 329, 0, "%s", "fileHeader");
-    if (!data)
-        MyAssertHandler(".\\r_image_load_obj.cpp", 330, 0, "%s", "data");
+    iassert( image );
+    iassert( fileHeader );
+    iassert( data );
     Image_SetupFromFile(image, fileHeader, format);
     if (image->mapType == MAPTYPE_CUBE)
         faceCount = 6;

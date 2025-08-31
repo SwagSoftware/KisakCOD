@@ -7,6 +7,7 @@
 #include "rb_pixelcost.h"
 #include "r_rendertarget.h"
 #include "r_utils.h"
+#include "r_reflection_probe.h"
 
 //float const *const shadowmapClearColor 820ebb50     gfx_d3d : r_state.obj
 //BOOL g_renderTargetIsOverridden 85b5dd38     gfx_d3d : r_state.obj
@@ -36,12 +37,10 @@ void __cdecl R_ChangeIndices(GfxCmdBufPrimState *state, IDirect3DIndexBuffer9 *i
     int hr; // [esp+0h] [ebp-8h]
     IDirect3DDevice9 *device; // [esp+4h] [ebp-4h]
 
-    if (ib == state->indexBuffer)
-        MyAssertHandler("c:\\trees\\cod3\\src\\gfx_d3d\\r_state.h", 611, 0, "%s", "ib != state->indexBuffer");
+    iassert( ib != state->indexBuffer );
     state->indexBuffer = ib;
     device = state->device;
-    if (!state->device)
-        MyAssertHandler("c:\\trees\\cod3\\src\\gfx_d3d\\r_state.h", 615, 0, "%s", "device");
+    iassert( device );
     do
     {
         if (r_logFile && r_logFile->current.integer)
@@ -151,8 +150,7 @@ void __cdecl R_SetTexFilter()
         v6 = 1;
     else
         v6 = integer;
-    if (v6 != integer)
-        MyAssertHandler(".\\r_state.cpp", 136, 0, "%s", "max( minAniso, min( maxAniso, 1 ) ) == minAniso");
+    //iassert( max( minAniso, min( maxAniso, 1 ) ) == minAniso );
     linearMippedAnisotropy = integer;
     if (integer == 1)
     {
@@ -160,8 +158,7 @@ void __cdecl R_SetTexFilter()
     }
     else
     {
-        if (integer <= 1)
-            MyAssertHandler(".\\r_state.cpp", 145, 0, "%s", "linearMippedAnisotropy > 1");
+        iassert( linearMippedAnisotropy > 1 );
         linearMippedFilter = anisotropicFilter;
     }
     if (maxAniso >= 2)
@@ -320,8 +317,7 @@ void __cdecl R_SetInitialContextState(IDirect3DDevice9 *device)
 
 void __cdecl R_ChangeDepthHackNearClip(GfxCmdBufSourceState *source, unsigned int depthHackFlags)
 {
-    if (!source)
-        MyAssertHandler(".\\r_state.cpp", 260, 0, "%s", "source");
+    iassert( source );
     if (depthHackFlags != source->depthHackFlags)
     {
         R_DepthHackNearClipChanged(source);
@@ -452,8 +448,7 @@ void  R_DeriveWorldViewMatrix(GfxCmdBufSourceState *source)
 
     //activeMatrices = retaddr;
     p_viewParms = &source->viewParms;
-    if (source->constVersions[58] != source->matrixVersions[0])
-        MyAssertHandler(".\\r_state.cpp", 338, 0, "%s", "R_IsMatrixConstantUpToDate( source, CONST_SRC_CODE_WORLD_MATRIX )");
+    iassert( R_IsMatrixConstantUpToDate( source, CONST_SRC_CODE_WORLD_MATRIX ) );
     memcpy(&world, (float *)source, sizeof(GfxMatrix));
     Vec3Add(world.m[3], source->eyeOffset, world.m[3]);
     MatrixMultiply44(world.m, p_viewParms->viewMatrix.m, source->matrices.matrix[12].m);
@@ -577,8 +572,7 @@ const GfxImage *__cdecl R_GetTextureFromCode(
             "codeTexture doesn't index TEXTURE_SRC_CODE_COUNT\n\t%i not in [0, %i)",
             codeTexture,
             27);
-    if (!source)
-        MyAssertHandler(".\\r_state.cpp", 608, 0, "%s", "source");
+    iassert( source );
     *samplerState = source->input.codeImageSamplerStates[codeTexture];
     if ((*samplerState & 7) == 0)
     {
@@ -622,8 +616,7 @@ void __cdecl R_SetLightmap(GfxCmdBufContext context, unsigned int lmapIndex)
     const MaterialPass *pass; // [esp+0h] [ebp-8h]
     const GfxImage *overrideImage; // [esp+4h] [ebp-4h]
 
-    if (!rgp.world)
-        MyAssertHandler(".\\r_state.cpp", 641, 0, "%s", "rgp.world");
+    iassert( rgp.world );
     pass = context.state->pass;
     if (lmapIndex == 31)
     {
@@ -670,10 +663,8 @@ void __cdecl R_SetLightmap(GfxCmdBufContext context, unsigned int lmapIndex)
 
 void __cdecl R_SetReflectionProbe(GfxCmdBufContext context, unsigned int reflectionProbeIndex)
 {
-    if (!rgp.world)
-        MyAssertHandler(".\\r_state.cpp", 681, 0, "%s", "rgp.world");
-    if (reflectionProbeIndex == 255)
-        MyAssertHandler(".\\r_state.cpp", 682, 0, "%s", "reflectionProbeIndex != REFLECTION_PROBE_INVALID");
+    iassert( rgp.world );
+    iassert( reflectionProbeIndex != REFLECTION_PROBE_INVALID );
     if (reflectionProbeIndex >= rgp.world->reflectionProbeCount)
         MyAssertHandler(
             ".\\r_state.cpp",
@@ -682,8 +673,7 @@ void __cdecl R_SetReflectionProbe(GfxCmdBufContext context, unsigned int reflect
             "reflectionProbeIndex doesn't index rgp.world->reflectionProbeCount\n\t%i not in [0, %i)",
             reflectionProbeIndex,
             rgp.world->reflectionProbeCount);
-    if (!rgp.world->reflectionProbes[reflectionProbeIndex].reflectionImage)
-        MyAssertHandler(".\\r_state.cpp", 684, 0, "%s", "rgp.world->reflectionProbes[reflectionProbeIndex].reflectionImage");
+    iassert( rgp.world->reflectionProbes[reflectionProbeIndex].reflectionImage );
     if ((context.state->pass->customSamplerFlags & 1) != 0)
         R_SetSampler(context, 1u, 0x72u, rgp.world->reflectionProbes[reflectionProbeIndex].reflectionImage);
 }
@@ -714,8 +704,7 @@ void __cdecl R_ChangeDepthRange(GfxCmdBufState *state, GfxDepthRangeType depthRa
         v2 = 1.0;
     state->depthRangeFar = v2;
     device = state->prim.device;
-    if (!device)
-        MyAssertHandler(".\\r_state.cpp", 713, 0, "%s", "device");
+    iassert( device );
     R_HW_SetViewport(device, &state->viewport, state->depthRangeNear, state->depthRangeFar);
 }
 
@@ -766,8 +755,7 @@ int __cdecl R_BeginMaterial(GfxCmdBufState *state, const Material *material, Mat
     const char *v5; // eax
     const MaterialTechnique *technique; // [esp+8h] [ebp-4h]
 
-    if (!material)
-        MyAssertHandler(".\\r_state.cpp", 722, 0, "%s", "material");
+    iassert( material );
     technique = Material_GetTechnique(material, techType);
     if (!technique)
         return 0;
@@ -805,8 +793,7 @@ void __cdecl R_DrawIndexedPrimitive(GfxCmdBufPrimState *state, const GfxDrawPrim
         if (r_skipDrawTris->current.enabled)
             triCount = 1;
         device = state->device;
-        if (!state->device)
-            MyAssertHandler(".\\r_state.cpp", 770, 0, "%s", "device");
+        iassert( device );
         RB_TrackDrawPrimCall(triCount);
         do
         {
@@ -842,23 +829,19 @@ void __cdecl R_ChangeState_0(GfxCmdBufState *state, unsigned int stateBits0)
     {
         if (r_logFile->current.integer)
             RB_LogPrintState_0(stateBits0, changedBits);
-        if (!dx.d3d9 || !dx.device)
-            MyAssertHandler(".\\r_state.cpp", 851, 0, "%s", "dx.d3d9 && dx.device");
+        iassert( dx.d3d9 && dx.device );
         device = state->prim.device;
-        if (!device)
-            MyAssertHandler(".\\r_state.cpp", 854, 0, "%s", "device");
+        iassert( device );
         if ((changedBits & 0x18000000) != 0)
             R_HW_SetColorMask(device, stateBits0);
         if ((changedBits & 0x800) != 0)
             R_HW_SetAlphaTestEnable(state->prim.device, stateBits0);
         if ((stateBits0 & 0x800) != 0)
         {
-            if ((stateBits0 & 0x3000) != 0)
-                MyAssertHandler(".\\r_state.cpp", 864, 0, "%s", "(stateBits0 & GFXS0_ATEST_MASK) == 0");
+            iassert( (stateBits0 & GFXS0_ATEST_MASK) == 0 );
             stateBits0 |= state->activeStateBits[0] & 0x3000;
             changedBits &= 0xFFFFCFFF;
-            if ((state->activeStateBits[0] ^ stateBits0) != changedBits)
-                MyAssertHandler(".\\r_state.cpp", 867, 0, "%s", "(stateBits0 ^ state->activeStateBits[0]) == changedBits");
+            iassert( (stateBits0 ^ state->activeStateBits[0]) == changedBits );
         }
         if ((changedBits & 0x3000) != 0)
             R_SetAlphaTestFunction(state, stateBits0);
@@ -873,8 +856,7 @@ void __cdecl R_ChangeState_0(GfxCmdBufState *state, unsigned int stateBits0)
             {
                 stateBits0 = stateBits0 & 0xF800FFFF | ((stateBits0 & 0x7FF) << 16);
                 changedBits = changedBits & 0xF800FFFF | (state->activeStateBits[0] ^ stateBits0) & 0x7FF0000;
-                if ((state->activeStateBits[0] ^ stateBits0) != changedBits)
-                    MyAssertHandler(".\\r_state.cpp", 906, 0, "%s", "(stateBits0 ^ state->activeStateBits[0]) == changedBits");
+                iassert( (stateBits0 ^ state->activeStateBits[0]) == changedBits );
             }
             R_HW_SetBlend(device, blendOpRgbWasEnabled, changedBits, stateBits0);
         }
@@ -889,8 +871,7 @@ void __cdecl R_ChangeState_0(GfxCmdBufState *state, unsigned int stateBits0)
                     "(stateBits0 & GFXS0_BLENDOP_ALPHA_MASK) == (GFXS_BLENDOP_DISABLED << GFXS0_BLENDOP_ALPHA_SHIFT)");
             stateBits0 = stateBits0 & 0xF800F800 | state->activeStateBits[0] & 0x7FF07FF;
             changedBits &= 0xF800F800;
-            if ((state->activeStateBits[0] ^ stateBits0) != changedBits)
-                MyAssertHandler(".\\r_state.cpp", 887, 0, "%s", "(stateBits0 ^ state->activeStateBits[0]) == changedBits");
+            iassert( (stateBits0 ^ state->activeStateBits[0]) == changedBits );
             if (blendOpRgbWasEnabled)
                 R_HW_DisableBlend(device);
         }
@@ -1276,8 +1257,7 @@ void __cdecl R_SetAlphaTestFunction(GfxCmdBufState *state, __int16 stateBits0)
         ref = 0x80;
     }
     device = state->prim.device;
-    if (!device)
-        MyAssertHandler("c:\\trees\\cod3\\src\\gfx_d3d\\r_state.h", 711, 0, "%s", "device");
+    iassert( device );
     do
     {
         if (r_logFile && r_logFile->current.integer)
@@ -1339,23 +1319,19 @@ void __cdecl R_ChangeState_1(GfxCmdBufState *state, unsigned int stateBits1)
                 "!(stateBits1 & GFXS1_STENCIL_BACK_ENABLE) | (stateBits1 & GFXS1_STENCIL_FRONT_ENABLE)");
         if (r_logFile->current.integer)
             RB_LogPrintState_1(stateBits1, changedBits);
-        if (!dx.d3d9 || !dx.device)
-            MyAssertHandler(".\\r_state.cpp", 942, 0, "%s", "dx.d3d9 && dx.device");
+        iassert( dx.d3d9 && dx.device );
         device = state->prim.device;
-        if (!device)
-            MyAssertHandler(".\\r_state.cpp", 945, 0, "%s", "device");
+        iassert( device );
         if ((changedBits & 1) != 0)
             R_HW_SetDepthWriteEnable(device, stateBits1);
         if ((changedBits & 2) != 0)
             R_HW_SetDepthTestEnable(device, stateBits1);
         if ((stateBits1 & 2) != 0)
         {
-            if ((stateBits1 & 0xC) != 0)
-                MyAssertHandler(".\\r_state.cpp", 953, 0, "%s", "(stateBits1 & GFXS1_DEPTHTEST_MASK) == 0");
+            iassert( (stateBits1 & GFXS1_DEPTHTEST_MASK) == 0 );
             stateBits1 |= state->activeStateBits[1] & 0xC;
             changedBits &= 0xFFFFFFF3;
-            if ((state->activeStateBits[1] ^ stateBits1) != changedBits)
-                MyAssertHandler(".\\r_state.cpp", 956, 0, "%s", "(stateBits1 ^ state->activeStateBits[1]) == changedBits");
+            iassert( (stateBits1 ^ state->activeStateBits[1]) == changedBits );
         }
         if ((changedBits & 0xC) != 0)
             R_HW_SetDepthTestFunction(device, stateBits1);
@@ -1789,8 +1765,7 @@ unsigned int __cdecl R_HW_SetSamplerState(
 
     finalSamplerState = samplerState;
     diffSamplerState = oldSamplerState ^ samplerState;
-    if (oldSamplerState == samplerState)
-        MyAssertHandler("c:\\trees\\cod3\\src\\gfx_d3d\\r_setstate_d3d.h", 143, 0, "%s", "diffSamplerState");
+    iassert( diffSamplerState );
     if ((diffSamplerState & 0xF00) != 0)
     {
         do
@@ -2048,8 +2023,7 @@ void __cdecl R_GetViewport(GfxCmdBufSourceState *source, GfxViewport *outViewpor
     int v2; // [esp+0h] [ebp-10h]
     int v3; // [esp+4h] [ebp-Ch]
 
-    if (!source)
-        MyAssertHandler(".\\r_state.cpp", 1163, 0, "%s", "source");
+    iassert( source );
     if (source->viewportBehavior == GFX_USE_VIEWPORT_FULL)
     {
         if (source->renderTargetWidth <= 0)
@@ -2135,12 +2109,9 @@ void __cdecl R_SetViewport(GfxCmdBufState *state, const GfxViewport *viewport)
         v2 = va("Viewport at (%i, %i) with size %i x %i\n", viewport->x, viewport->y, viewport->width, viewport->height);
         RB_LogPrint(v2);
     }
-    if (viewport->x < 0)
-        MyAssertHandler(".\\r_state.cpp", 1199, 0, "%s\n\t(viewport->x) = %i", "(viewport->x >= 0)", viewport->x);
-    if (viewport->y < 0)
-        MyAssertHandler(".\\r_state.cpp", 1200, 0, "%s\n\t(viewport->y) = %i", "(viewport->y >= 0)", viewport->y);
-    if (viewport->width <= 0)
-        MyAssertHandler(".\\r_state.cpp", 1201, 0, "%s\n\t(viewport->width) = %i", "(viewport->width > 0)", viewport->width);
+    iassert( (viewport->x >= 0) );
+    iassert( (viewport->y >= 0) );
+    iassert( (viewport->width > 0) );
     if (viewport->height <= 0)
         MyAssertHandler(
             ".\\r_state.cpp",
@@ -2199,10 +2170,8 @@ void __cdecl R_UpdateViewport(GfxCmdBufSourceState *source, GfxViewport *viewpor
     float lookupOffset_4; // [esp+58h] [ebp-4h]
     float lookupOffset_4a; // [esp+58h] [ebp-4h]
 
-    if (!source)
-        MyAssertHandler(".\\r_state.cpp", 1252, 0, "%s", "source");
-    if (source->viewMode == VIEW_MODE_NONE)
-        MyAssertHandler(".\\r_state.cpp", 1253, 0, "%s", "source->viewMode != VIEW_MODE_NONE");
+    iassert( source );
+    iassert( source->viewMode != VIEW_MODE_NONE );
     source->viewportIsDirty = 0;
     if (source->renderTargetWidth <= 0)
         MyAssertHandler(
@@ -2462,8 +2431,7 @@ void __cdecl R_ClearScreenInternal(
     int hr; // [esp+9Ch] [ebp-8h]
     GfxColor nativeColor; // [esp+A0h] [ebp-4h] BYREF
 
-    if (!device)
-        MyAssertHandler(".\\r_state.cpp", 1420, 0, "%s", "device");
+    iassert( device );
     if (r_logFile->current.integer)
     {
         RB_LogPrint("---------- R_ClearScreenInternal\n");
@@ -2480,15 +2448,11 @@ void __cdecl R_ClearScreenInternal(
         v8 = va("---------- (%c) stencil %i\n", (whichToClear & 4) != 0 ? 42 : 32, stencil);
         RB_LogPrint(v8);
     }
-    if (!whichToClear)
-        MyAssertHandler(".\\r_state.cpp", 1432, 0, "%s", "whichToClear");
-    if (!color)
-        MyAssertHandler(".\\r_state.cpp", 1433, 0, "%s", "color");
-    if (depth < 0.0 || depth > 1.0)
-        MyAssertHandler(".\\r_state.cpp", 1434, 0, "depth not in [0.0f, 1.0f]\n\t%g not in [%g, %g]", depth, 0.0, 1.0);
+    iassert( whichToClear );
+    iassert( color );
+    //iassert( depth not in [0.0f, 1.0f]\n\t%g not in [%g, %g] );
     Byte4PackVertexColor(color, (unsigned __int8 *)&nativeColor);
-    if (viewport)
-        MyAssertHandler(".\\r_state.cpp", 1457, 0, "%s", "!viewport");
+    iassert( !viewport );
     do
     {
         if (r_logFile && r_logFile->current.integer)
@@ -2526,8 +2490,7 @@ void __cdecl R_ClearScreen(
     unsigned __int8 stencil,
     const GfxViewport *viewport)
 {
-    if (!whichToClear)
-        MyAssertHandler(".\\r_state.cpp", 1484, 0, "%s", "whichToClear");
+    iassert( whichToClear );
     if ((whichToClear & 0xF8) != 0)
         MyAssertHandler(
             ".\\r_state.cpp",
@@ -2536,10 +2499,8 @@ void __cdecl R_ClearScreen(
             "%s\n\t(whichToClear) = %i",
             "((whichToClear & ~(0x00000001l | 0x00000002l | 0x00000004l)) == 0)",
             whichToClear);
-    if (!color)
-        MyAssertHandler(".\\r_state.cpp", 1486, 0, "%s", "color");
-    if (depth < 0.0 || depth > 1.0)
-        MyAssertHandler(".\\r_state.cpp", 1487, 0, "%s\n\t(depth) = %g", "(depth >= 0.0f && depth <= 1.0f)", depth);
+    iassert( color );
+    iassert( (depth >= 0.0f && depth <= 1.0f) );
     if (pixelCostMode <= GFX_PIXEL_COST_MODE_MEASURE_MSEC || (whichToClear &= ~1u) != 0)
         R_ClearScreenInternal(device, whichToClear, color, depth, stencil, viewport);
 }

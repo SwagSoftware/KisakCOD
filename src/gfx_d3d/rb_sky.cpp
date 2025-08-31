@@ -91,8 +91,7 @@ unsigned int __cdecl RB_CalcSunSpriteSamples()
     } while (alwaysfails);
     R_Set2D(&gfxCmdBufSourceState);
     RB_DrawStretchPic(rgp.additiveMaterial, 0.0, 0.0, 16.0, 16.0, 0.0, 0.0, 1.0, 1.0, 0xFFFFFFFF, GFX_PRIM_STATS_CODE);
-    if (gfxCmdBufSourceState.viewMode != VIEW_MODE_2D)
-        MyAssertHandler(".\\rb_sky.cpp", 65, 1, "%s", "gfxCmdBufSourceState.viewMode == VIEW_MODE_2D");
+    iassert( gfxCmdBufSourceState.viewMode == VIEW_MODE_2D );
     RB_EndTessSurface();
     do
     {
@@ -140,8 +139,7 @@ void __cdecl RB_DrawSun(unsigned int localClientNum)
 {
     SunFlareDynamic *sunFlare; // [esp+0h] [ebp-4h]
 
-    if (!rgp.world)
-        MyAssertHandler(".\\rb_sky.cpp", 590, 0, "%s", "rgp.world");
+    iassert( rgp.world );
     if (localClientNum >= gfxCfg.maxClientViews)
         MyAssertHandler(
             ".\\rb_sky.cpp",
@@ -173,8 +171,7 @@ void __cdecl RB_DrawSunQuerySprite(SunFlareDynamic *sunFlare)
     float lastVisibility; // [esp+7Ch] [ebp-8h]
     int queryIndex; // [esp+80h] [ebp-4h]
 
-    if (!sunFlare)
-        MyAssertHandler(".\\rb_sky.cpp", 316, 0, "%s", "sunFlare");
+    iassert( sunFlare );
     queryIndex = r_glob.backEndFrameCount % 2;
     if ((unsigned int)(r_glob.backEndFrameCount % 2) >= 2)
         MyAssertHandler(
@@ -199,8 +196,7 @@ void __cdecl RB_DrawSunQuerySprite(SunFlareDynamic *sunFlare)
             if (drawnSampleCount == -1)
                 sunFlare->error = 1;
             sunSpriteSamples = dx.sunSpriteSamples;
-            if (!dx.sunSpriteSamples)
-                MyAssertHandler(".\\rb_sky.cpp", 356, 0, "%s\n\t(sunSpriteSamples) = %i", "(sunSpriteSamples > 0)", 0);
+            iassert( (sunSpriteSamples > 0) );
             if (drawnSampleCount > sunSpriteSamples)
                 sunFlare->error = 1;
             lastVisibilitya = (double)drawnSampleCount / (double)sunSpriteSamples;
@@ -238,8 +234,7 @@ void __cdecl RB_DrawSunQuerySprite(SunFlareDynamic *sunFlare)
 
 void __cdecl RB_HW_BeginOcclusionQuery(IDirect3DQuery9 *query)
 {
-    if (!query)
-        MyAssertHandler("c:\\trees\\cod3\\src\\gfx_d3d\\rb_query_d3d.h", 26, 0, "%s", "query");
+    iassert( query );
     query->Issue(2);
 }
 
@@ -274,8 +269,7 @@ void __cdecl RB_TessSunBillboard(float widthInClipSpace, float heightInClipSpace
     float sunTransformedPosition_12; // [esp+38h] [ebp-8h]
 
     transform = (GfxMatrix*)&gfxCmdBufSourceState.viewParms3D->viewProjectionMatrix;
-    if (!rgp.world)
-        MyAssertHandler(".\\rb_sky.cpp", 198, 0, "%s", "rgp.world");
+    iassert( rgp.world );
     sunTransformedPosition = rgp.world->sun.sunFxPosition[0] * transform->m[0][0]
         + rgp.world->sun.sunFxPosition[1] * transform->m[1][0]
         + rgp.world->sun.sunFxPosition[2] * transform->m[2][0];
@@ -327,10 +321,8 @@ GfxVertex *__cdecl RB_SetTessQuad(GfxColor color)
     unsigned __int16 vertCount; // [esp+10h] [ebp-8h]
     GfxVertex *vert; // [esp+14h] [ebp-4h]
 
-    if (tess.vertexCount)
-        MyAssertHandler(".\\rb_sky.cpp", 152, 0, "%s", "tess.vertexCount == 0");
-    if (tess.indexCount)
-        MyAssertHandler(".\\rb_sky.cpp", 153, 0, "%s", "tess.indexCount == 0");
+    iassert( tess.vertexCount == 0 );
+    iassert( tess.indexCount == 0 );
     vertCount = tess.vertexCount;
     tess.indices[tess.indexCount] = LOWORD(tess.vertexCount) + 3;
     tess.indices[tess.indexCount + 1] = vertCount;
@@ -364,8 +356,7 @@ void __cdecl RB_UpdateSunVisibilityWithoutQuery(SunFlareDynamic *sunFlare)
 {
     float sunTraceEnd[3]; // [esp+Ch] [ebp-Ch] BYREF
 
-    if (!sunFlare)
-        MyAssertHandler(".\\rb_sky.cpp", 292, 0, "%s", "sunFlare");
+    iassert( sunFlare );
     sunFlare->lastVisibility = RB_GetSunSampleRectRelativeArea(16, 16);
     if (sunFlare->lastVisibility != 0.0)
     {
@@ -397,8 +388,7 @@ double __cdecl RB_GetSunSampleRectRelativeArea(int widthInPixels, int heightInPi
     signed int bottom; // [esp+54h] [ebp-8h]
 
     transform = (GfxMatrix*)&gfxCmdBufSourceState.viewParms3D->viewProjectionMatrix;
-    if (!rgp.world)
-        MyAssertHandler(".\\rb_sky.cpp", 254, 0, "%s", "rgp.world");
+    iassert( rgp.world );
     sunTransformedPosition_12 = rgp.world->sun.sunFxPosition[0] * transform->m[0][3]
         + rgp.world->sun.sunFxPosition[1] * transform->m[1][3]
         + rgp.world->sun.sunFxPosition[2] * transform->m[2][3];
@@ -435,10 +425,8 @@ double __cdecl RB_GetSunSampleRectRelativeArea(int widthInPixels, int heightInPi
 
 void __cdecl RB_AddSunEffects(SunFlareDynamic *sunFlare)
 {
-    if (!rgp.world)
-        MyAssertHandler(".\\rb_sky.cpp", 556, 0, "%s", "rgp.world");
-    if (!sunFlare)
-        MyAssertHandler(".\\rb_sky.cpp", 557, 0, "%s", "sunFlare");
+    iassert( rgp.world );
+    iassert( sunFlare );
     sunFlare->lastDot = Vec3Dot(rgp.world->sun.sunFxPosition, gfxCmdBufSourceState.viewParms3D->axis[0]);
     if (sunFlare->lastDot > 0.0)
         RB_DrawSunSprite();
@@ -489,10 +477,8 @@ void RB_DrawSunSprite()
     GfxVertex *vert; // [esp+58h] [ebp-10h]
     float rightUp[3]; // [esp+5Ch] [ebp-Ch] BYREF
 
-    if (gfxCmdBufSourceState.viewMode != VIEW_MODE_IDENTITY)
-        MyAssertHandler(".\\rb_sky.cpp", 406, 0, "%s", "gfxCmdBufSourceState.viewMode == VIEW_MODE_IDENTITY");
-    if (!rgp.world)
-        MyAssertHandler(".\\rb_sky.cpp", 408, 0, "%s", "rgp.world");
+    iassert( gfxCmdBufSourceState.viewMode == VIEW_MODE_IDENTITY );
+    iassert( rgp.world );
     sunPosition = rgp.world->sun.sunFxPosition;
     RB_SetTessTechnique(rgp.world->sun.spriteMaterial, TECHNIQUE_UNLIT);
     R_TrackPrims(&gfxCmdBufState, GFX_PRIM_STATS_FX);
@@ -549,8 +535,7 @@ void __cdecl RB_DrawSunPostEffects(unsigned int localClientNum)
     sunFlare->lastTime = gfxCmdBufSourceState.sceneDef.time;
     if (r_drawSun->current.enabled)
     {
-        if (!rgp.world)
-            MyAssertHandler(".\\rb_sky.cpp", 634, 0, "%s", "rgp.world");
+        iassert( rgp.world );
         if (rgp.world->sun.hasValidData)
         {
             RB_DrawSunFlare(sunFlare, frameTime);
@@ -566,8 +551,7 @@ void __cdecl RB_DrawSunFlare(SunFlareDynamic *sunFlare, int frameTime)
     float size; // [esp+1Ch] [ebp-8h]
     float alpha; // [esp+20h] [ebp-4h]
 
-    if (!sunFlare)
-        MyAssertHandler(".\\rb_sky.cpp", 470, 0, "%s", "sunFlare");
+    iassert( sunFlare );
     if (rgp.world->sun.flareMaterial && rgp.world->sun.flareMinDot < (double)sunFlare->lastDot)
     {
         if (rgp.world->sun.flareMaxDot > (double)sunFlare->lastDot)
@@ -575,8 +559,7 @@ void __cdecl RB_DrawSunFlare(SunFlareDynamic *sunFlare, int frameTime)
             / (rgp.world->sun.flareMaxDot - rgp.world->sun.flareMinDot);
         else
             lerp = 1.0;
-        if (lerp < 0.0 || lerp > 1.0)
-            MyAssertHandler(".\\rb_sky.cpp", 483, 1, "%s\n\t(lerp) = %g", "(lerp >= 0.0f && lerp <= 1.0f)", lerp);
+        iassert( (lerp >= 0.0f && lerp <= 1.0f) );
         if (rgp.world->sun.flareMaxAlpha < 0.0)
             MyAssertHandler(
                 ".\\rb_sky.cpp",
@@ -617,8 +600,7 @@ void __cdecl RB_DrawSunFlare(SunFlareDynamic *sunFlare, int frameTime)
                 "%s\n\t(sunFlare->flareIntensity) = %g",
                 "(sunFlare->flareIntensity >= 0.0f)",
                 sunFlare->flareIntensity);
-        if (alpha < 0.0)
-            MyAssertHandler(".\\rb_sky.cpp", 495, 0, "%s\n\t(alpha) = %g", "(alpha >= 0.0f)", alpha);
+        iassert( (alpha >= 0.0f) );
         v2 = sunFlare->flareIntensity * alpha;
         RB_DrawSunFlareCore(v2, size);
     }
@@ -626,12 +608,9 @@ void __cdecl RB_DrawSunFlare(SunFlareDynamic *sunFlare, int frameTime)
 
 double __cdecl R_UpdateOverTime(float fCurrent, float fGoal, int iFadeInTime, int iFadeOutTime, int frametime)
 {
-    if (frametime < 0)
-        MyAssertHandler(".\\rb_sky.cpp", 120, 0, "%s\n\t(frametime) = %i", "(frametime >= 0)", frametime);
-    if (iFadeInTime < 0)
-        MyAssertHandler(".\\rb_sky.cpp", 121, 0, "%s\n\t(iFadeInTime) = %i", "(iFadeInTime >= 0)", iFadeInTime);
-    if (iFadeOutTime < 0)
-        MyAssertHandler(".\\rb_sky.cpp", 122, 0, "%s\n\t(iFadeOutTime) = %i", "(iFadeOutTime >= 0)", iFadeOutTime);
+    iassert( (frametime >= 0) );
+    iassert( (iFadeInTime >= 0) );
+    iassert( (iFadeOutTime >= 0) );
     if (fGoal <= (double)fCurrent)
     {
         if (fGoal < (double)fCurrent)
@@ -682,8 +661,7 @@ void __cdecl RB_DrawBlindAndGlare(SunFlareDynamic *sunFlare, int frameTime)
     float glare; // [esp+28h] [ebp-8h] BYREF
     GfxColor color; // [esp+2Ch] [ebp-4h] BYREF
 
-    if (!sunFlare)
-        MyAssertHandler(".\\rb_sky.cpp", 573, 0, "%s", "sunFlare");
+    iassert( sunFlare );
     RB_CalcSunBlind(sunFlare, frameTime, &blind, &glare);
     colorVec[0] = glare;
     colorVec[1] = glare;
@@ -701,10 +679,8 @@ void __cdecl RB_CalcSunBlind(SunFlareDynamic *sunFlare, int frameTime, float *bl
     float glareLerpa; // [esp+18h] [ebp-8h]
     float sunDot; // [esp+1Ch] [ebp-4h]
 
-    if (!sunFlare)
-        MyAssertHandler(".\\rb_sky.cpp", 507, 0, "%s", "sunFlare");
-    if (!rgp.world)
-        MyAssertHandler(".\\rb_sky.cpp", 508, 0, "%s", "rgp.world");
+    iassert( sunFlare );
+    iassert( rgp.world );
     sunDot = Vec3Dot(rgp.world->sun.sunFxPosition, gfxCmdBufSourceState.viewParms3D->axis[0]);
     if (rgp.world->sun.blindMaxDarken > 0.0)
     {
@@ -719,15 +695,11 @@ void __cdecl RB_CalcSunBlind(SunFlareDynamic *sunFlare, int frameTime, float *bl
         {
             blindLerp = 0.0;
         }
-        if (blindLerp < 0.0)
-            MyAssertHandler(".\\rb_sky.cpp", 524, 0, "%s\n\t(blindLerp) = %g", "(blindLerp >= 0)", blindLerp);
-        if (blindLerp > 1.0)
-            MyAssertHandler(".\\rb_sky.cpp", 525, 0, "%s\n\t(blindLerp) = %g", "(blindLerp <= 1)", blindLerp);
+        iassert( (blindLerp >= 0) );
+        iassert( (blindLerp <= 1) );
         blindLerpa = blindLerp * sunFlare->lastVisibility;
-        if (blindLerpa < 0.0)
-            MyAssertHandler(".\\rb_sky.cpp", 527, 0, "%s\n\t(blindLerp) = %g", "(blindLerp >= 0)", blindLerpa);
-        if (blindLerpa > 1.0)
-            MyAssertHandler(".\\rb_sky.cpp", 528, 0, "%s\n\t(blindLerp) = %g", "(blindLerp <= 1)", blindLerpa);
+        iassert( (blindLerp >= 0) );
+        iassert( (blindLerp <= 1) );
         sunFlare->currentBlind = R_UpdateOverTime(
             sunFlare->currentBlind,
             blindLerpa,

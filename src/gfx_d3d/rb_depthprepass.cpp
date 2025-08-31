@@ -30,8 +30,7 @@ void R_DepthPrepassCallback(const void *userData, GfxCmdBufContext context, GfxC
     device->SetScissorRect(&v6);
     if (viewInfo->needsFloatZ)
     {
-        if (!gfxRenderTargets[5].surface.color)
-            MyAssertHandler(".\\rb_depthprepass.cpp", 31, 0, "%s", "R_HaveFloatZ()");
+        iassert( R_HaveFloatZ() );
         R_SetRenderTarget(context, R_RENDERTARGET_FLOAT_Z);
         baseTechType = TECHNIQUE_BUILD_FLOAT_Z;
         R_DrawQuadMesh(context, rgp.shadowClearMaterial, &viewInfo->fullSceneViewMesh->meshData);

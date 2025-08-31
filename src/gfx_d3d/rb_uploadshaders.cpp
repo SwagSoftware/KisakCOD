@@ -12,8 +12,7 @@ $C28D828B354D71D7584331F40DBDE744 mtlUploadGlob;
 
 void __cdecl Material_UploadShaders(MaterialTechniqueSet *techSet)
 {
-    if (!Sys_IsDatabaseThread())
-        MyAssertHandler(".\\rb_uploadshaders.cpp", 26, 0, "%s", "Sys_IsDatabaseThread()");
+    iassert( Sys_IsDatabaseThread() );
     if (mtlUploadGlob.put - mtlUploadGlob.get >= 0x400)
         MyAssertHandler(
             ".\\rb_uploadshaders.cpp",
@@ -98,16 +97,11 @@ unsigned int RB_UploadMaterialPass(
 
     //argIter = a1;
     //argCount = retaddr;
-    if (!pass->vertexShader)
-        MyAssertHandler(".\\rb_uploadshaders.cpp", 110, 0, "%s", "pass->vertexShader");
-    if (!pass->vertexShader->prog.vs)
-        MyAssertHandler(".\\rb_uploadshaders.cpp", 111, 0, "%s", "pass->vertexShader->prog.vs");
-    if (!pass->pixelShader)
-        MyAssertHandler(".\\rb_uploadshaders.cpp", 112, 0, "%s", "pass->pixelShader");
-    if (!pass->pixelShader->prog.ps)
-        MyAssertHandler(".\\rb_uploadshaders.cpp", 113, 0, "%s", "pass->pixelShader->prog.ps");
-    if (!pass->vertexDecl)
-        MyAssertHandler(".\\rb_uploadshaders.cpp", 114, 0, "%s", "pass->vertexDecl");
+    iassert( pass->vertexShader );
+    iassert( pass->vertexShader->prog.vs );
+    iassert( pass->pixelShader );
+    iassert( pass->pixelShader->prog.ps );
+    iassert( pass->vertexDecl );
     R_SetVertexShader(gfxCmdBufContext.state, pass->vertexShader);
     R_SetPixelShader(gfxCmdBufContext.state, pass->pixelShader);
     vertMem_140 = pass->stableArgCount + pass->perObjArgCount + pass->perPrimArgCount;
@@ -164,8 +158,7 @@ void __cdecl RB_UploadShaderStep()
     MaterialTechnique *tech; // [esp+4h] [ebp-8h]
     MaterialTechniqueSet *techSet; // [esp+8h] [ebp-4h]
 
-    if (!Sys_IsRenderThread() && !Sys_IsMainThread())
-        MyAssertHandler(".\\rb_uploadshaders.cpp", 179, 0, "%s", "Sys_IsRenderThread() || Sys_IsMainThread()");
+    iassert( Sys_IsRenderThread() || Sys_IsMainThread() );
     if (backEndData->viewInfoCount && gfxDrawMethod.drawScene == GFX_DRAW_SCENE_STANDARD)
     {
         Material_ClearShaderUploadList();
@@ -189,8 +182,7 @@ void __cdecl RB_UploadShaderStep()
                             tech->flags |= 0x8000u;
                             if (tech->passCount)
                             {
-                                if (!tech->passArray[0].pixelShader)
-                                    MyAssertHandler(".\\rb_uploadshaders.cpp", 210, 0, "%s", "tech->passArray[0].pixelShader");
+                                iassert( tech->passArray[0].pixelShader );
                                 if (tech->passArray[0].pixelShader->prog.loadDef.loadForRenderer == r_rendererInUse->current.integer)
                                     uploadCount += RB_UploadMaterialTechnique(tech, mtlUploadGlob.techTypeIter);
                             }

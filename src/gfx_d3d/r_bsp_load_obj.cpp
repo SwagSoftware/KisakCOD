@@ -46,8 +46,7 @@ void __cdecl R_InterpretSunLightParseParamsIntoLights(SunLightParseParams *sunPa
 
 void __cdecl R_SetUpSunLight(const float *sunColor, const float *sunDirection, GfxLight *light)
 {
-    if (!light)
-        MyAssertHandler(".\\r_bsp_load_obj.cpp", 4559, 0, "%s", "light");
+    iassert( light );
     memset(&light->type, 0, sizeof(GfxLight));
     light->type = 1;
     light->dir[0] = *sunDirection;
@@ -64,8 +63,7 @@ void __cdecl R_InitPrimaryLights(GfxLight *primaryLights)
     const ComPrimaryLight *in; // [esp+24h] [ebp-8h]
     unsigned int lightIndex; // [esp+28h] [ebp-4h]
 
-    if (!rgp.world)
-        MyAssertHandler(".\\r_bsp_load_obj.cpp", 4614, 0, "%s", "rgp.world");
+    iassert( rgp.world );
     for (lightIndex = 0; lightIndex < rgp.world->primaryLightCount; ++lightIndex)
     {
         in = Com_GetPrimaryLight(lightIndex);
@@ -202,8 +200,7 @@ char *__cdecl R_ParseSunLight(SunLightParseParams *params, char *text)
     char dest[2048]; // [esp+20h] [ebp-1008h] BYREF
     char nptr[2052]; // [esp+820h] [ebp-808h] BYREF
 
-    if (!params)
-        MyAssertHandler(".\\r_bsp_load_obj.cpp", 3097, 0, "%s", "params");
+    iassert( params );
     while (1)
     {
         src = Com_Parse((const char**)&text);
@@ -329,8 +326,7 @@ void __cdecl R_LoadPrimaryLights(unsigned int bspVersion)
 
     if (bspVersion > 0xE)
     {
-        if (!comWorld.isInUse)
-            MyAssertHandler("c:\\trees\\cod3\\src\\gfx_d3d\\../qcommon/com_bsp_api.h", 23, 0, "%s", "comWorld.isInUse");
+        iassert( comWorld.isInUse );
         s_world.primaryLightCount = comWorld.primaryLightCount;
         s_world.sunPrimaryLightIndex = comWorld.primaryLightCount > 1 && Com_GetPrimaryLight(1)->type == 1;
         for (lightIndex = 0; lightIndex < s_world.primaryLightCount; ++lightIndex)
@@ -384,8 +380,7 @@ void R_LoadLightRegions()
         for (regionIter = 0; regionIter < regionCount; ++regionIter)
         {
             s_world.lightRegion[regionIter].hullCount = diskRegions[regionIter].hullCount;
-            if (s_world.lightRegion[regionIter].hulls)
-                MyAssertHandler(".\\r_bsp_load_obj.cpp", 3275, 1, "%s", "s_world.lightRegion[regionIter].hulls == NULL");
+            iassert( s_world.lightRegion[regionIter].hulls == NULL );
             if (s_world.lightRegion[regionIter].hullCount)
             {
                 s_world.lightRegion[regionIter].hulls = &hulls[usedHullCount];
@@ -544,10 +539,8 @@ unsigned int __cdecl R_DetermineLightmapCoupling(GfxBspLoad *load, int (*couplin
     unsigned int diskLmapCount; // [esp+A0h] [ebp-8h] BYREF
     unsigned int triSurfIndex; // [esp+A4h] [ebp-4h]
 
-    if (!load)
-        MyAssertHandler(".\\r_bsp_load_obj.cpp", 474, 0, "%s", "load");
-    if (!coupling)
-        MyAssertHandler(".\\r_bsp_load_obj.cpp", 475, 0, "%s", "coupling");
+    iassert( load );
+    iassert( coupling );
     R_LoadTriangleSurfaces(load->bspVersion, load->trisType, &triSurfs, &triSurfCount);
     if (load->bspVersion >= 7)
         Com_GetBspLump(LUMP_LIGHTBYTES, 3145728u, &diskLmapCount);
@@ -718,7 +711,7 @@ void __cdecl R_CopyLightmap(
     }
 }
 
-void __cdecl R_CopyLightDefAttenuationImage(GfxLightDef *header, _DWORD *anonymousConfig)
+void __cdecl R_CopyLightDefAttenuationImage(GfxLightDef *def, _DWORD *anonymousConfig)
 {
     int endCount; // [esp+30h] [ebp-7Ch]
     unsigned __int8 *dstPixel; // [esp+38h] [ebp-74h]
@@ -729,10 +722,9 @@ void __cdecl R_CopyLightDefAttenuationImage(GfxLightDef *header, _DWORD *anonymo
     GfxRawPixel lerpedPixel; // [esp+A4h] [ebp-8h]
     int iter; // [esp+A8h] [ebp-4h]
 
-    Image_GetRawPixels((char*)header->attenuation.image->name, &rawImage);
-    if (rawImage.width != header->attenuation.image->width)
-        MyAssertHandler(".\\r_light_load_obj.cpp", 144, 0, "%s", "rawImage.width == def->attenuation.image->width");
-    dstPixel = (unsigned char*)(*anonymousConfig + anonymousConfig[1] * (4 * header->lmapLookupStart - 4));
+    Image_GetRawPixels((char*)def->attenuation.image->name, &rawImage);
+    iassert( rawImage.width == def->attenuation.image->width );
+    dstPixel = (unsigned char*)(*anonymousConfig + anonymousConfig[1] * (4 * def->lmapLookupStart - 4));
     srcPixel = rawImage.pixels;
     if (anonymousConfig[1] == 1)
     {
@@ -789,14 +781,14 @@ void __cdecl R_CopyLightDefAttenuationImage(GfxLightDef *header, _DWORD *anonymo
             lerp = 1;
             ++srcPixel;
         } while (srcPixel != &rawImage.pixels[rawImage.width - 1]);
-        if ((int)((int)&dstPixel[-(int)*anonymousConfig] >> 2) != ((int)(anonymousConfig[1] * (header->lmapLookupStart + rawImage.width + 1) - endCount)))
+        if ((int)((int)&dstPixel[-(int)*anonymousConfig] >> 2) != ((int)(anonymousConfig[1] * (def->lmapLookupStart + rawImage.width + 1) - endCount)))
             MyAssertHandler(
                 ".\\r_light_load_obj.cpp",
                 193,
                 1,
                 "(dstPixel - cfg->dest) / 4u == (def->lmapLookupStart + rawImage.width + 1) * cfg->zoom - endCount\n\t%i, %i",
                 (int)&dstPixel[-(int)*anonymousConfig] >> 2,
-                anonymousConfig[1] * (header->lmapLookupStart + rawImage.width + 1) - endCount);
+                anonymousConfig[1] * (def->lmapLookupStart + rawImage.width + 1) - endCount);
         for (iter = 0; iter < endCount; ++iter)
         {
             *dstPixel = (srcPixel->a << 24) | srcPixel->b | (srcPixel->g << 8) | (srcPixel->r << 16);
@@ -833,8 +825,7 @@ void __cdecl R_LoadLightmaps(GfxBspLoad *load)
     int oldLmapCount; // [esp+1C4h] [ebp-8h]
     int oldLmapIndex; // [esp+1C8h] [ebp-4h]
 
-    if (!load)
-        MyAssertHandler(".\\r_bsp_load_obj.cpp", 687, 0, "%s", "load");
+    iassert( load );
     load->lmapMergeInfo[31].index = 31;
     load->lmapMergeInfo[31].shift[0] = 0.0;
     load->lmapMergeInfo[31].shift[1] = 0.0;
@@ -906,16 +897,14 @@ void __cdecl R_LoadLightmaps(GfxBspLoad *load)
             v1 = va("*lightmap%i_primary", newLmapIndex);
             v2 = Image_Alloc(v1, 2u, 1u, 4u);
             s_world.lightmaps[newLmapIndex].primary = v2;
-            if (!s_world.lightmaps[newLmapIndex].primary)
-                MyAssertHandler(".\\r_bsp_load_obj.cpp", 756, 1, "%s", "s_world.lightmaps[newLmapIndex].primary");
+            iassert( s_world.lightmaps[newLmapIndex].primary );
             width = groupInfo[newLmapIndex].wideCount << 10;
             height = groupInfo[newLmapIndex].highCount << 10;
             Image_Generate2D(s_world.lightmaps[newLmapIndex].primary, primaryImage, width, height, D3DFMT_L8);
             v3 = va("*lightmap%i_secondary", newLmapIndex);
             v4 = Image_Alloc(v3, 2u, 1u, 4u);
             s_world.lightmaps[newLmapIndex].secondary = v4;
-            if (!s_world.lightmaps[newLmapIndex].secondary)
-                MyAssertHandler(".\\r_bsp_load_obj.cpp", 762, 1, "%s", "s_world.lightmaps[newLmapIndex].secondary");
+            iassert( s_world.lightmaps[newLmapIndex].secondary );
             width = groupInfo[newLmapIndex].wideCount << 9;
             height = groupInfo[newLmapIndex].highCount << 10;
             Image_Generate2D(s_world.lightmaps[newLmapIndex].secondary, secondaryImage, width, height, D3DFMT_A8R8G8B8);
@@ -945,8 +934,7 @@ GfxShadowGeometry *R_AllocShadowGeometryHeaderMemory()
 {
     GfxShadowGeometry *result; // eax
 
-    if (s_world.shadowGeom)
-        MyAssertHandler(".\\r_bsp_load_obj.cpp", 4250, 1, "%s", "s_world.shadowGeom == NULL");
+    iassert( s_world.shadowGeom == NULL );
     result = (GfxShadowGeometry*)Hunk_Alloc(12 * s_world.primaryLightCount, "R_AllocShadowGeometryHeaderMemory", 20);
     s_world.shadowGeom = result;
     return result;
@@ -1103,16 +1091,11 @@ void __cdecl R_FinalizeSurfVerts(
     unsigned int vertIndex; // [esp+Ch] [ebp-8h]
     unsigned int indexIndex; // [esp+10h] [ebp-4h]
 
-    if (!material)
-        MyAssertHandler(".\\r_bsp_load_obj.cpp", 1779, 0, "%s", "material");
-    if (!surface)
-        MyAssertHandler(".\\r_bsp_load_obj.cpp", 1780, 0, "%s", "surface");
-    if (!vertsDisk)
-        MyAssertHandler(".\\r_bsp_load_obj.cpp", 1781, 0, "%s", "vertsDisk");
-    if (!merge)
-        MyAssertHandler(".\\r_bsp_load_obj.cpp", 1782, 0, "%s", "merge");
-    if (!vertsMem)
-        MyAssertHandler(".\\r_bsp_load_obj.cpp", 1783, 0, "%s", "vertsMem");
+    iassert( material );
+    iassert( surface );
+    iassert( vertsDisk );
+    iassert( merge );
+    iassert( vertsMem );
     ClearBounds(surface->bounds[0], surface->bounds[1]);
     indexCount = 3 * surface->tris.triCount;
     if (surface->tris.baseIndex + indexCount - 1 >= s_world.indexCount)
@@ -1159,8 +1142,7 @@ MaterialUsage *__cdecl R_GetMaterialUsageData(Material *material)
     if (!exists)
         return 0;
     materialUsage = &rg.materialUsage[hashIndex];
-    if (material != rg.materialHashTable[hashIndex])
-        MyAssertHandler(".\\r_bsp.cpp", 42, 0, "%s", "material == rg.materialHashTable[hashIndex]");
+    iassert( material == rg.materialHashTable[hashIndex] );
     materialUsage->material = material;
     return materialUsage;
 }
@@ -1267,8 +1249,7 @@ void __cdecl R_CalculateOutdoorBounds(GfxBspLoad *load, const DiskTriangleSoup *
     int surfCount; // [esp+4h] [ebp-Ch]
 
     ClearBounds(load->outdoorMins, load->outdoorMaxs);
-    if (s_world.modelCount <= 0)
-        MyAssertHandler(".\\r_bsp_load_obj.cpp", 1895, 0, "%s", "s_world.modelCount > 0");
+    iassert( s_world.modelCount > 0 );
     if (s_world.models->startSurfIndex)
         MyAssertHandler(
             ".\\r_bsp_load_obj.cpp",
@@ -1315,16 +1296,14 @@ void __cdecl R_CreateMaterialList()
             memory = rg.materialUsage[hashIndexa].memory;
             if (memory)
             {
-                if (index >= s_world.materialMemoryCount)
-                    MyAssertHandler(".\\r_bsp.cpp", 79, 0, "%s", "index < s_world.materialMemoryCount");
+                iassert( index < s_world.materialMemoryCount );
                 materialMemory = &s_world.materialMemory[index];
                 materialMemory->material = rg.materialUsage[hashIndexa].material;
                 materialMemory->memory = memory;
                 ++index;
             }
         }
-        if (index != s_world.materialMemoryCount)
-            MyAssertHandler(".\\r_bsp.cpp", 86, 0, "%s", "index == s_world.materialMemoryCount");
+        iassert( index == s_world.materialMemoryCount );
     }
 }
 
@@ -1360,8 +1339,7 @@ void __cdecl R_LoadSurfaces(GfxBspLoad *load)
     unsigned __int16 *worldIndices; // [esp+90h] [ebp-8h]
     unsigned __int16 surfIndexCount; // [esp+94h] [ebp-4h]
 
-    if (!load)
-        MyAssertHandler(".\\r_bsp_load_obj.cpp", 2613, 0, "%s", "load");
+    iassert( load );
     if (load->bspVersion < 0x16)
         Com_PrintWarning(8, "Bsp compiled with old version of cod2map.\n");
     R_LoadTriangleSurfaces(load->bspVersion, load->trisType, &diskSurfaces, &surfCount);
@@ -1391,8 +1369,7 @@ void __cdecl R_LoadSurfaces(GfxBspLoad *load)
     s_world.vertexLayerDataSize = vertLayerDataSize;
     s_world.vld.data = vertLayerDataMem;
     vertsMem = (GfxWorldVertex*)R_LoadSurfaceAlloc(44 * vertCount);
-    if (!vertsMem)
-        MyAssertHandler(".\\r_bsp_load_obj.cpp", 2651, 0, "%s", "vertsMem");
+    iassert( vertsMem );
     s_world.vd.vertices = vertsMem;
     for (vertIndex = 0; vertIndex < vertCount; ++vertIndex)
     {
@@ -1423,8 +1400,7 @@ void __cdecl R_LoadSurfaces(GfxBspLoad *load)
     }
     lumpType = load->trisType != TRIS_TYPE_LAYERED ? LUMP_UNLAYERED_DRAWINDICES : LUMP_DRAWINDICES;
     indices = (const unsigned short*)Com_GetBspLump(lumpType, 2u, &indexCount);
-    if (surfCount > 0x10000)
-        MyAssertHandler(".\\r_bsp_load_obj.cpp", 2692, 0, "%s\n\t(surfCount) = %i", "(surfCount <= 65536)", surfCount);
+    iassert( (surfCount <= 65536) );
     s_world.surfaceCount = surfCount;
     s_world.dpvs.surfaces = (GfxSurface*)Hunk_Alloc(48 * surfCount, "R_LoadSurfaces", 20);
     s_world.indexCount = 0;
@@ -1465,8 +1441,7 @@ void __cdecl R_LoadSurfaces(GfxBspLoad *load)
                     tris = &surface->tris;
                     surfIndexCount = diskSurfaces[surfIndex].indexCount;
                     surface->tris.baseIndex = baseIndex;
-                    if (surface->flags)
-                        MyAssertHandler(".\\r_bsp_load_obj.cpp", 2744, 0, "%s", "surface->flags == 0");
+                    iassert( surface->flags == 0 );
                     if (load->bspVersion <= 0x13 || diskSurfaces[surfIndex].castsSunShadow)
                         surface->flags |= 1u;
                     if (surfIndexCount % 3)
@@ -1555,8 +1530,7 @@ void __cdecl R_LoadSurfaces(GfxBspLoad *load)
     }
     if (s_world.skySurfCount)
     {
-        if (!skyMaterial)
-            MyAssertHandler(".\\r_bsp_load_obj.cpp", 2809, 0, "%s", "skyMaterial != NULL");
+        iassert( skyMaterial != NULL );
         R_SetSkyImage(skyMaterial);
         s_world.skyStartSurfs = (int*)Hunk_Alloc(4 * s_world.skySurfCount, "Sky surfaces", 20);
         s_world.skySurfCount = 0;
@@ -1569,8 +1543,7 @@ void __cdecl R_LoadSurfaces(GfxBspLoad *load)
     }
     else
     {
-        if (skyMaterial)
-            MyAssertHandler(".\\r_bsp_load_obj.cpp", 2803, 0, "%s", "skyMaterial == NULL");
+        iassert( skyMaterial == NULL );
         s_world.skyImage = 0;
         s_world.skyStartSurfs = 0;
     }
@@ -1625,8 +1598,7 @@ void R_LoadCullGroupIndices()
     in = (int*)Com_GetBspLump(LUMP_CULLGROUPINDICES, 4u, &indexCount);
     out = (int*)Hunk_Alloc(4 * indexCount, "R_LoadCullGroupIndices", 22);
     rgl.cullGroupIndices = out;
-    if (indexCount && !s_world.dpvs.cullGroups)
-        MyAssertHandler(".\\r_bsp_load_obj.cpp", 3844, 0, "%s", "!indexCount || s_world.dpvs.cullGroups");
+    iassert( !indexCount || s_world.dpvs.cullGroups );
     Com_Memcpy(out, in, 4 * indexCount);
 }
 
@@ -1647,17 +1619,14 @@ int __cdecl R_FinishLoadingAabbTrees_r(GfxAabbTree *tree, int totalTreesUsed)
     const GfxSurface *surf; // [esp+8h] [ebp-8h]
     int surfNodeIndex; // [esp+Ch] [ebp-4h]
 
-    if (!tree)
-        MyAssertHandler(".\\r_bsp_load_obj.cpp", 3582, 0, "%s", "tree");
-    if (!rgl.aabbTrees)
-        MyAssertHandler(".\\r_bsp_load_obj.cpp", 3583, 0, "%s", "rgl.aabbTrees");
+    iassert( tree );
+    iassert( rgl.aabbTrees );
     ClearBounds(tree->mins, tree->maxs);
     if (tree->childCount)
     {
         tree->childrenOffset = &rgl.aabbTrees[totalTreesUsed] - tree;
         children = (tree + tree->childrenOffset);
-        if (children->startSurfIndex != tree->startSurfIndex)
-            MyAssertHandler(".\\r_bsp_load_obj.cpp", 3596, 0, "%s", "children[0].startSurfIndex == tree->startSurfIndex");
+        iassert( children[0].startSurfIndex == tree->startSurfIndex );
         totalTreesUsed += tree->childCount;
         for (childIndex = 0; childIndex < tree->childCount; ++childIndex)
         {
@@ -1713,8 +1682,7 @@ void __cdecl R_LoadAabbTrees(TrisType trisType)
             out[aabbTreeIndex].startSurfIndex = 0;
         }
         out[aabbTreeIndex].surfaceCount = surfaceCount;
-        if (out[aabbTreeIndex].surfaceCount != surfaceCount)
-            MyAssertHandler(".\\r_bsp_load_obj.cpp", 3641, 0, "%s", "out[aabbTreeIndex].surfaceCount == surfaceCount");
+        iassert( out[aabbTreeIndex].surfaceCount == surfaceCount );
         out[aabbTreeIndex].childCount = in[aabbTreeIndex].childCount;
         if (out[aabbTreeIndex].childCount != in[aabbTreeIndex].childCount)
             MyAssertHandler(
@@ -1821,10 +1789,8 @@ unsigned int R_LoadPortals()
 
     in = Com_GetBspLump(LUMP_PORTALS, 0x10u, &portalCount);
     out = (GfxPortal *)Hunk_Alloc(68 * portalCount, "R_LoadPortals", 22);
-    if (!s_world.cells)
-        MyAssertHandler(".\\r_bsp_load_obj.cpp", 3776, 0, "%s", "s_world.cells");
-    if (!s_world.dpvsPlanes.planes)
-        MyAssertHandler(".\\r_bsp_load_obj.cpp", 3777, 0, "%s", "s_world.dpvsPlanes.planes");
+    iassert( s_world.cells );
+    iassert( s_world.dpvsPlanes.planes );
     for (portalIndex = 0; ; ++portalIndex)
     {
         result = portalIndex;
@@ -1848,8 +1814,7 @@ unsigned int R_LoadPortals()
                 *(_DWORD *)&in[16 * portalIndex + 4],
                 s_world.dpvsPlanes.cellCount);
         out[portalIndex].cell = &s_world.cells[*(_DWORD *)&in[16 * portalIndex + 4]];
-        if (!rgl.portalVerts)
-            MyAssertHandler(".\\r_bsp_load_obj.cpp", 3787, 0, "%s", "rgl.portalVerts");
+        iassert( rgl.portalVerts );
         out[portalIndex].vertices = (float (*)[3])rgl.portalVerts[*(_DWORD *)&in[16 * portalIndex + 8]];
         out[portalIndex].vertexCount = in[16 * portalIndex + 12];
         PerpendicularVector(plane->normal, out[portalIndex].hullAxis[0]);
@@ -1912,8 +1877,7 @@ mnode_t *__cdecl R_SortNodes_r(mnode_load_t *node, mnode_t *out)
     else
     {
         out->cellIndex = node->cellIndex + 1;
-        if (out->cellIndex != node->cellIndex + 1)
-            MyAssertHandler(".\\r_bsp_load_obj.cpp", 3886, 0, "%s", "out->cellIndex == node->cellIndex + 1");
+        iassert( out->cellIndex == node->cellIndex + 1 );
         return (mnode_t *)&out->rightChildOffset;
     }
 }
@@ -1967,19 +1931,18 @@ void __cdecl R_LoadNodesAndLeafs(unsigned int bspVersion)
         for (leafIndexa = 0; leafIndexa < leafCount; ++leafIndexa)
         {
             out->cellIndex = SLOWORD(inLeaf->cellNum);
-            if (out->cellIndex != inLeaf->cellNum)
-                MyAssertHandler(".\\r_bsp_load_obj.cpp", 3977, 0, "%s", "out->cellIndex == inLeaf->cellNum");
+            iassert( out->cellIndex == inLeaf->cellNum );
             ++inLeaf;
             ++out;
         }
     }
     else
     {
+        iassert(0); // lwss test add
         for (leafIndex = 0; leafIndex < leafCount; ++leafIndex)
         {
             out->cellIndex = *((__int16 *)inLeaf_v14 + 12);
-            if (out->cellIndex != *((_DWORD *)inLeaf_v14 + 6))
-                MyAssertHandler(".\\r_bsp_load_obj.cpp", 3967, 0, "%s", "out->cellIndex == inLeaf_v14->cellNum");
+            //iassert( out->cellIndex == inLeaf_v14->cellNum );
             inLeaf_v14 += 36;
             ++out;
         }
@@ -2003,8 +1966,7 @@ BOOL __cdecl R_CompareSurfaces(const GfxSurface &surf0, const GfxSurface &surf1)
     int surfIndex; // [esp+30h] [ebp-5Ch]
     int surfIndex_4; // [esp+34h] [ebp-58h]
     const MaterialTechnique *techniqueLit; // [esp+38h] [ebp-54h]
-    Material *material; // [esp+40h] [ebp-4Ch]
-    Material *material_4; // [esp+44h] [ebp-48h]
+    Material *material[2]; // [esp+40h] [ebp-4Ch]
     int firstVertex; // [esp+48h] [ebp-44h]
     int firstVertex_4; // [esp+4Ch] [ebp-40h]
     int reflectionProbeIndex; // [esp+58h] [ebp-34h]
@@ -2013,32 +1975,30 @@ BOOL __cdecl R_CompareSurfaces(const GfxSurface &surf0, const GfxSurface &surf1)
     int hasTechniqueLit_4; // [esp+74h] [ebp-18h]
     int lightmapIndex; // [esp+78h] [ebp-14h]
     int lightmapIndex_4; // [esp+7Ch] [ebp-10h]
-    MaterialTechniqueSet *techSet; // [esp+80h] [ebp-Ch]
-    MaterialTechniqueSet *techSet_4; // [esp+84h] [ebp-8h]
+    MaterialTechniqueSet *techSet[2]; // [esp+80h] [ebp-Ch]
     int comparison; // [esp+88h] [ebp-4h]
     int comparisona; // [esp+88h] [ebp-4h]
     int comparisonb; // [esp+88h] [ebp-4h]
     int comparisonc; // [esp+88h] [ebp-4h]
 
-    material = surf0.material;
-    material_4 = surf1.material;
-    techSet = Material_GetTechniqueSet(material);
-    techSet_4 = Material_GetTechniqueSet(material_4);
-    if (!techSet || !techSet_4)
-        MyAssertHandler(".\\r_bsp_load_obj.cpp", 2030, 0, "%s", "techSet[0] && techSet[1]");
-    techniqueLit = Material_GetTechnique(material, TECHNIQUE_LIT_BEGIN);
+    material[0] = surf0.material;
+    material[1] = surf1.material;
+    techSet[0] = Material_GetTechniqueSet(material[0]);
+    techSet[1] = Material_GetTechniqueSet(material[1]);
+    iassert( techSet[0] && techSet[1] );
+    techniqueLit = Material_GetTechnique(material[0], TECHNIQUE_LIT_BEGIN);
     hasTechniqueLit = techniqueLit != 0;
-    hasTechniqueLit_4 = Material_GetTechnique(material_4, TECHNIQUE_LIT_BEGIN) != 0;
+    hasTechniqueLit_4 = Material_GetTechnique(material[1], TECHNIQUE_LIT_BEGIN) != 0;
     if (hasTechniqueLit_4 != hasTechniqueLit)
         return hasTechniqueLit_4 - hasTechniqueLit < 0;
     if (!techniqueLit)
     {
-        techniqueEmissive = Material_GetTechnique(material, TECHNIQUE_EMISSIVE);
-        comparison = (Material_GetTechnique(material_4, TECHNIQUE_EMISSIVE) != 0) - (techniqueEmissive != 0);
+        techniqueEmissive = Material_GetTechnique(material[0], TECHNIQUE_EMISSIVE);
+        comparison = (Material_GetTechnique(material[1], TECHNIQUE_EMISSIVE) != 0) - (techniqueEmissive != 0);
         if (comparison)
             return comparison < 0;
     }
-    comparisona = (material->info.drawSurf.fields.primarySortKey - material_4->info.drawSurf.fields.primarySortKey);
+    comparisona = (material[0]->info.drawSurf.fields.primarySortKey - material[1]->info.drawSurf.fields.primarySortKey);
     if (comparisona)
         return comparisona < 0;
     Com_GetPrimaryLight(surf0.primaryLightIndex);
@@ -2046,17 +2006,15 @@ BOOL __cdecl R_CompareSurfaces(const GfxSurface &surf0, const GfxSurface &surf1)
     comparisonb = surf0.primaryLightIndex - surf1.primaryLightIndex;
     if (comparisonb)
         return comparisonb < 0;
-    comparisonc = (material->info.drawSurf.fields.materialSortedIndex - material_4->info.drawSurf.fields.materialSortedIndex);
+    comparisonc = (material[0]->info.drawSurf.fields.materialSortedIndex - material[1]->info.drawSurf.fields.materialSortedIndex);
     if (comparisonc)
     {
-        if (surf0.tris.firstVertex == surf1.tris.firstVertex)
-            MyAssertHandler(".\\r_bsp_load_obj.cpp", 2075, 0, "%s", "surf0.tris.firstVertex != surf1.tris.firstVertex");
+        iassert( surf0.tris.firstVertex != surf1.tris.firstVertex );
         return comparisonc < 0;
     }
     else
     {
-        if (material != material_4)
-            MyAssertHandler(".\\r_bsp_load_obj.cpp", 2080, 0, "%s", "material[0] == material[1]");
+        iassert( material[0] == material[1] );
         reflectionProbeIndex = surf0.reflectionProbeIndex;
         reflectionProbeIndex_4 = surf1.reflectionProbeIndex;
         if (reflectionProbeIndex == reflectionProbeIndex_4)
@@ -2071,8 +2029,7 @@ BOOL __cdecl R_CompareSurfaces(const GfxSurface &surf0, const GfxSurface &surf1)
                 {
                     surfIndex = surf0.tris.vertexCount;
                     surfIndex_4 = surf1.tris.vertexCount;
-                    if (surfIndex == surfIndex_4)
-                        MyAssertHandler(".\\r_bsp_load_obj.cpp", 2104, 0, "%s", "comparison");
+                    iassert( comparison );
                     return surfIndex - surfIndex_4 < 0;
                 }
                 else
@@ -2129,8 +2086,7 @@ unsigned int R_SortSurfaces()
         surface = &s_world.dpvs.surfaces[surfIndex];
         s_world.dpvs.sortedSurfIndex[surfIndex] = surface->tris.vertexCount;
         surface->tris.vertexCount = surfIndex;
-        if (surface->tris.vertexCount != surfIndex)
-            MyAssertHandler(".\\r_bsp_load_obj.cpp", 2167, 0, "%s", "surface->tris.vertexCount == surfIndex");
+        iassert( surface->tris.vertexCount == surfIndex );
     }
     //std::_Sort<GfxSurface *, int, bool(__cdecl *)(GfxSurface const &, GfxSurface const &)>(
     //    s_world.dpvs.surfaces,
@@ -2461,8 +2417,7 @@ bool __cdecl R_VectorForKey(const char *key, char *defaultString, char *(*spawnV
     char *string; // [esp+0h] [ebp-8h]
     bool success; // [esp+7h] [ebp-1h]
 
-    if (!defaultString)
-        MyAssertHandler(".\\r_bsp_load_obj.cpp", 2912, 0, "%s", "defaultString");
+    iassert( defaultString );
     success = 1;
     string = R_ValueForKey(key, spawnVars, spawnVarCount);
     if (!string)
@@ -2509,11 +2464,9 @@ void __cdecl R_CheckValidStaticModel(char *(*spawnVars)[2], XModel **model, floa
         if (!tempModel || XModelBad(tempModel))
             Com_Error(ERR_DROP, "R_CheckValidStaticModel: could not find xmodel 'default_static_model'");
     }
-    if (!model)
-        MyAssertHandler(".\\r_bsp_load_obj.cpp", 3017, 0, "%s", "model");
+    iassert( model );
     *model = tempModel;
-    if (!origin)
-        MyAssertHandler(".\\r_bsp_load_obj.cpp", 3020, 0, "%s", "origin");
+    iassert( origin );
     *origin = tempOrigin[0];
     origin[1] = tempOrigin[1];
     origin[2] = tempOrigin[2];
@@ -2559,18 +2512,15 @@ void __cdecl R_GetXModelBounds(XModel *model, const float (*axes)[3], float *min
     maxs[1] = -FLT_MAX;
     maxs[2] = -FLT_MAX;
     surfaceCount = XModelGetSurfaces(model, &surfaces, 0);
-    if (!surfaces)
-        MyAssertHandler(".\\xanim\\xmodel_load_obj.cpp", 922, 0, "%s", "surfaces");
+    iassert( surfaces );
     vert = (float(*)[3])Hunk_AllocateTempMemory(393216, "R_GetXModelBounds");
-    if (surfaceCount <= 0)
-        MyAssertHandler(".\\xanim\\xmodel_load_obj.cpp", 926, 0, "%s", "surfaceCount > 0");
+    iassert( surfaceCount > 0 );
     for (index = 0; index < surfaceCount; ++index)
     {
         xsurf = &surfaces[index];
         vertCount = XSurfaceGetNumVerts(xsurf);
         XSurfaceGetVerts(xsurf, (float*)vert, 0, 0);
-        if (vertCount <= 0)
-            MyAssertHandler(".\\xanim\\xmodel_load_obj.cpp", 933, 0, "%s", "vertCount > 0");
+        iassert( vertCount > 0 );
         for (vertIndex = 0; vertIndex < vertCount; ++vertIndex)
         {
             for (axisIndex = 0; axisIndex < 3; ++axisIndex)
@@ -2606,8 +2556,7 @@ void __cdecl R_CreateStaticModel(
     R_GetXModelBounds(model, axis, smodelInst->mins, smodelInst->maxs);
     Vec3Mad(origin, scale, smodelInst->mins, smodelInst->mins);
     Vec3Mad(origin, scale, smodelInst->maxs, smodelInst->maxs);
-    if (scale == 0.0)
-        MyAssertHandler(".\\r_staticmodel_load_obj.cpp", 582, 0, "%s", "scale");
+    iassert( scale );
     smodelDrawInst->cullDist = XModelGetLodOutDist(model) * scale;
     smodelDrawInst->reflectionProbeIndex = 0;
     smodelDrawInst->flags = staticModelFlags;
@@ -2634,8 +2583,7 @@ bool __cdecl R_DecodeGroundLighting(
     int fieldsRead; // [esp+1Ch] [ebp-8h]
     int dimIter; // [esp+20h] [ebp-4h]
 
-    if (!defaultString)
-        MyAssertHandler(".\\r_bsp_load_obj.cpp", 2937, 0, "%s", "defaultString");
+    iassert( defaultString );
     success = 1;
     string = R_ValueForKey(key, spawnVars, spawnVarCount);
     if (!string)
@@ -2817,8 +2765,7 @@ void __cdecl R_LoadEntities(unsigned int bspVersion)
     s_world.dpvs.smodelInsts = (GfxStaticModelInst*)Hunk_Alloc(28 * smodelCount, "R_LoadEntities", 21);
     s_world.dpvs.smodelCount = 0;
     text = startPos;
-    if (!s_world.cells)
-        MyAssertHandler(".\\r_bsp_load_obj.cpp", 3517, 0, "%s", "s_world.cells");
+    iassert( s_world.cells );
     while (1)
     {
         token = Com_Parse(&text)->token;
@@ -2863,10 +2810,8 @@ void __cdecl R_LoadEntities(unsigned int bspVersion)
             R_LoadMiscModel(&ptrs, bspVersion);
         }
     }
-    if (s_world.dpvs.smodelCount != smodelCount)
-        MyAssertHandler(".\\r_bsp_load_obj.cpp", 3566, 0, "%s", "s_world.dpvs.smodelCount == smodelCount");
-    if (smodelCount > 0x10000)
-        MyAssertHandler(".\\r_bsp_load_obj.cpp", 3567, 0, "%s\n\t(smodelCount) = %i", "(smodelCount <= 65536)", smodelCount);
+    iassert( s_world.dpvs.smodelCount == smodelCount );
+    iassert( (smodelCount <= 65536) );
     Hunk_FreeTempMemory(textPool);
 }
 
@@ -2878,17 +2823,14 @@ void R_AddAllProbesToAllCells()
     int cellIndexa; // [esp+4h] [ebp-8h]
     unsigned __int8 reflectionProbeIndex; // [esp+Bh] [ebp-1h]
 
-    if (!s_world.reflectionProbeCount)
-        MyAssertHandler(".\\r_bsp_load_obj.cpp", 4355, 0, "%s", "s_world.reflectionProbeCount > 0");
+    iassert( s_world.reflectionProbeCount > 0 );
     if (s_world.reflectionProbeCount == 1)
     {
         for (cellIndex = 0; cellIndex < s_world.dpvsPlanes.cellCount; ++cellIndex)
         {
             cell = &s_world.cells[cellIndex];
-            if (cell->reflectionProbeCount)
-                MyAssertHandler(".\\r_bsp_load_obj.cpp", 4362, 0, "%s", "cell->reflectionProbeCount == 0");
-            if (cell->reflectionProbes)
-                MyAssertHandler(".\\r_bsp_load_obj.cpp", 4363, 0, "%s", "cell->reflectionProbes == NULL");
+            iassert( cell->reflectionProbeCount == 0 );
+            iassert( cell->reflectionProbes == NULL );
             cell->reflectionProbeCount = 1;
             cell->reflectionProbes = Hunk_Alloc(1u, "R_AddAllProbesToAllCells", 22);
             *cell->reflectionProbes = 0;
@@ -2899,10 +2841,8 @@ void R_AddAllProbesToAllCells()
         for (cellIndexa = 0; cellIndexa < s_world.dpvsPlanes.cellCount; ++cellIndexa)
         {
             cella = &s_world.cells[cellIndexa];
-            if (cella->reflectionProbeCount)
-                MyAssertHandler(".\\r_bsp_load_obj.cpp", 4374, 0, "%s", "cell->reflectionProbeCount == 0");
-            if (cella->reflectionProbes)
-                MyAssertHandler(".\\r_bsp_load_obj.cpp", 4375, 0, "%s", "cell->reflectionProbes == NULL");
+            iassert( cell->reflectionProbeCount == 0 );
+            iassert( cell->reflectionProbes == NULL );
             cella->reflectionProbeCount = LOBYTE(s_world.reflectionProbeCount) - 1;
             if (cella->reflectionProbeCount != s_world.reflectionProbeCount - 1)
                 MyAssertHandler(
@@ -2942,8 +2882,7 @@ void R_SetStaticModelReflectionProbes()
 {
     unsigned int smodelIndex; // [esp+0h] [ebp-4h]
 
-    if (!rgl.reflectionProbesLoaded)
-        MyAssertHandler(".\\r_bsp_load_obj.cpp", 4239, 0, "%s", "rgl.reflectionProbesLoaded");
+    iassert( rgl.reflectionProbesLoaded );
     for (smodelIndex = 0; smodelIndex < s_world.dpvs.smodelCount; ++smodelIndex)
         R_SetStaticModelReflectionProbe(
             &s_world,
@@ -3045,8 +2984,7 @@ void __cdecl R_AddStaticModelToCell(GfxWorld *world, GfxStaticModelInst *smodelI
     GfxAabbTree *tree; // [esp+4h] [ebp-8h]
     int smodelIndex; // [esp+8h] [ebp-4h]
 
-    if (!smodelInst)
-        MyAssertHandler(".\\r_staticmodel_load_obj.cpp", 355, 0, "%s", "smodelInst");
+    iassert( smodelInst );
     if (cellIndex < 0 || cellIndex >= world->dpvsPlanes.cellCount)
         MyAssertHandler(
             ".\\r_staticmodel_load_obj.cpp",
@@ -3057,8 +2995,7 @@ void __cdecl R_AddStaticModelToCell(GfxWorld *world, GfxStaticModelInst *smodelI
     cell = &world->cells[cellIndex];
     smodelIndex = smodelInst - world->dpvs.smodelInsts;
     tree = cell->aabbTree;
-    if (!tree)
-        MyAssertHandler(".\\r_staticmodel_load_obj.cpp", 361, 0, "%s", "tree");
+    iassert( tree );
     if (!tree->smodelIndexCount || tree->smodelIndexes[tree->smodelIndexCount - 1] != smodelIndex)
         R_AddStaticModelToAabbTree_r(world, cell->aabbTree, smodelIndex);
 }
@@ -3197,8 +3134,7 @@ int __cdecl R_SortGfxAabbTreeChildren(
         {
             smodelSwapIndex = staticModels[childCount];
             staticModels[childCount] = smodelIndex;
-            if (staticModels[childCount] != smodelIndex)
-                MyAssertHandler(".\\r_staticmodel_load_obj.cpp", 73, 0, "%s", "staticModels[childCount] == smodelIndex");
+            iassert( staticModels[childCount] == smodelIndex );
             staticModels[smodelChildIndex] = smodelSwapIndex;
             if (staticModels[smodelChildIndex] != smodelSwapIndex)
                 MyAssertHandler(
@@ -3349,8 +3285,7 @@ void __cdecl R_SortGfxAabbTree(GfxWorld *world, GfxAabbTree *tree)
                         children = (tree + tree->childrenOffset);
                         childTree = &children[tree->childCount++];
                         childTree->smodelIndexCount = count;
-                        if (childTree->smodelIndexCount != count)
-                            MyAssertHandler(".\\r_staticmodel_load_obj.cpp", 235, 0, "%s", "childTree->smodelIndexCount == count");
+                        iassert( childTree->smodelIndexCount == count );
                         childTree->smodelIndexes = smodelIndexes;
                         R_SortGfxAabbTree(world, childTree);
                         smodelIndexes += count;
@@ -3411,8 +3346,7 @@ void __cdecl R_FixupGfxAabbTrees(GfxCell *cell)
     GfxAabbTree *newTree; // [esp+4h] [ebp-8h]
 
     tree = cell->aabbTree;
-    if (!tree)
-        MyAssertHandler(".\\r_bsp_load_obj.cpp", 3378, 0, "%s", "tree");
+    iassert( tree );
     cell->aabbTreeCount = R_AabbTreeChildrenCount_r(tree);
     newTree = (GfxAabbTree*)Hunk_AllocAlign(44 * cell->aabbTreeCount, 4, "R_FixupGfxAabbTrees", 21);
     if (R_AabbTreeMove_r(tree, newTree, newTree + 1) - newTree != cell->aabbTreeCount)
@@ -3431,8 +3365,7 @@ int R_PostLoadEntities()
     unsigned int smodelIndexa; // [esp+520h] [ebp-4h]
     unsigned int smodelIndexb; // [esp+520h] [ebp-4h]
 
-    if (!rgl.staticModelReflectionProbesLoaded)
-        MyAssertHandler(".\\r_bsp_load_obj.cpp", 3396, 0, "%s", "rgl.staticModelReflectionProbesLoaded");
+    iassert( rgl.staticModelReflectionProbesLoaded );
     smodelCombinedInsts = (GfxStaticModelCombinedInst*)Z_Malloc(104 * s_world.dpvs.smodelCount, "R_PostLoadEntities", 21);
     for (smodelIndex = 0; smodelIndex < s_world.dpvs.smodelCount; ++smodelIndex)
     {
@@ -3460,8 +3393,7 @@ int R_PostLoadEntities()
             sizeof(s_world.dpvs.smodelInsts[smodelIndexa]));
     }
     Z_Free(smodelCombinedInsts, 21);
-    if (!s_world.dpvsPlanes.nodes)
-        MyAssertHandler(".\\r_bsp_load_obj.cpp", 3418, 0, "%s", "s_world.dpvsPlanes.nodes");
+    iassert( s_world.dpvsPlanes.nodes );
     for (smodelIndexb = 0; smodelIndexb < s_world.dpvs.smodelCount; ++smodelIndexb)
         R_FilterStaticModelIntoCells_r(
             &s_world,
@@ -3488,10 +3420,8 @@ void __cdecl R_ForEachShadowCastingSurfaceOnEachLight(void(__cdecl *Callback)(Gf
 {
     unsigned int sortedSurfIndex; // [esp+0h] [ebp-8h]
 
-    if (!s_world.shadowGeom)
-        MyAssertHandler(".\\r_bsp_load_obj.cpp", 4260, 1, "%s", "s_world.shadowGeom");
-    if (!s_world.lightRegion)
-        MyAssertHandler(".\\r_bsp_load_obj.cpp", 4261, 1, "%s", "s_world.lightRegion");
+    iassert( s_world.shadowGeom );
+    iassert( s_world.lightRegion );
     for (sortedSurfIndex = 0; sortedSurfIndex < s_world.models->surfaceCount; ++sortedSurfIndex)
     {
         if ((s_world.dpvs.surfaces[sortedSurfIndex].material->info.gameFlags & 0x40) != 0)
@@ -3517,8 +3447,7 @@ unsigned int R_InitShadowGeometryArrays()
     GfxShadowGeometry *shadowGeoma; // [esp+8h] [ebp-8h]
     unsigned int smodelIndex; // [esp+Ch] [ebp-4h]
 
-    if (!s_world.shadowGeom)
-        MyAssertHandler(".\\r_bsp_load_obj.cpp", 4285, 1, "%s", "s_world.shadowGeom");
+    iassert( s_world.shadowGeom );
     R_ForEachShadowCastingSurfaceOnEachLight(R_IncrementShadowGeometryCount);
     s_world.shadowGeom->surfaceCount = 0;
     s_world.shadowGeom[s_world.sunPrimaryLightIndex].surfaceCount = 0;
@@ -3577,10 +3506,8 @@ void __cdecl R_LoadSun(const char *name, sunflare_t *sun)
     const char *firstCharToCopy; // [esp+4Ch] [ebp-8h]
     char *firstPeriod; // [esp+50h] [ebp-4h]
 
-    if (!name)
-        MyAssertHandler(".\\r_sky_load_obj.cpp", 16, 0, "%s", "name");
-    if (!sun)
-        MyAssertHandler(".\\r_sky_load_obj.cpp", 17, 0, "%s", "sun");
+    iassert( name );
+    iassert( sun );
     Com_Memset(sun, 0, 96);
     firstCharToCopy = name;
     for (nameIter = name; *nameIter; ++nameIter)
@@ -3877,8 +3804,7 @@ unsigned int __cdecl R_OptimalSModelResourceStats(GfxWorld *world, GfxSModelSurf
     unsigned int smodelIterNext; // [esp+F8h] [ebp-8h]
     unsigned int statCount; // [esp+FCh] [ebp-4h]
 
-    if (!world)
-        MyAssertHandler(".\\r_staticmodelcache_load_obj.cpp", 202, 0, "%s", "world");
+    iassert( world );
     if (!world->dpvs.smodelCount)
         return 0;
     drawInstArray = (const GfxStaticModelDrawInst **)Hunk_AllocateTempMemory(4 * world->dpvs.smodelCount, "R_AssignSModelCacheResources");
@@ -3950,14 +3876,11 @@ void __cdecl XModelSetSModelCacheForLod(
 {
     int v4; // [esp+0h] [ebp-4h]
 
-    if (!model)
-        MyAssertHandler(".\\xanim\\xmodel_utils.cpp", 106, 0, "%s", "model");
+    iassert( model );
     if (lod >= 4)
         MyAssertHandler(".\\xanim\\xmodel_utils.cpp", 107, 0, "lod doesn't index MAX_LODS\n\t%i not in [0, %i)", lod, 4);
-    if (model->lodInfo[lod].smcIndexPlusOne)
-        MyAssertHandler(".\\xanim\\xmodel_utils.cpp", 108, 0, "%s", "model->lodInfo[lod].smcIndexPlusOne == 0");
-    if (model->lodInfo[lod].lod != lod)
-        MyAssertHandler(".\\xanim\\xmodel_utils.cpp", 109, 0, "%s", "model->lodInfo[lod].lod == lod");
+    iassert( model->lodInfo[lod].smcIndexPlusOne == 0 );
+    iassert( model->lodInfo[lod].lod == lod );
     v4 = smcIndex + 1;
     if (smcIndex + 1 != (smcIndex + 1))
         MyAssertHandler(
@@ -3990,8 +3913,7 @@ void __cdecl R_AssignSModelCacheResources(GfxWorld *world)
     unsigned int v7; // [esp+219Ch] [ebp-8h]
     unsigned int i; // [esp+21A0h] [ebp-4h]
 
-    if (!world)
-        MyAssertHandler(".\\r_staticmodelcache_load_obj.cpp", 239, 0, "%s", "world");
+    iassert( world );
     memset(smcUseCount, 0, sizeof(smcUseCount));
     v7 = R_OptimalSModelResourceStats(world, stats, 0x200u);
     //std::_Sort<DBReorderAssetEntry *, int, bool(__cdecl *)(DBReorderAssetEntry const &, DBReorderAssetEntry const &)>(

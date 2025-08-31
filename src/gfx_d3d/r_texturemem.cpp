@@ -156,8 +156,7 @@ unsigned int __cdecl R_DetectCurrentTextureMemory()
     unsigned int texMemInMegs; // [esp+0h] [ebp-Ch]
     unsigned int vidMemInMegs; // [esp+8h] [ebp-4h]
 
-    if (!dx.device)
-        MyAssertHandler(".\\r_texturemem.cpp", 138, 0, "%s", "dx.device");
+    iassert( dx.device );
     vidMemInMegs = R_VideoMemory();
     texMemInMegs = dx.device->GetAvailableTextureMem() >> 20;
     if (vidMemInMegs)

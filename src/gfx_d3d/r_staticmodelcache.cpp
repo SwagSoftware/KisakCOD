@@ -93,8 +93,7 @@ void __cdecl R_CacheStaticModelIndices(unsigned int smodelIndex, unsigned int lo
             | ((unsigned __int16)(cacheBaseVertIndex + xsurf->baseVertIndex) << 16);
         twoSrcIndices = (unsigned int *)xsurf->triIndices;
         baseIndex = 3 * xsurf->baseTriIndex + 4 * cacheBaseVertIndex;
-        if (baseIndex >= 0x100000)
-            MyAssertHandler(".\\r_staticmodelcache.cpp", 477, 0, "%s", "baseIndex < SMC_MAX_INDEX_IN_CACHE");
+        iassert( baseIndex < SMC_MAX_INDEX_IN_CACHE );
         if (baseIndex + 3 * xsurf->triCount > 0x100000)
             MyAssertHandler(
                 ".\\r_staticmodelcache.cpp",
@@ -104,10 +103,8 @@ void __cdecl R_CacheStaticModelIndices(unsigned int smodelIndex, unsigned int lo
                 "baseIndex + xsurf->triCount * 3 <= SMC_MAX_INDEX_IN_CACHE");
         twoDstIndices = (unsigned int *)&gfxBuf.smodelCache.indices[baseIndex];
         iterationCount = xsurf->triCount / 2;
-        if (2 * iterationCount != xsurf->triCount)
-            MyAssertHandler(".\\r_staticmodelcache.cpp", 482, 0, "%s", "iterationCount * 2 == xsurf->triCount");
-        if (!iterationCount)
-            MyAssertHandler(".\\r_staticmodelcache.cpp", 483, 0, "%s", "iterationCount");
+        iassert( iterationCount * 2 == xsurf->triCount );
+        iassert( iterationCount );
         {
             PROF_SCOPED("R_memcpy");
             do
@@ -129,8 +126,7 @@ char __cdecl SMC_ForceFreeBlock(unsigned int smcIndex)
     static_model_tree_t *treenode; // [esp+Ch] [ebp-4h]
 
     treenode = (static_model_tree_t *)s_cache.usedlist[smcIndex].prev;
-    if (treenode == (static_model_tree_t *)&s_cache.usedlist[smcIndex])
-        MyAssertHandler(".\\r_staticmodelcache.cpp", 201, 0, "%s", "treenode != &s_cache.usedlist[smcIndex]");
+    iassert( (uintptr_t)treenode != (uintptr_t)&s_cache.usedlist[smcIndex] );
     if (rg.frontEndFrameCount - treenode->frameCount < 4)
         return 0;
     if (treenode->nodes[0].usedVerts <= 0)
@@ -190,8 +186,7 @@ char __cdecl SMC_GetFreeBlockOfSize(unsigned int smcIndex, unsigned int listInde
     if (freelist->freenode.next == (static_model_node_list_t*)freelist && !SMC_GetFreeBlockOfSize(smcIndex, listIndex - 1))
         return 0;
     block = freelist->freenode.next;
-    if (block == (static_model_node_list_t*)freelist)
-        MyAssertHandler(".\\r_staticmodelcache.cpp", 248, 0, "%s", "block != freelist");
+    iassert( (uintptr_t)block != (uintptr_t)freelist );
     block->next->prev = block->prev;
     block->prev->next = block->next;
     treeIndex = ((char*)block - (char*)s_cache.leafs) / sizeof(s_cache.leafs[0]);
@@ -772,5 +767,5 @@ void __cdecl R_SkinCachedStaticModelCmd(SkinCachedStaticModelCmd *skinCmd)
             xsurf->verts0,
             cachedSurf->smodelIndex,
             &verts[xsurf->baseVertIndex]);
-    }
 }
+    }

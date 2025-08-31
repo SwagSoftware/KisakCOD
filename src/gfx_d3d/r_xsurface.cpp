@@ -11,8 +11,7 @@ void __cdecl XSurfaceGetVerts(const XSurface *surf, float *pVert, float *pTexCoo
     GfxPackedVertex *verts0; // [esp+8h] [ebp-4h]
 
     verts0 = surf->verts0;
-    if (!verts0)
-        MyAssertHandler(".\\r_xsurface.cpp", 79, 0, "%s", "verts0");
+    iassert( verts0 );
     verts1 = verts0;
     for (render_count = surf->vertCount; render_count; --render_count)
     {
@@ -37,15 +36,13 @@ void __cdecl XSurfaceGetVerts(const XSurface *surf, float *pVert, float *pTexCoo
 
 int __cdecl XSurfaceGetNumVerts(const XSurface *surface)
 {
-    if (!surface)
-        MyAssertHandler(".\\r_xsurface.cpp", 21, 0, "%s", "surface");
+    iassert( surface );
     return surface->vertCount;
 }
 
 int __cdecl XSurfaceGetNumTris(const XSurface *surface)
 {
-    if (!surface)
-        MyAssertHandler(".\\r_xsurface.cpp", 28, 0, "%s", "surface");
+    iassert( surface );
     return surface->triCount;
 }
 

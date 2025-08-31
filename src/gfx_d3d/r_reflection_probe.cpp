@@ -208,8 +208,7 @@ void __cdecl R_ParseColorCorrectionData(const char *buf, const char *filename)
     ColorCorrectionData *ccd; // [esp+10h] [ebp-8h]
     parseInfo_t *token; // [esp+14h] [ebp-4h]
 
-    if (s_numColorCorrectionDataEntries)
-        MyAssertHandler(".\\r_reflection_probe.cpp", 416, 0, "%s", "s_numColorCorrectionDataEntries == 0");
+    iassert( s_numColorCorrectionDataEntries == 0 );
     if (R_VerifyFieldNames(&buf, filename))
     {
         while (1)
@@ -223,8 +222,7 @@ void __cdecl R_ParseColorCorrectionData(const char *buf, const char *filename)
                 return;
             }
             ccd = &s_colorCorrectionDataEntries[s_numColorCorrectionDataEntries++];
-            if (!token)
-                MyAssertHandler(".\\r_reflection_probe.cpp", 435, 0, "%s", "token");
+            iassert( token );
             if (strlen(token->token) >= 0x40)
                 Com_PrintError(1, "R_ParseColorCorrectionData: file %s truncating name because %s is too longer than %d", filename, token, 64);
             I_strncpyz(ccd->name, token->token, 64);
@@ -269,8 +267,7 @@ ColorCorrectionData *R_CreateDefaultColorCorrectionEntry()
     ColorCorrectionData *result; // eax
     ColorCorrectionData *ccd; // [esp+0h] [ebp-4h]
 
-    if (s_numColorCorrectionDataEntries)
-        MyAssertHandler(".\\r_reflection_probe.cpp", 490, 0, "%s", "s_numColorCorrectionDataEntries == 0");
+    iassert( s_numColorCorrectionDataEntries == 0 );
     ccd = &s_colorCorrectionDataEntries[s_numColorCorrectionDataEntries++];
     I_strncpyz(ccd->name, "default", 64);
     ccd->black_level = 0.0;
@@ -286,8 +283,7 @@ const ColorCorrectionData *__cdecl R_FindColorCorrectionData(const char *name)
 {
     int i; // [esp+0h] [ebp-4h]
 
-    if (!name)
-        MyAssertHandler(".\\r_reflection_probe.cpp", 506, 0, "%s", "name");
+    iassert( name );
     if (!*name)
         return R_FindColorCorrectionData("default");
     for (i = 0; i < s_numColorCorrectionDataEntries; ++i)
@@ -323,8 +319,7 @@ void __cdecl R_ColorCorrectBGRAPixel(const ColorCorrectionData *ccd, const unsig
     float maxIntensity; // [esp+6Ch] [ebp-10h]
     float color[3]; // [esp+70h] [ebp-Ch] BYREF
 
-    if (!ccd)
-        MyAssertHandler(".\\r_reflection_probe.cpp", 264, 0, "%s", "ccd");
+    iassert( ccd );
     for (i = 0; i < 3; ++i)
     {
         color[i] = from[i] / 255.0;
@@ -383,10 +378,8 @@ void __cdecl R_CopyBlockFromBgraToPixelColorWithColorCorrection(
 {
     unsigned int offset; // [esp+0h] [ebp-4h]
 
-    if (!blockSize)
-        MyAssertHandler(".\\r_reflection_probe.cpp", 321, 0, "%s", "blockSize");
-    if (blockSize % 4)
-        MyAssertHandler(".\\r_reflection_probe.cpp", 322, 0, "%s", "blockSize % 4 == 0");
+    iassert( blockSize );
+    iassert( blockSize % 4 == 0 );
     offset = 0;
     do
     {
@@ -434,8 +427,7 @@ GfxImage *__cdecl R_GenerateReflectionImageFromRawData(const unsigned __int8 *ra
     }
     v2 = va("*reflection_probe%i", probeIndex);
     reflectionImage = Image_Alloc(v2, 1u, 1u, 0);
-    if (!reflectionImage)
-        MyAssertHandler(".\\r_reflection_probe.cpp", 379, 1, "%s", "reflectionImage");
+    iassert( reflectionImage );
     Image_GenerateCube(reflectionImage, pixels, 64, imageFormat, mipLevel);
     return reflectionImage;
 }
@@ -489,10 +481,8 @@ void __cdecl R_GenerateReflections(char *mapname, GfxReflectionProbe *probes, un
     bool generateProbe[256]; // [esp+24h] [ebp-108h] BYREF
     unsigned int lumpSize; // [esp+128h] [ebp-4h]
 
-    if (!r_reflectionProbeGenerate)
-        MyAssertHandler(".\\r_reflection_probe.cpp", 176, 0, "%s", "r_reflectionProbeGenerate");
-    if (probeCount >= 0xFF)
-        MyAssertHandler(".\\r_reflection_probe.cpp", 177, 0, "%s", "probeCount < MAX_MAP_REFLECTION_PROBES");
+    iassert( r_reflectionProbeGenerate );
+    iassert( probeCount < MAX_MAP_REFLECTION_PROBES );
     if (r_reflectionProbeGenerate->current.enabled)
     {
         Com_LoadBsp(mapname);

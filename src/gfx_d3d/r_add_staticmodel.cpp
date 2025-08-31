@@ -98,8 +98,7 @@ GfxStaticModelId __cdecl R_GetStaticModelId(unsigned int smodelIndex, int lod)
     XSurface *xsurf; // [esp+24h] [ebp-4h]
 
     model = rgp.world->dpvs.smodelDrawInsts[smodelIndex].model;
-    if (!R_StaticModelHasLighting(smodelIndex))
-        MyAssertHandler(".\\r_add_staticmodel.cpp", 466, 0, "%s", "R_StaticModelHasLighting( smodelIndex )");
+    iassert( R_StaticModelHasLighting( smodelIndex ) );
     if (!r_smc_enable->current.enabled)
         goto LABEL_9;
     lodInfo = XModelGetLodInfo(model, lod);
@@ -125,8 +124,7 @@ GfxStaticModelId __cdecl R_GetStaticModelId(unsigned int smodelIndex, int lod)
         staticModelIda.surfType = SF_STATICMODEL_RIGID;
         staticModelIda.objectId = smodelIndex;
         surfaceCount = XModelGetSurfaces(model, &surfaces, lod);
-        if (!surfaceCount)
-            MyAssertHandler(".\\r_add_staticmodel.cpp", 489, 0, "%s", "surfaceCount");
+        iassert( surfaceCount );
         for (surfaceIndex = 0; surfaceIndex < surfaceCount; ++surfaceIndex)
         {
             xsurf = &surfaces[surfaceIndex];
@@ -177,7 +175,7 @@ void __cdecl R_AddAllStaticModelSurfacesCamera()
     char* Name; // eax
     float dist; // [esp+8h] [ebp-1104h]
     float v3; // [esp+Ch] [ebp-1100h]
-    float v4; // [esp+2Ch] [ebp-10E0h]
+    float val; // [esp+2Ch] [ebp-10E0h]
     float diff[2][3]; // [esp+34h] [ebp-10D8h] BYREF
     GfxStaticModelId StaticModelId; // [esp+54h] [ebp-10B8h]
     GfxStaticModelDrawInst* smodelDrawInst; // [esp+58h] [ebp-10B4h]
@@ -213,13 +211,13 @@ void __cdecl R_AddAllStaticModelSurfacesCamera()
     Com_Memset((unsigned int*)dest, 0, 32 * ((smodelCount + 127) >> 7));
     v24 = rgp.world->dpvs.smodelVisData[0];
     smodelDrawInsts = rgp.world->dpvs.smodelDrawInsts;
-    if (!rg.correctedLodParms.valid)
-        MyAssertHandler(".\\r_add_staticmodel.cpp", 671, 0, "%s", "g_lodParms->valid");
-    scale = rg.correctedLodParms.ramp[0].scale;
-    bias = rg.correctedLodParms.ramp[0].bias;
-    a[0] = rg.correctedLodParms.origin[0];
-    a[1] = rg.correctedLodParms.origin[1];
-    a[2] = rg.correctedLodParms.origin[2];
+    GfxLodParms *g_lodParms = &rg.correctedLodParms;
+    iassert( g_lodParms->valid );
+    scale = g_lodParms->ramp[0].scale;
+    bias = g_lodParms->ramp[0].bias;
+    a[0] = g_lodParms->origin[0];
+    a[1] = g_lodParms->origin[1];
+    a[2] = g_lodParms->origin[2];
     R_InitBspDrawSurf((GfxBspDrawSurfData*)&surfData);
     surfData.drawSurf[0].current = scene.drawSurfs[1];
     surfData.drawSurf[1].current = scene.drawSurfs[4];
@@ -258,10 +256,9 @@ void __cdecl R_AddAllStaticModelSurfacesCamera()
                     v13 = reflectionProbeIndex;
                     v26 = primaryLightIndex;
                 }
-                v4 = smodelDrawInst->placement.scale;
-                if (v4 == 0.0)
-                    MyAssertHandler("c:\\trees\\cod3\\src\\universal\\com_math.h", 107, 0, "%s", "val");
-                v3 = 1.0 / v4;
+                val = smodelDrawInst->placement.scale;
+                iassert( val );
+                v3 = 1.0 / val;
                 dist = v12 * v3;
                 lod = XModelGetLodForDist(v14, dist);
                 if (lod >= 0)
@@ -465,8 +462,7 @@ void __cdecl R_ShowCountsStaticModel(int smodelIndex, int lod)
         model = smodelDrawInst->model;
         XModelGetLodInfo(model, lod);
         surfaceCount = XModelGetSurfaces(model, &surfaces, lod);
-        if (!surfaceCount)
-            MyAssertHandler(".\\r_add_staticmodel.cpp", 421, 0, "%s", "surfaceCount");
+        iassert( surfaceCount );
         totalTriCount = 0;
         totalVertCount = 0;
         for (surfaceIndex = 0; surfaceIndex < surfaceCount; ++surfaceIndex)
@@ -530,9 +526,9 @@ void __cdecl R_StaticModelWriteInfo(int fileHandle, const GfxStaticModelDrawInst
     char dest; // [esp+60h] [ebp-1018h] BYREF
     _BYTE v5[4103]; // [esp+61h] [ebp-1017h] BYREF
     float v6; // [esp+1068h] [ebp-10h]
-    XModel *model; // [esp+106Ch] [ebp-Ch]
+    XModel *xmodel; // [esp+106Ch] [ebp-Ch]
     float v8; // [esp+1070h] [ebp-8h]
-    float v9; // [esp+1074h] [ebp-4h]
+    float lodDist; // [esp+1074h] [ebp-4h]
 
     if ((_S1_0 & 1) == 0)
     {
@@ -541,18 +537,14 @@ void __cdecl R_StaticModelWriteInfo(int fileHandle, const GfxStaticModelDrawInst
         radius2pixels = 720.0 / v3;
     }
     *(unsigned int *)&v5[4099] = 4096;
-    model = smodelDrawInst->model;
-    if (!model)
-        MyAssertHandler(".\\r_add_staticmodel.cpp", 538, 0, "%s", "xmodel");
-    if (!model->name)
-        MyAssertHandler(".\\r_add_staticmodel.cpp", 539, 0, "%s", "xmodel->name");
-    if (model->numLods <= 0)
-        MyAssertHandler(".\\r_add_staticmodel.cpp", 540, 0, "%s", "xmodel->numLods > 0");
-    v9 = *((float *)&model->parentList + 7 * model->numLods);
-    if (v9 <= 0.0)
-        MyAssertHandler(".\\r_add_staticmodel.cpp", 544, 0, "%s", "lodDist > 0.0f");
-    v6 = radius2pixels * model->radius / v9;
-    v8 = radius2pixels * model->radius;
+    xmodel = smodelDrawInst->model;
+    iassert( xmodel );
+    iassert( xmodel->name );
+    iassert( xmodel->numLods > 0 );
+    lodDist = *((float *)&xmodel->parentList + 7 * xmodel->numLods);
+    iassert( lodDist > 0.0f );
+    v6 = radius2pixels * xmodel->radius / lodDist;
+    v8 = radius2pixels * xmodel->radius;
     ++g_dumpStaticModelCount;
     if (smodelDrawInst->placement.scale > 0.0 && dist > 0.0)
         Com_sprintf(
@@ -560,10 +552,10 @@ void __cdecl R_StaticModelWriteInfo(int fileHandle, const GfxStaticModelDrawInst
             0x1000u,
             "%d,%s,%.1f,%d,%.1f,%.1f,%.1f,%.1f,%.1f,%.1f,%.1f,%.1f\n",
             g_dumpStaticModelCount,
-            model->name,
-            model->radius,
-            model->numLods,
-            v9,
+            xmodel->name,
+            xmodel->radius,
+            xmodel->numLods,
+            lodDist,
             v6,
             v8,
             dist / smodelDrawInst->placement.scale,
@@ -603,7 +595,7 @@ void __cdecl R_AddAllStaticModelSurfacesRangeSunShadow(unsigned int partitionInd
     double v2; // st7
     float dist; // [esp+4h] [ebp-10E4h]
     float v4; // [esp+8h] [ebp-10E0h]
-    float v5; // [esp+28h] [ebp-10C0h]
+    float val; // [esp+28h] [ebp-10C0h]
     float diff[2][3]; // [esp+30h] [ebp-10B8h] BYREF
     GfxStaticModelId StaticModelId; // [esp+50h] [ebp-1098h]
     GfxStaticModelDrawInst* smodelDrawInst; // [esp+54h] [ebp-1094h]
@@ -615,7 +607,7 @@ void __cdecl R_AddAllStaticModelSurfacesRangeSunShadow(unsigned int partitionInd
     XModel* v14; // [esp+106Ch] [ebp-7Ch]
     XModel* model; // [esp+1070h] [ebp-78h]
     GfxStaticModelId v16; // [esp+1074h] [ebp-74h]
-    unsigned int v17; // [esp+1078h] [ebp-70h]
+    unsigned int stage; // [esp+1078h] [ebp-70h]
     unsigned __int16* list; // [esp+107Ch] [ebp-6Ch]
     int lod; // [esp+1080h] [ebp-68h]
     unsigned int smodelCount; // [esp+1084h] [ebp-64h]
@@ -632,18 +624,17 @@ void __cdecl R_AddAllStaticModelSurfacesRangeSunShadow(unsigned int partitionInd
     smodelCount = rgp.world->dpvs.smodelCount;
     v22 = rgp.world->dpvs.smodelVisData[partitionIndex + 1];
     smodelDrawInsts = rgp.world->dpvs.smodelDrawInsts;
-    if (!rg.correctedLodParms.valid)
-        MyAssertHandler(".\\r_add_staticmodel.cpp", 1003, 0, "%s", "g_lodParms->valid");
-    scale = rg.correctedLodParms.ramp[0].scale;
-    bias = rg.correctedLodParms.ramp[0].bias;
-    a[0] = rg.correctedLodParms.origin[0];
-    a[1] = rg.correctedLodParms.origin[1];
-    a[2] = rg.correctedLodParms.origin[2];
+    GfxLodParms *g_lodParms = &rg.correctedLodParms;
+    iassert( g_lodParms->valid );
+    scale = g_lodParms->ramp[0].scale;
+    bias =  g_lodParms->ramp[0].bias;
+    a[0] =  g_lodParms->origin[0];
+    a[1] =  g_lodParms->origin[1];
+    a[2] =  g_lodParms->origin[2];
     R_InitBspDrawSurf(&surfData);
-    v17 = 3 * partitionIndex + 16;
-    surfData.drawSurfList.current = scene.drawSurfs[v17];
-    if (maxDrawSurfCount != scene.maxDrawSurfCount[v17])
-        MyAssertHandler(".\\r_add_staticmodel.cpp", 1023, 0, "%s", "(int)maxDrawSurfCount == scene.maxDrawSurfCount[stage]");
+    stage = 3 * partitionIndex + 16;
+    surfData.drawSurfList.current = scene.drawSurfs[stage];
+    iassert( (int)maxDrawSurfCount == scene.maxDrawSurfCount[stage] );
     surfData.drawSurfList.end = &surfData.drawSurfList.current[maxDrawSurfCount];
     memset(staticModelLodCount, 0, sizeof(staticModelLodCount));
     v26 = 0;
@@ -675,10 +666,9 @@ void __cdecl R_AddAllStaticModelSurfacesRangeSunShadow(unsigned int partitionInd
                         }
                         model = v14;
                     }
-                    v5 = smodelDrawInst->placement.scale;
-                    if (v5 == 0.0)
-                        MyAssertHandler("c:\\trees\\cod3\\src\\universal\\com_math.h", 107, 0, "%s", "val");
-                    v4 = 1.0 / v5;
+                    val = smodelDrawInst->placement.scale;
+                    iassert( val );
+                    v4 = 1.0 / val;
                     dist = v13 * v4;
                     lod = XModelGetLodForDist(v14, dist);
                     if (lod >= 0)
@@ -724,7 +714,7 @@ void __cdecl R_AddAllStaticModelSurfacesRangeSunShadow(unsigned int partitionInd
     if (v26)
         R_SkinStaticModelsShadow(model, staticModelLodList, staticModelLodCount, (GfxSModelDrawSurfData*)&surfData);
     R_EndCmdBuf(&surfData.delayedCmdBuf);
-    scene.drawSurfCount[v17] = surfData.drawSurfList.current - scene.drawSurfs[v17];
+    scene.drawSurfCount[stage] = surfData.drawSurfList.current - scene.drawSurfs[stage];
 }
 
 void __cdecl R_SkinStaticModelsShadowForLod(
@@ -746,11 +736,9 @@ void __cdecl R_SkinStaticModelsShadowForLod(
     XSurface *surfaces[2]; // [esp+2Ch] [ebp-8h] BYREF
 
     surfaceCount = XModelGetSurfaces(model, surfaces, lod);
-    if (!surfaceCount)
-        MyAssertHandler(".\\r_add_staticmodel.cpp", 252, 0, "%s", "surfaceCount");
+    iassert( surfaceCount );
     materialForSurf = XModelGetSkins(model, lod);
-    if (!materialForSurf)
-        MyAssertHandler(".\\r_add_staticmodel.cpp", 255, 0, "%s", "materialForSurf");
+    iassert( materialForSurf );
     if (surfaceCount < 1 || surfaceCount > 48)
         MyAssertHandler(
             ".\\r_add_staticmodel.cpp",
@@ -848,7 +836,7 @@ void __cdecl R_AddAllStaticModelSurfacesSpotShadow(unsigned int spotShadowIndex,
     double v2; // st7
     float dist; // [esp+4h] [ebp-10B4h]
     float v4; // [esp+8h] [ebp-10B0h]
-    float v5; // [esp+Ch] [ebp-10ACh]
+    float val; // [esp+Ch] [ebp-10ACh]
     float diff[3]; // [esp+14h] [ebp-10A4h] BYREF
     GfxStaticModelId StaticModelId; // [esp+20h] [ebp-1098h]
     GfxStaticModelDrawInst* smodelDrawInst; // [esp+24h] [ebp-1094h]
@@ -901,10 +889,9 @@ void __cdecl R_AddAllStaticModelSurfacesSpotShadow(unsigned int spotShadowIndex,
             if (smodelDrawInst->cullDist > (double)v13)
             {
                 model = smodelDrawInst->model;
-                v5 = smodelDrawInst->placement.scale;
-                if (v5 == 0.0)
-                    MyAssertHandler("c:\\trees\\cod3\\src\\universal\\com_math.h", 107, 0, "%s", "val");
-                v4 = 1.0 / v5;
+                val = smodelDrawInst->placement.scale;
+                iassert( val );
+                v4 = 1.0 / val;
                 dist = v13 * v4;
                 lod = XModelGetLodForDist(model, dist);
                 if (lod >= 0)

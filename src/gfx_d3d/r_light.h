@@ -4,6 +4,7 @@
 #include "r_rendercmds.h"
 
 #define MAX_VISIBLE_SHADOWABLE_DLIGHTS 1
+#define GFX_LIGHTGRID_SAMPLE_COUNT 56
 
 struct AnnotatedLightGridPoint // sizeof=0xA
 {                                       // ...

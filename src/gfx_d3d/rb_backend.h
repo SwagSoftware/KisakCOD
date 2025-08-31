@@ -5,6 +5,8 @@
 #include "r_init.h"
 #include "r_rendercmds.h"
 
+#define CONTXTCMD_TYPE_HUDICON_FLIP 2
+
 enum MaterialVertexDeclType : __int32
 {                                       // ...
     VERTDECL_GENERIC = 0x0,
@@ -625,4 +627,11 @@ void __cdecl RB_TouchAllImages();
 extern r_backEndGlobals_t backEnd;
 extern materialCommands_t tess;
 extern GfxBackEndData *backEndData;
-extern GfxRenderTarget gfxRenderTargets[17];// LWSS: changed to 17 to please ASAN.
+extern GfxRenderTarget gfxRenderTargets[17];// LWSS: changed to 17 to please ASAN. (GfxRenderTargetId)
+
+
+
+inline bool R_HaveFloatZ()
+{
+    return (bool)gfxRenderTargets[R_RENDERTARGET_FLOAT_Z].surface.color;
+}

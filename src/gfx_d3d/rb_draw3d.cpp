@@ -372,8 +372,7 @@ void __cdecl RB_StandardDrawCommands(const GfxViewInfo *viewInfo)
     needsDepthPrepass = r_depthPrepass->current.enabled;
     whichToClearForScene = 7;
     R_InitContext(data, &cmdBuf);
-    if (viewInfo->needsFloatZ && !gfxRenderTargets[5].surface.color)
-        MyAssertHandler(".\\rb_draw3d.cpp", 1084, 0, "%s", "!viewInfo->needsFloatZ || R_HaveFloatZ()");
+    iassert( !viewInfo->needsFloatZ || R_HaveFloatZ() );
     if (viewInfo->needsFloatZ || dynamicShadowType == SHADOW_COOKIE)
     {
         if (viewInfo->needsFloatZ)
@@ -839,12 +838,9 @@ void __cdecl RB_ApplyLatePostEffects(const GfxViewInfo *viewInfo)
 
 void RB_DrawDebugPostEffects()
 {
-    if (!r_showFbColorDebug)
-        MyAssertHandler(".\\rb_draw3d.cpp", 845, 0, "%s", "r_showFbColorDebug");
-    if (!r_showFloatZDebug)
-        MyAssertHandler(".\\rb_draw3d.cpp", 846, 0, "%s", "r_showFloatZDebug");
-    if (!sc_showDebug)
-        MyAssertHandler(".\\rb_draw3d.cpp", 847, 0, "%s", "sc_showDebug");
+    iassert( r_showFbColorDebug );
+    iassert( r_showFloatZDebug );
+    iassert( sc_showDebug );
     if (r_showFbColorDebug->current.integer == 1)
     {
         RB_ShowFbColorDebug_Screen();

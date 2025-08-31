@@ -13,8 +13,7 @@ void R_WarnOncePerFrame(GfxWarningType warnType, ...)
     va_list va; // [esp+41Ch] [ebp+Ch] BYREF
 
     va_start(va, warnType);
-    if (!r_warningRepeatDelay)
-        MyAssertHandler(".\\r_warn.cpp", 159, 0, "%s", "r_warningRepeatDelay");
+    iassert( r_warningRepeatDelay );
     frameRate = R_UpdateFrameRate();
     if (s_warnCount[warnType] < rg.frontEndFrameCount)
     {

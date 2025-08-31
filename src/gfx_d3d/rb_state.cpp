@@ -34,8 +34,7 @@ void __cdecl RB_SetInitialState()
     R_SetTexFilter();
     R_InitCmdBufState(&gfxCmdBufState);
     RB_InitSceneViewport();
-    if (!gfxRenderTargets[1].surface.color)
-        MyAssertHandler(".\\rb_state.cpp", 62, 0, "%s", "gfxRenderTargets[R_RENDERTARGET_FRAME_BUFFER].surface.color");
+    iassert( gfxRenderTargets[R_RENDERTARGET_FRAME_BUFFER].surface.color );
     if (!g_allocateMinimalResources && !gfxRenderTargets[1].surface.depthStencil)
         MyAssertHandler(
             ".\\rb_state.cpp",
@@ -43,40 +42,24 @@ void __cdecl RB_SetInitialState()
             0,
             "%s",
             "gfxRenderTargets[R_RENDERTARGET_FRAME_BUFFER].surface.depthStencil");
-    if (!gfxRenderTargets[1].width)
-        MyAssertHandler(".\\rb_state.cpp", 66, 0, "%s", "gfxRenderTargets[R_RENDERTARGET_FRAME_BUFFER].width");
-    if (!gfxRenderTargets[1].height)
-        MyAssertHandler(".\\rb_state.cpp", 67, 0, "%s", "gfxRenderTargets[R_RENDERTARGET_FRAME_BUFFER].height");
-    if (gfxCmdBufSourceState.renderTargetWidth)
-        MyAssertHandler(".\\rb_state.cpp", 68, 1, "%s", "gfxCmdBufSourceState.renderTargetWidth == 0");
-    if (gfxCmdBufSourceState.renderTargetHeight)
-        MyAssertHandler(".\\rb_state.cpp", 69, 1, "%s", "gfxCmdBufSourceState.renderTargetHeight == 0");
-    if (gfxCmdBufSourceState.viewportBehavior)
-        MyAssertHandler(".\\rb_state.cpp", 70, 1, "%s", "gfxCmdBufSourceState.viewportBehavior == 0");
+    iassert( gfxRenderTargets[R_RENDERTARGET_FRAME_BUFFER].width );
+    iassert( gfxRenderTargets[R_RENDERTARGET_FRAME_BUFFER].height );
+    iassert( gfxCmdBufSourceState.renderTargetWidth == 0 );
+    iassert( gfxCmdBufSourceState.renderTargetHeight == 0 );
+    iassert( gfxCmdBufSourceState.viewportBehavior == 0 );
     R_SetRenderTargetSize(&gfxCmdBufSourceState, R_RENDERTARGET_FRAME_BUFFER);
     R_SetRenderTarget(gfxCmdBufContext, R_RENDERTARGET_FRAME_BUFFER);
-    if (gfxCmdBufState.prim.indexBuffer)
-        MyAssertHandler(".\\rb_state.cpp", 76, 1, "%s", "gfxCmdBufState.prim.indexBuffer == NULL");
-    if (gfxCmdBufState.prim.streams[0].vb)
-        MyAssertHandler(".\\rb_state.cpp", 77, 1, "%s", "gfxCmdBufState.prim.streams[0].vb == NULL");
-    if (gfxCmdBufState.prim.streams[0].offset)
-        MyAssertHandler(".\\rb_state.cpp", 78, 1, "%s", "gfxCmdBufState.prim.streams[0].offset == 0");
-    if (gfxCmdBufState.prim.streams[0].stride)
-        MyAssertHandler(".\\rb_state.cpp", 79, 1, "%s", "gfxCmdBufState.prim.streams[0].stride == 0");
-    if (gfxCmdBufState.prim.streams[1].vb)
-        MyAssertHandler(".\\rb_state.cpp", 80, 1, "%s", "gfxCmdBufState.prim.streams[1].vb == NULL");
-    if (gfxCmdBufState.prim.streams[1].offset)
-        MyAssertHandler(".\\rb_state.cpp", 81, 1, "%s", "gfxCmdBufState.prim.streams[1].offset == 0");
-    if (gfxCmdBufState.prim.streams[1].stride)
-        MyAssertHandler(".\\rb_state.cpp", 82, 1, "%s", "gfxCmdBufState.prim.streams[1].stride == 0");
-    if (gfxCmdBufState.vertexShader)
-        MyAssertHandler(".\\rb_state.cpp", 86, 1, "%s", "gfxCmdBufState.vertexShader == NULL");
-    if (gfxCmdBufState.material)
-        MyAssertHandler(".\\rb_state.cpp", 88, 1, "%s", "gfxCmdBufState.material == NULL");
-    if (gfxCmdBufState.technique)
-        MyAssertHandler(".\\rb_state.cpp", 89, 1, "%s", "gfxCmdBufState.technique == NULL");
-    if (gfxCmdBufState.alphaRef)
-        MyAssertHandler(".\\rb_state.cpp", 92, 1, "%s", "gfxCmdBufState.alphaRef == 0");
+    iassert( gfxCmdBufState.prim.indexBuffer == NULL );
+    iassert( gfxCmdBufState.prim.streams[0].vb == NULL );
+    iassert( gfxCmdBufState.prim.streams[0].offset == 0 );
+    iassert( gfxCmdBufState.prim.streams[0].stride == 0 );
+    iassert( gfxCmdBufState.prim.streams[1].vb == NULL );
+    iassert( gfxCmdBufState.prim.streams[1].offset == 0 );
+    iassert( gfxCmdBufState.prim.streams[1].stride == 0 );
+    iassert( gfxCmdBufState.vertexShader == NULL );
+    iassert( gfxCmdBufState.material == NULL );
+    iassert( gfxCmdBufState.technique == NULL );
+    iassert( gfxCmdBufState.alphaRef == 0 );
 }
 
 void __cdecl RB_InitSceneViewport()

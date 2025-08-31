@@ -77,8 +77,7 @@ void __cdecl R_ModernizeLegacyLightGridColors(const unsigned __int8 *legacyColor
                     else
                         v4 = v6;
                     length = v4;
-                    if (v4 <= 0.0)
-                        MyAssertHandler(".\\r_bsp_load_obj.cpp", 812, 1, "%s", "length > 0.0f");
+                    iassert( length > 0.0f );
                     scale = 1.0 / length;
                     Vec3Scale(rotated, scale, projected);
                     axisWeight[0][0] = projected[0] * 0.5 + 0.5;
@@ -125,8 +124,7 @@ void __cdecl R_ModernizeLegacyLightGridColors(const unsigned __int8 *legacyColor
             }
         }
     }
-    if (basisIndex != 56)
-        MyAssertHandler(".\\r_bsp_load_obj.cpp", 844, 1, "%s", "basisIndex == GFX_LIGHTGRID_SAMPLE_COUNT");
+    iassert( basisIndex == GFX_LIGHTGRID_SAMPLE_COUNT );
 }
 
 void __cdecl R_LoadDefaultLightGridColors(GfxLightGridColors *colors)
@@ -177,8 +175,7 @@ void __cdecl R_LoadDefaultLightGridColors(GfxLightGridColors *colors)
                     else
                         v2 = v4;
                     length = v2;
-                    if (v2 <= 0.0)
-                        MyAssertHandler(".\\r_bsp_load_obj.cpp", 877, 1, "%s", "length > 0.0f");
+                    iassert( length > 0.0f );
                     scale = 1.0 / length;
                     Vec3Scale(rotated, scale, projected);
                     colors->rgb[basisIndex][0] = ((projected[0] * 0.5 + 0.5) * 255.0);
@@ -188,8 +185,7 @@ void __cdecl R_LoadDefaultLightGridColors(GfxLightGridColors *colors)
             }
         }
     }
-    if (basisIndex != 56)
-        MyAssertHandler(".\\r_bsp_load_obj.cpp", 887, 1, "%s", "basisIndex == GFX_LIGHTGRID_SAMPLE_COUNT");
+    iassert( basisIndex == GFX_LIGHTGRID_SAMPLE_COUNT );
 }
 
 void __cdecl R_LoadLightGridColors(unsigned int bspVersion)
@@ -465,8 +461,7 @@ char __cdecl R_EmitLightGridBlock_Version15(
                 }
             }
         }
-        if (pointIndex != endBlock)
-            MyAssertHandler(".\\r_bsp_load_obj.cpp", 1077, 0, "%s", "pointIndex == endBlock");
+        iassert( pointIndex == endBlock );
         zBase = *zSubRange - *zRangeGlobal;
         zBaseUsesShort = zRangeGlobal[1] - *zRangeGlobal + 1 > 255;
         do
@@ -598,8 +593,7 @@ char __cdecl R_EncodeLightGrid_Version15(const AnnotatedLightGridPoint *pointsAr
     const AnnotatedLightGridPoint *point; // [esp+10h] [ebp-8h]
     unsigned __int16 rowIndex; // [esp+14h] [ebp-4h]
 
-    if (s_world.lightGrid.entryCount)
-        MyAssertHandler(".\\r_bsp_load_obj.cpp", 1182, 0, "%s", "s_world.lightGrid.entryCount == 0");
+    iassert( s_world.lightGrid.entryCount == 0 );
     for (pointIndex = 0; pointIndex < pointsArrayCount; pointIndex += pointCount)
     {
         point = &pointsArray[pointIndex];
@@ -856,10 +850,8 @@ void __cdecl R_AllocateFalloffSpaceInLightmaps(GfxLightDef *def)
 {
     int pixelsNeeded; // [esp+0h] [ebp-4h]
 
-    if (!def)
-        MyAssertHandler(".\\r_light_load_obj.cpp", 66, 0, "%s", "def");
-    if (!def->attenuation.image)
-        MyAssertHandler(".\\r_light_load_obj.cpp", 67, 0, "%s", "def->attenuation.image");
+    iassert( def );
+    iassert( def->attenuation.image );
     pixelsNeeded = def->attenuation.image->width + 2;
     if (pixelsNeeded + s_lmapPixelsUsedForFalloff > 512)
         Com_Error(
@@ -897,8 +889,7 @@ GfxLightDef *__cdecl R_LoadLightDef(const char *name)
     int fileSize; // [esp+2Ch] [ebp-8h]
     const unsigned __int8 *readPos; // [esp+30h] [ebp-4h]
 
-    if (!name)
-        MyAssertHandler(".\\r_light_load_obj.cpp", 88, 0, "%s", "name");
+    iassert( name );
     filename = va("lights/%s", name);
     fileSize = FS_ReadFile(filename, (void **)&file);
     if (fileSize < 0)
@@ -907,8 +898,7 @@ GfxLightDef *__cdecl R_LoadLightDef(const char *name)
     {
         def = (GfxLightDef *)Hunk_Alloc(0x10u, "R_RegisterLightDef", 20);
         def->name = (const char *)Hunk_Alloc(strlen(name) + 1, "R_RegisterLightDef", 20);
-        if (!def)
-            MyAssertHandler(".\\r_light_load_obj.cpp", 103, 0, "%s", "def");
+        iassert( def );
         readPos = file;
         readPos = R_LoadLightImage(file, &def->attenuation);
         v4 = name;

@@ -50,8 +50,7 @@ void RB_DrawPolyInteriors()
     int vertIndexa; // [esp+10h] [ebp-8h]
     GfxColor color; // [esp+14h] [ebp-4h] BYREF
 
-    if (backEndData->debugGlobals.polyCount <= 0)
-        MyAssertHandler(".\\rb_debug.cpp", 83, 0, "%s", "backEndData->debugGlobals.polyCount > 0");
+    iassert( backEndData->debugGlobals.polyCount > 0 );
     RB_BeginSurface(rgp.whiteMaterial, TECHNIQUE_UNLIT);
     R_TrackPrims(&gfxCmdBufState, GFX_PRIM_STATS_DEBUG);
     for (polyIndex = 0; polyIndex < backEndData->debugGlobals.polyCount; ++polyIndex)
@@ -120,8 +119,7 @@ int RB_DrawPolyOutlines()
     int vertIndex; // [esp+14h] [ebp-8h]
     int vertIndexPrev; // [esp+18h] [ebp-4h]
 
-    if (backEndData->debugGlobals.polyCount <= 0)
-        MyAssertHandler(".\\rb_debug.cpp", 124, 0, "%s", "backEndData->debugGlobals.polyCount > 0");
+    iassert( backEndData->debugGlobals.polyCount > 0 );
     vertCount = 0;
     for (polyIndex = 0; polyIndex < backEndData->debugGlobals.polyCount; ++polyIndex)
     {
@@ -228,8 +226,7 @@ void __cdecl RB_DrawDebugStrings(trDebugString_t *strings, int stringCount)
 
 void __cdecl RB_DrawDebug(const GfxViewParms *viewParms)
 {
-    if (!viewParms)
-        MyAssertHandler(".\\rb_debug.cpp", 250, 0, "%s", "viewParms");
+    iassert( viewParms );
     RB_AddPlumeStrings(viewParms);
     RB_DrawDebugPolys();
     RB_DrawDebugLines(backEndData->debugGlobals.lines, backEndData->debugGlobals.lineCount, g_debugLineVerts);

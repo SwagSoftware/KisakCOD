@@ -43,8 +43,7 @@ void __cdecl RB_ShowCollision(const GfxViewParms *viewParms)
     int contentMask; // [esp+18h] [ebp-88h]
     cplane_s frustumPlanes[6]; // [esp+20h] [ebp-80h] BYREF
 
-    if (!viewParms)
-        MyAssertHandler(".\\rb_showcollision.cpp", 133, 0, "%s", "viewParms");
+    iassert( viewParms );
     if (r_showCollision && r_showCollision->current.integer != 0)
     {
         //contentMask = showCollisionContentMasks[*(unsigned int *)(LODWORD(r_lightTweakSunDirection.vector[3]) + 12)];
@@ -92,10 +91,8 @@ void __cdecl BuildFrustumPlanes(const GfxViewParms *viewParms, cplane_s *frustum
     DpvsPlane dpvsFrustumPlanes[5]; // [esp+14h] [ebp-70h] BYREF
     unsigned int planeIndex; // [esp+80h] [ebp-4h]
 
-    if (!viewParms)
-        MyAssertHandler(".\\rb_showcollision.cpp", 59, 0, "%s", "viewParms");
-    if (!frustumPlanes)
-        MyAssertHandler(".\\rb_showcollision.cpp", 60, 0, "%s", "frustumPlanes");
+    iassert( viewParms );
+    iassert( frustumPlanes );
     R_FrustumClipPlanes(&viewParms->viewProjectionMatrix, frustumSidePlanes, 5, dpvsFrustumPlanes);
     for (planeIndex = 0; planeIndex < 5; ++planeIndex)
     {
@@ -156,10 +153,8 @@ void __cdecl RB_DrawCollisionPoly(int numPoints, float (*points)[3], const float
     int vertIndexPrev; // [esp+Ch] [ebp-8h]
     GfxColor color; // [esp+10h] [ebp-4h] BYREF
 
-    if (numPoints < 3)
-        MyAssertHandler(".\\rb_showcollision.cpp", 84, 0, "%s", "numPoints >= 3");
-    if (!points)
-        MyAssertHandler(".\\rb_showcollision.cpp", 85, 0, "%s", "points");
+    iassert( numPoints >= 3 );
+    iassert( points );
     if (r_showCollisionPolyType->current.integer == 2 || !r_showCollisionPolyType->current.integer)
     {
         R_ConvertColorToBytes(colorFloat, (unsigned int *)&color);

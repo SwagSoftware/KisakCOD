@@ -58,8 +58,7 @@ void __cdecl R_UnlockSkinnedCache()
         gfxBuf.skinnedCacheLockAddr = 0;
         PROF_SCOPED("UnlockSkinnedCache");
         vb = frontEndDataOut->skinnedCacheVb->buffer;
-        if (!vb)
-            MyAssertHandler(".\\r_model.cpp", 372, 0, "%s", "vb");
+        iassert( vb );
         R_UnlockVertexBuffer(vb);
     }
 }
@@ -144,8 +143,7 @@ void __cdecl R_ModelList_f()
 
 void __cdecl R_GetModelList(XAssetHeader header, XAssetHeader *data)
 {
-    if (data->xmodelPieces >= (XModelPieces *)0x800)
-        MyAssertHandler(".\\r_model.cpp", 96, 0, "%s", "modelList->count < ARRAY_COUNT( modelList->sorted )");
+    //iassert( modelList->count < ARRAY_COUNT( modelList->sorted ) ); // KISAKTODO
     data[(int)data->xmodelPieces++ + 1] = header;
 }
 
@@ -180,14 +178,12 @@ void __cdecl R_XModelDebugBoxes(const DObj_s *obj, int *partBits)
     float color[4]; // [esp+23Ch] [ebp-14h] BYREF
     unsigned int animPartBit; // [esp+24Ch] [ebp-4h]
 
-    if (!obj)
-        MyAssertHandler(".\\r_model.cpp", 215, 0, "%s", "obj");
+    iassert( obj );
     boneMatrix = DObjGetRotTransArray(obj);
     if (boneMatrix)
     {
         boneCount = DObjNumBones(obj);
-        if (boneCount > 128)
-            MyAssertHandler(".\\r_model.cpp", 221, 0, "%s", "boneCount <= DOBJ_MAX_PARTS");
+        iassert( boneCount <= DOBJ_MAX_PARTS );
         DObjGetBoneInfo(obj, boneInfoArray);
         color[0] = 1.0;
         color[1] = 1.0;
@@ -235,8 +231,7 @@ void __cdecl R_XModelDebugAxes(const DObj_s *obj, int *partBits)
     float color[4]; // [esp+4Ch] [ebp-14h] BYREF
     unsigned int animPartBit; // [esp+5Ch] [ebp-4h]
 
-    if (!obj)
-        MyAssertHandler(".\\r_model.cpp", 273, 0, "%s", "obj");
+    iassert( obj );
     boneMatrix = DObjGetRotTransArray(obj);
     if (boneMatrix)
     {
@@ -391,8 +386,7 @@ int __cdecl R_SkinAndBoundSceneEnt(GfxSceneEntity *sceneEnt)
     boneMatrix = R_UpdateSceneEntBounds(sceneEnt, &localSceneEnt, &obj, 1);
     if (boneMatrix)
     {
-        if (!localSceneEnt)
-            MyAssertHandler(".\\r_model.cpp", 524, 0, "%s", "localSceneEnt");
+        iassert( localSceneEnt );
         CG_CullIn(localSceneEnt->info.pose);
         R_SkinSceneDObj(sceneEnt, localSceneEnt, obj, boneMatrix, 0);
         return 1;
@@ -409,14 +403,12 @@ void __cdecl R_LockSkinnedCache()
 {
     IDirect3DVertexBuffer9 *vb; // [esp+30h] [ebp-4h]
 
-    if (gfxBuf.skinnedCacheLockAddr)
-        MyAssertHandler(".\\r_model.cpp", 337, 0, "%s", "!gfxBuf.skinnedCacheLockAddr");
+    iassert( !gfxBuf.skinnedCacheLockAddr );
     if (!dx.deviceLost)
     {
         vb = frontEndDataOut->skinnedCacheVb->buffer;
 
-        if (!vb)
-            MyAssertHandler(".\\r_model.cpp", 342, 0, "%s", "vb");
+        iassert( vb );
 
         PROF_SCOPED("LockSkinnedCache");
 
@@ -437,15 +429,13 @@ void R_DObjReplaceMaterial(DObj_s *obj, int lod, int surfaceIndex, Material *mat
     unsigned int NumModels; // r21
     int v9; // r29
     int v10; // r26
-    const XModel *Model; // r31
+    const XModel *model; // r31
     unsigned int SurfCount; // r30
-    Material **Skins; // r31
+    Material **originalMaterial; // r31
     unsigned int v14; // r11
 
-    if (!obj)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\gfx_d3d\\r_model.cpp", 574, 0, "%s", "obj");
-    if (lod < 0)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\gfx_d3d\\r_model.cpp", 575, 0, "%s", "lod >= 0");
+    iassert( obj );
+    iassert( lod >= 0 );
     NumModels = DObjGetNumModels(obj);
     v9 = 0;
     v10 = 0;
@@ -453,13 +443,11 @@ void R_DObjReplaceMaterial(DObj_s *obj, int lod, int surfaceIndex, Material *mat
     {
         while (1)
         {
-            Model = DObjGetModel(obj, v10);
-            if (!Model)
-                MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\gfx_d3d\\r_model.cpp", 583, 0, "%s", "model");
-            SurfCount = XModelGetSurfCount(Model, lod);
-            Skins = XModelGetSkins(Model, lod);
-            if (!Skins)
-                MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\gfx_d3d\\r_model.cpp", 587, 0, "%s", "originalMaterial");
+            model = DObjGetModel(obj, v10);
+            iassert( model );
+            SurfCount = XModelGetSurfCount(model, lod);
+            originalMaterial = XModelGetSkins(model, lod);
+            iassert( originalMaterial );
             v14 = 0;
             if (SurfCount)
                 break;
@@ -474,7 +462,7 @@ void R_DObjReplaceMaterial(DObj_s *obj, int lod, int surfaceIndex, Material *mat
             if (v14 >= SurfCount)
                 goto LABEL_13;
         }
-        Skins[v14] = material;
+        originalMaterial[v14] = material;
     }
 }
 

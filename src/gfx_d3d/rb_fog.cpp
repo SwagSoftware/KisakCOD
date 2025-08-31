@@ -13,8 +13,7 @@ void __cdecl R_SetFrameFog(GfxCmdBufInput *input)
     if (r_fog->current.enabled)
     {
         data = input->data;
-        if (!data)
-            MyAssertHandler(".\\rb_fog.cpp", 22, 0, "%s", "data");
+        iassert( data );
         fog = &data->fogSettings;
         Byte4UnpackBgra((const unsigned __int8 *)&data->fogSettings.color, fogColorVec);
         R_SetInputCodeConstantFromVec4(input, 0x2Au, fogColorVec);

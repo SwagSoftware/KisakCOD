@@ -628,8 +628,7 @@ void __cdecl R_SetupSunShadowMapPartitionFraction(
     float endOfNearFrustum; // [esp+10h] [ebp-4h]
 
     zNear = viewParms->zNear;
-    if (zNear == 0.0)
-        MyAssertHandler(".\\r_sunshadow.cpp", 268, 0, "%s", "zNear");
+    iassert( zNear );
     endOfNearFrustum = zNear * sm_sunSampleSizeNear->current.value * scaleToFitUsable;
     scale = 1.0 / endOfNearFrustum;
     Vec3Scale(viewParms->axis[0], scale, partitionFraction);

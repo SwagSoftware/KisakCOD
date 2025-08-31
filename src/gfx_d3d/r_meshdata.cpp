@@ -14,14 +14,10 @@ char __cdecl R_ReserveMeshIndices(GfxMeshData *mesh, int indexCount, r_double_in
 {
     unsigned int usedCodeMeshIndexCount; // [esp+0h] [ebp-4h]
 
-    if (indexCount < 0)
-        MyAssertHandler(".\\r_meshdata.cpp", 48, 0, "%s\n\t(indexCount) = %i", "(indexCount >= 0)", indexCount);
-    if ((indexCount & 1) != 0)
-        MyAssertHandler(".\\r_meshdata.cpp", 49, 0, "%s\n\t(indexCount) = %i", "(!(indexCount & 1))", indexCount);
-    if (!indicesOut)
-        MyAssertHandler(".\\r_meshdata.cpp", 50, 0, "%s", "indicesOut");
-    if (mesh->indexCount > mesh->totalIndexCount)
-        MyAssertHandler(".\\r_meshdata.cpp", 51, 0, "%s", "mesh->indexCount <= mesh->totalIndexCount");
+    iassert( (indexCount >= 0) );
+    iassert( (!(indexCount & 1)) );
+    iassert( indicesOut );
+    iassert( mesh->indexCount <= mesh->totalIndexCount );
     usedCodeMeshIndexCount = mesh->indexCount;
     if (indexCount + mesh->indexCount > mesh->totalIndexCount)
         return 0;
@@ -42,10 +38,8 @@ char __cdecl R_ReserveMeshVerts(GfxMeshData *mesh, int vertCount, unsigned __int
 {
     volatile unsigned int usedCodeMeshVertBytes; // [esp+8h] [ebp-8h]
 
-    if (vertCount < 0)
-        MyAssertHandler(".\\r_meshdata.cpp", 80, 0, "%s\n\t(vertCount) = %i", "(vertCount >= 0)", vertCount);
-    if (!baseVertex)
-        MyAssertHandler(".\\r_meshdata.cpp", 81, 0, "%s", "baseVertex");
+    iassert( (vertCount >= 0) );
+    iassert( baseVertex );
     usedCodeMeshVertBytes = mesh->vb.used;
     mesh->vb.used = mesh->vertSize * vertCount + usedCodeMeshVertBytes;
     if (mesh->vb.used > mesh->vb.total)
@@ -67,8 +61,7 @@ void __cdecl R_ResetMesh(GfxMeshData *mesh)
 
 void __cdecl R_BeginMeshVerts(GfxMeshData *mesh)
 {
-    if (mesh->vb.verts)
-        MyAssertHandler(".\\r_meshdata.cpp", 24, 0, "%s", "mesh->vb.verts == NULL");
+    iassert( mesh->vb.verts == NULL );
     mesh->vb.verts = (unsigned __int8 *)R_LockVertexBuffer(
         mesh->vb.buffer,
         0,
@@ -93,10 +86,8 @@ void __cdecl R_SetQuadMeshData(
     GfxVertex *verts; // [esp+24h] [ebp-Ch]
     r_double_index_t *indices; // [esp+28h] [ebp-8h]
 
-    if (!mesh)
-        MyAssertHandler(".\\r_meshdata.cpp", 120, 0, "%s", "mesh");
-    if (mesh->vertSize != 32)
-        MyAssertHandler(".\\r_meshdata.cpp", 121, 0, "mesh->vertSize == sizeof( GfxVertex )\n\t%i, %i", mesh->vertSize, 32);
+    iassert( mesh );
+    iassert(mesh->vertSize == sizeof(GfxVertex));
     if (mesh->vb.total != 128)
         MyAssertHandler(
             ".\\r_meshdata.cpp",
@@ -105,8 +96,7 @@ void __cdecl R_SetQuadMeshData(
             "mesh->vb.total == sizeof( GfxVertex ) * 4\n\t%i, %i",
             mesh->vb.total,
             128);
-    if (mesh->totalIndexCount != 6)
-        MyAssertHandler(".\\r_meshdata.cpp", 123, 0, "mesh->totalIndexCount == 6\n\t%i, %i", mesh->totalIndexCount, 6);
+    iassert(mesh->totalIndexCount == 6);
     R_BeginMeshVerts(mesh);
     indices = (r_double_index_t *)mesh->indices;
     *indices = (r_double_index_t)3;
@@ -136,8 +126,7 @@ void __cdecl R_SetQuadMesh(
     float t1,
     unsigned int color)
 {
-    if (!quadMesh)
-        MyAssertHandler(".\\r_meshdata.cpp", 161, 0, "%s", "quadMesh");
+    iassert( quadMesh );
     quadMesh->x = x;
     quadMesh->y = y;
     quadMesh->width = w;

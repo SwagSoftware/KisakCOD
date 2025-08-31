@@ -1195,6 +1195,9 @@ char *CMod_LoadCollisionAabbTrees();
 
 
 // cm_showcollision
+#define BOXSIDE_FRONT 1
+#define BOXSIDE_BACK 2
+
 struct ShowCollisionBrushPt // sizeof=0x14
 {                                       // ...
     float xyz[3];
@@ -1559,3 +1562,8 @@ inline void __cdecl KISAK_NULLSUB()
     ;
 }
 #define qmemcpy memcpy
+
+inline bool IsPowerOf2(int num)
+{
+    return (num & (num - 1)) == 0;
+}

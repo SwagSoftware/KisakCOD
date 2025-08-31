@@ -366,8 +366,7 @@ const GfxStaticModelDrawInst *__cdecl R_SetupCachedSModelSurface(
     const GfxStaticModelDrawInst *smodelDrawInst; // [esp+14h] [ebp-Ch]
     const XSurface *xsurf; // [esp+1Ch] [ebp-4h]
 
-    if (!cachedIndex)
-        MyAssertHandler(".\\r_draw_staticmodel.cpp", 1822, 0, "%s", "cachedIndex");
+    iassert( cachedIndex );
     smodelDrawInst = &rgp.world->dpvs.smodelDrawInsts[R_GetCachedSModelSurf(cachedIndex)->smodelIndex];
     xsurf = XModelGetSurface(smodelDrawInst->model, lod, surfIndex);
     if (baseIndex)
@@ -391,8 +390,7 @@ void __cdecl R_DrawStaticModelsPreTessDrawSurf(
     IDirect3DIndexBuffer9 *ib; // [esp+0h] [ebp-2Ch]
     GfxDrawPrimArgs args; // [esp+20h] [ebp-Ch] BYREF
 
-    if (!count)
-        MyAssertHandler(".\\r_draw_staticmodel.cpp", 2034, 0, "%s", "count");
+    iassert( count );
     R_SetupCachedSModelSurface(
         context.state,
         pretessSurf.fields.cachedIndex,
@@ -419,8 +417,7 @@ void __cdecl R_DrawStaticModelsPreTessDrawSurfLighting(
     const GfxStaticModelDrawInst *smodelDrawInst; // [esp+20h] [ebp-10h]
     GfxDrawPrimArgs args; // [esp+24h] [ebp-Ch] BYREF
 
-    if (!count)
-        MyAssertHandler(".\\r_draw_staticmodel.cpp", 1970, 0, "%s", "count");
+    iassert( count );
     smodelDrawInst = R_SetupCachedSModelSurface(
         context.state,
         pretessSurf.fields.cachedIndex,
@@ -477,8 +474,7 @@ void __cdecl R_DrawStaticModelsSkinnedDrawSurfLighting(GfxStaticModelDrawStream 
     R_CheckVertexDataOverflow(32 * args.vertexCount);
     vertexOffset = R_SetVertexData(context.state, xsurf->verts0, args.vertexCount, 32);
     vb = gfxBuf.dynamicVertexBuffer->buffer;
-    if (!vb)
-        MyAssertHandler(".\\r_draw_staticmodel.cpp", 1714, 0, "%s", "vb");
+    iassert( vb );
     R_SetStreamSource(&context.state->prim, vb, vertexOffset, 32);
     smodelCount = drawStream->smodelCount;
     smodelDrawInsts = rgp.world->dpvs.smodelDrawInsts;
@@ -532,8 +528,7 @@ void __cdecl R_DrawStaticModelsSkinnedDrawSurf(GfxStaticModelDrawStream *drawStr
     R_CheckVertexDataOverflow(32 * args.vertexCount);
     vertexOffset = R_SetVertexData(context.state, xsurf->verts0, args.vertexCount, 32);
     vb = gfxBuf.dynamicVertexBuffer->buffer;
-    if (!vb)
-        MyAssertHandler(".\\r_draw_staticmodel.cpp", 1752, 0, "%s", "vb");
+    iassert( vb );
     R_SetStreamSource(&context.state->prim, vb, vertexOffset, 0x20u);
     smodelCount = drawStream->smodelCount;
     smodelDrawInsts = rgp.world->dpvs.smodelDrawInsts;

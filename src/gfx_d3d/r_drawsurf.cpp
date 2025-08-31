@@ -18,8 +18,7 @@ static bool g_processMarkMesh;
 
 char __cdecl R_ReserveCodeMeshIndices(int indexCount, r_double_index_t** indicesOut)
 {
-    if (!g_processCodeMesh)
-        MyAssertHandler(".\\r_drawsurf.cpp", 673, 0, "%s", "g_processCodeMesh");
+    iassert( g_processCodeMesh );
     if (R_ReserveMeshIndices(&frontEndDataOut->codeMesh, indexCount, indicesOut))
         return 1;
     R_WarnOncePerFrame(R_WARN_MAX_CODE_INDS);
@@ -28,8 +27,7 @@ char __cdecl R_ReserveCodeMeshIndices(int indexCount, r_double_index_t** indices
 
 char __cdecl R_ReserveCodeMeshVerts(int vertCount, unsigned __int16* baseVertex)
 {
-    if (!g_processCodeMesh)
-        MyAssertHandler(".\\r_drawsurf.cpp", 725, 0, "%s", "g_processCodeMesh");
+    iassert( g_processCodeMesh );
     if (R_ReserveMeshVerts(&frontEndDataOut->codeMesh, vertCount, baseVertex))
         return 1;
     R_WarnOncePerFrame(R_WARN_MAX_CODE_VERTS);
@@ -40,12 +38,9 @@ char __cdecl R_ReserveCodeMeshArgs(int argCount, unsigned int* argOffsetOut)
 {
     volatile int oldArgCount; // [esp+8h] [ebp-4h]
 
-    if (!g_processCodeMesh)
-        MyAssertHandler(".\\r_drawsurf.cpp", 750, 0, "%s", "g_processCodeMesh");
-    if (argCount < 0)
-        MyAssertHandler(".\\r_drawsurf.cpp", 751, 0, "%s\n\t(argCount) = %i", "(argCount >= 0)", argCount);
-    if (!argOffsetOut)
-        MyAssertHandler(".\\r_drawsurf.cpp", 752, 0, "%s", "argOffsetOut");
+    iassert( g_processCodeMesh );
+    iassert( (argCount >= 0) );
+    iassert( argOffsetOut );
     oldArgCount = frontEndDataOut->codeMeshArgsCount;
     if ((unsigned int)(argCount + oldArgCount) < 0x100)
     {
@@ -157,15 +152,13 @@ void __cdecl R_AddCodeMeshDrawSurf(
 
 float (*__cdecl R_GetCodeMeshArgs(unsigned int argOffset))[4]
 {
-    if (!g_processCodeMesh)
-        MyAssertHandler(".\\r_drawsurf.cpp", 797, 0, "%s", "g_processCodeMesh");
+    iassert( g_processCodeMesh );
     return (float (*)[4])frontEndDataOut->codeMeshArgs[argOffset];
 }
 
 GfxPackedVertex* __cdecl R_GetCodeMeshVerts(unsigned __int16 baseVertex)
 {
-    if (!g_processCodeMesh)
-        MyAssertHandler(".\\r_drawsurf.cpp", 804, 0, "%s", "g_processCodeMesh");
+    iassert( g_processCodeMesh );
     return (GfxPackedVertex*)R_GetMeshVerts(&frontEndDataOut->codeMesh, baseVertex);
 }
 
@@ -186,8 +179,7 @@ void R_EndCodeMeshVerts()
 
 void R_BeginCodeMeshVerts()
 {
-    if (g_processCodeMesh)
-        MyAssertHandler(".\\r_drawsurf.cpp", 616, 0, "%s", "!g_processCodeMesh");
+    iassert( !g_processCodeMesh );
     g_processCodeMesh = 1;
     R_BeginMeshVerts(&frontEndDataOut->codeMesh);
 }
@@ -200,8 +192,7 @@ void R_EndMarkMeshVerts()
 
 char __cdecl R_ReserveMarkMeshIndices(int indexCount, r_double_index_t** indicesOut)
 {
-    if (!g_processMarkMesh)
-        MyAssertHandler(".\\r_drawsurf.cpp", 772, 0, "%s", "g_processMarkMesh");
+    iassert( g_processMarkMesh );
     if (R_ReserveMeshIndices(&frontEndDataOut->markMesh, indexCount, indicesOut))
         return 1;
     R_WarnOncePerFrame(R_WARN_MAX_MARK_INDS);
@@ -210,8 +201,7 @@ char __cdecl R_ReserveMarkMeshIndices(int indexCount, r_double_index_t** indices
 
 char __cdecl R_ReserveMarkMeshVerts(int vertCount, unsigned __int16 *baseVertex)
 {
-    if (!g_processMarkMesh)
-        MyAssertHandler(".\\r_drawsurf.cpp", 784, 0, "%s", "g_processMarkMesh");
+    iassert( g_processMarkMesh );
     if (R_ReserveMeshVerts(&frontEndDataOut->markMesh, vertCount, baseVertex))
         return 1;
     R_WarnOncePerFrame(R_WARN_MAX_MARK_VERTS);
@@ -220,8 +210,7 @@ char __cdecl R_ReserveMarkMeshVerts(int vertCount, unsigned __int16 *baseVertex)
 
 void __cdecl R_BeginMarkMeshVerts()
 {
-    if (g_processMarkMesh)
-        MyAssertHandler(".\\r_drawsurf.cpp", 649, 0, "%s", "!g_processMarkMesh");
+    iassert( !g_processMarkMesh );
     g_processMarkMesh = 1;
     R_BeginMeshVerts(&frontEndDataOut->markMesh);
 }
@@ -467,8 +456,7 @@ void __cdecl R_SortDrawSurfs(GfxDrawSurf *drawSurfList, int surfCount)
 
 GfxWorldVertex *__cdecl R_GetMarkMeshVerts(unsigned __int16 baseVertex)
 {
-    if (!g_processMarkMesh)
-        MyAssertHandler(".\\r_drawsurf.cpp", 815, 0, "%s", "g_processMarkMesh");
+    iassert( g_processMarkMesh );
     return (GfxWorldVertex*)R_GetMeshVerts(&frontEndDataOut->markMesh, baseVertex);
 }
 
@@ -477,8 +465,7 @@ GfxDrawSurf __cdecl R_GetWorldDrawSurf(GfxSurface *worldSurf)
     GfxDrawSurf drawSurf; // [esp+1Ch] [ebp-8h]
 
     drawSurf.fields = worldSurf->material->info.drawSurf.fields;
-    if (drawSurf.fields.primaryLightIndex)
-        MyAssertHandler(".\\r_drawsurf.cpp", 321, 1, "%s", "drawSurf.fields.primaryLightIndex == 0");
+    iassert( drawSurf.fields.primaryLightIndex == 0 );
     drawSurf.fields.primaryLightIndex = worldSurf->primaryLightIndex;
     if (drawSurf.fields.primaryLightIndex != worldSurf->primaryLightIndex)
         MyAssertHandler(
@@ -521,8 +508,7 @@ void __cdecl R_SortWorldSurfaces()
     unsigned int worldSurfCount; // [esp+24h] [ebp-8h]
     GfxSurface *worldSurfArray; // [esp+28h] [ebp-4h]
 
-    if (!rgp.world)
-        MyAssertHandler(".\\r_drawsurf.cpp", 336, 0, "%s", "rgp.world");
+    iassert( rgp.world );
     if (rgp.world->models->startSurfIndex)
         MyAssertHandler(
             ".\\r_drawsurf.cpp",
@@ -535,10 +521,8 @@ void __cdecl R_SortWorldSurfaces()
     worldSurfCount = rgp.world->models->surfaceCount;
     if (rgp.world->models->surfaceCount)
         memset(rgp.world->dpvs.surfaceCastsSunShadow, 0, 4 * ((worldSurfCount - 1) >> 5) + 4);
-    if (worldSurfArray != rgp.world->dpvs.surfaces)
-        MyAssertHandler(".\\r_drawsurf.cpp", 347, 1, "%s", "worldSurfArray == rgp.world->dpvs.surfaces");
-    if (worldSurfCount != rgp.world->models->surfaceCount)
-        MyAssertHandler(".\\r_drawsurf.cpp", 348, 1, "%s", "worldSurfCount == rgp.world->models[0].surfaceCount");
+    iassert( worldSurfArray == rgp.world->dpvs.surfaces );
+    iassert( worldSurfCount == rgp.world->models[0].surfaceCount );
     for (surfIndex = 0; surfIndex < worldSurfCount; ++surfIndex)
     {
         v0 = R_GetWorldDrawSurf(&worldSurfArray[surfIndex]);

@@ -1,6 +1,7 @@
 #pragma once
 #include "r_material.h"
 
+#define HCOUNT 4096
 
 struct WaterGlob // sizeof=0x9000
 {                                       // ...

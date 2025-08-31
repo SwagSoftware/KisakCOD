@@ -1,7 +1,7 @@
 #include "r_dpvs.h"
 #include "r_workercmds.h"
 
-
+// KISAKTODO: cleanup this 
 void R_AddCellSceneEntSurfacesInFrustumCmd(GfxWorldDpvsPlanes *data)
 {
     bool v2; // zf
@@ -29,7 +29,7 @@ void R_AddCellSceneEntSurfacesInFrustumCmd(GfxWorldDpvsPlanes *data)
     int infoa; // [esp+4Ch] [ebp-7Ch]
     unsigned int sceneEntIndex; // [esp+50h] [ebp-78h]
     DWORD sceneEntIndexa; // [esp+50h] [ebp-78h]
-    unsigned int bit; // [esp+54h] [ebp-74h]
+    unsigned int bits; // [esp+54h] [ebp-74h]
     unsigned int bita; // [esp+54h] [ebp-74h]
     unsigned int entnum; // [esp+58h] [ebp-70h]
     unsigned int entnuma; // [esp+58h] [ebp-70h]
@@ -103,25 +103,24 @@ void R_AddCellSceneEntSurfacesInFrustumCmd(GfxWorldDpvsPlanes *data)
             128);
     innerPlaneCounta = innerPlaneCount + (cellIndex_ << 7);
     wordIndex = &dpvsPlanes->sceneEntCellBits[innerPlaneCounta];
-    if (frustumPlaneCount > planeCount_)
-        MyAssertHandler(".\\r_dpvs_sceneent.cpp", 181, 0, "%s", "frustumPlaneCount <= planeCount");
+    //iassert( frustumPlaneCount <= planeCount );
     plane = &planes[frustumPlaneCount];
     indexLow = planeCount_ - frustumPlaneCount;
     for (entnum = 0; entnum < entCountIndex; ++entnum)
     {
-        bit = wordIndex[entnum];
+        bits = wordIndex[entnum];
         while (1)
         {
-            v2 = !_BitScanReverse(&v3, bit);
+            v2 = !_BitScanReverse(&v3, bits);
             if (v2)
                 v3 = 63;
             sceneEntIndex = v3 ^ 0x1F;
             if ((v3 ^ 0x1Fu) >= 0x20)
                 break;
             offset_ = sceneEntIndex + 32 * entnum;
-            if (((0x80000000 >> sceneEntIndex) & bit) == 0)
-                MyAssertHandler(".\\r_dpvs_sceneent.cpp", 198, 0, "%s", "bits & bit");
-            bit &= ~(0x80000000 >> sceneEntIndex);
+            unsigned int bit = (0x80000000 >> sceneEntIndex);
+            iassert( bits & bit );
+            bits &= ~bit;
             if (!*((_BYTE *)data_[3] + offset_))
             {
                 v21 = dobjIndex[offset_];
@@ -216,9 +215,9 @@ void R_AddCellSceneEntSurfacesInFrustumCmd(GfxWorldDpvsPlanes *data)
             if ((v4 ^ 0x1F) >= 0x20)
                 break;
             infoa = sceneEntIndexa + 32 * entnuma;
-            if (((0x80000000 >> sceneEntIndexa) & bita) == 0)
-                MyAssertHandler(".\\r_dpvs_sceneent.cpp", 280, 0, "%s", "bits & bit");
-            bita &= ~(0x80000000 >> sceneEntIndexa);
+            unsigned int bit = (0x80000000 >> sceneEntIndexa);
+            iassert( bita & bit ); // should be `bits` instead of `bita`
+            bita &= ~bit;
             if (!*((_BYTE *)data_[3] + infoa))
             {
                 i = 0;

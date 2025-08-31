@@ -34,10 +34,8 @@ const GfxMtlFeatureMap s_materialFeatures[20] =
 
 void __cdecl Material_GetRemappedFeatures_RunTime(unsigned int *mask, unsigned int *value)
 {
-    if (!mask)
-        MyAssertHandler(".\\r_material_override.cpp", 100, 0, "%s", "mask");
-    if (!value)
-        MyAssertHandler(".\\r_material_override.cpp", 101, 0, "%s", "value");
+    iassert( mask );
+    iassert( value );
     *mask = 0;
     *value = 0;
     if (!r_detail->current.enabled)
@@ -157,8 +155,7 @@ void __cdecl Material_RemapTechniqueSetName(
     const char *parse; // [esp+30h] [ebp-4Ch] BYREF
     char token[68]; // [esp+34h] [ebp-48h] BYREF
 
-    if (!techSetName)
-        MyAssertHandler(".\\r_material_override.cpp", 262, 0, "%s", "techSetName");
+    iassert( techSetName );
     parse = techSetName;
     remapNameLen = 0;
     *remapName = 0;
@@ -185,8 +182,7 @@ void __cdecl Material_RemapTechniqueSetName(
                 {
                     for (featureIndex = 0; ; ++featureIndex)
                     {
-                        if (featureIndex == featureCount)
-                            MyAssertHandler(".\\r_material_override.cpp", 304, 0, "%s", "featureIndex != featureCount");
+                        iassert( featureIndex != featureCount );
                         altFeature = &featureMap[featureIndex];
                         if (altFeature->mask == feature->mask && altFeature->value == maskedRemapValue)
                             break;
@@ -223,10 +219,8 @@ void __cdecl AssertValidRemappedTechniqueSet(MaterialTechniqueSet *techSet)
     const char *name; // [esp+4h] [ebp-8h]
     unsigned int techTypeIter; // [esp+8h] [ebp-4h]
 
-    if (!techSet)
-        MyAssertHandler(".\\r_material_override.cpp", 327, 0, "%s", "techSet");
-    if (!techSet->remappedTechniqueSet)
-        MyAssertHandler(".\\r_material_override.cpp", 328, 0, "%s", "techSet->remappedTechniqueSet");
+    iassert( techSet );
+    iassert( techSet->remappedTechniqueSet );
     if (techSet->remappedTechniqueSet != techSet)
     {
         for (techTypeIter = 0; techTypeIter < 0x22; ++techTypeIter)
@@ -266,8 +260,7 @@ void __cdecl Material_RemapTechniqueSet(MaterialTechniqueSet *techSet)
 {
     char remapName[260]; // [esp+14h] [ebp-108h] BYREF
 
-    if (!techSet)
-        MyAssertHandler(".\\r_material_override.cpp", 365, 0, "%s", "techSet");
+    iassert( techSet );
     Material_RemapTechniqueSetName(
         techSet->name,
         remapName,
@@ -293,8 +286,7 @@ void __cdecl Material_OverrideTechniqueSets()
 
     if (!Sys_IsRenderThread())
     {
-        if (!Sys_IsMainThread())
-            MyAssertHandler(".\\r_material_override.cpp", 394, 1, "%s", "Sys_IsMainThread()");
+        iassert( Sys_IsMainThread() );
         Material_GetRemappedFeatures_RunTime(&remapMask, &remapValue);
         if (mtlOverrideGlob.isDirty || mtlOverrideGlob.remapMask != remapMask || mtlOverrideGlob.remapValue != remapValue)
         {
@@ -312,8 +304,7 @@ void __cdecl Material_OriginalRemapTechniqueSet(MaterialTechniqueSet *techSet)
 {
     char remapName[68]; // [esp+0h] [ebp-48h] BYREF
 
-    if (!techSet)
-        MyAssertHandler(".\\r_material_override.cpp", 341, 0, "%s", "techSet");
+    iassert( techSet );
     if (r_rendererInUse->current.integer || !strncmp(techSet->name, "sm2/", 4u))
     {
         techSet->remappedTechniqueSet = techSet;
@@ -346,8 +337,7 @@ bool __cdecl Material_WouldTechniqueSetBeOverridden(const MaterialTechniqueSet *
     char remapName[256]; // [esp+18h] [ebp-108h] BYREF
     unsigned int remapMask; // [esp+11Ch] [ebp-4h] BYREF
 
-    if (!techSet)
-        MyAssertHandler(".\\r_material_override.cpp", 418, 0, "%s", "techSet");
+    iassert( techSet );
     Material_GetRemappedFeatures_RunTime(&remapMask, &remapValue);
     Material_RemapTechniqueSetName(techSet->name, remapName, remapMask, remapValue, s_materialFeatures, 0x14u);
     return strcmp(techSet->name, remapName) != 0;

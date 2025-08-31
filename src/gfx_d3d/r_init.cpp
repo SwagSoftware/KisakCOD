@@ -2769,8 +2769,7 @@ void __cdecl R_CalcGammaRamp(GfxGammaRamp *gammaRamp)
     unsigned __int16 colorTableIndex; // [esp+2Ch] [ebp-Ch]
     float exponent; // [esp+30h] [ebp-8h]
 
-    if (!gammaRamp)
-        MyAssertHandler(".\\r_init.cpp", 740, 0, "%s", "gammaRamp");
+    iassert( gammaRamp );
     if (r_gamma->current.value <= 0.0)
         MyAssertHandler(
             ".\\r_init.cpp",
@@ -2810,10 +2809,8 @@ void __cdecl R_GammaCorrect(unsigned __int8 *buffer, int bufSize)
     GfxGammaRamp gammaRamp; // [esp+8h] [ebp-208h] BYREF
     int inValue; // [esp+20Ch] [ebp-4h]
 
-    if (!buffer)
-        MyAssertHandler(".\\r_init.cpp", 784, 0, "%s", "buffer");
-    if (bufSize <= 0)
-        MyAssertHandler(".\\r_init.cpp", 785, 0, "%s\n\t(bufSize) = %i", "(bufSize > 0)", bufSize);
+    iassert( buffer );
+    iassert( (bufSize > 0) );
     R_CalcGammaRamp(&gammaRamp);
     for (tableIndex = 0; tableIndex < bufSize; ++tableIndex)
     {
@@ -2947,8 +2944,7 @@ void R_ShutdownDirect3D()
 
 void __cdecl R_UnloadWorld()
 {
-    if (!useFastFile->current.enabled)
-        MyAssertHandler(".\\r_init.cpp", 2468, 0, "%s", "IsFastFileLoad()");
+    iassert( IsFastFileLoad() );
     if (rgp.world)
         Sys_Error("Cannot unload bsp while it is in use");
 }
@@ -3027,8 +3023,7 @@ void R_InitGraphicsApi()
 {
     GfxWindowParms wndParms; // [esp+4h] [ebp-28h] BYREF
 
-    if ((dx.device != 0) != (dx.d3d9 != 0))
-        MyAssertHandler(".\\r_init.cpp", 1981, 0, "%s", "(dx.device != NULL) == (dx.d3d9 != NULL)");
+    iassert( (dx.device != NULL) == (dx.d3d9 != NULL) );
     if (dx.device)
     {
         R_InitSystems();
@@ -3066,8 +3061,7 @@ int __cdecl R_CompareRefreshRates(_DWORD *e0, _DWORD *e1)
 
 int __cdecl R_AddValidResolution(int width, int height, int resolutionCount, int (*availableResolutions)[2])
 {
-    if (resolutionCount < 0)
-        MyAssertHandler(".\\r_init.cpp", 1093, 0, "%s\n\t(resolutionCount) = %i", "(resolutionCount >= 0)", resolutionCount);
+    iassert( (resolutionCount >= 0) );
     if (resolutionCount > 0
         && (*availableResolutions)[2 * resolutionCount - 2] == width
         && (*availableResolutions)[2 * resolutionCount - 1] == height)
@@ -3294,8 +3288,7 @@ const char *__cdecl R_DescribeRenderer(int renderer)
 {
     if (renderer == 1)
         return "Shader model 3.0";
-    if (renderer)
-        MyAssertHandler(".\\r_init.cpp", 560, 1, "%s\n\t(renderer) = %i", "(renderer == GFX_RENDERER_SHADER_2)", renderer);
+    iassert( (renderer == GFX_RENDERER_SHADER_2) );
     return "Shader model 2.0";
 }
 
@@ -3414,8 +3407,7 @@ void __cdecl R_GetDirect3DCaps(unsigned int adapterIndex, _D3DCAPS9 *caps)
     int hr; // [esp+0h] [ebp-8h]
     int attempt; // [esp+4h] [ebp-4h]
 
-    if (!dx.d3d9)
-        MyAssertHandler(".\\r_init.cpp", 533, 0, "%s", "dx.d3d9");
+    iassert( dx.d3d9 );
     attempt = 0;
     while (1)
     {
@@ -3562,10 +3554,8 @@ char __cdecl R_CreateWindow(GfxWindowParms *wndParms)
     HINSTANCE__ *hinst; // [esp+8h] [ebp-14h]
     tagRECT rc; // [esp+Ch] [ebp-10h] BYREF
 
-    if (!wndParms)
-        MyAssertHandler(".\\r_init.cpp", 1614, 0, "%s", "wndParms");
-    if (wndParms->hwnd)
-        MyAssertHandler(".\\r_init.cpp", 1615, 0, "%s", "wndParms->hwnd == NULL");
+    iassert( wndParms );
+    iassert( wndParms->hwnd == NULL );
     if (wndParms->fullscreen)
     {
         Com_Printf(
@@ -3730,8 +3720,7 @@ void __cdecl R_FinishAttachingToWindow(const GfxWindowParms *wndParms)
             "(dx.windowCount >= 0 && dx.windowCount < ((123987 / ((((0) ? (123987) : (-123987)) * ((0) == 0 || (0) == 1))) == 1"
             "23987 / (123987)) ? 5 : 1))",
             dx.windowCount);
-    if (!dx.windows[dx.windowCount].swapChain)
-        MyAssertHandler(".\\r_init.cpp", 919, 0, "%s", "dx.windows[dx.windowCount].swapChain");
+    iassert( dx.windows[dx.windowCount].swapChain );
     dx.windows[dx.windowCount].hwnd = wndParms->hwnd;
     dx.windows[dx.windowCount].width = wndParms->displayWidth;
     dx.windows[dx.windowCount++].height = wndParms->displayHeight;
@@ -3761,8 +3750,7 @@ char __cdecl R_InitHardware(const GfxWindowParms *wndParms)
     R_FinishAttachingToWindow(wndParms);
     for (workerIndex = 0; workerIndex < 2; ++workerIndex)
     {
-        if (!r_smp_worker_thread[workerIndex])
-            MyAssertHandler(".\\r_init.cpp", 1593, 0, "%s", "r_smp_worker_thread[workerIndex]");
+        iassert( r_smp_worker_thread[workerIndex] );
         Dvar_ClearModified((dvar_s*)r_smp_worker_thread[workerIndex]);
         if (r_smp_worker_thread[workerIndex]->current.enabled)
             Sys_ResumeThread((ThreadContext_t)(workerIndex + 2));
@@ -3777,8 +3765,7 @@ void __cdecl R_StoreWindowSettings(const GfxWindowParms *wndParms)
     int monitorHeight; // [esp+28h] [ebp-10h]
     int monitorWidth; // [esp+2Ch] [ebp-Ch]
 
-    if (!r_aspectRatio)
-        MyAssertHandler(".\\r_init.cpp", 425, 0, "%s", "r_aspectRatio");
+    iassert( r_aspectRatio );
     vidConfig.sceneWidth = wndParms->sceneWidth;
     vidConfig.sceneHeight = wndParms->sceneHeight;
     vidConfig.displayWidth = wndParms->displayWidth;
@@ -3828,8 +3815,7 @@ void __cdecl R_StoreWindowSettings(const GfxWindowParms *wndParms)
         }
         break;
     }
-    if (!com_wideScreen)
-        MyAssertHandler(".\\r_init.cpp", 485, 0, "%s", "com_wideScreen");
+    iassert( com_wideScreen );
     Dvar_SetBool((dvar_s *)com_wideScreen, vidConfig.aspectRatioWindow != 1.333333373069763f);
     vidConfig.aspectRatioScenePixel = (float)vidConfig.sceneHeight
         * vidConfig.aspectRatioWindow
@@ -3932,15 +3918,11 @@ char __cdecl R_CreateDevice(const GfxWindowParms *wndParms)
     HRESULT hr; // [esp+3Ch] [ebp-8h]
     unsigned int behavior; // [esp+40h] [ebp-4h]
 
-    if (!wndParms)
-        MyAssertHandler(".\\r_init.cpp", 1473, 0, "%s", "wndParms");
-    if (dx.windowCount)
-        MyAssertHandler(".\\r_init.cpp", 1475, 0, "%s", "dx.windowCount == 0");
-    if (!wndParms->hwnd)
-        MyAssertHandler(".\\r_init.cpp", 1476, 0, "%s", "wndParms->hwnd");
+    iassert( wndParms );
+    iassert( dx.windowCount == 0 );
+    iassert( wndParms->hwnd );
     hwnd = wndParms->hwnd;
-    if (dx.device)
-        MyAssertHandler(".\\r_init.cpp", 1484, 0, "%s", "dx.device == NULL");
+    iassert( dx.device == NULL );
     dx.depthStencilFormat = (D3DFORMAT)R_GetDepthStencilFormat(D3DFMT_A8R8G8B8);
     R_SetD3DPresentParameters(&d3dpp, wndParms);
     behavior = 70;
@@ -3948,8 +3930,7 @@ char __cdecl R_CreateDevice(const GfxWindowParms *wndParms)
     r_glob.haveThreadOwnership = 1;
     if (hr >= 0)
     {
-        if (!dx.device)
-            MyAssertHandler(".\\r_init.cpp", 1514, 1, "%s", "dx.device");
+        iassert( dx.device );
         dx.deviceLost = 0;
         return 1;
     }
@@ -3963,10 +3944,8 @@ char __cdecl R_CreateDevice(const GfxWindowParms *wndParms)
 
 void __cdecl R_SetD3DPresentParameters(_D3DPRESENT_PARAMETERS_ *d3dpp, const GfxWindowParms *wndParms)
 {
-    if (!d3dpp)
-        MyAssertHandler(".\\r_init.cpp", 339, 0, "%s", "d3dpp");
-    if (!wndParms)
-        MyAssertHandler(".\\r_init.cpp", 340, 0, "%s", "wndParms");
+    iassert( d3dpp );
+    iassert( wndParms );
     R_SetupAntiAliasing(wndParms);
     memset((unsigned __int8 *)d3dpp, 0, sizeof(_D3DPRESENT_PARAMETERS_));
     d3dpp->BackBufferWidth = wndParms->displayWidth;
@@ -3979,8 +3958,7 @@ void __cdecl R_SetD3DPresentParameters(_D3DPRESENT_PARAMETERS_ *d3dpp, const Gfx
     d3dpp->EnableAutoDepthStencil = 0;
     d3dpp->AutoDepthStencilFormat = dx.depthStencilFormat;
     d3dpp->PresentationInterval = r_vsync->current.enabled ? 1 : 0x80000000;
-    if (!wndParms->hwnd)
-        MyAssertHandler(".\\r_init.cpp", 374, 0, "%s", "wndParms->hwnd");
+    iassert( wndParms->hwnd );
     d3dpp->hDeviceWindow = wndParms->hwnd;
     d3dpp->Flags = 0;
     if (wndParms->fullscreen)
@@ -4000,8 +3978,7 @@ void __cdecl R_SetupAntiAliasing(const GfxWindowParms *wndParms)
     _D3DMULTISAMPLE_TYPE multiSampleCount; // [esp+0h] [ebp-Ch]
     DWORD qualityLevels; // [esp+8h] [ebp-4h] BYREF
 
-    if (!wndParms)
-        MyAssertHandler(".\\r_init.cpp", 234, 0, "%s", "wndParms");
+    iassert( wndParms );
     if (wndParms->aaSamples < 1 || wndParms->aaSamples > 16)
         MyAssertHandler(
             ".\\r_init.cpp",
@@ -4153,10 +4130,8 @@ const char *__cdecl R_ClosestRefreshRateForMode(unsigned int width, unsigned int
         else
             bot = mid + 1;
     }
-    if (top < 0)
-        MyAssertHandler(".\\r_init.cpp", 1702, 0, "%s\n\t(top) = %i", "(top >= 0)", top);
-    if (top != bot - 1)
-        MyAssertHandler(".\\r_init.cpp", 1703, 0, "%s", "top == bot - 1");
+    iassert( (top >= 0) );
+    iassert( top == bot - 1 );
     if (dx.displayModes[top].Width == width && dx.resolutionNameTable[4 * top - 1023] == (const char *)height)
         return dx.resolutionNameTable[4 * top - 1022];
     if (dx.displayModes[bot].Width != width || dx.resolutionNameTable[4 * bot - 1023] != (const char *)height)
@@ -4239,8 +4214,7 @@ void R_InitGlobalStructs()
 
 void __cdecl R_EndRegistration()
 {
-    if (!rg.registered)
-        MyAssertHandler(".\\r_init.cpp", 2511, 0, "%s", "rg.registered");
+    iassert( rg.registered );
     KISAK_NULLSUB();
     if (!useFastFile->current.enabled)
     {
@@ -4269,8 +4243,7 @@ void __cdecl R_ConfigureRenderer(const GfxConfiguration *config)
 
 void __cdecl R_ComErrorCleanup()
 {
-    if (!Sys_IsMainThread())
-        MyAssertHandler(".\\r_init.cpp", 2819, 0, "%s", "Sys_IsMainThread()");
+    iassert( Sys_IsMainThread() );
     R_AbortRenderCommands();
     R_SyncRenderThread();
     if (dx.inScene)
@@ -4285,13 +4258,10 @@ bool __cdecl R_CanRecoverLostDevice()
 {
     HRESULT hr; // [esp+0h] [ebp-4h]
 
-    if (!dx.device)
-        MyAssertHandler(".\\r_init.cpp", 2703, 0, "%s", "dx.device");
-    if (!dx.deviceLost)
-        MyAssertHandler(".\\r_init.cpp", 2704, 0, "%s", "dx.deviceLost");
+    iassert( dx.device );
+    iassert( dx.deviceLost );
     hr = dx.device->TestCooperativeLevel();
-    if (hr != -2005530520 && hr != -2005530519)
-        MyAssertHandler(".\\r_init.cpp", 2707, 0, "%s", "hr == D3DERR_DEVICELOST || hr == D3DERR_DEVICENOTRESET");
+    iassert( hr == D3DERR_DEVICELOST || hr == D3DERR_DEVICENOTRESET );
     return hr != -2005530520;
 }
 
@@ -4329,8 +4299,7 @@ void R_ReleaseForShutdownOrReset()
     R_DestroyParticleCloudBuffer();
     if (!g_allocateMinimalResources)
         R_ShutdownRenderBuffers();
-    if (gfxBuf.smodelCacheVb)
-        MyAssertHandler(".\\r_init.cpp", 1022, 0, "%s", "!gfxBuf.smodelCacheVb");
+    iassert( !gfxBuf.smodelCacheVb );
     if (dx.flushGpuQuery)
     {
         do
@@ -4412,14 +4381,10 @@ char __cdecl R_RecoverLostDevice()
 {
     int remoteScreenUpdateNesting; // [esp+0h] [ebp-4h]
 
-    if (!dx.device)
-        MyAssertHandler(".\\r_init.cpp", 2722, 0, "%s", "dx.device");
-    if (!dx.deviceLost)
-        MyAssertHandler(".\\r_init.cpp", 2723, 0, "%s", "dx.deviceLost");
-    if (!gfxBuf.dynamicVertexBuffer->buffer)
-        MyAssertHandler(".\\r_init.cpp", 2725, 0, "%s", "gfxBuf.dynamicVertexBuffer->buffer");
-    if (!gfxBuf.dynamicIndexBuffer->buffer)
-        MyAssertHandler(".\\r_init.cpp", 2727, 0, "%s", "gfxBuf.dynamicIndexBuffer->buffer");
+    iassert( dx.device );
+    iassert( dx.deviceLost );
+    iassert( gfxBuf.dynamicVertexBuffer->buffer );
+    iassert( gfxBuf.dynamicIndexBuffer->buffer );
     if (!R_CanRecoverLostDevice())
         return 0;
     Com_Printf(8, "Recovering lost device...\n");

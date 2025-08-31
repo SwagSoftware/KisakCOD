@@ -58,14 +58,11 @@ void __cdecl WaterFrequenciesAtTime(complex_s *H, const water_t *water, float t)
     float sinImag; // [esp+3Ch] [ebp-8h]
     float ta; // [esp+54h] [ebp+10h]
 
-    if (!H)
-        MyAssertHandler(".\\r_water.cpp", 154, 0, "%s", "H");
-    if (!water)
-        MyAssertHandler(".\\r_water.cpp", 155, 0, "%s", "water");
+    iassert( H );
+    iassert( water );
     ta = t * 162.9746551513672;
     vecKCount = water->N * water->M;
-    if (vecKCount > 4096)
-        MyAssertHandler(".\\r_water.cpp", 160, 0, "%s\n\t(vecKCount) = %i", "(vecKCount <= (64 * 64))", vecKCount);
+    iassert( (vecKCount <= (64 * 64)) );
     vecKIndex = 0;
     wTerm = water->wTerm;
     H0 = water->H0;
@@ -106,31 +103,24 @@ void __cdecl WaterAmplitudesFromFrequencies(complex_s *H, const water_t *water)
     int waterIndex; // [esp+8h] [ebp-4h]
     int waterIndexa; // [esp+8h] [ebp-4h]
 
-    if (!H)
-        MyAssertHandler(".\\r_water.cpp", 215, 0, "%s", "H");
-    if (!water)
-        MyAssertHandler(".\\r_water.cpp", 216, 0, "%s", "water");
-    if (water->M != water->N)
-        MyAssertHandler(".\\r_water.cpp", 217, 0, "%s", "water->M == water->N");
+    iassert( H );
+    iassert( water );
+    iassert( water->M == water->N );
     for (log2_m = 0; water->M != 1 << log2_m; ++log2_m)
         ;
     for (waterIndex = 0; waterIndex < water->N; ++waterIndex)
     {
         fftIndex = water->M * waterIndex;
-        if (fftIndex < 0)
-            MyAssertHandler(".\\r_water.cpp", 227, 0, "%s", "fftIndex >= 0");
-        if (fftIndex >= 4096)
-            MyAssertHandler(".\\r_water.cpp", 228, 0, "%s", "fftIndex < HCOUNT");
+        iassert( fftIndex >= 0 );
+        iassert( fftIndex < HCOUNT );
         FFT(&H[fftIndex], log2_m, waterGlobStatic.fftBitswap, waterGlobStatic.fftTrigTable);
     }
     TransposeArray(H, water->M);
     for (waterIndexa = 0; waterIndexa < water->M; ++waterIndexa)
     {
         fftIndexa = water->N * waterIndexa;
-        if (fftIndexa < 0)
-            MyAssertHandler(".\\r_water.cpp", 239, 0, "%s", "fftIndex >= 0");
-        if (fftIndexa >= 4096)
-            MyAssertHandler(".\\r_water.cpp", 240, 0, "%s", "fftIndex < HCOUNT");
+        iassert( fftIndex >= 0 );
+        iassert( fftIndex < HCOUNT );
         FFT(&H[fftIndexa], log2_m, waterGlobStatic.fftBitswap, waterGlobStatic.fftTrigTable);
     }
     TransposeArray(H, water->M);
@@ -190,15 +180,11 @@ void __cdecl WaterPixelsFromAmplitudes(GfxColor *pixels, complex_s *H, const wat
     GfxColor color; // [esp+A0h] [ebp-8h]
     unsigned int count; // [esp+A4h] [ebp-4h]
 
-    if (!pixels)
-        MyAssertHandler(".\\r_water.cpp", 257, 0, "%s", "pixels");
-    if (!H)
-        MyAssertHandler(".\\r_water.cpp", 258, 0, "%s", "H");
-    if (water->M != water->N)
-        MyAssertHandler(".\\r_water.cpp", 259, 0, "%s", "water->M == water->N");
+    iassert( pixels );
+    iassert( H );
+    iassert( water->M == water->N );
     count = water->N * water->M;
-    if ((count & 3) != 0)
-        MyAssertHandler(".\\r_water.cpp", 262, 0, "%s\n\t(count) = %i", "(!(count & 3))", count);
+    iassert( (!(count & 3)) );
     dz = 1.0 / (double)count;
     ixy = 0;
     while (ixy < count)
@@ -279,8 +265,7 @@ void __cdecl GenerateMipMaps(_D3DFORMAT format, unsigned __int8 *pixels, water_t
 
 void __cdecl R_UploadWaterTexture(water_t *water, float floatTime)
 {
-    if (!water)
-        MyAssertHandler(".\\r_water.cpp", 703, 0, "%s", "water");
+    iassert( water );
     if (floatTime != water->writable.floatTime)
     {
         water->writable.floatTime = floatTime;
@@ -327,10 +312,8 @@ void __cdecl Load_PicmipWater(water_t **waterRef)
         v5 = (*waterRef)->N >> r_picmip_water->current.integer;
     if (v6 != (*waterRef)->M || v5 != (*waterRef)->N)
     {
-        if ((*waterRef)->M != (*waterRef)->N)
-            MyAssertHandler(".\\r_water.cpp", 746, 0, "%s", "(*waterRef)->M == (*waterRef)->N");
-        if (v6 != v5)
-            MyAssertHandler(".\\r_water.cpp", 747, 0, "%s", "M == N");
+        iassert( (*waterRef)->M == (*waterRef)->N );
+        //iassert( M == N );
         downsample = (*waterRef)->M / v6;
         (*waterRef)->M = v6;
         (*waterRef)->N = v5;

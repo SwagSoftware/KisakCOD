@@ -154,8 +154,7 @@ void __cdecl R_AddAllBspDrawSurfacesRangeCamera(
     GfxBspDrawSurfData surfData; // [esp+160h] [ebp-18h] BYREF
 
     PROF_SCOPED("BspSurfaces");
-    if (!rgp.world)
-        MyAssertHandler(".\\r_add_bsp.cpp", 205, 0, "%s", "rgp.world");
+    iassert( rgp.world );
     if (beginSurface >= (unsigned int)rgp.world->models->surfaceCount + 1)
         MyAssertHandler(
             ".\\r_add_bsp.cpp",
@@ -175,8 +174,7 @@ void __cdecl R_AddAllBspDrawSurfacesRangeCamera(
     surfaceVisData = rgp.world->dpvs.surfaceVisData[0];
     R_InitBspDrawSurf(&surfData);
     surfData.drawSurfList.current = scene.drawSurfs[stage];
-    if (maxDrawSurfCount != scene.maxDrawSurfCount[stage])
-        MyAssertHandler(".\\r_add_bsp.cpp", 222, 0, "%s", "(int)maxDrawSurfCount == scene.maxDrawSurfCount[stage]");
+    iassert( (int)maxDrawSurfCount == scene.maxDrawSurfCount[stage] );
     surfaceMaterials = rgp.world->dpvs.surfaceMaterials;
     surfData.drawSurfList.end = &surfData.drawSurfList.current[maxDrawSurfCount];
     prevDrawSurf.packed = -1;
@@ -238,8 +236,7 @@ void __cdecl R_AddAllBspDrawSurfacesCameraNonlit(
     GfxBspDrawSurfData surfData; // [esp+128h] [ebp-20h] BYREF
     int drawSurfCount; // [esp+144h] [ebp-4h]
 
-    if (!rgp.world)
-        MyAssertHandler(".\\r_add_bsp.cpp", 357, 0, "%s", "rgp.world");
+    iassert( rgp.world );
     surfaceVisData = rgp.world->dpvs.surfaceVisData[0];
     surfaceMaterials = rgp.world->dpvs.surfaceMaterials;
     R_InitBspDrawSurf(&surfData);
@@ -318,8 +315,7 @@ void __cdecl R_AddAllBspDrawSurfacesRangeSunShadow(
 
     PROF_SCOPED("BspSurfacesShadow");
 
-    if (!rgp.world)
-        MyAssertHandler(".\\r_add_bsp.cpp", 437, 0, "%s", "rgp.world");
+    iassert( rgp.world );
     if (beginSurface >= (unsigned int)rgp.world->models->surfaceCount + 1)
         MyAssertHandler(
             ".\\r_add_bsp.cpp",
@@ -340,8 +336,7 @@ void __cdecl R_AddAllBspDrawSurfacesRangeSunShadow(
     R_InitBspDrawSurf(&surfData);
     stage = 3 * partitionIndex + 15;
     surfData.drawSurfList.current = scene.drawSurfs[stage];
-    if (maxDrawSurfCount != scene.maxDrawSurfCount[stage])
-        MyAssertHandler(".\\r_add_bsp.cpp", 456, 0, "%s", "(int)maxDrawSurfCount == scene.maxDrawSurfCount[stage]");
+    iassert( (int)maxDrawSurfCount == scene.maxDrawSurfCount[stage] );
     surfaceMaterials = rgp.world->dpvs.surfaceMaterials;
     surfData.drawSurfList.end = &surfData.drawSurfList.current[maxDrawSurfCount];
     prevDrawSurf.packed = -1;
@@ -399,8 +394,7 @@ void __cdecl R_AddAllBspDrawSurfacesRangeSunShadow(
                 {
                     if (triSurfCount)
                     {
-                        if (skipMaterial)
-                            MyAssertHandler(".\\r_add_bsp.cpp", 499, 0, "%s", "!skipMaterial");
+                        iassert( !skipMaterial );
                         R_AddBspDrawSurfs(prevDrawSurf, (unsigned __int8*)triSurfList, triSurfCount, &surfData);
                     }
                     prevDrawSurf.fields = drawSurf.fields;
@@ -429,8 +423,7 @@ void __cdecl R_AddAllBspDrawSurfacesRangeSunShadow(
     }
     if (triSurfCount)
     {
-        if (skipMaterial)
-            MyAssertHandler(".\\r_add_bsp.cpp", 564, 0, "%s", "!skipMaterial");
+        iassert( !skipMaterial );
         R_AddBspDrawSurfs(prevDrawSurf, (unsigned __int8*)triSurfList, triSurfCount, &surfData);
     }
     R_EndCmdBuf(&surfData.delayedCmdBuf);
@@ -453,8 +446,7 @@ void __cdecl R_AddAllBspDrawSurfacesSpotShadow(unsigned int spotShadowIndex, uns
     GfxBspDrawSurfData surfData; // [esp+138h] [ebp-20h] BYREF
     int drawSurfCount; // [esp+154h] [ebp-4h]
 
-    if (!rgp.world)
-        MyAssertHandler(".\\r_add_bsp.cpp", 659, 0, "%s", "rgp.world");
+    iassert( rgp.world );
     surfaceMaterials = rgp.world->dpvs.surfaceMaterials;
     stage = 3 * spotShadowIndex + 21;
     R_InitBspDrawSurf(&surfData);

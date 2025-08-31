@@ -285,8 +285,7 @@ unsigned __int8 *__cdecl Material_Alloc(unsigned int size)
 
 void __cdecl Load_CreateMaterialPixelShader(GfxPixelShaderLoadDef *loadDef, MaterialPixelShader *mtlShader)
 {
-    if (loadDef != &mtlShader->prog.loadDef)
-        MyAssertHandler(".\\r_material.cpp", 623, 0, "%s", "loadDef == &mtlShader->prog.loadDef");
+    iassert( loadDef == &mtlShader->prog.loadDef );
     if (r_loadForRenderer->current.enabled && loadDef->loadForRenderer == r_rendererInUse->current.integer)
     {
         ProfLoad_Begin("Create pixel shader");
@@ -301,8 +300,7 @@ void __cdecl Load_CreateMaterialPixelShader(GfxPixelShaderLoadDef *loadDef, Mate
 
 void __cdecl Load_CreateMaterialVertexShader(GfxVertexShaderLoadDef *loadDef, MaterialVertexShader *mtlShader)
 {
-    if (loadDef != &mtlShader->prog.loadDef)
-        MyAssertHandler(".\\r_material.cpp", 643, 0, "%s", "loadDef == &mtlShader->prog.loadDef");
+    iassert( loadDef == &mtlShader->prog.loadDef );
     if (r_loadForRenderer->current.enabled && loadDef->loadForRenderer == r_rendererInUse->current.integer)
     {
         ProfLoad_Begin("Create vertex shader");
@@ -452,8 +450,7 @@ IDirect3DVertexDeclaration9 *__cdecl Material_BuildVertexDecl(
             } while (alwaysfails);
         }
     } while (alwaysfails);
-    if (!decl)
-        MyAssertHandler(".\\r_material.cpp", 736, 0, "%s", "decl");
+    iassert( decl );
     return decl;
 }
 
@@ -485,10 +482,8 @@ void __cdecl Material_DirtySort()
 
 bool __cdecl Material_IsDefault(const Material *material)
 {
-    if (!material)
-        MyAssertHandler(".\\r_material.cpp", 1175, 0, "%s", "material");
-    if (!rgp.defaultMaterial)
-        MyAssertHandler(".\\r_material.cpp", 1176, 0, "%s", "rgp.defaultMaterial");
+    iassert( material );
+    iassert( rgp.defaultMaterial );
     if (material->textureTable != rgp.defaultMaterial->textureTable)
         return 0;
     if (material->constantTable == rgp.defaultMaterial->constantTable)
@@ -505,12 +500,9 @@ void __cdecl Material_GetHashIndex(const char *name, unsigned __int16 *hashIndex
 {
     unsigned __int16 beginHashIndex; // [esp+14h] [ebp-4h]
 
-    if (!name)
-        MyAssertHandler(".\\r_material.cpp", 1193, 0, "%s", "name");
-    if (!hashIndex)
-        MyAssertHandler(".\\r_material.cpp", 1194, 0, "%s", "hashIndex");
-    if (!exists)
-        MyAssertHandler(".\\r_material.cpp", 1195, 0, "%s", "exists");
+    iassert( name );
+    iassert( hashIndex );
+    iassert( exists );
     beginHashIndex = R_HashAssetName(name) % 0x7FF;
     *hashIndex = beginHashIndex;
     do
@@ -529,8 +521,7 @@ void __cdecl Material_GetHashIndex(const char *name, unsigned __int16 *hashIndex
 
 Material *__cdecl Material_MakeDefault(char *name)
 {
-    if (!name)
-        MyAssertHandler(".\\r_material.cpp", 1158, 0, "%s", "name");
+    iassert( name );
     if (!rgp.defaultMaterial)
     {
         if (strcmp(name, "$default"))
@@ -570,10 +561,8 @@ Material *__cdecl Material_Register_LoadObj(char *name, int imageTrack)
     bool exists; // [esp+7h] [ebp-5h] BYREF
     unsigned __int16 hashIndex; // [esp+8h] [ebp-4h] BYREF
 
-    if (!name)
-        MyAssertHandler(".\\r_material.cpp", 1222, 0, "%s", "name");
-    if (!*name)
-        MyAssertHandler(".\\r_material.cpp", 1223, 0, "%s", "name[0]");
+    iassert( name );
+    iassert( name[0] );
     Material_GetHashIndex(name, &hashIndex, &exists);
     if (exists)
         return rg.materialHashTable[hashIndex];
@@ -583,8 +572,7 @@ Material *__cdecl Material_Register_LoadObj(char *name, int imageTrack)
     if (!material)
         return Material_MakeDefault(name);
     Material_GetHashIndex(name, &hashIndex, &exists);
-    if (exists)
-        MyAssertHandler(".\\r_material.cpp", 1236, 1, "%s", "!exists");
+    iassert( !exists );
     Material_Add(material, hashIndex);
     return material;
 }
@@ -601,10 +589,8 @@ Material *__cdecl Material_RegisterHandle(const char *name, int imageTrack)
 {
     PROF_SCOPED("Material_RegisterHandle");
 
-    if (!name)
-        MyAssertHandler(".\\r_material.cpp", 1324, 0, "%s", "name");
-    if (!rgp.defaultMaterial)
-        MyAssertHandler(".\\r_material.cpp", 1325, 0, "%s", "rgp.defaultMaterial");
+    iassert( name );
+    iassert( rgp.defaultMaterial );
     if (g_alwaysUseDefaultMaterial && rgp.defaultMaterial)
         return rgp.defaultMaterial;
     if (*name)
@@ -643,8 +629,7 @@ void __cdecl R_MaterialList_f()
     {
         v4 = &v6[i];
         material = v4->material;
-        if (!v4->material)
-            MyAssertHandler(".\\r_material.cpp", 1431, 0, "%s", "material");
+        iassert( material );
         v3 += v4->memory;
         v7 = (double)v4->memory / 1024.0;
         if (v7 >= 10.0)
@@ -668,8 +653,7 @@ void __cdecl R_GetMaterialList(XAssetHeader header, char *data)
     memory = R_GetMaterialMemory(header.material);
     if (memory)
     {
-        if (*(unsigned int *)data >= 0x800u)
-            MyAssertHandler(".\\r_material.cpp", 1393, 0, "%s", "materialList->count < ARRAY_COUNT( materialList->sorted )");
+        //iassert( materialList->count < ARRAY_COUNT( materialList->sorted ) ); // KISAKTODO
         materialMemory = (XAssetHeader *)&data[8 * *(unsigned int *)data + 4];
         materialMemory->xmodelPieces = header.xmodelPieces;
         materialMemory[1].xmodelPieces = (XModelPieces *)memory;
@@ -693,8 +677,7 @@ int __cdecl R_GetMaterialMemory(Material *material)
 
 const char *__cdecl Material_GetName(Material *handle)
 {
-    if (!handle)
-        MyAssertHandler(".\\r_material.cpp", 1484, 0, "%s", "handle");
+    iassert( handle );
     return Material_FromHandle(handle)->info.name;
 }
 
@@ -705,8 +688,7 @@ void __cdecl Material_ReleasePassResources(MaterialPass *pass)
     IDirect3DPixelShader9 *varCopy; // [esp+8h] [ebp-8h]
     int declIndex; // [esp+Ch] [ebp-4h]
 
-    if (!pass->pixelShader)
-        MyAssertHandler(".\\r_material.cpp", 933, 0, "%s", "pass->pixelShader");
+    iassert( pass->pixelShader );
     if (pass->pixelShader->prog.ps)
     {
         do
@@ -722,8 +704,7 @@ void __cdecl Material_ReleasePassResources(MaterialPass *pass)
                 935);
         } while (alwaysfails);
     }
-    if (!pass->vertexShader)
-        MyAssertHandler(".\\r_material.cpp", 937, 0, "%s", "pass->vertexShader");
+    iassert( pass->vertexShader );
     if (pass->vertexShader->prog.vs)
     {
         do
@@ -735,8 +716,7 @@ void __cdecl Material_ReleasePassResources(MaterialPass *pass)
             R_ReleaseAndSetNULL<IDirect3DDevice9>(var, "pass->vertexShader->prog.vs", ".\\r_material.cpp", 939);
         } while (alwaysfails);
     }
-    if (!pass->vertexDecl)
-        MyAssertHandler(".\\r_material.cpp", 941, 0, "%s", "pass->vertexDecl");
+    iassert( pass->vertexDecl );
     if (pass->vertexDecl->isLoaded)
     {
         pass->vertexDecl->isLoaded = 0;
@@ -783,21 +763,17 @@ void __cdecl Material_ReleaseTechniqueSetResources(MaterialTechniqueSet *techniq
 
 void __cdecl Material_ReloadPassResources(MaterialPass *pass)
 {
-    if (!pass->pixelShader)
-        MyAssertHandler(".\\r_material.cpp", 958, 0, "%s", "pass->pixelShader");
+    iassert( pass->pixelShader );
     if (!pass->pixelShader->prog.ps)
         Load_CreateMaterialPixelShader(&pass->pixelShader->prog.loadDef, pass->pixelShader);
-    if (!pass->vertexShader)
-        MyAssertHandler(".\\r_material.cpp", 962, 0, "%s", "pass->vertexShader");
+    iassert( pass->vertexShader );
     if (!pass->vertexShader->prog.vs)
         Load_CreateMaterialVertexShader(&pass->vertexShader->prog.loadDef, pass->vertexShader);
-    if (!pass->vertexDecl)
-        MyAssertHandler(".\\r_material.cpp", 966, 0, "%s", "pass->vertexDecl");
+    iassert( pass->vertexDecl );
     if (!pass->vertexDecl->isLoaded)
     {
         Load_BuildVertexDecl(&pass->vertexDecl);
-        if (!pass->vertexDecl->isLoaded)
-            MyAssertHandler(".\\r_material.cpp", 970, 0, "%s", "pass->vertexDecl->isLoaded");
+        iassert( pass->vertexDecl->isLoaded );
     }
 }
 
@@ -896,8 +872,7 @@ void __cdecl Material_CollateTechniqueSets(XAssetHeader header, TechniqueSetList
 
 bool __cdecl IsValidMaterialHandle(Material *const handle)
 {
-    if (((unsigned __int8)handle & 3) != 0)
-        MyAssertHandler(".\\r_material.cpp", 1798, 0, "%s", "( 0x0003 & reinterpret_cast<int>( handle ) ) == 0x0");
+    iassert( ( 0x0003 & reinterpret_cast<int>( handle ) ) == 0x0 );
     return handle && handle->info.name && *handle->info.name;
 }
 
@@ -908,8 +883,7 @@ void __cdecl Material_PreventOverrideTechniqueGeneration()
 
 void __cdecl Material_UpdatePicmipForTexdef(const MaterialTextureDef *texdef)
 {
-    if (!texdef)
-        MyAssertHandler(".\\r_material.cpp", 1654, 0, "%s", "texdef");
+    iassert( texdef );
     if (texdef->semantic != 11)
     {
         if (texdef->u.image)
@@ -943,8 +917,7 @@ Material *__cdecl Material_Find(const char *name)
     if (!exists)
         return 0;
     material = rg.materialHashTable[hashIndex[0]];
-    if (!material)
-        MyAssertHandler(".\\r_material.cpp", 1313, 1, "%s", "material");
+    iassert( material );
     return material;
 }
 
@@ -957,8 +930,7 @@ void __cdecl Material_ReloadTextures(const Material *material)
     int textureCount; // [esp+10h] [ebp-8h]
     const MaterialTextureDef *texture; // [esp+14h] [ebp-4h]
 
-    if (!material)
-        MyAssertHandler(".\\r_material.cpp", 1621, 0, "%s", "material");
+    iassert( material );
     textureCount = material->textureCount;
     lastConverted = 0;
     while (1)
@@ -990,8 +962,7 @@ void __cdecl R_Cmd_ReloadMaterialTextures()
     if (Cmd_Argc() == 2)
     {
         name = Cmd_Argv(1);
-        if (!name)
-            MyAssertHandler(".\\r_material.cpp", 1702, 0, "%s", "name");
+        iassert( name );
         material = Material_Find(name);
         if (material)
         {

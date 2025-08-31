@@ -100,10 +100,8 @@ void __cdecl Image_DecodeBitmap(
     int faceCount; // [esp+20h] [ebp-8h]
     int mipLevel; // [esp+24h] [ebp-4h]
 
-    if (!image)
-        MyAssertHandler(".\\r_imagedecode.cpp", 236, 0, "%s", "image");
-    if (!imageFile)
-        MyAssertHandler(".\\r_imagedecode.cpp", 237, 0, "%s", "imageFile");
+    iassert( image );
+    iassert( imageFile );
     if ((imageFile->flags & 4) != 0)
         faceCount = 6;
     else
@@ -320,10 +318,8 @@ void __cdecl Image_DecodeDxtc(
     int faceCount; // [esp+20h] [ebp-8h]
     int mipLevel; // [esp+24h] [ebp-4h]
 
-    if (!image)
-        MyAssertHandler(".\\r_imagedecode.cpp", 461, 0, "%s", "image");
-    if (!imageFile)
-        MyAssertHandler(".\\r_imagedecode.cpp", 462, 0, "%s", "imageFile");
+    iassert( image );
+    iassert( imageFile );
     if (bytesPerBlock != 8 * (imageFile->format != 11) + 8)
         MyAssertHandler(
             ".\\r_imagedecode.cpp",
@@ -363,8 +359,7 @@ void __cdecl Image_GetRawPixels(char *imageName, GfxRawImage *image)
     char filepath[64]; // [esp+1Ch] [ebp-48h] BYREF
     GfxImageFileHeader *imageFile; // [esp+60h] [ebp-4h] BYREF
 
-    if (!imageName)
-        MyAssertHandler(".\\r_imagedecode.cpp", 492, 0, "%s", "imageName");
+    iassert( imageName );
     Com_AssembleFilepath((char*)"images/", imageName, (char*)".iwi", filepath, 64);
     if (FS_ReadFile(filepath, (void**)&imageFile) < 0)
         Com_Error(ERR_DROP, "image '%s' is missing", filepath);
@@ -454,8 +449,7 @@ int __cdecl Image_CountMipmapsForFile(GfxImageFileHeader *imageFile)
     mipCount = 1;
     width = imageFile->dimensions[0];
     height = imageFile->dimensions[1];
-    if (imageFile->dimensions[2] != 1)
-        MyAssertHandler(".\\r_imagedecode.cpp", 157, 1, "%s", "imageFile->dimensions[2] == 1");
+    iassert( imageFile->dimensions[2] == 1 );
     while (width > 1 || height > 1)
     {
         if (width >> 1 > 1)
@@ -486,8 +480,7 @@ int __cdecl Image_CountMipmapsForFile_0(GfxImageFileHeader *imageFile)
     mipCount = 1;
     width = imageFile->dimensions[0];
     height = imageFile->dimensions[1];
-    if (imageFile->dimensions[2] != 1)
-        MyAssertHandler(".\\r_imagedecode.cpp", 157, 1, "%s", "imageFile->dimensions[2] == 1");
+    iassert( imageFile->dimensions[2] == 1 );
     while (width > 1 || height > 1)
     {
         if (width >> 1 > 1)
@@ -525,10 +518,8 @@ void __cdecl Image_DecodeWavelet(
     unsigned __int8 *to[6]; // [esp+74h] [ebp-1Ch]
     int totalSize; // [esp+8Ch] [ebp-4h]
 
-    if (!image)
-        MyAssertHandler(".\\r_imagedecode.cpp", 181, 0, "%s", "image");
-    if (!imageFile)
-        MyAssertHandler(".\\r_imagedecode.cpp", 182, 0, "%s", "imageFile");
+    iassert( image );
+    iassert( imageFile );
     decode.value = 0;
     decode.bit = 0;
     decode.width = imageFile->dimensions[0];

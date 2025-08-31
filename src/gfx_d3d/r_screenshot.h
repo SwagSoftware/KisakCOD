@@ -2,6 +2,8 @@
 #include <bgame/bg_local.h>
 #include "r_reflection_probe.h"
 
+#define CUBE_MAP_HIGH_MIP_SIZE 64
+
 enum GfxScreenshotType : __int32
 {                                       // ...
     R_SCREENSHOT_JPG = 0x0,

@@ -52,10 +52,8 @@ unsigned int __cdecl R_AllocSceneDObj()
 {
     unsigned int sceneEntIndex; // [esp+0h] [ebp-4h]
 
-    if (!rg.registered)
-        MyAssertHandler(".\\r_scene.cpp", 123, 0, "%s", "rg.registered");
-    if (!rg.inFrame)
-        MyAssertHandler(".\\r_scene.cpp", 125, 0, "%s", "rg.inFrame");
+    iassert( rg.registered );
+    iassert( rg.inFrame );
     sceneEntIndex = InterlockedExchangeAdd(&scene.sceneDObjCount, 1);
     if (sceneEntIndex >= 0x200)
     {
@@ -69,10 +67,8 @@ unsigned int __cdecl R_AllocSceneModel()
 {
     unsigned int sceneEntIndex; // [esp+0h] [ebp-4h]
 
-    if (!rg.registered)
-        MyAssertHandler(".\\r_scene.cpp", 143, 0, "%s", "rg.registered");
-    if (!rg.inFrame)
-        MyAssertHandler(".\\r_scene.cpp", 145, 0, "%s", "rg.inFrame");
+    iassert( rg.registered );
+    iassert( rg.inFrame );
     sceneEntIndex = InterlockedExchangeAdd(&scene.sceneModelCount, 1);
     if (sceneEntIndex >= 0x400)
     {
@@ -86,10 +82,8 @@ unsigned int __cdecl R_AllocSceneBrush()
 {
     unsigned int sceneEntIndex; // [esp+0h] [ebp-4h]
 
-    if (!rg.registered)
-        MyAssertHandler(".\\r_scene.cpp", 163, 0, "%s", "rg.registered");
-    if (!rg.inFrame)
-        MyAssertHandler(".\\r_scene.cpp", 165, 0, "%s", "rg.inFrame");
+    iassert( rg.registered );
+    iassert( rg.inFrame );
     sceneEntIndex = InterlockedExchangeAdd(&scene.sceneBrushCount, 1);
     if (sceneEntIndex >= 0x200)
     {
@@ -101,8 +95,7 @@ unsigned int __cdecl R_AllocSceneBrush()
 
 GfxBrushModel *__cdecl R_GetBrushModel(unsigned int modelIndex)
 {
-    if (!rgp.world)
-        MyAssertHandler(".\\r_scene.cpp", 180, 0, "%s", "rgp.world");
+    iassert( rgp.world );
     if (modelIndex >= rgp.world->modelCount)
         MyAssertHandler(
             ".\\r_scene.cpp",
@@ -123,8 +116,7 @@ void __cdecl R_AddBrushModelToSceneFromAngles(
     unsigned int sceneEntIndex; // [esp+4h] [ebp-8h]
     GfxSceneBrush *sceneBrush; // [esp+8h] [ebp-4h]
 
-    if (!bmodel)
-        MyAssertHandler(".\\r_scene.cpp", 191, 0, "%s", "bmodel");
+    iassert( bmodel );
     if (r_drawEntities->current.enabled && r_drawBModels->current.enabled && bmodel->surfaceCount)
     {
         sceneEntIndex = R_AllocSceneBrush();
@@ -264,8 +256,7 @@ void __cdecl R_AddOmniLightToScene(const float *org, float radius, float r, floa
 
     if (rg.registered && rgp.world)
     {
-        if (!rg.inFrame)
-            MyAssertHandler(".\\r_scene.cpp", 353, 0, "%s", "rg.inFrame");
+        iassert( rg.inFrame );
         if (radius > 0.0)
         {
             if (scene.addedLightCount < 32)
@@ -297,7 +288,7 @@ void __cdecl R_AddSpotLightToScene(const float *org, const float *dir, float rad
     float v6; // [esp+Ch] [ebp-38h]
     float v7; // [esp+10h] [ebp-34h]
     float v8; // [esp+14h] [ebp-30h]
-    float v9; // [esp+18h] [ebp-2Ch]
+    float spotLightFovOuter; // [esp+18h] [ebp-2Ch]
     float v10; // [esp+1Ch] [ebp-28h]
     float value; // [esp+20h] [ebp-24h]
     float v12; // [esp+30h] [ebp-14h]
@@ -307,8 +298,7 @@ void __cdecl R_AddSpotLightToScene(const float *org, const float *dir, float rad
 
     if (rg.registered && rgp.world)
     {
-        if (!rg.inFrame)
-            MyAssertHandler(".\\r_scene.cpp", 392, 0, "%s", "rg.inFrame");
+        iassert( rg.inFrame );
         if (radius > 0.0)
         {
             if (scene.addedLightCount < 32)
@@ -325,11 +315,10 @@ void __cdecl R_AddSpotLightToScene(const float *org, const float *dir, float rad
                 }
                 dst = &scene.addedLight[scene.addedLightCount++];
                 v12 = (r_spotLightEndRadius->current.value - r_spotLightStartRadius->current.value) / radius;
-                v9 = atan(v12);
-                spotLightFovInner = v9 * r_spotLightFovInnerFraction->current.value;
-                if (v9 <= 0.0)
-                    MyAssertHandler(".\\r_scene.cpp", 413, 0, "%s", "spotLightFovOuter > 0.0f");
-                v8 = tan(v9);
+                spotLightFovOuter = atan(v12);
+                spotLightFovInner = spotLightFovOuter * r_spotLightFovInnerFraction->current.value;
+                iassert( spotLightFovOuter > 0.0f );
+                v8 = tan(spotLightFovOuter);
                 spotLightOffset = r_spotLightStartRadius->current.value / v8;
                 memset(&dst->type, 0, sizeof(GfxLight));
                 dst->def = rgp.dlightDef;
@@ -346,11 +335,10 @@ void __cdecl R_AddSpotLightToScene(const float *org, const float *dir, float rad
                 Vec3Scale(dst->color, r_spotLightBrightness->current.value, dst->color);
                 scene.dynamicSpotLightNearPlaneOffset = spotLightOffset;
                 dst->exponent = 1;
-                if (spotLightFovInner >= (double)v9)
-                    MyAssertHandler(".\\r_scene.cpp", 429, 0, "%s", "spotLightFovOuter > spotLightFovInner");
+                iassert( spotLightFovOuter > spotLightFovInner );
                 v7 = cos(spotLightFovInner);
                 dst->cosHalfFovInner = v7;
-                v6 = cos(v9);
+                v6 = cos(spotLightFovOuter);
                 dst->cosHalfFovOuter = v6;
                 dst->canUseShadowMap = r_spotLightShadows->current.color[0];
                 dst->spotShadowIndex = -1;
@@ -482,8 +470,7 @@ GfxDrawSurf *__cdecl R_AddBModelSurfaces(
     BModelSurface *modelSurf; // [esp+20h] [ebp-10h]
     unsigned int count; // [esp+2Ch] [ebp-4h]
 
-    if (!bmodel)
-        MyAssertHandler(".\\r_scene.cpp", 598, 0, "%s", "bmodel");
+    iassert( bmodel );
     surfId = bmodelInfo->surfId;
     modelSurf = (BModelSurface *)((char *)frontEndDataOut + 4 * surfId);
     if (r_drawDecals->current.enabled)
@@ -522,10 +509,8 @@ GfxDrawSurf *__cdecl R_AddBModelSurfaces(
 
 const XSurface *__cdecl R_GetXSurface(unsigned int *modelSurf, surfaceType_t surfType)
 {
-    if (!modelSurf)
-        MyAssertHandler(".\\r_scene.cpp", 640, 0, "%s", "modelSurf");
-    if ((unsigned int)surfType < SF_BEGIN_XMODEL || (unsigned int)surfType >= SF_END_XMODEL)
-        MyAssertHandler(".\\r_scene.cpp", 641, 0, "%s", "R_IsModelSurfaceType( surfType )");
+    iassert( modelSurf );
+    iassert( R_IsModelSurfaceType( surfType ) );
     return (const XSurface *)modelSurf[1];
 }
 
@@ -560,19 +545,16 @@ void __cdecl R_AddXModelSurfacesCamera(
     unsigned int region; // [esp+38h] [ebp-8h]
     unsigned int numsurfs; // [esp+3Ch] [ebp-4h]
 
-    if (!lightingHandle)
-        MyAssertHandler(".\\r_scene.cpp", 674, 0, "%s", "lightingHandle");
+    iassert( lightingHandle );
     totalTriCount = 0;
     totalVertCount = 0;
-    if (!model)
-        MyAssertHandler(".\\r_scene.cpp", 681, 0, "%s", "model");
+    iassert( model );
     surfId = modelInfo->surfId;
     modelSurf = (GfxModelRigidSurface*)((char*)frontEndDataOut + 4 * surfId);
     lod = modelInfo->lod;
     numsurfs = XModelGetSurfCount(model, lod);
     material = XModelGetSkins(model, lod);
-    if (!material)
-        MyAssertHandler(".\\r_scene.cpp", 691, 0, "%s", "material");
+    iassert( material );
     if (reflectionProbeIndex >= 0x100)
         MyAssertHandler(
             ".\\r_scene.cpp",
@@ -599,8 +581,7 @@ void __cdecl R_AddXModelSurfacesCamera(
         }
         else
         {
-            if (!*material)
-                MyAssertHandler(".\\r_scene.cpp", 708, 0, "%s", "*material");
+            iassert( *material );
             if (rgp.sortedMaterials[(*material)->info.drawSurf.fields.materialSortedIndex] != *material)
                 MyAssertHandler(
                     ".\\r_scene.cpp",
@@ -728,15 +709,13 @@ GfxDrawSurf *__cdecl R_AddXModelSurfaces(
     char surfType; // [esp+34h] [ebp-8h]
     unsigned int numsurfs; // [esp+38h] [ebp-4h]
 
-    if (!model)
-        MyAssertHandler(".\\r_scene.cpp", 787, 0, "%s", "model");
+    iassert( model );
     surfId = modelInfo->surfId;
     modelSurf = (GfxModelRigidSurface *)((char *)frontEndDataOut + 4 * surfId);
     lod = modelInfo->lod;
     numsurfs = XModelGetSurfCount(model, lod);
     material = XModelGetSkins(model, lod);
-    if (!material)
-        MyAssertHandler(".\\r_scene.cpp", 797, 0, "%s", "material");
+    iassert( material );
     for (subMatIndex = 0; subMatIndex < numsurfs; ++subMatIndex)
     {
         skinnedCachedOffset = modelSurf->surf.skinnedCachedOffset;
@@ -850,8 +829,7 @@ void __cdecl R_AddDObjSurfacesCamera(
     totalVertCount = 0;
     totalSurfCount = 0;
     obj = sceneEnt->obj;
-    if (!obj)
-        MyAssertHandler(".\\r_scene.cpp", 895, 0, "%s", "obj");
+    iassert( obj );
     modelCount = DObjGetNumModels(obj);
     if (gfxDrawMethod.emissiveTechType >= (unsigned int)TECHNIQUE_COUNT)
         MyAssertHandler(
@@ -881,12 +859,10 @@ LABEL_15:
         if (lod < 0)
             goto LABEL_14;
         model = DObjGetModel(obj, modelIndex);
-        if (!model)
-            MyAssertHandler(".\\r_scene.cpp", 926, 0, "%s", "model");
+        iassert( model );
         numsurfs = XModelGetSurfCount(model, lod);
         material = XModelGetSkins(model, lod);
-        if (!material)
-            MyAssertHandler(".\\r_scene.cpp", 930, 0, "%s", "material");
+        iassert( material );
         for (subMatIndex = 0; ; ++subMatIndex)
         {
             if (subMatIndex >= numsurfs)
@@ -925,8 +901,7 @@ LABEL_15:
                 *((_WORD *)modelSurf + 7) = gfxEntIndex;
                 *((_WORD *)modelSurf + 8) = lightingHandle;
                 surfId = modelSurf - (char *)frontEndDataOut;
-                if ((((_BYTE)modelSurf - (_BYTE)frontEndDataOut) & 3) != 0)
-                    MyAssertHandler(".\\r_scene.cpp", 971, 0, "%s", "!(surfId & 3)");
+                iassert( !(surfId & 3) );
                 surfIda = surfId >> 2;
                 if (surfIda >= 0x10000)
                     MyAssertHandler(
@@ -1016,8 +991,7 @@ GfxDrawSurf *__cdecl R_AddDObjSurfaces(
     if (!modelSurf)
         return drawSurf;
     obj = sceneEnt->obj;
-    if (!obj)
-        MyAssertHandler(".\\r_scene.cpp", 1037, 0, "%s", "obj");
+    iassert( obj );
     modelCount = DObjGetNumModels(obj);
     if (sceneEnt->gfxEntIndex)
         depthHack = (frontEndDataOut->gfxEnts[sceneEnt->gfxEntIndex].renderFxFlags & 2) != 0;
@@ -1029,12 +1003,10 @@ GfxDrawSurf *__cdecl R_AddDObjSurfaces(
         if (lod >= 0)
         {
             model = DObjGetModel(obj, modelIndex);
-            if (!model)
-                MyAssertHandler(".\\r_scene.cpp", 1060, 0, "%s", "model");
+            iassert( model );
             numsurfs = XModelGetSurfCount(model, lod);
             material = XModelGetSkins(model, lod);
-            if (!material)
-                MyAssertHandler(".\\r_scene.cpp", 1064, 0, "%s", "material");
+            iassert( material );
             subMatIndex = 0;
         LABEL_18:
             if (subMatIndex >= numsurfs)
@@ -1194,10 +1166,8 @@ void __cdecl R_ClearScene(unsigned int localClientNum)
 {
     unsigned int viewIndex; // [esp+0h] [ebp-4h]
 
-    if (!rg.inFrame)
-        MyAssertHandler(".\\r_scene.cpp", 2422, 0, "%s", "rg.inFrame");
-    if (!Sys_IsMainThread() && !Sys_IsRenderThread())
-        MyAssertHandler(".\\r_scene.cpp", 2423, 0, "%s", "Sys_IsMainThread() || Sys_IsRenderThread()");
+    iassert( rg.inFrame );
+    iassert( Sys_IsMainThread() || Sys_IsRenderThread() );
     scene.dpvs.localClientNum = localClientNum;
     Com_Memset((unsigned int *)scene.sceneDObj, 0, 124 * scene.sceneDObjCount);
     Com_Memset((unsigned int *)&scene.sceneModel[0].info, 0, 72 * scene.sceneModelCount);
@@ -1328,8 +1298,7 @@ void __cdecl R_SetViewParmsForScene(const refdef_s *refdef, GfxViewParms *viewPa
     else
         DefaultNearClip = refdef->zNear;
     viewParms->zNear = DefaultNearClip;
-    if (viewParms->zNear == 0.0)
-        MyAssertHandler(".\\r_scene.cpp", 2471, 0, "%s", "viewParms->zNear");
+    iassert( viewParms->zNear );
     R_SetupProjection(refdef->tanHalfFovX, refdef->tanHalfFovY, viewParms);
     R_SetupViewProjectionMatrices(viewParms);
 }
@@ -1349,10 +1318,8 @@ bool R_UpdateFrameSun()
     float *color; // [esp+2Ch] [ebp-8h]
     float *dir; // [esp+30h] [ebp-4h]
 
-    if (!rgp.world)
-        MyAssertHandler(".\\r_scene.cpp", 2535, 0, "%s", "rgp.world");
-    if (!rgp.world->sunLight)
-        MyAssertHandler(".\\r_scene.cpp", 2536, 0, "%s", "rgp.world->sunLight");
+    iassert( rgp.world );
+    iassert( rgp.world->sunLight );
     memcpy(&frontEndDataOut->sunLight, rgp.world->sunLight, sizeof(frontEndDataOut->sunLight));
     if (rg.useSunDirOverride)
     {
@@ -1419,8 +1386,7 @@ void __cdecl R_LerpDir(
     float v9; // [esp+28h] [ebp-8h]
     float lerpFraction; // [esp+2Ch] [ebp-4h]
 
-    if (endLerpTime <= beginLerpTime)
-        MyAssertHandler(".\\r_scene.cpp", 2523, 0, "%s", "endLerpTime > beginLerpTime");
+    iassert( endLerpTime > beginLerpTime );
     lerpFraction = (double)(currTime - beginLerpTime) / (double)(endLerpTime - beginLerpTime);
     v8 = lerpFraction - 1.0;
     if (v8 < 0.0)
@@ -1475,14 +1441,10 @@ void __cdecl R_RenderScene(const refdef_s *refdef)
     GfxSceneParms sceneParms; // [esp+40h] [ebp-A8h] BYREF
     GfxViewParms *viewParmsDraw; // [esp+E4h] [ebp-4h]
 
-    if (refdef->tanHalfFovX <= 0.0)
-        MyAssertHandler(".\\r_scene.cpp", 2631, 0, "%s", "refdef->tanHalfFovX > 0");
-    if (refdef->tanHalfFovY <= 0.0)
-        MyAssertHandler(".\\r_scene.cpp", 2632, 0, "%s", "refdef->tanHalfFovY > 0");
-    if (!refdef->height)
-        MyAssertHandler(".\\r_scene.cpp", 2633, 0, "%s", "refdef->height > 0");
-    if (!refdef->width)
-        MyAssertHandler(".\\r_scene.cpp", 2634, 0, "%s", "refdef->width > 0");
+    iassert( refdef->tanHalfFovX > 0 );
+    iassert( refdef->tanHalfFovY > 0 );
+    iassert( refdef->height > 0 );
+    iassert( refdef->width > 0 );
     if (refdef->localClientNum >= gfxCfg.maxClientViews)
         MyAssertHandler(
             ".\\r_scene.cpp",
@@ -1509,10 +1471,8 @@ void __cdecl R_RenderScene(const refdef_s *refdef)
         R_SetViewParmsForScene(refdef, viewParmsDraw);
         R_SetSceneParms(refdef, &sceneParms);
         R_CorrectLodScale(refdef);
-        if (scene.def.time != refdef->time)
-            MyAssertHandler(".\\r_scene.cpp", 2666, 0, "%s", "scene.def.time == refdef->time");
-        if (!rg.lodParms.valid)
-            MyAssertHandler(".\\r_scene.cpp", 2668, 0, "%s", "rg.lodParms.valid");
+        iassert( scene.def.time == refdef->time );
+        iassert( rg.lodParms.valid );
         if (r_lockPvs->current.enabled)
             v1 = &lockPvsViewParms;
         else
@@ -1860,8 +1820,7 @@ void __cdecl R_GenerateSortedDrawSurfs(
     emissiveInfo->cameraView = 1;
     if (viewInfo->emissiveSpotLightCount)
     {
-        if (viewInfo->emissiveSpotLightCount != 1)
-            MyAssertHandler(".\\r_scene.cpp", 2298, 0, "%s", "viewInfo->emissiveSpotLightCount == 1");
+        iassert( viewInfo->emissiveSpotLightCount == 1 );
         emissiveInfo->light = &viewInfo->emissiveSpotLight;
     }
     firstDrawSurfCount = frontEndDataOut->drawSurfCount;
@@ -1952,10 +1911,8 @@ void __cdecl R_SetFilmInfo(GfxViewInfo *viewInfo, const GfxSceneParms *sceneParm
     int v3; // [esp+14h] [ebp-8h]
     float desaturationScale; // [esp+18h] [ebp-4h]
 
-    if (!viewInfo)
-        MyAssertHandler(".\\r_scene.cpp", 1237, 0, "%s", "viewInfo");
-    if (!sceneParms)
-        MyAssertHandler(".\\r_scene.cpp", 1238, 0, "%s", "sceneParms");
+    iassert( viewInfo );
+    iassert( sceneParms );
     if (r_filmUseTweaks->current.enabled)
     {
         viewInfo->film.enabled = r_filmTweakEnable->current.enabled;
@@ -1997,8 +1954,7 @@ void __cdecl R_UpdateColorManipulation(GfxViewInfo *viewInfo)
     float desaturationScale; // [esp+58h] [ebp-8h]
     float tintBias; // [esp+5Ch] [ebp-4h]
 
-    if (!viewInfo)
-        MyAssertHandler(".\\r_scene.cpp", 1202, 0, "%s", "viewInfo");
+    iassert( viewInfo );
     if (viewInfo->film.enabled)
     {
         desaturation = viewInfo->film.desaturation;
@@ -2038,10 +1994,8 @@ void __cdecl R_SetGlowInfo(GfxViewInfo *viewInfo, const GfxSceneParms *sceneParm
     float bloomCutoffRescale; // [esp+28h] [ebp-Ch]
     float bloomCutoff; // [esp+30h] [ebp-4h]
 
-    if (!viewInfo)
-        MyAssertHandler(".\\r_scene.cpp", 1277, 0, "%s", "viewInfo");
-    if (!sceneParms)
-        MyAssertHandler(".\\r_scene.cpp", 1278, 0, "%s", "sceneParms");
+    iassert( viewInfo );
+    iassert( sceneParms );
     if (r_glowUseTweaks->current.enabled)
     {
         viewInfo->glow.enabled = r_glowTweakEnable->current.enabled;
@@ -2054,8 +2008,7 @@ void __cdecl R_SetGlowInfo(GfxViewInfo *viewInfo, const GfxSceneParms *sceneParm
     {
         viewInfo->glow = sceneParms->glow;
     }
-    if (viewInfo->glow.bloomIntensity < 0.0)
-        MyAssertHandler(".\\r_scene.cpp", 1293, 0, "%s", "viewInfo->glow.bloomIntensity >= 0.0f");
+    iassert( viewInfo->glow.bloomIntensity >= 0.0f );
     if (viewInfo->glow.bloomIntensity != 0.0)
     {
         bloomCutoff = viewInfo->glow.bloomCutoff;
@@ -2118,12 +2071,10 @@ void __cdecl R_AddEmissiveSpotLight(GfxViewInfo *viewInfo)
     v1 = r_dlightLimit->current.integer && gfxDrawMethod.drawScene == GFX_DRAW_SCENE_STANDARD;
     if (v1 && !R_CullDynamicSpotLightInCameraView())
     {
-        if (scene.addedLightCount <= 0)
-            MyAssertHandler(".\\r_scene.cpp", 1518, 0, "%s", "scene.addedLightCount > 0");
-        if (scene.isAddedLightCulled[0])
-            MyAssertHandler(".\\r_scene.cpp", 1519, 0, "%s", "!scene.isAddedLightCulled[0]");
-        if (scene.addedLight[0].type != 2)
-            MyAssertHandler(".\\r_scene.cpp", 1521, 0, "%s", "spotLight->type == GFX_LIGHT_TYPE_SPOT");
+        iassert( scene.addedLightCount > 0 );
+        iassert( !scene.isAddedLightCulled[0] );
+        //iassert( spotLight->type == GFX_LIGHT_TYPE_SPOT );
+        iassert(scene.addedLight[0].type == GFX_LIGHT_TYPE_SPOT);
         memcpy(&viewInfo->emissiveSpotLight, scene.addedLight, sizeof(viewInfo->emissiveSpotLight));
         viewInfo->emissiveSpotLightIndex = 0;
         viewInfo->emissiveSpotDrawSurfCount = 0;
@@ -2171,8 +2122,7 @@ void R_GenerateMarkVertsForDynamicModels()
         if (entnum < gfxCfg.entnumOrdinaryEnd && (scene.sceneModelVisData[0][modelIndex] & 1) != 0)
         {
             reflectionProbeIndex = sceneModel->reflectionProbeIndex;
-            if (!sceneModel->cachedLightingHandle)
-                MyAssertHandler(".\\r_scene.cpp", 1574, 0, "%s", "sceneModel->cachedLightingHandle");
+            iassert( sceneModel->cachedLightingHandle );
             if (sceneModel->obj)
                 FX_GenerateMarkVertsForEntXModel(
                     scene.dpvs.localClientNum,
@@ -2236,8 +2186,7 @@ void __cdecl R_GetPointLightShadowSurfs(GfxViewInfo *viewInfo, GfxVisibleLight *
 {
     if (viewInfo->emissiveSpotLightCount)
     {
-        if (viewInfo->emissiveSpotLightCount != 1)
-            MyAssertHandler(".\\r_scene.cpp", 1649, 0, "%s", "viewInfo->emissiveSpotLightCount == 1");
+        iassert( viewInfo->emissiveSpotLightCount == 1 );
         if (viewInfo->emissiveSpotLightIndex >= 4)
             MyAssertHandler(
                 ".\\r_scene.cpp",
@@ -2246,10 +2195,8 @@ void __cdecl R_GetPointLightShadowSurfs(GfxViewInfo *viewInfo, GfxVisibleLight *
                 "viewInfo->emissiveSpotLightIndex doesn't index MAX_VISIBLE_DLIGHTS\n\t%i not in [0, %i)",
                 viewInfo->emissiveSpotLightIndex,
                 4);
-        if (viewInfo->emissiveSpotLightIndex)
-            MyAssertHandler(".\\r_scene.cpp", 1652, 0, "%s", "viewInfo->emissiveSpotLightIndex == 0");
-        if ((*lights)->type != 2)
-            MyAssertHandler(".\\r_scene.cpp", 1654, 0, "%s", "lights[0]->type == GFX_LIGHT_TYPE_SPOT");
+        iassert( viewInfo->emissiveSpotLightIndex == 0 );
+        iassert( lights[0]->type == GFX_LIGHT_TYPE_SPOT );
         viewInfo->emissiveSpotDrawSurfCount = visibleLights->drawSurfCount;
         viewInfo->emissiveSpotDrawSurfs = visibleLights->drawSurfs;
     }
@@ -2261,12 +2208,10 @@ MaterialTechniqueType __cdecl R_GetEmissiveTechnique(const GfxViewInfo *viewInfo
         return baseTech;
     if (!viewInfo->emissiveSpotLightCount || !r_spotLightShadows->current.enabled)
         return (MaterialTechniqueType)5;
-    if (!comWorld.isInUse)
-        MyAssertHandler("c:\\trees\\cod3\\src\\gfx_d3d\\../qcommon/com_bsp_api.h", 23, 0, "%s", "comWorld.isInUse");
+    iassert( comWorld.isInUse );
     if (!Com_BitCheckAssert(frontEndDataOut->shadowableLightHasShadowMap, comWorld.primaryLightCount, 32))
         return (MaterialTechniqueType)5;
-    if (!comWorld.isInUse)
-        MyAssertHandler("c:\\trees\\cod3\\src\\gfx_d3d\\../qcommon/com_bsp_api.h", 23, 0, "%s", "comWorld.isInUse");
+    iassert( comWorld.isInUse );
     if (comWorld.primaryLightCount + 1 != viewInfo->shadowableLightCount)
         MyAssertHandler(
             ".\\r_scene.cpp",
@@ -2288,8 +2233,7 @@ void __cdecl R_SetSunConstants(GfxCmdBufInput *input)
     const GfxLight *sun; // [esp+1Ch] [ebp-10h]
     float specularColor[3]; // [esp+20h] [ebp-Ch] BYREF
 
-    if (input->data->sunLight.type != 1)
-        MyAssertHandler(".\\r_scene.cpp", 1691, 0, "%s", "input->data->sunLight.type == GFX_LIGHT_TYPE_DIR");
+    iassert( input->data->sunLight.type == GFX_LIGHT_TYPE_DIR );
     sun = &input->data->sunLight;
     Vec3Scale(input->data->sunLight.color, r_specularColorScale->current.value, specularColor);
     R_SetInputCodeConstantFromVec4(input, 0x23u, (float*)sun->dir);
@@ -2316,10 +2260,8 @@ void __cdecl R_SetSceneParms(const refdef_s *refdef, GfxSceneParms *sceneParms)
 {
     bool v2; // [esp+10h] [ebp-4h]
 
-    if (!refdef)
-        MyAssertHandler(".\\r_scene.cpp", 2480, 0, "%s", "refdef");
-    if (!sceneParms)
-        MyAssertHandler(".\\r_scene.cpp", 2481, 0, "%s", "sceneParms");
+    iassert( refdef );
+    iassert( sceneParms );
     if (refdef->blurRadius < 0.0)
         MyAssertHandler(
             ".\\r_scene.cpp",

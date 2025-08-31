@@ -541,10 +541,8 @@ void __cdecl R_SkinXSurfaceRigidSseInOut(
             ++vertCount;
         }
     }
-    if (((char *)vertList - (char *)dstVerts) >> 5 != totalVertCount)
-        MyAssertHandler(".\\r_model_skin.cpp", 2137, 0, "%s", "vertex - dstVerts == totalVertCount");
-    if (((char *)vertCount - (char *)dstVertNormals) >> 3 != totalVertCount)
-        MyAssertHandler(".\\r_model_skin.cpp", 2138, 0, "%s", "vertexNormal - dstVertNormals == totalVertCount");
+    //iassert( vertex - dstVerts == totalVertCount );
+    //iassert( vertexNormal - dstVertNormals == totalVertCount );
 }
 
 
@@ -1184,10 +1182,8 @@ void __cdecl R_SkinXSurfaceRigidSseOut(
             ++vertCount;
         }
     }
-    if (((char *)vertList - (char *)dstVerts) >> 5 != totalVertCount)
-        MyAssertHandler(".\\r_model_skin.cpp", 2077, 0, "%s", "vertex - dstVerts == totalVertCount");
-    if (((char *)vertCount - (char *)dstVertNormals) >> 3 != totalVertCount)
-        MyAssertHandler(".\\r_model_skin.cpp", 2078, 0, "%s", "vertexNormal - dstVertNormals == totalVertCount");
+    //iassert( vertex - dstVerts == totalVertCount );
+    //iassert( vertexNormal - dstVertNormals == totalVertCount );
 }
 
 void __cdecl R_SkinXSurfaceWeightSseBlock_1_Sse_SkinVertex_0_(
@@ -1795,8 +1791,7 @@ void __cdecl R_SkinXSurfaceRigidSse(
             vertCount += 4;
         }
     }
-    if (((char *)vertCount - (char *)dstVerts) >> 5 != totalVertCount)
-        MyAssertHandler(".\\r_model_skin.cpp", 2019, 0, "%s", "vertex - dstVerts == totalVertCount");
+    //iassert( vertex - dstVerts == totalVertCount );
 }
 
 void __cdecl R_SkinXSurfaceSkinnedSse(
@@ -1843,8 +1838,7 @@ void __cdecl R_SkinXSurfaceSkinnedSse(
     }
     else
     {
-        if (skinVertNormalIn)
-            MyAssertHandler(".\\r_model_skin.cpp", 2178, 0, "%s", "!skinVertNormalIn");
+        iassert( !skinVertNormalIn );
         if (xsurf->deformed)
             R_SkinXSurfaceWeightSse(xsurf->verts0, &xsurf->vertInfo, boneMatrix, skinVerticesOut);
         else

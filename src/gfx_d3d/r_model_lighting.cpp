@@ -99,8 +99,7 @@ void __cdecl R_GetPackedStaticModelLightingCoords(unsigned int smodelIndex, Pack
 
     entryIndex = R_ModelLightingIndexFromHandle(rgp.world->dpvs.smodelDrawInsts[smodelIndex].lightingHandle);
     xPixel = 4 * (entryIndex & 0x3F);
-    if ((modelLightGlob.imageHeight & (modelLightGlob.imageHeight - 1)) != 0)
-        MyAssertHandler(".\\r_model_lighting.cpp", 833, 0, "%s", "IsPowerOf2( modelLightGlob.imageHeight )");
+    iassert( IsPowerOf2( modelLightGlob.imageHeight ) );
     if (modelLightGlob.imageHeight > 0x100)
         MyAssertHandler(
             ".\\r_model_lighting.cpp",
@@ -225,8 +224,7 @@ unsigned int __cdecl R_AllocModelLighting(
     unsigned __int16 lightingHandlea; // [esp+28h] [ebp-8h]
     unsigned int nonSunPrimaryLightIndex; // [esp+2Ch] [ebp-4h]
 
-    if (!cachedLightingHandle)
-        MyAssertHandler(".\\r_model_lighting.cpp", 322, 0, "%s", "cachedLightingHandle");
+    iassert( cachedLightingHandle );
     lightingHandle = *cachedLightingHandle;
     if (*cachedLightingHandle
         && r_cacheModelLighting->current.enabled
@@ -398,11 +396,9 @@ void __cdecl R_BeginAllStaticModelLighting()
 {
     unsigned int size; // [esp+0h] [ebp-4h]
 
-    if (smodelLightGlob.local.anyNewLighting)
-        MyAssertHandler(".\\r_model_lighting.cpp", 745, 0, "%s", "!smodelLightGlob.local.anyNewLighting");
+    iassert( !smodelLightGlob.local.anyNewLighting );
     size = 4 * ((rgp.world->dpvs.smodelCount + 31) >> 5);
-    if (size >= 0x2000)
-        MyAssertHandler(".\\r_model_lighting.cpp", 749, 0, "%s", "size < sizeof( smodelLightGlob.lightingBits )");
+    iassert( size < sizeof( smodelLightGlob.lightingBits ) );
     Com_Memset(smodelLightGlob.lightingBits, 0, size);
 }
 
@@ -421,8 +417,7 @@ void __cdecl R_SetAllStaticModelLighting()
         PROF_SCOPED("SModelLighting");
 
         wordCount = (rgp.world->dpvs.smodelCount + 31) >> 5;
-        if (wordCount >= 0x2000)
-            MyAssertHandler(".\\r_model_lighting.cpp", 772, 0, "%s", "wordCount < sizeof( smodelLightGlob.lightingBits )");
+        iassert( wordCount < sizeof( smodelLightGlob.lightingBits ) );
         for (wordIndex = 0; wordIndex < wordCount; ++wordIndex)
         {
             bits = smodelLightGlob.lightingBits[wordIndex];
@@ -435,9 +430,9 @@ void __cdecl R_SetAllStaticModelLighting()
                     indexLow = v1 ^ 0x1F;
                     if ((v1 ^ 0x1Fu) >= 0x20)
                         break;
-                    if (((0x80000000 >> indexLow) & bits) == 0)
-                        MyAssertHandler(".\\r_model_lighting.cpp", 789, 0, "%s", "bits & bit");
-                    bits &= ~(0x80000000 >> indexLow);
+                    unsigned int bit = (0x80000000 >> indexLow);
+                    iassert( bits & bit );
+                    bits &= ~bit;
                     R_SetStaticModelLighting(indexLow + 32 * wordIndex);
                 }
             }
@@ -484,8 +479,7 @@ void __cdecl R_SetModelGroundLighting(unsigned int entryIndex, const unsigned __
             entryIndex,
             (unsigned __int16)entryIndex);
     patch->modelLightingIndex = entryIndex;
-    if (patch->colorsCount)
-        MyAssertHandler(".\\r_model_lighting.cpp", 715, 1, "%s", "patch->colorsCount == 0");
+    iassert( patch->colorsCount == 0 );
     *(unsigned int *)patch->groundLighting = *(unsigned int *)groundLighting;
 }
 

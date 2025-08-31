@@ -130,8 +130,7 @@ void __cdecl R_PixelCost_BeginSurface(GfxCmdBufContext context)
     }
     else
     {
-        if (pixelCostMode <= GFX_PIXEL_COST_MODE_MEASURE_MSEC)
-            MyAssertHandler(".\\rb_pixelcost.cpp", 362, 0, "%s", "RB_PixelCost_IsAccumulating()");
+        iassert( RB_PixelCost_IsAccumulating() );
         cost = RB_PixelCost_GetCostForRecordIndex(pixelCostGlob.recordCount);
         R_PixelCost_SetConstant(context.source, cost);
     }
@@ -198,8 +197,7 @@ int __cdecl RB_PixelCost_GetCostForRecordIndex(int recordIndex)
     }
     else
     {
-        if (validCount <= 0)
-            MyAssertHandler(".\\rb_pixelcost.cpp", 222, 0, "%s\n\t(validCount) = %i", "(validCount > 0)", validCount);
+        iassert( (validCount > 0) );
         standardDeviationSum = 0.0f;
         avgCost = totalCost / validCount;
         for (frameIndexa = 0; frameIndexa < validCount; ++frameIndexa)
@@ -221,16 +219,14 @@ int __cdecl RB_PixelCost_GetCostForRecordIndex(int recordIndex)
                 --validCount;
             }
         }
-        if (validCount < 2)
-            MyAssertHandler(".\\rb_pixelcost.cpp", 242, 0, "%s\n\t(validCount) = %i", "(validCount >= 2)", validCount);
+        iassert( (validCount >= 2) );
         return totalCost / validCount;
     }
 }
 
 unsigned __int64 __cdecl R_PixelCost_PackedKeyForMaterial(__int64 material)
 {
-    if (!(unsigned int)material)
-        MyAssertHandler(".\\rb_pixelcost.cpp", 257, 0, "%s", "material");
+    iassert( material );
     return material;
 }
 
@@ -321,8 +317,7 @@ void __cdecl R_PixelCost_EndSurface(GfxCmdBufContext context)
     }
     else
     {
-        if (pixelCostMode <= GFX_PIXEL_COST_MODE_MEASURE_MSEC)
-            MyAssertHandler(".\\rb_pixelcost.cpp", 403, 0, "%s", "RB_PixelCost_IsAccumulating()");
+        iassert( RB_PixelCost_IsAccumulating() );
         ++pixelCostGlob.recordCount;
     }
 }

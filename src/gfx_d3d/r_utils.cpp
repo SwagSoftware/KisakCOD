@@ -12,10 +12,8 @@ unsigned int __cdecl R_HashAssetName(const char *name)
     hash = 0;
     for (pos = name; *pos; ++pos)
     {
-        if (*pos >= 65 && *pos <= 90)
-            MyAssertHandler(".\\r_utils.cpp", 42, 0, "%s\n\t(name) = %s", "(*pos < 'A' || *pos > 'Z')", name);
-        if (*pos == 92)
-            MyAssertHandler(".\\r_utils.cpp", 43, 0, "%s\n\t(name) = %s", "(*pos != '\\\\' || *pos == '/')", name);
+        iassert( (*pos < 'A' || *pos > 'Z') );
+        iassert( (*pos != '\\\\' || *pos == '/') );
         hash = *pos ^ (33 * hash);
     }
     return hash;
@@ -102,12 +100,10 @@ double __cdecl FresnelTerm(float n0, float n1, float cosIncidentAngle)
     }
     transmissionAngle = asin(sinTransmissionAngle);
     sinSum = sin(incidentAngle + transmissionAngle);
-    if (0.0 == sinSum)
-        MyAssertHandler(".\\r_utils.cpp", 227, 1, "%s\n\t(sinSum) = %g", "(sinSum != 0)", sinSum);
+    iassert( (sinSum != 0) );
     sinRatio = sin(incidentAngle - transmissionAngle) / sinSum;
     tanSum = tan(incidentAngle + transmissionAngle);
-    if (0.0 == tanSum)
-        MyAssertHandler(".\\r_utils.cpp", 233, 1, "%s\n\t(tanSum) = %g", "(tanSum != 0)", tanSum);
+    iassert( (tanSum != 0) );
     tanRatio = tan(incidentAngle - transmissionAngle) / tanSum;
     refraction = (sinRatio * sinRatio + tanRatio * tanRatio) * 0.5;
     if (refraction < 0.0)

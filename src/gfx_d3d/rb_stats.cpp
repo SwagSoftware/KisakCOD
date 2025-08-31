@@ -67,10 +67,8 @@ void __cdecl TRACK_rb_stats()
 
 void __cdecl R_TrackPrims(GfxCmdBufState *state, GfxPrimStatsTarget target)
 {
-    if (backupPrimStats)
-        MyAssertHandler(".\\rb_stats.cpp", 74, 0, "%s", "backupPrimStats == NULL");
-    if (!g_viewStats)
-        MyAssertHandler(".\\rb_stats.cpp", 75, 0, "%s", "g_viewStats");
+    iassert( backupPrimStats == NULL );
+    iassert( g_viewStats );
     if (g_primStats && g_primStats != &g_viewStats->primStats[target])
         MyAssertHandler(
             ".\\rb_stats.cpp",
@@ -84,10 +82,8 @@ void __cdecl R_TrackPrims(GfxCmdBufState *state, GfxPrimStatsTarget target)
 
 void __cdecl RB_TrackImmediatePrims(GfxPrimStatsTarget target)
 {
-    if (backupPrimStats)
-        MyAssertHandler(".\\rb_stats.cpp", 83, 0, "%s", "backupPrimStats == NULL");
-    if (!g_viewStats)
-        MyAssertHandler(".\\rb_stats.cpp", 84, 0, "%s", "g_viewStats");
+    iassert( backupPrimStats == NULL );
+    iassert( g_viewStats );
     backupPrimStats = g_primStats;
     g_primStats = &g_viewStats->primStats[target];
 }
@@ -102,8 +98,7 @@ void __cdecl RB_TrackDrawPrimCall(int triCount)
 {
     int histogramIndex; // [esp+0h] [ebp-4h]
 
-    if (!g_primStats)
-        MyAssertHandler(".\\rb_stats.cpp", 101, 0, "%s", "g_primStats");
+    iassert( g_primStats );
     g_primStats->triCount += triCount;
     ++g_primStats->primCount;
     for (histogramIndex = 0; histogramIndex < 15 && triCount > drawPrimHistogramLimit[histogramIndex]; ++histogramIndex)

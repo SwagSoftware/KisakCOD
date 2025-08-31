@@ -34,50 +34,52 @@ bool __cdecl R_SortBspShadowReceiverSurfaces(GfxSurface *surface0, GfxSurface *s
 
 void __cdecl R_EmitShadowCookieSurfs(GfxViewInfo *viewInfo)
 {
-    float *v1; // [esp+4h] [ebp-38h]
-    float *dir; // [esp+Ch] [ebp-30h]
     ShadowCookie *cookie; // [esp+14h] [ebp-28h]
     int firstCasterDrawSurf; // [esp+1Ch] [ebp-20h]
     unsigned int cookieIndex; // [esp+20h] [ebp-1Ch]
     int firstReceiverDrawSurf; // [esp+24h] [ebp-18h]
     unsigned int casterDrawSurfCount; // [esp+2Ch] [ebp-10h]
     GfxDrawSurf *casterDrawSurfs; // [esp+34h] [ebp-8h]
+    GfxDrawSurfListInfo *casterInfo;
+    GfxDrawSurfListInfo *receiverInfo;
 
-    if (frontEndDataOut->sunLight.type != 1)
-        MyAssertHandler(".\\r_shadowcookie.cpp", 308, 0, "%s", "frontEndDataOut->sunLight.type == GFX_LIGHT_TYPE_DIR");
+    iassert( frontEndDataOut->sunLight.type == GFX_LIGHT_TYPE_DIR );
     for (cookieIndex = 0; cookieIndex < viewInfo->shadowCookieList.cookieCount; ++cookieIndex)
     {
         cookie = &viewInfo->shadowCookieList.cookies[cookieIndex];
-        casterDrawSurfs = (GfxDrawSurf *)cookie->casterInfo.drawSurfs;
-        casterDrawSurfCount = cookie->casterInfo.drawSurfCount;
-        R_InitDrawSurfListInfo(&cookie->casterInfo);
-        cookie->casterInfo.baseTechType = TECHNIQUE_SHADOWCOOKIE_CASTER;
-        cookie->casterInfo.viewInfo = viewInfo;
-        dir = frontEndDataOut->sunLight.dir;
-        cookie->casterInfo.viewOrigin[0] = frontEndDataOut->sunLight.dir[0];
-        cookie->casterInfo.viewOrigin[1] = dir[1];
-        cookie->casterInfo.viewOrigin[2] = dir[2];
-        cookie->casterInfo.viewOrigin[3] = 0.0;
-        if (cookie->casterInfo.cameraView)
-            MyAssertHandler(".\\r_shadowcookie.cpp", 325, 0, "%s", "!casterInfo->cameraView");
-        R_InitDrawSurfListInfo(&cookie->receiverInfo);
-        cookie->receiverInfo.baseTechType = TECHNIQUE_SHADOWCOOKIE_RECEIVER;
-        cookie->receiverInfo.viewInfo = viewInfo;
-        v1 = frontEndDataOut->sunLight.dir;
-        cookie->receiverInfo.viewOrigin[0] = frontEndDataOut->sunLight.dir[0];
-        cookie->receiverInfo.viewOrigin[1] = v1[1];
-        cookie->receiverInfo.viewOrigin[2] = v1[2];
-        cookie->receiverInfo.viewOrigin[3] = 0.0;
-        if (cookie->receiverInfo.cameraView)
-            MyAssertHandler(".\\r_shadowcookie.cpp", 333, 0, "%s", "!receiverInfo->cameraView");
+        casterInfo = &cookie->casterInfo;
+        casterDrawSurfs = (GfxDrawSurf *)casterInfo->drawSurfs;
+        casterDrawSurfCount = casterInfo->drawSurfCount;
+
+        R_InitDrawSurfListInfo(casterInfo);
+
+        casterInfo->baseTechType = TECHNIQUE_SHADOWCOOKIE_CASTER;
+        casterInfo->viewInfo = viewInfo;
+        casterInfo->viewOrigin[0] = frontEndDataOut->sunLight.dir[0];
+        casterInfo->viewOrigin[1] = frontEndDataOut->sunLight.dir[1];
+        casterInfo->viewOrigin[2] = frontEndDataOut->sunLight.dir[2];
+        casterInfo->viewOrigin[3] = 0.0;
+        iassert( !casterInfo->cameraView );
+
+        receiverInfo = &cookie->receiverInfo;
+        R_InitDrawSurfListInfo(receiverInfo);
+        receiverInfo->baseTechType = TECHNIQUE_SHADOWCOOKIE_RECEIVER;
+        receiverInfo->viewInfo = viewInfo;
+        receiverInfo->viewOrigin[0] = frontEndDataOut->sunLight.dir[0];
+        receiverInfo->viewOrigin[1] = frontEndDataOut->sunLight.dir[1];
+        receiverInfo->viewOrigin[2] = frontEndDataOut->sunLight.dir[2];
+        receiverInfo->viewOrigin[3] = 0.0;
+        iassert( !receiverInfo->cameraView );
+
         firstCasterDrawSurf = frontEndDataOut->drawSurfCount;
         R_EmitDrawSurfList(casterDrawSurfs, casterDrawSurfCount);
-        cookie->casterInfo.drawSurfs = &frontEndDataOut->drawSurfs[firstCasterDrawSurf];
-        cookie->casterInfo.drawSurfCount = frontEndDataOut->drawSurfCount - firstCasterDrawSurf;
+        casterInfo->drawSurfs = &frontEndDataOut->drawSurfs[firstCasterDrawSurf];
+        casterInfo->drawSurfCount = frontEndDataOut->drawSurfCount - firstCasterDrawSurf;
+
         firstReceiverDrawSurf = frontEndDataOut->drawSurfCount;
         R_EmitDrawSurfList(scene.cookie[cookieIndex].drawSurfs, scene.cookie[cookieIndex].drawSurfCount);
-        cookie->receiverInfo.drawSurfs = &frontEndDataOut->drawSurfs[firstReceiverDrawSurf];
-        cookie->receiverInfo.drawSurfCount = frontEndDataOut->drawSurfCount - firstReceiverDrawSurf;
+        receiverInfo->drawSurfs = &frontEndDataOut->drawSurfs[firstReceiverDrawSurf];
+        receiverInfo->drawSurfCount = frontEndDataOut->drawSurfCount - firstReceiverDrawSurf;
     }
 }
 
@@ -158,8 +160,7 @@ void __cdecl R_PopulateCandidates(const GfxViewParms *viewParmsDraw, ShadowCandi
                         entityWeight = entityWeight * 4.0;
                         break;
                     }
-                    if (!worstCandidate)
-                        MyAssertHandler(".\\r_shadowcookie.cpp", 416, 0, "%s", "worstCandidate");
+                    iassert( worstCandidate );
                     if (worstCandidate->weight >= (double)entityWeight)
                     {
                         worstCandidate->sceneEntIndex = sceneEntIndex;
@@ -260,8 +261,7 @@ void __cdecl R_AddCasters(
     fadePoint = (1.0 - sc_fadeRange->current.value) * shadowCookieGlob.weightCap;
     fadeScale = 1.0 / (sc_fadeRange->current.value * shadowCookieGlob.weightCap);
     localClientCount = CL_GetLocalClientActiveCount();
-    if (localClientCount <= 0)
-        MyAssertHandler(".\\r_shadowcookie.cpp", 457, 0, "%s", "localClientCount > 0");
+    iassert( localClientCount > 0 );
     for (candidateIter = 0; ; ++candidateIter)
     {
         if (candidateIter == 24 / localClientCount)
@@ -293,11 +293,9 @@ void __cdecl R_AddCasters(
             R_AddShadowCookie(localClientNum, viewParmsDraw, sceneEntIndex, fadeVal, shadowCookieList);
         }
     }
-    if (!sc_wantCount)
-        MyAssertHandler(".\\r_shadowcookie.cpp", 487, 0, "%s", "sc_wantCount");
+    iassert( sc_wantCount );
     //if (!LODWORD(r_lightTweakSunDirection.vector[2]))
-    if (!sc_wantCountMargin)
-        MyAssertHandler(".\\r_shadowcookie.cpp", 488, 0, "%s", "sc_wantCountMargin");
+    iassert( sc_wantCountMargin );
     if (candidateIter <= sc_wantCountMargin->current.integer + 12 + sc_wantCount->current.integer)
     {
         //if (candidateIter < sc_wantCount->current.integer - *(unsigned int *)(LODWORD(r_lightTweakSunDirection.vector[2]) + 12))
@@ -373,8 +371,7 @@ void __cdecl R_AddShadowCookie(
                 "(cookieList->cookieCount < 24)",
                 cookieList->cookieCount);
         Vec3Sub(sceneEnt->cull.maxs, sceneEnt->cull.mins, span);
-        if (Vec3LengthSq(span) <= 0.0)
-            MyAssertHandler(".\\r_shadowcookie.cpp", 236, 0, "%s", "Vec3LengthSq( span ) > 0.0f");
+        iassert( Vec3LengthSq( span ) > 0.0f );
         cookie = &cookieList->cookies[cookieList->cookieCount++];
         cookie->sceneEntIndex = sceneEntIndex;
         cookie->shadowViewParms = R_AllocViewParms();
@@ -435,8 +432,7 @@ static void __cdecl R_GetSunAxes(float (*sunAxis)[3][3])
     float v1; // [esp+0h] [ebp-1Ch]
     float *dir; // [esp+18h] [ebp-4h]
 
-    if (!frontEndDataOut)
-        MyAssertHandler((char *)".\\r_shadowcookie.cpp", 62, 0, "%s", "frontEndDataOut");
+    iassert( frontEndDataOut );
     if (frontEndDataOut->sunLight.type != 1)
         MyAssertHandler(
             (char *)".\\r_shadowcookie.cpp",
@@ -485,12 +481,9 @@ void __cdecl R_GenerateShadowCookieViewParms(float *modelMin, float *modelMax, G
     float sunAxes[3][3]; // [esp+78h] [ebp-28h] BYREF
     float inverseLength; // [esp+9Ch] [ebp-4h]
 
-    if (!modelMin)
-        MyAssertHandler(".\\r_shadowcookie.cpp", 92, 0, "%s", "modelMin");
-    if (!modelMax)
-        MyAssertHandler(".\\r_shadowcookie.cpp", 93, 0, "%s", "modelMax");
-    if (!shadowViewParms)
-        MyAssertHandler(".\\r_shadowcookie.cpp", 94, 0, "%s", "shadowViewParms");
+    iassert( modelMin );
+    iassert( modelMax );
+    iassert( shadowViewParms );
     R_GetSunAxes(&sunAxes);
     sunAxes[1][0] = -sunAxes[1][0];
     sunAxes[1][1] = -sunAxes[1][1];
@@ -534,8 +527,7 @@ void __cdecl R_GenerateShadowCookieViewParms(float *modelMin, float *modelMax, G
             shadowViewParms->viewMatrix.m[1][2] = sunAxes[dimItera][1];
             shadowViewParms->viewMatrix.m[2][2] = sunAxes[dimItera][2];
             shadowViewParms->viewMatrix.m[3][2] = (projectedMin[dimItera] + projectedMax[dimItera]) * -0.5;
-            if (sc_length->current.value <= 0.0)
-                MyAssertHandler(".\\r_shadowcookie.cpp", 142, 0, "%s", "sc_length->current.value > 0");
+            iassert( sc_length->current.value > 0 );
             inverseLength = 1.0 / sc_length->current.value;
             shadowViewParms->viewMatrix.m[0][2] = shadowViewParms->viewMatrix.m[0][2] * inverseLength;
             shadowViewParms->viewMatrix.m[1][2] = shadowViewParms->viewMatrix.m[1][2] * inverseLength;
@@ -593,11 +585,9 @@ void __cdecl R_GenerateBspShadowReceivers(ShadowCookieList *shadowCookieList)
     GfxBspDrawSurfData surfData; // [esp+ECh] [ebp-18h] BYREF
     int savedregs; // [esp+104h] [ebp+0h] BYREF
 
-    if (!rgp.world)
-        MyAssertHandler(".\\r_shadowcookie.cpp", 583, 0, "%s", "rgp.world");
+    iassert( rgp.world );
     cookieCount = shadowCookieList->cookieCount;
-    if (!cookieCount)
-        MyAssertHandler(".\\r_shadowcookie.cpp", 586, 0, "%s", "cookieCount");
+    iassert( cookieCount );
     shadowReceiverCallback.surfaceVisData = rgp.world->dpvs.surfaceVisData[0];
 
     PROF_SCOPED("SC_FindReceivers");
@@ -674,8 +664,7 @@ void __cdecl R_GenerateSceneEntShadowReceivers(ShadowCookieList *shadowCookieLis
 
     sceneEntCount = scene.sceneDObjCount;
     cookieCount = shadowCookieList->cookieCount;
-    if (!cookieCount)
-        MyAssertHandler(".\\r_shadowcookie.cpp", 660, 0, "%s", "cookieCount");
+    iassert( cookieCount );
     for (sceneEntIndex = 0; sceneEntIndex < sceneEntCount; ++sceneEntIndex)
     {
         if (scene.sceneDObjVisData[0][sceneEntIndex] == 1)
@@ -689,8 +678,7 @@ void __cdecl R_GenerateSceneEntShadowReceivers(ShadowCookieList *shadowCookieLis
                     "sceneEnt->cull.state >= CULL_STATE_BOUNDED\n\t%i, %i",
                     sceneEnt->cull.state,
                     2);
-            if (sceneEnt->cull.state == 4)
-                MyAssertHandler(".\\r_shadowcookie.cpp", 669, 0, "%s", "sceneEnt->cull.state != CULL_STATE");
+            iassert( sceneEnt->cull.state != CULL_STATE_DONE );
             if (sceneEnt->gfxEntIndex && (frontEndDataOut->gfxEnts[sceneEnt->gfxEntIndex].renderFxFlags & 0x100) != 0)
             {
                 for (cookieIndex = 0; cookieIndex < cookieCount; ++cookieIndex)

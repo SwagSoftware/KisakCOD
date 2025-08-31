@@ -40,10 +40,8 @@ void __cdecl RB_GaussianFilterImage(
 
 void __cdecl RB_VirtualToSceneRadius(float radius, float *radiusX, float *radiusY)
 {
-    if (!radiusX)
-        MyAssertHandler(".\\rb_imagefilter.cpp", 57, 0, "%s", "radiusX");
-    if (!radiusY)
-        MyAssertHandler(".\\rb_imagefilter.cpp", 58, 0, "%s", "radiusY");
+    iassert( radiusX );
+    iassert( radiusY );
     *radiusY = (double)vidConfig.sceneHeight * radius / 480.0;
     *radiusX = *radiusY * vidConfig.aspectRatioScenePixel;
 }
@@ -95,8 +93,7 @@ int __cdecl RB_GenerateGaussianFilterChain(
         v16 = radiusY * radiusY - passRadius * passRadius;
         v15 = sqrt(v16);
         radiusY = v15 * (float)dstHeight / (float)(int)srcHeight;
-        if (passCount >= passLimit)
-            MyAssertHandler(".\\rb_imagefilter.cpp", 237, 0, "%s", "passCount < passLimit");
+        iassert( passCount < passLimit );
         RB_GenerateGaussianFilter2D(passRadius, srcWidth, srcHeight, dstWidth, dstHeight, &filterPass[passCount++]);
     }
     while (passCount < 32 && (radiusX >= 0.3295051157474518f || radiusY >= 0.3295051157474518f))
@@ -108,8 +105,7 @@ int __cdecl RB_GenerateGaussianFilterChain(
             passRadius = (radiusX + radiusY) * 0.5f;
             if (passRadius <= 1.389560461044312f)
             {
-                if (passCount >= passLimit)
-                    MyAssertHandler(".\\rb_imagefilter.cpp", 249, 0, "%s", "passCount < passLimit");
+                iassert( passCount < passLimit );
                 RB_GenerateGaussianFilter2D(passRadius, dstWidth, dstHeight, dstWidth, dstHeight, &filterPass[passCount++]);
                 break;
             }
@@ -148,12 +144,10 @@ int __cdecl RB_GenerateGaussianFilterChain(
             passAxis = 0;
             passRes = dstWidth;
         }
-        if (passCount >= passLimit)
-            MyAssertHandler(".\\rb_imagefilter.cpp", 287, 0, "%s", "passCount < passLimit");
+        iassert( passCount < passLimit );
         RB_GenerateGaussianFilter1D(passRadius, dstRes, passAxis, &filterPass[passCount++]);
     }
-    if (passCount > passLimit)
-        MyAssertHandler(".\\rb_imagefilter.cpp", 292, 1, "%s", "passCount <= passLimit");
+    iassert( passCount <= passLimit );
     return passCount;
 }
 
@@ -220,12 +214,9 @@ int __cdecl RB_GaussianFilterPoints1D(
     float sample; // [esp+58h] [ebp-8h]
     float sample_4; // [esp+5Ch] [ebp-4h]
 
-    if (pixels <= 0.0)
-        MyAssertHandler((char *)".\\rb_imagefilter.cpp", 94, 0, "%s\n\t(pixels) = %g", "(pixels > 0)", pixels);
-    if (dstRes <= 0)
-        MyAssertHandler((char *)".\\rb_imagefilter.cpp", 95, 0, "%s\n\t(dstRes) = %i", "(dstRes > 0)", dstRes);
-    if (srcRes < dstRes)
-        MyAssertHandler((char *)".\\rb_imagefilter.cpp", 96, 0, "srcRes >= dstRes\n\t%i, %i", srcRes, dstRes);
+    iassert( (pixels > 0) );
+    iassert( (dstRes > 0) );
+    iassert( srcRes >= dstRes );
 
     resolutionRatio = (int)((float)srcRes / (float)dstRes);
     if ((int)abs(srcRes - dstRes * resolutionRatio) >= resolutionRatio)
@@ -324,8 +315,7 @@ void __cdecl RB_GenerateGaussianFilter2D(
             filterPass->tapOffsetsAndWeights[2 * tapIndex++ + 1][3] = tapWeightsX[x] * tapWeightsY[y];
         }
     }
-    if (2 * tapIndex != 8)
-        MyAssertHandler((char *)".\\rb_imagefilter.cpp", 203, 1, "%s\n\t(tapIndex) = %i", "(tapIndex * 2 == 8)", tapIndex);
+    iassert( (tapIndex * 2 == 8) );
     filterPass->tapHalfCount = RB_PickSymmetricFilterMaterial(2 * tapIndex, &filterPass->material);
     filterPass->srcWidth = 1.0f;
     filterPass->srcHeight = 1.0f;
@@ -339,8 +329,7 @@ void __cdecl RB_FilterImage(GfxImageFilter *filter)
     float h; // [esp+30h] [ebp-8h]
     float w; // [esp+34h] [ebp-4h]
 
-    if (!filter)
-        MyAssertHandler(".\\rb_imagefilter.cpp", 359, 0, "%s", "filter");
+    iassert( filter );
     if (filter->passCount <= 0)
         MyAssertHandler(
             ".\\rb_imagefilter.cpp",
@@ -349,8 +338,7 @@ void __cdecl RB_FilterImage(GfxImageFilter *filter)
             "%s\n\t(filter->passCount) = %i",
             "(filter->passCount > 0)",
             filter->passCount);
-    if (!filter->sourceImage)
-        MyAssertHandler(".\\rb_imagefilter.cpp", 361, 0, "%s", "filter->sourceImage");
+    iassert( filter->sourceImage );
     if (tess.indexCount)
         RB_EndTessSurface();
     for (passIndex = 0; passIndex < filter->passCount; ++passIndex)
@@ -469,8 +457,7 @@ GfxRenderTargetId __cdecl RB_ApplyGlowFilter(
             dstRenderTarget,
             0,
             14);
-    if (radius < 0.0)
-        MyAssertHandler(".\\rb_imagefilter.cpp", 429, 0, "%s\n\t(radius) = %g", "(radius >= 0)", radius);
+    iassert( (radius >= 0) );
     if (radius == 0.0)
         return srcRenderTarget;
     if (gfxRenderTargets[dstRenderTarget].width != gfxRenderTargets[srcRenderTarget].width >> 2)

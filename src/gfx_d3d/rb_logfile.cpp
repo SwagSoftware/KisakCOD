@@ -53,8 +53,7 @@ bool __cdecl RB_IsLogging()
 
 void __cdecl RB_LogPrint(const char *text)
 {
-    if (!r_logFile->current.integer)
-        MyAssertHandler(".\\rb_logfile.cpp", 103, 0, "%s", "r_logFile->current.integer");
+    iassert( r_logFile->current.integer );
     if (RB_IsLogging())
     {
         fprintf(r_logFileGlob.fp, "%s", text);
@@ -138,8 +137,7 @@ void __cdecl RB_LogPrintState_0(int stateBits0, int changedBits0)
     cullTable[1].name = "Back";
     cullTable[2].stateBits = 49152;
     cullTable[2].name = "Front";
-    if (!r_logFile->current.integer)
-        MyAssertHandler(".\\rb_logfile.cpp", 309, 0, "%s", "r_logFile->current.integer");
+    iassert( r_logFile->current.integer );
     v2 = va("---------- (%c)Blend         : ", (changedBits0 & 0x7FF) != 0 ? 42 : 32);
     RB_LogPrint(v2);
     if ((stateBits0 & 0x700) != 0)
@@ -209,8 +207,7 @@ void __cdecl RB_LogBlend(const char *format, unsigned int blend)
     blendNames[11] = "SrcAlphaSat";
     blendNames[12] = "BlendFactor";
     blendNames[13] = "InvBlendFactor";
-    if (!r_logFile->current.integer)
-        MyAssertHandler(".\\rb_logfile.cpp", 203, 0, "%s", "r_logFile->current.integer");
+    iassert( r_logFile->current.integer );
     if (blend >= 0xE)
         MyAssertHandler(
             ".\\rb_logfile.cpp",
@@ -234,8 +231,7 @@ void __cdecl RB_LogBlendOp(const char *format, unsigned int blendOp)
     blendOpNames[3] = "RevSubtract";
     blendOpNames[4] = "Min";
     blendOpNames[5] = "Max";
-    if (!r_logFile->current.integer)
-        MyAssertHandler(".\\rb_logfile.cpp", 222, 0, "%s", "r_logFile->current.integer");
+    iassert( r_logFile->current.integer );
     if (blendOp >= 6)
         MyAssertHandler(
             ".\\rb_logfile.cpp",
@@ -313,8 +309,7 @@ void __cdecl RB_LogPrintState_1(int stateBits1, int changedBits1)
     stencilLogBack.failShift = 23;
     stencilLogBack.zfailShift = 26;
     stencilLogBack.funcShift = 29;
-    if (!r_logFile->current.integer)
-        MyAssertHandler(".\\rb_logfile.cpp", 383, 0, "%s", "r_logFile->current.integer");
+    iassert( r_logFile->current.integer );
     RB_LogBool("Depth Write", stateBits1, changedBits1, 1, "Enabled", "Disabled");
     RB_LogFromTable("Depth Test", stateBits1, changedBits1, 14, 0, depthTestTable, 5);
     RB_LogFromTable("Polygon Offset", stateBits1, changedBits1, 48, 0, polygonOffsetTable, 4);

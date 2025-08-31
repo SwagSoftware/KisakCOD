@@ -42,15 +42,13 @@ void __cdecl R_AddDynamicShadowableLight(GfxViewInfo *viewInfo, const GfxLight *
 
 bool __cdecl R_IsDynamicShadowedLight(unsigned int shadowableLightIndex)
 {
-    if (!comWorld.isInUse)
-        MyAssertHandler("c:\\trees\\cod3\\src\\gfx_d3d\\../qcommon/com_bsp_api.h", 23, 0, "%s", "comWorld.isInUse");
+    iassert( comWorld.isInUse );
     return shadowableLightIndex >= comWorld.primaryLightCount;
 }
 
 bool __cdecl R_IsPrimaryLight(unsigned int shadowableLightIndex)
 {
-    if (!comWorld.isInUse)
-        MyAssertHandler("c:\\trees\\cod3\\src\\gfx_d3d\\../qcommon/com_bsp_api.h", 23, 0, "%s", "comWorld.isInUse");
+    iassert( comWorld.isInUse );
     return shadowableLightIndex < comWorld.primaryLightCount;
 }
 
@@ -80,8 +78,7 @@ void __cdecl R_ChooseShadowedLights(GfxViewInfo *viewInfo)
         R_FadeOutShadowHistoryEntries(shadowHistory, fadeDelta);
         memcpy(shadowableLightIsUsed, scene.shadowableLightIsUsed, sizeof(shadowableLightIsUsed));
         candidateLightCount = 0;
-        if (!comWorld.isInUse)
-            MyAssertHandler("c:\\trees\\cod3\\src\\gfx_d3d\\../qcommon/com_bsp_api.h", 23, 0, "%s", "comWorld.isInUse");
+        iassert( comWorld.isInUse );
         if (viewInfo->shadowableLightCount < comWorld.primaryLightCount)
             MyAssertHandler(
                 ".\\r_primarylights.cpp",
@@ -266,8 +263,7 @@ void __cdecl R_FadeOutShadowHistoryEntries(GfxShadowedLightHistory *shadowHistor
     entryIndex = 0;
     while (entryIndex != shadowHistory->entryCount)
     {
-        if (shadowHistory->entries[entryIndex].fade <= 0.0)
-            MyAssertHandler(".\\r_primarylights.cpp", 131, 0, "%s", "shadowHistory->entries[entryIndex].fade > 0.0f");
+        iassert( shadowHistory->entries[entryIndex].fade > 0.0f );
         if (Com_BitCheckAssert(scene.shadowableLightIsUsed, shadowHistory->entries[entryIndex].shadowableLightIndex, 128))
         {
             if (shadowHistory->entries[entryIndex].isFadingOut)

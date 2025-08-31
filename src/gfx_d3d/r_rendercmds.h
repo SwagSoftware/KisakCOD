@@ -35,7 +35,6 @@ enum GfxRenderCommand : __int32
     RC_PROJECTION_SET = 0x15,
     RC_COUNT = 0x16,
 };
-
 enum GfxRenderTargetId : __int32
 {                                       // ...
     R_RENDERTARGET_SAVED_SCREEN = 0x0,
@@ -56,6 +55,7 @@ enum GfxRenderTargetId : __int32
     R_RENDERTARGET_COUNT = 0xF,
     R_RENDERTARGET_NONE = 0x10,
 };
+
 
 enum ShadowType : __int32
 {                                       // ...

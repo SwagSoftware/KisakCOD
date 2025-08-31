@@ -233,8 +233,7 @@ IDirect3DSurface9 *__cdecl R_AssignSingleSampleDepthStencilSurface()
                 depthStencilHeight,
                 v1);
         }
-        if (!dx.singleSampleDepthStencilSurface)
-            MyAssertHandler(".\\r_rendertarget.cpp", 528, 0, "%s", "dx.singleSampleDepthStencilSurface");
+        iassert( dx.singleSampleDepthStencilSurface );
         return dx.singleSampleDepthStencilSurface;
     }
 }
@@ -255,10 +254,8 @@ void __cdecl R_InitRenderTargetImage(
     unsigned int renderTargetId; // [esp+0h] [ebp-4h]
 
     AssertUninitializedRenderTarget(renderTarget);
-    if (!width)
-        MyAssertHandler(".\\r_rendertarget.cpp", 679, 0, "%s\n\t(width) = %i", "(width > 0)", 0);
-    if (!height)
-        MyAssertHandler(".\\r_rendertarget.cpp", 680, 0, "%s\n\t(height) = %i", "(height > 0)", 0);
+    iassert( (width > 0) );
+    iassert( (height > 0) );
     renderTargetId = renderTarget - gfxRenderTargets;
     if (renderTargetId >= 0xF)
         MyAssertHandler(
@@ -269,8 +266,7 @@ void __cdecl R_InitRenderTargetImage(
             renderTargetId,
             15);
     renderTarget->image = Image_AllocProg(imageProgType, 6u, 0);
-    if (!renderTarget->image)
-        MyAssertHandler(".\\r_rendertarget.cpp", 686, 1, "%s", "renderTarget->image");
+    iassert( renderTarget->image );
     Image_SetupRenderTarget(renderTarget->image, width, height, format);
     if (usage)
         R_AssignImageToRenderTargetColor(&renderTarget->surface, renderTarget->image);
@@ -383,8 +379,7 @@ void __cdecl R_InitShadowCookieRenderTarget(GfxRenderTarget *renderTarget)
 {
     AssertUninitializedRenderTarget(renderTarget);
     R_InitAndTrackRenderTargetImage(0, 0x80u, 0x80u, D3DFMT_A8R8G8B8, RENDERTARGET_USAGE_RENDER, renderTarget);
-    if (!renderTarget->surface.color)
-        MyAssertHandler(".\\r_rendertarget.cpp", 863, 1, "%s", "renderTarget->surface.color");
+    iassert( renderTarget->surface.color );
     R_AssignShadowCookieDepthStencilSurface(&renderTarget->surface);
 }
 
@@ -465,8 +460,7 @@ void __cdecl R_InitFrameBufferRenderTarget_Win32(GfxRenderTarget *renderTarget)
     HRESULT v6; // [esp+8h] [ebp-8h]
     HRESULT hr; // [esp+Ch] [ebp-4h]
 
-    if (!renderTarget)
-        MyAssertHandler(".\\r_rendertarget.cpp", 886, 0, "%s", "renderTarget");
+    iassert( renderTarget );
     renderTarget->width = vidConfig.displayWidth;
     renderTarget->height = vidConfig.displayHeight;
     hr = dx.device->GetSwapChain(0, &dx.windows[0].swapChain);
@@ -499,8 +493,7 @@ void __cdecl R_InitFrameBufferRenderTarget_Win32(GfxRenderTarget *renderTarget)
             } while (alwaysfails);
         }
     } while (alwaysfails);
-    if (!renderTarget->surface.color)
-        MyAssertHandler(".\\r_rendertarget.cpp", 896, 0, "%s", "renderTarget->surface.color");
+    iassert( renderTarget->surface.color );
     if (g_allocateMinimalResources)
     {
         renderTarget->surface.depthStencil = 0;
@@ -541,8 +534,7 @@ _D3DFORMAT __cdecl R_InitFrameBufferRenderTarget()
     v0 = R_DescribeFormat(D3DFMT_A8R8G8B8);
     Com_Printf(8, "Requested frame buffer to be %s\n", v0);
     gfxRenderTargets[1].surface.color->GetDesc(&surfaceDesc);
-    if (surfaceDesc.Format == D3DFMT_UNKNOWN)
-        MyAssertHandler(".\\r_rendertarget.cpp", 1035, 0, "%s", "surfaceDesc.Format != D3DFMT_UNKNOWN");
+    iassert( surfaceDesc.Format != D3DFMT_UNKNOWN );
     v1 = R_DescribeFormat(surfaceDesc.Format);
     Com_Printf(8, "DirectX returned a frame buffer that is %s\n", v1);
     if (!g_allocateMinimalResources)

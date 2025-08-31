@@ -21,16 +21,11 @@ void __cdecl R_DownsampleMipMapBilinear(
     const unsigned __int8 *srcPosa; // [esp+1Ch] [ebp-8h]
     int rowIndex; // [esp+20h] [ebp-4h]
 
-    if (!src)
-        MyAssertHandler(".\\r_image_utils.cpp", 17, 0, "%s", "src");
-    if (srcWidth <= 0)
-        MyAssertHandler(".\\r_image_utils.cpp", 18, 0, "%s\n\t(srcWidth) = %i", "(srcWidth > 0)", srcWidth);
-    if (srcHeight <= 0)
-        MyAssertHandler(".\\r_image_utils.cpp", 19, 0, "%s\n\t(srcHeight) = %i", "(srcHeight > 0)", srcHeight);
-    if (texelPitch <= 0)
-        MyAssertHandler(".\\r_image_utils.cpp", 20, 0, "%s\n\t(texelPitch) = %i", "(texelPitch > 0)", texelPitch);
-    if (!dst)
-        MyAssertHandler(".\\r_image_utils.cpp", 22, 0, "%s", "dst");
+    iassert( src );
+    iassert( (srcWidth > 0) );
+    iassert( (srcHeight > 0) );
+    iassert( (texelPitch > 0) );
+    iassert( dst );
     if (srcWidth != 1 || srcHeight != 1)
     {
         srcPos = src;

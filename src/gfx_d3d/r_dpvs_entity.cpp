@@ -20,8 +20,7 @@ void __cdecl R_AddEntitySurfacesInFrustumCmd(unsigned __int16 *data)
     boneMatrix = R_UpdateSceneEntBounds(sceneEnt, &localSceneEnt, &obj, 1);
     if (boneMatrix)
     {
-        if (!localSceneEnt)
-            MyAssertHandler(".\\r_dpvs_entity.cpp", 289, 0, "%s", "localSceneEnt");
+        iassert( localSceneEnt );
         planes = (const DpvsPlane *)*((unsigned int *)data + 1);
         v3 = 0;
         v2 = planes;
@@ -49,8 +48,7 @@ void __cdecl R_AddEntitySurfacesInFrustumCmd(unsigned __int16 *data)
         {
             CG_CullIn(localSceneEnt->info.pose);
             R_SkinSceneDObj(sceneEnt, localSceneEnt, obj, boneMatrix, 0);
-            if (localSceneEnt->entnum == gfxCfg.entnumNone)
-                MyAssertHandler(".\\r_dpvs_entity.cpp", 314, 0, "%s", "localSceneEnt->entnum != gfxCfg.entnumNone");
+            iassert( localSceneEnt->entnum != gfxCfg.entnumNone );
             *(_BYTE *)(localSceneEnt->entnum + *((unsigned int *)data + 3)) = 1;
         }
         else
@@ -142,8 +140,7 @@ bool __cdecl R_BoundsInCell_r(mnode_t *node, int findCellIndex, const float *min
         }
         else
         {
-            if (side != 1 && side != 2)
-                MyAssertHandler(".\\r_dpvs_entity.cpp", 207, 0, "%s", "(side == BOXSIDE_FRONT) || (side == BOXSIDE_BACK)");
+            iassert( (side == BOXSIDE_FRONT) || (side == BOXSIDE_BACK) );
             node = (mnode_t *)((char *)node + 2 * (side - 1) * (node->rightChildOffset - 2) + 4);
         }
     }

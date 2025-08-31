@@ -46,8 +46,7 @@ void __cdecl R_DeriveNearPlaneConstantsForView(GfxCmdBufSourceState *source)
             "%s\n\t(mtx->m[1][3]) = %g",
             "(I_I_fabs( mtx->m[1][3] ) < 1.0e-5f * mtx->m[3][3])",
             source->viewParms.inverseViewProjectionMatrix.m[1][3]);
-    if (source->viewParms.inverseViewProjectionMatrix.m[3][3] == 0.0)
-        MyAssertHandler(".\\r_state_utils.cpp", 288, 0, "%s", "mtx->m[3][3] != 0");
+    //iassert( mtx->m[3][3] != 0 );
     scale = 1.0 / source->viewParms.inverseViewProjectionMatrix.m[3][3];
     v11 = source->viewParms.inverseViewProjectionMatrix.m[3][0] * scale - source->viewParms.origin[0];
     v12 = source->viewParms.inverseViewProjectionMatrix.m[3][1] * scale - source->viewParms.origin[1];
@@ -301,15 +300,13 @@ const float g_identityMatrix44[4][4] =
 }; // idb
 void __cdecl R_MatrixIdentity44(float (*out)[4])
 {
-    if (!out)
-        MyAssertHandler(".\\r_state_utils.cpp", 18, 0, "%s", "out");
+    iassert( out );
     qmemcpy(out, g_identityMatrix44, 0x40u);
 }
 
 void __cdecl R_Set3D(GfxCmdBufSourceState *source)
 {
-    if (!source->viewParms3D)
-        MyAssertHandler(".\\r_state_utils.cpp", 240, 0, "%s", "source->viewParms3D");
+    iassert( source->viewParms3D );
     if (source->viewMode != VIEW_MODE_3D)
     {
         source->viewMode = VIEW_MODE_3D;
@@ -371,8 +368,7 @@ void __cdecl R_SetDefaultAlphaTestFunction(GfxCmdBufState *state)
     IDirect3DDevice9 *device; // [esp+4h] [ebp-4h]
 
     device = state->prim.device;
-    if (!device)
-        MyAssertHandler("c:\\trees\\cod3\\src\\gfx_d3d\\r_state.h", 727, 0, "%s", "device");
+    iassert( device );
     do
     {
         if (r_logFile && r_logFile->current.integer)
@@ -604,8 +600,7 @@ void __cdecl R_InitCmdBufState(GfxCmdBufState *state)
     IDirect3DDevice9 *device; // [esp+14h] [ebp-8h]
     unsigned int forceSamplerState; // [esp+18h] [ebp-4h]
 
-    if (!state)
-        MyAssertHandler(".\\r_state_utils.cpp", 96, 0, "%s", "state");
+    iassert( state );
     device = state->prim.device;
     memset(state->refSamplerState, 0, sizeof(GfxCmdBufState));
     state->prim.device = device;

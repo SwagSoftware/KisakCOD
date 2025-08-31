@@ -114,8 +114,7 @@ void __cdecl R_BoxSurfaces_r(
         }
         else
         {
-            if (listCount != 2)
-                MyAssertHandler(".\\r_marks.cpp", 792, 0, "%s", "listCount == 2");
+            iassert( listCount == 2 );
             R_CellSurfacesTwoLists(
                 cellIndex - 1,
                 mins,
@@ -250,8 +249,7 @@ void __cdecl R_AABBTreeSurfaces_r(
                     {
                         for (listIndex = 0; listIndex < *surfCount; ++listIndex)
                         {
-                            if (surfList[listIndex] == surf)
-                                MyAssertHandler(".\\r_marks.cpp", 397, 0, "%s", "surfList[listIndex] != surf");
+                            iassert( surfList[listIndex] != surf );
                         }
                         surfList[(*surfCount)++] = surf;
                     }
@@ -402,13 +400,11 @@ void __cdecl R_AABBTreeSurfacesTwoLists_r(
                 {
                     for (listIndex = 0; listIndex < *surfCounts; ++listIndex)
                     {
-                        if ((*surfLists)[listIndex] == surf)
-                            MyAssertHandler(".\\r_marks.cpp", 443, 0, "%s", "surfLists[0][listIndex] != surf");
+                        iassert( surfLists[0][listIndex] != surf );
                     }
                     for (i = 0; i < surfCounts[1]; ++i)
                     {
-                        if (surfLists[1][i] == surf)
-                            MyAssertHandler(".\\r_marks.cpp", 445, 0, "%s", "surfLists[1][listIndex] != surf");
+                        iassert( surfLists[1][listIndex] != surf );
                     }
                     if ((*allowSurf)(remappedSurfIndex, callbackContext))
                         (*surfLists)[(*surfCounts)++] = surf;
@@ -429,13 +425,12 @@ int  R_BoxStaticModels(
     unsigned __int16 *smodelList,
     int smodelListSize)
 {
-    int v7; // [esp-Ch] [ebp-A0h] BYREF
+    int smodelCount; // [esp-Ch] [ebp-A0h] BYREF
     unsigned __int8 v8[128]; // [esp-8h] [ebp-9Ch] BYREF
 
     //v9 = a1;
     //v10 = retaddr;
-    if (!rgp.world)
-        MyAssertHandler(".\\r_marks.cpp", 966, 0, "%s", "rgp.world");
+    iassert( rgp.world );
     if (rgp.world->dpvsPlanes.cellCount > 1024)
         MyAssertHandler(
             ".\\r_marks.cpp",
@@ -455,7 +450,7 @@ int  R_BoxStaticModels(
 
     PROF_SCOPED("R_BoxStaticModels");
     Com_Memset(v8, 0, rgp.world->cellBitsCount);
-    v7 = 0;
+    smodelCount = 0;
     R_BoxStaticModels_r(
         (mnode_t *)rgp.world->dpvsPlanes.nodes,
         mins,
@@ -463,11 +458,10 @@ int  R_BoxStaticModels(
         allowSModel,
         smodelList,
         smodelListSize,
-        &v7,
+        &smodelCount,
         v8);
-    if (v7 > smodelListSize)
-        MyAssertHandler(".\\r_marks.cpp", 975, 0, "smodelCount <= smodelListSize\n\t%i, %i", v7, smodelListSize);
-    return v7;
+    iassert( smodelCount <= smodelListSize );
+    return smodelCount;
 }
 
 void __cdecl R_BoxStaticModels_r(
@@ -616,13 +610,12 @@ unsigned int  R_CylinderSurfaces(
     GfxSurface **surfList,
     unsigned int surfListSize)
 {
-    unsigned int v11; // [esp+30h] [ebp-A0h] BYREF
+    unsigned int surfCount; // [esp+30h] [ebp-A0h] BYREF
     unsigned __int8 v12[128]; // [esp+34h] [ebp-9Ch] BYREF
 
     //v13 = a1;
     //v14 = retaddr;
-    if (!rgp.world)
-        MyAssertHandler(".\\r_marks.cpp", 986, 0, "%s", "rgp.world");
+    iassert( rgp.world );
     if (rgp.world->dpvsPlanes.cellCount > 1024)
         MyAssertHandler(
             ".\\r_marks.cpp",
@@ -640,7 +633,7 @@ unsigned int  R_CylinderSurfaces(
             "(rgp.world->cellBitsCount <= ((1024) >> 3))",
             rgp.world->cellBitsCount);
     Com_Memset(v12, 0, rgp.world->cellBitsCount);
-    v11 = 0;
+    surfCount = 0;
     R_CylinderSurfaces_r(
         (mnode_t *)rgp.world->dpvsPlanes.nodes,
         start,
@@ -652,11 +645,10 @@ unsigned int  R_CylinderSurfaces(
         callbackContext,
         surfList,
         surfListSize,
-        &v11,
+        &surfCount,
         v12);
-    if (v11 > surfListSize)
-        MyAssertHandler(".\\r_marks.cpp", 994, 0, "surfCount <= surfListSize\n\t%i, %i", v11, surfListSize);
-    return v11;
+    iassert(surfCount <= surfListSize);
+    return surfCount;
 }
 
 void __cdecl R_CylinderSurfaces_r(
@@ -754,8 +746,7 @@ void __cdecl R_CylinderSurfaces_r(
                     Vec3Mad(start2, fraction, delta, mid);
                     if (dist > (double)startDist)
                     {
-                        if (dist > (double)endDist)
-                            MyAssertHandler(".\\r_marks.cpp", 894, 0, "%s", "endDist >= dist");
+                        iassert( endDist >= dist );
                         R_CylinderSurfaces_r(
                             node + 1,
                             mid,
@@ -772,8 +763,7 @@ void __cdecl R_CylinderSurfaces_r(
                     }
                     else
                     {
-                        if (dist <= (double)endDist)
-                            MyAssertHandler(".\\r_marks.cpp", 889, 0, "%s", "endDist < dist");
+                        iassert( endDist < dist );
                         R_CylinderSurfaces_r(
                             node + 1,
                             start2,
@@ -796,16 +786,14 @@ void __cdecl R_CylinderSurfaces_r(
                     Vec3Mad(start2, fraction, delta, mid);
                     if (dist < (double)startDist)
                     {
-                        if (dist < (double)endDist)
-                            MyAssertHandler(".\\r_marks.cpp", 915, 0, "%s", "endDist <= dist");
+                        iassert( endDist <= dist );
                         start2[0] = mid[0];
                         start2[1] = mid[1];
                         start2[2] = mid[2];
                     }
                     else
                     {
-                        if (dist >= (double)endDist)
-                            MyAssertHandler(".\\r_marks.cpp", 910, 0, "%s", "endDist > dist");
+                        iassert( endDist > dist );
                         end2[0] = mid[0];
                         end2[1] = mid[1];
                         end2[2] = mid[2];
@@ -953,8 +941,7 @@ void __cdecl R_AABBTreeCylinderSurfaces_r(
                     {
                         for (listIndex = 0; listIndex < *surfCount; ++listIndex)
                         {
-                            if (surfList[listIndex] == surf)
-                                MyAssertHandler(".\\r_marks.cpp", 507, 0, "%s", "surfList[listIndex] != surf");
+                            iassert( surfList[listIndex] != surf );
                         }
                         surfList[(*surfCount)++] = surf;
                     }
@@ -984,8 +971,7 @@ void __cdecl R_MarkUtil_GetDObjAnimMatAndHideParts(
     DObjUnlock((DObj_s*)dobj);
     if (!DObjSkelAreBonesUpToDate(dobj, partBits))
         MyAssertHandler(".\\r_marks.cpp", 1726, 0, "%s", "DObjSkelAreBonesUpToDate( dobj, partBits )");
-    if (!*outBoneMtxList)
-        MyAssertHandler(".\\r_marks.cpp", 1728, 0, "%s", "*outBoneMtxList");
+    iassert( *outBoneMtxList );
     DObjGetHidePartBits(dobj, outHidePartBits);
 }
 
@@ -1214,8 +1200,7 @@ char __cdecl R_MarkFragments_WorldBrushes(MarkInfo *markInfo)
         markInfo->usedTriCount = 0;
         markInfo->usedPointCount = 0;
     }
-    if (markInfo->usedTriCount || markInfo->usedPointCount)
-        MyAssertHandler(".\\r_marks.cpp", 1319, 0, "%s", "!markInfo->usedTriCount && !markInfo->usedPointCount");
+    iassert( !markInfo->usedTriCount && !markInfo->usedPointCount );
     return 1;
 }
 
@@ -1407,8 +1392,7 @@ int __cdecl R_ChopWorldPolyBehindPlane(
     int sides[10]; // [esp+78h] [ebp-2Ch]
     int outPointCount; // [esp+A0h] [ebp-4h]
 
-    if (inPointCount > 9)
-        MyAssertHandler(".\\r_marks.cpp", 250, 0, "%s\n\t(inPointCount) = %i", "(inPointCount <= 3 + 6)", inPointCount);
+    iassert( (inPointCount <= 3 + 6) );
     memset(sideCount, 0, sizeof(sideCount));
     for (pointIndex = 0; pointIndex < inPointCount; ++pointIndex)
     {
@@ -1649,18 +1633,14 @@ void __cdecl R_Mark_TransformClipPlanes(const float (*inClipPlanes)[4], float (*
 
 char __cdecl R_MarkFragments_Models(MarkInfo *markInfo)
 {
-    if (markInfo->markHasLightmap)
-        MyAssertHandler(".\\r_marks.cpp", 1835, 0, "%s", "!markInfo->markHasLightmap");
-    if (markInfo->usedTriCount || markInfo->usedPointCount)
-        MyAssertHandler(".\\r_marks.cpp", 1836, 0, "%s", "!( markInfo->usedTriCount || markInfo->usedPointCount )");
+    iassert( !markInfo->markHasLightmap );
+    iassert( !( markInfo->usedTriCount || markInfo->usedPointCount ) );
     if (!R_MarkFragments_StaticModels(markInfo))
         return 0;
-    if (markInfo->usedTriCount || markInfo->usedPointCount)
-        MyAssertHandler(".\\r_marks.cpp", 1839, 0, "%s", "!( markInfo->usedTriCount || markInfo->usedPointCount )");
+    iassert( !( markInfo->usedTriCount || markInfo->usedPointCount ) );
     if (!R_MarkFragments_SceneDObjs(markInfo))
         return 0;
-    if (markInfo->usedTriCount || markInfo->usedPointCount)
-        MyAssertHandler(".\\r_marks.cpp", 1842, 0, "%s", "!( markInfo->usedTriCount || markInfo->usedPointCount )");
+    iassert( !( markInfo->usedTriCount || markInfo->usedPointCount ) );
     return 1;
 }
 
@@ -1740,8 +1720,7 @@ char __cdecl R_MarkFragments_AnimatedXModel(
     surfCount = XModelGetSurfaces(model, &surfaces, 0);
     baseMatList = XModelGetBasePose(model);
     materials = XModelGetSkins(model, 0);
-    if (markInfo->usedTriCount || markInfo->usedPointCount)
-        MyAssertHandler(".\\r_marks.cpp", 1639, 0, "%s", "!markInfo->usedTriCount && !markInfo->usedPointCount");
+    iassert( !markInfo->usedTriCount && !markInfo->usedPointCount );
 
     PROF_SCOPED("R_MarkFragments_AnimatedXModel");
 
@@ -1752,13 +1731,11 @@ char __cdecl R_MarkFragments_AnimatedXModel(
             surface = &surfaces[surfIndex];
             if (!surface->deformed)
             {
-                if (!surface->vertListCount)
-                    MyAssertHandler(".\\r_marks.cpp", 1654, 0, "%s", "surface->vertListCount > 0");
+                iassert( surface->vertListCount > 0 );
                 for (vertListIndex = 0; vertListIndex != surface->vertListCount; ++vertListIndex)
                 {
                     boneOffset = surface->vertList[vertListIndex].boneOffset >> 6;
-                    if (boneOffset + boneIndex >= boneCount)
-                        MyAssertHandler(".\\r_marks.cpp", 1669, 0, "%s", "(boneIndex + boneOffset) < boneCount");
+                    iassert( (boneIndex + boneOffset) < boneCount );
                     if ((hidePartBits[(boneOffset + boneIndex) >> 5] & (0x80000000 >> ((boneOffset + boneIndex) & 0x1F))) == 0)
                     {
                         markContext->lmapIndex = boneOffset;
@@ -1802,8 +1779,7 @@ char __cdecl R_MarkFragments_AnimatedXModel(
             }
         }
     }
-    if (markInfo->usedTriCount || markInfo->usedPointCount)
-        MyAssertHandler(".\\r_marks.cpp", 1700, 0, "%s", "!markInfo->usedTriCount && !markInfo->usedPointCount");
+    iassert( !markInfo->usedTriCount && !markInfo->usedPointCount );
 
     return 1;
 }
@@ -2297,8 +2273,7 @@ char __cdecl R_MarkFragments_StaticModels(MarkInfo *markInfo)
 
     for (smodelCollidedIndex = 0; smodelCollidedIndex != markInfo->smodelCollidedCount; ++smodelCollidedIndex)
     {
-        if (markInfo->usedTriCount || markInfo->usedPointCount)
-            MyAssertHandler(".\\r_marks.cpp", 1799, 0, "%s", "!markInfo->usedTriCount && !markInfo->usedPointCount");
+        iassert( !markInfo->usedTriCount && !markInfo->usedPointCount );
         smodelIndex = markInfo->smodelsCollided[smodelCollidedIndex];
         smodelDraw = &rgp.world->dpvs.smodelDrawInsts[smodelIndex];
         xmodel = smodelDraw->model;
@@ -2365,8 +2340,7 @@ char __cdecl R_MarkFragments_StaticModels(MarkInfo *markInfo)
             markInfo->usedPointCount = 0;
         }
     }
-    if (markInfo->usedTriCount || markInfo->usedPointCount)
-        MyAssertHandler(".\\r_marks.cpp", 1828, 0, "%s", "!markInfo->usedTriCount && !markInfo->usedPointCount");
+    iassert( !markInfo->usedTriCount && !markInfo->usedPointCount );
     return 1;
 }
 
@@ -2493,8 +2467,7 @@ int __cdecl R_ChopPolyBehindPlane(
     int sides[10]; // [esp+78h] [ebp-2Ch]
     int outPointCount; // [esp+A0h] [ebp-4h]
 
-    if (inPointCount > 9)
-        MyAssertHandler(".\\r_marks.cpp", 158, 0, "%s\n\t(inPointCount) = %i", "(inPointCount <= 3 + 6)", inPointCount);
+    iassert( (inPointCount <= 3 + 6) );
     memset(sideCount, 0, sizeof(sideCount));
     for (pointIndex = 0; pointIndex < inPointCount; ++pointIndex)
     {

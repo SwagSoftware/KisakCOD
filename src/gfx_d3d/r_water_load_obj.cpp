@@ -26,10 +26,8 @@ BOOL __cdecl R_WatersEquivalent(const water_t *w0, const water_t *w1)
     float v16; // [esp+44h] [ebp-8h]
     float fDirAngleCos; // [esp+48h] [ebp-4h]
 
-    if (!w0)
-        MyAssertHandler(".\\r_water_load_obj.cpp", 16, 0, "%s", "w0");
-    if (!w1)
-        MyAssertHandler(".\\r_water_load_obj.cpp", 17, 0, "%s", "w1");
+    iassert( w0 );
+    iassert( w1 );
     if (w0->M != w1->M || w0->N != w1->N)
         return 0;
     if (w1->Lx != w0->Lx || w1->Lz != w0->Lz)
@@ -87,8 +85,7 @@ void __cdecl R_PickWaterFrequencies(water_t *water)
     complex_s E; // [esp+5Ch] [ebp-Ch] BYREF
     float w_sqrd; // [esp+64h] [ebp-4h]
 
-    if (!water)
-        MyAssertHandler(".\\r_water_load_obj.cpp", 59, 0, "%s", "water");
+    iassert( water );
     windvelsqrd = water->windvel * water->windvel;
     L_sqrd = windvelsqrd * windvelsqrd / water->gravity;
     n_scale = 6.283185482025146 / ((double)water->N * water->Lx);
@@ -134,8 +131,7 @@ GfxImage *__cdecl R_CreateWaterMap(char *name, unsigned __int16 imageWidth, unsi
     GfxImage *image; // [esp+0h] [ebp-4h]
 
     image = Image_Alloc(name, 5u, 0xBu, 9u);
-    if (!image)
-        MyAssertHandler(".\\r_image_load_obj.cpp", 1160, 1, "%s", "image");
+    iassert( image );
     image->width = imageWidth;
     image->height = imageHeight;
     Image_BuildWaterMap(image);
@@ -150,10 +146,8 @@ void __cdecl R_CreateWaterSetup(const water_t *source, int waterMapSetupIndex, w
     GfxImage *image; // [esp+8h] [ebp-8h]
     int elementCount; // [esp+Ch] [ebp-4h]
 
-    if (!source)
-        MyAssertHandler(".\\r_water_load_obj.cpp", 113, 0, "%s", "source");
-    if (!destination)
-        MyAssertHandler(".\\r_water_load_obj.cpp", 114, 0, "%s", "destination");
+    iassert( source );
+    iassert( destination );
     elementCount = source->N * source->M;
     memcpy(destination, source, sizeof(water_t));
     destination->H0 = (complex_s *)Material_Alloc(8 * elementCount);
@@ -163,8 +157,7 @@ void __cdecl R_CreateWaterSetup(const water_t *source, int waterMapSetupIndex, w
     M = source->M;
     v3 = va("watersetup%i", waterMapSetupIndex);
     image = R_CreateWaterMap(v3, M, N);
-    if (!image)
-        MyAssertHandler(".\\r_water_load_obj.cpp", 132, 1, "%s", "image");
+    iassert( image );
     destination->image = image;
 }
 
@@ -172,10 +165,8 @@ water_t *__cdecl R_LoadWaterSetup(const water_t *water)
 {
     int waterMapSetupIndex; // [esp+0h] [ebp-4h]
 
-    if ((water->N & (water->N - 1)) != 0)
-        MyAssertHandler(".\\r_water_load_obj.cpp", 141, 0, "%s", "IsPowerOf2( water->N )");
-    if ((water->M & (water->M - 1)) != 0)
-        MyAssertHandler(".\\r_water_load_obj.cpp", 142, 0, "%s", "IsPowerOf2( water->M )");
+    iassert( IsPowerOf2( water->N ) );
+    iassert( IsPowerOf2( water->M ) );
     if (water->M < 4 || water->M > 64)
         MyAssertHandler(
             ".\\r_water_load_obj.cpp",
@@ -194,18 +185,12 @@ water_t *__cdecl R_LoadWaterSetup(const water_t *water)
             water->N,
             4,
             64);
-    if (water->Lx <= 0.0)
-        MyAssertHandler(".\\r_water_load_obj.cpp", 145, 0, "%s", "water->Lx > 0");
-    if (water->Lz <= 0.0)
-        MyAssertHandler(".\\r_water_load_obj.cpp", 146, 0, "%s", "water->Lz > 0");
-    if (water->gravity <= 0.0)
-        MyAssertHandler(".\\r_water_load_obj.cpp", 147, 0, "%s", "water->gravity > 0");
-    if (water->windvel <= 0.0)
-        MyAssertHandler(".\\r_water_load_obj.cpp", 148, 0, "%s", "water->windvel > 0");
-    if (water->winddir[0] == 0.0 && water->winddir[1] == 0.0)
-        MyAssertHandler(".\\r_water_load_obj.cpp", 149, 0, "%s", "water->winddir[0] || water->winddir[1]");
-    if (water->amplitude <= 0.0)
-        MyAssertHandler(".\\r_water_load_obj.cpp", 150, 0, "%s", "water->amplitude > 0");
+    iassert( water->Lx > 0 );
+    iassert( water->Lz > 0 );
+    iassert( water->gravity > 0 );
+    iassert( water->windvel > 0 );
+    iassert( water->winddir[0] || water->winddir[1] );
+    iassert( water->amplitude > 0 );
     for (waterMapSetupIndex = 0; waterMapSetupIndex < sceneWaterMapSetupsCount; ++waterMapSetupIndex)
     {
         if (R_WatersEquivalent(&sceneWaterMapSetups[waterMapSetupIndex], water))
@@ -226,6 +211,5 @@ water_t *__cdecl R_LoadWaterSetup(const water_t *water)
 
 void __cdecl R_InitLoadWater()
 {
-    if (sceneWaterMapSetupsCount)
-        MyAssertHandler(".\\r_water_load_obj.cpp", 174, 0, "%s", "sceneWaterMapSetupsCount == 0");
+    iassert( sceneWaterMapSetupsCount == 0 );
 }

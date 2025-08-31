@@ -71,23 +71,21 @@ void __cdecl R_DelayLoadImage(XAssetHeader header)
 
 void __cdecl R_GetImageList(ImageList *imageList)
 {
-    if (!imageList)
-        MyAssertHandler(".\\r_image.cpp", 173, 0, "%s", "imageList");
+    iassert( imageList );
     imageList->count = 0;
     DB_EnumXAssets(ASSET_TYPE_IMAGE, (void(__cdecl *)(XAssetHeader, void *))R_AddImageToList, imageList, 1);
 }
 
-void __cdecl R_AddImageToList(XAssetHeader header, ImageList* data)
+void __cdecl R_AddImageToList(XAssetHeader header, ImageList* imageList)
 {
-    if (data->count >= 0x800)
-        MyAssertHandler(".\\r_image.cpp", 165, 0, "%s", "imageList->count < ARRAY_COUNT( imageList->image )");
-    data->image[data->count++] = header.image;
+    iassert( imageList->count < ARRAY_COUNT( imageList->image ) );
+    imageList->image[imageList->count++] = header.image;
 }
 
 void __cdecl R_SumOfUsedImages(Image_MemUsage *usage)
 {
     const char *v1; // eax
-    GfxImage *v2; // [esp+0h] [ebp-2040h]
+    GfxImage *image; // [esp+0h] [ebp-2040h]
     unsigned int v3[4]; // [esp+4h] [ebp-203Ch] BYREF
     int v4; // [esp+14h] [ebp-202Ch]
     int v5; // [esp+18h] [ebp-2028h]
@@ -100,8 +98,7 @@ void __cdecl R_SumOfUsedImages(Image_MemUsage *usage)
     int v12; // [esp+34h] [ebp-200Ch]
     ImageList imageList; // [esp+38h] [ebp-2008h] BYREF
 
-    if (!usage)
-        MyAssertHandler(".\\r_image.cpp", 190, 0, "%s", "usage");
+    iassert( usage );
     R_GetImageList(&imageList);
     memset(v3, 0, sizeof(v3));
     v4 = 0;
@@ -113,12 +110,11 @@ void __cdecl R_SumOfUsedImages(Image_MemUsage *usage)
     v12 = 0;
     for (i = 0; i < imageList.count; ++i)
     {
-        v2 = imageList.image[i];
-        if (!v2)
-            MyAssertHandler(".\\r_image.cpp", 202, 0, "%s", "image");
-        v10 = v2->cardMemory.platform[0];
-        v3[v2->track] += v10;
-        if (!Image_IsCodeImage(v2->track))
+        image = imageList.image[i];
+        iassert( image );
+        v10 = image->cardMemory.platform[0];
+        v3[image->track] += v10;
+        if (!Image_IsCodeImage(image->track))
             v12 += v10;
     }
     usage->total = v12;
@@ -141,8 +137,7 @@ void __cdecl Image_Release(GfxImage *image)
 {
     int platform; // [esp+0h] [ebp-4h]
 
-    if (!image)
-        MyAssertHandler(".\\r_image.cpp", 255, 0, "%s", "image");
+    iassert( image );
     if (!Image_IsCodeImage(image->track))
     {
         for (platform = 0; platform < 2; ++platform)
@@ -158,8 +153,7 @@ void __cdecl Image_Release(GfxImage *image)
     }
     else if (r_loadForRenderer->current.enabled)
     {
-        if (image->cardMemory.platform[0])
-            MyAssertHandler(".\\r_image.cpp", 292, 0, "%s", "!image->cardMemory.platform[PICMIP_PLATFORM_USED]");
+        iassert( !image->cardMemory.platform[PICMIP_PLATFORM_USED] );
     }
 }
 
@@ -588,12 +582,10 @@ GfxImage *__cdecl Image_Alloc(
     unsigned int v5; // [esp+0h] [ebp-20h]
     GfxImage *image; // [esp+10h] [ebp-10h]
 
-    if (!name)
-        MyAssertHandler(".\\r_image.cpp", 409, 0, "%s", "name");
+    iassert( name );
     v5 = strlen(name);
     image = (GfxImage *)Hunk_Alloc(v5 + 37, "Image_Alloc", 22);
-    if (!image)
-        MyAssertHandler(".\\r_image.cpp", 418, 1, "%s", "image");
+    iassert( image );
     image->name = (const char *)&image[1];
     Image_Construct(name, v5 + 1, category, semantic, imageTrack, image);
     imageGlobals.imageHashTable[Image_GetAvailableHashLocation(name)] = image;
@@ -610,12 +602,9 @@ IDirect3DSurface9 *__cdecl Image_GetSurface(GfxImage *image)
     int hr; // [esp+0h] [ebp-8h]
     IDirect3DSurface9 *surface; // [esp+4h] [ebp-4h] BYREF
 
-    if (!image)
-        MyAssertHandler(".\\r_image.cpp", 1128, 0, "%s", "image");
-    if (image->mapType != MAPTYPE_2D)
-        MyAssertHandler(".\\r_image.cpp", 1129, 0, "%s", "image->mapType == MAPTYPE_2D");
-    if (!image->texture.basemap)
-        MyAssertHandler(".\\r_image.cpp", 1130, 0, "%s", "image->texture.map");
+    iassert( image );
+    iassert( image->mapType == MAPTYPE_2D );
+    iassert( image->texture.map );
     do
     {
         if (r_logFile && r_logFile->current.integer)
@@ -649,12 +638,10 @@ void __cdecl R_SetPicmip()
     bool cappedPicmip; // [esp+Bh] [ebp-5h]
     int minPicmip; // [esp+Ch] [ebp-4h]
 
-    if (!dx.device)
-        MyAssertHandler(".\\r_image.cpp", 1233, 0, "%s", "dx.device");
+    iassert( dx.device );
     texMemInMegs = R_AvailableTextureMemory();
     sysMemInMegs = Dvar_GetInt("sys_sysMB");
-    if (!r_reflectionProbeGenerate)
-        MyAssertHandler(".\\r_image.cpp", 1243, 0, "%s", "r_reflectionProbeGenerate");
+    iassert( r_reflectionProbeGenerate );
     if (r_reflectionProbeGenerate->current.enabled)
     {
         Com_Printf(8, "Picmip is set to lowest quality for generating reflections.\n");
@@ -941,11 +928,11 @@ bool __cdecl imagecompare(GfxImage *image1, GfxImage *image2)
 
 void __cdecl R_FreeLostImage(XAssetHeader header)
 {
-    if (!header.xmodelPieces)
-        MyAssertHandler(".\\r_image.cpp", 989, 0, "%s", "image");
-    if (!BYTE2(header.xmodelPieces[2].numpieces))
-        MyAssertHandler(".\\r_image.cpp", 990, 0, "%s", "image->category != IMG_CATEGORY_UNKNOWN");
-    if (BYTE2(header.xmodelPieces[2].numpieces) >= 5u)
+    GfxImage *image = header.image;
+    iassert( image );
+    iassert( image->category != IMG_CATEGORY_UNKNOWN );
+
+    if (image->category >= 5)
         Image_Release(header.image);
 }
 
@@ -980,14 +967,10 @@ void __cdecl Image_Rebuild(GfxImage *image)
     const char *v1; // eax
     unsigned __int8 category; // [esp+0h] [ebp-4h]
 
-    if (!image)
-        MyAssertHandler(".\\r_image.cpp", 890, 0, "%s", "image");
-    if (!image->category)
-        MyAssertHandler(".\\r_image.cpp", 891, 0, "%s", "image->category != IMG_CATEGORY_UNKNOWN");
-    if (image->category < 5u)
-        MyAssertHandler(".\\r_image.cpp", 894, 0, "%s", "image->category >= IMG_CATEGORY_FIRST_UNMANAGED");
-    if (image->texture.basemap)
-        MyAssertHandler(".\\r_image.cpp", 896, 0, "%s", "!image->texture.basemap");
+    iassert( image );
+    iassert( image->category != IMG_CATEGORY_UNKNOWN );
+    iassert( image->category >= IMG_CATEGORY_FIRST_UNMANAGED );
+    iassert( !image->texture.basemap );
     category = image->category;
     if (category == 5)
     {
@@ -1007,37 +990,28 @@ void __cdecl Image_Rebuild(GfxImage *image)
 
 void __cdecl R_RebuildLostImage(XAssetHeader header)
 {
-    if (!header.xmodelPieces)
-        MyAssertHandler(".\\r_image.cpp", 1004, 0, "%s", "image");
-    if (!BYTE2(header.xmodelPieces[2].numpieces))
-        MyAssertHandler(".\\r_image.cpp", 1005, 0, "%s", "image->category != IMG_CATEGORY_UNKNOWN");
-    if (!header.xmodelPieces->numpieces)
+    GfxImage *image = header.image;
+
+    iassert( image );
+    iassert( image->category != IMG_CATEGORY_UNKNOWN );
+
+    if (!image->texture.basemap)
     {
-        if (BYTE2(header.xmodelPieces[2].numpieces) < 5u)
+        if (image->category < 5)
         {
-            if (BYTE2(header.xmodelPieces[2].numpieces) == 3)
+            if (image->category == 3)
             {
-                if (!HIBYTE(header.xmodelPieces[2].numpieces)
-                    && !Image_ReloadFromFile(header.image)
-                    && !Image_AssignDefaultTexture(header.image))
-                {
-                    Com_Error(
-                        ERR_DROP,
-                        "Couldn't load image '%s' to recover from a lost device",
-                        (const char *)header.xmodelPieces[2].pieces);
-                }
+                if (!image->delayLoadPixels && !Image_ReloadFromFile(image) && !Image_AssignDefaultTexture(image))
+                    Com_Error(ERR_DROP, "Couldn't load image '%s' to recover from a lost device", image->name);
             }
             else
             {
-                Com_Error(
-                    ERR_DROP,
-                    "No way to recover image '%s' from a lost device",
-                    (const char *)header.xmodelPieces[2].pieces);
+                Com_Error(ERR_DROP, "No way to recover image '%s' from a lost device", image->name);
             }
         }
-        else if (!Image_IsProg(header.image))
+        else if (!Image_IsProg(image))
         {
-            Image_Rebuild(header.image);
+            Image_Rebuild(image);
         }
     }
 }
@@ -1063,8 +1037,7 @@ _D3DFORMAT __cdecl R_ImagePixelFormat(const GfxImage *image)
     mapType = image->mapType;
     if (image->mapType == MAPTYPE_2D)
     {
-        if (!image->texture.map)
-            MyAssertHandler(".\\r_image.cpp", 1388, 0, "%s", "image->texture.map");
+        iassert( image->texture.map );
 
         image->texture.map->GetLevelDesc(0, &surfaceDesc);
         return surfaceDesc.Format;
@@ -1072,16 +1045,14 @@ _D3DFORMAT __cdecl R_ImagePixelFormat(const GfxImage *image)
 
     if (mapType == MAPTYPE_3D)
     {
-        if (!image->texture.volmap)
-            MyAssertHandler(".\\r_image.cpp", 1398, 0, "%s", "image->texture.volmap");
+        iassert( image->texture.volmap );
         //image->texture.basemap->__vftable[1].QueryInterface(image->texture.basemap, 0, (void **)&volumeDesc);
         image->texture.volmap->GetLevelDesc(0, &volumeDesc);
         return volumeDesc.Format;
     }
     if (mapType == MAPTYPE_CUBE)
     {
-        if (!image->texture.cubemap)
-            MyAssertHandler(".\\r_image.cpp", 1393, 0, "%s", "image->texture.cubemap");
+        iassert( image->texture.cubemap );
     LABEL_7:
         //image->texture.basemap->__vftable[1].QueryInterface(image->texture.basemap, 0, (void **)&surfaceDesc);
         image->texture.cubemap->GetLevelDesc(0, &surfaceDesc);
@@ -1108,10 +1079,8 @@ void __cdecl Image_CreateCubeTexture_PC(
     const char *v6; // eax
     int hr; // [esp+0h] [ebp-4h]
 
-    if (!image)
-        MyAssertHandler(".\\r_image.cpp", 605, 0, "%s", "image");
-    if (image->texture.basemap)
-        MyAssertHandler(".\\r_image.cpp", 606, 0, "%s", "!image->texture.basemap");
+    iassert( image );
+    iassert( !image->texture.basemap );
     image->width = edgeLen;
     image->height = edgeLen;
     image->depth = 1;
@@ -1164,10 +1133,8 @@ void __cdecl Image_Create3DTexture_PC(
     HRESULT hr; // [esp+0h] [ebp-Ch]
     unsigned int usage; // [esp+4h] [ebp-8h]
 
-    if (!image)
-        MyAssertHandler(".\\r_image.cpp", 575, 0, "%s", "image");
-    if (image->texture.basemap)
-        MyAssertHandler(".\\r_image.cpp", 576, 0, "%s", "!image->texture.basemap");
+    iassert( image );
+    iassert( !image->texture.basemap );
     image->width = width;
     image->height = height;
     image->depth = depth;
@@ -1226,8 +1193,7 @@ void __cdecl RB_UnbindAllImages()
 
 void __cdecl Image_Reload(GfxImage *image)
 {
-    if (!image)
-        MyAssertHandler(".\\r_image.cpp", 1092, 0, "%s", "image");
+    iassert( image );
     Image_Release(image);
     if (!Image_ReloadFromFile(image) && !Image_AssignDefaultTexture(image))
         Com_Error(ERR_FATAL, "failed to load image '%s'", image->name);
@@ -1237,8 +1203,7 @@ void __cdecl Image_UpdatePicmip(GfxImage *image)
 {
     Picmip picmip; // [esp+0h] [ebp-4h] BYREF
 
-    if (!image)
-        MyAssertHandler(".\\r_image.cpp", 1078, 0, "%s", "image");
+    iassert( image );
     if (image->category == 3 && !image->noPicmip)
     {
         Image_GetPicmip(image, &picmip);
@@ -1262,10 +1227,8 @@ void __cdecl Image_Create2DTexture_PC(
     HRESULT hr; // [esp+0h] [ebp-Ch]
     unsigned int usage; // [esp+4h] [ebp-8h]
 
-    if (!image)
-        MyAssertHandler(".\\r_image.cpp", 544, 0, "%s", "image");
-    if (image->texture.basemap)
-        MyAssertHandler(".\\r_image.cpp", 545, 0, "%s", "!image->texture.basemap");
+    iassert( image );
+    iassert( !image->texture.basemap );
     image->width = width;
     image->height = height;
     image->depth = 1;

@@ -28,8 +28,7 @@ void __cdecl R_AddDebugPolygon(DebugGlobals *debugGlobalsEntry, const float *col
     {
         if (!debugGlobalsEntry->polys)
         {
-            if (debugGlobalsEntry->verts)
-                MyAssertHandler(".\\r_debug.cpp", 48, 0, "%s", "debugGlobalsEntry->verts == NULL");
+            iassert( debugGlobalsEntry->verts == NULL );
             R_DebugAlloc((void **)&debugGlobalsEntry->polys, 24 * debugGlobalsEntry->polyLimit, "(debugGlobalsEntry->polys)");
             R_DebugAlloc((void **)&debugGlobalsEntry->verts, 12 * debugGlobalsEntry->vertLimit, "(debugGlobalsEntry->verts)");
         }

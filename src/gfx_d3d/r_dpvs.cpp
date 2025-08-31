@@ -53,8 +53,7 @@ void __cdecl R_FrustumClipPlanes(
         for (term = 0; term < 4; ++term)
             frustumPlanes[planeIndex].coeffs[term] = Vec4Dot(&(*sidePlanes)[4 * planeIndex], viewProjMtx->m[term]);
         length = Vec3Length(frustumPlanes[planeIndex].coeffs);
-        if (length <= 0.0)
-            MyAssertHandler(".\\r_dpvs.cpp", 300, 0, "%s", "length > 0");
+        iassert( length > 0 );
         scale = 1.0 / length;
         Vec4Scale(frustumPlanes[planeIndex].coeffs, scale, frustumPlanes[planeIndex].coeffs);
         v4 = &frustumPlanes[planeIndex];
@@ -118,8 +117,7 @@ int __cdecl R_CellForPoint(const float *origin)
     int cellIndex; // [esp+14h] [ebp-Ch]
     int cellCount; // [esp+18h] [ebp-8h]
 
-    if (!rgp.world)
-        MyAssertHandler(".\\r_dpvs.cpp", 566, 0, "%s", "rgp.world");
+    iassert( rgp.world );
     node = (mnode_t *)rgp.world->dpvsPlanes.nodes;
     cellCount = rgp.world->dpvsPlanes.cellCount + 1;
     while (1)
@@ -146,13 +144,11 @@ unsigned int __cdecl R_FindNearestReflectionProbeInCell(
     float testProbeDist; // [esp+18h] [ebp-8h]
     unsigned int cellProbeIndex; // [esp+1Ch] [ebp-4h]
 
-    if (world->reflectionProbeCount >= 0xFF)
-        MyAssertHandler(".\\r_dpvs.cpp", 704, 0, "%s", "world->reflectionProbeCount < 0xff");
+    iassert( world->reflectionProbeCount < 0xff );
     bestProbe = 0;
     bestProbeDist = FLT_MAX;
     testProbeDist = FLT_MAX;
-    if (!cell->reflectionProbeCount)
-        MyAssertHandler(".\\r_dpvs.cpp", 710, 0, "%s", "cell->reflectionProbeCount > 0");
+    iassert( cell->reflectionProbeCount > 0 );
     for (cellProbeIndex = 0; cellProbeIndex < cell->reflectionProbeCount; ++cellProbeIndex)
     {
         probeIndex = cell->reflectionProbes[cellProbeIndex];
@@ -544,8 +540,7 @@ void __cdecl R_AddAllSceneEntSurfacesSpotShadow(
     signed int drawSurfCount; // [esp+3Ch] [ebp-8h]
     GfxDrawSurf *lastDrawSurf; // [esp+40h] [ebp-4h]
 
-    if (!R_IsPrimaryLight(primaryLightIndex))
-        MyAssertHandler(".\\r_dpvs.cpp", 1107, 0, "%s", "R_IsPrimaryLight( primaryLightIndex )");
+    iassert( R_IsPrimaryLight( primaryLightIndex ) );
     stage = 3 * spotShadowIndex + 23;
     drawSurf = scene.drawSurfs[stage];
     lastDrawSurf = &drawSurf[scene.maxDrawSurfCount[stage]];
@@ -618,8 +613,7 @@ void __cdecl R_AddAllSceneEntSurfacesSpotShadow(
 
 void __cdecl R_AddSceneDObj(unsigned int entnum, unsigned int viewIndex)
 {
-    if (entnum == gfxCfg.entnumNone)
-        MyAssertHandler(".\\r_dpvs.cpp", 1198, 0, "%s", "entnum != gfxCfg.entnumNone");
+    iassert( entnum != gfxCfg.entnumNone );
     scene.dpvs.entVisData[viewIndex][entnum] = 1;
 }
 
@@ -646,8 +640,6 @@ void __cdecl R_DrawAllSceneEnt(const GfxViewInfo *viewInfo)
     GfxSceneEntity *sceneEnt; // [esp+30h] [ebp-34h]
     GfxSceneBrush *sceneBrush; // [esp+34h] [ebp-30h]
     unsigned int entnum; // [esp+3Ch] [ebp-28h]
-    unsigned int entnuma; // [esp+3Ch] [ebp-28h]
-    unsigned int entnumb; // [esp+3Ch] [ebp-28h]
     unsigned __int8 *sceneEntVisData[7]; // [esp+40h] [ebp-24h]
     unsigned int viewIndex; // [esp+5Ch] [ebp-8h]
     unsigned int visData; // [esp+60h] [ebp-4h]
@@ -657,8 +649,7 @@ void __cdecl R_DrawAllSceneEnt(const GfxViewInfo *viewInfo)
     for (viewIndex = 0; viewIndex < 7; ++viewIndex)
         sceneEntVisData[viewIndex] = scene.sceneDObjVisData[viewIndex];
     sceneEntCount = scene.sceneDObjCount;
-    if (scene.dpvs.localClientNum != viewInfo->localClientNum)
-        MyAssertHandler(".\\r_dpvs.cpp", 1353, 0, "%s", "scene.dpvs.localClientNum == (uint)viewInfo->localClientNum");
+    iassert( scene.dpvs.localClientNum == (uint)viewInfo->localClientNum );
     views = dpvsGlob.views[scene.dpvs.localClientNum];
     for (sceneEntIndex = 0; sceneEntIndex < sceneEntCount; ++sceneEntIndex)
     {
@@ -807,12 +798,12 @@ void __cdecl R_DrawAllSceneEnt(const GfxViewInfo *viewInfo)
     sceneEntCounta = scene.sceneModelCount;
     for (sceneEntIndexa = 0; sceneEntIndexa < sceneEntCounta; ++sceneEntIndexa)
     {
-        entnuma = scene.sceneModel[sceneEntIndexa].entnum;
+        entnum = scene.sceneModel[sceneEntIndexa].entnum;
         visData = 0;
         if (scene.sceneModel[sceneEntIndexa].gfxEntIndex)
         {
             gfxEnta = &frontEndDataOut->gfxEnts[scene.sceneModel[sceneEntIndexa].gfxEntIndex];
-            if (entnuma == gfxCfg.entnumNone)
+            if (entnum == gfxCfg.entnumNone)
             {
                 for (viewIndex = 0; viewIndex < 3; ++viewIndex)
                 {
@@ -822,14 +813,14 @@ void __cdecl R_DrawAllSceneEnt(const GfxViewInfo *viewInfo)
                         visData |= sceneEntVisData[viewIndex][sceneEntIndexa];
                 }
             }
-            else if ((entVisBits[entnuma >> 5] & (0x80000000 >> (entnuma & 0x1F))) != 0)
+            else if ((entVisBits[entnum >> 5] & (0x80000000 >> (entnum & 0x1F))) != 0)
             {
                 for (viewIndex = 0; viewIndex < 3; ++viewIndex)
                 {
                     if ((views[viewIndex].renderFxFlagsCull & gfxEnta->renderFxFlags) != 0)
                         v1 = 0;
                     else
-                        v1 = scene.dpvs.entVisData[viewIndex][entnuma];
+                        v1 = scene.dpvs.entVisData[viewIndex][entnum];
                     sceneEntVisData[viewIndex][sceneEntIndexa] = v1;
                     visData |= sceneEntVisData[viewIndex][sceneEntIndexa];
                 }
@@ -838,7 +829,7 @@ void __cdecl R_DrawAllSceneEnt(const GfxViewInfo *viewInfo)
             {
                 for (viewIndex = 0; viewIndex < 3; ++viewIndex)
                 {
-                    viewVisDatab = scene.dpvs.entVisData[viewIndex][entnuma];
+                    viewVisDatab = scene.dpvs.entVisData[viewIndex][entnum];
                     if (!viewVisDatab)
                         viewVisDatab = 1;
                     sceneEntVisData[viewIndex][sceneEntIndexa] = (views[viewIndex].renderFxFlagsCull & gfxEnta->renderFxFlags) == 0
@@ -849,22 +840,22 @@ void __cdecl R_DrawAllSceneEnt(const GfxViewInfo *viewInfo)
             }
             while (viewIndex < 7)
             {
-                sceneEntVisData[viewIndex][sceneEntIndexa] = scene.dpvs.entVisData[viewIndex][entnuma];
+                sceneEntVisData[viewIndex][sceneEntIndexa] = scene.dpvs.entVisData[viewIndex][entnum];
                 visData |= sceneEntVisData[viewIndex++][sceneEntIndexa];
             }
         }
         else
         {
-            if (entnuma == gfxCfg.entnumNone)
+            if (entnum == gfxCfg.entnumNone)
             {
                 for (viewIndex = 0; viewIndex < 3; ++viewIndex)
                     visData |= sceneEntVisData[viewIndex][sceneEntIndexa];
             }
-            else if ((entVisBits[entnuma >> 5] & (0x80000000 >> (entnuma & 0x1F))) != 0)
+            else if ((entVisBits[entnum >> 5] & (0x80000000 >> (entnum & 0x1F))) != 0)
             {
                 for (viewIndex = 0; viewIndex < 3; ++viewIndex)
                 {
-                    sceneEntVisData[viewIndex][sceneEntIndexa] = scene.dpvs.entVisData[viewIndex][entnuma];
+                    sceneEntVisData[viewIndex][sceneEntIndexa] = scene.dpvs.entVisData[viewIndex][entnum];
                     visData |= sceneEntVisData[viewIndex][sceneEntIndexa];
                 }
             }
@@ -872,7 +863,7 @@ void __cdecl R_DrawAllSceneEnt(const GfxViewInfo *viewInfo)
             {
                 for (viewIndex = 0; viewIndex < 3; ++viewIndex)
                 {
-                    viewVisDatac = scene.dpvs.entVisData[viewIndex][entnuma];
+                    viewVisDatac = scene.dpvs.entVisData[viewIndex][entnum];
                     if (!viewVisDatac)
                         viewVisDatac = 1;
                     sceneEntVisData[viewIndex][sceneEntIndexa] = viewVisDatac;
@@ -881,7 +872,7 @@ void __cdecl R_DrawAllSceneEnt(const GfxViewInfo *viewInfo)
             }
             while (viewIndex < 7)
             {
-                sceneEntVisData[viewIndex][sceneEntIndexa] = scene.dpvs.entVisData[viewIndex][entnuma];
+                sceneEntVisData[viewIndex][sceneEntIndexa] = scene.dpvs.entVisData[viewIndex][entnum];
                 visData |= sceneEntVisData[viewIndex++][sceneEntIndexa];
             }
         }
@@ -907,15 +898,14 @@ void __cdecl R_DrawAllSceneEnt(const GfxViewInfo *viewInfo)
     for (sceneEntIndexb = 0; sceneEntIndexb < sceneEntCountb; ++sceneEntIndexb)
     {
         sceneBrush = &scene.sceneBrush[sceneEntIndexb];
-        entnumb = sceneBrush->entnum;
-        if (entnumb == gfxCfg.entnumNone)
-            MyAssertHandler(".\\r_dpvs.cpp", 1625, 0, "%s", "entnum != gfxCfg.entnumNone");
+        entnum = sceneBrush->entnum;
+        iassert( entnum != gfxCfg.entnumNone );
         visData = 0;
-        if ((entVisBits[entnumb >> 5] & (0x80000000 >> (entnumb & 0x1F))) != 0)
+        if ((entVisBits[entnum >> 5] & (0x80000000 >> (entnum & 0x1F))) != 0)
         {
             for (viewIndex = 0; viewIndex < 3; ++viewIndex)
             {
-                sceneEntVisData[viewIndex][sceneEntIndexb] = scene.dpvs.entVisData[viewIndex][entnumb];
+                sceneEntVisData[viewIndex][sceneEntIndexb] = scene.dpvs.entVisData[viewIndex][entnum];
                 visData |= sceneEntVisData[viewIndex][sceneEntIndexb];
             }
         }
@@ -923,14 +913,14 @@ void __cdecl R_DrawAllSceneEnt(const GfxViewInfo *viewInfo)
         {
             for (viewIndex = 0; viewIndex < 3; ++viewIndex)
             {
-                viewVisDatad = scene.dpvs.entVisData[viewIndex][entnumb];
+                viewVisDatad = scene.dpvs.entVisData[viewIndex][entnum];
                 if (!viewVisDatad)
                     viewVisDatad = 1;
                 sceneEntVisData[viewIndex][sceneEntIndexb] = viewVisDatad;
                 visData |= sceneEntVisData[viewIndex][sceneEntIndexb];
             }
         }
-        if (((visData & 1) != 0 || R_IsEntityVisibleToAnyShadowedPrimaryLight(viewInfo, entnumb))
+        if (((visData & 1) != 0 || R_IsEntityVisibleToAnyShadowedPrimaryLight(viewInfo, entnum))
             && !R_DrawBModel(&sceneBrush->info, sceneBrush->bmodel, &sceneBrush->placement))
         {
             Com_BitSetAssert(scene.entOverflowedDrawBuf, sceneBrush->entnum, 0xFFFFFFF);
@@ -942,7 +932,7 @@ void __cdecl R_DrawAllSceneEnt(const GfxViewInfo *viewInfo)
 
 int __cdecl R_DrawBModel(BModelDrawInfo *bmodelInfo, const GfxBrushModel *bmodel, const GfxPlacement *placement)
 {
-    unsigned __int16 surfaceCount; // [esp+Ah] [ebp-26h]
+    unsigned __int16 visibleSurfaceCount; // [esp+Ah] [ebp-26h]
     unsigned int surfId; // [esp+10h] [ebp-20h]
     int startSurfPos; // [esp+14h] [ebp-1Ch]
     GfxScaledPlacement *newPlacement; // [esp+18h] [ebp-18h]
@@ -953,23 +943,20 @@ int __cdecl R_DrawBModel(BModelDrawInfo *bmodelInfo, const GfxBrushModel *bmodel
     BModelSurface *bmodelSurf; // [esp+28h] [ebp-8h]
 
     if (r_drawDecals->current.enabled)
-        surfaceCount = bmodel->surfaceCount;
+        visibleSurfaceCount = bmodel->surfaceCount;
     else
-        surfaceCount = bmodel->surfaceCountNoDecal;
-    if (!surfaceCount)
-        MyAssertHandler(".\\r_dpvs.cpp", 1220, 0, "%s", "visibleSurfaceCount");
-    startSurfPos = InterlockedExchangeAdd(&frontEndDataOut->surfPos, 8 * surfaceCount + 32);
-    if (8 * (unsigned int)surfaceCount + 32 + startSurfPos <= 0x20000)
+        visibleSurfaceCount = bmodel->surfaceCountNoDecal;
+    iassert( visibleSurfaceCount );
+    startSurfPos = InterlockedExchangeAdd(&frontEndDataOut->surfPos, 8 * visibleSurfaceCount + 32);
+    if (8 * (unsigned int)visibleSurfaceCount + 32 + startSurfPos <= 0x20000)
     {
-        if ((startSurfPos & 3) != 0)
-            MyAssertHandler(".\\r_dpvs.cpp", 1236, 0, "%s", "!(startSurfPos & 3)");
+        iassert( !(startSurfPos & 3) );
         newPlacement = (GfxScaledPlacement *)&frontEndDataOut->surfsBuffer[startSurfPos];
         memcpy(&frontEndDataOut->surfsBuffer[startSurfPos], placement, 0x1Cu);
         newPlacement->scale = 1.0;
         bmodelSurf = (BModelSurface *)&newPlacement[1];
         surfId = (char *)&newPlacement[1] - (char *)frontEndDataOut;
-        if ((((_BYTE)newPlacement + 32 - (_BYTE)frontEndDataOut) & 3) != 0)
-            MyAssertHandler(".\\r_dpvs.cpp", 1244, 0, "%s", "!(surfId & 3)");
+        iassert( !(surfId & 3) );
         bmodelInfo->surfId = surfId >> 2;
         if (r_drawDecals->current.enabled)
         {
@@ -1039,8 +1026,7 @@ void __cdecl R_DrawAllDynEnt(const GfxViewInfo *viewInfo)
         {
             dynEntPose = DynEnt_GetClientPose(dynEntIndex, DYNENT_DRAW_MODEL);
             dynEntDef = DynEnt_GetEntityDef(dynEntIndex, DYNENT_DRAW_MODEL);
-            if (!dynEntDef->xModel)
-                MyAssertHandler(".\\r_dpvs.cpp", 1696, 0, "%s", "dynEntDef->xModel");
+            iassert( dynEntDef->xModel );
             sceneDynModel = &rgp.world->sceneDynModel[scene.sceneDynModelCount];
             if (R_SkinXModel(&sceneDynModel->info, dynEntDef->xModel, 0, &dynEntPose->pose, 1.0, 0))
             {
@@ -1067,10 +1053,8 @@ void __cdecl R_DrawAllDynEnt(const GfxViewInfo *viewInfo)
         {
             dynEntPosea = DynEnt_GetClientPose(dynEntIndexa, DYNENT_DRAW_BRUSH);
             dynEntDefa = DynEnt_GetEntityDef(dynEntIndexa, DYNENT_DRAW_BRUSH);
-            if (dynEntDefa->xModel)
-                MyAssertHandler(".\\r_dpvs.cpp", 1731, 0, "%s", "!dynEntDef->xModel");
-            if (!dynEntDefa->brushModel)
-                MyAssertHandler(".\\r_dpvs.cpp", 1732, 0, "%s", "dynEntDef->brushModel");
+            iassert( !dynEntDef->xModel );
+            iassert( dynEntDef->brushModel );
             bmodel = R_GetBrushModel(dynEntDefa->brushModel);
             if (bmodel->surfaceCount)
             {
@@ -1103,14 +1087,10 @@ void __cdecl R_UnfilterEntFromCells(unsigned int localClientNum, unsigned int en
     unsigned int cellCounta; // [esp+10h] [ebp-8h]
     unsigned int wordIndex; // [esp+14h] [ebp-4h]
 
-    if (!Sys_IsMainThread())
-        MyAssertHandler(".\\r_dpvs.cpp", 1772, 0, "%s", "Sys_IsMainThread()");
-    if (!rgp.world)
-        MyAssertHandler(".\\r_dpvs.cpp", 1773, 0, "%s", "rgp.world");
-    if (entnum == gfxCfg.entnumNone)
-        MyAssertHandler(".\\r_dpvs.cpp", 1774, 0, "%s", "entnum != gfxCfg.entnumNone");
-    if (gfxCfg.entCount * gfxCfg.maxClientViews > 0x1000)
-        MyAssertHandler(".\\r_dpvs.cpp", 1776, 0, "%s", "gfxCfg.maxClientViews * gfxCfg.entCount <= MAX_TOTAL_ENT_COUNT");
+    iassert( Sys_IsMainThread() );
+    iassert( rgp.world );
+    iassert( entnum != gfxCfg.entnumNone );
+    iassert( gfxCfg.maxClientViews * gfxCfg.entCount <= MAX_TOTAL_ENT_COUNT );
     cellCount = rgp.world->dpvsPlanes.cellCount;
     if ((gfxCfg.entCount & 0x1F) != 0)
         MyAssertHandler(
@@ -1149,8 +1129,7 @@ void __cdecl R_UnfilterDynEntFromCells(unsigned int dynEntId, DynEntityDrawType 
     unsigned int *dynEntCellBits; // [esp+10h] [ebp-8h]
     unsigned int wordIndex; // [esp+14h] [ebp-4h]
 
-    if (!Sys_IsMainThread())
-        MyAssertHandler(".\\r_dpvs.cpp", 1805, 0, "%s", "Sys_IsMainThread()");
+    iassert( Sys_IsMainThread() );
     dynEntCellBits = rgp.world->dpvsDyn.dynEntCellBits[drawType];
     dynEntClientWordCount = rgp.world->dpvsDyn.dynEntClientWordCount[drawType];
     cellCount = rgp.world->dpvsPlanes.cellCount;
@@ -1183,10 +1162,8 @@ void __cdecl R_FilterXModelIntoScene(
     unsigned __int8 sceneEntVisData[4]; // [esp+6Ch] [ebp-8h]
     unsigned int viewIndex; // [esp+70h] [ebp-4h]
 
-    if (!model)
-        MyAssertHandler(".\\r_dpvs.cpp", 2059, 0, "%s", "model");
-    if (placement->scale <= 0.0)
-        MyAssertHandler(".\\r_dpvs.cpp", 2060, 0, "%s", "placement->scale > 0");
+    iassert( model );
+    iassert( placement->scale > 0 );
     if (!Vec4IsNormalized(placement->base.quat))
     {
         v4 = va(
@@ -1251,8 +1228,7 @@ void __cdecl R_FilterXModelIntoScene(
         {
             sceneModel = &scene.sceneModel[sceneEntIndex];
             sceneModel->model = model;
-            if (sceneModel->obj)
-                MyAssertHandler(".\\r_dpvs.cpp", 2113, 1, "%s", "!sceneModel->obj");
+            iassert( !sceneModel->obj );
             sceneModel->gfxEntIndex = gfxEntIndex;
             memcpy(&sceneModel->placement, placement, sizeof(sceneModel->placement));
             sceneModel->entnum = gfxCfg.entnumNone;
@@ -1275,8 +1251,7 @@ void __cdecl R_FilterDObjIntoCells(unsigned int localClientNum, unsigned int ent
     FilterEntInfo entInfo; // [esp+14h] [ebp-1Ch] BYREF
     float maxs[3]; // [esp+24h] [ebp-Ch] BYREF
 
-    if (entnum == gfxCfg.entnumNone)
-        MyAssertHandler(".\\r_dpvs.cpp", 2136, 0, "%s", "entnum != gfxCfg.entnumNone");
+    iassert( entnum != gfxCfg.entnumNone );
     if (localClientNum >= gfxCfg.maxClientViews)
         MyAssertHandler(
             ".\\r_dpvs.cpp",
@@ -1357,8 +1332,7 @@ void __cdecl R_FilterEntIntoCells_r(FilterEntInfo *entInfo, mnode_t *node, const
         }
         else
         {
-            if (side != 1 && side != 2)
-                MyAssertHandler(".\\r_dpvs.cpp", 1953, 0, "%s", "(side == BOXSIDE_FRONT) || (side == BOXSIDE_BACK)");
+            iassert( (side == BOXSIDE_FRONT) || (side == BOXSIDE_BACK) );
             node = (mnode_t *)((char *)node + 2 * (side - 1) * (node->rightChildOffset - 2) + 4);
         }
     }
@@ -1374,8 +1348,7 @@ void __cdecl R_AddEntToCell(FilterEntInfo *entInfo, unsigned int cellIndex)
     unsigned int *entCellBits; // [esp+Ch] [ebp-10h]
     unsigned int entnum; // [esp+14h] [ebp-8h]
 
-    if (!Sys_IsMainThread())
-        MyAssertHandler(".\\r_dpvs.cpp", 1837, 0, "%s", "Sys_IsMainThread()");
+    iassert( Sys_IsMainThread() );
     localClientNum = entInfo->localClientNum;
     if (entInfo->localClientNum >= gfxCfg.maxClientViews)
         MyAssertHandler(
@@ -1386,8 +1359,7 @@ void __cdecl R_AddEntToCell(FilterEntInfo *entInfo, unsigned int cellIndex)
             localClientNum,
             gfxCfg.maxClientViews);
     entnum = entInfo->entnum;
-    if (gfxCfg.entCount * gfxCfg.maxClientViews > 0x1000)
-        MyAssertHandler(".\\r_dpvs.cpp", 1844, 0, "%s", "gfxCfg.maxClientViews * gfxCfg.entCount <= MAX_TOTAL_ENT_COUNT");
+    iassert( gfxCfg.maxClientViews * gfxCfg.entCount <= MAX_TOTAL_ENT_COUNT );
     if ((gfxCfg.entCount & 7) != 0)
         MyAssertHandler(
             ".\\r_dpvs.cpp",
@@ -1416,8 +1388,7 @@ void __cdecl R_FilterBModelIntoCells(unsigned int localClientNum, unsigned int e
 {
     FilterEntInfo entInfo; // [esp+0h] [ebp-10h] BYREF
 
-    if (entnum == gfxCfg.entnumNone)
-        MyAssertHandler(".\\r_dpvs.cpp", 2157, 0, "%s", "entnum != gfxCfg.entnumNone");
+    iassert( entnum != gfxCfg.entnumNone );
     if (localClientNum >= gfxCfg.maxClientViews)
         MyAssertHandler(
             ".\\r_dpvs.cpp",
@@ -1506,8 +1477,7 @@ void __cdecl R_FilterDynEntIntoCells_r(
         }
         else
         {
-            if (side != 1 && side != 2)
-                MyAssertHandler(".\\r_dpvs.cpp", 2038, 0, "%s", "(side == BOXSIDE_FRONT) || (side == BOXSIDE_BACK)");
+            iassert( (side == BOXSIDE_FRONT) || (side == BOXSIDE_BACK) );
             node = (mnode_t *)((char *)node + 2 * (side - 1) * (node->rightChildOffset - 2) + 4);
         }
     }
@@ -1519,8 +1489,7 @@ void __cdecl R_AddDynEntToCell(unsigned int cellIndex, unsigned int dynEntIndex,
 {
     unsigned int wordIndex; // [esp+Ch] [ebp-4h]
 
-    if (!Sys_IsMainThread())
-        MyAssertHandler(".\\r_dpvs.cpp", 1867, 0, "%s", "Sys_IsMainThread()");
+    iassert( Sys_IsMainThread() );
     wordIndex = rgp.world->dpvsDyn.dynEntClientWordCount[drawType] * cellIndex + (dynEntIndex >> 5);
     rgp.world->dpvsDyn.dynEntCellBits[drawType][wordIndex] |= 0x80000000 >> (dynEntIndex & 0x1F);
 }
@@ -1552,8 +1521,7 @@ void __cdecl R_FilterEntitiesIntoCells(int cameraCellIndex)
     unsigned int viewIndex; // [esp+7Ch] [ebp-8h]
     const GfxBrushModel *bmodel; // [esp+80h] [ebp-4h]
 
-    if (!Sys_IsMainThread())
-        MyAssertHandler(".\\r_dpvs.cpp", 2190, 0, "%s", "Sys_IsMainThread()");
+    iassert( Sys_IsMainThread() );
     if (cameraCellIndex < 0)
         v2 = 0;
     else
@@ -1719,16 +1687,14 @@ void __cdecl R_CullDynBrushInCell(unsigned int cellIndex, const DpvsPlane *plane
             if ((v4 ^ 0x1Fu) >= 0x20)
                 break;
             dynEntIndex = indexLow + 32 * wordIndex;
-            if (((0x80000000 >> indexLow) & bits) == 0)
-                MyAssertHandler(".\\r_dpvs.cpp", 1308, 0, "%s", "bits & bit");
-            bits &= ~(0x80000000 >> indexLow);
+            unsigned int bit = (0x80000000 >> indexLow);
+            iassert( bits & bit );
+            bits &= ~bit;
             if (!dynEntVisData[dynEntIndex])
             {
                 dynEntDef = DynEnt_GetEntityDef(dynEntIndex, DYNENT_DRAW_BRUSH);
-                if (dynEntDef->xModel)
-                    MyAssertHandler(".\\r_dpvs.cpp", 1315, 0, "%s", "!dynEntDef->xModel");
-                if (!dynEntDef->brushModel)
-                    MyAssertHandler(".\\r_dpvs.cpp", 1316, 0, "%s", "dynEntDef->brushModel");
+                iassert( !dynEntDef->xModel );
+                iassert( dynEntDef->brushModel );
                 bmodel = R_GetBrushModel(dynEntDef->brushModel);
                 v7 = 0;
                 v6 = planes;
@@ -1761,14 +1727,12 @@ void __cdecl R_GenerateShadowMapCasterCells()
     int cellIndex; // [esp+8h] [ebp-8h]
     unsigned int cellCasterBitsCount; // [esp+Ch] [ebp-4h]
 
-    if (!rgp.world->sunLight)
-        MyAssertHandler(".\\r_dpvs.cpp", 2925, 0, "%s", "rgp.world->sunLight");
+    iassert( rgp.world->sunLight );
     cellCasterBitsCount = (rgp.world->dpvsPlanes.cellCount + 31) >> 5;
     memset((unsigned __int8 *)rgp.world->cellCasterBits, 0, 4 * cellCasterBitsCount * rgp.world->dpvsPlanes.cellCount);
     if (rgp.world->sunPrimaryLightIndex)
     {
-        if (Vec3LengthSq(rgp.world->sunLight->dir) == 0.0)
-            MyAssertHandler(".\\r_dpvs.cpp", 2933, 0, "%s", "Vec3LengthSq( rgp.world->sunLight->dir )");
+        iassert( Vec3LengthSq( rgp.world->sunLight->dir ) );
         sunLight = rgp.world->sunLight;
         dpvsGlob.viewOrg[0] = -sunLight->dir[0];
         dpvsGlob.viewOrg[1] = -sunLight->dir[1];
@@ -1807,8 +1771,7 @@ void __cdecl R_VisitPortalsNoFrustum(const GfxCell *cell)
 
     PROF_SCOPED("R_VisitPortals");
 
-    if (!Sys_IsMainThread())
-        MyAssertHandler(".\\r_dpvs.cpp", 2879, 0, "%s", "Sys_IsMainThread()");
+    iassert( Sys_IsMainThread() );
     for (queueIndex = 0; queueIndex < 255; ++queueIndex)
         (*hullPointsPoolArray)[queueIndex].nextFree = &(*hullPointsPoolArray)[queueIndex + 1];
     (*hullPointsPoolArray)[queueIndex].nextFree = 0;
@@ -1819,8 +1782,7 @@ void __cdecl R_VisitPortalsNoFrustum(const GfxCell *cell)
     while (dpvsGlob.queuedCount)
     {
         portal = R_NextQueuedPortal();
-        if (!portal)
-            MyAssertHandler(".\\r_dpvs.cpp", 2892, 0, "%s", "portal");
+        iassert( portal );
         {
             PROF_SCOPED("R_ConvexHull");
             hullPointCount = Com_ConvexHull(portal->writable.hullPoints, portal->writable.hullPointCount, hull);
@@ -1837,8 +1799,7 @@ void __cdecl R_VisitPortalsNoFrustum(const GfxCell *cell)
                 Vec3Mad(portalVerts[vertIndex], hull[vertIndex][1], portal->hullAxis[1], portalVerts[vertIndex]);
             }
             childPlaneCount = R_PortalClipPlanesNoFrustum(dpvsGlob.childPlanes, hullPointCount, portalVerts);
-            if (childPlaneCount > 16)
-                MyAssertHandler(".\\r_dpvs.cpp", 2911, 0, "%s", "childPlaneCount <= DPVS_PORTAL_MAX_PLANES");
+            iassert( childPlaneCount <= DPVS_PORTAL_MAX_PLANES );
             R_VisitPortalsForCellNoFrustum(
                 portal->cell,
                 portal,
@@ -1865,10 +1826,8 @@ unsigned int __cdecl R_PortalClipPlanesNoFrustum(
     unsigned int planeCount; // [esp+618h] [ebp-8h]
     bool useNormalPlanes; // [esp+61Fh] [ebp-1h]
 
-    if (!Sys_IsMainThread())
-        MyAssertHandler(".\\r_dpvs.cpp", 531, 0, "%s", "Sys_IsMainThread()");
-    if (vertexCount < 3)
-        MyAssertHandler(".\\r_dpvs.cpp", 532, 0, "%s\n\t(vertexCount) = %i", "(vertexCount >= 3)", vertexCount);
+    iassert( Sys_IsMainThread() );
+    iassert( (vertexCount >= 3) );
     useNormalPlanes = vertexCount <= 0xA;
     R_GetSidePlaneNormals(winding, vertexCount, normals);
     planeCount = 0;
@@ -1902,8 +1861,7 @@ void __cdecl R_GetSidePlaneNormals(const float (*winding)[3], unsigned int verte
     unsigned int vertexIndex; // [esp+62Ch] [ebp-8h]
     unsigned int vertexIndexNext; // [esp+630h] [ebp-4h]
 
-    if (vertexCount >= 0x81)
-        MyAssertHandler(".\\r_dpvs.cpp", 157, 0, "%s", "vertexCount < ARRAY_COUNT( delta )");
+    iassert( vertexCount < ARRAY_COUNT( delta ) );
     if (dpvsGlob.viewOrgIsDir)
     {
         vertexIndex = vertexCount - 1;
@@ -2046,14 +2004,10 @@ void __cdecl R_EnqueuePortal(GfxPortal *portal)
     float dist; // [esp+8h] [ebp-8h]
     int parentIndex; // [esp+Ch] [ebp-4h]
 
-    if (!portal)
-        MyAssertHandler(".\\r_dpvs.cpp", 2359, 0, "%s", "portal");
-    if (portal->writable.isQueued)
-        MyAssertHandler(".\\r_dpvs.cpp", 2360, 0, "%s", "!portal->writable.isQueued");
-    if (!portal->writable.hullPoints)
-        MyAssertHandler(".\\r_dpvs.cpp", 2361, 0, "%s", "portal->writable.hullPoints");
-    if (portal->writable.hullPointCount < 3u)
-        MyAssertHandler(".\\r_dpvs.cpp", 2362, 0, "%s", "portal->writable.hullPointCount >= 3");
+    iassert( portal );
+    iassert( !portal->writable.isQueued );
+    iassert( portal->writable.hullPoints );
+    iassert( portal->writable.hullPointCount >= 3 );
     if (dpvsGlob.queuedCount >= 256)
         Com_Error(ERR_DROP, "More than %i queued portals", 256);
     portal->writable.isQueued = 1;
@@ -2178,8 +2132,7 @@ char __cdecl R_ChopPortalAndAddHullPointsNoFrustum(
     else
     {
         vertCount = portal->vertexCount;
-        if (!portal->vertexCount)
-            MyAssertHandler(".\\r_dpvs.cpp", 2562, 0, "%s", "vertCount");
+        iassert( vertCount );
         w = portal->vertices;
     }
     for (vertIndex = 0; vertIndex < vertCount; ++vertIndex)
@@ -2241,14 +2194,10 @@ int __cdecl R_ChopPortal(
     int planeIndex; // [esp+4h] [ebp-8h]
     const float (*w)[3]; // [esp+8h] [ebp-4h]
 
-    if (!Sys_IsMainThread())
-        MyAssertHandler(".\\r_dpvs.cpp", 2492, 0, "%s", "Sys_IsMainThread()");
-    if (!portal)
-        MyAssertHandler(".\\r_dpvs.cpp", 2493, 0, "%s", "portal");
-    if (!parentPlane)
-        MyAssertHandler(".\\r_dpvs.cpp", 2494, 0, "%s", "parentPlane");
-    if (!planes && planeCount)
-        MyAssertHandler(".\\r_dpvs.cpp", 2495, 0, "%s", "planes || planeCount == 0");
+    iassert( Sys_IsMainThread() );
+    iassert( portal );
+    iassert( parentPlane );
+    iassert( planes || planeCount == 0 );
     vertCount = portal->vertexCount;
     w = portal->vertices;
     w = R_ChopPortalWinding(w, &vertCount, parentPlane, (float (*)[3])v);
@@ -2357,8 +2306,7 @@ const float (*__cdecl R_ChopPortalWinding(
                     }
                 }
             }
-            if (newVertCount < 3)
-                MyAssertHandler(".\\r_dpvs.cpp", 690, 0, "%s", "newVertCount >= 3");
+            iassert( newVertCount >= 3 );
             *vertexCount = newVertCount;
             return vertsOut;
         }
@@ -2376,8 +2324,7 @@ const float (*__cdecl R_ChopPortalWinding(
 
 void __cdecl R_SetCellVisible(const GfxCell *cell)
 {
-    if (!dpvsGlob.cellBits)
-        MyAssertHandler(".\\r_dpvs.cpp", 2618, 0, "%s", "dpvsGlob.cellBits");
+    iassert( dpvsGlob.cellBits );
     dpvsGlob.cellBits[(unsigned int)(cell - rgp.world->cells) >> 5] |= 1 << ((cell - rgp.world->cells) & 0x1F);
 }
 
@@ -2385,8 +2332,7 @@ void __cdecl R_SetAncestorListStatus(GfxPortal *portal, bool isAncestor)
 {
     while (portal)
     {
-        if (portal->writable.isAncestor == isAncestor)
-            MyAssertHandler(".\\r_dpvs.cpp", 2645, 0, "%s", "portal->writable.isAncestor != isAncestor");
+        iassert( portal->writable.isAncestor != isAncestor );
         portal->writable.isAncestor = isAncestor;
         portal = portal->writable.queuedParent;
     }
@@ -2411,8 +2357,7 @@ void __cdecl R_AddWorldSurfacesFrustumOnly()
     unsigned int cellBitsCount; // [esp+B8h] [ebp-4h]
 
     cellCount = rgp.world->dpvsPlanes.cellCount;
-    if (!cellCount)
-        MyAssertHandler(".\\r_dpvs.cpp", 2994, 0, "%s", "cellCount");
+    iassert( cellCount );
     if (sm_strictCull->current.enabled)
     {
         cellBitsCount = (cellCount + 31) >> 5;
@@ -2578,12 +2523,9 @@ void __cdecl R_InitSceneData(int localClientNum)
     unsigned int offset; // [esp+4h] [ebp-Ch]
     unsigned int cellCount; // [esp+Ch] [ebp-4h]
 
-    if (!Sys_IsMainThread())
-        MyAssertHandler(".\\r_dpvs.cpp", 3148, 0, "%s", "Sys_IsMainThread()");
-    if (!rgp.world)
-        MyAssertHandler(".\\r_dpvs.cpp", 3149, 0, "%s", "rgp.world");
-    if (gfxCfg.entCount * gfxCfg.maxClientViews > 0x1000)
-        MyAssertHandler(".\\r_dpvs.cpp", 3151, 0, "%s", "gfxCfg.maxClientViews * gfxCfg.entCount <= MAX_TOTAL_ENT_COUNT");
+    iassert( Sys_IsMainThread() );
+    iassert( rgp.world );
+    iassert( gfxCfg.maxClientViews * gfxCfg.entCount <= MAX_TOTAL_ENT_COUNT );
     cellCount = rgp.world->dpvsPlanes.cellCount;
     if ((gfxCfg.entCount & 0x1F) != 0)
         MyAssertHandler(
@@ -2612,10 +2554,8 @@ void __cdecl DynEntCl_InitFilter()
 {
     unsigned int drawType; // [esp+0h] [ebp-4h]
 
-    if (!Sys_IsMainThread())
-        MyAssertHandler(".\\r_dpvs.cpp", 3173, 0, "%s", "Sys_IsMainThread()");
-    if (!rgp.world)
-        MyAssertHandler(".\\r_dpvs.cpp", 3174, 0, "%s", "rgp.world");
+    iassert( Sys_IsMainThread() );
+    iassert( rgp.world );
     scene.sceneDynModelCount = 0;
     scene.sceneDynBrushCount = 0;
     for (drawType = 0; drawType < 2; ++drawType)
@@ -2630,8 +2570,7 @@ void __cdecl R_InitSceneBuffers()
     unsigned int localClientNum; // [esp+0h] [ebp-8h]
     unsigned int viewIndex; // [esp+4h] [ebp-4h]
 
-    if ((gfxCfg.entCount & 0x1F) != 0)
-        MyAssertHandler(".\\r_dpvs.cpp", 3189, 1, "%s", "(gfxCfg.entCount & 31) == 0");
+    iassert( (gfxCfg.entCount & 31) == 0 );
     scene.entOverflowedDrawBuf = (unsigned int *)R_AllocGlobalVariable(gfxCfg.entCount >> 3, "R_InitSceneBuffers");
     for (viewIndex = 0; viewIndex < 7; ++viewIndex)
         scene.dpvs.entVisData[viewIndex] = (unsigned __int8 *)R_AllocGlobalVariable(gfxCfg.entCount, "R_InitSceneBuffers");
@@ -2654,10 +2593,8 @@ void __cdecl R_ClearDpvsScene()
     int i; // [esp+4h] [ebp-4h]
     int ia; // [esp+4h] [ebp-4h]
 
-    if (!rgp.world)
-        MyAssertHandler(".\\r_dpvs.cpp", 3232, 0, "%s", "rgp.world");
-    if (!rgp.world->cells)
-        MyAssertHandler(".\\r_dpvs.cpp", 3233, 0, "%s", "rgp.world->cells");
+    iassert( rgp.world );
+    iassert( rgp.world->cells );
     Com_Memset((unsigned int *)scene.dpvs.sceneXModelIndex, 255, 2 * gfxCfg.entCount);
     if (*scene.dpvs.sceneXModelIndex != 0xFFFF)
         MyAssertHandler(
@@ -2676,8 +2613,7 @@ void __cdecl R_ClearDpvsScene()
             "%s\n\t(scene.dpvs.sceneDObjIndex[0]) = %i",
             "(scene.dpvs.sceneDObjIndex[0] == (65535))",
             *scene.dpvs.sceneDObjIndex);
-    if ((gfxCfg.entCount & 0x1F) != 0)
-        MyAssertHandler(".\\r_dpvs.cpp", 3241, 1, "%s", "(gfxCfg.entCount & 31) == 0");
+    iassert( (gfxCfg.entCount & 31) == 0 );
     Com_Memset(scene.entOverflowedDrawBuf, 0, gfxCfg.entCount >> 3);
     for (i = 0; i < 7; ++i)
         Com_Memset((unsigned int *)scene.dpvs.entVisData[i], 0, gfxCfg.entCount);
@@ -2716,19 +2652,18 @@ void __cdecl R_CullDynamicPointLightsInCameraView()
 {
     int planeCount; // [esp+Ch] [ebp-10h]
     DpvsPlane *planes; // [esp+10h] [ebp-Ch]
-    GfxLight *v2; // [esp+14h] [ebp-8h]
+    GfxLight *dl; // [esp+14h] [ebp-8h]
     int lightIndex; // [esp+18h] [ebp-4h]
 
     planes = dpvsGlob.views[scene.dpvs.localClientNum][0].frustumPlanes;
     planeCount = dpvsGlob.views[scene.dpvs.localClientNum][0].frustumPlaneCount;
     for (lightIndex = 0; lightIndex < scene.addedLightCount; ++lightIndex)
     {
-        v2 = &scene.addedLight[lightIndex];
-        if (v2->type != 2 || lightIndex)
+        dl = &scene.addedLight[lightIndex];
+        if (dl->type != 2 || lightIndex)
         {
-            if (v2->type != 3)
-                MyAssertHandler(".\\r_dpvs.cpp", 3309, 1, "%s", "dl->type == GFX_LIGHT_TYPE_OMNI");
-            scene.isAddedLightCulled[lightIndex] = R_CullPointAndRadius(v2->origin, v2->radius, planes, planeCount);
+            iassert( dl->type == GFX_LIGHT_TYPE_OMNI );
+            scene.isAddedLightCulled[lightIndex] = R_CullPointAndRadius(dl->origin, dl->radius, planes, planeCount);
         }
     }
 }
@@ -2745,19 +2680,15 @@ void __cdecl R_SetupWorldSurfacesDpvs(const GfxViewParms *viewParms)
 {
     DpvsView *dpvsView; // [esp+0h] [ebp-4h]
 
-    if (!Sys_IsMainThread())
-        MyAssertHandler(".\\r_dpvs.cpp", 3319, 0, "%s", "Sys_IsMainThread()");
-    if (!rgp.world)
-        MyAssertHandler(".\\r_dpvs.cpp", 3320, 0, "%s", "rgp.world");
-    if (!viewParms)
-        MyAssertHandler(".\\r_dpvs.cpp", 3321, 0, "%s", "viewParms");
+    iassert( Sys_IsMainThread() );
+    iassert( rgp.world );
+    iassert( viewParms );
     dpvsView = dpvsGlob.views[scene.dpvs.localClientNum];
     dpvsView->renderFxFlagsCull = 0;
     dpvsGlob.viewProjMtx = &viewParms->viewProjectionMatrix;
     dpvsGlob.invViewProjMtx = &viewParms->inverseViewProjectionMatrix;
     R_FrustumClipPlanes(&viewParms->viewProjectionMatrix, standardFrustumSidePlanes, 4, dpvsView->frustumPlanes);
-    if (viewParms->projectionMatrix.m[3][3] != 0.0)
-        MyAssertHandler(".\\r_dpvs.cpp", 3333, 0, "%s", "viewParms->projectionMatrix.m[3][3] == 0");
+    iassert( viewParms->projectionMatrix.m[3][3] == 0 );
     R_SetupDpvsForPoint(viewParms);
     dpvsGlob.sideFrustumPlanes = dpvsView->frustumPlanes;
     dpvsView->frustumPlaneCount = R_AddNearAndFarClipPlanes(dpvsView->frustumPlanes, 4);
@@ -2767,10 +2698,8 @@ int __cdecl R_AddNearAndFarClipPlanes(DpvsPlane *planes, int planeCount)
 {
     int planeCounta; // [esp+Ch] [ebp+Ch]
 
-    if (!Sys_IsMainThread())
-        MyAssertHandler(".\\r_dpvs.cpp", 185, 0, "%s", "Sys_IsMainThread()");
-    if (!dpvsGlob.nearPlane)
-        MyAssertHandler(".\\r_dpvs.cpp", 187, 0, "%s", "dpvsGlob.nearPlane");
+    iassert( Sys_IsMainThread() );
+    iassert( dpvsGlob.nearPlane );
     planes[planeCount] = *dpvsGlob.nearPlane;
     planeCounta = planeCount + 1;
     if (dpvsGlob.farPlane)
@@ -2782,8 +2711,7 @@ void __cdecl R_SetupDpvsForPoint(const GfxViewParms *viewParms)
 {
     float zfar; // [esp+14h] [ebp-4h]
 
-    if (!Sys_IsMainThread())
-        MyAssertHandler(".\\r_dpvs.cpp", 2956, 0, "%s", "Sys_IsMainThread()");
+    iassert( Sys_IsMainThread() );
     dpvsGlob.viewOrg[0] = viewParms->origin[0];
     dpvsGlob.viewOrg[1] = viewParms->origin[1];
     dpvsGlob.viewOrg[2] = viewParms->origin[2];
@@ -2858,8 +2786,7 @@ void __cdecl R_AddSkySurfacesDpvs(const DpvsPlane *planes, int planeCount)
     DpvsClipPlaneSet clipSet; // [esp+164h] [ebp-50h]
     int planeIndex; // [esp+1B0h] [ebp-4h]
 
-    if (!Sys_IsMainThread())
-        MyAssertHandler(".\\r_dpvs_static.cpp", 970, 0, "%s", "Sys_IsMainThread()");
+    iassert( Sys_IsMainThread() );
     g_smodelVisData = rgp.world->dpvs.smodelVisData[0]; // (_DWORD *)(*((_DWORD *)NtCurrentTeb()->ThreadLocalStoragePointer + _tls_index) + 24)
     g_surfaceVisData = rgp.world->dpvs.surfaceVisData[0]; // *(_DWORD *)(*((_DWORD *)NtCurrentTeb()->ThreadLocalStoragePointer + _tls_index) + 28)
     for (planeIndex = 0; planeIndex < planeCount; ++planeIndex)
@@ -2902,12 +2829,9 @@ void __cdecl R_AddWorldSurfacesDpvs(const GfxViewParms *viewParms, int cameraCel
 {
     DpvsView *dpvsView; // [esp+0h] [ebp-4h]
 
-    if (!Sys_IsMainThread())
-        MyAssertHandler(".\\r_dpvs.cpp", 3357, 0, "%s", "Sys_IsMainThread()");
-    if (!rgp.world)
-        MyAssertHandler(".\\r_dpvs.cpp", 3358, 0, "%s", "rgp.world");
-    if (!viewParms)
-        MyAssertHandler(".\\r_dpvs.cpp", 3359, 0, "%s", "viewParms");
+    iassert( Sys_IsMainThread() );
+    iassert( rgp.world );
+    iassert( viewParms );
     rg.debugViewParms = viewParms;
     R_AddWorldSurfacesPortalWalk(cameraCellIndex);
     dpvsView = dpvsGlob.views[scene.dpvs.localClientNum];
@@ -2940,10 +2864,8 @@ void __cdecl R_AddWorldSurfacesPortalWalk(int cameraCellIndex)
     int cellIndex; // [esp+4h] [ebp-8h]
     DpvsView *dpvsView; // [esp+8h] [ebp-4h]
 
-    if (!Sys_IsMainThread())
-        MyAssertHandler(".\\r_dpvs.cpp", 3045, 0, "%s", "Sys_IsMainThread()");
-    if (!rgp.world->dpvsPlanes.cellCount)
-        MyAssertHandler(".\\r_dpvs.cpp", 3047, 0, "%s", "rgp.world->dpvsPlanes.cellCount");
+    iassert( Sys_IsMainThread() );
+    iassert( rgp.world->dpvsPlanes.cellCount );
     memset((unsigned __int8 *)dpvsGlob.cellVisibleBits, 0, 4 * ((rgp.world->dpvsPlanes.cellCount + 31) >> 5));
     dpvsGlob.cellBits = dpvsGlob.cellVisibleBits;
     if (!r_skipPvs->current.enabled)
@@ -3014,8 +2936,7 @@ void __cdecl R_VisitPortals(const GfxCell *cell, const DpvsPlane *parentPlane, c
 
     PROF_SCOPED("R_VisitPortals");
 
-    if (!Sys_IsMainThread())
-        MyAssertHandler(".\\r_dpvs.cpp", 2778, 0, "%s", "Sys_IsMainThread()");
+    iassert( Sys_IsMainThread() );
     childPlanesCount = 0;
     for (queueIndex = 0; queueIndex < 255; ++queueIndex)
         (*hullPointsPoolArray)[queueIndex].nextFree = &(*hullPointsPoolArray)[queueIndex + 1];
@@ -3028,8 +2949,7 @@ void __cdecl R_VisitPortals(const GfxCell *cell, const DpvsPlane *parentPlane, c
     while (dpvsGlob.queuedCount)
     {
         portal = R_NextQueuedPortal();
-        if (!portal)
-            MyAssertHandler(".\\r_dpvs.cpp", 2794, 0, "%s", "portal");
+        iassert( portal );
         {
             PROF_SCOPED("R_ConvexHull");
             hullPointCount = Com_ConvexHull(portal->writable.hullPoints, portal->writable.hullPointCount, hull);
@@ -3081,8 +3001,7 @@ void __cdecl R_VisitPortals(const GfxCell *cell, const DpvsPlane *parentPlane, c
             }
             childPlanes = &dpvsGlob.childPlanes[childPlanesCount];
             childPlaneCount = R_PortalClipPlanes(childPlanes, hullPointCount, portalVerts, portal->cell, &clipChildren);
-            if (childPlaneCount > 16)
-                MyAssertHandler(".\\r_dpvs.cpp", 2852, 0, "%s", "childPlaneCount <= DPVS_PORTAL_MAX_PLANES");
+            iassert( childPlaneCount <= DPVS_PORTAL_MAX_PLANES );
             childPlanesCount += childPlaneCount;
             if (portal->writable.recursionDepth < r_portalMinRecurseDepth->current.integer)
                 clipChildren = DPVS_CLIP_CHILDREN;
@@ -3122,10 +3041,8 @@ unsigned int __cdecl R_PortalClipPlanes(
     DpvsForceBevels forceBevels; // [esp+638h] [ebp-8h]
     bool useBevelPlanes; // [esp+63Fh] [ebp-1h]
 
-    if (!Sys_IsMainThread())
-        MyAssertHandler(".\\r_dpvs.cpp", 473, 0, "%s", "Sys_IsMainThread()");
-    if (vertexCount < 3)
-        MyAssertHandler(".\\r_dpvs.cpp", 474, 0, "%s\n\t(vertexCount) = %i", "(vertexCount >= 3)", vertexCount);
+    iassert( Sys_IsMainThread() );
+    iassert( (vertexCount >= 3) );
     useNormalPlanes = vertexCount <= 0xA;
     v7 = (DpvsForceBevels)(vertexCount > 0xA || r_portalBevelsOnly->current.enabled);
     forceBevels = v7;
@@ -3163,8 +3080,7 @@ unsigned int __cdecl R_PortalClipPlanes(
             }
         }
     }
-    if (!dpvsGlob.nearPlane)
-        MyAssertHandler(".\\r_dpvs.cpp", 506, 0, "%s", "dpvsGlob.nearPlane");
+    iassert( dpvsGlob.nearPlane );
     planes[planeCount] = *dpvsGlob.nearPlane;
     distMin = R_NearestPointOnWinding(winding, vertexCount, &planes[planeCount]);
     if (distMin > 0.0)
@@ -3235,8 +3151,7 @@ void __cdecl R_ProjectPortal(
     float screenSpaceWinding[265]; // [esp+58h] [ebp-428h] BYREF
     float w; // [esp+47Ch] [ebp-4h]
 
-    if (vertexCount < 3)
-        MyAssertHandler(".\\r_dpvs.cpp", 335, 0, "%s\n\t(vertexCount) = %i", "(vertexCount >= 3)", vertexCount);
+    iassert( (vertexCount >= 3) );
     *mins = 1.0;
     mins[1] = 1.0;
     *maxs = -1.0;
@@ -3452,8 +3367,7 @@ void __cdecl R_VisitPortalsForCell(
             portal = &cell->portals[portalIndex];
             if (!R_ShouldSkipPortal(portal, planes, planeCount))
             {
-                if (dpvsGlob.viewOrgIsDir)
-                    MyAssertHandler(".\\r_dpvs.cpp", 2687, 0, "%s", "!dpvsGlob.viewOrgIsDir");
+                iassert( !dpvsGlob.viewOrgIsDir );
                 v13 = Vec4Dot(portal->plane.coeffs, dpvsGlob.viewOrg);
                 if (v13 <= -0.125)
                 {
@@ -3479,10 +3393,8 @@ void __cdecl R_VisitPortalsForCell(
                 }
                 else
                 {
-                    if (portal->writable.isAncestor)
-                        MyAssertHandler(".\\r_dpvs.cpp", 2690, 1, "%s", "!portal->writable.isAncestor");
-                    if (portal->writable.isQueued)
-                        MyAssertHandler(".\\r_dpvs.cpp", 2691, 1, "%s", "!portal->writable.isQueued");
+                    iassert( !portal->writable.isAncestor );
+                    iassert( !portal->writable.isQueued );
                     vertCount = portal->vertexCount;
                     verts = (const float *)portal->vertices;
                     Vec3ProjectionCoords(portal->plane.coeffs, &xCoord, &yCoord);
@@ -3504,8 +3416,7 @@ void __cdecl R_VisitPortalsForCell(
                             portal->writable.recursionDepth + 1,
                             clipChildren);
                     }
-                    if (portal->writable.isAncestor)
-                        MyAssertHandler(".\\r_dpvs.cpp", 2699, 1, "%s", "!portal->writable.isAncestor");
+                    iassert( !portal->writable.isAncestor );
                     if (parentPortal)
                     {
                         if (!parentPortal->writable.isAncestor)
@@ -3730,8 +3641,7 @@ int __cdecl R_CellForPoint(const GfxWorld *world, const float *origin)
     int cellIndex; // [esp+14h] [ebp-Ch]
     int cellCount; // [esp+18h] [ebp-8h]
 
-    if (!world)
-        MyAssertHandler(".\\r_staticmodel_load_obj.cpp", 522, 0, "%s", "world");
+    iassert( world );
     node = (mnode_t *)world->dpvsPlanes.nodes;
     cellCount = world->dpvsPlanes.cellCount + 1;
     while (1)

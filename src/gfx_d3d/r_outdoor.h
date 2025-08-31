@@ -1,5 +1,7 @@
 #pragma once
 
+#define MIN_WORLD_COORD -131072.0f
+
 struct OutdoorGlob // sizeof=0x40
 {                                       // ...
     float bbox[2][3];                   // ...

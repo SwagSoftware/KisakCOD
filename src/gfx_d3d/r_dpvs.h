@@ -4,6 +4,8 @@
 #include "r_rendercmds.h"
 #include "r_scene.h"
 
+#define DPVS_PORTAL_MAX_PLANES 16
+
 enum $72E71F3D9535328A1AA08FD8E568F55B : __int32
 {
     CULL_STATE_OUT = 0x0,

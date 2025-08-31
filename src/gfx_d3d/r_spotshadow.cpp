@@ -39,8 +39,7 @@ void __cdecl R_AddSpotShadowEntCmd(const GfxSpotShadowEntCmd *data)
     boneMatrix = R_UpdateSceneEntBounds(sceneEnt, &localSceneEnt, &obj, 1);
     if (boneMatrix)
     {
-        if (!localSceneEnt)
-            MyAssertHandler(".\\r_spotshadow.cpp", 108, 0, "%s", "localSceneEnt");
+        iassert( localSceneEnt );
         localLight = cmd->light;
         Vec3Avg(localSceneEnt->cull.mins, localSceneEnt->cull.maxs, boxCenter);
         Vec3Sub(boxCenter, localSceneEnt->cull.mins, boxHalfSize);
@@ -189,8 +188,7 @@ void __cdecl R_GetSpotShadowLookupMatrix(
     float y0; // [esp+30h] [ebp-8h]
     float yScale; // [esp+34h] [ebp-4h]
 
-    if (!tileCount)
-        MyAssertHandler(".\\r_spotshadow.cpp", 46, 0, "%s", "tileCount");
+    iassert( tileCount );
     y1 = (double)spotShadowIndex * (1.0 / (double)tileCount);
     y0 = 1.0 / (double)tileCount + y1;
     xScale = ((float)1.0 - (float)0.0) * 0.5;
@@ -320,8 +318,7 @@ void __cdecl R_EmitSpotShadowMapSurfs(GfxViewInfo *viewInfo)
         info->viewOrigin[1] = origin[1];
         info->viewOrigin[2] = origin[2];
         info->viewOrigin[3] = 1.0;
-        if (viewInfo->spotShadows[spotShadowIndex].info.cameraView)
-            MyAssertHandler(".\\r_spotshadow.cpp", 303, 0, "%s", "!info->cameraView");
+        iassert( !info->cameraView );
         firstDrawSurf = frontEndDataOut->drawSurfCount;
         if (R_IsPrimaryLight(viewInfo->spotShadows[spotShadowIndex].shadowableLightIndex))
         {

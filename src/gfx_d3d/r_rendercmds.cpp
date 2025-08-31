@@ -219,14 +219,11 @@ void __cdecl R_SyncRenderThread()
 {
     if (!Sys_IsRenderThread())
     {
-        if (!Sys_IsMainThread())
-            MyAssertHandler(".\\r_rendercmds.cpp", 605, 0, "%s", "Sys_IsMainThread()");
+        iassert( Sys_IsMainThread() );
         if (rg.registered)
         {
-            if (!dx.device)
-                MyAssertHandler(".\\r_rendercmds.cpp", 613, 0, "%s", "dx.device");
-            if (r_glob.remoteScreenUpdateNesting)
-                MyAssertHandler(".\\r_rendercmds.cpp", 617, 0, "%s", "r_glob.remoteScreenUpdateNesting == 0");
+            iassert( dx.device );
+            iassert( r_glob.remoteScreenUpdateNesting == 0 );
             if (r_glob.startedRenderThread && !r_glob.haveThreadOwnership)
             {
                 PROF_SCOPED("FrontEndSleep");
@@ -252,12 +249,10 @@ GfxCmdArray *R_ClearCmdList()
 
 void __cdecl R_ReleaseThreadOwnership()
 {
-    if (!Sys_IsMainThread())
-        MyAssertHandler(".\\r_rendercmds.cpp", 665, 0, "%s", "Sys_IsMainThread()");
+    iassert( Sys_IsMainThread() );
     if (r_glob.startedRenderThread)
     {
-        if (!frontEndDataOut)
-            MyAssertHandler(".\\r_rendercmds.cpp", 670, 0, "%s", "frontEndDataOut");
+        iassert( frontEndDataOut );
         if (r_glob.haveThreadOwnership)
         {
             Sys_ReleaseThreadOwnership();
@@ -270,8 +265,7 @@ void __cdecl R_IssueRenderCommands(unsigned int type)
 {
     bool v1; // [esp+1Eh] [ebp-16h]
 
-    if (!Sys_IsMainThread() && !Sys_IsRenderThread())
-        MyAssertHandler(".\\r_rendercmds.cpp", 795, 0, "%s", "Sys_IsMainThread() || Sys_IsRenderThread()");
+    iassert( Sys_IsMainThread() || Sys_IsRenderThread() );
     if (R_CheckLostDevice())
     {
         PROF_SCOPED("R_IssueRenderCommands");
@@ -320,8 +314,7 @@ bool R_UpdateSkinCacheUsage()
 {
     bool result; // eax
 
-    if (!frontEndDataOut->skinnedCacheVb)
-        MyAssertHandler(".\\r_rendercmds.cpp", 650, 0, "%s", "frontEndDataOut->skinnedCacheVb");
+    iassert( frontEndDataOut->skinnedCacheVb );
     result = frontEndDataOut->skinnedCacheVb->used >= 0x410000u;
     rg.skinnedCacheReachedThreshold = result;
     return result;
@@ -350,8 +343,7 @@ char __cdecl R_HandOffToBackend(char type)
 
 void __cdecl R_ToggleSmpFrameCmd(char type)
 {
-    if (!Sys_IsMainThread())
-        MyAssertHandler(".\\r_rendercmds.cpp", 687, 0, "%s", "Sys_IsMainThread()");
+    iassert( Sys_IsMainThread() );
     R_ReleaseThreadOwnership();
     {
         PROF_SCOPED("WaitRenderer");
@@ -366,15 +358,13 @@ void __cdecl R_ToggleSmpFrameCmd(char type)
     R_UnlockSkinnedCache();
     KISAK_NULLSUB();
     Sys_WakeRenderer((void *)frontEndDataOut);
-    if (r_glob.haveThreadOwnership)
-        MyAssertHandler(".\\r_rendercmds.cpp", 729, 0, "%s", "!r_glob.haveThreadOwnership");
+    iassert( !r_glob.haveThreadOwnership );
     R_ToggleSmpFrame();
 }
 
 void __cdecl R_AbortRenderCommands()
 {
-    if (!Sys_IsMainThread())
-        MyAssertHandler(".\\r_rendercmds.cpp", 851, 0, "%s", "Sys_IsMainThread()");
+    iassert( Sys_IsMainThread() );
     if (rg.registered)
     {
         R_ClearCmdList();
@@ -421,10 +411,8 @@ GfxCmdHeader *__cdecl R_GetCommandBuffer(GfxRenderCommand renderCmd, int bytes)
             "%s\n\t(renderCmd) = %i",
             "(renderCmd >= 0 && renderCmd < RC_COUNT)",
             renderCmd);
-    if ((bytes & 3) != 0)
-        MyAssertHandler(".\\r_rendercmds.cpp", 882, 0, "%s\n\t(bytes) = %i", "((bytes & 3) == 0)", bytes);
-    if (bytes >= (int)s_renderCmdBufferSize)
-        MyAssertHandler(".\\r_rendercmds.cpp", 883, 0, "%s\n\t(bytes) = %i", "(bytes < s_renderCmdBufferSize)", bytes);
+    iassert( ((bytes & 3) == 0) );
+    iassert( (bytes < s_renderCmdBufferSize) );
     if (bytes != (unsigned __int16)bytes)
         MyAssertHandler(
             ".\\r_rendercmds.cpp",
@@ -433,12 +421,9 @@ GfxCmdHeader *__cdecl R_GetCommandBuffer(GfxRenderCommand renderCmd, int bytes)
             "%s\n\t(bytes) = %i",
             "(bytes == static_cast< unsigned short >( bytes ))",
             bytes);
-    if (!s_cmdList)
-        MyAssertHandler(".\\r_rendercmds.cpp", 885, 0, "%s", "s_cmdList");
-    if (!s_cmdList->cmds)
-        MyAssertHandler(".\\r_rendercmds.cpp", 886, 0, "%s", "s_cmdList->cmds");
-    if (!rg.inFrame)
-        MyAssertHandler(".\\r_rendercmds.cpp", 887, 0, "%s", "rg.inFrame");
+    iassert( s_cmdList );
+    iassert( s_cmdList->cmds );
+    iassert( rg.inFrame );
     if (renderCmd < RC_FIRST_NONCRITICAL && s_cmdList->usedCritical < 7680 && bytes + s_cmdList->usedCritical >= 7680)
         Com_PrintWarning(8, "RENDERCOMMAND_CRITICAL_WARN_SIZE (%i bytes) reached\n", 7680);
     if (s_cmdList->usedTotal < s_renderCmdWarnSize && bytes + s_cmdList->usedTotal >= s_renderCmdWarnSize)
@@ -492,11 +477,9 @@ DebugGlobals *R_ToggleSmpFrame()
     gfxBuf.dynamicBufferFrame = (gfxBuf.dynamicBufferFrame + 1) % 2;
     gfxBuf.preTessBufferFrame = (gfxBuf.preTessBufferFrame + 1) % 2;
     frontEndDataOut = &s_backEndData[s_smpFrame];
-    if (!rg.frontEndFrameCount)
-        MyAssertHandler(".\\r_rendercmds.cpp", 993, 0, "%s", "rg.frontEndFrameCount > 0");
+    iassert( rg.frontEndFrameCount > 0 );
     R_FreeTempSkinBuffer();
-    if (!frontEndDataOut)
-        MyAssertHandler(".\\r_rendercmds.cpp", 999, 0, "%s", "frontEndDataOut");
+    iassert( frontEndDataOut );
     frontEndDataOut->frameCount = rg.frontEndFrameCount;
     frontEndDataOut->viewInfoCount = rg.viewInfoCount;
     frontEndDataOut->viewInfo = g_viewInfo[g_frameIndex];
@@ -572,8 +555,7 @@ DebugGlobals *R_ToggleSmpFrame()
 
 GfxViewParms *__cdecl R_AllocViewParms()
 {
-    if (!frontEndDataOut)
-        MyAssertHandler(".\\r_rendercmds.cpp", 1128, 0, "%s", "frontEndDataOut");
+    iassert( frontEndDataOut );
     if (frontEndDataOut->viewParmCount >= 0x1Cu)
         MyAssertHandler(
             ".\\r_rendercmds.cpp",
@@ -629,8 +611,7 @@ void __cdecl R_AddCmdDrawStretchPic(
             v10);
         actualMaterial = rgp.defaultMaterial;
     }
-    if ((actualMaterial->stateFlags & 0x10) != 0)
-        MyAssertHandler(".\\r_rendercmds.cpp", 1160, 0, "%s", "!Material_UsesDepthBuffer( actualMaterial )");
+    iassert( !Material_UsesDepthBuffer( actualMaterial ) );
     cmd = (GfxCmdStretchPic *)R_GetCommandBuffer(RC_FIRST_NONCRITICAL, 44);
     if (cmd)
     {
@@ -658,8 +639,7 @@ const MaterialTechnique *__cdecl Material_GetTechnique(const Material *material,
     const MaterialTechniqueSet *techSet; // [esp+4h] [ebp-4h]
 
     techSet = Material_GetTechniqueSet(material);
-    if (!techSet)
-        MyAssertHandler("c:\\trees\\cod3\\src\\gfx_d3d\\r_material.h", 316, 0, "%s", "techSet");
+    iassert( techSet );
     technique = techSet->techniques[techType];
     if (technique
         && technique->passArray[0].pixelShader->prog.loadDef.loadForRenderer != r_rendererInUse->current.integer)
@@ -677,8 +657,7 @@ const MaterialTechnique *__cdecl Material_GetTechnique(const Material *material,
 
 MaterialTechniqueSet *__cdecl Material_GetTechniqueSet(const Material *material)
 {
-    if (!material)
-        MyAssertHandler("c:\\trees\\cod3\\src\\gfx_d3d\\r_material.h", 299, 0, "%s", "material");
+    iassert( material );
     if (!material->techniqueSet)
         MyAssertHandler(
             "c:\\trees\\cod3\\src\\gfx_d3d\\r_material.h",
@@ -734,8 +713,7 @@ void __cdecl R_AddCmdDrawStretchPicFlipST(
             v10);
         actualMaterial = rgp.defaultMaterial;
     }
-    if ((actualMaterial->stateFlags & 0x10) != 0)
-        MyAssertHandler(".\\r_rendercmds.cpp", 1198, 0, "%s", "!Material_UsesDepthBuffer( actualMaterial )");
+    iassert( !Material_UsesDepthBuffer( actualMaterial ) );
     cmd = (GfxCmdStretchPic *)R_GetCommandBuffer(RC_STRETCH_PIC_FLIP_ST, 44);
     if (cmd)
     {
@@ -862,10 +840,8 @@ GfxCmdDrawText2D *__cdecl AddBaseDrawTextCmd(
     unsigned int v13; // [esp+0h] [ebp-4Ch]
     GfxCmdDrawText2D *cmd; // [esp+48h] [ebp-4h]
 
-    if (maxChars <= 0)
-        MyAssertHandler(".\\r_rendercmds.cpp", 1293, 0, "%s", "maxChars > 0");
-    if (!text)
-        MyAssertHandler(".\\r_rendercmds.cpp", 1294, 0, "%s", "text");
+    iassert( maxChars > 0 );
+    iassert( text );
     if (!*text && cursorPos < 0)
         return 0;
     v13 = strlen(text);
@@ -1075,10 +1051,8 @@ GfxCmdDrawText2D *__cdecl AddBaseDrawConsoleTextCmd(
 {
     GfxCmdDrawText2D *cmd; // [esp+4h] [ebp-4h]
 
-    if (charCount < 0)
-        MyAssertHandler(".\\r_rendercmds.cpp", 1501, 0, "%s", "charCount >= 0");
-    if (!textPool)
-        MyAssertHandler(".\\r_rendercmds.cpp", 1502, 0, "%s", "textPool");
+    iassert( charCount >= 0 );
+    iassert( textPool );
     if (!charCount)
         return 0;
     cmd = (GfxCmdDrawText2D *)R_GetCommandBuffer(RC_DRAW_TEXT_2D, (charCount + 84) & 0xFFFFFFFC);
@@ -1239,8 +1213,7 @@ void __cdecl R_BeginFrame()
 
     if (rg.registered)
     {
-        if (rg.inFrame)
-            MyAssertHandler(".\\r_rendercmds.cpp", 1878, 0, "%s", "!rg.inFrame");
+        iassert( !rg.inFrame );
         rg.inFrame = 1;
         rg.lodParms.valid = 0;
         rg.correctedLodParms.valid = 0;
@@ -1267,10 +1240,8 @@ void __cdecl R_BeginFrame()
 
 int __cdecl R_GpuSyncModified()
 {
-    if (!r_gpuSync)
-        MyAssertHandler(".\\r_rendercmds.cpp", 1723, 0, "%s", "r_gpuSync");
-    if (!r_multiGpu)
-        MyAssertHandler(".\\r_rendercmds.cpp", 1724, 0, "%s", "r_multiGpu");
+    iassert( r_gpuSync );
+    iassert( r_multiGpu );
 
     return R_CheckDvarModified(r_gpuSync) || R_CheckDvarModified(r_multiGpu);
 }
@@ -1382,20 +1353,13 @@ bool __cdecl R_LightTweaksModified()
 
     if (!rgp.world)
         return 0;
-    if (!r_lightTweakAmbient)
-        MyAssertHandler(".\\r_rendercmds.cpp", 1698, 0, "%s", "r_lightTweakAmbient");
-    if (!r_lightTweakDiffuseFraction)
-        MyAssertHandler(".\\r_rendercmds.cpp", 1699, 0, "%s", "r_lightTweakDiffuseFraction");
-    if (!r_lightTweakSunLight)
-        MyAssertHandler(".\\r_rendercmds.cpp", 1700, 0, "%s", "r_lightTweakSunLight");
-    if (!r_lightTweakAmbientColor)
-        MyAssertHandler(".\\r_rendercmds.cpp", 1701, 0, "%s", "r_lightTweakAmbientColor");
-    if (!r_lightTweakSunColor)
-        MyAssertHandler(".\\r_rendercmds.cpp", 1702, 0, "%s", "r_lightTweakSunColor");
-    if (!r_lightTweakSunDiffuseColor)
-        MyAssertHandler(".\\r_rendercmds.cpp", 1703, 0, "%s", "r_lightTweakSunDiffuseColor");
-    if (!r_lightTweakSunDirection)
-        MyAssertHandler(".\\r_rendercmds.cpp", 1704, 0, "%s", "r_lightTweakSunDirection");
+    iassert( r_lightTweakAmbient );
+    iassert( r_lightTweakDiffuseFraction );
+    iassert( r_lightTweakSunLight );
+    iassert( r_lightTweakAmbientColor );
+    iassert( r_lightTweakSunColor );
+    iassert( r_lightTweakSunDiffuseColor );
+    iassert( r_lightTweakSunDirection );
     v1 = R_CheckDvarModified(r_lightTweakAmbient);
     v2 = R_CheckDvarModified(r_lightTweakDiffuseFraction) | v1;
     v3 = R_CheckDvarModified(r_lightTweakSunLight) | v2;
@@ -1487,8 +1451,7 @@ void __cdecl R_SetInputCodeConstant(GfxCmdBufInput *input, unsigned int constant
 
 void R_EnvMapOverrideConstants()
 {
-    if (r_envMapMaxIntensity->current.value <= 0.0)
-        MyAssertHandler(".\\r_rendercmds.cpp", 1777, 0, "%s", "r_envMapMaxIntensity->current.value > 0.0f");
+    iassert( r_envMapMaxIntensity->current.value > 0.0f );
     if (r_envMapOverride->current.enabled)
         R_SetInputCodeConstant(
             &gfxCmdBufInput,
@@ -1509,8 +1472,7 @@ void __cdecl R_EndFrame()
         R_ClearCmdList();
         rg.viewInfoCount = 0;
         g_frameIndex = (g_frameIndex + 1) % 2;
-        if (!rg.inFrame)
-            MyAssertHandler(".\\r_rendercmds.cpp", 1947, 0, "%s", "rg.inFrame");
+        iassert( rg.inFrame );
         rg.inFrame = 0;
     }
     else if (rg.inFrame)
@@ -1523,8 +1485,7 @@ void __cdecl R_AddCmdClearScreen(int whichToClear, const float *color, float dep
 {
     GfxCmdClearScreen *cmd; // [esp+Ch] [ebp-4h]
 
-    if (!whichToClear)
-        MyAssertHandler(".\\r_rendercmds.cpp", 2043, 0, "%s", "whichToClear");
+    iassert( whichToClear );
     if ((whichToClear & 0xFFFFFFF8) != 0)
         MyAssertHandler(
             ".\\r_rendercmds.cpp",
@@ -1533,16 +1494,12 @@ void __cdecl R_AddCmdClearScreen(int whichToClear, const float *color, float dep
             "%s\n\t(whichToClear) = %i",
             "((whichToClear & ~(0x00000001l | 0x00000002l | 0x00000004l)) == 0)",
             whichToClear);
-    if (!color)
-        MyAssertHandler(".\\r_rendercmds.cpp", 2045, 0, "%s", "color");
-    if (depth < 0.0 || depth > 1.0)
-        MyAssertHandler(".\\r_rendercmds.cpp", 2046, 0, "%s\n\t(depth) = %g", "(depth >= 0.0f && depth <= 1.0f)", depth);
+    iassert( color );
+    iassert( (depth >= 0.0f && depth <= 1.0f) );
     cmd = (GfxCmdClearScreen *)R_GetCommandBuffer(RC_CLEAR_SCREEN, 28);
-    if (!cmd)
-        MyAssertHandler(".\\r_rendercmds.cpp", 2050, 0, "%s", "cmd");
+    iassert( cmd );
     cmd->whichToClear = whichToClear;
-    if (cmd->whichToClear != whichToClear)
-        MyAssertHandler(".\\r_rendercmds.cpp", 2053, 1, "%s", "cmd->whichToClear == whichToClear");
+    iassert( cmd->whichToClear == whichToClear );
     cmd->stencil = stencil;
     cmd->depth = depth;
     cmd->color[0] = *color;
@@ -1565,8 +1522,7 @@ void __cdecl R_AddCmdSaveScreen(unsigned int screenTimerId)
             0,
             3);
     cmd = (GfxCmdSaveScreen *)R_GetCommandBuffer(RC_SAVE_SCREEN, 8);
-    if (!cmd)
-        MyAssertHandler(".\\r_rendercmds.cpp", 2068, 0, "%s", "cmd");
+    iassert( cmd );
     cmd->screenTimerId = screenTimerId;
 }
 
@@ -1589,8 +1545,7 @@ void __cdecl R_AddCmdSaveScreenSection(
             0,
             3);
     cmd = (GfxCmdSaveScreenSection *)R_GetCommandBuffer(RC_SAVE_SCREEN_SECTION, 24);
-    if (!cmd)
-        MyAssertHandler(".\\r_rendercmds.cpp", 2082, 0, "%s", "cmd");
+    iassert( cmd );
     cmd->s0 = viewX;
     cmd->t0 = viewY;
     cmd->ds = viewWidth;
@@ -1682,8 +1637,7 @@ void __cdecl R_BeginRemoteScreenUpdate()
 {
     if (useFastFile->current.enabled && Sys_IsMainThread())
     {
-        if (r_glob.remoteScreenUpdateNesting < 0)
-            MyAssertHandler(".\\r_rendercmds.cpp", 2370, 0, "%s", "r_glob.remoteScreenUpdateNesting >= 0");
+        iassert( r_glob.remoteScreenUpdateNesting >= 0 );
         if (r_glob.startedRenderThread && !CL_IsLocalClientInGame(0))
         {
             if (r_glob.remoteScreenUpdateNesting)
@@ -1692,8 +1646,7 @@ void __cdecl R_BeginRemoteScreenUpdate()
             }
             else
             {
-                if (r_glob.screenUpdateNotify)
-                    MyAssertHandler(".\\r_rendercmds.cpp", 2381, 0, "%s", "!r_glob.screenUpdateNotify");
+                iassert( !r_glob.screenUpdateNotify );
                 ++r_glob.remoteScreenUpdateNesting;
                 R_ReleaseThreadOwnership();
                 Sys_NotifyRenderer();
@@ -1706,19 +1659,16 @@ void __cdecl R_EndRemoteScreenUpdate()
 {
     if (useFastFile->current.enabled && Sys_IsMainThread())
     {
-        if (r_glob.remoteScreenUpdateNesting < 0)
-            MyAssertHandler(".\\r_rendercmds.cpp", 2398, 0, "%s", "r_glob.remoteScreenUpdateNesting >= 0");
+        iassert( r_glob.remoteScreenUpdateNesting >= 0 );
         if (r_glob.startedRenderThread && !CL_IsLocalClientInGame(0))
         {
-            if (r_glob.remoteScreenUpdateNesting <= 0)
-                MyAssertHandler(".\\r_rendercmds.cpp", 2406, 0, "%s", "r_glob.remoteScreenUpdateNesting > 0");
+            iassert( r_glob.remoteScreenUpdateNesting > 0 );
             if (r_glob.remoteScreenUpdateNesting == 1)
             {
                 while (!r_glob.screenUpdateNotify)
                     NET_Sleep(1);
                 r_glob.screenUpdateNotify = 0;
-                if (r_glob.remoteScreenUpdateNesting <= 0)
-                    MyAssertHandler(".\\r_rendercmds.cpp", 2421, 0, "%s", "r_glob.remoteScreenUpdateNesting > 0");
+                iassert( r_glob.remoteScreenUpdateNesting > 0 );
                 --r_glob.remoteScreenUpdateNesting;
                 while (!r_glob.screenUpdateNotify)
                 {
@@ -1742,10 +1692,8 @@ void __cdecl R_EndRemoteScreenUpdate()
 
 void __cdecl R_PushRemoteScreenUpdate(int remoteScreenUpdateNesting)
 {
-    if (!useFastFile->current.enabled && remoteScreenUpdateNesting)
-        MyAssertHandler(".\\r_rendercmds.cpp", 2439, 0, "%s", "IsFastFileLoad() || remoteScreenUpdateNesting == 0");
-    if (!Sys_IsMainThread())
-        MyAssertHandler(".\\r_rendercmds.cpp", 2440, 0, "%s", "Sys_IsMainThread()");
+    iassert( IsFastFileLoad() || remoteScreenUpdateNesting == 0 );
+    iassert( Sys_IsMainThread() );
     if (remoteScreenUpdateNesting < 0)
         MyAssertHandler(
             ".\\r_rendercmds.cpp",
@@ -1765,10 +1713,8 @@ int __cdecl R_PopRemoteScreenUpdate()
 {
     volatile int remoteScreenUpdateNesting; // [esp+4h] [ebp-4h]
 
-    if (!useFastFile->current.enabled && r_glob.remoteScreenUpdateNesting)
-        MyAssertHandler(".\\r_rendercmds.cpp", 2455, 0, "%s", "IsFastFileLoad() || r_glob.remoteScreenUpdateNesting == 0");
-    if (!Sys_IsMainThread())
-        MyAssertHandler(".\\r_rendercmds.cpp", 2456, 0, "%s", "Sys_IsMainThread()");
+    iassert( IsFastFileLoad() || r_glob.remoteScreenUpdateNesting == 0 );
+    iassert( Sys_IsMainThread() );
     remoteScreenUpdateNesting = r_glob.remoteScreenUpdateNesting;
     while (r_glob.remoteScreenUpdateNesting)
         R_EndRemoteScreenUpdate();
@@ -1785,8 +1731,7 @@ int __cdecl R_PopRemoteScreenUpdate()
 
 bool __cdecl R_IsInRemoteScreenUpdate()
 {
-    if (!Sys_IsRenderThread())
-        MyAssertHandler(".\\r_rendercmds.cpp", 2472, 0, "%s", "Sys_IsRenderThread()");
+    iassert( Sys_IsRenderThread() );
     return r_glob.isRenderingRemoteUpdate;
 }
 
@@ -1798,10 +1743,8 @@ void __cdecl R_InitTempSkinBuf()
     for (i = 0; i < 2; ++i)
     {
         data = &s_backEndData[i];
-        if (data->tempSkinPos)
-            MyAssertHandler(".\\r_rendercmds.cpp", 552, 0, "%s", "!data->tempSkinPos");
-        if (data->tempSkinBuf)
-            MyAssertHandler(".\\r_rendercmds.cpp", 553, 0, "%s", "!data->tempSkinBuf");
+        iassert( !data->tempSkinPos );
+        iassert( !data->tempSkinBuf );
         data->tempSkinBuf = (unsigned __int8 *)Z_VirtualReserve(0x480000);
     }
 }

@@ -37,8 +37,7 @@ void __cdecl R_SetLightProperties(
             "%s\n\t(source->viewMode) = %i",
             "(source->viewMode == VIEW_MODE_3D)",
             source->viewMode);
-    if (!light)
-        MyAssertHandler(".\\r_draw_shadowablelight.cpp", 56, 0, "%s", "light");
+    iassert( light );
     if (light->type != 3 && light->type != 2)
         MyAssertHandler(
             ".\\r_draw_shadowablelight.cpp",

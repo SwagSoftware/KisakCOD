@@ -18,8 +18,7 @@ void __cdecl Outdoor_ApplyBoundingBox(const float *outdoorMin, const float *outd
     {
         if (outdoorGlob.bbox[0][dimIter] == 131072.0)
         {
-            if (outdoorGlob.scale[dimIter - 3] != -131072.0)
-                MyAssertHandler(".\\r_outdoor.cpp", 90, 1, "%s", "outdoorGlob.bbox[SUPREMUM][dimIter] == MIN_WORLD_COORD");
+            //iassert( outdoorGlob.bbox[SUPREMUM][dimIter] == MIN_WORLD_COORD );
             outdoorGlob.bbox[0][dimIter] = 0.0;
             outdoorGlob.scale[dimIter - 3] = 0.0;
         }
@@ -63,14 +62,12 @@ int Outdoor_UpdateTransforms()
 
 void __cdecl R_RegisterOutdoorImage(GfxWorld *world, const float *outdoorMin, const float *outdoorMax)
 {
-    if (!world)
-        MyAssertHandler(".\\r_outdoor.cpp", 192, 0, "%s", "world");
+    iassert( world );
     Outdoor_ApplyBoundingBox(outdoorMin, outdoorMax);
     Outdoor_UpdateTransforms();
     Outdoor_SetRendererOutdoorLookupMatrix(world);
     world->outdoorImage = Image_Register("$outdoor", 1u, 0);
-    if (!world->outdoorImage)
-        MyAssertHandler(".\\r_outdoor.cpp", 199, 0, "%s", "world->outdoorImage");
+    iassert( world->outdoorImage );
 }
 
 void __cdecl Outdoor_SetRendererOutdoorLookupMatrix(GfxWorld *world)
@@ -95,26 +92,24 @@ void __cdecl Outdoor_SetRendererOutdoorLookupMatrix(GfxWorld *world)
 
 void Outdoor_TempHunkFreePic()
 {
-    if (!outdoorGlob.pic)
-        MyAssertHandler(".\\r_outdoor.cpp", 51, 0, "%s", "outdoorGlob.pic");
+    iassert( outdoorGlob.pic );
     Hunk_FreeTempMemory((char *)outdoorGlob.pic);
 }
 
 unsigned __int8 *Outdoor_ComputeTexels()
 {
     unsigned __int8 *result; // eax
-    int v1; // [esp+24h] [ebp-1Ch]
+    int zTexture; // [esp+24h] [ebp-1Ch]
     float zWorld; // [esp+28h] [ebp-18h]
     float yWorld; // [esp+2Ch] [ebp-14h]
-    unsigned __int8 *texelPtr; // [esp+30h] [ebp-10h]
+    unsigned __int8 *outByte; // [esp+30h] [ebp-10h]
     int x; // [esp+34h] [ebp-Ch]
     int y; // [esp+38h] [ebp-8h]
     float xWorld; // [esp+3Ch] [ebp-4h]
 
-    if (!outdoorGlob.pic)
-        MyAssertHandler(".\\r_outdoor.cpp", 173, 0, "%s", "outdoorGlob.pic");
+    iassert( outdoorGlob.pic );
     result = outdoorGlob.pic;
-    texelPtr = outdoorGlob.pic;
+    outByte = outdoorGlob.pic;
     for (y = 0; y != outdoorMapSize[1]; ++y)
     {
         yWorld = outdoorGlob.invScale[1] * ((double)y + 0.5 - outdoorGlob.add[1]);
@@ -125,11 +120,10 @@ unsigned __int8 *Outdoor_ComputeTexels()
                 break;
             xWorld = outdoorGlob.invScale[0] * ((double)x + 0.5 - outdoorGlob.add[0]);
             zWorld = Outdoor_TraceHeightInWorld(xWorld, yWorld);
-            v1 = Outdoor_TransformToTextureClamped(2, zWorld);
-            *texelPtr = v1;
-            if (v1 != *texelPtr)
-                MyAssertHandler(".\\r_outdoor.cpp", 163, 0, "%s", "zTexture == *outByte");
-            ++texelPtr;
+            zTexture = Outdoor_TransformToTextureClamped(2, zWorld);
+            *outByte = zTexture;
+            iassert( zTexture == *outByte ); // ?? seems useless
+            ++outByte;
         }
     }
     return result;
@@ -159,18 +153,18 @@ double __cdecl Outdoor_TraceHeightInWorld(float worldX, float worldY)
 
 int __cdecl Outdoor_TransformToTextureClamped(int dimension, float inWorld)
 {
-    int v4; // [esp+4h] [ebp-18h]
+    int max; // [esp+4h] [ebp-18h]
     int unclamped; // [esp+14h] [ebp-8h]
     float transformed; // [esp+18h] [ebp-4h]
 
     transformed = inWorld * outdoorGlob.scale[dimension] + outdoorGlob.add[dimension];
     unclamped = (int)(transformed - 0.4999999990686774);
-    v4 = outdoorMapSize[dimension] - 1;
-    if (v4 <= 0)
-        MyAssertHandler("c:\\trees\\cod3\\src\\universal\\com_math.h", 522, 0, "%s", "min < max");
+    max = outdoorMapSize[dimension] - 1;
+    iassert(max > 0); // lwss: changed assert
+    //iassert( min < max );
     if (unclamped < 0)
         return 0;
-    if (unclamped <= v4)
+    if (unclamped <= max)
         return (int)(transformed - 0.4999999990686774);
-    return v4;
+    return max;
 }

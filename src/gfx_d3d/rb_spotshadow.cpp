@@ -43,8 +43,7 @@ void __cdecl RB_DrawSpotShadowOverlay()
     unsigned int spotShadowIndex; // [esp+5Ch] [ebp-Ch]
     float h; // [esp+60h] [ebp-8h]
 
-    if (!backEndData->viewInfoCount)
-        MyAssertHandler(".\\rb_spotshadow.cpp", 167, 0, "%s", "backEndData->viewInfoCount > 0");
+    iassert( backEndData->viewInfoCount > 0 );
     viewInfo = backEndData->viewInfo;
     if (viewInfo->spotShadowCount)
     {

@@ -156,10 +156,8 @@ unsigned __int16 *__cdecl R_AllocPreTessIndices(int count)
 {
     unsigned __int16 *indices; // [esp+0h] [ebp-4h]
 
-    if (!gfxBuf.preTessIndexBuffer->indices)
-        MyAssertHandler(".\\r_pretess.cpp", 304, 0, "%s", "gfxBuf.preTessIndexBuffer->indices != NULL");
-    if (!count)
-        MyAssertHandler(".\\r_pretess.cpp", 305, 0, "%s", "count");
+    iassert( gfxBuf.preTessIndexBuffer->indices != NULL );
+    iassert( count );
     if (count + gfxBuf.preTessIndexBuffer->used > gfxBuf.preTessIndexBuffer->total)
         return 0;
     indices = &gfxBuf.preTessIndexBuffer->indices[gfxBuf.preTessIndexBuffer->used];
@@ -169,16 +167,14 @@ unsigned __int16 *__cdecl R_AllocPreTessIndices(int count)
 
 void __cdecl R_EndPreTess()
 {
-    if (!gfxBuf.preTessIndexBuffer->indices)
-        MyAssertHandler(".\\r_pretess.cpp", 292, 0, "%s", "gfxBuf.preTessIndexBuffer->indices != NULL");
+    iassert( gfxBuf.preTessIndexBuffer->indices != NULL );
     R_UnlockIndexBuffer(gfxBuf.preTessIndexBuffer->buffer);
     gfxBuf.preTessIndexBuffer->indices = 0;
 }
 
 void __cdecl R_BeginPreTess()
 {
-    if (gfxBuf.preTessIndexBuffer->indices)
-        MyAssertHandler(".\\r_pretess.cpp", 280, 0, "%s", "gfxBuf.preTessIndexBuffer->indices == NULL");
+    iassert( gfxBuf.preTessIndexBuffer->indices == NULL );
     gfxBuf.preTessIndexBuffer->indices = (unsigned __int16 *)R_LockIndexBuffer(
         gfxBuf.preTessIndexBuffer->buffer,
         0,
