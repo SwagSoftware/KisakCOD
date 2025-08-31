@@ -120,20 +120,6 @@ union VariableUnion // sizeof=0x4
 };
 struct VariableValue // sizeof=0x8
 {   
-    VariableValue()
-    {
-        u.intValue = 0;
-        type = VAR_UNDEFINED;
-    }
-    VariableValue(int i)
-    {
-        u.intValue = i;
-        type = VAR_INTEGER;
-    }
-    VariableValue(VariableUnion un)
-    {
-        u = un;
-    }
     // ...
     VariableUnion u;                    // ...
     Vartype_t type;                           // ...

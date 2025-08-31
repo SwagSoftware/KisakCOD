@@ -2260,7 +2260,7 @@ end_0:
 
             iassert(fs.top == fs.startTop);
             fs.top[1] = tempValue;
-        thread_return:
+thread_return:
             if (*profileEnablePos)
                 Profile_EndScripts(*profileEnablePos);
             if (thread_count)
@@ -2368,9 +2368,7 @@ end_0:
 
         case OP_GetGame:
             INC_TOP();
-            tempValue = Scr_EvalVariable(scrVarPub.gameId);
-            fs.top->u = tempValue.u;
-            fs.top->type = tempValue.type;
+            *fs.top = Scr_EvalVariable(scrVarPub.gameId);
             continue;
 
         case OP_GetAnim:
@@ -2416,64 +2414,49 @@ end_0:
 
         case OP_EvalLocalVariableCached0:
             INC_TOP();
-            tempValue = Scr_EvalVariable(scrVmPub.localVars[0]);
-            fs.top->u = tempValue.u;
-            fs.top->type = tempValue.type;
+            *fs.top = Scr_EvalVariable(scrVmPub.localVars[0]);
             continue;
 
         case OP_EvalLocalVariableCached1:
             INC_TOP();
-            tempValue = Scr_EvalVariable(scrVmPub.localVars[-1]);
-            fs.top->u = tempValue.u;
-            fs.top->type = tempValue.type;
+            *fs.top = Scr_EvalVariable(scrVmPub.localVars[-1]);
             continue;
 
         case OP_EvalLocalVariableCached2:
             INC_TOP();
-            tempValue = Scr_EvalVariable(scrVmPub.localVars[-2]);
-            fs.top->u = tempValue.u;
-            fs.top->type = tempValue.type;
+            *fs.top = Scr_EvalVariable(scrVmPub.localVars[-2]);
             continue;
 
         case OP_EvalLocalVariableCached3:
             INC_TOP();
-            tempValue = Scr_EvalVariable(scrVmPub.localVars[-3]);
-            fs.top->u = tempValue.u;
-            fs.top->type = tempValue.type;
+            *fs.top = Scr_EvalVariable(scrVmPub.localVars[-3]);
             continue;
 
         case OP_EvalLocalVariableCached4:
             INC_TOP();
-            tempValue = Scr_EvalVariable(scrVmPub.localVars[-4]);
-            fs.top->u = tempValue.u;
-            fs.top->type = tempValue.type;
+            *fs.top = Scr_EvalVariable(scrVmPub.localVars[-4]);
             continue;
 
         case OP_EvalLocalVariableCached5:
             INC_TOP();
-            tempValue = Scr_EvalVariable(scrVmPub.localVars[-5]);
-            fs.top->u = tempValue.u;
-            fs.top->type = tempValue.type;
+            *fs.top = Scr_EvalVariable(scrVmPub.localVars[-5]);
             continue;
 
         case OP_EvalLocalVariableCached:
             INC_TOP();
-            tempValue = Scr_EvalVariable(Scr_GetLocalVar(fs.pos));
-            fs.top->u = tempValue.u;
-            fs.top->type = tempValue.type;
+            *fs.top = Scr_EvalVariable(Scr_GetLocalVar(fs.pos));
             ++fs.pos;
             continue;
 
         case OP_EvalLocalArrayCached:
             INC_TOP();
-            tempValue = Scr_EvalVariable(Scr_GetLocalVar(fs.pos));
-            fs.top->u = tempValue.u;
-            fs.top->type = tempValue.type;
+            *fs.top = Scr_EvalVariable(Scr_GetLocalVar(fs.pos));
             ++fs.pos;
-            goto evalarray;
+            Scr_EvalArray(fs.top, fs.top - 1);
+            --fs.top;
+            continue;
 
         case OP_EvalArray:
-evalarray:
             Scr_EvalArray(fs.top, fs.top - 1);
             --fs.top;
             continue;
@@ -2530,15 +2513,14 @@ evalarrayref:
 
         case OP_EvalLevelFieldVariable:
             objectId = scrVarPub.levelId;
-            goto EvalAnimFieldVariable;
+            INC_TOP();
+            *fs.top = Scr_EvalVariable(FindVariable(objectId, Scr_ReadUnsignedShort(&fs.pos)));
+            continue;
 
         case OP_EvalAnimFieldVariable:
             objectId = scrVarPub.animId;
-EvalAnimFieldVariable:
             INC_TOP();
-            tempValue = Scr_EvalVariable(FindVariable(objectId, Scr_ReadUnsignedShort(&fs.pos)));
-            fs.top->u = tempValue.u;
-            fs.top->type = tempValue.type;
+            *fs.top = Scr_EvalVariable(FindVariable(objectId, Scr_ReadUnsignedShort(&fs.pos)));
             continue;
 
         case OP_EvalSelfFieldVariable:
@@ -2554,9 +2536,7 @@ EvalAnimFieldVariable:
         case OP_EvalFieldVariable:
 EvalFieldVariable:
             INC_TOP();
-            tempValue = Scr_FindVariableField(objectId, Scr_ReadUnsignedShort(&fs.pos));
-            fs.top->u = tempValue.u;
-            fs.top->type = tempValue.type;
+            *fs.top = Scr_FindVariableField(objectId, Scr_ReadUnsignedShort(&fs.pos));
             continue;
 
         case OP_EvalLevelFieldVariableRef:
@@ -2689,7 +2669,6 @@ LN403:
                 SetVariableFieldValue(fieldValueId, fs.top);
             }
 
-            // SetVariableFieldValue(fieldValueId, fs.top);
             --fs.top;
             continue;
 
@@ -3204,9 +3183,7 @@ function_call:
 
         case OP_inc:
             INC_TOP();
-            tempValue = Scr_EvalVariableField(fieldValueId);
-            fs.top->u = tempValue.u;
-            fs.top->type = tempValue.type;
+            *fs.top = Scr_EvalVariableField(fieldValueId);
             if (fs.top->type == VAR_INTEGER)
             {
                 ++fs.top->u.intValue;
@@ -3223,9 +3200,7 @@ function_call:
 
         case OP_dec:
             INC_TOP();
-            tempValue = Scr_EvalVariableField(fieldValueId);
-            fs.top->u = tempValue.u;
-            fs.top->type = tempValue.type;
+            *fs.top = Scr_EvalVariableField(fieldValueId);
             if (fs.top->type == VAR_INTEGER)
             {
                 --fs.top->u.intValue;
@@ -4736,9 +4711,15 @@ void __cdecl VM_Resume(unsigned int timeId)
     unsigned int startLocalId; // [esp+28h] [ebp-4h]
     function_stack_t stack;
 
+    PROF_SCOPED("VM_Resume");
+
     iassert(scrVmPub.top == scrVmPub.stack);
+
+    //Scr_ResetAbortDebugger(inst); // blops
     Scr_ResetTimeout();
+
     iassert(timeId);
+
     AddRefToObject(timeId);
     fs.startTop = scrVmPub.stack;
     thread_count = 0;
@@ -4758,7 +4739,7 @@ void __cdecl VM_Resume(unsigned int timeId)
         if (!stackId)
             break;
 
-        stack.startTop = scrVmPub.stack;
+        //stack.startTop = scrVmPub.stack;
 
         startLocalId = GetVariableKeyObject(stackId);
         iassert(startLocalId);
@@ -4811,12 +4792,14 @@ void __cdecl VM_UnarchiveStack(unsigned int startLocalId, VariableStackBuffer* s
     size = stackValue->size;
     buf = stackValue->buf;
     top = scrVmPub.stack;
+
     while (size)
     {
         ++top;
         --size;
         top->type = (Vartype_t)*(unsigned char*)buf;
         buf += 1;
+
         if (top->type == VAR_CODEPOS)
         {
             iassert(scrVmPub.function_count < 32 /*MAX_VM_STACK_DEPTH*/);
@@ -4829,6 +4812,7 @@ void __cdecl VM_UnarchiveStack(unsigned int startLocalId, VariableStackBuffer* s
         {
             top->u.codePosValue = *(const char**)buf;
         }
+
         buf += 4;
     }
     fs.pos = stackValue->pos;
@@ -4840,13 +4824,17 @@ void __cdecl VM_UnarchiveStack(unsigned int startLocalId, VariableStackBuffer* s
     iassert(scrVmPub.function_count < 32 /*MAX_VM_STACK_DEPTH*/);
 
     function_count = scrVmPub.function_count;
+
     while (1)
     {
         scrVmPub.function_frame_start[function_count--].fs.localId = localId;
+
         if (!function_count)
             break;
+
         localId = GetParentLocalId(localId);
     }
+
     while (++function_count != scrVmPub.function_count)
     {
         //scrVmPub.stack[3 * function_count - 95].u.intValue = Scr_AddLocalVars(scrVmPub.function_frame_start[function_count].fs.localId);

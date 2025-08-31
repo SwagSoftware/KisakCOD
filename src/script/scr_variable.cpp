@@ -2821,10 +2821,7 @@ void  Scr_EvalArray(VariableValue* value, VariableValue* index)
 
 		if ((entryValue->w.type & VAR_MASK) == VAR_ARRAY)
 		{
-			//*index = Scr_EvalVariable(Scr_FindArrayIndex(value->u.intValue, index));
-			VariableValue tmp = Scr_EvalVariable(Scr_FindArrayIndex(value->u.intValue, index));
-			index->type = tmp.type;
-			index->u = tmp.u;
+			*index = Scr_EvalVariable(Scr_FindArrayIndex(value->u.intValue, index));
 			RemoveRefToObject(value->u.pointerValue);
 		}
 		else
