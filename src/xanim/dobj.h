@@ -8,6 +8,8 @@ struct PhysPreset;
 struct XAnimTree_s;
 struct XModel;
 
+#define DOBJ_HANDLE_NONE -1
+
 #define DOBJ_MAX_PARTS 0x80
 #define DOBJ_MAX_SUBMODELS 32
 

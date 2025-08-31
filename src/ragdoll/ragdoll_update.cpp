@@ -43,11 +43,9 @@ char __cdecl Ragdoll_ValidateBodyObj(RagdollBody *body)
     int i; // [esp+10h] [ebp-8h]
     BaseLerpBoneDef *lerpBoneDef; // [esp+14h] [ebp-4h]
 
-    if (!body)
-        MyAssertHandler(".\\ragdoll\\ragdoll_update.cpp", 367, 0, "%s", "body");
+    iassert( body );
     def = Ragdoll_BodyDef(body);
-    if (!def)
-        MyAssertHandler(".\\ragdoll\\ragdoll_update.cpp", 370, 0, "%s", "def");
+    iassert( def );
     obj = Ragdoll_BodyDObj(body);
     if (!obj)
         return 0;
@@ -101,14 +99,11 @@ void __cdecl Ragdoll_SnapshotBaseLerpOffsets(RagdollBody *body)
     LerpBone *bone; // [esp+104h] [ebp-34h]
     float relMat[4][3]; // [esp+108h] [ebp-30h] BYREF
 
-    if (!body)
-        MyAssertHandler(".\\ragdoll\\ragdoll_update.cpp", 658, 0, "%s", "body");
+    iassert( body );
     def = Ragdoll_BodyDef(body);
-    if (!def)
-        MyAssertHandler(".\\ragdoll\\ragdoll_update.cpp", 661, 0, "%s", "def");
+    iassert( def );
     obj = Ragdoll_BodyDObj(body);
-    if (!obj)
-        MyAssertHandler(".\\ragdoll\\ragdoll_update.cpp", 664, 0, "%s", "obj");
+    iassert( obj );
     bone = body->lerpBones;
     boneOrientation = body->lerpBoneOffsets;
     i = 0;
@@ -186,8 +181,7 @@ void __cdecl Ragdoll_SnapshotBaseLerpOffsets(RagdollBody *body)
 
 void __cdecl Ragdoll_GetDObjBaseBoneMatrix(DObj_s *obj, unsigned __int8 boneIndex, DObjAnimMat *outMat)
 {
-    if (!obj)
-        MyAssertHandler(".\\ragdoll\\ragdoll_update.cpp", 86, 0, "%s", "obj");
+    iassert( obj );
     DObjGetBasePoseMatrix(obj, boneIndex, outMat);
 }
 
@@ -216,8 +210,7 @@ void __cdecl Ragdoll_AnimMatToMat43(const DObjAnimMat *mat, float (*out)[3])
             "%s",
             "!IS_NAN((mat->quat)[0]) && !IS_NAN((mat->quat)[1]) && !IS_NAN((mat->quat)[2]) && !IS_NAN((mat->quat)[3])");
     }
-    if ((COERCE_UNSIGNED_INT(mat->transWeight) & 0x7F800000) == 0x7F800000)
-        MyAssertHandler("c:\\trees\\cod3\\src\\ragdoll\\../xanim/xanim_public.h", 433, 0, "%s", "!IS_NAN(mat->transWeight)");
+    iassert( !IS_NAN(mat->transWeight) );
     Vec3Scale(mat->quat, mat->transWeight, result);
     v10 = result[0] * mat->quat[0];
     v3 = result[0] * mat->quat[1];
@@ -244,14 +237,10 @@ void __cdecl Ragdoll_AnimMatToMat43(const DObjAnimMat *mat, float (*out)[3])
 
 char __cdecl Ragdoll_CreateBodyPhysics(RagdollBody *body)
 {
-    if (!body)
-        MyAssertHandler(".\\ragdoll\\ragdoll_update.cpp", 740, 0, "%s", "body");
-    if (body->state <= BS_VELOCITY_CAPTURE)
-        MyAssertHandler(".\\ragdoll\\ragdoll_update.cpp", 741, 0, "%s", "body->state > RAGDOLL_DOBJ_VALID_STATE");
-    if (!body)
-        MyAssertHandler("c:\\trees\\cod3\\src\\ragdoll\\ragdoll.h", 285, 0, "%s", "body");
-    if (body->references <= 0)
-        MyAssertHandler(".\\ragdoll\\ragdoll_update.cpp", 742, 0, "%s", "Ragdoll_BodyInUse( body )");
+    iassert( body );
+    iassert( body->state > RAGDOLL_DOBJ_VALID_STATE );
+    iassert( body );
+    iassert( Ragdoll_BodyInUse( body ) );
     if (Ragdoll_CreatePhysObjs(body))
     {
         if (Ragdoll_CreatePhysJoints(body))
@@ -277,11 +266,9 @@ char __cdecl Ragdoll_CreatePhysJoints(RagdollBody *body)
     RagdollDef *def; // [esp+0h] [ebp-8h]
     int i; // [esp+4h] [ebp-4h]
 
-    if (!body)
-        MyAssertHandler(".\\ragdoll\\ragdoll_update.cpp", 580, 0, "%s", "body");
+    iassert( body );
     def = Ragdoll_BodyDef(body);
-    if (!def)
-        MyAssertHandler(".\\ragdoll\\ragdoll_update.cpp", 583, 0, "%s", "def");
+    iassert( def );
     for (i = 0; i < body->numJoints; ++i)
     {
         if (!Ragdoll_CreatePhysJoint(body, &def->jointDefs[i], &body->joints[i]))
@@ -302,12 +289,9 @@ char __cdecl Ragdoll_CreatePhysJoint(RagdollBody *body, JointDef *jointDef, Join
     float axis[3][3]; // [esp+80h] [ebp-28h] BYREF
     Bone *bone; // [esp+A4h] [ebp-4h]
 
-    if (!body)
-        MyAssertHandler(".\\ragdoll\\ragdoll_update.cpp", 524, 0, "%s", "body");
-    if (!jointDef)
-        MyAssertHandler(".\\ragdoll\\ragdoll_update.cpp", 525, 0, "%s", "jointDef");
-    if (!joint)
-        MyAssertHandler(".\\ragdoll\\ragdoll_update.cpp", 526, 0, "%s", "joint");
+    iassert( body );
+    iassert( jointDef );
+    iassert( joint );
     if ((unsigned int)jointDef->bone >= body->numBones)
         MyAssertHandler(
             ".\\ragdoll\\ragdoll_update.cpp",
@@ -379,11 +363,9 @@ char __cdecl Ragdoll_CreatePhysObjs(RagdollBody *body)
     RagdollDef *def; // [esp+0h] [ebp-8h]
     int i; // [esp+4h] [ebp-4h]
 
-    if (!body)
-        MyAssertHandler(".\\ragdoll\\ragdoll_update.cpp", 598, 0, "%s", "body");
+    iassert( body );
     def = Ragdoll_BodyDef(body);
-    if (!def)
-        MyAssertHandler(".\\ragdoll\\ragdoll_update.cpp", 601, 0, "%s", "def");
+    iassert( def );
     for (i = 0; i < body->numBones; ++i)
     {
         if (!Ragdoll_CreatePhysObj(body, &def->boneDefs[i], &body->bones[i]))
@@ -413,22 +395,16 @@ char __cdecl Ragdoll_CreatePhysObj(RagdollBody *body, BoneDef *boneDef, Bone *bo
     PhysPreset preset; // [esp+BCh] [ebp-30h] BYREF
     int boneIdx; // [esp+E8h] [ebp-4h]
 
-    if (!body)
-        MyAssertHandler(".\\ragdoll\\ragdoll_update.cpp", 415, 0, "%s", "body");
-    if (!boneDef)
-        MyAssertHandler(".\\ragdoll\\ragdoll_update.cpp", 416, 0, "%s", "boneDef");
-    if (!bone)
-        MyAssertHandler(".\\ragdoll\\ragdoll_update.cpp", 417, 0, "%s", "bone");
+    iassert( body );
+    iassert( boneDef );
+    iassert( bone );
     def = Ragdoll_BodyDef(body);
-    if (!def)
-        MyAssertHandler(".\\ragdoll\\ragdoll_update.cpp", 420, 0, "%s", "def");
+    iassert( def );
     obj = Ragdoll_BodyDObj(body);
     if (!obj)
         return 0;
-    if (!def->bound)
-        MyAssertHandler(".\\ragdoll\\ragdoll_update.cpp", 427, 0, "%s", "def->bound");
-    if (!boneDef->animBoneNames[0])
-        MyAssertHandler(".\\ragdoll\\ragdoll_update.cpp", 428, 0, "%s", "boneDef->animBoneNames[0]");
+    iassert( def->bound );
+    iassert( boneDef->animBoneNames[0] );
     bone->animBones[0] = 0;
     bone->animBones[1] = 0;
     if (!DObjGetBoneIndex(obj, boneDef->animBoneNames[0], bone->animBones) || bone->animBones[0] == 255)
@@ -443,8 +419,7 @@ char __cdecl Ragdoll_CreatePhysObj(RagdollBody *body, BoneDef *boneDef, Bone *bo
         bone->animBones[1] = 0;
     }
     pose = (const cpose_t *)Ragdoll_BodyPose(body);
-    if (!pose)
-        MyAssertHandler(".\\ragdoll\\ragdoll_update.cpp", 447, 0, "%s", "pose");
+    iassert( pose );
     Ragdoll_PoseInvAxis(pose, invPoseAxis);
     Ragdoll_GetDObjBaseBoneOriginQuat(
         body->localClientNum,
@@ -545,8 +520,7 @@ char __cdecl Ragdoll_GetDObjBaseBoneOrigin(
 {
     DObjAnimMat mat; // [esp+0h] [ebp-20h] BYREF
 
-    if (!obj)
-        MyAssertHandler(".\\ragdoll\\ragdoll_update.cpp", 96, 0, "%s", "obj");
+    iassert( obj );
     Ragdoll_GetDObjBaseBoneMatrix(obj, boneIndex, &mat);
     Vec3Rotate(mat.trans, axis, origin);
     Vec3Add(offset, origin, origin);
@@ -565,8 +539,7 @@ char __cdecl Ragdoll_GetDObjBaseBoneOriginQuat(
     DObjAnimMat mat; // [esp+0h] [ebp-30h] BYREF
     float orientation[4]; // [esp+20h] [ebp-10h] BYREF
 
-    if (!obj)
-        MyAssertHandler(".\\ragdoll\\ragdoll_update.cpp", 112, 0, "%s", "obj");
+    iassert( obj );
     Ragdoll_GetDObjBaseBoneMatrix(obj, boneIndex, &mat);
     Ragdoll_Mat33ToQuat(axis, orientation);
     Ragdoll_QuatMul(orientation, mat.quat, quat);
@@ -579,8 +552,7 @@ void __cdecl Ragdoll_PoseInvAxis(const cpose_t *pose, mat3x3 &invAxis)
 {
     float axis[3][3]; // [esp+0h] [ebp-24h] BYREF
 
-    if (!pose)
-        MyAssertHandler(".\\ragdoll\\ragdoll_update.cpp", 130, 0, "%s", "pose");
+    iassert( pose );
     AnglesToAxis(pose->angles, axis);
     AxisTranspose(axis, invAxis);
 }
@@ -589,8 +561,7 @@ void __cdecl Ragdoll_DestroyPhysJoints(RagdollBody *body)
 {
     int i; // [esp+0h] [ebp-4h]
 
-    if (!body)
-        MyAssertHandler(".\\ragdoll\\ragdoll_update.cpp", 615, 0, "%s", "body");
+    iassert( body );
     for (i = 0; i < body->numJoints; ++i)
     {
         if (body->joints[i].joint)
@@ -605,8 +576,7 @@ void __cdecl Ragdoll_DestroyPhysObjs(RagdollBody *body)
 {
     int i; // [esp+0h] [ebp-4h]
 
-    if (!body)
-        MyAssertHandler(".\\ragdoll\\ragdoll_update.cpp", 633, 0, "%s", "body");
+    iassert( body );
     for (i = 0; i < body->numBones; ++i)
     {
         if (body->bones[i].rigidBody)
@@ -617,8 +587,7 @@ void __cdecl Ragdoll_DestroyPhysObjs(RagdollBody *body)
 
 void __cdecl Ragdoll_RemoveBodyPhysics(RagdollBody *body)
 {
-    if (!body)
-        MyAssertHandler(".\\ragdoll\\ragdoll_update.cpp", 763, 0, "%s", "body");
+    iassert( body );
     Ragdoll_DestroyPhysJoints(body);
     Ragdoll_DestroyPhysObjs(body);
 }
@@ -627,10 +596,8 @@ bool __cdecl Ragdoll_ValidatePrecalcBoneDef(RagdollDef *def, BoneDef *bone)
 {
     float v3; // [esp+0h] [ebp-8h]
 
-    if (!def)
-        MyAssertHandler(".\\ragdoll\\ragdoll_update.cpp", 815, 0, "%s", "def");
-    if (!bone)
-        MyAssertHandler(".\\ragdoll\\ragdoll_update.cpp", 816, 0, "%s", "bone");
+    iassert( def );
+    iassert( bone );
     v3 = I_fabs(bone->mass);
     return v3 >= 0.000001;
 }
@@ -658,10 +625,8 @@ void __cdecl Ragdoll_ClosestPointsTwoSegs(float (*s0)[3], float (*s1)[3], float 
     float v[3]; // [esp+58h] [ebp-18h] BYREF
     float w[3]; // [esp+64h] [ebp-Ch] BYREF
 
-    if (!t0)
-        MyAssertHandler(".\\ragdoll\\ragdoll_update.cpp", 847, 0, "%s", "t0");
-    if (!t1)
-        MyAssertHandler(".\\ragdoll\\ragdoll_update.cpp", 848, 0, "%s", "t1");
+    iassert( t0 );
+    iassert( t1 );
     Vec3Sub(&(*s0)[3], (const float *)s0, u);
     Vec3Sub(&(*s1)[3], (const float *)s1, v);
     Vec3Sub((const float *)s0, (const float *)s1, w);
@@ -855,8 +820,7 @@ void __cdecl Ragdoll_AddSelfContact(
     {
         dist = Vec3NormalizeTo(contactDir, contact.normal);
         halfCorrection = (radius0 + radius1 - dist) * 0.5;
-        if (halfCorrection < -0.000001)
-            MyAssertHandler(".\\ragdoll\\ragdoll_update.cpp", 984, 0, "%s", "halfCorrection >= -ZERO_EPSILON");
+        iassert( halfCorrection >= -ZERO_EPSILON );
         scale = radius0 - halfCorrection;
         Vec3Mad(point0, scale, contact.normal, contact.pos);
         contact.depth = halfCorrection;
@@ -901,12 +865,9 @@ void __cdecl Ragdoll_ExplosionEvent(
     Bone *bone; // [esp+80h] [ebp-8h]
     float outerRadiusSqr; // [esp+84h] [ebp-4h]
 
-    if (!origin)
-        MyAssertHandler(".\\ragdoll\\ragdoll_update.cpp", 1074, 0, "%s", "origin");
-    if (innerRadius < 0.0)
-        MyAssertHandler(".\\ragdoll\\ragdoll_update.cpp", 1075, 0, "%s", "innerRadius >= 0.0f");
-    if (innerRadius > (double)outerRadius)
-        MyAssertHandler(".\\ragdoll\\ragdoll_update.cpp", 1076, 0, "%s", "outerRadius >= innerRadius");
+    iassert( origin );
+    iassert( innerRadius >= 0.0f );
+    iassert( outerRadius >= innerRadius );
     if (localClientNum == RETURN_ZERO32() && outerRadius != 0.0)
     {
         outerRadiusSqr = outerRadius * outerRadius;
@@ -917,8 +878,7 @@ void __cdecl Ragdoll_ExplosionEvent(
         for (i = 0; i < 32; ++i)
         {
             body = &ragdollBodies[i];
-            if (!body)
-                MyAssertHandler("c:\\trees\\cod3\\src\\ragdoll\\ragdoll.h", 285, 0, "%s", "body");
+            iassert( body );
             if (body->references > 0 && body->state >= BS_RUNNING)
             {
                 Ragdoll_GetTorsoPosition(body, torsoPos);
@@ -937,8 +897,7 @@ void __cdecl Ragdoll_ExplosionEvent(
                 distSqra = Vec3LengthSq(delta);
                 if (outerRadiusSqr > (double)distSqra)
                 {
-                    if (!body)
-                        MyAssertHandler("c:\\trees\\cod3\\src\\ragdoll\\ragdoll.h", 299, 0, "%s", "body");
+                    iassert( body );
                     if (body->state != BS_IDLE || Ragdoll_BodyNewState(body, BS_RUNNING))
                     {
                         body->stateMsec = 0;
@@ -1005,8 +964,7 @@ void __cdecl Ragdoll_GetTorsoPosition(RagdollBody *body, float *center)
 {
     BoneOrientation *boneOrientation; // [esp+0h] [ebp-4h]
 
-    if (!body || body->references <= 0)
-        MyAssertHandler(".\\ragdoll\\ragdoll_update.cpp", 1049, 0, "%s", "body && Ragdoll_BodyInUse( body )");
+    iassert( body && Ragdoll_BodyInUse( body ) );
     boneOrientation = Ragdoll_BodyBoneOrientations(body);
     *center = boneOrientation->origin[0];
     center[1] = boneOrientation->origin[1];
@@ -1028,8 +986,7 @@ bool __cdecl Ragdoll_EnterTunnelTest(RagdollBody *body, BodyState_t curState, Bo
         Ragdoll_EstimateInitialVelocities(body);
         tunnelPassed = Ragdoll_TunnelTest(body);
         pose = Ragdoll_BodyPose(body);
-        if (!pose)
-            MyAssertHandler(".\\ragdoll\\ragdoll_update.cpp", 1442, 0, "%s", "pose");
+        iassert( pose );
         boneOrientation = Ragdoll_BodyBoneOrientations(body);
         Vec3Sub(pose->origin, boneOrientation->origin, body->poseOffset);
         v3 = Ragdoll_BodyBoneOrientations(body);
@@ -1095,8 +1052,7 @@ void __cdecl Ragdoll_SnapshotBaseLerpBones(RagdollBody *body, BoneOrientation *s
     BoneOrientation *snapshota; // [esp+1BCh] [ebp+Ch]
 
     def = Ragdoll_BodyDef(body);
-    if (!def)
-        MyAssertHandler(".\\ragdoll\\ragdoll_update.cpp", 171, 0, "%s", "def");
+    iassert( def );
     obj = Ragdoll_BodyDObj(body);
     if (obj)
     {
@@ -1232,8 +1188,7 @@ DObjAnimMat *__cdecl Ragdoll_GetDObjLocalBoneMatrix(const cpose_t *pose, DObj_s 
 {
     DObjAnimMat *mat; // [esp+34h] [ebp-4h]
 
-    if (!obj)
-        MyAssertHandler(".\\ragdoll\\ragdoll_update.cpp", 43, 0, "%s", "obj");
+    iassert( obj );
     {
         PROF_SCOPED("Ragdoll_GetDObjLocalBoneMatrix");
         CG_DObjCalcBone(pose, obj, boneIndex);
@@ -1255,11 +1210,9 @@ void __cdecl Ragdoll_SetCurrentPoseFromSnapshot(RagdollBody *body, BoneOrientati
     int i; // [esp+20h] [ebp-8h]
     Bone *bone; // [esp+24h] [ebp-4h]
 
-    if (!body)
-        MyAssertHandler(".\\ragdoll\\ragdoll_update.cpp", 337, 0, "%s", "body");
+    iassert( body );
     def = Ragdoll_BodyDef(body);
-    if (!def)
-        MyAssertHandler(".\\ragdoll\\ragdoll_update.cpp", 340, 0, "%s", "def");
+    iassert( def );
     bone = body->bones;
     boneDef = def->boneDefs;
     i = 0;
@@ -1313,8 +1266,7 @@ void __cdecl Ragdoll_BodyCenterOfMass(RagdollBody *body, float *com)
     int i; // [esp+28h] [ebp-8h]
     Bone *bone; // [esp+2Ch] [ebp-4h]
 
-    if (!body)
-        MyAssertHandler(".\\ragdoll\\ragdoll_update.cpp", 698, 0, "%s", "body");
+    iassert( body );
     bone = body->bones;
     boneDef = Ragdoll_BodyDef(body)->boneDefs;
     massSum = 0.0;
@@ -1331,8 +1283,7 @@ void __cdecl Ragdoll_BodyCenterOfMass(RagdollBody *body, float *com)
         ++bone;
         ++boneDef;
     }
-    if (massSum <= 0.000001)
-        MyAssertHandler(".\\ragdoll\\ragdoll_update.cpp", 716, 0, "%s", "massSum > ZERO_EPSILON");
+    iassert( massSum > ZERO_EPSILON );
     v2 = 1.0 / massSum;
     Vec3Scale(com, v2, com);
 }
@@ -1352,8 +1303,7 @@ void __cdecl Ragdoll_EstimateInitialVelocities(RagdollBody *body)
     float angleOffsetWorld[3]; // [esp+70h] [ebp-10h] BYREF
     Bone *bone; // [esp+7Ch] [ebp-4h]
 
-    if (!body)
-        MyAssertHandler(".\\ragdoll\\ragdoll_update.cpp", 1233, 0, "%s", "body");
+    iassert( body );
     if (body->velCaptureMsec)
     {
         timeScale = 1000.0 / (double)body->velCaptureMsec;
@@ -1424,11 +1374,9 @@ char __cdecl Ragdoll_TunnelTest(RagdollBody *body)
     float orientation[4]; // [esp+F0h] [ebp-1Ch] BYREF
     float center[3]; // [esp+100h] [ebp-Ch] BYREF
 
-    if (!body)
-        MyAssertHandler(".\\ragdoll\\ragdoll_update.cpp", 1346, 0, "%s", "body");
+    iassert( body );
     def = Ragdoll_BodyDef(body);
-    if (!def)
-        MyAssertHandler(".\\ragdoll\\ragdoll_update.cpp", 1349, 0, "%s", "def");
+    iassert( def );
     bone = body->bones;
     boneDef = def->boneDefs;
     curOrientation = Ragdoll_BodyBoneOrientations(body);
@@ -1492,8 +1440,7 @@ int __cdecl Ragdoll_FindBoneChildren(RagdollBody *body, int boneIdx, int *childI
     int numChildren; // [esp+0h] [ebp-8h]
     int i; // [esp+4h] [ebp-4h]
 
-    if (!body)
-        MyAssertHandler(".\\ragdoll\\ragdoll_update.cpp", 1277, 0, "%s", "body");
+    iassert( body );
     numChildren = 0;
     for (i = 0; i < body->numBones; ++i)
     {
@@ -1534,10 +1481,8 @@ void __cdecl Ragdoll_PrintTunnelFail(RagdollBody *body)
     {
         pose = Ragdoll_BodyPose(body);
         obj = Ragdoll_BodyDObj(body);
-        if (!pose)
-            MyAssertHandler(".\\ragdoll\\ragdoll_update.cpp", 1413, 0, "%s", "pose");
-        if (!obj)
-            MyAssertHandler(".\\ragdoll\\ragdoll_update.cpp", 1414, 0, "%s", "obj");
+        iassert( pose );
+        iassert( obj );
         Com_Printf(
             20,
             "Ragdoll initial state in solid, using regular anim. Pos (%0.f %0.f %0.f)\n",
@@ -1553,8 +1498,7 @@ void __cdecl Ragdoll_UpdateVelocityCapture(RagdollBody *body)
     BoneOrientation *snapshot; // [esp+0h] [ebp-4h]
     BoneOrientation *snapshota; // [esp+0h] [ebp-4h]
 
-    if (!body)
-        MyAssertHandler(".\\ragdoll\\ragdoll_update.cpp", 1469, 0, "%s", "body");
+    iassert( body );
     if (body->stateFrames >= 1)
     {
         body->velCaptureMsec = body->stateMsec;
@@ -1580,8 +1524,7 @@ void __cdecl Ragdoll_SnapshotAnimOrientations(RagdollBody *body, BoneOrientation
     int i; // [esp+10h] [ebp-8h]
     Bone *bone; // [esp+14h] [ebp-4h]
 
-    if (!body)
-        MyAssertHandler(".\\ragdoll\\ragdoll_update.cpp", 305, 0, "%s", "body");
+    iassert( body );
     def = Ragdoll_BodyDef(body);
     obj = Ragdoll_BodyDObj(body);
     pose = Ragdoll_BodyPose(body);
@@ -1640,8 +1583,7 @@ bool __cdecl Ragdoll_EnterDead(RagdollBody *body, BodyState_t curState, BodyStat
 {
     int references; // [esp+0h] [ebp-4h]
 
-    if (!body)
-        MyAssertHandler(".\\ragdoll\\ragdoll_update.cpp", 1553, 0, "%s", "body");
+    iassert( body );
     Ragdoll_RemoveBodyPhysics(body);
     references = body->references;
     memset((unsigned __int8 *)body, 0, sizeof(RagdollBody));
@@ -1653,11 +1595,9 @@ bool __cdecl Ragdoll_ExitDead(RagdollBody *body, BodyState_t curState, BodyState
 {
     RagdollDef *def; // [esp+0h] [ebp-4h]
 
-    if (!body)
-        MyAssertHandler(".\\ragdoll\\ragdoll_update.cpp", 1570, 0, "%s", "body");
+    iassert( body );
     def = Ragdoll_BodyDef(body);
-    if (!def)
-        MyAssertHandler(".\\ragdoll\\ragdoll_update.cpp", 1573, 0, "%s", "def");
+    iassert( def );
     body->numBones = def->numBones;
     body->numLerpBones = def->numBaseLerpBones;
     body->numJoints = def->numJoints;
@@ -1674,16 +1614,13 @@ bool __cdecl Ragdoll_ExitDObjWait(RagdollBody *body, BodyState_t prevState, Body
     int ia; // [esp+10h] [ebp-8h]
     Bone *bone; // [esp+14h] [ebp-4h]
 
-    if (!body)
-        MyAssertHandler(".\\ragdoll\\ragdoll_update.cpp", 1592, 0, "%s", "body");
+    iassert( body );
     if (curState == BS_DEAD)
         return 1;
     def = Ragdoll_BodyDef(body);
-    if (!def)
-        MyAssertHandler(".\\ragdoll\\ragdoll_update.cpp", 1598, 0, "%s", "def");
+    iassert( def );
     obj = Ragdoll_BodyDObj(body);
-    if (!obj)
-        MyAssertHandler(".\\ragdoll\\ragdoll_update.cpp", 1601, 0, "%s", "obj");
+    iassert( obj );
     bone = body->bones;
     boneDef = def->boneDefs;
     for (i = 0; i < body->numBones; ++i)
@@ -1724,14 +1661,12 @@ bool __cdecl Ragdoll_ExitIdle(RagdollBody *body, BodyState_t curState, BodyState
 {
     BoneOrientation *v4; // eax
 
-    if (!body)
-        MyAssertHandler(".\\ragdoll\\ragdoll_update.cpp", 1642, 0, "%s", "body");
+    iassert( body );
     if ((unsigned int)newState <= BS_DOBJ_WAIT)
         return 1;
     if (!Ragdoll_ValidateBodyObj(body))
         return 0;
-    if (!body)
-        MyAssertHandler("c:\\trees\\cod3\\src\\ragdoll\\ragdoll.h", 271, 0, "%s", "body");
+    iassert( body );
     if (body->state < BS_TUNNEL_TEST)
         return 0;
     if (Ragdoll_CountPhysicsBodies() >= ragdoll_max_simulating->current.integer)
@@ -1747,8 +1682,7 @@ bool __cdecl Ragdoll_EnterIdle(RagdollBody *body, BodyState_t curState, BodyStat
 {
     BoneOrientation *v1; // eax
 
-    if (!body)
-        MyAssertHandler(".\\ragdoll\\ragdoll_update.cpp", 1664, 0, "%s", "body");
+    iassert( body );
     if (Ragdoll_BodyHasPhysics(body))
     {
         v1 = Ragdoll_BodyBoneOrientations(body);
@@ -1768,21 +1702,18 @@ void __cdecl Ragdoll_SnapshotBonePositions(RagdollBody *body, BoneOrientation *b
     int i; // [esp+24h] [ebp-8h]
     Bone *bone; // [esp+28h] [ebp-4h]
 
-    if (!body || !boneSnapshot)
-        MyAssertHandler(".\\ragdoll\\ragdoll_update.cpp", 253, 0, "%s", "body && boneSnapshot");
+    iassert( body && boneSnapshot );
     if (Ragdoll_BodyHasPhysics(body))
     {
         def = Ragdoll_BodyDef(body);
-        if (!def)
-            MyAssertHandler(".\\ragdoll\\ragdoll_update.cpp", 259, 0, "%s", "def");
+        iassert( def );
         bone = body->bones;
         boneDef = def->boneDefs;
         snapshot = boneSnapshot;
         i = 0;
         while (i < body->numBones)
         {
-            if (!bone->rigidBody)
-                MyAssertHandler(".\\ragdoll\\ragdoll_update.cpp", 267, 0, "%s", "bone->rigidBody");
+            iassert( bone->rigidBody );
             Phys_ObjGetInterpolatedState(PHYS_WORLD_RAGDOLL, (dxBody *)bone->rigidBody, snapshot->origin, boneRot);
             dest = snapshot->orientation;
             if (boneDef->mirror)
@@ -1807,8 +1738,7 @@ void __cdecl Ragdoll_SnapshotBonePositions(RagdollBody *body, BoneOrientation *b
 
 bool __cdecl Ragdoll_EnterRunning(RagdollBody *body, BodyState_t curState, BodyState_t newState)
 {
-    if (!body)
-        MyAssertHandler(".\\ragdoll\\ragdoll_update.cpp", 1677, 0, "%s", "body");
+    iassert( body );
     if (Ragdoll_CountPhysicsBodies() < ragdoll_max_simulating->current.integer)
         return 1;
     if (curState == BS_IDLE)
@@ -1820,8 +1750,7 @@ bool __cdecl Ragdoll_EnterRunning(RagdollBody *body, BodyState_t curState, BodyS
 
 void __cdecl Ragdoll_UpdateDObjWait(RagdollBody *body)
 {
-    if (!body)
-        MyAssertHandler(".\\ragdoll\\ragdoll_update.cpp", 1695, 0, "%s", "body");
+    iassert( body );
     if (body->stateFrames <= 3)
     {
         if (Ragdoll_ValidateBodyObj(body))
@@ -1839,8 +1768,7 @@ void __cdecl Ragdoll_UpdateDObjWait(RagdollBody *body)
 
 void __cdecl Ragdoll_UpdateRunning(RagdollBody *body)
 {
-    if (!body)
-        MyAssertHandler(".\\ragdoll\\ragdoll_update.cpp", 1770, 0, "%s", "body");
+    iassert( body );
     if (Ragdoll_CheckIdle(body))
     {
         Ragdoll_BodyNewState(body, BodyState_t::BS_IDLE);
@@ -1864,11 +1792,9 @@ void __cdecl Ragdoll_UpdateFriction(RagdollBody *body)
     int i; // [esp+30h] [ebp-8h]
     JointDef *jointDef; // [esp+34h] [ebp-4h]
 
-    if (!body)
-        MyAssertHandler(".\\ragdoll\\ragdoll_update.cpp", 1499, 0, "%s", "body");
+    iassert( body );
     def = Ragdoll_BodyDef(body);
-    if (!def)
-        MyAssertHandler(".\\ragdoll\\ragdoll_update.cpp", 1502, 0, "%s", "def");
+    iassert( def );
     jointDef = def->jointDefs;
     joint = body->joints;
     lerpScale = 1.0 - (double)body->stateMsec / (double)ragdoll_jointlerp_time->current.integer;
@@ -1936,8 +1862,7 @@ char __cdecl Ragdoll_BodyNewState(RagdollBody *body, BodyState_t state)
 {
     BodyState_t prevState; // [esp+4h] [ebp-4h]
 
-    if (!body)
-        MyAssertHandler(".\\ragdoll\\ragdoll_update.cpp", 1826, 0, "%s", "body");
+    iassert( body );
     if ((unsigned int)state >= RAGDOLL_NUM_STATES)
         MyAssertHandler(
             ".\\ragdoll\\ragdoll_update.cpp",
@@ -1979,8 +1904,7 @@ void __cdecl Ragdoll_BodyUpdate(int msec, RagdollBody *body)
     StateEnt *entry; // [esp+0h] [ebp-8h]
     BodyState_t prevState; // [esp+4h] [ebp-4h]
 
-    if (!body)
-        MyAssertHandler(".\\ragdoll\\ragdoll_update.cpp", 1870, 0, "%s", "body");
+    iassert( body );
     if (body->state >= (unsigned int)RAGDOLL_NUM_STATES)
         MyAssertHandler(
             ".\\ragdoll\\ragdoll_update.cpp",

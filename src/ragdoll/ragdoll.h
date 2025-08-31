@@ -3,6 +3,8 @@
 #include <ode/collision.h>
 #include <bgame/bg_local.h>
 
+#define RAGDOLL_DOBJ_VALID_STATE 2
+
 enum JointType : __int32
 {                                       // ...
     RAGDOLL_JOINT_NONE = 0x0,
@@ -269,6 +271,11 @@ void __cdecl Ragdoll_BodyUpdate(int msec, RagdollBody *body);
 void __cdecl Ragdoll_Update(int msec);
 
 void __cdecl Ragdoll_ResetBodiesUsingDef();
+
+inline bool Ragdoll_BodyInUse(RagdollBody *body)
+{
+    return body->references > 0;
+}
 
 extern const dvar_t *ragdoll_self_collision_scale;
 extern const dvar_t *ragdoll_bullet_force;

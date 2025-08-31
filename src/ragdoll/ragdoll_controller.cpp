@@ -28,8 +28,7 @@ RagdollBody *__cdecl Ragdoll_HandleBody(int ragdollHandle)
 
 BoneOrientation *__cdecl Ragdoll_BodyBoneOrientations(RagdollBody *body)
 {
-    if (!body)
-        MyAssertHandler(".\\ragdoll\\ragdoll_controller.cpp", 42, 0, "%s", "body");
+    iassert( body );
     if (body->curOrientationBuffer >= 2u)
         MyAssertHandler(
             ".\\ragdoll\\ragdoll_controller.cpp",
@@ -43,8 +42,7 @@ BoneOrientation *__cdecl Ragdoll_BodyBoneOrientations(RagdollBody *body)
 
 BoneOrientation *__cdecl Ragdoll_BodyPrevBoneOrientations(RagdollBody *body)
 {
-    if (!body)
-        MyAssertHandler(".\\ragdoll\\ragdoll_controller.cpp", 50, 0, "%s", "body");
+    iassert( body );
     if (body->curOrientationBuffer >= 2u)
         MyAssertHandler(
             ".\\ragdoll\\ragdoll_controller.cpp",

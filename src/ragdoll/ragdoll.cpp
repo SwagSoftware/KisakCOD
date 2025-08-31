@@ -55,8 +55,7 @@ void __cdecl Ragdoll_DebugDraw()
         for (i = 0; i < 32; ++i)
         {
             body = &ragdollBodies[i];
-            if (!body)
-                MyAssertHandler("c:\\trees\\cod3\\src\\ragdoll\\ragdoll.h", 285, 0, "%s", "body");
+            iassert( body );
             if (body->references > 0)
             {
                 if (body->state >= (unsigned int)RAGDOLL_NUM_STATES)
@@ -80,8 +79,7 @@ void __cdecl Ragdoll_DebugDraw()
 
 RagdollDef *__cdecl Ragdoll_BodyDef(RagdollBody *body)
 {
-    if (!body)
-        MyAssertHandler(".\\ragdoll\\ragdoll.cpp", 182, 0, "%s", "body");
+    iassert( body );
     if (body->ragdollDef >= 2u)
         MyAssertHandler(
             ".\\ragdoll\\ragdoll.cpp",
@@ -95,23 +93,19 @@ RagdollDef *__cdecl Ragdoll_BodyDef(RagdollBody *body)
 
 DObj_s *__cdecl Ragdoll_BodyDObj(RagdollBody *body)
 {
-    if (!body)
-        MyAssertHandler(".\\ragdoll\\ragdoll.cpp", 191, 0, "%s", "body");
+    iassert( body );
     if (body->obj)
         return body->obj;
-    if (body->dobj == -1)
-        MyAssertHandler(".\\ragdoll\\ragdoll.cpp", 199, 0, "%s", "body->dobj != DOBJ_HANDLE_NONE");
+    iassert( body->dobj != DOBJ_HANDLE_NONE );
     return Com_GetClientDObj(body->dobj, body->localClientNum);
 }
 
 const cpose_t *__cdecl Ragdoll_BodyPose(RagdollBody *body)
 {
-    if (!body)
-        MyAssertHandler(".\\ragdoll\\ragdoll.cpp", 207, 0, "%s", "body");
+    iassert( body );
     if (body->pose)
         return body->pose;
-    if (body->dobj == -1)
-        MyAssertHandler(".\\ragdoll\\ragdoll.cpp", 215, 0, "%s", "body->dobj != DOBJ_HANDLE_NONE");
+    iassert( body->dobj != DOBJ_HANDLE_NONE );
     return CG_GetPose(body->localClientNum, body->dobj);
 }
 
@@ -119,8 +113,7 @@ void __cdecl Ragdoll_BodyRootOrigin(RagdollBody *body, float *origin)
 {
     BoneOrientation *boneOrientation; // [esp+0h] [ebp-4h]
 
-    if (!body)
-        MyAssertHandler("c:\\trees\\cod3\\src\\ragdoll\\ragdoll.h", 271, 0, "%s", "body");
+    iassert( body );
     if (body->state >= BS_TUNNEL_TEST)
     {
         boneOrientation = Ragdoll_BodyBoneOrientations(body);
@@ -135,10 +128,8 @@ void __cdecl Ragdoll_GetRootOrigin(int ragdollHandle, float *origin)
     RagdollBody *body; // [esp+0h] [ebp-4h]
 
     body = Ragdoll_HandleBody(ragdollHandle);
-    if (!body || body->references <= 0)
-        MyAssertHandler(".\\ragdoll\\ragdoll.cpp", 244, 0, "%s", "body && Ragdoll_BodyInUse( body )");
-    if (!body)
-        MyAssertHandler("c:\\trees\\cod3\\src\\ragdoll\\ragdoll.h", 271, 0, "%s", "body");
+    iassert( body && Ragdoll_BodyInUse( body ) );
+    iassert( body );
     if (body->state >= BS_TUNNEL_TEST)
         Ragdoll_BodyRootOrigin(body, origin);
 }
@@ -153,8 +144,7 @@ int __cdecl Ragdoll_CountPhysicsBodies()
     for (i = 0; i < 32; ++i)
     {
         body = &ragdollBodies[i];
-        if (!body)
-            MyAssertHandler("c:\\trees\\cod3\\src\\ragdoll\\ragdoll.h", 285, 0, "%s", "body");
+        iassert( body );
         if (body->references > 0 && Ragdoll_BodyHasPhysics(body))
             ++running;
     }
@@ -163,8 +153,7 @@ int __cdecl Ragdoll_CountPhysicsBodies()
 
 bool __cdecl Ragdoll_BodyHasPhysics(RagdollBody *body)
 {
-    if (!body)
-        MyAssertHandler("c:\\trees\\cod3\\src\\ragdoll\\ragdoll.h", 292, 0, "%s", "body");
+    iassert( body );
     return body->state >= BS_TUNNEL_TEST && body->state <= BS_RUNNING;
 }
 
@@ -173,8 +162,7 @@ int __cdecl Ragdoll_CreateRagdollForDObj(int localClientNum, int ragdollDef, int
     int ragdoll; // [esp+0h] [ebp-8h]
     RagdollBody *body; // [esp+4h] [ebp-4h]
 
-    if (dobj == -1)
-        MyAssertHandler(".\\ragdoll\\ragdoll.cpp", 360, 0, "%s", "dobj != DOBJ_HANDLE_NONE");
+    iassert( dobj != DOBJ_HANDLE_NONE );
     if (!Ragdoll_BindDef(1u))
         return 0;
     if (Ragdoll_CountPhysicsBodies() >= ragdoll_max_simulating->current.integer)
@@ -218,8 +206,7 @@ int __cdecl Ragdoll_GetUnusedBody()
     body = ragdollBodies;
     for (i = 0; i < 32; ++i)
     {
-        if (!body)
-            MyAssertHandler("c:\\trees\\cod3\\src\\ragdoll\\ragdoll.h", 285, 0, "%s", "body");
+        iassert( body );
         if (body->references <= 0)
         {
             Ragdoll_InitBody(body);
@@ -234,8 +221,7 @@ int __cdecl Ragdoll_GetUnusedBody()
 
 void __cdecl Ragdoll_InitBody(RagdollBody *body)
 {
-    if (!body)
-        MyAssertHandler(".\\ragdoll\\ragdoll.cpp", 120, 0, "%s", "body");
+    iassert( body );
     memset((unsigned __int8 *)body, 0, sizeof(RagdollBody));
 }
 
@@ -247,8 +233,7 @@ int __cdecl Ragdoll_ReferenceDObjBody(int dobj)
     body = ragdollBodies;
     for (i = 0; i < 32; ++i)
     {
-        if (!body)
-            MyAssertHandler("c:\\trees\\cod3\\src\\ragdoll\\ragdoll.h", 285, 0, "%s", "body");
+        iassert( body );
         if (body->references > 0 && body->dobj == dobj)
         {
             ++body->references;
@@ -338,10 +323,8 @@ void __cdecl Ragdoll_Remove(int ragdoll)
     RagdollBody *body; // [esp+0h] [ebp-4h]
 
     body = Ragdoll_HandleBody(ragdoll);
-    if (!body)
-        MyAssertHandler("c:\\trees\\cod3\\src\\ragdoll\\ragdoll.h", 285, 0, "%s", "body");
-    if (body->references <= 0)
-        MyAssertHandler(".\\ragdoll\\ragdoll.cpp", 454, 0, "%s", "Ragdoll_BodyInUse( body )");
+    iassert( body );
+    iassert( Ragdoll_BodyInUse( body ) );
     if (body->references == 1)
     {
         Ragdoll_BodyNewState(body, BS_DEAD);
@@ -358,8 +341,7 @@ void __cdecl Ragdoll_FreeBody(int ragdollBody)
     RagdollBody *body; // [esp+0h] [ebp-4h]
 
     body = Ragdoll_HandleBody(ragdollBody);
-    if (!body)
-        MyAssertHandler(".\\ragdoll\\ragdoll.cpp", 173, 0, "%s", "body");
+    iassert( body );
     Ragdoll_BodyNewState(body, BS_DEAD);
     body->references = 0;
 }
@@ -480,8 +462,7 @@ void __cdecl Ragdoll_ResetBodiesUsingDef()
     for (i = 0; i < 32; ++i)
     {
         body = &ragdollBodies[i];
-        if (!body)
-            MyAssertHandler("c:\\trees\\cod3\\src\\ragdoll\\ragdoll.h", 278, 0, "%s", "body");
+        iassert( body );
         if (body->state >= BS_VELOCITY_CAPTURE)
             Ragdoll_BodyNewState(body, BS_DOBJ_WAIT);
     }
@@ -1007,10 +988,8 @@ void __cdecl Ragdoll_Register()
 {
     int v0; // eax
 
-    if (!Sys_IsMainThread())
-        MyAssertHandler(".\\ragdoll\\ragdoll.cpp", 503, 0, "%s", "Sys_IsMainThread()");
-    if (ragdollFirstInit)
-        MyAssertHandler(".\\ragdoll\\ragdoll.cpp", 504, 0, "%s", "!ragdollFirstInit");
+    iassert( Sys_IsMainThread() );
+    iassert( !ragdollFirstInit );
     Ragdoll_InitDvars();
     Ragdoll_InitCommands();
     v0 = CL_ControllerIndexFromClientNum(0);
@@ -1022,10 +1001,8 @@ void __cdecl Ragdoll_Init()
 {
     int i; // [esp+0h] [ebp-4h]
 
-    if (!Sys_IsMainThread())
-        MyAssertHandler(".\\ragdoll\\ragdoll.cpp", 519, 0, "%s", "Sys_IsMainThread()");
-    if (!ragdollFirstInit)
-        MyAssertHandler(".\\ragdoll\\ragdoll.cpp", 520, 0, "%s", "ragdollFirstInit");
+    iassert( Sys_IsMainThread() );
+    iassert( ragdollFirstInit );
     if (!ragdollInited)
     {
         if (ragdoll_enable->current.enabled && ragdoll_max_simulating->current.integer < 8)
@@ -1042,8 +1019,7 @@ void __cdecl Ragdoll_Init()
 
 void __cdecl Ragdoll_Shutdown()
 {
-    if (!Sys_IsMainThread())
-        MyAssertHandler(".\\ragdoll\\ragdoll.cpp", 546, 0, "%s", "Sys_IsMainThread()");
+    iassert( Sys_IsMainThread() );
     ragdollInited = 0;
 }
 
@@ -1053,10 +1029,8 @@ int Ragdoll_CreateRagdollForDObjRaw(int localClientNum, int ragdollDef, const cp
     int v10; // r31
     RagdollBody *v11; // r3
 
-    if (!dobj)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\ragdoll\\ragdoll.cpp", 424, 0, "%s", "dobj");
-    if (!pose)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\ragdoll\\ragdoll.cpp", 425, 0, "%s", "pose");
+    iassert( dobj );
+    iassert( pose );
     if (!Ragdoll_BindDef(ragdollDef))
         return 0;
     UnusedBody = Ragdoll_GetUnusedBody();

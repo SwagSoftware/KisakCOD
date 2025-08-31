@@ -7,8 +7,7 @@ void __cdecl Ragdoll_QuatMul(const float *qa, const float *qb, float *dest)
     float w0; // [esp+0h] [ebp-8h]
     float w1; // [esp+4h] [ebp-4h]
 
-    if (qa == dest || qb == dest)
-        MyAssertHandler(".\\ragdoll\\ragdoll_quat.cpp", 24, 0, "%s", "qa != dest && qb != dest");
+    iassert( qa != dest && qb != dest );
     w0 = qa[3];
     w1 = qb[3];
     *dest = w0 * *qb + w1 * *qa + qa[1] * qb[2] - qa[2] * qb[1];

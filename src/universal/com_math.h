@@ -5,6 +5,7 @@
 #include <math.h>
 
 #define EQUAL_EPSILON 0.001f
+#define ZERO_EPSILON 0.000001f
 #define WEIGHT_EPSILON EQUAL_EPSILON
 
 #define CLAMP(x, low, high) ((x) < (low) ? (low) : ((x) > (high) ? (high) : (x)))
