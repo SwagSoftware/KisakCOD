@@ -233,44 +233,12 @@ void __cdecl VP_ParseFields(vehicle_node_t *node)
     }
 }
 
-void __cdecl VP_ZeroNode(vehicle_node_t *node)
-{
-    node->name = 0;
-    node->target = 0;
-    node->script_linkname = 0;
-    node->script_noteworthy = 0;
-}
-
 void __cdecl VP_ClearNode(vehicle_node_t *node)
 {
     Scr_SetString(&node->name, 0);
     Scr_SetString(&node->target, 0);
     Scr_SetString(&node->script_linkname, 0);
     Scr_SetString(&node->script_noteworthy, 0);
-}
-
-void __cdecl VP_InitNode(vehicle_node_t *node, __int16 nodeIdx)
-{
-    node->index = nodeIdx;
-    node->speed = -1.0;
-    node->lookAhead = -1.0;
-    node->name = 0;
-    node->target = 0;
-    node->script_linkname = 0;
-    node->script_noteworthy = 0;
-    node->rotated = 0;
-    node->origin[0] = 0.0;
-    node->origin[1] = 0.0;
-    node->origin[2] = 0.0;
-    node->dir[0] = 0.0;
-    node->dir[1] = 0.0;
-    node->dir[2] = 0.0;
-    node->angles[0] = s_invalidAngles[0];
-    node->angles[1] = s_invalidAngles[1];
-    node->angles[2] = s_invalidAngles[2];
-    node->nextIdx = -1;
-    node->length = 0.0;
-    node->prevIdx = -1;
 }
 
 void __cdecl VP_CopyNode(const vehicle_node_t *src, vehicle_node_t *dst)
@@ -1328,40 +1296,60 @@ void __cdecl TRACK_g_vehicle_path()
     track_static_alloc_internal(s_nodes, 272000, "s_nodes", 9);
 }
 
-void __cdecl SP_info_vehicle_node(int rotated)
+static void VP_ZeroNode(vehicle_node_t *node)
 {
-    __int16 v2; // r11
-    vehicle_node_t *node; // r31
-    int name; // r11
-
-    v2 = s_numNodes;
-    if (s_numNodes >= 4000)
-    {
-        Com_Error(ERR_DROP, "Hit max vehicle path node count [%d]", 4000);
-        v2 = s_numNodes;
-    }
-    node = &s_nodes[v2];
-    node->speed = -1.0;
     node->name = 0;
-    node->lookAhead = -1.0;
     node->target = 0;
     node->script_linkname = 0;
-    *(unsigned int *)&node->script_noteworthy = (unsigned __int16)v2;
+    node->script_noteworthy = 0;
+}
+
+static void VP_InitNode(vehicle_node_t *node, short nodeIdx)
+{
+    VP_ZeroNode(node);
+
+    node->index = nodeIdx;
+    node->speed = -1.0f;
+    node->lookAhead = -1.0f;
+
     node->rotated = 0;
-    node->origin[0] = 0.0;
-    node->origin[1] = 0.0;
-    s_numNodes = v2 + 1;
-    node->origin[2] = 0.0;
-    node->dir[0] = 0.0;
-    node->dir[1] = 0.0;
-    node->dir[2] = 0.0;
+
+    node->origin[0] = 0.0f;
+    node->origin[1] = 0.0f;
+    node->origin[2] = 0.0f;
+
+    node->dir[0] = 0.0f;
+    node->dir[1] = 0.0f;
+    node->dir[2] = 0.0f;
+
     node->angles[0] = s_invalidAngles[0];
     node->angles[1] = s_invalidAngles[1];
     node->angles[2] = s_invalidAngles[2];
-    node->nextIdx = -1;
-    node->length = 0.0;
+
+    node->length = 0.0f;
+
     node->prevIdx = -1;
+    node->nextIdx = -1;
+}
+
+void __cdecl SP_info_vehicle_node(int rotated)
+{
+    vehicle_node_t *node; // r31
+    int name; // r11
+
+    if (s_numNodes >= 4000)
+    {
+        Com_Error(ERR_DROP, "Hit max vehicle path node count [%d]", 4000);
+    }
+
+    node = &s_nodes[s_numNodes];
+
+    VP_InitNode(node, s_numNodes);
+
+    s_numNodes++;
+
     VP_ParseFields(node);
+
     name = node->name;
     node->rotated = rotated;
     if (!name)
@@ -1372,8 +1360,8 @@ void __cdecl SP_info_vehicle_node(int rotated)
             node->origin[1],
             node->origin[2]
         );
-    if (node->speed >= 0.0)
-        node->speed = node->speed * (float)17.6;
+    if (node->speed >= 0.0f)
+        node->speed = node->speed * 17.6f;
 }
 
 int __cdecl GScr_GetVehicleNodeIndex(int index)

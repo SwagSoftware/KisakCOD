@@ -109,10 +109,7 @@ void SL_AddRefToString(unsigned int stringValue)
 
 void SL_CheckExists(unsigned int stringValue)
 {
-	if (scrStringDebugGlob)
-	{
-		iassert(!scrStringDebugGlob || scrStringDebugGlob->refCount[stringValue]);
-	}
+	iassert(!scrStringDebugGlob || scrStringDebugGlob->refCount[stringValue]);
 }
 
 static void SL_CheckLeaks()
@@ -382,7 +379,7 @@ HashEntry_unnamed_type_u SL_GetStringOfSize(const char* str, unsigned int user, 
 
 const char* SL_ConvertToString(unsigned int stringValue)
 {
-	//iassert((!stringValue || !scrStringDebugGlob || scrStringDebugGlob->refCount[stringValue]));
+	iassert((!stringValue || !scrStringDebugGlob || scrStringDebugGlob->refCount[stringValue]));
 
 	if (stringValue)
 	{
@@ -723,11 +720,16 @@ void SL_RemoveRefToStringOfSize(unsigned int stringValue, unsigned int len)
 	{
 		if (scrStringDebugGlob)
 		{
+			// An assert here means that it tried to free a string handle that didn't have ref's. (add `SL_ConvertToString(stringValue)` to watch tab)
+			// generally means there is a bug ("+attack" in vehicle nodes, that's odd!!)
 			iassert(scrStringDebugGlob->totalRefCount && scrStringDebugGlob->refCount[stringValue]);
 			iassert(scrStringDebugGlob->refCount[stringValue]);
-		
-			InterlockedDecrement(&scrStringDebugGlob->totalRefCount);
-			InterlockedDecrement(&scrStringDebugGlob->refCount[stringValue]);
+
+			if (scrStringDebugGlob->refCount[stringValue])
+			{
+				InterlockedDecrement(&scrStringDebugGlob->totalRefCount);
+				InterlockedDecrement(&scrStringDebugGlob->refCount[stringValue]);
+			}
 		}
 	}
 	else
@@ -735,11 +737,15 @@ void SL_RemoveRefToStringOfSize(unsigned int stringValue, unsigned int len)
 		SL_FreeString(stringValue, refStr, len);
 		if (scrStringDebugGlob)
 		{
+			// see above ^^
 			iassert(scrStringDebugGlob->totalRefCount && scrStringDebugGlob->refCount[stringValue]);
 			iassert(scrStringDebugGlob->refCount[stringValue]);
-		
-			InterlockedDecrement(&scrStringDebugGlob->totalRefCount);
-			InterlockedDecrement(&scrStringDebugGlob->refCount[stringValue]);
+
+			if (scrStringDebugGlob->refCount[stringValue])
+			{
+				InterlockedDecrement(&scrStringDebugGlob->totalRefCount);
+				InterlockedDecrement(&scrStringDebugGlob->refCount[stringValue]);
+			}
 		}
 	}
 }

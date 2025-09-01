@@ -1104,11 +1104,12 @@ void G_CallSpawn()
             else
             {
                 spawnFunc = G_FindSpawnFunc(classname, s_bspOrDynamicSpawns, ARRAY_COUNT(s_bspOrDynamicSpawns));
-                //   if ( !spawnFunc && level.spawnVar.spawnVarsValid )
-                if (!spawnFunc)
+
+                if (!spawnFunc && level.spawnVar.spawnVarsValid)
                 {
                     spawnFunc = G_FindSpawnFunc(classname, s_bspOnlySpawns, 15);
                 }
+
                 if (!spawnFunc)
                 {
                     Com_Printf(15, "%s doesn't have a spawn function\n", classname);
