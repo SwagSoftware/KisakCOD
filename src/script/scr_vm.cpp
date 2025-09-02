@@ -357,9 +357,14 @@ void __cdecl Scr_Settings(int developer, int developer_script, int abort_on_erro
     developer_script = 0;
     abort_on_error = 0;
 #endif
+
     scrVarPub.developer = developer != 0;
     scrVarPub.developer_script = developer_script != 0;
     scrVmPub.abort_on_error = abort_on_error != 0;
+
+#ifdef _DEBUG // LWSS ADD
+    scrVarPub.developer_script = true;
+#endif
 }
 
 void __cdecl Scr_Shutdown()

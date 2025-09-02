@@ -115,42 +115,6 @@ int GetExpressionCount(sval_u exprlist)
 
 /*
 ============
-Scr_GetBuiltin
-============
-*/
-//unsigned int Scr_GetBuiltin(sval_u func_name)
-//{
-//	if (func_name.node[0].type != ENUM_script_call)
-//	{
-//		return 0;
-//	}
-//
-//	func_name = func_name.node[1];
-//
-//	if (func_name.node[0].type != ENUM_function)
-//	{
-//		return 0;
-//	}
-//
-//	func_name = func_name.node[1];
-//
-//	if (func_name.node[0].type != ENUM_local_function)
-//	{
-//		return 0;
-//	}
-//
-//	func_name = func_name.node[1];
-//
-//	if (FindVariable(scrCompileGlob.fileId, func_name.idValue))
-//	{
-//		return 0;
-//	}
-//
-//	return func_name.idValue;
-//}
-
-/*
-============
 Scr_CompileStatement
 ============
 */
@@ -1617,7 +1581,7 @@ void EmitOpcode(unsigned int op, int offset, int callType)
 
 		index = *scrCompilePub.opcodePos - OP_EvalLocalVariableCached0;
 
-		if (index > OP_GetNegByte)
+		if (index > 5)
 			goto END;
 
 		RemoveOpcodePos();
@@ -1749,15 +1713,7 @@ void EmitOpcode(unsigned int op, int offset, int callType)
 			return;
 		}
 
-		if (scrCompilePub.opcodePos != (unsigned char*)TempMalloc(0) - 1)
-			MyAssertHandler(
-				".\\script\\scr_compiler.cpp",
-				500,
-				0,
-				"%s",
-				"scrCompilePub.opcodePos == (byte *)TempMalloc( 0 ) - 1");
-
-		//iassert(scrCompilePub.opcodePos == (byte *)TempMalloc(0) - 1);
+		iassert(scrCompilePub.opcodePos == (byte *)TempMalloc(0) - 1);
 		TempMemorySetPos((char *)scrCompilePub.opcodePos);
 		--scrCompilePub.opcodePos;
 		scrCompileGlob.prevOpcodePos = NULL;
@@ -1782,7 +1738,7 @@ void EmitOpcode(unsigned int op, int offset, int callType)
 
 		index = *scrCompilePub.opcodePos - OP_EvalLocalVariableCached0;
 
-		if (index > OP_GetNegByte)
+		if (index > 5)
 			goto END;
 
 		*scrCompilePub.opcodePos = OP_EvalLocalVariableObjectCached;

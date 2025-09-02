@@ -108,34 +108,16 @@ void __cdecl SentientScr_GetTeam(sentient_s *pSelf, const sentient_fields_s *pFi
 
 void __cdecl GScr_AddFieldsForSentient()
 {
-    const sentient_fields_s *v0; // r25
-    int v1; // r27
+    const sentient_fields_s *f; // [esp+4h] [ebp-4h]
 
-    v0 = fields_2;
-    if ("team")
+    for (f = fields_2; f->name; ++f)
     {
-        v1 = 0;
-        do
-        {
-            if (((v1 / 20) & 0xC000) != 0)
-                MyAssertHandler(
-                    "c:\\trees\\cod3\\cod3src\\src\\game\\sentient_fields.cpp",
-                    119,
-                    0,
-                    "%s",
-                    "!((f - fields) & ENTFIELD_MASK)");
-            if (v1 / 20 != (unsigned __int16)(v1 / 20))
-                MyAssertHandler(
-                    "c:\\trees\\cod3\\cod3src\\src\\game\\sentient_fields.cpp",
-                    120,
-                    0,
-                    "%s",
-                    "(f - fields) == (unsigned short)( f - fields )");
-            Scr_AddClassField(0, (char*)v0->name, (unsigned __int16)(v1 / 20) | 0x4000);
-            ++v0;
-            v1 += 20;
-        } while (v0->name);
+        iassert(!((f - fields_2) & ENTFIELD_MASK));
+        iassert((f - fields_2) == (unsigned short)(f - fields_2));
+
+        Scr_AddClassField(0, (char*)f->name, (unsigned __int16)(f - fields_2) | ENTFIELD_SENTIENT);
     }
+
 }
 
 void __cdecl Scr_SetSentientField(sentient_s *sentient, unsigned int offset)

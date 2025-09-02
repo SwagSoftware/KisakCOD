@@ -1752,23 +1752,48 @@ void __cdecl G_DObjGetWorldTagPos_CheckTagExists(const gentity_s *ent, unsigned 
 
 gentity_s *__cdecl G_Find(gentity_s *from, int fieldofs, unsigned __int16 match)
 {
-    gentity_s *result; // r3
-    gentity_s *v4; // r9
-    unsigned __int8 *i; // r11
+    //gentity_s *result; // r3
+    //gentity_s *v4; // r9
+    //unsigned __int8 *i; // r11
+    //
+    //if (from)
+    //    result = from + 1;
+    //else
+    //    result = g_entities;
+    //
+    //v4 = &g_entities[level.num_entities];
+    //
+    //if (result >= v4)
+    //    return 0;
+    //
+    //for (i = (unsigned char*)result + fieldofs; 
+    //    !i[168 - fieldofs] || !*(_WORD *)i || *(unsigned __int16 *)i != match; i += 628)
+    //{
+    //    if (++result >= v4)
+    //        return 0;
+    //}
+    //return result;
+
+    unsigned __int16 s; // [esp+0h] [ebp-4h]
 
     if (from)
-        result = from + 1;
+        from = from + 1;
     else
-        result = g_entities;
-    v4 = &g_entities[level.num_entities];
-    if (result >= v4)
-        return 0;
-    for (i = (unsigned char*)&result->s.eType + fieldofs; !i[168 - fieldofs] || !*(_WORD *)i || *(unsigned __int16 *)i != match; i += 628)
+        from = g_entities;
+    while (from < &g_entities[level.num_entities])
     {
-        if (++result >= v4)
-            return 0;
+        if (from->r.inuse)
+        {
+            s = *(_WORD *)((char *)from + fieldofs);
+            if (s)
+            {
+                if (s == match)
+                    return from;
+            }
+        }
+        ++from;
     }
-    return result;
+    return 0;
 }
 
 void __cdecl G_InitGentity(gentity_s *e)

@@ -414,18 +414,12 @@ void __cdecl G_DamageNotify(
 
     if (modelIndex)
     {
-        v36 = 2 * (modelIndex + 272);
-        if (!*(_WORD *)(&targ->s.eType + v36))
-            MyAssertHandler(
-                "c:\\trees\\cod3\\cod3src\\src\\game\\g_combat.cpp",
-                466,
-                0,
-                "%s",
-                "targ->attachTagNames[modelIndex - 1]");
+        //v36 = 2 * (modelIndex + 272);
+        iassert(targ->attachTagNames[modelIndex - 1]);
         modelName = SV_GetConfigstringConst(*((unsigned __int16 *)&targ->scripted + modelIndex + 1) + 1155);
-        if (!modelName)
-            MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\g_combat.cpp", 469, 1, "%s", "modelName");
-        Scr_AddConstString(*(unsigned __int16 *)(&targ->s.eType + v36));
+        iassert(modelName);
+        //Scr_AddConstString(*(unsigned __int16 *)(&targ->s.eType + v36));
+        Scr_AddConstString(targ->attachTagNames[modelIndex - 1]);
         Scr_AddConstString(modelName);
     }
     else

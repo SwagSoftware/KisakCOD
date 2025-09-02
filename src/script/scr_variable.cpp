@@ -2269,10 +2269,8 @@ void Scr_FreeObjects()
 void  Scr_AddClassField(unsigned int classnum, char* name, unsigned int offset)
 {
 	unsigned int str; // [esp+0h] [ebp-14h]
-	unsigned int stra; // [esp+0h] [ebp-14h]
 	unsigned int classId; // [esp+4h] [ebp-10h]
 	VariableValueInternal* entryValue; // [esp+8h] [ebp-Ch]
-	VariableValueInternal* entryValuea; // [esp+8h] [ebp-Ch]
 	unsigned int fieldId; // [esp+Ch] [ebp-8h]
 	const char* namePos; // [esp+10h] [ebp-4h]
 
@@ -2291,14 +2289,14 @@ void  Scr_AddClassField(unsigned int classnum, char* name, unsigned int offset)
 	entryValue->w.status &= 0xFFFFFFE0;
 	entryValue->w.status |= 6u;
 	entryValue->u.u.intValue = offset;
-	stra = SL_GetString_(name, 0, 16);
+	str = SL_GetString_(name, 0, 16);
 	iassert(!FindVariable(classId, str));
-	fieldId = GetNewVariable(classId, stra);
-	SL_RemoveRefToString(stra);
-	entryValuea = &scrVarGlob.variableList[fieldId + VARIABLELIST_CHILD_BEGIN];
-	entryValuea->w.status &= 0xFFFFFFE0;
-	entryValuea->w.status |= 6u;
-	entryValuea->u.u.intValue = offset;
+	fieldId = GetNewVariable(classId, str);
+	SL_RemoveRefToString(str);
+	entryValue = &scrVarGlob.variableList[fieldId + VARIABLELIST_CHILD_BEGIN];
+	entryValue->w.status &= 0xFFFFFFE0;
+	entryValue->w.status |= 6u;
+	entryValue->u.u.intValue = offset;
 }
 
 unsigned int  Scr_GetEntityId(unsigned int entnum, unsigned int classnum)

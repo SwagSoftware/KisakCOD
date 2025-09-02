@@ -2275,20 +2275,17 @@ void __cdecl ScrCmd_GetAttachModelName(scr_entref_t entref)
 
 void __cdecl ScrCmd_GetAttachTagName(scr_entref_t entref)
 {
-    gentity_s *Entity; // r30
-    unsigned int Int; // r3
-    unsigned int v3; // r31
-    int v4; // r31
+    gentity_s *ent; // r30
+    unsigned int i; // r3
 
-    Entity = GetEntity(entref);
-    Int = Scr_GetInt(0);
-    v3 = Int;
-    if (Int >= 0x1F || !Entity->attachModelNames[Int])
+    ent = GetEntity(entref);
+    i = Scr_GetInt(0);
+
+    if (i >= 0x1F || !ent->attachModelNames[i])
         Scr_ParamError(0, "bad index");
-    v4 = 2 * (v3 + 273);
-    if (!*(_WORD *)(&Entity->s.eType + v4))
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\g_scr_main.cpp", 2313, 0, "%s", "ent->attachTagNames[i]");
-    Scr_AddConstString(*(unsigned __int16 *)(&Entity->s.eType + v4));
+
+    iassert(ent->attachTagNames[i]);
+    Scr_AddConstString(ent->attachTagNames[i]);
 }
 
 void __cdecl ScrCmd_GetAttachIgnoreCollision(scr_entref_t entref)

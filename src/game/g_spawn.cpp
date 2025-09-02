@@ -221,45 +221,82 @@ void G_SpawnStruct()
 
 void __cdecl G_DuplicateEntityFields(gentity_s *dest, const gentity_s *source)
 {
-    const int *p_ofs; // r31
-    float *v5; // r11
-    float *v6; // r10
+    //const int *p_ofs; // r31
+    //float *v5; // r11
+    //float *v6; // r10
+    //
+    //if ("classname")
+    //{
+    //    p_ofs = &fields_1[0].ofs;
+    //    do
+    //    {
+    //        switch (p_ofs[1])
+    //        {
+    //        case 0:
+    //            *(unsigned int *)(&dest->s.eType + *p_ofs) = *(unsigned int *)(&source->s.eType + *p_ofs);
+    //            break;
+    //        case 1:
+    //        case 14:
+    //            *(_WORD *)(&dest->s.eType + *p_ofs) = *(_WORD *)(&source->s.eType + *p_ofs);
+    //            break;
+    //        case 2:
+    //            *(&dest->s.eType + *p_ofs) = *(&source->s.eType + *p_ofs);
+    //            break;
+    //        case 3:
+    //            *(float *)(&dest->s.eType + *p_ofs) = *(float *)(&source->s.eType + *p_ofs);
+    //            break;
+    //        case 4:
+    //            Scr_SetString((unsigned __int16 *)(&dest->s.eType + *p_ofs), *(unsigned __int16 *)(&source->s.eType + *p_ofs));
+    //            break;
+    //        case 5:
+    //            v5 = (float *)(&source->s.eType + *p_ofs);
+    //            v6 = (float *)(&dest->s.eType + *p_ofs);
+    //            *v6 = *v5;
+    //            v6[1] = v5[1];
+    //            v6[2] = v5[2];
+    //            break;
+    //        default:
+    //            break;
+    //        }
+    //        p_ofs += 4;
+    //    } while (*(p_ofs - 1));
+    //}
 
-    if ("classname")
+
+    float *destVec; // [esp+8h] [ebp-14h]
+    float *sourceVec; // [esp+Ch] [ebp-10h]
+    const ent_field_t *f; // [esp+14h] [ebp-8h]
+
+    for (f = fields_1; f->name; ++f)
     {
-        p_ofs = &fields_1[0].ofs;
-        do
+        switch (f->type)
         {
-            switch (p_ofs[1])
-            {
-            case 0:
-                *(unsigned int *)(&dest->s.eType + *p_ofs) = *(unsigned int *)(&source->s.eType + *p_ofs);
-                break;
-            case 1:
-            case 14:
-                *(_WORD *)(&dest->s.eType + *p_ofs) = *(_WORD *)(&source->s.eType + *p_ofs);
-                break;
-            case 2:
-                *(&dest->s.eType + *p_ofs) = *(&source->s.eType + *p_ofs);
-                break;
-            case 3:
-                *(float *)(&dest->s.eType + *p_ofs) = *(float *)(&source->s.eType + *p_ofs);
-                break;
-            case 4:
-                Scr_SetString((unsigned __int16 *)(&dest->s.eType + *p_ofs), *(unsigned __int16 *)(&source->s.eType + *p_ofs));
-                break;
-            case 5:
-                v5 = (float *)(&source->s.eType + *p_ofs);
-                v6 = (float *)(&dest->s.eType + *p_ofs);
-                *v6 = *v5;
-                v6[1] = v5[1];
-                v6[2] = v5[2];
-                break;
-            default:
-                break;
-            }
-            p_ofs += 4;
-        } while (*(p_ofs - 1));
+        case F_INT:
+            *(int *)((char *)dest + f->ofs) = *(int *)((char *)source + f->ofs);
+            break;
+        case F_SHORT:
+        case F_MODEL:
+            *(_WORD *)((char *)dest + f->ofs) = *(_WORD *)((char *)source + f->ofs);
+            break;
+        case F_BYTE:
+            *(byte *)((char*)dest + f->ofs) = *(byte *)((char *)source + f->ofs);
+            break;
+        case F_FLOAT:
+            *(float *)((char *)dest + f->ofs) = *(float *)((char *)source + f->ofs);
+            break;
+        case F_STRING:
+            Scr_SetString((unsigned __int16 *)((char *)dest + f->ofs), *(unsigned __int16 *)((char *)source + f->ofs));
+            break;
+        case F_VECTOR:
+            destVec = (float *)((char *)dest + f->ofs);
+            sourceVec = (float *)((char *)source + f->ofs);
+            destVec[0] = sourceVec[0];
+            destVec[1] = sourceVec[1];
+            destVec[2] = sourceVec[2];
+            break;
+        default:
+            continue;
+        }
     }
 }
 
@@ -418,34 +455,16 @@ int __cdecl G_CallSpawnEntity(gentity_s *ent)
 
 void __cdecl GScr_AddFieldsForEntity()
 {
-    const ent_field_t *v0; // r27
-    int v1; // r24
+    const ent_field_t *f;
 
-    v0 = fields_1;
-    if ("classname")
+    for (f = fields_1; f->name; ++f)
     {
-        v1 = 0;
-        do
-        {
-            if (((v1 >> 4) & 0xC000) != 0)
-                MyAssertHandler(
-                    "c:\\trees\\cod3\\cod3src\\src\\game\\g_spawn.cpp",
-                    563,
-                    0,
-                    "%s",
-                    "((f - fields) & ENTFIELD_MASK) == ENTFIELD_ENTITY");
-            if (v1 >> 4 != (unsigned __int16)(v1 >> 4))
-                MyAssertHandler(
-                    "c:\\trees\\cod3\\cod3src\\src\\game\\g_spawn.cpp",
-                    564,
-                    0,
-                    "%s",
-                    "(f - fields) == (unsigned short)( f - fields )");
-            Scr_AddClassField(0, (char*)v0->name, (unsigned __int16)(v1 >> 4));
-            ++v0;
-            v1 += 16;
-        } while (v0->name);
+        iassert(((f - fields_1) & ENTFIELD_MASK) == ENTFIELD_ENTITY);
+        iassert((f - fields_1) == (unsigned short)(f - fields_1));
+
+        Scr_AddClassField(0, (char*)f->name, (unsigned __int16)(f - fields_1));
     }
+
     GScr_AddFieldsForActor();
     GScr_AddFieldsForSentient();
     GScr_AddFieldsForClient();
@@ -681,43 +700,39 @@ void __cdecl Scr_Notify(gentity_s *ent, unsigned __int16 stringValue, unsigned i
 
 void __cdecl Scr_GetGenericEnt(unsigned int offset, unsigned int name)
 {
-    const ent_field_t *v4; // r27
+    const ent_field_t *f; // r27
     gentity_s *v5; // r3
-    gentity_s *v6; // r31
-    int v7; // r30
+    gentity_s *entItr; // r31
+    int i; // r30
     int num_entities; // r10
 
-    if (offset >= 0xF)
-        MyAssertHandler(
-            "c:\\trees\\cod3\\cod3src\\src\\game\\g_spawn.cpp",
-            996,
-            0,
-            "offset doesn't index ARRAY_COUNT( fields ) - 1\n\t%i not in [0, %i)",
-            offset,
-            15);
-    v4 = &fields_1[offset];
-    if (v4->type != F_STRING)
+    bcassert(offset, ARRAY_COUNT(fields_1));
+
+    f = &fields_1[offset];
+    if (f->type != F_STRING)
         Scr_ParamError(1u, "key is not internally a string");
+
+
     v5 = 0;
-    v6 = g_entities;
-    v7 = 0;
+    entItr = g_entities;
+    i = 0;
     num_entities = level.num_entities;
     if (level.num_entities > 0)
     {
         do
         {
-            if (v6->r.inuse && *(_WORD *)(&v6->s.eType + v4->ofs) && *(unsigned __int16 *)(&v6->s.eType + v4->ofs) == name)
+            if (entItr->r.inuse && *(_WORD *)((char*)entItr + f->ofs) && *(unsigned __int16 *)((char*)entItr + f->ofs) == name)
             {
                 if (v5)
                 {
                     Scr_Error("getent used with more than one entity");
                     num_entities = level.num_entities;
                 }
-                v5 = v6;
+                v5 = entItr;
             }
-            ++v7;
-            ++v6;
-        } while (v7 < num_entities);
+            ++i;
+            ++entItr;
+        } while (i < num_entities);
         if (v5)
             Scr_AddEntity(v5);
     }

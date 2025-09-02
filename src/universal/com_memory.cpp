@@ -169,8 +169,7 @@ void* __cdecl Z_TryVirtualAllocInternal(int32_t size)
 
 bool __cdecl Z_TryVirtualCommitInternal(void* ptr, int32_t size)
 {
-    if (size < 0)
-        MyAssertHandler(".\\universal\\com_memory.cpp", 294, 0, "%s\n\t(size) = %i", "(size >= 0)", size);
+    iassert(size >= 0);
     return VirtualAlloc(ptr, size, 0x1000u, 4u) != 0;
 }
 

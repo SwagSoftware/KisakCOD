@@ -11,6 +11,15 @@
 
 #define MAX_HUDELEMS_TOTAL 0x100
 
+enum $854C867908149C343981C8BAF4C9A230 : __int32
+{
+    ENTFIELD_ENTITY = 0x0,
+    ENTFIELD_SENTIENT = 0x4000,
+    ENTFIELD_ACTOR = 0x8000,
+    ENTFIELD_CLIENT = 0xC000,
+    ENTFIELD_MASK = 0xC000,
+};
+
 // MOD = Means of Death
 enum meansOfDeath_t : __int32
 {

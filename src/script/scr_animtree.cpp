@@ -184,10 +184,9 @@ void __cdecl Scr_LoadAnimTreeAtIndex(unsigned int index, void *(__cdecl *Alloc)(
     XAnim_s *animtree; // [esp+0h] [ebp-28h]
     unsigned int size; // [esp+8h] [ebp-20h]
     unsigned int size2;
-    HashEntry_unnamed_type_u name; // [esp+Ch] [ebp-1Ch]
+    unsigned int name; // [esp+Ch] [ebp-1Ch]
     unsigned int filenameId; // [esp+10h] [ebp-18h]
     unsigned int names; // [esp+14h] [ebp-14h]
-    unsigned int namesa; // [esp+14h] [ebp-14h]
     unsigned int fileId; // [esp+18h] [ebp-10h]
     VariableValue tempValue; // [esp+1Ch] [ebp-Ch] BYREF
     unsigned int id; // [esp+24h] [ebp-4h]
@@ -203,19 +202,19 @@ void __cdecl Scr_LoadAnimTreeAtIndex(unsigned int index, void *(__cdecl *Alloc)(
     filenameId = (unsigned __int16)GetVariableName(id);
     fileId = FindObject(id);
     iassert(fileId);
-    if (!FindVariable(fileId, 1u))
+    if (!FindVariable(fileId, 1))
     {
         names = FindVariable(fileId, 0);
         if (names)
         {
-            namesa = FindObject(names);
+            names = FindObject(names);
 
-            iassert(namesa);
+            iassert(names);
             iassert(!scrAnimPub.animtree_node);
 
             scrAnimPub.animtree_node = Scr_AllocArray();
             animtree_node = scrAnimPub.animtree_node;
-            if (!Scr_LoadAnimTreeInternal(SL_ConvertToString(filenameId), animtree_node, namesa))
+            if (!Scr_LoadAnimTreeInternal(SL_ConvertToString(filenameId), animtree_node, names))
             {
                 Com_Error(ERR_DROP, va("unknown anim tree '%s'", SL_ConvertToString(filenameId)));
             }
@@ -224,18 +223,18 @@ void __cdecl Scr_LoadAnimTreeAtIndex(unsigned int index, void *(__cdecl *Alloc)(
             size = Scr_GetAnimTreeSize(scrAnimPub.animtree_node);
             iassert(size);
             animtree = XAnimCreateAnims(SL_ConvertToString(filenameId), size, Alloc);
-            name.prev = SL_GetString_("root", 0, 4);
-            ConnectScriptToAnim(namesa, 0, filenameId, name.prev, index);
-            SL_RemoveRefToString(name.prev);
+            name = SL_GetString_("root", 0, 4);
+            ConnectScriptToAnim(names, 0, filenameId, name, index);
+            SL_RemoveRefToString(name);
 
             if (!useFastFile->current.enabled)
                 Scr_PrecacheAnimationTree(scrAnimPub.animtree_node);
 
-            size2 = Scr_CreateAnimationTree(scrAnimPub.animtree_node, namesa, animtree, 1, "root", 0, filenameId, index, 0);
+            size2 = Scr_CreateAnimationTree(scrAnimPub.animtree_node, names, animtree, 1, "root", 0, filenameId, index, 0);
 
             iassert(size == size2);
 
-            Scr_CheckAnimsDefined(namesa, filenameId);
+            Scr_CheckAnimsDefined(names, filenameId);
             RemoveVariable(fileId, 0);
             RemoveRefToObject(scrAnimPub.animtree_node);
             scrAnimPub.animtree_node = 0;
@@ -302,13 +301,16 @@ void __cdecl ConnectScriptToAnim(
         {
             Com_Error(ERR_DROP, "duplicate animation %s in animtrees/%s.atr", SL_ConvertToString(name), SL_ConvertToString(filename));
         }
+
         anim.index = index;
         anim.tree = treeIndex;
+
         for (codePos = (char *)value->u.codePosValue; codePos; codePos = nextCodePos)
         {
             nextCodePos = *(const char **)codePos;
-            *(const char**)codePos = anim.linkPointer;
+            *(scr_anim_s *)codePos = anim;
         }
+
         value->u.codePosValue = NULL;
     }
 }
@@ -491,15 +493,13 @@ bool __cdecl AnimTreeParseInternal(
     bool bLoop,
     bool bComplete)
 {
-    bool v5; // al
+    bool eof; // al
     unsigned int ArrayVariable; // eax
     unsigned int prev; // eax
     unsigned int currentAnim; // [esp+Ch] [ebp-24h]
     bool bResult; // [esp+13h] [ebp-1Dh]
     unsigned int animName; // [esp+14h] [ebp-1Ch]
-    unsigned int animNamea; // [esp+14h] [ebp-1Ch]
     parseInfo_t *token; // [esp+18h] [ebp-18h]
-    parseInfo_t *tokena; // [esp+18h] [ebp-18h]
     unsigned int currentAnimArray; // [esp+1Ch] [ebp-14h]
     int flags; // [esp+20h] [ebp-10h]
     bool bIgnore; // [esp+27h] [ebp-9h]
@@ -536,14 +536,14 @@ bool __cdecl AnimTreeParseInternal(
                 currentAnim = GetVariable(parentNode, animName);
                 bIgnore = (!bComplete && !FindVariable(names, animName) && !scrAnimGlob.bAnimCheck);
                 flags = 0;
-                tokena = Com_ParseOnLine(&scrAnimGlob.pos);
+                token = Com_ParseOnLine(&scrAnimGlob.pos);
 
-                if (tokena->token[0])
+                if (token->token[0])
                 {
-                    if (Scr_IsIdentifier(tokena->token))
+                    if (Scr_IsIdentifier(token->token))
                         AnimTreeCompileError("FIXME: aliases not yet implemented");
 
-                    if (tokena->token[0] != ':' || tokena->token[1])
+                    if (token->token[0] != ':' || token->token[1])
                         AnimTreeCompileError("bad token");
 
                     flags = GetAnimTreeParseProperties();
@@ -569,11 +569,11 @@ bool __cdecl AnimTreeParseInternal(
 
             currentAnimArray = GetArray(currentAnim);
             if (bComplete || (flags & ANIMFLAG_COMPLETE) != 0 && !bIgnore)
-                v5 = AnimTreeParseInternal(currentAnimArray, names, !bIgnore, flags & ANIMFLAG_LOOPSYNC, true);
+                eof = AnimTreeParseInternal(currentAnimArray, names, !bIgnore, flags & ANIMFLAG_LOOPSYNC, true);
             else
-                v5 = AnimTreeParseInternal(currentAnimArray, names, !bIgnore, flags & ANIMFLAG_LOOPSYNC, false);
+                eof = AnimTreeParseInternal(currentAnimArray, names, !bIgnore, flags & ANIMFLAG_LOOPSYNC, false);
 
-            if (v5)
+            if (eof)
                 AnimTreeCompileError("unexpected end of file");
 
             if (GetArraySize(currentAnimArray))
@@ -612,13 +612,14 @@ end:
     if (bIncludeParent && !GetArraySize(parentNode))
     {
         if (bLoop)
-            prev = SL_GetString_("void_loop", 0, 4);
+            animName = SL_GetString_("void_loop", 0, 4);
         else
-            prev = SL_GetString_("void", 0, 4);
-        animNamea = prev;
-        GetVariable(parentNode, prev);
-        SL_RemoveRefToString(animNamea);
+            animName = SL_GetString_("void", 0, 4);
+
+        GetVariable(parentNode, animName);
+        SL_RemoveRefToString(animName);
     }
+
     return bResult;
 }
 
