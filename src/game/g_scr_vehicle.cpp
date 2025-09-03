@@ -3140,472 +3140,246 @@ void VEH_GetWheelOrigin(gentity_s *ent, int idx, float *origin)
     }
 }
 
-// KISAKTODO: my god, just merge these with the MP version
-void __fastcall VEH_GroundPlant(gentity_s *ent, vehicle_physic_t *phys, int gravity)
+void VEH_GroundPlant(gentity_s *ent, vehicle_physic_t *phys, int gravity)
 {
     scr_vehicle_s *scr_vehicle; // r19
-    vehicle_info_t *v7; // r20
-    int v8; // r23
-    int v9; // r28
-    float *angles; // r24
-    int v11; // r29
-    float *v12; // r30
-    float *wheelZVel; // r31
-    const float *v14; // r6
-    const dvar_s *v15; // r11
-    const float *v16; // r6
-    double fraction; // fp0
+    vehicle_info_t *info; // r20
+    int content; // r23
+    int numWheels; // r28
+    int i; // r29
     double wheelOrigin; // fp13
-    double v19; // fp10
-    double v20; // fp12
-    double v21; // fp9
-    double v22; // fp11
-    double v23; // fp8
-    double v24; // fp10
-    double v25; // fp12
-    double v26; // fp0
-    double v27; // fp13
-    double v28; // fp11
-    double v29; // fp13
-    const dvar_s *v30; // r11
-    double v31; // fp0
-    double v32; // fp12
-    double v33; // fp13
-    double v34; // fp9
-    double v35; // fp11
-    double v36; // fp8
-    double v39; // fp10
-    double v40; // fp0
-    double v43; // fp0
-    double v44; // fp27
-    int v45; // r10
-    double v46; // fp29
-    double v47; // fp28
-    double v48; // fp30
     double suspensionTravel; // fp0
-    float *v50; // r11
-    unsigned int v51; // r9
-    int v52; // r9
-    float *v53; // r11
-    double v56; // fp0
-    double v59; // fp0
-    double v60; // fp1
     int flags; // r11
-    const dvar_s *v70; // r11
-    float v71; // [sp+50h] [-2A0h] BYREF
-    float v72; // [sp+54h] [-29Ch]
-    float v73; // [sp+58h] [-298h]
-    float v74; // [sp+60h] [-290h] BYREF
-    float v75; // [sp+64h] [-28Ch]
-    float v76; // [sp+68h] [-288h]
-    float v77; // [sp+70h] [-280h] BYREF
-    float v78; // [sp+74h] [-27Ch]
-    float v79; // [sp+78h] [-278h]
-    float v80; // [sp+7Ch] [-274h]
-    float v81; // [sp+80h] [-270h] BYREF
-    float v82; // [sp+84h] [-26Ch]
-    float v83; // [sp+88h] [-268h]
-    float v84; // [sp+90h] [-260h] BYREF
-    float v85; // [sp+94h] [-25Ch]
-    float v86; // [sp+98h] [-258h]
-    float v87; // [sp+A0h] [-250h] BYREF
-    float v88; // [sp+A4h] [-24Ch]
-    float v89; // [sp+A8h] [-248h]
-    float v90[3]; // [sp+B0h] [-240h] BYREF
-    float v91; // [sp+BCh] [-234h] BYREF
-    float v92; // [sp+C0h] [-230h]
-    float v93; // [sp+C4h] [-22Ch]
-    float v94; // [sp+D4h] [-21Ch]
-    float v95; // [sp+D8h] [-218h]
-    float v96; // [sp+DCh] [-214h]
-    float v97[3]; // [sp+E0h] [-210h] BYREF
-    float v98[3]; // [sp+ECh] [-204h] BYREF
-    float v99[3]; // [sp+F8h] [-1F8h] BYREF
-    float v100[3]; // [sp+104h] [-1ECh] BYREF
-    float v101; // [sp+110h] [-1E0h] BYREF
-    float v102; // [sp+114h] [-1DCh]
-    float v103; // [sp+118h] [-1D8h] BYREF
-    float v104; // [sp+11Ch] [-1D4h]
-    float v105; // [sp+120h] [-1D0h]
-    float v106; // [sp+124h] [-1CCh] BYREF
-    float v107; // [sp+128h] [-1C8h]
-    float v108; // [sp+12Ch] [-1C4h]
-    float v109; // [sp+130h] [-1C0h]
-    float v110; // [sp+134h] [-1BCh]
-    float v111; // [sp+138h] [-1B8h]
-    float v112; // [sp+13Ch] [-1B4h]
-    float v113[6]; // [sp+158h] [-198h] BYREF
-    float v114[4]; // [sp+170h] [-180h] BYREF
-    float v115[4]; // [sp+180h] [-170h] BYREF
-    float v116[4]; // [sp+190h] [-160h] BYREF
-    float v117[4]; // [sp+1A0h] [-150h] BYREF
-    float v118[4]; // [sp+1B0h] [-140h] BYREF
-    float v119[4]; // [sp+1C0h] [-130h] BYREF
-    float v120[4]; // [sp+1D0h] [-120h] BYREF
-    float v121[4]; // [sp+1E0h] [-110h] BYREF
-    float v122[4]; // [sp+1F0h] [-100h] BYREF
-    trace_t v123; // [sp+200h] [-F0h] BYREF
+    float traceEnd[3];
+    float hitPos[3];
+    float maxs[3];
+    float traceStart[3];
+    float mins[6]; // [sp+158h] [-198h] BYREF
+    float color[4]; // [sp+1D0h] [-120h] BYREF
+    float temp[4]; // [sp+1F0h] [-100h] BYREF
+    trace_t trace; // [sp+200h] [-F0h] BYREF
 
-    if (!ent)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\g_scr_vehicle.cpp", 1548, 0, "%s", "ent");
-    if (!ent->scr_vehicle)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\g_scr_vehicle.cpp", 1549, 0, "%s", "ent->scr_vehicle");
-    if (!phys)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\g_scr_vehicle.cpp", 1550, 0, "%s", "phys");
+    float axis[4][3];
+
+    iassert(ent);
+    iassert(ent->scr_vehicle);
+    iassert(phys);
+
     scr_vehicle = ent->scr_vehicle;
-    v7 = &s_vehicleInfos[scr_vehicle->infoIdx];
-    if (v7->type && v7->type != 1)
-        MyAssertHandler(
-            "c:\\trees\\cod3\\cod3src\\src\\game\\g_scr_vehicle.cpp",
-            1555,
-            0,
-            "%s",
-            "(info->type == VEH_WHEELS_4) || (info->type == VEH_TANK)");
-    v8 = 529;
-    v9 = v7->type == 0 ? 4 : 6;
+    info = &s_vehicleInfos[scr_vehicle->infoIdx];
+    iassert((info->type == VEH_WHEELS_4) || (info->type == VEH_TANK));
+    content = 529;
+    numWheels = info->type == 0 ? 4 : 6;
+
     if ((scr_vehicle->flags & 1) != 0)
-        v8 = 66065;
-    angles = phys->angles;
-    v94 = phys->origin[0];
-    v95 = phys->origin[1];
-    v96 = phys->prevOrigin[2];
-    AnglesToAxis(phys->angles, (float (*)[3])v90);
-    v11 = 0;
-    if (v9 > 0)
+        content = 66065;
+
+    //angles = phys->angles;
+
+    axis[3][0] = phys->origin[0];
+    axis[3][1] = phys->origin[1];
+    axis[3][2] = phys->prevOrigin[2];
+
+    AnglesToAxis(phys->angles, axis);
+
+    float wheelPos[4][3];
+
+    for (int i = 0; i < numWheels; i++)
     {
-        v12 = &v101;
-        wheelZVel = phys->wheelZVel;
-        do
+        VEH_GetWheelOrigin(ent, i, temp);
+        MatrixTransformVector43(temp, axis, hitPos);
+
+        if (g_vehicleDebug->current.enabled)
         {
-            VEH_GetWheelOrigin(ent, v11, v122);
-            MatrixTransformVector43(v122, (const mat4x3&)v90, &v74);
-            v15 = g_vehicleDebug;
-            if (g_vehicleDebug->current.enabled)
-            {
-                v114[0] = 1.0;
-                v114[1] = 0.0;
-                v114[2] = 0.0;
-                v114[3] = 1.0;
-                v113[0] = -2.0;
-                v113[1] = -2.0;
-                v113[2] = -2.0;
-                v77 = 2.0;
-                v78 = 2.0;
-                v79 = 2.0;
-                G_DebugBox(&v74, v113, &v77, 0.0, v14, (int)v114, 1);
-                v15 = g_vehicleDebug;
-            }
-            v87 = v74;
-            v71 = v74;
-            v88 = v75;
-            v72 = v75;
-            v89 = v76 + (float)64.0;
-            v73 = v76 - (float)256.0;
-            if (v15->current.enabled)
-            {
-                v120[0] = 0.0;
-                v120[1] = 0.0;
-                v120[2] = 1.0;
-                v120[3] = 1.0;
-                G_DebugLine(&v87, &v71, v120, 1);
-            }
-            G_TraceCapsule(&v123, &v87, vec3_origin, vec3_origin, &v71, ent->s.number, v8);
-            fraction = v123.fraction;
-            if (v123.fraction >= 1.0)
-            {
-                v24 = v71;
-                wheelZVel[12] = 0.0;
-                v25 = v72;
-                v26 = v73;
-            }
-            else
-            {
-                wheelOrigin = v87;
-                v19 = (float)(v71 - v87);
-                v20 = v88;
-                v21 = (float)(v72 - v88);
-                v22 = v89;
-                v23 = (float)(v73 - v89);
-                *((_DWORD *)wheelZVel + 12) = (v123.surfaceFlags >> 20) & 0x1F;
-                v24 = (float)((float)((float)v19 * (float)fraction) + (float)wheelOrigin);
-                v25 = (float)((float)((float)v21 * (float)fraction) + (float)v20);
-                v26 = (float)((float)((float)v23 * (float)fraction) + (float)v22);
-            }
-            v76 = v26;
-            v75 = v25;
-            v74 = v24;
-            if (!gravity
-                || (v27 = (float)(*wheelZVel - (float)40.0),
-                    v28 = wheelZVel[6],
-                    *wheelZVel = *wheelZVel - (float)40.0,
-                    v29 = (float)((float)((float)v27 * (float)0.050000001) + (float)v28),
-                    wheelZVel[6] = v29,
-                    v29 < v26))
-            {
-                *wheelZVel = 0.0;
-                wheelZVel[6] = v26;
-            }
-            v30 = g_vehicleDebug;
-            v31 = wheelZVel[6];
-            *v12 = v24;
-            v12[1] = v25;
-            v12[2] = v31;
-            if (v30->current.enabled)
-            {
-                v116[0] = 0.0;
-                v116[1] = 1.0;
-                v116[2] = 0.0;
-                v116[3] = 1.0;
-                v84 = -2.0;
-                v85 = -2.0;
-                v86 = -2.0;
-                v81 = 2.0;
-                v82 = 2.0;
-                v83 = 2.0;
-                G_DebugBox(v12, &v84, &v81, 0.0, v16, (int)v116, 1);
-            }
-            ++v11;
-            ++wheelZVel;
-            v12 += 3;
-        } while (v11 < v9);
-    }
+            // KISAKTODO
+            //v114[0] = 1.0;
+            //v114[1] = 0.0;
+            //v114[2] = 0.0;
+            //v114[3] = 1.0;
+            //
+            //mins[0] = -2.0f;
+            //mins[1] = -2.0f;
+            //mins[2] = -2.0f;
+            //
+            //maxs[0] = 2.0f;
+            //maxs[1] = 2.0f;
+            //maxs[2] = 2.0f;
+            //
+            //G_DebugBox(hitPos, mins, maxs, 0.0f, colorBlue, (int)v114, 1);
+            //v15 = g_vehicleDebug;
+        }
 
-    // aislop
-    //v32 = (float)((float)((float)(v112 + v106) * (float)0.5) - (float)((float)(v109 + v103) * (float)0.5));
-    //v33 = (float)((float)((float)(v104 + v110) * (float)0.5) - (float)((float)(v107 + v101) * (float)0.5));
-    //v34 = (float)((float)((float)(v106 + v103) * (float)0.5) - (float)((float)(v109 + v112) * (float)0.5));
-    //v35 = (float)((float)((float)(v111 + v105) * (float)0.5) - (float)((float)(v108 + v102) * (float)0.5));
-    //v36 = (float)((float)((float)(v105 + v102) * (float)0.5) - (float)((float)(v108 + v111) * (float)0.5));
-    //_FP0 = -__fsqrts((float)((float)((float)v35 * (float)v35)
-    //    + (float)((float)((float)v33 * (float)v33) + (float)((float)v32 * (float)v32))));
-    //__asm { fsel      f0, f0, f31, f10 }
-    //v39 = (float)((float)((float)(v104 + v101) * (float)0.5) - (float)((float)(v107 + v110) * (float)0.5));
-    //v40 = (float)((float)1.0 / (float)_FP0);
-    //v81 = (float)v40 * (float)((float)((float)(v104 + v110) * (float)0.5) - (float)((float)(v107 + v101) * (float)0.5));
-    //v82 = (float)((float)((float)(v111 + v105) * (float)0.5) - (float)((float)(v108 + v102) * (float)0.5)) * (float)v40;
-    //v83 = (float)((float)((float)(v112 + v106) * (float)0.5) - (float)((float)(v109 + v103) * (float)0.5)) * (float)v40;
-    //_FP13 = -__fsqrts((float)((float)((float)v36 * (float)v36)
-    //    + (float)((float)((float)v39 * (float)v39) + (float)((float)v34 * (float)v34))));
-    //__asm { fsel      f0, f13, f31, f0 }
-    //v43 = (float)((float)1.0 / (float)_FP0);
-    //v84 = (float)v43 * (float)((float)((float)(v104 + v101) * (float)0.5) - (float)((float)(v107 + v110) * (float)0.5));
-    //v85 = (float)((float)((float)(v105 + v102) * (float)0.5) - (float)((float)(v108 + v111) * (float)0.5)) * (float)v43;
-    //v86 = (float)((float)((float)(v106 + v103) * (float)0.5) - (float)((float)(v109 + v112) * (float)0.5)) * (float)v43;
-    //Vec3Cross(&v81, &v84, &v77);
-    {
-        // Compute vector components
-        v32 = ((v112 + v106) * 0.5f) - ((v109 + v103) * 0.5f);
-        v33 = ((v104 + v110) * 0.5f) - ((v107 + v101) * 0.5f);
-        v34 = ((v106 + v103) * 0.5f) - ((v109 + v112) * 0.5f);
-        v35 = ((v111 + v105) * 0.5f) - ((v108 + v102) * 0.5f);
-        v36 = ((v105 + v102) * 0.5f) - ((v108 + v111) * 0.5f);
+        traceStart[0] = hitPos[0];
+        traceStart[1] = hitPos[1];
+        traceStart[2] = hitPos[2] + 64.0f;
 
-        // Length of first vector
-        float _FP0 = -sqrtf(v35 * v35 + v33 * v33 + v32 * v32);
+        traceEnd[0] = hitPos[0];
+        traceEnd[1] = hitPos[1];
+        traceEnd[2] = hitPos[2] - 256.0f;
 
-        // Replace fsel: f0 = (f0 >= 0.0f) ? f31 : f10
-        // Assuming f31 = 0.0f and f10 = _FP0 from previous step
-        _FP0 = (_FP0 >= 0.0f) ? 0.0f : _FP0;
-
-        // Normalize factor
-        v39 = ((v104 + v101) * 0.5f) - ((v107 + v110) * 0.5f);
-        v40 = 1.0f / _FP0;
-
-        // Normalized components (v81, v82, v83)
-        v81 = v40 * (((v104 + v110) * 0.5f) - ((v107 + v101) * 0.5f));
-        v82 = v40 * (((v111 + v105) * 0.5f) - ((v108 + v102) * 0.5f));
-        v83 = v40 * (((v112 + v106) * 0.5f) - ((v109 + v103) * 0.5f));
-
-        // Length of second vector
-        float _FP13 = -sqrtf(v36 * v36 + v39 * v39 + v34 * v34);
-
-        // Replace fsel: f0 = (f13 >= 0.0f) ? f31 : f0
-        // Assuming f31 = 0.0f
-        _FP0 = (_FP13 >= 0.0f) ? 0.0f : _FP0;
-
-        // Normalize again using updated _FP0
-        v43 = 1.0f / _FP0;
-
-        // Normalized components (v84, v85, v86)
-        v84 = v43 * (((v104 + v101) * 0.5f) - ((v107 + v110) * 0.5f));
-        v85 = v43 * (((v105 + v102) * 0.5f) - ((v108 + v111) * 0.5f));
-        v86 = v43 * (((v106 + v103) * 0.5f) - ((v109 + v112) * 0.5f));
-
-        // Cross product of vectors
-        Vec3Cross(&v81, &v84, &v77);
-
-    }
-
-    v44 = v79;
-    v45 = 1;
-    v46 = v78;
-    v47 = v77;
-    v48 = (float)((float)(v101 * v77) + (float)((float)(v102 * v78) + (float)(v103 * v79)));
-    v80 = (float)(v101 * v77) + (float)((float)(v102 * v78) + (float)(v103 * v79));
-    if (v9 - 1 >= 4)
-    {
-        suspensionTravel = v7->suspensionTravel;
-        v50 = &v106;
-        v51 = ((unsigned int)(v9 - 5) >> 2) + 1;
-        v45 = 4 * v51 + 1;
-        do
+        if (g_vehicleDebug->current.enabled)
         {
-            if ((float)((float)((float)(*v50 * v79) + (float)((float)(*(v50 - 1) * v78) + (float)(*(v50 - 2) * v77)))
-                - (float)v48) > suspensionTravel)
-                v48 = (float)((float)((float)(*v50 * v79) + (float)((float)(*(v50 - 1) * v78) + (float)(*(v50 - 2) * v77)))
-                    - v7->suspensionTravel);
-            if ((float)((float)((float)(v50[3] * v79) + (float)((float)(v50[2] * v78) + (float)(v50[1] * v77))) - (float)v48) > suspensionTravel)
-                v48 = (float)((float)((float)(v50[3] * v79) + (float)((float)(v50[2] * v78) + (float)(v50[1] * v77)))
-                    - v7->suspensionTravel);
-            if ((float)((float)((float)(v50[6] * v79) + (float)((float)(v50[5] * v78) + (float)(v50[4] * v77))) - (float)v48) > suspensionTravel)
-                v48 = (float)((float)((float)(v50[6] * v79) + (float)((float)(v50[5] * v78) + (float)(v50[4] * v77)))
-                    - v7->suspensionTravel);
-            if ((float)((float)((float)(v50[9] * v79) + (float)((float)(v50[8] * v78) + (float)(v50[7] * v77))) - (float)v48) > suspensionTravel)
-                v48 = (float)((float)((float)(v50[9] * v79) + (float)((float)(v50[8] * v78) + (float)(v50[7] * v77)))
-                    - v7->suspensionTravel);
-            --v51;
-            v50 += 12;
-        } while (v51);
-        v80 = v48;
-    }
-    if (v45 < v9)
-    {
-        v52 = v9 - v45;
-        v53 = &v103 + 3 * v45;
-        do
+            color[0] = 0.0;
+            color[1] = 0.0;
+            color[2] = 1.0;
+            color[3] = 1.0;
+            G_DebugLine(traceStart, traceEnd, color, 1);
+        }
+
+        G_TraceCapsule(&trace, traceStart, vec3_origin, vec3_origin, traceEnd, ent->s.number, content);
+
+        if (trace.fraction >= 1.0)
         {
-            if ((float)((float)((float)(*v53 * v79) + (float)((float)(*(v53 - 1) * v78) + (float)(*(v53 - 2) * v77)))
-                - (float)v48) > (double)v7->suspensionTravel)
-                v48 = (float)((float)((float)(*v53 * v79) + (float)((float)(*(v53 - 1) * v78) + (float)(*(v53 - 2) * v77)))
-                    - v7->suspensionTravel);
-            --v52;
-            v53 += 3;
-        } while (v52);
-        v80 = v48;
-    }
-    // aislop
-    //Vec3Cross(&v77, v90, &v91);
-    //_FP10 = -__fsqrts((float)((float)(v93 * v93) + (float)((float)(v91 * v91) + (float)(v92 * v92))));
-    //__asm { fsel      f0, f10, f31, f0 }
-    //v56 = (float)((float)1.0 / (float)_FP0);
-    //v91 = v91 * (float)v56;
-    //v92 = v92 * (float)v56;
-    //v93 = v93 * (float)v56;
-    //Vec3Cross(&v91, &v77, v90);
-    //_FP10 = -__fsqrts((float)((float)(v90[1] * v90[1]) + (float)((float)(v90[0] * v90[0]) + (float)(v90[2] * v90[2]))));
-    //__asm { fsel      f0, f10, f31, f0 }
-    //v59 = (float)((float)1.0 / (float)_FP0);
-    //v90[0] = v90[0] * (float)v59;
-    //v90[1] = v90[1] * (float)v59;
-    //v90[2] = v90[2] * (float)v59;
-    //AxisToAngles((const float (*)[3])v90, v121);
-    //*angles = DiffTrackAngle(v121[0], phys->prevAngles[0], 6.0, 0.050000001);
-    //v60 = DiffTrackAngle(v121[2], phys->prevAngles[2], 6.0, 0.050000001);
-    //_FP11 = (float)(*angles - (float)60.0);
-    //_FP10 = (float)((float)-60.0 - *angles);
-    //__asm { fsel      f12, f11, f0, f12 }
-    //_FP11 = (float)((float)-60.0 - (float)v60);
-    //__asm { fsel      f12, f10, f13, f12 }
-    //*angles = _FP12;
-    //_FP12 = (float)((float)v60 - (float)60.0);
-    //__asm
-    //{
-    //    fsel      f0, f12, f0, f1
-    //    fsel      f0, f11, f13, f0
-    //}
-    //phys->angles[2] = _FP0;
+            hitPos[0] = traceEnd[0];
+            hitPos[1] = traceEnd[1];
+            hitPos[2] = traceEnd[2];
 
+            phys->wheelSurfType[i] = 0;
+        }
+        else
+        {
+            Vec3Lerp(traceStart, traceEnd, trace.fraction, hitPos);
+            phys->wheelSurfType[i] = (trace.surfaceFlags >> 20) & 0x1F;
+        }
+
+        if (gravity)
+        {
+            float frameTime = 50.0f; // 20hz
+            phys->wheelZVel[i] = phys->wheelZVel[i] - frameTime * 800.0;
+            phys->wheelZPos[i] = phys->wheelZVel[i] * frameTime + phys->wheelZPos[i];
+            if (hitPos[2] > (float)phys->wheelZPos[i])
+            {
+                phys->wheelZPos[i] = hitPos[2];
+                phys->wheelZVel[i] = 0.0f;
+            }
+        }
+        else
+        {
+            phys->wheelZPos[i] = hitPos[2];
+            phys->wheelZVel[i] = 0.0f;
+        }
+
+        wheelPos[i][0] = hitPos[0];
+        wheelPos[i][1] = hitPos[1];
+        wheelPos[i][2] = phys->wheelZPos[i];
+
+        if (g_vehicleDebug->current.enabled)
+        {
+            // KISAKTODO
+            //v116[0] = 0.0;
+            //v116[1] = 1.0;
+            //v116[2] = 0.0;
+            //v116[3] = 1.0;
+            //v84 = -2.0;
+            //v85 = -2.0;
+            //v86 = -2.0;
+            //v81 = 2.0;
+            //v82 = 2.0;
+            //v83 = 2.0;
+            //G_DebugBox(v12, &v84, &v81, 0.0, v16, (int)v116, 1);
+        }
+    }
+
+
+    float pt1[3];
+    float pt2[3];
+
+    Vec3Add(wheelPos[1], wheelPos[3], pt1);
+    Vec3Add(wheelPos[0], wheelPos[2], pt2);
+
+    Vec3Scale(pt1, 0.5f, pt1);
+    Vec3Scale(pt2, 0.5f, pt2);
+
+    float right[3];
+    Vec3Sub(pt1, pt2, right);
+    Vec3Normalize(right);
+
+    Vec3Add(wheelPos[0], wheelPos[1], pt1);
+    Vec3Add(wheelPos[2], wheelPos[3], pt2);
+    Vec3Scale(pt1, 0.5f, pt1);
+    Vec3Scale(pt2, 0.5f, pt2);
+
+    float forward[3];
+    Vec3Sub(pt1, pt2, forward);
+    Vec3Normalize(forward);
+
+    float plane[4];
+    Vec3Cross(right, forward, plane);
+
+    plane[3] = Vec3Dot(wheelPos[0], plane);
+
+    for (i = 1; i < numWheels; ++i)
     {
-        Vec3Cross(&v77, v90, &v91);
-
-        // Replace __fsqrts with sqrtf
-        float _FP10 = -sqrtf((v93 * v93) + (v91 * v91) + (v92 * v92));
-
-        // Replace fsel with ternary: f0 = (f10 >= 0) ? f31 : f0
-        float _FP0 = (_FP10 >= 0.0f) ? 0.0f : _FP10;
-
-        v56 = 1.0f / _FP0;
-        v91 = v91 * v56;
-        v92 = v92 * v56;
-        v93 = v93 * v56;
-
-        Vec3Cross(&v91, &v77, v90);
-
-        _FP10 = -sqrtf((v90[1] * v90[1]) + (v90[0] * v90[0]) + (v90[2] * v90[2]));
-        _FP0 = (_FP10 >= 0.0f) ? 0.0f : _FP10;
-
-        v59 = 1.0f / _FP0;
-        v90[0] = v90[0] * v59;
-        v90[1] = v90[1] * v59;
-        v90[2] = v90[2] * v59;
-
-        AxisToAngles((const mat3x3&)v90, v121);
-
-        *angles = DiffTrackAngle(v121[0], phys->prevAngles[0], 6.0f, 0.05f);
-        v60 = DiffTrackAngle(v121[2], phys->prevAngles[2], 6.0f, 0.05f);
-
-        float _FP11 = *angles - 60.0f;
-        _FP10 = -60.0f - *angles;
-
-        float _FP12 = (_FP11 >= 0.0f) ? 0.0f : ((_FP10 >= 0.0f) ? -60.0f : *angles);
-        *angles = _FP12;
-
-        _FP12 = v60 - 60.0f;
-        _FP11 = -60.0f - v60;
-
-        _FP0 = (_FP12 >= 0.0f) ? 0.0f : ((_FP11 >= 0.0f) ? -60.0f : v60);
-
-        phys->angles[2] = _FP0;
+        float dot = Vec3Dot(plane, wheelPos[i]) - plane[3];
+        if (info->suspensionTravel < dot)
+        {
+            plane[3] = Vec3Dot(wheelPos[i], plane) - info->suspensionTravel;
+        }
     }
+
+    Vec3Cross(plane, axis[0], axis[1]);
+    Vec3Normalize(axis[1]);
+    Vec3Cross(axis[1], plane, axis[0]);
+    Vec3Normalize(axis[0]);
+
+    float angles[3];
+    AxisToAngles(*(const mat3x3 *)&axis, angles);
+
+    phys->angles[0] = DiffTrackAngle(angles[0], phys->prevAngles[0], 6.0f, 0.05f);
+    phys->angles[1] = DiffTrackAngle(angles[2], phys->prevAngles[2], 6.0f, 0.05f);
+
+    CLAMP(phys->angles[0], -60.0f, 60.0f);
+    CLAMP(phys->angles[2], -60.0f, 60.0f);
 
     flags = scr_vehicle->flags;
-    if (((flags & 8) != 0 || (flags & 1) == 0) && v44 != 0.0)
-        phys->origin[2] = (float)((float)((float)(phys->origin[0] * (float)v47) + (float)((float)v46 * phys->origin[1]))
-            - (float)v48)
-        * (float)((float)-1.0 / (float)v44);
+
+    if (((flags & 8) != 0 || (flags & 1) == 0) && plane[2] != 0.0)
+        phys->origin[2] = -(phys->origin[0] * plane[0] + phys->origin[1] * plane[1] - plane[3]) / plane[2];
+
     AnglesSubtract(phys->angles, phys->prevAngles, phys->rotVel);
-    v70 = g_vehicleDebug;
-    phys->rotVel[0] = phys->rotVel[0] * (float)20.0;
-    phys->rotVel[1] = phys->rotVel[1] * (float)20.0;
-    phys->rotVel[2] = phys->rotVel[2] * (float)20.0;
-    if (v70->current.enabled)
+
+    float scale = 1.0f / 50; // 20.0f (20hz)
+    Vec3Scale(phys->rotVel, scale, phys->rotVel);
+
+    if (g_vehicleDebug->current.enabled)
     {
-        v97[1] = v102;
-        v97[0] = v101;
-        v98[1] = v105;
-        v98[0] = v104;
-        v99[0] = v107;
-        v99[1] = v108;
-        v100[0] = v110;
-        v100[1] = v111;
-        v117[0] = 1.0;
-        v117[1] = 1.0;
-        v117[2] = 0.0;
-        v117[3] = 1.0;
-        v97[2] = (float)((float)((float)(v102 * (float)v46) + (float)(v101 * (float)v47)) - (float)v48)
-            * (float)((float)-1.0 / (float)v44);
-        v98[2] = (float)((float)((float)(v105 * (float)v46) + (float)(v104 * (float)v47)) - (float)v48)
-            * (float)((float)-1.0 / (float)v44);
-        v99[2] = (float)((float)((float)(v108 * (float)v46) + (float)(v107 * (float)v47)) - (float)v48)
-            * (float)((float)-1.0 / (float)v44);
-        v100[2] = (float)((float)((float)(v111 * (float)v46) + (float)(v110 * (float)v47)) - (float)v48)
-            * (float)((float)-1.0 / (float)v44);
-        G_DebugLine(v97, v98, v117, 1);
-        v118[0] = 1.0;
-        v118[1] = 1.0;
-        v118[2] = 0.0;
-        v118[3] = 1.0;
-        G_DebugLine(v98, v100, v118, 1);
-        v119[0] = 1.0;
-        v119[1] = 1.0;
-        v119[2] = 0.0;
-        v119[3] = 1.0;
-        G_DebugLine(v100, v99, v119, 1);
-        v115[0] = 1.0;
-        v115[1] = 1.0;
-        v115[2] = 0.0;
-        v115[3] = 1.0;
-        G_DebugLine(v99, v97, v115, 1);
+        // KISAKTODO
+        //v97[1] = v102;
+        //v97[0] = v101;
+        //v98[1] = v105;
+        //v98[0] = v104;
+        //v99[0] = v107;
+        //v99[1] = v108;
+        //v100[0] = v110;
+        //v100[1] = v111;
+        //v117[0] = 1.0;
+        //v117[1] = 1.0;
+        //v117[2] = 0.0;
+        //v117[3] = 1.0;
+        //v97[2] = (float)((float)((float)(v102 * (float)v46) + (float)(v101 * (float)v47)) - (float)v48)
+        //    * (float)((float)-1.0 / (float)v44);
+        //v98[2] = (float)((float)((float)(v105 * (float)v46) + (float)(v104 * (float)v47)) - (float)v48)
+        //    * (float)((float)-1.0 / (float)v44);
+        //v99[2] = (float)((float)((float)(v108 * (float)v46) + (float)(v107 * (float)v47)) - (float)v48)
+        //    * (float)((float)-1.0 / (float)v44);
+        //v100[2] = (float)((float)((float)(v111 * (float)v46) + (float)(v110 * (float)v47)) - (float)v48)
+        //    * (float)((float)-1.0 / (float)v44);
+        //G_DebugLine(v97, v98, v117, 1);
+        //v118[0] = 1.0;
+        //v118[1] = 1.0;
+        //v118[2] = 0.0;
+        //v118[3] = 1.0;
+        //G_DebugLine(v98, v100, v118, 1);
+        //v119[0] = 1.0;
+        //v119[1] = 1.0;
+        //v119[2] = 0.0;
+        //v119[3] = 1.0;
+        //G_DebugLine(v100, v99, v119, 1);
+        //v115[0] = 1.0;
+        //v115[1] = 1.0;
+        //v115[2] = 0.0;
+        //v115[3] = 1.0;
+        //G_DebugLine(v99, v97, v115, 1);
     }
 }
 

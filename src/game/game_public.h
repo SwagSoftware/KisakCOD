@@ -18,6 +18,17 @@
 
 static const char *hintStrings[] = { "", "HINT_NOICON", "HINT_ACTIVATE", "HINT_HEALTH" }; // idb
 
+enum VehicleTypes : __int32 // (SP/MP same)
+{
+    VEH_WHEELS_4 = 0x0,
+    VEH_TANK = 0x1,
+    VEH_PLANE = 0x2,
+    VEH_BOAT = 0x3,
+    VEH_ARTILLERY = 0x4,
+    VEH_HELICOPTER = 0x5,
+    NUM_VEHICLE_TYPES = 0x6,
+};
+
 // g_client_fields
 #ifdef KISAK_MP
 enum fieldtype_t : int32_t

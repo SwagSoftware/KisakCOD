@@ -2173,25 +2173,6 @@ void __cdecl VEH_AirMove(gentity_s *ent, int32_t gravity, float frameTime)
 
 void __cdecl VEH_GroundPlant(gentity_s *ent, int32_t gravity, float frameTime)
 {
-    double v3; // st7
-    double v4; // st7
-    double v5; // st7
-    double v6; // st7
-    float v7; // [esp+10h] [ebp-1C8h]
-    float v8; // [esp+14h] [ebp-1C4h]
-    float v9; // [esp+18h] [ebp-1C0h]
-    float v10; // [esp+1Ch] [ebp-1BCh]
-    float v11; // [esp+20h] [ebp-1B8h]
-    float v12; // [esp+24h] [ebp-1B4h]
-    float v13; // [esp+28h] [ebp-1B0h]
-    float *v14; // [esp+2Ch] [ebp-1ACh]
-    float *v15; // [esp+30h] [ebp-1A8h]
-    float v16; // [esp+34h] [ebp-1A4h]
-    float v17; // [esp+38h] [ebp-1A0h]
-    float v18; // [esp+3Ch] [ebp-19Ch]
-    float v19; // [esp+40h] [ebp-198h]
-    float v20; // [esp+7Ch] [ebp-15Ch]
-    float v21; // [esp+80h] [ebp-158h]
     float proj[4][3]; // [esp+84h] [ebp-154h] BYREF
     int32_t contents; // [esp+B4h] [ebp-124h]
     float pt1[3]; // [esp+B8h] [ebp-120h] BYREF
@@ -2221,40 +2202,42 @@ void __cdecl VEH_GroundPlant(gentity_s *ent, int32_t gravity, float frameTime)
     veh = ent->scr_vehicle;
     phys = &veh->phys;
     info = &s_vehicleInfos[veh->infoIdx];
-    if (info->type && info->type != 1)
-        MyAssertHandler(
-            ".\\game_mp\\g_vehicles_mp.cpp",
-            1089,
-            0,
-            "%s",
-            "(info->type == VEH_WHEELS_4) || (info->type == VEH_TANK)");
+    iassert((info->type == VEH_WHEELS_4) || (info->type == VEH_TANK));
+
     if (info->type)
         numWheels = 6;
     else
         numWheels = 4;
+
     contents = 529;
+
     if ((veh->flags & 1) != 0)
         contents |= 0x10000u;
-    v20 = phys->origin[1];
-    v21 = phys->prevOrigin[2];
+
     axis[3][0] = phys->origin[0];
-    axis[3][1] = v20;
-    axis[3][2] = v21;
+    axis[3][1] = phys->origin[1];
+    axis[3][2] = phys->prevOrigin[2];
+
     AnglesToAxis(phys->angles, axis);
+
     for (i = 0; i < numWheels; ++i)
     {
         VEH_GetWheelOrigin(ent, i, temp);
         MatrixTransformVector43(temp, axis, hitPos);
         if (vehDebugServer->current.enabled)
             VEH_DebugBox(hitPos, 4.0f, 1.0f, 0.0f, 0.0f);
+
         traceStart[0] = hitPos[0];
         traceStart[1] = hitPos[1];
+        traceStart[2] = hitPos[2] + 64.0f;
+
         traceEnd[0] = hitPos[0];
         traceEnd[1] = hitPos[1];
-        traceStart[2] = hitPos[2] + 64.0f;
         traceEnd[2] = hitPos[2] - 256.0f;
+
         if (vehDebugServer->current.enabled)
             VEH_DebugLine(traceStart, traceEnd, 0.0f, 0.0f, 1.0f);
+
         G_TraceCapsule(&trace, traceStart, (float *)vec3_origin, (float *)vec3_origin, traceEnd, ent->s.number, contents);
         if (trace.fraction >= 1.0f)
         {
@@ -2289,11 +2272,15 @@ void __cdecl VEH_GroundPlant(gentity_s *ent, int32_t gravity, float frameTime)
         if (vehDebugServer->current.enabled)
             VEH_DebugBox(wheelPos[i], 4.0f, 0.0f, 1.0f, 0.0f);
     }
+
     Vec3Add(wheelPos[1], wheelPos[3], pt1);
     Vec3Add(wheelPos[0], wheelPos[2], pt2);
+
     Vec3Scale(pt1, 0.5f, pt1);
     Vec3Scale(pt2, 0.5f, pt2);
+
     Vec3Sub(pt1, pt2, right);
+
     Vec3Normalize(right);
     Vec3Add(wheelPos[0], wheelPos[1], pt1);
     Vec3Add(wheelPos[2], wheelPos[3], pt2);
@@ -2303,63 +2290,42 @@ void __cdecl VEH_GroundPlant(gentity_s *ent, int32_t gravity, float frameTime)
     Vec3Normalize(forward);
     Vec3Cross(right, forward, plane);
     plane[3] = Vec3Dot(wheelPos[0], plane);
+
     for (i = 1; i < numWheels; ++i)
     {
-        v3 = Vec3Dot(plane, wheelPos[i]);
-        dot = v3 - plane[3];
-        if (info->suspensionTravel < (double)dot)
+        float dot = Vec3Dot(plane, wheelPos[i]) - plane[3];
+        if (info->suspensionTravel < dot)
         {
-            v4 = Vec3Dot(wheelPos[i], plane);
-            plane[3] = v4 - info->suspensionTravel;
+            plane[3] = Vec3Dot(wheelPos[i], plane) - info->suspensionTravel;
         }
     }
+
     Vec3Cross(plane, axis[0], axis[1]);
     Vec3Normalize(axis[1]);
     Vec3Cross(axis[1], plane, axis[0]);
     Vec3Normalize(axis[0]);
     AxisToAngles(*(const mat3x3*)&axis, angles);
-    v5 = DiffTrackAngle(angles[0], phys->prevAngles[0], 6.0f, frameTime);
-    phys->angles[0] = v5;
-    v6 = DiffTrackAngle(angles[2], phys->prevAngles[2], 6.0f, frameTime);
-    phys->angles[2] = v6;
-    v18 = phys->angles[0];
-    v13 = v18 - 60.0f;
-    if (v13 < 0.0f)
-        v19 = v18;
-    else
-        v19 = 60.0f;
-    v12 = -60.0f - v18;
-    if (v12 < 0.0f)
-        v11 = v19;
-    else
-        v11 = -60.0f;
-    phys->angles[0] = v11;
-    v16 = phys->angles[2];
-    v10 = v16 - 60.0f;
-    if (v10 < 0.0f)
-        v17 = v16;
-    else
-        v17 = 60.0f;
-    v9 = -60.0f - v16;
-    if (v9 < 0.0f)
-        v8 = v17;
-    else
-        v8 = -60.0f;
-    phys->angles[2] = v8;
+    phys->angles[0] = DiffTrackAngle(angles[0], phys->prevAngles[0], 6.0f, frameTime);
+    phys->angles[2] = DiffTrackAngle(angles[2], phys->prevAngles[2], 6.0f, frameTime);
+
+    CLAMP(phys->angles[0], -60.0f, 60.0f);
+    CLAMP(phys->angles[2], -60.0f, 60.0f);
+
     if ((veh->flags & 1) == 0 && plane[2] != 0.0f)
         phys->origin[2] = -(phys->origin[0] * plane[0] + phys->origin[1] * plane[1] - plane[3]) / plane[2];
+
     AnglesSubtract(phys->angles, phys->prevAngles, phys->rotVel);
-    v7 = 1.0 / frameTime;
-    Vec3Scale(phys->rotVel, v7, phys->rotVel);
+    Vec3Scale(phys->rotVel, (1.0f / frameTime), phys->rotVel);
+
     if (vehDebugServer->current.enabled)
     {
         for (i = 0; i < 4; ++i)
         {
-            v14 = proj[i];
-            v15 = wheelPos[i];
-            *v14 = *v15;
-            v14[1] = v15[1];
-            v14[2] = v15[2];
+            float *pProj = proj[i];
+            float *pWheelPos = wheelPos[i];
+            pProj[0] = pWheelPos[0];
+            pProj[1] = pWheelPos[1];
+            pProj[2] = pWheelPos[2];
             proj[i][2] = -(proj[i][0] * plane[0] + proj[i][1] * plane[1] - plane[3]) / plane[2];
         }
         VEH_DebugLine(proj[0], proj[1], 1.0f, 1.0f, 0.0f);
