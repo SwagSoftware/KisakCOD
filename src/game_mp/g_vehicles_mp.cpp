@@ -56,8 +56,6 @@ uint16_t *s_flashTags[] =
     &scr_const.tag_flash_3,
 };
 
-const char *s_vehicleTypeNames[6] = { "4 wheel", "tank", "plane", "boat", "artillery", "helicopter" }; // idb
-
 cspField_t s_vehicleFields[33] =
 {
   { "type", 64, 12 },
