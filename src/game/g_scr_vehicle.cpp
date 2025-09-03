@@ -2644,28 +2644,26 @@ void G_UpdateVehicleTags(gentity_s *ent)
     } while ((int)v7 < (int)&s_wheelTags[6]);
 }
 
-static const char *s_vehicleTypeNames[6] = { "4 wheel", "tank", "plane", "boat", "artillery", "helicopter" };
-
 int VEH_ParseSpecificField(unsigned __int8 *pStruct, const char *pValue, int fieldType)
 {
-    const char *v6; // r3
-    int v8; // r30
-    const char **v9; // r31
-
     if (fieldType == 12)
     {
-        v8 = 0;
-        v9 = (const char **)s_vehicleTypeNames;
-        while (I_stricmp(pValue, *v9))
+        int typeIdx = 0;
+
+        for (int i = 0; i < ARRAY_COUNT(s_vehicleTypeNames); i++)
         {
-            ++v9;
-            ++v8;
-            if ((int)v9 >= (int)s_wheelTags)
-                goto LABEL_10;
+            if (!I_stricmp(pValue, s_vehicleTypeNames[i]))
+            {
+                typeIdx = i;
+                break;
+            }
         }
-        *((_WORD *)pStruct + 32) = v8;
-    LABEL_10:
-        if (v8 == 6)
+
+        vehicle_info_t *pInfo = (vehicle_info_t *)pStruct;
+        pInfo->type = typeIdx;
+        //*((_WORD *)pStruct + 32) = typeIdx;
+
+        if (typeIdx >= NUM_VEHICLE_TYPES)
             Com_Error(ERR_DROP, "Unknown vehicle type [%s]", pValue); // lwss: omg iw forgot the % here. wow what an epic find.
         return 1;
     }
@@ -2673,8 +2671,7 @@ int VEH_ParseSpecificField(unsigned __int8 *pStruct, const char *pValue, int fie
     {
         if (!alwaysfails)
         {
-            v6 = va("Bad vehicle field type %i\n", fieldType);
-            MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\g_scr_vehicle.cpp", 437, 0, v6);
+            MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\g_scr_vehicle.cpp", 437, 0, va("Bad vehicle field type %i\n", fieldType));
         }
         Com_Error(ERR_DROP, "Bad vehicle field type %i", fieldType);
         return 0;

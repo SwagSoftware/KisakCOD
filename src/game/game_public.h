@@ -29,6 +29,10 @@ enum VehicleTypes : __int32 // (SP/MP same)
     NUM_VEHICLE_TYPES = 0x6,
 };
 
+// Corresponds to above enum
+static const char *s_vehicleTypeNames[6] = { "4 wheel", "tank", "plane", "boat", "artillery", "helicopter" };
+
+
 // g_client_fields
 #ifdef KISAK_MP
 enum fieldtype_t : int32_t
