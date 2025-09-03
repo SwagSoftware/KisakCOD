@@ -12,6 +12,7 @@
 #include "player_use.h"
 #include "turret.h"
 #include <client/cl_input.h>
+#include <universal/profile.h>
 
 void __cdecl P_DamageFeedback(gentity_s *player)
 {
@@ -157,39 +158,24 @@ void __cdecl ClientImpacts(gentity_s *ent, pmove_t *pm)
 
 void __cdecl G_DoTouchTriggers(gentity_s *ent)
 {
-    int v2; // r20
+    int contentMask; // r20
     sentient_s *sentient; // r11
     team_t eTeam; // r11
-    double v5; // fp12
-    double v6; // fp13
-    double v7; // fp12
-    double v8; // fp13
-    int v9; // r30
-    double v10; // fp13
-    double v11; // fp0
-    double v12; // fp7
-    double v13; // fp11
-    double v14; // fp12
-    double v15; // fp9
-    double v16; // fp6
+    int count; // r30
     void(__cdecl * touch)(gentity_s *, gentity_s *, int); // r19
-    int *v18; // r21
     int i; // r17
-    gentity_s *v20; // r30
-    void(__cdecl * v21)(gentity_s *, gentity_s *, int); // r29
+    gentity_s *hit; // r30
+    void(__cdecl * hitTouch)(gentity_s *, gentity_s *, int); // r29
     gclient_s *client; // r3
-    float v23; // [sp+50h] [-22A0h] BYREF
-    float v24; // [sp+54h] [-229Ch]
-    float v25; // [sp+58h] [-2298h]
-    float v26; // [sp+60h] [-2290h] BYREF
-    float v27; // [sp+64h] [-228Ch]
-    float v28; // [sp+68h] [-2288h]
-    int v29[160]; // [sp+70h] [-2280h] BYREF
+    float mins[3];
+    float maxs[3];
+    int entityList[MAX_GENTITIES];
 
-    //Profile_Begin(355);
+    PROF_SCOPED("G_DoTouchTriggers");
+
     if (ent->scr_vehicle)
     {
-        v2 = 8;
+        contentMask = 8;
     }
     else
     {
@@ -198,7 +184,7 @@ void __cdecl G_DoTouchTriggers(gentity_s *ent)
         {
             if (ent->client)
             {
-                v2 = 0x40000000;
+                contentMask = 0x40000000;
             }
             else
             {
@@ -206,13 +192,13 @@ void __cdecl G_DoTouchTriggers(gentity_s *ent)
                 switch (eTeam)
                 {
                 case TEAM_AXIS:
-                    v2 = 0x40000;
+                    contentMask = 0x40000;
                     break;
                 case TEAM_ALLIES:
-                    v2 = 0x80000;
+                    contentMask = 0x80000;
                     break;
                 case TEAM_NEUTRAL:
-                    v2 = 0x100000;
+                    contentMask = 0x100000;
                     break;
                 default:
                     return;
@@ -222,77 +208,69 @@ void __cdecl G_DoTouchTriggers(gentity_s *ent)
         }
         else
         {
-            v2 = 0x400000;
+            contentMask = 0x400000;
         }
     }
-    v5 = (float)(ent->r.absmin[1] - (float)20.0);
-    v23 = ent->r.absmin[0] - (float)20.0;
-    v6 = (float)(ent->r.absmin[2] - (float)20.0);
-    v24 = v5;
-    v7 = (float)(ent->r.absmax[0] + (float)20.0);
-    v25 = v6;
-    v8 = (float)(ent->r.absmax[1] + (float)20.0);
-    v26 = v7;
-    v28 = ent->r.absmax[2] + (float)20.0;
-    v27 = v8;
-    v9 = CM_AreaEntities(&v23, &v26, v29, MAX_GENTITIES, v2);
-    v10 = ent->r.currentOrigin[1];
-    v11 = (float)(ent->r.maxs[0] + ent->r.currentOrigin[0]);
-    v12 = ent->r.maxs[1];
-    v13 = (float)(ent->r.mins[1] + ent->r.currentOrigin[1]);
-    v23 = ent->r.mins[0] + ent->r.currentOrigin[0];
-    v26 = v11;
-    v14 = ent->r.currentOrigin[2];
-    v15 = ent->r.mins[2];
-    v16 = ent->r.maxs[2];
-    v24 = v13;
-    v27 = (float)v12 + (float)v10;
-    v25 = (float)v15 + (float)v14;
-    v28 = (float)v16 + (float)v14;
-    ExpandBoundsToWidth(&v23, &v26);
+
+    mins[0] = ent->r.absmin[0] - 20.0f; // v23
+    mins[1] = ent->r.absmin[1] - 20.0f;
+    mins[2] = ent->r.absmin[2] - 20.0f;
+
+    maxs[0] = ent->r.absmax[0] + 20.0f; // v26
+    maxs[1] = ent->r.absmax[1] + 20.0f;
+    maxs[2] = ent->r.absmax[2] + 20.0f;
+
+    count = CM_AreaEntities(mins, maxs, entityList, MAX_GENTITIES, contentMask);
+
+    
+    mins[0] = ent->r.mins[0] + ent->r.currentOrigin[0];
+    mins[1] = ent->r.mins[1] + ent->r.currentOrigin[1];
+    mins[2] = ent->r.mins[2] + ent->r.currentOrigin[2];
+
+    maxs[0] = ent->r.maxs[0] + ent->r.currentOrigin[0];
+    maxs[1] = ent->r.maxs[1] + ent->r.currentOrigin[1];
+    maxs[2] = ent->r.maxs[2] + ent->r.currentOrigin[2];
+
+    ExpandBoundsToWidth(mins, maxs);
+
     touch = entityHandlers[ent->handler].touch;
-    if (v9 > 0)
+    if (count > 0)
     {
-        v18 = v29;
-        for (i = v9; i; --i)
+        for (i = count; i; --i)
         {
-            v20 = &g_entities[*v18];
-            if ((v20->r.contents & v2) == 0)
-                MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\g_active.cpp", 232, 0, "%s", "hit->r.contents & contents");
-            if (v20->s.eType == 3)
-                MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\g_active.cpp", 233, 0, "%s", "hit->s.eType != ET_MISSILE");
-            v21 = entityHandlers[v20->handler].touch;
-            if (!v21 && !touch)
-                goto LABEL_33;
-            if (v20->s.eType == 2)
+            hit = &g_entities[entityList[i]];
+            iassert(hit->r.contents & contentMask);
+            iassert(hit->s.eType != ET_MISSILE);
+            hitTouch = entityHandlers[hit->handler].touch;
+
+            if (!hitTouch && !touch)
+                continue;
+
+            if (hit->s.eType == ET_ITEM)
             {
                 client = ent->client;
-                if (client && BG_PlayerTouchesItem(&client->ps, &v20->s, level.time))
+                if (client && BG_PlayerTouchesItem(&client->ps, &hit->s, level.time))
                 {
                 LABEL_26:
                     if (Scr_IsSystemActive())
                     {
                         Scr_AddEntity(ent);
-                        Scr_Notify(v20, scr_const.touch, 1u);
-                        Scr_AddEntity(v20);
-                        Scr_Notify(ent, scr_const.touch, 1u);
+                        Scr_Notify(hit, scr_const.touch, 1);
+                        Scr_AddEntity(hit);
+                        Scr_Notify(ent, scr_const.touch, 1);
                     }
-                    if (v21)
-                        v21(v20, ent, 1);
+                    if (hitTouch)
+                        hitTouch(hit, ent, 1);
                     if (ent->actor && touch)
-                        touch(ent, v20, 1);
+                        touch(ent, hit, 1);
                 }
             }
-            else if (SV_EntityContact(&v23, &v26, v20))
+            else if (SV_EntityContact(mins, maxs, hit))
             {
                 goto LABEL_26;
             }
-        LABEL_33:
-            ++v18;
         }
     }
-//LABEL_34:
-    //Profile_EndInternal(0);
 }
 
 void __cdecl NotifyGrenadePullback(gentity_s *ent, unsigned int weaponIndex)

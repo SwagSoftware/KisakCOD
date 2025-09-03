@@ -3107,68 +3107,35 @@ void  VEH_ResetWheels(gentity_s *ent, vehicle_physic_t *phys)
     } while (v5);
 }
 
-void __fastcall VEH_GetWheelOrigin(gentity_s *ent, int idx, float *origin)
+void VEH_GetWheelOrigin(gentity_s *ent, int idx, float *origin)
 {
-    int v5; // r28
-    scr_vehicle_s *scr_vehicle; // r29
+    scr_vehicle_s *veh; // r29
     DObjAnimMat *mtx; // r30
-    double v10; // fp11
     int flags; // r11
-    double v12; // fp12
-    double v13; // fp0
-    double v15; // fp9
-    double v17; // fp0
-    double v18; // fp13
-    double v19; // fp12
-    double v20; // fp0
-    double v21; // fp11
-    double v22; // fp0
 
-    v5 = 4 * (idx + 198);
-    scr_vehicle = ent->scr_vehicle;
-    if (*(int *)((char *)&scr_vehicle->pathPos.nodeIdx + v5) < 0)
+    veh = ent->scr_vehicle;
+
+    if (veh->boneIndex.wheel[idx] < 0)
     {
         Com_Error(ERR_DROP, "Script vehicle [%s] needs [%s]", SL_ConvertToString(ent->targetname), SL_ConvertToString(*s_wheelTags[idx]));
     }
-    mtx = G_DObjGetLocalBoneIndexMatrix(ent, *(_DWORD *)((char *)&scr_vehicle->pathPos.nodeIdx + v5));
-    if (!mtx)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\g_scr_vehicle.cpp", 619, 0, "%s", "mtx");
-    *origin = mtx->trans[0];
+
+    mtx = G_DObjGetLocalBoneIndexMatrix(ent, veh->boneIndex.wheel[idx]);
+    iassert(mtx);
+
+    origin[0] = mtx->trans[0];
     origin[1] = mtx->trans[1];
-    v10 = mtx->trans[2];
     origin[2] = mtx->trans[2];
-    flags = scr_vehicle->flags;
+
+    flags = veh->flags;
+
     if ((flags & 8) == 0 && (flags & 1) != 0)
     {
-        v12 = origin[1];
-        v13 = (float)((float)((float)v10 * (float)v10) + (float)((float)(*origin * *origin) + (float)(origin[1] * origin[1])));
-        if (v13 > (float)(scr_vehicle->phys.maxs[0] * scr_vehicle->phys.maxs[0]))
+        float originLenSq = Vec3LengthSq(origin);
+        if (originLenSq > veh->phys.maxs[0] * veh->phys.maxs[0])
         {
-            // aislop
-            //float _FP11 = -__fsqrts(v13);
-            //__asm { fsel      f0, f11, f13, f0 }
-            //v17 = (float)((float)1.0 / (float)_FP0);
-            {
-                float _FP0, _FP11, v17;
-                float f13 = 1.0f;
-
-                _FP11 = -sqrtf(v13);  // same as -__fsqrts(v13)
-                _FP0 = (_FP11 >= 0.0f) ? f13 : _FP11;  // emulate fsel
-                v17 = 1.0f / _FP0;
-            }
-
-            v15 = origin[2];
-            v18 = (float)(*origin * (float)v17);
-            *origin = *origin * (float)v17;
-            v19 = (float)((float)v12 * (float)v17);
-            origin[1] = v19;
-            v20 = (float)((float)v17 * (float)v15);
-            origin[2] = v20;
-            v21 = v20;
-            v22 = (float)(scr_vehicle->phys.maxs[0] - (float)2.0);
-            *origin = (float)v18 * (float)(scr_vehicle->phys.maxs[0] - (float)2.0);
-            origin[1] = (float)v19 * (float)v22;
-            origin[2] = (float)v22 * (float)v21;
+            Vec3Normalize(origin);
+            Vec3Scale(origin, veh->phys.maxs[0] - 2.0f, origin);
         }
     }
 }
@@ -3188,7 +3155,7 @@ void __fastcall VEH_GroundPlant(gentity_s *ent, vehicle_physic_t *phys, int grav
     const dvar_s *v15; // r11
     const float *v16; // r6
     double fraction; // fp0
-    double v18; // fp13
+    double wheelOrigin; // fp13
     double v19; // fp10
     double v20; // fp12
     double v21; // fp9
@@ -3353,14 +3320,14 @@ void __fastcall VEH_GroundPlant(gentity_s *ent, vehicle_physic_t *phys, int grav
             }
             else
             {
-                v18 = v87;
+                wheelOrigin = v87;
                 v19 = (float)(v71 - v87);
                 v20 = v88;
                 v21 = (float)(v72 - v88);
                 v22 = v89;
                 v23 = (float)(v73 - v89);
                 *((_DWORD *)wheelZVel + 12) = (v123.surfaceFlags >> 20) & 0x1F;
-                v24 = (float)((float)((float)v19 * (float)fraction) + (float)v18);
+                v24 = (float)((float)((float)v19 * (float)fraction) + (float)wheelOrigin);
                 v25 = (float)((float)((float)v21 * (float)fraction) + (float)v20);
                 v26 = (float)((float)((float)v23 * (float)fraction) + (float)v22);
             }
@@ -4962,127 +4929,118 @@ void __cdecl VEH_JoltBody(gentity_s *ent, const float *dir, float intensity, flo
 
 void Scr_Vehicle_Init(gentity_s *pSelf)
 {
-    scr_vehicle_s *scr_vehicle; // r26
-    vehicle_info_t *v3; // r25
+    scr_vehicle_s *veh; // r26
+    vehicle_info_t *info; // v3
     int type; // r11
-    int v5; // r30
-    int *wheel; // r29
-    double info; // fp31
-    double v8; // fp13
-    double v9; // fp0
-    int dot2D; // r30
-    double damageScale; // fp31
-    int damage; // r29
-    double v13; // fp13
-    float *wheelZPos; // r30
-    int *v15; // r29
-    int v16; // r28
-    int v17; // r4
-    float v18; // [sp+50h] [-80h] BYREF
-    float v19; // [sp+54h] [-7Ch]
-    float v20; // [sp+58h] [-78h]
-    float v21; // [sp+60h] [-70h] BYREF
-    float v22; // [sp+64h] [-6Ch]
-    float v23; // [sp+68h] [-68h]
+    float radius; // fp31
+    int wheelCount; // r29
+    float wheelOrigin[3]; // [sp+50h] [-80h] BYREF // v18
+    //float v19; // [sp+54h] [-7Ch]
+    //float v20; // [sp+58h] [-78h]
+    float pos[3]; // [sp+60h] [-70h] BYREF // v21
+    //float v22; // [sp+64h] [-6Ch]
+    //float v23; // [sp+68h] [-68h]
 
-    scr_vehicle = pSelf->scr_vehicle;
-    v3 = &s_vehicleInfos[scr_vehicle->infoIdx];
-    type = v3->type;
-    if (!v3->type || type == 1)
+    veh = pSelf->scr_vehicle;
+    info = &s_vehicleInfos[veh->infoIdx];
+    type = info->type;
+
+    if (!info->type || type == 1)
     {
-        dot2D = 0;
-        damageScale = 0.0;
-        damage = type == 0 ? 4 : 6;
-        if (damage <= 0)
-            goto LABEL_16;
-        do
+        radius = 0.0;
+
+        wheelCount = type == 0 ? 4 : 6;
+
+        for (int w = 0; w < wheelCount; w++)
         {
-            VEH_GetWheelOrigin(pSelf, dot2D, &v18);
-            if ((float)((float)(v18 * v18) + (float)((float)(v19 * v19) + (float)(v20 * v20))) > damageScale)
-                damageScale = (float)((float)(v18 * v18) + (float)((float)(v19 * v19) + (float)(v20 * v20)));
-            ++dot2D;
-        } while (dot2D < damage);
-        if (damageScale <= 0.0)
-            LABEL_16:
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\g_scr_vehicle.cpp", 4336, 0, "%s", "radius > 0.0f");
-        v13 = sqrtf(damageScale);
-        scr_vehicle->phys.mins[2] = 0.0;
-        v9 = (float)((float)v13 + (float)1.0);
-        scr_vehicle->phys.mins[0] = -v9;
-        scr_vehicle->phys.mins[1] = -v9;
-        scr_vehicle->phys.maxs[2] = (float)((float)v13 + (float)1.0) * (float)2.0;
+            VEH_GetWheelOrigin(pSelf, w, wheelOrigin);
+            float wheelRadius = Vec3LengthSq(wheelOrigin);
+            if (wheelRadius > radius)
+            {
+                radius = wheelRadius;
+            }
+        }
+
+        iassert(radius > 0.0f);
+
+        radius = sqrtf(radius) + 1.0f;
+
+        veh->phys.mins[0] = -radius;
+        veh->phys.mins[1] = -radius;
+        veh->phys.mins[2] = 0.0;
+
+        veh->phys.maxs[0] = radius;
+        veh->phys.maxs[1] = radius;
+        veh->phys.maxs[2] = radius * 2.0f;
         goto LABEL_18;
     }
     if (type == 5)
     {
-        v5 = 0;
-        wheel = scr_vehicle->boneIndex.wheel;
-        info = 0.0;
-        do
+        radius = 0.0;
+
+        for (int w = 0; w < ARRAY_COUNT(veh->boneIndex.wheel); w++)
         {
-            if (*wheel >= 0)
+            if (veh->boneIndex.wheel[w] >= 0)
             {
-                VEH_GetWheelOrigin(pSelf, v5, &v18);
-                if ((float)((float)(v18 * v18) + (float)((float)(v19 * v19) + (float)(v20 * v20))) > info)
-                    info = (float)((float)(v18 * v18) + (float)((float)(v19 * v19) + (float)(v20 * v20)));
+                VEH_GetWheelOrigin(pSelf, w, wheelOrigin);
+                float wheelRadius = Vec3LengthSq(wheelOrigin);
+                if (wheelRadius > radius)
+                {
+                    radius = wheelRadius;
+                }
             }
-            ++v5;
-            ++wheel;
-        } while (v5 < 6);
-        if (info > 0.0)
+        }
+
+        if (radius > 0.0)
         {
-            v8 = sqrtf(info);
-            v9 = (float)((float)v8 + (float)1.0);
-            scr_vehicle->phys.mins[0] = -v9;
-            scr_vehicle->phys.mins[1] = -v9;
-            scr_vehicle->phys.mins[2] = -v9;
-            scr_vehicle->phys.maxs[2] = (float)v8 + (float)1.0;
+            radius = sqrtf(radius) + 1.0f;
+
+            veh->phys.mins[0] = -radius;
+            veh->phys.mins[1] = -radius;
+            veh->phys.mins[2] = -radius;
+            veh->phys.maxs[2] = radius;
         LABEL_18:
-            scr_vehicle->phys.maxs[1] = v9;
-            scr_vehicle->phys.maxs[0] = v9;
+            veh->phys.maxs[1] = radius;
+            veh->phys.maxs[0] = radius;
         }
     }
-    wheelZPos = scr_vehicle->phys.wheelZPos;
-    v15 = scr_vehicle->boneIndex.wheel;
-    v16 = 6;
-    do
+
+    int *wheelPtr = veh->boneIndex.wheel;
+
+    iassert(ARRAY_COUNT(veh->boneIndex.wheel) == 6); // LWSS ADD
+
+    for (int w = 0; w < ARRAY_COUNT(veh->boneIndex.wheel); w++)
     {
-        if (*v15 >= 0)
+        if (veh->boneIndex.wheel[w] >= 0)
         {
-            G_DObjGetWorldBoneIndexPos(pSelf, *v15, &v21);
-            *wheelZPos = v23;
+            G_DObjGetWorldBoneIndexPos(pSelf, veh->boneIndex.wheel[w], pos);
+            veh->phys.wheelZPos[w] = pos[2];
         }
-        --v16;
-        ++v15;
-        ++wheelZPos;
-    } while (v16);
-    v17 = scr_vehicle->boneIndex.flash[0];
-    if (v17 >= 0 && scr_vehicle->boneIndex.barrel >= 0)
-    {
-        G_DObjGetWorldBoneIndexPos(pSelf, v17, &v18);
-        G_DObjGetWorldBoneIndexPos(pSelf, scr_vehicle->boneIndex.barrel, &v21);
-        scr_vehicle->turret.barrelOffset = sqrtf((float)((float)((float)(v18 - v21) * (float)(v18 - v21))
-            + (float)((float)((float)(v20 - v23) * (float)(v20 - v23))
-                + (float)((float)(v19 - v22) * (float)(v19 - v22)))));
     }
-    if (!v3->type || v3->type == 1)
-        VEH_GroundPlant(pSelf, &scr_vehicle->phys, 0);
-    VEH_SetPosition(pSelf, scr_vehicle->phys.origin, scr_vehicle->phys.vel, scr_vehicle->phys.angles);
-    scr_vehicle->phys.prevOrigin[0] = scr_vehicle->phys.origin[0];
-    scr_vehicle->phys.prevOrigin[1] = scr_vehicle->phys.origin[1];
-    scr_vehicle->phys.prevOrigin[2] = scr_vehicle->phys.origin[2];
-    scr_vehicle->phys.prevAngles[0] = scr_vehicle->phys.angles[0];
-    scr_vehicle->phys.prevAngles[1] = scr_vehicle->phys.angles[1];
-    scr_vehicle->phys.prevAngles[2] = scr_vehicle->phys.angles[2];
+
+    if (veh->boneIndex.flash[0] >= 0 && veh->boneIndex.barrel >= 0)
+    {
+        G_DObjGetWorldBoneIndexPos(pSelf, veh->boneIndex.flash[0], wheelOrigin);
+        G_DObjGetWorldBoneIndexPos(pSelf, veh->boneIndex.barrel, pos);
+        veh->turret.barrelOffset = Vec3Distance(pos, wheelOrigin);
+    }
+
+    if (!info->type || info->type == 1)
+        VEH_GroundPlant(pSelf, &veh->phys, 0);
+
+    VEH_SetPosition(pSelf, veh->phys.origin, veh->phys.vel, veh->phys.angles);
+
+    veh->phys.prevOrigin[0] = veh->phys.origin[0];
+    veh->phys.prevOrigin[1] = veh->phys.origin[1];
+    veh->phys.prevOrigin[2] = veh->phys.origin[2];
+
+    veh->phys.prevAngles[0] = veh->phys.angles[0];
+    veh->phys.prevAngles[1] = veh->phys.angles[1];
+    veh->phys.prevAngles[2] = veh->phys.angles[2];
+
     VEH_TouchEntities(pSelf);
     G_DoTouchTriggers(pSelf);
-    if (pSelf->handler != 9)
-        MyAssertHandler(
-            "c:\\trees\\cod3\\cod3src\\src\\game\\g_scr_vehicle.cpp",
-            4398,
-            0,
-            "%s",
-            "pSelf->handler == ENT_HANDLER_VEHICLE_INIT");
+    iassert(pSelf->handler == ENT_HANDLER_VEHICLE_INIT);
     pSelf->handler = ENT_HANDLER_VEHICLE;
     pSelf->nextthink = level.time + 50;
 }

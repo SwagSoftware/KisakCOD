@@ -1160,12 +1160,9 @@ void __cdecl CG_SetTeamScore(int32_t localClientNum, uint32_t team, int32_t scor
     CG_GetLocalClientGlobals(localClientNum)->teamScores[team] = score;
 }
 
+// KISAKTODO: remove function (also in cg_servercmds) and just call SND_SetEnvironmentEffects(like in blops)
 void CG_ReverbCmd()
 {
-    const char *v0; // eax
-    const char *v1; // eax
-    const char *v2; // eax
-    const char *v3; // eax
     int32_t fademsec; // [esp+Ch] [ebp-30h]
     float v5; // [esp+14h] [ebp-28h]
     const char *roomstring; // [esp+24h] [ebp-18h]
@@ -1176,21 +1173,20 @@ void CG_ReverbCmd()
     int32_t argc; // [esp+38h] [ebp-4h]
 
     argc = Cmd_Argc();
+
     if (argc == 6)
     {
-        v0 = Cmd_Argv(1);
-        prio = atoi(v0);
-        v1 = Cmd_Argv(3);
-        drylevel = atof(v1);
-        v2 = Cmd_Argv(4);
-        wetlevel = atof(v2);
-        v3 = Cmd_Argv(5);
-        fadetime = atof(v3);
+        prio = atoi(Cmd_Argv(1));
+        drylevel = atof(Cmd_Argv(3));
+        wetlevel = atof(Cmd_Argv(4));
+        fadetime = atof(Cmd_Argv(5));
         roomstring = Cmd_Argv(2);
+
         if ((int)(fadetime * 1000.0f) > 0)
             fademsec = (int)(fadetime * 1000.0f);
         else
             fademsec = 0;
+
         SND_SetEnvironmentEffects(prio, roomstring, drylevel, wetlevel, fademsec);
     }
     else

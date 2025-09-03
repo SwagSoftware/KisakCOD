@@ -258,7 +258,6 @@ void(__cdecl *__cdecl Scr_GetMethod(const char **pName, int *type))(scr_entref_t
 void(__cdecl *__cdecl BuiltIn_GetMethod(const char **pName, int *type))(scr_entref_t);
 void __cdecl GScr_AddVector(const float* vVec);
 void __cdecl GScr_Shutdown();
-void __cdecl Scr_GetObjectField(unsigned int classnum, int entnum, int offset);
 void __cdecl GScr_SetDynamicEntityField(gentity_s* ent, unsigned int index);
 void __cdecl Scr_InitFromChildBlocks(struct scr_block_s** childBlocks, int childCount, struct scr_block_s* block);
 Scr_StringNode_s* __cdecl Scr_GetStringList(const char* filename, char** pBuf);

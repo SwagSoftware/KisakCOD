@@ -3072,36 +3072,31 @@ void __cdecl G_UpdateTags(gentity_s *ent, int bHasDObj)
 
 void __cdecl G_DObjUpdate(gentity_s *ent)
 {
-    int model; // r31
-    int v3; // r4
+    int modelIndex; // r31
     XAnimTree_s *pAnimTree; // r19
     int eType; // r11
     XAnimTree_s *ActorAnimTree; // r3
-    XModel *v7; // r31
-    int v8; // r29
-    int v9; // r26
-    char *v10; // r31
+    XModel *model; // r31
+    int i; // r29
+    int numModels; // r26
     unsigned __int16 *attachTagNames; // r30
-    int v12; // r28
-    XModel *v13; // r3
     unsigned int attachIgnoreCollision; // r11
-    unsigned int v15; // r11
-    DObjModel_s v16; // [sp+50h] [-170h] BYREF
-    char v17; // [sp+5Ch] [-164h] BYREF
+    DObjModel_s dobjModels[DOBJ_MAX_SUBMODELS]; // [sp+50h] [-170h] BYREF
 
     //Profile_Begin(251);
+
     if (ent->s.number == level.cachedTagMat.entnum)
         level.cachedTagMat.entnum = ENTITYNUM_NONE;
+
     if (ent->s.number == level.cachedEntTargetTagMat.entnum)
         level.cachedEntTargetTagMat.entnum = ENTITYNUM_NONE;
+
     Com_SafeServerDObjFree(ent->s.number);
-    model = ent->model;
+    modelIndex = ent->model;
     if (!ent->model)
     {
-        if (ent->scr_vehicle)
-            G_UpdateVehicleTags(ent);
-        v3 = 0;
-        goto LABEL_31;
+        G_UpdateTags(ent, false);
+        return;
     }
     if (!ent->s.lerp.u.actor.species)
     {
@@ -3124,48 +3119,39 @@ void __cdecl G_DObjUpdate(gentity_s *ent)
     }
     pAnimTree = ent->pAnimTree;
 LABEL_17:
-    v7 = G_GetModel(model);
-    if (!v7)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\g_utils.cpp", 746, 0, "%s", "model");
-    v16.model = v7;
-    v8 = 0;
-    v16.boneName = 0;
-    v16.ignoreCollision = 0;
-    v9 = 1;
-    v10 = &v17;
+    model = G_GetModel(modelIndex);
+    iassert(model);
+
+    dobjModels[0].model = model;
+    dobjModels[0].boneName = 0;
+    dobjModels[0].ignoreCollision = 0;
+
+    i = 0;
+    numModels = 1;
     attachTagNames = ent->attachTagNames;
     do
     {
-        v12 = *(attachTagNames - 31);
-        if (!*(attachTagNames - 31))
+        modelIndex = ent->attachModelNames[i];
+
+        if (!modelIndex)
             break;
-        if (v9 >= 32)
-            MyAssertHandler(
-                "c:\\trees\\cod3\\cod3src\\src\\game\\g_utils.cpp",
-                760,
-                0,
-                "%s",
-                "numModels < DOBJ_MAX_SUBMODELS");
-        v13 = G_GetModel(v12);
-        *((unsigned int *)v10 - 1) = (unsigned int)v13;
-        if (!v13)
-            MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\g_utils.cpp", 762, 0, "%s", "dobjModels[numModels].model");
-        if (!*attachTagNames)
-            MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\g_utils.cpp", 763, 0, "%s", "ent->attachTagNames[i]");
-        ++v9;
-        attachIgnoreCollision = ent->attachIgnoreCollision;
-        *(_WORD *)v10 = *attachTagNames++;
-        v15 = (1 << v8++) & attachIgnoreCollision;
-        //v10[2] = (_cntlzw(v15) & 0x20) == 0;
-        v10[2] = v15 != 0;
-        v10 += 8;
-    } while (v8 < 31);
-    Com_ServerDObjCreate(&v16, v9, pAnimTree, ent->s.number);
-    if (ent->scr_vehicle)
-        G_UpdateVehicleTags(ent);
-    v3 = 1;
-LABEL_31:
-    G_UpdateTagInfoOfChildren(ent, v3);
+
+        iassert(numModels < DOBJ_MAX_SUBMODELS);
+
+        dobjModels[numModels].model = G_GetModel(modelIndex);
+
+        iassert(dobjModels[numModels].model);
+        iassert(ent->attachTagNames[i]);
+
+        dobjModels[numModels].boneName = ent->attachTagNames[i];
+        dobjModels[numModels].ignoreCollision = (ent->attachIgnoreCollision & (1 << i)) != 0;
+
+        numModels++;
+        i++;
+    } while (i < 31);
+
+    Com_ServerDObjCreate(dobjModels, numModels, pAnimTree, ent->s.number);
+    G_UpdateTags(ent, true);
     //Profile_EndInternal(0);
 }
 

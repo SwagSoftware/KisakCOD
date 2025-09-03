@@ -1122,7 +1122,7 @@ void G_CallSpawn()
 
                 if (!spawnFunc && level.spawnVar.spawnVarsValid)
                 {
-                    spawnFunc = G_FindSpawnFunc(classname, s_bspOnlySpawns, 15);
+                    spawnFunc = G_FindSpawnFunc(classname, s_bspOnlySpawns, ARRAY_COUNT(s_bspOnlySpawns));
                 }
 
                 if (!spawnFunc)

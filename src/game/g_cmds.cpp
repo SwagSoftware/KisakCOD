@@ -133,25 +133,22 @@ void __cdecl SanitizeString(char *in, char *out)
 
 void __cdecl G_setfog(const char *fogstring)
 {
-    const char *v2; // r3
-    double v3; // fp0
-    int v4; // [sp+8h] [-98h]
-    float v5; // [sp+60h] [-40h] BYREF
-    float v6; // [sp+64h] [-3Ch] BYREF
-    float v7; // [sp+68h] [-38h] BYREF
-    char v8; // [sp+70h] [-30h] BYREF
-    char v9; // [sp+74h] [-2Ch] BYREF
-    char v10; // [sp+78h] [-28h] BYREF
+    float fDensity; // [esp+0h] [ebp-1Ch] BYREF
+    float clr[3]; // [esp+4h] [ebp-18h] BYREF
+    float fFar; // [esp+10h] [ebp-Ch] BYREF
+    float fNear; // [esp+14h] [ebp-8h] BYREF
+    int32_t time; // [esp+18h] [ebp-4h] BYREF
 
-    v2 = va("fog %s", fogstring);
-    SV_GameSendServerCommand(-1, v2);
+    SV_GameSendServerCommand(-1, va("fog %s", fogstring));
+
     level.fFogOpaqueDist = FLT_MAX;
     level.fFogOpaqueDistSqrd = FLT_MAX;
-    if (sscanf(fogstring, "%f %f %f %f %f %f %i", &v6, &v7, &v5, &v8, &v9, &v10, v4) == 7 && v5 >= 1.0)
+
+    if (sscanf(fogstring, "%f %f %f %f %f %f %i", &fNear, &fFar, &fDensity, clr, &clr[1], &clr[2], &time) == 7
+        && fDensity >= 1.0)
     {
-        v3 = (float)((float)((float)(v7 - v6) * (float)0.82800001) + v6);
-        level.fFogOpaqueDist = (float)((float)(v7 - v6) * (float)0.82800001) + v6;
-        level.fFogOpaqueDistSqrd = (float)v3 * (float)v3;
+        level.fFogOpaqueDist = (fFar - fNear) * 1.0 + fNear;
+        level.fFogOpaqueDistSqrd = level.fFogOpaqueDist * level.fFogOpaqueDist;
     }
 }
 

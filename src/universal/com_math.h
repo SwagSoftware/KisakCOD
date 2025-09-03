@@ -197,6 +197,7 @@ void MatrixRotationY(float mat[3][3], float degree);
 void MatrixRotationZ(float mat[3][3], float degree);
 
 void Vec3Basis_LeftHanded(const float *forward, float *right, float *up);
+float Vec3Distance(const float *v1, const float *v2);
 float Vec3DistanceSq(const float *p1, const float *p2);
 
 

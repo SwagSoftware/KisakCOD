@@ -721,59 +721,38 @@ void CG_DeactivateEqCmd()
     }
 }
 
+// KISAKTODO: remove function (also in cg_servercmds_mp) and just call SND_SetEnvironmentEffects(like in blops)
 void CG_ReverbCmd()
 {
-    int nesting; // r7
-    int v1; // r5
-    const char *v2; // r3
-    int v3; // r31
-    const char *v4; // r3
-    long double v5; // fp2
-    double v6; // fp30
-    const char *v7; // r3
-    long double v8; // fp2
-    double v9; // fp29
-    const char *v10; // r3
-    long double v11; // fp2
-    double v12; // fp31
-    const char *v13; // r30
-    long double v14; // fp2
-    int v15; // r5
+    int32_t fademsec; // [esp+Ch] [ebp-30h]
+    float v5; // [esp+14h] [ebp-28h]
+    const char *roomstring; // [esp+24h] [ebp-18h]
+    float drylevel; // [esp+28h] [ebp-14h]
+    float fadetime; // [esp+2Ch] [ebp-10h]
+    float wetlevel; // [esp+30h] [ebp-Ch]
+    int32_t prio; // [esp+34h] [ebp-8h]
+    int32_t argc; // [esp+38h] [ebp-4h]
 
-    nesting = cmd_args.nesting;
-    if (cmd_args.nesting >= 8u)
+    argc = Cmd_Argc();
+
+    if (argc == 6)
     {
-        MyAssertHandler(
-            "c:\\trees\\cod3\\cod3src\\src\\cgame\\../qcommon/cmd.h",
-            160,
-            0,
-            "cmd_args.nesting doesn't index CMD_MAX_NESTING\n\t%i not in [0, %i)",
-            cmd_args.nesting,
-            8);
-        nesting = cmd_args.nesting;
-    }
-    v1 = cmd_args.argc[nesting];
-    if (v1 == 6)
-    {
-        v2 = Cmd_Argv(1);
-        v3 = atol(v2);
-        v4 = Cmd_Argv(3);
-        v5 = atof(v4);
-        v6 = (float)*(double *)&v5;
-        v7 = Cmd_Argv(4);
-        v8 = atof(v7);
-        v9 = (float)*(double *)&v8;
-        v10 = Cmd_Argv(5);
-        v11 = atof(v10);
-        v12 = (float)*(double *)&v11;
-        v13 = Cmd_Argv(2);
-        *(double *)&v14 = (float)((float)((float)v12 * (float)1000.0) + (float)0.5);
-        floor(v14);
-        SND_SetEnvironmentEffects(v3, v13, v6, v9, v15);
+        prio = atoi(Cmd_Argv(1));
+        drylevel = atof(Cmd_Argv(3));
+        wetlevel = atof(Cmd_Argv(4));
+        fadetime = atof(Cmd_Argv(5));
+        roomstring = Cmd_Argv(2);
+
+        if ((int)(fadetime * 1000.0f) > 0)
+            fademsec = (int)(fadetime * 1000.0f);
+        else
+            fademsec = 0;
+
+        SND_SetEnvironmentEffects(prio, roomstring, drylevel, wetlevel, fademsec);
     }
     else
     {
-        Com_PrintError(14, "ERROR: CG_ReverbCmd called with %i args (should be 6)\n", v1);
+        Com_PrintError(14, "ERROR: CG_ReverbCmd called with %i args (should be 6)\n", argc);
     }
 }
 

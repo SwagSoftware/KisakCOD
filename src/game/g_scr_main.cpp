@@ -583,7 +583,8 @@ BuiltinFunctionDef functions[250] =
 
 
 bool g_archiveGetDvar;
-char **difficultyStrings;
+const char *difficultyStrings[4] = { "easy", "medium", "hard", "fu" };
+
 scr_data_t g_scr_data;
 
 unsigned int __cdecl GScr_AllocString(const char *s)
@@ -1654,10 +1655,12 @@ void GScr_SetSavedDvar()
         Var = Dvar_FindVar(String);
         if (Var)
         {
-            if ((Var->flags & 0x1000) != 0)
-                Dvar_SetFromStringByNameFromSource(String, v9, DVAR_SOURCE_SCRIPT);
-            else
-                Scr_Error("SetSavedDvar can only be called on dvars with the SAVED flag set");
+            // LWSS: because the flags aren't really set, just allow any dvar to be set here (KISAKTODO: requires fixing all dvar declarations, enjoy)
+            //if ((Var->flags & 0x1000) != 0)
+            //    Dvar_SetFromStringByNameFromSource(String, v9, DVAR_SOURCE_SCRIPT);
+            //else
+            //    Scr_Error("SetSavedDvar can only be called on dvars with the SAVED flag set");
+            Dvar_SetFromStringByNameFromSource(String, v9, DVAR_SOURCE_SCRIPT);
         }
         else
         {
@@ -2511,16 +2514,15 @@ void ScrCmd_SetTimeScale()
 // aislop
 void ScrCmd_SetPhysicsGravityDir()
 {
-    // Declare local variables
-    float v7, v8, v9;
+    float v7[3];
     double v2, v5, v6;
     const char *v4;
 
     // Get vector from parameter 0
-    Scr_GetVector(0, &v7);
+    Scr_GetVector(0, v7);
 
     // Compute the magnitude (length) of the vector
-    float magnitude = sqrtf(v7 * v7 + v8 * v8 + v9 * v9);
+    float magnitude = sqrtf(v7[0] * v7[0] + v7[1] * v7[1] + v7[2] * v7[2]);
 
     // Avoid division by zero
     if (magnitude == 0.0f) {
@@ -2530,12 +2532,12 @@ void ScrCmd_SetPhysicsGravityDir()
 
     // Normalize the vector
     float invMagnitude = 1.0f / magnitude;
-    v7 *= invMagnitude;
-    v8 *= invMagnitude;
-    v9 *= invMagnitude;
+    v7[0] *= invMagnitude;
+    v7[1] *= invMagnitude;
+    v7[2] *= invMagnitude;
 
     // Prepare the formatted string for the server command
-    v4 = va("phys_grav %f %f %f\n", v7, v8, v9);
+    v4 = va("phys_grav %f %f %f\n", v7[0], v7[1], v7[2]);
 
     // Send the command to the server
     SV_GameSendServerCommand(-1, v4);
@@ -3064,9 +3066,7 @@ void __cdecl ScrCmd_MagicGrenade(scr_entref_t entref)
     const char *v4; // r3
     const char *v5; // r3
     float v6[4]; // [sp+58h] [-78h] BYREF
-    float v7; // [sp+68h] [-68h] BYREF
-    float v8; // [sp+6Ch] [-64h]
-    float v9; // [sp+70h] [-60h]
+    float v7[3]; // [sp+68h] [-68h] BYREF
     float v10[4]; // [sp+78h] [-58h] BYREF
     float v11[4]; // [sp+88h] [-48h] BYREF
     float v12[14]; // [sp+98h] [-38h] BYREF
@@ -3077,14 +3077,14 @@ void __cdecl ScrCmd_MagicGrenade(scr_entref_t entref)
     {
         if (Scr_GetNumParam() != 2 && Scr_GetNumParam() != 3)
             Scr_Error("<actor> MagicGrenade <origin> <target position> [time to blow (seconds)].\n");
-        Scr_GetVector(0, &v7);
-        v6[0] = v7;
-        v6[1] = v8;
-        v6[2] = v9;
-        Scr_GetVector(1u, &v7);
-        v12[0] = v7;
-        v12[1] = v8;
-        v12[2] = v9;
+        Scr_GetVector(0, v7);
+        v6[0] = v7[0];
+        v6[1] = v7[1];
+        v6[2] = v7[2];
+        Scr_GetVector(1, v7);
+        v12[0] = v7[0];
+        v12[1] = v7[1];
+        v12[2] = v7[2];
         Actor_Grenade_GetTossPositions(v6, v12, v10, actor->iGrenadeWeaponIndex);
         if (Actor_Grenade_CheckMinimumEnergyToss(actor, v6, v10, v11)
             || Actor_Grenade_CheckMaximumEnergyToss(actor, v6, v10, 0, v11)
@@ -3123,9 +3123,7 @@ void __cdecl ScrCmd_MagicGrenadeManual(scr_entref_t entref)
     int v3; // r29
     const char *v4; // r3
     const char *v5; // r3
-    float v6; // [sp+58h] [-58h] BYREF
-    float v7; // [sp+5Ch] [-54h]
-    float v8; // [sp+60h] [-50h]
+    float v6[3]; // [sp+58h] [-58h] BYREF
     float v9[4]; // [sp+68h] [-48h] BYREF
     float v10[14]; // [sp+78h] [-38h] BYREF
 
@@ -3135,14 +3133,14 @@ void __cdecl ScrCmd_MagicGrenadeManual(scr_entref_t entref)
     {
         if (Scr_GetNumParam() != 2 && Scr_GetNumParam() != 3)
             Scr_Error("<actor> MagicGrenadeManual <origin> <velocity> [time To Blow (seconds)].\n");
-        Scr_GetVector(0, &v6);
-        v10[0] = v6;
-        v10[1] = v7;
-        v10[2] = v8;
-        Scr_GetVector(1u, &v6);
-        v9[0] = v6;
-        v9[1] = v7;
-        v9[2] = v8;
+        Scr_GetVector(0, v6);
+        v10[0] = v6[0];
+        v10[1] = v6[1];
+        v10[2] = v6[2];
+        Scr_GetVector(1, v6);
+        v9[0] = v6[0];
+        v9[1] = v6[1];
+        v9[2] = v6[2];
         if (Scr_GetNumParam() == 3)
             v3 = (int)(float)(Scr_GetFloat(2) * (float)1000.0);
         else
@@ -5395,31 +5393,31 @@ void Scr_BulletTrace()
     int EntityHitId; // r11
     const char *v3; // r3
     double v6; // fp11
-    float v7; // [sp+50h] [-90h] BYREF
-    float v8; // [sp+54h] [-8Ch]
-    float v9; // [sp+58h] [-88h]
-    float v10; // [sp+60h] [-80h] BYREF
-    float v11; // [sp+64h] [-7Ch]
-    float v12; // [sp+68h] [-78h]
+    float v7[3]; // [sp+50h] [-90h] BYREF
+    //float v8; // [sp+54h] [-8Ch]
+    //float v9; // [sp+58h] [-88h]
+    float v10[3]; // [sp+60h] [-80h] BYREF
+    //float v11; // [sp+64h] [-7Ch]
+    //float v12; // [sp+68h] [-78h]
     float v13[4]; // [sp+70h] [-70h] BYREF
     float v14[4]; // [sp+80h] [-60h] BYREF
     trace_t v15; // [sp+90h] [-50h] BYREF
 
     number = ENTITYNUM_NONE;
     v1 = 42002481;
-    Scr_GetVector(0, &v7);
-    Scr_GetVector(1u, &v10);
+    Scr_GetVector(0, v7);
+    Scr_GetVector(1, v10);
     if (!Scr_GetInt(2))
         v1 = 8398897;
     if (Scr_GetType(3) == 1 && Scr_GetPointerType(3) == 20)
         number = Scr_GetEntity(3)->s.number;
-    G_LocationalTrace(&v15, &v7, &v10, number, v1, 0);
+    G_LocationalTrace(&v15, v7, v10, number, v1, 0);
     Scr_MakeArray();
     Scr_AddFloat(v15.fraction);
     Scr_AddArrayStringIndexed(scr_const.fraction);
-    v13[0] = (float)((float)(v10 - v7) * v15.fraction) + v7;
-    v13[1] = (float)((float)(v11 - v8) * v15.fraction) + v8;
-    v13[2] = (float)((float)(v12 - v9) * v15.fraction) + v9;
+    v13[0] = (float)((float)(v10[0] - v7[0]) * v15.fraction) + v7[0];
+    v13[1] = (float)((float)(v10[1] - v7[1]) * v15.fraction) + v7[1];
+    v13[2] = (float)((float)(v10[2] - v7[2]) * v15.fraction) + v7[2];
     Scr_AddVector(v13);
     Scr_AddArrayStringIndexed(scr_const.position);
     EntityHitId = Trace_GetEntityHitId(&v15);
@@ -5439,9 +5437,9 @@ void Scr_BulletTrace()
         {
             // Compute magnitude of vector difference (negated)
             float mag = -sqrtf(
-                (v10 - v7) * (v10 - v7) +
-                (v12 - v9) * (v12 - v9) +
-                (v11 - v8) * (v11 - v8)
+                (v10[0] - v7[0]) * (v10[0] - v7[0]) +
+                (v10[2] - v7[2]) * (v10[2] - v7[2]) +
+                (v10[1] - v7[1]) * (v10[1] - v7[1])
             );
 
             // Use a fallback (e.g. 1.0f) if mag is negative
@@ -5451,9 +5449,9 @@ void Scr_BulletTrace()
             v6 = 1.0f / safeMag;
         }
 
-        v14[0] = (float)v6 * (float)(v10 - v7);
-        v14[1] = (float)(v11 - v8) * (float)v6;
-        v14[2] = (float)(v12 - v9) * (float)v6;
+        v14[0] = (float)v6 * (float)(v10[0] - v7[0]);
+        v14[1] = (float)(v10[1] - v7[1]) * (float)v6;
+        v14[2] = (float)(v10[2] - v7[2]) * (float)v6;
         Scr_AddVector(v14);
         Scr_AddArrayStringIndexed(scr_const.normal);
         Scr_AddConstString(scr_const.none);
@@ -5479,7 +5477,7 @@ void Scr_BulletTracePassed()
     number = ENTITYNUM_NONE;
     v1 = 42002481;
     Scr_GetVector(0, v4);
-    Scr_GetVector(1u, v3);
+    Scr_GetVector(1, v3);
     if (!Scr_GetInt(2))
         v1 = 8398897;
     if (Scr_GetType(3) == 1 && Scr_GetPointerType(3) == 20)
@@ -5499,7 +5497,7 @@ void __cdecl Scr_SightTracePassed()
     number = ENTITYNUM_NONE;
     v1 = 41998339;
     Scr_GetVector(0, v4);
-    Scr_GetVector(1u, v3);
+    Scr_GetVector(1, v3);
     if (!Scr_GetInt(2))
         v1 = 8394755;
     if (Scr_GetType(3) == 1 && Scr_GetPointerType(3) == 20)
@@ -5512,37 +5510,37 @@ void __cdecl Scr_SightTracePassed()
 
 void Scr_PhysicsTrace()
 {
-    float v0; // [sp+50h] [-70h] BYREF
-    float v1; // [sp+54h] [-6Ch]
-    float v2; // [sp+58h] [-68h]
+    float v0[3]; // [sp+50h] [-70h] BYREF
+    //float v1; // [sp+54h] [-6Ch]
+    //float v2; // [sp+58h] [-68h]
     float v3[4]; // [sp+60h] [-60h] BYREF
     float v4[4]; // [sp+70h] [-50h] BYREF
     trace_t v5; // [sp+80h] [-40h] BYREF
 
-    Scr_GetVector(0, &v0);
-    Scr_GetVector(1u, v3);
-    G_TraceCapsule(&v5, &v0, vec3_origin, vec3_origin, v3, ENTITYNUM_NONE, 8519697);
-    v4[0] = (float)((float)(v3[0] - v0) * v5.fraction) + v0;
-    v4[1] = (float)((float)(v3[1] - v1) * v5.fraction) + v1;
-    v4[2] = (float)((float)(v3[2] - v2) * v5.fraction) + v2;
+    Scr_GetVector(0, v0);
+    Scr_GetVector(1, v3);
+    G_TraceCapsule(&v5, v0, vec3_origin, vec3_origin, v3, ENTITYNUM_NONE, 8519697);
+    v4[0] = (float)((float)(v3[0] - v0[0]) * v5.fraction) + v0[0];
+    v4[1] = (float)((float)(v3[1] - v0[1]) * v5.fraction) + v0[1];
+    v4[2] = (float)((float)(v3[2] - v0[2]) * v5.fraction) + v0[2];
     Scr_AddVector(v4);
 }
 
 void Scr_PlayerPhysicsTrace()
 {
-    float v0; // [sp+50h] [-70h] BYREF
-    float v1; // [sp+54h] [-6Ch]
-    float v2; // [sp+58h] [-68h]
+    float v0[3]; // [sp+50h] [-70h] BYREF
+    //float v1; // [sp+54h] [-6Ch]
+    //float v2; // [sp+58h] [-68h]
     float v3[4]; // [sp+60h] [-60h] BYREF
     float v4[4]; // [sp+70h] [-50h] BYREF
     trace_t v5; // [sp+80h] [-40h] BYREF
 
-    Scr_GetVector(0, &v0);
-    Scr_GetVector(1u, v3);
-    G_TraceCapsule(&v5, &v0, playerMins, playerMaxs, v3, ENTITYNUM_NONE, 8519697);
-    v4[0] = (float)((float)(v3[0] - v0) * v5.fraction) + v0;
-    v4[1] = (float)((float)(v3[1] - v1) * v5.fraction) + v1;
-    v4[2] = (float)((float)(v3[2] - v2) * v5.fraction) + v2;
+    Scr_GetVector(0, v0);
+    Scr_GetVector(1, v3);
+    G_TraceCapsule(&v5, v0, playerMins, playerMaxs, v3, ENTITYNUM_NONE, 8519697);
+    v4[0] = (float)((float)(v3[0] - v0[0]) * v5.fraction) + v0[0];
+    v4[1] = (float)((float)(v3[1] - v0[1]) * v5.fraction) + v0[1];
+    v4[2] = (float)((float)(v3[2] - v0[2]) * v5.fraction) + v0[2];
     Scr_AddVector(v4);
 }
 
@@ -5826,34 +5824,29 @@ void GScr_VectorFromLineToPoint()
     double v2; // fp29
     double v3; // fp28
     double v4; // fp0
-    float v5; // [sp+50h] [-70h] BYREF
-    float v6; // [sp+54h] [-6Ch]
-    float v7; // [sp+58h] [-68h]
-    float v8; // [sp+60h] [-60h] BYREF
-    float v9; // [sp+64h] [-5Ch]
-    float v10; // [sp+68h] [-58h]
-    float v11; // [sp+70h] [-50h] BYREF
-    float v12; // [sp+74h] [-4Ch]
-    float v13; // [sp+78h] [-48h]
-    float v14[14]; // [sp+80h] [-40h] BYREF
+    float v5[4]; // [sp+50h] [-70h] BYREF
+    float v6[4]; // [sp+60h] [-60h] BYREF
+    float v7[4]; // [sp+70h] [-50h] BYREF
+    float v8[14]; // [sp+80h] [-40h] BYREF
 
-    Scr_GetVector(0, &v5);
-    Scr_GetVector(1u, &v8);
-    Scr_GetVector(2u, &v11);
-    v0 = (float)(v10 - v7);
-    v1 = (float)(v9 - v6);
-    v2 = (float)(v8 - v5);
-    v3 = (float)((float)((float)(v8 - v5) * (float)(v8 - v5))
-        + (float)((float)((float)(v10 - v7) * (float)(v10 - v7)) + (float)((float)(v9 - v6) * (float)(v9 - v6))));
+    Scr_GetVector(0, v5);
+    Scr_GetVector(1u, v6);
+    Scr_GetVector(2u, v7);
+    v0 = (float)(v6[2] - v5[2]);
+    v1 = (float)(v6[1] - v5[1]);
+    v2 = (float)(v6[0] - v5[0]);
+    v3 = (float)((float)((float)(v6[0] - v5[0]) * (float)(v6[0] - v5[0]))
+        + (float)((float)((float)(v6[2] - v5[2]) * (float)(v6[2] - v5[2]))
+            + (float)((float)(v6[1] - v5[1]) * (float)(v6[1] - v5[1]))));
     if (v3 == 0.0)
         Scr_ParamError(0, "The two points on the line must be different from each other");
-    v4 = -(float)((float)((float)((float)(v11 - v5) * (float)v2)
-        + (float)((float)((float)(v13 - v7) * (float)v0) + (float)((float)(v12 - v6) * (float)v1)))
+    v4 = -(float)((float)((float)((float)(v7[0] - v5[0]) * (float)v2)
+        + (float)((float)((float)(v7[2] - v5[2]) * (float)v0) + (float)((float)(v7[1] - v5[1]) * (float)v1)))
         / (float)v3);
-    v14[0] = (float)((float)v2 * (float)v4) + (float)(v11 - v5);
-    v14[1] = (float)((float)v1 * (float)v4) + (float)(v12 - v6);
-    v14[2] = (float)((float)v0 * (float)v4) + (float)(v13 - v7);
-    Scr_AddVector(v14);
+    v8[0] = (float)((float)v2 * (float)v4) + (float)(v7[0] - v5[0]);
+    v8[1] = (float)((float)v1 * (float)v4) + (float)(v7[1] - v5[1]);
+    v8[2] = (float)((float)v0 * (float)v4) + (float)(v7[2] - v5[2]);
+    Scr_AddVector(v8);
 }
 
 void GScr_PointOnSegmentNearestToPoint()
@@ -5866,166 +5859,147 @@ void GScr_PointOnSegmentNearestToPoint()
     double v5; // fp29
     double v6; // fp28
     double v7; // fp0
-    const float *v8; // r3
-    float v9; // [sp+50h] [-70h] BYREF
-    float v10; // [sp+54h] [-6Ch]
-    float v11; // [sp+58h] [-68h]
-    float v12; // [sp+60h] [-60h] BYREF
-    float v13; // [sp+64h] [-5Ch]
-    float v14; // [sp+68h] [-58h]
-    float v15; // [sp+70h] [-50h] BYREF
-    float v16; // [sp+74h] [-4Ch]
-    float v17; // [sp+78h] [-48h]
-    float v18[14]; // [sp+80h] [-40h] BYREF
+    float *v8; // r3
+    float v9[4]; // [sp+50h] [-70h] BYREF
+    float v10[4]; // [sp+60h] [-60h] BYREF
+    float v11[4]; // [sp+70h] [-50h] BYREF
+    float v12[14]; // [sp+80h] [-40h] BYREF
 
-    Scr_GetVector(0, &v9);
-    Scr_GetVector(1u, &v12);
-    Scr_GetVector(2u, &v15);
-    v0 = v11;
-    v1 = (float)(v14 - v11);
-    v2 = v9;
-    v3 = (float)(v12 - v9);
-    v4 = v10;
-    v5 = (float)(v13 - v10);
-    v6 = (float)((float)((float)(v13 - v10) * (float)(v13 - v10))
-        + (float)((float)((float)(v14 - v11) * (float)(v14 - v11)) + (float)((float)(v12 - v9) * (float)(v12 - v9))));
+    Scr_GetVector(0, v9);
+    Scr_GetVector(1u, v10);
+    Scr_GetVector(2u, v11);
+    v0 = v9[2];
+    v1 = (float)(v10[2] - v9[2]);
+    v2 = v9[0];
+    v3 = (float)(v10[0] - v9[0]);
+    v4 = v9[1];
+    v5 = (float)(v10[1] - v9[1]);
+    v6 = (float)((float)((float)(v10[1] - v9[1]) * (float)(v10[1] - v9[1]))
+        + (float)((float)((float)(v10[2] - v9[2]) * (float)(v10[2] - v9[2]))
+            + (float)((float)(v10[0] - v9[0]) * (float)(v10[0] - v9[0]))));
     if (v6 == 0.0)
     {
         Scr_ParamError(0, "Line segment must not have zero length");
-        v0 = v11;
-        v4 = v10;
-        v2 = v9;
+        v0 = v9[2];
+        v4 = v9[1];
+        v2 = v9[0];
     }
-    v7 = (float)((float)((float)((float)(v16 - (float)v4) * (float)v5)
-        + (float)((float)((float)(v17 - (float)v0) * (float)v1)
-            + (float)((float)(v15 - (float)v2) * (float)v3)))
+    v7 = (float)((float)((float)((float)(v11[1] - (float)v4) * (float)v5)
+        + (float)((float)((float)(v11[2] - (float)v0) * (float)v1)
+            + (float)((float)(v11[0] - (float)v2) * (float)v3)))
         / (float)v6);
     if (v7 >= 0.0)
     {
         if (v7 <= 1.0)
         {
-            v8 = v18;
-            v18[0] = (float)((float)v3
-                * (float)((float)((float)((float)(v16 - (float)v4) * (float)v5)
-                    + (float)((float)((float)(v17 - (float)v0) * (float)v1)
-                        + (float)((float)(v15 - (float)v2) * (float)v3)))
+            v8 = v12;
+            v12[0] = (float)((float)v3
+                * (float)((float)((float)((float)(v11[1] - (float)v4) * (float)v5)
+                    + (float)((float)((float)(v11[2] - (float)v0) * (float)v1)
+                        + (float)((float)(v11[0] - (float)v2) * (float)v3)))
                     / (float)v6))
                 + (float)v2;
-            v18[1] = (float)((float)v5
-                * (float)((float)((float)((float)(v16 - (float)v4) * (float)v5)
-                    + (float)((float)((float)(v17 - (float)v0) * (float)v1)
-                        + (float)((float)(v15 - (float)v2) * (float)v3)))
+            v12[1] = (float)((float)v5
+                * (float)((float)((float)((float)(v11[1] - (float)v4) * (float)v5)
+                    + (float)((float)((float)(v11[2] - (float)v0) * (float)v1)
+                        + (float)((float)(v11[0] - (float)v2) * (float)v3)))
                     / (float)v6))
                 + (float)v4;
-            v18[2] = (float)((float)v1
-                * (float)((float)((float)((float)(v16 - (float)v4) * (float)v5)
-                    + (float)((float)((float)(v17 - (float)v0) * (float)v1)
-                        + (float)((float)(v15 - (float)v2) * (float)v3)))
+            v12[2] = (float)((float)v1
+                * (float)((float)((float)((float)(v11[1] - (float)v4) * (float)v5)
+                    + (float)((float)((float)(v11[2] - (float)v0) * (float)v1)
+                        + (float)((float)(v11[0] - (float)v2) * (float)v3)))
                     / (float)v6))
                 + (float)v0;
         }
         else
         {
-            v8 = &v12;
+            v8 = v10;
         }
     }
     else
     {
-        v8 = &v9;
+        v8 = v9;
     }
     Scr_AddVector(v8);
 }
 
 void Scr_Distance()
 {
-    float v0; // [sp+50h] [-30h] BYREF
-    float v1; // [sp+54h] [-2Ch]
-    float v2; // [sp+58h] [-28h]
-    float v3; // [sp+60h] [-20h] BYREF
-    float v4; // [sp+64h] [-1Ch]
-    float v5; // [sp+68h] [-18h]
+    float v0[3]; // [sp+50h] [-30h] BYREF
+    float v1[3]; // [sp+60h] [-20h] BYREF
 
-    Scr_GetVector(0, &v0);
-    Scr_GetVector(1u, &v3);
-    Scr_AddFloat(sqrtf((float)((float)((float)(v4 - v1) * (float)(v4 - v1))
-        + (float)((float)((float)(v5 - v2) * (float)(v5 - v2))
-            + (float)((float)(v3 - v0) * (float)(v3 - v0))))));
+    Scr_GetVector(0, v0);
+    Scr_GetVector(1, v1);
+    Scr_AddFloat(sqrtf((float)((float)((float)(v1[1] - v0[1]) * (float)(v1[1] - v0[1]))
+        + (float)((float)((float)(v1[2] - v0[2]) * (float)(v1[2] - v0[2]))
+            + (float)((float)(v1[0] - v0[0]) * (float)(v1[0] - v0[0]))))));
 }
 
 void Scr_Distance2D()
 {
     double v0; // fp1
-    float v1[4]; // [sp+50h] [-30h] BYREF
-    float v2[6]; // [sp+60h] [-20h] BYREF
+    float v1[3]; // [sp+50h] [-30h] BYREF
+    float v2[3]; // [sp+60h] [-20h] BYREF
 
     Scr_GetVector(0, v2);
-    Scr_GetVector(1u, v1);
+    Scr_GetVector(1, v1);
     v0 = Vec2Distance(v2, v1);
     Scr_AddFloat(v0);
 }
 
 void Scr_DistanceSquared()
 {
-    float v0; // [sp+50h] [-30h] BYREF
-    float v1; // [sp+54h] [-2Ch]
-    float v2; // [sp+58h] [-28h]
-    float v3; // [sp+60h] [-20h] BYREF
-    float v4; // [sp+64h] [-1Ch]
-    float v5; // [sp+68h] [-18h]
+    float v0[3]; // [sp+50h] [-30h] BYREF
+    float v1[3]; // [sp+60h] [-20h] BYREF
 
-    Scr_GetVector(0, &v0);
-    Scr_GetVector(1u, &v3);
-    Scr_AddFloat((float)((float)((float)(v4 - v1) * (float)(v4 - v1))
-        + (float)((float)((float)(v5 - v2) * (float)(v5 - v2))
-            + (float)((float)(v3 - v0) * (float)(v3 - v0)))));
+    Scr_GetVector(0, v0);
+    Scr_GetVector(1, v1);
+    Scr_AddFloat((float)((float)((float)(v1[1] - v0[1]) * (float)(v1[1] - v0[1]))
+        + (float)((float)((float)(v1[2] - v0[2]) * (float)(v1[2] - v0[2]))
+            + (float)((float)(v1[0] - v0[0]) * (float)(v1[0] - v0[0])))));
 }
 
 void Scr_Length()
 {
-    float v0; // [sp+50h] [-20h] BYREF
-    float v1; // [sp+54h] [-1Ch]
-    float v2; // [sp+58h] [-18h]
+    float v0[3]; // [sp+50h] [-20h] BYREF
 
-    Scr_GetVector(0, &v0);
-    Scr_AddFloat(sqrtf((float)((float)(v2 * v2) + (float)((float)(v1 * v1) + (float)(v0 * v0)))));
+    Scr_GetVector(0, v0);
+    Scr_AddFloat(sqrtf((float)((float)(v0[2] * v0[2]) + (float)((float)(v0[1] * v0[1]) + (float)(v0[0] * v0[0])))));
 }
 
 void Scr_LengthSquared()
 {
-    float v0; // [sp+50h] [-20h] BYREF
-    float v1; // [sp+54h] [-1Ch]
-    float v2; // [sp+58h] [-18h]
+    float v0[3]; // [sp+50h] [-20h] BYREF
 
-    Scr_GetVector(0, &v0);
-    Scr_AddFloat((float)((float)(v2 * v2) + (float)((float)(v1 * v1) + (float)(v0 * v0))));
+    Scr_GetVector(0, v0);
+    Scr_AddFloat((float)((float)(v0[2] * v0[2]) + (float)((float)(v0[1] * v0[1]) + (float)(v0[0] * v0[0]))));
 }
 
 void Scr_Closer()
 {
-    float v0; // [sp+50h] [-40h] BYREF
-    float v1; // [sp+54h] [-3Ch]
-    float v2; // [sp+58h] [-38h]
-    float v3; // [sp+60h] [-30h] BYREF
-    float v4; // [sp+64h] [-2Ch]
-    float v5; // [sp+68h] [-28h]
-    float v6; // [sp+70h] [-20h] BYREF
-    float v7; // [sp+74h] [-1Ch]
-    float v8; // [sp+78h] [-18h]
+    float v0[3]; // [sp+50h] [-40h] BYREF
+    float v1[3]; // [sp+60h] [-30h] BYREF
+    float v2[3]; // [sp+70h] [-20h] BYREF
 
-    Scr_GetVector(0, &v0);
-    Scr_GetVector(1u, &v3);
-    Scr_GetVector(2u, &v6);
-    Scr_AddInt((float)((float)((float)(v1 - v4) * (float)(v1 - v4))
-        + (float)((float)((float)(v2 - v5) * (float)(v2 - v5)) + (float)((float)(v0 - v3) * (float)(v0 - v3)))) < (double)(float)((float)((float)(v0 - v6) * (float)(v0 - v6)) + (float)((float)((float)(v2 - v8) * (float)(v2 - v8)) + (float)((float)(v1 - v7) * (float)(v1 - v7)))));
+    Scr_GetVector(0, v0);
+    Scr_GetVector(1, v1);
+    Scr_GetVector(2, v2);
+    Scr_AddInt((float)((float)((float)(v0[1] - v1[1]) * (float)(v0[1] - v1[1]))
+        + (float)((float)((float)(v0[2] - v1[2]) * (float)(v0[2] - v1[2]))
+            + (float)((float)(v0[0] - v1[0]) * (float)(v0[0] - v1[0])))) 
+        < (double)(float)((float)((float)(v0[0] - v2[0]) 
+            * (float)(v0[0] - v2[0])) + (float)((float)((float)(v0[2] - v2[2]) 
+            * (float)(v0[2] - v2[2])) + (float)((float)(v0[1] - v2[1]) * (float)(v0[1] - v2[1])))));
 }
 
 void Scr_VectorDot()
 {
-    float v0[4]; // [sp+50h] [-30h] BYREF
-    float v1[6]; // [sp+60h] [-20h] BYREF
+    float v0[3]; // [sp+50h] [-30h] BYREF
+    float v1[3]; // [sp+60h] [-20h] BYREF
 
     Scr_GetVector(0, v0);
-    Scr_GetVector(1u, v1);
+    Scr_GetVector(1, v1);
     Scr_AddFloat((float)((float)(v0[2] * v1[2]) + (float)((float)(v0[1] * v1[1]) + (float)(v1[0] * v0[0]))));
 }
 
@@ -6049,12 +6023,14 @@ void Scr_VectorNormalize()
 
 void Scr_VectorToAngles()
 {
-    float v0[4]; // [sp+50h] [-30h] BYREF
-    float v1[6]; // [sp+60h] [-20h] BYREF
+    float v0[3]; // [sp+50h] [-30h] BYREF
+    float v1[3]; // [sp+60h] [-20h] BYREF
 
     if (Scr_GetNumParam() != 1)
         Scr_Error("wrong number of arguments to vectortoangle!");
+
     Scr_GetVector(0, v0);
+
     vectoangles(v0, v1);
     Scr_AddVector(v1);
 }
@@ -6062,20 +6038,20 @@ void Scr_VectorToAngles()
 void Scr_VectorLerp()
 {
     double Float; // fp1
-    float v1; // [sp+50h] [-40h] BYREF
-    float v2; // [sp+54h] [-3Ch]
-    float v3; // [sp+58h] [-38h]
+    float v1[3]; // [sp+50h] [-40h] BYREF
+    //float v2; // [sp+54h] [-3Ch]
+    //float v3; // [sp+58h] [-38h]
     float v4[4]; // [sp+60h] [-30h] BYREF
     float v5[6]; // [sp+70h] [-20h] BYREF
 
     if (Scr_GetNumParam() != 3)
         Scr_Error("wrong number of arguments to vectorlerp");
-    Scr_GetVector(0, &v1);
+    Scr_GetVector(0, v1);
     Scr_GetVector(1, v4);
     Float = Scr_GetFloat(2);
-    v5[0] = (float)((float)(v4[0] - v1) * (float)Float) + v1;
-    v5[1] = (float)((float)(v4[1] - v2) * (float)Float) + v2;
-    v5[2] = (float)((float)(v4[2] - v3) * (float)Float) + v3;
+    v5[0] = (float)((float)(v4[0] - v1[0]) * (float)Float) + v1[0];
+    v5[1] = (float)((float)(v4[1] - v1[1]) * (float)Float) + v1[1];
+    v5[2] = (float)((float)(v4[2] - v1[2]) * (float)Float) + v1[2];
     Scr_AddVector(v5);
 }
 
@@ -6113,15 +6089,16 @@ void Scr_AnglesToForward()
 
 void Scr_CombineAngles()
 {
-    float v0[4]; // [sp+50h] [-C0h] BYREF
-    float v1[4]; // [sp+60h] [-B0h] BYREF
-    float v2[4]; // [sp+70h] [-A0h] BYREF
+    float v0[3]; // [sp+50h] [-C0h] BYREF
+    float v1[3]; // [sp+60h] [-B0h] BYREF
+    float v2[3]; // [sp+70h] [-A0h] BYREF
     float v3[4][3]; // [sp+80h] [-90h] BYREF
     float v4[4][3]; // [sp+B0h] [-60h] BYREF
     float v5[3][3]; // [sp+E0h] [-30h] BYREF
 
     Scr_GetVector(0, v2);
-    Scr_GetVector(1u, v1);
+    Scr_GetVector(1, v1);
+
     AnglesToAxis(v2, v3);
     AnglesToAxis(v1, v4);
     MatrixMultiply((const mat3x3&)v4, (const mat3x3&)v3, v5);
@@ -9884,30 +9861,30 @@ void __cdecl GScr_Launch(scr_entref_t entref)
     float v7; // [sp+50h] [-40h]
     float v8; // [sp+50h] [-40h]
     float v9; // [sp+50h] [-40h]
-    float v10; // [sp+58h] [-38h] BYREF
-    float v11; // [sp+5Ch] [-34h]
-    float v12; // [sp+60h] [-30h]
+    float v10[3]; // [sp+58h] [-38h] BYREF
+    //float v11; // [sp+5Ch] [-34h]
+    //float v12; // [sp+60h] [-30h]
 
     if (Scr_GetNumParam() != 1)
         Scr_Error("Incorrect number of parameters\n");
     Entity = GetEntity(entref);
-    Scr_GetVector(0, &v10);
-    v3 = v10;
-    v4 = v12;
-    v5 = v11;
-    if ((LODWORD(v10) & 0x7F800000) == 0x7F800000
-        || (LODWORD(v11) & 0x7F800000) == 0x7F800000
-        || (LODWORD(v12) & 0x7F800000) == 0x7F800000)
+    Scr_GetVector(0, v10);
+    v3 = v10[0];
+    v4 = v10[2];
+    v5 = v10[1];
+    if ((LODWORD(v10[0]) & 0x7F800000) == 0x7F800000
+        || (LODWORD(v10[1]) & 0x7F800000) == 0x7F800000
+        || (LODWORD(v10[2]) & 0x7F800000) == 0x7F800000)
     {
         Scr_Error(va(
             "invalid velocity parameter in launch command: %f %f %f",
-            v10,
-            v11,
-            v12
+            v10[0],
+            v10[1],
+            v10[2]
         ));
-        v4 = v12;
-        v5 = v11;
-        v3 = v10;
+        v4 = v10[2];
+        v5 = v10[1];
+        v3 = v10[0];
     }
     v7 = v3;
     if ((LODWORD(v7) & 0x7F800000) == 0x7F800000
@@ -9923,9 +9900,9 @@ void __cdecl GScr_Launch(scr_entref_t entref)
     }
     Entity->s.lerp.pos.trType = TR_GRAVITY;
     Entity->s.lerp.pos.trTime = level.time;
-    Entity->s.lerp.pos.trDelta[0] = v10;
-    Entity->s.lerp.pos.trDelta[1] = v11;
-    Entity->s.lerp.pos.trDelta[2] = v12;
+    Entity->s.lerp.pos.trDelta[0] = v10[0];
+    Entity->s.lerp.pos.trDelta[1] = v10[1];
+    Entity->s.lerp.pos.trDelta[2] = v10[2];
     if ((COERCE_UNSIGNED_INT(Entity->s.lerp.pos.trDelta[0]) & 0x7F800000) == 0x7F800000
         || (COERCE_UNSIGNED_INT(Entity->s.lerp.pos.trDelta[1]) & 0x7F800000) == 0x7F800000
         || (COERCE_UNSIGNED_INT(Entity->s.lerp.pos.trDelta[2]) & 0x7F800000) == 0x7F800000)

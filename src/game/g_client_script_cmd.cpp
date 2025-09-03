@@ -2320,12 +2320,12 @@ void __cdecl PlayerCmd_SetReverb(scr_entref_t entref)
 {
     unsigned __int16 v1; // r29
     const char *v2; // r3
-    double Float; // fp29
-    double v4; // fp31
-    double v5; // fp30
-    unsigned int ConstString; // r3
-    int v7; // r31
-    const char *v8; // r3
+    float fadetime; // fp29
+    float drylevel; // fp31
+    float wetlevel; // fp30
+    unsigned int prio_name; // r3
+    int prio; // r31
+    const char *pszReverb;
 
     v1 = entref.entnum;
     if (entref.classnum)
@@ -2346,9 +2346,11 @@ void __cdecl PlayerCmd_SetReverb(scr_entref_t entref)
     LABEL_7:
         Scr_ObjectError(v2);
     }
-    Float = 0.0;
-    v4 = 1.0;
-    v5 = 0.5;
+
+    fadetime = 0.0f;
+    drylevel = 1.0f;
+    wetlevel = 0.5f;
+
     switch (Scr_GetNumParam())
     {
     case 2u:
@@ -2358,24 +2360,23 @@ void __cdecl PlayerCmd_SetReverb(scr_entref_t entref)
     case 4u:
         goto LABEL_10;
     case 5u:
-        Float = Scr_GetFloat(4);
+        fadetime = Scr_GetFloat(4);
     LABEL_10:
-        v5 = Scr_GetFloat(3);
+        wetlevel = Scr_GetFloat(3);
     LABEL_11:
-        v4 = Scr_GetFloat(2);
+        drylevel = Scr_GetFloat(2);
     LABEL_12:
-        Scr_GetString(1);
-        ConstString = Scr_GetConstString(0);
-        v7 = 1;
-        if (ConstString != scr_const.snd_enveffectsprio_level)
+        pszReverb = Scr_GetString(1);
+        prio_name = Scr_GetConstString(0);
+        prio = 1;
+        if (prio_name != scr_const.snd_enveffectsprio_level)
         {
-            if (ConstString == scr_const.snd_enveffectsprio_shellshock)
-                v7 = 2;
+            if (prio_name == scr_const.snd_enveffectsprio_shellshock)
+                prio = 2;
             else
                 Scr_Error("priority must be 'snd_enveffectsprio_level' or 'snd_enveffectsprio_shellshock'\n");
         }
-        v8 = va("reverb %i \"%s\" %g %g %g", v7, v4, LODWORD(v5), LODWORD(Float));
-        SV_GameSendServerCommand(v1, v8);
+        SV_GameSendServerCommand(v1, va("reverb %i \"%s\" %g %g %g", prio, pszReverb, drylevel, wetlevel, fadetime));
         break;
     default:
         Scr_Error("Incorrect number of parameters\n");

@@ -891,3 +891,24 @@ int32_t G_SpawnStruct()
     return result;
 }
 
+void __cdecl Scr_GetObjectField(unsigned int classnum, int entnum, int offset)
+{
+    const char *v3; // eax
+
+    if (classnum)
+    {
+        if (classnum == 1)
+        {
+            Scr_GetHudElemField(entnum, offset);
+        }
+        else if (!alwaysfails)
+        {
+            v3 = va("bad class num %u", classnum);
+            MyAssertHandler(".\\game_mp\\g_spawn_mp.cpp", 760, 0, v3);
+        }
+    }
+    else
+    {
+        Scr_GetEntityField(entnum, offset);
+    }
+}

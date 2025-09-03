@@ -831,6 +831,7 @@ struct SpawnFuncEntry // sizeof=0x8
     const char *classname;
     void(__cdecl *callback)(gentity_s *);
 };
+void __cdecl Scr_GetObjectField(unsigned int classnum, int entnum, int offset);
 int32_t __cdecl G_LevelSpawnString(const char *key, const char *defaultString, const char **out);
 int32_t __cdecl G_SpawnFloat(const char *key, const char *defaultString, float *out);
 int32_t __cdecl G_SpawnInt(const char *key, const char *defaultString, int32_t *out);
