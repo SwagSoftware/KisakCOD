@@ -18,7 +18,7 @@
 //  int g_breakonHit         8304323c     scr_evaluate.obj
 //  unsigned int g_breakonString      83043244     scr_evaluate.obj
 
-debugger_sval_s *g_debugExprHead;
+debugger_sval_s *g_debugExprHead = NULL;
 int g_breakonExpr; // thread_local in blops?
 int g_breakonHit;
 unsigned int g_breakonObject;
@@ -1825,19 +1825,20 @@ bool __cdecl Scr_RefVector(sval_u expr1, sval_u expr2, sval_u expr3)
 
 void __cdecl Scr_FreeDebugExprValue(sval_u val)
 {
-    switch (*(unsigned int *)val.type)
+    //switch (*(unsigned int *)val.type)
+    switch (val.node[0].type)
     {
-    case 4:
-    case 5:
+    case ENUM_local_variable:
+    case ENUM_local_variable_frozen:
         iassert(val.node[4].idValue);
         FreeValue(val.node[4].idValue);
         break;
-    case 0x11:
-    case 0x13:
+    case ENUM_variable:
+    case ENUM_call_expression:
         iassert(val.node[2].idValue);
         FreeValue(val.node[2].idValue);
         break;
-    case 0x51:
+    case ENUM_thread_object:
         if (val.node[1].idValue)
         {
             RemoveRefToObject(val.node[2].idValue);

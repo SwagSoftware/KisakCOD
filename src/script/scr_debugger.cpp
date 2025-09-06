@@ -3227,3 +3227,120 @@ void Scr_EnableBreakpoints(bool enable)
 {
     scrDebuggerGlob.disableBreakpoints = !enable;
 }
+
+bool __cdecl Scr_CanDrawScript()
+{
+    return scrDebuggerGlob.debugger_inited_system && scrDebuggerGlob.scriptWatch.dirty == 0;
+}
+
+// LWSS HACK (dont see thisptr for these... but it's just a wrapper for R_*** functions, so who cares)
+void __cdecl UI_Component__DrawText(float x, float y, float width, int fontEnum, const float *color, char *text)
+{
+    float v6; // [esp+1Ch] [ebp-10h]
+    float v7; // [esp+20h] [ebp-Ch]
+    float v8; // [esp+24h] [ebp-8h]
+    int maxChars; // [esp+28h] [ebp-4h]
+
+    if (UI_Component::g.charWidth == 0.0)
+        MyAssertHandler((char *)".\\ui\\ui_component.cpp", 132, 0, "%s", "g.charWidth");
+    maxChars = (int)(width / UI_Component::g.charWidth);
+    v7 = floor(x);
+    v8 = UI_Component::g.charHeight + y;
+    v6 = floor(v8);
+    R_AddCmdDrawText(text, maxChars, cls.consoleFont, v7, v6, 1.0, 1.0, 0.0, color, 0);
+}
+
+void __cdecl UI_Component__DrawPic(float x, float y, float width, float height, const float *color, Material *material)
+{
+    float v6; // [esp+2Ch] [ebp-Ch]
+    float v7; // [esp+30h] [ebp-8h]
+
+    v7 = floor(y);
+    v6 = floor(x);
+    R_AddCmdDrawStretchPic(v6, v7, width, height, 0.0, 0.0, 1.0, 1.0, color, material);
+}
+
+void Scr_DrawCurrentFilename()
+{
+    char *v0; // eax
+    char *v1; // eax
+    __int64 v2; // [esp+10h] [ebp-C8h]
+    int v3; // [esp+14h] [ebp-C4h]
+    float v4; // [esp+18h] [ebp-C0h]
+    float v5; // [esp+1Ch] [ebp-BCh]
+    float colorYellow[4]; // [esp+38h] [ebp-A0h] BYREF
+    char filename[128]; // [esp+48h] [ebp-90h] BYREF
+    float width; // [esp+CCh] [ebp-Ch]
+    float x; // [esp+D0h] [ebp-8h]
+    Scr_ScriptWindow *window; // [esp+D4h] [ebp-4h]
+
+    if (scrDebuggerGlob.scriptList.selectedLine >= 0)
+    {
+        window = scrDebuggerGlob.scriptList.scriptWindows[scrDebuggerGlob.scriptList.selectedLine];
+        if (window->selectedLine)
+        {
+            if (window->selectedLine < 0)
+            {
+                //v1 = Scr_ScriptWindow::GetFilename(window);
+                I_strncpyz(filename, window->GetFilename(), 128);
+            }
+            else
+            {
+                //v3 = window->selectedLine + 1;
+                //v0 = Scr_ScriptWindow::GetFilename(window);
+                Com_sprintf(filename, 0x80u, "%s (%i)", window->GetFilename(), window->selectedLine + 1);
+            }
+            width = (double)(unsigned int)(&filename[strlen(filename) + 1] - &filename[1]) * UI_Component::g.charWidth;
+#ifdef KISAK_MP
+            CL_LookupColor(0, 0x33u, colorYellow);
+#elif KISAK_SP
+            CL_LookupColor(0x33u, colorYellow);
+#endif
+            x = UI_Component::g.screenWidth - UI_Component::g.scrollBarSize - width;
+            v4 = width + UI_Component::g.charWidth;
+            v3 = x - UI_Component::g.charWidth;
+            //UI_Component::DrawPic(v3, 0.0, v4, UI_Component::g.charHeight, 0, cls.consoleMaterial);
+            //UI_Component::DrawText(x, 0.0, width, 5, colorYellow, filename);
+            UI_Component__DrawPic(v3, 0.0, v4, UI_Component::g.charHeight, 0, cls.consoleMaterial);
+            UI_Component__DrawText(x, 0.0, width, 5, colorYellow, filename);
+        }
+    }
+}
+
+void __cdecl Scr_DrawScript()
+{
+    BOOL isForegroundWindow; // [esp+18h] [ebp-4h]
+
+    iassert(scrDebuggerGlob.debugger_inited_system);
+    iassert(!scrDebuggerGlob.scriptWatch.dirty);
+
+    if (scrDebuggerGlob.gainFocusTime)
+    {
+        isForegroundWindow = IN_IsForegroundWindow();
+        IN_SetForegroundWindow();
+        if (!isForegroundWindow)
+            IN_ActivateMouse(1);
+        if (!scrDebuggerGlob.atBreakpoint || (int)(Sys_Milliseconds() - scrDebuggerGlob.gainFocusTime) >= 0)
+            scrDebuggerGlob.gainFocusTime = 0;
+    }
+    if (!scrDebuggerGlob.scriptList.scriptWindows)
+        MyAssertHandler((char *)".\\script\\scr_debugger.cpp", 7727, 0, "%s", "scrDebuggerGlob.scriptList.scriptWindows");
+    if (scrDebuggerGlob.scriptList.selectedLine < 0)
+    {
+        scrDebuggerGlob.mainWindow.topComp = 0;
+    }
+    else
+    {
+        scrDebuggerGlob.mainWindow.topComp = &scrDebuggerGlob.scriptScrollPane;
+        scrDebuggerGlob.scriptScrollPane.comp = scrDebuggerGlob.scriptList.scriptWindows[scrDebuggerGlob.scriptList.selectedLine];
+        scrDebuggerGlob.scriptScrollPane.forceHorScoll = 1;
+    }
+    scrDebuggerGlob.mainWindow.bottomComp = &scrDebuggerGlob.miscScrollPane;
+    scrDebuggerGlob.mainWindow.Draw(0.0f, 0.0f,
+        UI_Component::g.screenWidth,
+        UI_Component::g.screenHeight,
+        0.0f,
+        0.0f);
+    Scr_DrawCurrentFilename();
+    Con_DrawConsole(0);
+}

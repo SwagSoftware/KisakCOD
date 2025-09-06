@@ -836,5 +836,8 @@ void __cdecl R_ShutdownRenderBuffers();
 
 void __cdecl R_ShutdownRenderCommands();
 
+void __cdecl R_BeginDebugFrame();
+void __cdecl R_EndDebugFrame();
+
 extern GfxBackEndData *frontEndDataOut;
 extern GfxBackEndData s_backEndData[2];

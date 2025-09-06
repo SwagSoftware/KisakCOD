@@ -27,6 +27,7 @@ void	IN_KillRumbleScripts( void );
 
 // LWSS add
 void __cdecl IN_SetForegroundWindow();
+bool __cdecl IN_IsForegroundWindow();
 
 void IN_ActivateMouse(qboolean force);
 void __cdecl IN_RecenterMouse();

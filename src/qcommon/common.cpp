@@ -210,10 +210,46 @@ void QDECL Com_PrintMessage(int channel, const char* msg, int error)
 
 }
 
+int __cdecl Debug_EventLoop(int localClientNum)
+{
+    sysEvent_t result; // [esp+4h] [ebp-50h] BYREF
+    sysEvent_t v3; // [esp+20h] [ebp-34h]
+    int newEvent; // [esp+38h] [ebp-1Ch]
+    sysEvent_t ev; // [esp+3Ch] [ebp-18h]
+
+    for (newEvent = 0; ; newEvent = 1)
+    {
+        v3 = *Sys_GetEvent(&result);
+        ev = v3;
+        switch (v3.evType)
+        {
+        case SE_NONE:
+            iassert(!ev.evPtr);
+            return newEvent;
+        case SE_KEY:
+            iassert(!ev.evPtr);
+            CL_KeyEvent(localClientNum, ev.evValue, ev.evValue2, ev.evTime);
+            break;
+        case SE_CHAR:
+            iassert(!ev.evPtr);
+            CL_CharEvent(localClientNum, ev.evValue);
+            break;
+        case SE_CONSOLE:
+            iassert(ev.evPtr);
+            Cbuf_AddText(localClientNum, (const char *)ev.evPtr);
+            Com_FreeEvent((char *)ev.evPtr);
+            Cbuf_AddText(localClientNum, "\n");
+            break;
+        default:
+            iassert(!ev.evPtr);
+            Com_Error(ERR_FATAL, "Com_EventLoop: bad event type %i", ev.evType);
+            break;
+        }
+    }
+}
+
 void __cdecl Debug_Frame(int localClientNum)
 {
-    // KISAKTODO
-#if 0
     unsigned int v1; // edx
     int lastFrameIndex; // [esp+0h] [ebp-18h]
     int newEvent; // [esp+4h] [ebp-14h]
@@ -270,7 +306,6 @@ void __cdecl Debug_Frame(int localClientNum)
     }
     iassert( (bgs == 0) );
     bgs = oldBgs;
-#endif
 }
 
 void QDECL Com_Printf(int channel, const char* fmt, ...)

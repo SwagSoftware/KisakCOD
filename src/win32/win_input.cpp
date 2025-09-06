@@ -233,7 +233,7 @@ static DIDATAFORMAT	df = {
 	rgodf,                      // and here they are
 };
 
-BOOL __cdecl IN_IsForegroundWindow()
+bool __cdecl IN_IsForegroundWindow()
 {
 	return GetForegroundWindow() == g_wv.hWnd;
 }

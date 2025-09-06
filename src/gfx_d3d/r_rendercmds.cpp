@@ -1767,3 +1767,63 @@ void R_AddCmdSetViewportValues(int x, int y, int width, int height)
     writer[3] = width;
     writer[4] = height;
 }
+
+void __cdecl R_BeginDebugFrame()
+{
+    iassert(s_debugFrameGlob.restoreCmdList == NULL);
+    iassert(s_debugFrameGlob.restoreFrontEndDataOut == NULL);
+
+    if (rg.registered)
+    {
+        Com_SyncThreads();
+        s_debugFrameGlob.inFrame = rg.inFrame;
+        rg.inFrame = 1;
+        s_debugFrameGlob.restoreCmdList = s_cmdList;
+        s_debugFrameGlob.restoreFrontEndDataOut = frontEndDataOut;
+        if (gfxBuf.skinnedCacheLockAddr)
+        {
+            iassert(!s_debugFrameGlob.restoreSkinnedCache);
+            s_debugFrameGlob.restoreSkinnedCache = 1;
+            R_UnlockSkinnedCache();
+        }
+        s_cmdList = s_debugFrameGlob.frontEndDataOut.commands;
+        frontEndDataOut = &s_debugFrameGlob.frontEndDataOut;
+        R_BeginSharedCmdList();
+    }
+}
+
+void __cdecl R_EndDebugFrame()
+{
+    bool v0; // [esp+1h] [ebp-1h]
+
+    if (rg.registered)
+    {
+        R_AddCmdEndOfList();
+        R_ClearCmdList();
+        R_SyncRenderThread();
+        frontEndDataOut->drawType = -1;
+        iassert(Sys_IsMainThread());
+        if (R_CheckLostDevice())
+            v0 = g_disableRendering == 0;
+        else
+            v0 = 0;
+        if (v0)
+        {
+            RB_BeginFrame(frontEndDataOut);
+            RB_Draw3D();
+            RB_CallExecuteRenderCommands();
+            RB_EndFrame(-1);
+        }
+        s_cmdList = s_debugFrameGlob.restoreCmdList;
+        frontEndDataOut = s_debugFrameGlob.restoreFrontEndDataOut;
+        if (s_debugFrameGlob.restoreSkinnedCache)
+        {
+            s_debugFrameGlob.restoreSkinnedCache = 0;
+            R_LockSkinnedCache();
+        }
+        s_debugFrameGlob.restoreCmdList = 0;
+        s_debugFrameGlob.restoreFrontEndDataOut = 0;
+        iassert(rg.inFrame);
+        rg.inFrame = s_debugFrameGlob.inFrame;
+    }
+}

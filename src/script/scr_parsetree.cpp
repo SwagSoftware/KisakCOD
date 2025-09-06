@@ -236,20 +236,25 @@ sval_u *__cdecl Scr_AllocDebugExpr(Enum_t type, int size, const char *name)
 
 void __cdecl Scr_FreeDebugExpr(ScriptExpression_t *expr)
 {
-    char *debugExprHead; // [esp+0h] [ebp-Ch]
+    debugger_sval_s *debugExprHead; // [esp+0h] [ebp-Ch]
     debugger_sval_s *nextDebugExprHead; // [esp+8h] [ebp-4h]
 
     if (expr->breakonExpr)
         --scrVmDebugPub.checkBreakon;
-    debugExprHead = (char *)expr->exprHead;
-    if (!debugExprHead)
-        MyAssertHandler(".\\script\\scr_parsetree.cpp", 395, 0, "%s", "debugExprHead");
+
+    debugExprHead = expr->exprHead;
+
+    iassert(debugExprHead);
+
     while (debugExprHead)
     {
-        Scr_FreeDebugExprValue(*(sval_u*)(debugExprHead + 4));
-        nextDebugExprHead = *(debugger_sval_s **)debugExprHead;
+        // See Prefixed data in Scr_AllocDebugExpr()
+        sval_u *pval = (sval_u *)((char *)debugExprHead + sizeof(debugger_sval_s));
+        Scr_FreeDebugExprValue(*(sval_u*)&pval);
+
+        nextDebugExprHead = debugExprHead->next;
         Z_Free(debugExprHead, 0);
-        debugExprHead = (char *)nextDebugExprHead;
+        debugExprHead = nextDebugExprHead;
     }
 }
 

@@ -317,6 +317,8 @@ int __cdecl Scr_HitAssignmentBreakpoint(VariableValue *top, char *pos, unsigned 
 bool __cdecl Scr_IgnoreErrors();
 
 void Scr_EnableBreakpoints(bool enable);
+bool Scr_CanDrawScript();
+void __cdecl Scr_DrawScript();
 
 extern scrDebuggerGlob_t scrDebuggerGlob;
 extern Scr_Breakpoint g_breakpoints[128];
