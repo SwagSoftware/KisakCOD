@@ -5,6 +5,9 @@
 
 #include <ui/ui_shared.h>
 
+#define ONLY_LOCAL_CLIENT_NUM 0
+#define KEYCATCH_SCRIPT 2
+
 struct debugger_sval_s // sizeof=0x4
 {
     debugger_sval_s *next;

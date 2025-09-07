@@ -259,8 +259,10 @@ void __cdecl Debug_Frame(int localClientNum)
     int newEvent2; // [esp+14h] [ebp-4h]
 
     iassert( Sys_IsMainThread() );
+#ifdef KISAK_MP
     oldBgs = bgs;
     bgs = 0;
+#endif
     IN_Frame();
     if (Sys_IsRemoteDebugClient())
     {
@@ -269,7 +271,11 @@ void __cdecl Debug_Frame(int localClientNum)
     else
     {
         minMsec = 1;
-        if (com_maxfps->current.integer > 0 && !com_dedicated->current.integer)
+        if (com_maxfps->current.integer > 0
+#ifdef KISAK_MP
+            && !com_dedicated->current.integer
+#endif
+            )
         {
             minMsec = 1000 / com_maxfps->current.integer;
             iassert( minMsec >= 0 );
@@ -304,8 +310,10 @@ void __cdecl Debug_Frame(int localClientNum)
         Scr_DrawScript();
         R_EndDebugFrame();
     }
+#ifdef KISAK_MP
     iassert( (bgs == 0) );
     bgs = oldBgs;
+#endif
 }
 
 void QDECL Com_Printf(int channel, const char* fmt, ...)

@@ -4420,7 +4420,6 @@ void __cdecl Scr_AddArrayStringIndexed(unsigned int stringValue)
 
 void __cdecl Scr_Error(const char* error)
 {
-    iassert(0); // KISAK ADD
     Scr_SetErrorMessage(error);
     Scr_ErrorInternal();
 }

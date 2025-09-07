@@ -1069,9 +1069,7 @@ unsigned int  Scr_FindAllThreads(unsigned int selfId, unsigned int* threads, uns
 	unsigned int stackId; // [esp+4h] [ebp-1Ch]
 	unsigned int timeId; // [esp+8h] [ebp-18h]
 	unsigned int notifyListId; // [esp+Ch] [ebp-14h]
-	unsigned int notifyListIda; // [esp+Ch] [ebp-14h]
 	unsigned int threadId; // [esp+10h] [ebp-10h]
-	unsigned int threadIda; // [esp+10h] [ebp-10h]
 	VariableValueInternal* entryValue; // [esp+14h] [ebp-Ch]
 	int count; // [esp+18h] [ebp-8h]
 	unsigned int id; // [esp+1Ch] [ebp-4h]
@@ -1106,24 +1104,24 @@ unsigned int  Scr_FindAllThreads(unsigned int selfId, unsigned int* threads, uns
 	if (notifyListId)
 	{
 		Object = FindObject(notifyListId);
-		for (notifyListIda = FindFirstSibling(Object.u.stringValue);
-			notifyListIda;
-			notifyListIda = FindNextSibling(notifyListIda))
+		for (notifyListId = FindFirstSibling(Object.u.stringValue);
+			notifyListId;
+			notifyListId = FindNextSibling(notifyListId))
 		{
-			timeId = FindObject(notifyListIda);
+			timeId = FindObject(notifyListId);
 			iassert(timeId);
 			for (stackId = FindFirstSibling(timeId); stackId; stackId = FindNextSibling(stackId))
 			{
 				if (GetValueType(stackId) == 10)
 				{
-					for (threadIda = *(unsigned int*)(GetVariableValueAddress(stackId)->u.intValue + 8);
-						threadIda;
-						threadIda = GetSafeParentLocalId(threadIda))
+					for (threadId = *(unsigned int*)(GetVariableValueAddress(stackId)->u.intValue + 8);
+						threadId;
+						threadId = GetSafeParentLocalId(threadId))
 					{
-						if (selfId != Scr_GetSelf(threadIda))
+						if (selfId != Scr_GetSelf(threadId))
 						{
 							if (threads)
-								threads[count] = threadIda;
+								threads[count] = threadId;
 							++count;
 							break;
 						}

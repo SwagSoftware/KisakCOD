@@ -1843,44 +1843,38 @@ Scr_WatchElement_s *Scr_DisplayDebugger()
     int startTime; // [esp+Ch] [ebp-8h]
     int remoteScreenUpdateNesting; // [esp+10h] [ebp-4h]
 
-    if (Sys_IsRemoteDebugClient())
-        MyAssertHandler(".\\script\\scr_debugger.cpp", 8459, 0, "%s", "!Sys_IsRemoteDebugClient()");
+    iassert(!Sys_IsRemoteDebugClient());
+
     if (scrDebuggerGlob.atBreakpoint)
     {
-        //Scr_ScriptCallStack::UpdateStack(&scrDebuggerGlob.scriptCallStack);
         scrDebuggerGlob.scriptCallStack.UpdateStack();
     }
     varUsagePos = scrVarPub.varUsagePos;
     scrVarPub.varUsagePos = "<script debugger variable>";
-    if (scrVmPub.outparamcount)
-        MyAssertHandler(".\\script\\scr_debugger.cpp", 8480, 0, "%s", "!scrVmPub.outparamcount");
-    if (scrVmPub.inparamcount)
-        MyAssertHandler(".\\script\\scr_debugger.cpp", 8481, 0, "%s", "!scrVmPub.inparamcount");
-    if (scrVarPub.evaluate)
-        MyAssertHandler(".\\script\\scr_debugger.cpp", 8483, 0, "%s", "!scrVarPub.evaluate");
+
+    iassert(!scrVmPub.outparamcount);
+    iassert(!scrVmPub.inparamcount);
+    iassert(!scrVarPub.evaluate);
+
     scrVarPub.evaluate = 1;
-    //Scr_ScriptWatch::UpdateBreakpoints(&scrDebuggerGlob.scriptWatch, 0);
+    
     scrDebuggerGlob.scriptWatch.UpdateBreakpoints(0);
+
     Scr_Evaluate();
-    //Scr_ScriptWatch::UpdateHeight(&scrDebuggerGlob.scriptWatch);
+    
     scrDebuggerGlob.scriptWatch.UpdateHeight();
-    //UI_LinesComponent::UpdateHeight(&scrDebuggerGlob.scriptCallStack);
     scrDebuggerGlob.scriptCallStack.UpdateHeight();
 
     if (scrDebuggerGlob.showConsole)
         scrDebuggerGlob.showConsole = 0;
     else
         Con_CloseConsole(0);
-    if (!Sys_IsMainThread())
-        MyAssertHandler(".\\script\\scr_debugger.cpp", 8498, 0, "%s", "Sys_IsMainThread()");
-    if (Key_IsCatcherActive(0, 2))
-        MyAssertHandler(
-            ".\\script\\scr_debugger.cpp",
-            8499,
-            0,
-            "%s",
-            "!Key_IsCatcherActive( ONLY_LOCAL_CLIENT_NUM, KEYCATCH_SCRIPT )");
-    Key_AddCatcher(0, 2);
+
+    iassert(Sys_IsMainThread());
+    iassert(!Key_IsCatcherActive(ONLY_LOCAL_CLIENT_NUM, KEYCATCH_SCRIPT));
+
+    Key_AddCatcher(ONLY_LOCAL_CLIENT_NUM, KEYCATCH_SCRIPT);
+
     if ((clientUIActives[0].keyCatchers & 2) != 0)
     {
         startTime = cls.realtime;
@@ -1895,10 +1889,11 @@ Scr_WatchElement_s *Scr_DisplayDebugger()
         clientUIActives[0].keyCatchers = keyCatchers | clientUIActives[0].keyCatchers & 3;
         CL_EndScriptDebugger(cls.realtime - startTime);
     }
-    //Scr_ScriptWatch::UpdateBreakpoints(&scrDebuggerGlob.scriptWatch, 1);
+
     scrDebuggerGlob.scriptWatch.UpdateBreakpoints(1);
-    if (!scrVarPub.evaluate)
-        MyAssertHandler(".\\script\\scr_debugger.cpp", 8536, 0, "%s", "scrVarPub.evaluate");
+
+    iassert(scrVarPub.evaluate);
+
     scrVarPub.evaluate = 0;
     scrVarPub.varUsagePos = varUsagePos;
     return Scr_ResumeBreakpoints();
