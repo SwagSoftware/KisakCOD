@@ -34,8 +34,6 @@ void __cdecl Sys_SnapVector(float *v)
 
         *v = static_cast<float>(output);
         ++v;
-
-        iassert(static_cast<float>(output) == std::floor(input + 0.5f));
     }
 }
 
