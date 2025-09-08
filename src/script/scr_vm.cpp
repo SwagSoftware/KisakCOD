@@ -267,13 +267,7 @@ const dvar_s* Scr_VM_Init()
 
 void __cdecl Scr_Settings(int developer, int developer_script, int abort_on_error)
 {
-    if (abort_on_error && !developer)
-        MyAssertHandler(".\\script\\scr_vm.cpp", 188, 0, "%s", "!abort_on_error || developer");
-#ifndef KISAK_SCRIPT_DEBUGGER
-    developer = 0;
-    developer_script = 0;
-    abort_on_error = 0;
-#endif
+    iassert(!abort_on_error || developer);
 
     scrVarPub.developer = developer != 0;
     scrVarPub.developer_script = developer_script != 0;
@@ -3947,9 +3941,10 @@ BOOL Scr_ErrorInternal()
 {
     BOOL result; // eax
 
-    if (!scrVarPub.error_message)
-        MyAssertHandler(".\\script\\scr_vm.cpp", 215, 0, "%s", "scrVarPub.error_message");
+    iassert(scrVarPub.error_message);
+
     result = scrVarPub.evaluate;
+
     if (!scrVarPub.evaluate && !scrCompilePub.script_loading)
     {
         if (scrVmPub.function_count || scrVmPub.debugCode)
@@ -3957,28 +3952,23 @@ BOOL Scr_ErrorInternal()
             Com_PrintMessage(6, "throwing script exception: ", 0);
             Com_PrintMessage(6, (char*)scrVarPub.error_message, 0);
             Com_PrintMessage(6, "\n", 0);
-            if ((unsigned int)g_script_error_level >= 0x21)
-                MyAssertHandler(
-                    ".\\script\\scr_vm.cpp",
-                    252,
-                    0,
-                    "g_script_error_level doesn't index ARRAY_COUNT( g_script_error )\n\t%i not in [0, %i)",
-                    g_script_error_level,
-                    33);
+
+            bcassert(g_script_error_level, ARRAY_COUNT(g_script_error));
+
             longjmp(g_script_error[g_script_error_level], -1); // KISAKTRYCATCH
         }
     error_2:
         Sys_Error("%s", scrVarPub.error_message);
     }
+
     if (scrVmPub.terminal_error)
         goto error_2;
+
     return result;
 }
 
 float __cdecl Scr_GetFloat(unsigned int index)
 {
-    const char* v2; // eax
-    const char* v3; // eax
     VariableValue* value; // [esp+0h] [ebp-4h]
 
     if (index < scrVmPub.outparamcount)
@@ -3989,11 +3979,9 @@ float __cdecl Scr_GetFloat(unsigned int index)
         if (value->type == 6)
             return (double)value->u.intValue;
         scrVarPub.error_index = index + 1;
-        v2 = va("type %s is not a float", var_typename[value->type]);
-        Scr_Error(v2);
+        Scr_Error(va("type %s is not a float", var_typename[value->type]));
     }
-    v3 = va("parameter %d does not exist", index + 1);
-    Scr_Error(v3);
+    Scr_Error(va("parameter %d does not exist", index + 1));
     return 0.0;
 }
 

@@ -1478,13 +1478,13 @@ void __cdecl Scr_GetTextSourcePos(const char *buf, char *codePos, char *line)
 void __cdecl RuntimeError(char *codePos, unsigned int index, const char *msg, const char *dialogMessage)
 {
     const char *v4; // [esp+4h] [ebp-Ch]
-    bool v5; // [esp+8h] [ebp-8h]
     bool abort_on_error; // [esp+Fh] [ebp-1h]
 
     if (scrVarPub.developer)
         goto LABEL_5;
-    if (!Scr_IsInOpcodeMemory(codePos))
-        MyAssertHandler(".\\script\\scr_parser.cpp", 1650, 0, "%s", "Scr_IsInOpcodeMemory( codePos )");
+
+    iassert(Scr_IsInOpcodeMemory(codePos));
+
     if (scrVmPub.terminal_error)
     {
     LABEL_5:
@@ -1495,11 +1495,13 @@ void __cdecl RuntimeError(char *codePos, unsigned int index, const char *msg, co
                 return;
             goto error;
         }
-        v5 = scrVmPub.abort_on_error || scrVmPub.terminal_error;
-        abort_on_error = v5;
+
+        abort_on_error = scrVmPub.abort_on_error || scrVmPub.terminal_error;
         if (Scr_IgnoreErrors())
             abort_on_error = 0;
+
         RuntimeErrorInternal(abort_on_error ? 23 : 6, codePos, index, msg);
+
         if (abort_on_error)
         {
         error:
