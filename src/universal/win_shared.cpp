@@ -1,5 +1,7 @@
 #include "q_shared.h"
 
+#include <cmath>
+
 #include <Windows.h>
 
 int initialized_1 = 0;
@@ -22,11 +24,18 @@ unsigned int __cdecl Sys_MillisecondsRaw()
 
 void __cdecl Sys_SnapVector(float *v)
 {
-    float *va; // [esp+10h] [ebp+8h]
+    for (size_t i = 0; i < 3; ++i)
+    {
+        const float input = *v;
+        int32_t output{};
 
-    *v = (float)(int)*v;
-    va = v + 1;
-    *va = (float)(int)*va;
-    va[1] = (float)(int)va[1];
+        __asm fld input
+        __asm fistp output
+
+        *v = static_cast<float>(output);
+        ++v;
+
+        iassert(static_cast<float>(output) == std::floor(input + 0.5f));
+    }
 }
 
