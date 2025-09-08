@@ -119,15 +119,15 @@ BOOL cl_serverLoadingMap;
 //ping_t *cl_pinglist;
 ping_t cl_pinglist[16];
 
-bool cl_waitingOnServerToLoadMap[1];
+bool cl_waitingOnServerToLoadMap[STATIC_MAX_LOCAL_CLIENTS];
 
 int32_t cl_maxLocalClients;
 int32_t old_com_frameTime;
 uint32_t frame_msec;
 
-clientConnection_t clientConnections[MAX_CLIENTS];
-clientUIActive_t clientUIActives[MAX_CLIENTS];
-clientActive_t clients[MAX_CLIENTS];
+clientConnection_t clientConnections[STATIC_MAX_LOCAL_CLIENTS];
+clientUIActive_t clientUIActives[STATIC_MAX_LOCAL_CLIENTS];
+clientActive_t clients[STATIC_MAX_LOCAL_CLIENTS];
 
 clientStatic_t cls;
 
@@ -144,9 +144,9 @@ $03EB187DDD3425F4F7BCEA9E0EB47FBF rconGlob;
 
 void __cdecl TRACK_cl_main()
 {
-    track_static_alloc_internal(clients, sizeof(clientActive_t) * MAX_CLIENTS /*1776604*/, "clients", 9);
-    track_static_alloc_internal(clientConnections, sizeof(clientConnection_t) * MAX_CLIENTS /*398824*/, "clientConnections", 9);
-    track_static_alloc_internal(clientUIActives, sizeof(clientUIActive_t) * MAX_CLIENTS, "clientUIActives", 9);
+    track_static_alloc_internal(clients, sizeof(clientActive_t) * STATIC_MAX_LOCAL_CLIENTS /*1776604*/, "clients", 9);
+    track_static_alloc_internal(clientConnections, sizeof(clientConnection_t) * STATIC_MAX_LOCAL_CLIENTS /*398824*/, "clientConnections", 9);
+    track_static_alloc_internal(clientUIActives, sizeof(clientUIActive_t) * STATIC_MAX_LOCAL_CLIENTS, "clientUIActives", 9);
     track_static_alloc_internal(&cls, sizeof(clientStatic_t)/*3002480*/, "cls", 9);
 }
 
