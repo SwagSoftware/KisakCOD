@@ -1550,6 +1550,7 @@ bool __thiscall Scr_ScriptCallStack::SetSelectedLineFocus(int newSelectedLine, b
         LineNum = Scr_GetLineNum(bufferIndex, this->stack[newSelectedLine].sourcePos);
         Scr_SelectScriptLine(bufferIndex, LineNum);
     }
+
     return 1;
 }
 
@@ -1663,29 +1664,29 @@ bool Scr_OpenScriptList::KeyEvent(float *point, int key)
 {
     bool result; // al
 
-    if (!Key_IsDown(0, 158) && !Key_IsDown(0, 159) && !Key_IsDown(0, 160))
+    if (!Key_IsDown(0, K_ALT) && !Key_IsDown(0, K_CTRL) && !Key_IsDown(0, K_SHIFT))
     {
-        if (key == 127)
+        if (key == K_BACKSPACE)
         {
             Scr_AbstractScriptList::BackspaceEntry();
             return 1;
         }
-        if (key == 162)
+        if (key == K_DEL)
         {
             Scr_AbstractScriptList::DeleteEntry();
             return 1;
         }
         return UI_LinesComponent::KeyEvent(point, key);
     }
-    if (!Key_IsDown(0, 158) && !Key_IsDown(0, 159) && Key_IsDown(0, 160))
+    if (!Key_IsDown(0, K_ALT) && !Key_IsDown(0, K_CTRL) && Key_IsDown(0, K_SHIFT))
     {
-        if (key == 161)
+        if (key == K_INS)
         {
         LABEL_15:
             Scr_AbstractScriptList::PasteEntry();
             return 1;
         }
-        if (key == 162)
+        if (key == K_DEL)
         {
         LABEL_16:
             Scr_AbstractScriptList::CopyEntry();
@@ -1694,20 +1695,18 @@ bool Scr_OpenScriptList::KeyEvent(float *point, int key)
         }
         return UI_LinesComponent::KeyEvent(point, key);
     }
-    if (Key_IsDown(0, 158) || !Key_IsDown(0, 159) || Key_IsDown(0, 160))
-    {
+    if (Key_IsDown(0, K_ALT) || !Key_IsDown(0, K_CTRL) || Key_IsDown(0, K_SHIFT))
         return UI_LinesComponent::KeyEvent(point, key);
-    }
     switch (key)
     {
-    case 99:
-    case 161:
+    case 'c':
+    case K_INS:
         Scr_AbstractScriptList::CopyEntry();
         result = 1;
         break;
-    case 118:
+    case 'v':
         goto LABEL_15;
-    case 120:
+    case 'x':
         goto LABEL_16;
     default:
         return UI_LinesComponent::KeyEvent(point, key);
@@ -3961,17 +3960,19 @@ bool UI_LinesComponent::KeyEvent(float *point, int key)
 {
     bool result; // al
 
-    if (Key_IsDown(0, 158) || Key_IsDown(0, 159) || Key_IsDown(0, 160))
+    if (Key_IsDown(0, K_ALT) || Key_IsDown(0, K_CTRL) || Key_IsDown(0, K_SHIFT))
     {
-        if (Key_IsDown(0, 158) || !Key_IsDown(0, 159) || Key_IsDown(0, 160))
+        if (Key_IsDown(0, K_ALT) || !Key_IsDown(0, K_CTRL) || Key_IsDown(0, K_SHIFT))
             return 0;
-        if (key == 103)
+
+        if (key == 'g')
         {
             UI_Component::g.consoleReason = 0;
             Con_ToggleConsole();
             return 1;
         }
-        if (key == 200)
+
+        if (key == K_MOUSE1)
         {
             if (this->selectedLine == (point[1] / UI_Component::g.charHeight))
                 this->selectedLine = -1;
@@ -3986,19 +3987,19 @@ bool UI_LinesComponent::KeyEvent(float *point, int key)
     {
         switch (key)
         {
-        case 45:
+        case K_SPACE | K_ENTER:
             this->selectedLine = -1;
             result = 1;
             break;
-        case 154:
+        case K_UPARROW:
             UI_LinesComponent::DecSelectedLineFocus(0);
             result = 1;
             break;
-        case 155:
+        case K_DOWNARROW:
             UI_LinesComponent::IncSelectedLineFocus(0);
             result = 1;
             break;
-        case 200:
+        case K_MOUSE1:
             this->SetSelectedLineFocus((point[1] / UI_Component::g.charHeight), 1);
             result = 0;
             break;

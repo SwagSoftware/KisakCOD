@@ -1379,16 +1379,12 @@ void __cdecl Scr_TerminateWaittillThread(unsigned int localId, unsigned int star
 void __cdecl Scr_CancelNotifyList(unsigned int notifyListOwnerId)
 {
     VariableValueInternal_u* VariableValueAddress; // eax
-    VariableStackBuffer* stackValuea; // [esp+0h] [ebp-1Ch]
     VariableStackBuffer* stackValue; // [esp+0h] [ebp-1Ch]
     unsigned int stackId; // [esp+4h] [ebp-18h]
-    unsigned int stackIda; // [esp+4h] [ebp-18h]
     unsigned int startLocalId; // [esp+8h] [ebp-14h]
     unsigned int selfStartLocalId; // [esp+Ch] [ebp-10h]
     unsigned int notifyListId; // [esp+10h] [ebp-Ch]
-    unsigned int notifyListIda; // [esp+10h] [ebp-Ch]
     unsigned int notifyNameListId; // [esp+14h] [ebp-8h]
-    unsigned int notifyNameListIda; // [esp+14h] [ebp-8h]
     unsigned int selfLocalId; // [esp+18h] [ebp-4h]
 
     while (1)
@@ -1396,23 +1392,23 @@ void __cdecl Scr_CancelNotifyList(unsigned int notifyListOwnerId)
         notifyListId = FindVariable(notifyListOwnerId, 0x18000u);
         if (!notifyListId)
             break;
-        notifyListIda = FindObject(notifyListId);
+        notifyListId = FindObject(notifyListId);
         iassert(notifyListId);
-        notifyNameListId = FindFirstSibling(notifyListIda);
+        notifyNameListId = FindFirstSibling(notifyListId);
         if (!notifyNameListId)
             break;
-        notifyNameListIda = FindObject(notifyNameListId);
+        notifyNameListId = FindObject(notifyNameListId);
         iassert(notifyNameListId);
-        stackId = FindFirstSibling(notifyNameListIda);
+        stackId = FindFirstSibling(notifyNameListId);
         if (!stackId)
             break;
         startLocalId = GetVariableKeyObject(stackId);
         iassert(startLocalId);
         if (GetValueType(stackId) == VAR_STACK)
         {
-            stackValuea = (VariableStackBuffer*)GetVariableValueAddress(stackId)->u.intValue;
+            stackValue = (VariableStackBuffer*)GetVariableValueAddress(stackId)->u.intValue;
             Scr_CancelWaittill(startLocalId);
-            VM_TrimStack(startLocalId, stackValuea, 0);
+            VM_TrimStack(startLocalId, stackValue, 0);
         }
         else
         {
@@ -1420,12 +1416,12 @@ void __cdecl Scr_CancelNotifyList(unsigned int notifyListOwnerId)
             Scr_CancelWaittill(startLocalId);
             selfLocalId = Scr_GetSelf(startLocalId);
             selfStartLocalId = GetStartLocalId(selfLocalId);
-            stackIda = FindVariable(selfStartLocalId, 0x18001u);
-            if (stackIda)
+            stackId = FindVariable(selfStartLocalId, 0x18001u);
+            if (stackId)
             {
                 iassert(!Scr_GetThreadNotifyName(selfStartLocalId));
                 iassert(GetValueType(stackId) == VAR_STACK);
-                VariableValueAddress = GetVariableValueAddress(stackIda);
+                VariableValueAddress = GetVariableValueAddress(stackId);
                 stackValue = (VariableStackBuffer*)VariableValueAddress->u.intValue;
                 iassert(!stackValue->pos);
                 VM_TrimStack(selfStartLocalId, stackValue, 1);

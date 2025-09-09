@@ -3210,7 +3210,7 @@ void __cdecl Scr_SelectScriptLine(unsigned int bufferIndex, int lineNum)
     iassert(sortedIndex < scrParserPub.sourceBufferLookupLen);
 
     //UI_LinesComponent::SetSelectedLineFocus(&scrDebuggerGlob.scriptList, sortedIndex, 1);
-    ((UI_LinesComponent)scrDebuggerGlob.scriptList).SetSelectedLineFocus(sortedIndex, 1);
+    scrDebuggerGlob.scriptList.SetSelectedLineFocus(sortedIndex, 1);
 
     scrDebuggerGlob.scriptList.scriptWindows[sortedIndex]->SetSelectedLineFocus(lineNum, 0);
 

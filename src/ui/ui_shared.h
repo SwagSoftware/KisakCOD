@@ -3,6 +3,7 @@
 #include <bgame/bg_local.h> // team_t
 
 #include <gfx_d3d/r_font.h>
+#include "keycodes.h"
 
 #undef DrawText
 

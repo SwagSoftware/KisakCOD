@@ -1276,7 +1276,6 @@ int __cdecl CM_TraceCylinderThroughCylinder(
     float fHitHeight; // [esp+50h] [ebp-34h]
     float fEpsilon; // [esp+54h] [ebp-30h]
     float fTotalHeight; // [esp+58h] [ebp-2Ch]
-    float fTotalHeighta; // [esp+58h] [ebp-2Ch]
     float fC; // [esp+5Ch] [ebp-28h]
     float fB; // [esp+60h] [ebp-24h]
     float fA; // [esp+64h] [ebp-20h]
@@ -1309,11 +1308,11 @@ int __cdecl CM_TraceCylinderThroughCylinder(
                 }
                 else
                 {
-                    fTotalHeighta = tw->size[2] - tw->radius + fStationaryHalfHeight;
+                    fTotalHeight = tw->size[2] - tw->radius + fStationaryHalfHeight;
                     fHitHeight = (fEntry - fEpsilon) * tw->delta[2] + tw->extents.start[2] - vStationary[2];
                     iassert( fTotalHeight >= 0 );
                     v8 = I_fabs(fHitHeight);
-                    if (fTotalHeighta >= (double)v8)
+                    if (fTotalHeight >= (double)v8)
                     {
                         v7 = fEntry - 0.0;
                         if (v7 < 0.0)
