@@ -209,7 +209,12 @@ void __cdecl Scr_ClearDebugExpr(debugger_sval_s *debugExprHead)
 {
     while (debugExprHead)
     {
-        Scr_ClearDebugExprValue(*(sval_u*)&debugExprHead[1]);
+        //Scr_ClearDebugExprValue((sval_u)(uintptr_t)&debugExprHead[1]);
+
+        // See Prefixed data in Scr_AllocDebugExpr()
+        sval_u *pval = (sval_u *)((char *)debugExprHead + sizeof(debugger_sval_s));
+        Scr_ClearDebugExprValue(*(sval_u *)&pval);
+
         debugExprHead = debugExprHead->next;
     }
 }

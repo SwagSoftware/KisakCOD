@@ -648,10 +648,9 @@ void __cdecl Scr_CompilePrimitiveExpressionList(sval_u *exprlist)
 
 char __cdecl Scr_CompileCallExpression(sval_u *expr)
 {
-    int v2; // [esp+0h] [ebp-Ch]
+    Enum_t type = expr->node[0].type;
 
-    v2 = *(unsigned int *)expr->type;
-    if (v2 == 23)
+    if (type == ENUM_call)
     {
         if (Scr_CompileFunction(&expr->node[1], &expr->node[2]))
         {
@@ -659,8 +658,7 @@ char __cdecl Scr_CompileCallExpression(sval_u *expr)
             return 1;
         }
     }
-    else if (v2 == 24
-        && Scr_CompileMethod(&expr->node[1], &expr->node[2], (sval_u *)(expr->type + 12)))
+    else if (type == ENUM_method && Scr_CompileMethod(&expr->node[1], &expr->node[2], (sval_u *)(expr->type + 12)))
     {
         *expr = debugger_node3(
             ENUM_method,
@@ -1056,7 +1054,7 @@ void __cdecl Scr_EvalVariableExpression(sval_u expr, unsigned int localId, Varia
     unsigned int objectIda; // [esp+4h] [ebp-4h]
     unsigned int objectIdb; // [esp+4h] [ebp-4h]
 
-    switch (*(unsigned int *)expr.type)
+    switch (expr.node[0].type)
     {
     case 3:
         value->type = VAR_UNDEFINED;
@@ -1303,7 +1301,7 @@ unsigned int __cdecl Scr_EvalPrimitiveExpressionFieldObject(sval_u expr, unsigne
     VariableValue value; // [esp+4h] [ebp-Ch] BYREF
     unsigned int selfId; // [esp+Ch] [ebp-4h]
 
-    switch (*(unsigned int *)expr.type)
+    switch (expr.node[0].type)
     {
     case 0x11:
         Scr_EvalVariableExpression(expr.node[1], localId, &value);
@@ -1361,11 +1359,11 @@ unsigned int __cdecl Scr_EvalPrimitiveExpressionFieldObject(sval_u expr, unsigne
 
 void __cdecl Scr_EvalCallExpression(sval_u expr, unsigned int localId, VariableValue *value)
 {
-    if (*(unsigned int *)expr.type == 23)
+    if (expr.node[0].type == ENUM_call)
     {
         Scr_EvalFunction(expr.node[1], expr.node[2], localId, value);
     }
-    else if (*(unsigned int *)expr.type == 24)
+    else if (expr.node[0].type == ENUM_method)
     {
         Scr_EvalMethod(expr.node[1], expr.node[2], expr.node[3], localId, value);
     }
@@ -1571,7 +1569,7 @@ void __cdecl Scr_EvalVector(sval_u expr1, sval_u expr2, sval_u expr3, unsigned i
 
 void __cdecl Scr_ClearDebugExprValue(sval_u val)
 {
-    switch (*(unsigned int *)val.type)
+    switch (val.node[0].type)
     {
     case 4:
     case 5:
@@ -1605,7 +1603,7 @@ bool __cdecl Scr_RefExpression(sval_u expr)
 {
     bool result; // al
 
-    switch (*(unsigned int *)expr.type)
+    switch (expr.node[0].type)
     {
     case 6:
         result = Scr_RefPrimitiveExpression(expr.node[1]);
@@ -1636,7 +1634,7 @@ bool __cdecl Scr_RefPrimitiveExpression(sval_u expr)
 {
     bool result; // al
 
-    switch (*(unsigned int *)expr.type)
+    switch (expr.node[0].type)
     {
     case 0x11:
         result = Scr_RefVariableExpression(expr.node[1]);
@@ -1649,7 +1647,7 @@ bool __cdecl Scr_RefPrimitiveExpression(sval_u expr)
             goto $LN4_67;
         if (expr.node[2].idValue)
         {
-            *(unsigned int *)expr.type = 33;
+            expr.node[0].type = ENUM_self_frozen;
             goto $LN4_67;
         }
         expr.node[1].idValue = 0;
@@ -1682,14 +1680,14 @@ bool __cdecl Scr_RefVariableExpression(sval_u expr)
 {
     bool result; // al
 
-    switch (*(unsigned int *)expr.type)
+    switch (expr.node[0].type)
     {
     case 4:
         if (!Scr_RefToVariable(expr.node[2].idValue, 1))
             goto $LN11_33;
         if (expr.node[3].idValue)
         {
-            *(unsigned int *)expr.type = 5;
+            expr.node[0].type = ENUM_local_variable_frozen;
             goto $LN11_33;
         }
         expr.node[2].idValue = 0;
@@ -1715,7 +1713,7 @@ bool __cdecl Scr_RefVariableExpression(sval_u expr)
             goto $LN5_66;
         if (expr.node[3].idValue)
         {
-            *(unsigned int *)expr.type = 16;
+            expr.node[0].type = ENUM_field_variable_frozen;
             goto $LN5_66;
         }
         result = 1;
@@ -1770,10 +1768,12 @@ bool __cdecl Scr_RefBreakonExpression(sval_u expr, sval_u param)
 
 bool __cdecl Scr_RefCallExpression(sval_u expr)
 {
-    if (*(unsigned int *)expr.type == 23)
+    if (expr.node[0].type == ENUM_call)
         return Scr_RefCall(expr.node[2]);
-    if (*(unsigned int *)expr.type == 24)
+
+    if (expr.node[0].type == ENUM_method)
         return Scr_RefMethod(expr.node[1], expr.node[3]);
+
     return 0;
 }
 
@@ -1825,7 +1825,6 @@ bool __cdecl Scr_RefVector(sval_u expr1, sval_u expr2, sval_u expr3)
 
 void __cdecl Scr_FreeDebugExprValue(sval_u val)
 {
-    //switch (*(unsigned int *)val.type)
     switch (val.node[0].type)
     {
     case ENUM_local_variable:
