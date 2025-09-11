@@ -481,7 +481,7 @@ bool __cdecl PM_ShouldMakeFootsteps(pmove_t *pm)
         return 0;
     if (iStance == 2)
         return 0;
-    if ((ps->pm_flags & 0x20) != 0)
+    if ((ps->pm_flags & PMF_BACKWARDS_RUN) != 0)
     {
         if (!bWalking)
             return player_footstepsThreshhold->current.value <= (double)pm->xyspeed;
@@ -1462,7 +1462,7 @@ void __cdecl PmoveSingle(pmove_t *pm)
     }
     else
     {
-        ps->pm_flags |= 0x20u;
+        ps->pm_flags |= PMF_BACKWARDS_RUN;
     }
 #ifdef KISAK_MP
     if (ps->pm_type >= PM_LASTSTAND)
@@ -3639,7 +3639,7 @@ void __cdecl PM_Footsteps(pmove_t *pm, pml_t *pml)
                 }
                 else if (pm->cmd.forwardmove || pm->cmd.rightmove)
                 {
-                    stanceFrontBack = (PmStanceFrontBack)PM_GetStanceEx(iStance, ps->pm_flags & 0x20);
+                    stanceFrontBack = (PmStanceFrontBack)PM_GetStanceEx(iStance, ps->pm_flags & PMF_BACKWARDS_RUN);
 #ifdef KISAK_MP
                     PM_SetStrafeCondition(pm);
                     moveAnim = (scriptAnimMoveTypes_t)PM_GetMoveAnim(ps, stanceFrontBack, walking, sprinting);
