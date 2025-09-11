@@ -1257,7 +1257,7 @@ void __cdecl PM_MeleeChargeClear(playerState_s *ps)
 {
     if (!ps)
         MyAssertHandler(".\\bgame\\bg_pmove.cpp", 4724, 0, "%s", "ps");
-    ps->pm_flags &= ~0x20000u;
+    ps->pm_flags &= ~PMF_MELEE_CHARGE;
     ps->meleeChargeYaw = 0.0;
     ps->meleeChargeDist = 0;
     ps->meleeChargeTime = 0;
@@ -1367,7 +1367,7 @@ void __cdecl PmoveSingle(pmove_t *pm)
         pm->cmd.forwardmove = 0;
         pm->cmd.rightmove = 0;
     }
-    ps->pm_flags &= ~0x1000u;
+    ps->pm_flags &= ~PMF_NO_PRONE;
     if (ps->pm_type >= PM_DEAD)
         pm->tracemask &= ~0x2000000u;
     if ((ps->pm_flags & PMF_PRONE) == 0 || BG_UsingSniperScope(ps))
@@ -1431,7 +1431,7 @@ void __cdecl PmoveSingle(pmove_t *pm)
     }
 
     if (ps->pm_type < PM_DEAD && (pm->cmd.buttons & 0x101) == 0)
-        ps->pm_flags &= ~0x400u;
+        ps->pm_flags &= ~PMF_RESPAWNED;
     memset((uint8_t *)&pml, 0, sizeof(pml));
     pml.msec = pm->cmd.serverTime - ps->commandTime;
     if (pml.msec >= 1)
@@ -1458,7 +1458,7 @@ void __cdecl PmoveSingle(pmove_t *pm)
     if (pm->cmd.forwardmove >= 0)
     {
         if (pm->cmd.forwardmove > 0 || !pm->cmd.forwardmove && pm->cmd.rightmove)
-            ps->pm_flags &= ~0x20u;
+            ps->pm_flags &= ~PMF_BACKWARDS_RUN;
     }
     else
     {
@@ -1737,7 +1737,7 @@ void __cdecl PM_EndSprint(playerState_s *ps, pmove_t *pm)
     {
         ps->sprintState.sprintDelay = 0;
         ps->sprintState.lastSprintEnd = pm->cmd.serverTime;
-        ps->pm_flags &= ~0x8000u;
+        ps->pm_flags &= ~PMF_SPRINTING;
         if ((pm->cmd.buttons & 2) != 0)
             ps->sprintState.sprintButtonUpRequired = 1;
     }
@@ -1753,7 +1753,7 @@ bool __cdecl PM_SprintStartInterferingButtons(const playerState_s *ps, int32_t f
         return 1;
     if (ps->leanf != 0.0)
         return 1;
-    if ((ps->pm_flags & 0x1001C) != 0)
+    if ((ps->pm_flags & (PMF_MANTLE | PMF_LADDER | PMF_SIGHT_AIMING | PMF_SHELLSHOCKED)) != 0)
         return 1;
     if ((ps->pm_flags & PMF_JUMPING) != 0 && !ps->pm_time)
         return 0;
@@ -1765,7 +1765,7 @@ bool __cdecl PM_SprintStartInterferingButtons(const playerState_s *ps, int32_t f
 
 bool __cdecl PM_SprintEndingButtons(const playerState_s *ps, int32_t forwardSpeed, int16_t buttons)
 {
-    if ((ps->pm_flags & 0x10018) != 0)
+    if ((ps->pm_flags & (PMF_LADDER | PMF_SIGHT_AIMING | PMF_SHELLSHOCKED)) != 0)
         return 1;
     if (forwardSpeed <= player_sprintForwardMinimum->current.integer)
         return 1;
@@ -3072,7 +3072,7 @@ void __cdecl PM_CheckDuck(pmove_t *pm, pml_t *pml)
                     ps->pm_flags &= ~PMF_DUCKED;
                 }
             }
-            else if ((ps->pm_flags & 0xC00) == 0 && !PM_IsPlayerFrozenByWeapon(ps))
+            else if ((ps->pm_flags & (PMF_RESPAWNED | PMF_FROZEN)) == 0 && !PM_IsPlayerFrozenByWeapon(ps))
             {
 #ifdef KISAK_MP
                 if (ps->pm_type == PM_LASTSTAND)
@@ -4090,7 +4090,7 @@ void __cdecl PM_DropTimers(playerState_s *ps, pml_t *pml)
         {
             if ((ps->pm_flags & PMF_JUMPING) != 0)
                 Jump_ClearState(ps);
-            ps->pm_flags &= ~0x4180;
+            ps->pm_flags &= ~(PMF_TIME_HARDLANDING | PMF_TIME_KNOCKBACK | PMF_JUMPING);
             ps->pm_time = 0;
         }
     }
@@ -4124,7 +4124,7 @@ void __cdecl PM_UpdatePlayerWalkingFlag(pmove_t *pm)
     ps = pm->ps;
     if (!pm->ps)
         MyAssertHandler(".\\bgame\\bg_pmove.cpp", 4379, 0, "%s", "ps");
-    ps->pm_flags &= ~0x40u;
+    ps->pm_flags &= ~PMF_WALKING;
     if (ps->pm_type < PM_DEAD
         && (pm->cmd.buttons & 0x800) != 0
         && (ps->pm_flags & PMF_PRONE) == 0
@@ -4146,7 +4146,7 @@ void __cdecl PM_ClearLadderFlag(playerState_s *ps)
     if ((ps->pm_flags & PMF_LADDER) != 0)
     {
         ps->pm_flags |= PMF_LADDER_FALL;
-        ps->pm_flags &= ~8u;
+        ps->pm_flags &= ~PMF_LADDER;
     }
 }
 
@@ -4169,8 +4169,8 @@ void __cdecl PM_CheckLadderMove(pmove_t *pm, pml_t *pml)
     if (!ps)
         MyAssertHandler(".\\bgame\\bg_pmove.cpp", 4446, 0, "%s", "ps");
     if (pml->walking)
-        ps->pm_flags &= ~0x2000u;
-    if (!ps->pm_time || (ps->pm_flags & PMF_LADDER) != 0 || (ps->pm_flags & 0x180) == 0)
+        ps->pm_flags &= ~PMF_LADDER_FALL;
+    if (!ps->pm_time || (ps->pm_flags & PMF_LADDER) != 0 || (ps->pm_flags & (PMF_TIME_HARDLANDING | PMF_TIME_KNOCKBACK)) == 0)
     {
         if (pml->walking)
             tracedist = 8.0;
@@ -4452,7 +4452,7 @@ void __cdecl PM_MeleeChargeUpdate(pmove_t *pm, pml_t *pml)
     chargeValid = v5;
     v4 = v5 && (ps->eFlags & 0x300) == 0;
     chargeValid = v4;
-    v3 = v4 && (ps->pm_flags & 0xC) == 0;
+    v3 = v4 && (ps->pm_flags & (PMF_MANTLE | PMF_LADDER)) == 0;
     chargeValid = v3;
     if (v3)
     {

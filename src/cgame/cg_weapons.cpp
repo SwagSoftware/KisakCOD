@@ -1643,7 +1643,7 @@ bool __cdecl WeaponCycleAllowed(cg_s *cgameGlob)
 {
     if (!cgameGlob)
         MyAssertHandler(".\\cgame\\cg_weapons.cpp", 3240, 0, "%s", "cgameGlob");
-    if ((cgameGlob->predictedPlayerState.pm_flags & 0xC00) != 0)
+    if ((cgameGlob->predictedPlayerState.pm_flags & (PMF_RESPAWNED | PMF_FROZEN)) != 0)
         return 0;
     if ((cgameGlob->predictedPlayerState.weapFlags & 0x80) != 0)
         return 0;
@@ -1973,7 +1973,7 @@ bool __cdecl ActionSlotUsageAllowed(cg_s *cgameGlob)
         return 0;
     if (cgameGlob->predictedPlayerState.weaponstate == 3 || cgameGlob->predictedPlayerState.weaponstate == 4)
         return 0;
-    if ((cgameGlob->predictedPlayerState.pm_flags & 0xC00) != 0)
+    if ((cgameGlob->predictedPlayerState.pm_flags & (PMF_RESPAWNED | PMF_FROZEN)) != 0)
         return 0;
     if ((cgameGlob->predictedPlayerState.weapFlags & 0x80) != 0)
         return 0;

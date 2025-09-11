@@ -809,7 +809,7 @@ void __cdecl PM_UpdateAimDownSightFlag(pmove_t *pm, pml_t *pml)
         MyAssertHandler(".\\bgame\\bg_weapons.cpp", 1126, 0, "%s", "ps");
     weapIndex = BG_GetViewmodelWeaponIndex(ps);
     weapDef = BG_GetWeaponDef(weapIndex);
-    ps->pm_flags &= ~0x10u;
+    ps->pm_flags &= ~PMF_SIGHT_AIMING;
     adsAllowed = PM_IsAdsAllowed(ps, pml);
     adsRequested = (pm->cmd.buttons & 0x800) != 0;
     if ((pm->cmd.buttons & 2) != 0
@@ -923,7 +923,7 @@ bool __cdecl PM_IsAdsAllowed(playerState_s *ps, pml_t *pml)
 void __cdecl PM_ExitAimDownSight(playerState_s *ps)
 {
     PM_AddEvent(ps, 0xEu);
-    ps->pm_flags &= ~0x10u;
+    ps->pm_flags &= ~PMF_SIGHT_AIMING;
 }
 
 void __cdecl PM_UpdateAimDownSightLerp(pmove_t *pm, pml_t *pml)
@@ -2399,7 +2399,7 @@ void __cdecl PM_Weapon_CheckForChangeWeapon(pmove_t *pm)
                 PM_BeginWeaponChange(ps, 0, 0);
         }
         else if (ps->weapon == pm->cmd.weapon
-            || (ps->pm_flags & 0xC00) != 0 && ps->weapon
+            || (ps->pm_flags & (PMF_RESPAWNED | PMF_FROZEN)) != 0 && ps->weapon
             || pm->cmd.weapon && !BG_IsWeaponValid(ps, pm->cmd.weapon))
         {
             if (ps->weapon == pm->cmd.weapon && (ps->weaponstate == 3 || ps->weaponstate == 4))

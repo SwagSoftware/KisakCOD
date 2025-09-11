@@ -49,7 +49,7 @@ void __cdecl Jump_RegisterDvars()
 
 void __cdecl Jump_ClearState(playerState_s *ps)
 {
-    ps->pm_flags &= ~0x4000u;
+    ps->pm_flags &= ~PMF_JUMPING;
     ps->jumpOriginZ = 0.0;
 }
 
@@ -247,7 +247,7 @@ void __cdecl Jump_Start(pmove_t *pm, pml_t *pml, float height)
     ps->jumpOriginZ = ps->origin[2];
     v3 = sqrt(velocitySqrd);
     ps->velocity[2] = v3;
-    ps->pm_flags &= ~0x180;
+    ps->pm_flags &= ~(PMF_TIME_HARDLANDING | PMF_TIME_KNOCKBACK);
     ps->pm_flags |= PMF_JUMPING;
     ps->pm_time = 0;
     ps->sprintState.sprintButtonUpRequired = 0;
@@ -303,7 +303,7 @@ void __cdecl Jump_PushOffLadder(playerState_s *ps, pml_t *pml)
     value = jump_ladderPushVel->current.value;
     ps->velocity[0] = value * pushOffDir[0];
     ps->velocity[1] = value * pushOffDir[1];
-    ps->pm_flags &= ~8u;
+    ps->pm_flags &= ~PMF_LADDER;
 }
 
 void __cdecl Jump_AddSurfaceEvent(playerState_s *ps, pml_t *pml)

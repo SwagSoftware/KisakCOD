@@ -4961,7 +4961,7 @@ void __cdecl GScr_StopShellShock(scr_entref_t entref)
     ent->client->ps.shellshockIndex = 0;
     ent->client->ps.shellshockTime = 0;
     ent->client->ps.shellshockDuration = 0;
-    ent->client->ps.pm_flags &= ~0x10000u;
+    ent->client->ps.pm_flags &= ~PMF_SHELLSHOCKED;
 }
 
 void __cdecl GScr_GetTagOrigin(scr_entref_t entref)

@@ -573,7 +573,7 @@ void __cdecl StopFollowing(gentity_s *ent)
         client->ps.eFlags &= 0xFFFFFCFF;
         client->ps.viewlocked = PLAYERVIEWLOCK_NONE;
         client->ps.viewlocked_entNum = ENTITYNUM_NONE;
-        client->ps.pm_flags &= ~0x10010;
+        client->ps.pm_flags &= ~(PMF_SIGHT_AIMING | PMF_SHELLSHOCKED);
         client->ps.weapFlags &= ~0x40u;
         client->ps.otherFlags &= ~2u;
         client->ps.fWeaponPosFrac = 0.0;

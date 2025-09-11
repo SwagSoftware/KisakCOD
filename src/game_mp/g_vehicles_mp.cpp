@@ -429,7 +429,7 @@ void __cdecl G_VehUnlinkPlayer(gentity_s *ent, gentity_s *player)
     TeleportPlayer(player, origin, angles);
     VehicleClearRideSlotForPlayer(ent, player->s.number);
     player->r.ownerNum.setEnt(NULL);
-    client->ps.pm_flags &= ~0x100000u;
+    client->ps.pm_flags &= ~PMF_VEHICLE_ATTACHED;
     client->ps.weapFlags &= ~0x80u;
     client->ps.viewlocked_entNum = ENTITYNUM_NONE;
 }
@@ -1668,7 +1668,7 @@ void __cdecl VEH_UpdateClientDriver(gentity_s *ent)
         player = &g_entities[playerEntNum];
         if (!player->client)
             MyAssertHandler(".\\game_mp\\g_vehicles_mp.cpp", 1906, 0, "%s", "player->client");
-        if ((player->client->ps.pm_flags & 0xC00) == 0)
+        if ((player->client->ps.pm_flags & (PMF_RESPAWNED | PMF_FROZEN)) == 0)
         {
             veh->phys.inputAccelerationOLD = player->client->sess.cmd.forwardmove;
             veh->phys.inputTurning = VEH_PlayerRotation(player, &veh->phys);

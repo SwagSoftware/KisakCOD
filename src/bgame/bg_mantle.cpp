@@ -630,7 +630,7 @@ void __cdecl Mantle_Move(pmove_t *pm, playerState_s *ps, pml_t *pml)
         if (mstate->timer == mantleLength)
         {
             iassert(ps->pm_flags & PMF_MANTLE);
-            ps->pm_flags &= ~4u;
+            ps->pm_flags &= ~PMF_MANTLE;
 
 #ifdef KISAK_MP
             pm->mantleStarted = 0;

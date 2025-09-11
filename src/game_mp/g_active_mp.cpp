@@ -626,7 +626,7 @@ void __cdecl ClientThink_real(gentity_s *ent, usercmd_s *ucmd)
                 if (ssDT <= 0)
                 {
                     ssSwayScale = 1.0;
-                    client->ps.pm_flags &= ~0x10000u;
+                    client->ps.pm_flags &= ~PMF_SHELLSHOCKED;
                 }
                 else
                 {
@@ -1160,7 +1160,7 @@ void __cdecl ClientEndFrame(gentity_s *ent)
     if (client->bFrozen)
         client->ps.pm_flags |= PMF_FROZEN;
     else
-        client->ps.pm_flags &= ~0x800;
+        client->ps.pm_flags &= ~PMF_FROZEN;
     {
         PROF_SCOPED("G_UpdateClientInfo");
         bChanged = G_UpdateClientInfo(ent);
