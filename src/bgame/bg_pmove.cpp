@@ -2379,7 +2379,7 @@ double __cdecl PM_CmdScale_Walk(pmove_t *pm, usercmd_s *cmd)
     {
         scaleb = scaleb * weapon->moveSpeedScale;
     }
-    if ((ps->pm_flags & 0x10000) != 0 && BG_GetShellshockParms(ps->shellshockIndex)->movement.affect)
+    if ((ps->pm_flags & PMF_SHELLSHOCKED) != 0 && BG_GetShellshockParms(ps->shellshockIndex)->movement.affect)
         scaleb = scaleb * 0.40000001;
     return (float)(scaleb * ps->moveSpeedScaleMultiplier);
 }

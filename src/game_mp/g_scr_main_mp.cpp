@@ -4943,7 +4943,7 @@ void __cdecl GScr_ShellShock(scr_entref_t entref)
     ent->client->ps.shellshockDuration = duration;
     if (ent->health > 0)
     {
-        ent->client->ps.pm_flags |= 0x10000u;
+        ent->client->ps.pm_flags |= PMF_SHELLSHOCKED;
         bgs = &level_bgs;
         BG_AnimScriptEvent(&ent->client->ps, ANIM_ET_SHELLSHOCK, 0, 1);
         if (bgs != &level_bgs)
