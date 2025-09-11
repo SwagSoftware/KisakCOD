@@ -954,7 +954,7 @@ void __cdecl CG_DrawPlayerStance(
         drawColor[0] = color[0];
         drawColor[1] = color[1];
         drawColor[2] = color[2];
-        if ((cgameGlob->predictedPlayerState.pm_flags & 0x1000) != 0 && cgameGlob->proneBlockedEndTime < cgameGlob->time)
+        if ((cgameGlob->predictedPlayerState.pm_flags & PMF_NO_PRONE) != 0 && cgameGlob->proneBlockedEndTime < cgameGlob->time)
             cgameGlob->proneBlockedEndTime = cgameGlob->time + 1500;
         if (cgameGlob->proneBlockedEndTime > cgameGlob->time)
         {

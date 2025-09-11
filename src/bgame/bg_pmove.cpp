@@ -1029,7 +1029,7 @@ void __cdecl PM_UpdateViewAngles_ProneYawClamp(
     }
     if (proneBlocked)
     {
-        ps->pm_flags |= 0x1000u;
+        ps->pm_flags |= PMF_NO_PRONE;
         deltaYaw1 = AngleDelta(oldViewYaw, ps->viewangles[1]);
         v8 = I_fabs(deltaYaw1);
         if (v8 <= 1.0)
@@ -1153,7 +1153,7 @@ void __cdecl PM_UpdatePronePitch(pmove_t *pm, pml_t *pml)
             if (!v2)
             {
                 BG_AddPredictableEventToPlayerstate(7u, 0, ps);
-                ps->pm_flags |= 0x1000u;
+                ps->pm_flags |= PMF_NO_PRONE;
             }
         }
         else if (pml->groundPlane && !pml->groundTrace.walkable)
@@ -3196,7 +3196,7 @@ void __cdecl PM_CheckDuck(pmove_t *pm, pml_t *pml)
                     }
                     else if (ps->groundEntityNum != ENTITYNUM_NONE)
                     {
-                        ps->pm_flags |= 0x1000u;
+                        ps->pm_flags |= PMF_NO_PRONE;
                         if ((pm->cmd.buttons & 0x1000) == 0)
                         {
                             if ((ps->pm_flags & PMF_PRONE) != 0 || (ps->pm_flags & PMF_DUCKED) != 0)
