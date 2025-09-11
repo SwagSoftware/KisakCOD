@@ -1341,7 +1341,7 @@ void __cdecl PmoveSingle(pmove_t *pm)
         velocity[1] = 0.0;
         velocity[2] = 0.0;
     }
-    else if ((ps->pm_flags & 0x400) != 0)
+    else if ((ps->pm_flags & PMF_RESPAWNED) != 0)
     {
         pm->cmd.buttons &= 0x1301u;
         pm->cmd.forwardmove = 0;
@@ -1422,7 +1422,7 @@ void __cdecl PmoveSingle(pmove_t *pm)
 #ifdef KISAK_MP
         ps->pm_type != PM_INTERMISSION && 
 #endif
-        (ps->pm_flags & 0x400) == 0
+        (ps->pm_flags & PMF_RESPAWNED) == 0
         && (!ps->weaponstate || ps->weaponstate == 5)
         && PM_WeaponAmmoAvailable(ps)
         && (pm->cmd.buttons & 1) != 0)
@@ -3088,7 +3088,7 @@ void __cdecl PM_CheckDuck(pmove_t *pm, pml_t *pml)
                         pm->cmd.buttons &= 0xFFFFFCFF;
                         BG_AddPredictableEventToPlayerstate(6u, 0, ps);
                     }
-                    if ((pm->cmd.buttons & 0x100) == 0 || (ps->pm_flags & 0x400) != 0)
+                    if ((pm->cmd.buttons & 0x100) == 0 || (ps->pm_flags & PMF_RESPAWNED) != 0)
                     {
                         if ((pm->cmd.buttons & 0x200) != 0)
                         {

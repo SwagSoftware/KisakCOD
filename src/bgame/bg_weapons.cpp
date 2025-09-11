@@ -1291,7 +1291,7 @@ void __cdecl PM_Weapon(pmove_t *pm, pml_t *pml)
     }
     if (ps->pm_type < PM_DEAD)
     {
-        if (!G_ExitAfterConnectPaths() && (ps->pm_flags & 0x400) == 0 && (ps->eFlags & 0x300) == 0)
+        if (!G_ExitAfterConnectPaths() && (ps->pm_flags & PMF_RESPAWNED) == 0 && (ps->eFlags & 0x300) == 0)
         {
             PM_UpdateAimDownSightLerp(pm, pml);
             PM_UpdateHoldBreath(pm, pml);
