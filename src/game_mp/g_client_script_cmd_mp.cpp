@@ -1330,7 +1330,7 @@ void __cdecl PlayerCmd_finishPlayerDamage(scr_entref_t entref)
                             if (t > 200)
                                 t = 200;
                             pSelf->client->ps.pm_time = t;
-                            pSelf->client->ps.pm_flags |= 0x100u;
+                            pSelf->client->ps.pm_flags |= PMF_TIME_KNOCKBACK;
                         }
                     }
                 }

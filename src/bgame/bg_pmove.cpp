@@ -1874,7 +1874,7 @@ void __cdecl PM_Friction(playerState_s *ps, pml_t *pml)
         {
             drop = player_meleeChargeFriction->current.value * pml->frametime;
         }
-        else if (pml->walking && (pml->groundTrace.surfaceFlags & 2) == 0 && (ps->pm_flags & 0x100) == 0)
+        else if (pml->walking && (pml->groundTrace.surfaceFlags & 2) == 0 && (ps->pm_flags & PMF_TIME_KNOCKBACK) == 0)
         {
             if (stopspeed->current.value <= (double)speed)
                 value = speed;
@@ -2273,7 +2273,7 @@ void __cdecl PM_WalkMove(pmove_t *pm, pml_t *pml)
         wishspeed = wishspeed * scale;
         PM_ProjectVelocity(wishdir, pml->groundTrace.normal, wishdir);
         iStance = PM_GetEffectiveStance(ps);
-        if ((pml->groundTrace.surfaceFlags & 2) != 0 || (ps->pm_flags & 0x100) != 0)
+        if ((pml->groundTrace.surfaceFlags & 2) != 0 || (ps->pm_flags & PMF_TIME_KNOCKBACK) != 0)
         {
             acceleration = 1.0;
         }
@@ -2292,7 +2292,7 @@ void __cdecl PM_WalkMove(pmove_t *pm, pml_t *pml)
         if ((ps->pm_flags & PMF_TIME_HARDLANDING) != 0)
             acceleration = acceleration * 0.25;
         PM_Accelerate(ps, pml, wishdir, wishspeed, acceleration);
-        if ((pml->groundTrace.surfaceFlags & 2) != 0 || (ps->pm_flags & 0x100) != 0)
+        if ((pml->groundTrace.surfaceFlags & 2) != 0 || (ps->pm_flags & PMF_TIME_KNOCKBACK) != 0)
             ps->velocity[2] = ps->velocity[2] - (double)ps->gravity * pml->frametime;
         PM_ProjectVelocity(ps->velocity, pml->groundTrace.normal, ps->velocity);
         if (ps->velocity[0] != 0.0 || ps->velocity[1] != 0.0)
