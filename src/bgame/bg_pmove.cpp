@@ -1372,7 +1372,7 @@ void __cdecl PmoveSingle(pmove_t *pm)
         pm->tracemask &= ~0x2000000u;
     if ((ps->pm_flags & PMF_PRONE) == 0 || BG_UsingSniperScope(ps))
     {
-        ps->pm_flags &= ~0x200u;
+        ps->pm_flags &= ~PMF_PRONEMOVE_OVERRIDDEN;
     }
     else
     {
@@ -1393,14 +1393,14 @@ void __cdecl PmoveSingle(pmove_t *pm)
                 v6 >= (double)v7))
         {
             if ((ps->pm_flags & PMF_SIGHT_AIMING) == 0 && (ps->weaponstate <= 4u || ps->weaponstate == 7))
-                ps->pm_flags &= ~0x200u;
+                ps->pm_flags &= ~PMF_PRONEMOVE_OVERRIDDEN;
         }
         else
         {
         LABEL_90:
             if (PM_InteruptWeaponWithProneMove(ps))
             {
-                ps->pm_flags &= ~0x200u;
+                ps->pm_flags &= ~PMF_PRONEMOVE_OVERRIDDEN;
                 PM_ExitAimDownSight(ps);
             }
         }
@@ -3278,7 +3278,7 @@ void __cdecl PM_CheckDuck(pmove_t *pm, pml_t *pml)
             {
                 if (pm->cmd.forwardmove || pm->cmd.rightmove)
                 {
-                    ps->pm_flags &= ~0x200u;
+                    ps->pm_flags &= ~PMF_PRONEMOVE_OVERRIDDEN;
                     PM_ExitAimDownSight(ps);
                 }
                 vEnd[0] = ps->origin[0];

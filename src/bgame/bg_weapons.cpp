@@ -1245,7 +1245,7 @@ void __cdecl PM_Weapon_Idle(playerState_s *ps)
 {
 #ifdef KISAK_MP
     ps->weapFlags &= ~2u;
-    ps->pm_flags &= ~0x200u;
+    ps->pm_flags &= ~PMF_PRONEMOVE_OVERRIDDEN;
     if (G_IsServerGameSystem(ps->clientNum))
         Com_Printf(19, "end weapon (idle)\n");
     ps->weaponTime = 0;
@@ -3019,7 +3019,7 @@ void __cdecl PM_Weapon_OffHandEnd(playerState_s *ps)
     ps->throwBackGrenadeOwner = ENTITYNUM_NONE;
     ps->weaponstate = 20;
     ps->weapFlags &= ~2u;
-    ps->pm_flags &= ~0x200u;
+    ps->pm_flags &= ~PMF_PRONEMOVE_OVERRIDDEN;
 }
 
 void __cdecl PM_Weapon_CheckForOffHand(pmove_t *pm)
