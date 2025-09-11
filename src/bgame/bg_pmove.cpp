@@ -1242,7 +1242,7 @@ void __cdecl PM_MeleeChargeStart(pmove_t *pm)
         MyAssertHandler(".\\bgame\\bg_pmove.cpp", 4740, 0, "%s", "ps");
     if (pm->cmd.meleeChargeDist)
     {
-        ps->pm_flags |= 0x20000u;
+        ps->pm_flags |= PMF_MELEE_CHARGE;
         ps->meleeChargeYaw = pm->cmd.meleeChargeYaw;
         ps->meleeChargeDist = pm->cmd.meleeChargeDist;
         ps->meleeChargeTime = 0;
@@ -1329,7 +1329,7 @@ void __cdecl PmoveSingle(pmove_t *pm)
 #ifdef KISAK_MP
     BG_AnimUpdatePlayerStateConditions(pm);
 #endif
-    if ((ps->pm_flags & 0x20000) != 0)
+    if ((ps->pm_flags & PMF_MELEE_CHARGE) != 0)
         pm->cmd.forwardmove = 127;
     if ((ps->pm_flags & PMF_FROZEN) != 0)
     {
@@ -1870,7 +1870,7 @@ void __cdecl PM_Friction(playerState_s *ps, pml_t *pml)
     if (speed >= 1.0)
     {
         drop = 0.0;
-        if ((ps->pm_flags & 0x20000) != 0)
+        if ((ps->pm_flags & PMF_MELEE_CHARGE) != 0)
         {
             drop = player_meleeChargeFriction->current.value * pml->frametime;
         }
@@ -4447,7 +4447,7 @@ void __cdecl PM_MeleeChargeUpdate(pmove_t *pm, pml_t *pml)
     ps = pm->ps;
     if (!ps)
         MyAssertHandler(".\\bgame\\bg_pmove.cpp", 4764, 0, "%s", "ps");
-    chargeValid = (ps->pm_flags & 0x20000) != 0;
+    chargeValid = (ps->pm_flags & PMF_MELEE_CHARGE) != 0;
     v5 = chargeValid && !ps->pm_type;
     chargeValid = v5;
     v4 = v5 && (ps->eFlags & 0x300) == 0;

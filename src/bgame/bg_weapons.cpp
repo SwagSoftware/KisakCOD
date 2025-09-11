@@ -2860,7 +2860,7 @@ void __cdecl PM_Weapon_MeleeInit(playerState_s *ps)
     if (!ps)
         MyAssertHandler(".\\bgame\\bg_weapons.cpp", 3107, 0, "%s", "ps");
     weapDef = BG_GetWeaponDef(ps->weapon);
-    v1 = (ps->pm_flags & 0x20000) != 0 && PM_WeaponHasChargeMelee(ps);
+    v1 = (ps->pm_flags & PMF_MELEE_CHARGE) != 0 && PM_WeaponHasChargeMelee(ps);
     if (v1)
     {
         ps->weaponTime = weapDef->meleeChargeTime;
