@@ -4145,7 +4145,7 @@ void __cdecl PM_ClearLadderFlag(playerState_s *ps)
 {
     if ((ps->pm_flags & PMF_LADDER) != 0)
     {
-        ps->pm_flags |= 0x2000u;
+        ps->pm_flags |= PMF_LADDER_FALL;
         ps->pm_flags &= ~8u;
     }
 }
@@ -4193,7 +4193,7 @@ void __cdecl PM_CheckLadderMove(pmove_t *pm, pml_t *pml)
         }
         if (ps->pm_type < PM_DEAD)
         {
-            if ((ps->pm_flags & 0x2000) != 0 || PM_GetEffectiveStance(ps) == 1 || pm->cmd.serverTime - ps->jumpTime < 300)
+            if ((ps->pm_flags & PMF_LADDER_FALL) != 0 || PM_GetEffectiveStance(ps) == 1 || pm->cmd.serverTime - ps->jumpTime < 300)
             {
                 PM_ClearLadderFlag(ps);
             }
