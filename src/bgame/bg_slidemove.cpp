@@ -76,7 +76,7 @@ void __cdecl PM_StepSlideMove(pmove_t *pm, pml_t *pml, int32_t gravity)
     start_v[1] = ps->velocity[1];
     start_v[2] = ps->velocity[2];
     iBumps = PM_SlideMove(pm, pml, gravity);
-    if ((ps->pm_flags & 1) != 0)
+    if ((ps->pm_flags & PMF_PRONE) != 0)
         fStepSize = 10.0;
     else
         fStepSize = 18.0;
@@ -256,7 +256,7 @@ int __cdecl PM_VerifyPronePosition(pmove_t *pm, float *vFallbackOrg, float *vFal
     ps = pm->ps;
     if (!pm->ps)
         MyAssertHandler(".\\bgame\\bg_slidemove.cpp", 30, 0, "%s", "ps");
-    if ((ps->pm_flags & 1) == 0)
+    if ((ps->pm_flags & PMF_PRONE) == 0)
         return 1;
     result = BG_CheckProne(
         ps->clientNum,

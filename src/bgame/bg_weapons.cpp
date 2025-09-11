@@ -820,7 +820,7 @@ void __cdecl PM_UpdateAimDownSightFlag(pmove_t *pm, pml_t *pml)
     }
     if (adsRequested && adsAllowed)
     {
-        if ((ps->pm_flags & 1) == 0 || BG_UsingSniperScope(ps))
+        if ((ps->pm_flags & PMF_PRONE) == 0 || BG_UsingSniperScope(ps))
         {
             ps->pm_flags |= 0x10u;
             if ((ps->otherFlags & 4) == 0)
@@ -1312,7 +1312,7 @@ void __cdecl PM_Weapon(pmove_t *pm, pml_t *pml)
                 }
                 if (!PM_Weapon_CheckForRechamber(ps, delayedAction))
                 {
-                    if ((ps->pm_flags & 1) != 0 && (pm->cmd.forwardmove || pm->cmd.rightmove) && ps->fWeaponPosFrac != 1.0
+                    if ((ps->pm_flags & PMF_PRONE) != 0 && (pm->cmd.forwardmove || pm->cmd.rightmove) && ps->fWeaponPosFrac != 1.0
                         || ps->weaponstate == 12
                         || ps->weaponstate == 13
                         || ps->weaponstate == 14)

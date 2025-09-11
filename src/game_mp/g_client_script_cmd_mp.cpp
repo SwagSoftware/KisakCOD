@@ -1303,7 +1303,7 @@ void __cdecl PlayerCmd_finishPlayerDamage(scr_entref_t entref)
             if ((pSelf->flags & 8) == 0 && (dflags & 4) == 0)
             {
                 knockbackMod = 0.30000001f;
-                if ((pSelf->client->ps.pm_flags & 1) != 0)
+                if ((pSelf->client->ps.pm_flags & PMF_PRONE) != 0)
                 {
                     knockbackMod = 0.02f;
                 }

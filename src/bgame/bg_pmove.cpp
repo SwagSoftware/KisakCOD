@@ -375,7 +375,7 @@ bool __cdecl PlayerProneAllowed(pmove_t *pm)
         MyAssertHandler(".\\bgame\\bg_pmove.cpp", 2459, 0, "%s", "ps");
     if (BG_WeaponBlocksProne(pm->ps->weapon))
         return 0;
-    if ((ps->pm_flags & 1) != 0)
+    if ((ps->pm_flags & PMF_PRONE) != 0)
         return 1;
     return ps->groundEntityNum != ENTITYNUM_NONE
         && BG_CheckProne(
@@ -457,7 +457,7 @@ int32_t __cdecl PM_FootstepType(playerState_s *ps, pml_t *pml)
 {
     if (!PM_GroundSurfaceType(pml))
         return 0;
-    if ((ps->pm_flags & 1) != 0)
+    if ((ps->pm_flags & PMF_PRONE) != 0)
         return 75;
     if ((ps->pm_flags & 0x40) != 0 || ps->leanf != 0.0)
         return 74;
@@ -636,7 +636,7 @@ void __cdecl PM_UpdateViewAngles(playerState_s *ps, float msec, usercmd_s *cmd, 
     }
     if ((ps->pm_flags & 8) != 0 && ps->groundEntityNum == ENTITYNUM_NONE && bg_ladder_yawcap->current.value != 0.0)
         PM_UpdateViewAngles_LadderClamp(ps);
-    if ((ps->pm_flags & 1) != 0)
+    if ((ps->pm_flags & PMF_PRONE) != 0)
     {
         if ((ps->eFlags & 0x300) != 0)
             MyAssertHandler(".\\bgame\\bg_pmove.cpp", 4241, 0, "%s", "!(ps->eFlags & EF_TURRET_ACTIVE)");
@@ -1116,7 +1116,7 @@ void __cdecl PM_UpdatePronePitch(pmove_t *pm, pml_t *pml)
     ps = pm->ps;
     if (!pm->ps)
         MyAssertHandler(".\\bgame\\bg_pmove.cpp", 4282, 0, "%s", "ps");
-    if ((ps->pm_flags & 1) != 0)
+    if ((ps->pm_flags & PMF_PRONE) != 0)
     {
         if (ps->groundEntityNum == ENTITYNUM_NONE)
         {
@@ -1227,7 +1227,7 @@ void __cdecl PM_UpdatePronePitch(pmove_t *pm, pml_t *pml)
 
 void __cdecl PM_SetProneMovementOverride(playerState_s *ps)
 {
-    if ((ps->pm_flags & 1) != 0)
+    if ((ps->pm_flags & PMF_PRONE) != 0)
         ps->pm_flags |= 0x200u;
 }
 
@@ -1370,7 +1370,7 @@ void __cdecl PmoveSingle(pmove_t *pm)
     ps->pm_flags &= ~0x1000u;
     if (ps->pm_type >= PM_DEAD)
         pm->tracemask &= ~0x2000000u;
-    if ((ps->pm_flags & 1) == 0 || BG_UsingSniperScope(ps))
+    if ((ps->pm_flags & PMF_PRONE) == 0 || BG_UsingSniperScope(ps))
     {
         ps->pm_flags &= ~0x200u;
     }
@@ -2159,7 +2159,7 @@ void __cdecl PM_SetMovementDir(pmove_t *pm, pml_t *pml)
     ps = pm->ps;
     if (!ps)
         MyAssertHandler(".\\bgame\\bg_pmove.cpp", 1039, 0, "%s", "ps");
-    if ((ps->pm_flags & 1) == 0 || (ps->eFlags & 0x300) != 0)
+    if ((ps->pm_flags & PMF_PRONE) == 0 || (ps->eFlags & 0x300) != 0)
     {
         if ((ps->pm_flags & 8) != 0)
         {
@@ -2326,7 +2326,7 @@ double __cdecl PM_CmdScale_Walk(pmove_t *pm, usercmd_s *cmd)
     ps = pm->ps;
     if (!pm->ps)
         MyAssertHandler(".\\bgame\\bg_pmove.cpp", 943, 0, "%s", "ps");
-    v9 = (ps->pm_flags & 1) != 0 && ps->fWeaponPosFrac > 0.0;
+    v9 = (ps->pm_flags & PMF_PRONE) != 0 && ps->fWeaponPosFrac > 0.0;
     v13 = (float)(cmd->rightmove * cmd->rightmove + cmd->forwardmove * cmd->forwardmove);
     v8 = sqrt(v13);
     if (cmd->forwardmove >= 0)
@@ -3022,7 +3022,7 @@ void __cdecl PM_CheckDuck(pmove_t *pm, pml_t *pml)
     }
     else
     {
-        bWasProne = (ps->pm_flags & 1) != 0;
+        bWasProne = (ps->pm_flags & PMF_PRONE) != 0;
         bWasStanding = (ps->pm_flags & 3) == 0;
         pm->mins[0] = -15.0;
         pm->mins[1] = -15.0;
@@ -3068,7 +3068,7 @@ void __cdecl PM_CheckDuck(pmove_t *pm, pml_t *pml)
                 }
                 else
                 {
-                    ps->pm_flags |= 1u;
+                    ps->pm_flags |= PMF_PRONE;
                     ps->pm_flags &= ~2u;
                 }
             }
@@ -3092,7 +3092,7 @@ void __cdecl PM_CheckDuck(pmove_t *pm, pml_t *pml)
                     {
                         if ((pm->cmd.buttons & 0x200) != 0)
                         {
-                            if ((ps->pm_flags & 1) != 0)
+                            if ((ps->pm_flags & PMF_PRONE) != 0)
                             {
                                 pm->maxs[2] = 50.0;
                                 pmoveHandlers[pm->handler].trace(
@@ -3125,7 +3125,7 @@ void __cdecl PM_CheckDuck(pmove_t *pm, pml_t *pml)
                             }
 #endif
                         }
-                        else if ((ps->pm_flags & 1) != 0)
+                        else if ((ps->pm_flags & PMF_PRONE) != 0)
                         {
                             pmoveHandlers[pm->handler].trace(
                                 &trace,
@@ -3191,7 +3191,7 @@ void __cdecl PM_CheckDuck(pmove_t *pm, pml_t *pml)
                     }
                     else if (PlayerProneAllowed(pm))
                     {
-                        ps->pm_flags |= 1u;
+                        ps->pm_flags |= PMF_PRONE;
                         ps->pm_flags &= ~2u;
                     }
                     else if (ps->groundEntityNum != ENTITYNUM_NONE)
@@ -3199,7 +3199,7 @@ void __cdecl PM_CheckDuck(pmove_t *pm, pml_t *pml)
                         ps->pm_flags |= 0x1000u;
                         if ((pm->cmd.buttons & 0x1000) == 0)
                         {
-                            if ((ps->pm_flags & 1) != 0 || (ps->pm_flags & 2) != 0)
+                            if ((ps->pm_flags & PMF_PRONE) != 0 || (ps->pm_flags & 2) != 0)
                                 BG_AddPredictableEventToPlayerstate(7u, 0, ps);
                             else
                                 BG_AddPredictableEventToPlayerstate(6u, 0, ps);
@@ -3214,7 +3214,7 @@ void __cdecl PM_CheckDuck(pmove_t *pm, pml_t *pml)
                 {
                     ps->viewHeightTarget = 22;
                 }
-                else if ((ps->pm_flags & 1) != 0)
+                else if ((ps->pm_flags & PMF_PRONE) != 0)
 #elif KISAK_SP
                 if ((ps->pm_flags & 1) != 0)
 #endif
@@ -3257,7 +3257,7 @@ void __cdecl PM_CheckDuck(pmove_t *pm, pml_t *pml)
                 pm->maxs[2] = 30.0;
                 ps->eFlags |= 8u;
                 ps->eFlags &= ~4u;
-                ps->pm_flags |= 1u;
+                ps->pm_flags |= PMF_PRONE;
                 ps->pm_flags &= ~2u;
             }
             else if (iStance == 2)
@@ -3274,7 +3274,7 @@ void __cdecl PM_CheckDuck(pmove_t *pm, pml_t *pml)
                 ps->eFlags &= 0xFFFFFFF3;
                 ps->pm_flags &= ~3;
             }
-            if ((ps->pm_flags & 1) != 0 && !bWasProne)
+            if ((ps->pm_flags & PMF_PRONE) != 0 && !bWasProne)
             {
                 if (pm->cmd.forwardmove || pm->cmd.rightmove)
                 {
@@ -4127,7 +4127,7 @@ void __cdecl PM_UpdatePlayerWalkingFlag(pmove_t *pm)
     ps->pm_flags &= ~0x40u;
     if (ps->pm_type < PM_DEAD
         && (pm->cmd.buttons & 0x800) != 0
-        && (ps->pm_flags & 1) == 0
+        && (ps->pm_flags & PMF_PRONE) == 0
         && (ps->pm_flags & 0x10) != 0
         && ps->weaponstate != 7
         && ps->weaponstate != 9

@@ -48,7 +48,7 @@ void __cdecl SetClientViewAngle(gentity_s *ent, const float *angle)
     newAngle[0] = *angle;
     newAngle[1] = angle[1];
     newAngle[2] = angle[2];
-    if ((ent->client->ps.pm_flags & 1) != 0 && (ent->client->ps.eFlags & 0x300) == 0)
+    if ((ent->client->ps.pm_flags & PMF_PRONE) != 0 && (ent->client->ps.eFlags & 0x300) == 0)
     {
         fDeltab = AngleDelta(ent->client->ps.proneDirection, newAngle[1]);
         v25 = fDeltab * 0.002777777845039964f;

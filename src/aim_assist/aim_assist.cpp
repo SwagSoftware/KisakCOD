@@ -1043,7 +1043,7 @@ void __cdecl AimAssist_ApplyMeleeCharge(const AimInput *input, AimOutput *output
     tweaks = &aaGlob->tweakables;
     output->meleeChargeYaw = 0.0;
     output->meleeChargeDist = 0;
-    if ((input->buttons & 4) != 0 && (input->ps->pm_flags & 1) == 0)
+    if ((input->buttons & 4) != 0 && (input->ps->pm_flags & PMF_PRONE) == 0)
     {
         screenTarget = AimAssist_GetBestTarget(
             aaGlob,

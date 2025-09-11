@@ -2531,7 +2531,7 @@ void __cdecl G_VehEntHandler_Touch(gentity_s *pSelf, gentity_s *pOther, int32_t 
                         dot = hitDir[1] * moveDir[1] + hitDir[0] * moveDir[0];
                         if (dot >= 0.800000011920929f)
                         {
-                            if (pOther->client && (pOther->client->ps.pm_flags & 1) != 0)
+                            if (pOther->client && (pOther->client->ps.pm_flags & PMF_PRONE) != 0)
                             {
                                 InflictDamage(pSelf, pOther, moveDir, 999999);
                             }

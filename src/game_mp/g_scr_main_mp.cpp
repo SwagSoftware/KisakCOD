@@ -1966,7 +1966,7 @@ void __cdecl ScrCmd_GetStance(scr_entref_t entref)
     ent = GetEntity(entref);
     if (ent->client)
     {
-        if ((ent->client->ps.pm_flags & 1) != 0)
+        if ((ent->client->ps.pm_flags & PMF_PRONE) != 0)
         {
             Scr_AddConstString(scr_const.prone);
         }

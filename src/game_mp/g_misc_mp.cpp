@@ -131,7 +131,7 @@ void __cdecl G_ClientStopUsingTurret(gentity_s *self)
         if (pTurretInfo->prevStance == 2)
         {
             ps->pm_flags &= ~2u;
-            ps->pm_flags |= 1u;
+            ps->pm_flags |= PMF_PRONE;
             ps->viewHeightTarget = 11;
             G_AddEvent(owner, 8u, 0);
         }
@@ -984,7 +984,7 @@ void __cdecl turret_use(gentity_s *self, gentity_s *owner, gentity_s* activator)
     pTurretInfo->userOrigin[2] = owner->r.currentOrigin[2];
     owner->s.otherEntityNum = self->s.number;
     self->s.otherEntityNum = owner->s.number;
-    if ((ps->ps.pm_flags & 1) != 0)
+    if ((ps->ps.pm_flags & PMF_PRONE) != 0)
         pTurretInfo->prevStance = 2;
     else
         pTurretInfo->prevStance = (ps->ps.pm_flags & 2) != 0;
