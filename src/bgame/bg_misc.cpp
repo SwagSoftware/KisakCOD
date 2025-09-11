@@ -1570,7 +1570,7 @@ void __cdecl BG_PlayerToEntitySetFlags(playerState_s *ps, entityState_s *s)
     else
         v2 = s->lerp.eFlags | 0x20000;
     s->lerp.eFlags = v2;
-    if ((ps->pm_flags & 0x10) != 0)
+    if ((ps->pm_flags & PMF_SIGHT_AIMING) != 0)
         v3 = s->lerp.eFlags | 0x40000;
     else
         v3 = s->lerp.eFlags & 0xFFFBFFFF;

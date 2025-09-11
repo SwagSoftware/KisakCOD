@@ -822,20 +822,20 @@ void __cdecl PM_UpdateAimDownSightFlag(pmove_t *pm, pml_t *pml)
     {
         if ((ps->pm_flags & PMF_PRONE) == 0 || BG_UsingSniperScope(ps))
         {
-            ps->pm_flags |= 0x10u;
+            ps->pm_flags |= PMF_SIGHT_AIMING;
             if ((ps->otherFlags & 4) == 0)
                 MyAssertHandler(".\\bgame\\bg_weapons.cpp", 1161, 0, "%s", "ps->otherFlags & POF_PLAYER");
         }
         else if ((pm->oldcmd.buttons & 0x800) == 0 || !pm->cmd.forwardmove && !pm->cmd.rightmove)
         {
-            ps->pm_flags |= 0x10u;
+            ps->pm_flags |= PMF_SIGHT_AIMING;
             ps->pm_flags |= 0x200u;
             if ((ps->otherFlags & 4) == 0)
                 MyAssertHandler(".\\bgame\\bg_weapons.cpp", 1153, 0, "%s", "ps->otherFlags & POF_PLAYER");
         }
     }
 #ifdef KISAK_MP
-    if ((ps->pm_flags & 0x10) != 0)
+    if ((ps->pm_flags & PMF_SIGHT_AIMING) != 0)
         BG_SetConditionValue(ps->clientNum, 7u, 1u);
     else
         BG_SetConditionValue(ps->clientNum, 7u, 0);
@@ -964,7 +964,7 @@ void __cdecl PM_UpdateAimDownSightLerp(pmove_t *pm, pml_t *pml)
         {
             adsRequested = 0;
         }
-        else if ((ps->pm_flags & 0x10) != 0)
+        else if ((ps->pm_flags & PMF_SIGHT_AIMING) != 0)
         {
             adsRequested = 1;
         }

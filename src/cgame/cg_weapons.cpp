@@ -787,7 +787,7 @@ void __cdecl WeaponRunXModelAnims(int32_t localClientNum, const playerState_s* p
     if (weapDef->aimDownSight)
     {
         v5 = ps->weaponstate == 7 && ps->weaponTime - weapDef->iPositionReloadTransTime > 0;
-        v4 = (ps->pm_flags & 0x10) != 0 && (ps->weapFlags & 2) == 0;
+        v4 = (ps->pm_flags & PMF_SIGHT_AIMING) != 0 && (ps->weapFlags & 2) == 0;
         v3 = !v5 && v4;
         PlayADSAnim(ps->fWeaponPosFrac, weaponIndex, obj, 32 - v3);
     }

@@ -1392,7 +1392,7 @@ void __cdecl PmoveSingle(pmove_t *pm)
                 v6 = I_fabs(v15),
                 v6 >= (double)v7))
         {
-            if ((ps->pm_flags & 0x10) == 0 && (ps->weaponstate <= 4u || ps->weaponstate == 7))
+            if ((ps->pm_flags & PMF_SIGHT_AIMING) == 0 && (ps->weaponstate <= 4u || ps->weaponstate == 7))
                 ps->pm_flags &= ~0x200u;
         }
         else
@@ -1406,7 +1406,7 @@ void __cdecl PmoveSingle(pmove_t *pm)
         }
     }
     stance = PM_GetEffectiveStance(ps);
-    if ((ps->pm_flags & 0x10) != 0 && stance == 1 && !BG_UsingSniperScope(ps))
+    if ((ps->pm_flags & PMF_SIGHT_AIMING) != 0 && stance == 1 && !BG_UsingSniperScope(ps))
     {
         pm->cmd.forwardmove = 0;
         pm->cmd.rightmove = 0;
@@ -4128,7 +4128,7 @@ void __cdecl PM_UpdatePlayerWalkingFlag(pmove_t *pm)
     if (ps->pm_type < PM_DEAD
         && (pm->cmd.buttons & 0x800) != 0
         && (ps->pm_flags & PMF_PRONE) == 0
-        && (ps->pm_flags & 0x10) != 0
+        && (ps->pm_flags & PMF_SIGHT_AIMING) != 0
         && ps->weaponstate != 7
         && ps->weaponstate != 9
         && ps->weaponstate != 11
