@@ -1706,7 +1706,7 @@ void __cdecl PM_UpdateSprint(pmove_t *pm, const pml_t *pml)
         || player_sprintRechargePause->current.value * 1000.0 <= (double)(pm->cmd.serverTime
             - ps->sprintState.lastSprintEnd))
         && (pm->cmd.buttons & 2) != 0
-        && (ps->pm_flags & 0x40000) == 0
+        && (ps->pm_flags & PMF_NO_SPRINT) == 0
         && !p_sprintState->sprintButtonUpRequired
         && !PM_SprintStartInterferingButtons(ps, pm->cmd.forwardmove, pm->cmd.buttons)
         && PM_CanStand(ps, pm))

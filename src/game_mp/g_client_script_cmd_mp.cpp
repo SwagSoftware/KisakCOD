@@ -2746,9 +2746,9 @@ void __cdecl PlayerCmd_AllowSprint(scr_entref_t entref)
         }
     }
     if (Scr_GetInt(0))
-        pSelf->client->ps.pm_flags &= ~0x40000u;
+        pSelf->client->ps.pm_flags &= ~PMF_NO_SPRINT;
     else
-        pSelf->client->ps.pm_flags |= 0x40000u;
+        pSelf->client->ps.pm_flags |= PMF_NO_SPRINT;
 }
 
 void __cdecl PlayerCmd_SetSpreadOverride(scr_entref_t entref)
