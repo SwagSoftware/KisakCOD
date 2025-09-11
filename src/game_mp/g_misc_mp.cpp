@@ -130,7 +130,7 @@ void __cdecl G_ClientStopUsingTurret(gentity_s *self)
         ps = &owner->client->ps;
         if (pTurretInfo->prevStance == 2)
         {
-            ps->pm_flags &= ~2u;
+            ps->pm_flags &= ~PMF_DUCKED;
             ps->pm_flags |= PMF_PRONE;
             ps->viewHeightTarget = 11;
             G_AddEvent(owner, 8u, 0);

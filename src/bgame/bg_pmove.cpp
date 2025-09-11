@@ -3069,7 +3069,7 @@ void __cdecl PM_CheckDuck(pmove_t *pm, pml_t *pml)
                 else
                 {
                     ps->pm_flags |= PMF_PRONE;
-                    ps->pm_flags &= ~2u;
+                    ps->pm_flags &= ~PMF_DUCKED;
                 }
             }
             else if ((ps->pm_flags & 0xC00) == 0 && !PM_IsPlayerFrozenByWeapon(ps))
@@ -3184,7 +3184,7 @@ void __cdecl PM_CheckDuck(pmove_t *pm, pml_t *pml)
                             else
                             {
                                 BG_AnimScriptEvent(ps, ANIM_ET_CROUCH_TO_STAND, 0, 0);
-                                ps->pm_flags &= ~2u;
+                                ps->pm_flags &= ~PMF_DUCKED;
                             }
 #endif
                         }
@@ -3192,7 +3192,7 @@ void __cdecl PM_CheckDuck(pmove_t *pm, pml_t *pml)
                     else if (PlayerProneAllowed(pm))
                     {
                         ps->pm_flags |= PMF_PRONE;
-                        ps->pm_flags &= ~2u;
+                        ps->pm_flags &= ~PMF_DUCKED;
                     }
                     else if (ps->groundEntityNum != ENTITYNUM_NONE)
                     {
@@ -3258,7 +3258,7 @@ void __cdecl PM_CheckDuck(pmove_t *pm, pml_t *pml)
                 ps->eFlags |= 8u;
                 ps->eFlags &= ~4u;
                 ps->pm_flags |= PMF_PRONE;
-                ps->pm_flags &= ~2u;
+                ps->pm_flags &= ~PMF_DUCKED;
             }
             else if (iStance == 2)
             {
