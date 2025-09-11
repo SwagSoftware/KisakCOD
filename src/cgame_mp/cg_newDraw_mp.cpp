@@ -939,14 +939,14 @@ void __cdecl CG_DrawPlayerStance(
     {
         if (cg_hudStanceHintPrints->current.enabled)
         {
-            if (cgameGlob->lastStance != (cgameGlob->predictedPlayerState.pm_flags & 3))
+            if (cgameGlob->lastStance != (cgameGlob->predictedPlayerState.pm_flags & (PMF_PRONE | PMF_DUCKED)))
                 cgameGlob->lastStanceChangeTime = cgameGlob->time;
         }
         else
         {
             cgameGlob->lastStanceChangeTime = 0;
         }
-        cgameGlob->lastStance = cgameGlob->predictedPlayerState.pm_flags & 3;
+        cgameGlob->lastStance = cgameGlob->predictedPlayerState.pm_flags & (PMF_PRONE | PMF_DUCKED);
         drawColor[4] = 1.4025731e-38f;
         x = (compassSize->current.value - 1.0f) * cgs->compassWidth * 0.699999988079071f + rect->x;
         y = rect->y;

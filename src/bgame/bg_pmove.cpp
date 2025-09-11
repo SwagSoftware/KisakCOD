@@ -1785,7 +1785,7 @@ bool __cdecl PM_CanStand(playerState_s *ps, pmove_t *pm)
 {
     trace_t trace; // [esp+0h] [ebp-2Ch] BYREF
 
-    if ((ps->pm_flags & 3) == 0)
+    if ((ps->pm_flags & (PMF_PRONE | PMF_DUCKED)) == 0)
         return 1;
     pmoveHandlers[pm->handler].trace(
         &trace,
@@ -3011,7 +3011,7 @@ void __cdecl PM_CheckDuck(pmove_t *pm, pml_t *pml)
         pm->maxs[0] = 8.0;
         pm->maxs[1] = 8.0;
         pm->maxs[2] = 16.0;
-        ps->pm_flags &= ~3;
+        ps->pm_flags &= ~(PMF_PRONE | PMF_DUCKED);
         if ((pm->cmd.buttons & 0x100) != 0)
         {
             pm->cmd.buttons &= ~0x100u;
@@ -3023,7 +3023,7 @@ void __cdecl PM_CheckDuck(pmove_t *pm, pml_t *pml)
     else
     {
         bWasProne = (ps->pm_flags & PMF_PRONE) != 0;
-        bWasStanding = (ps->pm_flags & 3) == 0;
+        bWasStanding = (ps->pm_flags & (PMF_PRONE | PMF_DUCKED)) == 0;
         pm->mins[0] = -15.0;
         pm->mins[1] = -15.0;
         pm->mins[2] = 0.0;
@@ -3038,7 +3038,7 @@ void __cdecl PM_CheckDuck(pmove_t *pm, pml_t *pml)
         else if ((ps->pm_flags & PMF_VEHICLE_ATTACHED) != 0)
         {
             ps->viewHeightTarget = 60;
-            ps->pm_flags &= ~3;
+            ps->pm_flags &= ~(PMF_PRONE | PMF_DUCKED);
             BG_AddPredictableEventToPlayerstate(6u, 0, ps);
             PM_ViewHeightAdjust(pm, pml);
         }
@@ -3046,7 +3046,7 @@ void __cdecl PM_CheckDuck(pmove_t *pm, pml_t *pml)
         {
             ps->viewHeightTarget = 60;
             ps->eFlags &= 0xFFFFFFF3;
-            ps->pm_flags &= ~3;
+            ps->pm_flags &= ~(PMF_PRONE | PMF_DUCKED);
             BG_AddPredictableEventToPlayerstate(6u, 0, ps);
             PM_ViewHeightAdjust(pm, pml);
         }
@@ -3058,7 +3058,7 @@ void __cdecl PM_CheckDuck(pmove_t *pm, pml_t *pml)
                 {
                     if ((ps->eFlags & 0x200) == 0 || (ps->eFlags & 0x100) != 0)
                     {
-                        ps->pm_flags &= ~3;
+                        ps->pm_flags &= ~(PMF_PRONE | PMF_DUCKED);
                     }
                     else
                     {
@@ -3161,7 +3161,7 @@ void __cdecl PM_CheckDuck(pmove_t *pm, pml_t *pml)
                             else
                             {
                                 BG_AnimScriptEvent(ps, ANIM_ET_PRONE_TO_STAND, 0, 0);
-                                ps->pm_flags &= ~3;
+                                ps->pm_flags &= ~(PMF_PRONE | PMF_DUCKED);
                             }
 #endif
                         }
@@ -3272,7 +3272,7 @@ void __cdecl PM_CheckDuck(pmove_t *pm, pml_t *pml)
             {
                 pm->maxs[2] = 70.0;
                 ps->eFlags &= 0xFFFFFFF3;
-                ps->pm_flags &= ~3;
+                ps->pm_flags &= ~(PMF_PRONE | PMF_DUCKED);
             }
             if ((ps->pm_flags & PMF_PRONE) != 0 && !bWasProne)
             {
@@ -3663,7 +3663,7 @@ void __cdecl PM_Footsteps(pmove_t *pm, pml_t *pml)
             else
             {
                 PM_Footstep_LadderMove(pm, pml);
-                if (iStance != (ps->pm_flags & 3))
+                if (iStance != (ps->pm_flags & (PMF_PRONE | PMF_DUCKED)))
                     MyAssertHandler(
                         ".\\bgame\\bg_pmove.cpp",
                         3562,
