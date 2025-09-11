@@ -626,7 +626,7 @@ void __cdecl ClientThink_real(gentity_s *ent, usercmd_s *ucmd)
                 if (ssDT <= 0)
                 {
                     ssSwayScale = 1.0;
-                    client->ps.pm_flags &= ~0x10000u;
+                    client->ps.pm_flags &= ~PMF_SHELLSHOCKED;
                 }
                 else
                 {
@@ -708,7 +708,7 @@ void __cdecl ClientThink_real(gentity_s *ent, usercmd_s *ucmd)
                 }
                 if (pm.mantleStarted)
                 {
-                    if ((client->ps.pm_flags & 4) == 0)
+                    if ((client->ps.pm_flags & PMF_MANTLE) == 0)
                         MyAssertHandler(".\\game_mp\\g_active_mp.cpp", 907, 0, "%s", "client->ps.pm_flags & PMF_MANTLE");
                     G_AddPlayerMantleBlockage(pm.mantleEndPos, pm.mantleDuration, &pm);
                 }
@@ -1084,13 +1084,13 @@ int32_t __cdecl StuckInClient(gentity_s *self)
     *velocity = hitSpeed * vDelta[0];
     velocity[1] = hitSpeed * vDelta[1];
     hit->client->ps.pm_time = 300;
-    hit->client->ps.pm_flags |= 0x80u;
+    hit->client->ps.pm_flags |= PMF_TIME_HARDLANDING;
     v5 = self->client->ps.velocity;
     v6 = -selfSpeed;
     *v5 = v6 * vDelta[0];
     v5[1] = v6 * vDelta[1];
     self->client->ps.pm_time = 300;
-    self->client->ps.pm_flags |= 0x80u;
+    self->client->ps.pm_flags |= PMF_TIME_HARDLANDING;
     return 1;
 }
 
@@ -1128,7 +1128,7 @@ void __cdecl G_PlayerController(const gentity_s *self, int32_t *partBits)
 
 void __cdecl ClientEndFrame(gentity_s *ent)
 {
-    int32_t v1; // ecx
+    //int32_t v1; // ecx
     int32_t v2; // eax
     uint32_t v3; // edx
     const char *v4; // eax
@@ -1158,10 +1158,9 @@ void __cdecl ClientEndFrame(gentity_s *ent)
     client->ps.gravity = (int)g_gravity->current.value;
     client->ps.moveSpeedScaleMultiplier = ent->client->sess.moveSpeedScaleMultiplier;
     if (client->bFrozen)
-        v1 = client->ps.pm_flags | 0x800;
+        client->ps.pm_flags |= PMF_FROZEN;
     else
-        v1 = client->ps.pm_flags & 0xFFFFF7FF;
-    client->ps.pm_flags = v1;
+        client->ps.pm_flags &= ~PMF_FROZEN;
     {
         PROF_SCOPED("G_UpdateClientInfo");
         bChanged = G_UpdateClientInfo(ent);
@@ -1449,7 +1448,7 @@ int32_t __cdecl G_UpdateClientInfo(gentity_s *ent)
             client->sess.cs.attachTagIndex[i] = 0;
         }
     }
-    if ((client->ps.pm_flags & 0x100000) != 0)
+    if ((client->ps.pm_flags & PMF_VEHICLE_ATTACHED) != 0)
     {
         v3 = va("pm_flags is %i", client->ps.pm_flags);
         MyAssertHandler(
@@ -1460,7 +1459,7 @@ int32_t __cdecl G_UpdateClientInfo(gentity_s *ent)
             "!( client->ps.pm_flags & PMF_VEHICLE_ATTACHED )",
             v3);
     }
-    if ((client->ps.pm_flags & 0x100000) != 0)
+    if ((client->ps.pm_flags & PMF_VEHICLE_ATTACHED) != 0)
     {
         if (ent->r.ownerNum.isDefined())
         {

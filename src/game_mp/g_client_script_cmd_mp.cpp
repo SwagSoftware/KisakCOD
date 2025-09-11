@@ -1303,11 +1303,11 @@ void __cdecl PlayerCmd_finishPlayerDamage(scr_entref_t entref)
             if ((pSelf->flags & 8) == 0 && (dflags & 4) == 0)
             {
                 knockbackMod = 0.30000001f;
-                if ((pSelf->client->ps.pm_flags & 1) != 0)
+                if ((pSelf->client->ps.pm_flags & PMF_PRONE) != 0)
                 {
                     knockbackMod = 0.02f;
                 }
-                else if ((pSelf->client->ps.pm_flags & 2) != 0)
+                else if ((pSelf->client->ps.pm_flags & PMF_DUCKED) != 0)
                 {
                     knockbackMod = 0.15000001f;
                 }
@@ -1330,7 +1330,7 @@ void __cdecl PlayerCmd_finishPlayerDamage(scr_entref_t entref)
                             if (t > 200)
                                 t = 200;
                             pSelf->client->ps.pm_time = t;
-                            pSelf->client->ps.pm_flags |= 0x100u;
+                            pSelf->client->ps.pm_flags |= PMF_TIME_KNOCKBACK;
                         }
                     }
                 }
@@ -2719,9 +2719,9 @@ void __cdecl PlayerCmd_AllowJump(scr_entref_t entref)
         }
     }
     if (Scr_GetInt(0))
-        pSelf->client->ps.pm_flags &= ~0x80000u;
+        pSelf->client->ps.pm_flags &= ~PMF_NO_JUMP;
     else
-        pSelf->client->ps.pm_flags |= 0x80000u;
+        pSelf->client->ps.pm_flags |= PMF_NO_JUMP;
 }
 
 void __cdecl PlayerCmd_AllowSprint(scr_entref_t entref)
@@ -2746,9 +2746,9 @@ void __cdecl PlayerCmd_AllowSprint(scr_entref_t entref)
         }
     }
     if (Scr_GetInt(0))
-        pSelf->client->ps.pm_flags &= ~0x40000u;
+        pSelf->client->ps.pm_flags &= ~PMF_NO_SPRINT;
     else
-        pSelf->client->ps.pm_flags |= 0x40000u;
+        pSelf->client->ps.pm_flags |= PMF_NO_SPRINT;
 }
 
 void __cdecl PlayerCmd_SetSpreadOverride(scr_entref_t entref)

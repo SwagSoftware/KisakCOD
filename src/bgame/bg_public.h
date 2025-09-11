@@ -12,14 +12,6 @@
 #define abs8(x) abs(x)
 #define abs32(x) abs(x)
 
-// Player Movement Flags (PMF)
-#define PMF_DUCKED 1
-#define PMF_PRONE 2
-#define PMF_MANTLE 4
-#define PMF_LADDER 8
-#define PMF_JUMPING 0x4000
-#define PMF_VEHICLE_ATTACHED 0x100000
-
 #ifdef KISAK_MP
 enum entity_event_t : __int32
 {

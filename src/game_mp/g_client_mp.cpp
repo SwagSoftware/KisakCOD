@@ -48,7 +48,7 @@ void __cdecl SetClientViewAngle(gentity_s *ent, const float *angle)
     newAngle[0] = *angle;
     newAngle[1] = angle[1];
     newAngle[2] = angle[2];
-    if ((ent->client->ps.pm_flags & 1) != 0 && (ent->client->ps.eFlags & 0x300) == 0)
+    if ((ent->client->ps.pm_flags & PMF_PRONE) != 0 && (ent->client->ps.eFlags & 0x300) == 0)
     {
         fDeltab = AngleDelta(ent->client->ps.proneDirection, newAngle[1]);
         v25 = fDeltab * 0.002777777845039964f;
@@ -397,7 +397,7 @@ void __cdecl ClientSpawn(gentity_s *ent, const float *spawn_origin, const float 
     client->ps.origin[0] = *spawn_origin;
     client->ps.origin[1] = spawn_origin[1];
     client->ps.origin[2] = spawn_origin[2];
-    client->ps.pm_flags |= 0x400u;
+    client->ps.pm_flags |= PMF_RESPAWNED;
     SetClientViewAngle(ent, spawn_angles);
     client->inactivityTime = level.time + 1000 * g_inactivity->current.integer;
     if (client->latched_buttons)

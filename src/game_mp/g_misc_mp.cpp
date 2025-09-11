@@ -130,21 +130,21 @@ void __cdecl G_ClientStopUsingTurret(gentity_s *self)
         ps = &owner->client->ps;
         if (pTurretInfo->prevStance == 2)
         {
-            ps->pm_flags &= ~2u;
-            ps->pm_flags |= 1u;
+            ps->pm_flags &= ~PMF_DUCKED;
+            ps->pm_flags |= PMF_PRONE;
             ps->viewHeightTarget = 11;
             G_AddEvent(owner, 8u, 0);
         }
         else if (pTurretInfo->prevStance == 1)
         {
-            ps->pm_flags &= ~1u;
-            ps->pm_flags |= 2u;
+            ps->pm_flags &= ~PMF_PRONE;
+            ps->pm_flags |= PMF_DUCKED;
             ps->viewHeightTarget = 40;
             G_AddEvent(owner, 7u, 0);
         }
         else
         {
-            ps->pm_flags &= 0xFFFFFFFC;
+            ps->pm_flags &= ~(PMF_PRONE | PMF_DUCKED);
             ps->viewHeightTarget = 60;
             G_AddEvent(owner, 6u, 0);
         }
@@ -203,7 +203,7 @@ void __cdecl turret_track(gentity_s *self, gentity_s *other)
     if (turretInfo->fireTime <= 0)
     {
         turretInfo->fireTime = 0;
-        if ((other->client->ps.pm_flags & 0x800) != 0 || (other->client->buttons & 1) == 0)
+        if ((other->client->ps.pm_flags & PMF_FROZEN) != 0 || (other->client->buttons & 1) == 0)
         {
             turretInfo->triggerDown = 0;
         }
@@ -984,10 +984,10 @@ void __cdecl turret_use(gentity_s *self, gentity_s *owner, gentity_s* activator)
     pTurretInfo->userOrigin[2] = owner->r.currentOrigin[2];
     owner->s.otherEntityNum = self->s.number;
     self->s.otherEntityNum = owner->s.number;
-    if ((ps->ps.pm_flags & 1) != 0)
+    if ((ps->ps.pm_flags & PMF_PRONE) != 0)
         pTurretInfo->prevStance = 2;
     else
-        pTurretInfo->prevStance = (ps->ps.pm_flags & 2) != 0;
+        pTurretInfo->prevStance = (ps->ps.pm_flags & PMF_DUCKED) != 0;
     if (pTurretInfo->stance == 2)
     {
         ps->ps.eFlags |= 0x100u;

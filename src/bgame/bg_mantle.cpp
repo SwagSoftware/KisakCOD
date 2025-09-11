@@ -179,7 +179,7 @@ void __cdecl Mantle_Check(pmove_t *pm, pml_t *pml)
         Mantle_ClearHint(ps);
         if (ps->pm_type < PM_DEAD)
         {
-            if ((ps->pm_flags & 4) != 0)
+            if ((ps->pm_flags & PMF_MANTLE) != 0)
             {
                 Mantle_DebugPrint("Mantle Failed: Player already mantling");
             }
@@ -413,7 +413,7 @@ void __cdecl Mantle_Start(pmove_t *pm, playerState_s *ps, MantleResults *mresult
     Mantle_GetAnimDelta(mstate, mantleTime, trans);
     Vec3Sub(mresults->endPos, trans, ps->origin);
     iassert(!(ps->pm_flags & PMF_MANTLE));
-    ps->pm_flags |= 4u;
+    ps->pm_flags |= PMF_MANTLE;
 #ifdef KISAK_MP
     ps->eFlags |= 0x8000u;
     pm->mantleEndPos[0] = mresults->endPos[0];
@@ -630,7 +630,7 @@ void __cdecl Mantle_Move(pmove_t *pm, playerState_s *ps, pml_t *pml)
         if (mstate->timer == mantleLength)
         {
             iassert(ps->pm_flags & PMF_MANTLE);
-            ps->pm_flags &= ~4u;
+            ps->pm_flags &= ~PMF_MANTLE;
 
 #ifdef KISAK_MP
             pm->mantleStarted = 0;

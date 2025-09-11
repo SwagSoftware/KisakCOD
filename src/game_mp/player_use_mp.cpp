@@ -68,11 +68,11 @@ char __cdecl Player_ActivateCmd(gentity_s *ent)
             ent->active = 0;
         return 1;
     }
-    else if ((ent->client->ps.pm_flags & 4) != 0)
+    else if ((ent->client->ps.pm_flags & PMF_MANTLE) != 0)
     {
         return 1;
     }
-    else if ((ent->client->ps.pm_flags & 0x8000) != 0)
+    else if ((ent->client->ps.pm_flags & PMF_SPRINTING) != 0)
     {
         return 1;
     }
@@ -189,12 +189,12 @@ void __cdecl Player_UpdateCursorHints(gentity_s *ent)
             if ((ps->eFlags & 0x300) != 0)
                 Player_SetTurretDropHint(ent);
         }
-        else if ((ps->pm_flags & 0x100000) != 0)
+        else if ((ps->pm_flags & PMF_VEHICLE_ATTACHED) != 0)
         {
             Player_SetVehicleDropHint(ent);
         }
-        else if ((ent->client->ps.pm_flags & 4) == 0
-            && (ent->client->ps.pm_flags & 0x8000) == 0
+        else if ((ent->client->ps.pm_flags & PMF_MANTLE) == 0
+            && (ent->client->ps.pm_flags & PMF_SPRINTING) == 0
             && (ps->weaponstate < 15 || ps->weaponstate > 19))
         {
             if (ps->pm_type == 6)
@@ -519,7 +519,7 @@ void __cdecl Player_SetVehicleDropHint(gentity_s *ent)
 
     ps = ent->client;
 
-    if ((ps->ps.pm_flags & 0x100000) == 0)
+    if ((ps->ps.pm_flags & PMF_VEHICLE_ATTACHED) == 0)
         MyAssertHandler(".\\game_mp\\player_use_mp.cpp", 502, 0, "%s", "ps->pm_flags & PMF_VEHICLE_ATTACHED");
 
     iassert(ent->r.ownerNum.isDefined());

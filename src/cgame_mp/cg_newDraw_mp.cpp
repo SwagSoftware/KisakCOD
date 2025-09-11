@@ -939,14 +939,14 @@ void __cdecl CG_DrawPlayerStance(
     {
         if (cg_hudStanceHintPrints->current.enabled)
         {
-            if (cgameGlob->lastStance != (cgameGlob->predictedPlayerState.pm_flags & 3))
+            if (cgameGlob->lastStance != (cgameGlob->predictedPlayerState.pm_flags & (PMF_PRONE | PMF_DUCKED)))
                 cgameGlob->lastStanceChangeTime = cgameGlob->time;
         }
         else
         {
             cgameGlob->lastStanceChangeTime = 0;
         }
-        cgameGlob->lastStance = cgameGlob->predictedPlayerState.pm_flags & 3;
+        cgameGlob->lastStance = cgameGlob->predictedPlayerState.pm_flags & (PMF_PRONE | PMF_DUCKED);
         drawColor[4] = 1.4025731e-38f;
         x = (compassSize->current.value - 1.0f) * cgs->compassWidth * 0.699999988079071f + rect->x;
         y = rect->y;
@@ -954,7 +954,7 @@ void __cdecl CG_DrawPlayerStance(
         drawColor[0] = color[0];
         drawColor[1] = color[1];
         drawColor[2] = color[2];
-        if ((cgameGlob->predictedPlayerState.pm_flags & 0x1000) != 0 && cgameGlob->proneBlockedEndTime < cgameGlob->time)
+        if ((cgameGlob->predictedPlayerState.pm_flags & PMF_NO_PRONE) != 0 && cgameGlob->proneBlockedEndTime < cgameGlob->time)
             cgameGlob->proneBlockedEndTime = cgameGlob->time + 1500;
         if (cgameGlob->proneBlockedEndTime > cgameGlob->time)
         {

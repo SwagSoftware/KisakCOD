@@ -1093,7 +1093,7 @@ bool __cdecl BG_CanItemBeGrabbed(const entityState_s *ent, const playerState_s *
     if (ent->clientNum == ps->clientNum)
         return 0;
 
-    if ((ps->pm_flags & 0x100000) != 0)
+    if ((ps->pm_flags & PMF_VEHICLE_ATTACHED) != 0)
         return 0;
 #endif
 
@@ -1570,7 +1570,7 @@ void __cdecl BG_PlayerToEntitySetFlags(playerState_s *ps, entityState_s *s)
     else
         v2 = s->lerp.eFlags | 0x20000;
     s->lerp.eFlags = v2;
-    if ((ps->pm_flags & 0x10) != 0)
+    if ((ps->pm_flags & PMF_SIGHT_AIMING) != 0)
         v3 = s->lerp.eFlags | 0x40000;
     else
         v3 = s->lerp.eFlags & 0xFFFBFFFF;

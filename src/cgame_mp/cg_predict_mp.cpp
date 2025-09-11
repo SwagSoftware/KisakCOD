@@ -280,7 +280,7 @@ void __cdecl CG_PredictPlayerState_Internal(int32_t localClientNum)
             if (!bPredictionRun && cg_showmiss->current.integer)
                 Com_Printf(17, "no prediction run\n");
             CG_TransitionPlayerState(localClientNum, &cgameGlob->predictedPlayerState, &oldTransPlayerState);
-            if ((cgameGlob->predictedPlayerState.pm_flags & 0x400) != 0)
+            if ((cgameGlob->predictedPlayerState.pm_flags & PMF_RESPAWNED) != 0)
                 CL_SetStance(localClientNum, CL_STANCE_STAND);
             if (!cgameGlob->predictedPlayerState.cursorHint)
             {

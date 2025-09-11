@@ -54,7 +54,7 @@ void __cdecl PM_StepSlideMove(pmove_t *pm, pml_t *pml, int32_t gravity)
     if (!ps)
         MyAssertHandler(".\\bgame\\bg_slidemove.cpp", 310, 0, "%s", "ps");
     jumping = 0;
-    if ((ps->pm_flags & 8) != 0)
+    if ((ps->pm_flags & PMF_LADDER) != 0)
     {
         bHadGround = 0;
         Jump_ClearState(ps);
@@ -66,7 +66,7 @@ void __cdecl PM_StepSlideMove(pmove_t *pm, pml_t *pml, int32_t gravity)
     else
     {
         bHadGround = 0;
-        if ((ps->pm_flags & 0x4000) != 0 && ps->pm_time)
+        if ((ps->pm_flags & PMF_JUMPING) != 0 && ps->pm_time)
             Jump_ClearState(ps);
     }
     start_o[0] = ps->origin[0];
@@ -76,21 +76,21 @@ void __cdecl PM_StepSlideMove(pmove_t *pm, pml_t *pml, int32_t gravity)
     start_v[1] = ps->velocity[1];
     start_v[2] = ps->velocity[2];
     iBumps = PM_SlideMove(pm, pml, gravity);
-    if ((ps->pm_flags & 1) != 0)
+    if ((ps->pm_flags & PMF_PRONE) != 0)
         fStepSize = 10.0;
     else
         fStepSize = 18.0;
     if (ps->groundEntityNum != ENTITYNUM_NONE)
         goto LABEL_26;
-    if ((ps->pm_flags & 0x4000) != 0 && ps->pm_time)
+    if ((ps->pm_flags & PMF_JUMPING) != 0 && ps->pm_time)
         Jump_ClearState(ps);
-    if (iBumps && (ps->pm_flags & 0x4000) != 0 && Jump_GetStepHeight(ps, start_o, &fStepSize))
+    if (iBumps && (ps->pm_flags & PMF_JUMPING) != 0 && Jump_GetStepHeight(ps, start_o, &fStepSize))
     {
         if (fStepSize < 1.0)
             return;
         jumping = 1;
     }
-    if (jumping || (ps->pm_flags & 8) != 0 && ps->velocity[2] > 0.0)
+    if (jumping || (ps->pm_flags & PMF_LADDER) != 0 && ps->velocity[2] > 0.0)
     {
     LABEL_26:
         down_o[0] = ps->origin[0];
@@ -256,7 +256,7 @@ int __cdecl PM_VerifyPronePosition(pmove_t *pm, float *vFallbackOrg, float *vFal
     ps = pm->ps;
     if (!pm->ps)
         MyAssertHandler(".\\bgame\\bg_slidemove.cpp", 30, 0, "%s", "ps");
-    if ((ps->pm_flags & 1) == 0)
+    if ((ps->pm_flags & PMF_PRONE) == 0)
         return 1;
     result = BG_CheckProne(
         ps->clientNum,

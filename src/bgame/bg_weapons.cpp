@@ -809,7 +809,7 @@ void __cdecl PM_UpdateAimDownSightFlag(pmove_t *pm, pml_t *pml)
         MyAssertHandler(".\\bgame\\bg_weapons.cpp", 1126, 0, "%s", "ps");
     weapIndex = BG_GetViewmodelWeaponIndex(ps);
     weapDef = BG_GetWeaponDef(weapIndex);
-    ps->pm_flags &= ~0x10u;
+    ps->pm_flags &= ~PMF_SIGHT_AIMING;
     adsAllowed = PM_IsAdsAllowed(ps, pml);
     adsRequested = (pm->cmd.buttons & 0x800) != 0;
     if ((pm->cmd.buttons & 2) != 0
@@ -820,22 +820,22 @@ void __cdecl PM_UpdateAimDownSightFlag(pmove_t *pm, pml_t *pml)
     }
     if (adsRequested && adsAllowed)
     {
-        if ((ps->pm_flags & 1) == 0 || BG_UsingSniperScope(ps))
+        if ((ps->pm_flags & PMF_PRONE) == 0 || BG_UsingSniperScope(ps))
         {
-            ps->pm_flags |= 0x10u;
+            ps->pm_flags |= PMF_SIGHT_AIMING;
             if ((ps->otherFlags & 4) == 0)
                 MyAssertHandler(".\\bgame\\bg_weapons.cpp", 1161, 0, "%s", "ps->otherFlags & POF_PLAYER");
         }
         else if ((pm->oldcmd.buttons & 0x800) == 0 || !pm->cmd.forwardmove && !pm->cmd.rightmove)
         {
-            ps->pm_flags |= 0x10u;
-            ps->pm_flags |= 0x200u;
+            ps->pm_flags |= PMF_SIGHT_AIMING;
+            ps->pm_flags |= PMF_PRONEMOVE_OVERRIDDEN;
             if ((ps->otherFlags & 4) == 0)
                 MyAssertHandler(".\\bgame\\bg_weapons.cpp", 1153, 0, "%s", "ps->otherFlags & POF_PLAYER");
         }
     }
 #ifdef KISAK_MP
-    if ((ps->pm_flags & 0x10) != 0)
+    if ((ps->pm_flags & PMF_SIGHT_AIMING) != 0)
         BG_SetConditionValue(ps->clientNum, 7u, 1u);
     else
         BG_SetConditionValue(ps->clientNum, 7u, 0);
@@ -923,7 +923,7 @@ bool __cdecl PM_IsAdsAllowed(playerState_s *ps, pml_t *pml)
 void __cdecl PM_ExitAimDownSight(playerState_s *ps)
 {
     PM_AddEvent(ps, 0xEu);
-    ps->pm_flags &= ~0x10u;
+    ps->pm_flags &= ~PMF_SIGHT_AIMING;
 }
 
 void __cdecl PM_UpdateAimDownSightLerp(pmove_t *pm, pml_t *pml)
@@ -964,7 +964,7 @@ void __cdecl PM_UpdateAimDownSightLerp(pmove_t *pm, pml_t *pml)
         {
             adsRequested = 0;
         }
-        else if ((ps->pm_flags & 0x10) != 0)
+        else if ((ps->pm_flags & PMF_SIGHT_AIMING) != 0)
         {
             adsRequested = 1;
         }
@@ -1245,7 +1245,7 @@ void __cdecl PM_Weapon_Idle(playerState_s *ps)
 {
 #ifdef KISAK_MP
     ps->weapFlags &= ~2u;
-    ps->pm_flags &= ~0x200u;
+    ps->pm_flags &= ~PMF_PRONEMOVE_OVERRIDDEN;
     if (G_IsServerGameSystem(ps->clientNum))
         Com_Printf(19, "end weapon (idle)\n");
     ps->weaponTime = 0;
@@ -1291,7 +1291,7 @@ void __cdecl PM_Weapon(pmove_t *pm, pml_t *pml)
     }
     if (ps->pm_type < PM_DEAD)
     {
-        if (!G_ExitAfterConnectPaths() && (ps->pm_flags & 0x400) == 0 && (ps->eFlags & 0x300) == 0)
+        if (!G_ExitAfterConnectPaths() && (ps->pm_flags & PMF_RESPAWNED) == 0 && (ps->eFlags & 0x300) == 0)
         {
             PM_UpdateAimDownSightLerp(pm, pml);
             PM_UpdateHoldBreath(pm, pml);
@@ -1312,7 +1312,7 @@ void __cdecl PM_Weapon(pmove_t *pm, pml_t *pml)
                 }
                 if (!PM_Weapon_CheckForRechamber(ps, delayedAction))
                 {
-                    if ((ps->pm_flags & 1) != 0 && (pm->cmd.forwardmove || pm->cmd.rightmove) && ps->fWeaponPosFrac != 1.0
+                    if ((ps->pm_flags & PMF_PRONE) != 0 && (pm->cmd.forwardmove || pm->cmd.rightmove) && ps->fWeaponPosFrac != 1.0
                         || ps->weaponstate == 12
                         || ps->weaponstate == 13
                         || ps->weaponstate == 14)
@@ -1394,7 +1394,7 @@ void __cdecl PM_Weapon(pmove_t *pm, pml_t *pml)
                             {
                                 if (PM_Weapon_ShouldBeFiring(pm, delayedAction))
                                 {
-                                    if (!PM_Weapon_CheckGrenadeHold(pm, delayedAction) && (ps->pm_flags & 0x800) == 0)
+                                    if (!PM_Weapon_CheckGrenadeHold(pm, delayedAction) && (ps->pm_flags & PMF_FROZEN) == 0)
                                     {
                                         PM_Weapon_FireWeapon(ps, delayedAction);
                                         if (ps->weaponTime < 0 || ps->weaponDelay < 0)
@@ -1596,7 +1596,7 @@ void __cdecl PM_Weapon_FinishWeaponChange(pmove_t *pm, bool quick)
     }
     else
     {
-        if ((ps->pm_flags & 8) != 0)
+        if ((ps->pm_flags & PMF_LADDER) != 0)
             goto LABEL_13;
         bitNum = pm->cmd.weapon;
         if (!ps)
@@ -1641,7 +1641,7 @@ void __cdecl PM_Weapon_FinishWeaponChange(pmove_t *pm, bool quick)
             MyAssertHandler("c:\\trees\\cod3\\src\\bgame\\../bgame/bg_weapons.h", 236, 0, "%s", "ps");
         firstequip = !Com_BitCheckAssert(ps->weaponold, weapon, 16);
         Com_BitSetAssert(ps->weaponold, ps->weapon, 16);
-        if ((ps->pm_flags & 0x8000) == 0 && oldweapon)
+        if ((ps->pm_flags & PMF_SPRINTING) == 0 && oldweapon)
         {
             v2 = newweapon && newweapon == BG_GetWeaponDef(oldweapon)->altWeaponIndex;
             altswitch = v2;
@@ -2388,7 +2388,7 @@ void __cdecl PM_Weapon_CheckForChangeWeapon(pmove_t *pm)
             if (ps->weapon)
                 PM_BeginWeaponChange(ps, 0, 1);
         }
-        else if ((ps->pm_flags & 8) != 0)
+        else if ((ps->pm_flags & PMF_LADDER) != 0)
         {
             if (ps->weapon)
                 PM_BeginWeaponChange(ps, 0, 1);
@@ -2399,7 +2399,7 @@ void __cdecl PM_Weapon_CheckForChangeWeapon(pmove_t *pm)
                 PM_BeginWeaponChange(ps, 0, 0);
         }
         else if (ps->weapon == pm->cmd.weapon
-            || (ps->pm_flags & 0xC00) != 0 && ps->weapon
+            || (ps->pm_flags & (PMF_RESPAWNED | PMF_FROZEN)) != 0 && ps->weapon
             || pm->cmd.weapon && !BG_IsWeaponValid(ps, pm->cmd.weapon))
         {
             if (ps->weapon == pm->cmd.weapon && (ps->weaponstate == 3 || ps->weaponstate == 4))
@@ -2472,7 +2472,7 @@ void __cdecl PM_BeginWeaponChange(playerState_s *ps, uint32_t newweapon, bool qu
             if (Com_BitCheckAssert(ps->weapons, oldweapon, 16) && ps->grenadeTimeLeft <= 0)
             {
                 weapDefOld = BG_GetWeaponDef(oldweapon);
-                if ((ps->pm_flags & 0x8000) != 0)
+                if ((ps->pm_flags & PMF_SPRINTING) != 0)
                 {
                     altswitch = 0;
                 }
@@ -2491,7 +2491,7 @@ void __cdecl PM_BeginWeaponChange(playerState_s *ps, uint32_t newweapon, bool qu
                 else
                 {
                     PM_AddEvent(ps, 0x17u);
-                    if ((ps->pm_flags & 0x8000) == 0)
+                    if ((ps->pm_flags & PMF_SPRINTING) == 0)
                     {
                         if (noammo)
                         {
@@ -2508,7 +2508,7 @@ void __cdecl PM_BeginWeaponChange(playerState_s *ps, uint32_t newweapon, bool qu
                     }
                 }
 #ifdef KISAK_MP
-                if (!altswitch && (ps->pm_flags & 4) == 0)
+                if (!altswitch && (ps->pm_flags & PMF_MANTLE) == 0)
                     BG_AnimScriptEvent(ps, ANIM_ET_DROPWEAPON, 0, 1);
 #endif
                 ps->weaponstate = quick + 3;
@@ -2860,7 +2860,7 @@ void __cdecl PM_Weapon_MeleeInit(playerState_s *ps)
     if (!ps)
         MyAssertHandler(".\\bgame\\bg_weapons.cpp", 3107, 0, "%s", "ps");
     weapDef = BG_GetWeaponDef(ps->weapon);
-    v1 = (ps->pm_flags & 0x20000) != 0 && PM_WeaponHasChargeMelee(ps);
+    v1 = (ps->pm_flags & PMF_MELEE_CHARGE) != 0 && PM_WeaponHasChargeMelee(ps);
     if (v1)
     {
         ps->weaponTime = weapDef->meleeChargeTime;
@@ -3019,7 +3019,7 @@ void __cdecl PM_Weapon_OffHandEnd(playerState_s *ps)
     ps->throwBackGrenadeOwner = ENTITYNUM_NONE;
     ps->weaponstate = 20;
     ps->weapFlags &= ~2u;
-    ps->pm_flags &= ~0x200u;
+    ps->pm_flags &= ~PMF_PRONEMOVE_OVERRIDDEN;
 }
 
 void __cdecl PM_Weapon_CheckForOffHand(pmove_t *pm)
@@ -3041,7 +3041,7 @@ void __cdecl PM_Weapon_CheckForOffHand(pmove_t *pm)
         MyAssertHandler(".\\bgame\\bg_weapons.cpp", 3458, 0, "%s", "ps");
     if ((ps->eFlags & 0x300) == 0
         && (ps->weapFlags & 0x80) == 0
-        && (ps->pm_flags & 0x8000) == 0
+        && (ps->pm_flags & PMF_SPRINTING) == 0
         && !PM_Weapon_IsHoldingGrenade(pm)
         && (ps->weaponstate < 15 || ps->weaponstate >= 20)
         && ps->weaponstate != 25
@@ -3416,11 +3416,11 @@ void __cdecl PM_Weapon_CheckForSprint(pmove_t *pm)
         && ps->weaponstate != 25
         && ps->weaponstate != 26)
     {
-        if ((ps->pm_flags & 0x8000) != 0 && (ps->weaponstate < 22 || ps->weaponstate > 24))
+        if ((ps->pm_flags & PMF_SPRINTING) != 0 && (ps->weaponstate < 22 || ps->weaponstate > 24))
         {
             Sprint_State_Raise(ps);
         }
-        else if ((ps->pm_flags & 0x8000) == 0 && (ps->weaponstate == 22 || ps->weaponstate == 23))
+        else if ((ps->pm_flags & PMF_SPRINTING) == 0 && (ps->weaponstate == 22 || ps->weaponstate == 23))
         {
             Sprint_State_Drop(ps);
         }
@@ -3559,7 +3559,7 @@ double __cdecl BG_GetVerticalBobFactor(const playerState_s *ps, float cycle, flo
     }
     else
     {
-        if ((ps->pm_flags & 0x8000) != 0)
+        if ((ps->pm_flags & PMF_SPRINTING) != 0)
             v4 = speed * bg_bobAmplitudeSprinting->current.vector[1];
         else
             v4 = speed * bg_bobAmplitudeStanding->current.vector[1];
@@ -3590,7 +3590,7 @@ double __cdecl BG_GetHorizontalBobFactor(const playerState_s *ps, float cycle, f
     }
     else
     {
-        if ((ps->pm_flags & 0x8000) != 0)
+        if ((ps->pm_flags & PMF_SPRINTING) != 0)
             v4 = speed * bg_bobAmplitudeSprinting->current.value;
         else
             v4 = speed * bg_bobAmplitudeStanding->current.value;

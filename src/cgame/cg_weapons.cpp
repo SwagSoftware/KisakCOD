@@ -787,7 +787,7 @@ void __cdecl WeaponRunXModelAnims(int32_t localClientNum, const playerState_s* p
     if (weapDef->aimDownSight)
     {
         v5 = ps->weaponstate == 7 && ps->weaponTime - weapDef->iPositionReloadTransTime > 0;
-        v4 = (ps->pm_flags & 0x10) != 0 && (ps->weapFlags & 2) == 0;
+        v4 = (ps->pm_flags & PMF_SIGHT_AIMING) != 0 && (ps->weapFlags & 2) == 0;
         v3 = !v5 && v4;
         PlayADSAnim(ps->fWeaponPosFrac, weaponIndex, obj, 32 - v3);
     }
@@ -1643,7 +1643,7 @@ bool __cdecl WeaponCycleAllowed(cg_s *cgameGlob)
 {
     if (!cgameGlob)
         MyAssertHandler(".\\cgame\\cg_weapons.cpp", 3240, 0, "%s", "cgameGlob");
-    if ((cgameGlob->predictedPlayerState.pm_flags & 0xC00) != 0)
+    if ((cgameGlob->predictedPlayerState.pm_flags & (PMF_RESPAWNED | PMF_FROZEN)) != 0)
         return 0;
     if ((cgameGlob->predictedPlayerState.weapFlags & 0x80) != 0)
         return 0;
@@ -1973,7 +1973,7 @@ bool __cdecl ActionSlotUsageAllowed(cg_s *cgameGlob)
         return 0;
     if (cgameGlob->predictedPlayerState.weaponstate == 3 || cgameGlob->predictedPlayerState.weaponstate == 4)
         return 0;
-    if ((cgameGlob->predictedPlayerState.pm_flags & 0xC00) != 0)
+    if ((cgameGlob->predictedPlayerState.pm_flags & (PMF_RESPAWNED | PMF_FROZEN)) != 0)
         return 0;
     if ((cgameGlob->predictedPlayerState.weapFlags & 0x80) != 0)
         return 0;

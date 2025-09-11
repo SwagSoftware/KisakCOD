@@ -1966,11 +1966,11 @@ void __cdecl ScrCmd_GetStance(scr_entref_t entref)
     ent = GetEntity(entref);
     if (ent->client)
     {
-        if ((ent->client->ps.pm_flags & 1) != 0)
+        if ((ent->client->ps.pm_flags & PMF_PRONE) != 0)
         {
             Scr_AddConstString(scr_const.prone);
         }
-        else if ((ent->client->ps.pm_flags & 2) != 0)
+        else if ((ent->client->ps.pm_flags & PMF_DUCKED) != 0)
         {
             Scr_AddConstString(scr_const.crouch);
         }
@@ -4943,7 +4943,7 @@ void __cdecl GScr_ShellShock(scr_entref_t entref)
     ent->client->ps.shellshockDuration = duration;
     if (ent->health > 0)
     {
-        ent->client->ps.pm_flags |= 0x10000u;
+        ent->client->ps.pm_flags |= PMF_SHELLSHOCKED;
         bgs = &level_bgs;
         BG_AnimScriptEvent(&ent->client->ps, ANIM_ET_SHELLSHOCK, 0, 1);
         if (bgs != &level_bgs)
@@ -4961,7 +4961,7 @@ void __cdecl GScr_StopShellShock(scr_entref_t entref)
     ent->client->ps.shellshockIndex = 0;
     ent->client->ps.shellshockTime = 0;
     ent->client->ps.shellshockDuration = 0;
-    ent->client->ps.pm_flags &= ~0x10000u;
+    ent->client->ps.pm_flags &= ~PMF_SHELLSHOCKED;
 }
 
 void __cdecl GScr_GetTagOrigin(scr_entref_t entref)
@@ -6046,7 +6046,7 @@ void __cdecl GScr_IsOnLadder(scr_entref_t entref)
     ent = GetEntity(entref);
     if (!ent->client)
         Scr_Error("setstat: entity must be a player entity");
-    Scr_AddBool((ent->client->ps.pm_flags & 8) != 0);
+    Scr_AddBool((ent->client->ps.pm_flags & PMF_LADDER) != 0);
 }
 
 void __cdecl GScr_IsMantling(scr_entref_t entref)
@@ -6056,7 +6056,7 @@ void __cdecl GScr_IsMantling(scr_entref_t entref)
     ent = GetEntity(entref);
     if (!ent->client)
         Scr_Error("setstat: entity must be a player entity");
-    Scr_AddBool((ent->client->ps.pm_flags & 4) != 0);
+    Scr_AddBool((ent->client->ps.pm_flags & PMF_MANTLE) != 0);
 }
 
 void __cdecl GScr_StartRagdoll(scr_entref_t entref)

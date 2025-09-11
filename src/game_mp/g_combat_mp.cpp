@@ -337,7 +337,7 @@ uint32_t __cdecl G_GetWeaponIndexForEntity(const gentity_s *ent)
     client = ent->client;
     if (!client)
         return ent->s.weapon;
-    if ((client->ps.eFlags & 0x300) == 0 && (client->ps.pm_flags & 0x100000) == 0)
+    if ((client->ps.eFlags & 0x300) == 0 && (client->ps.pm_flags & PMF_VEHICLE_ATTACHED) == 0)
         return BG_GetViewmodelWeaponIndex(&client->ps);
 
     iassert(client->ps.viewlocked);
