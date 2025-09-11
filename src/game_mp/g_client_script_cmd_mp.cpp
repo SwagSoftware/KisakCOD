@@ -2719,9 +2719,9 @@ void __cdecl PlayerCmd_AllowJump(scr_entref_t entref)
         }
     }
     if (Scr_GetInt(0))
-        pSelf->client->ps.pm_flags &= ~0x80000u;
+        pSelf->client->ps.pm_flags &= ~PMF_NO_JUMP;
     else
-        pSelf->client->ps.pm_flags |= 0x80000u;
+        pSelf->client->ps.pm_flags |= PMF_NO_JUMP;
 }
 
 void __cdecl PlayerCmd_AllowSprint(scr_entref_t entref)
