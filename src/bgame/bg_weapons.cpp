@@ -1394,7 +1394,7 @@ void __cdecl PM_Weapon(pmove_t *pm, pml_t *pml)
                             {
                                 if (PM_Weapon_ShouldBeFiring(pm, delayedAction))
                                 {
-                                    if (!PM_Weapon_CheckGrenadeHold(pm, delayedAction) && (ps->pm_flags & 0x800) == 0)
+                                    if (!PM_Weapon_CheckGrenadeHold(pm, delayedAction) && (ps->pm_flags & PMF_FROZEN) == 0)
                                     {
                                         PM_Weapon_FireWeapon(ps, delayedAction);
                                         if (ps->weaponTime < 0 || ps->weaponDelay < 0)

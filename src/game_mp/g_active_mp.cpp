@@ -1158,7 +1158,7 @@ void __cdecl ClientEndFrame(gentity_s *ent)
     client->ps.gravity = (int)g_gravity->current.value;
     client->ps.moveSpeedScaleMultiplier = ent->client->sess.moveSpeedScaleMultiplier;
     if (client->bFrozen)
-        client->ps.pm_flags |= 0x800;
+        client->ps.pm_flags |= PMF_FROZEN;
     else
         client->ps.pm_flags &= ~0x800;
     {

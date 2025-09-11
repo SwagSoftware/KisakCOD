@@ -404,7 +404,7 @@ void __cdecl CL_AdjustAngles(int localClientNum)
 
     kb = playersKb[localClientNum];
     LocalClientGlobals = CL_GetLocalClientGlobals(localClientNum);
-    if ((LocalClientGlobals->snap.ps.pm_flags & 0x800) == 0)
+    if ((LocalClientGlobals->snap.ps.pm_flags & PMF_FROZEN) == 0)
     {
         if (kb[9].active)
             v1 = (double)cls.frametime * EQUAL_EPSILON * cl_anglespeedkey->current.value;
@@ -621,7 +621,7 @@ void __cdecl CL_MouseMove(int localClientNum, usercmd_s *cmd)
         accelSensitivity = accelSensitivity * LocalClientGlobals->cgameFOVSensitivityScale;
         if (rate != 0.0 && cl_showMouseRate->current.enabled)
             Com_Printf(14, "%f : %f\n", rate, accelSensitivity);
-        if ((LocalClientGlobals->snap.ps.pm_flags & 0x800) == 0)
+        if ((LocalClientGlobals->snap.ps.pm_flags & PMF_FROZEN) == 0)
         {
             mx = mx * accelSensitivity;
             my = my * accelSensitivity;

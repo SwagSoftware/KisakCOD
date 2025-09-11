@@ -515,7 +515,7 @@ void __cdecl PM_UpdateLean(
     leaning = 0;
     leanofs = 0.0;
     if ((cmd->buttons & 0xC0) != 0
-        && (ps->pm_flags & 0x800) == 0
+        && (ps->pm_flags & PMF_FROZEN) == 0
         && ps->pm_type < PM_DEAD
         && (ps->groundEntityNum != ENTITYNUM_NONE || ps->pm_type == PM_NORMAL_LINKED))
     {
@@ -1331,7 +1331,7 @@ void __cdecl PmoveSingle(pmove_t *pm)
 #endif
     if ((ps->pm_flags & 0x20000) != 0)
         pm->cmd.forwardmove = 127;
-    if ((ps->pm_flags & 0x800) != 0)
+    if ((ps->pm_flags & PMF_FROZEN) != 0)
     {
         pm->cmd.buttons &= 0x1300u;
         pm->cmd.forwardmove = 0;
