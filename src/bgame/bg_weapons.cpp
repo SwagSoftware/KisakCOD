@@ -829,7 +829,7 @@ void __cdecl PM_UpdateAimDownSightFlag(pmove_t *pm, pml_t *pml)
         else if ((pm->oldcmd.buttons & 0x800) == 0 || !pm->cmd.forwardmove && !pm->cmd.rightmove)
         {
             ps->pm_flags |= PMF_SIGHT_AIMING;
-            ps->pm_flags |= 0x200u;
+            ps->pm_flags |= PMF_PRONEMOVE_OVERRIDDEN;
             if ((ps->otherFlags & 4) == 0)
                 MyAssertHandler(".\\bgame\\bg_weapons.cpp", 1153, 0, "%s", "ps->otherFlags & POF_PLAYER");
         }

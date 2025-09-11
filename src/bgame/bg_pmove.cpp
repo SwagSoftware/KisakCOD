@@ -1228,7 +1228,7 @@ void __cdecl PM_UpdatePronePitch(pmove_t *pm, pml_t *pml)
 void __cdecl PM_SetProneMovementOverride(playerState_s *ps)
 {
     if ((ps->pm_flags & PMF_PRONE) != 0)
-        ps->pm_flags |= 0x200u;
+        ps->pm_flags |= PMF_PRONEMOVE_OVERRIDDEN;
 }
 
 void __cdecl PM_MeleeChargeStart(pmove_t *pm)
@@ -1473,7 +1473,7 @@ void __cdecl PmoveSingle(pmove_t *pm)
         pm->cmd.forwardmove = 0;
         pm->cmd.rightmove = 0;
     }
-    if (stance == 1 && (ps->pm_flags & 0x200) != 0)
+    if (stance == 1 && (ps->pm_flags & PMF_PRONEMOVE_OVERRIDDEN) != 0)
     {
         pm->cmd.forwardmove = 0;
         pm->cmd.rightmove = 0;
