@@ -3035,7 +3035,7 @@ void __cdecl PM_CheckDuck(pmove_t *pm, pml_t *pml)
             ps->viewHeightTarget = 8;
             PM_ViewHeightAdjust(pm, pml);
         }
-        else if ((ps->pm_flags & 0x100000) != 0)
+        else if ((ps->pm_flags & PMF_VEHICLE_ATTACHED) != 0)
         {
             ps->viewHeightTarget = 60;
             ps->pm_flags &= ~3;

@@ -1448,7 +1448,7 @@ int32_t __cdecl G_UpdateClientInfo(gentity_s *ent)
             client->sess.cs.attachTagIndex[i] = 0;
         }
     }
-    if ((client->ps.pm_flags & 0x100000) != 0)
+    if ((client->ps.pm_flags & PMF_VEHICLE_ATTACHED) != 0)
     {
         v3 = va("pm_flags is %i", client->ps.pm_flags);
         MyAssertHandler(
@@ -1459,7 +1459,7 @@ int32_t __cdecl G_UpdateClientInfo(gentity_s *ent)
             "!( client->ps.pm_flags & PMF_VEHICLE_ATTACHED )",
             v3);
     }
-    if ((client->ps.pm_flags & 0x100000) != 0)
+    if ((client->ps.pm_flags & PMF_VEHICLE_ATTACHED) != 0)
     {
         if (ent->r.ownerNum.isDefined())
         {

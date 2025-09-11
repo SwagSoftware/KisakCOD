@@ -410,7 +410,7 @@ void __cdecl G_VehUnlinkPlayer(gentity_s *ent, gentity_s *player)
     iassert(player->r.ownerNum.isDefined());
     iassert(ent == player->r.ownerNum.ent());
 
-    if ((client->ps.pm_flags & 0x100000) == 0)
+    if ((client->ps.pm_flags & PMF_VEHICLE_ATTACHED) == 0)
         Com_Error(ERR_DROP, "G_VehUnlinkPlayer: Player is not using a vehicle");
 
     veh = ent->scr_vehicle;
@@ -937,7 +937,7 @@ bool __cdecl G_VehUsable(gentity_s *vehicle, gentity_s *player)
     client = player->client;
     if (!client)
         return 0;
-    if ((client->ps.pm_flags & 0x100000) != 0)
+    if ((client->ps.pm_flags & PMF_VEHICLE_ATTACHED) != 0)
         return 0;
     if (player->r.ownerNum.isDefined())
         return 0;
@@ -2557,7 +2557,7 @@ void __cdecl G_VehEntHandler_Use(gentity_s *pEnt, gentity_s *pOther, gentity_s *
 {
     if (pOther->client)
     {
-        if ((pOther->client->ps.pm_flags & 0x100000) != 0)
+        if ((pOther->client->ps.pm_flags & PMF_VEHICLE_ATTACHED) != 0)
             G_EntUnlink(pOther);
         else
             LinkPlayerToVehicle(pEnt, pOther);
@@ -2585,7 +2585,7 @@ void __cdecl LinkPlayerToVehicle(gentity_s *ent, gentity_s *player)
         MyAssertHandler(".\\game_mp\\g_vehicles_mp.cpp", 2487, 0, "%s", "client");
     if (!alwaysfails)
         MyAssertHandler(".\\game_mp\\g_vehicles_mp.cpp", 2489, 0, "Trying to attach a player to a vehicle!");
-    if ((client->ps.pm_flags & 0x100000) != 0)
+    if ((client->ps.pm_flags & PMF_VEHICLE_ATTACHED) != 0)
         Com_Error(ERR_DROP, "LinkPlayerToVehicle: Player is already using a vehicle");
     if (player->r.ownerNum.isDefined())
         Com_Error(ERR_DROP, "LinkPlayerToVehicle: Player already has an owner");
@@ -2628,7 +2628,7 @@ void __cdecl LinkPlayerToVehicle(gentity_s *ent, gentity_s *player)
     veh->flags |= 1u;
     bestRiderTag->entNum = player->s.number;
     player->r.ownerNum.setEnt(ent);
-    client->ps.pm_flags |= 0x100000u;
+    client->ps.pm_flags |= PMF_VEHICLE_ATTACHED;
     if (bestRiderTag->tagName != scr_const.tag_passenger)
         client->ps.weapFlags |= 0x80u;
     client->ps.viewlocked_entNum = ent->s.number;

@@ -1093,7 +1093,7 @@ bool __cdecl BG_CanItemBeGrabbed(const entityState_s *ent, const playerState_s *
     if (ent->clientNum == ps->clientNum)
         return 0;
 
-    if ((ps->pm_flags & 0x100000) != 0)
+    if ((ps->pm_flags & PMF_VEHICLE_ATTACHED) != 0)
         return 0;
 #endif
 
