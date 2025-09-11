@@ -1970,7 +1970,7 @@ void __cdecl ScrCmd_GetStance(scr_entref_t entref)
         {
             Scr_AddConstString(scr_const.prone);
         }
-        else if ((ent->client->ps.pm_flags & 2) != 0)
+        else if ((ent->client->ps.pm_flags & PMF_DUCKED) != 0)
         {
             Scr_AddConstString(scr_const.crouch);
         }

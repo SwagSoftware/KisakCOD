@@ -3062,7 +3062,7 @@ void __cdecl PM_CheckDuck(pmove_t *pm, pml_t *pml)
                     }
                     else
                     {
-                        ps->pm_flags |= 2u;
+                        ps->pm_flags |= PMF_DUCKED;
                         ps->pm_flags &= ~1u;
                     }
                 }
@@ -3078,7 +3078,7 @@ void __cdecl PM_CheckDuck(pmove_t *pm, pml_t *pml)
                 if (ps->pm_type == PM_LASTSTAND)
                 {
                     ps->pm_flags &= ~1u;
-                    ps->pm_flags |= 2u;
+                    ps->pm_flags |= PMF_DUCKED;
                 }
                 else
 #endif
@@ -3113,7 +3113,7 @@ void __cdecl PM_CheckDuck(pmove_t *pm, pml_t *pml)
                                 {
                                     BG_AnimScriptEvent(ps, ANIM_ET_PRONE_TO_CROUCH, 0, 0);
                                     ps->pm_flags &= ~1u;
-                                    ps->pm_flags |= 2u;
+                                    ps->pm_flags |= PMF_DUCKED;
                                 }
 #endif
                             }
@@ -3121,7 +3121,7 @@ void __cdecl PM_CheckDuck(pmove_t *pm, pml_t *pml)
                             else
                             {
                                 BG_AnimScriptEvent(ps, ANIM_ET_STAND_TO_CROUCH, 0, 0);
-                                ps->pm_flags |= 2u;
+                                ps->pm_flags |= PMF_DUCKED;
                             }
 #endif
                         }
@@ -3154,7 +3154,7 @@ void __cdecl PM_CheckDuck(pmove_t *pm, pml_t *pml)
                                 else
                                 {
                                     ps->pm_flags &= ~1u;
-                                    ps->pm_flags |= 2u;
+                                    ps->pm_flags |= PMF_DUCKED;
                                 }
                             }
 #ifdef KISAK_MP
@@ -3165,7 +3165,7 @@ void __cdecl PM_CheckDuck(pmove_t *pm, pml_t *pml)
                             }
 #endif
                         }
-                        else if ((ps->pm_flags & 2) != 0)
+                        else if ((ps->pm_flags & PMF_DUCKED) != 0)
                         {
                             pmoveHandlers[pm->handler].trace(
                                 &trace,
@@ -3199,7 +3199,7 @@ void __cdecl PM_CheckDuck(pmove_t *pm, pml_t *pml)
                         ps->pm_flags |= 0x1000u;
                         if ((pm->cmd.buttons & 0x1000) == 0)
                         {
-                            if ((ps->pm_flags & PMF_PRONE) != 0 || (ps->pm_flags & 2) != 0)
+                            if ((ps->pm_flags & PMF_PRONE) != 0 || (ps->pm_flags & PMF_DUCKED) != 0)
                                 BG_AddPredictableEventToPlayerstate(7u, 0, ps);
                             else
                                 BG_AddPredictableEventToPlayerstate(6u, 0, ps);
@@ -3241,7 +3241,7 @@ void __cdecl PM_CheckDuck(pmove_t *pm, pml_t *pml)
                     BG_PlayAnim(ps, 0, ANIM_BP_TORSO, 0, 0, 1, 1);
 #endif
                 }
-                else if ((ps->pm_flags & 2) != 0)
+                else if ((ps->pm_flags & PMF_DUCKED) != 0)
                 {
                     ps->viewHeightTarget = 40;
                 }
@@ -3265,7 +3265,7 @@ void __cdecl PM_CheckDuck(pmove_t *pm, pml_t *pml)
                 pm->maxs[2] = 50.0;
                 ps->eFlags |= 4u;
                 ps->eFlags &= ~8u;
-                ps->pm_flags |= 2u;
+                ps->pm_flags |= PMF_DUCKED;
                 ps->pm_flags &= ~1u;
             }
             else

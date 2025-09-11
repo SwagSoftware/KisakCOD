@@ -1307,7 +1307,7 @@ void __cdecl PlayerCmd_finishPlayerDamage(scr_entref_t entref)
                 {
                     knockbackMod = 0.02f;
                 }
-                else if ((pSelf->client->ps.pm_flags & 2) != 0)
+                else if ((pSelf->client->ps.pm_flags & PMF_DUCKED) != 0)
                 {
                     knockbackMod = 0.15000001f;
                 }
