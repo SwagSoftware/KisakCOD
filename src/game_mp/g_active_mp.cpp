@@ -1128,7 +1128,7 @@ void __cdecl G_PlayerController(const gentity_s *self, int32_t *partBits)
 
 void __cdecl ClientEndFrame(gentity_s *ent)
 {
-    int32_t v1; // ecx
+    //int32_t v1; // ecx
     int32_t v2; // eax
     uint32_t v3; // edx
     const char *v4; // eax
@@ -1158,10 +1158,9 @@ void __cdecl ClientEndFrame(gentity_s *ent)
     client->ps.gravity = (int)g_gravity->current.value;
     client->ps.moveSpeedScaleMultiplier = ent->client->sess.moveSpeedScaleMultiplier;
     if (client->bFrozen)
-        v1 = client->ps.pm_flags | 0x800;
+        client->ps.pm_flags |= 0x800;
     else
-        v1 = client->ps.pm_flags & 0xFFFFF7FF;
-    client->ps.pm_flags = v1;
+        client->ps.pm_flags &= ~0x800;
     {
         PROF_SCOPED("G_UpdateClientInfo");
         bChanged = G_UpdateClientInfo(ent);

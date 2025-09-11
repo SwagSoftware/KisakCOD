@@ -761,6 +761,31 @@ enum pmtype_t : __int32
     PM_DEAD_LINKED = 0x8,
 };
 
+enum pmflags_t : __int32
+{
+    PMF_PRONE = 1 << 0,
+    PMF_DUCKED = 1 << 1,
+    PMF_MANTLE = 1 << 2,
+    PMF_LADDER = 1 << 3,
+    PMF_SIGHT_AIMING = 1 << 4,
+    PMF_BACKWARDS_RUN = 1 << 5,
+    PMF_WALKING = 1 << 6,
+    PMF_TIME_HARDLANDING = 1 << 7,
+    PMF_TIME_KNOCKBACK = 1 << 8,
+    PMF_PRONEMOVE_OVERRIDDEN = 1 << 9,
+    PMF_RESPAWNED = 1 << 10,
+    PMF_FROZEN = 1 << 11,
+    PMF_NO_PRONE = 1 << 12,
+    PMF_LADDER_FALL = 1 << 13,
+    PMF_JUMPING = 1 << 14,
+    PMF_SPRINTING = 1 << 15,
+    PMF_SHELLSHOCKED = 1 << 16,
+    PMF_MELEE_CHARGE = 1 << 17,
+    PMF_NO_SPRINT = 1 << 18,
+    PMF_NO_JUMP = 1 << 19,
+    PMF_VEHICLE_ATTACHED = 1 << 20
+};
+
 struct playerState_s // sizeof=0x2F64
 {                                       // XREF: gclient_s/r
                                         // clSnapshot_t/r ...

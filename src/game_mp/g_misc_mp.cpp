@@ -144,7 +144,7 @@ void __cdecl G_ClientStopUsingTurret(gentity_s *self)
         }
         else
         {
-            ps->pm_flags &= 0xFFFFFFFC;
+            ps->pm_flags &= ~3;
             ps->viewHeightTarget = 60;
             G_AddEvent(owner, 6u, 0);
         }

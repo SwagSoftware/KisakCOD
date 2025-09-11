@@ -455,14 +455,11 @@ void __cdecl PM_FootstepEvent(pmove_t *pm, pml_t *pml, char iOldBobCycle, char i
 
 int32_t __cdecl PM_FootstepType(playerState_s *ps, pml_t *pml)
 {
-    int32_t iPMFlags; // [esp+0h] [ebp-8h]
-
     if (!PM_GroundSurfaceType(pml))
         return 0;
-    iPMFlags = ps->pm_flags;
-    if ((iPMFlags & 1) != 0)
+    if ((ps->pm_flags & 1) != 0)
         return 75;
-    if ((iPMFlags & 0x40) != 0 || ps->leanf != 0.0)
+    if ((ps->pm_flags & 0x40) != 0 || ps->leanf != 0.0)
         return 74;
     if (PM_IsSprinting(ps))
         return 72;
@@ -3014,7 +3011,7 @@ void __cdecl PM_CheckDuck(pmove_t *pm, pml_t *pml)
         pm->maxs[0] = 8.0;
         pm->maxs[1] = 8.0;
         pm->maxs[2] = 16.0;
-        ps->pm_flags &= 0xFFFFFFFC;
+        ps->pm_flags &= ~3;
         if ((pm->cmd.buttons & 0x100) != 0)
         {
             pm->cmd.buttons &= ~0x100u;
@@ -3041,7 +3038,7 @@ void __cdecl PM_CheckDuck(pmove_t *pm, pml_t *pml)
         else if ((ps->pm_flags & 0x100000) != 0)
         {
             ps->viewHeightTarget = 60;
-            ps->pm_flags &= 0xFFFFFFFC;
+            ps->pm_flags &= ~3;
             BG_AddPredictableEventToPlayerstate(6u, 0, ps);
             PM_ViewHeightAdjust(pm, pml);
         }
@@ -3049,7 +3046,7 @@ void __cdecl PM_CheckDuck(pmove_t *pm, pml_t *pml)
         {
             ps->viewHeightTarget = 60;
             ps->eFlags &= 0xFFFFFFF3;
-            ps->pm_flags &= 0xFFFFFFFC;
+            ps->pm_flags &= ~3;
             BG_AddPredictableEventToPlayerstate(6u, 0, ps);
             PM_ViewHeightAdjust(pm, pml);
         }
@@ -3061,7 +3058,7 @@ void __cdecl PM_CheckDuck(pmove_t *pm, pml_t *pml)
                 {
                     if ((ps->eFlags & 0x200) == 0 || (ps->eFlags & 0x100) != 0)
                     {
-                        ps->pm_flags &= 0xFFFFFFFC;
+                        ps->pm_flags &= ~3;
                     }
                     else
                     {
@@ -3164,7 +3161,7 @@ void __cdecl PM_CheckDuck(pmove_t *pm, pml_t *pml)
                             else
                             {
                                 BG_AnimScriptEvent(ps, ANIM_ET_PRONE_TO_STAND, 0, 0);
-                                ps->pm_flags &= 0xFFFFFFFC;
+                                ps->pm_flags &= ~3;
                             }
 #endif
                         }
@@ -3275,7 +3272,7 @@ void __cdecl PM_CheckDuck(pmove_t *pm, pml_t *pml)
             {
                 pm->maxs[2] = 70.0;
                 ps->eFlags &= 0xFFFFFFF3;
-                ps->pm_flags &= 0xFFFFFFFC;
+                ps->pm_flags &= ~3;
             }
             if ((ps->pm_flags & 1) != 0 && !bWasProne)
             {
@@ -4093,7 +4090,7 @@ void __cdecl PM_DropTimers(playerState_s *ps, pml_t *pml)
         {
             if ((ps->pm_flags & 0x4000) != 0)
                 Jump_ClearState(ps);
-            ps->pm_flags &= 0xFFFFBE7F;
+            ps->pm_flags &= ~0x4180;
             ps->pm_time = 0;
         }
     }

@@ -247,7 +247,7 @@ void __cdecl Jump_Start(pmove_t *pm, pml_t *pml, float height)
     ps->jumpOriginZ = ps->origin[2];
     v3 = sqrt(velocitySqrd);
     ps->velocity[2] = v3;
-    ps->pm_flags &= 0xFFFFFE7F;
+    ps->pm_flags &= ~0x180;
     ps->pm_flags |= 0x4000u;
     ps->pm_time = 0;
     ps->sprintState.sprintButtonUpRequired = 0;
