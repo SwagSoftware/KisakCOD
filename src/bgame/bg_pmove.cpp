@@ -3063,7 +3063,7 @@ void __cdecl PM_CheckDuck(pmove_t *pm, pml_t *pml)
                     else
                     {
                         ps->pm_flags |= PMF_DUCKED;
-                        ps->pm_flags &= ~1u;
+                        ps->pm_flags &= ~PMF_PRONE;
                     }
                 }
                 else
@@ -3077,7 +3077,7 @@ void __cdecl PM_CheckDuck(pmove_t *pm, pml_t *pml)
 #ifdef KISAK_MP
                 if (ps->pm_type == PM_LASTSTAND)
                 {
-                    ps->pm_flags &= ~1u;
+                    ps->pm_flags &= ~PMF_PRONE;
                     ps->pm_flags |= PMF_DUCKED;
                 }
                 else
@@ -3112,7 +3112,7 @@ void __cdecl PM_CheckDuck(pmove_t *pm, pml_t *pml)
                                 else
                                 {
                                     BG_AnimScriptEvent(ps, ANIM_ET_PRONE_TO_CROUCH, 0, 0);
-                                    ps->pm_flags &= ~1u;
+                                    ps->pm_flags &= ~PMF_PRONE;
                                     ps->pm_flags |= PMF_DUCKED;
                                 }
 #endif
@@ -3153,7 +3153,7 @@ void __cdecl PM_CheckDuck(pmove_t *pm, pml_t *pml)
                                 }
                                 else
                                 {
-                                    ps->pm_flags &= ~1u;
+                                    ps->pm_flags &= ~PMF_PRONE;
                                     ps->pm_flags |= PMF_DUCKED;
                                 }
                             }
@@ -3266,7 +3266,7 @@ void __cdecl PM_CheckDuck(pmove_t *pm, pml_t *pml)
                 ps->eFlags |= 4u;
                 ps->eFlags &= ~8u;
                 ps->pm_flags |= PMF_DUCKED;
-                ps->pm_flags &= ~1u;
+                ps->pm_flags &= ~PMF_PRONE;
             }
             else
             {

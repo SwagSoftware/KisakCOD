@@ -137,7 +137,7 @@ void __cdecl G_ClientStopUsingTurret(gentity_s *self)
         }
         else if (pTurretInfo->prevStance == 1)
         {
-            ps->pm_flags &= ~1u;
+            ps->pm_flags &= ~PMF_PRONE;
             ps->pm_flags |= PMF_DUCKED;
             ps->viewHeightTarget = 40;
             G_AddEvent(owner, 7u, 0);
