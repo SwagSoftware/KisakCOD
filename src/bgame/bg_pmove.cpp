@@ -1881,7 +1881,7 @@ void __cdecl PM_Friction(playerState_s *ps, pml_t *pml)
             else
                 value = stopspeed->current.value;
             control = value;
-            if ((ps->pm_flags & 0x80) != 0)
+            if ((ps->pm_flags & PMF_TIME_HARDLANDING) != 0)
             {
                 control = value * 0.300000011920929;
             }
@@ -2289,7 +2289,7 @@ void __cdecl PM_WalkMove(pmove_t *pm, pml_t *pml)
         {
             acceleration = 9.0;
         }
-        if ((ps->pm_flags & 0x80) != 0)
+        if ((ps->pm_flags & PMF_TIME_HARDLANDING) != 0)
             acceleration = acceleration * 0.25;
         PM_Accelerate(ps, pml, wishdir, wishspeed, acceleration);
         if ((pml->groundTrace.surfaceFlags & 2) != 0 || (ps->pm_flags & 0x100) != 0)
@@ -2794,7 +2794,7 @@ void __cdecl PM_CrashLand(playerState_s *ps, pml_t *pml)
                     fSpeedMult = 0.5f;
                 }
                 ps->pm_time = stunTime;
-                ps->pm_flags |= 0x80u;
+                ps->pm_flags |= PMF_TIME_HARDLANDING;
                 Vec3Scale(ps->velocity, fSpeedMult, ps->velocity);
             }
             v2 = PM_DamageLandingForSurface(pml);

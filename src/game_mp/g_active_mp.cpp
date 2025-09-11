@@ -1084,13 +1084,13 @@ int32_t __cdecl StuckInClient(gentity_s *self)
     *velocity = hitSpeed * vDelta[0];
     velocity[1] = hitSpeed * vDelta[1];
     hit->client->ps.pm_time = 300;
-    hit->client->ps.pm_flags |= 0x80u;
+    hit->client->ps.pm_flags |= PMF_TIME_HARDLANDING;
     v5 = self->client->ps.velocity;
     v6 = -selfSpeed;
     *v5 = v6 * vDelta[0];
     v5[1] = v6 * vDelta[1];
     self->client->ps.pm_time = 300;
-    self->client->ps.pm_flags |= 0x80u;
+    self->client->ps.pm_flags |= PMF_TIME_HARDLANDING;
     return 1;
 }
 
