@@ -1596,7 +1596,7 @@ void __cdecl PM_Weapon_FinishWeaponChange(pmove_t *pm, bool quick)
     }
     else
     {
-        if ((ps->pm_flags & 8) != 0)
+        if ((ps->pm_flags & PMF_LADDER) != 0)
             goto LABEL_13;
         bitNum = pm->cmd.weapon;
         if (!ps)
@@ -2388,7 +2388,7 @@ void __cdecl PM_Weapon_CheckForChangeWeapon(pmove_t *pm)
             if (ps->weapon)
                 PM_BeginWeaponChange(ps, 0, 1);
         }
-        else if ((ps->pm_flags & 8) != 0)
+        else if ((ps->pm_flags & PMF_LADDER) != 0)
         {
             if (ps->weapon)
                 PM_BeginWeaponChange(ps, 0, 1);

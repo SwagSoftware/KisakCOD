@@ -209,7 +209,7 @@ char __cdecl Jump_Check(pmove_t *pm, pml_t *pml)
     {
         Jump_Start(pm, pml, jump_height->current.value);
         Jump_AddSurfaceEvent(ps, pml);
-        if ((ps->pm_flags & 8) != 0)
+        if ((ps->pm_flags & PMF_LADDER) != 0)
             Jump_PushOffLadder(ps, pml);
 #ifdef KISAK_MP
         if (pm->cmd.forwardmove < 0)
@@ -278,7 +278,7 @@ void __cdecl Jump_PushOffLadder(playerState_s *ps, pml_t *pml)
     float pushOffDir[3]; // [esp+44h] [ebp-10h] BYREF
     float dot; // [esp+50h] [ebp-4h]
 
-    if ((ps->pm_flags & 8) == 0)
+    if ((ps->pm_flags & PMF_LADDER) == 0)
         MyAssertHandler(".\\bgame\\bg_jump.cpp", 309, 0, "%s", "ps->pm_flags & PMF_LADDER");
     ps->velocity[2] = ps->velocity[2] * 0.75;
     v4 = pml->forward[1];
@@ -310,7 +310,7 @@ void __cdecl Jump_AddSurfaceEvent(playerState_s *ps, pml_t *pml)
 {
     int surfType; // [esp+0h] [ebp-4h]
 
-    if ((ps->pm_flags & 8) != 0)
+    if ((ps->pm_flags & PMF_LADDER) != 0)
     {
         BG_AddPredictableEventToPlayerstate(0x4Cu, 0x15u, ps);
     }

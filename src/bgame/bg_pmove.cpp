@@ -414,7 +414,7 @@ void __cdecl PM_FootstepEvent(pmove_t *pm, pml_t *pml, char iOldBobCycle, char i
     {
         if (ps->groundEntityNum == ENTITYNUM_NONE)
         {
-            if (bFootStep && (ps->pm_flags & 8) != 0)
+            if (bFootStep && (ps->pm_flags & PMF_LADDER) != 0)
             {
                 mins[0] = pm->mins[0];
                 mins[1] = pm->mins[1];
@@ -634,7 +634,7 @@ void __cdecl PM_UpdateViewAngles(playerState_s *ps, float msec, usercmd_s *cmd, 
         Mantle_CapView(ps);
         return;
     }
-    if ((ps->pm_flags & 8) != 0 && ps->groundEntityNum == ENTITYNUM_NONE && bg_ladder_yawcap->current.value != 0.0)
+    if ((ps->pm_flags & PMF_LADDER) != 0 && ps->groundEntityNum == ENTITYNUM_NONE && bg_ladder_yawcap->current.value != 0.0)
         PM_UpdateViewAngles_LadderClamp(ps);
     if ((ps->pm_flags & PMF_PRONE) != 0)
     {
@@ -1609,7 +1609,7 @@ void __cdecl PmoveSingle(pmove_t *pm)
 
                 {
                     PROF_SCOPED("PM_Move");
-                    if ((ps->pm_flags & 8) != 0)
+                    if ((ps->pm_flags & PMF_LADDER) != 0)
                     {
                         PM_LadderMove(pm, &pml);
                     }
@@ -1745,7 +1745,7 @@ void __cdecl PM_EndSprint(playerState_s *ps, pmove_t *pm)
 
 bool __cdecl PM_SprintStartInterferingButtons(const playerState_s *ps, int32_t forwardSpeed, int16_t buttons)
 {
-    if ((ps->pm_flags & 8) != 0)
+    if ((ps->pm_flags & PMF_LADDER) != 0)
         return 1;
     if (forwardSpeed <= player_sprintForwardMinimum->current.integer)
         return 1;
@@ -1922,7 +1922,7 @@ void __cdecl PM_Accelerate(playerState_s *ps, const pml_t *pml, const float *wis
     float currentspeed; // [esp+48h] [ebp-8h]
     float accelspeed; // [esp+4Ch] [ebp-4h]
 
-    if ((ps->pm_flags & 8) != 0)
+    if ((ps->pm_flags & PMF_LADDER) != 0)
     {
         Vec3Scale(wishdir, wishspeed, wishVelocity);
         Vec3Sub(wishVelocity, ps->velocity, pushDir);
@@ -2161,7 +2161,7 @@ void __cdecl PM_SetMovementDir(pmove_t *pm, pml_t *pml)
         MyAssertHandler(".\\bgame\\bg_pmove.cpp", 1039, 0, "%s", "ps");
     if ((ps->pm_flags & PMF_PRONE) == 0 || (ps->eFlags & 0x300) != 0)
     {
-        if ((ps->pm_flags & 8) != 0)
+        if ((ps->pm_flags & PMF_LADDER) != 0)
         {
             speed = vectoyaw(ps->vLadderVec) + 180.0;
             moveyaw = (int)AngleDelta(speed, ps->viewangles[1]);
@@ -2646,7 +2646,7 @@ void __cdecl PM_GroundTrace(pmove_t *pm, pml_t *pml)
         {
             iassert(trace.normal[0] || trace.normal[1] || trace.normal[2]);
 
-            if ((ps->pm_flags & 8) != 0 || ps->velocity[2] <= 0.0 || Vec3Dot(ps->velocity, trace.normal) <= 10.0)
+            if ((ps->pm_flags & PMF_LADDER) != 0 || ps->velocity[2] <= 0.0 || Vec3Dot(ps->velocity, trace.normal) <= 10.0)
             {
                 if (trace.walkable)
                 {
@@ -3083,7 +3083,7 @@ void __cdecl PM_CheckDuck(pmove_t *pm, pml_t *pml)
                 else
 #endif
                 {
-                    if ((ps->pm_flags & 8) != 0 && (pm->cmd.buttons & 0x300) != 0)
+                    if ((ps->pm_flags & PMF_LADDER) != 0 && (pm->cmd.buttons & 0x300) != 0)
                     {
                         pm->cmd.buttons &= 0xFFFFFCFF;
                         BG_AddPredictableEventToPlayerstate(6u, 0, ps);
@@ -3694,7 +3694,7 @@ void __cdecl PM_Footstep_LadderMove(pmove_t *pm, pml_t *pml)
     int32_t old; // [esp+10h] [ebp-4h]
 
     ps = pm->ps;
-    if ((pm->ps->pm_flags & 8) != 0 && pm->cmd.serverTime - ps->jumpTime >= 300)
+    if ((pm->ps->pm_flags & PMF_LADDER) != 0 && pm->cmd.serverTime - ps->jumpTime >= 300)
     {
         fLadderSpeed = ps->velocity[2];
         fMaxSpeed = 0.5f * 1.5f * 127.0f;
@@ -4143,7 +4143,7 @@ void __cdecl PM_UpdatePlayerWalkingFlag(pmove_t *pm)
 
 void __cdecl PM_ClearLadderFlag(playerState_s *ps)
 {
-    if ((ps->pm_flags & 8) != 0)
+    if ((ps->pm_flags & PMF_LADDER) != 0)
     {
         ps->pm_flags |= 0x2000u;
         ps->pm_flags &= ~8u;
@@ -4170,13 +4170,13 @@ void __cdecl PM_CheckLadderMove(pmove_t *pm, pml_t *pml)
         MyAssertHandler(".\\bgame\\bg_pmove.cpp", 4446, 0, "%s", "ps");
     if (pml->walking)
         ps->pm_flags &= ~0x2000u;
-    if (!ps->pm_time || (ps->pm_flags & 8) != 0 || (ps->pm_flags & 0x180) == 0)
+    if (!ps->pm_time || (ps->pm_flags & PMF_LADDER) != 0 || (ps->pm_flags & 0x180) == 0)
     {
         if (pml->walking)
             tracedist = 8.0;
         else
             tracedist = 30.0;
-        v2 = (ps->pm_flags & 8) != 0 && ps->groundEntityNum == ENTITYNUM_NONE;
+        v2 = (ps->pm_flags & PMF_LADDER) != 0 && ps->groundEntityNum == ENTITYNUM_NONE;
         fellOffLadderInAir = v2;
         if (v2)
         {
@@ -4221,7 +4221,7 @@ void __cdecl PM_CheckLadderMove(pmove_t *pm, pml_t *pml)
                 PM_playerTrace(pm, &trace, ps->origin, mins, maxs, spot, ps->clientNum, pm->tracemask);
                 if (trace.fraction >= 1.0 || (trace.surfaceFlags & 8) == 0 || pml->walking && pm->cmd.forwardmove <= 0)
                     goto LABEL_45;
-                if ((ps->pm_flags & 8) != 0)
+                if ((ps->pm_flags & PMF_LADDER) != 0)
                     goto LABEL_42;
                 vLadderVec = ps->vLadderVec;
                 ps->vLadderVec[0] = trace.normal[0];
@@ -4263,7 +4263,7 @@ void __cdecl PM_CheckLadderMove(pmove_t *pm, pml_t *pml)
 
 void __cdecl PM_SetLadderFlag(playerState_s *ps)
 {
-    ps->pm_flags |= 8u;
+    ps->pm_flags |= PMF_LADDER;
 }
 
 void __cdecl PM_LadderMove(pmove_t *pm, pml_t *pml)
@@ -4506,7 +4506,7 @@ void __cdecl TurretNVGTrigger(pmove_t *pm)
 
 double __cdecl BG_GetSpeed(const playerState_s *ps, int32_t time)
 {
-    if ((ps->pm_flags & 8) == 0)
+    if ((ps->pm_flags & PMF_LADDER) == 0)
         return Vec2Length(ps->velocity);
     if (time - ps->jumpTime >= 500)
         return ps->velocity[2];

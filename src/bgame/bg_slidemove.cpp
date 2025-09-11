@@ -54,7 +54,7 @@ void __cdecl PM_StepSlideMove(pmove_t *pm, pml_t *pml, int32_t gravity)
     if (!ps)
         MyAssertHandler(".\\bgame\\bg_slidemove.cpp", 310, 0, "%s", "ps");
     jumping = 0;
-    if ((ps->pm_flags & 8) != 0)
+    if ((ps->pm_flags & PMF_LADDER) != 0)
     {
         bHadGround = 0;
         Jump_ClearState(ps);
@@ -90,7 +90,7 @@ void __cdecl PM_StepSlideMove(pmove_t *pm, pml_t *pml, int32_t gravity)
             return;
         jumping = 1;
     }
-    if (jumping || (ps->pm_flags & 8) != 0 && ps->velocity[2] > 0.0)
+    if (jumping || (ps->pm_flags & PMF_LADDER) != 0 && ps->velocity[2] > 0.0)
     {
     LABEL_26:
         down_o[0] = ps->origin[0];
