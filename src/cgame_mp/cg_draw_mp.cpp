@@ -496,7 +496,7 @@ bool __cdecl CG_CheckPlayerTryReload(int32_t localClientNum, char buttons)
     if ((buttons & 0x30) == 0)
         return 0;
 
-    return (cgameGlob->predictedPlayerState.pm_flags & 4) == 0 && (cgameGlob->predictedPlayerState.eFlags & 0x300) == 0;
+    return (cgameGlob->predictedPlayerState.pm_flags & PMF_MANTLE) == 0 && (cgameGlob->predictedPlayerState.eFlags & 0x300) == 0;
 }
 
 bool __cdecl CG_CheckPlayerFireNonTurret(int32_t localClientNum, char buttons)

@@ -2508,7 +2508,7 @@ void __cdecl PM_BeginWeaponChange(playerState_s *ps, uint32_t newweapon, bool qu
                     }
                 }
 #ifdef KISAK_MP
-                if (!altswitch && (ps->pm_flags & 4) == 0)
+                if (!altswitch && (ps->pm_flags & PMF_MANTLE) == 0)
                     BG_AnimScriptEvent(ps, ANIM_ET_DROPWEAPON, 0, 1);
 #endif
                 ps->weaponstate = quick + 3;

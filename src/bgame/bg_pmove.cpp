@@ -629,7 +629,7 @@ void __cdecl PM_UpdateViewAngles(playerState_s *ps, float msec, usercmd_s *cmd, 
         PM_UpdateViewAngles_RangeLimited(ps, oldViewYaw);
         return;
     }
-    if ((ps->pm_flags & 4) != 0)
+    if ((ps->pm_flags & PMF_MANTLE) != 0)
     {
         Mantle_CapView(ps);
         return;
@@ -1560,7 +1560,7 @@ void __cdecl PmoveSingle(pmove_t *pm)
         }
         else
         {
-            if ((ps->pm_flags & 4) == 0)
+            if ((ps->pm_flags & PMF_MANTLE) == 0)
             {
                 PM_UpdateAimDownSightFlag(pm, &pml);
                 PM_UpdateSprint(pm, &pml);
@@ -1575,7 +1575,7 @@ void __cdecl PmoveSingle(pmove_t *pm)
                 PROF_SCOPED("Mantle_Check");
                 Mantle_Check(pm, &pml);
             }
-            if ((ps->pm_flags & 4) != 0)
+            if ((ps->pm_flags & PMF_MANTLE) != 0)
             {
                 PM_ClearLadderFlag(ps);
                 ps->groundEntityNum = ENTITYNUM_NONE;

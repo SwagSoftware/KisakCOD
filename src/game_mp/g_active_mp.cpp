@@ -708,7 +708,7 @@ void __cdecl ClientThink_real(gentity_s *ent, usercmd_s *ucmd)
                 }
                 if (pm.mantleStarted)
                 {
-                    if ((client->ps.pm_flags & 4) == 0)
+                    if ((client->ps.pm_flags & PMF_MANTLE) == 0)
                         MyAssertHandler(".\\game_mp\\g_active_mp.cpp", 907, 0, "%s", "client->ps.pm_flags & PMF_MANTLE");
                     G_AddPlayerMantleBlockage(pm.mantleEndPos, pm.mantleDuration, &pm);
                 }

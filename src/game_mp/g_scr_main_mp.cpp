@@ -6056,7 +6056,7 @@ void __cdecl GScr_IsMantling(scr_entref_t entref)
     ent = GetEntity(entref);
     if (!ent->client)
         Scr_Error("setstat: entity must be a player entity");
-    Scr_AddBool((ent->client->ps.pm_flags & 4) != 0);
+    Scr_AddBool((ent->client->ps.pm_flags & PMF_MANTLE) != 0);
 }
 
 void __cdecl GScr_StartRagdoll(scr_entref_t entref)

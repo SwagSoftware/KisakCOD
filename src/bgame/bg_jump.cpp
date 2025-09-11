@@ -192,7 +192,7 @@ char __cdecl Jump_Check(pmove_t *pm, pml_t *pml)
         return 0;
     if ((ps->pm_flags & 0x400) != 0)
         return 0;
-    if ((ps->pm_flags & 4) != 0)
+    if ((ps->pm_flags & PMF_MANTLE) != 0)
         return 0;
     if (ps->pm_type >= PM_DEAD)
         return 0;

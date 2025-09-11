@@ -68,7 +68,7 @@ char __cdecl Player_ActivateCmd(gentity_s *ent)
             ent->active = 0;
         return 1;
     }
-    else if ((ent->client->ps.pm_flags & 4) != 0)
+    else if ((ent->client->ps.pm_flags & PMF_MANTLE) != 0)
     {
         return 1;
     }
@@ -193,7 +193,7 @@ void __cdecl Player_UpdateCursorHints(gentity_s *ent)
         {
             Player_SetVehicleDropHint(ent);
         }
-        else if ((ent->client->ps.pm_flags & 4) == 0
+        else if ((ent->client->ps.pm_flags & PMF_MANTLE) == 0
             && (ent->client->ps.pm_flags & 0x8000) == 0
             && (ps->weaponstate < 15 || ps->weaponstate > 19))
         {
