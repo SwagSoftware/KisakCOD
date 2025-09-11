@@ -1641,7 +1641,7 @@ void __cdecl PM_Weapon_FinishWeaponChange(pmove_t *pm, bool quick)
             MyAssertHandler("c:\\trees\\cod3\\src\\bgame\\../bgame/bg_weapons.h", 236, 0, "%s", "ps");
         firstequip = !Com_BitCheckAssert(ps->weaponold, weapon, 16);
         Com_BitSetAssert(ps->weaponold, ps->weapon, 16);
-        if ((ps->pm_flags & 0x8000) == 0 && oldweapon)
+        if ((ps->pm_flags & PMF_SPRINTING) == 0 && oldweapon)
         {
             v2 = newweapon && newweapon == BG_GetWeaponDef(oldweapon)->altWeaponIndex;
             altswitch = v2;
@@ -2472,7 +2472,7 @@ void __cdecl PM_BeginWeaponChange(playerState_s *ps, uint32_t newweapon, bool qu
             if (Com_BitCheckAssert(ps->weapons, oldweapon, 16) && ps->grenadeTimeLeft <= 0)
             {
                 weapDefOld = BG_GetWeaponDef(oldweapon);
-                if ((ps->pm_flags & 0x8000) != 0)
+                if ((ps->pm_flags & PMF_SPRINTING) != 0)
                 {
                     altswitch = 0;
                 }
@@ -2491,7 +2491,7 @@ void __cdecl PM_BeginWeaponChange(playerState_s *ps, uint32_t newweapon, bool qu
                 else
                 {
                     PM_AddEvent(ps, 0x17u);
-                    if ((ps->pm_flags & 0x8000) == 0)
+                    if ((ps->pm_flags & PMF_SPRINTING) == 0)
                     {
                         if (noammo)
                         {
@@ -3041,7 +3041,7 @@ void __cdecl PM_Weapon_CheckForOffHand(pmove_t *pm)
         MyAssertHandler(".\\bgame\\bg_weapons.cpp", 3458, 0, "%s", "ps");
     if ((ps->eFlags & 0x300) == 0
         && (ps->weapFlags & 0x80) == 0
-        && (ps->pm_flags & 0x8000) == 0
+        && (ps->pm_flags & PMF_SPRINTING) == 0
         && !PM_Weapon_IsHoldingGrenade(pm)
         && (ps->weaponstate < 15 || ps->weaponstate >= 20)
         && ps->weaponstate != 25
@@ -3416,11 +3416,11 @@ void __cdecl PM_Weapon_CheckForSprint(pmove_t *pm)
         && ps->weaponstate != 25
         && ps->weaponstate != 26)
     {
-        if ((ps->pm_flags & 0x8000) != 0 && (ps->weaponstate < 22 || ps->weaponstate > 24))
+        if ((ps->pm_flags & PMF_SPRINTING) != 0 && (ps->weaponstate < 22 || ps->weaponstate > 24))
         {
             Sprint_State_Raise(ps);
         }
-        else if ((ps->pm_flags & 0x8000) == 0 && (ps->weaponstate == 22 || ps->weaponstate == 23))
+        else if ((ps->pm_flags & PMF_SPRINTING) == 0 && (ps->weaponstate == 22 || ps->weaponstate == 23))
         {
             Sprint_State_Drop(ps);
         }
@@ -3559,7 +3559,7 @@ double __cdecl BG_GetVerticalBobFactor(const playerState_s *ps, float cycle, flo
     }
     else
     {
-        if ((ps->pm_flags & 0x8000) != 0)
+        if ((ps->pm_flags & PMF_SPRINTING) != 0)
             v4 = speed * bg_bobAmplitudeSprinting->current.vector[1];
         else
             v4 = speed * bg_bobAmplitudeStanding->current.vector[1];
@@ -3590,7 +3590,7 @@ double __cdecl BG_GetHorizontalBobFactor(const playerState_s *ps, float cycle, f
     }
     else
     {
-        if ((ps->pm_flags & 0x8000) != 0)
+        if ((ps->pm_flags & PMF_SPRINTING) != 0)
             v4 = speed * bg_bobAmplitudeSprinting->current.value;
         else
             v4 = speed * bg_bobAmplitudeStanding->current.value;

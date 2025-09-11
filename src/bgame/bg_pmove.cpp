@@ -1686,7 +1686,7 @@ void __cdecl PM_UpdateSprint(pmove_t *pm, const pml_t *pml)
         PM_EndSprint(ps, pm);
         return;
     }
-    if ((ps->pm_flags & 0x8000) != 0)
+    if ((ps->pm_flags & PMF_SPRINTING) != 0)
     {
         if (pm->cmd.serverTime - ps->sprintState.lastSprintStart >= ps->sprintState.sprintStartMaxLength)
         {
@@ -1728,12 +1728,12 @@ void __cdecl PM_StartSprint(playerState_s *ps, pmove_t *pm, const pml_t *pml, in
             "ss->lastSprintEnd == 0 || ss->lastSprintEnd >= ss->lastSprintStart");
     ps->sprintState.sprintStartMaxLength = sprintLeft;
     ps->sprintState.lastSprintStart = pm->cmd.serverTime;
-    ps->pm_flags |= 0x8000u;
+    ps->pm_flags |= PMF_SPRINTING;
 }
 
 void __cdecl PM_EndSprint(playerState_s *ps, pmove_t *pm)
 {
-    if ((ps->pm_flags & 0x8000) != 0)
+    if ((ps->pm_flags & PMF_SPRINTING) != 0)
     {
         ps->sprintState.sprintDelay = 0;
         ps->sprintState.lastSprintEnd = pm->cmd.serverTime;
@@ -2243,7 +2243,7 @@ void __cdecl PM_WalkMove(pmove_t *pm, pml_t *pml)
         MyAssertHandler(".\\bgame\\bg_pmove.cpp", 1287, 0, "%s", "ps");
     if ((ps->pm_flags & PMF_JUMPING) != 0)
         Jump_ApplySlowdown(ps);
-    if ((ps->pm_flags & 0x8000) != 0)
+    if ((ps->pm_flags & PMF_SPRINTING) != 0)
         pm->cmd.rightmove = (int)((double)pm->cmd.rightmove * player_sprintStrafeSpeedScale->current.value);
     if (Jump_Check(pm, pml))
     {
@@ -2355,7 +2355,7 @@ double __cdecl PM_CmdScale_Walk(pmove_t *pm, usercmd_s *cmd)
         scalea = scale * 0.4000000059604645;
     else
         scalea = scale * 1.0;
-    if ((ps->pm_flags & 0x8000) != 0)
+    if ((ps->pm_flags & PMF_SPRINTING) != 0)
         scalea = scalea * player_sprintSpeedScale->current.value;
     if (ps->pm_type == PM_NOCLIP)
     {
@@ -3042,7 +3042,7 @@ void __cdecl PM_CheckDuck(pmove_t *pm, pml_t *pml)
             BG_AddPredictableEventToPlayerstate(6u, 0, ps);
             PM_ViewHeightAdjust(pm, pml);
         }
-        else if ((ps->pm_flags & 0x8000) != 0)
+        else if ((ps->pm_flags & PMF_SPRINTING) != 0)
         {
             ps->viewHeightTarget = 60;
             ps->eFlags &= 0xFFFFFFF3;
@@ -3629,7 +3629,7 @@ void __cdecl PM_Footsteps(pmove_t *pm, pml_t *pml)
             {
                 v5 = (ps->pm_flags & PMF_WALKING) != 0 || ps->leanf != 0.0;
                 walking = v5;
-                v3 = ps->pm_flags & 0x8000;
+                v3 = ps->pm_flags & PMF_SPRINTING;
                 sprinting = v3 != 0;
                 if (v3 && v5)
                     MyAssertHandler(".\\bgame\\bg_pmove.cpp", 3569, 0, "%s", "!sprinting || !walking");

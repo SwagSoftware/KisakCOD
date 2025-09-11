@@ -684,7 +684,7 @@ void __cdecl MSG_SetDefaultUserCmd(playerState_s *ps, usercmd_s *cmd)
         }
         if (ps->fWeaponPosFrac != 0.0)
             cmd->buttons |= 0x800u;
-        if ((ps->pm_flags & 0x8000) != 0)
+        if ((ps->pm_flags & PMF_SPRINTING) != 0)
             cmd->buttons |= 2u;
     }
 }
