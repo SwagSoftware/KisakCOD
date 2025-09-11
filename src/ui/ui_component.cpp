@@ -2604,14 +2604,16 @@ void Scr_ScriptWindow::SetScriptFile(const char *name)
 
 bool Scr_ScriptList::KeyEvent(float *point, int key)
 {
-    if (Key_IsDown(0, 158) || Key_IsDown(0, 159) || Key_IsDown(0, 160) || key != 13 && key != 191 && key != 223)
+    if (Key_IsDown(0, K_ALT)
+        || Key_IsDown(0, K_CTRL)
+        || Key_IsDown(0, K_SHIFT)
+        || key != '\r' && key != K_KP_ENTER && key != K_LAST_KEY)
     {
         return UI_LinesComponent::KeyEvent(point, key);
     }
 
     if (this->selectedLine >= 0)
     {
-        //Scr_AbstractScriptList::AddEntry(&scrDebuggerGlob.openScriptList, this->scriptWindows[this->selectedLine], 0);
         scrDebuggerGlob.openScriptList.AddEntry(this->scriptWindows[this->selectedLine], 0);
     }
 

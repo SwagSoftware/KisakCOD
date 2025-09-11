@@ -303,10 +303,11 @@ void __cdecl PathNode_OriginMatches(const char *value, const float *nodeOrigin)
 {
     float v4; // [sp+50h] [-30h] BYREF
     float v5; // [sp+54h] [-2Ch] BYREF
-    char v6; // [sp+58h] [-28h] BYREF
+    float v6; // [sp+58h] [-28h] BYREF
 
     if (sscanf(value, "%f %f %f", &v4, &v5, &v6) != 3)
         Com_Error(ERR_DROP, "Malformed origin for path node '%s'\n", value);
+
     if (v4 != *nodeOrigin || v5 != nodeOrigin[1])
         ++g_path.originErrors;
 }
@@ -3534,16 +3535,17 @@ void __cdecl G_SetPathnodeScriptVariable(const char *key, const char *value, pat
 
 void __cdecl G_ParsePathnodeScriptField(const char *key, const char *value, pathnode_t *node)
 {
-    node_field_t *v6; // r28
-
     PathNode_UpdateStringField("target", &node->constant.target, key, value);
     PathNode_UpdateStringField("targetname", &node->constant.targetname, key, value);
     PathNode_UpdateStringField("script_linkname", &node->constant.script_linkName, key, value);
     PathNode_UpdateStringField("script_noteworthy", &node->constant.script_noteworthy, key, value);
     PathNode_UpdateFloatField("radius", &node->constant.fRadius, key, value);
+
     if (!I_stricmp(key, "origin"))
         PathNode_OriginMatches(value, node->constant.vOrigin);
-    v6 = fields_3;
+
+    node_field_t * v6 = fields_3;
+
     if (fields_3[0].name)
     {
         while (I_stricmp(v6->name, key))

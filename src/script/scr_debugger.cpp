@@ -1875,15 +1875,17 @@ Scr_WatchElement_s *Scr_DisplayDebugger()
 
     Key_AddCatcher(ONLY_LOCAL_CLIENT_NUM, KEYCATCH_SCRIPT);
 
-    if ((clientUIActives[0].keyCatchers & 2) != 0)
+    if ((clientUIActives[0].keyCatchers & KEYCATCH_SCRIPT) != 0)
     {
         startTime = cls.realtime;
         keyCatchers = clientUIActives[0].keyCatchers & 0xFFFFFFFC;
         clientUIActives[0].keyCatchers &= 3u;
         IN_ActivateMouse(1);
         remoteScreenUpdateNesting = R_PopRemoteScreenUpdate();
-        while ((clientUIActives[0].keyCatchers & 2) != 0)
+
+        while ((clientUIActives[0].keyCatchers & KEYCATCH_SCRIPT) != 0)
             Debug_Frame(0);
+
         R_PushRemoteScreenUpdate(remoteScreenUpdateNesting);
         IN_ActivateMouse(1);
         clientUIActives[0].keyCatchers = keyCatchers | clientUIActives[0].keyCatchers & 3;

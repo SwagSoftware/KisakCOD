@@ -32,11 +32,15 @@ int __cdecl CL_ShutdownUI()
 
 void __cdecl CL_InitUI()
 {
-    int v0; // r3
+    int remoteScreenUpdateNesting; // r3
 
     UI_Init();
-    v0 = R_PopRemoteScreenUpdate();
+    // LWSS ADD from MP ( UI_Component::InitAssets() needs to run so that UI_Component::g members are set. 
+    // Otherwise some UI panels in the script debugger will be size 0.0, which means they won't render (KISAKTODO: could probably run this at the start of Scr_InitDebugger()?)
+    UI_Component_Init(); 
+    // LWSS END
+    remoteScreenUpdateNesting = R_PopRemoteScreenUpdate();
     cls.uiStarted = 1;
-    R_PushRemoteScreenUpdate(v0);
+    R_PushRemoteScreenUpdate(remoteScreenUpdateNesting);
 }
 
