@@ -66,7 +66,7 @@ void __cdecl PM_StepSlideMove(pmove_t *pm, pml_t *pml, int32_t gravity)
     else
     {
         bHadGround = 0;
-        if ((ps->pm_flags & 0x4000) != 0 && ps->pm_time)
+        if ((ps->pm_flags & PMF_JUMPING) != 0 && ps->pm_time)
             Jump_ClearState(ps);
     }
     start_o[0] = ps->origin[0];
@@ -82,9 +82,9 @@ void __cdecl PM_StepSlideMove(pmove_t *pm, pml_t *pml, int32_t gravity)
         fStepSize = 18.0;
     if (ps->groundEntityNum != ENTITYNUM_NONE)
         goto LABEL_26;
-    if ((ps->pm_flags & 0x4000) != 0 && ps->pm_time)
+    if ((ps->pm_flags & PMF_JUMPING) != 0 && ps->pm_time)
         Jump_ClearState(ps);
-    if (iBumps && (ps->pm_flags & 0x4000) != 0 && Jump_GetStepHeight(ps, start_o, &fStepSize))
+    if (iBumps && (ps->pm_flags & PMF_JUMPING) != 0 && Jump_GetStepHeight(ps, start_o, &fStepSize))
     {
         if (fStepSize < 1.0)
             return;

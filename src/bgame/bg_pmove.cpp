@@ -1755,7 +1755,7 @@ bool __cdecl PM_SprintStartInterferingButtons(const playerState_s *ps, int32_t f
         return 1;
     if ((ps->pm_flags & 0x1001C) != 0)
         return 1;
-    if ((ps->pm_flags & 0x4000) != 0 && !ps->pm_time)
+    if ((ps->pm_flags & PMF_JUMPING) != 0 && !ps->pm_time)
         return 0;
     return ps->weaponstate == 12
         || ps->weaponstate == 13
@@ -1885,7 +1885,7 @@ void __cdecl PM_Friction(playerState_s *ps, pml_t *pml)
             {
                 control = value * 0.300000011920929;
             }
-            else if ((ps->pm_flags & 0x4000) != 0)
+            else if ((ps->pm_flags & PMF_JUMPING) != 0)
             {
                 control = Jump_ReduceFriction(ps) * value;
             }
@@ -2241,7 +2241,7 @@ void __cdecl PM_WalkMove(pmove_t *pm, pml_t *pml)
     ps = pm->ps;
     if (!ps)
         MyAssertHandler(".\\bgame\\bg_pmove.cpp", 1287, 0, "%s", "ps");
-    if ((ps->pm_flags & 0x4000) != 0)
+    if ((ps->pm_flags & PMF_JUMPING) != 0)
         Jump_ApplySlowdown(ps);
     if ((ps->pm_flags & 0x8000) != 0)
         pm->cmd.rightmove = (int)((double)pm->cmd.rightmove * player_sprintStrafeSpeedScale->current.value);
@@ -4088,7 +4088,7 @@ void __cdecl PM_DropTimers(playerState_s *ps, pml_t *pml)
         }
         else
         {
-            if ((ps->pm_flags & 0x4000) != 0)
+            if ((ps->pm_flags & PMF_JUMPING) != 0)
                 Jump_ClearState(ps);
             ps->pm_flags &= ~0x4180;
             ps->pm_time = 0;

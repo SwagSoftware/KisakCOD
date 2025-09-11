@@ -58,7 +58,7 @@ char __cdecl Jump_GetStepHeight(playerState_s *ps, const float *origin, float *s
     float v4; // [esp+0h] [ebp-8h]
     float v5; // [esp+4h] [ebp-4h]
 
-    if ((ps->pm_flags & 0x4000) == 0)
+    if ((ps->pm_flags & PMF_JUMPING) == 0)
         MyAssertHandler(".\\bgame\\bg_jump.cpp", 84, 0, "%s", "ps->pm_flags & PMF_JUMPING");
     if (!origin)
         MyAssertHandler(".\\bgame\\bg_jump.cpp", 85, 0, "%s", "origin");
@@ -76,7 +76,7 @@ char __cdecl Jump_GetStepHeight(playerState_s *ps, const float *origin, float *s
 
 bool __cdecl Jump_IsPlayerAboveMax(playerState_s *ps)
 {
-    if ((ps->pm_flags & 0x4000) == 0)
+    if ((ps->pm_flags & PMF_JUMPING) == 0)
         MyAssertHandler(".\\bgame\\bg_jump.cpp", 108, 0, "%s", "ps->pm_flags & PMF_JUMPING");
     return ps->origin[2] >= ps->jumpOriginZ + jump_height->current.value;
 }
@@ -85,7 +85,7 @@ void __cdecl Jump_ActivateSlowdown(playerState_s *ps)
 {
     if (!ps->pm_time)
     {
-        ps->pm_flags |= 0x4000u;
+        ps->pm_flags |= PMF_JUMPING;
         ps->pm_time = 1800;
     }
 }
@@ -94,7 +94,7 @@ void __cdecl Jump_ApplySlowdown(playerState_s *ps)
 {
     float scale; // [esp+8h] [ebp-4h]
 
-    if ((ps->pm_flags & 0x4000) == 0)
+    if ((ps->pm_flags & PMF_JUMPING) == 0)
         MyAssertHandler(".\\bgame\\bg_jump.cpp", 134, 0, "%s", "ps->pm_flags & PMF_JUMPING");
     scale = 1.0;
     if (ps->pm_time <= 1800)
@@ -124,7 +124,7 @@ void __cdecl Jump_ApplySlowdown(playerState_s *ps)
 
 double __cdecl Jump_ReduceFriction(playerState_s *ps)
 {
-    if ((ps->pm_flags & 0x4000) == 0)
+    if ((ps->pm_flags & PMF_JUMPING) == 0)
         MyAssertHandler(".\\bgame\\bg_jump.cpp", 187, 0, "%s", "ps->pm_flags & PMF_JUMPING");
     if (ps->pm_time > 1800)
     {
@@ -139,7 +139,7 @@ double __cdecl Jump_ReduceFriction(playerState_s *ps)
 
 double __cdecl Jump_GetSlowdownFriction(playerState_s *ps)
 {
-    if ((ps->pm_flags & 0x4000) == 0)
+    if ((ps->pm_flags & PMF_JUMPING) == 0)
         MyAssertHandler(".\\bgame\\bg_jump.cpp", 167, 0, "%s", "ps->pm_flags & PMF_JUMPING");
     if (ps->pm_time > 1800)
         MyAssertHandler(".\\bgame\\bg_jump.cpp", 168, 0, "%s", "ps->pm_time <= JUMP_LAND_SLOWDOWN_TIME");
@@ -156,7 +156,7 @@ void __cdecl Jump_ClampVelocity(playerState_s *ps, const float *origin)
     float v3; // [esp+4h] [ebp-Ch]
     float heightDiff; // [esp+Ch] [ebp-4h]
 
-    if ((ps->pm_flags & 0x4000) == 0)
+    if ((ps->pm_flags & PMF_JUMPING) == 0)
         MyAssertHandler(".\\bgame\\bg_jump.cpp", 211, 0, "%s", "ps->pm_flags & PMF_JUMPING");
     if (!origin)
         MyAssertHandler(".\\bgame\\bg_jump.cpp", 212, 0, "%s", "origin");
@@ -232,7 +232,7 @@ void __cdecl Jump_Start(pmove_t *pm, pml_t *pml, float height)
     if (!pm->ps)
         MyAssertHandler(".\\bgame\\bg_jump.cpp", 261, 0, "%s", "ps");
     velocitySqrd = (height + height) * (double)ps->gravity;
-    if ((ps->pm_flags & 0x4000) != 0 && ps->pm_time <= 1800)
+    if ((ps->pm_flags & PMF_JUMPING) != 0 && ps->pm_time <= 1800)
     {
         factor = Jump_GetLandFactor(ps);
         if (factor == 0.0)
@@ -248,7 +248,7 @@ void __cdecl Jump_Start(pmove_t *pm, pml_t *pml, float height)
     v3 = sqrt(velocitySqrd);
     ps->velocity[2] = v3;
     ps->pm_flags &= ~0x180;
-    ps->pm_flags |= 0x4000u;
+    ps->pm_flags |= PMF_JUMPING;
     ps->pm_time = 0;
     ps->sprintState.sprintButtonUpRequired = 0;
     ps->aimSpreadScale = ps->aimSpreadScale + jump_spreadAdd->current.value;
@@ -258,7 +258,7 @@ void __cdecl Jump_Start(pmove_t *pm, pml_t *pml, float height)
 
 double __cdecl Jump_GetLandFactor(playerState_s *ps)
 {
-    if ((ps->pm_flags & 0x4000) == 0)
+    if ((ps->pm_flags & PMF_JUMPING) == 0)
         MyAssertHandler(".\\bgame\\bg_jump.cpp", 238, 0, "%s", "ps->pm_flags & PMF_JUMPING");
     if (ps->pm_time > 1800)
         MyAssertHandler(".\\bgame\\bg_jump.cpp", 239, 0, "%s", "ps->pm_time <= JUMP_LAND_SLOWDOWN_TIME");
