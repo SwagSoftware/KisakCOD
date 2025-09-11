@@ -459,7 +459,7 @@ int32_t __cdecl PM_FootstepType(playerState_s *ps, pml_t *pml)
         return 0;
     if ((ps->pm_flags & PMF_PRONE) != 0)
         return 75;
-    if ((ps->pm_flags & 0x40) != 0 || ps->leanf != 0.0)
+    if ((ps->pm_flags & PMF_WALKING) != 0 || ps->leanf != 0.0)
         return 74;
     if (PM_IsSprinting(ps))
         return 72;
@@ -475,7 +475,7 @@ bool __cdecl PM_ShouldMakeFootsteps(pmove_t *pm)
     ps = pm->ps;
     if (!pm->ps)
         MyAssertHandler(".\\bgame\\bg_pmove.cpp", 3062, 0, "%s", "ps");
-    bWalking = ps->pm_flags & 0x40;
+    bWalking = ps->pm_flags & PMF_WALKING;
     iStance = PM_GetEffectiveStance(ps);
     if (iStance == 1)
         return 0;
@@ -2048,7 +2048,7 @@ double __cdecl PM_MoveScale(playerState_s *ps, float fmove, float rmove, float u
     v6 = umove * umove + rmove * rmove + fmove * fmove;
     v5 = sqrt(v6);
     scale = (double)ps->speed * max / (v5 * 127.0);
-    if ((ps->pm_flags & 0x40) == 0 && ps->leanf == 0.0)
+    if ((ps->pm_flags & PMF_WALKING) == 0 && ps->leanf == 0.0)
         scalea = scale * 1.0;
     else
         scalea = scale * 0.4000000059604645;
@@ -2085,7 +2085,7 @@ double __cdecl PM_CmdScale(playerState_s *ps, usercmd_s *cmd)
     if (!max)
         return 0.0;
     scale = (double)ps->speed * (double)max / (v3 * 127.0);
-    if ((ps->pm_flags & 0x40) == 0 && ps->leanf == 0.0)
+    if ((ps->pm_flags & PMF_WALKING) == 0 && ps->leanf == 0.0)
         scalea = scale * 1.0;
     else
         scalea = scale * 0.4000000059604645;
@@ -2351,7 +2351,7 @@ double __cdecl PM_CmdScale_Walk(pmove_t *pm, usercmd_s *cmd)
     if (v3 == 0.0)
         return 0.0;
     scale = (double)ps->speed * v3 / (v8 * 127.0);
-    if ((ps->pm_flags & 0x40) != 0 || ps->leanf != 0.0 || v9)
+    if ((ps->pm_flags & PMF_WALKING) != 0 || ps->leanf != 0.0 || v9)
         scalea = scale * 0.4000000059604645;
     else
         scalea = scale * 1.0;
@@ -2370,7 +2370,7 @@ double __cdecl PM_CmdScale_Walk(pmove_t *pm, usercmd_s *cmd)
         scaleb = PM_CmdScaleForStance(pm) * scalea;
     }
     weapon = BG_GetWeaponDef(ps->weapon);
-    if (!ps->weapon || weapon->moveSpeedScale <= 0.0 || (ps->pm_flags & 0x40) != 0 || v9)
+    if (!ps->weapon || weapon->moveSpeedScale <= 0.0 || (ps->pm_flags & PMF_WALKING) != 0 || v9)
     {
         if (ps->weapon && weapon->adsMoveSpeedScale > 0.0)
             scaleb = scaleb * weapon->adsMoveSpeedScale;
@@ -3627,7 +3627,7 @@ void __cdecl PM_Footsteps(pmove_t *pm, pml_t *pml)
             iStance = PM_GetEffectiveStance(ps);
             if (ps->groundEntityNum != ENTITYNUM_NONE || ps->pm_type == PM_NORMAL_LINKED)
             {
-                v5 = (ps->pm_flags & 0x40) != 0 || ps->leanf != 0.0;
+                v5 = (ps->pm_flags & PMF_WALKING) != 0 || ps->leanf != 0.0;
                 walking = v5;
                 v3 = ps->pm_flags & 0x8000;
                 sprinting = v3 != 0;
@@ -3699,7 +3699,7 @@ void __cdecl PM_Footstep_LadderMove(pmove_t *pm, pml_t *pml)
         fLadderSpeed = ps->velocity[2];
         fMaxSpeed = 0.5f * 1.5f * 127.0f;
 
-        if ((ps->pm_flags & 0x40) == 0 && ps->leanf == 0.0)
+        if ((ps->pm_flags & PMF_WALKING) == 0 && ps->leanf == 0.0)
             bobmove = fLadderSpeed / (fMaxSpeed * 1.0) * 0.449999988079071;
         else
             bobmove = fLadderSpeed / (fMaxSpeed * 0.4000000059604645) * 0.3499999940395355;
@@ -3903,7 +3903,7 @@ double __cdecl PM_GetMaxSpeed(pmove_t *pm, int32_t walking, int32_t sprinting)
     if (pm->ps->weapon)
     {
         weapon = BG_GetWeaponDef(pm->ps->weapon);
-        if (weapon->moveSpeedScale <= 0.0 || (pm->ps->pm_flags & 0x40) != 0)
+        if (weapon->moveSpeedScale <= 0.0 || (pm->ps->pm_flags & PMF_WALKING) != 0)
         {
             if (weapon->adsMoveSpeedScale > 0.0)
                 fMaxSpeeda = fMaxSpeeda * weapon->adsMoveSpeedScale;
@@ -4135,7 +4135,7 @@ void __cdecl PM_UpdatePlayerWalkingFlag(pmove_t *pm)
         && ps->weaponstate != 10
         && ps->weaponstate != 8)
     {
-        ps->pm_flags |= 0x40u;
+        ps->pm_flags |= PMF_WALKING;
         if ((ps->otherFlags & 4) == 0)
             MyAssertHandler(".\\bgame\\bg_pmove.cpp", 4404, 0, "%s", "ps->otherFlags & POF_PLAYER");
     }
