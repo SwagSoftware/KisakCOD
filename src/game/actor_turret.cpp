@@ -53,7 +53,7 @@ int __cdecl Actor_UseTurret(actor_s *self, gentity_s *pTurret)
     {
         self->pTurret = pTurret;
         result = 1;
-        pTurret->flags |= 0x4000000u;
+        pTurret->flags |= FL_ACTOR_TURRET;
     }
     else
     {

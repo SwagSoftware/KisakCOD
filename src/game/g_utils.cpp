@@ -1592,8 +1592,8 @@ void __cdecl G_SafeDObjFree(gentity_s *ent)
 
 int __cdecl G_DObjUpdateServerTime(gentity_s *ent, int bNotify)
 {
-    ent->flags &= ~0x40000u;
-    return SV_DObjUpdateServerTime(ent, 0.050000001, bNotify);
+    ent->flags &= ~(FL_REPEAT_ANIM_UPDATE);
+    return SV_DObjUpdateServerTime(ent, 0.05f, bNotify);
 }
 
 void __cdecl G_DObjCalcPose(gentity_s *ent, int *partBits)

@@ -1501,7 +1501,7 @@ void __cdecl PlayerCmd_Suicide(scr_entref_t entref)
             Scr_ObjectError(v1);
         }
     }
-    pSelf->flags &= 0xFFFFFFFC;
+    pSelf->flags &= ~(FL_GODMODE | FL_DEMI_GODMODE);
     pSelf->health = 0;
     pSelf->client->ps.stats[0] = 0;
     player_die(pSelf, pSelf, pSelf, 100000, 12, 0, 0, HITLOC_NONE, 0);

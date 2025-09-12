@@ -262,7 +262,7 @@ void __cdecl Player_UpdateCursorHints(gentity_s *ent)
                                 if (hintString)
                                 {
                                     ps->cursorHintEntIndex = self->s.number;
-                                    self->flags |= 0x200000u;
+                                    self->flags |= ~(FL_CURSOR_HINT);
                                     ps->cursorHint = hintString;
                                     ps->cursorHintString = scale;
                                 }
@@ -525,6 +525,6 @@ void __cdecl Player_SetVehicleDropHint(gentity_s *ent)
     iassert(ent->r.ownerNum.isDefined());
 
     ps->ps.cursorHintEntIndex = ent->r.ownerNum.entnum();
-    ent->r.ownerNum.ent()->flags |= 0x200000u;
+    ent->r.ownerNum.ent()->flags |= FL_CURSOR_HINT;
 }
 

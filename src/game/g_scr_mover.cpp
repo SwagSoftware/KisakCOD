@@ -168,11 +168,8 @@ void __cdecl InitScriptMover(gentity_s *pSelf)
     pSelf->s.lerp.apos.trBase[1] = pSelf->r.currentAngles[1];
     pSelf->s.lerp.apos.trBase[2] = pSelf->r.currentAngles[2];
     pSelf->s.lerp.apos.trType = TR_STATIONARY;
-#ifdef KISAK_MP
-    pSelf->flags |= 0x1000u;
-#elif KISAK_SP
-    pSelf->flags |= 0x800;
-#endif
+
+    pSelf->flags |= FL_SUPPORTS_LINKTO;
 }
 
 void __cdecl SP_script_brushmodel(gentity_s *self)

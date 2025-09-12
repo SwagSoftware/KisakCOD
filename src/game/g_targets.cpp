@@ -399,7 +399,7 @@ void __cdecl Scr_Target_Set()
         v8 = v3;
         targGlob.targets[v8].ent = v2;
         offset = targGlob.targets[v3].offset;
-        v2->flags |= 0x2000000u;
+        v2->flags |= FL_TARGET;
         targGlob.targets[v8].materialIndex = -1;
         targGlob.targets[v8].offscreenMaterialIndex = -1;
         *offset = 0.0;

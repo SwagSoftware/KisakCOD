@@ -9,6 +9,8 @@
 
 #include <game/enthandle.h>
 
+#include <type_traits> // used for enum operators
+
 #define abs8(x) abs(x)
 #define abs32(x) abs(x)
 
@@ -593,6 +595,84 @@ enum EntHandler_t : uint8_t
     ENT_HANDLER_COUNT = 0x18,
 };
 
+enum gentityFlags_t : __int32 // LWSS: not a real enum name, used to force usage
+{
+    FL_GODMODE              = 0x1,
+    FL_DEMI_GODMODE         = 0x2,
+    FL_NOTARGET             = 0x4,
+    FL_NO_KNOCKBACK         = 0x8,
+    FL_DROPPED_ITEM         = 0x10,
+    FL_NO_BOTS              = 0x20,
+    FL_NO_HUMANS            = 0x40,
+    FL_TOGGLE               = 0x80,
+    FL_SOFTACTIVATE         = 0x100,
+    FL_PARACHUTE            = 0x200,
+    FL_NO_HEADCHECK         = 0x400,
+    FL_SUPPORTS_LINKTO      = 0x1000,
+    FL_NO_AUTO_ANIM_UPDATE  = 0x2000,
+    FL_GRENADE_TOUCH_DAMAGE = 0x4000,
+    FL_MISSILE_DESTABILIZED = 0x10'000,
+    FL_STABLE_MISSILES      = 0x20'000,
+    FL_REPEAT_ANIM_UPDATE   = 0x40'000,
+    FL_VEHICLE_TARGET       = 0x80'000,
+    FL_GROUND_ENT           = 0x100'000,
+    FL_CURSOR_HINT          = 0x200'000,
+    FL_USE_TURRET           = 0x400'000,
+    FL_MISSILE_ATTRACTOR    = 0x800'000,
+    FL_WEAPON_BEING_GRABBED = 0x1'000'000,
+};
+
+// Enable bitwise operators for gentityFlags_t ( All Enum operators generated with Aislop )
+inline gentityFlags_t operator|(gentityFlags_t lhs, gentityFlags_t rhs)
+{
+    return static_cast<gentityFlags_t>(
+        static_cast<std::underlying_type_t<gentityFlags_t>>(lhs) |
+        static_cast<std::underlying_type_t<gentityFlags_t>>(rhs)
+        );
+}
+
+inline gentityFlags_t operator&(gentityFlags_t lhs, gentityFlags_t rhs)
+{
+    return static_cast<gentityFlags_t>(
+        static_cast<std::underlying_type_t<gentityFlags_t>>(lhs) &
+        static_cast<std::underlying_type_t<gentityFlags_t>>(rhs)
+        );
+}
+
+inline gentityFlags_t operator^(gentityFlags_t lhs, gentityFlags_t rhs)
+{
+    return static_cast<gentityFlags_t>(
+        static_cast<std::underlying_type_t<gentityFlags_t>>(lhs) ^
+        static_cast<std::underlying_type_t<gentityFlags_t>>(rhs)
+        );
+}
+
+inline gentityFlags_t operator~(gentityFlags_t flag)
+{
+    return static_cast<gentityFlags_t>(
+        ~static_cast<std::underlying_type_t<gentityFlags_t>>(flag)
+        );
+}
+
+// Compound assignment operators
+inline gentityFlags_t &operator|=(gentityFlags_t &lhs, gentityFlags_t rhs)
+{
+    lhs = lhs | rhs;
+    return lhs;
+}
+
+inline gentityFlags_t &operator&=(gentityFlags_t &lhs, gentityFlags_t rhs)
+{
+    lhs = lhs & rhs;
+    return lhs;
+}
+
+inline gentityFlags_t &operator^=(gentityFlags_t &lhs, gentityFlags_t rhs)
+{
+    lhs = lhs ^ rhs;
+    return lhs;
+}
+
 struct gentity_s // sizeof=0x274
 {                                       // ...
     entityState_s s;                    // ...
@@ -614,7 +694,7 @@ struct gentity_s // sizeof=0x274
     // padding byte
     uint32_t attachIgnoreCollision;
     int32_t spawnflags;                     // ...
-    int32_t flags;                          // ...
+    gentityFlags_t flags;                          // ...
     int32_t eventTime;
     int32_t freeAfterEvent;
     int32_t unlinkAfterEvent;
@@ -752,33 +832,84 @@ enum EntHandler_t : unsigned __int8 // (not a real enum name)
 
 enum gentityFlags_t : __int32 // LWSS: not a real enum name, used to force usage
 {
-    FL_GODMODE = 0x1,
-    FL_DEMI_GODMODE = 0x2,
-    FL_NOTARGET = 0x4,
-    FL_DODGE_LEFT = 0x8,
-    FL_DODGE_RIGHT = 0x10,
-    FL_NO_KNOCKBACK = 0x20,
-    FL_DROPPED_ITEM = 0x40,
-    FL_DYNAMICPATH = 0x100,
-    FL_AUTO_BLOCKPATHS = 0x200,
-    FL_OBSTACLE = 0x400,
-    FL_SUPPORTS_LINKTO = 0x800,
-    FL_NO_AUTO_ANIM_UPDATE = 0x1000,
+    FL_GODMODE               = 0x1,
+    FL_DEMI_GODMODE          = 0x2,
+    FL_NOTARGET              = 0x4,
+    FL_DODGE_LEFT            = 0x8,
+    FL_DODGE_RIGHT           = 0x10,
+    FL_NO_KNOCKBACK          = 0x20,
+    FL_DROPPED_ITEM          = 0x40,
+    FL_DYNAMICPATH           = 0x100,
+    FL_AUTO_BLOCKPATHS       = 0x200,
+    FL_OBSTACLE              = 0x400,
+    FL_SUPPORTS_LINKTO       = 0x800,
+    FL_NO_AUTO_ANIM_UPDATE   = 0x1000,
     FL_SUPPORTS_ANIMSCRIPTED = 0x2000,
-    FL_GRENADE_TOUCH_DAMAGE = 0x4000,
-    FL_MISSILE_DESTABILIZED = 0x10000,
-    FL_STABLE_MISSILES = 0x20000,
-    FL_REPEAT_ANIM_UPDATE = 0x40000,
-    FL_VISIBLE_AIMTARGET = 0x80000,
-    FL_GROUND_ENT = 0x100000,
-    FL_BADPLACE_VOLUME = 0x200000,
-    FL_CURSOR_HINT = 0x400000,
-    FL_VEHICLE_TARGET = 0x800000,
-    FL_MISSILE_ATTRACTOR = 0x1000000,
-    FL_TARGET = 0x2000000,
-    FL_ACTOR_TURRET = 0x4000000,
-    FL_WEAPON_BEING_GRABBED = 0x8000000,
+    FL_GRENADE_TOUCH_DAMAGE  = 0x4000,
+    FL_MISSILE_DESTABILIZED  = 0x10'000,
+    FL_STABLE_MISSILES       = 0x20'000,
+    FL_REPEAT_ANIM_UPDATE    = 0x40'000,
+    FL_VISIBLE_AIMTARGET     = 0x80'000,
+    FL_GROUND_ENT            = 0x100'000,
+    FL_BADPLACE_VOLUME       = 0x200'000,
+    FL_CURSOR_HINT           = 0x400'000,
+    FL_VEHICLE_TARGET        = 0x800'000,
+    FL_MISSILE_ATTRACTOR     = 0x1'000'000,
+    FL_TARGET                = 0x2'000'000,
+    FL_ACTOR_TURRET          = 0x4'000'000,
+    FL_WEAPON_BEING_GRABBED  = 0x8'000'000,
 };
+
+// Enable bitwise operators for gentityFlags_t ( All Enum operators generated with Aislop )
+inline gentityFlags_t operator|(gentityFlags_t lhs, gentityFlags_t rhs)
+{
+    return static_cast<gentityFlags_t>(
+        static_cast<std::underlying_type_t<gentityFlags_t>>(lhs) |
+        static_cast<std::underlying_type_t<gentityFlags_t>>(rhs)
+        );
+}
+
+inline gentityFlags_t operator&(gentityFlags_t lhs, gentityFlags_t rhs)
+{
+    return static_cast<gentityFlags_t>(
+        static_cast<std::underlying_type_t<gentityFlags_t>>(lhs) &
+        static_cast<std::underlying_type_t<gentityFlags_t>>(rhs)
+        );
+}
+
+inline gentityFlags_t operator^(gentityFlags_t lhs, gentityFlags_t rhs)
+{
+    return static_cast<gentityFlags_t>(
+        static_cast<std::underlying_type_t<gentityFlags_t>>(lhs) ^
+        static_cast<std::underlying_type_t<gentityFlags_t>>(rhs)
+        );
+}
+
+inline gentityFlags_t operator~(gentityFlags_t flag)
+{
+    return static_cast<gentityFlags_t>(
+        ~static_cast<std::underlying_type_t<gentityFlags_t>>(flag)
+        );
+}
+
+// Compound assignment operators
+inline gentityFlags_t &operator|=(gentityFlags_t &lhs, gentityFlags_t rhs)
+{
+    lhs = lhs | rhs;
+    return lhs;
+}
+
+inline gentityFlags_t &operator&=(gentityFlags_t &lhs, gentityFlags_t rhs)
+{
+    lhs = lhs & rhs;
+    return lhs;
+}
+
+inline gentityFlags_t &operator^=(gentityFlags_t &lhs, gentityFlags_t rhs)
+{
+    lhs = lhs ^ rhs;
+    return lhs;
+}
 
 struct gentity_s
 {
@@ -806,7 +937,7 @@ struct gentity_s
     unsigned __int16 targetname;
     unsigned int attachIgnoreCollision;
     int spawnflags;
-    int flags;
+    gentityFlags_t flags;
     int clipmask;
     int processedFrame;
     EntHandle parent;

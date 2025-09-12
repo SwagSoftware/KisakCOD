@@ -14,11 +14,7 @@ void __cdecl G_FinishSetupSpawnPoint(gentity_s *ent)
     unsigned __int16 EntityHitId; // r3
     double fraction; // fp0
     float start[3]; // [sp+58h] [-88h] BYREF
-    //float v15; // [sp+5Ch] [-84h]
-    //float v16; // [sp+60h] [-80h]
     float end[3]; // [sp+68h] [-78h] BYREF
-    //float v18; // [sp+6Ch] [-74h]
-    //float v19; // [sp+70h] [-70h]
     trace_t trace; // [sp+80h] [-60h] BYREF
 
     start[0] = ent->r.currentOrigin[0];
@@ -44,7 +40,7 @@ void __cdecl G_FinishSetupSpawnPoint(gentity_s *ent)
     start[0] = ((end[0] - start[0]) * fraction) + start[0];
     start[1] = ((end[1] - start[1]) * fraction) + start[1];
     start[2] = ((end[2] - start[2]) * fraction) + start[2];
-    g_entities[EntityHitId].flags |= 0x100000u;
+    g_entities[EntityHitId].flags |= FL_GROUND_ENT;
     G_TraceCapsule(&trace, start, playerMins, playerMaxs, start, ent->s.number, 42057745);
 
     if (trace.allsolid)
@@ -599,7 +595,7 @@ void __cdecl ClientSpawn(gentity_s *ent)
     Scr_SetString(&ent->classname, scr_const.player);
     ent->r.contents = 0x2000000;
     ent->clipmask = 42057745;
-    ent->flags = 3072;
+    ent->flags = (FL_SUPPORTS_LINKTO | FL_OBSTACLE);
     ent->r.mins[0] = -15.0;
     ent->r.mins[1] = -15.0;
     ent->r.mins[2] = 0.0;

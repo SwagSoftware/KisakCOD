@@ -10,6 +10,7 @@
 #include <game/savememory.h>
 #include <game/actor.h>
 #include <game/g_main.h>
+#include <universal/profile.h>
 
 AimTargetGlob atGlob;
 
@@ -386,67 +387,46 @@ bool __cdecl AimTarget_PlayerInValidState(const playerState_s *ps)
 
 void __cdecl AimTarget_ProcessEntity(gentity_s *ent)
 {
-    gentity_s *Player; // r29
+    gentity_s *playerEnt; // r29
     gclient_s *client; // r29
     unsigned int aim_vis_bone; // r4
     int v5; // r11
     char v6; // r3
-    int flags; // r11
-    int v8; // r11
+    gentityFlags_t flags; // r11
+    gentityFlags_t v8; // r11
     char IsTargetVisible; // r3
     AimTarget v10[2]; // [sp+50h] [-60h] BYREF
 
-    //Profile_Begin(58);
-    if (!ent)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\aim_assist\\aim_target.cpp", 440, 0, "%s", "ent");
-    if (!ent->r.inuse)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\aim_assist\\aim_target.cpp", 441, 0, "%s", "ent->r.inuse");
-    Player = G_GetPlayer();
-    if (!Player)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\aim_assist\\aim_target.cpp", 444, 0, "%s", "playerEnt");
-    if (!Player->client)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\aim_assist\\aim_target.cpp", 445, 0, "%s", "playerEnt->client");
-    if (ent->s.number == Player->s.number)
-        MyAssertHandler(
-            "c:\\trees\\cod3\\cod3src\\src\\aim_assist\\aim_target.cpp",
-            446,
-            0,
-            "%s",
-            "ent->s.number != playerEnt->s.number");
-    client = Player->client;
+    PROF_SCOPED("AimTarget_ProcessEntity");
+
+    iassert(ent);
+    iassert(ent->r.inuse);
+    playerEnt = G_GetPlayer();
+    iassert(playerEnt);
+    iassert(playerEnt->client);
+    iassert(ent->s.number != playerEnt->s.number);
+    client = playerEnt->client;
     if (!client)
         MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\aim_assist\\aim_target.cpp", 410, 0, "%s", "ps");
     if ((unsigned int)(client->ps.pm_type - 2) <= 4)
         goto LABEL_35;
     if (!ent->r.linked || !(unsigned __int8)AimTarget_IsTargetValid(ent))
     {
-        ent->flags &= ~0x80000u;
+        ent->flags &= ~(FL_VISIBLE_AIMTARGET);
         goto LABEL_35;
     }
-    if (ent->s.eType == 14)
+    if (ent->s.eType == ET_ACTOR)
     {
         aim_vis_bone = scr_const.aim_vis_bone;
     }
     else
     {
-        if ((ent->s.lerp.eFlags & 0x800) == 0)
-            MyAssertHandler(
-                "c:\\trees\\cod3\\cod3src\\src\\aim_assist\\aim_target.cpp",
-                463,
-                0,
-                "%s",
-                "ent->s.lerp.eFlags & EF_AIM_ASSIST");
-        if (ent->s.solid != 0xFFFFFF)
-            MyAssertHandler(
-                "c:\\trees\\cod3\\cod3src\\src\\aim_assist\\aim_target.cpp",
-                464,
-                0,
-                "%s",
-                "ent->s.solid == SOLID_BMODEL");
+        iassert(ent->s.lerp.eFlags & EF_AIM_ASSIST);
+        iassert(ent->s.solid == SOLID_BMODEL);
         aim_vis_bone = 0;
     }
     v5 = ent->s.number - level.time / 50;
-    if ((ent->flags & 0x80000) == 0)
+    if ((ent->flags & FL_VISIBLE_AIMTARGET) == 0)
     {
         if (v5 % 2)
             goto LABEL_32;
@@ -454,11 +434,11 @@ void __cdecl AimTarget_ProcessEntity(gentity_s *ent)
         flags = ent->flags;
         if (IsTargetVisible)
         {
-            v8 = flags | 0x80000;
+            v8 = flags | FL_VISIBLE_AIMTARGET;
             goto LABEL_31;
         }
     LABEL_30:
-        v8 = flags & 0xFFF7FFFF;
+        v8 = flags & ~(FL_VISIBLE_AIMTARGET);
         goto LABEL_31;
     }
     if (v5 % 8)
@@ -467,19 +447,17 @@ void __cdecl AimTarget_ProcessEntity(gentity_s *ent)
     flags = ent->flags;
     if (!v6)
         goto LABEL_30;
-    v8 = flags | 0x80000;
+    v8 = flags | FL_VISIBLE_AIMTARGET;
 LABEL_31:
     ent->flags = v8;
 LABEL_32:
-    if ((ent->flags & 0x80000) != 0)
+    if ((ent->flags & FL_VISIBLE_AIMTARGET) != 0)
     {
         AimTarget_CreateTarget(ent, v10);
-        //Profile_EndInternal(0);
         return;
     }
 LABEL_35:
     ; // LWSS: this is only here so the goto works
-    //Profile_EndInternal(0);
 }
 
 void __cdecl AimTarget_UpdateClientTargets()

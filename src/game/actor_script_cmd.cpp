@@ -1648,7 +1648,7 @@ void __cdecl ActorCmd_FireGrenadeLauncher(scr_entref_t entref)
             if (v7)
             {
                 v8 = G_FireGrenade(v2->ent, v9, v2->vGrenadeTossVel, v2->ent->s.weapon, v2->ent->s.weaponModel, 0, 0);
-                v8->flags |= 0x20000u;
+                v8->flags |= FL_STABLE_MISSILES;
             }
         }
     }
@@ -1743,11 +1743,11 @@ void __cdecl ActorCmd_AnimMode(scr_entref_t entref)
     if (ConstString == scr_const.nophysics)
     {
         v1->eScriptSetAnimMode = AI_ANIM_NOPHYSICS;
-        ent->flags |= 0x1000u;
+        ent->flags |= FL_NO_AUTO_ANIM_UPDATE;
     }
     else
     {
-        ent->flags &= ~0x1000u;
+        ent->flags &= ~(FL_NO_AUTO_ANIM_UPDATE);
         if (ConstString == scr_const.gravity)
         {
             v1->eScriptSetAnimMode = AI_ANIM_USE_BOTH_DELTAS;

@@ -2772,22 +2772,18 @@ void __cdecl ScrCmd_EnableLinkTo(scr_entref_t entref)
 {
     gentity_s *Entity; // r31
     const char *EntityTypeName; // r30
-    const char *v3; // r3
-    const char *v4; // r3
 
     Entity = GetEntity(entref);
-    if ((Entity->flags & 0x800) != 0)
+    if ((Entity->flags & FL_SUPPORTS_LINKTO) != 0)
         Scr_ObjectError("entity already has linkTo enabled");
     if (Entity->s.eType || Entity->physicsObject)
     {
         EntityTypeName = G_GetEntityTypeName(Entity);
-        v3 = SL_ConvertToString(Entity->classname);
-        v4 = va("entity (classname: '%s', type: '%s') does not currently support enableLinkTo", v3, EntityTypeName);
-        Scr_ObjectError(v4);
+        Scr_ObjectError(va("entity (classname: '%s', type: '%s') does not currently support enableLinkTo", SL_ConvertToString(Entity->classname), EntityTypeName));
     }
     if (Entity->client)
         MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\g_scr_main.cpp", 2907, 0, "%s", "!ent->client");
-    Entity->flags |= 0x800u;
+    Entity->flags |= FL_SUPPORTS_LINKTO;
 }
 
 void __cdecl ScrCmd_DontInterpolate(scr_entref_t entref)
@@ -4083,8 +4079,8 @@ void __cdecl Scr_SetStableMissile(scr_entref_t entref)
     int Int; // r3
     int eType; // r11
     int v4; // r30
-    int flags; // r11
-    unsigned int v6; // r11
+    gentityFlags_t flags; // r11
+    gentityFlags_t v6; // r11
 
     Entity = GetEntity(entref);
     Int = Scr_GetInt(0);
@@ -4094,9 +4090,9 @@ void __cdecl Scr_SetStableMissile(scr_entref_t entref)
         Scr_Error("Type should be a sentient or a vehicle");
     flags = Entity->flags;
     if (v4)
-        v6 = flags | 0x20000;
+        v6 = flags | FL_STABLE_MISSILES;
     else
-        v6 = flags & 0xFFFDFFFF;
+        v6 = flags & ~(FL_STABLE_MISSILES);
     Entity->flags = v6;
 }
 
@@ -8678,11 +8674,8 @@ XAnimTree_s *__cdecl GScr_GetEntAnimTree(gentity_s *ent)
 
 void __cdecl G_FlagAnimForUpdate(gentity_s *ent)
 {
-    int flags; // r11
-
-    flags = ent->flags;
-    if ((flags & 0x1000) == 0)
-        ent->flags = flags | 0x40000;
+    if ((ent->flags & FL_NO_AUTO_ANIM_UPDATE) == 0)
+        ent->flags |= FL_REPEAT_ANIM_UPDATE;
 }
 
 void __cdecl Scr_AnimRelative(scr_entref_t entref)
@@ -8871,7 +8864,6 @@ void __cdecl GScr_SetAnimKnobInternal(scr_entref_t entref, unsigned int flags)
     int v12; // r6
     unsigned int v13; // r5
     int v14; // r3
-    int v15; // r11
 
     Entity = GetEntity(entref);
     Float = 1.0;
@@ -8939,9 +8931,8 @@ void __cdecl GScr_SetAnimKnobInternal(scr_entref_t entref, unsigned int flags)
         }
         else
         {
-            v15 = Entity->flags;
-            if ((v15 & 0x1000) == 0)
-                Entity->flags = v15 | 0x40000;
+            if ((Entity->flags & FL_NO_AUTO_ANIM_UPDATE) == 0)
+                Entity->flags |= FL_REPEAT_ANIM_UPDATE;
         }
         return;
     }
@@ -9056,9 +9047,8 @@ void __cdecl GScr_SetAnimKnobAllInternal(scr_entref_t entref, unsigned int flags
         }
         else
         {
-            v15 = Entity->flags;
-            if ((v15 & 0x1000) == 0)
-                Entity->flags = v15 | 0x40000;
+            if ((Entity->flags & FL_NO_AUTO_ANIM_UPDATE) == 0)
+                Entity->flags |= FL_REPEAT_ANIM_UPDATE;
         }
         return;
     }
@@ -9167,9 +9157,8 @@ void __cdecl GScr_SetAnimInternal(scr_entref_t entref, unsigned int flags)
         }
         else
         {
-            v16 = Entity->flags;
-            if ((v16 & 0x1000) == 0)
-                Entity->flags = v16 | 0x40000;
+            if ((Entity->flags & FL_NO_AUTO_ANIM_UPDATE) == 0)
+                Entity->flags |= FL_REPEAT_ANIM_UPDATE;
         }
         return;
     }
@@ -9318,9 +9307,8 @@ void __cdecl GScr_SetFlaggedAnimKnobInternal(scr_entref_t entref, unsigned int f
         }
         else
         {
-            v16 = Entity->flags;
-            if ((v16 & 0x1000) == 0)
-                Entity->flags = v16 | 0x40000;
+            if ((Entity->flags & FL_NO_AUTO_ANIM_UPDATE) == 0)
+                Entity->flags |= FL_REPEAT_ANIM_UPDATE;
         }
         return;
     }
@@ -9438,9 +9426,8 @@ void __cdecl GScr_SetFlaggedAnimKnobAllInternal(scr_entref_t entref, unsigned in
         }
         else
         {
-            v18 = Entity->flags;
-            if ((v18 & 0x1000) == 0)
-                Entity->flags = v18 | 0x40000;
+            if ((Entity->flags & FL_NO_AUTO_ANIM_UPDATE) == 0)
+                Entity->flags |= FL_REPEAT_ANIM_UPDATE;
         }
         return;
     }
@@ -9545,9 +9532,8 @@ void __cdecl GScr_SetFlaggedAnimInternal(scr_entref_t entref, unsigned int flags
         }
         else
         {
-            v17 = Entity->flags;
-            if ((v17 & 0x1000) == 0)
-                Entity->flags = v17 | 0x40000;
+            if ((Entity->flags & FL_NO_AUTO_ANIM_UPDATE) == 0)
+                Entity->flags |= FL_REPEAT_ANIM_UPDATE;
         }
         return;
     }
@@ -9618,9 +9604,8 @@ LABEL_9:
     if (v2 == 1.0 && XAnimIsLooped(Anims, v8))
         Scr_ParamError(1u, "cannot set time 1 on looping animation");
     XAnimSetTime(EntAnimTree, v8, v2);
-    flags = Entity->flags;
-    if ((flags & 0x1000) == 0)
-        Entity->flags = flags | 0x40000;
+    if ((Entity->flags & FL_NO_AUTO_ANIM_UPDATE) == 0)
+        Entity->flags |= FL_REPEAT_ANIM_UPDATE;
 }
 
 void __cdecl GScr_DumpAnims(scr_entref_t entref)
@@ -9977,7 +9962,7 @@ void __cdecl GScr_EnableGrenadeTouchDamage(scr_entref_t entref)
     Entity = GetEntity(entref);
     if (Entity->classname != scr_const.trigger_damage)
         Scr_Error("Currently on supported on damage triggers");
-    Entity->flags |= 0x4000u;
+    Entity->flags |= FL_GRENADE_TOUCH_DAMAGE;
 }
 
 void __cdecl GScr_DisableGrenadeTouchDamage(scr_entref_t entref)
@@ -9987,7 +9972,7 @@ void __cdecl GScr_DisableGrenadeTouchDamage(scr_entref_t entref)
     Entity = GetEntity(entref);
     if (Entity->classname != scr_const.trigger_damage)
         Scr_Error("Currently on supported on damage triggers");
-    Entity->flags &= ~0x4000u;
+    Entity->flags &= ~(FL_GRENADE_TOUCH_DAMAGE);
 }
 
 void __cdecl GScr_MissileSetTarget(scr_entref_t entref)
@@ -11730,9 +11715,8 @@ void __cdecl ScrCmd_animscriptedInternal(scr_entref_t entref, int bDelayForActor
                 if (g_dumpAnimsCommands->current.integer == Entity->s.number)
                     DumpAnimCommand("animscripted", EntAnimTree, v26, -1, 1.0, 0.2, 1.0);
                 XAnimSetCompleteGoalWeight(ServerDObj, Entity->scripted->anim, 1.0, 0.2, 1.0, v26, v24, v23);
-                flags = Entity->flags;
-                if ((flags & 0x1000) == 0)
-                    Entity->flags = flags | 0x40000;
+                if ((Entity->flags & FL_NO_AUTO_ANIM_UPDATE) == 0)
+                    Entity->flags |= FL_REPEAT_ANIM_UPDATE;
             }
         }
         if (v6)

@@ -824,7 +824,7 @@ void __cdecl G_Damage(
                         goto LABEL_85;
                     }
                     if (client)
-                        targ->flags |= 0x20u;
+                        targ->flags |= FL_NO_KNOCKBACK;
                     if (v58 < -999)
                         targ->health = -999;
                     if (!client)

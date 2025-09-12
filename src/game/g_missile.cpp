@@ -516,9 +516,9 @@ void __cdecl Scr_MissileCreateAttractorEnt()
     attrGlob.attractors[attractorIndex].strength = Scr_GetFloat(1);
     attrGlob.attractors[attractorIndex].maxDist = Scr_GetFloat(2);
     if (attrGlob.attractors[attractorIndex].maxDist <= 0.0)
-        Scr_ParamError(2u, "maxDist must be greater than zero");
+        Scr_ParamError(2, "maxDist must be greater than zero");
     attrGlob.attractors[attractorIndex].entnum = ent->s.number;
-    ent->flags |= 0x800000u;
+    ent->flags |= FL_MISSILE_ATTRACTOR;
     attrGlob.attractors[attractorIndex].inUse = 1;
     Scr_AddInt(attractorIndex);
 }
@@ -1339,7 +1339,7 @@ bool __cdecl BounceMissile(gentity_s *ent, trace_t *trace)
     if (mayStop && (weapDef->stickiness == WEAPSTICKINESS_ALL || trace->normal[2] > 0.699999988079071))
     {
         ent->s.groundEntityNum = Trace_GetEntityHitId(trace);
-        g_entities[ent->s.groundEntityNum].flags |= 0x100000u;
+        g_entities[ent->s.groundEntityNum].flags |= FL_GROUND_ENT;
     }
     if ((ent->s.lerp.eFlags & 0x1000000) == 0)
         goto LABEL_40;
@@ -1760,7 +1760,7 @@ void __cdecl RunMissile_Destabilize(gentity_s *missile)
         missile->mover.pos2[0] = newAngleAccel[2];
         missile->s.lerp.pos.trTime = level.time;
         missile->mover.decelTime = weaponDef->destabilizationRateTime * 1000.0f;
-        missile->flags |= 0x10000u;
+        missile->flags |= FL_MISSILE_DESTABILIZED;
     }
     Vec3Mad(missile->s.lerp.apos.trBase, 0.050000001f, &missile->mover.pos1[1], newAPos);
     G_SetAngle(missile, newAPos);
@@ -2848,7 +2848,7 @@ gentity_s *__cdecl G_FireRocket(
     const float *targetOffset)
 {
     int32_t v7; // eax
-    int32_t v8; // ecx
+    gentityFlags_t v8; // ecx
     float iProjectileSpeed; // [esp+4h] [ebp-A8h]
     float speed; // [esp+8h] [ebp-A4h]
     float scale; // [esp+Ch] [ebp-A0h]
@@ -3015,9 +3015,9 @@ gentity_s *__cdecl G_FireRocket(
         MyAssertHandler(".\\game\\g_missile.cpp", 2827, 0, "%s", "weapDef->iProjectileSpeed");
     bolt->mover.decelTime = (double)weapDef->destabilizeDistance / (double)weapDef->iProjectileSpeed * 1000.0;
     if (weapDef->destabilizationRateTime == 0.0)
-        v8 = bolt->flags | 0x20000;
+        v8 = bolt->flags | FL_STABLE_MISSILES;
     else
-        v8 = bolt->flags | parent->flags & 0x20000;
+        v8 = bolt->flags | parent->flags & FL_STABLE_MISSILES;
     bolt->flags = v8;
     SV_LinkEntity(bolt);
     return bolt;

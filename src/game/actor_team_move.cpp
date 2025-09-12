@@ -1155,7 +1155,7 @@ void __cdecl Actor_MoveAlongPathWithTeam(actor_s *self, bool bRun, bool bUseInte
     if (!IsMoving && (unsigned __int8)Actor_IsMoving(self))
     {
         Actor_ClearMoveHistory(self);
-        self->ent->flags &= 0xFFFFFFE7;
+        self->ent->flags &= ~(FL_DODGE_LEFT | FL_DODGE_RIGHT);
         self->Path.iPathEndTime = 0;
     }
 }

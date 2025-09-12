@@ -371,7 +371,7 @@ gentity_s *__cdecl Weapon_GrenadeLauncher_Fire(
     Vec3Scale(wp->forward, scale, vTossVel);
     vTossVel[2] = (double)wp->weapDef->iProjectileSpeedUp + vTossVel[2];
     m = G_FireGrenade(ent, wp->muzzleTrace, vTossVel, grenType, grenModel, 0, 0);
-    m->flags |= 0x20000u;
+    m->flags |= FL_STABLE_MISSILES;
     Vec3Normalize(vTossVel);
     fAddVel = Vec3Dot(ent->client->ps.velocity, vTossVel);
     Vec3Mad(m->s.lerp.pos.trDelta, fAddVel, vTossVel, m->s.lerp.pos.trDelta);

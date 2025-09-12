@@ -1593,7 +1593,7 @@ void __cdecl ScrCmd_EnableLinkTo(scr_entref_t entref)
 
     iassert(!ent->client);
 
-    ent->flags |= 0x1000u;
+    ent->flags |= FL_SUPPORTS_LINKTO;
 }
 
 void __cdecl ScrCmd_GetOrigin(scr_entref_t entref)
@@ -1987,7 +1987,7 @@ void __cdecl ScrCmd_GetStance(scr_entref_t entref)
 
 void __cdecl Scr_SetStableMissile(scr_entref_t entref)
 {
-    uint32_t  v1; // eax
+    gentityFlags_t  v1; // eax
     int32_t stableMissile; // [esp+0h] [ebp-8h]
     gentity_s *ent; // [esp+4h] [ebp-4h]
 
@@ -1996,9 +1996,9 @@ void __cdecl Scr_SetStableMissile(scr_entref_t entref)
     if (ent->s.eType != ET_PLAYER)
         Scr_Error("Type should be a player");
     if (stableMissile)
-        v1 = ent->flags | 0x20000;
+        v1 = ent->flags | FL_STABLE_MISSILES;
     else
-        v1 = ent->flags & 0xFFFDFFFF;
+        v1 = ent->flags & ~(FL_STABLE_MISSILES);
     ent->flags = v1;
 }
 
@@ -2118,7 +2118,7 @@ void __cdecl GScr_EnableGrenadeTouchDamage(scr_entref_t entref)
     ent = GetEntity(entref);
     if (ent->classname != scr_const.trigger_damage)
         Scr_Error("Currently on supported on damage triggers");
-    ent->flags |= 0x4000u;
+    ent->flags |= FL_GRENADE_TOUCH_DAMAGE;
 }
 
 void __cdecl GScr_DisableGrenadeTouchDamage(scr_entref_t entref)
@@ -2128,7 +2128,7 @@ void __cdecl GScr_DisableGrenadeTouchDamage(scr_entref_t entref)
     ent = GetEntity(entref);
     if (ent->classname != scr_const.trigger_damage)
         Scr_Error("Currently on supported on damage triggers");
-    ent->flags &= ~0x4000u;
+    ent->flags &= ~(FL_GRENADE_TOUCH_DAMAGE);
 }
 
 void __cdecl GScr_MissileSetTarget(scr_entref_t entref)
@@ -5229,7 +5229,7 @@ void __cdecl GScr_PlaceSpawnPoint(scr_entref_t entref)
         0x2810011);
     EntityHitId = Trace_GetEntityHitId(&trace);
     pEnt->s.groundEntityNum = EntityHitId;
-    g_entities[pEnt->s.groundEntityNum].flags |= 0x100000u;
+    g_entities[pEnt->s.groundEntityNum].flags |= FL_GROUND_ENT;
     Vec3Lerp(vStart, vEnd, trace.fraction, vStart);
     G_TraceCapsule(
         &trace,

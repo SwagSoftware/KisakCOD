@@ -1181,7 +1181,7 @@ void __cdecl G_InitGame(
     ProfLoad_End();
     memset(g_entities, 0, sizeof(g_entities));
     level.gentities = g_entities;
-    g_entities[ENTITYNUM_NONE].flags |= 0x400u;
+    g_entities[ENTITYNUM_NONE].flags |= FL_OBSTACLE;
     level.maxclients = 1;
     memset(g_clients, 0, sizeof(g_clients));
     level.clients = g_clients;

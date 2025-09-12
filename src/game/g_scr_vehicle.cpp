@@ -173,7 +173,7 @@ void __cdecl VEH_InitEntity(gentity_s *ent, scr_vehicle_s *veh, int32_t infoIdx)
     ent->s.lerp.u.vehicle.gunYaw = 0.0;
     ent->takedamage = 1;
     ent->active = 1;
-    ent->flags = ent->flags | 0x100;
+    ent->flags |= FL_DYNAMICPATH;
     ent->clipmask = 0x810211;
     ent->nextthink = level.time + 50;
     SV_DObjGetBounds(ent, ent->r.mins, ent->r.maxs);
@@ -2147,7 +2147,7 @@ void __cdecl CMD_VEH_SetTurretTargetEnt(scr_entref_t entref)
         number = ENTITYNUM_NONE;
     veh->targetEnt = number;
     if (tgtEnt)
-        tgtEnt->flags |= 0x80000u;
+        tgtEnt->flags |= FL_VEHICLE_TARGET;
     if (Scr_GetNumParam() <= 1)
     {
         veh->targetOffset[0] = 0.0f;

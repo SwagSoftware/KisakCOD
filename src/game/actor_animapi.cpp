@@ -106,7 +106,7 @@ void __cdecl Actor_SetAnimScript(
         self->bGrenadeTossValid = 0;
         self->eScriptSetAnimMode = AI_ANIM_UNKNOWN;
         self->safeToChangeScript = 1;
-        ent->flags &= ~0x1000u;
+        ent->flags &= ~(FL_NO_AUTO_ANIM_UPDATE);
         Scr_SetString(&self->scriptState, 0);
         Scr_SetString(&self->stateChangeReason, 0);
         self->pAnimScriptFunc = pAnimScriptFunc;

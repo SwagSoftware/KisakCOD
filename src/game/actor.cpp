@@ -905,27 +905,18 @@ void __cdecl Actor_InitMove(actor_s *self)
 bool __cdecl Actor_IsDodgeEntity(actor_s *self, int entnum)
 {
     gentity_s *gentities; // r11
-    gentity_s *v5; // r11
+    gentity_s *ent; // r11
     bool result; // r3
 
     gentities = level.gentities;
-    if ((level.gentities[ENTITYNUM_NONE].flags & 0x400) == 0)
-    {
-        MyAssertHandler(
-            "c:\\trees\\cod3\\cod3src\\src\\game\\actor.cpp",
-            2393,
-            0,
-            "%s",
-            "level.gentities[ENTITYNUM_NONE].flags & FL_OBSTACLE");
-        gentities = level.gentities;
-    }
-    v5 = &gentities[entnum];
-    if (v5->sentient)
+    iassert(level.gentities[ENTITYNUM_NONE].flags & FL_OBSTACLE);
+    ent = &gentities[entnum];
+    if (ent->sentient)
         return level.time < self->iTeamMoveDodgeTime;
-    if ((v5->flags & 0x400) != 0)
+    if ((ent->flags & FL_OBSTACLE) != 0)
         return 0;
     result = 1;
-    if (self->Path.iPathTime <= v5->iDisconnectTime)
+    if (self->Path.iPathTime <= ent->iDisconnectTime)
         return 0;
     return result;
 }
@@ -4139,7 +4130,7 @@ int __cdecl Actor_MoveAwayNoWorse(actor_s *self)
 int __cdecl Actor_PhysicsCheckMoveAwayNoWorse(
     actor_s *self,
     gentity_s *other,
-    int flags,
+    gentityFlags_t flags,
     double distanceSqrd,
     double lengthSqrd)
 {
@@ -4154,8 +4145,10 @@ int __cdecl Actor_PhysicsCheckMoveAwayNoWorse(
         return 0;
     }
     result = 1;
-    self->ent->flags &= 0xFFFFFFE7;
+
+    self->ent->flags &= ~(FL_DODGE_LEFT| FL_DODGE_RIGHT);
     self->ent->flags |= flags;
+
     return result;
 }
 
@@ -4180,8 +4173,8 @@ int __cdecl Actor_PhysicsMoveAway(actor_s *self)
     double v18; // fp30
     int result; // r3
     int i; // r24
-    int LeftOrRightDodge; // r3
-    int v22; // r29
+    gentityFlags_t LeftOrRightDodge; // r3
+    gentityFlags_t v22; // r29
     gentity_s *v23; // r11
     actor_s *actor; // r11
     gentity_s *v25; // r11
@@ -4239,7 +4232,7 @@ int __cdecl Actor_PhysicsMoveAway(actor_s *self)
     v18 = (float)((float)v15 * (float)0.25);
     if (Actor_Physics(&self->Physics))
     {
-        if (!Actor_PhysicsCheckMoveAwayNoWorse(self, v11, 0, v14, v18) && self->Physics.groundEntNum != ENTITYNUM_NONE)
+        if (!Actor_PhysicsCheckMoveAwayNoWorse(self, v11, (gentityFlags_t)0, v14, v18) && self->Physics.groundEntNum != ENTITYNUM_NONE)
         {
             for (i = 0; i < 2; ++i)
             {
@@ -4248,7 +4241,7 @@ int __cdecl Actor_PhysicsMoveAway(actor_s *self)
                 Vec2Normalize(self->Physics.vHitNormal);
                 v16 = (float)((float)v16 * (float)0.75);
                 v18 = (float)((float)v18 * (float)0.5625);
-                LeftOrRightDodge = Actor_Physics_GetLeftOrRightDodge(
+                LeftOrRightDodge = (gentityFlags_t)Actor_Physics_GetLeftOrRightDodge(
                     self,
                     (float)(self->Physics.vHitNormal[0] * v27) >= (double)(float)(self->Physics.vHitNormal[1]
                         * v26),
@@ -4277,7 +4270,7 @@ int __cdecl Actor_PhysicsMoveAway(actor_s *self)
                 if (!actor->pCloseEnt.isDefined())
                     v11->actor->pCloseEnt.setEnt(self->ent);
             }
-            self->ent->flags &= 0xFFFFFFE7;
+            self->ent->flags &= ~(FL_DODGE_LEFT | FL_DODGE_RIGHT);
             self->Physics.vVelocity[0] = v9;
             self->Physics.vVelocity[1] = v10;
             self->Physics.vVelocity[2] = v12;
@@ -4296,7 +4289,7 @@ int __cdecl Actor_PhysicsMoveAway(actor_s *self)
     {
     LABEL_13:
         result = 0;
-        self->ent->flags &= 0xFFFFFFE7;
+        self->ent->flags &= ~(FL_DODGE_LEFT | FL_DODGE_RIGHT);
     }
     return result;
 }
@@ -5038,7 +5031,6 @@ int __cdecl SP_actor(gentity_s *ent)
     sentient_s *v5; // r27
     int eFlags; // r11
     unsigned __int8 v7; // r10
-    int v8; // r9
     float *currentOrigin; // r26
     float *v10; // r11
     int v11; // r10
@@ -5081,10 +5073,9 @@ int __cdecl SP_actor(gentity_s *ent)
         if (eFlags)
             MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\actor.cpp", 259, 0, "%s", "!ent->s.lerp.eFlags");
         v7 = ent->r.svFlags | 2;
-        v8 = ent->flags | 0x2800;
         ent->takedamage = 1;
         ent->r.svFlags = v7;
-        ent->flags = v8;
+        ent->flags |= (FL_SUPPORTS_ANIMSCRIPTED | FL_SUPPORTS_LINKTO);
         currentOrigin = ent->r.currentOrigin;
         ent->maxHealth = 100;
         ent->health = 100;
@@ -5436,13 +5427,13 @@ int __cdecl Actor_PhysicsAndDodge(actor_s *self)
     double v9; // fp25
     int result; // r3
     int iHitEntnum; // r19
-    int v12; // r28
+    gentityFlags_t v12; // r28
     float *v13; // r25
     int v14; // r23
     double v15; // fp31
     double v16; // fp30
     double v17; // fp29
-    int LeftOrRightDodge; // r3
+    gentityFlags_t LeftOrRightDodge; // r3
     gentity_s *v19; // r11
     int v20; // r11
     int v21; // r3
@@ -5474,17 +5465,17 @@ int __cdecl Actor_PhysicsAndDodge(actor_s *self)
     {
     LABEL_5:
         result = 0;
-        self->ent->flags &= 0xFFFFFFE7;
+        self->ent->flags &= ~(FL_DODGE_LEFT | FL_DODGE_RIGHT);
         return result;
     }
     iHitEntnum = self->Physics.iHitEntnum;
     if (iHitEntnum == ENTITYNUM_NONE)
     {
         result = 1;
-        self->ent->flags &= 0xFFFFFFE7;
+        self->ent->flags &= ~(FL_DODGE_LEFT | FL_DODGE_RIGHT);
         return result;
     }
-    v12 = 0;
+    v12 = (gentityFlags_t)0;
     if (!self->Physics.bStuck && Actor_IsDodgeEntity(self, self->Physics.iHitEntnum) && Path_IsTrimmed(&self->Path))
     {
         if ((unsigned __int16)self->Path.wNegotiationStartNode >= 0x8000u)
@@ -5511,7 +5502,7 @@ int __cdecl Actor_PhysicsAndDodge(actor_s *self)
             v17 = (float)(self->Path.vCurrPoint[1] - self->Physics.vHitOrigin[1]);
             Vec2Normalize(self->Physics.vHitNormal);
             v15 = (float)((float)v15 * (float)0.75);
-            LeftOrRightDodge = Actor_Physics_GetLeftOrRightDodge(
+            LeftOrRightDodge = (gentityFlags_t)Actor_Physics_GetLeftOrRightDodge(
                 self,
                 (float)(v13[1] * (float)v16) >= (double)(float)(*v13 * (float)v17),
                 v15);
@@ -5545,7 +5536,7 @@ int __cdecl Actor_PhysicsAndDodge(actor_s *self)
     {
         if (!v12 || (v21 = 1, v12 == v20))
             v21 = 0;
-        self->ent->flags &= 0xFFFFFFE7;
+        self->ent->flags &= ~(FL_DODGE_LEFT | FL_DODGE_RIGHT);
     }
     else
     {
@@ -5774,7 +5765,7 @@ void __cdecl Actor_DoMove(actor_s *self)
     }
     else
     {
-        self->ent->flags &= 0xFFFFFFE7;
+        self->ent->flags &= ~(FL_DODGE_LEFT | FL_DODGE_RIGHT);
         v15 = self->ent;
         self->Physics.vOrigin[0] = self->ent->r.currentOrigin[0];
         self->Physics.vOrigin[1] = v15->r.currentOrigin[1];

@@ -436,8 +436,8 @@ void __cdecl Cmd_God_f(gentity_s *ent)
 
     if (CheatsOk(ent))
     {
-        ent->flags ^= 1u;
-        if ((ent->flags & 1) != 0)
+        ent->flags ^= FL_GODMODE;
+        if ((ent->flags & FL_GODMODE) != 0)
             v2 = "GAME_GODMODE_ON";
         else
             v2 = "GAME_GODMODE_OFF";
@@ -453,8 +453,8 @@ void __cdecl Cmd_DemiGod_f(gentity_s *ent)
 
     if (CheatsOk(ent))
     {
-        ent->flags ^= 2u;
-        if ((ent->flags & 2) != 0)
+        ent->flags ^= FL_DEMI_GODMODE;
+        if ((ent->flags & FL_DEMI_GODMODE) != 0)
             v2 = "GAME_DEMI_GODMODE_ON";
         else
             v2 = "GAME_DEMI_GODMODE_OFF";
@@ -469,8 +469,8 @@ void __cdecl Cmd_Notarget_f(gentity_s *ent)
 
     if (CheatsOk(ent))
     {
-        ent->flags ^= 4u;
-        if ((ent->flags & 4) != 0)
+        ent->flags ^= FL_NOTARGET;
+        if ((ent->flags & FL_NOTARGET) != 0)
             v1 = va("%c \"%s\"", 101, "GAME_NOTARGETON");
         else
             v1 = va("%c \"%s\"", 101, "GAME_NOTARGETOFF");
@@ -523,7 +523,7 @@ void __cdecl Cmd_Kill_f(gentity_s *ent)
         if (bgs)
             MyAssertHandler(".\\game_mp\\g_cmds_mp.cpp", 688, 0, "%s\n\t(bgs) = %p", "(bgs == 0)", bgs);
         bgs = &level_bgs;
-        ent->flags &= 0xFFFFFFFC;
+        ent->flags &= ~(FL_GODMODE|FL_DEMI_GODMODE);
         ent->health = 0;
         ent->client->ps.stats[0] = 0;
         player_die(ent, ent, ent, 100000, 12, 0, 0, HITLOC_NONE, 0);

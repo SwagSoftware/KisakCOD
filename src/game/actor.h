@@ -544,7 +544,7 @@ int __cdecl Actor_MoveAwayNoWorse(actor_s *self);
 int __cdecl Actor_PhysicsCheckMoveAwayNoWorse(
     actor_s *self,
     gentity_s *other,
-    int flags,
+    gentityFlags_t flags,
     double distanceSqrd,
     double lengthSqrd);
 int __cdecl Actor_PhysicsMoveAway(actor_s *self);

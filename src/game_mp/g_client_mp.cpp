@@ -359,7 +359,7 @@ void __cdecl ClientSpawn(gentity_s *ent, const float *spawn_origin, const float 
     ent->takedamage = 0;
     G_SetClientContents(ent);
     ent->handler = ENT_HANDLER_CLIENT_SPECTATOR;
-    ent->flags = 4096;
+    ent->flags = FL_SUPPORTS_LINKTO;
     ent->r.mins[0] = -15.0f;
     ent->r.mins[1] = -15.0f;
     ent->r.mins[2] = 0.0f;

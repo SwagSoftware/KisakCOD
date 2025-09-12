@@ -736,7 +736,7 @@ void __cdecl Player_UpdateCursorHints(gentity_s *ent)
                                             scale = BG_GetWeaponDef(v13->s.weapon)->iUseHintStringIndex;
                                     LABEL_47:
                                         client->ps.cursorHintEntIndex = v13->s.number;
-                                        v13->flags |= 0x400000u;
+                                        v13->flags |= FL_CURSOR_HINT;
                                         client->ps.cursorHint = v11;
                                         client->ps.cursorHintString = scale;
                                         if (!v11)

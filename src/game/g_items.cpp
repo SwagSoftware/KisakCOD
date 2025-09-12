@@ -213,12 +213,9 @@ int32_t __cdecl WeaponPickup_Grab(gentity_s *weaponEnt, gentity_s *player, int32
     gentity_s *droppedEnt; // [esp+8h] [ebp-8h] BYREF
     WeaponDef *weapDef; // [esp+Ch] [ebp-4h]
 
-    if (!weaponEnt)
-        MyAssertHandler(".\\game\\g_items.cpp", 429, 0, "%s", "weaponEnt");
-    if (!player)
-        MyAssertHandler(".\\game\\g_items.cpp", 430, 0, "%s", "player");
-    if (!player->client)
-        MyAssertHandler(".\\game\\g_items.cpp", 431, 0, "%s", "player->client");
+    iassert(weaponEnt);
+    iassert(player);
+    iassert(player->client);
     droppedEnt = 0;
     weaponModel = weaponEnt->s.index.brushmodel / 128;
     weapDef = BG_GetWeaponDef(weapIdx);
@@ -230,13 +227,11 @@ int32_t __cdecl WeaponPickup_Grab(gentity_s *weaponEnt, gentity_s *player, int32
     }
     else
     {
-        if (!weaponEnt->r.inuse)
-            MyAssertHandler(".\\game\\g_items.cpp", 444, 0, "%s", "weaponEnt->r.inuse");
-        weaponEnt->flags |= 0x1000000u;
+        iassert(weaponEnt->r.inuse);
+        weaponEnt->flags |= FL_WEAPON_BEING_GRABBED;
         gotWeapon = WeaponPickup_AddWeapon(weaponEnt, player, weapIdx, weaponModel, &droppedEnt);
-        if (!weaponEnt->r.inuse)
-            MyAssertHandler(".\\game\\g_items.cpp", 449, 0, "%s", "weaponEnt->r.inuse");
-        weaponEnt->flags &= ~0x1000000u;
+        iassert(weaponEnt->r.inuse);
+        weaponEnt->flags &= ~(FL_WEAPON_BEING_GRABBED);
         if (gotWeapon)
         {
             *pickupEvent = EV_ITEM_PICKUP;
@@ -739,10 +734,10 @@ gentity_s *__cdecl LaunchItem(const gitem_s *item, float *origin, float *angles,
     iassert(!IS_NAN((dropped->s.lerp.pos.trDelta)[0]) && !IS_NAN((dropped->s.lerp.pos.trDelta)[1]) && !IS_NAN((dropped->s.lerp.pos.trDelta)[2]));
 
 #ifdef KISAK_MP
-    dropped->flags = 16;
+    dropped->flags = FL_DROPPED_ITEM;
     dropped->nextthink = level.time + 1000;
 #elif KISAK_SP
-    dropped->flags = 2112;
+    dropped->flags = (FL_DROPPED_ITEM | FL_SUPPORTS_LINKTO);
 #endif
     SV_LinkEntity(dropped);
     return dropped;
@@ -1079,7 +1074,7 @@ void __cdecl FinishSpawningItem(gentity_s *ent)
             return;
         }
         ent->s.groundEntityNum = Trace_GetEntityHitId(&tr);
-        g_entities[ent->s.groundEntityNum].flags |= 0x100000u;
+        g_entities[ent->s.groundEntityNum].flags |= FL_GROUND_ENT;
         Vec3Lerp(start, dest, tr.fraction, endpos);
         G_SetOrigin(ent, endpos);
         if (tr.fraction < 1.0)
@@ -1262,11 +1257,11 @@ void __cdecl G_SpawnItem(gentity_s *ent, const gitem_s *item)
     TransferRandomAmmoToWeaponEntity(ent, weapIndex);
     G_DObjUpdate(ent);
 #ifdef KISAK_MP
-    ent->s.clientNum = 64;
-    ent->flags |= 0x1000u;
-#elif KISAK_SP
-    ent->flags |= 0x800;
+    ent->s.clientNum = MAX_CLIENTS;
 #endif
+
+    ent->flags |= FL_SUPPORTS_LINKTO;
+
     if (level.spawnVar.spawnVarsValid)
     {
         G_SetAngle(ent, ent->r.currentAngles);
@@ -1432,7 +1427,7 @@ void __cdecl G_RunItem(gentity_s *ent)
                 G_OrientItemToGround(ent, &tr);
                 G_SetOrigin(ent, endpos);
                 ent->s.groundEntityNum = Trace_GetEntityHitId(&tr);
-                g_entities[ent->s.groundEntityNum].flags |= 0x100000u;
+                g_entities[ent->s.groundEntityNum].flags |= FL_GROUND_ENT;
                 SV_LinkEntity(ent);
             }
         }

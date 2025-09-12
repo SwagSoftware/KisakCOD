@@ -975,7 +975,7 @@ void __cdecl turret_use(gentity_s *self, gentity_s *owner, gentity_s* activator)
     owner->active = 1;
     self->active = 1;
     self->r.ownerNum.setEnt(owner);
-    owner->flags |= 0x400000u;
+    owner->flags |= FL_USE_TURRET;
     ps->ps.viewlocked = PLAYERVIEWLOCK_FULL;
     ps->ps.viewlocked_entNum = self->s.number;
     pTurretInfo->flags |= 0x800u;
@@ -1140,7 +1140,7 @@ void __cdecl G_SpawnTurret(gentity_s *self, const char *weaponinfoname)
     self->r.contents = 2097156;
     self->r.svFlags = 0;
     self->s.eType = ET_MG42;
-    self->flags |= 0x1000u;
+    self->flags |= FL_SUPPORTS_LINKTO;
     G_DObjUpdate(self);
     self->r.mins[0] = -32.0;
     self->r.mins[1] = -32.0;

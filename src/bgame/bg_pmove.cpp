@@ -3037,7 +3037,6 @@ void __cdecl PM_CheckDuck(pmove_t *pm, pml_t *pml)
         }
 #ifdef KISAK_MP
         else if ((ps->pm_flags & PMF_VEHICLE_ATTACHED) != 0)
-        {
 #elif KISAK_SP
         if ((ps->eFlags & 0x20000) != 0 && (ps->eFlags & 0x80000) == 0)
 #endif

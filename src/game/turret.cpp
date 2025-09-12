@@ -2329,7 +2329,6 @@ void __cdecl G_SpawnTurret(gentity_s *self, const char *weaponinfoname)
     float  yawConvergenceTime; // fp0
     float pitchConvergenceTime; // fp0
     float maxRange; // fp0
-    int flags; // r9
     int time; // r11
     int number; // r11
     float convergenceTime; // [sp+50h] [-80h] BYREF
@@ -2540,12 +2539,11 @@ void __cdecl G_SpawnTurret(gentity_s *self, const char *weaponinfoname)
     turretInfo->prevSentTarget = -1;
     turretInfo->flags = 4099;
     turretInfo->eTeam = TEAM_NEUTRAL;
-    flags = self->flags;
     self->clipmask = 1;
     self->r.svFlags = 0;
     self->s.eType = ET_MG42;
     self->r.contents = 2097156;
-    self->flags = flags | 0x800;
+    self->flags |= FL_SUPPORTS_LINKTO;
     G_DObjUpdate(self);
     self->r.mins[2] = 0.0;
     self->r.mins[0] = -32.0;

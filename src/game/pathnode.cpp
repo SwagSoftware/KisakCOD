@@ -2547,7 +2547,7 @@ void __cdecl Path_ConnectPathsForEntity(gentity_s *ent)
             "%s",
             "Path_IsDynamicBlockingEntity( ent )");
     disconnectedLinks = ent->disconnectedLinks;
-    ent->flags |= 0x400u;
+    ent->flags |= FL_OBSTACLE;
     next = disconnectedLinks;
     if (disconnectedLinks)
     {
@@ -2628,7 +2628,7 @@ void __cdecl Path_DisconnectPathsForEntity(gentity_s *ent)
     Path_ConnectPathsForEntity(ent);
     number = ent->s.number;
     v3 = 0;
-    ent->flags &= ~0x400u;
+    ent->flags &= ~(FL_OBSTACLE);
     ent->iDisconnectTime = level.time;
     actualNodeCount = g_path.actualNodeCount;
     if (g_path.actualNodeCount)

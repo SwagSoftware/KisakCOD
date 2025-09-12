@@ -490,9 +490,8 @@ void __cdecl Cmd_God_f(gentity_s *ent)
 {
     int ok; // r30
     int v3; // r3
-    int v4; // r11
+    gentityFlags_t v4; // r11
     const char *v5; // r4
-    const char *v6; // r3
 
     if (level.demoplaying)
     {
@@ -506,14 +505,13 @@ void __cdecl Cmd_God_f(gentity_s *ent)
     }
     if (v3)
     {
-        v4 = ent->flags ^ 1;
+        v4 = ent->flags ^ FL_GODMODE;
         ent->flags = v4;
-        if ((v4 & 1) != 0)
+        if ((v4 & FL_GODMODE) != 0)
             v5 = "GAME_GODMODE_ON";
         else
             v5 = "GAME_GODMODE_OFF";
-        v6 = va("print \"%s\"", v5);
-        SV_GameSendServerCommand(ent - g_entities, v6);
+        SV_GameSendServerCommand(ent - g_entities, va("print \"%s\"", v5));
         g_godModeRemoteInputValid = HIBYTE(ent->flags) & 1;
     }
 }
@@ -522,9 +520,8 @@ void __cdecl Cmd_DemiGod_f(gentity_s *ent)
 {
     int ok; // r30
     int v3; // r3
-    int v4; // r11
+    gentityFlags_t v4; // r11
     const char *v5; // r4
-    const char *v6; // r3
 
     if (level.demoplaying)
     {
@@ -538,14 +535,13 @@ void __cdecl Cmd_DemiGod_f(gentity_s *ent)
     }
     if (v3)
     {
-        v4 = ent->flags ^ 2;
+        v4 = ent->flags ^ FL_DEMI_GODMODE;
         ent->flags = v4;
-        if ((v4 & 2) != 0)
+        if ((v4 & FL_DEMI_GODMODE) != 0)
             v5 = "GAME_DEMI_GODMODE_ON";
         else
             v5 = "GAME_DEMI_GODMODE_OFF";
-        v6 = va("print \"%s\"", v5);
-        SV_GameSendServerCommand(ent - g_entities, v6);
+        SV_GameSendServerCommand(ent - g_entities, va("print \"%s\"", v5));
     }
 }
 
@@ -553,9 +549,8 @@ void __cdecl Cmd_Notarget_f(gentity_s *ent)
 {
     int ok; // r30
     int v3; // r3
-    int v4; // r11
+    gentityFlags_t v4; // r11
     const char *v5; // r4
-    const char *v6; // r3
 
     if (level.demoplaying)
     {
@@ -569,14 +564,13 @@ void __cdecl Cmd_Notarget_f(gentity_s *ent)
     }
     if (v3)
     {
-        v4 = ent->flags ^ 4;
+        v4 = ent->flags ^ FL_NOTARGET;
         ent->flags = v4;
         if ((v4 & 4) != 0)
             v5 = "GAME_NOTARGETON";
         else
             v5 = "GAME_NOTARGETOFF";
-        v6 = va("print \"%s\"", v5);
-        SV_GameSendServerCommand(ent - g_entities, v6);
+        SV_GameSendServerCommand(ent - g_entities, va("print \"%s\"", v5));
     }
 }
 
@@ -645,12 +639,12 @@ void __cdecl Cmd_UFO_f(gentity_s *ent)
 void __cdecl Cmd_Kill_f(gentity_s *ent)
 {
     gclient_s *client; // r5
-    unsigned int v2; // r6
+    gentityFlags_t v2; // r6
 
     if (!g_reloading->current.integer)
     {
         client = ent->client;
-        v2 = ent->flags & 0xFFFFFFFC;
+        v2 = ent->flags & ~(FL_GODMODE | FL_DEMI_GODMODE);
         ent->health = 0;
         ent->flags = v2;
         client->ps.stats[0] = 0;

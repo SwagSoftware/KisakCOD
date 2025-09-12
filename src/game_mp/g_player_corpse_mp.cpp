@@ -259,7 +259,7 @@ void __cdecl G_BounceCorpse(gentity_s *ent, corpseInfo_t *corpseInfo, trace_t *t
         ent->s.lerp.pos.trTime = 0;
         ent->s.lerp.pos.trDuration = 0;
         ent->s.groundEntityNum = Trace_GetEntityHitId(trace);
-        g_entities[ent->s.groundEntityNum].flags |= 0x100000u;
+        g_entities[ent->s.groundEntityNum].flags |= FL_GROUND_ENT;
         if (trace->allsolid)
         {
             G_SetAngle(ent, ent->r.currentAngles);
