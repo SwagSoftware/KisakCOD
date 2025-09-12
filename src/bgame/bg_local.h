@@ -747,21 +747,7 @@ struct objective_t // sizeof=0x1C
 };
 static_assert(sizeof(objective_t) == 0x1C);
 
-#ifdef KISAK_MP
-enum pmtype_t : __int32
-{
-    PM_NORMAL = 0x0,
-    PM_NORMAL_LINKED = 0x1,
-    PM_NOCLIP = 0x2,
-    PM_UFO = 0x3,
-    PM_SPECTATOR = 0x4,
-    PM_INTERMISSION = 0x5,
-    PM_LASTSTAND = 0x6,
-    PM_DEAD = 0x7,
-    PM_DEAD_LINKED = 0x8,
-};
-
-enum pmflags_t : __int32
+enum pmflags_t : __int32 // (MP/SP same)
 {
     PMF_PRONE = 1 << 0,
     PMF_DUCKED = 1 << 1,
@@ -783,7 +769,23 @@ enum pmflags_t : __int32
     PMF_MELEE_CHARGE = 1 << 17,
     PMF_NO_SPRINT = 1 << 18,
     PMF_NO_JUMP = 1 << 19,
+#ifdef KISAK_MP
     PMF_VEHICLE_ATTACHED = 1 << 20
+#endif
+};
+
+#ifdef KISAK_MP
+enum pmtype_t : __int32
+{
+    PM_NORMAL = 0x0,
+    PM_NORMAL_LINKED = 0x1,
+    PM_NOCLIP = 0x2,
+    PM_UFO = 0x3,
+    PM_SPECTATOR = 0x4,
+    PM_INTERMISSION = 0x5,
+    PM_LASTSTAND = 0x6,
+    PM_DEAD = 0x7,
+    PM_DEAD_LINKED = 0x8,
 };
 
 struct playerState_s // sizeof=0x2F64

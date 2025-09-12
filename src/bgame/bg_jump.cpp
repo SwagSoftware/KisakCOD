@@ -181,11 +181,10 @@ char __cdecl Jump_Check(pmove_t *pm, pml_t *pml)
 {
     playerState_s *ps; // [esp+4h] [ebp-4h]
 
-    if (!pm)
-        MyAssertHandler(".\\bgame\\bg_jump.cpp", 368, 0, "%s", "pm");
+    iassert(pm);
     ps = pm->ps;
-    if (!pm->ps)
-        MyAssertHandler(".\\bgame\\bg_jump.cpp", 371, 0, "%s", "ps");
+    iassert(ps);
+
     if ((ps->pm_flags & PMF_NO_JUMP) != 0)
         return 0;
     if (pm->cmd.serverTime - ps->jumpTime < 500)
