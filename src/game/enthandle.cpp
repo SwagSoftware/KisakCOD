@@ -10,7 +10,7 @@
 
 #include <bgame/bg_public.h>
 
-static EntHandleList g_entitiesHandleList[0x400];
+static EntHandleList g_entitiesHandleList[MAX_GENTITIES];
 static EntHandleInfo g_entHandleInfoArray[0x1000];
 
 static int32_t g_usedEntHandle;

@@ -1818,63 +1818,55 @@ int __cdecl turret_think_manual(gentity_s *self, actor_s *actor)
 void __cdecl turret_RestoreDefaultDropPitch(gentity_s *self)
 {
     TurretInfo *pTurretInfo; // r27
-    DObjAnimMat *LocalTagMatrix; // r28
-    DObjAnimMat *v4; // r29
-    double v5; // fp0
-    __int64 v6; // r11
-    int v7; // r29
-    float v8; // [sp+50h] [-140h] BYREF
-    float v9; // [sp+54h] [-13Ch]
-    float v10; // [sp+58h] [-138h]
-    float v11[4]; // [sp+60h] [-130h] BYREF
-    float v12[4]; // [sp+70h] [-120h] BYREF
-    __int64 v13; // [sp+80h] [-110h]
-    float v14[4]; // [sp+88h] [-108h] BYREF
-    float v15[6]; // [sp+98h] [-F8h] BYREF
-    float v16[12]; // [sp+B0h] [-E0h] BYREF
-    float v17[4][3]; // [sp+E0h] [-B0h] BYREF
-    trace_t v18; // [sp+110h] [-80h] BYREF
+    DObjAnimMat *aimMtx; // r28
+    DObjAnimMat *weaponMtx; // r29
+    float baseMtx[4][3];
+    float dir[3];
+    float start[3];
+    float angles[3];
+    trace_t trace; // [sp+110h] [-80h] BYREF
+    float mtx[3][3];
+    float transDir[3];
+    float end[3];
+
+    static const int numSteps = 30;
 
     pTurretInfo = self->pTurretInfo;
-    if (!pTurretInfo)
-        MyAssertHandler("c:\\trees\\cod3\\ENTITYNUM_NONE\\src\\game\\turret.cpp", 1637, 0, "%s", "pTurretInfo");
-    LocalTagMatrix = G_DObjGetLocalTagMatrix(self, scr_const.tag_aim);
-    if (LocalTagMatrix)
+    iassert(pTurretInfo);
+    aimMtx = G_DObjGetLocalTagMatrix(self, scr_const.tag_aim);
+    if (aimMtx)
     {
-        v4 = G_DObjGetLocalTagMatrix(self, scr_const.tag_butt);
-        if (v4)
+        weaponMtx = G_DObjGetLocalTagMatrix(self, scr_const.tag_butt);
+        if (weaponMtx)
         {
-            AnglesToAxis(self->r.currentAngles, (float (*)[3])v16);
-            v16[9] = self->r.currentOrigin[0];
-            v16[10] = self->r.currentOrigin[1];
-            v16[11] = self->r.currentOrigin[2];
-            v12[0] = v4->trans[0] - LocalTagMatrix->trans[0];
-            v5 = (float)(v4->trans[2] - LocalTagMatrix->trans[2]);
-            v12[1] = v4->trans[1] - LocalTagMatrix->trans[1];
-            v12[2] = v5;
-            MatrixTransformVector43(LocalTagMatrix->trans, (const mat4x3&)v16, v15);
-            //HIDWORD(v6) = "erverTime - cgameGlob->time > 0"; // KISAKTODO
-            v7 = 0;
-            while (1)
+            AnglesToAxis(self->r.currentAngles, baseMtx);
+            baseMtx[3][0] = self->r.currentOrigin[0];
+            baseMtx[3][1] = self->r.currentOrigin[1];
+            baseMtx[3][2] = self->r.currentOrigin[2];
+            dir[0] = weaponMtx->trans[0] - aimMtx->trans[0];
+            dir[1] = weaponMtx->trans[1] - aimMtx->trans[1];
+            dir[2] = weaponMtx->trans[2] - aimMtx->trans[2];
+            MatrixTransformVector43(aimMtx->trans, baseMtx, start);
+
+            for (int i = 0; i < numSteps; i++)
             {
-                LODWORD(v6) = v7;
-                v11[1] = 0.0;
-                v11[2] = 0.0;
-                v13 = v6;
-                v11[0] = (float)v6 * (float)-3.0;
-                AnglesToAxis(v11, v17);
-                MatrixTransformVector(v12, (const mat3x3&)v17, &v8);
-                v8 = LocalTagMatrix->trans[0] + v8;
-                v9 = LocalTagMatrix->trans[1] + v9;
-                v10 = LocalTagMatrix->trans[2] + v10;
-                MatrixTransformVector43(&v8, (const mat4x3&)v16, v14);
-                G_LocationalTrace(&v18, v15, v14, self->s.number, 8390673, bulletPriorityMap);
-                if (v18.fraction < 1.0)
-                    break;
-                if (++v7 > 30)
+                angles[0] = (-90 / (float)numSteps) * i;
+                angles[1] = 0.0f;
+                angles[2] = 0.0f;
+
+                AnglesToAxis(angles, mtx);
+                MatrixTransformVector(dir, mtx, transDir);
+                transDir[0] += aimMtx->trans[0];
+                transDir[1] += aimMtx->trans[1];
+                transDir[2] += aimMtx->trans[2];
+                MatrixTransformVector43(transDir, baseMtx, end);
+                G_LocationalTrace(&trace, start, end, self->s.number, 8390673, bulletPriorityMap);
+                if (trace.fraction < 1.0f)
+                {
+                    pTurretInfo->dropPitch = angles[0] + self->s.lerp.u.turret.gunAngles[0];
                     return;
+                }
             }
-            pTurretInfo->dropPitch = self->s.lerp.u.turret.gunAngles[0] + v11[0];
         }
     }
 }
@@ -2330,266 +2322,224 @@ int __cdecl G_CanSpawnTurret()
 
 void __cdecl G_SpawnTurret(gentity_s *self, const char *weaponinfoname)
 {
-    int v4; // r10
     TurretInfo *turretInfo; // r11
-    TurretInfo *v6; // r31
-    unsigned __int8 WeaponIndexForName; // r3
-    WeaponDef *WeaponDef; // r27
-    long double v9; // fp2
-    const char *v10; // r3
-    const char *v11; // r3
+    unsigned __int8 weaponIdx; // r3
+    WeaponDef *weapDef; // r27
     weapStance_t stance; // r11
-    const char **p_aliasName; // r11
-    const char **v14; // r11
-    const char **v15; // r11
-    const char **v16; // r11
-    float *v17; // r29
-    double v18; // fp0
-    bool spawnVarsValid; // r11
-    float *v20; // r29
-    double v21; // fp0
-    long double v26; // fp2
-    bool v27; // r11
-    float *arcmin; // r29
-    double v29; // fp0
-    float *arcmax; // r29
-    double yawConvergenceTime; // fp0
-    bool v32; // cr58
-    double pitchConvergenceTime; // fp0
-    bool v34; // r10
-    double suppressTime; // fp0
-    bool v36; // r10
-    double maxRange; // fp0
-    double v38; // fp0
-    float *p_accuracy; // r29
-    double v40; // fp0
-    float *p_aiSpread; // r29
-    float *p_playerSpread; // r29
+    float  yawConvergenceTime; // fp0
+    float pitchConvergenceTime; // fp0
+    float maxRange; // fp0
     int flags; // r9
     int time; // r11
     int number; // r11
-    float v46; // [sp+50h] [-80h] BYREF
-    float v47; // [sp+54h] [-7Ch] BYREF
-    float v48[4]; // [sp+58h] [-78h] BYREF
+    float convergenceTime; // [sp+50h] [-80h] BYREF
+    float suppressTime; // [sp+54h] [-7Ch] BYREF
 
-    v4 = 0;
-    int i = 0;
-    for (; i < 32; ++i)
+    int i;
+
+    for (i = 0; i < 32; ++i)
     {
         turretInfo = &turretInfoStore[i];
         if (!turretInfo->inuse)
             break;
     }
-    if (i == 32)
+
+    if (i >= 32)
         Com_Error(ERR_DROP, "G_SpawnTurret: max number of turrets (%d) exceeded", 32);
 
-    memset(v6, 0, sizeof(TurretInfo));
-    self->pTurretInfo = v6;
-    v6->inuse = 1;
-    WeaponIndexForName = G_GetWeaponIndexForName(weaponinfoname);
+    memset(turretInfo, 0, sizeof(TurretInfo));
+
+    self->pTurretInfo = turretInfo;
+    turretInfo->inuse = 1;
+    weaponIdx = G_GetWeaponIndexForName(weaponinfoname);
     self->s.weaponModel = 0;
-    self->s.weapon = WeaponIndexForName;
-    if (!WeaponIndexForName)
+    self->s.weapon = weaponIdx;
+    if (!weaponIdx)
         Com_Error(ERR_DROP, "bad weaponinfo '%s' specified for turret", weaponinfoname);
-    WeaponDef = BG_GetWeaponDef(self->s.weapon);
-    if (WeaponDef->weapClass != WEAPCLASS_TURRET)
+
+    weapDef = BG_GetWeaponDef(self->s.weapon);
+
+    if (weapDef->weapClass != WEAPCLASS_TURRET)
     {
-        v10 = va("Could not load turret '%s'", weaponinfoname);
-        Scr_Error(v10);
+        Scr_Error(va("Could not load turret '%s'", weaponinfoname));
     }
     if (!level.initializing && !IsItemRegistered(self->s.weapon))
     {
-        v11 = va("turret '%s' not precached", weaponinfoname);
-        Scr_Error(v11);
-    }
-    if (*WeaponDef->szScript && !*(int *)((char *)&g_scr_data.anim.weapons[0].func + __ROL4__(self->s.weapon, 3)))
-        Com_Error(ERR_DROP, "cannot spawn turret '%s' which has a script, unless one instance placed in map", weaponinfoname);
-    v6->fireTime = 0;
-    stance = WeaponDef->stance;
-    v6->fireSndDelay = 0;
-    v6->prevStance = -1;
-    v6->stance = stance;
-    p_aliasName = &WeaponDef->fireLoopSound->aliasName;
-    if (p_aliasName)
-        v6->fireSnd = G_SoundAliasIndexPermanent(*p_aliasName);
-    else
-        v6->fireSnd = 0;
-    v14 = &WeaponDef->fireLoopSoundPlayer->aliasName;
-    if (v14)
-        v6->fireSndPlayer = G_SoundAliasIndexPermanent(*v14);
-    else
-        v6->fireSndPlayer = 0;
-    v15 = &WeaponDef->fireStopSound->aliasName;
-    if (v15)
-        v6->stopSnd = G_SoundAliasIndexPermanent(*v15);
-    else
-        v6->stopSnd = 0;
-    v16 = &WeaponDef->fireStopSoundPlayer->aliasName;
-    if (v16)
-        v6->stopSndPlayer = G_SoundAliasIndexPermanent(*v16);
-    else
-        v6->stopSndPlayer = 0;
-    if (!level.spawnVar.spawnVarsValid
-        || (v17 = &v6->arcmin[1], !G_SpawnFloat("rightarc", "", &v6->arcmin[1])))
-    {
-        v17 = &v6->arcmin[1];
-        v6->arcmin[1] = WeaponDef->rightArc;
-    }
-    v18 = (float)(*v17 * (float)-1.0);
-    *v17 = *v17 * (float)-1.0;
-    if (v18 > 0.0)
-        *v17 = 0.0;
-    spawnVarsValid = level.spawnVar.spawnVarsValid;
-    v6->initialYawmin = *v17;
-    if (!spawnVarsValid || (v20 = &v6->arcmax[1], !G_SpawnFloat("leftarc", "", &v6->arcmax[1])))
-    {
-        v20 = &v6->arcmax[1];
-        v6->arcmax[1] = WeaponDef->leftArc;
-    }
-    if (*v20 < 0.0)
-        *v20 = 0.0;
-    v21 = (float)(*v20 - v6->initialYawmin);
-    v6->initialYawmax = *v20;
-    v6->forwardAngleDot = v21;
-
-    // aislop
-    //_FP11 = (float)((float)v21 - (float)180.0);
-    //_FP10 = (float)((float)90.0 - (float)v21);
-    //__asm { fsel      f0, f11, f13, f0 }
-    //__asm { fsel      f0, f10, f12, f0 }
-    //v6->forwardAngleDot = _FP0;
-    //v26 = cos((float)((float)_FP0 * (float)0.017453292));
-
-    {
-        float t1 = v21 - 180.0f;
-        float t2 = 90.0f - v21;
-        // Mimic: fsel f0, f11, f13, f0  =>  f0 = (t1 >= 0 ? f13 : f0)
-        float f0 = (t1 >= 0.0f) ? t2 : /* fallback: keep old f0 value */ t2;
-        // Then: fsel f0, f10, f12, f0 => f0 = (t2 >= 0 ? f0 : f0)
-        f0 = (t2 >= 0.0f) ? f0 : f0;
-        v6->forwardAngleDot = f0;
-        v26 = cosf(f0 * (float)(M_PI / 180.0f));
+        Scr_Error(va("turret '%s' not precached", weaponinfoname));
     }
 
+    // LWSS: Removing this check, it's not in blops. 
+    //if (*weapDef->szScript && !*(int *)((char *)&g_scr_data.anim.weapons[0].func + __ROL4__(self->s.weapon, 3)))
+    //    Com_Error(ERR_DROP, "cannot spawn turret '%s' which has a script, unless one instance placed in map", weaponinfoname);
 
-    v27 = level.spawnVar.spawnVarsValid;
-    v6->forwardAngleDot = *(double *)&v26;
-    if (!v27 || (arcmin = v6->arcmin, !G_SpawnFloat("toparc", "", v6->arcmin)))
+    turretInfo->fireTime = 0;
+    stance = weapDef->stance;
+    turretInfo->fireSndDelay = 0;
+    turretInfo->prevStance = -1;
+    turretInfo->stance = stance;
+
+    if (weapDef->fireLoopSound)
+        turretInfo->fireSnd = G_SoundAliasIndexPermanent(weapDef->fireLoopSound->aliasName);
+    else
+        turretInfo->fireSnd = 0;
+
+    if (weapDef->fireLoopSoundPlayer)
+        turretInfo->fireSndPlayer = G_SoundAliasIndexPermanent(weapDef->fireLoopSoundPlayer->aliasName);
+    else
+        turretInfo->fireSndPlayer = 0;
+
+    if (weapDef->fireStopSound)
+        turretInfo->stopSnd = G_SoundAliasIndexPermanent(weapDef->fireStopSound->aliasName);
+    else
+        turretInfo->stopSnd = 0;
+
+    if (weapDef->fireStopSoundPlayer)
+        turretInfo->stopSndPlayer = G_SoundAliasIndexPermanent(weapDef->fireStopSoundPlayer->aliasName);
+    else
+        turretInfo->stopSndPlayer = 0;
+
+    if (!level.spawnVar.spawnVarsValid || !G_SpawnFloat("rightarc", "", &turretInfo->arcmin[1]))
     {
-        arcmin = v6->arcmin;
-        v6->arcmin[0] = WeaponDef->topArc;
+        turretInfo->arcmin[1] = weapDef->rightArc;
     }
-    v29 = (float)(*arcmin * (float)-1.0);
-    *arcmin = *arcmin * (float)-1.0;
-    if (v29 > 0.0)
-        *arcmin = 0.0;
-    if (!level.spawnVar.spawnVarsValid || (arcmax = v6->arcmax, !G_SpawnFloat("bottomarc", "", v6->arcmax)))
+
+    turretInfo->arcmin[1] = turretInfo->arcmin[1] * -1.0f;
+    if (turretInfo->arcmin[1] > 0.0f)
     {
-        arcmax = v6->arcmax;
-        v6->arcmax[0] = WeaponDef->bottomArc;
+        turretInfo->arcmin[1] = 0.0f;
     }
-    if (*arcmax < 0.0)
-        *arcmax = 0.0;
-    if (level.spawnVar.spawnVarsValid && G_SpawnFloat("yawconvergencetime", "", &v46)
-        || level.spawnVar.spawnVarsValid && G_SpawnFloat("convergencetime", "", &v46))
+    turretInfo->initialYawmin = turretInfo->arcmin[1];
+
+    if (!level.spawnVar.spawnVarsValid || !G_SpawnFloat("leftarc", "", &turretInfo->arcmax[1]))
     {
-        yawConvergenceTime = v46;
+        turretInfo->arcmax[1] = weapDef->leftArc;
+    }
+
+    if (turretInfo->arcmax[1] < 0.0f)
+    {
+        turretInfo->arcmax[1] = 0.0f;
+    }
+
+    turretInfo->initialYawmax = turretInfo->arcmax[1];
+
+    turretInfo->forwardAngleDot = cosf(DEG2RAD(CLAMP((turretInfo->initialYawmax - turretInfo->initialYawmin), 90.0f, 180.0f)));
+
+
+    if (!level.spawnVar.spawnVarsValid || !G_SpawnFloat("toparc", "", turretInfo->arcmin))
+    {
+        turretInfo->arcmin[0] = weapDef->topArc;
+    }
+
+    turretInfo->arcmin[0] = turretInfo->arcmin[0] * -1.0f;
+    if (turretInfo->arcmin[0] > 0.0f)
+    {
+        turretInfo->arcmin[0] = 0.0f;
+    }
+
+    if (!level.spawnVar.spawnVarsValid || !G_SpawnFloat("bottomarc", "", turretInfo->arcmax))
+    {
+        turretInfo->arcmax[0] = weapDef->bottomArc;
+    }
+
+    if (turretInfo->arcmax[0] < 0.0)
+    {
+        turretInfo->arcmax[0] = 0.0f;
+    }
+
+    if (level.spawnVar.spawnVarsValid && G_SpawnFloat("yawconvergencetime", "", &convergenceTime) || level.spawnVar.spawnVarsValid && G_SpawnFloat("convergencetime", "", &convergenceTime))
+    {
+        yawConvergenceTime = convergenceTime;
     }
     else
     {
-        yawConvergenceTime = WeaponDef->yawConvergenceTime;
-        v46 = WeaponDef->yawConvergenceTime;
+        yawConvergenceTime = weapDef->yawConvergenceTime;
+        convergenceTime = weapDef->yawConvergenceTime;
     }
     if (yawConvergenceTime < 0.0)
     {
         yawConvergenceTime = 0.0;
-        v46 = 0.0;
+        convergenceTime = 0.0;
     }
-    v32 = !level.spawnVar.spawnVarsValid;
-    v6->convergenceTime[1] = (int)(float)((float)((float)yawConvergenceTime * (float)1000.0) + (float)0.5);
-    if (!v32 && G_SpawnFloat("pitchconvergencetime", "", &v46))
+
+    turretInfo->convergenceTime[1] = (int)(float)((float)(convergenceTime * 1000.0f) + 0.5f);
+    if (level.spawnVar.spawnVarsValid && G_SpawnFloat("pitchconvergencetime", "", &convergenceTime))
     {
-        pitchConvergenceTime = v46;
+        pitchConvergenceTime = convergenceTime;
     }
     else
     {
-        pitchConvergenceTime = WeaponDef->pitchConvergenceTime;
-        v46 = WeaponDef->pitchConvergenceTime;
+        pitchConvergenceTime = weapDef->pitchConvergenceTime;
+        convergenceTime = weapDef->pitchConvergenceTime;
     }
     if (pitchConvergenceTime < 0.0)
     {
         pitchConvergenceTime = 0.0;
-        v46 = 0.0;
+        convergenceTime = 0.0;
     }
-    v34 = level.spawnVar.spawnVarsValid;
-    v6->convergenceTime[0] = (int)(float)((float)((float)pitchConvergenceTime * (float)1000.0) + (float)0.5);
-    if (v34 && G_SpawnFloat("suppressionTime", "", &v47))
+
+    turretInfo->convergenceTime[0] = (int)(float)((float)(pitchConvergenceTime * 1000.0f) + 0.5f);
+    if (level.spawnVar.spawnVarsValid && G_SpawnFloat("suppressionTime", "", &suppressTime))
     {
-        suppressTime = v47;
+        suppressTime = suppressTime;
     }
     else
     {
-        suppressTime = WeaponDef->suppressTime;
-        v47 = WeaponDef->suppressTime;
+        suppressTime = weapDef->suppressTime;
+        suppressTime = weapDef->suppressTime;
     }
     if (suppressTime < 0.0)
     {
         suppressTime = 0.0;
-        v47 = 0.0;
+        suppressTime = 0.0;
     }
-    v36 = level.spawnVar.spawnVarsValid;
-    v6->suppressTime = (int)(float)((float)((float)suppressTime * (float)1000.0) + (float)0.5);
-    if (v36 && G_SpawnFloat("maxrange", "", v48))
+    turretInfo->suppressTime = (int)(float)((float)(suppressTime * 1000.0f) + 0.5f);
+    if (level.spawnVar.spawnVarsValid && G_SpawnFloat("maxrange", "", &maxRange))
     {
-        maxRange = v48[0];
+        maxRange = maxRange;
     }
     else
     {
-        maxRange = WeaponDef->maxRange;
-        v48[0] = WeaponDef->maxRange;
+        maxRange = weapDef->maxRange;
     }
+
     if (maxRange <= 0.0)
-        v38 = FLT_MAX;
+        turretInfo->maxRangeSquared = FLT_MAX;
     else
-        v38 = (float)((float)maxRange * (float)maxRange);
-    v6->maxRangeSquared = v38;
-    v6->dropPitch = -90.0;
+        turretInfo->maxRangeSquared = (maxRange * maxRange);
+
+    turretInfo->dropPitch = -90.0f;
+
     if (!self->health)
         self->health = 100;
-    if (!level.spawnVar.spawnVarsValid || (p_accuracy = &v6->accuracy, !G_SpawnFloat("accuracy", "1", &v6->accuracy)))
+
+    if (!level.spawnVar.spawnVarsValid || !G_SpawnFloat("accuracy", "1", &turretInfo->accuracy))
     {
-        p_accuracy = &v6->accuracy;
-        v6->accuracy = WeaponDef->accuracy;
+        turretInfo->accuracy = weapDef->accuracy;
     }
-    v40 = *p_accuracy;
-    if (v40 >= 0.0)
+
+    turretInfo->accuracy = CLAMP(turretInfo->accuracy, 0.0f, 1.0f);
+
+    if (!level.spawnVar.spawnVarsValid || !G_SpawnFloat("aiSpread", "1", &turretInfo->aiSpread))
     {
-        if (v40 > 1.0)
-            *p_accuracy = 1.0;
+        turretInfo->aiSpread = weapDef->aiSpread;
     }
-    else
+
+    if (turretInfo->aiSpread < 0.0f)
+        turretInfo->aiSpread = 0.0f;
+
+    if (!level.spawnVar.spawnVarsValid || !G_SpawnFloat("playerSpread", "1", &turretInfo->playerSpread))
     {
-        *p_accuracy = 0.0;
+        turretInfo->playerSpread = weapDef->playerSpread;
     }
-    if (!level.spawnVar.spawnVarsValid || (p_aiSpread = &v6->aiSpread, !G_SpawnFloat("aiSpread", "1", &v6->aiSpread)))
+
+    if (turretInfo->playerSpread < 0.0f)
     {
-        p_aiSpread = &v6->aiSpread;
-        v6->aiSpread = WeaponDef->aiSpread;
+        turretInfo->playerSpread = 0.0f;
     }
-    if (*p_aiSpread < 0.0)
-        *p_aiSpread = 0.0;
-    if (!level.spawnVar.spawnVarsValid
-        || (p_playerSpread = &v6->playerSpread, !G_SpawnFloat("playerSpread", "1", &v6->playerSpread)))
-    {
-        p_playerSpread = &v6->playerSpread;
-        v6->playerSpread = WeaponDef->playerSpread;
-    }
-    if (*p_playerSpread < 0.0)
-        *p_playerSpread = 0.0;
-    v6->state = 0;
-    v6->prevSentTarget = -1;
-    v6->flags = 4099;
-    v6->eTeam = TEAM_NEUTRAL;
+    turretInfo->state = 0;
+    turretInfo->prevSentTarget = -1;
+    turretInfo->flags = 4099;
+    turretInfo->eTeam = TEAM_NEUTRAL;
     flags = self->flags;
     self->clipmask = 1;
     self->r.svFlags = 0;
@@ -2614,16 +2564,8 @@ void __cdecl G_SpawnTurret(gentity_s *self, const char *weaponinfoname)
     self->takedamage = 0;
     self->nextthink = time + 50;
     number = self->r.ownerNum.number;
-    if (self->r.ownerNum.number && !g_entities[number - 1].r.inuse)
-        MyAssertHandler(
-            "c:\\trees\\cod3\\ENTITYNUM_NONE\\src\\game\\g_public.h",
-            336,
-            0,
-            "%s\n\t(number - 1) = %i",
-            "(!number || g_entities[number - 1].r.inuse)",
-            number - 1);
-    if (self->r.ownerNum.number)
-        MyAssertHandler("c:\\trees\\cod3\\ENTITYNUM_NONE\\src\\game\\turret.cpp", 2308, 0, "%s", "!self->r.ownerNum.isDefined()");
+    iassert((!number || g_entities[number - 1].r.inuse));
+    iassert(!self->r.ownerNum.isDefined());
     SV_LinkEntity(self);
 }
 
