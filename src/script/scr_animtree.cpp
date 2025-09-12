@@ -227,7 +227,7 @@ void __cdecl Scr_LoadAnimTreeAtIndex(unsigned int index, void *(__cdecl *Alloc)(
             ConnectScriptToAnim(names, 0, filenameId, name, index);
             SL_RemoveRefToString(name);
 
-            if (!useFastFile->current.enabled)
+            if (!IsFastFileLoad())
                 Scr_PrecacheAnimationTree(scrAnimPub.animtree_node);
 
             size2 = Scr_CreateAnimationTree(scrAnimPub.animtree_node, names, animtree, 1, "root", 0, filenameId, index, 0);

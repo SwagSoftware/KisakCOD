@@ -1180,7 +1180,7 @@ void __cdecl UI_Shutdown(int localClientNum)
     Menus_CloseAll(&uiInfoArray.uiDC);
     sharedUiInfo.assets.whiteMaterial = 0;
     UILocalVar_Shutdown(&uiInfoArray.uiDC.localVars);
-    if (!useFastFile->current.enabled)
+    if (!IsFastFileLoad())
         Menus_FreeAllMemory(&uiInfoArray.uiDC);
     LAN_SaveServersToCache();
 }
@@ -1216,7 +1216,7 @@ char *__cdecl GetMenuBuffer_LoadObj(char *filename)
 
 char *__cdecl GetMenuBuffer(char *filename)
 {
-    if (useFastFile->current.enabled)
+    if (IsFastFileLoad())
         return (char *)GetMenuBuffer_FastFile(filename);
     else
         return GetMenuBuffer_LoadObj(filename);
@@ -1363,7 +1363,7 @@ void __cdecl UI_DrawMapLevelshot(int localClientNum)
     {
         if (g_mapname[0])
         {
-            if (useFastFile->current.enabled)
+            if (IsFastFileLoad())
                 menua = DB_FindXAssetHeader(ASSET_TYPE_MENU, "connect").menu;
             else
                 menua = Menus_FindByName(&uiInfoArray.uiDC, "connect");
@@ -1471,7 +1471,7 @@ void __cdecl UI_SetMap(char *mapname, char *gametype)
 
     I_strncpyz(g_mapname, mapname, 64);
     I_strncpyz(g_gametype, gametype, 64);
-    if (!useFastFile->current.enabled)
+    if (!IsFastFileLoad())
     {
         if (g_mapname[0])
         {
@@ -3212,7 +3212,7 @@ void __cdecl UI_RunMenuScript(int localClientNum, const char **args, const char 
                                                                                     }
                                                                                     else
                                                                                     {
-                                                                                        if (useFastFile->current.enabled)
+                                                                                        if (IsFastFileLoad())
                                                                                             DB_SyncXAssets();
                                                                                         Var = Dvar_FindVar("fs_game");
                                                                                         Dvar_Reset(Var, DVAR_SOURCE_INTERNAL);
@@ -3237,7 +3237,7 @@ void __cdecl UI_RunMenuScript(int localClientNum, const char **args, const char 
                                                                                             "%s/%s",
                                                                                             "mods",
                                                                                             sharedUiInfo.modList[sharedUiInfo.modIndex].modName);
-                                                                                        if (useFastFile->current.enabled)
+                                                                                        if (IsFastFileLoad())
                                                                                             DB_SyncXAssets();
                                                                                         Dvar_SetStringByName("fs_game", value);
                                                                                         Cbuf_AddText(localClientNum, "vid_restart\n");
@@ -4517,7 +4517,7 @@ void UI_GetGameTypesList()
     sharedUiInfo.numJoinGameTypes = 0;
     sharedUiInfo.joinGameTypes[0].gameType = String_Alloc("All");
     sharedUiInfo.joinGameTypes[sharedUiInfo.numJoinGameTypes++].gameTypeName = "";
-    if (useFastFile->current.enabled)
+    if (IsFastFileLoad())
         ((void(__cdecl *)(void (*)()))UI_GetGameTypesList_FastFile)(UI_GetGameTypesList_FastFile);
     else
         ((void(__cdecl *)(void (*)()))UI_GetGameTypesList_LoadObj)(UI_GetGameTypesList_LoadObj);
@@ -4705,9 +4705,9 @@ void __cdecl UI_Init(int localClientNum)
             localClientNum);
     uiInfoArray.uiDC.localClientNum = localClientNum;
     g_ingameMenusLoaded[localClientNum] = 0;
-    if (useFastFile->current.enabled)
+    if (IsFastFileLoad())
         DB_ResetZoneSize(0);
-    if (!useFastFile->current.enabled)
+    if (!IsFastFileLoad())
         UI_LoadSoundAliases();
     UI_RegisterDvars();
     uiInfoArray.allowScriptMenuResponse = 1;
@@ -4733,17 +4733,17 @@ void __cdecl UI_Init(int localClientNum)
     v2.enumeration.stringCount = 0;
     ui_netGameType = Dvar_RegisterInt("ui_netGametype", 0, v2, DVAR_ARCHIVE, "Game type");
     UI_LoadArenas();
-    if (useFastFile->current.enabled)
+    if (IsFastFileLoad())
     {
         menuList = UI_LoadMenus((char*)"ui_mp/code.txt", 3);
         UI_AddMenuList(&uiInfoArray.uiDC, menuList);
     }
-    if (!g_mapname[0] || !useFastFile->current.enabled)
+    if (!g_mapname[0] || !IsFastFileLoad())
     {
         menuLista = UI_LoadMenus((char *)"ui_mp/menus.txt", 3);
         UI_AddMenuList(&uiInfoArray.uiDC, menuLista);
     }
-    if (g_mapname[0] && !useFastFile->current.enabled)
+    if (g_mapname[0] && !IsFastFileLoad())
     {
         v1 = va("maps/mp/%s.csv", g_mapname);
         UI_MapLoadInfo(v1);

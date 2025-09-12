@@ -39,7 +39,7 @@ LoadedSound *__cdecl SND_LoadSoundFile(const char *name)
     char realname[256]; // [esp+8h] [ebp-108h] BYREF
     LoadedSound *loadSnd; // [esp+10Ch] [ebp-4h]
 
-    if (useFastFile->current.enabled)
+    if (IsFastFileLoad())
         MyAssertHandler(".\\win32\\snd_driver_load_obj.cpp", 175, 0, "%s", "IsObjFileLoad()");
     if (!name)
         MyAssertHandler(".\\win32\\snd_driver_load_obj.cpp", 176, 0, "%s", "name");

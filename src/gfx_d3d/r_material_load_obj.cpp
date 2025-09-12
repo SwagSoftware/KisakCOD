@@ -6038,7 +6038,7 @@ void Material_FreeAllStateMaps()
 void __cdecl Material_FreeAllTechniqueSets()
 {
     DB_EnumXAssets(ASSET_TYPE_TECHNIQUE_SET, Material_ReleaseTechniqueSet, 0, 1);
-    if (!useFastFile->current.enabled)
+    if (!IsFastFileLoad())
         memset(materialGlobals.techniqueSetHashTable, 0, sizeof(materialGlobals.techniqueSetHashTable));
 }
 void __cdecl Material_FreeAll()
@@ -6047,7 +6047,7 @@ void __cdecl Material_FreeAll()
     Material_FreeAllStrings();
     Material_FreeAllStateMaps();
     Material_FreeAllTechniqueSets();
-    if (!useFastFile->current.enabled)
+    if (!IsFastFileLoad())
     {
         memset(mtlLoadGlob.techniqueHashTable, 0, sizeof(mtlLoadGlob.techniqueHashTable));
         mtlLoadGlob.techniqueCount = 0;
@@ -6416,7 +6416,7 @@ void __cdecl Material_SortInternal(Material **sortedMaterials, unsigned int mate
 
 void __cdecl Material_Sort()
 {
-    if (useFastFile->current.enabled)
+    if (IsFastFileLoad())
         rgp.materialCount = DB_GetAllXAssetOfType(ASSET_TYPE_MATERIAL, (XAssetHeader *)&rgp, 2048);
     Material_SortInternal(rgp.sortedMaterials, rgp.materialCount);
 }

@@ -2326,7 +2326,7 @@ void __cdecl CL_ShutdownRenderer(int32_t destroyWindow)
     iassert(cls.rendererStarted || destroyWindow);
     cls.rendererStarted = 0;
     Com_ShutdownWorld();
-    if (useFastFile->current.enabled && destroyWindow)
+    if (IsFastFileLoad() && destroyWindow)
         CM_Shutdown();
     R_Shutdown(destroyWindow);
     cls.whiteMaterial = 0;

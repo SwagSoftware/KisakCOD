@@ -912,7 +912,7 @@ WeaponDef *__cdecl BG_LoadDefaultWeaponDef_LoadObj()
 
 WeaponDef *__cdecl BG_LoadDefaultWeaponDef()
 {
-    if (useFastFile->current.enabled)
+    if (IsFastFileLoad())
         return BG_LoadDefaultWeaponDef_FastFile();
     else
         return BG_LoadDefaultWeaponDef_LoadObj();

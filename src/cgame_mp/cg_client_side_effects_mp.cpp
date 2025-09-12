@@ -65,7 +65,7 @@ void __cdecl CG_LoadClientEffects_LoadObj(int32_t localClientNum, const char *fi
 
 void __cdecl CG_LoadClientEffects(int32_t localClientNum, const char *filename)
 {
-    if (useFastFile->current.enabled)
+    if (IsFastFileLoad())
         CG_LoadClientEffects_FastFile(localClientNum, filename);
     else
         CG_LoadClientEffects_LoadObj(localClientNum, filename);
@@ -409,7 +409,7 @@ void __cdecl CG_LoadClientEffectMapping_LoadObj(const char *filename)
 
 void __cdecl CG_LoadClientEffectMapping(const char *filename)
 {
-    if (useFastFile->current.enabled)
+    if (IsFastFileLoad())
         CG_LoadClientEffectMapping_FastFile(filename);
     else
         CG_LoadClientEffectMapping_LoadObj(filename);

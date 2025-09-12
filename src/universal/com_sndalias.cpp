@@ -106,7 +106,7 @@ double __cdecl Com_GetVolumeFalloffCurveValue(SndCurve *volumeFalloffCurve, floa
 
 void __cdecl Com_InitSoundDevGuiGraphs()
 {
-    if (useFastFile->current.enabled)
+    if (IsFastFileLoad())
         ((void(__cdecl *)(void (*)()))Com_InitSoundDevGuiGraphs_FastFile)(Com_InitSoundDevGuiGraphs_FastFile);
     else
         ((void(__cdecl *)(void (*)()))Com_InitSoundDevGuiGraphs_LoadObj)(Com_InitSoundDevGuiGraphs_LoadObj);
@@ -217,7 +217,7 @@ snd_alias_list_t *__cdecl Com_TryFindSoundAlias_LoadObj(const char *name)
 
 snd_alias_list_t *__cdecl Com_TryFindSoundAlias(const char *name)
 {
-    if (useFastFile->current.enabled)
+    if (IsFastFileLoad())
         return Com_TryFindSoundAlias_FastFile(name);
     else
         return Com_TryFindSoundAlias_LoadObj(name);
@@ -253,7 +253,7 @@ snd_alias_list_t *__cdecl Com_TryFindSoundAlias_FastFile(const char *name)
 
 snd_alias_list_t *__cdecl Com_FindSoundAlias(const char *name)
 {
-    if (useFastFile->current.enabled)
+    if (IsFastFileLoad())
         return Com_FindSoundAlias_FastFile(name);
     else
         return Com_FindSoundAlias_LoadObj(name);
@@ -288,7 +288,7 @@ snd_alias_list_t *__cdecl Com_FindSoundAlias_FastFile(const char *name)
 
 snd_alias_list_t *__cdecl Com_FindSoundAliasNoErrors(const char *name)
 {
-    if (useFastFile->current.enabled)
+    if (IsFastFileLoad())
         return Com_FindSoundAliasNoErrors_FastFile(name);
     else
         return Com_FindSoundAliasNoErrors_LoadObj(name);

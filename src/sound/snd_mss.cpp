@@ -310,7 +310,7 @@ int __cdecl MSS_DigitalFormatType(int waveFormat, int bits, int channels)
 
 unsigned __int8 *__cdecl MSS_Alloc(unsigned int bytes, unsigned int rate)
 {
-  if ( useFastFile->current.enabled )
+  if ( IsFastFileLoad() )
     return (unsigned __int8 *)((int (__cdecl *)(unsigned int, unsigned int))MSS_Alloc_FastFile)(bytes, rate);
   else
     return MSS_Alloc_LoadObj(bytes, rate);

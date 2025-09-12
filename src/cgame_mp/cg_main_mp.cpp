@@ -1364,7 +1364,7 @@ void CG_RegisterPhysicsSounds_LoadObj()
 
 void CG_RegisterPhysicsSounds()
 {
-    if (useFastFile->current.enabled)
+    if (IsFastFileLoad())
         CG_RegisterPhysicsSounds_FastFile();
     else
         CG_RegisterPhysicsSounds_LoadObj();
@@ -1783,7 +1783,7 @@ void __cdecl CG_Init(int32_t localClientNum, int32_t serverMessageNum, int32_t s
         Com_SetWeaponInfoMemory(2);
         BG_ClearWeaponDef();
     }
-    if (!g_mapLoaded && !useFastFile->current.enabled)
+    if (!g_mapLoaded && !IsFastFileLoad())
     {
         CG_LoadingString(localClientNum, "sound aliases");
         CL_LoadSoundAliases(cgs->mapname);
@@ -2170,7 +2170,7 @@ void __cdecl CG_Shutdown(int32_t localClientNum)
     g_ambientStarted = 0;
     g_mapLoaded = 0;
     Mantle_ShutdownAnims();
-    if (!useFastFile->current.enabled)
+    if (!IsFastFileLoad())
         Menus_FreeAllMemory(&cgDC[localClientNum]);
     CG_FreeWeapons(localClientNum);
     CG_FreeClientDObjInfo(localClientNum);

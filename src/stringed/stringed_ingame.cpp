@@ -12,7 +12,7 @@ char sTemp[64];
 
 const char *__cdecl SE_GetString(const char *psPackageAndStringReference)
 {
-    if (useFastFile->current.enabled)
+    if (IsFastFileLoad())
         return SE_GetString_FastFile(psPackageAndStringReference);
     else
         return (const char *)SE_GetString_LoadObj(psPackageAndStringReference);

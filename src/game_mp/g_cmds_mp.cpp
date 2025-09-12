@@ -905,7 +905,7 @@ void __cdecl Cmd_CallVote_f(gentity_s *ent)
         if (!I_stricmp(arg2, g_gametype->current.string))
             arg2[0] = 0;
         SV_Cmd_ArgvBuffer(3, arg3, 256);
-        if (!useFastFile->current.enabled && !SV_MapExists(arg3))
+        if (!IsFastFileLoad() && !SV_MapExists(arg3))
             goto LABEL_36;
         mapname = Dvar_RegisterString("mapname", (char *)"", DVAR_SERVERINFO | DVAR_ROM, "Current map name");
         if (!I_stricmp(arg3, mapname->current.string))
@@ -980,7 +980,7 @@ void __cdecl Cmd_CallVote_f(gentity_s *ent)
     }
     if (!I_stricmp(arg1, "map"))
     {
-        if (!useFastFile->current.enabled && !SV_MapExists(arg2))
+        if (!IsFastFileLoad() && !SV_MapExists(arg2))
         {
         LABEL_36:
             v14 = va(aC_7, 101);

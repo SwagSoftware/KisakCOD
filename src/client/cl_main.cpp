@@ -1563,7 +1563,7 @@ void __cdecl CL_ShutdownRenderer(int destroyWindow)
     cls.rendererStarted = 0;
     // MP ADD
     Com_ShutdownWorld();
-    if (useFastFile->current.enabled && destroyWindow)
+    if (IsFastFileLoad() && destroyWindow)
         CM_Shutdown();
     // MP END
     R_Shutdown(destroyWindow);

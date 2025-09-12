@@ -1063,7 +1063,7 @@ void __cdecl DB_EnumXAssets_FastFile(
 
 int32_t __cdecl DB_GetAllXAssetOfType(XAssetType type, XAssetHeader* assets, int32_t maxCount)
 {
-    if (useFastFile->current.enabled)
+    if (IsFastFileLoad())
         return DB_GetAllXAssetOfType_FastFile(type, assets, maxCount);
     else
         return DB_GetAllXAssetOfType_LoadObj(type, assets, maxCount);
@@ -1086,7 +1086,7 @@ void __cdecl DB_EnumXAssets(
     void* inData,
     bool includeOverride)
 {
-    if (useFastFile->current.enabled)
+    if (IsFastFileLoad())
         DB_EnumXAssets_FastFile(type, func, inData, includeOverride);
     else
         DB_EnumXAssets_LoadObj(type, (void(*)(void *, void *))func, inData);
@@ -1180,8 +1180,8 @@ XAssetHeader __cdecl DB_FindXAssetHeader(XAssetType type, const char *name)
     XAssetEntry *assetEntry; // [esp+18h] [ebp-8h]
     XAssetEntry *newEntry; // [esp+1Ch] [ebp-4h]
 
-    if (!useFastFile->current.enabled)
-        MyAssertHandler(".\\database\\db_registry.cpp", 2691, 0, "%s", "IsFastFileLoad()");
+    iassert(IsFastFileLoad());
+
     start = 0;
     while (1)
     {

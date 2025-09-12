@@ -1113,7 +1113,7 @@ void __cdecl CL_ParseGamestate(netsrc_t localClientNum, msg_t *msg)
     clc->clientNum = Long;
     v3 = MSG_ReadLong(msg);
     clc->checksumFeed = v3;
-    if (useFastFile->current.enabled)
+    if (IsFastFileLoad())
         DB_SyncXAssets();
     CL_SystemInfoChanged(localClientNum);
     cls.gameDirChanged = fs_gameDirVar->modified;

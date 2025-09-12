@@ -3756,7 +3756,7 @@ int32_t Scr_PrecacheModel()
     modelName = Scr_GetString(0);
     if (!*modelName)
         Scr_ParamError(0, "Model name string is empty");
-    if (useFastFile->current.enabled)
+    if (IsFastFileLoad())
         Scr_ErrorOnDefaultAsset(ASSET_TYPE_XMODEL, modelName);
     return G_ModelIndex((char*)modelName);
 }
@@ -4594,7 +4594,7 @@ void Scr_TableLookup()
     int32_t returnValueColumn; // [esp+14h] [ebp-8h]
     int32_t comparisonColumn; // [esp+18h] [ebp-4h]
 
-    if (useFastFile->current.enabled)
+    if (IsFastFileLoad())
     {
         if (Scr_GetNumParam() < 3)
             Scr_Error("USAGE: tableLookup( filename, searchColumnNum, searchValue, returnValueColumnNum )\n");
@@ -4622,7 +4622,7 @@ void Scr_TableLookupIString()
     int32_t returnValueColumn; // [esp+14h] [ebp-8h]
     int32_t comparisonColumn; // [esp+18h] [ebp-4h]
 
-    if (useFastFile->current.enabled)
+    if (IsFastFileLoad())
     {
         if (Scr_GetNumParam() < 3)
             Scr_Error("USAGE: tableLookupIString( filename, searchColumnNum, searchValue, returnValueColumnNum )\n");
@@ -6302,7 +6302,7 @@ int32_t Scr_ParseGameTypeList_LoadObj()
 
 void __cdecl Scr_ParseGameTypeList()
 {
-    if (useFastFile->current.enabled)
+    if (IsFastFileLoad())
         Scr_ParseGameTypeList_FastFile();
     else
         Scr_ParseGameTypeList_LoadObj();

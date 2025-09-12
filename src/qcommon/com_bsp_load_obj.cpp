@@ -451,7 +451,7 @@ void __cdecl Com_LoadWorld_LoadObj(char *name)
 
 void __cdecl Com_LoadWorld(char *name)
 {
-    if (useFastFile->current.enabled)
+    if (IsFastFileLoad())
         Com_LoadWorld_FastFile(name);
     else
         Com_LoadWorld_LoadObj(name);

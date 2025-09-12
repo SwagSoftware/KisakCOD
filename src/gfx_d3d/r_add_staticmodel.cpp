@@ -128,7 +128,7 @@ GfxStaticModelId __cdecl R_GetStaticModelId(unsigned int smodelIndex, int lod)
         for (surfaceIndex = 0; surfaceIndex < surfaceCount; ++surfaceIndex)
         {
             xsurf = &surfaces[surfaceIndex];
-            if (xsurf->deformed || !useFastFile->current.enabled)
+            if (xsurf->deformed || !IsFastFileLoad())
             {
                 staticModelIda.surfType = SF_STATICMODEL_SKINNED;
                 return staticModelIda;

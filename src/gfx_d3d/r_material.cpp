@@ -456,7 +456,7 @@ IDirect3DVertexDeclaration9 *__cdecl Material_BuildVertexDecl(
 
 MaterialTechniqueSet *__cdecl Material_FindTechniqueSet(const char *name, MtlTechSetNotFoundBehavior notFoundBehavior)
 {
-    if (useFastFile->current.enabled)
+    if (IsFastFileLoad())
         return Material_FindTechniqueSet_FastFile(name, notFoundBehavior);
     else
         return Material_FindTechniqueSet_LoadObj(name, notFoundBehavior);
@@ -579,7 +579,7 @@ Material *__cdecl Material_Register_LoadObj(char *name, int imageTrack)
 
 Material *__cdecl Material_Register(const char *name, int imageTrack)
 {
-    if (useFastFile->current.enabled)
+    if (IsFastFileLoad())
         return Material_Register_FastFile(name);
     else
         return Material_Register_LoadObj((char*)name, imageTrack);
@@ -825,7 +825,7 @@ const Material *__cdecl Material_FromHandle(Material *handle)
 
 void __cdecl Material_Init()
 {
-    if (!useFastFile->current.enabled)
+    if (!IsFastFileLoad())
     {
         memset((unsigned __int8 *)&materialGlobals, 0, sizeof(materialGlobals));
         Material_PreLoadAllShaderText();

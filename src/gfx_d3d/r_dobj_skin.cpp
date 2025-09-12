@@ -59,7 +59,7 @@ int  R_PreSkinXSurface(
     iassert(surf);
     iassert(surfaceInfo);
 
-    if (!surf->deformed && useFastFile->current.enabled && surf->vertListCount == 1)
+    if (!surf->deformed && IsFastFileLoad() && surf->vertListCount == 1)
     {
         surf->vertList = surf->vertList;
         rigidSurf = (GfxModelRigidSurface *)surfPos;
@@ -107,7 +107,7 @@ int  R_SkinSceneDObjModels(
     iassert(!sceneEnt->cull.skinnedSurfs.firstSurf);
     iassert(obj);
     iassert(boneMatrix);
-    iassert(!useFastFile->current.enabled || !DObjBad(obj));
+    iassert(!IsFastFileLoad() || !DObjBad(obj));
 
     PROF_SCOPED("R_SkinXModel");
 

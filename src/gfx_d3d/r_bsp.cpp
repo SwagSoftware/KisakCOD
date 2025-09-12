@@ -139,7 +139,7 @@ void __cdecl R_LoadWorld(char *name, int *checksum, int savegame)
 
     iassert( !rgp.world );
     R_InitLightVisHistory(name);
-    if (useFastFile->current.enabled)
+    if (IsFastFileLoad())
         R_SetWorldPtr_FastFile(name);
     else
         R_SetWorldPtr_LoadObj(name);

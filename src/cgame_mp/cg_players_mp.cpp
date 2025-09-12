@@ -766,7 +766,7 @@ void __cdecl CG_UpdateWeaponVisibility(int32_t localClientNum, centity_s *cent)
             ci->usingKnife = 1;
             ci->dobjDirty = 1;
         }
-        if (weapModel && (useFastFile->current.enabled || !XModelBad(weapModel)))
+        if (weapModel && (IsFastFileLoad() || !XModelBad(weapModel)))
         {
             boneHandle = CG_GetWeaponAttachBone(ci, weapDef->weapType);
             obj = Com_GetClientDObj(p_nextState->number, localClientNum);

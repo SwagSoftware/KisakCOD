@@ -540,7 +540,7 @@ int __cdecl FS_HandleForFile(FsThread thread)
         {
             if (thread != FS_THREAD_DATABASE)
                 MyAssertHandler(".\\universal\\com_files.cpp", 920, 0, "thread == FS_THREAD_DATABASE\n\t%i, %i", thread, 2);
-            if (useFastFile->current.enabled)
+            if (IsFastFileLoad())
             {
                 if (!Sys_IsDatabaseThread())
                     MyAssertHandler(".\\universal\\com_files.cpp", 921, 0, "%s", "Sys_IsDatabaseThread()");

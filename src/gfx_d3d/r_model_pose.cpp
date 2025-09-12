@@ -137,7 +137,7 @@ DObjAnimMat *R_UpdateSceneEntBounds(
             localSceneEnt->placement.base.origin,
             localSceneEnt->placement.scale,
             localSceneEnt->cull.lods);
-        if (useFastFile->current.enabled || !DObjBad(obj))
+        if (IsFastFileLoad() || !DObjBad(obj))
         {
             partBits_8 = DObjGetSurfaces(obj, partBits_12, localSceneEnt->cull.lods);
             if (partBits_8 && (partBits_4 = R_DObjCalcPose(localSceneEnt, obj, partBits_12)) != 0)

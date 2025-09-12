@@ -18,7 +18,7 @@ void __cdecl R_SetupStaticModelPrim(XSurface *xsurf, GfxDrawPrimArgs *args, GfxC
     iassert(xsurf);
     args->vertexCount = xsurf->vertCount;
     args->triCount = xsurf->triCount;
-    //if (!useFastFile->current.enabled)
+    //if (!IsFastFileLoad())
     //    MyAssertHandler(".\\r_draw_staticmodel.cpp", 266, 0, "%s", "XSurfaceHasOptimizedIndices()");
     DB_GetIndexBufferAndBase(xsurf->zoneHandle, xsurf->triIndices, (void **)&ib, &args->baseIndex);
     iassert(ib);
@@ -132,7 +132,7 @@ void __cdecl R_SetStaticModelVertexBuffer(GfxCmdBufPrimState *primState, XSurfac
     int vertexOffset; // [esp+1Ch] [ebp-4h] BYREF
 
     iassert(xsurf);
-    //if (xsurf->deformed || !useFastFile->current.enabled)
+    //if (xsurf->deformed || !IsFastFileLoad())
     //    MyAssertHandler(".\\r_draw_staticmodel.cpp", 246, 0, "%s", "XSurfaceHasOptimizedVertices( xsurf )");
     DB_GetVertexBufferAndOffset(xsurf->zoneHandle, (uint8*)xsurf->verts0, (void **)&vb, &vertexOffset);
     iassert(vb);

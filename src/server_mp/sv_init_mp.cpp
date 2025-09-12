@@ -402,7 +402,7 @@ void __cdecl SV_SpawnServer(char *mapname)
     Com_SyncThreads();
     Sys_BeginLoadThreadPriorities();
     mapIsPreloaded = 0;
-    if (useFastFile->current.enabled && !com_dedicated->current.integer)
+    if (IsFastFileLoad() && !com_dedicated->current.integer)
     {
         DB_ResetZoneSize(0);
         Com_sprintf(zoneName, 0x40u, "%s_load", mapname);
@@ -417,7 +417,7 @@ void __cdecl SV_SpawnServer(char *mapname)
     if (!mapIsPreloaded)
         CL_InitLoad(mapname, sv_gametype->current.string);
 
-    if (useFastFile->current.enabled && !mapIsPreloaded)
+    if (IsFastFileLoad() && !mapIsPreloaded)
     {
         DB_SyncXAssets();
         DB_UpdateDebugZone();
@@ -474,7 +474,7 @@ void __cdecl SV_SpawnServer(char *mapname)
 
     {
         PROF_SCOPED("Shutdown file system");
-        if (!useFastFile->current.enabled)
+        if (!IsFastFileLoad())
         {
             FS_Shutdown();
             FS_ClearIwdReferences();
@@ -492,7 +492,7 @@ void __cdecl SV_SpawnServer(char *mapname)
     srand(Sys_MillisecondsRaw());
     sv.checksumFeed = Sys_Milliseconds() ^ (rand() ^ (rand() << 16));
     FS_Restart(0, sv.checksumFeed);
-    if (!useFastFile->current.enabled)
+    if (!IsFastFileLoad())
     {
         Com_GetBspFilename(filename, 0x40u, mapname);
         SV_SetExpectedHunkUsage(filename);
@@ -505,7 +505,7 @@ void __cdecl SV_SpawnServer(char *mapname)
             CL_StartLoading();
         }
 
-        if (useFastFile->current.enabled)
+        if (IsFastFileLoad())
         {
             PROF_SCOPED("Load fast file");
             zoneInfo.name = mapname;
@@ -541,7 +541,7 @@ void __cdecl SV_SpawnServer(char *mapname)
     Dvar_SetString((dvar_s *)nextmap, (char*)"map_restart");
     Dvar_SetInt((dvar_s *)cl_paused, 0);
     Com_GetBspFilename(filename, 0x40u, mapname);
-    if (!useFastFile->current.enabled)
+    if (!IsFastFileLoad())
         Com_LoadBsp(filename);
 
     {
@@ -550,7 +550,7 @@ void __cdecl SV_SpawnServer(char *mapname)
     }
 
     Com_LoadWorld(filename);
-    if (!useFastFile->current.enabled)
+    if (!IsFastFileLoad())
         Com_UnloadBsp();
     CM_LinkWorld();
     sv_serverId_value = (unsigned __int8)(sv_serverId_value + 16);
@@ -559,7 +559,7 @@ void __cdecl SV_SpawnServer(char *mapname)
     Dvar_SetInt((dvar_s *)sv_serverid, sv_serverId_value);
     sv.start_frameTime = com_frameTime;
     sv.state = SS_LOADING;
-    if (!useFastFile->current.enabled)
+    if (!IsFastFileLoad())
     {
         Com_GetBspFilename(filename, 0x40u, mapname);
         Com_LoadSoundAliases(filename, "all_mp", SASYS_GAME);

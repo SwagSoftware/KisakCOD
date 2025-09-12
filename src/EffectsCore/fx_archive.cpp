@@ -210,7 +210,7 @@ void __cdecl FX_Save(int32_t clientIndex, MemoryFile *memFile)
 
 void __cdecl FX_SaveEffectDefTable(FxSystem *system, MemoryFile *memFile)
 {
-    if (useFastFile->current.enabled)
+    if (IsFastFileLoad())
         FX_SaveEffectDefTable_FastFile(memFile);
     else
         FX_SaveEffectDefTable_LoadObj(memFile);

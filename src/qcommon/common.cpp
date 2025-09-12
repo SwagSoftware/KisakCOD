@@ -1107,10 +1107,10 @@ void Com_ErrorCleanup()
     }
     Cmd_ComErrorCleanup();
     Dvar_SetInAutoExec(0);
-    if (useFastFile->current.enabled)
+    if (IsFastFileLoad())
         DB_Cleanup();
     Com_ClearTempMemory();
-    if (!useFastFile->current.enabled)
+    if (!IsFastFileLoad())
         FX_UnregisterAll();
     if (ProfLoad_IsActive())
         ProfLoad_Deactivate();
@@ -1248,7 +1248,7 @@ void __cdecl Com_Init_Try_Block_Function(char* commandLine)
     Com_InitDvars();
     CCS_InitConstantConfigStrings();
     initStartTime = 0;
-    if (useFastFile->current.enabled)
+    if (IsFastFileLoad())
     {
         PMem_Init();
         DB_SetInitializing(1);
@@ -1256,7 +1256,7 @@ void __cdecl Com_Init_Try_Block_Function(char* commandLine)
         initStartTime = Sys_Milliseconds();
         PMem_BeginAlloc(comInitAllocName, 1u);
     }
-    if (useFastFile->current.enabled)
+    if (IsFastFileLoad())
         Com_InitXAssets();
     CL_InitKeyCommands();
     FS_InitFilesystem();
@@ -1271,7 +1271,7 @@ void __cdecl Com_Init_Try_Block_Function(char* commandLine)
     com_recommendedSet = Dvar_RegisterBool("com_recommendedSet", 0, DVAR_ARCHIVE, "Use recommended settings");
     Com_CheckSetRecommended(0);
     Com_StartupVariable(0);
-    if (!useFastFile->current.enabled)
+    if (!IsFastFileLoad())
         SEH_UpdateLanguageInfo();
 #ifdef KISAK_MP
     if (com_dedicated->current.integer)
@@ -1371,7 +1371,7 @@ void __cdecl Com_Init_Try_Block_Function(char* commandLine)
 #endif
 
     COM_PlayIntroMovies();
-    if (useFastFile->current.enabled)
+    if (IsFastFileLoad())
     {
         PMem_EndAlloc(comInitAllocName, 1u);
         DB_SetInitializing(0);
@@ -2045,7 +2045,7 @@ void __cdecl Com_AssetLoadUI()
 {
     XZoneInfo zoneInfo; // [esp+0h] [ebp-10h] BYREF
 
-    if (useFastFile->current.enabled)
+    if (IsFastFileLoad())
     {
         zoneInfo.name = "ui_mp";
         zoneInfo.allocFlags = 8;
@@ -2156,7 +2156,7 @@ void __cdecl Com_Close()
     CM_Shutdown();
     SND_ShutdownChannels();
     Hunk_Clear();
-    if (useFastFile->current.enabled)
+    if (IsFastFileLoad())
         DB_ShutdownXAssets();
     Scr_Shutdown();
     NET_ShutdownDebug();
@@ -2183,7 +2183,7 @@ void __cdecl Com_Restart()
     SND_ShutdownChannels();
     Hunk_Clear();
     Hunk_ResetDebugMem();
-    if (useFastFile->current.enabled)
+    if (IsFastFileLoad())
         DB_ReleaseXAssets();
     Com_SetScriptSettings();
     com_fixedConsolePosition = 0;

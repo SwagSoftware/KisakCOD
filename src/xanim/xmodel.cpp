@@ -29,7 +29,7 @@ bool __cdecl XModelBad(const XModel *model)
 {
     iassert(model);
 
-    if (useFastFile->current.enabled)
+    if (IsFastFileLoad())
         return DB_IsXAssetDefault(ASSET_TYPE_XMODEL, model->name);
     else
         return model->bad;
@@ -37,7 +37,7 @@ bool __cdecl XModelBad(const XModel *model)
 
 XModel *__cdecl XModelPrecache(char *name, void *(__cdecl *Alloc)(int), void *(__cdecl *AllocColl)(int))
 {
-    if (useFastFile->current.enabled)
+    if (IsFastFileLoad())
         return XModelPrecache_FastFile(name);
     else
         return XModelPrecache_LoadObj(name, Alloc, AllocColl);

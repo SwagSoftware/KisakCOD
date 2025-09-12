@@ -90,7 +90,7 @@ GfxLightDef *__cdecl R_RegisterLightDef_LoadObj(const char *name)
 
 GfxLightDef *__cdecl R_RegisterLightDef(const char *name)
 {
-    if (useFastFile->current.enabled)
+    if (IsFastFileLoad())
         return R_RegisterLightDef_FastFile(name);
     else
         return R_RegisterLightDef_LoadObj(name);

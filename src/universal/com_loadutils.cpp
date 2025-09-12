@@ -6,7 +6,7 @@ char *__cdecl Com_LoadInfoString(char *fileName, const char *fileDesc, const cha
 {
     char *buffer; // [esp+20h] [ebp-4h]
 
-    if (useFastFile->current.enabled)
+    if (IsFastFileLoad())
         buffer = (char *)Com_LoadInfoString_FastFile(fileName, fileDesc, ident);
     else
         buffer = Com_LoadInfoString_LoadObj(fileName, fileDesc, ident, loadBuffer);
@@ -55,7 +55,7 @@ char *__cdecl Com_LoadInfoString_LoadObj(char *fileName, const char *fileDesc, c
 
 char *__cdecl Com_LoadRawTextFile(const char *fullpath)
 {
-    if (useFastFile->current.enabled)
+    if (IsFastFileLoad())
         return (char *)Com_LoadRawTextFile_FastFile(fullpath);
     else
         return Com_LoadRawTextFile_LoadObj(fullpath);
@@ -84,7 +84,7 @@ char *__cdecl Com_LoadRawTextFile_LoadObj(const char *fullpath)
 
 void __cdecl Com_UnloadRawTextFile(char *filebuf)
 {
-    if (!useFastFile->current.enabled)
+    if (!IsFastFileLoad())
         FS_FreeFile(filebuf);
 }
 

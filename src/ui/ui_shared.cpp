@@ -323,7 +323,7 @@ void __cdecl Script_StatClearPerkNew(UiContext *dc, itemDef_s *item, const char 
     int statValue; // [esp+Ch] [ebp-40Ch]
     char refString[1028]; // [esp+10h] [ebp-408h] BYREF
 
-    if (useFastFile->current.enabled)
+    if (IsFastFileLoad())
     {
         Script_StatClearPerkGetArg(dc, item, args, refString, 1024);
         StringTable_GetAsset("mp/statstable.csv", &table);
@@ -1012,7 +1012,7 @@ void __cdecl Script_StatSetUsingStatsTable(UiContext *dc, itemDef_s *item, const
     char arg[1024]; // [esp+414h] [ebp-408h] BYREF
     int newStatValue; // [esp+818h] [ebp-4h]
 
-    if (useFastFile->current.enabled)
+    if (IsFastFileLoad())
     {
         String_Parse(args, arg, 1024);
         if (!I_stricmp(arg, "("))
@@ -6738,7 +6738,7 @@ void __cdecl UI_AddMenu(UiContext *dc, menuDef_t *menu)
             "dc->menuCount doesn't index ARRAY_COUNT( dc->Menus )\n\t%i not in [0, %i)",
             dc->menuCount,
             640);
-    if (useFastFile->current.enabled && DB_FindXAssetHeader(ASSET_TYPE_MENU, menu->window.name).menu != menu)
+    if (IsFastFileLoad() && DB_FindXAssetHeader(ASSET_TYPE_MENU, menu->window.name).menu != menu)
         MyAssertHandler(".\\ui\\ui_shared.cpp", 6304, 0, "%s", "touchMenu == menu");
     dc->Menus[dc->menuCount++] = menu;
 }
@@ -6777,7 +6777,7 @@ int __cdecl UI_GetMenuScreenForError()
 
 MenuList *__cdecl UI_LoadMenu(char *menuFile, int imageTrack)
 {
-    if (useFastFile->current.enabled)
+    if (IsFastFileLoad())
         return UI_LoadMenus_FastFile(menuFile);
     else
         return UI_LoadMenu_LoadObj(menuFile, imageTrack);
@@ -6785,7 +6785,7 @@ MenuList *__cdecl UI_LoadMenu(char *menuFile, int imageTrack)
 
 MenuList *__cdecl UI_LoadMenus(char *menuFile, int imageTrack)
 {
-    if (useFastFile->current.enabled)
+    if (IsFastFileLoad())
         return UI_LoadMenus_FastFile(menuFile);
     else
         return UI_LoadMenus_LoadObj(menuFile, imageTrack);

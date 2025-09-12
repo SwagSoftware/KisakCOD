@@ -337,7 +337,7 @@ FxImpactTable *__cdecl CG_RegisterImpactEffects_FastFile()
 
 FxImpactTable *__cdecl CG_RegisterImpactEffects(const char *mapname)
 {
-    if (useFastFile->current.enabled)
+    if (IsFastFileLoad())
         return CG_RegisterImpactEffects_FastFile();
     else
         return CG_RegisterImpactEffects_LoadObj(mapname);

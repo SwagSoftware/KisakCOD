@@ -63,7 +63,7 @@ int __cdecl StringTable_LookupRowNumForValue(const StringTable *table, int compa
 
 void __cdecl StringTable_GetAsset(const char *filename, StringTable **tablePtr)
 {
-    if (!useFastFile->current.enabled)
+    if (!IsFastFileLoad())
         Com_Error(ERR_DROP, "Trying to use a string table with fast file loading disabled.");
     //tablePtr->xmodelPieces = DB_FindXAssetHeader(ASSET_TYPE_STRINGTABLE, filename).xmodelPieces;
     *tablePtr = DB_FindXAssetHeader(ASSET_TYPE_STRINGTABLE, filename).stringTable;

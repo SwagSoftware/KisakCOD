@@ -14409,7 +14409,7 @@ void __cdecl Image_LoadWavelet(GfxImage *image, const GfxImageFileHeader *fileHe
         pixels[faceIndex] = Image_AllocTempMemory(totalSize);
         to[faceIndex] = 0;
     }
-    picmip = image->picmip.platform[0]; // image->picmip.platform[!useFastFile->current.enabled]; ?? (This was in blops)
+    picmip = image->picmip.platform[0]; // image->picmip.platform[!IsFastFileLoad()]; ?? (This was in blops)
     decode.data = data;
     while (decode.mipLevel >= picmip)
     {

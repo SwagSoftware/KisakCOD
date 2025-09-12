@@ -291,7 +291,7 @@ void SCR_ClearScreen()
 
 void __cdecl SCR_UpdateLoadScreen()
 {
-    if (!useFastFile->current.enabled)
+    if (!IsFastFileLoad())
         SCR_UpdateScreen();
 }
 

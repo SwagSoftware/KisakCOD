@@ -254,9 +254,9 @@ void Com_InitHunkMemory()
         MyAssertHandler(".\\universal\\com_memory.cpp", 1259, 0, "%s", "!s_hunkData");
     if (FS_LoadStack())
         Com_Error(ERR_FATAL, "Hunk initialization failed. File system load stack not zero");
-    if (!useFastFile->current.enabled)
+    if (!IsFastFileLoad())
         s_hunkTotal = 0xA000000;
-    if (useFastFile->current.enabled)
+    if (IsFastFileLoad())
         s_hunkTotal = 0xA00000;
     R_ReflectionProbeRegisterDvars();
     if (r_reflectionProbeGenerate->current.enabled)
@@ -276,7 +276,7 @@ void __cdecl Com_Meminfo_f()
     if (!Sys_IsMainThread())
         MyAssertHandler(".\\universal\\com_memory.cpp", 1140, 0, "%s", "Sys_IsMainThread()");
     track_PrintInfo();
-    if (useFastFile->current.enabled)
+    if (IsFastFileLoad())
         PMem_DumpMemStats();
     Com_Printf(0, "Related commands: meminfo, imagelist, gfx_world, gfx_model, cg_drawfps, com_statmon, tempmeminfo\n");
 }

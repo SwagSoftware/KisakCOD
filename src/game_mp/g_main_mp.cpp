@@ -337,7 +337,7 @@ void __cdecl G_InitGame(int32_t levelTime, int32_t randomSeed, int32_t restart, 
     for (i = 0; i < 8; ++i)
         g_scr_data.playerCorpseInfo[i].entnum = -1;
 
-    if (useFastFile->current.enabled)
+    if (IsFastFileLoad())
         G_PrintAllFastFileErrors();
 
     iassert(bgs == &level_bgs);

@@ -365,7 +365,7 @@ void __cdecl Load_Texture(GfxTexture *remoteLoadDef, GfxImage *image)
 
 GfxImage *__cdecl Image_FindExisting(const char *name)
 {
-    if (useFastFile->current.enabled)
+    if (IsFastFileLoad())
         return Image_FindExisting_FastFile(name);
     else
         return Image_FindExisting_LoadObj(name);
@@ -378,7 +378,7 @@ GfxImage *__cdecl Image_FindExisting_FastFile(const char *name)
 
 GfxImage *__cdecl Image_Register(const char *imageName, unsigned __int8 semantic, int imageTrack)
 {
-    if (useFastFile->current.enabled)
+    if (IsFastFileLoad())
         return (GfxImage *)Image_Register_FastFile(imageName);
     else
         return Image_Register_LoadObj((char*)imageName, semantic, imageTrack);
@@ -885,7 +885,7 @@ void __cdecl R_ImageList_f()
                 fmt = "%7.1fk";
             Com_Printf(8, fmt, v13);
             v5 = image->cardMemory.platform[j];
-            if (!useFastFile->current.enabled)
+            if (!IsFastFileLoad())
             {
                 *(unsigned int *)&dst[8 * image->track + 4 * j] += v5;
                 if (!v6 && Image_IsCodeImage(image->track))
@@ -899,7 +899,7 @@ void __cdecl R_ImageList_f()
     Com_Printf(8, " %i total images\n", imageList.count);
     for (j = 0; j < 2; ++j)
         Com_Printf(8, " %5.1f MB %s total image size\n", (double)(int)v8[j] / 1048576.0, g_platform_name[j]);
-    if (!useFastFile->current.enabled)
+    if (!IsFastFileLoad())
     {
         Com_Printf(8, "\n");
         Com_Printf(8, "       ");

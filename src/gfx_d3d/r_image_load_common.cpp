@@ -458,7 +458,7 @@ void __cdecl Image_TrackFullscreenTexture(
         platformHeight = Image_GetPlatformScreenHeight(platform, fullscreenHeight);
         Image_GetMipmapResolution(platformWidth, platformHeight, picmip, &width, &height);
         memory = Image_GetCardMemoryAmount(3, format, width, height, 1u);
-        if (!useFastFile->current.enabled)
+        if (!IsFastFileLoad())
             Image_TrackTotalMemory(image, platform, memory);
         image->cardMemory.platform[platform] = memory;
     }

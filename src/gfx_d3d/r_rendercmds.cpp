@@ -1229,7 +1229,7 @@ void __cdecl R_BeginFrame()
             R_SortWorldSurfaces();
         }
         CL_FlushDebugClientData();
-        v1 = r_skinCache->current.enabled && useFastFile->current.enabled;
+        v1 = r_skinCache->current.enabled && IsFastFileLoad();
         gfxBuf.skinCache = v1;
         v0 = v1 && r_fastSkin->current.enabled;
         gfxBuf.fastSkin = v0;
@@ -1635,7 +1635,7 @@ void __cdecl R_AddCmdProjectionSet(GfxProjectionTypes projection)
 
 void __cdecl R_BeginRemoteScreenUpdate()
 {
-    if (useFastFile->current.enabled && Sys_IsMainThread())
+    if (IsFastFileLoad() && Sys_IsMainThread())
     {
         iassert( r_glob.remoteScreenUpdateNesting >= 0 );
         if (r_glob.startedRenderThread && !CL_IsLocalClientInGame(0))
@@ -1657,7 +1657,7 @@ void __cdecl R_BeginRemoteScreenUpdate()
 
 void __cdecl R_EndRemoteScreenUpdate()
 {
-    if (useFastFile->current.enabled && Sys_IsMainThread())
+    if (IsFastFileLoad() && Sys_IsMainThread())
     {
         iassert( r_glob.remoteScreenUpdateNesting >= 0 );
         if (r_glob.startedRenderThread && !CL_IsLocalClientInGame(0))

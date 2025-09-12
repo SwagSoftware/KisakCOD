@@ -1221,7 +1221,7 @@ const FxEffectDef *__cdecl FX_Register_LoadObj(const char *name)
 
 const FxEffectDef *__cdecl FX_Register(const char *name)
 {
-    if (useFastFile->current.enabled)
+    if (IsFastFileLoad())
         return FX_Register_FastFile(name);
     else
         return FX_Register_LoadObj(name);

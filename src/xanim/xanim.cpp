@@ -105,12 +105,12 @@ void __cdecl XAnimCreate(XAnim_s* anims, unsigned int animIndex, const char* nam
     char* debugName; // [esp+28h] [ebp-Ch]
     XAnimParts* parts; // [esp+30h] [ebp-4h]
 
-    if (useFastFile->current.enabled)
+    if (IsFastFileLoad())
         parts = XAnimFindData_FastFile(name);
     else
         parts = XAnimFindData_LoadObj(name);
 
-    if (useFastFile->current.enabled || parts)
+    if (IsFastFileLoad() || parts)
     {
         iassert(parts);
         anims->entries[animIndex].numAnims = 0;
@@ -168,7 +168,7 @@ XAnimParts *__cdecl XAnimPrecache(const char *name, void *(__cdecl *Alloc)(int))
     XAnimParts *defaultParts; // [esp+Ch] [ebp-8h]
     XAnimParts *parts; // [esp+10h] [ebp-4h]
 
-    if (useFastFile->current.enabled)
+    if (IsFastFileLoad())
         result = XAnimFindData_FastFile(name);
     else
         result = XAnimFindData_LoadObj(name);
@@ -178,7 +178,7 @@ XAnimParts *__cdecl XAnimPrecache(const char *name, void *(__cdecl *Alloc)(int))
         if (!parts)
         {
             Com_PrintWarning(19, "WARNING: Couldn't find xanim '%s', using default xanim '%s' instead\n", name, "void");
-            if (useFastFile->current.enabled)
+            if (IsFastFileLoad())
                 Data_FastFile = XAnimFindData_FastFile("void");
             else
                 Data_FastFile = XAnimFindData_LoadObj("void");
@@ -744,7 +744,7 @@ char* __cdecl XAnimGetAnimDebugName(const XAnim_s* anims, unsigned int animIndex
             MyAssertHandler(".\\xanim\\xanim.cpp", 2608, 0, "%s", "anims->debugAnimNames[animIndex]");
         debugName = anims->debugAnimNames[animIndex];
         if (IsLeafNode(anim)
-            && ((parts = anims->entries[animIndex].parts, !useFastFile->current.enabled)
+            && ((parts = anims->entries[animIndex].parts, !IsFastFileLoad())
                 ? (isDefault = parts->isDefault)
                 : (isDefault = DB_IsXAssetDefault(ASSET_TYPE_XANIMPARTS, parts->name)),
                 isDefault))
@@ -3741,16 +3741,16 @@ void __cdecl XAnimFillInSyncNodes_r(XAnim_s* anims, unsigned int animIndex, bool
         if (anims->entries[animIndex].parts->bLoop != bLoop)
         {
             parts = anims->entries[animIndex].parts;
-            if (useFastFile->current.enabled)
+            if (IsFastFileLoad())
                 IsXAssetDefault = DB_IsXAssetDefault(ASSET_TYPE_XANIMPARTS, parts->name);
             else
                 IsXAssetDefault = parts->isDefault;
             if (IsXAssetDefault)
             {
-                if (!useFastFile->current.enabled)
+                if (!IsFastFileLoad())
                     XAnimPrecache("void_loop", (void*(*)(int))Hunk_AllocXAnimPrecache);
 
-                if (useFastFile->current.enabled)
+                if (IsFastFileLoad())
                     Data_FastFile = XAnimFindData_FastFile("void_loop");
                 else
                     Data_FastFile = XAnimFindData_LoadObj("void_loop");

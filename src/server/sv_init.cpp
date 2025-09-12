@@ -387,7 +387,7 @@ void __cdecl SV_SpawnServer(const char *mapname, int savegame)
     Sys_BeginLoadThreadPriorities(); // (FROM MP)
 
     // MP ADD
-    if (useFastFile->current.enabled)
+    if (IsFastFileLoad())
     {
         char zoneName[64];
         XZoneInfo zoneInfo;
@@ -404,7 +404,7 @@ void __cdecl SV_SpawnServer(const char *mapname, int savegame)
 
     CL_InitLoad(mapname);
     // MP ADD
-    if (useFastFile->current.enabled)
+    if (IsFastFileLoad())
     {
         DB_SyncXAssets();
         DB_UpdateDebugZone();

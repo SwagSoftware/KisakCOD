@@ -217,7 +217,7 @@ void __cdecl Image_TrackTexture(GfxImage *image, char imageFlags, _D3DFORMAT for
                 0,
                 "%s",
                 "!image->cardMemory.platform[platform] || (image->cardMemory.platform[platform] == memory)");
-        if (!useFastFile->current.enabled)
+        if (!IsFastFileLoad())
             Image_TrackTotalMemory(image, platform, memory);
         image->cardMemory.platform[platform] = memory;
     }

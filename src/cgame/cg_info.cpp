@@ -62,7 +62,7 @@ void __cdecl CG_DrawInformation(int32_t localClientNum)
     }
     CL_GetConfigString(localClientNum, 0);
     UI_DrawMapLevelshot(localClientNum);
-    if (useFastFile->current.enabled)
+    if (IsFastFileLoad())
         v2 = (uint8_t (*)(void))CG_IsShowingProgress_FastFile;
     else
         v2 = (uint8_t (*)(void))CG_IsShowingProgress_LoadObj;

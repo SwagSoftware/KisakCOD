@@ -401,7 +401,7 @@ void __cdecl SV_Map_f()
         basename = SV_GetMapBaseName(map);
         I_strncpyz(mapname, (char *)basename, 64);
         I_strlwr(mapname);
-        if (useFastFile->current.enabled)
+        if (IsFastFileLoad())
         {
             if (!fs_gameDirVar)
                 MyAssertHandler(".\\server_mp\\sv_ccmds_mp.cpp", 239, 0, "%s", "fs_gameDirVar");

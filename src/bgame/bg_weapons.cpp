@@ -417,8 +417,7 @@ uint32_t __cdecl BG_GetWeaponIndexForName(const char *name, void(__cdecl *regWea
     weapDef = BG_LoadWeaponDef(name);
     if (weapDef)
     {
-        if (useFastFile->current.enabled
-            && (DB_FindXAssetHeader(ASSET_TYPE_WEAPON, name), DB_IsXAssetDefault(ASSET_TYPE_WEAPON, name)))
+        if (IsFastFileLoad() && (DB_FindXAssetHeader(ASSET_TYPE_WEAPON, name), DB_IsXAssetDefault(ASSET_TYPE_WEAPON, name)))
         {
             return 0;
         }
@@ -4469,7 +4468,7 @@ bool __cdecl BG_ThrowingBackGrenade(const playerState_s *ps)
 WeaponDef *__cdecl BG_LoadWeaponDef(const char *name)
 {
 #ifndef DEDICATED
-    if (*(_BYTE *)fs_gameDirVar->current.integer || !useFastFile->current.enabled)
+    if (*(_BYTE *)fs_gameDirVar->current.integer || !IsFastFileLoad())
         return BG_LoadWeaponDef_LoadObj(name);
     else
         return BG_LoadWeaponDef_FastFile(name);

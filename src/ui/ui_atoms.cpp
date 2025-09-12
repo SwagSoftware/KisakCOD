@@ -84,7 +84,7 @@ void __cdecl UI_DrawLoadBar(
     double (*v10)(void); // [esp+34h] [ebp-1Ch]
     float percentDone; // [esp+40h] [ebp-10h]
 
-    if (useFastFile->current.enabled)
+    if (IsFastFileLoad())
         v10 = UI_LoadBarProgress_FastFile;
     else
         v10 = UI_LoadBarProgress_LoadObj;

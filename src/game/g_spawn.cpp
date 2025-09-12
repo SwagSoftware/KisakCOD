@@ -1089,7 +1089,7 @@ void G_CallSpawn()
 
         if (!strncmp(classname, "node_", 5))
         {
-            //if (!useFastFile->current.enabled)
+            //if (!IsFastFileLoad())
             //    G_SpawnPathnodeStatic(spawnVar, classname);
             G_SpawnPathnodeDynamic();
         }

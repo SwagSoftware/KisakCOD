@@ -79,7 +79,7 @@ void __cdecl Material_ForEachTechniqueSet_LoadObj(void(__cdecl *callback)(Materi
 
 void __cdecl Material_ForEachTechniqueSet(void(__cdecl *callback)(MaterialTechniqueSet *))
 {
-    if (useFastFile->current.enabled)
+    if (IsFastFileLoad())
         Material_ForEachTechniqueSet_FastFile(callback);
     else
         Material_ForEachTechniqueSet_LoadObj(callback);

@@ -1158,7 +1158,7 @@ void __cdecl Cmd_Exec_f()
         pathname = (char *)Com_GetFilenameSubString(filename);
         if (I_stricmp(pathname, "config_mp.cfg"))
         {
-            if ((!useFastFile->current.enabled || !Cmd_ExecFromFastFile(localClientNum, 0, filename))
+            if ((!IsFastFileLoad() || !Cmd_ExecFromFastFile(localClientNum, 0, filename))
                 && !Cmd_ExecFromDisk(localClientNum, 0, filename))
             {
                 v1 = Cmd_Argv(1);

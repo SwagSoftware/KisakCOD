@@ -702,7 +702,7 @@ char *__cdecl Scr_ReadFile(const char *filename, char *extFilename, const char *
             return Scr_ReadFile_LoadObj(filename, extFilename, codePos, archive);
         }
     }
-    else if (useFastFile->current.enabled)
+    else if (IsFastFileLoad())
     {
         return Scr_ReadFile_FastFile(filename, extFilename, codePos, archive);
     }

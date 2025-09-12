@@ -2876,7 +2876,7 @@ void __cdecl R_Shutdown(int destroyWindow)
         R_SaveLightVisHistory();
         R_ShutdownLightDefs();
         R_ShutdownWorld();
-        if (!useFastFile->current.enabled)
+        if (!IsFastFileLoad())
         {
             R_ShutdownLoadWater();
             R_ShutdownFonts();
@@ -2906,7 +2906,7 @@ void R_ShutdownDirect3D()
     IDirect3DSurface9 *var; // [esp+4h] [ebp-8h]
     IDirect3DDevice9 *varCopy; // [esp+8h] [ebp-4h]
 
-    if (useFastFile->current.enabled)
+    if (IsFastFileLoad())
         R_UnloadGraphicsAssets();
     R_Cinematic_Shutdown();
     R_ReleaseForShutdownOrReset();
@@ -3732,7 +3732,7 @@ char __cdecl R_InitHardware(const GfxWindowParms *wndParms)
 
     if (!R_CreateDevice(wndParms))
         return 0;
-    if (useFastFile->current.enabled)
+    if (IsFastFileLoad())
         R_LoadGraphicsAssets();
     R_UpdateGpuSyncType();
     R_StoreWindowSettings(wndParms);
@@ -4216,7 +4216,7 @@ void __cdecl R_EndRegistration()
 {
     iassert( rg.registered );
     KISAK_NULLSUB();
-    if (!useFastFile->current.enabled)
+    if (!IsFastFileLoad())
     {
         R_SyncRenderThread();
         RB_TouchAllImages();

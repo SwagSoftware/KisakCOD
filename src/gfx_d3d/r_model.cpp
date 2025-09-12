@@ -296,7 +296,7 @@ int __cdecl R_SkinXModel(
     //modela = (const XModel*)obja;
     iassert(model);
 
-    if (!useFastFile->current.enabled && XModelBad(model))
+    if (!IsFastFileLoad() && XModelBad(model))
         return 0;
 
     iassert(val);
@@ -332,7 +332,7 @@ int __cdecl R_SkinXModel(
         }
         else
         {
-            if (!xsurf->deformed && useFastFile->current.enabled)
+            if (!xsurf->deformed && IsFastFileLoad())
                 startSurfPos = -2;
             else
                 startSurfPos = -1;

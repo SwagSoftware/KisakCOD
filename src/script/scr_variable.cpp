@@ -1032,7 +1032,7 @@ void __cdecl Scr_AddFields_LoadObj(const char *path, const char *extension)
 
 void  Scr_AddFields(char const* path, char const* extension)
 {
-	if (useFastFile->current.enabled)
+	if (IsFastFileLoad())
 		Scr_AddFields_FastFile(path, extension);
 	else
 		Scr_AddFields_LoadObj(path, extension);
@@ -3619,7 +3619,7 @@ void  Scr_AddFieldsForFile(char const* filename)
 	int i; // [esp+9Ch] [ebp-4h]
 
 	Hunk_CheckTempMemoryHighClear();
-	if (useFastFile->current.enabled)
+	if (IsFastFileLoad())
 		SourceFile_FastFile_DONE = (const char*)Scr_GetSourceFile_FastFile(filename);
 	else
 		SourceFile_FastFile_DONE = Scr_GetSourceFile_LoadObj(filename);

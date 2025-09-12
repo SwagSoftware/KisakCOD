@@ -423,7 +423,7 @@ void __cdecl G_OverrideModel(unsigned int modelIndex, char *defaultModelName)
 
     iassert(modelName[0]);
 
-    if (useFastFile->current.enabled)
+    if (IsFastFileLoad())
     {
         DB_ReplaceModel(modelName, defaultModelName);
     }

@@ -400,7 +400,7 @@ void __cdecl CL_CM_LoadMap(char *mapname)
 {
     int32_t checksum; // [esp+0h] [ebp-4h] BYREF
 
-    if (!useFastFile->current.enabled)
+    if (!IsFastFileLoad())
         Com_LoadBsp(mapname);
     CM_LoadMap(mapname, &checksum);
     if (!com_sv_running->current.enabled)
@@ -663,7 +663,7 @@ int32_t __cdecl LoadWorld(char *mapname)
     int32_t checksum; // [esp+0h] [ebp-4h] BYREF
 
     R_LoadWorld(mapname, &checksum, 0);
-    if (!useFastFile->current.enabled)
+    if (!IsFastFileLoad())
         Com_UnloadBsp();
     return checksum;
 }
@@ -755,7 +755,7 @@ void __cdecl CL_InitCGame(int32_t localClientNum)
     if (!CL_WasMapAlreadyLoaded())
     {
         Com_InitDObj();
-        if (useFastFile->current.enabled)
+        if (IsFastFileLoad())
         {
             zoneInfo.name = mapname;
             zoneInfo.allocFlags = 8;
@@ -799,13 +799,13 @@ void __cdecl CL_InitCGame(int32_t localClientNum)
     Con_ClearNotify(localClientNum);
     Con_InitMessageBuffer();
     Con_InitGameMsgChannels();
-    if (!useFastFile->current.enabled)
+    if (!IsFastFileLoad())
     {
         v2 = CL_ControllerIndexFromClientNum(localClientNum);
         Cmd_ExecuteSingleCommand(localClientNum, v2, (char*)"updatehunkusage");
     }
     R_EndRemoteScreenUpdate();
-    if (useFastFile->current.enabled)
+    if (IsFastFileLoad())
         DB_SyncXAssets();
 }
 

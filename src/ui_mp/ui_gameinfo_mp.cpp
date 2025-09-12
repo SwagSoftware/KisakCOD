@@ -181,7 +181,7 @@ const char *UI_LoadArenasFromFile_LoadObj()
 
 void UI_LoadArenasFromFile()
 {
-    if (useFastFile->current.enabled)
+    if (IsFastFileLoad())
         UI_LoadArenasFromFile_FastFile();
     else
         UI_LoadArenasFromFile_LoadObj();
