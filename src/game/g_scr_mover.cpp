@@ -1223,8 +1223,7 @@ void __cdecl ScriptEntCmd_NotSolid(scr_entref_t entref)
     }
     else
     {
-        if (entref.entnum >= 0x400u)
-            MyAssertHandler(".\\game\\g_scr_mover.cpp", 1119, 0, "%s", "entref.entnum < MAX_GENTITIES");
+        iassert(entref.entnum < MAX_GENTITIES);
         pSelf = &g_entities[entref.entnum];
         if (pSelf->classname != scr_const.script_brushmodel
             && pSelf->classname != scr_const.script_model

@@ -222,178 +222,8 @@ const char *debugOverlayNames[4] =
 
 
 
-const dvar_s *CG_RegisterDvars()
+void CG_RegisterDvars()
 {
-    const char *v0; // r5
-    unsigned __int16 v1; // r4
-    const char *v2; // r5
-    unsigned __int16 v3; // r4
-    const char *v4; // r5
-    unsigned __int16 v5; // r4
-    const char *v6; // r5
-    unsigned __int16 v7; // r4
-    const char *v8; // r5
-    unsigned __int16 v9; // r4
-    const char *v10; // r5
-    unsigned __int16 v11; // r4
-    const char *v12; // r5
-    unsigned __int16 v13; // r4
-    const char *v14; // r5
-    unsigned __int16 v15; // r4
-    const char *v16; // r5
-    unsigned __int16 v17; // r4
-    const char *v18; // r5
-    unsigned __int16 v19; // r4
-    const char *v20; // r5
-    unsigned __int16 v21; // r4
-    const char *v22; // r5
-    unsigned __int16 v23; // r4
-    const char *v24; // r5
-    unsigned __int16 v25; // r4
-    const char *v26; // r5
-    unsigned __int16 v27; // r4
-    const char *v28; // r5
-    unsigned __int16 v29; // r4
-    const char *v30; // r5
-    unsigned __int16 v31; // r4
-    const char *v32; // r5
-    unsigned __int16 v33; // r4
-    const char *v34; // r5
-    unsigned __int16 v35; // r4
-    const char *v36; // r5
-    unsigned __int16 v37; // r4
-    const char *v38; // r5
-    unsigned __int16 v39; // r4
-    const char *v40; // r5
-    unsigned __int16 v41; // r4
-    const char *v42; // r5
-    unsigned __int16 v43; // r4
-    const char *v44; // r5
-    unsigned __int16 v45; // r4
-    const char *v46; // r5
-    unsigned __int16 v47; // r4
-    const char *v48; // r5
-    unsigned __int16 v49; // r4
-    const char *v50; // r5
-    unsigned __int16 v51; // r4
-    const char *v52; // r5
-    unsigned __int16 v53; // r4
-    const char *v54; // r5
-    unsigned __int16 v55; // r4
-    const char *v56; // r5
-    unsigned __int16 v57; // r4
-    const char *v58; // r5
-    unsigned __int16 v59; // r4
-    const char *v60; // r5
-    unsigned __int16 v61; // r4
-    const char *v62; // r5
-    unsigned __int16 v63; // r4
-    const char *v64; // r5
-    unsigned __int16 v65; // r4
-    const char *v66; // r5
-    unsigned __int16 v67; // r4
-    const char *v68; // r5
-    unsigned __int16 v69; // r4
-    const char *v70; // r5
-    unsigned __int16 v71; // r4
-    const char *v72; // r5
-    unsigned __int16 v73; // r4
-    const char *v74; // r5
-    unsigned __int16 v75; // r4
-    const char *v76; // r5
-    unsigned __int16 v77; // r4
-    const char *v78; // r5
-    unsigned __int16 v79; // r4
-    const char *v80; // r5
-    unsigned __int16 v81; // r4
-    const char *v82; // r5
-    unsigned __int16 v83; // r4
-    const char *v84; // r5
-    unsigned __int16 v85; // r4
-    const char *v86; // r5
-    unsigned __int16 v87; // r4
-    const char *v88; // r5
-    unsigned __int16 v89; // r4
-    const char *v90; // r5
-    unsigned __int16 v91; // r4
-    const char *v92; // r5
-    unsigned __int16 v93; // r4
-    const char *v94; // r5
-    unsigned __int16 v95; // r4
-    const char *v96; // r5
-    unsigned __int16 v97; // r4
-    const char *v98; // r5
-    unsigned __int16 v99; // r4
-    const char *v100; // r5
-    unsigned __int16 v101; // r4
-    const char *v102; // r5
-    unsigned __int16 v103; // r4
-    const char *v104; // r5
-    unsigned __int16 v105; // r4
-    const char *v106; // r5
-    unsigned __int16 v107; // r4
-    const char *v108; // r5
-    unsigned __int16 v109; // r4
-    const char *v110; // r5
-    unsigned __int16 v111; // r4
-    const char *v112; // r5
-    unsigned __int16 v113; // r4
-    const char *v114; // r5
-    unsigned __int16 v115; // r4
-    const char *v116; // r5
-    unsigned __int16 v117; // r4
-    const char *v118; // r5
-    unsigned __int16 v119; // r4
-    const char *v120; // r5
-    unsigned __int16 v121; // r4
-    const char *v122; // r5
-    unsigned __int16 v123; // r4
-    const char *v124; // r5
-    unsigned __int16 v125; // r4
-    const char *v126; // r5
-    unsigned __int16 v127; // r4
-    const char *v128; // r5
-    unsigned __int16 v129; // r4
-    const char *v130; // r5
-    unsigned __int16 v131; // r4
-    const char *v132; // r5
-    unsigned __int16 v133; // r4
-    const char *v134; // r5
-    unsigned __int16 v135; // r4
-    const char *v136; // r5
-    unsigned __int16 v137; // r4
-    const char *v138; // r5
-    unsigned __int16 v139; // r4
-    const char *v140; // r5
-    unsigned __int16 v141; // r4
-    const char *v142; // r5
-    unsigned __int16 v143; // r4
-    const char *v144; // r5
-    unsigned __int16 v145; // r4
-    const char *v146; // r5
-    unsigned __int16 v147; // r4
-    const char *v148; // r5
-    unsigned __int16 v149; // r4
-    const char *v150; // r5
-    unsigned __int16 v151; // r4
-    const char *v152; // r5
-    unsigned __int16 v153; // r4
-    const char *v154; // r5
-    unsigned __int16 v155; // r4
-    const char *v156; // r5
-    unsigned __int16 v157; // r4
-    const char *v158; // r5
-    unsigned __int16 v159; // r4
-    const char *v160; // r5
-    unsigned __int16 v161; // r4
-    const char *v162; // r5
-    unsigned __int16 v163; // r4
-    const char *v164; // r5
-    unsigned __int16 v165; // r4
-    const char *v166; // r5
-    unsigned __int16 v167; // r4
-    const dvar_s *result; // r3
-
     cg_drawGun = Dvar_RegisterBool("cg_drawGun", 1, 0x80u, "Draw the view model");
     cg_cursorHints = Dvar_RegisterInt(
         "cg_cursorHints",
@@ -419,8 +249,8 @@ const dvar_s *CG_RegisterDvars()
         0x7FFFFFFF,
         1u,
         "Time in milliseconds for the cursor hint to fade");
-    cg_fov = Dvar_RegisterFloat("cg_fov", 65.0, 1.0, 160.0, v1, v0);
-    cg_viewVehicleInfluence = Dvar_RegisterFloat("cg_viewVehicleInfluence", 1.0, 0.0, 1.0, v3, v2);
+    cg_fov = Dvar_RegisterFloat("cg_fov", 65.0, 1.0, 160.0, DVAR_ARCHIVE, "The field of view angle in degrees");
+    cg_viewVehicleInfluence = Dvar_RegisterFloat("cg_viewVehicleInfluence", 1.0, 0.0, 1.0, 0, "The influence on the view from being in a vehicle");
     cg_draw2D = Dvar_RegisterBool("cg_draw2D", 1, 0, "Draw 2D screen elements");
     cg_drawHUD = Dvar_RegisterBool("cg_drawHUD", 1, 0, "Draw HUD elements");
     cg_drawHealth = Dvar_RegisterBool("cg_drawHealth", 0, 0x80u, "Draw health bar");
@@ -433,10 +263,10 @@ const dvar_s *CG_RegisterDvars()
     limits.value.min = -200.0f;
     limits.value.max = 640.0f;
     //cg_debugInfoCornerOffset = Dvar_RegisterVec2("cg_debugInfoCornerOffset", 20.0, -20.0, -200.0, 640.0, v5, v4);
-    cg_debugInfoCornerOffset = Dvar_RegisterVec2("cg_debugInfoCornerOffset", 20.0, -20.0, limits, v5, v4);
+    cg_debugInfoCornerOffset = Dvar_RegisterVec2("cg_debugInfoCornerOffset", 20.0, -20.0, limits, DVAR_ARCHIVE, "Offset from top-right corner, for cg_drawFPS, etc");
     cg_drawVersion = Dvar_RegisterBool("cg_drawVersion", 1, 0, "Draw the game version");
-    cg_drawVersionX = Dvar_RegisterFloat("cg_drawVersionX", 50.0, 0.0, 512.0, v7, v6);
-    cg_drawVersionY = Dvar_RegisterFloat("cg_drawVersionY", 18.0, 0.0, 512.0, v9, v8);
+    cg_drawVersionX = Dvar_RegisterFloat("cg_drawVersionX", 50.0, 0.0, 512.0, DVAR_NOFLAG, "X offset for the version string");
+    cg_drawVersionY = Dvar_RegisterFloat("cg_drawVersionY", 18.0, 0.0, 512.0, DVAR_NOFLAG, "Y offset for the version string");
     snd_drawInfo = Dvar_RegisterEnum("snd_drawInfo", snd_drawInfoStrings, 0, 0, "Draw debugging information for sounds");
     cg_drawScriptUsage = Dvar_RegisterBool("cg_drawScriptUsage", 0, 0, "Draw debugging information for scripts");
     cg_drawMaterial = Dvar_RegisterEnum(
@@ -457,15 +287,15 @@ const dvar_s *CG_RegisterDvars()
         1,
         0x80u,
         "Draw various debug overlays.  Only useful when cg_draw2D is off.");
-    cg_hudStanceFlash = Dvar_RegisterColor("cg_hudStanceFlash", 1.0, 1.0, 1.0, 1.0, v11, v10);
+    cg_hudStanceFlash = Dvar_RegisterColor("cg_hudStanceFlash", 1.0, 1.0, 1.0, 1.0, DVAR_NOFLAG, "The background color of the flash when the stance changes");
     cg_hudStanceHintPrints = Dvar_RegisterBool(
         "cg_hudStanceHintPrints",
         0,
         1u,
         "Draw helpful text to say how to change stances");
-    cg_hudDamageIconWidth = Dvar_RegisterFloat("cg_hudDamageIconWidth", 128.0, 0.0, 512.0, v13, v12);
-    cg_hudDamageIconHeight = Dvar_RegisterFloat("cg_hudDamageIconHeight", 64.0, 0.0, 512.0, v15, v14);
-    cg_hudDamageIconOffset = Dvar_RegisterFloat("cg_hudDamageIconOffset", 128.0, 0.0, 512.0, v17, v16);
+    cg_hudDamageIconWidth = Dvar_RegisterFloat("cg_hudDamageIconWidth", 128.0, 0.0, 512.0, DVAR_ARCHIVE, "The width of the damage icon");
+    cg_hudDamageIconHeight = Dvar_RegisterFloat("cg_hudDamageIconHeight", 64.0, 0.0, 512.0, DVAR_ARCHIVE, "The height of the damage icon");
+    cg_hudDamageIconOffset = Dvar_RegisterFloat("cg_hudDamageIconOffset", 128.0, 0.0, 512.0, DVAR_ARCHIVE, "The offset from the center of the damage icon");
     cg_hudDamageIconTime = Dvar_RegisterInt(
         "cg_hudDamageIconTime",
         2000,
@@ -478,31 +308,47 @@ const dvar_s *CG_RegisterDvars()
         0,
         1u,
         "Draw damage icons when aiming down the sight of a scoped weapon");
-    cg_hudGrenadeIconMaxRangeFrag = Dvar_RegisterFloat("cg_hudGrenadeIconMaxRangeFrag", 256.0, 0.0, 1000.0, v19, v18);
-    cg_hudGrenadeIconMaxRangeFlash = Dvar_RegisterFloat("cg_hudGrenadeIconMaxRangeFlash", 500.0, 0.0, 2000.0, v21, v20);
-    cg_hudGrenadeIconMaxHeight = Dvar_RegisterFloat("cg_hudGrenadeIconMaxHeight", 104.0, 0.0, 1000.0, v23, v22);
+    cg_hudGrenadeIconMaxRangeFrag = Dvar_RegisterFloat("cg_hudGrenadeIconMaxRangeFrag", 256.0, 0.0, 1000.0, DVAR_CHEAT | DVAR_SAVED,
+        "The minimum distance that a grenade has to be from a player in order to be shown on the grenade indicator");
+    cg_hudGrenadeIconMaxRangeFlash = Dvar_RegisterFloat("cg_hudGrenadeIconMaxRangeFlash", 500.0, 0.0, 2000.0, DVAR_CHEAT | DVAR_SAVED,
+        "The minimum distance that a flashbang has to be from a player in order to be shown "
+        "on the grenade indicator");
+    cg_hudGrenadeIconMaxHeight = Dvar_RegisterFloat("cg_hudGrenadeIconMaxHeight", 104.0, 0.0, 1000.0, DVAR_ARCHIVE,
+        "The minimum height difference between a player and a grenade for the grenade to be show"
+        "n on the grenade indicator");
     cg_hudGrenadeIconInScope = Dvar_RegisterBool(
         "cg_hudGrenadeIconInScope",
         1,
         1u,
         "Show the grenade indicator when aiming down the sight of a scoped weapon");
-    cg_hudGrenadeIconOffset = Dvar_RegisterFloat("cg_hudGrenadeIconOffset", 50.0, 0.0, 512.0, v25, v24);
-    cg_hudGrenadeIconHeight = Dvar_RegisterFloat("cg_hudGrenadeIconHeight", 25.0, 0.0, 512.0, v27, v26);
-    cg_hudGrenadeIconWidth = Dvar_RegisterFloat("cg_hudGrenadeIconWidth", 25.0, 0.0, 512.0, v29, v28);
+    cg_hudGrenadeIconOffset = Dvar_RegisterFloat("cg_hudGrenadeIconOffset", 50.0, 0.0, 512.0, DVAR_ARCHIVE,
+        "The offset from the center of the screen for a grenade icon");
+    cg_hudGrenadeIconHeight = Dvar_RegisterFloat("cg_hudGrenadeIconHeight", 25.0, 0.0, 512.0, DVAR_ARCHIVE,
+        "The height of the grenade indicator icon");
+    cg_hudGrenadeIconWidth = Dvar_RegisterFloat("cg_hudGrenadeIconWidth", 25.0, 0.0, 512.0, DVAR_ARCHIVE,
+        "The width of the grenade indicator icon");
     cg_hudGrenadeIconEnabledFlash = Dvar_RegisterBool(
         "cg_hudGrenadeIconEnabledFlash",
         0,
         1u,
         "Show the grenade indicator for flash grenades");
-    cg_hudGrenadePointerHeight = Dvar_RegisterFloat("cg_hudGrenadePointerHeight", 12.0, 0.0, 512.0, v31, v30);
-    cg_hudGrenadePointerWidth = Dvar_RegisterFloat("cg_hudGrenadePointerWidth", 25.0, 0.0, 512.0, v33, v32);
+    cg_hudGrenadePointerHeight = Dvar_RegisterFloat("cg_hudGrenadePointerHeight", 12.0, 0.0, 512.0, DVAR_ARCHIVE,
+        "The height of the grenade indicator pointer");
+    cg_hudGrenadePointerWidth = Dvar_RegisterFloat("cg_hudGrenadePointerWidth", 25.0, 0.0, 512.0, DVAR_ARCHIVE,
+        "The width of the grenade indicator pointer");
     limits.value.min = 0.0f;
     limits.value.max = 512.0f;
     //cg_hudGrenadePointerPivot = Dvar_RegisterVec2("cg_hudGrenadePointerPivot", 12.0, 27.0, 0.0, 512.0, v35, v34);
-    cg_hudGrenadePointerPivot = Dvar_RegisterVec2("cg_hudGrenadePointerPivot", 12.0, 27.0, limits, v35, v34);
-    cg_hudGrenadePointerPulseFreq = Dvar_RegisterFloat("cg_hudGrenadePointerPulseFreq", 1.7, 0.1, 50.0, v37, v36);
-    cg_hudGrenadePointerPulseMax = Dvar_RegisterFloat("cg_hudGrenadePointerPulseMax", 1.85, 0.0, 3.0, v39, v38);
-    cg_hudGrenadePointerPulseMin = Dvar_RegisterFloat("cg_hudGrenadePointerPulseMin", 0.30000001, -3.0, 1.0, v41, v40);
+    cg_hudGrenadePointerPivot = Dvar_RegisterVec2("cg_hudGrenadePointerPivot", 12.0, 27.0, limits, DVAR_ARCHIVE,
+        "The pivot point of th grenade indicator pointer");
+    cg_hudGrenadePointerPulseFreq = Dvar_RegisterFloat("cg_hudGrenadePointerPulseFreq", 1.7, 0.1, 50.0, DVAR_NOFLAG,
+        "The number of times per second that the grenade indicator flashes in Hertz");
+    cg_hudGrenadePointerPulseMax = Dvar_RegisterFloat("cg_hudGrenadePointerPulseMax", 1.85, 0.0, 3.0, DVAR_NOFLAG,
+        "The maximum alpha of the grenade indicator pulse. Values higher than 1 will cause the"
+        " indicator to remain at full brightness for longer");
+    cg_hudGrenadePointerPulseMin = Dvar_RegisterFloat("cg_hudGrenadePointerPulseMin", 0.30000001, -3.0, 1.0, DVAR_NOFLAG,
+        "The minimum alpha of the grenade indicator pulse. Values lower than 0 will cause the "
+        "indicator to remain at full transparency for longer");
     cg_weaponCycleDelay = Dvar_RegisterInt(
         "cg_weaponCycleDelay",
         0,
@@ -510,8 +356,9 @@ const dvar_s *CG_RegisterDvars()
         0x7FFFFFFF,
         1u,
         "The delay after cycling to a new weapon to prevent holding down the cycle weapon button from cycling too fast");
-    cg_crosshairAlpha = Dvar_RegisterFloat("cg_crosshairAlpha", 1.0, 0.0, 1.0, v43, v42);
-    cg_crosshairAlphaMin = Dvar_RegisterFloat("cg_crosshairAlphaMin", 0.5, 0.0, 1.0, v45, v44);
+    cg_crosshairAlpha = Dvar_RegisterFloat("cg_crosshairAlpha", 1.0, 0.0, 1.0, DVAR_CHEAT | DVAR_ARCHIVE, "The alpha value of the crosshair");
+    cg_crosshairAlphaMin = Dvar_RegisterFloat("cg_crosshairAlphaMin", 0.5, 0.0, 1.0, DVAR_CHEAT | DVAR_ARCHIVE,
+        "The minimum alpha value of the crosshair when it fades in");
     cg_crosshairDynamic = Dvar_RegisterBool("cg_crosshairDynamic", 0, 0x81u, "Crosshair is Dynamic");
     cg_crosshairEnemyColor = Dvar_RegisterBool(
         "cg_crosshairEnemyColor",
@@ -524,29 +371,29 @@ const dvar_s *CG_RegisterDvars()
         0x81u,
         "draw the friendly fire crosshair (friendly move)");
     cg_brass = Dvar_RegisterBool("cg_brass", 1, 1u, "Weapons eject brass");
-    cg_gun_x = Dvar_RegisterFloat("cg_gun_x", 0.0, -FLT_MAX, FLT_MAX, v47, v46);
-    cg_gun_y = Dvar_RegisterFloat("cg_gun_y", 0.0, -FLT_MAX, FLT_MAX, v49, v48);
-    cg_gun_z = Dvar_RegisterFloat("cg_gun_z", 0.0, -FLT_MAX, FLT_MAX, v51, v50);
-    cg_gun_move_f = Dvar_RegisterFloat("cg_gun_move_f", 0.0, -FLT_MAX, FLT_MAX, v53, v52);
-    cg_gun_move_r = Dvar_RegisterFloat("cg_gun_move_r", 0.0, -FLT_MAX, FLT_MAX, v55, v54);
-    cg_gun_move_u = Dvar_RegisterFloat("cg_gun_move_u", 0.0, -FLT_MAX, FLT_MAX, v57, v56);
-    cg_gun_ofs_f = Dvar_RegisterFloat("cg_gun_ofs_f", 0.0, -FLT_MAX, FLT_MAX, v59, v58);
-    cg_gun_ofs_r = Dvar_RegisterFloat("cg_gun_ofs_r", 0.0, -FLT_MAX, FLT_MAX, v61, v60);
-    cg_gun_ofs_u = Dvar_RegisterFloat("cg_gun_ofs_u", 0.0, -FLT_MAX, FLT_MAX, v63, v62);
-    cg_gun_rot_p = Dvar_RegisterFloat("cg_gun_rot_p", 0.0, -FLT_MAX, FLT_MAX, v65, v64);
-    cg_gun_rot_y = Dvar_RegisterFloat("cg_gun_rot_y", 0.0, -FLT_MAX, FLT_MAX, v67, v66);
-    cg_gun_rot_r = Dvar_RegisterFloat("cg_gun_rot_r", 0.0, -FLT_MAX, FLT_MAX, v69, v68);
-    cg_gun_move_rate = Dvar_RegisterFloat("cg_gun_move_rate", 0.0, -FLT_MAX, FLT_MAX, v71, v70);
-    cg_gun_move_minspeed = Dvar_RegisterFloat("cg_gun_move_minspeed", 0.0, -FLT_MAX, FLT_MAX, v73, v72);
-    cg_gun_rot_rate = Dvar_RegisterFloat("cg_gun_rot_rate", 0.0, -FLT_MAX, FLT_MAX, v75, v74);
-    cg_gun_rot_minspeed = Dvar_RegisterFloat("cg_gun_rot_minspeed", 0.0, -FLT_MAX, FLT_MAX, v77, v76);
-    cg_centertime = Dvar_RegisterFloat("cg_centertime", 3.0, 0.0, FLT_MAX, v79, v78);
-    cg_bobWeaponAmplitude = Dvar_RegisterFloat("cg_bobWeaponAmplitude", 0.16, 0.0, 1.0, v81, v80);
-    cg_bobWeaponRollAmplitude = Dvar_RegisterFloat("cg_bobWeaponRollAmplitude", 1.5, 0.0, 90.0, v83, v82);
-    cg_bobWeaponMax = Dvar_RegisterFloat("cg_bobWeaponMax", 10.0, 0.0, 36.0, v85, v84);
-    cg_bobWeaponLag = Dvar_RegisterFloat("cg_bobWeaponLag", 0.25, -1.0, 1.0, v87, v86);
+    cg_gun_x = Dvar_RegisterFloat("cg_gun_x", 0.0, -FLT_MAX, FLT_MAX, DVAR_CHEAT, "x position of the viewmodel");
+    cg_gun_y = Dvar_RegisterFloat("cg_gun_y", 0.0, -FLT_MAX, FLT_MAX, DVAR_CHEAT, "y position of the viewmodel");
+    cg_gun_z = Dvar_RegisterFloat("cg_gun_z", 0.0, -FLT_MAX, FLT_MAX, DVAR_CHEAT, "z position of the viewmodel");
+    cg_gun_move_f = Dvar_RegisterFloat("cg_gun_move_f", 0.0, -FLT_MAX, FLT_MAX, DVAR_CHEAT, "Weapon movement forward due to player movement");
+    cg_gun_move_r = Dvar_RegisterFloat("cg_gun_move_r", 0.0, -FLT_MAX, FLT_MAX, DVAR_CHEAT, "Weapon movement right due to player movement");
+    cg_gun_move_u = Dvar_RegisterFloat("cg_gun_move_u", 0.0, -FLT_MAX, FLT_MAX, DVAR_CHEAT, "Weapon movement up due to player movement");
+    cg_gun_ofs_f = Dvar_RegisterFloat("cg_gun_ofs_f", 0.0, -FLT_MAX, FLT_MAX, DVAR_CHEAT, "Forward weapon offset when prone/ducked");
+    cg_gun_ofs_r = Dvar_RegisterFloat("cg_gun_ofs_r", 0.0, -FLT_MAX, FLT_MAX, DVAR_CHEAT, "Right weapon offset when prone/ducked");
+    cg_gun_ofs_u = Dvar_RegisterFloat("cg_gun_ofs_u", 0.0, -FLT_MAX, FLT_MAX, DVAR_CHEAT, "Up weapon offset when prone/ducked");
+    cg_gun_rot_p = Dvar_RegisterFloat("cg_gun_rot_p", 0.0, -FLT_MAX, FLT_MAX, DVAR_CHEAT, "Pitch gun rotation with movement");
+    cg_gun_rot_y = Dvar_RegisterFloat("cg_gun_rot_y", 0.0, -FLT_MAX, FLT_MAX, DVAR_CHEAT, "Yaw gun rotation with movement");
+    cg_gun_rot_r = Dvar_RegisterFloat("cg_gun_rot_r", 0.0, -FLT_MAX, FLT_MAX, DVAR_CHEAT, "Roll gun rotation with movement");
+    cg_gun_move_rate = Dvar_RegisterFloat("cg_gun_move_rate", 0.0, -FLT_MAX, FLT_MAX, DVAR_CHEAT, "The base weapon movement rate");
+    cg_gun_move_minspeed = Dvar_RegisterFloat("cg_gun_move_minspeed", 0.0, -FLT_MAX, FLT_MAX, DVAR_CHEAT, "The minimum weapon movement rate");
+    cg_gun_rot_rate = Dvar_RegisterFloat("cg_gun_rot_rate", 0.0, -FLT_MAX, FLT_MAX, DVAR_CHEAT, "The base weapon rotation rate");
+    cg_gun_rot_minspeed = Dvar_RegisterFloat("cg_gun_rot_minspeed", 0.0, -FLT_MAX, FLT_MAX, DVAR_CHEAT, "The minimum weapon rotation speed");
+    cg_centertime = Dvar_RegisterFloat("cg_centertime", 3.0, 0.0, FLT_MAX, DVAR_CHEAT, "The time for a center printed message to fade");
+    cg_bobWeaponAmplitude = Dvar_RegisterFloat("cg_bobWeaponAmplitude", 0.16, 0.0, 1.0, DVAR_CHEAT, "The weapon bob amplitude");
+    cg_bobWeaponRollAmplitude = Dvar_RegisterFloat("cg_bobWeaponRollAmplitude", 1.5, 0.0, 90.0, DVAR_CHEAT, "The amplitude of roll for weapon bobbing");
+    cg_bobWeaponMax = Dvar_RegisterFloat("cg_bobWeaponMax", 10.0, 0.0, 36.0, DVAR_CHEAT, "The maximum weapon bob");
+    cg_bobWeaponLag = Dvar_RegisterFloat("cg_bobWeaponLag", 0.25, -1.0, 1.0, DVAR_CHEAT, "The lag on the weapon bob");
     cg_debugEvents = Dvar_RegisterBool("cg_debugevents", 0, 0x80u, "Output event debug information");
-    cg_errorDecay = Dvar_RegisterFloat("cg_errordecay", 100.0, 0.0, FLT_MAX, v89, v88);
+    cg_errorDecay = Dvar_RegisterFloat("cg_errordecay", 100.0, 0.0, FLT_MAX, DVAR_CHEAT, "Decay for predicted error");
     cg_nopredict = Dvar_RegisterBool("cg_nopredict", 0, 1u, "Don't do client side prediction");
     cg_cinematicFullscreen = Dvar_RegisterBool("cg_cinematicFullscreen", 1, 0x1000u, "Draw ingame cinematics full screen");
     cg_showmiss = Dvar_RegisterInt("cg_showmiss", 0, 0, 2, 0, "Show prediction errors");
@@ -556,40 +403,52 @@ const dvar_s *CG_RegisterDvars()
         0,
         0x80u,
         "Force laser sights on in all possible places (for debug purposes).");
-    cg_laserRange = Dvar_RegisterFloat("cg_laserRange", 1500.0, 1.0, FLT_MAX, v91, v90);
-    cg_laserRangePlayer = Dvar_RegisterFloat("cg_laserRangePlayer", 1500.0, 1.0, FLT_MAX, v93, v92);
-    cg_laserRadius = Dvar_RegisterFloat("cg_laserRadius", 0.80000001, 0.001, FLT_MAX, v95, v94);
+    cg_laserRange = Dvar_RegisterFloat("cg_laserRange", 1500.0, 1.0, FLT_MAX, DVAR_CHEAT, "The maximum range of a laser beam");
+    cg_laserRangePlayer = Dvar_RegisterFloat("cg_laserRangePlayer", 1500.0, 1.0, FLT_MAX, DVAR_CHEAT, "The maximum range of the player's laser beam");
+    cg_laserRadius = Dvar_RegisterFloat("cg_laserRadius", 0.80000001, 0.001, FLT_MAX, DVAR_CHEAT, "The size (radius) of a laser beam");
     cg_laserLight = Dvar_RegisterBool(
         "cg_laserLight",
         1,
         0,
         "Whether to draw the light emitted from a laser (not the laser itself)");
-    cg_laserLightBodyTweak = Dvar_RegisterFloat("cg_laserLightBodyTweak", 15.0, -FLT_MAX, FLT_MAX, v97, v96);
-    cg_laserLightRadius = Dvar_RegisterFloat("cg_laserLightRadius", 3.0, 0.001, FLT_MAX, v99, v98);
+    cg_laserLightBodyTweak = Dvar_RegisterFloat("cg_laserLightBodyTweak", 15.0, -FLT_MAX, FLT_MAX, DVAR_CHEAT,
+        "Amount to add to length of beam for light when laser hits a body (for hitboxes).");
+    cg_laserLightRadius = Dvar_RegisterFloat("cg_laserLightRadius", 3.0, 0.001, FLT_MAX, DVAR_CHEAT,
+        "The radius of the light at the far end of a laser beam");
     cg_laserLightBeginOffset = Dvar_RegisterFloat(
         "cg_laserLightBeginOffset",
         13.0,
         -FLT_MAX,
         FLT_MAX,
-        v101,
-        v100);
-    cg_laserLightEndOffset = Dvar_RegisterFloat("cg_laserLightEndOffset", -3.0, -FLT_MAX, FLT_MAX, v103, v102);
-    cg_laserEndOffset = Dvar_RegisterFloat("cg_laserEndOffset", 0.5, -FLT_MAX, FLT_MAX, v105, v104);
-    cg_laserFlarePct = Dvar_RegisterFloat("cg_laserFlarePct", 0.2, 0.0, FLT_MAX, v107, v106);
+        DVAR_CHEAT,
+        "How far from the true beginning of the beam the light at the beginning is.");
+    cg_laserLightEndOffset = Dvar_RegisterFloat("cg_laserLightEndOffset", -3.0, -FLT_MAX, FLT_MAX, DVAR_CHEAT,
+        "How far from the true end of the beam the light at the end is.");
+    cg_laserEndOffset = Dvar_RegisterFloat("cg_laserEndOffset", 0.5, -FLT_MAX, FLT_MAX, DVAR_CHEAT,
+        "How far from the point of collision the end of the beam is.");
+    cg_laserFlarePct = Dvar_RegisterFloat("cg_laserFlarePct", 0.2, 0.0, FLT_MAX, DVAR_CHEAT,
+        "Percentage laser widens over distance from viewer.");
     cg_marks_ents_player_only = Dvar_RegisterBool(
         "cg_marks_ents_player_only",
         0,
         1u,
         "Marks on entities from player's bullets only.");
-    cg_tracerChance = Dvar_RegisterFloat("cg_tracerchance", 0.2, 0.0, 1.0, v109, v108);
-    cg_tracerWidth = Dvar_RegisterFloat("cg_tracerwidth", 4.0, 0.0, FLT_MAX, v111, v110);
-    cg_tracerSpeed = Dvar_RegisterFloat("cg_tracerSpeed", 7500.0, 0.0, FLT_MAX, v113, v112);
-    cg_tracerLength = Dvar_RegisterFloat("cg_tracerlength", 160.0, 0.0, FLT_MAX, v115, v114);
-    cg_tracerScale = Dvar_RegisterFloat("cg_tracerScale", 1.0, 1.0, FLT_MAX, v117, v116);
-    cg_tracerScaleMinDist = Dvar_RegisterFloat("cg_tracerScaleMinDist", 5000.0, 0.0, FLT_MAX, v119, v118);
-    cg_tracerScaleDistRange = Dvar_RegisterFloat("cg_tracerScaleDistRange", 25000.0, 0.0, FLT_MAX, v121, v120);
-    cg_tracerScrewDist = Dvar_RegisterFloat("cg_tracerScrewDist", 100.0, 0.0, FLT_MAX, v123, v122);
-    cg_tracerScrewRadius = Dvar_RegisterFloat("cg_tracerScrewRadius", 0.5, 0.0, FLT_MAX, v125, v124);
+    cg_tracerChance = Dvar_RegisterFloat("cg_tracerchance", 0.2, 0.0, 1.0, DVAR_CHEAT,
+        "The probability that a bullet is a tracer round");
+    cg_tracerWidth = Dvar_RegisterFloat("cg_tracerwidth", 4.0, 0.0, FLT_MAX, DVAR_CHEAT, "The width of the tracer round");
+    cg_tracerSpeed = Dvar_RegisterFloat("cg_tracerSpeed", 7500.0, 0.0, FLT_MAX, DVAR_CHEAT,
+        "The speed of a tracer round in units per second");
+    cg_tracerLength = Dvar_RegisterFloat("cg_tracerlength", 160.0, 0.0, FLT_MAX, DVAR_CHEAT, "The length of a tracer round");
+    cg_tracerScale = Dvar_RegisterFloat("cg_tracerScale", 1.0, 1.0, FLT_MAX, DVAR_CHEAT,
+        "Scale the tracer at a distance, so it's still visible");
+    cg_tracerScaleMinDist = Dvar_RegisterFloat("cg_tracerScaleMinDist", 5000.0, 0.0, FLT_MAX, DVAR_CHEAT,
+        "The minimum distance to scale a tracer");
+    cg_tracerScaleDistRange = Dvar_RegisterFloat("cg_tracerScaleDistRange", 25000.0, 0.0, FLT_MAX, DVAR_CHEAT,
+        "The range at which a tracer is scaled to its maximum amount");
+    cg_tracerScrewDist = Dvar_RegisterFloat("cg_tracerScrewDist", 100.0, 0.0, FLT_MAX, DVAR_CHEAT,
+        "The length a tracer goes as it completes a full corkscrew revolution");
+    cg_tracerScrewRadius = Dvar_RegisterFloat("cg_tracerScrewRadius", 0.5, 0.0, FLT_MAX, DVAR_CHEAT,
+        "The radius of a tracer's corkscrew motion");
     cg_paused = Dvar_RegisterInt("cl_paused", 0, 0, 2, 0, "Pause the game");
     cg_drawpaused = Dvar_RegisterBool("cg_drawpaused", 1, 0, "Draw paused screen");
     cg_debug_overlay_viewport = Dvar_RegisterBool(
@@ -614,7 +473,8 @@ const dvar_s *CG_RegisterDvars()
     cg_dumpAnims = Dvar_RegisterInt("cg_dumpAnims", -1, -1, ENTITYNUM_NONE, 0x80u, "Output animation info for the given entity id");
     cg_developer = Dvar_RegisterInt("developer", 0, 0, 2, 0, "Turn on Development systems");
     cg_minicon = Dvar_RegisterBool("con_minicon", 0, 1u, "Display the mini console on screen");
-    cg_subtitleMinTime = Dvar_RegisterFloat("cg_subtitleMinTime", 3.0, 0.0, FLT_MAX, v127, v126);
+    cg_subtitleMinTime = Dvar_RegisterFloat("cg_subtitleMinTime", 3.0, 0.0, FLT_MAX, DVAR_ARCHIVE,
+        "The minimum time that the subtitles are displayed on screen in seconds");
     cg_subtitleWidthStandard = Dvar_RegisterInt(
         "cg_subtitleWidthStandard",
         306,
@@ -657,22 +517,22 @@ const dvar_s *CG_RegisterDvars()
         1.5,
         0.0,
         FLT_MAX,
-        v129,
-        v128);
+        0,
+        "Font scale for a small development only display string");
     cg_mapLocationSelectionCursorSpeed = Dvar_RegisterFloat(
         "cg_mapLocationSelectionCursorSpeed",
         0.60000002,
         0.001,
         1.0,
-        v131,
-        v130);
-    turretScopeZoom = Dvar_RegisterFloat("turretScopeZoom", 20.0, 0.0099999998, 180.0, v133, v132);
-    turretScopeZoomMin = Dvar_RegisterFloat("turretScopeZoomMin", 5.0, 0.0099999998, 180.0, v135, v134);
-    turretScopeZoomMax = Dvar_RegisterFloat("turretScopeZoomMax", 20.0, 0.0099999998, 180.0, v137, v136);
-    turretScopeZoomRate = Dvar_RegisterFloat("turretScopeZoomRate", 15.0, 0.0, FLT_MAX, v139, v138);
-    cg_viewZSmoothingMin = Dvar_RegisterFloat("cg_viewZSmoothingMin", 1.0, 0.0, FLT_MAX, v141, v140);
-    cg_viewZSmoothingMax = Dvar_RegisterFloat("cg_viewZSmoothingMax", 16.0, 0.0, FLT_MAX, v143, v142);
-    cg_viewZSmoothingTime = Dvar_RegisterFloat("cg_viewZSmoothingTime", 0.1, 0.0, FLT_MAX, v145, v144);
+        0,
+        "Speed of the cursor when selecting a location on the map");
+    turretScopeZoom = Dvar_RegisterFloat("turretScopeZoom", 20.0, 0.0099999998, 180.0, 0, "Current fov on scoped turrets.");
+    turretScopeZoomMin = Dvar_RegisterFloat("turretScopeZoomMin", 5.0, 0.0099999998, 180.0, 0, "Min fov on scoped turrets.");
+    turretScopeZoomMax = Dvar_RegisterFloat("turretScopeZoomMax", 20.0, 0.0099999998, 180.0, 0, "Max fov on scoped turrets.");
+    turretScopeZoomRate = Dvar_RegisterFloat("turretScopeZoomRate", 15.0, 0.0, FLT_MAX, 0, "Speed of fov change on scoped turrets, fov-per-second");
+    cg_viewZSmoothingMin = Dvar_RegisterFloat("cg_viewZSmoothingMin", 1.0, 0.0, FLT_MAX, 0, "Threshold for the minimum smoothing distance it must move to smooth");
+    cg_viewZSmoothingMax = Dvar_RegisterFloat("cg_viewZSmoothingMax", 16.0, 0.0, FLT_MAX, 0, "Threshold for the maximum smoothing distance we'll do");
+    cg_viewZSmoothingTime = Dvar_RegisterFloat("cg_viewZSmoothingTime", 0.1, 0.0, FLT_MAX, 0, "Amount of time to spread the smoothing over");
     overrideNVGModelWithKnife = Dvar_RegisterBool(
         "overrideNVGModelWithKnife",
         0,
@@ -685,7 +545,7 @@ const dvar_s *CG_RegisterDvars()
     cg_r_forceLod = Dvar_FindVar("r_forceLod");
     if (!cg_r_forceLod)
         MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\cgame\\cg_main.cpp", 490, 0, "%s", "cg_r_forceLod");
-    sv_znear = Dvar_RegisterFloat("sv_znear", 0.0, 0.0, 10000.0, v147, v146);
+    sv_znear = Dvar_RegisterFloat("sv_znear", 0.0, 0.0, 10000.0, 0, "Things closer than this aren't drawn.");
     DynEntCl_RegisterDvars();
     CG_OffhandRegisterDvars();
     CG_CompassRegisterDvars();
@@ -714,36 +574,36 @@ const dvar_s *CG_RegisterDvars()
         8.0,
         0.0099999998,
         FLT_MAX,
-        v149,
-        v148);
+        0,
+        "The rate that the player's view moves back to center when freelook is released");
     vehHelicopterHeadSwayOnYaw = Dvar_RegisterFloat(
         "vehHelicopterHeadSwayOnYaw",
         0.1,
         -FLT_MAX,
         FLT_MAX,
-        v151,
-        v150);
+        0,
+        "The rate at which the head turns when the chopper is turning");
     vehHelicopterHeadSwayOnPitch = Dvar_RegisterFloat(
         "vehHelicopterHeadSwayOnPitch",
         0.2,
         -FLT_MAX,
         FLT_MAX,
-        v153,
-        v152);
+        0,
+        "The amount which the head pitches when chopper is turning");
     vehHelicopterHeadSwayOnRollHorz = Dvar_RegisterFloat(
         "vehHelicopterHeadSwayOnRollHorz",
         0.1,
         -FLT_MAX,
         FLT_MAX,
-        v155,
-        v154);
+        0,
+        "The horizontal amount that the player turns when the chopper is strafing");
     vehHelicopterHeadSwayOnRollVert = Dvar_RegisterFloat(
         "vehHelicopterHeadSwayOnRollVert",
         2.0,
         -FLT_MAX,
         FLT_MAX,
-        v157,
-        v156);
+        0,
+        "The vertical amount that the player turns when the chopper is strafing");
     hud_showStance = Dvar_RegisterBool(
         "hud_showStance",
         1,
@@ -760,7 +620,7 @@ const dvar_s *CG_RegisterDvars()
         1,
         0,
         "Use the objective font for friendly prints.");
-    friendlyNameFontSize = Dvar_RegisterFloat("friendlyNameFontSize", 0.30000001, 0.0099999998, 100.0, v159, v158);
+    friendlyNameFontSize = Dvar_RegisterFloat("friendlyNameFontSize", 0.30000001, 0.0099999998, 100.0, 0, "Fontsize of the popup friendly names.");
     limits.value.min = 0.0f;
     limits.value.max = 1.0f;
     friendlyNameFontColor = Dvar_RegisterVec4(
@@ -770,8 +630,8 @@ const dvar_s *CG_RegisterDvars()
         0.89999998,
         0.69999999,
         limits,
-        v161,
-        v160);
+        0,
+        "friendlyNameFontColor");
     limits.value.min = 0.0f;
     limits.value.max = 1.0f;
     friendlyNameFontGlowColor = Dvar_RegisterVec4(
@@ -781,8 +641,8 @@ const dvar_s *CG_RegisterDvars()
         0.0,
         1.0,
         limits,
-        v163,
-        v162);
+        0,
+        "friendlyNameFontGlowColor");
     limits.value.min = 0.0f;
     limits.value.max = 1.0f;
     hostileNameFontColor = Dvar_RegisterVec4(
@@ -792,8 +652,8 @@ const dvar_s *CG_RegisterDvars()
         0.89999998,
         0.69999999,
         limits,
-        v165,
-        v164);
+        0,
+        "hostileNameFontColor");
     limits.value.min = 0.0f;
     limits.value.max = 1.0f;
     hostileNameFontGlowColor = Dvar_RegisterVec4(
@@ -803,11 +663,9 @@ const dvar_s *CG_RegisterDvars()
         0.0,
         1.0,
         limits,
-        v167,
-        v166);
-    result = Dvar_RegisterEnum("debugOverlay", debugOverlayNames, 0, 0, "Toggles the display of various debug info.");
-    debugOverlay = result;
-    return result;
+        0,
+        "hostileNameFontGlowColor");
+    debugOverlay = Dvar_RegisterEnum("debugOverlay", debugOverlayNames, 0, 0, "Toggles the display of various debug info.");
 }
 
 void __cdecl TRACK_cg_main()
@@ -1801,16 +1659,15 @@ void __cdecl CG_FreeWeapons(int localClientNum)
 
 void __cdecl CG_Shutdown(int localClientNum)
 {
-    int v2; // r3
     int i; // r30
     centity_s *Entity; // r31
     int ragdollHandle; // r3
     dxBody *physObjId; // r4
 
     R_TrackStatistics(0);
-    SND_FadeAllSounds(1.0, v2);
+    SND_FadeAllSounds(1.0, 0);
     //CG_StopAllRumbles(localClientNum); // KISAKTODO
-    for (i = 0; i < 2176; ++i)
+    for (i = 0; i < MAX_GENTITIES; ++i)
     {
         Entity = CG_GetEntity(localClientNum, i);
         ragdollHandle = Entity->pose.ragdollHandle;

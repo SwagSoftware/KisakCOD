@@ -363,7 +363,7 @@ void SV_SaveSystemInfo()
 {
     const char *v0; // r3
     const char *v1; // r3
-    char v2[16]; // [sp+50h] [-2010h] BYREF
+    char v2[0x2000]; // [sp+50h] [-2010h] BYREF
 
     v0 = Dvar_InfoString_Big(8);
     I_strncpyz(v2, v0, 0x2000);

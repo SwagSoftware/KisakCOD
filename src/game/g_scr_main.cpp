@@ -8315,18 +8315,14 @@ void Scr_GetMapSunLight()
 
 void Scr_SetSunLight()
 {
-    double Float; // fp31
-    double v1; // fp30
-    const char *v2; // r3
-    double v3; // [sp+18h] [-58h]
-
     if (Scr_GetNumParam() != 3)
         Scr_Error("Incorrect number of parameters\n");
-    Float = Scr_GetFloat(2);
-    v1 = Scr_GetFloat(1);
-    v3 = Scr_GetFloat(0);
-    v2 = va((const char *)HIDWORD(v3), HIDWORD(v1), Float);
-    SV_SetConfigstring(7, v2);
+
+    float f2 = Scr_GetFloat(2);
+    float f1 = Scr_GetFloat(1);
+    float f0 = Scr_GetFloat(0);
+
+    SV_SetConfigstring(7, va("%g %g %g", f0, f1, f2));
 }
 
 void Scr_ResetSunLight()
