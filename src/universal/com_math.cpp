@@ -3073,7 +3073,9 @@ float __cdecl Vec4LengthSq(const float *v)
 
 float __cdecl Vec3LengthSq(const float* v)
 {
-    return (v[0] * v[0] + v[1] * v[1] + v[2] * v[2]);
+    float fDistSqrd = (v[0] * v[0] + v[1] * v[1] + v[2] * v[2]);
+    iassert(!IS_NAN(fDistSqrd));
+    return fDistSqrd;
 }
 
 void __cdecl Vec3Scale(const float *v, float scale, float *result)

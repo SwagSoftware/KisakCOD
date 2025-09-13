@@ -3305,7 +3305,7 @@ unsigned int  FindVariableIndexInternal2(unsigned int name, unsigned int index)
 	VariableValueInternal* newEntry; // [esp+10h] [ebp-4h]
 
 	iassert(!(name & ~VAR_NAME_LOW_MASK));
-	iassert(index < 0xFFFE);
+	bcassert(index, VARIABLELIST_CHILD_SIZE);
 	entry = &scrVarGlob.variableList[index + VARIABLELIST_CHILD_BEGIN];
 	iassert(entry->hash.id < 0xFFFEu);
 	entryValue = &scrVarGlob.variableList[entry->hash.id + VARIABLELIST_CHILD_BEGIN];
@@ -3705,22 +3705,17 @@ unsigned int  GetNewVariableIndexInternal3(unsigned int parentId, unsigned int n
 	VariableValueInternal* parentValue; // [esp+8h] [ebp-40h]
 	VariableValueInternal* entry; // [esp+Ch] [ebp-3Ch]
 	unsigned int newIndex; // [esp+10h] [ebp-38h]
-	unsigned int newIndexb; // [esp+10h] [ebp-38h]
-	unsigned int newIndexa; // [esp+10h] [ebp-38h]
 	unsigned int prevId; // [esp+14h] [ebp-34h]
 	unsigned int next; // [esp+20h] [ebp-28h]
-	unsigned int nexta; // [esp+20h] [ebp-28h]
-	unsigned int nextb; // [esp+20h] [ebp-28h]
 	VariableValueInternal* entryValue; // [esp+24h] [ebp-24h]
 	unsigned int prev; // [esp+2Ch] [ebp-1Ch]
-	unsigned int preva; // [esp+2Ch] [ebp-1Ch]
-	unsigned int prevb; // [esp+2Ch] [ebp-1Ch]
 	VariableValueInternal* newEntryValue; // [esp+30h] [ebp-18h]
 	int type; // [esp+34h] [ebp-14h]
-	VariableValueInternal* newEntrya; // [esp+38h] [ebp-10h]
 	VariableValueInternal* newEntry; // [esp+38h] [ebp-10h]
 	VariableValue value; // [esp+3Ch] [ebp-Ch]
 	unsigned __int16 id; // [esp+44h] [ebp-4h]
+	unsigned int prevSiblingIndex;
+	unsigned int nextSiblingIndex;
 
 	iassert(!(name & ~VAR_NAME_LOW_MASK));
 	entry = &scrVarGlob.variableList[index + VARIABLELIST_CHILD_BEGIN];
@@ -3734,7 +3729,7 @@ unsigned int  GetNewVariableIndexInternal3(unsigned int parentId, unsigned int n
 			{
 				index = scrVarGlob.variableList[VARIABLELIST_CHILD_BEGIN].u.next;
 
-				if (!scrVarGlob.variableList[VARIABLELIST_CHILD_BEGIN].u.next)
+				if (!index)
 					Scr_TerminalError("exceeded maximum number of script variables");
 
 				iassert(index > 0 && index < VARIABLELIST_CHILD_SIZE);
@@ -3744,64 +3739,70 @@ unsigned int  GetNewVariableIndexInternal3(unsigned int parentId, unsigned int n
 
 				iassert((newEntryValue->w.status & VAR_STAT_MASK) == VAR_STAT_FREE);
 
-				scrVarGlob.variableList[VARIABLELIST_CHILD_BEGIN].u.next = newEntryValue->u.next;
-				scrVarGlob.variableList[scrVarGlob.variableList[VARIABLELIST_CHILD_BEGIN].u.next + VARIABLELIST_CHILD_BEGIN].hash.u.prev = 0;
+				next = newEntryValue->u.next;
+				scrVarGlob.variableList[VARIABLELIST_CHILD_BEGIN].u.next = next;
+				scrVarGlob.variableList[next + VARIABLELIST_CHILD_BEGIN].hash.u.prev = 0;
 				newEntryValue->w.status = 32;
 				newEntryValue->v.next = entryValue->v.next;
 				entryValue->v.next = index;
 			}
 			else
 			{
-				newIndexb = entry->v.next;
-				newEntrya = &scrVarGlob.variableList[newIndexb + VARIABLELIST_CHILD_BEGIN];
+				newIndex = entry->v.next;
+				newEntry = &scrVarGlob.variableList[newIndex + VARIABLELIST_CHILD_BEGIN];
 				newEntryValue = &scrVarGlob.variableList[index + VARIABLELIST_CHILD_BEGIN];
-				preva = newEntrya->hash.u.prev;
-				nexta = entry->u.next;
-				scrVarGlob.variableList[scrVarGlob.variableList[preva + VARIABLELIST_CHILD_BEGIN].hash.id + VARIABLELIST_CHILD_BEGIN].u.next = nexta;
-				scrVarGlob.variableList[nexta + VARIABLELIST_CHILD_BEGIN].hash.u.prev = preva;
-				newEntrya->hash.id = entry->hash.id;
+				prev = newEntry->hash.u.prev;
+				next = entry->u.next;
+				scrVarGlob.variableList[scrVarGlob.variableList[prev + VARIABLELIST_CHILD_BEGIN].hash.id + VARIABLELIST_CHILD_BEGIN].u.next = next;
+				scrVarGlob.variableList[next + VARIABLELIST_CHILD_BEGIN].hash.u.prev = prev;
+				newEntry->hash.id = entry->hash.id;
 				entry->hash.id = index;
-				newEntrya->hash.u.prev = entry->hash.u.prev;
-				scrVarGlob.variableList[scrVarGlob.variableList[newEntrya->hash.u.prev + VARIABLELIST_CHILD_BEGIN].hash.id + VARIABLELIST_CHILD_BEGIN].nextSibling = newIndexb;
-				scrVarGlob.variableList[entryValue->nextSibling + VARIABLELIST_CHILD_BEGIN].hash.u.prev = newIndexb;
+				newEntry->hash.u.prev = entry->hash.u.prev;
+				scrVarGlob.variableList[scrVarGlob.variableList[newEntry->hash.u.prev + VARIABLELIST_CHILD_BEGIN].hash.id + VARIABLELIST_CHILD_BEGIN].nextSibling = newIndex;
+				scrVarGlob.variableList[entryValue->nextSibling + VARIABLELIST_CHILD_BEGIN].hash.u.prev = newIndex;
 				entryValue->w.status &= 0xFFFFFF9F;
 				entryValue->w.status |= 0x20u;
-				entry->w.status = 64;
+				entry->w.status = VAR_STAT_HEAD;
 			}
 		}
 		else
 		{
 			iassert(type == VAR_STAT_MOVABLE || type == VAR_STAT_EXTERNAL);
+
 			if ((entry->w.status & VAR_STAT_MASK) != 0)
 			{
-				newIndexa = scrVarGlob.variableList[VARIABLELIST_CHILD_BEGIN].u.next;
+				newIndex = scrVarGlob.variableList[VARIABLELIST_CHILD_BEGIN].u.next;
 
-				if (!scrVarGlob.variableList[VARIABLELIST_CHILD_BEGIN].u.next)
+				if (!newIndex)
 					Scr_TerminalError("exceeded maximum number of script variables");
 
-				newEntry = &scrVarGlob.variableList[newIndexa + VARIABLELIST_CHILD_BEGIN];
+				newEntry = &scrVarGlob.variableList[newIndex + VARIABLELIST_CHILD_BEGIN];
 				newEntryValue = &scrVarGlob.variableList[newEntry->hash.id + VARIABLELIST_CHILD_BEGIN];
 				iassert((newEntryValue->w.status & VAR_STAT_MASK) == VAR_STAT_FREE);
-				scrVarGlob.variableList[VARIABLELIST_CHILD_BEGIN].u.next = newEntryValue->u.next;
-				scrVarGlob.variableList[scrVarGlob.variableList[VARIABLELIST_CHILD_BEGIN].u.next + VARIABLELIST_CHILD_BEGIN].hash.u.prev = 0;
+				next = newEntryValue->u.next;
+				scrVarGlob.variableList[VARIABLELIST_CHILD_BEGIN].u.next = next;
+				scrVarGlob.variableList[next + VARIABLELIST_CHILD_BEGIN].hash.u.prev = 0;
 			}
 			else
 			{
 				iassert(entry != entryValue);
-				newIndexa = entry->v.next;
-				newEntry = &scrVarGlob.variableList[newIndexa + VARIABLELIST_CHILD_BEGIN];
-				newEntryValue = &scrVarGlob.variableList[index + VARIABLELIST_CHILD_BEGIN];
-				prevb = newEntry->hash.u.prev;
-				nextb = entry->u.next;
-				scrVarGlob.variableList[scrVarGlob.variableList[prevb + VARIABLELIST_CHILD_BEGIN].hash.id + VARIABLELIST_CHILD_BEGIN].u.next = nextb;
-				scrVarGlob.variableList[nextb + VARIABLELIST_CHILD_BEGIN].hash.u.prev = prevb;
+				newIndex = entry->v.next;
+				newEntry = &scrVarGlob.variableList[newIndex + VARIABLELIST_CHILD_BEGIN];
+				//newEntryValue = &scrVarGlob.variableList[index + VARIABLELIST_CHILD_BEGIN];
+				newEntryValue = entry;
+				prev = newEntry->hash.u.prev;
+				next = entry->u.next;
+				scrVarGlob.variableList[scrVarGlob.variableList[prev + VARIABLELIST_CHILD_BEGIN].hash.id + VARIABLELIST_CHILD_BEGIN].u.next = next;
+				scrVarGlob.variableList[next + VARIABLELIST_CHILD_BEGIN].hash.u.prev = prev;
 			}
 
-			if (entry->hash.u.prev)
-				scrVarGlob.variableList[scrVarGlob.variableList[entry->hash.u.prev + VARIABLELIST_CHILD_BEGIN].hash.id + VARIABLELIST_CHILD_BEGIN].nextSibling = newIndexa;
+			prevSiblingIndex = entry->hash.u.prev;
+			if (prevSiblingIndex)
+				scrVarGlob.variableList[scrVarGlob.variableList[prevSiblingIndex + VARIABLELIST_CHILD_BEGIN].hash.id + VARIABLELIST_CHILD_BEGIN].nextSibling = newIndex;
 
-			if (entryValue->nextSibling)
-				scrVarGlob.variableList[entryValue->nextSibling + VARIABLELIST_CHILD_BEGIN].hash.u.prev = newIndexa;
+			nextSiblingIndex = entryValue->nextSibling;
+			if (nextSiblingIndex)
+				scrVarGlob.variableList[nextSiblingIndex + VARIABLELIST_CHILD_BEGIN].hash.u.prev = newIndex;
 
 			if (type == 32)
 			{
@@ -3813,12 +3814,12 @@ unsigned int  GetNewVariableIndexInternal3(unsigned int parentId, unsigned int n
 					prevId = scrVarGlob.variableList[scrVarGlob.variableList[prevId + VARIABLELIST_CHILD_BEGIN].v.next + VARIABLELIST_CHILD_BEGIN].hash.id;
 					iassert((scrVarGlob.variableList[VARIABLELIST_CHILD_BEGIN + prevId].w.status & VAR_STAT_MASK) == VAR_STAT_MOVABLE || (scrVarGlob.variableList[VARIABLELIST_CHILD_BEGIN + prevId].w.status & VAR_STAT_MASK) == VAR_STAT_HEAD);
 				}
-				scrVarGlob.variableList[prevId + VARIABLELIST_CHILD_BEGIN].v.next = newIndexa;
+				scrVarGlob.variableList[prevId + VARIABLELIST_CHILD_BEGIN].v.next = newIndex;
 			}
 			else
 			{
 				iassert(type == VAR_STAT_EXTERNAL);
-				entryValue->v.next = newIndexa;
+				entryValue->v.next = newIndex;
 			}
 			newEntry->hash.u.prev = entry->hash.u.prev;
 			id = newEntry->hash.id;
@@ -3834,7 +3835,7 @@ unsigned int  GetNewVariableIndexInternal3(unsigned int parentId, unsigned int n
 		next = entryValue->u.next;
 		if (newIndex == entry->hash.id || (entry->w.status & VAR_STAT_MASK) != 0)
 		{
-			newEntryValue = &scrVarGlob.variableList[scrVarGlob.variableList[index + VARIABLELIST_CHILD_BEGIN].hash.id + VARIABLELIST_CHILD_BEGIN];
+			newEntryValue = &scrVarGlob.variableList[entry->hash.id + VARIABLELIST_CHILD_BEGIN];
 		}
 		else
 		{
@@ -3842,14 +3843,14 @@ unsigned int  GetNewVariableIndexInternal3(unsigned int parentId, unsigned int n
 			entry->hash.id = index;
 			entryValue->v.next = newIndex;
 			entryValue->u.next = entry->u.next;
-			newEntryValue = &scrVarGlob.variableList[index + VARIABLELIST_CHILD_BEGIN];
+			newEntryValue = entry;
 		}
 		prev = entry->hash.u.prev;
 		iassert(!scrVarGlob.variableList[VARIABLELIST_CHILD_BEGIN + prev].hash.id || (scrVarGlob.variableList[VARIABLELIST_CHILD_BEGIN + scrVarGlob.variableList[VARIABLELIST_CHILD_BEGIN + prev].hash.id].w.status & VAR_STAT_MASK) == VAR_STAT_FREE);
 		iassert(!scrVarGlob.variableList[VARIABLELIST_CHILD_BEGIN + next].hash.id || (scrVarGlob.variableList[VARIABLELIST_CHILD_BEGIN + scrVarGlob.variableList[VARIABLELIST_CHILD_BEGIN + next].hash.id].w.status & VAR_STAT_MASK) == VAR_STAT_FREE);
 		scrVarGlob.variableList[scrVarGlob.variableList[prev + VARIABLELIST_CHILD_BEGIN].hash.id + VARIABLELIST_CHILD_BEGIN].u.next = next;
 		scrVarGlob.variableList[next + VARIABLELIST_CHILD_BEGIN].hash.u.prev = prev;
-		newEntryValue->w.status = 64;
+		newEntryValue->w.status = VAR_STAT_HEAD;
 		newEntryValue->v.next = index;
 	}
 
@@ -3899,20 +3900,22 @@ unsigned int  GetNewVariableIndexInternal2(unsigned int parentId, unsigned int n
 	VariableValueInternal* parentValue; // [esp+4h] [ebp-1Ch]
 	unsigned int siblingIndex; // [esp+10h] [ebp-10h]
 	unsigned int id; // [esp+1Ch] [ebp-4h]
-	unsigned int indexa; // [esp+30h] [ebp+10h]
+	VariableValueInternal *entry;
 
-	indexa = GetNewVariableIndexInternal3(parentId, name, index);
+	index = GetNewVariableIndexInternal3(parentId, name, index);
 	parentValue = &scrVarGlob.variableList[parentId + 1];
 	iassert((parentValue->w.status & VAR_STAT_MASK) == VAR_STAT_EXTERNAL);
-	id = scrVarGlob.variableList[indexa + VARIABLELIST_CHILD_BEGIN].hash.id;
+	entry = &scrVarGlob.variableList[index + VARIABLELIST_CHILD_BEGIN];
+	id = entry->hash.id;
 	siblingId = parentValue->nextSibling;
-	if (parentValue->nextSibling)
+	if (siblingId)
 	{
 		VariableValueInternal *siblingValue = &scrVarGlob.variableList[siblingId + VARIABLELIST_CHILD_BEGIN];
+		iassert((siblingValue->w.status & VAR_STAT_MASK) != VAR_STAT_FREE);
 		iassert(!IsObject(siblingValue));
-		siblingIndex = FindVariableIndexInternal(parentId, scrVarGlob.variableList[siblingId + VARIABLELIST_CHILD_BEGIN].w.status >> VAR_NAME_BITS);
+		siblingIndex = FindVariableIndexInternal(parentId, siblingValue->w.status >> VAR_NAME_BITS);
 		iassert(siblingIndex);
-		scrVarGlob.variableList[siblingIndex + VARIABLELIST_CHILD_BEGIN].hash.u.prev = indexa;
+		scrVarGlob.variableList[siblingIndex + VARIABLELIST_CHILD_BEGIN].hash.u.prev = index;
 	}
 	else
 	{
@@ -3920,9 +3923,9 @@ unsigned int  GetNewVariableIndexInternal2(unsigned int parentId, unsigned int n
 		scrVarGlob.variableList[parentValue->v.next + 1].hash.u.prev = id;
 	}
 	parentValue->nextSibling = id;
-	scrVarGlob.variableList[indexa + VARIABLELIST_CHILD_BEGIN].hash.u.prev = 0;
+	entry->hash.u.prev = 0;
 	scrVarGlob.variableList[id + VARIABLELIST_CHILD_BEGIN].nextSibling = siblingIndex;
-	return indexa;
+	return index;
 }
 
 unsigned int  GetNewVariableIndexReverseInternal2(unsigned int parentId, unsigned int name, unsigned int index)
@@ -4628,42 +4631,31 @@ void CopyEntity(unsigned int parentId, unsigned int newParentId)
 	iassert(IsObject(&scrVarGlob.variableList[VARIABLELIST_PARENT_BEGIN + newParentId]));
 	iassert((scrVarGlob.variableList[VARIABLELIST_PARENT_BEGIN + newParentId].w.type & VAR_MASK) == VAR_ENTITY);
 
-	FirstSibling = FindFirstSibling(parentId);
 
-	if (FirstSibling)
+	for (unsigned int id = FindFirstSibling(parentId); id; id = FindNextSibling(id))
 	{
-		while (1)
+		entryValue = &scrVarGlob.variableList[id + VARIABLELIST_CHILD_BEGIN];
+
+		iassert((entryValue->w.status & VAR_STAT_MASK) != VAR_STAT_FREE && (entryValue->w.status & VAR_STAT_MASK) != VAR_STAT_EXTERNAL);
+		iassert((entryValue->w.status & VAR_STAT_MASK) != VAR_STAT_FREE);
+		iassert(!IsObject(entryValue));
+
+		name = entryValue->w.name >> VAR_NAME_BITS;
+		iassert(name != OBJECT_STACK);
+
+		if (name != OBJECT_STACK)
 		{
-			entryValue = &scrVarGlob.variableList[FirstSibling + VARIABLELIST_CHILD_BEGIN];
-			//v8 = entryValue->w.u.intValue & 0x60;
-			iassert((entryValue->w.status & VAR_STAT_MASK) != VAR_STAT_FREE && (entryValue->w.status & VAR_STAT_MASK) != VAR_STAT_EXTERNAL);
-			iassert((entryValue->w.status & VAR_STAT_MASK) != VAR_STAT_FREE);
-			iassert(!IsObject(entryValue));
-
-			//v9 = (unsigned int)entryValue->w.u.intValue >> 8;
-			name = entryValue->w.name;
-			iassert(name != OBJECT_STACK);
-
-			if (name != 0x18000)
-				goto LABEL_28;
-		LABEL_40:
-			FirstSibling = FindNextSibling(FirstSibling);
-			if (!FirstSibling)
-				return;
+			iassert(!FindVariableIndexInternal(newParentId, name));
+			newEntryValue = &scrVarGlob.variableList[GetVariable(newParentId, name) + VARIABLELIST_CHILD_BEGIN];
+			iassert((newEntryValue->w.status & VAR_STAT_MASK) != VAR_STAT_FREE && (newEntryValue->w.status & VAR_STAT_MASK) != VAR_STAT_EXTERNAL);
+			iassert((newEntryValue->w.type & VAR_MASK) == VAR_UNDEFINED);
+			int type = entryValue->w.status & VAR_MASK;
+			iassert(!(newEntryValue->w.type & VAR_MASK));
+			newEntryValue->w.status |= type;
+			iassert((newEntryValue->w.name >> VAR_NAME_BITS) == name);
+			newEntryValue->u.next = entryValue->u.next;
+			AddRefToValue(type, newEntryValue->u.u);
 		}
-	LABEL_28:
-		iassert(!FindVariableIndexInternal(newParentId, name));
-		newEntryValue = (VariableValueInternal*)((char *)&scrVarGlob.variableList[VARIABLELIST_CHILD_BEGIN] + __ROL4__(scrVarGlob.variableList[GetVariableIndexInternal(newParentId, name) + VARIABLELIST_CHILD_BEGIN].hash.id, 4));
-		iassert((newEntryValue->w.status & VAR_STAT_MASK) != VAR_STAT_FREE && (newEntryValue->w.status & VAR_STAT_MASK) != VAR_STAT_EXTERNAL);
-		iassert((newEntryValue->w.type & VAR_MASK) == VAR_UNDEFINED);
-		iassert(!(newEntryValue->w.type & VAR_MASK));
-		iassert((newEntryValue->w.name >> VAR_NAME_BITS) == name);
-		//intValue = (VariableUnion *)entryValue->u.u.intValue;
-		//*((_DWORD *)newEntryValue + 1) = intValue;
-		newEntryValue->w.type = entryValue->w.type; // sus
-		newEntryValue->u.u.intValue = entryValue->u.u.intValue;
-		AddRefToValue((newEntryValue->w.type & VAR_MASK), newEntryValue->u.u.intValue);
-		goto LABEL_40;
 	}
 }
 

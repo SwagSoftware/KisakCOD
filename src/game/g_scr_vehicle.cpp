@@ -103,21 +103,17 @@ gentity_s *__cdecl GScr_GetVehicle(scr_entref_t entref)
 
 gentity_s *__cdecl VEH_GetVehicle(int32_t entNum)
 {
-    const char *v1; // eax
-    const char *v2; // eax
+    iassert(entNum < MAX_GENTITIES);
 
-    if (entNum >= 1024)
-        MyAssertHandler(".\\game\\g_scr_vehicle.cpp", 453, 0, "%s", "entNum < MAX_GENTITIES");
     if (g_entities[entNum].classname != scr_const.script_vehicle)
     {
-        v1 = va("entity %i is not a script_vehicle\n", entNum);
-        Scr_Error(v1);
+        Scr_Error(va("entity %i is not a script_vehicle\n", entNum));
     }
     if (!g_entities[entNum].scr_vehicle)
     {
-        v2 = va("entity %i doesn't have a script_vehicle\n", entNum);
-        Scr_Error(v2);
+        Scr_Error(va("entity %i doesn't have a script_vehicle\n", entNum));
     }
+
     return &g_entities[entNum];
 }
 
@@ -3179,7 +3175,7 @@ void VEH_GroundPlant(gentity_s *ent, vehicle_physic_t *phys, int gravity)
 
     AnglesToAxis(phys->angles, axis);
 
-    float wheelPos[4][3];
+    float wheelPos[6][3];
 
     for (int i = 0; i < numWheels; i++)
     {

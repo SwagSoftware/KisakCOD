@@ -13,6 +13,7 @@
 #include <script/scr_const.h>
 #include "actor_turret.h"
 #include "turret.h"
+#include <universal/profile.h>
 
 // aislop
 int Actor_SightTrace(actor_s *self, const float *start, const float *end, int passEntNum)
@@ -738,15 +739,15 @@ int __cdecl Actor_CanSeeEntity(actor_s *self, const gentity_s *ent)
 
 int __cdecl Actor_CanSeeSentient(actor_s *self, sentient_s *sentient, int iMaxLatency)
 {
-    char *v3; // r9
-    int v4; // r11
-
-    v3 = (char *)self + 40 * (sentient - level.sentients);
-    v4 = *((unsigned int *)v3 + 526);
-    if (v4 && v4 + iMaxLatency >= level.time)
-        return (unsigned __int8)v3[2100];
+    if (self->sentientInfo[sentient - level.sentients].VisCache.iLastUpdateTime
+        && iMaxLatency + self->sentientInfo[sentient - level.sentients].VisCache.iLastUpdateTime >= level.time)
+    {
+        return self->sentientInfo[sentient - level.sentients].VisCache.bVisible;
+    }
     else
-        return Actor_CanSeeEntityEx(self, sentient->ent, self->fovDot, self->fMaxSightDistSqrd);
+    {
+        return Actor_CanSeeEntity(self, sentient->ent);
+    }
 }
 
 int __cdecl Actor_CanSeeEnemy(actor_s *self)
@@ -806,96 +807,69 @@ int __cdecl Actor_CanSeeEnemyExtended(actor_s *self, int useClaimedNode)
 
 void __cdecl Actor_UpdateSight(actor_s *self)
 {
-    team_t v2; // r3
-    signed int v3; // r25
-    int v4; // r18
-    sentient_s *Sentient; // r29
-    float *v6; // r30
-    gentity_s *ent; // r11
-    double v8; // fp31
-    int v9; // r31
-    double v10; // fp1
-    __int64 v11; // r11
+    sentient_s *sentient; // r29
     int iTraceCount; // r29
-    signed int v13; // r30
-    const gentity_s ***v14; // r31
     int iLastUpdateTime; // r11
-    float v16; // [sp+50h] [-1B0h] BYREF
-    float v17; // [sp+54h] [-1ACh]
-    float v18; // [sp+58h] [-1A8h]
-    float v19; // [sp+5Ch] [-1A4h]
-    __int64 v20; // [sp+60h] [-1A0h]
-    _BYTE v21[264]; // [sp+70h] [-190h] BYREF
+    float v[3]; // [sp+50h] [-1B0h] BYREF // v16
+    float *currentOrigin;
 
-    if (!self)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\actor_senses.cpp", 658, 0, "%s", "self");
-    if (!self->sentient)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\actor_senses.cpp", 659, 0, "%s", "self->sentient");
-    //Profile_Begin(230);
-    v2 = Sentient_EnemyTeam(self->sentient->eTeam);
-    if (v2)
+    sentient_sort_t check[48];
+
+    PROF_SCOPED("Actor_UpdateSight");
+
+    iassert(self);
+    iassert(self->sentient);
+
+    int iTeamFlags = 1 << Sentient_EnemyTeam(self->sentient->eTeam);
+
+    int iCheckCount = 0;
+
     {
-        v3 = 0;
-        v4 = 1 << v2;
-        Sentient = Sentient_FirstSentient(1 << v2);
-        if (Sentient)
+        PROF_SCOPED("sight 1");
+
+        for (sentient = Sentient_FirstSentient(iTeamFlags); sentient; sentient = Sentient_NextSentient(sentient, iTeamFlags))
         {
-            v6 = (float *)v21;
-            do
+            iassert(sentient->ent);
+            iassert(sentient->ent->s.number != self->ent->s.number);
+
+            Sentient_GetOrigin(sentient, v);
+            float *currentOrigin = self->ent->r.currentOrigin;
+            v[0] -= currentOrigin[0];
+            v[1] -= currentOrigin[1];
+            v[2] -= currentOrigin[2];
+            float fDistSqrd = Vec3LengthSq(v);
+
+            if (fDistSqrd != 0.0f)
             {
-                if (!Sentient->ent)
-                    MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\actor_senses.cpp", 691, 0, "%s", "sentient->ent");
-                if (Sentient->ent->s.number == self->ent->s.number)
-                    MyAssertHandler(
-                        "c:\\trees\\cod3\\cod3src\\src\\game\\actor_senses.cpp",
-                        692,
-                        0,
-                        "%s",
-                        "sentient->ent->s.number != self->ent->s.number");
-                Sentient_GetOrigin(Sentient, &v16);
-                ent = self->ent;
-                v16 = v16 - self->ent->r.currentOrigin[0];
-                v17 = v17 - ent->r.currentOrigin[1];
-                v8 = (float)((float)(v16 * v16)
-                    + (float)((float)((float)(v18 - ent->r.currentOrigin[2]) * (float)(v18 - ent->r.currentOrigin[2]))
-                        + (float)(v17 * v17)));
-                v18 = v18 - ent->r.currentOrigin[2];
-                v19 = v8;
-                if ((LODWORD(v19) & 0x7F800000) == 0x7F800000)
-                    MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\actor_senses.cpp", 698, 0, "%s", "!IS_NAN(fDistSqrd)");
-                if (v8 != 0.0)
-                {
-                    v9 = level.time - self->sentientInfo[Sentient - level.sentients].VisCache.iLastUpdateTime - 100;
-                    v10 = I_rsqrt(v8);
-                    *(unsigned int *)v6 = (unsigned int)Sentient;
-                    ++v3;
-                    LODWORD(v11) = v9 & ~(v9 >> 31);
-                    v20 = v11;
-                    v6[1] = (float)v10 * (float)v11;
-                    v6 += 2;
-                }
-                Sentient = Sentient_NextSentient(Sentient, v4);
-            } while (Sentient);
-            if (v3 > 1)
-                qsort(v21, v3, 8u, (int(__cdecl *)(const void *, const void *))compare_sentient_sort);
+                int v4 = level.time - self->sentientInfo[(uintptr_t)sentient - (uintptr_t)level.sentients].VisCache.iLastUpdateTime - 100;
+                float v2 = (float)(v4 & ~(v4 >> 31));
+                float v1 = I_rsqrt(fDistSqrd);
+
+                check[iCheckCount].fMetric = v1 * v2;
+                check[iCheckCount].sentient = sentient;
+                iCheckCount++;
+
+                iassert(iCheckCount < ARRAY_COUNT(check)); // LWSS ADD
+            }
         }
-        iTraceCount = self->iTraceCount;
-        v13 = 0;
-        if (v3 > 0)
+
+        if (iCheckCount > 1)
         {
-            v14 = (const gentity_s ***)v21;
-            do
-            {
-                iLastUpdateTime = self->sentientInfo[((char *)*v14 - (char *)level.sentients) / 116].VisCache.iLastUpdateTime;
-                if (!iLastUpdateTime || iLastUpdateTime < level.time)
-                    Actor_CanSeeEntityEx(self, **v14, self->fovDot, self->fMaxSightDistSqrd);
-                if (self->iTraceCount != iTraceCount)
-                    break;
-                ++v13;
-                v14 += 2;
-            } while (v13 < v3);
+            qsort(check, iCheckCount, sizeof(sentient_sort_t), (int(__cdecl *)(const void *, const void *))compare_sentient_sort);
         }
     }
-    //Profile_EndInternal(0);
+
+    {
+        PROF_SCOPED("sight 2");
+
+        int iOldTraceCount = self->iTraceCount;
+        for (int i = 0; i < iCheckCount; i++)
+        {
+            Actor_CanSeeSentient(self, check[i].sentient, 0);
+
+            if (self->iTraceCount != iOldTraceCount)
+                break;
+        }
+    }
 }
 

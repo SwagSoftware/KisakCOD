@@ -141,43 +141,35 @@ unsigned int __cdecl G_SetEntityScriptVariableInternal(const char *key, const ch
 {
     unsigned int result; // r3
     unsigned int v4; // r30
-    long double v5; // fp2
-    int v6; // r3
-    const char *v7; // r3
-    int v8; // [sp+50h] [-30h] BYREF
-    float v9; // [sp+58h] [-28h] BYREF
-    float v10; // [sp+5Ch] [-24h] BYREF
-    float v11; // [sp+60h] [-20h] BYREF
+    int type; // [sp+50h] [-30h] BYREF
+    float vec[3]; // [sp+58h] [-28h] BYREF
 
-    result = Scr_FindField(key, &v8);
+    result = Scr_FindField(key, &type);
     v4 = result;
     if (result)
     {
-        switch (v8)
+        switch (type)
         {
         case 2:
             Scr_AddString(value);
             break;
         case 4:
-            v9 = 0.0;
-            v10 = 0.0;
-            v11 = 0.0;
-            sscanf(value, "%f %f %f", &v9, &v10, &v11);
-            Scr_AddVector(&v9);
+            vec[0] = 0.0f;
+            vec[1] = 0.0f;
+            vec[2] = 0.0f;
+            sscanf(value, "%f %f %f", &vec[0], &vec[1], &vec[2]);
+            Scr_AddVector(vec);
             break;
         case 5:
-            v5 = atof(value);
-            Scr_AddFloat((float)*(double *)&v5);
+            Scr_AddFloat(atof(value));
             break;
         case 6:
-            v6 = atol(value);
-            Scr_AddInt(v6);
+            Scr_AddInt(atol(value));
             break;
         default:
             if (!alwaysfails)
             {
-                v7 = va("G_SetEntityScriptVariableInternal: bad case %d", v8);
-                MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\g_spawn.cpp", 204, 0, v7);
+                MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\g_spawn.cpp", 204, 0, va("G_SetEntityScriptVariableInternal: bad case %d", type));
             }
             break;
         }

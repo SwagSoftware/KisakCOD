@@ -45,6 +45,12 @@ struct sentient_s
     int banNodeTime;
 };
 
+struct sentient_sort_t
+{
+    sentient_s *sentient;
+    float fMetric;
+};
+
 struct SentientGlobals
 {
     int lastTime;
