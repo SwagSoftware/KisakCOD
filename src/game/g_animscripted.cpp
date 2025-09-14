@@ -548,33 +548,38 @@ void __cdecl GScr_GetStartOrigin()
 
 void __cdecl GScr_GetStartAngles()
 {
-    XAnimTree_s *v0; // r5
-    const XAnim_s *Anims; // r3
-    double v2; // fp1
-    float (*v3)[3]; // r3
-    scr_anim_s Anim; // [sp+50h] [-100h]
-    float v5[4]; // [sp+58h] [-F8h] BYREF
-    float v6[2]; // [sp+68h] [-E8h] BYREF
-    float v7[4]; // [sp+70h] [-E0h] BYREF
-    float v8[4]; // [sp+80h] [-D0h] BYREF
-    float v9[12]; // [sp+90h] [-C0h] BYREF
-    float v10[16]; // [sp+C0h] [-90h] BYREF
-    float v11[4][3]; // [sp+100h] [-50h] BYREF
+    float pos[3];
+    float angles[3];
 
-    Scr_GetVector(0, v5);
-    Scr_GetVector(1u, v8);
-    Anim = Scr_GetAnim(2, NULL);
-    Anims = Scr_GetAnims(Anim.tree);
-    XAnimGetAbsDelta(Anims, Anim.index, v6, v10, 0.0);
-    v9[9] = v5[0];
-    v9[10] = v5[1];
-    v9[11] = v5[2];
-    AnglesToAxis(v8, (float (*)[3])v9);
-    v2 = RotationToYaw(v6);
-    YawToAxis(v2, (mat3x3&)v3);
-    MatrixMultiply((const mat3x3&)v10[4], (const mat3x3&)v9, (mat3x3&)v11);
-    AxisToAngles((const mat3x3&)v11, v7);
-    Scr_AddVector(v7);
+    Scr_GetVector(0, pos);
+    Scr_GetVector(1, angles);
+
+    scr_anim_s anim = Scr_GetAnim(2, NULL);
+    const XAnim_s *anims = Scr_GetAnims(anim.tree);
+
+    float rot[3];
+    float trans[3];
+    XAnimGetAbsDelta(anims, anim.index, rot, trans, 0.0f);
+
+    float axis[3][3];
+    axis[2][0] = pos[0];
+    axis[2][1] = pos[1];
+    axis[2][2] = pos[2];
+
+    AnglesToAxis(angles, axis);
+
+    float yaw = RotationToYaw(rot);
+
+    mat3x3 yawAxis;
+    YawToAxis(yaw, yawAxis);
+
+    mat3x3 result;
+    MatrixMultiply(yawAxis, axis, result);
+
+    float finalAngles[3];
+    AxisToAngles(result, finalAngles);
+
+    Scr_AddVector(finalAngles);
 }
 
 void __cdecl GScr_GetCycleOriginOffset()

@@ -286,52 +286,42 @@ void __cdecl Actor_UpdateLastEnemySightPos(actor_s *self)
 
 void __cdecl Actor_UpdateEyeInformation(actor_s *self)
 {
-    gentity_s *ent; // r3
-    double v3; // fp13
-    double v4; // fp12
-    double v5; // fp11
-    double v6; // fp10
-    gentity_s *v7; // r11
-    double v8; // fp13
-    float v9[20]; // [sp+50h] [-50h] BYREF
+    float tagMat[4][3]; // [esp+2Ch] [ebp-30h] BYREF
 
-    if (!self)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\actor_senses.cpp", 795, 0, "%s", "self");
-    if (!self->ent)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\actor_senses.cpp", 796, 0, "%s", "self->ent");
+    iassert(self);
+    iassert(self->ent);
+
     if (self->eyeInfo.time != level.time)
     {
-        //Profile_Begin(229);
-        ent = self->ent;
+        PROF_SCOPED("Actor_UpdateEyeInformation");
+
         self->eyeInfo.time = level.time;
-        if (G_DObjGetWorldTagMatrix(ent, scr_const.tag_eye, (float (*)[3])v9))
+
+        if (G_DObjGetWorldTagMatrix(self->ent, scr_const.tag_eye, tagMat))
         {
-            v3 = v9[10];
-            v4 = v9[11];
-            v5 = v9[0];
-            v6 = v9[1];
-            self->eyeInfo.pos[0] = v9[9];
-            self->eyeInfo.pos[1] = v3;
-            self->eyeInfo.pos[2] = v4;
-            self->eyeInfo.dir[0] = v5;
-            self->eyeInfo.dir[1] = v6;
+            self->eyeInfo.pos[0] = tagMat[3][0];
+            self->eyeInfo.pos[1] = tagMat[3][1];
+            self->eyeInfo.pos[2] = tagMat[3][2];
+
+            self->eyeInfo.dir[0] = tagMat[0][0];
+            self->eyeInfo.dir[1] = tagMat[0][1];
+
             Vec2Normalize(self->eyeInfo.dir);
-            self->eyeInfo.dir[2] = 0.0;
+            self->eyeInfo.dir[2] = 0.0f;
         }
         else
         {
             Com_Printf(18, "Actor_UpdateEyeInformation: Actor dobj doesn't have TAG_EYE.\n");
-            v7 = self->ent;
+
             self->eyeInfo.pos[0] = self->ent->r.currentOrigin[0];
-            self->eyeInfo.pos[1] = v7->r.currentOrigin[1];
-            v8 = v7->r.currentOrigin[2];
-            self->eyeInfo.pos[2] = v7->r.currentOrigin[2];
-            self->eyeInfo.pos[2] = (float)64.0 + (float)v8;
+            self->eyeInfo.pos[1] = self->ent->r.currentOrigin[1];
+            self->eyeInfo.pos[2] = self->ent->r.currentOrigin[2];
+            self->eyeInfo.pos[2] += 64.0f;
+
             self->eyeInfo.dir[0] = self->vLookForward[0];
             self->eyeInfo.dir[1] = self->vLookForward[1];
             self->eyeInfo.dir[2] = self->vLookForward[2];
         }
-        //Profile_EndInternal(0);
     }
 }
 
@@ -563,7 +553,6 @@ void __cdecl Actor_UpdateVisCache(actor_s *self, const gentity_s *ent, sentient_
     }
 }
 
-// aislop
 int Actor_CanSeeEntityEx(actor_s *self, const gentity_s *ent, double fovDot, double fMaxDistSqrd)
 {
     iassert(self);
@@ -572,104 +561,81 @@ int Actor_CanSeeEntityEx(actor_s *self, const gentity_s *ent, double fovDot, dou
     iassert(fovDot);
     iassert(fMaxDistSqrd);
 
-    float eyePosTarget[4];
-    float eyePosSelf[14];
-    float dummyOut[2];
-    sentient_s *targetSentient = ent->sentient;
-    sentient_info_t *sentientInfo = NULL;
+    sentient_s *targetSentient;
+    float fMaxSightDistSqrd; // [esp+14h] [ebp-54h]
+    BOOL v8; // [esp+18h] [ebp-50h]
+    int v9; // [esp+1Ch] [ebp-4Ch]
+    BOOL v10; // [esp+20h] [ebp-48h]
+    float v11; // [esp+24h] [ebp-44h]
+    bool bVisible; // [esp+37h] [ebp-31h]
+    float vViewPos[3]; // [esp+3Ch] [ebp-2Ch] BYREF
+    sentient_s *sentient; // [esp+48h] [ebp-20h]
+    bool bOtherVisible; // [esp+4Fh] [ebp-19h]
+    sentient_info_t *pInfo; // [esp+50h] [ebp-18h]
+    float fovDotUse; // [esp+54h] [ebp-14h]
+    float vDestPos[3]; // [esp+58h] [ebp-10h] BYREF
+    int bCacheable; // [esp+64h] [ebp-4h]
 
-    if (targetSentient)
+    sentient = ent->sentient;
+    if (sentient)
     {
-        sentientInfo = &self->sentientInfo[targetSentient - level.sentients];
-        Sentient_GetEyePosition(targetSentient, eyePosTarget);
+        pInfo = &self->sentientInfo[(uintptr_t)sentient - (uintptr_t)level.sentients];
+        Sentient_GetEyePosition(sentient, vDestPos);
+        Actor_GetEyePosition(self, vViewPos);
+        fovDotUse = fovDot;
+        targetSentient = Actor_GetTargetSentient(self);
 
-        if (Actor_IsUsingTurret(self))
+        if (targetSentient == sentient || (self->pFavoriteEnemy.isDefined() && self->pFavoriteEnemy.sentient() == sentient))
         {
-            if (turret_CanTargetPoint(self->pTurret, eyePosTarget, eyePosSelf, dummyOut) ||
-                turret_CanTargetSentient(self->pTurret, targetSentient, eyePosTarget, eyePosSelf, dummyOut))
-            {
-                // can target; skip further checks
-                goto can_see_check;
-            }
-
-            if (level.time - sentientInfo->lastKnownPosTime >= 1000 &&
-                Vec2DistanceSq(eyePosTarget, self->ent->r.currentOrigin) >= 262144.0f)
-            {
-                return 0;
-            }
+            fovDotUse = 0.0f;
         }
 
-        Actor_GetEyePosition(self, eyePosSelf);
-
-    can_see_check:
-        double adjustedFovDot = fovDot;
-        if (Actor_GetTargetSentient(self) == targetSentient ||
-            (self->pFavoriteEnemy.isDefined() && self->pFavoriteEnemy.sentient() == targetSentient))
-        {
-            adjustedFovDot = 0.0;
-        }
-
-        float targetMaxDistSq = targetSentient->maxVisibleDist * targetSentient->maxVisibleDist;
-        float effectiveMaxDistSq = (float)fMaxDistSqrd > targetMaxDistSq ? (float)fMaxDistSqrd : targetMaxDistSq;
-
-        unsigned char canSee = Actor_CanSeePointExInternal(
-            self, eyePosTarget, adjustedFovDot, effectiveMaxDistSq, ent->s.number, eyePosSelf);
-
-        if (canSee)
-        {
-            if (fovDot < self->fovDot || fMaxDistSqrd > self->fMaxSightDistSqrd)
-                ; // fall through
-        }
-        else if (fovDot > self->fovDot || fMaxDistSqrd < self->fMaxSightDistSqrd)
-        {
-            ; // fall through
-        }
-
-        if (targetSentient)
-            Actor_UpdateVisCache(self, ent, sentientInfo, canSee);
-
-        if (!canSee)
-            return 0;
+        if ((float)(fMaxDistSqrd - (float)(sentient->maxVisibleDist * sentient->maxVisibleDist)) < 0.0)
+            v11 = fMaxDistSqrd;
+        else
+            v11 = sentient->maxVisibleDist * sentient->maxVisibleDist;
+        fMaxDistSqrd = v11;
+        bVisible = Actor_CanSeePointExInternal(self, vDestPos, fovDotUse, v11, ent->s.number, vViewPos);
     }
     else
     {
-        if (!G_DObjGetWorldTagPos(ent, scr_const.tag_eye, eyePosTarget))
-            G_EntityCentroid(ent, eyePosTarget);
-
-        unsigned char canSee = Actor_CanSeePointEx(self, eyePosTarget, fovDot, fMaxDistSqrd, ent->s.number);
-        if (canSee)
-        {
-            if (fovDot < self->fovDot || fMaxDistSqrd > self->fMaxSightDistSqrd)
-                ; // fall through
-        }
-        else if (fovDot > self->fovDot || fMaxDistSqrd < self->fMaxSightDistSqrd)
-        {
-            ; // fall through
-        }
-
-        if (!canSee)
-            return 0;
+        if (!G_DObjGetWorldTagPos(ent, scr_const.tag_eye, vDestPos))
+            G_EntityCentroid(ent, vDestPos);
+        pInfo = 0;
+        bVisible = Actor_CanSeePointEx(self, vDestPos, fovDot, fMaxDistSqrd, ent->s.number);
     }
 
-    if (ent->actor && !Actor_IsUsingTurret(self) && !Actor_IsUsingTurret(ent->actor))
+    if (bVisible)
     {
-        if (!ent->sentient)
-            MyAssertHandler(__FILE__, __LINE__, 0, "%s", "ent->sentient");
+        v10 = fovDot >= self->fovDot && self->fMaxSightDistSqrd >= fMaxDistSqrd;
+        v9 = v10;
+    }
+    else
+    {
+        v8 = self->fovDot >= fovDot && fMaxDistSqrd >= self->fMaxSightDistSqrd;
+        v9 = v8;
+    }
 
-        float selfMaxDistSq = self->sentient->maxVisibleDist * self->sentient->maxVisibleDist;
-        float actorEffectiveMaxDistSq = ent->actor->fMaxSightDistSqrd > selfMaxDistSq ?
-            ent->actor->fMaxSightDistSqrd : selfMaxDistSq;
+    bCacheable = v9;
 
-        int reciprocalCanSee = PointInFovAndRange(
-            ent->actor, eyePosTarget, eyePosSelf,
-            ent->actor->fovDot, actorEffectiveMaxDistSq
-        );
+    if (v9 && sentient)
+        Actor_UpdateVisCache(self, ent, pInfo, bVisible);
 
-        Actor_UpdateVisCache(
-            ent->actor, self->ent,
-            &ent->actor->sentientInfo[self->sentient - level.sentients],
-            reciprocalCanSee
-        );
+    if (!bVisible)
+        return 0;
+
+    if (ent->actor)
+    {
+        bOtherVisible = 1;
+        iassert(ent->sentient);
+        if ((float)(ent->actor->fMaxSightDistSqrd - (float)(self->sentient->maxVisibleDist * self->sentient->maxVisibleDist)) < 0.0)
+            fMaxSightDistSqrd = ent->actor->fMaxSightDistSqrd;
+        else
+            fMaxSightDistSqrd = self->sentient->maxVisibleDist * self->sentient->maxVisibleDist;
+        if (!PointInFovAndRange(ent->actor, vDestPos, vViewPos, ent->actor->fovDot, fMaxSightDistSqrd))
+            bOtherVisible = 0;
+        pInfo = &ent->actor->sentientInfo[self->sentient - level.sentients];
+        Actor_UpdateVisCache(ent->actor, self->ent, pInfo, bOtherVisible);
     }
 
     return 1;

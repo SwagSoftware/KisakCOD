@@ -8848,89 +8848,84 @@ LABEL_5:
 
 void __cdecl GScr_SetAnimKnobInternal(scr_entref_t entref, unsigned int flags)
 {
-    gentity_s *Entity; // r28
-    double Float; // fp30
-    double v5; // fp31
-    double v6; // fp29
-    XAnimTree_s *EntAnimTree; // r31
-    XAnimTree_s *v8; // r5
-    unsigned int v9; // r30
-    const char *v10; // r3
-    DObj_s *ServerDObj; // r31
-    int v12; // r6
-    unsigned int v13; // r5
-    int v14; // r3
+    gentity_s *pSelf; // r28
+    double rate; // fp30
+    double goalWeight; // fp31
+    double goalTime; // fp29
+    XAnimTree_s *tree; // r31
+    unsigned int anim; // r30
+    const char *funcName; // r3
+    DObj_s *obj; // r31
+    int error; // r3
 
-    Entity = GetEntity(entref);
-    Float = 1.0;
-    v5 = 1.0;
-    v6 = 0.2;
-    EntAnimTree = GScr_GetEntAnimTree(Entity);
+    pSelf = GetEntity(entref);
+    rate = 1.0;
+    goalWeight = 1.0;
+    goalTime = 0.2;
+    tree = GScr_GetEntAnimTree(pSelf);
+
     switch (Scr_GetNumParam())
     {
-    case 1u:
-        goto LABEL_9;
-    case 2u:
-        goto LABEL_7;
-    case 3u:
-        goto LABEL_5;
-    case 4u:
-        goto LABEL_3;
+    case 1:
+        break;
+    case 2:
+        goalWeight = Scr_GetFloat(1);
+        if (goalWeight < 0.0)
+            Scr_ParamError(1, "must set nonnegative weight");
+    case 3:
+        goalTime = Scr_GetFloat(2);
+        if (goalTime < 0.0)
+            Scr_ParamError(2, "must set nonnegative goal time");
+    case 4:
+        rate = Scr_GetFloat(3);
+        if (rate < 0.0)
+            Scr_ParamError(3, "must set nonnegative rate");
     default:
         Scr_Error("too many parameters");
-    LABEL_3:
-        Float = Scr_GetFloat(3);
-        if (Float < 0.0)
-            Scr_ParamError(3u, "must set nonnegative rate");
-    LABEL_5:
-        v6 = Scr_GetFloat(2);
-        if (v6 < 0.0)
-            Scr_ParamError(2u, "must set nonnegative goal time");
-    LABEL_7:
-        v5 = Scr_GetFloat(1);
-        if (v5 < 0.0)
-            Scr_ParamError(1u, "must set nonnegative weight");
-    LABEL_9:
-        //v9 = (unsigned int)Scr_GetAnim(0, (unsigned int)EntAnimTree, v8) >> 16;
-        v9 = (unsigned int)Scr_GetAnim(0, EntAnimTree).index;
-        if (g_dumpAnimsCommands->current.integer == Entity->s.number)
+    }
+
+    anim = (unsigned int)Scr_GetAnim(0, tree).index;
+
+    if (g_dumpAnimsCommands->current.integer == pSelf->s.number)
+    {
+        switch (flags)
         {
-            switch (flags)
-            {
-            case 1u:
-                v10 = "SetAnimKnob";
-                break;
-            case 2u:
-                v10 = "SetAnimKnobLimitedRestart";
-                break;
-            case 3u:
-                v10 = "SetAnimKnobRestart";
-                break;
-            default:
-                if (flags)
-                    MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\g_scr_main.cpp", 10338, 0, "%s", "flags == 0");
-                v10 = "SetAnimKnobLimited";
-                break;
-            }
-            DumpAnimCommand(v10, EntAnimTree, v9, -1, v5, v6, Float);
+        case 1:
+            funcName = "SetAnimKnob";
+            break;
+        case 2:
+            funcName = "SetAnimKnobLimitedRestart";
+            break;
+        case 3:
+            funcName = "SetAnimKnobRestart";
+            break;
+        default:
+            iassert(flags == 0);
+            funcName = "SetAnimKnobLimited";
+            break;
         }
-        ServerDObj = Com_GetServerDObj(Entity->s.number);
-        if (!ServerDObj)
-            Scr_ObjectError("No model exists.");
-        if ((flags & 1) != 0)
-            v14 = XAnimSetCompleteGoalWeightKnob(ServerDObj, v9, v5, v6, Float, v13, v12);
-        else
-            v14 = XAnimSetGoalWeightKnob(ServerDObj, v9, v5, v6, Float, v13, v12);
-        if (v14)
-        {
-            GScr_HandleAnimError(v14);
-        }
-        else
-        {
-            if ((Entity->flags & FL_NO_AUTO_ANIM_UPDATE) == 0)
-                Entity->flags |= FL_REPEAT_ANIM_UPDATE;
-        }
-        return;
+        DumpAnimCommand(funcName, tree, anim, -1, goalWeight, goalTime, rate);
+    }
+
+    // KISAKTODO: blops has some interesting extra cases here involving goalWeight < 0.001
+
+    obj = Com_GetServerDObj(pSelf->s.number);
+    if (!obj)
+        Scr_ObjectError("No model exists.");
+
+    if ((flags & 1) != 0)
+        error = XAnimSetCompleteGoalWeightKnob(obj, anim, goalWeight, goalTime, rate, 0, (flags & 2) != 0);
+    else
+        error = XAnimSetGoalWeightKnob(obj, anim, goalWeight, goalTime, rate, 0, (flags & 2) != 0);
+
+    if (error)
+    {
+        GScr_HandleAnimError(error);
+    }
+    else
+    {
+        if ((pSelf->flags & FL_NO_AUTO_ANIM_UPDATE) == 0)
+            pSelf->flags |= FL_REPEAT_ANIM_UPDATE;
     }
 }
 

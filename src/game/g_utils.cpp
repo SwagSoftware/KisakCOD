@@ -1642,21 +1642,19 @@ DObjAnimMat *__cdecl G_DObjGetLocalBoneIndexMatrix(const gentity_s *ent, int bon
 
 void __cdecl G_DObjGetWorldBoneIndexMatrix(const gentity_s *ent, int boneIndex, float (*tagMat)[3])
 {
-    DObjAnimMat *v6; // r30
-    float v7[4][3]; // [sp+50h] [-80h] BYREF
-    float v8[20]; // [sp+80h] [-50h] BYREF
+    DObjAnimMat *mat; // r30
+    mat4x3 ent_axis;
+    mat3x3 axis; // [esp+84h] [ebp-24h] BYREF
 
-    //Profile_Begin(318);
     G_DObjCalcBone(ent, boneIndex);
-    //Profile_EndInternal(0);
-    v6 = &SV_DObjGetMatrixArray(ent)[boneIndex];
-    AnglesToAxis(ent->r.currentAngles, (float (*)[3])v8);
-    v8[9] = ent->r.currentOrigin[0];
-    v8[10] = ent->r.currentOrigin[1];
-    v8[11] = ent->r.currentOrigin[2];
-    LocalConvertQuatToMat(v6, v7);
-    MatrixMultiply((const mat3x3&)v7, (const mat3x3&)v8, (mat3x3&)tagMat);
-    MatrixTransformVector43(v6->trans, (const mat4x3&)v8, &(*tagMat)[9]);
+    mat = &SV_DObjGetMatrixArray(ent)[boneIndex];
+    AnglesToAxis(ent->r.currentAngles, ent_axis);
+    ent_axis[3][0] = ent->r.currentOrigin[0];
+    ent_axis[3][1] = ent->r.currentOrigin[1];
+    ent_axis[3][2] = ent->r.currentOrigin[2];
+    LocalConvertQuatToMat(mat, axis);
+    MatrixMultiply(axis, (const mat3x3&)ent_axis, (mat3x3&)*tagMat);
+    MatrixTransformVector43(mat->trans, ent_axis, &(*tagMat)[9]);
 }
 
 void __cdecl G_DObjGetWorldBoneIndexPos(const gentity_s *ent, int boneIndex, float *pos)
