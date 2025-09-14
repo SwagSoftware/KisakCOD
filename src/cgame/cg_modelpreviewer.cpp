@@ -932,8 +932,8 @@ void __cdecl CG_ModPrvLoadAnimations(const char *animationFilename)
     XAnimTree_s *v3; // r30
     XAnim_s *Anims; // r29
     HunkUser *v5; // r3
-    XAnim_s *v6; // r29
-    XAnimTree_s *v7; // r30
+    XAnim_s *xAnims; // r29
+    XAnimTree_s *animTree; // r30
     int v8; // r7
     unsigned int v9; // r6
     int fromCurrentIndex; // r11
@@ -967,19 +967,18 @@ void __cdecl CG_ModPrvLoadAnimations(const char *animationFilename)
         {
             MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\cgame\\cg_modelpreviewer.cpp", 1394, 0, "%s", "!g_modPrvHunkUser");
         }
+
         g_modPrvHunkUser = Hunk_UserCreate(0x10000, "CG_ModPrvLoadAnimations", 0, 0, 0);
-        v6 = XAnimCreateAnims("ModelPreviewer", 3, CG_ModPrvAlloc);
-        if (!v6)
-            MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\cgame\\cg_modelpreviewer.cpp", 1399, 0, "%s", "xAnims");
-        XAnimBlend(v6, 0, "root", 1u, 2u, 0);
+        xAnims = XAnimCreateAnims("ModelPreviewer", 3, CG_ModPrvAlloc);
+        iassert(xAnims);
+        XAnimBlend(xAnims, 0, "root", 1, 2, 0);
         if (g_mdlprv.anim.fromCurrentIndex >= 0)
-            BG_CreateXAnim(v6, 1u, g_mdlprv.system.animNames[g_mdlprv.anim.fromCurrentIndex]);
+            BG_CreateXAnim(xAnims, 1, g_mdlprv.system.animNames[g_mdlprv.anim.fromCurrentIndex]);
         if (g_mdlprv.anim.toCurrentIndex >= 0)
-            BG_CreateXAnim(v6, 2u, g_mdlprv.system.animNames[g_mdlprv.anim.toCurrentIndex]);
-        v7 = XAnimCreateTree(v6, CG_ModPrvAlloc);
-        if (!v7)
-            MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\cgame\\cg_modelpreviewer.cpp", 1411, 0, "%s", "animTree");
-        DObjSetTree(g_mdlprv.model.currentObj, v7);
+            BG_CreateXAnim(xAnims, 2, g_mdlprv.system.animNames[g_mdlprv.anim.toCurrentIndex]);
+        animTree = XAnimCreateTree(xAnims, CG_ModPrvAlloc);
+        iassert(animTree);
+        DObjSetTree(g_mdlprv.model.currentObj, animTree);
         fromCurrentIndex = g_mdlprv.anim.fromCurrentIndex;
         if (g_mdlprv.anim.fromCurrentIndex >= 0)
         {
@@ -987,17 +986,17 @@ void __cdecl CG_ModPrvLoadAnimations(const char *animationFilename)
                 value = modPrvAnimBlendWeight->current.value;
             else
                 value = (float)((float)1.0 - modPrvAnimBlendWeight->current.value);
-            XAnimSetGoalWeightKnobAll(g_mdlprv.model.currentObj, 1u, 0, value, 1.0, 1.0, v9, v8);
+            XAnimSetGoalWeightKnobAll(g_mdlprv.model.currentObj, 1, 0, value, 1.0, 1.0, 0, 0, 1); // KISAKTODO: args sus
             //g_mdlprv.anim.isFromLooped = (_cntlzw(XAnimIsLooped(v6, 1u)) & 0x20) == 0;
-            g_mdlprv.anim.isFromLooped = XAnimIsLooped(v6, 1);
+            g_mdlprv.anim.isFromLooped = XAnimIsLooped(xAnims, 1);
             fromCurrentIndex = g_mdlprv.anim.fromCurrentIndex;
         }
         if (g_mdlprv.anim.toCurrentIndex >= 0)
         {
             if (fromCurrentIndex >= 0 && *(unsigned int *)(modPrvAnimBlendMode + 12) == 1)
-                XAnimSetGoalWeightKnobAll(g_mdlprv.model.currentObj, 2u, 0, 1.0, 1.0, 1.0, v9, v8);
+                XAnimSetGoalWeightKnobAll(g_mdlprv.model.currentObj, 2, 0, 1.0, 1.0, 1.0, 0, 0, 1);// KISAKTODO: args sus
             //g_mdlprv.anim.isToLooped = (_cntlzw(XAnimIsLooped(v6, 2u)) & 0x20) == 0;
-            g_mdlprv.anim.isToLooped = XAnimIsLooped(v6, 2);
+            g_mdlprv.anim.isToLooped = XAnimIsLooped(xAnims, 2);
         }
         if (animationFilename)
         {
@@ -1046,8 +1045,7 @@ void __cdecl CG_ModPrvApplyAnimationBlend(double deltaTime)
                     1.0,
                     modPrvAnimCrossBlendDuration->current.value,
                     1.0,
-                    v3,
-                    v2);
+                    0, 0, 1);// KISAKTODO: args sus
                 g_mdlprv.anim.isToAnimPlaying = 1;
             }
         }
@@ -1147,7 +1145,7 @@ int __cdecl CG_ModPrvLoopAnimation()
         {
             if (!g_mdlprv.anim.isFromLooped)
             {
-                XAnimSetGoalWeightKnobAll(g_mdlprv.model.currentObj, 1u, 0, 1.0, 1.0, 1.0, v5, v4);
+                XAnimSetGoalWeightKnobAll(g_mdlprv.model.currentObj, 1u, 0, 1.0, 1.0, 1.0, 0, 0, 1);// KISAKTODO: args sus
                 g_mdlprv.model.currentEntity.placement.base.origin[0] = g_mdlprv.model.initialOrigin[0];
                 g_mdlprv.model.currentEntity.placement.base.origin[1] = g_mdlprv.model.initialOrigin[1];
                 g_mdlprv.model.currentEntity.placement.base.origin[2] = g_mdlprv.model.initialOrigin[2];
@@ -1173,7 +1171,7 @@ LABEL_15:
             else
                 value = (float)((float)1.0 - modPrvAnimBlendWeight->current.value);
             XAnimClearTreeGoalWeights(v3, 2u, 0.0);
-            XAnimSetGoalWeightKnobAll(g_mdlprv.model.currentObj, 1u, 0, value, 1.0, 1.0, v13, v12);
+            XAnimSetGoalWeightKnobAll(g_mdlprv.model.currentObj, 1u, 0, value, 1.0, 1.0, 0, 0, 1);// KISAKTODO: args sus
             g_mdlprv.model.currentEntity.placement.base.origin[0] = g_mdlprv.model.initialOrigin[0];
             result = 1;
             g_mdlprv.anim.isToAnimPlaying = 0;
@@ -1191,7 +1189,7 @@ LABEL_15:
     }
     if (!g_mdlprv.anim.isToLooped)
     {
-        XAnimSetGoalWeightKnobAll(g_mdlprv.model.currentObj, 2u, 0, 1.0, 1.0, 1.0, v5, v4);
+        XAnimSetGoalWeightKnobAll(g_mdlprv.model.currentObj, 2u, 0, 1.0, 1.0, 1.0, 0, 0, 1);// KISAKTODO: args sus
         g_mdlprv.model.currentEntity.placement.base.origin[0] = g_mdlprv.model.initialOrigin[0];
         g_mdlprv.model.currentEntity.placement.base.origin[1] = g_mdlprv.model.initialOrigin[1];
         g_mdlprv.model.currentEntity.placement.base.origin[2] = g_mdlprv.model.initialOrigin[2];

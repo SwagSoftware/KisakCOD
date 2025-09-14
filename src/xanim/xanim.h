@@ -18,6 +18,8 @@
 
 #include <ui/ui_shared.h>
 
+#define ANIM_FLAG_COMPLETE 1
+
 union XAnimIndices // sizeof=0x4
 {                                       // ...
     unsigned __int8 *_1;
@@ -1361,10 +1363,11 @@ int XAnimSetCompleteGoalWeightKnobAll(
     DObj_s *obj,
     unsigned int animIndex,
     unsigned int rootIndex,
-    double goalWeight,
-    double goalTime,
-    double rate,
+    float goalWeight,
+    float goalTime,
+    float rate,
     int notifyName,
+    int notifyType,
     int bRestart);
 int __cdecl XAnimSetGoalWeightKnobAll(
     DObj_s* obj,
@@ -1374,6 +1377,7 @@ int __cdecl XAnimSetGoalWeightKnobAll(
     float goalTime,
     float rate,
     unsigned int notifyName,
+    unsigned int notifyType,
     int bRestart);
 int XAnimSetCompleteGoalWeightKnob(
     DObj_s *obj,
@@ -1382,6 +1386,7 @@ int XAnimSetCompleteGoalWeightKnob(
     double goalTime,
     double rate,
     unsigned int notifyName,
+    unsigned int notifyType,
     int bRestart);
 int __cdecl XAnimSetGoalWeightKnob(
     DObj_s* obj,
@@ -1390,6 +1395,7 @@ int __cdecl XAnimSetGoalWeightKnob(
     float goalTime,
     float rate,
     unsigned int notifyName,
+    unsigned int notifyType,
     int bRestart);
 void __cdecl XAnimClearTree(XAnimTree_s* tree);
 int __cdecl XAnimSetGoalWeightNode(

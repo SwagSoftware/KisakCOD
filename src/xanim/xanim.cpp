@@ -3367,30 +3367,33 @@ int XAnimSetCompleteGoalWeightKnobAll(
     DObj_s *obj,
     unsigned int animIndex,
     unsigned int rootIndex,
-    double goalWeight,
-    double goalTime,
-    double rate,
+    float goalWeight,
+    float goalTime,
+    float rate,
     int notifyName,
+    int notifyType,
     int bRestart)
 {
     int v18; // r24
     XAnimTree_s *tree; // r29
-    unsigned int InfoIndex; // r31
+    unsigned int infoIndex; // r31
     unsigned int parent; // r31
     unsigned int v22; // r6
     unsigned int v23; // r5
 
-    if (animIndex == rootIndex)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\xanim\\xanim.cpp", 3509, 0, "%s", "animIndex != rootIndex");
-    if (!obj)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\xanim\\xanim.cpp", 3510, 0, "%s", "obj");
-    v18 = XAnimSetGoalWeightKnob(obj, animIndex, goalWeight, goalTime, rate, rootIndex, notifyName);
-    Profile_Begin(332);
+    iassert(animIndex != rootIndex);
+    iassert(obj);
+
+    PROF_SCOPED("XAnimSetCompleteGoalWeightKnobAll");
+
+    v18 = XAnimSetGoalWeightKnob(obj, animIndex, goalWeight, goalTime, rate, notifyName, notifyType, bRestart);
     tree = obj->tree;
-    InfoIndex = XAnimGetInfoIndex(obj->tree, animIndex);
-    if (!InfoIndex)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\xanim\\xanim.cpp", 3519, 0, "%s", "infoIndex");
-    parent = g_xAnimInfo[InfoIndex].parent;
+    infoIndex = XAnimGetInfoIndex(obj->tree, animIndex);
+
+    iassert(infoIndex);
+
+    parent = g_xAnimInfo[infoIndex].parent;
+
     if (parent)
     {
         while (g_xAnimInfo[parent].animIndex != rootIndex)
@@ -3401,15 +3404,12 @@ int XAnimSetCompleteGoalWeightKnobAll(
             XAnimSetCompleteGoalWeightNode(tree, parent, 1.0, goalTime, 1.0, v23, v22);
             parent = g_xAnimInfo[parent].parent;
             if (!parent)
-                goto LABEL_12;
+                return 1;
         }
-        Profile_EndInternal(0);
         return v18;
     }
     else
     {
-    LABEL_12:
-        Profile_EndInternal(0);
         return 1;
     }
 }
@@ -3422,6 +3422,7 @@ int __cdecl XAnimSetGoalWeightKnobAll(
     float goalTime,
     float rate,
     unsigned int notifyName,
+    unsigned int notifyType,
     int bRestart)
 {
     XAnimTree_s* tree; // [esp+60h] [ebp-Ch]
@@ -3430,7 +3431,7 @@ int __cdecl XAnimSetGoalWeightKnobAll(
 
     iassert(animIndex != rootIndex);
     iassert(obj);
-    error = XAnimSetGoalWeightKnob(obj, animIndex, goalWeight, goalTime, rate, notifyName, bRestart);
+    error = XAnimSetGoalWeightKnob(obj, animIndex, goalWeight, goalTime, rate, notifyName, notifyType, bRestart);
     PROF_SCOPED("XAnimSetGoalWeight");
     tree = obj->tree;
     infoIndex = XAnimGetInfoIndex(obj->tree, animIndex);
@@ -3461,6 +3462,7 @@ int XAnimSetCompleteGoalWeightKnob(
     double goalTime,
     double rate,
     unsigned int notifyName,
+    unsigned int notifyType,
     int bRestart)
 {
     XAnimTree_s *tree; // r28
@@ -3485,7 +3487,7 @@ int XAnimSetCompleteGoalWeightKnob(
         XAnimInitInfo(&g_xAnimInfo[infoIndex]);
     }
     XAnimClearGoalWeightKnobInternal(tree, infoIndex, goalWeight, goalTime);
-    return XAnimSetCompleteGoalWeightNode(tree, infoIndex, goalWeight, goalTime, rate, notifyName, 0);
+    return XAnimSetCompleteGoalWeightNode(tree, infoIndex, goalWeight, goalTime, rate, notifyName, notifyType);
 }
 
 int __cdecl XAnimSetGoalWeightKnob(
@@ -3495,6 +3497,7 @@ int __cdecl XAnimSetGoalWeightKnob(
     float goalTime,
     float rate,
     unsigned int notifyName,
+    unsigned int notifyType,
     int bRestart)
 {
     XAnimTree_s* tree; // [esp+44h] [ebp-Ch]
@@ -3521,7 +3524,7 @@ int __cdecl XAnimSetGoalWeightKnob(
         XAnimInitInfo(&g_xAnimInfo[infoIndex]);
     }
     XAnimClearGoalWeightKnobInternal(tree, infoIndex, goalWeight, goalTime);
-    error = XAnimSetGoalWeightNode(tree, infoIndex, goalWeight, goalTime, rate, notifyName, 0);
+    error = XAnimSetGoalWeightNode(tree, infoIndex, goalWeight, goalTime, rate, notifyName, notifyType);
     return error;
 }
 

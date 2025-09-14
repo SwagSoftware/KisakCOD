@@ -8911,16 +8911,24 @@ void __cdecl GScr_SetAnimKnobInternal(scr_entref_t entref, unsigned int flags)
         DumpAnimCommand(funcName, tree, anim, -1, goalWeight, goalTime, rate);
     }
 
-    // KISAKTODO: blops has some interesting extra cases here involving goalWeight < 0.001
-
     obj = Com_GetServerDObj(pSelf->s.number);
     if (!obj)
         Scr_ObjectError("No model exists.");
 
-    if ((flags & 1) != 0)
-        error = XAnimSetCompleteGoalWeightKnob(obj, anim, goalWeight, goalTime, rate, 0, (flags & 2) != 0);
+    unsigned int notifyType;
+    if (goalWeight <= EQUAL_EPSILON)
+    {
+        notifyType = 0;
+    }
     else
-        error = XAnimSetGoalWeightKnob(obj, anim, goalWeight, goalTime, rate, 0, (flags & 2) != 0);
+    {
+        notifyType = 2;
+    }
+
+    if ((flags & 1) != 0)
+        error = XAnimSetCompleteGoalWeightKnob(obj, anim, goalWeight, goalTime, rate, 0, notifyType, (flags & 2) != 0);
+    else
+        error = XAnimSetGoalWeightKnob(obj, anim, goalWeight, goalTime, rate, 0, notifyType, (flags & 2) != 0);
 
     if (error)
     {
@@ -8956,97 +8964,104 @@ void __cdecl GScr_SetAnimKnobLimitedRestart(scr_entref_t entref)
 void __cdecl GScr_SetAnimKnobAllInternal(scr_entref_t entref, unsigned int flags)
 {
     gentity_s *Entity; // r27
-    double Float; // fp30
-    double v5; // fp31
-    double v6; // fp29
+    double rate; // fp30
+    double goalWeight; // fp31
+    double goalTime; // fp29
     XAnimTree_s *EntAnimTree; // r31
-    XAnimTree_s *v8; // r5
-    XAnimTree_s *v9; // r5
-    const char *v10; // r3
-    DObj_s *ServerDObj; // r31
-    int v12; // r7
-    unsigned int v13; // r6
-    int v14; // r3
+    const char *funcName; // r3
+    DObj_s *obj; // r31
+    int error; // r3
     int v15; // r11
     scr_anim_s rootanim; // [sp+50h] [-60h]
     scr_anim_s anim; // [sp+54h] [-5Ch]
 
     Entity = GetEntity(entref);
-    Float = 1.0;
-    v5 = 1.0;
-    v6 = 0.2;
+    rate = 1.0;
+    goalWeight = 1.0;
+    goalTime = 0.2;
     EntAnimTree = GScr_GetEntAnimTree(Entity);
     switch (Scr_GetNumParam())
     {
-    case 2u:
-        goto LABEL_9;
-    case 3u:
-        goto LABEL_7;
-    case 4u:
-        goto LABEL_5;
-    case 5u:
-        goto LABEL_3;
+    case 2:
+        break;
+    case 3:
+        goalWeight = Scr_GetFloat(2);
+        if (goalWeight < 0.0f)
+            Scr_ParamError(2, "must set nonnegative weight");
+        break;
+    case 4:
+        goalTime = Scr_GetFloat(3);
+        if (goalTime < 0.0f)
+            Scr_ParamError(3, "must set nonnegative goal time");
+        break;
+    case 5:
+        rate = Scr_GetFloat(4);
+        if (rate < 0.0f)
+            Scr_ParamError(4, "must set nonnegative rate");
+        break;
     default:
         Scr_Error("incorrect number of parameters");
-    LABEL_3:
-        Float = Scr_GetFloat(4);
-        if (Float < 0.0)
-            Scr_ParamError(4u, "must set nonnegative rate");
-    LABEL_5:
-        v6 = Scr_GetFloat(3);
-        if (v6 < 0.0)
-            Scr_ParamError(3u, "must set nonnegative goal time");
-    LABEL_7:
-        v5 = Scr_GetFloat(2);
-        if (v5 < 0.0)
-            Scr_ParamError(2u, "must set nonnegative weight");
-    LABEL_9:
-        anim = Scr_GetAnim(1, EntAnimTree);
-        rootanim = Scr_GetAnim(0, EntAnimTree);
-
-        if (anim.tree != rootanim.tree)
-            Scr_Error("root anim is not in the same anim tree");
-        if (anim.index == rootanim.index)
-            Scr_Error("root anim is not an ancestor of the anim");
-        if (g_dumpAnimsCommands->current.integer == Entity->s.number)
-        {
-            switch (flags)
-            {
-            case 1u:
-                v10 = "SetAnimKnobAll";
-                break;
-            case 2u:
-                v10 = "SetAnimKnobAllLimitedRestart";
-                break;
-            case 3u:
-                v10 = "SetAnimKnobAllRestart";
-                break;
-            default:
-                if (flags)
-                    MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\g_scr_main.cpp", 10527, 0, "%s", "flags == 0");
-                v10 = "SetAnimKnobAllLimited";
-                break;
-            }
-            DumpAnimCommand(v10, EntAnimTree, rootanim.index, anim.index, v5, v6, Float);
-        }
-        ServerDObj = Com_GetServerDObj(Entity->s.number);
-        if (!ServerDObj)
-            Scr_ObjectError("No model exists.");
-        if ((flags & 1) != 0)
-            v14 = XAnimSetCompleteGoalWeightKnobAll(ServerDObj, rootanim.index, anim.index, v5, v6, Float, v13, v12);
-        else
-            v14 = XAnimSetGoalWeightKnobAll(ServerDObj, rootanim.index, anim.index, v5, v6, Float, v13, v12);
-        if (v14)
-        {
-            GScr_HandleAnimError(v14);
-        }
-        else
-        {
-            if ((Entity->flags & FL_NO_AUTO_ANIM_UPDATE) == 0)
-                Entity->flags |= FL_REPEAT_ANIM_UPDATE;
-        }
-        return;
     }
+
+    anim = Scr_GetAnim(1, EntAnimTree);
+    rootanim = Scr_GetAnim(0, EntAnimTree);
+
+    if (anim.tree != rootanim.tree)
+        Scr_Error("root anim is not in the same anim tree");
+    if (anim.index == rootanim.index)
+        Scr_Error("root anim is not an ancestor of the anim");
+
+    if (g_dumpAnimsCommands->current.integer == Entity->s.number)
+    {
+        switch (flags)
+        {
+        case 1:
+            funcName = "SetAnimKnobAll";
+            break;
+        case 2:
+            funcName = "SetAnimKnobAllLimitedRestart";
+            break;
+        case 3:
+            funcName = "SetAnimKnobAllRestart";
+            break;
+        default:
+            iassert(flags == 0);
+            funcName = "SetAnimKnobAllLimited";
+            break;
+        }
+        DumpAnimCommand(funcName, EntAnimTree, rootanim.index, anim.index, goalWeight, goalTime, rate);
+    }
+
+    obj = Com_GetServerDObj(Entity->s.number);
+    if (!obj)
+        Scr_ObjectError("No model exists.");
+    
+    unsigned int notifyType;
+
+    if (goalWeight <= EQUAL_EPSILON)
+    {
+        notifyType = 0;
+    }
+    else
+    {
+        notifyType = 2;
+    }
+
+    if ((flags & 1) != 0)
+        error = XAnimSetCompleteGoalWeightKnobAll(obj, rootanim.index, anim.index, goalWeight, goalTime, rate, 0, notifyType, (flags & 2) != 0);
+    else
+        error = XAnimSetGoalWeightKnobAll(obj, rootanim.index, anim.index, goalWeight, goalTime, rate, 0, notifyType, (flags & 2) != 0);
+
+    if (error)
+    {
+        GScr_HandleAnimError(error);
+    }
+    else
+    {
+        if ((Entity->flags & FL_NO_AUTO_ANIM_UPDATE) == 0)
+            Entity->flags |= FL_REPEAT_ANIM_UPDATE;
+    }
+    return;
 }
 
 void __cdecl GScr_SetAnimKnobAll(scr_entref_t entref)
@@ -9072,91 +9087,97 @@ void __cdecl GScr_SetAnimKnobAllLimitedRestart(scr_entref_t entref)
 void __cdecl GScr_SetAnimInternal(scr_entref_t entref, unsigned int flags)
 {
     gentity_s *Entity; // r28
-    double Float; // fp30
-    double v5; // fp31
-    double v6; // fp29
+    double rate; // fp30
+    double goalWeight; // fp31
+    double goalTime; // fp29
     XAnimTree_s *EntAnimTree; // r31
-    XAnimTree_s *v8; // r5
-    unsigned __int16 v9; // r30
-    const char *v10; // r3
-    DObj_s *ServerDObj; // r31
-    int v12; // r7
-    unsigned int v13; // r6
-    unsigned int v14; // r5
-    int v15; // r3
-    int v16; // r11
+    unsigned __int16 animIndex; // r30
+    const char *funcName; // r3
+    DObj_s *obj; // r31
+    int error; // r3
 
     Entity = GetEntity(entref);
-    Float = 1.0;
-    v5 = 1.0;
-    v6 = 0.2;
+    rate = 1.0;
+    goalWeight = 1.0;
+    goalTime = 0.2;
     EntAnimTree = GScr_GetEntAnimTree(Entity);
+
     switch (Scr_GetNumParam())
     {
-    case 1u:
-        goto LABEL_9;
-    case 2u:
-        goto LABEL_7;
-    case 3u:
-        goto LABEL_5;
-    case 4u:
-        goto LABEL_3;
+    case 1:
+        break;
+    case 2:
+        goalWeight = Scr_GetFloat(1);
+        if (goalWeight < 0.0)
+            Scr_ParamError(1, "must set nonnegative weight");
+        break;
+    case 3:
+        goalTime = Scr_GetFloat(2);
+        if (goalTime < 0.0)
+            Scr_ParamError(2, "must set nonnegative goal time");
+        break;
+    case 4:
+        rate = Scr_GetFloat(3);
+        if (rate < 0.0)
+            Scr_ParamError(3u, "must set nonnegative rate");
+        break;
     default:
         Scr_Error("too many parameters");
-    LABEL_3:
-        Float = Scr_GetFloat(3);
-        if (Float < 0.0)
-            Scr_ParamError(3u, "must set nonnegative rate");
-    LABEL_5:
-        v6 = Scr_GetFloat(2);
-        if (v6 < 0.0)
-            Scr_ParamError(2u, "must set nonnegative goal time");
-    LABEL_7:
-        v5 = Scr_GetFloat(1);
-        if (v5 < 0.0)
-            Scr_ParamError(1u, "must set nonnegative weight");
-    LABEL_9:
-        //v9 = Scr_GetAnim(0, EntAnimTree) >> 16;
-        v9 = Scr_GetAnim(0, EntAnimTree).index;
-        if (g_dumpAnimsCommands->current.integer == Entity->s.number)
-        {
-            switch (flags)
-            {
-            case 1u:
-                v10 = "SetAnim";
-                break;
-            case 2u:
-                v10 = "SetAnimLimitedRestart";
-                break;
-            case 3u:
-                v10 = "SetAnimRestart";
-                break;
-            default:
-                if (flags)
-                    MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\g_scr_main.cpp", 10712, 0, "%s", "flags == 0");
-                v10 = "SetAnimLimited";
-                break;
-            }
-            DumpAnimCommand(v10, EntAnimTree, v9, -1, v5, v6, Float);
-        }
-        ServerDObj = Com_GetServerDObj(Entity->s.number);
-        if (!ServerDObj)
-            Scr_ObjectError("No model exists.");
-        if ((flags & 1) != 0)
-            v15 = XAnimSetCompleteGoalWeight(ServerDObj, v9, v5, v6, Float, v14, v13, v12);
-        else
-            v15 = XAnimSetGoalWeight(ServerDObj, v9, v5, v6, Float, v14, v13, v12);
-        if (v15)
-        {
-            GScr_HandleAnimError(v15);
-        }
-        else
-        {
-            if ((Entity->flags & FL_NO_AUTO_ANIM_UPDATE) == 0)
-                Entity->flags |= FL_REPEAT_ANIM_UPDATE;
-        }
-        return;
     }
+
+    animIndex = Scr_GetAnim(0, EntAnimTree).index;
+
+    if (g_dumpAnimsCommands->current.integer == Entity->s.number)
+    {
+        switch (flags)
+        {
+        case 1:
+            funcName = "SetAnim";
+            break;
+        case 2:
+            funcName = "SetAnimLimitedRestart";
+            break;
+        case 3:
+            funcName = "SetAnimRestart";
+            break;
+        default:
+            iassert(flags == 0);
+            funcName = "SetAnimLimited";
+            break;
+        }
+        DumpAnimCommand(funcName, EntAnimTree, animIndex, -1, goalWeight, goalTime, rate);
+    }
+
+    obj = Com_GetServerDObj(Entity->s.number);
+
+    if (!obj)
+        Scr_ObjectError("No model exists.");
+
+    unsigned int notifyType;
+    if (goalWeight <= EQUAL_EPSILON)
+    {
+        notifyType = 0;
+    }
+    else
+    {
+        notifyType = 2;
+    }
+
+    if ((flags & 1) != 0)
+        error = XAnimSetCompleteGoalWeight(obj, animIndex, goalWeight, goalTime, rate, 0, notifyType, (flags & 2) != 0);
+    else
+        error = XAnimSetGoalWeight(obj, animIndex, goalWeight, goalTime, rate, 0, notifyType, (flags & 2) != 0);
+
+    if (error)
+    {
+        GScr_HandleAnimError(error);
+    }
+    else
+    {
+        if ((Entity->flags & FL_NO_AUTO_ANIM_UPDATE) == 0)
+            Entity->flags |= FL_REPEAT_ANIM_UPDATE;
+    }
+    return;
 }
 
 void __cdecl GScr_SetAnim(scr_entref_t entref)
@@ -9217,95 +9238,99 @@ void __cdecl GScr_GetAnimAssetType(scr_entref_t entref)
 void __cdecl GScr_SetFlaggedAnimKnobInternal(scr_entref_t entref, unsigned int flags)
 {
     gentity_s *Entity; // r25
-    double Float; // fp30
-    double v5; // fp31
-    double v6; // fp29
+    double rate; // fp30
+    double goalWeight; // fp31
+    double goalTime; // fp29
     XAnimTree_s *EntAnimTree; // r27
-    XAnimTree_s *v8; // r5
-    unsigned int v9; // r29
+    unsigned int animIndex; // r29
     const XAnim_s *Anims; // r3
-    const char *v11; // r3
-    DObj_s *ServerDObj; // r31
-    int v13; // r6
-    unsigned int v14; // r5
-    int v15; // r3
-    int v16; // r11
+    const char *funcName; // r3
+    DObj_s *obj; // r31
+    int error; // r3
 
     Entity = GetEntity(entref);
-    Float = 1.0;
-    v5 = 1.0;
-    v6 = 0.2;
+    rate = 1.0f;
+    goalWeight = 1.0f;
+    goalTime = 0.2f;
     EntAnimTree = GScr_GetEntAnimTree(Entity);
     switch (Scr_GetNumParam())
     {
-    case 2u:
-        goto LABEL_9;
-    case 3u:
-        goto LABEL_7;
-    case 4u:
-        goto LABEL_5;
-    case 5u:
-        goto LABEL_3;
+    case 2:
+        break;
+    case 3:
+        goalWeight = Scr_GetFloat(2);
+        if (goalWeight <= 0.0f)
+            Scr_ParamError(2, "must set positive weight");
+        break;
+    case 4:
+        goalTime = Scr_GetFloat(3);
+        if (goalTime < 0.0f)
+            Scr_ParamError(3, "must set nonnegative goal time");
+        break;
+    case 5:
+        rate = Scr_GetFloat(4);
+        if (rate < 0.0f)
+            Scr_ParamError(4, "must set nonnegative rate");
+        break;
     default:
         Scr_Error("too many parameters");
-    LABEL_3:
-        Float = Scr_GetFloat(4);
-        if (Float < 0.0)
-            Scr_ParamError(4u, "must set nonnegative rate");
-    LABEL_5:
-        v6 = Scr_GetFloat(3);
-        if (v6 < 0.0)
-            Scr_ParamError(3u, "must set nonnegative goal time");
-    LABEL_7:
-        v5 = Scr_GetFloat(2);
-        if (v5 <= 0.0)
-            Scr_ParamError(2u, "must set positive weight");
-    LABEL_9:
-        //v9 = (unsigned int)Scr_GetAnim((scr_anim_s *)1, (unsigned int)EntAnimTree, v8) >> 16;
-        v9 = Scr_GetAnim(1, EntAnimTree).index;
-        if (!Scr_GetConstString(0))
-            MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\g_scr_main.cpp", 10930, 0, "%s", "notifyName");
-        Anims = XAnimGetAnims(EntAnimTree);
-        if (!XAnimHasTime(Anims, v9))
-            Scr_ParamError(1u, "blended nonsynchronized animation has no concept of time");
-        if (g_dumpAnimsCommands->current.integer == Entity->s.number)
+    }
+
+    animIndex = Scr_GetAnim(1, EntAnimTree).index;
+    if (!Scr_GetConstString(0))
+        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\g_scr_main.cpp", 10930, 0, "%s", "notifyName");
+    Anims = XAnimGetAnims(EntAnimTree);
+    if (!XAnimHasTime(Anims, animIndex))
+        Scr_ParamError(1u, "blended nonsynchronized animation has no concept of time");
+
+    if (g_dumpAnimsCommands->current.integer == Entity->s.number)
+    {
+        switch (flags)
         {
-            switch (flags)
-            {
-            case 1u:
-                v11 = "SetFlaggedAnimKnob";
-                break;
-            case 2u:
-                v11 = "SetFlaggedAnimKnobLimitedRestart";
-                break;
-            case 3u:
-                v11 = "SetFlaggedAnimKnobRestart";
-                break;
-            default:
-                if (flags)
-                    MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\g_scr_main.cpp", 10959, 0, "%s", "flags == 0");
-                v11 = "SetFlaggedAnimKnobLimited";
-                break;
-            }
-            DumpAnimCommand(v11, EntAnimTree, v9, -1, v5, v6, Float);
+        case 1:
+            funcName = "SetFlaggedAnimKnob";
+            break;
+        case 2:
+            funcName = "SetFlaggedAnimKnobLimitedRestart";
+            break;
+        case 3:
+            funcName = "SetFlaggedAnimKnobRestart";
+            break;
+        default:
+            iassert(flags == 0);
+            funcName = "SetFlaggedAnimKnobLimited";
+            break;
         }
-        ServerDObj = Com_GetServerDObj(Entity->s.number);
-        if (!ServerDObj)
-            Scr_ObjectError("No model exists.");
-        if ((flags & 1) != 0)
-            v15 = XAnimSetCompleteGoalWeightKnob(ServerDObj, v9, v5, v6, Float, v14, v13);
-        else
-            v15 = XAnimSetGoalWeightKnob(ServerDObj, v9, v5, v6, Float, v14, v13);
-        if (v15)
-        {
-            GScr_HandleAnimError(v15);
-        }
-        else
-        {
-            if ((Entity->flags & FL_NO_AUTO_ANIM_UPDATE) == 0)
-                Entity->flags |= FL_REPEAT_ANIM_UPDATE;
-        }
-        return;
+        DumpAnimCommand(funcName, EntAnimTree, animIndex, -1, goalWeight, goalTime, rate);
+    }
+
+    obj = Com_GetServerDObj(Entity->s.number);
+    if (!obj)
+        Scr_ObjectError("No model exists.");
+
+    unsigned int notifyType;
+    if (goalWeight <= EQUAL_EPSILON)
+    {
+        notifyType = 0;
+    }
+    else
+    {
+        notifyType = 2;
+    }
+
+    if ((flags & 1) != 0)
+        error = XAnimSetCompleteGoalWeightKnob(obj, animIndex, goalWeight, goalTime, rate, 0, notifyType, (flags & 2) != 0);
+    else
+        error = XAnimSetGoalWeightKnob(obj, animIndex, goalWeight, goalTime, rate, 0, notifyType, (flags & 2) != 0);
+
+    if (error)
+    {
+        GScr_HandleAnimError(error);
+    }
+    else
+    {
+        if ((Entity->flags & FL_NO_AUTO_ANIM_UPDATE) == 0)
+            Entity->flags |= FL_REPEAT_ANIM_UPDATE;
     }
 }
 
@@ -9332,100 +9357,104 @@ void __cdecl GScr_SetFlaggedAnimKnobLimitedRestart(scr_entref_t entref)
 void __cdecl GScr_SetFlaggedAnimKnobAllInternal(scr_entref_t entref, unsigned int flags, const char *usage)
 {
     gentity_s *Entity; // r24
-    double Float; // fp30
-    double v7; // fp31
-    double v8; // fp29
+    double rate; // fp30
+    double goalWeight; // fp31
+    double goalTime; // fp29
     XAnimTree_s *EntAnimTree; // r27
-    XAnimTree_s *v10; // r5
-    XAnimTree_s *v11; // r5
     const XAnim_s *Anims; // r3
-    const char *v13; // r3
-    DObj_s *ServerDObj; // r31
-    int v15; // r7
-    unsigned int v16; // r6
-    int v17; // r3
-    int v18; // r11
+    const char *funcName; // r3
+    DObj_s *obj; // r31
+    int error; // r3
     scr_anim_s rootanim; // [sp+50h] [-70h]
     scr_anim_s anim; // [sp+54h] [-6Ch]
 
     Entity = GetEntity(entref);
-    Float = 1.0;
-    v7 = 1.0;
-    v8 = 0.2;
+    rate = 1.0f;
+    goalWeight = 1.0f;
+    goalTime = 0.2f;
     EntAnimTree = GScr_GetEntAnimTree(Entity);
+
     switch (Scr_GetNumParam())
     {
-    case 3u:
-        goto LABEL_9;
-    case 4u:
-        goto LABEL_7;
-    case 5u:
-        goto LABEL_5;
-    case 6u:
-        goto LABEL_3;
+    case 3:
+        break;
+    case 4:
+        goalWeight = Scr_GetFloat(3);
+        if (goalWeight <= 0.0f)
+            Scr_ParamError(3, "must set positive weight");
+        break;
+    case 5:
+        goalTime = Scr_GetFloat(4);
+        if (goalTime < 0.0f)
+            Scr_ParamError(4, "must set nonnegative goal time");
+        break;
+    case 6:
+        rate = Scr_GetFloat(5);
+        if (rate < 0.0f)
+            Scr_ParamError(5, "must set nonnegative rate");
+        break;
     default:
         Scr_Error(usage);
-    LABEL_3:
-        Float = Scr_GetFloat(5);
-        if (Float < 0.0)
-            Scr_ParamError(5u, "must set nonnegative rate");
-    LABEL_5:
-        v8 = Scr_GetFloat(4);
-        if (v8 < 0.0)
-            Scr_ParamError(4u, "must set nonnegative goal time");
-    LABEL_7:
-        v7 = Scr_GetFloat(3);
-        if (v7 <= 0.0)
-            Scr_ParamError(3u, "must set positive weight");
-    LABEL_9:
-        anim = Scr_GetAnim(2, EntAnimTree);
-        rootanim = Scr_GetAnim(1, EntAnimTree);
-        if (!Scr_GetConstString(0))
-            MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\g_scr_main.cpp", 11122, 0, "%s", "notifyName");
-        Anims = XAnimGetAnims(EntAnimTree);
-        if (!XAnimHasTime(Anims, rootanim.index))
-            Scr_ParamError(1u, "blended nonsynchronized animation has no concept of time");
-        if (anim.tree != rootanim.tree)
-            Scr_Error("root anim is not in the same anim tree");
-        if (anim.index == rootanim.index)
-            Scr_Error("root anim is not an ancestor of the anim");
-        if (g_dumpAnimsCommands->current.integer == Entity->s.number)
-        {
-            if (flags == 3)
-            {
-                v13 = "SetFlaggedAnimKnobAllRestart";
-            }
-            else
-            {
-                if (flags != 1)
-                    MyAssertHandler(
-                        "c:\\trees\\cod3\\cod3src\\src\\game\\g_scr_main.cpp",
-                        11151,
-                        0,
-                        "%s",
-                        "flags == ANIM_FLAG_COMPLETE");
-                v13 = "SetFlaggedAnimKnobAll";
-            }
-            DumpAnimCommand(v13, EntAnimTree, rootanim.index, anim.index, v7, v8, Float);
-        }
-        ServerDObj = Com_GetServerDObj(Entity->s.number);
-        if (!ServerDObj)
-            Scr_ObjectError("No model exists.");
-        if ((flags & 1) != 0)
-            v17 = XAnimSetCompleteGoalWeightKnobAll(ServerDObj, rootanim.index, anim.index, v7, v8, Float, v16, v15);
-        else
-            v17 = XAnimSetGoalWeightKnobAll(ServerDObj, rootanim.index, anim.index, v7, v8, Float, v16, v15);
-        if (v17)
-        {
-            GScr_HandleAnimError(v17);
-        }
-        else
-        {
-            if ((Entity->flags & FL_NO_AUTO_ANIM_UPDATE) == 0)
-                Entity->flags |= FL_REPEAT_ANIM_UPDATE;
-        }
-        return;
     }
+
+    anim = Scr_GetAnim(2, EntAnimTree);
+    rootanim = Scr_GetAnim(1, EntAnimTree);
+    if (!Scr_GetConstString(0))
+        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\g_scr_main.cpp", 11122, 0, "%s", "notifyName");
+    Anims = XAnimGetAnims(EntAnimTree);
+
+    if (!XAnimHasTime(Anims, rootanim.index))
+        Scr_ParamError(1, "blended nonsynchronized animation has no concept of time");
+    if (anim.tree != rootanim.tree)
+        Scr_Error("root anim is not in the same anim tree");
+    if (anim.index == rootanim.index)
+        Scr_Error("root anim is not an ancestor of the anim");
+
+    if (g_dumpAnimsCommands->current.integer == Entity->s.number)
+    {
+        if (flags == 3)
+        {
+            funcName = "SetFlaggedAnimKnobAllRestart";
+        }
+        else
+        {
+            iassert(flags == ANIM_FLAG_COMPLETE);
+            funcName = "SetFlaggedAnimKnobAll";
+        }
+        DumpAnimCommand(funcName, EntAnimTree, rootanim.index, anim.index, goalWeight, goalTime, rate);
+    }
+
+    obj = Com_GetServerDObj(Entity->s.number);
+
+    if (!obj)
+        Scr_ObjectError("No model exists.");
+
+    unsigned int notifyType;
+
+    if (goalWeight <= EQUAL_EPSILON)
+    {
+        notifyType = 0;
+    }
+    else
+    {
+        notifyType = 2;
+    }
+
+    if ((flags & 1) != 0)
+        error = XAnimSetCompleteGoalWeightKnobAll(obj, rootanim.index, anim.index, goalWeight, goalTime, rate, 0, notifyType, (flags & 2) != 0);
+    else
+        error = XAnimSetGoalWeightKnobAll(obj, rootanim.index, anim.index, goalWeight, goalTime, rate, 0, notifyType, (flags & 2) != 0);
+
+    if (error)
+    {
+        GScr_HandleAnimError(error);
+    }
+    else
+    {
+        if ((Entity->flags & FL_NO_AUTO_ANIM_UPDATE) == 0)
+            Entity->flags |= FL_REPEAT_ANIM_UPDATE;
+    }
+    return;
 }
 
 void __cdecl GScr_SetFlaggedAnimKnobAll(scr_entref_t entref)

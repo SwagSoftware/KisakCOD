@@ -87,21 +87,13 @@ void __cdecl Sentient_GetOrigin(const sentient_s *self, float *vOriginOut)
 {
     gentity_s *ent; // r11
 
-    if (!self)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\sentient.cpp", 197, 0, "%s", "self");
-    if (!self->ent)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\sentient.cpp", 198, 0, "%s", "self->ent");
-    if (!self->ent->actor && !self->ent->client)
-        MyAssertHandler(
-            "c:\\trees\\cod3\\cod3src\\src\\game\\sentient.cpp",
-            199,
-            0,
-            "%s",
-            "self->ent->actor || self->ent->client");
-    if (!vOriginOut)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\sentient.cpp", 200, 0, "%s", "vOriginOut");
+    iassert(self);
+    iassert(self->ent);
+    iassert(self->ent->actor || self->ent->client);
+    iassert(vOriginOut);
+
     ent = self->ent;
-    *vOriginOut = self->ent->r.currentOrigin[0];
+    vOriginOut[0] = ent->r.currentOrigin[0];
     vOriginOut[1] = ent->r.currentOrigin[1];
     vOriginOut[2] = ent->r.currentOrigin[2];
 }

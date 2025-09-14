@@ -201,7 +201,7 @@ void __cdecl G_AnimScripted_ClearAnimWeights(
     {
         animLookAtLeft = pActor->lookAtInfo.animLookAtLeft;
     LABEL_8:
-        XAnimSetGoalWeightKnob(obj, animLookAtLeft, v11, 0.2, 1.0, v10, v9);
+        XAnimSetGoalWeightKnob(obj, animLookAtLeft, v11, 0.2, 1.0, 0, 0, 0);
         goto LABEL_9;
     }
     v11 = XAnimGetWeight(pAnimTree, pActor->lookAtInfo.animLookAtRight);
@@ -211,7 +211,7 @@ void __cdecl G_AnimScripted_ClearAnimWeights(
         goto LABEL_8;
     }
 LABEL_9:
-    XAnimSetCompleteGoalWeight(obj, pActor->lookAtInfo.animLookAtStraight, Weight, 0.2, 1.0, v10, v9, v13);
+    XAnimSetCompleteGoalWeight(obj, pActor->lookAtInfo.animLookAtStraight, Weight, 0.2, 1.0, 0, 0, 0);
     if (!root)
         return;
     v14 = 0.2;

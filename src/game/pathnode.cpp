@@ -4315,10 +4315,10 @@ pathnode_t *__cdecl Path_NearestNode(
         nodes,
         typeFlags,
         fMaxDist,
-        (float (*)[2])returnCount,
+        NULL,
+        NULL,
         0,
-        0,
-        0,
+        returnCount,
         maxNodes,
         heightCheck);
 }
