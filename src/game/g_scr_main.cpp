@@ -8872,16 +8872,20 @@ void __cdecl GScr_SetAnimKnobInternal(scr_entref_t entref, unsigned int flags)
         goalWeight = Scr_GetFloat(1);
         if (goalWeight < 0.0)
             Scr_ParamError(1, "must set nonnegative weight");
+        break;
     case 3:
         goalTime = Scr_GetFloat(2);
         if (goalTime < 0.0)
             Scr_ParamError(2, "must set nonnegative goal time");
+        break;
     case 4:
         rate = Scr_GetFloat(3);
         if (rate < 0.0)
             Scr_ParamError(3, "must set nonnegative rate");
+        break;
     default:
         Scr_Error("too many parameters");
+        break;
     }
 
     anim = (unsigned int)Scr_GetAnim(0, tree).index;

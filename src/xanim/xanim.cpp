@@ -784,12 +784,13 @@ void __cdecl XAnimInitInfo(XAnimInfo* info)
 {
     info->state.currentAnimTime = 0.0;
     info->state.oldTime = 0.0;
-    *(_DWORD*)&info->state.cycleCount = 0;
+    info->state.cycleCount = 0;
+    info->state.oldCycleCount = 0;
     info->state.goalTime = 0.0;
     info->state.goalWeight = 0.0;
     info->state.weight = 0.0;
     info->state.rate = 0.0;
-    *(_DWORD*)&info->state.instantWeightChange = 0;
+    info->state.instantWeightChange = 0;
     info->notifyName = 0;
     info->notifyIndex = -1;
     info->notifyChild = 0;
@@ -3463,45 +3464,28 @@ int XAnimSetCompleteGoalWeightKnob(
     int bRestart)
 {
     XAnimTree_s *tree; // r28
-    unsigned int InfoIndex; // r3
-    unsigned int v18; // r31
-    XAnimInfo *v19; // r11
+    unsigned int infoIndex; // r3
     XAnimState *p_state; // r10
-    int v21; // ctr
-    unsigned int v22; // r6
-    unsigned int v23; // r5
 
-    if (!obj)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\xanim\\xanim.cpp", 3436, 0, "%s", "obj");
+    iassert(obj);
+
     if (goalWeight < 0.001)
         goalWeight = 0.0;
+
     tree = obj->tree;
-    InfoIndex = XAnimGetInfoIndex(obj->tree, animIndex);
-    v18 = InfoIndex;
-    if (InfoIndex)
+    infoIndex = XAnimGetInfoIndex(obj->tree, animIndex);
+    if (infoIndex)
     {
         if (bRestart)
-            v18 = XAnimRestart(tree, InfoIndex, goalTime);
+            infoIndex = XAnimRestart(tree, infoIndex, goalTime);
     }
     else
     {
-        v18 = XAnimAllocInfoIndex(obj, animIndex, 0);
-        v19 = &g_xAnimInfo[v18];
-        p_state = &g_xAnimInfo[v18].state;
-        v21 = 8;
-        do
-        {
-            p_state->currentAnimTime = 0.0;
-            p_state = (XAnimState *)((char *)p_state + 4);
-            --v21;
-        } while (v21);
-        v19->notifyName = 0;
-        v19->notifyChild = 0;
-        v19->notifyType = 0;
-        v19->notifyIndex = -1;
+        infoIndex = XAnimAllocInfoIndex(obj, animIndex, 0);
+        XAnimInitInfo(&g_xAnimInfo[infoIndex]);
     }
-    XAnimClearGoalWeightKnobInternal(tree, v18, goalWeight, goalTime);
-    return XAnimSetCompleteGoalWeightNode(tree, v18, goalWeight, goalTime, rate, v23, v22);
+    XAnimClearGoalWeightKnobInternal(tree, infoIndex, goalWeight, goalTime);
+    return XAnimSetCompleteGoalWeightNode(tree, infoIndex, goalWeight, goalTime, rate, notifyName, 0);
 }
 
 int __cdecl XAnimSetGoalWeightKnob(
