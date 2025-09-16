@@ -65,12 +65,13 @@ void __cdecl XAnimInit()
     }
     g_xAnimInfo[0].state.currentAnimTime = 0.0;
     g_xAnimInfo[0].state.oldTime = 0.0;
-    *(DWORD*)&g_xAnimInfo[0].state.cycleCount = 0;
+    g_xAnimInfo[0].state.cycleCount = 0;
+    g_xAnimInfo[0].state.oldCycleCount = 0;
     g_xAnimInfo[0].state.goalTime = 0.0;
     g_xAnimInfo[0].state.goalWeight = 0.0;
     g_xAnimInfo[0].state.weight = 0.0;
     g_xAnimInfo[0].state.rate = 0.0;
-    *(DWORD*)&g_xAnimInfo[0].state.instantWeightChange = 0;
+    g_xAnimInfo[0].state.instantWeightChange = 0;
     g_endNotetrackName = SL_GetString_("end", 0, 3);
     g_anim_developer = 1;
     g_info_usage = 1;
@@ -3378,8 +3379,6 @@ int XAnimSetCompleteGoalWeightKnobAll(
     XAnimTree_s *tree; // r29
     unsigned int infoIndex; // r31
     unsigned int parent; // r31
-    unsigned int v22; // r6
-    unsigned int v23; // r5
 
     iassert(animIndex != rootIndex);
     iassert(obj);
@@ -3401,7 +3400,7 @@ int XAnimSetCompleteGoalWeightKnobAll(
             if (bRestart)
                 parent = XAnimRestart(tree, parent, goalTime);
             XAnimClearGoalWeightKnobInternal(tree, parent, 1.0, goalTime);
-            XAnimSetCompleteGoalWeightNode(tree, parent, 1.0, goalTime, 1.0, v23, v22);
+            XAnimSetCompleteGoalWeightNode(tree, parent, 1.0, goalTime, 1.0, 0, 0);
             parent = g_xAnimInfo[parent].parent;
             if (!parent)
                 return 1;

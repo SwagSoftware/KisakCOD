@@ -493,6 +493,11 @@ float __cdecl Vec2Length(const vec2r v)
     return sqrtf(v3);
 }
 
+float Vec2LengthSq(const vec2r v)
+{
+    return (v[1] * v[1]) + (v[0] * v[0]);
+}
+
 float __cdecl Vec2Distance(const vec2r v1, const vec2r v2)
 {
     vec2 dir; // [esp+4h] [ebp-8h] BYREF

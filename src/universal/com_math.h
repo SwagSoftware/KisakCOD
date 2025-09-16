@@ -225,6 +225,7 @@ float __cdecl Vec2DistanceSq(const vec2r p1, const vec2r p2);
 float __cdecl Vec2Normalize(vec2r v);
 float __cdecl Vec2NormalizeTo(const vec2r v, vec2r out);
 float __cdecl Vec2Length(const vec2r v);
+float Vec2LengthSq(const vec2r v);
 void __cdecl YawVectors2D(float yaw, vec2r forward, vec2r right);
 
 void __cdecl Vec3Add(const vec3r a, const vec3r b, vec3r sum);

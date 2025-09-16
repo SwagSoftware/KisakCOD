@@ -36,41 +36,36 @@ void __cdecl SentientCmd_GetEnemySqDist(scr_entref_t entref)
 
 void __cdecl SentientCmd_GetClosestEnemySqDist(scr_entref_t entref)
 {
-    sentient_s *v1; // r29
-    double v2; // fp31
+    sentient_s *pSelf; // r29
+    double closestDist; // fp31
     team_t v3; // r3
-    int v4; // r27
+    int iTeamFlags; // r27
     sentient_s *i; // r31
-    float v6; // [sp+50h] [-60h] BYREF
-    float v7; // [sp+54h] [-5Ch]
-    float v8; // [sp+58h] [-58h]
-    float v9; // [sp+60h] [-50h] BYREF
-    float v10; // [sp+64h] [-4Ch]
-    float v11; // [sp+68h] [-48h]
+    float selfOrigin[3]; // [sp+50h] [-60h] BYREF // v6
+    float enemyOrigin[3]; // [sp+60h] [-50h] BYREF // v9
 
-    v1 = Sentient_Get(entref);
-    v2 = 100000000.0;
-    v3 = Sentient_EnemyTeam(v1->eTeam);
+    pSelf = Sentient_Get(entref);
+    closestDist = 100000000.0f;
+    v3 = Sentient_EnemyTeam(pSelf->eTeam);
     if (v3)
     {
-        v4 = 1 << v3;
-        Sentient_GetOrigin(v1, &v6);
-        for (i = Sentient_FirstSentient(v4); i; i = Sentient_NextSentient(i, v4))
+        iTeamFlags = 1 << v3;
+        Sentient_GetOrigin(pSelf, selfOrigin);
+        for (i = Sentient_FirstSentient(iTeamFlags); i; i = Sentient_NextSentient(i, iTeamFlags))
         {
-            if (v1->ent->actor->sentientInfo[i - level.sentients].lastKnownPosTime > 0
+            if (pSelf->ent->actor->sentientInfo[i - level.sentients].lastKnownPosTime > 0
                 && (i->ent->flags & 4) == 0
-                && !Actor_CheckIgnore(v1, i))
+                && !Actor_CheckIgnore(pSelf, i))
             {
-                Sentient_GetOrigin(i, &v9);
-                if ((float)((float)((float)(v10 - v7) * (float)(v10 - v7))
-                    + (float)((float)((float)(v11 - v8) * (float)(v11 - v8))
-                        + (float)((float)(v9 - v6) * (float)(v9 - v6)))) < v2)
-                    v2 = (float)((float)((float)(v10 - v7) * (float)(v10 - v7))
-                        + (float)((float)((float)(v11 - v8) * (float)(v11 - v8))
-                            + (float)((float)(v9 - v6) * (float)(v9 - v6))));
+                Sentient_GetOrigin(i, enemyOrigin);
+                float dist = Vec3DistanceSq(enemyOrigin, selfOrigin);
+                if (dist < closestDist)
+                {
+                    closestDist = dist;
+                }
             }
         }
-        Scr_AddFloat(v2);
+        Scr_AddFloat(closestDist);
     }
 }
 

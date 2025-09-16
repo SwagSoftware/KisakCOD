@@ -57,7 +57,7 @@ void __cdecl AIPhys_ClipVelocity(
     const float *normal,
     bool isWalkable,
     float *out,
-    double overbounce);
+    float overbounce);
 SlideMoveResult __cdecl AIPhys_SlideMove(int gravity, int zonly);
 int __cdecl AIPhys_StepSlideMove(int gravity, int zonly);
 int __cdecl AIPhys_AirMove();

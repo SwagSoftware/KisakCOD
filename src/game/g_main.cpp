@@ -2109,6 +2109,8 @@ void __cdecl G_TraceCapsule(
     int passEntityNum,
     int contentmask)
 {
+    PROF_SCOPED("G_TraceCapsule");
+
     IgnoreEntParams ignoreEntParams; // [esp+0h] [ebp-Ch] BYREF
 
     SV_SetupIgnoreEntParams(&ignoreEntParams, passEntityNum);

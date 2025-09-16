@@ -935,10 +935,10 @@ void __cdecl SV_Trace(
             }
         }
         clip.contentmask = contentmask;
-        clip.extents.start[0] = *start;
+        clip.extents.start[0] = start[0];
         clip.extents.start[1] = start[1];
         clip.extents.start[2] = start[2];
-        clip.extents.end[0] = *end;
+        clip.extents.end[0] = end[0];
         clip.extents.end[1] = end[1];
         clip.extents.end[2] = end[2];
         CM_CalcTraceExtents(&clip.extents);

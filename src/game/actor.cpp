@@ -4154,144 +4154,126 @@ int __cdecl Actor_PhysicsCheckMoveAwayNoWorse(
 
 int __cdecl Actor_PhysicsMoveAway(actor_s *self)
 {
-    gentity_s *v2; // r3
-    gentity_s *ent; // r11
-    actor_physics_t *p_Physics; // r30
-    unsigned __int16 groundEntNum; // r27
-    int bHasGroundPlane; // r26
-    double groundplaneSlope; // fp26
-    int iFootstepTimer; // r25
-    double v9; // fp25
-    double v10; // fp24
-    gentity_s *v11; // r28
-    double v12; // fp23
-    double v13; // fp31
-    double v14; // fp27
-    double v15; // fp0
-    double v16; // fp31
-    double v17; // fp11
-    double v18; // fp30
-    int result; // r3
+    gentity_s *other; // r3
+    float distance; // fp31
+    float distanceSqrd; // fp27
+    float lengthSqrd; // fp0
+    float length; // fp31
     int i; // r24
-    gentityFlags_t LeftOrRightDodge; // r3
-    gentityFlags_t v22; // r29
-    gentity_s *v23; // r11
+    gentityFlags_t newFlags; // r3
     actor_s *actor; // r11
-    gentity_s *v25; // r11
-    float v26; // [sp+50h] [-B0h] BYREF
-    float v27; // [sp+54h] [-ACh]
-    float v28[2]; // [sp+58h] [-A8h] BYREF
-    float v29; // [sp+60h] [-A0h] BYREF
-    float v30; // [sp+64h] [-9Ch]
+    float vDelta[2];
+    float rotation[2]; // [sp+58h] [-A8h] BYREF
+    float translation[3];
+
+    PhysicsInputs physicsInputs;
 
     iassert(Actor_ShouldMoveAwayFromCloseEnt(self));
     iassert(self->pCloseEnt.isDefined());
 
-    v2 = self->pCloseEnt.ent();
-    ent = self->ent;
-    p_Physics = &self->Physics;
-    groundEntNum = self->Physics.groundEntNum;
-    bHasGroundPlane = self->Physics.bHasGroundPlane;
-    groundplaneSlope = self->Physics.groundplaneSlope;
-    iFootstepTimer = self->Physics.iFootstepTimer;
-    v9 = self->Physics.vVelocity[0];
-    v10 = self->Physics.vVelocity[1];
-    v11 = v2;
-    v12 = self->Physics.vVelocity[2];
+    other = self->pCloseEnt.ent();
+
+    Actor_PhysicsBackupInputs(self, &physicsInputs);
+
     self->Physics.vOrigin[0] = self->ent->r.currentOrigin[0];
-    self->Physics.vOrigin[1] = ent->r.currentOrigin[1];
-    self->Physics.vOrigin[2] = ent->r.currentOrigin[2];
-    if (v2->client)
+    self->Physics.vOrigin[1] = self->ent->r.currentOrigin[1];
+    self->Physics.vOrigin[2] = self->ent->r.currentOrigin[2];
+
+    if (other->client)
     {
-        v14 = Vec2DistanceSq(self->Physics.vOrigin, v2->r.currentOrigin);
-        v16 = Actor_CalcultatePlayerPushDelta(self, v11, &v26);
-        v15 = (float)((float)v16 * (float)v16);
+        distanceSqrd = Vec2DistanceSq(self->Physics.vOrigin, other->r.currentOrigin);
+        length = Actor_CalcultatePlayerPushDelta(self, other, vDelta);
+        lengthSqrd = length * length;
     }
     else
     {
-        v26 = p_Physics->vOrigin[0] - v2->r.currentOrigin[0];
-        v27 = self->Physics.vOrigin[1] - v2->r.currentOrigin[1];
-        v13 = Vec2Normalize(&v26);
-        if (v13 == 0.0)
+        vDelta[0] = self->Physics.vOrigin[0] - other->r.currentOrigin[0];
+        vDelta[1] = self->Physics.vOrigin[1] - other->r.currentOrigin[1];
+        distance = Vec2Normalize(vDelta);
+        if (distance == 0.0)
         {
-            v26 = G_crandom();
-            v27 = G_crandom();
-            Vec2Normalize(&v26);
+            vDelta[0] = G_crandom();
+            vDelta[1] = G_crandom();
+            Vec2Normalize(vDelta);
         }
-        v14 = (float)((float)v13 * (float)v13);
-        Actor_GetAnimDeltas(self, v28, &v29);
-        v15 = (float)((float)(v30 * v30) + (float)(v29 * v29));
-        if (v15 < 2.2500002)
-            v15 = 2.2500002;
-        //v16 = sqrtf(v15);
-        v16 = sqrtf(v15);
+        distanceSqrd = distance * distance;
+        Actor_GetAnimDeltas(self, rotation, translation);
+        lengthSqrd = (translation[0] * translation[0]) + (translation[1] * translation[1]);
+        if (lengthSqrd < 2.25f)
+            lengthSqrd = 2.25f;
+        length = sqrtf(lengthSqrd);
     }
-    v17 = (float)((float)v16 * v27);
-    self->Physics.vWishDelta[0] = (float)v16 * v26;
-    self->Physics.vWishDelta[1] = v17;
-    v18 = (float)((float)v15 * (float)0.25);
+
+    lengthSqrd = lengthSqrd * 0.25f;
+    self->Physics.vWishDelta[0] = length * vDelta[0];
+    self->Physics.vWishDelta[1] = length * vDelta[1];
+
     if (Actor_Physics(&self->Physics))
     {
-        if (!Actor_PhysicsCheckMoveAwayNoWorse(self, v11, (gentityFlags_t)0, v14, v18) && self->Physics.groundEntNum != ENTITYNUM_NONE)
+        if (Actor_PhysicsCheckMoveAwayNoWorse(self, other, (gentityFlags_t)0, distanceSqrd, lengthSqrd))
         {
-            for (i = 0; i < 2; ++i)
-            {
-                if (self->Physics.iHitEntnum == ENTITYNUM_NONE)
-                    break;
-                Vec2Normalize(self->Physics.vHitNormal);
-                v16 = (float)((float)v16 * (float)0.75);
-                v18 = (float)((float)v18 * (float)0.5625);
-                LeftOrRightDodge = (gentityFlags_t)Actor_Physics_GetLeftOrRightDodge(
-                    self,
-                    (float)(self->Physics.vHitNormal[0] * v27) >= (double)(float)(self->Physics.vHitNormal[1]
-                        * v26),
-                    v16);
-                self->Physics.vVelocity[0] = v9;
-                self->Physics.vVelocity[1] = v10;
-                v22 = LeftOrRightDodge;
-                self->Physics.vVelocity[2] = v12;
-                v23 = self->ent;
-                self->Physics.groundplaneSlope = groundplaneSlope;
-                self->Physics.groundEntNum = groundEntNum;
-                self->Physics.bHasGroundPlane = bHasGroundPlane;
-                self->Physics.iFootstepTimer = iFootstepTimer;
-                p_Physics->vOrigin[0] = v23->r.currentOrigin[0];
-                self->Physics.vOrigin[1] = v23->r.currentOrigin[1];
-                self->Physics.vOrigin[2] = v23->r.currentOrigin[2];
-                if (!Actor_Physics(&self->Physics))
-                    goto LABEL_13;
-                if (Actor_PhysicsCheckMoveAwayNoWorse(self, v11, v22, v14, v18))
-                    return 1;
-            }
-            self->Physics.iHitEntnum = v11->s.number;
-            actor = v11->actor;
-            if (actor)
-            {
-                if (!actor->pCloseEnt.isDefined())
-                    v11->actor->pCloseEnt.setEnt(self->ent);
-            }
-            self->ent->flags &= ~(FL_DODGE_LEFT | FL_DODGE_RIGHT);
-            self->Physics.vVelocity[0] = v9;
-            self->Physics.vVelocity[1] = v10;
-            self->Physics.vVelocity[2] = v12;
-            v25 = self->ent;
-            self->Physics.groundplaneSlope = groundplaneSlope;
-            self->Physics.groundEntNum = groundEntNum;
-            self->Physics.bHasGroundPlane = bHasGroundPlane;
-            self->Physics.iFootstepTimer = iFootstepTimer;
-            p_Physics->vOrigin[0] = v25->r.currentOrigin[0];
-            self->Physics.vOrigin[1] = v25->r.currentOrigin[1];
-            self->Physics.vOrigin[2] = v25->r.currentOrigin[2];
+            return 1;
         }
+        if (self->Physics.groundEntNum == ENTITYNUM_NONE)
+        {
+            return 1;
+        }
+        
+        static const int NUM_ATTEMPTS = 2;
+        for (i = 0; i < NUM_ATTEMPTS; ++i)
+        {
+            if (self->Physics.iHitEntnum == ENTITYNUM_NONE)
+                break;
+
+            Vec2Normalize(self->Physics.vHitNormal);
+            length *= 0.75f;
+            lengthSqrd *= 0.5625f;
+            newFlags = (gentityFlags_t)Actor_Physics_GetLeftOrRightDodge(
+                self,
+                (float)(self->Physics.vHitNormal[0] * vDelta[1]) >= (double)(float)(self->Physics.vHitNormal[1] * vDelta[0]),
+                length);
+
+            Actor_PhysicsRestoreInputs(self, &physicsInputs);
+
+            self->Physics.vOrigin[0] = self->ent->r.currentOrigin[0];
+            self->Physics.vOrigin[1] = self->ent->r.currentOrigin[1];
+            self->Physics.vOrigin[2] = self->ent->r.currentOrigin[2];
+
+            if (!Actor_Physics(&self->Physics))
+            {
+                self->ent->flags &= ~(FL_DODGE_LEFT | FL_DODGE_RIGHT);
+                return 0;
+            }
+
+            if (Actor_PhysicsCheckMoveAwayNoWorse(self, other, newFlags, distanceSqrd, lengthSqrd))
+            {
+                return 1;
+            }
+        }
+
+        self->Physics.iHitEntnum = other->s.number;
+
+        actor = other->actor;
+        if (actor)
+        {
+            if (!actor->pCloseEnt.isDefined())
+                other->actor->pCloseEnt.setEnt(self->ent);
+        }
+
+        self->ent->flags &= ~(FL_DODGE_LEFT | FL_DODGE_RIGHT);
+
+        Actor_PhysicsRestoreInputs(self, &physicsInputs);
+
+        self->Physics.vOrigin[0] = self->ent->r.currentOrigin[0];
+        self->Physics.vOrigin[1] = self->ent->r.currentOrigin[1];
+        self->Physics.vOrigin[2] = self->ent->r.currentOrigin[2];
         return 1;
     }
     else
     {
-    LABEL_13:
-        result = 0;
         self->ent->flags &= ~(FL_DODGE_LEFT | FL_DODGE_RIGHT);
+        return 0;
     }
-    return result;
 }
 
 int __cdecl Actor_IsAtScriptGoal(actor_s *self)
