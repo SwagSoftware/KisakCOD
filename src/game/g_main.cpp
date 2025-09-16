@@ -2577,23 +2577,34 @@ int __cdecl G_RunFrame(ServerFrameExtent extent, int timeCap)
 
     {
         PROF_SCOPED("update client");
-        maxclients = level.maxclients;
-        v28 = 0;
-        if (level.maxclients > 0)
+
+        for (int i = 0; i < level.maxclients; i++)
         {
-            p_client = &g_entities[0].client;
-            do
+            gentity_s *ent = &g_entities[i];
+
+            if (ent->r.inuse)
             {
-                if (*((_BYTE *)p_client - 88))
-                {
-                    HudElem_UpdateClient(*p_client);
-                    ClientEndFrame((gentity_s *)(p_client - 64));
-                    maxclients = level.maxclients;
-                }
-                ++v28;
-                p_client += 157;
-            } while (v28 < maxclients);
+                HudElem_UpdateClient(ent->client);
+                ClientEndFrame(ent);
+            }
         }
+        //maxclients = level.maxclients;
+        //v28 = 0;
+        //if (level.maxclients > 0)
+        //{
+        //    p_client = &g_entities[0].client;
+        //    do
+        //    {
+        //        if (*((_BYTE *)p_client - 88))
+        //        {
+        //            HudElem_UpdateClient(*p_client);
+        //            ClientEndFrame((gentity_s *)(p_client - 64));
+        //            maxclients = level.maxclients;
+        //        }
+        //        ++v28;
+        //        p_client += 157;
+        //    } while (v28 < maxclients);
+        //}
     }
     {
         PROF_SCOPED("update corpses");

@@ -1332,18 +1332,10 @@ void __cdecl HudElem_UpdateClient(gclient_s *client, int32_t clientNum, hudelem_
     uint32_t i; // [esp+14h] [ebp-8h]
     hudelem_s *elem; // [esp+18h] [ebp-4h]
 
-    if (clientNum < 0 || clientNum >= level.maxclients)
-        MyAssertHandler(
-            ".\\game\\g_hudelem.cpp",
-            1650,
-            0,
-            "%s\n\t(clientNum) = %i",
-            "(clientNum >= 0 && clientNum < level.maxclients)",
-            clientNum);
-    if (!level.gentities[clientNum].r.inuse)
-        MyAssertHandler(".\\game\\g_hudelem.cpp", 1651, 0, "%s", "level.gentities[clientNum].r.inuse");
-    if (!client)
-        MyAssertHandler(".\\game\\g_hudelem.cpp", 1652, 0, "%s", "client");
+    iassert((clientNum >= 0 && clientNum < level.maxclients));
+    iassert(level.gentities[clientNum].r.inuse);
+    iassert(client);
+
     archivalCount = 0;
     currentCount = 0;
     hud = g_hudelems;
@@ -1438,90 +1430,120 @@ void __cdecl HudElem_UpdateClient(gclient_s *client, int32_t clientNum, hudelem_
 hudelem_s g_dummyHudCurrent;
 void HudElem_UpdateClient(gclient_s *client)
 {
-    unsigned int v2; // r30
-    hudelem_s *p_hud; // r31
-    game_hudelem_s *v4; // r29
-    int v5; // r28
-    hudelem_s *i; // r31
-    unsigned int v7; // r29
-    hudelem_s *v8; // r31
-    char *v9; // r11
-    hudelem_s *v10; // r10
-    int type_high; // r7
-    int v12; // r9
+    //hudelem_s *p_hud; // r31
+    //game_hudelem_s *v4; // r29
+    //int v5; // r28
+    //hudelem_s *i; // r31
+    //unsigned int remainder; // r29
+    //hudelem_s *v8; // r31
+    //char *v9; // r11
+    //hudelem_s *v10; // r10
+    //int type_high; // r7
+    //int v12; // r9
+    //
+    //iassert(client);
+    //
+    //v2 = 0;
+    //p_hud = client->ps.hud.elem;
+    //v4 = &g_hudelems[2];
+    //v5 = 64;
+    //do
+    //{
+    //    if (v4[-2].elem.type)
+    //    {
+    //        ++v2;
+    //        memcpy(p_hud++, &v4[-2], sizeof(hudelem_s));
+    //    }
+    //    if (v4[-1].elem.type)
+    //    {
+    //        ++v2;
+    //        memcpy(p_hud++, &v4[-1], sizeof(hudelem_s));
+    //    }
+    //    if (v4->elem.type)
+    //    {
+    //        ++v2;
+    //        memcpy(p_hud++, v4, sizeof(hudelem_s));
+    //    }
+    //    if (v4[1].elem.type)
+    //    {
+    //        ++v2;
+    //        memcpy(p_hud++, &v4[1], sizeof(hudelem_s));
+    //    }
+    //    --v5;
+    //    v4 += 4;
+    //} while (v5);
 
-    if (!client)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\g_hudelem.cpp", 1738, 0, "%s", "client");
-    v2 = 0;
-    p_hud = client->ps.hud.elem;
-    v4 = &g_hudelems[2];
-    v5 = 64;
-    do
+
+    int currentCount = 0;
+    for (int h = 0; h < 256; h++)
     {
-        if (v4[-2].elem.type)
+        if (g_hudelems[h].elem.type)
         {
-            ++v2;
-            memcpy(p_hud++, &v4[-2], sizeof(hudelem_s));
+            currentCount++;
+            memcpy(&client->ps.hud.elem[h], &g_hudelems[h].elem, sizeof(hudelem_s));
         }
-        if (v4[-1].elem.type)
-        {
-            ++v2;
-            memcpy(p_hud++, &v4[-1], sizeof(hudelem_s));
-        }
-        if (v4->elem.type)
-        {
-            ++v2;
-            memcpy(p_hud++, v4, sizeof(hudelem_s));
-        }
-        if (v4[1].elem.type)
-        {
-            ++v2;
-            memcpy(p_hud++, &v4[1], sizeof(hudelem_s));
-        }
-        --v5;
-        v4 += 4;
-    } while (v5);
-    if (v2 < 0x100)
-    {
-        for (i = &client->ps.hud.elem[v2]; i->type; ++i)
-        {
-            memset(i, 0, sizeof(hudelem_s));
-            if (i->type)
-                MyAssertHandler(
-                    "c:\\trees\\cod3\\cod3src\\src\\game\\g_hudelem.cpp",
-                    1755,
-                    0,
-                    "%s",
-                    "client->ps.hud.elem[currentCount].type == HE_TYPE_FREE");
-            if (++v2 >= 0x100)
-                return;
-        }
-        v7 = 256 - v2;
-        v8 = &client->ps.hud.elem[v2];
-        do
-        {
-            v9 = (char *)v8;
-            v10 = &g_dummyHudCurrent;
-            do
-            {
-                type_high = HIBYTE(v10->type);
-                v12 = (unsigned __int8)*v9 - type_high;
-                if ((unsigned __int8)*v9 != type_high)
-                    break;
-                ++v9;
-                v10 = (hudelem_s *)((char *)v10 + 1);
-            } while (v9 != (char *)&v8[1]);
-            if (v12)
-                MyAssertHandler(
-                    "c:\\trees\\cod3\\cod3src\\src\\game\\g_hudelem.cpp",
-                    1762,
-                    0,
-                    "%s",
-                    "!memcmp( &client->ps.hud.elem[currentCount], &g_dummyHudCurrent, sizeof( g_dummyHudCurrent ) )");
-            --v7;
-            ++v8;
-        } while (v7);
     }
+
+    if (currentCount < 0x100)
+    {
+        for (hudelem_s *hud = &client->ps.hud.elem[currentCount]; hud->type; hud++)
+        {
+            memset(hud, 0, sizeof(hudelem_s));
+            iassert(client->ps.hud.elem[currentCount].type == HE_TYPE_FREE);
+            if (++currentCount >= 0x100)
+            {
+                return;
+            }
+        }
+    }
+
+
+
+    //if (v2 < 0x100)
+    //{
+    //
+    //    for (i = &client->ps.hud.elem[v2]; i->type; ++i)
+    //    {
+    //        memset(i, 0, sizeof(hudelem_s));
+    //        iassert(i->type == HE_TYPE_FREE);
+    //        //if (i->type)
+    //        //    MyAssertHandler(
+    //        //        "c:\\trees\\cod3\\cod3src\\src\\game\\g_hudelem.cpp",
+    //        //        1755,
+    //        //        0,
+    //        //        "%s",
+    //        //        "client->ps.hud.elem[currentCount].type == HE_TYPE_FREE");
+    //        if (++v2 >= 0x100)
+    //            return;
+    //    }
+    //
+    //    remainder = 256 - v2;
+    //    v8 = &client->ps.hud.elem[v2];
+    //    do
+    //    {
+    //        v9 = (char *)v8;
+    //        v10 = &g_dummyHudCurrent;
+    //        do
+    //        {
+    //            type_high = HIBYTE(v10->type);
+    //            v12 = (unsigned __int8)*v9 - type_high;
+    //            if ((unsigned __int8)*v9 != type_high)
+    //                break;
+    //            ++v9;
+    //            v10 = (hudelem_s *)((char *)v10 + 1);
+    //        } while (v9 != (char *)&v8[1]);
+    //
+    //        if (v12)
+    //            MyAssertHandler(
+    //                "c:\\trees\\cod3\\cod3src\\src\\game\\g_hudelem.cpp",
+    //                1762,
+    //                0,
+    //                "%s",
+    //                "!memcmp( &client->ps.hud.elem[currentCount], &g_dummyHudCurrent, sizeof( g_dummyHudCurrent ) )");
+    //        --remainder;
+    //        ++v8;
+    //    } while (remainder);
+    //}
 }
 #endif
 

@@ -1184,19 +1184,16 @@ void __cdecl G_RunFrame(int32_t levelTime)
     level_bgs.time = levelTime;
     level_bgs.latestSnapshotTime = levelTime;
     level_bgs.frametime = levelTime - level.previousTime;
-    if (bgs)
-        MyAssertHandler(".\\game_mp\\g_main_mp.cpp", 1880, 0, "%s\n\t(bgs) = %p", "(bgs == 0)", bgs);
+    iassert(bgs == 0);
     bgs = &level_bgs;
-    if (level.frametime < 0)
-        MyAssertHandler(".\\game_mp\\g_main_mp.cpp", 1883, 0, "%s", "level.frametime >= 0");
+    iassert(level.frametime >= 0);
     ent = g_entities;
     i = 0;
     while (i < level.maxclients)
     {
         if (ent->r.inuse)
         {
-            if (!ent->client)
-                MyAssertHandler(".\\game_mp\\g_main_mp.cpp", 1890, 0, "%s", "ent->client");
+            iassert(ent->client);
             if (!ent->client->noclip)
                 G_TouchTriggers(ent);
         }
@@ -1328,18 +1325,10 @@ void __cdecl G_RunFrame(int32_t levelTime)
         {
             if (ent->r.inuse)
             {
-                if ((uint32_t)i >= 0x40)
-                    MyAssertHandler(".\\game_mp\\g_main_mp.cpp", 2012, 0, "i doesn't index MAX_CLIENTS\n\t%i not in [0, %i)", i, 64);
-                if (!level_bgs.clientinfo[i].infoValid)
-                    MyAssertHandler(".\\game_mp\\g_main_mp.cpp", 2013, 0, "%s", "level_bgs.clientinfo[i].infoValid");
-                if (ent->client - level.clients != i)
-                    MyAssertHandler(
-                        ".\\game_mp\\g_main_mp.cpp",
-                        2014,
-                        0,
-                        "ent->client - level.clients == i\n\t%i, %i",
-                        ent->client - level.clients,
-                        i);
+                bcassert(i, MAX_CLIENTS);
+                iassert(level_bgs.clientinfo[i].infoValid);
+                iassert(ent->client - level.clients == i);
+
                 ClientEndFrame(ent);
             }
             ++i;
