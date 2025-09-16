@@ -630,6 +630,9 @@ int __cdecl LiveStorage_GetStat(int __formal, int index)
 
 void __cdecl LiveStorage_SetStat(int __formal, int index, unsigned int value)
 {
+#ifdef KISAK_SP
+    iassert(0); // LWSS: do not use with SP!! Broken! Writes random addresses with crap!
+#endif
     const char *v3; // eax
 
     if ((unsigned int)index > 0xDAA)
@@ -790,11 +793,15 @@ void __cdecl LiveStorage_StatGetInDvarCmd()
 
 void __cdecl LiveStorage_UploadStatsCmd()
 {
+#ifdef KISAK_MP
     LiveStorage_UploadStats();
+#endif
 }
 
 void __cdecl LiveStorage_ReadStatsCmd()
 {
+#ifdef KISAK_MP
     LiveStorage_ReadStats();
+#endif
 }
 
