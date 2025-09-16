@@ -135,7 +135,7 @@ void __cdecl CG_mg42_PreControllers(DObj_s *obj, centity_s *cent)
     {
         playAnim = 1;
     }
-    XAnimSetGoalWeightKnobAll(obj, playAnim, 0, 1.0f, 0.1f, 1.0f, 0, 0);
+    XAnimSetGoalWeightKnobAll(obj, playAnim, 0, 1.0f, 0.1f, 1.0f, 0, 0, 0);
 }
 
 void  CG_UpdateBModelWorldBounds(uint32_t localClientNum, centity_s *cent, int32_t forceFilter)

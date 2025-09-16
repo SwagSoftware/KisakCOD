@@ -1879,7 +1879,7 @@ void __cdecl BG_SetNewAnimation(
                 }
                 else
                 {
-                    XAnimSetGoalWeightKnobAll(obj, newAnimationa, 0, 1.0f, 0.0f, 1.0f, 0, 0);
+                    XAnimSetGoalWeightKnobAll(obj, newAnimationa, 0, 1.0f, 0.0f, 1.0f, 0, 0, 0);
                     XAnimSetTime(pAnimTree, newAnimationa, 1.0);
                 }
             }
