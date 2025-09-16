@@ -3621,6 +3621,7 @@ void __cdecl CG_MeleeBloodEvent(int32_t localClientNum, const centity_s *cent)
 
 void __cdecl CG_SetupWeaponDef(int32_t localClientNum)
 {
+#ifdef KISAK_MP
     char v1; // [esp+3h] [ebp-2225h]
     _BYTE *v2; // [esp+8h] [ebp-2220h]
     const char *v3; // [esp+Ch] [ebp-221Ch]
@@ -3660,6 +3661,9 @@ void __cdecl CG_SetupWeaponDef(int32_t localClientNum)
         }
     }
     ParseWeaponDefFiles((const char **)dst, iNumFiles);
+#elif KISAK_SP
+    iassert(bg_lastParsedWeaponIndex > 0);
+#endif
 }
 
 void __cdecl ParseWeaponDefFiles(const char **ppszFiles, int32_t iNumFiles)

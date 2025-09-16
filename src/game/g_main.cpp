@@ -290,7 +290,7 @@ const dvar_s *G_RegisterServerDemoDvars()
     Dvar_RegisterString("gamedate", "Sep  7 2007", 0x42u, "The date compiled");
     Dvar_RegisterString("sv_mapname", "", 0x46u, "The current map name");
     Dvar_RegisterString("ui_campaign", "american", 0x1000u, "The current campaign");
-    compassMaxRange = Dvar_RegisterFloat("compassMaxRange", 3500.0, 0.0, FLT_MAX, 0, "The maximum range from the player that objects will show on the compass");
+    //compassMaxRange = Dvar_RegisterFloat("compassMaxRange", 3500.0, 0.0, FLT_MAX, 0, "The maximum range from the player that objects will show on the compass"); // LWSS: already defined in cg_compass.cpp
     g_reloading = Dvar_RegisterInt("g_reloading", 0, 0, 4, 0x40u, "True if the game is reloading");
     g_player_maxhealth = Dvar_RegisterInt("g_player_maxhealth", 100, 10, 2000, 0x62u, "Player's maximum health");
     player_damageMultiplier = Dvar_RegisterFloat("player_damageMultiplier", 1.0, 0.0, 1000.0, 0, "Player damage is scaled by this amount; used by script for setting difficulty level");

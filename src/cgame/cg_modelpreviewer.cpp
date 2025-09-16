@@ -3523,7 +3523,7 @@ void CG_ModPrvEnumerateModels_FastFile()
         //    (Material **)&g_mdlprv.system.modelNames[g_mdlprv.system.modelCount],
         //    (4 * g_mdlprv.system.modelCount) >> 2,
         //    (bool(__cdecl *)(const Material *, const Material *))CG_ModPrvCompareString);
-        std::sort(g_mdlprv.system.modelNames, &g_mdlprv.system.modelNames[g_mdlprv.system.modelCount], CG_ModPrvCompareString);
+        //std::sort(g_mdlprv.system.modelNames, &g_mdlprv.system.modelNames[g_mdlprv.system.modelCount], CG_ModPrvCompareString); // KISAKTODO: fix sorting of model names here, std::sort with raw pointers is annoying
     }
 }
 
@@ -3564,7 +3564,7 @@ void CG_ModPrvEnumerateAnimations_FastFile()
         //    (4 * g_mdlprv.system.animCount) >> 2,
         //    (bool(__cdecl *)(const Material *, const Material *))CG_ModPrvCompareString);
 
-        std::sort(g_mdlprv.system.animNames, &g_mdlprv.system.animNames[g_mdlprv.system.animCount], CG_ModPrvCompareString);
+        //std::sort(g_mdlprv.system.animNames, &g_mdlprv.system.animNames[g_mdlprv.system.animCount], CG_ModPrvCompareString); // KISAKTODO: fix sorting of model names here, std::sort with raw pointers is annoying
 
     }
 }

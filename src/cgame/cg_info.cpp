@@ -94,7 +94,7 @@ void __cdecl CG_DrawInformation(int32_t localClientNum)
 #elif KISAK_SP
     int v2; // r3
 
-    iassert(drawInformationCalled);
+    iassert(!drawInformationCalled);
     if (localClientNum)
         MyAssertHandler(
             "c:\\trees\\cod3\\cod3src\\src\\cgame\\cg_local.h",

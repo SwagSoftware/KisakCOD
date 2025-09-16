@@ -738,7 +738,7 @@ int __cdecl G_EntIsLinkedTo(gentity_s *ent, gentity_s *parent);
 void __cdecl G_UpdateViewAngleClamp(gclient_s *client, const float *worldAnglesCenter);
 void __cdecl G_UpdateGroundTilt(gclient_s *client);
 bool __cdecl G_SlideMove(
-    double deltaT,
+    float deltaT,
     float *origin,
     float *velocity,
     float *mins,
@@ -747,7 +747,7 @@ bool __cdecl G_SlideMove(
     unsigned __int8 passEntityNum,
     int clipMask);
 void __cdecl G_StepSlideMove(
-    double deltaT,
+    float deltaT,
     float *origin,
     float *velocity,
     float *mins,

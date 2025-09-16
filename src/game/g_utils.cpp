@@ -1229,353 +1229,233 @@ void __cdecl G_UpdateGroundTilt(gclient_s *client)
 }
 
 bool __cdecl G_SlideMove(
-    double deltaT,
+    float deltaT,
     float *origin,
     float *velocity,
     float *mins,
     const float *maxs,
     const float *gravity,
     unsigned __int8 passEntityNum,
-    int clipMask,
-    int a9)
+    int clipMask)
 {
-    double v10; // fp27
-    int v11; // r18
-    double v17; // fp0
-    int v18; // r26
-    signed int v19; // r19
-    float *v20; // r24
-    double v21; // fp0
-    double fraction; // fp0
-    double v23; // fp12
-    double v24; // fp11
-    double v25; // fp9
-    double v26; // fp8
-    double v27; // fp0
-    int v28; // r30
-    double v29; // fp13
-    double v30; // fp12
-    float *v31; // r11
-    double v32; // fp11
-    double v33; // fp9
-    int v34; // r28
-    float *v35; // r11
-    double v36; // fp8
-    double v37; // fp9
-    int v38; // r27
-    double v39; // fp10
-    float *v40; // r30
-    int v41; // r11
-    double v42; // fp10
-    float *v43; // r10
-    double v44; // fp9
-    double v45; // fp8
-    double v48; // fp12
-    double v49; // fp13
-    double v50; // fp10
-    double v51; // fp11
-    double v52; // fp11
-    double v53; // fp12
-    double v54; // fp0
-    bool result; // r3
-    float v56; // [sp+50h] [-160h] BYREF
-    float v57; // [sp+54h] [-15Ch]
-    float v58; // [sp+58h] [-158h]
-    float v59; // [sp+60h] [-150h] BYREF
-    float v60; // [sp+64h] [-14Ch]
-    float v61; // [sp+68h] [-148h]
-    float v62; // [sp+70h] [-140h] BYREF
-    float v63; // [sp+74h] [-13Ch]
-    float v64; // [sp+78h] [-138h]
-    float v65; // [sp+80h] [-130h] BYREF
-    float v66; // [sp+84h] [-12Ch]
-    float v67; // [sp+88h] [-128h]
-    float v68; // [sp+90h] [-120h] BYREF
-    float v69; // [sp+94h] [-11Ch]
-    float v70; // [sp+98h] [-118h]
-    trace_t v71; // [sp+A0h] [-110h] BYREF
-    float v72; // [sp+D0h] [-E0h] BYREF
-    char v73; // [sp+D4h] [-DCh] BYREF
-    _BYTE v74[12]; // [sp+D8h] [-D8h] BYREF
-    char v75; // [sp+E4h] [-CCh] BYREF
+    float endVel[3];
+    float end[3]; // [sp+80h] [-130h] BYREF
+    trace_t trace; // [sp+A0h] [-110h] BYREF
 
-    v10 = deltaT;
-    v11 = passEntityNum;
-    v56 = *mins;
-    v17 = mins[2];
-    v57 = mins[1];
-    v58 = v17;
-    if (passEntityNum)
+    float planes[5][3];
+    int numPlanes = 0;
+    int i;
+    int bumpCount;
+
+    endVel[0] = velocity[0];
+    endVel[1] = velocity[1];
+    endVel[2] = velocity[2];
+
+    if (gravity)
     {
-        v58 = -(float)((float)((float)deltaT * (float)800.0) - (float)v17);
-        mins[2] = (float)((float)v17 - (float)((float)((float)deltaT * (float)800.0) - (float)v17)) * (float)0.5;
+        endVel[2] = -(float)((float)((float)deltaT * (float)800.0) - (float)velocity[2]);
+        velocity[2] = (float)((float)velocity[2] - (float)((float)((float)deltaT * (float)800.0) - (float)velocity[2])) * (float)0.5;
     }
-    Vec3NormalizeTo(mins, &v72);
-    v18 = 1;
-    v19 = 0;
-    v20 = (float *)&v75;
-    do
+
+    Vec3NormalizeTo(velocity, planes[numPlanes++]);
+
+    for (bumpCount = 0; bumpCount < 4; ++bumpCount)
     {
-        v21 = (float)((float)(mins[1] * (float)v10) + velocity[1]);
-        v65 = (float)(*mins * (float)v10) + *velocity;
-        v67 = (float)(mins[2] * (float)v10) + velocity[2];
-        v66 = v21;
-        G_TraceCapsule(&v71, velocity, maxs, gravity, &v65, clipMask, a9);
-        if (v71.allsolid)
+        end[0] = (deltaT * velocity[0]) + origin[0];
+        end[1] = (deltaT * velocity[1]) + origin[1];
+        end[2] = (deltaT * velocity[2]) + origin[2];
+
+        G_TraceCapsule(&trace, origin, mins, maxs, end, passEntityNum, clipMask);
+
+        if (trace.startsolid)
         {
-            result = 1;
-            mins[2] = 0.0;
-            return result;
+            velocity[2] = 0.0f;
+            return 1;
         }
-        fraction = v71.fraction;
-        if (v71.fraction > 0.0)
+
+        if (trace.fraction > 0.0f)
         {
-            v23 = velocity[1];
-            v24 = velocity[2];
-            v25 = (float)(v66 - velocity[1]);
-            v26 = (float)(v67 - velocity[2]);
-            *velocity = (float)((float)(v65 - *velocity) * v71.fraction) + *velocity;
-            velocity[1] = (float)((float)v25 * (float)fraction) + (float)v23;
-            velocity[2] = (float)((float)v26 * (float)fraction) + (float)v24;
+            Vec3Lerp(origin, end, trace.fraction, origin);
         }
-        if (fraction == 1.0)
+        if (trace.fraction == 1.0f)
+        {
             break;
-        v10 = (float)-(float)((float)((float)fraction * (float)v10) - (float)v10);
-        if (v18 >= 5)
-            goto LABEL_36;
-        v27 = v71.normal[2];
-        v28 = 0;
-        v29 = v71.normal[1];
-        v30 = v71.normal[0];
-        if (v18 <= 0)
-            goto LABEL_15;
-        v31 = (float *)v74;
-        while ((float)((float)(*v31 * v71.normal[2])
-            + (float)((float)(*(v31 - 1) * v71.normal[1]) + (float)(*(v31 - 2) * v71.normal[0]))) <= 0.99000001)
-        {
-            ++v28;
-            v31 += 3;
-            if (v28 >= v18)
-                goto LABEL_15;
         }
-        PM_ClipVelocity(mins, v71.normal, mins);
-        v30 = v71.normal[0];
-        v29 = v71.normal[1];
-        v27 = v71.normal[2];
-        v32 = (float)(mins[1] + v71.normal[1]);
-        v33 = (float)(mins[2] + v71.normal[2]);
-        *mins = *mins + v71.normal[0];
-        mins[1] = v32;
-        mins[2] = v33;
-        if (v28 >= v18)
+
+        deltaT = -((trace.fraction * deltaT) - deltaT);
+
+        if (numPlanes >= 5)
         {
-        LABEL_15:
-            ++v18;
-            *(v20 - 2) = v30;
-            *(v20 - 1) = v29;
-            v34 = 0;
-            *v20 = v27;
-            v20 += 3;
-            if (v18 > 0)
+            velocity[0] = 0.0f;
+            velocity[1] = 0.0f;
+            velocity[2] = 0.0f;
+            return 1;
+        }
+
+        for (i = 0; i < numPlanes; i++)
+        {
+            if (
+                (trace.normal[0] * planes[i][0]) +
+                (trace.normal[1] * planes[i][1]) +
+                (trace.normal[2] * planes[i][2]) > 0.99f)
+                {
+                    velocity[0] += trace.normal[0];
+                    velocity[1] += trace.normal[1];
+                    velocity[2] += trace.normal[2];
+                    break;
+                }
+        }
+
+        if (i >= numPlanes)
+        {
+            planes[numPlanes][0] = trace.normal[0];
+            planes[numPlanes][1] = trace.normal[1];
+            planes[numPlanes][2] = trace.normal[2];
+
+            numPlanes++;
+
+            for (i = 0; i < numPlanes; i++)
             {
-                v35 = (float *)&v73;
-                while ((float)((float)(*v35 * mins[1]) + (float)((float)(v35[1] * mins[2]) + (float)(*(v35 - 1) * *mins))) >= 0.1)
+                if ((velocity[0] * planes[i][0]) + (velocity[1] * planes[i][1]) + (velocity[2] * planes[i][2]) < 0.1f)
                 {
-                    ++v34;
-                    v35 += 3;
-                    if (v34 >= v18)
-                        goto LABEL_31;
-                }
-                PM_ClipVelocity(mins, &v72 + 3 * v34, &v59);
-                PM_ClipVelocity(&v56, &v72 + 3 * v34, &v62);
-                v36 = v61;
-                v37 = v60;
-                v38 = 0;
-                v39 = v59;
-                v40 = &v72;
-                while (1)
-                {
-                    if (v38 != v34
-                        && (float)((float)((float)v36 * v40[2]) + (float)((float)(v40[1] * (float)v37) + (float)(*v40 * (float)v39))) < 0.1)
-                    {
-                        PM_ClipVelocity(&v59, v40, &v59);
-                        PM_ClipVelocity(&v62, v40, &v62);
-                        v36 = v61;
-                        v37 = v60;
-                        v39 = v59;
-                        if ((float)((float)(*(&v72 + 3 * v34) * v59)
-                            + (float)((float)(*(&v72 + 3 * v34 + 1) * v60) + (float)(*(&v72 + 3 * v34 + 2) * v61))) < 0.0)
-                            break;
-                    }
-                LABEL_29:
-                    ++v38;
-                    v40 += 3;
-                    if (v38 >= v18)
-                    {
-                        v56 = v62;
-                        v57 = v63;
-                        v54 = v64;
-                        *mins = v39;
-                        mins[1] = v37;
-                        mins[2] = v36;
-                        v58 = v54;
-                        goto LABEL_31;
-                    }
-                }
-                Vec3Cross(&v72 + 3 * v34, v40, &v68);
-                v41 = 0;
-                v42 = mins[2];
-                v43 = (float *)v74;
-                v44 = mins[1];
-                v45 = *mins;
+                    float clipVel[3];
+                    float endClipVel[3];
 
-                {
-                    float _FP5 = -sqrtf((float)((float)(v68 * v68) + (float)((float)(v70 * v70) + (float)(v69 * v69))));
-                    //__asm { fsel      f12, f5, f31, f12 }
-                    float _FP12 = (_FP5 > 0.0f) ? _FP5 : 0.0f;
-                    v48 = (float)((float)1.0 / (float)_FP12);
-                }
+                    PM_ClipVelocity(velocity, planes[i], clipVel);
+                    PM_ClipVelocity(endVel, planes[i], endClipVel);
 
-                v49 = (float)(v70 * (float)v48);
-                v69 = v69 * (float)v48;
-                v68 = v68 * (float)v48;
-                v50 = (float)((float)v42 * (float)(v70 * (float)v48));
-                v51 = (float)((float)((float)v45 * v68) + (float)((float)((float)v44 * v69) + (float)v50));
-                v37 = (float)(v69 * (float)((float)((float)v45 * v68) + (float)((float)((float)v44 * v69) + (float)v50)));
-                v60 = v37;
-                v39 = (float)(v68 * (float)v51);
-                v59 = v68 * (float)v51;
-                v36 = (float)((float)(v70 * (float)v48) * (float)v51);
-                v61 = (float)(v70 * (float)v48) * (float)v51;
-                v52 = (float)((float)((float)(v70 * (float)v48) * v58) + (float)((float)(v69 * v57) + (float)(v68 * v56)));
-                v63 = v69 * (float)((float)((float)(v70 * (float)v48) * v58) + (float)((float)(v69 * v57) + (float)(v68 * v56)));
-                v53 = (float)(v68
-                    * (float)((float)((float)(v70 * (float)v48) * v58) + (float)((float)(v69 * v57) + (float)(v68 * v56))));
-                v70 = v49;
-                v62 = v53;
-                v64 = (float)v49 * (float)v52;
-                while (v41 == v34
-                    || v41 == v38
-                    || (float)((float)(*v43 * (float)v36)
-                        + (float)((float)(*(v43 - 1) * (float)v37) + (float)(*(v43 - 2) * (float)v39))) >= 0.1)
-                {
-                    ++v41;
-                    v43 += 3;
-                    if (v41 >= v18)
-                        goto LABEL_29;
+                    for (int j = 0; j < numPlanes; j++)
+                    {
+                        if (j == i)
+                        {
+                            continue;
+                        }
+
+                        if ((clipVel[0] * planes[j][0]) + (clipVel[1] * planes[j][1]) + (clipVel[2] * planes[j][2]) < 0.1f)
+                        {
+                            PM_ClipVelocity(clipVel, planes[j], clipVel);
+                            PM_ClipVelocity(endClipVel, planes[j], endClipVel);
+
+                            if ((clipVel[0] * planes[i][0]) + (clipVel[1] * planes[i][1]) + (clipVel[2] * planes[i][2]) < 0.0f)
+                            {
+                                float dir[3];
+                                Vec3Cross(planes[i], planes[j], dir);
+                                Vec3Normalize(dir);
+                                float dot = (dir[0] * velocity[0]) + (dir[1] * velocity[1]) + (dir[2] * velocity[2]);
+                                Vec3Scale(dir, dot, clipVel);
+
+                                dot = (dir[0] * endVel[0]) + (dir[1] * endVel[1]) + (dir[2] * endVel[2]);
+                                Vec3Scale(dir, dot, endClipVel);
+
+                                for (int k = 0; k < numPlanes; k++)
+                                {
+                                    if (k == j || k == i)
+                                    {
+                                        continue;
+                                    }
+
+                                    if ((clipVel[0] * planes[k][0]) + (clipVel[1] * planes[k][1]) + (clipVel[2] * planes[k][2]) < 0.1f)
+                                    {
+                                        velocity[0] = 0.0f;
+                                        velocity[1] = 0.0f;
+                                        velocity[2] = 0.0f;
+                                        return 1;
+                                    }
+                                }
+                            }
+                        }
+                    }
+
+                    velocity[0] = clipVel[0];
+                    velocity[1] = clipVel[1];
+                    velocity[2] = clipVel[2];
+                    endVel[0] = endClipVel[0];
+                    endVel[1] = endClipVel[1];
+                    endVel[2] = endClipVel[2];
+                    break;
                 }
-            LABEL_36:
-                *mins = 0.0;
-                result = 1;
-                mins[1] = 0.0;
-                mins[2] = 0.0;
-                return result;
             }
         }
-    LABEL_31:
-        ++v19;
-    } while (v19 < 4);
-    if (v11)
-    {
-        *mins = v56;
-        mins[1] = v57;
-        mins[2] = v58;
     }
-    //return (_cntlzw(v19) & 0x20) == 0;
-    return v19 != 0;
+
+    if (gravity)
+    {
+        velocity[0] = endVel[0];
+        velocity[1] = endVel[1];
+        velocity[2] = endVel[2];
+    }
+
+    return bumpCount != 0;
 }
 
 void __cdecl G_StepSlideMove(
-    double deltaT,
+    float deltaT,
     float *origin,
     float *velocity,
     float *mins,
     const float *maxs,
     const float *gravity,
     unsigned __int8 passEntityNum,
-    int clipMask,
-    int a9)
+    int clipMask)
 {
-    double v17; // fp29
-    double v18; // fp28
-    double v19; // fp30
-    float *v20; // r3
-    double v21; // fp1
-    double v22; // fp13
-    double v23; // fp11
-    double v24; // fp10
-    double v25; // fp8
-    double fraction; // fp0
-    double v27; // fp31
-    double v28; // fp13
-    double v29; // fp0
-    double v30; // fp12
-    double v31; // fp11
-    double v32; // fp9
-    double v33; // fp8
-    float v34; // [sp+50h] [-D0h] BYREF
-    float v35; // [sp+54h] [-CCh]
-    float v36; // [sp+58h] [-C8h]
-    float v37; // [sp+60h] [-C0h] BYREF
-    float v38; // [sp+64h] [-BCh]
-    float v39; // [sp+68h] [-B8h]
-    float v40; // [sp+70h] [-B0h] BYREF
-    float v41; // [sp+74h] [-ACh]
-    float v42; // [sp+78h] [-A8h]
-    trace_t v43[2]; // [sp+80h] [-A0h] BYREF
+    trace_t trace; // [sp+80h] [-A0h] BYREF
 
-    v34 = *velocity;
-    v35 = velocity[1];
-    v17 = *mins;
-    v18 = mins[1];
-    v19 = mins[2];
-    v36 = velocity[2];
-    if (G_SlideMove(deltaT, origin, velocity, mins, maxs, gravity, passEntityNum, clipMask, a9))
+    float startOrigin[3];
+    startOrigin[0] = origin[0];
+    startOrigin[1] = origin[1];
+    startOrigin[2] = origin[2];
+
+    float startVel[3];
+    startVel[0] = velocity[0];
+    startVel[1] = velocity[1];
+    startVel[2] = velocity[2];
+
+    float down[3];
+    float up[3];
+
+    if (G_SlideMove(deltaT, origin, velocity, mins, maxs, gravity, passEntityNum, clipMask))
     {
-        v37 = v34;
-        v38 = v35;
-        v39 = v36 - (float)18.0;
-        G_TraceCapsule(v43, &v34, maxs, gravity, &v37, clipMask, a9);
-        if (v19 <= 0.0 || v43[0].fraction != 1.0 && v43[0].normal[2] >= 0.69999999)
+        down[0] = startOrigin[0];
+        down[0] = startOrigin[1];
+        down[0] = startOrigin[2] - 18.0f;
+
+        G_TraceCapsule(&trace, startOrigin, mins, maxs, down, passEntityNum, clipMask);
+
+        if (velocity[2] <= 0.0f || trace.fraction != 1.0f && trace.normal[2] >= 0.7f)
         {
-            v40 = v34;
-            v41 = v35;
-            v42 = v36 + (float)18.0;
-            G_TraceCapsule(v43, &v34, maxs, gravity, &v40, clipMask, a9);
-            if (!v43[0].startsolid)
+            up[0] = startOrigin[0];
+            up[1] = startOrigin[1];
+            up[2] = startOrigin[2] + 18.0;
+            G_TraceCapsule(&trace, startOrigin, mins, maxs, up, passEntityNum, clipMask);
+
+            if (!trace.startsolid)
             {
-                v21 = deltaT;
-                v22 = v34;
-                v23 = v36;
-                v24 = (float)(v40 - v34);
-                v25 = (float)(v42 - v36);
-                fraction = v43[0].fraction;
-                velocity[1] = (float)((float)(v41 - v35) * v43[0].fraction) + v35;
-                *velocity = (float)((float)v24 * (float)fraction) + (float)v22;
-                v27 = (float)((float)((float)v25 * (float)fraction) + (float)v23);
-                velocity[2] = (float)((float)v25 * (float)fraction) + (float)v23;
-                *mins = v17;
-                mins[1] = v18;
-                mins[2] = v19;
-                G_SlideMove(v21, v20, velocity, mins, maxs, gravity, passEntityNum, clipMask, a9);
-                v28 = velocity[2];
-                v37 = *velocity;
-                v38 = velocity[1];
-                v39 = (float)(v36 - (float)v27) + (float)v28;
-                G_TraceCapsule(v43, velocity, maxs, gravity, &v37, clipMask, a9);
-                v29 = v43[0].fraction;
-                if (!v43[0].startsolid)
+                float endpos[3];
+                Vec3Lerp(startOrigin, up, trace.fraction, endpos);
+
+                origin[0] = endpos[0];
+                origin[1] = endpos[1];
+                origin[2] = endpos[2];
+
+                velocity[0] = startVel[0];
+                velocity[1] = startVel[1];
+                velocity[2] = startVel[2];
+
+                G_SlideMove(deltaT, origin, velocity, mins, maxs, gravity, passEntityNum, clipMask);
+
+                down[0] = origin[0];
+                down[1] = origin[1];
+                down[2] = origin[2];
+                down[2] = (startOrigin[2] - endpos[2]) + down[2];
+
+                G_TraceCapsule(&trace, origin, mins, maxs, down, passEntityNum, clipMask);
+
+                if (!trace.startsolid)
                 {
-                    v30 = velocity[1];
-                    v31 = velocity[2];
-                    v32 = (float)(v38 - velocity[1]);
-                    v33 = (float)(v39 - velocity[2]);
-                    *velocity = (float)((float)(v37 - *velocity) * v43[0].fraction) + *velocity;
-                    velocity[1] = (float)((float)v32 * (float)v29) + (float)v30;
-                    velocity[2] = (float)((float)v33 * (float)v29) + (float)v31;
+                    Vec3Lerp(origin, down, trace.fraction, origin);
                 }
-                if (v29 < 1.0)
-                    PM_ClipVelocity(mins, v43[0].normal, mins);
+                if (trace.fraction < 1.0f)
+                    PM_ClipVelocity(velocity, trace.normal, velocity);
             }
         }
     }
@@ -2541,157 +2421,127 @@ void __cdecl G_SetFixedLink(gentity_s *ent, unsigned int eAngles)
 void __cdecl G_SetPlayerFixedLink(gentity_s *ent)
 {
     gclient_s *client; // r28
-    float *v3; // r5
-    float *v4; // r31
-    long double v5; // fp2
-    float *v6; // r29
-    int v7; // r30
-    double v8; // fp31
-    double v9; // fp12
-    long double v10; // fp2
-    float *v11; // r29
     float *viewangles; // r31
-    int v13; // r30
-    double v14; // fp31
-    double v15; // fp12
-    gclient_s *v16; // r11
-    double viewHeightCurrent; // fp0
+    float viewHeightCurrent; // fp0
     float *currentOrigin; // r4
-    double v19; // fp13
-    float *v20; // r3
-    float v21[4]; // [sp+50h] [-200h] BYREF
-    float v22[4]; // [sp+60h] [-1F0h] BYREF
-    float v23[4]; // [sp+70h] [-1E0h] BYREF
-    float v24[4]; // [sp+80h] [-1D0h] BYREF
-    float v25[4]; // [sp+90h] [-1C0h] BYREF
-    float v26[4]; // [sp+A0h] [-1B0h] BYREF
-    float v27[2]; // [sp+B0h] [-1A0h] BYREF
-    float v28; // [sp+B8h] [-198h]
-    float v29[4]; // [sp+C0h] [-190h] BYREF
-    float v30[4]; // [sp+D0h] [-180h] BYREF
-    float v31[4]; // [sp+E0h] [-170h] BYREF
-    float v32[3][3]; // [sp+F0h] [-160h] BYREF
-    float v33[3]; // [sp+114h] [-13Ch] BYREF
-    float v34[4]; // [sp+120h] [-130h] BYREF
-    float v35[4]; // [sp+130h] [-120h] BYREF
-    float v36[4]; // [sp+140h] [-110h] BYREF
-    float v37[4]; // [sp+150h] [-100h] BYREF
-    float v38[4][3]; // [sp+160h] [-F0h] BYREF
-    float v39[4][3]; // [sp+190h] [-C0h] BYREF
-    float v40[7][3]; // [sp+1C0h] [-90h] BYREF
+    float linkChangeQuat[4]; // [sp+50h] [-200h] BYREF
+    float maxs[4]; // [sp+60h] [-1F0h] BYREF
+    float mins[4]; // [sp+70h] [-1E0h] BYREF
+    float worldAngles[3]; // [sp+80h] [-1D0h] BYREF
+    float newViewAngles[3]; // [sp+90h] [-1C0h] BYREF
+    float velocity[4]; // [sp+A0h] [-1B0h] BYREF
+    float worldViewOff[3]; // [sp+B0h] [-1A0h] BYREF
+    float localViewOff[4]; // [sp+C0h] [-190h] BYREF
+    float identQuat[4]; // [sp+D0h] [-180h] BYREF
+    float worldQuat[4]; // [sp+E0h] [-170h] BYREF
+    float worldAxis[4][3]; // [sp+F0h] [-160h] BYREF
+    float viewQuat[4]; // [sp+130h] [-120h] BYREF
+    float newViewQuat[4]; // [sp+140h] [-110h] BYREF
+    float newViewMat[3][3]; // [sp+190h] [-C0h] BYREF
+    float viewMat[3][3]; // [sp+1C0h] [-90h] BYREF
 
-    if (!ent->client)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\g_utils.cpp", 1778, 0, "%s", "ent->client");
+    iassert(ent->client);
     client = ent->client;
-    if (!ent->tagInfo)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\g_utils.cpp", 1782, 0, "%s", "tagInfo");
-    G_CalcTagParentAxis(ent, v32);
+    tagInfo_s *tagInfo = ent->tagInfo;
+    iassert(tagInfo);
+
+    G_CalcTagParentAxis(ent, worldAxis);
     if ((client->ps.pm_flags & 0x1000000) != 0)
     {
-        AxisToAngles(v32, v25);
-        v11 = v25;
-        viewangles = client->ps.viewangles;
-        v13 = 3;
-        do
+        AxisToAngles((const mat3x3&)worldAxis, newViewAngles);
+
+        for (int angleIndex = 0; angleIndex < 3; ++angleIndex)
         {
-            v14 = (float)((float)(*v11 - *viewangles) * (float)0.0027777778);
-            *(double *)&v10 = (float)((float)((float)(*v11 - *viewangles) * (float)0.0027777778) + (float)0.5);
-            v10 = floor(v10);
-            v15 = *viewangles;
-            --v13;
-            ++v11;
-            *(viewangles - 32) = (float)((float)((float)v14 - (float)*(double *)&v10) * (float)360.0) + *(viewangles - 32);
-            *viewangles++ = (float)v15 + (float)((float)((float)v14 - (float)*(double *)&v10) * (float)360.0);
-        } while (v13);
+            float angleDiff = AngleNormalize180(newViewAngles[angleIndex] - client->ps.viewangles[angleIndex]);
+            client->ps.delta_angles[angleIndex] = client->ps.delta_angles[angleIndex] + angleDiff;
+            client->ps.viewangles[angleIndex] = client->ps.viewangles[angleIndex] + angleDiff;
+        }
     }
     else
     {
-        AxisToQuat(v32, v31);
-        AxisToAngles(v32, v24);
-        G_UpdateViewAngleClamp(client, v24);
+        AxisToQuat(worldAxis, worldQuat);
+        AxisToAngles((const mat3x3&)worldAxis, worldAngles);
+        G_UpdateViewAngleClamp(client, worldAngles);
+
         if (client->prevLinkAnglesSet)
         {
-            QuatMultiply(client->prevLinkedInvQuat, v31, v21);
-            QuatInverse(v31, client->prevLinkedInvQuat);
-            v30[0] = 0.0;
-            v30[1] = 0.0;
-            v30[2] = 0.0;
-            v30[3] = 1.0;
-            QuatLerp(v30, v21, client->linkAnglesFrac, v3);
+            QuatMultiply(client->prevLinkedInvQuat, worldQuat, linkChangeQuat);
+            QuatInverse(worldQuat, client->prevLinkedInvQuat);
+            identQuat[0] = 0.0f;
+            identQuat[1] = 0.0f;
+            identQuat[2] = 0.0f;
+            identQuat[3] = 1.0f;
+            QuatLerp(identQuat, linkChangeQuat, client->linkAnglesFrac, linkChangeQuat);
         }
         else
         {
             client->prevLinkAnglesSet = 1;
-            QuatInverse(v31, client->prevLinkedInvQuat);
-            v21[0] = 0.0;
-            v21[1] = 0.0;
-            v21[2] = 0.0;
-            v21[3] = 1.0;
+            QuatInverse(worldQuat, client->prevLinkedInvQuat);
+            linkChangeQuat[0] = 0.0f;
+            linkChangeQuat[1] = 0.0f;
+            linkChangeQuat[2] = 0.0f;
+            linkChangeQuat[3] = 1.0f;
         }
-        v4 = client->ps.viewangles;
-        AnglesToAxis(client->ps.viewangles, v40);
-        AxisToQuat(v40, v35);
-        QuatMultiply(v35, v21, v36);
-        QuatToAxis(v36, (mat3x3&)v39);
-        AxisToAngles((const mat3x3&)v39, v25);
-        v6 = v25;
-        v7 = 2;
-        do
+
+        AnglesToAxis(client->ps.viewangles, viewMat);
+        AxisToQuat(viewMat, viewQuat);
+        QuatMultiply(viewQuat, linkChangeQuat, newViewQuat);
+        QuatToAxis(newViewQuat, (mat3x3&)newViewMat);
+        AxisToAngles((const mat3x3&)newViewMat, newViewAngles);
+
+        for (int angleIndex = 0; angleIndex < 2; ++angleIndex)
         {
-            v8 = (float)((float)(*v6 - *v4) * (float)0.0027777778);
-            *(double *)&v5 = (float)((float)((float)(*v6 - *v4) * (float)0.0027777778) + (float)0.5);
-            v5 = floor(v5);
-            v9 = *v4;
-            --v7;
-            ++v6;
-            *(v4 - 32) = *(v4 - 32) + (float)((float)((float)v8 - (float)*(double *)&v5) * (float)360.0);
-            *v4++ = (float)v9 + (float)((float)((float)v8 - (float)*(double *)&v5) * (float)360.0);
-        } while (v7);
-        if (ent->client->link_useTagAnglesForViewAngles)
-        {
-            client->ps.linkAngles[0] = v24[0];
-            client->ps.linkAngles[1] = v24[1];
-            client->ps.linkAngles[2] = v24[2];
+            float angleDiff = AngleNormalize180(newViewAngles[angleIndex] - client->ps.viewangles[angleIndex]);
+            client->ps.delta_angles[angleIndex] = client->ps.delta_angles[angleIndex] + angleDiff;
+            client->ps.viewangles[angleIndex] = client->ps.viewangles[angleIndex] + angleDiff;
         }
-        else
-        {
-            AnglesToAxis(client->ps.linkAngles, v38);
-            AxisToQuat(v38, v37);
-            QuatMultiply(v37, v21, v34);
-            QuatToAxis(v34, (mat3x3&)v38);
-            AxisToAngles((const mat3x3&)v38, client->ps.linkAngles);
-        }
+
+        // LWSS: removed in blops... try this for now
+        //if (ent->client->link_useTagAnglesForViewAngles)
+        //{
+            client->ps.linkAngles[0] = worldAngles[0];
+            client->ps.linkAngles[1] = worldAngles[1];
+            client->ps.linkAngles[2] = worldAngles[2];
+        //}
+        //else
+        //{
+        //    AnglesToAxis(client->ps.linkAngles, v38);
+        //    AxisToQuat(v38, v37);
+        //    QuatMultiply(v37, linkChangeQuat, v34);
+        //    QuatToAxis(v34, (mat3x3&)v38);
+        //    AxisToAngles((const mat3x3&)v38, client->ps.linkAngles);
+        //}
     }
-    v16 = ent->client;
-    if (v16->link_rotationMovesEyePos)
+    if (ent->client->link_rotationMovesEyePos)
     {
         viewHeightCurrent = client->ps.viewHeightCurrent;
-        v29[0] = 0.0;
-        v29[1] = 0.0;
-        v29[2] = viewHeightCurrent;
-        MatrixTransformVector43(v29, (const mat4x3&)v32, v27);
-        currentOrigin = v27;
-        v28 = v28 - client->ps.viewHeightCurrent;
+        localViewOff[0] = 0.0f;
+        localViewOff[1] = 0.0f;
+        localViewOff[2] = viewHeightCurrent;
+        MatrixTransformVector43(localViewOff, (const mat4x3&)worldAxis, worldViewOff);
+        currentOrigin = worldViewOff;
+        worldViewOff[2] = worldViewOff[2] - client->ps.viewHeightCurrent;
     }
-    else if (v16->link_doCollision)
+    else if (ent->client->link_doCollision)
     {
-        v23[0] = ent->r.mins[0];
-        v23[1] = ent->r.mins[1];
-        v23[2] = ent->r.mins[2];
-        v22[0] = ent->r.maxs[0];
-        v22[1] = ent->r.maxs[1];
-        v22[2] = ent->r.maxs[2];
-        v19 = (float)(v33[1] - ent->r.currentOrigin[1]);
-        v26[0] = v33[0] - ent->r.currentOrigin[0];
-        v26[1] = v19;
-        v26[2] = v33[2] - ent->r.currentOrigin[2];
-        ExpandBoundsToWidth(v23, v22);
-        G_StepSlideMove(1.0, v20, ent->r.currentOrigin, v26, v23, v22, 0, ent->s.number, ent->clipmask & 0xFFFFBFFF);
+        mins[0] = ent->r.mins[0];
+        mins[1] = ent->r.mins[1];
+        mins[2] = ent->r.mins[2];
+
+        maxs[0] = ent->r.maxs[0];
+        maxs[1] = ent->r.maxs[1];
+        maxs[2] = ent->r.maxs[2];
+
+        velocity[0] = worldAxis[3][0] - ent->r.currentOrigin[0];
+        velocity[1] = worldAxis[3][1] - ent->r.currentOrigin[1];
+        velocity[2] = worldAxis[3][2] - ent->r.currentOrigin[2];
+        ExpandBoundsToWidth(mins, maxs);
+        G_StepSlideMove(1.0f, ent->r.currentOrigin, velocity, mins, maxs, 0, ent->s.number, ent->clipmask & 0xFFFFBFFF);
         currentOrigin = ent->r.currentOrigin;
     }
     else
     {
-        currentOrigin = v33;
+        currentOrigin = worldAxis[3];
     }
     G_SetOrigin(ent, currentOrigin);
     ent->s.lerp.pos.trType = TR_INTERPOLATE;

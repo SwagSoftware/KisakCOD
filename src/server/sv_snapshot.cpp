@@ -110,7 +110,7 @@ void __cdecl SV_AddEntitiesVisibleFromPoint(int clientNum)
             if (ent->r.linked)
             {
                 number = ent->s.number;
-                iassert(ent->s.number == 3);
+                iassert(ent->s.number == e);
                 if ((v4->r.svFlags & 1) == 0 && e != clientNum)
                     SV_AddEntToSnapshot(e);
             }
@@ -150,18 +150,18 @@ void __cdecl SV_SendMessageToClient(msg_t *msg, client_t *client)
 void __cdecl SV_BuildAndSendClientSnapshot(client_t *client)
 {
     int outgoingSequence; // r4
-    msg_t v3; // [sp+50h] [-4040h] BYREF
-    unsigned __int8 v4[16]; // [sp+80h] [-4010h] BYREF
+    msg_t msg; // [sp+50h] [-4040h] BYREF
+    unsigned __int8 msgbuf[0x4000]; // [sp+80h] [-4010h] BYREF
 
     SV_BuildClientSnapshot(client);
-    MSG_Init(&v3, v4, 0x4000);
-    SV_WriteSnapshotToClient(client, &v3);
-    if (v3.overflowed)
+    MSG_Init(&msg, msgbuf, 0x4000);
+    SV_WriteSnapshotToClient(client, &msg);
+    if (msg.overflowed)
         Com_Error(ERR_DROP, "SV_BuildAndSendClientSnapshot: bad gEnt");
-    MSG_WriteByte(&v3, 4);
+    MSG_WriteByte(&msg, 4);
     outgoingSequence = client->netchan.outgoingSequence;
     client->netchan.outgoingSequence = outgoingSequence + 1;
-    CL_PacketEvent(&v3, outgoingSequence);
+    CL_PacketEvent(&msg, outgoingSequence);
 }
 
 void __cdecl SV_SendClientMessages()

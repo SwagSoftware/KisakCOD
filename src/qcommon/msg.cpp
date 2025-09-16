@@ -169,17 +169,8 @@ void __cdecl TRACK_msg()
 
 void __cdecl MSG_Init(msg_t *buf, unsigned __int8 *data, int length)
 {
-    msg_t *v3; // r11
-    int v4; // ctr
+    memset(buf, 0, sizeof(msg_t));
 
-    v3 = buf;
-    v4 = 10;
-    do
-    {
-        v3->overflowed = 0;
-        v3 = (msg_t *)((char *)v3 + 4);
-        --v4;
-    } while (v4);
     buf->data = data;
     buf->maxsize = length;
 }
