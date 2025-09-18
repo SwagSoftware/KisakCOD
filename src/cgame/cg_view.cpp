@@ -297,91 +297,91 @@ void __cdecl CG_KickAngles(cg_s *cgameGlob)
     }
 }
 
-// local variable allocation has failed, the output may be wrong!
 float __cdecl CG_GetVerticalBobFactor(
     const playerState_s *predictedPlayerState,
-    double cycle,
-    double speed,
-    double maxAmp)
+    float cycle,
+    float speed,
+    float maxAmp)
 {
-    int viewHeightTarget; // r11
-    double v5; // fp1
-    double v6; // fp29
-    const dvar_s *v7; // r11
-    double v8; // fp31
-    double v9; // fp1
-    double v10; // fp1
-    long double v11; // fp2
-    double v12; // fp30
-    long double v13; // fp2
-    double v14; // fp1
-
-    viewHeightTarget = predictedPlayerState->viewHeightTarget;
-    v6 = v5;
-    if (viewHeightTarget == 11)
-    {
-        v7 = bg_bobAmplitudeProne;
-    }
-    else if (viewHeightTarget == 40)
-    {
-        v7 = bg_bobAmplitudeDucked;
-    }
-    else if ((predictedPlayerState->pm_flags & 0x8000) != 0)
-    {
-        v7 = bg_bobAmplitudeSprinting;
-    }
-    else
-    {
-        v7 = bg_bobAmplitudeStanding;
-    }
-    v8 = (float)(v7->current.vector[1] * (float)speed);
-    if (v8 > maxAmp)
-        v8 = maxAmp;
-    v10 = (float)((float)v9 * (float)2.0);
-    v11 = sin(*(long double *)&speed);
-    v12 = (float)*(double *)&v11;
-    *(double *)&v11 = (float)((float)((float)v6 * (float)4.0) + (float)1.5707964);
-    v13 = sin(v11);
-    v14 = (float)((float)((float)((float)((float)*(double *)&v13 * (float)0.2) + (float)v12) * (float)v8) * (float)0.75);
-    return *((float *)&v14 + 1);
+    return BG_GetVerticalBobFactor(predictedPlayerState, cycle, speed, maxAmp);
+    //int viewHeightTarget; // r11
+    //const dvar_s *ampDvar; // r11
+    //float amplitude; // fp31
+    //float v9; // fp1
+    //float v10; // fp1
+    //float v11; // fp2
+    //float v12; // fp30
+    //float v13; // fp2
+    //float v14; // fp1
+    //
+    //viewHeightTarget = predictedPlayerState->viewHeightTarget;
+    //
+    //if (viewHeightTarget == 11)
+    //{
+    //    ampDvar = bg_bobAmplitudeProne;
+    //}
+    //else if (viewHeightTarget == 40)
+    //{
+    //    ampDvar = bg_bobAmplitudeDucked;
+    //}
+    //else if ((predictedPlayerState->pm_flags & 0x8000) != 0)
+    //{
+    //    ampDvar = bg_bobAmplitudeSprinting;
+    //}
+    //else
+    //{
+    //    ampDvar = bg_bobAmplitudeStanding;
+    //}
+    //amplitude = (float)(ampDvar->current.vector[1] * (float)speed);
+    //if (amplitude > maxAmp)
+    //    amplitude = maxAmp;
+    //
+    //v10 = (float)((float)v9 * (float)2.0);
+    //v11 = sin(*(long double *)&speed);
+    //v12 = (float)*(double *)&v11;
+    //*(double *)&v11 = ((cycle * 4.0f) + 1.5707964f);
+    //v13 = sin(v11);
+    //v14 = (float)((float)((float)((float)((float)*(double *)&v13 * (float)0.2) + (float)v12) * (float)amplitude) * (float)0.75);
+    //return *((float *)&v14 + 1);
 }
 
 // local variable allocation has failed, the output may be wrong!
 float __cdecl CG_GetHorizontalBobFactor(
     const playerState_s *predictedPlayerState,
-    double cycle,
-    double speed,
-    double maxAmp)
+    float cycle,
+    float speed,
+    float maxAmp)
 {
-    int viewHeightTarget; // r11
-    const dvar_s *v5; // r11
-    double v6; // fp31
-    long double v7; // fp2
-    double v8; // fp1
-
-    viewHeightTarget = predictedPlayerState->viewHeightTarget;
-    if (viewHeightTarget == 11)
-    {
-        v5 = bg_bobAmplitudeProne;
-    }
-    else if (viewHeightTarget == 40)
-    {
-        v5 = bg_bobAmplitudeDucked;
-    }
-    else if ((predictedPlayerState->pm_flags & 0x8000) != 0)
-    {
-        v5 = bg_bobAmplitudeSprinting;
-    }
-    else
-    {
-        v5 = bg_bobAmplitudeStanding;
-    }
-    v6 = (float)(v5->current.value * (float)speed);
-    if (v6 > maxAmp)
-        v6 = maxAmp;
-    v7 = sin(*(long double *)&speed);
-    v8 = (float)((float)*(double *)&v7 * (float)v6);
-    return *((float *)&v8 + 1);
+    return BG_GetHorizontalBobFactor(predictedPlayerState, cycle, speed, maxAmp);
+    //int viewHeightTarget; // r11
+    //const dvar_s *v5; // r11
+    //double v6; // fp31
+    //long double v7; // fp2
+    //double v8; // fp1
+    //
+    //viewHeightTarget = predictedPlayerState->viewHeightTarget;
+    //if (viewHeightTarget == 11)
+    //{
+    //    v5 = bg_bobAmplitudeProne;
+    //}
+    //else if (viewHeightTarget == 40)
+    //{
+    //    v5 = bg_bobAmplitudeDucked;
+    //}
+    //else if ((predictedPlayerState->pm_flags & 0x8000) != 0)
+    //{
+    //    v5 = bg_bobAmplitudeSprinting;
+    //}
+    //else
+    //{
+    //    v5 = bg_bobAmplitudeStanding;
+    //}
+    //v6 = (float)(v5->current.value * (float)speed);
+    //if (v6 > maxAmp)
+    //    v6 = maxAmp;
+    //v7 = sin(*(long double *)&speed);
+    //v8 = (float)((float)*(double *)&v7 * (float)v6);
+    //return *((float *)&v8 + 1);
 }
 
 void __cdecl CG_CalculateView_IdleAngles(cg_s *cgameGlob, float *angles)

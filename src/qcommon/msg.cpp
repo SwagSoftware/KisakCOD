@@ -11,154 +11,209 @@
 #include <universal/com_math.h>
 #include <client/client.h>
 
-struct netField_t *hudElemFields;
+#undef time
 
+// Generates a membername string literal, then offsetof (EX: "value", 132)
+#define	NETF_BASE(s, x) #x,(size_t)&((s*)0)->x
+
+#define NETF_HUD(x) NETF_BASE(hudelem_s, x)
+
+netField_t hudElemFields[43] =
+{
+  { NETF_HUD(value), 0 },
+  { NETF_HUD(text), 10 },
+  { NETF_HUD(label), 10 },
+  { NETF_HUD(time), 32 },
+  { NETF_HUD(color.rgba), 32 },
+  { NETF_HUD(fromColor.rgba), 32 },
+  { NETF_HUD(fadeStartTime), 32 },
+  { NETF_HUD(fadeTime), 16 },
+  { NETF_HUD(materialIndex), 8 },
+  { NETF_HUD(width), 10 },
+  { NETF_HUD(height), 10 },
+  { NETF_HUD(offscreenMaterialIdx), 8 },
+  { NETF_HUD(glowColor.rgba), 32 },
+  { NETF_HUD(scaleStartTime), 32 },
+  { NETF_HUD(scaleTime), 16 },
+  { NETF_HUD(fromWidth), 10 },
+  { NETF_HUD(fromHeight), 10 },
+  { NETF_HUD(moveStartTime), 32 },
+  { NETF_HUD(moveTime), 16 },
+  { NETF_HUD(fromX), 0 },
+  { NETF_HUD(fromY), 0 },
+  { NETF_HUD(x), 0 },
+  { NETF_HUD(y), 0 },
+  { NETF_HUD(z), 0 },
+  { NETF_HUD(targetEntNum), 12 },
+  { NETF_HUD(fromAlignOrg), 4 },
+  { NETF_HUD(fromAlignScreen), 6 },
+  { NETF_HUD(alignOrg), 4 },
+  { NETF_HUD(alignScreen), 6 },
+  { NETF_HUD(fontScaleStartTime), 32 },
+  { NETF_HUD(fontScaleTime), 16 },
+  { NETF_HUD(fromFontScale), 0 },
+  { NETF_HUD(fontScale), 0 },
+  { NETF_HUD(font), 4 },
+  { NETF_HUD(type), 4 },
+  { NETF_HUD(sort), 0 },
+  { NETF_HUD(duration), 32 },
+  { NETF_HUD(flags), 3 },
+  { NETF_HUD(fxBirthTime), 32 },
+  { NETF_HUD(fxLetterTime), 32 },
+  { NETF_HUD(fxDecayStartTime), 32 },
+  { NETF_HUD(fxDecayDuration), 32 },
+  { NETF_HUD(soundID), 5 },
+};
+
+
+#define NETF_PL(x) NETF_BASE(playerState_s, x)
 const netField_t playerStateFields[143] =
 {
-  { (char*)"commandTime", 0, 32 },
-  { (char*)"pm_type", 4, 8 },
-  { (char*)"bobCycle", 8, 8 },
-  { (char*)"pm_flags", 12, 26 },
-  { (char*)"weapFlags", 16, 12 },
-  { (char*)"otherFlags", 20, 1 },
-  { (char*)"pm_time", 24, -16 },
-  { (char*)"origin[0]", 28, 0 },
-  { (char*)"origin[1]", 32, 0 },
-  { (char*)"origin[2]", 36, 0 },
-  { (char*)"velocity[0]", 40, 0 },
-  { (char*)"velocity[1]", 44, 0 },
-  { (char*)"velocity[2]", 48, 0 },
-  { (char*)"weaponTime", 60, -16 },
-  { (char*)"weaponRestrictKickTime", 80, -16 },
-  { (char*)"weaponDelay", 64, -16 },
-  { (char*)"grenadeTimeLeft", 68, -16 },
-  { (char*)"throwBackGrenadeTimeLeft", 76, -16 },
-  { (char*)"throwBackGrenadeOwner", 72, 12 },
-  { (char*)"foliageSoundTime", 84, 32 },
-  { (char*)"gravity", 88, 16 },
-  { (char*)"leanf", 92, 0 },
-  { (char*)"speed", 96, 16 },
-  { (char*)"delta_angles[0]", 100, 0 },
-  { (char*)"delta_angles[1]", 104, 0 },
-  { (char*)"delta_angles[2]", 108, 0 },
-  { (char*)"groundEntityNum", 112, 12 },
-  { (char*)"vLadderVec[0]", 116, 0 },
-  { (char*)"vLadderVec[1]", 120, 0 },
-  { (char*)"vLadderVec[2]", 124, 0 },
-  { (char*)"jumpTime", 128, 32 },
-  { (char*)"jumpOriginZ", 132, 0 },
-  { (char*)"movementDir", 136, -8 },
-  { (char*)"eFlags", 140, 24 },
-  { (char*)"eventSequence", 144, 32 },
-  { (char*)"oldEventSequence", 180, 32 },
-  { (char*)"entityEventSequence", 1564, 32 },
-  { (char*)"events[0]", 148, 8 },
-  { (char*)"events[1]", 152, 8 },
-  { (char*)"events[2]", 156, 8 },
-  { (char*)"events[3]", 160, 8 },
-  { (char*)"eventParms[0]", 164, 32 },
-  { (char*)"eventParms[1]", 168, 32 },
-  { (char*)"eventParms[2]", 172, 32 },
-  { (char*)"eventParms[3]", 176, 32 },
-  { (char*)"clientNum", 184, 8 },
-  { (char*)"weapons[0]", 1332, 32 },
-  { (char*)"weapons[1]", 1336, 32 },
-  { (char*)"weapons[2]", 1340, 32 },
-  { (char*)"weapons[3]", 1344, 32 },
-  { (char*)"weaponold[0]", 1348, 32 },
-  { (char*)"weaponold[1]", 1352, 32 },
-  { (char*)"weaponold[2]", 1356, 32 },
-  { (char*)"weaponold[3]", 1360, 32 },
-  { (char*)"weaponrechamber[0]", 1364, 32 },
-  { (char*)"weaponrechamber[1]", 1368, 32 },
-  { (char*)"weaponrechamber[2]", 1372, 32 },
-  { (char*)"weaponrechamber[3]", 1376, 32 },
-  { (char*)"offHandIndex", 188, 7 },
-  { (char*)"sprintState.lastSprintStart", 1452, 32 },
-  { (char*)"sprintState.lastSprintEnd", 1456, 32 },
-  { (char*)"sprintState.sprintStartMaxLength", 1460, 14 },
-  { (char*)"sprintState.sprintDelay", 1448, 1 },
-  { (char*)"sprintState.sprintButtonUpRequired", 1444, 1 },
-  { (char*)"weapon", 196, 7 },
-  { (char*)"weapAnim", 1568, 10 },
-  { (char*)"weaponstate", 200, 5 },
-  { (char*)"weaponShotCount", 204, 3 },
-  { (char*)"fWeaponPosFrac", 208, 0 },
-  { (char*)"spreadOverride", 216, 6 },
-  { (char*)"spreadOverrideState", 220, 2 },
-  { (char*)"groundTiltAngles[0]", 1416, 0 },
-  { (char*)"groundTiltAngles[1]", 1420, 0 },
-  { (char*)"groundTiltAngles[2]", 1424, 0 },
-  { (char*)"viewangles[0]", 228, 0 },
-  { (char*)"viewangles[1]", 232, 0 },
-  { (char*)"viewangles[2]", 236, 0 },
-  { (char*)"viewHeightTarget", 240, -8 },
-  { (char*)"viewHeightCurrent", 244, 0 },
-  { (char*)"viewHeightLerpTime", 248, 32 },
-  { (char*)"viewHeightLerpTarget", 252, -8 },
-  { (char*)"viewHeightLerpDown", 256, 1 },
-  { (char*)"damageEvent", 276, 8 },
-  { (char*)"damageYaw", 280, 8 },
-  { (char*)"damagePitch", 284, 8 },
-  { (char*)"damageCount", 288, 7 },
-  { (char*)"proneDirection", 1380, 0 },
-  { (char*)"proneDirectionPitch", 1384, 0 },
-  { (char*)"proneTorsoPitch", 1388, 0 },
-  { (char*)"viewlocked", 1392, 2 },
-  { (char*)"viewlocked_entNum", 1396, 16 },
-  { (char*)"vehicleType", 1400, 16 },
-  { (char*)"linkAngles[0]", 1404, 0 },
-  { (char*)"linkAngles[1]", 1408, 0 },
-  { (char*)"linkAngles[2]", 1412, 0 },
-  { (char*)"aimSpreadScale", 1572, 0 },
-  { (char*)"cursorHint", 1428, 8 },
-  { (char*)"cursorHintString", 1432, -8 },
-  { (char*)"cursorHintEntIndex", 1436, 12 },
-  { (char*)"viewmodelIndex", 224, 9 },
-  { (char*)"shellshockIndex", 1576, 4 },
-  { (char*)"shellshockTime", 1580, 32 },
-  { (char*)"shellshockDuration", 1584, 16 },
-  { (char*)"offhandSecondary", 192, 1 },
-  { (char*)"holdBreathScale", 1472, 0 },
-  { (char*)"holdBreathTimer", 1476, 16 },
-  { (char*)"locationSelectionInfo", 1440, 8 },
-  { (char*)"mantleState.yaw", 1484, 0 },
-  { (char*)"mantleState.timer", 1488, 32 },
-  { (char*)"mantleState.transIndex", 1492, 4 },
-  { (char*)"mantleState.flags", 1496, 5 },
-  { (char*)"viewAngleClampBase[0]", 260, 0 },
-  { (char*)"viewAngleClampBase[1]", 264, 0 },
-  { (char*)"viewAngleClampRange[0]", 268, 0 },
-  { (char*)"viewAngleClampRange[1]", 272, 0 },
-  { (char*)"moveSpeedScaleMultiplier", 1480, 0 },
-  { (char*)"adsDelayTime", 212, 32 },
-  { (char*)"oldVelocity[0]", 52, 0 },
-  { (char*)"oldVelocity[1]", 56, 0 },
-  { (char*)"weapLockFlags", 1512, 6 },
-  { (char*)"weapLockedEntnum", 1516, 12 },
-  { (char*)"forcedViewAnimWeaponIdx", 1520, 7 },
-  { (char*)"forcedViewAnimWeaponState", 1524, 5 },
-  { (char*)"forcedViewAnimOriginalWeaponIdx", 1528, 7 },
-  { (char*)"actionSlotType[0]", 1532, 2 },
-  { (char*)"actionSlotType[1]", 1536, 2 },
-  { (char*)"actionSlotType[2]", 1540, 2 },
-  { (char*)"actionSlotType[3]", 1544, 2 },
-  { (char*)"actionSlotParam[0]", 1548, 7 },
-  { (char*)"actionSlotParam[1]", 1552, 7 },
-  { (char*)"actionSlotParam[2]", 1556, 7 },
-  { (char*)"actionSlotParam[3]", 1560, 7 },
-  { (char*)"dofNearStart", 1588, 32 },
-  { (char*)"dofNearEnd", 1592, 32 },
-  { (char*)"dofFarStart", 1596, 32 },
-  { (char*)"dofFarEnd", 1600, 32 },
-  { (char*)"dofNearBlur", 1604, 32 },
-  { (char*)"dofFarBlur", 1608, 32 },
-  { (char*)"dofViewmodelStart", 1612, 32 },
-  { (char*)"dofViewmodelEnd", 1616, 32 },
-  { (char*)"meleeChargeYaw", 1500, 32 },
-  { (char*)"meleeChargeDist", 1504, 8 },
-  { (char*)"meleeChargeTime", 1508, 32 }
+  { NETF_PL(commandTime), 32},
+  { NETF_PL(pm_type), 8},
+  { NETF_PL(bobCycle), 8},
+  { NETF_PL(pm_flags), 26},
+  { NETF_PL(weapFlags), 12},
+  { NETF_PL(otherFlags), 1},
+  { NETF_PL(pm_time), -16},
+  { NETF_PL(origin[0]), 0 },
+  { NETF_PL(origin[1]), 0 },
+  { NETF_PL(origin[2]), 0 },
+  { NETF_PL(velocity[0]), 0 },
+  { NETF_PL(velocity[1]), 0 },
+  { NETF_PL(velocity[2]), 0 },
+  { NETF_PL(weaponTime), -16 },
+  { NETF_PL(weaponRestrictKickTime), -16 },
+  { NETF_PL(weaponDelay), -16 },
+  { NETF_PL(grenadeTimeLeft), -16 },
+  { NETF_PL(throwBackGrenadeTimeLeft), -16 },
+  { NETF_PL(throwBackGrenadeOwner), 12 },
+  { NETF_PL(foliageSoundTime), 32 },
+  { NETF_PL(gravity), 16 },
+  { NETF_PL(leanf), 0 },
+  { NETF_PL(speed), 16 },
+  { NETF_PL(delta_angles[0]), 0 },
+  { NETF_PL(delta_angles[1]), 0 },
+  { NETF_PL(delta_angles[2]), 0 },
+  { NETF_PL(groundEntityNum), 12 },
+  { NETF_PL(vLadderVec[0]), 0 },
+  { NETF_PL(vLadderVec[1]), 0 },
+  { NETF_PL(vLadderVec[2]), 0 },
+  { NETF_PL(jumpTime), 32 },
+  { NETF_PL(jumpOriginZ), 0 },
+  { NETF_PL(movementDir), -8 },
+  { NETF_PL(eFlags), 24 },
+  { NETF_PL(eventSequence), 32 },
+  { NETF_PL(oldEventSequence), 32 },
+  { NETF_PL(entityEventSequence), 32 },
+  { NETF_PL(events[0]), 8 },
+  { NETF_PL(events[1]), 8 },
+  { NETF_PL(events[2]), 8 },
+  { NETF_PL(events[3]), 8 },
+  { NETF_PL(eventParms[0]), 32 },
+  { NETF_PL(eventParms[1]), 32 },
+  { NETF_PL(eventParms[2]), 32 },
+  { NETF_PL(eventParms[3]), 32 },
+  { NETF_PL(clientNum), 8 },
+  { NETF_PL(weapons[0]), 32 },
+  { NETF_PL(weapons[1]), 32 },
+  { NETF_PL(weapons[2]), 32 },
+  { NETF_PL(weapons[3]), 32 },
+  { NETF_PL(weaponold[0]), 32 },
+  { NETF_PL(weaponold[1]), 32 },
+  { NETF_PL(weaponold[2]), 32 },
+  { NETF_PL(weaponold[3]), 32 },
+  { NETF_PL(weaponrechamber[0]), 32 },
+  { NETF_PL(weaponrechamber[1]), 32 },
+  { NETF_PL(weaponrechamber[2]), 32 },
+  { NETF_PL(weaponrechamber[3]), 32 },
+  { NETF_PL(offHandIndex), 7 },
+  { NETF_PL(sprintState.lastSprintStart), 32 },
+  { NETF_PL(sprintState.lastSprintEnd), 32 },
+  { NETF_PL(sprintState.sprintStartMaxLength), 14 },
+  { NETF_PL(sprintState.sprintDelay), 1 },
+  { NETF_PL(sprintState.sprintButtonUpRequired), 1 },
+  { NETF_PL(weapon), 7 },
+  { NETF_PL(weapAnim), 10 },
+  { NETF_PL(weaponstate), 5 },
+  { NETF_PL(weaponShotCount), 3 },
+  { NETF_PL(fWeaponPosFrac), 0 },
+  { NETF_PL(spreadOverride), 6 },
+  { NETF_PL(spreadOverrideState), 2 },
+  { NETF_PL(groundTiltAngles[0]), 0 },
+  { NETF_PL(groundTiltAngles[1]), 0 },
+  { NETF_PL(groundTiltAngles[2]), 0 },
+  { NETF_PL(viewangles[0]), 0 },
+  { NETF_PL(viewangles[1]), 0 },
+  { NETF_PL(viewangles[2]), 0 },
+  { NETF_PL(viewHeightTarget), -8 },
+  { NETF_PL(viewHeightCurrent), 0 },
+  { NETF_PL(viewHeightLerpTime), 32 },
+  { NETF_PL(viewHeightLerpTarget), -8 },
+  { NETF_PL(viewHeightLerpDown), 1 },
+  { NETF_PL(damageEvent), 8 },
+  { NETF_PL(damageYaw), 8 },
+  { NETF_PL(damagePitch), 8 },
+  { NETF_PL(damageCount), 7 },
+  { NETF_PL(proneDirection), 0 },
+  { NETF_PL(proneDirectionPitch), 0 },
+  { NETF_PL(proneTorsoPitch), 0 },
+  { NETF_PL(viewlocked), 2 },
+  { NETF_PL(viewlocked_entNum), 16 },
+  { NETF_PL(vehicleType), 16 },
+  { NETF_PL(linkAngles[0]), 0 },
+  { NETF_PL(linkAngles[1]), 0 },
+  { NETF_PL(linkAngles[2]), 0 },
+  { NETF_PL(aimSpreadScale), 0 },
+  { NETF_PL(cursorHint), 8 },
+  { NETF_PL(cursorHintString), -8 },
+  { NETF_PL(cursorHintEntIndex), 12 },
+  { NETF_PL(viewmodelIndex), 9 },
+  { NETF_PL(shellshockIndex), 4 },
+  { NETF_PL(shellshockTime), 32 },
+  { NETF_PL(shellshockDuration), 16 },
+  { NETF_PL(offhandSecondary), 1 },
+  { NETF_PL(holdBreathScale), 0 },
+  { NETF_PL(holdBreathTimer), 16 },
+  { NETF_PL(locationSelectionInfo), 8 },
+  { NETF_PL(mantleState.yaw), 0 },
+  { NETF_PL(mantleState.timer), 32 },
+  { NETF_PL(mantleState.transIndex), 4 },
+  { NETF_PL(mantleState.flags), 5 },
+  { NETF_PL(viewAngleClampBase[0]), 0 },
+  { NETF_PL(viewAngleClampBase[1]), 0 },
+  { NETF_PL(viewAngleClampRange[0]), 0 },
+  { NETF_PL(viewAngleClampRange[1]), 0 },
+  { NETF_PL(moveSpeedScaleMultiplier), 0 },
+  { NETF_PL(adsDelayTime), 32 },
+  { NETF_PL(oldVelocity[0]), 0 },
+  { NETF_PL(oldVelocity[1]), 0 },
+  { NETF_PL(weapLockFlags), 6 },
+  { NETF_PL(weapLockedEntnum), 12 },
+  { NETF_PL(forcedViewAnimWeaponIdx), 7 },
+  { NETF_PL(forcedViewAnimWeaponState), 5 },
+  { NETF_PL(forcedViewAnimOriginalWeaponIdx), 7 },
+  { NETF_PL(actionSlotType[0]), 2 },
+  { NETF_PL(actionSlotType[1]), 2 },
+  { NETF_PL(actionSlotType[2]), 2 },
+  { NETF_PL(actionSlotType[3]), 2 },
+  { NETF_PL(actionSlotParam[0]), 7 },
+  { NETF_PL(actionSlotParam[1]), 7 },
+  { NETF_PL(actionSlotParam[2]), 7 },
+  { NETF_PL(actionSlotParam[3]), 7 },
+  { NETF_PL(dofNearStart), 32 },
+  { NETF_PL(dofNearEnd), 32 },
+  { NETF_PL(dofFarStart), 32 },
+  { NETF_PL(dofFarEnd), 32 },
+  { NETF_PL(dofNearBlur), 32 },
+  { NETF_PL(dofFarBlur), 32 },
+  { NETF_PL(dofViewmodelStart), 32 },
+  { NETF_PL(dofViewmodelEnd), 32 },
+  { NETF_PL(meleeChargeYaw), 32 },
+  { NETF_PL(meleeChargeDist), 32 },
+  { NETF_PL(meleeChargeTime), 32 },
 };
+
 
 
 
@@ -1574,8 +1629,9 @@ void __cdecl MSG_WriteDeltaPlayerstate(msg_t *msg, playerState_s *to)
     int v60; // r10
     int v61; // r11
     int v62; // r11
-    _BYTE v63[12]; // [sp+60h] [-90h] BYREF
-    int v64; // [sp+6Ch] [-84h]
+    //_BYTE v63[12]; // [sp+60h] [-90h] BYREF
+    //int v64; // [sp+6Ch] [-84h]
+    unsigned int v63[4];
 
     bit = msg->bit;
     cursize = msg->cursize;
@@ -1755,7 +1811,8 @@ void __cdecl MSG_WriteDeltaPlayerstate(msg_t *msg, playerState_s *to)
     {
         MSG_WriteBits(msg, 0, 1u);
     }
-    v30 = (unsigned int*)v63;
+
+    v30 = v63;
     v31 = &to->ammo[1];
     v32 = 4;
     do
@@ -1778,7 +1835,9 @@ void __cdecl MSG_WriteDeltaPlayerstate(msg_t *msg, playerState_s *to)
         --v32;
         ++v30;
     } while (v32);
-    if (*(unsigned int *)v63 || *(_QWORD *)&v63[4] || v64)
+
+
+    if (v63[0] || v63[1] || v63[2] || v63[3])
     {
         MSG_WriteBits(msg, 1, 1u);
         v34 = 78;
@@ -2029,7 +2088,7 @@ void __cdecl MSG_ReadDeltaPlayerstate(msg_t *msg, playerState_s *to)
     int readcount; // r5
     int v6; // r17
     int integer; // r11
-    int v8; // r18
+    int print; // r18
     int v9; // r23
     const int *p_bits; // r26
     int v11; // r28
@@ -2123,15 +2182,17 @@ void __cdecl MSG_ReadDeltaPlayerstate(msg_t *msg, playerState_s *to)
         v6 = 8 * readcount + bit - 20;
     else
         v6 = 8 * readcount - 12;
+
     if (cl_shownet && ((integer = cl_shownet->current.integer, integer >= 2) || integer == -2))
     {
-        v8 = 1;
+        print = 1;
         Com_Printf(16, "%3i: playerstate ", readcount);
     }
     else
     {
-        v8 = 0;
+        print = 0;
     }
+
     v9 = 143;
     p_bits = &playerStateFields[0].bits;
     do
@@ -2188,12 +2249,12 @@ void __cdecl MSG_ReadDeltaPlayerstate(msg_t *msg, playerState_s *to)
             LODWORD(v14) = Bits;
             *(float *)((char *)&to->commandTime + v11) = (float)v14;
         LABEL_32:
-            if (v8)
+            if (print)
                 Com_Printf(16, "%s:%i ", (const char *)*(p_bits - 2), Bits);
             goto LABEL_34;
         }
         *(int *)((char *)&to->commandTime + v11) = MSG_ReadBits(msg, 0x20u);
-        if (v8)
+        if (print)
             Com_Printf(16, "%s:%f ", (const char *)*(p_bits - 2), *(float *)((char *)&to->commandTime + v11));
     LABEL_34:
         --v9;
@@ -2551,7 +2612,7 @@ void __cdecl MSG_ReadDeltaPlayerstate(msg_t *msg, playerState_s *to)
         v77[2] = v90;
         v77 += 4;
     } while (v78);
-    if (v8)
+    if (print)
     {
         v91 = msg->bit;
         v92 = 8 * msg->readcount;

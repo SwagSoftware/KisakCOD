@@ -323,6 +323,8 @@ typedef ull             uint64;
 #define M_PI		3.14159265358979323846	// matches value in gcc v2 math.h
 #endif
 
+#define M_PI_HALF (M_PI / 2.0) // LWSS ADD
+
 // Some convenience macros to make partial accesses nicer
 #define LAST_IND(x,part_type)    (sizeof(x)/sizeof(part_type) - 1)
 #if defined(__BYTE_ORDER) && __BYTE_ORDER == __BIG_ENDIAN

@@ -72,8 +72,6 @@ float __cdecl CL_GetScreenAspectRatioDisplayPixel()
 
 int __cdecl CL_GetUserCmd(int localClientNum, int cmdNumber, usercmd_s *ucmd)
 {
-    int v5; // r6
-
     iassert(localClientNum == 0);
     
     if (cmdNumber > clients[0].cmdNumber)
@@ -81,7 +79,7 @@ int __cdecl CL_GetUserCmd(int localClientNum, int cmdNumber, usercmd_s *ucmd)
         Com_Error(ERR_DROP, "CL_GetUserCmd:cmdNumber %i >= %i", cmdNumber, clients[0].cmdNumber);
     }
 
-    if (cmdNumber <= v5 - 64 || cmdNumber <= 0)
+    if (cmdNumber <= clients[0].cmdNumber - 64 || cmdNumber <= 0)
         return 0;
 
     memcpy(ucmd, &clients[0].cmds[cmdNumber & 0x3F], sizeof(usercmd_s));

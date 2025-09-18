@@ -3539,13 +3539,8 @@ double __cdecl BG_GetBobCycle(const playerState_s *ps)
         + 6.283185482025146);
 }
 
-double __cdecl BG_GetVerticalBobFactor(const playerState_s *ps, float cycle, float speed, float maxAmp)
+float __cdecl BG_GetVerticalBobFactor(const playerState_s *ps, float cycle, float speed, float maxAmp)
 {
-    double v4; // st7
-    float v7; // [esp+4h] [ebp-18h]
-    float v8; // [esp+8h] [ebp-14h]
-    float v9; // [esp+Ch] [ebp-10h]
-    float v10; // [esp+10h] [ebp-Ch]
     float amplitude; // [esp+18h] [ebp-4h]
 
     if (ps->viewHeightTarget == 11)
@@ -3559,24 +3554,18 @@ double __cdecl BG_GetVerticalBobFactor(const playerState_s *ps, float cycle, flo
     else
     {
         if ((ps->pm_flags & PMF_SPRINTING) != 0)
-            v4 = speed * bg_bobAmplitudeSprinting->current.vector[1];
+            amplitude = speed * bg_bobAmplitudeSprinting->current.vector[1];
         else
-            v4 = speed * bg_bobAmplitudeStanding->current.vector[1];
-        amplitude = v4;
+            amplitude = speed * bg_bobAmplitudeStanding->current.vector[1];
     }
-    if (maxAmp < (double)amplitude)
+    if (maxAmp < amplitude)
         amplitude = maxAmp;
-    v10 = cycle + cycle;
-    v9 = sin(v10);
-    v8 = cycle * 4.0 + 1.570796370506287;
-    v7 = sin(v8);
-    return (float)((v7 * 0.2000000029802322 + v9) * 0.75 * amplitude);
+
+    return ((sinf(cycle * 4.0f + M_PI_HALF) * 0.2f + sinf(cycle + cycle)) * 0.75f * amplitude);
 }
 
-double __cdecl BG_GetHorizontalBobFactor(const playerState_s *ps, float cycle, float speed, float maxAmp)
+float __cdecl BG_GetHorizontalBobFactor(const playerState_s *ps, float cycle, float speed, float maxAmp)
 {
-    double v4; // st7
-    float v7; // [esp+4h] [ebp-8h]
     float amplitude; // [esp+8h] [ebp-4h]
 
     if (ps->viewHeightTarget == 11)
@@ -3590,15 +3579,15 @@ double __cdecl BG_GetHorizontalBobFactor(const playerState_s *ps, float cycle, f
     else
     {
         if ((ps->pm_flags & PMF_SPRINTING) != 0)
-            v4 = speed * bg_bobAmplitudeSprinting->current.value;
+            amplitude = speed * bg_bobAmplitudeSprinting->current.value;
         else
-            v4 = speed * bg_bobAmplitudeStanding->current.value;
-        amplitude = v4;
+            amplitude = speed * bg_bobAmplitudeStanding->current.value;
     }
-    if (maxAmp < (double)amplitude)
+
+    if (maxAmp < amplitude)
         amplitude = maxAmp;
-    v7 = sin(cycle);
-    return (float)(v7 * amplitude);
+
+    return (sinf(cycle) * amplitude);
 }
 
 void __cdecl BG_CalculateWeaponAngles(weaponState_t *ws, float *angles)

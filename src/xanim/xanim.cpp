@@ -4102,38 +4102,19 @@ void XAnimFreeAnims(XAnim_s *anims, void(*Free)(void *, int))
 
 static void XAnimCloneClientAnimInfo(const XAnimInfo *from, XAnimInfo *to)
 {
-    const XAnimState *p_state; // r11
-    XAnimState *v5; // r10
-    int v6; // ctr
+    iassert(to->animIndex == from->animIndex);
+    //iassert(!from->notifyType);
 
-    if (to->animIndex != from->animIndex)
-        MyAssertHandler(
-            "c:\\trees\\cod3\\cod3src\\src\\xanim\\xanim.cpp",
-            4203,
-            0,
-            "%s",
-            "to->animIndex == from->animIndex");
-    if (from->notifyType)
-        MyAssertHandler(
-            "c:\\trees\\cod3\\cod3src\\src\\xanim\\xanim.cpp",
-            4204,
-            0,
-            "%s\n\t(from->notifyType) = %i",
-            "(!from->notifyType)",
-            from->notifyType);
-    p_state = &from->state;
-    v5 = &to->state;
-    v6 = 8;
-    do
-    {
-        v5->currentAnimTime = p_state->currentAnimTime;
-        p_state = (XAnimState *)((char *)p_state + 4);
-        v5 = (XAnimState *)((char *)v5 + 4);
-        --v6;
-    } while (v6);
-    to->notifyType = 0;
-    *(_DWORD *)&to->notifyChild = 0xFFFF;
-    to->notifyName = 0;
+    memcpy(&to->state, &from->state, sizeof(to->state));
+
+    to->notifyChild = from->notifyChild;
+    to->notifyIndex = from->notifyIndex;
+    to->notifyName = from->notifyName;
+    to->notifyType = from->notifyType;
+
+    //to->notifyType = 0;
+    //*(_DWORD *)&to->notifyChild = 0xFFFF;
+    //to->notifyName = 0;
 }
 
 static void XAnimCloneClientAnimTree_r(
@@ -4142,56 +4123,34 @@ static void XAnimCloneClientAnimTree_r(
     unsigned int fromInfoIndex,
     unsigned int toInfoParentIndex)
 {
-    XAnimInfo *v8; // r31
+    XAnimInfo *fromInfo; // r31
     unsigned int animToModel; // r30
-    unsigned int v10; // r30
-    unsigned int i; // r31
+    unsigned int toInfoIndex; // r30
+    unsigned int fromChildInfoIndex; // r31
 
-    if (!from)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\xanim\\xanim.cpp", 4221, 0, "%s", "from");
-    if (!from->anims)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\xanim\\xanim.cpp", 4222, 0, "%s", "from->anims");
-    if (!from->anims->size)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\xanim\\xanim.cpp", 4223, 0, "%s", "from->anims->size");
-    if (!to)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\xanim\\xanim.cpp", 4224, 0, "%s", "to");
-    if (to->anims != from->anims)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\xanim\\xanim.cpp", 4225, 0, "%s", "to->anims == from->anims");
-    if (!fromInfoIndex || fromInfoIndex >= 0x1000)
-        MyAssertHandler(
-            "c:\\trees\\cod3\\cod3src\\src\\xanim\\xanim.cpp",
-            4227,
-            0,
-            "%s\n\t(fromInfoIndex) = %i",
-            "(fromInfoIndex && (fromInfoIndex < 4096))",
-            fromInfoIndex);
-    v8 = &g_xAnimInfo[fromInfoIndex];
-    if (!v8->inuse)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\xanim\\xanim.cpp", 4230, 0, "%s", "fromInfo->inuse");
-    animToModel = v8->animToModel;
-    if (v8->animToModel)
-        SL_AddRefToString(v8->animToModel);
-    v10 = XAnimAllocInfoWithParent(to, animToModel, v8->animIndex, toInfoParentIndex, 1);
-    XAnimCloneClientAnimInfo(v8, &g_xAnimInfo[v10]);
-    for (i = v8->children; i; i = g_xAnimInfo[i].next)
-        XAnimCloneClientAnimTree_r(from, to, i, v10);
+    iassert(from);
+    iassert(from->anims);
+    iassert(from->anims->size);
+    iassert(to);
+    iassert(to->anims == from->anims);
+    iassert((fromInfoIndex && (fromInfoIndex < 4096)));
+
+    fromInfo = &g_xAnimInfo[fromInfoIndex];
+    iassert(fromInfo->inuse);
+    animToModel = fromInfo->animToModel;
+    if (fromInfo->animToModel)
+        SL_AddRefToString(fromInfo->animToModel);
+    toInfoIndex = XAnimAllocInfoWithParent(to, animToModel, fromInfo->animIndex, toInfoParentIndex, 1);
+    XAnimCloneClientAnimInfo(fromInfo, &g_xAnimInfo[toInfoIndex]);
+
+    for (fromChildInfoIndex = fromInfo->children; fromChildInfoIndex; fromChildInfoIndex = g_xAnimInfo[fromChildInfoIndex].next)
+        XAnimCloneClientAnimTree_r(from, to, fromChildInfoIndex, toInfoIndex);
 }
 
 void XAnimCloneClientAnimTree(const XAnimTree_s *from, XAnimTree_s *to)
 {
-    //Profile_Begin(312);
-    if (!from)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\xanim\\xanim.cpp", 4254, 0, "%s", "from");
-    if (!from->anims)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\xanim\\xanim.cpp", 4255, 0, "%s", "from->anims");
-    if (!from->anims->size)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\xanim\\xanim.cpp", 4256, 0, "%s", "from->anims->size");
-    if (!to)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\xanim\\xanim.cpp", 4257, 0, "%s", "to");
-    if (to->anims != from->anims)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\xanim\\xanim.cpp", 4258, 0, "%s", "to->anims == from->anims");
-    if (to->children)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\xanim\\xanim.cpp", 4259, 0, "%s", "!to->children");
+    PROF_SCOPED("XAnimCloneClientAnimTree");
+
     iassert(from);
     iassert(from->anims);
     iassert(from->anims->size);
@@ -4201,8 +4160,6 @@ void XAnimCloneClientAnimTree(const XAnimTree_s *from, XAnimTree_s *to)
 
     if (from->children)
         XAnimCloneClientAnimTree_r(from, to, from->children, 0);
-
-    //Profile_EndInternal(0);
 }
 
 static unsigned int XAnimTransfer_r(
@@ -4212,177 +4169,116 @@ static unsigned int XAnimTransfer_r(
     unsigned int toInfoIndex,
     unsigned int toInfoParentIndex)
 {
-    XAnimInfo *v10; // r30
-    unsigned int v11; // r11
+    XAnimInfo *fromInfo; // r30
     unsigned int animToModel; // r31
-    XAnimInfo *v13; // r10
+    XAnimInfo *toInfo2; // r10
     XAnimState *p_state; // r9
-    int v15; // ctr
-    float *v16; // r31
-    int v17; // r8
-    unsigned int prev; // r31
+    unsigned int toChildInfoIndex; // r31
     unsigned int i; // r11
     unsigned int children; // r28
     unsigned int j; // r11
-    unsigned int v22; // r25
-    XAnimInfo *v23; // r27
-    unsigned int v24; // r30
-    unsigned int v25; // r31
-    unsigned int v26; // r31
 
-    if (!from)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\xanim\\xanim.cpp", 1439, 0, "%s", "from");
-    if (!from->anims)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\xanim\\xanim.cpp", 1440, 0, "%s", "from->anims");
-    if (!from->anims->size)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\xanim\\xanim.cpp", 1441, 0, "%s", "from->anims->size");
-    if (!to)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\xanim\\xanim.cpp", 1442, 0, "%s", "to");
-    if (to->anims != from->anims)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\xanim\\xanim.cpp", 1443, 0, "%s", "to->anims == from->anims");
-    if (!fromInfoIndex || fromInfoIndex >= 0x1000)
-        MyAssertHandler(
-            "c:\\trees\\cod3\\cod3src\\src\\xanim\\xanim.cpp",
-            1445,
-            0,
-            "%s\n\t(fromInfoIndex) = %i",
-            "(fromInfoIndex && (fromInfoIndex < 4096))",
-            fromInfoIndex);
-    v10 = &g_xAnimInfo[fromInfoIndex];
-    if (!v10->inuse)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\xanim\\xanim.cpp", 1448, 0, "%s", "fromInfo->inuse");
-    if (!toInfoIndex || (v11 = toInfoIndex << 6, g_xAnimInfo[toInfoIndex].animIndex < (unsigned int)v10->animIndex))
+    iassert(from);
+    iassert(from->anims);
+    iassert(from->anims->size);
+    iassert(to);
+    iassert(to->anims == from->anims);
+    iassert((fromInfoIndex && (fromInfoIndex < 4096)));
+
+    fromInfo = &g_xAnimInfo[fromInfoIndex];
+
+    iassert(fromInfo->inuse);
+
+    if (!toInfoIndex || g_xAnimInfo[toInfoIndex].animIndex < (unsigned int)fromInfo->animIndex)
     {
-        if (!v10->inuse)
-            MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\xanim\\xanim.cpp", 1454, 0, "%s", "fromInfo->inuse");
-        animToModel = v10->animToModel;
-        if (v10->animToModel)
-            SL_AddRefToString(v10->animToModel);
-        toInfoIndex = XAnimAllocInfoWithParent(to, animToModel, v10->animIndex, toInfoParentIndex, 0);
-        v11 = toInfoIndex << 6;
-        v13 = &g_xAnimInfo[toInfoIndex];
-        p_state = &g_xAnimInfo[toInfoIndex].state;
-        v15 = 8;
-        do
-        {
-            p_state->currentAnimTime = 0.0;
-            p_state = (XAnimState *)((char *)p_state + 4);
-            --v15;
-        } while (v15);
-        v13->notifyName = 0;
-        v13->notifyChild = 0;
-        v13->notifyType = 0;
-        v13->notifyIndex = -1;
+        iassert(fromInfo->inuse);
+        animToModel = fromInfo->animToModel;
+        if (fromInfo->animToModel)
+            SL_AddRefToString(fromInfo->animToModel);
+        toInfoIndex = XAnimAllocInfoWithParent(to, animToModel, fromInfo->animIndex, toInfoParentIndex, 0);
+        toInfo2 = &g_xAnimInfo[toInfoIndex];
+
+        memset(&toInfo2->state, 0, sizeof(XAnimState));
+
+        toInfo2->notifyName = 0;
+        toInfo2->notifyChild = 0;
+        toInfo2->notifyType = 0;
+        toInfo2->notifyIndex = -1;
     }
-    v16 = (float *)((char *)&g_xAnimInfo[0].notifyChild + v11);
-    v17 = *(__int16 *)((char *)&g_xAnimInfo[0].notifyIndex + v11);
-    if (v17 != -1)
-        MyAssertHandler(
-            "c:\\trees\\cod3\\cod3src\\src\\xanim\\xanim.cpp",
-            1467,
-            0,
-            "%s\n\t(toInfo->notifyIndex) = %i",
-            "(toInfo->notifyIndex == -1)",
-            v17);
-    v16[8] = v10->state.oldTime;
-    *((_WORD *)v16 + 20) = v10->state.oldCycleCount;
-    v16[12] = v10->state.goalWeight;
-    v16[14] = v10->state.rate;
-    v16[11] = v10->state.goalTime;
-    if (v10->state.instantWeightChange)
-        v16[13] = v10->state.weight;
-    prev = *((unsigned __int16 *)v16 + 6);
-    if (prev)
+
+    XAnimInfo *toInfo = &g_xAnimInfo[toInfoIndex];
+
+    iassert(toInfo->notifyIndex == -1);
+
+    toInfo->state.currentAnimTime = fromInfo->state.oldTime;
+    toInfo->state.cycleCount = fromInfo->state.oldCycleCount;
+    toInfo->state.goalWeight = fromInfo->state.goalWeight;
+    toInfo->state.rate = fromInfo->state.rate;
+    toInfo->state.goalTime = fromInfo->state.goalTime;
+    if (fromInfo->state.instantWeightChange)
+        toInfo->state.weight = fromInfo->state.weight;
+    toChildInfoIndex = toInfo->children;
+
+    if (toChildInfoIndex)
     {
-        for (i = g_xAnimInfo[prev].next; i; i = g_xAnimInfo[i].next)
-            prev = i;
+        for (i = g_xAnimInfo[toChildInfoIndex].next; i; i = g_xAnimInfo[i].next)
+            toChildInfoIndex = i;
     }
-    children = v10->children;
-    if (v10->children)
+
+    children = fromInfo->children;
+
+    if (fromInfo->children)
     {
         for (j = g_xAnimInfo[children].next; j; j = g_xAnimInfo[j].next)
             children = j;
+
         if (children)
         {
             do
             {
-                v22 = children << 6;
-                v23 = &g_xAnimInfo[children];
-                if (prev && !g_xAnimInfo[prev].inuse)
-                    MyAssertHandler(
-                        "c:\\trees\\cod3\\cod3src\\src\\xanim\\xanim.cpp",
-                        1498,
-                        0,
-                        "%s",
-                        "!toChildInfoIndex || g_xAnimInfo[toChildInfoIndex].inuse");
-                if (!v23->inuse)
-                    MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\xanim\\xanim.cpp", 1499, 0, "%s", "fromInfo->inuse");
-                if (prev)
+                fromInfo = &g_xAnimInfo[children];
+                iassert(!toChildInfoIndex || g_xAnimInfo[toChildInfoIndex].inuse);
+                iassert(fromInfo->inuse);
+
+                if (toChildInfoIndex)
                 {
                     while (1)
                     {
-                        v24 = prev << 6;
-                        if (g_xAnimInfo[prev].animIndex <= (unsigned int)v23->animIndex)
+                        if (g_xAnimInfo[toChildInfoIndex].animIndex <= (unsigned int)fromInfo->animIndex)
                             break;
-                        XAnimClearTreeGoalWeightsInternal(to, prev, 0.0, fromInfoIndex);
-                        prev = *(unsigned __int16 *)((char *)&g_xAnimInfo[0].prev + v24);
-                        if (!*(unsigned __int16 *)((char *)&g_xAnimInfo[0].prev + v24))
+                        XAnimClearTreeGoalWeightsInternal(to, toChildInfoIndex, 0.0, fromInfoIndex);
+                        //toChildInfoIndex = *(unsigned __int16 *)((char *)&g_xAnimInfo[0].prev + v24);
+                        toChildInfoIndex = g_xAnimInfo[toChildInfoIndex].prev;
+                        if (!toChildInfoIndex)
                             goto LABEL_48;
                     }
-                    if (prev && !g_xAnimInfo[prev].inuse)
-                        MyAssertHandler(
-                            "c:\\trees\\cod3\\cod3src\\src\\xanim\\xanim.cpp",
-                            1509,
-                            0,
-                            "%s",
-                            "!toChildInfoIndex || g_xAnimInfo[toChildInfoIndex].inuse");
+
+                    iassert(!toChildInfoIndex || g_xAnimInfo[toChildInfoIndex].inuse);
                 }
             LABEL_48:
-                v25 = XAnimTransfer_r(from, to, children, prev, toInfoIndex);
-                if (!v23->inuse)
-                    MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\xanim\\xanim.cpp", 1514, 0, "%s", "fromInfo->inuse");
-                v26 = v25 << 6;
-                if (!*(&g_xAnimInfo[0].inuse + v26))
-                    MyAssertHandler(
-                        "c:\\trees\\cod3\\cod3src\\src\\xanim\\xanim.cpp",
-                        1515,
-                        0,
-                        "%s",
-                        "g_xAnimInfo[toChildInfoIndex].inuse");
-                if (*(unsigned __int16 *)((char *)&g_xAnimInfo[0].animIndex + v26) != v23->animIndex)
-                    MyAssertHandler(
-                        "c:\\trees\\cod3\\cod3src\\src\\xanim\\xanim.cpp",
-                        1517,
-                        0,
-                        "%s",
-                        "g_xAnimInfo[toChildInfoIndex].animIndex == fromInfo->animIndex");
-                prev = *(unsigned __int16 *)((char *)&g_xAnimInfo[0].prev + v26);
-                if (prev && !g_xAnimInfo[prev].inuse)
-                    MyAssertHandler(
-                        "c:\\trees\\cod3\\cod3src\\src\\xanim\\xanim.cpp",
-                        1520,
-                        0,
-                        "%s",
-                        "!toChildInfoIndex || g_xAnimInfo[toChildInfoIndex].inuse");
-                children = *(unsigned __int16 *)((char *)&g_xAnimInfo[0].prev + v22);
-            } while (*(unsigned __int16 *)((char *)&g_xAnimInfo[0].prev + v22));
+                toChildInfoIndex = XAnimTransfer_r(from, to, children, toChildInfoIndex, toInfoIndex);
+                iassert(fromInfo->inuse);
+                iassert(g_xAnimInfo[toChildInfoIndex].inuse);
+                iassert(g_xAnimInfo[toChildInfoIndex].animIndex == fromInfo->animIndex);
+
+                toChildInfoIndex = g_xAnimInfo[toChildInfoIndex].prev;
+                iassert(!toChildInfoIndex || g_xAnimInfo[toChildInfoIndex].inuse);
+
+                children = g_xAnimInfo[children].prev;
+            } while (children);
         }
     }
-    if (prev)
+
+    if (toChildInfoIndex)
     {
-        if (!g_xAnimInfo[prev].inuse)
-            MyAssertHandler(
-                "c:\\trees\\cod3\\cod3src\\src\\xanim\\xanim.cpp",
-                1527,
-                0,
-                "%s",
-                "!toChildInfoIndex || g_xAnimInfo[toChildInfoIndex].inuse");
+        iassert(!toChildInfoIndex || g_xAnimInfo[toChildInfoIndex].inuse);
         do
         {
-            XAnimClearTreeGoalWeightsInternal(to, prev, 0.0, fromInfoIndex);
-            prev = g_xAnimInfo[prev].prev;
-        } while (prev);
+            XAnimClearTreeGoalWeightsInternal(to, toChildInfoIndex, 0.0, fromInfoIndex);
+            toChildInfoIndex = g_xAnimInfo[toChildInfoIndex].prev;
+        } while (toChildInfoIndex);
     }
+
     return toInfoIndex;
 }
 
@@ -4410,11 +4306,12 @@ static void XAnimTransfer(const XAnimTree_s *from, XAnimTree_s *to)
 
 void DObjTransfer(const DObj_s *fromObj, DObj_s *toObj, double dtime)
 {
-    bool v6; // r6
+    bool childHasTimeForParent; // r6
     XAnimTree_s *tree; // r10
-    XAnimState v8; // [sp+60h] [-50h] BYREF
+    XAnimState syncState; // [sp+60h] [-50h] BYREF
 
-    //Profile_Begin(312);
+    PROF_SCOPED("DObjTransfer");
+
     iassert(fromObj);
     iassert(toObj);
 
@@ -4423,10 +4320,10 @@ void DObjTransfer(const DObj_s *fromObj, DObj_s *toObj, double dtime)
         iassert(toObj->tree);
 
         tree = toObj->tree;
-        v8.currentAnimTime = 0.0f;
-        v8.cycleCount = 0;
+        syncState.currentAnimTime = 0.0f;
+        syncState.cycleCount = 0;
         if (tree->children)
-            XAnimUpdateOldTime(toObj, tree->children, &v8, dtime, v6, (bool *)1);
+            XAnimUpdateOldTime(toObj, tree->children, &syncState, dtime, 1, &childHasTimeForParent);
 
         XAnimTransfer(fromObj->tree, toObj->tree);
 
@@ -4435,5 +4332,4 @@ void DObjTransfer(const DObj_s *fromObj, DObj_s *toObj, double dtime)
         toObj->hidePartBits[2] = fromObj->hidePartBits[2];
         toObj->hidePartBits[3] = fromObj->hidePartBits[3];
     }
-    //Profile_EndInternal(0);
 }

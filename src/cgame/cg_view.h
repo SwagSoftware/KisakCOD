@@ -33,18 +33,16 @@ void __cdecl CG_CalcVrect(int localClientNum);
 // local variable allocation has failed, the output may be wrong!
 void __cdecl CG_SmoothCameraZ(cg_s *cgameGlob);
 void __cdecl CG_KickAngles(cg_s *cgameGlob);
-// local variable allocation has failed, the output may be wrong!
 float __cdecl CG_GetVerticalBobFactor(
     const playerState_s *predictedPlayerState,
-    double cycle,
-    double speed,
-    double maxAmp);
-// local variable allocation has failed, the output may be wrong!
+    float cycle,
+    float speed,
+    float maxAmp);
 float __cdecl CG_GetHorizontalBobFactor(
     const playerState_s *predictedPlayerState,
-    double cycle,
-    double speed,
-    double maxAmp);
+    float cycle,
+    float speed,
+    float maxAmp);
 void __cdecl CG_CalculateView_IdleAngles(cg_s *cgameGlob, float *angles);
 void __cdecl CG_CalculateView_BobAngles(const cg_s *cgameGlob, float *angles);
 void __cdecl CG_AddGroundTiltToAngles(int localClientNum, float *angles, const cg_s *cgameGlob);

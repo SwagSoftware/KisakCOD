@@ -337,6 +337,7 @@ snapshot_s *__cdecl CG_ReadNextSnapshot(int localClientNum)
     return v3;
 }
 
+// Debug function
 void __cdecl CG_CheckSnapshot(int localClientNum, const char *caller)
 {
     int numEntities; // r11
@@ -345,7 +346,7 @@ void __cdecl CG_CheckSnapshot(int localClientNum, const char *caller)
     int *v7; // r10
     int i; // r31
     const char *v9; // r3
-    _BYTE v10[2272]; // [sp+50h] [-8E0h] BYREF
+    unsigned char v10[MAX_GENTITIES]; // [sp+50h] [-8E0h] BYREF
 
     if (localClientNum)
         MyAssertHandler(
@@ -355,7 +356,9 @@ void __cdecl CG_CheckSnapshot(int localClientNum, const char *caller)
             "%s\n\t(localClientNum) = %i",
             "(localClientNum == 0)",
             localClientNum);
-    memset(v10, 0, 0x880u);
+
+    memset(v10, 0, MAX_GENTITIES);
+
     if (cgArray[0].snap)
     {
         numEntities = cgArray[0].snap->numEntities;
@@ -449,21 +452,15 @@ void __cdecl CG_SetNextSnap(int localClientNum)
     DObj_s *v31; // r3
     DObj_s *v32; // r3
     FxMarkDObjUpdateContext v33; // [sp+60h] [-2C0h] BYREF
-    unsigned int v34[108]; // [sp+170h] [-1B0h] BYREF
+    unsigned int centInPrevSnapshot[68]; // [sp+170h] [-1B0h] BYREF
 
-    if (localClientNum)
-        MyAssertHandler(
-            "c:\\trees\\cod3\\cod3src\\src\\cgame\\cg_local.h",
-            910,
-            0,
-            "%s\n\t(localClientNum) = %i",
-            "(localClientNum == 0)",
-            localClientNum);
-    if (!cgArray[0].createdNextSnap)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\cgame\\cg_snapshot.cpp", 597, 0, "%s", "cgameGlob->createdNextSnap");
-    cgArray[0].createdNextSnap = 0;
+    cg_s *cgameGlob = CG_GetLocalClientGlobals(localClientNum);
+
+    iassert(cgameGlob->createdNextSnap);
+    cgameGlob->createdNextSnap = 0;
     CG_CheckSnapshot(localClientNum, "CG_SetNextSnap-pre");
-    memset(v34, 0, 0x110u);
+    memset(centInPrevSnapshot, 0, sizeof(centInPrevSnapshot));
+
     snap = cgArray[0].snap;
     if (cgArray[0].snap)
     {
@@ -476,7 +473,7 @@ void __cdecl CG_SetNextSnap(int localClientNum)
             {
                 v6 = *entityNums;
                 v7 = g_clientDirty[*entityNums];
-                v34[*entityNums >> 5] |= 0x80000000 >> (*entityNums & 0x1F);
+                centInPrevSnapshot[*entityNums >> 5] |= 0x80000000 >> (*entityNums & 0x1F);
                 if (v7)
                 {
                     g_clientDirty[v6] = 0;
@@ -546,7 +543,7 @@ void __cdecl CG_SetNextSnap(int localClientNum)
                     MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\cgame\\cg_snapshot.cpp", 662, 0, "%s", "cent->nextValid");
                 v19 = v17 >> 5;
                 v20 = 0x80000000 >> (v17 & 0x1F);
-                v21 = v34[v19];
+                v21 = centInPrevSnapshot[v19];
                 //if ((_cntlzw(v21 & v20) & 0x20) != 0)
                 if (((v21 & v20) == 0))
                 {
@@ -570,7 +567,7 @@ void __cdecl CG_SetNextSnap(int localClientNum)
                 {
                     v22 = v21 & ~v20;
                     eFlags = v18->currentState.eFlags;
-                    v34[v19] = v22;
+                    centInPrevSnapshot[v19] = v22;
                     if ((((unsigned __int8)v18->nextState.lerp.eFlags ^ (unsigned __int8)eFlags) & 2) == 0
                         && v18->currentState.useCount == v18->nextState.lerp.useCount)
                     {
@@ -603,7 +600,7 @@ void __cdecl CG_SetNextSnap(int localClientNum)
     p_duration = &cg_entitiesArray[0][0].currentState.u.earthquake.duration;
     do
     {
-        if (((0x80000000 >> (v26 & 0x1F)) & v34[v26 >> 5]) != 0)
+        if (((0x80000000 >> (v26 & 0x1F)) & centInPrevSnapshot[v26 >> 5]) != 0)
         {
             if (localClientNum)
                 MyAssertHandler(

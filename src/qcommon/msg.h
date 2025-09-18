@@ -20,7 +20,7 @@ struct msg_t
 
 struct netField_t
 {
-	char *name;
+	const char *name;
 	int offset;
 	int bits;
 };

@@ -1482,28 +1482,20 @@ void CG_PrimaryLight(int localClientNum, centity_s *cent) {
 
 void __cdecl CG_InterpolateEntityOrigin(const cg_s *cgameGlob, centity_s *cent)
 {
-    double frameInterpolation; // fp31
-    double v5; // fp13
-    double v6; // fp10
-    double v7; // fp12
-    double v8; // fp9
-    float v9; // [sp+50h] [-40h] BYREF
-    float v10; // [sp+54h] [-3Ch]
-    float v11; // [sp+58h] [-38h]
-    float v12[4]; // [sp+60h] [-30h] BYREF
+    float frameInterpolation; // fp31
+    float current[3]; // [sp+50h] [-40h] BYREF v9
+    float next[3]; // [sp+60h] [-30h] BYREF v12
 
-    if (!cgameGlob->nextSnap)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\cgame\\cg_ents.cpp", 1101, 0, "%s", "cgameGlob->nextSnap");
+    iassert(cgameGlob->nextSnap);
+
     frameInterpolation = cgameGlob->frameInterpolation;
-    BG_EvaluateTrajectory(&cent->currentState.pos, cgameGlob->snap->serverTime, &v9);
-    BG_EvaluateTrajectory(&cent->nextState.lerp.pos, cgameGlob->nextSnap->serverTime, v12);
-    v5 = v10;
-    v6 = (float)(v12[1] - v10);
-    v7 = v11;
-    v8 = (float)(v12[2] - v11);
-    cent->pose.origin[0] = (float)((float)(v12[0] - v9) * (float)frameInterpolation) + v9;
-    cent->pose.origin[1] = (float)((float)v6 * (float)frameInterpolation) + (float)v5;
-    cent->pose.origin[2] = (float)((float)v8 * (float)frameInterpolation) + (float)v7;
+
+    BG_EvaluateTrajectory(&cent->currentState.pos, cgameGlob->snap->serverTime, current);
+    BG_EvaluateTrajectory(&cent->nextState.lerp.pos, cgameGlob->nextSnap->serverTime, next);
+
+    cent->pose.origin[0] = ((next[0] - current[0]) * frameInterpolation) + current[0];
+    cent->pose.origin[1] = ((next[1] - current[0]) * frameInterpolation) + current[1];
+    cent->pose.origin[2] = ((next[2] - current[2]) * frameInterpolation) + current[2];
 }
 
 void __cdecl CG_InterpolateEntityAngles(const cg_s *cgameGlob, centity_s *cent)

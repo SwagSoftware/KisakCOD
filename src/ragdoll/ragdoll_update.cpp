@@ -315,8 +315,8 @@ char __cdecl Ragdoll_CreatePhysJoint(RagdollBody *body, JointDef *jointDef, Join
         jointDef->limitAxes[0][1] = 0.0f;
         jointDef->limitAxes[0][2] = 1.0f;
         jointDef->axisFriction[0] = 0.0f;
-        jointDef->minAngles[0] = -1.5707964f;
-        jointDef->maxAngles[0] = 1.5707964f;
+        jointDef->minAngles[0] = -M_PI_HALF;
+        jointDef->maxAngles[0] = M_PI_HALF;
         ++jointDef->numLimitAxes;
     }
     for (i = 0; i < jointDef->numLimitAxes; ++i)

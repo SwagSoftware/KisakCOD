@@ -563,7 +563,7 @@ double __cdecl Image_CubeMipMapBlurDot(int mipSize)
         result = v4;
         break;
     case 2:
-        v5 = cos(1.5707964);
+        v5 = cos(M_PI_HALF);
         result = v5;
         break;
     case 4:
