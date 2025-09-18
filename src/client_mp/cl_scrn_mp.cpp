@@ -81,8 +81,8 @@ void SCR_UpdateFrame()
 {
     int refreshedUI; // [esp+8h] [ebp-4h]
 
-    if (!Sys_IsMainThread() && !Sys_IsRenderThread())
-        MyAssertHandler(".\\client_mp\\cl_scrn_mp.cpp", 408, 0, "%s", "Sys_IsMainThread() || Sys_IsRenderThread()");
+    iassert(Sys_IsMainThread() || Sys_IsRenderThread());
+
     R_BeginFrame();
     SND_InitFXSounds();
     refreshedUI = CL_CGameRendering(0);

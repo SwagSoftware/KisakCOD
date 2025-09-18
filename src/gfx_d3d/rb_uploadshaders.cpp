@@ -32,17 +32,17 @@ void __cdecl RB_SetUploadMaterialArg(const MaterialShaderArgument *arg)
 {
     switch (arg->type)
     {
-    case 0u:
-    case 1u:
-    case 3u:
-    case 5u:
-    case 6u:
-    case 7u:
+    case MTL_ARG_MATERIAL_VERTEX_CONST:
+    case MTL_ARG_LITERAL_VERTEX_CONST:
+    case MTL_ARG_CODE_PRIM_BEGIN:
+    case MTL_ARG_CODE_PIXEL_CONST:
+    case MTL_ARG_MATERIAL_PIXEL_CONST:
+    case MTL_ARG_LITERAL_PIXEL_CONST:
         return;
-    case 2u:
+    case MTL_ARG_MATERIAL_PIXEL_SAMPLER:
         R_SetSampler(gfxCmdBufContext, arg->dest, 0xAu, rgp.blackImage);
         break;
-    case 4u:
+    case MTL_ARG_CODE_PIXEL_SAMPLER:
         if (arg->u.codeSampler == 3)
         {
             R_SetSampler(gfxCmdBufContext, arg->dest, 0xAu, rgp.blackImage3D);

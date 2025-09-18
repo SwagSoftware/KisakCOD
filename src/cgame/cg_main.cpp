@@ -28,8 +28,8 @@ cg_s cgArray[1];
 cgMedia_t cgMedia;
 
 weaponInfo_s cg_weaponsArray[1][128];
-centity_s cg_entitiesArray[1][2176];
-float cg_entityOriginArray[1][2176][3];
+centity_s cg_entitiesArray[1][MAX_GENTITIES];
+float cg_entityOriginArray[1][MAX_GENTITIES][3];
 
 const dvar_t *cg_hudGrenadeIconEnabledFlash;
 const dvar_t *vehHelicopterHeadSwayOnRollVert;

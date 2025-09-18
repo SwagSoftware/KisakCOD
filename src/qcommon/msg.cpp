@@ -210,7 +210,7 @@ const netField_t playerStateFields[143] =
   { NETF_PL(dofViewmodelStart), 32 },
   { NETF_PL(dofViewmodelEnd), 32 },
   { NETF_PL(meleeChargeYaw), 32 },
-  { NETF_PL(meleeChargeDist), 32 },
+  { NETF_PL(meleeChargeDist), 8 },
   { NETF_PL(meleeChargeTime), 32 },
 };
 

@@ -217,7 +217,7 @@ void __cdecl SCR_UpdateRumble()
 
 void SCR_UpdateFrame()
 {
-    int v0; // r31
+    int refreshedUI; // r31
 
     iassert(Sys_IsMainThread() || Sys_IsRenderThread());
     //Profile_Begin(18);
@@ -226,14 +226,10 @@ void SCR_UpdateFrame()
     //Profile_EndInternal(0);
     SND_InitFXSounds();
     //Profile_Begin(20);
-    v0 = 0;
-    if (Sys_IsMainThread())
-    {
-        v0 = CL_CGameRendering();
-        if (!v0)
-            CL_UpdateSound();
-    }
-    SCR_DrawScreenField(v0);
+    refreshedUI = CL_CGameRendering();
+    if (Sys_IsMainThread() && !refreshedUI)
+        CL_UpdateSound();
+    SCR_DrawScreenField(refreshedUI);
     if (clientUIActives[0].connectionState == CA_ACTIVE)
     {
         //Profile_Begin(349);

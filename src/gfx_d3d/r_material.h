@@ -286,7 +286,7 @@ union MaterialArgumentDef // sizeof=0x4
 };
 struct MaterialShaderArgument // sizeof=0x8
 {                                       // ...
-    unsigned __int16 type;
+    unsigned __int16 type; // $74254F2FBB58A9D84A85080F50CF363D
     unsigned __int16 dest;
     MaterialArgumentDef u;
 };

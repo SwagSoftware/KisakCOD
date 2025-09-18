@@ -161,7 +161,7 @@ void SV_DifficultyHard();
 void SV_DifficultyFu();
 int __cdecl ReadSaveHeader(const char *filename, SaveHeader *header);
 int __cdecl ExtractMapStringFromSaveGame(const char *filename, char *mapname);
-void __cdecl ShowLoadErrorsSummary(const char *mapName, unsigned int count, int a3);
+void __cdecl ShowLoadErrorsSummary(const char *mapName, unsigned int count);
 void __cdecl SV_ClearLoadGame();
 void __cdecl SV_MapRestart(int savegame, int loadScripts);
 int __cdecl CheckForSaveGame(char *mapname, char *filename);

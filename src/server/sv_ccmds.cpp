@@ -344,46 +344,45 @@ int __cdecl ExtractMapStringFromSaveGame(const char *filename, char *mapname)
     return 1;
 }
 
-void __cdecl ShowLoadErrorsSummary(const char *mapName, unsigned int count, int a3)
+void __cdecl ShowLoadErrorsSummary(const char *mapName, unsigned int count)
 {
-    const char *v3; // r6
-    int v4; // r11
+    int showError; // r11
     char *v5; // r11
     char *v7; // r11
     char *v9; // r11
-    char v11[1024]; // [sp+50h] [-410h] BYREF
+    char errstr[1024]; // [sp+50h] [-410h] BYREF
 
-    v3 = mapName;
-    v4 = 0;
+    showError = 0;
     if (com_errorPrintsCount)
     {
         if (count == 1)
-            Com_sprintf(v11, 1024, ERRMSG_SINGLE, mapName);
+            Com_sprintf(errstr, 1024, ERRMSG_SINGLE, mapName, com_errorPrintsCount);
         else
-            Com_sprintf(v11, 1024, ERRMSG_PLURAL, mapName);
-        v5 = v11;
+            Com_sprintf(errstr, 1024, ERRMSG_PLURAL, mapName, com_errorPrintsCount);
+        v5 = errstr;
         while (*v5++)
             ;
-        v4 = v5 - v11 - 1;
+        showError = v5 - errstr - 1;
     }
     if (com_consoleLogOpenFailed)
     {
-        Com_sprintf(&v11[v4], 1024 - v4, "\nUNABLE TO OPEN %s", "console.log");
-        v7 = v11;
+        Com_sprintf(&errstr[showError], 1024 - showError, "\nUNABLE TO OPEN %s", "console.log");
+        v7 = errstr;
         while (*v7++)
             ;
-        v4 = v7 - v11 - 1;
+        showError = v7 - errstr - 1;
     }
     if (com_missingAssetOpenFailed)
     {
-        Com_sprintf(&v11[v4], 1024 - v4, "\nUNABLE TO OPEN %s", "missingasset.csv");
-        v9 = v11;
+        Com_sprintf(&errstr[showError], 1024 - showError, "\nUNABLE TO OPEN %s", "missingasset.csv");
+        v9 = errstr;
         while (*v9++)
             ;
-        v4 = v9 - v11 - 1;
+        showError = v9 - errstr - 1;
     }
-    if (v4)
-        Com_Error(ERR_MAPLOADERRORSUMMARY, v11, a3, v3);
+
+    if (showError)
+        Com_Error(ERR_MAPLOADERRORSUMMARY, errstr);
 }
 
 void __cdecl SV_ClearLoadGame()
@@ -1088,34 +1087,26 @@ void __cdecl SV_RemoveOperatorCommands()
 
 void SV_Map_f()
 {
-    char *v0; // r3
-    bool v1; // r31
-    __int64 v2; // r10
-    __int64 v3; // r8
-    __int64 v4; // r6
-    int v5; // r5
-    int v6; // [sp+8h] [-E8h]
-    int v7; // [sp+Ch] [-E4h]
-    int v8; // [sp+10h] [-E0h]
-    int v9; // [sp+14h] [-DCh]
-    int v10; // [sp+18h] [-D8h]
-    int v11; // [sp+1Ch] [-D4h]
-    int v12; // [sp+20h] [-D0h]
-    int v13; // [sp+24h] [-CCh]
-    char v14[64]; // [sp+50h] [-A0h] BYREF
-    char v15[72]; // [sp+90h] [-60h] BYREF
+    char *hasSVG; // r3
+    bool savegame; // r31
+    char mapname[64]; // [sp+50h] [-A0h] BYREF
+    char filename[72]; // [sp+90h] [-60h] BYREF
 
     com_errorPrintsCount = 0;
-    SV_Cmd_ArgvBuffer(1, v14, 64);
+    SV_Cmd_ArgvBuffer(1, mapname, 64);
     //if (!ui_skipMainLockout->current.enabled)
     //    SV_SelectSaveDevice_f();
-    I_strlwr(v14);
-    v0 = strstr(v14, ".svg");
-    v1 = v0 != 0;
-    if (v0)
+    I_strlwr(mapname);
+    hasSVG = strstr(mapname, ".svg");
+
+    hasSVG = 0; // LWSS ADD -- // KISAKTODO !! (SP saves!)
+
+    savegame = hasSVG != 0;
+
+    if (hasSVG)
     {
-        I_strncpyz(v15, v14, 64);
-        if (!(unsigned __int8)ExtractMapStringFromSaveGame(v15, v14))
+        I_strncpyz(filename, mapname, 64);
+        if (!(unsigned __int8)ExtractMapStringFromSaveGame(filename, mapname))
         {
             //HIDWORD(v4) = &unk_8207A5B4;
             G_SaveError(ERR_DROP, SAVE_ERROR_MISSING_DEVICE, "Unable to extract map string name from save");
@@ -1123,9 +1114,9 @@ void SV_Map_f()
     }
     Dvar_SetBool(sv_cheats, 1);
     CL_ShutdownDemo();
-    FS_ConvertPath(v14);
-    SV_SpawnServer(v14, v1);
-    ShowLoadErrorsSummary(v14, com_errorPrintsCount, v5);
+    FS_ConvertPath(mapname);
+    SV_SpawnServer(mapname, savegame);
+    ShowLoadErrorsSummary(mapname, com_errorPrintsCount);
 }
 
 cmd_function_s SV_NextLevel_f_VAR;

@@ -604,13 +604,13 @@ void __cdecl R_SetPassShaderObjectArguments(
     const GfxImage *image; // [esp+Ch] [ebp-8h]
     unsigned __int8 samplerState; // [esp+13h] [ebp-1h] BYREF
 
-    while (arg->type == 3)
+    while (arg->type == MTL_ARG_CODE_VERTEX_CONST)
     {
         R_SetVertexShaderConstantFromCode(context, arg++);
         if (!--argCount)
             return;
     }
-    while (arg->type == 4)
+    while (arg->type == MTL_ARG_CODE_PIXEL_SAMPLER)
     {
         image = R_GetTextureFromCode(context.source, arg->u.codeSampler, &samplerState);
         if (!image)

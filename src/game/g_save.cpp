@@ -1908,6 +1908,8 @@ void G_CheckAllEntities()
 
 void __cdecl G_SaveInitState(SaveGame *save)
 {
+    return; // KISAKTODO !! (SP saves!)
+
     signed int i; // r28
     const char *szInternalName; // r29
     const char *v4; // r11
@@ -1945,6 +1947,8 @@ void __cdecl G_SaveInitState(SaveGame *save)
 
 void __cdecl G_SaveMainState(bool savegame, SaveGame *save)
 {
+    return; // KISAKTODO !! (SP saves!)
+
     MemoryFile *memFile; // r3
     unsigned int UsedSize; // r3
     MemoryFile *v6; // r3
