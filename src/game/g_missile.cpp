@@ -2655,7 +2655,7 @@ void __cdecl G_InitGrenadeEntity(gentity_s *parent, gentity_s *grenade)
 
     grenade->handler = ENT_HANDLER_GRENADE;
     grenade->missileTargetEnt.setEnt(NULL);
-    G_BroadcastEntity(grenade);
+    //G_BroadcastEntity(grenade);
     grenade->r.svFlags = 4;
     if (weapDef->offhandClass == OFFHAND_CLASS_FRAG_GRENADE)
         G_MakeMissilePickupItem(grenade);
