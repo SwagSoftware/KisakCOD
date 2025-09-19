@@ -559,7 +559,7 @@ void  R_GenerateWorldOutdoorLookupMatrix(
 
 const GfxImage *__cdecl R_GetTextureFromCode(
     GfxCmdBufSourceState *source,
-    unsigned int codeTexture,
+    MaterialTextureSource codeTexture,
     unsigned __int8 *samplerState)
 {
     const char *v3; // eax

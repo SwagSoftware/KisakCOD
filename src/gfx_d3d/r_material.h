@@ -25,7 +25,7 @@ enum $74254F2FBB58A9D84A85080F50CF363D : __int32
     MLT_ARG_COUNT = 0x8,
 };
 
-enum MaterialTextureSource : __int32
+enum MaterialTextureSource : unsigned int
 {                                       // ...
     TEXTURE_SRC_CODE_BLACK = 0x0, // ...
     TEXTURE_SRC_CODE_WHITE = 0x1, // ...
@@ -281,7 +281,7 @@ union MaterialArgumentDef // sizeof=0x4
 {                                       // ...
     const float *literalConst;
     MaterialArgumentCodeConst codeConst;
-    unsigned int codeSampler;
+    MaterialTextureSource codeSampler;
     unsigned int nameHash;
 };
 struct MaterialShaderArgument // sizeof=0x8

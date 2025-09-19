@@ -64,16 +64,9 @@ void __cdecl RB_ApplyColorManipulationSplitscreen(const GfxViewInfo *viewInfo)
 
 void RB_GetResolvedScene()
 {
-    if (!gfxCmdBufSourceState.input.codeImages[11])
+    if (!gfxCmdBufSourceState.input.codeImages[TEXTURE_SRC_CODE_RESOLVED_SCENE])
     {
-        if (gfxCmdBufState.renderTargetId != R_RENDERTARGET_SCENE)
-            MyAssertHandler(
-                ".\\rb_postfx.cpp",
-                225,
-                0,
-                "gfxCmdBufState.renderTargetId == R_RENDERTARGET_SCENE\n\t%i, %i",
-                gfxCmdBufState.renderTargetId,
-                2);
+        iassert(gfxCmdBufState.renderTargetId == R_RENDERTARGET_SCENE);
         R_Resolve(gfxCmdBufContext, gfxRenderTargets[4].image);
         R_SetCodeImageTexture(&gfxCmdBufSourceState, 0xBu, gfxRenderTargets[4].image);
     }

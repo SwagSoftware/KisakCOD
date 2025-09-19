@@ -5,6 +5,8 @@
 #include <binklib/binktextures.h>
 #include "r_material.h"
 
+#define CINEMATIC_INVALID_IMAGE_FRAME -1
+
 enum CinematicEnum : __int32
 {                                       // ...
     CINEMATIC_NOT_PAUSED = 0x0,
@@ -86,7 +88,7 @@ void R_Cinematic_RelinquishIO();
 void R_Cinematic_CheckBinkError();
 void __cdecl R_Cinematic_InitBinkVolumes();
 void __cdecl R_Cinematic_Init();
-unsigned int *R_Cinematic_ReserveMemory();
+void R_Cinematic_ReserveMemory();
 void __cdecl  R_Cinematic_Thread(unsigned int threadContext);
 void R_Cinematic_UpdateFrame_Core2();
 void __cdecl R_Cinematic_UpdateFrame_Core(
@@ -109,7 +111,7 @@ void __cdecl R_Cinematic_HunksOpen(int activeTexture, char playbackFlags);
 void __cdecl CinematicHunk_Open(CinematicHunk *hunk, char *memory, int size);
 void __cdecl R_Cinematic_HunksAllocate(int activeTexture, char playbackFlags);
 void __cdecl R_Cinematic_HunksReset(int activeTexture, char playbackFlags);
-IDirect3DTexture9 *R_Cinematic_InitBinkTextures();
+void R_Cinematic_InitBinkTextures();
 void* __stdcall R_Cinematic_Bink_Alloc(unsigned int bytes);
 void __stdcall R_Cinematic_Bink_Free(void *ptr);
 bool __cdecl R_Cinematic_BinkOpen(

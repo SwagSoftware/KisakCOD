@@ -2603,7 +2603,7 @@ char __cdecl Material_AddShaderArgumentFromMaterial(
             "arg->dest doesn't index R_MAX_PIXEL_SHADER_CONSTS\n\t%i not in [0, %i)",
             arg->dest,
             256);
-    arg->u.codeSampler = R_HashString(name);
+    arg->u.codeSampler = (MaterialTextureSource)R_HashString(name);
     return MaterialAddShaderArgument(shaderName, paramName, arg, registerUsage);
 }
 
@@ -2626,13 +2626,13 @@ char __cdecl Material_AddShaderArgumentFromLiteral(
             "arg->dest doesn't index R_MAX_PIXEL_SHADER_CONSTS\n\t%i not in [0, %i)",
             arg->dest,
             256);
-    arg->u.codeSampler = (uint32)literal;
+    arg->u.literalConst = literal;
     return MaterialAddShaderArgument(shaderName, paramName, arg, registerUsage);
 }
 
 void __cdecl Material_AddShaderArgumentFromCodeSampler(
     unsigned __int16 type,
-    unsigned int codeSampler,
+    MaterialTextureSource codeSampler,
     ShaderUniformDef *dest,
     MaterialShaderArgument *arg)
 {
@@ -2831,7 +2831,7 @@ bool __cdecl Material_AddShaderArgument(
                 return 0;
             Material_AddShaderArgumentFromCodeSampler(
                 argSource->type,
-                indexOffseta + argSource->indexRange.first + argSource->u.codeIndex,
+                (MaterialTextureSource)(indexOffseta + argSource->indexRange.first + argSource->u.codeIndex),
                 destb,
                 &argTable[*usedCount]);
             ++*usedCount;

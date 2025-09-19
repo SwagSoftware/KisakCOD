@@ -3012,8 +3012,8 @@ void __cdecl RB_SetBspImages()
             0,
             "%s",
             "!rgp.world->skyImage || (rgp.world->skySamplerState & SAMPLER_FILTER_MASK)");
-    gfxCmdBufInput.codeImages[17] = rgp.world->outdoorImage;
-    gfxCmdBufInput.codeImages[14] = rgp.world->skyImage;
+    gfxCmdBufInput.codeImages[TEXTURE_SRC_CODE_OUTDOOR] = rgp.world->outdoorImage;
+    gfxCmdBufInput.codeImages[TEXTURE_SRC_CODE_SKY] = rgp.world->skyImage;
     gfxCmdBufInput.codeImageSamplerStates[14] = rgp.world->skySamplerState;
 }
 
@@ -3033,71 +3033,91 @@ void __cdecl RB_InitCodeImages()
     unsigned __int8 v0; // [esp+Eh] [ebp-16h]
     unsigned __int8 shadowmapSamplerState; // [esp+Fh] [ebp-15h]
 
-    gfxCmdBufInput.codeImages[0] = rgp.blackImage;
-    gfxCmdBufInput.codeImageSamplerStates[0] = 1;
-    rg.codeImageNames[0] = 0;
-    gfxCmdBufInput.codeImages[1] = rgp.whiteImage;
-    gfxCmdBufInput.codeImageSamplerStates[1] = 1;
-    rg.codeImageNames[1] = 0;
-    gfxCmdBufInput.codeImages[2] = rgp.identityNormalMapImage;
-    gfxCmdBufInput.codeImageSamplerStates[2] = 1;
-    rg.codeImageNames[2] = 0;
-    gfxCmdBufInput.codeImages[3] = 0;
-    gfxCmdBufInput.codeImageSamplerStates[3] = -30;
-    rg.codeImageNames[3] = 0;
-    gfxCmdBufInput.codeImages[6] = gfxRenderTargets[9].image;
-    gfxCmdBufInput.codeImageSamplerStates[6] = 98;
-    rg.codeImageNames[6] = "shadowCookieSampler";
+    gfxCmdBufInput.codeImages[TEXTURE_SRC_CODE_BLACK] = rgp.blackImage;
+    gfxCmdBufInput.codeImageSamplerStates[TEXTURE_SRC_CODE_BLACK] = 1;
+    rg.codeImageNames[TEXTURE_SRC_CODE_BLACK] = 0;
+
+    gfxCmdBufInput.codeImages[TEXTURE_SRC_CODE_WHITE] = rgp.whiteImage;
+    gfxCmdBufInput.codeImageSamplerStates[TEXTURE_SRC_CODE_WHITE] = 1;
+    rg.codeImageNames[TEXTURE_SRC_CODE_WHITE] = 0;
+
+    gfxCmdBufInput.codeImages[TEXTURE_SRC_CODE_IDENTITY_NORMAL_MAP] = rgp.identityNormalMapImage;
+    gfxCmdBufInput.codeImageSamplerStates[TEXTURE_SRC_CODE_IDENTITY_NORMAL_MAP] = 1;
+    rg.codeImageNames[TEXTURE_SRC_CODE_IDENTITY_NORMAL_MAP] = 0;
+
+    gfxCmdBufInput.codeImages[TEXTURE_SRC_CODE_MODEL_LIGHTING] = 0;
+    gfxCmdBufInput.codeImageSamplerStates[TEXTURE_SRC_CODE_MODEL_LIGHTING] = -30;
+    rg.codeImageNames[TEXTURE_SRC_CODE_MODEL_LIGHTING] = 0;
+
+    gfxCmdBufInput.codeImages[TEXTURE_SRC_CODE_SHADOWCOOKIE] = gfxRenderTargets[9].image;
+    gfxCmdBufInput.codeImageSamplerStates[TEXTURE_SRC_CODE_SHADOWCOOKIE] = 98;
+    rg.codeImageNames[TEXTURE_SRC_CODE_SHADOWCOOKIE] = "shadowCookieSampler";
     shadowmapSamplerState = gfxMetrics.shadowmapSamplerState;
-    gfxCmdBufInput.codeImages[7] = gfxRenderTargets[13].image;
-    gfxCmdBufInput.codeImageSamplerStates[7] = shadowmapSamplerState;
-    rg.codeImageNames[7] = "shadowmapSamplerSun";
+
+    gfxCmdBufInput.codeImages[TEXTURE_SRC_CODE_SHADOWMAP_SUN] = gfxRenderTargets[13].image;
+    gfxCmdBufInput.codeImageSamplerStates[TEXTURE_SRC_CODE_SHADOWMAP_SUN] = shadowmapSamplerState;
+    rg.codeImageNames[TEXTURE_SRC_CODE_SHADOWMAP_SUN] = "shadowmapSamplerSun";
     v0 = gfxMetrics.shadowmapSamplerState;
-    gfxCmdBufInput.codeImages[8] = 0;
-    gfxCmdBufInput.codeImageSamplerStates[8] = v0;
-    rg.codeImageNames[8] = "shadowmapSamplerSpot";
-    gfxCmdBufInput.codeImages[9] = 0;
-    gfxCmdBufInput.codeImageSamplerStates[9] = 98;
-    rg.codeImageNames[9] = "feedbackSampler";
-    gfxCmdBufInput.codeImages[10] = 0;
-    gfxCmdBufInput.codeImageSamplerStates[10] = 98;
-    rg.codeImageNames[10] = 0;
-    gfxCmdBufInput.codeImages[11] = 0;
-    gfxCmdBufInput.codeImageSamplerStates[11] = 98;
-    rg.codeImageNames[11] = 0;
-    gfxCmdBufInput.codeImages[12] = gfxRenderTargets[11].image;
-    gfxCmdBufInput.codeImageSamplerStates[12] = 98;
-    rg.codeImageNames[12] = "postEffect0";
-    gfxCmdBufInput.codeImages[13] = gfxRenderTargets[12].image;
-    gfxCmdBufInput.codeImageSamplerStates[13] = 98;
-    rg.codeImageNames[13] = "postEffect1";
-    gfxCmdBufInput.codeImages[14] = 0;
-    gfxCmdBufInput.codeImageSamplerStates[14] = 0;
-    rg.codeImageNames[14] = "sampler.sky";
-    gfxCmdBufInput.codeImages[15] = 0;
-    gfxCmdBufInput.codeImageSamplerStates[15] = 0;
-    rg.codeImageNames[15] = "attenuationSampler";
-    gfxCmdBufInput.codeImages[16] = 0;
-    gfxCmdBufInput.codeImageSamplerStates[16] = 98;
-    rg.codeImageNames[16] = 0;
-    gfxCmdBufInput.codeImages[17] = 0;
+
+    gfxCmdBufInput.codeImages[TEXTURE_SRC_CODE_SHADOWMAP_SPOT] = 0;
+    gfxCmdBufInput.codeImageSamplerStates[TEXTURE_SRC_CODE_SHADOWMAP_SPOT] = v0;
+    rg.codeImageNames[TEXTURE_SRC_CODE_SHADOWMAP_SPOT] = "shadowmapSamplerSpot";
+
+    gfxCmdBufInput.codeImages[TEXTURE_SRC_CODE_FEEDBACK] = 0;
+    gfxCmdBufInput.codeImageSamplerStates[TEXTURE_SRC_CODE_FEEDBACK] = 98;
+    rg.codeImageNames[TEXTURE_SRC_CODE_FEEDBACK] = "feedbackSampler";
+
+    gfxCmdBufInput.codeImages[TEXTURE_SRC_CODE_RESOLVED_POST_SUN] = 0;
+    gfxCmdBufInput.codeImageSamplerStates[TEXTURE_SRC_CODE_RESOLVED_POST_SUN] = 98;
+    rg.codeImageNames[TEXTURE_SRC_CODE_RESOLVED_POST_SUN] = 0;
+
+    gfxCmdBufInput.codeImages[TEXTURE_SRC_CODE_RESOLVED_SCENE] = 0;
+    gfxCmdBufInput.codeImageSamplerStates[TEXTURE_SRC_CODE_RESOLVED_SCENE] = 98;
+    rg.codeImageNames[TEXTURE_SRC_CODE_RESOLVED_SCENE] = 0;
+
+    gfxCmdBufInput.codeImages[TEXTURE_SRC_CODE_POST_EFFECT_0] = gfxRenderTargets[11].image;
+    gfxCmdBufInput.codeImageSamplerStates[TEXTURE_SRC_CODE_POST_EFFECT_0] = 98;
+    rg.codeImageNames[TEXTURE_SRC_CODE_POST_EFFECT_0] = "postEffect0";
+
+    gfxCmdBufInput.codeImages[TEXTURE_SRC_CODE_POST_EFFECT_1] = gfxRenderTargets[12].image;
+    gfxCmdBufInput.codeImageSamplerStates[TEXTURE_SRC_CODE_POST_EFFECT_1] = 98;
+    rg.codeImageNames[TEXTURE_SRC_CODE_POST_EFFECT_1] = "postEffect1";
+
+    gfxCmdBufInput.codeImages[TEXTURE_SRC_CODE_SKY] = 0;
+    gfxCmdBufInput.codeImageSamplerStates[TEXTURE_SRC_CODE_SKY] = 0;
+    rg.codeImageNames[TEXTURE_SRC_CODE_SKY] = "sampler.sky";
+
+    gfxCmdBufInput.codeImages[TEXTURE_SRC_CODE_LIGHT_ATTENUATION] = 0;
+    gfxCmdBufInput.codeImageSamplerStates[TEXTURE_SRC_CODE_LIGHT_ATTENUATION] = 0;
+    rg.codeImageNames[TEXTURE_SRC_CODE_LIGHT_ATTENUATION] = "attenuationSampler";
+
+    gfxCmdBufInput.codeImages[TEXTURE_SRC_CODE_DYNAMIC_SHADOWS] = 0;
+    gfxCmdBufInput.codeImageSamplerStates[TEXTURE_SRC_CODE_DYNAMIC_SHADOWS] = 98;
+    rg.codeImageNames[TEXTURE_SRC_CODE_DYNAMIC_SHADOWS] = 0;
+
+    gfxCmdBufInput.codeImages[TEXTURE_SRC_CODE_OUTDOOR] = 0;
     gfxCmdBufInput.codeImageSamplerStates[17] = 98;
     rg.codeImageNames[17] = 0;
-    gfxCmdBufInput.codeImages[18] = gfxRenderTargets[5].image;
-    gfxCmdBufInput.codeImageSamplerStates[18] = 97;
-    rg.codeImageNames[18] = 0;
-    gfxCmdBufInput.codeImages[22] = 0;
-    gfxCmdBufInput.codeImageSamplerStates[22] = 98;
-    rg.codeImageNames[22] = "cinematicY";
-    gfxCmdBufInput.codeImages[23] = 0;
-    gfxCmdBufInput.codeImageSamplerStates[23] = 98;
-    rg.codeImageNames[23] = "cinematicCr";
-    gfxCmdBufInput.codeImages[24] = 0;
-    gfxCmdBufInput.codeImageSamplerStates[24] = 98;
-    rg.codeImageNames[24] = "cinematicCb";
-    gfxCmdBufInput.codeImages[25] = 0;
-    gfxCmdBufInput.codeImageSamplerStates[25] = 98;
-    rg.codeImageNames[25] = "cinematicA";
+
+    gfxCmdBufInput.codeImages[TEXTURE_SRC_CODE_FLOATZ] = gfxRenderTargets[5].image;
+    gfxCmdBufInput.codeImageSamplerStates[TEXTURE_SRC_CODE_FLOATZ] = 97;
+    rg.codeImageNames[TEXTURE_SRC_CODE_FLOATZ] = 0;
+
+    gfxCmdBufInput.codeImages[TEXTURE_SRC_CODE_CINEMATIC_Y] = 0;
+    gfxCmdBufInput.codeImageSamplerStates[TEXTURE_SRC_CODE_CINEMATIC_Y] = 98;
+    rg.codeImageNames[TEXTURE_SRC_CODE_CINEMATIC_Y] = "cinematicY";
+
+    gfxCmdBufInput.codeImages[TEXTURE_SRC_CODE_CINEMATIC_CR] = 0;
+    gfxCmdBufInput.codeImageSamplerStates[TEXTURE_SRC_CODE_CINEMATIC_CR] = 98;
+    rg.codeImageNames[TEXTURE_SRC_CODE_CINEMATIC_CR] = "cinematicCr";
+
+    gfxCmdBufInput.codeImages[TEXTURE_SRC_CODE_CINEMATIC_CB] = 0;
+    gfxCmdBufInput.codeImageSamplerStates[TEXTURE_SRC_CODE_CINEMATIC_CB] = 98;
+    rg.codeImageNames[TEXTURE_SRC_CODE_CINEMATIC_CB] = "cinematicCb";
+
+    gfxCmdBufInput.codeImages[TEXTURE_SRC_CODE_CINEMATIC_A] = 0;
+    gfxCmdBufInput.codeImageSamplerStates[TEXTURE_SRC_CODE_CINEMATIC_A] = 98;
+    rg.codeImageNames[TEXTURE_SRC_CODE_CINEMATIC_A] = "cinematicA";
 }
 
 void __cdecl RB_RegisterBackendAssets()

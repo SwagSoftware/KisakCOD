@@ -57,7 +57,7 @@ add_executable(${PROJECT_NAME}
     ${STEAM_HEADERS}
 )
 
-target_compile_definitions(${PROJECT_NAME} PUBLIC KISAK_SP)
+target_compile_definitions(${PROJECT_NAME} PUBLIC KISAK_SP CINEMA USE_SEPARATE_BLIT_TEXTURE)
 
 # We need all of the pre/post-build commands
 include(${SCRIPTS_DIR}/pre_build.cmake)

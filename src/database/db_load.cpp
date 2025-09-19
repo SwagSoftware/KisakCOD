@@ -1931,7 +1931,7 @@ void __cdecl Load_MaterialArgumentDef(bool atStreamStart)
         {
             if (varMaterialArgumentDef->codeSampler == -1)
             {
-                varMaterialArgumentDef->codeSampler = (uint32_t)AllocLoad_FxElemVisStateSample();
+                varMaterialArgumentDef->codeSampler = (MaterialTextureSource)(unsigned int)AllocLoad_FxElemVisStateSample();
                 varfloat = (float *)varMaterialArgumentDef->codeSampler;
                 Load_floatArray(1, 4);
             }

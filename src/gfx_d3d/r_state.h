@@ -237,7 +237,7 @@ void  R_GenerateWorldOutdoorLookupMatrix(
     float (*outMatrix)[4]);
 const GfxImage *__cdecl R_GetTextureFromCode(
     GfxCmdBufSourceState *source,
-    unsigned int codeTexture,
+    MaterialTextureSource codeTexture,
     unsigned __int8 *samplerState);
 void __cdecl R_TextureFromCodeError(GfxCmdBufSourceState *source, unsigned int codeTexture);
 const GfxImage *__cdecl R_OverrideGrayscaleImage(const dvar_s *dvar);
