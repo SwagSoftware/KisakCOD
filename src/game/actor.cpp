@@ -2228,150 +2228,126 @@ bool __cdecl Path_UseMomentum(actor_s *self)
 
 void __cdecl Path_UpdateMovementDelta(actor_s *self, double fMoveDist)
 {
-    path_t *p_Path; // r30
-    gentity_s *ent; // r11
+    path_t *pPath; // r30
     int iHitEntnum; // r4
-    bool IsDodgeEntity; // r3
-    long double v8; // fp2
-    double v9; // fp12
-    AISpecies species; // r9
-    double v11; // fp11
-    double v12; // fp10
+    long double lookAheadLen; // fp2
+    double calculatedLen; // fp12
     int moveHistoryIndex; // r29
-    double v14; // fp0
-    double v15; // fp10
-    double v16; // fp0
-    double sideMove; // fp11
-    double v18; // fp0
-    double v19; // fp12
-    double v20; // fp7
-    long double v21; // fp2
-    long double v22; // fp2
-    double v23; // fp0
-    double fLookaheadDist; // fp1
-    double v25; // fp13
-    double v26; // fp11
-    float *v27; // r11
-    double v28; // fp12
-    float v29; // [sp+50h] [-90h] BYREF
-    float v30; // [sp+54h] [-8Ch]
-    float v31; // [sp+58h] [-88h] BYREF
-    float v32; // [sp+5Ch] [-84h]
-    float v33; // [sp+60h] [-80h]
-    float v34; // [sp+68h] [-78h] BYREF
-    float v35; // [sp+6Ch] [-74h]
-    float v36; // [sp+70h] [-70h]
-    float v37; // [sp+78h] [-68h] BYREF
-    float v38; // [sp+7Ch] [-64h]
-    float v39; // [sp+80h] [-60h]
-    float v40[6]; // [sp+88h] [-58h] BYREF
+    float vWishDir[3];
+    float vNewDir[3];
+    float maxSideMove[2];
+    float perp[3];
+    float vEndPos[3];
+    float dot[3];
 
-    p_Path = &self->Path;
-    if (self == (actor_s *)-796)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\actor.cpp", 5281, 0, "%s", "pPath");
-    if (p_Path->wPathLen <= 0)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\actor.cpp", 5282, 0, "%s", "pPath->wPathLen > 0");
-    ent = self->ent;
-    iHitEntnum = self->Physics.iHitEntnum;
-    v34 = self->ent->r.currentOrigin[0];
-    v35 = ent->r.currentOrigin[1];
-    v36 = ent->r.currentOrigin[2];
-    IsDodgeEntity = Actor_IsDodgeEntity(self, iHitEntnum);
-    Path_UpdateLookahead(p_Path, &v34, IsDodgeEntity, 0, 1);
-    v9 = p_Path->lookaheadDir[0];
-    species = self->species;
-    v11 = p_Path->lookaheadDir[1];
-    v12 = p_Path->lookaheadDir[2];
+    pPath = &self->Path;
+    iassert(pPath->wPathLen > 0);
+
+    vWishDir[0] = self->ent->r.currentOrigin[0];
+    vWishDir[1] = self->ent->r.currentOrigin[1];
+    vWishDir[2] = self->ent->r.currentOrigin[2];
+
+    Path_UpdateLookahead(pPath, vWishDir, Actor_IsDodgeEntity(self, self->Physics.iHitEntnum), 0, 1);
+
+    perp[0] = pPath->lookaheadDir[0];
+    perp[1] = pPath->lookaheadDir[1];
+    perp[2] = pPath->lookaheadDir[2];
     moveHistoryIndex = self->moveHistoryIndex;
-    v31 = p_Path->lookaheadDir[0];
-    v32 = v11;
-    v33 = v12;
-    v14 = (float)((float)((float)((float)fMoveDist * (float)20.0) - (float)(g_actorAssumedSpeed[species] * (float)0.5))
-        / (float)(g_actorAssumedSpeed[species] * (float)0.5));
-    if (v14 > 0.0)
+    float speed = g_actorAssumedSpeed[self->species];
+    float t = ((fMoveDist * 20.0f) - (speed * 0.5f)) / (speed * 0.5f);
+
+    float vLookDir[2];
+
+    if (t > 0.0f)
     {
-        if (v14 < 1.0)
+        if (t < 1.0f)
         {
-            v15 = (float)(self->Path.forwardLookaheadDir2D[1]
-                * (float)((float)((float)((float)fMoveDist * (float)20.0)
-                    - (float)(g_actorAssumedSpeed[species] * (float)0.5))
-                    / (float)(g_actorAssumedSpeed[species] * (float)0.5)));
-            v16 = (float)((float)1.0
-                - (float)((float)((float)((float)fMoveDist * (float)20.0)
-                    - (float)(g_actorAssumedSpeed[species] * (float)0.5))
-                    / (float)(g_actorAssumedSpeed[species] * (float)0.5)));
-            v29 = (float)((float)v9
-                * (float)((float)1.0
-                    - (float)((float)((float)((float)fMoveDist * (float)20.0)
-                        - (float)(g_actorAssumedSpeed[species] * (float)0.5))
-                        / (float)(g_actorAssumedSpeed[species] * (float)0.5))))
-                + (float)(self->Path.forwardLookaheadDir2D[0]
-                    * (float)((float)((float)((float)fMoveDist * (float)20.0)
-                        - (float)(g_actorAssumedSpeed[species] * (float)0.5))
-                        / (float)(g_actorAssumedSpeed[species] * (float)0.5)));
-            v30 = (float)((float)v11 * (float)v16) + (float)v15;
-            Vec2Normalize(&v29);
+            //forwardLookaheadDir2D = self_->Path.forwardLookaheadDir2D;
+            vLookDir[0] = t * self->Path.forwardLookaheadDir2D[0];
+            vLookDir[1] = t * self->Path.forwardLookaheadDir2D[1];
+            t = 1.0 - t;
+            vLookDir[0] = (float)(t * perp[0]) + vLookDir[0];
+            vLookDir[1] = (float)(t * perp[1]) + vLookDir[1];
+            Vec2Normalize(vLookDir);
         }
         else
         {
-            v29 = self->Path.forwardLookaheadDir2D[0];
-            v30 = self->Path.forwardLookaheadDir2D[1];
+            //LODWORD(v16[0]) = self_->Path.forwardLookaheadDir2D;
+            //*(_QWORD *)vLookDir = *(_QWORD *)self_->Path.forwardLookaheadDir2D;
+            vLookDir[0] = self->Path.forwardLookaheadDir2D[0];
+            vLookDir[1] = self->Path.forwardLookaheadDir2D[1];
         }
     }
     else
     {
-        v29 = v9;
-        v30 = v11;
+        vLookDir[0] = perp[0];
+        vLookDir[1] = perp[1];
     }
-    if (self->sideMove != 0.0 && !Path_CompleteLookahead(p_Path))
+    if (self->sideMove != 0.0 && !Path_CompleteLookahead(pPath))
     {
-        sideMove = self->sideMove;
-        v18 = (float)(p_Path->fLookaheadDist * (float)0.5);
-        v19 = I_fabs(sideMove);
-        v20 = (float)(p_Path->fLookaheadDist * v32);
-        if (v18 > v19)
-            v18 = v19;
-        if (sideMove < 0.0)
-            v18 = -v18;
-        v37 = (float)(p_Path->fLookaheadDist * v31) + (float)((float)v18 * v32);
-        v38 = (float)v20 + (float)((float)v18 * (float)-v31);
-        Vec2Normalize(&v37);
-        v40[0] = (float)(v37 * (float)60.0) + v34;
-        v40[1] = (float)(v38 * (float)60.0) + v35;
-        v39 = v33;
-        v40[2] = (float)(v33 * (float)60.0) + v36;
-        if (Path_LookaheadPredictionTrace(p_Path, &v34, v40))
+        vNewDir[1] = perp[1];
+        vNewDir[2] = (-perp[0]);
+        vNewDir[0] = pPath->fLookaheadDist;
+        maxSideMove[0] = vNewDir[0] * perp[0];
+        maxSideMove[1] = vNewDir[0] * perp[1];
+        vEndPos[2] = pPath->fLookaheadDist * 0.5f;
+        vEndPos[1] = self->sideMove;
+        vEndPos[0] = (-vEndPos[1]);
+
+        if (vEndPos[2] > -vEndPos[1])
+            vEndPos[2] = vEndPos[0];
+
+        if (self->sideMove < 0.0)
+            vEndPos[2] = -vEndPos[2];
+
+        vNewDir[1] = vEndPos[2] * vNewDir[1];
+        vNewDir[2] = vEndPos[2] * vNewDir[2];
+        maxSideMove[0] = maxSideMove[0] + vNewDir[1];
+        maxSideMove[1] = maxSideMove[1] + vNewDir[2];
+        Vec2Normalize(maxSideMove);
+        dot[0] = (60.0f * maxSideMove[0]) + vWishDir[0];
+        dot[1] = (60.0f * maxSideMove[1]) + vWishDir[1];
+        dot[2] = (60.0f * perp[2]) + vWishDir[2];
+        if (Path_LookaheadPredictionTrace(pPath, vWishDir, dot))
         {
-            v31 = v37;
-            v32 = v38;
-            v29 = v37;
-            v30 = v38;
+            perp[0] = maxSideMove[0];
+            perp[1] = maxSideMove[1];
+            vLookDir[0] = maxSideMove[0];
+            vLookDir[1] = maxSideMove[1];
         }
     }
-    *(double *)&v8 = (float)((float)(p_Path->lookaheadDir[1] * p_Path->forwardLookaheadDir2D[1])
-        + (float)(p_Path->forwardLookaheadDir2D[0] * p_Path->lookaheadDir[0]));
-    if (*(double *)&v8 < 0.000001)
-        *(double *)&v8 = 0.000001;
-    v21 = log(v8);
-    *(double *)&v21 = (float)((float)*(double *)&v21 * (float)0.333);
-    v22 = exp(v21);
-    v23 = (float)*(double *)&v22;
-    if (v23 < 0.60000002)
-        v23 = 0.60000002;
-    fLookaheadDist = (float)((float)v23 * (float)fMoveDist);
-    if (fLookaheadDist > p_Path->fLookaheadDist)
-        fLookaheadDist = p_Path->fLookaheadDist;
+
+    lookAheadLen = (pPath->lookaheadDir[0] * pPath->forwardLookaheadDir2D[0]) + (pPath->lookaheadDir[1] * pPath->forwardLookaheadDir2D[1]);
+
+    if (lookAheadLen < 0.000001f)
+        lookAheadLen = 0.000001f;
+
+    //__libm_sse2_log(v4);
+    //__libm_sse2_exp(v5);
+
+    lookAheadLen = log(lookAheadLen);
+    lookAheadLen = exp(lookAheadLen);
+
+    calculatedLen = 0.333 * lookAheadLen;
+
+    if (calculatedLen < 0.6f)
+        calculatedLen = 0.6f;
+
+    fMoveDist = fMoveDist * calculatedLen;
+
+    if (fMoveDist > pPath->fLookaheadDist)
+        fMoveDist = pPath->fLookaheadDist;
+
     if (self->species == AI_SPECIES_DOG && (self->Path.flags & 2) != 0)
-        fLookaheadDist = Path_UpdateMomentum(self, &v31, fLookaheadDist);
-    v25 = (float)(v32 * (float)fLookaheadDist);
-    v26 = v29;
-    v27 = self->moveHistory[moveHistoryIndex];
-    v28 = (float)(v33 * (float)fLookaheadDist);
-    self->Physics.vWishDelta[0] = v31 * (float)fLookaheadDist;
-    self->Physics.vWishDelta[1] = v25;
-    self->Physics.vWishDelta[2] = v28;
-    *v27 = v26;
-    v27[1] = v30;
+        fMoveDist = Path_UpdateMomentum(self, perp, fMoveDist);
+
+    self->Physics.vWishDelta[0] = fMoveDist * perp[0];
+    self->Physics.vWishDelta[1] = fMoveDist * perp[1];
+    self->Physics.vWishDelta[2] = fMoveDist * perp[2];
+
+    self->moveHistory[moveHistoryIndex][0] = vLookDir[0];
+    self->moveHistory[moveHistoryIndex][0] = vLookDir[1];
+
     Actor_UpdateMoveHistory(self);
 }
 
@@ -4724,25 +4700,20 @@ void __cdecl Actor_UpdateAnglesAndDelta(actor_s *self)
     ai_animmode_t eAnimMode; // r4
     double v5; // fp13
     double v6; // fp0
-    double v7; // fp30
+    double yawChange; // fp30
     bool IsDodgeEntity; // r3
-    double v9; // fp0
-    double v10; // fp13
-    double v11; // fp0
-    double v12; // fp13
-    double v13; // fp0
-    double v14; // fp13
     gentity_s *v15; // r3
     const char *v16; // r3
-    float v17[2]; // [sp+50h] [-50h] BYREF
-    float v18; // [sp+58h] [-48h] BYREF
-    float v19; // [sp+5Ch] [-44h]
+    float rotation[2]; // [sp+50h] [-50h] BYREF
+    float translation[3];
+    //float v18; // [sp+58h] [-48h] BYREF
+    //float v19; // [sp+5Ch] [-44h]
+    float dist;
 
-    if (!self)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\actor.cpp", 4725, 0, "%s", "self");
+    iassert(self);
     ent = self->ent;
-    if (!self->ent)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\actor.cpp", 4727, 0, "%s", "ent");
+    iassert(ent);
+
     if (self->eAnimMode != AI_ANIM_MOVE_CODE)
     {
         iPathEndTime = self->Path.iPathEndTime;
@@ -4755,21 +4726,21 @@ void __cdecl Actor_UpdateAnglesAndDelta(actor_s *self)
             }
         }
     }
+
     eAnimMode = self->eAnimMode;
+
     switch (eAnimMode)
     {
     case AI_ANIM_MOVE_CODE:
         if (self->moveMode && Actor_HasPath(self) && !self->pCloseEnt.isDefined())
         {
-            Actor_GetAnimDeltas(self, v17, &v18);
-            if (!Actor_HasPath(self))
-                MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\actor.cpp", 4748, 0, "%s", "Actor_HasPath( self )");
-            v5 = (float)(v18 * v18);
-            v6 = v19;
+            Actor_GetAnimDeltas(self, rotation, translation);
+            iassert(Actor_HasPath(self));
+            dist = Vec2Length(translation);
             self->Physics.ePhysicsType = AIPHYS_NORMAL_ABSOLUTE;
-            Path_UpdateMovementDelta(self, sqrtf((float)((float)((float)v6 * (float)v6) + (float)v5)));
+            Path_UpdateMovementDelta(self, dist);
             Actor_PathEndActions(self);
-            v7 = 0.0;
+            yawChange = 0.0;
             if (ai_showPaths->current.integer)
                 Path_DebugDraw(&self->Path, ent->r.currentOrigin, 1);
         }
@@ -4781,7 +4752,7 @@ void __cdecl Actor_UpdateAnglesAndDelta(actor_s *self)
                 Path_UpdateLookahead(&self->Path, ent->r.currentOrigin, IsDodgeEntity, 0, 1);
                 Actor_AddStationaryMoveHistory(self);
             }
-            v7 = 0.0;
+            yawChange = 0.0;
             self->Physics.ePhysicsType = AIPHYS_NORMAL_ABSOLUTE;
             self->Physics.vWishDelta[0] = 0.0;
             self->Physics.vWishDelta[1] = 0.0;
@@ -4791,51 +4762,45 @@ void __cdecl Actor_UpdateAnglesAndDelta(actor_s *self)
         }
         goto LABEL_33;
     case AI_ANIM_USE_POS_DELTAS:
-        Actor_GetAnimDeltas(self, v17, &v18);
-        v9 = v18;
-        v10 = v19;
+        Actor_GetAnimDeltas(self, rotation, translation);
         self->Physics.ePhysicsType = AIPHYS_NORMAL_RELATIVE;
-        self->Physics.vWishDelta[0] = v9;
-        self->Physics.vWishDelta[1] = v10;
-        self->Physics.vWishDelta[2] = 0.0;
+        self->Physics.vWishDelta[0] = translation[0];
+        self->Physics.vWishDelta[1] = translation[1];
+        self->Physics.vWishDelta[2] = 0.0f;
         goto LABEL_32;
     case AI_ANIM_USE_ANGLE_DELTAS:
-        Actor_GetAnimDeltas(self, v17, &v18);
+        Actor_GetAnimDeltas(self, rotation, translation);
         self->Physics.ePhysicsType = AIPHYS_NORMAL_ABSOLUTE;
         self->Physics.vWishDelta[0] = 0.0;
         self->Physics.vWishDelta[1] = 0.0;
         self->Physics.vWishDelta[2] = 0.0;
-        v7 = RotationToYaw(v17);
+        yawChange = RotationToYaw(rotation);
         goto LABEL_33;
     case AI_ANIM_USE_BOTH_DELTAS:
-        Actor_GetAnimDeltas(self, v17, &v18);
-        v11 = v18;
-        v12 = v19;
+        Actor_GetAnimDeltas(self, rotation, translation);
         self->Physics.ePhysicsType = AIPHYS_NORMAL_RELATIVE;
-        self->Physics.vWishDelta[0] = v11;
-        self->Physics.vWishDelta[1] = v12;
+        self->Physics.vWishDelta[0] = translation[0];
+        self->Physics.vWishDelta[1] = translation[1];
         self->Physics.vWishDelta[2] = 0.0;
-        v7 = RotationToYaw(v17);
+        yawChange = RotationToYaw(rotation);
         goto LABEL_33;
     case AI_ANIM_USE_BOTH_DELTAS_NOCLIP:
-        Actor_GetAnimDeltas(self, v17, self->Physics.vWishDelta);
+        Actor_GetAnimDeltas(self, rotation, self->Physics.vWishDelta);
         self->Physics.ePhysicsType = AIPHYS_NOCLIP;
-        v7 = RotationToYaw(v17);
+        yawChange = RotationToYaw(rotation);
         goto LABEL_33;
     case AI_ANIM_USE_BOTH_DELTAS_NOGRAVITY:
-        Actor_GetAnimDeltas(self, v17, self->Physics.vWishDelta);
+        Actor_GetAnimDeltas(self, rotation, self->Physics.vWishDelta);
         self->Physics.ePhysicsType = AIPHYS_NOGRAVITY;
-        v7 = RotationToYaw(v17);
+        yawChange = RotationToYaw(rotation);
         goto LABEL_33;
     case AI_ANIM_USE_BOTH_DELTAS_ZONLY_PHYSICS:
-        Actor_GetAnimDeltas(self, v17, &v18);
-        v13 = v18;
-        v14 = v19;
+        Actor_GetAnimDeltas(self, rotation, translation);
         self->Physics.ePhysicsType = AIPHYS_ZONLY_PHYSICS_RELATIVE;
-        self->Physics.vWishDelta[0] = v13;
-        self->Physics.vWishDelta[1] = v14;
+        self->Physics.vWishDelta[0] = translation[0];
+        self->Physics.vWishDelta[1] = translation[1];
         self->Physics.vWishDelta[2] = 0.0;
-        v7 = RotationToYaw(v17);
+        yawChange = RotationToYaw(rotation);
         goto LABEL_33;
     case AI_ANIM_POINT_RELATIVE:
         v15 = self->ent;
@@ -4857,12 +4822,12 @@ void __cdecl Actor_UpdateAnglesAndDelta(actor_s *self)
             MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\actor.cpp", 4841, 0, v16);
         }
     LABEL_32:
-        v7 = 0.0;
+        yawChange = 0.0;
     LABEL_33:
         if (ai_debugAnimDeltas->current.integer == ent->s.number)
-            Com_Printf(18, (const char *)HIDWORD(v7), LODWORD(v7));
-        if (v7 != 0.0)
-            Actor_ChangeAngles(self, 0.0, v7);
+            Com_Printf(18, (const char *)HIDWORD(yawChange), LODWORD(yawChange));
+        if (yawChange != 0.0)
+            Actor_ChangeAngles(self, 0.0, yawChange);
         Actor_DecideOrientation(self);
         Actor_UpdateBodyAngle(self);
         Actor_UpdateLookAngles(self);
@@ -5589,127 +5554,154 @@ LABEL_44:
 
 void __cdecl Actor_DoMove(actor_s *self)
 {
-    gentity_s *ent; // r11
-    gentity_s *v3; // r11
-    unsigned __int16 groundEntNum; // r29
-    double v5; // fp0
-    double v6; // fp12
-    double v7; // fp13
-    double v8; // fp10
-    double v9; // fp9
-    double v10; // fp0
     ai_animmode_t eAnimMode; // r10
     sentient_s *sentient; // r3
-    gentity_s *v13; // r11
-    double fLookaheadAmount; // fp13
-    gentity_s *v15; // r11
     float *currentOrigin; // r3
-    double v17; // fp31
-    double v18; // fp30
-    double v19; // fp29
-    int v20; // r5
-    pathsort_t *v21; // r4
-    int v22; // r3
-    int v23; // r30
-    int v24; // r8
-    double v25; // fp0
-    char *v26; // r10
-    unsigned int v27; // r9
-    float *v28; // r11
-    double v29; // fp13
-    double v30; // fp12
-    double v31; // fp11
-    double v32; // fp13
-    double v33; // fp13
-    double v34; // fp12
-    double v35; // fp11
-    double v36; // fp13
-    float *v37; // r11
-    double v38; // fp13
-    double v39; // fp12
-    double v40; // fp11
-    double v41; // fp13
-    float *v42; // r11
-    double v43; // fp13
-    double v44; // fp12
-    double v45; // fp11
-    double v46; // fp13
-    int v47; // r9
-    unsigned int *v48; // r10
-    double v49; // fp13
-    double v50; // fp12
-    double v51; // fp11
-    double v52; // fp13
-    gentity_s *v53; // r11
-    double v54; // fp0
-    double v55; // fp13
-    gentity_s *v56; // r11
-    gentity_s *v57; // r11
-    unsigned __int16 v58; // r9
-    float v59[8]; // [sp+50h] [-360h] BYREF
-    unsigned int v60[3]; // [sp+70h] [-340h] BYREF
-    char v61; // [sp+7Ch] [-334h] BYREF
 
-    if (!self)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\actor.cpp", 2885, 0, "%s", "self");
-    if (!self->ent)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\actor.cpp", 2886, 0, "%s", "self->ent");
-    if (self->ent->s.number != self->Physics.iEntNum)
-        MyAssertHandler(
-            "c:\\trees\\cod3\\cod3src\\src\\game\\actor.cpp",
-            2887,
-            0,
-            "%s",
-            "self->ent->s.number == self->Physics.iEntNum");
-    ent = self->ent;
-    if (self->ent->r.mins[0] != self->Physics.vMins[0]
-        || ent->r.mins[1] != self->Physics.vMins[1]
-        || ent->r.mins[2] != self->Physics.vMins[2])
-    {
-        MyAssertHandler(
-            "c:\\trees\\cod3\\cod3src\\src\\game\\actor.cpp",
-            2888,
-            0,
-            "%s",
-            "Vec3Compare( self->ent->r.mins, self->Physics.vMins )");
-    }
-    v3 = self->ent;
-    if (self->ent->r.maxs[0] != self->Physics.vMaxs[0]
-        || v3->r.maxs[1] != self->Physics.vMaxs[1]
-        || v3->r.maxs[2] != self->Physics.vMaxs[2])
-    {
-        MyAssertHandler(
-            "c:\\trees\\cod3\\cod3src\\src\\game\\actor.cpp",
-            2889,
-            0,
-            "%s",
-            "Vec3Compare( self->ent->r.maxs, self->Physics.vMaxs )");
-    }
-    if (self->Physics.ePhysicsType == AIPHYS_BAD)
-        MyAssertHandler(
-            "c:\\trees\\cod3\\cod3src\\src\\game\\actor.cpp",
-            2890,
-            0,
-            "%s",
-            "self->Physics.ePhysicsType != AIPHYS_BAD");
-    groundEntNum = self->Physics.groundEntNum;
+    float forward[3];
+    float right[3];
+    float vOrigin[3];
+
+    bool bSuccess;
+
+    int iNodeCount;
+    float bestDist;
+    pathnode_t *node;
+    int i;
+    pathnode_t *pTestNode;
+    float dist;
+    float deltaHeight;
+    pathsort_t nodes[64];
+
+    iassert(self);
+    iassert(self->ent);
+    iassert(self->ent->s.number == self->Physics.iEntNum);
+    iassert(Vec3Compare(self->ent->r.mins, self->Physics.vMins));
+    iassert(Vec3Compare(self->ent->r.maxs, self->Physics.vMaxs));
+    iassert(self->Physics.ePhysicsType != AIPHYS_BAD);
+
+    unsigned __int16 oldGroundEntNum = self->Physics.groundEntNum;
+
     if (self->Physics.ePhysicsType != AIPHYS_NORMAL_ABSOLUTE)
     {
-        YawVectors(self->fDesiredBodyYaw, (float *)self, v59);
-        v5 = self->Physics.vWishDelta[0];
-        v6 = self->Physics.vWishDelta[2];
-        v7 = -self->Physics.vWishDelta[1];
-        self->Physics.vWishDelta[0] = v59[0] * self->Physics.vWishDelta[0];
-        self->Physics.vWishDelta[1] = v59[1] * (float)v5;
-        self->Physics.vWishDelta[2] = v59[2] * (float)v5;
-        v8 = v59[5];
-        v9 = v59[6];
-        self->Physics.vWishDelta[0] = (float)(v59[4] * (float)v7) + self->Physics.vWishDelta[0];
-        self->Physics.vWishDelta[1] = (float)((float)v8 * (float)v7) + self->Physics.vWishDelta[1];
-        v10 = (float)((float)((float)v9 * (float)v7) + self->Physics.vWishDelta[2]);
-        self->Physics.vWishDelta[2] = (float)((float)v9 * (float)v7) + self->Physics.vWishDelta[2];
-        self->Physics.vWishDelta[2] = (float)v6 + (float)v10;
+        YawVectors(self->fDesiredBodyYaw, forward, right);
+
+        float wishdelta_1 = self->Physics.vWishDelta[1];
+        float wishdelta_2 = self->Physics.vWishDelta[2];
+
+        self->Physics.vWishDelta[0] = forward[0] * self->Physics.vWishDelta[0];
+        self->Physics.vWishDelta[1] = forward[1] * self->Physics.vWishDelta[0];
+        self->Physics.vWishDelta[2] = forward[2] * self->Physics.vWishDelta[0];
+
+        self->Physics.vWishDelta[0] = (-wishdelta_1) * right[0] + self->Physics.vWishDelta[0];
+        self->Physics.vWishDelta[1] = (-wishdelta_1) * right[1] + self->Physics.vWishDelta[1];
+        self->Physics.vWishDelta[2] = (-wishdelta_1) * right[2] + self->Physics.vWishDelta[2];
+        self->Physics.vWishDelta[2] += wishdelta_2;
     }
+
+    self->Physics.fGravity = g_gravity->current.value;
+    if (self->eAnimMode != AI_ANIM_MOVE_CODE
+        || !self->moveMode
+        || !Actor_HasPath(self)
+        || self->pCloseEnt.isDefined())
+    {
+        if (!Actor_ShouldMoveAwayFromCloseEnt(self))
+        {
+            self->ent->flags &= ~(FL_DODGE_LEFT | FL_DODGE_RIGHT);
+            currentOrigin = self->ent->r.currentOrigin;
+            self->Physics.vOrigin[0] = *currentOrigin;
+            self->Physics.vOrigin[1] = currentOrigin[1];
+            self->Physics.vOrigin[2] = currentOrigin[2];
+            bSuccess = Actor_Physics(&self->Physics);
+        LABEL_41:
+            if (!bSuccess)
+            {
+                vOrigin[0] = self->ent->r.currentOrigin[0];
+                vOrigin[1] = self->ent->r.currentOrigin[1];
+                vOrigin[2] = self->ent->r.currentOrigin[2];
+                iNodeCount = Path_NodesInCylinder(self->ent->r.currentOrigin, 384.0, 128.0, nodes, 64, -1);
+                node = 0;
+                bestDist = FLT_MAX;
+                for (i = 0; i < iNodeCount; ++i)
+                {
+                    pTestNode = nodes[i].node;
+                    dist = Vec3DistanceSq(vOrigin, pTestNode->constant.vOrigin);
+                    if (dist <= bestDist)
+                    {
+                        bestDist = dist;
+                        node = pTestNode;
+                    }
+                }
+                if (node)
+                {
+                    deltaHeight = node->constant.vOrigin[2] - self->ent->r.currentOrigin[2];
+                    if (deltaHeight <= 8.0)
+                    {
+                        if (deltaHeight < 0.0)
+                        {
+                            if (deltaHeight >= -18.0)
+                                deltaHeight = 0.0f;
+                            else
+                                deltaHeight = -8.0f;
+                        }
+                    }
+                    else
+                    {
+                        deltaHeight = 8.0f;
+                    }
+                    self->Physics.vOrigin[0] = self->ent->r.currentOrigin[0];
+                    self->Physics.vOrigin[1] = self->ent->r.currentOrigin[1];
+                    self->Physics.vOrigin[2] = self->ent->r.currentOrigin[2];
+                    self->Physics.vOrigin[2] = self->Physics.vOrigin[2] + deltaHeight;
+                    self->Physics.vVelocity[2] = 0.0f;
+                }
+            }
+            goto LABEL_67;
+        }
+        bSuccess = Actor_PhysicsMoveAway(self);
+        if (bSuccess || self->eAnimMode != AI_ANIM_MOVE_CODE || !Actor_HasPath(self))
+            goto LABEL_41;
+    }
+    bSuccess = Actor_PhysicsAndDodge(self);
+    if (bSuccess)
+    {
+        if (self->Path.lookaheadDir[2] <= 4.0
+            || self->Physics.vWishDelta[2] <= 0.0
+            || self->ent->r.currentOrigin[2] < self->Physics.vOrigin[2])
+        {
+            if (self->sentient->bNearestNodeBad)
+            {
+                Sentient_InvalidateNearestNode(self->sentient);
+                Sentient_NearestNode(self->sentient);
+                if (self->sentient->bNearestNodeBad)
+                    bSuccess = 0;
+            }
+        }
+        else
+        {
+            bSuccess = 0;
+        }
+    }
+    if (!bSuccess)
+    {
+        self->Physics.vOrigin[0] = self->ent->r.currentOrigin[0] + self->Physics.vWishDelta[0];
+        self->Physics.vOrigin[1] = self->ent->r.currentOrigin[1] + self->Physics.vWishDelta[1];
+        self->Physics.vOrigin[2] = self->ent->r.currentOrigin[2] + self->Physics.vWishDelta[2];
+        self->Physics.vVelocity[2] = 0.0f;
+        self->Path.wDodgeEntity = 1023;
+        if (self->Path.fLookaheadAmount < 64.0)
+            self->Path.fLookaheadAmount = 64.0f;
+    }
+LABEL_67:
+    self->ent->r.currentOrigin[0] = self->Physics.vOrigin[0];
+    self->ent->r.currentOrigin[1] = self->Physics.vOrigin[1];
+    self->ent->r.currentOrigin[2] = self->Physics.vOrigin[2];
+    self->Physics.ePhysicsType = AIPHYS_BAD;
+    self->ent->s.groundEntityNum = self->Physics.groundEntNum;
+    if (oldGroundEntNum != self->Physics.groundEntNum)
+        Scr_Notify(self->ent, scr_const.groundEntChanged, 0);
+
+    /*
     eAnimMode = self->eAnimMode;
     self->Physics.fGravity = g_gravity->current.value;
     if (eAnimMode == AI_ANIM_MOVE_CODE
@@ -5748,10 +5740,9 @@ void __cdecl Actor_DoMove(actor_s *self)
     else
     {
         self->ent->flags &= ~(FL_DODGE_LEFT | FL_DODGE_RIGHT);
-        v15 = self->ent;
         self->Physics.vOrigin[0] = self->ent->r.currentOrigin[0];
-        self->Physics.vOrigin[1] = v15->r.currentOrigin[1];
-        self->Physics.vOrigin[2] = v15->r.currentOrigin[2];
+        self->Physics.vOrigin[1] = self->ent->r.currentOrigin[1];
+        self->Physics.vOrigin[2] = self->ent->r.currentOrigin[2];
         if (Actor_Physics(&self->Physics))
             goto LABEL_60;
     }
@@ -5875,6 +5866,7 @@ LABEL_60:
     v57->s.groundEntityNum = v58;
     if (groundEntNum != self->Physics.groundEntNum)
         Scr_Notify(self->ent, scr_const.groundEntChanged, 0);
+*/
 }
 
 bool __cdecl Actor_IsAtGoal(actor_s *self)

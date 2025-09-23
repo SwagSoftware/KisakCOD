@@ -830,7 +830,7 @@ enum EntHandler_t : unsigned __int8 // (not a real enum name)
     ENT_HANDLER_COUNT = 0x1B,
 };
 
-enum gentityFlags_t : __int32 // LWSS: not a real enum name, used to force usage
+enum gentityFlags_t : unsigned int // LWSS: not a real enum name, used to force usage
 {
     FL_GODMODE               = 0x1,
     FL_DEMI_GODMODE          = 0x2,

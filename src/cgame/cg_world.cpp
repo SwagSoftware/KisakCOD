@@ -18,43 +18,17 @@
 
 bool __cdecl CG_IsEntityLinked(int32_t localClientNum, uint32_t entIndex)
 {
-    if (localClientNum)
-        MyAssertHandler(
-            ".\\cgame\\cg_world.cpp",
-            183,
-            0,
-            "localClientNum doesn't index MAX_LOCAL_CLIENTS\n\t%i not in [0, %i)",
-            localClientNum,
-            1);
-    if (entIndex >= 0x400)
-        MyAssertHandler(
-            ".\\cgame\\cg_world.cpp",
-            184,
-            0,
-            "entIndex doesn't index MAX_GENTITIES\n\t%i not in [0, %i)",
-            entIndex,
-            1024);
+    //bcassert(localClientNum, MAX_LOCAL_CLIENTS);
+    bcassert(entIndex, MAX_GENTITIES);
+
     return CG_GetEntityCollNode(localClientNum, entIndex)->sector != 0;
 }
 
 bool __cdecl CG_EntityNeedsLinked(int32_t localClientNum, uint32_t entIndex)
 {
-    if (localClientNum)
-        MyAssertHandler(
-            ".\\cgame\\cg_world.cpp",
-            200,
-            0,
-            "localClientNum doesn't index MAX_LOCAL_CLIENTS\n\t%i not in [0, %i)",
-            localClientNum,
-            1);
-    if (entIndex >= 0x400)
-        MyAssertHandler(
-            ".\\cgame\\cg_world.cpp",
-            201,
-            0,
-            "entIndex doesn't index MAX_GENTITIES\n\t%i not in [0, %i)",
-            entIndex,
-            1024);
+    //bcassert(localClientNum, MAX_LOCAL_CLIENTS);
+    bcassert(entIndex, MAX_GENTITIES);
+    
     return CG_GetEntity(localClientNum, entIndex)->nextState.solid
         || CG_LocationalTraceDObj(localClientNum, entIndex) != 0;
 }
@@ -63,22 +37,9 @@ DObj_s *__cdecl CG_LocationalTraceDObj(int32_t localClientNum, uint32_t entIndex
 {
     centity_s *cent; // [esp+0h] [ebp-8h]
 
-    if (localClientNum)
-        MyAssertHandler(
-            ".\\cgame\\cg_world.cpp",
-            132,
-            0,
-            "localClientNum doesn't index MAX_LOCAL_CLIENTS\n\t%i not in [0, %i)",
-            localClientNum,
-            1);
-    if (entIndex >= 0x400)
-        MyAssertHandler(
-            ".\\cgame\\cg_world.cpp",
-            133,
-            0,
-            "entIndex doesn't index MAX_GENTITIES\n\t%i not in [0, %i)",
-            entIndex,
-            1024);
+    //bcassert(localClientNum, MAX_LOCAL_CLIENTS);
+    bcassert(entIndex, MAX_GENTITIES);
+
     cent = CG_GetEntity(localClientNum, entIndex);
     if (cent->nextState.solid)
         return 0;
@@ -110,22 +71,8 @@ void __cdecl CG_LinkEntity(int32_t localClientNum, uint32_t entIndex)
     entityState_s *p_nextState; // [esp+78h] [ebp-10h]
     float absMins[3]; // [esp+7Ch] [ebp-Ch] BYREF
 
-    if (localClientNum)
-        MyAssertHandler(
-            ".\\cgame\\cg_world.cpp",
-            243,
-            0,
-            "localClientNum doesn't index MAX_LOCAL_CLIENTS\n\t%i not in [0, %i)",
-            localClientNum,
-            1);
-    if (entIndex >= 0x400)
-        MyAssertHandler(
-            ".\\cgame\\cg_world.cpp",
-            244,
-            0,
-            "entIndex doesn't index MAX_GENTITIES\n\t%i not in [0, %i)",
-            entIndex,
-            1024);
+    //bcassert(localClientNum, MAX_LOCAL_CLIENTS);
+    bcassert(entIndex, MAX_GENTITIES);
 
     PROF_SCOPED("CG_LinkEntity");
     cent = CG_GetEntity(localClientNum, entIndex);
@@ -597,18 +544,11 @@ void __cdecl CG_ClipMoveToEntity(const moveclip_t *clip, uint32_t entIndex, trac
     float oldFraction; // [esp+50h] [ebp-10h]
     float absMins[3]; // [esp+54h] [ebp-Ch] BYREF
 
-    if (!clip)
-        MyAssertHandler(".\\cgame\\cg_world.cpp", 297, 0, "%s", "clip");
-    if (entIndex >= 0x400)
-        MyAssertHandler(
-            ".\\cgame\\cg_world.cpp",
-            298,
-            0,
-            "entIndex doesn't index MAX_GENTITIES\n\t%i not in [0, %i)",
-            entIndex,
-            1024);
-    if (!results)
-        MyAssertHandler(".\\cgame\\cg_world.cpp", 299, 0, "%s", "results");
+    iassert(clip);
+
+    bcassert(entIndex, MAX_GENTITIES);
+    iassert(results);
+
     localClientNum = CG_GetCollWorldLocalClientNum();
     cent = CG_GetEntity(localClientNum, entIndex);
     p_nextState = &cent->nextState;
@@ -833,18 +773,10 @@ void __cdecl CG_PointTraceToEntity(const pointtrace_t *clip, uint32_t entIndex, 
     int32_t partBits[4]; // [esp+9Ch] [ebp-1Ch] BYREF
     float absMins[3]; // [esp+ACh] [ebp-Ch] BYREF
 
-    if (!clip)
-        MyAssertHandler(".\\cgame\\cg_world.cpp", 507, 0, "%s", "clip");
-    if (entIndex >= 0x400)
-        MyAssertHandler(
-            ".\\cgame\\cg_world.cpp",
-            508,
-            0,
-            "entIndex doesn't index MAX_GENTITIES\n\t%i not in [0, %i)",
-            entIndex,
-            1024);
-    if (!results)
-        MyAssertHandler(".\\cgame\\cg_world.cpp", 509, 0, "%s", "results");
+    iassert(clip);
+    bcassert(entIndex, MAX_GENTITIES);
+    iassert(results);
+
     localClientNum = CG_GetCollWorldLocalClientNum();
     cent = CG_GetEntity(localClientNum, entIndex);
     p_nextState = &cent->nextState;

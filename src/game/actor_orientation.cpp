@@ -165,47 +165,53 @@ void __cdecl Actor_UpdateBodyAngle(actor_s *self)
 
 void __cdecl Actor_FaceVector(ai_orient_t *pOrient, const float *v)
 {
-    double v4; // fp31
-    float v5; // [sp+50h] [-40h] BYREF
-    float v6; // [sp+54h] [-3Ch]
+    float vAngle[3];
 
-    if (*v == 0.0 && v[1] == 0.0)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\actor_orientation.cpp", 207, 0, "%s", "v[0] || v[1]");
-    vectoangles(v, &v5);
-    v4 = v6;
-    Actor_SetDesiredLookAngles(pOrient, v5, v6);
-    if (!pOrient)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\actor_orientation.cpp", 41, 0, "%s", "pOrient");
-    pOrient->fDesiredBodyYaw = AngleNormalize360(v4);
+    iassert(v[0] || v[1]);
+    vectoangles(v, vAngle);
+    Actor_SetDesiredLookAngles(pOrient, vAngle[0], vAngle[1]);
+    iassert(pOrient);
+    pOrient->fDesiredBodyYaw = AngleNormalize360(vAngle[1]);
 }
 
 void __cdecl Actor_FaceMotion(actor_s *self, ai_orient_t *pOrient)
 {
-    float *v4; // r3
-    float v5; // [sp+50h] [-40h] BYREF
-    float v6; // [sp+54h] [-3Ch]
-    float v7[4]; // [sp+60h] [-30h] BYREF
+    float vDir[3];
+    float forward[3];
 
-    if (!self)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\actor_orientation.cpp", 226, 0, "%s", "self");
+    iassert(self);
+
     if (Actor_HasPath(self) && self->eAnimMode == AI_ANIM_MOVE_CODE)
     {
         if (self->moveMode
             && Path_CompleteLookahead(&self->Path)
-            && self->Path.fLookaheadDist < 60.0
-            && (float)((float)(self->vLookForward[1] * self->Path.lookaheadDir[1])
-                + (float)(self->Path.lookaheadDir[0] * self->vLookForward[0])) < 0.0
-            || (Actor_GetMoveHistoryAverage(self, &v5), v5 == 0.0) && v6 == 0.0
-            || !self->moveMode
-            && (Vec2Normalize(&v5),
-                YawVectors(pOrient->fDesiredBodyYaw, v4, v7),
-                (float)((float)(v7[0] * v5) + (float)(v7[1] * v6)) >= 0.89999998))
+            && self->Path.fLookaheadDist < 60.0f
+            && ((self->vLookForward[0] * self->Path.lookaheadDir[0])
+                + (self->vLookForward[1] * self->Path.lookaheadDir[1])) < 0.0f)
         {
+            goto dont_change;
+        }
+        //if (ai_angularYawEnabled->current.enabled)
+        //{
+        //    vDir[0] = self->Physics.vWishDelta[0];
+        //    vDir[1] = self->Physics.vWishDelta[1];
+        //}
+        //else
+        {
+            Actor_GetMoveHistoryAverage(self, vDir);
+        }
+        if (vDir[0] == 0.0 && vDir[1] == 0.0
+            || !self->moveMode
+            && (Vec2Normalize(vDir),
+                YawVectors(pOrient->fDesiredBodyYaw, forward, 0),
+                ((forward[0] * vDir[0]) + (forward[1] * vDir[1])) >= 0.9f))
+        {
+        dont_change:
             Actor_SetDesiredAngles(pOrient, self->ent->r.currentAngles[0], self->ent->r.currentAngles[1]);
         }
         else
         {
-            Actor_FaceVector(pOrient, &v5);
+            Actor_FaceVector(pOrient, vDir);
         }
     }
 }

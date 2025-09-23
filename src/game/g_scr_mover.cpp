@@ -266,8 +266,8 @@ void __cdecl ScriptEntCmd_MoveTo(scr_entref_t entref)
     }
     else
     {
-        if (entref.entnum >= 0x400u)
-            MyAssertHandler(".\\game\\g_scr_mover.cpp", 572, 0, "%s", "entref.entnum < MAX_GENTITIES");
+        iassert(entref.entnum < MAX_GENTITIES);
+        
         pSelf = &g_entities[entref.entnum];
         if (pSelf->classname != scr_const.script_brushmodel
             && pSelf->classname != scr_const.script_model
@@ -471,8 +471,7 @@ void __cdecl ScriptEntCmd_GravityMove(scr_entref_t entref)
     }
     else
     {
-        if (entref.entnum >= 0x400u)
-            MyAssertHandler(".\\game\\g_scr_mover.cpp", 597, 0, "%s", "entref.entnum < MAX_GENTITIES");
+        iassert(entref.entnum < MAX_GENTITIES);
         pSelf = &g_entities[entref.entnum];
         if (pSelf->classname != scr_const.script_brushmodel
             && pSelf->classname != scr_const.script_model
@@ -554,8 +553,7 @@ void __cdecl ScriptEnt_MoveAxis(scr_entref_t entref, int iAxis)
     }
     else
     {
-        if (entref.entnum >= 0x400u)
-            MyAssertHandler(".\\game\\g_scr_mover.cpp", 616, 0, "%s", "entref.entnum < MAX_GENTITIES");
+        iassert(entref.entnum < MAX_GENTITIES);
         pSelf = &g_entities[entref.entnum];
         if (pSelf->classname != scr_const.script_brushmodel
             && pSelf->classname != scr_const.script_model
@@ -609,8 +607,7 @@ void __cdecl ScriptEntCmd_RotateTo(scr_entref_t entref)
     }
     else
     {
-        if (entref.entnum >= 0x400u)
-            MyAssertHandler(".\\game\\g_scr_mover.cpp", 711, 0, "%s", "entref.entnum < MAX_GENTITIES");
+        iassert(entref.entnum < MAX_GENTITIES);
         pSelf = &g_entities[entref.entnum];
         if (pSelf->classname != scr_const.script_brushmodel
             && pSelf->classname != scr_const.script_model
@@ -685,8 +682,7 @@ void __cdecl ScriptEnt_DevAddRotate(scr_entref_t entref, unsigned int iAxis)
     }
     else
     {
-        if (entref.entnum >= 0x400u)
-            MyAssertHandler(".\\game\\g_scr_mover.cpp", 735, 0, "%s", "entref.entnum < MAX_GENTITIES");
+        iassert(entref.entnum < MAX_GENTITIES);
         pSelf = &g_entities[entref.entnum];
         if (pSelf->classname != scr_const.script_brushmodel
             && pSelf->classname != scr_const.script_model
@@ -750,8 +746,7 @@ void __cdecl ScriptEnt_RotateAxis(scr_entref_t entref, int iAxis)
     }
     else
     {
-        if (entref.entnum >= 0x400u)
-            MyAssertHandler(".\\game\\g_scr_mover.cpp", 832, 0, "%s", "entref.entnum < MAX_GENTITIES");
+        iassert(entref.entnum < MAX_GENTITIES);
         pSelf = &g_entities[entref.entnum];
         if (pSelf->classname != scr_const.script_brushmodel
             && pSelf->classname != scr_const.script_model
@@ -807,8 +802,7 @@ void __cdecl ScriptEntCmd_Vibrate(scr_entref_t entref)
     }
     else
     {
-        if (entref.entnum >= 0x400u)
-            MyAssertHandler(".\\game\\g_scr_mover.cpp", 932, 0, "%s", "entref.entnum < MAX_GENTITIES");
+        iassert(entref.entnum < MAX_GENTITIES);
         pSelf = &g_entities[entref.entnum];
         if (pSelf->classname != scr_const.script_brushmodel
             && pSelf->classname != scr_const.script_model
@@ -866,8 +860,7 @@ void __cdecl ScriptEntCmd_RotateVelocity(scr_entref_t entref)
     }
     else
     {
-        if (entref.entnum >= 0x400u)
-            MyAssertHandler(".\\game\\g_scr_mover.cpp", 987, 0, "%s", "entref.entnum < MAX_GENTITIES");
+        iassert(entref.entnum < MAX_GENTITIES);
         pSelf = &g_entities[entref.entnum];
         if (pSelf->classname != scr_const.script_brushmodel
             && pSelf->classname != scr_const.script_model
@@ -1080,8 +1073,7 @@ void __cdecl ScriptEntCmd_SetCanDamage(scr_entref_t entref)
         }
         else
         {
-            if (entref.entnum >= 0x400u)
-                MyAssertHandler(".\\game\\g_scr_mover.cpp", 1021, 0, "%s", "entref.entnum < MAX_GENTITIES");
+            iassert(entref.entnum < MAX_GENTITIES);
             pSelf = &g_entities[entref.entnum];
         }
         pSelf->takedamage = Scr_GetInt(0);
@@ -1106,8 +1098,7 @@ void __cdecl ScriptEntCmd_PhysicsLaunch(scr_entref_t entref)
     }
     else
     {
-        if (entref.entnum >= 0x400u)
-            MyAssertHandler(".\\game\\g_scr_mover.cpp", 1053, 0, "%s", "entref.entnum < MAX_GENTITIES");
+        iassert(entref.entnum < MAX_GENTITIES);
         pSelf = &g_entities[entref.entnum];
         if (pSelf->classname != scr_const.script_brushmodel
             && pSelf->classname != scr_const.script_model
@@ -1180,8 +1171,7 @@ void __cdecl ScriptEntCmd_Solid(scr_entref_t entref)
     }
     else
     {
-        if (entref.entnum >= 0x400u)
-            MyAssertHandler(".\\game\\g_scr_mover.cpp", 1084, 0, "%s", "entref.entnum < MAX_GENTITIES");
+        iassert(entref.entnum < MAX_GENTITIES);
         pSelf = &g_entities[entref.entnum];
         if (pSelf->classname != scr_const.script_brushmodel
             && pSelf->classname != scr_const.script_model

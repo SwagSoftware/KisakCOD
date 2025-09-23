@@ -779,11 +779,8 @@ void Sys_WaitClientMessageReceived()
 {
     unsigned int v0; // r8
 
-    Profile_Begin(424);
-    //PIXBeginNamedEvent_Copy_NoVarArgs(0xFFFFFFFF, "wait receive msg");
+    PROF_SCOPED("wait receive msg");
     Sys_WaitForSingleObject(&clientMessageReceived);
-    //PIXEndNamedEvent();
-    Profile_EndInternal(0);
 }
 void Sys_ServerSnapshotCompleted()
 {
@@ -791,14 +788,8 @@ void Sys_ServerSnapshotCompleted()
 }
 bool Sys_WaitServerSnapshot()
 {
-    bool v0; // r31
-
-    Profile_Begin(423);
-    //PIXBeginNamedEvent_Copy_NoVarArgs(0xFFFFFFFF, "wait snapshot");
-    v0 = WaitForSingleObject(serverSnapshotEvent, 1) == 0;
-    //PIXEndNamedEvent();
-    Profile_EndInternal(0);
-    return v0;
+    PROF_SCOPED("wait snapshot");
+    return WaitForSingleObject(serverSnapshotEvent, 1) == 0;
 }
 void Sys_AllowSendClientMessages()
 {
@@ -858,14 +849,8 @@ void Sys_WakeServer()
 }
 bool Sys_WaitServer()
 {
-    bool v0; // r31
-
-    Profile_Begin(422);
-    //PIXBeginNamedEvent_Copy_NoVarArgs(0xFFFFFFFF, "wait server");
-    v0 = WaitForSingleObject(serverCompletedEvent, 1u) == 0;
-    //PIXEndNamedEvent();
-    Profile_EndInternal(0);
-    return v0;
+    PROF_SCOPED("wait server");
+    return WaitForSingleObject(serverCompletedEvent, 1) == 0;
 }
 void Sys_SleepServer()
 {

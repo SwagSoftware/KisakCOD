@@ -595,6 +595,8 @@ void AIPhys_GroundTrace()
     bool use_big_trace = g_pPhys->vVelocity[2] <= 0.0f && g_pPhys->groundEntNum != ENTITYNUM_NONE;
     if (g_pPhys->vVelocity[2] <= 0.0 && g_pPhys->groundEntNum != ENTITYNUM_NONE)
         stepheight = g_apl.stepheight;
+    else
+        stepheight = 0.25f;
 
     end[2] = g_pPhys->vOrigin[2] - stepheight;
 
@@ -628,8 +630,8 @@ void AIPhys_GroundTrace()
     LABEL_10:
         if (trace.fraction == 1.0
             || g_pPhys->vVelocity[2] > 0.0
-            && (float)((float)(trace.normal[0] * g_pPhys->vVelocity[0])
-                + (float)((float)(g_pPhys->vVelocity[2] * trace.normal[2]) + (float)(g_pPhys->vVelocity[1] * trace.normal[1]))) > 10.0)
+            && ((trace.normal[0] * g_pPhys->vVelocity[0])
+                + ((g_pPhys->vVelocity[2] * trace.normal[2]) + (g_pPhys->vVelocity[1] * trace.normal[1]))) > 10.0)
         {
             g_pPhys->groundEntNum = ENTITYNUM_NONE;
             g_apl.bGroundPlane = 0;
@@ -637,15 +639,14 @@ void AIPhys_GroundTrace()
         }
         else if (trace.walkable)
         {
-            if ((float)((float)((float)(end[2] - start[2]) * trace.fraction) + start[2]) < (double)g_pPhys->vOrigin[2] || g_pPhys->ePhysicsType == AIPHYS_ZONLY_PHYSICS_RELATIVE)
+            if ((((end[2] - start[2]) * trace.fraction) + start[2]) < g_pPhys->vOrigin[2] || g_pPhys->ePhysicsType == AIPHYS_ZONLY_PHYSICS_RELATIVE)
             {
-                g_pPhys->vOrigin[2] = (float)((float)(end[2] - start[2]) * trace.fraction) + start[2];
+                g_pPhys->vOrigin[2] = ((end[2] - start[2]) * trace.fraction) + start[2];
             }
             g_apl.bGroundPlane = 1;
             g_apl.bIsWalking = 1;
-            unsigned int v8 = Trace_GetEntityHitId(&trace);
-            g_pPhys->groundEntNum = v8;
-            AIPhys_AddTouchEnt(v8);
+            g_pPhys->groundEntNum = Trace_GetEntityHitId(&trace);
+            AIPhys_AddTouchEnt(g_pPhys->groundEntNum);
         }
         else
         {

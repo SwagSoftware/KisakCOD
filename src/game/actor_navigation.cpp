@@ -1142,22 +1142,29 @@ bool __cdecl Path_FailedLookahead(path_t *pPath)
 
 void __cdecl Path_IncreaseLookaheadAmount(path_t *pPath)
 {
-    double v1; // fp0
-    int flags; // r11
-    int v3; // r11
+    //pPath->numReductions = 0;
+    //++pPath->numIncreases;
 
-    v1 = (float)((float)(pPath->fLookaheadAmount * (float)1.1764705) + (float)6.4000001);
-    pPath->fLookaheadAmount = (float)(pPath->fLookaheadAmount * (float)1.1764705) + (float)6.4000001;
-    if (v1 > 65536.0)
-        pPath->fLookaheadAmount = 65536.0;
-    flags = pPath->flags;
-    if ((flags & 2) != 0)
-        v3 = flags | 0x200;
+    pPath->fLookaheadAmount *= 1.1764705f;
+
+    //if (ai_useBetterLookahead->current.enabled && !zombiemode->current.enabled)
+    //{
+    //    v3 = _Pow_int<float>(momentumFactor, pPath->numIncreases - 1);
+    //    pPath->fLookaheadAmount = pPath->fLookaheadAmount * v3;
+    //}
+
+    pPath->fLookaheadAmount += 6.4f;
+
+    if (pPath->fLookaheadAmount > 65536.0f)
+        pPath->fLookaheadAmount = 65536.0f;
+
+    if ((pPath->flags & 2) != 0)
+        pPath->flags |= 0x200;
     else
-        v3 = flags | 2;
-    pPath->flags = v3;
+        pPath->flags |= 2;
 }
 
+static const float PREDICTION_TRACE_MIN[3] = { -15.0, -15.0, 0.0 };
 static const float PREDICTION_TRACE_MAX[3] = { 15.0, 15.0, 72.0 };
 
 bool __cdecl Path_PredictionTrace(
@@ -1169,139 +1176,113 @@ bool __cdecl Path_PredictionTrace(
     double stepheight,
     int allowStartSolid)
 {
-    double v15; // fp0
-    double v16; // fp12
-    bool v17; // cr58
-    double v18; // fp13
-    double v19; // fp10
-    double v20; // fp8
-    float fraction; // fp0
-    double v22; // fp11
-    double v23; // fp12
-    gentity_s *v24; // r11
     actor_s *actor; // r11
-    actor_s *pPileUpActor; // r11
-    double v27; // fp0
-    double v28; // fp13
-    double v29; // fp11
-    double v30; // fp9
-    double v31; // fp10
-    double v32; // fp0
-    double v33; // fp8
-    double v34; // fp12
-    double v35; // fp12
-    double v36; // fp11
-    double v37; // fp9
-    double v38; // fp10
-    double v39; // fp0
-    double v40; // fp8
-    double v41; // fp13
-    float v43; // [sp+50h] [-F0h] BYREF
-    float v44; // [sp+54h] [-ECh]
-    float v45; // [sp+58h] [-E8h]
-    float v46; // [sp+60h] [-E0h] BYREF
-    float v47; // [sp+64h] [-DCh]
-    float v48; // [sp+68h] [-D8h]
-    float v49; // [sp+70h] [-D0h] BYREF
-    float v50; // [sp+74h] [-CCh]
-    float v51; // [sp+78h] [-C8h]
-    float v52[4]; // [sp+80h] [-C0h] BYREF
-    trace_t v53[2]; // [sp+90h] [-B0h] BYREF
+    float vSource[3]; // [sp+50h] [-F0h] BYREF
+    float vDest[3]; // [sp+70h] [-D0h] BYREF
+    float traceMin[3]; // [sp+80h] [-C0h] BYREF
+    trace_t trace; // [sp+90h] [-B0h] BYREF
+    float vDown[3];
+    int hitEntId;
 
-    v52[2] = stepheight;
-    v52[0] = -15.0;
-    v52[1] = -15.0;
-    if (!vStartPos)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\actor_navigation.cpp", 2610, 0, "%s", "vStartPos");
-    if (!vEndPos)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\actor_navigation.cpp", 2611, 0, "%s", "vEndPos");
-    v49 = *vEndPos;
-    v50 = vEndPos[1];
-    v43 = *vStartPos;
-    v15 = vStartPos[2];
-    v44 = vStartPos[1];
+
+    PROF_SCOPED("pathpredictiontrace");
+
+    traceMin[0] = PREDICTION_TRACE_MIN[0];
+    traceMin[1] = PREDICTION_TRACE_MIN[1];
+    traceMin[2] = stepheight + PREDICTION_TRACE_MIN[2];
+
+    iassert(vStartPos);
+    iassert(vEndPos);
+
+
+    vDest[0] = vEndPos[0];
+    vDest[1] = vEndPos[1];
+    vDest[2] = vStartPos[2]; // this a bug?
+
+    vSource[0] = vStartPos[0];
+    vSource[1] = vStartPos[1];
+    vSource[2] = vStartPos[2];
+
     while (1)
     {
-        v45 = v15;
-        v51 = v15;
-        G_TraceCapsule(v53, &v43, v52, PREDICTION_TRACE_MAX, &v49, entityIgnore, mask);
-        v16 = v43;
-        v17 = !v53[0].startsolid;
-        v18 = v45;
-        v19 = (float)(v49 - v43);
-        v20 = (float)(v51 - v45);
-        fraction = v53[0].fraction;
-        v22 = (float)((float)((float)(v50 - v44) * v53[0].fraction) + v44);
-        vTraceEndPos[1] = (float)((float)(v50 - v44) * v53[0].fraction) + v44;
-        v23 = (float)((float)((float)v19 * (float)fraction) + (float)v16);
-        *vTraceEndPos = v23;
-        vTraceEndPos[2] = (float)((float)v20 * (float)fraction) + (float)v18;
-        if (!v17 && !allowStartSolid)
+
+        G_TraceCapsule(&trace, vSource, traceMin, PREDICTION_TRACE_MAX, vDest, entityIgnore, mask);
+        Vec3Lerp(vSource, vDest, trace.fraction, vTraceEndPos);
+
+        if (trace.fraction < 0.0001) // blops fix
+        {
             break;
-        if (!v53[0].allsolid && fraction == 1.0)
-        {
-            v46 = *vTraceEndPos;
-            v47 = vTraceEndPos[1];
-            v43 = v23;
-            v44 = v22;
-            v48 = (float)v18 - (float)72.0;
-            G_TraceCapsule(v53, &v43, v52, PREDICTION_TRACE_MAX, &v46, entityIgnore, mask);
-            v35 = v45;
-            v36 = v43;
-            v37 = (float)(v46 - v43);
-            v38 = v44;
-            v39 = v53[0].fraction;
-            v40 = (float)(v47 - v44);
-            v41 = (float)((float)((float)(v48 - v45) * v53[0].fraction) + v45);
-            vTraceEndPos[2] = (float)((float)(v48 - v45) * v53[0].fraction) + v45;
-            *vTraceEndPos = (float)((float)v37 * (float)v39) + (float)v36;
-            vTraceEndPos[1] = (float)((float)v40 * (float)v39) + (float)v38;
-            if (v41 < v35 || v39 == 1.0 || v53[0].normal[2] >= 0.69999999)
-            {
-                vTraceEndPos[2] = (float)v41 + (float)stepheight;
-                return I_fabs((float)((float)((float)v41 + (float)stepheight) - vEndPos[2])) < 72.0;
-            }
-            return 0;
         }
-        v24 = &level.gentities[Trace_GetEntityHitId(v53)];
-        if (v24->sentient)
+
+        if (trace.startsolid && !allowStartSolid)
         {
-            actor = v24->actor;
-            if (!actor)
+            break;
+        }
+
+        if (!trace.allsolid && trace.fraction == 1.0f)
+        {
+            vSource[0] = vTraceEndPos[0];
+            vSource[1] = vTraceEndPos[1];
+
+            vDown[0] = vTraceEndPos[0];
+            vDown[1] = vTraceEndPos[1];
+            vDown[2] = vSource[2] - 48.0f;
+
+            G_TraceCapsule(&trace, vSource, traceMin, PREDICTION_TRACE_MAX, vDown, entityIgnore, mask);
+            Vec3Lerp(vSource, vDown, trace.fraction, vTraceEndPos);
+
+            if (vTraceEndPos[2] < vSource[2] || trace.fraction == 1.0 || trace.normal[2] >= 0.7f)
+            {
+                vTraceEndPos[2] += stepheight;
+                return I_fabs(((vTraceEndPos[2] + stepheight) - vEndPos[2])) < 48.0f;
+            }
+            else
+            {
                 return 0;
-            if (actor->eAnimMode != AI_ANIM_MOVE_CODE || !actor->moveMode)
-            {
-                pPileUpActor = actor->pPileUpActor;
-                if (!pPileUpActor || pPileUpActor->ent->s.number != entityIgnore)
-                    return 0;
             }
-            mask &= ~0x4000u;
         }
-        else if (Vec2DistanceSq(vTraceEndPos, &v43) < 225.0)
+
+        hitEntId = Trace_GetEntityHitId(&trace);
+        if (!level.gentities[hitEntId].sentient)
+        {
+            break;
+        }
+
+        actor = level.gentities[hitEntId].actor;
+        if (!actor)
         {
             return 0;
         }
-        v43 = *vTraceEndPos;
-        v46 = v43;
-        v27 = vTraceEndPos[1];
-        v44 = vTraceEndPos[1];
-        v48 = v45 - (float)72.0;
-        v47 = v27;
-        G_TraceCapsule(v53, &v43, v52, PREDICTION_TRACE_MAX, &v46, entityIgnore, mask);
-        v28 = v45;
-        v29 = v43;
-        v30 = (float)(v46 - v43);
-        v31 = v44;
-        v32 = v53[0].fraction;
-        v33 = (float)(v47 - v44);
-        v34 = (float)((float)((float)(v48 - v45) * v53[0].fraction) + v45);
-        vTraceEndPos[2] = (float)((float)(v48 - v45) * v53[0].fraction) + v45;
-        *vTraceEndPos = (float)((float)v30 * (float)v32) + (float)v29;
-        vTraceEndPos[1] = (float)((float)v33 * (float)v32) + (float)v31;
-        if (v34 >= v28 && v32 != 1.0 && v53[0].normal[2] < 0.69999999)
+
+        if ((actor->eAnimMode != AI_ANIM_MOVE_CODE || !actor->moveMode) 
+            && (!actor->pPileUpActor || actor->pPileUpActor->ent->s.number != entityIgnore))
+        {
             return 0;
-        v15 = (float)((float)v34 + (float)stepheight);
+        }
+
+        mask &= ~0x4000u;
+
+ LABEL_45:
+        vSource[0] = vTraceEndPos[0];
+        vSource[1] = vTraceEndPos[1];
+        vDown[0] = vTraceEndPos[0];
+        vDown[1] = vTraceEndPos[1];
+        vDown[2] = vSource[2] - 48.0f;
+        G_TraceCapsule(&trace, vSource, traceMin, PREDICTION_TRACE_MAX, vDown, entityIgnore, mask);
+        Vec3Lerp(vSource, vDown, trace.fraction, vTraceEndPos);
+        if (vTraceEndPos[2] >= vSource[2] && trace.fraction != 1.0 && trace.normal[2] < 0.7f)
+        {
+            return 0;
+        }
+        vSource[2] = vTraceEndPos[2] + stepheight;
+        vDest[2] = vSource[2];
     }
+
+    if (Vec2DistanceSq(vTraceEndPos, vSource) >= 225.0f)
+    {
+        goto LABEL_45;
+    }
+
     return 0;
 }
 
@@ -2768,114 +2749,107 @@ static bool Path_AStarAlgorithm(
         g_pathAttemptGoalPos[2] = 0.0;
     }
 
-    nodeTo = pNodeFrom;
-    pNextOpen = pNodeFrom;
     pNodeFrom->transient.fCost = 0.0;
     pNodeFrom->transient.iSearchFrame = ++level.iSearchFrame;
     pNodeFrom->transient.pParent = &topParent;
     pNodeFrom->transient.pNextOpen = 0;
     pNodeFrom->transient.pPrevOpen = &topParent;
 
-    while (1)
-    {
-        pCurrent = nodeTo;
-        if constexpr (CHECK_NODETO)
-        {
-            if (nodeTo == custom->m_pNodeTo)
-                break;
-        }
-        pNextOpen = nodeTo->transient.pNextOpen;
-        if (pNextOpen)
-            pNextOpen->transient.pPrevOpen = &topParent;
-        v19 = 0;
-        if (nodeTo->dynamic.wLinkCount > 0)
-        {
-            i = 0;
-            while (1)
-            {
-                v21 = &pCurrent->constant.Links[i];
-                if (v21->ubBadPlaceCount[eTeam])
-                    goto LABEL_33;
-                pSuccessor = Path_ConvertIndexToNode(v21->nodeNum);
+    topParent.transient.pNextOpen = pNodeFrom;
 
+LABEL_12:
+    if (!topParent.transient.pNextOpen)
+    {
+        return 0;
+    }
+
+    pCurrent = topParent.transient.pNextOpen;
+
+    bool nodeToCheck = true;
+
+    if constexpr (CHECK_NODETO)
+    {
+        nodeToCheck = (pCurrent != custom->m_pNodeTo);
+    }
+
+    if (nodeToCheck)
+    {
+        topParent.transient.pNextOpen = topParent.transient.pNextOpen->transient.pNextOpen;
+        if (topParent.transient.pNextOpen)
+        {
+            topParent.transient.pNextOpen->transient.pPrevOpen = &topParent;
+        }
+
+        for (i = 0; ; i++)
+        {
+            if (i >= pCurrent->dynamic.wLinkCount)
+            {
+                pCurrent->transient.pPrevOpen = 0;
+                goto LABEL_12;
+            }
+
+            if constexpr (USE_IGNORE)
+            {
+                if (custom->IgnoreNode(pSuccessor))
+                {
+                    continue;
+                }
+            }
+
+            if (/*ignorebadplaces || */ !pCurrent->constant.Links[i].ubBadPlaceCount[eTeam])
+            {
+                pSuccessor = Path_ConvertIndexToNode(pCurrent->constant.Links[i].nodeNum);
                 iassert(pSuccessor != pCurrent);
 
-                if (pCurrent->constant.type == NODE_NEGOTIATION_BEGIN
-                    && pSuccessor->constant.type == NODE_NEGOTIATION_END
-                    && (pCurrent->dynamic.wOverlapCount || pSuccessor->dynamic.wOverlapCount))
+                if ((pCurrent->constant.type != NODE_NEGOTIATION_BEGIN
+                        || pSuccessor->constant.type != NODE_NEGOTIATION_END
+                        || !pCurrent->dynamic.wOverlapCount && !pSuccessor->dynamic.wOverlapCount))
                 {
-                    goto LABEL_33;
-                }
-
-                if constexpr (USE_IGNORE)
-                {
-                    if (custom->IgnoreNode(pSuccessor))
+                    float fCost;
+                    if (pSuccessor->transient.iSearchFrame == level.iSearchFrame)
                     {
-                        goto LABEL_33;
+                        fCost = (float)(pCurrent->constant.Links[i].fDist * 1.0) + pCurrent->transient.fCost;
+                        if (fCost >= pSuccessor->transient.fCost)
+                            continue;
+                        if (pSuccessor->transient.pPrevOpen)
+                        {
+                            pSuccessor->transient.pPrevOpen->transient.pNextOpen = pSuccessor->transient.pNextOpen;
+                            if (pSuccessor->transient.pNextOpen)
+                                pSuccessor->transient.pNextOpen->transient.pPrevOpen = pSuccessor->transient.pPrevOpen;
+                        }
                     }
-                }
-
-                if (pSuccessor->transient.iSearchFrame != level.iSearchFrame)
-                    break;
-
-                v23 = (float)(pCurrent->constant.Links[i].fDist + pCurrent->transient.fCost);
-
-                if (pSuccessor->transient.fCost > v23)
-                {
-                    pPrevOpen = pSuccessor->transient.pPrevOpen;
-                    if (pPrevOpen)
+                    else
                     {
-                        pPrevOpen->transient.pNextOpen = pSuccessor->transient.pNextOpen;
-                        v25 = pSuccessor->transient.pNextOpen;
-                        if (v25)
-                            v25->transient.pPrevOpen = pSuccessor->transient.pPrevOpen;
+                        pSuccessor->transient.iSearchFrame = level.iSearchFrame;
+                        //v10 = CustomSearchInfo_FindPath::EvaluateHeuristic(custom, pSuccessor, vGoalPos);
+                        pSuccessor->transient.fHeuristic = custom->EvaluateHeuristic(pSuccessor, vGoalPos);
+                        fCost = (float)(pCurrent->constant.Links[i].fDist * 1.0) + pCurrent->transient.fCost;
                     }
-                    goto LABEL_28;
+                    pSuccessor->transient.pParent = pCurrent;
+                    pSuccessor->transient.fCost = fCost;
+                    fApproxTotalCost = pSuccessor->transient.fCost + pSuccessor->transient.fHeuristic;
+
+                    for (pInsert = &topParent;
+                        pInsert->transient.pNextOpen
+                        && (float)(pInsert->transient.pNextOpen->transient.fCost
+                            + pInsert->transient.pNextOpen->transient.fHeuristic) < fApproxTotalCost;
+                        pInsert = pInsert->transient.pNextOpen)
+                    {
+                        ;
+                    }
+
+                    iassert(pInsert);
+
+                    pSuccessor->transient.pPrevOpen = pInsert;
+                    pSuccessor->transient.pNextOpen = pInsert->transient.pNextOpen;
+                    pInsert->transient.pNextOpen = pSuccessor;
+                    if (pSuccessor->transient.pNextOpen)
+                        pSuccessor->transient.pNextOpen->transient.pPrevOpen = pSuccessor;
                 }
-            LABEL_33:
-                ++v19;
-                ++i;
-                if (v19 >= pCurrent->dynamic.wLinkCount)
-                    goto LABEL_34;
             }
-            pSuccessor->transient.iSearchFrame = level.iSearchFrame;
-            //pSuccessor->transient.fHeuristic = CustomSearchInfo_FindPath::EvaluateHeuristic(custom, pSuccessor, vGoalPos);
-            //pSuccessor->transient.fHeuristic = T::EvaluateHeuristic(custom, pSuccessor, vGoalPos);
-            pSuccessor->transient.fHeuristic = custom->EvaluateHeuristic(pSuccessor, vGoalPos);
-            v23 = (float)(pCurrent->constant.Links[i].fDist + pCurrent->transient.fCost);
-        LABEL_28:
-            pSuccessor->transient.fCost = v23;
-            pSuccessor->transient.pParent = pCurrent;
-
-            fApproxTotalCost = pSuccessor->transient.fCost + pSuccessor->transient.fHeuristic;
-            pInsert = &topParent;
-            if (pNextOpen)
-            {
-                do
-                {
-                    next = pInsert->transient.pNextOpen;
-                    if ((float)(next->transient.fHeuristic + next->transient.fCost) >= fApproxTotalCost)
-                        break;
-                    pInsert = pInsert->transient.pNextOpen;
-                } while (next->transient.pNextOpen);
-            }
-            pSuccessor->transient.pPrevOpen = pInsert;
-            pSuccessor->transient.pNextOpen = pInsert->transient.pNextOpen;
-            pInsert->transient.pNextOpen = pSuccessor;
-
-            if (pSuccessor->transient.pNextOpen)
-                pSuccessor->transient.pNextOpen->transient.pPrevOpen = pSuccessor;
-
-            goto LABEL_33;
-        }
-    LABEL_34:
-        pCurrent->transient.pPrevOpen = 0;
-        nodeTo = pNextOpen;
-        if (!pNextOpen)
-        {
-            return 0;
         }
     }
+
     if (pPath)
     {
         int success = Path_GeneratePath(
@@ -2884,7 +2858,7 @@ static bool Path_AStarAlgorithm(
             (float*)vStartPos,
             (float*)vGoalPos,
             pNodeFrom,
-            nodeTo,
+            topParent.transient.pNextOpen,
             bIncludeGoalInPath,
             bAllowNegotiationLinks);
 
@@ -3452,43 +3426,27 @@ void __cdecl Path_CalcLookahead_Completed(
     int bReduceLookaheadAmount,
     double totalArea)
 {
-    int wNegotiationStartNode; // r8
-    int v11; // r11
-    float *vCurrPoint; // r5
+    float *vLookaheadPos;
 
     iassert(pPath);
-    wNegotiationStartNode = pPath->wNegotiationStartNode;
-    v11 = pPath->wPathLen - 1;
+    iassert(pPath->wNegotiationStartNode < pPath->wPathLen); // blops add
+
     pPath->flags |= 0x41u;
-    if (v11 == wNegotiationStartNode)
-        vCurrPoint = pPath->vCurrPoint;
+    if (pPath->wPathLen - 1 == pPath->wNegotiationStartNode)
+        vLookaheadPos = pPath->vCurrPoint;
     else
-        vCurrPoint = pPath->pts[wNegotiationStartNode].vOrigPoint;
+        vLookaheadPos = pPath->pts[pPath->wNegotiationStartNode].vOrigPoint;
+
     Path_UpdateLookaheadAmount(
         pPath,
         vStartPos,
-        vCurrPoint,
+        vLookaheadPos,
         bReduceLookaheadAmount,
         0.0,
-        wNegotiationStartNode,
+        pPath->wNegotiationStartNode,
         totalArea);
 
-    // aislop
-    //_FP12 = (float)((float)totalArea - (float)32768.0);
-    //__asm { fsel      f0, f12, f31, f0 }
-    //_FP12 = (float)((float)_FP0 - pPath->fLookaheadAmount);
-    //__asm { fsel      f0, f12, f13, f0 }
-    //
-    //pPath->fLookaheadAmount = _FP0;
-
-    {
-        float _FP12 = totalArea - 32768.0f;
-        _FP12 = fmaxf(_FP12, 0.0f);
-        _FP12 -= pPath->fLookaheadAmount;
-        _FP12 = fmaxf(_FP12, 0.0f);
-
-        pPath->fLookaheadAmount = _FP12;
-    }
+    pPath->fLookaheadAmount = fmaxf(pPath->fLookaheadAmount, fmaxf(totalArea, 32768.0f));
 }
 
 void __cdecl Path_CalcLookahead(path_t *pPath, float *vStartPos, int bReduceLookaheadAmount)

@@ -199,6 +199,10 @@ struct pathnode_tree_t // sizeof=0x10
 };
 struct PathData // sizeof=0x28
 {                                       // ...
+    PathData()
+    {
+        memset(this, 0, sizeof(PathData)); // lwss add
+    }
     unsigned int nodeCount;
     pathnode_t *nodes;
     pathbasenode_t *basenodes;

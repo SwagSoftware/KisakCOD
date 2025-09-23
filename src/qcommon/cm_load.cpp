@@ -8,14 +8,30 @@
 
 //Line 53199 : 0006 : 006e75b8       struct clipMap_t cm        82e975b8     cm_load.obj
 clipMap_t cm;
-cbrush_t g_box_brush[4];
-cmodel_t g_box_model[4];
+cbrush_t g_box_brush[THREAD_CONTEXT_TRACE_COUNT];
+cmodel_t g_box_model[THREAD_CONTEXT_TRACE_COUNT];
 
 void __cdecl TRACK_cm_load()
 {
-    track_static_alloc_internal(&cm, 284, "cm", 25);
-    track_static_alloc_internal(g_box_brush, 320, "g_box_brush", 25);
-    track_static_alloc_internal(g_box_model, 288, "g_box_model", 25);
+    //track_static_alloc_internal(&cm, 284, "cm", 25);
+    //track_static_alloc_internal(g_box_brush, 320, "g_box_brush", 25);
+    //track_static_alloc_internal(g_box_model, 288, "g_box_model", 25);
+}
+
+static void CM_InitAllThreadData()
+{
+    unsigned int workerIndex; // [esp+0h] [ebp-4h]
+
+    CM_InitThreadData(THREAD_CONTEXT_MAIN);
+    CM_InitThreadData(THREAD_CONTEXT_BACKEND);
+
+    // r_smp_worker threads
+    for (workerIndex = 0; workerIndex < 2; ++workerIndex)
+        CM_InitThreadData(workerIndex + 2);
+
+#ifdef KISAK_SP
+    CM_InitThreadData(THREAD_CONTEXT_SERVER);
+#endif
 }
 
 void __cdecl CM_LoadMap(const char *name, int *checksum)
@@ -28,29 +44,13 @@ void __cdecl CM_LoadMap(const char *name, int *checksum)
     *checksum = cm.checksum;
 }
 
-void CM_InitAllThreadData()
-{
-    unsigned int workerIndex; // [esp+0h] [ebp-4h]
-
-    CM_InitThreadData(0);
-    CM_InitThreadData(1);
-    for (workerIndex = 0; workerIndex < 2; ++workerIndex)
-        CM_InitThreadData(workerIndex + 2);
-}
-
 extern TraceThreadInfo g_traceThreadInfo[THREAD_CONTEXT_COUNT];
 void __cdecl CM_InitThreadData(unsigned int threadContext)
 {
     TraceThreadInfo *traceThreadInfo; // [esp+8h] [ebp-4h]
 
-    if (threadContext >= 4)
-        MyAssertHandler(
-            ".\\qcommon\\cm_load.cpp",
-            60,
-            0,
-            "threadContext doesn't index THREAD_CONTEXT_TRACE_COUNT\n\t%i not in [0, %i)",
-            threadContext,
-            4);
+    bcassert(threadContext, THREAD_CONTEXT_TRACE_COUNT);
+
     traceThreadInfo = &g_traceThreadInfo[threadContext];
     traceThreadInfo->checkcount.global = 0;
     traceThreadInfo->checkcount.partitions = (int *)Hunk_Alloc(4 * cm.partitionCount, "CM_InitThreadData", 28);
@@ -98,27 +98,22 @@ void __cdecl CM_Unload()
 
 int __cdecl CM_LeafCluster(unsigned int leafnum)
 {
-    if (leafnum >= cm.numLeafs)
-        MyAssertHandler(
-            ".\\qcommon\\cm_load.cpp",
-            200,
-            0,
-            "leafnum doesn't index cm.numLeafs\n\t%i not in [0, %i)",
-            leafnum,
-            cm.numLeafs);
+    bcassert(leafnum, cm.numLeafs);
     return cm.leafs[leafnum].cluster;
 }
 
 void __cdecl CM_ModelBounds(unsigned int model, float *mins, float *maxs)
 {
-    cmodel_t *v3; // eax
+    cmodel_t *cmodel; // eax
 
-    v3 = CM_ClipHandleToModel(model);
-    *mins = v3->mins[0];
-    mins[1] = v3->mins[1];
-    mins[2] = v3->mins[2];
-    *maxs = v3->maxs[0];
-    maxs[1] = v3->maxs[1];
-    maxs[2] = v3->maxs[2];
+    cmodel = CM_ClipHandleToModel(model);
+
+    mins[0] = cmodel->mins[0];
+    mins[1] = cmodel->mins[1];
+    mins[2] = cmodel->mins[2];
+
+    maxs[0] = cmodel->maxs[0];
+    maxs[1] = cmodel->maxs[1];
+    maxs[2] = cmodel->maxs[2];
 }
 

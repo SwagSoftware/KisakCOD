@@ -1127,7 +1127,6 @@ void CM_UnlockTree();
 // cm_load
 void __cdecl TRACK_cm_load();
 void __cdecl CM_LoadMap(const char *name, int *checksum);
-void CM_InitAllThreadData();
 void __cdecl CM_InitThreadData(unsigned int threadContext);
 void __cdecl CM_LoadMapData(const char *name);
 void __cdecl CM_LoadMapData_FastFile(const char *name);

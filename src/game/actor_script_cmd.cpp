@@ -902,75 +902,57 @@ int __cdecl MayMove_CheckFriendlyFire(actor_s *self, float *start, const float *
 
 int __cdecl MayMove_TraceCheck(actor_s *self, float *vStart, float *vEnd, int allowStartSolid, int checkDrop)
 {
-    gentity_s *ent; // r10
-    double v11; // fp12
-    int iTraceMask; // r9
-    double v15; // fp1
-    double v16; // fp9
-    float v17; // [sp+50h] [-C0h] BYREF
-    float v18; // [sp+54h] [-BCh]
-    float v19; // [sp+58h] [-B8h]
-    float v20; // [sp+60h] [-B0h] BYREF
-    float v21; // [sp+64h] [-ACh]
-    float v22; // [sp+68h] [-A8h]
-    float v23[4]; // [sp+70h] [-A0h] BYREF
-    float v24[4]; // [sp+80h] [-90h] BYREF
-    float v25[4]; // [sp+90h] [-80h] BYREF
-    trace_t v26; // [sp+A0h] [-70h] BYREF
+    trace_t results; // [sp+A0h] [-70h] BYREF
+    float vPointLow[3];
+    float vPointHigh[3];
+    float stepheight;
+    float vTraceEndPos[3];
 
-    if (!self)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\actor_script_cmd.cpp", 1217, 0, "%s", "self");
-    if (!vStart)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\actor_script_cmd.cpp", 1218, 0, "%s", "vStart");
-    if (!vEnd)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\actor_script_cmd.cpp", 1219, 0, "%s", "vEnd");
-    ent = self->ent;
-    v20 = *vEnd;
-    v17 = v20;
-    v11 = vEnd[2];
-    iTraceMask = self->Physics.iTraceMask;
-    v21 = vEnd[1];
-    v18 = v21;
-    v22 = (float)v11 + (float)72.0;
-    v19 = (float)v11 - (float)72.0;
-    G_TraceCapsule(&v26, &v20, vec3_origin, vec3_origin, &v17, ent->s.number, iTraceMask | 0x6000);
-    if (v26.allsolid)
+    static const float MAX_FALL_HEIGHT = 32.0f;
+
+    iassert(self);
+    iassert(vStart);
+    iassert(vEnd);
+
+    vPointHigh[0] = vEnd[0];
+    vPointHigh[1] = vEnd[1];
+    vPointHigh[2] = vEnd[2];
+
+    vPointLow[0] = vEnd[0];
+    vPointLow[1] = vEnd[1];
+    vPointLow[2] = vEnd[2];
+
+    vPointHigh[2] += 48.0;
+    vPointLow[2] -= 48.0;
+
+    G_TraceCapsule(&results, vPointHigh, vec3_origin, vec3_origin, vPointLow, self->ent->s.number, self->Physics.iTraceMask | 0x6000);
+
+    if (results.allsolid)
     {
-        if (ai_debugMayMove->current.enabled)
-        {
-            v23[0] = v20;
-            v23[1] = v21;
-            v24[0] = v17;
-            v24[1] = v18;
-            v23[2] = v22 + (float)32.0;
-            v24[2] = v19 + (float)32.0;
-            G_DebugLineWithDuration(v23, v24, colorOrange, 0, 100);
-        }
+        DEBUGMAYMOVE(vPointHigh, vPointLow, colorOrange, DEBUGMAYMOVE_LIFTED);
         return 0;
     }
     else
     {
         if (self->Physics.prone)
-            v15 = 10.0;
+            stepheight = 10.0f;
         else
-            v15 = 18.0;
+            stepheight = 18.0f;
+
         if (checkDrop
-            && (v16 = vStart[2],
-                v19 = (float)((float)(v19 - v22) * v26.fraction) + v22,
-                v17 = (float)((float)(v17 - v20) * v26.fraction) + v20,
-                v18 = (float)((float)(v18 - v21) * v26.fraction) + v21,
-                (float)((float)v16 - v19) > 32.0))
+            && (Vec3Lerp(vPointHigh, vPointLow, results.fraction, vPointLow),
+                (float)(vStart[2] - vPointLow[2]) > MAX_FALL_HEIGHT))
         {
-            DEBUGMAYMOVE(vEnd, &v17, colorOrange, DEBUGMAYMOVE_NOT_LIFTED);
+            DEBUGMAYMOVE(vEnd, vPointLow, colorOrange, DEBUGMAYMOVE_NOT_LIFTED);
             return 0;
         }
         else if (Path_PredictionTrace(
             vStart,
             vEnd,
             self->ent->s.number,
-            self->Physics.iTraceMask | 0x4004,
-            v25,
-            v15,
+            self->Physics.iTraceMask | 0x8004,
+            vTraceEndPos,
+            stepheight,
             allowStartSolid))
         {
             return 1;

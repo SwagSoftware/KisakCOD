@@ -340,6 +340,8 @@ snapshot_s *__cdecl CG_ReadNextSnapshot(int localClientNum)
 // Debug function
 void __cdecl CG_CheckSnapshot(int localClientNum, const char *caller)
 {
+    return; // KISAKTODO: Com_GetClientDObj() returning non-zero below for over 0x400?
+
     int numEntities; // r11
     int *entityNums; // r10
     int v6; // r11

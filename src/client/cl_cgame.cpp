@@ -1000,11 +1000,11 @@ void __cdecl CL_SetActive()
 
 void __cdecl CL_CreateNextSnap()
 {
-    __int64 v0; // r11
-    int v1; // r4
+    //int v1; // r4
 
-    LODWORD(v0) = SV_GetPartialFrametime();
-    CG_CreateNextSnap(0, (float)((float)v0 * (float)0.001), v1);
+    //v0 = SV_GetPartialFrametime();
+    //CG_CreateNextSnap(0, (float)((float)v0 * (float)0.001), v1);
+    CG_CreateNextSnap(0, SV_GetPartialFrametime() * 0.001f, 1);
 }
 
 char *__cdecl CL_TimeDemoLogBaseName(const char *mapname)

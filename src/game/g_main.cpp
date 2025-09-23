@@ -1415,7 +1415,7 @@ void __cdecl G_ApplyEntityEq(gentity_s *ent)
 
     if (g_enteqEnable->current.enabled && ent->nexteq <= level.time)
     {
-        PROF_SCOPED("ent Eq")
+        PROF_SCOPED("ent Eq");
         Player = G_GetPlayer();
         G_GetPlayerViewOrigin(&Player->client->ps, origin);
         if (!G_DObjGetWorldTagPos(ent, scr_const.aim_vis_bone, visBonePos))

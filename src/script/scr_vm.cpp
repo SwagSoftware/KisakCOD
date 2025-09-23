@@ -5044,7 +5044,7 @@ void Scr_AddExecEntThreadNum(int entnum, unsigned int classnum, int handle, unsi
                 0,
                 "%s",
                 "scrVmPub.localVars == scrVmGlob.localVarsStack - 1");
-        Profile_Begin(336);
+        //Profile_Begin(336);
         Scr_ResetTimeout();
     }
     iassert(scrVarPub.timeArrayId);
@@ -5064,7 +5064,7 @@ void Scr_AddExecEntThreadNum(int entnum, unsigned int classnum, int handle, unsi
     --scrVmPub.inparamcount;
     if (!scrVmPub.function_count)
     {
-        Profile_EndInternal(0);
+        //Profile_EndInternal(0);
         if ((int *)scrVmPub.localVars != &scrVmGlob.starttime)
             MyAssertHandler(
                 "c:\\trees\\cod3\\cod3src\\src\\script\\scr_vm.cpp",

@@ -172,7 +172,6 @@ void __cdecl CM_UnlinkEntity(svEntity_s *ent)
 
 void __cdecl CM_LinkEntity(svEntity_s *ent, float *absmin, float *absmax, unsigned int clipHandle)
 {
-    bool v4; // zf
     worldSector_s *node; // [esp+10h] [ebp-30h]
     int contents; // [esp+14h] [ebp-2Ch]
     unsigned __int16 nodeIndex; // [esp+18h] [ebp-28h]
@@ -188,9 +187,8 @@ void __cdecl CM_LinkEntity(svEntity_s *ent, float *absmin, float *absmax, unsign
     leaf = &cmod->leaf;
     contents = SV_GEntityForSvEntity(ent)->r.contents;
     iassert( contents );
-    v4 = *(_QWORD *)&leaf->brushContents == 0;
     linkcontents = leaf->terrainContents | leaf->brushContents;
-    if (v4)
+    if (leaf->terrainContents == 0 && leaf->brushContents == 0)
     {
         CM_UnlinkEntity(ent);
     }

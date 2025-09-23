@@ -180,29 +180,36 @@ void __cdecl CG_Item(centity_s *cent)
     int v3; // r10
     unsigned __int8 v4; // r28
     unsigned int v5; // r29
-    WeaponDef *WeaponDef; // r30
+    WeaponDef *weapDef; // r30
     unsigned int RenderFlagForRefEntity; // r3
-    const DObj_s *v8; // r9
-    float *v9; // r7
-    double v10; // fp1
+    const DObj_s *obj; // r9
 
     p_nextState = &cent->nextState;
+
     if (cent->nextState.index.item >= 0x800u)
         Com_Error(ERR_DROP, "Bad item index %i on entity", cent->nextState.index);
+
     if ((p_nextState->lerp.eFlags & 0x20) == 0)
     {
         v3 = p_nextState->index.item;
         v4 = (unsigned int)v3 >> 7;
         v5 = v3 - (v3 >> 7 << 7);
-        WeaponDef = BG_GetWeaponDef(v5);
-        if (!WeaponDef)
-            MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\cgame\\cg_ents.cpp", 166, 0, "%s", "weapDef");
-        if (!WeaponDef->worldModel[v4])
+        weapDef = BG_GetWeaponDef(v5);
+        iassert(weapDef);
+        if (!weapDef->worldModel[v4])
             Com_Error(ERR_DROP, "Bad item/weap index"); //KISAKTODO: "XModel loaded for item index %i weap index %i model %i (%s)", *(unsigned __int16 *)p_nextState->index, v5);
-        if (Com_GetClientDObj(p_nextState->number, 0))
+
+        obj = Com_GetClientDObj(p_nextState->number, 0);
+
+        if (obj)
         {
+            float lightingOrigin[3];
+            lightingOrigin[0] = cent->pose.origin[0];
+            lightingOrigin[1] = cent->pose.origin[1];
+            lightingOrigin[2] = cent->pose.origin[2];
+
             RenderFlagForRefEntity = CG_GetRenderFlagForRefEntity(p_nextState->lerp.eFlags);
-            R_AddDObjToScene(v8, &cent->pose, p_nextState->number, RenderFlagForRefEntity, v9, v10);
+            R_AddDObjToScene(obj, &cent->pose, p_nextState->number, RenderFlagForRefEntity, lightingOrigin, 0.0f);
         }
     }
 }
@@ -446,7 +453,7 @@ void __cdecl CG_UpdateBModelWorldBounds(unsigned int localClientNum, centity_s *
     }
     AnglesToAxis(cent->pose.angles, (float (*)[3])v47);
     __asm { vspltw128 v5, v126, 1 }
-    __asm { vspltw128 v8, v126, 0 }
+    __asm { vspltw128 obj, v126, 0 }
     _R10 = &g_zero;
     __asm { vspltw128 v9, v127, 0 }
     _R11 = &g_keepXYZ;
@@ -492,17 +499,17 @@ void __cdecl CG_UpdateBModelWorldBounds(unsigned int localClientNum, centity_s *
         vcmpgtfp  v5, v13, v12
         vcmpgtfp  v2, v13, v10
         vspltw128 v13, v127, 2
-        vsel      v1, v9, v8, v5
-        vsel      v9, v8, v9, v5
+        vsel      v1, v9, obj, v5
+        vsel      v9, obj, v9, v5
         vsel      v5, v0, v7, v4
         vsel      v0, v7, v0, v4
-        vmaddfp   v8, v1, v6, v12
+        vmaddfp   obj, v1, v6, v12
         vmaddfp   v12, v9, v6, v12
-        vmaddfp   v8, v5, v8, v11
+        vmaddfp   obj, v5, obj, v11
         vmaddfp   v12, v0, v12, v11
         vsel      v0, v13, v3, v2
         vsel      v13, v3, v13, v2
-        vmaddfp   v0, v0, v8, v10
+        vmaddfp   v0, v0, obj, v10
         vmaddfp   v13, v13, v12, v10
         stvx128   v0, r0, r11
     }
@@ -831,12 +838,10 @@ void __cdecl CG_ScriptMover(int localClientNum, centity_s *cent)
     entityState_s *p_nextState; // r31
     DObj_s *ClientDObj; // r29
     unsigned int RenderFlagForRefEntity; // r3
-    float *v7; // r7
-    double v8; // fp1
     cg_s *LocalClientGlobals; // r3
     unsigned int number; // r29
     const GfxBrushModel *BrushModel; // r3
-    float v12; // [sp+50h] [-40h] BYREF
+    float lightingOrigin[3];
 
     p_nextState = &cent->nextState;
     if ((cent->nextState.lerp.eFlags & 0x20) == 0)
@@ -852,9 +857,9 @@ void __cdecl CG_ScriptMover(int localClientNum, centity_s *cent)
             ClientDObj = Com_GetClientDObj(cent->nextState.number, 0);
             if (ClientDObj)
             {
-                if ((CG_LockLightingOrigin(cent, &v12),
+                if ((CG_LockLightingOrigin(cent, lightingOrigin),
                     RenderFlagForRefEntity = CG_GetRenderFlagForRefEntity(p_nextState->lerp.eFlags),
-                    R_AddDObjToScene(ClientDObj, &cent->pose, p_nextState->number, RenderFlagForRefEntity, v7, v8),
+                    R_AddDObjToScene(ClientDObj, &cent->pose, p_nextState->number, RenderFlagForRefEntity, lightingOrigin, 0.0f),
                     CG_LookingThroughNightVision(localClientNum))
                     && (p_nextState->lerp.eFlags & 0x4000) != 0
                     || cg_laserForceOn->current.enabled)
@@ -974,11 +979,13 @@ void __cdecl CG_SetFrameInterpolation(int localClientNum)
 
 void __cdecl CG_DObjUpdateInfo(const cg_s *cgameGlob, DObj_s *obj, bool notify)
 {
-    __int64 v3; // r11
+    //__int64 v3; // r11
+    //
+    //HIDWORD(v3) = 108040;
+    //LODWORD(v3) = cgameGlob->animFrametime;
+    //DObjUpdateClientInfo(obj, (float)((float)v3 * (float)0.001), (bool)obj);
 
-    HIDWORD(v3) = 108040;
-    LODWORD(v3) = cgameGlob->animFrametime;
-    DObjUpdateClientInfo(obj, (float)((float)v3 * (float)0.001), (bool)obj);
+    DObjUpdateClientInfo(obj, cgameGlob->frametime * 0.001f, notify);
 }
 
 cpose_t *__cdecl CG_GetPose(int localClientNum, int handle)
@@ -1167,23 +1174,19 @@ void __cdecl CG_Vehicle_PreControllers(int localClientNum, const DObj_s *obj, ce
 void __cdecl CG_Vehicle(int localClientNum, centity_s *cent)
 {
     entityState_s *p_nextState; // r30
-    const DObj_s *ClientDObj; // r3
-    const DObj_s *v6; // r29
+    const DObj_s *obj; // r3
     int RenderFlagForRefEntity; // r3
-    float *v8; // r7
-    double v9; // fp1
 
     p_nextState = &cent->nextState;
     if ((cent->nextState.lerp.eFlags & 0x20) == 0)
     {
-        ClientDObj = Com_GetClientDObj(cent->nextState.number, 0);
-        v6 = ClientDObj;
-        if (ClientDObj)
+        obj = Com_GetClientDObj(cent->nextState.number, 0);
+        if (obj)
         {
-            CG_Vehicle_PreControllers(localClientNum, ClientDObj, cent);
+            CG_Vehicle_PreControllers(localClientNum, obj, cent);
             CG_GetLocalClientGlobals(localClientNum);
             RenderFlagForRefEntity = CG_GetRenderFlagForRefEntity(p_nextState->lerp.eFlags);
-            R_AddDObjToScene(v6, &cent->pose, p_nextState->number, RenderFlagForRefEntity | 4, v8, v9);
+            R_AddDObjToScene(obj, &cent->pose, p_nextState->number, RenderFlagForRefEntity | 4, cent->pose.origin, 0.0f); // KISAKTODO: is materialTime really 0.0 here?
             if (p_nextState->eType == 11)
                 CG_CompassUpdateVehicleInfo(localClientNum, p_nextState->number);
         }

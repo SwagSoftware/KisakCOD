@@ -3,13 +3,8 @@
 #include "threads.h"
 #include <xanim/dobj.h>
 
-#ifdef KISAK_MP
-#define CLIENT_DOBJ_HANDLE_MAX 1152 // 0x480
-#define SERVER_DOBJ_HANDLE_MAX 1024 // 0x400
-#elif KISAK_SP
-#define CLIENT_DOBJ_HANDLE_MAX 2304
-#define SERVER_DOBJ_HANDLE_MAX 2176
-#endif
+#define CLIENT_DOBJ_HANDLE_MAX (MAX_GENTITIES + 128)
+#define SERVER_DOBJ_HANDLE_MAX (MAX_GENTITIES)
 
 #define DOBJ_HANDLE_MAX 2048
 
@@ -53,40 +48,14 @@ DObj_s *Com_GetClientDObjBuffered(unsigned int handle, int localClientNum)
     unsigned int v4; // r31
     unsigned int v5; // r31
 
-    if (handle >= 0x900)
-        MyAssertHandler(
-            "c:\\trees\\cod3\\cod3src\\src\\qcommon\\dobj_management.cpp",
-            115,
-            0,
-            "%s\n\t(handle) = %i",
-            "(handle >= 0 && handle < (((2176)) + 128))",
-            handle);
-    if (localClientNum)
-        MyAssertHandler(
-            "c:\\trees\\cod3\\cod3src\\src\\qcommon\\dobj_management.cpp",
-            116,
-            0,
-            "localClientNum doesn't index MAX_LOCAL_CLIENTS\n\t%i not in [0, %i)",
-            localClientNum,
-            1);
+    iassert(handle >= 0 && handle < CLIENT_DOBJ_HANDLE_MAX);
+
     v4 = 2304 * localClientNum + handle;
-    if (v4 >= 0x900)
-        MyAssertHandler(
-            "c:\\trees\\cod3\\cod3src\\src\\qcommon\\dobj_management.cpp",
-            120,
-            0,
-            "%s\n\t(handle) = %i",
-            "((unsigned)handle < (sizeof( clientObjMapBuffered ) / (sizeof( clientObjMapBuffered[0] ) * (sizeof( clientObjMapBu"
-            "ffered ) != 4 || sizeof( clientObjMapBuffered[0] ) <= 4))))",
-            v4);
+
+    //iassert(((unsigned)handle < (sizeof(clientObjMapBuffered) / (sizeof(clientObjMapBuffered[0]) * (sizeof(clientObjMapBuffered) != 4 || sizeof(clientObjMapBuffered[0]) <= 4))));
     v5 = v4;
-    if ((unsigned __int16)clientObjMapBuffered[v5] >= 0x800u)
-        MyAssertHandler(
-            "c:\\trees\\cod3\\cod3src\\src\\qcommon\\dobj_management.cpp",
-            121,
-            0,
-            "%s",
-            "(unsigned)clientObjMapBuffered[handle] < DOBJ_HANDLE_MAX");
+
+    iassert((unsigned)clientObjMapBuffered[handle] < DOBJ_HANDLE_MAX);
 
     if (clientObjMapBuffered[v5])
         return &objBuf[clientObjMapBuffered[v5]];

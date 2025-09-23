@@ -7601,20 +7601,9 @@ void GScr_GetNorthYaw()
     Scr_AddFloat((float)*(double *)&v0);
 }
 
-// aislop
 void __cdecl Scr_SetFxAngles(unsigned int givenAxisCount, float (*axis)[3], float *angles)
 {
-    if (givenAxisCount > 2)
-    {
-        MyAssertHandler(
-            "c:\\trees\\cod3\\cod3src\\src\\game\\g_scr_main.cpp",
-            8767,
-            0,
-            "givenAxisCount not in [0, 2]\n\t%i not in [%i, %i]",
-            givenAxisCount,
-            0,
-            2);
-    }
+    iassert(givenAxisCount >= 0 && givenAxisCount <= 2);
 
     if (givenAxisCount == 1)
     {
@@ -7622,37 +7611,24 @@ void __cdecl Scr_SetFxAngles(unsigned int givenAxisCount, float (*axis)[3], floa
     }
     else if (givenAxisCount == 2)
     {
-        // Orthogonalize the forward vector to the up vector
-        float dot = (*axis)[6] * (*axis)[0]
-            + (*axis)[7] * (*axis)[1]
-            + (*axis)[8] * (*axis)[2];
 
-        (*axis)[6] = (*axis)[6] - dot * (*axis)[0];
-        (*axis)[7] = (*axis)[7] - dot * (*axis)[1];
-        (*axis)[8] = (*axis)[8] - dot * (*axis)[2];
+        float negdot = -((*axis)[6] * (*axis)[0]
+                     + (*axis)[7] * (*axis)[1]
+                     + (*axis)[8] * (*axis)[2]);
 
-        // Normalize the orthogonalized forward vector
-        float x = (*axis)[6];
-        float y = (*axis)[7];
-        float z = (*axis)[8];
 
-        float length = sqrtf(x * x + y * y + z * z);
-        if (length == 0.0f)
+        (*axis)[6] = (negdot * (*axis)[0]) + (*axis)[6];
+        (*axis)[7] = (negdot * (*axis)[1]) + (*axis)[7];
+        (*axis)[8] = (negdot * (*axis)[2]) + (*axis)[8];
+
+        if (Vec3Normalize(&(*axis)[6]) == 0.0f)
         {
             Scr_Error(va("forward and up vectors are the same direction or exact opposite directions"));
-            return;
         }
 
-        float invLength = 1.0f / length;
-        (*axis)[6] = x * invLength;
-        (*axis)[7] = y * invLength;
-        (*axis)[8] = z * invLength;
-
-        // Compute the right vector using cross product
         Vec3Cross(&(*axis)[6], (const float *)axis, &(*axis)[3]);
 
-        // Convert final axis to angles
-        AxisToAngles((const mat3x3 &)axis, angles);
+        AxisToAngles((const mat3x3 &)*axis, angles);
     }
     else
     {

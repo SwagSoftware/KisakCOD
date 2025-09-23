@@ -3003,6 +3003,11 @@ float __cdecl Vec3Length(const vec3r v)
     return sqrtf((v[2] * v[2]) + (v[1] * v[1]) + (v[0] * v[0]));
 }
 
+bool __cdecl Vec3Compare(const float *a, const float *b)
+{
+    return a[0] == b[0] && a[1] == b[1] && a[2] == b[2];
+}
+
 float __cdecl Vec3Dot(const vec3r a, const vec3r b)
 {
     return a[0] * b[0] + a[1] * b[1] + a[2] * b[2];

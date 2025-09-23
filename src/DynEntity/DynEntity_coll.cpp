@@ -13,24 +13,10 @@ void __cdecl TRACK_DynEntityCollWorld()
 
 DynEntityCollSector *__cdecl DynEnt_GetCollSector(DynEntityCollType collType, uint32_t sectorIndex)
 {
-    if (!sectorIndex)
-        MyAssertHandler(".\\DynEntity\\DynEntity_coll.cpp", 71, 0, "%s", "sectorIndex");
-    if (sectorIndex >= 0x400)
-        MyAssertHandler(
-            ".\\DynEntity\\DynEntity_coll.cpp",
-            72,
-            0,
-            "%s\n\t(sectorIndex) = %i",
-            "(sectorIndex < 1024)",
-            sectorIndex);
-    if ((uint32_t)collType >= DYNENT_COLL_COUNT)
-        MyAssertHandler(
-            ".\\DynEntity\\DynEntity_coll.cpp",
-            59,
-            0,
-            "collType doesn't index DYNENT_COLL_COUNT\n\t%i not in [0, %i)",
-            collType,
-            2);
+    iassert(sectorIndex);
+    iassert(sectorIndex < 1024);
+    bcassert(collType, DYNENT_COLL_COUNT);
+
     return &dynEntCollWorlds[collType].sectors[sectorIndex];
 }
 

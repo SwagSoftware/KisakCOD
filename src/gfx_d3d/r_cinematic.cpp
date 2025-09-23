@@ -285,7 +285,8 @@ char __cdecl R_Cinematic_Advance()
     unsigned int percentageFull; // [esp+DCh] [ebp-8h]
     int skipped; // [esp+E0h] [ebp-4h]
 
-    Profile_Begin(145);
+    PROF_SCOPED("R_Cinematic_Advance");
+
     targetPaused = cinematicGlob.targetPaused;
 
     iassert((targetPaused == CINEMATIC_PAUSED || targetPaused == CINEMATIC_NOT_PAUSED));
@@ -306,14 +307,16 @@ char __cdecl R_Cinematic_Advance()
         R_Cinematic_CheckBinkError();
         cinematicGlob.currentPaused = targetPaused;
     }
-    Profile_Begin(148);
-    if (BinkWait(cinematicGlob.bink) || cinematicGlob.underrun)
+
+    int wait;
+
     {
-        Profile_EndInternal(0);
+        PROF_SCOPED("BinkWait");
+        wait = BinkWait(cinematicGlob.bink);
     }
-    else
+    
+    if (!wait && !cinematicGlob.underrun)
     {
-        Profile_EndInternal(0);
         Lock_Bink_textures(&cinematicGlob.binkTextureSet);
         {
             PROF_SCOPED("BinkDoFrame");
@@ -334,7 +337,9 @@ char __cdecl R_Cinematic_Advance()
             }
         }
     }
+
     R_Cinematic_CheckBinkError();
+
     if ((cinematicGlob.playbackFlags & 2) != 0 || cinematicGlob.bink->FrameNum != cinematicGlob.bink->Frames)
     {
         iassert( cinematicGlob.bink );
@@ -368,14 +373,12 @@ char __cdecl R_Cinematic_Advance()
                     "!(cinematicGlob.playbackFlags & CINEMATIC_PLAYBACKFLAGS_MEMORY_RESIDENT)");
             R_Cinematic_SeizeIO();
         }
-        Profile_EndInternal(0);
         return 1;
     }
     else
     {
         if (cinematicGlob.hasFileIO)
             R_Cinematic_RelinquishIO();
-        Profile_EndInternal(0);
         return 0;
     }
 }
@@ -998,7 +1001,8 @@ void __cdecl R_Cinematic_UpdateFrame()
 {
     bool v0; // [esp+0h] [ebp-44h]
 
-    Profile_Begin(144);
+    PROF_SCOPED("R_Cinematic_UpdateFrame");
+
     Sys_EnterCriticalSection(CRITSECT_CINEMATIC);
     v0 = !cinematicGlob.fullSyncNextUpdate && (cinematicGlob.playbackFlags & 1) == 0;
     cinematicGlob.fullSyncNextUpdate = 0;
@@ -1018,7 +1022,6 @@ void __cdecl R_Cinematic_UpdateFrame()
     }
     R_Cinematic_UpdateRendererImages();
     Sys_LeaveCriticalSection(CRITSECT_CINEMATIC);
-    Profile_EndInternal(0);
 }
 
 void R_Cinematic_UpdateRendererImages()

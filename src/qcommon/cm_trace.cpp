@@ -71,23 +71,11 @@ void __cdecl CM_GetBox(cbrush_t **box_brush, cmodel_t **box_model)
     TraceThreadInfo *value; // [esp+0h] [ebp-4h]
 
     value = (TraceThreadInfo *)Sys_GetValue(3);
+
     iassert( value );
-    if (value->box_model->leaf.brushContents != -1)
-        MyAssertHandler(
-            ".\\qcommon\\cm_trace.cpp",
-            78,
-            0,
-            "%s\n\t(value->box_model->leaf.brushContents) = %i",
-            "(value->box_model->leaf.brushContents == ~0)",
-            value->box_model->leaf.brushContents);
-    if (value->box_model->leaf.terrainContents)
-        MyAssertHandler(
-            ".\\qcommon\\cm_trace.cpp",
-            79,
-            0,
-            "%s\n\t(value->box_model->leaf.terrainContents) = %i",
-            "(value->box_model->leaf.terrainContents == 0)",
-            value->box_model->leaf.terrainContents);
+    iassert(value->box_model->leaf.brushContents == ~0);
+    iassert(value->box_model->leaf.terrainContents == 0);
+
     *box_brush = value->box_brush;
     *box_model = value->box_model;
 }

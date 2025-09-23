@@ -5,7 +5,7 @@
 #include <qcommon/threads.h>
 
 CgEntCollWorld cgEntCollWorld[1];
-CgEntCollNode cgEntCollNodes[1][1024];
+CgEntCollNode cgEntCollNodes[1][MAX_GENTITIES];
 int32_t cgCollWorldLocalClientNum;
 
 void __cdecl TRACK_CG_CollWorld()
@@ -87,22 +87,8 @@ const CgEntCollNode *__cdecl CG_GetEntityCollNode(int32_t localClientNum, uint32
 
 CgEntCollNode *__cdecl CG_GetCollNode(int32_t localClientNum, uint32_t entIndex)
 {
-    if (localClientNum)
-        MyAssertHandler(
-            ".\\cgame\\cg_colltree.cpp",
-            132,
-            0,
-            "localClientNum doesn't index STATIC_MAX_LOCAL_CLIENTS\n\t%i not in [0, %i)",
-            localClientNum,
-            1);
-    if (entIndex >= 0x400)
-        MyAssertHandler(
-            ".\\cgame\\cg_colltree.cpp",
-            133,
-            0,
-            "entIndex doesn't index MAX_GENTITIES\n\t%i not in [0, %i)",
-            entIndex,
-            1024);
+    //bcassert(localClientNum, STATIC_MAX_LOCAL_CLIENTS);
+    bcassert(entIndex, MAX_GENTITIES);
     return &cgEntCollNodes[localClientNum][entIndex];
 }
 
@@ -117,22 +103,9 @@ void __cdecl CG_UnlinkEntityColl(int32_t localClientNum, uint32_t entIndex)
     uint16_t sectorIndex; // [esp+14h] [ebp-8h]
     CgEntCollWorld *world; // [esp+18h] [ebp-4h]
 
-    if (localClientNum)
-        MyAssertHandler(
-            ".\\cgame\\cg_colltree.cpp",
-            329,
-            0,
-            "localClientNum doesn't index STATIC_MAX_LOCAL_CLIENTS\n\t%i not in [0, %i)",
-            localClientNum,
-            1);
-    if (entIndex >= 0x400)
-        MyAssertHandler(
-            ".\\cgame\\cg_colltree.cpp",
-            330,
-            0,
-            "entIndex doesn't index MAX_GENTITIES\n\t%i not in [0, %i)",
-            entIndex,
-            1024);
+    //bcassert(localClientNum, STATIC_MAX_LOCAL_CLIENTS);
+    bcassert(entIndex, MAX_GENTITIES);
+
     world = &cgEntCollWorld[localClientNum];
     node = CG_GetCollNode(localClientNum, entIndex);
     sectorIndex = node->sector;
@@ -203,26 +176,12 @@ void __cdecl CG_LinkEntityColl(int32_t localClientNum, uint32_t entIndex, const 
     CgEntCollWorld *world; // [esp+34h] [ebp-8h]
     int32_t axis; // [esp+38h] [ebp-4h]
 
-    if (localClientNum)
-        MyAssertHandler(
-            ".\\cgame\\cg_colltree.cpp",
-            417,
-            0,
-            "localClientNum doesn't index STATIC_MAX_LOCAL_CLIENTS\n\t%i not in [0, %i)",
-            localClientNum,
-            1);
-    if (entIndex >= 0x400)
-        MyAssertHandler(
-            ".\\cgame\\cg_colltree.cpp",
-            418,
-            0,
-            "entIndex doesn't index MAX_GENTITIES\n\t%i not in [0, %i)",
-            entIndex,
-            1024);
-    if (!absMins)
-        MyAssertHandler(".\\cgame\\cg_colltree.cpp", 419, 0, "%s", "absMins");
-    if (!absMaxs)
-        MyAssertHandler(".\\cgame\\cg_colltree.cpp", 420, 0, "%s", "absMaxs");
+    //bcassert(localClientNum, STATIC_MAX_LOCAL_CLIENTS);
+    bcassert(entIndex, MAX_GENTITIES);
+
+    iassert(absMins);
+    iassert(absMaxs);
+    
     world = &cgEntCollWorld[localClientNum];
     node = CG_GetCollNode(localClientNum, entIndex);
     while (1)
@@ -280,32 +239,10 @@ void __cdecl CG_AddEntityToCollSector(int32_t localClientNum, uint32_t entIndex,
     CgEntCollNode *node; // [esp+0h] [ebp-18h]
     uint16_t *prevListIndex; // [esp+Ch] [ebp-Ch]
 
-    if (localClientNum)
-        MyAssertHandler(
-            ".\\cgame\\cg_colltree.cpp",
-            160,
-            0,
-            "localClientNum doesn't index STATIC_MAX_LOCAL_CLIENTS\n\t%i not in [0, %i)",
-            localClientNum,
-            1);
-    if (entIndex >= 0x400)
-        MyAssertHandler(
-            ".\\cgame\\cg_colltree.cpp",
-            161,
-            0,
-            "entIndex doesn't index MAX_GENTITIES\n\t%i not in [0, %i)",
-            entIndex,
-            1024);
-    if (!sectorIndex)
-        MyAssertHandler(".\\cgame\\cg_colltree.cpp", 162, 0, "%s", "sectorIndex");
-    if (sectorIndex >= 0x400u)
-        MyAssertHandler(
-            ".\\cgame\\cg_colltree.cpp",
-            163,
-            0,
-            "%s\n\t(sectorIndex) = %i",
-            "(sectorIndex < 1024)",
-            sectorIndex);
+    //bcassert(localClientNum, STATIC_MAX_LOCAL_CLIENTS);
+    bcassert(entIndex, MAX_GENTITIES);
+    iassert(sectorIndex);
+    iassert(sectorIndex < 1024);
     node = CG_GetCollNode(localClientNum, entIndex);
     for (prevListIndex = &cgEntCollWorld[localClientNum].sectors[sectorIndex].entListHead;
         (uint32_t)*prevListIndex - 1 <= entIndex;
@@ -333,28 +270,12 @@ void __cdecl CG_SortEntityCollSector(
     int32_t axis; // [esp+1Ch] [ebp-8h]
     uint16_t childSectorIndex; // [esp+20h] [ebp-4h]
 
-    if (localClientNum)
-        MyAssertHandler(
-            ".\\cgame\\cg_colltree.cpp",
-            247,
-            0,
-            "localClientNum doesn't index STATIC_MAX_LOCAL_CLIENTS\n\t%i not in [0, %i)",
-            localClientNum,
-            1);
-    if (!sectorIndex)
-        MyAssertHandler(".\\cgame\\cg_colltree.cpp", 248, 0, "%s", "sectorIndex");
-    if (sectorIndex >= 0x400u)
-        MyAssertHandler(
-            ".\\cgame\\cg_colltree.cpp",
-            249,
-            0,
-            "%s\n\t(sectorIndex) = %i",
-            "(sectorIndex < 1024)",
-            sectorIndex);
-    if (!mins)
-        MyAssertHandler(".\\cgame\\cg_colltree.cpp", 250, 0, "%s", "mins");
-    if (!maxs)
-        MyAssertHandler(".\\cgame\\cg_colltree.cpp", 251, 0, "%s", "maxs");
+    //bcassert(localClientNum, STATIC_MAX_LOCAL_CLIENTS);
+    iassert(sectorIndex);
+    iassert(sectorIndex < 1024);
+    iassert(mins);
+    iassert(maxs);
+
     world = &cgEntCollWorld[localClientNum];
     axis = world->sectors[sectorIndex].tree.axis;
     dist = world->sectors[sectorIndex].tree.dist;

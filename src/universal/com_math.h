@@ -251,6 +251,8 @@ void __cdecl Vec3ScaleMad(float scale0, const vec3r dir0, float scale1, const ve
 float __cdecl Vec3Normalize(float* v);
 bool __cdecl Vec3IsNormalized(const vec3r v);
 
+bool __cdecl Vec3Compare(const float *a, const float *b);
+
 float __cdecl Vec3Length(const vec3r v);
 void __cdecl Vec3Copy(const vec3r from, vec3r to);
 
