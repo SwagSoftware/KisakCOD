@@ -704,7 +704,9 @@ int __cdecl R_FinishedWorkerCmds()
 
 void __cdecl R_WaitWorkerCmds()
 {
+#ifndef KISAK_SP
     iassert(Sys_IsMainThread());
+#endif
 
     PROF_SCOPED("R_WaitWorkerCmds");
     //KISAK_NULLSUB();

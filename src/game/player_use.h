@@ -34,12 +34,11 @@ gentity_s *__cdecl Player_UpdateLookAtEntityTrace(
     float *forward);
 int __cdecl Player_CheckAlmostStationary(gentity_s *ent, float *dir);
 void __cdecl Player_DebugDrawLOS(const float *center, const float *dir, double dist2D, int debugDrawDuration);
-void __cdecl Player_BanNodesInFront(gentity_s *ent, double dist, const float *start, const float *dir, int a5);
-void __cdecl Player_BlockFriendliesInADS(gentity_s *ent, double dist, const float *start, const float *dir, int a5);
+void __cdecl Player_BanNodesInFront(gentity_s *ent, float dist, const float *start, const float *dir);
+void __cdecl Player_BlockFriendliesInADS(gentity_s *ent, float dist, const float *start, const float *dir);
 void __cdecl Player_GrenadeThrowBlockFriendlies(
     gentity_s *ent,
-    double dist,
+    float dist,
     const float *start,
-    const float *dir,
-    float *a5);
+    const float *dir);
 void __cdecl Player_UpdateLookAtEntity(gentity_s *ent);

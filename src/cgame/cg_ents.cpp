@@ -447,9 +447,9 @@ void __cdecl CG_UpdateBModelWorldBounds(unsigned int localClientNum, centity_s *
         lvrx      v0, r31, r11
         lvlx      v13, r0, r11
         vor128    v127, v13, v0
-        lvrx      v12, r31, r10
+        lvrx      gunYaw, r31, r10
         lvlx      v0, r0, r10
-        vor128    v126, v0, v12
+        vor128    v126, v0, gunYaw
     }
     AnglesToAxis(cent->pose.angles, (float (*)[3])v47);
     __asm { vspltw128 v5, v126, 1 }
@@ -465,52 +465,52 @@ void __cdecl CG_UpdateBModelWorldBounds(unsigned int localClientNum, centity_s *
     _R10 = v48;
     __asm { lvx128    v0, r0, r11 }
     _R11 = cent->pose.origin;
-    __asm { lvrx      v12, r31, r9 }
+    __asm { lvrx      gunYaw, r31, r9 }
     _R9 = v49;
     __asm { lvlx      v11, r0, r8 }
     _R8 = v49;
     __asm
     {
-        vor       v12, v11, v12
+        vor       gunYaw, v11, gunYaw
         lvrx      v11, r31, r7
-        lvlx      v10, r0, r10
+        lvlx      gunPitch, r0, r10
     }
     __asm
     {
-        vor       v11, v10, v11
+        vor       v11, gunPitch, v11
         lvlx      v4, r0, r11
-        lvrx      v6, r31, r11
+        lvrx      pitch, r31, r11
     }
     _R11 = &v41;
     __asm
     {
         lvlx      v7, r0, r8
-        vor       v6, v4, v6
-        lvrx      v10, r31, r9
-        vand      v12, v12, v0
-        vor       v10, v7, v10
+        vor       pitch, v4, pitch
+        lvrx      gunPitch, r31, r9
+        vand      gunYaw, gunYaw, v0
+        vor       gunPitch, v7, gunPitch
         vspltw128 v7, v127, 1
         vand      v11, v11, v0
-        vand      v6, v6, v0
-        vand      v10, v10, v0
+        vand      pitch, pitch, v0
+        vand      gunPitch, gunPitch, v0
         vmr       v0, v7
         vcmpgtfp  v4, v13, v11
         vmr       v7, v5
-        vcmpgtfp  v5, v13, v12
-        vcmpgtfp  v2, v13, v10
+        vcmpgtfp  v5, v13, gunYaw
+        vcmpgtfp  v2, v13, gunPitch
         vspltw128 v13, v127, 2
         vsel      v1, v9, obj, v5
         vsel      v9, obj, v9, v5
         vsel      v5, v0, v7, v4
         vsel      v0, v7, v0, v4
-        vmaddfp   obj, v1, v6, v12
-        vmaddfp   v12, v9, v6, v12
+        vmaddfp   obj, v1, pitch, gunYaw
+        vmaddfp   gunYaw, v9, pitch, gunYaw
         vmaddfp   obj, v5, obj, v11
-        vmaddfp   v12, v0, v12, v11
+        vmaddfp   gunYaw, v0, gunYaw, v11
         vsel      v0, v13, v3, v2
         vsel      v13, v3, v13, v2
-        vmaddfp   v0, v0, obj, v10
-        vmaddfp   v13, v13, v12, v10
+        vmaddfp   v0, v0, obj, gunPitch
+        vmaddfp   v13, v13, gunYaw, gunPitch
         stvx128   v0, r0, r11
     }
     _R11 = &v44;
@@ -1020,17 +1020,13 @@ unsigned __int16 *g_wheelTags[6] =
 
 void __cdecl CG_Vehicle_PreControllers(int localClientNum, const DObj_s *obj, centity_s *cent)
 {
-    long double v6; // fp2
+    long double pitch; // fp2
     long double v7; // fp2
-    long double v8; // fp2
-    long double v9; // fp2
-    long double v10; // fp2
-    long double v11; // fp2
-    long double v12; // fp2
+    long double vehRoll; // fp2
+    long double gunPitch; // fp2
+    long double gunYaw; // fp2
     long double v13; // fp2
-    long double v14; // fp2
-    long double v15; // fp2
-    __int64 v16; // r11
+    long double steerYaw; // fp2
     unsigned __int8 *v17; // r11
     int v18; // ctr
     double height; // fp30
@@ -1040,83 +1036,69 @@ void __cdecl CG_Vehicle_PreControllers(int localClientNum, const DObj_s *obj, ce
     unsigned __int8 *wheelBoneIndex; // r30
     CEntFx *v24; // r29
     int v25; // r25
-    int number; // r8
-    float v27[4]; // [sp+58h] [-F8h] BYREF
-    float v28[4]; // [sp+68h] [-E8h] BYREF
-    float v29; // [sp+78h] [-D8h] BYREF
-    float v30; // [sp+7Ch] [-D4h]
-    float v31; // [sp+80h] [-D0h]
-    float v32[2][3]; // [sp+90h] [-C0h] BYREF
-    float v33; // [sp+A8h] [-A8h]
-    float v34; // [sp+ACh] [-A4h]
-    float v35; // [sp+B0h] [-A0h]
-    float v36; // [sp+B4h] [-9Ch]
-    float v37; // [sp+B8h] [-98h]
-    float v38; // [sp+BCh] [-94h]
-    trace_t v39; // [sp+C0h] [-90h] BYREF
+    float transformed[3];
+    //float v29; // [sp+78h] [-D8h] BYREF
+    //float v30; // [sp+7Ch] [-D4h]
+    //float v31; // [sp+80h] [-D0h]
+    float axis[4][3]; // [sp+90h] [-C0h] BYREF
+    trace_t traceresults; // [sp+C0h] [-90h] BYREF
 
-    if (!obj)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\cgame\\cg_ents.cpp", 800, 0, "%s", "obj");
-    if (localClientNum)
-        MyAssertHandler(
-            "c:\\trees\\cod3\\cod3src\\src\\cgame\\cg_local.h",
-            910,
-            0,
-            "%s\n\t(localClientNum) = %i",
-            "(localClientNum == 0)",
-            localClientNum);
-    *(double *)&v6 = (float)((float)(LerpAngle(
+    iassert(obj);
+    pitch = ((LerpAngle(
         cent->currentState.u.turret.gunAngles[0],
         cent->nextState.lerp.u.turret.gunAngles[0],
         cgArray[0].frameInterpolation)
-        * (float)182.04445)
-        + (float)0.5);
-    v7 = floor(v6);
-    cent->pose.vehicle.pitch = (int)*(double *)&v7;
-    *(double *)&v8 = (float)((float)(LerpAngle(
-        cent->currentState.u.turret.gunAngles[1],
-        cent->nextState.lerp.u.turret.gunAngles[1],
+        * 182.04445f)
+        + 0.5f);
+    cent->pose.vehicle.pitch = (int)floor(pitch);
+
+    vehRoll = ((LerpAngle(
+        cent->currentState.u.vehicle.bodyRoll,
+        cent->nextState.lerp.u.vehicle.bodyRoll,
         cgArray[0].frameInterpolation)
-        * (float)182.04445)
-        + (float)0.5);
-    v9 = floor(v8);
-    cent->pose.vehicle.roll = (int)*(double *)&v9;
-    *(double *)&v10 = (float)((float)(LerpAngle(
-        cent->currentState.u.primaryLight.cosHalfFovInner,
-        cent->nextState.lerp.u.primaryLight.cosHalfFovInner,
+        * 182.04445f)
+        + 0.5f);
+    cent->pose.vehicle.roll = (int)floor(vehRoll);
+
+    gunPitch = (float)((float)(LerpAngle(
+        cent->currentState.u.vehicle.gunPitch,
+        cent->nextState.lerp.u.vehicle.gunPitch,
         cgArray[0].frameInterpolation)
-        * (float)182.04445)
-        + (float)0.5);
-    v11 = floor(v10);
-    cent->pose.vehicle.barrelPitch = (int)*(double *)&v11;
-    *(double *)&v12 = (float)((float)(LerpAngle(
+        * 182.04445f)
+        + 0.5f);
+    cent->pose.vehicle.barrelPitch = (int)floor(gunPitch);
+
+    gunYaw = ((LerpAngle(
         cent->currentState.u.vehicle.gunYaw,
         cent->nextState.lerp.u.vehicle.gunYaw,
         cgArray[0].frameInterpolation)
-        * (float)182.04445)
-        + (float)0.5);
-    v13 = floor(v12);
-    cent->pose.vehicle.yaw = (int)*(double *)&v13;
-    *(double *)&v14 = (float)((float)(LerpAngle(
+        * 182.04445f)
+        + 0.5f);
+    cent->pose.vehicle.yaw = (int)floor(gunYaw);
+
+    steerYaw = ((LerpAngle(
         cent->currentState.u.turret.gunAngles[2],
         cent->nextState.lerp.u.turret.gunAngles[2],
         cgArray[0].frameInterpolation)
-        * (float)182.04445)
-        + (float)0.5);
-    v15 = floor(v14);
-    cent->pose.vehicle.steerYaw = (int)*(double *)&v15;
-    LODWORD(v16) = cent->nextState.time2;
-    cent->pose.actor.height = (float)v16 * (float)0.001;
+        * 182.04445f)
+        + 0.5f);
+    cent->pose.vehicle.steerYaw = (int)floor(steerYaw);
+
+    cent->pose.actor.height = (float)cent->nextState.time2 * 0.001f;
     DObjGetBoneIndex(obj, scr_const.tag_body, &cent->pose.vehicle.tag_body);
     DObjGetBoneIndex(obj, scr_const.tag_turret, &cent->pose.vehicle.tag_turret);
     DObjGetBoneIndex(obj, scr_const.tag_barrel, &cent->pose.vehicle.tag_barrel);
+
     if (cent->pose.cullIn == 2)
     {
         height = cent->pose.actor.height;
-        AnglesToAxis(cent->pose.angles, v32);
-        v36 = cent->pose.origin[0];
-        v37 = cent->pose.origin[1];
-        v38 = cent->pose.origin[2];
+        AnglesToAxis(cent->pose.angles, axis);
+        //v36 = cent->pose.origin[0];
+        //v37 = cent->pose.origin[1];
+        //v38 = cent->pose.origin[2];
+        axis[3][0] = cent->pose.origin[0];
+        axis[3][1] = cent->pose.origin[1];
+        axis[3][2] = cent->pose.origin[2];
         Model = DObjGetModel(obj, 0);
         BasePose = XModelGetBasePose(Model);
         if (*g_wheelTags[0] != scr_const.tag_wheel_front_left)
@@ -1141,17 +1123,26 @@ void __cdecl CG_Vehicle_PreControllers(int localClientNum, const DObj_s *obj, ce
         {
             if (DObjGetBoneIndex(obj, **v22, wheelBoneIndex))
             {
-                MatrixTransformVector43((const float *)((char *)BasePose->trans + __ROL4__(*wheelBoneIndex, 5)), (const mat4x3&)v32, &v29);
-                v27[0] = (float)(v33 * (float)40.0) + v29;
-                v27[1] = (float)(v34 * (float)40.0) + v30;
-                number = cent->nextState.number;
-                v28[0] = (float)(v33 * (float)-height) + v29;
-                v27[2] = (float)(v35 * (float)40.0) + v31;
-                v28[1] = (float)(v34 * (float)-height) + v30;
-                v28[2] = (float)(v35 * (float)-height) + v31;
-                CG_TraceCapsule(&v39, v27, vec3_origin, vec3_origin, v28, number, 529);
+                float start[3];
+                float end[3];
+                MatrixTransformVector43((const float *)((char *)BasePose->trans + __ROL4__(*wheelBoneIndex, 5)), (const mat4x3&)axis, transformed);
+                //start[0] = (float)(v33 * (float)40.0) + transformed[0];
+                //start[1] = (float)(v34 * (float)40.0) + transformed[1];
+                //start[2] = (float)(v35 * (float)40.0) + transformed[2];
+                start[0] = (axis[2][0] * 40.0f) + transformed[0]; // KSIAKTODO: double check if axis[2] is correct here and below
+                start[1] = (axis[2][1] * 40.0f) + transformed[1];
+                start[2] = (axis[2][2] * 40.0f) + transformed[2];
+
+                //end[0] = (float)(v33 * (float)-height) + transformed[0];
+                //end[1] = (float)(v34 * (float)-height) + transformed[1];
+                //end[2] = (float)(v35 * (float)-height) + transformed[2];
+                end[0] = (axis[2][0] * (-height)) + transformed[0];
+                end[1] = (axis[2][1] * (-height)) + transformed[1];
+                end[2] = (axis[2][2] * (-height)) + transformed[2];
+
+                CG_TraceCapsule(&traceresults, start, vec3_origin, vec3_origin, end, cent->nextState.number, 529);
                 //HIWORD(v24->triggerTime) = CompressUnit(v39.fraction);
-                v24->triggerTime = CompressUnit(v39.fraction);
+                v24->triggerTime = CompressUnit(traceresults.fraction);
             }
             --v25;
             v24 = (CEntFx *)((char *)v24 + 2);

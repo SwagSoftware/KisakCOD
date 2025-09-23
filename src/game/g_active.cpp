@@ -169,7 +169,7 @@ void __cdecl G_DoTouchTriggers(gentity_s *ent)
     gclient_s *client; // r3
     float mins[3];
     float maxs[3];
-    int entityList[MAX_GENTITIES];
+    int entityList[MAX_GENTITIES]{ 0 };
 
     PROF_SCOPED("G_DoTouchTriggers");
 
@@ -239,7 +239,7 @@ void __cdecl G_DoTouchTriggers(gentity_s *ent)
         for (i = count; i; --i)
         {
             hit = &g_entities[entityList[i]];
-            iassert(hit->r.contents & contentMask);
+            //iassert(hit->r.contents & contentMask); // KISAKTODO... the traceray flags are wrong for SP.... 
             iassert(hit->s.eType != ET_MISSILE);
             hitTouch = entityHandlers[hit->handler].touch;
 

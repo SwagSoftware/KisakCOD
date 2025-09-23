@@ -258,8 +258,9 @@ void __cdecl Debug_Frame(int localClientNum)
     int minMsec; // [esp+10h] [ebp-8h]
     int newEvent2; // [esp+14h] [ebp-4h]
 
-    iassert( Sys_IsMainThread() );
 #ifdef KISAK_MP
+    iassert(Sys_IsMainThread());
+
     oldBgs = bgs;
     bgs = 0;
 #endif
@@ -2294,7 +2295,9 @@ void __cdecl Com_LocalizedFloatToString(float f, char* buffer, unsigned int maxl
 
 void __cdecl Com_SyncThreads()
 {
+#ifndef KISAK_SP // called from Debug_Frame for script debugger
     iassert( Sys_IsMainThread() );
+#endif
     R_SyncRenderThread();
     R_WaitWorkerCmds();
 }

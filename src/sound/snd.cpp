@@ -4994,4 +4994,50 @@ void SND_MapInit()
     }
 }
 
-#endif
+int SND_FindPlaybackId(const snd_alias_t *sndEnt, const char *aliasName)
+{
+    int v4; // r31
+    const snd_alias_t **p_alias0; // r29
+    bool IsStreamChannelFree; // r3
+    const char **v7; // r11
+
+    if (!g_snd.Initialized2d)
+        return -1;
+    v4 = 0;
+    p_alias0 = &g_snd.chaninfo[0].alias0;
+    while (1)
+    {
+        if (*(p_alias0 - 18) != sndEnt)
+            goto LABEL_18;
+        if (v4 >= 0 && v4 < g_snd.max_2D_channels)
+        {
+            IsStreamChannelFree = SND_Is2DChannelFree(v4);
+            goto LABEL_13;
+        }
+        if (v4 >= 8 && v4 < g_snd.max_3D_channels + 8)
+        {
+            IsStreamChannelFree = SND_Is3DChannelFree(v4);
+            goto LABEL_13;
+        }
+        if (v4 < 40 || v4 >= g_snd.max_stream_channels + 40)
+            break;
+        IsStreamChannelFree = SND_IsStreamChannelFree(v4);
+    LABEL_13:
+        if (!IsStreamChannelFree)
+            break;
+    LABEL_18:
+        p_alias0 += 35;
+        ++v4;
+        if ((int)p_alias0 >= (int)&g_sndPhysics.info[4].org[2])
+            return -1;
+    }
+    if (!*p_alias0 || I_stricmp((*p_alias0)->aliasName, aliasName))
+    {
+        v7 = (const char **)p_alias0[1];
+        if (!v7 || I_stricmp(*v7, aliasName))
+            goto LABEL_18;
+    }
+    return (int)*(p_alias0 - 12);
+}
+
+#endif // KISAK_SP

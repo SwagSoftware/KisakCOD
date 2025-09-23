@@ -1552,6 +1552,11 @@ void __cdecl XAnimAddClientNotify(unsigned int notetrackName, float frac, unsign
     XAnimNotify_s* notifya; // [esp+0h] [ebp-8h]
     int i; // [esp+4h] [ebp-4h]
 
+    if (!Sys_IsMainThread())
+    {
+        return; // lmao blops added this
+    }
+
     if (g_notifyListSize >= 128)
         MyAssertHandler(".\\xanim\\xanim.cpp", 1032, 0, "%s", "g_notifyListSize < MAX_NOTIFYLIST");
     if (!Sys_IsMainThread())

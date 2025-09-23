@@ -952,7 +952,7 @@ void __cdecl CL_GamepadMove(usercmd_s *cmd)
     double v5; // fp30
     int v6; // r3
     double Button; // fp26
-    int v8; // r3
+    int oldAngles; // r3
     double v9; // fp25
     double v10; // fp24
     double v11; // fp31
@@ -988,8 +988,8 @@ void __cdecl CL_GamepadMove(usercmd_s *cmd)
         v5 = CL_GamepadAxisValue(0, 0);
         v6 = CL_ControllerIndexFromClientNum(0);
         Button = GPad_GetButton(v6, GPAD_R_TRIG);
-        v8 = CL_ControllerIndexFromClientNum(0);
-        v9 = GPad_GetButton(v8, GPAD_L_TRIG);
+        oldAngles = CL_ControllerIndexFromClientNum(0);
+        v9 = GPad_GetButton(oldAngles, GPAD_L_TRIG);
         v10 = CL_GamepadAxisValue(0, 5);
         v11 = 127.0;
         if (I_fabs(v5) > 0.0 || I_fabs(v4) > 0.0)
@@ -1080,10 +1080,10 @@ void __cdecl CL_GetMouseMovement(clientActive_t *cl, float *mx, float *my)
     cl->mouseDy[cl->mouseIndex] = 0;
 }
 
-void __cdecl CL_MouseMove(usercmd_s *cmd, int a2, int a3, int a4, int a5, int a6, __int64 a7)
+void __cdecl CL_MouseMove(usercmd_s *cmd)
 {
 #if 0
-    __int64 v8; // r9
+    __int64 oldAngles; // r9
     long double v9; // fp2
     __int64 v10; // r11
     double v11; // fp29
@@ -1105,17 +1105,17 @@ void __cdecl CL_MouseMove(usercmd_s *cmd, int a2, int a3, int a4, int a5, int a6
     if (frame_msec)
     {
         v11 = *(float *)v31;
-        LODWORD(v8) = frame_msec;
+        LODWORD(oldAngles) = frame_msec;
         v12 = v30[0];
         v13 = (float)((float)(v30[0] * v30[0]) + (float)(*(float *)v31 * *(float *)v31));
-        v31[0] = v8;
+        v31[0] = oldAngles;
         v14 = sqrtf(v13);
-        v15 = (float)((float)((float)(cl_mouseAccel->current.value * (float)((float)v14 / (float)v8))
+        v15 = (float)((float)((float)(cl_mouseAccel->current.value * (float)((float)v14 / (float)oldAngles))
             + cl_sensitivity->current.value)
             * clients[0].cgameFOVSensitivityScale);
-        if ((float)((float)v14 / (float)v8) != 0.0 && cl_showMouseRate->current.enabled)
+        if ((float)((float)v14 / (float)oldAngles) != 0.0 && cl_showMouseRate->current.enabled)
         {
-            v16 = (float)((float)v14 / (float)v8);
+            v16 = (float)((float)v14 / (float)oldAngles);
             Com_Printf(14, (const char *)HIDWORD(v16), LODWORD(v16), LODWORD(v15));
             HIDWORD(v10) = frame_msec;
         }
@@ -1410,7 +1410,7 @@ int __cdecl CG_HandleLocationSelectionInput(int localClientNum, usercmd_s *cmd)
     double v5; // fp27
     double v6; // fp28
     double v7; // fp31
-    double v8; // fp31
+    double oldAngles; // fp31
     double v9; // fp30
     double v10; // fp1
     double v11; // fp0
@@ -1436,16 +1436,16 @@ int __cdecl CG_HandleLocationSelectionInput(int localClientNum, usercmd_s *cmd)
         v5 = (float)(cgArray[0].compassMapWorldSize[0] / cgArray[0].compassMapWorldSize[1]);
         v6 = (float)((float)(cgArray[0].frametime | 0x29DAC00000000uLL) * (float)0.001);
         v7 = CL_GamepadAxisValue(localClientNum, 4);
-        v8 = (float)((float)v7 + CL_GamepadAxisValue(localClientNum, 1));
+        oldAngles = (float)((float)v7 + CL_GamepadAxisValue(localClientNum, 1));
         v9 = CL_GamepadAxisValue(localClientNum, 3);
         v10 = CL_GamepadAxisValue(localClientNum, 0);
         v11 = (float)((float)v9 + (float)v10);
         v12 = (float)((float)((float)((float)v9 + (float)v10) * (float)((float)v9 + (float)v10))
-            + (float)((float)v8 * (float)v8));
+            + (float)((float)oldAngles * (float)oldAngles));
         if (v12 > 1.0)
         {
             v13 = (float)((float)1.0 / (float)sqrtf(v12));
-            v8 = (float)((float)v13 * (float)v8);
+            oldAngles = (float)((float)v13 * (float)oldAngles);
             v11 = (float)((float)v13 * (float)((float)v9 + (float)v10));
         }
         v14 = (float)((float)((float)(cg_mapLocationSelectionCursorSpeed->current.value * (float)v11) * (float)v6)
@@ -1454,7 +1454,7 @@ int __cdecl CG_HandleLocationSelectionInput(int localClientNum, usercmd_s *cmd)
             * (float)v6)
             + cgArray[0].selectedLocation[0];
         cgArray[0].selectedLocation[1] = -(float)((float)((float)((float)(cg_mapLocationSelectionCursorSpeed->current.value
-            * (float)v8)
+            * (float)oldAngles)
             * (float)v5)
             * (float)v6)
             - cgArray[0].selectedLocation[1]);
@@ -1567,39 +1567,27 @@ int __cdecl CG_HandleLocationSelectionInput(int localClientNum, usercmd_s *cmd)
 
 void __cdecl CL_CreateCmd(usercmd_s *result)
 {
-    double v8; // fp31
-    __int64 v9; // r10
-    int v10; // r8
-    int v11; // r7
-    int v12; // r6
-    int v13; // r5
-    int v14; // r4
-    int v15; // r3
-    double v16; // fp0
+    float oldAngles; // fp31
 
-    v8 = clients[0].viewangles[0];
+    oldAngles = clients[0].viewangles[0];
     CL_AdjustAngles();
     memset(result, 0, sizeof(usercmd_s));
     if (!Key_IsCatcherActive(0, 8) || !(unsigned __int8)CG_HandleLocationSelectionInput(0, result))
     {
         CL_CmdButtons(result);
         CL_KeyMove(result);
-        CL_MouseMove(result, v14, v13, v12, v11, v10, v9);
-        v15 = CL_ControllerIndexFromClientNum(0);
+        CL_MouseMove(result);
         // KISAKTODO
-        //if (GPad_IsActive(v15))
+        //if (GPad_IsActive(CL_ControllerIndexFromClientNum(0)))
         //    CL_GamepadMove(result);
-        if ((float)(clients[0].viewangles[0] - (float)v8) > 90.0)
+        if (clients[0].viewangles[0] - oldAngles <= 90.0)
         {
-            v16 = (float)((float)v8 + (float)90.0);
-        LABEL_9:
-            clients[0].viewangles[0] = v16;
-            goto LABEL_10;
+            if (oldAngles - clients[0].viewangles[0] > 90.0)
+                clients[0].viewangles[0] = oldAngles - 90.0;
         }
-        if ((float)((float)v8 - clients[0].viewangles[0]) > 90.0)
+        else
         {
-            v16 = (float)((float)v8 - (float)90.0);
-            goto LABEL_9;
+            clients[0].viewangles[0] = oldAngles + 90.0;
         }
     }
 LABEL_10:

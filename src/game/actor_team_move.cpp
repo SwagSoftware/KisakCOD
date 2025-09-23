@@ -636,38 +636,32 @@ int __cdecl Actor_TeamMoveTrimPath(path_t *pPath, const team_move_context_t *con
 void __cdecl Actor_TeamMoveTooCloseMoveAway(const actor_s *self, int mask, team_move_context_t *context)
 {
     gentity_s *ent; // r11
-    double v7; // fp31
-    double v8; // fp30
-    double v9; // fp29
-    double v10; // fp0
-    gentity_s *v11; // r11
-    float v12; // [sp+50h] [-60h] BYREF
-    float v13; // [sp+54h] [-5Ch]
-    float v14[6]; // [sp+58h] [-58h] BYREF
+    float vOrgDodge[3]; // fp31
+    float vDodgeDelta[2];
+    float vNewOrgSelf[3];
 
     if (context->fDodgePosDeltaLengthSqrd < 1406.25)
     {
-        if (!context->pDodgeOther)
-            MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\actor_team_move.cpp", 597, 0, "%s", "context.pDodgeOther");
+        iassert(context->pDodgeOther);
         ent = context->pDodgeOther->ent;
-        v7 = ent->r.currentOrigin[0];
-        v8 = ent->r.currentOrigin[1];
-        v9 = ent->r.currentOrigin[2];
-        v10 = (float)(ent->r.currentOrigin[1] - context->vOrgSelf[1]);
-        v12 = ent->r.currentOrigin[0] - context->vOrgSelf[0];
-        v13 = v10;
-        if (Vec2Normalize(&v12) < 37.5)
+        vOrgDodge[0] = ent->r.currentOrigin[0];
+        vOrgDodge[1] = ent->r.currentOrigin[1];
+        vOrgDodge[2] = ent->r.currentOrigin[2];
+        vDodgeDelta[0] = ent->r.currentOrigin[0] - context->vOrgSelf[0];
+        vDodgeDelta[1] = ent->r.currentOrigin[1] - context->vOrgSelf[1];
+
+        if (Vec2Normalize(vDodgeDelta) < 37.5f)
         {
-            v11 = self->ent;
-            v14[2] = v9;
-            v14[0] = -(float)((float)(v12 * (float)37.5) - (float)v7);
-            v14[1] = -(float)((float)(v13 * (float)37.5) - (float)v8);
+            vNewOrgSelf[0] = (-37.5f * vDodgeDelta[0]) + vOrgDodge[0];
+            vNewOrgSelf[1] = (-37.5f * vDodgeDelta[1]) + vOrgDodge[1];
+            vNewOrgSelf[2] = vOrgDodge[2];
+
             Path_PredictionTraceCheckForEntities(
                 context->vOrgSelf,
-                v14,
+                vNewOrgSelf,
                 context->dodgeEntities,
                 context->dodgeEntityCount,
-                v11->s.number,
+                self->ent->s.number,
                 mask,
                 context->vOrgSelf);
         }

@@ -260,3 +260,13 @@ char __cdecl Com_LoadSpkrMapFile(char *name, SpeakerMapInfo *info);
 
 
 extern SoundAliasGlobals g_sa;
+
+inline int Com_GetSoundAliasSeed()
+{
+    return g_sa.randSeed;
+}
+
+inline void Com_SetSoundAliasSeed(int seed)
+{
+    g_sa.randSeed = seed;
+}

@@ -853,7 +853,7 @@ struct clientActive_t
 
     // skel_glob sub-struct?
     int32_t skelTimeStamp;
-    volatile int32_t skelMemPos;
+    volatile uint32_t skelMemPos;
     char skelMemory[524288];
     char *skelMemoryStart;
     bool allowedAllocSkel;

@@ -369,14 +369,44 @@ unsigned int __cdecl CG_CheckPlayerMiscInput(int buttons)
     return buttons & 0xFFFFECFF;
 }
 
-// local variable allocation has failed, the output may be wrong!
 void __cdecl CG_CheckForPlayerInput(int localClientNum)
 {
+    usercmd_s v1; // [esp-40h] [ebp-9Ch] BYREF
+    usercmd_s v2; // [esp-20h] [ebp-7Ch] BYREF
+    usercmd_s oldCmd; // [esp+8h] [ebp-54h] BYREF
+    int32_t oldCmdIndex; // [esp+28h] [ebp-34h]
+    usercmd_s newCmd; // [esp+2Ch] [ebp-30h] BYREF
+    int32_t newInput; // [esp+50h] [ebp-Ch]
+    int32_t changedButtons; // [esp+54h] [ebp-8h]
+    int32_t newCmdIndex; // [esp+58h] [ebp-4h]
+
+    newCmdIndex = CL_GetCurrentCmdNumber(localClientNum);
+    if (newCmdIndex > 1)
+    {
+        oldCmdIndex = newCmdIndex - 1;
+        CL_GetUserCmd(localClientNum, newCmdIndex - 1, &oldCmd);
+        CL_GetUserCmd(localClientNum, newCmdIndex, &newCmd);
+        changedButtons = newCmd.buttons ^ oldCmd.buttons;
+        memcpy(&v2, &newCmd, sizeof(v2));
+        memcpy(&v1, &oldCmd, sizeof(v1));
+        newInput = CG_CheckPlayerMovement(v1, v2);
+        if (CG_CheckPlayerWeaponUsage(localClientNum, newCmd.buttons))
+            newInput = 1;
+        if (CG_CheckPlayerOffHandUsage(localClientNum, newCmd.buttons))
+            newInput = 1;
+        if (CG_CheckPlayerStanceChange(localClientNum, newCmd.buttons, changedButtons))
+            newInput = 1;
+        if (!newInput)
+            newInput = CG_CheckPlayerMiscInput(changedButtons) != 0;
+        if (newInput)
+            CG_MenuShowNotify(localClientNum, 2);
+    }
+#if 0
     int CurrentCmdNumber; // r3
     int v3; // r30
     int buttons; // r30
-    int v5; // r28
-    int v6; // r29
+    int changedButtons; // r28
+    int newInput; // r29
     _BYTE v7[48]; // [sp+58h] [-D8h] BYREF
     usercmd_s v8; // [sp+90h] [-A0h] BYREF
     usercmd_s v9; // [sp+D0h] [-60h] BYREF
@@ -388,17 +418,17 @@ void __cdecl CG_CheckForPlayerInput(int localClientNum)
         CL_GetUserCmd(localClientNum, CurrentCmdNumber - 1, &v8);
         CL_GetUserCmd(localClientNum, v3, &v9);
         buttons = v9.buttons;
-        v5 = v9.buttons ^ v8.buttons;
+        changedButtons = v9.buttons ^ v8.buttons;
         memcpy(v7, v9.angles, sizeof(v7));
-        v6 = CG_CheckPlayerMovement(*(usercmd_s *)v8.angles[0], *(usercmd_s *)v8.angles[2]);
+        newInput = CG_CheckPlayerMovement(*(usercmd_s *)v8.angles[0], *(usercmd_s *)v8.angles[2]);
         if (CG_CheckPlayerWeaponUsage(localClientNum, buttons))
-            v6 = 1;
+            newInput = 1;
         if ((v9.buttons & 0xC000) != 0)
         {
             CG_MenuShowNotify(localClientNum, 4);
-            v6 = 1;
+            newInput = 1;
         }
-        if ((v5 & 0x1300) != 0)
+        if ((changedButtons & 0x1300) != 0)
         {
             CG_MenuShowNotify(localClientNum, 3);
             CG_MenuShowNotify(localClientNum, 2);
@@ -407,10 +437,13 @@ void __cdecl CG_CheckForPlayerInput(int localClientNum)
         {
             if ((v9.buttons & 0x1300) != 0)
                 CG_MenuShowNotify(localClientNum, 3);
-            if (v6 || (v5 & 0xFFFFECFF) != 0)
+            if (!newInput)
+                newInput = CG_CheckPlayerMiscInput(changedButtons) != 0;
+            if (newInput)
                 CG_MenuShowNotify(localClientNum, 2);
         }
     }
+#endif
 }
 
 void __cdecl CG_CheckHudHealthDisplay(int localClientNum)

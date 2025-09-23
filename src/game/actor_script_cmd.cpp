@@ -1054,95 +1054,89 @@ LABEL_8:
 
 void __cdecl ActorCmd_Teleport(scr_entref_t entref)
 {
-    actor_s *v1; // r31
-    float *v2; // r25
+    actor_s *self; // r31
+    float *angles; // r25
     gentity_s *ent; // r27
-    double v4; // fp31
-    gentity_s *v5; // r30
-    float v6; // [sp+50h] [-90h] BYREF
-    float v7; // [sp+54h] [-8Ch]
-    float v8; // [sp+58h] [-88h]
-    float v9[4]; // [sp+60h] [-80h] BYREF
-    float v10[6]; // [sp+70h] [-70h] BYREF
-    unsigned __int16 v11; // [sp+F4h] [+14h]
+    double distSquared; // fp31
+    gentity_s *player; // r30
+    float vEyePos[3]; // [sp+60h] [-80h] BYREF
+    float vSpawnPos[3];
+    float vAngles[3];
 
-    v11 = entref.entnum;
-    v1 = Actor_Get(entref);
-    v2 = 0;
-    ent = v1->ent;
-    Scr_GetVector(0, &v6);
+    self = Actor_Get(entref);
+    angles = 0;
+    ent = self->ent;
+    Scr_GetVector(0, vSpawnPos);
     if (Scr_GetNumParam() > 1)
     {
-        Scr_GetVector(1u, v10);
-        v2 = v10;
+        Scr_GetVector(1, vAngles);
     }
-    v4 = (float)((float)((float)(ent->r.currentOrigin[1] - v7) * (float)(ent->r.currentOrigin[1] - v7))
-        + (float)((float)((float)(ent->r.currentOrigin[2] - v8) * (float)(ent->r.currentOrigin[2] - v8))
-            + (float)((float)(ent->r.currentOrigin[0] - v6) * (float)(ent->r.currentOrigin[0] - v6))));
-    if (v1->ent->tagInfo)
+    distSquared = Vec3DistanceSq(vSpawnPos, ent->r.currentOrigin);
+
+    if (self->ent->tagInfo)
     {
     LABEL_15:
         ent->s.lerp.eFlags ^= 2u;
         goto LABEL_16;
     }
-    if (level.loading)
-        goto LABEL_16;
-    if (v4 > 100.0)
+    else if (level.loading)
     {
-        v5 = G_Find(0, 284, scr_const.player);
-        if (!v5)
-            MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\actor_script_cmd.cpp", 1410, 0, "%s", "player");
-        if (!v5->sentient)
-            MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\actor_script_cmd.cpp", 1411, 0, "%s", "player->sentient");
-        Sentient_GetEyePosition(v5->sentient, v9);
-        if (PointCouldSeeSpawn(v9, &v6, v5->s.number, v11))
+        goto LABEL_16;
+    }
+    else if (distSquared > 100.0)
+    {
+        player = G_Find(0, 284, scr_const.player);
+        iassert(player);
+        iassert(player->sentient);
+        Sentient_GetEyePosition(player->sentient, vEyePos);
+        if (PointCouldSeeSpawn(vEyePos, vSpawnPos, player->s.number, entref.entnum))
         {
             Com_DPrintf(18, "Teleport (of actor %i) failed because player could see goal pos.\n", ent->s.number);
             Scr_AddInt(0);
             return;
         }
-        if (PointCouldSeeSpawn(v9, ent->r.currentOrigin, v5->s.number, v11))
+        if (PointCouldSeeSpawn(vEyePos, ent->r.currentOrigin, player->s.number, entref.entnum))
         {
             Com_DPrintf(18, "Teleport failed because player could see actor (%i).\n", ent->s.number);
             Scr_AddInt(0);
             return;
         }
-        if (v4 <= 16384.0)
+        if (distSquared <= 16384.0)
             goto LABEL_16;
         goto LABEL_15;
     }
-    if (Actor_HasPath(v1) && v1->Path.iPathEndTime)
+    if (Actor_HasPath(self) && self->Path.iPathEndTime)
     {
         Com_DPrintf(18, "Teleport failed because actor (%i) in mid-stopping.\n", ent->s.number);
         Scr_AddInt(0);
         return;
     }
 LABEL_16:
-    G_SetOrigin(ent, &v6);
-    v1->Physics.vVelocity[0] = 0.0;
-    v1->Physics.vVelocity[1] = 0.0;
-    v1->Physics.vVelocity[2] = 0.0;
-    v1->Physics.vWishDelta[0] = 0.0;
-    v1->Physics.vWishDelta[1] = 0.0;
-    v1->Physics.vWishDelta[2] = 0.0;
-    if (v1->useEnemyGoal && (!(unsigned __int8)Actor_PointAtGoal(&v6, &v1->codeGoal) || v4 > 100.0))
+    G_SetOrigin(ent, vSpawnPos);
+    self->Physics.vVelocity[0] = 0.0;
+    self->Physics.vVelocity[1] = 0.0;
+    self->Physics.vVelocity[2] = 0.0;
+    self->Physics.vWishDelta[0] = 0.0;
+    self->Physics.vWishDelta[1] = 0.0;
+    self->Physics.vWishDelta[2] = 0.0;
+    if (self->useEnemyGoal && (!Actor_PointAtGoal(vSpawnPos, &self->codeGoal) || distSquared > 100.0))
     {
-        v1->useEnemyGoal = 0;
-        Actor_UpdateGoalPos(v1);
+        self->useEnemyGoal = 0;
+        Actor_UpdateGoalPos(self);
     }
-    if (v2)
+    if (angles)
     {
-        G_SetAngle(ent, v2);
-        Actor_SetDesiredAngles(&v1->CodeOrient, ent->r.currentAngles[0], ent->r.currentAngles[1]);
-        if (v1->ScriptOrient.eMode == AI_ORIENT_DONT_CHANGE)
-            Actor_SetDesiredAngles(&v1->ScriptOrient, ent->r.currentAngles[0], ent->r.currentAngles[1]);
-        Actor_SetLookAngles(v1, ent->r.currentAngles[0], ent->r.currentAngles[1]);
+        G_SetAngle(ent, angles);
+        Actor_SetDesiredAngles(&self->CodeOrient, ent->r.currentAngles[0], ent->r.currentAngles[1]);
+        if (self->ScriptOrient.eMode == AI_ORIENT_DONT_CHANGE)
+            Actor_SetDesiredAngles(&self->ScriptOrient, ent->r.currentAngles[0], ent->r.currentAngles[1]);
+        Actor_SetLookAngles(self, ent->r.currentAngles[0], ent->r.currentAngles[1]);
     }
-    if (!v1->ent->tagInfo && (level.loading || v4 > 100.0))
+    if (!self->ent->tagInfo && (level.loading || distSquared > 100.0))
     {
-        Sentient_InvalidateNearestNode(v1->sentient);
-        Actor_ClearPath(v1);
-        Sentient_NearestNode(v1->sentient);
+        Sentient_InvalidateNearestNode(self->sentient);
+        Actor_ClearPath(self);
+        Sentient_NearestNode(self->sentient);
     }
     Scr_AddInt(1);
 }

@@ -747,163 +747,77 @@ void __cdecl CG_Actor_DoControllers(const cpose_t *pose, const DObj_s *obj, int 
 
 void __cdecl CG_DoBaseOriginController(const cpose_t *pose, const DObj_s *obj, int *setPartBits)
 {
-    unsigned int RootBoneCount; // r31
-    int v7; // r29
-    int v8; // r31
-    unsigned int v9; // r9
-    unsigned int v10; // r11
-    int *v11; // r10
-    DObjAnimMat *RotTransArray; // r30
+    unsigned int rootBoneCount; // r31
+    DObjAnimMat *mat; // r30
     int LocalClientNum; // r8
-    double v14; // fp30
-    double v15; // fp29
-    double v16; // fp28
-    unsigned int v17; // r11
-    unsigned int v18; // r10
-    double v19; // fp12
-    double v20; // fp13
-    double v21; // fp0
-    double v22; // fp7
-    double v23; // fp0
-    double v24; // fp12
-    double v25; // fp11
-    double v26; // fp8
-    double v27; // fp6
-    double v28; // fp5
-    double v29; // fp4
-    float v30; // [sp+50h] [-D0h] BYREF
-    float v31; // [sp+54h] [-CCh]
-    float v32; // [sp+58h] [-C8h]
-    float v33; // [sp+60h] [-C0h] BYREF
-    float v34; // [sp+64h] [-BCh]
-    float v35; // [sp+68h] [-B8h]
-    float v36; // [sp+6Ch] [-B4h]
-    int v37; // [sp+70h] [-B0h]
-    int v38; // [sp+74h] [-ACh]
-    int v39; // [sp+78h] [-A8h]
-    int v40[5]; // [sp+7Ch] [-A4h] BYREF
-    DObjAnimMat v41[2]; // [sp+90h] [-90h] BYREF
+    float baseQuat[4];
+    int partBits[9];
+    DObjAnimMat animMat;
+    unsigned int highIndex;
+    int partIndex;
+    float origin[3];
 
-    RootBoneCount = DObjGetRootBoneCount(obj);
-    if (!RootBoneCount)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\cgame\\cg_pose.cpp", 225, 0, "%s", "rootBoneCount");
-    v7 = RootBoneCount - 1;
-    v9 = (int)(RootBoneCount - 1) >> 5;
-    v8 = 0;
-    v10 = 0;
-    if (v9)
+    rootBoneCount = DObjGetRootBoneCount(obj);
+    iassert(rootBoneCount);
+
+    unsigned int maxHighIndex = --rootBoneCount >> 5;
+    for (highIndex = 0; highIndex < maxHighIndex; ++highIndex)
     {
-        v11 = setPartBits;
-        while (*v11 == -1)
-        {
-            ++v10;
-            ++v11;
-            if (v10 >= v9)
-                goto LABEL_7;
-        }
+        if (setPartBits[highIndex] != -1)
+            goto notSet;
     }
-    else
+
+    if (((0xFFFFFFFF >> ((rootBoneCount & 0x1F) + 1)) | setPartBits[maxHighIndex]) == 0xFFFFFFFF)
+        return;
+notSet:
+
+    mat = DObjGetRotTransArray(obj);
+    if (mat)
     {
-    LABEL_7:
-        if (((0xFFFFFFFF >> ((v7 & 0x1F) + 1)) | setPartBits[v9]) == 0xFFFFFFFF)
-            return;
-    }
-    RotTransArray = DObjGetRotTransArray(obj);
-    if (RotTransArray)
-    {
-        AnglesToQuat(pose->angles, &v33);
-        v37 = 0;
-        v38 = 0;
-        v39 = 0;
-        memset(&v40[1], 0, 12);
-        v40[0] = 0x80000000;
-        LocalClientNum = R_GetLocalClientNum();
-        if (LocalClientNum)
-            MyAssertHandler(
-                "c:\\trees\\cod3\\cod3src\\src\\cgame\\cg_local.h",
-                910,
-                0,
-                "%s\n\t(localClientNum) = %i",
-                "(localClientNum == 0)",
-                LocalClientNum);
-        v14 = cgArray[0].refdef.viewOffset[0];
-        v15 = cgArray[0].refdef.viewOffset[1];
-        v16 = cgArray[0].refdef.viewOffset[2];
-        if (v7 >= 0)
+        AnglesToQuat(pose->angles, baseQuat);
+        memset(partBits, 0, sizeof(partBits));
+        partBits[4] = 0x80000000;
+        partIndex = 0;
+        while (partIndex <= rootBoneCount)
         {
-            v17 = v40[0];
-            do
+            highIndex = partIndex >> 5;
+            if ((setPartBits[partIndex >> 5] & partBits[4]) == 0)
             {
-                v18 = 4 * (v8 >> 5);
-                if ((setPartBits[v18 / 4] & v17) == 0)
+                if (DObjSetRotTransIndex((DObj_s*)obj, &partBits[4 - highIndex], partIndex))
                 {
-                    if (DObjSetRotTransIndex((DObj_s*)obj, &v40[v18 / 0xFFFFFFFC], v8))
+                    mat->quat[0] = baseQuat[0];
+                    mat->quat[1] = baseQuat[1];
+                    mat->quat[2] = baseQuat[2];
+                    mat->quat[3] = baseQuat[3];
+                    origin[0] = pose->origin[0];
+                    origin[1] = pose->origin[1];
+                    origin[2] = pose->origin[2];
+                }
+                else
+                {
+                    animMat.quat[0] = baseQuat[0];
+                    animMat.quat[1] = baseQuat[1];
+                    animMat.quat[2] = baseQuat[2];
+                    animMat.quat[3] = baseQuat[3];
+                    DObjSetTrans(&animMat, pose->origin);
+                    float len = Vec4LengthSq(animMat.quat);
+                    if (len == 0.0)
                     {
-                        RotTransArray->quat[0] = v33;
-                        RotTransArray->quat[1] = v34;
-                        RotTransArray->quat[2] = v35;
-                        RotTransArray->quat[3] = v36;
-                        v19 = pose->origin[0];
-                        v20 = pose->origin[1];
-                        v21 = pose->origin[2];
+                        animMat.quat[3] = 1.0f;
+                        animMat.transWeight = 2.0f;
                     }
                     else
                     {
-                        v41[0].quat[0] = v33;
-                        v41[0].quat[1] = v34;
-                        v41[0].quat[2] = v35;
-                        v41[0].quat[3] = v36;
-                        DObjSetTrans(v41, pose->origin);
-                        if ((float)((float)(v41[0].quat[0] * v41[0].quat[0])
-                            + (float)((float)(v41[0].quat[1] * v41[0].quat[1])
-                                + (float)((float)(v41[0].quat[3] * v41[0].quat[3])
-                                    + (float)(v41[0].quat[2] * v41[0].quat[2])))) == 0.0)
-                        {
-                            v41[0].quat[3] = 1.0;
-                            v41[0].transWeight = 2.0;
-                        }
-                        else
-                        {
-                            v41[0].transWeight = (float)2.0
-                                / (float)((float)(v41[0].quat[0] * v41[0].quat[0])
-                                    + (float)((float)(v41[0].quat[1] * v41[0].quat[1])
-                                        + (float)((float)(v41[0].quat[3] * v41[0].quat[3])
-                                            + (float)(v41[0].quat[2] * v41[0].quat[2]))));
-                        }
-                        v22 = v34;
-                        v23 = RotTransArray->quat[2];
-                        v24 = RotTransArray->quat[1];
-                        v25 = RotTransArray->quat[3];
-                        v26 = v35;
-                        v27 = (float)((float)(RotTransArray->quat[0] * v35)
-                            + (float)((float)(RotTransArray->quat[1] * v36) - (float)(RotTransArray->quat[2] * v33)));
-                        v28 = (float)-(float)((float)(RotTransArray->quat[0] * v34)
-                            - (float)((float)(RotTransArray->quat[2] * v36) + (float)(RotTransArray->quat[1] * v33)));
-                        v29 = (float)((float)(RotTransArray->quat[3] * v36) - (float)(RotTransArray->quat[0] * v33));
-                        RotTransArray->quat[0] = -(float)((float)(RotTransArray->quat[1] * v35)
-                            - (float)((float)(RotTransArray->quat[3] * v33)
-                                + (float)((float)(RotTransArray->quat[0] * v36)
-                                    + (float)(RotTransArray->quat[2] * v34))));
-                        RotTransArray->quat[1] = (float)((float)v25 * (float)v22) + (float)v27;
-                        RotTransArray->quat[2] = (float)((float)v25 * (float)v26) + (float)v28;
-                        RotTransArray->quat[3] = -(float)((float)((float)v23 * (float)v26)
-                            - (float)-(float)((float)((float)v24 * (float)v22) - (float)v29));
-                        LocalMatrixTransformVectorQuatTrans(RotTransArray->trans, v41, &v30);
-                        v21 = v32;
-                        v20 = v31;
-                        v19 = v30;
+                        animMat.transWeight = 2.0 / len;
                     }
-                    v30 = (float)v19 - (float)v14;
-                    v31 = (float)v20 - (float)v15;
-                    v32 = (float)v21 - (float)v16;
-                    DObjSetTrans(RotTransArray, &v30);
-                    v17 = v40[0];
+                    QuatMultiplyEquals(baseQuat, mat->quat);
+                    MatrixTransformVectorQuatTrans(mat->trans, &animMat, origin);
                 }
-                ++v8;
-                v17 = (v17 >> 1) | (v17 << 31);
-                ++RotTransArray;
-                v40[0] = v17;
-            } while (v8 <= v7);
+                DObjSetTrans(mat, origin);
+            }
+            ++partIndex;
+            partBits[4] = (partBits[4] << 31) | ((unsigned int)partBits[4] >> 1);
+            ++mat;
         }
     }
 }

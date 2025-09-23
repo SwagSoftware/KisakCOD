@@ -21,6 +21,7 @@
 #include "cg_servercmds.h"
 #include "cg_compassfriendlies.h"
 #endif
+#include <universal/com_sndalias.h>
 
 
 int32_t __cdecl CG_GetBoneIndex(
@@ -111,6 +112,11 @@ void __cdecl CG_EntityEvent(int32_t localClientNum, centity_s *cent, int32_t eve
     float *position; // [esp+148h] [ebp-Ch]
     const playerState_s *ps; // [esp+14Ch] [ebp-8h]
     uint32_t weaponIdx; // [esp+150h] [ebp-4h]
+    int SoundAliasSeed;
+    const char *v85;
+    int v86;
+    int v88;
+    const char *v90;
 
     if (event)
     {
@@ -452,6 +458,45 @@ void __cdecl CG_EntityEvent(int32_t localClientNum, centity_s *cent, int32_t eve
                 CG_FireWeapon(localClientNum, cent, event, scr_const.tag_flash_2, 0, &cgameGlob->nextSnap->ps);
                 CG_FireWeapon(localClientNum, cent, event, scr_const.tag_flash_22, 0, &cgameGlob->nextSnap->ps);
                 return;
+#ifdef KISAK_SP
+            case EV_BULLET_TRACER: // 0x29
+                if (cent->nextState.eventParm || (cg_tracerChance->current.value * 32768.0f > (float)rand()))
+                {
+                    CG_SpawnTracer(localClientNum, cent->nextState.lerp.pos.trBase, cent->nextState.lerp.u.turret.gunAngles);
+                }
+                return;
+            case EV_SOUND_ALIAS_NOTIFY:
+            case EV_SOUND_ALIAS_NOTIFY_AS_MASTER:
+                if (cent->nextState.eventParm)
+                {
+                    SoundAliasSeed = Com_GetSoundAliasSeed();
+                    Com_SetSoundAliasSeed(cgArray[0].snap->serverCommandSequence + cent->nextState.number);
+                    v85 = CL_GetConfigString(localClientNum, cent->nextState.eventParm + 1667);
+                    v86 = cent->nextState.number;
+                    if (event == EV_SOUND_ALIAS_NOTIFY)
+                        v88 = CG_PlaySoundAliasByName(localClientNum, v86, cent->nextState.lerp.pos.trBase, v85);
+                    else
+                        v88 = CG_PlaySoundAliasAsMasterByName(localClientNum, v86, cent->nextState.lerp.pos.trBase, v85);
+                    if (cgArray[0].demoType != DEMO_TYPE_CLIENT)
+                        SND_AddLengthNotify(v88, (const snd_alias_t *)cent->nextState.number, SndLengthNotify_Script);
+                    Com_SetSoundAliasSeed(SoundAliasSeed);
+                }
+
+                return;
+            case EV_SOUND_ALIAS_ADD_NOTIFY:
+                if (cent->nextState.eventParm)
+                {
+                    if (cgArray[0].demoType != DEMO_TYPE_CLIENT)
+                    {
+                        v90 = CL_GetConfigString(localClientNum, cent->nextState.eventParm + 1667);
+                        if (v90)
+                        {
+                            SND_AddLengthNotify(SND_FindPlaybackId((const snd_alias_t *)cent->nextState.number, v90), (const snd_alias_t *)cent->nextState.number, SndLengthNotify_Script);
+                        }
+                    }
+                }
+                return;
+#endif
             case EV_BULLET_HIT:
                 ByteToDir(ent->eventParm, dir);
                 CG_BulletHitEvent(

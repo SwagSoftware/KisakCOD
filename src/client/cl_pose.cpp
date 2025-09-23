@@ -23,24 +23,11 @@ char *__cdecl CL_AllocSkelMemory(unsigned int size)
 
     iassert(skel_glob->skelMemoryStart);
 
-    // Atomic allocation using InterlockedCompareExchange()
-    // (Adapted from PowerPC assembly...)
-    LONG oldPos, newPos;
-    do
-    {
-        oldPos = skel_glob->skelMemPos;
-        newPos = oldPos + size;
+    int skelMemPos = InterlockedExchangeAdd(&skel_glob->skelMemPos, size);
 
-        if ((unsigned int)newPos > CL_SKEL_MEMORY_SIZE)
-        {
-            // Out of Memory
-            return NULL;
-        }
-    } while (InterlockedCompareExchange((volatile uintptr_t*)&skel_glob->skelMemPos, newPos, oldPos) != oldPos);
+    char *result = skel_glob->skelMemoryStart + skelMemPos;
 
-    char *result = skel_glob->skelMemoryStart + oldPos;
-
-    if (!result || (unsigned int)result > CL_SKEL_MEMORY_SIZE)
+    if (!result || (size + skelMemPos > CL_SKEL_MEMORY_SIZE))
     {
         iassert(0);
         return NULL;

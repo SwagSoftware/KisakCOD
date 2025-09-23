@@ -193,12 +193,12 @@ int __cdecl Player_GetUseList(gentity_s *ent, useList_t *useList, int prevHintEn
 {
     int v6; // r22
     gclient_s *client; // r29
-    int v10; // r3
+    int numEnts; // r3
     unsigned int v11; // r27
     useList_t *v12; // r30
     int *v13; // r23
     int i; // r18
-    gentity_s *v15; // r31
+    gentity_s *gEnt; // r31
     int eType; // r10
     actor_s *actor; // r11
     double value; // fp31
@@ -219,23 +219,26 @@ int __cdecl Player_GetUseList(gentity_s *ent, useList_t *useList, int prevHintEn
     unsigned int v35; // r28
     const gentity_s *v36; // r3
     double v37; // fp0
-    float v39; // [sp+50h] [-2340h] BYREF
-    float v40; // [sp+54h] [-233Ch]
-    float v41; // [sp+58h] [-2338h]
-    float v42; // [sp+60h] [-2330h] BYREF
-    float v43; // [sp+64h] [-232Ch]
-    float v44; // [sp+68h] [-2328h]
-    float v45; // [sp+70h] [-2320h] BYREF
-    float v46; // [sp+74h] [-231Ch]
-    float v47; // [sp+78h] [-2318h]
-    float v48; // [sp+80h] [-2310h] BYREF
-    float v49; // [sp+84h] [-230Ch]
-    float v50; // [sp+88h] [-2308h]
-    float v51[4]; // [sp+90h] [-2300h] BYREF
-    float v52; // [sp+A0h] [-22F0h] BYREF
-    float v53; // [sp+A4h] [-22ECh]
-    float v54; // [sp+A8h] [-22E8h]
-    float v55[4]; // [sp+B0h] [-22E0h] BYREF
+    float traceEnd[3];
+    //float v39; // [sp+50h] [-2340h] BYREF
+    //float v40; // [sp+54h] [-233Ch]
+    //float v41; // [sp+58h] [-2338h]
+    float viewOrigin[3];
+    //float v42; // [sp+60h] [-2330h] BYREF
+    //float v43; // [sp+64h] [-232Ch]
+    //float v44; // [sp+68h] [-2328h]
+    float mins[3]; // [sp+70h] [-2320h] BYREF
+    //float v46; // [sp+74h] [-231Ch]
+    //float v47; // [sp+78h] [-2318h]
+    float maxs[3]; // [sp+80h] [-2310h] BYREF
+    //float v49; // [sp+84h] [-230Ch]
+    //float v50; // [sp+88h] [-2308h]
+    float areaMaxs[3]; // [sp+90h] [-2300h] BYREF
+    float forward[3];
+    //float v52; // [sp+A0h] [-22F0h] BYREF
+    //float v53; // [sp+A4h] [-22ECh]
+    //float v54; // [sp+A8h] [-22E8h]
+    float areaMins[3]; // [sp+B0h] [-22E0h] BYREF
     int v56[180]; // [sp+C0h] [-22D0h] BYREF
 
     v6 = 0;
@@ -265,54 +268,55 @@ int __cdecl Player_GetUseList(gentity_s *ent, useList_t *useList, int prevHintEn
         float fsel_input = _FP12;
 
         // Emulate PowerPC fsel: if fsel_input >= 0, result = fsel_input, else result = fallback (assumed here also fsel_input)
-        float fsel_result = (fsel_input >= 0.0f) ? fsel_input : fsel_input;
+        float fsel_result = (fsel_input >= 0.0f) ? fsel_input : -fsel_input;
 
-        G_GetPlayerViewOrigin(&client->ps, &v42);
-        G_GetPlayerViewDirection(ent, &v52, 0, 0);
+        G_GetPlayerViewOrigin(&client->ps, viewOrigin);
+        G_GetPlayerViewDirection(ent, forward, 0, 0);
 
-        v45 = client->ps.origin[0] - 15.0f;
-        v46 = client->ps.origin[1] - 15.0f;
-        v47 = client->ps.origin[2] + 0.0f;
-        v48 = client->ps.origin[0] + 15.0f;
-        v49 = client->ps.origin[1] + 15.0f;
-        v50 = client->ps.origin[2] + 70.0f;
+        mins[0] = client->ps.origin[0] - 15.0f;
+        mins[1] = client->ps.origin[1] - 15.0f;
+        mins[2] = client->ps.origin[2] + 0.0f;
 
-        v55[0] = v42 - fsel_result;
-        v55[1] = v43 - fsel_result;
-        v55[2] = v44 - 96.0f;
+        maxs[0] = client->ps.origin[0] + 15.0f;
+        maxs[1] = client->ps.origin[1] + 15.0f;
+        maxs[2] = client->ps.origin[2] + 70.0f;
 
-        v51[0] = v42 + fsel_result;
-        v51[1] = v43 + fsel_result;
-        v51[2] = v44 + 96.0f;
+        areaMins[0] = viewOrigin[0] - fsel_result;
+        areaMins[1] = viewOrigin[1] - fsel_result;
+        areaMins[2] = viewOrigin[2] - 96.0f;
+
+        areaMaxs[0] = viewOrigin[0] + fsel_result;
+        areaMaxs[1] = viewOrigin[1] + fsel_result;
+        areaMaxs[2] = viewOrigin[2] + 96.0f;
     }
 
-    v10 = CM_AreaEntities(v55, v51, v56, MAX_GENTITIES, 2113536);
+    numEnts = CM_AreaEntities(areaMins, areaMaxs, v56, MAX_GENTITIES, 2113536);
     v11 = 0;
-    if (v10 > 0)
+    if (numEnts > 0)
     {
         v12 = useList;
         v13 = v56;
-        for (i = v10; i; --i)
+        for (i = numEnts; i; --i)
         {
-            v15 = &g_entities[*v13];
-            if (ent == v15)
+            gEnt = &g_entities[*v13];
+            if (ent == gEnt)
                 goto LABEL_41;
-            eType = v15->s.eType;
-            if (eType != 2 && (v15->r.contents & 0x200000) == 0)
+            eType = gEnt->s.eType;
+            if (eType != 2 && (gEnt->r.contents & 0x200000) == 0)
             {
-                actor = v15->actor;
+                actor = gEnt->actor;
                 if (!actor || !actor->useable)
                     goto LABEL_41;
             }
-            if (v15->classname == scr_const.trigger_use_touch)
+            if (gEnt->classname == scr_const.trigger_use_touch)
             {
-                if (v15->r.absmin[0] > (double)v48
-                    || v15->r.absmax[0] < (double)v45
-                    || v15->r.absmin[1] > (double)v49
-                    || v15->r.absmax[1] < (double)v46
-                    || v15->r.absmin[2] > (double)v50
-                    || v15->r.absmax[2] < (double)v47
-                    || !SV_EntityContact(&v45, &v48, v15))
+                if (gEnt->r.absmin[0] > maxs[0]
+                    || gEnt->r.absmax[0] < mins[0]
+                    || gEnt->r.absmin[1] > maxs[1]
+                    || gEnt->r.absmax[1] < mins[1]
+                    || gEnt->r.absmin[2] > maxs[2]
+                    || gEnt->r.absmax[2] < mins[2]
+                    || !SV_EntityContact(mins, maxs, gEnt))
                 {
                     goto LABEL_41;
                 }
@@ -322,28 +326,28 @@ int __cdecl Player_GetUseList(gentity_s *ent, useList_t *useList, int prevHintEn
             {
                 if (eType == 3)
                 {
-                    if (prevHintEntIndex != v15->s.number)
+                    if (prevHintEntIndex != gEnt->s.number)
                     {
                         value = player_throwbackInnerRadius->current.value;
-                        if (Vec2DistanceSq(v15->r.currentOrigin, ent->r.currentOrigin) > (double)(float)((float)value * (float)value))
+                        if (Vec2DistanceSq(gEnt->r.currentOrigin, ent->r.currentOrigin) > (double)(float)((float)value * (float)value))
                             goto LABEL_41;
                     }
-                    if ((float)((float)(v15->s.lerp.pos.trDelta[2] * v15->s.lerp.pos.trDelta[2])
-                        + (float)((float)(v15->s.lerp.pos.trDelta[0] * v15->s.lerp.pos.trDelta[0])
-                            + (float)(v15->s.lerp.pos.trDelta[1] * v15->s.lerp.pos.trDelta[1]))) > (double)(float)(bg_maxGrenadeIndicatorSpeed->current.value * bg_maxGrenadeIndicatorSpeed->current.value))
+                    if (((gEnt->s.lerp.pos.trDelta[2] * gEnt->s.lerp.pos.trDelta[2])
+                        + ((gEnt->s.lerp.pos.trDelta[0] * gEnt->s.lerp.pos.trDelta[0])
+                            + (gEnt->s.lerp.pos.trDelta[1] * gEnt->s.lerp.pos.trDelta[1]))) > (bg_maxGrenadeIndicatorSpeed->current.value * bg_maxGrenadeIndicatorSpeed->current.value))
                         goto LABEL_41;
                 }
-                v19 = v15->s.eType;
+                v19 = gEnt->s.eType;
                 if (v19 == 3)
                     v20 = player_throwbackOuterRadius->current.value;
                 else
                     v20 = v19 == 11 ? 128.0 : 72.0;
-                v21 = (float)(v15->r.absmin[2] + v15->r.absmax[2]);
-                v40 = (float)(v15->r.absmin[1] + v15->r.absmax[1]) * (float)0.5;
-                v22 = (float)((float)(v15->r.absmin[0] + v15->r.absmax[0]) * (float)0.5);
-                v39 = (float)(v15->r.absmin[0] + v15->r.absmax[0]) * (float)0.5;
-                v41 = (float)v21 * (float)0.5;
-                v23 = (float)((float)v22 - v42);
+                v21 = (gEnt->r.absmin[2] + gEnt->r.absmax[2]);
+                traceEnd[1] = (gEnt->r.absmin[1] + gEnt->r.absmax[1]) * 0.5f;
+                v22 = (gEnt->r.absmin[0] + gEnt->r.absmax[0]) * 0.5f;
+                traceEnd[0] = (gEnt->r.absmin[0] + gEnt->r.absmax[0]) * 0.5f;
+                traceEnd[2] = v21 * 0.5f;
+                v23 = (v22 - viewOrigin[0]);
 
                 // aislop
                 //v24 = sqrtf((float)((float)((float)v23 * (float)v23)
@@ -356,8 +360,8 @@ int __cdecl Player_GetUseList(gentity_s *ent, useList_t *useList, int prevHintEn
 
                 {
                     v24 = sqrtf(v23 * v23
-                        + (v41 - v44) * (v41 - v44)
-                        + (v40 - v43) * (v40 - v43));
+                        + (traceEnd[2] - viewOrigin[2]) * (traceEnd[2] - viewOrigin[2])
+                        + (traceEnd[1] - viewOrigin[1]) * (traceEnd[1] - viewOrigin[1]));
                     float neg_v24 = -v24;
 
                     // Emulate: fsel f11, f10, f29, f31
@@ -370,46 +374,46 @@ int __cdecl Player_GetUseList(gentity_s *ent, useList_t *useList, int prevHintEn
 
                 v29 = (float)((float)v28 * (float)v23);
                 if (v26
-                    || v15->classname == scr_const.trigger_use
-                    && v15->trigger.requireLookAt
-                    && (float)((float)(v52 * (float)v29)
-                        + (float)((float)(v54 * (float)((float)(v41 - v44) * (float)v28))
-                            + (float)(v53 * (float)((float)(v40 - v43) * (float)v28)))) < 0.75999999)
+                    || gEnt->classname == scr_const.trigger_use
+                    && gEnt->trigger.requireLookAt
+                    && (float)((float)(forward[0] * (float)v29)
+                        + (float)((float)(forward[2] * (float)((float)(traceEnd[2] - viewOrigin[2]) * (float)v28))
+                            + (float)(forward[1] * (float)((float)(traceEnd[1] - viewOrigin[1]) * (float)v28)))) < 0.75999999)
                 {
                     goto LABEL_41;
                 }
-                v30 = (float)((float)-(float)((float)((float)((float)((float)(v52 * (float)v29)
-                    + (float)((float)(v54
-                        * (float)((float)(v41 - v44) * (float)v28))
-                        + (float)(v53
-                            * (float)((float)(v40 - v43) * (float)v28))))
+                v30 = (float)((float)-(float)((float)((float)((float)((float)(forward[0] * (float)v29)
+                    + (float)((float)(forward[2]
+                        * (float)((float)(traceEnd[2] - viewOrigin[2]) * (float)v28))
+                        + (float)(forward[1]
+                            * (float)((float)(traceEnd[1] - viewOrigin[1]) * (float)v28))))
                     + (float)1.0)
                     * (float)0.5)
                     - (float)1.0)
                     * (float)256.0);
-                v12->score = (float)-(float)((float)((float)((float)((float)(v52 * (float)v29)
-                    + (float)((float)(v54
-                        * (float)((float)(v41 - v44) * (float)v28))
-                        + (float)(v53
-                            * (float)((float)(v40 - v43) * (float)v28))))
+                v12->score = (float)-(float)((float)((float)((float)((float)(forward[0] * (float)v29)
+                    + (float)((float)(forward[2]
+                        * (float)((float)(traceEnd[2] - viewOrigin[2]) * (float)v28))
+                        + (float)(forward[1]
+                            * (float)((float)(traceEnd[1] - viewOrigin[1]) * (float)v28))))
                     + (float)1.0)
                     * (float)0.5)
                     - (float)1.0)
                     * (float)256.0;
-                if (v15->s.eType == 3)
-                    v12->score = (float)v30 - (float)512.0;
-                if (v15->classname == scr_const.trigger_use)
-                    v12->score = v12->score - (float)256.0;
-                if (v15->s.eType == 10)
-                    v12->score = v12->score - (float)128.0;
-                if (v15->s.eType == 2 && !BG_CanItemBeGrabbed(&v15->s, &ent->client->ps, 0))
+                if (gEnt->s.eType == 3)
+                    v12->score = (float)v30 - 512.0f;
+                if (gEnt->classname == scr_const.trigger_use)
+                    v12->score = v12->score - 256.0f;
+                if (gEnt->s.eType == ET_MG42)
+                    v12->score = v12->score - 128.0f;
+                if (gEnt->s.eType == 2 && !BG_CanItemBeGrabbed(&gEnt->s, &ent->client->ps, 0))
                 {
                     ++v6;
                     v12->score = v12->score + (float)10000.0;
                 }
                 v12->score = v12->score + (float)v24;
             }
-            v12->ent = v15;
+            v12->ent = gEnt;
             ++v11;
             ++v12;
         LABEL_41:
@@ -429,15 +433,16 @@ int __cdecl Player_GetUseList(gentity_s *ent, useList_t *useList, int prevHintEn
             v36 = (const gentity_s *)*((unsigned int *)p_score - 1);
             if (v36->classname != scr_const.trigger_use_touch)
             {
-                v39 = v36->r.absmin[0] + v36->r.absmax[0];
-                v40 = v36->r.absmin[1] + v36->r.absmax[1];
-                v37 = (float)(v36->r.absmin[2] + v36->r.absmax[2]);
-                v39 = v39 * (float)0.5;
-                v40 = v40 * (float)0.5;
-                v41 = (float)v37 * (float)0.5;
-                if (v36->s.eType == 10)
-                    G_DObjGetWorldTagPos_CheckTagExists(v36, scr_const.tag_aim, &v39);
-                if (!G_TraceCapsuleComplete(&v42, vec3_origin, vec3_origin, &v39, client->ps.clientNum, 17))
+                traceEnd[0] = v36->r.absmin[0] + v36->r.absmax[0];
+                traceEnd[1] = v36->r.absmin[1] + v36->r.absmax[1];
+                traceEnd[2] = v36->r.absmin[2] + v36->r.absmax[2];
+
+                Vec3Scale(traceEnd, 0.5f, traceEnd);
+
+                if (v36->s.eType == ET_MG42)
+                    G_DObjGetWorldTagPos_CheckTagExists(v36, scr_const.tag_aim, traceEnd);
+
+                if (!G_TraceCapsuleComplete(viewOrigin, vec3_origin, vec3_origin, traceEnd, client->ps.clientNum, 17))
                 {
                     ++v32;
                     *p_score = *p_score + (float)10000.0;
@@ -824,38 +829,36 @@ int __cdecl Player_CheckAlmostStationary(gentity_s *ent, float *dir)
     gclient_s *client; // r29
     float *currentOrigin; // r30
     float *playerLOSCheckPos; // r31
-    double v7; // fp1
+    double distSq; // fp1
     int result; // r3
-    float v9; // [sp+50h] [-30h] BYREF
-    float v10; // [sp+54h] [-2Ch]
+    float dir2D[2]; // [sp+50h] [-30h] BYREF
 
-    if (!ent->client)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\player_use.cpp", 754, 0, "%s", "ent->client");
-    v9 = *dir;
+    iassert(ent->client);
+
+    dir2D[0] = dir[0];
+    dir2D[1] = dir[1];
+
     client = ent->client;
-    v10 = dir[1];
-    Vec2Normalize(&v9);
+
+    Vec2Normalize(dir2D);
+
     currentOrigin = ent->r.currentOrigin;
-    v7 = Vec2DistanceSq(client->playerLOSCheckPos, ent->r.currentOrigin);
+    distSq = Vec2DistanceSq(client->playerLOSCheckPos, ent->r.currentOrigin);
     playerLOSCheckPos = client->playerLOSCheckPos;
-    if (v7 > ai_playerLOSHalfWidth->current.value
-        || (float)((float)(client->playerLOSCheckDir[1] * v10) + (float)(client->playerLOSCheckDir[0] * v9)) < 0.98479998)
+    if (distSq > ai_playerLOSHalfWidth->current.value || ((client->playerLOSCheckDir[1] * dir2D[1]) + (client->playerLOSCheckDir[0] * dir2D[0])) < 0.98479998)
     {
         *playerLOSCheckPos = *currentOrigin;
         client->playerLOSCheckPos[1] = currentOrigin[1];
-        client->playerLOSCheckDir[0] = v9;
-        client->playerLOSCheckDir[1] = v10;
+        client->playerLOSCheckDir[0] = dir2D[0];
+        client->playerLOSCheckDir[1] = dir2D[1];
         client->playerLOSPosTime = level.time;
     }
     else
     {
-        *playerLOSCheckPos = (float)((float)(*currentOrigin - *playerLOSCheckPos) * (float)0.25) + *playerLOSCheckPos;
-        client->playerLOSCheckPos[1] = (float)((float)(currentOrigin[1] - client->playerLOSCheckPos[1]) * (float)0.25)
-            + client->playerLOSCheckPos[1];
-        client->playerLOSCheckDir[0] = (float)((float)(v9 - client->playerLOSCheckDir[0]) * (float)0.25)
-            + client->playerLOSCheckDir[0];
-        client->playerLOSCheckDir[1] = (float)((float)(v10 - client->playerLOSCheckDir[1]) * (float)0.25)
-            + client->playerLOSCheckDir[1];
+        *playerLOSCheckPos = ((currentOrigin[0] - playerLOSCheckPos[0]) * 0.25f) + playerLOSCheckPos[0];
+        client->playerLOSCheckPos[1] = ((currentOrigin[1] - client->playerLOSCheckPos[1]) * 0.25f) + client->playerLOSCheckPos[1];
+        client->playerLOSCheckDir[0] = ((dir2D[0] - client->playerLOSCheckDir[0]) * 0.25f) + client->playerLOSCheckDir[0];
+        client->playerLOSCheckDir[1] = ((dir2D[1] - client->playerLOSCheckDir[1]) * 0.25f) + client->playerLOSCheckDir[1];
         if (ai_playerLOSMinTime->current.integer + client->playerLOSPosTime <= level.time)
         {
             result = 1;
@@ -883,96 +886,76 @@ void __cdecl Player_DebugDrawLOS(const float *center, const float *dir, double d
     G_DebugBox(center, v8, v7, v5, v6, (int)colorOrange, 0);
 }
 
-void __cdecl Player_BanNodesInFront(gentity_s *ent, double dist, const float *start, const float *dir, int a5)
+void __cdecl Player_BanNodesInFront(gentity_s *ent, float dist, const float *start, const float *dir)
 {
-    double v9; // fp0
-    double v10; // fp31
-    double v11; // fp11
-    double v12; // fp13
+    double dist2D; // fp31
     int v13; // r5
     pathsort_t *v14; // r4
     int iNodeCount; // r30
-    int v16; // r5
-    int v17; // r19
+    int duration; // r19
     double v18; // fp31
     pathsort_t *v19; // r22
     pathnode_t *node; // r29
     sentient_s *v21; // r3
-    sentient_s *v22; // r31
+    sentient_s *nodeOwner; // r31
     actor_s *actor; // r27
-    sentient_s *sentient; // r11
-    float v25; // [sp+50h] [-E0h] BYREF
-    float v26; // [sp+54h] [-DCh]
-    float v27; // [sp+58h] [-D8h]
-    float v28[4]; // [sp+60h] [-D0h] BYREF
+    float endPoint[3]; // [sp+50h] [-E0h] BYREF
+    //float v26; // [sp+54h] [-DCh]
+    //float v27; // [sp+58h] [-D8h]
+    float center[3]; // [sp+60h] [-D0h] BYREF
     pathsort_t nodes[4]; // [sp+70h] [-C0h] BYREF
 
-    if (I_fabs((float)((float)((float)(*(float *)(a5 + 8) * *(float *)(a5 + 8))
-        + (float)((float)(*(float *)a5 * *(float *)a5)
-            + (float)(*(float *)(a5 + 4) * *(float *)(a5 + 4))))
-        - (float)1.0)) >= 0.0020000001)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\player_use.cpp", 820, 0, "%s", "Vec3IsNormalized( dir )");
-    if (ent->sentient->eTeam == TEAM_DEAD)
-        MyAssertHandler(
-            "c:\\trees\\cod3\\cod3src\\src\\game\\player_use.cpp",
-            821,
-            0,
-            "%s",
-            "ent->sentient->eTeam != TEAM_DEAD");
-    v9 = (float)((float)((float)dist * *(float *)(a5 + 4)) + dir[1]);
-    v25 = (float)(*(float *)a5 * (float)dist) + *dir;
-    v27 = (float)((float)dist * *(float *)(a5 + 8)) + dir[2];
-    v26 = v9;
-    v10 = Vec2Distance(dir, &v25);
-    v11 = (float)(dir[2] + v27);
-    v12 = (float)((float)(dir[1] + v26) * (float)0.5);
-    v28[0] = (float)(*dir + v25) * (float)0.5;
-    v28[1] = v12;
-    v28[2] = (float)v11 * (float)0.5;
-    iNodeCount = Path_NodesInCylinder(v28, (float)((float)v10 * (float)0.5), 80.0, nodes, 4, 270332);
-    v17 = ai_playerLOSMinTime->current.integer / 50;
+    iassert(Vec3IsNormalized(dir));
+    iassert(ent->sentient->eTeam != TEAM_DEAD);
+
+    endPoint[0] = (dist * dir[0]) + start[0];
+    endPoint[1] = (dist * dir[1]) + start[1];
+    endPoint[2] = (dist * dir[2]) + start[2];
+
+
+    dist2D = Vec2Distance(dir, endPoint);
+    center[0] = (dir[0] + endPoint[0]) * 0.5f;
+    center[1] = (dir[1] + endPoint[1]) * 0.5f;
+    center[2] = (dir[2] + endPoint[2]) * 0.5f;
+
+    iNodeCount = Path_NodesInCylinder(center, (dist2D * 0.5f), 80.0f, nodes, 4, 270332);
+
+    duration = ai_playerLOSMinTime->current.integer / 50;
+
     if (ai_debugPlayerLOS->current.enabled)
-        Player_DebugDrawLOS(v28, (const float *)a5, v10, v16);
+        Player_DebugDrawLOS(center, dir, dist2D, 1); // debug draw duration 1 is a guess
+
     v18 = (float)(ai_playerLOSHalfWidth->current.value * ai_playerLOSHalfWidth->current.value);
+
     if (iNodeCount > 0)
     {
         v19 = nodes;
         do
         {
             node = v19->node;
-            if (PointToLineDistSq2D(v19->node->constant.vOrigin, dir, &v25) <= v18)
+            if (PointToLineDistSq2D(v19->node->constant.vOrigin, start, endPoint) <= v18)
             {
-                //if (SentientHandle::isDefined(&node->dynamic.pOwner))
                 if (node->dynamic.pOwner.isDefined())
                 {
-                    //v21 = SentientHandle::sentient(&node->dynamic.pOwner);
                     v21 = node->dynamic.pOwner.sentient();
-                    v22 = v21;
+                    nodeOwner = v21;
                     if (v21)
                     {
                         if (v21->pClaimedNode == node)
                         {
                             if (Actor_PointNearNode(v21->ent->r.currentOrigin, node))
                                 goto LABEL_23;
-                            actor = v22->ent->actor;
+                            actor = nodeOwner->ent->actor;
                             if (!actor)
                                 goto LABEL_23;
-                            sentient = ent->sentient;
-                            if (v22->eTeam != sentient->eTeam)
+                            if (nodeOwner->eTeam != ent->sentient->eTeam)
                                 goto LABEL_23;
-                            if (v22 == sentient)
-                                MyAssertHandler(
-                                    "c:\\trees\\cod3\\cod3src\\src\\game\\player_use.cpp",
-                                    857,
-                                    0,
-                                    "%s",
-                                    "nodeOwner != ent->sentient");
-                            if ((unsigned __int8)Actor_KeepClaimedNode(actor))
+                            iassert(nodeOwner != ent->sentient);
+                            if (Actor_KeepClaimedNode(actor))
                                 goto LABEL_23;
                             if (actor->numCoverNodesInGoal > 1)
                             {
-                                Path_RelinquishNodeSoon(v22);
-                                //SentientHandle::setSentient(&node->dynamic.pOwner, 0);
+                                Path_RelinquishNodeSoon(nodeOwner);
                                 node->dynamic.pOwner.setSentient(0);
                             }
                         }
@@ -980,29 +963,26 @@ void __cdecl Player_BanNodesInFront(gentity_s *ent, double dist, const float *st
                 }
                 node->dynamic.inPlayerLOSTime = ai_playerLOSMinTime->current.integer + level.time;
                 if (ai_debugPlayerLOS->current.enabled)
-                    Path_DrawDebugNoLinks(node, (const float (*)[4])colorOrange, v17);
+                    Path_DrawDebugNoLinks(node, (const float (*)[4])colorOrange, duration);
             }
         LABEL_23:
-            //iNodeCount = (pathnode_tree_t *)((char *)iNodeCount - 1);
             iNodeCount--;
             ++v19;
         } while (iNodeCount);
     }
 }
 
-void __cdecl Player_BlockFriendliesInADS(gentity_s *ent, double dist, const float *start, const float *dir, int a5)
+void __cdecl Player_BlockFriendliesInADS(gentity_s *ent, float dist, const float *start, const float *dir)
 {
     int BestTarget; // r29
     gclient_s *client; // r10
     sentient_s *sentient; // r10
-    double v12; // fp0
-    float v13[6]; // [sp+50h] [-50h] BYREF
+    float end[3]; // [sp+50h] [-50h] BYREF
 
-    if (!ent)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\player_use.cpp", 886, 0, "%s", "ent");
-    if (!ent->client)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\player_use.cpp", 887, 0, "%s", "ent->client");
-    BestTarget = AimTarget_GetBestTarget(dir, (const float *)a5);
+    iassert(ent);
+    iassert(ent->client);
+
+    BestTarget = AimTarget_GetBestTarget(start, dir);
     client = ent->client;
     if (BestTarget == ENTITYNUM_NONE)
     {
@@ -1013,39 +993,34 @@ void __cdecl Player_BlockFriendliesInADS(gentity_s *ent, double dist, const floa
     {
         client->playerADSTargetTime = level.time;
     }
+
     sentient = ent->sentient;
-    v12 = (float)((float)(*(float *)(a5 + 4) * (float)dist) + dir[1]);
-    v13[0] = (float)(*(float *)a5 * (float)dist) + *dir;
-    v13[2] = (float)(*(float *)(a5 + 8) * (float)dist) + dir[2];
-    v13[1] = v12;
-    Actor_BroadcastLineEvent(ent, 14, 1 << sentient->eTeam, dir, v13, 0.0);
+    end[0] = (dir[0] * dist) + start[0];
+    end[1] = (dir[1] * dist) + start[1];
+    end[2] = (dir[2] * dist) + start[2];
+    Actor_BroadcastLineEvent(ent, AI_EV_BULLET, 1 << sentient->eTeam, start, end, 0.0f);
+
     if (ai_debugPlayerLOS->current.enabled)
         G_DebugLine(ent->r.currentOrigin, g_entities[BestTarget].r.currentOrigin, colorCyan, 0);
 }
 
 void __cdecl Player_GrenadeThrowBlockFriendlies(
     gentity_s *ent,
-    double dist,
+    float dist,
     const float *start,
-    const float *dir,
-    float *a5)
+    const float *dir)
 {
-    sentient_s *sentient; // r10
-    double v10; // fp0
-    float v11[6]; // [sp+50h] [-50h] BYREF
+    float end[3]; // [sp+50h] [-50h] BYREF
 
-    if (!ent)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\player_use.cpp", 920, 0, "%s", "ent");
-    if (!ent->client)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\player_use.cpp", 921, 0, "%s", "ent->client");
+    iassert(ent);
+    iassert(ent->client);
+
     if ((ent->client->ps.weapFlags & 2) != 0)
     {
-        sentient = ent->sentient;
-        v10 = (float)((float)(a5[1] * (float)dist) + dir[1]);
-        v11[0] = (float)(*a5 * (float)dist) + *dir;
-        v11[2] = (float)(a5[2] * (float)dist) + dir[2];
-        v11[1] = v10;
-        Actor_BroadcastLineEvent(ent, 14, 1 << sentient->eTeam, dir, v11, 0.0);
+        end[0] = (dir[0] * dist) + start[0];
+        end[1] = (dir[1] * dist) + start[1];
+        end[2] = (dir[2] * dist) + start[2];
+        Actor_BroadcastLineEvent(ent, AI_EV_BULLET, 1 << ent->sentient->eTeam, dir, end, 0.0f);
     }
 }
 
@@ -1055,10 +1030,9 @@ void __cdecl Player_UpdateLookAtEntity(gentity_s *ent)
     unsigned int weapon; // r3
     WeaponDef *weapDef; // r3
     WeaponDef *v5; // r23
-    unsigned __int8 *v6; // r27
+    unsigned __int8 *prioMap; // r27
     int number; // r6
     gentity_s *updated; // r31
-    const float *v9; // r4
     gclient_s *v12; // r11
     double value; // fp1
     double v14; // fp30
@@ -1079,14 +1053,16 @@ void __cdecl Player_UpdateLookAtEntity(gentity_s *ent)
     const dvar_s *v29; // r11
     double v30; // fp30
     const dvar_s *v31; // r11
-    float v32; // [sp+58h] [-E8h] BYREF
-    float v33; // [sp+5Ch] [-E4h]
-    float v34; // [sp+60h] [-E0h]
-    float v35; // [sp+68h] [-D8h] BYREF
-    float v36; // [sp+6Ch] [-D4h]
-    float v37; // [sp+70h] [-D0h]
-    float v38[6]; // [sp+78h] [-C8h] BYREF
-    trace_t v39; // [sp+90h] [-B0h] BYREF
+    float start[3];
+    //float v32; // [sp+58h] [-E8h] BYREF
+    //float v33; // [sp+5Ch] [-E4h]
+    //float v34; // [sp+60h] [-E0h]
+    float forward[3];
+    //float v35; // [sp+68h] [-D8h] BYREF
+    //float v36; // [sp+6Ch] [-D4h]
+    //float v37; // [sp+70h] [-D0h]
+    float traceEnd[3]; // [sp+78h] [-C8h] BYREF
+    trace_t traceresult; // [sp+90h] [-B0h] BYREF
 
     if (!ent)
         MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\player_use.cpp", 946, 0, "%s", "ent");
@@ -1099,8 +1075,8 @@ void __cdecl Player_UpdateLookAtEntity(gentity_s *ent)
     client = ent->client;
     client->ps.weapFlags &= 0xFFFFFDE7;
     ent->client->pLookatEnt.setEnt(NULL);
-    G_GetPlayerViewOrigin(&client->ps, &v32);
-    G_GetPlayerViewDirection(ent, &v35, 0, 0);
+    G_GetPlayerViewOrigin(&client->ps, start);
+    G_GetPlayerViewDirection(ent, forward, 0, 0);
     if ((client->ps.eFlags & 0x20300) != 0)
     {
         if (client->ps.viewlocked_entNum == ENTITYNUM_NONE)
@@ -1119,71 +1095,52 @@ void __cdecl Player_UpdateLookAtEntity(gentity_s *ent)
     weapDef = BG_GetWeaponDef(weapon);
     v5 = weapDef;
     if (ent->client->ps.weapon && weapDef->bRifleBullet)
-        v6 = riflePriorityMap;
+        prioMap = riflePriorityMap;
     else
-        v6 = bulletPriorityMap;
-    if ((LODWORD(v32) & 0x7F800000) == 0x7F800000
-        || (LODWORD(v33) & 0x7F800000) == 0x7F800000
-        || (LODWORD(v34) & 0x7F800000) == 0x7F800000)
-    {
-        MyAssertHandler(
-            "c:\\trees\\cod3\\cod3src\\src\\game\\player_use.cpp",
-            976,
-            0,
-            "%s",
-            "!IS_NAN((start)[0]) && !IS_NAN((start)[1]) && !IS_NAN((start)[2])");
-    }
-    if ((LODWORD(v35) & 0x7F800000) == 0x7F800000
-        || (LODWORD(v36) & 0x7F800000) == 0x7F800000
-        || (LODWORD(v37) & 0x7F800000) == 0x7F800000)
-    {
-        MyAssertHandler(
-            "c:\\trees\\cod3\\cod3src\\src\\game\\player_use.cpp",
-            977,
-            0,
-            "%s",
-            "!IS_NAN((forward)[0]) && !IS_NAN((forward)[1]) && !IS_NAN((forward)[2])");
-    }
+        prioMap = bulletPriorityMap;
+
+    iassert(!IS_NAN((start)[0]) && !IS_NAN((start)[1]) && !IS_NAN((start)[2]));
+    iassert(!IS_NAN((forward)[0]) && !IS_NAN((forward)[1]) && !IS_NAN((forward)[2]));
     number = ent->s.number;
-    v38[0] = (float)(v35 * (float)15000.0) + v32;
-    v38[1] = (float)(v36 * (float)15000.0) + v33;
-    v38[2] = (float)(v37 * (float)15000.0) + v34;
-    updated = Player_UpdateLookAtEntityTrace(&v39, &v32, v38, number, 578873345, v6, &v35);
-    if ((unsigned __int8)Player_CheckAlmostStationary(ent, &v35))
+    traceEnd[0] = (float)(forward[0] * (float)15000.0) + start[0];
+    traceEnd[1] = (float)(forward[1] * (float)15000.0) + start[1];
+    traceEnd[2] = (float)(forward[2] * (float)15000.0) + start[2];
+    updated = Player_UpdateLookAtEntityTrace(&traceresult, start, traceEnd, number, 578873345, prioMap, forward);
+    if ((unsigned __int8)Player_CheckAlmostStationary(ent, forward))
     {
         // aislop
         //_FP12 = (float)((float)(v39.fraction * (float)15000.0) - ai_playerLOSRange->current.value);
         //__asm { fsel      f1, f12, f0, f13# dist }
         //Player_BanNodesInFront(ent, _FP1, v9, &v32, (int)&v35);
 
-        float _FP12 = v39.fraction * 15000.0f - ai_playerLOSRange->current.value;
-        float denom = (_FP12 >= 0.0f) ? _FP12 : _FP12;  // mimics fsel behavior with fallback
-        Player_BanNodesInFront(ent, denom, v9, &v32, (int)&v35);
+        float _FP12 = traceresult.fraction * 15000.0f - ai_playerLOSRange->current.value;
+        float denom = (_FP12 >= 0.0f) ? _FP12 : -_FP12;  // mimics fsel behavior with fallback
+        Player_BanNodesInFront(ent, denom, start, forward);
     }
     v12 = ent->client;
     if ((v12->ps.pm_flags & 0x10) != 0 && v12->ps.fWeaponPosFrac == 1.0)
     {
         value = ai_playerADS_LOSRange->current.value;
         if (value != 0.0)
-            Player_BlockFriendliesInADS(ent, value, v9, &v32, (int)&v35);
+            Player_BlockFriendliesInADS(ent, value, start, forward);
     }
-    Player_GrenadeThrowBlockFriendlies(ent, ai_playerLOSRange->current.value, v9, &v32, &v35);
+    Player_GrenadeThrowBlockFriendlies(ent, ai_playerLOSRange->current.value, start, forward);
     if (updated)
     {
         if (updated->classname != scr_const.trigger_lookat
             || (ent->client->pLookatEnt.setEnt(updated),
                 G_Trigger(updated, ent),
-                (updated = Player_UpdateLookAtEntityTrace(&v39, &v32, v38, ent->s.number, 42002433, v6, &v35)) != 0))
+                (updated = Player_UpdateLookAtEntityTrace(&traceresult, start, traceEnd, ent->s.number, 42002433, prioMap, forward)) != 0))
         {
             if ((updated->r.contents & 0x4000) != 0)
             {
-                if ((v39.surfaceFlags & 0x10) == 0)
+                if ((traceresult.surfaceFlags & 0x10) == 0)
                 {
                     if (!updated->sentient)
                         MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\player_use.cpp", 1018, 0, "%s", "traceEnt->sentient");
-                    v14 = (float)(updated->r.currentOrigin[0] - v32);
-                    v15 = (float)(updated->r.currentOrigin[1] - v33);
-                    v16 = (float)(updated->r.currentOrigin[2] - v34);
+                    v14 = (float)(updated->r.currentOrigin[0] - start[0]);
+                    v15 = (float)(updated->r.currentOrigin[1] - start[1]);
+                    v16 = (float)(updated->r.currentOrigin[2] - start[2]);
                     if (((1 << updated->sentient->eTeam) & ~(1 << Sentient_EnemyTeam(ent->sentient->eTeam))) != 0)
                     {
                         v17 = g_friendlyNameDist;
@@ -1252,11 +1209,11 @@ void __cdecl Player_UpdateLookAtEntity(gentity_s *ent)
                 if (updated->lookAtText0 && !ent->client->pLookatEnt.isDefined())
                 {
                     v29 = g_friendlyNameDist;
-                    v30 = (float)((float)((float)(updated->r.currentOrigin[0] - v32) * (float)(updated->r.currentOrigin[0] - v32))
-                        + (float)((float)((float)(updated->r.currentOrigin[2] - v34)
-                            * (float)(updated->r.currentOrigin[2] - v34))
-                            + (float)((float)(updated->r.currentOrigin[1] - v33)
-                                * (float)(updated->r.currentOrigin[1] - v33))));
+                    v30 = (float)((float)((float)(updated->r.currentOrigin[0] - start[0]) * (float)(updated->r.currentOrigin[0] - start[0]))
+                        + (float)((float)((float)(updated->r.currentOrigin[2] - start[2])
+                            * (float)(updated->r.currentOrigin[2] - start[2]))
+                            + (float)((float)(updated->r.currentOrigin[1] - start[1])
+                                * (float)(updated->r.currentOrigin[1] - start[1]))));
                     if (g_friendlyNameDist->current.value > 15000.0)
                     {
                         MyAssertHandler(
@@ -1296,9 +1253,9 @@ void __cdecl Player_UpdateLookAtEntity(gentity_s *ent)
                 if (!updated->scr_vehicle)
                     MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\player_use.cpp", 1054, 0, "%s", "traceEnt->scr_vehicle");
                 v22 = g_friendlyNameDist;
-                v23 = (float)(updated->r.currentOrigin[0] - v32);
-                v24 = (float)(updated->r.currentOrigin[1] - v33);
-                v25 = (float)(updated->r.currentOrigin[2] - v34);
+                v23 = (float)(updated->r.currentOrigin[0] - start[0]);
+                v24 = (float)(updated->r.currentOrigin[1] - start[1]);
+                v25 = (float)(updated->r.currentOrigin[2] - start[2]);
                 if (g_friendlyNameDist->current.value > 15000.0)
                 {
                     MyAssertHandler(

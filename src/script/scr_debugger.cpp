@@ -1870,7 +1870,9 @@ Scr_WatchElement_s *Scr_DisplayDebugger()
     else
         Con_CloseConsole(0);
 
+#ifndef KISAK_SP // on SP, we are in the SERVER thread
     iassert(Sys_IsMainThread());
+#endif
     iassert(!Key_IsCatcherActive(ONLY_LOCAL_CLIENT_NUM, KEYCATCH_SCRIPT));
 
     Key_AddCatcher(ONLY_LOCAL_CLIENT_NUM, KEYCATCH_SCRIPT);

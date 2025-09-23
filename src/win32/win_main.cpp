@@ -329,7 +329,9 @@ void Sys_Error(const char *error, ...)
 	if (com_dedicated->current.integer)
 #endif
 	{
+#ifndef KISAK_SP
 		if (Sys_IsMainThread())
+#endif
 		{
 			Sys_ShowConsole();
 			Conbuf_AppendText("\n\n");

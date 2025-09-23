@@ -219,7 +219,9 @@ void __cdecl R_SyncRenderThread()
 {
     if (!Sys_IsRenderThread())
     {
+#ifndef KISAK_SP // called in Debug_Frame from script debugger (SP = SERVER thread)
         iassert( Sys_IsMainThread() );
+#endif
         if (rg.registered)
         {
             iassert( dx.device );
@@ -1714,7 +1716,9 @@ int __cdecl R_PopRemoteScreenUpdate()
     volatile int remoteScreenUpdateNesting; // [esp+4h] [ebp-4h]
 
     iassert( IsFastFileLoad() || r_glob.remoteScreenUpdateNesting == 0 );
+#ifndef KISAK_SP
     iassert( Sys_IsMainThread() );
+#endif
     remoteScreenUpdateNesting = r_glob.remoteScreenUpdateNesting;
     while (r_glob.remoteScreenUpdateNesting)
         R_EndRemoteScreenUpdate();
@@ -1802,7 +1806,9 @@ void __cdecl R_EndDebugFrame()
         R_ClearCmdList();
         R_SyncRenderThread();
         frontEndDataOut->drawType = -1;
+#ifndef KISAK_SP
         iassert(Sys_IsMainThread());
+#endif
         if (R_CheckLostDevice())
             v0 = g_disableRendering == 0;
         else

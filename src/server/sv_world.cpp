@@ -1220,58 +1220,16 @@ int __cdecl SV_SightTraceToEntity(float *start, float *mins, float *maxs, float 
     ent = SV_GentityNum(entityNum);
     if ((ent->r.contents & contentmask) == 0)
         return 0;
-    if (!mins)
-        MyAssertHandler(".\\server\\sv_world.cpp", 1036, 0, "%s", "mins");
-    if (!maxs)
-        MyAssertHandler(".\\server\\sv_world.cpp", 1037, 0, "%s", "maxs");
-    if (!start)
-        MyAssertHandler(".\\server\\sv_world.cpp", 1038, 0, "%s", "start");
-    if (!end)
-        MyAssertHandler(".\\server\\sv_world.cpp", 1039, 0, "%s", "end");
-    if ((COERCE_UNSIGNED_INT(*start) & 0x7F800000) == 0x7F800000
-        || (COERCE_UNSIGNED_INT(start[1]) & 0x7F800000) == 0x7F800000
-        || (COERCE_UNSIGNED_INT(start[2]) & 0x7F800000) == 0x7F800000)
-    {
-        MyAssertHandler(
-            ".\\server\\sv_world.cpp",
-            1040,
-            0,
-            "%s",
-            "!IS_NAN((start)[0]) && !IS_NAN((start)[1]) && !IS_NAN((start)[2])");
-    }
-    if ((COERCE_UNSIGNED_INT(*mins) & 0x7F800000) == 0x7F800000
-        || (COERCE_UNSIGNED_INT(mins[1]) & 0x7F800000) == 0x7F800000
-        || (COERCE_UNSIGNED_INT(mins[2]) & 0x7F800000) == 0x7F800000)
-    {
-        MyAssertHandler(
-            ".\\server\\sv_world.cpp",
-            1041,
-            0,
-            "%s",
-            "!IS_NAN((mins)[0]) && !IS_NAN((mins)[1]) && !IS_NAN((mins)[2])");
-    }
-    if ((COERCE_UNSIGNED_INT(*maxs) & 0x7F800000) == 0x7F800000
-        || (COERCE_UNSIGNED_INT(maxs[1]) & 0x7F800000) == 0x7F800000
-        || (COERCE_UNSIGNED_INT(maxs[2]) & 0x7F800000) == 0x7F800000)
-    {
-        MyAssertHandler(
-            ".\\server\\sv_world.cpp",
-            1042,
-            0,
-            "%s",
-            "!IS_NAN((maxs)[0]) && !IS_NAN((maxs)[1]) && !IS_NAN((maxs)[2])");
-    }
-    if ((COERCE_UNSIGNED_INT(*end) & 0x7F800000) == 0x7F800000
-        || (COERCE_UNSIGNED_INT(end[1]) & 0x7F800000) == 0x7F800000
-        || (COERCE_UNSIGNED_INT(end[2]) & 0x7F800000) == 0x7F800000)
-    {
-        MyAssertHandler(
-            ".\\server\\sv_world.cpp",
-            1043,
-            0,
-            "%s",
-            "!IS_NAN((end)[0]) && !IS_NAN((end)[1]) && !IS_NAN((end)[2])");
-    }
+
+    iassert(mins);
+    iassert(maxs);
+    iassert(start);
+    iassert(end);
+    iassert(!IS_NAN((start)[0]) && !IS_NAN((start)[1]) && !IS_NAN((start)[2]));
+    iassert(!IS_NAN((mins)[0]) && !IS_NAN((mins)[1]) && !IS_NAN((mins)[2]));
+    iassert(!IS_NAN((maxs)[0]) && !IS_NAN((maxs)[1]) && !IS_NAN((maxs)[2]));
+    iassert(!IS_NAN((end)[0]) && !IS_NAN((end)[1]) && !IS_NAN((end)[2]));
+
     for (i = 0; i < 3; ++i)
     {
         if (start[i] >= (double)end[i])

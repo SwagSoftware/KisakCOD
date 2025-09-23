@@ -1341,22 +1341,24 @@ void __cdecl CG_ArchiveViewInfo(cg_s *cgameGlob, MemoryFile *memFile)
 void __cdecl GetCeilingHeight(cg_s *cgameGlob)
 {
     float *origin; // r31
-    double v3; // fp0
-    float v4[2]; // [sp+50h] [-60h] BYREF
-    float v5; // [sp+58h] [-58h]
-    trace_t v6; // [sp+60h] [-50h] BYREF
+    float endPos[3];
+    trace_t result; // [sp+60h] [-50h] BYREF
 
     origin = cgameGlob->predictedPlayerState.origin;
-    v4[0] = cgameGlob->predictedPlayerState.origin[0];
-    v5 = cgameGlob->predictedPlayerState.origin[2] + (float)1024.0;
-    v4[1] = cgameGlob->predictedPlayerState.origin[1];
-    CG_TraceCapsule(&v6, cgameGlob->predictedPlayerState.origin, playerMins, playerMaxs, v4, ENTITYNUM_NONE, 1);
-    if (v6.fraction < 1.0)
-        v3 = (float)((float)((float)((float)(v5 - origin[2]) * v6.fraction) + origin[2])
-            - cgameGlob->predictedPlayerState.origin[2]);
+    endPos[0] = cgameGlob->predictedPlayerState.origin[0];
+    endPos[1] = cgameGlob->predictedPlayerState.origin[1];
+    endPos[2] = cgameGlob->predictedPlayerState.origin[2] + 1024.0f;
+
+    CG_TraceCapsule(&result, cgameGlob->predictedPlayerState.origin, playerMins, playerMaxs, endPos, ENTITYNUM_NONE, 1);
+    if (result.fraction < 1.0)
+    {
+        Vec3Lerp(cgameGlob->predictedPlayerState.origin, endPos, result.fraction, endPos);
+        cgameGlob->heightToCeiling = endPos[2] - cgameGlob->predictedPlayerState.origin[2];
+    }
     else
-        v3 = FLT_MAX;
-    cgameGlob->heightToCeiling = v3;
+    {
+        cgameGlob->heightToCeiling = FLT_MAX;
+    }
 }
 
 void __cdecl DumpAnims(int localClientNum)
@@ -1696,12 +1698,6 @@ int __cdecl CG_DrawActiveFrame(
     int shellshockTime; // r28
     const shellshock_parms_t *ShellshockParms; // r3
     unsigned int viewlocked_entNum; // r28
-    __int64 v25; // r10
-    int v26; // r8
-    int v27; // r7
-    int v28; // r6
-    int v29; // r5
-    int v30; // r4
     double FarPlaneDist; // fp1
     FxCmd v32[9]; // [sp+50h] [-70h] BYREF
 
@@ -1841,7 +1837,7 @@ int __cdecl CG_DrawActiveFrame(
     }
     CL_Input(localClientNum);
     CG_ModelPreviewerFrame(cgArray);
-    CG_AddModelPreviewerModel(cgArray[0].frametime, v30, v29, v28, v27, v26, v25);
+    CG_AddModelPreviewerModel(cgArray[0].frametime);
     //PIXBeginNamedEvent_Copy_NoVarArgs(0xFFFFFFFF, "player state");
     CG_PredictPlayerState(localClientNum);
     //PIXEndNamedEvent();

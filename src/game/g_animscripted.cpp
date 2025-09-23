@@ -39,18 +39,22 @@ void __cdecl CalcDeltaOriginAndAngles(
     float *origin,
     float *angles)
 {
-    double v8; // fp1
-    float (*v9)[3]; // r3
-    float v10[2]; // [sp+50h] [-A0h] BYREF
-    float v11[18]; // [sp+58h] [-98h] BYREF
-    float v12[6][3]; // [sp+A0h] [-50h] BYREF
+    long double v8; // fp4
+    double v9; // fp2
+    double v10; // fp1
+    double yaw; // fp1
+    float (*v12)[3]; // r3
+    float rot[2]; // [sp+50h] [-A0h] BYREF
+    float trans[6]; // [sp+58h] [-98h] BYREF
+    float localAxis[4][3]; // [sp+70h] [-80h] BYREF
+    float resultAxis[4][3]; // [sp+A0h] [-50h] BYREF
 
-    XAnimCalcAbsDelta(obj, anim, v10, v11);
-    MatrixTransformVector43(v11, (const mat4x3&)matrix, origin);
-    v8 = RotationToYaw(v10);
-    YawToAxis(v8, (mat3x3&)v9);
-    MatrixMultiply((const mat3x3&)v11[6], (const mat3x3 &)matrix, (mat3x3 &)v12);
-    AxisToAngles((const mat3x3&)v12, angles);
+    XAnimCalcAbsDelta(obj, anim, rot, trans);
+    MatrixTransformVector43(trans, (const mat4x3&)*matrix, origin);
+    yaw = RotationToYaw(rot);
+    YawToAxis(yaw, (mat3x3&)*localAxis);
+    MatrixMultiply((const mat3x3&)*localAxis, (const mat3x3&)*matrix, (mat3x3&)*resultAxis);
+    AxisToAngles((const mat3x3&)*resultAxis, angles);
 }
 
 void __cdecl GetDeltaOriginAndAngles(
@@ -228,45 +232,42 @@ void __cdecl G_Animscripted(
     unsigned int notifyName,
     unsigned __int8 animMode)
 {
-    const char *v13; // r3
-    const char *v14; // r3
-    XAnimTree_s *EntAnimTree; // r26
+    XAnimTree_s *pAnimTree; // r26
     animscripted_s *scripted; // r30
     const XAnim_s *Anims; // r3
-    const XAnim_s *v18; // r27
+    const XAnim_s *v20; // r27
     DObj_s *ServerDObj; // r29
-    int v20; // r7
-    unsigned int v21; // r6
-    unsigned int v22; // r5
-    double v23; // fp1
-    float (*v24)[3]; // r3
-    float v25[2]; // [sp+50h] [-110h] BYREF
-    float v26[4]; // [sp+58h] [-108h] BYREF
-    float v27[4]; // [sp+68h] [-F8h] BYREF
-    float v28[18]; // [sp+78h] [-E8h] BYREF
-    float v29[4][3]; // [sp+C0h] [-A0h] BYREF
+    bool IsLooped; // r3
+    int v23; // r7
+    unsigned int v24; // r6
+    unsigned int v25; // r5
+    double yaw; // fp1
+    float (*v27)[3]; // r3
+    float rot[2]; // [sp+50h] [-110h] BYREF
+    float transformedPos[4]; // [sp+58h] [-108h] BYREF
+    float trans[4]; // [sp+68h] [-F8h] BYREF
+    float axisAngles[6]; // [sp+78h] [-E8h] BYREF
+    float localAxis[4][3]; // [sp+90h] [-D0h] BYREF
+    float resultAxis[4][3]; // [sp+C0h] [-A0h] BYREF
 
     if ((ent->flags & 0x2000) == 0)
     {
-        v13 = SL_ConvertToString(ent->classname);
-        v14 = va("entity (classname: '%s') does not currently support animscripted", v13);
-        Scr_ObjectError(v14);
+        Scr_ObjectError(va("entity (classname: '%s') does not currently support animscripted", SL_ConvertToString(ent->classname)));
     }
-    EntAnimTree = GScr_GetEntAnimTree(ent);
-    if (!EntAnimTree)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\g_animscripted.cpp", 163, 0, "%s", "pAnimTree");
+    pAnimTree = GScr_GetEntAnimTree(ent);
+    iassert(pAnimTree);
     scripted = ent->scripted;
     if (!scripted)
     {
-        scripted = (animscripted_s *)MT_Alloc(96, 18);
+        scripted = (animscripted_s *)MT_Alloc(sizeof(animscripted_s), 18);
         ent->scripted = scripted;
     }
     scripted->anim = anim;
     scripted->root = root;
     scripted->mode = animMode;
     scripted->bStarted = 0;
-    Anims = XAnimGetAnims(EntAnimTree);
-    v18 = Anims;
+    Anims = XAnimGetAnims(pAnimTree);
+    v20 = Anims;
     if (animMode == 1)
     {
         G_Animscripted_DeathPlant(ent, Anims, anim, origin, angles);
@@ -279,22 +280,22 @@ void __cdecl G_Animscripted(
         AnglesToAxis(angles, scripted->axis);
     }
     ServerDObj = Com_GetServerDObj(ent->s.number);
-    G_AnimScripted_ClearAnimWeights(ServerDObj, EntAnimTree, root, ent->actor);
+    G_AnimScripted_ClearAnimWeights(ServerDObj, pAnimTree, root, ent->actor);
     if (g_dumpAnimsCommands->current.integer == ent->s.number)
-        DumpAnimCommand("animscripted(internal)", EntAnimTree, ent->scripted->anim, -1, 1.0, 0.2, 1.0);
-    XAnimIsLooped(v18, anim);
-    XAnimSetCompleteGoalWeight(ServerDObj, anim, 1.0, 0.2, 1.0, v22, v21, v20);
+        DumpAnimCommand("animscripted(internal)", pAnimTree, ent->scripted->anim, -1, 1.0, 0.2, 1.0);
+    IsLooped = XAnimIsLooped(v20, anim);
+    XAnimSetCompleteGoalWeight(ServerDObj, anim, 1.0, 0.2, 1.0, notifyName, 0, !IsLooped);
     G_FlagAnimForUpdate(ent);
-    XAnimCalcAbsDelta(ServerDObj, anim, v25, v27);
-    MatrixTransformVector43(v27, scripted->axis, v26);
-    v23 = RotationToYaw(v25);
-    YawToAxis(v23, (mat3x3&)v24);
-    MatrixMultiply((const mat3x3&)v28[6], (const mat3x3&)scripted->axis, (mat3x3&)v29);
-    AxisToAngles((const mat3x3&)v29, v28);
-    scripted->originError[0] = ent->r.currentOrigin[0] - v26[0];
-    scripted->originError[1] = ent->r.currentOrigin[1] - v26[1];
-    scripted->originError[2] = ent->r.currentOrigin[2] - v26[2];
-    AnglesSubtract(ent->r.currentAngles, v28, scripted->anglesError);
+    XAnimCalcAbsDelta(ServerDObj, anim, rot, trans);
+    MatrixTransformVector43(trans, scripted->axis, transformedPos);
+    yaw = RotationToYaw(rot);
+    YawToAxis(yaw, (mat3x3&)*localAxis);
+    MatrixMultiply((const mat3x3&)*localAxis, (const mat3x3&)*scripted->axis, (mat3x3&)*resultAxis);
+    AxisToAngles((const mat3x3&)*resultAxis, axisAngles);
+    scripted->originError[0] = ent->r.currentOrigin[0] - transformedPos[0];
+    scripted->originError[1] = ent->r.currentOrigin[1] - transformedPos[1];
+    scripted->originError[2] = ent->r.currentOrigin[2] - transformedPos[2];
+    AnglesSubtract(ent->r.currentAngles, axisAngles, scripted->anglesError);
 }
 
 void __cdecl G_ReduceOriginError(float *origin, float *originError, double maxChange)

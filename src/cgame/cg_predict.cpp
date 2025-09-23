@@ -437,7 +437,7 @@ void __cdecl CG_InterpolateGroundTilt(int localClientNum)
     }
 }
 
-void __cdecl CG_PredictPlayerState_Internal(int localClientNum)
+void __cdecl CG_PredictPlayerState_Internal(int localClientNum) // KISAKTODO: use the MP version to further clean this up
 {
     playerState_s *Buf; // r20
     int v3; // r11
@@ -445,18 +445,16 @@ void __cdecl CG_PredictPlayerState_Internal(int localClientNum)
     int CurrentCmdNumber; // r27
     int v6; // r28
     int i; // r30
-    const dvar_s *v8; // r11
     double v9; // fp30
     double v10; // fp29
     double v11; // fp28
-    double v12; // fp1
+    double len; // fp1
     __int64 v13; // r10
-    double v14; // fp31
+    double f; // fp31
     double v15; // r5
     double v16; // fp0
     double v17; // fp13
     double v18; // fp12
-    const dvar_s *v19; // r11
     __int64 v20; // r8
     _BYTE v21[12]; // r11 OVERLAPPED
     double v22; // fp0
@@ -468,11 +466,13 @@ void __cdecl CG_PredictPlayerState_Internal(int localClientNum)
     __int64 v30; // r11
     LargeLocal v31(45784); // [sp+58h] [-118h] BYREF
     __int64 v32; // [sp+60h] [-110h]
-    float v33; // [sp+68h] [-108h] BYREF
-    float v34; // [sp+6Ch] [-104h]
-    float v35; // [sp+70h] [-100h]
+    float adjusted[3];
+    float deltaAngles[3];
+    //float v33; // [sp+68h] [-108h] BYREF
+    //float v34; // [sp+6Ch] [-104h]
+    //float v35; // [sp+70h] [-100h]
     float v36[4]; // [sp+78h] [-F8h] BYREF
-    float v37[6]; // [sp+88h] [-E8h] BYREF
+    //float v37[6]; // [sp+88h] [-E8h] BYREF
     usercmd_s v38; // [sp+A0h] [-D0h] BYREF
 
     //LargeLocal::LargeLocal(&v31, 45784);
@@ -559,7 +559,7 @@ void __cdecl CG_PredictPlayerState_Internal(int localClientNum)
             cgArray[0].physicsTime,
             cgArray[0].time,
             cgArray[0].predictedPlayerState.origin,
-            v37);
+            deltaAngles);
         v6 = CurrentCmdNumber - 63;
         for (i = 0; v6 <= CurrentCmdNumber; ++v6)
         {
@@ -576,27 +576,24 @@ void __cdecl CG_PredictPlayerState_Internal(int localClientNum)
                         cgArray[0].predictedPlayerState.groundEntityNum,
                         cgArray[0].time,
                         cgArray[0].oldTime,
-                        &v33,
-                        v37);
-                    cgArray[0].predictedPlayerState.delta_angles[1] = cgArray[0].predictedPlayerState.delta_angles[1] + v37[1];
-                    v8 = cg_showmiss;
-                    if (cg_showmiss->current.integer && (Buf->origin[0] != v33 || Buf->origin[1] != v34 || Buf->origin[2] != v35))
+                        adjusted,
+                        deltaAngles);
+                    cgArray[0].predictedPlayerState.delta_angles[1] = cgArray[0].predictedPlayerState.delta_angles[1] + deltaAngles[1];
+                    if (cg_showmiss->current.integer && (Buf->origin[0] != adjusted[0] || Buf->origin[1] != adjusted[1]|| Buf->origin[2] != adjusted[2]))
                     {
                         Com_PrintError(17, "prediction error\n");
-                        v8 = cg_showmiss;
                     }
-                    v9 = (float)(Buf->origin[1] - v34);
-                    v10 = (float)(Buf->origin[2] - v35);
-                    v11 = (float)(Buf->origin[0] - v33);
-                    v12 = sqrtf((float)((float)((float)(Buf->origin[0] - v33) * (float)(Buf->origin[0] - v33))
-                        + (float)((float)((float)(Buf->origin[2] - v35) * (float)(Buf->origin[2] - v35))
-                            + (float)((float)(Buf->origin[1] - v34) * (float)(Buf->origin[1] - v34)))));
-                    if (v12 > 0.1)
+                    v9 = (float)(Buf->origin[1] - adjusted[1]);
+                    v10 = (float)(Buf->origin[2] - adjusted[2]);
+                    v11 = (float)(Buf->origin[0] - adjusted[0]);
+                    len = sqrtf((((Buf->origin[0] - adjusted[0]) * (Buf->origin[0] - adjusted[0]))
+                        + (((Buf->origin[2] - adjusted[2]) * (Buf->origin[2] - adjusted[2]))
+                            + ((Buf->origin[1] - adjusted[1]) * (Buf->origin[1] - adjusted[1])))));
+                    if (len > 0.1)
                     {
-                        if (v8->current.integer)
+                        if (cg_showmiss->current.integer)
                         {
-                            Com_Printf(17, (const char *)HIDWORD(v12), LODWORD(v12));
-                            v8 = cg_showmiss;
+                            Com_Printf(17, "Prediction miss: %f\n", len);
                         }
                         if (cg_errorDecay->current.value == 0.0)
                         {
@@ -608,22 +605,21 @@ void __cdecl CG_PredictPlayerState_Internal(int localClientNum)
                         {
                             HIDWORD(v13) = cgArray[0].time;
                             LODWORD(v13) = cgArray[0].time - cgArray[0].predictedErrorTime;
-                            v14 = (float)((float)(cg_errorDecay->current.value - (float)v13) / cg_errorDecay->current.value);
-                            if (v14 >= 0.0)
+                            f = (float)((float)(cg_errorDecay->current.value - (float)v13) / cg_errorDecay->current.value);
+                            if (f >= 0.0)
                             {
-                                if (v14 > 0.0 && v8->current.integer)
+                                if (f > 0.0 && cg_showmiss->current.integer)
                                 {
-                                    v15 = (float)((float)(cg_errorDecay->current.value - (float)v13) / cg_errorDecay->current.value);
-                                    Com_Printf(17, (const char *)HIDWORD(v15), LODWORD(v15));
+                                    Com_Printf(17, "Double prediction decay: %f\n", f);
                                 }
                             }
                             else
                             {
-                                v14 = 0.0;
+                                f = 0.0;
                             }
-                            v16 = (float)(cgArray[0].predictedError[0] * (float)v14);
-                            v17 = (float)(cgArray[0].predictedError[1] * (float)v14);
-                            v18 = (float)(cgArray[0].predictedError[2] * (float)v14);
+                            v16 = (float)(cgArray[0].predictedError[0] * (float)f);
+                            v17 = (float)(cgArray[0].predictedError[1] * (float)f);
+                            v18 = (float)(cgArray[0].predictedError[2] * (float)f);
                         }
                         cgArray[0].predictedError[0] = (float)v16 + (float)v11;
                         cgArray[0].predictedErrorTime = cgArray[0].oldTime;
@@ -637,13 +633,11 @@ void __cdecl CG_PredictPlayerState_Internal(int localClientNum)
                 i = 1;
             }
         }
-        v19 = cg_showmiss;
         if (cg_showmiss->current.integer > 1)
         {
             Com_Printf(17, "[%i : %i] ", cg_pmove.cmd.serverTime, cgArray[0].time);
-            v19 = cg_showmiss;
         }
-        if (!i && v19->current.integer)
+        if (!i && cg_showmiss->current.integer)
             Com_Printf(17, "no prediction run\n");
         CG_TransitionPlayerState(localClientNum, &cgArray[0].predictedPlayerState, Buf);
         if ((cgArray[0].predictedPlayerState.pm_flags & 0x400) != 0)

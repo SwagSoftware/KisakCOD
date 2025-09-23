@@ -158,7 +158,9 @@ void __cdecl RB_UploadShaderStep()
     MaterialTechnique *tech; // [esp+4h] [ebp-8h]
     MaterialTechniqueSet *techSet; // [esp+8h] [ebp-4h]
 
+#ifndef KISAK_SP
     iassert( Sys_IsRenderThread() || Sys_IsMainThread() );
+#endif
     if (backEndData->viewInfoCount && gfxDrawMethod.drawScene == GFX_DRAW_SCENE_STANDARD)
     {
         Material_ClearShaderUploadList();

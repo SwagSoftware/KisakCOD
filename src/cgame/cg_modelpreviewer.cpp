@@ -1451,9 +1451,7 @@ bool __cdecl CG_ModPrvAnyLightValuesChanged()
 
 void CG_ModPrvLightValuesUpdate()
 {
-    float v0; // [sp+50h] [-30h] BYREF
-    float v1; // [sp+54h] [-2Ch]
-    float v2; // [sp+58h] [-28h]
+    float color[4]; // [sp+50h] [-30h] BYREF
 
     Dvar_ClearModified((dvar_s*)(const dvar_s *)modPrvSunDirection);
     Dvar_ClearModified((dvar_s*)(const dvar_s *)modPrvSunColor);
@@ -1462,23 +1460,27 @@ void CG_ModPrvLightValuesUpdate()
     Dvar_ClearModified((dvar_s*)(const dvar_s *)modPrvSunDiffuseFraction);
     Dvar_ClearModified((dvar_s*)(const dvar_s *)modPrvAmbientColor);
     Dvar_ClearModified((dvar_s*)modPrvAmbientScale);
-    g_mdlprv.light.tweakableSunLight.angles[0] = *(float *)(modPrvSunDirection + 12);
-    g_mdlprv.light.tweakableSunLight.angles[1] = *(float *)(modPrvSunDirection + 16);
-    g_mdlprv.light.tweakableSunLight.angles[2] = *(float *)(modPrvSunDirection + 20);
-    Dvar_GetUnpackedColor((const dvar_s *)modPrvSunColor, &v0);
-    g_mdlprv.light.tweakableSunLight.sunColor[0] = v0;
-    g_mdlprv.light.tweakableSunLight.sunColor[1] = v1;
-    g_mdlprv.light.tweakableSunLight.sunColor[2] = v2;
-    g_mdlprv.light.tweakableSunLight.sunLight = *(float *)(modPrvSunLight + 12);
-    Dvar_GetUnpackedColor((const dvar_s *)modPrvSunDiffuseColor, &v0);
-    g_mdlprv.light.tweakableSunLight.diffuseColor[0] = v0;
-    g_mdlprv.light.tweakableSunLight.diffuseColor[1] = v1;
-    g_mdlprv.light.tweakableSunLight.diffuseColor[2] = v2;
-    g_mdlprv.light.tweakableSunLight.diffuseFraction = *(float *)(modPrvSunDiffuseFraction + 12);
-    Dvar_GetUnpackedColor((const dvar_s *)modPrvAmbientColor, &v0);
-    g_mdlprv.light.tweakableSunLight.ambientColor[0] = v0;
-    g_mdlprv.light.tweakableSunLight.ambientColor[1] = v1;
-    g_mdlprv.light.tweakableSunLight.ambientColor[2] = v2;
+
+    g_mdlprv.light.tweakableSunLight.angles[0] = modPrvSunDirection->current.vector[0];
+    g_mdlprv.light.tweakableSunLight.angles[1] = modPrvSunDirection->current.vector[1];
+    g_mdlprv.light.tweakableSunLight.angles[2] = modPrvSunDirection->current.vector[2];
+    Dvar_GetUnpackedColor((const dvar_s *)modPrvSunColor, color);
+
+    g_mdlprv.light.tweakableSunLight.sunColor[0] = color[0];
+    g_mdlprv.light.tweakableSunLight.sunColor[1] = color[1];
+    g_mdlprv.light.tweakableSunLight.sunColor[2] = color[2];
+    g_mdlprv.light.tweakableSunLight.sunLight = modPrvSunLight->current.value;
+    Dvar_GetUnpackedColor((const dvar_s *)modPrvSunDiffuseColor, color);
+
+    g_mdlprv.light.tweakableSunLight.diffuseColor[0] = color[0];
+    g_mdlprv.light.tweakableSunLight.diffuseColor[1] = color[1];
+    g_mdlprv.light.tweakableSunLight.diffuseColor[2] = color[2];
+    g_mdlprv.light.tweakableSunLight.diffuseFraction = modPrvSunDiffuseFraction->current.value;
+    Dvar_GetUnpackedColor((const dvar_s *)modPrvAmbientColor, color);
+
+    g_mdlprv.light.tweakableSunLight.ambientColor[0] = color[0];
+    g_mdlprv.light.tweakableSunLight.ambientColor[1] = color[1];
+    g_mdlprv.light.tweakableSunLight.ambientColor[2] = color[2];
     g_mdlprv.light.tweakableSunLight.ambientScale = modPrvAmbientScale->current.value;
     R_InterpretSunLightParseParams(&g_mdlprv.light.tweakableSunLight);
 }
@@ -2756,8 +2758,10 @@ bool __cdecl CG_ModelPreviewerNeedsVieworgInterpSkipped(int localClientNum)
     return cgArray[0].predictedPlayerState.pm_type == 4;
 }
 
-void __cdecl CG_AddModelPreviewerModel(int frametime, int a2, int a3, int a4, int a5, int a6, __int64 a7)
+void __cdecl CG_AddModelPreviewerModel(int frametime)
 {
+    // KISAKTODO: pending rework to fix stack
+#if 0
     double v7; // fp0
     bool isAnimPlaying; // r11
     double v9; // fp30
@@ -2855,6 +2859,7 @@ void __cdecl CG_AddModelPreviewerModel(int frametime, int a2, int a3, int a4, in
             v13 += 78;
         } while (v12);
     }
+#endif
 }
 
 void __cdecl CG_ModelPreviewerDestroyDevGui()

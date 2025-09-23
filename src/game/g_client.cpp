@@ -373,28 +373,18 @@ void __cdecl SetClientViewAngle(gentity_s *ent, const float *angle)
 
 void __cdecl G_GetPlayerViewOrigin(const playerState_s *ps, float *origin)
 {
-    double v4; // fp0
-
     if ((ps->eFlags & 0x300) != 0)
     {
-        if (ps->viewlocked == PLAYERVIEWLOCK_NONE)
-            MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\g_client.cpp", 382, 0, "%s", "ps->viewlocked");
-        if (ps->viewlocked_entNum == ENTITYNUM_NONE)
-            MyAssertHandler(
-                "c:\\trees\\cod3\\cod3src\\src\\game\\g_client.cpp",
-                383,
-                0,
-                "%s",
-                "ps->viewlocked_entNum != ENTITYNUM_NONE");
+        iassert(ps->viewlocked);
+        iassert(ps->viewlocked_entNum != ENTITYNUM_NONE);
         G_DObjGetWorldTagPos_CheckTagExists(&g_entities[ps->viewlocked_entNum], scr_const.tag_player, origin);
     }
     else
     {
-        *origin = ps->origin[0];
+        origin[0] = ps->origin[0];
         origin[1] = ps->origin[1];
-        v4 = ps->origin[2];
         origin[2] = ps->origin[2];
-        origin[2] = ps->viewHeightCurrent + (float)v4;
+        origin[2] = ps->viewHeightCurrent + ps->origin[2];
         AddLeanToPosition(origin, ps->viewangles[1], ps->leanf, 16.0, 20.0);
     }
 }

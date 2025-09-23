@@ -293,7 +293,7 @@ void __cdecl MdlPrvUpdateViewFocused(float *viewOrigin, float (*viewAxis)[3], fl
 void __cdecl MdlPrvUpdateViewFree(float *viewOrigin, float (*viewAxis)[3], float *viewAngles, float *zNear);
 void __cdecl CG_ModelPreviewerUpdateView(float *viewOrigin, float (*viewAxis)[3], float *viewAngles, float *zNear);
 bool __cdecl CG_ModelPreviewerNeedsVieworgInterpSkipped(int localClientNum);
-void __cdecl CG_AddModelPreviewerModel(int frametime, int a2, int a3, int a4, int a5, int a6, __int64 a7);
+void __cdecl CG_AddModelPreviewerModel(int frametime);
 void __cdecl CG_ModelPreviewerDestroyDevGui();
 void __cdecl CG_ModelPreviewerBuildInfoStr(char *buffer, int bufferSize);
 void __cdecl CG_ModelPreviewerBuildViewPosStr(char *buffer, int bufferSize);

@@ -3234,32 +3234,32 @@ PredictionTraceResult __cdecl Path_PredictionTraceCheckForEntities(
     int v13; // r28
     gentity_s *v15; // r3
     actor_s *actor; // r11
-    double v17; // fp0
-    int v18; // r7
     PredictionTraceResult result; // r3
-    float v20[2]; // [sp+50h] [-80h] BYREF
-    float v21; // [sp+58h] [-78h]
-    float v22[4]; // [sp+60h] [-70h] BYREF
+    float mins[3]; // [sp+50h] [-80h] BYREF
+    float end[3]; // [sp+60h] [-70h] BYREF
 
-    v22[0] = *vEndPos;
-    v20[0] = -15.0;
+    end[0] = vEndPos[0];
+    end[1] = vEndPos[1];
+    end[2] = vStartPos[2];
+
+    mins[0] = -15.0f;
+    mins[1] = -15.0f;
+    mins[2] = 0.0f;
+
     v13 = 0;
-    v20[1] = -15.0;
-    v22[2] = vStartPos[2];
-    v22[1] = vEndPos[1];
-    v21 = 0.0;
+
     if (entityCount <= 0)
         return (PredictionTraceResult)!Path_PredictionTrace(vStartPos, vEndPos, entityIgnore, mask, vTraceEndPos, 18.0, 1);
+
     while (1)
     {
         v15 = SV_GentityNum(*entities);
         if (v15 && (actor = v15->actor) != 0 && actor->Physics.prone)
-            v17 = 10.0;
+            mins[2] = 10.0f;
         else
-            v17 = 18.0;
-        v18 = *entities;
-        v21 = v17;
-        if (SV_SightTraceToEntity(vStartPos, v20, (float*)PREDICTION_TRACE_MAX, v22, v18, -1))
+            mins[2] = 18.0f;
+
+        if (SV_SightTraceToEntity(vStartPos, mins, (float*)PREDICTION_TRACE_MAX, end, *entities, -1))
             break;
         ++v13;
         ++entities;
@@ -3267,7 +3267,7 @@ PredictionTraceResult __cdecl Path_PredictionTraceCheckForEntities(
             return (PredictionTraceResult)!Path_PredictionTrace(vStartPos, vEndPos, entityIgnore, mask, vTraceEndPos, 18.0, 1);
     }
     result = PTR_HIT_ENTITY;
-    *vTraceEndPos = *vStartPos;
+    vTraceEndPos[0] = vStartPos[0];
     vTraceEndPos[1] = vStartPos[1];
     vTraceEndPos[2] = vStartPos[2];
     return result;

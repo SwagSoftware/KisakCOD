@@ -626,6 +626,7 @@ void SND_StopAmplify();
 void SND_SetPauseSettings(const bool *pauseSettings);
 void SND_MapInit();
 void SND_SetEq(const char *channelName, int eqIndex, int band, SND_EQTYPE type, float gain, float freq, float q);
+int SND_FindPlaybackId(const snd_alias_t *sndEnt, const char *aliasName);
 #endif
 
 // snd_driver_load_obj

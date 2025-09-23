@@ -2816,8 +2816,10 @@ void __cdecl Con_DrawInput(int32_t localClientNum)
     char *promptString; // [esp+40h] [ebp-Ch]
     const char *originalCommand; // [esp+48h] [ebp-4h]
 
+#ifndef KISAK_SP
     if (!Sys_IsMainThread() && !Sys_IsRenderThread())
         MyAssertHandler(".\\client\\cl_console.cpp", 2163, 0, "%s", "Sys_IsMainThread() || Sys_IsRenderThread()");
+#endif
     if (Key_IsCatcherActive(localClientNum, 1) && Sys_IsMainThread())
     {
         promptString = va("%s: %s> ", "CoD4 MP", "1.0");
