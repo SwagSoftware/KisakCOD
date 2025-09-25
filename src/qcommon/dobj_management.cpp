@@ -260,7 +260,7 @@ void __cdecl Com_SafeServerDObjFree(unsigned int handle)
 
         iassert((unsigned)index < DOBJ_HANDLE_MAX);
 #ifndef KISAK_SP
-        iassert(Sys_IsMainThread());'
+        iassert(Sys_IsMainThread());
 #endif
 #ifdef KISAK_SP
         Sys_EnterCriticalSection(CRITSECT_DOBJ_ALLOC);
