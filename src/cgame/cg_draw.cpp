@@ -997,10 +997,10 @@ void __cdecl CG_DrawFriendOverlay(int localClientNum)
                     FontHandle,
                     25.0, // x
                     -2.0, // y
-                    2, // KISAKTODO: args bad
-                    2,
-                    friendlyNameFontSize->current.value,
-                    (const float *)2,
+                    2, // horzAlign KISAKTODO: args bad
+                    2, // vertAlign
+                    friendlyNameFontSize->current.value, // scale
+                    colorGreen, // Color bodge
                     2,
                     colorBlue,
                     false,

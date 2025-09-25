@@ -509,9 +509,10 @@ void __cdecl  SV_ServerThread(unsigned int threadContext)
         while (1)
         {
             Sys_ServerCompleted();
-            //PIXBeginNamedEvent_Copy_NoVarArgs(0xFFFFFFFF, "wait start server");
-            R_ProcessWorkerCmdsWithTimeout(SV_CheckStartServer, 1);
-            //PIXEndNamedEvent();
+            {
+                PROF_SCOPED("wait start server");
+                R_ProcessWorkerCmdsWithTimeout(SV_CheckStartServer, 1);
+            }
             if (!sv.restartServerThread)
                 break;
             sv.serverExecTime = 0;
@@ -519,46 +520,45 @@ void __cdecl  SV_ServerThread(unsigned int threadContext)
             sv.clientMessageTimeout = 0;
         }
         v3 = Sys_Milliseconds();
-        //PIXBeginNamedEvent_Copy_NoVarArgs(0xFFFFFFFF, "run frame");
-        SV_PreFrame();
-        //Profile_Begin(259);
+        {
+            PROF_SCOPED("run frame");
+            SV_PreFrame();
+        }
         CL_FlushDebugServerData();
         if (!CL_DemoPlaying())
         {
-            //Profile_Begin(234);
+            PROF_SCOPED("G_RunFrame");
             G_RunFrame(SV_FRAME_DO_ALL, 0);
-            //Profile_EndInternal(0);
         }
         Scr_ProfileUpdate();
         Scr_ProfileBuiltinUpdate();
-        //Profile_ResetCounters(1);
-        //Profile_ResetScriptCounters();
         CL_UpdateDebugServerData();
-        //Profile_EndInternal(0);
         Sys_ServerCompleted();
         v4 = SV_CheckAutoSaveHistory(0) != 0;
-        //PIXEndNamedEvent();
         v5 = Sys_Milliseconds() - v3;
         Sys_WaitClientMessageReceived();
         Sys_EnterCriticalSection(CRITSECT_CLIENT_MESSAGE);
         if (!v4 && !Sys_ServerTimeout())
         {
             Sys_LeaveCriticalSection(CRITSECT_CLIENT_MESSAGE);
-            //PIXBeginNamedEvent_Copy_NoVarArgs(0xFFFFFFFF, "server timeout");
-            R_ProcessWorkerCmdsWithTimeout(Sys_ServerTimeout, 1);
-            //PIXEndNamedEvent();
+            {
+                PROF_SCOPED("server timeout")
+                R_ProcessWorkerCmdsWithTimeout(Sys_ServerTimeout, 1);
+            }
             Sys_EnterCriticalSection(CRITSECT_CLIENT_MESSAGE);
         }
         if (sv.clientMessageTimeout)
             MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\server\\sv_main.cpp", 784, 0, "%s", "!sv.clientMessageTimeout");
         sv.clientMessageTimeout = 1;
         Sys_LeaveCriticalSection(CRITSECT_CLIENT_MESSAGE);
-        //PIXBeginNamedEvent_Copy_NoVarArgs(0xFFFFFFFF, "wait send msg");
-        R_ProcessWorkerCmdsWithTimeout(Sys_CanSendClientMessages, 1);
-        //PIXEndNamedEvent();
-        //PIXBeginNamedEvent_Copy_NoVarArgs(0xFFFFFFFF, "wait start server");
-        R_ProcessWorkerCmdsWithTimeout(SV_CheckStartServer, 1);
-        //PIXEndNamedEvent();
+        {
+            PROF_SCOPED("wait send msg");
+            R_ProcessWorkerCmdsWithTimeout(Sys_CanSendClientMessages, 1);
+        }
+        {
+            PROF_SCOPED("wait start server");
+            R_ProcessWorkerCmdsWithTimeout(SV_CheckStartServer, 1);
+        }
         if (sv.restartServerThread)
         {
             sv.serverExecTime = 0;
@@ -568,16 +568,17 @@ void __cdecl  SV_ServerThread(unsigned int threadContext)
         else
         {
             v6 = Sys_Milliseconds();
-            //PIXBeginNamedEvent_Copy_NoVarArgs(0xFFFFFFFF, "post frame");
-            Sys_ClearClientMessage();
-            SV_SendClientMessages();
-            CL_CreateNextSnap();
-            Sys_ServerSnapshotCompleted();
-            if (SV_ProcessPendingSaves())
-                SV_DisplaySaveErrorUI(); // savedevice_xenon
-            Scr_UpdateDebugger();
-            SV_UpdateDemo();
-            //PIXEndNamedEvent();
+            {
+                PROF_SCOPED("post frame");
+                Sys_ClearClientMessage();
+                SV_SendClientMessages();
+                CL_CreateNextSnap();
+                Sys_ServerSnapshotCompleted();
+                if (SV_ProcessPendingSaves())
+                    SV_DisplaySaveErrorUI(); // savedevice_xenon
+                Scr_UpdateDebugger();
+                SV_UpdateDemo();
+            }
             sv.serverExecTime = Sys_Milliseconds() + v5 - v6;
             SV_UpdatePerformanceFrame(sv.serverExecTime);
         }
@@ -733,11 +734,13 @@ int __cdecl SV_WaitServerSnapshot()
     int v1; // r29
     int timeResidual; // r11
 
-    if (!Sys_IsMainThread())
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\server\\sv_main.cpp", 1023, 0, "%s", "Sys_IsMainThread()");
+    iassert(Sys_IsMainThread());
+
     if (!sv.pendingSnapshot)
         return 0;
+
     sv.pendingSnapshot = 0;
+
     if (sv.smp)
     {
         v1 = Sys_Milliseconds();
@@ -763,6 +766,13 @@ int __cdecl SV_WaitServerSnapshot()
                 Sys_SetServerTimeout(0);
             Sys_LeaveCriticalSection(CRITSECT_CLIENT_MESSAGE);
             Com_CheckSyncFrame();
+
+            if (g_kisakScriptDebuggerHack)
+            {
+                Scr_DisplayDebugger();
+            }
+
+            g_kisakScriptDebuggerHack = false;
         }
         sv.waitSnapshotTime = Sys_Milliseconds() - v1;
         Sys_DisallowSendClientMessages();

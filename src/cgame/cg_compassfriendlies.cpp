@@ -288,22 +288,22 @@ void __cdecl CG_CompassDrawActors(
     Material *material,
     float *color)
 {
-    double v11; // fp24
-    double v12; // fp27
-    double v13; // fp26
-    int v14; // r19
-    CompassActor *v15; // r31
+    double fadeAlpha; // fp24
+    double centerX; // fp27
+    double centerY; // fp26
+    int numCompassActors; // r19
+    CompassActor *compassActor; // r31
     int v16; // r11
     Material *v17; // r7
     const float *v18; // r6
     int v19; // r5
     int v20; // r4
-    double v21; // fp1
+    double yawTo; // fp1
     int beginFadeTime; // r11
     double v23; // fp31
     Material *compassping_friendlyfiring; // r30
     double v25; // fp0
-    double v26; // fp0
+    double firingFade; // fp0
     __int64 v27; // r11
     const char *text; // r3
     int v29; // r8
@@ -338,13 +338,13 @@ void __cdecl CG_CompassDrawActors(
     float v58; // [sp+58h] [-168h]
     float v59; // [sp+60h] [-160h]
     float v60; // [sp+68h] [-158h]
-    float v61; // [sp+70h] [-150h] BYREF
-    float v62; // [sp+74h] [-14Ch] BYREF
+    float sizeW; // [sp+70h] [-150h] BYREF
+    float sizeH; // [sp+74h] [-14Ch] BYREF
     float v63; // [sp+78h] [-148h]
     const char *v64; // [sp+7Ch] [-144h]
-    float x; // [sp+80h] [-140h] BYREF
-    float y; // [sp+84h] [-13Ch]
-    float v67[2]; // [sp+88h] [-138h] BYREF
+    float xy[2]; // [sp+80h] [-140h] BYREF
+    //float y; // [sp+84h] [-13Ch]
+    float compassNorth[2]; // [sp+88h] [-138h] BYREF
     unsigned __int64 v68; // [sp+90h] [-130h]
     unsigned __int64 v69; // [sp+98h] [-128h]
     unsigned __int64 v70; // [sp+A0h] [-120h]
@@ -353,71 +353,56 @@ void __cdecl CG_CompassDrawActors(
     float v73; // [sp+B4h] [-10Ch]
     float v74; // [sp+B8h] [-108h]
     float v75; // [sp+BCh] [-104h]
-    rectDef_s v76[4]; // [sp+C0h] [-100h] BYREF
+    rectDef_s v76; // [sp+C0h] [-100h] BYREF
 
-    if (localClientNum)
-        MyAssertHandler(
-            "c:\\trees\\cod3\\cod3src\\src\\cgame\\cg_local.h",
-            910,
-            0,
-            "%s\n\t(localClientNum) = %i",
-            "(localClientNum == 0)",
-            localClientNum);
-    v64 = "c:\\trees\\cod3\\cod3src\\src\\cgame\\cg_compassfriendlies.cpp";
-    if (!cgArray[0].nextSnap)
-        MyAssertHandler(
-            "c:\\trees\\cod3\\cod3src\\src\\cgame\\cg_compassfriendlies.cpp",
-            196,
-            0,
-            "%s",
-            "cgameGlob->nextSnap");
-    v11 = CG_FadeCompass(localClientNum, cgArray[0].compassFadeTime, compassType);
-    if (v11 != 0.0)
+    cg_s *cgameGlob = &cgArray[0];
+    iassert(cgameGlob->nextSnap);
+
+    fadeAlpha = CG_FadeCompass(localClientNum, cgArray[0].compassFadeTime, compassType);
+
+    if (fadeAlpha != 0.0)
     {
-        CG_CompassUpYawVector(cgArray, v67);
-        CG_CompassCalcDimensions(compassType, cgArray, parentRect, rect, &v76[0].x, &v76[0].y, &v76[0].w, &v76[0].h);
+        CG_CompassUpYawVector(cgArray, compassNorth);
+        CG_CompassCalcDimensions(compassType, cgArray, parentRect, rect, &v76.x, &v76.y, &v76.w, &v76.h);
         v72 = *color;
         v73 = color[1];
         v74 = color[2];
         v75 = color[3];
-        v12 = (float)((float)(v76[0].w * (float)0.5) + v76[0].x);
-        v13 = (float)((float)(v76[0].h * (float)0.5) + v76[0].y);
-        if (localClientNum)
-            MyAssertHandler(
-                "c:\\trees\\cod3\\cod3src\\src\\cgame\\cg_compassfriendlies.cpp",
-                211,
-                0,
-                "localClientNum doesn't index STATIC_MAX_LOCAL_CLIENTS\n\t%i not in [0, %i)",
-                localClientNum,
-                1);
-        v14 = 32;
-        v15 = s_compassActors[localClientNum];
-        v63 = -1.741201e-37;
+        centerX = ((v76.w * 0.5f) + v76.x);
+        centerY = ((v76.h * 0.5f) + v76.y);
+        numCompassActors = 32;
+        compassActor = s_compassActors[localClientNum];
+        //v63 = -1.741201e-37;
         do
         {
-            if (v15->lastUpdate > cgArray[0].time)
-                v15->lastUpdate = 0;
-            if (v15->lastUpdate >= cgArray[0].time - 800
-                && (!CG_WorldPosToCompass(compassType, cgArray, v76, v67, cgArray[0].refdef.vieworg, v15->lastPos, 0, &x)
-                    || *(_BYTE *)(*(unsigned int *)(LODWORD(v63) - 17812) + 12)))
+            if (compassActor->lastUpdate > cgArray[0].time)
+                compassActor->lastUpdate = 0;
+            if (compassActor->lastUpdate >= cgArray[0].time - 800
+                && (!CG_WorldPosToCompass(compassType, cgArray, &v76, compassNorth, cgArray[0].refdef.vieworg, compassActor->lastPos, 0, xy)
+                    || compassClampIcons->current.integer))
             {
-                CalcCompassFriendlySize(compassType, &v61, &v62);
-                x = x - (float)((float)(v61 * (float)0.5) - (float)v12);
-                y = y - (float)((float)(v62 * (float)0.5) - (float)v13);
+                CalcCompassFriendlySize(compassType, &sizeW, &sizeH);
+                xy[0] = xy[0] - ((sizeW * 0.5f) - centerX);
+                xy[1] = xy[1] - ((sizeH * 0.5f) - centerY);
+
                 if (compassType || !compassRotation->current.enabled)
-                    v16 = 171408;
+                {
+                    yawTo = AngleNormalize360(cgameGlob->compassNorthYaw - compassActor->lastYaw);
+                }
                 else
-                    v16 = 170872;
-                v21 = AngleNormalize360((float)(*(float *)((char *)&cgArray[0].clientNum + v16) - v15->lastYaw));
-                beginFadeTime = v15->beginFadeTime;
-                v23 = v21;
+                {
+                    yawTo = AngleNormalize360(cgameGlob->refdefViewAngles[1] - compassActor->lastYaw);
+                }
+
+                beginFadeTime = compassActor->beginFadeTime;
+                v23 = yawTo;
                 compassping_friendlyfiring = 0;
                 v25 = (float)(compassSoundPingFadeTime->current.value * (float)1000.0);
                 v68 = __PAIR64__((unsigned int)compassSoundPingFadeTime, cgArray[0].time);
                 v69 = __PAIR64__((unsigned int)compassSoundPingFadeTime, beginFadeTime);
                 if ((float)((float)__SPAIR64__((unsigned int)compassSoundPingFadeTime, beginFadeTime) + (float)v25) < (double)(float)__SPAIR64__((unsigned int)compassSoundPingFadeTime, cgArray[0].time))
                 {
-                    v26 = v75;
+                    firingFade = v75;
                 }
                 else if (beginFadeTime < cgArray[0].time)
                 {
@@ -425,37 +410,39 @@ void __cdecl CG_CompassDrawActors(
                     HIDWORD(v27) = cgArray[0].time;
                     LODWORD(v27) = cgArray[0].time - beginFadeTime;
                     v70 = v27;
-                    v26 = (float)((float)1.0 - (float)((float)v27 / (float)v25));
-                    v75 = v26;
+                    firingFade = (float)((float)1.0 - (float)((float)v27 / (float)v25));
+                    v75 = firingFade;
                 }
                 else
                 {
-                    v26 = 1.0;
+                    firingFade = 1.0;
                     compassping_friendlyfiring = cgMedia.compassping_friendlyfiring;
                     v75 = 1.0;
                 }
-                if (v11 < color[3])
-                    color[3] = v11;
-                if (v11 < v26)
+                if (fadeAlpha < color[3])
+                    color[3] = fadeAlpha;
+                if (fadeAlpha < firingFade)
                 {
-                    v26 = v11;
-                    v75 = v11;
+                    firingFade = fadeAlpha;
+                    v75 = fadeAlpha;
                 }
-                if (!compassping_friendlyfiring || v26 != 1.0)
-                    CG_DrawRotatedPic(&scrPlaceView[localClientNum], x, y, v61, v62, v20, v19, v21, v18, v17);
+
+                // KISAKTODO: materials here seem wrong
+                if (!compassping_friendlyfiring || firingFade != 1.0)
+                    CG_DrawRotatedPic(&scrPlaceView[localClientNum], xy[0], xy[1], sizeW, sizeH, rect->horzAlign, rect->vertAlign, yawTo, color, cgMedia.compassping_enemyfiring);
                 if (compassping_friendlyfiring)
-                    CG_DrawRotatedPic(&scrPlaceView[localClientNum], x, y, v61, v62, v20, v19, v23, v18, v17);
+                    CG_DrawRotatedPic(&scrPlaceView[localClientNum], xy[0], xy[1], sizeW, sizeH, rect->horzAlign, rect->vertAlign, yawTo, color, compassping_friendlyfiring);
                 if (compassDebug->current.enabled)
                 {
-                    lastYaw = v15->lastYaw;
+                    lastYaw = compassActor->lastYaw;
                     text = va("yaw: %3.2f - final:%3.2f", lastYaw, v23);
                     CL_DrawText(
                         &scrPlaceView[localClientNum],
                         text,
                         0x7FFFFFFF,
                         cgMedia.smallDevFont,
-                        x,
-                        (float)(y + (float)15.0),
+                        xy[0],
+                        (xy[1] + 15.0f),
                         rect->horzAlign,
                         rect->vertAlign,
                         0.7f,
@@ -464,17 +451,10 @@ void __cdecl CG_CompassDrawActors(
                         0);
                 }
             }
-            --v14;
-            ++v15;
-        } while (v14);
-        if (localClientNum)
-            MyAssertHandler(
-                v64,
-                269,
-                0,
-                "localClientNum doesn't index STATIC_MAX_LOCAL_CLIENTS\n\t%i not in [0, %i)",
-                localClientNum,
-                1);
+            --numCompassActors;
+            ++compassActor;
+        } while (numCompassActors);
+
         v35 = 32;
         p_beginFadeTime = &s_compassActors[localClientNum][0].beginFadeTime;
         do
@@ -487,27 +467,27 @@ void __cdecl CG_CompassDrawActors(
                 LODWORD(v39) = *p_beginFadeTime;
                 v70 = __PAIR64__((unsigned int)compassSoundPingFadeTime, cgArray[0].time);
                 v69 = v39;
-                if ((float)((float)((float)value * (float)1000.0) + (float)v39) >= (double)(float)__SPAIR64__(
+                if (((value * 1000.0f) + v39) >= (double)(float)__SPAIR64__(
                     (unsigned int)compassSoundPingFadeTime,
                     cgArray[0].time)
                     && v37
                     && (!CG_WorldPosToCompass(
                         compassType,
                         cgArray,
-                        v76,
-                        v67,
+                        &v76,
+                        compassNorth,
                         cgArray[0].refdef.vieworg,
                         (const float *)p_beginFadeTime - 3,
                         0,
-                        &x)
-                        || *(_BYTE *)(*(unsigned int *)(LODWORD(v63) - 17812) + 12)))
+                        xy)
+                        || compassClampIcons->current.integer))
                 {
-                    CalcCompassFriendlySize(compassType, &v61, &v62);
+                    CalcCompassFriendlySize(compassType, &sizeW, &sizeH);
                     v44 = *p_beginFadeTime;
-                    v45 = (float)(x - (float)((float)(v61 * (float)0.5) - (float)v12));
-                    v46 = (float)(y - (float)((float)(v62 * (float)0.5) - (float)v13));
-                    x = x - (float)((float)(v61 * (float)0.5) - (float)v12);
-                    y = y - (float)((float)(v62 * (float)0.5) - (float)v13);
+                    v45 = (xy[0] - ((sizeW * 0.5f) - centerX));
+                    v46 = (xy[1] - ((sizeH * 0.5f) - centerY));
+                    xy[0] = xy[0] - ((sizeW * 0.5f) - centerX);
+                    xy[1] = xy[1] - ((sizeH * 0.5f) - centerY);
                     if (v44 < cgArray[0].time)
                     {
                         LODWORD(v48) = cgArray[0].time - v44;
@@ -521,9 +501,9 @@ void __cdecl CG_CompassDrawActors(
                         v47 = 1.0;
                     }
                     v75 = v47;
-                    if (v11 < v47)
-                        v75 = v11;
-                    UI_DrawHandlePic(&scrPlaceView[localClientNum], v45, v46, v61, v62, v43, v42, v41, v40);
+                    if (fadeAlpha < v47)
+                        v75 = fadeAlpha;
+                    UI_DrawHandlePic(&scrPlaceView[localClientNum], v45, v46, sizeW, sizeH, v43, v42, v41, v40);
                 }
             }
             --v35;

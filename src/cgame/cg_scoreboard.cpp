@@ -11,25 +11,21 @@
 
 float __cdecl CG_FadeObjectives(const cg_s *cgameGlob)
 {
-    double v2; // fp1
-    float *v3; // r3
+    float *fadeColor; // r3
 
-    if (!(unsigned __int8)CG_IsHudHidden())
+    if (!CG_IsHudHidden())
     {
         if (cgameGlob->showScores)
         {
-            v2 = 1.0;
-            return *((float *)&v2 + 1);
+            return 1.0f;
         }
-        v3 = CG_FadeColor(cgameGlob->time, cgameGlob->scoreFadeTime, 300, 300);
-        if (v3)
+        fadeColor = CG_FadeColor(cgameGlob->time, cgameGlob->scoreFadeTime, 300, 300);
+        if (fadeColor)
         {
-            v2 = v3[3];
-            return *((float *)&v2 + 1);
+            return fadeColor[3];
         }
     }
-    v2 = 0.0;
-    return *((float *)&v2 + 1);
+    return 0.0f;
 }
 
 void __cdecl CG_DrawObjectiveBackdrop(const cg_s *cgameGlob, const float *color)
@@ -53,42 +49,14 @@ void __cdecl CG_DrawObjectiveHeader(
     float *color,
     int textStyle)
 {
-    double v11; // fp1
-    char *v12; // r3
-    int v13; // r8
-    ScreenPlacement *v14; // r30
-    int v15; // r7
-    double v16; // fp8
-    double v17; // fp7
-    double v18; // fp6
-    double v19; // fp5
-    double v20; // fp4
-    int v21; // r4
-    double v22; // fp31
-    int v23; // r4
-    long double v24; // fp2
-    double v25; // fp29
+    double fadeAlpha; // fp1
+    char *text; // r3
+    ScreenPlacement *place; // r30
+    double x0; // fp31
+    double width; // fp29
     long double v26; // fp2
-    long double v27; // fp2
-    __int64 v28; // r11
-    double v29; // fp30
-    int v30; // r4
+    double height; // fp30
     double v31; // fp1
-    const float *v32; // r3
-    float v33; // [sp+8h] [-B8h]
-    float v34; // [sp+10h] [-B0h]
-    float v35; // [sp+18h] [-A8h]
-    float v36; // [sp+20h] [-A0h]
-    float v37; // [sp+28h] [-98h]
-    float v38; // [sp+30h] [-90h]
-    float v39; // [sp+38h] [-88h]
-    float v40; // [sp+40h] [-80h]
-    float v41; // [sp+48h] [-78h]
-    float v42; // [sp+50h] [-70h]
-    float v43; // [sp+58h] [-68h]
-    float v44; // [sp+60h] [-60h]
-    float v45; // [sp+68h] [-58h]
-    float v46; // [sp+70h] [-50h]
 
     if (localClientNum)
         MyAssertHandler(
@@ -98,35 +66,34 @@ void __cdecl CG_DrawObjectiveHeader(
             "%s\n\t(localClientNum) = %i",
             "(localClientNum == 0)",
             localClientNum);
-    v11 = CG_FadeObjectives(cgArray);
-    if (v11 != 0.0)
+    fadeAlpha = CG_FadeObjectives(cgArray);
+    if (fadeAlpha != 0.0)
     {
-        *(float *)(textStyle + 12) = v11;
-        v12 = UI_SafeTranslateString("CGAME_MISSIONOBJECTIVES");
-        v13 = 68 * localClientNum;
-        v14 = &scrPlaceView[localClientNum];
+        //*(float *)(textStyle + 12) = fadeColor;
+        color[3] = fadeAlpha;
+        text = UI_SafeTranslateString("CGAME_MISSIONOBJECTIVES");
+        //v13 = 68 * localClientNum;
+        place = &scrPlaceView[localClientNum];
         UI_DrawText(
-            v14,
-            v12,
+            place,
+            text,
             0x7FFFFFFF,
             font,
             rect->x,
             rect->y,
-            v15,
-            v13,
+            rect->horzAlign,
+            rect->vertAlign,
             scale,
-            (const float *)rect->horzAlign,
-            rect->vertAlign);
-        v22 = ScrPlace_ApplyX(v14, rect->x, v21);
-        v25 = (float)(ScrPlace_ApplyX(v14, -rect->x, v23) - (float)v22);
-        *(double *)&v24 = (float)(v14->scaleVirtualToReal[0] + (float)0.5);
-        v26 = floor(v24);
-        *(double *)&v26 = (float)((float)(v14->scaleVirtualToReal[1] * (float)2.0) + (float)0.5);
-        v27 = floor(v26);
-        LODWORD(v28) = (int)(float)*(double *)&v27;
-        v29 = (float)v28;
-        v31 = ScrPlace_ApplyY(v14, rect->y, v30);
-        UI_FillRectPhysical(v22, (float)((float)v31 + (float)v29), v25, v29, v32);
+            color,
+            1); // style guess here
+        x0 = ScrPlace_ApplyX(place, rect->x, rect->horzAlign);
+        width = ScrPlace_ApplyX(place, -rect->x, rect->horzAlign) - x0;
+        //v24 = place->scaleVirtualToReal[0] + 0.5f; // gah duplicate? busted?
+        //v26 = floor(v24);
+        v26 = ((place->scaleVirtualToReal[1] * 2.0f) + 0.5f);
+        height = floor(v26);
+        v31 = ScrPlace_ApplyY(place, rect->y, rect->vertAlign);
+        UI_FillRectPhysical(x0, (v31 + height), width, height, color);
     }
 }
 
@@ -136,8 +103,7 @@ const char *__cdecl CG_WordWrap(
     double scale,
     int maxChars,
     int maxPixelWidth,
-    int *charCount,
-    int *a7)
+    int *charCount)
 {
     const char *v13; // r11
     const char *v14; // r24
@@ -159,8 +125,8 @@ const char *__cdecl CG_WordWrap(
     if (!*inputText)
     {
     LABEL_16:
-        if (a7)
-            *a7 = v16;
+        if (charCount)
+            *charCount = v16;
         return 0;
     }
     while (1)
@@ -181,8 +147,8 @@ const char *__cdecl CG_WordWrap(
                 v14 = v18;
                 v16 = v17 - 1;
             }
-            if (a7)
-                *a7 = v16;
+            if (charCount)
+                *charCount = v16;
             return v14;
         }
         if (Language_IsAsian())
@@ -202,8 +168,8 @@ const char *__cdecl CG_WordWrap(
                 goto LABEL_15;
         }
     }
-    if (a7)
-        *a7 = v17;
+    if (charCount)
+        *charCount = v17;
     return v21;
 }
 
@@ -217,25 +183,23 @@ void __cdecl CG_DrawObjectiveList(
 {
     const char *v9; // r29
     const char *v11; // r28
-    double v12; // fp1
+    double fadeAlpha; // fp1
     __int64 v13; // r11
     const float *v14; // r6
-    int v15; // r5
+    int lineCharCount; // r5
     int v16; // r4
     long double v17; // fp2
     double h; // fp0
     double v19; // fp28
     double v20; // fp25
     double y; // fp31
-    double v22; // fp30
+    double textY; // fp30
     double v23; // fp19
-    Material *v24; // r7
     int *p_icon; // r24
     Material *checkbox_active; // r11
-    const char *v27; // r30
-    double v28; // fp29
-    const dvar_s *v29; // r11
-    int *integer; // r28
+    const char *drawText; // r30
+    double textX; // fp29
+    const dvar_s *wrapDvar; // r11
     int v31; // r8
     const char *v32; // r3
     double v33; // fp8
@@ -243,7 +207,7 @@ void __cdecl CG_DrawObjectiveList(
     double v35; // fp6
     double v36; // fp5
     double v37; // fp4
-    const char *v38; // r29
+    const char *wordwrapNext; // r29
     double v39; // fp30
     long double v40; // fp2
     double w; // fp0
@@ -301,13 +265,13 @@ void __cdecl CG_DrawObjectiveList(
             "%s\n\t(localClientNum) = %i",
             "(localClientNum == 0)",
             localClientNum);
-    v12 = CG_FadeObjectives(cgArray);
-    if (v12 != 0.0)
+    fadeAlpha = CG_FadeObjectives(cgArray);
+    if (fadeAlpha != 0.0)
     {
-        v70 = v12;
-        v78 = v12;
-        v74 = v12;
-        v82 = v12;
+        v70 = fadeAlpha;
+        v78 = fadeAlpha;
+        v74 = fadeAlpha;
+        v82 = fadeAlpha;
         v67 = 0.60000002;
         v68 = 0.60000002;
         v69 = 0.60000002;
@@ -329,9 +293,9 @@ void __cdecl CG_DrawObjectiveList(
         else
             v20 = (float)v13;
         y = rect->y;
-        v22 = 0.0;
+        textY = 0.0;
         v23 = (float)(rect->y - (float)v13);
-        v24 = (Material *)0x82000000;
+        //v24 = (Material *)0x82000000; // wtf is this 
         p_icon = &cgArray[0].objectives[0].icon;
         do
         {
@@ -374,41 +338,39 @@ void __cdecl CG_DrawObjectiveList(
                         1.0,
                         1.0,
                         colorWhite,// KISAKTODO: arg bad
-                        v24);
+                        checkbox_active);
                 }
-                v27 = SEH_LocalizeTextMessage((const char *)p_icon - 1032, "objective text", LOCMSG_SAFE);
-                v28 = (float)((float)(rect->w + rect->x) + (float)12.0);
+                drawText = SEH_LocalizeTextMessage((const char *)p_icon - 1032, "objective text", LOCMSG_SAFE);
+                textX = (float)((float)(rect->w + rect->x) + (float)12.0);
                 if (localClientNum)
                     MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\cgame\\cg_local.h", 917, 0, v9, v11, localClientNum);
                 if (cgsArray[0].viewAspect <= 1.3333334)
-                    v29 = cg_objectiveListWrapCountStandard;
+                    wrapDvar = cg_objectiveListWrapCountStandard;
                 else
-                    v29 = cg_objectiveListWrapCountWidescreen;
-                integer = (int *)v29->current.integer;
+                    wrapDvar = cg_objectiveListWrapCountWidescreen;
                 do
                 {
-                    v32 = CG_WordWrap(v27, font, scale, v15, 0x7FFFFFFF, integer, (int *)&v64);
-                    v15 = HIDWORD(v64);
-                    v38 = v32;
+                    v32 = CG_WordWrap(drawText, font, scale, -1, wrapDvar->current.integer, &lineCharCount);
+                    wordwrapNext = v32;
                     if (HIDWORD(v64))
                     {
-                        v22 = (float)((float)((float)((float)v19 - rect->h) * (float)0.5) + (float)y);
+                        textY = (float)((float)((float)((float)v19 - rect->h) * (float)0.5) + (float)y);
                         UI_DrawText(
                             &scrPlaceView[localClientNum],
-                            v27,
-                            SHIDWORD(v64),
+                            drawText,
+                            -1,
                             font,
-                            v28,
-                            v22,
-                            (int)v24,
-                            v31,
+                            textX,
+                            textY,
+                            rect->horzAlign,
+                            rect->vertAlign,
                             scale,
-                            (const float *)rect->horzAlign,
-                            rect->vertAlign);
+                            colorWhite, // KISAKTODO scuffed color
+                            1);
                         y = (float)((float)((float)y + (float)v20) + (float)4.0);
                     }
-                    v27 = v38;
-                } while (v38);
+                    drawText = wordwrapNext;
+                } while (wordwrapNext);
                 v11 = v65;
                 v9 = (const char *)HIDWORD(v66);
                 break;
@@ -417,9 +379,9 @@ void __cdecl CG_DrawObjectiveList(
             }
             p_icon += 284;
         } while ((int)p_icon < (int)&cgArray[0].visionSetPreLoaded[0].filmLightTint[2]);
-        if (v22 != 0.0)
+        if (textY != 0.0)
         {
-            v39 = (float)((float)v22 - (float)v23);
+            v39 = (float)((float)textY - (float)v23);
             if (v39 != 0.0)
             {
                 *(double *)&v17 = (float)(scrPlaceView[localClientNum].scaleVirtualToReal[0] + (float)0.5);
@@ -448,7 +410,7 @@ void __cdecl CG_DrawPausedMenuLine(
     float *color,
     int textStyle)
 {
-    double v11; // fp1
+    double fadeAlpha; // fp1
     __int64 v12; // r9
     double y; // fp12
     ScreenPlacement *v14; // r30
@@ -475,10 +437,10 @@ void __cdecl CG_DrawPausedMenuLine(
             "%s\n\t(localClientNum) = %i",
             "(localClientNum == 0)",
             localClientNum);
-    v11 = CG_FadeObjectives(cgArray);
-    if (v11 != 0.0)
+    fadeAlpha = CG_FadeObjectives(cgArray);
+    if (fadeAlpha != 0.0)
     {
-        *(float *)(textStyle + 12) = v11;
+        *(float *)(textStyle + 12) = fadeAlpha;
         LODWORD(v12) = UI_TextHeight(font, scale);
         y = rect->y;
         v28 = v12;

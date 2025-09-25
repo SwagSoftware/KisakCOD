@@ -330,3 +330,7 @@ extern Scr_Breakpoint *g_breakpointsHead;
 extern unsigned int g_breakonObject;
 extern unsigned int g_breakonString;
 extern int g_breakonHit;
+
+#ifdef KISAK_SP
+inline bool g_kisakScriptDebuggerHack = false;
+#endif

@@ -2285,12 +2285,12 @@ void __cdecl UI_OwnerDraw(
             textAlignMode);
     }
 
-    rect.x = (float)x + (float)text_x;
-    rect.y = (float)y + (float)text_y;
-    rect.horzAlign = (int)align;
+    rect.x = x + text_x;
+    rect.y = y + text_y;
     rect.w = w;
-    rect.vertAlign = (int)font;
     rect.h = h;
+    rect.horzAlign = horzAlign;
+    rect.vertAlign = vertAlign;
 
     switch (ownerDraw)
     {

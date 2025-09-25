@@ -1049,7 +1049,7 @@ int __cdecl Actor_Cover_FindBestCoverList(actor_s *self, pathnode_t **bestNodes,
         MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\actor_cover.cpp", 1003, 0, "%s", "self");
     if (!self->sentient)
         MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\actor_cover.cpp", 1004, 0, "%s", "self->sentient");
-    v8 = Path_NodesInCylinder(self->codeGoal.pos, self->codeGoal.radius, self->codeGoal.height, v7, v6, (int)v29);
+    v8 = Path_NodesInCylinder(self->codeGoal.pos, self->codeGoal.radius, self->codeGoal.height, v29, 256, 270332);
     BestCoverListInList = Actor_Cover_FindBestCoverListInList(self, v29, v8, self->codeGoal.volume);
     v10 = BestCoverListInList;
     v11 = 0;

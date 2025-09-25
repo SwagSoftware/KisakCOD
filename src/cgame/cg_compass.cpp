@@ -1607,7 +1607,8 @@ void __cdecl CG_CompassUpYawVector(const cg_s *cgameGlob, float *result)
     if (compassRotation->current.enabled)
         YawVectors2D(cgameGlob->refdefViewAngles[1], result, 0);
     else
-        *(double *)result = *(double *)cgameGlob->compassNorth;
+        result[0] = cgameGlob->compassNorth[0];
+        result[1] = cgameGlob->compassNorth[1];
 }
 
 void __cdecl CG_CompassDrawTickertape(
@@ -2080,12 +2081,12 @@ void CG_CompassDrawPlayerPointers_SP(
     Material *material,
     float *color)
 {
-    double v11; // fp14
+    double fadeAlpha; // fp14
     float *v12; // r3
     double x; // fp18
     double y; // fp17
-    double v15; // fp16
-    double v16; // fp15
+    double centerX; // fp16
+    double centerY; // fp15
     objectiveInfo_t *objectives; // r25
     float *v18; // r28
     int v19; // r18
@@ -2117,34 +2118,28 @@ void CG_CompassDrawPlayerPointers_SP(
     float v45; // [sp+6Ch] [-154h]
     float v46; // [sp+70h] [-150h] BYREF
     float v47; // [sp+74h] [-14Ch]
-    float v48[5]; // [sp+78h] [-148h] BYREF
+    float north[5]; // [sp+78h] [-148h] BYREF
     float v49; // [sp+8Ch] [-134h]
-    rectDef_s v50[7]; // [sp+90h] [-130h] BYREF
+    rectDef_s scaledRect; // [sp+90h] [-130h] BYREF
 
-    if (localClientNum)
-        MyAssertHandler(
-            "c:\\trees\\cod3\\cod3src\\src\\cgame\\cg_local.h",
-            910,
-            0,
-            "%s\n\t(localClientNum) = %i",
-            "(localClientNum == 0)",
-            localClientNum);
-    v11 = CG_FadeCompass(localClientNum, cgArray[0].compassFadeTime, compassType);
-    if (v11 != 0.0)
+    cg_s *cgameGlob = CG_GetLocalClientGlobals(localClientNum);
+
+    fadeAlpha = CG_FadeCompass(localClientNum, cgArray[0].compassFadeTime, compassType);
+    if (fadeAlpha != 0.0)
     {
-        CG_CompassCalcDimensions(compassType, cgArray, parentRect, rect, &v50[0].x, &v50[0].y, &v50[0].w, &v50[0].h);
-        x = v50[0].x;
-        y = v50[0].y;
-        v15 = (float)((float)(v50[0].w * (float)0.5) + v50[0].x);
-        v16 = (float)((float)(v50[0].h * (float)0.5) + v50[0].y);
+        CG_CompassCalcDimensions(compassType, cgArray, parentRect, rect, &scaledRect.x, &scaledRect.y, &scaledRect.w, &scaledRect.h);
+        x = scaledRect.x;
+        y = scaledRect.y;
+        centerX = ((scaledRect.w * 0.5f) + scaledRect.x);
+        centerY = ((scaledRect.h * 0.5f) + scaledRect.y);
         if (compassRotation->current.enabled)
         {
-            YawVectors2D(cgArray[0].refdefViewAngles[1], v12, v48);
+            YawVectors2D(cgArray[0].refdefViewAngles[1], north, NULL); // either arg2 or arg3 is null here
         }
         else
         {
-            v48[0] = cgArray[0].compassNorth[0];
-            v48[1] = cgArray[0].compassNorth[1];
+            north[0] = cgArray[0].compassNorth[0];
+            north[1] = cgArray[0].compassNorth[1];
         }
         objectives = cgArray[0].objectives;
         do
@@ -2159,9 +2154,9 @@ void CG_CompassDrawPlayerPointers_SP(
                     {
                         x = (float)(*v18 - cgArray[0].refdef.vieworg[0]);
                         v21 = (float)(v18[1] - cgArray[0].refdef.vieworg[1]);
-                        v48[2] = *color;
-                        v48[3] = color[1];
-                        v48[4] = color[2];
+                        north[2] = *color;
+                        north[3] = color[1];
+                        north[4] = color[2];
                         v22 = sqrtf((float)((float)((float)v21 * (float)v21) + (float)((float)x * (float)x)));
                         v49 = v22;
                         value = compassObjectiveMaxRange->current.value;
@@ -2183,20 +2178,20 @@ void CG_CompassDrawPlayerPointers_SP(
                         }
                         v46 = 0.0;
                         v47 = 0.0;
-                        CG_WorldPosToCompass(compassType, cgArray, v50, v48, cgArray[0].refdef.vieworg, v18, &v44, &v46);
-                        v25 = (float)(v44 + (float)v15);
-                        v26 = (float)(v45 + (float)v16);
-                        v27 = (float)(v46 + (float)v15);
-                        v44 = v44 + (float)v15;
-                        v45 = v45 + (float)v16;
-                        v28 = (float)(v47 + (float)v16);
+                        CG_WorldPosToCompass(compassType, cgArray, &scaledRect, north, cgArray[0].refdef.vieworg, v18, &v44, &v46);
+                        v25 = (float)(v44 + (float)centerX);
+                        v26 = (float)(v45 + (float)centerY);
+                        v27 = (float)(v46 + (float)centerX);
+                        v44 = v44 + (float)centerX;
+                        v45 = v45 + (float)centerY;
+                        v28 = (float)(v47 + (float)centerY);
                         CalcCompassPointerSize(compassType, &v42, &v43);
                         CG_ObjectiveIcon(objectives->icon, 0);
                         v33 = v49;
-                        if (v11 < v49)
+                        if (fadeAlpha < v49)
                         {
-                            v33 = v11;
-                            v49 = v11;
+                            v33 = fadeAlpha;
+                            v49 = fadeAlpha;
                         }
                         v34 = v42;
                         v35 = 0.0;
@@ -2209,18 +2204,18 @@ void CG_CompassDrawPlayerPointers_SP(
                         if ((float)((float)((float)y - (float)((float)v26 - (float)(v43 * (float)0.5))) * (float)((float)1.0 / v43)) > v35)
                             v35 = (float)((float)((float)y - (float)((float)v26 - (float)(v43 * (float)0.5)))
                                 * (float)((float)1.0 / v43));
-                        v39 = (float)(v50[0].w + (float)x);
+                        v39 = (float)(scaledRect.w + (float)x);
                         if ((float)((float)((float)((float)((float)v25 - (float)(v42 * (float)0.5)) + v42)
-                            - (float)(v50[0].w + (float)x))
+                            - (float)(scaledRect.w + (float)x))
                             * (float)((float)1.0 / v42)) > v35)
                             v35 = (float)((float)((float)((float)((float)v25 - (float)(v42 * (float)0.5)) + v42)
-                                - (float)(v50[0].w + (float)x))
+                                - (float)(scaledRect.w + (float)x))
                                 * (float)((float)1.0 / v42));
                         if ((float)((float)((float)((float)((float)v26 - (float)(v43 * (float)0.5)) + v43)
-                            - (float)(v50[0].h + (float)y))
+                            - (float)(scaledRect.h + (float)y))
                             * (float)((float)1.0 / v43)) > v35)
                             v35 = (float)((float)((float)((float)((float)v26 - (float)(v43 * (float)0.5)) + v43)
-                                - (float)(v50[0].h + (float)y))
+                                - (float)(scaledRect.h + (float)y))
                                 * (float)((float)1.0 / v43));
                         if (v35 > 1.0)
                             v35 = 1.0;
@@ -2229,13 +2224,13 @@ void CG_CompassDrawPlayerPointers_SP(
                         {
                             v41 = 2.0;
                             v49 = (float)((float)((float)v40 - (float)0.5) * (float)v33) * 2.0;
-                            if (v26 >= y && v26 <= (float)(v50[0].h + (float)y))
+                            if (v26 >= y && v26 <= (float)(scaledRect.h + (float)y))
                             {
                                 UI_DrawHandlePic(
                                     &scrPlaceView[localClientNum],
                                     x,
                                     (float)((float)v26 - (float)1.0),
-                                    v50[0].w,
+                                    scaledRect.w,
                                     2.0,
                                     v32,
                                     v31,
@@ -2244,7 +2239,7 @@ void CG_CompassDrawPlayerPointers_SP(
                                 v41 = 2.0;
                             }
                             if (v25 >= x && v25 <= v39)
-                                CG_DrawVLine(&scrPlaceView[localClientNum], v25, y, v41, v50[0].h, v32, v31, v30, v29);
+                                CG_DrawVLine(&scrPlaceView[localClientNum], v25, y, v41, scaledRect.h, v32, v31, v30, v29);
                             v49 = v33;
                         }
                         UI_DrawHandlePic(
@@ -2327,7 +2322,7 @@ static float DistanceToNearestGoal(cg_s *cgameGlob, float *heightDelta)
     double v8; // fp29
     float *v9; // r31
     int v10; // r28
-    double v11; // fp1
+    double fadeAlpha; // fp1
     float v12[2]; // fp1
 
     if (!cgameGlob)
@@ -2347,11 +2342,11 @@ static float DistanceToNearestGoal(cg_s *cgameGlob, float *heightDelta)
             {
                 if (*(v9 - 2) != 0.0 || *(v9 - 1) != 0.0 || *v9 != 0.0)
                 {
-                    v11 = Vec2Distance(v9 - 2, cgameGlob->refdef.vieworg);
-                    if (v11 < v7)
+                    fadeAlpha = Vec2Distance(v9 - 2, cgameGlob->refdef.vieworg);
+                    if (fadeAlpha < v7)
                     {
                         v4 = 1;
-                        v7 = v11;
+                        v7 = fadeAlpha;
                         v8 = (float)(cgameGlob->refdef.vieworg[2] - *v9);
                     }
                 }
@@ -2388,8 +2383,8 @@ void CG_CompassDrawGoalDistance(
     long double v12; // fp2
     long double v13; // fp2
     double v14; // fp1
-    double v15; // fp0
-    bool v16; // mr_fpscr48
+    double centerX; // fp0
+    bool centerY; // mr_fpscr48
     double v17; // fp0
     double v18; // fp1
     __int64 v19; // r11
@@ -2423,14 +2418,14 @@ void CG_CompassDrawGoalDistance(
     v14 = CG_FadeHudMenu(localClientNum, hud_fade_compass, compassFadeTime, SHIDWORD(v30));
     if (v14 != 0.0)
     {
-        v15 = color[3];
+        centerX = color[3];
         v32 = color[3];
-        v16 = v14 < v15;
+        centerY = v14 < centerX;
         v31[1] = color[1];
         v17 = color[2];
         v31[0] = color[0];
         v31[2] = v17;
-        if (v16)
+        if (centerY)
             v32 = v14;
         v18 = (float)(DistanceToNearestGoal(cgArray, (float *)&v30) * (float)0.0254);
         if (v18 >= 0.0)

@@ -258,9 +258,9 @@ void __cdecl Debug_Frame(int localClientNum)
     int minMsec; // [esp+10h] [ebp-8h]
     int newEvent2; // [esp+14h] [ebp-4h]
 
-#ifdef KISAK_MP
     iassert(Sys_IsMainThread());
 
+#ifdef KISAK_MP
     oldBgs = bgs;
     bgs = 0;
 #endif

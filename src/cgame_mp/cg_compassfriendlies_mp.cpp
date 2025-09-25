@@ -453,8 +453,6 @@ void __cdecl CG_CompassDrawFriendlies(
     float v8; // [esp+30h] [ebp-DCh]
     float v9; // [esp+34h] [ebp-D8h]
     float v10; // [esp+38h] [ebp-D4h]
-    float v11; // [esp+44h] [ebp-C8h]
-    float angle; // [esp+48h] [ebp-C4h]
     float v13; // [esp+4Ch] [ebp-C0h]
     float v14; // [esp+50h] [ebp-BCh]
     BOOL icon; // [esp+68h] [ebp-A4h]
@@ -570,13 +568,11 @@ void __cdecl CG_CompassDrawFriendlies(
                             xy[1] = centerY - h * 0.5 + xy[1];
                             if (compassType || !compassRotation->current.enabled)
                             {
-                                v11 = cgameGlob->compassNorthYaw - actor->lastYaw;
-                                yawTo = AngleNormalize360(v11);
+                                yawTo = AngleNormalize360(cgameGlob->compassNorthYaw - actor->lastYaw);
                             }
                             else
                             {
-                                angle = cgameGlob->refdefViewAngles[1] - actor->lastYaw;
-                                yawTo = AngleNormalize360(angle);
+                                yawTo = AngleNormalize360(cgameGlob->refdefViewAngles[1] - actor->lastYaw);
                             }
                             if (actor->pingTime <= cgameGlob->time)
                             {

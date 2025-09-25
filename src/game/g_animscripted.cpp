@@ -482,9 +482,6 @@ void __cdecl G_Animscripted_Think(gentity_s *ent)
     animscripted_s *scripted; // r31
     XAnimTree_s *EntAnimTree; // r28
     DObj_s *ServerDObj; // r29
-    int v5; // r7
-    unsigned int v6; // r6
-    unsigned int v7; // r5
     float v8[4]; // [sp+50h] [-50h] BYREF
     float v9[16]; // [sp+60h] [-40h] BYREF
 
@@ -499,13 +496,13 @@ void __cdecl G_Animscripted_Think(gentity_s *ent)
             if (scripted->mode == 1)
                 G_AnimScripted_Think_DeathPlant(ent, EntAnimTree, v9, v8);
             G_ReduceOriginError(v9, scripted->originError, 0.25);
-            G_ReduceAnglesError(v8, scripted->anglesError, (float)(ent->angleLerpRate * (float)0.050000001));
+            G_ReduceAnglesError(v8, scripted->anglesError, (float)(ent->angleLerpRate * 0.05f));
             G_AnimScripted_UpdateEntityOriginAndAngles(ent, v9, v8);
             if (scripted->bStarted)
             {
                 if (XAnimHasFinished(EntAnimTree, scripted->anim))
                 {
-                    XAnimSetCompleteGoalWeight(ServerDObj, scripted->anim, 1.0, 0.2, 1.0, v7, v6, v5);
+                    XAnimSetCompleteGoalWeight(ServerDObj, scripted->anim, 1.0, 0.2, 1.0, 0, 0, 0);
                     scripted->anim = 0;
                 }
             }

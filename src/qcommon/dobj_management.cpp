@@ -2,6 +2,7 @@
 #include "mem_track.h"
 #include "threads.h"
 #include <xanim/dobj.h>
+#include <win32/win_local.h>
 
 #define CLIENT_DOBJ_HANDLE_MAX (MAX_GENTITIES + 128)
 #define SERVER_DOBJ_HANDLE_MAX (MAX_GENTITIES)
@@ -117,9 +118,13 @@ DObj_s *__cdecl Com_ClientDObjCreate(
 
 int __cdecl Com_GetFreeDObjIndex()
 {
+#ifdef KISAK_MP
     iassert(Sys_IsMainThread());
+#elif KISAK_SP
+    Sys_EnterCriticalSection(CRITSECT_DOBJ_ALLOC);
+#endif
 
-    for (int i = com_lastDObjIndex + 1; i < 2048; ++i)
+    for (int i = com_lastDObjIndex + 1; i < DOBJ_HANDLE_MAX; ++i)
     {
         if (!objAlloced[i])
         {
@@ -127,12 +132,16 @@ int __cdecl Com_GetFreeDObjIndex()
 
             iassert(i);
             iassert((unsigned)i < DOBJ_HANDLE_MAX);
+            iassert((unsigned)i < ARRAY_COUNT(objAlloced));
 
             objAlloced[i] = 1;
 
             iassert(objFreeCount);
 
             --objFreeCount;
+#ifdef KISAK_SP
+            Sys_LeaveCriticalSection(CRITSECT_DOBJ_ALLOC);
+#endif
             return i;
         }
     }
@@ -149,6 +158,9 @@ int __cdecl Com_GetFreeDObjIndex()
             iassert(objFreeCount);
 
             --objFreeCount;
+#ifdef KISAK_SP
+            Sys_LeaveCriticalSection(CRITSECT_DOBJ_ALLOC);
+#endif
             return i;
         }
     }
@@ -218,9 +230,15 @@ void __cdecl Com_SafeClientDObjFree(unsigned int handle, int localClientNum)
         iassert((unsigned)index < DOBJ_HANDLE_MAX);
         iassert(Sys_IsMainThread());
 
+#ifdef KISAK_SP
+        Sys_EnterCriticalSection(CRITSECT_DOBJ_ALLOC);
+#endif
         objAlloced[index] = 0;
         ++objFreeCount;
         DObjFree(&objBuf[index]);
+#ifdef KISAK_SP
+        Sys_LeaveCriticalSection(CRITSECT_DOBJ_ALLOC);
+#endif
     }
 }
 
@@ -241,11 +259,18 @@ void __cdecl Com_SafeServerDObjFree(unsigned int handle)
 #endif
 
         iassert((unsigned)index < DOBJ_HANDLE_MAX);
-        iassert(Sys_IsMainThread());
-
+#ifndef KISAK_SP
+        iassert(Sys_IsMainThread());'
+#endif
+#ifdef KISAK_SP
+        Sys_EnterCriticalSection(CRITSECT_DOBJ_ALLOC);
+#endif
         objAlloced[index] = 0;
         ++objFreeCount;
         DObjFree(&objBuf[index]);
+#ifdef KISAK_SP
+        Sys_LeaveCriticalSection(CRITSECT_DOBJ_ALLOC);
+#endif
     }
 }
 
