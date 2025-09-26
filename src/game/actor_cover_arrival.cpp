@@ -100,86 +100,75 @@ int __cdecl Actor_CheckCoverApproach(actor_s *self)
 void __cdecl Actor_CoverApproachNotify(actor_s *self)
 {
     path_t *p_Path; // r29
-    pathnode_t *NegotiationNode; // r25
-    double v4; // fp0
+    pathnode_t *arrivalNode; // r25
+    double goalHeight; // fp0
     int iTraceMask; // r26
     int wPathLen; // r10
-    int v7; // r30
-    float *v8; // r31
-    gentity_s *ent; // r11
-    pathpoint_t *v10; // r11
-    float v11; // [sp+50h] [-C0h] BYREF
-    float v12; // [sp+54h] [-BCh]
-    float v13; // [sp+58h] [-B8h]
-    float v14[4]; // [sp+60h] [-B0h] BYREF
-    float v15[4]; // [sp+70h] [-A0h] BYREF
-    trace_t v16; // [sp+80h] [-90h] BYREF
+    int ptItr; // r30
+    float traceEnd[3]; // [sp+50h] [-C0h] BYREF
+    float traceStart[4]; // [sp+70h] [-A0h] BYREF
+    trace_t traceresults; // [sp+80h] [-90h] BYREF
 
-    if (!Actor_HasPath(self))
-        MyAssertHandler(
-            "c:\\trees\\cod3\\cod3src\\src\\game\\actor_cover_arrival.cpp",
-            113,
-            0,
-            "%s",
-            "Actor_HasPath( self )");
+    iassert(Actor_HasPath(self));
     p_Path = &self->Path;
     if (Path_HasNegotiationNode(&self->Path))
     {
-        NegotiationNode = Path_GetNegotiationNode(&self->Path);
-        if (!NegotiationNode)
-            MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\actor_cover_arrival.cpp", 120, 0, "%s", "arrivalNode");
-        v11 = NegotiationNode->constant.vOrigin[0];
-        v12 = NegotiationNode->constant.vOrigin[1];
-        v4 = NegotiationNode->constant.vOrigin[2];
+        arrivalNode = Path_GetNegotiationNode(&self->Path);
+        iassert(arrivalNode);
+        traceEnd[0] = arrivalNode->constant.vOrigin[0];
+        traceEnd[1] = arrivalNode->constant.vOrigin[1];
+        goalHeight = arrivalNode->constant.vOrigin[2];
     }
     else
     {
-        NegotiationNode = self->sentient->pClaimedNode;
-        if (!NegotiationNode)
-            MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\actor_cover_arrival.cpp", 126, 0, "%s", "arrivalNode");
-        v11 = self->Path.vFinalGoal[0];
-        v12 = self->Path.vFinalGoal[1];
-        v4 = self->Path.vFinalGoal[2];
+        arrivalNode = self->sentient->pClaimedNode;
+        iassert(arrivalNode);
+        traceEnd[0] = self->Path.vFinalGoal[0];
+        traceEnd[1] = self->Path.vFinalGoal[1];
+        goalHeight = self->Path.vFinalGoal[2];
     }
     iTraceMask = self->Physics.iTraceMask;
     wPathLen = self->Path.wPathLen;
-    v7 = self->Path.wNegotiationStartNode + 1;
-    v13 = (float)v4 + (float)18.0;
-    if (v7 < wPathLen)
+    traceEnd[2] = goalHeight + 18.0f;
+
+    ptItr = self->Path.wNegotiationStartNode + 1;
+
+    if (ptItr < wPathLen)
     {
-        v8 = &p_Path->pts[v7].vOrigPoint[1];
         do
         {
-            if (v7 > self->Path.wNegotiationStartNode + 1
-                && (float)((float)((float)(v12 - *v8) * (float)(v12 - *v8))
-                    + (float)((float)(v11 - *(v8 - 1)) * (float)(v11 - *(v8 - 1)))) > 250000.0)
+            float *origPoint = p_Path->pts[ptItr].vOrigPoint;
+
+            if (ptItr > self->Path.wNegotiationStartNode + 1
+                && (((traceEnd[1] - origPoint[1]) * (traceEnd[1] - origPoint[1]))
+                    + ((traceEnd[0] - origPoint[0]) * (traceEnd[0] - origPoint[0]))) > 250000.0f)
             {
                 break;
             }
-            if ((float)((float)(NegotiationNode->constant.forward[1] * (float)(v12 - *v8))
-                + (float)(NegotiationNode->constant.forward[0] * (float)(v11 - *(v8 - 1)))) >= 0.0)
+            if (((arrivalNode->constant.forward[1] * (traceEnd[1] - origPoint[1]))
+                + (arrivalNode->constant.forward[0] * (traceEnd[0] - origPoint[0]))) >= 0.0)
             {
-                v15[0] = *(v8 - 1);
-                ent = self->ent;
-                v15[1] = *v8;
-                v15[2] = v8[1] + (float)18.0;
-                G_TraceCapsule(&v16, v15, vec3_origin, vec3_origin, &v11, ent->s.number, iTraceMask);
-                if (v16.allsolid || v16.fraction < 1.0)
+                traceStart[0] = origPoint[0];
+                traceStart[1] = origPoint[1];
+                traceStart[2] = origPoint[2] + 18.0f;
+                G_TraceCapsule(&traceresults, traceStart, vec3_origin, vec3_origin, traceEnd, self->ent->s.number, iTraceMask);
+                if (traceresults.allsolid || traceresults.fraction < 1.0)
                     break;
             }
-            ++v7;
-            v8 += 7;
-        } while (v7 < self->Path.wPathLen);
+            ++ptItr;
+        } while (ptItr < self->Path.wPathLen);
     }
-    if (v7 != self->Path.wNegotiationStartNode + 1)
+
+    if (ptItr != self->Path.wNegotiationStartNode + 1)
     {
-        v10 = &p_Path->pts[v7];
-        v14[0] = v11 - v10[-1].vOrigPoint[0];
-        v14[1] = v12 - v10[-1].vOrigPoint[1];
-        Vec2Normalize(v14);
-        v14[2] = 0.0;
-        Scr_AddVector(v14);
-        Scr_Notify(self->ent, scr_const.corner_approach, 1u);
+        pathpoint_t *pt = &p_Path->pts[ptItr];
+        float vec[3];
+        vec[0] = traceEnd[0] - pt[-1].vOrigPoint[0];
+        vec[1] = traceEnd[1] - pt[-1].vOrigPoint[1];
+        Vec2Normalize(vec);
+        vec[2] = 0.0;
+        Scr_AddVector(vec);
+        Scr_Notify(self->ent, scr_const.corner_approach, 1);
     }
 }
 

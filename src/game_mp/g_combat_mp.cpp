@@ -378,36 +378,15 @@ void __cdecl G_Damage(
             attacker = &g_entities[ENTITYNUM_WORLD];
         if (weapon == -1)
             weapon = G_GetWeaponIndexForEntity(inflictor);
-        if (weapon >= BG_GetNumWeapons())
-        {
-            NumWeapons = BG_GetNumWeapons();
-            MyAssertHandler(
-                ".\\game_mp\\g_combat_mp.cpp",
-                593,
-                0,
-                "weapon doesn't index BG_GetNumWeapons()\n\t%i not in [0, %i)",
-                weapon,
-                NumWeapons);
-        }
+
+        bcassert(weapon, BG_GetNumWeapons());
         if (!targ->scr_vehicle || !G_VehImmuneToDamage(targ, mod, dFlags, weapon))
         {
-            if (!targ->r.inuse)
-                MyAssertHandler(
-                    ".\\game_mp\\g_combat_mp.cpp",
-                    603,
-                    0,
-                    "%s\n\t(targ->s.number) = %i",
-                    "(targ->r.inuse)",
-                    targ->s.number);
-            if (!attacker->r.inuse)
-                MyAssertHandler(
-                    ".\\game_mp\\g_combat_mp.cpp",
-                    604,
-                    0,
-                    "%s\n\t(attacker->s.number) = %i",
-                    "(attacker->r.inuse)",
-                    attacker->s.number);
+            iassert(targ->r.inuse);
+            iassert(attacker->r.inuse);
+
             Vec3NormalizeTo(dir, localdir);
+
             if ((targ->flags & 1) == 0)
             {
                 if (damage < 1)

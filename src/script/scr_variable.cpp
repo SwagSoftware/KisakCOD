@@ -723,12 +723,15 @@ unsigned int  FindNextSibling(unsigned int id)
 
 	entryValue = &scrVarGlob.variableList[id + VARIABLELIST_CHILD_BEGIN];
 
+	iassert((entryValue->w.status & VAR_STAT_MASK) != VAR_STAT_FREE);
 	iassert(!IsObject(entryValue));
 
-	if (!entryValue->nextSibling)
+	unsigned int nextSibling = entryValue->nextSibling;
+
+	if (!nextSibling)
 		return 0;
 
-	childId = scrVarGlob.variableList[entryValue->nextSibling + VARIABLELIST_CHILD_BEGIN].hash.id;
+	childId = scrVarGlob.variableList[nextSibling + VARIABLELIST_CHILD_BEGIN].hash.id;
 
 	iassert(!IsObject(&scrVarGlob.variableList[VARIABLELIST_CHILD_BEGIN + childId]));
 
@@ -4114,6 +4117,7 @@ void  FreeChildValue(unsigned int parentId, unsigned int id)
 		scrVarGlob.variableList[parentIndex + 1].hash.u.prev = scrVarGlob.variableList[prevSiblingIndex + VARIABLELIST_CHILD_BEGIN].hash.id;
 	}
 	entryValue->w.status = 0;
+	entryValue->u = 0; // lwss ADD (zero out upper bytes of the union) (KISAKTODO: this might be improper)
 	entryValue->u.next = scrVarGlob.variableList[VARIABLELIST_CHILD_BEGIN].u.next;
 	entry->hash.u.prev = 0;
 	scrVarGlob.variableList[scrVarGlob.variableList[VARIABLELIST_CHILD_BEGIN].u.next + VARIABLELIST_CHILD_BEGIN].hash.u.prev = index;
@@ -4611,12 +4615,8 @@ void CopyEntity(unsigned int parentId, unsigned int newParentId)
 	VariableValueInternal *parentValue; // r31
 	unsigned int FirstSibling; // r15
 	VariableValueInternal *entryValue; // r26
-	int v8; // r11
 	unsigned int name; // r29
 	VariableValueInternal *newEntryValue; // r31
-	int v11; // r11
-	int v12; // r30
-	unsigned int v13; // r11
 	VariableUnion *intValue; // r4
 
 	iassert(parentId);

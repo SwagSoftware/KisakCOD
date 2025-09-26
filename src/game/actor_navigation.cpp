@@ -3799,214 +3799,151 @@ void __cdecl Path_TransferLookahead(path_t *pPath, float *vStartPos)
 {
     int wPathLen; // r11
     float fCurrLength; // fp1
-    double v6; // fp2
-    const char *v7; // r3
-    float fLookaheadAmount; // fp21
-    double v9; // fp23
-    double v10; // fp28
-    double v11; // fp30
-    double v12; // fp0
-    double v13; // fp1
-    double v14; // fp22
-    int v15; // r29
-    int v16; // r10
-    double v17; // fp24
-    double v18; // fp25
+    float amount; // fp21
+    double totalArea; // fp23
+    float vDir[2]; // v10, v11
+    double fLength; // fp1
+    double closestTotalArea; // fp22
+    int i; // r29
+    int bAtStart; // r10
+    double bestForwardDot; // fp24
+    double prevDot; // fp25
     float *fDir2D; // r31
-    float *v20; // r26
-    double v21; // fp11
-    double v22; // fp12
-    double v23; // fp26
-    double v24; // fp29
-    double v25; // fp31
-    double v26; // fp31
-    double v27; // fp0
-    float *v28; // r4
-    path_t *v29; // r3
-    float v30; // [sp+50h] [-D0h]
-    float v31; // [sp+50h] [-D0h]
-    float v32; // [sp+50h] [-D0h]
-    float v33; // [sp+58h] [-C8h] BYREF
-    float v34; // [sp+5Ch] [-C4h]
-    float v35; // [sp+60h] [-C0h] BYREF
-    float v36; // [sp+64h] [-BCh]
+    float vStartDir[3];
 
-    if (!pPath)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\actor_navigation.cpp", 325, 0, "%s", "pPath");
-    if (pPath->wOrigPathLen != pPath->wPathLen)
-        MyAssertHandler(
-            "c:\\trees\\cod3\\cod3src\\src\\game\\actor_navigation.cpp",
-            326,
-            0,
-            "%s",
-            "pPath->wOrigPathLen == pPath->wPathLen");
-    if ((unsigned __int16)pPath->wNegotiationStartNode >= 0x8000u)
-        MyAssertHandler(
-            "c:\\trees\\cod3\\cod3src\\src\\game\\actor_navigation.cpp",
-            327,
-            0,
-            "%s",
-            "pPath->wNegotiationStartNode >= 0");
-    if (pPath->wNegotiationStartNode >= pPath->wPathLen)
-        MyAssertHandler(
-            "c:\\trees\\cod3\\cod3src\\src\\game\\actor_navigation.cpp",
-            328,
-            0,
-            "%s",
-            "pPath->wNegotiationStartNode < pPath->wPathLen");
-    wPathLen = pPath->wPathLen;
-    if (wPathLen > 1)
-    {
-        fCurrLength = pPath->fCurrLength;
-        v6 = *((float *)&pPath->pts[wPathLen - 1] - 2);
-        if (fCurrLength > v6)
-        {
-            v7 = va((const char *)HIDWORD(fCurrLength), LODWORD(fCurrLength), LODWORD(v6));
-            MyAssertHandler(
-                "c:\\trees\\cod3\\cod3src\\src\\game\\actor_navigation.cpp",
-                329,
-                0,
-                "%s\n\t%s",
-                "pPath->wPathLen <= 1 || pPath->fCurrLength <= pPath->pts[pPath->wPathLen - 2].fOrigLength",
-                v7);
-        }
-    }
+    iassert(pPath);
+    iassert(pPath->wOrigPathLen == pPath->wPathLen);
+    iassert(pPath->wNegotiationStartNode >= 0);
+    iassert(pPath->wNegotiationStartNode < pPath->wPathLen);
+    iassert(pPath->wPathLen <= 1 || pPath->fCurrLength <= pPath->pts[pPath->wPathLen - 2].fOrigLength);
+
     if (pPath->fLookaheadDist == 0.0)
-        goto LABEL_59;
-    fLookaheadAmount = pPath->fLookaheadAmount;
-    v9 = 0.0;
-    if (fLookaheadAmount <= 0.0)
-        MyAssertHandler(
-            "c:\\trees\\cod3\\cod3src\\src\\game\\actor_navigation.cpp",
-            339,
-            0,
-            "%s\n\t(amount) = %g",
-            HIDWORD(fLookaheadAmount),
-            LODWORD(fLookaheadAmount));
-    v10 = pPath->lookaheadDir[0];
-    v11 = pPath->lookaheadDir[1];
-    if (v10 == 0.0 && v11 == 0.0)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\actor_navigation.cpp", 341, 0, "%s", "vDir[0] || vDir[1]");
-    v12 = (float)(pPath->vCurrPoint[1] - vStartPos[1]);
-    v35 = pPath->vCurrPoint[0] - *vStartPos;
-    v36 = v12;
-    v13 = Vec2Normalize(&v35);
-    v14 = 0.0;
-    v15 = pPath->wPathLen - 2;
-    v16 = 1;
-    v17 = (float)((float)(v36 * (float)v11) + (float)(v35 * (float)v10));
-    v18 = (float)((float)((float)(v36 * (float)v10) - (float)(v35 * (float)v11)) * (float)v13);
-    if (v15 < pPath->wNegotiationStartNode)
     {
-    LABEL_59:
-        v28 = vStartPos;
-        v29 = pPath;
-    LABEL_60:
-        Path_SetLookaheadToStart(v29, v28, 0);
+        Path_SetLookaheadToStart(pPath, vStartPos, 0);
+        return;
     }
-    else
+
+    amount = pPath->fLookaheadAmount;
+    totalArea = 0.0;
+
+    iassert(amount);
+
+    vDir[0] = pPath->lookaheadDir[0];
+    vDir[1] = pPath->lookaheadDir[1];
+
+    iassert(vDir[0] || vDir[1]);
+
+    vStartDir[0] = pPath->vCurrPoint[0] - vStartPos[0];
+    vStartDir[1] = pPath->vCurrPoint[1] - vStartPos[1];
+
+    fLength = Vec2Normalize(vStartDir);
+    closestTotalArea = 0.0;
+    i = pPath->wPathLen - 2;
+    bAtStart = 1;
+
+    prevDot = ((vDir[0] * vStartDir[1]) - (vDir[1] * vStartDir[0])) * fLength;
+    bestForwardDot = (vDir[0] * vStartDir[0]) + (vDir[1] * vStartDir[1]);
+
+    if (i < pPath->wNegotiationStartNode)
     {
-        fDir2D = pPath->pts[v15].fDir2D;
-        while (1)
+        Path_SetLookaheadToStart(pPath, vStartPos, 0);
+        return;
+    }
+
+    fDir2D = pPath->pts[i].fDir2D;
+
+    float offset[2]; // v33, v34
+
+    i = pPath->wPathLen - 2;
+
+    while (i >= pPath->wNegotiationStartNode)
+    {
+        pathpoint_t *pt = &pPath->pts[i];
+        offset[0] = pt->vOrigPoint[0] - vStartPos[0];
+        offset[1] = pt->vOrigPoint[1] - vStartPos[1];
+
+        if (bAtStart)
+            fCurrLength = pPath->fCurrLength;
+        else
+            fCurrLength = fDir2D[2];
+
+        fLength = fCurrLength;
+
+        iassert(pt->fDir2D[0] || pt->fDir2D[1]);
+
+        float height = (pt->fDir2D[0] * offset[1]) - (pt->fDir2D[1] * offset[0]);
+        bool bInFront = (((pt->fDir2D[0] * vDir[1]) - (pt->fDir2D[1] * vDir[0])) * height) > 0.0;
+        height = I_fabs(height);
+
+        float dot = (vDir[0] * offset[1]) - (vDir[1] * offset[0]);
+
+        if (bInFront && (float)(dot * prevDot) < 0.0)
         {
-            v20 = fDir2D - 3;
-            v21 = (float)(*(fDir2D - 3) - *vStartPos);
-            v33 = *(fDir2D - 3) - *vStartPos;
-            v22 = (float)(*(fDir2D - 2) - vStartPos[1]);
-            v34 = *(fDir2D - 2) - vStartPos[1];
-            if (v16)
-                v23 = pPath->fCurrLength;
-            else
-                v23 = fDir2D[2];
-            if (*fDir2D == 0.0 && fDir2D[1] == 0.0)
+            Path_UpdateLookahead(pPath, vStartPos, 0, 1, 1);
+            return;
+        }
+
+        iassert(!IS_NAN(fLength));
+        iassert(fLength > 0);
+
+        totalArea = ((height * fLength) + totalArea);
+
+        if (totalArea >= amount)
+        {
+            iassert(!IS_NAN(height));
+            iassert(height);
+            iassert(!IS_NAN(fLength));
+            iassert(fLength > 0);
+            
+            float dist = (totalArea - amount) / height;
+
+            iassert(pt->fDir2D[0] || pt->fDir2D[1]);
+
+            offset[0] = (-dist * pt->fDir2D[0]) + pt->vOrigPoint[0];
+            offset[1] = (-dist * pt->fDir2D[1]) + pt->vOrigPoint[1];
+            Vec2Normalize(offset);
+
+            float forwardDot = (vDir[0] * offset[0]) + (vDir[1] * offset[1]);
+            if (bestForwardDot > forwardDot)
             {
-                MyAssertHandler(
-                    "c:\\trees\\cod3\\cod3src\\src\\game\\actor_navigation.cpp",
-                    356,
-                    0,
-                    "%s",
-                    "pt->fDir2D[0] || pt->fDir2D[1]");
-                v22 = v34;
-                v21 = v33;
-            }
-            v24 = I_fabs((float)((float)(*fDir2D * (float)v22) - (float)(fDir2D[1] * (float)v21)));
-            v25 = (float)((float)((float)v22 * (float)v10) - (float)((float)v21 * (float)v11));
-            if ((float)((float)((float)(*fDir2D * (float)v11) - (float)(fDir2D[1] * (float)v10))
-                * (float)((float)(*fDir2D * (float)v22) - (float)(fDir2D[1] * (float)v21))) > 0.0
-                && (float)((float)((float)((float)v22 * (float)v10) - (float)((float)v21 * (float)v11)) * (float)v18) < 0.0)
-            {
-                Path_UpdateLookahead(pPath, vStartPos, 0, 1, 1);
-                return;
-            }
-            v30 = v23;
-            if ((LODWORD(v30) & 0x7F800000) == 0x7F800000)
-                MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\actor_navigation.cpp", 367, 0, "%s", "!IS_NAN(fLength)");
-            if (v23 <= 0.0)
-                MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\actor_navigation.cpp", 368, 0, "%s", "fLength > 0");
-            v9 = (float)((float)((float)v24 * (float)v23) + (float)v9);
-            if (v9 >= fLookaheadAmount)
-                break;
-            v18 = v25;
-            Vec2Normalize(&v33);
-            if ((float)((float)(v34 * (float)v11) + (float)(v33 * (float)v10)) >= v17)
-            {
-                v17 = (float)((float)(v34 * (float)v11) + (float)(v33 * (float)v10));
-                v14 = v9;
-            }
-            --v15;
-            fDir2D -= 7;
-            v16 = 0;
-            if (v15 < pPath->wNegotiationStartNode)
-            {
-                if (v14 == v9)
-                    goto LABEL_59;
                 Path_SetLookaheadToStart(pPath, vStartPos, 1);
-                if ((pPath->flags & 2) == 0 && pPath->fLookaheadAmount > v14)
+                if ((pPath->flags & 2) == 0 && pPath->fLookaheadAmount > closestTotalArea)
                 {
-                    if (v14 < 64.0)
-                        v14 = 64.0;
-                    goto LABEL_41;
+                    if (closestTotalArea < 64.0)
+                        closestTotalArea = 64.0f;
+                    pPath->fLookaheadAmount = closestTotalArea;
                 }
                 return;
             }
+
+            Path_SetLookaheadToStart(pPath, vStartPos, 0);
+            return;
         }
-        v31 = v24;
-        if ((LODWORD(v31) & 0x7F800000) == 0x7F800000)
-            MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\actor_navigation.cpp", 372, 0, "%s", "!IS_NAN(height)");
-        if (v24 == 0.0)
-            MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\actor_navigation.cpp", 373, 0, "%s", "height");
-        v32 = v23;
-        if ((LODWORD(v32) & 0x7F800000) == 0x7F800000)
-            MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\actor_navigation.cpp", 374, 0, "%s", "!IS_NAN(fLength)");
-        if (v23 <= 0.0)
-            MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\actor_navigation.cpp", 375, 0, "%s", "fLength > 0");
-        v26 = (float)((float)((float)v9 - (float)fLookaheadAmount) / (float)v24);
-        if (*fDir2D == 0.0 && v20[4] == 0.0)
-            MyAssertHandler(
-                "c:\\trees\\cod3\\cod3src\\src\\game\\actor_navigation.cpp",
-                379,
-                0,
-                "%s",
-                "pt->fDir2D[0] || pt->fDir2D[1]");
-        v27 = (float)((float)((float)(v20[4] * (float)-v26) + v20[1]) - vStartPos[1]);
-        v33 = (float)((float)(*fDir2D * (float)-v26) + *(fDir2D - 3)) - *vStartPos;
-        v34 = v27;
-        Vec2Normalize(&v33);
-        v28 = vStartPos;
-        v29 = pPath;
-        if ((float)((float)(v34 * (float)v11) + (float)(v33 * (float)v10)) >= v17)
-            goto LABEL_60;
-        Path_SetLookaheadToStart(pPath, vStartPos, 1);
-        if ((pPath->flags & 2) == 0 && pPath->fLookaheadAmount > v14)
+
+        prevDot = dot;
+        Vec2Normalize(offset);
+        float forwardDot = (vDir[0] * offset[0]) + (vDir[1] * offset[1]);
+        if (forwardDot >= bestForwardDot)
         {
-            if (v14 >= 64.0)
-            {
-            LABEL_41:
-                pPath->fLookaheadAmount = v14;
-                return;
-            }
-            pPath->fLookaheadAmount = 64.0;
+            bestForwardDot = forwardDot;
+            closestTotalArea = totalArea;
         }
+        --i;
+        bAtStart = 0;
+    }
+
+    if (closestTotalArea == totalArea)
+    {
+        Path_SetLookaheadToStart(pPath, vStartPos, 0);
+        return;
+    }
+
+    Path_SetLookaheadToStart(pPath, vStartPos, 1);
+    if ((pPath->flags & 2) == 0 && pPath->fLookaheadAmount > closestTotalArea)
+    {
+        if (closestTotalArea < 64.0)
+            closestTotalArea = 64.0f;
+        pPath->fLookaheadAmount = closestTotalArea;
     }
 }
 

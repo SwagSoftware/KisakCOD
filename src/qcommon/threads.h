@@ -55,6 +55,9 @@ void __cdecl Sys_StartRenderer();
 bool __cdecl Sys_IsRenderThread();
 bool __cdecl Sys_IsDatabaseThread();
 bool __cdecl Sys_IsMainThread();
+#ifdef KISAK_SP
+bool __cdecl Sys_IsServerThread();
+#endif
 void __cdecl Sys_SetValue(int valueIndex, void* data);
 void* __cdecl Sys_GetValue(int valueIndex);
 void __cdecl Sys_WaitForWorkerCmd();

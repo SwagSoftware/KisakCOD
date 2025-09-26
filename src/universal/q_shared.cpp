@@ -148,7 +148,11 @@ va_info_t va_info[THREAD_CONTEXT_COUNT];
 jmp_buf g_com_error[THREAD_CONTEXT_COUNT];
 TraceThreadInfo g_traceThreadInfo[THREAD_CONTEXT_COUNT];
 
+#ifdef KISAK_MP
 static char value1[2][2][8192];
+#elif KISAK_SP
+static char value1[3][2][8192]; // 3rd for server thread
+#endif
 
 void __cdecl TRACK_q_shared()
 {
@@ -587,10 +591,15 @@ const char *__cdecl Info_ValueForKey(const char *s, const char *key)
         {
             v5 = value1[0][valueindex];
         }
+#ifdef KISAK_SP
+        else if (Sys_IsServerThread())
+        {
+            v5 = value1[2][valueindex];
+        }
+#endif
         else
         {
-            if (!Sys_IsRenderThread())
-                MyAssertHandler(".\\universal\\q_shared.cpp", 1026, 0, "%s", "Sys_IsRenderThread()");
+            iassert(Sys_IsRenderThread());
             v5 = value1[1][valueindex];
         }
         v4 = v5;

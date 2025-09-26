@@ -486,89 +486,76 @@ int __cdecl G_GetWeaponIndexForEntity(const gentity_s *ent)
     return result;
 }
 
-void __cdecl G_DamageKnockback(
+static void __cdecl G_DamageKnockback(
     gentity_s *targ,
     const gentity_s *attacker,
     const float *dir,
     float *scaledDir,
-    __int64 dflags,
+    int damage,
+    int dflags,
     int mod)
 {
-    double v10; // fp31
-    unsigned int v11; // r28
-    char v12; // r27
+    float scale; // fp31
+    unsigned int dmg; // r28
+    char flags; // r27
     gclient_s *client; // r11
     int pm_flags; // r10
-    int v16; // r9
-    double v17; // fp13
-    double v18; // fp12
-    double v19; // fp11
-    double v20; // fp12
-    double v21; // fp0
-    int v22; // r10
-    int v23; // r9
-    __int64 v24; // [sp+50h] [-50h] BYREF
 
-    v10 = 0.050000001;
-    v11 = HIDWORD(dflags);
-    v12 = dflags;
-    if (!targ)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\g_combat.cpp", 534, 0, "%s", "targ");
+    scale = 0.05f;
+    dmg = damage;
+    flags = dflags;
+
+    iassert(targ);
+
     if (dir)
         Vec3NormalizeTo(dir, scaledDir);
     else
-        v12 |= 4u;
+        flags |= 4;
+
     client = targ->client;
     if (client)
     {
         pm_flags = client->ps.pm_flags;
         if ((pm_flags & 1) != 0)
         {
-            v10 = 0.0099999998;
+            scale = 0.01f;
         }
         else if ((pm_flags & 2) != 0)
         {
-            v10 = 0.025;
+            scale = 0.025f;
         }
     }
-    LODWORD(v24) = v11;
-    HIDWORD(v24) = (int)(float)((float)__SPAIR64__(&v24, v11) * (float)v10);
-    v16 = HIDWORD(v24);
-    if (SHIDWORD(v24) > 60)
-        v16 = 60;
+
+    dmg *= scale;
+
+    if (dmg > 60)
+        dmg = 60;
     if ((targ->flags & 0x20) != 0)
-        v16 = 0;
-    if ((v12 & 4) == 0 && v16 && client && (client->ps.eFlags & 0x300) == 0)
+        dmg = 0;
+
+    if ((flags & 4) == 0 && dmg && client && (client->ps.eFlags & 0x300) == 0)
     {
-        LODWORD(dflags) = v16;
-        v17 = *scaledDir;
-        v18 = scaledDir[1];
-        v19 = scaledDir[2];
-        v24 = dflags;
-        v20 = (float)((float)v18 * (float)((float)(g_knockback->current.value * (float)dflags) * (float)0.0040000002));
-        v21 = (float)((float)v19 * (float)((float)(g_knockback->current.value * (float)dflags) * (float)0.0040000002));
-        client->ps.velocity[0] = client->ps.velocity[0]
-            + (float)((float)v17
-                * (float)((float)(g_knockback->current.value * (float)dflags) * (float)0.0040000002));
-        client->ps.velocity[1] = client->ps.velocity[1] + (float)v20;
-        client->ps.velocity[2] = client->ps.velocity[2] + (float)v21;
+        client->ps.velocity[0] += (scaledDir[0] * ((g_knockback->current.value * dmg) * 0.004f));
+        client->ps.velocity[1] += (scaledDir[1] * ((g_knockback->current.value * dmg) * 0.004f));
+        client->ps.velocity[2] += (scaledDir[2] * ((g_knockback->current.value * dmg) * 0.004f));
+
         if (targ == attacker && (mod == 5 || mod == 6 || mod == 3 || mod == 4))
             client->ps.velocity[2] = client->ps.velocity[2] * 0.25;
+
         if (!client->ps.pm_time)
         {
-            v22 = 2 * v16;
-            if (2 * v16 < 200)
+            int timething = 2 * dmg;
+            if (2 * dmg < 200)
             {
-                if (v22 <= 50)
-                    v22 = 50;
+                if (timething <= 50)
+                    timething = 50;
             }
             else
             {
-                v22 = 200;
+                timething = 200;
             }
-            v23 = client->ps.pm_flags;
-            client->ps.pm_time = v22;
-            client->ps.pm_flags = v23 | 0x100;
+            client->ps.pm_time = timething;
+            client->ps.pm_flags |= 0x100;
         }
     }
 }
@@ -605,14 +592,12 @@ void __cdecl G_Damage(
     unsigned int modelIndex,
     unsigned int partName)
 {
-    unsigned int WeaponIndexForEntity; // r19
     const gentity_s *v43; // r3
     unsigned int NumWeapons; // r3
     gclient_s *client; // r24
     __int64 v46; // r10
     const dvar_s *dmgDvar; // r11
     __int64 v48; // fp13
-    unsigned int v49; // r20
     double WeaponHitLocationMultiplier; // fp1
     actor_s *actor; // r3
     int v54; // r3
@@ -647,165 +632,113 @@ void __cdecl G_Damage(
     int v83; // [sp+48h] [-B8h]
     int v84; // [sp+4Ch] [-B4h]
     int v85; // [sp+50h] [-B0h]
-    float v86; // [sp+68h] [-98h] BYREF
-    float v87; // [sp+6Ch] [-94h]
-    float v88; // [sp+70h] [-90h]
+    float knockbackDir[3]; // [sp+68h] [-98h] BYREF
+    //float v87; // [sp+6Ch] [-94h]
+    //float v88; // [sp+70h] [-90h]
 
     damage = damage;
 
     iassert(targ);
 
-    if (targ->takedamage)
+    if (!targ->takedamage)
     {
-        if (!inflictor)
-            inflictor = &g_entities[ENTITYNUM_WORLD];
-        if (!attacker)
-            attacker = &g_entities[ENTITYNUM_WORLD];
+        return;
+    }
 
+    if (!inflictor)
+        inflictor = &g_entities[ENTITYNUM_WORLD];
+
+    if (!attacker)
+        attacker = &g_entities[ENTITYNUM_WORLD];
+
+    iassert(targ->r.inuse);
+    iassert(attacker->r.inuse);
+
+    if (weapon == -1)
+    {
+        weapon = G_GetWeaponIndexForEntity(inflictor);
+    }
+
+    bcassert(weapon, BG_GetNumWeapons());
+
+    if (!targ->scr_vehicle || !G_IsVehicleImmune(targ, mod, dflags, weapon))
+    {
         iassert(targ->r.inuse);
         iassert(attacker->r.inuse);
-        
-        WeaponIndexForEntity = weapon;
 
-        if (weapon == -1)
+        client = targ->client;
+        if (client)
         {
-            v43 = inflictor;
-            if (!inflictor)
-                v43 = attacker;
-            WeaponIndexForEntity = G_GetWeaponIndexForEntity(v43);
-        }
-        if (WeaponIndexForEntity >= BG_GetNumWeapons())
-        {
-            NumWeapons = BG_GetNumWeapons();
-            MyAssertHandler(
-                "c:\\trees\\cod3\\cod3src\\src\\game\\g_combat.cpp",
-                692,
-                0,
-                "weapon doesn't index BG_GetNumWeapons()\n\t%i not in [0, %i)",
-                WeaponIndexForEntity,
-                NumWeapons);
-        }
-        if (!targ->scr_vehicle || !G_IsVehicleImmune(targ, mod, dflags, WeaponIndexForEntity))
-        {
-            client = targ->client;
-            if (client)
+            if (G_IsPlayerDrivingVehicle(targ)
+                || (client->ps.otherFlags & 1) != 0
+                || client->noclip
+                || client->ufo
+                || level.mpviewer)
             {
-                if (G_IsPlayerDrivingVehicle(targ)
-                    || (client->ps.otherFlags & 1) != 0
-                    || client->noclip
-                    || client->ufo
-                    || level.mpviewer)
-                {
-                    return;
-                }
-                if (mod != 11)
-                {
-                    LODWORD(v46) = damage;
-                    if ((dflags & 1) != 0)
-                    {
-                        dmgDvar = player_radiusDamageMultiplier;
-                        v48 = v46;
-                    }
-                    else
-                    {
-                        if (mod == 7)
-                            dmgDvar = player_meleeDamageMultiplier;
-                        else
-                            dmgDvar = player_damageMultiplier;
-                        v48 = v46;
-                    }
-                    //a22 = (int)(float)(dmgDvar->current.value * (float)v48);
-                    //damage = a22;
-                    damage = (int)(float)(dmgDvar->current.value * (float)v48);
-                }
-                if (damage <= 0)
-                {
-                    damage = 1;
-                    //a22 = 1;
-                }
-            }
-            if (!G_ShouldTakeBulletDamage(targ, attacker))
                 return;
-            v49 = hitLoc;
-            if (targ->actor && mod != 7)
-            {
-                if (hitLoc > 0x12)
-                    MyAssertHandler(
-                        "c:\\trees\\cod3\\cod3src\\src\\game\\g_combat.cpp",
-                        744,
-                        0,
-                        "%s",
-                        "(hitLoc >= HITLOC_NONE) && (hitLoc < HITLOC_NUM)");
-                WeaponHitLocationMultiplier = G_GetWeaponHitLocationMultiplier(v49, WeaponIndexForEntity);
-                if (WeaponHitLocationMultiplier == 0.0)
-                    return;
-                //a22 = (int)(float)((float)__SPAIR64__(&a22, damage) * (float)WeaponHitLocationMultiplier);
-                damage = damage * WeaponHitLocationMultiplier;
-                if (damage <= 0)
-                    damage = 1;
             }
-            v86 = 0.0;
-            v87 = 0.0;
-            v88 = 0.0;
-            G_DamageKnockback(targ, attacker, dir, &v86, __SPAIR64__(damage, dflags), mod);
-            if ((targ->flags & 1) == 0)
+            if (mod != 11)
             {
-                if (damage < 1)
-                    damage = 1;
-                actor = targ->actor;
-                //v52 = a34;
-                //v53 = a32;
-                if (actor)
+                LODWORD(v46) = damage;
+                if ((dflags & 1) != 0)
                 {
-                    v54 = Actor_CheckDeathAllowed(actor, damage);
-                    v55 = v54;
-                    damage -= v54;
-                    if (g_debugDamage->current.enabled)
-                        Com_Printf(15, "client:%i health:%i damage:%i armor:%i\n", targ->s.number, targ->health, damage, v54);
-                    if (v55)
-                        G_DamageNotify(
-                            scr_const.damage_notdone,
-                            targ,
-                            attacker,
-                            dir,
-                            point,
-                            damage,
-                            mod,
-                            modelIndex,
-                            partName);
+                    dmgDvar = player_radiusDamageMultiplier;
+                    v48 = v46;
                 }
-                if (client)
+                else
                 {
-                    client->damage_blood += damage;
-                    if (dir)
-                    {
-                        client->damage_from[0] = v86;
-                        client->damage_from[1] = v87;
-                        client->damage_from[2] = v88;
-                        client->damage_fromWorld = 0;
-                    }
+                    if (mod == 7)
+                        dmgDvar = player_meleeDamageMultiplier;
                     else
-                    {
-                        client->damage_from[0] = targ->r.currentOrigin[0];
-                        client->damage_from[1] = targ->r.currentOrigin[1];
-                        client->damage_from[2] = targ->r.currentOrigin[2];
-                        client->damage_fromWorld = 1;
-                    }
+                        dmgDvar = player_damageMultiplier;
+                    v48 = v46;
                 }
-                if (damage)
-                {
-                    if ((targ->flags & 2) != 0)
-                    {
-                        health = targ->health;
-                        if (health - damage <= 0)
-                            damage = health - 1;
-                    }
-                    v57 = targ->health;
-                    targ->health = v57 - damage;
-                    if (client && client->invulnerableEnabled)
-                        handleDeathInvulnerability(targ, v57, mod);
+                //a22 = (int)(float)(dmgDvar->current.value * (float)v48);
+                //damage = a22;
+                damage = (int)(float)(dmgDvar->current.value * (float)v48);
+            }
+            if (damage <= 0)
+            {
+                damage = 1;
+                //a22 = 1;
+            }
+        }
+        if (!G_ShouldTakeBulletDamage(targ, attacker))
+            return;
+
+        if (targ->actor && mod != 7)
+        {
+            iassert(hitLoc >= HITLOC_NONE && hitLoc < HITLOC_NUM);
+            WeaponHitLocationMultiplier = G_GetWeaponHitLocationMultiplier(hitLoc, weapon);
+            if (WeaponHitLocationMultiplier == 0.0)
+                return;
+            //a22 = (int)(float)((float)__SPAIR64__(&a22, damage) * (float)WeaponHitLocationMultiplier);
+            damage = damage * WeaponHitLocationMultiplier;
+            if (damage <= 0)
+                damage = 1;
+        }
+        knockbackDir[0] = 0.0f;
+        knockbackDir[1] = 0.0f;
+        knockbackDir[2] = 0.0f;
+        G_DamageKnockback(targ, attacker, dir, knockbackDir, damage, dflags, mod);
+
+        if ((targ->flags & 1) == 0)
+        {
+            if (damage < 1)
+                damage = 1;
+            actor = targ->actor;
+            //v52 = a34;
+            //v53 = a32;
+            if (actor)
+            {
+                v54 = Actor_CheckDeathAllowed(actor, damage);
+                v55 = v54;
+                damage -= v54;
+                if (g_debugDamage->current.enabled)
+                    Com_Printf(15, "client:%i health:%i damage:%i armor:%i\n", targ->s.number, targ->health, damage, v54);
+                if (v55)
                     G_DamageNotify(
-                        scr_const.damage,
+                        scr_const.damage_notdone,
                         targ,
                         attacker,
                         dir,
@@ -813,65 +746,105 @@ void __cdecl G_Damage(
                         damage,
                         mod,
                         modelIndex,
-                        partName
-                    );
-                    v58 = targ->health;
-                    if (v58 > 0)
+                        partName);
+            }
+            if (client)
+            {
+                client->damage_blood += damage;
+                if (dir)
+                {
+                    client->damage_from[0] = knockbackDir[0];
+                    client->damage_from[1] = knockbackDir[1];
+                    client->damage_from[2] = knockbackDir[2];
+                    client->damage_fromWorld = 0;
+                }
+                else
+                {
+                    client->damage_from[0] = targ->r.currentOrigin[0];
+                    client->damage_from[1] = targ->r.currentOrigin[1];
+                    client->damage_from[2] = targ->r.currentOrigin[2];
+                    client->damage_fromWorld = 1;
+                }
+            }
+            if (damage)
+            {
+                if ((targ->flags & 2) != 0)
+                {
+                    health = targ->health;
+                    if (health - damage <= 0)
+                        damage = health - 1;
+                }
+                v57 = targ->health;
+                targ->health = v57 - damage;
+                if (client && client->invulnerableEnabled)
+                    handleDeathInvulnerability(targ, v57, mod);
+                G_DamageNotify(
+                    scr_const.damage,
+                    targ,
+                    attacker,
+                    dir,
+                    point,
+                    damage,
+                    mod,
+                    modelIndex,
+                    partName
+                );
+                v58 = targ->health;
+                if (v58 > 0)
+                {
+                    pain = entityHandlers[targ->handler].pain;
+                    if (pain)
+                        pain(targ, attacker, damage, point, mod, knockbackDir, hitLoc, weapon);
+                    goto LABEL_85;
+                }
+                if (client)
+                    targ->flags |= FL_NO_KNOCKBACK;
+                if (v58 < -999)
+                    targ->health = -999;
+                if (!client)
+                {
+                    if (weapon)
                     {
-                        pain = entityHandlers[targ->handler].pain;
-                        if (pain)
-                            pain(targ, attacker, damage, point, mod, &v86, (const hitLocation_t)v49, WeaponIndexForEntity);
-                        goto LABEL_85;
+                        WeaponDef = BG_GetWeaponDef(weapon);
+                        Scr_AddString(WeaponDef->szInternalName);
                     }
-                    if (client)
-                        targ->flags |= FL_NO_KNOCKBACK;
-                    if (v58 < -999)
-                        targ->health = -999;
-                    if (!client)
+                    else
                     {
-                        if (WeaponIndexForEntity)
+                        Scr_AddUndefined();
+                    }
+                    Scr_AddConstString(*modNames[mod]);
+                    Scr_AddEntity(attacker);
+                    Scr_Notify(targ, scr_const.death, 3u);
+                    if (attacker->client)
+                    {
+                        sentient = targ->sentient;
+                        if (sentient)
                         {
-                            WeaponDef = BG_GetWeaponDef(WeaponIndexForEntity);
-                            Scr_AddString(WeaponDef->szInternalName);
-                        }
-                        else
-                        {
-                            Scr_AddUndefined();
-                        }
-                        Scr_AddConstString(*modNames[mod]);
-                        Scr_AddEntity(attacker);
-                        Scr_Notify(targ, scr_const.death, 3u);
-                        if (attacker->client)
-                        {
-                            sentient = targ->sentient;
-                            if (sentient)
-                            {
-                                v61 = 1;
-                                if (sentient->eTeam != TEAM_AXIS)
-                                    v61 = -1;
-                                SV_AddToPlayerScore(v61);
-                            }
+                            v61 = 1;
+                            if (sentient->eTeam != TEAM_AXIS)
+                                v61 = -1;
+                            SV_AddToPlayerScore(v61);
                         }
                     }
-                    v62 = targ->sentient;
-                    if (v62)
-                        v62->lastAttacker = attacker;
-                    die = entityHandlers[targ->handler].die;
-                    if (die)
+                }
+                v62 = targ->sentient;
+                if (v62)
+                    v62->lastAttacker = attacker;
+                die = entityHandlers[targ->handler].die;
+                if (die)
+                {
+                    v64 = G_GetWeaponIndexForEntity(inflictor);
+                    die(targ, inflictor, attacker, damage, mod, v64, knockbackDir, hitLoc);
+                }
+                if (targ->r.inuse)
+                {
+                LABEL_85:
+                    v66 = targ->client;
+                    if (v66)
                     {
-                        v64 = G_GetWeaponIndexForEntity(inflictor);
-                        die(targ, inflictor, attacker, damage, mod, v64, &v86, (const hitLocation_t)v49);
-                    }
-                    if (targ->r.inuse)
-                    {
-                    LABEL_85:
-                        v66 = targ->client;
-                        if (v66)
-                        {
-                            if (targ->health < 0)
-                                targ->health = 0;
-                            v66->ps.stats[0] = targ->health;
-                        }
+                        if (targ->health < 0)
+                            targ->health = 0;
+                        v66->ps.stats[0] = targ->health;
                     }
                 }
             }

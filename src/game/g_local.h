@@ -474,13 +474,6 @@ void __cdecl G_DamageNotify(
     unsigned int modelIndex,
     unsigned int partName);
 int __cdecl G_GetWeaponIndexForEntity(const gentity_s *ent);
-void __cdecl G_DamageKnockback(
-    gentity_s *targ,
-    const gentity_s *attacker,
-    const float *dir,
-    float *scaledDir,
-    __int64 dflags,
-    int mod);
 bool __cdecl G_ShouldTakeBulletDamage(gentity_s *targ, gentity_s *attacker);
 void G_Damage(
     gentity_s *targ,

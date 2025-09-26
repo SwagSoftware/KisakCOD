@@ -2514,24 +2514,26 @@ void __cdecl ActorCmd_IsInGoal(scr_entref_t entref)
 
 void __cdecl ActorCmd_SetOverrideRunToPos(scr_entref_t entref)
 {
-    actor_s *v1; // r31
-    float v2; // [sp+50h] [-20h] BYREF
-    float v3; // [sp+54h] [-1Ch]
-    float v4; // [sp+58h] [-18h]
+    actor_s *self; // r31
+    float pos[3];
 
-    v1 = Actor_Get(entref);
-    Scr_GetVector(0, &v2);
-    if (v2 != v1->arrivalInfo.animscriptOverrideRunToPos[0]
-        || v3 != v1->arrivalInfo.animscriptOverrideRunToPos[1]
-        || v4 != v1->arrivalInfo.animscriptOverrideRunToPos[2]
-        || !v1->arrivalInfo.animscriptOverrideRunTo)
+    self = Actor_Get(entref);
+    Scr_GetVector(0, pos);
+
+    bool posEqual = 
+        pos[0] == self->arrivalInfo.animscriptOverrideRunToPos[0]
+        && pos[1] == self->arrivalInfo.animscriptOverrideRunToPos[1]
+        && pos[2] == self->arrivalInfo.animscriptOverrideRunToPos[2];
+
+    if (!posEqual || !self->arrivalInfo.animscriptOverrideRunTo)
     {
-        Scr_Notify(v1->ent, scr_const.goal_changed, 0);
+        Scr_Notify(self->ent, scr_const.goal_changed, 0);
     }
-    v1->arrivalInfo.animscriptOverrideRunTo = 1;
-    v1->arrivalInfo.animscriptOverrideRunToPos[0] = v2;
-    v1->arrivalInfo.animscriptOverrideRunToPos[1] = v3;
-    v1->arrivalInfo.animscriptOverrideRunToPos[2] = v4;
+
+    self->arrivalInfo.animscriptOverrideRunTo = 1;
+    self->arrivalInfo.animscriptOverrideRunToPos[0] = pos[0];
+    self->arrivalInfo.animscriptOverrideRunToPos[1] = pos[1];
+    self->arrivalInfo.animscriptOverrideRunToPos[2] = pos[2];
 }
 
 void __cdecl ActorCmd_NearNode(scr_entref_t entref)

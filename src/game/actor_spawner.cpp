@@ -75,7 +75,7 @@ gentity_s *__cdecl SpawnActor(gentity_s *ent, unsigned int targetname, enumForce
     const char *v10; // r5
     gentity_s *v11; // r29
     const char *v12; // r5
-    gentity_s *v13; // r28
+    gentity_s *spawn; // r28
     const char *v14; // r5
     sentient_s *i; // r31
     actor_s *actor; // r29
@@ -122,25 +122,25 @@ gentity_s *__cdecl SpawnActor(gentity_s *ent, unsigned int targetname, enumForce
     if (!PointCouldSeeSpawn(v21, ent->r.currentOrigin, v11->s.number, ent->s.number))
     {
     LABEL_24:
-        v13 = G_Spawn();
-        G_DuplicateEntityFields(v13, ent);
-        G_DuplicateScriptFields(v13, ent);
-        Scr_SetString(&v13->targetname, targetname);
-        v13->spawnflags &= ~1u;
-        if (SP_actor(v13))
+        spawn = G_Spawn();
+        G_DuplicateEntityFields(spawn, ent);
+        G_DuplicateScriptFields(spawn, ent);
+        Scr_SetString(&spawn->targetname, targetname);
+        spawn->spawnflags &= ~1u;
+        if (SP_actor(spawn))
         {
-            if (!v13->actor)
+            if (!spawn->actor)
                 MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\actor_spawner.cpp", 132, 0, "%s", "spawn->actor");
             if ((ent->spawnflags & 8) != 0)
             {
                 for (i = Sentient_FirstSentient(-1); i; i = Sentient_NextSentient(i, -1))
-                    Actor_GetPerfectInfo(v13->actor, i);
+                    Actor_GetPerfectInfo(spawn->actor, i);
             }
-            Actor_FinishSpawning(v13->actor);
-            actor = v13->actor;
+            Actor_FinishSpawning(spawn->actor);
+            actor = spawn->actor;
             if (getEnemyInfo)
             {
-                v17 = 1 << v13->sentient->eTeam;
+                v17 = 1 << spawn->sentient->eTeam;
                 for (j = Actor_FirstActor(v17); j; j = Actor_NextActor(j, v17))
                 {
                     if (actor != j)
@@ -152,13 +152,13 @@ gentity_s *__cdecl SpawnActor(gentity_s *ent, unsigned int targetname, enumForce
             }
             Actor_UpdateSight(actor);
             Actor_UpdateThreat(actor);
-            Actor_InitAnimScript(v13->actor);
-            Scr_AddEntity(v13);
+            Actor_InitAnimScript(spawn->actor);
+            Scr_AddEntity(spawn);
             Scr_Notify(ent, scr_const.spawned, 1u);
             count = ent->count;
             if (count > 0)
                 ent->count = count - 1;
-            return v13;
+            return spawn;
         }
         else
         {

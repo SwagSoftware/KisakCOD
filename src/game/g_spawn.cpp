@@ -213,48 +213,6 @@ void G_SpawnStruct()
 
 void __cdecl G_DuplicateEntityFields(gentity_s *dest, const gentity_s *source)
 {
-    //const int *p_ofs; // r31
-    //float *v5; // r11
-    //float *v6; // r10
-    //
-    //if ("classname")
-    //{
-    //    p_ofs = &fields_1[0].ofs;
-    //    do
-    //    {
-    //        switch (p_ofs[1])
-    //        {
-    //        case 0:
-    //            *(unsigned int *)(&dest->s.eType + *p_ofs) = *(unsigned int *)(&source->s.eType + *p_ofs);
-    //            break;
-    //        case 1:
-    //        case 14:
-    //            *(_WORD *)(&dest->s.eType + *p_ofs) = *(_WORD *)(&source->s.eType + *p_ofs);
-    //            break;
-    //        case 2:
-    //            *(&dest->s.eType + *p_ofs) = *(&source->s.eType + *p_ofs);
-    //            break;
-    //        case 3:
-    //            *(float *)(&dest->s.eType + *p_ofs) = *(float *)(&source->s.eType + *p_ofs);
-    //            break;
-    //        case 4:
-    //            Scr_SetString((unsigned __int16 *)(&dest->s.eType + *p_ofs), *(unsigned __int16 *)(&source->s.eType + *p_ofs));
-    //            break;
-    //        case 5:
-    //            v5 = (float *)(&source->s.eType + *p_ofs);
-    //            v6 = (float *)(&dest->s.eType + *p_ofs);
-    //            *v6 = *v5;
-    //            v6[1] = v5[1];
-    //            v6[2] = v5[2];
-    //            break;
-    //        default:
-    //            break;
-    //        }
-    //        p_ofs += 4;
-    //    } while (*(p_ofs - 1));
-    //}
-
-
     float *destVec; // [esp+8h] [ebp-14h]
     float *sourceVec; // [esp+Ch] [ebp-10h]
     const ent_field_t *f; // [esp+14h] [ebp-8h]
@@ -263,6 +221,7 @@ void __cdecl G_DuplicateEntityFields(gentity_s *dest, const gentity_s *source)
     {
         switch (f->type)
         {
+            iassert(f->ofs <= sizeof(gentity_s)); // lwss add
         case F_INT:
             *(int *)((char *)dest + f->ofs) = *(int *)((char *)source + f->ofs);
             break;
@@ -294,20 +253,8 @@ void __cdecl G_DuplicateEntityFields(gentity_s *dest, const gentity_s *source)
 
 void __cdecl G_DuplicateScriptFields(gentity_s *dest, const gentity_s *source)
 {
-    if (dest->s.number != dest - g_entities)
-        MyAssertHandler(
-            "c:\\trees\\cod3\\cod3src\\src\\game\\g_spawn.cpp",
-            372,
-            0,
-            "%s",
-            "dest->s.number == dest - g_entities");
-    if (source->s.number != source - g_entities)
-        MyAssertHandler(
-            "c:\\trees\\cod3\\cod3src\\src\\game\\g_spawn.cpp",
-            373,
-            0,
-            "%s",
-            "source->s.number == source - g_entities");
+    iassert(dest->s.number == dest - g_entities);
+    iassert(source->s.number == source - g_entities);
     Scr_CopyEntityNum(source->s.number, dest->s.number, 0);
 }
 

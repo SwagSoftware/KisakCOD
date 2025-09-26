@@ -9930,21 +9930,20 @@ void __cdecl GScr_SetSoundBlend(scr_entref_t entref)
 
 void __cdecl GScr_LocalToWorldCoords(scr_entref_t entref)
 {
-    gentity_s *Entity; // r31
-    float v2; // [sp+50h] [-60h] BYREF
-    float v3; // [sp+54h] [-5Ch]
-    float v4; // [sp+58h] [-58h]
-    float v5[4]; // [sp+60h] [-50h] BYREF
-    float v6[4][3]; // [sp+70h] [-40h] BYREF
+    gentity_s *ent; // r31
 
-    Entity = GetEntity(entref);
-    Scr_GetVector(0, v5);
-    AnglesToAxis(Entity->r.currentAngles, v6);
-    MatrixTransformVector(v5, (const mat3x3&)v6, &v2);
-    v2 = Entity->r.currentOrigin[0] + v2;
-    v3 = Entity->r.currentOrigin[1] + v3;
-    v4 = Entity->r.currentOrigin[2] + v4;
-    Scr_AddVector(&v2);
+    float vLocal[3];
+    float vWorld[3];
+    float axis[3][3];
+
+    ent = GetEntity(entref);
+    Scr_GetVector(0, vLocal);
+    AnglesToAxis(ent->r.currentAngles, axis);
+    MatrixTransformVector(vLocal, (const mat3x3&)*axis, vWorld);
+    vWorld[0] += ent->r.currentOrigin[0];
+    vWorld[1] += ent->r.currentOrigin[1];
+    vWorld[2] += ent->r.currentOrigin[2];
+    Scr_AddVector(vWorld);
 }
 
 void __cdecl GScr_GetEntityNumber(scr_entref_t entref)

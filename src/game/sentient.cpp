@@ -600,57 +600,48 @@ void __cdecl Sentient_StealClaimNode(sentient_s *self, sentient_s *other)
 
 void __cdecl Sentient_BanNearNodes(sentient_s *self)
 {
-    pathnode_t *pClaimedNode; // r31
-    int v3; // r5
-    pathsort_t *v4; // r4
+    pathnode_t *node; // r31
     int iNodeCount; // r3
     team_t eTeam; // r27
-    double v7; // fp31
-    double v8; // fp30
-    double v9; // fp29
-    double v10; // fp28
-    pathsort_t *v11; // r30
-    int v12; // r29
-    pathnode_t *node; // r31
-    float v14; // [sp+50h] [-370h] BYREF
-    float v15; // [sp+54h] [-36Ch]
+    float forward[2]; // fp31
+    float origin[2]; // fp29
+    float delta[2];
     pathsort_t nodes[64]; // [sp+60h] [-360h] BYREF
 
     if (level.time - self->banNodeTime >= 0)
     {
-        pClaimedNode = self->pClaimedNode;
         self->banNodeTime = level.time + 4950;
-        if (pClaimedNode)
+        node = self->pClaimedNode;
+        if (node)
         {
-            if (Path_IsValidClaimNode(pClaimedNode))
+            if (Path_IsValidClaimNode(node))
             {
-                iNodeCount = Path_NodesInCylinder(pClaimedNode->constant.vOrigin, 80.0, 80.0, nodes, 64, 270332);
+                iNodeCount = Path_NodesInCylinder(node->constant.vOrigin, 80.0f, 80.0f, nodes, 64, 270332);
                 eTeam = self->eTeam;
-                v7 = pClaimedNode->constant.forward[0];
-                v8 = pClaimedNode->constant.forward[1];
-                v9 = pClaimedNode->constant.vOrigin[0];
-                v10 = pClaimedNode->constant.vOrigin[1];
-                if (iNodeCount > 0)
+                forward[0] = node->constant.forward[0];
+                forward[1] = node->constant.forward[1];
+                origin[0] = node->constant.vOrigin[0];
+                origin[1] = node->constant.vOrigin[1];
+
+                pathnode_t *pTestNode;
+
+                for (int i = 0; i < iNodeCount; i++)
                 {
-                    v11 = nodes;
-                    v12 = iNodeCount;
-                    do
+                    pTestNode = nodes[i].node;
+                    if ((pTestNode->constant.spawnflags & 0x8000) != 0 && pTestNode->dynamic.iFreeTime != 0x7FFFFFFF)
                     {
-                        node = v11->node;
-                        if ((v11->node->constant.spawnflags & 0x8000) != 0 && node->dynamic.iFreeTime != 0x7FFFFFFF)
+                        delta[0] = origin[0] - pTestNode->constant.vOrigin[0];
+                        delta[1] = origin[1] - pTestNode->constant.vOrigin[1];
+
+                        Vec2Normalize(delta);
+
+                        if (((forward[0] * delta[0]) + (forward[1] * delta[1])) <= -0.5
+                            && ((pTestNode->constant.forward[0] * delta[0])
+                                + (pTestNode->constant.forward[1] * delta[1])) >= 0.5)
                         {
-                            v14 = (float)v9 - node->constant.vOrigin[0];
-                            v15 = (float)v10 - node->constant.vOrigin[1];
-                            Vec2Normalize(&v14);
-                            if ((float)((float)(v14 * (float)v7) + (float)(v15 * (float)v8)) <= -0.5
-                                && (float)((float)(node->constant.forward[1] * v15) + (float)(node->constant.forward[0] * v14)) >= 0.5)
-                            {
-                                Path_MarkNodeInvalid(node, eTeam);
-                            }
+                            Path_MarkNodeInvalid(pTestNode, eTeam);
                         }
-                        --v12;
-                        ++v11;
-                    } while (v12);
+                    }
                 }
             }
         }

@@ -515,6 +515,13 @@ bool __cdecl Sys_IsMainThread()
     return Sys_GetCurrentThreadId() == threadId[THREAD_CONTEXT_MAIN];
 }
 
+#ifdef KISAK_SP
+bool Sys_IsServerThread()
+{
+    return threadId[THREAD_CONTEXT_SERVER] == GetCurrentThreadId();
+}
+#endif
+
 void __cdecl Sys_SetValue(int valueIndex, void* data)
 {
     //*(unsigned int*)(*(unsigned int*)(*((unsigned int*)NtCurrentTeb()->ThreadLocalStoragePointer + _tls_index) + 4) + 4 * valueIndex) = data;
