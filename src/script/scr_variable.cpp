@@ -30,6 +30,13 @@ scr_classStruct_t g_classMap[4] =
 	{ 0, 0, 0x76, "vehiclenode" }
 };
 
+// This is 101 in MP. Nothing(1) in SP. I don't ask questions.
+#ifdef KISAK_MP
+#define FACTOR101 101
+#elif KISAK_SP
+#define FACTOR101 1
+#endif
+
 int  VariableInfoFunctionCompare(void *p_info1, void *p_info2)
 {
 	const char *functionName2; // [esp+0h] [ebp-Ch]
@@ -92,7 +99,7 @@ void Scr_InitVariables()
 	if (scrVarDebugPub)
 		memset(scrVarDebugPub, 0, 0x60000u);
 
-	Scr_InitVariableRange(1u, 0x8001u);
+	Scr_InitVariableRange(VARIABLELIST_PARENT_BEGIN, VARIABLELIST_PARENT_SIZE + 1);
 	Scr_InitVariableRange(VARIABLELIST_CHILD_BEGIN, 0x18000u);
 }
 
@@ -1330,11 +1337,11 @@ unsigned int  GetVariableIndexInternal(unsigned int parentId, unsigned int name)
 	iassert((scrVarGlob.variableList[parentId + 1].w.status & VAR_STAT_MASK) == VAR_STAT_EXTERNAL);
 	iassert(IsObject(&scrVarGlob.variableList[parentId + 1]));
 
-	newIndex = FindVariableIndexInternal2(name, (parentId + 101 * name) % 0xFFFD + 1);
+	newIndex = FindVariableIndexInternal2(name, (parentId + FACTOR101 * name) % 0xFFFD + 1);
 	if (newIndex)
 		return newIndex;
 	else
-		return GetNewVariableIndexInternal2(parentId, name, (parentId + 101 * name) % 0xFFFD + 1);
+		return GetNewVariableIndexInternal2(parentId, name, (parentId + FACTOR101 * name) % 0xFFFD + 1);
 }
 
 void ClearObject(unsigned int parentId)
@@ -3340,7 +3347,7 @@ unsigned int FindVariableIndexInternal(unsigned int parentId, unsigned int name)
 	iassert((scrVarGlob.variableList[parentId + 1].w.status & VAR_STAT_MASK) == VAR_STAT_EXTERNAL);
 	iassert(IsObject(&scrVarGlob.variableList[parentId + 1]));
 
-	return FindVariableIndexInternal2(name, (parentId + 101 * name) % 0xFFFD + 1);
+	return FindVariableIndexInternal2(name, (parentId + FACTOR101 * name) % 0xFFFD + 1);
 }
 
 unsigned short  AllocVariable(void)
@@ -3906,7 +3913,7 @@ unsigned int  GetNewVariableIndexInternal2(unsigned int parentId, unsigned int n
 	VariableValueInternal *entry;
 
 	index = GetNewVariableIndexInternal3(parentId, name, index);
-	parentValue = &scrVarGlob.variableList[parentId + 1];
+	parentValue = &scrVarGlob.variableList[parentId + VARIABLELIST_PARENT_BEGIN];
 	iassert((parentValue->w.status & VAR_STAT_MASK) == VAR_STAT_EXTERNAL);
 	entry = &scrVarGlob.variableList[index + VARIABLELIST_CHILD_BEGIN];
 	id = entry->hash.id;
@@ -3923,7 +3930,7 @@ unsigned int  GetNewVariableIndexInternal2(unsigned int parentId, unsigned int n
 	else
 	{
 		siblingIndex = 0;
-		scrVarGlob.variableList[parentValue->v.next + 1].hash.u.prev = id;
+		scrVarGlob.variableList[parentValue->v.next + VARIABLELIST_PARENT_BEGIN].hash.u.prev = id;
 	}
 	parentValue->nextSibling = id;
 	entry->hash.u.prev = 0;
@@ -3941,9 +3948,9 @@ unsigned int  GetNewVariableIndexReverseInternal2(unsigned int parentId, unsigne
 	unsigned int indexa; // [esp+30h] [ebp+10h]
 
 	indexa = GetNewVariableIndexInternal3(parentId, name, index);
-	parentValue = &scrVarGlob.variableList[parentId + 1];
+	parentValue = &scrVarGlob.variableList[parentId + VARIABLELIST_PARENT_BEGIN];
 	iassert(((parentValue->w.status & VAR_STAT_MASK) == VAR_STAT_EXTERNAL));
-	parent = &scrVarGlob.variableList[parentValue->v.next + 1];
+	parent = &scrVarGlob.variableList[parentValue->v.next + VARIABLELIST_PARENT_BEGIN];
 	id = scrVarGlob.variableList[indexa + VARIABLELIST_CHILD_BEGIN].hash.id;
 	if (parent->hash.u.prev)
 	{
@@ -3967,13 +3974,13 @@ unsigned int  GetNewVariableIndexReverseInternal2(unsigned int parentId, unsigne
 unsigned int  GetNewVariableIndexInternal(unsigned int parentId, unsigned int name)
 {
 	iassert(!FindVariableIndexInternal(parentId, name));
-	return GetNewVariableIndexInternal2(parentId, name, (parentId + 101 * name) % 0xFFFD + 1);
+	return GetNewVariableIndexInternal2(parentId, name, (parentId + FACTOR101 * name) % 0xFFFD + 1);
 }
 
 unsigned int  GetNewVariableIndexReverseInternal(unsigned int parentId, unsigned int name)
 {
 	iassert(!FindVariableIndexInternal(parentId, name));
-	return GetNewVariableIndexReverseInternal2(parentId, name, (parentId + 101 * name) % 0xFFFD + 1);
+	return GetNewVariableIndexReverseInternal2(parentId, name, (parentId + FACTOR101 * name) % 0xFFFD + 1);
 }
 
 void  MakeVariableExternal(unsigned int index, VariableValueInternal* parentValue)
@@ -4128,13 +4135,11 @@ void  ClearObjectInternal(unsigned int parentId)
 {
 	unsigned int nextId; // [esp+0h] [ebp-18h]
 	unsigned int nextSibling; // [esp+4h] [ebp-14h]
-	unsigned int nextSiblinga; // [esp+4h] [ebp-14h]
 	VariableValueInternal* parentValue; // [esp+8h] [ebp-10h]
 	VariableValueInternal* entryValue; // [esp+10h] [ebp-8h]
 	unsigned int id; // [esp+14h] [ebp-4h]
-	unsigned int ida; // [esp+14h] [ebp-4h]
 
-	parentValue = &scrVarGlob.variableList[parentId + 1];
+	parentValue = &scrVarGlob.variableList[parentId + VARIABLELIST_PARENT_BEGIN];
 	iassert(IsObject(parentValue));
 
 	if (parentValue->nextSibling)
@@ -4144,20 +4149,23 @@ void  ClearObjectInternal(unsigned int parentId)
 
 		nextSibling = FindVariableIndexInternal(parentId, entryValue->w.status >> 8);
 		iassert(nextSibling);
+
 		do
 		{
 			id = scrVarGlob.variableList[nextSibling + VARIABLELIST_CHILD_BEGIN].hash.id;
 			MakeVariableExternal(nextSibling, parentValue);
 			nextSibling = scrVarGlob.variableList[id + VARIABLELIST_CHILD_BEGIN].nextSibling;
 		} while (scrVarGlob.variableList[id + VARIABLELIST_CHILD_BEGIN].nextSibling);
+
 		nextId = parentValue->nextSibling;
+
 		do
 		{
-			ida = nextId;
-			nextSiblinga = scrVarGlob.variableList[nextId + VARIABLELIST_CHILD_BEGIN].nextSibling;
-			nextId = scrVarGlob.variableList[nextSiblinga + VARIABLELIST_CHILD_BEGIN].hash.id;
-			FreeChildValue(parentId, ida);
-		} while (nextSiblinga);
+			id = nextId;
+			nextSibling = scrVarGlob.variableList[nextId + VARIABLELIST_CHILD_BEGIN].nextSibling;
+			nextId = scrVarGlob.variableList[nextSibling + VARIABLELIST_CHILD_BEGIN].hash.id;
+			FreeChildValue(parentId, id);
+		} while (nextSibling);
 	}
 }
 

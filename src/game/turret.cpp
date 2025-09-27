@@ -2069,35 +2069,31 @@ bool __cdecl turret_canuse(actor_s *actor, gentity_s *pTurret)
 
 void __cdecl turret_controller(const gentity_s *self, int *partBits)
 {
-    int number; // r3
-    double v5; // fp12
-    double v6; // fp0
-    DObj_s *ServerDObj; // r31
-    unsigned __int8 v8[8]; // [sp+50h] [-50h] BYREF
-    float v9; // [sp+58h] [-48h] BYREF
-    float v10; // [sp+5Ch] [-44h]
-    float v11; // [sp+60h] [-40h]
+    DObj_s *obj; // r31
+    unsigned __int8 boneIndex; // [sp+50h] [-50h] BYREF
+    float angles[3]; // [sp+58h] [-48h] BYREF // v9
 
-    v5 = self->s.lerp.u.turret.gunAngles[1];
-    v6 = (float)(self->s.lerp.u.turret.gunAngles[0] - self->s.lerp.u.turret.gunAngles[2]);
-    number = self->s.number;
-    v10 = v5;
-    v9 = v6;
-    v11 = 0.0;
-    ServerDObj = Com_GetServerDObj(number);
-    if (!ServerDObj)
-        MyAssertHandler("c:\\trees\\cod3\\ENTITYNUM_NONE\\src\\game\\turret.cpp", 1906, 0, "%s", "obj");
-    v8[0] = -2;
-    DObjGetBoneIndex(ServerDObj, scr_const.tag_aim, v8);
-    DObjSetControlTagAngles(ServerDObj, partBits, v8[0], &v9);
-    v8[0] = -2;
-    DObjGetBoneIndex(ServerDObj, scr_const.tag_aim_animated, v8);
-    DObjSetControlTagAngles(ServerDObj, partBits, v8[0], &v9);
-    v9 = self->s.lerp.u.turret.gunAngles[2];
-    v10 = 0.0;
-    v8[0] = -2;
-    DObjGetBoneIndex(ServerDObj, scr_const.tag_flash, v8);
-    DObjSetControlTagAngles(ServerDObj, partBits, v8[0], &v9);
+    angles[0] = (self->s.lerp.u.turret.gunAngles[0] - self->s.lerp.u.turret.gunAngles[2]);
+    angles[1] = self->s.lerp.u.turret.gunAngles[1];
+    angles[2] = 0.0f;
+
+    obj = Com_GetServerDObj(self->s.number);
+
+    iassert(obj);
+
+    boneIndex = -2;
+    DObjGetBoneIndex(obj, scr_const.tag_aim, &boneIndex);
+    DObjSetControlTagAngles(obj, partBits, boneIndex, angles);
+
+    boneIndex = -2;
+    DObjGetBoneIndex(obj, scr_const.tag_aim_animated, &boneIndex);
+    DObjSetControlTagAngles(obj, partBits, boneIndex, angles);
+
+    angles[0] = self->s.lerp.u.turret.gunAngles[2];
+    angles[1] = 0.0f;
+    boneIndex = -2;
+    DObjGetBoneIndex(obj, scr_const.tag_flash, &boneIndex);
+    DObjSetControlTagAngles(obj, partBits, boneIndex, angles);
 }
 
 void __cdecl SP_turret_XAnimPrecache(ScriptFunctions *functions, const char *classname)

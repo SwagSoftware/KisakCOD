@@ -497,118 +497,85 @@ bool __cdecl CG_WorldPosToCompass(
     float *out,
     float *outClipped)
 {
-    float v9; // [esp+8h] [ebp-30h]
-    float v10; // [esp+Ch] [ebp-2Ch]
-    float v11; // [esp+10h] [ebp-28h]
-    float v12; // [esp+14h] [ebp-24h]
     bool clipped; // [esp+1Fh] [ebp-19h]
-    float posDelta; // [esp+20h] [ebp-18h]
-    float posDeltaa; // [esp+20h] [ebp-18h]
-    float posDeltab; // [esp+20h] [ebp-18h]
-    float posDelta_4; // [esp+24h] [ebp-14h]
-    float posDelta_4a; // [esp+24h] [ebp-14h]
-    float posDelta_4b; // [esp+24h] [ebp-14h]
+    float posDelta[2]; // [esp+20h] [ebp-18h]
     float pixPerInch; // [esp+28h] [ebp-10h]
-    float outTemp; // [esp+2Ch] [ebp-Ch]
-    float outTempa; // [esp+2Ch] [ebp-Ch]
-    float outTempb; // [esp+2Ch] [ebp-Ch]
-    float outTemp_4; // [esp+30h] [ebp-8h]
-    float outTemp_4a; // [esp+30h] [ebp-8h]
-    float outTemp_4b; // [esp+30h] [ebp-8h]
+    float outTemp[2]; // [esp+2Ch] [ebp-Ch]
     float scale; // [esp+34h] [ebp-4h]
-    float scalea; // [esp+34h] [ebp-4h]
-    float scaleb; // [esp+34h] [ebp-4h]
-    float scalec; // [esp+34h] [ebp-4h]
 
-    if (!cgameGlob)
-        MyAssertHandler(".\\cgame\\cg_compass.cpp", 228, 0, "%s", "cgameGlob");
-    if (!mapRect)
-        MyAssertHandler(".\\cgame\\cg_compass.cpp", 229, 0, "%s", "mapRect");
-    if (!playerWorldPos)
-        MyAssertHandler(".\\cgame\\cg_compass.cpp", 230, 0, "%s", "playerWorldPos");
-    if (!in)
-        MyAssertHandler(".\\cgame\\cg_compass.cpp", 231, 0, "%s", "in");
+    iassert(cgameGlob);
+    iassert(mapRect);
+    iassert(playerWorldPos);
+    iassert(in);
+
     if (compassType)
     {
-        if (compassType != COMPASS_TYPE_FULL)
-            MyAssertHandler(".\\cgame\\cg_compass.cpp", 249, 0, "%s", "compassType == COMPASS_TYPE_FULL");
-        posDeltab = *in - cgameGlob->compassMapUpperLeft[0];
-        posDelta_4b = in[1] - cgameGlob->compassMapUpperLeft[1];
-        outTempa = cgameGlob->compassNorth[1] * posDeltab - cgameGlob->compassNorth[0] * posDelta_4b;
-        outTemp_4a = -cgameGlob->compassNorth[1] * posDelta_4b - cgameGlob->compassNorth[0] * posDeltab;
-        outTempb = outTempa / cgameGlob->compassMapWorldSize[0] - 0.5;
-        outTemp_4b = outTemp_4a / cgameGlob->compassMapWorldSize[1] - 0.5;
-        outTemp = outTempb * mapRect->w;
-        outTemp_4 = outTemp_4b * mapRect->h;
+        iassert(compassType == COMPASS_TYPE_FULL);
+        posDelta[0] = in[0] - cgameGlob->compassMapUpperLeft[0];
+        posDelta[1] = in[1] - cgameGlob->compassMapUpperLeft[1];
+        outTemp[0] = cgameGlob->compassNorth[1] * posDelta[0] - cgameGlob->compassNorth[0] * posDelta[1];
+        outTemp[1] = -cgameGlob->compassNorth[1] * posDelta[1] - cgameGlob->compassNorth[0] * posDelta[0];
+        outTemp[0] = outTemp[0] / cgameGlob->compassMapWorldSize[0] - 0.5;
+        outTemp[1] = outTemp[1] / cgameGlob->compassMapWorldSize[1] - 0.5;
+        outTemp[0] = outTemp[0] * mapRect->w;
+        outTemp[1] = outTemp[1] * mapRect->h;
     }
     else
     {
-        if (!north)
-            MyAssertHandler(".\\cgame\\cg_compass.cpp", 235, 0, "%s", "north");
-        if (compassMaxRange->current.value < 0.0)
-            MyAssertHandler(
-                ".\\cgame\\cg_compass.cpp",
-                237,
-                0,
-                "%s\n\t(compassMaxRange->current.value) = %g",
-                "(compassMaxRange->current.value >= 0.0f)",
-                compassMaxRange->current.value);
+        iassert(north);
+        iassert(compassMaxRange->current.value >= 0.0f);
         pixPerInch = mapRect->h / compassMaxRange->current.value;
-        posDelta = *in - *playerWorldPos;
-        posDelta_4 = in[1] - playerWorldPos[1];
-        posDeltaa = pixPerInch * posDelta;
-        posDelta_4a = pixPerInch * posDelta_4;
-        outTemp = north[1] * posDeltaa - *north * posDelta_4a;
-        outTemp_4 = -north[1] * posDelta_4a - *north * posDeltaa;
+        posDelta[0] = in[0] - playerWorldPos[0];
+        posDelta[1] = in[1] - playerWorldPos[1];
+        posDelta[0] = pixPerInch * posDelta[0];
+        posDelta[1] = pixPerInch * posDelta[1];
+        outTemp[0] = north[1] * posDelta[0] - north[0] * posDelta[1];
+        outTemp[1] = -north[1] * posDelta[1] - north[0] * posDelta[0];
     }
     clipped = 0;
     if (outClipped && mapRect->w >= 0.0 && mapRect->h >= 0.0)
     {
-        *outClipped = outTemp;
-        outClipped[1] = outTemp_4;
-        v12 = mapRect->w * 0.5;
-        if (*outClipped <= (double)v12)
+        outClipped[0] = outTemp[0];
+        outClipped[1] = outTemp[1];
+        if (*outClipped <= (mapRect->w * 0.5f))
         {
-            v11 = -mapRect->w * 0.5;
-            if (*outClipped < (double)v11)
+            if (*outClipped < (-mapRect->w * 0.5))
             {
-                scalea = -(mapRect->w * 0.5) / *outClipped;
-                *outClipped = scalea * *outClipped;
-                outClipped[1] = scalea * outClipped[1];
+                scale = -(mapRect->w * 0.5) / *outClipped;
+                outClipped[0] = scale * outClipped[0];
+                outClipped[1] = scale * outClipped[1];
                 clipped = 1;
             }
         }
         else
         {
             scale = mapRect->w * 0.5 / *outClipped;
-            *outClipped = scale * *outClipped;
+            outClipped[0] = scale * *outClipped;
             outClipped[1] = scale * outClipped[1];
             clipped = 1;
         }
-        v10 = mapRect->h * 0.5;
-        if (outClipped[1] <= (double)v10)
+        if (outClipped[1] <= (mapRect->h * 0.5))
         {
-            v9 = -mapRect->h * 0.5;
-            if (outClipped[1] < (double)v9)
+            if (outClipped[1] < (-mapRect->h * 0.5))
             {
-                scalec = -(mapRect->h * 0.5) / outClipped[1];
-                *outClipped = scalec * *outClipped;
-                outClipped[1] = scalec * outClipped[1];
+                scale = -(mapRect->h * 0.5) / outClipped[1];
+                outClipped[0] = scale * *outClipped;
+                outClipped[1] = scale * outClipped[1];
                 clipped = 1;
             }
         }
         else
         {
-            scaleb = mapRect->h * 0.5 / outClipped[1];
-            *outClipped = scaleb * *outClipped;
-            outClipped[1] = scaleb * outClipped[1];
+            scale = mapRect->h * 0.5 / outClipped[1];
+            outClipped[0] = scale * *outClipped;
+            outClipped[1] = scale * outClipped[1];
             clipped = 1;
         }
     }
     if (out)
     {
-        *out = outTemp;
-        out[1] = outTemp_4;
+        out[0] = outTemp[0];
+        out[1] = outTemp[1];
     }
     return clipped;
 }
@@ -2099,10 +2066,6 @@ void CG_CompassDrawPlayerPointers_SP(
     double v26; // fp31
     double v27; // fp20
     double v28; // fp19
-    Material *v29; // r7
-    const float *v30; // r6
-    int v31; // r5
-    int v32; // r4
     double v33; // fp30
     double v34; // fp29
     double v35; // fp0
@@ -2112,12 +2075,14 @@ void CG_CompassDrawPlayerPointers_SP(
     double v39; // fp27
     double v40; // fp0
     double v41; // fp3
-    float v42; // [sp+60h] [-160h] BYREF
-    float v43; // [sp+64h] [-15Ch] BYREF
-    float v44; // [sp+68h] [-158h] BYREF
-    float v45; // [sp+6Ch] [-154h]
-    float v46; // [sp+70h] [-150h] BYREF
-    float v47; // [sp+74h] [-14Ch]
+    float w; // [sp+60h] [-160h] BYREF
+    float h; // [sp+64h] [-15Ch] BYREF
+    float xy[2];
+    //float v44; // [sp+68h] [-158h] BYREF
+    //float v45; // [sp+6Ch] [-154h]
+    float xyClipped[2];
+    //float v46; // [sp+70h] [-150h] BYREF
+    //float v47; // [sp+74h] [-14Ch]
     float north[5]; // [sp+78h] [-148h] BYREF
     float v49; // [sp+8Ch] [-134h]
     rectDef_s scaledRect; // [sp+90h] [-130h] BYREF
@@ -2176,16 +2141,16 @@ void CG_CompassDrawPlayerPointers_SP(
                             v49 = v49 / (float)(compassObjectiveMaxRange->current.value - compassMaxRange->current.value);
                             v49 = (float)((float)(compassObjectiveMinAlpha->current.value - (float)1.0) * (float)v24) + (float)1.0;
                         }
-                        v46 = 0.0;
-                        v47 = 0.0;
-                        CG_WorldPosToCompass(compassType, cgArray, &scaledRect, north, cgArray[0].refdef.vieworg, v18, &v44, &v46);
-                        v25 = (float)(v44 + (float)centerX);
-                        v26 = (float)(v45 + (float)centerY);
-                        v27 = (float)(v46 + (float)centerX);
-                        v44 = v44 + (float)centerX;
-                        v45 = v45 + (float)centerY;
-                        v28 = (float)(v47 + (float)centerY);
-                        CalcCompassPointerSize(compassType, &v42, &v43);
+                        xyClipped[0] = 0.0f;
+                        xyClipped[1] = 0.0f;
+                        CG_WorldPosToCompass(compassType, cgArray, &scaledRect, north, cgArray[0].refdef.vieworg, v18, xy, xyClipped);
+                        v25 = (xy[0] + centerX);
+                        v26 = (xy[1] + centerY);
+                        v27 = (xyClipped[0] + centerX);
+                        xy[0] += centerX;
+                        xy[1] += centerY;
+                        v28 = (xyClipped[1] + centerY);
+                        CalcCompassPointerSize(compassType, &w, &h);
                         CG_ObjectiveIcon(objectives->icon, 0);
                         v33 = v49;
                         if (fadeAlpha < v49)
@@ -2193,30 +2158,30 @@ void CG_CompassDrawPlayerPointers_SP(
                             v33 = fadeAlpha;
                             v49 = fadeAlpha;
                         }
-                        v34 = v42;
+                        v34 = w;
                         v35 = 0.0;
-                        v36 = (float)(v42 * (float)0.5);
-                        v37 = v43;
-                        v38 = (float)(v43 * (float)0.5);
-                        if ((float)((float)((float)x - (float)((float)v25 - (float)(v42 * (float)0.5))) * (float)((float)1.0 / v42)) > 0.0)
-                            v35 = (float)((float)((float)x - (float)((float)v25 - (float)(v42 * (float)0.5)))
-                                * (float)((float)1.0 / v42));
-                        if ((float)((float)((float)y - (float)((float)v26 - (float)(v43 * (float)0.5))) * (float)((float)1.0 / v43)) > v35)
-                            v35 = (float)((float)((float)y - (float)((float)v26 - (float)(v43 * (float)0.5)))
-                                * (float)((float)1.0 / v43));
+                        v36 = (float)(w * (float)0.5);
+                        v37 = h;
+                        v38 = (float)(h * (float)0.5);
+                        if ((float)((float)((float)x - (float)((float)v25 - (float)(w * (float)0.5))) * (float)((float)1.0 / w)) > 0.0)
+                            v35 = (float)((float)((float)x - (float)((float)v25 - (float)(w * (float)0.5)))
+                                * (float)((float)1.0 / w));
+                        if ((float)((float)((float)y - (float)((float)v26 - (float)(h * (float)0.5))) * (float)((float)1.0 / h)) > v35)
+                            v35 = (float)((float)((float)y - (float)((float)v26 - (float)(h * (float)0.5)))
+                                * (float)((float)1.0 / h));
                         v39 = (float)(scaledRect.w + (float)x);
-                        if ((float)((float)((float)((float)((float)v25 - (float)(v42 * (float)0.5)) + v42)
+                        if ((float)((float)((float)((float)((float)v25 - (float)(w * (float)0.5)) + w)
                             - (float)(scaledRect.w + (float)x))
-                            * (float)((float)1.0 / v42)) > v35)
-                            v35 = (float)((float)((float)((float)((float)v25 - (float)(v42 * (float)0.5)) + v42)
+                            * (float)((float)1.0 / w)) > v35)
+                            v35 = (float)((float)((float)((float)((float)v25 - (float)(w * (float)0.5)) + w)
                                 - (float)(scaledRect.w + (float)x))
-                                * (float)((float)1.0 / v42));
-                        if ((float)((float)((float)((float)((float)v26 - (float)(v43 * (float)0.5)) + v43)
+                                * (float)((float)1.0 / w));
+                        if ((float)((float)((float)((float)((float)v26 - (float)(h * (float)0.5)) + h)
                             - (float)(scaledRect.h + (float)y))
-                            * (float)((float)1.0 / v43)) > v35)
-                            v35 = (float)((float)((float)((float)((float)v26 - (float)(v43 * (float)0.5)) + v43)
+                            * (float)((float)1.0 / h)) > v35)
+                            v35 = (float)((float)((float)((float)((float)v26 - (float)(h * (float)0.5)) + h)
                                 - (float)(scaledRect.h + (float)y))
-                                * (float)((float)1.0 / v43));
+                                * (float)((float)1.0 / h));
                         if (v35 > 1.0)
                             v35 = 1.0;
                         v40 = (float)((float)1.0 - (float)v35);
@@ -2232,14 +2197,14 @@ void CG_CompassDrawPlayerPointers_SP(
                                     (float)((float)v26 - (float)1.0),
                                     scaledRect.w,
                                     2.0,
-                                    v32,
-                                    v31,
-                                    v30,
-                                    v29);
+                                    rect->horzAlign,
+                                    rect->vertAlign,
+                                    color, // KISAKTODO: probably need 'newColor'
+                                    material);
                                 v41 = 2.0;
                             }
                             if (v25 >= x && v25 <= v39)
-                                CG_DrawVLine(&scrPlaceView[localClientNum], v25, y, v41, scaledRect.h, v32, v31, v30, v29);
+                                CG_DrawVLine(&scrPlaceView[localClientNum], v25, y, v41, scaledRect.h, rect->horzAlign, rect->vertAlign, color, material); // KISAKTODO: probably need 'newColor'
                             v49 = v33;
                         }
                         UI_DrawHandlePic(
@@ -2248,10 +2213,10 @@ void CG_CompassDrawPlayerPointers_SP(
                             (float)((float)v28 - (float)v38),
                             v34,
                             v37,
-                            v32,
-                            v31,
-                            v30,
-                            v29);
+                            rect->horzAlign,
+                            rect->vertAlign,
+                            color, // KISAKTODO: probably need 'newColor'
+                            material);
                     }
                     --v19;
                     v18 += 3;

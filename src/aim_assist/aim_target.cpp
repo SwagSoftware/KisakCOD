@@ -264,62 +264,52 @@ int __cdecl AimTarget_IsTargetValid(const gentity_s *targetEnt)
 
 int __cdecl AimTarget_IsTargetVisible(const gentity_s *targetEnt, unsigned int visBone)
 {
-    gentity_s *Player; // r28
-    unsigned int index; // r4
-    long double *v6; // r3
-    double Visibility; // fp1
-    float v9[4]; // [sp+50h] [-90h] BYREF
-    float v10; // [sp+60h] [-80h] BYREF
-    float v11; // [sp+64h] [-7Ch]
-    float v12; // [sp+68h] [-78h]
-    float v13[4]; // [sp+70h] [-70h] BYREF
-    trace_t v14[2]; // [sp+80h] [-60h] BYREF
+    gentity_s *playerEnt; // r28
+    float targetEyePos[3]; // [sp+50h] [-90h] BYREF
+    float endPos[3]; // [sp+70h] [-70h] BYREF
+    trace_t traceresults; // [sp+80h] [-60h] BYREF
+    float playerEyePos[3];
 
-    //Profile_Begin(60);
-    if (!targetEnt)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\aim_assist\\aim_target.cpp", 314, 0, "%s", "targetEnt");
-    Player = G_GetPlayer();
-    if (!Player)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\aim_assist\\aim_target.cpp", 317, 0, "%s", "playerEnt");
+    iassert(targetEnt);
+    playerEnt = G_GetPlayer();
+    iassert(playerEnt);
+
     if (visBone)
-        G_DObjGetWorldTagPos_CheckTagExists(targetEnt, visBone, v9);
+        G_DObjGetWorldTagPos_CheckTagExists(targetEnt, visBone, targetEyePos);
     else
-        AimTarget_GetTargetCenter(targetEnt, v9);
-    if (!Player->client)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\aim_assist\\aim_target.cpp", 324, 0, "%s", "playerEnt->client");
-    G_GetPlayerViewOrigin(&Player->client->ps, &v10);
+        AimTarget_GetTargetCenter(targetEnt, targetEyePos);
+
+    iassert(playerEnt->client);
+
+    G_GetPlayerViewOrigin(&playerEnt->client->ps, playerEyePos);
+
     if (targetEnt->s.solid == 0xFFFFFF)
     {
-        G_LocationalTrace(v14, &v10, v9, Player->s.number, 8396803, bulletPriorityMap);
-        if (v14[0].fraction != 1.0 && Trace_GetEntityHitId(v14) != targetEnt->s.number)
+        G_LocationalTrace(&traceresults, playerEyePos, targetEyePos, playerEnt->s.number, 8396803, bulletPriorityMap);
+        if (traceresults.fraction != 1.0 && Trace_GetEntityHitId(&traceresults) != targetEnt->s.number)
         {
-            index = targetEnt->s.index.item;
-            v13[0] = (float)((float)(v9[0] - v10) * v14[0].fraction) + v10;
-            v13[1] = (float)((float)(v9[1] - v11) * v14[0].fraction) + v11;
-            v13[2] = (float)((float)(v9[2] - v12) * v14[0].fraction) + v12;
-            v6 = (long double *)CM_TransformedPointContents(
-                v13,
-                index,
+            Vec3Lerp(playerEyePos, targetEyePos, traceresults.fraction, endPos);
+
+            if (!CM_TransformedPointContents(
+                endPos,
+                targetEnt->s.index.item,
                 targetEnt->r.currentOrigin,
-                targetEnt->r.currentAngles);
-            if (!v6)
-                goto LABEL_14;
+                targetEnt->r.currentAngles))
+            {
+                return 0;
+            }
         }
     }
-    else if (!G_LocationalTracePassed(&v10, v9, Player->s.number, targetEnt->s.number, 8396803, bulletPriorityMap))
+    else if (!G_LocationalTracePassed(playerEyePos, targetEyePos, playerEnt->s.number, targetEnt->s.number, 8396803, bulletPriorityMap))
     {
-        //Profile_EndInternal(0);
         return 0;
     }
-    Visibility = SV_FX_GetVisibility(&v10, v9);
-    v6 = 0;
-    if (Visibility <= 0.000099999997)
+
+    if (SV_FX_GetVisibility(playerEyePos, targetEyePos) <= 0.000099999997)
     {
-    LABEL_14:
-        //Profile_EndInternal(v6);
         return 0;
     }
-    //Profile_EndInternal(0);
+
     return 1;
 }
 
