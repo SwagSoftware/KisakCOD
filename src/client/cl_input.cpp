@@ -860,44 +860,43 @@ void __cdecl CL_AddCurrentStanceToCmd(usercmd_s *cmd)
 
 void __cdecl CL_KeyMove(usercmd_s *cmd)
 {
-    char v2; // r10
     int buttons; // r11
     unsigned int v4; // r11
-    int v5; // r11
-    int v6; // r11
     int v7; // r30
     int v8; // r30
-    int v9; // r30
-    int v10; // r29
-    int v11; // r28
+    int side; // r30
+    int forward; // r29
+    int up; // r28
     int v12; // r31
     int v13; // [sp+54h] [-4Ch]
     int v14; // [sp+54h] [-4Ch]
     int v15; // [sp+54h] [-4Ch]
 
-    if (kb[24].active || (v2 = 0, kb[11].active))
-        v2 = 1;
-    if (v2)
+    if (kb[24].active || kb[11].active)
     {
-        buttons = cmd->buttons;
         if (kb[24].active)
-            v4 = buttons & 0xFFFFFCFF | 0x100;
+        {
+            cmd->buttons |= 0x100u;
+            cmd->buttons = cmd->buttons & 0xFFFFFDFF;
+        }
         else
-            v4 = __ROL4__(1, 9) & 0x300 | buttons & 0xFFFFFCFF;
-        cmd->buttons = v4;
-        cmd->buttons = v4 | 0x1000;
+        {
+            cmd->buttons |= 0x200u;
+            cmd->buttons = cmd->buttons & 0xFFFFFEFF;
+        }
+        cmd->buttons |= 0x1000u;
     }
     else
     {
         CL_StanceButtonUpdate();
         CL_AddCurrentStanceToCmd(cmd);
     }
-    v5 = cmd->buttons;
-    if (kb[9].active == !clients[0].usingAds)
-        v6 = v5 | 0x800;
+
+    if (kb[9].active == !CL_GetLocalClientGlobals(0)->usingAds)
+        cmd->buttons = cmd->buttons | 0x800;
     else
-        v6 = v5 & 0xFFFFF7FF;
-    cmd->buttons = v6;
+        cmd->buttons = cmd->buttons & 0xFFFFF7FF;
+
     v7 = 0;
     if (kb[8].active)
     {
@@ -905,19 +904,19 @@ void __cdecl CL_KeyMove(usercmd_s *cmd)
         v7 = v13 - (int)(float)(CL_KeyState(kb) * (float)127.0);
     }
     v8 = v7 - (int)(float)(CL_KeyState(&kb[7]) * (float)-127.0);
-    v9 = v8 - (int)(float)(CL_KeyState(&kb[6]) * (float)127.0);
+    side = v8 - (int)(float)(CL_KeyState(&kb[6]) * (float)127.0);
     v14 = (int)(float)(CL_KeyState(&kb[2]) * (float)127.0);
-    v10 = v14 - (int)(float)(CL_KeyState(&kb[3]) * (float)127.0);
+    forward = v14 - (int)(float)(CL_KeyState(&kb[3]) * (float)127.0);
     v15 = (int)(float)(CL_KeyState(&kb[23]) * (float)127.0);
-    v11 = v15 - (int)(float)(CL_KeyState(&kb[22]) * (float)127.0);
+    up = v15 - (int)(float)(CL_KeyState(&kb[22]) * (float)127.0);
     if (kb[8].active && (cmd->buttons & 2) == 0)
     {
-        v12 = v9 - (int)(float)(CL_KeyState(&kb[1]) * (float)-127.0);
-        v9 = v12 - (int)(float)(CL_KeyState(kb) * (float)127.0);
+        v12 = side - (int)(float)(CL_KeyState(&kb[1]) * (float)-127.0);
+        side = v12 - (int)(float)(CL_KeyState(kb) * (float)127.0);
     }
-    cmd->forwardmove = ClampChar(v10);
-    cmd->rightmove = ClampChar(v9);
-    cmd->upmove = ClampChar(v11);
+    cmd->forwardmove = ClampChar(forward);
+    cmd->rightmove = ClampChar(side);
+    cmd->upmove = ClampChar(up);
 }
 
 int __cdecl CL_AllowInput()
@@ -953,9 +952,9 @@ void __cdecl CL_GamepadMove(usercmd_s *cmd)
     int v6; // r3
     double Button; // fp26
     int oldAngles; // r3
-    double v9; // fp25
-    double v10; // fp24
-    double v11; // fp31
+    double side; // fp25
+    double forward; // fp24
+    double up; // fp31
     double v12; // fp0
     char v13; // r3
     char forwardmove; // r10
@@ -989,30 +988,30 @@ void __cdecl CL_GamepadMove(usercmd_s *cmd)
         v6 = CL_ControllerIndexFromClientNum(0);
         Button = GPad_GetButton(v6, GPAD_R_TRIG);
         oldAngles = CL_ControllerIndexFromClientNum(0);
-        v9 = GPad_GetButton(oldAngles, GPAD_L_TRIG);
-        v10 = CL_GamepadAxisValue(0, 5);
-        v11 = 127.0;
+        side = GPad_GetButton(oldAngles, GPAD_L_TRIG);
+        forward = CL_GamepadAxisValue(0, 5);
+        up = 127.0;
         if (I_fabs(v5) > 0.0 || I_fabs(v4) > 0.0)
         {
             if (I_fabs(v5) <= I_fabs(v4))
                 v12 = (float)((float)v5 / (float)v4);
             else
                 v12 = (float)((float)v4 / (float)v5);
-            v11 = (float)((float)sqrtf((float)((float)((float)v12 * (float)v12) + (float)1.0)) * (float)127.0);
+            up = (float)((float)sqrtf((float)((float)((float)v12 * (float)v12) + (float)1.0)) * (float)127.0);
         }
-        v13 = ClampChar((int)(float)((float)v11 * (float)v5) + cmd->rightmove);
+        v13 = ClampChar((int)(float)((float)up * (float)v5) + cmd->rightmove);
         forwardmove = cmd->forwardmove;
         cmd->rightmove = v13;
-        v15 = ClampChar((int)(float)((float)v11 * (float)v4) + forwardmove);
+        v15 = ClampChar((int)(float)((float)up * (float)v4) + forwardmove);
         upmove = cmd->upmove;
         cmd->forwardmove = v15;
-        v17 = ClampChar((int)(float)((float)((float)v11 * (float)Button) - (float)((float)v11 * (float)v9)) + upmove);
+        v17 = ClampChar((int)(float)((float)((float)up * (float)Button) - (float)((float)up * (float)side)) + upmove);
         pitchmove = cmd->pitchmove;
         cmd->upmove = v17;
-        v19 = ClampChar((int)(float)((float)v11 * (float)v2) + pitchmove);
+        v19 = ClampChar((int)(float)((float)up * (float)v2) + pitchmove);
         yawmove = cmd->yawmove;
         cmd->pitchmove = v19;
-        cmd->yawmove = ClampChar((int)(float)((float)v11 * (float)v3) + yawmove);
+        cmd->yawmove = ClampChar((int)(float)((float)up * (float)v3) + yawmove);
         v21 = CL_ControllerIndexFromClientNum(0);
         ProfileSettings = Gamer//Profile_GetProfileSettings(v21);
             HIDWORD(v23) = _cntlzw(clients[0].usingAds);
@@ -1032,7 +1031,7 @@ void __cdecl CL_GamepadMove(usercmd_s *cmd)
                 cmd->buttons &= ~2u;
             }
         }
-        if (v10 >= cl_analog_attack_threshold->current.value)
+        if (forward >= cl_analog_attack_threshold->current.value)
             cmd->buttons |= 1u;
         buttons = cmd->buttons;
         v27.pitchAxis = v24;
@@ -1084,9 +1083,9 @@ void __cdecl CL_MouseMove(usercmd_s *cmd)
 {
 #if 0
     __int64 oldAngles; // r9
-    long double v9; // fp2
-    __int64 v10; // r11
-    double v11; // fp29
+    long double side; // fp2
+    __int64 forward; // r11
+    double up; // fp29
     double v12; // fp30
     double v13; // fp12
     double v14; // fp12
@@ -1101,10 +1100,10 @@ void __cdecl CL_MouseMove(usercmd_s *cmd)
     __int64 v31[6]; // [sp+58h] [-58h] BYREF
 
     CL_GetMouseMovement(clients, v30, (float *)v31, a4, a5, a7);
-    HIDWORD(v10) = frame_msec;
+    HIDWORD(forward) = frame_msec;
     if (frame_msec)
     {
-        v11 = *(float *)v31;
+        up = *(float *)v31;
         LODWORD(oldAngles) = frame_msec;
         v12 = v30[0];
         v13 = (float)((float)(v30[0] * v30[0]) + (float)(*(float *)v31 * *(float *)v31));
@@ -1117,30 +1116,30 @@ void __cdecl CL_MouseMove(usercmd_s *cmd)
         {
             v16 = (float)((float)v14 / (float)oldAngles);
             Com_Printf(14, (const char *)HIDWORD(v16), LODWORD(v16), LODWORD(v15));
-            HIDWORD(v10) = frame_msec;
+            HIDWORD(forward) = frame_msec;
         }
         if ((clients[0].snap.ps.pm_flags & 0x800) == 0)
         {
-            if ((float)((float)v15 * (float)v12) != 0.0 || (float)((float)v15 * (float)v11) != 0.0)
+            if ((float)((float)v15 * (float)v12) != 0.0 || (float)((float)v15 * (float)up) != 0.0)
             {
                 HIDWORD(v17) = 0x82000000;
-                LOBYTE(v10) = kb[8].active;
+                LOBYTE(forward) = kb[8].active;
                 if (kb[8].active)
                 {
-                    *(double *)&v9 = (float)((float)(m_side->current.value * (float)((float)v15 * (float)v12)) + (float)0.5);
-                    v18 = floor(v9);
+                    *(double *)&side = (float)((float)(m_side->current.value * (float)((float)v15 * (float)v12)) + (float)0.5);
+                    v18 = floor(side);
                     rightmove = cmd->rightmove;
                     HIDWORD(v31[0]) = (int)(float)*(double *)&v18;
                     cmd->rightmove = ClampChar(rightmove + HIDWORD(v31[0]));
-                    HIDWORD(v10) = frame_msec;
-                    LOBYTE(v10) = kb[8].active;
+                    HIDWORD(forward) = frame_msec;
+                    LOBYTE(forward) = kb[8].active;
                 }
                 else
                 {
                     _FP0 = (float)(m_yaw->current.value * (float)((float)v15 * (float)v12));
                     if (clients[0].cgameMaxYawSpeed != 0.0)
                     {
-                        LODWORD(v17) = HIDWORD(v10);
+                        LODWORD(v17) = HIDWORD(forward);
                         v31[0] = v17;
                         _FP11 = (float)((float)_FP0 - (float)((float)((float)v17 * clients[0].cgameMaxYawSpeed) * (float)0.001));
                         __asm { fsel      f0, f11, f13, f0 }
@@ -1150,16 +1149,16 @@ void __cdecl CL_MouseMove(usercmd_s *cmd)
                     }
                     clients[0].viewangles[1] = clients[0].viewangles[1] - (float)_FP0;
                 }
-                if ((kb[13].active || cl_freelook->current.enabled) && !(_BYTE)v10)
+                if ((kb[13].active || cl_freelook->current.enabled) && !(_BYTE)forward)
                 {
-                    _FP0 = (float)(m_pitch->current.value * (float)((float)v15 * (float)v11));
+                    _FP0 = (float)(m_pitch->current.value * (float)((float)v15 * (float)up));
                     if (clients[0].cgameMaxPitchSpeed != 0.0)
                     {
-                        LODWORD(v10) = HIDWORD(v10);
-                        v31[0] = v10;
-                        _FP11 = (float)((float)_FP0 - (float)((float)((float)v10 * clients[0].cgameMaxPitchSpeed) * (float)0.001));
+                        LODWORD(forward) = HIDWORD(forward);
+                        v31[0] = forward;
+                        _FP11 = (float)((float)_FP0 - (float)((float)((float)forward * clients[0].cgameMaxPitchSpeed) * (float)0.001));
                         __asm { fsel      f0, f11, f13, f0 }
-                        _FP13 = (float)((float)-(float)((float)((float)v10 * clients[0].cgameMaxPitchSpeed) * (float)0.001)
+                        _FP13 = (float)((float)-(float)((float)((float)forward * clients[0].cgameMaxPitchSpeed) * (float)0.001)
                             - (float)_FP0);
                         __asm { fsel      f0, f13, f12, f0 }
                     }
@@ -1167,8 +1166,8 @@ void __cdecl CL_MouseMove(usercmd_s *cmd)
                 }
                 else
                 {
-                    *(double *)&v9 = (float)((float)(m_forward->current.value * (float)((float)v15 * (float)v11)) + (float)0.5);
-                    v28 = floor(v9);
+                    *(double *)&side = (float)((float)(m_forward->current.value * (float)((float)v15 * (float)up)) + (float)0.5);
+                    v28 = floor(side);
                     forwardmove = cmd->forwardmove;
                     HIDWORD(v31[0]) = (int)(float)*(double *)&v28;
                     cmd->forwardmove = ClampChar(forwardmove - HIDWORD(v31[0]));
@@ -1301,53 +1300,31 @@ void __cdecl CL_UpdateCmdButton(int *cmdButtons, int kbButton, int buttonFlag)
     kb[v3].wasPressed = 0;
 }
 
+static void __cdecl CL_UpdateCmdButton(int localClientNum, int *cmdButtons, int kbButton, int buttonFlag)
+{
+    if (kb[kbButton].active || kb[kbButton].wasPressed)
+        *cmdButtons |= buttonFlag;
+    kb[kbButton].wasPressed = 0;
+}
+
 void __cdecl CL_CmdButtons(usercmd_s *cmd)
 {
-    if (kb[14].active || kb[14].wasPressed)
-        cmd->buttons |= 1u;
-    kb[14].wasPressed = 0;
-    if (kb[15].active || kb[15].wasPressed)
-        cmd->buttons |= 0x2000u;
-    kb[15].wasPressed = 0;
-    if (kb[16].active || kb[16].wasPressed)
-        cmd->buttons |= 0x4000u;
-    kb[16].wasPressed = 0;
-    if (kb[17].active || kb[17].wasPressed)
-        cmd->buttons |= 0x8000u;
-    kb[17].wasPressed = 0;
-    if (kb[18].active || kb[18].wasPressed)
-        cmd->buttons |= 4u;
-    kb[18].wasPressed = 0;
-    if (kb[19].active || kb[19].wasPressed)
-        cmd->buttons |= 8u;
-    kb[19].wasPressed = 0;
-    if (kb[20].active || kb[20].wasPressed)
-        cmd->buttons |= 0x10u;
-    kb[20].wasPressed = 0;
-    if (kb[21].active || kb[21].wasPressed)
-        cmd->buttons |= 0x20u;
-    kb[21].wasPressed = 0;
-    if (kb[22].active || kb[22].wasPressed)
-        cmd->buttons |= 0x40u;
-    kb[22].wasPressed = 0;
-    if (kb[23].active || kb[23].wasPressed)
-        cmd->buttons |= 0x80u;
-    kb[23].wasPressed = 0;
-    if (kb[24].active || kb[24].wasPressed)
-        cmd->buttons |= 0x100u;
-    kb[24].wasPressed = 0;
-    if (kb[25].active || kb[25].wasPressed)
-        cmd->buttons |= 0x200u;
-    kb[25].wasPressed = 0;
-    if (kb[10].active || kb[10].wasPressed)
-        cmd->buttons |= 0x400u;
-    kb[10].wasPressed = 0;
-    if (kb[28].active || kb[28].wasPressed)
-        cmd->buttons |= 0x40000u;
-    kb[28].wasPressed = 0;
-    if (kb[26].active || kb[26].wasPressed)
-        cmd->buttons |= 0x80000u;
-    kb[26].wasPressed = 0;
+    CL_UpdateCmdButton(&cmd->buttons, 14, 1);
+    CL_UpdateCmdButton(&cmd->buttons, 15, 0x2000);
+    CL_UpdateCmdButton(&cmd->buttons, 16, 0x4000);
+    CL_UpdateCmdButton(&cmd->buttons, 17, 0x8000);
+    CL_UpdateCmdButton(&cmd->buttons, 18, 4);
+    CL_UpdateCmdButton(&cmd->buttons, 19, 8);
+    CL_UpdateCmdButton(&cmd->buttons, 20, 16);
+    CL_UpdateCmdButton(&cmd->buttons, 21, 0x20);
+    CL_UpdateCmdButton(&cmd->buttons, 22, 0x40);
+    CL_UpdateCmdButton(&cmd->buttons, 23, 0x80);
+    CL_UpdateCmdButton(&cmd->buttons, 24, 0x100);
+    CL_UpdateCmdButton(&cmd->buttons, 25, 0x200);
+    CL_UpdateCmdButton(&cmd->buttons, 10, 0x400);
+    CL_UpdateCmdButton(&cmd->buttons, 28, 0x40000);
+    CL_UpdateCmdButton(&cmd->buttons, 26, 0x80000);
+
     if (clients[0].snap.ps.pm_type == 2
         || clients[0].snap.ps.pm_type == 3
         || (clients[0].snap.ps.eFlags & 0x20000) != 0 && (clients[0].snap.ps.eFlags & 0x80000) == 0)
@@ -1356,6 +1333,7 @@ void __cdecl CL_CmdButtons(usercmd_s *cmd)
             cmd->buttons |= 0x400u;
         kb[12].wasPressed = 0;
     }
+    
     if (cmd->buttons >= 0x100000)
         MyAssertHandler(
             "c:\\trees\\cod3\\cod3src\\src\\client\\cl_input.cpp",
@@ -1411,9 +1389,9 @@ int __cdecl CG_HandleLocationSelectionInput(int localClientNum, usercmd_s *cmd)
     double v6; // fp28
     double v7; // fp31
     double oldAngles; // fp31
-    double v9; // fp30
-    double v10; // fp1
-    double v11; // fp0
+    double side; // fp30
+    double forward; // fp1
+    double up; // fp0
     double v12; // fp13
     double v13; // fp13
     double v14; // fp1
@@ -1437,20 +1415,20 @@ int __cdecl CG_HandleLocationSelectionInput(int localClientNum, usercmd_s *cmd)
         v6 = (float)((float)(cgArray[0].frametime | 0x29DAC00000000uLL) * (float)0.001);
         v7 = CL_GamepadAxisValue(localClientNum, 4);
         oldAngles = (float)((float)v7 + CL_GamepadAxisValue(localClientNum, 1));
-        v9 = CL_GamepadAxisValue(localClientNum, 3);
-        v10 = CL_GamepadAxisValue(localClientNum, 0);
-        v11 = (float)((float)v9 + (float)v10);
-        v12 = (float)((float)((float)((float)v9 + (float)v10) * (float)((float)v9 + (float)v10))
+        side = CL_GamepadAxisValue(localClientNum, 3);
+        forward = CL_GamepadAxisValue(localClientNum, 0);
+        up = (float)((float)side + (float)forward);
+        v12 = (float)((float)((float)((float)side + (float)forward) * (float)((float)side + (float)forward))
             + (float)((float)oldAngles * (float)oldAngles));
         if (v12 > 1.0)
         {
             v13 = (float)((float)1.0 / (float)sqrtf(v12));
             oldAngles = (float)((float)v13 * (float)oldAngles);
-            v11 = (float)((float)v13 * (float)((float)v9 + (float)v10));
+            up = (float)((float)v13 * (float)((float)side + (float)forward));
         }
-        v14 = (float)((float)((float)(cg_mapLocationSelectionCursorSpeed->current.value * (float)v11) * (float)v6)
+        v14 = (float)((float)((float)(cg_mapLocationSelectionCursorSpeed->current.value * (float)up) * (float)v6)
             + cgArray[0].selectedLocation[0]);
-        cgArray[0].selectedLocation[0] = (float)((float)(cg_mapLocationSelectionCursorSpeed->current.value * (float)v11)
+        cgArray[0].selectedLocation[0] = (float)((float)(cg_mapLocationSelectionCursorSpeed->current.value * (float)up)
             * (float)v6)
             + cgArray[0].selectedLocation[0];
         cgArray[0].selectedLocation[1] = -(float)((float)((float)((float)(cg_mapLocationSelectionCursorSpeed->current.value

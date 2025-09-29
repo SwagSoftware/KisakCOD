@@ -1435,3 +1435,10 @@ inline weaponInfo_s *__cdecl CG_GetLocalClientWeaponInfo(int localClientNum, int
 
     return &cg_weaponsArray[localClientNum][weaponIndex];
 }
+
+inline int CG_GetLocalClientConnectionState(int localClientNum)
+{
+    iassert(localClientNum == 0);
+
+    return clientUIActives[0].connectionState;
+}

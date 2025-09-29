@@ -725,21 +725,18 @@ ai_teammove_t __cdecl Actor_GetTeamMoveStatus(actor_s *self, bool bUseInterval, 
     sentient_s *i; // r31
     sentient_s *pDodgeOther; // r4
     sentient_s *TargetSentient; // r3
-    actor_s *actor; // r27
-    bool v13; // r25
+    actor_s *pOtherActor; // r27
+    bool bCheckWait; // r25
     int v14; // r3
-    int v15; // r28
-    int checkLookahead; // r29
+    int startIndex; // r28
+    int bCheckLookahead; // r29
     int iTraceMask; // r11
     int mask; // r31
-    gentity_s *v19; // r10
-    double v20; // fp31
-    double v21; // fp30
-    double v22; // fp11
-    double v23; // fp10
-    double v24; // fp13
+    float v20; // fp31
+    float v21; // fp30
+    float v22; // fp11
+    float v23; // fp10
     int number; // r6
-    gentity_s *v26; // r11
     int v27; // r6
     unsigned int v28; // r11
     ai_animmode_t eAnimMode; // r11
@@ -752,106 +749,50 @@ ai_teammove_t __cdecl Actor_GetTeamMoveStatus(actor_s *self, bool bUseInterval, 
     int v36; // r6
     int v37; // r6
     int v38; // r10
-    int v39; // [sp+8h] [-288h]
-    int v40; // [sp+8h] [-288h]
-    int v41; // [sp+Ch] [-284h]
-    int v42; // [sp+Ch] [-284h]
-    int v43; // [sp+10h] [-280h]
-    int v44; // [sp+10h] [-280h]
-    int v45; // [sp+14h] [-27Ch]
-    int v46; // [sp+14h] [-27Ch]
-    int v47; // [sp+18h] [-278h]
-    int v48; // [sp+18h] [-278h]
-    int v49; // [sp+1Ch] [-274h]
-    int v50; // [sp+1Ch] [-274h]
-    int v51; // [sp+20h] [-270h]
-    int v52; // [sp+20h] [-270h]
-    int v53; // [sp+24h] [-26Ch]
-    int v54; // [sp+24h] [-26Ch]
-    int v55; // [sp+28h] [-268h]
-    int v56; // [sp+28h] [-268h]
-    int v57; // [sp+2Ch] [-264h]
-    int v58; // [sp+2Ch] [-264h]
-    int v59; // [sp+30h] [-260h]
-    int v60; // [sp+30h] [-260h]
-    int v61; // [sp+34h] [-25Ch]
-    int v62; // [sp+34h] [-25Ch]
-    int v63; // [sp+38h] [-258h]
-    int v64; // [sp+38h] [-258h]
-    int v65; // [sp+3Ch] [-254h]
-    int v66; // [sp+3Ch] [-254h]
-    int v67; // [sp+40h] [-250h]
-    int v68; // [sp+40h] [-250h]
-    int v69; // [sp+44h] [-24Ch]
-    int v70; // [sp+44h] [-24Ch]
-    int v71; // [sp+48h] [-248h]
-    int v72; // [sp+48h] [-248h]
-    int v73; // [sp+4Ch] [-244h]
-    int v74; // [sp+4Ch] [-244h]
-    int v75; // [sp+50h] [-240h]
-    int v76; // [sp+50h] [-240h]
-    int v77; // [sp+58h] [-238h]
-    int v78; // [sp+58h] [-238h]
-    ai_teammove_t v79[2]; // [sp+60h] [-230h] BYREF
-    float v80; // [sp+68h] [-228h] BYREF
-    float v81; // [sp+6Ch] [-224h]
-    float v82; // [sp+70h] [-220h]
-    float v83; // [sp+78h] [-218h] BYREF
-    float v84; // [sp+7Ch] [-214h]
-    float v85; // [sp+80h] [-210h]
-    const char *v86; // [sp+84h] [-20Ch]
-    const char *v87; // [sp+88h] [-208h]
-    team_move_context_t v88; // [sp+90h] [-200h] BYREF
+    ai_teammove_t eResult; // [sp+60h] [-230h] BYREF
+    float vOrgDodgeStart[3]; // [sp+68h] [-228h] BYREF
+    float vOrgDodgeEnd[3]; // [sp+78h] [-218h] BYREF
+    team_move_context_t context; // [sp+90h] [-200h] BYREF
     team_move_other_context_t v89[2]; // [sp+170h] [-120h] BYREF
 
-    v86 = "c:\\trees\\cod3\\cod3src\\src\\game\\actor_team_move.cpp";
-    v87 = "%s";
-    if (!self)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\actor_team_move.cpp", 667, 0, "%s", "self");
-    if (!self->sentient)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\actor_team_move.cpp", 668, 0, "%s", "self->sentient");
-    if (!Actor_HasPath(self))
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\actor_team_move.cpp", 669, 0, "%s", "Actor_HasPath( self )");
-    if (self->eAnimMode != AI_ANIM_MOVE_CODE)
-        MyAssertHandler(
-            "c:\\trees\\cod3\\cod3src\\src\\game\\actor_team_move.cpp",
-            670,
-            0,
-            "%s",
-            "self->eAnimMode == AI_ANIM_MOVE_CODE");
+    iassert(self);
+    iassert(self->sentient);
+    iassert(Actor_HasPath(self));
+    iassert(self->eAnimMode == AI_ANIM_MOVE_CODE);
+
     ent = self->ent;
-    v88.vOrgSelf[0] = self->ent->r.currentOrigin[0];
-    v79[0] = AI_TEAMMOVE_TRAVEL;
-    v88.vOrgSelf[1] = ent->r.currentOrigin[1];
-    v88.vOrgSelf[2] = ent->r.currentOrigin[2];
-    if ((unsigned __int8)Actor_TeamMoveCheckWaitTimer(self, v79))
-        return v79[0];
-    v88.self = self;
-    if ((unsigned __int8)Actor_TeamMoveCalcMovementDir(&v88, v79))
-        return v79[0];
-    Actor_TeamMoveInitializeContext(self, bUseInterval, bAllowGoalPileUp, &v88);
+    context.vOrgSelf[0] = self->ent->r.currentOrigin[0];
+    eResult = AI_TEAMMOVE_TRAVEL;
+    context.vOrgSelf[1] = ent->r.currentOrigin[1];
+    context.vOrgSelf[2] = ent->r.currentOrigin[2];
+    if (Actor_TeamMoveCheckWaitTimer(self, &eResult))
+        return eResult;
+    context.self = self;
+    if (Actor_TeamMoveCalcMovementDir(&context, &eResult))
+        return eResult;
+    Actor_TeamMoveInitializeContext(self, bUseInterval, bAllowGoalPileUp, &context);
     sentients = level.sentients;
     for (i = level.sentients; i < &sentients[33]; ++i)
     {
         if (i->inuse)
         {
             v89[0].other = i;
-            if ((unsigned __int8)Actor_TeamMoveShouldTryDodgeSentient(&v88, v89)
-                && (unsigned __int8)Actor_TeamMoveTryDodge(&v88, v89))
+            if ((unsigned __int8)Actor_TeamMoveShouldTryDodgeSentient(&context, v89)
+                && (unsigned __int8)Actor_TeamMoveTryDodge(&context, v89))
             {
-                v88.fDodgePosDeltaLengthSqrd = v89[0].fPosDeltaLengthSqrd;
-                v88.pDodgeOther = v89[0].other;
+                context.fDodgePosDeltaLengthSqrd = v89[0].fPosDeltaLengthSqrd;
+                context.pDodgeOther = v89[0].other;
             }
             sentients = level.sentients;
         }
     }
-    if (v88.pSlowDownOther && !(unsigned __int8)Actor_TeamMoveConsiderSlowDown(&v88, v79))
+    if (context.pSlowDownOther && !Actor_TeamMoveConsiderSlowDown(&context, &eResult))
         return AI_TEAMMOVE_WAIT;
     Actor_ClearPileUp(self);
-    pDodgeOther = v88.pDodgeOther;
-    if (!v88.pDodgeOther || self->noDodgeMove || ai_noDodge->current.enabled)
-        return Actor_TeamMoveNoDodge(&v88, v79[0]);
-    if (self->Path.wDodgeEntity != v88.pDodgeOther->ent->s.number)
+    pDodgeOther = context.pDodgeOther;
+    if (!context.pDodgeOther || self->noDodgeMove || ai_noDodge->current.enabled)
+        return Actor_TeamMoveNoDodge(&context, eResult);
+    if (self->Path.wDodgeEntity != context.pDodgeOther->ent->s.number)
     {
         self->iTeamMoveDodgeTime = 0;
         if ((unsigned __int16)self->Path.wDodgeCount >= 0x8000u)
@@ -860,100 +801,106 @@ ai_teammove_t __cdecl Actor_GetTeamMoveStatus(actor_s *self, bool bUseInterval, 
     }
     if (Actor_IsEnemy(self, pDodgeOther))
     {
-        if (v88.fDodgePosDeltaLengthSqrd < 1406.25)
+        if (context.fDodgePosDeltaLengthSqrd < 1406.25)
         {
             TargetSentient = Actor_GetTargetSentient(self);
-            if (TargetSentient == v88.pDodgeOther)
+            if (TargetSentient == context.pDodgeOther)
                 Actor_ClearPath(self);
             result = AI_TEAMMOVE_WAIT;
             self->iTeamMoveWaitTime = level.time + 500;
             return result;
         }
-        return v79[0];
+        return eResult;
     }
-    actor = v88.pDodgeOther->ent->actor;
-    v13 = Actor_TeamMoveNeedToCheckWait(self->moveMode, &self->Path);
-    if (v13)
+    pOtherActor = context.pDodgeOther->ent->actor;
+    bCheckWait = Actor_TeamMoveNeedToCheckWait(self->moveMode, &self->Path);
+
+    if (bCheckWait)
         goto checkwait;
+
     while (1)
     {
         if (level.time < self->iTeamMoveDodgeTime)
-            return v79[0];
-        v14 = Actor_TeamMoveTrimPath(&self->Path, &v88);
-        v15 = v14;
+            return eResult;
+        v14 = Actor_TeamMoveTrimPath(&self->Path, &context);
+        startIndex = v14;
         if (self->Path.fLookaheadDistToNextNode == 0.0
-            || self->Path.fLookaheadDist < (double)(float)((float)sqrtf(v88.fDodgePosDeltaLengthSqrd) + (float)37.5))
+            || self->Path.fLookaheadDist < (double)(float)((float)sqrtf(context.fDodgePosDeltaLengthSqrd) + (float)37.5))
         {
-            checkLookahead = 0;
+            bCheckLookahead = 0;
             if (v14 < self->Path.wNegotiationStartNode)
                 goto failed_dodge;
         }
         else
         {
-            checkLookahead = 1;
-            if (self->Path.lookaheadNextNode >= self->Path.wPathLen - 1)
-                MyAssertHandler(v86, 753, 0, v87, "!bCheckLookahead || pPath->lookaheadNextNode < pPath->wPathLen - 1");
+            bCheckLookahead = 1;
+            iassert(self->Path.lookaheadNextNode < self->Path.wPathLen - 1);
         }
-        if (v88.vVelDirSelf[0] == 0.0 && v88.vVelDirSelf[1] == 0.0)
-            MyAssertHandler(v86, 758, 0, v87, "context.vVelDirSelf[0] || context.vVelDirSelf[1]");
+        iassert(context.vVelDirSelf[0] || context.vVelDirSelf[1]);
         iTraceMask = self->Physics.iTraceMask;
         mask = iTraceMask | 4;
-        if (!actor)
+
+        if (!pOtherActor)
             mask = iTraceMask | 0x4004;
-        Actor_TeamMoveTooCloseMoveAway(self, mask, &v88);
-        v19 = self->ent;
-        v20 = (float)(v88.vVelDirSelf[1] * (float)37.5);
-        v21 = (float)(v88.vVelDirSelf[0] * (float)-37.5);
-        v22 = (float)-(float)((float)(v88.vVelDirSelf[0] * (float)37.5) - v88.pDodgeOther->ent->r.currentOrigin[0]);
-        v23 = (float)(v88.pDodgeOther->ent->r.currentOrigin[1] - (float)(v88.vVelDirSelf[1] * (float)37.5));
-        v24 = v88.pDodgeOther->ent->r.currentOrigin[2];
-        v85 = v88.pDodgeOther->ent->r.currentOrigin[2];
-        v82 = v24;
-        v80 = (float)v22 + (float)(v88.vVelDirSelf[1] * (float)37.5);
-        v81 = (float)v23 + (float)(v88.vVelDirSelf[0] * (float)-37.5);
-        v83 = (float)(v88.vVelDirSelf[0] * (float)75.0) + v80;
-        v84 = (float)(v88.vVelDirSelf[1] * (float)75.0) + v81;
-        if ((unsigned __int8)Path_AttemptDodge(
+
+        Actor_TeamMoveTooCloseMoveAway(self, mask, &context);
+
+        v20 = (context.vVelDirSelf[1] * 37.5f);
+        v21 = (context.vVelDirSelf[0] * -37.5f);
+        v22 = -((context.vVelDirSelf[0] * 37.5f) - context.pDodgeOther->ent->r.currentOrigin[0]);
+        v23 = (context.pDodgeOther->ent->r.currentOrigin[1] - (context.vVelDirSelf[1] * 37.5f));
+
+        vOrgDodgeStart[0] = v22 + (context.vVelDirSelf[1] * 37.5f);
+        vOrgDodgeStart[1] = v23 + (context.vVelDirSelf[0] * -37.5f);
+        vOrgDodgeStart[2] = context.pDodgeOther->ent->r.currentOrigin[2];
+
+        vOrgDodgeEnd[0] = (context.vVelDirSelf[0] * 75.0f) + vOrgDodgeStart[0];
+        vOrgDodgeEnd[1] = (context.vVelDirSelf[1] * 75.0f) + vOrgDodgeStart[1];
+        vOrgDodgeEnd[2] = context.pDodgeOther->ent->r.currentOrigin[2];
+
+        if (Path_AttemptDodge(
             &self->Path,
-            v88.vOrgSelf,
-            &v80,
-            &v83,
-            v15,
-            v88.dodgeEntities,
-            v88.dodgeEntityCount,
-            v19->s.number,
+            context.vOrgSelf,
+            vOrgDodgeStart,
+            vOrgDodgeEnd,
+            startIndex,
+            context.dodgeEntities,
+            context.dodgeEntityCount,
+            self->ent->s.number,
             mask,
-            checkLookahead))
+            bCheckLookahead))
             break;
         if (ai_showDodge->current.enabled)
         {
-            if (actor)
-                number = actor->ent->s.number;
+            if (pOtherActor)
+                number = pOtherActor->ent->s.number;
             else
                 number = ENTITYNUM_NONE;
             Com_Printf(18, "AI %d failed right dodge pathing AI %d\n", self->ent->s.number, number);
         }
-        v26 = self->ent;
-        v80 = v80 - (float)((float)v20 * (float)2.0);
-        v81 = v81 - (float)((float)v21 * (float)2.0);
-        v83 = v83 - (float)((float)v20 * (float)2.0);
-        v84 = v84 - (float)((float)v21 * (float)2.0);
+
+        vOrgDodgeStart[0] -= (v20 * 2.0f);
+        vOrgDodgeStart[1] -= (v21 * 2.0f);
+
+        vOrgDodgeEnd[0] -= (v20 * 2.0f);
+        vOrgDodgeEnd[1] -= (v21 * 2.0f);
+
         if ((unsigned __int8)Path_AttemptDodge(
             &self->Path,
-            v88.vOrgSelf,
-            &v80,
-            &v83,
-            v15,
-            v88.dodgeEntities,
-            v88.dodgeEntityCount,
-            v26->s.number,
+            context.vOrgSelf,
+            vOrgDodgeStart,
+            vOrgDodgeEnd,
+            startIndex,
+            context.dodgeEntities,
+            context.dodgeEntityCount,
+            self->ent->s.number,
             mask,
-            checkLookahead))
+            bCheckLookahead))
         {
             if (ai_showDodge->current.enabled)
             {
-                if (actor)
-                    v36 = actor->ent->s.number;
+                if (pOtherActor)
+                    v36 = pOtherActor->ent->s.number;
                 else
                     v36 = ENTITYNUM_NONE;
                 Com_Printf(18, "AI %d left dodge succeed AI %d\n", self->ent->s.number, v36);
@@ -962,27 +909,24 @@ ai_teammove_t __cdecl Actor_GetTeamMoveStatus(actor_s *self, bool bUseInterval, 
         }
         if (ai_showDodge->current.enabled)
         {
-            if (actor)
-                v27 = actor->ent->s.number;
+            if (pOtherActor)
+                v27 = pOtherActor->ent->s.number;
             else
                 v27 = ENTITYNUM_NONE;
             Com_Printf(18, "AI %d failed left dodge pathing AI %d\n", self->ent->s.number, v27);
         }
     failed_dodge:
-        if (actor)
+        if (pOtherActor
+            && self->eSubState[self->stateLevel] == STATE_EXPOSED_COMBAT
+            && (pOtherActor->eSubState[self->stateLevel] != STATE_EXPOSED_COMBAT || !Actor_HasPath(pOtherActor)))
         {
-            v28 = 4 * (self->stateLevel + 8);
-            if (*(gentity_s **)((char *)&self->ent + v28) == (gentity_s *)100
-                && (*(gentity_s **)((char *)&actor->ent + v28) != (gentity_s *)100 || !Actor_HasPath(actor)))
-            {
-                goto dodge;
-            }
+            goto dodge;
         }
-        if (v88.fDodgePosDeltaLengthSqrd >= 1406.25)
+        if (context.fDodgePosDeltaLengthSqrd >= 1406.25)
         {
             if (self->moveMode)
-                return v79[0];
-            if (v88.fDodgePosDeltaLengthSqrd >= 3600.0
+                return eResult;
+            if (context.fDodgePosDeltaLengthSqrd >= 3600.0
                 && (self->Path.fLookaheadDist >= 60.0 || Path_CompleteLookahead(&self->Path)))
             {
                 goto dodge;
@@ -990,18 +934,18 @@ ai_teammove_t __cdecl Actor_GetTeamMoveStatus(actor_s *self, bool bUseInterval, 
         }
         if (self->Path.wDodgeCount >= 0)
         {
-            if (!self->Path.wDodgeCount && actor)
+            if (!self->Path.wDodgeCount && pOtherActor)
             {
-                eAnimMode = actor->eAnimMode;
+                eAnimMode = pOtherActor->eAnimMode;
                 if ((eAnimMode == AI_ANIM_MOVE_CODE || eAnimMode == AI_ANIM_USE_BOTH_DELTAS_ZONLY_PHYSICS)
-                    && !actor->moveMode
-                    && Actor_IsAtGoal(actor))
+                    && !pOtherActor->moveMode
+                    && Actor_IsAtGoal(pOtherActor))
                 {
                     if (ai_showDodge->current.enabled)
-                        Com_Printf(18, "AI %d failed to dodge stationary AI %d\n", self->ent->s.number, actor->ent->s.number);
+                        Com_Printf(18, "AI %d failed to dodge stationary AI %d\n", self->ent->s.number, pOtherActor->ent->s.number);
                     goto dodge;
                 }
-                v30 = actor->eState[actor->stateLevel];
+                v30 = pOtherActor->eState[pOtherActor->stateLevel];
                 if (v30 == AIS_SCRIPTEDANIM || v30 == AIS_CUSTOMANIM)
                     goto LABEL_88;
             }
@@ -1010,40 +954,34 @@ ai_teammove_t __cdecl Actor_GetTeamMoveStatus(actor_s *self, bool bUseInterval, 
         {
             goto failsafe;
         }
-        time = level.time;
-        //__twllei(0x1F4u, 0);
-        //__twllei(0x1F4u, 0);
-        //v32 = ~(__ROL4__(level.time, 1) - 1) & 0x1F4;
-        //__twllei(4u, 0);
-        //__twlgei(v32, 0xFFFFFFFF);
-        //__twlgei(~(__ROL4__(time / 500, 1) - 1) & 4, 0xFFFFFFFF);
 
-        v32 = (~((level.time << 1) - 1)) & 0x1F4;
-
-        if (time / 500 % 4)
+        if (level.time / ACTOR_TEAMMOVE_WAIT_TIME % (2000 / ACTOR_TEAMMOVE_WAIT_TIME))
+        {
             goto LABEL_100;
+        }
+
         if ((unsigned __int16)self->Path.wDodgeCount < 0x8000u)
         {
-            if (self->Path.wDodgeCount || v88.bFailedLookahead)
+            if (self->Path.wDodgeCount || context.bFailedLookahead)
                 Actor_ClearPath(self);
             else
                 self->Path.wDodgeCount = -1;
             goto LABEL_100;
         }
     failsafe:
-        if (!actor)
+        if (!pOtherActor)
             goto LABEL_95;
-        if (actor->eAnimMode != AI_ANIM_MOVE_CODE)
+        if (pOtherActor->eAnimMode != AI_ANIM_MOVE_CODE)
         {
-            v33 = actor->eState[actor->stateLevel];
+            v33 = pOtherActor->eState[pOtherActor->stateLevel];
             if (v33 != AIS_SCRIPTEDANIM && v33 != AIS_CUSTOMANIM)
             {
             LABEL_95:
                 self->Path.wDodgeCount = 0;
             LABEL_100:
-                if (!actor || actor->pPileUpEnt != self->ent)
+                if (!pOtherActor || pOtherActor->pPileUpEnt != self->ent)
                 {
-                    v35 = v88.pDodgeOther;
+                    v35 = context.pDodgeOther;
                     self->pPileUpActor = self;
                     self->pPileUpEnt = v35->ent;
                 }
@@ -1053,34 +991,34 @@ ai_teammove_t __cdecl Actor_GetTeamMoveStatus(actor_s *self, bool bUseInterval, 
             }
         LABEL_88:
             if (ai_showDodge->current.enabled)
-                Com_Printf(18, "AI %d failed to dodge scripted AI %d\n", self->ent->s.number, actor->ent->s.number);
+                Com_Printf(18, "AI %d failed to dodge scripted AI %d\n", self->ent->s.number, pOtherActor->ent->s.number);
             goto dodge;
         }
         if (ai_showDodge->current.enabled)
-            Com_Printf(18, "AI %d failed to dodge pathing AI %d\n", self->ent->s.number, actor->ent->s.number);
+            Com_Printf(18, "AI %d failed to dodge pathing AI %d\n", self->ent->s.number, pOtherActor->ent->s.number);
     dodge:
         moveMode = self->moveMode;
         self->iTeamMoveDodgeTime = level.time + 1000;
         if (moveMode)
-            return v79[0];
-        if (v13)
+            return eResult;
+        if (bCheckWait)
             return AI_TEAMMOVE_WAIT;
-        v79[0] = AI_TEAMMOVE_WAIT;
+        eResult = AI_TEAMMOVE_WAIT;
     checkwait:
-        if ((unsigned __int8)Actor_TeamMoveCheckPileup(self, actor))
+        if ((unsigned __int8)Actor_TeamMoveCheckPileup(self, pOtherActor))
             return AI_TEAMMOVE_WAIT;
     }
     if (ai_showDodge->current.enabled)
     {
-        if (actor)
-            v37 = actor->ent->s.number;
+        if (pOtherActor)
+            v37 = pOtherActor->ent->s.number;
         else
             v37 = ENTITYNUM_NONE;
         Com_Printf(18, "AI %d right dodge succeed AI %d\n", self->ent->s.number, v37);
     }
 LABEL_114:
     v38 = self->moveMode;
-    result = v79[0];
+    result = eResult;
     self->iTeamMoveDodgeTime = level.time + 1000;
     if (v38)
         return result;

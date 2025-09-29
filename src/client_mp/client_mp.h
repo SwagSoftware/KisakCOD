@@ -1047,7 +1047,7 @@ void __cdecl CL_CreateCmdsDuringConnection(int32_t localClientNum);
 void __cdecl CL_CreateNewCommands(int32_t localClientNum);
 usercmd_s *__cdecl CL_CreateCmd(usercmd_s *result, int32_t localClientNum);
 void __cdecl CL_AdjustAngles(int32_t localClientNum);
-double __cdecl CL_KeyState(kbutton_t *key);
+float __cdecl CL_KeyState(kbutton_t *key);
 void __cdecl CL_KeyMove(int32_t localClientNum, usercmd_s *cmd);
 void __cdecl CL_StanceButtonUpdate(int32_t localClientNum);
 void __cdecl CL_AddCurrentStanceToCmd(int32_t localClientNum, usercmd_s *cmd);

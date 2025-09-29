@@ -1655,7 +1655,7 @@ void __cdecl CL_KeyEvent(int32_t localClientNum, int32_t key, int32_t down, uint
         if (!down)
         {
             kba = keys[key].binding;
-            if (kba && *kba == 43)
+            if (kba && *kba == '+')
             {
                 Com_sprintf(cmd, 0x400u, "-%s %i %i\n", kba + 1, key, time);
                 Cbuf_AddText(localClientNum, cmd);
@@ -1688,7 +1688,7 @@ void __cdecl CL_KeyEvent(int32_t localClientNum, int32_t key, int32_t down, uint
                 kbb = keys[key].binding;
                 if (kbb)
                 {
-                    if (*kbb == 43)
+                    if (*kbb == '+')
                     {
                         Com_sprintf(cmd, 0x400u, "%s %i %i\n", kbb, key, time);
                         Cbuf_AddText(localClientNum, cmd);
@@ -1759,7 +1759,6 @@ void __cdecl CL_KeyEvent(int32_t localClientNum, int32_t key, int32_t down, uint
     PROF_SCOPED("CL_KeyEvent");
 
     const char *v4; // eax
-    bool v6; // [esp+2Fh] [ebp-421h]
     KeyState *keys; // [esp+34h] [ebp-41Ch]
     const char *kb; // [esp+38h] [ebp-418h]
     const char *kba; // [esp+38h] [ebp-418h]
@@ -1870,11 +1869,11 @@ void __cdecl CL_KeyEvent(int32_t localClientNum, int32_t key, int32_t down, uint
                 "%s\n\t(localClientNum) = %i",
                 "(localClientNum == 0)",
                 localClientNum);
-        clcState = clientUIActives[0].connectionState;
+        clcState = CL_GetLocalClientConnectionState(localClientNum);
         if (down)
         {
-            v6 = key == 200 || key < 128;
-            if (v6
+            if ((key == 200 || key < 128)
+                && (cls.demoplaying || clcState == CA_CINEMATIC || clcState == CA_LOGO)
                 && !clientUIActives[0].keyCatchers)
             {
                 Dvar_SetString(nextdemo, (char *)"");
@@ -1924,7 +1923,7 @@ void __cdecl CL_KeyEvent(int32_t localClientNum, int32_t key, int32_t down, uint
         if (!down)
         {
             kba = keys[key].binding;
-            if (kba && *kba == 43)
+            if (kba && *kba == '+')
             {
                 Com_sprintf(cmd, 0x400u, "-%s %i %i\n", kba + 1, key, time);
                 Cbuf_AddText(localClientNum, cmd);
@@ -1957,7 +1956,7 @@ void __cdecl CL_KeyEvent(int32_t localClientNum, int32_t key, int32_t down, uint
                 kbb = keys[key].binding;
                 if (kbb)
                 {
-                    if (*kbb == 43)
+                    if (*kbb == '+')
                     {
                         Com_sprintf(cmd, 0x400u, "%s %i %i\n", kbb, key, time);
                         Cbuf_AddText(localClientNum, cmd);
@@ -2200,14 +2199,7 @@ void __cdecl Key_Shutdown()
 
 bool __cdecl Key_IsCatcherActive(int32_t localClientNum, int32_t mask)
 {
-    if (localClientNum)
-        MyAssertHandler(
-            "c:\\trees\\cod3\\src\\client\\../client_mp/client_mp.h",
-            1063,
-            0,
-            "%s\n\t(localClientNum) = %i",
-            "(localClientNum == 0)",
-            localClientNum);
+    iassert(localClientNum == 0);
     return (mask & clientUIActives[0].keyCatchers) != 0;
 }
 

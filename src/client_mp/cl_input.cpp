@@ -451,7 +451,7 @@ void __cdecl CL_AdjustAngles(int localClientNum)
     }
 }
 
-double __cdecl CL_KeyState(kbutton_t *key)
+float __cdecl CL_KeyState(kbutton_t *key)
 {
     signed int msec; // [esp+Ch] [ebp-4h]
 
@@ -465,24 +465,22 @@ double __cdecl CL_KeyState(kbutton_t *key)
             msec = com_frameTime;
         key->downtime = com_frameTime;
     }
+
     if (msec <= 0)
-        return 0.0;
+        return 0.0f;
+
     if (msec >= frame_msec)
-        return 1.0;
-    if (!frame_msec)
-        MyAssertHandler(".\\client_mp\\cl_input.cpp", 270, 0, "%s", "frame_msec");
-    return (float)((double)msec / (double)frame_msec);
+        return 1.0f;
+
+    iassert(frame_msec);
+
+    return (float)((float)msec / (float)frame_msec);
 }
 
 void __cdecl CL_KeyMove(int localClientNum, usercmd_s *cmd)
 {
-    unsigned int v2; // ecx
-    int v3; // ecx
-    int sidea; // [esp+3Ch] [ebp-10h]
     int side; // [esp+3Ch] [ebp-10h]
-    int sideb; // [esp+3Ch] [ebp-10h]
     kbutton_t *kb; // [esp+44h] [ebp-8h]
-    int forwarda; // [esp+48h] [ebp-4h]
     int forward; // [esp+48h] [ebp-4h]
 
     CL_GetLocalClientGlobals(localClientNum);
@@ -491,14 +489,13 @@ void __cdecl CL_KeyMove(int localClientNum, usercmd_s *cmd)
         if (playersKb[localClientNum][24].active)
         {
             cmd->buttons |= 0x100u;
-            v2 = cmd->buttons & 0xFFFFFDFF;
+            cmd->buttons = cmd->buttons & 0xFFFFFDFF;
         }
         else
         {
             cmd->buttons |= 0x200u;
-            v2 = cmd->buttons & 0xFFFFFEFF;
+            cmd->buttons = cmd->buttons & 0xFFFFFEFF;
         }
-        cmd->buttons = v2;
         cmd->buttons |= 0x1000u;
     }
     else
@@ -506,16 +503,18 @@ void __cdecl CL_KeyMove(int localClientNum, usercmd_s *cmd)
         CL_StanceButtonUpdate(localClientNum);
         CL_AddCurrentStanceToCmd(localClientNum, cmd);
     }
+
     kb = playersKb[localClientNum];
+
     if (kb[9].active == !CL_GetLocalClientGlobals(localClientNum)->usingAds)
-        v3 = cmd->buttons | 0x800;
+        cmd->buttons = cmd->buttons | 0x800;
     else
-        v3 = cmd->buttons & 0xFFFFF7FF;
-    cmd->buttons = v3;
-    sidea = (int)(CL_KeyState(kb + 7) * (double)127);
-    side = sidea - (int)(CL_KeyState(kb + 6) * (double)127);
-    forwarda = (int)(CL_KeyState(kb + 2) * (double)127);
-    forward = forwarda - (int)(CL_KeyState(kb + 3) * (double)127);
+        cmd->buttons = cmd->buttons & 0xFFFFF7FF;
+
+    side = (int)(CL_KeyState(kb + 7) * 127.0f);
+    side -= (int)(CL_KeyState(kb + 6) * 127.0f);
+    forward = (int)(CL_KeyState(kb + 2) * 127.0f);
+    forward -= (int)(CL_KeyState(kb + 3) * 127.0f);
     if (!kb[3].active)
     {
         if (kb[27].active || kb[27].wasPressed)
@@ -530,8 +529,8 @@ void __cdecl CL_KeyMove(int localClientNum, usercmd_s *cmd)
     }
     if (kb[8].active && (cmd->buttons & 2) == 0)
     {
-        sideb = side + (int)(CL_KeyState(kb + 1) * (double)127);
-        side = sideb - (int)(CL_KeyState(kb) * (double)127);
+        side += (int)(CL_KeyState(kb + 1) * (double)127);
+        side -= (int)(CL_KeyState(kb) * (double)127);
     }
     cmd->forwardmove = ClampChar(forward);
     cmd->rightmove = ClampChar(side);
@@ -725,7 +724,6 @@ void __cdecl CL_GetMouseMovement(clientActive_t *cl, float *mx, float *my)
 
 void __cdecl CL_CmdButtons(int localClientNum, usercmd_s *cmd)
 {
-    bool v3; // [esp+4h] [ebp-10h]
     clientActive_t *LocalClientGlobals; // [esp+8h] [ebp-Ch]
 
     CL_UpdateCmdButton(localClientNum, &cmd->buttons, 14, 1);
@@ -742,26 +740,13 @@ void __cdecl CL_CmdButtons(int localClientNum, usercmd_s *cmd)
     CL_UpdateCmdButton(localClientNum, &cmd->buttons, 25, 512);
     CL_UpdateCmdButton(localClientNum, &cmd->buttons, 10, 1024);
     CL_UpdateCmdButton(localClientNum, &cmd->buttons, 26, 0x80000);
-    if (localClientNum)
-        MyAssertHandler(
-            "c:\\trees\\cod3\\src\\client_mp\\client_mp.h",
-            1063,
-            0,
-            "%s\n\t(localClientNum) = %i",
-            "(localClientNum == 0)",
-            localClientNum);
-    v3 = clientUIActives[0].keyCatchers && !cl_bypassMouseInput->current.enabled;
-    if (v3 && UI_GetActiveMenu(localClientNum) != 10)
+
+    Key_IsCatcherActive(localClientNum, -1);
+
+    if (clientUIActives[0].keyCatchers && !cl_bypassMouseInput->current.enabled && UI_GetActiveMenu(localClientNum) != UIMENU_SCOREBOARD)
         cmd->buttons |= 0x100000u;
-    if (localClientNum)
-        MyAssertHandler(
-            "c:\\trees\\cod3\\src\\client_mp\\client_mp.h",
-            1112,
-            0,
-            "%s\n\t(localClientNum) = %i",
-            "(localClientNum == 0)",
-            localClientNum);
-    if (clientUIActives[0].connectionState > CA_CONNECTED)
+
+    if (CG_GetLocalClientConnectionState(localClientNum) > CA_CONNECTED)
     {
         LocalClientGlobals = CL_GetLocalClientGlobals(localClientNum);
         if (LocalClientGlobals->snap.ps.pm_type == PM_NOCLIP
@@ -771,8 +756,7 @@ void __cdecl CL_CmdButtons(int localClientNum, usercmd_s *cmd)
             CL_UpdateCmdButton(localClientNum, &cmd->buttons, 12, 1024);
         }
     }
-    if (cmd->buttons >= 0x200000)
-        MyAssertHandler(".\\client_mp\\cl_input.cpp", 1633, 0, "%s", "cmd->buttons < (1 << BUTTON_BIT_COUNT)");
+    iassert(cmd->buttons < (1 << BUTTON_BIT_COUNT));
 }
 
 void __cdecl CL_FinishMove(int localClientNum, usercmd_s *cmd)

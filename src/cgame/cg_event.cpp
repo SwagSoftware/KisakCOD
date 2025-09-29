@@ -848,6 +848,32 @@ void __cdecl CG_EntityEvent(int32_t localClientNum, centity_s *cent, int32_t eve
                 else
                     CG_PlayEntitySoundAlias(localClientNum, ent->number, weaponDef->nightVisionRemoveSound);
                 return;
+#ifdef KISAK_SP
+                // KISAKTODO: Rumbling
+            case EV_PLAY_RUMBLE_ON_ENT:
+                //v109 = CL_GetConfigString(localClientNum, cent->nextState.eventParm + 1115);
+                //CG_PlayRumbleOnEntity(localClientNum, v109, clientNum);
+                return;
+            case EV_PLAY_RUMBLE_ON_POS:
+                //v110 = CL_GetConfigString(localClientNum, cent->nextState.eventParm + 1115);
+                //CG_PlayRumbleOnPosition(localClientNum, v110, cent->pose.origin);
+                return;
+            case EV_PLAY_RUMBLELOOP_ON_ENT:
+                //v111 = CL_GetConfigString(localClientNum, cent->nextState.eventParm + 1115);
+                //CG_PlayRumbleLoopOnEntity(localClientNum, v111, clientNum);
+                return;
+            case EV_PLAY_RUMBLELOOP_ON_POS:
+                //v112 = CL_GetConfigString(localClientNum, cent->nextState.eventParm + 1115);
+                //CG_PlayRumbleLoopOnPosition(localClientNum, v112, cent->pose.origin);
+                return;
+            case EV_STOP_RUMBLE:
+                //v113 = CL_GetConfigString(localClientNum, cent->nextState.eventParm + 1115);
+                //CG_StopRumble(localClientNum, clientNum, v113);
+                return;
+            case EV_STOP_ALL_RUMBLES:
+                //CG_StopAllRumbles(localClientNum);
+                return;
+#endif
 #ifdef KISAK_MP
             case EV_OBITUARY:
                 CG_Obituary(localClientNum, ent);
