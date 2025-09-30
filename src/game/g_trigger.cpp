@@ -112,7 +112,7 @@ void __cdecl SP_trigger_multiple(gentity_s *ent)
 {
     ent->handler = ENT_HANDLER_TRIGGER_MULTIPLE;
     InitTriggerWait(ent, 64);
-    if ((unsigned __int8)InitTrigger(ent))
+    if (InitTrigger(ent))
     {
         InitSentientTrigger(ent);
         SV_LinkEntity(ent);

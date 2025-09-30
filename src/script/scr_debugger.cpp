@@ -1958,11 +1958,22 @@ void Scr_HitBreakpointInternal()
 #ifdef KISAK_MP
     Scr_DisplayDebugger();
 #elif KISAK_SP
-    g_kisakScriptDebuggerHack = true;
-
-    while (g_kisakScriptDebuggerHack)
+    if (Sys_IsMainThread())
     {
-        NET_Sleep(50);
+        Scr_DisplayDebugger();
+    }
+    else if (Sys_IsServerThread())
+    {
+        g_kisakScriptDebuggerHack = true;
+
+        while (g_kisakScriptDebuggerHack)
+        {
+            NET_Sleep(50);
+        }
+    }
+    else
+    {
+        iassert(0);
     }
 #endif
     Scr_ResetTimeout();

@@ -1822,11 +1822,11 @@ void __cdecl CL_KeyEvent(int32_t localClientNum, int32_t key, int32_t down, uint
                 {
                     if (!down)
                         return;
-                    if ((clientUIActives[0].keyCatchers & 1) == 0
-                        && !com_sv_running->current.enabled)
-                    {
-                        return;
-                    }
+                    //if ((clientUIActives[0].keyCatchers & 1) == 0
+                    //    && !com_sv_running->current.enabled)
+                    //{
+                    //    return;
+                    //}
                     if (keys[160].down)
                     {
                         if (!Con_IsActive(localClientNum))

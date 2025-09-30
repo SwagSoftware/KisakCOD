@@ -3218,7 +3218,7 @@ void __cdecl CG_OwnerDraw(
     ps = CG_GetPredictedPlayerState(0);
 
     iassert(ps);
-    iassert(ps->offhandSecondary == PLAYER_OFFHAND_SECONDARY_FLASH);
+    //iassert(ps->offhandSecondary == PLAYER_OFFHAND_SECONDARY_FLASH);
 
     rect.x = x;
     rect.y = y;

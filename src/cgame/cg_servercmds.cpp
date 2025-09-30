@@ -1349,10 +1349,6 @@ void __cdecl CG_DispatchServerCommand(int localClientNum)
     const char *v97; // r10
     const char *v98; // r11
     int v99; // r8
-    const char *v100; // r3
-    const char *v101; // r3
-    long double v102; // fp2
-    int v103; // r3
     const char *v104; // r10
     const char *v105; // r11
     int v106; // r8
@@ -2185,11 +2181,7 @@ void __cdecl CG_DispatchServerCommand(int localClientNum)
                                                                             }
                                                                             else
                                                                             {
-                                                                                v100 = Cmd_Argv(2);
-                                                                                atol(v100);
-                                                                                v101 = Cmd_Argv(1);
-                                                                                v102 = atof(v101);
-                                                                                SND_FadeAllSounds((float)*(double *)&v102, v103);
+                                                                                SND_FadeAllSounds(atof(Cmd_Argv(1)), atol(Cmd_Argv(2)));
                                                                             }
                                                                         }
                                                                         else
