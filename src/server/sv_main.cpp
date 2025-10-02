@@ -542,7 +542,7 @@ void __cdecl  SV_ServerThread(unsigned int threadContext)
         {
             Sys_LeaveCriticalSection(CRITSECT_CLIENT_MESSAGE);
             {
-                PROF_SCOPED("server timeout")
+                PROF_SCOPED("server timeout");
                 R_ProcessWorkerCmdsWithTimeout(Sys_ServerTimeout, 1);
             }
             Sys_EnterCriticalSection(CRITSECT_CLIENT_MESSAGE);

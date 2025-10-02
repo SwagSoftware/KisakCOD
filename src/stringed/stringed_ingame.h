@@ -422,7 +422,7 @@ struct CStringEdPackage // sizeof=0x78
                 return 0;
             args[argIndex] = 1;
 
-            v4 = strstr(++convString, "");
+            v4 = strstr(++convString, "&&");
         }
         return 1;
     }
@@ -500,7 +500,7 @@ struct CStringEdPackage // sizeof=0x78
                         //    p_m_strCurrentEntryRef_ParseOnly = (std::string *)p_m_strCurrentEntryRef_ParseOnly->_Bx._Ptr;
                         //v9 = p_m_strCurrentEntryRef_ParseOnly->_Bx._Buf[0] == 0;
                         v9 = p_m_strCurrentEntryRef_ParseOnly->data()[0] == 0;
-                        psReference = (const char *)p_m_strCurrentEntryRef_ParseOnly;
+                        psReference = p_m_strCurrentEntryRef_ParseOnly->c_str();
                         if (v9)
                         {
                             return "Error parsing file: Unexpected \"LANG_\"";
@@ -568,11 +568,12 @@ struct CStringEdPackage // sizeof=0x78
 
         if (!**psParsePos)
             return 0;
-        v3 = (int)strchr(*psParsePos, 10);
+        v3 = (int)strchr(*psParsePos, '\n');
         if (v3)
         {
             iCharsToCopy = v3 - (_DWORD)*psParsePos;
-            strncpy(psDest, *psParsePos, iCharsToCopy);
+            I_strncpyz(psDest, *psParsePos, iCharsToCopy);
+            //strncpy(psDest, *psParsePos, iCharsToCopy);
             psDest[iCharsToCopy] = 0;
             for (*psParsePos += iCharsToCopy; **psParsePos; ++*psParsePos)
             {

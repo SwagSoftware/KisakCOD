@@ -389,7 +389,9 @@ void __cdecl SV_Map_f()
             Com_Error(ERR_DROP, "PLATFORM_NOTSIGNEDINTOPROFILE");
             return;
         }
+#ifndef KISAK_NO_FASTFILES
         Cbuf_ExecuteBuffer(0, 0, "selectStringTableEntryInDvar mp/didyouknow.csv 0 didyouknow");
+#endif
         if (com_dedicated->latched.integer != com_dedicated->current.integer)
         {
             v3 = SV_Cmd_Argv(1);

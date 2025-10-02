@@ -32,33 +32,34 @@ const char *__cdecl SE_GetString_FastFile(const char *psPackageAndStringReferenc
 char *__cdecl SE_Load(char *psFileName, bool forceEnglish)
 {
     char *psParsePos; // [esp+14h] [ebp-4014h] BYREF
-    char psDest; // [esp+18h] [ebp-4010h] BYREF
-    _BYTE v5[3]; // [esp+19h] [ebp-400Fh] BYREF
-    const char *v6; // [esp+4020h] [ebp-8h]
+    char psDest[16388]; // [esp+20h] [ebp-4010h] BYREF
+    const char *errorMsg; // [esp+4020h] [ebp-8h]
     unsigned __int8 *psLoadedFile; // [esp+4024h] [ebp-4h]
 
-    v6 = 0;
+    errorMsg = 0;
     psLoadedFile = SE_LoadFileData(psFileName);
+
     if (!psLoadedFile)
         return va("Unable to load \"%s\"!", psFileName);
+
     psParsePos = (char *)psLoadedFile;
-    //CStringEdPackage::SetupNewFileParse(TheStringPackage, psFileName);
     TheStringPackage->SetupNewFileParase(psFileName);
-    //while (!v6 && CStringEdPackage::ReadLine(TheStringPackage, (const char **)&psParsePos, &psDest))
-    while (!v6 && TheStringPackage->ReadLine(&psParsePos, &psDest))
+
+    while (!errorMsg && TheStringPackage->ReadLine(&psParsePos, psDest))
     {
-        if (&v5[strlen(&psDest)] != v5)
-        {
-            //v6 = CStringEdPackage::ParseLine(TheStringPackage, &psDest, forceEnglish);
-            v6 = TheStringPackage->ParseLine(&psDest, forceEnglish);
-        }
+        if (&psDest[strlen(psDest) + 1] != &psDest[1])
+            errorMsg = TheStringPackage->ParseLine(psDest, forceEnglish);
     }
-    if (v6)
-        v6 = va("%s in %s", v6, psFileName);
+
+    if (errorMsg)
+        errorMsg = va("%s in %s", errorMsg, psFileName);
+
     SE_FreeFileDataAfterLoad(psLoadedFile);
-    if (!v6 && !TheStringPackage->m_bEndMarkerFound_ParseOnly)
+
+    if (!errorMsg && !TheStringPackage->m_bEndMarkerFound_ParseOnly)
         return va("Truncated file, failed to find \"%s\" at file end!", "ENDMARKER");
-    return (char *)v6;
+
+    return (char *)errorMsg;
 }
 
 // KISAKTODO: my god this is aids
@@ -164,12 +165,10 @@ void __cdecl SE_ShutDown()
 char *__cdecl SE_LoadLanguage(bool forceEnglish)
 {
     char *psErrorMessage; // [esp+30h] [ebp-28h]
-    //std::basic_string<char, std::char_traits<char>, Allocator<char, LocalizeStringName> > strResults; // [esp+34h] [ebp-24h] BYREF
     std::string strResults;
     const char *p; // [esp+54h] [ebp-4h]
 
     psErrorMessage = 0;
-    //std::basic_string<char, std::char_traits<char>, Allocator<char, LocalizeStringName>>::_Tidy(&strResults, 0, 0);
     strResults.clear();
     SE_NewLanguage();
     SE_BuildFileList("localizedstrings", &strResults);
@@ -180,7 +179,6 @@ char *__cdecl SE_LoadLanguage(bool forceEnglish)
             break;
         psErrorMessage = SE_Load((char *)p, forceEnglish);
     }
-    //std::basic_string<char, std::char_traits<char>, Allocator<char, LocalizeStringName>>::_Tidy(&strResults, 1, 0);
     return psErrorMessage;
 }
 

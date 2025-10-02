@@ -1367,16 +1367,16 @@ void __cdecl CMod_LoadLeafs(bool usePvs)
     {
         if (usePvs)
         {
-            cluster = *in;
-            out->cluster = *in;
+            cluster = *(DWORD*)in;
+            out->cluster = *(DWORD*)in;
             if (out->cluster != cluster)
                 Com_Error(ERR_DROP, "CMod_LoadLeafs: cluster exceeded");
         }
-        firstCollAabbIndex = *(in + 1);
+        firstCollAabbIndex = *((DWORD*)in + 1);
         out->firstCollAabbIndex = firstCollAabbIndex;
         if (out->firstCollAabbIndex != firstCollAabbIndex)
             Com_Error(ERR_DROP, "CMod_LoadLeafs: firstCollAabbIndex exceeded");
-        collAabbCount = *(in + 2);
+        collAabbCount = *((DWORD*)in + 2);
         out->collAabbCount = collAabbCount;
         if (out->collAabbCount != collAabbCount)
             Com_Error(ERR_DROP, "CMod_LoadLeafs: collAabbCount exceeded");

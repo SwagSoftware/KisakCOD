@@ -17,6 +17,11 @@
 #include <win32/win_local.h>
 #include <devgui/devgui.h>
 
+int g_vertexNamesCount;
+ShaderBinNames *g_vertexNamesList;
+int g_pixelNamesCount;
+ShaderBinNames *g_pixelNamesList;
+
 const CodeSamplerSource s_lightmapSamplers[3] =
 {
     { "primary", TEXTURE_SRC_CODE_LIGHTMAP_PRIMARY, NULL, 0, 0 },
@@ -1192,8 +1197,8 @@ MaterialStateMap *__cdecl Material_LoadStateMap(char *name)
         v2 = strlen(name);
         nameSize = v2 + 1;
         stateMap = (MaterialStateMap*)Material_Alloc(v2 + 45);
-        //stateMap->name = &stateMap[1];
-        memcpy((void*)stateMap[1].name, name, nameSize);
+        stateMap->name = (const char*)&stateMap[1]; // (skip past statemap struct and use rest of buffer for name)
+        memcpy((void*)stateMap->name, name, nameSize);
         if (!Material_ParseStateMap(&text, stateMap))
             stateMap = 0;
         Com_EndParseSession();
@@ -1693,8 +1698,10 @@ char __cdecl Material_FindCachedShader(
     *cachedShader = 0;
     *shaderLen = 0;
     cacheFile = fopen(filename, "rb");
+
     if (!cacheFile)
         return 0;
+
     if (fread(&cachedShaderTextLen, 4u, 1u, cacheFile) == 1 && cachedShaderTextLen == shaderTextLen)
     {
         cachedShaderText = (char*)Z_Malloc(cachedShaderTextLen, "Material_FindCachedShader", 31);
@@ -1723,6 +1730,67 @@ char __cdecl Material_FindCachedShader(
         return 0;
     }
 }
+
+#ifdef KISAK_NO_FASTFILES
+static bool Material_FindCachedShader2(unsigned int *shaderLen, void **cachedShader, const char *filename)
+{
+    Material_DeleteOldCachedShaders();
+
+    *cachedShader = NULL;
+
+    FILE *cacheFile = fopen(filename, "rb");
+    
+    if (!cacheFile)
+        return false;
+
+    // read in length
+    if (fread(shaderLen, 4, 1, cacheFile) != 1)
+    {
+        fclose(cacheFile);
+        return false;
+    }
+
+    *cachedShader = Z_Malloc(*shaderLen, "Material_FindCachedShader2", 31);
+
+    iassert(*cachedShader);
+
+    fread(*cachedShader, 1, *shaderLen, cacheFile);
+    fclose(cacheFile);
+
+    return true;
+}
+
+static bool Material_CopyTextToDXBuffer2(unsigned int shaderHash, ID3DXBuffer **shader, const char *targetprefix)
+{
+    const char *v3; // eax
+    unsigned __int8 *v5; // eax
+    int hr; // [esp+0h] [ebp-4h]
+
+    char buffer[260];
+    //Com_sprintf(buffer, 260, "%s/raw/shader_bin/%s_%8.8x", fs_basepath->current.string, targetprefix, shaderHash);
+    Com_sprintf(buffer, 260, "%s/main/shader_bin/%s_%8.8x", fs_basepath->current.string, targetprefix, shaderHash);
+
+    unsigned int shaderLen;
+    void *cachedShader;
+    if (!Material_FindCachedShader2(&shaderLen, &cachedShader, buffer))
+    {
+        return false;
+    }
+
+    hr = D3DXCreateBuffer(shaderLen, shader);
+
+    if (hr < 0)
+    {
+        Com_PrintError(8, "ERROR: Material_CopyTextToDXBuffer: D3DXCreateBuffer(%d) failed: %s (0x%08x)\n", shaderLen, R_ErrorDescription(hr), hr);
+        free(cachedShader);
+        return false;
+    }
+
+    memcpy((*shader)->GetBufferPointer(), cachedShader, shaderLen);
+    free(cachedShader);
+    return true;
+}
+#endif
 
 char __cdecl Material_CopyTextToDXBuffer(unsigned __int8 *cachedShader, unsigned int shaderLen, ID3DXBuffer **shader)
 {
@@ -1952,57 +2020,100 @@ ID3DXBuffer *__cdecl Material_CompileShader(
     return 0;
 }
 
+#ifdef KISAK_NO_FASTFILES
+static int GetHashedFilename(int shaderType, const char *shaderName)
+{
+    iassert(shaderType == MTL_PIXEL_SHADER || shaderType == MTL_VERTEX_SHADER); // lwss add
+
+    ShaderBinNames *pList = shaderType ? g_pixelNamesList : g_vertexNamesList;
+    int listSize = shaderType ? g_pixelNamesCount : g_vertexNamesCount;
+
+    unsigned int hash = R_HashAssetName(shaderName);
+
+    int itr = 0;
+    int end = listSize - 1;
+
+    if (end < 0)
+        return 0;
+
+    int v7;
+    unsigned int key;
+
+    while (1)
+    {
+        v7 = (end + itr) >> 1;
+        //key = *(_DWORD *)(pList + 8 * v7);
+        key = pList[v7].key;
+        if (key <= hash)
+            break;
+        end = v7 - 1;
+    LABEL_11:
+        if (itr > end)
+            return 0;
+    }
+    if (key < hash)
+    {
+        itr = v7 + 1;
+        goto LABEL_11;
+    }
+    //return *(_DWORD *)(pList + 8 * v7 + 4);
+    return pList[v7].val;
+}
+#endif
+
 MaterialVertexShader *__cdecl Material_LoadVertexShader(char *shaderName, int shaderVersion, GfxRenderer renderer)
 {
-    unsigned __int8 *v4; // eax
-    const char *v5; // eax
-    ID3DXBuffer *v6; // [esp-8h] [ebp-4Ch]
     unsigned int programSize; // [esp+10h] [ebp-34h]
     int hr; // [esp+18h] [ebp-2Ch]
     char target[16]; // [esp+1Ch] [ebp-28h] BYREF
     unsigned int *program; // [esp+30h] [ebp-14h]
     unsigned int nameSize; // [esp+34h] [ebp-10h]
-    ID3DXBuffer *shader; // [esp+38h] [ebp-Ch]
+    ID3DXBuffer *shader = NULL; // [esp+38h] [ebp-Ch]
     unsigned int totalSize; // [esp+3Ch] [ebp-8h]
     MaterialVertexShader *mtlShader; // [esp+40h] [ebp-4h]
 
     Material_GetShaderTargetString(target, 0x10u, "vs", shaderVersion, renderer);
-    shader = Material_CompileShader(shaderName, MTL_VERTEX_SHADER, (char*)"vs_main", target);
+
+    // We are missing the shader/ folder with hlsl, (see Material_PreLoadAllShaderText())
+#ifdef KISAK_NO_FASTFILES
+    int hashedName = GetHashedFilename(MTL_VERTEX_SHADER, shaderName);
+
+    if (!hashedName || !Material_CopyTextToDXBuffer2(hashedName, &shader, target))
+    {
+        Com_Error(ERR_DROP, "Can't find shader: shader_bin/%s_%8.8x\n", target, hashedName);
+        return 0;
+    }
+#else
+    shader = Material_CompileShader(shaderName, MTL_VERTEX_SHADER, (char *)"vs_main", target);
+#endif
+
     if (!shader)
         return 0;
+
     programSize = shader->GetBufferSize();
     iassert( (programSize > 0) );
     nameSize = strlen(shaderName) + 1;
-    totalSize = programSize + nameSize + 16;
+    totalSize = sizeof(MaterialVertexShader) + programSize + nameSize;
     mtlShader = (MaterialVertexShader*)Material_Alloc(totalSize);
     program = (uint*)&mtlShader[1];
     mtlShader->name = (const char*)&mtlShader[1] + programSize;
     memcpy((void*)mtlShader->name, shaderName, nameSize);
-    v6 = shader;
-    v4 = (unsigned __int8*)shader->GetBufferPointer();
-    //memcpy(program, v4, v6);
-    memcpy(program, v4, totalSize);
+    memcpy(program, shader->GetBufferPointer(), programSize);
     hr = dx.device->CreateVertexShader((const DWORD*)program, &mtlShader->prog.vs);
     if (hr >= 0)
     {
         mtlShader->prog.loadDef.loadForRenderer = renderer;
         mtlShader->prog.loadDef.programSize = programSize >> 2;
-        if (4 * mtlShader->prog.loadDef.programSize != programSize)
-            MyAssertHandler(
-                ".\\r_material_load_obj.cpp",
-                3837,
-                1,
-                "mtlShader->prog.loadDef.programSize * sizeof( mtlShader->prog.loadDef.program[0] ) == programSize\n\t%i, %i",
-                4 * mtlShader->prog.loadDef.programSize,
-                programSize);
+        //iassert(mtlShader->prog.loadDef.programSize * sizeof(mtlShader->prog.loadDef.program[0]) == programSize);
+        iassert(mtlShader->prog.loadDef.programSize * 4 == programSize);
+
         mtlShader->prog.loadDef.program = program;
         shader->Release();
         return mtlShader;
     }
     else
     {
-        v5 = R_ErrorDescription(hr);
-        Com_ScriptError("vertex shader creation failed for %s: %s\n", shaderName, v5);
+        Com_ScriptError("vertex shader creation failed for %s: %s\n", shaderName, R_ErrorDescription(hr));
         return 0;
     }
 }
@@ -2040,15 +2151,15 @@ char __cdecl Material_LoadPassVertexShader(
     MaterialShaderArgument *args)
 {
     unsigned __int8 shaderVersion; // [esp+3h] [ebp-Dh]
-    parseInfo_t *shaderName; // [esp+8h] [ebp-8h]
+    char *shaderName; // [esp+8h] [ebp-8h]
     MaterialVertexShader *mtlShader; // [esp+Ch] [ebp-4h]
 
     memset(paramSet, 0, sizeof(ShaderParameterSet));
     if (!Material_MatchToken(text, "vertexShader"))
         return 0;
     shaderVersion = Material_ParseShaderVersion(text);
-    shaderName = Com_Parse(text);
-    mtlShader = Material_RegisterVertexShader(shaderName->token, shaderVersion, renderer);
+    shaderName = Com_Parse(text)->token;
+    mtlShader = Material_RegisterVertexShader(shaderName, shaderVersion, renderer);
     if (!mtlShader)
         return 0;
     pass->vertexShader = mtlShader;
@@ -2150,56 +2261,59 @@ char __cdecl Material_GetPixelShaderHashIndex(
 
 MaterialPixelShader *__cdecl Material_LoadPixelShader(char *shaderName, int shaderVersion, GfxRenderer renderer)
 {
-    void *v4; // eax
-    const char *v5; // eax
-    ID3DXBuffer *v6; // [esp-8h] [ebp-4Ch]
     unsigned int programSize; // [esp+10h] [ebp-34h]
     int hr; // [esp+18h] [ebp-2Ch]
     char target[16]; // [esp+1Ch] [ebp-28h] BYREF
     unsigned int *program; // [esp+30h] [ebp-14h]
     unsigned int nameSize; // [esp+34h] [ebp-10h]
-    ID3DXBuffer *shader; // [esp+38h] [ebp-Ch]
+    ID3DXBuffer *shader = NULL; // [esp+38h] [ebp-Ch]
     unsigned int totalSize; // [esp+3Ch] [ebp-8h]
     MaterialPixelShader *mtlShader; // [esp+40h] [ebp-4h]
 
     Material_GetShaderTargetString(target, 0x10u, "ps", shaderVersion, renderer);
+
+#ifdef KISAK_NO_FASTFILES
+    int hashedName = GetHashedFilename(MTL_PIXEL_SHADER, shaderName);
+
+    if (!hashedName || !Material_CopyTextToDXBuffer2(hashedName, &shader, target))
+    {
+        Com_Error(ERR_DROP, "Can't find shader: shader_bin/%s_%8.8x\n", target, hashedName);
+        return 0;
+    }
+#else
     shader = Material_CompileShader(shaderName, MTL_PIXEL_SHADER, (char*)"ps_main", target);
+#endif
+
     if (!shader)
         return 0;
+
     programSize = shader->GetBufferSize();
     iassert( (programSize > 0) );
     nameSize = strlen(shaderName) + 1;
-    totalSize = programSize + nameSize + 16;
+    totalSize = sizeof(MaterialPixelShader) + programSize + nameSize;
     mtlShader = (MaterialPixelShader*)Material_Alloc(totalSize);
     program = (unsigned int *)&mtlShader[1];
     mtlShader->name = (const char*)&mtlShader[1] + programSize;
     memcpy((void*)mtlShader->name, shaderName, nameSize);
-    v6 = shader;
-    v4 = shader->GetBufferPointer();
-    //memcpy(program, v4, v6);
-    memcpy(program, v4, totalSize);
-    //hr = dx.device->CreatePixelShader(dx.device, dx.device, program, &mtlShader->prog, programSize);
+    memcpy(program, shader->GetBufferPointer(), programSize);
+
     hr = dx.device->CreatePixelShader((const DWORD*)program, &mtlShader->prog.ps);
+
     if (hr >= 0)
     {
         mtlShader->prog.loadDef.loadForRenderer = renderer;
         mtlShader->prog.loadDef.programSize = programSize >> 2;
-        if (4 * mtlShader->prog.loadDef.programSize != programSize)
-            MyAssertHandler(
-                ".\\r_material_load_obj.cpp",
-                3957,
-                1,
-                "mtlShader->prog.loadDef.programSize * sizeof( mtlShader->prog.loadDef.program[0] ) == programSize\n\t%i, %i",
-                4 * mtlShader->prog.loadDef.programSize,
-                programSize);
+
+        //iassert(mtlShader->prog.loadDef.programSize * sizeof(mtlShader->prog.loadDef.program[0]) == programSize);
+        iassert(mtlShader->prog.loadDef.programSize * 4 == programSize);
+
         mtlShader->prog.loadDef.program = program;
         shader->Release();
         return mtlShader;
     }
     else
     {
-        v5 = R_ErrorDescription(hr);
-        Com_ScriptError("pixel shader creation failed for %s: %s\n", shaderName, v5);
+        Com_ScriptError("pixel shader creation failed for %s: %s\n", shaderName, R_ErrorDescription(hr));
         return 0;
     }
 }
@@ -2247,8 +2361,8 @@ unsigned int __cdecl R_SetParameterDefArray(
     constantInfo = (const _D3DXSHADER_CONSTANTINFO*)&BufferOffset((char*)constantTable, constantTable->ConstantInfo)[20 * constantIndex];
     typeInfo = BufferOffset((char *)constantTable, constantInfo->TypeInfo);
     name = BufferOffset((char *)constantTable, constantInfo->Name);
-    isTransposed = *typeInfo == 3;
-    switch (*(typeInfo + 1))
+    isTransposed = *(_WORD *)typeInfo == 3;
+    switch (*((_WORD *)typeInfo + 1))
     {
     case 3:
         type = SHADER_PARAM_FLOAT4;
@@ -2275,7 +2389,8 @@ unsigned int __cdecl R_SetParameterDefArray(
         result = paramDefIndex;
         break;
     default:
-        Com_ScriptError("Unknown constant type '%i'", *(typeInfo + 1));
+        iassert(0); // lwss add
+        Com_ScriptError("Unknown constant type '%i'", *((_WORD *)typeInfo + 1));
         result = 0;
         break;
     }
@@ -2372,8 +2487,10 @@ char __cdecl Material_SetShaderArguments(
 
     iassert( args );
     iassert( argCount );
+
     if (!usedCount)
         return 1;
+
     if (*argCount + usedCount <= argLimit)
     {
         qsort(localArgs, usedCount, 8u, (int(*)(const void*, const void*))Material_CompareShaderArgumentsForCombining);
@@ -3346,6 +3463,7 @@ char __cdecl Material_ParseShaderArguments(
     usedCount = 0;
     if (!Material_MatchToken(text, "{"))
         return 0;
+
     while (1)
     {
         token = Com_Parse(text)->token;
@@ -3965,12 +4083,11 @@ char __cdecl Material_LoadPassVertexDecl(
             return 0;
         for (insertIndex = routingIndex;
             insertIndex > 0
-            && dest[2 * insertIndex] >= source
-            && (dest[2 * insertIndex] != source || dest[2 * insertIndex + 1] >= resourceDest);
+            && routing[insertIndex - 1].source >= source
+            && (routing[insertIndex - 1].source != source || routing[insertIndex - 1].dest >= resourceDest);
             --insertIndex)
         {
-            //routing[insertIndex] = (MaterialStreamRouting)*&dest[2 * insertIndex];
-            routing[insertIndex] = *(MaterialStreamRouting *)&dest[2 * insertIndex];
+            routing[insertIndex] = routing[insertIndex - 1];
         }
         routing[insertIndex].source = source;
         routing[insertIndex].dest = resourceDest;
@@ -4019,8 +4136,10 @@ bool __cdecl Material_LoadPass(
     pass->stableArgCount = 0;
     pass->customSamplerFlags = 0;
     pass->args = 0;
+
     if (!Material_LoadPassStateMap(text, stateMap))
         return 0;
+
     argCount = 0;
     if (Material_LoadPassVertexShader(text, renderer, techFlags, &vertexParamSet, pass, 0x40u, &argCount, args))
     {
@@ -4036,40 +4155,25 @@ bool __cdecl Material_LoadPass(
             customArg = &args[firstArg];
             customCount = Material_CountArgsWithUpdateFrequency(MTL_UPDATE_CUSTOM, args, argCount, &firstArg);
             pass->customSamplerFlags = 0;
+
             customArgIndex = 0;
             while (customArgIndex < customCount)
             {
-                if (customArg->type != 4)
-                    MyAssertHandler(
-                        ".\\r_material_load_obj.cpp",
-                        5136,
-                        0,
-                        "%s\n\t(customArg->type) = %i",
-                        "(customArg->type == MTL_ARG_CODE_PIXEL_SAMPLER)",
-                        customArg->type);
+                iassert(customArg->type == MTL_ARG_CODE_PIXEL_SAMPLER);
                 iassert( customArg->dest != SAMPLER_INDEX_INVALID );
+
                 for (customSamplerIndex = 0; customSamplerIndex < 3; ++customSamplerIndex)
                 {
                     if (customArg->u.codeSampler == g_customSamplerSrc[customSamplerIndex])
                     {
-                        if (((1 << customSamplerIndex) & pass->customSamplerFlags) != 0)
-                            MyAssertHandler(
-                                ".\\r_material_load_obj.cpp",
-                                5144,
-                                0,
-                                "%s",
-                                "!(pass->customSamplerFlags & (1 << customSamplerIndex))");
-                        if (customArg->dest != g_customSamplerDest[customSamplerIndex])
-                            MyAssertHandler(
-                                ".\\r_material_load_obj.cpp",
-                                5145,
-                                0,
-                                "%s",
-                                "customArg->dest == g_customSamplerDest[customSamplerIndex]");
+                        iassert(!(pass->customSamplerFlags & (1 << customSamplerIndex)));
+                        iassert(customArg->dest == g_customSamplerDest[customSamplerIndex]);
+                        
                         pass->customSamplerFlags |= 1 << customSamplerIndex;
                         break;
                     }
                 }
+
                 iassert( customSamplerIndex != CUSTOM_SAMPLER_COUNT );
                 ++customArgIndex;
                 ++customArg;
@@ -4194,22 +4298,22 @@ MaterialTechnique *__cdecl Material_LoadTechnique(char *name, GfxRenderer render
             nameSize = strlen(name) + 1;
             technique = Material_Alloc(nameSize + 24 * passCount + 8);
             stateMapForPass = (MaterialStateMap**)&technique[20 * passCount + 8];
-            *technique = (unsigned __int8)&stateMapForPass[passCount];
-            memcpy((void*)*technique, name, nameSize);
-            *(technique + 2) = techFlags;
-            if (!strcmp((const char*)*technique, "zprepass"))
-                *(technique + 2) |= 4u;
+            *(DWORD*)technique = (DWORD)&stateMapForPass[passCount];
+            memcpy(*(unsigned char**)technique, name, nameSize);
+            *((_WORD *)technique + 2) = techFlags;
+            if (!strcmp(*(const char**)technique, "zprepass"))
+                *((_WORD *)technique + 2) |= 4u;
             for (passIndex = 0; passIndex < passCount; ++passIndex)
             {
                 vertexDecl = passes[passIndex].vertexDecl;
                 iassert( vertexDecl );
                 if (vertexDecl->hasOptionalSource)
                 {
-                    *(technique + 2) |= 8u;
+                    *((_WORD *)technique + 2) |= 8u;
                     break;
                 }
             }
-            *(technique + 3) = passCount;
+            *((_WORD *)technique + 3) = passCount;
             memcpy(technique + 8, passes, 20 * passCount);
             memcpy(stateMapForPass, stateMap, stateMapSize);
             return (MaterialTechnique*)technique;
@@ -5445,7 +5549,7 @@ bool __cdecl Material_FinishLoadingInstance(
             "mtlRaw->info.sortKey doesn't index 1 << MTL_SORT_PRIMARY_SORT_KEY_BITS\n\t%i not in [0, %i)",
             mtlRaw->info.sortKey,
             64);
-    textureTable = (MaterialTextureDefRaw*)(mtlRaw + mtlRaw->textureTableOffset);
+    textureTable = (MaterialTextureDefRaw*)((char*)mtlRaw + mtlRaw->textureTableOffset);
     for (textureIndex = 0; textureIndex < mtlRaw->textureCount; ++textureIndex)
     {
         if (!Material_FinishLoadingTexdef(mtlRaw, &textureTable[textureIndex], materialType, imageTrack))
@@ -5454,7 +5558,7 @@ bool __cdecl Material_FinishLoadingInstance(
     mtlLoadGlob.sortMtlRaw = mtlRaw;
     qsort(textureTable, mtlRaw->textureCount, 0xCu, (int(*)(const void*, const void*))CompareRawMaterialTextures);
     mtlLoadGlob.sortMtlRaw = 0;
-    constantTable = (MaterialConstantDefRaw*)(mtlRaw + mtlRaw->constantTableOffset);
+    constantTable = (MaterialConstantDefRaw*)((char*)mtlRaw + mtlRaw->constantTableOffset);
     for (constantIndex = 0; constantIndex < mtlRaw->constantCount; ++constantIndex)
     {
         if (!constantTable[constantIndex].nameOffset)
@@ -5463,7 +5567,7 @@ bool __cdecl Material_FinishLoadingInstance(
     mtlLoadGlob.sortMtlRaw = mtlRaw;
     qsort(constantTable, mtlRaw->constantCount, 0x14u, (int(*)(const void *, const void *))CompareRawMaterialTextures);
     mtlLoadGlob.sortMtlRaw = 0;
-    Com_sprintf(techniqueSetName, 0x100u, "%s%s", techniqueSetVertDeclPrefix, mtlRaw + mtlRaw->techSetNameOffset);
+    Com_sprintf(techniqueSetName, 0x100u, "%s%s", techniqueSetVertDeclPrefix, (char*) mtlRaw + mtlRaw->techSetNameOffset);
     *techniqueSet = Material_RegisterTechniqueSet(techniqueSetName);
     return *techniqueSet != 0;
 }
@@ -5786,7 +5890,6 @@ Material *__cdecl Material_LoadRaw(const MaterialRaw *mtlRaw, unsigned int mater
 {
     int v4; // edx
     unsigned int v5; // eax
-    unsigned int v6; // [esp+1Ch] [ebp-60h]
     float *literal; // [esp+34h] [ebp-48h]
     float *v8; // [esp+38h] [ebp-44h]
     unsigned int texIndex; // [esp+40h] [ebp-3Ch]
@@ -5812,12 +5915,11 @@ Material *__cdecl Material_LoadRaw(const MaterialRaw *mtlRaw, unsigned int mater
         return 0;
     name = (char*)mtlRaw + mtlRaw->info.nameOffset;
     prefixLen = g_materialTypeInfo[materialType].prefixLen;
-    v6 = strlen(name);
-    materialMem = Material_Alloc(prefixLen + v6 + 1 + 80);
+    materialMem = Material_Alloc(prefixLen + strlen(name) + 1 + sizeof(Material));
     material = (Material*)materialMem;
-    strDest = (char*)materialMem + 80;
+    strDest = (char*)materialMem + sizeof(Material);
     memcpy(strDest, g_materialTypeInfo[materialType].prefix, prefixLen);
-    memcpy(&strDest[prefixLen], name, v6 + 1);
+    memcpy(&strDest[prefixLen], name, strlen(name) + 1);
     material->info.name = strDest;
     iassert(!material->info.drawSurf.fields.materialSortedIndex);
     material->info.gameFlags = mtlRaw->info.gameFlags;
@@ -5850,7 +5952,7 @@ Material *__cdecl Material_LoadRaw(const MaterialRaw *mtlRaw, unsigned int mater
     if (mtlRaw->textureCount)
     {
         material->textureTable = (MaterialTextureDef*)Material_Alloc(12 * mtlRaw->textureCount);
-        textureTableRaw = (const MaterialTextureDefRaw*)(mtlRaw + mtlRaw->textureTableOffset);
+        textureTableRaw = (const MaterialTextureDefRaw*)((char*)mtlRaw + mtlRaw->textureTableOffset);
         for (texIndex = 0; texIndex < mtlRaw->textureCount; ++texIndex)
         {
             tableEntryName = (const char*)mtlRaw + textureTableRaw[texIndex].nameOffset;
@@ -5878,7 +5980,7 @@ Material *__cdecl Material_LoadRaw(const MaterialRaw *mtlRaw, unsigned int mater
     if (mtlRaw->constantCount)
     {
         material->constantTable = (MaterialConstantDef*)Material_Alloc(32 * mtlRaw->constantCount);
-        constantTableRaw = (const MaterialConstantDefRaw*)(mtlRaw + mtlRaw->constantTableOffset);
+        constantTableRaw = (const MaterialConstantDefRaw*)((char*)mtlRaw + mtlRaw->constantTableOffset);
         for (constIndex = 0; constIndex < mtlRaw->constantCount; ++constIndex)
         {
             constName = (char*)mtlRaw + constantTableRaw[constIndex].nameOffset;
@@ -6005,6 +6107,28 @@ static bool __cdecl Material_CachedShaderTextLess(const GfxCachedShaderText &cac
 
 void __cdecl Material_PreLoadAllShaderText()
 {
+    // LWSS: we are actually missing the entire shaders/ folder afaik. Instead, we have the shader_bin/ folder which are precompiled pixel and vertex shaders.
+    // Therefore, I have RE'd the "CoD4EffectsEd.exe" to see what it does, and that's where this code comes from.
+
+    // What we have in shader_bin/ is basically a list of compiled shaders, however the names are hashed and stored in this shader_names file.
+#ifdef KISAK_NO_FASTFILES
+
+    int file;
+    int fileLen = FS_FOpenFileRead("shader_bin/shader_names", &file);
+
+    if (fileLen >= 0)
+    {
+        FS_Read((unsigned char*)&g_vertexNamesCount, sizeof(int), file);
+        g_vertexNamesList = (ShaderBinNames *)Z_Malloc(sizeof(ShaderBinNames) * g_vertexNamesCount, "shader_names list", 69);
+        FS_Read((unsigned char *)g_vertexNamesList, sizeof(ShaderBinNames) * g_vertexNamesCount, file);
+
+        FS_Read((unsigned char *)&g_pixelNamesCount, sizeof(int), file);
+        g_pixelNamesList = (ShaderBinNames *)Z_Malloc(sizeof(ShaderBinNames) * g_pixelNamesCount, "shader_names list", 69);
+        FS_Read((unsigned char *)g_pixelNamesList, sizeof(ShaderBinNames) * g_pixelNamesCount, file);
+
+        FS_FCloseFile(file);
+    }
+#else
     int fileCountLib; // [esp+154h] [ebp-8h] BYREF
     const char **shaderListLib; // [esp+158h] [ebp-4h]
 
@@ -6019,6 +6143,7 @@ void __cdecl Material_PreLoadAllShaderText()
     //    Material_CachedShaderTextLess);
     std::sort(&mtlLoadGlob.cachedShaderText[0], &mtlLoadGlob.cachedShaderText[mtlLoadGlob.cachedShaderCount], Material_CachedShaderTextLess);
     FS_FreeFileList(shaderListLib);
+#endif
 }
 
 void Material_FreeAllLiterals()

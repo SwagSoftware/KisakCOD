@@ -322,8 +322,10 @@ void __cdecl CL_MapLoading(const char *mapname)
         LiveStorage_UploadStats();
         UI_CloseAllMenus(0);
         cl_serverLoadingMap = 1;
+#ifndef KISAK_NO_FASTFILES
         if (!com_sv_running->current.enabled)
             Cbuf_ExecuteBuffer(0, 0, "selectStringTableEntryInDvar mp/didyouknow.csv 0 didyouknow");
+#endif
         if (clientUIActives[0].connectionState >= 5 && !I_stricmp(cls.servername, "localhost"))
         {
             memset((uint8_t *)cls.updateInfoString, 0, sizeof(cls.updateInfoString));

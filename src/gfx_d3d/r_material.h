@@ -727,3 +727,14 @@ inline bool R_IsModelSurfaceType(int surfType)
 {
     return (surfType >= SF_BEGIN_XMODEL && surfType < SF_END_XMODEL);
 }
+
+struct ShaderBinNames
+{
+    int key;
+    int val;
+};
+
+extern int g_vertexNamesCount;
+extern ShaderBinNames *g_vertexNamesList;
+extern int g_pixelNamesCount;
+extern ShaderBinNames *g_pixelNamesList;

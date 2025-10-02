@@ -15,10 +15,6 @@ void __cdecl Com_RefreshVolumeModGroups_f()
 
 void __cdecl Com_LoadVolumeModGroups(VolumeModGroup *volumeModGroups)
 {
-    float v1; // [esp+8h] [ebp-208Ch]
-    char v2; // [esp+Fh] [ebp-2085h]
-    VolumeModGroup *v3; // [esp+14h] [ebp-2080h]
-    char *v4; // [esp+18h] [ebp-207Ch]
     char filename[68]; // [esp+2Ch] [ebp-2068h] BYREF
     signed int v6; // [esp+70h] [ebp-2024h]
     char buffer[8196]; // [esp+74h] [ebp-2020h] BYREF
@@ -70,19 +66,14 @@ void __cdecl Com_LoadVolumeModGroups(VolumeModGroup *volumeModGroups)
                                 32);
                             return;
                         }
-                        v4 = nptr;
-                        v3 = &volumeModGroups[i];
-                        do
-                        {
-                            v2 = *v4;
-                            v3->name[0] = *v4++;
-                            v3 = (v3 + 1);
-                        } while (v2);
+                        
+                        I_strncpyz(volumeModGroups[i].name, nptr, 64);
+
                         nptr = (char*)Com_Parse(&data_p);
                         if (!*nptr || *nptr == 125)
                             break;
-                        v1 = atof(nptr);
-                        volumeModGroups[i].value = v1;
+
+                        volumeModGroups[i].value = atof(nptr);
                     }
                     Com_EndParseSession();
                     Com_Error(
@@ -127,16 +118,8 @@ SpeakerMap *__cdecl Com_GetDefaultSoundAliasSpeakerMap()
 
 void __cdecl Com_LoadSoundAliasDefaults(snd_alias_build_s *alias, const char *sourceFile, const char *loadspec)
 {
-    char v3; // al
-    snd_alias_build_s *v4; // [esp+1Ch] [ebp-8h]
+    I_strncpyz(alias->szSourceFile, sourceFile, 64);
 
-    v4 = alias;
-    do
-    {
-        v3 = *sourceFile;
-        v4->szSourceFile[0] = *sourceFile++;
-        v4 = (v4 + 1);
-    } while (v3);
     alias->aliasName[0] = 0;
     alias->secondaryAliasName[0] = 0;
     alias->chainAliasName[0] = 0;
@@ -1712,7 +1695,7 @@ void __cdecl Com_ParseEntChannelFile(const char *buffer)
             break;
         if (value->token[0] && value->token[0] != 35)
         {
-            if (strlen(value->token) > 0x40)
+            if (strlen(value->token) >= 0x40)
             {
                 Com_EndParseSession();
                 Com_Error(
@@ -1730,16 +1713,10 @@ void __cdecl Com_ParseEntChannelFile(const char *buffer)
                     Com_Error(ERR_DROP, "duplicate channel name '%s' in file [%s].\n", value->token, "soundaliases/channels.def");
                 }
             }
-            v3 = value;
-            v2 = saLoadObjGlob.entChannels[saLoadObjGlob.entChannelCount];
-            do
-            {
-                v1 = v3->token[0];
-                *v2 = v3->token[0];
-                v3 = (v3 + 1);
-                ++v2;
-            } while (v1);
-            if (++saLoadObjGlob.entChannelCount > 64)
+
+            I_strncpyz(saLoadObjGlob.entChannels[saLoadObjGlob.entChannelCount], value->token, 64);
+
+            if (++saLoadObjGlob.entChannelCount >= 64)
             {
                 Com_EndParseSession();
                 Com_Error(ERR_DROP, "exceeded max number of channels (%d) in file [%s].\n", 64, "soundaliases/channels.def");
