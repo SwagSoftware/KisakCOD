@@ -1175,7 +1175,7 @@ void __cdecl SV_AddEntitiesVisibleFromPoint(float *org, int clientNum, snapshotE
     {
         clientpvs = CM_ClusterPVS(clientcluster);
         fogOpaqueDistSqrd = G_GetFogOpaqueDistSqrd();
-        if (fogOpaqueDistSqrd == 3.402823466385289e38)
+        if (fogOpaqueDistSqrd == FLT_MAX)
             fogOpaqueDistSqrd = 0.0;
         for (e = 0; ; ++e)
         {
@@ -1271,7 +1271,7 @@ void __cdecl SV_AddCachedEntitiesVisibleFromPoint(
     {
         v16 = CM_ClusterPVS(cluster);
         fogOpaqueDistSqrd = G_GetFogOpaqueDistSqrd();
-        if (fogOpaqueDistSqrd == 3.402823466385289e38)
+        if (fogOpaqueDistSqrd == FLT_MAX)
             fogOpaqueDistSqrd = 0.0;
         memset((unsigned __int8 *)dst, 0, 0x1000u);
         for (e = 0; e < from_num_entities; ++e)

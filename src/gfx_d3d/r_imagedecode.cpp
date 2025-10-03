@@ -365,14 +365,9 @@ void __cdecl Image_GetRawPixels(char *imageName, GfxRawImage *image)
         Com_Error(ERR_DROP, "image '%s' is missing", filepath);
     if (!Image_ValidateHeader(imageFile, filepath))
         Com_Error(ERR_DROP, "image '%s' is not valid", filepath);
-    v4 = imageName;
-    v3 = image;
-    do
-    {
-        v2 = *v4;
-        v3->name[0] = *v4++;
-        v3 = (v3 + 1);
-    } while (v2);
+
+    I_strncpyz(image->name, imageName, 64);
+
     image->width = imageFile->dimensions[0];
     image->height = imageFile->dimensions[1];
     image->pixels = (GfxRawPixel*)Z_Malloc(4 * image->height * image->width, "Image_GetRawPixels", 22);

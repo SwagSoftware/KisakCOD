@@ -103,7 +103,7 @@ static bool PickAabbSplitPlane(
         else
             v7 = v10;
         nextDist = v7;
-        while (nextDist < 3.402823466385289e38)
+        while (nextDist < FLT_MAX)
         {
             dist = nextDist;
             nextDist = FLT_MAX;

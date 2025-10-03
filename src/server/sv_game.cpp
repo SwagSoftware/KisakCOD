@@ -737,7 +737,7 @@ bool __cdecl SV_inSnapshot(const float *origin, int iEntityNum)
             return 0;
     }
     fogOpaqueDistSqrd = G_GetFogOpaqueDistSqrd();
-    return fogOpaqueDistSqrd == 3.402823466385289e38
+    return fogOpaqueDistSqrd == FLT_MAX
         || !BoxDistSqrdExceeds(ent->r.absmin, ent->r.absmax, origin, fogOpaqueDistSqrd);
 }
 

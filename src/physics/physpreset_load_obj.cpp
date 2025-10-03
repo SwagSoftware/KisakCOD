@@ -19,6 +19,20 @@ cspField_t physPresetFields[10] =
   { "tempDefaultToCylinder", 36, 5 }
 }; // idb
 
+struct PhysPresetLite // LWSS add custom struct to adhere to the above field offfsets
+{
+    float mass;   // 0
+    float bounce; // 4
+    float friction; // 8
+    int isFrictionInfinity; // 12
+    float bulletForceScale; // 16
+    float explosiveForceScale; // 20
+    const char *sndAliasPrefix; // 24
+    float piecesSpreadFraction; // 28
+    float piecesUpwardVelocity; // 32
+    bool tempDefaultToCylinder; // 36
+};
+
 void __cdecl PhysPreset_Strcpy(unsigned __int8 *member, const char *keyValue)
 {
     char v2; // [esp+3h] [ebp-25h]
@@ -46,22 +60,12 @@ void __cdecl PhysPreset_Strcpy(unsigned __int8 *member, const char *keyValue)
 
 PhysPreset *__cdecl PhysPresetLoadFile(const char *name, void *(__cdecl *Alloc)(int))
 {
-    float v3; // [esp+0h] [ebp-20A4h]
     char dest[64]; // [esp+24h] [ebp-2080h] BYREF
     char buffer[8192]; // [esp+64h] [ebp-2040h] BYREF
-    unsigned __int8 pStruct[4]; // [esp+2068h] [ebp-3Ch] BYREF
-    float v7; // [esp+206Ch] [ebp-38h]
-    float v8; // [esp+2070h] [ebp-34h]
-    int v9; // [esp+2074h] [ebp-30h]
-    float v10; // [esp+2078h] [ebp-2Ch]
-    float v11; // [esp+207Ch] [ebp-28h]
-    const char *v12; // [esp+2080h] [ebp-24h]
-    float v13; // [esp+2084h] [ebp-20h]
-    float v14; // [esp+2088h] [ebp-1Ch]
-    int v15; // [esp+208Ch] [ebp-18h]
-    float *v16; // [esp+2090h] [ebp-14h]
+    PhysPresetLite pStruct;
+    PhysPreset *physPreset; // [esp+2090h] [ebp-14h]
     char *last; // [esp+2094h] [ebp-10h]
-    signed int v18; // [esp+2098h] [ebp-Ch]
+    signed int filelen; // [esp+2098h] [ebp-Ch]
     int f; // [esp+209Ch] [ebp-8h] BYREF
     int len; // [esp+20A0h] [ebp-4h]
 
@@ -71,50 +75,46 @@ PhysPreset *__cdecl PhysPresetLoadFile(const char *name, void *(__cdecl *Alloc)(
         return 0;
     if (Com_sprintf(dest, 0x40u, "physic/%s", name) >= 0)
     {
-        v18 = FS_FOpenFileByMode(dest, &f, FS_READ);
-        if (v18 >= 0)
+        filelen = FS_FOpenFileByMode(dest, &f, FS_READ);
+        if (filelen >= 0)
         {
             FS_Read((unsigned __int8 *)buffer, len, f);
             buffer[len] = 0;
             if (!strncmp(buffer, last, len))
             {
-                if (v18 - len < 0x2000)
+                if (filelen - len < 0x2000)
                 {
-                    FS_Read((unsigned __int8 *)buffer, v18 - len, f);
-                    buffer[v18 - len] = 0;
+                    FS_Read((unsigned __int8 *)buffer, filelen - len, f);
+                    buffer[filelen - len] = 0;
                     FS_FCloseFile(f);
                     if (Info_Validate(buffer))
                     {
-                        *(float *)pStruct = 0.0;
-                        v7 = 0.0;
-                        v8 = 0.0;
-                        v9 = 0;
-                        v10 = 0.0;
-                        v11 = 0.0;
-                        v13 = 0.0;
-                        v14 = 0.0;
-                        v15 = 0;
-                        v12 = "";
+                        memset(&pStruct, 0, sizeof(pStruct));
+                        pStruct.sndAliasPrefix = "";
                         physAlloc = Alloc;
-                        if (ParseConfigStringToStruct(pStruct, physPresetFields, 10, buffer, 0, 0, PhysPreset_Strcpy))
+                        if (ParseConfigStringToStruct((unsigned char*)&pStruct, physPresetFields, 10, buffer, 0, 0, PhysPreset_Strcpy))
                         {
-                            v16 = (float *)Alloc(44);
-                            if (!v16)
-                                MyAssertHandler(".\\physics\\physpreset_load_obj.cpp", 126, 0, "%s", "physPreset");
-                            v16[2] = *(float *)pStruct;
-                            v16[3] = v7;
-                            if (v9)
-                                v3 = FLT_MAX;
+                            iassert(sizeof(PhysPreset) == 44);
+
+                            physPreset = (PhysPreset *)Alloc(sizeof(PhysPreset));
+
+                            iassert(physPreset);
+
+                            physPreset->mass = pStruct.mass;
+                            physPreset->bounce = pStruct.bounce;
+
+                            if (pStruct.isFrictionInfinity)
+                                physPreset->friction = FLT_MAX;
                             else
-                                v3 = v8;
-                            v16[4] = v3;
-                            v16[5] = v10;
-                            v16[6] = v11;
-                            *((_DWORD *)v16 + 7) = (_DWORD)v12;
-                            v16[8] = v13;
-                            v16[9] = v14;
-                            *((_BYTE *)v16 + 40) = v15;
-                            return (PhysPreset *)v16;
+                                physPreset->friction = pStruct.friction;
+
+                            physPreset->bulletForceScale = pStruct.bulletForceScale;
+                            physPreset->explosiveForceScale = pStruct.explosiveForceScale;
+                            physPreset->sndAliasPrefix = pStruct.sndAliasPrefix;
+                            physPreset->piecesSpreadFraction = pStruct.piecesSpreadFraction;
+                            physPreset->piecesUpwardVelocity = pStruct.piecesUpwardVelocity;
+                            physPreset->tempDefaultToCylinder = pStruct.tempDefaultToCylinder;
+                            return physPreset;
                         }
                         else
                         {

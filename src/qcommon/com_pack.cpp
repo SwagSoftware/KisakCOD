@@ -26,33 +26,35 @@ PackedUnitVec __cdecl Vec3PackUnitVec(const float *unitVec)
     testEncoding[3] = 0;
     do
     {
-        encodeScale = 32385.0 / (testEncoding[3] - -192.0);
-        testEncoding[0] = (normalized[0] * encodeScale + 127.5);
-        testEncoding[1] = (normalized[1] * encodeScale + 127.5);
-        testEncoding[2] = (normalized[2] * encodeScale + 127.5);
-        decodeScale = (testEncoding[3] - -192.0) / 32385.0;
-        decoded[0] = (testEncoding[0] - 127.0) * decodeScale;
-        decoded[1] = (testEncoding[1] - 127.0) * decodeScale;
-        decoded[2] = (testEncoding[2] - 127.0) * decodeScale;
+        encodeScale = 32385.0 / ((double)testEncoding[3] - -192.0);
+        testEncoding[0] = (int)(normalized[0] * encodeScale + 127.5);
+        testEncoding[1] = (int)(normalized[1] * encodeScale + 127.5);
+        testEncoding[2] = (int)(normalized[2] * encodeScale + 127.5);
+        decodeScale = ((double)testEncoding[3] - -192.0) / 32385.0;
+        decoded[0] = ((double)testEncoding[0] - 127.0) * decodeScale;
+        decoded[1] = ((double)testEncoding[1] - 127.0) * decodeScale;
+        decoded[2] = ((double)testEncoding[2] - 127.0) * decodeScale;
         v5 = Vec3Normalize(decoded) - 1.0;
-        v3 = I_fabs(v5);
+        v3 = fabs(v5);
         lenError = v3;
-        if (v3 < EQUAL_EPSILON)
+        if (v3 < 0.001000000047497451)
         {
-            v4 = Vec3Dot(decoded, normalized) - 1.0;
-            v2 = I_fabs(v4);
-            if (v2 < bestDirError || v2 == bestDirError && lenError < bestLenError)
+            v4 = Vec3Dot(decoded, normalized) - 1.0f;
+            v2 = fabs(v4);
+            if (v2 < (double)bestDirError || v2 == bestDirError && lenError < (double)bestLenError)
             {
                 bestDirError = v2;
                 bestLenError = lenError;
-                out.packed = *testEncoding;
+                out.packed = *(unsigned int *)testEncoding;
                 if (lenError + v2 == 0.0)
-                    return out;
+                    return *(PackedUnitVec *)testEncoding;
             }
         }
         ++testEncoding[3];
     } while (testEncoding[3]);
-    iassert( out.packed != 0 );
+
+    iassert(out.packed != 0);
+
     return out;
 }
 

@@ -344,97 +344,115 @@ void __cdecl XModelReadSurface_BuildCollisionTree(
     free(options.treeNodePool);
 }
 
+static void __cdecl XSurfaceTransferGetTexCoordRange(const XVertexInfo_s *v, int vertCount, float *texCoordAv)
+{
+    float v3; // [esp+8h] [ebp-1Ch]
+    float v4; // [esp+Ch] [ebp-18h]
+    int vertIndex; // [esp+1Ch] [ebp-8h]
+    char texCoordUnitRange; // [esp+20h] [ebp-4h]
+    char texCoordUnitRange_1; // [esp+21h] [ebp-3h]
+
+    texCoordAv[0] = 0.0f;
+    texCoordAv[1] = 0.0f;
+    texCoordUnitRange = 1;
+    texCoordUnitRange_1 = 1;
+    for (vertIndex = 0; vertIndex < vertCount; ++vertIndex)
+    {
+        *texCoordAv = *texCoordAv + v->texCoordX;
+        texCoordAv[1] = texCoordAv[1] + v->texCoordY;
+        if (v->texCoordX < 0.0 || v->texCoordX > 1.0)
+            texCoordUnitRange = 0;
+        if (v->texCoordY < 0.0 || v->texCoordY > 1.0)
+            texCoordUnitRange_1 = 0;
+    }
+    *texCoordAv = (float)(1.0 / (float)vertCount) * *texCoordAv;
+    texCoordAv[1] = (float)(1.0 / (float)vertCount) * texCoordAv[1];
+    if (texCoordUnitRange)
+    {
+        *texCoordAv = 0.0f;
+    }
+    else
+    {
+        v4 = floor((float)(*texCoordAv + 0.5));
+        *texCoordAv = v4;
+    }
+    if (texCoordUnitRange_1)
+    {
+        texCoordAv[1] = 0.0f;
+    }
+    else
+    {
+        v3 = floor((float)(texCoordAv[1] + 0.5));
+        texCoordAv[1] = v3;
+    }
+}
+
+static void __cdecl XSurfaceTransfer_Position_GfxPackedVertex_(GfxPackedVertex *out, const XVertexInfo_s *v)
+{
+    out->xyz[0] = v->offset[0];
+    out->xyz[1] = v->offset[1];
+    out->xyz[2] = v->offset[2];
+}
+
+static void __cdecl XSurfaceTransfer_BinormalSign_GfxPackedVertex_(GfxPackedVertex *out, const XVertexInfo_s *v)
+{
+    float binormal[3]; // [esp+8h] [ebp-Ch] BYREF
+
+    Vec3Cross(v->normal, v->tangent, binormal);
+    if (Vec3Dot(binormal, v->binormal) < 0.0)
+        out->binormalSign = -1.0f;
+    else
+        out->binormalSign = 1.0f;
+}
+
+static void __cdecl XSurfaceTransfer_NormalTangent_GfxPackedVertex_(GfxPackedVertex *out, const XVertexInfo_s *v)
+{
+    out->normal = Vec3PackUnitVec(v->normal);
+    out->tangent = Vec3PackUnitVec(v->tangent);
+}
+
+static void __cdecl XSurfaceTransfer_Texcoord_GfxPackedVertex_(
+    GfxPackedVertex *out,
+    const XVertexInfo_s *v,
+    const float *texCoordAv)
+{
+    float texCoord[2]; // [esp+4h] [ebp-8h] BYREF
+
+    texCoord[0] = v->texCoordX - *texCoordAv;
+    texCoord[1] = v->texCoordY - texCoordAv[1];
+    out->texCoord = Vec2PackTexCoords(texCoord);
+}
+
+static void __cdecl XSurfaceTransfer_Color_GfxPackedVertex_(GfxPackedVertex *out, const XVertexInfo_s *v)
+{
+    out->color.packed = *(_DWORD *)v->color;
+}
+
 void __cdecl XSurfaceTransfer(
     const XVertexBuffer *surfVerts,
     GfxPackedVertex *verts0,
     GfxPackedVertex *verts1,
     int vertCount)
 {
-    float v4; // [esp+8h] [ebp-54h]
-    float v5; // [esp+Ch] [ebp-50h]
-    float v6; // [esp+10h] [ebp-4Ch]
-    GfxPackedVertex *v7; // [esp+14h] [ebp-48h]
-    const float *offset; // [esp+18h] [ebp-44h]
-    float v9; // [esp+1Ch] [ebp-40h]
-    float v10; // [esp+20h] [ebp-3Ch]
-    float v11; // [esp+24h] [ebp-38h]
-    PackedUnitVec v12; // [esp+28h] [ebp-34h]
-    PackedTexCoords v13; // [esp+2Ch] [ebp-30h]
-    PackedUnitVec v14; // [esp+30h] [ebp-2Ch]
-    float texCoordAv; // [esp+34h] [ebp-28h]
-    float texCoordAva; // [esp+34h] [ebp-28h]
-    float texCoordAvb; // [esp+34h] [ebp-28h]
-    float texCoordAv_4; // [esp+38h] [ebp-24h]
-    float texCoordAv_4a; // [esp+38h] [ebp-24h]
-    float texCoordAv_4b; // [esp+38h] [ebp-24h]
-    float binormal[3]; // [esp+3Ch] [ebp-20h] BYREF
-    float texCoord[2]; // [esp+48h] [ebp-14h] BYREF
-    bool texCoordUnitRange[4]; // [esp+50h] [ebp-Ch]
-    int vertIndex; // [esp+54h] [ebp-8h]
-    const XVertexInfo_s *v; // [esp+58h] [ebp-4h]
+    float texCoordAv[2];
+    const XVertexInfo_s *v;
 
-    if (!vertCount)
-        MyAssertHandler(".\\r_xsurface.cpp", 116, 0, "%s", "vertCount");
-    texCoordAv = 0.0;
-    texCoordAv_4 = 0.0;
-    texCoordUnitRange[0] = 1;
-    texCoordUnitRange[1] = 1;
+    iassert(vertCount);
+
     v = &surfVerts->v;
-    for (vertIndex = 0; vertIndex < vertCount; ++vertIndex)
+
+    XSurfaceTransferGetTexCoordRange(&surfVerts->v, vertCount, texCoordAv);
+
+    for (int vertIndex = 0; vertIndex < vertCount; ++vertIndex)
     {
-        texCoordAv = texCoordAv + v->texCoordX;
-        texCoordAv_4 = texCoordAv_4 + v->texCoordY;
-        if (v->texCoordX < 0.0 || v->texCoordX > 1.0)
-            texCoordUnitRange[0] = 0;
-        if (v->texCoordY < 0.0 || v->texCoordY > 1.0)
-            texCoordUnitRange[1] = 0;
-    }
-    v11 = 1.0 / vertCount;
-    texCoordAva = v11 * texCoordAv;
-    texCoordAv_4a = v11 * texCoordAv_4;
-    if (texCoordUnitRange[0])
-    {
-        texCoordAvb = 0.0;
-    }
-    else
-    {
-        v10 = texCoordAva + 0.5;
-        v6 = floor(v10);
-        texCoordAvb = v6;
-    }
-    if (texCoordUnitRange[1])
-    {
-        texCoordAv_4b = 0.0;
-    }
-    else
-    {
-        v9 = texCoordAv_4a + 0.5;
-        v5 = floor(v9);
-        texCoordAv_4b = v5;
-    }
-    v = &surfVerts->v;
-    for (vertIndex = 0; vertIndex < vertCount; ++vertIndex)
-    {
-        v7 = &verts0[vertIndex];
-        offset = v->offset;
-        v7->xyz[0] = offset[0];
-        v7->xyz[1] = offset[1];
-        v7->xyz[2] = offset[2];
-        Vec3Cross(v->normal, v->tangent, binormal);
-        if (Vec3Dot(binormal, v->binormal) < 0.0)
-            v4 = -1.0;
-        else
-            v4 = 1.0;
-        verts0[vertIndex].binormalSign = v4;
-        v14.packed = Vec3PackUnitVec(v->normal).packed;
-        verts1[vertIndex].normal = v14;
-        verts1[vertIndex].color.packed = *v->color;
-        texCoord[0] = v->texCoordX - texCoordAvb;
-        texCoord[1] = v->texCoordY - texCoordAv_4b;
-        v13.packed = Vec2PackTexCoords(texCoord).packed;
-        verts1[vertIndex].texCoord = v13;
-        v12.packed = Vec3PackUnitVec(v->tangent).packed;
-        verts1[vertIndex].tangent = v12;
+        XSurfaceTransfer_Position_GfxPackedVertex_(&verts0[vertIndex], v);
+        XSurfaceTransfer_BinormalSign_GfxPackedVertex_(&verts0[vertIndex], v);
+        XSurfaceTransfer_NormalTangent_GfxPackedVertex_(&verts1[vertIndex], v);
+        XSurfaceTransfer_Texcoord_GfxPackedVertex_(&verts1[vertIndex], v, texCoordAv);
+        //XSurfaceTransfer_Color_GfxPackedVertex_(&verts1[vertIndex], v);
+
+        verts1[vertIndex].tangent.packed = Vec3PackUnitVec(v->tangent).packed;
+
         v = (const XVertexInfo_s *)((char *)v + 4 * v->numWeights + 64);
     }
 }
@@ -478,10 +496,6 @@ void __cdecl XModelReadSurface(XModel *model, unsigned __int16 **pos, void *(__c
     float v24; // [esp+64h] [ebp-6DCh]
     float v25; // [esp+68h] [ebp-6D8h]
     float v26; // [esp+6Ch] [ebp-6D4h]
-    __int16 v27; // [esp+70h] [ebp-6D0h]
-    __int16 v28; // [esp+74h] [ebp-6CCh]
-    unsigned __int16 v29; // [esp+78h] [ebp-6C8h]
-    unsigned __int16 v30; // [esp+7Ch] [ebp-6C4h]
     unsigned __int16 v31; // [esp+80h] [ebp-6C0h]
     __int16 v32; // [esp+84h] [ebp-6BCh]
     float check[3]; // [esp+88h] [ebp-6B8h] BYREF
@@ -523,44 +537,43 @@ void __cdecl XModelReadSurface(XModel *model, unsigned __int16 **pos, void *(__c
     XVertexBuffer *surfVerts; // [esp+738h] [ebp-8h]
     XVertexInfo3 *vert3Out; // [esp+73Ch] [ebp-4h]
 
+    iassert(sizeof(XVertexInfo_s) == 64); // lwss add
+
     memset(weightCount, 0, sizeof(weightCount));
-    surface->tileMode = **pos;
-    *pos = (*pos + 1);
+    surface->tileMode = *(_BYTE *)*pos;
+    *pos = (unsigned __int16 *)((char *)*pos + 1);
     v32 = *(*pos)++;
     v31 = *(*pos)++;
     surface->vertCount = v31;
-    v30 = *(*pos)++;
-    surface->triCount = v30;
-    if (!surface->triCount)
-        MyAssertHandler(
-            ".\\r_xsurface_load_obj.cpp",
-            455,
-            0,
-            "%s\n\t(surface->triCount) = %i",
-            "(surface->triCount > 0)",
-            surface->triCount);
+    surface->triCount = *(*pos)++;
+
+    iassert(surface->triCount > 0);
+
     vertListCount = 0;
     rigidVertCount = 0;
+
     while (1)
     {
-        if (vertListCount >= 0x81)
-            MyAssertHandler(".\\r_xsurface_load_obj.cpp", 462, 0, "%s", "vertListCount < ARRAY_COUNT( rigidVertListArray )");
+        iassert(vertListCount < ARRAY_COUNT(rigidVertListArray));
+
         rigidVertList = &rigidVertListArray[vertListCount];
-        v29 = *(*pos)++;
-        rigidVertList->vertCount = v29;
+        rigidVertList->vertCount = *(*pos)++;
         if (!rigidVertList->vertCount)
             break;
-        v28 = *(*pos)++;
-        localBoneIndex = v28;
-        rigidVertList->boneOffset = v28 << 6;
+        localBoneIndex = *(*pos)++;
+        rigidVertList->boneOffset = localBoneIndex << 6;
         rigidVertCount += rigidVertList->vertCount;
         ++vertListCount;
     }
+
     vertCount = surface->vertCount;
     deformed = rigidVertCount != vertCount;
+
     if (rigidVertCount != vertCount)
         vertListCount = 0;
+
     surface->deformed = deformed;
+
     if (vertListCount == 1)
     {
         numblends = 0;
@@ -569,23 +582,24 @@ void __cdecl XModelReadSurface(XModel *model, unsigned __int16 **pos, void *(__c
     }
     else
     {
-        v27 = *(*pos)++;
-        numblends = v27;
+        numblends = *(*pos)++;
     }
+
     size = (surface->vertCount << 6) + 4 * numblends;
     surfVerts = (XVertexBuffer*)Hunk_AllocateTempMemory(size, "XModelReadSurface");
     verts = &surfVerts->v;
     for (j = 0; j < surface->vertCount; ++j)
     {
-        v26 = **pos;
+        v26 = *(float*)*pos;
         *pos += 2;
         verts->normal[0] = v26;
-        v25 = **pos;
+        v25 = *(float *)*pos;
         *pos += 2;
         verts->normal[1] = v25;
-        v24 = **pos;
+        v24 = *(float *)*pos;
         *pos += 2;
         verts->normal[2] = v24;
+
         if (r_modelVertColor->current.enabled)
         {
             Byte4CopyBgraToVertexColor((unsigned char *)*pos, verts->color);
@@ -594,91 +608,88 @@ void __cdecl XModelReadSurface(XModel *model, unsigned __int16 **pos, void *(__c
         {
             *verts->color = -1;
         }
+
         *pos += 2;
-        v23 = **pos;
+        v23 = *(float *)*pos;
         *pos += 2;
         verts->texCoordX = v23;
-        v22 = **pos;
+        v22 = *(float *)*pos;
         *pos += 2;
         verts->texCoordY = v22;
-        v21 = **pos;
+        v21 = *(float *)*pos;
         *pos += 2;
         verts->binormal[0] = v21;
-        v20 = **pos;
+        v20 = *(float *)*pos;
         *pos += 2;
         verts->binormal[1] = v20;
-        v19 = **pos;
+        v19 = *(float *)*pos;
         *pos += 2;
         verts->binormal[2] = v19;
-        v18 = **pos;
+        v18 = *(float *)*pos;
         *pos += 2;
         verts->tangent[0] = v18;
-        v17 = **pos;
+        v17 = *(float *)*pos;
         *pos += 2;
         verts->tangent[1] = v17;
-        v16 = **pos;
+        v16 = *(float *)*pos;
         *pos += 2;
         verts->tangent[2] = v16;
+
         check[0] = Vec3Dot(verts->normal, verts->tangent);
         check[1] = Vec3Dot(verts->tangent, verts->binormal);
         check[2] = Vec3Dot(verts->binormal, verts->normal);
-        if (!VecNCompareCustomEpsilon(check, vec3_origin, 0.0020000001f, 3))
-            MyAssertHandler(
-                ".\\r_xsurface_load_obj.cpp",
-                533,
-                0,
-                "%s",
-                "VecNCompareCustomEpsilon( check, vec3_origin, EQUAL_EPSILON * 2, 3 )");
+
+        iassert(VecNCompareCustomEpsilon(check, vec3_origin, EQUAL_EPSILON * 2, 3));
+
         if (vertListCount == 1)
         {
-            if (deformed)
-                MyAssertHandler(".\\r_xsurface_load_obj.cpp", 571, 0, "%s", "!deformed");
+            iassert(!deformed);
             verts->numWeights = 0;
             verts->boneOffset = rigidVertListArray[0].boneOffset;
-            v11 = **pos;
+            v11 = *(float *)*pos;
             *pos += 2;
             verts->offset[0] = v11;
-            v10 = **pos;
+            v10 = *(float *)*pos;
             *pos += 2;
             verts->offset[1] = v10;
-            v9 = **pos;
+            v9 = *(float *)*pos;
             *pos += 2;
             verts->offset[2] = v9;
             ++verts;
         }
         else
         {
-            numWeights = **pos;
-            *pos = (*pos + 1);
+            numWeights = *(_BYTE *)*pos;
+            *pos = (unsigned __int16 *)((char *)*pos + 1);
             verts->numWeights = numWeights;
-            if (numWeights >= 4u)
-                MyAssertHandler(".\\r_xsurface_load_obj.cpp", 543, 0, "%s\n\t(numWeights) = %i", "(numWeights < 4)", numWeights);
+            iassert(numWeights < 4);
             ++weightCount[numWeights];
             v15 = *(*pos)++;
             blendBoneIndex = v15;
             surface->partBits[v15 >> 5] |= 0x80000000 >> (v15 & 0x1F);
             blendBoneOffset = blendBoneIndex << 6;
-            verts->boneOffset = blendBoneIndex << 6;
-            if (blendBoneOffset != verts->boneOffset)
-                MyAssertHandler(".\\r_xsurface_load_obj.cpp", 550, 0, "%s", "blendBoneOffset == verts->boneOffset");
-            v14 = **pos;
+            verts->boneOffset = (_WORD)blendBoneIndex << 6;
+
+            iassert(blendBoneOffset == verts->boneOffset);
+
+            v14 = *(float *)*pos;
             *pos += 2;
             verts->offset[0] = v14;
-            v13 = **pos;
+            v13 = *(float *)*pos;
             *pos += 2;
             verts->offset[1] = v13;
-            v12 = **pos;
+            v12 = *(float *)*pos;
             *pos += 2;
             verts->offset[2] = v12;
             ++verts;
             if (numWeights)
             {
-                if (!deformed)
-                    MyAssertHandler(".\\r_xsurface_load_obj.cpp", 560, 0, "%s", "deformed");
+                iassert(deformed);
+
                 for (i = 0; i < numWeights; ++i)
                 {
                     ReadBlend(surface, surface->partBits, (XBlendLoadInfo*)verts, pos);
-                    verts = (verts + 4);
+                    verts = (XVertexInfo_s*)((char *)verts + 4);
                 }
             }
         }
@@ -686,14 +697,15 @@ void __cdecl XModelReadSurface(XModel *model, unsigned __int16 **pos, void *(__c
     allocCount = (surface->triCount + 1) & 0xFFFFFFFE;
     sizeInBytes = 6 * (surface->triCount + 1);
     surface->triIndices = (unsigned short*)Alloc(sizeInBytes);
-    if (!surface->triIndices)
-        MyAssertHandler(".\\r_xsurface_load_obj.cpp", 599, 0, "%s", "surface->triIndices");
+
+    iassert(surface->triIndices);
+
     for (vertIndex = 0; vertIndex < 3 * surface->triCount; ++vertIndex)
     {
         v8 = *(*pos)++;
         surface->triIndices[vertIndex] = v8;
-        if (surface->triIndices[vertIndex] >= surface->vertCount)
-            MyAssertHandler(".\\r_xsurface_load_obj.cpp", 604, 0, "%s", "surface->triIndices[vertIndex] < surface->vertCount");
+
+        iassert(surface->triIndices[vertIndex] < surface->vertCount);
     }
     triIndex = 0;
     endIndex = 0;
@@ -701,38 +713,38 @@ void __cdecl XModelReadSurface(XModel *model, unsigned __int16 **pos, void *(__c
     {
         startTriIndex = triIndex;
         rigidVertListArray[j].triOffset = triIndex;
-        if (rigidVertListArray[j].triOffset != startTriIndex)
-            MyAssertHandler(".\\r_xsurface_load_obj.cpp", 613, 0, "%s", "rigidVertListArray[j].triOffset == startTriIndex");
+
+        iassert(rigidVertListArray[j].triOffset == startTriIndex);
+
         endIndex += rigidVertListArray[j].vertCount;
         while (triIndex < surface->triCount && surface->triIndices[3 * triIndex] < endIndex)
             ++triIndex;
         rigidVertListArray[j].triCount = triIndex - startTriIndex;
-        if (rigidVertListArray[j].triCount != triIndex - startTriIndex)
-            MyAssertHandler(
-                ".\\r_xsurface_load_obj.cpp",
-                618,
-                0,
-                "%s",
-                "rigidVertListArray[j].triCount == triIndex - startTriIndex");
+
+        iassert(rigidVertListArray[j].triCount == triIndex - startTriIndex);
     }
+
     if (allocCount != surface->triCount)
     {
-        if (allocCount != surface->triCount + 1)
-            MyAssertHandler(".\\r_xsurface_load_obj.cpp", 623, 1, "%s", "allocCount == surface->triCount + 1");
+        iassert(allocCount == surface->triCount + 1);
+
         surface->triIndices[vertIndex] = surface->triIndices[vertIndex - 1];
         surface->triIndices[vertIndex + 1] = surface->triIndices[vertIndex - 1];
         surface->triIndices[vertIndex + 2] = surface->triIndices[vertIndex - 1];
         ++surface->triCount;
     }
+
     if (vertListCount)
         v7 = (XRigidVertList *)Alloc(12 * vertListCount);
     else
         v7 = 0;
+
     surface->vertList = v7;
     surface->vertListCount = vertListCount;
     memcpy(surface->vertList, rigidVertListArray, 12 * vertListCount);
     vertexBytes = 32 * surface->vertCount;
     surface->verts0 = (GfxPackedVertex *)Alloc(vertexBytes);
+    memset(surface->verts0, 0, vertexBytes); // Add from blops
     model->memUsage += vertexBytes;
     surfaceVerts1 = surface->verts0;
     XSurfaceTransfer(surfVerts, surface->verts0, surfaceVerts1, surface->vertCount);
@@ -833,7 +845,7 @@ void __cdecl XModelReadSurface(XModel *model, unsigned __int16 **pos, void *(__c
                     blendOut->boneOffset = LOWORD(verts->normal[0]);
                     blendOut->boneWeight = HIWORD(verts->normal[0]);
                     ++blendOut;
-                    verts = (verts + 4);
+                    verts = (XVertexInfo_s*)((char*)verts + 4);
                 }
             }
         }
@@ -913,13 +925,8 @@ void __cdecl XModelReadSurface(XModel *model, unsigned __int16 **pos, void *(__c
                 ++vert3Out;
             }
         }
-        if (vertsBlendOut - surface->vertInfo.vertsBlend != size)
-            MyAssertHandler(
-                ".\\r_xsurface_load_obj.cpp",
-                845,
-                0,
-                "%s",
-                "(byte *)vertsBlendOut - (byte *)(surface->vertInfo.vertsBlend) == size");
+
+        iassert((byte *)vertsBlendOut - (byte *)(surface->vertInfo.vertsBlend) == size);
     }
     if (surface->deformed != (surface->vertListCount == 0))
         MyAssertHandler(".\\r_xsurface_load_obj.cpp", 848, 0, "%s", "surface->deformed == (surface->vertListCount == 0)");
@@ -1027,7 +1034,7 @@ XModelSurfs *__cdecl R_XModelSurfsLoadFile(
                         size = 56 * modelNumsurfs + 20;
                         modelSurfs = (XModelSurfs*)Alloc(size);
                         model->memUsage += size;
-                        modelSurfs->surfs = modelSurfs[1].surfs;
+                        modelSurfs->surfs = (XSurface*)&modelSurfs[1];
                         XModelReadSurfaces(model, name, modelSurfs, modelSurfs->partBits, modelNumsurfs, (unsigned short**)&pos, Alloc);
                         FS_FreeFile((char*)buf);
                         if (!modelSurfs)
@@ -1679,7 +1686,6 @@ void __cdecl XModelCalcBasePose(XModelPartsLoad *modelParts)
         quatTrans->trans[2] = 0.0f;
 
         quatTrans->transWeight = 2.0f;
-        --i;
         ++quatTrans;
     }
 

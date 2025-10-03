@@ -567,14 +567,14 @@ const char *__cdecl Dvar_DomainToString_Internal(
         _snprintf((char *)outBuffer, outBufferLen, "Domain is 0 or 1");
         break;
     case 1u:
-        if (domain.value.min == -3.402823466385289e38)
+        if (domain.value.min == -FLT_MAX)
         {
-            if (domain.value.max == 3.402823466385289e38)
+            if (domain.value.max == FLT_MAX)
                 _snprintf((char *)outBuffer, outBufferLen, "Domain is any number");
             else
                 _snprintf((char *)outBuffer, outBufferLen, "Domain is any number %g or smaller", domain.value.max);
         }
-        else if (domain.value.max == 3.402823466385289e38)
+        else if (domain.value.max == FLT_MAX)
         {
             _snprintf((char *)outBuffer, outBufferLen, "Domain is any number %g or bigger", domain.value.min);
         }
@@ -674,9 +674,9 @@ const char *__cdecl Dvar_DomainToString(
 
 void __cdecl Dvar_VectorDomainToString(int components, DvarLimits domain, char *outBuffer, unsigned int outBufferLen)
 {
-    if (domain.value.min == -3.402823466385289e38)
+    if (domain.value.min == -FLT_MAX)
     {
-        if (domain.value.max == 3.402823466385289e38)
+        if (domain.value.max == FLT_MAX)
             _snprintf(outBuffer, outBufferLen, "Domain is any %iD vector", components);
         else
             _snprintf(
@@ -686,7 +686,7 @@ void __cdecl Dvar_VectorDomainToString(int components, DvarLimits domain, char *
                 components,
                 domain.value.max);
     }
-    else if (domain.value.max == 3.402823466385289e38)
+    else if (domain.value.max == FLT_MAX)
     {
         _snprintf(
             outBuffer,
