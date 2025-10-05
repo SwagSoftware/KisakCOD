@@ -18,3 +18,4 @@ static const int outdoorMapSize[3] =
 int Outdoor_UpdateTransforms();
 void __cdecl R_RegisterOutdoorImage(struct GfxWorld *world, const float *outdoorMin, const float *outdoorMax);
 void __cdecl Outdoor_SetRendererOutdoorLookupMatrix(struct GfxWorld *world);
+void __cdecl R_GenerateOutdoorImage(struct GfxImage *outdoorImage);

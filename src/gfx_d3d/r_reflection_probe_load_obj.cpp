@@ -25,7 +25,7 @@ void R_CreateDefaultProbe()
     v2 = 0;
     while (v2 != 131064)
     {
-        *pixels = -65536;
+        *(_DWORD *)pixels = -65536;
         v2 += 4;
         pixels += 4;
     }

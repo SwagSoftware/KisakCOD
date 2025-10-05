@@ -28,6 +28,30 @@ struct DiskLeaf_Version14 // sizeof=0x24
     int unused2;
 };
 
+struct DiskCollPartition // sizeof=0xC
+{
+    unsigned __int16 checkStamp;
+    unsigned __int8 triCount;
+    unsigned __int8 borderCount;
+    int firstTriIndex;
+    int firstBorderIndex;
+};
+
+union DiskCollAabbTree_u // sizeof=0x4
+{                                       // ...
+    int firstChildIndex;
+    int partitionIndex;
+};
+
+struct DiskCollAabbTree // sizeof=0x20
+{
+    float origin[3];
+    float halfSize[3];
+    unsigned __int16 materialIndex;
+    unsigned __int16 childCount;
+    DiskCollAabbTree_u u;
+};
+
 struct dbrush_t // sizeof=0x4
 {
     __int16 numSides;
@@ -322,15 +346,11 @@ void __cdecl CM_LoadMapFromBsp(const char *name, bool usePvs)
     const char *v4; // [esp+Ch] [ebp-18h]
     unsigned int version; // [esp+20h] [ebp-4h]
 
-    Com_Memset(&cm, 0, 284);
+    Com_Memset(&cm, 0, sizeof(clipMap_t));
     cm.name = (const char *)CM_Hunk_Alloc(strlen(name) + 1, "CM_LoadMapFromBsp", 25);
-    v4 = name;
-    v3 = (char *)cm.name;
-    do
-    {
-        v2 = *v4;
-        *v3++ = *v4++;
-    } while (v2);
+
+    I_strncpyz((char*)cm.name, name, strlen(name));
+
     version = Com_GetBspVersion();
     CMod_LoadMaterials();
     CMod_LoadPlanes();
@@ -391,7 +411,7 @@ void __cdecl CMod_LoadPlanes()
     cplane_s *out; // [esp+10h] [ebp-1Ch]
     unsigned int planeIter; // [esp+14h] [ebp-18h]
     unsigned __int8 bits; // [esp+1Fh] [ebp-Dh]
-    char *in; // [esp+20h] [ebp-Ch]
+    char *in; // [esp+20h] [ebp-Ch] // KISAKTODO: assign struct type
     unsigned int axisIter; // [esp+24h] [ebp-8h]
     unsigned int count; // [esp+28h] [ebp-4h] BYREF
 
@@ -447,33 +467,28 @@ bool __cdecl CMod_HasSpawnString(const SpawnVar *userData, const char *key)
     return G_SpawnString(userData, key, "", &value) != 0;
 }
 
-int CMod_LoadMaterials()
+void CMod_LoadMaterials()
 {
-    int result; // eax
     dmaterial_t *in; // [esp+4h] [ebp-Ch]
     unsigned int matIndex; // [esp+8h] [ebp-8h]
     unsigned int count; // [esp+Ch] [ebp-4h] BYREF
 
-    in = (dmaterial_t*)Com_GetBspLump(LUMP_MATERIALS, 0x48u, &count);
+    in = (dmaterial_t *)Com_GetBspLump(LUMP_MATERIALS, 0x48u, &count);
     if (!count)
         Com_Error(ERR_DROP, "Map with no materials");
-    cm.materials = (dmaterial_t*)(CM_Hunk_Alloc(72 * (count + 1), "CMod_LoadMaterials", 25) + 72);
+    cm.materials = (dmaterial_t *)(CM_Hunk_Alloc(72 * (count + 1), "CMod_LoadMaterials", 25) + 72);
     cm.numMaterials = count;
     Com_Memcpy(cm.materials->material, in->material, 72 * count);
     for (matIndex = 0; matIndex < cm.numMaterials; ++matIndex)
-    {
-        result = 72 * matIndex;
         cm.materials[matIndex].contentFlags &= 0xDFFFFFFB;
-    }
-    return result;
 }
 
-cNode_t *CMod_LoadNodes()
+void CMod_LoadNodes()
 {
     cNode_t *result; // eax
     int j; // [esp+0h] [ebp-1Ch]
     cNode_t *out; // [esp+4h] [ebp-18h]
-    char *in; // [esp+Ch] [ebp-10h]
+    char *in; // [esp+Ch] [ebp-10h] // KISAKTODO: assign struct type (idk what it is)
     unsigned int nodeIter; // [esp+10h] [ebp-Ch]
     int child; // [esp+14h] [ebp-8h]
     unsigned int count; // [esp+18h] [ebp-4h] BYREF
@@ -495,10 +510,9 @@ cNode_t *CMod_LoadNodes()
             if (out->children[j] != child)
                 Com_Error(ERR_DROP, "CMod_LoadNodes: children exceeded");
         }
-        result = ++out;
+        ++out;
         in += 36;
     }
-    return result;
 }
 
 void CMod_LoadLeafSurfaces()
@@ -544,7 +558,7 @@ void CMod_LoadCollisionEdgeWalkable()
     Com_Memcpy(cm.triEdgeIsWalkable, in, count);
 }
 
-const DiskCollBorder *CMod_LoadCollisionBorders()
+void CMod_LoadCollisionBorders()
 {
     const DiskCollBorder *result; // eax
     CollisionBorder *out; // [esp+0h] [ebp-14h]
@@ -554,9 +568,9 @@ const DiskCollBorder *CMod_LoadCollisionBorders()
 
     in = (const DiskCollBorder*)Com_GetBspLump(LUMP_COLLISIONBORDERS, 0x1Cu, &count);
     cm.borders = (CollisionBorder*)CM_Hunk_Alloc(28 * count, "CMod_LoadCollisionBorders", 28);
-    result = (const DiskCollBorder*)count;
     cm.borderCount = count;
     out = cm.borders;
+
     for (index = 0; index < count; ++index)
     {
         out->distEq[0] = in->distEq[0];
@@ -566,40 +580,46 @@ const DiskCollBorder *CMod_LoadCollisionBorders()
         out->zSlope = in->zSlope;
         out->start = in->start;
         out->length = in->length;
-        result = ++in;
+        ++in;
         ++out;
     }
-    return result;
 }
 
-char *CMod_LoadCollisionPartitions()
+void CMod_LoadCollisionPartitions()
 {
-    char *result; // eax
     CollisionPartition *out; // [esp+0h] [ebp-14h]
-    char *in; // [esp+8h] [ebp-Ch]
+    DiskCollPartition *in; // [esp+8h] [ebp-Ch]
     unsigned int index; // [esp+Ch] [ebp-8h]
     unsigned int count; // [esp+10h] [ebp-4h] BYREF
 
-    in = Com_GetBspLump(LUMP_COLLISIONPARTITIONS, 0xCu, &count);
-    cm.partitions = (CollisionPartition*)CM_Hunk_Alloc(12 * count, "CMod_LoadCollisionPartitions", 28);
-    result = (char*)count;
+    iassert(sizeof(CollisionPartition) == 12);
+
+    in = (DiskCollPartition *)Com_GetBspLump(LUMP_COLLISIONPARTITIONS, 0xCu, &count);
+    cm.partitions = (CollisionPartition*)CM_Hunk_Alloc(sizeof(CollisionPartition) * count, "CMod_LoadCollisionPartitions", 28);
     cm.partitionCount = count;
+
+    int totaltricount = 0;
+
     out = cm.partitions;
     index = 0;
+
     while (index < count)
     {
-        out->triCount = in[2];
-        out->borderCount = in[3];
-        out->firstTri = *(in + 1);
-        out->borders = &cm.borders[*(in + 2)];
+        out->triCount = in->triCount;
+        totaltricount += in->triCount;
+        out->borderCount = in->borderCount;
+        out->firstTri = in->firstTriIndex;
+        out->borders = &cm.borders[in->firstBorderIndex];
+
         iassert( out->firstTri + out->triCount <= cm.triCount );
         iassert( out->firstTri >= 0 );
-        ++index;
-        result = in + 12;
-        in += 12;
-        ++out;
+
+        index++;
+        in++;
+        out++;
     }
-    return result;
+
+    iassert(totaltricount == cm.triCount); // lwss add
 }
 
 const char *g_purgeableEnts[7] =
@@ -706,8 +726,8 @@ void CMod_LoadVisibility()
     if (len)
     {
         cm.vised = 1;
-        cm.numClusters = *buf;
-        cm.clusterBytes = *(buf + 1);
+        cm.numClusters = *(_DWORD *)buf;
+        cm.clusterBytes = *((_DWORD *)buf + 1);
         if (len != cm.clusterBytes * cm.numClusters + 8)
         {
             v0 = va("%i != %i == %i * %i + %i", len, cm.clusterBytes * cm.numClusters + 8, cm.numClusters, cm.clusterBytes, 8);
@@ -804,14 +824,16 @@ unsigned int CMod_LoadSubmodels()
     float v4; // [esp+Ch] [ebp-44h]
     int j; // [esp+24h] [ebp-2Ch]
     cmodel_t *out; // [esp+28h] [ebp-28h]
-    char *in; // [esp+30h] [ebp-20h]
+    DiskBrushModel *in;
     unsigned int bmodelIndex; // [esp+34h] [ebp-1Ch]
     int firstCollAabbIndex; // [esp+38h] [ebp-18h]
     float extent[3]; // [esp+3Ch] [ebp-14h] BYREF
     unsigned int count; // [esp+48h] [ebp-8h] BYREF
     int collAabbCount; // [esp+4Ch] [ebp-4h]
 
-    in = Com_GetBspLump(LUMP_MODELS, 0x30u, &count);
+    iassert(sizeof(DiskBrushModel) == 0x30);
+
+    in = (DiskBrushModel *)Com_GetBspLump(LUMP_MODELS, 0x30u, &count);
     if (!count)
         Com_Error(ERR_DROP, "Map with no brush models (should at least have the world model)");
     cm.cmodels = (cmodel_t*)CM_Hunk_Alloc(72 * count, "CMod_LoadSubmodels", 26);
@@ -826,8 +848,8 @@ unsigned int CMod_LoadSubmodels()
         out = &cm.cmodels[bmodelIndex];
         for (j = 0; j < 3; ++j)
         {
-            out->mins[j] = *(float *)&in[4 * j] - 1.0;
-            out->maxs[j] = *(float *)&in[4 * j + 12] + 1.0;
+            out->mins[j] = in->mins[j] - 1.0;
+            out->maxs[j] = in->maxs[j] + 1.0;
             v4 = I_fabs(out->maxs[j]);
             v3 = I_fabs(out->mins[j]);
             v2 = v3 - v4;
@@ -840,16 +862,16 @@ unsigned int CMod_LoadSubmodels()
         out->radius = Vec3Length(extent);
         if (bmodelIndex)
         {
-            collAabbCount = *((_DWORD *)in + 9);
+            collAabbCount = in->numSurfaces;
             out->leaf.collAabbCount = collAabbCount;
             if (out->leaf.collAabbCount != collAabbCount)
                 Com_Error(ERR_DROP, "CMod_LoadSubmodels: collAabbCount exceeded");
-            firstCollAabbIndex = *((_DWORD *)in + 8);
+            firstCollAabbIndex = in->firstSurface;
             out->leaf.firstCollAabbIndex = firstCollAabbIndex;
             if (out->leaf.firstCollAabbIndex != firstCollAabbIndex)
                 Com_Error(ERR_DROP, "CMod_LoadSubmodels: firstCollAabbIndex exceeded");
         }
-        in += 48;
+        in++;
     }
     return result;
 }
@@ -1351,15 +1373,17 @@ void __cdecl CMod_LoadLeafs(bool usePvs)
     cLeaf_t *out; // [esp+0h] [ebp-20h]
     int cluster; // [esp+4h] [ebp-1Ch]
     unsigned int leafIter; // [esp+8h] [ebp-18h]
-    char *in; // [esp+10h] [ebp-10h]
+    DiskLeaf *in; // [esp+10h] [ebp-10h]
     int firstCollAabbIndex; // [esp+14h] [ebp-Ch]
     unsigned int count; // [esp+18h] [ebp-8h] BYREF
     int collAabbCount; // [esp+1Ch] [ebp-4h]
 
-    in = Com_GetBspLump(LUMP_LEAFS, 24u, &count);
+    iassert(sizeof(DiskLeaf) == 24);
+
+    in = (DiskLeaf *)Com_GetBspLump(LUMP_LEAFS, 24u, &count);
     if (!count)
         Com_Error(ERR_DROP, "Map with no leafs");
-    cm.leafs = (cLeaf_t*)CM_Hunk_Alloc(44 * count, "CMod_LoadLeafs", 25);
+    cm.leafs = (cLeaf_t *)CM_Hunk_Alloc(44 * count, "CMod_LoadLeafs", 25);
     cm.numLeafs = count;
     cluster = 0;
     out = cm.leafs;
@@ -1367,22 +1391,22 @@ void __cdecl CMod_LoadLeafs(bool usePvs)
     {
         if (usePvs)
         {
-            cluster = *(DWORD*)in;
-            out->cluster = *(DWORD*)in;
+            cluster = in->cluster;
+            out->cluster = in->cluster;
             if (out->cluster != cluster)
                 Com_Error(ERR_DROP, "CMod_LoadLeafs: cluster exceeded");
         }
-        firstCollAabbIndex = *((DWORD*)in + 1);
+        firstCollAabbIndex = in->firstCollAabbIndex;
         out->firstCollAabbIndex = firstCollAabbIndex;
         if (out->firstCollAabbIndex != firstCollAabbIndex)
             Com_Error(ERR_DROP, "CMod_LoadLeafs: firstCollAabbIndex exceeded");
-        collAabbCount = *((DWORD*)in + 2);
+        collAabbCount = in->collAabbCount;
         out->collAabbCount = collAabbCount;
         if (out->collAabbCount != collAabbCount)
             Com_Error(ERR_DROP, "CMod_LoadLeafs: collAabbCount exceeded");
         if (usePvs && cluster >= cm.numClusters)
             cm.numClusters = cluster + 1;
-        in += 24;
+        ++in;
         ++out;
     }
 }
@@ -1392,15 +1416,17 @@ void __cdecl CMod_LoadLeafs_Version14(bool usePvs)
     cLeaf_t *out; // [esp+0h] [ebp-20h]
     int cluster; // [esp+4h] [ebp-1Ch]
     unsigned int leafIter; // [esp+8h] [ebp-18h]
-    char *in; // [esp+10h] [ebp-10h]
+    DiskLeaf_Version14 *in; // [esp+10h] [ebp-10h]
     int firstCollAabbIndex; // [esp+14h] [ebp-Ch]
     unsigned int count; // [esp+18h] [ebp-8h] BYREF
     int collAabbCount; // [esp+1Ch] [ebp-4h]
 
-    in = Com_GetBspLump(LUMP_LEAFS, 0x24u, &count);
+    iassert(sizeof(DiskLeaf_Version14) == 0x24);
+
+    in = (DiskLeaf_Version14 *)Com_GetBspLump(LUMP_LEAFS, 0x24u, &count);
     if (!count)
         Com_Error(ERR_DROP, "Map with no leafs");
-    cm.leafs = (cLeaf_t*)CM_Hunk_Alloc(44 * count, "CMod_LoadLeafs", 25);
+    cm.leafs = (cLeaf_t *)CM_Hunk_Alloc(44 * count, "CMod_LoadLeafs", 25);
     cm.numLeafs = count;
     cluster = 0;
     out = cm.leafs;
@@ -1408,29 +1434,28 @@ void __cdecl CMod_LoadLeafs_Version14(bool usePvs)
     {
         if (usePvs)
         {
-            cluster = *in;
-            out->cluster = *in;
+            cluster = in->cluster;
+            out->cluster = in->cluster;
             if (out->cluster != cluster)
                 Com_Error(ERR_DROP, "CMod_LoadLeafs: cluster exceeded");
         }
-        firstCollAabbIndex = *(in + 2);
+        firstCollAabbIndex = in->firstCollAabbIndex;
         out->firstCollAabbIndex = firstCollAabbIndex;
         if (out->firstCollAabbIndex != firstCollAabbIndex)
             Com_Error(ERR_DROP, "CMod_LoadLeafs: firstCollAabbIndex exceeded");
-        collAabbCount = *(in + 3);
+        collAabbCount = in->collAabbCount;
         out->collAabbCount = collAabbCount;
         if (out->collAabbCount != collAabbCount)
             Com_Error(ERR_DROP, "CMod_LoadLeafs: collAabbCount exceeded");
         if (usePvs && cluster >= cm.numClusters)
             cm.numClusters = cluster + 1;
-        in += 36;
+        ++in;
         ++out;
     }
 }
 
-const DiskLeaf *CMod_LoadLeafBrushNodes()
+void CMod_LoadLeafBrushNodes()
 {
-    const DiskLeaf *result; // eax
     int contents; // [esp+0h] [ebp-24h]
     cLeaf_t *out; // [esp+4h] [ebp-20h]
     unsigned int numLeafBrushes; // [esp+8h] [ebp-1Ch]
@@ -1441,8 +1466,7 @@ const DiskLeaf *CMod_LoadLeafBrushNodes()
     unsigned int brushIter; // [esp+1Ch] [ebp-8h]
     int brushnum; // [esp+20h] [ebp-4h]
 
-    result = (const DiskLeaf*)Com_GetBspLump(LUMP_LEAFS, 0x18u, &count);
-    in = result;
+    in = (const DiskLeaf *)Com_GetBspLump(LUMP_LEAFS, 0x18u, &count);
     iassert( count == cm.numLeafs );
     out = cm.leafs;
     for (leafIter = 0; leafIter < cm.numLeafs; ++leafIter)
@@ -1458,15 +1482,13 @@ const DiskLeaf *CMod_LoadLeafBrushNodes()
         out->brushContents = contents;
         out->terrainContents = CMod_GetLeafTerrainContents(out);
         CMod_PartionLeafBrushes(&cm.leafbrushes[indexFirstLeafBrush], numLeafBrushes, out);
-        result = ++in;
+        ++in;
         ++out;
     }
-    return result;
 }
 
-char *CMod_LoadLeafBrushNodes_Version14()
+void CMod_LoadLeafBrushNodes_Version14()
 {
-    char *result; // eax
     int contents; // [esp+0h] [ebp-24h]
     cLeaf_t *out; // [esp+4h] [ebp-20h]
     unsigned int numLeafBrushes; // [esp+8h] [ebp-1Ch]
@@ -1477,8 +1499,7 @@ char *CMod_LoadLeafBrushNodes_Version14()
     unsigned int brushIter; // [esp+1Ch] [ebp-8h]
     int brushnum; // [esp+20h] [ebp-4h]
 
-    result = Com_GetBspLump(LUMP_LEAFS, 0x24u, &count);
-    in = (const DiskLeaf_Version14*)result;
+    in = (const DiskLeaf_Version14*)Com_GetBspLump(LUMP_LEAFS, 0x24u, &count);
     iassert( count == cm.numLeafs );
     iassert( cm.numLeafs > 0 );
     out = cm.leafs;
@@ -1497,16 +1518,13 @@ char *CMod_LoadLeafBrushNodes_Version14()
         out->terrainContents = CMod_GetLeafTerrainContents(out);
         CMod_PartionLeafBrushes(&cm.leafbrushes[indexFirstLeafBrush], numLeafBrushes, out);
         ++leafIter;
-        result = (char*)&in[1];
         ++in;
         ++out;
     }
-    return result;
 }
 
-unsigned int CMod_LoadLeafBrushes()
+void CMod_LoadLeafBrushes()
 {
-    unsigned int result; // eax
     unsigned __int16 *out; // [esp+0h] [ebp-18h]
     unsigned int brushIndex; // [esp+4h] [ebp-14h]
     char *in; // [esp+Ch] [ebp-Ch]
@@ -1519,50 +1537,42 @@ unsigned int CMod_LoadLeafBrushes()
     out = cm.leafbrushes;
     for (iter = 0; ; ++iter)
     {
-        result = iter;
         if (iter >= count)
             break;
-        brushIndex = *in;
-        *out = *in;
+        brushIndex = *(_DWORD *)in;
+        *out = *(_DWORD *)in;
         if (*out != brushIndex)
             Com_Error(ERR_DROP, "CMod_LoadLeafBrushes: brushIndex exceeded");
         iassert( (*out < cm.numBrushes) );
         in += 4;
         ++out;
     }
-    return result;
 }
 
-char *CMod_LoadCollisionAabbTrees()
+void CMod_LoadCollisionAabbTrees()
 {
-    char *result; // eax
     CollisionAabbTree *out; // [esp+0h] [ebp-14h]
-    char *in; // [esp+8h] [ebp-Ch]
+    DiskCollAabbTree *in; // [esp+8h] [ebp-Ch]
     unsigned int index; // [esp+Ch] [ebp-8h]
     unsigned int count; // [esp+10h] [ebp-4h] BYREF
 
-    in = Com_GetBspLump(LUMP_COLLISIONAABBS, 0x20u, &count);
-    cm.aabbTrees = (CollisionAabbTree*)CM_Hunk_Alloc(32 * count, "CMod_LoadCollisionAabbTrees", 28);
-    result = (char*)count;
+    in = (DiskCollAabbTree *)Com_GetBspLump(LUMP_COLLISIONAABBS, 0x20u, &count);
+    cm.aabbTrees = (CollisionAabbTree *)CM_Hunk_Alloc(32 * count, "CMod_LoadCollisionAabbTrees", 28);
     cm.aabbTreeCount = count;
     out = cm.aabbTrees;
-    index = 0;
-    while (index < count)
+    for (index = 0; index < count; ++index)
     {
-        out->origin[0] = *in;
-        out->origin[1] = *(in + 1);
-        out->origin[2] = *(in + 2);
-        out->halfSize[0] = *(in + 3);
-        out->halfSize[1] = *(in + 4);
-        out->halfSize[2] = *(in + 5);
-        out->materialIndex = *(in + 12);
-        out->childCount = *(in + 13);
-        out->u.firstChildIndex = *(in + 7);
-        ++index;
-        result = in + 32;
-        in += 32;
+        out->origin[0] = in->origin[0];
+        out->origin[1] = in->origin[1];
+        out->origin[2] = in->origin[2];
+        out->halfSize[0] = in->halfSize[0];
+        out->halfSize[1] = in->halfSize[1];
+        out->halfSize[2] = in->halfSize[2];
+        out->materialIndex = in->materialIndex;
+        out->childCount = in->childCount;
+        out->u.firstChildIndex = in->u.firstChildIndex;
+        ++in;
         ++out;
     }
-    return result;
 }
 

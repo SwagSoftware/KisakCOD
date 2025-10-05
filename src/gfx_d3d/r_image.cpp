@@ -14,6 +14,7 @@
 #include "r_texturemem.h"
 #include "rb_state.h"
 #include "r_state.h"
+#include "r_outdoor.h"
 
 #include <algorithm>
 
@@ -33,7 +34,7 @@ const BuiltinImageConstructorTable constructorTable[8] =
     {"$black_cube", Image_LoadBlackCube},
     {"$gray", Image_LoadGray},
     {"$identitynormalmap", Image_LoadIdentityNormalMap},
-    {"$outdoor", (void(__cdecl *)(GfxImage *))Outdoor_SetRendererOutdoorLookupMatrix},
+    {"$outdoor", R_GenerateOutdoorImage},
     {"$pixelcostcolorcode", Image_LoadPixelCostColorCode}
 };
 

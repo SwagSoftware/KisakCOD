@@ -429,6 +429,7 @@ GfxImage *__cdecl R_GenerateReflectionImageFromRawData(const unsigned __int8 *ra
     reflectionImage = Image_Alloc(v2, 1u, 1u, 0);
     iassert( reflectionImage );
     Image_GenerateCube(reflectionImage, pixels, 64, imageFormat, mipLevel);
+    iassert(reflectionImage->texture.basemap); // lwss add
     return reflectionImage;
 }
 

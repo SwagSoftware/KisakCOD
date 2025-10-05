@@ -1625,7 +1625,7 @@ void __cdecl R_GenerateSortedDrawSurfs(
     R_SetFullSceneViewMesh(viewInfoIndex, viewInfo);
     R_SetupWorldSurfacesDpvs(viewParmsDpvs);
     R_SetViewFrustumPlanes(viewInfo);
-    cameraCellIndex = R_CellForPoint(viewParmsDpvs->origin);
+    cameraCellIndex = R_CellForPoint(rgp.world, viewParmsDpvs->origin);
     KISAK_NULLSUB();
     R_FilterEntitiesIntoCells(cameraCellIndex);
     {

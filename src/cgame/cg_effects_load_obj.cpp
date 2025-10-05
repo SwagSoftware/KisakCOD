@@ -38,9 +38,6 @@ char *__cdecl CG_ParseImpactEffects(
     const char *const *pszTypeName,
     EffectFile *effectFile)
 {
-    char v6; // cl
-    char *v7; // [esp+8h] [ebp-34h]
-    parseInfo_t *v8; // [esp+Ch] [ebp-30h]
     int v9; // [esp+10h] [ebp-2Ch]
     unsigned int i; // [esp+20h] [ebp-1Ch]
     int iEffectType; // [esp+24h] [ebp-18h]
@@ -79,8 +76,8 @@ char *__cdecl CG_ParseImpactEffects(
     }
     iFleshType = -1;
 LABEL_20:
-    if (iSurfaceType >= 0 && iFleshType >= 0)
-        MyAssertHandler(".\\cgame\\cg_effects_load_obj.cpp", 167, 0, "%s", "iSurfaceType < 0 || iFleshType < 0");
+    iassert(iSurfaceType < 0 || iFleshType < 0);
+
     if (iSurfaceType < 0 && iFleshType < 0)
         return va("unknown surface/flesh type '%s' in second column of file '%s'", tokena->token, filename);
     tokenb = Com_ParseOnLine(&buf);
@@ -88,17 +85,21 @@ LABEL_20:
     if (v9 < 64)
     {
         effectName = (char *)Hunk_AllocateTempMemory(v9 + 1, "CG_ParseImpactEffects");
-        v8 = tokenb;
-        v7 = effectName;
-        do
-        {
-            v6 = v8->token[0];
-            *v7 = v8->token[0];
-            v8 = (parseInfo_t *)((char *)v8 + 1);
-            ++v7;
-        } while (v6);
-        if (iSurfaceType < 0 && iFleshType < 0)
-            MyAssertHandler(".\\cgame\\cg_effects_load_obj.cpp", 179, 0, "%s", "iSurfaceType >= 0 || iFleshType >= 0");
+
+        //v8 = tokenb;
+        //v7 = effectName;
+        //do
+        //{
+        //    v6 = v8->token[0];
+        //    *v7 = v8->token[0];
+        //    v8 = (parseInfo_t *)((char *)v8 + 1);
+        //    ++v7;
+        //} while (v6);
+
+        I_strncpyz(effectName, tokenb->token, v9 + 1);
+
+        iassert(iSurfaceType >= 0 || iFleshType >= 0);
+
         if (iSurfaceType < 0)
             effectFile->flesh[iEffectType][iFleshType] = effectName;
         else
@@ -206,6 +207,7 @@ void __cdecl CG_RegisterImpactEffectsForDir(char *dir, EffectFile *effectFile, c
                 Hunk_ClearTempMemoryHigh();
                 if (v7)
                 {
+                    iassert(0); // lwss add
                     Com_PrintError(21, "ERROR: %s", v7);
                     return;
                 }

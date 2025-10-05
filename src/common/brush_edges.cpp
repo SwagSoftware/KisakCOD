@@ -13,120 +13,123 @@ adjacencyWinding_t *__cdecl BuildBrushdAdjacencyWindingForSide(
     adjacencyWinding_t *optionalOutWinding,
     int32_t optionalOutWindingCount)
 {
-    const SimplePlaneIntersection *v7; // eax
+    SimplePlaneIntersection *v7; // eax
     float *v8; // [esp+10h] [ebp-6054h]
-    const SimplePlaneIntersection *v9; // [esp+14h] [ebp-6050h]
-    adjacencyWinding_t *w; // [esp+1Ch] [ebp-6048h]
-    int32_t i2; // [esp+20h] [ebp-6044h] BYREF
+    SimplePlaneIntersection *v9; // [esp+14h] [ebp-6050h]
+    adjacencyWinding_t *winding; // [esp+1Ch] [ebp-6048h]
+    int i2; // [esp+20h] [ebp-6044h] BYREF
     float perimiter1; // [esp+24h] [ebp-6040h]
     float plane[4]; // [esp+28h] [ebp-603Ch] BYREF
-    int32_t ptsCount; // [esp+38h] [ebp-602Ch]
-    float v0[3073]; // [esp+3Ch] [ebp-6028h] BYREF
-    const SimplePlaneIntersection *xyz[1024]; // [esp+3044h] [ebp-3020h] BYREF
-    const SimplePlaneIntersection *point[1024]; // [esp+4044h] [ebp-2020h] BYREF
-    const SimplePlaneIntersection *v19[1024]; // [esp+5044h] [ebp-1020h] BYREF
-    int32_t i0; // [esp+6044h] [ebp-20h] BYREF
-    char v21; // [esp+6048h] [ebp-1Ch]
-    char v22; // [esp+6049h] [ebp-1Bh]
-    int32_t v23; // [esp+604Ch] [ebp-18h]
-    uint32_t v24[2]; // [esp+6050h] [ebp-14h]
-    int32_t i1; // [esp+6058h] [ebp-Ch] BYREF
+    int ptsCount; // [esp+38h] [ebp-602Ch]
+    float v0[3073]{ 0 }; // [esp+3Ch] [ebp-6028h] BYREF
+    SimplePlaneIntersection *xyz[1024]{ 0 }; // [esp+3044h] [ebp-3020h] BYREF
+    SimplePlaneIntersection *cycle[2][1024]{ 0 }; // [esp+4044h] [ebp-2020h] BYREF
+    int i0; // [esp+6044h] [ebp-20h] BYREF
+    char v20; // [esp+6048h] [ebp-1Ch]
+    char v21; // [esp+6049h] [ebp-1Bh]
+    int cycleIndex; // [esp+604Ch] [ebp-18h]
+    unsigned int cycleCount[2]; // [esp+6050h] [ebp-14h]
+    int i1; // [esp+6058h] [ebp-Ch] BYREF
     float perimiter2; // [esp+605Ch] [ebp-8h]
-    int32_t plane2; // [esp+6060h] [ebp-4h]
+    int planeIndex; // [esp+6060h] [ebp-4h]
 
-    ptsCount = GetPointListAllowDupes(basePlaneIndex, InPts, InPtCount, xyz, 1024);
+    ptsCount = GetPointListAllowDupes(basePlaneIndex, InPts, InPtCount, (const SimplePlaneIntersection **)xyz, 1024);
     if (ptsCount < 3)
         return 0;
-    if (NumberOfUniquePoints(xyz, ptsCount) < 3)
+    if (NumberOfUniquePoints((const SimplePlaneIntersection **)xyz, ptsCount) < 3)
         return 0;
-    ptsCount = ReduceToACycle(basePlaneIndex, xyz, ptsCount);
+    ptsCount = ReduceToACycle(basePlaneIndex, (const SimplePlaneIntersection **)xyz, ptsCount);
     if (ptsCount < 3)
         return 0;
-    v23 = 0;
+    cycleIndex = 0;
     while (ptsCount)
     {
-        point[1024 * v23] = xyz[--ptsCount];
-        v24[v23] = 1;
-        plane2 = SecondPlane(point[1024 * v23], basePlaneIndex);
+        cycle[cycleIndex][0] = xyz[--ptsCount];
+        cycleCount[cycleIndex] = 1;
+        planeIndex = SecondPlane(cycle[cycleIndex][0], basePlaneIndex);
         while (ptsCount)
         {
-            v7 = RemoveNextPointFormedByThisPlane(plane2, xyz, &xyz[ptsCount]);
-            *(&point[1024 * v23] + v24[v23]) = v7;
-            if (!*(&point[1024 * v23] + v24[v23]))
+            v7 = (SimplePlaneIntersection *)RemoveNextPointFormedByThisPlane(
+                planeIndex,
+                (const SimplePlaneIntersection **)xyz,
+                (const SimplePlaneIntersection **)&xyz[ptsCount]);
+            cycle[cycleIndex][cycleCount[cycleIndex]] = v7;
+            if (!cycle[cycleIndex][cycleCount[cycleIndex]])
                 break;
-            plane2 = ThirdPlane(*(&point[1024 * v23] + v24[v23]), basePlaneIndex, plane2);
+            planeIndex = ThirdPlane(cycle[cycleIndex][cycleCount[cycleIndex]], basePlaneIndex, planeIndex);
             --ptsCount;
-            ++v24[v23];
+            ++cycleCount[cycleIndex];
         }
-        if (!IsPtFormedByThisPlane(plane2, point[1024 * v23]))
-            MyAssertHandler(
-                "..\\common\\brush_edges.cpp",
-                832,
-                1,
-                "%s",
-                "IsPtFormedByThisPlane( planeIndex, cycle[cycleIndex][0] )");
-        if (v23 <= 0)
+
+        iassert(IsPtFormedByThisPlane(planeIndex, cycle[cycleIndex][0]));
+
+        if (cycleIndex <= 0)
         {
-            v23 = 1;
+            cycleIndex = 1;
         }
         else
         {
-            perimiter1 = CyclePerimiter(point, v24[0]);
-            perimiter2 = CyclePerimiter(v19, v24[1]);
-            v21 = TestConvexWithoutNearPoints(point, v24[0]);
-            v22 = TestConvexWithoutNearPoints(v19, v24[1]);
-            if (CycleLess(v21, v22, perimiter1, perimiter2, v24[0], v24[1]))
+            perimiter1 = CyclePerimiter((const SimplePlaneIntersection **)cycle[0], cycleCount[0]);
+            perimiter2 = CyclePerimiter((const SimplePlaneIntersection **)cycle[1], cycleCount[1]);
+            v20 = TestConvexWithoutNearPoints((const SimplePlaneIntersection **)cycle[0], cycleCount[0]);
+            v21 = TestConvexWithoutNearPoints((const SimplePlaneIntersection **)cycle[1], cycleCount[1]);
+            if (CycleLess(v20, v21, perimiter1, perimiter2, cycleCount[0], cycleCount[1]))
             {
-                memcpy(point, v19, 4 * v24[1]);
-                v24[0] = v24[1];
+                memcpy((unsigned __int8 *)cycle, (unsigned __int8 *)cycle[1], 4 * cycleCount[1]);
+                cycleCount[0] = cycleCount[1];
             }
         }
     }
-    if (v24[0] <= 2)
-        MyAssertHandler("..\\common\\brush_edges.cpp", 850, 1, "%s", "cycleCount[0] > 2");
-    w = 0;
+
+    iassert(cycleCount[0] > 2);
+
+    winding = 0;
     if (optionalOutWinding)
     {
-        w = optionalOutWinding;
-        if (optionalOutWindingCount < v24[0])
+        winding = optionalOutWinding;
+        if (optionalOutWindingCount < (int)cycleCount[0])
         {
-            Com_PrintError(1, "Brush face has too many edges");
+            Com_PrintError(1, (char *)"Brush face has too many edges");
             return 0;
         }
     }
     else if (!alwaysfails)
     {
-        MyAssertHandler("..\\common\\brush_edges.cpp", 869, 0, "Not supported");
+        MyAssertHandler((char *)"..\\common\\brush_edges.cpp", 869, 0, "Not supported");
     }
-    if (!w)
-        MyAssertHandler("..\\common\\brush_edges.cpp", 873, 0, "%s", "winding");
-    if (!PlaneInCommonExcluding(point[0], xyz[v24[0] + 1023], basePlaneIndex, w->sides))
-        MyAssertHandler("..\\common\\brush_edges.cpp", 875, 1, "%s", "rv");
-    v0[0] = point[0]->xyz[0];
-    v0[1] = point[0]->xyz[1];
-    v0[2] = point[0]->xyz[2];
-    for (w->numsides = 1; w->numsides < v24[0]; ++w->numsides)
+
+    iassert(winding);
+
+    iassert(PlaneInCommonExcluding(cycle[0][0], cycle[0][cycleCount[0] - 1], basePlaneIndex, winding->sides));
+    //if (!PlaneInCommonExcluding(cycle[0][0], cycle[0][cycleCount[0] - 1], basePlaneIndex, winding->sides))
+    //    MyAssertHandler((char *)"..\\common\\brush_edges.cpp", 875, 1, "%s", "rv");
+
+    v0[0] = cycle[0][0]->xyz[0];
+    v0[1] = cycle[0][0]->xyz[1];
+    v0[2] = cycle[0][0]->xyz[2];
+
+    for (winding->numsides = 1; winding->numsides < (int)cycleCount[0]; ++winding->numsides)
     {
-        w->sides[w->numsides] = ThirdPlane(xyz[w->numsides + 1023], basePlaneIndex, *(&w->numsides + w->numsides));
-        v8 = &v0[3 * w->numsides];
-        v9 = point[w->numsides];
+        winding->sides[winding->numsides] = ThirdPlane(cycle[0][winding->numsides - 1], basePlaneIndex, winding->sides[winding->numsides - 1]);
+
+        v8 = &v0[3 * winding->numsides];
+        v9 = cycle[0][winding->numsides];
+
         *v8 = v9->xyz[0];
         v8[1] = v9->xyz[1];
         v8[2] = v9->xyz[2];
     }
-    if (w->sides[0] != ThirdPlane(xyz[v24[0] + 1023], basePlaneIndex, *(&w->numsides + w->numsides)))
-        MyAssertHandler(
-            "..\\common\\brush_edges.cpp",
-            884,
-            1,
-            "%s",
-            "winding->sides[0] == ThirdPlane( cycle[0][cycleCount[0]-1], basePlaneIndex, winding->sides[winding->numsides-1] )");
-    if (RepresentativeTriangleFromWinding((const float(*)[3])v0, w->numsides, sideNormal, &i0, &i1, &i2) < EQUAL_EPSILON)
+
+    winding->sides[0] = ThirdPlane(cycle[0][cycleCount[0] - 1], basePlaneIndex, winding->sides[winding->numsides - 1]); // lwss add
+
+    iassert(winding->sides[0] == ThirdPlane(cycle[0][cycleCount[0] - 1], basePlaneIndex, winding->sides[winding->numsides - 1]));
+
+    if (RepresentativeTriangleFromWinding((const float (*)[3])v0, winding->numsides, sideNormal, &i0, &i1, &i2) < 0.001000000047497451)
         return 0;
     PlaneFromPoints(plane, &v0[3 * i0], &v0[3 * i1], &v0[3 * i2]);
     if (Vec3Dot(plane, sideNormal) < 0.0)
-        ReverseAdjacencyWinding(w);
-    return w;
+        ReverseAdjacencyWinding(winding);
+    return winding;
 }
 
 void __cdecl ReverseAdjacencyWinding(adjacencyWinding_t *w)
@@ -288,7 +291,7 @@ const SimplePlaneIntersection *__cdecl RemoveNextPointFormedByThisPlane(
     if (begina == end)
         return 0;
     returnVal = *begina;
-    memmove(begina, begina + 4, 4 * (end - (begina + 1)));
+    memmove((unsigned __int8 *)begina, (unsigned __int8 *)begina + 4, 4 * (end - (begina + 1)));
     return returnVal;
 }
 
@@ -302,67 +305,52 @@ const SimplePlaneIntersection **__cdecl NextPointFormedByThisPlane(
     return begin;
 }
 
-double __cdecl CyclePerimiter(const SimplePlaneIntersection **pts, int32_t ptsCount)
+float __cdecl CyclePerimiter(const SimplePlaneIntersection **pts, int32_t ptsCount)
 {
-    double v3; // [esp+0h] [ebp-40h]
-    float v[3]; // [esp+14h] [ebp-2Ch] BYREF
-    float *a; // [esp+20h] [ebp-20h]
-    float *b; // [esp+24h] [ebp-1Ch]
-    float diff[3]; // [esp+2Ch] [ebp-14h] BYREF
-    float perimiter; // [esp+38h] [ebp-8h]
-    int32_t ptsIndex; // [esp+3Ch] [ebp-4h]
+    float perimiter; // [esp+20h] [ebp-8h]
+    int ptsIndex; // [esp+24h] [ebp-4h]
 
-    if (ptsCount <= 2)
-        MyAssertHandler("..\\common\\brush_edges.cpp", 403, 0, "%s", "ptsCount > 2");
-    a = (float*)pts[ptsCount - 1]->xyz;
-    b = (float*)*pts; // KISAKTODO: bad cast??
-    Vec3Sub(a, b, diff);
-    perimiter = Vec3Length(diff);
+    iassert(ptsCount > 2);
+
+    perimiter = Vec3Distance((*pts)->xyz, pts[ptsCount - 1]->xyz);
     for (ptsIndex = 1; ptsIndex < ptsCount; ++ptsIndex)
-    {
-        Vec3Sub(pts[ptsIndex - 1]->xyz, pts[ptsIndex]->xyz, v);
-        v3 = perimiter;
-        perimiter = Vec3Length(v) + v3;
-    }
+        perimiter += Vec3Distance(pts[ptsIndex]->xyz, pts[ptsIndex - 1]->xyz);
+
     return perimiter;
 }
 
 char __cdecl TestConvexWithoutNearPoints(const SimplePlaneIntersection **pts, uint32_t ptCount)
 {
-    float v[3]; // [esp+0h] [ebp-3028h] BYREF
-    float diff[3]; // [esp+Ch] [ebp-301Ch] BYREF
-    float *v5; // [esp+18h] [ebp-3010h]
-    const SimplePlaneIntersection *v6; // [esp+1Ch] [ebp-300Ch]
-    float a[3073]; // [esp+20h] [ebp-3008h] BYREF
-    uint32_t i; // [esp+3024h] [ebp-4h]
+    float *v3; // [esp+18h] [ebp-3010h]
+    const SimplePlaneIntersection *v4; // [esp+1Ch] [ebp-300Ch]
+    float p1[3073]; // [esp+20h] [ebp-3008h] BYREF
+    unsigned int i; // [esp+3024h] [ebp-4h]
 
     for (i = 0; i < ptCount; ++i)
     {
-        v5 = &a[3 * i];
-        v6 = pts[i];
-        *v5 = v6->xyz[0];
-        v5[1] = v6->xyz[1];
-        v5[2] = v6->xyz[2];
+        v3 = &p1[3 * i];
+        v4 = pts[i];
+        *v3 = v4->xyz[0];
+        v3[1] = v4->xyz[1];
+        v3[2] = v4->xyz[2];
     }
     i = 1;
     while (i < ptCount)
     {
-        Vec3Sub(&a[3 * i - 3], &a[3 * i], diff);
-        if (Vec3LengthSq(diff) >= 1.0)
+        if (Vec3DistanceSq(&p1[3 * i], &p1[3 * i - 3]) >= 1.0)
         {
             ++i;
         }
         else
         {
-            memmove(&a[3 * i], &a[3 * i + 3], 12 * (ptCount - i - 1));
+            memmove((unsigned __int8 *)&p1[3 * i], (unsigned __int8 *)&p1[3 * i + 3], 12 * (ptCount - i - 1));
             --ptCount;
         }
     }
-    Vec3Sub(&a[3 * ptCount - 3], a, v);
-    if (Vec3LengthSq(v) < 1.0)
+    if (Vec3DistanceSq(p1, &p1[3 * ptCount - 3]) < 1.0)
         --ptCount;
     if (ptCount >= 3)
-        return IsConvex((const float(*)[3])a, ptCount);
+        return IsConvex((const float (*)[3])p1, ptCount);
     else
         return 0;
 }

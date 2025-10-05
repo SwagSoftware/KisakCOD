@@ -2432,16 +2432,16 @@ bool __cdecl R_VectorForKey(const char *key, char *defaultString, char *(*spawnV
     return success;
 }
 
-void __cdecl R_CheckValidStaticModel(char *(*spawnVars)[2], XModel **model, float *origin)
+static void __cdecl R_CheckValidStaticModel(char *(*spawnVars)[2], int spawnVarCount, XModel **model, float *origin)
 {
     bool v4; // [esp+1Bh] [ebp-15h]
     char *modelName; // [esp+1Ch] [ebp-14h]
     float tempOrigin[3]; // [esp+20h] [ebp-10h] BYREF
     XModel *tempModel; // [esp+2Ch] [ebp-4h]
 
-    if (!R_VectorForKey("origin", (char*)"0 0 0", (char *(*)[2])spawnVars, SHIDWORD(spawnVars), tempOrigin))
+    if (!R_VectorForKey("origin", (char*)"0 0 0", (char *(*)[2])spawnVars, spawnVarCount, tempOrigin))
         Com_Error(ERR_DROP, "R_CheckValidStaticModel: no origin specified");
-    modelName = R_ValueForKey("model", spawnVars, SHIDWORD(spawnVars));
+    modelName = R_ValueForKey("model", spawnVars, spawnVarCount);
     if (!modelName)
         Com_Error(ERR_DROP, "R_CheckValidStaticModel: no model specified in misc_model at (%.0f %.0f %.0f)", tempOrigin[0], tempOrigin[1], tempOrigin[2]);
     if (Com_IsLegacyXModelName(modelName))
@@ -2623,7 +2623,7 @@ bool __cdecl R_DecodeGroundLighting(
     return success;
 }
 
-void __cdecl R_LoadMiscModel(char *(*spawnVars)[2], int bspVersion)
+static void __cdecl R_LoadMiscModel(char *(*spawnVars)[2], int spawnVarCount, int bspVersion)
 {
     bool groundLightContainsValidData; // [esp+13h] [ebp-69h]
     GfxStaticModelDrawInst *smodelDrawInst; // [esp+14h] [ebp-68h]
@@ -2639,13 +2639,13 @@ void __cdecl R_LoadMiscModel(char *(*spawnVars)[2], int bspVersion)
     float axis[3][3]; // [esp+54h] [ebp-28h] BYREF
     unsigned __int8 staticModelFlags; // [esp+7Bh] [ebp-1h]
 
-    R_CheckValidStaticModel(spawnVars, &model, origin);
+    R_CheckValidStaticModel(spawnVars, spawnVarCount, &model, origin);
     smodelDrawInst = &s_world.dpvs.smodelDrawInsts[s_world.dpvs.smodelCount];
     smodelInst = &s_world.dpvs.smodelInsts[s_world.dpvs.smodelCount++];
-    angle = R_FloatForKey("angle", 0.0, spawnVars, SHIDWORD(spawnVars));
+    angle = R_FloatForKey("angle", 0.0, spawnVars, spawnVarCount);
     if (angle == 0.0)
     {
-        R_VectorForKey("angles", (char*)"0 0 0", spawnVars, SHIDWORD(spawnVars), angles);
+        R_VectorForKey("angles", (char*)"0 0 0", spawnVars, spawnVarCount, angles);
     }
     else
     {
@@ -2654,8 +2654,8 @@ void __cdecl R_LoadMiscModel(char *(*spawnVars)[2], int bspVersion)
         angles[2] = 0.0;
     }
     AnglesToAxis(angles, axis);
-    scale = R_FloatForKey("modelscale", 1.0, spawnVars, SHIDWORD(spawnVars));
-    spawnflags = R_IntForKey("spawnflags", 0, spawnVars, SHIDWORD(spawnVars));
+    scale = R_FloatForKey("modelscale", 1.0, spawnVars, spawnVarCount);
+    spawnflags = R_IntForKey("spawnflags", 0, spawnVars, spawnVarCount);
     staticModelFlags = 0;
     if ((spawnflags & 2) != 0)
         staticModelFlags |= 1u;
@@ -2665,7 +2665,7 @@ void __cdecl R_LoadMiscModel(char *(*spawnVars)[2], int bspVersion)
         "gndLt",
         "FF00000000",
         spawnVars,
-        SHIDWORD(spawnVars),
+        spawnVarCount,
         bspVersion,
         &smodelDrawInst->primaryLightIndex,
         (unsigned char*)&smodelInst->groundLighting);
@@ -2702,12 +2702,7 @@ void __cdecl R_LoadMiscModel(char *(*spawnVars)[2], int bspVersion)
 void __cdecl R_LoadEntities(unsigned int bspVersion)
 {
     __int64 v1; // [esp-Ch] [ebp-278h]
-    unsigned int v2; // [esp+0h] [ebp-26Ch]
-    unsigned int v3; // [esp+10h] [ebp-25Ch]
-    unsigned int v4; // [esp+20h] [ebp-24Ch]
-    unsigned int v5; // [esp+30h] [ebp-23Ch]
     int spawnVarCount; // [esp+44h] [ebp-228h]
-    int spawnVarCounta; // [esp+44h] [ebp-228h]
     char *startPos; // [esp+48h] [ebp-224h]
     char *spawnVars[64][2]; // [esp+4Ch] [ebp-220h] BYREF
     unsigned int smodelCount; // [esp+250h] [ebp-1Ch]
@@ -2747,14 +2742,12 @@ void __cdecl R_LoadEntities(unsigned int bspVersion)
                 spawnVarIndex = 0;
             }
             spawnVars[spawnVarIndex][0] = &textPool[charsUsed];
-            v5 = strlen(token);
-            charsUsed += v5 + 1;
-            memcpy(spawnVars[spawnVarIndex][0], token, v5 + 1);
+            charsUsed += strlen(token) + 1;
+            memcpy(spawnVars[spawnVarIndex][0], token, strlen(token) + 1);
             token = Com_Parse(&text)->token;
             spawnVars[spawnVarIndex][1] = &textPool[charsUsed];
-            v4 = strlen(token);
-            charsUsed += v4 + 1;
-            memcpy(spawnVars[spawnVarIndex][1], token, v4 + 1);
+            charsUsed += strlen(token) + 1;
+            memcpy(spawnVars[spawnVarIndex][1], token, strlen(token) + 1);
         }
         if (!*spawnVars[0][0])
             Com_Error(ERR_DROP, "R_LoadEntities: entity without a classname");
@@ -2772,7 +2765,7 @@ void __cdecl R_LoadEntities(unsigned int bspVersion)
         if (*token != 123)
             break;
         spawnVars[0][0] = (char*)"";
-        spawnVarCounta = 1;
+        spawnVarCount = 1;
         charsUsed = 0;
         while (1)
         {
@@ -2781,33 +2774,27 @@ void __cdecl R_LoadEntities(unsigned int bspVersion)
                 break;
             if (I_stricmp(token, "classname"))
             {
-                if (spawnVarCounta == 64)
+                if (spawnVarCount == 64)
                     Com_Error(ERR_DROP, "R_LoadEntities: MAX_SPAWN_VARS (%i) reached", 64);
-                spawnVarIndex = spawnVarCounta++;
+                spawnVarIndex = spawnVarCount++;
             }
             else
             {
                 spawnVarIndex = 0;
             }
             spawnVars[spawnVarIndex][0] = &textPool[charsUsed];
-            v3 = strlen(token);
-            charsUsed += v3 + 1;
-            memcpy(spawnVars[spawnVarIndex][0], token, v3 + 1);
+            charsUsed += strlen(token) + 1;
+            memcpy(spawnVars[spawnVarIndex][0], token, strlen(token) + 1);
             token = Com_Parse(&text)->token;
             spawnVars[spawnVarIndex][1] = &textPool[charsUsed];
-            v2 = strlen(token);
-            charsUsed += v2 + 1;
-            memcpy(spawnVars[spawnVarIndex][1], token, v2 + 1);
+            charsUsed += strlen(token) + 1;
+            memcpy(spawnVars[spawnVarIndex][1], token, strlen(token) + 1);
         }
         if (!*spawnVars[0][0])
             Com_Error(ERR_DROP, "R_LoadEntities: entity without a classname");
         if (!I_stricmp(spawnVars[0][1], "misc_model"))
         {
-            char *ptrs[2] = { (char *)&spawnVarCounta, (char *)&spawnVars };
-            //HIDWORD(v1) = spawnVarCounta;
-            //LODWORD(v1) = spawnVars;
-            //R_LoadMiscModel(v1, bspVersion);
-            R_LoadMiscModel(&ptrs, bspVersion);
+            R_LoadMiscModel(spawnVars, spawnVarCount, bspVersion);
         }
     }
     iassert( s_world.dpvs.smodelCount == smodelCount );
@@ -2869,13 +2856,6 @@ void __cdecl R_SetStaticModelReflectionProbe(
     Vec3Avg(smodelInst->mins, smodelInst->maxs, center);
     reflectionProbeIndex = R_CalcReflectionProbeIndex(world, center);
     smodelDrawInst->reflectionProbeIndex = reflectionProbeIndex;
-    if (smodelDrawInst->reflectionProbeIndex != reflectionProbeIndex)
-        MyAssertHandler(
-            ".\\r_staticmodel_load_obj.cpp",
-            566,
-            0,
-            "%s",
-            "smodelDrawInst->reflectionProbeIndex == reflectionProbeIndex");
 }
 
 void R_SetStaticModelReflectionProbes()

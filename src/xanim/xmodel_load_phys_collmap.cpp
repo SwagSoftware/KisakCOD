@@ -845,41 +845,39 @@ char __cdecl Xmodel_ParsePhysicsBrush(
 {
     cplane_s *v6; // [esp+18h] [ebp-68F8h]
     float *v7; // [esp+1Ch] [ebp-68F4h]
-    float *v8; // [esp+20h] [ebp-68F0h]
-    BrushWrapper *brush; // [esp+24h] [ebp-68ECh]
     float m[3]; // [esp+28h] [ebp-68E8h] BYREF
     float v1[3]; // [esp+34h] [ebp-68DCh] BYREF
     float v2[3]; // [esp+40h] [ebp-68D0h] BYREF
-    int v13; // [esp+4Ch] [ebp-68C4h]
+    int order; // [esp+4Ch] [ebp-68C4h]
     unsigned int sideCount; // [esp+50h] [ebp-68C0h] BYREF
-    unsigned int v15; // [esp+54h] [ebp-68BCh]
-    float mins; // [esp+58h] [ebp-68B8h] BYREF
-    float v17; // [esp+5Ch] [ebp-68B4h]
-    float v18; // [esp+60h] [ebp-68B0h]
-    int v19; // [esp+64h] [ebp-68ACh]
-    float plane[32]; // [esp+68h] [ebp-68A8h] BYREF
+    unsigned int dir; // [esp+54h] [ebp-68BCh]
+    float mins[3]; // [esp+58h] [ebp-68B8h] BYREF
+    int edgeIndex; // [esp+64h] [ebp-68ACh]
+    float plane[128]; // [esp+68h] [ebp-68A8h] BYREF
     SimplePlaneIntersection OutPts[1024]; // [esp+268h] [ebp-66A8h] BYREF
     int InPtCount; // [esp+6268h] [ebp-6A8h]
-    unsigned int i; // [esp+626Ch] [ebp-6A4h]
-    int basePlaneIndex; // [esp+6270h] [ebp-6A0h]
-    float maxs; // [esp+6274h] [ebp-69Ch] BYREF
-    float v26; // [esp+6278h] [ebp-698h]
-    float v27; // [esp+627Ch] [ebp-694h]
+    unsigned int ptIndex; // [esp+626Ch] [ebp-6A4h]
+    int sideIndex; // [esp+6270h] [ebp-6A0h]
+    float maxs[3]; // [esp+6274h] [ebp-69Ch] BYREF
     adjacencyWinding_t windings[32]; // [esp+6280h] [ebp-690h] BYREF
     int v29; // [esp+6900h] [ebp-10h]
     parseInfo_t *v30; // [esp+6904h] [ebp-Ch]
-    int v31; // [esp+6908h] [ebp-8h]
-    unsigned int j; // [esp+690Ch] [ebp-4h]
+    int totalEdges; // [esp+6908h] [ebp-8h]
+    unsigned int axis; // [esp+690Ch] [ebp-4h]
 
     v29 = 32;
-    if (!geom)
-        MyAssertHandler(".\\xanim\\xmodel_load_phys_collmap.cpp", 301, 0, "%s", "geom");
+
+    iassert(geom);
+
     sideCount = 0;
     Map_SkipOptionalArg((const char**)file, "layer");
+
     if (!Map_SkipNamedFlags((const char**)file, "contents"))
         return 0;
+
     if (!Map_SkipNamedFlags((const char **)file, "toolFlags"))
         return 0;
+
     while (1)
     {
         v30 = Com_Parse(file);
@@ -887,12 +885,15 @@ char __cdecl Xmodel_ParsePhysicsBrush(
             return 0;
         if (!strcmp(v30->token, "}"))
             break;
+
         Com_UngetToken();
+
         if (sideCount == 32)
         {
             Com_PrintError(19, "ERROR: MAX_BUILD_SIDES (%i) -- brush too many sides.  Simplify the collision geometry.", 32);
             return 0;
         }
+
         Com_Parse1DMatrix((const char**)file, 3, m);
         Com_Parse1DMatrix((const char**)file, 3, v1);
         Com_Parse1DMatrix((const char**)file, 3, v2);
@@ -900,100 +901,97 @@ char __cdecl Xmodel_ParsePhysicsBrush(
         SnapPlane(&plane[4 * sideCount++]);
         Com_SkipRestOfLine((const char**)file);
     }
+
     if (!RemoveDuplicateBrushPlanes((float(*)[4])plane, &sideCount, mapname, brushCount))
         return 0;
+
     if (!sideCount)
         return 0;
+
     InPtCount = GetPlaneIntersections((const float(*)[4])plane, sideCount, OutPts, 0x400u);
-    v31 = 0;
-    mins = OutPts[0].xyz[0];
-    v17 = OutPts[0].xyz[1];
-    v18 = OutPts[0].xyz[2];
-    maxs = OutPts[0].xyz[0];
-    v26 = OutPts[0].xyz[1];
-    v27 = OutPts[0].xyz[2];
-    for (i = 1; i < InPtCount; ++i)
+    totalEdges = 0;
+    mins[0] = OutPts[0].xyz[0];
+    mins[1] = OutPts[0].xyz[1];
+    mins[2] = OutPts[0].xyz[2];
+    maxs[0] = OutPts[0].xyz[0];
+    maxs[1] = OutPts[0].xyz[1];
+    maxs[2] = OutPts[0].xyz[2];
+
+    for (ptIndex = 1; ptIndex < InPtCount; ++ptIndex)
     {
-        for (j = 0; j < 3; ++j)
+        for (axis = 0; axis < 3; ++axis)
         {
-            if (*(&mins + j) <= OutPts[i].xyz[j])
+            if (mins[axis] <= (double)OutPts[ptIndex].xyz[axis])
             {
-                if (*(&maxs + j) < OutPts[i].xyz[j])
-                    *(&maxs + j) = OutPts[i].xyz[j];
+                if (maxs[axis] < (double)OutPts[ptIndex].xyz[axis])
+                    maxs[axis] = OutPts[ptIndex].xyz[axis];
             }
             else
             {
-                *(&mins + j) = OutPts[i].xyz[j];
+                mins[axis] = OutPts[ptIndex].xyz[axis];
             }
         }
     }
-    if (!AddBrushBevels((float(*)[4])plane, windings, &sideCount, 0x20u, &mins, &maxs, mapname, brushCount))
+
+    if (!AddBrushBevels((float(*)[4])plane, windings, &sideCount, 0x20u, mins, maxs, mapname, brushCount))
         return 0;
+
     InPtCount = GetPlaneIntersections((const float(*)[4])plane, sideCount, OutPts, 0x400u);
-    v31 = 0;
-    for (basePlaneIndex = 0; basePlaneIndex < sideCount; ++basePlaneIndex)
+    totalEdges = 0;
+    for (sideIndex = 0; sideIndex < sideCount; ++sideIndex)
     {
         if (BuildBrushdAdjacencyWindingForSide(
-            &plane[4 * basePlaneIndex],
-            basePlaneIndex,
+            &plane[4 * sideIndex],
+            sideIndex,
             OutPts,
             InPtCount,
-            &windings[basePlaneIndex],
+            &windings[sideIndex],
             12))
         {
-            if (windings[basePlaneIndex].numsides <= 0)
-                MyAssertHandler(".\\xanim\\xmodel_load_phys_collmap.cpp", 370, 0, "%s", "windings[sideIndex].numsides > 0");
-            v31 += windings[basePlaneIndex].numsides;
+            iassert(windings[sideIndex].numsides > 0);
+            totalEdges += windings[sideIndex].numsides;
         }
         else
         {
-            windings[basePlaneIndex].numsides = 0;
+            windings[sideIndex].numsides = 0;
         }
     }
-    if (!v31)
+
+    if (!totalEdges)
         return 0;
+
     geom->brush = (BrushWrapper*)Alloc(80);
     memset(geom->brush, 0, sizeof(BrushWrapper));
-    brush = geom->brush;
-    brush->mins[0] = mins;
-    brush->mins[1] = v17;
-    brush->mins[2] = v18;
-    v8 = geom->brush->maxs;
-    *v8 = maxs;
-    v8[1] = v26;
-    v8[2] = v27;
-    geom->brush->totalEdgeCount = v31;
-    geom->brush->baseAdjacentSide = (unsigned char*)Alloc(v31);
-    v19 = 0;
-    v13 = 0;
-    for (j = 0; j < 3; ++j)
+
+    geom->brush->mins[0] = mins[0];
+    geom->brush->mins[1] = mins[1];
+    geom->brush->mins[2] = mins[2];
+
+    geom->brush->maxs[0] = maxs[0];
+    geom->brush->maxs[1] = maxs[1];
+    geom->brush->maxs[2] = maxs[2];
+
+    geom->brush->totalEdgeCount = totalEdges;
+    geom->brush->baseAdjacentSide = (unsigned char*)Alloc(totalEdges);
+
+    edgeIndex = 0;
+    order = 0;
+    for (axis = 0; axis < 3; ++axis)
     {
-        v15 = 0;
-        while (v15 < 2)
+        dir = 0;
+        while (dir < 2)
         {
-            geom->brush->edgeCount[v15][j] = windings[v13].numsides;
-            if (geom->brush->edgeCount[v15][j] != windings[v13].numsides)
-                MyAssertHandler(
-                    ".\\xanim\\xmodel_load_phys_collmap.cpp",
-                    398,
-                    0,
-                    "%s",
-                    "geom->brush->edgeCount[dir][axis] == windings[order].numsides");
-            geom->brush->firstAdjacentSideOffsets[v15][j] = v19;
-            for (i = 0; i < windings[v13].numsides; ++i)
+            geom->brush->edgeCount[dir][axis] = windings[order].numsides;
+            iassert(geom->brush->edgeCount[dir][axis] == windings[order].numsides);
+            geom->brush->firstAdjacentSideOffsets[dir][axis] = edgeIndex;
+            for (ptIndex = 0; ptIndex < windings[order].numsides; ++ptIndex)
             {
-                geom->brush->baseAdjacentSide[i + v19] = windings[v13].sides[i];
-                if (geom->brush->baseAdjacentSide[i + v19] != windings[v13].sides[i])
-                    MyAssertHandler(
-                        ".\\xanim\\xmodel_load_phys_collmap.cpp",
-                        404,
-                        0,
-                        "%s",
-                        "geom->brush->baseAdjacentSide[edgeIndex + ptIndex] == windings[order].sides[ptIndex]");
+                geom->brush->baseAdjacentSide[ptIndex + edgeIndex] = windings[order].sides[ptIndex];
+                iassert(geom->brush->baseAdjacentSide[edgeIndex + ptIndex] == windings[order].sides[ptIndex]);
             }
-            v19 += windings[v13].numsides;
-            ++v15;
-            ++v13;
+            edgeIndex += windings[order].numsides;
+            ++dir;
+            ++order;
         }
     }
     geom->brush->numsides = sideCount - 6;
@@ -1001,45 +999,33 @@ char __cdecl Xmodel_ParsePhysicsBrush(
     {
         geom->brush->sides = (cbrushside_t*)Alloc(12 * geom->brush->numsides);
         geom->brush->planes = (cplane_s*)Alloc(20 * geom->brush->numsides);
-        basePlaneIndex = 0;
-        while (basePlaneIndex < geom->brush->numsides)
+        sideIndex = 0;
+        while (sideIndex < geom->brush->numsides)
         {
-            if (v13 != basePlaneIndex + 6)
-                MyAssertHandler(".\\xanim\\xmodel_load_phys_collmap.cpp", 417, 0, "%s", "order == sideIndex + 6");
-            geom->brush->sides[basePlaneIndex].edgeCount = windings[v13].numsides;
-            if (geom->brush->sides[basePlaneIndex].edgeCount != windings[v13].numsides)
-                MyAssertHandler(
-                    ".\\xanim\\xmodel_load_phys_collmap.cpp",
-                    419,
-                    0,
-                    "%s",
-                    "geom->brush->sides[sideIndex].edgeCount == windings[order].numsides");
-            geom->brush->sides[basePlaneIndex].firstAdjacentSideOffset = v19;
-            for (i = 0; i < windings[v13].numsides; ++i)
+            iassert(order == sideIndex + 6);
+            geom->brush->sides[sideIndex].edgeCount = windings[order].numsides;
+            iassert(geom->brush->sides[sideIndex].edgeCount == windings[order].numsides);
+            geom->brush->sides[sideIndex].firstAdjacentSideOffset = edgeIndex;
+            for (ptIndex = 0; ptIndex < windings[order].numsides; ++ptIndex)
             {
-                geom->brush->baseAdjacentSide[i + v19] = windings[v13].sides[i];
-                if (geom->brush->baseAdjacentSide[i + v19] != windings[v13].sides[i])
-                    MyAssertHandler(
-                        ".\\xanim\\xmodel_load_phys_collmap.cpp",
-                        425,
-                        0,
-                        "%s",
-                        "geom->brush->baseAdjacentSide[edgeIndex + ptIndex] == windings[order].sides[ptIndex]");
+                geom->brush->baseAdjacentSide[ptIndex + edgeIndex] = windings[order].sides[ptIndex];
+                iassert(geom->brush->baseAdjacentSide[edgeIndex + ptIndex] == windings[order].sides[ptIndex]);
             }
-            v19 += windings[v13].numsides;
-            v6 = &geom->brush->planes[basePlaneIndex];
-            v7 = &plane[4 * v13];
+            edgeIndex += windings[order].numsides;
+            v6 = &geom->brush->planes[sideIndex];
+            v7 = &plane[4 * order];
             v6->normal[0] = *v7;
             v6->normal[1] = v7[1];
             v6->normal[2] = v7[2];
-            geom->brush->planes[basePlaneIndex].dist = plane[4 * v13 + 3];
-            geom->brush->sides[basePlaneIndex].plane = &geom->brush->planes[basePlaneIndex];
-            ++basePlaneIndex;
-            ++v13;
+            geom->brush->planes[sideIndex].dist = plane[4 * order + 3];
+            geom->brush->sides[sideIndex].plane = &geom->brush->planes[sideIndex];
+            ++sideIndex;
+            ++order;
         }
     }
-    if (v19 != v31)
-        MyAssertHandler(".\\xanim\\xmodel_load_phys_collmap.cpp", 435, 0, "%s", "edgeIndex == totalEdges");
+
+    iassert(edgeIndex == totalEdges);
+
     return 1;
 }
 

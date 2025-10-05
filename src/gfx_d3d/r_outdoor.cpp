@@ -168,3 +168,13 @@ int __cdecl Outdoor_TransformToTextureClamped(int dimension, float inWorld)
         return (int)(transformed - 0.4999999990686774);
     return max;
 }
+
+void __cdecl R_GenerateOutdoorImage(GfxImage *outdoorImage)
+{
+    outdoorGlob.pic = (unsigned __int8 *)Hunk_AllocateTempMemory(
+        outdoorMapSize[1] * outdoorMapSize[0],
+        "Outdoor_TempHunkAllocatePic");
+    Outdoor_ComputeTexels();
+    Image_Generate2D(outdoorImage, outdoorGlob.pic, outdoorMapSize[0], outdoorMapSize[1], D3DFMT_L8);
+    Outdoor_TempHunkFreePic();
+}

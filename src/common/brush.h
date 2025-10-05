@@ -52,7 +52,7 @@ const SimplePlaneIntersection **__cdecl NextPointFormedByThisPlane(
     int32_t planeIndex,
     const SimplePlaneIntersection **begin,
     const SimplePlaneIntersection **end);
-double __cdecl CyclePerimiter(const SimplePlaneIntersection **pts, int32_t ptsCount);
+float __cdecl CyclePerimiter(const SimplePlaneIntersection **pts, int32_t ptsCount);
 char __cdecl TestConvexWithoutNearPoints(const SimplePlaneIntersection **pts, uint32_t ptCount);
 char __cdecl IsConvex(const float (*pts)[3], uint32_t ptCount);
 bool __cdecl CycleLess(

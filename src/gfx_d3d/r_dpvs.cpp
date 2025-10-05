@@ -109,29 +109,6 @@ char *__cdecl R_PortalAssertMsg()
         dpvsGlob.viewProjMtx->m[3][3]);
 }
 
-int __cdecl R_CellForPoint(const float *origin)
-{
-    mnode_t *node; // [esp+4h] [ebp-1Ch]
-    cplane_s *plane; // [esp+Ch] [ebp-14h]
-    float d; // [esp+10h] [ebp-10h]
-    int cellIndex; // [esp+14h] [ebp-Ch]
-    int cellCount; // [esp+18h] [ebp-8h]
-
-    iassert( rgp.world );
-    node = (mnode_t *)rgp.world->dpvsPlanes.nodes;
-    cellCount = rgp.world->dpvsPlanes.cellCount + 1;
-    while (1)
-    {
-        cellIndex = node->cellIndex;
-        if (cellIndex - cellCount < 0)
-            break;
-        plane = &rgp.world->dpvsPlanes.planes[cellIndex - cellCount];
-        d = Vec3Dot(origin, plane->normal) - plane->dist;
-        node = (mnode_t *)((char *)node + 2 * (d <= 0.0) * (node->rightChildOffset - 2) + 4);
-    }
-    return cellIndex - 1;
-}
-
 unsigned int __cdecl R_FindNearestReflectionProbeInCell(
     const GfxWorld *world,
     const GfxCell *cell,
@@ -201,7 +178,7 @@ unsigned int __cdecl R_CalcReflectionProbeIndex(const float *origin)
 {
     unsigned int cellIndex; // [esp+0h] [ebp-4h]
 
-    cellIndex = R_CellForPoint(origin);
+    cellIndex = R_CellForPoint(rgp.world, origin);
 
     if (cellIndex == -1)
         return R_FindNearestReflectionProbe(rgp.world, origin);
@@ -3651,7 +3628,13 @@ int __cdecl R_CellForPoint(const GfxWorld *world, const float *origin)
             break;
         plane = &world->dpvsPlanes.planes[cellIndex - cellCount];
         d = Vec3Dot(origin, plane->normal) - plane->dist;
-        node = (mnode_t *)((char *)node + 2 * (d <= 0.0) * (node->rightChildOffset - 2) + 4);
+        int side = (d <= 0.0);
+        unsigned short offset = (node->rightChildOffset - 2);
+        offset *= side;
+
+        node = (mnode_t *)((char *)node + (offset * 2) + 4);
+
+        //node = (mnode_t *)((char *)node + 2 * side * (node->rightChildOffset - 2) + 4);
     }
     return cellIndex - 1;
 }

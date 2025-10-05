@@ -1156,14 +1156,14 @@ int __cdecl CM_GetPlaneCount();
 
 void __cdecl CMod_LoadPlanes();
 bool __cdecl CMod_HasSpawnString(const struct SpawnVar *userData, const char *key);
-int CMod_LoadMaterials();
-struct cNode_t *CMod_LoadNodes();
+void CMod_LoadMaterials();
+void CMod_LoadNodes();
 void CMod_LoadLeafSurfaces();
 void CMod_LoadCollisionVerts();
 void CMod_LoadCollisionTriangles();
 void CMod_LoadCollisionEdgeWalkable();
-const struct DiskCollBorder *CMod_LoadCollisionBorders();
-char *CMod_LoadCollisionPartitions();
+void CMod_LoadCollisionBorders();
+void CMod_LoadCollisionPartitions();
 struct MapEnts *CMod_LoadEntityString();
 void CMod_LoadVisibility();
 void __cdecl CMod_LoadBrushRelated(unsigned int version, bool usePvs);
@@ -1187,10 +1187,10 @@ int __cdecl CMod_GetLeafTerrainContents(cLeaf_t *leaf);
 void CMod_LoadBrushes();
 void __cdecl CMod_LoadLeafs(bool usePvs);
 void __cdecl CMod_LoadLeafs_Version14(bool usePvs);
-const struct DiskLeaf *CMod_LoadLeafBrushNodes();
-char *CMod_LoadLeafBrushNodes_Version14();
-unsigned int CMod_LoadLeafBrushes();
-char *CMod_LoadCollisionAabbTrees();
+void CMod_LoadLeafBrushNodes();
+void CMod_LoadLeafBrushNodes_Version14();
+void CMod_LoadLeafBrushes();
+void CMod_LoadCollisionAabbTrees();
 
 
 // cm_showcollision

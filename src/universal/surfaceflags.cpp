@@ -8,11 +8,20 @@ int __cdecl Com_SurfaceTypeFromName(const char *name)
 
     if (!I_stricmp(name, "default"))
         return 0;
+
+    // LWSS ADD - hacky fix for special devs who spelled 'foilage' wrong
+    if (!I_stricmp(name, "foliage"))
+    {
+        name = "foilage";
+    }
+    // LWSS END
+
     for (i = 0; i < 28; ++i)
     {
         if (!I_stricmp(name, infoParms[i].name))
             return (infoParms[i].surfaceFlags & 0x1F00000) >> 20;
     }
+
     return -1;
 }
 

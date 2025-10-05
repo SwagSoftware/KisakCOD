@@ -122,7 +122,6 @@ void __cdecl R_FrustumClipPlanes(
     int sidePlaneCount,
     DpvsPlane *frustumPlanes);
 char *__cdecl R_PortalAssertMsg();
-int __cdecl R_CellForPoint(const float *origin);
 unsigned int __cdecl R_FindNearestReflectionProbeInCell(
     const GfxWorld *world,
     const GfxCell *cell,
