@@ -117,7 +117,7 @@ const char *g_expOperatorNames[81] =
   ">=",
   "==",
   "!=",
-  "&",
+  "&&", // '&' IDA Betrayeth again
   "||",
   "(",
   ",",

@@ -48,7 +48,7 @@ punctuation_s default_punctuations[53] =
   { (char*)"<<=", 2, NULL },
   { (char*)"...", 3, NULL },
   { (char*)"##", 4, NULL },
-  { (char*)"&", 5, NULL },
+  { (char*)"&&", 5, NULL }, // '&' IDA Betrayeth
   { (char*)"||", 6, NULL },
   { (char*)">=", 7, NULL },
   { (char*)"<=", 8, NULL },
@@ -2064,8 +2064,6 @@ int __cdecl PC_EvaluateTokens(source_s *source, token_s *tokens, int *intvalue, 
     bool v10; // [esp+24h] [ebp-DB4h]
     int type; // [esp+74h] [ebp-D64h]
     operator_s *o; // [esp+78h] [ebp-D60h]
-    operator_s *oa; // [esp+78h] [ebp-D60h]
-    operator_s *ob; // [esp+78h] [ebp-D60h]
     double questmarkfloatvalue; // [esp+80h] [ebp-D58h]
     operator_s *lastoperator; // [esp+8Ch] [ebp-D4Ch]
     value_s value_heap[64]; // [esp+90h] [ebp-D48h] BYREF
@@ -2238,7 +2236,7 @@ int __cdecl PC_EvaluateTokens(source_s *source, token_s *tokens, int *intvalue, 
             }
             else
             {
-                switch (tokens->subtype)
+                switch (tokens->subtype) // see `default_punctuations`
                 {
                 case 5:
                 case 6:
@@ -2348,13 +2346,13 @@ int __cdecl PC_EvaluateTokens(source_s *source, token_s *tokens, int *intvalue, 
     while (!error && firstoperator)
     {
         v = firstvalue;
-        for (oa = firstoperator;
-            oa->next
-            && oa->parentheses <= oa->next->parentheses
-            && (oa->parentheses != oa->next->parentheses || oa->priority < oa->next->priority);
-            oa = oa->next)
+        for (o = firstoperator;
+            o->next
+            && o->parentheses <= o->next->parentheses
+            && (o->parentheses != o->next->parentheses || o->priority < o->next->priority);
+            o = o->next)
         {
-            if (oa->op != 36 && oa->op != 35)
+            if (o->op != 36 && o->op != 35)
                 v = v->next;
             if (!v)
             {
@@ -2367,7 +2365,7 @@ int __cdecl PC_EvaluateTokens(source_s *source, token_s *tokens, int *intvalue, 
             break;
         v1 = v;
         v2 = v->next;
-        switch (oa->op)
+        switch (o->op)
         {
         case 5:
             v10 = v1->intvalue && v2->intvalue;
@@ -2495,10 +2493,10 @@ int __cdecl PC_EvaluateTokens(source_s *source, token_s *tokens, int *intvalue, 
         }
         if (error)
             break;
-        lastoperatortype = oa->op;
-        if (oa->op != 36 && oa->op != 35)
+        lastoperatortype = o->op;
+        if (o->op != 36 && o->op != 35)
         {
-            if (oa->op != 43)
+            if (o->op != 43)
                 v = v->next;
             if (v->prev)
                 v->prev->next = v->next;
@@ -2509,12 +2507,12 @@ int __cdecl PC_EvaluateTokens(source_s *source, token_s *tokens, int *intvalue, 
             else
                 lastvalue = v->prev;
         }
-        if (oa->prev)
-            oa->prev->next = oa->next;
+        if (o->prev)
+            o->prev->next = o->next;
         else
-            firstoperator = oa->next;
-        if (oa->next)
-            oa->next->prev = oa->prev;
+            firstoperator = o->next;
+        if (o->next)
+            o->next->prev = o->prev;
     }
     if (firstvalue)
     {
@@ -2523,7 +2521,7 @@ int __cdecl PC_EvaluateTokens(source_s *source, token_s *tokens, int *intvalue, 
         if (floatvalue)
             *floatvalue = firstvalue->floatvalue;
     }
-    for (ob = firstoperator; ob; ob = ob->next)
+    for (o = firstoperator; o; o = o->next)
         ;
     for (v = firstvalue; v; v = lastvalue)
         lastvalue = v->next;
@@ -3351,7 +3349,7 @@ bool __cdecl Eval_OperatorForToken(const char *text, EvalOperatorType *op)
     switch (*text)
     {
     case '!':
-        if (text[1] == 61)
+        if (text[1] == '=')
             *op = EVAL_OP_NOT_EQUAL;
         else
             *op = EVAL_OP_LOGICAL_NOT;
@@ -3362,7 +3360,7 @@ bool __cdecl Eval_OperatorForToken(const char *text, EvalOperatorType *op)
         result = 1;
         break;
     case '&':
-        if (text[1] == 38)
+        if (text[1] == '&')
             *op = EVAL_OP_LOGICAL_AND;
         else
             *op = EVAL_OP_BITWISE_AND;
@@ -3397,14 +3395,14 @@ bool __cdecl Eval_OperatorForToken(const char *text, EvalOperatorType *op)
         result = 1;
         break;
     case '<':
-        if (text[1] == 60)
+        if (text[1] == '<')
         {
             *op = EVAL_OP_LSHIFT;
             result = 1;
         }
         else
         {
-            if (text[1] == 61)
+            if (text[1] == '=')
                 *op = EVAL_OP_LESS_EQUAL;
             else
                 *op = EVAL_OP_LESS;
@@ -3412,20 +3410,20 @@ bool __cdecl Eval_OperatorForToken(const char *text, EvalOperatorType *op)
         }
         break;
     case '=':
-        if (text[1] != 61)
+        if (text[1] != '=')
             goto LABEL_44;
         *op = EVAL_OP_EQUALS;
         result = 1;
         break;
     case '>':
-        if (text[1] == 62)
+        if (text[1] == '>')
         {
             *op = EVAL_OP_RSHIFT;
             result = 1;
         }
         else
         {
-            if (text[1] == 61)
+            if (text[1] == '=')
                 *op = EVAL_OP_GREATER_EQUAL;
             else
                 *op = EVAL_OP_GREATER;
@@ -3441,7 +3439,7 @@ bool __cdecl Eval_OperatorForToken(const char *text, EvalOperatorType *op)
         result = 1;
         break;
     case '|':
-        if (text[1] == 124)
+        if (text[1] == '|')
             *op = EVAL_OP_LOGICAL_OR;
         else
             *op = EVAL_OP_BITWISE_OR;
@@ -4451,11 +4449,14 @@ int __cdecl parse_operatorToken(const char *token)
 {
     int opNum; // [esp+0h] [ebp-4h]
 
-    for (opNum = 0; opNum < 81; ++opNum)
+    iassert(ARRAY_COUNT(g_expOperatorNames) == 81);
+
+    for (opNum = 0; opNum < ARRAY_COUNT(g_expOperatorNames); ++opNum)
     {
         if (!I_stricmp(g_expOperatorNames[opNum], token))
             return opNum;
     }
+
     return 0;
 }
 
@@ -4891,7 +4892,7 @@ int __cdecl Item_Parse(int handle, itemDef_s *item)
 
     if (!PC_ReadTokenHandle(handle, &token))
         return 0;
-    if (token.string[0] != 123)
+    if (token.string[0] != '{')
         return 0;
     do
     {
@@ -4904,9 +4905,9 @@ int __cdecl Item_Parse(int handle, itemDef_s *item)
                     PC_SourceError(handle, (char*)"end of file inside menu item\n");
                     return 0;
                 }
-                if (token.string[0] == 125)
+                if (token.string[0] == '}')
                     return 1;
-            } while (token.string[0] == 59);
+            } while (token.string[0] == ';');
             key = KeywordHash_Find_itemDef_s_256_3855_(itemParseKeywordHash, token.string);
             if (key)
                 break;
@@ -5122,14 +5123,14 @@ int __cdecl ItemParse_textfile(itemDef_s *item, int handle)
     return 1;
 }
 
-int __cdecl ItemParse_textsavegame(itemDef_s *item)
+int __cdecl ItemParse_textsavegame(itemDef_s *item, int handle)
 {
     item->text = "savegameinfo";
     item->itemFlags |= 1u;
     return 1;
 }
 
-int __cdecl ItemParse_textcinematicsubtitle(itemDef_s *item)
+int __cdecl ItemParse_textcinematicsubtitle(itemDef_s *item, int handle)
 {
     item->text = "cinematicsubtitle";
     item->itemFlags |= 2u;
@@ -5160,7 +5161,7 @@ int __cdecl ItemParse_origin(itemDef_s *item, int handle)
     return 1;
 }
 
-int __cdecl ItemParse_decoration(itemDef_s *item)
+int __cdecl ItemParse_decoration(itemDef_s *item, int handle)
 {
     Window_SetStaticFlags(&item->window, item->window.staticFlags | 0x100000);
     return 1;
@@ -5252,13 +5253,13 @@ int __cdecl ItemParse_usePaging(itemDef_s *item, int handle)
     return 1;
 }
 
-int __cdecl ItemParse_autowrapped(itemDef_s *item)
+int __cdecl ItemParse_autowrapped(itemDef_s *item, int handle)
 {
     Window_SetStaticFlags(&item->window, item->window.staticFlags | 0x800000);
     return 1;
 }
 
-int __cdecl ItemParse_horizontalscroll(itemDef_s *item)
+int __cdecl ItemParse_horizontalscroll(itemDef_s *item, int handle)
 {
     Window_SetStaticFlags(&item->window, item->window.staticFlags | 0x200000);
     return 1;
@@ -5272,7 +5273,7 @@ int __cdecl ItemParse_type(itemDef_s *item, int handle)
     return 1;
 }
 
-bool __cdecl ItemParse_elementwidth(itemDef_s *item, int handle)
+int __cdecl ItemParse_elementwidth(itemDef_s *item, int handle)
 {
     listBoxDef_s *listPtr; // [esp+0h] [ebp-4h]
 
@@ -5281,7 +5282,7 @@ bool __cdecl ItemParse_elementwidth(itemDef_s *item, int handle)
     return listPtr && PC_Float_Parse(handle, &listPtr->elementWidth) != 0;
 }
 
-bool __cdecl ItemParse_elementheight(itemDef_s *item, int handle)
+int __cdecl ItemParse_elementheight(itemDef_s *item, int handle)
 {
     listBoxDef_s *listPtr; // [esp+0h] [ebp-4h]
 
@@ -5290,12 +5291,12 @@ bool __cdecl ItemParse_elementheight(itemDef_s *item, int handle)
     return listPtr && PC_Float_Parse(handle, &listPtr->elementHeight) != 0;
 }
 
-bool __cdecl ItemParse_special(itemDef_s *item, int handle)
+int __cdecl ItemParse_special(itemDef_s *item, int handle)
 {
     return PC_Float_Parse(handle, &item->special) != 0;
 }
 
-bool __cdecl ItemParse_elementtype(itemDef_s *item, int handle)
+int __cdecl ItemParse_elementtype(itemDef_s *item, int handle)
 {
     listBoxDef_s *listPtr; // [esp+0h] [ebp-4h]
 
@@ -5342,12 +5343,12 @@ int __cdecl ItemParse_columns(itemDef_s *item, int handle)
     return 1;
 }
 
-bool __cdecl ItemParse_border(itemDef_s *item, int handle)
+int __cdecl ItemParse_border(itemDef_s *item, int handle)
 {
     return PC_Int_Parse(handle, &item->window.border) != 0;
 }
 
-bool __cdecl ItemParse_bordersize(itemDef_s *item, int handle)
+int __cdecl ItemParse_bordersize(itemDef_s *item, int handle)
 {
     return PC_Float_Parse(handle, &item->window.borderSize) != 0;
 }
@@ -5383,7 +5384,7 @@ int __cdecl ItemParse_ownerdraw(itemDef_s *item, int handle)
     return 1;
 }
 
-bool __cdecl ItemParse_align(itemDef_s *item, int handle)
+int __cdecl ItemParse_align(itemDef_s *item, int handle)
 {
     return PC_Int_Parse(handle, &item->alignment) != 0;
 }
@@ -5403,27 +5404,27 @@ int __cdecl ItemParse_textalign(itemDef_s *item, int handle)
     return 0;
 }
 
-bool __cdecl ItemParse_textalignx(itemDef_s *item, int handle)
+int __cdecl ItemParse_textalignx(itemDef_s *item, int handle)
 {
     return PC_Float_Parse(handle, &item->textalignx) != 0;
 }
 
-bool __cdecl ItemParse_textaligny(itemDef_s *item, int handle)
+int __cdecl ItemParse_textaligny(itemDef_s *item, int handle)
 {
     return PC_Float_Parse(handle, &item->textaligny) != 0;
 }
 
-bool __cdecl ItemParse_textscale(itemDef_s *item, int handle)
+int __cdecl ItemParse_textscale(itemDef_s *item, int handle)
 {
     return PC_Float_Parse(handle, &item->textscale) != 0;
 }
 
-bool __cdecl ItemParse_textstyle(itemDef_s *item, int handle)
+int __cdecl ItemParse_textstyle(itemDef_s *item, int handle)
 {
     return PC_Int_Parse(handle, &item->textStyle) != 0;
 }
 
-bool __cdecl ItemParse_textfont(itemDef_s *item, int handle)
+int __cdecl ItemParse_textfont(itemDef_s *item, int handle)
 {
     return PC_Int_Parse(handle, &item->fontEnum) != 0;
 }
@@ -5473,7 +5474,7 @@ int __cdecl ItemParse_bordercolor(itemDef_s *item, int handle)
     return 1;
 }
 
-bool __cdecl ItemParse_outlinecolor(itemDef_s *item, int handle)
+int __cdecl ItemParse_outlinecolor(itemDef_s *item, int handle)
 {
     return PC_Color_Parse(handle, (float (*)[4])item->window.outlineColor) != 0;
 }
@@ -5491,7 +5492,7 @@ int __cdecl ItemParse_background(itemDef_s *item, int handle)
     return 1;
 }
 
-bool __cdecl ItemParse_doubleClick(itemDef_s *item, int handle)
+int __cdecl ItemParse_doubleClick(itemDef_s *item, int handle)
 {
     listBoxDef_s *listPtr; // [esp+0h] [ebp-4h]
 
@@ -5502,47 +5503,47 @@ bool __cdecl ItemParse_doubleClick(itemDef_s *item, int handle)
     return listPtr && PC_Script_Parse(handle, &listPtr->doubleClick) != 0;
 }
 
-bool __cdecl ItemParse_onFocus(itemDef_s *item, int handle)
+int __cdecl ItemParse_onFocus(itemDef_s *item, int handle)
 {
     return PC_Script_Parse(handle, &item->onFocus) != 0;
 }
 
-bool __cdecl ItemParse_leaveFocus(itemDef_s *item, int handle)
+int __cdecl ItemParse_leaveFocus(itemDef_s *item, int handle)
 {
     return PC_Script_Parse(handle, &item->leaveFocus) != 0;
 }
 
-bool __cdecl ItemParse_mouseEnter(itemDef_s *item, int handle)
+int __cdecl ItemParse_mouseEnter(itemDef_s *item, int handle)
 {
     return PC_Script_Parse(handle, &item->mouseEnter) != 0;
 }
 
-bool __cdecl ItemParse_mouseExit(itemDef_s *item, int handle)
+int __cdecl ItemParse_mouseExit(itemDef_s *item, int handle)
 {
     return PC_Script_Parse(handle, &item->mouseExit) != 0;
 }
 
-bool __cdecl ItemParse_mouseEnterText(itemDef_s *item, int handle)
+int __cdecl ItemParse_mouseEnterText(itemDef_s *item, int handle)
 {
     return PC_Script_Parse(handle, &item->mouseEnterText) != 0;
 }
 
-bool __cdecl ItemParse_mouseExitText(itemDef_s *item, int handle)
+int __cdecl ItemParse_mouseExitText(itemDef_s *item, int handle)
 {
     return PC_Script_Parse(handle, &item->mouseExitText) != 0;
 }
 
-bool __cdecl ItemParse_action(itemDef_s *item, int handle)
+int __cdecl ItemParse_action(itemDef_s *item, int handle)
 {
     return PC_Script_Parse(handle, &item->action) != 0;
 }
 
-bool __cdecl ItemParse_accept(itemDef_s *item, int handle)
+int __cdecl ItemParse_accept(itemDef_s *item, int handle)
 {
     return PC_Script_Parse(handle, &item->onAccept) != 0;
 }
 
-bool __cdecl ItemParse_dvarTest(itemDef_s *item, int handle)
+int __cdecl ItemParse_dvarTest(itemDef_s *item, int handle)
 {
     return PC_String_Parse(handle, &item->dvarTest) != 0;
 }
@@ -5600,7 +5601,7 @@ int __cdecl ItemParse_maxPaintChars(itemDef_s *item, int handle)
     return 1;
 }
 
-bool __cdecl ItemParse_dvarFloat(itemDef_s *item, int handle)
+int __cdecl ItemParse_dvarFloat(itemDef_s *item, int handle)
 {
     editFieldDef_s *editPtr; // [esp+0h] [ebp-4h]
 
@@ -5963,118 +5964,119 @@ int __cdecl Item_Parse_maxCharsGotoNext(itemDef_s *item, int handle)
 }
 
 
+// (Casts are for different pointer type)
 const KeywordHashEntry<menuDef_t, 128, 128> menuParseKeywords[36] =
 {
-  { "name", &MenuParse_name },
-  { "fullscreen", &MenuParse_fullscreen },
-  { "rect", &MenuParse_rect },
-  { "style", (int(__cdecl *)(menuDef_t*, int))&ItemParse_style},
-  { "visible", &MenuParse_visible },
-  { "onOpen", &MenuParse_onOpen },
-  { "onClose", &MenuParse_onClose },
-  { "onESC", &MenuParse_onESC },
-  { "border", &MenuParse_border },
-  { "borderSize", &MenuParse_borderSize },
-  { "backcolor", &MenuParse_backcolor },
-  { "forecolor", &MenuParse_forecolor },
-  { "bordercolor", &MenuParse_bordercolor },
-  { "focuscolor", &MenuParse_focuscolor },
-  { "disablecolor", &MenuParse_disablecolor },
-  { "outlinecolor", &MenuParse_outlinecolor },
-  { "background", &MenuParse_background },
-  { "ownerdraw", &MenuParse_ownerdraw },
-  { "ownerdrawFlag", (int(__cdecl *)(menuDef_t *, int)) &ItemParse_ownerdrawFlag },
-  { "outOfBoundsClick", (int(__cdecl *)(menuDef_t *, int)) &MenuParse_outOfBounds },
-  { "soundLoop", &MenuParse_soundLoop },
-  { "itemDef", &MenuParse_itemDef },
-  { "exp", &MenuParse_execExp },
-  { "popup", (int(__cdecl *)(menuDef_t *, int)) &MenuParse_popup },
-  { "fadeClamp", &MenuParse_fadeClamp },
-  { "fadeCycle", &MenuParse_fadeCycle },
-  { "fadeAmount", &MenuParse_fadeAmount },
-  { "fadeInAmount", &MenuParse_fadeInAmount },
-  { "execKey", &MenuParse_execKey },
-  { "execKeyInt", &MenuParse_execKeyInt },
-  { "blurWorld", &MenuParse_blurWorld },
-  { "legacySplitScreenScale", &MenuParse_legacySplitScreenScale },
-  { "hiddenDuringScope", &MenuParse_hiddenDuringScope },
-  { "hiddenDuringFlashbang", &MenuParse_hiddenDuringFlashbang },
-  { "hiddenDuringUI", &MenuParse_hiddenDuringUI },
-  { "allowedBinding", &MenuParse_allowedBinding }
+  { "name", MenuParse_name },
+  { "fullscreen", MenuParse_fullscreen },
+  { "rect", MenuParse_rect },
+  { "style", (int(__cdecl *)(menuDef_t*, int))ItemParse_style},
+  { "visible", MenuParse_visible },
+  { "onOpen", MenuParse_onOpen },
+  { "onClose", MenuParse_onClose },
+  { "onESC", MenuParse_onESC },
+  { "border", MenuParse_border },
+  { "borderSize", MenuParse_borderSize },
+  { "backcolor", MenuParse_backcolor },
+  { "forecolor", MenuParse_forecolor },
+  { "bordercolor", MenuParse_bordercolor },
+  { "focuscolor", MenuParse_focuscolor },
+  { "disablecolor", MenuParse_disablecolor },
+  { "outlinecolor", MenuParse_outlinecolor },
+  { "background", MenuParse_background },
+  { "ownerdraw", MenuParse_ownerdraw },
+  { "ownerdrawFlag", (int(__cdecl *)(menuDef_t *, int)) ItemParse_ownerdrawFlag },
+  { "outOfBoundsClick", (int(__cdecl *)(menuDef_t *, int)) MenuParse_outOfBounds },
+  { "soundLoop", MenuParse_soundLoop },
+  { "itemDef", MenuParse_itemDef },
+  { "exp", MenuParse_execExp },
+  { "popup", (int(__cdecl *)(menuDef_t *, int)) MenuParse_popup },
+  { "fadeClamp", MenuParse_fadeClamp },
+  { "fadeCycle", MenuParse_fadeCycle },
+  { "fadeAmount", MenuParse_fadeAmount },
+  { "fadeInAmount", MenuParse_fadeInAmount },
+  { "execKey", MenuParse_execKey },
+  { "execKeyInt", MenuParse_execKeyInt },
+  { "blurWorld", MenuParse_blurWorld },
+  { "legacySplitScreenScale", MenuParse_legacySplitScreenScale },
+  { "hiddenDuringScope", MenuParse_hiddenDuringScope },
+  { "hiddenDuringFlashbang", MenuParse_hiddenDuringFlashbang },
+  { "hiddenDuringUI", MenuParse_hiddenDuringUI },
+  { "allowedBinding", MenuParse_allowedBinding }
 }; // idb
 const KeywordHashEntry<itemDef_s, 256, 3855> itemParseKeywords[71] =
 {
-  { "name", &ItemParse_name },
-  { "text", &ItemParse_text },
-  { "textfile", &ItemParse_textfile },
-  { "textsavegame", (int(__cdecl *)(itemDef_s *, int))&ItemParse_textsavegame },
-  { "textcinematicsubtitle",(int(__cdecl *)(itemDef_s *, int))&ItemParse_textcinematicsubtitle },
-  { "group", &ItemParse_group },
-  { "rect", &ItemParse_rect },
-  { "origin", &ItemParse_origin },
-  { "style", &ItemParse_style },
-  { "decoration", (int(__cdecl *)(itemDef_s *, int)) &ItemParse_decoration },
-  { "notselectable", &ItemParse_notselectable },
-  { "noscrollbars", &ItemParse_noScrollBars },
-  { "usepaging", &ItemParse_usePaging },
-  { "autowrapped", (int(__cdecl *)(itemDef_s *, int)) &ItemParse_autowrapped },
-  { "horizontalscroll", (int(__cdecl *)(itemDef_s *, int)) &ItemParse_horizontalscroll },
-  { "type", &ItemParse_type },
-  { "elementwidth", (int(__cdecl *)(itemDef_s *, int)) &ItemParse_elementwidth },
-  { "elementheight", (int(__cdecl *)(itemDef_s *, int)) &ItemParse_elementheight },
-  { "feeder",(int(__cdecl *)(itemDef_s *, int)) &ItemParse_special },
-  { "elementtype", (int(__cdecl *)(itemDef_s *, int)) &ItemParse_elementtype },
-  { "columns", &ItemParse_columns },
-  { "border", (int(__cdecl *)(itemDef_s *, int)) &ItemParse_border },
-  { "bordersize", (int(__cdecl *)(itemDef_s *, int)) &ItemParse_bordersize },
-  { "visible", &ItemParse_visible },
-  { "ownerdraw", &ItemParse_ownerdraw },
-  { "align", (int(__cdecl *)(itemDef_s *, int)) &ItemParse_align },
-  { "textalign", &ItemParse_textalign },
-  { "textalignx", (int(__cdecl *)(itemDef_s *, int)) &ItemParse_textalignx },
-  { "textaligny", (int(__cdecl *)(itemDef_s *, int)) &ItemParse_textaligny },
-  { "textscale", (int(__cdecl *)(itemDef_s *, int)) &ItemParse_textscale },
-  { "textstyle", (int(__cdecl *)(itemDef_s *, int)) &ItemParse_textstyle },
-  { "textfont", (int(__cdecl *)(itemDef_s *, int)) &ItemParse_textfont },
-  { "backcolor", &ItemParse_backcolor },
-  { "forecolor", &ItemParse_forecolor },
-  { "bordercolor", &ItemParse_bordercolor },
-  { "outlinecolor", (int(__cdecl *)(itemDef_s *, int)) &ItemParse_outlinecolor },
-  { "background", &ItemParse_background },
-  { "onFocus",(int(__cdecl *)(itemDef_s *, int)) &ItemParse_onFocus },
-  { "leaveFocus", (int(__cdecl *)(itemDef_s *, int)) &ItemParse_leaveFocus },
-  { "mouseEnter", (int(__cdecl *)(itemDef_s *, int)) &ItemParse_mouseEnter },
-  { "mouseExit",(int(__cdecl *)(itemDef_s *, int)) &ItemParse_mouseExit },
-  { "mouseEnterText",(int(__cdecl *)(itemDef_s *, int)) &ItemParse_mouseEnterText },
-  { "mouseExitText", (int(__cdecl *)(itemDef_s *, int)) &ItemParse_mouseExitText },
-  { "action", (int(__cdecl *)(itemDef_s *, int)) &ItemParse_action },
-  { "accept", (int(__cdecl *)(itemDef_s *, int)) &ItemParse_accept },
-  { "special", (int(__cdecl *)(itemDef_s *, int)) &ItemParse_special },
-  { "dvar", &ItemParse_dvar },
-  { "maxChars", &ItemParse_maxChars },
-  { "maxCharsGotoNext", &Item_Parse_maxCharsGotoNext },
-  { "maxPaintChars", &ItemParse_maxPaintChars },
-  { "focusSound", &ItemParse_focusSound },
-  { "dvarFloat", (int(__cdecl *)(itemDef_s *, int)) &ItemParse_dvarFloat },
-  { "dvarStrList", &ItemParse_dvarStrList },
-  { "dvarFloatList", &ItemParse_dvarFloatList },
-  { "dvarEnumList", &ItemParse_dvarEnumList },
-  { "ownerdrawFlag", &ItemParse_ownerdrawFlag },
-  { "enableDvar", &ItemParse_enableDvar },
-  { "dvarTest", (int(__cdecl *)(itemDef_s *, int)) &ItemParse_dvarTest },
-  { "disableDvar", &ItemParse_disableDvar },
-  { "showDvar", &ItemParse_showDvar },
-  { "hideDvar", &ItemParse_hideDvar },
-  { "focusDvar", &ItemParse_focusDvar },
-  { "doubleclick", (int(__cdecl *)(itemDef_s *, int)) &ItemParse_doubleClick },
-  { "execKey", &ItemParse_execKey },
-  { "execKeyInt", &ItemParse_execKeyInt },
-  { "exp", &ItemParse_execExp },
-  { "gamemsgwindowindex", &ItemParse_gameMsgWindowIndex },
-  { "gamemsgwindowmode", &ItemParse_gameMsgWindowMode },
-  { "selectBorder", &ItemParse_selectBorder },
-  { "disablecolor", &ItemParse_disableColor },
-  { "selectIcon", &ItemParse_selectIcon }
+  { "name", ItemParse_name },
+  { "text", ItemParse_text },
+  { "textfile", ItemParse_textfile },
+  { "textsavegame", ItemParse_textsavegame },
+  { "textcinematicsubtitle",ItemParse_textcinematicsubtitle },
+  { "group", ItemParse_group },
+  { "rect", ItemParse_rect },
+  { "origin", ItemParse_origin },
+  { "style", ItemParse_style },
+  { "decoration",  ItemParse_decoration },
+  { "notselectable", ItemParse_notselectable },
+  { "noscrollbars", ItemParse_noScrollBars },
+  { "usepaging", ItemParse_usePaging },
+  { "autowrapped",  ItemParse_autowrapped },
+  { "horizontalscroll",  ItemParse_horizontalscroll },
+  { "type", ItemParse_type },
+  { "elementwidth",  ItemParse_elementwidth },
+  { "elementheight",  ItemParse_elementheight },
+  { "feeder", ItemParse_special },
+  { "elementtype",  ItemParse_elementtype },
+  { "columns", ItemParse_columns },
+  { "border",  ItemParse_border },
+  { "bordersize",  ItemParse_bordersize },
+  { "visible", ItemParse_visible },
+  { "ownerdraw", ItemParse_ownerdraw },
+  { "align",  ItemParse_align },
+  { "textalign", ItemParse_textalign },
+  { "textalignx",  ItemParse_textalignx },
+  { "textaligny",  ItemParse_textaligny },
+  { "textscale",  ItemParse_textscale },
+  { "textstyle",  ItemParse_textstyle },
+  { "textfont",  ItemParse_textfont },
+  { "backcolor", ItemParse_backcolor },
+  { "forecolor", ItemParse_forecolor },
+  { "bordercolor", ItemParse_bordercolor },
+  { "outlinecolor",  ItemParse_outlinecolor },
+  { "background", ItemParse_background },
+  { "onFocus", ItemParse_onFocus },
+  { "leaveFocus",  ItemParse_leaveFocus },
+  { "mouseEnter",  ItemParse_mouseEnter },
+  { "mouseExit", ItemParse_mouseExit },
+  { "mouseEnterText", ItemParse_mouseEnterText },
+  { "mouseExitText",  ItemParse_mouseExitText },
+  { "action",  ItemParse_action },
+  { "accept",  ItemParse_accept },
+  { "special",  ItemParse_special },
+  { "dvar", ItemParse_dvar },
+  { "maxChars", ItemParse_maxChars },
+  { "maxCharsGotoNext", Item_Parse_maxCharsGotoNext },
+  { "maxPaintChars", ItemParse_maxPaintChars },
+  { "focusSound", ItemParse_focusSound },
+  { "dvarFloat",  ItemParse_dvarFloat },
+  { "dvarStrList", ItemParse_dvarStrList },
+  { "dvarFloatList", ItemParse_dvarFloatList },
+  { "dvarEnumList", ItemParse_dvarEnumList },
+  { "ownerdrawFlag", ItemParse_ownerdrawFlag },
+  { "enableDvar", ItemParse_enableDvar },
+  { "dvarTest",  ItemParse_dvarTest },
+  { "disableDvar", ItemParse_disableDvar },
+  { "showDvar", ItemParse_showDvar },
+  { "hideDvar", ItemParse_hideDvar },
+  { "focusDvar", ItemParse_focusDvar },
+  { "doubleclick",  ItemParse_doubleClick },
+  { "execKey", ItemParse_execKey },
+  { "execKeyInt", ItemParse_execKeyInt },
+  { "exp", ItemParse_execExp },
+  { "gamemsgwindowindex", ItemParse_gameMsgWindowIndex },
+  { "gamemsgwindowmode", ItemParse_gameMsgWindowMode },
+  { "selectBorder", ItemParse_selectBorder },
+  { "disablecolor", ItemParse_disableColor },
+  { "selectIcon", ItemParse_selectIcon }
 }; // idb
 
 int __cdecl KeywordHash_KeySeed(const char *keyword, int hashCount, int seed)
@@ -6270,7 +6272,7 @@ int __cdecl Menu_Parse(int handle, menuDef_t *menu)
 
     if (!PC_ReadTokenHandle(handle, &token))
         return 0;
-    if (token.string[0] != 123)
+    if (token.string[0] != '{')
         return 0;
     do
     {
@@ -6284,9 +6286,9 @@ int __cdecl Menu_Parse(int handle, menuDef_t *menu)
                     PC_SourceError(handle, (char*)"end of file inside menu\n");
                     return 0;
                 }
-                if (token.string[0] == 125)
+                if (token.string[0] == '}')
                     return 1;
-            } while (token.string[0] == 59);
+            } while (token.string[0] == ';');
             key = KeywordHash_Find_menuDef_t_128_128_(menuParseKeywordHash, token.string);
             if (key)
                 break;

@@ -4598,6 +4598,7 @@ void __cdecl UI_ListMenus_f()
 
 void __cdecl CL_SelectStringTableEntryInDvar_f()
 {
+#ifndef KISAK_NO_FASTFILES
     const char *v0; // eax
     unsigned int v1; // eax
     const char *v2; // eax
@@ -4629,6 +4630,7 @@ void __cdecl CL_SelectStringTableEntryInDvar_f()
             Com_Printf(16, "usage: selectStringTableEntryInDvar <tableFileName> <columnNum> <dvarName>");
         }
     }
+#endif
 }
 
 void __cdecl UI_CloseMenu_f()
