@@ -323,7 +323,11 @@ void __cdecl Script_StatClearPerkNew(UiContext *dc, itemDef_s *item, const char 
     int statValue; // [esp+Ch] [ebp-40Ch]
     char refString[1028]; // [esp+10h] [ebp-408h] BYREF
 
+#ifdef KISAK_NO_FASTFILES
+    if (true)
+#else
     if (IsFastFileLoad())
+#endif
     {
         Script_StatClearPerkGetArg(dc, item, args, refString, 1024);
         StringTable_GetAsset("mp/statstable.csv", &table);
@@ -1012,7 +1016,11 @@ void __cdecl Script_StatSetUsingStatsTable(UiContext *dc, itemDef_s *item, const
     char arg[1024]; // [esp+414h] [ebp-408h] BYREF
     int newStatValue; // [esp+818h] [ebp-4h]
 
+#ifdef KISAK_NO_FASTFILES
+    if (true)
+#else
     if (IsFastFileLoad())
+#endif
     {
         String_Parse(args, arg, 1024);
         if (!I_stricmp(arg, "("))

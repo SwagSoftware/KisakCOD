@@ -2339,7 +2339,11 @@ void __cdecl TableLookup(int localClientNum, OperandList *list, Operand *operand
     const char *string; // [esp-4h] [ebp-8h]
     StringTable *table; // [esp+0h] [ebp-4h] BYREF
 
+#ifdef KISAK_NO_FASTFILES
+    if (true)
+#else
     if (IsFastFileLoad())
+#endif
     {
         if (list->operandCount == 4)
         {

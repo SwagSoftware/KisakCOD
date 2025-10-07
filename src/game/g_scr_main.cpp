@@ -4613,7 +4613,8 @@ void __cdecl GScr_SetCursorHint(scr_entref_t entref)
             if (!*v8)
                 break;
             Com_Printf(23, "%s\n", *v8++);
-        } while ((int)v8 < (int)&functions[9].actionFunc);
+        //} while ((int)v8 < (int)&functions[9].actionFunc);
+        } while ((int)v8 < (uintptr_t)&hintStrings[4]);
         v9 = va("%s is not a valid hint type. See above for list of valid hint types\n", v4);
         Scr_Error(v9);
     }

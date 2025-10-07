@@ -1,6 +1,7 @@
 #include "cmd.h"
 
 #include <universal/assertive.h>
+#include <universal/q_parse.h>
 
 #include "qcommon.h"
 #include "mem_track.h"
@@ -258,8 +259,28 @@ void Cmd_Dumpraw_f(void)
 			std::filesystem::create_directories(rawDir / dir);
 
 			FILE* f;
-			fopen_s(&f, std::format("{}\\{}", rawDir, file.rawfile->name).c_str(), "wb");
-			fwrite(file.rawfile->buffer, file.rawfile->len, 1, f);
+            if (type == ASSET_TYPE_STRINGTABLE)
+            {
+                fopen_s(&f, std::format("{}\\{}", rawDir, file.stringTable->name).c_str(), "w");
+                for (int row = 0; row < file.stringTable->columnCount; row++)
+                {
+                    for (int col = 0; col < file.stringTable->rowCount; col++)
+                    {
+                        const char *str = StringTable_GetColumnValueForRow(file.stringTable, row, col);
+                        fwrite(str, strlen(str), 1, f);
+                        if (col < file.stringTable->rowCount - 1)
+                        {
+                            fwrite(",", 1, 1, f);
+                        }
+                    }
+                    fwrite("\n", 1, 1, f);
+                }
+            }
+            else
+            {
+                fopen_s(&f, std::format("{}\\{}", rawDir, file.rawfile->name).c_str(), "wb");
+                fwrite(file.rawfile->buffer, file.rawfile->len, 1, f);
+            }
 			fflush(f);
 			fclose(f);
 		}
@@ -292,7 +313,7 @@ void Cmd_Dumpraw_f(void)
 
         DB_LoadXAssets(&zinfo, 1, 0);
         DB_SyncXAssets();
-        DumpFileType(ASSET_TYPE_RAWFILE);
+        DumpFileType(ASSET_TYPE_STRINGTABLE);
     }
 
     //DumpFileType(ASSET_TYPE_RAWFILE);
