@@ -1179,7 +1179,9 @@ extern const dvar_t *input_invertPitch;
 extern const dvar_t *cl_avidemo;
 extern const dvar_t *cl_testAnimWeight;
 extern const dvar_t *cl_freemoveScale;
+#ifdef KISAK_MP
 extern const dvar_t *motd;
+#endif
 extern const dvar_t *cl_sensitivity;
 extern const dvar_t *cl_forceavidemo;
 extern const dvar_t *m_yaw;

@@ -104,10 +104,12 @@ const dvar_t *com_developer;
 
 const dvar_t *sys_lockThreads;
 const dvar_t *sys_smp_allowed;
+#ifdef KISAK_MP
 const dvar_t *com_masterServerName;
 const dvar_t *com_authServerName;
 const dvar_t *com_masterPort;
 const dvar_t *com_authPort;
+#endif
 
 const dvar_t *useFastFile;
 
@@ -1518,6 +1520,7 @@ void Com_InitDvars()
         "Prevents specified threads from changing CPUs; improves profiling and may fix some bugs, but can hurt performance");
 
     sys_smp_allowed = Dvar_RegisterBool("sys_smp_allowed", Sys_GetCpuCount() > 1u, DVAR_INIT, "Allow multi-threading");
+#ifdef KISAK_MP
     com_masterServerName = Dvar_RegisterString(
         "masterServerName",
         "cod4master.activision.com",
@@ -1530,6 +1533,7 @@ void Com_InitDvars()
         "Authentication server name for listing public inet games");
     com_masterPort = Dvar_RegisterInt("masterPort", 20810, 0, 0xFFFF, DVAR_CHEAT, "Master server port");
     com_authPort = Dvar_RegisterInt("authPort", 20800, 0, 0xFFFF, DVAR_CHEAT, "Auth server port");
+#endif
     com_developer = Dvar_RegisterInt("developer", 0, 0, 2, DVAR_NOFLAG, "Enable development options");
     com_developer_script = Dvar_RegisterBool("developer_script", 0, DVAR_NOFLAG, "Enable developer script comments");
     com_logfile = Dvar_RegisterInt(
