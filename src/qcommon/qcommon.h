@@ -143,10 +143,12 @@ extern const dvar_t *com_developer;
 
 extern const dvar_t *sys_lockThreads;
 extern const dvar_t *sys_smp_allowed;
+#ifdef KISAK_MP
 extern const dvar_t *com_masterServerName;
 extern const dvar_t *com_authServerName;
 extern const dvar_t *com_masterPort;
 extern const dvar_t *com_authPort;
+#endif
 
 
 enum errorParm_t : __int32

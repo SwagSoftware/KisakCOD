@@ -2822,7 +2822,11 @@ void __cdecl Con_DrawInput(int32_t localClientNum)
 #endif
     if (Key_IsCatcherActive(localClientNum, 1) && Sys_IsMainThread())
     {
+#ifdef KISAK_MP
         promptString = va("%s: %s> ", "CoD4 MP", "1.0");
+#elif KISAK_SP
+        promptString = va("%s: %s> ", "CoD4", "1.0");
+#endif
         conDrawInputGlob.fontHeight = (float)R_TextHeight(cls.consoleFont);
         conDrawInputGlob.x = con.screenMin[0] + 6.0;
         conDrawInputGlob.y = con.screenMin[1] + 6.0;

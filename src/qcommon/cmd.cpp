@@ -1156,7 +1156,11 @@ void __cdecl Cmd_Exec_f()
         Com_DefaultExtension(filename, 0x40u, ".cfg");
         localClientNum = 0;
         pathname = (char *)Com_GetFilenameSubString(filename);
+#ifdef KISAK_MP
         if (I_stricmp(pathname, "config_mp.cfg"))
+#elif KISAK_SP
+        if (I_stricmp(pathname, "config.cfg"))
+#endif
         {
             if ((!IsFastFileLoad() || !Cmd_ExecFromFastFile(localClientNum, 0, filename))
                 && !Cmd_ExecFromDisk(localClientNum, 0, filename))

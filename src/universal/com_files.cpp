@@ -2740,7 +2740,12 @@ void __cdecl FS_Restart(int localClientNum, int checksumFeed)
     FS_SetRestrictions();
     ProfLoad_End();
     ProfLoad_Begin("Default config");
+
+#ifdef KISAK_MP
     if (FS_ReadFile("default_mp.cfg", 0) <= 0)
+#elif KISAK_SP
+    if (FS_ReadFile("default.cfg", 0) <= 0)
+#endif
     {
         if (lastValidBase[0])
         {
@@ -2753,15 +2758,25 @@ void __cdecl FS_Restart(int localClientNum, int checksumFeed)
             FS_Restart(localClientNum, checksumFeed);
             Com_Error(ERR_DROP, "Invalid game folder\n");
         }
+#ifdef KISAK_MP
         Com_Error(ERR_FATAL, "Couldn't load %s.  Make sure Call of Duty is run from the correct folder.", "default_mp.cfg");
+#elif KISAK_SP
+        Com_Error(ERR_FATAL, "Couldn't load %s.  Make sure Call of Duty is run from the correct folder.", "default.cfg");
+#endif
     }
+
     if (I_stricmp(fs_gameDirVar->current.string, lastValidGame) && !Com_SafeMode())
     {
-        v2 = va("exec %s\n", "config_mp.cfg");
-        Cbuf_AddText(0, v2);
+#ifdef KISAK_MP
+        Cbuf_AddText(0, va("exec %s\n", "config_mp.cfg"));
+#elif KISAK_SP
+        Cbuf_AddText(0, va("exec %s\n", "config.cfg"));
+#endif
     }
-    I_strncpyz(lastValidBase, fs_basepath->current.string, 256);
-    I_strncpyz(lastValidGame, fs_gameDirVar->current.string, 256);
+
+    I_strncpyz(lastValidBase, fs_basepath->current.string, sizeof(lastValidBase));
+    I_strncpyz(lastValidGame, fs_gameDirVar->current.string, sizeof(lastValidBase));
+
     ProfLoad_End();
 }
 

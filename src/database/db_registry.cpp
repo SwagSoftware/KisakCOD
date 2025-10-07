@@ -2760,6 +2760,8 @@ void __cdecl DB_UnloadXZone(uint32_t zoneIndex, bool createDefault)
     iassert(zoneIndex);
     hash = 0;
 
+    // KISAKTODO: would be nice
+#if 0
     //Com_Printf(16, "Unloading assets from fastfile '%s' ", g_zoneNames[zoneIndex]) // KISAKTODO: would be nice
     Com_Printf(16, "Unloading assets from fastfile '%i' ", zoneIndex);
     
@@ -2771,6 +2773,7 @@ void __cdecl DB_UnloadXZone(uint32_t zoneIndex, bool createDefault)
     {
         Com_Printf(16, "and deleting all assets\n");
     }
+#endif
 
 LABEL_4:
     if (hash < 0x8000)

@@ -89,7 +89,9 @@ const dvar_t *input_invertPitch;
 const dvar_t *cl_avidemo;
 const dvar_t *cl_testAnimWeight;
 const dvar_t *cl_freemoveScale;
+#ifdef KISAK_MP
 const dvar_t *motd;
+#endif
 const dvar_t *cl_sensitivity;
 const dvar_t *cl_forceavidemo;
 const dvar_t *m_yaw;
@@ -1725,7 +1727,6 @@ void __cdecl CL_Init(int localClientNum)
     const dvar_s **v22; // r29
     const char *v23; // r5
     unsigned __int16 v24; // r4
-    const char *v25; // r3
     const char *v26; // r5
     unsigned __int16 v27; // r4
     char v29[80]; // [sp+70h] [-90h] BYREF
@@ -1810,8 +1811,9 @@ void __cdecl CL_Init(int localClientNum)
     input_invertPitch = Dvar_RegisterBool("input_invertPitch", 0, 0x400u, "Invert gamepad pitch");
     input_viewSensitivity = Dvar_RegisterFloat("input_viewSensitivity", 1.0, 0.000099999997, 5.0, 0, 0);
     input_autoAim = Dvar_RegisterBool("input_autoAim", 1, 0x400u, "Turn on auto aim for consoles");
-    v25 = SEH_SafeTranslateString((char*)"PLATFORM_NOMOTD");
-    motd = Dvar_RegisterString("motd", v25, 0, "Message of the day");
+#ifdef KISAK_MP
+    motd = Dvar_RegisterString("motd", SEH_SafeTranslateString((char*)"PLATFORM_NOMOTD"), 0, "Message of the day");
+#endif
     nextmap = Dvar_RegisterString("nextmap", "", 0, "The next map name");
     nextdemo = Dvar_RegisterString("nextdemo", "", 0, "The next demo to play");
     Dvar_RegisterBool("cg_blood", 1, 1u, "Show blood");
