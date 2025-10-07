@@ -1281,7 +1281,9 @@ void __cdecl Com_Init_Try_Block_Function(char* commandLine)
     CL_InitKeyCommands();
     FS_InitFilesystem();
     Con_InitChannels();
+#ifdef KISAK_MP
     LiveStorage_Init();
+#endif
     for (localClientNum = 0; localClientNum < 1; ++localClientNum)
         Com_StartupConfigs(localClientNum);
     v1 = CL_ControllerIndexFromClientNum(0);
@@ -1341,7 +1343,9 @@ void __cdecl Com_Init_Try_Block_Function(char* commandLine)
     XAnimInit();
     DObjInit();
     SV_Init();
+#ifdef KISAK_MP
     NET_Init();
+#endif
 
 #ifdef KISAK_MP
     Dvar_ClearModified((dvar_s*)com_dedicated);
