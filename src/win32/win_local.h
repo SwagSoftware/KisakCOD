@@ -238,8 +238,10 @@ sysEvent_t *__cdecl Sys_GetEvent(sysEvent_t *result);
 void __cdecl Sys_Init();
 
 void Sys_In_Restart_f();
+#ifdef KISAK_MP
 void Sys_Net_Restart_f();
 void __cdecl Sys_Listen_f();
+#endif
 
 void __cdecl Sys_Mkdir(const char *path);
 BOOL __cdecl Sys_RemoveDirTree(const char *path);

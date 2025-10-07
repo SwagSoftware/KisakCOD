@@ -593,7 +593,12 @@ int __stdcall HideWindowCallback(HWND hwnd, LPARAM lParam)
     char caption[1024]; // [esp+18h] [ebp-408h] BYREF
     int style; // [esp+41Ch] [ebp-4h]
 
-    if (GetWindowTextA(hwnd, caption, 1024) && strcmp(caption, "Call of Duty 4 Multiplayer"))
+    if (GetWindowTextA(hwnd, caption, 1024) &&
+#ifdef KISAK_MP
+        strcmp(caption, "Call of Duty 4 Multiplayer"))
+#elif KISAK_SP
+        strcmp(caption, "Call of Duty 4"))
+#endif
         return 1;
     style = GetWindowLongA(hwnd, -16);
     styleEx = GetWindowLongA(hwnd, -20);

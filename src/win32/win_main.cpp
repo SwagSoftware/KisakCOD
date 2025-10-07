@@ -51,8 +51,10 @@ SysInfo sys_info;
 int client_state;
 
 cmd_function_s Sys_In_Restart_f_VAR;
+#ifdef KISAK_MP
 cmd_function_s Sys_Net_Restart_f_VAR;
 cmd_function_s Sys_Listen_f_VAR;
+#endif
 
 WinVars_t	g_wv;
 
@@ -549,8 +551,10 @@ void __cdecl Sys_Init()
 
 	timeBeginPeriod(1);
 	Cmd_AddCommandInternal("in_restart", Sys_In_Restart_f, &Sys_In_Restart_f_VAR);
+#ifdef KISAK_MP
 	Cmd_AddCommandInternal("net_restart", Sys_Net_Restart_f, &Sys_Net_Restart_f_VAR);
 	Cmd_AddCommandInternal("net_listen", Sys_Listen_f, &Sys_Listen_f_VAR);
+#endif
 
 	// REM
 	// osversion.dwOSVersionInfoSize = 148;
@@ -589,10 +593,12 @@ void Sys_In_Restart_f()
 	IN_Init();
 }
 
+#ifdef KISAK_MP
 void Sys_Net_Restart_f()
 {
 	NET_Restart();
 }
+#endif
 
 void __cdecl Sys_CreateSplashWindow()
 {
@@ -625,7 +631,11 @@ void __cdecl Sys_CreateSplashWindow()
 			g_splashWnd = CreateWindowExA(
 				0x40000u,
 				"CoD Splash Screen",
+#ifdef KISAK_MP
 				"Call of Duty 4 Multiplayer",
+#elif KISAK_SP
+				"Call of Duty 4",
+#endif
 				0x80880000,
 				(screenSize.cx - 320) / 2,
 				(screenSize.cy - 100) / 2,
