@@ -1744,7 +1744,8 @@ void __cdecl UI_RunMenuScript(int localClientNum, const char **args, const char 
     }
     if (!I_stricmp(v13, "loadMissionDifficultyOffset"))
     {
-        if (String_Parse(args, v15, 1024))
+        //if (String_Parse(args, v15, 1024))
+        if (String_Parse(args, v15, sizeof(v15)))
         {
             v6 = atol(v15);
             v7 = v14;
