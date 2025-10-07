@@ -1510,6 +1510,8 @@ void __cdecl CG_Init(int localClientNum, int savegame)
             "(localClientNum == 0)",
             localClientNum);
     }
+    cgs_t *cgs = CG_GetLocalClientStaticGlobals(localClientNum);
+
     memset(&cgsArray[localClientNum], 0, sizeof(cgs_t));
     memset(&cgDC, 0, sizeof(cgDC));
     memset(cg_weaponsArray[localClientNum], 0, sizeof(weaponInfo_s[128]));
@@ -1564,6 +1566,18 @@ void __cdecl CG_Init(int localClientNum, int savegame)
         Com_Error(ERR_DROP, "Client/Server game mismatch");
     ProfLoad_Begin("Parse server info");
     CG_ParseServerInfo(localClientNum);
+
+    // MP ADD
+    static bool g_mapLoaded = false; // hacky
+    if (!g_mapLoaded && !IsFastFileLoad())
+    {
+        //CG_LoadingString(localClientNum, "sound aliases");
+        Com_LoadSoundAliases(cgs->mapname, "all", SASYS_CGAME);
+
+        g_mapLoaded = true;
+    }
+    // MP END
+
     CG_SetupWeaponDef(localClientNum);
     ProfLoad_End();
     SCR_UpdateLoadScreen();

@@ -6,6 +6,7 @@
 #include <universal/q_shared.h>
 #include "client.h"
 #include <ui/ui.h>
+#include <universal/com_sndalias.h>
 
 void __cdecl Key_KeynumToStringBuf(int keynum, char *buf, int buflen)
 {
@@ -17,17 +18,18 @@ void __cdecl Key_KeynumToStringBuf(int keynum, char *buf, int buflen)
 
 int __cdecl CL_ShutdownUI()
 {
-    int result; // r3
+    if (!cls.uiStarted)
+        return 0;
 
-    result = 0;
-    if (cls.uiStarted)
-    {
-        Key_RemoveCatcher(0, -17);
-        UI_Shutdown();
-        result = 1;
-        cls.uiStarted = 0;
-    }
-    return result;
+    // MP ADD
+    Com_UnloadSoundAliases(SASYS_UI);
+    // MP END
+
+    Key_RemoveCatcher(0, -17);
+    UI_Shutdown();
+    cls.uiStarted = 0;
+
+    return 1;
 }
 
 void __cdecl CL_InitUI()

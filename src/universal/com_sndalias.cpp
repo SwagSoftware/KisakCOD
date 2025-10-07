@@ -81,13 +81,15 @@ void Com_InitCurves()
     char *name; // [esp+18h] [ebp-8h]
     int fileCount; // [esp+1Ch] [ebp-4h] BYREF
 
-    if (g_sa.curvesInitialized)
-        MyAssertHandler(".\\universal\\com_sndalias.cpp", 867, 0, "%s", "!g_sa.curvesInitialized");
+    iassert(!g_sa.curvesInitialized);
+
     memset(g_sa.volumeFalloffCurves, 0, sizeof(g_sa.volumeFalloffCurves));
     Com_InitDefaultSoundAliasVolumeFalloffCurve(g_sa.volumeFalloffCurves);
     fileNames = FS_ListFiles("soundaliases", "vfcurve", FS_LIST_PURE_ONLY, &fileCount);
+
     if (fileCount > 15)
         Com_Error(ERR_DROP, "Snd_Alias Curve initialization: .vfcurve file count (%d) exceeds maximum (%d)", fileCount, 15);
+
     for (fileIndex = 0; fileIndex < fileCount; ++fileIndex)
     {
         name = g_sa.volumeFalloffCurveNames[fileIndex + 1];
@@ -95,6 +97,7 @@ void Com_InitCurves()
         if (!Com_LoadVolumeFalloffCurve(name, &g_sa.volumeFalloffCurves[fileIndex + 1]))
             Com_Error(ERR_FATAL, "Failed to load sndcurve file %s", fileNames[fileIndex]);
     }
+
     FS_FreeFileList(fileNames);
     g_sa.curvesInitialized = 1;
 }

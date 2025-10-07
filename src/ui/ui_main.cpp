@@ -16,6 +16,7 @@
 #include <universal/profile.h>
 #include <client/cl_scrn.h>
 #include <client/cl_input.h>
+#include <universal/com_sndalias.h>
 
 const dvar_t *ui_showList;
 const dvar_t *ui_isSaving;
@@ -1104,6 +1105,14 @@ void __cdecl UI_Init()
     uiInfo.allowScriptMenuResponse = 1;
     Cmd_AddCommandInternal("openmenu", (void(__cdecl *)())UI_OpenMenu_f, &UI_OpenMenu_f_VAR);
     Cmd_AddCommandInternal("closemenu", UI_CloseMenu_f, &UI_CloseMenu_f_VAR);
+
+    // MP ADD
+    if (!IsFastFileLoad())
+    {
+        Com_LoadSoundAliases("menu", "all", SASYS_UI);
+    }
+    // MP END
+
     String_Init();
     Menu_Setup(&uiInfo.uiDC);
     CL_GetScreenDimensions(&uiInfo.uiDC.screenWidth, &uiInfo.uiDC.screenHeight, &uiInfo.uiDC.screenAspect);

@@ -1376,16 +1376,26 @@ WeaponDef *__cdecl BG_LoadWeaponDefInternal(const char *one, const char *two)
 WeaponDef *__cdecl BG_LoadWeaponDef_LoadObj(const char *name)
 {
     WeaponDef *weapDef; // [esp+0h] [ebp-4h]
-    WeaponDef *weapDefa; // [esp+0h] [ebp-4h]
 
     if (!*name)
         return 0;
+#ifdef KISAK_MP
     weapDef = BG_LoadWeaponDefInternal("mp", name);
+#elif KISAK_SP
+    weapDef = BG_LoadWeaponDefInternal("sp", name);
+#endif
     if (weapDef)
         return weapDef;
-    weapDefa = BG_LoadWeaponDefInternal("mp", "defaultweapon_mp");
-    if (!weapDefa)
+
+#ifdef KISAK_MP
+    weapDef = BG_LoadWeaponDefInternal("mp", "defaultweapon_mp");
+#elif KISAK_SP
+    weapDef = BG_LoadWeaponDefInternal("sp", "defaultweapon");
+#endif
+
+    if (!weapDef)
         Com_Error(ERR_DROP, "BG_LoadWeaponDef: Could not find default weapon");
-    SetConfigString((char **)weapDefa, name);
-    return weapDefa;
+
+    SetConfigString((char **)weapDef, name);
+    return weapDef;
 }

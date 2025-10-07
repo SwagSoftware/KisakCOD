@@ -1250,9 +1250,11 @@ void __cdecl G_InitGame(
         goto LABEL_42;
 LABEL_43:
     Scr_FreeEntityList();
+#ifndef KISAK_NO_FASTFILES
     G_PrintFastFileErrors("code_post_gfx");
     G_PrintFastFileErrors("common");
     G_PrintFastFileErrors(sv_mapname->current.string);
+#endif
     level.initializing = 0;
 }
 

@@ -87,7 +87,7 @@ void __cdecl G_ParseHitLocDmgTable()
     const char *v3; // r3
     const char *InfoString; // r3
     cspField_t v5[20]; // [sp+50h] [-2140h] BYREF
-    char v6[80]; // [sp+140h] [-2050h] BYREF
+    char v6[0x2000]; // [sp+140h] [-2050h] BYREF
 
     v0 = 0;
     v1 = g_HitLocConstNames;

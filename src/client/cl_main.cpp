@@ -604,7 +604,9 @@ void __cdecl CL_MapLoading(const char *mapname)
     iassert(CL_GetLocalClientConnectionState(0) == CA_MAP_RESTART);
 
     clientUIActives[0].connectionState = CA_LOADING;
+#ifndef KISAK_NO_FASTFILES
     CL_MapLoading_StartCinematic(mapname, (float)(snd_cinematicVolumeScale->current.value * snd_volume->current.value)),
+#endif
     UI_DrawConnectScreen();
     //Live_SetCurrentMapname(mapname);
     if (cl_multi_gamepads_enabled)

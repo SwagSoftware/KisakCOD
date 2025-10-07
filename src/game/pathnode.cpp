@@ -526,8 +526,7 @@ unsigned int __cdecl Path_NodeCount()
 void __cdecl Path_Init(int restart)
 {
     memset(&g_path, 0, sizeof(g_path));
-    if (!gameWorldSp.path.nodes)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\pathnode.cpp", 1210, 0, "%s", "gameWorldSp.path.nodes");
+    iassert(gameWorldSp.path.nodes);
     g_pPath = 0;
     Path_InitBadPlaces();
 }

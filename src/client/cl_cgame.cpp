@@ -535,6 +535,10 @@ void __cdecl CL_LoadServerCommands(SaveGame *save)
 
 void __cdecl CL_ShutdownCGame()
 {
+    // MP ADD
+    Com_UnloadSoundAliases(SASYS_CGAME);
+    // MP END
+
     if (clientUIActives[0].cgameInitCalled)
     {
         CG_Shutdown(0);

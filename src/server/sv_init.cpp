@@ -19,6 +19,7 @@
 #include <universal/profile.h>
 #include <qcommon/threads.h>
 #include <universal/com_files.h>
+#include <universal/com_sndalias.h>
 
 const dvar_t *sv_clientFrameRateFix;
 const dvar_t *sv_loadMyChanges;
@@ -380,7 +381,7 @@ void __cdecl SV_SpawnServer(const char *mapname, int savegame)
     int v7; // r22
     int v9; // r30
     SaveGame *v11; // [sp+50h] [-B0h] BYREF
-    char v12[160]; // [sp+60h] [-A0h] BYREF
+    char filename[160]; // [sp+60h] [-A0h] BYREF
 
     Com_SyncThreads();
     startTime = Sys_Milliseconds();
@@ -457,11 +458,13 @@ void __cdecl SV_SpawnServer(const char *mapname, int savegame)
             CL_StartLoading(mapname);
         }
 
+#ifndef KISAK_NO_FASTFILES
         if (*mapname)
         {
             PROF_SCOPED("Load fast file");
             SV_LoadLevelAssets(mapname);
         }
+#endif
 
         R_BeginRemoteScreenUpdate();
         UI_LoadIngameMenus();
@@ -484,18 +487,31 @@ void __cdecl SV_SpawnServer(const char *mapname, int savegame)
         SCR_UpdateLoadScreen();
     }
 
-    Com_GetBspFilename(v12, 64, mapname);
+    Com_GetBspFilename(filename, 64, mapname);
     {
+#ifdef KISAK_NO_FASTFILES
+        if (!IsFastFileLoad())
+            Com_LoadBsp(filename);
+#endif
         PROF_SCOPED("Load collision (server)");
-        CM_LoadMap(v12, &sv.checksum);
+        CM_LoadMap(filename, &sv.checksum);
     }
 
-    Com_LoadWorld(v12);
+    Com_LoadWorld(filename);
     //Live_SetCurrentMapname(server);
     SCR_UpdateLoadScreen();
     SCR_UpdateLoadScreen();
     SaveMemory_InitializeSaveSystem();
     SaveMemory_ClearDemoSave();
+
+    // MP ADD
+    if (!IsFastFileLoad())
+    {
+        Com_GetBspFilename(filename, 0x40u, mapname);
+        Com_LoadSoundAliases(filename, "all_mp", SASYS_GAME);
+    }
+    // MP END
+
     SV_InitGameProgs(v7, savegame, &v11);
     CL_SetSkipRendering(1);
     if (CL_DemoPlaying())
