@@ -471,7 +471,7 @@ enum DvarType
 enum DvarFlags : uint16
 {
 	DVAR_NOFLAG             = 0x0,
-	DVAR_ARCHIVE            = 0x1,  // will be saved to config_mp.cfg
+	DVAR_ARCHIVE            = 0x1,  // will be saved to config(_mp).cfg
 	DVAR_USERINFO           = 0x2,  // sent to server on connect or change
 	DVAR_SERVERINFO         = 0x4,  // sent in response to front end requests
 	DVAR_SYSTEMINFO         = 0x8,  // this is sent (replicated) to all clients if you are host

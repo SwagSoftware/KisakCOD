@@ -128,7 +128,11 @@ void __cdecl Com_SetPlayerProfile(int localClientNum, char *profileName)
     iassert( profileName[0] );
     iassert( com_playerProfile );
     Dvar_SetString((dvar_s *)com_playerProfile, profileName);
+#ifdef KISAK_MP
     Com_BuildPlayerProfilePath(configFile, 64, "config_mp.cfg");
+#elif KISAK_SP
+    Com_BuildPlayerProfilePath(configFile, 64, "config.cfg");
+#endif
     Com_ExecStartupConfigs(localClientNum, configFile);
     name = Dvar_GetVariantString("name");
     if (!name || !*name)

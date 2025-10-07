@@ -2757,8 +2757,11 @@ void __cdecl FS_Restart(int localClientNum, int checksumFeed)
     }
     if (I_stricmp(fs_gameDirVar->current.string, lastValidGame) && !Com_SafeMode())
     {
-        v2 = va("exec %s\n", "config_mp.cfg");
-        Cbuf_AddText(0, v2);
+#ifdef KISAK_MP
+        Cbuf_AddText(0, va("exec config_mp.cfg\n"));
+#elif KISAK_SP
+        Cbuf_AddText(0, va("exec config.cfg\n"));
+#endif
     }
     I_strncpyz(lastValidBase, fs_basepath->current.string, 256);
     I_strncpyz(lastValidGame, fs_gameDirVar->current.string, 256);

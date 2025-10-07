@@ -480,12 +480,17 @@ void __cdecl Console_Key(int32_t localClientNum, int32_t key)
         {
             if (!g_consoleField.buffer[0])
                 return;
+
+#ifdef KISAK_MP
             if (!Console_IsRconCmd(g_consoleField.buffer))
             {
                 Cbuf_AddText(localClientNum, "cmd say ");
+#endif
                 Cbuf_AddText(localClientNum, g_consoleField.buffer);
+#ifdef KISAK_MP
                 Cbuf_AddText(localClientNum, "\n");
             }
+#endif
         }
         if (g_consoleField.buffer[0])
         {

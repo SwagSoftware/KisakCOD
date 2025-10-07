@@ -444,7 +444,11 @@ void Com_OpenLogFile()
         opening_qconsole = 1;
         _time64(&aclock);
         newtime = _localtime64(&aclock);
+#ifdef KISAK_MP
         logfile = FS_FOpenTextFileWrite("console_mp.log");
+#elif KISAK_SP
+        logfile = FS_FOpenTextFileWrite("console.log");
+#endif
         com_consoleLogOpenFailed = logfile == 0;
         v1 = asctime(newtime);
         BuildNumber = getBuildNumber();
@@ -1005,25 +1009,38 @@ void __cdecl Com_SetScriptSettings()
 void __cdecl Com_RunAutoExec(int localClientNum, int controllerIndex)
 {
     Dvar_SetInAutoExec(1);
+#ifdef KISAK_MP
     Cmd_ExecuteSingleCommand(localClientNum, controllerIndex, (char*)"exec autoexec_dev_mp.cfg");
+#elif KISAK_SP
+    Cmd_ExecuteSingleCommand(localClientNum, controllerIndex, (char*)"exec autoexec_dev.cfg");
+#endif
     Dvar_SetInAutoExec(0);
 }
 
 void __cdecl Com_ExecStartupConfigs(int localClientNum, const char* configFile)
 {
-    const char* v2; // eax
-
+#ifdef KISAK_MP
     Cbuf_AddText(localClientNum, "exec default_mp.cfg\n");
+#elif KISAK_SP
+    Cbuf_AddText(localClientNum, "exec default.cfg\n");
+#endif
     Cbuf_AddText(localClientNum, "exec language.cfg\n");
+
     if (configFile)
     {
-        v2 = va("exec %s\n", configFile);
-        Cbuf_AddText(localClientNum, v2);
+        Cbuf_AddText(localClientNum, va("exec %s\n", configFile));
     }
+
     Cbuf_Execute(localClientNum, CL_ControllerIndexFromClientNum(localClientNum));
     Com_RunAutoExec(localClientNum, CL_ControllerIndexFromClientNum(localClientNum));
+
     if (Com_SafeMode())
+#ifdef KISAK_MP
         Cbuf_AddText(localClientNum, "exec safemode_mp.cfg\n");
+#elif KISAK_SP
+        Cbuf_AddText(localClientNum, "exec safemode.cfg\n");
+#endif
+
     Cbuf_Execute(localClientNum, CL_ControllerIndexFromClientNum(localClientNum));
 }
 
@@ -1239,7 +1256,7 @@ void __cdecl Com_Init_Try_Block_Function(char* commandLine)
     char* s; // [esp+14h] [ebp-8h]
     unsigned int initStartTime; // [esp+18h] [ebp-4h]
 
-    Com_Printf(16, "%s %s build %s %s\n", "KisakCoD4", "1.0", "win-x86", __DATE__);
+    Com_Printf(16, "%s %s build %s %s\n", "KisakCoD4", "1.0", CPUSTRING, __DATE__);
     Com_ParseCommandLine(commandLine);
     SL_Init();
     Swap_Init();
@@ -1304,7 +1321,11 @@ void __cdecl Com_Init_Try_Block_Function(char* commandLine)
     Cmd_AddCommandInternal("writeconfig", Com_WriteConfig_f, &Com_WriteConfig_f_VAR);
     Cmd_AddCommandInternal("writedefaults", Com_WriteDefaults_f, &Com_WriteDefaults_f_VAR);
     BuildNumber = getBuildNumber();
-    s = va("%s %s build %s %s", "CoD4 MP", "1.0", BuildNumber, "win-x86");
+#ifdef KISAK_MP
+    s = va("%s %s build %s %s", "CoD4 MP", "1.0", BuildNumber, CPUSTRING);
+#elif KISAK_SP
+    s = va("%s %s build %s %s", "CoD4", "1.0", BuildNumber, CPUSTRING);
+#endif
     version = Dvar_RegisterString("version", "", DVAR_ROM, "Game version");
     Dvar_SetString(version, s);
     shortversion = Dvar_RegisterString("shortversion", "1.0", DVAR_ROM | DVAR_SERVERINFO, "Short game version");
@@ -1939,7 +1960,11 @@ void __cdecl Com_WriteConfiguration(int localClientNum)
         dvar_modifiedFlags &= ~1u;
         if (Com_HasPlayerProfile())
         {
+#ifdef KISAK_MP
             Com_BuildPlayerProfilePath(configFile, 64, "config_mp.cfg");
+#elif KISAK_SP
+            Com_BuildPlayerProfilePath(configFile, 64, "config.cfg");
+#endif
             Com_WriteConfigToFile(localClientNum, configFile);
         }
     }
