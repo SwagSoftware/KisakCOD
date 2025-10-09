@@ -266,7 +266,7 @@ GfxImage *__cdecl Image_FindExisting_LoadObj(const char *name)
 
 bool __cdecl Image_IsProg(GfxImage *image)
 {
-    return image >= g_imageProgs && image < (GfxImage *)&imageGlobals;
+    return image >= g_imageProgs && image < &g_imageProgs[ARRAY_COUNT(g_imageProgs)];
 }
 
 void __cdecl Image_Generate3D(

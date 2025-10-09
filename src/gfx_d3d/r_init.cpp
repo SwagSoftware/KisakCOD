@@ -3859,22 +3859,12 @@ char __cdecl R_CreateForInitOrReset()
     dx.nextFence = 0;
     dx.flushGpuQueryIssued = 0;
     dx.flushGpuQueryCount = 0;
-    //hr = ((int(__thiscall *)(IDirect3DDevice9 *, IDirect3DDevice9 *, int, IDirect3DQuery9 **))dx.device->CreateQuery)(
-    //    dx.device,
-    //    dx.device,
-    //    8,
-    //    &dx.flushGpuQuery);
+
     hr = dx.device->CreateQuery(D3DQUERYTYPE_EVENT, &dx.flushGpuQuery);
     if (hr >= 0)
     {
         for (fenceIter = 0; fenceIter < 8; ++fenceIter)
         {
-            //hr = ((int(__thiscall *)(IDirect3DDevice9 *, IDirect3DDevice9 *, int, unsigned int))dx.device->CreateQuery)(
-            //    dx.device,
-            //    dx.device,
-            //    8,
-            //    4 * fenceIter + 235334204);
-
             hr = dx.device->CreateQuery(D3DQUERYTYPE_EVENT, &dx.fencePool[fenceIter]);
 
             if (hr < 0)

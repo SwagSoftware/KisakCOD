@@ -1123,7 +1123,7 @@ void __cdecl R_EnumImages(void(__cdecl *func)(GfxImage *, void *), void *data)
     GfxImage *header; // [esp+0h] [ebp-8h]
     uint32_t imageIndex; // [esp+4h] [ebp-4h]
 
-    for (imageIndex = 0; imageIndex < 0x800; ++imageIndex)
+    for (imageIndex = 0; imageIndex < IMAGE_HASH_TABLE_SIZE; ++imageIndex)
     {
         header = imageGlobals.imageHashTable[imageIndex];
         if (header)

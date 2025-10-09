@@ -458,6 +458,7 @@ void __cdecl SV_SpawnServer(char *mapname)
         PROF_SCOPED("Shutdown systems");
 
         R_EndRemoteScreenUpdate();
+
         if (!mapIsPreloaded)
         {
             CL_MapLoading(mapname);
@@ -465,6 +466,7 @@ void __cdecl SV_SpawnServer(char *mapname)
             R_EndRemoteScreenUpdate();
             CL_ShutdownAll(false);
         }
+
         SV_ShutdownGameProgs();
         Com_Printf(15, "------ Server Initialization ------\n");
         Com_Printf(15, "Server: %s\n", mapname);
@@ -489,9 +491,11 @@ void __cdecl SV_SpawnServer(char *mapname)
 
 
     I_strncpyz(sv.gametype, (char *)sv_gametype->current.integer, 64);
+
     srand(Sys_MillisecondsRaw());
     sv.checksumFeed = Sys_Milliseconds() ^ (rand() ^ (rand() << 16));
     FS_Restart(0, sv.checksumFeed);
+
     if (!IsFastFileLoad())
     {
         Com_GetBspFilename(filename, 0x40u, mapname);
@@ -540,7 +544,9 @@ void __cdecl SV_SpawnServer(char *mapname)
     svs.snapFlagServerBit ^= 4u;
     Dvar_SetString((dvar_s *)nextmap, (char*)"map_restart");
     Dvar_SetInt((dvar_s *)cl_paused, 0);
+
     Com_GetBspFilename(filename, 0x40u, mapname);
+
     if (!IsFastFileLoad())
         Com_LoadBsp(filename);
 
@@ -564,9 +570,12 @@ void __cdecl SV_SpawnServer(char *mapname)
         Com_GetBspFilename(filename, 0x40u, mapname);
         Com_LoadSoundAliases(filename, "all_mp", SASYS_GAME);
     }
-    ProfLoad_Begin("Init game");
-    SV_InitGameProgs(savepersist);
-    ProfLoad_End();
+
+    {
+        PROF_SCOPED("Init game");
+        SV_InitGameProgs(savepersist);
+    }
+
     for (i = 0; i < 3; ++i)
     {
         svs.time += 100;

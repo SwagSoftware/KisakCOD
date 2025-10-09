@@ -189,30 +189,32 @@ void __cdecl Image_SetupAndLoad(
 void __cdecl R_ShutdownImages()
 {
     GfxImage *image; // [esp+0h] [ebp-2014h]
-    GfxImage *imagea; // [esp+0h] [ebp-2014h]
-    int v2; // [esp+4h] [ebp-2010h]
+    int numBackups; // [esp+4h] [ebp-2010h]
     unsigned int i; // [esp+8h] [ebp-200Ch]
-    _DWORD v4[2049]; // [esp+Ch] [ebp-2008h]
+    GfxImage* backupImages[IMAGE_HASH_TABLE_SIZE]; // [esp+Ch] [ebp-2008h]
     int j; // [esp+2010h] [ebp-4h]
 
     RB_UnbindAllImages();
-    v2 = 0;
-    for (i = 0; i < 0x800; ++i)
+    numBackups = 0;
+    for (i = 0; i < IMAGE_HASH_TABLE_SIZE; ++i)
     {
         image = imageGlobals.imageHashTable[i];
         if (image)
         {
             if (Image_IsProg(image))
-                v4[v2++] = (_DWORD)image;
+                backupImages[numBackups++] = image;
             else
                 Image_Free(imageGlobals.imageHashTable[i]);
         }
     }
-    memset((unsigned __int8 *)&imageGlobals, 0, 0x2000u);
-    for (j = 0; j < v2; ++j)
+
+    memset(imageGlobals.imageHashTable, 0, sizeof(imageGlobals.imageHashTable));
+
+    // Restore Images that were deleted in the memset above
+    for (j = 0; j < numBackups; ++j)
     {
-        imagea = (GfxImage *)v4[j];
-        imageGlobals.imageHashTable[Image_GetAvailableHashLocation(imagea->name)] = imagea;
+        image = backupImages[j];
+        imageGlobals.imageHashTable[Image_GetAvailableHashLocation(image->name)] = image;
     }
 }
 
