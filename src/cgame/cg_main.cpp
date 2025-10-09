@@ -1629,7 +1629,9 @@ void __cdecl CG_Init(int localClientNum, int savegame)
     CG_AntiBurnInHUD_RegisterDvars();
     CL_SetADS(localClientNum, 0);
     AimAssist_Init(localClientNum);
+#ifndef KISAK_NO_FASTFILES
     CG_ModelPreviewerCreateDevGui(localClientNum);
+#endif
     //CG_InitDevguiRumbleGraph(localClientNum); // KISAKTODO
     I_strncpyz(v10, Dvar_GetString("profile"), 1024);
     Dvar_SetFromStringByName("profile", (char*)"");

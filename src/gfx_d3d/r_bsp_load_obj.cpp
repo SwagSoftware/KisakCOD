@@ -1859,19 +1859,23 @@ unsigned int __cdecl R_CountNodes_r(mnode_load_t *node)
 
 mnode_t *__cdecl R_SortNodes_r(mnode_load_t *node, mnode_t *out)
 {
-    mnode_t *outa; // [esp+14h] [ebp+Ch]
     mnode_t *outb; // [esp+14h] [ebp+Ch]
 
     if (node->cellIndex == -2)
     {
-        outa = out + 1;
         out->cellIndex = LOWORD(s_world.dpvsPlanes.cellCount) + node->planeIndex + 1;
+
         if (out->cellIndex != s_world.dpvsPlanes.cellCount + node->planeIndex + 1)
             Com_Error(ERR_DROP, "Max planes exceeded");
-        outb = R_SortNodes_r(&rgl.nodes[node->children[0]], outa);
-        out->rightChildOffset = (outb - out) >> 1;
-        if (out->rightChildOffset != (outb - out) >> 1)
-            Com_Error(ERR_DROP, "Max cells exceeded");
+
+        outb = R_SortNodes_r(&rgl.nodes[node->children[0]], out + 1);
+
+        out->rightChildOffset = ((char*)outb - (char*)out) / 2;
+
+        // lwss: this can't be hit
+//        if (out->rightChildOffset != (outb - out) >> 1)
+//            Com_Error(ERR_DROP, "Max cells exceeded");
+
         return R_SortNodes_r(&rgl.nodes[node->children[1]], outb);
     }
     else
@@ -1950,13 +1954,10 @@ void __cdecl R_LoadNodesAndLeafs(unsigned int bspVersion)
     R_SetParentAndCell_r(rgl.nodes);
     s_world.nodeCount = R_CountNodes_r(rgl.nodes);
     s_world.dpvsPlanes.nodes = (unsigned __int16 *)Hunk_Alloc(16 * s_world.nodeCount, "R_LoadNodesAndLeafs", 22);
-    if (((char *)R_SortNodes_r(rgl.nodes, (mnode_t *)s_world.dpvsPlanes.nodes) - (char *)s_world.dpvsPlanes.nodes) >> 1 != s_world.nodeCount)
-        MyAssertHandler(
-            ".\\r_bsp_load_obj.cpp",
-            3989,
-            0,
-            "%s",
-            "reinterpret_cast< ushort * >( out2 ) - s_world.dpvsPlanes.nodes == s_world.nodeCount");
+
+    mnode_t *out2 = R_SortNodes_r(rgl.nodes, (mnode_t *)s_world.dpvsPlanes.nodes);
+    iassert(reinterpret_cast<ushort *>(out2) - s_world.dpvsPlanes.nodes == s_world.nodeCount);
+
     Z_Free((char *)rgl.nodes, 22);
 }
 

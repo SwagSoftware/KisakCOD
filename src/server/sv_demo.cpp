@@ -1191,6 +1191,7 @@ void __cdecl  SV_SaveHistoryLoop(unsigned int threadContext)
         //g_historySaving = 0;
         ////__lwsync();
         //Sys_SetSaveHistoryDoneEvent();
+        Sleep(500); // lwss add
     }
 }
 

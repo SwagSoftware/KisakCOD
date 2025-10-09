@@ -335,68 +335,61 @@ float __cdecl Actor_GetPlayerMovementAccuracy(const actor_s *self, const sentien
 
 float __cdecl Actor_GetPlayerSightAccuracy(actor_s *self, const sentient_s *enemy)
 {
-    gclient_s *client; // r11
-    double v5; // fp25
-    double v6; // fp31
-    double v7; // fp28
-    double v8; // fp30
-    double v9; // fp27
-    double v10; // fp29
-    double v11; // fp26
-    gentity_s *ent; // r5
-    gentity_s *v13; // r5
-    gentity_s *v14; // r5
-    double v15; // fp31
-    double v16; // fp1
-    float v18; // [sp+50h] [-90h] BYREF
-    float v19; // [sp+54h] [-8Ch]
-    float v20; // [sp+58h] [-88h]
-    float v21[22]; // [sp+60h] [-80h] BYREF
+    float accuracyFactor; // fp25
+    float accuracy; // fp31
+
+    float enemyEyePos[3];
 
     iassert(self);
     iassert(enemy);
     iassert(enemy->ent);
     iassert(enemy->ent->client);
 
-    Sentient_GetEyePosition(enemy, v21);
+    Sentient_GetEyePosition(enemy, enemyEyePos);
 
-    client = enemy->ent->client;
-    v5 = 0.0;
-    v6 = client->ps.origin[0];
-    v7 = (float)(v21[0] - client->ps.origin[0]);
-    v8 = client->ps.origin[1];
-    v9 = (float)(v21[1] - client->ps.origin[1]);
-    v10 = client->ps.origin[2];
-    v11 = (float)(v21[2] - client->ps.origin[2]);
-    if (Actor_CanSeeEntityPoint(self, v21, enemy->ent))
-        v5 = 10.0;
-    ent = enemy->ent;
-    v18 = (float)((float)v7 * (float)0.75) + (float)v6;
-    v19 = (float)((float)v9 * (float)0.75) + (float)v8;
-    v20 = (float)((float)v11 * (float)0.75) + (float)v10;
-    if (Actor_CanSeeEntityPoint(self, &v18, ent))
-        v5 = (float)((float)v5 + (float)30.0);
-    v13 = enemy->ent;
-    v18 = (float)((float)v7 * (float)0.5) + (float)v6;
-    v19 = (float)((float)v9 * (float)0.5) + (float)v8;
-    v20 = (float)((float)v11 * (float)0.5) + (float)v10;
-    if (Actor_CanSeeEntityPoint(self, &v18, v13))
-        v5 = (float)((float)v5 + (float)30.0);
-    v14 = enemy->ent;
-    v18 = (float)((float)v7 * (float)0.25) + (float)v6;
-    v19 = (float)((float)v9 * (float)0.25) + (float)v8;
-    v20 = (float)((float)v11 * (float)0.25) + (float)v10;
-    if (Actor_CanSeeEntityPoint(self, &v18, v14))
-        v5 = (float)((float)v5 + (float)30.0);
-    v15 = (float)((float)v5 * (float)0.0099999998);
-    v16 = 0.1;
-    if (v15 >= 0.1)
-    {
-        if (v15 < 0.0 || v15 > 1.0)
-            MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\actor_aim.cpp", 294, 1, (const char *)HIDWORD(v15), 0, 0, 0);
-        v16 = (float)((float)v5 * (float)0.0099999998);
-    }
-    return *((float *)&v16 + 1);
+    accuracyFactor = 0.0;
+
+    float enemyOrigin[3];
+    enemyOrigin[0] = enemy->ent->client->ps.origin[0]; // v6
+    enemyOrigin[1] = enemy->ent->client->ps.origin[1]; // v8
+    enemyOrigin[2] = enemy->ent->client->ps.origin[2]; // v10
+
+    float enemyEyeOffset[3];
+    Vec3Sub(enemyEyePos, enemy->ent->client->ps.origin, enemyEyeOffset);
+
+    if (Actor_CanSeeEntityPoint(self, enemyEyePos, enemy->ent))
+        accuracyFactor = 10.0;
+
+    // KISAKTODO: idk the vec3 function here
+    float eyeOffset75[3];
+    eyeOffset75[0] = (enemyEyeOffset[0] * 0.75f) + enemyOrigin[0]; // v18
+    eyeOffset75[1] = (enemyEyeOffset[1] * 0.75f) + enemyOrigin[1]; // v19
+    eyeOffset75[2] = (enemyEyeOffset[2] * 0.75f) + enemyOrigin[2]; // v20
+
+    if (Actor_CanSeeEntityPoint(self, eyeOffset75, enemy->ent))
+        accuracyFactor += 30.0f;
+
+    float eyeOffset50[3];
+    eyeOffset50[0] = (enemyEyeOffset[0] * 0.5f) + enemyOrigin[0]; // v18
+    eyeOffset50[1] = (enemyEyeOffset[1] * 0.5f) + enemyOrigin[1]; // v19
+    eyeOffset50[2] = (enemyEyeOffset[2] * 0.5f) + enemyOrigin[2]; // v20
+
+    if (Actor_CanSeeEntityPoint(self, eyeOffset50, enemy->ent))
+        accuracyFactor += 30.0f;
+
+    float eyeOffset25[3];
+    eyeOffset25[0] = (enemyEyeOffset[0] * 0.25f) + enemyOrigin[0];
+    eyeOffset25[1] = (enemyEyeOffset[1] * 0.25f) + enemyOrigin[1];
+    eyeOffset25[2] = (enemyEyeOffset[2] * 0.25f) + enemyOrigin[2];
+
+    if (Actor_CanSeeEntityPoint(self, eyeOffset25, enemy->ent))
+        accuracyFactor += 30.0f;
+
+    accuracy = (accuracyFactor * 0.01f);
+
+    iassert(accuracy >= 0.0f && accuracy <= 1.0f); // should be range assert
+
+    return accuracy;
 }
 
 float __cdecl Actor_GetFinalAccuracy(actor_s *self, weaponParms *wp, double accuracyMod)

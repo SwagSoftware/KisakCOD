@@ -1297,8 +1297,7 @@ void __cdecl R_FilterEntIntoCells_r(FilterEntInfo *entInfo, mnode_t *node, const
                 localmaxs[1] = maxs2[1];
                 localmaxs[2] = maxs2[2];
                 localmaxs[type] = dist;
-                if (BoxOnPlaneSide(localmins, maxs2, plane) != 1)
-                    MyAssertHandler(".\\r_dpvs.cpp", 1933, 0, "%s", "BoxOnPlaneSide( localmins, maxs2, plane ) == BOXSIDE_FRONT");
+                iassert(BoxOnPlaneSide(localmins, maxs2, plane) == BOXSIDE_FRONT);
                 if (maxs2[type] > (double)dist)
                     R_FilterEntIntoCells_r(entInfo, node + 1, localmins, maxs2);
                 maxs2[0] = localmaxs[0];
@@ -1310,7 +1309,13 @@ void __cdecl R_FilterEntIntoCells_r(FilterEntInfo *entInfo, mnode_t *node, const
         else
         {
             iassert( (side == BOXSIDE_FRONT) || (side == BOXSIDE_BACK) );
-            node = (mnode_t *)((char *)node + 2 * (side - 1) * (node->rightChildOffset - 2) + 4);
+
+            if (!side) // blops add
+            {
+                side = BOXSIDE_FRONT;
+            }
+
+            node = (mnode_t *)((char *)node + ((side - 1) * (node->rightChildOffset - 2)) * 2 + 4);
         }
     }
     if (cellIndex)
@@ -1455,7 +1460,7 @@ void __cdecl R_FilterDynEntIntoCells_r(
         else
         {
             iassert( (side == BOXSIDE_FRONT) || (side == BOXSIDE_BACK) );
-            node = (mnode_t *)((char *)node + 2 * (side - 1) * (node->rightChildOffset - 2) + 4);
+            node = (mnode_t *)((char *)node + ((side - 1) * (node->rightChildOffset - 2)) * 2 + 4);
         }
     }
     if (cellIndex)

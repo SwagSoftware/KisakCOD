@@ -669,7 +669,7 @@ void Com_Error(errorParm_t code, const char* fmt, ...)
         {
             Com_SetErrorMessage(com_errorMessage);
             if (Sys_IsMainThread())
-                UI_SetActiveMenu(0, (uiMenuCommand_t)1);
+                UI_SetActiveMenu(0, UIMENU_MAIN);
         }
         if (cls.uiStarted)
         {
@@ -702,7 +702,7 @@ void Com_Error(errorParm_t code, const char* fmt, ...)
     if (cls.uiStarted && Sys_IsMainThread())
     {
         Com_SetErrorMessage(com_errorMessage);
-        UI_SetActiveMenu(0, (uiMenuCommand_t)5);
+        UI_SetActiveMenu(0, UIMENU_PREGAME);
         com_errorEntered = 0;
         Sys_LeaveCriticalSection(CRITSECT_COM_ERROR);
     }

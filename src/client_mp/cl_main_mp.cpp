@@ -2588,7 +2588,7 @@ void __cdecl CL_PlayLogo_f()
     }
     clientUIActives[0].connectionState = CA_LOGO;
     if (cls.uiStarted)
-        UI_SetActiveMenu(0, (uiMenuCommand_t)0);
+        UI_SetActiveMenu(0, UIMENU_NONE);
     SND_StopSounds(SND_STOP_ALL);
     SND_FadeAllSounds(1.0, 0);
     name = Cmd_Argv(1);
@@ -2634,9 +2634,9 @@ void __cdecl CL_StopLogoOrCinematic(int32_t localClientNum)
     }
     SND_StopSounds(SND_STOP_ALL);
     if (clcState)
-        UI_SetActiveMenu(localClientNum, (uiMenuCommand_t)0);
+        UI_SetActiveMenu(localClientNum, UIMENU_NONE);
     else
-        UI_SetActiveMenu(localClientNum, (uiMenuCommand_t)1);
+        UI_SetActiveMenu(localClientNum, UIMENU_MAIN);
 }
 
 void __cdecl CL_ToggleMenu_f()

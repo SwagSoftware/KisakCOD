@@ -141,7 +141,7 @@ bool __cdecl R_BoundsInCell_r(mnode_t *node, int findCellIndex, const float *min
         else
         {
             iassert( (side == BOXSIDE_FRONT) || (side == BOXSIDE_BACK) );
-            node = (mnode_t *)((char *)node + 2 * (side - 1) * (node->rightChildOffset - 2) + 4);
+            node = (mnode_t *)((char *)node + ((side - 1) * (node->rightChildOffset - 2)) * 2 + 4);
         }
     }
     return cellIndex && cellIndex - 1 == findCellIndex;

@@ -1158,7 +1158,9 @@ LABEL_6:
 void __cdecl G_PrecacheDefaultModels()
 {
     G_ModelIndex("defaultactor");
+#ifndef KISAK_NO_FASTFILES
     G_PrecacheDefaultVehicle();
+#endif
 }
 
 int __cdecl G_EntIsLinkedTo(gentity_s *ent, gentity_s *parent)

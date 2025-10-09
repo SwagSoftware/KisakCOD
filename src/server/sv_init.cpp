@@ -565,7 +565,9 @@ void __cdecl SV_SpawnServer(const char *mapname, int savegame)
     }
 
     R_EndRemoteScreenUpdate();
+#ifndef KISAK_NO_FASTFILES
     DB_SyncXAssets();
+#endif
     //ProfLoad_Deactivate();
     UI_SetActiveMenu(0, UIMENU_PREGAME);
     if (v9)

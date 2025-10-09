@@ -1299,7 +1299,7 @@ void __cdecl CL_StopLogoOrCinematic(int localClientNum)
         CL_StopLogo(localClientNum);
     }
     SND_StopSounds(SND_STOP_ALL);
-    UI_SetActiveMenu(localClientNum, (uiMenuCommand_t)(connectionState == CA_DISCONNECTED));
+    UI_SetActiveMenu(localClientNum, (connectionState == CA_DISCONNECTED) ? UIMENU_MAIN : UIMENU_NONE);
 }
 
 // attributes: thunk

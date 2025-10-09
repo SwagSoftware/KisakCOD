@@ -141,7 +141,7 @@ void __cdecl CG_ScoresUp_f()
     {
         CG_ScoresUp(0);
         if (UI_GetActiveMenu(0) == 10)
-            UI_SetActiveMenu(0, (uiMenuCommand_t)0);
+            UI_SetActiveMenu(0, UIMENU_NONE);
     }
 }
 
@@ -155,7 +155,7 @@ void __cdecl CG_ScoresDown_f()
     {
         CG_ScoresDown(0);
         if (UI_GetActiveMenu(0) != 10)
-            UI_SetActiveMenu(0, (uiMenuCommand_t)10);
+            UI_SetActiveMenu(0, UIMENU_SCOREBOARD);
     }
 }
 

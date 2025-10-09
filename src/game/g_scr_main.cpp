@@ -6427,6 +6427,7 @@ void Scr_AmplifyStop()
 
 void __cdecl Scr_ErrorOnDefaultAsset(XAssetType type, const char *assetName)
 {
+#ifndef KISAK_NO_FASTFILES
     const char *XAssetTypeName; // r3
 
     DB_FindXAssetHeader(type, assetName);
@@ -6435,6 +6436,7 @@ void __cdecl Scr_ErrorOnDefaultAsset(XAssetType type, const char *assetName)
         XAssetTypeName = DB_GetXAssetTypeName((int)type);
         Scr_NeverTerminalError(va("precache %s '%s' failed", XAssetTypeName, assetName));
     }
+#endif
 }
 
 int Scr_PrecacheModel()
@@ -9447,26 +9449,22 @@ void __cdecl GScr_SetFlaggedAnimKnobAllRestart(scr_entref_t entref)
 void __cdecl GScr_SetFlaggedAnimInternal(scr_entref_t entref, unsigned int flags)
 {
     gentity_s *Entity; // r25
-    double Float; // fp30
-    double v5; // fp31
-    double v6; // fp29
+    double rate; // fp30
+    double goalWeight; // fp31
+    double goalTime; // fp29
     XAnimTree_s *EntAnimTree; // r27
     XAnimTree_s *v8; // r5
-    unsigned int v9; // r29
+    unsigned int anim; // r29
     const XAnim_s *Anims; // r3
-    const char *v11; // r3
-    DObj_s *ServerDObj; // r31
-    int v13; // r7
-    unsigned int v14; // r6
-    unsigned int v15; // r5
-    int v16; // r3
-    int v17; // r11
+    const char *funcName; // r3
+    DObj_s *obj; // r31
 
     Entity = GetEntity(entref);
-    Float = 1.0;
-    v5 = 1.0;
-    v6 = 0.2;
+    rate = 1.0;
+    goalWeight = 1.0;
+    goalTime = 0.2;
     EntAnimTree = GScr_GetEntAnimTree(Entity);
+
     switch (Scr_GetNumParam())
     {
     case 2u:
@@ -9479,65 +9477,87 @@ void __cdecl GScr_SetFlaggedAnimInternal(scr_entref_t entref, unsigned int flags
         goto LABEL_3;
     default:
         Scr_Error("incorrect number of parameters");
-    LABEL_3:
-        Float = Scr_GetFloat(4);
-        if (Float < 0.0)
-            Scr_ParamError(4u, "must set nonnegative rate");
-    LABEL_5:
-        v6 = Scr_GetFloat(3);
-        if (v6 < 0.0)
-            Scr_ParamError(3u, "must set nonnegative goal time");
-    LABEL_7:
-        v5 = Scr_GetFloat(2);
-        if (v5 <= 0.0)
-            Scr_ParamError(2u, "must set positive weight");
-    LABEL_9:
-        //v9 = (unsigned int)Scr_GetAnim((scr_anim_s *)1, (unsigned int)EntAnimTree, v8) >> 16;
-        v9 = Scr_GetAnim(1, EntAnimTree).index;
-        if (!Scr_GetConstString(0))
-            MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\g_scr_main.cpp", 11283, 0, "%s", "notifyName");
-        Anims = XAnimGetAnims(EntAnimTree);
-        if (!XAnimHasTime(Anims, v9))
-            Scr_ParamError(1u, "blended nonsynchronized animation has no concept of time");
-        if (g_dumpAnimsCommands->current.integer == Entity->s.number)
-        {
-            switch (flags)
-            {
-            case 1u:
-                v11 = "SetFlaggedAnim";
-                break;
-            case 2u:
-                v11 = "SetFlaggedAnimLimitedRestart";
-                break;
-            case 3u:
-                v11 = "SetFlaggedAnimRestart";
-                break;
-            default:
-                if (flags)
-                    MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\g_scr_main.cpp", 11306, 0, "%s", "flags == 0");
-                v11 = "SetFlaggedAnimLimited";
-                break;
-            }
-            DumpAnimCommand(v11, EntAnimTree, v9, -1, v5, v6, Float);
-        }
-        ServerDObj = Com_GetServerDObj(Entity->s.number);
-        if (!ServerDObj)
-            Scr_ObjectError("No model exists.");
-        if ((flags & 1) != 0)
-            v16 = XAnimSetCompleteGoalWeight(ServerDObj, v9, v5, v6, Float, v15, v14, v13);
-        else
-            v16 = XAnimSetGoalWeight(ServerDObj, v9, v5, v6, Float, v15, v14, v13);
-        if (v16)
-        {
-            GScr_HandleAnimError(v16);
-        }
-        else
-        {
-            if ((Entity->flags & FL_NO_AUTO_ANIM_UPDATE) == 0)
-                Entity->flags |= FL_REPEAT_ANIM_UPDATE;
-        }
-        return;
     }
+
+LABEL_3:
+    rate = Scr_GetFloat(4);
+    if (rate < 0.0)
+        Scr_ParamError(4u, "must set nonnegative rate");
+LABEL_5:
+    goalTime = Scr_GetFloat(3);
+    if (goalTime < 0.0)
+        Scr_ParamError(3u, "must set nonnegative goal time");
+LABEL_7:
+    goalWeight = Scr_GetFloat(2);
+    if (goalWeight <= 0.0)
+        Scr_ParamError(2u, "must set positive weight");
+LABEL_9:
+    //v9 = (unsigned int)Scr_GetAnim((scr_anim_s *)1, (unsigned int)EntAnimTree, v8) >> 16;
+    anim = Scr_GetAnim(1, EntAnimTree).index;
+
+    unsigned int notifyName = Scr_GetConstString(0);
+
+    iassert(notifyName);
+
+    Anims = XAnimGetAnims(EntAnimTree);
+    if (!XAnimHasTime(Anims, anim))
+        Scr_ParamError(1u, "blended nonsynchronized animation has no concept of time");
+
+    if (g_dumpAnimsCommands->current.integer == Entity->s.number)
+    {
+        switch (flags)
+        {
+        case 1u:
+            funcName = "SetFlaggedAnim";
+            break;
+        case 2u:
+            funcName = "SetFlaggedAnimLimitedRestart";
+            break;
+        case 3u:
+            funcName = "SetFlaggedAnimRestart";
+            break;
+        default:
+            if (flags)
+                MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\g_scr_main.cpp", 11306, 0, "%s", "flags == 0");
+            funcName = "SetFlaggedAnimLimited";
+            break;
+        }
+        DumpAnimCommand(funcName, EntAnimTree, anim, -1, goalWeight, goalTime, rate);
+    }
+
+    obj = Com_GetServerDObj(Entity->s.number);
+    if (!obj)
+        Scr_ObjectError("No model exists.");
+
+    int error;
+
+    // lwss add from blops
+    int notifyType;
+    if (goalWeight <= 0.001f)
+    {
+        notifyType = 0;
+    }
+    else
+    {
+        notifyType = 2;
+    }
+    // lwss end
+
+    if ((flags & 1) != 0)
+        error = XAnimSetCompleteGoalWeight(obj, anim, goalWeight, goalTime, rate, notifyName, notifyType, flags & 2 != 0);
+    else
+        error = XAnimSetGoalWeight(obj, anim, goalWeight, goalTime, rate, notifyName, notifyType, flags & 2 != 0);
+
+    if (error)
+    {
+        GScr_HandleAnimError(error);
+    }
+    else
+    {
+        if ((Entity->flags & FL_NO_AUTO_ANIM_UPDATE) == 0)
+            Entity->flags |= FL_REPEAT_ANIM_UPDATE;
+    }
+
 }
 
 void __cdecl GScr_SetFlaggedAnim(scr_entref_t entref)
@@ -10829,7 +10849,10 @@ void Scr_TableLookup()
     v2 = Scr_GetString(2);
     v3 = Scr_GetInt(3);
     v4 = StringTable_Lookup(v5, Int, v2, v3);
-    Scr_AddString(v4);
+    if (v4[0]) // lwss add
+    {
+        Scr_AddString(v4);
+    }
 }
 
 void Scr_TableLookupIString()

@@ -2270,7 +2270,6 @@ bool __cdecl CM_SightTraceCylinderThroughCylinder(
     float fHitHeight; // [esp+38h] [ebp-34h]
     float fEpsilon; // [esp+3Ch] [ebp-30h]
     float fTotalHeight; // [esp+40h] [ebp-2Ch]
-    float fTotalHeighta; // [esp+40h] [ebp-2Ch]
     float fC; // [esp+44h] [ebp-28h]
     float fB; // [esp+48h] [ebp-24h]
     float fA; // [esp+4Ch] [ebp-20h]
@@ -2298,11 +2297,11 @@ bool __cdecl CM_SightTraceCylinderThroughCylinder(
                 fEntry = (-fB - v7) / fA + fEpsilon;
                 if (trace->fraction > (double)fEntry)
                 {
-                    fTotalHeighta = tw->size[2] - tw->radius + fStationaryHalfHeight;
+                    fTotalHeight = tw->size[2] - tw->radius + fStationaryHalfHeight;
                     fHitHeight = (fEntry - fEpsilon) * tw->delta[2] + tw->extents.start[2] - vStationary[2];
                     iassert( fTotalHeight >= 0 );
                     v6 = I_fabs(fHitHeight);
-                    return fTotalHeighta < (double)v6;
+                    return fTotalHeight < (double)v6;
                 }
                 else
                 {

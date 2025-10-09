@@ -800,16 +800,16 @@ void __cdecl DrawIntermission(int32_t localClientNum)
 
         if (ui_showEndOfGame->current.enabled)
         {
-            if (UI_GetActiveMenu(localClientNum) != 11)
-                UI_SetActiveMenu(localClientNum, (uiMenuCommand_t)11);
+            if (UI_GetActiveMenu(localClientNum) != UIMENU_ENDOFGAME)
+                UI_SetActiveMenu(localClientNum, UIMENU_ENDOFGAME);
         }
         else
         {
             cgameGlob->showScores = 1;
             cgameGlob->scoreFadeTime = cgameGlob->time;
-            if (UI_GetActiveMenu(localClientNum) != 10 && !ui_showEndOfGame->current.enabled)
-                UI_SetActiveMenu(localClientNum, (uiMenuCommand_t)10);
-            if (UI_GetActiveMenu(localClientNum) == 10)
+            if (UI_GetActiveMenu(localClientNum) != UIMENU_SCOREBOARD && !ui_showEndOfGame->current.enabled)
+                UI_SetActiveMenu(localClientNum, UIMENU_SCOREBOARD);
+            if (UI_GetActiveMenu(localClientNum) == UIMENU_SCOREBOARD)
                 CG_DrawScoreboard(localClientNum);
         }
         CG_DrawChatMessages(localClientNum);

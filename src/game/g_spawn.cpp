@@ -1086,16 +1086,15 @@ void G_CallSpawn()
 void __cdecl Scr_SetGenericField(unsigned __int8 *b, fieldtype_t type, int ofs)
 {
     unsigned int ConstStringIncludeNull; // r3
-    unsigned __int8 *v6; // r11
-    double v7; // fp13
     gentity_s *Int; // r3
     gentity_s *EntityAllowNull; // r3
     gentity_s *v10; // r3
     gentity_s *v11; // r3
     gentity_s *v12; // r3
-    float v13; // [sp+50h] [-30h] BYREF
-    float v14; // [sp+54h] [-2Ch]
-    float v15; // [sp+58h] [-28h]
+    float vec[3];
+    //float v13; // [sp+50h] [-30h] BYREF
+    //float v14; // [sp+54h] [-2Ch]
+    //float v15; // [sp+58h] [-28h]
 
     EntHandle *enthand;
     SentientHandle *senthand;
@@ -1119,12 +1118,10 @@ void __cdecl Scr_SetGenericField(unsigned __int8 *b, fieldtype_t type, int ofs)
         Scr_SetString((unsigned __int16 *)&b[ofs], ConstStringIncludeNull);
         return;
     case F_VECTOR:
-        Scr_GetVector(0, &v13);
-        v6 = &b[ofs];
-        *(float *)&b[ofs] = v13;
-        v7 = v15;
-        *((float *)v6 + 1) = v14;
-        *((float *)v6 + 2) = v7;
+        Scr_GetVector(0, vec);
+        *(float *)&b[ofs] = vec[0];
+        *((float *)&b[ofs] + 1) = vec[1];
+        *((float *)&b[ofs] + 2) = vec[2];
         return;
     case F_ENTITY:
         Int = Scr_GetEntityAllowNull(0);
@@ -1167,8 +1164,8 @@ void __cdecl Scr_SetGenericField(unsigned __int8 *b, fieldtype_t type, int ofs)
         *(uintptr_t *)&b[ofs] = (uintptr_t)Int;
         break;
     case F_VECTORHACK:
-        Scr_GetVector(0, &v13);
-        *(float *)&b[ofs] = v14;
+        Scr_GetVector(0, vec);
+        *(float *)&b[ofs] = vec[1];
         break;
     default:
         return;

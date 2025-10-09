@@ -5988,7 +5988,7 @@ void __cdecl UI_CloseAll(int localClientNum)
             "(localClientNum == 0)",
             localClientNum);
     Menus_CloseAll(&uiInfoArray.uiDC);
-    UI_SetActiveMenu(localClientNum, (uiMenuCommand_t)0);
+    UI_SetActiveMenu(localClientNum, UIMENU_NONE);
 }
 
 void __cdecl UI_CloseFocusedMenu(int localClientNum)
@@ -6022,11 +6022,11 @@ int __cdecl UI_Popup(int localClientNum, const char *menu)
     if (I_stricmp(menu, "UIMENU_WM_QUICKMESSAGE"))
     {
         if (!I_stricmp(menu, "UIMENU_WM_AUTOUPDATE"))
-            UI_SetActiveMenu(localClientNum, (uiMenuCommand_t)8);
+            UI_SetActiveMenu(localClientNum, UIMENU_WM_AUTOUPDATE);
     }
     else
     {
-        UI_SetActiveMenu(localClientNum, (uiMenuCommand_t)7);
+        UI_SetActiveMenu(localClientNum, UIMENU_WM_QUICKMESSAGE);
     }
     return 1;
 }

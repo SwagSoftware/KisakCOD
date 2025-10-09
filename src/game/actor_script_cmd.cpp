@@ -214,22 +214,21 @@ void __cdecl ActorCmd_Melee(scr_entref_t entref)
 
 void __cdecl ActorCmd_UpdatePlayerSightAccuracy(scr_entref_t entref)
 {
-    actor_s *v1; // r31
-    sentient_s *TargetSentient; // r3
-    const sentient_s *v3; // r30
+    actor_s *self; // r31
+    sentient_s *enemy; // r3
 
-    v1 = Actor_Get(entref);
-    TargetSentient = Actor_GetTargetSentient(v1);
-    v3 = TargetSentient;
-    if (!TargetSentient)
+    self = Actor_Get(entref);
+    enemy = Actor_GetTargetSentient(self);
+    if (!enemy)
         goto LABEL_6;
-    if (!TargetSentient->ent)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\actor_script_cmd.cpp", 344, 0, "%s", "enemy->ent");
-    if (v3->ent->client)
-        v1->playerSightAccuracy = Actor_GetPlayerSightAccuracy(v1, v3);
+
+    iassert(enemy->ent);
+
+    if (enemy->ent->client)
+        self->playerSightAccuracy = Actor_GetPlayerSightAccuracy(self, enemy);
     else
         LABEL_6:
-    v1->playerSightAccuracy = 1.0;
+    self->playerSightAccuracy = 1.0;
 }
 
 void __cdecl ActorCmd_FindCoverNode(scr_entref_t entref)
