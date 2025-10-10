@@ -4,7 +4,11 @@
 
 #include <qcommon/qcommon.h>
 
+#include <universal/com_memory.h>
+
 // LWSS: One of the more nasty disliked files.
+
+// KISAKTODO: get koutsie to clean this up and move code to the cpp
 
 struct LocalizeName // sizeof=0x0
 {                                       // ...
@@ -15,6 +19,18 @@ struct mapStringEntriesName_t : LocalizeName // sizeof=0x0
 
 struct CStringEdPackage // sizeof=0x78
 {
+    void *operator new(size_t size)
+    {
+        void *mem = Z_Malloc(size, "CStringEdPackage operator new", 69);
+
+        return mem;
+    }
+
+    void operator delete(void *ptr) noexcept
+    {
+        Z_Free(ptr, 69);
+    }
+
     void Clear()
     {
         m_StringEntries.clear();
@@ -70,103 +86,42 @@ struct CStringEdPackage // sizeof=0x78
         return 1;
     }
 
-    // LWSS: I left these std::aids in the header file as a "fuck you" to the reader. Enjoy. 
     std::string * InsideQuotes(
-        //std::basic_string<char, std::char_traits<char>, Allocator<char, LocalizeStringName> > *result,
         std::string *result,
         const char *psLine)
     {
-        //std::basic_string<char, std::char_traits<char>, Allocator<char, LocalizeStringName> >::_Bxty *v4; // [esp+10h] [ebp-11Ch]
-        //std::basic_string<char, std::char_traits<char>, Allocator<char, LocalizeStringName> >::_Bxty *v5; // [esp+14h] [ebp-118h]
-        //unsigned int v6; // [esp+18h] [ebp-114h]
-        //std::basic_string<char, std::char_traits<char>, Allocator<char, LocalizeStringName> >::_Bxty *Ptr; // [esp+28h] [ebp-104h]
-        //std::basic_string<char, std::char_traits<char>, Allocator<char, LocalizeStringName> >::_Bxty *p_Bx; // [esp+3Ch] [ebp-F0h]
-        //std::basic_string<char, std::char_traits<char>, Allocator<char, LocalizeStringName> >::_Bxty *v9; // [esp+40h] [ebp-ECh]
-        //unsigned int v10; // [esp+44h] [ebp-E8h]
-        //std::basic_string<char, std::char_traits<char>, Allocator<char, LocalizeStringName> >::_Bxty *v11; // [esp+54h] [ebp-D8h]
-        //std::basic_string<char, std::char_traits<char>, Allocator<char, LocalizeStringName> >::_Bxty *v12; // [esp+58h] [ebp-D4h]
-        //unsigned int v13; // [esp+5Ch] [ebp-D0h]
-        //std::basic_string<char, std::char_traits<char>, Allocator<char, LocalizeStringName> >::_Bxty *v14; // [esp+6Ch] [ebp-C0h]
-//        std::basic_string<char, std::char_traits<char>, Allocator<char, LocalizeStringName> > str; // [esp+10Ch] [ebp-20h] BYREF
         std::string str; // [esp+10Ch] [ebp-20h] BYREF
 
-        //std::basic_string<char, std::char_traits<char>, Allocator<char, LocalizeStringName>>::_Tidy(&str, 0, 0);
-        //std::basic_string<char, std::char_traits<char>, Allocator<char, LocalizeStringName>>::assign(
-        //    &str,
-        //    &String,
-        //    strlen(&String));
         str = "";
 
         while (*psLine == ' ' || *psLine == '\t')
             ++psLine;
         if (*psLine == '"')
             ++psLine;
-        //std::basic_string<char, std::char_traits<char>, Allocator<char, LocalizeStringName>>::assign(
-        //    &str,
-        //    psLine,
-        //    strlen(psLine));
+
         str.assign(psLine);
+
         if (*psLine)
         {
             while (1)
             {
-                //v14 = str._Myres < 0x10 ? &str._Bx : str._Bx._Ptr;
-                //v13 = strlen(v14->_Buf);
-                //v12 = str._Myres < 0x10 ? &str._Bx : str._Bx._Ptr;
-                //if (v12->_Buf[v13 - 1] != 32)
                 if (str[str.size() - 1] != ' ')
                 {
-                    //v11 = str._Myres < 0x10 ? &str._Bx : str._Bx._Ptr;
-                    //v10 = strlen(v11->_Buf);
-                    //v9 = str._Myres < 0x10 ? &str._Bx : str._Bx._Ptr;
-                    //if (v9->_Buf[v10 - 1] != 9)
-                    //    break;
-
                     if (str[str.size() - 1] != 9)
                     {
                         break;
                     }
                 }
-                //if (str._Myres < 0x10)
-                //    p_Bx = &str._Bx;
-                //else
-                //    p_Bx = str._Bx._Ptr;
-                //std::basic_string<char, std::char_traits<char>, Allocator<char, LocalizeStringName>>::erase(
-                //    &str,
-                //    strlen(p_Bx->_Buf) - 1,
-                //    1u);
+
                 str.erase(str.size() - 1, 1);
             }
-            //if (str._Myres < 0x10)
-            //    Ptr = &str._Bx;
-            //else
-            //    Ptr = str._Bx._Ptr;
-            //v6 = strlen(Ptr->_Buf);
-            //if (str._Myres < 0x10)
-            //    v5 = &str._Bx;
-            //else
-            //    v5 = str._Bx._Ptr;
-            //if (v5->_Buf[v6 - 1] == 34)
+
             if (str[str.size() - 1] == '"')
             {
-                //if (str._Myres < 0x10)
-                //    v4 = &str._Bx;
-                //else
-                //    v4 = str._Bx._Ptr;
                 str.erase(str.size() - 1, 1);
-                //std::basic_string<char, std::char_traits<char>, Allocator<char, LocalizeStringName>>::erase(
-                //    &str,
-                //    strlen(v4->_Buf) - 1,
-                //    1u);
             }
         }
-        //std::basic_string<char, std::char_traits<char>, Allocator<char, LocalizeStringName>>::_Tidy(result, 0, 0);
-        //std::basic_string<char, std::char_traits<char>, Allocator<char, LocalizeStringName>>::assign(
-        //    result,
-        //    &str,
-        //    0,
-        //    std::string::npos);
-        //std::basic_string<char, std::char_traits<char>, Allocator<char, LocalizeStringName>>::_Tidy(&str, 1, 0);
+
         *result = str;
         return result;
     }
@@ -175,79 +130,22 @@ struct CStringEdPackage // sizeof=0x78
     {
         char *v2; // eax
         char *v3; // eax
-        //std::basic_string<char, std::char_traits<char>, Allocator<char, LocalizeStringName> > *v5; // [esp+68h] [ebp-140h]
         char *v6; // [esp+F0h] [ebp-B8h]
-        //std::_Tree_nod<std::_Tmap_traits<std::basic_string<char, std::char_traits<char>, Allocator<char, LocalizeStringName> >, std::basic_string<char, std::char_traits<char>, Allocator<char, LocalizeStringName> >, std::less<std::basic_string<char, std::char_traits<char>, Allocator<char, LocalizeStringName> > >, Allocator<std::pair<std::basic_string<char, std::char_traits<char>, Allocator<char, LocalizeStringName> >, std::basic_string<char, std::char_traits<char>, Allocator<char, LocalizeStringName> > >, mapStringEntriesName_t>, 0> >::_Node *Myhead; // [esp+104h] [ebp-A4h]
-        //std::basic_string<char, std::char_traits<char>, Allocator<char, LocalizeStringName> > v9; // [esp+140h] [ebp-68h] BYREF
-        //std::_Aux_cont *Myownedaux; // [esp+15Ch] [ebp-4Ch]
-        //std::_Tree_nod<std::_Tmap_traits<std::basic_string<char, std::char_traits<char>, Allocator<char, LocalizeStringName> >, std::basic_string<char, std::char_traits<char>, Allocator<char, LocalizeStringName> >, std::less<std::basic_string<char, std::char_traits<char>, Allocator<char, LocalizeStringName> > >, Allocator<std::pair<std::basic_string<char, std::char_traits<char>, Allocator<char, LocalizeStringName> >, std::basic_string<char, std::char_traits<char>, Allocator<char, LocalizeStringName> > >, mapStringEntriesName_t>, 0> >::_Node *v11; // [esp+160h] [ebp-48h]
-        //std::basic_string<char, std::char_traits<char>, Allocator<char, LocalizeStringName> > _Keyval; // [esp+164h] [ebp-44h] BYREF
-        //std::basic_string<char, std::char_traits<char>, Allocator<char, LocalizeStringName> > SE_Entry; // [esp+180h] [ebp-28h] BYREF
-        //std::_Tree<std::_Tmap_traits<std::basic_string<char, std::char_traits<char>, Allocator<char, LocalizeStringName> >, std::basic_string<char, std::char_traits<char>, Allocator<char, LocalizeStringName> >, std::less<std::basic_string<char, std::char_traits<char>, Allocator<char, LocalizeStringName> > >, Allocator<std::pair<std::basic_string<char, std::char_traits<char>, Allocator<char, LocalizeStringName> >, std::basic_string<char, std::char_traits<char>, Allocator<char, LocalizeStringName> > >, mapStringEntriesName_t>, 0> >::iterator itEntry; // [esp+1A0h] [ebp-8h] BYREF
-
-        //if (this->m_strCurrentFileRef_ParseOnly._Myres < 0x10)
-        //    v2 = va("%s_%s", this->m_strCurrentFileRef_ParseOnly._Bx._Buf, psLocalReference);
-        //else
-        //    v2 = va("%s_%s", this->m_strCurrentFileRef_ParseOnly._Bx._Ptr, psLocalReference);
-
-        //std::string _Keyval;
+        
         v2 = va("%s_%s", this->m_strCurrentFileRef_ParseOnly.data(), psLocalReference); // _Ptr
 
-        //std::basic_string<char, std::char_traits<char>, Allocator<char, LocalizeStringName>>::_Tidy(&_Keyval, 0, 0);
-        //std::basic_string<char, std::char_traits<char>, Allocator<char, LocalizeStringName>>::assign(
-        //    &_Keyval,
-        //    v2,
-        //    strlen(v2));
-        //_Keyval.assign(v2);
-        //std::_Tree<std::_Tmap_traits<std::basic_string<char, std::char_traits<char>, Allocator<char, LocalizeStringName>>, std::basic_string<char, std::char_traits<char>, Allocator<char, LocalizeStringName>>, std::less<std::basic_string<char, std::char_traits<char>, Allocator<char, LocalizeStringName>>>, Allocator<std::pair<std::basic_string<char, std::char_traits<char>, Allocator<char, LocalizeStringName>>, std::basic_string<char, std::char_traits<char>, Allocator<char, LocalizeStringName>>>, mapStringEntriesName_t>, 0>>::find(
-        //    &this->m_StringEntries,
-        //    &itEntry,
-        //    &_Keyval);
-        //std::basic_string<char, std::char_traits<char>, Allocator<char, LocalizeStringName>>::_Tidy(&_Keyval, 1, 0);
         auto itEntry = this->m_StringEntries.find(v2);
 
-        //Myhead = this->m_StringEntries._Myhead;
-        //Myownedaux = 0;
-        //v11 = Myhead;
-        //if (this == -88)
-        //    _invalid_parameter_noinfo();
-        //Myownedaux = this->m_StringEntries._Myownedaux;
-        //if (!itEntry._Myaux || itEntry._Myaux != Myownedaux)
-        //    _invalid_parameter_noinfo();
-
-        //if (itEntry._Ptr == v11)
         if (itEntry == this->m_StringEntries.end())
         {
             std::string SE_Entry;
 
-            //std::basic_string<char, std::char_traits<char>, Allocator<char, LocalizeStringName>>::_Tidy(&SE_Entry, 0, 0);
-            //if (this->m_strCurrentFileRef_ParseOnly._Myres < 0x10)
-            //    v3 = va("%s_%s", this->m_strCurrentFileRef_ParseOnly._Bx._Buf, psLocalReference);
-            //else
-            //    v3 = va("%s_%s", this->m_strCurrentFileRef_ParseOnly._Bx._Ptr, psLocalReference);
             v3 = va("%s_%s", this->m_strCurrentFileRef_ParseOnly.c_str(), psLocalReference);
 
-            //v6 = v3;
             std::string v9;
-            //std::basic_string<char, std::char_traits<char>, Allocator<char, LocalizeStringName>>::_Tidy(&v9, 0, 0);
-            //std::basic_string<char, std::char_traits<char>, Allocator<char, LocalizeStringName>>::assign(&v9, v6, strlen(v6));
             v9.assign(v3);
-            //v5 = std::map<std::basic_string<char, std::char_traits<char>, Allocator<char, LocalizeStringName>>, std::basic_string<char, std::char_traits<char>, Allocator<char, LocalizeStringName>>, std::less<std::basic_string<char, std::char_traits<char>, Allocator<char, LocalizeStringName>>>, Allocator<std::pair<std::basic_string<char, std::char_traits<char>, Allocator<char, LocalizeStringName>>, std::basic_string<char, std::char_traits<char>, Allocator<char, LocalizeStringName>>>, mapStringEntriesName_t>>::operator[](
-            //    &this->m_StringEntries,
-            //    &v9);
             m_StringEntries[v9] = SE_Entry;
-            //std::basic_string<char, std::char_traits<char>, Allocator<char, LocalizeStringName>>::assign(
-            //    v5,
-            //    &SE_Entry,
-            //    0,
-            //    std::string::npos);
-            //std::basic_string<char, std::char_traits<char>, Allocator<char, LocalizeStringName>>::_Tidy(&v9, 1, 0);
-            //std::basic_string<char, std::char_traits<char>, Allocator<char, LocalizeStringName>>::_Tidy(&SE_Entry, 1, 0);
         }
-        //std::basic_string<char, std::char_traits<char>, Allocator<char, LocalizeStringName>>::assign(
-        //    &this->m_strCurrentEntryRef_ParseOnly,
-        //    psLocalReference,
-        //    strlen(psLocalReference));
         this->m_strCurrentEntryRef_ParseOnly.assign(psLocalReference);
     }
 
@@ -257,148 +155,59 @@ struct CStringEdPackage // sizeof=0x78
         int bSentenceIsEnglish)
     {
         char *v4; // eax
-        //std::_Tree_nod<std::_Tmap_traits<std::basic_string<char, std::char_traits<char>, Allocator<char, LocalizeStringName> >, std::basic_string<char, std::char_traits<char>, Allocator<char, LocalizeStringName> >, std::less<std::basic_string<char, std::char_traits<char>, Allocator<char, LocalizeStringName> > >, Allocator<std::pair<std::basic_string<char, std::char_traits<char>, Allocator<char, LocalizeStringName> >, std::basic_string<char, std::char_traits<char>, Allocator<char, LocalizeStringName> > >, mapStringEntriesName_t>, 0> >::_Node *Myhead; // [esp+8Ch] [ebp-6Ch]
-        //char *_Ptr; // [esp+BCh] [ebp-3Ch]
-        //std::_Tree<std::_Tmap_traits<std::basic_string<char, std::char_traits<char>, Allocator<char, LocalizeStringName> >, std::basic_string<char, std::char_traits<char>, Allocator<char, LocalizeStringName> >, std::less<std::basic_string<char, std::char_traits<char>, Allocator<char, LocalizeStringName> > >, Allocator<std::pair<std::basic_string<char, std::char_traits<char>, Allocator<char, LocalizeStringName> >, std::basic_string<char, std::char_traits<char>, Allocator<char, LocalizeStringName> > >, mapStringEntriesName_t>, 0> >::const_iterator _Right; // [esp+C8h] [ebp-30h] BYREF
-        //std::basic_string<char, std::char_traits<char>, Allocator<char, LocalizeStringName> > _Keyval; // [esp+D0h] [ebp-28h] BYREF
-        //std::_Tree<std::_Tmap_traits<std::basic_string<char, std::char_traits<char>, Allocator<char, LocalizeStringName> >, std::basic_string<char, std::char_traits<char>, Allocator<char, LocalizeStringName> >, std::less<std::basic_string<char, std::char_traits<char>, Allocator<char, LocalizeStringName> > >, Allocator<std::pair<std::basic_string<char, std::char_traits<char>, Allocator<char, LocalizeStringName> >, std::basic_string<char, std::char_traits<char>, Allocator<char, LocalizeStringName> > >, mapStringEntriesName_t>, 0> >::iterator itEntry; // [esp+ECh] [ebp-Ch] BYREF
-        //std::basic_string<char, std::char_traits<char>, Allocator<char, LocalizeStringName> > *Entry; // [esp+F4h] [ebp-4h]
-
-        //if (this->m_strCurrentFileRef_ParseOnly._Myres < 0x10)
-        //    v4 = va("%s_%s", this->m_strCurrentFileRef_ParseOnly._Bx._Buf, psLocalReference);
-        //else
-        //    v4 = va("%s_%s", this->m_strCurrentFileRef_ParseOnly._Bx._Ptr, psLocalReference);
 
         v4 = va("%s_%s", m_strCurrentFileRef_ParseOnly.c_str(), psLocalReference);
 
-        //_Ptr = v4;
-        
-        //std::basic_string<char, std::char_traits<char>, Allocator<char, LocalizeStringName>>::_Tidy(&_Keyval, 0, 0);
-        //std::basic_string<char, std::char_traits<char>, Allocator<char, LocalizeStringName>>::assign(
-        //    &_Keyval,
-        //    _Ptr,
-        //    strlen(_Ptr));
-
-        //std::_Tree<std::_Tmap_traits<std::basic_string<char, std::char_traits<char>, Allocator<char, LocalizeStringName>>, std::basic_string<char, std::char_traits<char>, Allocator<char, LocalizeStringName>>, std::less<std::basic_string<char, std::char_traits<char>, Allocator<char, LocalizeStringName>>>, Allocator<std::pair<std::basic_string<char, std::char_traits<char>, Allocator<char, LocalizeStringName>>, std::basic_string<char, std::char_traits<char>, Allocator<char, LocalizeStringName>>>, mapStringEntriesName_t>, 0>>::find(
-        //    &this->m_StringEntries,
-        //    &itEntry,
-        //    &_Keyval);
-
         auto itEntry = this->m_StringEntries.find(v4);
-
-        //std::basic_string<char, std::char_traits<char>, Allocator<char, LocalizeStringName>>::_Tidy(&_Keyval, 1, 0);
-
-        //Myhead = this->m_StringEntries._Myhead;
-        //_Right._Myaux = 0;
-        //_Right._Ptr = Myhead;
-        //if (this == -88)
-        //    _invalid_parameter_noinfo();
-        //_Right._Myaux = this->m_StringEntries._Myownedaux;
-        //if (!std::_Tree<std::_Tmap_traits<std::basic_string<char, std::char_traits<char>, Allocator<char, LocalizeStringName>>, std::basic_string<char, std::char_traits<char>, Allocator<char, LocalizeStringName>>,
-        //    std::less<std::basic_string<char, std::char_traits<char>, Allocator<char, LocalizeStringName>>>, Allocator<std::pair<std::basic_string<char, std::char_traits<char>, Allocator<char, LocalizeStringName>>,
-        //    std::basic_string<char, std::char_traits<char>, Allocator<char, LocalizeStringName>>>, mapStringEntriesName_t>, 0>>::const_iterator::operator!=(
-        //    &itEntry,
-        //    &_Right))
-        //    MyAssertHandler(".\\stringed\\stringed_ingame.cpp", 685, 0, "%s", "itEntry != m_StringEntries.end()");
 
         if (itEntry == m_StringEntries.end())
         {
             MyAssertHandler(".\\stringed\\stringed_ingame.cpp", 685, 0, "%s", "itEntry != m_StringEntries.end()");
         }
 
-
-        //Entry = &std::_Tree<std::_Tmap_traits<std::basic_string<char, std::char_traits<char>, Allocator<char, LocalizeStringName>>, std::basic_string<char, std::char_traits<char>, Allocator<char, LocalizeStringName>>,
-        //    std::less<std::basic_string<char, std::char_traits<char>, Allocator<char, LocalizeStringName>>>, Allocator<std::pair<std::basic_string<char, std::char_traits<char>, Allocator<char, LocalizeStringName>>, 
-        //    std::basic_string<char, std::char_traits<char>, Allocator<char, LocalizeStringName>>>, mapStringEntriesName_t>, 0>>::const_iterator::operator*(&itEntry)->second;
-
-        auto& Entry = (*itEntry).second; // KISAKTODO: ensure this actually ref's and writes
+        auto& Entry = (*itEntry).second;
 
         if (bSentenceIsEnglish)
         {
-            //std::basic_string<char, std::char_traits<char>, Allocator<char, LocalizeStringName>>::assign(
-            //    Entry,
-            //    psNewString,
-            //    strlen(psNewString));
-
             Entry.assign(psNewString);
-
-            //std::basic_string<char, std::char_traits<char>, Allocator<char, LocalizeStringName>>::assign(
-            //    &this->m_strCurrentEntryEnglish_ParseOnly,
-            //    psNewString,
-            //    strlen(psNewString));
 
             m_strCurrentEntryEnglish_ParseOnly.assign(psNewString);
         }
         else if (I_stricmp(psNewString, "#same"))
         {
-            //std::basic_string<char, std::char_traits<char>, Allocator<char, LocalizeStringName>>::assign(
-            //    Entry,
-            //    psNewString,
-            //    strlen(psNewString));
             Entry.assign(psNewString);
         }
         else
         {
-            //std::basic_string<char, std::char_traits<char>, Allocator<char, LocalizeStringName>>::assign(
-            //    Entry,
-            //    &this->m_strCurrentEntryEnglish_ParseOnly,
-            //    0,
-            //    std::string::npos);
-
             Entry.assign(m_strCurrentEntryEnglish_ParseOnly);
         }
     }
 
     void ConvertCRLiterals_Read(
-        //std::basic_string<char, std::char_traits<char>, Allocator<char, LocalizeStringName> > *result,
         std::string *result,
-        //std::basic_string<char, std::char_traits<char>, Allocator<char, LocalizeStringName> > string)
         std::string string)
     {
         int v4[2]; // [esp-8h] [ebp-A8h]
-        //std::basic_string<char, std::char_traits<char>, Allocator<char, LocalizeStringName> >::_Bxty *p_Bx; // [esp+0h] [ebp-A0h]
-        //std::basic_string<char, std::char_traits<char>, Allocator<char, LocalizeStringName> > str; // [esp+7Ch] [ebp-24h] BYREF
         std::string str;
         int loc; // [esp+98h] [ebp-8h]
 
-        //std::basic_string<char, std::char_traits<char>, Allocator<char, LocalizeStringName>>::_Tidy(&str, 0, 0);
         str.assign(string);
-        //std::basic_string<char, std::char_traits<char>, Allocator<char, LocalizeStringName>>::assign(
-        //    &str,
-        //    &string,
-        //    0,
-        //    std::string::npos);
+
         while (1)
         {
             v4[0] = 0;
             v4[1] = strlen("\\n");
-            //loc = std::basic_string<char, std::char_traits<char>, Allocator<char, LocalizeStringName>>::find(&str, "\\n", *v4);
+
             auto loc = str.find("\\n", 0);
             if (loc == std::string::npos)
                 break;
-            //if (loc > str._Mysize)
-            //    _invalid_parameter_noinfo();
-            //if (str._Myres < 0x10)
-            //    p_Bx = &str._Bx;
-            //else
-            //    p_Bx = str._Bx._Ptr;
-            
-            //p_Bx->_Buf[loc] = 10;
+
             str[loc] = 10;
 
             str.erase(loc + 1, 1);
-            //std::basic_string<char, std::char_traits<char>, Allocator<char, LocalizeStringName>>::erase(&str, loc + 1, 1u);
         }
-        //std::basic_string<char, std::char_traits<char>, Allocator<char, LocalizeStringName>>::_Tidy(result, 0, 0);
+
         *result = str;
-        //std::basic_string<char, std::char_traits<char>, Allocator<char, LocalizeStringName>>::assign(
-        //    result,
-        //    &str,
-        //    0,
-        //    std::string::npos);
-        //std::basic_string<char, std::char_traits<char>, Allocator<char, LocalizeStringName>>::_Tidy(&str, 1, 0);
-        //std::basic_string<char, std::char_traits<char>, Allocator<char, LocalizeStringName>>::_Tidy(&string, 1, 0);
-        //return result;
     }
 
     char IsStringFormatCorrect(char *string)
@@ -622,12 +431,9 @@ struct CStringEdPackage // sizeof=0x78
             v6 = *psFilename;
             *v7++ = *psFilename++;
         } while (v6);
-        strrchr((unsigned __int8 *)sString, '.');
-        p = sString;
-        strrchr((unsigned __int8 *)sString, '\\');
-        p2 = sString;
-        strrchr((unsigned __int8 *)sString, '/');
-        v4 = sString;
+        p = strrchr(sString, '.');
+        p2 = strrchr(sString, '\\');
+        v4 = strrchr(sString, '/');
         if (p && (!p2 || p > p2) && (!v4 || p > v4))
             *p = 0;
         return sString;
@@ -658,7 +464,7 @@ struct CStringEdPackage // sizeof=0x78
         } while (v2);
         return sString_0;
     }
-    void SetupNewFileParase(const char *psFileName)
+    void SetupNewFileParse(const char *psFileName)
     {
         const char *v2; // eax
         char v3; // al
