@@ -871,6 +871,8 @@ void __cdecl CL_StartLoading(const char *mapname)
 
 void __cdecl CL_InitCGame(int localClientNum, int savegame)
 {
+    int t1 = Sys_Milliseconds();
+
     int startTime; // r22
     unsigned __int16 v5; // r11
     const char *info; // r31
@@ -969,14 +971,11 @@ void __cdecl CL_InitCGame(int localClientNum, int savegame)
             "!CL_GetLocalClientConnection( localClientNum )->serverCommands.header.sent || cls.demoplaying");
     clientUIActives[0].cgameInitCalled = 1;
     CG_Init(localClientNum, savegame);
-    //v8 = Sys_Milliseconds();
-    //HIDWORD(v9) = "erverTime - cgameGlob->time > 0";
-    //LODWORD(v9) = v8 - v4;
-    Com_Printf(
-        14,
-        "CL_InitCGame: %5.2f seconds\n",
-        Sys_Milliseconds() - startTime
-    );
+
+    int t2 = Sys_Milliseconds();
+
+    Com_Printf(CON_CHANNEL_CLIENT, "CL_InitCGame: %5.2f seconds\n", (t2 - t1) / 1000.0);
+
     R_EndRegistration();
     Con_ClearNotify(0);
     Con_InitMessageBuffer();

@@ -192,7 +192,7 @@ void __cdecl LiveStorage_StatsInit(int controllerIndex)
     LiveStorage_UnlockClassHeavyGunner(controllerIndex);
     LiveStorage_UnlockClassSniper(controllerIndex);
     LiveStorage_UnlockClassSpecOps(controllerIndex);
-    if (!*(_BYTE *)fs_gameDirVar->current.integer)
+    if (!IsUsingMods())
     {
         Dvar_SetStringByName("clanName", (char *)"");
         LiveStorage_SetFromLocString(controllerIndex, "customclass1", (char*)"CLASS_SLOT1");

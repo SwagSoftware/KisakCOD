@@ -1484,14 +1484,7 @@ bool __cdecl UI_AllowScriptMenuResponse(int localClientNum)
 
 void UI_PlayerStart()
 {
-    if (g_currentMenuType != UIMENU_PREGAME && g_currentMenuType != UIMENU_MAIN)
-        MyAssertHandler(
-            "c:\\trees\\cod3\\cod3src\\src\\ui\\ui_main.cpp",
-            516,
-            0,
-            "%s\n\t(UI_GetActiveMenu( 0 )) = %i",
-            "(UI_GetActiveMenu( 0 ) == UIMENU_PREGAME || UI_GetActiveMenu( 0 ) == UIMENU_MAIN)",
-            g_currentMenuType);
+    iassert(UI_GetActiveMenu(0) == UIMENU_PREGAME || UI_GetActiveMenu(0) == UIMENU_MAIN);
     CL_SetSkipRendering(0);
     UI_SetActiveMenu(0, UIMENU_NONE);
     if (R_Cinematic_IsNextReady())

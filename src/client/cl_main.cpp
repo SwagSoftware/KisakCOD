@@ -19,6 +19,7 @@
 #include "cl_demo.h"
 #include <gfx_d3d/r_init.h>
 #include <gfx_d3d/r_cinematic.h>
+#include <sound/snd_local.h>
 #include <stringed/stringed_hooks.h>
 #include "cl_input.h"
 #include <cgame/cg_main.h>
@@ -1591,6 +1592,55 @@ void __cdecl CL_ShutdownAll(bool destroyWindow)
     track_shutdown(3);
 }
 
+void CL_Vid_Restart_f()
+{
+    // don't let them loop during the restart
+    SND_StopSounds(SND_STOP_ALL);
+    // shutdown all the client stuff
+    CL_ShutdownHunkUsers();
+    // shutdown the renderer and clear the renderer interface
+    CL_ShutdownRef();
+
+    cls.rendererStarted = qfalse;
+
+    // restart common systems
+    Com_Restart();
+
+    Dvar_RegisterInt("loc_language", 0, 0, 14, DVAR_ARCHIVE | DVAR_LATCH, "The current language locale");
+    Dvar_RegisterBool("loc_translate", true, DVAR_LATCH, "Turn on string translation");
+    Dvar_RegisterBool("fs_ignoreLocalized", false, DVAR_LATCH | DVAR_CHEAT, "Ignore localized assets");
+
+    // reinitialize the filesystem if the game directory or checksum has changed
+    FS_ConditionalRestart(0, 0);
+
+    SEH_UpdateLanguageInfo();
+
+    // unpause so the cgame definately gets a snapshot and renders a frame
+    Dvar_SetInt(cl_paused, 0);
+
+    CL_InitRef();
+
+    // initialize the renderer interface
+    CL_InitRenderer();
+
+    // startup all the client stuff
+    CL_StartHunkUsers();
+}
+
+/*
+=================
+CL_Snd_Restart_f
+=================
+*/
+void CL_Snd_Restart_f()
+{
+    SND_Shutdown();
+    SND_InitDriver();
+    SND_Init();
+
+    CL_Vid_Restart_f();
+}
+
 void __cdecl CL_DisconnectLocalClient()
 {
     connstate_t connectionState; // r30
@@ -1703,6 +1753,10 @@ void __cdecl CL_DrawLogo()
 
 
 cmd_function_s CL_ForwardToServer_f_VAR;
+cmd_function_s CL_Vid_Restart_f_VAR;
+cmd_function_s CL_Vid_Restart_f_VAR_SERVER;
+cmd_function_s CL_Snd_Restart_f_VAR;
+cmd_function_s CL_Snd_Restart_f_VAR_SERVER;
 cmd_function_s CL_Disconnect_f_VAR;
 cmd_function_s CL_Disconnect_f_VAR_SERVER;
 cmd_function_s CL_PlayDemo_f_VAR_0;
@@ -1825,6 +1879,10 @@ void __cdecl CL_Init(int localClientNum)
     iassert(loc_warnings);
     iassert(loc_warningsAsErrors);
     Cmd_AddCommandInternal("cmd", CL_ForwardToServer_f, &CL_ForwardToServer_f_VAR);
+    Cmd_AddCommandInternal("vid_restart", Cbuf_AddServerText_f, &CL_Vid_Restart_f_VAR);
+    Cmd_AddServerCommandInternal("vid_restart", CL_Vid_Restart_f, &CL_Vid_Restart_f_VAR_SERVER);
+    Cmd_AddCommandInternal("snd_restart", Cbuf_AddServerText_f, &CL_Snd_Restart_f_VAR);
+    Cmd_AddServerCommandInternal("snd_restart", CL_Snd_Restart_f, &CL_Snd_Restart_f_VAR_SERVER);
     Cmd_AddCommandInternal("disconnect", Cbuf_AddServerText_f, &CL_Disconnect_f_VAR);
     Cmd_AddServerCommandInternal("disconnect", CL_Disconnect_f, &CL_Disconnect_f_VAR_SERVER);
     Cmd_AddCommandInternal("demo", Cbuf_AddServerText_f, &CL_PlayDemo_f_VAR_0);
