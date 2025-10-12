@@ -327,7 +327,7 @@ struct clientConnection_t // sizeof=0x615E8
     int32_t timeDemoBaseTime;
     netchan_t netchan;
     char netchanOutgoingBuffer[2048];
-    char netchanIncomingBuffer[131072];
+    char netchanIncomingBuffer[0x20000];
     netProfileInfo_t OOBProf;
     uint8_t statPacketsToSend;
     // padding byte

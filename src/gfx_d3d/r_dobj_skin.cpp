@@ -59,6 +59,7 @@ int  R_PreSkinXSurface(
     iassert(surf);
     iassert(surfaceInfo);
 
+    // if not deformed, it isn't weighted
     if (!surf->deformed && IsFastFileLoad() && surf->vertListCount == 1)
     {
         surf->vertList = surf->vertList;
@@ -89,13 +90,13 @@ int  R_PreSkinXSurface(
         float tmp[3];
         R_TransformSkelMat(invBaseMat.origin, &skelMat, tmp);
         Vec3Add(tmp, scene.def.viewOffset, rigidSurf->placement.base.origin);
-        return 56;
+        return sizeof(GfxModelRigidSurface); // 56
     }
     else
     {
         surfPos->skinnedCachedOffset = *numSkinnedVerts;
         *numSkinnedVerts += surf->vertCount;
-        return 24;
+        return sizeof(GfxModelSkinnedSurface); // 24
     }
 }
 
@@ -111,7 +112,7 @@ int  R_SkinSceneDObjModels(
 
     PROF_SCOPED("R_SkinXModel");
 
-    unsigned char surfsBuffer[131072];
+    unsigned char surfsBuffer[0x20000]{ 0 };
     GfxModelSkinnedSurface *surfPos = (GfxModelSkinnedSurface *)surfsBuffer;
     GfxModelSurfaceInfo targBoneIndexHigh;
 
@@ -203,23 +204,28 @@ int  R_SkinSceneDObjModels(
                 {
                     surfPos->skinnedCachedOffset = -3;
                     surfPos = (GfxModelSkinnedSurface *)((char *)surfPos + 4);
+                    continue;
                 }
-                else
-                {
-                    skinCmd.surfacePartBits[0] |= partBitsCheck[0];
-                    skinCmd.surfacePartBits[1] |= partBitsCheck[1];
-                    skinCmd.surfacePartBits[2] |= partBitsCheck[2];
-                    skinCmd.surfacePartBits[3] |= partBitsCheck[3];
 
-                    int surfBufSize = R_PreSkinXSurface(obj, surface, &targBoneIndexHigh, &numSkinnedVerts, surfPos);
 
-                    GfxModelSkinnedSurface *skinnedSurface = (GfxModelSkinnedSurface *)surfPos;
-                    skinnedSurface->xsurf = surface;
-                    skinnedSurface->info = targBoneIndexHigh;
+                skinCmd.surfacePartBits[0] |= partBitsCheck[0];
+                skinCmd.surfacePartBits[1] |= partBitsCheck[1];
+                skinCmd.surfacePartBits[2] |= partBitsCheck[2];
+                skinCmd.surfacePartBits[3] |= partBitsCheck[3];
 
-                    iassert(surfBufSize);
-                    surfPos = (GfxModelSkinnedSurface *)((char *)surfPos + surfBufSize);
-                }
+                // Sets *surfPos to a Rigidsurface or SkinnedSurface
+                // returns either sizeof(GfxModelRigidSurface) [56] OR sizeof(GfxModelSkinnedSurface) [24] 
+                // Both of them have the same 1st member `int skinnedCachedOffset`
+                // In case of Rigid(56 bytes), the int is set to "-2"
+                // Otherwise, the int is set to value of `numSkinnedVerts`
+                int surfBufSize = R_PreSkinXSurface(obj, surface, &targBoneIndexHigh, &numSkinnedVerts, surfPos);
+
+                GfxModelSkinnedSurface *skinnedSurface = (GfxModelSkinnedSurface *)surfPos;
+                skinnedSurface->xsurf = surface;
+                skinnedSurface->info = targBoneIndexHigh;
+
+                iassert(surfBufSize);
+                surfPos = (GfxModelSkinnedSurface *)((char *)surfPos + surfBufSize);
             }
         }
 
@@ -297,21 +303,20 @@ int  R_SkinSceneDObjModels(
             GfxModelSkinnedSurface *surfPos2 = (GfxModelSkinnedSurface *)surfsBuffer;
             for (unsigned int offset = 0; offset < totalSurfaceCount; ++offset)
             {
-                GfxModelRigidSurface *rigidSurf2_ = (GfxModelRigidSurface *)surfPos2;
                 if (surfPos2->skinnedCachedOffset == -2)
                 {
                     surfPos2 = (GfxModelSkinnedSurface *)((char *)surfPos2 + sizeof(GfxModelRigidSurface));
                 }
                 else if (surfPos2->skinnedCachedOffset == -3)
                 {
-                    // idk
+                    // (Skip over the int)
                     surfPos2 = (GfxModelSkinnedSurface *)((char *)surfPos2 + 4);
                 }
                 else
                 {
+                    surfPos2->oldSkinnedCachedOffset = (int)&frontEndDataOut->tempSkinBuf[sizeof(GfxPackedVertex) * surfPos2->skinnedCachedOffset + firstSurf];
+                    surfPos2->skinnedCachedOffset = -1;
                     ++surfPos2;
-                    rigidSurf2_->surf.oldSkinnedCachedOffset = (int)&frontEndDataOut->tempSkinBuf[sizeof(GfxPackedVertex) * surfPos2->skinnedCachedOffset + firstSurf];
-                    rigidSurf2_->surf.skinnedCachedOffset = -1;
                 }
             }
             iassert((byte *)surfPos == (byte *)surfPos2);
@@ -321,7 +326,7 @@ int  R_SkinSceneDObjModels(
     unsigned int totalSurfSize = ((char *)surfPos - (char *)surfsBuffer);
     unsigned int startSurfPos = InterlockedExchangeAdd(&frontEndDataOut->surfPos, totalSurfSize);
 
-    if (startSurfPos + totalSurfSize > 0x20000)
+    if (startSurfPos + totalSurfSize >= 0x20000)
     {
         R_WarnOncePerFrame(R_WARN_MAX_SCENE_SURFS_SIZE);
         return 0;

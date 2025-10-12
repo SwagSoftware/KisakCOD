@@ -1,5 +1,6 @@
 #pragma once
 #include "rb_backend.h"
+#include "r_dobj_skin.h"
 
 enum $7B978A8EAF4AE2627C6F063D7A9BDEE5 : __int32
 {
@@ -33,30 +34,6 @@ union GfxStaticModelPreTessSurf // sizeof=0x4
 //    GfxPackedVertex *skinnedVert;
 //    int oldSkinnedCachedOffset;
 //};
-
-struct GfxModelSurfaceInfo // sizeof=0xC
-{                                       // ...
-    const DObjAnimMat *baseMat;
-    unsigned __int8 boneIndex;
-    unsigned __int8 boneCount;
-    unsigned __int16 gfxEntIndex;
-    unsigned __int16 lightingHandle;
-    // padding byte
-    // padding byte
-};
-
-struct GfxModelSkinnedSurface // sizeof=0x18
-{                                       // ...
-    int skinnedCachedOffset;
-    XSurface *xsurf;
-    GfxModelSurfaceInfo info;
-    //$B667868682928995E3CB40CE466D3989 ___u3;
-    union
-    {
-        GfxPackedVertex *skinnedVert;
-        int oldSkinnedCachedOffset;
-    };
-};
 
 
 void __cdecl RB_ShowTess(GfxCmdBufContext context, const float *center, const char *tessName, const float *color);

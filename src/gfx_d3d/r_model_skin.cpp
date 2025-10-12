@@ -70,7 +70,7 @@ void R_SkinXModelCmd(_WORD *data)
     GfxModelSkinnedSurface * surfPos = (GfxModelSkinnedSurface*)skinCmd->modelSurfs;
 
     int boneIndex = -1;
-    GfxPackedVertex *skinnedVert = NULL;
+    GfxPackedVertex *skinVerticesOut = NULL;
 
     DObjSkelMat __declspec(align(16)) boneSkelMats[128];
     memset(boneSkelMats, 0, sizeof(boneSkelMats));
@@ -78,92 +78,91 @@ void R_SkinXModelCmd(_WORD *data)
     for (unsigned int i = 0; i < skinCmd->surfCount; i++)
     {
         GfxModelSkinnedSurface *skinnedSurf = surfPos;
+
         if (skinnedSurf->skinnedCachedOffset == -3)
         {
             surfPos = (GfxModelSkinnedSurface *)((char *)surfPos + 4);
+            continue;
+        }
+
+        if (boneIndex != skinnedSurf->info.boneIndex)
+        {
+            boneIndex = skinnedSurf->info.boneIndex;
+            const int totalBones = boneIndex + skinnedSurf->info.boneCount;
+            const DObjAnimMat* baseMats = &skinnedSurf->info.baseMat[-boneIndex];
+            for (unsigned int j = boneIndex; j < totalBones; j++)
+            {
+                if ((skinCmd->surfacePartBits[j >> 5] & (0x80000000 >> (j & 0x1F))) == 0)
+                    continue;
+
+                //if (sseStateUsed)
+                //{
+                //    sseStateUsed = false;
+                //    /*_m_empty();*/
+                //}
+
+                DObjSkelMat mat0, mat1;
+
+                ConvertQuatToInverseSkelMat(&baseMats[j], &mat0);
+                ConvertQuatToSkelMat(&skinCmd->mat[j], &mat1);
+                R_MultiplySkelMat(&mat0, &mat1, &boneSkelMats[j]);
+
+                boneSkelMats[j].axis[0][3] = 0.0f;
+                boneSkelMats[j].axis[1][3] = 0.0f;
+                boneSkelMats[j].axis[2][3] = 0.0f;
+                boneSkelMats[j].origin[3] = 1.0f;
+            }
+        }
+
+        if (skinnedSurf->skinnedCachedOffset == -2)
+        {
+            surfPos = (GfxModelSkinnedSurface *)((char *)surfPos + 56);
+            continue;
+        }
+
+        surfPos = skinnedSurf + 1;
+        XSurface *xsurf = skinnedSurf->xsurf;
+
+        iassert(xsurf);
+
+        if (skinnedSurf->skinnedCachedOffset < 0)
+        {
+            iassert((reinterpret_cast<uint>(skinnedSurf->skinnedVert) & 15) == 0);
+            skinVerticesOut = skinnedSurf->skinnedVert;
         }
         else
         {
-            if (boneIndex != skinnedSurf->info.boneIndex)
-            {
-                boneIndex = skinnedSurf->info.boneIndex;
-                const int totalBones = boneIndex + skinnedSurf->info.boneCount;
-                const DObjAnimMat* baseMats = &skinnedSurf->info.baseMat[-boneIndex];
-                for (unsigned int j = boneIndex; j < totalBones; j++)
-                {
-                    if ((skinCmd->surfacePartBits[j >> 5] & (0x80000000 >> (j & 0x1F))) == 0)
-                        continue;
-
-                    //if (sseStateUsed)
-                    //{
-                    //    sseStateUsed = false;
-                    //    /*_m_empty();*/
-                    //}
-
-                    DObjSkelMat mat0, mat1;
-
-                    ConvertQuatToInverseSkelMat(&baseMats[j], &mat0);
-                    ConvertQuatToSkelMat(&skinCmd->mat[j], &mat1);
-                    R_MultiplySkelMat(&mat0, &mat1, &boneSkelMats[j]);
-
-                    boneSkelMats[j].axis[0][3] = 0.0f;
-                    boneSkelMats[j].axis[1][3] = 0.0f;
-                    boneSkelMats[j].axis[2][3] = 0.0f;
-                    boneSkelMats[j].origin[3] = 1.0f;
-                }
-            }
-
-
-            if (skinnedSurf->skinnedCachedOffset == -2)
-            {
-                surfPos = (GfxModelSkinnedSurface *)((char *)surfPos + 56);
-            }
-            else
-            {
-                surfPos = skinnedSurf + 1;
-                XSurface *xsurf = skinnedSurf->xsurf;
-                iassert(xsurf);
-
-                if (skinnedSurf->skinnedCachedOffset < 0)
-                {
-                    iassert((reinterpret_cast<uint>(skinnedSurf->skinnedVert) & 15) == 0);
-                    skinnedVert = skinnedSurf->skinnedVert;
-                }
-                else
-                {
-                    iassert(gfxBuf.skinnedCacheLockAddr);
-                    iassert(((reinterpret_cast<uint>(gfxBuf.skinnedCacheLockAddr) & 15) == 0));
-                    iassert(((skinnedSurf->skinnedCachedOffset & 15) == 0));
-                    skinnedVert = (GfxPackedVertex*)&gfxBuf.skinnedCacheLockAddr[skinnedSurf->skinnedCachedOffset];
-                }
-
-                // LWSS: this makes the viewmodels flicker. Decomp is not fully accurate (should just have templated functions)
-                //if (sseEnabled)
-                //{
-                //    if (!sseStateUsed)
-                //    {
-                //        sseStateUsed = true;
-                //        //_m_empty();
-                //    }
-                //
-                //    GfxPackedVertexNormal *skinVertNormalIn = 0, *skinVertNormalOut = 0;
-                //    if (gfxBuf.fastSkin)
-                //    {
-                //        if (skinnedSurf->skinnedCachedOffset >= 0)
-                //            skinVertNormalOut = &gfxBuf.skinnedCacheNormalsAddr[skinnedSurf->skinnedCachedOffset >> 5];
-                //        if (skinnedSurf->skinnedVert)
-                //            skinVertNormalIn = &gfxBuf.oldSkinnedCacheNormalsAddr[(int)skinnedSurf->skinnedVert >> 5];
-                //    }
-                //    R_SkinXSurfaceSkinnedSse(skinnedSurf->xsurf, &boneSkelMats[boneIndex], skinVertNormalIn, skinVertNormalOut, skinnedVert);
-                //}
-                //else
-                //{
-
-                    R_SkinXSurfaceSkinned(skinnedSurf->xsurf, &boneSkelMats[boneIndex], skinnedVert);
-
-                //}
-            }
+            iassert(gfxBuf.skinnedCacheLockAddr);
+            iassert(((reinterpret_cast<uint>(gfxBuf.skinnedCacheLockAddr) & 15) == 0));
+            iassert(((skinnedSurf->skinnedCachedOffset & 15) == 0));
+            skinVerticesOut = (GfxPackedVertex*)&gfxBuf.skinnedCacheLockAddr[skinnedSurf->skinnedCachedOffset];
         }
+
+        // LWSS: this makes the viewmodels flicker. Decomp is not fully accurate (should just have templated functions)
+        //if (sseEnabled)
+        //{
+        //    if (!sseStateUsed)
+        //    {
+        //        sseStateUsed = true;
+        //        //_m_empty();
+        //    }
+        //
+        //    GfxPackedVertexNormal *skinVertNormalIn = 0, *skinVertNormalOut = 0;
+        //    if (gfxBuf.fastSkin)
+        //    {
+        //        if (skinnedSurf->skinnedCachedOffset >= 0)
+        //            skinVertNormalOut = &gfxBuf.skinnedCacheNormalsAddr[skinnedSurf->skinnedCachedOffset >> 5];
+        //        if (skinnedSurf->skinnedVert)
+        //            skinVertNormalIn = &gfxBuf.oldSkinnedCacheNormalsAddr[(int)skinnedSurf->skinnedVert >> 5];
+        //    }
+        //    R_SkinXSurfaceSkinnedSse(xsurf, &boneSkelMats[boneIndex], skinVertNormalIn, skinVertNormalOut, skinnedVert);
+        //}
+        //else
+        //{
+
+            R_SkinXSurfaceSkinned(xsurf, &boneSkelMats[boneIndex], skinVerticesOut);
+
+        //}
     }
 
     //if (sseStateUsed)

@@ -513,7 +513,7 @@ const struct GfxViewInfo // sizeof=0x67B0
 };
 const struct __declspec(align(16)) GfxBackEndData // sizeof=0x11E780
 {                                       // ...
-    unsigned __int8 surfsBuffer[131072];
+    unsigned __int8 surfsBuffer[0x20000];
     FxCodeMeshData codeMeshes[2048];
     unsigned int primDrawSurfsBuf[65536]; // ...
     GfxViewParms viewParms[28];

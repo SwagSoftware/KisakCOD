@@ -1,6 +1,30 @@
 #pragma once
 #include "r_scene.h"
-#include "rb_tess.h"
+
+struct GfxModelSurfaceInfo // sizeof=0xC
+{                                       // ...
+    const struct DObjAnimMat *baseMat;
+    unsigned __int8 boneIndex;
+    unsigned __int8 boneCount;
+    unsigned __int16 gfxEntIndex;
+    unsigned __int16 lightingHandle;
+    // padding byte
+    // padding byte
+};
+
+struct GfxModelSkinnedSurface // sizeof=0x18
+{                                       // ...
+    int skinnedCachedOffset;
+    XSurface *xsurf;
+    GfxModelSurfaceInfo info;
+    //$B667868682928995E3CB40CE466D3989 ___u3;
+    union
+    {
+        GfxPackedVertex *skinnedVert;
+        int oldSkinnedCachedOffset;
+    };
+};
+static_assert(sizeof(GfxModelSkinnedSurface) == 24);
 
 struct GfxModelRigidSurface // sizeof=0x38
 {

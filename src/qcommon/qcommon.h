@@ -1551,3 +1551,11 @@ inline bool IsPowerOf2(int num)
 {
     return (num & (num - 1)) == 0;
 }
+
+template <typename T>
+inline T Buf_Read(unsigned char **pos)
+{
+    T value = *(reinterpret_cast<const T *>(*pos));
+    *pos += sizeof(T);
+    return value;
+}

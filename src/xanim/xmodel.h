@@ -30,6 +30,7 @@ struct XModelCollTri_s // sizeof=0x30
     float svec[4];
     float tvec[4];
 };
+static_assert(sizeof(XModelCollTri_s) == 48);
 
 struct XBoneInfo // sizeof=0x28
 {                                       // ...
@@ -142,6 +143,8 @@ struct XModelSurfs // sizeof=0x14
     struct XSurface *surfs;                    // ...
     int partBits[4];                    // ...
 };
+static_assert(sizeof(XModelSurfs) == 20);
+
 struct XModelConfigEntry // sizeof=0x404
 {                                       // ...
     char filename[1024];                // ...
@@ -172,6 +175,8 @@ struct XModelPartsLoad // sizeof=0x1C
     unsigned __int8 *partClassification;
     DObjAnimMat *baseMat;
 };
+static_assert(sizeof(XModelPartsLoad) == 28);
+
 struct XModelDefault // sizeof=0x4C
 {                                       // ...
     unsigned __int16 boneNames[1];
@@ -197,6 +202,8 @@ struct XVertexInfo_s // sizeof=0x40
     unsigned __int8 pad;
     __int16 boneOffset;
 };
+static_assert(sizeof(XVertexInfo_s) == 64);
+
 struct XBlendLoadInfo // sizeof=0x4
 {                                       // ...
     unsigned __int16 boneOffset;
@@ -305,7 +312,7 @@ int __cdecl XModelGetStaticModelCacheVertCount(XModel *model, unsigned int lod);
 
 
 // xmodel_load_obj
-void __cdecl ConsumeQuatNoSwap(const unsigned __int8 **pos, __int16 *out);
+void __cdecl ConsumeQuatNoSwap(unsigned __int8 **pos, __int16 *out);
 int __cdecl XModelSurfsPrecache(
     XModel *model,
     const char *name,

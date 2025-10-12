@@ -346,44 +346,41 @@ void __cdecl XModelReadSurface_BuildCollisionTree(
 
 static void __cdecl XSurfaceTransferGetTexCoordRange(const XVertexInfo_s *v, int vertCount, float *texCoordAv)
 {
-    float v3; // [esp+8h] [ebp-1Ch]
-    float v4; // [esp+Ch] [ebp-18h]
     int vertIndex; // [esp+1Ch] [ebp-8h]
-    char texCoordUnitRange; // [esp+20h] [ebp-4h]
-    char texCoordUnitRange_1; // [esp+21h] [ebp-3h]
+    char texCoordUnitRange[2]; // [esp+20h] [ebp-4h]
 
     texCoordAv[0] = 0.0f;
     texCoordAv[1] = 0.0f;
-    texCoordUnitRange = 1;
-    texCoordUnitRange_1 = 1;
+    texCoordUnitRange[0] = 1;
+    texCoordUnitRange[1] = 1;
     for (vertIndex = 0; vertIndex < vertCount; ++vertIndex)
     {
         *texCoordAv = *texCoordAv + v->texCoordX;
         texCoordAv[1] = texCoordAv[1] + v->texCoordY;
-        if (v->texCoordX < 0.0 || v->texCoordX > 1.0)
-            texCoordUnitRange = 0;
-        if (v->texCoordY < 0.0 || v->texCoordY > 1.0)
-            texCoordUnitRange_1 = 0;
+        if (v->texCoordX < 0.0f || v->texCoordX > 1.0f)
+            texCoordUnitRange[0] = 0;
+        if (v->texCoordY < 0.0f || v->texCoordY > 1.0f)
+            texCoordUnitRange[1] = 0;
     }
-    *texCoordAv = (float)(1.0 / (float)vertCount) * *texCoordAv;
-    texCoordAv[1] = (float)(1.0 / (float)vertCount) * texCoordAv[1];
-    if (texCoordUnitRange)
+    texCoordAv[0] = (1.0f / (float)vertCount) * texCoordAv[0];
+    texCoordAv[1] = (1.0f / (float)vertCount) * texCoordAv[1];
+
+    if (texCoordUnitRange[0])
     {
-        *texCoordAv = 0.0f;
+        texCoordAv[0] = 0.0f;
     }
     else
     {
-        v4 = floor((float)(*texCoordAv + 0.5));
-        *texCoordAv = v4;
+        texCoordAv[0] = floor((float)(texCoordAv[0] + 0.5f));
     }
-    if (texCoordUnitRange_1)
+
+    if (texCoordUnitRange[1])
     {
         texCoordAv[1] = 0.0f;
     }
     else
     {
-        v3 = floor((float)(texCoordAv[1] + 0.5));
-        texCoordAv[1] = v3;
+        texCoordAv[1] = floor((float)(texCoordAv[1] + 0.5f));
     }
 }
 
@@ -399,7 +396,7 @@ static void __cdecl XSurfaceTransfer_BinormalSign_GfxPackedVertex_(GfxPackedVert
     float binormal[3]; // [esp+8h] [ebp-Ch] BYREF
 
     Vec3Cross(v->normal, v->tangent, binormal);
-    if (Vec3Dot(binormal, v->binormal) < 0.0)
+    if (Vec3Dot(binormal, v->binormal) < 0.0f)
         out->binormalSign = -1.0f;
     else
         out->binormalSign = 1.0f;
@@ -449,54 +446,24 @@ void __cdecl XSurfaceTransfer(
         XSurfaceTransfer_BinormalSign_GfxPackedVertex_(&verts0[vertIndex], v);
         XSurfaceTransfer_NormalTangent_GfxPackedVertex_(&verts1[vertIndex], v);
         XSurfaceTransfer_Texcoord_GfxPackedVertex_(&verts1[vertIndex], v, texCoordAv);
-        //XSurfaceTransfer_Color_GfxPackedVertex_(&verts1[vertIndex], v);
-
-        verts1[vertIndex].tangent.packed = Vec3PackUnitVec(v->tangent).packed;
+        XSurfaceTransfer_Color_GfxPackedVertex_(&verts1[vertIndex], v);
 
         v = (const XVertexInfo_s *)((char *)v + 4 * v->numWeights + 64);
     }
 }
 
-void __cdecl ReadBlend(XSurface *surface, int *partBits, XBlendLoadInfo *blend, unsigned __int16 **pos)
+static void ReadBlend(XSurface *surface, int *partBits, XBlendLoadInfo *blend, unsigned char **pos)
 {
-    unsigned __int16 v4; // [esp+0h] [ebp-10h]
-    __int16 v5; // [esp+4h] [ebp-Ch]
+    short boner = Buf_Read<short>(pos);
+    partBits[boner >> 5] |= 0x80000000 >> (boner & 0x1F);
 
-    v5 = *(*pos)++;
-    partBits[v5 >> 5] |= 0x80000000 >> (v5 & 0x1F);
-    blend->boneOffset = v5 << 6;
-    if (v5 << 6 != blend->boneOffset)
-        MyAssertHandler(".\\r_xsurface_load_obj.cpp", 67, 0, "%s", "boneOffset == blend->boneOffset");
-    v4 = *(*pos)++;
-    blend->boneWeight = v4;
+    blend->boneOffset = (boner << 6);
+    blend->boneWeight = Buf_Read<unsigned short>(pos);
 }
 
-void __cdecl XModelReadSurface(XModel *model, unsigned __int16 **pos, void *(__cdecl *Alloc)(int), XSurface *surface)
+void __cdecl XModelReadSurface(XModel *model, unsigned char **pos, void *(__cdecl *Alloc)(int), XSurface *surface)
 {
     int vertCount; // edx
-    unsigned __int16 *v5; // [esp+Ch] [ebp-734h]
-    unsigned __int8 v6; // [esp+10h] [ebp-730h]
-    XRigidVertList *v7; // [esp+14h] [ebp-72Ch]
-    unsigned __int16 v8; // [esp+18h] [ebp-728h]
-    float v9; // [esp+1Ch] [ebp-724h]
-    float v10; // [esp+20h] [ebp-720h]
-    float v11; // [esp+24h] [ebp-71Ch]
-    float v12; // [esp+28h] [ebp-718h]
-    float v13; // [esp+2Ch] [ebp-714h]
-    float v14; // [esp+30h] [ebp-710h]
-    __int16 v15; // [esp+34h] [ebp-70Ch]
-    float v16; // [esp+38h] [ebp-708h]
-    float v17; // [esp+3Ch] [ebp-704h]
-    float v18; // [esp+40h] [ebp-700h]
-    float v19; // [esp+44h] [ebp-6FCh]
-    float v20; // [esp+48h] [ebp-6F8h]
-    float v21; // [esp+4Ch] [ebp-6F4h]
-    float v22; // [esp+50h] [ebp-6F0h]
-    float v23; // [esp+54h] [ebp-6ECh]
-    float v24; // [esp+64h] [ebp-6DCh]
-    float v25; // [esp+68h] [ebp-6D8h]
-    float v26; // [esp+6Ch] [ebp-6D4h]
-    unsigned __int16 v31; // [esp+80h] [ebp-6C0h]
     __int16 v32; // [esp+84h] [ebp-6BCh]
     float check[3]; // [esp+88h] [ebp-6B8h] BYREF
     int j; // [esp+94h] [ebp-6ACh]
@@ -514,16 +481,15 @@ void __cdecl XModelReadSurface(XModel *model, unsigned __int16 **pos, void *(__c
     int vertexBytes; // [esp+D0h] [ebp-670h]
     int size; // [esp+D4h] [ebp-66Ch]
     bool deformed; // [esp+DBh] [ebp-665h]
+    XVertexInfo0 *verts0; // [esp+708h] [ebp-38h]
+    XVertexInfo1 *verts1; // [esp+F0h] [ebp-650h]
     XVertexInfo2 *verts2; // [esp+DCh] [ebp-664h]
     XVertexInfo3 *verts3; // [esp+E0h] [ebp-660h]
     int startTriIndex; // [esp+E4h] [ebp-65Ch]
     unsigned int vertListIter; // [esp+E8h] [ebp-658h]
     int localBoneIndex; // [esp+ECh] [ebp-654h]
-    XVertexInfo1 *verts1; // [esp+F0h] [ebp-650h]
     int vertListCount; // [esp+F4h] [ebp-64Ch]
     XRigidVertList rigidVertListArray[129]; // [esp+F8h] [ebp-648h] BYREF
-    XVertexInfo0 *verts0; // [esp+708h] [ebp-38h]
-    GfxPackedVertex *surfaceVerts1; // [esp+70Ch] [ebp-34h]
     XVertexInfo_s *verts; // [esp+710h] [ebp-30h]
     int blendBoneIndex; // [esp+714h] [ebp-2Ch]
     XVertexInfo1 *vert1Out; // [esp+718h] [ebp-28h]
@@ -537,15 +503,15 @@ void __cdecl XModelReadSurface(XModel *model, unsigned __int16 **pos, void *(__c
     XVertexBuffer *surfVerts; // [esp+738h] [ebp-8h]
     XVertexInfo3 *vert3Out; // [esp+73Ch] [ebp-4h]
 
-    iassert(sizeof(XVertexInfo_s) == 64); // lwss add
-
     memset(weightCount, 0, sizeof(weightCount));
-    surface->tileMode = *(_BYTE *)*pos;
-    *pos = (unsigned __int16 *)((char *)*pos + 1);
-    v32 = *(*pos)++;
-    v31 = *(*pos)++;
-    surface->vertCount = v31;
-    surface->triCount = *(*pos)++;
+    
+    surface->tileMode = Buf_Read<unsigned char>(pos);
+
+    v32 = Buf_Read<unsigned short>(pos); // unused? what is this
+
+    surface->vertCount = Buf_Read<unsigned short>(pos);
+
+    surface->triCount = Buf_Read<unsigned short>(pos);
 
     iassert(surface->triCount > 0);
 
@@ -557,19 +523,21 @@ void __cdecl XModelReadSurface(XModel *model, unsigned __int16 **pos, void *(__c
         iassert(vertListCount < ARRAY_COUNT(rigidVertListArray));
 
         rigidVertList = &rigidVertListArray[vertListCount];
-        rigidVertList->vertCount = *(*pos)++;
+        rigidVertList->vertCount = Buf_Read<unsigned short>(pos);
+
         if (!rigidVertList->vertCount)
             break;
-        localBoneIndex = *(*pos)++;
+
+        localBoneIndex = Buf_Read<unsigned short>(pos);
         rigidVertList->boneOffset = localBoneIndex << 6;
         rigidVertCount += rigidVertList->vertCount;
         ++vertListCount;
     }
 
     vertCount = surface->vertCount;
-    deformed = rigidVertCount != vertCount;
+    deformed = (rigidVertCount != vertCount);
 
-    if (rigidVertCount != vertCount)
+    if (deformed)
         vertListCount = 0;
 
     surface->deformed = deformed;
@@ -582,7 +550,7 @@ void __cdecl XModelReadSurface(XModel *model, unsigned __int16 **pos, void *(__c
     }
     else
     {
-        numblends = *(*pos)++;
+        numblends = Buf_Read<unsigned short>(pos);
     }
 
     size = (surface->vertCount << 6) + 4 * numblends;
@@ -590,50 +558,27 @@ void __cdecl XModelReadSurface(XModel *model, unsigned __int16 **pos, void *(__c
     verts = &surfVerts->v;
     for (j = 0; j < surface->vertCount; ++j)
     {
-        v26 = *(float*)*pos;
-        *pos += 2;
-        verts->normal[0] = v26;
-        v25 = *(float *)*pos;
-        *pos += 2;
-        verts->normal[1] = v25;
-        v24 = *(float *)*pos;
-        *pos += 2;
-        verts->normal[2] = v24;
+        verts->normal[0] = Buf_Read<float>(pos);
+        verts->normal[1] = Buf_Read<float>(pos);
+        verts->normal[2] = Buf_Read<float>(pos);
 
         if (r_modelVertColor->current.enabled)
-        {
-            Byte4CopyBgraToVertexColor((unsigned char *)*pos, verts->color);
-        }
+            Byte4CopyBgraToVertexColor(*pos, verts->color);
         else
-        {
-            *verts->color = -1;
-        }
+            *(_DWORD *)verts->color = -1;
 
-        *pos += 2;
-        v23 = *(float *)*pos;
-        *pos += 2;
-        verts->texCoordX = v23;
-        v22 = *(float *)*pos;
-        *pos += 2;
-        verts->texCoordY = v22;
-        v21 = *(float *)*pos;
-        *pos += 2;
-        verts->binormal[0] = v21;
-        v20 = *(float *)*pos;
-        *pos += 2;
-        verts->binormal[1] = v20;
-        v19 = *(float *)*pos;
-        *pos += 2;
-        verts->binormal[2] = v19;
-        v18 = *(float *)*pos;
-        *pos += 2;
-        verts->tangent[0] = v18;
-        v17 = *(float *)*pos;
-        *pos += 2;
-        verts->tangent[1] = v17;
-        v16 = *(float *)*pos;
-        *pos += 2;
-        verts->tangent[2] = v16;
+        *pos += 4;
+
+        verts->texCoordX = Buf_Read<float>(pos);
+        verts->texCoordY= Buf_Read<float>(pos);
+
+        verts->binormal[0] = Buf_Read<float>(pos);
+        verts->binormal[1] = Buf_Read<float>(pos);
+        verts->binormal[2] = Buf_Read<float>(pos);
+
+        verts->tangent[0] = Buf_Read<float>(pos);
+        verts->tangent[1] = Buf_Read<float>(pos);
+        verts->tangent[2] = Buf_Read<float>(pos);
 
         check[0] = Vec3Dot(verts->normal, verts->tangent);
         check[1] = Vec3Dot(verts->tangent, verts->binormal);
@@ -644,52 +589,46 @@ void __cdecl XModelReadSurface(XModel *model, unsigned __int16 **pos, void *(__c
         if (vertListCount == 1)
         {
             iassert(!deformed);
+
             verts->numWeights = 0;
             verts->boneOffset = rigidVertListArray[0].boneOffset;
-            v11 = *(float *)*pos;
-            *pos += 2;
-            verts->offset[0] = v11;
-            v10 = *(float *)*pos;
-            *pos += 2;
-            verts->offset[1] = v10;
-            v9 = *(float *)*pos;
-            *pos += 2;
-            verts->offset[2] = v9;
+
+            verts->offset[0] = Buf_Read<float>(pos);
+            verts->offset[1] = Buf_Read<float>(pos);
+            verts->offset[2] = Buf_Read<float>(pos);
+
             ++verts;
         }
         else
         {
-            numWeights = *(_BYTE *)*pos;
-            *pos = (unsigned __int16 *)((char *)*pos + 1);
+            numWeights = Buf_Read<unsigned char>(pos);
             verts->numWeights = numWeights;
+
             iassert(numWeights < 4);
+
             ++weightCount[numWeights];
-            v15 = *(*pos)++;
-            blendBoneIndex = v15;
-            surface->partBits[v15 >> 5] |= 0x80000000 >> (v15 & 0x1F);
+
+            blendBoneIndex = Buf_Read<unsigned short>(pos);
+
+            surface->partBits[blendBoneIndex >> 5] |= 0x80000000 >> (blendBoneIndex & 0x1F);
             blendBoneOffset = blendBoneIndex << 6;
             verts->boneOffset = (_WORD)blendBoneIndex << 6;
-
             iassert(blendBoneOffset == verts->boneOffset);
 
-            v14 = *(float *)*pos;
-            *pos += 2;
-            verts->offset[0] = v14;
-            v13 = *(float *)*pos;
-            *pos += 2;
-            verts->offset[1] = v13;
-            v12 = *(float *)*pos;
-            *pos += 2;
-            verts->offset[2] = v12;
+            verts->offset[0] = Buf_Read<float>(pos);
+            verts->offset[1] = Buf_Read<float>(pos);
+            verts->offset[2] = Buf_Read<float>(pos);
+
             ++verts;
+
             if (numWeights)
             {
                 iassert(deformed);
 
                 for (i = 0; i < numWeights; ++i)
                 {
-                    ReadBlend(surface, surface->partBits, (XBlendLoadInfo*)verts, pos);
-                    verts = (XVertexInfo_s*)((char *)verts + 4);
+                    ReadBlend(surface, surface->partBits, (XBlendLoadInfo *)verts, pos);
+                    verts = (XVertexInfo_s *)((char *)verts + 4);
                 }
             }
         }
@@ -702,11 +641,11 @@ void __cdecl XModelReadSurface(XModel *model, unsigned __int16 **pos, void *(__c
 
     for (vertIndex = 0; vertIndex < 3 * surface->triCount; ++vertIndex)
     {
-        v8 = *(*pos)++;
-        surface->triIndices[vertIndex] = v8;
+        surface->triIndices[vertIndex] = Buf_Read<unsigned short>(pos);
 
         iassert(surface->triIndices[vertIndex] < surface->vertCount);
     }
+
     triIndex = 0;
     endIndex = 0;
     for (j = 0; j < vertListCount; ++j)
@@ -735,23 +674,20 @@ void __cdecl XModelReadSurface(XModel *model, unsigned __int16 **pos, void *(__c
     }
 
     if (vertListCount)
-        v7 = (XRigidVertList *)Alloc(12 * vertListCount);
+        surface->vertList = (XRigidVertList *)Alloc(sizeof(XRigidVertList) * vertListCount);
     else
-        v7 = 0;
+        surface->vertList = 0;
 
-    surface->vertList = v7;
     surface->vertListCount = vertListCount;
-    memcpy(surface->vertList, rigidVertListArray, 12 * vertListCount);
-    vertexBytes = 32 * surface->vertCount;
+    memcpy(surface->vertList, rigidVertListArray, sizeof(XRigidVertList) * vertListCount);
+    vertexBytes = sizeof(GfxPackedVertex) * surface->vertCount;
     surface->verts0 = (GfxPackedVertex *)Alloc(vertexBytes);
     memset(surface->verts0, 0, vertexBytes); // Add from blops
     model->memUsage += vertexBytes;
-    surfaceVerts1 = surface->verts0;
-    XSurfaceTransfer(surfVerts, surface->verts0, surfaceVerts1, surface->vertCount);
+    XSurfaceTransfer(surfVerts, surface->verts0, surface->verts0, surface->vertCount);
     if (deformed)
     {
-        if (XModelNumBones(model) <= 1)
-            MyAssertHandler(".\\r_xsurface_load_obj.cpp", 659, 0, "%s", "XModelNumBones( model ) > 1");
+        iassert(XModelNumBones(model) > 1);
         verts0 = 0;
         verts1 = 0;
         verts2 = 0;
@@ -776,50 +712,41 @@ void __cdecl XModelReadSurface(XModel *model, unsigned __int16 **pos, void *(__c
             size = 14 * weightCount[3];
             verts3 = (XVertexInfo3 *)Alloc(14 * weightCount[3]);
         }
+
         for (i = 0; i < 4; ++i)
         {
             surface->vertInfo.vertCount[i] = weightCount[i];
-            if (surface->vertInfo.vertCount[i] != weightCount[i])
-                MyAssertHandler(".\\r_xsurface_load_obj.cpp", 693, 0, "%s", "surface->vertInfo.vertCount[i] == weightCount[i]");
+            iassert(surface->vertInfo.vertCount[i] == weightCount[i]);
         }
+
         verts = &surfVerts->v;
         vert0Out = verts0;
         vert1Out = verts1;
         vert2Out = verts2;
         vert3Out = verts3;
+
         for (j = 0; j < surface->vertCount; ++j)
         {
-            v6 = verts->numWeights;
-            if (v6)
+            if (verts->numWeights)
             {
-                if (v6 == 1)
+                if (verts->numWeights == 1)
                 {
-                    if (!vert1Out)
-                        MyAssertHandler(".\\r_xsurface_load_obj.cpp", 714, 0, "%s", "vert1Out");
+                    iassert(vert1Out);
                     vertOut = &vert1Out->vert0;
                     blendOut = vert1Out->blend;
                     ++vert1Out;
                 }
-                else if (v6 == 2)
+                else if (verts->numWeights == 2)
                 {
-                    if (!vert2Out)
-                        MyAssertHandler(".\\r_xsurface_load_obj.cpp", 721, 0, "%s", "vert2Out");
+                    iassert(vert2Out);
                     vertOut = &vert2Out->vert0;
                     blendOut = vert2Out->blend;
                     ++vert2Out;
                 }
                 else
                 {
-                    if (verts->numWeights != 3)
-                        MyAssertHandler(
-                            ".\\r_xsurface_load_obj.cpp",
-                            728,
-                            0,
-                            "%s\n\t(verts->numWeights) = %i",
-                            "(verts->numWeights == 3)",
-                            verts->numWeights);
-                    if (!vert3Out)
-                        MyAssertHandler(".\\r_xsurface_load_obj.cpp", 729, 0, "%s", "vert3Out");
+                    iassert(verts->numWeights == 3);
+                    iassert(vert3Out);
                     vertOut = &vert3Out->vert0;
                     blendOut = vert3Out->blend;
                     ++vert3Out;
@@ -827,8 +754,7 @@ void __cdecl XModelReadSurface(XModel *model, unsigned __int16 **pos, void *(__c
             }
             else
             {
-                if (!vert0Out)
-                    MyAssertHandler(".\\r_xsurface_load_obj.cpp", 707, 0, "%s", "vert0Out");
+                iassert(vert0Out);
                 vertOut = vert0Out;
                 blendOut = 0;
                 ++vert0Out;
@@ -838,8 +764,7 @@ void __cdecl XModelReadSurface(XModel *model, unsigned __int16 **pos, void *(__c
             ++verts;
             if (numWeights)
             {
-                if (!blendOut)
-                    MyAssertHandler(".\\r_xsurface_load_obj.cpp", 743, 0, "%s", "blendOut");
+                iassert(blendOut);
                 for (i = 0; i < numWeights; ++i)
                 {
                     blendOut->boneOffset = LOWORD(verts->normal[0]);
@@ -849,24 +774,23 @@ void __cdecl XModelReadSurface(XModel *model, unsigned __int16 **pos, void *(__c
                 }
             }
         }
-        if (vert0Out != &verts0[surface->vertInfo.vertCount[0]])
-            MyAssertHandler(".\\r_xsurface_load_obj.cpp", 755, 0, "%s", "vert0Out == verts0 + surface->vertInfo.vertCount[0]");
-        if (vert1Out != &verts1[surface->vertInfo.vertCount[1]])
-            MyAssertHandler(".\\r_xsurface_load_obj.cpp", 756, 0, "%s", "vert1Out == verts1 + surface->vertInfo.vertCount[1]");
-        if (vert2Out != &verts2[surface->vertInfo.vertCount[2]])
-            MyAssertHandler(".\\r_xsurface_load_obj.cpp", 757, 0, "%s", "vert2Out == verts2 + surface->vertInfo.vertCount[2]");
-        if (vert3Out != &verts3[surface->vertInfo.vertCount[3]])
-            MyAssertHandler(".\\r_xsurface_load_obj.cpp", 758, 0, "%s", "vert3Out == verts3 + surface->vertInfo.vertCount[3]");
+
+        iassert(vert0Out == verts0 + surface->vertInfo.vertCount[0]);
+        iassert(vert1Out == verts1 + surface->vertInfo.vertCount[1]);
+        iassert(vert2Out == verts2 + surface->vertInfo.vertCount[2]);
+        iassert(vert3Out == verts3 + surface->vertInfo.vertCount[3]);
+
         size = 2
             * (7 * surface->vertInfo.vertCount[3]
                 + 5 * surface->vertInfo.vertCount[2]
                 + 3 * surface->vertInfo.vertCount[1]
                 + surface->vertInfo.vertCount[0]);
+
         if (size)
-            v5 = (unsigned short*)Alloc(size);
+            vertsBlendOut = (unsigned short*)Alloc(size);
         else
-            v5 = 0;
-        vertsBlendOut = v5;
+            vertsBlendOut = 0;
+
         model->memUsage += size;
         surface->vertInfo.vertsBlend = vertsBlendOut;
         if (surface->vertInfo.vertCount[0])
@@ -928,10 +852,11 @@ void __cdecl XModelReadSurface(XModel *model, unsigned __int16 **pos, void *(__c
 
         iassert((byte *)vertsBlendOut - (byte *)(surface->vertInfo.vertsBlend) == size);
     }
-    if (surface->deformed != (surface->vertListCount == 0))
-        MyAssertHandler(".\\r_xsurface_load_obj.cpp", 848, 0, "%s", "surface->deformed == (surface->vertListCount == 0)");
+    iassert(surface->deformed == (surface->vertListCount == 0));
+
     for (vertListIter = 0; vertListIter != surface->vertListCount; ++vertListIter)
         XModelReadSurface_BuildCollisionTree(surface, vertListIter, Alloc);
+
     Hunk_FreeTempMemory((char*)surfVerts);
 }
 
@@ -941,52 +866,36 @@ void __cdecl XModelReadSurfaces(
     XModelSurfs *modelSurfs,
     int *modelPartBits,
     int surfCount,
-    unsigned __int16 **pos,
+    unsigned char **pos,
     void *(__cdecl *AllocMesh)(int))
 {
     int j; // [esp+4h] [ebp-18h]
     int surfIndex; // [esp+8h] [ebp-14h]
-    int baseVertIndex; // [esp+Ch] [ebp-10h]
-    XSurface *xsurf; // [esp+10h] [ebp-Ch]
-    int baseTriIndex; // [esp+14h] [ebp-8h]
     XSurface *surfs; // [esp+18h] [ebp-4h]
 
+    int baseTriIndex; // [esp+14h] [ebp-8h]
+    int baseVertIndex; // [esp+Ch] [ebp-10h]
+
     surfs = modelSurfs->surfs;
-    if (!modelSurfs->surfs)
-        MyAssertHandler(".\\xanim\\xmodel_load_obj.cpp", 720, 0, "%s", "surfs");
-    if (!modelPartBits)
-        MyAssertHandler(".\\xanim\\xmodel_load_obj.cpp", 721, 0, "%s", "modelPartBits");
-    if (surfCount <= 0)
-        MyAssertHandler(".\\xanim\\xmodel_load_obj.cpp", 722, 0, "%s", "surfCount > 0");
-    if (!pos)
-        MyAssertHandler(".\\xanim\\xmodel_load_obj.cpp", 723, 0, "%s", "pos");
-    if (!*pos)
-        MyAssertHandler(".\\xanim\\xmodel_load_obj.cpp", 724, 0, "%s", "*pos");
+
+    iassert(surfs);
+    iassert(modelPartBits);
+    iassert(surfCount > 0);
+    iassert(pos);
+    iassert(*pos);
+
     baseTriIndex = 0;
     baseVertIndex = 0;
     for (surfIndex = 0; surfIndex < surfCount; ++surfIndex)
     {
-        xsurf = &surfs[surfIndex];
+        XSurface *xsurf = &surfs[surfIndex];
+
         XModelReadSurface(model, pos, AllocMesh, xsurf);
+
         for (j = 0; j < 4; ++j)
             modelPartBits[j] |= xsurf->partBits[j];
-        if (baseTriIndex != baseTriIndex)
-            MyAssertHandler(
-                "c:\\trees\\cod3\\src\\qcommon\\../universal/assertive.h",
-                281,
-                0,
-                "i == static_cast< Type >( i )\n\t%i, %i",
-                baseTriIndex,
-                baseTriIndex);
+
         xsurf->baseTriIndex = baseTriIndex;
-        if (baseVertIndex != baseVertIndex)
-            MyAssertHandler(
-                "c:\\trees\\cod3\\src\\qcommon\\../universal/assertive.h",
-                281,
-                0,
-                "i == static_cast< Type >( i )\n\t%i, %i",
-                baseVertIndex,
-                baseVertIndex);
         xsurf->baseVertIndex = baseVertIndex;
         baseTriIndex += xsurf->triCount;
         baseVertIndex += xsurf->vertCount;
@@ -1000,84 +909,73 @@ XModelSurfs *__cdecl R_XModelSurfsLoadFile(
     __int16 modelNumsurfs,
     const char *modelName)
 {
-    __int16 v6; // [esp+0h] [ebp-6Ch]
-    __int16 v7; // [esp+4h] [ebp-68h]
-    const unsigned __int8 *pos; // [esp+8h] [ebp-64h] BYREF
+    unsigned __int8 *pos; // [esp+8h] [ebp-64h] BYREF
     char filename[68]; // [esp+Ch] [ebp-60h] BYREF
-    unsigned __int8 *buf; // [esp+54h] [ebp-18h] BYREF
-    __int16 version; // [esp+58h] [ebp-14h]
+    unsigned __int8 *buf = NULL; // [esp+54h] [ebp-18h] BYREF
     XModelSurfs *modelSurfs; // [esp+5Ch] [ebp-10h]
     int size; // [esp+60h] [ebp-Ch]
     int fileSize; // [esp+64h] [ebp-8h]
     __int16 numsurfs; // [esp+68h] [ebp-4h]
 
-    if (Com_sprintf(filename, 0x40u, "xmodelsurfs/%s", name) >= 0)
+    if (Com_sprintf(filename, 0x40u, "xmodelsurfs/%s", name) < 0)
     {
-        fileSize = FS_ReadFile(filename, (void**)&buf);
-        if (fileSize >= 0)
+        Com_PrintError(19, "ERROR: filename '%s' too long\n", filename);
+        return 0;
+    }
+
+    fileSize = FS_ReadFile(filename, (void**)&buf);
+
+    if (fileSize < 0)
+    {
+        iassert(!buf);
+        Com_PrintError(19, "ERROR: xmodelsurf '%s' not found\n", name);
+        return 0;
+    }
+
+    if (!fileSize)
+    {
+        Com_PrintError(19, "ERROR: xmodelsurf '%s' has 0 length\n", name);
+        FS_FreeFile((char *)buf);
+        return 0;
+    }
+
+    iassert(buf);
+
+    pos = buf;
+    short version = Buf_Read<short>(&pos);
+
+    if (version == 25)
+    {
+        numsurfs = Buf_Read<short>(&pos);
+
+        if (numsurfs == modelNumsurfs)
         {
-            if (fileSize)
-            {
-                if (!buf)
-                    MyAssertHandler(".\\xanim\\xmodel_load_obj.cpp", 847, 0, "%s", "buf");
-                pos = buf;
-                v7 = *(_WORD *)buf;
-                pos = buf + 2;
-                version = v7;
-                if (v7 == 25)
-                {
-                    v6 = *(_WORD *)pos;
-                    pos += 2;
-                    numsurfs = v6;
-                    if (v6 == modelNumsurfs)
-                    {
-                        size = 56 * modelNumsurfs + 20;
-                        modelSurfs = (XModelSurfs*)Alloc(size);
-                        model->memUsage += size;
-                        modelSurfs->surfs = (XSurface*)&modelSurfs[1];
-                        XModelReadSurfaces(model, name, modelSurfs, modelSurfs->partBits, modelNumsurfs, (unsigned short**)&pos, Alloc);
-                        FS_FreeFile((char*)buf);
-                        if (!modelSurfs)
-                            MyAssertHandler(".\\xanim\\xmodel_load_obj.cpp", 876, 0, "%s", "modelSurfs");
-                        return modelSurfs;
-                    }
-                    else
-                    {
-                        FS_FreeFile((char*)buf);
-                        Com_PrintError(
-                            19,
-                            "ERROR: File conflict (between non-iwd and iwd file) on xmodelsurfs '%s' for xmodel '%s'.\n"
-                            "Rename the export file to fix.\n",
-                            name,
-                            modelName);
-                        return 0;
-                    }
-                }
-                else
-                {
-                    FS_FreeFile((char*)buf);
-                    Com_PrintError(19, "ERROR: xmodelsurfs '%s' out of date (version %d, expecting %d).\n", name, version, 25);
-                    return 0;
-                }
-            }
-            else
-            {
-                Com_PrintError(19, "ERROR: xmodelsurf '%s' has 0 length\n", name);
-                FS_FreeFile((char*)buf);
-                return 0;
-            }
+            size = sizeof(XSurface) * modelNumsurfs + sizeof(XModelSurfs);
+            modelSurfs = (XModelSurfs*)Alloc(size);
+            model->memUsage += size;
+            modelSurfs->surfs = (XSurface*)&modelSurfs[1];
+            XModelReadSurfaces(model, name, modelSurfs, modelSurfs->partBits, modelNumsurfs, &pos, Alloc);
+            FS_FreeFile((char*)buf);
+
+            iassert(modelSurfs);
+            return modelSurfs;
         }
         else
         {
-            if (buf)
-                MyAssertHandler(".\\xanim\\xmodel_load_obj.cpp", 835, 0, "%s", "!buf");
-            Com_PrintError(19, "ERROR: xmodelsurf '%s' not found\n", name);
+            FS_FreeFile((char*)buf);
+            Com_PrintError(
+                19,
+                "ERROR: File conflict (between non-iwd and iwd file) on xmodelsurfs '%s' for xmodel '%s'.\n"
+                "Rename the export file to fix.\n",
+                name,
+                modelName);
             return 0;
         }
     }
     else
     {
-        Com_PrintError(19, "ERROR: filename '%s' too long\n", filename);
+        FS_FreeFile((char*)buf);
+        Com_PrintError(19, "ERROR: xmodelsurfs '%s' out of date (version %d, expecting %d).\n", name, version, 25);
         return 0;
     }
 }
@@ -1123,159 +1021,79 @@ int __cdecl XModelSurfsPrecache(
 
 PhysPreset *__cdecl XModel_PhysPresetPrecache(const char *name, void *(__cdecl *Alloc)(int))
 {
-    if (!name)
-        MyAssertHandler(".\\xanim\\xmodel_load_obj.cpp", 37, 0, "%s", "name");
+    iassert(name);
+
     return PhysPresetPrecache(name, Alloc);
 }
 
 void __cdecl XModelLoadCollData(
-    const unsigned __int8 **pos,
+    unsigned __int8 **pos,
     XModel *model,
     void *(__cdecl *AllocColl)(int),
     const char *name)
 {
-    float v4; // [esp+0h] [ebp-B4h]
-    int v5; // [esp+4h] [ebp-B0h]
-    int v6; // [esp+8h] [ebp-ACh]
-    int v7; // [esp+Ch] [ebp-A8h]
-    float v8; // [esp+10h] [ebp-A4h]
-    float v9; // [esp+14h] [ebp-A0h]
-    float v10; // [esp+18h] [ebp-9Ch]
-    float v11; // [esp+1Ch] [ebp-98h]
-    float v12; // [esp+20h] [ebp-94h]
-    float v13; // [esp+24h] [ebp-90h]
-    float *v14; // [esp+28h] [ebp-8Ch]
-    float *svec; // [esp+2Ch] [ebp-88h]
-    float v16; // [esp+30h] [ebp-84h]
-    float v17; // [esp+34h] [ebp-80h]
-    float v18; // [esp+38h] [ebp-7Ch]
-    float v19; // [esp+3Ch] [ebp-78h]
-    float v20; // [esp+40h] [ebp-74h]
-    float v21; // [esp+44h] [ebp-70h]
-    float v22; // [esp+48h] [ebp-6Ch]
-    float v23; // [esp+4Ch] [ebp-68h]
-    float v24; // [esp+50h] [ebp-64h]
-    float v25; // [esp+58h] [ebp-5Ch]
-    float v26; // [esp+5Ch] [ebp-58h]
-    float v27; // [esp+60h] [ebp-54h]
-    float v28; // [esp+64h] [ebp-50h]
-    int v29; // [esp+68h] [ebp-4Ch]
-    int v30; // [esp+6Ch] [ebp-48h]
-    int j; // [esp+80h] [ebp-34h]
-    float plane[4]; // [esp+84h] [ebp-30h] BYREF
-    XModelCollTri_s *tri; // [esp+94h] [ebp-20h]
-    XModelCollSurf_s *surf; // [esp+98h] [ebp-1Ch]
-    float tvec[4]; // [esp+9Ch] [ebp-18h]
-    int i; // [esp+ACh] [ebp-8h]
-    int numCollTris; // [esp+B0h] [ebp-4h]
+    iassert(!model->contents);
 
-    if (model->contents)
-        MyAssertHandler(".\\xanim\\xmodel_load_obj.cpp", 319, 0, "%s", "!model->contents");
-    v30 = *(_DWORD *)*pos;
-    *pos += 4;
-    model->numCollSurfs = v30;
+    model->numCollSurfs = Buf_Read<int>(pos);
+
     if (model->numCollSurfs)
     {
         model->collSurfs = (XModelCollSurf_s *)AllocColl(44 * model->numCollSurfs);
-        for (i = 0; i < model->numCollSurfs; ++i)
+        for (int i = 0; i < model->numCollSurfs; ++i)
         {
-            surf = &model->collSurfs[i];
-            v29 = *(_DWORD *)*pos;
-            *pos += 4;
-            numCollTris = v29;
-            if (!v29)
-                MyAssertHandler(".\\xanim\\xmodel_load_obj.cpp", 334, 0, "%s", "numCollTris");
+            XModelCollSurf_s *surf = &model->collSurfs[i];
+
+            int numCollTris = Buf_Read<int>(pos);
+
+            iassert(numCollTris);
+
             surf->numCollTris = numCollTris;
-            surf->collTris = (XModelCollTri_s *)AllocColl(48 * surf->numCollTris);
-            for (j = 0; j < numCollTris; ++j)
+            surf->collTris = (XModelCollTri_s *)AllocColl(sizeof(XModelCollTri_s) * numCollTris);
+
+            for (int j = 0; j < numCollTris; ++j)
             {
-                v28 = *(float *)*pos;
-                *pos += 4;
-                plane[0] = v28;
-                v27 = *(float *)*pos;
-                *pos += 4;
-                plane[1] = v27;
-                v26 = *(float *)*pos;
-                *pos += 4;
-                plane[2] = v26;
-                v25 = *(float *)*pos;
-                *pos += 4;
-                plane[3] = v25;
-                v24 = Vec3Length(plane) - 1.0;
-                v4 = I_fabs(v24);
-                if (v4 >= 0.009999999776482582)
-                    MyAssertHandler(
-                        ".\\xanim\\xmodel_load_obj.cpp",
-                        348,
-                        0,
-                        "%s\n\t(name) = %s",
-                        "(I_I_fabs( Vec3Length( plane ) - 1.0f ) < 0.01f)",
-                        name);
-                v23 = *(float *)*pos;
-                *pos += 4;
-                v22 = *(float *)*pos;
-                *pos += 4;
-                v21 = *(float *)*pos;
-                *pos += 4;
-                v20 = *(float *)*pos;
-                *pos += 4;
-                v19 = *(float *)*pos;
-                *pos += 4;
-                tvec[0] = v19;
-                v18 = *(float *)*pos;
-                *pos += 4;
-                tvec[1] = v18;
-                v17 = *(float *)*pos;
-                *pos += 4;
-                tvec[2] = v17;
-                v16 = *(float *)*pos;
-                *pos += 4;
-                tvec[3] = v16;
-                tri = &surf->collTris[j];
+                float plane[4];
+
+                plane[0] = Buf_Read<float>(pos);
+                plane[1] = Buf_Read<float>(pos);
+                plane[2] = Buf_Read<float>(pos);
+                plane[3] = Buf_Read<float>(pos);
+
+                iassert(I_fabs(Vec3Length(plane) - 1.0f) < 0.01f); // I_I_fabs?
+
+                XModelCollTri_s *tri = &surf->collTris[j];
+
+                tri->svec[0] = Buf_Read<float>(pos);
+                tri->svec[1] = Buf_Read<float>(pos);
+                tri->svec[2] = Buf_Read<float>(pos);
+                tri->svec[3] = Buf_Read<float>(pos);
+
+                tri->tvec[0] = Buf_Read<float>(pos);
+                tri->tvec[1] = Buf_Read<float>(pos);
+                tri->tvec[2] = Buf_Read<float>(pos);
+                tri->tvec[3] = Buf_Read<float>(pos);
+
                 tri->plane[0] = plane[0];
                 tri->plane[1] = plane[1];
                 tri->plane[2] = plane[2];
                 tri->plane[3] = plane[3];
-                svec = tri->svec;
-                tri->svec[0] = v23;
-                svec[1] = v22;
-                svec[2] = v21;
-                svec[3] = v20;
-                v14 = tri->tvec;
-                tri->tvec[0] = tvec[0];
-                v14[1] = tvec[1];
-                v14[2] = tvec[2];
-                v14[3] = tvec[3];
             }
-            v13 = *(float *)*pos;
-            *pos += 4;
-            surf->mins[0] = v13 - EQUAL_EPSILON;
-            v12 = *(float *)*pos;
-            *pos += 4;
-            surf->mins[1] = v12 - EQUAL_EPSILON;
-            v11 = *(float *)*pos;
-            *pos += 4;
-            surf->mins[2] = v11 - EQUAL_EPSILON;
-            v10 = *(float *)*pos;
-            *pos += 4;
-            surf->maxs[0] = v10 + EQUAL_EPSILON;
-            v9 = *(float *)*pos;
-            *pos += 4;
-            surf->maxs[1] = v9 + EQUAL_EPSILON;
-            v8 = *(float *)*pos;
-            *pos += 4;
-            surf->maxs[2] = v8 + EQUAL_EPSILON;
-            v7 = *(_DWORD *)*pos;
-            *pos += 4;
-            surf->boneIdx = v7;
-            v6 = *(_DWORD *)*pos;
-            *pos += 4;
-            surf->contents = v6 & 0xDFFFFFFB;
-            if (surf->contents && surf->boneIdx < 0)
-                MyAssertHandler(".\\xanim\\xmodel_load_obj.cpp", 379, 0, "%s", "!surf->contents || (surf->boneIdx >= 0)");
-            v5 = *(_DWORD *)*pos;
-            *pos += 4;
-            surf->surfFlags = v5;
+
+            surf->mins[0] = Buf_Read<float>(pos) - EQUAL_EPSILON;
+            surf->mins[1] = Buf_Read<float>(pos) - EQUAL_EPSILON;
+            surf->mins[2] = Buf_Read<float>(pos) - EQUAL_EPSILON;
+
+            surf->maxs[0] = Buf_Read<float>(pos) + EQUAL_EPSILON;
+            surf->maxs[1] = Buf_Read<float>(pos) + EQUAL_EPSILON;
+            surf->maxs[2] = Buf_Read<float>(pos) + EQUAL_EPSILON;
+
+            surf->boneIdx = Buf_Read<int>(pos);
+
+            surf->contents = Buf_Read<int>(pos) & 0xDFFFFFFB;
+
+            iassert(!surf->contents || (surf->boneIdx >= 0));
+
+            surf->surfFlags = Buf_Read<int>(pos);
             model->contents |= surf->contents;
         }
     }
@@ -1285,83 +1103,55 @@ void __cdecl XModelLoadCollData(
     }
 }
 
-char __cdecl XModelLoadConfigFile(const char *name, unsigned __int8 *pos, XModelConfig *config)
+char __cdecl XModelLoadConfigFile(const char *name, unsigned __int8 **pos, XModelConfig *config)
 {
-    char v4; // al
-    char v5; // al
-    XModelConfigEntry *v6; // [esp+18h] [ebp-54h]
-    const char *v7; // [esp+1Ch] [ebp-50h]
-    char *physicsPresetFilename; // [esp+38h] [ebp-34h]
-    float *v9; // [esp+3Ch] [ebp-30h]
-    int v10; // [esp+40h] [ebp-2Ch]
-    float v11; // [esp+44h] [ebp-28h]
-    float v12; // [esp+48h] [ebp-24h]
-    float v13; // [esp+4Ch] [ebp-20h]
-    float v14; // [esp+50h] [ebp-1Ch]
-    float v15; // [esp+54h] [ebp-18h]
-    float v16; // [esp+58h] [ebp-14h]
-    float v17; // [esp+5Ch] [ebp-10h]
-    __int16 v18; // [esp+60h] [ebp-Ch]
-    int i; // [esp+68h] [ebp-4h]
+    short version = Buf_Read<short>(pos);
 
-    v18 = **(_WORD **)pos;
-    *(_DWORD *)pos += 2;
-    if (v18 == 25)
+    if (version != 25)
     {
-        config->flags = *(_BYTE *)(*(_DWORD *)pos)++;
-        v17 = **(float **)pos;
-        *(_DWORD *)pos += 4;
-        config->mins[0] = v17;
-        v16 = **(float **)pos;
-        *(_DWORD *)pos += 4;
-        config->mins[1] = v16;
-        v15 = **(float **)pos;
-        *(_DWORD *)pos += 4;
-        config->mins[2] = v15;
-        v14 = **(float **)pos;
-        *(_DWORD *)pos += 4;
-        config->maxs[0] = v14;
-        v13 = **(float **)pos;
-        *(_DWORD *)pos += 4;
-        config->maxs[1] = v13;
-        v12 = **(float **)pos;
-        *(_DWORD *)pos += 4;
-        config->maxs[2] = v12;
-        v9 = *(float **)pos;
-        physicsPresetFilename = config->physicsPresetFilename;
-        do
-        {
-            v4 = *(_BYTE *)v9;
-            *physicsPresetFilename = *(_BYTE *)v9;
-            v9 = (float *)((char *)v9 + 1);
-            ++physicsPresetFilename;
-        } while (v4);
-        *(_DWORD *)pos += strlen(*(const char **)pos) + 1;
-        for (i = 0; i < 4; ++i)
-        {
-            v11 = **(float **)pos;
-            *(_DWORD *)pos += 4;
-            config->entries[i].dist = v11;
-            v7 = *(const char **)pos;
-            v6 = &config->entries[i];
-            do
-            {
-                v5 = *v7;
-                v6->filename[0] = *v7++;
-                v6 = (XModelConfigEntry *)((char *)v6 + 1);
-            } while (v5);
-            *(_DWORD *)pos += strlen(*(const char **)pos) + 1;
-        }
-        v10 = **(_DWORD **)pos;
-        *(_DWORD *)pos += 4;
-        config->collLod = v10;
-        return 1;
-    }
-    else
-    {
-        Com_PrintError(19, "ERROR: xmodel '%s' out of date (version %d, expecting %d).\n", name, v18, 25);
+        Com_PrintError(19, "ERROR: xmodel '%s' out of date (version %d, expecting %d).\n", name, version, 25);
         return 0;
     }
+
+    config->flags = Buf_Read<unsigned char>(pos); // DWORD in blops
+
+    config->mins[0] = Buf_Read<float>(pos);
+    config->mins[1] = Buf_Read<float>(pos);
+    config->mins[2] = Buf_Read<float>(pos);
+
+    config->maxs[0] = Buf_Read<float>(pos);
+    config->maxs[1] = Buf_Read<float>(pos);
+    config->maxs[2] = Buf_Read<float>(pos);
+
+    char *str = (char *)*pos;
+    char *out = config->physicsPresetFilename;
+
+    char c;
+    do
+    {
+        c = *str;
+        *out++ = *str++;
+    } while (c);
+    *pos += strlen((const char *)*pos) + 1;
+
+    for (int i = 0; i < 4; i++)
+    {
+        config->entries[i].dist = Buf_Read<float>(pos);
+
+        char *name = (char*)*pos;
+        char *entryfilename = config->entries[i].filename;
+
+        do
+        {
+            c = *name;
+            *entryfilename++ = *name++;
+        } while (c);
+        *pos += strlen((const char *)*pos) + 1;
+    }
+
+    config->collLod = Buf_Read<int>(pos);
+
+    return 1;
 }
 
 bool __cdecl XModelAllowLoadMesh()
@@ -1388,16 +1178,16 @@ XModelPartsLoad *__cdecl XModelPartsLoadFile(XModel *model, const char *name, vo
 XModelPartsLoad *__cdecl XModelPartsPrecache(XModel *model, const char *name, void *(__cdecl *Alloc)(int))
 {
     XModelPartsLoad *modelParts; // [esp+0h] [ebp-4h]
-    XModelPartsLoad *modelPartsa; // [esp+0h] [ebp-4h]
 
     modelParts = XModelPartsFindData(name);
     if (modelParts)
         return modelParts;
-    modelPartsa = XModelPartsLoadFile(model, name, Alloc);
-    if (modelPartsa)
+
+    modelParts = XModelPartsLoadFile(model, name, Alloc);
+    if (modelParts)
     {
-        XModelPartsSetData(name, modelPartsa, Alloc);
-        return modelPartsa;
+        XModelPartsSetData(name, modelParts, Alloc);
+        return modelParts;
     }
     else
     {
@@ -1438,220 +1228,190 @@ XModel *__cdecl XModelLoadFile(char *name, void *(__cdecl *Alloc)(int), void *(_
     int numBones; // [esp+70h] [ebp-1604h]
     char dest[68]; // [esp+74h] [ebp-1600h] BYREF
     float diff[12]; // [esp+B8h] [ebp-15BCh] BYREF
-    int v22; // [esp+E8h] [ebp-158Ch]
+    int surfIndex; // [esp+E8h] [ebp-158Ch]
     XModel *model; // [esp+ECh] [ebp-1588h]
     float *a; // [esp+F0h] [ebp-1584h]
-    void *buffer; // [esp+F4h] [ebp-1580h] BYREF
-    XModelLodInfo *v26; // [esp+F8h] [ebp-157Ch]
+    void *buf = NULL; // [esp+F4h] [ebp-1580h] BYREF
+    XModelLodInfo *modelLodInfo; // [esp+F8h] [ebp-157Ch]
     float *sum; // [esp+FCh] [ebp-1578h]
-    int v28; // [esp+100h] [ebp-1574h]
     const char *v29; // [esp+104h] [ebp-1570h]
-    int v30; // [esp+108h] [ebp-156Ch]
+    int filelen; // [esp+108h] [ebp-156Ch]
     char v31[256]; // [esp+10Ch] [ebp-1568h] BYREF
     float *b; // [esp+20Ch] [ebp-1468h]
     XModelSurfs outModelSurfs; // [esp+210h] [ebp-1464h] BYREF
-    XBoneInfo *v34; // [esp+224h] [ebp-1450h]
+    XBoneInfo *boneInfos; // [esp+224h] [ebp-1450h]
     int i; // [esp+228h] [ebp-144Ch]
-    unsigned __int8 *v36; // [esp+22Ch] [ebp-1448h]
-    int v37; // [esp+230h] [ebp-1444h]
+    int numsurfs; // [esp+230h] [ebp-1444h]
     XModelConfig config; // [esp+234h] [ebp-1440h] BYREF
     XModelPartsLoad *modelParts; // [esp+166Ch] [ebp-8h]
     const char *v40; // [esp+1670h] [ebp-4h]
+    unsigned __int8 *v36;
 
     if (Com_IsLegacyXModelName(name))
     {
         Com_PrintError(19, "ERROR: Remove xmodel prefix from model name '%s'\n", name);
         return 0;
     }
-    else if (Com_sprintf(dest, 0x40u, "xmodel/%s", name) >= 0)
+
+    if (Com_sprintf(dest, 0x40u, "xmodel/%s", name) < 0)
     {
-        v30 = FS_ReadFile(dest, &buffer);
-        if (v30 >= 0)
+        Com_PrintError(19, "ERROR: filename '%s' too long\n", dest);
+        return 0;
+    }
+
+    filelen = FS_ReadFile(dest, &buf);
+
+    if (filelen < 0)
+    {
+        iassert(!buf);
+        Com_PrintError(19, "ERROR: xmodel '%s' not found\n", name);
+        return 0;
+    }
+
+    if (!filelen)
+    {
+        Com_PrintError(19, "ERROR: xmodel '%s' has 0 length\n", name);
+        FS_FreeFile((char *)buf);
+        return 0;
+    }
+
+    pos = (unsigned __int8 *)buf;
+    if (!XModelLoadConfigFile(name, &pos, &config))
+        goto LABEL_28;
+
+    model = (XModel *)Alloc(sizeof(XModel));
+    model->memUsage = sizeof(XModel);
+    XModelLoadCollData(&pos, model, AllocColl, name);
+
+    model->numLods = 0;
+    v36 = pos;
+    numsurfs = 0;
+    for (i = 0; i < 4; ++i)
+    {
+        modelLodInfo = &model->lodInfo[i];
+        if (config.entries[i].filename[0])
         {
-            if (v30)
+            iassert(i == model->numLods);
+            ++model->numLods;
+
+            modelLodInfo->numsurfs = Buf_Read<unsigned short>(&pos);
+
+            numsurfs += modelLodInfo->numsurfs;
+            for (j = 0; j < modelLodInfo->numsurfs; ++j)
             {
-                pos = (unsigned __int8 *)buffer;
-                if (!XModelLoadConfigFile(name, (unsigned char *)&pos, &config))
-                    goto LABEL_28;
-                v28 = 220;
-                model = (XModel *)Alloc(220);
-                model->memUsage = v28;
-                XModelLoadCollData((const unsigned __int8 **)&pos, model, AllocColl, name);
-                model->numLods = 0;
-                v36 = pos;
-                v37 = 0;
-                for (i = 0; i < 4; ++i)
-                {
-                    v26 = &model->lodInfo[i];
-                    if (config.entries[i].filename[0])
-                    {
-                        if (i != model->numLods)
-                            MyAssertHandler(".\\xanim\\xmodel_load_obj.cpp", 518, 0, "%s", "i == model->numLods");
-                        ++model->numLods;
-                        v16 = *(_WORD *)pos;
-                        pos += 2;
-                        v26->numsurfs = v16;
-                        v37 += v26->numsurfs;
-                        for (j = 0; j < v26->numsurfs; ++j)
-                        {
-                            v40 = (const char *)pos;
-                            pos += strlen((const char *)pos) + 1;
-                        }
-                    }
-                    if (config.mins[257 * i - 772] == 0.0)
-                        v9 = 1000000.0;
-                    else
-                        v9 = config.mins[257 * i - 772];
-                    v26->dist = v9;
-                }
-                if (!model->numLods)
-                    MyAssertHandler(".\\xanim\\xmodel_load_obj.cpp", 533, 0, "%s", "model->numLods");
-                modelParts = XModelPartsPrecache(model, (const char *)&config, Alloc);
-                if (modelParts)
-                {
-                    XModelCopyXModelParts(modelParts, model);
-                    numBones = model->numBones;
-                    v28 = 40 * numBones;
-                    v34 = (XBoneInfo *)Alloc(40 * numBones);
-                    model->memUsage += v28;
-                    for (i = 0; i < numBones; ++i)
-                    {
-                        a = (float *)&v34[i];
-                        v15 = *(float *)pos;
-                        pos += 4;
-                        *a = v15;
-                        v14 = *(float *)pos;
-                        pos += 4;
-                        a[1] = v14;
-                        v13 = *(float *)pos;
-                        pos += 4;
-                        a[2] = v13;
-                        b = v34[i].bounds[1];
-                        v12 = *(float *)pos;
-                        pos += 4;
-                        *b = v12;
-                        v11 = *(float *)pos;
-                        pos += 4;
-                        b[1] = v11;
-                        v10 = *(float *)pos;
-                        pos += 4;
-                        b[2] = v10;
-                        sum = v34[i].offset;
-                        Vec3Avg(a, b, sum);
-                        Vec3Sub(b, sum, diff);
-                        v4 = Vec3LengthSq(diff);
-                        v34[i].radiusSquared = v4;
-                    }
-                    model->boneInfo = v34;
-                    model->lodRampType = 0;
-                    if (XModelAllowLoadMesh())
-                    {
-                        pos = v36;
-                        if (!config.entries[0].filename[0])
-                            MyAssertHandler(".\\xanim\\xmodel_load_obj.cpp", 579, 0, "%s", "config.entries[0].filename[0]");
-                        model->numsurfs = v37;
-                        if (model->numsurfs != v37)
-                            MyAssertHandler(".\\xanim\\xmodel_load_obj.cpp", 582, 0, "%s", "model->numsurfs == numsurfs");
-                        model->surfs = (XSurface *)Alloc(56 * v37);
-                        model->materialHandles = (Material **)Alloc(4 * v37);
-                        v22 = 0;
-                        for (i = 0; i < 4; ++i)
-                        {
-                            v26 = &model->lodInfo[i];
-                            if (config.entries[i].filename[0])
-                            {
-                                pos += 2;
-                                if (!XModelSurfsPrecache(model, config.entries[i].filename, Alloc, v26->numsurfs, name, &outModelSurfs))
-                                    goto LABEL_28;
-                                partBits = v26->partBits;
-                                v26->partBits[0] = outModelSurfs.partBits[0];
-                                partBits[1] = outModelSurfs.partBits[1];
-                                partBits[2] = outModelSurfs.partBits[2];
-                                partBits[3] = outModelSurfs.partBits[3];
-                                v26->surfIndex = v22;
-                                if (v26->surfIndex != v22)
-                                    MyAssertHandler(".\\xanim\\xmodel_load_obj.cpp", 611, 0, "%s", "modelLodInfo->surfIndex == surfIndex");
-                                if (i != (unsigned __int8)i)
-                                    MyAssertHandler(
-                                        "c:\\trees\\cod3\\src\\qcommon\\../universal/assertive.h",
-                                        281,
-                                        0,
-                                        "i == static_cast< Type >( i )\n\t%i, %i",
-                                        i,
-                                        (unsigned __int8)i);
-                                v26->lod = i;
-                                v26->smcIndexPlusOne = 0;
-                                for (j = 0; j < v26->numsurfs; ++j)
-                                {
-                                    v40 = (const char *)pos;
-                                    pos += strlen((const char *)pos) + 1;
-                                    if (!strcmp(v40, "$default"))
-                                        v40 = "$default3d";
-                                    v29 = "mc/";
-                                    Com_sprintf(v31, 0x100u, "%s%s", "mc/", v40);
-                                    v6 = Material_RegisterHandle(v31, 8);
-                                    model->materialHandles[v22] = v6;
-                                    if (outModelSurfs.surfs[j].deformed)
-                                        model->lodRampType = 1;
-                                    qmemcpy(&model->surfs[v22++], &outModelSurfs.surfs[j], sizeof(model->surfs[v22++]));
-                                }
-                            }
-                        }
-                        if (v22 != v37)
-                            MyAssertHandler(".\\xanim\\xmodel_load_obj.cpp", 667, 0, "%s", "surfIndex == numsurfs");
-                        diff[3] = 1.0;
-                        diff[4] = 0.0;
-                        diff[5] = 0.0;
-                        diff[6] = 0.0;
-                        diff[7] = 1.0;
-                        diff[8] = 0.0;
-                        diff[9] = 0.0;
-                        diff[10] = 0.0;
-                        diff[11] = 1.0;
-                        R_GetXModelBounds(model, (const float (*)[3]) & diff[3], model->mins, model->maxs);
-                    }
-                    FS_FreeFile((char *)buffer);
-                    if (config.maxs[0] < 0.0)
-                        MyAssertHandler(".\\xanim\\xmodel_load_obj.cpp", 684, 0, "%s", "config.maxs[0] >= 0.0f");
-                    model->radius = config.maxs[0];
-                    model->collLod = config.collLod;
-                    if (model->collLod >= model->numLods)
-                        MyAssertHandler(".\\xanim\\xmodel_load_obj.cpp", 689, 0, "%s", "model->collLod < model->numLods");
-                    model->flags = config.flags;
-                    if (config.physicsPresetFilename[0])
-                    {
-                        v7 = XModel_PhysPresetPrecache(config.physicsPresetFilename, Alloc);
-                        model->physPreset = v7;
-                    }
-                    PhysicsCollMap = XModel_LoadPhysicsCollMap(name, Alloc);
-                    model->physGeoms = PhysicsCollMap;
-                    return model;
-                }
-                else
-                {
-                LABEL_28:
-                    FS_FreeFile((char *)buffer);
-                    return 0;
-                }
-            }
-            else
-            {
-                Com_PrintError(19, "ERROR: xmodel '%s' has 0 length\n", name);
-                FS_FreeFile((char *)buffer);
-                return 0;
+                v40 = (const char *)pos;
+                pos += strlen((const char *)pos) + 1;
             }
         }
-        else
+        modelLodInfo->dist = (config.entries[i].dist == 0.0f) ? 1000000.0f : config.entries[i].dist;
+    }
+
+    iassert(model->numLods);
+
+    modelParts = XModelPartsPrecache(model, (const char *)&config, Alloc);
+    if (modelParts)
+    {
+        XModelCopyXModelParts(modelParts, model);
+        numBones = model->numBones;
+        boneInfos = (XBoneInfo *)Alloc(sizeof(XBoneInfo) * numBones);
+        model->memUsage += (sizeof(XBoneInfo) * numBones);
+        for (i = 0; i < numBones; ++i)
         {
-            if (buffer)
-                MyAssertHandler(".\\xanim\\xmodel_load_obj.cpp", 478, 0, "%s", "!buf");
-            Com_PrintError(19, "ERROR: xmodel '%s' not found\n", name);
-            return 0;
+            a = boneInfos[i].bounds[0];
+            a[0] = Buf_Read<float>(&pos);
+            a[1] = Buf_Read<float>(&pos);
+            a[2] = Buf_Read<float>(&pos);
+
+            b = boneInfos[i].bounds[1];
+            b[0] = Buf_Read<float>(&pos);
+            b[1] = Buf_Read<float>(&pos);
+            b[2] = Buf_Read<float>(&pos);
+
+            sum = boneInfos[i].offset;
+            Vec3Avg(a, b, sum);
+            Vec3Sub(b, sum, diff);
+
+            boneInfos[i].radiusSquared = Vec3LengthSq(diff);
         }
+        model->boneInfo = boneInfos;
+        model->lodRampType = 0;
+        if (XModelAllowLoadMesh())
+        {
+            pos = v36;
+            iassert(config.entries[0].filename[0]);
+            model->numsurfs = numsurfs;
+            model->surfs = (XSurface *)Alloc(sizeof(XSurface) * numsurfs);
+            model->materialHandles = (Material **)Alloc(4 * numsurfs);
+            surfIndex = 0;
+            for (i = 0; i < 4; ++i)
+            {
+                modelLodInfo = &model->lodInfo[i];
+                if (config.entries[i].filename[0])
+                {
+                    pos += 2;
+                    if (!XModelSurfsPrecache(model, config.entries[i].filename, Alloc, modelLodInfo->numsurfs, name, &outModelSurfs))
+                        goto LABEL_28;
+                    partBits = modelLodInfo->partBits;
+                    modelLodInfo->partBits[0] = outModelSurfs.partBits[0];
+                    partBits[1] = outModelSurfs.partBits[1];
+                    partBits[2] = outModelSurfs.partBits[2];
+                    partBits[3] = outModelSurfs.partBits[3];
+                    modelLodInfo->surfIndex = surfIndex;
+                    iassert(i == (unsigned __int8)i);
+                    modelLodInfo->lod = i;
+                    modelLodInfo->smcIndexPlusOne = 0;
+
+                    for (j = 0; j < modelLodInfo->numsurfs; ++j)
+                    {
+                        v40 = (const char *)pos;
+                        pos += strlen((const char *)pos) + 1;
+                        if (!strcmp(v40, "$default"))
+                            v40 = "$default3d";
+                        v29 = "mc/";
+                        Com_sprintf(v31, 0x100u, "%s%s", "mc/", v40);
+                        v6 = Material_RegisterHandle(v31, 8);
+                        model->materialHandles[surfIndex] = v6;
+                        if (outModelSurfs.surfs[j].deformed)
+                            model->lodRampType = 1;
+                        qmemcpy(&model->surfs[surfIndex++], &outModelSurfs.surfs[j], sizeof(model->surfs[surfIndex++]));
+                    }
+                }
+            }
+
+            iassert(surfIndex == numsurfs);
+
+            diff[3] = 1.0;
+            diff[4] = 0.0;
+            diff[5] = 0.0;
+            diff[6] = 0.0;
+            diff[7] = 1.0;
+            diff[8] = 0.0;
+            diff[9] = 0.0;
+            diff[10] = 0.0;
+            diff[11] = 1.0;
+
+            R_GetXModelBounds(model, (const float (*)[3]) & diff[3], model->mins, model->maxs);
+        }
+
+        FS_FreeFile((char *)buf);
+        iassert(config.maxs[0] >= 0.0f);
+        model->radius = config.maxs[0];
+        model->collLod = config.collLod;
+        iassert(model->collLod < model->numLods);
+        model->flags = config.flags;
+        if (config.physicsPresetFilename[0])
+        {
+            v7 = XModel_PhysPresetPrecache(config.physicsPresetFilename, Alloc);
+            model->physPreset = v7;
+        }
+        PhysicsCollMap = XModel_LoadPhysicsCollMap(name, Alloc);
+        model->physGeoms = PhysicsCollMap;
+        return model;
     }
     else
     {
-        Com_PrintError(19, "ERROR: filename '%s' too long\n", dest);
+    LABEL_28:
+        FS_FreeFile((char *)buf);
         return 0;
     }
 }
@@ -1719,21 +1479,13 @@ void __cdecl XModelCalcBasePose(XModelPartsLoad *modelParts)
 
 XModelPartsLoad *__cdecl XModelPartsLoadFile(XModel *model, const char *name, void *(__cdecl *Alloc)(int))
 {
-    unsigned __int8 *v4; // eax
     unsigned __int16 prev; // ax
-    unsigned __int8 *v6; // [esp+10h] [ebp-A8h]
-    float v7; // [esp+18h] [ebp-A0h]
-    float v8; // [esp+1Ch] [ebp-9Ch]
-    float v9; // [esp+20h] [ebp-98h]
-    __int16 v10; // [esp+24h] [ebp-94h]
-    __int16 v11; // [esp+28h] [ebp-90h]
-    __int16 v12; // [esp+2Ch] [ebp-8Ch]
-    const unsigned __int8 *pos; // [esp+30h] [ebp-88h] BYREF
+    unsigned __int8 *pos; // [esp+30h] [ebp-88h] BYREF
     int numBones; // [esp+34h] [ebp-84h]
     char filename[64]; // [esp+38h] [ebp-80h] BYREF
     int numRootBones; // [esp+7Ch] [ebp-3Ch]
     __int16 numChildBones; // [esp+80h] [ebp-38h]
-    unsigned __int8 *buf; // [esp+84h] [ebp-34h] BYREF
+    unsigned __int8 *buf = NULL; // [esp+84h] [ebp-34h] BYREF
     float *trans; // [esp+88h] [ebp-30h]
     __int16 version; // [esp+8Ch] [ebp-2Ch]
     int len; // [esp+90h] [ebp-28h]
@@ -1747,146 +1499,123 @@ XModelPartsLoad *__cdecl XModelPartsLoadFile(XModel *model, const char *name, vo
     bool useBones; // [esp+B3h] [ebp-5h]
     unsigned __int16 *boneNames; // [esp+B4h] [ebp-4h]
 
-    if (Com_sprintf(filename, 0x40u, "xmodelparts/%s", name) >= 0)
+    if (Com_sprintf(filename, 0x40u, "xmodelparts/%s", name) < 0)
     {
-        fileSize = FS_ReadFile(filename, (void **)&buf);
-        if (fileSize >= 0)
+        Com_PrintError(19, "ERROR: filename '%s' too long\n", filename);
+        return 0;
+    }
+
+    fileSize = FS_ReadFile(filename, (void **)&buf);
+
+    if (fileSize < 0)
+    {
+        iassert(!buf);
+        Com_PrintError(19, "ERROR: xmodelparts '%s' not found\n", name);
+        return 0;
+    }
+
+    if (!fileSize)
+    {
+        Com_PrintError(19, "ERROR: xmodelparts '%s' has 0 length\n", name);
+        FS_FreeFile((char *)buf);
+        return 0;
+    }
+
+    iassert(buf);
+    pos = buf;
+
+    version = Buf_Read<unsigned short>(&pos);
+
+    if (version != 25)
+    {
+        FS_FreeFile((char *)buf);
+        Com_PrintError(19, "ERROR: xmodelparts '%s' out of date (version %d, expecting %d).\n", name, version, 25);
+        return 0;
+    }
+
+    numChildBones = Buf_Read<unsigned short>(&pos);
+    numRootBones = Buf_Read<unsigned short>(&pos);
+    numBones = numRootBones + numChildBones;
+    size = 2 * numBones;
+    boneNames = (unsigned __int16 *)Alloc(2 * numBones);
+    model->memUsage += size;
+
+    if (numBones < 128)
+    {
+        size = numChildBones;
+        if (numChildBones)
+            parentList = (unsigned __int8 *)Alloc(size);
+        else
+            parentList = 0;
+
+        model->memUsage += size;
+        size = sizeof(XModelPartsLoad);
+        modelParts = (XModelPartsLoad *)Alloc(size);
+        model->memUsage += size;
+        modelParts->parentList = parentList;
+        modelParts->boneNames = boneNames;
+        size = sizeof(DObjAnimMat) * numBones;
+        modelParts->baseMat = (DObjAnimMat *)Alloc(size);
+        model->memUsage += size;
+        if (numChildBones)
         {
-            if (fileSize)
-            {
-                if (!buf)
-                    MyAssertHandler(".\\xanim\\xmodel_load_obj.cpp", 156, 0, "%s", "buf");
-                pos = buf;
-                v12 = *(_WORD *)buf;
-                pos = buf + 2;
-                version = v12;
-                if (v12 == 25)
-                {
-                    v11 = *(_WORD *)pos;
-                    pos += 2;
-                    numChildBones = v11;
-                    v10 = *(_WORD *)pos;
-                    pos += 2;
-                    numRootBones = v10;
-                    numBones = v10 + v11;
-                    size = 2 * numBones;
-                    boneNames = (unsigned __int16 *)Alloc(2 * numBones);
-                    model->memUsage += size;
-                    if (numBones < 128)
-                    {
-                        size = numChildBones;
-                        if (numChildBones)
-                            v6 = (unsigned __int8 *)Alloc(size);
-                        else
-                            v6 = 0;
-                        parentList = v6;
-                        model->memUsage += size;
-                        size = 28;
-                        modelParts = (XModelPartsLoad *)Alloc(28);
-                        model->memUsage += size;
-                        modelParts->parentList = parentList;
-                        modelParts->boneNames = boneNames;
-                        size = 32 * numBones;
-                        modelParts->baseMat = (DObjAnimMat *)Alloc(32 * numBones);
-                        model->memUsage += size;
-                        if (numChildBones)
-                        {
-                            size = 8 * numChildBones;
-                            modelParts->quats = (__int16 *)Alloc(size);
-                            model->memUsage += size;
-                            size = 16 * numChildBones;
-                            modelParts->trans = (float *)Alloc(size);
-                            model->memUsage += size;
-                        }
-                        else
-                        {
-                            modelParts->quats = 0;
-                            modelParts->trans = 0;
-                        }
-                        size = numBones;
-                        v4 = (unsigned __int8 *)Alloc(numBones);
-                        modelParts->partClassification = v4;
-                        model->memUsage += size;
-                        modelParts->numBones = numBones;
-                        if (modelParts->numBones != numBones)
-                            MyAssertHandler(".\\xanim\\xmodel_load_obj.cpp", 219, 0, "%s", "modelParts->numBones == numBones");
-                        modelParts->numRootBones = numRootBones;
-                        if (modelParts->numRootBones != numRootBones)
-                            MyAssertHandler(".\\xanim\\xmodel_load_obj.cpp", 222, 0, "%s", "modelParts->numRootBones == numRootBones");
-                        quats = modelParts->quats;
-                        trans = modelParts->trans;
-                        i = numRootBones;
-                        while (i < numBones)
-                        {
-                            index = *pos++;
-                            if (index >= i)
-                                MyAssertHandler(".\\xanim\\xmodel_load_obj.cpp", 233, 0, "%s", "index < i");
-                            *parentList = i - index;
-                            if (i - index != *parentList)
-                                MyAssertHandler(".\\xanim\\xmodel_load_obj.cpp", 235, 0, "%s", "i - index == *parentList");
-                            v9 = *(float *)pos;
-                            pos += 4;
-                            *trans = v9;
-                            v8 = *(float *)pos;
-                            pos += 4;
-                            trans[1] = v8;
-                            v7 = *(float *)pos;
-                            pos += 4;
-                            trans[2] = v7;
-                            ConsumeQuatNoSwap(&pos, quats);
-                            ++i;
-                            quats += 4;
-                            trans += 3;
-                            ++parentList;
-                        }
-                        for (i = 0; i < numBones; ++i)
-                        {
-                            len = strlen((const char *)pos) + 1;
-                            prev = SL_GetStringOfSize((char *)pos, 0, len, 10).prev;
-                            boneNames[i] = prev;
-                            pos += len;
-                        }
-                        memcpy(modelParts->partClassification, (unsigned __int8 *)pos, numBones);
-                        pos += numBones;
-                        useBones = *pos++ != 0;
-                        FS_FreeFile((char *)buf);
-                        XModelCalcBasePose(modelParts);
-                        if (!useBones)
-                            memset((unsigned __int8 *)modelParts->trans, 0, 16 * numChildBones);
-                        return modelParts;
-                    }
-                    else
-                    {
-                        FS_FreeFile((char *)buf);
-                        Com_PrintError(19, "ERROR: xmodel '%s' has more than %d bones\n", name, 127);
-                        return 0;
-                    }
-                }
-                else
-                {
-                    FS_FreeFile((char *)buf);
-                    Com_PrintError(19, "ERROR: xmodelparts '%s' out of date (version %d, expecting %d).\n", name, version, 25);
-                    return 0;
-                }
-            }
-            else
-            {
-                Com_PrintError(19, "ERROR: xmodelparts '%s' has 0 length\n", name);
-                FS_FreeFile((char *)buf);
-                return 0;
-            }
+            size = 8 * numChildBones;
+            modelParts->quats = (__int16 *)Alloc(size);
+            model->memUsage += size;
+
+            size = 16 * numChildBones;
+            modelParts->trans = (float *)Alloc(size);
+            model->memUsage += size;
         }
         else
         {
-            if (buf)
-                MyAssertHandler(".\\xanim\\xmodel_load_obj.cpp", 144, 0, "%s", "!buf");
-            Com_PrintError(19, "ERROR: xmodelparts '%s' not found\n", name);
-            return 0;
+            modelParts->quats = 0;
+            modelParts->trans = 0;
         }
+        size = numBones;
+        modelParts->partClassification = (unsigned __int8 *)Alloc(numBones);
+        model->memUsage += size;
+        modelParts->numBones = numBones;
+        modelParts->numRootBones = numRootBones;
+        quats = modelParts->quats;
+        trans = modelParts->trans;
+        i = numRootBones;
+        while (i < numBones)
+        {
+            index = *pos++;
+            iassert(index < i);
+            *parentList = i - index;
+
+            trans[0] = Buf_Read<float>(&pos);
+            trans[1] = Buf_Read<float>(&pos);
+            trans[2] = Buf_Read<float>(&pos);
+
+            ConsumeQuatNoSwap(&pos, quats);
+            ++i;
+            quats += 4;
+            trans += 3;
+            ++parentList;
+        }
+        for (i = 0; i < numBones; ++i)
+        {
+            len = strlen((const char *)pos) + 1;
+            prev = SL_GetStringOfSize((char *)pos, 0, len, 10).prev;
+            boneNames[i] = prev;
+            pos += len;
+        }
+        memcpy(modelParts->partClassification, (unsigned __int8 *)pos, numBones);
+        pos += numBones;
+        useBones = *pos++ != 0;
+        FS_FreeFile((char *)buf);
+        XModelCalcBasePose(modelParts);
+        if (!useBones)
+            memset((unsigned __int8 *)modelParts->trans, 0, 16 * numChildBones);
+        return modelParts;
     }
     else
     {
-        Com_PrintError(19, "ERROR: filename '%s' too long\n", filename);
+        FS_FreeFile((char *)buf);
+        Com_PrintError(19, "ERROR: xmodel '%s' has more than %d bones\n", name, 127);
         return 0;
     }
 }

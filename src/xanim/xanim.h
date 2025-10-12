@@ -1154,6 +1154,7 @@ struct XRigidVertList // sizeof=0xC
     unsigned __int16 triCount;          // ...
     XSurfaceCollisionTree *collisionTree;
 };
+static_assert(sizeof(XRigidVertList) == 12);
 
 struct XSurfaceVertexInfo // sizeof=0xC
 {                                       // ...
