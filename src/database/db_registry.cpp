@@ -2650,6 +2650,7 @@ int32_t __cdecl DB_TryLoadXFileInternal(char *zoneName, int32_t zoneFlags)
                 break;
             }
         }
+
         if (!g_zoneIndex)
             MyAssertHandler(".\\database\\db_registry.cpp", 3667, 0, "%s", "g_zoneIndex");
         if (!*zoneName)

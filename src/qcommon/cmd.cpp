@@ -197,6 +197,8 @@ void Cmd_Vstr_f(void) {
 #include <format>
 #include <filesystem>
 #include <vector>
+#include <sound/snd_local.h>
+#include <universal/com_sndalias.h>
 
 static void LoadXAssets()
 {
@@ -238,6 +240,33 @@ static void LoadXAssets()
     DB_LoadXAssets(zoneInfo, zoneCount, 0);
 #endif
 }
+
+// aislop
+static void WriteWAVHeader(FILE *f, uint32_t dataSize, uint32_t sampleRate, uint16_t bits, uint16_t channels)
+{
+    uint32_t byteRate = sampleRate * channels * bits / 8;
+    uint16_t blockAlign = channels * bits / 8;
+
+    fwrite("RIFF", 1, 4, f);
+    uint32_t chunkSize = 36 + dataSize;
+    fwrite(&chunkSize, 4, 1, f);
+    fwrite("WAVEfmt ", 1, 8, f);
+
+    uint32_t subchunk1Size = 16;
+    fwrite(&subchunk1Size, 4, 1, f);
+    uint16_t audioFormat = 1;
+    fwrite(&audioFormat, 2, 1, f);
+    fwrite(&channels, 2, 1, f);
+    fwrite(&sampleRate, 4, 1, f);
+    fwrite(&byteRate, 4, 1, f);
+    fwrite(&blockAlign, 2, 1, f);
+    fwrite(&bits, 2, 1, f);
+
+    fwrite("data", 1, 4, f);
+    fwrite(&dataSize, 4, 1, f);
+}
+
+
 void Cmd_Dumpraw_f(void)
 {
     auto DumpFileType = [](XAssetType type) -> void
@@ -245,22 +274,21 @@ void Cmd_Dumpraw_f(void)
 		auto rawDir = std::format("{}\\raw\\", (char*)fs_basepath->current.integer);
 
         XAssetHeader files[10000]{ 0 };
-		auto read = DB_GetAllXAssetOfType_FastFile(type, files, 10000);
+		int read = DB_GetAllXAssetOfType_FastFile(type, files, 10000);
 		for (auto file : files)
 		{
-			if (!file.rawfile)
+			if (!file.data)
 			{
 				continue;
 			}
 
-			std::filesystem::path p(file.rawfile->name);
-
-			auto dir = p.parent_path();
-			std::filesystem::create_directories(rawDir / dir);
-
 			FILE* f;
             if (type == ASSET_TYPE_STRINGTABLE)
             {
+                std::filesystem::path p(file.rawfile->name);
+                auto dir = p.parent_path();
+                std::filesystem::create_directories(rawDir / dir);
+
                 fopen_s(&f, std::format("{}\\{}", rawDir, file.stringTable->name).c_str(), "w");
                 for (int row = 0; row < file.stringTable->columnCount; row++)
                 {
@@ -275,18 +303,103 @@ void Cmd_Dumpraw_f(void)
                     }
                     fwrite("\n", 1, 1, f);
                 }
+
+                fflush(f);
+                fclose(f);
+            }
+            else if (type == ASSET_TYPE_SOUND)
+            {
+                if (file.sound->head)
+                {
+                    if (file.sound->head->soundFile->type == SAT_STREAMED)
+                    {
+                        char filename[128];
+                        char realname[256];
+                        Com_GetSoundFileName(file.sound->head, filename, 128);
+                        Com_sprintf(realname, 256, "sound/%s", filename);
+
+                        int f = 0;
+                        FS_FOpenFileRead(realname, &f);
+
+                        if (!f)
+                        {
+                            // these seem to all exist on-disk. 
+                            iassert(0);
+                        }
+
+                        FS_FCloseFile(f);
+                    }
+                    else if (file.sound->head->soundFile->type == SAT_LOADED)
+                    {
+                        char filename[128];
+                        char realname[256];
+                        Com_GetSoundFileName(file.sound->head, filename, 128);
+                        Com_sprintf(realname, 256, "sound/%s", filename);
+
+                        // create nested folders
+                        std::filesystem::path sndfilepath = std::format("{}\\{}", rawDir, realname);
+                        sndfilepath.remove_filename();
+                        std::filesystem::create_directories(sndfilepath);
+
+                        fopen_s(&f, std::format("{}\\{}", rawDir, realname).c_str(), "wb");
+                        // enjoy this long deref chain
+                        WriteWAVHeader(f, file.sound->head->soundFile->u.loadSnd->sound.info.data_len,
+                            file.sound->head->soundFile->u.loadSnd->sound.info.rate,
+                            file.sound->head->soundFile->u.loadSnd->sound.info.bits,
+                            file.sound->head->soundFile->u.loadSnd->sound.info.channels
+                        );
+                        fwrite(file.sound->head->soundFile->u.loadSnd->sound.data, 1, file.sound->head->soundFile->u.loadSnd->sound.info.data_len, f);
+                        fflush(f);
+                        fclose(f);
+                    }
+                    else
+                    {
+                        iassert(0);
+                    }
+                }
+            }
+            else if (type == ASSET_TYPE_LOADED_SOUND)
+            {
+                char realname[256];
+                Com_sprintf(realname, 256, "sound/%s", file.loadSnd->name);
+
+                // create nested folders
+                std::filesystem::path sndfilepath = std::format("{}\\{}", rawDir, realname);
+                sndfilepath.remove_filename();
+                std::filesystem::create_directories(sndfilepath);
+
+                fopen_s(&f, std::format("{}\\{}", rawDir, realname).c_str(), "wb");
+
+                WriteWAVHeader(f, file.loadSnd->sound.info.data_len,
+                    file.loadSnd->sound.info.rate,
+                    file.loadSnd->sound.info.bits,
+                    file.loadSnd->sound.info.channels
+                );
+
+                fwrite(file.loadSnd->sound.data, 1, file.loadSnd->sound.info.data_len, f);
+                fflush(f);
+                fclose(f);
             }
             else
             {
                 fopen_s(&f, std::format("{}\\{}", rawDir, file.rawfile->name).c_str(), "wb");
                 fwrite(file.rawfile->buffer, file.rawfile->len, 1, f);
+                fflush(f);
+                fclose(f);
             }
-			fflush(f);
-			fclose(f);
 		}
     }; 
 
     auto zoneDir = std::format("{}\\zone\\english\\", (char *)fs_basepath->current.integer);
+
+
+    // just dump from common ff's
+    if (Cmd_Argc() > 1)
+    {
+        int type = atoi(Cmd_Argv(1));
+        DumpFileType((XAssetType)type);
+        return;
+    }
 
     for (const auto &entry : std::filesystem::directory_iterator(zoneDir))
     {
