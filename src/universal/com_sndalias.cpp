@@ -567,55 +567,21 @@ void __cdecl Com_LoadSoundAliases(const char *loadspec, const char *loadspecCurG
     int i; // [esp+64h] [ebp-8h]
     int fileCount; // [esp+68h] [ebp-4h] BYREF
 
-    if (!loadspec)
-        MyAssertHandler(".\\universal\\com_sndalias.cpp", 907, 0, "%s", "loadspec");
-    if (!*loadspec)
-        MyAssertHandler(".\\universal\\com_sndalias.cpp", 908, 0, "%s", "loadspec[0]");
-    if ((unsigned int)system > SASYS_GAME)
-        MyAssertHandler(
-            ".\\universal\\com_sndalias.cpp",
-            913,
-            0,
-            "%s\n\t(system) = %i",
-            "(system >= 0 && system < SASYS_COUNT)",
-            system);
-    if (system == SASYS_GAME && g_sa.initialized[1])
-        MyAssertHandler(
-            ".\\universal\\com_sndalias.cpp",
-            914,
-            0,
-            "%s",
-            "system != SASYS_GAME || !g_sa.initialized[SASYS_CGAME]");
-    if (g_sa.initialized[system])
-        MyAssertHandler(
-            ".\\universal\\com_sndalias.cpp",
-            916,
-            0,
-            "%s\n\t(system) = %i",
-            "(!g_sa.initialized[system])",
-            system);
-    if (g_sa.aliasInfo[system].count)
-        MyAssertHandler(
-            ".\\universal\\com_sndalias.cpp",
-            917,
-            0,
-            "%s\n\t(g_sa.aliasInfo[system].count) = %i",
-            "(g_sa.aliasInfo[system].count == 0)",
-            g_sa.aliasInfo[system].count);
-    if (*(&g_sa.soundFileInfo[-4].count + 3 * system))
-        MyAssertHandler(".\\universal\\com_sndalias.cpp", 918, 0, "%s", "g_sa.aliasInfo[system].head == NULL");
+    iassert(loadspec);
+    iassert(loadspec[0]);
+    iassert(system >= 0 && system < SASYS_COUNT);
+    iassert(system != SASYS_GAME || !g_sa.initialized[SASYS_CGAME]);
+    iassert(!g_sa.initialized[system]);
+    iassert(g_sa.aliasInfo[system].count == 0);
+    iassert(g_sa.aliasInfo[system].head == NULL);
+
     if (!g_sa.curvesInitialized)
         Com_InitCurves();
     if (!g_sa.speakerMapsInitialized)
         Com_InitSpeakerMaps();
-    if ((unsigned int)system > SASYS_GAME)
-        MyAssertHandler(
-            ".\\universal\\com_sndalias.cpp",
-            930,
-            0,
-            "%s\n\t(system) = %i",
-            "(system >= 0 && system < SASYS_COUNT)",
-            system);
+
+    iassert(system >= 0 && system < SASYS_COUNT);
+
     if (I_strnicmp(loadspec, "maps/mp/", 8))
     {
         if (I_strnicmp(loadspec, "maps/", 5))

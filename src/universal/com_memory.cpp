@@ -248,16 +248,24 @@ void __cdecl Com_TempMeminfo_f()
 
 void Com_InitHunkMemory()
 {
-    if (!Sys_IsMainThread())
-        MyAssertHandler(".\\universal\\com_memory.cpp", 1258, 0, "%s", "Sys_IsMainThread()");
-    if (s_hunkData)
-        MyAssertHandler(".\\universal\\com_memory.cpp", 1259, 0, "%s", "!s_hunkData");
+    iassert(Sys_IsMainThread());
+    iassert(!s_hunkData);
+
     if (FS_LoadStack())
         Com_Error(ERR_FATAL, "Hunk initialization failed. File system load stack not zero");
+
     if (!IsFastFileLoad())
+    {
+#ifdef KISAK_PURE
         s_hunkTotal = 0xA000000;
+#else
+        s_hunkTotal = 0x20000000; // LWSS: MOAR! !
+#endif
+    }
     if (IsFastFileLoad())
+    {
         s_hunkTotal = 0xA00000;
+    }
     R_ReflectionProbeRegisterDvars();
     if (r_reflectionProbeGenerate->current.enabled)
         s_hunkTotal = 0x20000000;
