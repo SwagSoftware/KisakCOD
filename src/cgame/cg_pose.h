@@ -7,8 +7,10 @@
 #include <xanim/dobj.h>
 #include <bgame/bg_local.h>
 
-void __cdecl PitchToQuat(double pitch, float *quat, float *a3);
-void __cdecl RollToQuat(double roll, float *quat, float *a3);
+#define CENT_ACTOR_PRONE_NORMAL 1
+
+void __cdecl PitchToQuat(float pitch, float *quat);
+void __cdecl RollToQuat(float roll, float *quat);
 void __cdecl LocalMatrixTransformVectorQuatTrans(const float *in, const DObjAnimMat *mat, float *out);
 void __cdecl NormalizeQuatTrans(DObjAnimMat *mat);
 void __cdecl CG_mg42_DoControllers(const cpose_t *pose, const DObj_s *obj, int *partBits, long double a4);

@@ -2801,12 +2801,10 @@ int32_t __cdecl CalcMissileNoDrawTime(float speed)
 
 void __cdecl InitGrenadeTimer(const gentity_s *parent, gentity_s *grenade, const WeaponDef *weapDef, int32_t time)
 {
-    if (!parent)
-        MyAssertHandler(".\\game\\g_missile.cpp", 2590, 0, "%s", "parent");
-    if (!grenade)
-        MyAssertHandler(".\\game\\g_missile.cpp", 2591, 0, "%s", "grenade");
-    if (!weapDef)
-        MyAssertHandler(".\\game\\g_missile.cpp", 2592, 0, "%s", "weapDef");
+    iassert(parent);
+    iassert(grenade);
+    iassert(weapDef);
+
     if (!weapDef->iProjectileActivateDist || time > 0)
     {
         if (!parent->client || weapDef->timedDetonation)
@@ -2826,9 +2824,11 @@ void __cdecl InitGrenadeTimer(const gentity_s *parent, gentity_s *grenade, const
             parent->client->ps.grenadeTimeLeft = 0;
         }
     }
-    if (grenade->handler != 7)
-        MyAssertHandler(".\\game\\g_missile.cpp", 2615, 0, "%s", "grenade->handler == ENT_HANDLER_GRENADE");
+
+    iassert(grenade->handler == ENT_HANDLER_GRENADE);
+
     grenade->item[0].clipAmmoCount = level.time;
+
     if (!grenade->nextthink)
         grenade->nextthink = level.time + 30000;
     if (grenade->nextthink > level.time + 60000)

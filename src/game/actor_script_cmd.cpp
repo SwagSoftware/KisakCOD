@@ -643,38 +643,34 @@ void __cdecl ActorCmd_StopLookAt(scr_entref_t entref)
 
 void __cdecl ActorCmd_CanShoot(scr_entref_t entref)
 {
-    actor_s *v1; // r31
-    const char *v2; // r3
+    actor_s *self; // r31
     bool CanShootFrom; // r31
-    const float *v4; // r5
-    float v5; // [sp+50h] [-40h] BYREF
-    float v6; // [sp+54h] [-3Ch]
-    float v7; // [sp+58h] [-38h]
-    float v8[4]; // [sp+60h] [-30h] BYREF
-    float v9[4]; // [sp+70h] [-20h] BYREF
+    const float *color; // r5
+    float muzzlePos[3]; // [sp+50h] [-40h] BYREF
+    float offset[4]; // [sp+60h] [-30h] BYREF
+    float targetPos[4]; // [sp+70h] [-20h] BYREF
 
-    v1 = Actor_Get(entref);
-    Scr_GetVector(0, v9);
-    if (!Actor_GetMuzzleInfo(v1, &v5, 0))
+    self = Actor_Get(entref);
+    Scr_GetVector(0, targetPos);
+    if (!Actor_GetMuzzleInfo(self, muzzlePos, 0))
     {
-        v2 = va("Couldn't find %s in entity %d", "tag_flash", v1->ent->s.number);
-        Scr_Error(v2);
+        Scr_Error(va("Couldn't find %s in entity %d", "tag_flash", self->ent->s.number));
     }
     if (Scr_GetNumParam() > 1)
     {
-        Scr_GetVector(1u, v8);
-        v5 = v8[0] + v5;
-        v6 = v8[1] + v6;
-        v7 = v8[2] + v7;
+        Scr_GetVector(1u, offset);
+        muzzlePos[0] += offset[0];
+        muzzlePos[1] += offset[1];
+        muzzlePos[2] += offset[2];
     }
-    CanShootFrom = Actor_CanShootFrom(v1, v9, &v5);
+    CanShootFrom = Actor_CanShootFrom(self, targetPos, muzzlePos);
     if (ai_ShowCanshootChecks->current.enabled)
     {
         if (CanShootFrom)
-            v4 = colorGreen;
+            color = colorGreen;
         else
-            v4 = colorRed;
-        G_DebugLineWithDuration(v9, &v5, v4, 0, 30);
+            color = colorRed;
+        G_DebugLineWithDuration(targetPos, muzzlePos, color, 0, 30);
     }
     Scr_AddInt(CanShootFrom);
 }

@@ -128,7 +128,7 @@ struct BspGlob // sizeof=0x54
     const void *loadedLumpData;         // ...
 };
 
-#define $0368CFE3C958026DEB0A011CBC6EA813 BspGlob // sizeof=0x54
+//#define $0368CFE3C958026DEB0A011CBC6EA813 BspGlob // sizeof=0x54
 
 // com_bsp_load_obj
 char *__cdecl Com_GetBspLump(LumpType type, unsigned int elemSize, unsigned int *count);

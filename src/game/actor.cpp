@@ -1159,10 +1159,7 @@ void __cdecl actor_controller(const gentity_s *self, int *partBits)
         v7 = RotTransArray;
         if (RotTransArray)
         {
-            PitchToQuat(
-                (float)(p_ProneInfo->fTorsoPitch * (float)ActorProneFraction),
-                RotTransArray->quat,
-                RotTransArray->quat);
+            PitchToQuat((float)(p_ProneInfo->fTorsoPitch * (float)ActorProneFraction),RotTransArray->quat);
             DObjSetTrans(v7, vec3_origin);
         }
     }

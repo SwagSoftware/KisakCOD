@@ -5,6 +5,7 @@
 #include <universal/q_parse.h>
 #include <DynEntity/DynEntity_client.h>
 #include <game/game_public.h>
+#include <universal/profile.h>
 
 struct DiskCollBorder // sizeof=0x1C
 {
@@ -349,7 +350,7 @@ void __cdecl CM_LoadMapFromBsp(const char *name, bool usePvs)
     Com_Memset(&cm, 0, sizeof(clipMap_t));
     cm.name = (const char *)CM_Hunk_Alloc(strlen(name) + 1, "CM_LoadMapFromBsp", 25);
 
-    I_strncpyz((char*)cm.name, name, strlen(name));
+    I_strncpyz((char*)cm.name, name, strlen(name) + 1);
 
     version = Com_GetBspVersion();
     CMod_LoadMaterials();
@@ -379,15 +380,18 @@ void __cdecl CM_LoadMapData_LoadObj(const char *name)
 {
     if (!cm.isInUse || I_stricmp(cm.name, name))
     {
-        ProfLoad_Begin("Load bsp collision");
-        CM_LoadMapFromBsp(name, 1);
-        ProfLoad_End();
-        ProfLoad_Begin("Load static model collision");
-        CM_LoadStaticModels();
-        ProfLoad_End();
-        ProfLoad_Begin("Load dynamic entities");
-        DynEnt_LoadEntities();
-        ProfLoad_End();
+        {
+            PROFLOAD_SCOPED("Load bsp collision");
+            CM_LoadMapFromBsp(name, 1);
+        }
+        {
+            PROFLOAD_SCOPED("Load static model collision");
+            CM_LoadStaticModels();
+        }
+        {
+            PROFLOAD_SCOPED("Load dynamic entities");
+            DynEnt_LoadEntities();
+        }
     }
 }
 
@@ -1237,8 +1241,6 @@ int __cdecl CMod_GetLeafTerrainContents(cLeaf_t *leaf)
 
 void CMod_LoadBrushes()
 {
-    unsigned __int8 *v0; // [esp+0h] [ebp-68h]
-    unsigned __int8 *v1; // [esp+4h] [ebp-64h]
     unsigned int edgesCount; // [esp+8h] [ebp-60h] BYREF
     cbrushside_t *outSides; // [esp+Ch] [ebp-5Ch]
     cbrush_t *outBrush; // [esp+10h] [ebp-58h]
@@ -1273,22 +1275,20 @@ void CMod_LoadBrushes()
     inEdges = (const unsigned char*)Com_GetBspLump(LUMP_BRUSHEDGES, 1u, &edgesCount);
     allocSizeEdges = edgesCount;
     if (edgesCount)
-        v1 = CM_Hunk_Alloc(allocSizeEdges, "CMod_LoadBrushSides", 26);
+        cm.brushEdges = CM_Hunk_Alloc(allocSizeEdges, "CMod_LoadBrushSides", 26);
     else
-        v1 = 0;
-    cm.brushEdges = v1;
+        cm.brushEdges = 0;
     cm.numBrushEdges = edgesCount;
-    memcpy(v1, inEdges, allocSizeEdges);
+    memcpy(cm.brushEdges, inEdges, allocSizeEdges);
     outEdges = cm.brushEdges;
     sidesCount -= 6 * brushCount;
     allocSizeSides = 12 * sidesCount;
     if (sidesCount)
-        v0 = CM_Hunk_Alloc(allocSizeSides, "CMod_LoadBrushSides", 26);
+        cm.brushsides = (cbrushside_t *)CM_Hunk_Alloc(allocSizeSides, "CMod_LoadBrushSides", 26);
     else
-        v0 = 0;
-    cm.brushsides = (cbrushside_t*)v0;
+        cm.brushsides = 0;
     cm.numBrushSides = sidesCount;
-    outSides = (cbrushside_t*)v0;
+    outSides = cm.brushsides;
     countAllocatedBrushes = brushCount + 1;
     allocSizeBrushes = 80 * (brushCount + 1);
     cm.brushes = (cbrush_t*)CM_Hunk_Alloc(allocSizeBrushes, "CMod_LoadBrushes", 26);
@@ -1358,14 +1358,8 @@ void CMod_LoadBrushes()
         ++outBrush;
         ++inBrush;
     }
-    if (sideEdgeCountsCount != inEdgeCounts - inEdgeCountsBase)
-        MyAssertHandler(
-            ".\\qcommon\\cm_load_obj.cpp",
-            660,
-            1,
-            "sideEdgeCountsCount == static_cast< uint >( inEdgeCounts - inEdgeCountsBase )\n\t%i, %i",
-            sideEdgeCountsCount,
-            inEdgeCounts - inEdgeCountsBase);
+
+    iassert(sideEdgeCountsCount == static_cast<uint>(inEdgeCounts - inEdgeCountsBase));
 }
 
 void __cdecl CMod_LoadLeafs(bool usePvs)

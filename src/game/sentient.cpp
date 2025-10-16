@@ -192,19 +192,11 @@ void __cdecl Sentient_GetEyePosition(const sentient_s *self, float *vEyePosOut)
 {
     actor_s *actor; // r3
 
-    if (!self)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\sentient.cpp", 281, 0, "%s", "self");
-    if (!self->ent)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\sentient.cpp", 282, 0, "%s", "self->ent");
-    if (!self->ent->actor && !self->ent->client)
-        MyAssertHandler(
-            "c:\\trees\\cod3\\cod3src\\src\\game\\sentient.cpp",
-            283,
-            0,
-            "%s",
-            "self->ent->actor || self->ent->client");
-    if (!vEyePosOut)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\sentient.cpp", 284, 0, "%s", "vEyePosOut");
+    iassert(self);
+    iassert(self->ent);
+    iassert(self->ent->actor || self->ent->client);
+    iassert(vEyePosOut);
+
     actor = self->ent->actor;
     if (actor)
         Actor_GetEyePosition(actor, vEyePosOut);

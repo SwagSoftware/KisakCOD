@@ -2,6 +2,7 @@
 #include <universal/com_memory.h>
 #include <universal/com_files.h>
 #include <database/database.h>
+#include <universal/profile.h>
 
 BspGlob comBspGlob;
 
@@ -99,10 +100,6 @@ bool __cdecl Com_IsBspLoaded()
 
 void __cdecl Com_LoadBsp(char *filename)
 {
-    const char *v1; // eax
-    const char *v2; // eax
-    const char *v3; // eax
-    unsigned int v4; // edx
     unsigned int bytesRead; // [esp+18h] [ebp-Ch]
     unsigned int len; // [esp+1Ch] [ebp-8h]
     int h; // [esp+20h] [ebp-4h] BYREF
@@ -110,44 +107,37 @@ void __cdecl Com_LoadBsp(char *filename)
     iassert( filename );
     iassert( !Com_IsBspLoaded() );
     iassert( comBspGlob.loadedLumpData == NULL );
-    ProfLoad_Begin("Load bsp file");
-    comBspGlob.fileSize = FS_FOpenFileRead(filename, &h);
-    if (!h)
     {
-        v1 = va("EXE_ERR_COULDNT_LOAD %s", filename);
-        Com_Error(ERR_DROP, v1);
+        PROFLOAD_SCOPED("Load bsp file");
+        comBspGlob.fileSize = FS_FOpenFileRead(filename, &h);
+        if (!h)
+        {
+            Com_Error(ERR_DROP, va("EXE_ERR_COULDNT_LOAD %s", filename));
+        }
+        comBspGlob.header = (BspHeader *)Z_MallocGarbage(comBspGlob.fileSize, "Com_LoadBsp", 10);
+        bytesRead = FS_Read((unsigned __int8 *)comBspGlob.header, comBspGlob.fileSize, h);
+        FS_FCloseFile(h);
+        if (bytesRead != comBspGlob.fileSize)
+        {
+            Z_Free((char *)comBspGlob.header, 10);
+            Com_Error(ERR_DROP, va("EXE_ERR_COULDNT_LOAD %s", filename));
+        }
+
+        {
+            PROFLOAD_SCOPED("Bsp checksum");
+            comBspGlob.checksum = Com_BlockChecksumKey32((const unsigned __int8 *)comBspGlob.header, comBspGlob.fileSize, 0);
+        }
+
+        if (Com_BspError())
+        {
+            Z_Free((char *)comBspGlob.header, 10);
+            comBspGlob.header = 0;
+            Com_Error(ERR_DROP, va("EXE_ERR_WRONG_MAP_VERSION_NUM %s", filename));
+        }
     }
-    comBspGlob.header = (BspHeader *)Z_MallocGarbage(comBspGlob.fileSize, "Com_LoadBsp", 10);
-    bytesRead = FS_Read((unsigned __int8 *)comBspGlob.header, comBspGlob.fileSize, h);
-    FS_FCloseFile(h);
-    if (bytesRead != comBspGlob.fileSize)
-    {
-        Z_Free((char *)comBspGlob.header, 10);
-        v2 = va("EXE_ERR_COULDNT_LOAD %s", filename);
-        Com_Error(ERR_DROP, v2);
-    }
-    ProfLoad_Begin("Bsp checksum");
-    comBspGlob.checksum = Com_BlockChecksumKey32((const unsigned __int8 *)comBspGlob.header, comBspGlob.fileSize, 0);
-    ProfLoad_End();
-    if (Com_BspError())
-    {
-        Z_Free((char *)comBspGlob.header, 10);
-        comBspGlob.header = 0;
-        v3 = va("EXE_ERR_WRONG_MAP_VERSION_NUM %s", filename);
-        Com_Error(ERR_DROP, v3);
-    }
-    ProfLoad_End();
-    v4 = strlen(filename);
-    len = v4;
-    if (v4 >= 0x40)
-        MyAssertHandler(
-            ".\\qcommon\\com_bsp_load_obj.cpp",
-            337,
-            0,
-            "%s\n\t(len) = %i",
-            "(len < (sizeof( comBspGlob.name ) / (sizeof( comBspGlob.name[0] ) * (sizeof( comBspGlob.name ) != 4 || sizeof( com"
-            "BspGlob.name[0] ) <= 4))))",
-            v4);
+
+    len = strlen(filename);
+    iassert((len < (sizeof(comBspGlob.name) / (sizeof(comBspGlob.name[0]) * (sizeof(comBspGlob.name) != 4 || sizeof(comBspGlob.name[0]) <= 4)))));
     memcpy((unsigned __int8 *)&comBspGlob, (unsigned __int8 *)filename, len + 1);
     iassert( Com_IsBspLoaded() );
 }
@@ -156,11 +146,12 @@ void __cdecl Com_UnloadBsp()
 {
     iassert( Com_IsBspLoaded() );
     iassert( comBspGlob.loadedLumpData == NULL );
-    ProfLoad_Begin("Unload bsp file");
-    Z_Free((char *)comBspGlob.header, 10);
-    comBspGlob.header = 0;
-    comBspGlob.name[0] = 0;
-    ProfLoad_End();
+    {
+        PROFLOAD_SCOPED("Unload bsp file");
+        Z_Free((char *)comBspGlob.header, 10);
+        comBspGlob.header = 0;
+        comBspGlob.name[0] = 0;
+    }
     iassert( !Com_IsBspLoaded() );
 }
 

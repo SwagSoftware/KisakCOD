@@ -1415,6 +1415,7 @@ void Profile_Begin(int nameIndex);
 void Profile_EndInternal(double *duration);
 
 #define PROF_SCOPED(name) ZoneScopedN(name)
+#define PROFLOAD_SCOPED(name) PROF_SCOPED(name)
 
 #else
 void Profile_Init();
@@ -1442,6 +1443,7 @@ void __cdecl Profile_Begin(int index);
 int __cdecl Profile_EndInternal(long double *duration);
 
 #define PROF_SCOPED(name) // Disable Profiling without Tracy
+#define PROFLOAD_SCOPED(name) PROF_SCOPED(name)
 #define ZoneText(str, len)
 #define ZoneTextF(fmt, ...)
 

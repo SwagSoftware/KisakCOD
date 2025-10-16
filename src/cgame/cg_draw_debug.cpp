@@ -316,31 +316,13 @@ double __cdecl CG_CornerDebugPrintCaption(
 }
 
 #ifdef KISAK_SP
-float DrawReplayTime(const ScreenPlacement *scrPlace, double posY)
+void DrawReplayTime(const ScreenPlacement *scrPlace, float posY)
 {
-    double v4; // fp30
-    __int64 v5; // r11
-    double v6; // fp29
-    int DemoEndTime; // r28
-    int v8; // r28
-    int Time; // r27
-    int DemoStartTime; // r3
-    const float *v11; // r6
-    char *v12; // r5
-    char *v13; // r4
-    double v14; // fp1
-
-    v4 = (float)((float)(scrPlace->virtualViewableMax[0] - scrPlace->virtualViewableMin[0])
-        + cg_debugInfoCornerOffset->current.value);
-    LODWORD(v5) = R_TextWidth(" replay time", 0, cgMedia.smallDevFont);
-    v6 = (float)(cg_small_dev_string_fontscale->current.value * (float)((float)v5 * (float)0.75));
-    DemoEndTime = SV_GetDemoEndTime();
-    v8 = (DemoEndTime - SV_GetDemoStartTime()) / 1000;
-    Time = G_GetTime();
-    DemoStartTime = SV_GetDemoStartTime();
-    va("%i / %i", (Time - DemoStartTime) / 1000, v8);
-    v14 = (float)(CG_CornerDebugPrint(scrPlace, v4, posY, v6, v13, v12, v11) + (float)posY);
-    return *((float *)&v14 + 1);
+    float posX = ((scrPlace->virtualViewableMax[0] - scrPlace->virtualViewableMin[0]) + cg_debugInfoCornerOffset->current.value);
+    float width = (cg_small_dev_string_fontscale->current.value * (R_TextWidth(" replay time", 0, cgMedia.smallDevFont) * 0.75f));
+    char *text = va("%i / %i", (G_GetTime() - SV_GetDemoStartTime()) / 1000, (SV_GetDemoEndTime() - SV_GetDemoStartTime()) / 1000);
+    //v14 = (float)(CG_CornerDebugPrint(scrPlace, v4, posY, v6, v13, v12, v11) + (float)posY);
+    CG_CornerDebugPrint(scrPlace, posX, posY, width, text, (char*)"replay time", colorWhite);
 }
 #endif
 

@@ -339,8 +339,6 @@ void __cdecl CG_Missile(int localClientNum, centity_s *cent)
     const FxEffectDef *projIgnitionEffect; // r4
     snd_alias_list_t *projIgnitionSound; // r6
     unsigned int RenderFlagForRefEntity; // r3
-    float *v12; // r7
-    double v13; // fp1
 
     if (localClientNum)
         MyAssertHandler(
@@ -379,7 +377,15 @@ void __cdecl CG_Missile(int localClientNum, centity_s *cent)
                     CG_PlaySoundAlias(localClientNum, cent->nextState.number, cent->pose.origin, projIgnitionSound);
             }
             RenderFlagForRefEntity = CG_GetRenderFlagForRefEntity(cent->nextState.lerp.eFlags);
-            R_AddDObjToScene(ClientDObj, &cent->pose, cent->nextState.number, RenderFlagForRefEntity, v12, v13);
+            //R_AddDObjToScene(ClientDObj, &cent->pose, cent->nextState.number, RenderFlagForRefEntity, v12, v13);
+            // lwss add from blops
+            float lightingOrigin[3];
+            lightingOrigin[0] = cent->pose.origin[0];
+            lightingOrigin[1] = cent->pose.origin[1];
+            lightingOrigin[2] = cent->pose.origin[2];
+            lightingOrigin[2] = lightingOrigin[2] + 4.0;
+            // lwss end
+            R_AddDObjToScene(ClientDObj, &cent->pose, cent->nextState.number, RenderFlagForRefEntity, lightingOrigin, 0.0f);
             CG_AddHudGrenade(cgArray, cent);
         }
     }

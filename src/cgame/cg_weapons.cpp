@@ -2170,7 +2170,11 @@ void __cdecl CG_FireWeapon(
                         BG_EvaluateTrajectory(&p_nextState->lerp.pos, cgameGlob->time, origin);
                 }
                 playbackId = CG_PlaySoundAlias(localClientNum, p_nextState->number, origin, firesound);
+#ifdef KISAK_MP
                 if (cent->nextState.eType == ET_PLAYER && !weaponDef->silenced && weaponDef->weapType != WEAPTYPE_GRENADE)
+#elif KISAK_SP
+                if (cent->nextState.eType == ET_ACTOR && !weaponDef->silenced && weaponDef->weapType != WEAPTYPE_GRENADE)
+#endif
                 {
                     SND_GetKnownLength(playbackId, &msec);
                     CG_CompassAddWeaponPingInfo(localClientNum, cent, origin, msec);
@@ -2178,8 +2182,20 @@ void __cdecl CG_FireWeapon(
             }
             if (!BG_GetWeaponDef(weapon)->bBoltAction)
                 CG_EjectWeaponBrass(localClientNum, p_nextState, event);
+#ifdef KISAK_MP
             if (isPlayer)
                 TakeClipOnlyWeaponIfEmpty(localClientNum, &cgameGlob->predictedPlayerState);
+#elif KISAK_SP
+            //if (playerUsingTurret || v19 || p_nextState->eType == 1)
+            //{
+            //    fireRumble = weaponDef->fireRumble;
+            //    if (fireRumble)
+            //    {
+            //        if (*fireRumble)
+            //            CG_PlayRumbleOnClient(localClientNum, fireRumble);
+            //    }
+            //}
+#endif
         }
         else
         {

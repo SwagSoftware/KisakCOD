@@ -58,10 +58,9 @@ void __cdecl TRACK_cm_world()
 
 void __cdecl CM_LinkWorld()
 {
-    ProfLoad_Begin("CM_LinkWorld");
+    PROFLOAD_SCOPED("CM_LoadWorld");
     CM_ClearWorld();
     CM_LinkAllStaticModels();
-    ProfLoad_End();
 }
 
 void CM_ClearWorld()

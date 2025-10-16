@@ -210,112 +210,130 @@ static const float fSign[2] = { -1.0, 1.0 };
 
 int __cdecl Actor_Exposed_ReacquireStepMove(actor_s *self, double fDist)
 {
-    gentity_s *TargetEntity; // r23
-    double v5; // fp31
-    float *v6; // r3
-    gentity_s *ent; // r11
-    gentity_s *v8; // r11
-    int v9; // r24
-    int v10; // r6
-    int v11; // r25
-    gentity_s *v12; // r10
-    double v13; // fp31
-    double v14; // fp0
-    int v15; // r8
+    gentity_s *targetEnt; // r23
+    int iOrder; // r24
     bool prone; // r11
-    double v17; // fp1
-    float v19; // [sp+50h] [-110h] BYREF
-    float v20; // [sp+54h] [-10Ch]
-    float v21; // [sp+58h] [-108h]
-    float v22; // [sp+60h] [-100h] BYREF
-    float v23; // [sp+64h] [-FCh]
-    float v24; // [sp+68h] [-F8h]
-    float v25[4]; // [sp+70h] [-F0h] BYREF
-    float v26; // [sp+80h] [-E0h] BYREF
-    float v27; // [sp+84h] [-DCh]
-    float v28; // [sp+88h] [-D8h]
-    float v29[4]; // [sp+90h] [-D0h] BYREF
-    float v30[4]; // [sp+A0h] [-C0h] BYREF
-    float v31[4]; // [sp+B0h] [-B0h] BYREF
-    float v32[4]; // [sp+C0h] [-A0h] BYREF
-    float v33[16]; // [sp+D0h] [-90h] BYREF
+    float forward[3]; // [sp+50h] [-110h] BYREF // v19
+    float vStepDir[3]; // [sp+60h] [-100h] BYREF // v22
+    float vStartPos[3]; // [sp+80h] [-E0h] BYREF // v26
+    float vEyePos[4]; // [sp+90h] [-D0h] BYREF
+    float vEnemyPos[4]; // [sp+B0h] [-B0h] BYREF
+    float vCheckPos[3];
+    float vMovePos[3];
+    float vTraceEndPos[3];
 
-    if (!self)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\actor_exposed.cpp", 337, 0, "%s", "self");
-    if (!self->sentient)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\actor_exposed.cpp", 338, 0, "%s", "self->sentient");
-    TargetEntity = Actor_GetTargetEntity(self);
-    if (!TargetEntity)
+    iassert(self);
+    iassert(self->sentient);
+    targetEnt = Actor_GetTargetEntity(self);
+
+    if (!targetEnt)
         return 0;
+
     if (self->eState[self->stateLevel] != AIS_EXPOSED)
         return 0;
-    v5 = (float)(self->fDesiredBodyYaw + (float)90.0);
-    Actor_GetTargetLookPosition(self, v31);
-    YawVectors(v5, v6, &v22);
-    ent = self->ent;
-    v19 = TargetEntity->r.currentOrigin[0];
-    v20 = TargetEntity->r.currentOrigin[1];
-    v21 = TargetEntity->r.currentOrigin[2];
-    v19 = v19 - ent->r.currentOrigin[0];
-    v20 = v20 - ent->r.currentOrigin[1];
-    v21 = v21 - ent->r.currentOrigin[2];
-    if ((float)((float)(v19 * v19) + (float)(v20 * v20)) <= 1.0)
+
+    Actor_GetTargetLookPosition(self, vEnemyPos);
+    YawVectors((self->fDesiredBodyYaw + 90.0f), vStepDir, 0);
+
+    forward[0] = targetEnt->r.currentOrigin[0];
+    forward[1] = targetEnt->r.currentOrigin[1];
+    forward[2] = targetEnt->r.currentOrigin[2];
+
+    forward[0] -= self->ent->r.currentOrigin[0];
+    forward[1] -= self->ent->r.currentOrigin[1];
+    forward[2] -= self->ent->r.currentOrigin[2];
+
+    if (((forward[0] * forward[0]) + (forward[1] * forward[1])) <= 1.0f)
         return 0;
-    Vec2Normalize(&v19);
-    v22 = v20;
-    v23 = -v19;
-    v21 = 0.0;
-    v24 = 0.0;
-    Actor_GetEyePosition(self, v29);
-    v8 = self->ent;
-    v26 = self->ent->r.currentOrigin[0];
-    v27 = v8->r.currentOrigin[1];
-    v28 = v8->r.currentOrigin[2];
-    if (v24 != 0.0)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\actor_exposed.cpp", 384, 0, "%s", "!vStepDir[2]");
-    v9 = G_rand() & 1;
-    v11 = 0;
-    while (1)
+
+    Vec2Normalize(forward);
+
+    forward[2] = 0.0;
+
+    vStepDir[0] = forward[1];
+    vStepDir[1] = -forward[0];
+    vStepDir[2] = 0.0f;
+
+    Actor_GetEyePosition(self, vEyePos);
+
+    vStartPos[0] = self->ent->r.currentOrigin[0];
+    vStartPos[1] = self->ent->r.currentOrigin[1];
+    vStartPos[2] = self->ent->r.currentOrigin[2];
+
+    iassert(!vStepDir[2]);
+
+    iOrder = G_rand() & 1;
+
+    for (int i = 0; i < 2; ++i)
     {
-        v25[2] = v29[2];
-        v12 = self->ent;
-        v13 = (float)(fSign[v11 ^ v9] * (float)fDist);
-        v14 = (float)((float)(v23 * (float)(fSign[v11 ^ v9] * (float)fDist)) + v29[1]);
-        v25[0] = (float)(v22 * (float)(fSign[v11 ^ v9] * (float)fDist)) + v29[0];
-        v25[1] = v14;
-        if (ai_debugCoverEntityNum->current.integer == v12->s.number)
+        float fScale = fSign[iOrder ^ i] * fDist;
+        vCheckPos[0] = (float)(fScale * vStepDir[0]) + vEyePos[0];
+        vCheckPos[1] = (float)(fScale * vStepDir[1]) + vEyePos[1];
+        vCheckPos[2] = vEyePos[2];
+        if (Actor_CanSeePointFrom(self, vCheckPos, vEnemyPos, self->fMaxSightDistSqrd, targetEnt->s.number))
         {
-            v33[3] = 1.0;
-            v33[2] = 1.0;
-            v33[1] = 1.0;
-            v33[0] = 1.0;
-            CL_AddDebugLine(v25, v31, v33, 0, 30, 1);
-            CL_AddDebugLine(v25, TargetEntity->r.currentOrigin, colorRed, 0, 30, 1);
-            CL_AddDebugLine(v25, self->ent->r.currentOrigin, colorBlue, 0, 30, 1);
-        }
-        if (Actor_CanSeePointFrom(self, v25, v31, self->fMaxSightDistSqrd, v10))
-        {
-            prone = self->Physics.prone;
-            v30[2] = v28;
-            v30[0] = (float)(v22 * (float)v13) + v26;
-            v30[1] = (float)(v23 * (float)v13) + v27;
-            v17 = prone ? 10.0 : 18.0;
-            if (Path_PredictionTrace(&v26, v30, ENTITYNUM_NONE, self->Physics.iTraceMask | 4, v32, v17, v15))
+            vMovePos[0] = (float)(fScale * vStepDir[0]) + vStartPos[0];
+            vMovePos[1] = (float)(fScale * vStepDir[1]) + vStartPos[1];
+            vMovePos[2] = vStartPos[2];
+            float stepheight = self->Physics.prone ? 10.0f : 18.0f;
+            if (Path_PredictionTrace(vStartPos, vMovePos, 1023, self->Physics.iTraceMask | 4, vTraceEndPos, stepheight, 1)
+                && Actor_PointAtGoal(vTraceEndPos, &self->codeGoal))
             {
-                if ((unsigned __int8)Actor_PointAtGoal(v32, &self->codeGoal))
+                Actor_FindPath(self, vTraceEndPos, 0, 0);
+                if (Actor_HasPath(self))
                 {
-                    Actor_FindPath(self, v32, 0, 0);
-                    if (Actor_HasPath(self))
-                        break;
+                    Actor_SetSubState(self, STATE_EXPOSED_REACQUIRE_MOVE);
+                    Actor_SetOrientMode(self, AI_ORIENT_TO_ENEMY);
+                    return 1;
                 }
             }
         }
-        if (++v11 >= 2)
-            return 0;
     }
-    Actor_SetSubState(self, STATE_EXPOSED_REACQUIRE_MOVE);
-    Actor_SetOrientMode(self, AI_ORIENT_TO_ENEMY);
-    return 1;
+
+    return 0;
+
+    //v11 = 0;
+    //while (1)
+    //{
+    //    v25[2] = vEyePos[2];
+    //    v12 = self->ent;
+    //    v13 = (fSign[v11 ^ iOrder] * fDist);
+    //    v14 = ((v23 * (fSign[v11 ^ iOrder] * fDist)) + vEyePos[1]);
+    //    v25[0] = (vStepDir * (fSign[v11 ^ iOrder] * fDist)) + vEyePos[0];
+    //    v25[1] = v14;
+    //    if (ai_debugCoverEntityNum->current.integer == v12->s.number)
+    //    {
+    //        v33[3] = 1.0;
+    //        v33[2] = 1.0;
+    //        v33[1] = 1.0;
+    //        v33[0] = 1.0;
+    //        CL_AddDebugLine(v25, vEnemyPos, v33, 0, 30, 1);
+    //        CL_AddDebugLine(v25, targetEnt->r.currentOrigin, colorRed, 0, 30, 1);
+    //        CL_AddDebugLine(v25, self->ent->r.currentOrigin, colorBlue, 0, 30, 1);
+    //    }
+    //    if (Actor_CanSeePointFrom(self, v25, vEnemyPos, self->fMaxSightDistSqrd, v10))
+    //    {
+    //        prone = self->Physics.prone;
+    //        v30[2] = v28;
+    //        v30[0] = (float)(vStepDir * (float)v13) + vStartPos;
+    //        v30[1] = (float)(v23 * (float)v13) + v27;
+    //        v17 = prone ? 10.0 : 18.0;
+    //        if (Path_PredictionTrace(&vStartPos, v30, ENTITYNUM_NONE, self->Physics.iTraceMask | 4, v32, v17, v15))
+    //        {
+    //            if ((unsigned __int8)Actor_PointAtGoal(v32, &self->codeGoal))
+    //            {
+    //                Actor_FindPath(self, v32, 0, 0);
+    //                if (Actor_HasPath(self))
+    //                    break;
+    //            }
+    //        }
+    //    }
+    //    if (++v11 >= 2)
+    //        return 0;
+    //}
+    //Actor_SetSubState(self, STATE_EXPOSED_REACQUIRE_MOVE);
+    //Actor_SetOrientMode(self, AI_ORIENT_TO_ENEMY);
+    //return 1;
 }
 
 void __cdecl Actor_Exposed_FindReacquireDirectPath(actor_s *self, bool ignoreSuppression)

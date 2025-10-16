@@ -394,140 +394,114 @@ float __cdecl Actor_SetBodyPlantAngle(
     const float *vDir,
     float *pfAngle)
 {
-    double v12; // fp10
-    double v13; // fp12
-    double v14; // fp11
-    double v15; // fp9
-    double v16; // fp8
-    double v17; // fp1
-    double v18; // fp7
-    double v19; // fp13
-    double v20; // fp12
-    double v21; // fp27
-    double v22; // fp26
-    double v23; // fp28
-    double v24; // fp12
-    double v25; // fp11
-    double v26; // fp13
-    double v27; // fp0
-    double v28; // fp9
-    double v29; // fp7
-    double v30; // fp13
-    double v31; // fp12
-    double v32; // fp13
-    double v33; // fp12
-    double v34; // fp31
-    double v35; // fp1
-    float v37; // [sp+50h] [-F0h] BYREF
-    float v38; // [sp+54h] [-ECh]
-    float v39; // [sp+58h] [-E8h]
-    float v40; // [sp+60h] [-E0h] BYREF
-    float v41; // [sp+64h] [-DCh]
-    float v42; // [sp+68h] [-D8h]
-    float v43[4]; // [sp+70h] [-D0h] BYREF
-    float v44[4]; // [sp+80h] [-C0h] BYREF
-    float v45[4]; // [sp+90h] [-B0h] BYREF
-    trace_t v46[2]; // [sp+A0h] [-A0h] BYREF
+    float vStart[3]; // [sp+50h] [-F0h] BYREF // v37
+    float vEnd[3]; // [sp+60h] [-E0h] BYREF // v40
+    float vMaxs[3]; // [sp+70h] [-D0h] BYREF
+    float vMins[3]; // [sp+80h] [-C0h] BYREF
+    trace_t trace; // [sp+A0h] [-A0h] BYREF
 
-    v12 = *vDir;
-    v13 = vOrigin[1];
-    v14 = (float)(vOrigin[2] + (float)30.0);
-    v15 = vDir[1];
-    v16 = vDir[2];
-    v37 = *vOrigin;
-    v38 = v13;
-    v44[0] = -4.0;
-    v44[1] = -4.0;
-    v39 = v14;
-    v44[2] = 0.0;
-    v43[0] = 4.0;
-    v43[1] = 4.0;
-    v43[2] = 8.0;
-    v40 = (float)((float)v12 * (float)10.9) + v37;
-    v41 = (float)((float)v15 * (float)10.9) + (float)v13;
-    v42 = (float)((float)v16 * (float)10.9) + (float)v14;
-    G_TraceCapsule(v46, &v37, v44, v43, &v40, iEntNum, iClipMask);
-    if (v46[0].fraction == 0.0)
-        goto LABEL_2;
-    v18 = (float)(v42 - v39);
-    v42 = vOrigin[2] - (float)30.0;
-    v19 = (float)((float)((float)(v40 - v37) * v46[0].fraction) + v37);
-    v40 = (float)((float)(v40 - v37) * v46[0].fraction) + v37;
-    v37 = v19;
-    v20 = (float)((float)((float)(v41 - v38) * v46[0].fraction) + v38);
-    v41 = (float)((float)(v41 - v38) * v46[0].fraction) + v38;
-    v38 = v20;
-    v39 = (float)((float)v18 * v46[0].fraction) + v39;
-    G_TraceCapsule(v46, &v37, v44, v43, &v40, iEntNum, iClipMask);
-    if (v46[0].startsolid || v46[0].fraction >= 1.0)
+    float vPointA[3];
+    float vPointB[3];
+    float vDelta[3];
+
+    static const float fStartUp = 30.0f;
+    static const float fEndDown = 30.0f;
+    static const float fSize = 4.1f;
+
+    vStart[0] = vOrigin[0];
+    vStart[1] = vOrigin[1];
+    vStart[2] = (vOrigin[2] + 30.0f);
+
+    vMins[0] = -4.0f;
+    vMins[1] = -4.0f;
+    vMins[2] = 0.0f;
+
+    vMaxs[0] = 4.0f;
+    vMaxs[1] = 4.0f;
+    vMaxs[2] = 8.0f;
+
+    vEnd[0] = (vDir[0] * 10.9f) + vStart[0];
+    vEnd[1] = (vDir[1] * 10.9f) + vOrigin[1];
+    vEnd[2] = (vDir[2] * 10.9f) + (vOrigin[2] + 30.0f);
+
+    G_TraceCapsule(&trace, vStart, vMins, vMaxs, vEnd, iEntNum, iClipMask);
+
+    if (trace.fraction == 0.0)
     {
-        v21 = *vCenter;
-        v22 = vCenter[1];
-        v23 = vCenter[2];
+        *pfAngle = 0.0f;
+        return vCenter[2];
+    }
+
+    Vec3Lerp(vStart, vEnd, trace.fraction, vStart);
+    vEnd[0] = vStart[0];
+    vEnd[1] = vStart[1];
+    vEnd[2] = vStart[2];
+    vEnd[2] = vOrigin[2] - fEndDown;
+
+    G_TraceCapsule(&trace, vStart, vMins, vMaxs, vEnd, iEntNum, iClipMask);
+
+    if (trace.startsolid || trace.fraction >= 1.0)
+    {
+        vPointA[0] = vCenter[0];
+        vPointA[1] = vCenter[1];
+        vPointA[2] = vCenter[2];
     }
     else
     {
-        v21 = (float)((float)((float)(v40 - v37) * v46[0].fraction) + v37);
-        v22 = (float)((float)((float)(v41 - v38) * v46[0].fraction) + v38);
-        v23 = (float)((float)((float)(v42 - v39) * v46[0].fraction) + v39);
+        Vec3Lerp(vStart, vEnd, trace.fraction, vPointA);
     }
-    v24 = (float)(vOrigin[2] + (float)30.0);
-    v25 = *vDir;
-    v37 = *vOrigin;
-    v26 = vOrigin[1];
-    v27 = (float)-(float)((float)(vDir[1] * (float)10.9) - vOrigin[1]);
-    v40 = -(float)((float)((float)v25 * (float)10.9) - v37);
-    v28 = vDir[2];
-    v41 = v27;
-    v38 = v26;
-    v39 = v24;
-    v42 = -(float)((float)((float)v28 * (float)10.9) - (float)v24);
-    G_TraceCapsule(v46, &v37, v44, v43, &v40, iEntNum, iClipMask);
-    if (v46[0].fraction == 0.0)
+
+    vStart[0] = vOrigin[0];
+    vStart[1] = vOrigin[1];
+    vStart[2] = vOrigin[2];
+    vStart[2] = vStart[2] + fStartUp;
+
+    vEnd[0] = ((-(15.0f - fSize)) * vDir[0]) + vStart[0];
+    vEnd[1] = ((-(15.0f - fSize)) * vDir[1]) + vStart[1];
+    vEnd[2] = ((-(15.0f - fSize)) * vDir[2]) + vStart[2];
+
+    G_TraceCapsule(&trace, vStart, vMins, vMaxs, vEnd, iEntNum, iClipMask);
+
+    if (trace.fraction == 0.0)
     {
-    LABEL_2:
-        *pfAngle = 0.0;
-        v17 = vCenter[2];
+        *pfAngle = 0.0f;
+        return vCenter[2];
     }
     else
     {
-        v29 = (float)(v42 - v39);
-        v42 = vOrigin[2] - (float)30.0;
-        v30 = (float)((float)((float)(v40 - v37) * v46[0].fraction) + v37);
-        v40 = (float)((float)(v40 - v37) * v46[0].fraction) + v37;
-        v37 = v30;
-        v31 = (float)((float)((float)(v41 - v38) * v46[0].fraction) + v38);
-        v41 = (float)((float)(v41 - v38) * v46[0].fraction) + v38;
-        v38 = v31;
-        v39 = (float)((float)v29 * v46[0].fraction) + v39;
-        G_TraceCapsule(v46, &v37, v44, v43, &v40, iEntNum, iClipMask);
-        if (v46[0].startsolid || v46[0].fraction >= 1.0)
+        Vec3Lerp(vStart, vEnd, trace.fraction, vStart);
+        vEnd[0] = vStart[0];
+        vEnd[1] = vStart[1];
+        vEnd[2] = vStart[2];
+        vEnd[2] = vOrigin[2] - fEndDown;
+
+        G_TraceCapsule(&trace, vStart, vMins, vMaxs, vEnd, iEntNum, iClipMask);
+
+        if (trace.startsolid || trace.fraction >= 1.0f)
         {
-            v32 = *vCenter;
-            v33 = vCenter[1];
-            v34 = vCenter[2];
+            vPointB[0] = vCenter[0];
+            vPointB[1] = vCenter[1];
+            vPointB[2] = vCenter[2];
         }
         else
         {
-            v32 = (float)((float)((float)(v40 - v37) * v46[0].fraction) + v37);
-            v33 = (float)((float)((float)(v41 - v38) * v46[0].fraction) + v38);
-            v34 = (float)((float)((float)(v42 - v39) * v46[0].fraction) + v39);
+            Vec3Lerp(vStart, vEnd, trace.fraction, vPointB);
         }
-        if (v21 == v32 && v22 == v33 && v23 == v34)
+
+        if (vPointA[0] == vPointB[0] && vPointA[1] == vPointB[1] && vPointA[2] == vPointB[2])
         {
-            *pfAngle = 0.0;
+            *pfAngle = 0.0f;
         }
         else
         {
-            v45[0] = (float)v21 - (float)v32;
-            v45[1] = (float)v22 - (float)v33;
-            v45[2] = (float)v23 - (float)v34;
-            v35 = vectopitch(v45);
-            *pfAngle = AngleNormalize180(v35);
+            vDelta[0] = vPointA[0] - vPointB[0];
+            vDelta[1] = vPointA[1] - vPointB[1];
+            vDelta[2] = vPointA[2] - vPointB[2];
+            float angle = vectopitch(vDelta);
+            *pfAngle = AngleNormalize180(angle);
         }
-        v17 = (float)((float)((float)(vCenter[2] + (float)v34) + (float)v23) * (float)0.33333334);
+        return (vCenter[2] + vPointA[2] + vPointB[2]) / 3.0;
     }
-    return *((float *)&v17 + 1);
 }
 
 void __cdecl Actor_GetBodyPlantAngles(

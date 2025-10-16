@@ -78,21 +78,12 @@ void __cdecl XModelReadSurface_BuildCollisionTree(
     XRigidVertList *vertList; // [esp+190h] [ebp-8h]
     unsigned int allocedLeafCount; // [esp+194h] [ebp-4h]
 
-    if (surface->deformed)
-        MyAssertHandler(".\\r_xsurface_load_obj.cpp", 222, 0, "%s", "!surface->deformed");
-    if (vertListIndex >= surface->vertListCount)
-        MyAssertHandler(
-            ".\\r_xsurface_load_obj.cpp",
-            223,
-            0,
-            "%s\n\t(vertListIndex) = %i",
-            "(vertListIndex >= 0 && vertListIndex < surface->vertListCount)",
-            vertListIndex);
+    iassert(!surface->deformed);
+    iassert(vertListIndex >= 0 && vertListIndex < surface->vertListCount);
     vertList = &surface->vertList[vertListIndex];
     tree = (XSurfaceCollisionTree*)Alloc(40);
     vertList->collisionTree = tree;
-    if (!surface->triCount)
-        MyAssertHandler(".\\r_xsurface_load_obj.cpp", 228, 0, "%s", "surface->triCount > 0");
+    iassert(surface->triCount > 0);
     memset(&options, 0, 12);
     options.mins = 0;
     options.maxs = 0;

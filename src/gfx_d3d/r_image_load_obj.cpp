@@ -3,6 +3,7 @@
 #include "r_init.h"
 #include "r_utils.h"
 #include <universal/com_files.h>
+#include <universal/profile.h>
 
 unsigned __int8 *s_imageLoadBuf;
 unsigned int s_imageLoadBytesUsed;
@@ -631,15 +632,17 @@ void __cdecl Image_LoadFromData(GfxImage *image, GfxImageFileHeader *fileHeader,
 GfxImage *__cdecl Image_Register_LoadObj(char *imageName, unsigned __int8 semantic, unsigned __int8 imageTrack)
 {
     GfxImage *image; // [esp+0h] [ebp-4h]
-    GfxImage *imagea; // [esp+0h] [ebp-4h]
 
     image = Image_FindExisting(imageName);
     if (image)
         return image;
-    ProfLoad_Begin("Load image");
-    imagea = Image_Load(imageName, semantic, imageTrack);
-    ProfLoad_End();
-    if (!imagea)
+
+    {
+        PROFLOAD_SCOPED("Load image");
+        image = Image_Load(imageName, semantic, imageTrack);
+    }
+
+    if (!image)
         Com_PrintError(8, "ERROR: failed to load image '%s'\n", imageName);
-    return imagea;
+    return image;
 }

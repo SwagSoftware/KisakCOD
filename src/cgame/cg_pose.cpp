@@ -10,42 +10,24 @@
 #include "cg_main.h"
 #include <gfx_d3d/r_scene.h>
 
-// local variable allocation has failed, the output may be wrong!
-void __cdecl PitchToQuat(double pitch, float *quat, float *a3)
+void __cdecl PitchToQuat(float pitch, float *quat)
 {
-    double v4; // fp31
-    long double v5; // fp2
-    long double v6; // fp2
-    long double v7; // fp2
+    pitch = DEG2RAD(pitch);
 
-    v4 = (float)((float)pitch * (float)0.0087266462);
-    *a3 = 0.0;
-    a3[2] = 0.0;
-    *(double *)&v5 = v4;
-    v6 = sin(v5);
-    a3[1] = *(double *)&v6;
-    *(double *)&v6 = v4;
-    v7 = cos(v6);
-    a3[3] = *(double *)&v7;
+    quat[0] = 0.0;
+    quat[1] = sin(pitch);
+    quat[2] = 0.0;
+    quat[3] = cos(pitch);
 }
 
-// local variable allocation has failed, the output may be wrong!
-void __cdecl RollToQuat(double roll, float *quat, float *a3)
+void __cdecl RollToQuat(float  roll, float *quat)
 {
-    double v4; // fp31
-    long double v5; // fp2
-    long double v6; // fp2
-    long double v7; // fp2
+    roll = DEG2RAD(roll);
 
-    v4 = (float)((float)roll * (float)0.0087266462);
-    a3[1] = 0.0;
-    a3[2] = 0.0;
-    *(double *)&v5 = v4;
-    v6 = sin(v5);
-    *a3 = *(double *)&v6;
-    *(double *)&v6 = v4;
-    v7 = cos(v6);
-    a3[3] = *(double *)&v7;
+    quat[0] = sin(roll);
+    quat[1] = 0.0;
+    quat[2] = 0.0;
+    quat[3] = cos(roll);
 }
 
 void __cdecl LocalMatrixTransformVectorQuatTrans(const float *in, const DObjAnimMat *mat, float *out)
@@ -155,7 +137,7 @@ void __cdecl CG_Vehicle_DoControllers(const cpose_t *pose, const DObj_s *obj, in
     __int128 v7; // r9 OVERLAPPED
     __int16 pitch; // r10
     unsigned int tag_body; // r5
-    __int64 v10; // r11
+    __int64 offset; // r11
     double height; // fp29
     const XModel *Model; // r30
     const DObjAnimMat *BasePose; // r24
@@ -194,19 +176,19 @@ void __cdecl CG_Vehicle_DoControllers(const cpose_t *pose, const DObj_s *obj, in
     v45 = v7;
     v46 = *(_QWORD *)((char *)&v7 + 4);
     v38 = v3;
-    LODWORD(v10) = pitch;
-    HIDWORD(v10) = SWORD1(v7);
+    LODWORD(offset) = pitch;
+    HIDWORD(offset) = SWORD1(v7);
     v42[0] = 0.0;
     v42[2] = 0.0;
     v43[1] = 0.0;
     v43[2] = 0.0;
-    v36 = v10;
+    v36 = offset;
     v37 = *(_QWORD *)((char *)&v7 - 4);
     v44[1] = 0.0;
     v39 = 0.0;
     v41 = 0.0;
     v44[2] = (float)*(__int64 *)((char *)&v7 - 4) * (float)0.0054931641;
-    v44[0] = (float)v10 * (float)0.0054931641;
+    v44[0] = (float)offset * (float)0.0054931641;
     v43[0] = (float)(__int64)v7 * (float)0.0054931641;
     v42[1] = (float)*(__int64 *)((char *)&v7 + 4) * (float)0.0054931641;
     v40 = (float)v3 * (float)0.0054931641;
@@ -230,7 +212,7 @@ void __cdecl CG_Vehicle_DoControllers(const cpose_t *pose, const DObj_s *obj, in
     _R7 = v51;
     __asm
     {
-        vmr       v10, v0
+        vmr       offset, v0
         lvrx      v8, r27, r10
         vmr       v9, v0
         lvlx      v7, r0, r9
@@ -255,7 +237,7 @@ void __cdecl CG_Vehicle_DoControllers(const cpose_t *pose, const DObj_s *obj, in
     {
         vor       angles, v7, v8
         vor       v8, v5, v6
-        vrlimi128 v126, v10, 1, 3
+        vrlimi128 v126, offset, 1, 3
         vrlimi128 v125, v9, 1, 3
         vmr128    v123, v0
         lvx128    trans, r0, r11
@@ -264,13 +246,13 @@ void __cdecl CG_Vehicle_DoControllers(const cpose_t *pose, const DObj_s *obj, in
     _R28 = &g_keepXYZ;
     __asm
     {
-        lvx128    v12, r0, r28
-        vand128   v124, angles, v12
+        lvx128    rollQuat, r0, r28
+        vand128   v124, angles, rollQuat
         vmrglw128 angles, v127, v125
-        vand128   v122, v8, v12
-        vmrglw128 v12, v126, trans
+        vand128   v122, v8, rollQuat
+        vmrglw128 rollQuat, v126, trans
         vmrghw128 trans, v127, v125
-        vmrghw128 v119, angles, v12
+        vmrghw128 v119, angles, rollQuat
         vmrghw128 v121, trans, v0
         vmrglw128 v120, trans, v0
     }
@@ -289,28 +271,28 @@ void __cdecl CG_Vehicle_DoControllers(const cpose_t *pose, const DObj_s *obj, in
             __asm
             {
                 lvx128    v0, r0, r28
-                vmr128    v10, v123
+                vmr128    offset, v123
             }
             _R11 = (int)BasePose[v28].trans;
             HIDWORD(_R10) = &v37;
             v38 = _R10;
             __asm
             {
-                lvlx      v12, r0, r11
+                lvlx      rollQuat, r0, r11
                 lvrx      trans, r27, r11
             }
             _R11 = v52;
-            __asm { vor       trans, v12, trans }
+            __asm { vor       trans, rollQuat, trans }
             *(float *)&v37 = 40.0;
             __asm
             {
                 vand      v0, trans, v0
                 vspltw    trans, v0, 2
-                vspltw    v12, v0, 1
+                vspltw    rollQuat, v0, 1
                 vspltw    angles, v0, 0
-                vmaddfp128 v10, v125, trans, v10
-                vmaddfp128 v10, v12, v126, v10
-                vmaddfp128 v10, angles, v127, v10
+                vmaddfp128 offset, v125, trans, offset
+                vmaddfp128 offset, rollQuat, v126, offset
+                vmaddfp128 offset, angles, v127, offset
             }
             _FP12 = (float)((float)((float)((float)((float)height + (float)40.0) * (float)_R10) * (float)0.000015259022)
                 - (float)((float)40.0 - (float)height));
@@ -321,18 +303,18 @@ void __cdecl CG_Vehicle_DoControllers(const cpose_t *pose, const DObj_s *obj, in
             {
                 lvlx      trans, r0, r9
                 vspltw    trans, trans, 0
-                lvlx      v12, r0, r10
-                vspltw    v12, v12, 0
-                vmaddfp128 v10, trans, v124, v10
-                vmaddfp128 v10, v12, v124, v10
-                vsubfp128 trans, v10, v122
-                vspltw    v12, trans, 2
+                lvlx      rollQuat, r0, r10
+                vspltw    rollQuat, rollQuat, 0
+                vmaddfp128 offset, trans, v124, offset
+                vmaddfp128 offset, rollQuat, v124, offset
+                vsubfp128 trans, offset, v122
+                vspltw    rollQuat, trans, 2
                 vspltw    angles, trans, 1
                 vspltw    trans, trans, 0
-                vmulfp128 v12, v12, v119
-                vmaddfp128 v12, angles, v120, v12
-                vmaddfp128 v12, trans, v121, v12
-                vsubfp    v0, v12, v0
+                vmulfp128 rollQuat, rollQuat, v119
+                vmaddfp128 rollQuat, angles, v120, rollQuat
+                vmaddfp128 rollQuat, trans, v121, rollQuat
+                vsubfp    v0, rollQuat, v0
                 stvx128   v0, r0, r11
             }
             if (v40 == 0.0 || (unsigned int)v25 > 1)
@@ -699,47 +681,39 @@ void CG_Vehicle_DoControllers(const cpose_t *pose, const DObj_s *obj, int *partB
 
 void __cdecl CG_Actor_DoControllers(const cpose_t *pose, const DObj_s *obj, int *partBits)
 {
-    DObjAnimMat *RotTransArray; // r28
-    float *v7; // r3
+    DObjAnimMat *mat; // r28
     int proneType; // r8
-    float *v9; // r3
-    float v10[4]; // [sp+50h] [-60h] BYREF
-    float v11[4]; // [sp+60h] [-50h] BYREF
-    float v12[16]; // [sp+70h] [-40h] BYREF
+    float offset[4]; // [sp+50h] [-60h] BYREF
+    float pitchQuat[4]; // [sp+60h] [-50h] BYREF
+    float rollQuat[4]; // [sp+70h] [-40h] BYREF
 
-    if (!obj)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\cgame\\cg_pose.cpp", 169, 0, "%s", "obj");
+    iassert(obj);
+
     if (pose->actor.proneType)
     {
-        RotTransArray = DObjGetRotTransArray(obj);
-        if (RotTransArray)
+        mat = DObjGetRotTransArray(obj);
+        if (mat)
         {
-            v7 = (float *)DObjSetRotTransIndex((DObj_s*)obj, partBits, 0);
-            if (v7)
+            if (DObjSetRotTransIndex((DObj_s *)obj, partBits, 0))
             {
                 proneType = pose->actor.proneType;
                 if (proneType == 2)
                 {
-                    PitchToQuat(pose->actor.pitch, v7, v11);
-                    RollToQuat(pose->actor.roll, v9, v12);
-                    QuatMultiply(v12, v11, RotTransArray->quat);
+                    PitchToQuat(pose->actor.pitch, pitchQuat);
+                    RollToQuat(pose->actor.roll, rollQuat);
+                    QuatMultiply(rollQuat, pitchQuat, mat->quat);
                 }
                 else
                 {
-                    if (proneType != 1)
-                        MyAssertHandler(
-                            "c:\\trees\\cod3\\cod3src\\src\\cgame\\cg_pose.cpp",
-                            194,
-                            0,
-                            "%s\n\t(pose->actor.proneType) = %i",
-                            "(pose->actor.proneType == CENT_ACTOR_PRONE_NORMAL)",
-                            proneType);
-                    PitchToQuat(pose->actor.pitch, v7, RotTransArray->quat);
+                    iassert(pose->actor.proneType == CENT_ACTOR_PRONE_NORMAL);
+                    PitchToQuat(pose->actor.pitch, mat->quat);
                 }
-                v10[2] = pose->actor.height;
-                v10[0] = 0.0;
-                v10[1] = 0.0;
-                DObjSetTrans(RotTransArray, v10);
+
+                offset[0] = 0.0;
+                offset[1] = 0.0;
+                offset[2] = pose->actor.height;
+
+                DObjSetTrans(mat, offset);
             }
         }
     }
