@@ -493,10 +493,10 @@ int __cdecl G_CanRadiusDamageFromPos(
     const float *targetPos,
     gentity_s *inflictor,
     const float *centerPos,
-    double radius,
-    double coneAngleCos,
+    float radius,
+    float coneAngleCos,
     const float *coneDirection,
-    double maxHeight,
+    float maxHeight,
     bool useEyeOffset,
     int contentMask);
 float __cdecl EntDistToPoint(float *origin, gentity_s *ent);
