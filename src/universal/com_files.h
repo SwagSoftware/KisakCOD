@@ -187,7 +187,6 @@ extern const dvar_s *fs_ignoreLocalized;
 extern const dvar_s *fs_basepath;
 extern const dvar_s *fs_copyfiles;
 extern const dvar_s *fs_cdpath;
-extern const dvar_s *fs_gameDirVar;
 extern const dvar_s *fs_basegame;
 
 extern searchpath_s *fs_searchpaths;

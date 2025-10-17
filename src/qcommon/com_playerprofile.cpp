@@ -651,7 +651,9 @@ void __cdecl Com_ChangePlayerProfile(int localClientNum, char *profileName)
             Cmd_ExecuteSingleCommand(localClientNum, 0, (char*)"disconnect");
             Dvar_ResetDvars(0xFFFFu, DVAR_SOURCE_EXTERNAL);
             Com_SetPlayerProfile(localClientNum, cachedName);
+#ifdef KISAK_MP
             LiveStorage_ReadStats();
+#endif
             Com_CheckSetRecommended(localClientNum);
             if (Dvar_AnyLatchedValues())
                 Cbuf_AddText(localClientNum, "snd_restart\n");

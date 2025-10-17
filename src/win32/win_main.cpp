@@ -812,10 +812,10 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 
 #ifdef KISAK_MP
 			if (!com_dedicated->current.integer)
-#endif
 			{
 				Cbuf_AddText(0, "readStats\n");
 			}
+#endif
 
 			PrintWorkingDir();
 

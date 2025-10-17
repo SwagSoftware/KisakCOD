@@ -196,7 +196,7 @@ void __cdecl BG_FreeWeaponDefStrings()
 
 void __cdecl BG_ShutdownWeaponDefFiles()
 {
-    if (*(_BYTE *)fs_gameDirVar->current.integer)
+    if (IsUsingMods())
     {
         BG_ClearSurfaceTypeSounds();
         BG_FreeWeaponDefStrings();
@@ -4457,7 +4457,7 @@ bool __cdecl BG_ThrowingBackGrenade(const playerState_s *ps)
 WeaponDef *__cdecl BG_LoadWeaponDef(const char *name)
 {
 #ifndef DEDICATED
-    if (*(_BYTE *)fs_gameDirVar->current.integer || !IsFastFileLoad())
+    if (IsUsingMods() || !IsFastFileLoad())
         return BG_LoadWeaponDef_LoadObj(name);
     else
         return BG_LoadWeaponDef_FastFile(name);

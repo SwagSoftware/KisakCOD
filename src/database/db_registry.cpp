@@ -591,8 +591,8 @@ void __cdecl DB_BuildOSPath_Mod(const char *zoneName, uint32_t size, char *filen
     char *v3; // eax
     const char *string; // [esp-8h] [ebp-8h]
 
-    if (!*(_BYTE *)fs_gameDirVar->current.integer)
-        MyAssertHandler(".\\database\\db_registry.cpp", 3204, 0, "%s", "IsUsingMods()");
+    iassert(IsUsingMods());
+
     string = fs_gameDirVar->current.string;
     v3 = Sys_DefaultInstallPath();
     Com_sprintf(filename, size, "%s\\%s\\%s.ff", v3, string, zoneName);
@@ -603,7 +603,7 @@ bool __cdecl DB_ModFileExists()
     char filename[256]; // [esp+0h] [ebp-108h] BYREF
     void *zoneFile; // [esp+104h] [ebp-4h]
 
-    if (!*(_BYTE *)fs_gameDirVar->current.integer)
+    if (!IsUsingMods())
         return 0;
     DB_BuildOSPath_Mod("mod", 0x100u, filename);
     zoneFile = CreateFileA(filename, 0x80000000, 1u, 0, 3u, 0x60000000u, 0);
@@ -2592,9 +2592,10 @@ int32_t __cdecl DB_TryLoadXFileInternal(char *zoneName, int32_t zoneFlags)
 
     modZone = 0;
     iassert(!g_zoneInfoCount);
+
     if (I_stricmp(zoneName, "mp_patch"))
     {
-        if (*(_BYTE *)fs_gameDirVar->current.integer && DB_ShouldLoadFromModDir(zoneName))
+        if (IsUsingMods() && DB_ShouldLoadFromModDir(zoneName))
         {
             DB_BuildOSPath_Mod(zoneName, 256, filename);
             zoneFile = CreateFileA(filename, 0x80000000, 1u, 0, 3u, 0x60000000u, 0);

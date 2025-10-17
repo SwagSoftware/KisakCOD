@@ -1002,52 +1002,41 @@ bool __cdecl Actor_AtDifferentElevation(float *vOrgSelf, float *vOrgOther)
     return I_fabs((float)(vOrgSelf[2] - vOrgOther[2])) >= 80.0;
 }
 
-float __cdecl Actor_CalcultatePlayerPushDelta(const actor_s *self, const gentity_s *pusher, float *pushDir)
+float __cdecl Actor_CalcultatePlayerPushDelta(const actor_s* self, const gentity_s* pusher, float* pushDir)
 {
-    double v6; // fp30
-    double v7; // fp29
-    double v8; // fp28
-    double v9; // fp13
-    double v10; // fp12
-    double v11; // fp11
-    double v12; // fp0
-    double v13; // fp1
-    float v15; // [sp+50h] [-70h] BYREF
-    float v16; // [sp+54h] [-6Ch]
-    float v17[14]; // [sp+58h] [-68h] BYREF
+    iassert(self);
+    iassert(self->ent);
+    iassert(pusher);
+    iassert(pusher->client);
 
-    if (!self)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\actor.cpp", 2683, 0, "%s", "self");
-    if (!self->ent)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\actor.cpp", 2684, 0, "%s", "self->ent");
-    if (!pusher)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\actor.cpp", 2685, 0, "%s", "pusher");
-    if (!pusher->client)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\actor.cpp", 2686, 0, "%s", "pusher->client");
-    v6 = (float)(self->ent->r.currentOrigin[0] - pusher->r.currentOrigin[0]);
-    v7 = (float)(self->ent->r.currentOrigin[1] - pusher->r.currentOrigin[1]);
-    v8 = Vec2NormalizeTo(pusher->client->ps.velocity, &v15);
-    if (v8 == 0.0)
+    const float dx = self->ent->r.currentOrigin[0] - pusher->r.currentOrigin[0];
+    const float dy = self->ent->r.currentOrigin[1] - pusher->r.currentOrigin[1];
+
+    float dir[2];
+    float speed = Vec2NormalizeTo(pusher->client->ps.velocity, dir);
+
+    if (speed == 0.0f)
     {
-        G_GetPlayerViewDirection(pusher, v17, 0, 0);
-        Vec2NormalizeTo(v17, &v15);
+        float viewDir[3];
+        G_GetPlayerViewDirection(pusher, viewDir, 0, 0);
+        Vec2NormalizeTo(viewDir, dir);
     }
-    v9 = v16;
-    v10 = v15;
-    v11 = (float)((float)v6 * v16);
-    v12 = -v15;
-    pushDir[1] = v12;
-    *pushDir = v9;
-    if ((float)((float)((float)v12 * (float)v7) + (float)v11) < 0.0)
+
+    float perpX = dir[1];
+    float perpY = -dir[0];
+
+    const float dot = perpX * dx + perpY * dy;
+    if (dot < 0.0f)
     {
-        pushDir[1] = v10;
-        *pushDir = -v9;
+        perpX = -perpX;
+        perpY = -perpY;
     }
-    if (v8 >= 60.0)
-        v13 = (float)((float)v8 * 0.050000001);
-    else
-        v13 = (float)((float)60.0 * 0.050000001);
-    return *((float *)&v13 + 1);
+
+    pushDir[0] = perpX;
+    pushDir[1] = perpY;
+
+    const float magnitude = (speed >= 60.0f ? speed : 60.0f) * 0.05f;
+    return magnitude;
 }
 
 bool __cdecl Actor_ShouldMoveAwayFromCloseEnt(actor_s *self)

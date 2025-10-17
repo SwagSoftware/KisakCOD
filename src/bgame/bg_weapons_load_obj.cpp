@@ -1286,7 +1286,11 @@ WeaponDef *__cdecl BG_LoadWeaponDefInternal(const char *one, const char *two)
                         BG_ParseWeaponDefSpecificFieldType,
                         SetConfigString2))
                     {
+#ifdef KISAK_MP
                         if (I_stricmp(two, "defaultweapon_mp"))
+#elif KISAK_SP
+                        if (I_stricmp(two, "defaultweapon"))
+#endif
                         {
                             if (!weapDef->viewLastShotEjectEffect)
                                 weapDef->viewLastShotEjectEffect = weapDef->viewShellEjectEffect;
@@ -1386,14 +1390,8 @@ WeaponDef *__cdecl BG_LoadWeaponDef_LoadObj(const char *name)
 #endif
     if (weapDef)
         return weapDef;
-
-#ifdef KISAK_MP
-    weapDef = BG_LoadWeaponDefInternal("mp", "defaultweapon_mp");
-#elif KISAK_SP
-    weapDef = BG_LoadWeaponDefInternal("sp", "defaultweapon");
-#endif
-
-    if (!weapDef)
+    WeaponDef* weapDefa = BG_LoadWeaponDefInternal("mp", "defaultweapon_mp");
+    if (!weapDefa)
         Com_Error(ERR_DROP, "BG_LoadWeaponDef: Could not find default weapon");
 
     SetConfigString((char **)weapDef, name);

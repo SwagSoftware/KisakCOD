@@ -647,7 +647,7 @@ void Com_Error(errorParm_t code, const char* fmt, ...)
     jmp_buf * Value; // eax
     va_list va; // [esp+18h] [ebp+10h] BYREF
 
-    iassert(0);
+    //iassert(0); // keys: im not sure why this is here but ill comment it out instead of removing it for now
     va_start(va, fmt);
     Sys_EnterCriticalSection(CRITSECT_COM_ERROR);
     if ((unsigned int)code <= ERR_DROP)
@@ -2081,7 +2081,11 @@ void __cdecl Com_AssetLoadUI()
 
     if (IsFastFileLoad())
     {
+#ifdef KISAK_MP
         zoneInfo.name = "ui_mp";
+#elif KISAK_SP
+        zoneInfo.name = "ui";
+#endif
         zoneInfo.allocFlags = 8;
         zoneInfo.freeFlags = 104;
         DB_LoadXAssets(&zoneInfo, 1u, 0);

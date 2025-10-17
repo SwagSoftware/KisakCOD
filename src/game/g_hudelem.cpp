@@ -462,6 +462,8 @@ void __cdecl HudElem_SetFontScale(game_hudelem_s *hud, int32_t offset)
         v2 = va("font scale was %g; should be > 0", scale);
         Scr_Error(v2);
     }
+
+#ifdef KISAK_MP
     if (scale >= 1.399999976158142)
     {
         if (scale > 4.599999904632568)
@@ -475,6 +477,8 @@ void __cdecl HudElem_SetFontScale(game_hudelem_s *hud, int32_t offset)
         v3 = va("font scale %f is below the expected minimum %f", scale, 1.399999976158142);
         Scr_Error(v3);
     }
+#endif
+
     hud->elem.fontScale = scale;
 }
 

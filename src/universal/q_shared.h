@@ -862,5 +862,12 @@ inline bool IsFastFileLoad()
 	return useFastFile->current.enabled;
 }
 
+extern const dvar_t* fs_gameDirVar;
+
+inline bool IsUsingMods()
+{
+	return fs_gameDirVar->current.integer;
+}
+
 
 extern unsigned __int64(__cdecl *LittleLong64)(unsigned __int64);

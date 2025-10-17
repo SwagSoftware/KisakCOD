@@ -690,7 +690,7 @@ char *__cdecl Scr_ReadFile(const char *filename, char *extFilename, const char *
 {
     int file; // [esp+24h] [ebp-4h] BYREF
 
-    if (*(_BYTE *)fs_gameDirVar->current.integer)
+    if (IsUsingMods())
     {
         if ((FS_FOpenFileRead(extFilename, &file) & 0x80000000) != 0)
         {
