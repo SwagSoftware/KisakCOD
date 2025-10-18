@@ -2383,78 +2383,68 @@ DObjAnimMat *__cdecl CG_DObjGetLocalTagMatrix(const cpose_t *pose, DObj_s *obj, 
     return result;
 }
 
-DObjAnimMat *__cdecl CG_DObjGetWorldBoneMatrix(
+int32_t __cdecl CG_DObjGetWorldBoneMatrix(
     const cpose_t *pose,
     DObj_s *obj,
     int boneIndex,
     float (*tagMat)[3],
     float *origin)
 {
-    DObjAnimMat *result; // r3
-    float *v11; // r31
+    DObjAnimMat *mat; // r3
 
-    if (!obj)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\cgame\\cg_ents.cpp", 682, 0, "%s", "obj");
-    if (!pose)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\cgame\\cg_ents.cpp", 683, 0, "%s", "pose");
-    result = CG_DObjGetLocalBoneMatrix(pose, obj, boneIndex);
-    v11 = (float *)result;
-    if (result)
-    {
-        LocalConvertQuatToMat(result, tagMat);
-        result = (DObjAnimMat *)1;
-        *origin = v11[4] + cgArray[0].refdef.viewOffset[0];
-        origin[1] = v11[5] + cgArray[0].refdef.viewOffset[1];
-        origin[2] = v11[6] + cgArray[0].refdef.viewOffset[2];
-    }
-    return result;
+    iassert(obj);
+    iassert(pose);
+
+    mat = CG_DObjGetLocalBoneMatrix(pose, obj, boneIndex);
+    if (!mat)
+        return 0;
+
+    LocalConvertQuatToMat(mat, tagMat);
+    Vec3Add(mat->trans, CG_GetLocalClientGlobals(0)->refdef.viewOffset, origin);
+
+    return 1;
 }
 
-DObjAnimMat *__cdecl CG_DObjGetWorldTagMatrix(
+int32_t __cdecl CG_DObjGetWorldTagMatrix(
     const cpose_t *pose,
     DObj_s *obj,
     unsigned int tagName,
     float (*tagMat)[3],
     float *origin)
 {
-    DObjAnimMat *result; // r3
-    float *v11; // r31
+    DObjAnimMat *mat; // r3
 
-    if (!obj)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\cgame\\cg_ents.cpp", 707, 0, "%s", "obj");
-    if (!pose)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\cgame\\cg_ents.cpp", 708, 0, "%s", "pose");
-    result = CG_DObjGetLocalTagMatrix(pose, obj, tagName);
-    v11 = (float *)result;
-    if (result)
+    iassert(obj);
+    iassert(pose);
+
+    mat = CG_DObjGetLocalTagMatrix(pose, obj, tagName);
+
+    if (!mat)
     {
-        LocalConvertQuatToMat(result, tagMat);
-        result = (DObjAnimMat *)1;
-        *origin = v11[4] + cgArray[0].refdef.viewOffset[0];
-        origin[1] = v11[5] + cgArray[0].refdef.viewOffset[1];
-        origin[2] = v11[6] + cgArray[0].refdef.viewOffset[2];
+        return 0;
     }
-    return result;
+
+    LocalConvertQuatToMat(mat, tagMat);
+    Vec3Add(mat->trans, CG_GetLocalClientGlobals(0)->refdef.viewOffset, origin);
+    return 1;
 }
 
 int __cdecl CG_DObjGetWorldTagPos(const cpose_t *pose, DObj_s *obj, unsigned int tagName, float *pos)
 {
-    int result; // r3
-    float *v9; // r11
+    DObjAnimMat *mat;
 
-    if (!obj)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\cgame\\cg_ents.cpp", 732, 0, "%s", "obj");
-    if (!pose)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\cgame\\cg_ents.cpp", 733, 0, "%s", "pose");
-    result = (int)CG_DObjGetLocalTagMatrix(pose, obj, tagName);
-    v9 = (float *)result;
-    if (result)
+    iassert(obj);
+    iassert(pose);
+
+    mat = CG_DObjGetLocalTagMatrix(pose, obj, tagName);
+
+    if (!mat)
     {
-        result = 1;
-        *pos = v9[4] + cgArray[0].refdef.viewOffset[0];
-        pos[1] = v9[5] + cgArray[0].refdef.viewOffset[1];
-        pos[2] = v9[6] + cgArray[0].refdef.viewOffset[2];
+        return 0;
     }
-    return result;
+
+    Vec3Add(mat->trans, CG_GetLocalClientGlobals(0)->refdef.viewOffset, pos);
+
+    return 1;
 }
 

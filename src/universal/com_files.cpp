@@ -538,25 +538,28 @@ int __cdecl FS_HandleForFile(FsThread thread)
         }
         else
         {
-            if (thread != FS_THREAD_DATABASE)
-                MyAssertHandler(".\\universal\\com_files.cpp", 920, 0, "thread == FS_THREAD_DATABASE\n\t%i, %i", thread, 2);
+            iassert(thread == FS_THREAD_DATABASE);
+
             if (IsFastFileLoad())
             {
-                if (!Sys_IsDatabaseThread())
-                    MyAssertHandler(".\\universal\\com_files.cpp", 921, 0, "%s", "Sys_IsDatabaseThread()");
+                iassert(Sys_IsDatabaseThread());
             }
-            else if (!Sys_IsMainThread())
+            else 
             {
-                MyAssertHandler(".\\universal\\com_files.cpp", 921, 0, "%s", "Sys_IsMainThread()");
+#ifdef KISAK_MP
+                iassert(Sys_IsMainThread());
+#endif
             }
+
             first = 62;
             count = 1;
         }
     }
     else
     {
-        if (!Sys_IsMainThread())
-            MyAssertHandler(".\\universal\\com_files.cpp", 897, 0, "%s", "Sys_IsMainThread()");
+#ifdef KISAK_MP
+        iassert(Sys_IsMainThread());
+#endif
         first = 1;
         count = 48;
     }

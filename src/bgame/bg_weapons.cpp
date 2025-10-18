@@ -477,8 +477,9 @@ unsigned int __cdecl BG_GetViewmodelWeaponIndex(const playerState_s *ps)
     if ((ps->weapFlags & 2) == 0)
         return ps->weapon;
     weapIndex = ps->offHandIndex;
-    if (!weapIndex)
-        MyAssertHandler(".\\bgame\\bg_weapons.cpp", 652, 0, "%s", "weapIndex != WP_NONE");
+
+    iassert(weapIndex != WP_NONE);
+
     return weapIndex;
 }
 
@@ -3532,11 +3533,10 @@ void __cdecl BG_WeaponFireRecoil(const playerState_s *ps, float *vGunSpeed, floa
     vGunSpeed[1] = vGunSpeed[1] + fYawKickc;
 }
 
-double __cdecl BG_GetBobCycle(const playerState_s *ps)
+float __cdecl BG_GetBobCycle(const playerState_s *ps)
 {
-    return (float)((double)(unsigned __int8)ps->bobCycle / 255.0 * 3.141592741012573
-        + (double)(unsigned __int8)ps->bobCycle / 255.0 * 3.141592741012573
-        + 6.283185482025146);
+    return ((float)(unsigned __int8)ps->bobCycle / 255.0 * M_PI 
+        + (float)(unsigned __int8)ps->bobCycle / 255.0 * M_PI + (2.0 * M_PI));
 }
 
 float __cdecl BG_GetVerticalBobFactor(const playerState_s *ps, float cycle, float speed, float maxAmp)

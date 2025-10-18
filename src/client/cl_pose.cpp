@@ -44,15 +44,15 @@ int __cdecl CL_GetSkelTimeStamp()
 int warnCount_0 = 0;
 int __cdecl CL_DObjCreateSkelForBones(const DObj_s *obj, int *partBits, DObjAnimMat **pMatOut)
 {
-    int skelTimeStamp; // r31
+    int timeStamp; // r31
     unsigned int AllocSkelSize; // r3
-    DObjAnimMat *v9; // r3
-    int v10; // r10
+    DObjAnimMat *buf; // r3
 
-    if (!obj)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\client\\cl_pose.cpp", 75, 0, "%s", "obj");
-    skelTimeStamp = clients[R_GetLocalClientNum()].skelTimeStamp;
-    if (DObjSkelExists(obj, skelTimeStamp))
+    iassert(obj);
+
+    timeStamp = CL_GetSkelTimeStamp();
+
+    if (DObjSkelExists(obj, timeStamp))
     {
         *pMatOut = I_dmaGetDObjSkel(obj);
         return DObjSkelAreBonesUpToDate(obj, partBits);
@@ -60,20 +60,19 @@ int __cdecl CL_DObjCreateSkelForBones(const DObj_s *obj, int *partBits, DObjAnim
     else
     {
         AllocSkelSize = DObjGetAllocSkelSize(obj);
-        v9 = (DObjAnimMat *)CL_AllocSkelMemory(AllocSkelSize);
-        if (v9)
+        buf = (DObjAnimMat *)CL_AllocSkelMemory(AllocSkelSize);
+        if (buf)
         {
-            *pMatOut = v9;
-            DObjCreateSkel((DObj_s*)obj, (char *)v9, skelTimeStamp);
+            *pMatOut = buf;
+            DObjCreateSkel((DObj_s*)obj, (char *)buf, timeStamp);
             return 0;
         }
         else
         {
-            v10 = warnCount_0;
             *pMatOut = 0;
-            if (v10 != skelTimeStamp)
+            if (warnCount_0 != timeStamp)
             {
-                warnCount_0 = skelTimeStamp;
+                warnCount_0 = timeStamp;
                 Com_PrintWarning(14, "WARNING: CL_SKEL_MEMORY_SIZE exceeded - not calculating skeleton\n");
             }
             return 1;

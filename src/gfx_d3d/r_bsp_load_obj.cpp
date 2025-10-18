@@ -1978,9 +1978,6 @@ BOOL __cdecl R_CompareSurfaces(const GfxSurface &surf0, const GfxSurface &surf1)
     int lightmapIndex_4; // [esp+7Ch] [ebp-10h]
     MaterialTechniqueSet *techSet[2]; // [esp+80h] [ebp-Ch]
     int comparison; // [esp+88h] [ebp-4h]
-    int comparisona; // [esp+88h] [ebp-4h]
-    int comparisonb; // [esp+88h] [ebp-4h]
-    int comparisonc; // [esp+88h] [ebp-4h]
 
     material[0] = surf0.material;
     material[1] = surf1.material;
@@ -1999,19 +1996,19 @@ BOOL __cdecl R_CompareSurfaces(const GfxSurface &surf0, const GfxSurface &surf1)
         if (comparison)
             return comparison < 0;
     }
-    comparisona = (material[0]->info.drawSurf.fields.primarySortKey - material[1]->info.drawSurf.fields.primarySortKey);
-    if (comparisona)
-        return comparisona < 0;
+    comparison = (material[0]->info.drawSurf.fields.primarySortKey - material[1]->info.drawSurf.fields.primarySortKey);
+    if (comparison)
+        return comparison < 0;
     Com_GetPrimaryLight(surf0.primaryLightIndex);
     Com_GetPrimaryLight(surf1.primaryLightIndex);
-    comparisonb = surf0.primaryLightIndex - surf1.primaryLightIndex;
-    if (comparisonb)
-        return comparisonb < 0;
-    comparisonc = (material[0]->info.drawSurf.fields.materialSortedIndex - material[1]->info.drawSurf.fields.materialSortedIndex);
-    if (comparisonc)
+    comparison = surf0.primaryLightIndex - surf1.primaryLightIndex;
+    if (comparison)
+        return comparison < 0;
+    comparison = (material[0]->info.drawSurf.fields.materialSortedIndex - material[1]->info.drawSurf.fields.materialSortedIndex);
+    if (comparison)
     {
         iassert( surf0.tris.firstVertex != surf1.tris.firstVertex );
-        return comparisonc < 0;
+        return comparison < 0;
     }
     else
     {
@@ -2030,7 +2027,7 @@ BOOL __cdecl R_CompareSurfaces(const GfxSurface &surf0, const GfxSurface &surf1)
                 {
                     surfIndex = surf0.tris.vertexCount;
                     surfIndex_4 = surf1.tris.vertexCount;
-                    iassert( comparison );
+                    //iassert( comparison ); // var optimized out (surfIndex == surfIndex_4)
                     return surfIndex - surfIndex_4 < 0;
                 }
                 else

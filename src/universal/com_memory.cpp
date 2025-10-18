@@ -311,8 +311,9 @@ void* __cdecl Hunk_FindDataForFileInternal(int32_t type, const char* name, int32
 
 bool __cdecl Hunk_DataOnHunk(uint8_t* data)
 {
-    if (!Sys_IsMainThread())
-        MyAssertHandler(".\\universal\\com_memory.cpp", 1457, 0, "%s", "Sys_IsMainThread()");
+#ifdef KISAK_MP
+    iassert(Sys_IsMainThread());
+#endif
     if (!s_hunkData)
         MyAssertHandler(".\\universal\\com_memory.cpp", 1458, 0, "%s", "s_hunkData");
     return data >= s_hunkData && data < &s_hunkData[s_hunkTotal];
@@ -326,8 +327,9 @@ char* __cdecl Hunk_SetDataForFile(int32_t type, const char* name, void* data, vo
     int32_t hash; // [esp+20h] [ebp-8h]
     fileData_s* fileData; // [esp+24h] [ebp-4h]
 
-    if (!Sys_IsMainThread())
-        MyAssertHandler(".\\universal\\com_memory.cpp", 1480, 0, "%s", "Sys_IsMainThread()");
+#ifdef KISAK_MP
+    iassert(Sys_IsMainThread());
+#endif
     hash = FS_HashFileName(name, 1024);
     if (Hunk_FindDataForFileInternal(type, name, hash))
         MyAssertHandler(".\\universal\\com_memory.cpp", 1483, 0, "%s", "!Hunk_FindDataForFileInternal( type, name, hash )");
@@ -460,8 +462,9 @@ int32_t __cdecl Hunk_Used()
 
 uint8_t* __cdecl Hunk_Alloc(uint32_t size, const char* name, int32_t type)
 {
-    if (!Sys_IsMainThread())
-        MyAssertHandler(".\\universal\\com_memory.cpp", 1928, 0, "%s", "Sys_IsMainThread()");
+#ifdef KISAK_MP
+    iassert(Sys_IsMainThread());
+#endif
     return Hunk_AllocAlign(size, 32, name, type);
 }
 
@@ -472,8 +475,9 @@ uint8_t* __cdecl Hunk_AllocAlign(uint32_t size, int32_t alignment, const char* n
     uint8_t* endBuf; // [esp+8h] [ebp-Ch]
     int32_t alignmenta; // [esp+20h] [ebp+Ch]
 
-    if (!Sys_IsMainThread())
-        MyAssertHandler(".\\universal\\com_memory.cpp", 1975, 0, "%s", "Sys_IsMainThread()");
+#ifdef KISAK_MP
+    iassert(Sys_IsMainThread());
+#endif
     if (!s_hunkData)
         MyAssertHandler(".\\universal\\com_memory.cpp", 1976, 0, "%s", "s_hunkData");
     if ((alignment & (alignment - 1)) != 0)
@@ -545,8 +549,9 @@ void Hunk_ClearTempMemoryHigh()
 
 uint8_t* __cdecl Hunk_AllocLow(uint32_t size, const char* name, int32_t type)
 {
-    if (!Sys_IsMainThread())
-        MyAssertHandler(".\\universal\\com_memory.cpp", 2138, 0, "%s", "Sys_IsMainThread()");
+#ifdef KISAK_MP
+    iassert(Sys_IsMainThread());
+#endif
     return Hunk_AllocLowAlign(size, 32, name, type);
 }
 
@@ -558,8 +563,9 @@ uint8_t* __cdecl Hunk_AllocLowAlign(uint32_t size, int32_t alignment, const char
     uint8_t* beginBuf; // [esp+10h] [ebp-4h]
     int32_t alignmenta; // [esp+20h] [ebp+Ch]
 
-    if (!Sys_IsMainThread())
-        MyAssertHandler(".\\universal\\com_memory.cpp", 2185, 0, "%s", "Sys_IsMainThread()");
+#ifdef KISAK_MP
+    iassert(Sys_IsMainThread());
+#endif
     if (!s_hunkData)
         MyAssertHandler(".\\universal\\com_memory.cpp", 2186, 0, "%s", "s_hunkData");
     if ((alignment & (alignment - 1)) != 0)
@@ -599,8 +605,10 @@ uint32_t* __cdecl Hunk_AllocateTempMemory(int32_t size, const char* name)
     uint8_t* beginBuf; // [esp+14h] [ebp-4h]
     int32_t sizea; // [esp+20h] [ebp+8h]
 
-    if (!Sys_IsMainThread())
-        MyAssertHandler(".\\universal\\com_memory.cpp", 2263, 0, "%s", "Sys_IsMainThread()");
+
+#ifdef KISAK_MP
+    iassert(Sys_IsMainThread());
+#endif
     if (!s_hunkData)
         return (uint32_t*)Z_Malloc(size, name, 10);
     sizea = size + 16;
@@ -641,8 +649,10 @@ void __cdecl Hunk_FreeTempMemory(char* buf)
     uint8_t* endBuf; // [esp+4h] [ebp-Ch]
     uint8_t* beginBuf; // [esp+Ch] [ebp-4h]
 
-    if (!Sys_IsMainThread())
-        MyAssertHandler(".\\universal\\com_memory.cpp", 2339, 0, "%s", "Sys_IsMainThread()");
+#ifdef KISAK_MP
+    iassert(Sys_IsMainThread());
+#endif
+
     if (s_hunkData)
     {
         if (!buf)
@@ -690,8 +700,9 @@ void Hunk_ClearTempMemory()
 
 void Hunk_CheckTempMemoryClear()
 {
-    if (!Sys_IsMainThread())
-        MyAssertHandler(".\\universal\\com_memory.cpp", 2430, 0, "%s", "Sys_IsMainThread()");
+#ifdef KISAK_MP
+    iassert(Sys_IsMainThread());
+#endif
     if (!s_hunkData)
         MyAssertHandler(".\\universal\\com_memory.cpp", 2431, 0, "%s", "s_hunkData");
     if (hunk_low.temp != hunk_low.permanent)
@@ -700,7 +711,9 @@ void Hunk_CheckTempMemoryClear()
 
 void Hunk_CheckTempMemoryHighClear()
 {
+#ifdef KISAK_MP
     iassert(Sys_IsMainThread());
+#endif
     iassert(s_hunkData);
     iassert(hunk_high.temp == hunk_high.permanent);
 }

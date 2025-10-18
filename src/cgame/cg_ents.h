@@ -88,13 +88,13 @@ void __cdecl CG_AddPacketEntity(unsigned int localClientNum, unsigned int entnum
 int __cdecl CG_AddPacketEntities(int localClientNum);
 DObjAnimMat *__cdecl CG_DObjGetLocalBoneMatrix(const cpose_t *pose, DObj_s *obj, int boneIndex);
 DObjAnimMat *__cdecl CG_DObjGetLocalTagMatrix(const cpose_t *pose, DObj_s *obj, unsigned int tagName);
-DObjAnimMat *__cdecl CG_DObjGetWorldBoneMatrix(
+int32_t __cdecl CG_DObjGetWorldBoneMatrix(
     const cpose_t *pose,
     DObj_s *obj,
     int boneIndex,
     float (*tagMat)[3],
     float *origin);
-DObjAnimMat *__cdecl CG_DObjGetWorldTagMatrix(
+int32_t __cdecl CG_DObjGetWorldTagMatrix(
     const cpose_t *pose,
     DObj_s *obj,
     unsigned int tagName,

@@ -4508,13 +4508,13 @@ void __cdecl TurretNVGTrigger(pmove_t *pm)
     }
 }
 
-double __cdecl BG_GetSpeed(const playerState_s *ps, int32_t time)
+float __cdecl BG_GetSpeed(const playerState_s *ps, int32_t time)
 {
     if ((ps->pm_flags & PMF_LADDER) == 0)
         return Vec2Length(ps->velocity);
     if (time - ps->jumpTime >= 500)
         return ps->velocity[2];
-    return 0.0;
+    return 0.0f;
 }
 
 // LWSS: might not be right file for this function

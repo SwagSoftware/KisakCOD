@@ -44,6 +44,7 @@ int __cdecl CL_DObjCreateSkelForBones(const DObj_s *obj, int *partBits, DObjAnim
     int timeStamp; // [esp+8h] [ebp-4h]
 
     iassert(obj);
+
     timeStamp = CL_GetSkelTimeStamp();
     if (DObjSkelExists(obj, timeStamp))
     {

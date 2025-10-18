@@ -337,24 +337,20 @@ void __cdecl HandleClientEvent(gclient_s *client, gentity_s *ent, int32_t event,
 {
     gentity_s *attacker; // [esp+4h] [ebp-14h]
     float damage; // [esp+8h] [ebp-10h]
-    float damagea; // [esp+8h] [ebp-10h]
 
     switch (event)
     {
     case 19:
-        if (!ent->client)
-            MyAssertHandler(".\\game_mp\\g_active_mp.cpp", 505, 0, "%s", "ent->client");
+        iassert(ent->client);
         Scr_Notify(ent, scr_const.reload_start, 0);
         break;
     case 20:
-        if (!ent->client)
-            MyAssertHandler(".\\game_mp\\g_active_mp.cpp", 510, 0, "%s", "ent->client");
+        iassert(ent->client);
         Scr_Notify(ent, scr_const.reload, 0);
         break;
     case 25:
     case 32:
-        if (!ent->client)
-            MyAssertHandler(".\\game_mp\\g_active_mp.cpp", 467, 0, "%s", "ent->client");
+        iassert(ent->client);
         NotifyGrenadePullback(ent, eventParm);
         break;
     case 26:
@@ -395,8 +391,7 @@ void __cdecl HandleClientEvent(gclient_s *client, gentity_s *ent, int32_t event,
         }
         break;
     case 63:
-        if (!ent->client)
-            MyAssertHandler(".\\game_mp\\g_active_mp.cpp", 515, 0, "%s", "ent->client");
+        iassert(ent->client);
         Scr_Notify(ent, scr_const.detonate, 0);
         break;
     default:
@@ -405,8 +400,8 @@ void __cdecl HandleClientEvent(gclient_s *client, gentity_s *ent, int32_t event,
             damage = eventParm < 100 ? (double)eventParm * 0.009999999776482582 : 1.1;
             if (damage != 0.0)
             {
-                damagea = (double)client->ps.stats[2] * damage;
-                G_Damage(ent, 0, 0, 0, 0, (int)damagea, 0, 11, 0xFFFFFFFF, HITLOC_NONE, 0, 0, 0);
+                damage = (double)client->ps.stats[2] * damage;
+                G_Damage(ent, 0, 0, 0, 0, (int)damage, 0, 11, 0xFFFFFFFF, HITLOC_NONE, 0, 0, 0);
             }
         }
         break;

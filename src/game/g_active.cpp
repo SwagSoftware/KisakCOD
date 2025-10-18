@@ -352,7 +352,7 @@ void __cdecl ClientEvents(gentity_s *ent, int oldEventSequence)
     __int64 v6; // r11
     int v7; // r30
     int v8; // r29
-    double v9; // fp0
+    float damage; // fp0
     __int64 v10; // r11
     gclient_s *v11; // r11
     gclient_s *v12; // r11
@@ -360,12 +360,8 @@ void __cdecl ClientEvents(gentity_s *ent, int oldEventSequence)
     team_t v14; // r3
     int v15; // r29
     int v16; // r4
-    int v17; // [sp+8h] [-118h]
-    hitLocation_t v18; // [sp+Ch] [-114h]
-    unsigned int v19; // [sp+10h] [-110h]
-    unsigned int v20; // [sp+14h] [-10Ch]
     float v21[4]; // [sp+88h] [-98h] BYREF
-
+    
     client = ent->client;
     eventSequence = client->ps.eventSequence;
     if (oldEventSequence < eventSequence - 4)
@@ -385,19 +381,16 @@ void __cdecl ClientEvents(gentity_s *ent, int oldEventSequence)
                 case 1:
                     goto LABEL_46;
                 case 19:
-                    if (!ent->client)
-                        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\g_active.cpp", 423, 0, "%s", "ent->client");
+                    iassert(ent->client);
                     Scr_Notify(ent, scr_const.reload_start, 0);
                     break;
                 case 20:
-                    if (!ent->client)
-                        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\g_active.cpp", 428, 0, "%s", "ent->client");
+                    iassert(ent->client);
                     Scr_Notify(ent, scr_const.reload, 0);
                     break;
                 case 25:
                 case 32:
-                    if (!ent->client)
-                        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\g_active.cpp", 406, 0, "%s", "ent->client");
+                    iassert(ent->client);
                     NotifyGrenadePullback(ent, v8);
                     break;
                 case 26:
@@ -430,8 +423,7 @@ void __cdecl ClientEvents(gentity_s *ent, int oldEventSequence)
                     }
                     break;
                 case 67:
-                    if (!ent->client)
-                        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\g_active.cpp", 448, 0, "%s", "ent->client");
+                    iassert(ent->client);
                     Scr_Notify(ent, scr_const.detonate, 0);
                     break;
                 default:
@@ -465,18 +457,16 @@ void __cdecl ClientEvents(gentity_s *ent, int oldEventSequence)
             if (v8 >= 100)
                 break;
             LODWORD(v6) = client->ps.eventParms[v5 & 3];
-            v9 = (float)((float)v6 * (float)0.0099999998);
-            if (v9 != 0.0)
+            damage = (float)((float)v6 * (float)0.0099999998);
+            if (damage != 0.0)
                 goto LABEL_9;
         LABEL_46:
             if (++v5 >= client->ps.eventSequence)
                 return;
         }
-        v9 = 1.1;
+        damage = 1.1;
     LABEL_9:
-        LODWORD(v10) = client->ps.stats[2];
-        HIDWORD(v10) = 11;
-        G_Damage(ent, 0, 0, 0, 0, (int)(float)((float)v10 * (float)v9), 0, 11, v17, v18, v19, v20);
+        G_Damage(ent, 0, 0, 0, 0, (int)((float)client->ps.stats[2] * damage), 0, 11, 0xFFFFFFFF, HITLOC_NONE, 0, 0);
         goto LABEL_46;
     }
 }

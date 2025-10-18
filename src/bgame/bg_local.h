@@ -1989,7 +1989,7 @@ void __cdecl PM_SetLadderFlag(playerState_s *ps);
 void __cdecl PM_LadderMove(pmove_t *pm, pml_t *pml);
 void __cdecl PM_MeleeChargeUpdate(pmove_t *pm, pml_t *pml);
 void __cdecl TurretNVGTrigger(pmove_t *pm);
-double __cdecl BG_GetSpeed(const playerState_s *ps, int32_t time);
+float __cdecl BG_GetSpeed(const playerState_s *ps, int32_t time);
 
 
 // bg_mantle
@@ -2215,7 +2215,7 @@ void __cdecl Sprint_State_Raise(playerState_s *ps);
 void __cdecl Sprint_State_Drop(playerState_s *ps);
 void __cdecl PM_ResetWeaponState(playerState_s *ps);
 void __cdecl BG_WeaponFireRecoil(const playerState_s *ps, float *vGunSpeed, float *kickAVel);
-double __cdecl BG_GetBobCycle(const playerState_s *ps);
+float __cdecl BG_GetBobCycle(const playerState_s *ps);
 float __cdecl BG_GetVerticalBobFactor(const playerState_s *ps, float cycle, float speed, float maxAmp);
 float __cdecl BG_GetHorizontalBobFactor(const playerState_s *ps, float cycle, float speed, float maxAmp);
 void __cdecl BG_CalculateWeaponAngles(weaponState_t *ws, float *angles);

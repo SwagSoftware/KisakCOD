@@ -270,7 +270,6 @@ void __cdecl CG_DoBaseOriginController(const cpose_t *pose, const DObj_s *obj, i
 {
     float *trans; // [esp+8h] [ebp-104h]
     float result[3]; // [esp+30h] [ebp-DCh] BYREF
-    uint32_t localClientNum; // [esp+8Ch] [ebp-80h]
     uint32_t rootBoneMask; // [esp+90h] [ebp-7Ch]
     float baseQuat[4]; // [esp+94h] [ebp-78h] BYREF
     float viewOffset[3]; // [esp+A4h] [ebp-68h] BYREF
@@ -286,12 +285,14 @@ void __cdecl CG_DoBaseOriginController(const cpose_t *pose, const DObj_s *obj, i
 
     rootBoneCount = DObjGetRootBoneCount(obj);
     iassert(rootBoneCount);
+
     maxHighIndex = --rootBoneCount >> 5;
     for (highIndex = 0; highIndex < maxHighIndex; ++highIndex)
     {
         if (setPartBits[highIndex] != -1)
             goto notSet;
     }
+
     rootBoneMask = 0xFFFFFFFF >> ((rootBoneCount & 0x1F) + 1);
     if ((rootBoneMask | setPartBits[maxHighIndex]) == 0xFFFFFFFF)
         return;
@@ -300,15 +301,9 @@ notSet:
     if (mat)
     {
         AnglesToQuat(pose->angles, baseQuat);
-        partBits[0] = 0;
-        partBits[1] = 0;
-        partBits[2] = 0;
+        memset(partBits, 0, sizeof(partBits));
         partBits[3] = 0x80000000;
-        partBits[4] = 0;
-        partBits[5] = 0;
-        partBits[6] = 0;
-        localClientNum = R_GetLocalClientNum();
-        cgameGlob = CG_GetLocalClientGlobals(localClientNum);
+        cgameGlob = CG_GetLocalClientGlobals(R_GetLocalClientNum());
         viewOffset[0] = cgameGlob->refdef.viewOffset[0];
         viewOffset[1] = cgameGlob->refdef.viewOffset[1];
         viewOffset[2] = cgameGlob->refdef.viewOffset[2];
@@ -336,14 +331,15 @@ notSet:
                     animMat.quat[2] = baseQuat[2];
                     animMat.quat[3] = baseQuat[3];
                     DObjSetTrans(&animMat, pose->origin);
-                    if (Vec4LengthSq(animMat.quat) == 0.0f)
+                    float len = Vec4LengthSq(animMat.quat);
+                    if (len == 0.0f)
                     {
                         animMat.quat[3] = 1.0f;
                         animMat.transWeight = 2.0f;
                     }
                     else
                     {
-                        animMat.transWeight = 2.0f / Vec4LengthSq(animMat.quat);
+                        animMat.transWeight = 2.0f / len;
                     }
                     QuatMultiplyEquals(baseQuat, mat->quat);
                     MatrixTransformVectorQuatTrans(mat->trans, &animMat, origin);

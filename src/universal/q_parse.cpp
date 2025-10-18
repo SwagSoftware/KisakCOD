@@ -5,18 +5,18 @@
 #include <qcommon/qcommon.h>
 #include <qcommon/threads.h>
 
-ParseThreadInfo g_parse[3];
+ParseThreadInfo g_parse[4]; // LWSS: increase from 3 to 4 for SP's SERVER thread
 
 void __cdecl TRACK_q_parse()
 {
-    track_static_alloc_internal(g_parse, 53796, "g_parse", 10);
+    //track_static_alloc_internal(g_parse, 53796, "g_parse", 10);
 }
 
 void __cdecl Com_InitParse()
 {
     unsigned int i; // [esp+0h] [ebp-4h]
 
-    for (i = 0; i < 3; ++i)
+    for (i = 0; i < 4; ++i)
         Com_InitParseInfo(g_parse[i].parseInfo);
 }
 
@@ -59,10 +59,14 @@ ParseThreadInfo *__cdecl Com_GetParseThreadInfo()
         return &g_parse[0];
     if (Sys_IsRenderThread())
         return &g_parse[1];
-        //return g_parse + 17932;
     if (Sys_IsDatabaseThread())
         return &g_parse[2];
-        //return g_parse + 35864;
+#ifdef KISAK_SP
+    if (Sys_IsServerThread())
+    {
+        return &g_parse[3];
+    }
+#endif
     if (!alwaysfails)
         MyAssertHandler(".\\universal\\q_parse.cpp", 117, 0, "No parse context for current thread.");
     return 0;

@@ -419,7 +419,7 @@ void __cdecl SV_SpawnServer(const char *mapname, int savegame)
         Dvar_SetInt((dvar_s *)fs_debug, 0);
     //Live_Frame(CL_ControllerIndexFromClientNum(0), 0);
     
-    ProfLoad_Activate();
+    //ProfLoad_Activate();
 
     {
         PROF_SCOPED("Clear load game");

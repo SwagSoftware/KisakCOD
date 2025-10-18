@@ -762,6 +762,7 @@ int32_t __cdecl CG_DObjGetWorldBoneMatrix(
 
     iassert(obj);
     iassert(pose);
+
     mat = CG_DObjGetLocalBoneMatrix(pose, obj, boneIndex);
     if (!mat)
         return 0;

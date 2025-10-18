@@ -549,8 +549,6 @@ void __cdecl CG_InitView(int32_t localClientNum)
 
 void __cdecl CG_CalcViewValues(int32_t localClientNum)
 {
-    float v1; // [esp+Ch] [ebp-44h]
-    float v2; // [esp+38h] [ebp-18h]
     float f; // [esp+40h] [ebp-10h]
     float uiBlurRadius; // [esp+48h] [ebp-8h]
     cg_s *cgameGlob;
@@ -561,9 +559,7 @@ void __cdecl CG_CalcViewValues(int32_t localClientNum)
     cgameGlob->refdef.time = cgameGlob->time;
     cgameGlob->refdef.localClientNum = localClientNum;
     uiBlurRadius = CL_GetMenuBlurRadius(localClientNum);
-    v2 = uiBlurRadius * uiBlurRadius + cgDC[localClientNum].blurRadiusOut * cgDC[localClientNum].blurRadiusOut;
-    v1 = sqrt(v2);
-    cgameGlob->refdef.blurRadius = v1;
+    cgameGlob->refdef.blurRadius = sqrt(uiBlurRadius * uiBlurRadius + cgDC[localClientNum].blurRadiusOut * cgDC[localClientNum].blurRadiusOut);
     CG_VisionSetApplyToRefdef(localClientNum);
     if (cgameGlob->cubemapShot)
     {
@@ -599,22 +595,27 @@ void __cdecl CG_CalcViewValues(int32_t localClientNum)
         {
             cgameGlob->fBobCycle = BG_GetBobCycle(&cgameGlob->predictedPlayerState);
             cgameGlob->xyspeed = BG_GetSpeed(&cgameGlob->predictedPlayerState, cgameGlob->time);
+
             cgameGlob->refdef.vieworg[0] = cgameGlob->predictedPlayerState.origin[0];
             cgameGlob->refdef.vieworg[1] = cgameGlob->predictedPlayerState.origin[1];
             cgameGlob->refdef.vieworg[2] = cgameGlob->predictedPlayerState.origin[2];
+
             if (!cgameGlob->playerTeleported
-                && (!cgameGlob->nextSnap->ps.pm_type
+                && (cgameGlob->nextSnap->ps.pm_type == PM_NORMAL
                     || cgameGlob->nextSnap->ps.pm_type == PM_NOCLIP
                     || cgameGlob->nextSnap->ps.pm_type == PM_UFO))
             {
                 CG_SmoothCameraZ(cgameGlob);
             }
+
             cgameGlob->lastVieworg[0] = cgameGlob->refdef.vieworg[0];
             cgameGlob->lastVieworg[1] = cgameGlob->refdef.vieworg[1];
             cgameGlob->lastVieworg[2] = cgameGlob->refdef.vieworg[2];
+
             cgameGlob->refdefViewAngles[0] = cgameGlob->predictedPlayerState.viewangles[0];
             cgameGlob->refdefViewAngles[1] = cgameGlob->predictedPlayerState.viewangles[1];
             cgameGlob->refdefViewAngles[2] = cgameGlob->predictedPlayerState.viewangles[2];
+
             if (cg_errorDecay->current.value > 0.0)
             {
                 f = (cg_errorDecay->current.value - (double)(cgameGlob->time - cgameGlob->predictedErrorTime))
@@ -625,13 +626,18 @@ void __cdecl CG_CalcViewValues(int32_t localClientNum)
                     Vec3Mad(cgameGlob->refdef.vieworg, f, cgameGlob->predictedError, cgameGlob->refdef.vieworg);
             }
             CG_CalcTurretViewValues(localClientNum);
+
             if (!cgameGlob->renderingThirdPerson)
                 CG_OffsetFirstPersonView(cgameGlob);
+
             CG_ShakeCamera(localClientNum);
+
             AnglesToAxis(cgameGlob->refdefViewAngles, cgameGlob->refdef.viewaxis);
             CG_ApplyViewAnimation(localClientNum);
+
             if (cgameGlob->renderingThirdPerson)
                 CG_OffsetThirdPersonView(cgameGlob);
+
             CG_PerturbCamera(cgameGlob);
             CG_CalcFov(localClientNum);
         }
@@ -772,9 +778,7 @@ void __cdecl CG_SmoothCameraZ(cg_s *cgameGlob)
 void __cdecl CG_OffsetFirstPersonView(cg_s *cgameGlob)
 {
     int32_t v1; // [esp+14h] [ebp-54h]
-    float deltaa; // [esp+1Ch] [ebp-4Ch]
     float delta; // [esp+1Ch] [ebp-4Ch]
-    float deltab; // [esp+1Ch] [ebp-4Ch]
     float vRight[3]; // [esp+24h] [ebp-44h] BYREF
     float angles[3]; // [esp+30h] [ebp-38h] BYREF
     float f; // [esp+3Ch] [ebp-2Ch]
@@ -801,17 +805,21 @@ void __cdecl CG_OffsetFirstPersonView(cg_s *cgameGlob)
         BG_CalculateViewAngles(&vs, angles);
         Vec3Add(cgameGlob->refdefViewAngles, angles, cgameGlob->refdefViewAngles);
         cgameGlob->refdef.vieworg[2] = cgameGlob->refdef.vieworg[2] + cgameGlob->predictedPlayerState.viewHeightCurrent;
-        deltaa = BG_GetVerticalBobFactor(
+
+        delta = BG_GetVerticalBobFactor(
             &cgameGlob->predictedPlayerState,
             cgameGlob->fBobCycle,
             cgameGlob->xyspeed,
             bg_bobMax->current.value);
-        cgameGlob->refdef.vieworg[2] = cgameGlob->refdef.vieworg[2] + deltaa;
+
+        cgameGlob->refdef.vieworg[2] += delta;
+
         deltaB = BG_GetHorizontalBobFactor(
             &cgameGlob->predictedPlayerState,
             cgameGlob->fBobCycle,
             cgameGlob->xyspeed,
             bg_bobMax->current.value);
+
         AngleVectors(cgameGlob->refdefViewAngles, 0, vRight, 0);
         Vec3Mad(cgameGlob->refdef.vieworg, deltaB, vRight, cgameGlob->refdef.vieworg);
         delta = (float)(cgameGlob->time - cgameGlob->landTime);
@@ -819,8 +827,8 @@ void __cdecl CG_OffsetFirstPersonView(cg_s *cgameGlob)
         {
             if (delta > 0.0 && delta < 450.0)
             {
-                deltab = delta - 150.0;
-                f = 1.0 - deltab / 300.0;
+                delta = delta - 150.0;
+                f = 1.0 - delta / 300.0;
                 cgameGlob->refdef.vieworg[2] = cgameGlob->landChange * f + cgameGlob->refdef.vieworg[2];
             }
         }
@@ -848,7 +856,7 @@ void __cdecl CG_CalcFov(int32_t localClientNum)
     CG_UpdateFov(localClientNum, fov_x);
 }
 
-void __cdecl CG_CalcCubemapViewValues(cg_s *cgameGlob)
+void __cdecl CG_CalcCubemapViewValues(cg_s *cgameGlob) // KISAKTODO: de-dup? R_CalcCubeMapViewValues()
 {
     cgameGlob->refdef.x = 0;
     cgameGlob->refdef.y = 0;
@@ -985,8 +993,8 @@ void __cdecl CG_ApplyViewAnimation(int32_t localClientNum)
         weaponIndex = BG_GetViewmodelWeaponIndex(&cgameGlob->predictedPlayerState);
         if (weaponIndex > 0)
         {
-            vassert(localClientNum == 0, "localClientNum = %d", localClientNum);
-            weapInfo = &cg_weaponsArray[0][weaponIndex];
+            weapInfo = CG_GetLocalClientWeaponInfo(localClientNum, weaponIndex);
+
             if (weapInfo->viewModelDObj)
             {
                 cgameGlob->viewModelAxis[0][0] = cgameGlob->refdef.viewaxis[0][0];
