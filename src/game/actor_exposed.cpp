@@ -173,32 +173,30 @@ pathnode_t *__cdecl Actor_Exposed_GetReacquireNode(actor_s *self)
 
 int __cdecl Actor_Exposed_UseReacquireNode(actor_s *self, pathnode_t *pNode)
 {
-    int v4; // r6
-    float v6[4]; // [sp+50h] [-50h] BYREF
-    float v7[16]; // [sp+60h] [-40h] BYREF
+    float vFrom[3]; // [sp+50h] [-50h] BYREF
+    float vPoint[3]; // [sp+60h] [-40h] BYREF
 
-    if (!self)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\actor_exposed.cpp", 291, 0, "%s", "self");
-    if (!self->sentient)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\actor_exposed.cpp", 292, 0, "%s", "self->sentient");
-    if ((unsigned __int8)Actor_KeepClaimedNode(self))
-        MyAssertHandler(
-            "c:\\trees\\cod3\\cod3src\\src\\game\\actor_exposed.cpp",
-            293,
-            0,
-            "%s",
-            "!Actor_KeepClaimedNode( self )");
-    if (!Actor_GetTargetEntity(self))
+    iassert(self);
+    iassert(self->sentient);
+    iassert(!Actor_KeepClaimedNode(self));
+
+    gentity_s *targetEnt = Actor_GetTargetEntity(self);
+
+    if (!targetEnt)
         return 0;
+
     if (self->eState[self->stateLevel] != AIS_EXPOSED)
         return 0;
+
     if (!Path_CanClaimNode(pNode, self->sentient))
         return 0;
-    v6[0] = pNode->constant.vOrigin[0];
-    v6[2] = pNode->constant.vOrigin[2] + (float)64.0;
-    v6[1] = pNode->constant.vOrigin[1];
-    Actor_GetTargetLookPosition(self, v7);
-    if (!Actor_CanSeePointFrom(self, v6, v7, 0.0, v4) || !Actor_FindPathToNode(self, pNode, 1))
+
+    vFrom[0] = pNode->constant.vOrigin[0];
+    vFrom[1] = pNode->constant.vOrigin[1];
+    vFrom[2] = pNode->constant.vOrigin[2] + 64.0f;
+
+    Actor_GetTargetLookPosition(self, vPoint);
+    if (!Actor_CanSeePointFrom(self, vFrom, vPoint, 0.0, targetEnt->s.number) || !Actor_FindPathToNode(self, pNode, 1))
         return 0;
     Sentient_ClaimNode(self->sentient, pNode);
     self->iPotentialReacquireNodeCount = 0;

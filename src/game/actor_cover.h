@@ -12,10 +12,7 @@ void __cdecl DebugDrawNodePicking(const char *msg, actor_s *self, const pathnode
 int __cdecl Actor_Cover_IsWithinNodeAngle(
     const float *pos,
     const pathnode_t *node,
-    const pathnodeRange_t *range,
-    double a4,
-    double a5,
-    long double a6);
+    const pathnodeRange_t *range);
 int __cdecl Actor_Cover_NodeRangeValid(const float *pos, const pathnode_t *node, pathnodeRange_t *range);
 void __cdecl Actor_Cover_InitRange(pathnodeRange_t *rangeOut, const pathnode_t *node);
 bool __cdecl Actor_Cover_GetAttackScript(

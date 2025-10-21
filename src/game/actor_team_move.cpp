@@ -345,8 +345,8 @@ int __cdecl Actor_TeamMoveTryDodge(team_move_context_t *context, team_move_other
     int result; // r3
     double v14; // fp0
     double v15; // fp0
-    float v16; // [sp+50h] [-50h] BYREF
-    float v17; // [sp+54h] [-4Ch]
+    float forwardStartPos[2]; // [sp+50h] [-50h] BYREF // v16
+    //float v17; // [sp+54h] [-4Ch]
 
     self = context->self;
     other = context_other->other;
@@ -396,20 +396,20 @@ int __cdecl Actor_TeamMoveTryDodge(team_move_context_t *context, team_move_other
         if ((float)((float)(context_other->vPerp[0] * context_other->vPerp[0])
             + (float)(context_other->vPerp[1] * context_other->vPerp[1])) >= 1406.25)
         {
-            if (context_other->fPosDeltaLengthSqrd >= 3600.0 || !Path_GetForwardStartPos(p_Path, context->vOrgSelf, &v16))
+            if (context_other->fPosDeltaLengthSqrd >= 3600.0 || !Path_GetForwardStartPos(p_Path, context->vOrgSelf, forwardStartPos))
                 return 0;
         LABEL_25:
-            context_other->vDelta[0] = context_other->vOrgOther[0] - v16;
-            context_other->vDelta[1] = context_other->vOrgOther[1] - v17;
+            context_other->vDelta[0] = context_other->vOrgOther[0] - forwardStartPos[0];
+            context_other->vDelta[1] = context_other->vOrgOther[1] - forwardStartPos[1];
             goto LABEL_28;
         }
         if (context_other->fScale > 0.0)
         {
         LABEL_33:
-            if (Path_GetForwardStartPos(p_Path, context->vOrgSelf, &v16))
+            if (Path_GetForwardStartPos(p_Path, context->vOrgSelf, forwardStartPos))
             {
-                context_other->vDelta[0] = context_other->vOrgOther[0] - v16;
-                context_other->vDelta[1] = context_other->vOrgOther[1] - v17;
+                context_other->vDelta[0] = context_other->vOrgOther[0] - forwardStartPos[0];
+                context_other->vDelta[1] = context_other->vOrgOther[1] - forwardStartPos[1];
                 if ((float)((float)(context->vVelSelf[1] * context_other->vDelta[1])
                     + (float)(context->vVelSelf[0] * context_other->vDelta[0])) > 0.0)
                 {
@@ -437,7 +437,7 @@ int __cdecl Actor_TeamMoveTryDodge(team_move_context_t *context, team_move_other
         {
             if (context_other->fPosDeltaLengthSqrd >= 3600.0)
                 return 0;
-            if (Path_GetForwardStartPos(p_Path, context->vOrgSelf, &v16))
+            if (Path_GetForwardStartPos(p_Path, context->vOrgSelf, forwardStartPos))
                 goto LABEL_25;
         }
     }

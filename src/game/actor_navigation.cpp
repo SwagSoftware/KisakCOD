@@ -2128,19 +2128,19 @@ void __cdecl Path_UpdateForwardLookahead_IncompletePath(
 
 void __cdecl Path_UpdateForwardLookahead(path_t *pPath, const float *vStartPos)
 {
-    int wPathLen; // r11
     float fCurrLength; // fp1
     double v6; // fp2
     const char *v7; // r3
     double v8; // fp27
     double v9; // fp26
-    int v10; // r11
+    int bAtStart; // r11
     __int16 wNegotiationStartNode; // r8
     int v12; // r31
     const pathpoint_t *v13; // r28
     pathpoint_t *v14; // r25
-    double v15; // fp0
-    double v16; // fp13
+    float prevOffset[2]; // v15/v16
+    //double v15; // fp0
+    //double v16; // fp13
     float fLength; // fp31
     float fraction; // fp28
     const char *v19; // r3
@@ -2157,157 +2157,104 @@ void __cdecl Path_UpdateForwardLookahead(path_t *pPath, const float *vStartPos)
     float v30; // [sp+58h] [-78h] BYREF
     float v31; // [sp+5Ch] [-74h]
 
-    if (!pPath)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\actor_navigation.cpp", 3371, 0, "%s", "pPath");
-    if (pPath->wPathLen <= 0)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\actor_navigation.cpp", 3372, 0, "%s", "pPath->wPathLen > 0");
-    if ((unsigned __int16)pPath->wNegotiationStartNode >= 0x8000u)
-        MyAssertHandler(
-            "c:\\trees\\cod3\\cod3src\\src\\game\\actor_navigation.cpp",
-            3373,
-            0,
-            "%s",
-            "pPath->wNegotiationStartNode >= 0");
-    if (pPath->wNegotiationStartNode > pPath->lookaheadNextNode)
-        MyAssertHandler(
-            "c:\\trees\\cod3\\cod3src\\src\\game\\actor_navigation.cpp",
-            3374,
-            0,
-            "%s",
-            "pPath->wNegotiationStartNode <= pPath->lookaheadNextNode");
-    if (pPath->lookaheadNextNode >= pPath->wPathLen)
-        MyAssertHandler(
-            "c:\\trees\\cod3\\cod3src\\src\\game\\actor_navigation.cpp",
-            3375,
-            0,
-            "%s",
-            "pPath->lookaheadNextNode < pPath->wPathLen");
-    wPathLen = pPath->wPathLen;
-    if (wPathLen > 1)
-    {
-        fCurrLength = pPath->fCurrLength;
-        v6 = *((float *)&pPath->pts[wPathLen - 1] - 2);
-        if (fCurrLength > v6)
-        {
-            v7 = va((const char *)HIDWORD(fCurrLength), LODWORD(fCurrLength), LODWORD(v6));
-            MyAssertHandler(
-                "c:\\trees\\cod3\\cod3src\\src\\game\\actor_navigation.cpp",
-                3376,
-                0,
-                "%s\n\t%s",
-                "pPath->wPathLen <= 1 || pPath->fCurrLength <= pPath->pts[pPath->wPathLen - 2].fOrigLength",
-                v7);
-        }
-    }
-    if ((pPath->flags & 0x200) != 0
-        && Path_GetForwardStartPos(pPath, vStartPos, &v30)
-        && (v8 = v30,
-            v9 = v31,
-            (float)((float)(pPath->lookaheadDir[1] * (float)(pPath->vCurrPoint[1] - v31))
-                + (float)(pPath->lookaheadDir[0] * (float)(pPath->vCurrPoint[0] - v30))) <= 0.0)
-        && (v10 = 1,
-            wNegotiationStartNode = pPath->wNegotiationStartNode,
-            v12 = pPath->wPathLen - 2,
-            v12 >= wNegotiationStartNode))
-    {
-        v13 = &pPath->pts[v12];
-        while (1)
-        {
-            d2 = (float)(pPath->lookaheadDir[0] * (float)(v13->vOrigPoint[0] - v30))
-                + (float)(pPath->lookaheadDir[1] * (float)(v13->vOrigPoint[1] - v31));
-            if (d2 > 0.0)
-                break;
-            --v12;
-            --v13;
-            v10 = 0;
-            if (v12 < wNegotiationStartNode)
-                goto LABEL_21;
-        }
-        v14 = &pPath->pts[v12];
-        if (v10)
-        {
-            fLength = pPath->fCurrLength;
-            v15 = pPath->vCurrPoint[0];
-            v16 = pPath->vCurrPoint[1];
-        }
-        else
-        {
-            v15 = v14[1].vOrigPoint[0];
-            v16 = v14[1].vOrigPoint[1];
-            fLength = v13->fOrigLength;
-        }
-        d1 = (float)(pPath->lookaheadDir[1] * (float)((float)v16 - v31))
-            + (float)(pPath->lookaheadDir[0] * (float)((float)v15 - v30));
+    pathpoint_t *pt;
+    pathpoint_t *prevPt;
+    float offset[2];
+    float vForwardStartPos[2];
+    float dist;
+    float height;
+    float totalArea;
 
-        iassert(d1);
-        iassert(d2);
-        iassert(d1 - d2);
-        
-        fraction = (float)(d1 / (float)(d1 - d2));
-        iassert(fraction >= 0);
-        iassert(fraction <= 1.f);
-        
-        iassert(fLength);
-        
-        lookaheadAmount = pPath->fLookaheadAmount;
-        iassert(lookaheadAmount);
-        DistToPathSegment = Path_GetDistToPathSegment(&v30, v13);
-        v23 = (float)((float)((float)fLength - (float)((float)(d1 / (float)(d1 - d2)) * (float)fLength))
-            * (float)DistToPathSegment);
-        if (v23 < lookaheadAmount)
+
+    iassert(pPath);
+    iassert(pPath->wPathLen > 0);
+    iassert(pPath->wNegotiationStartNode >= 0);
+    iassert(pPath->wNegotiationStartNode <= pPath->lookaheadNextNode);
+    iassert(pPath->lookaheadNextNode < pPath->wPathLen);
+
+    iassert(pPath->wPathLen <= 1 || pPath->fCurrLength <= pPath->pts[pPath->wPathLen - 2].fOrigLength);
+
+    if ((pPath->flags & 0x200) != 0 && Path_GetForwardStartPos(pPath, vStartPos, vForwardStartPos))
+    {
+        prevOffset[0] = pPath->vCurrPoint[0] - vForwardStartPos[0];
+        prevOffset[1] = pPath->vCurrPoint[1] - vForwardStartPos[1];
+        if ((float)((float)(pPath->lookaheadDir[0] * prevOffset[0]) + (float)(pPath->lookaheadDir[1] * prevOffset[1])) <= 0.0)
         {
-            if (v12 <= pPath->wNegotiationStartNode)
+            bAtStart = 1;
+            int i = pPath->wPathLen - 2;
+            while (1)
             {
-            LABEL_47:
+                if (i < pPath->wNegotiationStartNode)
+                {
+                    pPath->forwardLookaheadDir2D[0] = pPath->lookaheadDir[0];
+                    pPath->forwardLookaheadDir2D[1] = pPath->lookaheadDir[1];
+                    return;
+                }
+                pt = &pPath->pts[i];
+                offset[0] = pt->vOrigPoint[0] - vForwardStartPos[0];
+                offset[1] = pt->vOrigPoint[1] - vForwardStartPos[1];
+                d2 = (float)(pPath->lookaheadDir[0] * offset[0]) + (float)(pPath->lookaheadDir[1] * offset[1]);
+                if (d2 > 0.0)
+                    break;
+                --i;
+                bAtStart = 0;
+            }
+            prevPt = &pPath->pts[i + 1];
+            if (bAtStart)
+            {
+                prevOffset[0] = pPath->vCurrPoint[0] - vForwardStartPos[0];
+                prevOffset[1] = pPath->vCurrPoint[1] - vForwardStartPos[1];
+                fLength = pPath->fCurrLength;
+            }
+            else
+            {
+                prevOffset[0] = prevPt->vOrigPoint[0] - vForwardStartPos[0];
+                prevOffset[1] = prevPt->vOrigPoint[1] - vForwardStartPos[1];
+                fLength = pt->fOrigLength;
+            }
+            d1 = (float)(pPath->lookaheadDir[0] * prevOffset[0]) + (float)(pPath->lookaheadDir[1] * prevOffset[1]);
+            iassert(d1 <= 0);
+            iassert(d2 > 0);
+            iassert(d1 - d2);
+            fraction = d1 / (d1 - d2);
+            iassert(fraction >= 0);
+            iassert(fraction <= 1.f);
+            iassert(fLength > 0);
+            dist = fraction * fLength;
+            lookaheadAmount = pPath->fLookaheadAmount;
+            iassert(lookaheadAmount > 0);
+            height = Path_GetDistToPathSegment(vForwardStartPos, pt);
+            totalArea = (float)(fLength - dist) * height;
+            if (totalArea < lookaheadAmount)
+            {
+                while (i > pPath->wNegotiationStartNode)
+                {
+                    pt = &pPath->pts[--i];
+                    iassert(pt->fOrigLength > 0);
+                    height = Path_GetDistToPathSegment(vForwardStartPos, pt);
+                    totalArea = (float)(height * pt->fOrigLength) + totalArea;
+                    if (totalArea >= lookaheadAmount)
+                        goto LABEL_54;
+                }
                 vOrigPoint = pPath->pts[pPath->wNegotiationStartNode].vOrigPoint;
-                pPath->forwardLookaheadDir2D[0] = *vOrigPoint - (float)v8;
-                pPath->forwardLookaheadDir2D[1] = vOrigPoint[1] - (float)v9;
+                pPath->forwardLookaheadDir2D[0] = *vOrigPoint - vForwardStartPos[0];
+                pPath->forwardLookaheadDir2D[1] = vOrigPoint[1] - vForwardStartPos[1];
                 Vec2Normalize(pPath->forwardLookaheadDir2D);
             }
             else
             {
-                p_fOrigLength = &v14->fOrigLength;
-                while (1)
-                {
-                    p_fOrigLength -= 7;
-                    --v12;
-                    v25 = *p_fOrigLength;
-                    if (v25 <= 0.0)
-                        MyAssertHandler(
-                            "c:\\trees\\cod3\\cod3src\\src\\game\\actor_navigation.cpp",
-                            3445,
-                            0,
-                            "%s\n\t(pt->fOrigLength) = %g",
-                            HIDWORD(v25),
-                            LODWORD(v25));
-                    v26 = Path_GetDistToPathSegment(&v30, (const pathpoint_t *)(p_fOrigLength - 5));
-                    v23 = (float)((float)(*p_fOrigLength * (float)v26) + (float)v23);
-                    if (v23 >= lookaheadAmount)
-                        break;
-                    if (v12 <= pPath->wNegotiationStartNode)
-                        goto LABEL_47;
-                }
-                Path_UpdateForwardLookahead_IncompletePath(
-                    pPath,
-                    (const pathpoint_t *)(p_fOrigLength - 5),
-                    &v30,
-                    (float)((float)v23 - (float)lookaheadAmount),
-                    v26);
+            LABEL_54:
+                Path_UpdateForwardLookahead_IncompletePath(pPath, pt, vForwardStartPos, totalArea - lookaheadAmount, height);
             }
         }
         else
         {
-            Path_UpdateForwardLookahead_IncompletePath(
-                pPath,
-                v13,
-                &v30,
-                (float)((float)v23 - (float)lookaheadAmount),
-                DistToPathSegment);
+            pPath->forwardLookaheadDir2D[0] = pPath->lookaheadDir[0];
+            pPath->forwardLookaheadDir2D[1] = pPath->lookaheadDir[1];
         }
     }
     else
     {
-    LABEL_21:
         pPath->forwardLookaheadDir2D[0] = pPath->lookaheadDir[0];
         pPath->forwardLookaheadDir2D[1] = pPath->lookaheadDir[1];
     }
@@ -2720,7 +2667,7 @@ static bool Path_AStarAlgorithm(
     int v19; // r28
     int i; // r29
     pathlink_s *v21; // r11
-    pathnode_t *pSuccessor; // r31
+    pathnode_t *pSuccessor = NULL; // r31
     double v23; // fp0
     pathnode_t *pPrevOpen; // r11
     pathnode_t *v25; // r11
@@ -3139,20 +3086,10 @@ int __cdecl Path_TrimToSeePoint(
     const float *vPoint)
 {
     int i; // r31
-    int v14; // r6
-    bool v15; // r28
     float *vOrigPoint; // r11
-    double v17; // fp0
-    double v18; // fp13
-    bool CanSeePointFrom; // r3
-    int v20; // r11
-    int result; // r3
-    float v22; // [sp+50h] [-80h] BYREF
-    float v23; // [sp+54h] [-7Ch]
-    float v24; // [sp+58h] [-78h]
-    float v25; // [sp+60h] [-70h] BYREF
-    float v26; // [sp+64h] [-6Ch]
-    float v27; // [sp+68h] [-68h]
+    bool canSeePoint; // r3
+    float eyeOffset[3]; // [sp+50h] [-80h] BYREF // v22
+    float startPos[3]; // [sp+60h] [-70h] BYREF // v25
 
     iassert(pPath);
     iassert(pTrim);
@@ -3170,46 +3107,43 @@ int __cdecl Path_TrimToSeePoint(
     if (i >= pPath->wPathLen)
         return 0;
 
-    Actor_GetEyeOffset(pActor, &v22);
-    v15 = pPath->wPathLen - 1 == i;
-    if (pPath->wPathLen - 1 == i)
+    Actor_GetEyeOffset(pActor, eyeOffset);
+    bool bAtStart = (pPath->wPathLen - 1 == i);
+
+    if (bAtStart)
     {
-        v18 = (float)(pPath->vCurrPoint[1] + v23);
-        v25 = v22 + pPath->vCurrPoint[0];
-        v17 = pPath->vCurrPoint[2];
-        v26 = v18;
+        startPos[0] = eyeOffset[0] + pPath->vCurrPoint[0];
+        startPos[1] = eyeOffset[1] + pPath->vCurrPoint[1];
+        startPos[2] = eyeOffset[2] + pPath->vCurrPoint[2];
     }
     else
     {
         vOrigPoint = pPath->pts[i].vOrigPoint;
-        v25 = *vOrigPoint + v22;
-        v26 = vOrigPoint[1] + v23;
-        v17 = vOrigPoint[2];
+        startPos[0] = vOrigPoint[0] + eyeOffset[0];
+        startPos[1] = vOrigPoint[1] + eyeOffset[1];
+        startPos[2] = vOrigPoint[2] + eyeOffset[2];
     }
-    v27 = (float)v17 + v24;
-    CanSeePointFrom = Actor_CanSeePointFrom(pActor, &v25, vPoint, fMaxDistSqrd, v14);
-    v20 = pTrim->iDelta;
-    if (CanSeePointFrom)
+
+    canSeePoint = Actor_CanSeePointFrom(pActor, startPos, vPoint, fMaxDistSqrd, iIgnoreEntityNum);
+    if (canSeePoint)
     {
-        if (v20 == -2 && !v15)
+        if (pTrim->iDelta == -2 && !bAtStart)
         {
             pTrim->iIndex = i;
-            result = 1;
             pTrim->iDelta = 1;
-            return result;
+            return 1;
         }
         Path_TrimLastNodes(pPath, i, 0);
         return 0;
     }
-    if (v20 == 1)
+    if (pTrim->iDelta == 1)
     {
         Path_TrimLastNodes(pPath, pTrim->iIndex, 0);
         return 0;
     }
     else if (i)
     {
-        if (v20 != -2)
-            MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\actor_navigation.cpp", 2109, 0, "%s", "pTrim->iDelta == -2");
+        iassert(pTrim->iDelta == -2);
         pTrim->iIndex = i;
         if (i == 1)
             pTrim->iDelta = -1;
@@ -3625,15 +3559,20 @@ int __cdecl Path_FindPath(
     float *vGoalPos,
     bool bAllowNegotiationLinks)
 {
-    pathnode_t *v10; // r30
-    int *v11; // r6
-    pathnode_t *v13; // r5
-    _BYTE v14[16]; // [sp+50h] [-350h] BYREF
-    pathsort_t v15[64]; // [sp+60h] [-340h] BYREF
+    pathnode_t *pNodeTo; // r30
+    pathnode_t *pNodeFrom; // r30
+    pathsort_t nodes[64]; // [sp+60h] [-340h] BYREF
 
-    v10 = Path_NearestNode(vGoalPos, v15, -2, 192.0, (int *)vGoalPos, (int)v14, (nearestNodeHeightCheck)64);
-    if (v10 && (v13 = Path_NearestNode(vStartPos, v15, -2, 192.0, v11, (int)v14, (nearestNodeHeightCheck)64)) != 0)
-        return Path_FindPathFromTo(pPath, eTeam, v13, vStartPos, v10, vGoalPos, bAllowNegotiationLinks);
+    int nodeCount;
+
+    pNodeTo = Path_NearestNode(vGoalPos, nodes, -2, 192.0, &nodeCount, 64, NEAREST_NODE_DO_HEIGHT_CHECK);
+    if (!pNodeTo)
+        return 0;
+
+    pNodeFrom = Path_NearestNode(vStartPos, nodes, -2, 192.0, &nodeCount, 64, NEAREST_NODE_DO_HEIGHT_CHECK);    
+
+    if (pNodeFrom)
+        return Path_FindPathFromTo(pPath, eTeam, pNodeFrom, vStartPos, pNodeTo, vGoalPos, bAllowNegotiationLinks);
     else
         return 0;
 }
@@ -5302,15 +5241,19 @@ pathnode_t *__cdecl Path_FindPathAway(
     float fDistAway,
     bool bAllowNegotiationLinks)
 {
-    int v13; // r8
     pathnode_t *result; // r3
-    _BYTE v15[16]; // [sp+50h] [-350h] BYREF
     pathsort_t nodes[64]; // [sp+60h] [-340h] BYREF
 
-    result = Path_NearestNode(vStartPos, nodes, -2, 192.0, (int *)vAwayFromPos, (int)v15, (nearestNodeHeightCheck)64);
+    int nodeCount;
+
+    result = Path_NearestNode(vStartPos, nodes, -2, 192.0, &nodeCount, 64, NEAREST_NODE_DO_HEIGHT_CHECK);
+
     if (result)
+    {
         return (pathnode_t *)Path_FindPathFromAway(pPath, eTeam, result, vStartPos, vAwayFromPos, fDistAway, bAllowNegotiationLinks);
-    return result;
+    }
+
+    return NULL;
 }
 
 pathnode_t *__cdecl Path_FindPathAwayNotCrossPlanes(
@@ -5324,10 +5267,7 @@ pathnode_t *__cdecl Path_FindPathAwayNotCrossPlanes(
     int iPlaneCount,
     bool bAllowNegotiationLinks)
 {
-    float *v37; // r8
     pathnode_t *pNodeTo; // r3
-    nearestNodeHeightCheck v39; // [sp+8h] [-3B8h]
-    int v60[16]; // [sp+60h] [-360h] BYREF
     int nodeCount;
     pathsort_t nodes[64]; // [sp+70h] [-350h] BYREF
 
@@ -5351,7 +5291,7 @@ pathnode_t *__cdecl Path_FindPathAwayNotCrossPlanes(
             vStartPos,
             vAwayFromPos,
             fDistAway,
-            (float (*)[2])v37,
+            vNormal,
             fDist,
             iPlaneCount,
             bAllowNegotiationLinks);

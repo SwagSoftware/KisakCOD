@@ -423,19 +423,17 @@ void __cdecl ActorCmd_AimAtPos(scr_entref_t entref)
     int v28; // r7
     unsigned int v29; // r6
     unsigned int v30; // r5
-    float v31[4]; // [sp+50h] [-60h] BYREF
-    float v32; // [sp+60h] [-50h] BYREF
-    float v33; // [sp+64h] [-4Ch]
-    float v34; // [sp+68h] [-48h]
+    float vec[4]; // [sp+50h] [-60h] BYREF
+    float eyePos[3]; // [sp+60h] [-50h] BYREF // v32, v33, v34
 
     v1 = Actor_Get(entref);
     v2 = 0.0;
     v3 = 0.0;
-    Scr_GetVector(0, v31);
-    v4 = v31[0];
-    v5 = v31[1];
-    v6 = v31[2];
-    Sentient_GetEyePosition(v1->sentient, &v32);
+    Scr_GetVector(0, vec);
+    v4 = vec[0];
+    v5 = vec[1];
+    v6 = vec[2];
+    Sentient_GetEyePosition(v1->sentient, eyePos);
 
     //_FP12 = -sqrtf((float)((float)((float)((float)v6 - v34) * (float)((float)v6 - v34))
     //    + (float)((float)((float)((float)v5 - v33) * (float)((float)v5 - v33))
@@ -445,18 +443,16 @@ void __cdecl ActorCmd_AimAtPos(scr_entref_t entref)
 
     // aislop
     {
-        float len = sqrtf((v6 - v34) * (v6 - v34)
-            + (v5 - v33) * (v5 - v33)
-            + (v4 - v32) * (v4 - v32));
-        float neg = -len;
-        float denom = (neg >= 0.0f) ? neg : neg;
-        v9 = 1.0f / denom;
+        float len = sqrtf((v6 - eyePos[2]) * (v6 - eyePos[2])
+            + (v5 - eyePos[1]) * (v5 - eyePos[1])
+            + (v4 - eyePos[0]) * (v4 - eyePos[0]));
+        v9 = 1.0f / len;
     }
 
-    v10 = -(float)((float)v9 * (float)((float)v6 - v34));
+    v10 = -(float)((float)v9 * (float)((float)v6 - eyePos[2]));
     if (v10 >= 0.0)
     {
-        v2 = -(float)((float)v9 * (float)((float)v6 - v34));
+        v2 = -(float)((float)v9 * (float)((float)v6 - eyePos[2]));
         v11 = (float)((float)1.0 - (float)v10);
     }
     else
@@ -465,13 +461,13 @@ void __cdecl ActorCmd_AimAtPos(scr_entref_t entref)
         v11 = (float)((float)1.0 - (float)-v10);
     }
     ServerDObj = Com_GetServerDObj(v1->ent->s.number);
-    XAnimSetCompleteGoalWeight(ServerDObj, v1->animSets.aimLow, v2, 0.1, 1.0, v15, v14, v13);
-    XAnimSetCompleteGoalWeight(ServerDObj, v1->animSets.aimLevel, v11, 0.1, 1.0, v18, v17, v16);
-    XAnimSetCompleteGoalWeight(ServerDObj, v1->animSets.aimHigh, v3, 0.1, 1.0, v21, v20, v19);
-    XAnimSetGoalWeight(ServerDObj, v1->animSets.shootLow, v2, 0.1, 1.0, v24, v23, v22);
-    XAnimSetGoalWeight(ServerDObj, v1->animSets.shootLevel, v11, 0.1, 1.0, v27, v26, v25);
-    XAnimSetGoalWeight(ServerDObj, v1->animSets.shootHigh, v3, 0.1, 1.0, v30, v29, v28);
-    Scr_AddFloat(0.1);
+    XAnimSetCompleteGoalWeight(ServerDObj, v1->animSets.aimLow, v2, 0.1, 1.0, 0, 0, 0);
+    XAnimSetCompleteGoalWeight(ServerDObj, v1->animSets.aimLevel, v11, 0.1, 1.0, 0, 0, 0);
+    XAnimSetCompleteGoalWeight(ServerDObj, v1->animSets.aimHigh, v3, 0.1, 1.0, 0, 0, 0);
+    XAnimSetGoalWeight(ServerDObj, v1->animSets.shootLow, v2, 0.1, 1.0, 0, 0, 0);
+    XAnimSetGoalWeight(ServerDObj, v1->animSets.shootLevel, v11, 0.1, 1.0, 0, 0, 0);
+    XAnimSetGoalWeight(ServerDObj, v1->animSets.shootHigh, v3, 0.1, 1.0, 0, 0, 0);
+    Scr_AddFloat(0.1f);
 }
 
 void __cdecl ActorCmd_EnterProne(scr_entref_t entref)
@@ -543,15 +539,6 @@ void __cdecl ActorCmd_UpdateProne(scr_entref_t entref)
     double v6; // fp30
     double v7; // fp29
     DObj_s *ServerDObj; // r30
-    int v9; // r7
-    unsigned int v10; // r6
-    unsigned int v11; // r5
-    int v12; // r7
-    unsigned int v13; // r6
-    unsigned int v14; // r5
-    float *v15; // r6
-    float *v16; // r5
-    long double v17; // fp2
     scr_anim_s Anim; // [sp+50h] [-40h]
     scr_anim_s v19; // [sp+54h] [-3Ch]
 
@@ -565,9 +552,9 @@ void __cdecl ActorCmd_UpdateProne(scr_entref_t entref)
         v6 = Scr_GetFloat(3);
         v7 = Scr_GetFloat(4);
         ServerDObj = Com_GetServerDObj(v1->ent->s.number);
-        XAnimSetCompleteGoalWeight(ServerDObj, Anim.index, Float, v6, v7, v11, v10, v9);
-        XAnimSetCompleteGoalWeight(ServerDObj, v19.index, Float, v6, v7, v14, v13, v12);
-        Actor_UpdateProneInformation(v1, 0, v16, v15, v17);
+        XAnimSetCompleteGoalWeight(ServerDObj, Anim.index, Float, v6, v7, 0, 0, 0);
+        XAnimSetCompleteGoalWeight(ServerDObj, v19.index, Float, v6, v7, 0, 0, 0);
+        Actor_UpdateProneInformation(v1, 0);
     }
 }
 
@@ -1503,7 +1490,7 @@ bool __cdecl Actor_CheckGrenadeLaunch(actor_s *self, const float *vStartPos, con
     const char *v6; // r3
     __int64 v7; // r11
     float *v8; // r7
-    double v9; // fp31
+    double speed; // fp31
     const char *v10; // r3
     bool result; // r3
 
@@ -1513,8 +1500,8 @@ bool __cdecl Actor_CheckGrenadeLaunch(actor_s *self, const float *vStartPos, con
         Scr_Error(v6);
     }
     LODWORD(v7) = BG_GetWeaponDef(self->ent->s.weapon)->iProjectileSpeed;
-    v9 = (float)v7;
-    if (v9 <= 0.0)
+    speed = (float)v7;
+    if (speed <= 0.0)
     {
         v10 = va("checkgrenadelaunch: grenade launcher speed must be > 0");
         Scr_Error(v10);
@@ -1524,8 +1511,7 @@ bool __cdecl Actor_CheckGrenadeLaunch(actor_s *self, const float *vStartPos, con
         vStartPos,
         vOffset,
         self->vGrenadeTargetPos,
-        v9,
-        v8,
+        speed,
         self->vGrenadeTossPos,
         self->vGrenadeTossVel);
     self->bGrenadeTossValid = result;
@@ -2048,33 +2034,31 @@ void __cdecl ActorCmd_LerpPosition(scr_entref_t entref)
 {
     actor_s *v1; // r31
     float *p_eType; // r30
-    float v3; // [sp+50h] [-40h] BYREF
-    float v4; // [sp+54h] [-3Ch]
-    float v5; // [sp+58h] [-38h]
-    float v6[6]; // [sp+60h] [-30h] BYREF
+    float vec1[3]; // [sp+50h] [-40h] BYREF // v3
+    float vec2[3]; // [sp+60h] [-30h] BYREF
 
     v1 = Actor_Get(entref);
     if (v1->eScriptSetAnimMode != AI_ANIM_NOPHYSICS)
         Scr_Error("cannot lerp position if animMode is not 'nophysics'");
     p_eType = (float *)&v1->ent->s.eType;
-    Scr_GetVector(0, &v3);
-    Scr_GetVector(1u, v6);
-    p_eType[59] = v6[0];
-    p_eType[60] = v6[1];
-    p_eType[61] = v6[2];
+    Scr_GetVector(0, vec1);
+    Scr_GetVector(1, vec2);
+    p_eType[59] = vec2[0];
+    p_eType[60] = vec2[1];
+    p_eType[61] = vec2[2];
     Actor_SetDesiredAngles(&v1->CodeOrient, p_eType[59], p_eType[60]);
-    v1->Physics.vVelocity[0] = v3 - p_eType[56];
-    v1->Physics.vVelocity[1] = v4 - p_eType[57];
-    v1->Physics.vVelocity[2] = v5 - p_eType[58];
+    v1->Physics.vVelocity[0] = vec1[0] - p_eType[56];
+    v1->Physics.vVelocity[1] = vec1[1] - p_eType[57];
+    v1->Physics.vVelocity[2] = vec1[2] - p_eType[58];
     v1->Physics.vVelocity[0] = v1->Physics.vVelocity[0] * (float)20.0;
     v1->Physics.vVelocity[1] = v1->Physics.vVelocity[1] * (float)20.0;
     v1->Physics.vVelocity[2] = v1->Physics.vVelocity[2] * (float)20.0;
     v1->Physics.vWishDelta[0] = 0.0;
     v1->Physics.vWishDelta[1] = 0.0;
     v1->Physics.vWishDelta[2] = 0.0;
-    p_eType[56] = v3;
-    p_eType[57] = v4;
-    p_eType[58] = v5;
+    p_eType[56] = vec1[0];
+    p_eType[57] = vec1[1];
+    p_eType[58] = vec1[2];
     v1->Physics.groundEntNum = ENTITYNUM_NONE;
 }
 
@@ -2326,24 +2310,18 @@ void __cdecl ScrCmd_GetNegotiationEndNode(scr_entref_t entref)
 
 void __cdecl ActorCmd_CheckProne(scr_entref_t entref)
 {
-    double Float; // fp31
-    unsigned int Int; // r3
-    bool v3; // r7
-    float *v4; // r6
-    float *v5; // r5
-    bool v6; // r3
+    double yaw; // fp31
+    unsigned int isProne; // r3
+    bool canGoProne; // r3
     proneCheckType_t v7; // [sp+8h] [-98h]
-    float v8[4]; // [sp+80h] [-20h] BYREF
-    unsigned __int16 v9; // [sp+B4h] [+14h]
+    float position[3]; // [sp+80h] [-20h] BYREF
 
-    v9 = entref.entnum;
     Actor_Get(entref);
-    Scr_GetVector(0, v8);
-    Float = Scr_GetFloat(1);
-    Int = Scr_GetInt(2);
-    //v6 = BG_CheckProneValid(v9, v8, 15.0, 48.0, Float, v5, v4, v3, 0, 0, (_cntlzw(Int) & 0x20) == 0, v7, 50.0);
-    v6 = BG_CheckProneValid(v9, v8, 15.0, 48.0, Float, v5, v4, v3, 0, 0, Int != 0, v7, 50.0);
-    Scr_AddBool(v6);
+    Scr_GetVector(0, position);
+    yaw = Scr_GetFloat(1);
+    isProne = Scr_GetInt(2);
+    canGoProne = BG_CheckProneValid(entref.entnum, position, 15.0, 48.0, yaw, NULL, NULL, isProne != 0, 1, 1, 1, PCT_ACTOR, 50.0f);
+    Scr_AddBool(canGoProne);
 }
 
 void __cdecl ActorCmd_PushPlayer(scr_entref_t entref)

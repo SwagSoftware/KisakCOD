@@ -937,73 +937,69 @@ bool __cdecl Actor_GrenadeLauncher_CheckPos(
     const float *vStandPos,
     const float *vOffset,
     const float *vTargetPos,
-    double speed,
+    float speed,
     float *vPosOut,
-    float *vVelOut,
-    float *a8)
+    float *vVelOut)
 {
-    long double v16; // fp2
-    double v17; // fp11
-    long double v18; // fp2
-    float *v19; // r3
-    double v20; // fp13
-    double v21; // fp0
-    float v22; // [sp+50h] [-60h]
-    float v23; // [sp+54h] [-5Ch] BYREF
+    float dist; // fp2
+    float v17; // fp11
+    float sinval; // [sp+50h] [-60h]
+    float cosval; // [sp+54h] [-5Ch] BYREF
 
-    if (!self)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\actor_grenade.cpp", 856, 0, "%s", "self");
-    if (!vStandPos)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\actor_grenade.cpp", 857, 0, "%s", "vStandPos");
-    if (!vTargetPos)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\actor_grenade.cpp", 858, 0, "%s", "vTargetPos");
-    if (!vVelOut)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\actor_grenade.cpp", 859, 0, "%s", "vPosOut");
-    if (!a8)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\actor_grenade.cpp", 860, 0, "%s", "vVelOut");
+    iassert(self);
+    iassert(vStandPos);
+    iassert(vTargetPos);
+    iassert(vPosOut);
+    iassert(vVelOut);
+
     if (g_gravity->current.value <= 0.0)
         return 0;
+
     if (vOffset)
     {
         Actor_Grenade_GetTossFromPosition(self, vStandPos, vOffset, vVelOut);
     }
     else
     {
-        *vVelOut = *vStandPos;
+        vVelOut[0] = vStandPos[0];
         vVelOut[1] = vStandPos[1];
         vVelOut[2] = vStandPos[2];
     }
-    *(double *)&v16 = Vec2Distance(vVelOut, vTargetPos);
-    if (*(double *)&v16 == 0.0)
+    dist = Vec2Distance(vVelOut, vTargetPos);
+
+    if (dist == 0.0f)
         return 0;
+
     v17 = (float)((float)((float)((float)((float)((float)(vTargetPos[2] - vVelOut[2])
         / (float)((float)speed * (float)speed))
-        * (float)((float)*(double *)&v16 * (float)*(double *)&v16))
+        * (float)(dist * dist))
         * g_gravity->current.value)
-        * (float)2.0)
-        + (float)((float)((float)*(double *)&v16 * (float)*(double *)&v16)
-            - (float)((float)((float)((float)((float)((float)*(double *)&v16 * (float)*(double *)&v16)
-                * (float)((float)*(double *)&v16 * (float)*(double *)&v16))
+        * 2.0f)
+        + (float)((float)(dist * dist)
+            - (float)((float)((float)((float)((float)(dist * dist)
+                * (float)(dist * dist))
                 * g_gravity->current.value)
                 * g_gravity->current.value)
                 / (float)((float)((float)speed * (float)speed) * (float)((float)speed * (float)speed)))));
-    if (v17 < 0.0)
+
+    if (v17 < 0.0f)
         return 0;
-    *(double *)&v16 = (float)((float)((float)((float)sqrtf(v17)
-        - (float)((float)*(double *)&v16 * (float)*(double *)&v16))
+
+    dist = (float)((float)((float)((float)sqrtf(v17)
+        - (float)(dist * dist))
         * (float)((float)speed * (float)speed))
-        / (float)((float)((float)*(double *)&v16 * (float)*(double *)&v16) * g_gravity->current.value));
-    v18 = atan(v16);
-    FastSinCos((float)*(double *)&v18, v19, &v23);
-    *a8 = *vTargetPos - *vVelOut;
-    a8[1] = vTargetPos[1] - vVelOut[1];
-    Vec2Normalize(a8);
-    v20 = (float)(*a8 * v22);
-    v21 = (float)(a8[1] * v22);
-    a8[2] = v23 * (float)speed;
-    *a8 = (float)v20 * (float)speed;
-    a8[1] = (float)v21 * (float)speed;
-    return Actor_Grenade_IsValidTrajectory(self, vVelOut, a8, vTargetPos);
+        / (float)((float)(dist * dist) * g_gravity->current.value));
+
+    FastSinCos(atan(dist), &sinval, &cosval); // KISAKTODO: not 100% sure on sinval here
+    vVelOut[0] = vTargetPos[0] - vVelOut[0];
+    vVelOut[1] = vTargetPos[1] - vVelOut[1];
+    Vec2Normalize(vVelOut);
+
+    vVelOut[0] = (vVelOut[0] * sinval) * speed;
+    vVelOut[1] = (vVelOut[1] * sinval) * speed;
+    vVelOut[2] = cosval * speed;
+
+    return Actor_Grenade_IsValidTrajectory(self, vVelOut, vVelOut, vTargetPos);
 }
 
 int Actor_Grenade_IsSafeTarget(actor_s *self, const float *vTargetPos, unsigned int iWeapID)
@@ -1012,9 +1008,7 @@ int Actor_Grenade_IsSafeTarget(actor_s *self, const float *vTargetPos, unsigned 
     float explosionCutoff; // fp31
     int v9; // r30
     sentient_s *Sentient; // r31
-    float v12; // [sp+58h] [-48h] BYREF
-    float v13; // [sp+5Ch] [-44h]
-    float v14; // [sp+60h] [-40h]
+    float sentOrigin[3]; // [sp+58h] [-48h] BYREF // v12
 
     iassert(self);
     iassert(self->sentient);
@@ -1028,10 +1022,10 @@ int Actor_Grenade_IsSafeTarget(actor_s *self, const float *vTargetPos, unsigned 
         return 1;
     while (1)
     {
-        Sentient_GetOrigin(Sentient, &v12);
-        if ((float)((float)((float)(vTargetPos[1] - v13) * (float)(vTargetPos[1] - v13))
-            + (float)((float)((float)(vTargetPos[2] - v14) * (float)(vTargetPos[2] - v14))
-                + (float)((float)(*vTargetPos - v12) * (float)(*vTargetPos - v12)))) <= explosionCutoff)
+        Sentient_GetOrigin(Sentient, sentOrigin);
+        if ((((vTargetPos[1] - sentOrigin[1]) * (vTargetPos[1] - sentOrigin[1]))
+            + (((vTargetPos[2] - sentOrigin[2]) * (vTargetPos[2] - sentOrigin[2]))
+                + ((vTargetPos[0] - sentOrigin[0]) * (vTargetPos[0] - sentOrigin[0])))) <= explosionCutoff)
             break;
         Sentient = Sentient_NextSentient(Sentient, v9);
         if (!Sentient)
@@ -1081,32 +1075,31 @@ bool __cdecl Actor_Grenade_IsPointSafe(actor_s *self, const float *vPoint)
 {
     EntHandle *p_pGrenade; // r31
     gentity_s *v5; // r3
-    WeaponDef *WeaponDef; // r27
+    WeaponDef *weapDef; // r27
     __int64 v7; // r10
-    double v9; // fp29
+    float radius; // fp29
     gentity_s *v10; // r11
-    EntHandle *v11; // r3
-    const float *v12; // r31
-    gentity_s *v13; // r3
+    EntHandle *grenadeEnt; // r3
+    const float *centerPos; // r31
+    gentity_s *inflictor; // r3
     bool v14; // r8
     float *v15; // r7
 
     p_pGrenade = &self->pGrenade;
 
     iassert(self->pGrenade.isDefined());
-    v5 = p_pGrenade->ent();
-    WeaponDef = BG_GetWeaponDef(v5->s.weapon);
-    if (!WeaponDef)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\actor_grenade.cpp", 1051, 0, "%s", "weapDef");
-    if (WeaponDef->projExplosion == WEAPPROJEXP_FLASHBANG)
+    weapDef = BG_GetWeaponDef(p_pGrenade->ent()->s.weapon);
+
+    iassert(weapDef);
+
+    if (weapDef->projExplosion == WEAPPROJEXP_FLASHBANG)
         return 1;
-    LODWORD(v7) = WeaponDef->iExplosionRadius;
-    v9 = (float)((float)v7 * (float)1.1);
-    v10 = p_pGrenade->ent();
-    v11 = p_pGrenade;
-    v12 = (const float *)&v10->missile.predictLandPos;
-    v13 = v11->ent();
-    return G_CanRadiusDamageFromPos(self->ent, vPoint, v13, v12, v9, 1.0, v15, 0.0, v14, 0) == 0;
+
+    radius = ((float)weapDef->iExplosionRadius * 1.1f);
+    grenadeEnt = p_pGrenade;
+    centerPos = p_pGrenade->ent()->missile.predictLandPos;
+    inflictor = grenadeEnt->ent();
+    return G_CanRadiusDamageFromPos(self->ent, vPoint, inflictor, centerPos, radius, 1.0f, NULL, 0.0f, 1, 0x802011) == 0; // KISAKTODO: check args...
 }
 
 float __cdecl Actor_Grenade_EscapePlane(actor_s *self, float *normal)
@@ -1119,7 +1112,7 @@ float __cdecl Actor_Grenade_EscapePlane(actor_s *self, float *normal)
     double v10; // fp13
     int integer; // r10
     int number; // r11
-    double v13; // fp1
+    double dist; // fp1
 
     v4 = 0.0;
     iassert(self);
@@ -1154,7 +1147,7 @@ float __cdecl Actor_Grenade_EscapePlane(actor_s *self, float *normal)
         if (ai_showSuppression->current.integer > 0)
         {
         LABEL_17:
-            G_DebugPlane(normal, v4, v7, self->ent->r.currentOrigin, 100.0, (int)colorOrange, (int)self->ent);
+            G_DebugPlane(normal, v4, self->ent->r.currentOrigin, colorOrange, 100.0f, 0, 100);
             goto LABEL_18;
         }
         if (integer != number)
@@ -1165,8 +1158,8 @@ float __cdecl Actor_Grenade_EscapePlane(actor_s *self, float *normal)
         }
     }
 LABEL_18:
-    v13 = v4;
-    return *((float *)&v13 + 1);
+    dist = v4;
+    return dist;
 }
 
 void __cdecl Actor_Grenade_GetPickupPos(actor_s *self, const float *enemyPos, float *vGrenadePickupPos)
@@ -1340,38 +1333,35 @@ void __cdecl Actor_Grenade_Attach(actor_s *self)
 void __cdecl Actor_Grenade_Detach(actor_s *self)
 {
     gentity_s *v2; // r31
-    WeaponDef *WeaponDef; // r30
+    WeaponDef *weapDef; // r30
     const char *Name; // r3
     unsigned __int8 svFlags; // r10
-    float v6; // [sp+50h] [-40h] BYREF
-    float v7; // [sp+54h] [-3Ch]
-    float v8; // [sp+58h] [-38h]
+    float pos[3]; // [sp+50h] [-40h] BYREF // v6
 
     iassert(self);
     iassert(self->pGrenade.isDefined());
     
     v2 = self->pGrenade.ent();
-    WeaponDef = BG_GetWeaponDef(v2->s.weapon);
-    if (!WeaponDef)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\actor_grenade.cpp", 1693, 0, "%s", "weapDef");
-    Name = XModelGetName(WeaponDef->worldModel[v2->s.weaponModel]);
+    weapDef = BG_GetWeaponDef(v2->s.weapon);
+    iassert(weapDef);
+    Name = XModelGetName(weapDef->worldModel[v2->s.weaponModel]);
     G_EntDetach(self->ent, Name, scr_const.grenade_return_hand_tag);
-    G_DObjGetWorldTagPos_CheckTagExists(self->ent, scr_const.grenade_return_hand_tag, &v6);
-    v2->r.currentOrigin[0] = v6;
-    v2->r.currentOrigin[1] = v7;
-    v2->r.currentOrigin[2] = v8;
-    v2->s.lerp.pos.trBase[0] = v6;
-    v2->s.lerp.pos.trBase[1] = v7;
-    v2->s.lerp.pos.trBase[2] = v8;
-    v2->s.lerp.pos.trDelta[0] = 0.0;
-    v2->s.lerp.pos.trDelta[1] = 0.0;
-    v2->s.lerp.pos.trDelta[2] = 0.0;
+    G_DObjGetWorldTagPos_CheckTagExists(self->ent, scr_const.grenade_return_hand_tag, pos);
+    v2->r.currentOrigin[0] = pos[0];
+    v2->r.currentOrigin[1] = pos[1];
+    v2->r.currentOrigin[2] = pos[2];
+    v2->s.lerp.pos.trBase[0] = pos[0];
+    v2->s.lerp.pos.trBase[1] = pos[1];
+    v2->s.lerp.pos.trBase[2] = pos[2];
+    v2->s.lerp.pos.trDelta[0] = 0.0f;
+    v2->s.lerp.pos.trDelta[1] = 0.0f;
+    v2->s.lerp.pos.trDelta[2] = 0.0f;
     svFlags = v2->r.svFlags;
     v2->activator = 0;
     v2->r.svFlags = svFlags & 0xFE;
-    v2->mover.decelTime = 0.0;
-    v2->mover.aDecelTime = 0.0;
-    v2->mover.speed = 0.0;
+    v2->mover.decelTime = 0.0f;
+    v2->mover.aDecelTime = 0.0f;
+    v2->mover.speed = 0.0f;
 }
 
 int __cdecl Actor_Grenade_InActorHands(gentity_s *grenade)
@@ -1575,33 +1565,33 @@ void __cdecl G_DrawGrenadeHints()
         gentities = level.gentities;
         if (level.gentities->client)
         {
-            v6 = 0;
-            v34[0] = 0.0;
-            v34[1] = 0.0;
+            pos = 0;
+            normal[0] = 0.0;
+            normal[1] = 0.0;
             grenadeHintCount = level.grenadeHintCount;
             v8 = level.clients->ps.origin[0];
-            v9 = (float)(level.clients->ps.viewHeightCurrent + level.clients->ps.origin[2]);
+            radius = (float)(level.clients->ps.viewHeightCurrent + level.clients->ps.origin[2]);
             v10 = level.clients->ps.origin[1];
-            v34[2] = 1.0;
+            normal[2] = 1.0;
             if (level.grenadeHintCount)
             {
                 LODWORD(a5) = a5 * a5;
                 v29 = a5;
-                v11 = &g_vGrenadeHint[0][2];
-                v12 = (float)a5;
+                grenadeEnt = &g_vGrenadeHint[0][2];
+                sentOrigin = (float)a5;
                 do
                 {
-                    v13 = v11 - 2;
-                    v14 = (float)(gentities->r.currentOrigin[1] - *(v11 - 1));
-                    v15 = (float)(gentities->r.currentOrigin[2] - *v11);
-                    v16 = (float)(gentities->r.currentOrigin[0] - *(v11 - 2));
-                    if ((float)((float)((float)v16 * (float)v16)
-                        + (float)((float)((float)v15 * (float)v15) + (float)((float)v14 * (float)v14))) <= v12)
+                    inflictor = grenadeEnt - 2;
+                    v14 = (float)(gentities->r.currentOrigin[1] - *(grenadeEnt - 1));
+                    v15 = (float)(gentities->r.currentOrigin[2] - *grenadeEnt);
+                    dist = (float)(gentities->r.currentOrigin[0] - *(grenadeEnt - 2));
+                    if ((float)((float)((float)dist * (float)dist)
+                        + (float)((float)((float)v15 * (float)v15) + (float)((float)v14 * (float)v14))) <= sentOrigin)
                     {
-                        G_DebugCircle(v11 - 2, 8.0, a2, (int)colorRed, 1, 0);
-                        G_DebugCircle(v11 - 2, 192.0, v17, (int)colorOrange, 1, 0);
-                        v18 = (float)(*(v11 - 1) - (float)v10);
-                        v19 = (float)(*v11 - (float)v9);
+                        G_DebugCircle(grenadeEnt - 2, 8.0, a2, (int)colorRed, 1, 0);
+                        G_DebugCircle(grenadeEnt - 2, 192.0, v17, (int)colorOrange, 1, 0);
+                        minSafeDist = (float)(*(grenadeEnt - 1) - (float)v10);
+                        v19 = (float)(*grenadeEnt - (float)radius);
 
                         // aislop
                         //_FP10 = -sqrtf((float)((float)((float)(*v13 - (float)v8) * (float)(*v13 - (float)v8))
@@ -1611,37 +1601,37 @@ void __cdecl G_DrawGrenadeHints()
                         //v22 = (float)((float)1.0 / (float)_FP11);
 
                         {
-                            float dx = *v13 - (float)v8;
-                            float dy = *v11 - (float)v9;
-                            float dz = (float)v18;
+                            float dx = *inflictor - (float)v8;
+                            float dy = *grenadeEnt - (float)radius;
+                            float dz = (float)minSafeDist;
 
                             float distance = sqrtf(dx * dx + dy * dy + dz * dz);
                             if (distance <= 0.0f)
                                 distance = FLT_MIN; // Avoid division by zero or negative sqrt result
 
-                            v22 = 1.0f / distance;
+                            sinval = 1.0f / distance;
                         }
 
-                        v23 = (float)((float)v22 * (float)(*v13 - (float)v8));
-                        v35[1] = (float)(*(v11 - 1) - (float)v10) * (float)v22;
-                        v35[0] = v23;
-                        v35[2] = (float)v19 * (float)v22;
-                        Vec3Cross(v35, v34, &v36);
-                        v24 = *(v11 - 1);
-                        v25 = (float)-(float)((float)(v36 * 192.0) - *v13);
-                        v26 = (float)((float)(v37 * 192.0) + *(v11 - 1));
-                        v31 = (float)(v36 * 192.0) + *v13;
-                        v27 = *v11;
+                        cosval = (float)((float)sinval * (float)(*inflictor - (float)v8));
+                        v35[1] = (float)(*(grenadeEnt - 1) - (float)v10) * (float)sinval;
+                        v35[0] = cosval;
+                        v35[2] = (float)v19 * (float)sinval;
+                        Vec3Cross(v35, normal, &v36);
+                        dist = *(grenadeEnt - 1);
+                        v25 = (float)-(float)((float)(v36 * 192.0) - *inflictor);
+                        v26 = (float)((float)(v37 * 192.0) + *(grenadeEnt - 1));
+                        v31 = (float)(v36 * 192.0) + *inflictor;
+                        v27 = *grenadeEnt;
                         v32 = v26;
                         *(float *)&v29 = v25;
                         v33 = (float)(v38 * (float)192.0) + (float)v27;
-                        *((float *)&v29 + 1) = -(float)((float)(v37 * (float)192.0) - (float)v24);
+                        *((float *)&v29 + 1) = -(float)((float)(v37 * (float)192.0) - (float)dist);
                         v30 = -(float)((float)(v38 * (float)192.0) - (float)v27);
                         G_DebugLine(&v31, (const float *)&v29, colorOrange, 1);
-                        v28 = *v11;
-                        v31 = *v13;
+                        v28 = *grenadeEnt;
+                        v31 = *inflictor;
                         *(float *)&v29 = v31;
-                        v32 = *(v11 - 1);
+                        v32 = *(grenadeEnt - 1);
                         v33 = (float)v28 + (float)192.0;
                         *((float *)&v29 + 1) = v32;
                         v30 = (float)v28 - (float)192.0;
@@ -1649,9 +1639,9 @@ void __cdecl G_DrawGrenadeHints()
                         grenadeHintCount = level.grenadeHintCount;
                         gentities = level.gentities;
                     }
-                    ++v6;
-                    v11 += 3;
-                } while (v6 < grenadeHintCount);
+                    ++pos;
+                    grenadeEnt += 3;
+                } while (pos < grenadeHintCount);
             }
         }
 #endif
@@ -1671,7 +1661,6 @@ bool __cdecl Actor_Grenade_CheckTossPos(
     double randomRange,
     int bRechecking)
 {
-    double v38; // fp0
     double v39; // fp1
     double v40; // fp0
     double v41; // fp2
@@ -1685,16 +1674,16 @@ bool __cdecl Actor_Grenade_CheckTossPos(
     const float *v49; // r4
     const char *v50; // r3
     const char *v51; // r3
-    float v52; // [sp+58h] [-D8h] BYREF
-    float v53; // [sp+5Ch] [-D4h]
-    float v54; // [sp+60h] [-D0h]
-    float v55; // [sp+68h] [-C8h] BYREF
-    float v56; // [sp+6Ch] [-C4h]
-    float v57; // [sp+70h] [-C0h]
-    float v58; // [sp+78h] [-B8h] BYREF
-    float v59; // [sp+7Ch] [-B4h]
-    float v60; // [sp+80h] [-B0h]
-    trace_t v61; // [sp+90h] [-A0h] BYREF
+    float lineEnd[3]; // [sp+58h] [-D8h] BYREF // v52
+    //float v53; // [sp+5Ch] [-D4h]
+    //float v54; // [sp+60h] [-D0h]
+    float endPos[3]; // [sp+68h] [-C8h] BYREF // v55
+    //float v56; // [sp+6Ch] [-C4h]
+    //float v57; // [sp+70h] [-C0h]
+    float landPos[3]; // [sp+78h] [-B8h] BYREF // v58
+    //float v59; // [sp+7Ch] [-B4h]
+    //float v60; // [sp+80h] [-B0h]
+    trace_t trace; // [sp+90h] [-A0h] BYREF
 
     iassert(self);
     iassert(vStandPos);
@@ -1710,24 +1699,23 @@ bool __cdecl Actor_Grenade_CheckTossPos(
     {
         return 0;
     }
-    v56 = vTargetPos[1];
-    v38 = *vTargetPos;
-    v57 = vTargetPos[2];
-    v55 = v38;
+    endPos[0] = vTargetPos[0];
+    endPos[1] = vTargetPos[1];
+    endPos[2] = vTargetPos[2];
     if (randomRange != 0.0)
     {
-        v39 = G_flrand((float)((float)v38 - (float)randomRange), (float)((float)v38 + (float)randomRange));
+        v39 = G_flrand((float)((float)endPos[0] - (float)randomRange), (float)((float)endPos[0] + (float)randomRange));
         v40 = vTargetPos[1];
         v41 = (float)(vTargetPos[1] + (float)randomRange);
-        v55 = v39;
-        v56 = G_flrand((float)((float)v40 - (float)randomRange), v41);
+        endPos[0] = v39;
+        endPos[1] = G_flrand((float)((float)v40 - (float)randomRange), v41);
     }
     Actor_Grenade_GetTossFromPosition(self, vStandPos, vOffset, vPosOut);
-    G_MissileTrace(&v61, vPosOut, &v55, ENTITYNUM_NONE, 2065);
+    G_MissileTrace(&trace, vPosOut, endPos, ENTITYNUM_NONE, 2065);
     TossPositionsFromHints = 0;
-    if (v61.fraction == 1.0)
+    if (trace.fraction == 1.0)
     {
-        Actor_Grenade_GetTossPositions(vPosOut, &v55, &v52, self->iGrenadeWeaponIndex);
+        Actor_Grenade_GetTossPositions(vPosOut, endPos, lineEnd, self->iGrenadeWeaponIndex);
         if (g_drawGrenadeHints->current.integer <= 0)
             goto LABEL_37;
         v43 = colorRed;
@@ -1735,41 +1723,41 @@ bool __cdecl Actor_Grenade_CheckTossPos(
     else
     {
         if (level.grenadeHintCount)
-            TossPositionsFromHints = Actor_Grenade_GetTossPositionsFromHints(vPosOut, vTargetPos, method, &v58);
+            TossPositionsFromHints = Actor_Grenade_GetTossPositionsFromHints(vPosOut, vTargetPos, method, landPos);
         if (TossPositionsFromHints)
         {
-            v52 = G_flrand(
-                (float)(v58 - ACTOR_GRENADE_HINT_DEVIATION_RADIUS),
-                (float)(ACTOR_GRENADE_HINT_DEVIATION_RADIUS + v58));
-            v53 = G_flrand(
-                (float)(v59 - ACTOR_GRENADE_HINT_DEVIATION_RADIUS),
-                (float)(ACTOR_GRENADE_HINT_DEVIATION_RADIUS + v59));
-            v54 = G_flrand(
-                (float)(v60 - ACTOR_GRENADE_HINT_DEVIATION_RADIUS),
-                (float)(ACTOR_GRENADE_HINT_DEVIATION_RADIUS + v60));
+            lineEnd[0] = G_flrand(
+                (float)(landPos[0] - ACTOR_GRENADE_HINT_DEVIATION_RADIUS),
+                (float)(ACTOR_GRENADE_HINT_DEVIATION_RADIUS + landPos[0]));
+            lineEnd[1] = G_flrand(
+                (float)(landPos[1] - ACTOR_GRENADE_HINT_DEVIATION_RADIUS),
+                (float)(ACTOR_GRENADE_HINT_DEVIATION_RADIUS + landPos[1]));
+            lineEnd[2] = G_flrand(
+                (float)(landPos[2] - ACTOR_GRENADE_HINT_DEVIATION_RADIUS),
+                (float)(ACTOR_GRENADE_HINT_DEVIATION_RADIUS + landPos[2]));
             if (g_drawGrenadeHints->current.integer <= 0)
                 goto LABEL_37;
             v43 = colorCyan;
         }
         else
         {
-            v52 = v55;
-            v53 = v56;
-            v54 = v57;
+            lineEnd[0] = endPos[0];
+            lineEnd[1] = endPos[1];
+            lineEnd[2] = endPos[2];
             if (g_drawGrenadeHints->current.integer <= 0)
                 goto LABEL_37;
             v43 = colorBlue;
         }
     }
-    G_DebugLineWithDuration(vPosOut, &v52, v43, 0, 100);
+    G_DebugLineWithDuration(vPosOut, lineEnd, v43, 0, 100);
 LABEL_37:
-    if ((float)((float)((float)(v53 - vPosOut[1]) * (float)(v53 - vPosOut[1]))
-        + (float)((float)((float)(v52 - *vPosOut) * (float)(v52 - *vPosOut))
-            + (float)((float)(v54 - vPosOut[2]) * (float)(v54 - vPosOut[2])))) == 0.0)
+    if ((float)((float)((float)(lineEnd[1] - vPosOut[1]) * (float)(lineEnd[1] - vPosOut[1]))
+        + (float)((float)((float)(lineEnd[0] - *vPosOut) * (float)(lineEnd[0] - *vPosOut))
+            + (float)((float)(lineEnd[2] - vPosOut[2]) * (float)(lineEnd[2] - vPosOut[2])))) == 0.0)
         return 0;
     if (method == scr_const.min_energy)
     {
-        v44 = Actor_Grenade_CheckMinimumEnergyToss(self, vPosOut, &v52, vVelOut);
+        v44 = Actor_Grenade_CheckMinimumEnergyToss(self, vPosOut, lineEnd, vVelOut);
         goto LABEL_43;
     }
     if (method == scr_const.min_time)
@@ -1777,7 +1765,7 @@ LABEL_37:
         v45 = vVelOut;
         v46 = 0;
     LABEL_42:
-        v44 = Actor_Grenade_CheckMaximumEnergyToss(self, vPosOut, &v52, v46, v45);
+        v44 = Actor_Grenade_CheckMaximumEnergyToss(self, vPosOut, lineEnd, v46, v45);
         goto LABEL_43;
     }
     if (method == scr_const.max_time)
@@ -1793,15 +1781,15 @@ LABEL_37:
         Scr_Error(v51);
         return 0;
     }
-    v44 = Actor_Grenade_CheckInfiniteEnergyToss(self, vPosOut, &v52, vVelOut);
+    v44 = Actor_Grenade_CheckInfiniteEnergyToss(self, vPosOut, lineEnd, vVelOut);
 LABEL_43:
     v47 = v44;
     if (v44 && g_drawGrenadeHints->current.integer > 0)
     {
-        G_DebugLineWithDuration(vPosOut, &v55, colorWhite, 0, 100);
-        G_DebugCircle(&v52, 3.0, v48, (int)colorWhite, 1, 0);
+        G_DebugLineWithDuration(vPosOut, endPos, colorWhite, 0, 100);
+        G_DebugCircle(lineEnd, 3.0, colorWhite, 0, 1, 0);
         if (TossPositionsFromHints)
-            G_DebugCircle(&v58, 6.0, v49, (int)colorCyan, 1, 0);
+            G_DebugCircle(landPos, 6.0, colorCyan, 0, 1, 0);
     }
     return v47;
 }
@@ -2095,7 +2083,6 @@ bool __cdecl Actor_Grenade_CheckToss(
 
 void __cdecl Actor_Grenade_AttemptEscape(actor_s *self, int bForceAbortPath)
 {
-    gentity_s *v4; // r3
     gentity_s *v5; // r3
     gentity_s *v6; // r3
     char v7; // r11
@@ -2106,31 +2093,21 @@ void __cdecl Actor_Grenade_AttemptEscape(actor_s *self, int bForceAbortPath)
     gentity_s *v12; // r30
     sentient_s *sentient; // r3
     sentient_s *v14; // r4
-    gentity_s *v15; // r3
     WeaponDef *weapDef; // r30
-    __int64 v17; // r11
-    double v18; // fp31
-    gentity_s *v19; // r3
-    ai_substate_t v20; // r4
-    gentity_s *v21; // r3
+    double minSafeDist; // fp31
+    ai_substate_t substate; // r4
     pathnode_t *CoverFromPoint; // r3
-    pathnode_t *v23; // r30
-    double v24; // fp30
-    gentity_s *v25; // r3
+    double dist; // fp30
     float *v27; // r5
-    gentity_s *v28; // r3
     float *v30; // r5
-    gentity_s *v31; // r3
     int v32; // r5
     bool HasPath; // r3
-    float v34[2]; // [sp+50h] [-60h] BYREF
-    __int64 v35; // [sp+58h] [-58h]
+    float normal[2]; // [sp+50h] [-60h] BYREF
 
     iassert(self);
     iassert(self->pGrenade.isDefined());
     iassert(self->sentient);
-    v4 = self->pGrenade.ent();
-    if (!v4->parent.isDefined()
+    if (!self->pGrenade.ent()->parent.isDefined()
         || (v5 = self->pGrenade.ent(), v6 = v5->parent.ent(), v7 = 1, v6 != self->ent))
     {
         v7 = 0;
@@ -2160,35 +2137,29 @@ void __cdecl Actor_Grenade_AttemptEscape(actor_s *self, int bForceAbortPath)
             }
         }
     }
-    v15 = self->pGrenade.ent();
-    weapDef = BG_GetWeaponDef(v15->s.weapon);
+    weapDef = BG_GetWeaponDef(self->pGrenade.ent()->s.weapon);
     iassert(weapDef);
-    LODWORD(v17) = weapDef->iExplosionRadius;
-    v35 = v17;
-    v18 = (float)((float)v17 * (float)1.1);
+    minSafeDist = ((float)weapDef->iExplosionRadius * 1.1f);
     if (!bForceAbortPath)
     {
         if (Actor_HasPath(self))
         {
-            v19 = self->pGrenade.ent();
             if (!Path_EncroachesPoint2D(
                 &self->Path,
                 self->ent->r.currentOrigin,
-                v19->missile.predictLandPos,
-                (float)((float)v18 * (float)v18)))
+                self->pGrenade.ent()->missile.predictLandPos,
+                (float)((float)minSafeDist * (float)minSafeDist)))
                 goto LABEL_26;
         }
     }
     if (!v8)
     {
-        v21 = self->pGrenade.ent();
-        CoverFromPoint = Actor_Cover_FindCoverFromPoint(self, v21->missile.predictLandPos, v18);
-        v23 = CoverFromPoint;
+        CoverFromPoint = Actor_Cover_FindCoverFromPoint(self, self->pGrenade.ent()->missile.predictLandPos, minSafeDist);
         if (CoverFromPoint && Actor_FindPathToNode(self, CoverFromPoint, 1))
         {
             Actor_ClearKeepClaimedNode(self);
-            Sentient_ClaimNode(self->sentient, v23);
-            v20 = STATE_GRENADE_TAKECOVER;
+            Sentient_ClaimNode(self->sentient, CoverFromPoint);
+            substate = STATE_GRENADE_TAKECOVER;
             goto LABEL_36;
         }
         goto LABEL_30;
@@ -2198,32 +2169,29 @@ void __cdecl Actor_Grenade_AttemptEscape(actor_s *self, int bForceAbortPath)
         || (self->pGrenade.ent(), !Actor_Grenade_IsPointSafe(self, self->Path.vFinalGoal)))
     {
     LABEL_30:
-        v24 = Actor_Grenade_EscapePlane(self, v34);
-        v25 = self->pGrenade.ent();
-        Actor_FindPathAwayNotCrossPlanes(self, v25->missile.predictLandPos, v18, v27, v24, v34, 1);
+        dist = Actor_Grenade_EscapePlane(self, normal);
+        Actor_FindPathAwayNotCrossPlanes(self, self->pGrenade.ent()->missile.predictLandPos, minSafeDist, normal, dist, 1);
         if (Actor_HasPath(self))
         {
             Actor_SetSubState(self, STATE_GRENADE_FLEE);
             return;
         }
         if (!Actor_IsSuppressed(self)
-            || (v28 = self->pGrenade.ent(),
-                Actor_FindPathAwayNotCrossPlanes(self, v28->missile.predictLandPos, v18, v30, v24, v34, 0),
+            || (Actor_FindPathAwayNotCrossPlanes(self, self->pGrenade.ent()->missile.predictLandPos, minSafeDist, normal, dist, 0),
                 !Actor_HasPath(self)))
         {
-            v31 = self->pGrenade.ent();
-            Actor_FindPathAway(self, v31->missile.predictLandPos, v18, v32);
+            Actor_FindPathAway(self, self->pGrenade.ent()->missile.predictLandPos, minSafeDist, 1);
             HasPath = Actor_HasPath(self);
-            v20 = STATE_GRENADE_FLEE;
+            substate = STATE_GRENADE_FLEE;
             if (!HasPath)
-                v20 = STATE_GRENADE_COWER;
+                substate = STATE_GRENADE_COWER;
             goto LABEL_36;
         }
     }
 LABEL_26:
-    v20 = STATE_GRENADE_FLEE;
+    substate = STATE_GRENADE_FLEE;
 LABEL_36:
-    Actor_SetSubState(self, v20);
+    Actor_SetSubState(self, substate);
 }
 
 void __cdecl Actor_Grenade_DecideResponse(actor_s *self)

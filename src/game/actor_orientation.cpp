@@ -392,14 +392,11 @@ void __cdecl Actor_FaceEnemy(actor_s *self, ai_orient_t *pOrient)
     const pathnode_t *FacingNode; // r3
     gentity_s *v16; // r11
     gentity_s *v17; // r11
-    float v18; // [sp+60h] [-40h] BYREF
-    float v19; // [sp+64h] [-3Ch]
-    float v20; // [sp+68h] [-38h]
+    float targetPos[3]; // [sp+60h] [-40h] BYREF // v18
 
-    if (!self)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\actor_orientation.cpp", 439, 0, "%s", "self");
-    if (!self->sentient)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\actor_orientation.cpp", 440, 0, "%s", "self->sentient");
+    iassert(self);
+    iassert(self->sentient);
+
     v5 = Actor_GetTargetEntity(self) != 0;
     v4 = self;
     if (!v5)
@@ -415,9 +412,9 @@ void __cdecl Actor_FaceEnemy(actor_s *self, ai_orient_t *pOrient)
     {
         ent = self->ent;
         v10 = (float)(self->sentientInfo[TargetSentient - level.sentients].vLastKnownPos[0] - self->ent->r.currentOrigin[0]);
-        v18 = self->sentientInfo[TargetSentient - level.sentients].vLastKnownPos[0] - self->ent->r.currentOrigin[0];
+        targetPos[0] = self->sentientInfo[TargetSentient - level.sentients].vLastKnownPos[0] - self->ent->r.currentOrigin[0];
         v11 = (float)(self->sentientInfo[TargetSentient - level.sentients].vLastKnownPos[1] - ent->r.currentOrigin[1]);
-        v19 = self->sentientInfo[TargetSentient - level.sentients].vLastKnownPos[1] - ent->r.currentOrigin[1];
+        targetPos[1] = self->sentientInfo[TargetSentient - level.sentients].vLastKnownPos[1] - ent->r.currentOrigin[1];
         v12 = (float)(self->sentientInfo[TargetSentient - level.sentients].vLastKnownPos[2] - ent->r.currentOrigin[2]);
         goto LABEL_20;
     }
@@ -440,25 +437,25 @@ void __cdecl Actor_FaceEnemy(actor_s *self, ai_orient_t *pOrient)
             {
                 v16 = self->ent;
                 v10 = (float)(FacingNode->constant.vOrigin[0] - self->ent->r.currentOrigin[0]);
-                v18 = FacingNode->constant.vOrigin[0] - self->ent->r.currentOrigin[0];
+                targetPos[0] = FacingNode->constant.vOrigin[0] - self->ent->r.currentOrigin[0];
                 v11 = (float)(FacingNode->constant.vOrigin[1] - v16->r.currentOrigin[1]);
-                v19 = FacingNode->constant.vOrigin[1] - v16->r.currentOrigin[1];
+                targetPos[1] = FacingNode->constant.vOrigin[1] - v16->r.currentOrigin[1];
                 v12 = (float)(FacingNode->constant.vOrigin[2] - v16->r.currentOrigin[2]);
                 goto LABEL_20;
             }
         }
     LABEL_19:
-        Actor_GetTargetPosition(self, &v18);
+        Actor_GetTargetPosition(self, targetPos);
         v17 = self->ent;
-        v10 = (float)(v18 - self->ent->r.currentOrigin[0]);
-        v18 = v18 - self->ent->r.currentOrigin[0];
-        v11 = (float)(v19 - v17->r.currentOrigin[1]);
-        v19 = v19 - v17->r.currentOrigin[1];
-        v12 = (float)(v20 - v17->r.currentOrigin[2]);
+        v10 = (float)(targetPos[0] - self->ent->r.currentOrigin[0]);
+        targetPos[0] = targetPos[0] - self->ent->r.currentOrigin[0];
+        v11 = (float)(targetPos[1] - v17->r.currentOrigin[1]);
+        targetPos[1] = targetPos[1] - v17->r.currentOrigin[1];
+        v12 = (float)(targetPos[2] - v17->r.currentOrigin[2]);
     LABEL_20:
-        v20 = v12;
+        targetPos[2] = v12;
         if ((float)((float)((float)v10 * (float)v10) + (float)((float)v11 * (float)v11)) >= 1.0)
-            Actor_FaceVector(pOrient, &v18);
+            Actor_FaceVector(pOrient, targetPos);
         return;
     }
     if (level.time - v8->VisCache.iLastVisTime >= 10000)

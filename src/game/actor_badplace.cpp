@@ -277,106 +277,80 @@ void __cdecl Path_RemoveBadPlaceEntity(gentity_s *entity)
 
 void __cdecl Path_DrawBadPlace(badplace_t *place)
 {
-    const float *type; // r4
-    const char *v3; // r3
-    double radius; // fp31
-    double angle0; // fp1
-    const float *v6; // r4
-    const float *v7; // r4
-    const float *v8; // r4
-    float *v9; // r3
-    double v10; // fp0
-    double angle1; // fp3
-    double v12; // fp2
-    int v13; // r6
-    int v14; // r5
-    const float *v15; // r4
-    double v16; // fp0
-    double v17; // fp3
-    double v18; // fp2
-    int v19; // r6
-    int v20; // r5
-    const float *v21; // r4
-    float v22; // [sp+50h] [-70h] BYREF
-    float v23; // [sp+54h] [-6Ch]
-    float v24; // [sp+58h] [-68h]
-    float v25; // [sp+60h] [-60h] BYREF
-    float v26; // [sp+64h] [-5Ch]
-    float v27; // [sp+68h] [-58h]
-    float v28; // [sp+70h] [-50h] BYREF
-    float v29; // [sp+74h] [-4Ch]
-    float v30; // [sp+78h] [-48h]
-    float v31; // [sp+80h] [-40h] BYREF
-    float v32; // [sp+84h] [-3Ch]
-    float v33; // [sp+88h] [-38h]
+    float radius; // fp31
 
-    type = (const float *)place->type;
-    if (type == (const float *)1)
+    float v0[3];
+    float v1[3];
+
+    float dir0[3];
+    float dir1[3];
+
+    if (place->type == 1)
     {
         if ((float)(place->parms.arc.radius * place->parms.arc.radius) == 0.0)
-            //radius = sqrtf(Actor_EventDefaultRadiusSqrd(AI_EV_BADPLACE_ARC));
             radius = sqrtf(Actor_EventDefaultRadiusSqrd(AI_EV_BADPLACE_ARC));
         else
             radius = place->parms.arc.radius;
-        angle0 = place->parms.arc.angle0;
-        if (angle0 == 0.0 && place->parms.arc.angle1 == 360.0)
+
+        if (place->parms.arc.angle0 == 0.0 && place->parms.arc.angle1 == 360.0)
         {
-            v22 = place->parms.arc.origin[0];
-            v23 = place->parms.arc.origin[1];
-            v24 = place->parms.arc.origin[2];
-            G_DebugCircle(&v22, radius, type, (int)colorRed, 1, 1);
-            v24 = v24 - place->parms.arc.halfheight;
-            G_DebugCircle(&v22, radius, v6, (int)colorRed, 1, 1);
-            v24 = (float)(place->parms.arc.halfheight * (float)2.0) + v24;
-            G_DebugCircle(&v22, radius, v7, (int)colorRed, 1, 1);
-            v24 = (float)(place->parms.arc.halfheight * (float)2.0) + v24;
-            G_DebugCircle(&v22, radius, v8, (int)colorRed, 1, 1);
+            v0[0] = place->parms.arc.origin[0];
+            v0[1] = place->parms.arc.origin[1];
+            v0[2] = place->parms.arc.origin[2];
+            G_DebugCircle(v0, radius, colorRed, 1, 1, 0);
+            v0[2] -= place->parms.arc.halfheight;
+            G_DebugCircle(v0, radius, colorLtOrange, 1, 1, 0);
+            v0[2] += (place->parms.arc.halfheight * 2.0f);
+            G_DebugCircle(v0, radius, colorLtOrange, 1, 1, 0);
+            v0[0] += (place->parms.arc.halfheight * 2.0f);
+            G_DebugCircle(v0, radius, colorLtOrange, 1, 1, 0);
         }
         else
         {
-            YawVectors(angle0, (float *)&place->endtime, &v28);
-            YawVectors(place->parms.arc.angle1, v9, &v31);
-            v24 = place->parms.arc.origin[2] - place->parms.arc.halfheight;
-            v10 = place->parms.arc.origin[1];
-            angle1 = place->parms.arc.angle1;
-            v12 = place->parms.arc.angle0;
-            v22 = place->parms.arc.origin[0];
-            v23 = v10;
-            G_DebugArc(&v22, radius, v12, angle1, v15, v14, v13);
-            v25 = (float)(v28 * (float)radius) + v22;
-            v26 = (float)(v29 * (float)radius) + v23;
-            v27 = (float)(v30 * (float)radius) + v24;
-            G_DebugLine(&v22, &v25, colorRed, 1);
-            v25 = (float)(v31 * (float)radius) + v22;
-            v26 = (float)(v32 * (float)radius) + v23;
-            v27 = (float)(v33 * (float)radius) + v24;
-            G_DebugLine(&v22, &v25, colorRed, 1);
-            v16 = (float)((float)(place->parms.arc.halfheight * (float)2.0) + v24);
-            v25 = (float)(v28 * (float)radius) + v22;
-            v17 = place->parms.arc.angle1;
-            v18 = place->parms.arc.angle0;
-            v24 = v16;
-            v26 = (float)(v29 * (float)radius) + v23;
-            v27 = (float)(v30 * (float)radius) + (float)v16;
-            G_DebugArc(&v22, radius, v18, v17, v21, v20, v19);
-            v25 = (float)(v28 * (float)radius) + v22;
-            v26 = (float)(v29 * (float)radius) + v23;
-            v27 = (float)(v30 * (float)radius) + v24;
-            G_DebugLine(&v22, &v25, colorRed, 1);
-            v25 = (float)(v31 * (float)radius) + v22;
-            v26 = (float)(v32 * (float)radius) + v23;
-            v27 = (float)(v33 * (float)radius) + v24;
-            G_DebugLine(&v22, &v25, colorRed, 1);
+            YawVectors(place->parms.arc.angle0, dir0, 0);
+            YawVectors(place->parms.arc.angle1, dir1, 0);
+            //YawVectors(place->parms.arc.angle0, (float *)&place->endtime, &v28);
+            //YawVectors(place->parms.arc.angle1, v9, &v31);
+
+            v0[0] = place->parms.arc.origin[0];
+            v0[1] = place->parms.arc.origin[1];
+            v0[2] = place->parms.arc.origin[2] - place->parms.arc.halfheight;
+            G_DebugArc(v0, radius, place->parms.arc.angle0, place->parms.arc.angle1, colorRed, 1, 0);
+
+            v1[0] = (float)(radius * dir0[0]) + v0[0];
+            v1[1] = (float)(radius * dir0[1]) + v0[1];
+            v1[2] = (float)(radius * dir0[2]) + v0[2];
+            G_DebugLine(v0, v1, colorRed, 1);
+
+            v1[0] = (float)(radius * dir1[0]) + v0[0];
+            v1[1] = (float)(radius * dir1[1]) + v0[1];
+            v1[2] = (float)(radius * dir1[2]) + v0[2];
+            G_DebugLine(v0, v1, colorRed, 1);
+
+            v0[2] = (float)(place->parms.arc.halfheight * 2.0) + v0[2];
+            v1[0] = (float)(radius * dir0[0]) + v0[0];
+            v1[1] = (float)(radius * dir0[1]) + v0[1];
+            v1[2] = (float)(radius * dir0[2]) + v0[2];
+            G_DebugArc(v0, radius, place->parms.arc.angle0, place->parms.arc.angle1, colorRed, 1, 0);
+
+            v1[0] = (float)(radius * dir0[0]) + v0[0];
+            v1[1] = (float)(radius * dir0[1]) + v0[1];
+            v1[2] = (float)(radius * dir0[2]) + v0[2];
+            G_DebugLine(v0, v1, colorRed, 1);
+
+            v1[0] = (float)(radius * dir1[0]) + v0[0];
+            v1[1] = (float)(radius * dir1[1]) + v0[1];
+            v1[2] = (float)(radius * dir1[2]) + v0[2];
+            G_DebugLine(v0, v1, colorRed, 1);
         }
     }
-    else if (type == (const float *)2)
+    else if (place->type == 2)
     {
         G_DebugDrawBrushModel(place->parms.brush.volume, colorRed, 1, 0);
     }
     else if (!alwaysfails)
     {
-        v3 = va("unhandled bad place type %i", type);
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\actor_badplace.cpp", 304, 0, v3);
+        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\actor_badplace.cpp", 304, 0, va("unhandled bad place type %i", place->type));
     }
 }
 

@@ -104,219 +104,153 @@ void __cdecl Actor_FindPathToGoalNearestNode(actor_s *self)
     }
 }
 
+// From blops with love
 int __cdecl Actor_SetMeleeAttackSpot(actor_s *self, const float *enemyPosition, float *attackPosition)
 {
-    sentient_s *TargetSentient; // r3
-    gentity_s *ent; // r11
-    sentient_s *v8; // r16
-    double v9; // fp13
-    int v10; // r20
-    unsigned int *v11; // r7
-    int v12; // r11
-    int v13; // r6
-    int v14; // r5
-    int v15; // r10
-    double v16; // fp0
-    unsigned int *v17; // r11
-    int v18; // r8
-    int v19; // r9
-    int v20; // r8
-    int v21; // r9
-    unsigned int *v22; // r11
-    int v23; // r10
-    int *meleeAttackerSpot; // r11
-    int *v25; // r22
-    int v26; // r30
-    int v27; // r31
-    double meleeAttackDist; // fp0
-    float *v29; // r11
-    int v30; // r31
-    double v31; // fp29
-    const float *v32; // r4
-    double v33; // fp0
-    const float *v34; // r4
-    const char *v36; // r5
-    float v37; // [sp+50h] [-130h] BYREF
-    float v38; // [sp+54h] [-12Ch]
-    float v39[4]; // [sp+58h] [-128h] BYREF
-    float v40[6]; // [sp+68h] [-118h] BYREF
-    float v41[4]; // [sp+80h] [-100h] BYREF
-    int v42; // [sp+90h] [-F0h] BYREF
-    unsigned int v43[3]; // [sp+94h] [-ECh] BYREF
-    trace_t v44; // [sp+A0h] [-E0h] BYREF
+    float dirFromEnemy[2]; // [sp+50h] [-130h] BYREF // v37-v38
 
-    if (!self)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\actor_dog_exposed.cpp", 130, 0, "%s", "self");
-    if (!enemyPosition)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\actor_dog_exposed.cpp", 131, 0, "%s", "enemyPosition");
-    TargetSentient = Actor_GetTargetSentient(self);
-    ent = self->ent;
-    v8 = TargetSentient;
-    v9 = enemyPosition[1];
-    v37 = self->ent->r.currentOrigin[0] - *enemyPosition;
-    v38 = ent->r.currentOrigin[1] - (float)v9;
-    Vec2Normalize(&v37);
-    v10 = 0;
-    v11 = v43;
-    v42 = 0;
-    v43[0] = 1;
-    v43[1] = 2;
-    v41[0] = (float)((float)1.0 * v37) + (float)((float)0.0 * v38);
-    v41[1] = (float)((float)0.0 * v37) + (float)((float)1.0 * v38);
-    v43[2] = 3;
-    v41[2] = (float)((float)-1.0 * v37) + (float)((float)0.0 * v38);
-    v41[3] = (float)((float)0.0 * v37) + (float)((float)-1.0 * v38);
-    v12 = 0;
-    do
+
+    iassert(self);
+    iassert(enemyPosition);
+
+    float bestFraction = 0.0f;
+    float currentValue;
+    int currentIndex;
+    int indices[4];
+    float dotProducts[4];
+    float mins[3];
+    float maxs[3];
+
+    float *v11;
+    float meleeAttackDist;
+    float endPos[3];
+
+    trace_t trace;
+
+    sentient_s *enemy = Actor_GetTargetSentient(self);
+    dirFromEnemy[0] = self->ent->r.currentOrigin[0] - enemyPosition[0];
+    dirFromEnemy[1] = self->ent->r.currentOrigin[1] - enemyPosition[1];
+    Vec2Normalize(dirFromEnemy);
+
+    int i;
+    int j;
+    for (i = 0; i < 4; ++i)
     {
-        v13 = *v11;
-        v14 = v12 + 1;
-        v15 = v12;
-        v16 = v41[*v11];
-        if (v12 + 1 < 4)
-        {
-        LABEL_13:
-            if (v15 >= 0)
-            {
-                v22 = &v43[v15 - 1];
-                do
-                {
-                    if (v16 < v41[*v22])
-                        break;
-                    --v15;
-                    v22[1] = *v22;
-                    --v22;
-                } while (v15 >= 0);
-            }
-        }
-        else
-        {
-            v17 = v11 - 3;
-            while (1)
-            {
-                v18 = v17[2];
-                if (v16 < v41[v18])
-                    break;
-                v19 = v17[1];
-                v17[3] = v18;
-                if (v16 < v41[v19])
-                {
-                    --v15;
-                    break;
-                }
-                v20 = *v17;
-                v17[2] = v19;
-                if (v16 < v41[v20])
-                {
-                    v15 -= 2;
-                    break;
-                }
-                v21 = *(v17 - 1);
-                v17[1] = v20;
-                if (v16 < v41[v21])
-                {
-                    v15 -= 3;
-                    break;
-                }
-                v15 -= 4;
-                *v17 = v21;
-                v17 -= 4;
-                if (v15 < 3)
-                    goto LABEL_13;
-            }
-        }
-        v12 = v14;
-        ++v11;
-        v43[v15] = v13;
-    } while (v14 + 1 < 4);
-    v23 = 0;
-    meleeAttackerSpot = v8->meleeAttackerSpot;
-    while (*meleeAttackerSpot != self->ent->s.number)
-    {
-        ++v23;
-        ++meleeAttackerSpot;
-        if (v23 >= 4)
-            goto LABEL_27;
+        dotProducts[i] = (float)(dirFromEnemy[0] * (float)meleeAttackOffsets[i][0])
+            + (float)(dirFromEnemy[1] * (float)meleeAttackOffsets[i][1]);
+        indices[i] = i;
     }
-    v8->meleeAttackerSpot[v23] = 0;
-LABEL_27:
-    attackPosition[2] = enemyPosition[2];
-    v25 = &v42;
-    v39[2] = 18.0;
-    v39[0] = -15.0;
-    v39[1] = -15.0;
-    while (1)
+    for (i = 1; i < 4; ++i)
     {
-        v26 = *v25;
-        v27 = v8->meleeAttackerSpot[*v25];
-        if (v27 >= 2176)
-            MyAssertHandler(
-                "c:\\trees\\cod3\\cod3src\\src\\game\\actor_dog_exposed.cpp",
-                194,
-                0,
-                "%s",
-                "currentOccupier < MAX_GENTITIES");
-        meleeAttackDist = self->meleeAttackDist;
-        v29 = (float *)meleeAttackOffsets[v26];
-        *attackPosition = (float)(*v29 * self->meleeAttackDist) + *enemyPosition;
-        attackPosition[1] = (float)(v29[1] * (float)meleeAttackDist) + enemyPosition[1];
-        if (v27 > 0)
+        currentValue = dotProducts[indices[i]];
+        currentIndex = indices[i];
+        for (j = i - 1; j >= 0 && dotProducts[indices[j]] <= currentValue; --j)
+            indices[j + 1] = indices[j];
+        indices[j + 1] = currentIndex;
+    }
+    for (i = 0; i < 4; ++i)
+    {
+        if (enemy->meleeAttackerSpot[i] == self->ent->s.number)
         {
-            v30 = v27;
-            if (!g_entities[v30].r.inuse)
-                MyAssertHandler(
-                    "c:\\trees\\cod3\\cod3src\\src\\game\\actor_dog_exposed.cpp",
-                    200,
-                    0,
-                    "%s",
-                    "g_entities[currentOccupier].r.inuse");
-            v31 = Vec2DistanceSq(attackPosition, g_entities[v30].r.currentOrigin);
-            if (v31 <= Vec2DistanceSq(attackPosition, self->ent->r.currentOrigin))
-                goto LABEL_43;
-        }
-        G_TraceCapsule(&v44, attackPosition, v39, actorMaxs, enemyPosition, v8->ent->s.number, 42074129);
-        if (v44.fraction == 1.0 && !v44.startsolid && !v44.allsolid)
+            enemy->meleeAttackerSpot[i] = 0;
             break;
-        if (ai_debugMeleeAttackSpots->current.enabled)
-        {
-            v34 = enemyPosition;
-            goto LABEL_42;
         }
-    LABEL_43:
-        ++v10;
-        ++v25;
-        if (v10 >= 4)
-            goto LABEL_46;
     }
-    v40[2] = attackPosition[2] - (float)50.0;
-    v33 = attackPosition[1];
-    v40[0] = *attackPosition;
-    v40[1] = v33;
-    G_TraceCapsule(&v44, attackPosition, v39, actorMaxs, v40, v8->ent->s.number, 42074129);
-    if (v44.fraction >= 1.0)
+    
+    attackPosition[2] = enemyPosition[2];
+    mins[0] = actorMins[0];
+    mins[1] = -15.0;
+    mins[2] = 18.0f;
+    maxs[0] = actorMaxs[0];
+    maxs[1] = 15.0;
+    maxs[2] = 48.0;
+
+    float v7;
+    float v8;
+    float v9;
+    float v10;
+    float bestPosition[3];
+    float dropPosition[3];
+
+    //static const float DROP_AMOUNT = 90.0f; // 90 in blops
+    static const float DROP_AMOUNT = 50.0f;
+
+    for (i = 0; i < 4; ++i)
     {
-        if (ai_debugMeleeAttackSpots->current.enabled)
+        int currentOccupier = enemy->meleeAttackerSpot[indices[i]];
+
+        iassert(currentOccupier < MAX_GENTITIES);
+
+        v11 = (float *)meleeAttackOffsets[indices[i]];
+        meleeAttackDist = self->meleeAttackDist;
+        *attackPosition = (float)(meleeAttackDist * *v11) + *enemyPosition;
+        attackPosition[1] = (float)(meleeAttackDist * v11[1]) + enemyPosition[1];
+        if (currentOccupier <= 0)
+            goto LABEL_33;
+
+        iassert(g_entities[currentOccupier].r.inuse);
+
+        v9 = g_entities[currentOccupier].r.currentOrigin[0] - *attackPosition;
+        v10 = g_entities[currentOccupier].r.currentOrigin[1] - attackPosition[1];
+        v7 = self->ent->r.currentOrigin[0] - *attackPosition;
+        v8 = self->ent->r.currentOrigin[1] - attackPosition[1];
+
+        if ((float)((float)(v7 * v7) + (float)(v8 * v8)) < (float)((float)(v9 * v9) + (float)(v10 * v10)))
         {
-            v34 = v40;
-        LABEL_42:
-            G_DebugLine(attackPosition, v34, colorRed, 0);
-            goto LABEL_43;
+        LABEL_33:
+            // blops mod (the flags arent the same, KISAKTODO: restore this part when flags are decoded)
+            //G_TraceCapsule(&trace, attackPosition, mins, maxs, attackPosition, enemy->ent->s.number, 0x20000);
+            //if (!trace.startsolid && !trace.allsolid)
+            //    G_TraceCapsule(&trace, attackPosition, mins, maxs, enemyPosition, enemy->ent->s.number, 0x2820011);
+            G_TraceCapsule(&trace, attackPosition, mins, maxs, enemyPosition, enemy->ent->s.number, 0x2820011);
+            if (trace.fraction < 1.0 && ai_debugMeleeAttackSpots->current.enabled)
+            {
+                Vec3Lerp(attackPosition, enemyPosition, trace.fraction, endPos);
+                G_DebugStar(endPos, colorYellow);
+            }
+            if (trace.fraction != 1.0 || trace.startsolid || trace.allsolid)
+            {
+                if (trace.fraction > bestFraction)
+                {
+                    bestFraction = trace.fraction;
+                    bestPosition[0] = *attackPosition;
+                    bestPosition[1] = attackPosition[1];
+                    bestPosition[2] = attackPosition[2];
+                }
+                if (ai_debugMeleeAttackSpots->current.enabled)
+                    G_DebugLine(attackPosition, enemyPosition, colorRed, 0);
+            }
+            else
+            {
+                dropPosition[0] = *attackPosition;
+                dropPosition[1] = attackPosition[1];
+                dropPosition[2] = attackPosition[2];
+                dropPosition[2] = dropPosition[2] - DROP_AMOUNT;
+                G_TraceCapsule(&trace, attackPosition, mins, actorMaxs, dropPosition, enemy->ent->s.number, 0x2820011);
+                if (trace.fraction < 1.0 && !trace.allsolid && !trace.startsolid)
+                {
+                    attackPosition[2] = (float)(attackPosition[2] - (float)(DROP_AMOUNT * trace.fraction)) + 1.0;
+                    enemy->meleeAttackerSpot[indices[i]] = self->ent->s.number;
+                    break;
+                }
+                if (ai_debugMeleeAttackSpots->current.enabled)
+                    G_DebugLine(attackPosition, dropPosition, colorRed, 0);
+            }
         }
-        goto LABEL_43;
     }
-    v8->meleeAttackerSpot[v43[v10 - 1]] = self->ent->s.number;
-LABEL_46:
-    if (v10 == 4)
-        return 0;
-    if (ai_debugMeleeAttackSpots->current.enabled)
+    if (i == 4)
     {
-        if (v8)
-        {
-            G_DebugCircle(attackPosition, 15.0, v32, (int)colorYellow, 0, 1);
-            va("%i", self->ent->s.number);
-            G_AddDebugString(attackPosition, colorYellow, 0.69999999, v36);
-            G_DebugLine(attackPosition, enemyPosition, colorGreen, 0);
-        }
+        if (bestFraction <= 0.94999999)
+            return 0;
+        *attackPosition = bestPosition[0];
+        attackPosition[1] = bestPosition[1];
+        attackPosition[2] = bestPosition[2];
+    }
+    if (ai_debugMeleeAttackSpots->current.enabled && enemy)
+    {
+        G_DebugCircle(attackPosition, 15.0, colorYellow, 0, 1, 0);
+        G_AddDebugString(attackPosition, colorYellow, 0.69999999, va("%i", self->ent->s.number));
+        G_DebugLine(attackPosition, enemyPosition, colorGreen, 0);
     }
     return 1;
 }
@@ -398,64 +332,59 @@ float __cdecl Actor_Dog_GetEnemyPos(actor_s *self, sentient_s *enemy, float *ene
 
 bool __cdecl Actor_Dog_IsEnemyInAttackRange(actor_s *self, sentient_s *enemy, int *goalPosSet)
 {
-    bool v6; // r29
-    double EnemyPos; // fp31
+    bool enemyInAttackRange; // r29
+    float bufferedAttackDist; // fp31
     float *currentOrigin; // r3
-    gentity_s *ent; // r11
-    gentity_s *v11; // r8
-    float *v12; // r4
-    float v13; // [sp+50h] [-B0h] BYREF
-    float v14; // [sp+54h] [-ACh]
-    float v15; // [sp+58h] [-A8h] BYREF
-    float v16; // [sp+5Ch] [-A4h]
-    float v17; // [sp+60h] [-A0h] BYREF
-    float v18; // [sp+64h] [-9Ch]
-    float v19[4]; // [sp+70h] [-90h] BYREF
-    float v20[4]; // [sp+80h] [-80h] BYREF
-    trace_t v21; // [sp+90h] [-70h] BYREF
+    float mins[4]; // [sp+80h] [-80h] BYREF
+    trace_t trace; // [sp+90h] [-70h] BYREF
 
-    if (!self)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\actor_dog_exposed.cpp", 326, 0, "%s", "self");
-    if (!enemy)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\actor_dog_exposed.cpp", 327, 0, "%s", "enemy");
-    if (!goalPosSet)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\actor_dog_exposed.cpp", 328, 0, "%s", "goalPosSet");
-    v6 = 0;
-    EnemyPos = Actor_Dog_GetEnemyPos(self, enemy, &v17);
+    float enemyPos[3]; // v17
+    float attackPos[3]; // v19
+    float enemyToAttackSpot[2]; // v13, v14
+    float enemyToMe[2]; // v15, v16
+
+    iassert(self);
+    iassert(enemy);
+    iassert(goalPosSet);
+
+    enemyInAttackRange = 0;
+    bufferedAttackDist = Actor_Dog_GetEnemyPos(self, enemy, enemyPos);
     *goalPosSet = 0;
-    if (!(unsigned __int8)Actor_PointAtGoal(&v17, &self->codeGoal))
-        return v6;
+    if (!Actor_PointAtGoal(enemyPos, &self->codeGoal))
+        return enemyInAttackRange;
     currentOrigin = self->ent->r.currentOrigin;
     self->useEnemyGoal = 1;
     self->useMeleeAttackSpot = 1;
-    v6 = Actor_PointNearPoint(currentOrigin, &v17, EnemyPos);
-    if ((unsigned __int8)Actor_SetMeleeAttackSpot(self, &v17, v19))
+    enemyInAttackRange = Actor_PointNearPoint(currentOrigin, enemyPos, bufferedAttackDist);
+
+    if (Actor_SetMeleeAttackSpot(self, enemyPos, attackPos))
     {
-        if (v6)
+        if (enemyInAttackRange)
         {
-            v13 = v19[0] - v17;
-            v14 = v19[1] - v18;
-            Vec2Normalize(&v13);
-            ent = self->ent;
-            v15 = self->ent->r.currentOrigin[0] - v17;
-            v16 = ent->r.currentOrigin[1] - v18;
-            Vec2Normalize(&v15);
-            v6 = (float)((float)(v16 * v14) + (float)(v15 * v13)) > 0.70700002;
+            enemyToAttackSpot[0] = attackPos[0] - enemyPos[0];
+            enemyToAttackSpot[1] = attackPos[1] - enemyPos[1];
+            Vec2Normalize(enemyToAttackSpot);
+
+            enemyToMe[0] = self->ent->r.currentOrigin[0] - enemyPos[0];
+            enemyToMe[1] = self->ent->r.currentOrigin[1] - enemyPos[1];
+            Vec2Normalize(enemyToMe);
+            //enemyInAttackRange = ((enemyToAttackSpot[0] * enemyToMe[0]) + (enemyToAttackSpot[1] * enemyToMe[1])) > 0.707f;
+            enemyInAttackRange = ((enemyToAttackSpot[0] * enemyToMe[0]) + (enemyToAttackSpot[1] * enemyToMe[1])) > cosf(DEG2RAD(45.0f));
         }
-        Actor_UpdateMeleeGoalPos(self, v19);
+        Actor_UpdateMeleeGoalPos(self, attackPos);
         *goalPosSet = 1;
-        return v6;
+        return enemyInAttackRange;
     }
-    if (!v6)
-        return v6;
-    v11 = enemy->ent;
-    v12 = self->ent->r.currentOrigin;
-    v20[0] = -15.0;
-    v20[1] = -15.0;
-    v20[2] = 18.0;
-    G_TraceCapsule(&v21, v12, v20, actorMaxs, &v17, v11->s.number, 42074129);
-    if (v21.fraction >= 1.0 && !v21.startsolid && !v21.allsolid)
-        return v6;
+
+    if (!enemyInAttackRange)
+        return enemyInAttackRange;
+
+    mins[0] = actorMins[0];
+    mins[1] = actorMins[1];
+    mins[2] = 18.0f;
+    G_TraceCapsule(&trace, self->ent->r.currentOrigin, mins, actorMaxs, enemyPos, enemy->ent->s.number, 42074129);
+    if (trace.fraction >= 1.0 && !trace.startsolid && !trace.allsolid)
+        return enemyInAttackRange;
     return 0;
 }
 

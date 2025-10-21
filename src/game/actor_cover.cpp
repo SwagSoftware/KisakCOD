@@ -15,6 +15,7 @@
 #include <server/sv_game.h>
 #include "actor_state.h"
 #include "actor_team_move.h"
+#include <universal/profile.h>
 
 float debugCoverNodeColors[512][4];
 char debugCoverNodeMsg[512][21];
@@ -87,12 +88,12 @@ void __cdecl DebugDrawNodeSelectionOverlay()
                         v8 = (float)(v4->constant.vOrigin[1] - v14[1]);
                         v9 = (float)(v4->constant.vOrigin[2] - v14[2]);
                         v10 = (float)((float)v6 * (float)0.001);
-                        va("%s  (%2.1f)", HIDWORD(v10), LODWORD(v10));
+                        ;
                         G_AddDebugString(
                             v12,
                             v1,
                             (float)((float)sqrtf((float)((float)((float)v8 * (float)v8) + (float)((float)((float)v9 * (float)v9) + (float)((float)v7 * (float)v7)))) * (float)0.0022222223),
-                            v11);
+                            va("%s  (%2.1f)", HIDWORD(v10), LODWORD(v10)));
                     }
                     ++v0;
                     ++v2;
@@ -165,84 +166,44 @@ void DebugDrawNodePicking(const char *msg, actor_s *self, const pathnode_t *node
 int __cdecl Actor_Cover_IsWithinNodeAngle(
     const float *pos,
     const pathnode_t *node,
-    const pathnodeRange_t *range,
-    double a4,
-    double a5,
-    long double a6)
+    const pathnodeRange_t *range)
 {
-    long double v9; // fp2
-    long double v10; // fp2
-    double v11; // fp1
-    double fAngleMin; // fp0
-    double v13; // fp30
-    double fAngleMax; // fp1
-    double v15; // fp0
-    double v16; // fp13
+    iassert(node);
+    iassert(range);
 
-    if (!node)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\actor_cover.cpp", 141, 0, "%s", "node");
-    if (!range)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\actor_cover.cpp", 142, 0, "%s", "range");
-    *((double *)&v9 + 1) = (float)(*pos - node->constant.vOrigin[0]);
-    *(double *)&v9 = (float)(pos[1] - node->constant.vOrigin[1]);
-    v10 = atan2(v9, a6);
-    v11 = AngleNormalize360((float)((float)((float)*(double *)&v10 * (float)57.295776) - node->constant.fAngle));
-    fAngleMin = range->fAngleMin;
-    v13 = v11;
-    if (fAngleMin < 0.0 || fAngleMin >= 360.0)
-        MyAssertHandler(
-            "c:\\trees\\cod3\\cod3src\\src\\game\\actor_cover.cpp",
-            150,
-            0,
-            "%s\n\t(range->fAngleMin) = %g",
-            HIDWORD(fAngleMin),
-            LODWORD(fAngleMin));
-    fAngleMax = range->fAngleMax;
-    if (fAngleMax < 0.0 || fAngleMax >= 360.0)
-        MyAssertHandler(
-            "c:\\trees\\cod3\\cod3src\\src\\game\\actor_cover.cpp",
-            151,
-            0,
-            "%s\n\t(range->fAngleMax) = %g",
-            "(range->fAngleMax >= 0 && range->fAngleMax < 360)",
-            fAngleMax);
-    if (v13 < 0.0 || v13 >= 360.0)
-        MyAssertHandler(
-            "c:\\trees\\cod3\\cod3src\\src\\game\\actor_cover.cpp",
-            152,
-            0,
-            "%s\n\t(fAngle) = %g",
-            HIDWORD(v13),
-            LODWORD(v13));
-    v15 = range->fAngleMin;
-    v16 = range->fAngleMax;
-    if (v15 <= v16)
+    float x = pos[0] - node->constant.vOrigin[0];
+    float y = pos[1] - node->constant.vOrigin[1];
+
+    float fAngle = RAD2DEG(atan2f(y, x));
+
+    fAngle -= node->constant.fAngle;
+
+    fAngle = AngleNormalize360(fAngle);
+
+    iassert(range->fAngleMin >= 0.0f && range->fAngleMin < 360.0f);
+    iassert(range->fAngleMax >= 0.0f && range->fAngleMax < 360.0f);
+    iassert(fAngle >= 0.0f && fAngle < 360.0f);
+
+    if (range->fAngleMin <= range->fAngleMax)
     {
-        if (v13 < v15 || v13 > v16)
+        if (fAngle < range->fAngleMin || fAngle > range->fAngleMax)
             return 0;
     }
-    else if (v13 < v15 && v13 > v16)
+    else if (fAngle < range->fAngleMin && fAngle > range->fAngleMax)
     {
         return 0;
     }
+
     return 1;
 }
 
 int __cdecl Actor_Cover_NodeRangeValid(const float *pos, const pathnode_t *node, pathnodeRange_t *range)
 {
-    long double v6; // fp4
-    double v7; // fp2
-    double v8; // fp1
+    iassert(node);
+    iassert(range);
 
-    if (!node)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\actor_cover.cpp", 177, 0, "%s", "node");
-    if (!range)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\actor_cover.cpp", 178, 0, "%s", "range");
-    v8 = Vec2DistanceSq(pos, node->constant.vOrigin);
-    if (v8 >= range->minSqDist)
-        return Actor_Cover_IsWithinNodeAngle(pos, node, range, v8, v7, v6);
-    else
-        return 0;
+    return Vec2DistanceSq(pos, node->constant.vOrigin) >= (double)range->minSqDist
+        && Actor_Cover_IsWithinNodeAngle(pos, node, range);
 }
 
 void __cdecl Actor_Cover_InitRange(pathnodeRange_t *rangeOut, const pathnode_t *node)
@@ -492,122 +453,97 @@ float __cdecl Actor_Cover_ScoreOnEngagement(actor_s *self, const pathnode_t *nod
     double engageMinFalloffDist; // fp12
     double v9; // fp0
     double engageMaxFalloffDist; // fp13
-    double v11; // fp31
+    double score; // fp31
     double v12; // fp1
     double v13; // fp31
 
-    if (!self)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\actor_cover.cpp", 481, 0, "%s", "self");
-    if (!node)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\actor_cover.cpp", 482, 0, "%s", "node");
-    if (self->engageMinDist < (double)self->engageMinFalloffDist)
-        MyAssertHandler(
-            "c:\\trees\\cod3\\cod3src\\src\\game\\actor_cover.cpp",
-            484,
-            0,
-            "%s",
-            "self->engageMinDist >= self->engageMinFalloffDist");
-    if (self->engageMaxDist > (double)self->engageMaxFalloffDist)
-        MyAssertHandler(
-            "c:\\trees\\cod3\\cod3src\\src\\game\\actor_cover.cpp",
-            485,
-            0,
-            "%s",
-            "self->engageMaxDist <= self->engageMaxFalloffDist");
+    iassert(self);
+    iassert(node);
+    iassert(self->engageMinDist >= self->engageMinFalloffDist);
+    iassert(self->engageMaxDist <= self->engageMaxFalloffDist);
+
     TargetEntity = Actor_GetTargetEntity(self);
     if (!TargetEntity)
-        goto LABEL_25;
+        return 0.0f;
+
     v5 = (float)(TargetEntity->r.currentOrigin[0] - node->constant.vOrigin[0]);
     v6 = (float)(TargetEntity->r.currentOrigin[2] - node->constant.vOrigin[2]);
     v7 = (float)(TargetEntity->r.currentOrigin[1] - node->constant.vOrigin[1]);
     engageMinFalloffDist = self->engageMinFalloffDist;
-    //v9 = sqrtf((float)((float)((float)v7 * (float)v7) + (float)((float)((float)v5 * (float)v5) + (float)((float)v6 * (float)v6))));
+
     v9 = sqrtf((float)((float)((float)v7 * (float)v7) + (float)((float)((float)v5 * (float)v5) + (float)((float)v6 * (float)v6))));
+
     if (v9 < engageMinFalloffDist)
-        goto LABEL_25;
+        return 0.0f;
+
     engageMaxFalloffDist = self->engageMaxFalloffDist;
     if (v9 > engageMaxFalloffDist)
-        goto LABEL_25;
+        return 0.0f;
     if (v9 < self->engageMinDist)
     {
         if (v9 >= engageMinFalloffDist)
         {
-            v11 = (float)((float)1.0
+            score = (float)((float)1.0
                 - (float)((float)(self->engageMinDist - (float)v9)
                     / (float)(self->engageMinDist - self->engageMinFalloffDist)));
-            if (v11 < 0.0 || v11 > 1.0)
-                MyAssertHandler(
-                    "c:\\trees\\cod3\\cod3src\\src\\game\\actor_cover.cpp",
-                    502,
-                    1,
-                    (const char *)HIDWORD(v11),
-                    0,
-                    0,
-                    0);
-            v12 = v11;
-            return *((float *)&v12 + 1);
+
+            iassert(score >= 0.0f && score <= 1.0f);
+            return score;
         }
-    LABEL_25:
-        v12 = 0.0;
-        return *((float *)&v12 + 1);
+        return 0.0f;
     }
+
     if (v9 <= self->engageMaxDist)
     {
-        v12 = 1.0;
-        return *((float *)&v12 + 1);
+        return 1.0f;
     }
     if (v9 > engageMaxFalloffDist)
-        goto LABEL_25;
-    v13 = (float)((float)(self->engageMaxFalloffDist - (float)v9)
-        / (float)(self->engageMaxFalloffDist - self->engageMaxDist));
-    if (v13 < 0.0 || v13 > 1.0)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\actor_cover.cpp", 513, 1, (const char *)HIDWORD(v13), 0, 0, 0);
-    v12 = v13;
-    return *((float *)&v12 + 1);
+    {
+        return 0.0f;
+    }
+
+    score = (float)((float)(self->engageMaxFalloffDist - (float)v9) / (float)(self->engageMaxFalloffDist - self->engageMaxDist));
+    iassert(score >= 0.0f && score <= 1.0f);
+    return score;
 }
 
 float __cdecl Actor_Cover_ScoreOnNodeAngle(actor_s *self, const pathnode_t *node)
 {
     bool PotentialThreat; // r28
     gentity_s *TargetEntity; // r29
-    long double v6; // fp4
-    double v7; // fp2
-    double v8; // fp1
     double v9; // fp1
     float v11[2]; // [sp+50h] [-50h] BYREF
-    float v12[4]; // [sp+58h] [-48h] BYREF
-    pathnodeRange_t v13[4]; // [sp+68h] [-38h] BYREF
+    float pos[4]; // [sp+58h] [-48h] BYREF
+    pathnodeRange_t range[4]; // [sp+68h] [-38h] BYREF
 
     PotentialThreat = Actor_GetPotentialThreat(&self->potentialThreat, v11);
-    Actor_Cover_InitRange(v13, node);
+    Actor_Cover_InitRange(range, node);
     TargetEntity = Actor_GetTargetEntity(self);
+
     if (!TargetEntity || !Actor_CanSeeEnemy(self) && PotentialThreat)
     {
         if (PotentialThreat)
         {
-            v12[2] = node->constant.vOrigin[2];
-            v12[0] = node->constant.vOrigin[0] + v11[0];
-            v12[1] = node->constant.vOrigin[1] + v11[1];
-            if ((unsigned __int8)Actor_Cover_IsWithinNodeAngle(v12, node, v13, v8, v7, v6))
+            pos[0] = node->constant.vOrigin[0] + v11[0];
+            pos[1] = node->constant.vOrigin[1] + v11[1];
+            pos[2] = node->constant.vOrigin[2];
+
+            if (Actor_Cover_IsWithinNodeAngle(pos, node, range))
             {
-                v9 = 1.0;
-                return *((float *)&v9 + 1);
+                return 1.0f;
             }
         }
-    LABEL_9:
-        v9 = 0.0;
-        return *((float *)&v9 + 1);
+        return 0.0f;
     }
-    if (!(unsigned __int8)Actor_Cover_IsWithinNodeAngle(TargetEntity->r.currentOrigin, node, v13, v8, v7, v6))
-        goto LABEL_9;
-    v9 = 1.0;
-    return *((float *)&v9 + 1);
+    if (!Actor_Cover_IsWithinNodeAngle(TargetEntity->r.currentOrigin, node, range))
+        return 0.0f;
+
+    return 1.0f;
 }
 
 float __cdecl Actor_Cover_ScoreOnTargetDir(actor_s *self, const pathnode_t *node)
 {
     gentity_s *TargetEntity; // r29
-    double v5; // fp1
     gentity_s *ent; // r11
     double v7; // fp13
     float v9; // [sp+50h] [-30h] BYREF
@@ -616,11 +552,12 @@ float __cdecl Actor_Cover_ScoreOnTargetDir(actor_s *self, const pathnode_t *node
     float v12; // [sp+5Ch] [-24h]
 
     TargetEntity = Actor_GetTargetEntity(self);
+
     if (TargetEntity)
     {
         if (Actor_PointNearNode(self->ent->r.currentOrigin, node))
         {
-            v5 = 1.0;
+            return 1.0f;
         }
         else
         {
@@ -632,36 +569,28 @@ float __cdecl Actor_Cover_ScoreOnTargetDir(actor_s *self, const pathnode_t *node
             v11 = node->constant.vOrigin[0] - self->ent->r.currentOrigin[0];
             v12 = (float)v7 - ent->r.currentOrigin[1];
             Vec2Normalize(&v11);
-            v5 = (float)((float)((float)((float)(v11 * v9) + (float)(v12 * v10)) + (float)1.0) * (float)0.5);
+            return (float)((float)((float)((float)(v11 * v9) + (float)(v12 * v10)) + (float)1.0) * (float)0.5);
         }
     }
-    else
-    {
-        v5 = 0.0;
-    }
-    return *((float *)&v5 + 1);
+
+
+    return 0.0f;
 }
 
 float __cdecl Actor_Cover_ScoreOnPriority(actor_s *self, const pathnode_t *node)
 {
-    double v2; // fp1
-
     if ((node->constant.spawnflags & 0x40) != 0)
-        v2 = 1.0;
+        return 1.0f;
     else
-        v2 = 0.0;
-    return *((float *)&v2 + 1);
+        return 0.0f;
 }
 
 float __cdecl Actor_Cover_ScoreOnPlayerLOS(actor_s *self, const pathnode_t *node)
 {
-    double v2; // fp1
-
     if (node->dynamic.inPlayerLOSTime >= level.time && self->sentient->eTeam == TEAM_ALLIES)
-        v2 = 0.0;
+        return 0.0f;
     else
-        v2 = 1.0;
-    return *((float *)&v2 + 1);
+        return 1.0f;
 }
 
 float __cdecl Actor_Cover_ScoreOnVisibility(actor_s *self, const pathnode_t *node)
@@ -672,21 +601,17 @@ float __cdecl Actor_Cover_ScoreOnVisibility(actor_s *self, const pathnode_t *nod
 
     TargetSentient = Actor_GetTargetSentient(self);
     if (TargetSentient && (v4 = Sentient_NearestNode(TargetSentient)) != 0 && !Path_NodesVisible(node, v4))
-        v5 = 0.0;
+        return 0.0f;
     else
-        v5 = 1.0;
-    return *((float *)&v5 + 1);
+        return 1.0f;
 }
 
 float __cdecl Actor_Cover_ScoreOnCoverType(actor_s *self, const pathnode_t *node)
 {
-    double v2; // fp1
-
     if (((1 << node->constant.type) & 0x1C00) != 0)
-        v2 = 0.0;
+        return 0.0f;
     else
-        v2 = 1.0;
-    return *((float *)&v2 + 1);
+        return 1.0f;
 }
 
 // aislop
@@ -716,7 +641,6 @@ float Actor_Cover_GetNodeDistMetric(actor_s *self, const pathnode_t *node)
     return (1.0f - score) * ai_coverScore_distance->current.value;
 }
 
-
 float __cdecl Actor_Cover_GetNodeMetric(actor_s *self, const pathnode_t *node)
 {
     double NodeDistMetric; // fp31
@@ -729,17 +653,13 @@ float __cdecl Actor_Cover_GetNodeMetric(actor_s *self, const pathnode_t *node)
     double v11; // fp0
     double v12; // fp13
     double v13; // fp0
-    double v14; // fp1
 
-    if (!self)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\actor_cover.cpp", 668, 0, "%s", "self");
-    if (!self->sentient)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\actor_cover.cpp", 669, 0, "%s", "self->sentient");
-    if (!node)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\actor_cover.cpp", 670, 0, "%s", "node");
+    iassert(self);
+    iassert(self->sentient);
+    iassert(node);
+
     NodeDistMetric = Actor_Cover_GetNodeDistMetric(self, node);
-    v5 = (float)((float)(Actor_Cover_ScoreOnEngagement(self, node) * ai_coverScore_engagement->current.value)
-        + (float)NodeDistMetric);
+    v5 = ((Actor_Cover_ScoreOnEngagement(self, node) * ai_coverScore_engagement->current.value) + NodeDistMetric);
     v6 = Actor_Cover_ScoreOnVisibility(self, node);
     if (((1 << node->constant.type) & 0x1C00) != 0)
         v7 = 0.0;
@@ -759,8 +679,8 @@ float __cdecl Actor_Cover_GetNodeMetric(actor_s *self, const pathnode_t *node)
         v13 = 1.0;
     else
         v13 = 0.0;
-    v14 = (float)((float)(ai_coverScore_priority->current.value * (float)v13) + (float)v12);
-    return *((float *)&v14 + 1);
+
+    return  (float)((float)(ai_coverScore_priority->current.value * (float)v13) + (float)v12);
 }
 
 float __cdecl Actor_Cover_FromPoint_GetNodeMetric(actor_s *self, const pathnode_t *node)
@@ -771,7 +691,6 @@ float __cdecl Actor_Cover_FromPoint_GetNodeMetric(actor_s *self, const pathnode_
     double v7; // fp31
     double v8; // fp1
     double v9; // fp0
-    double v10; // fp1
 
     if (!self)
         MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\actor_cover.cpp", 692, 0, "%s", "self");
@@ -792,9 +711,8 @@ float __cdecl Actor_Cover_FromPoint_GetNodeMetric(actor_s *self, const pathnode_
         v9 = 1.0;
     else
         v9 = 0.0;
-    v10 = (float)((float)(ai_coverScore_priority->current.value * (float)v9)
+    return (float)((float)(ai_coverScore_priority->current.value * (float)v9)
         + (float)((float)((float)v8 * ai_coverScore_nodeAngle->current.value) + (float)v7));
-    return *((float *)&v10 + 1);
 }
 
 int __cdecl Actor_Cover_IsValidReacquire(actor_s *self, const pathnode_t *node)
@@ -877,79 +795,73 @@ int __cdecl Actor_Cover_IsValidCover(actor_s *self, const pathnode_t *node)
 
 float __cdecl Actor_Cover_MinHeightAtCover(pathnode_t *node)
 {
-    double v2; // fp1
+    iassert(node);
 
-    if (!node)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\actor_cover.cpp", 821, 0, "%s", "node");
     if (((1 << node->constant.type) & 0x1020) != 0 || (node->constant.spawnflags & 8) != 0)
-        v2 = 20.0;
+        return 20.0f;
     else
-        v2 = 36.0;
-    return *((float *)&v2 + 1);
+        return 36.0f;
 }
 
 pathnode_t *__cdecl Actor_Cover_FindCoverFromPoint(actor_s *self, const float *vPoint, double fMinSafeDist)
 {
-    int v6; // r5
-    pathsort_t *v7; // r4
-    int v8; // r3
-    pathnode_t *v9; // r23
-    double v10; // fp30
-    pathnode_t **v11; // r27
-    int v12; // r24
-    pathnode_t *v13; // r31
+    int nodeCount; // r3
+    pathnode_t *bestNode; // r23
+    double bestNodeMetric; // fp30
+    pathsort_t *pNode; // r27
+    int itr; // r24
+    pathnode_t *node; // r31
     const float *vOrigin; // r30
     double v15; // fp1
-    bool v16; // r8
-    float *v17; // r7
     double NodeMetric; // fp1
-    _BYTE v20[3104]; // [sp+60h] [-C70h] BYREF
+    pathsort_t nodes[258]; // [sp+60h] [-C70h] BYREF
 
-    //Profile_Begin(356);
-    if (!self)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\actor_cover.cpp", 860, 0, "%s", "self");
-    if (!self->sentient)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\actor_cover.cpp", 861, 0, "%s", "self->sentient");
+    PROF_SCOPED("Actor_Cover_FindCoverFromPoint");
+
+    iassert(self);
+    iassert(self->sentient);
+
     Actor_HasPath(self);
-    v8 = Path_NodesInCylinder(self->ent->r.currentOrigin, 512.0, 80.0, v7, v6, (int)v20);
-    v9 = 0;
-    v10 = 0.0;
-    if (v8 > 0)
+
+    nodeCount = Path_NodesInCylinder(self->ent->r.currentOrigin, 512.0, 80.0, nodes, 64, 0x41FFC);
+    bestNode = NULL;
+    bestNodeMetric = 0.0;
+
+    if (nodeCount > 0)
     {
-        v11 = (pathnode_t **)v20;
-        v12 = v8;
+        pNode = nodes;
+        itr = nodeCount;
         do
         {
-            v13 = *v11;
-            vOrigin = (*v11)->constant.vOrigin;
-            if (Vec2DistanceSq(vOrigin, vPoint) > (double)(float)((float)fMinSafeDist * (float)fMinSafeDist)
-                || (v15 = Actor_Cover_MinHeightAtCover(v13),
-                    !G_CanRadiusDamageFromPos(self->ent, vOrigin, 0, vPoint, fMinSafeDist, 1.0, v17, v15, v16, 0)))
+            node = pNode->node;
+            vOrigin = pNode->node->constant.vOrigin;
+            if (Vec2DistanceSq(vOrigin, vPoint) > (fMinSafeDist * fMinSafeDist)
+                || (v15 = Actor_Cover_MinHeightAtCover(node),
+                    !G_CanRadiusDamageFromPos(self->ent, vOrigin, NULL, vPoint, fMinSafeDist, 1.0f, NULL, v15, 0, 0x802011))) // KISAKTODO: argcheck 
             {
-                if ((unsigned __int8)Actor_Cover_IsValidCover(self, v13))
+                if (Actor_Cover_IsValidCover(self, node))
                 {
-                    NodeMetric = Actor_Cover_FromPoint_GetNodeMetric(self, v13);
-                    if (NodeMetric > v10)
+                    NodeMetric = Actor_Cover_FromPoint_GetNodeMetric(self, node);
+                    if (NodeMetric > bestNodeMetric)
                     {
-                        v10 = NodeMetric;
-                        v9 = v13;
+                        bestNodeMetric = NodeMetric;
+                        bestNode = node;
                     }
                 }
             }
-            --v12;
-            v11 += 3;
-        } while (v12);
+            --itr;
+            ++pNode;
+        } while (itr);
     }
-    //Profile_EndInternal(0);
-    return v9;
+
+    return bestNode;
 }
 
 int __cdecl isNodeInRegion(pathnode_t *node, gentity_s *volume)
 {
-    if (!node)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\actor_cover.cpp", 908, 0, "%s", "node");
-    if (!volume)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\actor_cover.cpp", 909, 0, "%s", "volume");
+    iassert(node);
+    iassert(volume);
+
     return SV_EntityContact(node->constant.vOrigin, node->constant.vOrigin, volume);
 }
 
@@ -1194,37 +1106,32 @@ int __cdecl Actor_Cover_UseCoverNode(actor_s *self, pathnode_t *node)
 
 void __cdecl Actor_DebugDrawNodesInVolume(actor_s *self)
 {
-    int v2; // r5
-    pathsort_t *v3; // r4
     gentity_s *volume; // r28
-    int v5; // r3
-    const pathnode_t **v6; // r27
-    int v7; // r26
-    const pathnode_t *v8; // r31
-    float v9[4]; // [sp+50h] [-1860h] BYREF
-    _BYTE v10[2128]; // [sp+60h] [-1850h] BYREF
+    int nodeCount; // r3
+    pathsort_t *pNode; // r27
+    int itr; // r26
+    const pathnode_t *node; // r31
+    float viewpos[4]; // [sp+50h] [-1860h] BYREF
+    pathsort_t nodes[512]; // [sp+60h] [-1850h] BYREF
 
-    CL_GetViewPos(v9);
+    CL_GetViewPos(viewpos);
     volume = self->codeGoal.volume;
-    if (!volume)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\actor_cover.cpp", 1166, 0, "%s", "volume");
-    v5 = Path_NodesInCylinder(self->codeGoal.pos, self->codeGoal.radius, self->codeGoal.height, v3, v2, (int)v10);
-    if (v5 > 0)
+    iassert(volume);
+    nodeCount = Path_NodesInCylinder(self->codeGoal.pos, self->codeGoal.radius, self->codeGoal.height, nodes, 512, 0x41FFC);
+    if (nodeCount > 0)
     {
-        v6 = (const pathnode_t **)v10;
-        v7 = v5;
+        pNode = nodes;
+        itr = nodeCount;
         do
         {
-            v8 = *v6;
-            if (!*v6)
-                MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\actor_cover.cpp", 908, 0, "%s", "node");
-            if (!volume)
-                MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\actor_cover.cpp", 909, 0, "%s", "volume");
-            if (SV_EntityContact(v8->constant.vOrigin, v8->constant.vOrigin, volume))
-                Path_DrawDebugNode(v9, v8);
-            --v7;
-            v6 += 3;
-        } while (v7);
+            node = pNode->node;
+            iassert(node);
+            iassert(volume);
+            if (SV_EntityContact(node->constant.vOrigin, node->constant.vOrigin, volume))
+                Path_DrawDebugNode(viewpos, node);
+            --itr;
+            ++pNode;
+        } while (itr);
     }
 }
 

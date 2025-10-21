@@ -794,20 +794,10 @@ void __cdecl Actor_BroadcastArcEvent(
     const float *v26; // r4
 
     v9 = teamFlags;
-    if (teamFlags > 31)
-        MyAssertHandler(
-            "c:\\trees\\cod3\\cod3src\\src\\game\\actor_events.cpp",
-            358,
-            0,
-            "%s",
-            "teamFlags <= (1 << TEAM_NUM_TEAMS) - 1");
-    if (eventType != 18)
-        MyAssertHandler(
-            "c:\\trees\\cod3\\cod3src\\src\\game\\actor_events.cpp",
-            359,
-            0,
-            "%s",
-            "eventType > AI_EV_FIRST_ARC_EVENT && eventType < AI_EV_LAST_ARC_EVENT");
+
+    iassert(teamFlags <= (1 << TEAM_NUM_TEAMS) - 1);
+    iassert(eventType > AI_EV_FIRST_ARC_EVENT && eventType < AI_EV_LAST_ARC_EVENT);
+
     if (angle0 != angle1)
     {
         if (v9)
@@ -840,7 +830,7 @@ void __cdecl Actor_BroadcastArcEvent(
             for (j = Actor_EventListener_First(eventType, v9); j >= 0; j = Actor_EventListener_Next(j, eventType, v9))
             {
                 Entity = Actor_EventListener_GetEntity(j);
-                if (IsPosInsideArc(Entity->r.currentOrigin, 15.0, v26, radius, angle0, angle1, halfHeight))
+                if (IsPosInsideArc(Entity->r.currentOrigin, 15.0, origin, radius, angle0, angle1, halfHeight))
                     Actor_EventListener_NotifyToListener(Entity, originator, (ai_event_t)eventType, origin);
             }
             return;

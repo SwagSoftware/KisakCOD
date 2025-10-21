@@ -20,6 +20,13 @@
 
 #define ANIM_FLAG_COMPLETE 1
 
+enum WeapAccuracyType : __int32
+{
+    WEAP_ACCURACY_AI_VS_AI = 0x0,
+    WEAP_ACCURACY_AI_VS_PLAYER = 0x1,
+    WEAP_ACCURACY_COUNT = 0x2,
+};
+
 union XAnimIndices // sizeof=0x4
 {                                       // ...
     unsigned __int8 *_1;
@@ -775,11 +782,11 @@ struct WeaponDef // sizeof=0x878
     float fHipViewScatterMax;
     float fightDist;
     float maxDist;
-    const char* accuracyGraphName[2];
-    float (*accuracyGraphKnots[2])[2];
-    float (*originalAccuracyGraphKnots[2])[2];
-    int accuracyGraphKnotCount[2];
-    int originalAccuracyGraphKnotCount[2];
+    const char* accuracyGraphName[WEAP_ACCURACY_COUNT];
+    float (*accuracyGraphKnots[2])[WEAP_ACCURACY_COUNT];
+    float (*originalAccuracyGraphKnots[2])[WEAP_ACCURACY_COUNT];
+    int accuracyGraphKnotCount[WEAP_ACCURACY_COUNT];
+    int originalAccuracyGraphKnotCount[WEAP_ACCURACY_COUNT];
     int iPositionReloadTransTime;
     float leftArc;
     float rightArc;

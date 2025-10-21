@@ -445,23 +445,11 @@ void __cdecl Actor_SetState(actor_s *self, ai_state_t eState)
     unsigned int transitionCount; // r7
     unsigned int simulatedStateLevel; // r4
     const char *v6; // r3
-    int v7; // [sp+8h] [-B8h]
-    int v8; // [sp+Ch] [-B4h]
-    int v9; // [sp+10h] [-B0h]
-    int v10; // [sp+14h] [-ACh]
-    int v11; // [sp+18h] [-A8h]
 
-    if (!self)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\actor_state.cpp", 508, 0, "%s", "self");
+    iassert(self);
     transitionCount = self->transitionCount;
-    if (transitionCount >= 0xB)
-        MyAssertHandler(
-            "c:\\trees\\cod3\\cod3src\\src\\game\\actor_state.cpp",
-            509,
-            0,
-            "self->transitionCount doesn't index ARRAY_COUNT( self->StateTransitions )\n\t%i not in [0, %i)",
-            transitionCount,
-            11);
+    bcassert(self->transitionCount, ARRAY_COUNT(self->StateTransitions));
+
     simulatedStateLevel = self->simulatedStateLevel;
     if (simulatedStateLevel)
     {
@@ -474,11 +462,11 @@ void __cdecl Actor_SetState(actor_s *self, ai_state_t eState)
             self->eSimulatedState[3],
             self->eSimulatedState[4],
             self->stateLevel,
-            v7,
-            v8,
-            v9,
-            v10,
-            v11);
+            self->eState[0],
+            self->eState[1],
+            self->eState[2],
+            self->eState[3],
+            self->eState[4]);
         MyAssertHandler(
             "c:\\trees\\cod3\\cod3src\\src\\game\\actor_state.cpp",
             510,
@@ -487,6 +475,7 @@ void __cdecl Actor_SetState(actor_s *self, ai_state_t eState)
             "self->simulatedStateLevel == 0",
             v6);
     }
+
     self->StateTransitions[self->transitionCount].eTransition = AIS_TRANSITION_SET;
     self->StateTransitions[self->transitionCount++].eState = eState;
     Actor_SimplifyStateTransitions(self);

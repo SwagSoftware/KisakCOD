@@ -1764,7 +1764,7 @@ void R_AddCmdSetViewportValues(int x, int y, int width, int height)
 
     iassert(cmd);
 
-    _DWORD *writer; // hack
+    _DWORD *writer = (_DWORD *)cmd; // hack
 
     writer[1] = x;
     writer[2] = y;

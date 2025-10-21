@@ -2803,9 +2803,7 @@ void __cdecl R_LoadEntities(unsigned int bspVersion)
 void R_AddAllProbesToAllCells()
 {
     GfxCell *cell; // [esp+0h] [ebp-Ch]
-    GfxCell *cella; // [esp+0h] [ebp-Ch]
     int cellIndex; // [esp+4h] [ebp-8h]
-    int cellIndexa; // [esp+4h] [ebp-8h]
     unsigned __int8 reflectionProbeIndex; // [esp+Bh] [ebp-1h]
 
     iassert( s_world.reflectionProbeCount > 0 );
@@ -2823,22 +2821,16 @@ void R_AddAllProbesToAllCells()
     }
     else
     {
-        for (cellIndexa = 0; cellIndexa < s_world.dpvsPlanes.cellCount; ++cellIndexa)
+        for (cellIndex = 0; cellIndex < s_world.dpvsPlanes.cellCount; ++cellIndex)
         {
-            cella = &s_world.cells[cellIndexa];
+            cell = &s_world.cells[cellIndex];
             iassert( cell->reflectionProbeCount == 0 );
             iassert( cell->reflectionProbes == NULL );
-            cella->reflectionProbeCount = LOBYTE(s_world.reflectionProbeCount) - 1;
-            if (cella->reflectionProbeCount != s_world.reflectionProbeCount - 1)
-                MyAssertHandler(
-                    ".\\r_bsp_load_obj.cpp",
-                    4377,
-                    0,
-                    "%s",
-                    "cell->reflectionProbeCount == s_world.reflectionProbeCount - 1");
-            cella->reflectionProbes = Hunk_Alloc(cella->reflectionProbeCount, "R_AddAllProbesToAllCells", 22);
+            cell->reflectionProbeCount = LOBYTE(s_world.reflectionProbeCount) - 1;
+            iassert(cell->reflectionProbeCount == s_world.reflectionProbeCount - 1);
+            cell->reflectionProbes = Hunk_Alloc(cell->reflectionProbeCount, "R_AddAllProbesToAllCells", 22);
             for (reflectionProbeIndex = 0; reflectionProbeIndex < s_world.reflectionProbeCount - 1; ++reflectionProbeIndex)
-                cella->reflectionProbes[reflectionProbeIndex] = reflectionProbeIndex + 1;
+                cell->reflectionProbes[reflectionProbeIndex] = reflectionProbeIndex + 1;
         }
     }
 }

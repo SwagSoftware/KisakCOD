@@ -562,38 +562,33 @@ void CG_Draw2DLine(
     const float *color,
     Material *material)
 {
-    double v40; // fp31
-    int v41; // r4
-    double v42; // fp30
-    int v43; // r4
-    double v44; // fp29
-    int v45; // r4
-    double v46; // fp28
-    double v47; // fp13
-    float v48; // [sp+50h] [-80h] BYREF
-    float v49; // [sp+54h] [-7Ch]
+    float x0; // fp31
+    float x1; // fp30
+    float y0; // fp29
+    float y1; // fp28
+    float normalized2D[2]; // [sp+50h] [-80h] BYREF
     float v50[22]; // [sp+58h] [-78h] BYREF
 
     if (p1x != p2x || p1y != p2y)
     {
-        v40 = ScrPlace_ApplyX(scrPlace, p1x, horzAlign);
-        v42 = ScrPlace_ApplyX(scrPlace, p2x, v41);
-        v44 = ScrPlace_ApplyY(scrPlace, p1y, v43);
-        v46 = ScrPlace_ApplyY(scrPlace, p2y, v45);
-        v50[0] = (float)v42 - (float)v40;
-        v50[1] = (float)v46 - (float)v44;
-        Vec2NormalizeTo(v50, &v48);
-        v47 = (float)((float)((float)lineWidth * (float)0.5) * v48);
-        v48 = (float)((float)lineWidth * (float)0.5) * (float)-v49;
-        v49 = v47;
-        v50[2] = v48 + (float)v40;
-        v50[3] = (float)v47 + (float)v44;
-        v50[4] = v48 + (float)v42;
-        v50[5] = (float)v47 + (float)v46;
-        v50[6] = (float)v42 - v48;
-        v50[8] = (float)v40 - v48;
-        v50[7] = (float)v46 - (float)v47;
-        v50[9] = (float)v44 - (float)v47;
+        x0 = ScrPlace_ApplyX(scrPlace, p1x, horzAlign);
+        x1 = ScrPlace_ApplyX(scrPlace, p2x, horzAlign);
+        y0 = ScrPlace_ApplyY(scrPlace, p1y, vertAlign);
+        y1 = ScrPlace_ApplyY(scrPlace, p2y, vertAlign);
+
+        v50[0] = x1 - x0;
+        v50[1] = y1 - y0;
+        Vec2NormalizeTo(v50, normalized2D);
+        normalized2D[1] = ((lineWidth * 0.5f) * normalized2D[0]);
+        normalized2D[0] = (lineWidth * 0.5f) * -normalized2D[1];
+        v50[2] = normalized2D[0] + x0;
+        v50[3] = normalized2D[1] + y0;
+        v50[4] = normalized2D[0] + x1;
+        v50[5] = normalized2D[1] + y1;
+        v50[6] = x1 - normalized2D[0];
+        v50[8] = x0 - normalized2D[0];
+        v50[7] = y1 - normalized2D[1];
+        v50[9] = y0 - normalized2D[1];
         R_AddCmdDrawQuadPic((const float (*)[2]) & v50[2], color, material);
     }
 }

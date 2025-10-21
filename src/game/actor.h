@@ -17,6 +17,8 @@
 #include <bgame/bg_local.h>
 #include <bgame/bg_actor_prone.h>
 
+#define ACTOR_STOP_TIME 500
+
 enum AISpecies : __int32
 {
     AI_SPECIES_HUMAN = 0x0,
@@ -452,7 +454,7 @@ void __cdecl Actor_PhysicsRestoreInputs(actor_s *self, PhysicsInputs *inputs);
 bool __cdecl Actor_AtDifferentElevation(float *vOrgSelf, float *vOrgOther);
 float __cdecl Actor_CalcultatePlayerPushDelta(const actor_s *self, const gentity_s *pusher, float *pushDir);
 bool __cdecl Actor_ShouldMoveAwayFromCloseEnt(actor_s *self);
-void __cdecl Actor_UpdateProneInformation(actor_s *self, int bDoProneCheck, float *a3, float *a4, long double a5);
+void __cdecl Actor_UpdateProneInformation(actor_s *self, int bDoProneCheck);
 void __cdecl actor_controller(const gentity_s *self, int *partBits);
 bool __cdecl Actor_PointNear(const float *vPoint, const float *vGoalPos);
 bool __cdecl Actor_PointNearNode(const float *vPoint, const pathnode_t *node);
@@ -468,8 +470,7 @@ bool __cdecl Actor_IsCloseToSegment(
     float *pathPoint,
     double len,
     float *dir,
-    double requiredDistFromPathSq,
-    float *a6);
+    double requiredDistFromPathSq);
 int __cdecl Actor_IsAlongPath(actor_s *self, float *origin, float *pathPoint, int hadPath);
 int __cdecl Actor_IsDoingCover(actor_s *self);
 bool __cdecl Actor_IsReactingToEnemyDuringReacquireMove(actor_s *self);
@@ -572,10 +573,9 @@ void __cdecl Actor_FindPathAway(
 void __cdecl Actor_FindPathAwayNotCrossPlanes(
     actor_s *self,
     const float *vBadPos,
-    double fMinSafeDist,
+    float fMinSafeDist,
     float *normal,
-    double dist,
-    float *bSuppressable,
+    float dist,
     int bAllowNegotiationLinks);
 void __cdecl Actor_BadPlacesChanged();
 void __cdecl Actor_UpdateAnglesAndDelta(actor_s *self);

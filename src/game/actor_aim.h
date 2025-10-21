@@ -6,12 +6,7 @@
 
 #include <qcommon/graph.h>
 
-enum WeapAccuracyType : __int32
-{
-    WEAP_ACCURACY_AI_VS_AI = 0x0,
-    WEAP_ACCURACY_AI_VS_PLAYER = 0x1,
-    WEAP_ACCURACY_COUNT = 0x2,
-};
+enum WeapAccuracyType : __int32;
 
 enum enumLastShot : __int32
 {
@@ -31,14 +26,12 @@ void __cdecl Actor_DrawDebugAccuracy(const float *pos, double scale, double rowH
 void __cdecl Actor_DebugAccuracyMsg(
     unsigned int msgIndex,
     const char *msg,
-    double accuracy,
-    const float *color,
-    float *a5);
+    float accuracy,
+    const float *color);
 float __cdecl Actor_GetAccuracyFraction(
-    double dist,
+    float dist,
     const WeaponDef *weapDef,
-    const char **accuracyType,
-    unsigned int a4);
+    WeapAccuracyType accuracyType);
 float __cdecl Actor_GetWeaponAccuracy(
     const actor_s *self,
     const sentient_s *enemy,

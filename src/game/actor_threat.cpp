@@ -321,35 +321,31 @@ void DebugThreatStringAll(const actor_s *self, sentient_s *enemy, int threat)
 
 void __cdecl DebugThreatStringSimple(const actor_s *self, gentity_s *enemy, const char *string, const float *color)
 {
-    sentient_s *sentient; // r3
-    const char *v9; // r5
-    float v10[2]; // [sp+50h] [-60h] BYREF
-    float v11; // [sp+58h] [-58h]
-    float v12[20]; // [sp+60h] [-50h] BYREF
+    float displayPos[3]; // [sp+50h] [-60h] BYREF
+    float start[3]; // [sp+60h] [-50h] BYREF
 
-    if (!self)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\actor_threat.cpp", 396, 0, "%s", "self");
+    iassert(self);
+
     if (ai_debugThreatSelection->current.enabled && ai_debugEntIndex->current.integer == self->ent->s.number)
     {
-        if (!enemy)
-            MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\actor_threat.cpp", 400, 0, "%s", "enemy");
-        if (!string)
-            MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\actor_threat.cpp", 401, 0, "%s", "string");
-        Sentient_GetDebugEyePosition(self->ent->sentient, v12);
-        sentient = enemy->sentient;
-        if (sentient)
+        iassert(enemy);
+        iassert(string);
+
+        Sentient_GetDebugEyePosition(self->ent->sentient, start);
+
+        if (enemy->sentient)
         {
-            Sentient_GetDebugEyePosition(sentient, v10);
+            Sentient_GetDebugEyePosition(enemy->sentient, displayPos);
         }
         else
         {
-            v10[0] = enemy->r.currentOrigin[0];
-            v10[1] = enemy->r.currentOrigin[1];
-            v11 = enemy->r.currentOrigin[2];
+            displayPos[0] = enemy->r.currentOrigin[0];
+            displayPos[1] = enemy->r.currentOrigin[1];
+            displayPos[2] = enemy->r.currentOrigin[2];
         }
-        G_DebugLineWithDuration(v12, v10, color, 0, ai_threatUpdateInterval->current.integer / 50);
-        v11 = v11 + (float)16.0;
-        G_AddDebugStringWithDuration(v10, color, 1.0, v9, (int)string);
+        G_DebugLineWithDuration(start, displayPos, color, 0, ai_threatUpdateInterval->current.integer / 50);
+        displayPos[2] += 16.0f;
+        G_AddDebugStringWithDuration(displayPos, color, 1.0, string, ai_threatUpdateInterval->current.integer / 50);
     }
 }
 
@@ -360,42 +356,39 @@ void __cdecl DebugThreatNodes(
     pathnode_t *enemyNode,
     const float *color)
 {
-    double v10; // fp13
-    float v11[2]; // [sp+50h] [-60h] BYREF
-    float v12; // [sp+58h] [-58h]
-    float v13[2]; // [sp+60h] [-50h] BYREF
-    float v14; // [sp+68h] [-48h]
-    float v15[16]; // [sp+70h] [-40h] BYREF
+    float start[3]; // [sp+50h] [-60h] BYREF
+    float end[3]; // [sp+60h] [-50h] BYREF
+    float viewpos[16]; // [sp+70h] [-40h] BYREF
 
     if (ai_debugThreatSelection->current.enabled && ai_debugEntIndex->current.integer == self->ent->s.number)
     {
-        CL_GetViewPos(v15);
+        CL_GetViewPos(viewpos);
         if (selfNode)
         {
-            Path_DrawDebugNode(v15, selfNode);
-            v11[0] = selfNode->constant.vOrigin[0];
-            v11[1] = selfNode->constant.vOrigin[1];
-            v12 = selfNode->constant.vOrigin[2];
+            Path_DrawDebugNode(viewpos, selfNode);
+            start[0] = selfNode->constant.vOrigin[0];
+            start[1] = selfNode->constant.vOrigin[1];
+            start[2] = selfNode->constant.vOrigin[2];
         }
         else
         {
-            Sentient_GetDebugEyePosition(self->ent->sentient, v11);
+            Sentient_GetDebugEyePosition(self->ent->sentient, start);
         }
         if (enemyNode)
         {
-            Path_DrawDebugNode(v15, enemyNode);
-            v13[0] = enemyNode->constant.vOrigin[0];
-            v10 = enemyNode->constant.vOrigin[2];
-            v13[1] = enemyNode->constant.vOrigin[1];
+            Path_DrawDebugNode(viewpos, enemyNode);
+            end[0] = enemyNode->constant.vOrigin[0];
+            end[1] = enemyNode->constant.vOrigin[1];
+            end[2] = enemyNode->constant.vOrigin[2];
         }
         else
         {
-            Sentient_GetDebugEyePosition(enemy->ent->sentient, v13);
-            v10 = v14;
+            Sentient_GetDebugEyePosition(enemy->ent->sentient, end);
         }
-        v12 = v12 + (float)16.0;
-        v14 = (float)v10 + (float)16.0;
-        G_DebugLineWithDuration(v11, v13, color, 1, ai_threatUpdateInterval->current.integer / 50);
+
+        start[2] += 16.0f;
+        end[2] += 16.0f;
+        G_DebugLineWithDuration(start, end, color, 1, ai_threatUpdateInterval->current.integer / 50);
     }
 }
 
@@ -878,23 +871,22 @@ bool __cdecl Actor_GetPotentialThreat(potential_threat_t *self, float *potential
 
 void __cdecl Actor_PotentialThreat_Debug(actor_s *self)
 {
-    const char *v2; // r5
     double v3; // fp0
-    float v4[4]; // [sp+50h] [-30h] BYREF
+    float xyz[4]; // [sp+50h] [-30h] BYREF
     float v5[4]; // [sp+60h] [-20h] BYREF
 
-    Sentient_GetDebugEyePosition(self->ent->sentient, v4);
+    Sentient_GetDebugEyePosition(self->ent->sentient, xyz);
     if (self->potentialThreat.isEnabled)
     {
-        v5[2] = v4[2];
-        v3 = (float)((float)(self->potentialThreat.direction[1] * (float)32.0) + v4[1]);
-        v5[0] = (float)(self->potentialThreat.direction[0] * (float)32.0) + v4[0];
+        v5[2] = xyz[2];
+        v3 = (float)((float)(self->potentialThreat.direction[1] * (float)32.0) + xyz[1]);
+        v5[0] = (float)(self->potentialThreat.direction[0] * (float)32.0) + xyz[0];
         v5[1] = v3;
-        G_DebugLine(v4, v5, colorRed, 0);
+        G_DebugLine(xyz, v5, colorRed, 0);
     }
     else
     {
-        G_AddDebugString(v4, colorWhite, 1.0, v2);
+        G_AddDebugString(xyz, colorWhite, 1.0, "No Threat");
     }
 }
 

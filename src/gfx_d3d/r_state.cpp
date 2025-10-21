@@ -2348,13 +2348,12 @@ void __cdecl R_SetRenderTarget(GfxCmdBufContext context, GfxRenderTargetId newTa
 
 void __cdecl R_HW_SetRenderTarget(GfxCmdBufState *state, GfxRenderTargetId newTargetId)
 {
-    const char *v3; // eax
-    int v4; // [esp+0h] [ebp-Ch]
     int hr; // [esp+4h] [ebp-8h]
     IDirect3DDevice9 *device; // [esp+8h] [ebp-4h]
 
     device = state->prim.device;
     iassert(device);
+
     if (gfxRenderTargets[state->renderTargetId].surface.color != gfxRenderTargets[newTargetId].surface.color)
     {
         do
@@ -2385,13 +2384,16 @@ void __cdecl R_HW_SetRenderTarget(GfxCmdBufState *state, GfxRenderTargetId newTa
         state->depthRangeNear = 0.0;
         state->depthRangeFar = 1.0;
     }
+
     if (gfxRenderTargets[state->renderTargetId].surface.depthStencil != gfxRenderTargets[newTargetId].surface.depthStencil)
     {
         do
         {
             if (r_logFile && r_logFile->current.integer)
                 RB_LogPrint("device->SetDepthStencilSurface( gfxRenderTargets[newTargetId].surface.depthStencil )\n");
-            if (device->SetDepthStencilSurface(gfxRenderTargets[newTargetId].surface.depthStencil) < 0)
+
+            hr = device->SetDepthStencilSurface(gfxRenderTargets[newTargetId].surface.depthStencil);
+            if (hr < 0)
             {
                 do
                 {
@@ -2401,7 +2403,7 @@ void __cdecl R_HW_SetRenderTarget(GfxCmdBufState *state, GfxRenderTargetId newTa
                         "c:\\trees\\cod3\\src\\gfx_d3d\\r_state.h (%i) device->SetDepthStencilSurface( gfxRenderTargets[newTargetId]."
                         "surface.depthStencil ) failed: %s\n",
                         905,
-                        R_ErrorDescription(v4));
+                        R_ErrorDescription(hr));
                 } while (alwaysfails);
             }
         } while (alwaysfails);

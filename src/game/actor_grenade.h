@@ -49,10 +49,9 @@ bool __cdecl Actor_GrenadeLauncher_CheckPos(
     const float *vStandPos,
     const float *vOffset,
     const float *vTargetPos,
-    double speed,
+    float speed,
     float *vPosOut,
-    float *vVelOut,
-    float *a8);
+    float *vVelOut);
 int __cdecl Actor_Grenade_IsSafeTarget(actor_s *self, const float *vTargetPos, unsigned int iWeapID);
 void __cdecl Actor_PredictGrenadeLandPos(gentity_s *pGrenade);
 bool __cdecl Actor_Grenade_IsPointSafe(actor_s *self, const float *vPoint);
