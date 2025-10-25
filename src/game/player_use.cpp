@@ -369,7 +369,8 @@ int __cdecl Player_GetUseList(gentity_s *ent, useList_t *useList, int prevHintEn
                     // Without explicit original values for f29/f31, assume fallback = neg_v24 for simplicity
                     float denom = neg_v24 >= 0.0f ? neg_v24 : neg_v24;
 
-                    v26 = 1.0f / denom;
+                    v26 = v24 > v20;
+                    v28 = 1.0f / denom;
                 }
 
                 v29 = (float)((float)v28 * (float)v23);
@@ -871,19 +872,20 @@ int __cdecl Player_CheckAlmostStationary(gentity_s *ent, float *dir)
 
 void __cdecl Player_DebugDrawLOS(const float *center, const float *dir, double dist2D, int debugDrawDuration)
 {
-    double v5; // fp1
-    const float *v6; // r6
-    float v7[4]; // [sp+50h] [-40h] BYREF
-    float v8[12]; // [sp+60h] [-30h] BYREF
+    double yaw; // fp1
+    float maxs[3]; // [sp+50h] [-40h] BYREF
+    float mins[3]; // [sp+60h] [-30h] BYREF
 
-    v8[0] = (float)dist2D * (float)-0.5;
-    v8[1] = -ai_playerLOSHalfWidth->current.value;
-    v8[2] = -20.0;
-    v7[0] = (float)dist2D * (float)0.5;
-    v7[1] = ai_playerLOSHalfWidth->current.value;
-    v7[2] = 20.0;
-    v5 = vectoyaw(dir);
-    G_DebugBox(center, v8, v7, v5, v6, (int)colorOrange, 0);
+    mins[0] = (float)dist2D * (float)-0.5;
+    mins[1] = -ai_playerLOSHalfWidth->current.value;
+    mins[2] = -20.0;
+
+    maxs[0] = (float)dist2D * (float)0.5;
+    maxs[1] = ai_playerLOSHalfWidth->current.value;
+    maxs[2] = 20.0;
+
+    yaw = vectoyaw(dir);
+    G_DebugBox(center, mins, maxs, yaw, colorOrange, 0, debugDrawDuration);
 }
 
 void __cdecl Player_BanNodesInFront(gentity_s *ent, float dist, const float *start, const float *dir)

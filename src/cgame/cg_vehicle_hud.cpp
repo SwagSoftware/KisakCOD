@@ -172,8 +172,8 @@ LABEL_15:
             0.0,
             1.0,
             1.0,
-            localClientNum,
-            point);
+            colorYellow,
+            cgMedia.whiteMaterial);
         CL_DrawStretchPicPhysical(
             (float)((float)(*(float *)&point->info.name + (float)v25) - (float)1.0),
             (float)((float)(*(float *)&point->info.gameFlags + (float)v24) - (float)1.0),
@@ -183,8 +183,8 @@ LABEL_15:
             0.0,
             1.0,
             1.0,
-            v43,
-            v42);
+            colorGreen,
+            cgMedia.whiteMaterial);
         v41 = v53;
         v39 = v52;
     }
@@ -341,10 +341,10 @@ int __cdecl WorldDirToScreenPos(int localClientNum, const float *worldDir, float
     double v10; // fp13
     double v11; // fp0
     double v12; // fp13
-    float v13; // [sp+50h] [-80h] BYREF
-    float v14; // [sp+54h] [-7Ch]
-    float v15; // [sp+58h] [-78h]
-    float v16[6][3]; // [sp+60h] [-70h] BYREF
+    float transformed[3]; // [sp+50h] [-80h] BYREF
+    //float v14; // [sp+54h] [-7Ch]
+    //float v15; // [sp+58h] [-78h]
+    float axis[6][3]; // [sp+60h] [-70h] BYREF
 
     if (localClientNum)
         MyAssertHandler(
@@ -354,13 +354,13 @@ int __cdecl WorldDirToScreenPos(int localClientNum, const float *worldDir, float
             "%s\n\t(localClientNum) = %i",
             "(localClientNum == 0)",
             localClientNum);
-    AnglesToAxis(cgArray[0].refdefViewAngles, v16);
-    MatrixTransposeTransformVector(worldDir, (const mat3x3&)v16, &v13);
+    AnglesToAxis(cgArray[0].refdefViewAngles, axis);
+    MatrixTransposeTransformVector(worldDir, (const mat3x3&)axis, transformed);
     v5 = (float)(cls.vidConfig.aspectRatioWindow * (float)480.0);
-    if (v13 <= 0.0)
+    if (transformed[0] <= 0.0)
     {
-        v9 = -v14;
-        v10 = -v15;
+        v9 = -transformed[1];
+        v10 = -transformed[2];
         *outScreenPos = v9;
         outScreenPos[1] = v10;
         if (v9 == 0.0 && v10 == 0.0)
@@ -393,8 +393,8 @@ int __cdecl WorldDirToScreenPos(int localClientNum, const float *worldDir, float
     }
     else
     {
-        v6 = (float)((float)((float)1.0 / v13) * v14);
-        v7 = (float)((float)((float)1.0 / v13) * v15);
+        v6 = (float)((float)((float)1.0 / transformed[0]) * transformed[1]);
+        v7 = (float)((float)((float)1.0 / transformed[0]) * transformed[2]);
         if (cgArray[0].refdef.tanHalfFovX == 0.0)
             MyAssertHandler(
                 "c:\\trees\\cod3\\cod3src\\src\\cgame\\cg_vehicle_hud.cpp",
@@ -783,8 +783,8 @@ void CG_DrawPipOnAStickReticle(int localClientNum, rectDef_s *rect, float *color
     float v26; // [sp+80h] [-F0h] BYREF
     float v27; // [sp+84h] [-ECh]
     __int64 v28; // [sp+88h] [-E8h] BYREF
-    float v29; // [sp+90h] [-E0h] BYREF
-    float v30; // [sp+94h] [-DCh]
+    float screenPos[2]; // [sp+90h] [-E0h] BYREF
+    //float v30; // [sp+94h] [-DCh]
     float v31; // [sp+98h] [-D8h] BYREF
     float v32; // [sp+9Ch] [-D4h]
     float v33; // [sp+A0h] [-D0h]
@@ -808,7 +808,7 @@ void CG_DrawPipOnAStickReticle(int localClientNum, rectDef_s *rect, float *color
     {
         if (CG_DObjGetWorldTagMatrix(&Entity->pose, ClientDObj, scr_const.tag_body, (float (*)[3])v34, v35))
         {
-            WorldDirToScreenPos(localClientNum, v34, &v29);
+            WorldDirToScreenPos(localClientNum, v34, screenPos);
             LODWORD(v7) = WeaponDef->iProjectileSpeed;
             HIDWORD(v7) = 108032;
             v28 = v7;
@@ -851,11 +851,11 @@ void CG_DrawPipOnAStickReticle(int localClientNum, rectDef_s *rect, float *color
                         "%s",
                         "cgMedia.vehHudLine");
                 v10 = *(float *)&v28;
-                v11 = v29;
+                v11 = screenPos[0];
                 v12 = *((float *)&v28 + 1);
-                v13 = v30;
-                v26 = *(float *)&v28 - v29;
-                v27 = *((float *)&v28 + 1) - v30;
+                v13 = screenPos[1];
+                v26 = *(float *)&v28 - screenPos[0];
+                v27 = *((float *)&v28 + 1) - screenPos[1];
                 v18 = Vec2Normalize(&v26);
                 v19 = vehHudReticlePipOnAStickCenterCircle;
                 v20 = (float)(vehHudReticlePipOnAStickMovingCircle->current.value * (float)0.5);
@@ -884,10 +884,10 @@ void CG_DrawPipOnAStickReticle(int localClientNum, rectDef_s *rect, float *color
                                 - (float)(vehHudReticlePipOnAStickMovingCircle->current.value * (float)0.5)))
                             + (float)v12),
                         vehHudLineWidth->current.value,
-                        v17,
-                        v16,
-                        v15,
-                        v14);
+                        rect->horzAlign,
+                        rect->vertAlign,
+                        color,
+                        cgMedia.vehHudLine);
                     v19 = vehHudReticlePipOnAStickCenterCircle;
                 }
                 CL_DrawStretchPic(
@@ -896,28 +896,28 @@ void CG_DrawPipOnAStickReticle(int localClientNum, rectDef_s *rect, float *color
                     (float)((float)v13 - (float)v21),
                     v19->current.value,
                     v19->current.value,
-                    v17,
-                    v16,
+                    rect->horzAlign,
+                    rect->vertAlign,
                     0.0,
                     0.0,
                     1.0,
                     1.0,
-                    v15,
-                    v14);
+                    color,
+                    cgMedia.vehCenterCircle); // might be the below material (vehMovingCircle) instead
                 CL_DrawStretchPic(
                     &scrPlaceView[localClientNum],
                     (float)((float)v10 - (float)v20),
                     (float)((float)v12 - (float)v20),
                     vehHudReticlePipOnAStickMovingCircle->current.value,
                     vehHudReticlePipOnAStickMovingCircle->current.value,
-                    v25,
-                    v24,
+                    rect->horzAlign,
+                    rect->vertAlign,
                     0.0,
                     0.0,
                     1.0,
                     1.0,
-                    v23,
-                    v22);
+                    color,
+                    cgMedia.vehMovingCircle);
             }
         }
     }

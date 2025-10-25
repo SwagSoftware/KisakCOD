@@ -92,17 +92,19 @@ void __cdecl CG_Actor(int localClientNum, centity_s *cent)
     }
 }
 
-void __cdecl CG_ActorSpawner(centity_s *cent, int a2, int a3, const float *a4)
+void __cdecl CG_ActorSpawner(centity_s *cent)
 {
-    float v4[4]; // [sp+50h] [-30h] BYREF
-    float v5[6]; // [sp+60h] [-20h] BYREF
+    float mins[3]; // [sp+50h] [-30h] BYREF
+    float maxs[3]; // [sp+60h] [-20h] BYREF
 
-    v4[0] = -16.0;
-    v4[1] = -16.0;
-    v4[2] = 0.0;
-    v5[0] = 16.0;
-    v5[1] = 16.0;
-    v5[2] = 72.0;
-    CG_DebugBox(cent->pose.origin, v4, v5, 0.0, a4, (int)colorRed, 1);
+    mins[0] = -16.0;
+    mins[1] = -16.0;
+    mins[2] = 0.0;
+
+    maxs[0] = 16.0;
+    maxs[1] = 16.0;
+    maxs[2] = 72.0;
+
+    CG_DebugBox(cent->pose.origin, mins, maxs, 0.0f, colorRed, 1, 0);
 }
 

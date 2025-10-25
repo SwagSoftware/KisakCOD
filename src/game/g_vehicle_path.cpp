@@ -42,35 +42,20 @@ vn_field_t vn_fields[9] =
 
 void __cdecl VP_AddDebugLine(float *start, float *end, int forceDraw)
 {
-    double v6; // fp13
-    double v7; // fp12
-    double v10; // fp10
+    float v10; // fp10
     double v11; // fp31
     double v12; // fp30
     double v13; // fp29
     double v14; // fp0
     float v15[6]; // [sp+50h] [-60h] BYREF
 
-    //v5 = *start;
-    v6 = (float)(end[2] - start[2]);
-    v7 = (float)(end[1] - start[1]);
+    float deltaX = end[0] - start[0];
+    float deltaY = end[1] - start[1];
+    float deltaZ = end[2] - start[2];
 
-    // aislop
-    //_FP7 = -sqrtf((float)((float)((float)v7 * (float)v7)
-    //    + (float)((float)((float)v6 * (float)v6)
-    //        + (float)((float)(*end - *start) * (float)(*end - *start)))));
-    //__asm { fsel      f10, f7, f0, f10 }
-    //v10 = (float)((float)1.0 / (float)_FP10);
-    {
-        float delta = *end - *start;
-        float magnitude = sqrtf(v7 * v7 + v6 * v6 + delta * delta);
-        float value = -magnitude;
+    float magnitude = sqrtf(deltaZ * deltaZ + deltaY * deltaY + deltaX * deltaX);
 
-        // Replace PowerPC `fsel` with portable C conditional:
-        float selected = (value >= 0.0f) ? 0.0f : value;
-
-        float v10 = 1.0f / selected;
-    }
+    v10 = 1.0f / magnitude;
 
     v11 = (float)((float)v10 * (float)(*end - *start));
     v12 = (float)((float)v10 * (float)(end[1] - start[1]));
@@ -779,7 +764,7 @@ int __cdecl VP_UpdatePathPos(vehicle_pathpos_t *vpp, const float *dir, __int16 n
 {
     __int16 nodeIdx; // r8
     double frac; // fp6
-    int v5; // r29
+    int test; // r29
     __int16 v6; // r6
     vehicle_node_t *v7; // r11
     int v8; // r30
@@ -798,7 +783,7 @@ int __cdecl VP_UpdatePathPos(vehicle_pathpos_t *vpp, const float *dir, __int16 n
 
     nodeIdx = vpp->nodeIdx;
     frac = vpp->frac;
-    v5 = 0;
+    test = 0;
     v6 = 0;
     v7 = &s_nodes[vpp->nodeIdx];
     if (s_numNodes > 0)
@@ -809,7 +794,7 @@ int __cdecl VP_UpdatePathPos(vehicle_pathpos_t *vpp, const float *dir, __int16 n
             ++v6;
             v7 = &s_nodes[nodeIdx];
             if (nodeIdx == v8)
-                v5 = 1;
+                test = 1;
             nextIdx = v7->nextIdx;
             if (nextIdx < 0)
                 break;
@@ -850,19 +835,10 @@ LABEL_15:
     v14 = &s_nodes[nodeIdx];
     //vpp->endOfPath = _cntlzw(v13) == 0;
     vpp->endOfPath = v13;
-    speed = v14->speed;
-    v16 = v14->nextIdx;
-    if (v16 >= 0)
-        speed = (float)((float)((float)(s_nodes[v16].speed - v14->speed) * (float)frac) + v14->speed);
-    vpp->speed = speed;
-    lookAhead = v14->lookAhead;
-    v18 = v14->nextIdx;
-    if (v18 >= 0)
-        lookAhead = (float)((float)((float)(s_nodes[v18].lookAhead - v14->lookAhead) * (float)frac) + v14->lookAhead);
-    vpp->lookAhead = lookAhead;
-    Slide = VP_GetSlide(vpp);
-    *(float *)(v20 + 16) = Slide;
-    return v5;
+    vpp->speed = VP_GetSpeed(vpp);
+    vpp->lookAhead = VP_GetLookAhead(vpp);
+    vpp->slide = VP_GetSlide(vpp);
+    return test;
 }
 
 void __cdecl VP_BeginSwitchNode(const vehicle_pathpos_t *vpp)
@@ -1622,7 +1598,7 @@ LABEL_11:
         v11 = v15;
         if (i != &s_nodes[v8])
             v11 = v16;
-        G_DebugBox(i->origin, v14, v13, v10, v6, (int)v11, 1);
+        G_DebugBox(i->origin, v14, v13, v10, v11, 1, 0);
         nextIdx = i->nextIdx;
         if (nextIdx < 0)
             break;

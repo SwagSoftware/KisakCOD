@@ -82,37 +82,35 @@ void __cdecl CG_ParseSunLight(int localClientNum)
 void __cdecl CG_ParseSunDirection(int localClientNum)
 {
     const char *ConfigString; // r3
-    int v2; // r3
-    int v3; // [sp+8h] [-88h]
-    int v4; // [sp+Ch] [-84h]
-    int v5; // [sp+60h] [-30h]
-    int v6; // [sp+64h] [-2Ch]
-    float v7; // [sp+68h] [-28h] BYREF
-    char v8; // [sp+6Ch] [-24h] BYREF
-    char v9; // [sp+70h] [-20h] BYREF
-    float v10; // [sp+78h] [-18h] BYREF
-    char v11; // [sp+7Ch] [-14h] BYREF
-    char v12; // [sp+80h] [-10h] BYREF
+    int argCount; // r3
+    float sunDir[4]; // [sp+68h] [-28h] BYREF
+    float sunDirEnd[3]; // [sp+78h] [-18h] BYREF
 
-    ConfigString = CL_GetConfigString(localClientNum, 8u);
+    int lerpBeginTime;
+    int lerpEndTime;
+
+    ConfigString = CL_GetConfigString(localClientNum, 8);
     if (*ConfigString)
     {
-        v2 = sscanf(ConfigString, "%g %g %g %g %g %g %d %d", &v7, &v8, &v9, &v10, &v11, &v12, v3, v4);
-        if (v2 == 3)
+        argCount = sscanf(
+            ConfigString,
+            "%g %g %g %g %g %g %d %d",
+            &sunDir[0],
+            &sunDir[1],
+            &sunDir[2],
+            &sunDirEnd[0],
+            &sunDirEnd[1],
+            &sunDirEnd[2],
+            &lerpBeginTime,
+            &lerpEndTime);
+        if (argCount == 3)
         {
-            R_SetSunDirectionOverride(&v7);
+            R_SetSunDirectionOverride(sunDir);
         }
         else
         {
-            if (v2 != 8)
-                MyAssertHandler(
-                    "c:\\trees\\cod3\\cod3src\\src\\cgame\\cg_servercmds.cpp",
-                    112,
-                    0,
-                    "%s\n\t(argCount) = %i",
-                    "(argCount == 3 || argCount == 8)",
-                    v2);
-            R_LerpSunDirectionOverride(&v7, &v10, v6, v5);
+            iassert((argCount == 3 || argCount == 8));
+            R_LerpSunDirectionOverride(sunDir, sunDirEnd, lerpBeginTime, lerpEndTime);
         }
     }
     else

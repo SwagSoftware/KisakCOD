@@ -25,9 +25,9 @@ void __cdecl P_DamageFeedback(gentity_s *player)
     __int64 v8; // r11
     double v9; // fp0
     int damageEvent; // r11
-    float v11; // [sp+58h] [-58h] BYREF
-    float v12; // [sp+5Ch] [-54h]
-    float v13; // [sp+60h] [-50h]
+    float viewOrigin[3]; // [sp+58h] [-58h] BYREF
+    //float v12; // [sp+5Ch] [-54h]
+    //float v13; // [sp+60h] [-50h]
     float v14[4]; // [sp+68h] [-48h] BYREF
     float v15[14]; // [sp+78h] [-38h] BYREF
 
@@ -41,11 +41,11 @@ void __cdecl P_DamageFeedback(gentity_s *player)
             && level.time < client->invulnerableExpireTime)
         {
             G_GetPlayerViewDirection(player, v14, 0, 0);
-            G_GetPlayerViewOrigin(&client->ps, &v11);
-            v11 = (float)(v14[0] * (float)30.0) + v11;
-            v12 = (float)(v14[1] * (float)30.0) + v12;
-            v13 = (float)(v14[2] * (float)30.0) + v13;
-            G_DebugCircle(&v11, 10.0, v3, (int)colorYellow, 0, 0);
+            G_GetPlayerViewOrigin(&client->ps, viewOrigin);
+            viewOrigin[0] += (v14[0] * 30.0f);
+            viewOrigin[1] += (v14[1] * 30.0f);
+            viewOrigin[2] += (v14[2] * 30.0f);
+            G_DebugCircle(viewOrigin, 10.0, colorYellow, 0, 0, 0);
         }
         client->ps.damageCount = 0;
         damage_blood = client->damage_blood;

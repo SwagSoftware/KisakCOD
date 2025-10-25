@@ -654,14 +654,14 @@ LABEL_16:
     float v4; // [esp+4h] [ebp-54h]
     float v5; // [esp+8h] [ebp-50h]
     float v6; // [esp+Ch] [ebp-4Ch]
-    float v7; // [esp+10h] [ebp-48h]
-    float v8; // [esp+14h] [ebp-44h]
-    float v9; // [esp+18h] [ebp-40h]
+    float angle; // [esp+10h] [ebp-48h]
+    float duration; // [esp+14h] [ebp-44h]
+    float angle; // [esp+18h] [ebp-40h]
     float maxSprint; // [esp+1Ch] [ebp-3Ch]
     float v11; // [esp+20h] [ebp-38h]
     int32_t healthOverlayPulsePhase; // [esp+24h] [ebp-34h]
     float v13; // [esp+28h] [ebp-30h]
-    float v14; // [esp+2Ch] [ebp-2Ch]
+    float scrPlace; // [esp+2Ch] [ebp-2Ch]
     float v15; // [esp+30h] [ebp-28h]
     float string; // [esp+34h] [ebp-24h]
     float v6; // [esp+38h] [ebp-20h]
@@ -699,14 +699,14 @@ LABEL_16:
                 {
                     v15 = hud_healthOverlay_phaseTwo_toAlphaMultiplier->current.value
                         * pulseMags[cgameGlob->healthOverlayPulseIndex];
-                    v8 = v15 - 1.0f;
-                    if (v8 < 0.0f)
+                    duration = v15 - 1.0f;
+                    if (duration < 0.0f)
                         string = hud_healthOverlay_phaseTwo_toAlphaMultiplier->current.value
                         * pulseMags[cgameGlob->healthOverlayPulseIndex];
                     else
                         string = 1.0f;
-                    v7 = 0.0f - v15;
-                    if (v7 < 0.0f)
+                    angle = 0.0f - v15;
+                    if (angle < 0.0f)
                         v6 = string;
                     else
                         v6 = 0.0f;
@@ -720,13 +720,13 @@ LABEL_16:
                         * pulseMags[cgameGlob->healthOverlayPulseIndex];
                     v5 = v13 - 1.0f;
                     if (v5 < 0.0f)
-                        v14 = hud_healthOverlay_phaseThree_toAlphaMultiplier->current.value
+                        scrPlace = hud_healthOverlay_phaseThree_toAlphaMultiplier->current.value
                         * pulseMags[cgameGlob->healthOverlayPulseIndex];
                     else
-                        v14 = 1.0f;
+                        scrPlace = 1.0f;
                     v4 = 0.0f - v13;
                     if (v4 < 0.0f)
-                        v3 = v14;
+                        v3 = scrPlace;
                     else
                         v3 = 0.0f;
                     cgameGlob->healthOverlayToAlpha = v3;
@@ -755,10 +755,10 @@ LABEL_16:
                     displayString = 1.0f;
                 maxSprint = 0.0f - v6;
                 if (maxSprint < 0.0f)
-                    v9 = displayString;
+                    angle = displayString;
                 else
-                    v9 = 0.0f;
-                cgameGlob->healthOverlayToAlpha = v9;
+                    angle = 0.0f;
+                cgameGlob->healthOverlayToAlpha = angle;
                 cgameGlob->healthOverlayPulseDuration = hud_healthOverlay_phaseOne_pulseDuration->current.integer;
                 ++cgameGlob->healthOverlayPulsePhase;
             }
@@ -1148,41 +1148,6 @@ void __cdecl CG_DrawCursorhint(
                     {
                         if (*UseString)
                         {
-                            //LODWORD(v32) = UI_TextWidth(UseString, 0, font, fontscale);
-                            //v33 = (float)v32;
-                            //LODWORD(v34) = UI_TextHeight(font, fontscale);
-                            //UI_DrawText(
-                            //    &scrPlaceView[localClientNum],
-                            //    v31,
-                            //    0x7FFFFFFF,
-                            //    font,
-                            //    (float)((float)((float)v33 + (float)scale) * (float)-0.5),
-                            //    (float)((float)((float)v34 * (float)0.5) + rect->y),
-                            //    0x82000000,
-                            //    68 * localClientNum,
-                            //    fontscale,
-                            //    (const float *)rect->horzAlign,
-                            //    rect->vertAlign,
-                            //    v39,
-                            //    v38,
-                            //    v37,
-                            //    v36,
-                            //    v35,
-                            //    v91,
-                            //    v93,
-                            //    v95,
-                            //    v97,
-                            //    v99,
-                            //    v101,
-                            //    v103,
-                            //    v105,
-                            //    v107,
-                            //    v109,
-                            //    v111,
-                            //    v113,
-                            //    v115,
-                            //    *(float *)&v34);
-
                             float length = UI_TextWidth(UseString, 0, font, fontscale);
                             float heighta = UI_TextHeight(font, fontscale);
                             float x = (scale + length) * -0.5;
@@ -1252,14 +1217,14 @@ void __cdecl CG_DrawCursorhint(
 
                                 UI_DrawHandlePic(
                                     &scrPlaceView[localClientNum],
-                                    (float)((float)((float)(rect->w * (float)widthScale) + (float)scale) * (float)-0.5),
-                                    (float)((float)((float)height * (float)1.5) + (float)x),
-                                    (float)((float)(rect->w * (float)widthScale) + (float)scale),
-                                    (float)((float)(rect->h * (float)heightScale) + (float)scale),
-                                    v83,
-                                    v82,
-                                    v81,
-                                    v80);
+                                    (float)((float)((float)(rect->w *(float)widthScale) + (float)scale) *(float)-0.5),
+                                    (float)((float)((float)height *(float)1.5) + (float)x),
+                                    (float)((float)(rect->w *(float)widthScale) + (float)scale),
+                                    (float)((float)(rect->h *(float)heightScale) + (float)scale),
+                                    rect->horzAlign,
+                                    rect->vertAlign,
+                                    color,
+                                    cgMedia.hintMaterials[cursorHintIcon]);
                             }
                             else
                             {
@@ -1296,12 +1261,12 @@ void __cdecl CG_DrawCursorhint(
                                 &scrPlaceView[localClientNum],
                                 (float)-(float)((float)((float)((float)(rect->w + (float)halfscale) + (float)v21) * (float)0.5) - rect->x),
                                 (float)-(float)((float)((float)halfscale * (float)heightScale) - rect->y),
-                                (float)((float)(rect->w * (float)widthScale) + (float)scale),
-                                (float)((float)(rect->h * (float)heightScale) + (float)scale),
-                                v16,
-                                v15,
-                                v14,
-                                v13);
+                                (float)((float)(rect->w *(float)widthScale) + (float)scale),
+                                (float)((float)(rect->h *(float)heightScale) + (float)scale),
+                                rect->horzAlign,
+                                rect->vertAlign,
+                                color,
+                                cgMedia.hintMaterials[cursorHintIcon]);
                         }
                         return;
                     }
@@ -1489,41 +1454,31 @@ int __cdecl CG_OwnerDrawVisible(int flags)
 void __cdecl CG_DrawTankBody(int localClientNum, rectDef_s *rect, Material *material, float *color)
 {
     centity_s *Entity; // r3
-    double v7; // fp31
+    double angle; // fp31
     cgs_t *LocalClientStaticGlobals; // r3
-    const float *v9; // r6
-    int v10; // r5
-    int v11; // r4
 
-    if (localClientNum)
-        MyAssertHandler(
-            "c:\\trees\\cod3\\cod3src\\src\\cgame\\cg_local.h",
-            910,
-            0,
-            "%s\n\t(localClientNum) = %i",
-            "(localClientNum == 0)",
-            localClientNum);
-    if ((cgArray[0].predictedPlayerState.eFlags & 0x20000) != 0
-        && (cgArray[0].predictedPlayerState.eFlags & 0x80000) == 0)
+    cg_s *cgameGlob = CG_GetLocalClientGlobals(localClientNum);
+
+    if ((cgameGlob->predictedPlayerState.eFlags & 0x20000) != 0 && (cgameGlob->predictedPlayerState.eFlags & 0x80000) == 0)
     {
-        Entity = CG_GetEntity(localClientNum, cgArray[0].predictedPlayerState.viewlocked_entNum);
+        Entity = CG_GetEntity(localClientNum, cgameGlob->predictedPlayerState.viewlocked_entNum);
         if (Entity->nextState.eType == 11 && (Entity->nextState.lerp.eFlags & 0x10000) != 0)
         {
-            v7 = AngleSubtract(cgArray[0].refdefViewAngles[1], Entity->pose.angles[1]);
+            angle = AngleSubtract(cgameGlob->refdefViewAngles[1], Entity->pose.angles[1]);
             LocalClientStaticGlobals = CG_GetLocalClientStaticGlobals(localClientNum);
             CG_DrawRotatedPic(
                 &scrPlaceView[localClientNum],
-                (float)((float)((float)((float)(compassSize->current.value - (float)1.0) * LocalClientStaticGlobals->compassWidth)
-                    * (float)0.69999999)
+                ((((compassSize->current.value - (float)1.0) * LocalClientStaticGlobals->compassWidth)
+                    * 0.7f)
                     + rect->x),
                 rect->y,
                 rect->w,
                 rect->h,
-                v11,
-                v10,
-                v7,
-                v9,
-                (Material *)(68 * localClientNum));
+                rect->horzAlign,
+                rect->vertAlign,
+                angle,
+                colorWhite, //KISAKTODO
+                material);
         }
     }
 }
@@ -1595,69 +1550,59 @@ void __cdecl CG_DrawTankBarrel(int localClientNum, const rectDef_s *rect, Materi
     centity_s *Entity; // r3
     const cpose_t *p_pose; // r28
     DObj_s *ClientDObj; // r4
-    double v9; // fp31
+    double angle; // fp31
     cgs_t *LocalClientStaticGlobals; // r3
-    double x; // fp12
     int horzAlign; // r8
     int vertAlign; // r9
-    const ScreenPlacement *v14; // r30
     double v15; // fp13
     const float *v16; // r5
     const float (*v17)[2]; // r4
     float w; // [sp+50h] [-B0h] BYREF
     float h; // [sp+54h] [-ACh] BYREF
     float y; // [sp+58h] [-A8h] BYREF
-    float v21; // [sp+5Ch] [-A4h] BYREF
-    float v22[4]; // [sp+60h] [-A0h] BYREF
-    Material v23; // [sp+70h] [-90h] BYREF
+    float x; // [sp+5Ch] [-A4h] BYREF
+    float angles[4]; // [sp+60h] [-A0h] BYREF
+    float verts[8]; // [sp+70h] [-90h] BYREF
+    float tagmat[3][3]; // [sp+90h] [-70h] BYREF
+    float origin[3]; // [sp+B4h] [-4Ch] BYREF
 
-    if (localClientNum)
-        MyAssertHandler(
-            "c:\\trees\\cod3\\cod3src\\src\\cgame\\cg_local.h",
-            910,
-            0,
-            "%s\n\t(localClientNum) = %i",
-            "(localClientNum == 0)",
-            localClientNum);
-    if ((cgArray[0].predictedPlayerState.eFlags & 0x20000) != 0
-        && (cgArray[0].predictedPlayerState.eFlags & 0x80000) == 0)
+    cg_s *cgameGlob = CG_GetLocalClientGlobals(localClientNum);
+
+    if ((cgameGlob->predictedPlayerState.eFlags & 0x20000) != 0
+        && (cgameGlob->predictedPlayerState.eFlags & 0x80000) == 0)
     {
-        Entity = CG_GetEntity(localClientNum, cgArray[0].predictedPlayerState.viewlocked_entNum);
+        Entity = CG_GetEntity(localClientNum, cgameGlob->predictedPlayerState.viewlocked_entNum);
         p_pose = &Entity->pose;
         if (Entity->nextState.eType == 11 && (Entity->nextState.lerp.eFlags & 0x10000) != 0)
         {
             ClientDObj = Com_GetClientDObj(Entity->nextState.number, 0);
             if (ClientDObj)
             {
-                if (CG_DObjGetWorldTagMatrix(
-                    p_pose,
-                    ClientDObj,
-                    scr_const.tag_turret,
-                    (float (*)[3]) & v23.stateBitsEntry[8],
-                    (float *)&v23.stateBitsTable))
+                if (CG_DObjGetWorldTagMatrix(p_pose, ClientDObj, scr_const.tag_turret, tagmat, origin))
                 {
-                    AxisToAngles((const mat3x3&)v23.stateBitsEntry[8], v22);
-                    v9 = AngleSubtract(cgArray[0].refdefViewAngles[1], v22[1]);
+                    AxisToAngles(tagmat, angles);
+                    angle = AngleSubtract(cgameGlob->refdefViewAngles[1], angles[1]);
                     LocalClientStaticGlobals = CG_GetLocalClientStaticGlobals(localClientNum);
-                    x = rect->x;
                     horzAlign = rect->horzAlign;
                     vertAlign = rect->vertAlign;
-                    v14 = &scrPlaceView[localClientNum];
-                    v15 = (float)((float)(compassSize->current.value - (float)1.0) * LocalClientStaticGlobals->compassWidth);
+                    v15 = ((compassSize->current.value - 1.0f) * LocalClientStaticGlobals->compassWidth);
                     y = rect->y;
                     w = rect->w;
                     h = rect->h;
-                    v21 = (float)((float)v15 * (float)0.69999999) + (float)x;
-                    ScrPlace_ApplyRect(v14, &v21, &y, &w, &h, horzAlign, vertAlign);
-                    *(float *)&v23.info.name = w * (float)0.5;
-                    *(float *)v23.stateBitsEntry = *(float *)&v23.info.name;
-                    *((float *)&v23.info.surfaceTypeBits + 1) = h * (float)0.25;
-                    *(float *)&v23.stateBitsEntry[4] = *((float *)&v23.info.surfaceTypeBits + 1);
-                    *(float *)&v23.info.gameFlags = -(float)(h * (float)0.75);
-                    *((float *)&v23.info.drawSurf.packed + 1) = *(float *)&v23.info.gameFlags;
-                    *(float *)&v23.info.drawSurf.fields = -*(float *)&v23.info.name;
-                    v23.info.surfaceTypeBits = HIDWORD(v23.info.drawSurf.packed);
-                    CG_DrawRotatedQuadPic(v14, v21, y, v17, v9, v16, &v23);
+                    x = rect->x;
+                    x += (v15 * 0.7f);
+                    ScrPlace_ApplyRect(&scrPlaceView[localClientNum], &x, &y, &w, &h, horzAlign, vertAlign);
+
+                    verts[0] = w * 0.5f;
+                    verts[1] = -(h * 0.75f);
+                    verts[2] = -verts[0];
+                    verts[3] = verts[1];
+                    verts[4] = verts[2];
+                    verts[5] = h * 0.25f;
+                    verts[6] = verts[0];
+                    verts[7] = verts[5];
+
+                    CG_DrawRotatedQuadPic(&scrPlaceView[localClientNum], x, y, (const float(*)[2])verts, angle, color, material);
                 }
             }
         }
@@ -1799,27 +1744,16 @@ float __cdecl CG_FadeHudMenu(int localClientNum, const dvar_s *fadeDvar, int dis
 
 void __cdecl CG_DrawPlayerAmmoBackdrop(int localClientNum, const rectDef_s *rect, float *color, Material *material)
 {
-    long double v7; // fp2
-    long double v8; // fp2
-    const float *v9; // r6
-    int v10; // r5
-    int v11; // r4
+    float duration; // fp2
 
-    if (localClientNum)
-        MyAssertHandler(
-            "c:\\trees\\cod3\\cod3src\\src\\cgame\\cg_local.h",
-            910,
-            0,
-            "%s\n\t(localClientNum) = %i",
-            "(localClientNum == 0)",
-            localClientNum);
-    if ((cgArray[0].predictedPlayerState.eFlags & 0x20000) == 0)
+    cg_s *cgameGlob = CG_GetLocalClientGlobals(localClientNum);
+
+    if ((cgameGlob->predictedPlayerState.eFlags & 0x20000) == 0)
     {
         if (CG_GetSelectedWeaponIndex(cgArray))
         {
-            *(double *)&v7 = (float)((float)(hud_fade_ammodisplay->current.value * (float)1000.0) + (float)0.5);
-            v8 = floor(v7);
-            if (CG_FadeHudMenu(localClientNum, hud_fade_ammodisplay, cgArray[0].ammoFadeTime, (int)(float)*(double *)&v8) != 0.0)
+            duration = floor(((hud_fade_ammodisplay->current.value * 1000.0f) + 0.5f));
+            if (CG_FadeHudMenu(localClientNum, hud_fade_ammodisplay, cgameGlob->ammoFadeTime, (int)duration) != 0.0f)
             {
                 if (!material)
                     Material_RegisterHandle("$default", 3);
@@ -1830,10 +1764,10 @@ void __cdecl CG_DrawPlayerAmmoBackdrop(int localClientNum, const rectDef_s *rect
                     rect->y,
                     rect->w,
                     rect->h,
-                    v11,
-                    v10,
-                    v9,
-                    (Material *)(68 * localClientNum));
+                    rect->horzAlign,
+                    rect->vertAlign,
+                    colorWhite, // KISAKTODO:
+                    material);
             }
         }
     }
@@ -1992,9 +1926,9 @@ void __cdecl CG_DrawPlayerAmmoValue(
         *(double *)&v12 = (float)((float)(hud_fade_ammodisplay->current.value * (float)1000.0) + (float)0.5);
         v13 = floor(v12);
         v128 = (int)(float)*(double *)&v13;
-        v14 = CG_FadeHudMenu(localClientNum, hud_fade_ammodisplay, cgArray[0].ammoFadeTime, v128);
-        *((float *)&material->info.drawSurf.packed + 1) = v14;
-        if (v14 != 0.0)
+        scrPlace = CG_FadeHudMenu(localClientNum, hud_fade_ammodisplay, cgArray[0].ammoFadeTime, v128);
+        *((float *)&material->info.drawSurf.packed + 1) = scrPlace;
+        if (scrPlace != 0.0)
         {
             SelectedWeaponIndex = CG_GetSelectedWeaponIndex(cgArray);
             v16 = SelectedWeaponIndex;
@@ -2040,15 +1974,15 @@ void __cdecl CG_DrawPlayerAmmoValue(
                                 LODWORD(v30) = cgArray[0].time;
                                 cgArray[0].lastClipFlashTime = cgArray[0].time;
                             }
-                            v31 = *((float *)&material->info.drawSurf.packed + 1);
+                            tagmat = *((float *)&material->info.drawSurf.packed + 1);
                             v135 = 0.88999999;
                             LODWORD(v30) = v30 - cgArray[0].time + 800;
                             v136 = 0.18000001;
                             v137 = 0.0099999998;
                             v128 = HIDWORD(v30);
                             v138 = (float)v30 * (float)0.00125;
-                            if (v31 < v138)
-                                v138 = v31;
+                            if (tagmat < v138)
+                                v138 = tagmat;
                         }
                         if (v19)
                         {
@@ -2074,8 +2008,8 @@ void __cdecl CG_DrawPlayerAmmoValue(
                                     font,
                                     rect->x,
                                     rect->y,
-                                    v23,
-                                    v22,
+                                    verts,
+                                    angles,
                                     scale,
                                     (const float *)rect->horzAlign,
                                     rect->vertAlign,
@@ -2107,7 +2041,7 @@ void __cdecl CG_DrawPlayerAmmoValue(
                                         rect->x,
                                         rect->y,
                                         v33,
-                                        v32,
+                                        origin,
                                         scale,
                                         (const float *)rect->horzAlign,
                                         rect->vertAlign,
@@ -2637,16 +2571,16 @@ void __cdecl CG_DrawPlayerStance(
     long double v11; // fp2
     long double v12; // fp2
     double v13; // fp31
-    int v14; // r7
+    int scrPlace; // r7
     const float *v15; // r6
     const float *v16; // r5
     cgs_t *LocalClientStaticGlobals; // r3
     double y; // fp27
     double x; // fp12
     double v20; // fp13
-    double v21; // fp30
+    double x; // fp30
     int proneBlockedEndTime; // r11
-    bool v23; // cr57
+    bool verts; // cr57
     const char *v24; // r3
     char *v25; // r30
     int v26; // r3
@@ -2654,8 +2588,8 @@ void __cdecl CG_DrawPlayerStance(
     double v28; // fp31
     long double v29; // fp2
     long double v30; // fp2
-    int v31; // r7
-    double v32; // fp8
+    int tagmat; // r7
+    double origin; // fp8
     double v33; // fp7
     double v34; // fp6
     double v35; // fp5
@@ -2707,7 +2641,7 @@ void __cdecl CG_DrawPlayerStance(
             v51[0] = *(float *)&color->fontName;
             v51[1] = *(float *)&color->pixelHeight;
             v51[2] = *(float *)&color->glyphCount;
-            v21 = (float)((float)((float)v20 * (float)0.69999999) + (float)x);
+            x = (float)((float)((float)v20 * (float)0.69999999) + (float)x);
             if (cg_hudStanceHintPrints->current.enabled && cgArray[0].lastStanceChangeTime + 3000 > cgArray[0].time)
                 CG_DrawStanceHintPrints(
                     localClientNum,
@@ -2717,22 +2651,22 @@ void __cdecl CG_DrawPlayerStance(
                     v13,
                     color,
                     scale,
-                    v14,
+                    scrPlace,
                     font);
             v52 = *(float *)&color->material * (float)v13;
-            CG_DrawStanceIcon(localClientNum, rect, v51, v21, y, v13, v15);
+            CG_DrawStanceIcon(localClientNum, rect, v51, x, y, v13, v15);
             proneBlockedEndTime = cgArray[0].proneBlockedEndTime;
             if ((cgArray[0].predictedPlayerState.pm_flags & 0x1000) != 0)
             {
-                v23 = cgArray[0].proneBlockedEndTime > cgArray[0].time;
+                verts = cgArray[0].proneBlockedEndTime > cgArray[0].time;
                 if (cgArray[0].proneBlockedEndTime >= cgArray[0].time)
                     goto LABEL_17;
                 proneBlockedEndTime = cgArray[0].time + 1500;
                 cgArray[0].proneBlockedEndTime = cgArray[0].time + 1500;
             }
-            v23 = proneBlockedEndTime > cgArray[0].time;
+            verts = proneBlockedEndTime > cgArray[0].time;
         LABEL_17:
-            if (v23)
+            if (verts)
             {
                 if (BG_WeaponBlocksProne(cgArray[0].predictedPlayerState.weapon))
                     v24 = "CGAME_PRONE_BLOCKED_WEAPON";
@@ -2755,7 +2689,7 @@ void __cdecl CG_DrawPlayerStance(
                     font,
                     -v28,
                     -260.0,
-                    v31,
+                    tagmat,
                     68 * localClientNum,
                     scale,
                     (const float *)7,
@@ -2764,7 +2698,7 @@ void __cdecl CG_DrawPlayerStance(
                     v35,
                     v34,
                     v33,
-                    v32,
+                    origin,
                     v37,
                     v38,
                     v39,

@@ -105,13 +105,13 @@ void __cdecl G_Animscripted_DeathPlant(
     float v27; // [sp+70h] [-140h] BYREF
     float yaw; // [sp+74h] [-13Ch]
     float v29; // [sp+78h] [-138h]
-    float v30; // [sp+80h] [-130h] BYREF
-    float v31; // [sp+84h] [-12Ch]
-    float v32; // [sp+88h] [-128h]
+    float trans[3]; // [sp+80h] [-130h] BYREF
+    //float v31; // [sp+84h] [-12Ch]
+    //float v32; // [sp+88h] [-128h]
     float vOrigin[4]; // [sp+90h] [-120h] BYREF
-    float v34; // [sp+A0h] [-110h] BYREF
-    float v35; // [sp+A4h] [-10Ch]
-    float v36; // [sp+A8h] [-108h]
+    float transformedPos[3]; // [sp+A0h] [-110h] BYREF
+    //float v35; // [sp+A4h] [-10Ch]
+    //float v36; // [sp+A8h] [-108h]
     float v37[4]; // [sp+B0h] [-100h] BYREF
     trace_t v38[2]; // [sp+C0h] [-F0h] BYREF
     float v39[4][3]; // [sp+120h] [-90h] BYREF
@@ -144,22 +144,22 @@ void __cdecl G_Animscripted_DeathPlant(
     v29 = angles[2];
     v27 = 0.0;
     AnglesToAxis(&v27, scripted->axis);
-    XAnimGetAbsDelta(anims, anim, v37, &v30, 1.0);
-    MatrixTransformVector43(&v30, scripted->axis, &v34);
+    XAnimGetAbsDelta(anims, anim, v37, trans, 1.0);
+    MatrixTransformVector43(trans, scripted->axis, transformedPos);
     v15 = RotationToYaw(v37);
     YawToAxis(v15, (mat3x3&)v16);
     MatrixMultiply((const mat3x3&)v38[1].normal, (const mat3x3&)scripted->axis, (mat3x3&)v39);
     AxisToAngles((const mat3x3&)v39, &v27);
-    v21 = v34;
-    v24 = v34;
+    v21 = transformedPos[0];
+    v24 = transformedPos[0];
     v17 = ent->s.number;
-    v22 = v35;
-    v25 = v35;
+    v22 = transformedPos[1];
+    v25 = transformedPos[1];
     //v18 = (float)((float)sqrtf((float)((float)(v30 * v30) + (float)((float)(v31 * v31) + (float)(v32 * v32))))
-    v18 = (float)((float)sqrtf((float)((float)(v30 * v30) + (float)((float)(v31 * v31) + (float)(v32 * v32))))
+    v18 = (float)((float)sqrtf((float)((float)(trans[0] * trans[0]) + (float)((float)(trans[1] * trans[1]) + (float)(trans[2] * trans[2]))))
         + (float)128.0);
-    v23 = (float)v18 + v36;
-    v26 = v36 - (float)v18;
+    v23 = (float)v18 + transformedPos[2];
+    v26 = transformedPos[2] - (float)v18;
     G_TraceCapsule(v38, &v21, actorMins, actorMaxs, &v24, v17, 8519697);
     if (v38[0].allsolid || v38[0].fraction >= 1.0)
     {

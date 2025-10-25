@@ -194,7 +194,6 @@ void __cdecl CG_DrawObjectiveList(
     double v20; // fp25
     double y; // fp31
     double textY; // fp30
-    double v23; // fp19
     int *p_icon; // r24
     Material *checkbox_active; // r11
     const char *drawText; // r30
@@ -208,14 +207,13 @@ void __cdecl CG_DrawObjectiveList(
     double v36; // fp5
     double v37; // fp4
     const char *wordwrapNext; // r29
-    double v39; // fp30
+    double height; // fp30
     long double v40; // fp2
     double w; // fp0
-    double x; // fp13
     __int64 v43; // r11
-    double v44; // fp31
+    double width; // fp31
     int v45; // r4
-    double v46; // fp1
+    double x; // fp1
     const float *v47; // r6
     int v48; // r5
     int v49; // r4
@@ -294,7 +292,7 @@ void __cdecl CG_DrawObjectiveList(
             v20 = (float)v13;
         y = rect->y;
         textY = 0.0;
-        v23 = (float)(rect->y - (float)v13);
+        y = (float)(rect->y - (float)v13);
         //v24 = (Material *)0x82000000; // wtf is this 
         p_icon = &cgArray[0].objectives[0].icon;
         do
@@ -381,8 +379,8 @@ void __cdecl CG_DrawObjectiveList(
         } while ((int)p_icon < (int)&cgArray[0].visionSetPreLoaded[0].filmLightTint[2]);
         if (textY != 0.0)
         {
-            v39 = (float)((float)textY - (float)v23);
-            if (v39 != 0.0)
+            height = (float)((float)textY - (float)y);
+            if (height != 0.0)
             {
                 *(double *)&v17 = (float)(scrPlaceView[localClientNum].scaleVirtualToReal[0] + (float)0.5);
                 v40 = floor(v17);
@@ -391,12 +389,11 @@ void __cdecl CG_DrawObjectiveList(
                 HIDWORD(v64) = (int)(float)*(double *)&v40;
                 LODWORD(v43) = HIDWORD(v64);
                 v66 = v43;
-                v44 = (float)v43;
-                v46 = ScrPlace_ApplyX(
+                width = (float)v43;
+                x = ScrPlace_ApplyX(
                     &scrPlaceView[localClientNum],
-                    (float)((float)((float)((float)((float)12.0 - (float)v43) * (float)0.5) + (float)w) + (float)x),
-                    v45);
-                UI_FillRect(&scrPlaceView[localClientNum], v46, v23, v44, v39, v49, v48, v47);
+                    (float)((float)((float)((float)((float)12.0 - (float)v43) * (float)0.5) + (float)w) + (float)x), rect->horzAlign);
+                UI_FillRect(&scrPlaceView[localClientNum], x, y, width, height, rect->horzAlign, rect->vertAlign, color);
             }
         }
     }
@@ -410,54 +407,33 @@ void __cdecl CG_DrawPausedMenuLine(
     float *color,
     int textStyle)
 {
-    double fadeAlpha; // fp1
-    __int64 v12; // r9
-    double y; // fp12
-    ScreenPlacement *v14; // r30
-    double v15; // fp31
-    long double v16; // fp2
-    double v17; // fp30
-    long double v18; // fp2
-    __int64 v19; // r11
-    double v20; // fp31
-    double v21; // fp0
-    double v22; // fp29
-    int v23; // r4
-    double v24; // fp1
-    const float *v25; // r6
-    int v26; // r5
-    int v27; // r4
-    __int64 v28; // [sp+50h] [-50h] BYREF
+    float fadeAlpha; // fp1
+    int txtHeight; // r9
+    float y; // fp12
+    ScreenPlacement *scrPlace; // r30
+    float height; // fp31
+    float width; // fp29
+    float x; // fp1
 
-    if (localClientNum)
-        MyAssertHandler(
-            "c:\\trees\\cod3\\cod3src\\src\\cgame\\cg_local.h",
-            910,
-            0,
-            "%s\n\t(localClientNum) = %i",
-            "(localClientNum == 0)",
-            localClientNum);
+    cg_s *cgameGlob = CG_GetLocalClientGlobals(localClientNum);
+
     fadeAlpha = CG_FadeObjectives(cgArray);
+
     if (fadeAlpha != 0.0)
     {
-        *(float *)(textStyle + 12) = fadeAlpha;
-        LODWORD(v12) = UI_TextHeight(font, scale);
-        y = rect->y;
-        v28 = v12;
-        v14 = &scrPlaceView[localClientNum];
-        v15 = (float)v12;
-        *(double *)&v16 = (float)(v14->scaleVirtualToReal[0] + (float)0.5);
-        v17 = (float)((float)y - (float)v12);
-        v18 = floor(v16);
-        HIDWORD(v19) = (uint32_t)&v28;
-        v20 = (float)(rect->h * (float)v15);
-        v21 = (float)*(double *)&v18;
-        *(double *)&v18 = (float)(rect->x - (float)6.0);
-        LODWORD(v19) = (int)v21;
-        v28 = v19;
-        v22 = (float)v19;
-        v24 = ScrPlace_ApplyX(v14, *(double *)&v18, v23);
-        UI_FillRect(v14, v24, v17, v22, v20, v27, v26, v25);
+        color[3] = fadeAlpha;
+        txtHeight = UI_TextHeight(font, scale);
+
+        scrPlace = &scrPlaceView[localClientNum];
+
+        y = (rect->y - txtHeight);
+        height = (rect->h * txtHeight);
+
+        x = (rect->x - 6.0f);
+
+        width = floor(scrPlace->scaleVirtualToReal[0] + 0.5f);
+        x = ScrPlace_ApplyX(scrPlace, x, rect->horzAlign);
+        UI_FillRect(scrPlace, x, y, width, height, rect->horzAlign, rect->vertAlign, color);
     }
 }
 

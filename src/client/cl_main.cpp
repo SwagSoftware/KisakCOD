@@ -1245,7 +1245,7 @@ void __cdecl CL_PlayLogo_f()
     if (cls.uiStarted)
         UI_SetActiveMenu(0, UIMENU_NONE);
     SND_StopSounds(SND_STOP_ALL);
-    SND_FadeAllSounds(1.0, v1);
+    SND_FadeAllSounds(1.0, 0);
     v2 = Cmd_Argv(1);
     v3 = Cmd_Argv(2);
     v4 = atof(v3);

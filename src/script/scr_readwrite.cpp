@@ -1056,9 +1056,9 @@ static void CheckReferenceRange(unsigned int begin, unsigned int end)
 {
 #if 0
     signed int parentValue; // r20
-    signed int v3; // r23
+    signed int parentType; // r23
     VariableValueInternal::<unnamed_tag> *p_u; // r27
-    VariableValueInternal::<unnamed_tag> v5; // r11
+    VariableValueInternal::<unnamed_tag> entryValue; // r11
     unsigned int ParentLocalId; // r3
     int v7; // r10
     unsigned int i; // r28
@@ -1071,16 +1071,16 @@ static void CheckReferenceRange(unsigned int begin, unsigned int end)
     int v15; // r10
 
     parentValue = end - begin;
-    v3 = 1;
+    parentType = 1;
     if ((int)(end - begin) > 1)
     {
         p_u = &scrVarGlob.variableList[begin + 1].u;
         do
         {
-            v5 = p_u[1];
-            if ((v5.o.u.size & 0x60) != 0)
+            entryValue = p_u[1];
+            if ((entryValue.o.u.size & 0x60) != 0)
             {
-                switch (v5.o.u.size & 0x1F)
+                switch (entryValue.o.u.size & 0x1F)
                 {
                 case 1:
                     ++scrVarDebugPub->refCount[p_u->u.intValue];
@@ -1116,14 +1116,14 @@ static void CheckReferenceRange(unsigned int begin, unsigned int end)
                 case 0x13:
                     goto LABEL_7;
                 case 0x11:
-                    ParentLocalId = GetParentLocalId(v3);
+                    ParentLocalId = GetParentLocalId(parentType);
                     ++scrVarDebugPub->refCount[ParentLocalId];
                 LABEL_7:
                     v7 = 2 * (p_u->o.u.size + 0x38000);
                     ++*(_WORD *)((char *)scrVarDebugPub->varUsage + v7);
                     break;
                 case 0x15:
-                    for (i = FindFirstSibling(v3); i; i = FindNextSibling(i))
+                    for (i = FindFirstSibling(parentType); i; i = FindNextSibling(i))
                     {
                         if (IsObject(&scrVarGlob.variableList[i + 32770]))
                             MyAssertHandler(
@@ -1142,9 +1142,9 @@ static void CheckReferenceRange(unsigned int begin, unsigned int end)
                     break;
                 }
             }
-            ++v3;
+            ++parentType;
             p_u += 4;
-        } while (v3 < parentValue);
+        } while (parentType < parentValue);
     }
 #endif
 }
@@ -1335,7 +1335,7 @@ void __cdecl Scr_SaveSourceImmediate(SaveImmediate *save)
     int parentValue; // r9
     unsigned int sourceBufferLookupLen; // r11
     bool *p_archive; // r10
-    unsigned int v5; // r28
+    unsigned int entryValue; // r28
     int v6; // r29
     SourceBufferInfo *v7; // r31
     signed int len; // r5
@@ -1358,7 +1358,7 @@ void __cdecl Scr_SaveSourceImmediate(SaveImmediate *save)
             } while (sourceBufferLookupLen);
         }
         WriteToMemoryCardFile(save->f, &v9, 4u);
-        v5 = 0;
+        entryValue = 0;
         if (scrParserPub.sourceBufferLookupLen)
         {
             v6 = 0;
@@ -1372,9 +1372,9 @@ void __cdecl Scr_SaveSourceImmediate(SaveImmediate *save)
                     if (len > 0)
                         WriteToMemoryCardFile(save->f, v7->sourceBuf, len);
                 }
-                ++v5;
+                ++entryValue;
                 ++v6;
-            } while (v5 < scrParserPub.sourceBufferLookupLen);
+            } while (entryValue < scrParserPub.sourceBufferLookupLen);
         }
     }
 #endif
@@ -1660,9 +1660,9 @@ void __cdecl DoSaveEntry(VariableValue *value, VariableValue *name, bool isArray
 void __cdecl AddSaveObjectChildren(unsigned int parentId)
 {
     VariableValueInternal *parentValue; // r23
-    int v3; // r24
+    int parentType; // r24
     unsigned int i; // r29
-    VariableValueInternal *v5; // r30
+    VariableValueInternal *entryValue; // r30
     unsigned int v6; // r4
     int v7; // r2
     VariableValueInternal_u u; // r3
@@ -1672,37 +1672,25 @@ void __cdecl AddSaveObjectChildren(unsigned int parentId)
     int size; // r9
 
     parentValue = &scrVarGlob.variableList[parentId + 1];
-    if ((parentValue->w.status & 0x60) == 0)
-        MyAssertHandler(
-            "c:\\trees\\cod3\\cod3src\\src\\script\\scr_readwrite.cpp",
-            557,
-            0,
-            "%s",
-            "(parentValue->w.status & VAR_STAT_MASK) != VAR_STAT_FREE");
-    if (!IsObject(parentValue))
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\script\\scr_readwrite.cpp", 558, 0, "%s", "IsObject( parentValue )");
-    v3 = parentValue->w.type & 0x1F;
+
+    iassert((parentValue->w.status & VAR_STAT_MASK) != VAR_STAT_FREE);
+    iassert(IsObject(parentValue));
+    parentType = parentValue->w.type & 0x1F;
     for (i = FindLastSibling(parentId); i; i = FindPrevSibling(i))
     {
-        v5 = (VariableValueInternal *)((char *)&scrVarGlob.variableList[VARIABLELIST_CHILD_BEGIN]
+        entryValue = (VariableValueInternal *)((char *)&scrVarGlob.variableList[VARIABLELIST_CHILD_BEGIN]
             + __ROL4__(scrVarGlob.variableList[i + VARIABLELIST_CHILD_BEGIN].hash.id, 4));
-        if (IsObject(v5))
-            MyAssertHandler(
-                "c:\\trees\\cod3\\cod3src\\src\\script\\scr_readwrite.cpp",
-                567,
-                0,
-                "%s",
-                "!IsObject( entryValue )");
-        if (v3 == 21
-            && Scr_GetArrayIndexValue(((unsigned int)v5->w.status >> 8)).u.intValue == 1
+        iassert(!IsObject(entryValue));
+        if (parentType == VAR_ARRAY
+            && (v7 = Scr_GetArrayIndexValue(((unsigned int)entryValue->w.status >> 8)).u.intValue, v7 == 1)
             && v7
             && !scrVarPub.saveIdMap[v7])
         {
             scrVarPub.saveIdMap[v7] = ++scrVarPub.savecount;
             *(unsigned __int16 *)((char *)scrVarPub.saveIdMapRev + __ROL4__(scrVarPub.savecount, 1)) = v7;
         }
-        u = v5->u;
-        v9 = v5->w.type & 0x1F;
+        u = entryValue->u;
+        v9 = entryValue->w.type & 0x1F;
         if (v9 == 1)
         {
             if (u.u.intValue && !scrVarPub.saveIdMap[u.u.intValue])
@@ -1716,7 +1704,7 @@ void __cdecl AddSaveObjectChildren(unsigned int parentId)
             AddSaveStackInternal(u.u.stackValue);
         }
     }
-    switch (v3)
+    switch (parentType)
     {
     case 14:
     case 15:

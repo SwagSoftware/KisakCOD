@@ -351,41 +351,35 @@ void __cdecl MdlPrvGetBounds(float *mins, float *maxs, float *center)
 
 void CG_ModPrvFrameModel()
 {
-    double v0; // fp30
-    double v1; // fp31
     double v2; // fp0
-    double v3; // fp0
-    float v4; // [sp+50h] [-50h] BYREF
-    float v5; // [sp+54h] [-4Ch]
-    float v6; // [sp+58h] [-48h]
-    float v7; // [sp+60h] [-40h] BYREF
-    float v8; // [sp+64h] [-3Ch]
-    float v9; // [sp+68h] [-38h]
-    float v10[6]; // [sp+70h] [-30h] BYREF
+    double radius; // fp0
+    float mins[3]; // [sp+50h] [-50h] BYREF // v4, v5, v6
+    float maxs[3]; // [sp+60h] [-40h] BYREF // v7, v8, v9
+    float center[3]; // [sp+70h] [-30h] BYREF
 
-    MdlPrvGetBounds(&v4, &v7, v10);
-    v0 = v9;
-    v1 = v6;
-    Dvar_SetVec3((dvar_s*)modPrvCenterOffset, 0.0, 0.0, (float)((float)(v9 - v6) * (float)0.5));
+    MdlPrvGetBounds(mins, maxs, center);
+    Dvar_SetVec3((dvar_s*)modPrvCenterOffset, 0.0f, 0.0f, ((maxs[2] - mins[2]) * 0.5f));
     v2 = -FLT_MAX;
-    if (I_fabs(v4) > -FLT_MAX)
-        v2 = I_fabs(v4);
-    if (v2 < I_fabs(v7))
-        v2 = I_fabs(v7);
-    if (v2 < I_fabs(v5))
-        v2 = I_fabs(v5);
-    if (v2 < I_fabs(v8))
-        v2 = I_fabs(v8);
-    if (v2 < I_fabs(v1))
-        v2 = I_fabs(v1);
-    if (v2 < I_fabs(v0))
-        v2 = I_fabs(v0);
-    v3 = (float)((float)v2 * (float)1.5);
+    if (I_fabs(mins[0]) > -FLT_MAX)
+        v2 = I_fabs(mins[0]);
+    if (v2 < I_fabs(maxs[0]))
+        v2 = I_fabs(maxs[0]);
+    if (v2 < I_fabs(mins[1]))
+        v2 = I_fabs(mins[1]);
+    if (v2 < I_fabs(maxs[1]))
+        v2 = I_fabs(maxs[1]);
+    if (v2 < I_fabs(mins[2]))
+        v2 = I_fabs(mins[2]);
+    if (v2 < I_fabs(maxs[2]))
+        v2 = I_fabs(maxs[2]);
+
+    radius = (v2 * 1.5f);
+
     g_mdlprv.viewer.zNearChangeLimit = g_mdlprv.viewer.centerRadius;
-    if (v3 < 10.0)
-        v3 = 10.0;
-    if (g_mdlprv.viewer.centerRadius < v3)
-        g_mdlprv.viewer.centerRadius = v3;
+    if (radius < 10.0f)
+        radius = 10.0f;
+    if (g_mdlprv.viewer.centerRadius < radius)
+        g_mdlprv.viewer.centerRadius = radius;
 }
 
 void CG_ModPrvResetOrientation_f()
@@ -786,7 +780,7 @@ void CG_ModPrvDrawBones()
 {
     DObj_s *currentObj; // r3
     int NumModels; // r18
-    double v2; // fp31
+    double scale; // fp31
     const char *v3; // r19
     int v4; // r26
     const XModel *Model; // r3
@@ -806,8 +800,8 @@ void CG_ModPrvDrawBones()
     const char *v19; // r5
     const float *v20; // r4
     const char *v21; // r5
-    float v22[2]; // [sp+50h] [-210h] BYREF
-    float v23; // [sp+58h] [-208h]
+    float xyz[3]; // [sp+50h] [-210h] BYREF
+    //float v23; // [sp+58h] [-208h]
     float v24[4]; // [sp+60h] [-200h] BYREF
     float v25[4]; // [sp+70h] [-1F0h] BYREF
     float v26[4]; // [sp+80h] [-1E0h] BYREF
@@ -815,22 +809,14 @@ void CG_ModPrvDrawBones()
     float v28[4][3]; // [sp+C0h] [-1A0h] BYREF
     float v29[4][3]; // [sp+F0h] [-170h] BYREF
     float v30[4][3]; // [sp+120h] [-140h] BYREF
-    char v31[64]; // [sp+150h] [-110h] BYREF
-    char v32[64]; // [sp+190h] [-D0h] BYREF
+    char posTxt[64]; // [sp+150h] [-110h] BYREF
+    char angleTxt[64]; // [sp+190h] [-D0h] BYREF
 
     currentObj = g_mdlprv.model.currentObj;
-    if (!g_mdlprv.model.currentObj)
-    {
-        MyAssertHandler(
-            "c:\\trees\\cod3\\cod3src\\src\\cgame\\cg_modelpreviewer.cpp",
-            1295,
-            0,
-            "%s",
-            "g_mdlprv.model.currentObj");
-        currentObj = g_mdlprv.model.currentObj;
-    }
+    iassert(g_mdlprv.model.currentObj);
+
     NumModels = DObjGetNumModels(currentObj);
-    v2 = (float)(g_mdlprv.viewer.centerRadius * (float)0.001953125);
+    scale = (float)(g_mdlprv.viewer.centerRadius * (float)0.001953125);
     if (modPrvDrawBoneInfo->current.integer < 4u)
         v3 = 0;
     else
@@ -852,18 +838,18 @@ void CG_ModPrvDrawBones()
         while (1)
         {
             BoneName = CG_ModPrvModelGetBoneName(g_mdlprv.model.currentObj, v4, v7);
-            CG_DObjGetWorldBoneMatrix(g_mdlprv.model.currentEntity.info.pose, g_mdlprv.model.currentObj, v7, v30, v22);
+            CG_DObjGetWorldBoneMatrix(g_mdlprv.model.currentEntity.info.pose, g_mdlprv.model.currentObj, v7, v30, xyz);
             UnitQuatToAxis(g_mdlprv.model.currentEntity.placement.base.quat, (mat3x3&)v29);
             MatrixTranspose((const mat3x3&)v29, (mat3x3&)v27);
-            v24[0] = v22[0] - g_mdlprv.model.currentEntity.placement.base.origin[0];
-            v24[1] = v22[1] - g_mdlprv.model.currentEntity.placement.base.origin[1];
-            v24[2] = v23 - g_mdlprv.model.currentEntity.placement.base.origin[2];
+            v24[0] = xyz[0] - g_mdlprv.model.currentEntity.placement.base.origin[0];
+            v24[1] = xyz[1] - g_mdlprv.model.currentEntity.placement.base.origin[1];
+            v24[2] = xyz[2] - g_mdlprv.model.currentEntity.placement.base.origin[2];
             MatrixTransformVector(v24, (const mat3x3&)v27, v26);
             MatrixMultiply((const mat3x3&)v30, (const mat3x3&)v27, (mat3x3&)v28);
             AxisToAngles((const mat3x3&)v28, v25);
 
             sprintf(
-                v32,
+                angleTxt,
                 "angles( %.2f, %.2f, %.2f )",
                 v25[0],
                 v25[1],
@@ -871,7 +857,7 @@ void CG_ModPrvDrawBones()
             );
               
             sprintf(
-                v31,
+                posTxt,
                 "pos( %.2f, %.2f, %.2f )",
                 v26[0],
                 v26[1],
@@ -901,24 +887,24 @@ void CG_ModPrvDrawBones()
             {
                 if (integer != 2 && integer != 3 && !v13)
                     goto LABEL_24;
-                CL_AddDebugString(v22, colorRed, v2, v14, (int)BoneName, 0);
-                v17 = (float)((float)v2 * (float)12.0);
-                v23 = v23 - (float)((float)v2 * (float)12.0);
-                CL_AddDebugString(v22, colorRed, v2, v18, (int)v31, 0);
+                CL_AddDebugString(xyz, colorRed, scale, BoneName, 0, 1);
+                v17 = (float)((float)scale * (float)12.0);
+                xyz[2] = xyz[2] - (float)((float)scale * (float)12.0);
+                CL_AddDebugString(xyz, colorRed, scale, posTxt, 0, 1);
                 v20 = colorRed;
             }
             else
             {
                 if (integer != 1 && integer != 3 && !v13)
                     goto LABEL_24;
-                CL_AddDebugString(v22, colorGreen, v2, v14, (int)BoneName, 0);
-                v17 = (float)((float)v2 * (float)12.0);
-                v23 = v23 - (float)((float)v2 * (float)12.0);
-                CL_AddDebugString(v22, colorGreen, v2, v21, (int)v31, 0);
+                CL_AddDebugString(xyz, colorGreen, scale, BoneName, 0, 1);
+                v17 = (float)((float)scale * (float)12.0);
+                xyz[2] = xyz[2] - (float)((float)scale * (float)12.0);
+                CL_AddDebugString(xyz, colorGreen, scale, posTxt, 0, 1);
                 v20 = colorGreen;
             }
-            v23 = v23 - (float)v17;
-            CL_AddDebugString(v22, v20, v2, v19, (int)v32, 0);
+            xyz[2] = xyz[2] - (float)v17;
+            CL_AddDebugString(xyz, v20, scale, angleTxt, 0, 1);
         LABEL_24:
             if (++v7 >= v6)
                 goto LABEL_25;
@@ -1280,13 +1266,7 @@ XAnimTree_s *CG_ModPrvAnimBlendWeightUpdate()
     int fromCurrentIndex; // r11
     XAnimTree_s *v2; // r30
     double v3; // fp30
-    int v4; // r7
-    unsigned int v5; // r6
-    unsigned int v6; // r5
     double value; // fp30
-    int v8; // r7
-    unsigned int v9; // r6
-    unsigned int v10; // r5
 
     Dvar_ClearModified((dvar_s*)modPrvAnimBlendWeight);
     result = (XAnimTree_s *)g_mdlprv.model.currentObj;
@@ -1302,7 +1282,7 @@ XAnimTree_s *CG_ModPrvAnimBlendWeightUpdate()
             else
                 v3 = 1.0;
             XAnimClearTreeGoalWeights(result, 1u, 0.0);
-            result = (XAnimTree_s *)XAnimSetGoalWeight(g_mdlprv.model.currentObj, 1u, v3, 1.0, 1.0, v6, v5, v4);
+            result = (XAnimTree_s *)XAnimSetGoalWeight(g_mdlprv.model.currentObj, 1u, v3, 1.0, 1.0, 0, 0, 0);
             fromCurrentIndex = g_mdlprv.anim.fromCurrentIndex;
         }
         if (g_mdlprv.anim.toCurrentIndex >= 0)
@@ -1312,7 +1292,7 @@ XAnimTree_s *CG_ModPrvAnimBlendWeightUpdate()
             else
                 value = 1.0;
             XAnimClearTreeGoalWeights(v2, 2u, 0.0);
-            return (XAnimTree_s *)XAnimSetGoalWeight(g_mdlprv.model.currentObj, 2u, value, 1.0, 1.0, v10, v9, v8);
+            return (XAnimTree_s *)XAnimSetGoalWeight(g_mdlprv.model.currentObj, 2u, value, 1.0, 1.0, 0, 0, 0);
         }
     }
     return result;
@@ -1603,7 +1583,7 @@ const ButtonInfo g_buttons[27] =
 
 
 
-void __cdecl MdlPrvPrintHelpLine(ButtonNames idx, float vPos)
+int __cdecl MdlPrvPrintHelpLine(ButtonNames idx, float vPos)
 {
     Font_s *v6; // r7
     int v7; // r6
@@ -1611,19 +1591,19 @@ void __cdecl MdlPrvPrintHelpLine(ButtonNames idx, float vPos)
     const char *v9; // r4
 
     CG_DrawDevString(&scrPlaceFull, 0.0, vPos, 0.5, 0.5, (char*)g_buttons[(int)idx].name, g_buttons[(int)idx].nameColor, 0, NULL);
-    CG_DrawDevString(&scrPlaceFull, 50.0, vPos, 0.5, 0.5, (char*)g_buttons[(int)idx].desc, g_buttons[(int)idx].nameColor, 0, NULL);
+    return CG_DrawDevString(&scrPlaceFull, 50.0, vPos, 0.5, 0.5, (char*)g_buttons[(int)idx].desc, g_buttons[(int)idx].nameColor, 0, NULL);
 }
 
 void DrawDistFromModel()
 {
-    char *v0; // r3
+    char *txt; // r3
     const float *v1; // r5
     const char *v2; // r4
-    double v3; // [sp+18h] [-48h]
+    double dist; // [sp+18h] [-48h]
 
     if (modPrvDrawDistanceToModel->current.enabled)
     {
-        v3 = sqrtf((float)((float)((float)(cgArray[0].refdef.vieworg[1]
+        dist = sqrtf((float)((float)((float)(cgArray[0].refdef.vieworg[1]
             - g_mdlprv.model.currentEntity.placement.base.origin[1])
             * (float)(cgArray[0].refdef.vieworg[1]
                 - g_mdlprv.model.currentEntity.placement.base.origin[1]))
@@ -1635,8 +1615,8 @@ void DrawDistFromModel()
                     - g_mdlprv.model.currentEntity.placement.base.origin[2])
                     * (float)(cgArray[0].refdef.vieworg[2]
                         - g_mdlprv.model.currentEntity.placement.base.origin[2])))));
-        v0 = va((const char *)HIDWORD(v3), LODWORD(v3));
-        CG_DrawSmallDevStringColor(&scrPlaceFull, 500.0, 400.0, (char*)v2, v1, (int)v0);
+        txt = va("Distance to Model: %.0f", dist);
+        CG_DrawSmallDevStringColor(&scrPlaceFull, 500.0, 400.0, txt, colorWhiteFaded, 0); // align guess 0
     }
 }
 
@@ -1644,201 +1624,155 @@ void __cdecl MdlPrvDrawOverlayGamepad()
 {
     const float *v0; // r5
     const char *v1; // r4
-    __int64 v2; // r11
+    int textHeightStep; // r11
     double v3; // fp30
-    int v4; // r3
-    __int64 v5; // r11
-    double v6; // fp31
-    int v7; // r3
-    __int64 v8; // r11
-    double v9; // fp31
-    const float *v10; // r5
-    const char *v11; // r4
-    int v12; // r3
-    __int64 v13; // r11
+    int v4; // r11
+    double v5; // fp31
+    int v6; // r11
+    double v7; // fp31
+    int v8; // r11
+    const float *v9; // r5
+    const char *v10; // r4
+    double v11; // fp31
+    const char *moveTxt; // r6
+    int v13; // r11
     double v14; // fp31
-    const char *v15; // r6
-    int v16; // r3
-    __int64 v17; // r11
+    int v15; // r11
+    double v16; // fp31
+    int v17; // r11
     double v18; // fp31
-    int v19; // r3
-    __int64 v20; // r11
-    double v21; // fp31
-    int v22; // r3
-    __int64 v23; // r11
-    double v24; // fp31
-    int v25; // r3
-    __int64 v26; // r11
+    int v19; // r11
+    double v20; // fp31
+    int v21; // r11
+    double v22; // fp31
+    int v23; // r11
+    ButtonNames v24; // r3
+    __int64 v25; // fp13
+    int v26; // r11
     double v27; // fp31
-    int v28; // r3
-    __int64 v29; // r11
-    double v30; // fp31
-    int v31; // r3
-    __int64 v32; // r11
-    ButtonNames v33; // r3
-    __int64 v34; // fp13
-    int v35; // r3
-    __int64 v36; // r11
-    double v37; // fp31
-    int v38; // r3
-    __int64 v39; // r11
-    double v40; // fp31
-    const float *v41; // r5
-    const char *v42; // r4
-    int v43; // r3
-    __int64 v44; // r10
-    int v45; // r3
-    __int64 v46; // r11
-    const char *v47; // r6
-    int v48; // r3
-    __int64 v49; // r11
-    int v50; // r3
-    __int64 v51; // r11
-    int v52; // r3
-    __int64 v53; // r11
-    int v54; // r3
-    __int64 v55; // r11
-    double v56; // fp31
-    int v57; // r3
-    __int64 v58; // r11
-    int v59; // r3
-    __int64 v60; // r11
-    int v61; // r3
-    __int64 v62; // r11
-    int v63; // r3
+    int v28; // r11
+    double v29; // fp31
+    int v30; // r10
+    const float *v31; // r5
+    const char *v32; // r4
+    int v33; // r11
+    const char *modelRotateTxt; // r6
+    int v35; // r11
+    int v36; // r11
+    int v37; // r11
+    int v38; // r11
+    double v39; // fp31
+    int v40; // r11
+    int v41; // r11
+    int v42; // r11
 
     if (g_mdlprv.model.currentIndex >= 0 && modPrvDisplayToggle->current.enabled)
     {
         DrawDistFromModel();
         if (g_mdlprv.system.walkaboutActive)
         {
-            CG_DrawSmallDevStringColor(&scrPlaceFull, 300.0, 0.0, (char*)"Walkabout Mode", colorRed, 7);
-            MdlPrvPrintHelpLine(BTN_WALKABOUT_EXIT, 20.0);
+            CG_DrawSmallDevStringColor(&scrPlaceFull, 300.0, 0.0, (char*)"Walkabout Mode", colorRed, 0); // alignment guess 0
+            ((void(__fastcall *)(ButtonNames, double))MdlPrvPrintHelpLine)(BTN_WALKABOUT_EXIT, 20.0);
             return;
         }
         if (g_mdlprv.system.uiModeGPad == MDLPRVMODE_FREE)
-            LODWORD(v2) = CG_DrawSmallDevStringColor(
-                &scrPlaceFull,
-                300.0,
-                0.0,
-                (char*)"Freelook Mode",
-                colorRed,
-                7);
+            textHeightStep = CG_DrawSmallDevStringColor(&scrPlaceFull, 300.0, 0.0, (char*)"Freelook Mode", colorRed, 0);
         else
-            LODWORD(v2) = CG_DrawSmallDevStringColor(&scrPlaceFull, 300.0, 0.0, (char*)"Focused Mode", colorRed, 7);
-        v3 = (float)((float)v2 * (float)0.75);
-        MdlPrvPrintHelpLine(BTN_MODESWITCH, 20.0);
-        LODWORD(v5) = v4;
-        v6 = (float)((float)((float)v5 * (float)0.75) + 20.0);
-        MdlPrvPrintHelpLine(BTN_DROPMDL, v6);
-        LODWORD(v8) = v7;
-        v9 = (float)((float)((float)v8 * 0.75) + (float)v6);
-        MdlPrvPrintHelpLine(BTN_WALKABOUT_ENTER, v9);
-        LODWORD(v13) = v12;
-        v14 = (float)((float)((float)v13 * 0.75) + (float)v9);
+            textHeightStep = CG_DrawSmallDevStringColor(&scrPlaceFull, 300.0, 0.0, (char*)"Focused Mode", colorRed, 0);
+        v3 = (textHeightStep * 0.75f);
+        v4 = MdlPrvPrintHelpLine(BTN_MODESWITCH, 20.0);
+        v5 = (float)((float)((float)*(__int64 *)v4 * (float)0.75) + 20.0);
+        v6 = MdlPrvPrintHelpLine(BTN_DROPMDL, v5);
+        v7 = (float)((float)((float)*(__int64 *)v6 * 0.75) + (float)v5);
+        v8 = MdlPrvPrintHelpLine(BTN_WALKABOUT_ENTER, v7);
+        v11 = (float)((float)((float)*(__int64 *)v8 * 0.75) + (float)v7);
         if (g_mdlprv.system.uiModeGPad != MDLPRVMODE_FREE)
         {
-            MdlPrvPrintHelpLine(BTN_FOCUS_TOGGLEMOV, v14);
-            LODWORD(v36) = v35;
-            v37 = (float)((float)((float)v36 * 0.75) + (float)v14);
-            MdlPrvPrintHelpLine(BTN_FOCUS_TOGGLEROT, v37);
-            LODWORD(v39) = v38;
-            v40 = (float)((float)((float)v39 * 0.75) + (float)v37);
-            MdlPrvPrintHelpLine(BTN_FOCUS_TOGGLEFOCALMOVE, v40);
-            LODWORD(v44) = v43;
-            v30 = (float)((float)((float)v44 * 0.75) + (float)v40);
+            v26 = MdlPrvPrintHelpLine(BTN_FOCUS_TOGGLEMOV, v11);
+            v27 = (float)((float)((float)*(__int64 *)v26 * 0.75) + (float)v11);
+            v28 = MdlPrvPrintHelpLine(BTN_FOCUS_TOGGLEROT, v27);
+            v29 = (float)((float)((float)*(__int64 *)v28 * 0.75) + (float)v27);
+            v30 = MdlPrvPrintHelpLine(BTN_FOCUS_TOGGLEFOCALMOVE, v29);
+            v22 = (float)((float)((float)*(__int64 *)v30 * 0.75) + (float)v29);
             if (g_mdlprv.system.focusedMode == FOCUSEDMODE_MODELMOVE)
             {
-                CG_DrawSmallDevStringColor(&scrPlaceFull, 300.0, v3, (char*)"Model Move", colorWhiteFaded, 7);
-                MdlPrvPrintHelpLine(BTN_FOCUS_MMOV_2D, v30);
-                LODWORD(v46) = v45;
-                v33 = BTN_FOCUS_MMOV_UPDOWN;
-                v34 = v46;
+                CG_DrawSmallDevStringColor(&scrPlaceFull, 300.0, v3, (char*)"Model Move", colorWhiteFaded, 0);
+                v33 = MdlPrvPrintHelpLine(BTN_FOCUS_MMOV_2D, v22);
+                v24 = BTN_FOCUS_MMOV_UPDOWN;
+                v25 = *(_QWORD *)v33;
             }
             else if (g_mdlprv.system.focusedMode == FOCUSEDMODE_MODELROTATE)
             {
                 if (g_mdlprv.system.modelRotCamMode)
-                    v47 = "Model Rotate (with camera)";
+                    modelRotateTxt = "Model Rotate (with camera)";
                 else
-                    v47 = "Model Rotate";
-                CG_DrawSmallDevStringColor(&scrPlaceFull, 300.0, v3, (char*)v42, colorWhiteFaded, 7);
-                MdlPrvPrintHelpLine(BTN_FOCUS_MROT_TOGGLECAM, v30);
-                LODWORD(v49) = v48;
-                v30 = (float)((float)((float)v49 * 0.75) + (float)v30);
+                    modelRotateTxt = "Model Rotate";
+                CG_DrawSmallDevStringColor(&scrPlaceFull, 300.0, v3, (char*)modelRotateTxt, colorWhiteFaded, 0);
+                v35 = MdlPrvPrintHelpLine(BTN_FOCUS_MROT_TOGGLECAM, v22);
+                v22 = (float)((float)((float)*(__int64 *)v35 * 0.75) + (float)v22);
                 if (g_mdlprv.system.modelRotCamMode == MROTCAMMODE_STATIC)
                 {
-                    MdlPrvPrintHelpLine(BTN_FOCUS_MROT_PITCHROLL, v30);
-                    LODWORD(v51) = v50;
-                    v30 = (float)((float)((float)v51 * 0.75) + (float)v30);
+                    v36 = MdlPrvPrintHelpLine(BTN_FOCUS_MROT_PITCHROLL, v22);
+                    v22 = (float)((float)((float)*(__int64 *)v36 * 0.75) + (float)v22);
                 }
-                MdlPrvPrintHelpLine(BTN_FOCUS_MROT_YAW, v30);
-                LODWORD(v53) = v52;
-                v33 = BTN_FOCUS_MROT_RESET;
-                v34 = v53;
+                v37 = MdlPrvPrintHelpLine(BTN_FOCUS_MROT_YAW, v22);
+                v24 = BTN_FOCUS_MROT_RESET;
+                v25 = *(_QWORD *)v37;
             }
             else
             {
                 if (g_mdlprv.system.focusedMode)
                 {
-                    CG_DrawSmallDevStringColor(&scrPlaceFull, 300.0, v3, (char*)"Focus Move", colorWhiteFaded, 7);
-                    MdlPrvPrintHelpLine(BTN_FOCUS_FOCALMOVE_2D, v30);
-                    LODWORD(v62) = v61;
-                    v30 = (float)((float)((float)v62 * 0.75) + (float)v30);
-                    MdlPrvPrintHelpLine(BTN_FOCUS_FOCALMOVE_UPDOWN, v30);
-                    LODWORD(v60) = v63;
-                    v33 = BTN_FOCUS_FOCALMOVE_RESET;
+                    CG_DrawSmallDevStringColor(&scrPlaceFull, 300.0, v3, (char*)"Focus Move", colorWhiteFaded, 0);
+                    v42 = MdlPrvPrintHelpLine(BTN_FOCUS_FOCALMOVE_2D, v22);
+                    v22 = (float)((float)((float)*(__int64 *)v42 * 0.75) + (float)v22);
+                    v41 = MdlPrvPrintHelpLine(BTN_FOCUS_FOCALMOVE_UPDOWN, v22);
+                    v24 = BTN_FOCUS_FOCALMOVE_RESET;
                 }
                 else
                 {
-                    MdlPrvPrintHelpLine(BTN_FOCUS_DEFAULT_CLONEMODEL, v30);
-                    LODWORD(v55) = v54;
-                    v56 = (float)((float)((float)v55 * 0.75) + (float)v30);
-                    MdlPrvPrintHelpLine(BTN_FOCUS_DEFAULT_CLEARCLONES, v56);
-                    LODWORD(v58) = v57;
-                    v30 = (float)((float)((float)v58 * 0.75) + (float)v56);
-                    MdlPrvPrintHelpLine(BTN_FOCUS_DEFAULT_ZOOM, v30);
-                    LODWORD(v60) = v59;
-                    v33 = BTN_FOCUS_DEFAULT_ORBIT;
+                    v38 = MdlPrvPrintHelpLine(BTN_FOCUS_DEFAULT_CLONEMODEL, v22);
+                    v39 = (float)((float)((float)*(__int64 *)v38 * 0.75) + (float)v22);
+                    v40 = MdlPrvPrintHelpLine(BTN_FOCUS_DEFAULT_CLEARCLONES, v39);
+                    v22 = (float)((float)((float)*(__int64 *)v40 * 0.75) + (float)v39);
+                    v41 = MdlPrvPrintHelpLine(BTN_FOCUS_DEFAULT_ZOOM, v22);
+                    v24 = BTN_FOCUS_DEFAULT_ORBIT;
                 }
-                v34 = v60;
+                v25 = *(_QWORD *)v41;
             }
             goto LABEL_28;
         }
         if (g_mdlprv.viewer.freeModeSpeed == FREESPEED_SLOW)
         {
-            v15 = "Move Slow";
+            moveTxt = "Move Slow";
         }
         else
         {
             if (g_mdlprv.viewer.freeModeSpeed != FREESPEED_FAST)
             {
             LABEL_14:
-                MdlPrvPrintHelpLine(BTN_FREE_DROPFRONT, v14);
-                LODWORD(v17) = v16;
-                v18 = (float)((float)((float)v17 * 0.75) + (float)v14);
-                MdlPrvPrintHelpLine(BTN_FREE_DROPPOS, v18);
-                LODWORD(v20) = v19;
-                v21 = (float)((float)((float)v20 * 0.75) + (float)v18);
-                MdlPrvPrintHelpLine(BTN_FREE_TOGGLEMOVESPEED, v21);
-                LODWORD(v23) = v22;
-                v24 = (float)((float)((float)v23 * 0.75) + (float)v21);
-                MdlPrvPrintHelpLine(BTN_FREE_TOGGLERAGDOLL, v24);
-                LODWORD(v26) = v25;
-                v27 = (float)((float)((float)v26 * 0.75) + (float)v24);
-                MdlPrvPrintHelpLine(BTN_FREE_UP, v27);
-                LODWORD(v29) = v28;
-                v30 = (float)((float)((float)v29 * 0.75) + (float)v27);
-                MdlPrvPrintHelpLine(BTN_FREE_DOWN, v30);
-                LODWORD(v32) = v31;
-                v33 = BTN_FREE_UPDOWN;
-                v34 = v32;
+                v13 = MdlPrvPrintHelpLine(BTN_FREE_DROPFRONT, v11);
+                v14 = (float)((float)((float)*(__int64 *)v13 * 0.75) + (float)v11);
+                v15 = MdlPrvPrintHelpLine(BTN_FREE_DROPPOS, v14);
+                v16 = (float)((float)((float)*(__int64 *)v15 * 0.75) + (float)v14);
+                v17 = MdlPrvPrintHelpLine(BTN_FREE_TOGGLEMOVESPEED, v16);
+                v18 = (float)((float)((float)*(__int64 *)v17 * 0.75) + (float)v16);
+                v19 = MdlPrvPrintHelpLine(BTN_FREE_TOGGLERAGDOLL, v18);
+                v20 = (float)((float)((float)*(__int64 *)v19 * 0.75) + (float)v18);
+                v21 = MdlPrvPrintHelpLine(BTN_FREE_UP, v20);
+                v22 = (float)((float)((float)*(__int64 *)v21 * 0.75) + (float)v20);
+                v23 = MdlPrvPrintHelpLine(BTN_FREE_DOWN, v22);
+                v24 = BTN_FREE_UPDOWN;
+                v25 = *(_QWORD *)v23;
             LABEL_28:
-                MdlPrvPrintHelpLine(v33, (float)((float)((float)v34 * 0.75) + (float)v30));
+                MdlPrvPrintHelpLine(
+                    v24,
+                    (float)((float)((float)v25 * 0.75) + (float)v22));
                 return;
             }
-            v15 = "Move Fast";
+            moveTxt = "Move Fast";
         }
-        CG_DrawSmallDevStringColor(&scrPlaceFull, 315.0, v3, (char*)v15, colorWhiteFaded, 7);
+        CG_DrawSmallDevStringColor(&scrPlaceFull, 315.0, v3, (char*)moveTxt, colorWhiteFaded, 0);
         goto LABEL_14;
     }
 }
@@ -2039,31 +1973,32 @@ void __cdecl MdlPrvMoveModelUpDown(double dist)
         + (float)dist;
 }
 
-// aislop
+// some aislop
 void __cdecl MdlPrvMoveModel2D(const cg_s *cgGlob, float away, float left)
 {
-    float v10, v11, v12, v13;
     float lenHorz, lenVert;
     float invLenHorz, invLenVert;
 
-    // Compute forward/right vectors from yaw
-    YawVectors(cgGlob->refdefViewAngles[1], (float *)&cgGlob->clientNum, &v10);  // v10..v13 filled
+    float forward[3];
+    float right[3];
 
-    // Compute negative magnitudes of the horizontal and vertical vectors
-    lenHorz = sqrtf(v10 * v10 + v11 * v11);
-    lenVert = sqrtf(v12 * v12 + v13 * v13);
+    // Compute forward/right vectors from yaw
+    YawVectors(cgGlob->refdefViewAngles[1], forward, right);  // v10..v13 filled
+
+    lenHorz = sqrtf(forward[0] * forward[0] + forward[1] * forward[1]);
+    lenVert = sqrtf(right[0] * right[0] + right[1] * right[1]);
 
     // Prevent division by zero (replacing fsel)
-    invLenHorz = (lenHorz > 0.0f) ? (1.0f / lenHorz) : 0.0f;
-    invLenVert = (lenVert > 0.0f) ? (1.0f / lenVert) : 0.0f;
+    invLenHorz = (1.0f / lenHorz);
+    invLenVert = (1.0f / lenVert);
 
     // Apply movement to model origin
-    g_mdlprv.model.initialOrigin[1] += (invLenVert * v13 * left) + (invLenHorz * v11 * away);
-    g_mdlprv.model.initialOrigin[0] += (invLenVert * v12 * left) + (invLenHorz * v10 * away);
+    g_mdlprv.model.initialOrigin[1] += (invLenVert * right[1] * left) + (invLenHorz * forward[1] * away);
+    g_mdlprv.model.initialOrigin[0] += (invLenVert * right[0] * left) + (invLenHorz * forward[0] * away);
 
     // Apply movement to entity placement
-    g_mdlprv.model.currentEntity.placement.base.origin[0] += (invLenVert * v12 * left) + (invLenHorz * v10 * away);
-    g_mdlprv.model.currentEntity.placement.base.origin[1] += (invLenVert * v13 * left) + (invLenHorz * v11 * away);
+    g_mdlprv.model.currentEntity.placement.base.origin[0] += (invLenVert * right[0] * left) + (invLenHorz * forward[0] * away);
+    g_mdlprv.model.currentEntity.placement.base.origin[1] += (invLenVert * right[1] * left) + (invLenHorz * forward[1] * away);
 }
 
 
@@ -2079,31 +2014,34 @@ void __cdecl MdlPrvMoveFocusUpDown(double dist)
 // aislop
 void __cdecl MdlPrvMoveFocus2D(const cg_s *cgGlob, float away, float left)
 {
-    float v11, v12, v13, v14, v15, v16;
+    float forward[3];
+    float right[3];
 
-    YawVectors(cgGlob->refdefViewAngles[1], (float *)&cgGlob->clientNum, &v11);
+    YawVectors(cgGlob->refdefViewAngles[1], forward, right);
 
-    float lenHorz = sqrtf(v12 * v12 + v11 * v11);
-    float lenVert = sqrtf(v15 * v15 + v14 * v14);
+    float lenHorz = sqrtf(forward[1] * forward[1] + forward[0] * forward[0]);
+    float lenVert = sqrtf(right[1] * right[1] + right[0] * right[0]);
 
     float invLenHorz = (lenHorz > 0.0f) ? (1.0f / lenHorz) : 0.0f;
     float invLenVert = (lenVert > 0.0f) ? (1.0f / lenVert) : 0.0f;
 
-    float leftOffsetX = (invLenVert * v14) * left;
-    float leftOffsetY = (invLenVert * v15) * left;
-    float awayOffsetX = (invLenHorz * v11) * away;
-    float awayOffsetY = (invLenHorz * v12) * away;
+    float leftOffsetX = (invLenVert * right[0]) * left;
+    float leftOffsetY = (invLenVert * right[1]) * left;
+    float awayOffsetX = (invLenHorz * forward[0]) * away;
+    float awayOffsetY = (invLenHorz * forward[1]) * away;
 
-    v14 = leftOffsetX;
-    v15 = leftOffsetY;
-    v11 = awayOffsetX;
-    v13 = invLenHorz * 0.0f * away; // likely a no-op
-    v16 = invLenVert * 0.0f * left; // likely a no-op
+    right[0] = leftOffsetX;
+    right[1] = leftOffsetY;
+    right[2] = invLenVert * 0.0f * left;
+
+    forward[0] = awayOffsetX;
+    forward[1] = awayOffsetY;
+    forward[2] = invLenHorz * 0.0f * away;
 
     Dvar_SetVec3(
         (dvar_s *)modPrvCenterOffset,
-        modPrvCenterOffset->current.value + v14 + v11,
-        modPrvCenterOffset->current.vector[1] + v15 + awayOffsetY,
+        modPrvCenterOffset->current.value + right[0] + forward[0],
+        modPrvCenterOffset->current.vector[1] + right[1] + forward[1],
         modPrvCenterOffset->current.vector[2]);
 }
 
@@ -2148,25 +2086,20 @@ void __cdecl MdlPrvFreeMoveVertical(const cg_s *cgGlob, double dz)
     g_mdlprv.viewer.freeModeOrigin[2] = (float)(v3[2] * (float)dz) + g_mdlprv.viewer.freeModeOrigin[2];
 }
 
-// local variable allocation has failed, the output may be wrong!
 void __cdecl MdlPrvFreeRot(double yaw, double pitch)
 {
-    double v2; // fp1
     double v3; // fp30
     double v4; // fp1
-    long double v5; // fp2
     double v6; // fp31
     long double v7; // fp2
 
-    v3 = (float)((float)(g_mdlprv.viewer.freeModeAngles[1] + (float)v2) * (float)0.0027777778);
-    g_mdlprv.viewer.freeModeAngles[1] = g_mdlprv.viewer.freeModeAngles[1] + (float)v2;
+    v3 = (float)((float)(g_mdlprv.viewer.freeModeAngles[1] + yaw) * (float)0.0027777778);
+    g_mdlprv.viewer.freeModeAngles[1] = g_mdlprv.viewer.freeModeAngles[1] + (float)yaw;
     g_mdlprv.viewer.freeModeAngles[0] = g_mdlprv.viewer.freeModeAngles[0] + (float)pitch;
     v4 = (float)((float)v3 + (float)0.5);
-    v5 = floor(*(long double *)&pitch);
     v6 = (float)(g_mdlprv.viewer.freeModeAngles[0] * (float)0.0027777778);
-    g_mdlprv.viewer.freeModeAngles[1] = (float)((float)v3 - (float)*(double *)&v5) * (float)360.0;
-    *(double *)&v5 = (float)((float)(g_mdlprv.viewer.freeModeAngles[0] * (float)0.0027777778) + (float)0.5);
-    v7 = floor(v5);
+    g_mdlprv.viewer.freeModeAngles[1] = (float)((float)v3 - floorf(pitch) * (float)360.0);
+    v7 = floor((float)((float)(g_mdlprv.viewer.freeModeAngles[0] * (float)0.0027777778) + (float)0.5));
     g_mdlprv.viewer.freeModeAngles[0] = (float)((float)v6 - (float)*(double *)&v7) * (float)360.0;
 }
 
@@ -2178,35 +2111,26 @@ void __cdecl MdlPrvFreePlaceModel(float *pos)
 
 void __cdecl MdlPrvFreePlaceModelInFrontCamera(const cg_s *cgGlob)
 {
-    const float *refdefViewAngles; // r30
-    double v3; // fp0
-    double value; // fp8
-    double v5; // fp7
-    double v6; // fp6
-    double v7; // fp11
-    float v8; // [sp+50h] [-60h] BYREF
-    float v9; // [sp+54h] [-5Ch]
-    float v10; // [sp+58h] [-58h]
-    float v11[4]; // [sp+60h] [-50h] BYREF
-    float v12[4]; // [sp+70h] [-40h] BYREF
-    float v13[6]; // [sp+80h] [-30h] BYREF
+    float forward[3]; // [sp+50h] [-60h] BYREF // v8
+    float origin[3]; // [sp+60h] [-50h] BYREF
+    float up[3]; // [sp+70h] [-40h] BYREF
+    float right[3]; // [sp+80h] [-30h] BYREF
 
-    refdefViewAngles = cgGlob->refdefViewAngles;
-    AngleVectors(cgGlob->refdefViewAngles, &v8, v13, v12);
-    v3 = (float)(g_mdlprv.viewer.centerRadius * v10);
-    v10 = g_mdlprv.viewer.centerRadius * v10;
-    v8 = g_mdlprv.viewer.centerRadius * v8;
-    v9 = g_mdlprv.viewer.centerRadius * v9;
-    value = modPrvCenterOffset->current.value;
-    v5 = modPrvCenterOffset->current.vector[1];
-    v6 = modPrvCenterOffset->current.vector[2];
+    AngleVectors(cgGlob->refdefViewAngles, forward, right, up);
+
+    forward[0] = g_mdlprv.viewer.centerRadius * forward[0];
+    forward[1] = g_mdlprv.viewer.centerRadius * forward[1];
+    forward[2] = g_mdlprv.viewer.centerRadius * forward[2];
+
     g_mdlprv.viewer.horizontal = cgGlob->refdefViewAngles[1];
-    v7 = *refdefViewAngles;
-    v11[0] = (float)(g_mdlprv.viewer.freeModeOrigin[0] + v8) - (float)value;
-    v11[1] = (float)(g_mdlprv.viewer.freeModeOrigin[1] + v9) - (float)v5;
-    v11[2] = (float)(g_mdlprv.viewer.freeModeOrigin[2] + (float)v3) - (float)v6;
-    g_mdlprv.viewer.vertical = -v7;
-    MdlPrvModelOriginSet(v11);
+
+    origin[0] = (g_mdlprv.viewer.freeModeOrigin[0] + forward[0]) - modPrvCenterOffset->current.vector[0];
+    origin[1] = (g_mdlprv.viewer.freeModeOrigin[1] + forward[1]) - modPrvCenterOffset->current.vector[1];
+    origin[2] = (g_mdlprv.viewer.freeModeOrigin[2] + forward[2]) - modPrvCenterOffset->current.vector[2];
+
+    g_mdlprv.viewer.vertical = -cgGlob->refdefViewAngles[0];
+
+    MdlPrvModelOriginSet(origin);
 }
 
 void MdlPrvModeToggle()
@@ -2230,32 +2154,37 @@ void MdlPrvRotModeToggle()
 
 void MdlPrvDropToFloor()
 {
-    float v0[2]; // [sp+50h] [-80h] BYREF
-    float v1; // [sp+58h] [-78h]
-    float v2[4]; // [sp+60h] [-70h] BYREF
-    float v3[4]; // [sp+70h] [-60h] BYREF
-    float v4[4]; // [sp+80h] [-50h] BYREF
-    trace_t v5; // [sp+90h] [-40h] BYREF
+    float mins[3]; // [sp+50h] [-80h] BYREF
+    //float v1; // [sp+58h] [-78h]
+    float maxs[4]; // [sp+60h] [-70h] BYREF
+    float end[4]; // [sp+70h] [-60h] BYREF
+    float center[4]; // [sp+80h] [-50h] BYREF
+    trace_t trace; // [sp+90h] [-40h] BYREF
 
-    MdlPrvGetBounds(v0, v2, v4);
-    v2[2] = 5.0;
-    v2[1] = 5.0;
-    v2[0] = 5.0;
-    v4[0] = g_mdlprv.model.currentEntity.placement.base.origin[0];
-    v3[0] = g_mdlprv.model.currentEntity.placement.base.origin[0];
-    v4[1] = g_mdlprv.model.currentEntity.placement.base.origin[1];
-    v3[1] = g_mdlprv.model.currentEntity.placement.base.origin[1];
-    v3[2] = g_mdlprv.model.currentEntity.placement.base.origin[2] - (float)3000.0;
-    v0[1] = -5.0;
-    v0[0] = -5.0;
-    v4[2] = g_mdlprv.model.currentEntity.placement.base.origin[2] - (float)(v1 - (float)5.0);
-    v1 = -5.0;
-    CG_TraceCapsule(&v5, v4, v0, v2, v3, -1, 1);
-    if (!v5.allsolid && v5.fraction != 1.0)
+    MdlPrvGetBounds(mins, maxs, center);
+    maxs[2] = 5.0;
+    maxs[1] = 5.0;
+    maxs[0] = 5.0;
+
+    center[0] = g_mdlprv.model.currentEntity.placement.base.origin[0];
+    center[1] = g_mdlprv.model.currentEntity.placement.base.origin[1];
+    center[2] = g_mdlprv.model.currentEntity.placement.base.origin[2] - (float)(mins[2] - 5.0f);
+
+    end[0] = g_mdlprv.model.currentEntity.placement.base.origin[0];
+    end[1] = g_mdlprv.model.currentEntity.placement.base.origin[1];
+    end[2] = g_mdlprv.model.currentEntity.placement.base.origin[2] - (float)3000.0;
+
+    mins[0] = -5.0f;
+    mins[1] = -5.0f;
+    mins[2] = -5.0f;
+
+    CG_TraceCapsule(&trace, center, mins, maxs, end, -1, 1);
+
+    if (!trace.allsolid && trace.fraction != 1.0)
     {
-        g_mdlprv.model.initialOrigin[2] = g_mdlprv.model.initialOrigin[2] + (float)(v5.fraction * (float)-3000.0);
+        g_mdlprv.model.initialOrigin[2] = g_mdlprv.model.initialOrigin[2] + (float)(trace.fraction * (float)-3000.0);
         g_mdlprv.model.currentEntity.placement.base.origin[2] = g_mdlprv.model.currentEntity.placement.base.origin[2]
-            + (float)(v5.fraction * (float)-3000.0);
+            + (float)(trace.fraction * (float)-3000.0);
     }
 }
 
@@ -2293,12 +2222,11 @@ void MdlPrvCloneClearAll()
 void __cdecl MdlPrvCloneModel(const cg_s *cgGlob)
 {
     int cloneNextIdx; // r11
-    MdlPrvClone *v3; // r30
+    MdlPrvClone *pClone; // r30
     DObj_s *obj; // r3
-    float v5; // [sp+50h] [-60h] BYREF
-    float v6; // [sp+54h] [-5Ch]
-    float v7[4]; // [sp+60h] [-50h] BYREF
-    float v8; // [sp+70h] [-40h] BYREF
+    float right[3]; // [sp+50h] [-60h] BYREF
+    float up[4]; // [sp+60h] [-50h] BYREF
+    float forward[3]; // [sp+70h] [-40h] BYREF
 
     cloneNextIdx = g_mdlprv.model.cloneNextIdx;
     if (g_mdlprv.model.cloneNextIdx >= 0xAu)
@@ -2311,26 +2239,26 @@ void __cdecl MdlPrvCloneModel(const cg_s *cgGlob)
             "g_mdlprv.model.cloneNextIdx < CLONES_COUNT");
         cloneNextIdx = g_mdlprv.model.cloneNextIdx;
     }
-    v3 = &g_mdlprv.model.clones[cloneNextIdx];
-    obj = v3->obj;
+
+    pClone = &g_mdlprv.model.clones[cloneNextIdx];
+    obj = pClone->obj;
     if (obj)
     {
         DObjFree(obj);
-        v3->obj = 0;
+        pClone->obj = 0;
     }
     DObjGetTree(g_mdlprv.model.currentObj);
-    DObjClone(g_mdlprv.model.currentObj, (DObj_s*)v3->objBuf);
-    v3->obj = (DObj_s *)v3->objBuf;
-    DObjSetTree((DObj_s *)v3->objBuf, 0);
-    memcpy(v3, &g_mdlprv.model.currentEntity, 0x7Cu);
-    AngleVectors(cgGlob->refdefViewAngles, &v8, &v5, v7);
+    DObjClone(g_mdlprv.model.currentObj, (DObj_s*)pClone->objBuf);
+    pClone->obj = (DObj_s *)pClone->objBuf;
+    DObjSetTree((DObj_s *)pClone->objBuf, 0);
+    memcpy(pClone, &g_mdlprv.model.currentEntity, 0x7Cu);
+    AngleVectors(cgGlob->refdefViewAngles, forward, right, up);
     ++g_mdlprv.model.cloneNextIdx;
-    g_mdlprv.model.initialOrigin[1] = g_mdlprv.model.initialOrigin[1] + (float)(v6 * (float)16.0);
-    g_mdlprv.model.initialOrigin[0] = g_mdlprv.model.initialOrigin[0] + (float)(v5 * (float)16.0);
-    g_mdlprv.model.currentEntity.placement.base.origin[0] = g_mdlprv.model.currentEntity.placement.base.origin[0]
-        + (float)(v5 * (float)16.0);
-    g_mdlprv.model.currentEntity.placement.base.origin[1] = g_mdlprv.model.currentEntity.placement.base.origin[1]
-        + (float)(v6 * (float)16.0);
+    g_mdlprv.model.initialOrigin[1] = g_mdlprv.model.initialOrigin[1] + (forward[0] * 16.0f);
+    g_mdlprv.model.initialOrigin[0] = g_mdlprv.model.initialOrigin[0] + (right[0] * 16.0f);
+    g_mdlprv.model.currentEntity.placement.base.origin[0] = g_mdlprv.model.currentEntity.placement.base.origin[0] + (right[0] * 16.0f);
+    g_mdlprv.model.currentEntity.placement.base.origin[1] = g_mdlprv.model.currentEntity.placement.base.origin[1] + (forward[0] * 16.0f);
+
     if (g_mdlprv.model.cloneNextIdx >= 0xAu)
         g_mdlprv.model.cloneNextIdx = 0;
 }
@@ -2762,13 +2690,13 @@ void __cdecl CG_AddModelPreviewerModel(int frametime)
 {
     // KISAKTODO: pending rework to fix stack
 #if 0
-    double v7; // fp0
+    double maxs; // fp0
     bool isAnimPlaying; // r11
     double v9; // fp30
-    bool v10; // r4
+    bool center; // r4
     double Radius; // fp1
-    int v12; // r29
-    float *v13; // r31
+    int up; // r29
+    float *right; // r31
     const cpose_t *v14; // r4
     const DObj_s *v15; // r3
     __int64 v16; // [sp+50h] [-70h] BYREF
@@ -2779,9 +2707,9 @@ void __cdecl CG_AddModelPreviewerModel(int frametime)
     {
         LODWORD(a7) = frametime;
         v16 = a7;
-        v7 = (float)-(float)((float)((float)a7 * (float)0.001) - g_mdlprv.anim.stepCounter);
+        maxs = (float)-(float)((float)((float)a7 * (float)0.001) - g_mdlprv.anim.stepCounter);
         g_mdlprv.anim.stepCounter = -(float)((float)((float)a7 * (float)0.001) - g_mdlprv.anim.stepCounter);
-        if (v7 >= 0.0)
+        if (maxs >= 0.0)
         {
             isAnimPlaying = g_mdlprv.anim.isAnimPlaying;
         }
@@ -2798,7 +2726,7 @@ void __cdecl CG_AddModelPreviewerModel(int frametime)
             CG_ModPrvLoopAnimation();
         CG_ModPrvApplyAnimationBlend(v9);
         CG_ModPrvApplyDelta(v9);
-        DObjUpdateClientInfo(g_mdlprv.model.currentObj, v9, v10);
+        DObjUpdateClientInfo(g_mdlprv.model.currentObj, v9, center);
         memset(&g_mdlprv.model.pose, 0, sizeof(g_mdlprv.model.pose));
         g_mdlprv.model.pose.eType = 17;
         g_mdlprv.model.currentEntity.info.pose = &g_mdlprv.model.pose;
@@ -2834,30 +2762,30 @@ void __cdecl CG_AddModelPreviewerModel(int frametime)
             g_mdlprv.model.currentEntity.cull.maxs[2] = g_mdlprv.model.currentEntity.info.pose->origin[2] + (float)Radius;
             CG_ModPrvFrameModel();
         }
-        v12 = 10;
-        v13 = &g_mdlprv.model.clones[0].pose.origin[1];
+        up = 10;
+        right = &g_mdlprv.model.clones[0].pose.origin[1];
         do
         {
-            if (*((unsigned int *)v13 - 7))
+            if (*((unsigned int *)right - 7))
             {
-                memset(v13 - 6, 0, 0x54u);
-                *((_BYTE *)v13 - 22) = 17;
-                *((unsigned int *)v13 - 9) = (unsigned int)v13 - 6;
-                UnitQuatToAxis(v13 - 35, v18);
-                AxisToAngles(v18, v13 + 2);
-                *(v13 - 1) = *(v13 - 31);
-                *v13 = *(v13 - 30);
-                v13[1] = *(v13 - 29);
-                v14 = (const cpose_t *)*((unsigned int *)v13 - 9);
-                v15 = (const DObj_s *)*((unsigned int *)v13 - 7);
+                memset(right - 6, 0, 0x54u);
+                *((_BYTE *)right - 22) = 17;
+                *((unsigned int *)right - 9) = (unsigned int)right - 6;
+                UnitQuatToAxis(right - 35, v18);
+                AxisToAngles(v18, right + 2);
+                *(right - 1) = *(right - 31);
+                *right = *(right - 30);
+                right[1] = *(right - 29);
+                v14 = (const cpose_t *)*((unsigned int *)right - 9);
+                v15 = (const DObj_s *)*((unsigned int *)right - 7);
                 *(float *)&v16 = v14->origin[0];
                 *((float *)&v16 + 1) = v14->origin[1];
                 v17 = v14->origin[2] + (float)4.0;
                 R_AddDObjToScene(v15, v14, 0x881u, 0, (float *)&v16, 0.0);
             }
-            --v12;
-            v13 += 78;
-        } while (v12);
+            --up;
+            right += 78;
+        } while (up);
     }
 #endif
 }

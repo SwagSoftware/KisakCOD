@@ -2066,7 +2066,7 @@ void CG_CompassDrawPlayerPointers_SP(
     double v26; // fp31
     double v27; // fp20
     double v28; // fp19
-    double v33; // fp30
+    double txt; // fp30
     double v34; // fp29
     double v35; // fp0
     double v36; // fp25
@@ -2152,10 +2152,10 @@ void CG_CompassDrawPlayerPointers_SP(
                         v28 = (xyClipped[1] + centerY);
                         CalcCompassPointerSize(compassType, &w, &h);
                         CG_ObjectiveIcon(objectives->icon, 0);
-                        v33 = v49;
+                        txt = v49;
                         if (fadeAlpha < v49)
                         {
-                            v33 = fadeAlpha;
+                            txt = fadeAlpha;
                             v49 = fadeAlpha;
                         }
                         v34 = w;
@@ -2188,7 +2188,7 @@ void CG_CompassDrawPlayerPointers_SP(
                         if (v40 > 0.5 && compassObjectiveDrawLines->current.enabled)
                         {
                             v41 = 2.0;
-                            v49 = (float)((float)((float)v40 - (float)0.5) * (float)v33) * 2.0;
+                            v49 = (float)((float)((float)v40 - (float)0.5) * (float)txt) * 2.0;
                             if (v26 >= y && v26 <= (float)(scaledRect.h + (float)y))
                             {
                                 UI_DrawHandlePic(
@@ -2205,7 +2205,7 @@ void CG_CompassDrawPlayerPointers_SP(
                             }
                             if (v25 >= x && v25 <= v39)
                                 CG_DrawVLine(&scrPlaceView[localClientNum], v25, y, v41, scaledRect.h, rect->horzAlign, rect->vertAlign, color, material); // KISAKTODO: probably need 'newColor'
-                            v49 = v33;
+                            v49 = txt;
                         }
                         UI_DrawHandlePic(
                             &scrPlaceView[localClientNum],
@@ -2359,14 +2359,13 @@ void CG_CompassDrawGoalDistance(
     __int64 v23; // r11
     const float *horzAlign; // r9
     double y; // fp2
-    const ScreenPlacement *v26; // r30
     double v27; // fp31
     double v28; // fp30
     int v29; // r7
     __int64 v30; // [sp+70h] [-C0h] BYREF
-    float v31[3]; // [sp+80h] [-B0h] BYREF
+    float colour[3]; // [sp+80h] [-B0h] BYREF
     float v32; // [sp+8Ch] [-A4h]
-    char v33[64]; // [sp+90h] [-A0h] BYREF
+    char txt[64]; // [sp+90h] [-A0h] BYREF
 
     if (localClientNum)
         MyAssertHandler(
@@ -2386,10 +2385,10 @@ void CG_CompassDrawGoalDistance(
         centerX = color[3];
         v32 = color[3];
         centerY = v14 < centerX;
-        v31[1] = color[1];
+        colour[1] = color[1];
         v17 = color[2];
-        v31[0] = color[0];
-        v31[2] = v17;
+        colour[0] = color[0];
+        colour[2] = v17;
         if (centerY)
             v32 = v14;
         v18 = (float)(DistanceToNearestGoal(cgArray, (float *)&v30) * (float)0.0254);
@@ -2397,51 +2396,50 @@ void CG_CompassDrawGoalDistance(
         {
             if (v18 >= compassObjectiveNearbyDist->current.value)
             {
-                Com_sprintf(v33, 64, "%.0f", v18);
-                v21 = UI_TextWidth(v33, 20, font, scale);
+                Com_sprintf(txt, 64, "%.0f", v18);
+                v21 = UI_TextWidth(txt, 20, font, scale);
                 v22 = 68 * localClientNum;
                 HIDWORD(v23) = rect->vertAlign;
                 horzAlign = (const float *)rect->horzAlign;
                 y = rect->y;
-                v26 = &scrPlaceView[localClientNum];
                 LODWORD(v23) = v21;
                 v27 = (float)v23;
                 v28 = (float)((float)((float)(rect->w - (float)v23) * (float)0.5) + rect->x);
                 v30 = v23;
-                UI_DrawText(v26, v33, 0x7FFFFFFF, font, v28, y, (int)v31, v22, scale, horzAlign, SHIDWORD(v23));
+                UI_DrawText(&scrPlaceView[localClientNum], txt, 0x7FFFFFFF, font, v28, y, rect->horzAlign, rect->vertAlign, scale, colour, textStyle);
                 UI_DrawText(
-                    v26,
+                    &scrPlaceView[localClientNum],
                     "m",
                     0x7FFFFFFF,
                     font,
                     (float)((float)((float)v27 + (float)v28) + (float)4.0),
                     rect->y,
-                    v29,
-                    (int)v31,
+                    rect->horzAlign,
+                    rect->vertAlign,
                     scale,
-                    (const float *)rect->horzAlign,
-                    rect->vertAlign);
+                    colour,
+                    textStyle);
             }
             else
             {
                 if (*(float *)&v30 <= (double)compassObjectiveMaxHeight->current.value)
                 {
                     if (*(float *)&v30 >= (double)compassObjectiveMinHeight->current.value)
-                        Com_sprintf(v33, 64, "Nearby", LODWORD(v18));
+                        Com_sprintf(txt, 64, "Nearby", LODWORD(v18));
                     else
-                        Com_sprintf(v33, 64, "Above", LODWORD(v18));
+                        Com_sprintf(txt, 64, "Above", LODWORD(v18));
                 }
                 else
                 {
-                    Com_sprintf(v33, 64, "Below", LODWORD(v18));
+                    Com_sprintf(txt, 64, "Below", LODWORD(v18));
                 }
-                LODWORD(v19) = UI_TextWidth(v33, 20, font, scale);
+                LODWORD(v19) = UI_TextWidth(txt, 20, font, scale);
                 x = (float)((float)((float)(rect->w - (float)v19) * (float)0.5) + rect->x);
                 v30 = v19;
-                NearTargetTextColor(cgArray, v31);
+                NearTargetTextColor(cgArray, colour);
                 UI_DrawText(
                     &scrPlaceView[localClientNum],
-                    v33,
+                    txt,
                     0x7FFFFFFF,
                     font,
                     x,

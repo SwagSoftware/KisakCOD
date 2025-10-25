@@ -863,18 +863,14 @@ void __cdecl CL_FinishLoadingDemo()
 
 void __cdecl CL_StartPlayingDemo()
 {
-    int v0; // r3
+    iassert(cls.demoplaying);
+    iassert(cls.demofile);
 
-    if (!cls.demoplaying)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\client\\cl_demo.cpp", 786, 1, "%s", "cls.demoplaying");
-    if (!cls.demofile)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\client\\cl_demo.cpp", 787, 1, "%s", "cls.demofile");
     I_strncpyz(cls.servername, cls.demoName, 256);
     Dvar_SetIntByName("cl_paused", 0);
     CL_SetSkipRendering(0);
-    SND_FadeAllSounds(1.0, v0);
-    if (!clients[0].snap.valid)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\client\\cl_demo.cpp", 797, 0, "%s", "cl->snap.valid");
+    SND_FadeAllSounds(1.0, 0);
+    iassert(clients[0].snap.valid);
     CL_ReadDemoMessagesUntilNextSnap();
     G_SetClientDemoTime(clients[0].snap.serverTime);
     cls.timeDemoBaseTime = clients[0].snap.serverTime;

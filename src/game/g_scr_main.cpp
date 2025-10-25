@@ -1207,21 +1207,20 @@ void iprintlnbold()
 
 void GScr_print3d()
 {
+    int duration; // r31
     double Float; // fp31
-    const char *String; // r30
-    const char *v2; // r5
-    float v3[4]; // [sp+50h] [-50h] BYREF
-    float v4[4]; // [sp+60h] [-40h] BYREF
-    float v5; // [sp+70h] [-30h] BYREF
-    float v6; // [sp+74h] [-2Ch]
-    float v7; // [sp+78h] [-28h]
-    float v8; // [sp+7Ch] [-24h]
+    const char *txt; // r30
+    const char *v3; // r5
+    float v4[4]; // [sp+50h] [-50h] BYREF
+    float v5[4]; // [sp+60h] [-40h] BYREF
+    float color[4]; // [sp+70h] [-30h] BYREF
 
+    duration = 1;
     Float = 1.0;
-    v5 = 1.0;
-    v6 = 1.0;
-    v7 = 1.0;
-    v8 = 1.0;
+    color[0] = 1.0;
+    color[1] = 1.0;
+    color[2] = 1.0;
+    color[3] = 1.0;
     switch (Scr_GetNumParam())
     {
     case 2u:
@@ -1233,20 +1232,20 @@ void GScr_print3d()
     case 5u:
         goto LABEL_3;
     case 6u:
-        Scr_GetInt(5);
+        duration = Scr_GetInt(5u);
     LABEL_3:
-        Float = Scr_GetFloat(4);
+        Float = Scr_GetFloat(4u);
     LABEL_4:
-        v8 = Scr_GetFloat(3);
+        color[3] = Scr_GetFloat(3u);
     LABEL_5:
-        Scr_GetVector(2u, v3);
-        v5 = v3[0];
-        v6 = v3[1];
-        v7 = v3[2];
+        Scr_GetVector(2u, v4);
+        color[0] = v4[0];
+        color[1] = v4[1];
+        color[2] = v4[2];
     LABEL_6:
-        String = Scr_GetString(1);
-        Scr_GetVector(0, v4);
-        G_AddDebugStringWithDuration(v4, &v5, Float, v2, (int)String);
+        txt = Scr_GetString(1u);
+        Scr_GetVector(0, v5);
+        G_AddDebugStringWithDuration(v5, color, Float, txt, duration);
         break;
     default:
         Scr_Error("illegal call to print3d()");
@@ -10390,7 +10389,8 @@ void GScr_OpenFile()
             //else
             //    Remote = FS_FOpenFileByMode(v9, v23, FS_READ);
             //v11 = Remote;
-            if (Remote >= 0)
+            //if (Remote >= 0)
+            if (0) // ^^^^^^^^^^^^^^^^^^^^^^
             {
                 v12 = (unsigned char *)Z_VirtualAlloc(Remote + 1, "GScr_OpenFile", 10);
                 v13 = v23[0];
@@ -11737,7 +11737,7 @@ void __cdecl ScrCmd_animscriptedInternal(scr_entref_t entref, int bDelayForActor
             {
                 if (g_dumpAnimsCommands->current.integer == Entity->s.number)
                     DumpAnimCommand("animscripted", EntAnimTree, v26, -1, 1.0, 0.2, 1.0);
-                XAnimSetCompleteGoalWeight(ServerDObj, Entity->scripted->anim, 1.0, 0.2, 1.0, v26, v24, v23);
+                XAnimSetCompleteGoalWeight(ServerDObj, Entity->scripted->anim, 1.0, 0.2, 1.0, 0, 0, 0);
                 if ((Entity->flags & FL_NO_AUTO_ANIM_UPDATE) == 0)
                     Entity->flags |= FL_REPEAT_ANIM_UPDATE;
             }
@@ -11779,7 +11779,7 @@ void __cdecl G_StopAnimScripted(gentity_s *ent)
 {
     actor_s *actor; // r3
     animscripted_s *scripted; // r30
-    XAnimTree_s *EntAnimTree; // r29
+    XAnimTree_s *pAnimTree; // r29
     int v5; // r7
     unsigned int v6; // r6
     unsigned int v7; // r5
@@ -11793,14 +11793,13 @@ void __cdecl G_StopAnimScripted(gentity_s *ent)
     {
         if (scripted->anim)
         {
-            EntAnimTree = GScr_GetEntAnimTree(ent);
-            if (!EntAnimTree)
-                MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\g_scr_main.cpp", 10036, 0, "%s", "pAnimTree");
+            pAnimTree = GScr_GetEntAnimTree(ent);
+            iassert(pAnimTree);
             if (g_dumpAnimsCommands->current.integer == ent->s.number)
-                DumpAnimCommand("stopanimscripted", EntAnimTree, scripted->anim, -1, 0.0, 0.2, 1.0);
+                DumpAnimCommand("stopanimscripted", pAnimTree, scripted->anim, -1, 0.0, 0.2, 1.0);
             ServerDObj = Com_GetServerDObj(ent->s.number);
             if (ServerDObj)
-                XAnimSetCompleteGoalWeight(ServerDObj, scripted->anim, 0.0, 0.2, 1.0, v7, v6, v5);
+                XAnimSetCompleteGoalWeight(ServerDObj, scripted->anim, 0.0, 0.2, 1.0, 0, 0, 0);
         }
         MT_Free((unsigned char*)scripted, 96);
         ent->scripted = 0;

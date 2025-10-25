@@ -97,14 +97,12 @@ int __cdecl CG_DrawFriendlyFire(const cg_s *cgameGlob)
     double fWeaponPosFrac; // fp30
     int weapFlags; // r11
     unsigned int ViewmodelWeaponIndex; // r3
-    double v7; // fp1
-    double v8; // fp2
     Material *v9; // r4
     const float *v10; // r3
-    float v11; // [sp+60h] [-40h] BYREF
-    float v12; // [sp+64h] [-3Ch] BYREF
-    float v13; // [sp+68h] [-38h] BYREF
-    float v14[3]; // [sp+6Ch] [-34h] BYREF
+    float crossX; // [sp+60h] [-40h] BYREF
+    float crossY; // [sp+64h] [-3Ch] BYREF
+    float width; // [sp+68h] [-38h] BYREF
+    float height; // [sp+6Ch] [-34h] BYREF
 
     p_predictedPlayerState = &cgameGlob->predictedPlayerState;
     fWeaponPosFrac = cgameGlob->predictedPlayerState.fWeaponPosFrac;
@@ -123,17 +121,18 @@ int __cdecl CG_DrawFriendlyFire(const cg_s *cgameGlob)
         if (p_predictedPlayerState->fWeaponPosFrac > 0.0)
             return 0;
     }
-    CG_CalcCrosshairPosition(cgameGlob, &v11, &v12);
-    v11 = v11 * (float)fWeaponPosFrac;
-    v12 = v12 * (float)fWeaponPosFrac;
-    v14[0] = 40.0;
-    v13 = 40.0;
-    ScrPlace_ApplyRect(&scrPlaceFull, &v11, &v12, &v13, v14, 2, 2);
-    v7 = (float)-(float)((float)(v13 * (float)0.5) - v11);
-    v8 = (float)-(float)((float)(v14[0] * (float)0.5) - v12);
-    v11 = -(float)((float)(v13 * (float)0.5) - v11);
-    v12 = -(float)((float)(v14[0] * (float)0.5) - v12);
-    CL_DrawStretchPicPhysical(v7, v8, v13, v14[0], 0.0, 0.0, 1.0, 1.0, v10, v9);
+    CG_CalcCrosshairPosition(cgameGlob, &crossX, &crossY);
+    crossX = crossX * (float)fWeaponPosFrac;
+    crossY = crossY * (float)fWeaponPosFrac;
+    height = 40.0f;
+    width = 40.0f;
+    ScrPlace_ApplyRect(&scrPlaceFull, &crossX, &crossY, &width, &height, 2, 2);
+
+    crossX = -((width * 0.5f) - crossX);
+    crossY = -((height * 0.5f) - crossY);
+
+    CL_DrawStretchPicPhysical(crossX, crossY, width, height, 0.0, 0.0, 1.0, 1.0, 0, cgMedia.friendlyFireMaterial);
+
     return 1;
 }
 
@@ -141,85 +140,60 @@ int __cdecl CG_DrawFriendlyFire(const cg_s *cgameGlob)
 static int lastTime;
 void __cdecl CG_DrawFlashFade(int localClientNum)
 {
-    ScreenFade *v2; // r31
+    ScreenFade *fade; // r31
     double alpha; // fp0
-    int v5; // r3
-    __int64 v6; // r11 OVERLAPPED
+    int deltaMS; // r11 OVERLAPPED
     double alphaCurrent; // fp13
-    double v8; // fp13
-    double v9; // fp13
-    double v10; // fp0
-    __int64 v11; // r10
-    const float *v12; // r3
-    int v13; // [sp+50h] [-50h] BYREF
-    int v14; // [sp+54h] [-4Ch] BYREF
-    float v15[2]; // [sp+58h] [-48h] BYREF
-    __int64 v16; // [sp+60h] [-40h]
-    unsigned __int64 v17; // [sp+68h] [-38h]
-    float v18; // [sp+70h] [-30h]
-    float v19; // [sp+74h] [-2Ch]
-    float v20; // [sp+78h] [-28h]
-    float v21; // [sp+7Ch] [-24h]
+    double a; // fp0
+    int height; // [sp+50h] [-50h] BYREF
+    int width; // [sp+54h] [-4Ch] BYREF
+    float aspect; // [sp+58h] [-48h] BYREF
+    float color[4]; // [sp+70h] [-30h] // v18[4] 
 
-    if (localClientNum)
-        MyAssertHandler(
-            "c:\\trees\\cod3\\cod3src\\src\\cgame\\cg_local.h",
-            910,
-            0,
-            "%s\n\t(localClientNum) = %i",
-            "(localClientNum == 0)",
-            localClientNum);
-    v2 = &s_screenFade[localClientNum];
-    if (v2->startTime + v2->duration >= cgArray[0].time)
+    fade = &s_screenFade[localClientNum];
+    if (fade->startTime + fade->duration >= cgArray[0].time)
     {
-        if (v2->alphaCurrent == v2->alpha)
+        if (fade->alphaCurrent == fade->alpha)
             goto LABEL_12;
-        v5 = Sys_Milliseconds();
-        HIDWORD(v6) = v5 - lastTime;
-        LODWORD(v6) = v5 - lastTime - 1;
-        lastTime = v5;
-        if ((unsigned int)v6 > 0x1F2)
+
+        int now = Sys_Milliseconds();
+        deltaMS = now - lastTime;
+        int deltaMinus1 = deltaMS - 1;
+        lastTime = now;
+        if (deltaMinus1 > 498)
             goto LABEL_12;
-        LODWORD(v6) = v2->duration;
-        alphaCurrent = v2->alphaCurrent;
-        alpha = v2->alpha;
+        deltaMS = fade->duration;
+        alphaCurrent = fade->alphaCurrent;
+        alpha = fade->alpha;
         if (alphaCurrent <= alpha)
         {
-            v17 = *(__int64 *)((char *)&v6 + 4);
-            v9 = (float)((float)((float)*(__int64 *)((char *)&v6 + 4) / (float)v6) + v2->alphaCurrent);
-            v16 = v6;
-            v2->alphaCurrent = v9;
-            if (v9 <= alpha)
+            fade->alphaCurrent = ((alpha - alphaCurrent) / deltaMS) + fade->alphaCurrent; // KISAKTODO: logic check these
+            if (fade->alphaCurrent <= alpha)
                 goto LABEL_12;
         }
         else
         {
-            v16 = *(__int64 *)((char *)&v6 + 4);
-            v17 = v6;
-            v8 = (float)((float)alphaCurrent - (float)((float)*(__int64 *)((char *)&v6 + 4) / (float)v6));
-            v2->alphaCurrent = v8;
-            if (v8 >= alpha)
+            fade->alphaCurrent = alphaCurrent - (alpha / deltaMS); // KISAKTODO: logic check these
+            if (fade->alphaCurrent >= alpha)
                 goto LABEL_12;
         }
     }
     else
     {
-        alpha = v2->alpha;
+        alpha = fade->alpha;
     }
-    v2->alphaCurrent = alpha;
+
+    fade->alphaCurrent = alpha;
 LABEL_12:
-    v10 = v2->alphaCurrent;
-    if (v10 > 0.0)
+    a = fade->alphaCurrent;
+    if (a > 0.0f)
     {
-        v18 = 0.0;
-        v19 = 0.0;
-        v20 = 0.0;
-        v21 = v10;
-        CL_GetScreenDimensions(&v14, &v13, v15);
-        LODWORD(v11) = v14;
-        v17 = __PAIR64__(v14, v13);
-        v16 = v11;
-        UI_FillRectPhysical(0.0, 0.0, (float)v11, (float)__SPAIR64__(v14, v13), v12);
+        color[0] = 0.0f;
+        color[1] = 0.0f;
+        color[2] = 0.0f;
+        color[3] = a;
+        CL_GetScreenDimensions(&width, &height, &aspect);
+        UI_FillRectPhysical(0.0, 0.0, width, height, color);
     }
 }
 
@@ -409,21 +383,21 @@ void __cdecl CG_CheckForPlayerInput(int localClientNum)
     int newInput; // r29
     _BYTE v7[48]; // [sp+58h] [-D8h] BYREF
     usercmd_s v8; // [sp+90h] [-A0h] BYREF
-    usercmd_s v9; // [sp+D0h] [-60h] BYREF
+    usercmd_s weaponMdlName; // [sp+D0h] [-60h] BYREF
 
     CurrentCmdNumber = CL_GetCurrentCmdNumber(localClientNum);
     v3 = CurrentCmdNumber;
     if (CurrentCmdNumber > 1)
     {
         CL_GetUserCmd(localClientNum, CurrentCmdNumber - 1, &v8);
-        CL_GetUserCmd(localClientNum, v3, &v9);
-        buttons = v9.buttons;
-        changedButtons = v9.buttons ^ v8.buttons;
-        memcpy(v7, v9.angles, sizeof(v7));
+        CL_GetUserCmd(localClientNum, v3, &weaponMdlName);
+        buttons = weaponMdlName.buttons;
+        changedButtons = weaponMdlName.buttons ^ v8.buttons;
+        memcpy(v7, weaponMdlName.angles, sizeof(v7));
         newInput = CG_CheckPlayerMovement(*(usercmd_s *)v8.angles[0], *(usercmd_s *)v8.angles[2]);
         if (CG_CheckPlayerWeaponUsage(localClientNum, buttons))
             newInput = 1;
-        if ((v9.buttons & 0xC000) != 0)
+        if ((weaponMdlName.buttons & 0xC000) != 0)
         {
             CG_MenuShowNotify(localClientNum, 4);
             newInput = 1;
@@ -435,7 +409,7 @@ void __cdecl CG_CheckForPlayerInput(int localClientNum)
         }
         else
         {
-            if ((v9.buttons & 0x1300) != 0)
+            if ((weaponMdlName.buttons & 0x1300) != 0)
                 CG_MenuShowNotify(localClientNum, 3);
             if (!newInput)
                 newInput = CG_CheckPlayerMiscInput(changedButtons) != 0;
@@ -1207,58 +1181,75 @@ static const char *WeaponStateNames_8[27] =
 void DrawViewmodelInfo(int localClientNum)
 {
     int ViewmodelWeaponIndex; // r31
-    Font_s *FontHandle; // r24
-    weaponInfo_s *LocalClientWeaponInfo; // r27
-    WeaponDef *WeaponDef; // r28
-    XModel *v6; // r11
+    Font_s *font; // r24
+    weaponInfo_s *weapInfo; // r27
+    WeaponDef *weapDef; // r28
+    XModel *weaponMdl; // r11
     const char *name; // r31
-    double ViewFov; // fp1
-    const char *v9; // r8
+    double fov; // fp1
+    const char *weaponMdlName; // r8
     const char **p_name; // r11
-    const char *v11; // r10
+    const char *goggles; // r10
     const char **v12; // r11
-    const char *v13; // r9
-    char *v14; // r11
+    const char *hands; // r9
+    char *len; // r11
     int v16; // r7
-    const char *v17; // [sp+8h] [-8B8h]
-    const char *v18; // [sp+Ch] [-8B4h]
-    char v19[2128]; // [sp+70h] [-850h] BYREF
+    const char *rocket; // [sp+8h] [-8B8h]
+    const char *knife; // [sp+Ch] [-8B4h]
+    char buf[2128]; // [sp+70h] [-850h] BYREF
 
-    if (localClientNum)
-        MyAssertHandler(
-            "c:\\trees\\cod3\\cod3src\\src\\cgame\\cg_local.h",
-            910,
-            0,
-            "%s\n\t(localClientNum) = %i",
-            "(localClientNum == 0)",
-            localClientNum);
+    cg_s *cgameGlob = CG_GetLocalClientGlobals(localClientNum);
+
     ViewmodelWeaponIndex = BG_GetViewmodelWeaponIndex(&cgArray[0].predictedPlayerState);
-    FontHandle = UI_GetFontHandle(&scrPlaceView[localClientNum], 6, 0.25);
+    font = UI_GetFontHandle(&scrPlaceView[localClientNum], 6, 0.25);
     if (ViewmodelWeaponIndex > 0)
     {
-        LocalClientWeaponInfo = CG_GetLocalClientWeaponInfo(localClientNum, ViewmodelWeaponIndex);
-        WeaponDef = BG_GetWeaponDef(ViewmodelWeaponIndex);
-        v6 = WeaponDef->gunXModel[cgArray[0].predictedPlayerState.weaponmodels[ViewmodelWeaponIndex]];
-        if (v6)
-            name = v6->name;
+        weapInfo = CG_GetLocalClientWeaponInfo(localClientNum, ViewmodelWeaponIndex);
+        weapDef = BG_GetWeaponDef(ViewmodelWeaponIndex);
+        weaponMdl = weapDef->gunXModel[cgArray[0].predictedPlayerState.weaponmodels[ViewmodelWeaponIndex]];
+        if (weaponMdl)
+            name = weaponMdl->name;
         else
             name = 0;
-        ViewFov = CG_GetViewFov(localClientNum);
-        v9 = "none";
-        p_name = &LocalClientWeaponInfo->gogglesModel->name;
+        fov = CG_GetViewFov(localClientNum);
+        weaponMdlName = "none";
+
+        p_name = &weapInfo->gogglesModel->name;
         if (p_name)
-            v11 = *p_name;
+            goggles = *p_name;
         else
-            v11 = "none";
-        v12 = &LocalClientWeaponInfo->handModel->name;
+            goggles = "none";
+
+        v12 = &weapInfo->handModel->name;
         if (v12)
-            v13 = *v12;
+            hands = *v12;
         else
-            v13 = "none";
+            hands = "none";
+
         if (name)
-            v9 = name;
+            weaponMdlName = name;
+        
+        // LWSS add - why this missing? :o
+        if (weapInfo->rocketModel)
+        {
+            rocket = weapInfo->rocketModel->name;
+        }
+        else
+        {
+            rocket = "none";
+        }
+        if (weapInfo->knifeModel)
+        {
+            knife = weapInfo->knifeModel->name;
+        }
+        else
+        {
+            knife = "none";
+        }
+        // LWSS end
+
         Com_sprintf(
-            v19,
+            buf,
             2048,
             "^6%s\n"
             "^7Weapon: ^2%s^7 - ^5%s\n"
@@ -1270,23 +1261,24 @@ void DrawViewmodelInfo(int localClientNum)
             "^7---Anims---\n"
             "^3",
             WeaponStateNames_8[cgArray[0].predictedPlayerState.weaponstate],
-            WeaponDef->szInternalName,
-            v9,
-            v13,
-            v11,
-            v17,
-            v18,
+            weapDef->szInternalName,
+            weaponMdlName,
+            hands,
+            goggles,
+            rocket,
+            knife,
             cgArray[0].predictedPlayerState.fWeaponPosFrac,
-            ViewFov);
-        v14 = v19;
-        while (*v14++)
+            fov);
+        len = buf;
+        while (*len++)
             ;
         DObjDisplayAnimToBuffer(
-            LocalClientWeaponInfo->viewModelDObj,
+            weapInfo->viewModelDObj,
             "",
-            &v19[v14 - v19 - 1],
-            2048 - (v14 - v19 - 1));
-        UI_DrawText(&scrPlaceView[localClientNum], v19, 2048, FontHandle, 0.0, 20.0, v16, 3, 0.25, (const float *)1, 1);
+            &buf[len - buf - 1],
+            2048 - (len - buf - 1));
+        UI_DrawText(&scrPlaceView[localClientNum], buf, 2048, font, 0.0, 20.0, 1, 1, 0.25f, colorWhite, 3);
+        //UI_DrawText(&scrPlaceView[localClientNum], buf, 2048, font, 0.0, 20.0, v16, 3, 0.25, (const float *)1, 1);
     }
 }
 

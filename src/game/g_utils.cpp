@@ -2372,14 +2372,12 @@ void __cdecl G_SetFixedLink(gentity_s *ent, unsigned int eAngles)
     tagInfo_s *tagInfo; // r30
     double v5; // fp13
     double v6; // fp12
-    double v7; // fp13
-    double v8; // fp12
     double v9; // fp13
     double v10; // fp12
-    float v11[3][3]; // [sp+50h] [-80h] BYREF
-    float v12; // [sp+74h] [-5Ch] BYREF
-    float v13; // [sp+78h] [-58h]
-    float v14; // [sp+7Ch] [-54h]
+    float axis[4][3]; // [sp+50h] [-80h] BYREF
+    //float v12; // [sp+74h] [-5Ch] BYREF
+    //float v13; // [sp+78h] [-58h]
+    //float v14; // [sp+7Ch] [-54h]
     float v15[6][3]; // [sp+80h] [-50h] BYREF
 
     G_CalcTagParentAxis(ent, v15);
@@ -2390,33 +2388,28 @@ void __cdecl G_SetFixedLink(gentity_s *ent, unsigned int eAngles)
     {
         if (eAngles == 1)
         {
-            MatrixMultiply43(tagInfo->axis, (const mat4x3&)v15, (mat4x3&)v11);
-            v7 = v13;
-            v8 = v14;
-            ent->r.currentOrigin[0] = v12;
-            ent->r.currentOrigin[1] = v7;
-            ent->r.currentOrigin[2] = v8;
-            ent->r.currentAngles[1] = vectoyaw(v11[0]);
+            MatrixMultiply43(tagInfo->axis, (const mat4x3&)v15, (mat4x3&)axis);
+            ent->r.currentOrigin[0] = axis[3][0];
+            ent->r.currentOrigin[1] = axis[3][1];
+            ent->r.currentOrigin[2] = axis[3][2];
+            ent->r.currentAngles[1] = vectoyaw(axis[0]);
         }
         else if (eAngles < 3)
         {
-            MatrixTransformVector43(tagInfo->axis[3], (const mat4x3&)v15, &v12);
-            v5 = v13;
-            v6 = v14;
-            ent->r.currentOrigin[0] = v12;
-            ent->r.currentOrigin[1] = v5;
-            ent->r.currentOrigin[2] = v6;
+            float pos[3];
+            MatrixTransformVector43(tagInfo->axis[3], (const mat4x3&)v15, pos);
+            ent->r.currentOrigin[0] = pos[0];
+            ent->r.currentOrigin[1] = pos[1];
+            ent->r.currentOrigin[2] = pos[2];
         }
     }
     else
     {
-        MatrixMultiply43(tagInfo->axis, (const mat4x3&)v15, (mat4x3&)v11);
-        v9 = v13;
-        v10 = v14;
-        ent->r.currentOrigin[0] = v12;
-        ent->r.currentOrigin[1] = v9;
-        ent->r.currentOrigin[2] = v10;
-        AxisToAngles(v11, ent->r.currentAngles);
+        MatrixMultiply43(tagInfo->axis, (const mat4x3&)v15, (mat4x3&)axis);
+        ent->r.currentOrigin[0] = axis[3][0];
+        ent->r.currentOrigin[1] = axis[3][1];
+        ent->r.currentOrigin[2] = axis[3][2];
+        AxisToAngles((const mat3x3&)axis, ent->r.currentAngles);
     }
 }
 

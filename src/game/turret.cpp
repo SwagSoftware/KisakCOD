@@ -63,57 +63,47 @@ void __cdecl Turret_FillWeaponParms(const gentity_s *ent, const gentity_s *activ
     double v19; // fp11
     double v20; // fp10
     double v21; // fp9
-    float v22; // [sp+50h] [-70h] BYREF
-    float v23; // [sp+54h] [-6Ch]
-    float v24; // [sp+58h] [-68h]
-    float v25[13]; // [sp+60h] [-60h] BYREF
-    float v26; // [sp+94h] [-2Ch]
-    float v27; // [sp+98h] [-28h]
-    float v28; // [sp+9Ch] [-24h]
+    float viewOrigin[4]; // [sp+50h] [-70h] BYREF
+    float angles[4]; // [sp+60h] [-60h] BYREF
+    float tagMat[12]; // [sp+70h] [-50h] BYREF
 
-    if (!G_DObjGetWorldTagMatrix(ent, scr_const.tag_flash, (float (*)[3]) & v25[4]))
+    if (!G_DObjGetWorldTagMatrix(ent, scr_const.tag_flash, (float(*)[3])tagMat))
     {
         Com_Error(ERR_DROP, "Couldn't find %s on turret (entity %d, classname %s)", "tag_flash", ent->s.number, SL_ConvertToString(ent->classname));
     }
     client = activator->client;
     if (client)
     {
-        G_GetPlayerViewOrigin(&client->ps, &v22);
+        G_GetPlayerViewOrigin(&client->ps, viewOrigin);
         G_GetPlayerViewDirection(activator, wp->forward, wp->right, wp->up);
-        v8 = v23;
-        v9 = (float)(v27 - v23);
-        v10 = v24;
-        v11 = (float)(v28 - v24);
-        v12 = v22;
-        v13 = (float)(v26 - v22);
+        v11 = viewOrigin[1];
+        v12 = (float)(tagMat[10] - viewOrigin[1]);
+        v13 = viewOrigin[2];
+        v14 = (float)(tagMat[11] - viewOrigin[2]);
+        v15 = viewOrigin[0];
+        v16 = (float)(tagMat[9] - viewOrigin[0]);
         wp->gunForward[0] = wp->forward[0];
         wp->gunForward[1] = wp->forward[1];
         wp->gunForward[2] = wp->forward[2];
-        v14 = sqrtf((float)((float)((float)v13 * (float)v13)
-            + (float)((float)((float)v11 * (float)v11) + (float)((float)v9 * (float)v9))));
-        wp->muzzleTrace[0] = (float)(wp->forward[0] * (float)v14) + (float)v12;
-        wp->muzzleTrace[1] = (float)((float)v14 * wp->forward[1]) + (float)v8;
-        wp->muzzleTrace[2] = (float)(wp->forward[2] * (float)v14) + (float)v10;
+        v17 = sqrtf((float)((float)((float)v16 * (float)v16)
+            + (float)((float)((float)v14 * (float)v14) + (float)((float)v12 * (float)v12))));
+        wp->muzzleTrace[0] = (float)(wp->forward[0] * (float)v17) + (float)v15;
+        wp->muzzleTrace[1] = (float)((float)v17 * wp->forward[1]) + (float)v11;
+        wp->muzzleTrace[2] = (float)(wp->forward[2] * (float)v17) + (float)v13;
     }
     else
     {
-        v15 = ent->r.currentAngles[0];
-        v16 = ent->s.lerp.u.turret.gunAngles[0];
-        v25[1] = ent->r.currentAngles[1] + ent->s.lerp.u.turret.gunAngles[1];
-        v25[2] = ent->r.currentAngles[2];
-        v25[0] = (float)v15 + (float)v16;
-        AngleVectors(v25, wp->forward, wp->right, wp->up);
-        v17 = v25[5];
-        v18 = v25[6];
-        v19 = v26;
-        v20 = v27;
-        v21 = v28;
-        wp->gunForward[0] = v25[4];
-        wp->gunForward[1] = v17;
-        wp->gunForward[2] = v18;
-        wp->muzzleTrace[0] = v19;
-        wp->muzzleTrace[1] = v20;
-        wp->muzzleTrace[2] = v21;
+        angles[0] = ent->r.currentAngles[0] + ent->s.lerp.u.turret.gunAngles[0];
+        angles[1] = ent->r.currentAngles[1] + ent->s.lerp.u.turret.gunAngles[1];
+        angles[2] = ent->r.currentAngles[2];
+
+        AngleVectors(tagMat, wp->forward, wp->right, wp->up);
+        wp->gunForward[0] = tagMat[0];
+        wp->gunForward[1] = tagMat[1];
+        wp->gunForward[2] = tagMat[2];
+        wp->muzzleTrace[0] = tagMat[9];
+        wp->muzzleTrace[1] = tagMat[10];
+        wp->muzzleTrace[2] = tagMat[11];
     }
 }
 
@@ -155,141 +145,90 @@ bool __cdecl MayHitTarget(const weaponParms *weapon, const gentity_s *target, co
     return SV_SightTraceToEntity(v17, (float*)vec3_origin, (float *)vec3_origin, v18, number, -1) != 0;
 }
 
+// blops version
 void __cdecl Fire_Lead(gentity_s *ent, gentity_s *activator, int bUseAccuracy)
 {
-    gentity_s *v6; // r25
-    weaponParms *v7; // r5
-    const weaponParms *v8; // r4
-    WeaponDef *WeaponDef; // r3
-    TurretInfo *pTurretInfo; // r31
-    double v11; // fp12
-    double v12; // fp13
-    double v13; // fp0
-    double v14; // fp0
-    double v15; // fp13
-    double v16; // fp12
-    int flags; // r11
-    unsigned int v20; // r11
-    double Visibility; // fp31
-    int v22; // r29
-    const gentity_s *v23; // r3
-    char v24; // r11
-    char v25; // r29
-    gentity_s *v26; // r3
-    char v27; // r11
-    float v28; // [sp+50h] [-B0h] BYREF
-    float v29; // [sp+54h] [-ACh]
-    float v30; // [sp+58h] [-A8h]
-    float v31[4]; // [sp+60h] [-A0h] BYREF
-    weaponParms wp; // [sp+70h] [-90h] BYREF
+    gentity_s *v2; // [esp+18h] [ebp-78h]
+    int i; // [esp+20h] [ebp-70h]
+    //$A5C519FFED38118F396585C413DE405F *targets; // [esp+24h] [ebp-6Ch]
+    const target_t *targetEnt; // [esp+28h] [ebp-68h]
+    float spread; // [esp+30h] [ebp-60h]
+    TurretInfo *turretInfo; // [esp+34h] [ebp-5Ch]
+    weaponParms wp; // [esp+38h] [ebp-58h] BYREF
+    float targetPos[3]; // [esp+84h] [ebp-Ch]
+    int savedregs; // [esp+90h] [ebp+0h] BYREF
 
-    //Profile_Begin(239);
-    if (!activator)
-        MyAssertHandler("c:\\trees\\cod3\\ENTITYNUM_NONE\\src\\game\\turret.cpp", 146, 0, "%s", "activator");
-    v6 = activator;
-    if (activator == &g_entities[2175])
-        v6 = ent;
-    Turret_FillWeaponParms(ent, v6, &wp);
-    WeaponDef = BG_GetWeaponDef(ent->s.weapon);
-    pTurretInfo = ent->pTurretInfo;
-    wp.weapDef = WeaponDef;
-    if (!pTurretInfo)
-        MyAssertHandler("c:\\trees\\cod3\\ENTITYNUM_NONE\\src\\game\\turret.cpp", 155, 0, "%s", "turretInfo");
-    v11 = pTurretInfo->targetPos[0];
-    v31[0] = pTurretInfo->targetPos[0];
-    v12 = pTurretInfo->targetPos[1];
-    v31[1] = pTurretInfo->targetPos[1];
-    v13 = pTurretInfo->targetPos[2];
-    v31[2] = pTurretInfo->targetPos[2];
-    if (bUseAccuracy)
-    {
-        // aislop
-        //v14 = (float)((float)v13 - v32.muzzleTrace[2]);
-        //v15 = (float)((float)v12 - v32.muzzleTrace[1]);
-        //v16 = (float)((float)v11 - v32.muzzleTrace[0]);
-        //flags = pTurretInfo->flags;
-        //_FP6 = -sqrtf((float)((float)((float)v16 * (float)v16)
-        //    + (float)((float)((float)v14 * (float)v14) + (float)((float)v15 * (float)v15))));
-        //__asm { fsel      f11, f6, f10, f11 }
-        //v20 = (float)((float)(v32.forward[0] * (float)((float)((float)1.0 / (float)_FP11) * (float)v16))
-        //    + (float)((float)(v32.forward[2] * (float)((float)v14 * (float)((float)1.0 / (float)_FP11)))
-        //        + (float)(v32.forward[1] * (float)((float)v15 * (float)((float)1.0 / (float)_FP11))))) > (double)pTurretInfo->forwardAngleDot
-        //    ? flags & 0xFFFFFF7F
-        //    : flags | 0x80;
-        //pTurretInfo->flags = v20;
+    iassert(activator);
 
-        // Compute relative vector components
-        v14 = v13 - wp.muzzleTrace[2];
-        v15 = v12 - wp.muzzleTrace[1];
-        v16 = v11 - wp.muzzleTrace[0];
+    if (activator == &g_entities[ENTITYNUM_NONE])
+        v2 = ent;
+    else
+        v2 = activator;
 
-        // Compute magnitude and negate
-        float mag = sqrtf(v16 * v16 + v14 * v14 + v15 * v15);
-        float negMag = -mag;
-
-        // Conditional select: corresponds to fsel
-        float denom = (negMag >= 0.0f) ? mag : mag;
-
-        // Compute dot of forward and normalized direction
-        float inv = 1.0f / denom;
-        float dotVal =
-            wp.forward[0] * (v16 * inv) +
-            wp.forward[2] * (v14 * inv) +
-            wp.forward[1] * (v15 * inv);
-
-        // Determine if ahead and set flags appropriately
-        v20 = dotVal > pTurretInfo->forwardAngleDot
-            ? flags & ~0x80U
-            : flags | 0x80U;
-
-        pTurretInfo->flags = v20;
-
-
-
-        Visibility = SV_FX_GetVisibility(wp.muzzleTrace, v31);
-        v22 = pTurretInfo->convergenceTime[1] + pTurretInfo->targetTime - level.time;
-        if (pTurretInfo->target.isDefined())
-        {
-            v23 = pTurretInfo->target.ent();
-            if (MayHitTarget(&wp, v23, wp.forward))
-            {
-                if (v22 > 0 || (v24 = 1, Visibility < 0.2))
-                    v24 = 0;
-                v25 = v24;
-                if (pTurretInfo->target.ent()->sentient)
-                {
-                    if (!v25 || (v26 = pTurretInfo->target.ent(), v27 = 1, v26->sentient->turretInvulnerability))
-                        v27 = 0;
-                    v25 = v27;
-                }
-                if (v25)
-                    Actor_HitTarget(&wp, v31, &v28);
-                else
-                    Actor_MissTarget(&wp, v31, &v28);
-                if ((float)((float)(v28 * wp.forward[0])
-                    + (float)((float)(v29 * wp.forward[1]) + (float)(v30 * wp.forward[2]))) > 0.94999999)
-                {
-                    wp.forward[2] = v30;
-                    wp.forward[1] = v29;
-                    wp.forward[0] = v28;
-                }
-            }
-        }
-    }
+    Turret_FillWeaponParms(ent, v2, &wp);
+    turretInfo = ent->pTurretInfo;
+    iassert(turretInfo);
+    targetPos[0] = turretInfo->targetPos[0];
+    targetPos[1] = turretInfo->targetPos[1];
+    targetPos[2] = turretInfo->targetPos[2];
     if (wp.weapDef->weapType)
     {
-        Weapon_RocketLauncher_Fire(ent, ent->s.weapon, 0.0, &wp, vec3_origin, NULL, NULL);
-    }
-    else if (activator->client)
-    {
-        Bullet_Fire(v6, pTurretInfo->playerSpread, &wp, ent, level.time);
+        //if (wp.weapDef->weapType == WEAPTYPE_GAS)
+        //{
+        //    Weapon_Flamethrower_Fire(ent, &wp);
+        //}
+        //else if ((turretInfo->flags & 0x20000) != 0 && EntHandle::isDefined(&turretInfo->target))
+        //{
+        //    targets = Target_GetTargetArray();
+        //    targetEnt = 0;
+        //    for (i = 0; i < 32; ++i)
+        //    {
+        //        if (targets->targets[i].ent == EntHandle::ent(&turretInfo->target))
+        //        {
+        //            targetEnt = &targets->targets[i];
+        //            break;
+        //        }
+        //    }
+        //    if (targetEnt)
+        //        Weapon_RocketLauncher_Fire(
+        //            COERCE_FLOAT(&savedregs),
+        //            ent,
+        //            ent->s.weapon,
+        //            0.0,
+        //            &wp,
+        //            vec3_origin,
+        //            targetEnt->ent,
+        //            targetEnt->offset);
+        //    else
+        //        Weapon_RocketLauncher_Fire(COERCE_FLOAT(&savedregs), ent, ent->s.weapon, 0.0, &wp, vec3_origin, 0, 0);
+        //}
+        //else
+        {
+            //Weapon_RocketLauncher_Fire(COERCE_FLOAT(&savedregs), v2, ent->s.weapon, 0.0, &wp, vec3_origin, 0, 0);
+            Weapon_RocketLauncher_Fire(ent, ent->s.weapon, 0.0f, &wp, vec3_origin, NULL, NULL);
+        }
     }
     else
     {
-        Bullet_Fire(v6, pTurretInfo->aiSpread, &wp, ent, level.time);
+        if (activator->client)
+            spread = turretInfo->playerSpread;
+        else
+            spread = turretInfo->aiSpread;
+        Bullet_Fire(v2, spread, &wp, ent, level.time);
     }
-    G_AddEvent(ent, 0x26, v6->s.number);
-    //Profile_EndInternal(0);
+
+    //if (turretInfo->fireBarrel)
+    //    G_AddEvent(ent, 0x30u, v2->s.number);
+    //else
+    //    G_AddEvent(ent, 0x2Fu, v2->s.number);
+
+    G_AddEvent(ent, 0x26, v2->s.number);
+
+    //if ((turretInfo->flags & 0x8000) != 0)
+    //{
+    //    ++turretInfo->fireBarrel;
+    //    turretInfo->fireBarrel %= 2;
+    //}
 }
 
 void __cdecl clamp_playerbehindgun(gentity_s *self, gentity_s *other)
@@ -695,21 +634,20 @@ int __cdecl turret_CanTargetPoint(const gentity_s *self, const float *vPoint, fl
     const float *currentAngles; // r29
     double v15; // fp31
     double v16; // fp0
-    double v17; // fp0
-    float v18; // [sp+50h] [-90h] BYREF
-    float v19; // [sp+54h] [-8Ch]
-    float v20; // [sp+58h] [-88h]
+    float tagPos[3]; // [sp+50h] [-90h] BYREF
+    //float v19; // [sp+54h] [-8Ch]
+    //float v20; // [sp+58h] [-88h]
     float v21[4]; // [sp+60h] [-80h] BYREF
     float v22[14]; // [sp+70h] [-70h] BYREF
 
-    if (G_DObjGetWorldTagPos(self, scr_const.tag_flash, &v18))
+    if (G_DObjGetWorldTagPos(self, scr_const.tag_flash, tagPos))
     {
         pTurretInfo = self->pTurretInfo;
         if (!pTurretInfo)
             MyAssertHandler("c:\\trees\\cod3\\ENTITYNUM_NONE\\src\\game\\turret.cpp", 693, 0, "%s", "pTurretInfo");
-        v21[0] = *vPoint - v18;
-        v21[1] = vPoint[1] - v19;
-        v21[2] = vPoint[2] - v20;
+        v21[0] = vPoint[0] - tagPos[0];
+        v21[1] = vPoint[1] - tagPos[1];
+        v21[2] = vPoint[2] - tagPos[2];
         vectosignedangles(v21, v22);
         arcmin = pTurretInfo->arcmin;
         v12 = (char *)v22 - (char *)localAngles;
@@ -733,10 +671,9 @@ int __cdecl turret_CanTargetPoint(const gentity_s *self, const float *vPoint, fl
             if (v13 >= 2)
             {
                 result = 1;
-                *vSource = v18;
-                v17 = v20;
-                vSource[1] = v19;
-                vSource[2] = v17;
+                vSource[0] = tagPos[0];
+                vSource[1] = tagPos[1];
+                vSource[2] = tagPos[2];
                 return result;
             }
         }
@@ -774,54 +711,53 @@ int __cdecl turret_CanTargetSentient(
     double v30; // fp30
     double v31; // fp1
     double v32; // fp1
-    float v33; // [sp+50h] [-80h] BYREF
-    float v34; // [sp+54h] [-7Ch]
-    float v35; // [sp+58h] [-78h]
-    float v36; // [sp+60h] [-70h] BYREF
-    float v37; // [sp+64h] [-6Ch]
-    float v38; // [sp+68h] [-68h]
-    float v39; // [sp+70h] [-60h] BYREF
-    float v40; // [sp+74h] [-5Ch]
+    float tagPos[3]; // [sp+50h] [-80h] BYREF
+    //float v34; // [sp+54h] [-7Ch]
+    //float v35; // [sp+58h] [-78h]
+    float vec[3]; // [sp+60h] [-70h] BYREF
+    //float v37; // [sp+64h] [-6Ch]
+    //float v38; // [sp+68h] [-68h]
+    float angles[3]; // [sp+70h] [-60h] BYREF
+    //float v40; // [sp+74h] [-5Ch]
 
     Sentient_GetEyePosition(sentient, targetPosition);
-    if (G_DObjGetWorldTagPos(self, scr_const.tag_flash, &v33))
+    if (G_DObjGetWorldTagPos(self, scr_const.tag_flash, tagPos))
     {
         pTurretInfo = self->pTurretInfo;
-        if (!pTurretInfo)
-            MyAssertHandler("c:\\trees\\cod3\\ENTITYNUM_NONE\\src\\game\\turret.cpp", 727, 0, "%s", "pTurretInfo");
-        v36 = *targetPosition - v33;
-        v37 = targetPosition[1] - v34;
-        v38 = targetPosition[2] - v35;
-        vectosignedangles(&v36, &v39);
-        v11 = (float)((float)(v40 - self->r.currentAngles[1]) * (float)0.0027777778);
-        *(double *)&v12 = (float)((float)((float)(v40 - self->r.currentAngles[1]) * (float)0.0027777778) + (float)0.5);
+        iassert(pTurretInfo);
+        vec[0] = targetPosition[0] - tagPos[0];
+        vec[1] = targetPosition[1] - tagPos[1];
+        vec[2] = targetPosition[2] - tagPos[2];
+        vectosignedangles(vec, angles);
+        v11 = (float)((float)(angles[1] - self->r.currentAngles[1]) * (float)0.0027777778);
+        *(double *)&v12 = (float)((float)((float)(angles[1] - self->r.currentAngles[1]) * (float)0.0027777778) + (float)0.5);
         v13 = floor(v12);
         v14 = (float)((float)((float)v11 - (float)*(double *)&v13) * (float)360.0);
         localAngles[1] = (float)((float)v11 - (float)*(double *)&v13) * (float)360.0;
         if (v14 <= pTurretInfo->arcmax[1] && v14 >= pTurretInfo->arcmin[1])
         {
-            v15 = v33;
-            v16 = v34;
-            v17 = v35;
-            *muzzlePosition = v33;
+            v15 = tagPos[0];
+            v16 = tagPos[1];
+            v17 = tagPos[2];
+            muzzlePosition[0] = tagPos[0];
             muzzlePosition[1] = v16;
             muzzlePosition[2] = v17;
             if (pTurretInfo->state != 1)
             {
                 ent = sentient->ent;
                 v19 = self->r.currentAngles[0];
-                v36 = sentient->ent->r.currentOrigin[0] - (float)v15;
-                v37 = ent->r.currentOrigin[1] - (float)v16;
+                vec[0] = sentient->ent->r.currentOrigin[0] - (float)v15;
+                vec[1] = ent->r.currentOrigin[1] - (float)v16;
                 v20 = 2.0;
-                v38 = (float)(ent->r.currentOrigin[2] - (float)v17) + (float)2.0;
-                v21 = vectosignedpitch(&v36);
+                vec[2] = (float)(ent->r.currentOrigin[2] - (float)v17) + (float)2.0;
+                v21 = vectosignedpitch(vec);
                 v22 = AngleSubtract(v21, v19);
                 *localAngles = v22;
                 if (v22 > pTurretInfo->arcmax[0])
                 {
                     v23 = 1;
                 LABEL_11:
-                    v24 = AngleSubtract(v39, self->r.currentAngles[0]);
+                    v24 = AngleSubtract(angles[0], self->r.currentAngles[0]);
                     *localAngles = v24;
                     if (v24 > pTurretInfo->arcmax[0])
                     {
@@ -829,7 +765,7 @@ int __cdecl turret_CanTargetSentient(
                         {
                             result = 1;
                             *localAngles = 0.0;
-                            targetPosition[2] = v35;
+                            targetPosition[2] = tagPos[2];
                             return result;
                         }
                         return 0;
@@ -840,7 +776,7 @@ int __cdecl turret_CanTargetSentient(
                         {
                             result = 1;
                             *localAngles = 0.0;
-                            targetPosition[2] = v35;
+                            targetPosition[2] = tagPos[2];
                             return result;
                         }
                         return 0;
@@ -860,7 +796,7 @@ int __cdecl turret_CanTargetSentient(
                 targetPosition[2] = v26->r.currentOrigin[2] + (float)v20;
                 return result;
             }
-            v27 = AngleSubtract(v39, self->r.currentAngles[0]);
+            v27 = AngleSubtract(angles[0], self->r.currentAngles[0]);
             *localAngles = v27;
             if (v27 <= pTurretInfo->arcmax[0])
             {
@@ -874,11 +810,11 @@ int __cdecl turret_CanTargetSentient(
             }
             v29 = sentient->ent;
             v30 = self->r.currentAngles[0];
-            v36 = sentient->ent->r.currentOrigin[0] - v33;
-            v37 = v29->r.currentOrigin[1] - v34;
+            vec[0] = sentient->ent->r.currentOrigin[0] - tagPos[0];
+            vec[1] = v29->r.currentOrigin[1] - tagPos[1];
             v20 = 2.0;
-            v38 = (float)(v29->r.currentOrigin[2] - v35) + (float)2.0;
-            v31 = vectosignedpitch(&v36);
+            vec[2] = (float)(v29->r.currentOrigin[2] - tagPos[2]) + (float)2.0;
+            v31 = vectosignedpitch(vec);
             v32 = AngleSubtract(v31, v30);
             *localAngles = v32;
             if (v32 <= pTurretInfo->arcmax[0])
@@ -890,7 +826,7 @@ int __cdecl turret_CanTargetSentient(
                 LABEL_25:
                     result = 1;
                     *localAngles = 0.0;
-                    targetPosition[2] = v35;
+                    targetPosition[2] = tagPos[2];
                     return result;
                 }
             }
@@ -1024,15 +960,15 @@ int __cdecl turret_aimat_Sentient_Internal(
     __int64 v32; // [sp+58h] [-C8h]
     __int64 v33; // [sp+60h] [-C0h] BYREF
     float v34; // [sp+68h] [-B8h]
-    float v35; // [sp+70h] [-B0h] BYREF
-    float v36; // [sp+74h] [-ACh]
-    float v37; // [sp+78h] [-A8h]
+    float targetPos[3]; // [sp+70h] [-B0h] BYREF
+    //float v36; // [sp+74h] [-ACh]
+    //float v37; // [sp+78h] [-A8h]
     float v38[22]; // [sp+80h] [-A0h] BYREF
 
     if (missTime < 0)
         MyAssertHandler("c:\\trees\\cod3\\ENTITYNUM_NONE\\src\\game\\turret.cpp", 935, 0, "%s", "missTime >= 0");
     turret_SetTargetEnt(self, enemy->ent);
-    if (!turret_CanTargetSentient(self, enemy, &v35, (float *)&v33, desiredAngles))
+    if (!turret_CanTargetSentient(self, enemy, targetPos, (float *)&v33, desiredAngles))
         return 0;
     pTurretInfo = self->pTurretInfo;
     if (!pTurretInfo)
@@ -1061,9 +997,9 @@ int __cdecl turret_aimat_Sentient_Internal(
                 + (float)(pTurretInfo->missOffsetNormalized[2] * (float)((float)v27 * (float)30.0)));
             *(float *)&v33 = (float)((float)(pTurretInfo->missOffsetNormalized[0] * (float)33.0)
                 + (float)((float)((float)v27 * (float)30.0) * pTurretInfo->missOffsetNormalized[0]))
-                + v35;
-            *((float *)&v33 + 1) = (float)v28 + v36;
-            v34 = (float)v29 + v37;
+                + targetPos[0];
+            *((float *)&v33 + 1) = (float)v28 + targetPos[1];
+            v34 = (float)v29 + targetPos[2];
             if (turret_aimat_vector(self, (float *)&v33, bShoot, desiredAngles))
                 return 1;
         }
@@ -1072,8 +1008,8 @@ int __cdecl turret_aimat_Sentient_Internal(
             pTurretInfo->flags = HIDWORD(v13) | 8;
             if (!G_DObjGetWorldTagMatrix(self, scr_const.tag_aim, (float (*)[3])v38))
                 return 0;
-            v30 = v36 - v38[10];
-            v31 = v38[9] - v35;
+            v30 = targetPos[1] - v38[10];
+            v31 = v38[9] - targetPos[0];
             Vec2Normalize(&v30);
             v14 = (float)(v30 * (float)63.0);
             v15 = (float)(v31 * (float)63.0);
@@ -1082,13 +1018,13 @@ int __cdecl turret_aimat_Sentient_Internal(
             v30 = v30 * (float)63.0;
             if (v16 < 0.0)
             {
-                v17 = (float)(v35 - (float)v14);
-                v18 = (float)(v36 - (float)v15);
+                v17 = (float)(targetPos[0] - (float)v14);
+                v18 = (float)(targetPos[1] - (float)v15);
             }
             else
             {
-                v17 = (float)(v35 + (float)v14);
-                v18 = (float)((float)v15 + v36);
+                v17 = (float)(targetPos[0] + (float)v14);
+                v18 = (float)((float)v15 + targetPos[1]);
             }
             ent = enemy->ent;
             *((float *)&v33 + 1) = v18;
@@ -1096,12 +1032,12 @@ int __cdecl turret_aimat_Sentient_Internal(
             v20 = ent->r.currentOrigin[2];
             v34 = ent->r.currentOrigin[2];
             if (turret_aimat_vector(self, (float *)&v33, bShoot, desiredAngles)
-                || (v20 = v37, v34 = v37, turret_aimat_vector(self, (float *)&v33, bShoot, desiredAngles)))
+                || (v20 = targetPos[2], v34 = targetPos[2], turret_aimat_vector(self, (float *)&v33, bShoot, desiredAngles)))
             {
                 result = 1;
-                pTurretInfo->missOffsetNormalized[0] = (float)v17 - v35;
-                pTurretInfo->missOffsetNormalized[1] = (float)v18 - v36;
-                pTurretInfo->missOffsetNormalized[2] = (float)v20 - v37;
+                pTurretInfo->missOffsetNormalized[0] = (float)v17 - targetPos[0];
+                pTurretInfo->missOffsetNormalized[1] = (float)v18 - targetPos[1];
+                pTurretInfo->missOffsetNormalized[2] = (float)v20 - targetPos[2];
                 v21 = pTurretInfo->missOffsetNormalized[1];
                 v22 = pTurretInfo->missOffsetNormalized[2];
 
@@ -1138,7 +1074,7 @@ int __cdecl turret_aimat_Sentient_Internal(
             pTurretInfo->missOffsetNormalized[2] = 0.0;
         }
     }
-    turret_aimat_vector_internal(self, &v35, bShoot, desiredAngles);
+    turret_aimat_vector_internal(self, targetPos, bShoot, desiredAngles);
     return 1;
 }
 

@@ -749,8 +749,7 @@ int __cdecl SaveMemory_WriteSaveToDevice(SaveGame *save)
     int v5; // r30
     int v6; // r3
 
-    if (!save)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\savememory.cpp", 497, 0, "%s", "save");
+    iassert(save);
     saveState = save->saveState;
     if (saveState == AWAITING_COMMIT || saveState == COMMITTED)
     {
@@ -769,10 +768,11 @@ int __cdecl SaveMemory_WriteSaveToDevice(SaveGame *save)
         //v5 = WriteSaveToDevice(save->memFile.buffer, &save->header, save->suppressPlayerNotify); // KISAKSAVE
         v6 = Sys_Milliseconds();
         Com_Printf(10, "time to write: %i  ms\n", v6 - v4);
-        if (!v5)
-            save->isWrittenToDevice = 1;
+        //if (!v5)
+        //    save->isWrittenToDevice = 1;
         SaveMemory_FinalizeSaveCommit(save);
-        return v5;
+        //return v5;
+        return 0;
     }
     else
     {

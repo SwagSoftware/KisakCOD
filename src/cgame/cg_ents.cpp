@@ -156,20 +156,17 @@ int __cdecl CG_GetRenderFlagForRefEntity(__int16 eFlags)
 void __cdecl CG_General(int localClientNum, centity_s *cent)
 {
     entityState_s *p_nextState; // r31
-    unsigned int RenderFlagForRefEntity; // r3
-    const DObj_s *v5; // r9
-    float *v6; // r7
-    double v7; // fp1
-    float v8[6]; // [sp+50h] [-30h] BYREF
+    DObj_s *obj;
+    float lightingOrigin[3];
 
     p_nextState = &cent->nextState;
     if ((cent->nextState.lerp.eFlags & 0x20) == 0)
     {
-        if (Com_GetClientDObj(cent->nextState.number, 0))
+        obj = Com_GetClientDObj(cent->nextState.number, 0);
+        if (obj)
         {
-            CG_LockLightingOrigin(cent, v8);
-            RenderFlagForRefEntity = CG_GetRenderFlagForRefEntity(p_nextState->lerp.eFlags);
-            R_AddDObjToScene(v5, &cent->pose, p_nextState->number, RenderFlagForRefEntity, v6, v7);
+            CG_LockLightingOrigin(cent, lightingOrigin);
+            R_AddDObjToScene(obj, &cent->pose, p_nextState->number, CG_GetRenderFlagForRefEntity(p_nextState->lerp.eFlags), lightingOrigin, 0.0f);
         }
     }
 }
@@ -300,25 +297,24 @@ void __cdecl CG_mg42_PreControllers(int localClientNum, const DObj_s *obj, centi
 void __cdecl CG_mg42(int localClientNum, centity_s *cent)
 {
     entityState_s *p_nextState; // r30
-    const DObj_s *ClientDObj; // r3
-    const DObj_s *v6; // r28
-    int RenderFlagForRefEntity; // r3
-    float *v8; // r7
-    double v9; // fp1
+    const DObj_s *obj; // r3
 
     p_nextState = &cent->nextState;
     if ((cent->nextState.lerp.eFlags & 0x20) == 0)
     {
-        ClientDObj = Com_GetClientDObj(cent->nextState.number, 0);
-        v6 = ClientDObj;
-        if (ClientDObj)
+        obj = Com_GetClientDObj(cent->nextState.number, 0);
+        if (obj)
         {
-            CG_mg42_PreControllers(localClientNum, ClientDObj, cent);
+            CG_mg42_PreControllers(localClientNum, obj, cent);
             if (!CG_PlayerUsingScopedTurret(localClientNum)
                 || CG_GetLocalClientGlobals(localClientNum)->predictedPlayerState.viewlocked_entNum != p_nextState->number)
             {
-                RenderFlagForRefEntity = CG_GetRenderFlagForRefEntity(p_nextState->lerp.eFlags);
-                R_AddDObjToScene(v6, &cent->pose, p_nextState->number, RenderFlagForRefEntity | 4, v8, v9);
+                // KISAKTODO: blops offsets this by +32 [Z], should we copy?
+                float lightingOrigin[3];
+                lightingOrigin[0] = cent->pose.origin[0];
+                lightingOrigin[1] = cent->pose.origin[1];
+                lightingOrigin[2] = cent->pose.origin[2];
+                R_AddDObjToScene(obj, &cent->pose, p_nextState->number, CG_GetRenderFlagForRefEntity(p_nextState->lerp.eFlags) | 4, lightingOrigin, 0.0f);
             }
         }
     }
@@ -490,25 +486,25 @@ void __cdecl CG_UpdateBModelWorldBounds(unsigned int localClientNum, centity_s *
     _R11 = &v41;
     __asm
     {
-        lvlx      v7, r0, r8
+        lvlx      color, r0, r8
         vor       pitch, v4, pitch
         lvrx      gunPitch, r31, r9
         vand      gunYaw, gunYaw, v0
-        vor       gunPitch, v7, gunPitch
-        vspltw128 v7, v127, 1
+        vor       gunPitch, color, gunPitch
+        vspltw128 color, v127, 1
         vand      v11, v11, v0
         vand      pitch, pitch, v0
         vand      gunPitch, gunPitch, v0
-        vmr       v0, v7
+        vmr       v0, color
         vcmpgtfp  v4, v13, v11
-        vmr       v7, v5
+        vmr       color, v5
         vcmpgtfp  v5, v13, gunYaw
         vcmpgtfp  v2, v13, gunPitch
         vspltw128 v13, v127, 2
         vsel      v1, v9, obj, v5
         vsel      v9, obj, v9, v5
-        vsel      v5, v0, v7, v4
-        vsel      v0, v7, v0, v4
+        vsel      v5, v0, color, v4
+        vsel      v0, color, v0, v4
         vmaddfp   obj, v1, pitch, gunYaw
         vmaddfp   gunYaw, v9, pitch, gunYaw
         vmaddfp   obj, v5, obj, v11
@@ -1817,9 +1813,8 @@ void __cdecl CG_DrawEntEqDebug(const centity_s *cent)
     int eType; // r3
     int number; // r30
     const char *EntityTypeName; // r3
-    int v5; // r7
-    char *v6; // r6
-    const float *v7; // r5
+    char *txt; // r6
+    const float *color; // r5
 
     if (snd_drawEqEnts->current.enabled)
     {
@@ -1832,12 +1827,12 @@ void __cdecl CG_DrawEntEqDebug(const centity_s *cent)
         case 0xEu:
             number = cent->nextState.number;
             EntityTypeName = BG_GetEntityTypeName(eType);
-            v6 = va("%s: #%i", EntityTypeName, number);
+            txt = va("%s: #%i", EntityTypeName, number);
             if ((cent->currentState.eFlags & 0x200000) != 0)
-                v7 = colorRed;
+                color = colorRed;
             else
-                v7 = colorLtGreen;
-            CG_DebugStarWithText(cent->pose.origin, v7, v7, v6, 1.0, v5);
+                color = colorLtGreen;
+            CG_DebugStarWithText(cent->pose.origin, color, color, txt, 1.0, 1);
             break;
         default:
             return;
@@ -1936,61 +1931,58 @@ void __cdecl CG_UpdatePoseUnion(int localClientNum, centity_s *cent)
 
 void __cdecl CG_ProcessEntity(int localClientNum, centity_s *cent)
 {
-    const float *v4; // r6
-    int v5; // r4
-    int eType; // r5
-
     if (cent->nextState.loopSound)
         CG_AddEntityLoopSound(localClientNum, cent);
     if (cent->nextState.eType != cent->pose.eTypeUnion)
         CG_UpdatePoseUnion(localClientNum, cent);
+
     CG_DrawEntEqDebug(cent);
-    eType = cent->nextState.eType;
+
     switch (cent->nextState.eType)
     {
-    case 0u:
+    case ET_GENERAL:
         CG_General(localClientNum, cent);
         break;
-    case 1u:
-    case 4u:
+    case ET_PLAYER:
+    case ET_INVISIBLE:
         return;
-    case 2u:
+    case ET_ITEM:
         CG_Item(cent);
         break;
-    case 3u:
+    case ET_MISSILE:
         CG_Missile(localClientNum, cent);
         break;
-    case 5u:
+    case ET_SCRIPTMOVER:
         CG_ScriptMover(localClientNum, cent);
         break;
-    case 6u:
+    case ET_SOUND_BLEND:
         CG_SoundBlend(localClientNum, cent);
         break;
-    case 7u:
+    case ET_FX:
         CG_Fx(localClientNum, cent);
         break;
-    case 8u:
+    case ET_LOOP_FX:
         CG_LoopFx(localClientNum, cent);
         break;
-    case 9u:
+    case ET_PRIMARY_LIGHT:
         CG_PrimaryLight(localClientNum, cent);
         break;
-    case 0xAu:
+    case ET_MG42:
         CG_mg42(localClientNum, cent);
         break;
-    case 0xBu:
-    case 0xDu:
+    case ET_VEHICLE:
+    case ET_VEHICLE_CORPSE:
         CG_Vehicle(localClientNum, cent);
         break;
-    case 0xEu:
-    case 0x10u:
+    case ET_ACTOR:
+    case ET_ACTOR_CORPSE:
         CG_Actor(localClientNum, cent);
         break;
-    case 0xFu:
-        CG_ActorSpawner(cent, v5, eType, v4);
+    case ET_ACTOR_SPAWNER:
+        CG_ActorSpawner(cent);
         break;
     default:
-        Com_Error(ERR_DROP, "Bad entity type %i", eType);
+        Com_Error(ERR_DROP, "Bad entity type %i", cent->nextState.eType);
         break;
     }
 }

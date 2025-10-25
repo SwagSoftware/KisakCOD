@@ -3516,7 +3516,7 @@ float Vec3DistanceSq(const float *p1, const float *p2)
          + (p2[0] - p1[0]) * (p2[0] - p1[0]);
 }
 
-static float  __cdecl Abs(const float *v)
+float  __cdecl Abs(const float *v)
 {
     return (float)sqrt((float)((float)((float)(*v * *v) + (float)(v[1] * v[1])) + (float)(v[2] * v[2])));
 }

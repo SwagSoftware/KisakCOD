@@ -223,21 +223,19 @@ void __cdecl misc_EntInfo(gentity_s *self, float *source)
     const char *v6; // r30
     const char *v7; // r3
     const char *v8; // r5
-    char *v9; // r3
-    float v10; // [sp+50h] [-40h] BYREF
-    float v11; // [sp+54h] [-3Ch] BYREF
-    float v12[14]; // [sp+58h] [-38h] BYREF
+    char *txt; // r3
+    float textScale; // [sp+50h] [-40h] BYREF
+    float dist; // [sp+54h] [-3Ch] BYREF
+    float origin[14]; // [sp+58h] [-38h] BYREF
 
-    if (!self)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\g_misc.cpp", 53, 0, "%s", "self");
-    EntinfoPosAndScale(self, source, v12, &v10, &v11);
-    G_DebugBox(self->r.currentOrigin, self->r.mins, self->r.maxs, self->r.currentAngles[1], v4, (int)colorMagenta, 1);
-    if (!self->classname)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\g_misc.cpp", 58, 0, "%s", "self->classname");
+    iassert(self);
+    EntinfoPosAndScale(self, source, origin, &textScale, &dist);
+    G_DebugBox(self->r.currentOrigin, self->r.mins, self->r.maxs, self->r.currentAngles[1], colorMagenta, 1, 0);
+    iassert(self->classname);
     integer = g_entinfo->current.integer;
     if (integer == 4 || integer == 5)
     {
-        v9 = va("%i", self->s.number);
+        txt = va("%i", self->s.number);
     }
     else
     {
@@ -246,9 +244,9 @@ void __cdecl misc_EntInfo(gentity_s *self, float *source)
         else
             v6 = "<noname>";
         v7 = SL_ConvertToString(self->classname);
-        v9 = va("%i : %s : %i : %s", self->s.number, v6, self->health, v7);
+        txt = va("%i : %s : %i : %s", self->s.number, v6, self->health, v7);
     }
-    G_AddDebugString(v12, color, (float)(v10 * (float)0.75), v8);
+    G_AddDebugString(origin, color, (textScale * 0.75f), txt);
 }
 
 void __cdecl EntInfo_Item(gentity_s *self, float *source)
@@ -267,10 +265,10 @@ void __cdecl EntInfo_Item(gentity_s *self, float *source)
     char *v9; // r3
     const char *v10; // r5
     const float *v11; // r6
-    float v12; // [sp+50h] [-80h] BYREF
-    float v13; // [sp+54h] [-7Ch] BYREF
-    float v14[2]; // [sp+58h] [-78h] BYREF
-    float v15; // [sp+60h] [-70h]
+    float dist; // [sp+50h] [-80h] BYREF
+    float textScale; // [sp+54h] [-7Ch] BYREF
+    float pos[3]; // [sp+58h] [-78h] BYREF
+    //float v15; // [sp+60h] [-70h]
     float v16[6]; // [sp+70h] [-60h] BYREF
 
     if ((_S1 & 1) == 0)
@@ -281,38 +279,38 @@ void __cdecl EntInfo_Item(gentity_s *self, float *source)
 
     iassert(self);
 
-    EntinfoPosAndScale(self, source, v14, &v13, &v12);
+    EntinfoPosAndScale(self, source, pos, &textScale, &dist);
 
-    if (v12 <= (double)MY_MAX_DIST)
+    if (dist <= (double)MY_MAX_DIST)
     {
         v16[0] = MY_RGB[0];
         v16[1] = MY_RGB[1];
         v16[2] = MY_RGB[2];
-        if (v12 >= (double)MY_MAX_DIST_HALF)
-            v4 = (float)(1.0 - (float)((float)(v12 - MY_MAX_DIST_HALF) / MY_MAX_DIST_HALF));
+        if (dist >= (double)MY_MAX_DIST_HALF)
+            v4 = (float)(1.0 - (float)((float)(dist - MY_MAX_DIST_HALF) / MY_MAX_DIST_HALF));
         else
             v4 = 1.0;
         v16[3] = v4;
         p_index = &self->item[0].index;
         v6 = 2;
-        v15 = -(float)((float)(MY_NEXTLINE * (float)0.5) - v15);
-        v7 = v13;
+        pos[2] = -(float)((float)(MY_NEXTLINE * (float)0.5) - pos[2]);
+        v7 = textScale;
         do
         {
             if (*p_index)
             {
                 WeaponDef = BG_GetWeaponDef(*p_index);
                 v9 = va("%i: %s (%i + %i)", self->s.number, WeaponDef->szInternalName, *(p_index - 1), *(p_index - 2));
-                G_AddDebugString(v14, v16, (float)((float)v7 * 0.8f), v10);
+                G_AddDebugString(pos, v16, (float)((float)v7 * 0.8f), v9);
                 G_DebugBox(
                     self->r.currentOrigin,
                     self->r.mins,
                     self->r.maxs,
                     self->r.currentAngles[1],
-                    v11,
-                    (int)colorRedFaded,
-                    1);
-                v15 = MY_NEXTLINE + v15;
+                    colorRedFaded,
+                    1,
+                    0);
+                pos[2] = MY_NEXTLINE + pos[2];
             }
             --v6;
             p_index += 3;

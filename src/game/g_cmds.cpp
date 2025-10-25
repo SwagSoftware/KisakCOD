@@ -683,8 +683,8 @@ void __cdecl Cmd_SetViewpos_f(gentity_s *ent)
     float v12; // [sp+50h] [-440h] BYREF
     float v13; // [sp+54h] [-43Ch]
     float v14; // [sp+58h] [-438h]
-    float v15[2]; // [sp+60h] [-430h] BYREF
-    float v16; // [sp+68h] [-428h]
+    float v15[3]; // [sp+60h] [-430h] BYREF
+    //float v16; // [sp+68h] [-428h]
     char v17[1056]; // [sp+70h] [-420h] BYREF
 
     if (!ent)
@@ -718,7 +718,8 @@ void __cdecl Cmd_SetViewpos_f(gentity_s *ent)
             v5 = v7;
             *v6++ = *(double *)&v8;
         } while (v7 < 3);
-        v16 = v16 - ent->client->ps.viewHeightCurrent;
+
+        v15[2] = v15[2] - ent->client->ps.viewHeightCurrent;
         v12 = 0.0;
         v13 = 0.0;
         v14 = 0.0;

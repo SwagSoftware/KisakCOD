@@ -2274,7 +2274,7 @@ int __cdecl G_WriteGame(const PendingSave *pendingSave, int checksum, SaveGame *
     MemoryFile *v12; // r3
     unsigned int v13; // r3
     SaveGame *v14; // [sp+8h] [-D8h]
-    char v15[128]; // [sp+60h] [-80h] BYREF
+    char username[128]; // [sp+60h] [-80h] BYREF
 
     //Profile_Begin(242);
     if (pendingSave == (const PendingSave *)-64)
@@ -2294,10 +2294,10 @@ int __cdecl G_WriteGame(const PendingSave *pendingSave, int checksum, SaveGame *
     Scr_SaveSource(v8);
     G_SaveState(1, save);
     SaveMemory_StartSegment(save, -1);
-    if (SaveMemory_IsSuccessful(save) && BuildCleanSavePath(v15, 0x40u, pendingSave->filename, pendingSave->saveType))
+    if (SaveMemory_IsSuccessful(save) && BuildCleanSavePath(username, 0x40u, pendingSave->filename, pendingSave->saveType))
     {
         SaveMemory_CreateHeader(
-            v15,
+            username,
             pendingSave->description,
             pendingSave->screenShotName,
             checksum,
@@ -2305,7 +2305,7 @@ int __cdecl G_WriteGame(const PendingSave *pendingSave, int checksum, SaveGame *
             pendingSave->suppressPlayerNotify,
             pendingSave->saveType,
             pendingSave->saveId,
-            v14);
+            save);
         SaveMemory_FinalizeSave(save);
         //Profile_EndInternal(0);
         v12 = SaveMemory_GetMemoryFile(save);

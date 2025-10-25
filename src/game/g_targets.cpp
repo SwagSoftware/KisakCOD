@@ -517,8 +517,7 @@ int __cdecl G_WorldDirToScreenPos(
     const gentity_s *player,
     double fov_x,
     const float *worldDir,
-    const float *outScreenPos,
-    float *a5)
+    float *outScreenPos)
 {
     long double v9; // fp2
     int result; // r3
@@ -547,8 +546,8 @@ int __cdecl G_WorldDirToScreenPos(
     if (v15 <= 0.0)
         MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\g_targets.cpp", 374, 1, "%s", "tanHalfFovY > 0");
     result = 1;
-    *a5 = (float)((float)v11 / (float)v14) * (float)-320.0;
-    a5[1] = (float)((float)v12 / (float)v15) * (float)-240.0;
+    outScreenPos[0] = (float)((float)v11 / (float)v14) * (float)-320.0;
+    outScreenPos[1] = (float)((float)v12 / (float)v15) * (float)-240.0;
     return result;
 }
 
@@ -558,32 +557,28 @@ int __cdecl ScrGetTargetScreenPos(float *screenPos)
     gentity_s *Entity; // r28
     unsigned int v4; // r4
     gentity_s *v5; // r3
-    const gentity_s *v6; // r30
-    const char *v7; // r3
+    const gentity_s *player; // r30
     const float *v8; // r4
-    double Float; // fp31
+    double fov_x; // fp31
     int v10; // r31
     unsigned int v11; // r10
     target_t *v12; // r11
     const char *v13; // r3
     gentity_s *ent; // r11
     float *offset; // r10
-    float v17; // [sp+50h] [-50h] BYREF
-    float v18; // [sp+54h] [-4Ch]
-    float v19; // [sp+58h] [-48h]
+    float worldDir[3]; // [sp+50h] [-50h] BYREF
 
     if (Scr_GetNumParam() < 2)
         Scr_Error("Too few arguments\n");
     Entity = Scr_GetEntity(0);
     v5 = Scr_GetEntity(1);
-    v6 = v5;
+    player = v5;
     if (!v5->client)
     {
-        v7 = va("entity %i is not a player", v5->s.number);
-        Scr_ObjectError(v7);
+        Scr_ObjectError(va("entity %i is not a player", v5->s.number));
     }
-    Float = Scr_GetFloat(2);
-    if (Float <= 0.0)
+    fov_x = Scr_GetFloat(2);
+    if (fov_x <= 0.0)
         Scr_ParamError(2u, "FOV must be positive");
     v10 = 0;
     v11 = 0;
@@ -618,26 +613,27 @@ int __cdecl ScrGetTargetScreenPos(float *screenPos)
     }
     ent = targGlob.targets[v10].ent;
     offset = targGlob.targets[v10].offset;
-    v17 = ent->r.currentOrigin[0] + *offset;
-    v18 = ent->r.currentOrigin[1] + offset[1];
-    v19 = ent->r.currentOrigin[2] + offset[2];
-    v17 = v17 - v6->r.currentOrigin[0];
-    v18 = v18 - v6->r.currentOrigin[1];
-    v19 = v19 - v6->r.currentOrigin[2];
-    v19 = v19 - v6->client->ps.viewHeightCurrent;
-    return G_WorldDirToScreenPos(v6, Float, v8, &v17, screenPos);
+    worldDir[0] = ent->r.currentOrigin[0] + *offset;
+    worldDir[1] = ent->r.currentOrigin[1] + offset[1];
+    worldDir[2] = ent->r.currentOrigin[2] + offset[2];
+
+    worldDir[0] -= player->r.currentOrigin[0];
+    worldDir[1] -= player->r.currentOrigin[1];
+    worldDir[2] -= player->r.currentOrigin[2];
+    worldDir[2] -= player->client->ps.viewHeightCurrent;
+    return G_WorldDirToScreenPos(player, fov_x, worldDir, screenPos);
 }
 
 void __cdecl Scr_Target_IsInCircle()
 {
     double Float; // fp31
     int v1; // r3
-    float v2; // [sp+50h] [-20h] BYREF
-    float v3; // [sp+54h] [-1Ch]
+    float screenPos[2]; // [sp+50h] [-20h] BYREF
+    //float v3; // [sp+54h] [-1Ch]
 
     Float = Scr_GetFloat(3);
-    if (!(unsigned __int8)ScrGetTargetScreenPos(&v2)
-        || (v1 = 1, (float)((float)(v2 * v2) + (float)(v3 * v3)) >= (double)(float)((float)Float * (float)Float)))
+    if (!(unsigned __int8)ScrGetTargetScreenPos(screenPos)
+        || (v1 = 1, (float)((float)(screenPos[0] * screenPos[0]) + (float)(screenPos[1] * screenPos[1])) >= (double)(float)((float)Float * (float)Float)))
     {
         v1 = 0;
     }
@@ -706,28 +702,23 @@ int __cdecl GetTargetIdx(const gentity_s *ent)
 
 int __cdecl G_TargetGetOffset(const gentity_s *targ, float *result)
 {
-    float *v2; // r4
-    int TargetIdx; // r3
-    int v4; // r3
-    float *offset; // r11
+    unsigned int targetIndex; // [esp+4h] [ebp-4h]
 
-    TargetIdx = GetTargetIdx(targ);
-    if (TargetIdx == 32)
+    targetIndex = GetTargetIdx(targ);
+    if (targetIndex == 32)
     {
-        v4 = 0;
-        *v2 = 0.0;
-        v2[1] = 0.0;
-        v2[2] = 0.0;
+        result[0] = 0.0f;
+        result[1] = 0.0f;
+        result[2] = 0.0f;
+        return 0;
     }
     else
     {
-        offset = targGlob.targets[TargetIdx].offset;
-        v4 = 1;
-        *v2 = *offset;
-        v2[1] = offset[1];
-        v2[2] = offset[2];
+        *result = targGlob.targets[targetIndex].offset[0];
+        result[1] = targGlob.targets[targetIndex].offset[1];
+        result[2] = targGlob.targets[targetIndex].offset[2];
+        return 1;
     }
-    return v4;
 }
 
 int __cdecl G_TargetAttackProfileTop(const gentity_s *ent)
@@ -746,8 +737,6 @@ void __cdecl Scr_Target_SetAttackMode()
     unsigned int v0; // r4
     gentity_s *Entity; // r3
     int TargetIdx; // r29
-    int v3; // r7
-    const char *v4; // r3
     unsigned int ConstString; // r3
     const char *v6; // r3
     char v7[1056]; // [sp+50h] [-420h] BYREF
@@ -758,8 +747,7 @@ void __cdecl Scr_Target_SetAttackMode()
     TargetIdx = GetTargetIdx(Entity);
     if (TargetIdx == 32)
     {
-        v4 = va("Entity %i is not a target", *(unsigned __int16 *)(v3 + 118));
-        Scr_Error(v4);
+        Scr_Error(va("Entity %i is not a target", Entity->s.number));
     }
     ConstString = Scr_GetConstString(1);
     if (ConstString == scr_const.top)
@@ -782,40 +770,30 @@ void __cdecl Scr_Target_SetAttackMode()
 
 void __cdecl Scr_Target_SetJavelinOnly()
 {
-    unsigned int v0; // r4
-    gentity_s *Entity; // r3
-    int TargetIdx; // r30
-    int v3; // r7
-    const char *v4; // r3
-    int Int; // r3
-    int *p_flags; // r31
-    int v7; // r11
-    unsigned int v8; // r11
-    int v9; // r30
-    const char *v10; // r3
-    char v11[1032]; // [sp+50h] [-420h] BYREF
+    const char *v0; // eax
+    int v1; // ecx
+    const char *v2; // eax
+    unsigned int targIdx; // [esp+0h] [ebp-410h]
+    char configString[1024]; // [esp+8h] [ebp-408h] BYREF
+    gentity_s *ent; // [esp+40Ch] [ebp-4h]
 
-    if (Scr_GetNumParam() < 2)
+    if ((unsigned int)Scr_GetNumParam() < 2)
         Scr_Error("Too few arguments\n");
-    Entity = Scr_GetEntity(0);
-    TargetIdx = GetTargetIdx(Entity);
-    if (TargetIdx == 32)
+    ent = Scr_GetEntity(0);
+    targIdx = GetTargetIdx(ent);
+    if (targIdx == 32)
     {
-        v4 = va("Entity %i is not a target", *(unsigned __int16 *)(v3 + 118));
-        Scr_Error(v4);
+        v0 = va("Entity %i is not a target", ent->s.number);
+        Scr_Error(v0);
     }
-    Int = Scr_GetInt(1);
-    p_flags = &targGlob.targets[TargetIdx].flags;
-    v7 = *p_flags;
-    if (Int)
-        v8 = v7 | 2;
+    if (Scr_GetInt(1))
+        v1 = targGlob.targets[targIdx].flags | 2;
     else
-        v8 = v7 & 0xFFFFFFFD;
-    v9 = TargetIdx + 27;
-    *p_flags = v8;
-    SV_GetConfigstring(v9, v11, 1024);
-    v10 = va("%i", *p_flags);
-    Info_SetValueForKey(v11, "flags", v10);
-    SV_SetConfigstring(v9, v11);
+        v1 = targGlob.targets[targIdx].flags & 0xFFFFFFFD;
+    targGlob.targets[targIdx].flags = v1;
+    SV_GetConfigstring(targIdx + 387, configString, 1024);
+    v2 = va("%i", targGlob.targets[targIdx].flags);
+    Info_SetValueForKey(configString, "flags", v2);
+    SV_SetConfigstring(targIdx + 387, configString);
 }
 

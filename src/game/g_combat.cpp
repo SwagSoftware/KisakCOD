@@ -139,7 +139,7 @@ void __cdecl TossClientItems(gentity_s *self)
                     ItemForWeapon = BG_FindItemForWeapon(weapon, v5->ps.weaponmodels[weapon]);
                     if ((self->client->ps.eFlags & 0x300) == 0)
                     {
-                        v8 = Drop_Item(self, ItemForWeapon, 0.0, v6);
+                        v8 = Drop_Item(self, ItemForWeapon, 0.0, 0);
                         if (v8)
                             v8->nextthink = 0;
                     }
@@ -1188,57 +1188,34 @@ int __cdecl G_CanRadiusDamageFromPos(
 
 float __cdecl EntDistToPoint(float *origin, gentity_s *ent)
 {
-    float *v2; // r11
-    double v3; // fp0
-    double v4; // fp13
-    double v5; // fp0
-    double v6; // fp13
-    double v7; // fp1
-    float *absmax; // r10
-    int v9; // r8
-    int v10; // r9
-    double v11; // fp0
-    float back_chain; // [sp+0h] [-10h] BYREF
-    float v14; // [sp+4h] [-Ch]
-    float v15; // [sp+8h] [-8h]
+    unsigned int i; // [esp+10h] [ebp-10h]
+    float v[3]; // [esp+14h] [ebp-Ch] BYREF
 
-    v2 = origin;
     if (ent->r.bmodel)
     {
-        absmax = ent->r.absmax;
-        v9 = (char *)&back_chain - (char *)origin;
-        v10 = 3;
-        do
+        for (i = 0; i < 3; ++i)
         {
-            v11 = *v2;
-            if (v11 >= *(absmax - 3))
+            if (ent->r.absmin[i] <= origin[i])
             {
-                if (v11 <= *absmax)
-                    *(float *)((char *)v2 + v9) = 0.0;
+                if (origin[i] <= ent->r.absmax[i])
+                    v[i] = 0.0f;
                 else
-                    *(float *)((char *)v2 + v9) = *v2 - *absmax;
+                    v[i] = origin[i] - ent->r.absmax[i];
             }
             else
             {
-                *(float *)((char *)v2 + v9) = *(absmax - 3) - *v2;
+                v[i] = ent->r.absmin[i] - origin[i];
             }
-            --v10;
-            ++v2;
-            ++absmax;
-        } while (v10);
-        //v7 = sqrtf((float)((float)(v14 * v14) + (float)((float)(v15 * v15) + (float)(back_chain * back_chain))));
-        v7 = sqrtf((float)((float)(v14 * v14) + (float)((float)(v15 * v15) + (float)(back_chain * back_chain))));
+        }
+        return Abs(v);
     }
     else
     {
-        v3 = (float)(ent->r.currentOrigin[0] - *origin);
-        v4 = (float)(ent->r.currentOrigin[2] - origin[2]);
-        v6 = (float)((float)((float)v4 * (float)v4) + (float)((float)v3 * (float)v3));
-        v5 = (float)(ent->r.currentOrigin[1] - origin[1]);
-        //v7 = sqrtf((float)((float)((float)v5 * (float)v5) + (float)v6));
-        v7 = sqrtf((float)((float)((float)v5 * (float)v5) + (float)v6));
+        v[0] = ent->r.currentOrigin[0] - *origin;
+        v[1] = ent->r.currentOrigin[1] - origin[1];
+        v[2] = ent->r.currentOrigin[2] - origin[2];
+        return Abs(v);
     }
-    return *((float *)&v7 + 1);
 }
 
 void __cdecl GetEntListForRadius(

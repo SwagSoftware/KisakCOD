@@ -76,59 +76,51 @@ void __cdecl NormalizeQuatTrans(DObjAnimMat *mat)
     }
 }
 
-void __cdecl CG_mg42_DoControllers(const cpose_t *pose, const DObj_s *obj, int *partBits, long double a4)
+void __cdecl CG_mg42_DoControllers(const cpose_t *pose, const DObj_s *obj, int *partBits)
 {
     bool playerUsing; // r10
-    float *proneType; // r30
+    float *turretViewAngles; // r30
     double v9; // fp30
-    long double v10; // fp2
     double v11; // fp0
     double v12; // fp31
     long double v13; // fp2
     double roll; // fp0
     double v15; // fp13
-    float v16; // [sp+50h] [-70h] BYREF
-    float pitch; // [sp+54h] [-6Ch]
-    float v18; // [sp+58h] [-68h]
-    float v19[12]; // [sp+60h] [-60h] BYREF
+    float aimAngles[3]; // [sp+50h] [-70h] BYREF
+    //float pitch; // [sp+54h] [-6Ch]
+    //float v18; // [sp+58h] [-68h]
+    float flashAngles[3]; // [sp+60h] [-60h] BYREF
 
-    if (!obj)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\cgame\\cg_pose.cpp", 32, 0, "%s", "obj");
+    iassert(obj);
+
     playerUsing = pose->turret.playerUsing;
-    v16 = 0.0;
-    pitch = 0.0;
-    v18 = 0.0;
-    v19[0] = 0.0;
-    v19[1] = 0.0;
-    v19[2] = 0.0;
+    aimAngles[0] = 0.0;
+    aimAngles[1] = 0.0; 
+    aimAngles[2] = 0.0;
+    flashAngles[0] = 0.0;
+    flashAngles[1] = 0.0;
+    flashAngles[2] = 0.0;
     if (playerUsing)
     {
-        if (!pose->actor.proneType)
-            MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\cgame\\cg_pose.cpp", 39, 0, "%s", "pose->turret.viewAngles");
-        proneType = (float *)pose->actor.proneType;
-        v9 = (float)((float)(*proneType - pose->angles[0]) * (float)0.0027777778);
-        *(double *)&a4 = (float)((float)((float)(*proneType - pose->angles[0]) * (float)0.0027777778) + (float)0.5);
-        v10 = floor(a4);
+        iassert(pose->turret.viewAngles);
+        turretViewAngles = (float*)pose->turret.viewAngles;
+        v9 = ((*turretViewAngles - pose->angles[0]) * 0.0027777778);
         v11 = pose->angles[1];
-        v16 = (float)((float)v9 - (float)*(double *)&v10) * (float)360.0;
-        v12 = (float)((float)(proneType[1] - (float)v11) * (float)0.0027777778);
-        *(double *)&v10 = (float)((float)((float)(proneType[1] - (float)v11) * (float)0.0027777778) + (float)0.5);
-        v13 = floor(v10);
-        v19[0] = 0.0;
-        pitch = (float)((float)v12 - (float)*(double *)&v13) * (float)360.0;
+        aimAngles[0] = (float)((float)v9 - floor((((*turretViewAngles - pose->angles[0]) * 0.0027777778f) + 0.5f))) * (float)360.0;
+        v12 = (float)((float)(turretViewAngles[1] - (float)v11) * (float)0.0027777778);
+        v13 = floor((((turretViewAngles[1] - (float)v11) * (float)0.0027777778) + (float)0.5));
+        aimAngles[2] = (float)((float)v12 - (float)*(double *)&v13) * (float)360.0;
+        flashAngles[0] = 0.0;
     }
     else
     {
-        roll = pose->actor.roll;
-        //v15 = (float)(pose->turret.$51809EA76892896F64281DFB626CE797::angles.pitch - pose->actor.roll);
-        v15 = (float)(pose->turret.angles.pitch - pose->actor.roll);
-        pitch = pose->actor.pitch;
-        v16 = v15;
-        v19[0] = roll;
+        aimAngles[0] = (pose->turret.angles.pitch - pose->turret.barrelPitch);
+        aimAngles[1] = pose->turret.angles.yaw;
+        flashAngles[0] = pose->turret.barrelPitch;
     }
-    DObjSetControlTagAngles((DObj_s*)obj, partBits, pose->turret.tag_aim, &v16);
-    DObjSetControlTagAngles((DObj_s*)obj, partBits, pose->turret.tag_aim_animated, &v16);
-    DObjSetControlTagAngles((DObj_s*)obj, partBits, pose->turret.tag_flash, v19);
+    DObjSetControlTagAngles((DObj_s*)obj, partBits, pose->turret.tag_aim, aimAngles);
+    DObjSetControlTagAngles((DObj_s*)obj, partBits, pose->turret.tag_aim_animated, aimAngles);
+    DObjSetControlTagAngles((DObj_s*)obj, partBits, pose->turret.tag_flash, flashAngles);
 }
 
 #if 0
@@ -806,7 +798,6 @@ notSet:
 
 void __cdecl CG_DoControllers(const cpose_t *pose, const DObj_s *obj, int *partBits)
 {
-    long double v6; // fp2
     int setPartBits[4];
 
     PROF_SCOPED("CG_DoControllers");
@@ -815,7 +806,7 @@ void __cdecl CG_DoControllers(const cpose_t *pose, const DObj_s *obj, int *partB
     switch (pose->eType)
     {
     case ET_MG42:
-        CG_mg42_DoControllers(pose, obj, partBits, v6);
+        CG_mg42_DoControllers(pose, obj, partBits);
         break;
     case ET_VEHICLE:
     case ET_VEHICLE_CORPSE:

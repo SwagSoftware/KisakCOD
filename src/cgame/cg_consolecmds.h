@@ -18,13 +18,10 @@ void CG_Noclip_f();
 void CG_UFO_f();
 void __cdecl CG_SetViewPos_f();
 void __cdecl SphereCoordsToPos(
-    double sphereDistance,
-    double sphereYaw,
-    double sphereAltitude,
-    float *result,
-    int a5,
-    int a6,
-    float *a7);
+    float sphereDistance,
+    float sphereYaw,
+    float sphereAltitude,
+    float *result);
 void __cdecl CG_SetViewOrbit_f();
 void CG_PlayRumble_f();
 void __cdecl UpdateGlowTweaks_f();

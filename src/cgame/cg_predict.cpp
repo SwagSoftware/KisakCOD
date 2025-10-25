@@ -181,7 +181,6 @@ void __cdecl CG_InterpolatePlayerState(int localClientNum, int grabAngles, int g
     snapshot_s *nextSnap; // r27
     snapshot_s *prevSnap; // r31
     int CurrentCmdNumber; // r3
-    usercmd_s *v9; // r4
     double f; // fp31
     int i; // r10
     int v12; // r11
@@ -216,7 +215,7 @@ void __cdecl CG_InterpolatePlayerState(int localClientNum, int grabAngles, int g
     {
         CurrentCmdNumber = CL_GetCurrentCmdNumber(localClientNum);
         CL_GetUserCmd(localClientNum, CurrentCmdNumber, &cmd);
-        PM_UpdateViewAngles(&cgArray[0].predictedPlayerState, 0.0, v9, (unsigned __int8)&cmd);
+        PM_UpdateViewAngles(&cgArray[0].predictedPlayerState, 0.0, &cmd, 0);
     }
 
     if (nextSnap->serverTime > prevSnap->serverTime)
@@ -356,8 +355,8 @@ void __cdecl CG_UpdateFreeMove(cg_s *cgameGlob)
     snapshot_s *nextSnap; // r10
     double frameInterpolation; // fp3
     const float *v7; // r6
-    double v8; // fp1
-    float v9[6]; // [sp+50h] [-30h] BYREF
+    double yaw; // fp1
+    float origin[6]; // [sp+50h] [-30h] BYREF
 
     v2 = cl_freemove;
     if (!cl_freemove->current.integer)
@@ -384,13 +383,13 @@ void __cdecl CG_UpdateFreeMove(cg_s *cgameGlob)
     snap = cgameGlob->snap;
     nextSnap = cgameGlob->nextSnap;
     frameInterpolation = cgameGlob->frameInterpolation;
-    v9[0] = (float)((float)(nextSnap->ps.origin[0] - snap->ps.origin[0]) * cgameGlob->frameInterpolation)
+    origin[0] = (float)((float)(nextSnap->ps.origin[0] - snap->ps.origin[0]) * cgameGlob->frameInterpolation)
         + snap->ps.origin[0];
-    v9[1] = (float)((float)(nextSnap->ps.origin[1] - snap->ps.origin[1]) * (float)frameInterpolation) + snap->ps.origin[1];
-    v9[2] = (float)((float)(nextSnap->ps.origin[2] - snap->ps.origin[2]) * (float)frameInterpolation) + snap->ps.origin[2];
-    v8 = LerpAngle(snap->ps.viewangles[1], nextSnap->ps.viewangles[1], frameInterpolation);
+    origin[1] = (float)((float)(nextSnap->ps.origin[1] - snap->ps.origin[1]) * (float)frameInterpolation) + snap->ps.origin[1];
+    origin[2] = (float)((float)(nextSnap->ps.origin[2] - snap->ps.origin[2]) * (float)frameInterpolation) + snap->ps.origin[2];
+    yaw = LerpAngle(snap->ps.viewangles[1], nextSnap->ps.viewangles[1], frameInterpolation);
     if (cg_drawPlayerPosInFreeMove->current.enabled)
-        CG_DebugBox(v9, cg_pmove.mins, cg_pmove.maxs, v8, v7, (int)colorRed, 1);
+        CG_DebugBox(origin, cg_pmove.mins, cg_pmove.maxs, yaw, colorRed, 1, 0);
 }
 
 void __cdecl CG_InterpolateGroundTilt(int localClientNum)

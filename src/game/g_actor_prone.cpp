@@ -150,20 +150,22 @@ void __cdecl G_ActorEnterProne(actor_s *actor, unsigned int iTransTime)
         actor->ProneInfo.iProneTrans = iTransTime;
         actor->Physics.prone = 1;
         actor->ProneInfo.iProneTime = time;
-        actor->bProneOK = BG_CheckProneValid(
-            ent->s.number,
-            currentOrigin,
-            15.0,
-            48.0,
+
+        actor->bProneOK = BG_CheckProneValid(ent->s.number, 
+            currentOrigin, 
+            15.0f, 
+            48.0f, 
             ent->r.currentAngles[1],
-            v5,
-            (float *)".0f, 1.0f]\n\t%g not in [%g, %g]",
-            (bool)ent,
-            (_BYTE)actor + 96,
-            (_BYTE)actor + 100,
-            0,
-            v12,
-            50.0);
+            &actor->ProneInfo.fTorsoPitch, 
+            &actor->ProneInfo.fWaistPitch,
+            false, 
+            true, 
+            true,
+            1,
+            proneCheckType_t::PCT_ACTOR,
+            50.0f
+        );
+
     }
     if (!BG_ActorGoalIsProne(p_ProneInfo))
         MyAssertHandler(

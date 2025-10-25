@@ -656,10 +656,6 @@ void __cdecl UI_DrawSaveGameShot(rectDef_s *rect, double scale, float *color)
 {
     int v4; // r3
     int v5; // r30
-    Material *v6; // r7
-    const float *v7; // r6
-    int v8; // r5
-    int v9; // r4
     Material *sshotImage; // r3
     int v11; // r30
 
@@ -685,10 +681,10 @@ void __cdecl UI_DrawSaveGameShot(rectDef_s *rect, double scale, float *color)
     }
     else
     {
-        Material_RegisterHandle("unknownsave", 3);
+        uiInfo.sshotImage = Material_RegisterHandle("unknownsave", 3);
     }
 LABEL_14:
-    UI_DrawHandlePic(&scrPlaceFull, rect->x, rect->y, rect->w, rect->h, v9, v8, v7, v6);
+    UI_DrawHandlePic(&scrPlaceFull, rect->x, rect->y, rect->w, rect->h, rect->horzAlign, rect->vertAlign, color, uiInfo.sshotImage);
 }
 
 void UI_DrawCinematic()

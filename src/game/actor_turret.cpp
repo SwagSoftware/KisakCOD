@@ -294,9 +294,9 @@ actor_think_result_t __cdecl Actor_Turret_PostThink(actor_s *self)
     gentity_s *v74; // r31
     double v75; // fp4
     double v76; // fp0
-    float v77; // [sp+50h] [-220h] BYREF
-    float v78; // [sp+54h] [-21Ch]
-    float v79; // [sp+58h] [-218h]
+    float trans[3]; // [sp+50h] [-220h] BYREF
+    //float v78; // [sp+54h] [-21Ch]
+    //float v79; // [sp+58h] [-218h]
     DObjAnimMat *v80; // [sp+5Ch] [-214h]
     float v81; // [sp+60h] [-210h] BYREF
     float v82; // [sp+64h] [-20Ch]
@@ -313,8 +313,8 @@ actor_think_result_t __cdecl Actor_Turret_PostThink(actor_s *self)
     float v93[2]; // [sp+98h] [-1D8h] BYREF
     const gentity_s *pTurret; // [sp+A0h] [-1D0h]
     __int64 v95; // [sp+A8h] [-1C8h] BYREF
-    float v96[2]; // [sp+B8h] [-1B8h] BYREF
-    float v97; // [sp+C0h] [-1B0h]
+    float tmpTrans[3]; // [sp+B8h] [-1B8h] BYREF
+    //float v97; // [sp+C0h] [-1B0h]
     __int64 v98; // [sp+C8h] [-1A8h]
     __int64 v99; // [sp+D0h] [-1A0h]
     float v100[12]; // [sp+E0h] [-190h] BYREF
@@ -322,16 +322,16 @@ actor_think_result_t __cdecl Actor_Turret_PostThink(actor_s *self)
     float v102[12]; // [sp+140h] [-130h] BYREF
     float v103[8][3]; // [sp+170h] [-100h] BYREF
 
-    if (!self)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\actor_turret.cpp", 214, 0, "%s", "self");
+    iassert(self);
+
     pTurret = self->pTurret;
-    if (!pTurret)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\actor_turret.cpp", 218, 0, "%s", "pTurret");
-    if (!pTurret->r.inuse)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\actor_turret.cpp", 219, 0, "%s", "pTurret->r.inuse");
+    iassert(pTurret);
+    iassert(pTurret->r.inuse);
+
     ent = self->ent;
-    if (!self->ent)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\actor_turret.cpp", 222, 0, "%s", "ent");
+
+    iassert(ent);
+
     v84 = &scr_const;
     LocalTagMatrix = G_DObjGetLocalTagMatrix(pTurret, scr_const.tag_weapon);
     v80 = LocalTagMatrix;
@@ -424,19 +424,19 @@ actor_think_result_t __cdecl Actor_Turret_PostThink(actor_s *self)
         v95 = v21;
         v25 = (float)((float)v23 - (float)v21);
         v26 = XAnimGetChildAt(Anims, ChildAt, (int)v23);
-        XAnimGetAbsDelta(Anims, v26, v93, &v77, 0.0);
+        XAnimGetAbsDelta(Anims, v26, v93, trans, 0.0);
         if (v25 == 0.0)
         {
-            v27 = v79;
+            v27 = trans[2];
         }
         else
         {
             v13 = XAnimGetChildAt(Anims, ChildAt, v24 + 1);
-            XAnimGetAbsDelta(Anims, v13, v93, v96, 0.0);
-            v77 = (float)((float)(v96[0] - v77) * (float)v25) + v77;
-            v78 = (float)((float)(v96[1] - v78) * (float)v25) + v78;
-            v27 = (float)((float)((float)(v97 - v79) * (float)v25) + v79);
-            v79 = (float)((float)(v97 - v79) * (float)v25) + v79;
+            XAnimGetAbsDelta(Anims, v13, v93, tmpTrans, 0.0);
+            trans[0] = (float)((float)(tmpTrans[0] - trans[0]) * (float)v25) + trans[0];
+            trans[1] = (float)((float)(tmpTrans[1] - trans[1]) * (float)v25) + trans[1];
+            v27 = (float)((float)((float)(tmpTrans[2] - trans[2]) * (float)v25) + trans[2]);
+            trans[2] = (float)((float)(tmpTrans[2] - trans[2]) * (float)v25) + trans[2];
         }
         if (v27 >= v8)
             break;
@@ -446,9 +446,9 @@ actor_think_result_t __cdecl Actor_Turret_PostThink(actor_s *self)
         v15 = v25;
     } while (v18 < NumChildren);
     XAnimClearTreeGoalWeightsStrict(ActorAnimTree, turretAnim, 0.0);
-    XAnimSetGoalWeight(ServerDObj, v26, (float)((float)1.0 - (float)v25), 0.0, 1.0, v30, v29, v28);
+    XAnimSetGoalWeight(ServerDObj, v26, (float)((float)1.0 - (float)v25), 0.0, 1.0, 0, 0, 0);
     if (v25 != 0.0)
-        XAnimSetGoalWeight(ServerDObj, v13, v25, 0.0, 1.0, v33, v32, v31);
+        XAnimSetGoalWeight(ServerDObj, v13, v25, 0.0, 1.0, 0, 0, 0);
     v34 = pTurret;
     pTurretInfo = pTurret->pTurretInfo;
     if (!pTurretInfo)
@@ -483,18 +483,18 @@ actor_think_result_t __cdecl Actor_Turret_PostThink(actor_s *self)
                 pTurretInfo->flags = flags & 0xFFFFFDFF;
             }
         }
-        if ((float)(v79 - (float)v14) == 0.0)
+        if ((float)(trans[2] - (float)v14) == 0.0)
             MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\actor_turret.cpp", 406, 0, "%s", "trans[2] - fPrevTransZ");
-        v41 = (float)((float)((float)v8 - (float)v14) / (float)(v79 - (float)v14));
-        XAnimSetGoalWeight(ServerDObj, ChildAt, v41, 0.0, 1.0, v33, v32, v31);
+        v41 = (float)((float)((float)v8 - (float)v14) / (float)(trans[2] - (float)v14));
+        XAnimSetGoalWeight(ServerDObj, ChildAt, v41, 0.0, 1.0, 0, 0, 0);
         v42 = XAnimGetChildAt(Anims, turretAnim, NumChildren - v18);
-        XAnimSetGoalWeight(ServerDObj, v42, (float)((float)1.0 - (float)v41), 0.0, 1.0, v45, v44, v43);
+        XAnimSetGoalWeight(ServerDObj, v42, (float)((float)1.0 - (float)v41), 0.0, 1.0, 0, 0, 0);
         v46 = XAnimGetChildAt(Anims, v42, v12);
-        XAnimSetGoalWeight(ServerDObj, v46, (float)((float)1.0 - (float)v15), 0.0, 1.0, v49, v48, v47);
+        XAnimSetGoalWeight(ServerDObj, v46, (float)((float)1.0 - (float)v15), 0.0, 1.0, 0, 0, 0);
         if (v15 != 0.0)
         {
             v50 = XAnimGetChildAt(Anims, v42, v12 + 1);
-            XAnimSetGoalWeight(ServerDObj, v50, v15, 0.0, 1.0, v53, v52, v51);
+            XAnimSetGoalWeight(ServerDObj, v50, v15, 0.0, 1.0, 0, 0, 0);
         }
         v54 = (float *)v80;
         goto LABEL_60;
@@ -518,7 +518,7 @@ actor_think_result_t __cdecl Actor_Turret_PostThink(actor_s *self)
         v90 = Vec2Distance(v80->trans, v61->trans);
         v91 = v54[6] - v62->trans[2];
         v88 = v90;
-        v89 = (float)(ent->tagInfo->axis[3][2] - v79) - v62->trans[2];
+        v89 = (float)(ent->tagInfo->axis[3][2] - trans[2]) - v62->trans[2];
         Vec2Normalize(&v90);
         Vec2Normalize(&v88);
         *(double *)&v64 = (float)((float)(v89 * v91) + (float)(v88 * v90));
@@ -567,13 +567,13 @@ actor_think_result_t __cdecl Actor_Turret_PostThink(actor_s *self)
     else
         v70 = "manual_turret EXCEEDED ANIM PITCH";
     self->pszDebugInfo = v70;
-    XAnimSetGoalWeight(ServerDObj, ChildAt, 1.0, 0.0, 1.0, v60, v59, v58);
+    XAnimSetGoalWeight(ServerDObj, ChildAt, 1.0, 0.0, 1.0, 0, 0, 0);
 LABEL_60:
-    XAnimCalcAbsDelta(ServerDObj, turretAnim, v93, &v77);
-    VectorAngleMultiply(&v77, v7);
-    v100[9] = v54[4] + v77;
-    v100[10] = v54[5] + v78;
-    v100[11] = v54[6] + v79;
+    XAnimCalcAbsDelta(ServerDObj, turretAnim, v93, trans);
+    VectorAngleMultiply(trans, v7);
+    v100[9] = v54[4] + trans[0];
+    v100[10] = v54[5] + trans[1];
+    v100[11] = v54[6] + trans[2];
     v55 = RotationToYaw(v93);
     YawToAxis((float)((float)v55 + (float)v7), (mat3x3&)v56);
     AnglesToAxis(v34->r.currentAngles, (float (*)[3])v101);

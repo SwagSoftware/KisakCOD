@@ -626,8 +626,7 @@ int __cdecl G_WorldDirToScreenPos(
     const gentity_s *player,
     double fov_x,
     const float *worldDir,
-    const float *outScreenPos,
-    float *a5);
+    float *outScreenPos);
 int __cdecl ScrGetTargetScreenPos(float *screenPos);
 void __cdecl Scr_Target_IsInCircle();
 void __cdecl Scr_Target_IsInRect();

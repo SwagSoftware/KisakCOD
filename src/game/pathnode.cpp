@@ -1311,7 +1311,7 @@ LABEL_11:
                 if (gameWorldSp.path.nodes[v8].transient.iSearchFrame == level.iSearchFrame)
                 {
                     v10 = va("%i", v7);
-                    G_AddDebugString(v9->constant.vOrigin, colorWhite, 1.0, v11);
+                    G_AddDebugString(v9->constant.vOrigin, colorWhite, 1.0, v10);
                     actualNodeCount = g_path.actualNodeCount;
                 }
                 ++v7;
@@ -1393,10 +1393,10 @@ void __cdecl Path_DrawFriendlyChain()
                             v11 = "%i";
                         LABEL_14:
                             v12 = va(v11, v10->constant.wChainDepth);
-                            G_AddDebugString(v10->constant.vOrigin, colorWhite, 1.0, v13);
+                            G_AddDebugString(v10->constant.vOrigin, colorWhite, 1.0, v12);
                             fRadius = v10->constant.fRadius;
                             if (fRadius != 0.0)
-                                G_DebugCircle(v10->constant.vOrigin, fRadius, v14, (int)colorWhite, 1, 1);
+                                G_DebugCircle(v10->constant.vOrigin, fRadius, colorWhite, 1, 1, 0);
                         }
                         ++v8;
                         ++v9;
@@ -2878,55 +2878,43 @@ void __cdecl WriteEntityDisconnectedLinks(gentity_s *ent, SaveGame *save)
 void __cdecl ReadEntityDisconnectedLinks(gentity_s *ent, SaveGame *save)
 {
     int disconnectedLinks; // r27
-    int v5; // r31
-    pathnode_t *v6; // r29
-    int v7; // r31
+    int index; // r31
+    pathnode_t *node; // r29
+    int j; // r31
     int i; // r28
     int prev; // r10
     int next; // r9
     unsigned __int64 v11; // r4
-    _WORD v12[2]; // [sp+50h] [-70h] BYREF
-    unsigned int v13; // [sp+54h] [-6Ch]
+    _WORD buffer[4]; // [sp+50h] [-70h] BYREF
 
-    if (!save)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\pathnode.cpp", 3869, 0, "%s", "save");
+    iassert(save);
     disconnectedLinks = ent->disconnectedLinks;
     if (ent->disconnectedLinks)
     {
         do
         {
-            SaveMemory_LoadRead(v12, 8, save);
-            v5 = v12[0];
-            if (v12[0] >= g_path.actualNodeCount)
-                MyAssertHandler(
-                    "c:\\trees\\cod3\\cod3src\\src\\game\\pathnode.cpp",
-                    1185,
-                    0,
-                    "index doesn't index g_path.actualNodeCount\n\t%i not in [0, %i)",
-                    v12[0],
-                    g_path.actualNodeCount);
-            v6 = &gameWorldSp.path.nodes[v5];
-            v7 = v6->constant.totalLinkCount - 1;
-            for (i = v7; ; --i)
+            SaveMemory_LoadRead(buffer, 8, save);
+            index = buffer[0];
+            bcassert(index, g_path.actualNodeCount);
+            node = &gameWorldSp.path.nodes[index];
+            j = node->constant.totalLinkCount - 1;
+            for (i = j; ; --i)
             {
-                if (v7 < v6->dynamic.wLinkCount)
-                    MyAssertHandler(
-                        "c:\\trees\\cod3\\cod3src\\src\\game\\pathnode.cpp",
-                        3882,
-                        0,
-                        "%s",
-                        "j >= node->dynamic.wLinkCount");
-                if (v6->constant.Links[i].nodeNum == v12[1])
+                iassert(j >= node->dynamic.wLinkCount);
+
+                if (node->constant.Links[i].nodeNum == buffer[1])
                     break;
-                --v7;
+                --j;
             }
-            ++v6->constant.Links[v7].disconnectCount;
+            ++node->constant.Links[j].disconnectCount;
             prev = g_path.pathLinkInfoArray[disconnectedLinks].prev;
             next = g_path.pathLinkInfoArray[disconnectedLinks].next;
-            v11 = __PAIR64__(__ROL4__(next, 3), v13);
             *(unsigned __int16 *)((char *)&g_path.pathLinkInfoArray[0].next + __ROL4__(prev, 3)) = next;
-            *(unsigned __int16 *)((char *)&g_path.pathLinkInfoArray[0].prev + HIDWORD(v11)) = prev;
-            g_path.pathLinkInfoArray[disconnectedLinks] = (PathLinkInfo)v11;
+            *(unsigned __int16 *)((char *)&g_path.pathLinkInfoArray[0].prev + __ROL4__(next, 3)) = prev;
+            //g_path.pathLinkInfoArray[disconnectedLinks] = (PathLinkInfo)v11;
+            g_path.pathLinkInfoArray[disconnectedLinks].from = buffer[2];
+            g_path.pathLinkInfoArray[disconnectedLinks].to = buffer[3]; // KISAKTODO: this could be wrong, it was packed weird
+
             disconnectedLinks = g_path.pathLinkInfoArray[disconnectedLinks].next;
         } while (disconnectedLinks != ent->disconnectedLinks);
     }
@@ -4374,122 +4362,74 @@ void __cdecl Path_DrawDebugNearestNode(float *vOrigin, int numNodes)
     }
 }
 
+// blops
 void __cdecl Path_DrawDebugClaimedNodes(float *origin, int numNodes)
 {
-    const float *v3; // r6
-    int v4; // r5
-    int v5; // r4
-    int v6; // r14
-    int v7; // r16
-    pathsort_t *v8; // r17
-    const pathnode_t *node; // r29
-    float *vOrigin; // r31
-    double DebugStringScale; // fp1
-    double v12; // fp30
-    const char *v13; // r5
-    sentient_s *v14; // r3
-    const char *v15; // r6
-    const float *v16; // r4
-    __int64 v17; // r11
-    double v18; // r4
-    char *v19; // r3
-    const char *v20; // r5
-    double v21; // r4
-    char *v22; // r3
-    const char *v23; // r5
-    double v24; // r4
-    char *v25; // r3
-    const char *v26; // r5
-    nearestNodeHeightCheck v27; // [sp+8h] [-D48h]
-    float v47[2]; // [sp+60h] [-CF0h] BYREF
-    float v48; // [sp+68h] [-CE8h]
-    const char *v49; // [sp+6Ch] [-CE4h]
-    const char *v50; // [sp+70h] [-CE0h]
-    _QWORD v51[3]; // [sp+78h] [-CD8h] BYREF
-    pathsort_t v52[259]; // [sp+90h] [-CC0h] BYREF
+    sentient_s *v2; // eax
+    char *v3; // [esp+10h] [ebp-C38h]
+    char *v4; // [esp+14h] [ebp-C34h]
+    char *v5; // [esp+18h] [ebp-C30h]
+    char *pszText; // [esp+1Ch] [ebp-C2Ch]
+    pathnode_t *node; // [esp+24h] [ebp-C24h]
+    float pos[3]; // [esp+28h] [ebp-C20h] BYREF
+    int nodeIndex; // [esp+34h] [ebp-C14h]
+    pathsort_t nodes[256]; // [esp+38h] [ebp-C10h] BYREF
+    float time; // [esp+C3Ch] [ebp-Ch]
+    int nodeCount; // [esp+C40h] [ebp-8h] BYREF
+    float scale; // [esp+C44h] [ebp-4h]
 
-    v50 = "c:\\trees\\cod3\\cod3src\\src\\game\\pathnode.cpp";
-    v49 = "%s";
-    if (!origin)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\pathnode.cpp", 1776, 0, "%s", "origin");
-    Path_NearestNodeNotCrossPlanes(
+    iassert(origin);
+
+    Path_NearestNode(
         origin,
-        v52,
+        nodes,
         -1,
         ai_showNodesDist->current.value,
-        (float (*)[2])1,
-        0,
-        0,
-        0,
+        &nodeCount,
         256,
         NEAREST_NODE_DONT_DO_HEIGHT_CHECK);
-    v6 = HIDWORD(v51[0]);
-    v7 = 0;
-    if (SHIDWORD(v51[0]) > 0)
+    for (nodeIndex = 0; nodeIndex < nodeCount && nodeIndex < numNodes; ++nodeIndex)
     {
-        v8 = v52;
-        do
+        node = nodes[nodeIndex].node;
+        Path_DrawDebugNodeBox(node);
+        scale = Path_GetDebugStringScale(origin, node->constant.vOrigin);
+        scale = scale * 0.5;
+        pos[0] = node->constant.vOrigin[0];
+        pos[1] = node->constant.vOrigin[1];
+        pos[2] = node->constant.vOrigin[2];
+        if (node->dynamic.pOwner.isDefined())
         {
-            if (v7 >= numNodes)
-                break;
-            node = v8->node;
-            vOrigin = v8->node->constant.vOrigin;
-            Path_DrawDebugNodeBox(v8->node);
-            DebugStringScale = Path_GetDebugStringScale(origin, node->constant.vOrigin);
-            v47[0] = *vOrigin;
-            v12 = (float)((float)DebugStringScale * (float)0.5);
-            v47[1] = node->constant.vOrigin[1];
-            v48 = node->constant.vOrigin[2];
-            if (node->dynamic.pOwner.isDefined())
-            {
-                iassert(node->dynamic.pOwner.sentient()->ent);
-                v14 = node->dynamic.pOwner.sentient();
-                v15 = va("Owner: %d", v14->ent->s.number);
-                v16 = colorGreen;
-            }
-            else
-            {
-                v15 = "Owner: None";
-                v16 = colorWhite;
-            }
-            G_AddDebugString(v47, v16, v12, v13);
-            LODWORD(v17) = level.time;
-            v48 = (float)((float)v12 * (float)12.0) + v48;
-            HIDWORD(v17) = node->dynamic.iValidTime[1];
-            if (level.time < SHIDWORD(v17))
-            {
-                LODWORD(v17) = HIDWORD(v17) - level.time;
-                v51[0] = v17;
-                v18 = (float)((float)v17 * (float)0.001);
-                v19 = va((const char *)HIDWORD(v18), LODWORD(v18));
-                G_AddDebugString(v47, colorYellow, v12, v20);
-                LODWORD(v17) = level.time;
-                v48 = (float)((float)v12 * (float)12.0) + v48;
-            }
-            HIDWORD(v17) = node->dynamic.iValidTime[0];
-            if ((int)v17 <= SHIDWORD(v17))
-            {
-                LODWORD(v17) = HIDWORD(v17) - v17;
-                v51[1] = v17;
-                v21 = (float)((float)v17 * (float)0.001);
-                v22 = va((const char *)HIDWORD(v21), LODWORD(v21));
-                G_AddDebugString(v47, colorYellow, v12, v23);
-                LODWORD(v17) = level.time;
-                v48 = (float)((float)v12 * (float)12.0) + v48;
-            }
-            HIDWORD(v17) = node->dynamic.iFreeTime;
-            if (HIDWORD(v17) != 0x7FFFFFFF && (int)v17 < SHIDWORD(v17))
-            {
-                LODWORD(v17) = HIDWORD(v17) - v17;
-                v51[2] = v17;
-                v24 = (float)((float)v17 * (float)0.001);
-                v25 = va((const char *)HIDWORD(v24), LODWORD(v24));
-                G_AddDebugString(v47, colorYellow, v12, v26);
-                v48 = (float)((float)v12 * (float)12.0) + v48;
-            }
-            ++v7;
-            ++v8;
-        } while (v7 < v6);
+            iassert(node->dynamic.pOwner.sentient()->ent);
+            v2 =node->dynamic.pOwner.sentient();
+            pszText = va("Owner: %d", v2->ent->s.number);
+            G_AddDebugString(pos, colorGreen, scale, pszText);
+        }
+        else
+        {
+            G_AddDebugString(pos, colorWhite, scale, "Owner: None");
+        }
+        pos[2] = (float)(12.0 * scale) + pos[2];
+        if (level.time < node->dynamic.iValidTime[1])
+        {
+            time = (float)(node->dynamic.iValidTime[1] - level.time) * 0.001;
+            v5 = va("Invalid Ally: %2.1f", time);
+            G_AddDebugString(pos, colorYellow, scale, v5);
+            pos[2] = (float)(12.0 * scale) + pos[2];
+        }
+        if (level.time <= node->dynamic.iValidTime[0])
+        {
+            time = (float)(node->dynamic.iValidTime[0] - level.time) * 0.001;
+            v4 = va("Invalid Axis: %2.1f", time);
+            G_AddDebugString(pos, colorYellow, scale, v4);
+            pos[2] = (float)(12.0 * scale) + pos[2];
+        }
+        if (node->dynamic.iFreeTime != 0x7FFFFFFF && level.time < node->dynamic.iFreeTime)
+        {
+            time = (float)(node->dynamic.iFreeTime - level.time) * 0.001;
+            v3 = va("Delay: %2.1f", time);
+            G_AddDebugString(pos, colorYellow, scale, v3);
+            pos[2] = (float)(12.0 * scale) + pos[2];
+        }
     }
 }
 
@@ -4500,18 +4440,18 @@ void __cdecl Path_DrawDebug()
     pathnode_t *v2; // r29
     int integer; // r11
     char *v4; // r3
-    const char *v5; // r5
     bool v6; // r28
     unsigned int wLinkCount; // r30
     unsigned int i; // r31
-    float v9; // [sp+50h] [-A0h] BYREF
-    float v10; // [sp+54h] [-9Ch]
+    float viewPos[3]; // [sp+50h] [-A0h] BYREF
+    //float v10; // [sp+54h] [-9Ch]
+    //
 
     if (level.gentities->client)
     {
         if (ai_showNodes->current.integer)
         {
-            CL_GetViewPos(&v9);
+            CL_GetViewPos(viewPos);
             v0 = 0;
             if (g_path.actualNodeCount)
             {
@@ -4520,14 +4460,14 @@ void __cdecl Path_DrawDebug()
                 {
                     v2 = &gameWorldSp.path.nodes[v1];
                     if (ai_showNodesDist->current.value == 0.0
-                        || (float)((float)((float)(v2->constant.vOrigin[0] - v9) * (float)(v2->constant.vOrigin[0] - v9))
-                            + (float)((float)(v2->constant.vOrigin[1] - v10) * (float)(v2->constant.vOrigin[1] - v10))) <= (double)(float)(ai_showNodesDist->current.value * ai_showNodesDist->current.value))
+                        || (float)((float)((float)(v2->constant.vOrigin[0] - viewPos[0]) * (float)(v2->constant.vOrigin[0] - viewPos[0]))
+                            + (float)((float)(v2->constant.vOrigin[1] - viewPos[1]) * (float)(v2->constant.vOrigin[1] - viewPos[1]))) <= (double)(float)(ai_showNodesDist->current.value * ai_showNodesDist->current.value))
                     {
                         integer = ai_showNodes->current.integer;
                         if (integer == 2 || integer == 4)
                         {
                             v4 = va("%i", v0);
-                            G_AddDebugString(v2->constant.vOrigin, colorWhite, 1.0, v5);
+                            G_AddDebugString(v2->constant.vOrigin, colorWhite, 1.0, v4);
                         }
                         v6 = ai_showNodes->current.integer >= 3;
                         if (ai_showNodes->current.integer < 3)
@@ -4551,13 +4491,13 @@ void __cdecl Path_DrawDebug()
         }
         if (ai_showNearestNode->current.integer)
         {
-            CL_GetViewPos(&v9);
-            Path_DrawDebugNearestNode(&v9, ai_showNearestNode->current.integer);
+            CL_GetViewPos(viewPos);
+            Path_DrawDebugNearestNode(viewPos, ai_showNearestNode->current.integer);
         }
         if (ai_debugClaimedNodes->current.integer)
         {
-            CL_GetViewPos(&v9);
-            Path_DrawDebugClaimedNodes(&v9, ai_debugClaimedNodes->current.integer);
+            CL_GetViewPos(viewPos);
+            Path_DrawDebugClaimedNodes(viewPos, ai_debugClaimedNodes->current.integer);
         }
         if (ai_debugFindPath->current.integer)
             Path_DrawDebugFindPath(level.gentities->client->ps.origin);

@@ -254,7 +254,7 @@ void __cdecl CG_ModelPreviewerStepAnim(float deltaTime);
 //    const float *a5,
 //    int a6,
 //    Font_s *a7);
-void __cdecl MdlPrvPrintHelpLine(ButtonNames idx, float vPos);
+int __cdecl MdlPrvPrintHelpLine(ButtonNames idx, float vPos);
 void DrawDistFromModel();
 void __cdecl MdlPrvDrawOverlayGamepad();
 void __cdecl CG_ModelPreviewerDrawInfo();

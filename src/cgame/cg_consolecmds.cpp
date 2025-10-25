@@ -392,138 +392,75 @@ void __cdecl CG_SetViewPos_f()
     }
 }
 
-// local variable allocation has failed, the output may be wrong!
 void __cdecl SphereCoordsToPos(
-    double sphereDistance,
-    double sphereYaw,
-    double sphereAltitude,
-    float *result,
-    int a5,
-    int a6,
-    float *a7)
+    float sphereDistance,
+    float sphereYaw,
+    float sphereAltitude,
+    float *result)
 {
-    double v7; // fp1
-    double v8; // fp31
-    double v11; // fp28
-    double v12; // fp1
-    long double v13; // fp2
-    double v14; // fp0
-    double v15; // fp28
-    long double v16; // fp2
-    double v17; // fp29
-    long double v18; // fp2
-    double v19; // fp30
-    long double v20; // fp2
+    float v15; // fp28
+    float v17; // fp29
+    float v19; // fp30
+    float v20; // fp2
 
-    v8 = v7;
-    v11 = (float)((float)((float)90.0 - (float)sphereAltitude) * (float)0.017453292);
-    v12 = v11;
-    v13 = sin(*(long double *)&sphereYaw);
-    v14 = *(double *)&v13;
-    *(double *)&v13 = v11;
-    v15 = (float)v14;
-    v16 = cos(v13);
-    v17 = (float)*(double *)&v16;
-    *(double *)&v16 = (float)((float)((float)sphereYaw - (float)90.0) * (float)0.017453292);
-    v18 = sin(v16);
-    v19 = (float)*(double *)&v18;
-    *(double *)&v18 = (float)((float)((float)sphereYaw - (float)90.0) * (float)0.017453292);
-    v20 = cos(v18);
-    a7[2] = (float)v17 * (float)v8;
-    a7[1] = (float)((float)v19 * (float)v15) * (float)v8;
-    *a7 = (float)((float)*(double *)&v20 * (float)v15) * (float)v8;
+    v15 = sinf(sphereYaw);
+    v17 = cosf(((90.0f - sphereAltitude) * 0.017453292f));
+    v19 = sinf(((sphereYaw - 90.0f) * 0.017453292f));
+    v20 = cosf(((sphereYaw - 90.0f) * 0.017453292f));
+
+    result[0] = (v20 * v15) * sphereDistance;
+    result[1] = (v19 * v15) * sphereDistance;
+    result[2] = v17 * sphereDistance;
 }
 
 void __cdecl CG_SetViewOrbit_f()
 {
-    int v0; // r3
     playerState_s *p_predictedPlayerState; // r31
-    const char *v2; // r3
-    long double v3; // fp2
-    double v4; // fp31
-    const char *v5; // r3
-    long double v6; // fp2
-    double v7; // fp30
-    const char *v8; // r3
-    long double v9; // fp2
-    double v10; // fp29
-    const char *v11; // r3
-    long double v12; // fp2
-    double v13; // fp28
-    const char *v14; // r3
-    long double v15; // fp2
-    double v16; // fp27
-    const char *v17; // r3
-    long double v18; // fp2
-    double v19; // fp29
-    int v20; // r5
-    int v21; // r4
-    float *v22; // r3
-    double v23; // fp0
-    double v24; // fp12
-    double v25; // fp13
-    double v26; // fp12
-    double v29; // fp11
-    float v30; // [sp+50h] [-70h] BYREF
-    float v31; // [sp+54h] [-6Ch]
-    float v32; // [sp+58h] [-68h]
-    float v33[4]; // [sp+60h] [-60h] BYREF
-    float v34[16]; // [sp+70h] [-50h] BYREF
+    float focusX; // fp31
+    float focusY; // fp30
+    float focusZ; // fp29
+    float dist; // fp28
+    float degUp; // fp27
+    long double degAround; // fp2
+    float len; // fp11
+    float vec[3]; // [sp+50h] [-70h] BYREF // v30
+    float pos[4]; // [sp+60h] [-60h] BYREF
+    float angles[3]; // [sp+70h] [-50h] BYREF
 
     if (cgArray[0].nextSnap)
     {
         if (Cmd_Argc() == 7)
         {
-            v0 = Cmd_LocalClientNum();
-            p_predictedPlayerState = &CG_GetLocalClientGlobals(v0)->predictedPlayerState;
+            p_predictedPlayerState = &CG_GetLocalClientGlobals(Cmd_LocalClientNum())->predictedPlayerState;
             Dvar_SetInt(cl_freemove, 2);
-            v2 = Cmd_Argv(1);
-            v3 = atof(v2);
-            v4 = (float)*(double *)&v3;
-            v5 = Cmd_Argv(2);
-            v6 = atof(v5);
-            v7 = (float)*(double *)&v6;
-            v8 = Cmd_Argv(3);
-            v9 = atof(v8);
-            v10 = (float)*(double *)&v9;
-            v11 = Cmd_Argv(4);
-            v12 = atof(v11);
-            v13 = (float)*(double *)&v12;
-            v14 = Cmd_Argv(5);
-            v15 = atof(v14);
-            v16 = (float)*(double *)&v15;
-            v17 = Cmd_Argv(6);
-            v18 = atof(v17);
-            v19 = (float)((float)v10 - p_predictedPlayerState->viewHeightCurrent);
-            SphereCoordsToPos(v13, (float)*(double *)&v18, v16, v22, v21, v20, v33);
-            v23 = (float)(v33[0] + (float)v4);
-            v24 = v33[2];
-            v25 = (float)(v33[1] + (float)v7);
-            p_predictedPlayerState->origin[0] = v33[0] + (float)v4;
-            p_predictedPlayerState->origin[1] = v25;
-            p_predictedPlayerState->origin[2] = (float)v24 + (float)v19;
-            v30 = (float)v4 - (float)v23;
-            v31 = (float)v7 - p_predictedPlayerState->origin[1];
-            v26 = (float)((float)v19 - p_predictedPlayerState->origin[2]);
 
-            // aislop
-            //_FP9 = -sqrtf((float)((float)(v30 * v30) + (float)((float)((float)v26 * (float)v26) + (float)(v31 * v31))));
-            //__asm { fsel      f11, f9, f10, f11 }
-            //v29 = (float)((float)1.0 / (float)_FP11);
+            focusX = atof(Cmd_Argv(1));
+            focusY = atof(Cmd_Argv(2));
+            focusZ = atof(Cmd_Argv(3));
+            dist = atof(Cmd_Argv(4));
+            degUp = atof(Cmd_Argv(5));
+            degAround = atof(Cmd_Argv(6));
 
-            {
-                float temp = v30 * v30 + v26 * v26 + v31 * v31;
-                float _FP9 = -sqrtf(temp > 0.0f ? temp : 0.0f);
-                float _FP11 = (_FP9 < 0.0f) ? -_FP9 : _FP9;  // fsel equivalent: select positive _FP9
-                v29 = 1.0f / _FP11;
-            }
+            focusZ = (float)((float)focusZ - p_predictedPlayerState->viewHeightCurrent);
 
+            SphereCoordsToPos(dist, degAround, degUp, pos);
 
-            v30 = (float)v29 * v30;
-            v31 = v31 * (float)v29;
-            v32 = (float)v26 * (float)v29;
-            vectoangles(&v30, v34);
-            CG_SetDebugAngles(v34);
+            p_predictedPlayerState->origin[0] = pos[0] + (float)focusX;
+            p_predictedPlayerState->origin[1] = pos[1] + (float)focusY;
+            p_predictedPlayerState->origin[2] = pos[2] + (float)focusZ;
+
+            vec[0] = (float)focusX - p_predictedPlayerState->origin[0];
+            vec[1] = (float)focusY - p_predictedPlayerState->origin[1];
+            vec[2] = (float)focusZ - p_predictedPlayerState->origin[2];
+
+            float temp = vec[0] * vec[0] + vec[1] * vec[1] + vec[2] * vec[2];
+            len = 1.0f / sqrtf(temp);
+
+            vec[0] *= len;
+            vec[1] *= len;
+            vec[2] *= len;
+            vectoangles(vec, angles);
+            CG_SetDebugAngles(angles);
         }
         else
         {

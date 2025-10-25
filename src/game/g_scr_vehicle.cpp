@@ -3562,7 +3562,7 @@ void CMD_VEH_SetSpeedImmediate(scr_entref_t entref)
     double v9; // fp12
     double v10; // fp0
     float v11; // [sp+50h] [-30h] BYREF
-    float v12; // [sp+54h] [-2Ch]
+    float vec; // [sp+54h] [-2Ch]
     float v13; // [sp+58h] [-28h]
 
     if (entref.classnum)
@@ -3577,14 +3577,14 @@ void CMD_VEH_SetSpeedImmediate(scr_entref_t entref)
     p_nodeIdx = (float *)&Vehicle->scr_vehicle->pathPos.nodeIdx;
     CMD_VEH_Script_SetSpeed(Vehicle);
     v11 = 0.0;
-    v12 = 0.0;
+    vec = 0.0;
     v13 = 0.0;
     if (p_nodeIdx[150] <= 0.0 && p_nodeIdx[167] == 0.0 && p_nodeIdx[168] == 0.0 && p_nodeIdx[169] == 0.0)
         goto LABEL_11;
     v11 = p_nodeIdx[167] - Vehicle->r.currentOrigin[0];
-    v12 = p_nodeIdx[168] - Vehicle->r.currentOrigin[1];
+    vec = p_nodeIdx[168] - Vehicle->r.currentOrigin[1];
     v3 = (float)(p_nodeIdx[169] - Vehicle->r.currentOrigin[2]);
-    _FP8 = -sqrtf((float)((float)(v11 * v11) + (float)((float)((float)v3 * (float)v3) + (float)(v12 * v12))));
+    _FP8 = -sqrtf((float)((float)(v11 * v11) + (float)((float)((float)v3 * (float)v3) + (float)(vec * vec))));
     //__asm { fsel      f11, f8, f10, f11 }
     if (_FP8 >= 0.0f)
     {
@@ -3597,8 +3597,8 @@ void CMD_VEH_SetSpeedImmediate(scr_entref_t entref)
     v6 = (float)((float)1.0 / (float)_FP11);
     v7 = (float)((float)v6 * v11);
     v11 = (float)v6 * v11;
-    v8 = (float)(v12 * (float)v6);
-    v12 = v12 * (float)v6;
+    v8 = (float)(vec * (float)v6);
+    vec = vec * (float)v6;
     v9 = (float)((float)v3 * (float)v6);
     v13 = v9;
     if (v7 == 0.0 && v8 == 0.0 && v9 == 0.0)
@@ -3607,7 +3607,7 @@ void CMD_VEH_SetSpeedImmediate(scr_entref_t entref)
     v10 = p_nodeIdx[146];
     p_nodeIdx[150] = p_nodeIdx[146];
     p_nodeIdx[71] = (float)v10 * v11;
-    p_nodeIdx[72] = v12 * (float)v10;
+    p_nodeIdx[72] = vec * (float)v10;
     p_nodeIdx[73] = v13 * (float)v10;
 }
 
@@ -3813,9 +3813,9 @@ void CMD_VEH_JoltBody(scr_entref_t entref)
     double v7; // fp13
     double v10; // fp11
     double v11; // fp12
-    float v12; // [sp+50h] [-60h] BYREF
-    float v13; // [sp+54h] [-5Ch]
-    float v14; // [sp+58h] [-58h]
+    float vec[3]; // [sp+50h] [-60h] BYREF
+    //float v13; // [sp+54h] [-5Ch]
+    //float v14; // [sp+58h] [-58h]
     float v15[14]; // [sp+60h] [-50h] BYREF
 
     if (entref.classnum)
@@ -3828,7 +3828,7 @@ void CMD_VEH_JoltBody(scr_entref_t entref)
         Vehicle = VEH_GetVehicle(entref.entnum);
     }
     NumParam = Scr_GetNumParam();
-    Scr_GetVector(0, &v12);
+    Scr_GetVector(0, vec);
     volume = Scr_GetFloat(1u);
     if (NumParam <= 2)
     {
@@ -3845,13 +3845,13 @@ void CMD_VEH_JoltBody(scr_entref_t entref)
         if (v6 < 0.0)
             Scr_ParamError(3u, "Deceleration can't be negative");
     }
-    v7 = (float)(Vehicle->r.currentOrigin[2] - v14);
-    float _FP10 = -sqrtf((float)((float)((float)(Vehicle->r.currentOrigin[0] - v12)
-        * (float)(Vehicle->r.currentOrigin[0] - v12))
-        + (float)((float)((float)(Vehicle->r.currentOrigin[2] - v14)
-            * (float)(Vehicle->r.currentOrigin[2] - v14))
-            + (float)((float)(Vehicle->r.currentOrigin[1] - v13)
-                * (float)(Vehicle->r.currentOrigin[1] - v13)))));
+    v7 = (float)(Vehicle->r.currentOrigin[2] - vec[2]);
+    float _FP10 = -sqrtf((float)((float)((float)(Vehicle->r.currentOrigin[0] - vec[0])
+        * (float)(Vehicle->r.currentOrigin[0] - vec[0]))
+        + (float)((float)((float)(Vehicle->r.currentOrigin[2] - vec[2])
+            * (float)(Vehicle->r.currentOrigin[2] - vec[2]))
+            + (float)((float)(Vehicle->r.currentOrigin[1] - vec[1])
+                * (float)(Vehicle->r.currentOrigin[1] - vec[1])))));
     float _FP11;
     //__asm { fsel      f11, f10, f29, f11 }
     if (_FP10 >= 0.0f)
@@ -3863,8 +3863,8 @@ void CMD_VEH_JoltBody(scr_entref_t entref)
         _FP11 = _FP10;
     }
     v10 = (float)((float)1.0 / (float)_FP11);
-    v11 = (float)((float)v10 * (float)(Vehicle->r.currentOrigin[0] - v12));
-    v15[1] = (float)(Vehicle->r.currentOrigin[1] - v13) * (float)v10;
+    v11 = (float)((float)v10 * (float)(Vehicle->r.currentOrigin[0] - vec[0]));
+    v15[1] = (float)(Vehicle->r.currentOrigin[1] - vec[1]) * (float)v10;
     v15[0] = v11;
     v15[2] = (float)v7 * (float)v10;
     VEH_JoltBody(Vehicle, v15, volume, v5, v6);
@@ -4610,7 +4610,7 @@ void __cdecl VEH_SetPosition(gentity_s *ent, const float *origin, const float *v
     double v9; // fp12
     double v10; // fp13
     double v11; // fp0
-    double v12; // fp12
+    double vec; // fp12
     double v13; // fp13
     double v14; // fp0
     gentity_s *v15; // r31
@@ -4624,10 +4624,10 @@ void __cdecl VEH_SetPosition(gentity_s *ent, const float *origin, const float *v
         || ent->s.lerp.pos.trBase[0] != v9
         || ent->s.lerp.pos.trBase[1] != v10
         || ent->s.lerp.pos.trBase[2] != v11
-        || (v12 = *angles, ent->r.currentAngles[0] != v12)
+        || (vec = *angles, ent->r.currentAngles[0] != vec)
         || (v13 = angles[1], ent->r.currentAngles[1] != v13)
         || (v14 = angles[2], ent->r.currentAngles[2] != v14)
-        || ent->s.lerp.apos.trBase[0] != v12
+        || ent->s.lerp.apos.trBase[0] != vec
         || ent->s.lerp.apos.trBase[1] != v13
         || ent->s.lerp.apos.trBase[2] != v14)
     {
@@ -4919,7 +4919,7 @@ static void VEH_LinkPlayer(gentity_s *ent, gentity_s *player)
     __int64 v9; // r6
     __int64 v10; // r10
     __int64 v11; // r8
-    __int64 v12; // r6
+    __int64 vec; // r6
     __int64 v13; // r10
     __int64 v14; // r8
     __int64 v15; // r6
@@ -5131,7 +5131,7 @@ void Vehicle_EntInfo(gentity_s *self, float *source)
     double v9; // fp31
     scr_vehicle_s *scr_vehicle; // r31
     const float *v11; // r28
-    const float *v12; // r4
+    const float *vec; // r4
     gentity_s *v13; // r3
     double v14; // fp31
     double v15; // fp13
@@ -5184,7 +5184,7 @@ void Vehicle_EntInfo(gentity_s *self, float *source)
                 v35 = scr_vehicle->goalPosition[1];
                 v36 = scr_vehicle->goalPosition[2] + (float)16.0;
                 G_DebugLine(self->r.currentOrigin, &v34, v11, 0);
-                G_DebugCircle(&v34, 64.0, v12, (int)v11, 0, 1);
+                G_DebugCircle(&v34, 64.0, v11, 0, 1, 0);
             }
             v34 = scr_vehicle->phys.vel[0] + *currentOrigin;
             v35 = self->r.currentOrigin[1] + scr_vehicle->phys.vel[1];
