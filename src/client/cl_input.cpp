@@ -1568,7 +1568,6 @@ void __cdecl CL_CreateCmd(usercmd_s *result)
             clients[0].viewangles[0] = oldAngles + 90.0;
         }
     }
-LABEL_10:
     CL_FinishMove(result);
 }
 

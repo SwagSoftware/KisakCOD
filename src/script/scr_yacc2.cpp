@@ -64,12 +64,12 @@ FILE *yy_stdout()
 
 void __cdecl IntegerValue(char *str)
 {
-	sscanf(str, "%d", &yylval);
+	sscanf(str, "%d", &yylval.val.intValue);
 }
 
 void __cdecl FloatValue(char *str)
 {
-	sscanf(str, "%f", &yylval);
+	sscanf(str, "%f", &yylval.val.floatValue);
 }
 
 int StringValue(unsigned char *str, int len)

@@ -476,4 +476,5 @@ LRESULT WINAPI MainWndProc(
 	}
 
 	iassert(0); // LWSS: shouldn't reach.
+	return 0;
 }

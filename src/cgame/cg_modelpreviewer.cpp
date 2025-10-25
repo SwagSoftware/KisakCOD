@@ -2873,10 +2873,10 @@ void __cdecl CG_ModelPreviewerBuildInfoStr(char *buffer, int bufferSize)
             modPrvAnimRate->current.value);
         I_strncat(buffer, bufferSize, v18);
         //sprintf(v18, "modPrvAnimApplyDelta %i,", (_cntlzw(*(unsigned __int8 *)(modPrvAnimApplyDelta + 12)) & 0x20) == 0);
-        sprintf(v18, "modPrvAnimApplyDelta %i,", modPrvAnimApplyDelta->current.value);
+        sprintf(v18, "modPrvAnimApplyDelta %i,", modPrvAnimApplyDelta->current.integer);
         I_strncat(buffer, bufferSize, v18);
         //sprintf(v18, "modPrvAnimForceLoop %i,", (_cntlzw(*(unsigned __int8 *)(modPrvAnimForceLoop + 12)) & 0x20) == 0);
-        sprintf(v18, "modPrvAnimForceLoop %i,", modPrvAnimForceLoop->current.value);
+        sprintf(v18, "modPrvAnimForceLoop %i,", modPrvAnimForceLoop->current.integer);
         I_strncat(buffer, bufferSize, v18);
         v9 = Dvar_EnumToString((const dvar_s *)modPrvAnimBlendMode);
         sprintf(v18, "modPrvAnimBlendMode %s,", v9);

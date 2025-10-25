@@ -437,18 +437,18 @@ void __cdecl DynEnt_LoadEntities()
                                                             {
                                                                 if (!I_stricmp(key, "prodofinertia"))
                                                                     sscanf_s(value, "%f %f %f", 
-                                                                        &params.productsOfInertia[0], sizeof(float),
-                                                                        &params.productsOfInertia[1], sizeof(float), 
-                                                                        &params.productsOfInertia[2], sizeof(float));
+                                                                        &params.productsOfInertia[0],
+                                                                        &params.productsOfInertia[1],
+                                                                        &params.productsOfInertia[2]);
                                                             }
                                                             else
                                                             {
                                                                 sscanf_s(
                                                                     value,
                                                                     "%f %f %f",
-                                                                    &params.momentsOfInertia[0], sizeof(float),
-                                                                    &params.momentsOfInertia[1], sizeof(float),
-                                                                    &params.momentsOfInertia[2], sizeof(float));
+                                                                    &params.momentsOfInertia[0],
+                                                                    &params.momentsOfInertia[1],
+                                                                    &params.momentsOfInertia[2]);
 
                                                             }
                                                         }
@@ -457,9 +457,9 @@ void __cdecl DynEnt_LoadEntities()
                                                             sscanf_s(
                                                                 value,
                                                                 "%f %f %f",
-                                                                &params.centerOfMass[0], sizeof(float),
-                                                                &params.centerOfMass[1], sizeof(float),
-                                                                &params.centerOfMass[2], sizeof(float));
+                                                                &params.centerOfMass[0],
+                                                                &params.centerOfMass[1],
+                                                                &params.centerOfMass[2]);
 
                                                         }
                                                     }
@@ -481,12 +481,12 @@ void __cdecl DynEnt_LoadEntities()
                                             }
                                             else
                                             {
-                                                sscanf_s(value, "%f %f %f", &params.angles[0], sizeof(float), &params.angles[1], sizeof(float), &params.angles[2], sizeof(float));
+                                                sscanf_s(value, "%f %f %f", &params.angles[0], &params.angles[1], &params.angles[2]);
                                             }
                                         }
                                         else
                                         {
-                                            sscanf_s(value, "%f %f %f", &params.origin[0], sizeof(float), &params.origin[1], sizeof(float), &params.origin[2], sizeof(float));
+                                            sscanf_s(value, "%f %f %f", &params.origin[0], &params.origin[1], &params.origin[2]);
                                         }
                                     }
                                     else

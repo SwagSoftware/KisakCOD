@@ -757,9 +757,9 @@ actor_think_result_t __cdecl Actor_Turret_Think(actor_s *self)
         iassert(pTurret->r.inuse);
         pTurretInfo = pTurret->pTurretInfo;
         iassert(pTurretInfo);
-        if (!(unsigned __int8)Actor_KnowAboutEnemy(self, 0))
+        if (!Actor_KnowAboutEnemy(self, 0))
             self->useEnemyGoal = 0;
-        if (!(unsigned __int8)Actor_KeepClaimedNode(self))
+        if (!Actor_KeepClaimedNode(self))
         {
             Actor_UpdateDesiredChainPos(self);
             Actor_UpdateGoalPos(self);

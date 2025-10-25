@@ -1056,7 +1056,6 @@ _D3DFORMAT __cdecl R_ImagePixelFormat(const GfxImage *image)
     if (mapType == MAPTYPE_CUBE)
     {
         iassert( image->texture.cubemap );
-    LABEL_7:
         //image->texture.basemap->__vftable[1].QueryInterface(image->texture.basemap, 0, (void **)&surfaceDesc);
         image->texture.cubemap->GetLevelDesc(0, &surfaceDesc);
         return surfaceDesc.Format;
