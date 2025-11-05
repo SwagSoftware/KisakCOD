@@ -330,8 +330,8 @@ void __cdecl R_DepthHackNearClipChanged(GfxCmdBufSourceState *source)
     ++source->matrixVersions[2];
     ++source->matrixVersions[4];
     ++source->matrixVersions[5];
-    source->input.consts[54][3] = -source->input.consts[54][3];
-    R_DirtyCodeConstant(source, 0x36u);
+    source->input.consts[CONST_SRC_CODE_DEPTH_FROM_CLIP][3] = -source->input.consts[CONST_SRC_CODE_DEPTH_FROM_CLIP][3];
+    R_DirtyCodeConstant(source, CONST_SRC_CODE_DEPTH_FROM_CLIP);
 }
 
 GfxCmdBufSourceState *__cdecl R_GetCodeMatrix(
@@ -564,14 +564,7 @@ const GfxImage *__cdecl R_GetTextureFromCode(
 {
     const char *v3; // eax
 
-    if (codeTexture >= 0x1B)
-        MyAssertHandler(
-            ".\\r_state.cpp",
-            607,
-            0,
-            "codeTexture doesn't index TEXTURE_SRC_CODE_COUNT\n\t%i not in [0, %i)",
-            codeTexture,
-            27);
+    bcassert(codeTexture, TEXTURE_SRC_CODE_COUNT);
     iassert( source );
     *samplerState = source->input.codeImageSamplerStates[codeTexture];
     if ((*samplerState & 7) == 0)
@@ -1798,10 +1791,7 @@ unsigned int __cdecl R_HW_SetSamplerState(
         {
             if (r_logFile && r_logFile->current.integer)
                 RB_LogPrint("device->SetSamplerState( samplerIndex, D3DSAMP_MAGFILTER, magFilter )\n");
-            v17 = device->SetSamplerState(
-                samplerIndex,
-                D3DSAMP_MAGFILTER,
-                (unsigned __int16)(samplerState & 0xF000) >> 12);
+            v17 = device->SetSamplerState(samplerIndex, D3DSAMP_MAGFILTER, (unsigned __int16)(samplerState & 0xF000) >> 12);
             if (v17 < 0)
             {
                 do
@@ -1905,10 +1895,7 @@ unsigned int __cdecl R_HW_SetSamplerState(
             {
                 if (r_logFile && r_logFile->current.integer)
                     RB_LogPrint("device->SetSamplerState( samplerIndex, D3DSAMP_ADDRESSV, address )\n");
-                v13 = device->SetSamplerState(
-                    samplerIndex,
-                    D3DSAMP_ADDRESSV,
-                    (samplerState & 0xC00000) >> 22);
+                v13 = device->SetSamplerState(samplerIndex, D3DSAMP_ADDRESSV, (samplerState & 0xC00000) >> 22);
                 if (v13 < 0)
                 {
                     do
@@ -2207,18 +2194,18 @@ void __cdecl R_UpdateViewport(GfxCmdBufSourceState *source, GfxViewport *viewpor
     source->input.consts[10][1] = renderTargetHeight;
     source->input.consts[10][2] = invWidth;
     source->input.consts[10][3] = invHeight;
-    R_DirtyCodeConstant(source, 0xAu);
+    R_DirtyCodeConstant(source, CONST_SRC_CODE_RENDER_TARGET_SIZE);
     v2 = -lookupScale_4;
     source->input.consts[51][0] = lookupScale;
     source->input.consts[51][1] = v2;
     source->input.consts[51][2] = 0.0;
     source->input.consts[51][3] = 1.0;
-    R_DirtyCodeConstant(source, 0x33u);
+    R_DirtyCodeConstant(source, CONST_SRC_CODE_CLIP_SPACE_LOOKUP_SCALE);
     source->input.consts[52][0] = lookupOffseta;
     source->input.consts[52][1] = lookupOffset_4a;
     source->input.consts[52][2] = 0.0;
     source->input.consts[52][3] = 0.0;
-    R_DirtyCodeConstant(source, 0x34u);
+    R_DirtyCodeConstant(source, CONST_SRC_CODE_CLIP_SPACE_LOOKUP_OFFSET);
 }
 
 void __cdecl R_DisableSampler(GfxCmdBufState *state, unsigned int samplerIndex)
@@ -2236,9 +2223,9 @@ void __cdecl R_HW_DisableSampler(IDirect3DDevice9 *device, unsigned int samplerI
     {
         if (r_logFile && r_logFile->current.integer)
             RB_LogPrint("device->SetTexture( samplerIndex, 0 )\n");
-        hr = device->SetTexture(
-            samplerIndex,
-            0);
+
+        hr = device->SetTexture(samplerIndex,0);
+
         if (hr < 0)
         {
             do
@@ -2342,6 +2329,7 @@ void __cdecl R_SetRenderTarget(GfxCmdBufContext context, GfxRenderTargetId newTa
         context.source->viewMode = VIEW_MODE_NONE;
         context.source->viewportIsDirty = 1;
 
+        // LWSS: if this assert() goes off, it means that R_RENDERTARGET_SHADOWMAP_SUN is the new renderTargetId (Set in R_AddSpotShadowsForLight() - path with sm_qualitySpotShadow)
         iassert(context.source->renderTargetWidth == (int)gfxRenderTargets[newTargetId].width);
     }
 }
@@ -2467,7 +2455,7 @@ void __cdecl R_ClearScreenInternal(
         //    (GfxColor)nativeColor.packed,
         //    LODWORD(depth),
         //    stencil);
-        hr = device->Clear(0, 0, whichToClear, (GfxColor)nativeColor.packed, LODWORD(depth), stencil);
+        hr = device->Clear(0, 0, whichToClear, nativeColor.packed, depth, stencil);
         if (hr < 0)
         {
             do
@@ -2542,7 +2530,7 @@ void __cdecl R_HW_SetPolygonOffset(IDirect3DDevice9 *device, float scale, float 
         {
             if (r_logFile && r_logFile->current.integer)
                 RB_LogPrint("device->SetRenderState( D3DRS_SLOPESCALEDEPTHBIAS, FloatAsInt( &scale ) )\n");
-            hr = device->SetRenderState(D3DRS_SLOPESCALEDEPTHBIAS, LODWORD(scale));
+            hr = device->SetRenderState(D3DRS_SLOPESCALEDEPTHBIAS, FloatAsInt(scale));
             if (hr < 0)
             {
                 do
@@ -2567,7 +2555,7 @@ void __cdecl R_HW_SetPolygonOffset(IDirect3DDevice9 *device, float scale, float 
     {
         if (r_logFile && r_logFile->current.integer)
             RB_LogPrint("device->SetRenderState( D3DRS_DEPTHBIAS, FloatAsInt( &bias ) )\n");
-        v5 = device->SetRenderState(D3DRS_DEPTHBIAS, LODWORD(bias));
+        v5 = device->SetRenderState(D3DRS_DEPTHBIAS, FloatAsInt(bias));
         if (v5 < 0)
         {
             do
@@ -2606,6 +2594,13 @@ void __cdecl R_SetCompleteState(IDirect3DDevice9 *device, unsigned int *stateBit
     R_ForceSetStencilState(device, stateBits[1]);
 }
 
+void __cdecl R_InitLocalCmdBufState(GfxCmdBufState *state)
+{
+    memcpy(state, &gfxCmdBufState, sizeof(GfxCmdBufState));
+    memset(state->vertexShaderConstState, 0, sizeof(state->vertexShaderConstState));
+    memset(state->pixelShaderConstState, 0,  sizeof(state->pixelShaderConstState));
+}
+
 void R_DrawCall(
     DrawCallCallback callback,
     const void* userData,
@@ -2625,19 +2620,15 @@ void R_DrawCall(
     context.state = &cmdBuf;
 
     R_BeginView(source, &viewInfo->sceneDef, viewParms);
-    //R_InitLocalCmdBufState(&cmdBuf);
-    memcpy(&cmdBuf, &gfxCmdBufState, sizeof(cmdBuf));
-    memset(cmdBuf.vertexShaderConstState, 0, sizeof(cmdBuf.vertexShaderConstState));
-    memset(cmdBuf.pixelShaderConstState, 0, sizeof(cmdBuf.pixelShaderConstState));
+
+    R_InitLocalCmdBufState(&cmdBuf);
 
     if (prepassCmdBufEA)
     {
         prepassContext.source = source;
         prepassContext.state = &prepassCmdBuf;
-        //R_InitLocalCmdBufState(&prepassCmdBuf);
-        memcpy(&prepassCmdBuf, &gfxCmdBufState, sizeof(prepassCmdBuf));
-        memset(prepassCmdBuf.vertexShaderConstState, 0, sizeof(prepassCmdBuf.vertexShaderConstState));
-        memset(prepassCmdBuf.pixelShaderConstState, 0, sizeof(prepassCmdBuf.pixelShaderConstState));
+
+        R_InitLocalCmdBufState(&prepassCmdBuf);
 
         callback(userData, context, prepassContext);
         memcpy(&gfxCmdBufState, &prepassCmdBuf, sizeof(gfxCmdBufState));
@@ -2651,7 +2642,7 @@ void R_DrawCall(
     memcpy(&gfxCmdBufState, &cmdBuf, sizeof(gfxCmdBufState));
 }
 
-void __cdecl R_SetCodeConstant(GfxCmdBufSourceState *source, unsigned int constant, float x, float y, float z, float w)
+void __cdecl R_SetCodeConstant(GfxCmdBufSourceState *source, CodeConstant constant, float x, float y, float z, float w)
 {
     float *v6; // [esp+0h] [ebp-4h]
 
@@ -2669,6 +2660,59 @@ void __cdecl R_SetCodeConstant(GfxCmdBufSourceState *source, unsigned int consta
     v6[2] = z;
     v6[3] = w;
     R_DirtyCodeConstant(source, constant);
+}
+
+void __cdecl R_SetCodeConstantFromVec4(GfxCmdBufSourceState *source, CodeConstant constant, float *value)
+{
+    float *v3; // [esp+0h] [ebp-4h]
+
+    iassert(constant < CONST_SRC_CODE_COUNT_FLOAT4);
+
+    v3 = source->input.consts[constant];
+    v3[0] = value[0];
+    v3[1] = value[1];
+    v3[2] = value[2];
+    v3[3] = value[3];
+    R_DirtyCodeConstant(source, constant);
+}
+
+void __cdecl R_DirtyCodeConstant(GfxCmdBufSourceState *source, CodeConstant constant)
+{
+    iassert(constant < ARRAY_COUNT(source->constVersions));
+
+    ++source->constVersions[constant];
+}
+
+void __cdecl R_UpdateCodeConstant(
+    GfxCmdBufSourceState *source,
+    CodeConstant constant,
+    float x,
+    float y,
+    float z,
+    float w)
+{
+    float *v6; // [esp+0h] [ebp-8h]
+
+    if (x != source->input.consts[constant][0]
+        || y != source->input.consts[constant][1]
+        || z != source->input.consts[constant][2]
+        || w != source->input.consts[constant][3])
+    {
+        if (constant >= 0x3A)
+            MyAssertHandler(
+                "c:\\trees\\cod3\\src\\gfx_d3d\\r_state.h",
+                495,
+                0,
+                "constant doesn't index CONST_SRC_CODE_COUNT_FLOAT4\n\t%i not in [0, %i)",
+                constant,
+                58);
+        v6 = source->input.consts[constant];
+        *v6 = x;
+        v6[1] = y;
+        v6[2] = z;
+        v6[3] = w;
+        R_DirtyCodeConstant(source, constant);
+    }
 }
 
 
@@ -2694,9 +2738,7 @@ void __cdecl R_SetAlphaAntiAliasingState(IDirect3DDevice9 *device, __int16 state
     {
         if (r_logFile && r_logFile->current.integer)
             RB_LogPrint("device->SetRenderState( D3DRS_ADAPTIVETESS_Y, aaAlphaFormat )\n");
-        hr = device->SetRenderState(
-            D3DRS_ADAPTIVETESS_Y,
-            aaAlphaFormat);
+        hr = device->SetRenderState(D3DRS_ADAPTIVETESS_Y, aaAlphaFormat);
         if (hr < 0)
         {
             do

@@ -225,21 +225,14 @@ void __cdecl R_TessCodeMeshList_AddCodeMeshArgs(
     unsigned int argGlobalIndex; // [esp+18h] [ebp-14h]
     unsigned int argCount; // [esp+20h] [ebp-Ch]
     unsigned int argOffset; // [esp+24h] [ebp-8h]
-    unsigned int constantId; // [esp+28h] [ebp-4h]
+    CodeConstant constantId; // [esp+28h] [ebp-4h]
 
     argOffset = codeMesh->argOffset;
     argCount = codeMesh->argCount;
     for (argIndex = 0; argIndex != argCount; ++argIndex)
     {
-        constantId = argIndex + 55;
-        if (argIndex + 55 > 0x38)
-            MyAssertHandler(
-                ".\\rb_tess.cpp",
-                154,
-                0,
-                "%s\n\t(constantId) = %i",
-                "(constantId <= CONST_SRC_CODE_CODE_MESH_ARG_LAST)",
-                constantId);
+        constantId = (CodeConstant)((int)CONST_SRC_CODE_CODE_MESH_ARG_0 + argIndex);
+        iassert(constantId <= CONST_SRC_CODE_CODE_MESH_ARG_LAST);
         argGlobalIndex = argOffset + argIndex;
         if (argOffset + argIndex >= data->codeMeshArgsCount)
             MyAssertHandler(
@@ -316,9 +309,9 @@ unsigned int __cdecl R_TessMarkMeshList(const GfxDrawSurfListArgs *listArgs, Gfx
     if (baseTechType == TECHNIQUE_LIT_BEGIN)
     {
         if (sc_enable->current.enabled)
-            R_SetCodeImageTexture(context.source, 0x10u, gfxRenderTargets[6].image);
+            R_SetCodeImageTexture(context.source, TEXTURE_SRC_CODE_DYNAMIC_SHADOWS, gfxRenderTargets[R_RENDERTARGET_DYNAMICSHADOWS].image);
         else
-            R_SetCodeImageTexture(context.source, 0x10u, rgp.whiteImage);
+            R_SetCodeImageTexture(context.source, TEXTURE_SRC_CODE_DYNAMIC_SHADOWS, rgp.whiteImage);
     }
     drawSurf.fields = drawSurfList->fields;
     if (context.source->objectPlacement != &rg.identityPlacement)
@@ -550,9 +543,9 @@ void __cdecl R_SetParticleCloudConstants(GfxCmdBufSourceState *source, const Gfx
     particleCloudMatrix[1] = viewAxis[0][1];
     particleCloudMatrix[2] = viewAxis[1][0];
     particleCloudMatrix[3] = viewAxis[1][1];
-    R_SetCodeConstantFromVec4(source, 0x35u, particleCloudMatrix);
+    R_SetCodeConstantFromVec4(source, CONST_SRC_CODE_PARTICLE_CLOUD_MATRIX, particleCloudMatrix);
     Byte4UnpackBgra((const unsigned __int8 *)&cloud->color, particleColor);
-    R_SetCodeConstantFromVec4(source, 0x11u, particleColor);
+    R_SetCodeConstantFromVec4(source, CONST_SRC_CODE_PARTICLE_CLOUD_COLOR, particleColor);
 }
 
 void __cdecl RB_Vec3DirWorldToView(const GfxCmdBufSourceState *source, const float *worldDir, float *viewDir)
@@ -696,9 +689,9 @@ unsigned int __cdecl R_TessXModelSkinnedDrawSurfList(
         if (baseTechType == TECHNIQUE_LIT_BEGIN)
         {
             if (sc_enable->current.enabled && (drawSurf.fields.customIndex != 0))
-                R_SetCodeImageTexture(commonSource, 0x10u, gfxRenderTargets[6].image);
+                R_SetCodeImageTexture(commonSource, TEXTURE_SRC_CODE_DYNAMIC_SHADOWS, gfxRenderTargets[R_RENDERTARGET_DYNAMICSHADOWS].image);
             else
-                R_SetCodeImageTexture(commonSource, 0x10u, rgp.whiteImage);
+                R_SetCodeImageTexture(commonSource, TEXTURE_SRC_CODE_DYNAMIC_SHADOWS, rgp.whiteImage);
             R_SetupPassPerObjectArgs(context);
             if (prepassContext.state)
             {
@@ -983,9 +976,9 @@ unsigned int __cdecl R_TessXModelRigidDrawSurfList(
         if (baseTechType == TECHNIQUE_LIT_BEGIN)
         {
             if (sc_enable->current.enabled && drawSurf.fields.customIndex != 0)
-                R_SetCodeImageTexture(commonSource, 0x10u, gfxRenderTargets[6].image);
+                R_SetCodeImageTexture(commonSource, TEXTURE_SRC_CODE_DYNAMIC_SHADOWS, gfxRenderTargets[R_RENDERTARGET_DYNAMICSHADOWS].image);
             else
-                R_SetCodeImageTexture(commonSource, 0x10u, rgp.whiteImage);
+                R_SetCodeImageTexture(commonSource, TEXTURE_SRC_CODE_DYNAMIC_SHADOWS, rgp.whiteImage);
             if (prepassContext.state)
             {
                 R_SetupPassCriticalPixelShaderArgs(prepassContext);
@@ -1071,7 +1064,7 @@ void __cdecl R_DrawStaticModelPreTessSurfLit(const unsigned int *primDrawSurfPos
     unsigned int count; // [esp+8h] [ebp-8h] BYREF
     GfxStaticModelPreTessSurf pretessSurf; // [esp+Ch] [ebp-4h] BYREF
 
-    R_SetCodeImageTexture(context.source, 0x10u, rgp.whiteImage);
+    R_SetCodeImageTexture(context.source, TEXTURE_SRC_CODE_DYNAMIC_SHADOWS, rgp.whiteImage);
     R_SetupCachedStaticModelLighting(context.source);
     R_SetupPassPerObjectArgs(context);
     readCmdBuf.primDrawSurfPos = primDrawSurfPos;
@@ -1224,7 +1217,7 @@ unsigned int __cdecl R_TessStaticModelRigidDrawSurfList(
     iassert( g_primStats );
     if (baseTechType == TECHNIQUE_LIT_BEGIN)
     {
-        R_SetCodeImageTexture(commonSource, 0x10u, rgp.whiteImage);
+        R_SetCodeImageTexture(commonSource, TEXTURE_SRC_CODE_DYNAMIC_SHADOWS, rgp.whiteImage);
         if (prepassContext.state)
             R_SetupPassPerObjectArgs(prepassContext);
         R_SetupPassPerObjectArgs(context);
@@ -1307,9 +1300,9 @@ unsigned int __cdecl R_TessXModelRigidSkinnedDrawSurfList(
         if (baseTechType == TECHNIQUE_LIT_BEGIN)
         {
             if (sc_enable->current.enabled && (drawSurf.fields.customIndex != 0))
-                R_SetCodeImageTexture(commonSource, 0x10u, gfxRenderTargets[6].image);
+                R_SetCodeImageTexture(commonSource, TEXTURE_SRC_CODE_DYNAMIC_SHADOWS, gfxRenderTargets[R_RENDERTARGET_DYNAMICSHADOWS].image);
             else
-                R_SetCodeImageTexture(commonSource, 0x10u, rgp.whiteImage);
+                R_SetCodeImageTexture(commonSource, TEXTURE_SRC_CODE_DYNAMIC_SHADOWS, rgp.whiteImage);
         }
         drawSurfSubKey = drawSurfSubMask.packed & drawSurf.packed;
         do
@@ -1439,9 +1432,9 @@ unsigned int __cdecl R_TessTrianglesList(const GfxDrawSurfListArgs *listArgs, Gf
     if (baseTechType == TECHNIQUE_LIT)
     {
         if (sc_enable->current.enabled)
-            R_SetCodeImageTexture(commonSource, 0x10u, gfxRenderTargets[6].image);
+            R_SetCodeImageTexture(commonSource, TEXTURE_SRC_CODE_DYNAMIC_SHADOWS, gfxRenderTargets[R_RENDERTARGET_DYNAMICSHADOWS].image);
         else
-            R_SetCodeImageTexture(commonSource, 0x10u, rgp.whiteImage);
+            R_SetCodeImageTexture(commonSource, TEXTURE_SRC_CODE_DYNAMIC_SHADOWS, rgp.whiteImage);
         R_SetupPassPerObjectArgs(context);
         R_SetupPassPerPrimArgs(context);
         if (prepassContext.state)
@@ -1505,9 +1498,9 @@ unsigned int __cdecl R_TessBModel(const GfxDrawSurfListArgs *listArgs, GfxCmdBuf
     if (baseTechType == TECHNIQUE_LIT)
     {
         if (sc_enable->current.enabled)
-            R_SetCodeImageTexture(commonSource, 0x10u, gfxRenderTargets[6].image);
+            R_SetCodeImageTexture(commonSource, TEXTURE_SRC_CODE_DYNAMIC_SHADOWS, gfxRenderTargets[R_RENDERTARGET_DYNAMICSHADOWS].image);
         else
-            R_SetCodeImageTexture(commonSource, 0x10u, rgp.whiteImage);
+            R_SetCodeImageTexture(commonSource, TEXTURE_SRC_CODE_DYNAMIC_SHADOWS, rgp.whiteImage);
     }
 
     R_ChangeDepthHackNearClip(commonSource, 0);

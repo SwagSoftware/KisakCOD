@@ -303,7 +303,7 @@ int __cdecl XModelGetNumLods(const XModel *model);
 double __cdecl XModelGetLodOutDist(const XModel *model);
 int __cdecl XModelNumBones(const XModel *model);
 const DObjAnimMat *__cdecl XModelGetBasePose(const XModel *model);
-XModelLodRampType __cdecl XModelGetLodForDist(const XModel *model, float dist);
+int __cdecl XModelGetLodForDist(const XModel *model, float dist);
 void __cdecl XModelSetTestLods(unsigned int lodLevel, float dist);
 double __cdecl XModelGetLodDist(const XModel *model, unsigned int lod);
 int __cdecl XModelGetContents(const XModel *model);

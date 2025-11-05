@@ -470,9 +470,9 @@ void __cdecl R_DrawBspDrawSurfsLitPreTess(const unsigned int *primDrawSurfPos, G
     unsigned int count; // [esp+28h] [ebp-4h] BYREF
 
     if (sc_enable->current.enabled)
-        R_SetCodeImageTexture(context.source, 0x10u, gfxRenderTargets[6].image);
+        R_SetCodeImageTexture(context.source, TEXTURE_SRC_CODE_DYNAMIC_SHADOWS, gfxRenderTargets[R_RENDERTARGET_DYNAMICSHADOWS].image);
     else
-        R_SetCodeImageTexture(context.source, 0x10u, rgp.whiteImage);
+        R_SetCodeImageTexture(context.source, TEXTURE_SRC_CODE_DYNAMIC_SHADOWS, rgp.whiteImage);
     cmdBuf.primDrawSurfPos = primDrawSurfPos;
     while (R_ReadBspPreTessDrawSurfs(&cmdBuf, &list, &count, &baseIndex))
     {

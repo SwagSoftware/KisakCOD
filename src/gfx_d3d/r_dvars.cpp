@@ -251,6 +251,9 @@
  const dvar_t *r_customMode;
  const dvar_t *r_altModelLightingUpdate;
  const dvar_t *r_preloadShaders;
+ // LWSS ADD
+ const dvar_t *r_showSunDirectionDebug; // from blops
+ // LWSS END
 
  const char *g_profile_mode_values[2] =
  {
@@ -1222,7 +1225,10 @@
          minbu,
          DVAR_SAVED | DVAR_CHEAT,
          "Sun shadow center, 0 0 0 means don't override");
+     minbv.value.max = 10.f;
+#ifdef KISAK_PURE
      minbv.value.max = 1.0f;
+#endif
      minbv.value.min = 0.25f;
      sm_sunShadowScale = Dvar_RegisterFloat("sm_sunShadowScale", 1.0f, minbv, DVAR_SAVED | DVAR_CHEAT, "Sun shadow scale optimization");
      sm_strictCull = Dvar_RegisterBool("sm_strictCull", 1, DVAR_CHEAT, "Strict shadow map cull");
@@ -1485,6 +1491,10 @@
          false,
          DVAR_ARCHIVE | DVAR_LATCH,
          "Force D3D to draw dummy geometry with all shaders during level load; may fix long pauses at level start.");
+
+     // LWSS ADd
+     r_showSunDirectionDebug = Dvar_RegisterBool("r_showSunDirectionDebug", false, DVAR_NOFLAG, "Toggles the display of sun direction debug");
+     // LWSS END
      R_ReflectionProbeRegisterDvars();
  }
 

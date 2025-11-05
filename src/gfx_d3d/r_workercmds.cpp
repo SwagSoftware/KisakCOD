@@ -21,7 +21,7 @@
 #include <setjmp.h>
 
 void(__cdecl *g_cmdExecFailed[17])();
-volatile int g_waitTypeMainThread;
+volatile WorkerCmdType g_waitTypeMainThread;
 
 //long volatile g_workerCmdWaitCount 85b4fc54     gfx_d3d : r_workercmds.obj
 
@@ -43,7 +43,7 @@ SceneEntCmd g_addSceneEntBuf[1];
 GfxSpotShadowEntCmd g_spotShadowEntBuf[256];
 ShadowCookieCmd g_shadowCookieBuf[1];
 
-WorkerCmds g_workerCmds[17];
+WorkerCmds g_workerCmds[WRKCMD_COUNT];
 
 
 int __cdecl R_FXNonDependentOrSpotLightPending(void* args)
@@ -77,13 +77,12 @@ void __cdecl TRACK_r_workercmds()
     track_static_alloc_internal(g_workerCmds, 2176, "g_workerCmds", 18);
 }
 
-LONG g_workerCmdMinType;
+WorkerCmdType g_workerCmdMinType;
 int __cdecl R_ProcessWorkerCmdsWithTimeoutInternal(int(__cdecl *timeout)())
 {
     int processed; // [esp+0h] [ebp-Ch]
-    int minType; // [esp+4h] [ebp-8h]
-    LONG type; // [esp+8h] [ebp-4h]
-    LONG typea; // [esp+8h] [ebp-4h]
+    WorkerCmdType minType; // [esp+4h] [ebp-8h]
+    WorkerCmdType type; // [esp+8h] [ebp-4h]
 
     if (timeout())
         return 1;
@@ -104,21 +103,21 @@ int __cdecl R_ProcessWorkerCmdsWithTimeoutInternal(int(__cdecl *timeout)())
         }
         minType = g_workerCmdMinType;
         if (g_workerCmdMinType == 0x7FFFFFFF)
-            minType = 0;
-        for (typea = minType; typea < 17; ++typea)
+            minType = WRKCMD_FIRST_FRONTEND;
+        for (type = minType; type < WRKCMD_COUNT; ++type)
         {
-            if (g_workerCmds[typea].outSize > 0)
+            if (g_workerCmds[type].outSize > 0)
             {
-                while (R_ProcessWorkerCmd(typea))
+                while (R_ProcessWorkerCmd(type))
                 {
                     if (timeout())
                         return 1;
-                    if (g_workerCmdMinType < typea)
+                    if (g_workerCmdMinType < type)
                         goto restart_2;
                     processed = 1;
                 }
             }
-            InterlockedCompareExchange(&g_workerCmdMinType, 0x7FFFFFFF, typea);
+            InterlockedCompareExchange((volatile unsigned int*)&g_workerCmdMinType, 0x7FFFFFFF, type);
         }
         if (timeout())
             return 1;
@@ -143,7 +142,7 @@ void __cdecl R_ProcessWorkerCmdsWithTimeout(int(__cdecl *timeout)(), int forever
     }
 }
 
-void __cdecl R_WaitWorkerCmdsOfType(int type)
+void __cdecl R_WaitWorkerCmdsOfType(WorkerCmdType type)
 {
     iassert(Sys_IsMainThread());
     g_waitTypeMainThread = type;
@@ -153,13 +152,13 @@ void __cdecl R_WaitWorkerCmdsOfType(int type)
         KISAK_NULLSUB();
         R_ProcessWorkerCmdsWithTimeout(R_WorkerCmdsFinished, 1);
     }
-    g_waitTypeMainThread = -1;
+    g_waitTypeMainThread = (WorkerCmdType)-1;
 }
 
-void __cdecl R_NotifyWorkerCmdType(int type)
+void __cdecl R_NotifyWorkerCmdType(WorkerCmdType type)
 {
     if (g_workerCmdMinType > type)
-        InterlockedCompareExchange(&g_workerCmdMinType, type, g_workerCmdMinType);
+        InterlockedCompareExchange((volatile unsigned int *)&g_workerCmdMinType, type, g_workerCmdMinType);
     if (g_workerCmdWaitCount)
         Sys_SetWorkerCmdEvent();
 }
@@ -172,9 +171,8 @@ int __cdecl R_WorkerCmdsFinished()
 void __cdecl R_ProcessWorkerCmds()
 {
     int processed; // [esp+0h] [ebp-Ch]
-    int minType; // [esp+4h] [ebp-8h]
-    int type; // [esp+8h] [ebp-4h]
-    int typea; // [esp+8h] [ebp-4h]
+    WorkerCmdType minType; // [esp+4h] [ebp-8h]
+    WorkerCmdType type; // [esp+8h] [ebp-4h]
 
     Sys_ResetWorkerCmdEvent();
     do
@@ -189,113 +187,24 @@ void __cdecl R_ProcessWorkerCmds()
         }
         minType = g_workerCmdMinType;
         if (g_workerCmdMinType == 0x7FFFFFFF)
-            minType = 0;
-        for (typea = minType; typea < 17; ++typea)
+            minType = WRKCMD_FIRST_FRONTEND;
+        for (type = minType; type < WRKCMD_COUNT; ++type)
         {
-            if (g_workerCmds[typea].outSize > 0)
+            if (g_workerCmds[type].outSize > 0)
             {
-                while (R_ProcessWorkerCmd(typea))
+                while (R_ProcessWorkerCmd(type))
                 {
-                    if (g_workerCmdMinType < typea)
+                    if (g_workerCmdMinType < type)
                         goto restart_1;
                     processed = 1;
                 }
             }
-            InterlockedCompareExchange(&g_workerCmdMinType, 0x7FFFFFFF, typea);
+            InterlockedCompareExchange((volatile unsigned int*)&g_workerCmdMinType, 0x7FFFFFFF, type);
         }
     } while (processed || minType);
 }
 
-int __cdecl R_ProcessWorkerCmd(LONG type)
-{
-    LONG v2; // eax
-    LONG v3; // eax
-    unsigned int bufCount; // [esp+0h] [ebp-7A4h]
-    unsigned __int8 data[1920]; // [esp+4h] [ebp-7A0h] BYREF
-    int dataSize; // [esp+788h] [ebp-1Ch]
-    WorkerCmds *workerCmds; // [esp+78Ch] [ebp-18h]
-    unsigned int currentCount; // [esp+790h] [ebp-14h]
-    unsigned int startPos; // [esp+794h] [ebp-10h]
-    unsigned int newStartPos; // [esp+798h] [ebp-Ch]
-    unsigned int i; // [esp+79Ch] [ebp-8h]
-    unsigned int count; // [esp+7A0h] [ebp-4h]
-
-    workerCmds = &g_workerCmds[type];
-    dataSize = workerCmds->dataSize;
-    bufCount = workerCmds->bufCount;
-    iassert( !(workerCmds->bufSize % dataSize) );
-    while (InterlockedExchangeAdd((LONG*)&workerCmds->outSize, -1) <= 0)
-    {
-        if (InterlockedExchangeAdd((LONG*)&workerCmds->outSize, 1) < 0)
-            return 0;
-    }
-    if (g_cmdOutputBusy[type])
-    {
-        while (1)
-        {
-            startPos = workerCmds->startPos;
-            memcpy(data, &workerCmds->buf[dataSize * startPos], dataSize);
-            if (g_cmdOutputBusy[type](data))
-            {
-                InterlockedExchangeAdd((LONG*)&workerCmds->outSize, 1);
-                return 0;
-            }
-            newStartPos = startPos + 1;
-            if (startPos + 1 == bufCount)
-                newStartPos = 0;
-            v2 = InterlockedCompareExchange((LONG*)&workerCmds->startPos, newStartPos, startPos);
-            if (v2 == startPos)
-                break;
-            if (g_cmdExecFailed[type])
-                g_cmdExecFailed[type]();
-        }
-        KISAK_NULLSUB();
-        R_ProcessWorkerCmdInternal(type, data);
-        InterlockedExchangeAdd((LONG*)&workerCmds->inSize, -1);
-        if (g_workerCmdWaitCount)
-            Sys_SetWorkerCmdEvent();
-    }
-    else
-    {
-        iassert( !g_cmdExecFailed[type] );
-        if (InterlockedExchangeAdd((LONG*)&workerCmds->outSize, -9) < 9)
-        {
-            InterlockedExchangeAdd((LONG*)&workerCmds->outSize, 9);
-            count = 1;
-        }
-        else
-        {
-            count = 10;
-        }
-        do
-        {
-            startPos = workerCmds->startPos;
-            currentCount = bufCount - startPos;
-            if (count < bufCount - startPos)
-            {
-                currentCount = count;
-                newStartPos = count + startPos;
-            }
-            else
-            {
-                memcpy(&data[dataSize * currentCount], workerCmds->buf, dataSize * (count - currentCount));
-                newStartPos = count - currentCount;
-            }
-            memcpy(data, &workerCmds->buf[dataSize * startPos], dataSize * currentCount);
-            v3 = InterlockedCompareExchange((LONG*)&workerCmds->startPos, newStartPos, startPos);
-        } while (v3 != startPos);
-        KISAK_NULLSUB();
-        for (i = 0; i < count; ++i)
-            R_ProcessWorkerCmdInternal(type, &data[dataSize * i]);
-        //InterlockedExchangeAdd(&workerCmds->inSize, -count);
-        InterlockedExchangeAdd((LONG*)&workerCmds->inSize, -(int)count);
-        if (g_workerCmdWaitCount)
-            Sys_SetWorkerCmdEvent();
-    }
-    return 1;
-}
-
-int __cdecl R_ProcessWorkerCmd(int type)
+int __cdecl R_ProcessWorkerCmd(WorkerCmdType type)
 {
     int v2; // eax
     int v3; // eax
@@ -384,62 +293,62 @@ int __cdecl R_ProcessWorkerCmd(int type)
     return 1;
 }
 
-void __cdecl R_ProcessWorkerCmdInternal(int type, void *data)
+void __cdecl R_ProcessWorkerCmdInternal(WorkerCmdType type, void *data)
 {
     R_NotifyWorkerCmdType(type);
     switch (type)
     {
-    case 0:
+    case WRKCMD_UPDATE_FX_SPOT_LIGHT:
         R_ProcessCmd_UpdateFxSpotLight((FxCmd *)data);
         break;
-    case 1:
+    case WRKCMD_UPDATE_FX_NON_DEPENDENT:
         R_ProcessCmd_UpdateFxNonDependent((FxCmd *)data);
         break;
-    case 2:
+    case WRKCMD_UPDATE_FX_REMAINING:
         R_ProcessCmd_UpdateFxRemaining((FxCmd *)data);
         break;
-    case 3:
+    case WRKCMD_DPVS_CELL_STATIC:
         R_AddCellStaticSurfacesInFrustumCmd((DpvsStaticCellCmd *)data);
         break;
-    case 4:
+    case WRKCMD_DPVS_CELL_SCENE_ENT:
         R_AddCellSceneEntSurfacesInFrustumCmd((GfxWorldDpvsPlanes *)data);
         break;
-    case 5:
+    case WRKCMD_DPVS_CELL_DYN_MODEL:
         R_AddCellDynModelSurfacesInFrustumCmd((const DpvsDynamicCellCmd *)data);
         break;
-    case 6:
+    case WRKCMD_DPVS_CELL_DYN_BRUSH:
         R_AddCellDynBrushSurfacesInFrustumCmd((const DpvsDynamicCellCmd *)data);
         break;
-    case 7:
+    case WRKCMD_DPVS_ENTITY:
         R_AddEntitySurfacesInFrustumCmd((unsigned __int16 *)data);
         break;
-    case 8:
+    case WRKCMD_ADD_SCENE_ENT:
         R_AddAllSceneEntSurfacesCamera(*(const GfxViewInfo **)data);
         break;
-    case 9:
+    case WRKCMD_SPOT_SHADOW_ENT:
         R_AddSpotShadowEntCmd((const GfxSpotShadowEntCmd *)data);
         break;
-    case 10:
+    case WRKCMD_SHADOW_COOKIE:
         R_GenerateShadowCookiesCmd((ShadowCookieCmd *)data);
         break;
-    case 11:
+    case WRKCMD_BOUNDS_ENT_DELAYED:
         R_UpdateGfxEntityBoundsCmd((GfxSceneEntity **)data);
         break;
-    case 12:
+    case WRKCMD_SKIN_ENT_DELAYED:
         R_SkinGfxEntityCmd((GfxSceneEntity **)data);
         break;
-    case 13:
+    case WRKCMD_GENERATE_FX_VERTS:
         if (!dx.deviceLost)
             FX_GenerateVerts((FxGenerateVertsCmd *)data);
         break;
-    case 14:
+    case WRKCMD_GENERATE_MARK_VERTS:
         if (!dx.deviceLost)
             FX_GenerateMarkVertsForWorld(((FxCmd *)data)->localClientNum);
         break;
-    case 15:
+    case WRKCMD_SKIN_CACHED_STATICMODEL:
         R_SkinCachedStaticModelCmd((SkinCachedStaticModelCmd *)data);
         break;
-    case 16:
+    case WRKCMD_SKIN_XMODEL:
         R_SkinXModelCmd((WORD*)data);
         break;
     default:
@@ -595,7 +504,7 @@ void __cdecl  R_WorkerThread()
     }
 }
 
-void __cdecl R_AddWorkerCmd(int type, unsigned __int8 *data)
+void __cdecl R_AddWorkerCmd(WorkerCmdType type, unsigned __int8 *data)
 {
     LONG* Destination; // [esp+30h] [ebp-20h]
     int bufCount; // [esp+34h] [ebp-1Ch]

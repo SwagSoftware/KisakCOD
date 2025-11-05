@@ -205,10 +205,10 @@ double __cdecl FX_GetProfileEntryCost(const FxProfileEntry *entry)
     float costElem; // [esp+10h] [ebp-4h]
 
     costEffect = (double)entry->effectCount * (1.0f / 1024.0f);
-    costElem = (double)(entry->pendingElemCount + entry->activeElemCount) * 0.00048828125;
+    costElem = (double)(entry->pendingElemCount + entry->activeElemCount) * (1.0f / 2048.0f);
     v3 = costEffect - costElem;
     if (v3 < 0.0)
-        return (float)((double)(entry->pendingElemCount + entry->activeElemCount) * 0.00048828125);
+        return (float)((double)(entry->pendingElemCount + entry->activeElemCount) * (1.0f / 2048.0f));
     else
         return (float)((double)entry->effectCount * (1.0f / 1024.0f));
 }

@@ -18,13 +18,7 @@ void __cdecl RB_CalcGlowEffect(const GfxViewInfo *viewInfo);
 void __cdecl RB_ApplyGlowEffect(const GfxViewInfo *viewInfo);
 void __cdecl RB_ApplyGlowEffectPass(const GfxViewInfo *viewInfo, GfxImage *glowImage);
 void __cdecl RB_ApplyMergedPostEffects(const GfxViewInfo *viewInfo);
-void __cdecl R_UpdateCodeConstant(
-    GfxCmdBufSourceState *source,
-    unsigned int constant,
-    float x,
-    float y,
-    float z,
-    float w);
+
 void __cdecl RB_GetSceneDepthOfFieldEquation(
     float nearOutOfFocus,
     float nearInFocus,

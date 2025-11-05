@@ -2,46 +2,6 @@
 #include "r_material.h"
 #include <xanim/xanim.h>
 
-// KISAKTODO move out of header file
-
-static const char *g_imageProgNames[14] =
-{
-  "$shadow_cookie",
-  "$shadow_cookie_blur",
-  "$shadowmap_sun",
-  "$shadowmap_spot",
-  "$floatz",
-  "$post_effect_0",
-  "$post_effect_1",
-  "$pingpong_0",
-  "$pingpong_1",
-  "$resolved_scene",
-  "$savedscreen",
-  "$raw",
-  "$model_lighting",
-  "$model_lighting1"
-}; // idb
-
-static const char *imageTypeName[10] =
-{
-    "misc",
-    "debug",
-    "$tex+?",
-    "ui",
-    "lmap",
-    "light",
-    "f/x",
-    "hud",
-    "model",
-    "world"
-};
-
-static const char *g_platform_name[2] =
-{
-    "current",
-    "min_pc"
-};
-
  enum $92364187413C9A0320C404614F91083D : __int32
  {
      PICMIP_PLATFORM_USED    = 0x0,

@@ -1,13 +1,14 @@
 #include "r_bsp.h"
 #include "r_rendercmds.h"
-
+#include "r_drawsurf.h"
 
 void __cdecl R_InitDelayedCmdBuf(GfxDelayedCmdBuf *delayedCmdBuf)
 {
     delayedCmdBuf->primDrawSurfPos = -1;
     delayedCmdBuf->primDrawSurfSize = 0;
-    *(unsigned int *)&delayedCmdBuf->drawSurfKey.fields = -1;
-    HIDWORD(delayedCmdBuf->drawSurfKey.packed) = -1;
+    delayedCmdBuf->drawSurfKey.packed = 0xFFFFFFFFFFFFFFFF;
+    //*(unsigned int *)&delayedCmdBuf->drawSurfKey.fields = -1;
+    //HIDWORD(delayedCmdBuf->drawSurfKey.packed) = -1;
 }
 
 void __cdecl R_EndCmdBuf(GfxDelayedCmdBuf *delayedCmdBuf)
@@ -62,14 +63,7 @@ int __cdecl R_AllocDrawSurf(
     if (drawSurfList->current < drawSurfList->end)
     {
         delayedCmdBuf->drawSurfKey = drawSurf;
-        if (primDrawSurfPos >= 0x10000)
-            MyAssertHandler(
-                ".\\r_add_cmdbuf.cpp",
-                117,
-                0,
-                "primDrawSurfPos doesn't index 1 << MTL_SORT_OBJECT_ID_BITS\n\t%i not in [0, %i)",
-                primDrawSurfPos,
-                0x10000);
+        bcassert(primDrawSurfPos, (1 << MTL_SORT_OBJECT_ID_BITS));
         *(unsigned int *)&drawSurf.fields = (unsigned __int16)primDrawSurfPos | *(unsigned int *)&drawSurf.fields & 0xFFFF0000;
         drawSurfList->current->fields = drawSurf.fields;
         ++drawSurfList->current;

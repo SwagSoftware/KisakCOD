@@ -256,3 +256,6 @@ extern const dvar_t *r_aspectRatio;
 extern const dvar_t *r_customMode;
 extern const dvar_t *r_altModelLightingUpdate;
 extern const dvar_t *r_preloadShaders;
+// LWSS ADD
+extern const dvar_t *r_showSunDirectionDebug; // from blops
+// LWSS END

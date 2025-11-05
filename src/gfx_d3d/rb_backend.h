@@ -439,7 +439,7 @@ void __cdecl RB_SaveScreenCmd(GfxRenderCommandExecState *execState);
 void __cdecl RB_SaveScreenSectionCmd(GfxRenderCommandExecState *execState);
 void __cdecl R_ResolveSection(GfxCmdBufContext context, GfxImage *image);
 void __cdecl RB_BlendSavedScreenBlurredCmd(GfxRenderCommandExecState *execState);
-void __cdecl R_SetCodeImageTexture(GfxCmdBufSourceState *source, unsigned int codeTexture, const GfxImage *image);
+void __cdecl R_SetCodeImageTexture(GfxCmdBufSourceState *source, MaterialTextureSource codeTexture, const GfxImage *image);
 void __cdecl RB_BlendSavedScreenFlashedCmd(GfxRenderCommandExecState *execState);
 void __cdecl RB_DrawPointsCmd(GfxRenderCommandExecState *execState);
 void __cdecl RB_DrawPoints2D(const GfxCmdDrawPoints *cmd);
@@ -470,8 +470,6 @@ void __cdecl RB_DrawTriangles_Internal(
     const float (*st)[2]);
 void __cdecl RB_DrawProfileCmd(GfxRenderCommandExecState *execState);
 void __cdecl RB_SetMaterialColorCmd(GfxRenderCommandExecState *execState);
-void __cdecl R_SetCodeConstantFromVec4(GfxCmdBufSourceState *source, unsigned int constant, float *value);
-void __cdecl R_DirtyCodeConstant(GfxCmdBufSourceState *source, unsigned int constant);
 void __cdecl RB_SetViewportCmd(GfxRenderCommandExecState *execState);
 void __cdecl RB_LookupColor(unsigned __int8 c, GfxColor *color);
 void __cdecl RB_DrawText(const char *text, Font_s *font, float x, float y, GfxColor color);

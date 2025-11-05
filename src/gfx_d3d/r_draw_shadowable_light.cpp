@@ -4,6 +4,7 @@
 #include "rb_postfx.h"
 #include <devgui/devgui.h>
 #include <qcommon/com_bsp.h>
+#include "r_state.h"
 
 
 void __cdecl R_SetLightProperties(
@@ -53,8 +54,8 @@ void __cdecl R_SetLightProperties(
             "%s\n\t(light->radius) = %g",
             "(light->radius > 0.0f)",
             light->radius);
-    R_SetCodeImageTexture(source, 0xFu, def->attenuation.image);
-    R_SetCodeImageSamplerState(source, 0xFu, def->attenuation.samplerState);
+    R_SetCodeImageTexture(source, TEXTURE_SRC_CODE_LIGHT_ATTENUATION, def->attenuation.image);
+    R_SetCodeImageSamplerState(source, TEXTURE_SRC_CODE_LIGHT_ATTENUATION, def->attenuation.samplerState);
     Vec3Sub(light->origin, source->eyeOffset, lightOrigin);
     Vec3Scale(light->color, r_diffuseColorScale->current.value, diffuseColor);
     Vec3Scale(light->color, r_specularColorScale->current.value, specularColor);
@@ -65,28 +66,28 @@ void __cdecl R_SetLightProperties(
     source->input.consts[0][1] = v11;
     source->input.consts[0][2] = v12;
     source->input.consts[0][3] = v13;
-    R_DirtyCodeConstant(source, 0);
+    R_DirtyCodeConstant(source, CONST_SRC_CODE_LIGHT_POSITION);
     v9 = diffuseColor[1];
     v10 = diffuseColor[2];
     source->input.consts[1][0] = diffuseColor[0];
     source->input.consts[1][1] = v9;
     source->input.consts[1][2] = v10;
     source->input.consts[1][3] = 1.0;
-    R_DirtyCodeConstant(source, 1u);
+    R_DirtyCodeConstant(source, CONST_SRC_CODE_LIGHT_DIFFUSE);
     v7 = specularColor[1];
     v8 = specularColor[2];
     source->input.consts[2][0] = specularColor[0];
     source->input.consts[2][1] = v7;
     source->input.consts[2][2] = v8;
     source->input.consts[2][3] = 1.0;
-    R_DirtyCodeConstant(source, 2u);
+    R_DirtyCodeConstant(source, CONST_SRC_CODE_LIGHT_SPECULAR);
     v5 = light->dir[1];
     v6 = light->dir[2];
     source->input.consts[3][0] = light->dir[0];
     source->input.consts[3][1] = v5;
     source->input.consts[3][2] = v6;
     source->input.consts[3][3] = 0.0;
-    R_DirtyCodeConstant(source, 3u);
+    R_DirtyCodeConstant(source, CONST_SRC_CODE_LIGHT_SPOTDIR);
     if (light->type == 2 || hasShadowMap == LIGHT_HAS_SHADOWMAP)
     {
         if (light->cosHalfFovOuter >= (double)light->cosHalfFovInner)
@@ -101,36 +102,18 @@ void __cdecl R_SetLightProperties(
         spotDotBias = -spotDotScale * light->cosHalfFovOuter;
         spotExponent = (float)light->exponent;
         Vec4Set(source->input.consts[4], spotDotScale, spotDotBias, spotExponent, spotShadowFade);
-        R_DirtyCodeConstant(source, 4u);
+        R_DirtyCodeConstant(source, CONST_SRC_CODE_LIGHT_SPOTFACTORS);
     }
 }
 
 void __cdecl R_SetCodeImageSamplerState(
     GfxCmdBufSourceState *source,
-    unsigned int codeTexture,
+    MaterialTextureSource codeTexture,
     unsigned __int8 samplerState)
 {
-    const char *v3; // eax
+    bcassert(codeTexture, TEXTURE_SRC_CODE_COUNT);
+    iassert(samplerState & SAMPLER_FILTER_MASK);
 
-    if (codeTexture >= 0x1B)
-        MyAssertHandler(
-            "c:\\trees\\cod3\\src\\gfx_d3d\\r_state.h",
-            564,
-            0,
-            "codeTexture doesn't index TEXTURE_SRC_CODE_COUNT\n\t%i not in [0, %i)",
-            codeTexture,
-            27);
-    if ((samplerState & 7) == 0)
-    {
-        v3 = va("R_SetCodeImageSamplerState %d %d", codeTexture, samplerState);
-        MyAssertHandler(
-            "c:\\trees\\cod3\\src\\gfx_d3d\\r_state.h",
-            565,
-            0,
-            "%s\n\t%s",
-            "samplerState & SAMPLER_FILTER_MASK",
-            v3);
-    }
     source->input.codeImageSamplerStates[codeTexture] = samplerState;
 }
 
@@ -181,7 +164,7 @@ void __cdecl R_SetShadowableLight(
                 def = viewInfo->shadowableLights[shadowableLightIndex].def;
                 falloffShift = (double)def->lmapLookupStart * 0.001953125;
                 falloffScale = (double)def->attenuation.image->width * 0.001953125;
-                R_UpdateCodeConstant(source, 0xBu, falloffScale, 0.0, falloffShift, 0.0);
+                R_UpdateCodeConstant(source, CONST_SRC_CODE_LIGHT_FALLOFF_PLACEMENT, falloffScale, 0.0, falloffShift, 0.0);
                 hasShadowMap = LIGHT_HAS_NO_SHADOWMAP;
                 spotShadowFade = 0.0;
                 if (Com_BitCheckAssert(source->input.data->shadowableLightHasShadowMap, shadowableLightIndex, 32))
@@ -203,9 +186,9 @@ void __cdecl R_SetShadowableLight(
                     }
                     hasShadowMap = LIGHT_HAS_SHADOWMAP;
                     spotShadowFade = spotShadow->fade;
-                    R_SetCodeImageTexture(source, 8u, spotShadow->image);
+                    R_SetCodeImageTexture(source, TEXTURE_SRC_CODE_SHADOWMAP_SPOT, spotShadow->image);
                     if (!Vec4Compare(source->input.consts[50], spotShadow->pixelAdjust))
-                        R_SetCodeConstantFromVec4(source, 0x32u, (float*)spotShadow->pixelAdjust);
+                        R_SetCodeConstantFromVec4(source, CONST_SRC_CODE_SPOT_SHADOWMAP_PIXEL_ADJUST, (float*)spotShadow->pixelAdjust);
                 }
                 R_SetLightProperties(
                     source,

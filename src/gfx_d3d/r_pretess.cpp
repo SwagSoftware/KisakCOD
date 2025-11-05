@@ -38,7 +38,7 @@ void __cdecl R_EmitDrawSurfList(GfxDrawSurf *drawSurfs, unsigned int drawSurfCou
     // LWSS ADD from blops
     if (!drawSurfCount)
     {
-        return;
+        return; // I had this hit once (ever!) while dying
     }
     // LWSS END
 
@@ -55,20 +55,17 @@ void __cdecl R_EmitDrawSurfList(GfxDrawSurf *drawSurfs, unsigned int drawSurfCou
     }
 }
 
-void __cdecl R_MergeAndEmitDrawSurfLists(unsigned int firstStage, unsigned int stageCount)
+void __cdecl R_MergeAndEmitDrawSurfLists(DrawSurfType firstStage, int stageCount)
 {
     unsigned int v2; // eax
     signed int v3; // [esp+0h] [ebp-164h]
     unsigned int srcStageIndex; // [esp+38h] [ebp-12Ch]
-    unsigned int srcStageIndexa; // [esp+38h] [ebp-12Ch]
     int freeDrawSurfCount; // [esp+3Ch] [ebp-128h]
     unsigned int stageIndex; // [esp+40h] [ebp-124h]
-    unsigned int stageIndexa; // [esp+40h] [ebp-124h]
     signed int primarySortKey; // [esp+48h] [ebp-11Ch]
-    GfxDrawSurf *drawSurfs[34]; // [esp+4Ch] [ebp-118h]
+    GfxDrawSurf *drawSurfs[DRAW_SURF_TYPE_COUNT]; // [esp+4Ch] [ebp-118h]
     unsigned int dstStageIndex; // [esp+D8h] [ebp-8Ch]
-    unsigned int drawSurfCount[34]; // [esp+DCh] [ebp-88h]
-    unsigned int stageCounta; // [esp+170h] [ebp+Ch]
+    unsigned int drawSurfCount[DRAW_SURF_TYPE_COUNT]; // [esp+DCh] [ebp-88h]
     
     iassert(stageCount >= 1 && stageCount <= DRAW_SURF_TYPE_COUNT);
 
@@ -93,28 +90,28 @@ void __cdecl R_MergeAndEmitDrawSurfLists(unsigned int firstStage, unsigned int s
         }
         while (dstStageIndex)
         {
-            stageCounta = dstStageIndex;
+            stageCount = dstStageIndex;
             if (dstStageIndex == 1)
             {
                 R_EmitDrawSurfList(drawSurfs[0], drawSurfCount[0]);
                 return;
             }
             primarySortKey = drawSurfs[0]->fields.primarySortKey;
-            for (stageIndexa = 1; stageIndexa < dstStageIndex; ++stageIndexa)
+            for (stageIndex = 1; stageIndex < dstStageIndex; ++stageIndex)
             {
-                if (drawSurfs[stageIndexa]->fields.primarySortKey < primarySortKey)
-                    v3 = drawSurfs[stageIndexa]->fields.primarySortKey;
+                if (drawSurfs[stageIndex]->fields.primarySortKey < primarySortKey)
+                    v3 = drawSurfs[stageIndex]->fields.primarySortKey;
                 else
                     v3 = primarySortKey;
 
                 primarySortKey = v3;
             }
             dstStageIndex = 0;
-            for (srcStageIndexa = 0; srcStageIndexa < stageCounta; ++srcStageIndexa)
+            for (srcStageIndex = 0; srcStageIndex < stageCount; ++srcStageIndex)
             {
-                v2 = R_EmitDrawSurfListForKey(drawSurfs[srcStageIndexa], drawSurfCount[srcStageIndexa], primarySortKey); // KISAKTODO: change to blops style
-                drawSurfs[dstStageIndex] = &drawSurfs[srcStageIndexa][v2];
-                drawSurfCount[dstStageIndex] = drawSurfCount[srcStageIndexa] - v2;
+                v2 = R_EmitDrawSurfListForKey(drawSurfs[srcStageIndex], drawSurfCount[srcStageIndex], primarySortKey); // KISAKTODO: change to blops style
+                drawSurfs[dstStageIndex] = &drawSurfs[srcStageIndex][v2];
+                drawSurfCount[dstStageIndex] = drawSurfCount[srcStageIndex] - v2;
                 dstStageIndex += drawSurfCount[dstStageIndex] != 0;
             }
         }

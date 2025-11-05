@@ -673,22 +673,21 @@ void __cdecl R_GetStaticModelLightSurfs(const GfxLight **visibleLights, int visi
     for (lightIndex = 0; lightIndex < visibleCount; ++lightIndex)
     {
         light = visibleLights[lightIndex];
-        if (light->type != 3 && light->type != 2)
-            MyAssertHandler(
-                ".\\r_light.cpp",
-                720,
-                1,
-                "%s",
-                "light->type == GFX_LIGHT_TYPE_OMNI || light->type == GFX_LIGHT_TYPE_SPOT");
+
+        iassert(light->type == GFX_LIGHT_TYPE_OMNI || light->type == GFX_LIGHT_TYPE_SPOT);
+
         mins[0] = light->origin[0] - light->radius;
         mins[1] = light->origin[1] - light->radius;
         mins[2] = light->origin[2] - light->radius;
+
         maxs[0] = light->origin[0] + light->radius;
         maxs[1] = light->origin[1] + light->radius;
         maxs[2] = light->origin[2] + light->radius;
+
         surfData.drawSurfList.current = &scene.visLight[lightIndex].drawSurfs[scene.visLightShadow[lightIndex - 4].drawSurfCount];
         surfData.drawSurfList.end = (GfxDrawSurf*)&scene.visLightShadow[lightIndex - 3];
-        if (light->type == 3)
+
+        if (light->type == GFX_LIGHT_TYPE_OMNI)
         {
             g_staticModelLightCallback.position[0] = light->origin[0];
             g_staticModelLightCallback.position[1] = light->origin[1];
@@ -703,6 +702,7 @@ void __cdecl R_GetStaticModelLightSurfs(const GfxLight **visibleLights, int visi
             R_CalcSpotLightPlanes(light, g_staticModelLightCallback.planes);
             smodelCount = R_BoxStaticModels(mins, maxs, R_AllowStaticModelSpotLight, smodels, 1024);
         }
+
         for (index = 0; index < smodelCount; ++index)
         {
             smodelIndex = smodels[index];
@@ -719,13 +719,8 @@ void __cdecl R_GetStaticModelLightSurfs(const GfxLight **visibleLights, int visi
             {
                 material = *pMaterial;
                 iassert( material );
-                if (rgp.sortedMaterials[material->info.drawSurf.fields.materialSortedIndex] != material)
-                    MyAssertHandler(
-                        ".\\r_light.cpp",
-                        776,
-                        0,
-                        "%s",
-                        "rgp.sortedMaterials[material->info.drawSurf.fields.materialSortedIndex] == material");
+                iassert(rgp.sortedMaterials[material->info.drawSurf.fields.materialSortedIndex] == material);
+
                 if (Material_GetTechnique(material, TECHNIQUE_LIGHT_OMNI))
                 {
                     drawSurf = material->info.drawSurf;

@@ -5,6 +5,7 @@
 #include "r_rendercmds.h"
 #include "rb_postfx.h"
 #include "rb_sunshadow.h"
+#include "r_state.h"
 
 void __cdecl RB_SetSpotShadowOverlayScaleAndBias(const GfxSpotShadow *spotShadow)
 {
@@ -24,13 +25,13 @@ void __cdecl RB_SetSpotShadowOverlayScaleAndBias(const GfxSpotShadow *spotShadow
     {
         scale = 1.0f / ((zFar - zNear) * (farDepth - nearDepth));
         bias = -scale * ((zFar - zNear) * nearDepth + zNear);
-        R_UpdateCodeConstant(&gfxCmdBufSourceState, 0x15u, scale, bias, 1.0f, 1.0f);
+        R_UpdateCodeConstant(&gfxCmdBufSourceState, CONST_SRC_CODE_FILTER_TAP_0, scale, bias, 1.0f, 1.0f);
     }
     else
     {
         scale = 1.0f / (farDepth - nearDepth);
         bias = -scale * nearDepth;
-        R_UpdateCodeConstant(&gfxCmdBufSourceState, 0x15u, scale, bias, zNear, zFar);
+        R_UpdateCodeConstant(&gfxCmdBufSourceState, CONST_SRC_CODE_FILTER_TAP_0, scale, bias, zNear, zFar);
     }
 }
 
@@ -48,8 +49,8 @@ void __cdecl RB_DrawSpotShadowOverlay()
     if (viewInfo->spotShadowCount)
     {
         h = vidConfig.displayHeight * 0.25;
-        gfxCmdBufSourceState.input.codeImageSamplerStates[9] = 97;
-        R_SetCodeImageTexture(&gfxCmdBufSourceState, 9u, gfxRenderTargets[14].image);
+        gfxCmdBufSourceState.input.codeImageSamplerStates[TEXTURE_SRC_CODE_FEEDBACK] = (SAMPLER_CLAMP_V | SAMPLER_CLAMP_U | SAMPLER_FILTER_NEAREST);
+        R_SetCodeImageTexture(&gfxCmdBufSourceState, TEXTURE_SRC_CODE_FEEDBACK, gfxRenderTargets[R_RENDERTARGET_SHADOWMAP_SPOT].image);
         for (spotShadowIndex = 0; spotShadowIndex < viewInfo->spotShadowCount; ++spotShadowIndex)
         {
             t0 = spotShadowIndex * 0.25;
@@ -59,6 +60,6 @@ void __cdecl RB_DrawSpotShadowOverlay()
             RB_DrawStretchPic(rgp.shadowOverlayMaterial, x, 4.0, h, h, 0.0, t0, 1.0, t1, 0xFFFFFFFF, GFX_PRIM_STATS_HUD);
             RB_EndTessSurface();
         }
-        gfxCmdBufSourceState.input.codeImageSamplerStates[9] = 98;
+        gfxCmdBufSourceState.input.codeImageSamplerStates[TEXTURE_SRC_CODE_FEEDBACK] = (SAMPLER_CLAMP_V | SAMPLER_CLAMP_U | SAMPLER_FILTER_LINEAR);
     }
 }

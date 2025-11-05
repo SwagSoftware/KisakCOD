@@ -27,7 +27,7 @@ void __cdecl RB_TouchImage(GfxImage *image)
 {
     if (image->mapType == MAPTYPE_2D)
     {
-        R_SetCodeImageTexture(&gfxCmdBufSourceState, 9u, image);
+        R_SetCodeImageTexture(&gfxCmdBufSourceState, TEXTURE_SRC_CODE_FEEDBACK, image);
         R_Set2D(&gfxCmdBufSourceState);
         RB_DrawStretchPic(
             rgp.feedbackReplaceMaterial,
@@ -85,7 +85,7 @@ void __cdecl RB_TouchAllImages()
         RB_TouchImage(imageList.image[i]);
         v6 += imageList.image[i]->cardMemory.platform[0];
     }
-    R_SetCodeImageTexture(&gfxCmdBufSourceState, 9u, 0);
+    R_SetCodeImageTexture(&gfxCmdBufSourceState, TEXTURE_SRC_CODE_FEEDBACK, 0);
     if (!inScene)
     {
         do

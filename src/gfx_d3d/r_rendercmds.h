@@ -8,6 +8,8 @@
 #include "r_material.h"
 #include <qcommon/com_pack.h>
 
+enum CodeConstant : __int32; // r_state.h
+
 enum GfxRenderCommand : __int32
 {                                       // ...
     RC_END_OF_LIST = 0x0,
@@ -397,7 +399,7 @@ struct GfxSunShadow // sizeof=0x4A0
 {                                       // ...
     GfxMatrix lookupMatrix;
     GfxSunShadowProjection sunProj;
-    GfxSunShadowPartition partition[2];
+    GfxSunShadowPartition partition[2]; // 0 = partitionNear, 1 = partitionFar
 };
 struct __declspec(align(16)) GfxSpotShadow // sizeof=0x1F0
 {                                       // ...
@@ -786,13 +788,13 @@ void __cdecl R_AddCmdDrawConsoleTextPulseFX(
 void __cdecl R_AddCmdDrawQuadPic(const float (*verts)[2], const float *color, Material *material);
 void __cdecl R_BeginFrame();
 void R_UpdateFrontEndDvarOptions();
-void __cdecl R_SetInputCodeConstantFromVec4(GfxCmdBufInput *input, unsigned int constant, float *value);
-void __cdecl R_SetInputCodeImageTexture(GfxCmdBufInput *input, unsigned int codeTexture, const GfxImage *image);
+void __cdecl R_SetInputCodeConstantFromVec4(GfxCmdBufInput *input, CodeConstant constant, const float *value);
+void __cdecl R_SetInputCodeImageTexture(GfxCmdBufInput *input, MaterialTextureSource codeTexture, const GfxImage *image);
 bool __cdecl R_LightTweaksModified();
 void R_SetTestLods();
 bool __cdecl R_AreAnyImageOverridesActive();
 void R_SetOutdoorFeatherConst();
-void __cdecl R_SetInputCodeConstant(GfxCmdBufInput *input, unsigned int constant, float x, float y, float z, float w);
+void __cdecl R_SetInputCodeConstant(GfxCmdBufInput *input, CodeConstant constant, float x, float y, float z, float w);
 void R_EnvMapOverrideConstants();
 void __cdecl R_EndFrame();
 void __cdecl R_AddCmdClearScreen(int whichToClear, const float *color, float depth, unsigned __int8 stencil);

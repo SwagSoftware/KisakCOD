@@ -35,7 +35,7 @@ void __cdecl RB_SetInitialState()
     R_InitCmdBufState(&gfxCmdBufState);
     RB_InitSceneViewport();
     iassert( gfxRenderTargets[R_RENDERTARGET_FRAME_BUFFER].surface.color );
-    if (!g_allocateMinimalResources && !gfxRenderTargets[1].surface.depthStencil)
+    if (!g_allocateMinimalResources && !gfxRenderTargets[R_RENDERTARGET_FRAME_BUFFER].surface.depthStencil)
         MyAssertHandler(
             ".\\rb_state.cpp",
             64,

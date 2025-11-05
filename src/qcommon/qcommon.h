@@ -1476,6 +1476,9 @@ void CL_CubemapShotUsage();
 #endif
 
 
+
+#define FloatAsInt(f) (*(int*)&(f))
+
 /**
  * stristr - Case insensitive strstr()
  * @haystack: Where we will search for our @needle

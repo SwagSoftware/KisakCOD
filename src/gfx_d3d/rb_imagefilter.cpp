@@ -378,7 +378,11 @@ void __cdecl RB_SetupFilterPass(const GfxImageFilterPass *filterPass)
             filterPass->tapHalfCount,
             9);
     for (constIndex = 0; constIndex < filterPass->tapHalfCount; ++constIndex)
-        R_SetCodeConstantFromVec4(&gfxCmdBufSourceState, constIndex + 21, (float*)filterPass->tapOffsetsAndWeights[constIndex]);
+    {
+        //R_SetCodeConstantFromVec4(&gfxCmdBufSourceState, constIndex + 21, (float *)filterPass->tapOffsetsAndWeights[constIndex]);
+        R_SetCodeConstantFromVec4(&gfxCmdBufSourceState, (CodeConstant)((int)CONST_SRC_CODE_FILTER_TAP_0 + constIndex), (float *)filterPass->tapOffsetsAndWeights[constIndex]);
+    }
+        
 }
 
 void __cdecl RB_FilterPingPong(const GfxImageFilter *filter, int passIndex)
@@ -389,10 +393,10 @@ void __cdecl RB_FilterPingPong(const GfxImageFilter *filter, int passIndex)
 
     pingpong = passIndex & 1;
     if (passIndex)
-        image = gfxRenderTargets[8 - pingpong].image;
+        image = gfxRenderTargets[R_RENDERTARGET_PINGPONG_1 - pingpong].image;
     else
         image = filter->sourceImage;
-    R_SetCodeImageTexture(&gfxCmdBufSourceState, 9u, image);
+    R_SetCodeImageTexture(&gfxCmdBufSourceState, TEXTURE_SRC_CODE_FEEDBACK, image);
     if (passIndex == filter->passCount - 1)
         finalTarget = filter->finalTarget;
     else
@@ -416,7 +420,7 @@ void __cdecl RB_GlowFilterImage(float radius)
             backEnd.glowCount);
     if (radius != 0.0f)
     {
-        radiusScale = (float)gfxRenderTargets[11].width / (float)gfxRenderTargets[4].width;
+        radiusScale = (float)gfxRenderTargets[R_RENDERTARGET_POST_EFFECT_0].width / (float)gfxRenderTargets[R_RENDERTARGET_RESOLVED_SCENE].width;
         radiusa = radius * radiusScale;
         backEnd.glowImage = gfxRenderTargets[RB_ApplyGlowFilter(
             radiusa,
@@ -439,24 +443,9 @@ GfxRenderTargetId __cdecl RB_ApplyGlowFilter(
     float radiusX; // [esp+30h] [ebp-1314h] BYREF
     GfxImageFilter filter; // [esp+34h] [ebp-1310h] BYREF
 
-    if ((unsigned int)srcRenderTarget > R_RENDERTARGET_SHADOWMAP_SPOT)
-        MyAssertHandler(
-            ".\\rb_imagefilter.cpp",
-            427,
-            0,
-            "srcRenderTarget not in [0, R_RENDERTARGET_COUNT - 1]\n\t%i not in [%i, %i]",
-            srcRenderTarget,
-            0,
-            14);
-    if ((unsigned int)dstRenderTarget > R_RENDERTARGET_SHADOWMAP_SPOT)
-        MyAssertHandler(
-            ".\\rb_imagefilter.cpp",
-            428,
-            0,
-            "dstRenderTarget not in [0, R_RENDERTARGET_COUNT - 1]\n\t%i not in [%i, %i]",
-            dstRenderTarget,
-            0,
-            14);
+    bcassert(srcRenderTarget, R_RENDERTARGET_COUNT - 1);
+    bcassert(dstRenderTarget, R_RENDERTARGET_COUNT - 1);
+    
     iassert( (radius >= 0) );
     if (radius == 0.0)
         return srcRenderTarget;

@@ -1,7 +1,10 @@
 #pragma once
 #include "r_rendercmds.h"
+#include "r_drawsurf.h"
 
 #define MAX_DRAWSURFS 0x8000
+
+enum DrawSurfType : __int32;
 
 struct GfxBspPreTessDrawSurf // sizeof=0x4
 {                                       // ...
@@ -11,7 +14,7 @@ struct GfxBspPreTessDrawSurf // sizeof=0x4
 
 void __cdecl R_InitDrawSurfListInfo(GfxDrawSurfListInfo *info);
 void __cdecl R_EmitDrawSurfList(GfxDrawSurf *drawSurfs, unsigned int drawSurfCount);
-void __cdecl R_MergeAndEmitDrawSurfLists(unsigned int firstStage, unsigned int stageCount);
+void __cdecl R_MergeAndEmitDrawSurfLists(DrawSurfType firstStage, int stageCount);
 unsigned int __cdecl R_EmitDrawSurfListForKey(
     const GfxDrawSurf *drawSurfs,
     unsigned int drawSurfCount,

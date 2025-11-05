@@ -66,7 +66,7 @@ void(__cdecl *const RB_RenderCommandTable[22])(GfxRenderCommandExecState *) =
 }; // idb
 
 GfxBackEndData *backEndData;
-GfxRenderTarget gfxRenderTargets[17]; // LWSS: changed to 17 to please ASAN.
+GfxRenderTarget gfxRenderTargets[17]; // LWSS: changed to 17 to please ASAN. (GfxRenderTargetId)
 
 r_backEndGlobals_t backEnd;
 materialCommands_t tess;
@@ -715,7 +715,7 @@ void __cdecl RB_StretchRaw(int x, int y, int w, int h, int cols, int rows, const
         //    gfxRenderTargets[1].surface.color,
         //    &dstRect,
         //    2);
-        dx.device->StretchRect(rawSurf, 0, gfxRenderTargets[1].surface.color, &dstRect, D3DTEXF_LINEAR);
+        dx.device->StretchRect(rawSurf, 0, gfxRenderTargets[R_RENDERTARGET_FRAME_BUFFER].surface.color, &dstRect, D3DTEXF_LINEAR);
 
         rawSurf->Release();
     }
@@ -907,7 +907,7 @@ void __cdecl RB_SaveScreenCmd(GfxRenderCommandExecState *execState)
 
     if (tess.indexCount)
         RB_EndTessSurface();
-    R_Resolve(gfxCmdBufContext, gfxRenderTargets[0].image);
+    R_Resolve(gfxCmdBufContext, gfxRenderTargets[R_RENDERTARGET_SAVED_SCREEN].image);
     rgp.savedScreenTimes[cmd->screenTimerId] = gfxCmdBufSourceState.sceneDef.time;
 
     execState->cmd = (char *)execState->cmd + cmd->header.byteCount;
@@ -924,7 +924,7 @@ void __cdecl RB_SaveScreenSectionCmd(GfxRenderCommandExecState *execState)
     if (tess.indexCount)
         RB_EndTessSurface();
 
-    R_ResolveSection(gfxCmdBufContext, gfxRenderTargets[0].image);
+    R_ResolveSection(gfxCmdBufContext, gfxRenderTargets[R_RENDERTARGET_SAVED_SCREEN].image);
     rgp.savedScreenTimes[cmd->screenTimerId] = gfxCmdBufSourceState.sceneDef.time;
 
     execState->cmd = (char *)execState->cmd + cmd->header.byteCount;
@@ -973,7 +973,7 @@ void __cdecl RB_BlendSavedScreenBlurredCmd(GfxRenderCommandExecState *execState)
             alpha = 0.99f;
         screenWidth = (double)gfxCmdBufSourceState.renderTargetWidth * cmd->ds;
         screenHeight = (double)gfxCmdBufSourceState.renderTargetHeight * cmd->dt;
-        R_SetCodeImageTexture(&gfxCmdBufSourceState, 9u, gfxRenderTargets[0].image);
+        R_SetCodeImageTexture(&gfxCmdBufSourceState, TEXTURE_SRC_CODE_FEEDBACK, gfxRenderTargets[R_RENDERTARGET_SAVED_SCREEN].image);
         t1 = cmd->t0 + cmd->dt;
         s1 = cmd->s0 + cmd->ds;
         RB_DrawStretchPic(
@@ -992,7 +992,7 @@ void __cdecl RB_BlendSavedScreenBlurredCmd(GfxRenderCommandExecState *execState)
     execState->cmd = (char *)execState->cmd + cmd->header.byteCount;
 }
 
-void __cdecl R_SetCodeImageTexture(GfxCmdBufSourceState *source, unsigned int codeTexture, const GfxImage *image)
+void __cdecl R_SetCodeImageTexture(GfxCmdBufSourceState *source, MaterialTextureSource codeTexture, const GfxImage *image)
 {
     iassert(source);
     iassert(codeTexture < TEXTURE_SRC_CODE_COUNT);
@@ -1016,7 +1016,7 @@ void __cdecl RB_BlendSavedScreenFlashedCmd(GfxRenderCommandExecState *execState)
     iassert( gfxCmdBufSourceState.viewMode == VIEW_MODE_2D );
     screenWidth = (double)gfxCmdBufSourceState.renderTargetWidth * cmd->ds;
     screenHeight = (double)gfxCmdBufSourceState.renderTargetHeight * cmd->dt;
-    R_SetCodeImageTexture(&gfxCmdBufSourceState, 9u, gfxRenderTargets[0].image);
+    R_SetCodeImageTexture(&gfxCmdBufSourceState, TEXTURE_SRC_CODE_FEEDBACK, gfxRenderTargets[R_RENDERTARGET_SAVED_SCREEN].image);
     t1 = cmd->t0 + cmd->dt;
     s1 = cmd->s0 + cmd->ds;
     RB_DrawStretchPic(
@@ -1438,30 +1438,9 @@ void __cdecl RB_SetMaterialColorCmd(GfxRenderCommandExecState *execState)
     cmd = (const GfxCmdSetMaterialColor *)execState->cmd;
     if (tess.indexCount)
         RB_EndTessSurface();
-    R_SetCodeConstantFromVec4(&gfxCmdBufSourceState, 0x28u, (float*)cmd->color);
+    R_SetCodeConstantFromVec4(&gfxCmdBufSourceState, CONST_SRC_CODE_MATERIAL_COLOR, (float*)cmd->color);
 
     execState->cmd = (char *)execState->cmd + cmd->header.byteCount;
-}
-
-void __cdecl R_SetCodeConstantFromVec4(GfxCmdBufSourceState *source, unsigned int constant, float *value)
-{
-    float *v3; // [esp+0h] [ebp-4h]
-
-    iassert(constant < CONST_SRC_CODE_COUNT_FLOAT4);
-
-    v3 = source->input.consts[constant];
-    v3[0] = value[0];
-    v3[1] = value[1];
-    v3[2] = value[2];
-    v3[3] = value[3];
-    R_DirtyCodeConstant(source, constant);
-}
-
-void __cdecl R_DirtyCodeConstant(GfxCmdBufSourceState *source, unsigned int constant)
-{
-    iassert(constant < ARRAY_COUNT(source->constVersions));
-
-    ++source->constVersions[constant];
 }
 
 void __cdecl RB_SetViewportCmd(GfxRenderCommandExecState *execState)
@@ -3014,7 +2993,7 @@ void __cdecl RB_SetBspImages()
             "!rgp.world->skyImage || (rgp.world->skySamplerState & SAMPLER_FILTER_MASK)");
     gfxCmdBufInput.codeImages[TEXTURE_SRC_CODE_OUTDOOR] = rgp.world->outdoorImage;
     gfxCmdBufInput.codeImages[TEXTURE_SRC_CODE_SKY] = rgp.world->skyImage;
-    gfxCmdBufInput.codeImageSamplerStates[14] = rgp.world->skySamplerState;
+    gfxCmdBufInput.codeImageSamplerStates[TEXTURE_SRC_CODE_SKY] = rgp.world->skySamplerState;
 }
 
 void __cdecl RB_BindDefaultImages()
@@ -3030,93 +3009,88 @@ void __cdecl RB_BindDefaultImages()
 
 void __cdecl RB_InitCodeImages()
 {
-    unsigned __int8 v0; // [esp+Eh] [ebp-16h]
-    unsigned __int8 shadowmapSamplerState; // [esp+Fh] [ebp-15h]
-
     gfxCmdBufInput.codeImages[TEXTURE_SRC_CODE_BLACK] = rgp.blackImage;
-    gfxCmdBufInput.codeImageSamplerStates[TEXTURE_SRC_CODE_BLACK] = 1;
+    gfxCmdBufInput.codeImageSamplerStates[TEXTURE_SRC_CODE_BLACK] = SAMPLER_FILTER_NEAREST;
     rg.codeImageNames[TEXTURE_SRC_CODE_BLACK] = 0;
 
     gfxCmdBufInput.codeImages[TEXTURE_SRC_CODE_WHITE] = rgp.whiteImage;
-    gfxCmdBufInput.codeImageSamplerStates[TEXTURE_SRC_CODE_WHITE] = 1;
+    gfxCmdBufInput.codeImageSamplerStates[TEXTURE_SRC_CODE_WHITE] = SAMPLER_FILTER_NEAREST;
     rg.codeImageNames[TEXTURE_SRC_CODE_WHITE] = 0;
 
     gfxCmdBufInput.codeImages[TEXTURE_SRC_CODE_IDENTITY_NORMAL_MAP] = rgp.identityNormalMapImage;
-    gfxCmdBufInput.codeImageSamplerStates[TEXTURE_SRC_CODE_IDENTITY_NORMAL_MAP] = 1;
+    gfxCmdBufInput.codeImageSamplerStates[TEXTURE_SRC_CODE_IDENTITY_NORMAL_MAP] = SAMPLER_FILTER_NEAREST;
     rg.codeImageNames[TEXTURE_SRC_CODE_IDENTITY_NORMAL_MAP] = 0;
 
     gfxCmdBufInput.codeImages[TEXTURE_SRC_CODE_MODEL_LIGHTING] = 0;
-    gfxCmdBufInput.codeImageSamplerStates[TEXTURE_SRC_CODE_MODEL_LIGHTING] = -30;
+    gfxCmdBufInput.codeImageSamplerStates[TEXTURE_SRC_CODE_MODEL_LIGHTING] = (SAMPLER_CLAMP_MASK | SAMPLER_FILTER_LINEAR);
     rg.codeImageNames[TEXTURE_SRC_CODE_MODEL_LIGHTING] = 0;
 
-    gfxCmdBufInput.codeImages[TEXTURE_SRC_CODE_SHADOWCOOKIE] = gfxRenderTargets[9].image;
-    gfxCmdBufInput.codeImageSamplerStates[TEXTURE_SRC_CODE_SHADOWCOOKIE] = 98;
+    gfxCmdBufInput.codeImages[TEXTURE_SRC_CODE_SHADOWCOOKIE] = gfxRenderTargets[R_RENDERTARGET_SHADOWCOOKIE].image;
+    gfxCmdBufInput.codeImageSamplerStates[TEXTURE_SRC_CODE_SHADOWCOOKIE] = (SAMPLER_CLAMP_V | SAMPLER_CLAMP_U | SAMPLER_FILTER_LINEAR);
     rg.codeImageNames[TEXTURE_SRC_CODE_SHADOWCOOKIE] = "shadowCookieSampler";
-    shadowmapSamplerState = gfxMetrics.shadowmapSamplerState;
 
-    gfxCmdBufInput.codeImages[TEXTURE_SRC_CODE_SHADOWMAP_SUN] = gfxRenderTargets[13].image;
-    gfxCmdBufInput.codeImageSamplerStates[TEXTURE_SRC_CODE_SHADOWMAP_SUN] = shadowmapSamplerState;
+    gfxCmdBufInput.codeImages[TEXTURE_SRC_CODE_SHADOWMAP_SUN] = gfxRenderTargets[R_RENDERTARGET_SHADOWMAP_SUN].image;
+    gfxCmdBufInput.codeImageSamplerStates[TEXTURE_SRC_CODE_SHADOWMAP_SUN] = gfxMetrics.shadowmapSamplerState;
     rg.codeImageNames[TEXTURE_SRC_CODE_SHADOWMAP_SUN] = "shadowmapSamplerSun";
-    v0 = gfxMetrics.shadowmapSamplerState;
 
     gfxCmdBufInput.codeImages[TEXTURE_SRC_CODE_SHADOWMAP_SPOT] = 0;
-    gfxCmdBufInput.codeImageSamplerStates[TEXTURE_SRC_CODE_SHADOWMAP_SPOT] = v0;
+    gfxCmdBufInput.codeImageSamplerStates[TEXTURE_SRC_CODE_SHADOWMAP_SPOT] = gfxMetrics.shadowmapSamplerState;
     rg.codeImageNames[TEXTURE_SRC_CODE_SHADOWMAP_SPOT] = "shadowmapSamplerSpot";
 
     gfxCmdBufInput.codeImages[TEXTURE_SRC_CODE_FEEDBACK] = 0;
-    gfxCmdBufInput.codeImageSamplerStates[TEXTURE_SRC_CODE_FEEDBACK] = 98;
+    gfxCmdBufInput.codeImageSamplerStates[TEXTURE_SRC_CODE_FEEDBACK] = (SAMPLER_CLAMP_V | SAMPLER_CLAMP_U | SAMPLER_FILTER_LINEAR);
     rg.codeImageNames[TEXTURE_SRC_CODE_FEEDBACK] = "feedbackSampler";
 
     gfxCmdBufInput.codeImages[TEXTURE_SRC_CODE_RESOLVED_POST_SUN] = 0;
-    gfxCmdBufInput.codeImageSamplerStates[TEXTURE_SRC_CODE_RESOLVED_POST_SUN] = 98;
+    gfxCmdBufInput.codeImageSamplerStates[TEXTURE_SRC_CODE_RESOLVED_POST_SUN] = (SAMPLER_CLAMP_V | SAMPLER_CLAMP_U | SAMPLER_FILTER_LINEAR);
     rg.codeImageNames[TEXTURE_SRC_CODE_RESOLVED_POST_SUN] = 0;
 
     gfxCmdBufInput.codeImages[TEXTURE_SRC_CODE_RESOLVED_SCENE] = 0;
-    gfxCmdBufInput.codeImageSamplerStates[TEXTURE_SRC_CODE_RESOLVED_SCENE] = 98;
+    gfxCmdBufInput.codeImageSamplerStates[TEXTURE_SRC_CODE_RESOLVED_SCENE] = (SAMPLER_CLAMP_V | SAMPLER_CLAMP_U | SAMPLER_FILTER_LINEAR);
     rg.codeImageNames[TEXTURE_SRC_CODE_RESOLVED_SCENE] = 0;
 
-    gfxCmdBufInput.codeImages[TEXTURE_SRC_CODE_POST_EFFECT_0] = gfxRenderTargets[11].image;
-    gfxCmdBufInput.codeImageSamplerStates[TEXTURE_SRC_CODE_POST_EFFECT_0] = 98;
+    gfxCmdBufInput.codeImages[TEXTURE_SRC_CODE_POST_EFFECT_0] = gfxRenderTargets[R_RENDERTARGET_POST_EFFECT_0].image;
+    gfxCmdBufInput.codeImageSamplerStates[TEXTURE_SRC_CODE_POST_EFFECT_0] = (SAMPLER_CLAMP_V | SAMPLER_CLAMP_U | SAMPLER_FILTER_LINEAR);
     rg.codeImageNames[TEXTURE_SRC_CODE_POST_EFFECT_0] = "postEffect0";
 
-    gfxCmdBufInput.codeImages[TEXTURE_SRC_CODE_POST_EFFECT_1] = gfxRenderTargets[12].image;
-    gfxCmdBufInput.codeImageSamplerStates[TEXTURE_SRC_CODE_POST_EFFECT_1] = 98;
+    gfxCmdBufInput.codeImages[TEXTURE_SRC_CODE_POST_EFFECT_1] = gfxRenderTargets[R_RENDERTARGET_POST_EFFECT_1].image;
+    gfxCmdBufInput.codeImageSamplerStates[TEXTURE_SRC_CODE_POST_EFFECT_1] = (SAMPLER_CLAMP_V | SAMPLER_CLAMP_U | SAMPLER_FILTER_LINEAR);
     rg.codeImageNames[TEXTURE_SRC_CODE_POST_EFFECT_1] = "postEffect1";
 
     gfxCmdBufInput.codeImages[TEXTURE_SRC_CODE_SKY] = 0;
-    gfxCmdBufInput.codeImageSamplerStates[TEXTURE_SRC_CODE_SKY] = 0;
+    gfxCmdBufInput.codeImageSamplerStates[TEXTURE_SRC_CODE_SKY] = SAMPLER_FILTER_SHIFT;
     rg.codeImageNames[TEXTURE_SRC_CODE_SKY] = "sampler.sky";
 
     gfxCmdBufInput.codeImages[TEXTURE_SRC_CODE_LIGHT_ATTENUATION] = 0;
-    gfxCmdBufInput.codeImageSamplerStates[TEXTURE_SRC_CODE_LIGHT_ATTENUATION] = 0;
+    gfxCmdBufInput.codeImageSamplerStates[TEXTURE_SRC_CODE_LIGHT_ATTENUATION] = SAMPLER_FILTER_SHIFT;
     rg.codeImageNames[TEXTURE_SRC_CODE_LIGHT_ATTENUATION] = "attenuationSampler";
 
     gfxCmdBufInput.codeImages[TEXTURE_SRC_CODE_DYNAMIC_SHADOWS] = 0;
-    gfxCmdBufInput.codeImageSamplerStates[TEXTURE_SRC_CODE_DYNAMIC_SHADOWS] = 98;
+    gfxCmdBufInput.codeImageSamplerStates[TEXTURE_SRC_CODE_DYNAMIC_SHADOWS] = (SAMPLER_CLAMP_V | SAMPLER_CLAMP_U | SAMPLER_FILTER_LINEAR);
     rg.codeImageNames[TEXTURE_SRC_CODE_DYNAMIC_SHADOWS] = 0;
 
     gfxCmdBufInput.codeImages[TEXTURE_SRC_CODE_OUTDOOR] = 0;
-    gfxCmdBufInput.codeImageSamplerStates[17] = 98;
-    rg.codeImageNames[17] = 0;
+    gfxCmdBufInput.codeImageSamplerStates[TEXTURE_SRC_CODE_OUTDOOR] = (SAMPLER_CLAMP_V | SAMPLER_CLAMP_U | SAMPLER_FILTER_LINEAR);
+    rg.codeImageNames[TEXTURE_SRC_CODE_OUTDOOR] = 0;
 
-    gfxCmdBufInput.codeImages[TEXTURE_SRC_CODE_FLOATZ] = gfxRenderTargets[5].image;
-    gfxCmdBufInput.codeImageSamplerStates[TEXTURE_SRC_CODE_FLOATZ] = 97;
+    gfxCmdBufInput.codeImages[TEXTURE_SRC_CODE_FLOATZ] = gfxRenderTargets[R_RENDERTARGET_FLOAT_Z].image;
+    gfxCmdBufInput.codeImageSamplerStates[TEXTURE_SRC_CODE_FLOATZ] = (SAMPLER_CLAMP_V | SAMPLER_CLAMP_U | SAMPLER_FILTER_NEAREST);
     rg.codeImageNames[TEXTURE_SRC_CODE_FLOATZ] = 0;
 
     gfxCmdBufInput.codeImages[TEXTURE_SRC_CODE_CINEMATIC_Y] = 0;
-    gfxCmdBufInput.codeImageSamplerStates[TEXTURE_SRC_CODE_CINEMATIC_Y] = 98;
+    gfxCmdBufInput.codeImageSamplerStates[TEXTURE_SRC_CODE_CINEMATIC_Y] = (SAMPLER_CLAMP_V | SAMPLER_CLAMP_U | SAMPLER_FILTER_LINEAR);
     rg.codeImageNames[TEXTURE_SRC_CODE_CINEMATIC_Y] = "cinematicY";
 
     gfxCmdBufInput.codeImages[TEXTURE_SRC_CODE_CINEMATIC_CR] = 0;
-    gfxCmdBufInput.codeImageSamplerStates[TEXTURE_SRC_CODE_CINEMATIC_CR] = 98;
+    gfxCmdBufInput.codeImageSamplerStates[TEXTURE_SRC_CODE_CINEMATIC_CR] = (SAMPLER_CLAMP_V | SAMPLER_CLAMP_U | SAMPLER_FILTER_LINEAR);
     rg.codeImageNames[TEXTURE_SRC_CODE_CINEMATIC_CR] = "cinematicCr";
 
     gfxCmdBufInput.codeImages[TEXTURE_SRC_CODE_CINEMATIC_CB] = 0;
-    gfxCmdBufInput.codeImageSamplerStates[TEXTURE_SRC_CODE_CINEMATIC_CB] = 98;
+    gfxCmdBufInput.codeImageSamplerStates[TEXTURE_SRC_CODE_CINEMATIC_CB] = (SAMPLER_CLAMP_V | SAMPLER_CLAMP_U | SAMPLER_FILTER_LINEAR);
     rg.codeImageNames[TEXTURE_SRC_CODE_CINEMATIC_CB] = "cinematicCb";
 
     gfxCmdBufInput.codeImages[TEXTURE_SRC_CODE_CINEMATIC_A] = 0;
-    gfxCmdBufInput.codeImageSamplerStates[TEXTURE_SRC_CODE_CINEMATIC_A] = 98;
+    gfxCmdBufInput.codeImageSamplerStates[TEXTURE_SRC_CODE_CINEMATIC_A] = (SAMPLER_CLAMP_V | SAMPLER_CLAMP_U | SAMPLER_FILTER_LINEAR);
     rg.codeImageNames[TEXTURE_SRC_CODE_CINEMATIC_A] = "cinematicA";
 }
 

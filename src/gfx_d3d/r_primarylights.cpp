@@ -79,14 +79,9 @@ void __cdecl R_ChooseShadowedLights(GfxViewInfo *viewInfo)
         memcpy(shadowableLightIsUsed, scene.shadowableLightIsUsed, sizeof(shadowableLightIsUsed));
         candidateLightCount = 0;
         iassert( comWorld.isInUse );
-        if (viewInfo->shadowableLightCount < comWorld.primaryLightCount)
-            MyAssertHandler(
-                ".\\r_primarylights.cpp",
-                226,
-                0,
-                "%s",
-                "viewInfo->shadowableLightCount >= Com_GetPrimaryLightCount()");
-        scanLimit = (viewInfo->shadowableLightCount + 31) >> 5;
+        iassert(viewInfo->shadowableLightCount >= Com_GetPrimaryLightCount());
+        scanLimit = (viewInfo->shadowableLightCount + 31) / 32;
+
         for (scanIndex = 0; scanIndex != scanLimit; ++scanIndex)
         {
             usedBits = scene.shadowableLightIsUsed[scanIndex];
@@ -95,7 +90,7 @@ void __cdecl R_ChooseShadowedLights(GfxViewInfo *viewInfo)
                 if (!_BitScanReverse(&v2, usedBits))
                     v2 = 63;// `CountLeadingZeros'::`2': : notFound;
                 leadingZeros = v2 ^ 0x1F;
-                if ((v2 ^ 0x1F) == 0x20)
+                if (leadingZeros == 32)
                     break;
                 bitIndex = 31 - leadingZeros;
                 usedBits &= ~(1 << (31 - leadingZeros));
@@ -106,6 +101,7 @@ void __cdecl R_ChooseShadowedLights(GfxViewInfo *viewInfo)
                     candidateLightCount);
             }
         }
+
         for (candidateLightIndex = 0; candidateLightIndex < candidateLightCount; ++candidateLightIndex)
             R_AddShadowedLightToShadowHistory(
                 shadowHistory,
@@ -113,19 +109,12 @@ void __cdecl R_ChooseShadowedLights(GfxViewInfo *viewInfo)
                 fadeDelta);
         memcpy(shadowHistory, shadowableLightIsUsed, 0x20u);
     }
-    else if (rgp.world->sunPrimaryLightIndex
-        && Com_BitCheckAssert(scene.shadowableLightIsUsed, rgp.world->sunPrimaryLightIndex, 128))
+    else if (rgp.world->sunPrimaryLightIndex && Com_BitCheckAssert(scene.shadowableLightIsUsed, rgp.world->sunPrimaryLightIndex, 128))
     {
         Com_BitSetAssert(frontEndDataOut->shadowableLightHasShadowMap, rgp.world->sunPrimaryLightIndex, 32);
     }
-    if (viewInfo->spotShadowCount)
-        MyAssertHandler(
-            ".\\r_primarylights.cpp",
-            248,
-            1,
-            "viewInfo->spotShadowCount == 0\n\t%i, %i",
-            viewInfo->spotShadowCount,
-            0);
+
+    iassert(viewInfo->spotShadowCount == 0);
     if (r_rendererInUse->current.integer || gfxMetrics.shadowmapBuildTechType != TECHNIQUE_BUILD_SHADOWMAP_COLOR)
     {
         for (entryIndex = 0; entryIndex < shadowHistory->entryCount; ++entryIndex)

@@ -776,7 +776,7 @@ inline bool __cdecl Com_BitCheckAssert(const unsigned int *array, int bitNum, in
 	iassert(array);
 	iassert(bitNum < (8 * size));
 	
-	return (array[bitNum >> 5] & (1 << (bitNum & 0x1F))) != 0;
+	return (array[bitNum / 32] & (1 << (bitNum & 31))) != 0;
 }
 
 inline void __cdecl Com_BitClearAssert(unsigned int *array, int bitNum, int size)
@@ -784,7 +784,7 @@ inline void __cdecl Com_BitClearAssert(unsigned int *array, int bitNum, int size
 	iassert(array);
 	iassert(bitNum < (8 * size));
 
-	array[bitNum >> 5] &= ~(1 << (bitNum & 0x1F));
+	array[bitNum / 32] &= ~(1 << (bitNum & 31));
 }
 
 inline void __cdecl Com_BitSetAssert(unsigned int *array, int bitNum, int size)
@@ -792,7 +792,7 @@ inline void __cdecl Com_BitSetAssert(unsigned int *array, int bitNum, int size)
 	iassert(array);
 	iassert(bitNum < (8 * size));
 	
-	array[bitNum >> 5] |= 1 << (bitNum & 0x1F);
+	array[bitNum / 32] |= 1 << (bitNum & 31);
 }
 
 enum trType_t : __int32

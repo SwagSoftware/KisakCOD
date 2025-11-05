@@ -63,7 +63,7 @@ void R_InitRenderTargets_PC()
                 0,
                 D3DFMT_R32F,
                 RENDERTARGET_USAGE_RENDER,
-                &gfxRenderTargets[5]);
+                &gfxRenderTargets[R_RENDERTARGET_FLOAT_Z]);
         R_ShareRenderTarget(R_RENDERTARGET_RESOLVED_SCENE, R_RENDERTARGET_DYNAMICSHADOWS);
         R_ShareRenderTarget(R_RENDERTARGET_RESOLVED_SCENE, R_RENDERTARGET_RESOLVED_POST_SUN);
         R_InitFullscreenRenderTargetImage(
@@ -73,38 +73,38 @@ void R_InitRenderTargets_PC()
             backBufferFormat,
             RENDERTARGET_USAGE_TEXTURE,
             gfxRenderTargets);
-        R_InitShadowmapRenderTarget(2, 0x400u, 2u, &gfxRenderTargets[13]);
-        R_InitShadowmapRenderTarget(3, 0x200u, 4u, &gfxRenderTargets[14]);
-        R_InitShadowCookieRenderTarget(&gfxRenderTargets[9]);
-        R_InitShadowCookieBlurRenderTarget(&gfxRenderTargets[10]);
+        R_InitShadowmapRenderTarget(2, 1024, 2u, &gfxRenderTargets[R_RENDERTARGET_SHADOWMAP_SUN]);
+        R_InitShadowmapRenderTarget(3, 512, 4u, &gfxRenderTargets[R_RENDERTARGET_SHADOWMAP_SPOT]);
+        R_InitShadowCookieRenderTarget(&gfxRenderTargets[R_RENDERTARGET_SHADOWCOOKIE]);
+        R_InitShadowCookieBlurRenderTarget(&gfxRenderTargets[R_RENDERTARGET_SHADOWCOOKIE_BLUR]);
         R_InitFullscreenRenderTargetImage(
             5,
             FULLSCREEN_SCENE,
             2,
             backBufferFormat,
             RENDERTARGET_USAGE_RENDER,
-            &gfxRenderTargets[11]);
+            &gfxRenderTargets[R_RENDERTARGET_POST_EFFECT_0]);
         R_InitFullscreenRenderTargetImage(
             6,
             FULLSCREEN_SCENE,
             2,
             backBufferFormat,
             RENDERTARGET_USAGE_RENDER,
-            &gfxRenderTargets[12]);
+            &gfxRenderTargets[R_RENDERTARGET_POST_EFFECT_1]);
         R_InitFullscreenRenderTargetImage(
             7,
             FULLSCREEN_SCENE,
             2,
             backBufferFormat,
             RENDERTARGET_USAGE_RENDER,
-            &gfxRenderTargets[7]);
+            &gfxRenderTargets[R_RENDERTARGET_PINGPONG_0]);
         R_InitFullscreenRenderTargetImage(
             8,
             FULLSCREEN_SCENE,
             2,
             backBufferFormat,
             RENDERTARGET_USAGE_RENDER,
-            &gfxRenderTargets[8]);
+            &gfxRenderTargets[R_RENDERTARGET_PINGPONG_1]);
     }
 }
 
@@ -205,7 +205,7 @@ IDirect3DSurface9 *__cdecl R_AssignSingleSampleDepthStencilSurface()
     int depthStencilHeight; // [esp+8h] [ebp-4h] BYREF
 
     if (!dx.singleSampleDepthStencilSurface && dx.multiSampleType == D3DMULTISAMPLE_NONE)
-        dx.singleSampleDepthStencilSurface = gfxRenderTargets[1].surface.depthStencil;
+        dx.singleSampleDepthStencilSurface = gfxRenderTargets[R_RENDERTARGET_FRAME_BUFFER].surface.depthStencil;
     if (dx.singleSampleDepthStencilSurface)
     {
         dx.singleSampleDepthStencilSurface->AddRef();
@@ -389,9 +389,9 @@ void __cdecl R_AssignShadowCookieDepthStencilSurface(GfxRenderTargetSurface *sur
     int hr; // [esp+0h] [ebp-8h]
     _D3DFORMAT depthStencilFormat; // [esp+4h] [ebp-4h]
 
-    if (gfxRenderTargets[9].surface.depthStencil)
+    if (gfxRenderTargets[R_RENDERTARGET_SHADOWCOOKIE].surface.depthStencil)
     {
-        surface->depthStencil = gfxRenderTargets[9].surface.depthStencil;
+        surface->depthStencil = gfxRenderTargets[R_RENDERTARGET_SHADOWCOOKIE].surface.depthStencil;
         surface->depthStencil->AddRef();
     }
     else
@@ -529,11 +529,11 @@ _D3DFORMAT __cdecl R_InitFrameBufferRenderTarget()
     const char *v1; // eax
     _D3DSURFACE_DESC surfaceDesc; // [esp+0h] [ebp-20h] BYREF
 
-    R_InitFrameBufferRenderTarget_Win32(&gfxRenderTargets[1]);
+    R_InitFrameBufferRenderTarget_Win32(&gfxRenderTargets[R_RENDERTARGET_FRAME_BUFFER]);
     R_ShareRenderTarget(R_RENDERTARGET_FRAME_BUFFER, R_RENDERTARGET_SCENE);
     v0 = R_DescribeFormat(D3DFMT_A8R8G8B8);
     Com_Printf(8, "Requested frame buffer to be %s\n", v0);
-    gfxRenderTargets[1].surface.color->GetDesc(&surfaceDesc);
+    gfxRenderTargets[R_RENDERTARGET_FRAME_BUFFER].surface.color->GetDesc(&surfaceDesc);
     iassert( surfaceDesc.Format != D3DFMT_UNKNOWN );
     v1 = R_DescribeFormat(surfaceDesc.Format);
     Com_Printf(8, "DirectX returned a frame buffer that is %s\n", v1);
@@ -544,7 +544,7 @@ _D3DFORMAT __cdecl R_InitFrameBufferRenderTarget()
             0,
             surfaceDesc.Format,
             RENDERTARGET_USAGE_RENDER,
-            &gfxRenderTargets[4]);
+            &gfxRenderTargets[R_RENDERTARGET_RESOLVED_SCENE]);
     return surfaceDesc.Format;
 }
 
@@ -561,7 +561,7 @@ void __cdecl R_ShutdownRenderTargets()
         if (gfxRenderTargets[renderTargetId].image)
             Image_Release(gfxRenderTargets[renderTargetId].image);
     }
-    memset((unsigned __int8 *)gfxRenderTargets, 0, sizeof(gfxRenderTargets));
+    memset(gfxRenderTargets, 0, sizeof(gfxRenderTargets));
     dx.singleSampleDepthStencilSurface = 0;
 }
 

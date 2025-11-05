@@ -6,6 +6,7 @@
 #include "rb_light.h"
 #include "rb_logfile.h"
 #include <universal/profile.h>
+#include "r_state.h"
 
 struct $D83B18AC5ED51685DB5F92059A920C50 // sizeof=0x4
 {                                       // ...
@@ -486,13 +487,13 @@ void __cdecl R_SetModelGroundLighting(unsigned int entryIndex, const unsigned __
 void __cdecl R_SetModelLightingCoordsForSource(unsigned __int16 handle, GfxCmdBufSourceState *source)
 {
     R_SetModelLightingCoords(handle, source->input.consts[57]);
-    R_DirtyCodeConstant(source, 0x39u);
+    R_DirtyCodeConstant(source, CONST_SRC_CODE_BASE_LIGHTING_COORDS);
 }
 
 void __cdecl R_SetStaticModelLightingCoordsForSource(unsigned int smodelIndex, GfxCmdBufSourceState *source)
 {
     R_SetModelLightingCoords(rgp.world->dpvs.smodelDrawInsts[smodelIndex].lightingHandle, source->input.consts[57]);
-    R_DirtyCodeConstant(source, 0x39u);
+    R_DirtyCodeConstant(source, CONST_SRC_CODE_BASE_LIGHTING_COORDS);
 }
 
 
@@ -527,12 +528,12 @@ void __cdecl R_SetModelLightingLookupScale(GfxCmdBufInput *input)
     lookupScale[1] = modelLightGlob.invImageHeight * 1.5;
     lookupScale[2] = 0.375;
     lookupScale[3] = 0.0;
-    R_SetInputCodeConstantFromVec4(input, 0x26u, lookupScale);
+    R_SetInputCodeConstantFromVec4(input, CONST_SRC_CODE_LIGHTING_LOOKUP_SCALE, lookupScale);
 }
 
 void __cdecl R_SetupDynamicModelLighting(GfxCmdBufInput *input)
 {
-    R_SetInputCodeImageTexture(input, 3u, modelLightGlob.image);
+    R_SetInputCodeImageTexture(input, TEXTURE_SRC_CODE_MODEL_LIGHTING, modelLightGlob.image);
     R_SetModelLightingLookupScale(input);
 }
 

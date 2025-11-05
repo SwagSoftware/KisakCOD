@@ -10,6 +10,7 @@
 #include "r_spotshadow.h"
 #include "r_buffers.h"
 #include "r_model.h"
+#include "r_state.h"
 #include "r_workercmds.h"
 #include "r_cinematic.h"
 #include "r_dvars.h"
@@ -1282,7 +1283,7 @@ void R_UpdateFrontEndDvarOptions()
     }
     if (R_CheckDvarModified(r_outdoorFeather))
         R_SetOutdoorFeatherConst();
-    R_SetInputCodeConstantFromVec4(&gfxCmdBufInput, 0x27u, (float*)s_debugShaderConsts[r_debugShader->current.integer]);
+    R_SetInputCodeConstantFromVec4(&gfxCmdBufInput, CONST_SRC_CODE_DEBUG_BUMPMAP, (float*)s_debugShaderConsts[r_debugShader->current.integer]);
     if (R_CheckDvarModified(r_envMapOverride)
         || R_CheckDvarModified(r_envMapMinIntensity)
         || R_CheckDvarModified(r_envMapMaxIntensity)
@@ -1295,33 +1296,18 @@ void R_UpdateFrontEndDvarOptions()
     if (rg.distortion != v0)
         R_SyncRenderThread();
     rg.distortion = v0;
-    R_SetInputCodeImageTexture(&gfxCmdBufInput, 0xAu, v0 ? gfxRenderTargets[3].image : 0);
+    R_SetInputCodeImageTexture(&gfxCmdBufInput, TEXTURE_SRC_CODE_RESOLVED_POST_SUN, v0 ? gfxRenderTargets[R_RENDERTARGET_RESOLVED_POST_SUN].image : 0);
     rg.drawWorld = r_drawWorld->current.enabled;
     rg.drawBModels = r_drawBModels->current.enabled;
     rg.drawSModels = r_drawSModels->current.enabled;
     rg.drawXModels = r_drawXModels->current.enabled;
 }
 
-void __cdecl R_SetInputCodeConstantFromVec4(GfxCmdBufInput *input, unsigned int constant, float *value)
+void __cdecl R_SetInputCodeConstantFromVec4(GfxCmdBufInput *input, CodeConstant constant, const float *value)
 {
-    float *v3; // [esp+0h] [ebp-4h]
+    bcassert(constant, CONST_SRC_CODE_COUNT_FLOAT4);
+    iassert(s_codeConstUpdateFreq[constant] == MTL_UPDATE_RARELY);
 
-    if (constant >= 0x3A)
-        MyAssertHandler(
-            "c:\\trees\\cod3\\src\\gfx_d3d\\r_state.h",
-            485,
-            0,
-            "constant doesn't index CONST_SRC_CODE_COUNT_FLOAT4\n\t%i not in [0, %i)",
-            constant,
-            58);
-    if (s_codeConstUpdateFreq[constant] != 2)
-        MyAssertHandler(
-            "c:\\trees\\cod3\\src\\gfx_d3d\\r_state.h",
-            486,
-            0,
-            "%s\n\t(constant) = %i",
-            "(s_codeConstUpdateFreq[constant] == MTL_UPDATE_RARELY)",
-            constant);
     if (constant < 0x20)
         MyAssertHandler(
             "c:\\trees\\cod3\\src\\gfx_d3d\\r_state.h",
@@ -1330,14 +1316,14 @@ void __cdecl R_SetInputCodeConstantFromVec4(GfxCmdBufInput *input, unsigned int 
             "%s\n\t(constant) = %i",
             "(!R_IsChangeablePixelShaderConst( constant ))",
             constant);
-    v3 = input->consts[constant];
-    *v3 = *value;
-    v3[1] = value[1];
-    v3[2] = value[2];
-    v3[3] = value[3];
+
+    input->consts[constant][0] = value[0];
+    input->consts[constant][1] = value[1];
+    input->consts[constant][2] = value[2];
+    input->consts[constant][3] = value[3];
 }
 
-void __cdecl R_SetInputCodeImageTexture(GfxCmdBufInput *input, unsigned int codeTexture, const GfxImage *image)
+void __cdecl R_SetInputCodeImageTexture(GfxCmdBufInput *input, MaterialTextureSource codeTexture, const GfxImage *image)
 {
     iassert(input);
     bcassert(codeTexture, TEXTURE_SRC_CODE_COUNT);
@@ -1409,14 +1395,14 @@ void R_SetOutdoorFeatherConst()
 {
     R_SetInputCodeConstant(
         &gfxCmdBufInput,
-        0x30u,
+        CONST_SRC_CODE_OUTDOOR_FEATHER_PARMS,
         r_outdoorFeather->current.value,
         r_outdoorFeather->current.value,
         r_outdoorFeather->current.value,
         r_outdoorFeather->current.value);
 }
 
-void __cdecl R_SetInputCodeConstant(GfxCmdBufInput *input, unsigned int constant, float x, float y, float z, float w)
+void __cdecl R_SetInputCodeConstant(GfxCmdBufInput *input, CodeConstant constant, float x, float y, float z, float w)
 {
     float *v6; // [esp+0h] [ebp-4h]
 
@@ -1457,7 +1443,7 @@ void R_EnvMapOverrideConstants()
     if (r_envMapOverride->current.enabled)
         R_SetInputCodeConstant(
             &gfxCmdBufInput,
-            0x31u,
+            CONST_SRC_CODE_ENVMAP_PARMS,
             r_envMapMinIntensity->current.value,
             r_envMapMaxIntensity->current.value,
             r_envMapExponent->current.value,

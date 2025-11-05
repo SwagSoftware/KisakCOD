@@ -66,7 +66,7 @@ enum $5D1712DF4D603403B9E48E83EDF32C0E : __int32
     GFXS1_STENCILOP_FRONTBACK_MASK = 0x1FF1FF00,
 };
 
-enum $03401F5063F140792915F3E4BD6A646F : __int32
+enum CodeConstant : __int32 // LWSS: not a real enum name
 {
     CONST_SRC_CODE_MAYBE_DIRTY_PS_BEGIN = 0x0,
     CONST_SRC_CODE_LIGHT_POSITION = 0x0,
@@ -104,6 +104,7 @@ enum $03401F5063F140792915F3E4BD6A646F : __int32
     CONST_SRC_CODE_COLOR_MATRIX_G = 0x1E,
     CONST_SRC_CODE_COLOR_MATRIX_B = 0x1F,
     CONST_SRC_CODE_ALWAYS_DIRTY_PS_END = 0x20,
+
     CONST_SRC_CODE_NEVER_DIRTY_PS_BEGIN = 0x20,
     CONST_SRC_CODE_SHADOWMAP_SWITCH_PARTITION = 0x20,
     CONST_SRC_CODE_SHADOWMAP_SCALE = 0x21,
@@ -133,6 +134,7 @@ enum $03401F5063F140792915F3E4BD6A646F : __int32
     CONST_SRC_CODE_CODE_MESH_ARG_LAST = 0x38,
     CONST_SRC_CODE_BASE_LIGHTING_COORDS = 0x39,
     CONST_SRC_CODE_NEVER_DIRTY_PS_END = 0x3A,
+
     CONST_SRC_CODE_COUNT_FLOAT4 = 0x3A,
     CONST_SRC_FIRST_CODE_MATRIX = 0x3A,
     CONST_SRC_CODE_WORLD_MATRIX = 0x3A,
@@ -335,7 +337,19 @@ void R_DrawCall(
     GfxCmdBuf* cmdBufEA,
     GfxCmdBuf* prepassCmdBufEA);
 
-void __cdecl R_SetCodeConstant(GfxCmdBufSourceState *source, unsigned int constant, float x, float y, float z, float w);
+void __cdecl R_SetCodeConstant(GfxCmdBufSourceState *source, CodeConstant constant, float x, float y, float z, float w);
+void __cdecl R_UpdateCodeConstant(
+    GfxCmdBufSourceState *source,
+    CodeConstant constant,
+    float x,
+    float y,
+    float z,
+    float w);
+void __cdecl R_DirtyCodeConstant(GfxCmdBufSourceState *source, CodeConstant constant);
+void __cdecl R_SetCodeConstantFromVec4(GfxCmdBufSourceState *source, CodeConstant constant, float *value);
+
+
+
 void __cdecl R_SetAlphaAntiAliasingState(IDirect3DDevice9 *device, __int16 stateBits0);
 
 

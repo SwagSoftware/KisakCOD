@@ -35,19 +35,15 @@ char __cdecl R_PreTessBspDrawSurfs(
     triCount = 0;
     for (surfIter = 0; surfIter < count; ++surfIter)
     {
-        if ((unsigned int)list[surfIter] >= rgp.world->surfaceCount)
-            MyAssertHandler(
-                ".\\r_add_bsp.cpp",
-                108,
-                0,
-                "list[surfIter] doesn't index rgp.world->surfaceCount\n\t%i not in [0, %i)",
-                list[surfIter],
-                rgp.world->surfaceCount);
+        bcassert(list[surfIter], rgp.world->surfaceCount);
         triCount += rgp.world->dpvs.surfaces[list[surfIter]].tris.triCount;
     }
+
     preTessIndices = R_AllocPreTessIndices(3 * triCount);
+
     if (!preTessIndices)
         return 0;
+
     {
         PROF_SCOPED("R_memcpy");
         copyIndex = 0;
@@ -56,41 +52,43 @@ char __cdecl R_PreTessBspDrawSurfs(
         lmapIndex = 31;
         reflectionProbeIndex = 255;
         for (surfIter = 0; surfIter < count; ++surfIter)
-    {
-        surfIndex = list[surfIter];
-        surf = &rgp.world->dpvs.surfaces[surfIndex];
-        tris = surf;
-        if (baseVertex != surf->tris.firstVertex
-            || lmapIndex != surf->lightmapIndex
-            || reflectionProbeIndex != surf->reflectionProbeIndex)
         {
-            baseVertex = surf->tris.firstVertex;
-            lmapIndex = surf->lightmapIndex;
-            reflectionProbeIndex = surf->reflectionProbeIndex;
-            simplifiedList[simplifiedCount].baseSurfIndex = surfIndex;
-            simplifiedList[simplifiedCount++].totalTriCount = 0;
+            surfIndex = list[surfIter];
+            surf = &rgp.world->dpvs.surfaces[surfIndex];
+            tris = surf;
+            if (baseVertex != surf->tris.firstVertex
+                || lmapIndex != surf->lightmapIndex
+                || reflectionProbeIndex != surf->reflectionProbeIndex)
+            {
+                baseVertex = surf->tris.firstVertex;
+                lmapIndex = surf->lightmapIndex;
+                reflectionProbeIndex = surf->reflectionProbeIndex;
+                simplifiedList[simplifiedCount].baseSurfIndex = surfIndex;
+                simplifiedList[simplifiedCount++].totalTriCount = 0;
+            }
+            Com_Memcpy(
+                (char *)&preTessIndices[copyIndex],
+                (char *)&rgp.world->indices[tris->tris.baseIndex],
+                6 * tris->tris.triCount);
+            copyIndex += 3 * tris->tris.triCount;
+            //v5 = tris->tris.triCount + *((unsigned __int16*)&copyIndex + 2 * simplifiedCount + 1);
+            // TODO(mrsteyk): @Correctness
+            iassert(simplifiedCount);
+            v5 = tris->tris.triCount + simplifiedList[simplifiedCount - 1].totalTriCount;
+            if (v5 != (unsigned __int16)v5)
+                MyAssertHandler(
+                    "c:\\trees\\cod3\\src\\qcommon\\../universal/assertive.h",
+                    281,
+                    0,
+                    "i == static_cast< Type >( i )\n\t%i, %i",
+                    v5,
+                    (unsigned __int16)v5);
+            simplifiedList[simplifiedCount - 1].totalTriCount = v5;
         }
-        Com_Memcpy(
-            (char *)&preTessIndices[copyIndex],
-            (char *)&rgp.world->indices[tris->tris.baseIndex],
-            6 * tris->tris.triCount);
-        copyIndex += 3 * tris->tris.triCount;
-        //v5 = tris->tris.triCount + *((unsigned __int16*)&copyIndex + 2 * simplifiedCount + 1);
-        // TODO(mrsteyk): @Correctness
-        iassert(simplifiedCount);
-        v5 = tris->tris.triCount + simplifiedList[simplifiedCount - 1].totalTriCount;
-        if (v5 != (unsigned __int16)v5)
-            MyAssertHandler(
-                "c:\\trees\\cod3\\src\\qcommon\\../universal/assertive.h",
-                281,
-                0,
-                "i == static_cast< Type >( i )\n\t%i, %i",
-                v5,
-                (unsigned __int16)v5);
-        simplifiedList[simplifiedCount - 1].totalTriCount = v5;
     }
-    }
-    HIDWORD(drawSurf.packed) = HIDWORD(drawSurf.packed) & 0xFFC3FFFF | 0x40000;
+
+    //HIDWORD(drawSurf.packed) = HIDWORD(drawSurf.packed) & 0xFFC3FFFF | 0x40000; // (0xFFc3FFFF without surfType) (Set b(1))
+    drawSurf.fields.surfType = SF_TRIANGLES_PRETESS;
     if (R_AllocDrawSurf(&surfData->delayedCmdBuf, drawSurf, &surfData->drawSurfList, simplifiedCount + 2))
     {
         firstIndex = preTessIndices - gfxBuf.preTessIndexBuffer->indices;
@@ -154,23 +152,11 @@ void __cdecl R_AddAllBspDrawSurfacesRangeCamera(
     GfxBspDrawSurfData surfData; // [esp+160h] [ebp-18h] BYREF
 
     PROF_SCOPED("BspSurfaces");
+
     iassert( rgp.world );
-    if (beginSurface >= (unsigned int)rgp.world->models->surfaceCount + 1)
-        MyAssertHandler(
-            ".\\r_add_bsp.cpp",
-            206,
-            0,
-            "beginSurface doesn't index rgp.world->models[0].surfaceCount + 1\n\t%i not in [0, %i)",
-            beginSurface,
-            rgp.world->models->surfaceCount + 1);
-    if (endSurface >= (unsigned int)rgp.world->models->surfaceCount + 1)
-        MyAssertHandler(
-            ".\\r_add_bsp.cpp",
-            207,
-            0,
-            "endSurface doesn't index rgp.world->models[0].surfaceCount + 1\n\t%i not in [0, %i)",
-            endSurface,
-            rgp.world->models->surfaceCount + 1);
+    bcassert(beginSurface, rgp.world->models[0].surfaceCount + 1);
+    bcassert(endSurface, rgp.world->models[0].surfaceCount + 1);
+
     surfaceVisData = rgp.world->dpvs.surfaceVisData[0];
     R_InitBspDrawSurf(&surfData);
     surfData.drawSurfList.current = scene.drawSurfs[stage];
@@ -198,15 +184,10 @@ void __cdecl R_AddAllBspDrawSurfacesRangeCamera(
                 prevDrawSurf.fields = drawSurf.fields;
                 triSurfCount = 0;
             }
+
             triSurfList[triSurfCount] = sortedSurfIndex;
-            if (triSurfList[triSurfCount] != sortedSurfIndex)
-                MyAssertHandler(
-                    ".\\r_add_bsp.cpp",
-                    273,
-                    0,
-                    "triSurfList[triSurfCount] == sortedSurfIndex\n\t%i, %i",
-                    triSurfList[triSurfCount],
-                    sortedSurfIndex);
+            iassert(triSurfList[triSurfCount] == sortedSurfIndex);
+
             if (++triSurfCount >= 0x80)
             {
                 R_AddBspDrawSurfs(drawSurf, (unsigned __int8*)triSurfList, triSurfCount, &surfData);
@@ -251,24 +232,17 @@ void __cdecl R_AddAllBspDrawSurfacesCameraNonlit(
             //packed_high = HIDWORD(surfaceMaterials[sortedSurfIndex].packed);
             //*(_DWORD*)&drawSurf.fields = surfaceMaterials[sortedSurfIndex].fields;
             //HIDWORD(drawSurf.packed) = packed_high;
-            drawSurf.fields = surfaceMaterials[sortedSurfIndex].fields;
+            drawSurf.packed = surfaceMaterials[sortedSurfIndex].packed;
             if (drawSurf.packed != prevDrawSurf.packed)
             {
                 if (triSurfCount)
                     R_AddBspDrawSurfs(prevDrawSurf, (unsigned __int8*)triSurfList, triSurfCount, &surfData);
-                prevDrawSurf.fields = drawSurf.fields;
+                prevDrawSurf.packed = drawSurf.packed;
                 triSurfCount = 0;
             }
             triSurfList[triSurfCount] = sortedSurfIndex;
-            if (triSurfList[triSurfCount] != sortedSurfIndex)
-                MyAssertHandler(
-                    ".\\r_add_bsp.cpp",
-                    390,
-                    0,
-                    "triSurfList[triSurfCount] == sortedSurfIndex\n\t%i, %i",
-                    triSurfList[triSurfCount],
-                    sortedSurfIndex);
-            if (++triSurfCount >= 0x80)
+            iassert(triSurfList[triSurfCount] == sortedSurfIndex);
+            if (++triSurfCount >= 128)
             {
                 R_AddBspDrawSurfs(drawSurf, (unsigned __int8*)triSurfList, triSurfCount, &surfData);
                 triSurfCount = 0;
@@ -316,22 +290,9 @@ void __cdecl R_AddAllBspDrawSurfacesRangeSunShadow(
     PROF_SCOPED("BspSurfacesShadow");
 
     iassert( rgp.world );
-    if (beginSurface >= (unsigned int)rgp.world->models->surfaceCount + 1)
-        MyAssertHandler(
-            ".\\r_add_bsp.cpp",
-            438,
-            0,
-            "beginSurface doesn't index rgp.world->models[0].surfaceCount + 1\n\t%i not in [0, %i)",
-            beginSurface,
-            rgp.world->models->surfaceCount + 1);
-    if (endSurface >= (unsigned int)rgp.world->models->surfaceCount + 1)
-        MyAssertHandler(
-            ".\\r_add_bsp.cpp",
-            439,
-            0,
-            "endSurface doesn't index rgp.world->models[0].surfaceCount + 1\n\t%i not in [0, %i)",
-            endSurface,
-            rgp.world->models->surfaceCount + 1);
+    bcassert(beginSurface, rgp.world->models[0].surfaceCount + 1);
+    bcassert(endSurface, rgp.world->models[0].surfaceCount + 1);
+
     surfaceVisData = rgp.world->dpvs.surfaceVisData[partitionIndex + 1];
     R_InitBspDrawSurf(&surfData);
     stage = 3 * partitionIndex + 15;
@@ -339,11 +300,11 @@ void __cdecl R_AddAllBspDrawSurfacesRangeSunShadow(
     iassert( (int)maxDrawSurfCount == scene.maxDrawSurfCount[stage] );
     surfaceMaterials = rgp.world->dpvs.surfaceMaterials;
     surfData.drawSurfList.end = &surfData.drawSurfList.current[maxDrawSurfCount];
-    prevDrawSurf.packed = -1;
+    prevDrawSurf.packed = (unsigned __int64)-1;
     skipMaterial = 0;
     triSurfCount = 0;
     surfaceCastsSunShadow = rgp.world->dpvs.surfaceCastsSunShadow;
-    fastSunShadow = sm_fastSunShadow->current.color[0];
+    fastSunShadow = sm_fastSunShadow->current.enabled;
     hasApproxSunDirChanged = frontEndDataOut->hasApproxSunDirChanged;
     if (!hasApproxSunDirChanged && fastSunShadow)
     {
@@ -355,24 +316,17 @@ void __cdecl R_AddAllBspDrawSurfacesRangeSunShadow(
                 //packed_high = HIDWORD(surfaceMaterials[sortedSurfIndex].packed);
                 //*(_DWORD*)&drawSurf.fields = surfaceMaterials[sortedSurfIndex].fields;
                 //HIDWORD(drawSurf.packed) = packed_high;
-                drawSurf.fields = surfaceMaterials[sortedSurfIndex].fields;
+                drawSurf.packed = surfaceMaterials[sortedSurfIndex].packed;
                 if (drawSurf.packed != prevDrawSurf.packed)
                 {
                     if (triSurfCount)
                         R_AddBspDrawSurfs(prevDrawSurf, (unsigned __int8*)triSurfList, triSurfCount, &surfData);
-                    prevDrawSurf.fields = drawSurf.fields;
+                    prevDrawSurf.packed = drawSurf.packed;
                     triSurfCount = 0;
                 }
                 triSurfList[triSurfCount] = sortedSurfIndex;
-                if (triSurfList[triSurfCount] != sortedSurfIndex)
-                    MyAssertHandler(
-                        ".\\r_add_bsp.cpp",
-                        551,
-                        0,
-                        "triSurfList[triSurfCount] == sortedSurfIndex\n\t%i, %i",
-                        triSurfList[triSurfCount],
-                        sortedSurfIndex);
-                if (++triSurfCount >= 0x80)
+                iassert(triSurfList[triSurfCount] == sortedSurfIndex);
+                if (++triSurfCount >= 128)
                 {
                     R_AddBspDrawSurfs(drawSurf, (unsigned __int8*)triSurfList, triSurfCount, &surfData);
                     triSurfCount = 0;
@@ -404,14 +358,7 @@ void __cdecl R_AddAllBspDrawSurfacesRangeSunShadow(
                 if (!skipMaterial)
                 {
                     triSurfList[triSurfCount] = sortedSurfIndex;
-                    if (triSurfList[triSurfCount] != sortedSurfIndex)
-                        MyAssertHandler(
-                            ".\\r_add_bsp.cpp",
-                            511,
-                            0,
-                            "triSurfList[triSurfCount] == sortedSurfIndex\n\t%i, %i",
-                            triSurfList[triSurfCount],
-                            sortedSurfIndex);
+                    iassert(triSurfList[triSurfCount] == sortedSurfIndex);
                     if (++triSurfCount >= 0x80)
                     {
                         R_AddBspDrawSurfs(drawSurf, (unsigned __int8*)triSurfList, triSurfCount, &surfData);

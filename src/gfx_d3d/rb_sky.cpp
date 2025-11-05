@@ -73,7 +73,7 @@ unsigned int __cdecl RB_CalcSunSpriteSamples()
         }
     } while (alwaysfails);
     R_ClearScreenInternal(gfxCmdBufState.prim.device, 2u, colorWhite, 1.0, 0, 0);
-    R_SetCodeConstantFromVec4(&gfxCmdBufSourceState, 0x28u, (float *)colorWhite);
+    R_SetCodeConstantFromVec4(&gfxCmdBufSourceState, CONST_SRC_CODE_MATERIAL_COLOR, (float *)colorWhite);
     do
     {
         if (r_logFile && r_logFile->current.integer)

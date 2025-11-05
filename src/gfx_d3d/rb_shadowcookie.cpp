@@ -20,7 +20,7 @@ void __cdecl RB_SetShadowCookie(const GfxMatrix *lookupMatrix, float fade)
     gfxCmdBufSourceState.input.consts[8][1] = 0.0;
     gfxCmdBufSourceState.input.consts[8][2] = 0.0;
     gfxCmdBufSourceState.input.consts[8][3] = fade;
-    R_DirtyCodeConstant(&gfxCmdBufSourceState, 8u);
+    R_DirtyCodeConstant(&gfxCmdBufSourceState, CONST_SRC_CODE_SHADOW_PARMS);
 }
 
 void __cdecl RB_BlurShadowPass(float st0, float st1)
@@ -35,9 +35,9 @@ void __cdecl RB_BlurShadowPass(float st0, float st1)
         RB_EndTessSurface();
     screenWidth = gfxCmdBufSourceState.renderTargetWidth;
     screenHeight = gfxCmdBufSourceState.renderTargetHeight;
-    workingImage = gfxRenderTargets[10].image;
-    R_Resolve(gfxCmdBufContext, gfxRenderTargets[10].image);
-    R_SetCodeImageTexture(&gfxCmdBufSourceState, 9u, workingImage);
+    workingImage = gfxRenderTargets[R_RENDERTARGET_SHADOWCOOKIE_BLUR].image;
+    R_Resolve(gfxCmdBufContext, gfxRenderTargets[R_RENDERTARGET_SHADOWCOOKIE_BLUR].image);
+    R_SetCodeImageTexture(&gfxCmdBufSourceState, TEXTURE_SRC_CODE_FEEDBACK, workingImage);
     R_Set2D(&gfxCmdBufSourceState);
     h = screenHeight - 2.0;
     w = screenWidth - 2.0;

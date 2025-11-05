@@ -17,7 +17,7 @@ void __cdecl R_SetLightProperties(
     float spotShadowFade);
 void __cdecl R_SetCodeImageSamplerState(
     GfxCmdBufSourceState *source,
-    unsigned int codeTexture,
+    MaterialTextureSource codeTexture,
     unsigned __int8 samplerState);
 void __cdecl R_SetShadowableLight(
     GfxCmdBufSourceState *source,

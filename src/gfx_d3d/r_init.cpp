@@ -3435,11 +3435,13 @@ void __cdecl R_SetShadowmapFormats_DX(unsigned int adapterIndex)
     _D3DFORMAT colorFormat; // [esp+0h] [ebp-24h]
     unsigned int formatIndex; // [esp+4h] [ebp-20h]
     _D3DFORMAT depthFormat; // [esp+8h] [ebp-1Ch]
-    _D3DFORMAT formats[3][2]; // [esp+Ch] [ebp-18h]
 
-    *(_QWORD *)&formats[0][0] = 0x170000004BLL;
-    *(_QWORD *)&formats[1][0] = 0x160000004BLL;
-    *(_QWORD *)&formats[2][0] = 0x150000004BLL;
+    D3DFORMAT formats[3][2] = {
+        { D3DFMT_D24S8, D3DFMT_R5G6B5 },
+        { D3DFMT_D24S8, D3DFMT_X8R8G8B8 },
+        { D3DFMT_D24S8, D3DFMT_A8R8G8B8   },
+    };
+
     for (formatIndex = 0; formatIndex < 3; ++formatIndex)
     {
         depthFormat = formats[formatIndex][0];
@@ -3463,12 +3465,14 @@ void __cdecl R_SetShadowmapFormats_DX(unsigned int adapterIndex)
         //        2,
         //        3,
         //        depthFormat))
+        if (cond1 == D3D_OK && cond2 == D3D_OK)
         {
             gfxMetrics.shadowmapFormatPrimary = depthFormat;
             gfxMetrics.shadowmapFormatSecondary = colorFormat;
             gfxMetrics.shadowmapBuildTechType = TECHNIQUE_BUILD_SHADOWMAP_DEPTH;
             gfxMetrics.hasHardwareShadowmap = 1;
-            gfxMetrics.shadowmapSamplerState = 98;
+            //gfxMetrics.shadowmapSamplerState = 98;
+            gfxMetrics.shadowmapSamplerState = (SAMPLER_CLAMP_V | SAMPLER_CLAMP_U | SAMPLER_FILTER_LINEAR);
             return;
         }
     }
@@ -3476,7 +3480,8 @@ void __cdecl R_SetShadowmapFormats_DX(unsigned int adapterIndex)
     gfxMetrics.shadowmapFormatSecondary = D3DFMT_D24X8;
     gfxMetrics.shadowmapBuildTechType = TECHNIQUE_BUILD_SHADOWMAP_COLOR;
     gfxMetrics.hasHardwareShadowmap = 0;
-    gfxMetrics.shadowmapSamplerState = 97;
+    //gfxMetrics.shadowmapSamplerState = 97;
+    gfxMetrics.shadowmapSamplerState = (SAMPLER_CLAMP_V | SAMPLER_CLAMP_U | SAMPLER_FILTER_NEAREST);
 }
 
 struct GfxEnumMonitors // sizeof=0x8

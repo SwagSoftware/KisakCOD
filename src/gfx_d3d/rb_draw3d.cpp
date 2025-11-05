@@ -440,7 +440,7 @@ void __cdecl RB_StandardDrawCommands(const GfxViewInfo *viewInfo)
         PROF_SCOPED("RB_ApplyPostEffects");
         R_SetRenderTargetSize(&gfxCmdBufSourceState, R_RENDERTARGET_SCENE);
         R_SetRenderTarget(gfxCmdBufContext, R_RENDERTARGET_SCENE);
-        R_Resolve(gfxCmdBufContext, gfxRenderTargets[3].image);
+        R_Resolve(gfxCmdBufContext, gfxRenderTargets[R_RENDERTARGET_RESOLVED_POST_SUN].image);
     }
     R_InitContext(data, &cmdBuf);
     KISAK_NULLSUB();
@@ -937,7 +937,7 @@ void RB_ShowFbColorDebug_Feedback()
     halfScreenHeight = (double)gfxCmdBufSourceState.renderTargetHeight * 0.5;
     quarterScreenWidth = halfScreenWidth * 0.5;
     quarterScreenHeight = halfScreenHeight * 0.5;
-    R_SetCodeImageTexture(&gfxCmdBufSourceState, 9u, gfxRenderTargets[6].image);
+    R_SetCodeImageTexture(&gfxCmdBufSourceState, TEXTURE_SRC_CODE_FEEDBACK, gfxRenderTargets[R_RENDERTARGET_DYNAMICSHADOWS].image);
     R_SetRenderTargetSize(&gfxCmdBufSourceState, R_RENDERTARGET_FRAME_BUFFER);
     R_SetRenderTarget(gfxCmdBufContext, R_RENDERTARGET_FRAME_BUFFER);
     R_Set2D(&gfxCmdBufSourceState);
@@ -945,17 +945,17 @@ void RB_ShowFbColorDebug_Feedback()
     gfxCmdBufSourceState.input.consts[29][1] = 0.0;
     gfxCmdBufSourceState.input.consts[29][2] = 0.0;
     gfxCmdBufSourceState.input.consts[29][3] = 0.0;
-    R_DirtyCodeConstant(&gfxCmdBufSourceState, 0x1Du);
+    R_DirtyCodeConstant(&gfxCmdBufSourceState, CONST_SRC_CODE_COLOR_MATRIX_R);
     gfxCmdBufSourceState.input.consts[30][0] = 0.0;
     gfxCmdBufSourceState.input.consts[30][1] = 0.0;
     gfxCmdBufSourceState.input.consts[30][2] = 0.0;
     gfxCmdBufSourceState.input.consts[30][3] = 0.0;
-    R_DirtyCodeConstant(&gfxCmdBufSourceState, 0x1Eu);
+    R_DirtyCodeConstant(&gfxCmdBufSourceState, CONST_SRC_CODE_COLOR_MATRIX_G);
     gfxCmdBufSourceState.input.consts[31][0] = 0.0;
     gfxCmdBufSourceState.input.consts[31][1] = 0.0;
     gfxCmdBufSourceState.input.consts[31][2] = 0.0;
     gfxCmdBufSourceState.input.consts[31][3] = 0.0;
-    R_DirtyCodeConstant(&gfxCmdBufSourceState, 0x1Fu);
+    R_DirtyCodeConstant(&gfxCmdBufSourceState, CONST_SRC_CODE_COLOR_MATRIX_B);
     RB_DrawStretchPic(
         rgp.colorChannelMixerMaterial,
         quarterScreenWidth,
@@ -973,17 +973,17 @@ void RB_ShowFbColorDebug_Feedback()
     gfxCmdBufSourceState.input.consts[29][1] = 0.0;
     gfxCmdBufSourceState.input.consts[29][2] = 0.0;
     gfxCmdBufSourceState.input.consts[29][3] = 0.0;
-    R_DirtyCodeConstant(&gfxCmdBufSourceState, 0x1Du);
+    R_DirtyCodeConstant(&gfxCmdBufSourceState, CONST_SRC_CODE_COLOR_MATRIX_R);
     gfxCmdBufSourceState.input.consts[30][0] = 0.0;
     gfxCmdBufSourceState.input.consts[30][1] = 1.0;
     gfxCmdBufSourceState.input.consts[30][2] = 0.0;
     gfxCmdBufSourceState.input.consts[30][3] = 0.0;
-    R_DirtyCodeConstant(&gfxCmdBufSourceState, 0x1Eu);
+    R_DirtyCodeConstant(&gfxCmdBufSourceState, CONST_SRC_CODE_COLOR_MATRIX_G);
     gfxCmdBufSourceState.input.consts[31][0] = 0.0;
     gfxCmdBufSourceState.input.consts[31][1] = 0.0;
     gfxCmdBufSourceState.input.consts[31][2] = 0.0;
     gfxCmdBufSourceState.input.consts[31][3] = 0.0;
-    R_DirtyCodeConstant(&gfxCmdBufSourceState, 0x1Fu);
+    R_DirtyCodeConstant(&gfxCmdBufSourceState, CONST_SRC_CODE_COLOR_MATRIX_B);
     RB_DrawStretchPic(
         rgp.colorChannelMixerMaterial,
         halfScreenWidth,
@@ -998,11 +998,11 @@ void RB_ShowFbColorDebug_Feedback()
         GFX_PRIM_STATS_CODE);
     RB_EndTessSurface();
     Vec4Set(gfxCmdBufSourceState.input.consts[29], 0.0, 0.0, 0.0, 0.0);
-    R_DirtyCodeConstant(&gfxCmdBufSourceState, 0x1Du);
+    R_DirtyCodeConstant(&gfxCmdBufSourceState, CONST_SRC_CODE_COLOR_MATRIX_R);
     Vec4Set(gfxCmdBufSourceState.input.consts[30], 0.0, 0.0, 0.0, 0.0);
-    R_DirtyCodeConstant(&gfxCmdBufSourceState, 0x1Eu);
+    R_DirtyCodeConstant(&gfxCmdBufSourceState, CONST_SRC_CODE_COLOR_MATRIX_G);
     Vec4Set(gfxCmdBufSourceState.input.consts[31], 0.0, 0.0, 1.0, 0.0);
-    R_DirtyCodeConstant(&gfxCmdBufSourceState, 0x1Fu);
+    R_DirtyCodeConstant(&gfxCmdBufSourceState, CONST_SRC_CODE_COLOR_MATRIX_B);
     RB_DrawStretchPic(
         rgp.colorChannelMixerMaterial,
         quarterScreenWidth,
@@ -1016,9 +1016,9 @@ void RB_ShowFbColorDebug_Feedback()
         0xFFFFFFFF,
         GFX_PRIM_STATS_CODE);
     RB_EndTessSurface();
-    R_SetCodeConstant(&gfxCmdBufSourceState, 0x1Du, 0.0, 0.0, 0.0, 1.0);
-    R_SetCodeConstant(&gfxCmdBufSourceState, 0x1Eu, 0.0, 0.0, 0.0, 1.0);
-    R_SetCodeConstant(&gfxCmdBufSourceState, 0x1Fu, 0.0, 0.0, 0.0, 1.0);
+    R_SetCodeConstant(&gfxCmdBufSourceState, CONST_SRC_CODE_COLOR_MATRIX_R, 0.0, 0.0, 0.0, 1.0);
+    R_SetCodeConstant(&gfxCmdBufSourceState, CONST_SRC_CODE_COLOR_MATRIX_G, 0.0, 0.0, 0.0, 1.0);
+    R_SetCodeConstant(&gfxCmdBufSourceState, CONST_SRC_CODE_COLOR_MATRIX_B, 0.0, 0.0, 0.0, 1.0);
     RB_DrawStretchPic(
         rgp.colorChannelMixerMaterial,
         halfScreenWidth,
@@ -1041,7 +1041,7 @@ void RB_ShowFloatZDebug()
     float halfScreenHeight; // [esp+30h] [ebp-8h]
     float quarterScreenWidth; // [esp+34h] [ebp-4h]
 
-    if (gfxRenderTargets[5].surface.color)
+    if (gfxRenderTargets[R_RENDERTARGET_FLOAT_Z].surface.color)
     {
         if (tess.indexCount)
             RB_EndTessSurface();
@@ -1082,22 +1082,22 @@ void RB_ShowShadowsDebug()
     R_SetRenderTargetSize(&gfxCmdBufSourceState, R_RENDERTARGET_FRAME_BUFFER);
     R_SetRenderTarget(gfxCmdBufContext, R_RENDERTARGET_FRAME_BUFFER);
     R_Set2D(&gfxCmdBufSourceState);
-    R_SetCodeImageTexture(&gfxCmdBufSourceState, 9u, gfxRenderTargets[6].image);
+    R_SetCodeImageTexture(&gfxCmdBufSourceState, TEXTURE_SRC_CODE_FEEDBACK, gfxRenderTargets[R_RENDERTARGET_DYNAMICSHADOWS].image);
     gfxCmdBufSourceState.input.consts[29][0] = 1.0;
     gfxCmdBufSourceState.input.consts[29][1] = 0.0;
     gfxCmdBufSourceState.input.consts[29][2] = 0.0;
     gfxCmdBufSourceState.input.consts[29][3] = 0.0;
-    R_DirtyCodeConstant(&gfxCmdBufSourceState, 0x1Du);
+    R_DirtyCodeConstant(&gfxCmdBufSourceState, CONST_SRC_CODE_COLOR_MATRIX_R);
     gfxCmdBufSourceState.input.consts[30][0] = 0.0;
     gfxCmdBufSourceState.input.consts[30][1] = 1.0;
     gfxCmdBufSourceState.input.consts[30][2] = 0.0;
     gfxCmdBufSourceState.input.consts[30][3] = 0.0;
-    R_DirtyCodeConstant(&gfxCmdBufSourceState, 0x1Eu);
+    R_DirtyCodeConstant(&gfxCmdBufSourceState, CONST_SRC_CODE_COLOR_MATRIX_G);
     gfxCmdBufSourceState.input.consts[31][0] = 0.0;
     gfxCmdBufSourceState.input.consts[31][1] = 0.0;
     gfxCmdBufSourceState.input.consts[31][2] = 1.0;
     gfxCmdBufSourceState.input.consts[31][3] = 0.0;
-    R_DirtyCodeConstant(&gfxCmdBufSourceState, 0x1Fu);
+    R_DirtyCodeConstant(&gfxCmdBufSourceState, CONST_SRC_CODE_COLOR_MATRIX_B);
     RB_DrawStretchPic(
         rgp.colorChannelMixerMaterial,
         quarterScreenWidth,

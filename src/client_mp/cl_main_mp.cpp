@@ -3810,7 +3810,12 @@ void __cdecl CL_InitOnceForAllClients()
     Cmd_AddCommandInternal("resetStats", KISAK_NULLSUB, &KISAK_NULLSUB_VAR);
     autoupdateChecked = 0;
     autoupdateStarted = 0;
+#ifdef KISAK_PURE
+    // LWSS: depending on network settings, the Sys_StringToSockaddr() can stall in the gethostbyname() winapi
     CL_CheckAutoUpdate();
+#else
+    autoupdateChecked = 1;
+#endif
     CL_InitRef();
     SCR_Init();
     CG_RegisterDvars();

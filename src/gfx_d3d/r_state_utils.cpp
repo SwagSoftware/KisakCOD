@@ -55,7 +55,7 @@ void __cdecl R_DeriveNearPlaneConstantsForView(GfxCmdBufSourceState *source)
     source->input.consts[5][1] = v12;
     source->input.consts[5][2] = v13;
     source->input.consts[5][3] = 0.0;
-    R_DirtyCodeConstant(source, 5u);
+    R_DirtyCodeConstant(source, CONST_SRC_CODE_NEARPLANE_ORG);
     scalea = scale + scale;
     v8 = source->viewParms.inverseViewProjectionMatrix.m[0][0] * scalea;
     v9 = source->viewParms.inverseViewProjectionMatrix.m[0][1] * scalea;
@@ -64,7 +64,7 @@ void __cdecl R_DeriveNearPlaneConstantsForView(GfxCmdBufSourceState *source)
     source->input.consts[6][1] = v9;
     source->input.consts[6][2] = v10;
     source->input.consts[6][3] = 0.0;
-    R_DirtyCodeConstant(source, 6u);
+    R_DirtyCodeConstant(source, CONST_SRC_CODE_NEARPLANE_DX);
     v5 = source->viewParms.inverseViewProjectionMatrix.m[1][0] * -scalea;
     v6 = source->viewParms.inverseViewProjectionMatrix.m[1][1] * -scalea;
     v7 = source->viewParms.inverseViewProjectionMatrix.m[1][2] * -scalea;
@@ -72,7 +72,7 @@ void __cdecl R_DeriveNearPlaneConstantsForView(GfxCmdBufSourceState *source)
     source->input.consts[7][1] = v6;
     source->input.consts[7][2] = v7;
     source->input.consts[7][3] = 0.0;
-    R_DirtyCodeConstant(source, 7u);
+    R_DirtyCodeConstant(source, CONST_SRC_CODE_NEARPLANE_DY);
 }
 
 void __cdecl R_SetGameTime(GfxCmdBufSourceState *source, float gameTime)
@@ -92,7 +92,7 @@ void __cdecl R_SetGameTime(GfxCmdBufSourceState *source, float gameTime)
     source->input.consts[18][1] = cosOfFracPartOfGameTime;
     source->input.consts[18][2] = fracPartOfGameTime;
     source->input.consts[18][3] = gameTime;
-    R_DirtyCodeConstant(source, 0x12u);
+    R_DirtyCodeConstant(source, CONST_SRC_CODE_GAMETIME);
 }
 
 void __cdecl R_BeginView(GfxCmdBufSourceState *source, const GfxSceneDef *sceneDef, const GfxViewParms *viewParms)

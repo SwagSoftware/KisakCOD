@@ -67,8 +67,8 @@ void RB_GetResolvedScene()
     if (!gfxCmdBufSourceState.input.codeImages[TEXTURE_SRC_CODE_RESOLVED_SCENE])
     {
         iassert(gfxCmdBufState.renderTargetId == R_RENDERTARGET_SCENE);
-        R_Resolve(gfxCmdBufContext, gfxRenderTargets[4].image);
-        R_SetCodeImageTexture(&gfxCmdBufSourceState, 0xBu, gfxRenderTargets[4].image);
+        R_Resolve(gfxCmdBufContext, gfxRenderTargets[R_RENDERTARGET_RESOLVED_SCENE].image);
+        R_SetCodeImageTexture(&gfxCmdBufSourceState, TEXTURE_SRC_CODE_RESOLVED_SCENE, gfxRenderTargets[R_RENDERTARGET_RESOLVED_SCENE].image);
     }
 }
 
@@ -86,7 +86,7 @@ void __cdecl RB_GetDepthOfFieldInputImages(float radius)
     RB_FullScreenFilter(rgp.dofNearCocMaterial);
     R_SetRenderTargetSize(&gfxCmdBufSourceState, R_RENDERTARGET_POST_EFFECT_1);
     R_SetRenderTarget(gfxCmdBufContext, R_RENDERTARGET_POST_EFFECT_1);
-    R_SetCodeImageTexture(&gfxCmdBufSourceState, 9u, gfxRenderTargets[7].image);
+    R_SetCodeImageTexture(&gfxCmdBufSourceState, TEXTURE_SRC_CODE_FEEDBACK, gfxRenderTargets[R_RENDERTARGET_PINGPONG_0].image);
     RB_FullScreenFilter(rgp.smallBlurMaterial);
 }
 
@@ -151,7 +151,7 @@ void __cdecl RB_CalcGlowEffect(const GfxViewInfo *viewInfo)
 
 void __cdecl RB_ApplyGlowEffect(const GfxViewInfo *viewInfo)
 {
-    if (gfxRenderTargets[gfxCmdBufState.renderTargetId].surface.color != gfxRenderTargets[1].surface.color)
+    if (gfxRenderTargets[gfxCmdBufState.renderTargetId].surface.color != gfxRenderTargets[R_RENDERTARGET_FRAME_BUFFER].surface.color)
         MyAssertHandler(
             ".\\rb_postfx.cpp",
             143,
@@ -170,7 +170,7 @@ void __cdecl RB_ApplyGlowEffectPass(const GfxViewInfo *viewInfo, GfxImage *glowI
 {
     iassert( viewInfo );
     iassert( rgp.world );
-    R_SetCodeImageTexture(&gfxCmdBufSourceState, 9u, glowImage);
+    R_SetCodeImageTexture(&gfxCmdBufSourceState, TEXTURE_SRC_CODE_FEEDBACK, glowImage);
     RB_FullScreenFilter(rgp.glowApplyBloomMaterial);
 }
 
@@ -202,15 +202,15 @@ void __cdecl RB_ApplyMergedPostEffects(const GfxViewInfo *viewInfo)
             dofEquation,
             viewInfo->viewParms.zNear);
         if (!Vec4Compare(gfxCmdBufSourceState.input.consts[13], dofEquation))
-            R_SetCodeConstantFromVec4(&gfxCmdBufSourceState, 0xDu, dofEquation);
+            R_SetCodeConstantFromVec4(&gfxCmdBufSourceState, CONST_SRC_CODE_DOF_EQUATION_SCENE, dofEquation);
         RB_GetViewModelDepthOfFieldEquation(viewInfo->dof.viewModelStart, viewInfo->dof.viewModelEnd, dofEquation);
         v11 = viewInfo->dof.farBlur / viewInfo->dof.nearBlur;
         v10 = pow(v11, r_dof_bias->current.value);
         dofEquation[3] = v10;
         if (!Vec4Compare(gfxCmdBufSourceState.input.consts[12], dofEquation))
-            R_SetCodeConstantFromVec4(&gfxCmdBufSourceState, 0xCu, dofEquation);
+            R_SetCodeConstantFromVec4(&gfxCmdBufSourceState, CONST_SRC_CODE_DOF_EQUATION_VIEWMODEL_AND_FAR_BLUR, dofEquation);
         v9 = 1.0f / (float)vidConfig.sceneHeight;
-        R_UpdateCodeConstant(&gfxCmdBufSourceState, 0x10u, 0.0, v9, 0.0f, 0.0f);
+        R_UpdateCodeConstant(&gfxCmdBufSourceState, CONST_SRC_CODE_DOF_ROW_DELTA, 0.0, v9, 0.0f, 0.0f);
         smallFrac = RB_GetDepthOfFieldBlurFraction(viewInfo, 1.4f);
         mediumFrac = RB_GetDepthOfFieldBlurFraction(viewInfo, 3.5999999f);
         if (smallFrac <= 0.0f || mediumFrac <= smallFrac || mediumFrac >= 1.0f)
@@ -228,11 +228,11 @@ void __cdecl RB_ApplyMergedPostEffects(const GfxViewInfo *viewInfo)
         v7 = -1.0f / (1.0f - mediumFrac);
         v6 = -1.0f / (mediumFrac - smallFrac);
         v5 = -1.0f / smallFrac;
-        R_UpdateCodeConstant(&gfxCmdBufSourceState, 0xEu, v5, v6, v7, v8);
+        R_UpdateCodeConstant(&gfxCmdBufSourceState, CONST_SRC_CODE_DOF_LERP_SCALE, v5, v6, v7, v8);
         v4 = -mediumFrac / (1.0f - mediumFrac);
         v3 = 1.0f / (1.0f - mediumFrac);
         v2 = mediumFrac / (mediumFrac - smallFrac);
-        R_UpdateCodeConstant(&gfxCmdBufSourceState, 0xFu, 1.0f, v2, v3, v4);
+        R_UpdateCodeConstant(&gfxCmdBufSourceState, CONST_SRC_CODE_DOF_LERP_BIAS, 1.0f, v2, v3, v4);
         RB_GetDepthOfFieldInputImages(viewInfo->dof.nearBlur);
         R_SetRenderTargetSize(&gfxCmdBufSourceState, R_RENDERTARGET_FRAME_BUFFER);
         R_SetRenderTarget(gfxCmdBufContext, R_RENDERTARGET_FRAME_BUFFER);
@@ -244,38 +244,6 @@ void __cdecl RB_ApplyMergedPostEffects(const GfxViewInfo *viewInfo)
     else
     {
         RB_ApplyColorManipulationFullscreen(viewInfo);
-    }
-}
-
-void __cdecl R_UpdateCodeConstant(
-    GfxCmdBufSourceState *source,
-    unsigned int constant,
-    float x,
-    float y,
-    float z,
-    float w)
-{
-    float *v6; // [esp+0h] [ebp-8h]
-
-    if (x != source->input.consts[constant][0]
-        || y != source->input.consts[constant][1]
-        || z != source->input.consts[constant][2]
-        || w != source->input.consts[constant][3])
-    {
-        if (constant >= 0x3A)
-            MyAssertHandler(
-                "c:\\trees\\cod3\\src\\gfx_d3d\\r_state.h",
-                495,
-                0,
-                "constant doesn't index CONST_SRC_CODE_COUNT_FLOAT4\n\t%i not in [0, %i)",
-                constant,
-                58);
-        v6 = source->input.consts[constant];
-        *v6 = x;
-        v6[1] = y;
-        v6[2] = z;
-        v6[3] = w;
-        R_DirtyCodeConstant(source, constant);
     }
 }
 
@@ -391,7 +359,7 @@ void __cdecl RB_BlurScreen(const GfxViewInfo *viewInfo, float blurRadius)
     RB_GaussianFilterImage(blurRadius, R_RENDERTARGET_RESOLVED_SCENE, R_RENDERTARGET_POST_EFFECT_0);
     R_SetRenderTargetSize(&gfxCmdBufSourceState, R_RENDERTARGET_FRAME_BUFFER);
     R_SetRenderTarget(gfxCmdBufContext, R_RENDERTARGET_FRAME_BUFFER);
-    R_SetCodeImageTexture(&gfxCmdBufSourceState, 9u, gfxRenderTargets[11].image);
+    R_SetCodeImageTexture(&gfxCmdBufSourceState, TEXTURE_SRC_CODE_FEEDBACK, gfxRenderTargets[R_RENDERTARGET_POST_EFFECT_0].image);
     if (viewInfo->film.enabled)
         RB_FullScreenColoredFilter(rgp.feedbackFilmBlendMaterial, color);
     else

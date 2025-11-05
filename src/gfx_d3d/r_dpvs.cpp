@@ -14,6 +14,7 @@
 #include <devgui/devgui.h>
 #include <cgame/cg_local.h>
 #include "rb_light.h"
+#include "r_sunshadow.h" // SCENE_VIEW_CAMERA
 #include <universal/profile.h>
 
 #ifdef KISAK_MP
@@ -42,7 +43,6 @@ void __cdecl R_FrustumClipPlanes(
     int sidePlaneCount,
     DpvsPlane *frustumPlanes)
 {
-    DpvsPlane *v4; // [esp+8h] [ebp-1Ch]
     int term; // [esp+14h] [ebp-10h]
     float scale; // [esp+18h] [ebp-Ch]
     float length; // [esp+1Ch] [ebp-8h]
@@ -51,15 +51,15 @@ void __cdecl R_FrustumClipPlanes(
     for (planeIndex = 0; planeIndex < sidePlaneCount; ++planeIndex)
     {
         for (term = 0; term < 4; ++term)
+        {
             frustumPlanes[planeIndex].coeffs[term] = Vec4Dot(&(*sidePlanes)[4 * planeIndex], viewProjMtx->m[term]);
+        }
         length = Vec3Length(frustumPlanes[planeIndex].coeffs);
         iassert( length > 0 );
         scale = 1.0 / length;
         Vec4Scale(frustumPlanes[planeIndex].coeffs, scale, frustumPlanes[planeIndex].coeffs);
-        v4 = &frustumPlanes[planeIndex];
-        v4->side[0] = COERCE_INT(v4->coeffs[0]) <= 0 ? 0 : 0xC;
-        v4->side[1] = COERCE_INT(v4->coeffs[1]) <= 0 ? 4 : 16;
-        v4->side[2] = COERCE_INT(v4->coeffs[2]) <= 0 ? 8 : 20;
+
+        R_SetDpvsPlaneSides(&frustumPlanes[planeIndex]);
     }
 }
 
@@ -608,7 +608,7 @@ void __cdecl R_DrawAllSceneEnt(const GfxViewInfo *viewInfo)
     volatile unsigned int sceneEntCount; // [esp+20h] [ebp-44h]
     volatile unsigned int sceneEntCounta; // [esp+20h] [ebp-44h]
     volatile unsigned int sceneEntCountb; // [esp+20h] [ebp-44h]
-    DpvsView *views; // [esp+24h] [ebp-40h]
+    const DpvsView *view; // [esp+24h] [ebp-40h]
     GfxEntity *gfxEnt; // [esp+28h] [ebp-3Ch]
     GfxEntity *gfxEnta; // [esp+28h] [ebp-3Ch]
     unsigned int sceneEntIndex; // [esp+2Ch] [ebp-38h]
@@ -627,7 +627,7 @@ void __cdecl R_DrawAllSceneEnt(const GfxViewInfo *viewInfo)
         sceneEntVisData[viewIndex] = scene.sceneDObjVisData[viewIndex];
     sceneEntCount = scene.sceneDObjCount;
     iassert( scene.dpvs.localClientNum == (uint)viewInfo->localClientNum );
-    views = dpvsGlob.views[scene.dpvs.localClientNum];
+    view = dpvsGlob.views[scene.dpvs.localClientNum];
     for (sceneEntIndex = 0; sceneEntIndex < sceneEntCount; ++sceneEntIndex)
     {
         sceneEnt = &scene.sceneDObj[sceneEntIndex];
@@ -640,7 +640,7 @@ void __cdecl R_DrawAllSceneEnt(const GfxViewInfo *viewInfo)
                 visData = 0;
                 for (viewIndex = 0; viewIndex < 3; ++viewIndex)
                 {
-                    sceneEntVisData[viewIndex][sceneEntIndex] = (views[viewIndex].renderFxFlagsCull & gfxEnt->renderFxFlags) == 0;
+                    sceneEntVisData[viewIndex][sceneEntIndex] = (view[viewIndex].renderFxFlagsCull & gfxEnt->renderFxFlags) == 0;
                     visData |= sceneEntVisData[viewIndex][sceneEntIndex];
                 }
                 while (viewIndex < 7)
@@ -656,7 +656,7 @@ void __cdecl R_DrawAllSceneEnt(const GfxViewInfo *viewInfo)
                     visData = 0;
                     for (viewIndex = 0; viewIndex < 3; ++viewIndex)
                     {
-                        if ((views[viewIndex].renderFxFlagsCull & gfxEnt->renderFxFlags) != 0)
+                        if ((view[viewIndex].renderFxFlagsCull & gfxEnt->renderFxFlags) != 0)
                             v2 = 0;
                         else
                             v2 = scene.dpvs.entVisData[viewIndex][entnum];
@@ -684,7 +684,7 @@ void __cdecl R_DrawAllSceneEnt(const GfxViewInfo *viewInfo)
                     viewVisData = scene.dpvs.entVisData[viewIndex][entnum];
                     if (!viewVisData)
                         viewVisData = 1;
-                    sceneEntVisData[viewIndex][sceneEntIndex] = (views[viewIndex].renderFxFlagsCull & gfxEnt->renderFxFlags) == 0
+                    sceneEntVisData[viewIndex][sceneEntIndex] = (view[viewIndex].renderFxFlagsCull & gfxEnt->renderFxFlags) == 0
                         ? viewVisData
                         : 0;
                     visData |= sceneEntVisData[viewIndex][sceneEntIndex];
@@ -784,7 +784,7 @@ void __cdecl R_DrawAllSceneEnt(const GfxViewInfo *viewInfo)
             {
                 for (viewIndex = 0; viewIndex < 3; ++viewIndex)
                 {
-                    if ((views[viewIndex].renderFxFlagsCull & gfxEnta->renderFxFlags) != 0)
+                    if ((view[viewIndex].renderFxFlagsCull & gfxEnta->renderFxFlags) != 0)
                         sceneEntVisData[viewIndex][sceneEntIndexa] = 0;
                     else
                         visData |= sceneEntVisData[viewIndex][sceneEntIndexa];
@@ -794,7 +794,7 @@ void __cdecl R_DrawAllSceneEnt(const GfxViewInfo *viewInfo)
             {
                 for (viewIndex = 0; viewIndex < 3; ++viewIndex)
                 {
-                    if ((views[viewIndex].renderFxFlagsCull & gfxEnta->renderFxFlags) != 0)
+                    if ((view[viewIndex].renderFxFlagsCull & gfxEnta->renderFxFlags) != 0)
                         v1 = 0;
                     else
                         v1 = scene.dpvs.entVisData[viewIndex][entnum];
@@ -809,7 +809,7 @@ void __cdecl R_DrawAllSceneEnt(const GfxViewInfo *viewInfo)
                     viewVisDatab = scene.dpvs.entVisData[viewIndex][entnum];
                     if (!viewVisDatab)
                         viewVisDatab = 1;
-                    sceneEntVisData[viewIndex][sceneEntIndexa] = (views[viewIndex].renderFxFlagsCull & gfxEnta->renderFxFlags) == 0
+                    sceneEntVisData[viewIndex][sceneEntIndexa] = (view[viewIndex].renderFxFlagsCull & gfxEnta->renderFxFlags) == 0
                         ? viewVisDatab
                         : 0;
                     visData |= sceneEntVisData[viewIndex][sceneEntIndexa];
@@ -1127,11 +1127,11 @@ void __cdecl R_FilterXModelIntoScene(
     const char *v4; // eax
     int v5; // [esp+38h] [ebp-3Ch]
     int frustumPlaneCount; // [esp+3Ch] [ebp-38h]
-    float *a; // [esp+40h] [ebp-34h]
+    const float *a; // [esp+40h] [ebp-34h]
     int v8; // [esp+44h] [ebp-30h]
     GfxSceneModel *sceneModel; // [esp+4Ch] [ebp-28h]
     float radius; // [esp+54h] [ebp-20h]
-    DpvsView *views; // [esp+58h] [ebp-1Ch]
+    const DpvsView *view; // [esp+58h] [ebp-1Ch]
     GfxEntity *gfxEnt; // [esp+5Ch] [ebp-18h]
     unsigned int sceneEntIndex; // [esp+60h] [ebp-14h]
     unsigned int gfxEntIndex; // [esp+64h] [ebp-10h]
@@ -1153,12 +1153,12 @@ void __cdecl R_FilterXModelIntoScene(
     }
     radius = XModelGetRadius(model) * placement->scale;
     cullCount = 0;
-    views = dpvsGlob.views[scene.dpvs.localClientNum];
+    view = dpvsGlob.views[scene.dpvs.localClientNum];
     for (viewIndex = 0; viewIndex < 3; ++viewIndex)
     {
-        frustumPlaneCount = views[viewIndex].frustumPlaneCount;
+        frustumPlaneCount = view[viewIndex].frustumPlaneCount;
         v8 = 0;
-        a = views[viewIndex].frustumPlanes[0].coeffs;
+        a = view[viewIndex].frustumPlanes[0].coeffs;
         while (v8 < frustumPlaneCount)
         {
             if (Vec3Dot(a, placement->base.origin) + a[3] + radius <= 0.0)
@@ -1481,21 +1481,21 @@ void __cdecl R_FilterEntitiesIntoCells(int cameraCellIndex)
     float s; // [esp+0h] [ebp-84h]
     unsigned int v2; // [esp+14h] [ebp-70h]
     int v3; // [esp+18h] [ebp-6Ch]
-    DpvsPlane *v4; // [esp+1Ch] [ebp-68h]
+    const DpvsPlane *v4; // [esp+1Ch] [ebp-68h]
     int v5; // [esp+20h] [ebp-64h]
     int v6; // [esp+24h] [ebp-60h]
     int frustumPlaneCount; // [esp+28h] [ebp-5Ch]
     float radius; // [esp+2Ch] [ebp-58h]
-    DpvsPlane *a; // [esp+30h] [ebp-54h]
+    const DpvsPlane *a; // [esp+30h] [ebp-54h]
     int v10; // [esp+34h] [ebp-50h]
     int v11; // [esp+38h] [ebp-4Ch]
-    DpvsPlane *frustumPlanes; // [esp+40h] [ebp-44h]
+    const DpvsPlane *frustumPlanes; // [esp+40h] [ebp-44h]
     int v13; // [esp+44h] [ebp-40h]
     float mins[3]; // [esp+48h] [ebp-3Ch] BYREF
     float maxs[3]; // [esp+54h] [ebp-30h] BYREF
     GfxSceneModel *sceneModel; // [esp+60h] [ebp-24h]
-    DpvsView *dpvsView; // [esp+64h] [ebp-20h]
-    DpvsView *views; // [esp+68h] [ebp-1Ch]
+    const DpvsView *dpvsView; // [esp+64h] [ebp-20h]
+    const DpvsView *view; // [esp+68h] [ebp-1Ch]
     int sceneEntIndex; // [esp+6Ch] [ebp-18h]
     GfxSceneEntity *sceneEnt; // [esp+70h] [ebp-14h]
     GfxSceneBrush *sceneBrush; // [esp+74h] [ebp-10h]
@@ -1509,7 +1509,7 @@ void __cdecl R_FilterEntitiesIntoCells(int cameraCellIndex)
     else
         v2 = cameraCellIndex;
     dpvsGlob.cameraCellIndex = v2;
-    views = dpvsGlob.views[scene.dpvs.localClientNum];
+    view = dpvsGlob.views[scene.dpvs.localClientNum];
     for (sceneEntIndex = 0; sceneEntIndex < scene.sceneDObjCount; ++sceneEntIndex)
     {
         sceneEnt = &scene.sceneDObj[sceneEntIndex];
@@ -1518,7 +1518,7 @@ void __cdecl R_FilterEntitiesIntoCells(int cameraCellIndex)
             entnum = sceneEnt->entnum;
             for (viewIndex = 0; viewIndex < 3; ++viewIndex)
             {
-                dpvsView = &views[viewIndex];
+                dpvsView = &view[viewIndex];
                 v13 = 0;
                 frustumPlanes = dpvsView->frustumPlanes;
                 while (v13 < dpvsView->frustumPlaneCount)
@@ -1549,7 +1549,7 @@ void __cdecl R_FilterEntitiesIntoCells(int cameraCellIndex)
         entnum = sceneModel->entnum;
         for (viewIndex = 0; viewIndex < 3; ++viewIndex)
         {
-            dpvsView = &views[viewIndex];
+            dpvsView = &view[viewIndex];
             frustumPlaneCount = dpvsView->frustumPlaneCount;
             radius = sceneModel->radius;
             v10 = 0;
@@ -1584,7 +1584,7 @@ void __cdecl R_FilterEntitiesIntoCells(int cameraCellIndex)
         bmodel = sceneBrush->bmodel;
         for (viewIndex = 0; viewIndex < 3; ++viewIndex)
         {
-            dpvsView = &views[viewIndex];
+            dpvsView = &view[viewIndex];
             v5 = 0;
             v4 = dpvsView->frustumPlanes;
             while (v5 < dpvsView->frustumPlaneCount)
@@ -2429,15 +2429,15 @@ void __cdecl R_AddCellSurfacesAndCullGroupsInFrustumDelayed(
     dpvsStaticCell.planeCount = planeCount;
     dpvsStaticCell.frustumPlaneCount = frustumPlaneCount;
     dpvsStaticCell.viewIndex = g_viewIndex; // *(_WORD *)(*((unsigned int *)NtCurrentTeb()->ThreadLocalStoragePointer + _tls_index) + 12);
-    R_AddWorkerCmd(3, (unsigned __int8 *)&dpvsStaticCell);
+    R_AddWorkerCmd(WRKCMD_DPVS_CELL_STATIC, (unsigned __int8 *)&dpvsStaticCell);
     dpvsDynamicCell.cellIndex = cell - rgp.world->cells;
     dpvsDynamicCell.planes = planes;
     dpvsDynamicCell.planeCount = planeCount;
     dpvsDynamicCell.frustumPlaneCount = frustumPlaneCount;
     dpvsDynamicCell.viewIndex = g_viewIndex; //*(_WORD *)(*((unsigned int *)NtCurrentTeb()->ThreadLocalStoragePointer + _tls_index) + 12);
-    R_AddWorkerCmd(5, (unsigned __int8 *)&dpvsDynamicCell);
-    R_AddWorkerCmd(4, (unsigned __int8 *)&dpvsDynamicCell);
-    R_AddWorkerCmd(6, (unsigned __int8 *)&dpvsDynamicCell);
+    R_AddWorkerCmd(WRKCMD_DPVS_CELL_DYN_MODEL, (unsigned __int8 *)&dpvsDynamicCell);
+    R_AddWorkerCmd(WRKCMD_DPVS_CELL_SCENE_ENT, (unsigned __int8 *)&dpvsDynamicCell);
+    R_AddWorkerCmd(WRKCMD_DPVS_CELL_DYN_BRUSH, (unsigned __int8 *)&dpvsDynamicCell);
 }
 
 void __cdecl R_ShowCull()
@@ -2625,8 +2625,8 @@ bool __cdecl R_CullDynamicSpotLightInCameraView()
     scene.isAddedLightCulled[0] = R_CullPointAndRadius(
         scene.addedLight[0].origin,
         scene.addedLight[0].radius,
-        dpvsGlob.views[scene.dpvs.localClientNum][0].frustumPlanes,
-        dpvsGlob.views[scene.dpvs.localClientNum][0].frustumPlaneCount);
+        dpvsGlob.views[scene.dpvs.localClientNum][SCENE_VIEW_CAMERA].frustumPlanes,
+        dpvsGlob.views[scene.dpvs.localClientNum][SCENE_VIEW_CAMERA].frustumPlaneCount);
     return scene.isAddedLightCulled[0];
 }
 
@@ -2637,8 +2637,8 @@ void __cdecl R_CullDynamicPointLightsInCameraView()
     GfxLight *dl; // [esp+14h] [ebp-8h]
     int lightIndex; // [esp+18h] [ebp-4h]
 
-    planes = dpvsGlob.views[scene.dpvs.localClientNum][0].frustumPlanes;
-    planeCount = dpvsGlob.views[scene.dpvs.localClientNum][0].frustumPlaneCount;
+    planes = dpvsGlob.views[scene.dpvs.localClientNum][SCENE_VIEW_CAMERA].frustumPlanes;
+    planeCount = dpvsGlob.views[scene.dpvs.localClientNum][SCENE_VIEW_CAMERA].frustumPlaneCount;
     for (lightIndex = 0; lightIndex < scene.addedLightCount; ++lightIndex)
     {
         dl = &scene.addedLight[lightIndex];
@@ -2727,26 +2727,14 @@ void __cdecl R_SetupDpvsForPoint(const GfxViewParms *viewParms)
 
 void __cdecl R_SetViewFrustumPlanes(GfxViewInfo *viewInfo)
 {
-    float *v1; // [esp+0h] [ebp-Ch]
-    DpvsPlane *v2; // [esp+4h] [ebp-8h]
-    int i; // [esp+8h] [ebp-4h]
+    iassert(dpvsGlob.views[scene.dpvs.localClientNum][SCENE_VIEW_CAMERA].frustumPlaneCount >= 4);
 
-    if (dpvsGlob.views[scene.dpvs.localClientNum][0].frustumPlaneCount < 4)
-        MyAssertHandler(
-            ".\\r_dpvs.cpp",
-            3346,
-            0,
-            "%s\n\t(dpvsGlob.views[scene.dpvs.localClientNum][SCENE_VIEW_CAMERA].frustumPlaneCount) = %i",
-            "(dpvsGlob.views[scene.dpvs.localClientNum][SCENE_VIEW_CAMERA].frustumPlaneCount >= 4)",
-            dpvsGlob.views[scene.dpvs.localClientNum][0].frustumPlaneCount);
-    for (i = 0; i < 4; ++i)
+    for (int i = 0; i < 4; ++i)
     {
-        v1 = viewInfo->frustumPlanes[i];
-        v2 = &dpvsGlob.views[scene.dpvs.localClientNum][0].frustumPlanes[i];
-        *v1 = v2->coeffs[0];
-        v1[1] = v2->coeffs[1];
-        v1[2] = v2->coeffs[2];
-        v1[3] = v2->coeffs[3];
+        viewInfo->frustumPlanes[i][0] = dpvsGlob.views[scene.dpvs.localClientNum][SCENE_VIEW_CAMERA].frustumPlanes[i].coeffs[0];
+        viewInfo->frustumPlanes[i][1] = dpvsGlob.views[scene.dpvs.localClientNum][SCENE_VIEW_CAMERA].frustumPlanes[i].coeffs[1];
+        viewInfo->frustumPlanes[i][2] = dpvsGlob.views[scene.dpvs.localClientNum][SCENE_VIEW_CAMERA].frustumPlanes[i].coeffs[2];
+        viewInfo->frustumPlanes[i][3] = dpvsGlob.views[scene.dpvs.localClientNum][SCENE_VIEW_CAMERA].frustumPlanes[i].coeffs[3];
     }
 }
 
@@ -2974,11 +2962,11 @@ void __cdecl R_VisitPortals(const GfxCell *cell, const DpvsPlane *parentPlane, c
             if (childPlanesCount + 16 > 0x800)
             {
                 R_WarnOncePerFrame(R_WARN_PORTAL_PLANES);
-                R_WaitWorkerCmdsOfType(3);
-                R_WaitWorkerCmdsOfType(5);
-                R_WaitWorkerCmdsOfType(4);
-                R_WaitWorkerCmdsOfType(7);
-                R_WaitWorkerCmdsOfType(6);
+                R_WaitWorkerCmdsOfType(WRKCMD_DPVS_CELL_STATIC);
+                R_WaitWorkerCmdsOfType(WRKCMD_DPVS_CELL_DYN_MODEL);
+                R_WaitWorkerCmdsOfType(WRKCMD_DPVS_CELL_SCENE_ENT);
+                R_WaitWorkerCmdsOfType(WRKCMD_DPVS_ENTITY);
+                R_WaitWorkerCmdsOfType(WRKCMD_DPVS_CELL_DYN_BRUSH);
                 childPlanesCount = 0;
             }
             childPlanes = &dpvsGlob.childPlanes[childPlanesCount];
@@ -3519,73 +3507,46 @@ void __cdecl R_SetupShadowSurfacesDpvs(
     unsigned int sidePlaneCount,
     int partitionIndex)
 {
-    DpvsPlane *v4; // ecx
-    DpvsPlane *v5; // edx
-    DpvsPlane *v6; // eax
-    DpvsPlane *v7; // ecx
-    DpvsPlane *v8; // eax
-    DpvsPlane *v9; // ecx
     DpvsView *dpvsView; // [esp+0h] [ebp-8h]
-    unsigned int planeIndex; // [esp+4h] [ebp-4h]
 
     iassert(Sys_IsMainThread());
     iassert(rgp.world);
     iassert(viewParms);
 
-    dpvsView = &dpvsGlob.views[scene.dpvs.localClientNum][partitionIndex + 1];
+    dpvsView = &dpvsGlob.views[scene.dpvs.localClientNum][SCENE_VIEW_SUNSHADOW_0 + partitionIndex];
     dpvsView->renderFxFlagsCull = 1;
 
-    iassert((sidePlaneCount <= (sizeof(dpvsView->frustumPlanes) / (sizeof(dpvsView->frustumPlanes[0]) * (sizeof(dpvsView->frustumPlanes) != 4 || sizeof(dpvsView->frustumPlanes[0]) <= 4)))));
+    iassert(sidePlaneCount <= ARRAY_COUNT(dpvsView->frustumPlanes));
 
     R_FrustumClipPlanes(&viewParms->viewProjectionMatrix, sidePlanes, sidePlaneCount, dpvsView->frustumPlanes);
 
-    if (Vec3Dot(viewParms->axis[0], scene.shadowNearPlane[partitionIndex].coeffs) < 0.0)
+    // Add Near plane only if facing the same way as the view direction (Which at this point should be sunAxis[0] - sun forward)
+    if (Vec3Dot(viewParms->axis[0], scene.shadowNearPlane[partitionIndex].coeffs) < 0.0f)
     {
-        iassert((sidePlaneCount < (sizeof(dpvsView->frustumPlanes) / (sizeof(dpvsView->frustumPlanes[0]) * (sizeof(dpvsView->frustumPlanes) != 4 || sizeof(dpvsView->frustumPlanes[0]) <= 4)))));
-
-        v4 = &scene.shadowNearPlane[partitionIndex];
-        v5 = &dpvsView->frustumPlanes[sidePlaneCount];
-        v5->coeffs[0] = v4->coeffs[0];
-        v5->coeffs[1] = v4->coeffs[1];
-        v5->coeffs[2] = v4->coeffs[2];
-        v5->coeffs[3] = v4->coeffs[3];
-        v5->side[0] = v4->side[0];
-        v5->side[1] = v4->side[1];
-        v5->side[2] = v4->side[2];
-        v5->pad = v5->pad;
-
-        ++sidePlaneCount;
+        iassert(sidePlaneCount < ARRAY_COUNT(dpvsView->frustumPlanes));
+        memcpy(&dpvsView->frustumPlanes[sidePlaneCount], &scene.shadowNearPlane[partitionIndex], sizeof(DpvsPlane));
+        sidePlaneCount++;
     }
-    if ((!partitionIndex || !rg.sunShadowFull)
-        && Vec3Dot(viewParms->axis[0], scene.shadowFarPlane[partitionIndex].coeffs) < 0.0)
+
+    // Add far plane if doing the Near Partition AND it's facing the same way 
+    if ((!partitionIndex || !rg.sunShadowFull) && Vec3Dot(viewParms->axis[0], scene.shadowFarPlane[partitionIndex].coeffs) < 0.0)
     {
-        iassert((sidePlaneCount < (sizeof(dpvsView->frustumPlanes) / (sizeof(dpvsView->frustumPlanes[0]) * (sizeof(dpvsView->frustumPlanes) != 4 || sizeof(dpvsView->frustumPlanes[0]) <= 4)))));
-
-        v6 = &scene.shadowFarPlane[partitionIndex];
-        v7 = &dpvsView->frustumPlanes[sidePlaneCount];
-        v7->coeffs[0] = v6->coeffs[0];
-        v7->coeffs[1] = v6->coeffs[1];
-        v7->coeffs[2] = v6->coeffs[2];
-        v7->coeffs[3] = v6->coeffs[3];
-        *(unsigned int *)v7->side = *(unsigned int *)v6->side;
-        ++sidePlaneCount;
+        iassert(sidePlaneCount < ARRAY_COUNT(dpvsView->frustumPlanes));
+        memcpy(&dpvsView->frustumPlanes[sidePlaneCount], &scene.shadowFarPlane[partitionIndex], sizeof(DpvsPlane));
+        sidePlaneCount++;
     }
-    for (planeIndex = 0; planeIndex < 4; ++planeIndex)
+
+    // Add the side planes
+    for (int planeIndex = 0; planeIndex < 4; ++planeIndex)
     {
         if (Vec3Dot(viewParms->axis[0], dpvsGlob.sideFrustumPlanes[planeIndex].coeffs) < 0.0)
         {
-            iassert((sidePlaneCount < (sizeof(dpvsView->frustumPlanes) / (sizeof(dpvsView->frustumPlanes[0]) * (sizeof(dpvsView->frustumPlanes) != 4 || sizeof(dpvsView->frustumPlanes[0]) <= 4)))));
-
-            v8 = &dpvsGlob.sideFrustumPlanes[planeIndex];
-            v9 = &dpvsView->frustumPlanes[sidePlaneCount];
-            v9->coeffs[0] = v8->coeffs[0];
-            v9->coeffs[1] = v8->coeffs[1];
-            v9->coeffs[2] = v8->coeffs[2];
-            v9->coeffs[3] = v8->coeffs[3];
-            *(unsigned int *)v9->side = *(unsigned int *)v8->side;
-            ++sidePlaneCount;
+            iassert(sidePlaneCount < ARRAY_COUNT(dpvsView->frustumPlanes));
+            memcpy(&dpvsView->frustumPlanes[sidePlaneCount], &dpvsGlob.sideFrustumPlanes[planeIndex], sizeof(DpvsPlane));
+            sidePlaneCount++;
         }
     }
+
     dpvsView->frustumPlaneCount = sidePlaneCount;
 }
 
@@ -3650,29 +3611,27 @@ void __cdecl R_FreeHullPoints(GfxHullPointsPool *hullPoints)
     dpvsGlob.nextFreeHullPoints = hullPoints;
 }
 
-// LWSS: this is NOT the blops version
-float __cdecl R_DpvsPlaneMaxSignedDistToBox(const DpvsPlane *plane, float forward)
+float __cdecl R_DpvsPlaneMaxSignedDistToBox(const DpvsPlane *plane, const float *minmax)
 {
-    return *(float *)((char *)rgp.world->mins + plane->side[2]) * forward
-        + *(float *)((char *)rgp.world->mins + plane->side[1]) * plane->coeffs[1]
-        + *(float *)((char *)rgp.world->mins + plane->side[0]) * plane->coeffs[0]
-        + plane->coeffs[3];
+    return (float)((float)(*(const float *)((char *)minmax + plane->side[2]) * plane->coeffs[2])
+        + (float)((float)(*(const float *)((char *)minmax + plane->side[1]) * plane->coeffs[1])
+            + (float)((float)(*(const float *)((char *)minmax + plane->side[0]) * plane->coeffs[0])
+                + plane->coeffs[3])));
 }
 
-// LWSS: this is NOT the blops version
-float __cdecl R_DpvsPlaneMinSignedDistToBox(const DpvsPlane *plane, float forward)
+float __cdecl R_DpvsPlaneMinSignedDistToBox(const DpvsPlane *plane, const float *minmax)
 {
-    return *(float *)((char *)&rgp.world->materialMemoryCount - plane->side[2]) * forward
-        + *(float *)((char *)&rgp.world->maxs[2] - plane->side[1]) * plane->coeffs[1]
-        + *(float *)((char *)rgp.world->maxs - plane->side[0]) * plane->coeffs[0]
-        + plane->coeffs[3];
+    return (float)((float)(*(const float *)((char *)minmax - plane->side[2] + 28) * plane->coeffs[2])
+        + (float)((float)(*(const float *)((char *)minmax - plane->side[1] + 20) * plane->coeffs[1])
+            + (float)((float)(*(const float *)((char *)minmax - plane->side[0] + 12) * plane->coeffs[0])
+                + plane->coeffs[3])));
 }
 
 void __cdecl R_SetDpvsPlaneSides(DpvsPlane *plane)
 {
-    plane->side[0] = SLODWORD(plane->coeffs[0]) <= 0 ? 0 : 12;
-    plane->side[1] = SLODWORD(plane->coeffs[1]) <= 0 ? 4 : 16;
-    plane->side[2] = SLODWORD(plane->coeffs[2]) <= 0 ? 8 : 20;
+    plane->side[0] = (plane->coeffs[0] <= 0.0f) ? 0 : 12;
+    plane->side[1] = (plane->coeffs[1] <= 0.0f) ? 4 : 16;
+    plane->side[2] = (plane->coeffs[2] <= 0.0f) ? 8 : 20;
 }
 
 void R_SetCullDist(float dist)

@@ -285,8 +285,8 @@ int __cdecl R_SkinXModel(
     unsigned int hidePartBits[4]; // [esp+E4Ch] [ebp-38h] BYREF
     //XSurface* surfaces; // [esp+E5Ch] [ebp-28h]
     XSurface* surfaces; // [esp+E60h] [ebp-24h] BYREF
-    XModelLodRampType lodRampType; // [esp+E64h] [ebp-20h]
-    XModelLodRampType dist; // [esp+E68h] [ebp-1Ch]
+    int lodForDist; // [esp+E64h] [ebp-20h]
+    float dist; // [esp+E68h] [ebp-1Ch]
     float AdjustedLodDist; // [esp+E6Ch] [ebp-18h]
     XModelDrawInfo* modelInfoa; // [esp+E78h] [ebp-Ch]
     //const XModel* modela; // [esp+E7Ch] [ebp-8h]
@@ -301,17 +301,17 @@ int __cdecl R_SkinXModel(
 
     iassert(val);
 
-    AdjustedLodDist = R_GetBaseLodDist(placement->origin) * (1.0 / val);
-    dist = XModelGetLodRampType(model);
-    AdjustedLodDist = R_GetAdjustedLodDist(AdjustedLodDist, dist);
-    lodRampType = XModelGetLodForDist(model, AdjustedLodDist);
+    dist = R_GetBaseLodDist(placement->origin) * (1.0 / val);
+    XModelLodRampType lodRamp = XModelGetLodRampType(model);
+    AdjustedLodDist = R_GetAdjustedLodDist(dist, lodRamp);
+    lodForDist = XModelGetLodForDist(model, AdjustedLodDist);
 
-    if (lodRampType < XMODEL_LOD_RAMP_RIGID)
+    if (lodForDist < 0)
         return 0;
 
     PROF_SCOPED("R_SkinXModel");
 
-    int surfaceCount = XModelGetSurfaces(model, &surfaces, lodRampType);
+    int surfaceCount = XModelGetSurfaces(model, &surfaces, lodForDist);
     iassert(surfaceCount);
 
     if (obj)
@@ -352,7 +352,7 @@ int __cdecl R_SkinXModel(
         iassert(!(startSurfPos & 3));
         modelInfo->surfId = startSurfPos >> 2;
         memcpy(&frontEndDataOut->surfsBuffer[startSurfPos], surfBuf, (char*)surfPos - (char*)surfBuf);
-        modelInfo->lod = lodRampType;
+        modelInfo->lod = lodForDist;
         return 1;
     }
     else

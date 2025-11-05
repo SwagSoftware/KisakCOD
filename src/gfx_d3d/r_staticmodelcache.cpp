@@ -352,7 +352,7 @@ unsigned __int16 __cdecl R_CacheStaticModelSurface(
 
                 skinSmodelCmd.firstPatchVert = smcPatchVertsUsed;
                 frontEndDataOut->smcPatchVertsUsed += cachedVertsNeeded;
-                R_AddWorkerCmd(15, (unsigned char*)&skinSmodelCmd);
+                R_AddWorkerCmd(WRKCMD_SKIN_CACHED_STATICMODEL, (unsigned char*)&skinSmodelCmd);
                 R_CacheStaticModelIndices(cachedSurfa->smodelIndex, cachedSurfa->lodIndex, cachedSurfa->baseVertIndex);
                 treea = &s_cache.trees[((char*)cachedSurfa - (char*)s_cache.leafs) / 256];
                 treea->frameCount = rg.frontEndFrameCount;

@@ -1859,10 +1859,13 @@ void __cdecl AddPointToBounds2D(const float *v, float *mins, float *maxs)
 {
     if (mins[0] > v[0])
         mins[0] = v[0];
+
     if (maxs[0] < v[0])
         maxs[0] = v[0];
+
     if (mins[1] > v[1])
         mins[1] = v[1];
+
     if (maxs[1] < v[1])
         maxs[1] = v[1];
 }

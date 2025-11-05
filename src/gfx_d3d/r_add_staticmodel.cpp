@@ -171,169 +171,175 @@ void __cdecl R_EndDumpStaticModelLodInfo()
 
 void __cdecl R_AddAllStaticModelSurfacesCamera()
 {
-    double v0; // st7
     char* Name; // eax
     float dist; // [esp+8h] [ebp-1104h]
-    float v3; // [esp+Ch] [ebp-1100h]
     float val; // [esp+2Ch] [ebp-10E0h]
-    float diff[2][3]; // [esp+34h] [ebp-10D8h] BYREF
     GfxStaticModelId StaticModelId; // [esp+54h] [ebp-10B8h]
-    GfxStaticModelDrawInst* smodelDrawInst; // [esp+58h] [ebp-10B4h]
+    GfxStaticModelDrawInst* inst; // [esp+58h] [ebp-10B4h]
     float scale; // [esp+5Ch] [ebp-10B0h]
     float bias; // [esp+60h] [ebp-10ACh]
-    unsigned __int16 staticModelLodList[4][4][128]; // [esp+64h] [ebp-10A8h] BYREF
+    unsigned __int16 staticModelLodList[4][4][128]{ 0 }; // [esp+64h] [ebp-10A8h] BYREF
     GfxStaticModelDrawInst* smodelDrawInsts; // [esp+1068h] [ebp-A4h]
-    float v12; // [esp+106Ch] [ebp-A0h]
-    int v13; // [esp+1070h] [ebp-9Ch]
-    XModel* v14; // [esp+1074h] [ebp-98h]
+    float originDist; // [esp+106Ch] [ebp-A0h]
+    int currentProbeIndex; // [esp+1070h] [ebp-9Ch]
+    XModel* model; // [esp+1074h] [ebp-98h]
     unsigned __int8 primaryLightIndex; // [esp+107Bh] [ebp-91h]
-    XModel* model; // [esp+107Ch] [ebp-90h]
-    GfxStaticModelId v17; // [esp+1080h] [ebp-8Ch]
+    XModel* currentModel; // [esp+107Ch] [ebp-90h]
     int reflectionProbeIndex; // [esp+1084h] [ebp-88h]
     unsigned __int16* list; // [esp+1088h] [ebp-84h]
-    void* dest; // [esp+108Ch] [ebp-80h]
+    unsigned int* lodData; // [esp+108Ch] [ebp-80h]
     int lod; // [esp+1090h] [ebp-7Ch]
     unsigned int smodelCount; // [esp+1094h] [ebp-78h]
-    _WORD* v23; // [esp+1098h] [ebp-74h]
-    unsigned __int8* v24; // [esp+109Ch] [ebp-70h]
+    _WORD* count; // [esp+1098h] [ebp-74h]
+    unsigned __int8* visData; // [esp+109Ch] [ebp-70h]
     _BYTE v25[3]; // [esp+10A0h] [ebp-6Ch] BYREF
-    unsigned __int8 v26; // [esp+10A3h] [ebp-69h]
-    float a[3]; // [esp+10A4h] [ebp-68h] BYREF
-    unsigned __int16 staticModelLodCount[4][4]; // [esp+10B0h] [ebp-5Ch] BYREF
+    unsigned __int8 currentLightIndex; // [esp+10A3h] [ebp-69h]
+    float origin[3]; // [esp+10A4h] [ebp-68h] BYREF
+    unsigned __int16 staticModelLodCount[4][4]{ 0 }; // [esp+10B0h] [ebp-5Ch] BYREF
     GfxSModelDrawSurfLightingData surfData; // [esp+10D4h] [ebp-38h] BYREF
-    int v30; // [esp+1100h] [ebp-Ch]
-    unsigned int count; // [esp+1104h] [ebp-8h]
+    int allocatedLighting; // [esp+1100h] [ebp-Ch]
+    unsigned int entryCount; // [esp+1104h] [ebp-8h]
     int smodelIndex; // [esp+1108h] [ebp-4h]
 
     PROF_SCOPED("SModelSurfaces");
     smodelCount = rgp.world->dpvs.smodelCount;
-    dest = rgp.world->dpvs.lodData;
-    Com_Memset((unsigned int*)dest, 0, 32 * ((smodelCount + 127) >> 7));
-    v24 = rgp.world->dpvs.smodelVisData[0];
+    lodData = rgp.world->dpvs.lodData;
+    Com_Memset(lodData, 0, 32 * ((smodelCount + 127) >> 7));
+
+    visData = rgp.world->dpvs.smodelVisData[0];
     smodelDrawInsts = rgp.world->dpvs.smodelDrawInsts;
     GfxLodParms *g_lodParms = &rg.correctedLodParms;
     iassert( g_lodParms->valid );
     scale = g_lodParms->ramp[0].scale;
     bias = g_lodParms->ramp[0].bias;
-    a[0] = g_lodParms->origin[0];
-    a[1] = g_lodParms->origin[1];
-    a[2] = g_lodParms->origin[2];
-    R_InitBspDrawSurf((GfxBspDrawSurfData*)&surfData);
-    surfData.drawSurf[0].current = scene.drawSurfs[1];
-    surfData.drawSurf[1].current = scene.drawSurfs[4];
-    surfData.drawSurf[2].current = scene.drawSurfs[10];
-    surfData.drawSurf[0].end = scene.drawSurfs[1] + 0x2000;
-    surfData.drawSurf[1].end = scene.drawSurfs[4] + 512;
-    surfData.drawSurf[2].end = scene.drawSurfs[10] + 0x2000;
+    origin[0] = g_lodParms->origin[0];
+    origin[1] = g_lodParms->origin[1];
+    origin[2] = g_lodParms->origin[2];
+
+    R_InitDelayedCmdBuf(&surfData.delayedCmdBuf);
+
+    surfData.drawSurf[0].current = scene.drawSurfs[DRAW_SURF_SMODEL_CAMERA_LIT];
+    surfData.drawSurf[1].current = scene.drawSurfs[DRAW_SURF_SMODEL_CAMERA_DECAL];
+    surfData.drawSurf[2].current = scene.drawSurfs[DRAW_SURF_SMODEL_CAMERA_EMISSIVE];
+
+    surfData.drawSurf[0].end = scene.drawSurfs[DRAW_SURF_SMODEL_CAMERA_LIT] + 0x2000;
+    surfData.drawSurf[1].end = scene.drawSurfs[DRAW_SURF_SMODEL_CAMERA_DECAL] + 0x200;
+    surfData.drawSurf[2].end = scene.drawSurfs[DRAW_SURF_SMODEL_CAMERA_EMISSIVE] + 0x2000;
+
     memset(staticModelLodCount, 0, sizeof(staticModelLodCount));
-    v30 = 0;
-    model = 0;
-    v13 = 255;
-    v26 = 0;
+
+    allocatedLighting = 0;
+    currentModel = NULL;
+    currentProbeIndex = 255;
+    currentLightIndex = 0;
+
     for (smodelIndex = 0; smodelIndex < smodelCount; ++smodelIndex)
     {
-        if (v24[smodelIndex])
+        if (!visData[smodelIndex])
         {
-            smodelDrawInst = &smodelDrawInsts[smodelIndex];
-            Vec3Sub(a, smodelDrawInst->placement.origin, diff[0]);
-            v0 = Vec3Length(diff[0]);
-            v12 = v0 * scale + bias;
-            if (smodelDrawInst->cullDist > (double)v12)
+            continue;
+        }
+
+        inst = &smodelDrawInsts[smodelIndex];
+        originDist = Vec3Distance(inst->placement.origin, origin) * scale + bias;
+
+        if (originDist >= inst->cullDist)
+        {
+            visData[smodelIndex] = 0;
+            continue;
+        }
+
+        model = inst->model;
+        primaryLightIndex = inst->primaryLightIndex;
+        reflectionProbeIndex = inst->reflectionProbeIndex;
+        if (model != currentModel || reflectionProbeIndex != currentProbeIndex || primaryLightIndex != currentLightIndex)
+        {
+            if (allocatedLighting)
             {
-                v14 = smodelDrawInst->model;
-                primaryLightIndex = smodelDrawInst->primaryLightIndex;
-                reflectionProbeIndex = smodelDrawInst->reflectionProbeIndex;
-                if (v14 != model || reflectionProbeIndex != v13 || primaryLightIndex != v26)
+                R_SkinStaticModelsCamera(currentModel, currentLightIndex, staticModelLodList, staticModelLodCount, &surfData);
+                memset(staticModelLodCount, 0, sizeof(staticModelLodCount));
+                allocatedLighting = 0;
+            }
+            if (model != currentModel)
+                currentModel = model;
+            currentProbeIndex = reflectionProbeIndex;
+            currentLightIndex = primaryLightIndex;
+        }
+        iassert(inst->placement.scale);
+        dist = originDist * (1.0 / inst->placement.scale);
+        lod = XModelGetLodForDist(model, dist);
+        if (lod >= 0)
+        {
+            if (r_showCullSModels->current.enabled)
+                R_AddDebugBox(
+                    &frontEndDataOut->debugGlobals,
+                    rgp.world->dpvs.smodelInsts[smodelIndex].mins,
+                    rgp.world->dpvs.smodelInsts[smodelIndex].maxs,
+                    colorLtGrey);
+
+            if (r_showSModelNames->current.enabled)
+            {
+                Name = (char*)XModelGetName(model);
+                R_AddDebugString(
+                    &frontEndDataOut->debugGlobals,
+                    inst->placement.origin,
+                    colorWhite,
+                    0.3f,
+                    Name);
+            }
+
+            R_ShowCountsStaticModel(smodelIndex, lod);
+            if (r_staticModelDumpLodInfo->current.enabled)
+                R_DumpStaticModelLodInfo(inst, originDist);
+            if (R_AllocStaticModelLighting(inst, smodelIndex))
+            {
+                allocatedLighting = 1;
+                lodData[(unsigned int)smodelIndex >> 4] |= lod << (2 * (smodelIndex & 0xF));
+                StaticModelId = R_GetStaticModelId(smodelIndex, lod);
+                count = &staticModelLodCount[StaticModelId.surfType - 2][lod];
+                list = staticModelLodList[StaticModelId.surfType - 2][lod];
+                entryCount = *count;
+                list[entryCount++] = StaticModelId.objectId;
+                if (entryCount >= 128)
                 {
-                    if (v30)
-                    {
-                        R_SkinStaticModelsCamera(model, v26, staticModelLodList, staticModelLodCount, &surfData);
-                        memset(staticModelLodCount, 0, sizeof(staticModelLodCount));
-                        v30 = 0;
-                    }
-                    if (v14 != model)
-                        model = v14;
-                    v13 = reflectionProbeIndex;
-                    v26 = primaryLightIndex;
-                }
-                val = smodelDrawInst->placement.scale;
-                iassert( val );
-                v3 = 1.0 / val;
-                dist = v12 * v3;
-                lod = XModelGetLodForDist(v14, dist);
-                if (lod >= 0)
-                {
-                    if (r_showCullSModels->current.enabled)
-                        R_AddDebugBox(
-                            &frontEndDataOut->debugGlobals,
-                            rgp.world->dpvs.smodelInsts[smodelIndex].mins,
-                            rgp.world->dpvs.smodelInsts[smodelIndex].maxs,
-                            colorLtGrey);
-                    if (r_showSModelNames->current.enabled)
-                    {
-                        Name = (char*)XModelGetName(v14);
-                        R_AddDebugString(
-                            &frontEndDataOut->debugGlobals,
-                            smodelDrawInst->placement.origin,
-                            colorWhite,
-                            0.30000001f,
-                            Name);
-                    }
-                    R_ShowCountsStaticModel(smodelIndex, lod);
-                    if (r_staticModelDumpLodInfo->current.enabled)
-                        R_DumpStaticModelLodInfo(smodelDrawInst, v12);
-                    if (R_AllocStaticModelLighting(smodelDrawInst, smodelIndex))
-                    {
-                        v30 = 1;
-                        *((_DWORD*)dest + ((unsigned int)smodelIndex >> 4)) |= lod << (2 * (smodelIndex & 0xF));
-                        StaticModelId = R_GetStaticModelId(smodelIndex, lod);
-                        v17 = StaticModelId;
-                        v23 = &staticModelLodCount[StaticModelId.surfType - 2][lod];
-                        list = staticModelLodList[StaticModelId.surfType - 2][lod];
-                        count = *v23;
-                        list[count++] = StaticModelId.objectId;
-                        if (count >= 0x80)
-                        {
-                            R_SkinStaticModelsCameraForLod(
-                                v14,
-                                primaryLightIndex,
-                                (unsigned __int8*)list,
-                                count,
-                                v17.surfType,
-                                lod,
-                                &surfData);
-                            *v23 = 0;
-                        }
-                        else
-                        {
-                            *v23 = count;
-                        }
-                    }
-                    else
-                    {
-                        R_WarnOncePerFrame(R_WARN_SMODEL_LIGHTING);
-                        v24[smodelIndex] = 0;
-                    }
+                    R_SkinStaticModelsCameraForLod(
+                        model,
+                        primaryLightIndex,
+                        (unsigned __int8*)list,
+                        entryCount,
+                        StaticModelId.surfType,
+                        lod,
+                        &surfData);
+                    *count = 0;
                 }
                 else
                 {
-                    v24[smodelIndex] = 0;
+                    *count = entryCount;
                 }
             }
             else
             {
-                v24[smodelIndex] = 0;
+                R_WarnOncePerFrame(R_WARN_SMODEL_LIGHTING);
+                visData[smodelIndex] = 0;
             }
         }
+        else
+        {
+            visData[smodelIndex] = 0;
+        }
     }
+
     if (r_staticModelDumpLodInfo->current.enabled)
         R_EndDumpStaticModelLodInfo();
-    if (v30)
-        R_SkinStaticModelsCamera(model, v26, staticModelLodList, staticModelLodCount, &surfData);
+
+    if (allocatedLighting)
+        R_SkinStaticModelsCamera(currentModel, currentLightIndex, staticModelLodList, staticModelLodCount, &surfData);
+
     R_EndCmdBuf(&surfData.delayedCmdBuf);
-    scene.drawSurfCount[1] = surfData.drawSurf[0].current - scene.drawSurfs[1];
-    scene.drawSurfCount[4] = surfData.drawSurf[1].current - scene.drawSurfs[4];
-    scene.drawSurfCount[10] = surfData.drawSurf[2].current - scene.drawSurfs[10];
+    
+    scene.drawSurfCount[DRAW_SURF_SMODEL_CAMERA_LIT] = surfData.drawSurf[0].current - scene.drawSurfs[DRAW_SURF_SMODEL_CAMERA_LIT];
+    scene.drawSurfCount[DRAW_SURF_SMODEL_CAMERA_DECAL] = surfData.drawSurf[1].current - scene.drawSurfs[DRAW_SURF_SMODEL_CAMERA_DECAL];
+    scene.drawSurfCount[DRAW_SURF_SMODEL_CAMERA_EMISSIVE] = surfData.drawSurf[2].current - scene.drawSurfs[DRAW_SURF_SMODEL_CAMERA_EMISSIVE];
 }
 
 void __cdecl R_SkinStaticModelsCameraForLod(
@@ -592,127 +598,140 @@ void __cdecl R_AddAllStaticModelSurfacesSunShadow()
 
 void __cdecl R_AddAllStaticModelSurfacesRangeSunShadow(unsigned int partitionIndex, unsigned int maxDrawSurfCount)
 {
-    double v2; // st7
     float dist; // [esp+4h] [ebp-10E4h]
-    float v4; // [esp+8h] [ebp-10E0h]
     float val; // [esp+28h] [ebp-10C0h]
     float diff[2][3]; // [esp+30h] [ebp-10B8h] BYREF
     GfxStaticModelId StaticModelId; // [esp+50h] [ebp-1098h]
-    GfxStaticModelDrawInst* smodelDrawInst; // [esp+54h] [ebp-1094h]
+    GfxStaticModelDrawInst* inst; // [esp+54h] [ebp-1094h]
     float scale; // [esp+58h] [ebp-1090h]
     float bias; // [esp+5Ch] [ebp-108Ch]
-    unsigned __int16 staticModelLodList[4][4][128]; // [esp+60h] [ebp-1088h] BYREF
     GfxStaticModelDrawInst* smodelDrawInsts; // [esp+1064h] [ebp-84h]
-    float v13; // [esp+1068h] [ebp-80h]
-    XModel* v14; // [esp+106Ch] [ebp-7Ch]
-    XModel* model; // [esp+1070h] [ebp-78h]
-    GfxStaticModelId v16; // [esp+1074h] [ebp-74h]
+    float originDist; // [esp+1068h] [ebp-80h]
+    XModel* model; // [esp+106Ch] [ebp-7Ch]
+    XModel* currentModel; // [esp+1070h] [ebp-78h]
     unsigned int stage; // [esp+1078h] [ebp-70h]
     unsigned __int16* list; // [esp+107Ch] [ebp-6Ch]
+    unsigned __int16 *count; // [esp+1088h] [ebp-60h]
     int lod; // [esp+1080h] [ebp-68h]
     unsigned int smodelCount; // [esp+1084h] [ebp-64h]
-    _WORD* v21; // [esp+1088h] [ebp-60h]
-    unsigned __int8* v22; // [esp+108Ch] [ebp-5Ch] BYREF
-    float a[3]; // [esp+1090h] [ebp-58h] BYREF
-    unsigned __int16 staticModelLodCount[4][4]; // [esp+109Ch] [ebp-4Ch] BYREF
-    GfxBspDrawSurfData surfData; // [esp+10C0h] [ebp-28h] BYREF
-    int v26; // [esp+10DCh] [ebp-Ch]
-    unsigned int v27; // [esp+10E0h] [ebp-8h]
+    unsigned __int8* visData; // [esp+108Ch] [ebp-5Ch] BYREF
+    float origin[3]; // [esp+1090h] [ebp-58h] BYREF
+    unsigned __int16 staticModelLodCount[4][4]{ 0 }; // [esp+109Ch] [ebp-4Ch] BYREF
+    unsigned __int16 staticModelLodList[4][4][128]{ 0 }; // [esp+60h] [ebp-1088h] BYREF
+    GfxSModelDrawSurfData surfData; // [esp+10C0h] [ebp-28h] BYREF
+    int allocatedLighting; // [esp+10DCh] [ebp-Ch] // LWSS: guessed name
+    unsigned int entryCount; // [esp+10E0h] [ebp-8h]
     unsigned int i; // [esp+10E4h] [ebp-4h]
 
     PROF_SCOPED("SModelSurfacesShadow");
     smodelCount = rgp.world->dpvs.smodelCount;
-    v22 = rgp.world->dpvs.smodelVisData[partitionIndex + 1];
+    visData = rgp.world->dpvs.smodelVisData[partitionIndex + 1];
     smodelDrawInsts = rgp.world->dpvs.smodelDrawInsts;
     GfxLodParms *g_lodParms = &rg.correctedLodParms;
     iassert( g_lodParms->valid );
     scale = g_lodParms->ramp[0].scale;
     bias =  g_lodParms->ramp[0].bias;
-    a[0] =  g_lodParms->origin[0];
-    a[1] =  g_lodParms->origin[1];
-    a[2] =  g_lodParms->origin[2];
-    R_InitBspDrawSurf(&surfData);
-    stage = 3 * partitionIndex + 16;
+    origin[0] =  g_lodParms->origin[0];
+    origin[1] =  g_lodParms->origin[1];
+    origin[2] =  g_lodParms->origin[2];
+
+    R_InitDelayedCmdBuf(&surfData.delayedCmdBuf);
+    
+    stage = DRAW_SURF_SMODEL_SUNSHADOW_0 + (3 * partitionIndex);
+
     surfData.drawSurfList.current = scene.drawSurfs[stage];
     iassert( (int)maxDrawSurfCount == scene.maxDrawSurfCount[stage] );
     surfData.drawSurfList.end = &surfData.drawSurfList.current[maxDrawSurfCount];
     memset(staticModelLodCount, 0, sizeof(staticModelLodCount));
-    v26 = 0;
-    model = 0;
+    allocatedLighting = 0;
+    currentModel = 0;
+
     for (i = 0; i < smodelCount; ++i)
     {
-        if (v22[i])
+        if (!visData[i])
         {
-            smodelDrawInst = &smodelDrawInsts[i];
-            if ((smodelDrawInst->flags & 1) == 0)
+            continue;
+        }
+
+        inst = &smodelDrawInsts[i];
+
+        if ((inst->flags & 1) != 0)
+        {
+            continue;
+        }
+
+        originDist = Vec3Distance(inst->placement.origin, origin) * scale + bias;
+
+        if (inst->cullDist <= originDist)
+        {
+            visData[i] = 0;
+            continue;
+        }
+
+        model = inst->model;
+        if (model != currentModel)
+        {
+            if (allocatedLighting)
             {
-                Vec3Sub(a, smodelDrawInst->placement.origin, diff[0]);
-                v2 = Vec3Length(diff[0]);
-                v13 = v2 * scale + bias;
-                if (smodelDrawInst->cullDist > (double)v13)
-                {
-                    v14 = smodelDrawInst->model;
-                    if (v14 != model)
-                    {
-                        if (v26)
-                        {
-                            R_SkinStaticModelsShadow(
-                                model,
-                                staticModelLodList,
-                                staticModelLodCount,
-                                (GfxSModelDrawSurfData*)&surfData);
-                            memset(staticModelLodCount, 0, sizeof(staticModelLodCount));
-                            v26 = 0;
-                        }
-                        model = v14;
-                    }
-                    val = smodelDrawInst->placement.scale;
-                    iassert( val );
-                    v4 = 1.0 / val;
-                    dist = v13 * v4;
-                    lod = XModelGetLodForDist(v14, dist);
-                    if (lod >= 0)
-                    {
-                        if (R_AllocStaticModelLighting(smodelDrawInst, i))
-                        {
-                            v26 = 1;
-                            StaticModelId = R_GetStaticModelId(i, lod);
-                            v16 = StaticModelId;
-                            v21 = &staticModelLodCount[StaticModelId.surfType - 2][lod];
-                            list = staticModelLodList[StaticModelId.surfType - 2][lod];
-                            v27 = (unsigned __int16)*v21;
-                            list[v27++] = StaticModelId.objectId;
-                            if (v27 >= 0x80)
-                            {
-                                R_SkinStaticModelsShadowForLod(
-                                    v14,
-                                    (unsigned __int8*)list,
-                                    v27,
-                                    v16.surfType,
-                                    lod,
-                                    (GfxSModelDrawSurfData*)&surfData);
-                                *v21 = 0;
-                            }
-                            else
-                            {
-                                *v21 = v27;
-                            }
-                        }
-                        else
-                        {
-                            R_WarnOncePerFrame(R_WARN_SMODEL_LIGHTING);
-                        }
-                    }
-                }
-                else
-                {
-                    v22[i] = 0;
-                }
+                // If model changed, flush the batch and set new model
+                R_SkinStaticModelsShadow(
+                    currentModel,
+                    staticModelLodList,
+                    staticModelLodCount,
+                    &surfData);
+                memset(staticModelLodCount, 0, sizeof(staticModelLodCount));
+                allocatedLighting = 0;
+            }
+            currentModel = model;
+        }
+
+        iassert(inst->placement.scale);
+        dist = originDist * (1.0f / inst->placement.scale);
+        lod = XModelGetLodForDist(model, dist);
+
+        if (lod < 0)
+        {
+            continue;
+        }
+
+        // Allocate lighting for this static model
+        if (R_AllocStaticModelLighting(inst, i))
+        {
+            allocatedLighting = 1;
+            StaticModelId = R_GetStaticModelId(i, lod);
+            iassert(StaticModelId.surfType >= 2 && StaticModelId.surfType < 6); // lwss add
+            count = &staticModelLodCount[StaticModelId.surfType - 2][lod];
+            list = staticModelLodList[StaticModelId.surfType - 2][lod];
+            entryCount = *count;
+            list[entryCount++] = StaticModelId.objectId;
+
+            // Flush if list is full
+            if (entryCount >= 128)
+            {
+                R_SkinStaticModelsShadowForLod(
+                    model,
+                    (unsigned __int8*)list,
+                    entryCount,
+                    StaticModelId.surfType,
+                    lod,
+                    &surfData);
+                *count = 0;
+            }
+            else
+            {
+                *count = entryCount;
             }
         }
+        else
+        {
+            R_WarnOncePerFrame(R_WARN_SMODEL_LIGHTING);
+        }
     }
-    if (v26)
-        R_SkinStaticModelsShadow(model, staticModelLodList, staticModelLodCount, (GfxSModelDrawSurfData*)&surfData);
+
+    // Flush last model batch if needed
+    if (allocatedLighting)
+        R_SkinStaticModelsShadow(currentModel, staticModelLodList, staticModelLodCount, &surfData);
+
     R_EndCmdBuf(&surfData.delayedCmdBuf);
     scene.drawSurfCount[stage] = surfData.drawSurfList.current - scene.drawSurfs[stage];
 }

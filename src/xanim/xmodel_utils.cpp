@@ -90,7 +90,7 @@ const DObjAnimMat *__cdecl XModelGetBasePose(const XModel *model)
     return model->baseMat;
 }
 
-XModelLodRampType __cdecl XModelGetLodForDist(const XModel *model, float dist)
+int __cdecl XModelGetLodForDist(const XModel *model, float dist)
 {
     float v3; // [esp+0h] [ebp-14h]
     int lodIndex; // [esp+4h] [ebp-10h]
@@ -104,9 +104,9 @@ XModelLodRampType __cdecl XModelGetLodForDist(const XModel *model, float dist)
         else
             v3 = model->lodInfo[lodIndex].dist;
         if (v3 == 0.0 || v3 > (double)dist)
-            return (XModelLodRampType)lodIndex;
+            return lodIndex;
     }
-    return (XModelLodRampType)-1;
+    return -1;
 }
 
 void __cdecl XModelSetTestLods(unsigned int lodLevel, float dist)

@@ -97,12 +97,12 @@ char __cdecl R_AddSpotShadowsForLight(
         viewInfo->spotShadows[spotShadowIndex].viewport.y = spotShadowIndex << 10;
         viewInfo->spotShadows[spotShadowIndex].viewport.width = 1024;
         viewInfo->spotShadows[spotShadowIndex].viewport.height = 1024;
-        viewInfo->spotShadows[spotShadowIndex].image = gfxRenderTargets[13].image;
+        viewInfo->spotShadows[spotShadowIndex].image = gfxRenderTargets[R_RENDERTARGET_SHADOWMAP_SUN].image;
         viewInfo->spotShadows[spotShadowIndex].renderTargetId = R_RENDERTARGET_SHADOWMAP_SUN;
-        viewInfo->spotShadows[spotShadowIndex].pixelAdjust[0] = 0.00024414062f;
-        viewInfo->spotShadows[spotShadowIndex].pixelAdjust[1] = 0.00024414062f;
-        viewInfo->spotShadows[spotShadowIndex].pixelAdjust[2] = 0.00048828125f;
-        viewInfo->spotShadows[spotShadowIndex].pixelAdjust[3] = -0.00012207031f;
+        viewInfo->spotShadows[spotShadowIndex].pixelAdjust[0] = (1.0f / 4096.0f);
+        viewInfo->spotShadows[spotShadowIndex].pixelAdjust[1] = (1.0f / 4096.0f);
+        viewInfo->spotShadows[spotShadowIndex].pixelAdjust[2] = (1.0f / 2048.0f);
+        viewInfo->spotShadows[spotShadowIndex].pixelAdjust[3] = -(1.0f / 8192.0f);
         viewInfo->spotShadows[spotShadowIndex].clearScreen = spotShadowIndex == 0;
         viewInfo->spotShadows[spotShadowIndex].clearMesh = &gfxMeshGlob.sunShadowClearMeshData[spotShadowIndex];
         tileCount = 2;
@@ -113,12 +113,12 @@ char __cdecl R_AddSpotShadowsForLight(
         viewInfo->spotShadows[spotShadowIndex].viewport.y = spotShadowIndex << 9;
         viewInfo->spotShadows[spotShadowIndex].viewport.width = 512;
         viewInfo->spotShadows[spotShadowIndex].viewport.height = 512;
-        viewInfo->spotShadows[spotShadowIndex].image = gfxRenderTargets[14].image;
+        viewInfo->spotShadows[spotShadowIndex].image = gfxRenderTargets[R_RENDERTARGET_SHADOWMAP_SPOT].image;
         viewInfo->spotShadows[spotShadowIndex].renderTargetId = R_RENDERTARGET_SHADOWMAP_SPOT;
-        viewInfo->spotShadows[spotShadowIndex].pixelAdjust[0] = 0.00048828125f;
-        viewInfo->spotShadows[spotShadowIndex].pixelAdjust[1] = 0.00024414062f;
+        viewInfo->spotShadows[spotShadowIndex].pixelAdjust[0] = (1.0f / 2048.0f);
+        viewInfo->spotShadows[spotShadowIndex].pixelAdjust[1] = (1.0f / 4096.0f);
         viewInfo->spotShadows[spotShadowIndex].pixelAdjust[2] = (1.0f / 1024.0f);
-        viewInfo->spotShadows[spotShadowIndex].pixelAdjust[3] = -0.00012207031f;
+        viewInfo->spotShadows[spotShadowIndex].pixelAdjust[3] = -(1.0f / 8192.0f);
         if (v6)
             viewInfo->spotShadows[spotShadowIndex].clearScreen = spotShadowIndex == 2;
         else
@@ -243,7 +243,7 @@ void __cdecl R_AddSpotShadowModelEntities(
             if (entnum != gfxCfg.entnumNone)
             {
                 if (R_IsEntityVisibleToPrimaryLight(localClientNum, entnum, primaryLightIndex))
-                    R_AddWorkerCmd(9, (unsigned __int8 *)&cmd);
+                    R_AddWorkerCmd(WRKCMD_SPOT_SHADOW_ENT, (unsigned __int8 *)&cmd);
             }
         }
     }
@@ -322,8 +322,10 @@ void __cdecl R_EmitSpotShadowMapSurfs(GfxViewInfo *viewInfo)
         firstDrawSurf = frontEndDataOut->drawSurfCount;
         if (R_IsPrimaryLight(viewInfo->spotShadows[spotShadowIndex].shadowableLightIndex))
         {
-            R_MergeAndEmitDrawSurfLists(3 * spotShadowIndex + 21, 1u);
-            R_MergeAndEmitDrawSurfLists(3 * spotShadowIndex + 22, 2u);
+            DrawSurfType bspSpotShadowDrawType = (DrawSurfType)((int)DRAW_SURF_BSP_SPOTSHADOW_0 + (3 * spotShadowIndex));
+            DrawSurfType smodelSpotShadowDrawType = (DrawSurfType)((int)DRAW_SURF_SMODEL_SPOTSHADOW_0 + (3 * spotShadowIndex));
+            R_MergeAndEmitDrawSurfLists(bspSpotShadowDrawType, 1);
+            R_MergeAndEmitDrawSurfLists(smodelSpotShadowDrawType, 2);
             viewInfo->spotShadows[spotShadowIndex].info.drawSurfs = &frontEndDataOut->drawSurfs[firstDrawSurf];
             viewInfo->spotShadows[spotShadowIndex].info.drawSurfCount = frontEndDataOut->drawSurfCount - firstDrawSurf;
         }
@@ -425,31 +427,31 @@ void __cdecl R_DrawSpotShadowMapCallback(
 }
 void __cdecl R_DrawSpotShadowMapArray(const GfxViewInfo *viewInfo, GfxCmdBuf *cmdBuf)
 {
-    unsigned int v4; // r30
-    GfxSpotShadow *spotShadows; // r31
-    GfxCmdBufSourceState v6; // [sp+50h] [-F10h] BYREF
+    unsigned int i; // r30
+    const GfxSpotShadow *spotShadow; // r31
+    GfxCmdBufSourceState state; // [sp+50h] [-F10h] BYREF
 
-    R_InitCmdBufSourceState(&v6, &viewInfo->input, 0);
-    R_SetRenderTargetSize(&v6, R_RENDERTARGET_SHADOWMAP_SPOT);
-    R_SetViewportValues(&v6, 0, 0, 512, 512);
-    v4 = 0;
+    R_InitCmdBufSourceState(&state, &viewInfo->input, 0);
+    R_SetRenderTargetSize(&state, R_RENDERTARGET_SHADOWMAP_SPOT);
+    R_SetViewportValues(&state, 0, 0, 512, 512);
+    i = 0;
     if (viewInfo->spotShadowCount)
     {
-        spotShadows = (GfxSpotShadow*)viewInfo->spotShadows;
+        spotShadow = viewInfo->spotShadows;
         do
         {
             R_DrawCall(
                 R_DrawSpotShadowMapCallback,
-                spotShadows,
-                &v6,
+                spotShadow,
+                &state,
                 viewInfo,
-                &spotShadows->info,
-                &spotShadows->shadowViewParms,
+                &spotShadow->info,
+                &spotShadow->shadowViewParms,
                 cmdBuf,
                 0);
-            ++v4;
-            ++spotShadows;
-        } while (v4 < viewInfo->spotShadowCount);
+            ++i;
+            ++spotShadow;
+        } while (i < viewInfo->spotShadowCount);
     }
 }
 

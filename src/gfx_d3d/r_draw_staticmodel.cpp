@@ -166,11 +166,11 @@ void __cdecl R_DrawStaticModelDrawSurfPlacement(
 
 void __cdecl R_SetupCachedStaticModelLighting(GfxCmdBufSourceState *source)
 {
-    source->input.consts[57][0] = 0.0;
-    source->input.consts[57][1] = 0.0;
-    source->input.consts[57][2] = 0.5;
-    source->input.consts[57][3] = 1.0;
-    R_DirtyCodeConstant(source, 57);
+    source->input.consts[CONST_SRC_CODE_BASE_LIGHTING_COORDS][0] = 0.0f;
+    source->input.consts[CONST_SRC_CODE_BASE_LIGHTING_COORDS][1] = 0.0f;
+    source->input.consts[CONST_SRC_CODE_BASE_LIGHTING_COORDS][2] = 0.5f;
+    source->input.consts[CONST_SRC_CODE_BASE_LIGHTING_COORDS][3] = 1.0f;
+    R_DirtyCodeConstant(source, CONST_SRC_CODE_BASE_LIGHTING_COORDS);
 }
 
 int __cdecl R_GetNextStaticModelCachedSurf(GfxStaticModelDrawStream *drawStream)
@@ -288,7 +288,7 @@ void __cdecl R_DrawStaticModelCachedSurfLit(const unsigned int *primDrawSurfPos,
 {
     GfxStaticModelDrawStream drawStream; // [esp+0h] [ebp-1Ch] BYREF
 
-    R_SetCodeImageTexture(context.source, 16, rgp.whiteImage);
+    R_SetCodeImageTexture(context.source, TEXTURE_SRC_CODE_DYNAMIC_SHADOWS, rgp.whiteImage);
     R_SetupCachedStaticModelLighting(context.source);
     R_SetupPassPerObjectArgs(context);
     drawStream.primDrawSurfPos = primDrawSurfPos;
@@ -492,7 +492,7 @@ void __cdecl R_DrawStaticModelSkinnedSurfLit(const unsigned int *primDrawSurfPos
     GfxStaticModelDrawStream drawStream; // [esp+0h] [ebp-20h] BYREF
     XSurface *surf; // [esp+1Ch] [ebp-4h] BYREF
 
-    R_SetCodeImageTexture(context.source, 0x10u, rgp.whiteImage);
+    R_SetCodeImageTexture(context.source, TEXTURE_SRC_CODE_DYNAMIC_SHADOWS, rgp.whiteImage);
     R_SetupPassPerObjectArgs(context);
     drawStream.primDrawSurfPos = primDrawSurfPos;
     drawStream.reflectionProbeTexture = context.state->samplerTexture[1];
