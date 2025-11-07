@@ -1,245 +1,206 @@
 #include "r_dpvs.h"
 #include "r_workercmds.h"
 
-// KISAKTODO: cleanup this 
+static int __cdecl R_CullSphereDpvs(const float *origin, float radius, const DpvsPlane *planes, int planeCount)
+{
+    int planeIndex; // [esp+8h] [ebp-4h]
+
+    for (planeIndex = 0; planeIndex < planeCount; ++planeIndex)
+    {
+        if ((float)((float)((float)((float)((float)(planes->coeffs[0] * *origin) + (float)(planes->coeffs[1] * origin[1]))
+            + (float)(planes->coeffs[2] * origin[2]))
+            + planes->coeffs[3])
+            + radius) <= 0.0)
+            return 1;
+        ++planes;
+    }
+    return 0;
+}
+
+// Blops augmented 
 void R_AddCellSceneEntSurfacesInFrustumCmd(GfxWorldDpvsPlanes *data)
 {
     bool v2; // zf
     DWORD v3; // eax
     DWORD v4; // eax
-    int v5; // [esp-1Ch] [ebp-E4h]
-    DpvsPlane *pln; // [esp-14h] [ebp-DCh]
-    signed int i; // [esp-10h] [ebp-D8h]
-    GfxEntCellRefInfo v8; // [esp-Ch] [ebp-D4h]
-    int skipWorkerCmd; // [esp-4h] [ebp-CCh]
-    DpvsPlane *plane__; // [esp+4h] [ebp-C4h]
-    int v11; // [esp+8h] [ebp-C0h]
-    int v12; // [esp+10h] [ebp-B8h]
-    DpvsPlane *v13; // [esp+18h] [ebp-B0h]
-    signed int itr; // [esp+1Ch] [ebp-ACh]
-    float radius_; // [esp+20h] [ebp-A8h]
-    GfxSceneEntity *gfxSceneEnt; // [esp+24h] [ebp-A4h]
-    int v17; // [esp+28h] [ebp-A0h]
-    DpvsPlane *coeffs; // [esp+30h] [ebp-98h]
-    signed int v19; // [esp+34h] [ebp-94h]
-    float radius; // [esp+38h] [ebp-90h]
-    int v21; // [esp+44h] [ebp-84h]
-    int v22; // [esp+44h] [ebp-84h]
-    int offset_; // [esp+4Ch] [ebp-7Ch]
-    int infoa; // [esp+4Ch] [ebp-7Ch]
-    unsigned int sceneEntIndex; // [esp+50h] [ebp-78h]
-    DWORD sceneEntIndexa; // [esp+50h] [ebp-78h]
-    unsigned int bits; // [esp+54h] [ebp-74h]
-    unsigned int bita; // [esp+54h] [ebp-74h]
-    unsigned int entnum; // [esp+58h] [ebp-70h]
-    unsigned int entnuma; // [esp+58h] [ebp-70h]
-    signed int indexLow; // [esp+5Ch] [ebp-6Ch]
-    const DpvsPlane *plane; // [esp+60h] [ebp-68h]
-    unsigned int *wordIndex; // [esp+64h] [ebp-64h]
-    unsigned int *wordIndexa; // [esp+64h] [ebp-64h]
-    int innerPlaneCount; // [esp+68h] [ebp-60h]
-    int innerPlaneCounta; // [esp+68h] [ebp-60h]
-    void *data_[4]; // [esp+6Ch] [ebp-5Ch] BYREF
-    int frustumPlaneCount; // [esp+88h] [ebp-40h]
-    int planeCount_; // [esp+8Ch] [ebp-3Ch]
-    DpvsPlane *planes; // [esp+90h] [ebp-38h]
-    unsigned int cellIndex_; // [esp+94h] [ebp-34h]
-    int planeCount; // [esp+98h] [ebp-30h]
-    unsigned __int16 *dobjIndex; // [esp+9Ch] [ebp-2Ch]
-    unsigned __int16 *xmodelIndex; // [esp+A0h] [ebp-28h]
-    GfxEntCellRefInfo *entInfo; // [esp+A4h] [ebp-24h]
-    unsigned int entCountIndex; // [esp+A8h] [ebp-20h]
-    GfxWorldDpvsPlanes *dpvsPlanes; // [esp+ACh] [ebp-1Ch]
-    unsigned int localClientNum_; // [esp+B0h] [ebp-18h]
-    GfxSceneDpvs *dpvs; // [esp+B4h] [ebp-14h]
-    DpvsDynamicCellCmd *worldDpvs; // [esp+B8h] [ebp-10h]
-    unsigned int localClientNum; // [esp+BCh] [ebp-Ch]
-    GfxSceneDpvs *sceneDpvs; // [esp+C0h] [ebp-8h]
-    GfxSceneDpvs *retaddr; // [esp+C8h] [ebp+0h]
+    int v5; // [esp+18h] [ebp-C0h]
+    const float *mins; // [esp+28h] [ebp-B0h]
+    int skipWorkerCmd; // [esp+30h] [ebp-A8h]
+    const DpvsPlane *bmodel; // [esp+38h] [ebp-A0h]
+    GfxSceneEntity *sceneEnt; // [esp+40h] [ebp-98h]
+    unsigned int sceneEntIndex; // [esp+4Ch] [ebp-8Ch]
+    unsigned int entnum; // [esp+54h] [ebp-84h]
+    unsigned int indexLow; // [esp+58h] [ebp-80h]
+    unsigned int bits; // [esp+5Ch] [ebp-7Ch]
+    unsigned int wordIndex; // [esp+60h] [ebp-78h]
+    int innerPlaneCount; // [esp+64h] [ebp-74h]
+    const DpvsPlane *innerPlanes; // [esp+68h] [ebp-70h]
+    unsigned int *entCellBits; // [esp+6Ch] [ebp-6Ch]
+    const DpvsPlane *planes; // [esp+70h] [ebp-68h]
+    unsigned int offset; // [esp+78h] [ebp-60h]
+    DpvsEntityCmd dpvsEntity; // [esp+7Ch] [ebp-5Ch] BYREF
+    int frustumPlaneCount; // [esp+98h] [ebp-40h]
+    int planeCount; // [esp+9Ch] [ebp-3Ch]
+    const DpvsPlane *planesEA; // [esp+A0h] [ebp-38h]
+    unsigned int cellIndex; // [esp+A4h] [ebp-34h]
+    unsigned int viewIndex; // [esp+A8h] [ebp-30h]
+    unsigned __int16 *sceneDObjIndex; // [esp+ACh] [ebp-2Ch]
+    unsigned __int16 *sceneXModelIndex; // [esp+B0h] [ebp-28h]
+    GfxEntCellRefInfo *entInfo; // [esp+B4h] [ebp-24h]
+    unsigned int wordCount; // [esp+B8h] [ebp-20h]
+    GfxWorldDpvsPlanes *worldDpvsPlanes; // [esp+BCh] [ebp-1Ch]
+    unsigned int localClientNum; // [esp+C0h] [ebp-18h]
+    GfxSceneDpvs *sceneDpvs; // [esp+C4h] [ebp-14h]
+    DpvsDynamicCellCmd *dpvsCell; // [esp+C8h] [ebp-10h]
 
-    //localClientNum = a1;
-    //sceneDpvs = retaddr;
-    worldDpvs = (DpvsDynamicCellCmd*)data;
-    dpvs = &scene.dpvs;
-    localClientNum_ = scene.dpvs.localClientNum;
-    dpvsPlanes = &rgp.world->dpvsPlanes;
-    entCountIndex = gfxCfg.entCount >> 5;
-    if (scene.dpvs.localClientNum >= gfxCfg.maxClientViews)
-        MyAssertHandler(
-            ".\\r_dpvs_sceneent.cpp",
-            136,
-            0,
-            "localClientNum doesn't index gfxCfg.maxClientViews\n\t%i not in [0, %i)",
-            localClientNum_,
-            gfxCfg.maxClientViews);
-    entInfo = scene.dpvs.entInfo[localClientNum_];
-    xmodelIndex = scene.dpvs.sceneXModelIndex;
-    dobjIndex = scene.dpvs.sceneDObjIndex;
-    planeCount = worldDpvs->viewIndex;
-    cellIndex_ = worldDpvs->cellIndex;
-    planes = (DpvsPlane *)worldDpvs->planes;
-    planeCount_ = worldDpvs->planeCount;
-    frustumPlaneCount = worldDpvs->frustumPlaneCount;
-    if (cellIndex_ >= dpvsPlanes->cellCount)
-        MyAssertHandler(
-            ".\\r_dpvs_sceneent.cpp",
-            148,
-            0,
-            "cellIndex doesn't index worldDpvs->cellCount\n\t%i not in [0, %i)",
-            cellIndex_,
-            dpvsPlanes->cellCount);
-    data_[3] = dpvs->entVisData[planeCount];
-    data_[1] = planes;
-    LOWORD(data_[2]) = planeCount_;
-    HIWORD(data_[2]) = cellIndex_;
-    innerPlaneCount = entCountIndex * localClientNum_;
-    if (entCountIndex * localClientNum_ >= 0x80)
-        MyAssertHandler(
-            ".\\r_dpvs_sceneent.cpp",
-            157,
-            0,
-            "offset doesn't index MAX_TOTAL_ENT_COUNT >> 5\n\t%i not in [0, %i)",
-            innerPlaneCount,
-            128);
-    innerPlaneCounta = innerPlaneCount + (cellIndex_ << 7);
-    wordIndex = &dpvsPlanes->sceneEntCellBits[innerPlaneCounta];
-    //iassert( frustumPlaneCount <= planeCount );
-    plane = &planes[frustumPlaneCount];
-    indexLow = planeCount_ - frustumPlaneCount;
-    for (entnum = 0; entnum < entCountIndex; ++entnum)
+    dpvsCell = (DpvsDynamicCellCmd*)data;
+    sceneDpvs = &scene.dpvs;
+    localClientNum = scene.dpvs.localClientNum;
+    worldDpvsPlanes = &rgp.world->dpvsPlanes;
+    wordCount = gfxCfg.entCount >> 5;
+
+    bcassert(localClientNum, gfxCfg.maxClientViews);
+
+    //entInfo = (GfxEntCellRefInfo *)scene.dynSModelVisBitsCamera[localClientNum - 4];
+    entInfo = scene.dpvs.entInfo[localClientNum];
+    sceneXModelIndex = scene.dpvs.sceneXModelIndex;
+    sceneDObjIndex = scene.dpvs.sceneDObjIndex;
+    viewIndex = dpvsCell->viewIndex;
+    cellIndex = dpvsCell->cellIndex;
+    planesEA = dpvsCell->planes;
+    planeCount = dpvsCell->planeCount;
+    frustumPlaneCount = dpvsCell->frustumPlaneCount;
+
+    bcassert(cellIndex, worldDpvsPlanes->cellCount);
+
+    dpvsEntity.entVisData = sceneDpvs->entVisData[viewIndex];
+    dpvsEntity.planes = planesEA;
+    dpvsEntity.planeCount = planeCount;
+    dpvsEntity.cellIndex = cellIndex;
+
+    offset = wordCount * localClientNum;
+
+    bcassert(offset, MAX_TOTAL_ENT_COUNT >> 5);
+
+    //offseta = offset + (cellIndex << 8);
+    offset += (cellIndex << 7);
+    planes = planesEA;
+    entCellBits = &worldDpvsPlanes->sceneEntCellBits[offset];
+
+    iassert(frustumPlaneCount <= planeCount);
+
+    innerPlanes = &planesEA[frustumPlaneCount];
+    innerPlaneCount = planeCount - frustumPlaneCount;
+    for (wordIndex = 0; wordIndex < wordCount; ++wordIndex)
     {
-        bits = wordIndex[entnum];
+        bits = entCellBits[wordIndex];
         while (1)
         {
             v2 = !_BitScanReverse(&v3, bits);
             if (v2)
                 v3 = 63;
-            sceneEntIndex = v3 ^ 0x1F;
-            if ((v3 ^ 0x1Fu) >= 0x20)
+
+            indexLow = v3 ^ 31;
+            if ((v3 ^ 31) >= 32)
                 break;
-            offset_ = sceneEntIndex + 32 * entnum;
-            unsigned int bit = (0x80000000 >> sceneEntIndex);
-            iassert( bits & bit );
-            bits &= ~bit;
-            if (!*((_BYTE *)data_[3] + offset_))
+
+            entnum = indexLow + 32 * wordIndex;
+            unsigned int bit = (0x80000000 >> indexLow);
+            iassert(bits & bit);
+
+            bits &= ~(bit);
+            if (!dpvsEntity.entVisData[entnum])
             {
-                v21 = dobjIndex[offset_];
-                if (v21 == 0xFFFF)
+                sceneEntIndex = sceneDObjIndex[entnum];
+                if (sceneEntIndex == 0xFFFF)
                 {
-                    v22 = xmodelIndex[offset_];
-                    if (v22 != 0xFFFF)
+                    sceneEntIndex = sceneXModelIndex[entnum];
+                    if (sceneEntIndex != 0xFFFF
+                        && !R_CullSphereDpvs(
+                            scene.sceneModel[sceneEntIndex].placement.base.origin,
+                            entInfo[entnum].radius,
+                            innerPlanes,
+                            innerPlaneCount))
                     {
-                        radius = entInfo[offset_].radius;
-                        v19 = 0;
-                        coeffs = (DpvsPlane *)plane;
-                        while (v19 < indexLow)
-                        {
-                            if (Vec3Dot(coeffs->coeffs, scene.sceneModel[v22].placement.base.origin)
-                                + coeffs->coeffs[3]
-                                + radius <= 0.0)
-                            {
-                                v17 = 1;
-                                goto LABEL_26;
-                            }
-                            ++v19;
-                            ++coeffs;
-                        }
-                        v17 = 0;
-                    LABEL_26:
-                        if (!v17)
-                            *((_BYTE *)data_[3] + offset_) = 1;
+                        dpvsEntity.entVisData[entnum] = 1;
                     }
                 }
                 else
                 {
-                    gfxSceneEnt = &scene.sceneDObj[v21];
-                    radius_ = entInfo[offset_].radius;
-                    itr = 0;
-                    v13 = (DpvsPlane *)plane;
-                    while (itr < indexLow)
+                    sceneEnt = &scene.sceneDObj[sceneEntIndex];
+                    if (!R_CullSphereDpvs(sceneEnt->placement.base.origin, entInfo[entnum].radius, innerPlanes, innerPlaneCount))
                     {
-                        if (Vec3Dot(v13->coeffs, gfxSceneEnt->placement.base.origin)
-                            + v13->coeffs[3]
-                            + radius_ <= 0.0)
+                        int itr = 0;
+                        if (sceneEnt->cull.state < 2)
+                            goto LABEL_36;
+
+                        bmodel = planes;
+                        while (itr < planeCount)
                         {
-                            v12 = 1;
-                            goto LABEL_34;
-                        }
-                        ++itr;
-                        ++v13;
-                    }
-                    v12 = 0;
-                LABEL_34:
-                    if (!v12)
-                    {
-                        v11 = 0;
-                        plane__ = planes;
-                        while (v11 < planeCount_)
-                        {
-                            if (*(float *)((char *)gfxSceneEnt->cull.mins + plane__->side[0]) * plane__->coeffs[0]
-                                + plane__->coeffs[3]
-                                + *(float *)((char *)gfxSceneEnt->cull.mins + plane__->side[1]) * plane__->coeffs[1]
-                                + *(float *)((char *)gfxSceneEnt->cull.mins + plane__->side[2]) * plane__->coeffs[2] <= 0.0)
+                            if (R_DpvsPlaneMaxSignedDistToBox(bmodel, sceneEnt->cull.mins) <= 0.0)
                             {
                                 skipWorkerCmd = 1;
-                                goto LABEL_41;
+                                goto LABEL_35;
                             }
-                            ++v11;
-                            ++plane__;
+                            ++itr;
+                            ++bmodel;
                         }
                         skipWorkerCmd = 0;
-                    LABEL_41:
+                    LABEL_35:
                         if (!skipWorkerCmd)
                         {
-                            data_[0] = &scene.sceneDObj[v21];
-                            if (gfxSceneEnt->cull.state < 2)
-                                R_AddWorkerCmd(WRKCMD_DPVS_ENTITY, (unsigned __int8 *)data_);
+                        LABEL_36:
+                            dpvsEntity.sceneEnt = &scene.sceneDObj[sceneEntIndex];
+                            if (sceneEnt->cull.state < 2)
+                                R_AddWorkerCmd(WRKCMD_DPVS_ENTITY, (unsigned __int8 *)&dpvsEntity);
                             else
-                                R_AddEntitySurfacesInFrustumCmd((unsigned __int16 *)data_);
+                                R_AddEntitySurfacesInFrustumCmd((unsigned __int16 *)&dpvsEntity);
                         }
                     }
                 }
             }
         }
     }
-    wordIndexa = &dpvsPlanes->sceneEntCellBits[128 * dpvsPlanes->cellCount + innerPlaneCounta];
-    for (entnuma = 0; entnuma < entCountIndex; ++entnuma)
+
+
+    //entCellBits = &worldDpvsPlanes->sceneEntCellBits[256 * worldDpvsPlanes->cellCount + offset];
+    entCellBits = &worldDpvsPlanes->sceneEntCellBits[128 * worldDpvsPlanes->cellCount + offset];
+    for (wordIndex = 0; wordIndex < wordCount; ++wordIndex)
     {
-        bita = wordIndexa[entnuma];
+        bits = entCellBits[wordIndex];
         while (1)
         {
-            v2 = !_BitScanReverse(&v4, bita);
+            v2 = !_BitScanReverse(&v4, bits);
             if (v2)
                 v4 = 63;
-            sceneEntIndexa = v4 ^ 0x1F;
-            if ((v4 ^ 0x1F) >= 0x20)
+            indexLow = v4 ^ 31;
+            if ((v4 ^ 31) >= 32)
                 break;
-            infoa = sceneEntIndexa + 32 * entnuma;
-            unsigned int bit = (0x80000000 >> sceneEntIndexa);
-            iassert( bita & bit ); // should be `bits` instead of `bita`
-            bita &= ~bit;
-            if (!*((_BYTE *)data_[3] + infoa))
+            entnum = indexLow + 32 * wordIndex;
+
+            unsigned int bit = (0x80000000 >> indexLow);
+            iassert(bits & bit);
+
+            bits &= ~(bit);
+            if (!dpvsEntity.entVisData[entnum])
             {
-                i = 0;
-                pln = (DpvsPlane *)plane;
-                while (i < indexLow)
+                mins = entInfo[entnum].bmodel->writable.mins;
+                int itr = 0;
+                const DpvsPlane *plane = innerPlanes;
+                while (itr < innerPlaneCount)
                 {
-                    v8.radius = entInfo[infoa].radius;
-                    if (*(float *)((char *)v8.bmodel->writable.mins + pln->side[0]) * pln->coeffs[0]
-                        + pln->coeffs[3]
-                        + *(float *)((char *)v8.bmodel->writable.mins + pln->side[1]) * pln->coeffs[1]
-                        + *(float *)((char *)v8.bmodel->writable.mins + pln->side[2]) * pln->coeffs[2] <= 0.0)
+                    if (R_DpvsPlaneMaxSignedDistToBox(plane, mins) <= 0.0)
                     {
                         v5 = 1;
-                        goto LABEL_61;
+                        goto LABEL_56;
                     }
-                    ++i;
-                    ++pln;
+                    ++itr;
+                    ++plane;
                 }
                 v5 = 0;
-            LABEL_61:
+            LABEL_56:
                 if (!v5)
-                    *((_BYTE *)data_[3] + infoa) = 1;
+                    dpvsEntity.entVisData[entnum] = 1;
             }
         }
     }

@@ -8,8 +8,8 @@
 void __cdecl R_AddEntitySurfacesInFrustumCmd(unsigned __int16 *data)
 {
     int v1; // [esp+4h] [ebp-28h]
-    const DpvsPlane *v2; // [esp+Ch] [ebp-20h]
-    int v3; // [esp+10h] [ebp-1Ch]
+    const DpvsPlane *plane; // [esp+Ch] [ebp-20h]
+    int itr; // [esp+10h] [ebp-1Ch]
     DObjAnimMat *boneMatrix; // [esp+14h] [ebp-18h]
     const DObj_s *obj; // [esp+1Ch] [ebp-10h] BYREF
     GfxSceneEntity *localSceneEnt; // [esp+20h] [ebp-Ch] BYREF
@@ -22,20 +22,21 @@ void __cdecl R_AddEntitySurfacesInFrustumCmd(unsigned __int16 *data)
     {
         iassert( localSceneEnt );
         planes = (const DpvsPlane *)*((unsigned int *)data + 1);
-        v3 = 0;
-        v2 = planes;
-        while (v3 < data[4])
+        itr = 0;
+        plane = planes;
+        while (itr < data[4])
         {
-            if (*(float *)((char *)localSceneEnt->cull.mins + v2->side[0]) * v2->coeffs[0]
-                + v2->coeffs[3]
-                + *(float *)((char *)localSceneEnt->cull.mins + v2->side[1]) * v2->coeffs[1]
-                + *(float *)((char *)localSceneEnt->cull.mins + v2->side[2]) * v2->coeffs[2] <= 0.0)
+            //if (*(float *)((char *)localSceneEnt->cull.mins + v2->side[0]) * v2->coeffs[0]
+            //    + v2->coeffs[3]
+            //    + *(float *)((char *)localSceneEnt->cull.mins + v2->side[1]) * v2->coeffs[1]
+            //    + *(float *)((char *)localSceneEnt->cull.mins + v2->side[2]) * v2->coeffs[2] <= 0.0)
+            if (R_DpvsPlaneMaxSignedDistToBox(plane, localSceneEnt->cull.mins) <= 0.0)
             {
                 v1 = 1;
                 goto LABEL_13;
             }
-            ++v3;
-            ++v2;
+            ++itr;
+            ++plane;
         }
         v1 = 0;
     LABEL_13:

@@ -575,19 +575,19 @@ void __cdecl R_StaticModelWriteInfo(int fileHandle, const GfxStaticModelDrawInst
 void __cdecl R_SortAllStaticModelSurfacesCamera()
 {
     KISAK_NULLSUB();
-    R_SortDrawSurfs(scene.drawSurfs[1], scene.drawSurfCount[1]);
+    R_SortDrawSurfs(scene.drawSurfs[DRAW_SURF_SMODEL_CAMERA_LIT], scene.drawSurfCount[DRAW_SURF_SMODEL_CAMERA_LIT]);
     KISAK_NULLSUB();
-    R_SortDrawSurfs(scene.drawSurfs[4], scene.drawSurfCount[4]);
+    R_SortDrawSurfs(scene.drawSurfs[DRAW_SURF_SMODEL_CAMERA_DECAL], scene.drawSurfCount[DRAW_SURF_SMODEL_CAMERA_DECAL]);
     KISAK_NULLSUB();
-    R_SortDrawSurfs(scene.drawSurfs[10], scene.drawSurfCount[10]);
+    R_SortDrawSurfs(scene.drawSurfs[DRAW_SURF_SMODEL_CAMERA_EMISSIVE], scene.drawSurfCount[DRAW_SURF_SMODEL_CAMERA_EMISSIVE]);
 }
 
 void __cdecl R_SortAllStaticModelSurfacesSunShadow()
 {
     KISAK_NULLSUB();
-    R_SortDrawSurfs(scene.drawSurfs[16], scene.drawSurfCount[16]);
+    R_SortDrawSurfs(scene.drawSurfs[DRAW_SURF_SMODEL_SUNSHADOW_0], scene.drawSurfCount[DRAW_SURF_SMODEL_SUNSHADOW_0]);
     KISAK_NULLSUB();
-    R_SortDrawSurfs(scene.drawSurfs[19], scene.drawSurfCount[19]);
+    R_SortDrawSurfs(scene.drawSurfs[DRAW_SURF_SMODEL_SUNSHADOW_1], scene.drawSurfCount[DRAW_SURF_SMODEL_SUNSHADOW_1]);
 }
 
 void __cdecl R_AddAllStaticModelSurfacesSunShadow()

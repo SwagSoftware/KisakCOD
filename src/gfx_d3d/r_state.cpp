@@ -2400,10 +2400,10 @@ void __cdecl R_HW_SetRenderTarget(GfxCmdBufState *state, GfxRenderTargetId newTa
 
 void __cdecl R_UpdateStatsTarget(int newTargetId)
 {
-    if (newTargetId == 9 || newTargetId == 6)
+    if (newTargetId == R_RENDERTARGET_SHADOWCOOKIE || newTargetId == R_RENDERTARGET_DYNAMICSHADOWS)
         g_viewStats = &g_frameStatsCur.viewStats[1];
     else
-        g_viewStats = (GfxViewStats *)&g_frameStatsCur;
+        g_viewStats = &g_frameStatsCur.viewStats[0];
 }
 
 void __cdecl R_ClearScreenInternal(

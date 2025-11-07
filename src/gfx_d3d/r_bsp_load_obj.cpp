@@ -1872,9 +1872,8 @@ mnode_t *__cdecl R_SortNodes_r(mnode_load_t *node, mnode_t *out)
 
         out->rightChildOffset = ((char*)outb - (char*)out) / 2;
 
-        // lwss: this can't be hit
-//        if (out->rightChildOffset != (outb - out) >> 1)
-//            Com_Error(ERR_DROP, "Max cells exceeded");
+        if (out->rightChildOffset != (outb - out) >> 1)
+            Com_Error(ERR_DROP, "Max cells exceeded");
 
         return R_SortNodes_r(&rgl.nodes[node->children[1]], outb);
     }

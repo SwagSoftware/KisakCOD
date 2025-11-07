@@ -186,7 +186,6 @@ void __cdecl R_AddAabbTreeSurfacesInFrustum_r(const GfxAabbTree *tree, const Dpv
                 v20 = &rgp.world->dpvs.sortedSurfIndex[startSurfIndex];
                 for (surfNodeIndex = 0; surfNodeIndex < surfaceCount; ++surfNodeIndex)
                 {
-                    //*(_BYTE *)(*(_DWORD *)(*((_DWORD *)NtCurrentTeb()->ThreadLocalStoragePointer + _tls_index) + 28) + v20[surfNodeIndex]) = 1;
                     g_surfaceVisData[v20[surfNodeIndex]] = 1;
                 }
             }
@@ -291,8 +290,6 @@ void __cdecl R_AddCellStaticSurfacesInFrustumCmd(DpvsStaticCellCmd *data)
     viewIndex = data->viewIndex;
     g_smodelVisData = rgp.world->dpvs.smodelVisData[viewIndex];
     g_surfaceVisData = rgp.world->dpvs.surfaceVisData[viewIndex];
-//    *(_DWORD *)(*((_DWORD *)NtCurrentTeb()->ThreadLocalStoragePointer + _tls_index) + 24) = rgp.world->dpvs.smodelVisData[viewIndex];
-//    *(_DWORD *)(*((_DWORD *)NtCurrentTeb()->ThreadLocalStoragePointer + _tls_index) + 28) = rgp.world->dpvs.surfaceVisData[viewIndex];
     R_AddCellStaticSurfacesInFrustum(data);
     if (rg.drawWorld)
         R_AddCellCullGroupsInFrustum(data);

@@ -34,10 +34,10 @@ void R_DepthPrepassCallback(const void *userData, GfxCmdBufContext context, GfxC
         R_SetRenderTarget(context, R_RENDERTARGET_FLOAT_Z);
         baseTechType = TECHNIQUE_BUILD_FLOAT_Z;
         R_DrawQuadMesh(context, rgp.shadowClearMaterial, &viewInfo->fullSceneViewMesh->meshData);
-        context.source->input.consts[54][0] = 0.0;
-        context.source->input.consts[54][1] = 0.0;
-        context.source->input.consts[54][2] = 0.0;
-        context.source->input.consts[54][3] = 1.0;
+        context.source->input.consts[CONST_SRC_CODE_DEPTH_FROM_CLIP][0] = 0.0;
+        context.source->input.consts[CONST_SRC_CODE_DEPTH_FROM_CLIP][1] = 0.0;
+        context.source->input.consts[CONST_SRC_CODE_DEPTH_FROM_CLIP][2] = 0.0;
+        context.source->input.consts[CONST_SRC_CODE_DEPTH_FROM_CLIP][3] = 1.0;
         R_DirtyCodeConstant(context.source, CONST_SRC_CODE_DEPTH_FROM_CLIP);
     }
     else

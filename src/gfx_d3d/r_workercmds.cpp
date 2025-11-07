@@ -551,7 +551,7 @@ void __cdecl R_AddWorkerCmd(WorkerCmdType type, unsigned __int8 *data)
         }
     }
 
-    R_ProcessWorkerCmdInternal(type, (FxCmd*)data);
+    R_ProcessWorkerCmdInternal(type, data);
 }
 
 void __cdecl R_UpdateActiveWorkerThreads()

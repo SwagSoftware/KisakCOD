@@ -396,23 +396,9 @@ void __cdecl R_AddAllSceneEntSurfacesRangeSunShadow(unsigned int partitionIndex)
     GfxSceneDynBrush *sceneDynBrush; // [esp+30h] [ebp-40h]
     GfxDrawSurf *drawSurf; // [esp+38h] [ebp-38h]
     MaterialTechniqueType shadowmapBuildTechType; // [esp+3Ch] [ebp-34h]
-    volatile unsigned int sceneEntCount; // [esp+40h] [ebp-30h]
-    volatile unsigned int sceneEntCounta; // [esp+40h] [ebp-30h]
-    unsigned int sceneEntCountb; // [esp+40h] [ebp-30h]
-    volatile unsigned int sceneEntCountc; // [esp+40h] [ebp-30h]
-    unsigned int sceneEntCountd; // [esp+40h] [ebp-30h]
     unsigned int stage; // [esp+44h] [ebp-2Ch]
     const DynEntityDef *dynEntDef; // [esp+48h] [ebp-28h]
-    const DynEntityDef *dynEntDefa; // [esp+48h] [ebp-28h]
-    unsigned int sceneEntIndex; // [esp+4Ch] [ebp-24h]
-    unsigned int sceneEntIndexa; // [esp+4Ch] [ebp-24h]
-    unsigned int sceneEntIndexb; // [esp+4Ch] [ebp-24h]
-    unsigned int sceneEntIndexc; // [esp+4Ch] [ebp-24h]
-    unsigned int sceneEntIndexd; // [esp+4Ch] [ebp-24h]
-    unsigned __int16 dynEntId; // [esp+58h] [ebp-18h]
-    unsigned __int16 dynEntIda; // [esp+58h] [ebp-18h]
     unsigned __int8 *sceneEntVisData; // [esp+5Ch] [ebp-14h]
-    unsigned __int8 *sceneEntVisDataa; // [esp+5Ch] [ebp-14h]
     GfxSceneDynModel *sceneDynModel; // [esp+60h] [ebp-10h]
     GfxBrushModel *bmodel; // [esp+64h] [ebp-Ch]
     signed int drawSurfCount; // [esp+68h] [ebp-8h]
@@ -424,32 +410,32 @@ void __cdecl R_AddAllSceneEntSurfacesRangeSunShadow(unsigned int partitionIndex)
     drawSurf = scene.drawSurfs[stage];
     lastDrawSurf = &drawSurf[scene.maxDrawSurfCount[stage]];
     shadowmapBuildTechType = gfxMetrics.shadowmapBuildTechType;
-    sceneEntCount = scene.sceneDObjCount;
-    for (sceneEntIndex = 0; sceneEntIndex < sceneEntCount; ++sceneEntIndex)
+
+    for (int sceneEntIndex = 0; sceneEntIndex < scene.sceneDObjCount; ++sceneEntIndex)
     {
         if (scene.sceneDObjVisData[partitionIndex + 1][sceneEntIndex] == 1)
             drawSurf = R_AddDObjSurfaces(&scene.sceneDObj[sceneEntIndex], shadowmapBuildTechType, drawSurf, lastDrawSurf);
     }
-    sceneEntCounta = scene.sceneModelCount;
-    for (sceneEntIndexa = 0; sceneEntIndexa < sceneEntCounta; ++sceneEntIndexa)
+
+    for (int sceneEntIndex = 0; sceneEntIndex < scene.sceneModelCount; ++sceneEntIndex)
     {
-        if (scene.sceneModelVisData[partitionIndex + 1][sceneEntIndexa] == 1)
+        if (scene.sceneModelVisData[partitionIndex + 1][sceneEntIndex] == 1)
             drawSurf = R_AddXModelSurfaces(
-                &scene.sceneModel[sceneEntIndexa].info,
-                scene.sceneModel[sceneEntIndexa].model,
+                &scene.sceneModel[sceneEntIndex].info,
+                scene.sceneModel[sceneEntIndex].model,
                 shadowmapBuildTechType,
                 drawSurf,
                 lastDrawSurf);
     }
-    sceneEntCountb = scene.sceneDynModelCount;
+
+
     sceneEntVisData = rgp.world->dpvsDyn.dynEntVisData[0][partitionIndex + 1];
-    for (sceneEntIndexb = 0; sceneEntIndexb < sceneEntCountb; ++sceneEntIndexb)
+    for (int sceneEntIndex = 0; sceneEntIndex < scene.sceneDynModelCount; ++sceneEntIndex)
     {
-        sceneDynModel = &rgp.world->sceneDynModel[sceneEntIndexb];
-        dynEntId = sceneDynModel->dynEntId;
-        if (sceneEntVisData[dynEntId] == 1)
+        sceneDynModel = &rgp.world->sceneDynModel[sceneEntIndex];
+        if (sceneEntVisData[sceneDynModel->dynEntId] == 1)
         {
-            dynEntDef = DynEnt_GetEntityDef(dynEntId, DYNENT_DRAW_MODEL);
+            dynEntDef = DynEnt_GetEntityDef(sceneDynModel->dynEntId, DYNENT_DRAW_MODEL);
             drawSurf = R_AddXModelSurfaces(
                 &sceneDynModel->info,
                 dynEntDef->xModel,
@@ -458,30 +444,31 @@ void __cdecl R_AddAllSceneEntSurfacesRangeSunShadow(unsigned int partitionIndex)
                 lastDrawSurf);
         }
     }
-    sceneEntCountc = scene.sceneBrushCount;
-    for (sceneEntIndexc = 0; sceneEntIndexc < sceneEntCountc; ++sceneEntIndexc)
+
+
+    for (int sceneEntIndex = 0; sceneEntIndex < scene.sceneBrushCount; ++sceneEntIndex)
     {
-        if (scene.sceneBrushVisData[partitionIndex + 1][sceneEntIndexc] == 1)
+        if (scene.sceneBrushVisData[partitionIndex + 1][sceneEntIndex] == 1)
             drawSurf = R_AddBModelSurfaces(
-                &scene.sceneBrush[sceneEntIndexc].info,
-                scene.sceneBrush[sceneEntIndexc].bmodel,
+                &scene.sceneBrush[sceneEntIndex].info,
+                scene.sceneBrush[sceneEntIndex].bmodel,
                 shadowmapBuildTechType,
                 drawSurf,
                 lastDrawSurf);
     }
-    sceneEntCountd = scene.sceneDynBrushCount;
-    sceneEntVisDataa = rgp.world->dpvsDyn.dynEntVisData[1][partitionIndex + 1];
-    for (sceneEntIndexd = 0; sceneEntIndexd < sceneEntCountd; ++sceneEntIndexd)
+
+    sceneEntVisData = rgp.world->dpvsDyn.dynEntVisData[1][partitionIndex + 1];
+    for (int sceneEntIndex = 0; sceneEntIndex < scene.sceneDynBrushCount; ++sceneEntIndex)
     {
-        sceneDynBrush = &rgp.world->sceneDynBrush[sceneEntIndexd];
-        dynEntIda = sceneDynBrush->dynEntId;
-        if (sceneEntVisDataa[dynEntIda] == 1)
+        sceneDynBrush = &rgp.world->sceneDynBrush[sceneEntIndex];
+        if (sceneEntVisData[sceneDynBrush->dynEntId] == 1)
         {
-            dynEntDefa = DynEnt_GetEntityDef(dynEntIda, DYNENT_DRAW_BRUSH);
-            bmodel = R_GetBrushModel(dynEntDefa->brushModel);
+            dynEntDef = DynEnt_GetEntityDef(sceneDynBrush->dynEntId, DYNENT_DRAW_BRUSH);
+            bmodel = R_GetBrushModel(dynEntDef->brushModel);
             R_AddBModelSurfaces((BModelDrawInfo *)sceneDynBrush, bmodel, shadowmapBuildTechType, drawSurf, lastDrawSurf);
         }
     }
+
     drawSurfCount = drawSurf - scene.drawSurfs[stage];
     scene.drawSurfCount[stage] = drawSurfCount;
     KISAK_NULLSUB();
@@ -596,24 +583,14 @@ void __cdecl R_AddSceneDObj(unsigned int entnum, unsigned int viewIndex)
 
 void __cdecl R_DrawAllSceneEnt(const GfxViewInfo *viewInfo)
 {
-    unsigned __int8 v1; // [esp+Ch] [ebp-58h]
-    unsigned __int8 v2; // [esp+10h] [ebp-54h]
     unsigned __int8 viewVisData; // [esp+14h] [ebp-50h]
-    unsigned __int8 viewVisDataa; // [esp+14h] [ebp-50h]
-    unsigned __int8 viewVisDatab; // [esp+14h] [ebp-50h]
-    unsigned __int8 viewVisDatac; // [esp+14h] [ebp-50h]
-    unsigned __int8 viewVisDatad; // [esp+14h] [ebp-50h]
     unsigned int *entVisBits; // [esp+18h] [ebp-4Ch]
     GfxSceneModel *sceneModel; // [esp+1Ch] [ebp-48h]
     volatile unsigned int sceneEntCount; // [esp+20h] [ebp-44h]
-    volatile unsigned int sceneEntCounta; // [esp+20h] [ebp-44h]
-    volatile unsigned int sceneEntCountb; // [esp+20h] [ebp-44h]
     const DpvsView *view; // [esp+24h] [ebp-40h]
     GfxEntity *gfxEnt; // [esp+28h] [ebp-3Ch]
     GfxEntity *gfxEnta; // [esp+28h] [ebp-3Ch]
     unsigned int sceneEntIndex; // [esp+2Ch] [ebp-38h]
-    unsigned int sceneEntIndexa; // [esp+2Ch] [ebp-38h]
-    unsigned int sceneEntIndexb; // [esp+2Ch] [ebp-38h]
     GfxSceneEntity *sceneEnt; // [esp+30h] [ebp-34h]
     GfxSceneBrush *sceneBrush; // [esp+34h] [ebp-30h]
     unsigned int entnum; // [esp+3Ch] [ebp-28h]
@@ -657,10 +634,9 @@ void __cdecl R_DrawAllSceneEnt(const GfxViewInfo *viewInfo)
                     for (viewIndex = 0; viewIndex < 3; ++viewIndex)
                     {
                         if ((view[viewIndex].renderFxFlagsCull & gfxEnt->renderFxFlags) != 0)
-                            v2 = 0;
+                            sceneEntVisData[viewIndex][sceneEntIndex] = 0;
                         else
-                            v2 = scene.dpvs.entVisData[viewIndex][entnum];
-                        sceneEntVisData[viewIndex][sceneEntIndex] = v2;
+                            sceneEntVisData[viewIndex][sceneEntIndex] = scene.dpvs.entVisData[viewIndex][entnum];
                         visData |= sceneEntVisData[viewIndex][sceneEntIndex];
                     }
                     while (viewIndex < 7)
@@ -737,10 +713,10 @@ void __cdecl R_DrawAllSceneEnt(const GfxViewInfo *viewInfo)
             visData = 0;
             for (viewIndex = 0; viewIndex < 3; ++viewIndex)
             {
-                viewVisDataa = scene.dpvs.entVisData[viewIndex][entnum];
-                if (!viewVisDataa)
-                    viewVisDataa = 1;
-                sceneEntVisData[viewIndex][sceneEntIndex] = viewVisDataa;
+                viewVisData = scene.dpvs.entVisData[viewIndex][entnum];
+                if (!viewVisData)
+                    viewVisData = 1;
+                sceneEntVisData[viewIndex][sceneEntIndex] = viewVisData;
                 visData |= sceneEntVisData[viewIndex][sceneEntIndex];
             }
             while (viewIndex < 7)
@@ -772,22 +748,23 @@ void __cdecl R_DrawAllSceneEnt(const GfxViewInfo *viewInfo)
     }
     for (viewIndex = 0; viewIndex < 7; ++viewIndex)
         sceneEntVisData[viewIndex] = scene.sceneModelVisData[viewIndex];
-    sceneEntCounta = scene.sceneModelCount;
-    for (sceneEntIndexa = 0; sceneEntIndexa < sceneEntCounta; ++sceneEntIndexa)
+
+
+    for (sceneEntIndex = 0; sceneEntIndex < scene.sceneModelCount; ++sceneEntIndex)
     {
-        entnum = scene.sceneModel[sceneEntIndexa].entnum;
+        entnum = scene.sceneModel[sceneEntIndex].entnum;
         visData = 0;
-        if (scene.sceneModel[sceneEntIndexa].gfxEntIndex)
+        if (scene.sceneModel[sceneEntIndex].gfxEntIndex)
         {
-            gfxEnta = &frontEndDataOut->gfxEnts[scene.sceneModel[sceneEntIndexa].gfxEntIndex];
+            gfxEnta = &frontEndDataOut->gfxEnts[scene.sceneModel[sceneEntIndex].gfxEntIndex];
             if (entnum == gfxCfg.entnumNone)
             {
                 for (viewIndex = 0; viewIndex < 3; ++viewIndex)
                 {
                     if ((view[viewIndex].renderFxFlagsCull & gfxEnta->renderFxFlags) != 0)
-                        sceneEntVisData[viewIndex][sceneEntIndexa] = 0;
+                        sceneEntVisData[viewIndex][sceneEntIndex] = 0;
                     else
-                        visData |= sceneEntVisData[viewIndex][sceneEntIndexa];
+                        visData |= sceneEntVisData[viewIndex][sceneEntIndex];
                 }
             }
             else if ((entVisBits[entnum >> 5] & (0x80000000 >> (entnum & 0x1F))) != 0)
@@ -795,30 +772,29 @@ void __cdecl R_DrawAllSceneEnt(const GfxViewInfo *viewInfo)
                 for (viewIndex = 0; viewIndex < 3; ++viewIndex)
                 {
                     if ((view[viewIndex].renderFxFlagsCull & gfxEnta->renderFxFlags) != 0)
-                        v1 = 0;
+                        sceneEntVisData[viewIndex][sceneEntIndex] = 0;
                     else
-                        v1 = scene.dpvs.entVisData[viewIndex][entnum];
-                    sceneEntVisData[viewIndex][sceneEntIndexa] = v1;
-                    visData |= sceneEntVisData[viewIndex][sceneEntIndexa];
+                        sceneEntVisData[viewIndex][sceneEntIndex] = scene.dpvs.entVisData[viewIndex][entnum];
+                    visData |= sceneEntVisData[viewIndex][sceneEntIndex];
                 }
             }
             else
             {
                 for (viewIndex = 0; viewIndex < 3; ++viewIndex)
                 {
-                    viewVisDatab = scene.dpvs.entVisData[viewIndex][entnum];
-                    if (!viewVisDatab)
-                        viewVisDatab = 1;
-                    sceneEntVisData[viewIndex][sceneEntIndexa] = (view[viewIndex].renderFxFlagsCull & gfxEnta->renderFxFlags) == 0
-                        ? viewVisDatab
+                    viewVisData = scene.dpvs.entVisData[viewIndex][entnum];
+                    if (!viewVisData)
+                        viewVisData = 1;
+                    sceneEntVisData[viewIndex][sceneEntIndex] = (view[viewIndex].renderFxFlagsCull & gfxEnta->renderFxFlags) == 0
+                        ? viewVisData
                         : 0;
-                    visData |= sceneEntVisData[viewIndex][sceneEntIndexa];
+                    visData |= sceneEntVisData[viewIndex][sceneEntIndex];
                 }
             }
             while (viewIndex < 7)
             {
-                sceneEntVisData[viewIndex][sceneEntIndexa] = scene.dpvs.entVisData[viewIndex][entnum];
-                visData |= sceneEntVisData[viewIndex++][sceneEntIndexa];
+                sceneEntVisData[viewIndex][sceneEntIndex] = scene.dpvs.entVisData[viewIndex][entnum];
+                visData |= sceneEntVisData[viewIndex++][sceneEntIndex];
             }
         }
         else
@@ -826,36 +802,36 @@ void __cdecl R_DrawAllSceneEnt(const GfxViewInfo *viewInfo)
             if (entnum == gfxCfg.entnumNone)
             {
                 for (viewIndex = 0; viewIndex < 3; ++viewIndex)
-                    visData |= sceneEntVisData[viewIndex][sceneEntIndexa];
+                    visData |= sceneEntVisData[viewIndex][sceneEntIndex];
             }
             else if ((entVisBits[entnum >> 5] & (0x80000000 >> (entnum & 0x1F))) != 0)
             {
                 for (viewIndex = 0; viewIndex < 3; ++viewIndex)
                 {
-                    sceneEntVisData[viewIndex][sceneEntIndexa] = scene.dpvs.entVisData[viewIndex][entnum];
-                    visData |= sceneEntVisData[viewIndex][sceneEntIndexa];
+                    sceneEntVisData[viewIndex][sceneEntIndex] = scene.dpvs.entVisData[viewIndex][entnum];
+                    visData |= sceneEntVisData[viewIndex][sceneEntIndex];
                 }
             }
             else
             {
                 for (viewIndex = 0; viewIndex < 3; ++viewIndex)
                 {
-                    viewVisDatac = scene.dpvs.entVisData[viewIndex][entnum];
-                    if (!viewVisDatac)
-                        viewVisDatac = 1;
-                    sceneEntVisData[viewIndex][sceneEntIndexa] = viewVisDatac;
-                    visData |= sceneEntVisData[viewIndex][sceneEntIndexa];
+                    viewVisData = scene.dpvs.entVisData[viewIndex][entnum];
+                    if (!viewVisData)
+                        viewVisData = 1;
+                    sceneEntVisData[viewIndex][sceneEntIndex] = viewVisData;
+                    visData |= sceneEntVisData[viewIndex][sceneEntIndex];
                 }
             }
             while (viewIndex < 7)
             {
-                sceneEntVisData[viewIndex][sceneEntIndexa] = scene.dpvs.entVisData[viewIndex][entnum];
-                visData |= sceneEntVisData[viewIndex++][sceneEntIndexa];
+                sceneEntVisData[viewIndex][sceneEntIndex] = scene.dpvs.entVisData[viewIndex][entnum];
+                visData |= sceneEntVisData[viewIndex++][sceneEntIndex];
             }
         }
         if ((visData & 1) != 0)
         {
-            sceneModel = &scene.sceneModel[sceneEntIndexa];
+            sceneModel = &scene.sceneModel[sceneEntIndex];
             if (!R_SkinXModel(
                 &sceneModel->info,
                 sceneModel->model,
@@ -865,16 +841,18 @@ void __cdecl R_DrawAllSceneEnt(const GfxViewInfo *viewInfo)
                 sceneModel->gfxEntIndex))
             {
                 for (viewIndex = 0; viewIndex < 7; ++viewIndex)
-                    sceneEntVisData[viewIndex][sceneEntIndexa] = 0;
+                    sceneEntVisData[viewIndex][sceneEntIndex] = 0;
             }
         }
     }
+
+
     for (viewIndex = 0; viewIndex < 3; ++viewIndex)
         sceneEntVisData[viewIndex] = scene.sceneBrushVisData[viewIndex];
-    sceneEntCountb = scene.sceneBrushCount;
-    for (sceneEntIndexb = 0; sceneEntIndexb < sceneEntCountb; ++sceneEntIndexb)
+
+    for (sceneEntIndex = 0; sceneEntIndex < scene.sceneBrushCount; ++sceneEntIndex)
     {
-        sceneBrush = &scene.sceneBrush[sceneEntIndexb];
+        sceneBrush = &scene.sceneBrush[sceneEntIndex];
         entnum = sceneBrush->entnum;
         iassert( entnum != gfxCfg.entnumNone );
         visData = 0;
@@ -882,19 +860,19 @@ void __cdecl R_DrawAllSceneEnt(const GfxViewInfo *viewInfo)
         {
             for (viewIndex = 0; viewIndex < 3; ++viewIndex)
             {
-                sceneEntVisData[viewIndex][sceneEntIndexb] = scene.dpvs.entVisData[viewIndex][entnum];
-                visData |= sceneEntVisData[viewIndex][sceneEntIndexb];
+                sceneEntVisData[viewIndex][sceneEntIndex] = scene.dpvs.entVisData[viewIndex][entnum];
+                visData |= sceneEntVisData[viewIndex][sceneEntIndex];
             }
         }
         else
         {
             for (viewIndex = 0; viewIndex < 3; ++viewIndex)
             {
-                viewVisDatad = scene.dpvs.entVisData[viewIndex][entnum];
-                if (!viewVisDatad)
-                    viewVisDatad = 1;
-                sceneEntVisData[viewIndex][sceneEntIndexb] = viewVisDatad;
-                visData |= sceneEntVisData[viewIndex][sceneEntIndexb];
+                viewVisData = scene.dpvs.entVisData[viewIndex][entnum];
+                if (!viewVisData)
+                    viewVisData = 1;
+                sceneEntVisData[viewIndex][sceneEntIndex] = viewVisData;
+                visData |= sceneEntVisData[viewIndex][sceneEntIndex];
             }
         }
         if (((visData & 1) != 0 || R_IsEntityVisibleToAnyShadowedPrimaryLight(viewInfo, entnum))
@@ -902,7 +880,7 @@ void __cdecl R_DrawAllSceneEnt(const GfxViewInfo *viewInfo)
         {
             Com_BitSetAssert(scene.entOverflowedDrawBuf, sceneBrush->entnum, 0xFFFFFFF);
             for (viewIndex = 0; viewIndex < 3; ++viewIndex)
-                sceneEntVisData[viewIndex][sceneEntIndexb] = 0;
+                sceneEntVisData[viewIndex][sceneEntIndex] = 0;
         }
     }
 }
@@ -1505,11 +1483,13 @@ void __cdecl R_FilterEntitiesIntoCells(int cameraCellIndex)
 
     iassert( Sys_IsMainThread() );
     if (cameraCellIndex < 0)
-        v2 = 0;
+        dpvsGlob.cameraCellIndex = 0;
     else
-        v2 = cameraCellIndex;
-    dpvsGlob.cameraCellIndex = v2;
+        dpvsGlob.cameraCellIndex = cameraCellIndex;
+
     view = dpvsGlob.views[scene.dpvs.localClientNum];
+
+    // DObj 
     for (sceneEntIndex = 0; sceneEntIndex < scene.sceneDObjCount; ++sceneEntIndex)
     {
         sceneEnt = &scene.sceneDObj[sceneEntIndex];
@@ -1543,6 +1523,8 @@ void __cdecl R_FilterEntitiesIntoCells(int cameraCellIndex)
                 R_AddDebugBox(&frontEndDataOut->debugGlobals, sceneEnt->cull.mins, sceneEnt->cull.maxs, colorCyan);
         }
     }
+
+    // XModels
     for (sceneEntIndex = 0; sceneEntIndex < scene.sceneModelCount; ++sceneEntIndex)
     {
         sceneModel = &scene.sceneModel[sceneEntIndex];
@@ -1577,6 +1559,8 @@ void __cdecl R_FilterEntitiesIntoCells(int cameraCellIndex)
             R_AddDebugBox(&frontEndDataOut->debugGlobals, mins, maxs, colorCyan);
         }
     }
+
+    // Brushes
     for (sceneEntIndex = 0; sceneEntIndex < scene.sceneBrushCount; ++sceneEntIndex)
     {
         sceneBrush = &scene.sceneBrush[sceneEntIndex];
@@ -1608,13 +1592,18 @@ void __cdecl R_FilterEntitiesIntoCells(int cameraCellIndex)
     }
 }
 
+// [ viewIndex ]
+// SCENE_VIEW_CAMERA = 0x0,
+// SCENE_VIEW_SUNSHADOW_0 = 0x1, (CSM Near)
+// SCENE_VIEW_SUNSHADOW_1 = 0x2, (CSM Far)
 unsigned int __cdecl R_SetVisData(unsigned int viewIndex)
 {
     unsigned int oldViewIndex; // [esp+4h] [ebp-8h]
     unsigned int drawType; // [esp+8h] [ebp-4h]
 
     oldViewIndex = g_viewIndex; // *(unsigned int *)(*((unsigned int *)NtCurrentTeb()->ThreadLocalStoragePointer + _tls_index) + 12);
-    g_viewIndex = oldViewIndex; // *(unsigned int *)(*((unsigned int *)NtCurrentTeb()->ThreadLocalStoragePointer + _tls_index) + 12) = viewIndex;
+    //g_viewIndex = oldViewIndex; // *(unsigned int *)(*((unsigned int *)NtCurrentTeb()->ThreadLocalStoragePointer + _tls_index) + 12) = viewIndex; (Fuck you whoever did this typo!)
+    g_viewIndex = viewIndex;
     for (drawType = 0; drawType < 2; ++drawType)
         g_dynEntVisData[drawType] = rgp.world->dpvsDyn.dynEntVisData[drawType][viewIndex]; // *(unsigned int *)(*((unsigned int *)NtCurrentTeb()->ThreadLocalStoragePointer + _tls_index) + 4 * drawType + 16) =
     g_dpvsView = &dpvsGlob.views[scene.dpvs.localClientNum][viewIndex]; // *(unsigned int *)(*((unsigned int *)NtCurrentTeb()->ThreadLocalStoragePointer + _tls_index) + 8)
@@ -2430,6 +2419,7 @@ void __cdecl R_AddCellSurfacesAndCullGroupsInFrustumDelayed(
     dpvsStaticCell.frustumPlaneCount = frustumPlaneCount;
     dpvsStaticCell.viewIndex = g_viewIndex; // *(_WORD *)(*((unsigned int *)NtCurrentTeb()->ThreadLocalStoragePointer + _tls_index) + 12);
     R_AddWorkerCmd(WRKCMD_DPVS_CELL_STATIC, (unsigned __int8 *)&dpvsStaticCell);
+
     dpvsDynamicCell.cellIndex = cell - rgp.world->cells;
     dpvsDynamicCell.planes = planes;
     dpvsDynamicCell.planeCount = planeCount;
@@ -2757,8 +2747,8 @@ void __cdecl R_AddSkySurfacesDpvs(const DpvsPlane *planes, int planeCount)
     int planeIndex; // [esp+1B0h] [ebp-4h]
 
     iassert( Sys_IsMainThread() );
-    g_smodelVisData = rgp.world->dpvs.smodelVisData[0]; // (_DWORD *)(*((_DWORD *)NtCurrentTeb()->ThreadLocalStoragePointer + _tls_index) + 24)
-    g_surfaceVisData = rgp.world->dpvs.surfaceVisData[0]; // *(_DWORD *)(*((_DWORD *)NtCurrentTeb()->ThreadLocalStoragePointer + _tls_index) + 28)
+    g_smodelVisData = rgp.world->dpvs.smodelVisData[0];
+    g_surfaceVisData = rgp.world->dpvs.surfaceVisData[0];
     for (planeIndex = 0; planeIndex < planeCount; ++planeIndex)
     {
         R_CopyClipPlane(&planes[planeIndex], &clipPlanePool[planeIndex]);
@@ -3589,18 +3579,31 @@ int __cdecl R_CellForPoint(const GfxWorld *world, const float *origin)
     cellCount = world->dpvsPlanes.cellCount + 1;
     while (1)
     {
+        //cellIndex = node->cellIndex;
+        //if (cellIndex - cellCount < 0)
+        //    break;
+        //plane = &world->dpvsPlanes.planes[cellIndex - cellCount];
+        //d = Vec3Dot(origin, plane->normal) - plane->dist;
+        //int side = (d <= 0.0);
+        //unsigned short offset = (node->rightChildOffset - 2);
+        //offset *= side;
+        //
+        //node = (mnode_t *)((char *)node + (offset * 2) + 4);
+        //
+        //mnode_t *nodemethod2 = (mnode_t *)((char *)node + 2 * side * (node->rightChildOffset - 2) + 4);
+        //iassert(node == nodemethod2);
+
         cellIndex = node->cellIndex;
         if (cellIndex - cellCount < 0)
             break;
-        plane = &world->dpvsPlanes.planes[cellIndex - cellCount];
-        d = Vec3Dot(origin, plane->normal) - plane->dist;
-        int side = (d <= 0.0);
-        unsigned short offset = (node->rightChildOffset - 2);
-        offset *= side;
-
-        node = (mnode_t *)((char *)node + (offset * 2) + 4);
-
-        //node = (mnode_t *)((char *)node + 2 * side * (node->rightChildOffset - 2) + 4);
+        cplane_s *v2 = &world->dpvsPlanes.planes[cellIndex - cellCount];
+        node = (mnode_t *)((char *)node
+            + 2
+            * ((float)((float)((float)((float)(*origin * v2->normal[0]) + (float)(origin[1] * v2->normal[1]))
+                + (float)(origin[2] * v2->normal[2]))
+                - v2->dist) <= 0.0)
+            * (node->rightChildOffset - 2)
+            + 4);
     }
     return cellIndex - 1;
 }
