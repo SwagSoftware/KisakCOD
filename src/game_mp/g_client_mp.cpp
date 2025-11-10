@@ -496,8 +496,8 @@ uint32_t __cdecl G_GetNonPVSPlayerInfo(gentity_s *pSelf, float *vPosition, int32
     }
     vOfs = pEnt->r.currentOrigin[0] - *vPosition;
     vOfs_4 = pEnt->r.currentOrigin[1] - vPosition[1];
-    iPos = (int)(vOfs + 0.5f);
-    iPos_4 = (int)(vOfs_4 + 0.5f);
+    iPos = SnapFloatToInt(vOfs + 0.5f);
+    iPos_4 = SnapFloatToInt(vOfs_4 + 0.5f);
     fScale = 1.0f;
     fScale_4 = 1.0f;
     if (iPos <= 1024)
@@ -523,11 +523,11 @@ uint32_t __cdecl G_GetNonPVSPlayerInfo(gentity_s *pSelf, float *vPosition, int32
         if (fScale_4 <= (double)fScale)
         {
             if (fScale > (double)fScale_4)
-                iPos = (int)((double)iPos * fScale_4);
+                iPos = SnapFloatToInt((double)iPos * fScale_4);
         }
         else
         {
-            iPos_4 = (int)((double)iPos_4 * fScale);
+            iPos_4 = SnapFloatToInt((double)iPos_4 * fScale);
         }
     }
     if (iPos <= 1024)
@@ -548,7 +548,7 @@ uint32_t __cdecl G_GetNonPVSPlayerInfo(gentity_s *pSelf, float *vPosition, int32
     {
         iPos_4 = 1024;
     }
- return ((int)(pEnt->r.currentAngles[1] * 0.7111111283302307f) << 24)
+ return (SnapFloatToInt(pEnt->r.currentAngles[1] * 0.7111111283302307f) << 24)
        | (((((iPos_4 + 2) / 4) + 255) & 0x1FF) << 15) & 0xFFFFFF
        | (((((iPos + 2) / 4) + 255) & 0x1FF) << 6) & 0x7FFF
        | pEnt->s.number & 0x3F;

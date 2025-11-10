@@ -566,7 +566,7 @@ int32_t __cdecl Bullet_GetDamage(
                         "((lerpAmount >= 0.0) && (lerpAmount <= 1.0))",
                         lerpAmount);
                 v5 = lerpAmount * (double)minDamage + (1.0 - lerpAmount) * (double)baseDamage;
-                damage = (int)v5;
+                damage = SnapFloatToInt(v5);
             }
         }
         else
@@ -574,7 +574,7 @@ int32_t __cdecl Bullet_GetDamage(
             damage = baseDamage;
         }
     }
-    return (int)((double)damage * bp->damageMultiplier);
+    return SnapFloatToInt((double)damage * bp->damageMultiplier);
 }
 
 void __cdecl Bullet_ImpactEffect(

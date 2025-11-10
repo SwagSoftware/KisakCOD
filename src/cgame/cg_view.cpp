@@ -163,6 +163,7 @@ void __cdecl CG_CalcVrect(int localClientNum)
 }
 
 // local variable allocation has failed, the output may be wrong!
+// KISAKTODO: sync to mp version
 void __cdecl CG_SmoothCameraZ(cg_s *cgameGlob)
 {
     float *p_stepViewChange; // r28

@@ -200,7 +200,7 @@ void __cdecl DevGui_UpdateMenuScroll(float deltaTime)
                     v2 = -1.0;
                 else
                     v2 = 1.0;
-                s_input.menuScroll[axisIndex] += (int)v2;
+                s_input.menuScroll[axisIndex] += SnapFloatToInt(v2);
             }
         }
         else if (pressed)
@@ -209,7 +209,7 @@ void __cdecl DevGui_UpdateMenuScroll(float deltaTime)
                 v1 = -1.0;
             else
                 v1 = 1.0;
-            s_input.menuScroll[axisIndex] += (int)v1;
+            s_input.menuScroll[axisIndex] += SnapFloatToInt(v1);
             s_input.menuScrollTime[axisIndex] = 0.0;
         }
     }

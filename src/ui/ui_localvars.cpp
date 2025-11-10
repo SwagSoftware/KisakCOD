@@ -103,7 +103,7 @@ UILocalVar_u __cdecl UILocalVar_GetInt(const UILocalVar *var)
     {
         if (var->type == UILOCALVAR_FLOAT)
         {
-            return (UILocalVar_u)(int)var->u.value;
+            return (UILocalVar_u)SnapFloatToInt(var->u.value);
         }
         else
         {

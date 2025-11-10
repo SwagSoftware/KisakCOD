@@ -275,7 +275,7 @@ int32_t __cdecl PM_GetSprintLeft(const playerState_s *ps, int32_t gametime)
                 - (ps->sprintState.lastSprintEnd
                     - ps->sprintState.lastSprintStart)
                 - ps->sprintState.lastSprintEnd
-                - (int)(player_sprintRechargePause->current.value * 1000.0);
+                - (int)SnapFloatToInt(player_sprintRechargePause->current.value * 1000.0);
             else
                 sprintLeft = gametime
                 + ps->sprintState.sprintStartMaxLength
@@ -612,7 +612,7 @@ void __cdecl PM_UpdateViewAngles(playerState_s *ps, float msec, usercmd_s *cmd, 
         {
             angle = (double)cmd->angles[1] * 0.0054931640625 + ps->delta_angles[1];
             temp = AngleNormalize360(angle);
-            ps->stats[1] = (int)(temp * 0.0054931640625);
+            ps->stats[1] = SnapFloatToInt(temp * 0.0054931640625);
         }
     LABEL_21:
         PM_UpdateLean(
@@ -2164,7 +2164,7 @@ void __cdecl PM_SetMovementDir(pmove_t *pm, pml_t *pml)
         if ((ps->pm_flags & PMF_LADDER) != 0)
         {
             speed = vectoyaw(ps->vLadderVec) + 180.0;
-            moveyaw = (int)AngleDelta(speed, ps->viewangles[1]);
+            moveyaw = SnapFloat(AngleDelta(speed, ps->viewangles[1]));
             if ((int)abs32(moveyaw) > 90)
             {
                 if (moveyaw <= 0)
@@ -2188,7 +2188,7 @@ void __cdecl PM_SetMovementDir(pmove_t *pm, pml_t *pml)
             {
                 Vec3NormalizeTo(moved, dir);
                 vectoangles(dir, dir);
-                moveyaw = (int)AngleDelta(dir[1], ps->viewangles[1]);
+                moveyaw = SnapFloat(AngleDelta(dir[1], ps->viewangles[1]));
                 if (pm->cmd.forwardmove < 0)
                 {
                     v5 = (double)moveyaw + 180.0;
@@ -2196,7 +2196,7 @@ void __cdecl PM_SetMovementDir(pmove_t *pm, pml_t *pml)
                     v4 = v6 + 0.5;
                     v3 = floor(v4);
                     v2 = (v6 - v3) * 360.0;
-                    moveyaw = (int)v2;
+                    moveyaw = SnapFloatToInt(v2);
                 }
                 if ((int)abs32(moveyaw) > 90)
                 {
@@ -2211,7 +2211,7 @@ void __cdecl PM_SetMovementDir(pmove_t *pm, pml_t *pml)
     }
     else
     {
-        moveyaw = (int)AngleDelta(ps->proneDirection, ps->viewangles[1]);
+        moveyaw = SnapFloat(AngleDelta(ps->proneDirection, ps->viewangles[1]));
         if ((int)abs32(moveyaw) > 90)
         {
             if (moveyaw <= 0)
@@ -2244,7 +2244,7 @@ void __cdecl PM_WalkMove(pmove_t *pm, pml_t *pml)
     if ((ps->pm_flags & PMF_JUMPING) != 0)
         Jump_ApplySlowdown(ps);
     if ((ps->pm_flags & PMF_SPRINTING) != 0)
-        pm->cmd.rightmove = (int)((double)pm->cmd.rightmove * player_sprintStrafeSpeedScale->current.value);
+        pm->cmd.rightmove = SnapFloatToInt((double)pm->cmd.rightmove * player_sprintStrafeSpeedScale->current.value);
     if (Jump_Check(pm, pml))
     {
         PM_AirMove(pm, pml);
@@ -2258,7 +2258,7 @@ void __cdecl PM_WalkMove(pmove_t *pm, pml_t *pml)
         scale = PM_CmdScale_Walk(pm, &cmd);
 #ifdef KISAK_MP
         scale = PM_DamageScale_Walk(ps->damageTimer) * scale;
-        ps->damageTimer -= (int)(pml->frametime * 1000.0);
+        ps->damageTimer -= SnapFloatToInt(pml->frametime * 1000.0);
         if (ps->damageTimer <= 0)
             ps->damageTimer = 0;
 #endif
@@ -2733,10 +2733,10 @@ void __cdecl PM_CrashLand(playerState_s *ps, pml_t *pml)
             }
             else if (bg_fallDamageMaxHeight->current.value > (float)fallHeight)
             {
-                if ((int)((fallHeight - bg_fallDamageMinHeight->current.value)
+                if (SnapFloatToInt((fallHeight - bg_fallDamageMinHeight->current.value)
                     / (bg_fallDamageMaxHeight->current.value - bg_fallDamageMinHeight->current.value)
                     * 100.0f) < 100)
-                    v8 = (int)((fallHeight - bg_fallDamageMinHeight->current.value)
+                    v8 = SnapFloatToInt((fallHeight - bg_fallDamageMinHeight->current.value)
                         / (bg_fallDamageMaxHeight->current.value - bg_fallDamageMinHeight->current.value)
                         * 100.0);
                 else
@@ -2757,9 +2757,9 @@ void __cdecl PM_CrashLand(playerState_s *ps, pml_t *pml)
             Com_Printf(17, "bg_fallDamageMaxHeight must be greater than bg_fallDamageMinHeight\n");
             damage = 0;
         }
-        if (fallHeight > 12.0f)
+        if (fallHeight > 12.0f) 
         {
-            viewDip = (int)((fallHeight - 12.0f) / 26.0f * 4.0f + 4.0f);
+            viewDip = SnapFloatToInt((fallHeight - 12.0f) / 26.0f * 4.0f + 4.0f);
             if (viewDip > 24)
                 viewDip = 24;
 #ifdef KISAK_MP
@@ -3458,7 +3458,7 @@ void __cdecl PM_ViewHeightAdjust(pmove_t *pm, pml_t *pml)
                         {
                             iLerpTime = PM_GetViewHeightLerpTime(ps, ps->viewHeightLerpTarget, ps->viewHeightLerpDown);
                             ps->viewHeightLerpTime = pm->cmd.serverTime
-                                - (int)((double)iLerpFrac * 0.009999999776482582 * (double)iLerpTime);
+                                - SnapFloatToInt((double)iLerpFrac * 0.009999999776482582 * (double)iLerpTime);
                             if (ps->viewHeightLerpTarget == 11)
                             {
                                 PM_ViewHeightTableLerp(iLerpFrac, viewLerp_CrouchProne, &fNewPosOfs);
@@ -3653,7 +3653,7 @@ void __cdecl PM_Footsteps(pmove_t *pm, pml_t *pml)
                     fMaxSpeed = PM_GetMaxSpeed(pm, walking, sprinting);
                     bobmove = PM_GetBobMove(stanceFrontBack, pm->xyspeed, fMaxSpeed, walking, sprinting);
                     old = ps->bobCycle;
-                    ps->bobCycle = (uint8_t)(int)((double)old + (double)pml->msec * bobmove);
+                    ps->bobCycle = (uint8_t)SnapFloatToInt((double)old + (double)pml->msec * bobmove);
                     Footsteps = PM_ShouldMakeFootsteps(pm);
                     PM_FootstepEvent(pm, pml, old, ps->bobCycle, Footsteps);
                 }
@@ -3715,7 +3715,7 @@ void __cdecl PM_Footstep_LadderMove(pmove_t *pm, pml_t *pml)
 #endif
 
         old = ps->bobCycle;
-        ps->bobCycle = (uint8_t)(int)((double)old + (double)pml->msec * bobmove);
+        ps->bobCycle = (uint8_t)SnapFloatToInt((double)old + (double)pml->msec * bobmove);
         PM_FootstepEvent(pm, pml, old, ps->bobCycle, 1);
     }
 }
@@ -4033,7 +4033,7 @@ void __cdecl PM_FoliageSounds(pmove_t *pm)
             / (bg_foliagesnd_maxspeed->current.value - bg_foliagesnd_minspeed->current.value);
         if (speedFrac > 1.0)
             speedFrac = 1.0;
-        interval = (int)((double)(bg_foliagesnd_fastinterval->current.integer - bg_foliagesnd_slowinterval->current.integer)
+        interval = SnapFloatToInt((double)(bg_foliagesnd_fastinterval->current.integer - bg_foliagesnd_slowinterval->current.integer)
             * speedFrac
             + (double)bg_foliagesnd_slowinterval->current.integer);
         if (interval + ps->foliageSoundTime < pm->cmd.serverTime)
@@ -4418,7 +4418,7 @@ void __cdecl PM_LadderMove(pmove_t *pm, pml_t *pml)
         }
         PM_StepSlideMove(pm, pml, 0);
         scale = vectoyaw(ps->vLadderVec) + 180.0;
-        moveyaw = (int)AngleDelta(scale, ps->viewangles[1]);
+        moveyaw = SnapFloatToInt(AngleDelta(scale, ps->viewangles[1]));
         if ((int)abs32(moveyaw) > 75)
         {
             if (moveyaw <= 0)
@@ -4472,7 +4472,7 @@ void __cdecl PM_MeleeChargeUpdate(pmove_t *pm, pml_t *pml)
             ps->velocity[0] = v2 * chargeDir[0];
             velocity[1] = chargeVel * chargeDir[1];
             chargeTime = chargeVel / player_meleeChargeFriction->current.value * 1000.0;
-            ps->meleeChargeTime = (int)chargeTime;
+            ps->meleeChargeTime = SnapFloatToInt(chargeTime);
         }
         ps->meleeChargeTime -= pml->msec;
         if (ps->meleeChargeTime <= 0)

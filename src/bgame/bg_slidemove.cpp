@@ -237,7 +237,7 @@ void __cdecl PM_StepSlideMove(pmove_t *pm, pml_t *pml, int32_t gravity)
                                     iDeltaa = 4;
                                 bobmove = (double)iDeltaa * 1.25 + 7.0;
                                 old = ps->bobCycle;
-                                ps->bobCycle = (unsigned __int8)(int)((double)old + bobmove);
+                                ps->bobCycle = (unsigned __int8)SnapFloatToInt((double)old + bobmove);
                                 PM_FootstepEvent(pm, pml, old, ps->bobCycle, 1);
                             }
                         }

@@ -9,7 +9,7 @@
 #include <gfx_d3d/r_gfx.h>
 
 #define FX_MARK_FREE -1
-
+#define FX_MARKS_LIMIT 512 // 0x200
 #define FX_EFFECT_LIMIT 1024
 
 enum $FFE723C3A54D7F6DDF86A219D7944B2F : int32_t

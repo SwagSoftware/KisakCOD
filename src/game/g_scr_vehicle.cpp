@@ -546,7 +546,7 @@ void __cdecl Scr_Vehicle_Think(gentity_s *pSelf)
     VEH_TouchEntities(pSelf);
     veh->turret.barrelBlocked = 0;
     VEH_UpdateAim(pSelf);
-    pSelf->s.time2 = (int)(info->suspensionTravel * 1000.0f);
+    pSelf->s.time2 = SnapFloatToInt(info->suspensionTravel * 1000.0f);
     pSelf->nextthink = level.time + 50;
 }
 

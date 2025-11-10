@@ -259,11 +259,11 @@ void __cdecl FX_Beam_GenerateVerts(FxGenerateVertsCmd *cmd)
                 wiggleYs.v[3] = scaledWiggle.v[1];
                 for (dim = 0; dim != 4; ++dim)
                 {
-                    v8 = (int)((double)(endColor.array[dim] - beginColor.array[dim]) * alpha + (double)beginColor.array[dim]);
+                    v8 = SnapFloatToInt((double)(endColor.array[dim] - beginColor.array[dim]) * alpha + (double)beginColor.array[dim]);
                     if (v8 >= 0)
                     {
                         if (v8 <= 255)
-                            v7 = (int)((double)(endColor.array[dim] - beginColor.array[dim]) * alpha + (double)beginColor.array[dim]);
+                            v7 = SnapFloatToInt((double)(endColor.array[dim] - beginColor.array[dim]) * alpha + (double)beginColor.array[dim]);
                         else
                             v7 = -1;
                     }

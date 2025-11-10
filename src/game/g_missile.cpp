@@ -266,8 +266,10 @@ void __cdecl G_ExplodeMissile(gentity_s *ent)
     }
     else
     {
-
         BG_EvaluateTrajectory(&ent->s.lerp.pos, level.time, origin);
+        origin[0] = SnapFloat(origin[0]);
+        origin[1] = SnapFloat(origin[1]);
+        origin[2] = SnapFloat(origin[2]);
         G_SetOrigin(ent, origin);
 
         doEvent = 1;
@@ -366,9 +368,9 @@ void __cdecl G_ExplodeMissile(gentity_s *ent)
 #ifdef KISAK_MP
             if (weapDef->projExplosion == WEAPPROJEXP_SMOKE && weapDef->projExplosionEffect)
             {
-                eventEnt->s.lerp.pos.trBase[0] = (float)(int)eventEnt->s.lerp.pos.trBase[0];
-                eventEnt->s.lerp.pos.trBase[1] = (float)(int)eventEnt->s.lerp.pos.trBase[1];
-                eventEnt->s.lerp.pos.trBase[2] = (float)(int)eventEnt->s.lerp.pos.trBase[2];
+                eventEnt->s.lerp.pos.trBase[0] = SnapFloat(eventEnt->s.lerp.pos.trBase[0]);
+                eventEnt->s.lerp.pos.trBase[1] = SnapFloat(eventEnt->s.lerp.pos.trBase[1]);
+                eventEnt->s.lerp.pos.trBase[2] = SnapFloat(eventEnt->s.lerp.pos.trBase[2]);
                 G_SetOrigin(eventEnt, eventEnt->s.lerp.pos.trBase);
                 eventEnt->s.lerp.eFlags |= 0x10000u;
                 eventEnt->s.lerp.u.customExplode.startTime = level.time;
@@ -1281,7 +1283,7 @@ bool __cdecl CheckCrumpleMissile(gentity_s *ent, trace_t *trace)
         return 0;
     if (trace->surfaceFlags == 0x700000)
         return 1;
-    hitTime = level.previousTime + (int)((double)(level.time - level.previousTime) * trace->fraction);
+    hitTime = level.previousTime + SnapFloatToInt((double)(level.time - level.previousTime) * trace->fraction);
     BG_EvaluateTrajectoryDelta(&ent->s.lerp.pos, hitTime, velocity);
     speed = Vec3Length(velocity);
     MIN_CRUMPLE_SPEED = 500.0f;
@@ -1316,7 +1318,7 @@ bool __cdecl BounceMissile(gentity_s *ent, trace_t *trace)
         MyAssertHandler(".\\game\\g_missile.cpp", 310, 0, "%s", "weapDef");
     contents = SV_PointContents(ent->r.currentOrigin, -1, 32);
     surfType = (trace->surfaceFlags & 0x1F00000) >> 20;
-    hitTime = level.previousTime + (int)((double)(level.time - level.previousTime) * trace->fraction);
+    hitTime = level.previousTime + SnapFloatToInt((double)(level.time - level.previousTime) * trace->fraction);
     BG_EvaluateTrajectoryDelta(&ent->s.lerp.pos, hitTime, velocity);
     dot = Vec3Dot(velocity, trace->normal);
     scale = dot * -2.0;
@@ -1437,7 +1439,7 @@ void __cdecl MissileLandAngles(gentity_s *ent, trace_t *trace, float *vAngles, i
     float fAngleDelta; // [esp+60h] [ebp-4h]
 
     fAdjustPitchDiff = 80.0f;
-    hitTime = level.previousTime + (int)((float)(level.time - level.previousTime) * trace->fraction);
+    hitTime = level.previousTime + SnapFloatToInt((float)(level.time - level.previousTime) * trace->fraction);
     BG_EvaluateTrajectory(&ent->s.lerp.apos, hitTime, vAngles);
     if (trace->normal[2] <= 0.1000000014901161f)
     {
@@ -1512,7 +1514,7 @@ void __cdecl MissileLandAnglesFlat(gentity_s *ent, trace_t *trace, float *angles
         MyAssertHandler(".\\game\\g_missile.cpp", 182, 0, "%s", "trace");
     BG_EvaluateTrajectory(
         &ent->s.lerp.apos,
-        level.previousTime + (int)((double)(level.time - level.previousTime) * trace->fraction),
+        level.previousTime + SnapFloatToInt((double)(level.time - level.previousTime) * trace->fraction),
         angles);
     NearestPitchAndYawOnPlane(angles, trace->normal, angles);
     if (angles[2] != 0.0f)
@@ -1538,7 +1540,7 @@ void __cdecl MissileLandAnglesFlatMaintainingDirection(gentity_s *ent, trace_t *
         MyAssertHandler(".\\game\\g_missile.cpp", 208, 0, "%s", "trace");
     BG_EvaluateTrajectory(
         &ent->s.lerp.apos,
-        level.previousTime + (int)((double)(level.time - level.previousTime) * trace->fraction),
+        level.previousTime + SnapFloatToInt((double)(level.time - level.previousTime) * trace->fraction),
         angles);
     *angles = PitchForYawOnNormal(angles[1], trace->normal);
     angles[2] = 0.0f;
@@ -1727,7 +1729,7 @@ void __cdecl RunMissile_Destabilize(gentity_s *missile)
     if ((missile->flags & 0x20000) != 0)
         MyAssertHandler(".\\game\\g_missile.cpp", 1337, 0, "%s", "!(missile->flags & FL_STABLE_MISSILES)");
     weaponDef = BG_GetWeaponDef(missile->s.weapon);
-    if (missile->s.lerp.pos.trTime + (int)missile->mover.decelTime >= level.time)
+    if (missile->s.lerp.pos.trTime + SnapFloatToInt(missile->mover.decelTime) >= level.time)
     {
         if ((missile->flags & 0x10000) == 0)
             return;
@@ -2707,9 +2709,9 @@ void __cdecl G_InitGrenadeMovement(gentity_s *grenade, const float *start, const
             ".pos.trDelta)[2])");
     }
     vectoangles(dir, grenade->r.currentAngles);
-    grenade->s.lerp.pos.trDelta[0] = (float)(int)grenade->s.lerp.pos.trDelta[0];
-    grenade->s.lerp.pos.trDelta[1] = (float)(int)grenade->s.lerp.pos.trDelta[1];
-    grenade->s.lerp.pos.trDelta[2] = (float)(int)grenade->s.lerp.pos.trDelta[2];
+    grenade->s.lerp.pos.trDelta[0] = SnapFloat(grenade->s.lerp.pos.trDelta[0]);
+    grenade->s.lerp.pos.trDelta[1] = SnapFloat(grenade->s.lerp.pos.trDelta[1]);
+    grenade->s.lerp.pos.trDelta[2] = SnapFloat(grenade->s.lerp.pos.trDelta[2]);
     if (rotate)
     {
         grenade->s.lerp.apos.trType = TR_LINEAR;
@@ -2789,8 +2791,8 @@ int32_t __cdecl CalcMissileNoDrawTime(float speed)
 {
     int32_t v3; // [esp+4h] [ebp-8h]
 
-    if ((int)(speed * -35.0f / 600.0f + 85.0f) < 50)
-        v3 = (int)(speed * -35.0f / 600.0f + 85.0f);
+    if (SnapFloatToInt(speed * -35.0f / 600.0f + 85.0f) < 50)
+        v3 = SnapFloatToInt(speed * -35.0f / 600.0f + 85.0f);
     else
         v3 = 50;
     if (v3 > 20)
@@ -2964,9 +2966,9 @@ gentity_s *__cdecl G_FireRocket(
             "%s",
             "!IS_NAN((bolt->s.lerp.pos.trDelta)[0]) && !IS_NAN((bolt->s.lerp.pos.trDelta)[1]) && !IS_NAN((bolt->s.lerp.pos.trDelta)[2])");
     }
-    bolt->s.lerp.pos.trDelta[0] = (float)(int)bolt->s.lerp.pos.trDelta[0];
-    bolt->s.lerp.pos.trDelta[1] = (float)(int)bolt->s.lerp.pos.trDelta[1];
-    bolt->s.lerp.pos.trDelta[2] = (float)(int)bolt->s.lerp.pos.trDelta[2];
+    bolt->s.lerp.pos.trDelta[0] = SnapFloat(bolt->s.lerp.pos.trDelta[0]);
+    bolt->s.lerp.pos.trDelta[1] = SnapFloat(bolt->s.lerp.pos.trDelta[1]);
+    bolt->s.lerp.pos.trDelta[2] = SnapFloat(bolt->s.lerp.pos.trDelta[2]);
     currentOrigin = bolt->r.currentOrigin;
     bolt->r.currentOrigin[0] = *start;
     currentOrigin[1] = start[1];
@@ -3029,7 +3031,7 @@ void __cdecl InitRocketTimer(gentity_s *bolt, WeaponDef *weapDef)
         MyAssertHandler(".\\game\\g_missile.cpp", 2684, 0, "%s", "bolt");
     if (!weapDef)
         MyAssertHandler(".\\game\\g_missile.cpp", 2685, 0, "%s", "weapDef");
-    bolt->nextthink = level.time + (int)(weapDef->projLifetime * 1000.0);
+    bolt->nextthink = level.time + SnapFloatToInt(weapDef->projLifetime * 1000.0);
     if (bolt->nextthink > level.time + 60000)
         bolt->nextthink = level.time + 60000;
 }

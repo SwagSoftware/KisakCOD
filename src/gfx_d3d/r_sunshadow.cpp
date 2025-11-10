@@ -420,8 +420,8 @@ void __cdecl R_SetupSunShadowMapProjection(
     sampleSizeFar = sampleSizeNear * rg.sunShadowPartitionRatio; // rg.sunShadowPartitionRatio Typically 4.0f
 
     scale = sampleSizeFar * rg.sunShadowmapScaleNum;
-    snappedViewOrgInTicks[0] = (int)floor(viewOrgInSunProj[0] / scale);
-    snappedViewOrgInTicks[1] = (int)floor(viewOrgInSunProj[1] / scale);
+    snappedViewOrgInTicks[0] = SnapFloatToInt(floor(viewOrgInSunProj[0] / scale));
+    snappedViewOrgInTicks[1] = SnapFloatToInt(floor(viewOrgInSunProj[1] / scale));
     snappedViewOrgInSunProj[0] = (float)snappedViewOrgInTicks[0] * scale;
     snappedViewOrgInSunProj[1] = (float)snappedViewOrgInTicks[1] * scale;
     scaleToFitUsable = 1023.0f / maxSizeInSunProj;
@@ -450,8 +450,8 @@ void __cdecl R_SetupSunShadowMapProjection(
     partitionFar = &sunShadow->partition[1];
     
     // Setup the Near Viewport, this is used for D3D ScissorRect
-    partitionNear->viewport.width = (int)ceilf(1024.0f / maxSizeInSunProj * sizeInSunProj[0] - EQUAL_EPSILON);
-    partitionNear->viewport.height = (int)ceilf(1024.0f / maxSizeInSunProj * sizeInSunProj[1] - EQUAL_EPSILON);
+    partitionNear->viewport.width =  SnapFloatToInt(ceilf(1024.0f / maxSizeInSunProj * sizeInSunProj[0] - EQUAL_EPSILON));
+    partitionNear->viewport.height = SnapFloatToInt(ceilf(1024.0f / maxSizeInSunProj * sizeInSunProj[1] - EQUAL_EPSILON));
 
     // Align the viewports depending on whether the viewOrgInSunProj(origin in Sun 2D space) is on the left/right and top/bottom
     if (viewOrgInSunProj[0] < (minsInSunProj[0][0] + maxsInSunProj[0][0]) * 0.5f)
@@ -467,8 +467,8 @@ void __cdecl R_SetupSunShadowMapProjection(
             viewOrgInPixels[1][0] = (float)(farShadowBegin + 1) + (viewOrgInSunProj[0] - minsInSunProj[0][0]) * scaleToFitUsable * farShadowSizeRatio;
             float v12 = floor(scaleToFitUsable * (minsInSunProj[1][0] - minsInSunProj[0][0]) + (float)farShadowBegin);
 
-            if ((int)farShadowBegin < (int)v12)
-                partitionFar->viewport.x = (int)v12;
+            if ((int)farShadowBegin < SnapFloatToInt(v12))
+                partitionFar->viewport.x = SnapFloatToInt(v12);
             else
                 partitionFar->viewport.x = farShadowBegin;
         }
@@ -490,8 +490,8 @@ void __cdecl R_SetupSunShadowMapProjection(
 
             float v14 = ceil((float)farShadowEnd - scaleToFitUsable * (maxsInSunProj[0][0] - maxsInSunProj[1][0]));
 
-            if ((int)((int)v14 - farShadowBegin) < (int)rg.sunShadowSize)
-                sunShadowSize = (int)v14 - farShadowBegin;
+            if ((int)(SnapFloatToInt(v14) - farShadowBegin) < (int)rg.sunShadowSize)
+                sunShadowSize = SnapFloatToInt(v14) - farShadowBegin;
             else
                 sunShadowSize = rg.sunShadowSize;
             partitionFar->viewport.width = sunShadowSize;
@@ -514,8 +514,8 @@ void __cdecl R_SetupSunShadowMapProjection(
             viewOrgInPixels[1][1] = (float)(farShadowBegin + 1)
                 + (maxsInSunProj[0][1] - viewOrgInSunProj[1]) * scaleToFitUsable * farShadowSizeRatio;
             float v8 = floor(scaleToFitUsable * (maxsInSunProj[0][1] - maxsInSunProj[1][1]) + (float)farShadowBegin);
-            if ((int)farShadowBegin < (int)v8)
-                partitionFar->viewport.y = (int)v8;
+            if ((int)farShadowBegin < SnapFloatToInt(v8))
+                partitionFar->viewport.y = SnapFloatToInt(v8);
             else
                 partitionFar->viewport.y = farShadowBegin;
         }
@@ -535,8 +535,8 @@ void __cdecl R_SetupSunShadowMapProjection(
             viewOrgInPixels[1][1] = (double)(farShadowEnd - 1)
                 - (viewOrgInSunProj[1] - minsInSunProj[0][1]) * scaleToFitUsable * farShadowSizeRatio;
             float v10 = ceil((float)farShadowEnd - scaleToFitUsable * (minsInSunProj[1][1] - minsInSunProj[0][1]));
-            if ((int)((int)v10 - farShadowBegin) < (int)rg.sunShadowSize)
-                partitionFar->viewport.height = (int)v10 - farShadowBegin;
+            if ((int)(SnapFloatToInt(v10) - farShadowBegin) < (int)rg.sunShadowSize)
+                partitionFar->viewport.height = SnapFloatToInt(v10) - farShadowBegin;
             else
                 partitionFar->viewport.height = rg.sunShadowSize;
         }

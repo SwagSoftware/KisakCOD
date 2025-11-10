@@ -3501,7 +3501,7 @@ void __cdecl DebugDrawWorldSound3D(
     if (!offsets[chaninfo->sndEnt.field.entIndex])
         CL_AddDebugStar(org, starColor, 1, 0);
 LABEL_35:
-    offsets[chaninfo->sndEnt.field.entIndex] = (int)(org[2] - fontsize * 1.25 * 12.0 - origZ);
+    offsets[chaninfo->sndEnt.field.entIndex] = SnapFloatToInt(org[2] - fontsize * 1.25 * 12.0 - origZ);
 }
 
 double __cdecl FontSizeForDistance(float distance)
@@ -4679,7 +4679,7 @@ int __cdecl SND_GetSoundOverlay3D(snd_overlay_info_t *info, int maxcount)
             a = &g_snd.listeners[SND_GetListenerIndexNearestToOrigin(org)];
             Vec3Sub(a->orient.origin, org, diff);
             dist = Vec3Length(diff);
-            info[i].dist = (int)dist;
+            info[i].dist = SnapFloatToInt(dist);
         }
         else
         {
@@ -4730,7 +4730,7 @@ int __cdecl SND_GetSoundOverlayStream(snd_overlay_info_t *info, int maxcount)
                 a = &g_snd.listeners[SND_GetListenerIndexNearestToOrigin(org)];
                 Vec3Sub(a->orient.origin, org, diff);
                 dist = Vec3Length(diff);
-                info[i].dist = (int)dist;
+                info[i].dist = SnapFloatToInt(dist);
             }
             else
             {

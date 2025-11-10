@@ -1116,7 +1116,7 @@ void __cdecl DevGui_DrawGraph(const DevMenuItem *menu, int32_t localClientNum)
         3 * rowHeight + 16,
         devgui_bevelShade->current.value,
         (const uint8_t *)&devgui_colorBgnd->current);
-    graphBottomY = (int)((double)x_4 * 0.949999988079071);
+    graphBottomY = SnapFloatToInt((double)x_4 * 0.949999988079071);
     DevGui_DrawBox(x, graphBottomY, rowWidth + 8, 2, (const uint8_t *)&devgui_colorBgndSel->current);
     x += 4;
     x_4 += 6;
@@ -1126,8 +1126,8 @@ void __cdecl DevGui_DrawGraph(const DevMenuItem *menu, int32_t localClientNum)
         v5 = graph->knots[knotIndex];
         knot[0] = *v5;
         knot[1] = v5[1];
-        knotX = x + (int)((double)width * knot[0]);
-        knotY = graphBottomY - (int)((double)(graphBottomY - 48) * knot[1]);
+        knotX = x + SnapFloatToInt((double)width * knot[0]);
+        knotY = graphBottomY - SnapFloatToInt((double)(graphBottomY - 48) * knot[1]);
         if (knotIndex == graph->selectedKnot)
         {
             if (devguiGlob.editingKnot)
@@ -1927,7 +1927,7 @@ float __cdecl DevGui_PickFloatScrollStep(float min, float max)
     float roundedStep; // [esp+40h] [ebp-4h]
 
     range = max - min;
-    if (max == (float)(int)(max) && min == (float)(int)(min))
+    if (max == SnapFloat(max) && min == SnapFloat(min))
     {
         for (step = 1.0f; range > step * 100.0f; step = step + step)
             ;
@@ -1937,13 +1937,13 @@ float __cdecl DevGui_PickFloatScrollStep(float min, float max)
     else
     {
         step = range * 0.009999999776482582f;
-        roundedStep = (float)(int)(step);
+        roundedStep = SnapFloat(step);
         if (roundedStep != 0.0f)
         {
             v4 = roundedStep - step;
             v3 = I_fabs(v4);
             if (v3 < 0.1f)
-                return (float)(int)(step);
+                return SnapFloat(step);
         }
     }
     return step;

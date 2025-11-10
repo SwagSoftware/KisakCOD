@@ -2250,7 +2250,7 @@ int __cdecl Item_ListBox_Viewmax(itemDef_s *item)
         MyAssertHandler(".\\ui\\ui_shared.cpp", 2324, 0, "%s\n\t(totalSize) = %g", "(totalSize >= 0)", totalSize);
     if (unitSize < 0.0)
         MyAssertHandler(".\\ui\\ui_shared.cpp", 2325, 0, "%s\n\t(unitSize) = %g", "(unitSize >= 0)", unitSize);
-    return (int)(totalSize / unitSize);
+    return SnapFloatToInt(totalSize / unitSize);
 }
 
 void __cdecl Item_ListBox_SetCursorPos(int localClientNum, itemDef_s *item, int viewmax, int newCursorPos)
@@ -3018,7 +3018,7 @@ void __cdecl Scroll_ListBox_ThumbFunc(UiContext *dc, void *p)
                 r = *(float *)(v3 + 4) + 16.0 + 1.0;
                 r_8 = *(float *)(v3 + 12) - 32.0 - 2.0;
                 max = Item_ListBox_MaxScroll(dc->localClientNum, *((itemDef_s **)p + 6));
-                pos = (int)((dc->cursor.x - r - 8.0) * (double)max / (r_8 - 16.0));
+                pos = SnapFloatToInt((dc->cursor.x - r - 8.0) * (double)max / (r_8 - 16.0));
                 if (pos >= 0)
                 {
                     if (pos > max)
@@ -3039,7 +3039,7 @@ void __cdecl Scroll_ListBox_ThumbFunc(UiContext *dc, void *p)
                 r_4 = *(float *)(v2 + 8) + 16.0 + 1.0;
                 r_12 = *(float *)(v2 + 16) - 32.0 - 2.0;
                 maxa = Item_ListBox_MaxScroll(dc->localClientNum, *((itemDef_s **)p + 6));
-                posa = (int)((dc->cursor.y - r_4 - 8.0) * (double)maxa / (r_12 - 16.0));
+                posa = SnapFloatToInt((dc->cursor.y - r_4 - 8.0) * (double)maxa / (r_12 - 16.0));
                 if (posa >= 0)
                 {
                     if (posa > maxa)
@@ -4293,9 +4293,9 @@ void __cdecl DrawWrappedText(
     {
         v17 = textWidth / rect->w;
         v16 = ceil(v17);
-        v15 = textWidth / (double)(int)v16;
+        v15 = textWidth / SnapFloat(v16);
         v14 = ceil(v15);
-        targetLineWidth = UI_PickWordWrapLineWidth(text, 1024, font, normalizedScale, (int)v16, (int)v14, (int)rect->w);
+        targetLineWidth = UI_PickWordWrapLineWidth(text, 1024, font, normalizedScale, SnapFloatToInt(v16), SnapFloatToInt(v14), SnapFloatToInt(rect->w));
     }
     p = text;
     while (*p)
@@ -4774,7 +4774,7 @@ void __cdecl Window_Paint(
                         localClientNum,
                         1);
                 flags = w->dynamicFlags[localClientNum];
-                Fade(&flags, &w->backColor[3], fadeClamp, &w->nextTime, (int)fadeCycle, 1, fadeAmount, fadeInAmount, dc);
+                Fade(&flags, &w->backColor[3], fadeClamp, &w->nextTime, SnapFloatToInt(fadeCycle), 1, fadeAmount, fadeInAmount, dc);
                 Window_SetDynamicFlags(dc->localClientNum, w, flags);
                 UI_DrawHandlePic(
                     scrPlace,
@@ -5921,7 +5921,7 @@ void __cdecl Item_ListBox_Paint(UiContext *dc, itemDef_s *item)
                     size = size - listPtr->elementWidth;
                     if (listPtr->elementWidth > (double)size)
                     {
-                        listPtr->drawPadding = (int)size;
+                        listPtr->drawPadding = SnapFloatToInt(size);
                         return;
                     }
                     xa = xa + listPtr->elementWidth;
@@ -6030,7 +6030,7 @@ void __cdecl Item_ListBox_Paint(UiContext *dc, itemDef_s *item)
                     sizea = sizea - listPtr->elementHeight;
                     if (listPtr->elementHeight > (double)sizea)
                     {
-                        listPtr->drawPadding = (int)(listPtr->elementHeight - sizea);
+                        listPtr->drawPadding = SnapFloatToInt(listPtr->elementHeight - sizea);
                         return;
                     }
                     yc = yc + listPtr->elementHeight;
@@ -6082,7 +6082,7 @@ void __cdecl Item_ListBox_Paint(UiContext *dc, itemDef_s *item)
                     sizea = sizea - listPtr->elementHeight;
                     if (listPtr->elementHeight > (double)sizea)
                     {
-                        listPtr->drawPadding = (int)(listPtr->elementHeight - sizea);
+                        listPtr->drawPadding = SnapFloatToInt(listPtr->elementHeight - sizea);
                         return;
                     }
                     ++listPtr->endPos[dc->localClientNum];
@@ -6524,8 +6524,8 @@ void __cdecl Item_GameMsgWindow_Paint(UiContext *dc, itemDef_s *item)
         Con_DrawGameMessageWindow(
             dc->localClientNum,
             item->gameMsgWindowIndex,
-            (int)item->window.rect.x,
-            (int)item->window.rect.y,
+            SnapFloatToInt(item->window.rect.x),
+            SnapFloatToInt(item->window.rect.y),
             item->window.rect.horzAlign,
             item->window.rect.vertAlign,
             font,

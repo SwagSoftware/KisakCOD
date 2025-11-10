@@ -77,17 +77,17 @@ void __cdecl SV_LinkEntity(gentity_s *gEnt)
     }
     else if ((gEnt->r.contents & 0x2000001) != 0)
     {
-        i = (int)gEnt->r.maxs[0];
+        i = SnapFloatToInt(gEnt->r.maxs[0]);
         if (i < 1)
             i = 1;
         if (i > 255)
             i = 255;
-        j = (int)(1.0 - gEnt->r.mins[2]);
+        j = SnapFloatToInt(1.0 - gEnt->r.mins[2]);
         if (j < 1)
             j = 1;
         if (j > 255)
             j = 255;
-        k = (int)(gEnt->r.maxs[2] + 32.0);
+        k = SnapFloatToInt(gEnt->r.maxs[2] + 32.0);
         if (k < 1)
             k = 1;
         if (k > 255)

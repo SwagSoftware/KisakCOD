@@ -1867,7 +1867,7 @@ void __cdecl CG_PrimaryLight(int32_t localClientNum, centity_s *cent)
         - cent->currentState.u.primaryLight.cosHalfFovInner)
         * cgameGlob->frameInterpolation
         + cent->currentState.u.primaryLight.cosHalfFovInner;
-    light->exponent = (int)((double)(cent->nextState.lerp.u.primaryLight.colorAndExp[3]
+    light->exponent = SnapFloatToInt((double)(cent->nextState.lerp.u.primaryLight.colorAndExp[3]
         - cent->currentState.u.primaryLight.colorAndExp[3])
         * cgameGlob->frameInterpolation)
         + cent->currentState.u.primaryLight.colorAndExp[3];

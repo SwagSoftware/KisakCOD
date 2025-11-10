@@ -1386,6 +1386,7 @@ void __cdecl CG_ClampPrimaryLightDir(GfxLight *light, const ComPrimaryLight *ref
     }
 }
 
+// KISAKTODO: sync with mp version
 void CG_PrimaryLight(int localClientNum, centity_s *cent) {
     iassert(cent->nextState.eType == ET_PRIMARY_LIGHT);
     iassert(cent->nextState.index.item != PRIMARY_LIGHT_NONE);

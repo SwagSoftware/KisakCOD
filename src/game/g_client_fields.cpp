@@ -371,7 +371,7 @@ void __cdecl ClientScr_SetArchiveTime(gclient_s *pSelf, const client_fields_s *p
 {
     if (!pSelf)
         MyAssertHandler(".\\game\\g_client_fields.cpp", 394, 0, "%s", "pSelf");
-    pSelf->sess.archiveTime = (int)(Scr_GetFloat(0) * 1000.0);
+    pSelf->sess.archiveTime = SnapFloatToInt(Scr_GetFloat(0) * 1000.0);
 }
 
 void __cdecl ClientScr_GetArchiveTime(gclient_s *pSelf, const client_fields_s *pField)

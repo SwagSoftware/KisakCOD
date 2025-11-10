@@ -377,86 +377,12 @@ void R_InitWorkerThreads()
     }
 }
 
-int R_InitWorkerCmds()
+void R_InitWorkerCmdsPos()
 {
-    g_workerCmds[0].buf = (unsigned __int8 *)g_UpdateFxSpotLightBuf;
-    g_workerCmds[0].bufSize = 12;
-    g_workerCmds[0].dataSize = 12;
-
-    g_workerCmds[1].buf = (unsigned __int8 *)g_UpdateFxNonDependentBuf;
-    g_workerCmds[1].bufSize = 12;
-    g_workerCmds[1].dataSize = 12;
-
-    g_workerCmds[2].buf = (unsigned __int8 *)g_UpdateFxRemainingBuf;
-    g_workerCmds[2].bufSize = 12;
-    g_workerCmds[2].dataSize = 12;
-
-    g_workerCmds[3].buf = (unsigned __int8 *)g_dpvsCellStaticBuf;
-    g_workerCmds[3].bufSize = 3072;
-    g_workerCmds[3].dataSize = 12;
-
-    g_workerCmds[4].buf = (unsigned __int8 *)g_dpvsCellSceneEntBuf;
-    g_workerCmds[4].bufSize = 6144;
-    g_workerCmds[4].dataSize = 12;
-
-    g_workerCmds[5].buf = (unsigned __int8 *)g_dpvsCellDynModelBuf;
-    g_workerCmds[5].bufSize = 6144;
-    g_workerCmds[5].dataSize = 12;
-
-    g_workerCmds[6].buf = (unsigned __int8 *)g_dpvsCellDynBrushBuf;
-    g_workerCmds[6].bufSize = 6144;
-    g_workerCmds[6].dataSize = 12;
-
-    g_workerCmds[7].buf = (unsigned __int8 *)g_dpvsEntityBuf;
-    g_workerCmds[7].bufSize = 0x8000;
-    g_workerCmds[7].dataSize = 16;
-
-    g_workerCmds[8].buf = (unsigned __int8 *)g_addSceneEntBuf;
-    g_workerCmds[8].bufSize = 4;
-    g_workerCmds[8].dataSize = 4;
-
-    g_workerCmds[9].buf = (unsigned __int8 *)g_spotShadowEntBuf;
-    g_workerCmds[9].bufSize = 2048;
-    g_workerCmds[9].dataSize = 8;
-
-    g_workerCmds[10].buf = (unsigned __int8 *)g_shadowCookieBuf;
-    g_workerCmds[10].bufSize = 16;
-    g_workerCmds[10].dataSize = 16;
-
-    g_workerCmds[11].buf = (unsigned __int8 *)g_GfxEntityBoundsBuf;
-    g_workerCmds[11].bufSize = 1024;
-    g_workerCmds[11].dataSize = 4;
-
-    g_workerCmds[12].buf = (unsigned __int8 *)g_SkinGfxEntityBuf;
-    g_workerCmds[12].bufSize = 4096;
-    g_workerCmds[12].dataSize = 4;
-
-    g_workerCmds[13].buf = (unsigned __int8 *)g_GenerateFxVertsBuf;
-    g_workerCmds[13].bufSize = 136;
-    g_workerCmds[13].dataSize = 68;
-
-    g_workerCmds[14].buf = (unsigned __int8 *)g_GenerateMarkVertsBuf;
-    g_workerCmds[14].bufSize = 12;
-    g_workerCmds[14].dataSize = 12;
-
-    g_workerCmds[15].buf = (unsigned __int8 *)g_skinCachedStaticModelBuf;
-    g_workerCmds[15].bufSize = 2048;
-    g_workerCmds[15].dataSize = 4;
-
-    g_workerCmds[16].buf = (unsigned __int8 *)g_SkinXModelBuf;
-    g_workerCmds[16].bufSize = 28672;
-    g_workerCmds[16].dataSize = 28;
-
-    return R_InitWorkerCmdsPos();
-}
-
-int R_InitWorkerCmdsPos()
-{
-    int result; // eax
     WorkerCmds *workerCmds; // [esp+4h] [ebp-8h]
     int type; // [esp+8h] [ebp-4h]
 
-    for (type = 0; type < 17; ++type)
+    for (type = 0; type < WRKCMD_COUNT; ++type)
     {
         workerCmds = &g_workerCmds[type];
         workerCmds->startPos = 0;
@@ -464,19 +390,83 @@ int R_InitWorkerCmdsPos()
         workerCmds->syncedEndPos = 0;
         workerCmds->inSize = 0;
         workerCmds->outSize = 0;
-        iassert( workerCmds->dataSize );
+        iassert(workerCmds->dataSize);
         workerCmds->bufCount = workerCmds->bufSize / workerCmds->dataSize;
-        if (workerCmds->dataSize > 0xC0)
-            MyAssertHandler(
-                ".\\r_workercmds.cpp",
-                369,
-                0,
-                "%s\n\t(workerCmds->dataSize) = %i",
-                "(workerCmds->dataSize <= 192)",
-                workerCmds->dataSize);
-        result = type + 1;
+        iassert(workerCmds->dataSize <= 192);
     }
-    return result;
+}
+
+void R_InitWorkerCmds()
+{
+    g_workerCmds[WRKCMD_UPDATE_FX_SPOT_LIGHT].buf = (unsigned __int8 *)g_UpdateFxSpotLightBuf;
+    g_workerCmds[WRKCMD_UPDATE_FX_SPOT_LIGHT].bufSize = 12;
+    g_workerCmds[WRKCMD_UPDATE_FX_SPOT_LIGHT].dataSize = 12;
+
+    g_workerCmds[WRKCMD_UPDATE_FX_NON_DEPENDENT].buf = (unsigned __int8 *)g_UpdateFxNonDependentBuf;
+    g_workerCmds[WRKCMD_UPDATE_FX_NON_DEPENDENT].bufSize = 12;
+    g_workerCmds[WRKCMD_UPDATE_FX_NON_DEPENDENT].dataSize = 12;
+
+    g_workerCmds[WRKCMD_UPDATE_FX_REMAINING].buf = (unsigned __int8 *)g_UpdateFxRemainingBuf;
+    g_workerCmds[WRKCMD_UPDATE_FX_REMAINING].bufSize = 12;
+    g_workerCmds[WRKCMD_UPDATE_FX_REMAINING].dataSize = 12;
+
+    g_workerCmds[WRKCMD_DPVS_CELL_STATIC].buf = (unsigned __int8 *)g_dpvsCellStaticBuf;
+    g_workerCmds[WRKCMD_DPVS_CELL_STATIC].bufSize = 3072;
+    g_workerCmds[WRKCMD_DPVS_CELL_STATIC].dataSize = 12;
+
+    g_workerCmds[WRKCMD_DPVS_CELL_SCENE_ENT].buf = (unsigned __int8 *)g_dpvsCellSceneEntBuf;
+    g_workerCmds[WRKCMD_DPVS_CELL_SCENE_ENT].bufSize = 6144;
+    g_workerCmds[WRKCMD_DPVS_CELL_SCENE_ENT].dataSize = 12;
+
+    g_workerCmds[WRKCMD_DPVS_CELL_DYN_MODEL].buf = (unsigned __int8 *)g_dpvsCellDynModelBuf;
+    g_workerCmds[WRKCMD_DPVS_CELL_DYN_MODEL].bufSize = 6144;
+    g_workerCmds[WRKCMD_DPVS_CELL_DYN_MODEL].dataSize = 12;
+
+    g_workerCmds[WRKCMD_DPVS_CELL_DYN_BRUSH].buf = (unsigned __int8 *)g_dpvsCellDynBrushBuf;
+    g_workerCmds[WRKCMD_DPVS_CELL_DYN_BRUSH].bufSize = 6144;
+    g_workerCmds[WRKCMD_DPVS_CELL_DYN_BRUSH].dataSize = 12;
+
+    g_workerCmds[WRKCMD_DPVS_ENTITY].buf = (unsigned __int8 *)g_dpvsEntityBuf;
+    g_workerCmds[WRKCMD_DPVS_ENTITY].bufSize = 0x8000;
+    g_workerCmds[WRKCMD_DPVS_ENTITY].dataSize = 16;
+
+    g_workerCmds[WRKCMD_ADD_SCENE_ENT].buf = (unsigned __int8 *)g_addSceneEntBuf;
+    g_workerCmds[WRKCMD_ADD_SCENE_ENT].bufSize = 4;
+    g_workerCmds[WRKCMD_ADD_SCENE_ENT].dataSize = 4;
+
+    g_workerCmds[WRKCMD_SPOT_SHADOW_ENT].buf = (unsigned __int8 *)g_spotShadowEntBuf;
+    g_workerCmds[WRKCMD_SPOT_SHADOW_ENT].bufSize = 2048;
+    g_workerCmds[WRKCMD_SPOT_SHADOW_ENT].dataSize = 8;
+
+    g_workerCmds[WRKCMD_SHADOW_COOKIE].buf = (unsigned __int8 *)g_shadowCookieBuf;
+    g_workerCmds[WRKCMD_SHADOW_COOKIE].bufSize = 16;
+    g_workerCmds[WRKCMD_SHADOW_COOKIE].dataSize = 16;
+
+    g_workerCmds[WRKCMD_BOUNDS_ENT_DELAYED].buf = (unsigned __int8 *)g_GfxEntityBoundsBuf;
+    g_workerCmds[WRKCMD_BOUNDS_ENT_DELAYED].bufSize = 1024;
+    g_workerCmds[WRKCMD_BOUNDS_ENT_DELAYED].dataSize = 4;
+
+    g_workerCmds[WRKCMD_SKIN_ENT_DELAYED].buf = (unsigned __int8 *)g_SkinGfxEntityBuf;
+    g_workerCmds[WRKCMD_SKIN_ENT_DELAYED].bufSize = 4096;
+    g_workerCmds[WRKCMD_SKIN_ENT_DELAYED].dataSize = 4;
+
+    g_workerCmds[WRKCMD_GENERATE_FX_VERTS].buf = (unsigned __int8 *)g_GenerateFxVertsBuf;
+    g_workerCmds[WRKCMD_GENERATE_FX_VERTS].bufSize = 136;
+    g_workerCmds[WRKCMD_GENERATE_FX_VERTS].dataSize = 68;
+
+    g_workerCmds[WRKCMD_GENERATE_MARK_VERTS].buf = (unsigned __int8 *)g_GenerateMarkVertsBuf;
+    g_workerCmds[WRKCMD_GENERATE_MARK_VERTS].bufSize = 12;
+    g_workerCmds[WRKCMD_GENERATE_MARK_VERTS].dataSize = 12;
+
+    g_workerCmds[WRKCMD_SKIN_CACHED_STATICMODEL].buf = (unsigned __int8 *)g_skinCachedStaticModelBuf;
+    g_workerCmds[WRKCMD_SKIN_CACHED_STATICMODEL].bufSize = 2048;
+    g_workerCmds[WRKCMD_SKIN_CACHED_STATICMODEL].dataSize = 4;
+
+    g_workerCmds[WRKCMD_SKIN_XMODEL].buf = (unsigned __int8 *)g_SkinXModelBuf;
+    g_workerCmds[WRKCMD_SKIN_XMODEL].bufSize = 28672;
+    g_workerCmds[WRKCMD_SKIN_XMODEL].dataSize = 28;
+
+    R_InitWorkerCmdsPos();
 }
 
 void __cdecl  R_WorkerThread()
@@ -603,7 +593,7 @@ int __cdecl R_FinishedWorkerCmds()
 {
     int type; // [esp+4h] [ebp-4h]
 
-    for (type = 0; type < 17; ++type)
+    for (type = 0; type < WRKCMD_COUNT; ++type)
     {
         if (g_workerCmds[type].inSize > 0)
             return 0;

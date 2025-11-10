@@ -7,6 +7,7 @@
 #include <xanim/dobj.h>
 #include <stdlib.h>
 #include "q_shared.h"
+#include <qcommon/qcommon.h>
 
 //Line 51773:  0006 : 0000bc58       float (*)[3] bytedirs        827bbc58     com_math.obj
 //Line 53450 : 0006 : 0291d360       int marker_com_math      850cd360     com_math.obj
@@ -2028,15 +2029,6 @@ int __cdecl IntersectPlanes(const float **plane, float *xyz)
 
 void __cdecl SnapPointToIntersectingPlanes(const float **planes, float *xyz, float snapGrid, float snapEpsilon)
 {
-    float v4; // [esp+0h] [ebp-68h]
-    float v5; // [esp+4h] [ebp-64h]
-    float v6; // [esp+Ch] [ebp-5Ch]
-    float v7; // [esp+10h] [ebp-58h]
-    float v9; // [esp+1Ch] [ebp-4Ch]
-    float v10; // [esp+20h] [ebp-48h]
-    float v11; // [esp+24h] [ebp-44h]
-    float v12; // [esp+28h] [ebp-40h]
-    float v13; // [esp+30h] [ebp-38h]
     float snapped[3]; // [esp+40h] [ebp-28h] BYREF
     float baseError; // [esp+4Ch] [ebp-1Ch]
     float maxBaseError; // [esp+50h] [ebp-18h]
@@ -2048,37 +2040,30 @@ void __cdecl SnapPointToIntersectingPlanes(const float **planes, float *xyz, flo
 
     for (axis = 0; axis < 3; ++axis)
     {
-        v13 = xyz[axis] / snapGrid;
-        rounded = (int)(v13) * snapGrid;
-        v12 = rounded - xyz[axis];
-        v9 = I_fabs(v12);
-        if (snapEpsilon <= v9)
+        rounded = SnapFloat(xyz[axis] / snapGrid) * snapGrid;
+        if (snapEpsilon <= I_fabs(rounded - xyz[axis]))
             snapped[axis] = xyz[axis];
         else
             snapped[axis] = rounded;
     }
-    if (*xyz != snapped[0] || xyz[1] != snapped[1] || xyz[2] != snapped[2])
+
+    if (xyz[0] != snapped[0] || xyz[1] != snapped[1] || xyz[2] != snapped[2])
     {
-        maxSnapError = 0.0;
+        maxSnapError = 0.0f;
         maxBaseError = snapEpsilon;
         for (planeIndex = 0; planeIndex < 3; ++planeIndex)
         {
-            v7 = planes[planeIndex][3];
-            v11 = Vec3Dot(planes[planeIndex], snapped) - v7;
-            v6 = I_fabs(v11);
-            snapError = v6;
-            if (v6 > maxSnapError)
+            snapError = I_fabs(Vec3Dot(planes[planeIndex], snapped) - planes[planeIndex][3]);
+            if (snapError > maxSnapError)
                 maxSnapError = snapError;
-            v5 = planes[planeIndex][3];
-            v10 = Vec3Dot(planes[planeIndex], xyz) - v5;
-            v4 = I_fabs(v10);
-            baseError = v4;
-            if (v4 > maxBaseError)
+
+            baseError = I_fabs(Vec3Dot(planes[planeIndex], xyz) - planes[planeIndex][3]);
+            if (baseError > maxBaseError)
                 maxBaseError = baseError;
         }
         if (maxBaseError > maxSnapError)
         {
-            *xyz = snapped[0];
+            xyz[0] = snapped[0];
             xyz[1] = snapped[1];
             xyz[2] = snapped[2];
         }

@@ -205,7 +205,7 @@ void __cdecl NetProf_UpdateStatistics(netProfileStream_t *pStream)
             if (iTimeSpan >= 1 && iNumPackets)
             {
                 if (iTotalBytes)
-                    pStream->iBytesPerSecond = (int)((double)iTotalBytes / ((double)iTimeSpan * EQUAL_EPSILON));
+                    pStream->iBytesPerSecond = SnapFloatToInt((double)iTotalBytes / ((double)iTimeSpan * EQUAL_EPSILON));
                 else
                     pStream->iBytesPerSecond = 0;
                 pStream->iLastBPSCalcTime = Sys_Milliseconds();
@@ -540,10 +540,10 @@ void __cdecl FakeLag_Frame()
     {
         integer = (double)fakelag_jitter->current.integer;
         v0 = flrand(0.0, 1.0) * integer;
-        Dvar_SetInt((dvar_s *)fakelag_currentjitter, (int)v0);
+        Dvar_SetInt((dvar_s *)fakelag_currentjitter, SnapFloatToInt(v0));
         v1 = fakelag_jitterinterval->current.integer + now;
         v2 = (double)(2 * fakelag_jitterinterval->current.integer);
-        nextChangeTime = (int)(flrand(0.0, 1.0) * v2) + v1;
+        nextChangeTime = SnapFloatToInt(flrand(0.0, 1.0) * v2) + v1;
     }
     FakeLag_ReceivePackets();
     FakeLag_SendLaggedPackets();

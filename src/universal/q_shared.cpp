@@ -1033,7 +1033,7 @@ bool __cdecl ParseConfigStringToStructCustomSize(
                     break;
                 case 7:
                     v15 = atof(src);
-                    *(unsigned int *)&pStruct[v20->iOffset] = (int)(v15 * 1000.0);
+                    *(unsigned int *)&pStruct[v20->iOffset] = SnapFloatToInt(v15 * 1000.0);
                     break;
                 case 8:
 #ifdef KISAK_MP

@@ -360,9 +360,9 @@ void __cdecl Con_CheckResize()
         con.fontHeight = R_TextHeight(cls.consoleFont);
         if (con.fontHeight <= 0)
             MyAssertHandler(".\\client\\cl_console.cpp", 554, 0, "%s", "con.fontHeight > 0");
-        con.visibleLineCount = (int)(con.screenMax[1] - con.screenMin[1] - (double)(2 * con.fontHeight) - 6.0 * 4.0)
+        con.visibleLineCount = SnapFloatToInt(con.screenMax[1] - con.screenMin[1] - (double)(2 * con.fontHeight) - 6.0 * 4.0)
             / con.fontHeight;
-        con.visiblePixelWidth = (int)(con.screenMax[0] - con.screenMin[0] - 10.0 - 6.0 * 3.0);
+        con.visiblePixelWidth = SnapFloatToInt(con.screenMax[0] - con.screenMin[0] - 10.0 - 6.0 * 3.0);
     }
     else
     {
@@ -2297,7 +2297,7 @@ void __cdecl Con_DrawMessageLineOnHUD(
         v15 = textAlignMode & 3;
         if (v15 == 1)
         {
-            x -= (int)((double)R_ConsoleTextWidth(
+            x -= SnapFloatToInt((double)R_ConsoleTextWidth(
                 msgwnd->circularTextBuffer,
                 msgwnd->textBufSize,
                 line->textBufPos,
@@ -2308,7 +2308,7 @@ void __cdecl Con_DrawMessageLineOnHUD(
         }
         else if (v15 == 2)
         {
-            x -= (int)((double)R_ConsoleTextWidth(
+            x -= SnapFloatToInt((double)R_ConsoleTextWidth(
                 msgwnd->circularTextBuffer,
                 msgwnd->textBufSize,
                 line->textBufPos,
@@ -2319,11 +2319,11 @@ void __cdecl Con_DrawMessageLineOnHUD(
         v14 = textAlignMode & 0xC;
         if (v14 == 4)
         {
-            y += (int)((double)R_TextHeight(font) * yScale);
+            y += SnapFloatToInt((double)R_TextHeight(font) * yScale);
         }
         else if (v14 == 8)
         {
-            y += (int)((double)R_TextHeight(font) * yScale * 0.5);
+            y += SnapFloatToInt((double)R_TextHeight(font) * yScale * 0.5);
         }
         xAdj = (float)x;
         yAdj = (float)y;
@@ -2762,7 +2762,7 @@ void __cdecl Con_DrawSay(int32_t localClientNum, int32_t x, int32_t y)
         font = UI_GetFontHandle(&scrPlaceView[localClientNum], 0, normalizedScale);
         normalizedScalea = R_NormalizedTextScale(font, normalizedScale);
         textX = (float)x;
-        textY = (float)(y + (int)((double)R_TextHeight(font) * normalizedScalea));
+        textY = (float)(y + SnapFloatToInt((double)R_TextHeight(font) * normalizedScalea));
         CL_DrawText(
             &scrPlaceView[localClientNum],
             string,
@@ -2776,7 +2776,7 @@ void __cdecl Con_DrawSay(int32_t localClientNum, int32_t x, int32_t y)
             normalizedScalea,
             colorWhite,
             3);
-        v4 = (int)((double)R_TextWidth(string, 0, font) * normalizedScalea);
+        v4 = SnapFloatToInt((double)R_TextWidth(string, 0, font) * normalizedScalea);
         Field_Draw(localClientNum, &playerKeys[localClientNum].chatField, x + v4, y, 1, 1);
     }
 }
@@ -2834,7 +2834,7 @@ void __cdecl Con_DrawInput(int32_t localClientNum)
         ConDrawInput_Box(1, &con_inputBoxColor->current.value);
         ConDrawInput_TextAndOver(promptString, con_versionColor);
         conDrawInputGlob.leftX = conDrawInputGlob.x;
-        g_consoleField.widthInPixels = (int)(con.screenMax[0] - 6.0 - conDrawInputGlob.x);
+        g_consoleField.widthInPixels = SnapFloatToInt(con.screenMax[0] - 6.0 - conDrawInputGlob.x);
         inputTextLenPrev = conDrawInputGlob.inputTextLen;
         conDrawInputGlob.inputText = Con_TokenizeInput();
         conDrawInputGlob.inputTextLen = strlen(conDrawInputGlob.inputText);
@@ -3257,8 +3257,8 @@ void __cdecl Con_DrawAutoCompleteChoice(int32_t localClientNum, bool isDvarComma
         isDvarCommand,
         originalCommand,
         colorCodedLine);
-    x = (int)conDrawInputGlob.x;
-    y = (int)conDrawInputGlob.y;
+    x = SnapFloatToInt(conDrawInputGlob.x);
+    y = SnapFloatToInt(conDrawInputGlob.y);
     if (&colorCodedLine[strlen(colorCodedLine) + 1] == &colorCodedLine[1])
         MyAssertHandler(".\\client\\cl_console.cpp", 2117, 0, "%s", "strlen( colorCodedLine ) > 0");
     drawLen = SEH_PrintStrlen(colorCodedLine);
@@ -3428,7 +3428,7 @@ int32_t __cdecl Con_GetAutoCompleteColorCodedStringContiguous(
 
 void __cdecl Con_DrawInputPrompt(int32_t localClientNum)
 {
-    Field_Draw(localClientNum, &g_consoleField, (int)conDrawInputGlob.x, (int)conDrawInputGlob.y, 5, 5);
+    Field_Draw(localClientNum, &g_consoleField, SnapFloatToInt(conDrawInputGlob.x), SnapFloatToInt(conDrawInputGlob.y), 5, 5);
 }
 
 void Con_DrawOuputWindow()
@@ -3554,7 +3554,7 @@ void __cdecl Con_DrawOutputVersion(float x, float y, float width, float height)
 
     ya = height - 16.0 + y;
     VersionString = Con_GetVersionString();
-    SCR_DrawSmallStringExt((int)x, (int)ya, VersionString, con_versionColor);
+    SCR_DrawSmallStringExt(SnapFloatToInt(x), SnapFloatToInt(ya), VersionString, con_versionColor);
 }
 
 char *__cdecl Con_GetVersionString()

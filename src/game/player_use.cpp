@@ -186,7 +186,7 @@ void __cdecl Player_UpdateActivate(gentity_s *ent)
 
 int __cdecl compare_use(float *pe1, float *pe2)
 {
-    return (int)(float)(pe1[1] - pe2[1]);
+    return SnapFloatToInt(pe1[1] - pe2[1]);
 }
 
 int __cdecl Player_GetUseList(gentity_s *ent, useList_t *useList, int prevHintEntIndex)

@@ -1502,7 +1502,7 @@ void __cdecl DynEntCl_ExplosionEvent(
                     }
                     if (DynEnt_GetEntityProps(dynEntDef->type)->destroyable)
                     {
-                        damage = (int)((double)(innerDamage - outerDamage) * scale + (double)outerDamage);
+                        damage = SnapFloatToInt((double)(innerDamage - outerDamage) * scale + (double)outerDamage);
                         if (damage)
                             DynEntCl_Damage(localClientNum, hitEnts[i], (DynEntityCollType)drawType, outPosition, diff, damage);
                     }

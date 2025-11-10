@@ -676,7 +676,7 @@ void __cdecl HoldBreathUpdate(int32_t localClientNum)
             {
                 playbackId = CG_PlayClientSoundAlias(localClientNum, cgMedia.playerBreathInSound);
                 SND_GetKnownLength(playbackId, &cgameGlob->holdBreathInTime);
-                cgameGlob->holdBreathDelay = (int)(player_breath_snd_delay->current.value * 1000.0);
+                cgameGlob->holdBreathDelay = SnapFloatToInt(player_breath_snd_delay->current.value * 1000.0);
             }
         }
         cgameGlob->holdBreathTime += cgameGlob->frametime;
@@ -686,12 +686,12 @@ void __cdecl HoldBreathUpdate(int32_t localClientNum)
         if (cgameGlob->holdBreathTime >= 0)
         {
             cgameGlob->holdBreathTime += cgameGlob->frametime;
-            if (cgameGlob->holdBreathTime <= (int)(player_breath_hold_time->current.value * 1000.0))
+            if (cgameGlob->holdBreathTime <= SnapFloatToInt(player_breath_hold_time->current.value * 1000.0))
             {
                 if (cgameGlob->holdBreathDelay <= 0)
                 {
                     CG_PlayClientSoundAlias(localClientNum, cgMedia.playerBreathOutSound);
-                    cgameGlob->holdBreathDelay = (int)(player_breath_snd_delay->current.value * 1000.0);
+                    cgameGlob->holdBreathDelay = SnapFloatToInt(player_breath_snd_delay->current.value * 1000.0);
                 }
             }
             else
@@ -2918,7 +2918,7 @@ void __cdecl CG_SpawnTracer(int32_t localClientNum, const float *pstart, const f
     else
         v3 = 0;
     startTime = cgameGlob->time - v3;
-    le->endTime = startTime + (int)(dist * 1000.0 / cg_tracerSpeed->current.value);
+    le->endTime = startTime + SnapFloatToInt(dist * 1000.0 / cg_tracerSpeed->current.value);
     le->pos.trType = TR_LINEAR;
     le->pos.trTime = startTime;
     trBase = le->pos.trBase;
@@ -2974,7 +2974,7 @@ void __cdecl CG_DrawTracer(const float *start, const float *finish, const refdef
     beam.material = cgMedia.tracerMaterial;
     Vec3Sub(finish, start, diff);
     v3 = Vec3Length(diff);
-    beam.segmentCount = (int)(v3 * 8.0 / cg_tracerScrewDist->current.value);
+    beam.segmentCount = SnapFloatToInt(v3 * 8.0 / cg_tracerScrewDist->current.value);
     beam.wiggleDist = cg_tracerScrewRadius->current.value;
     FX_Beam_Add(&beam);
 }

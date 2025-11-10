@@ -71,7 +71,7 @@ void __cdecl CG_AddPlayerSpriteDrawSurfs(int32_t localClientNum, const centity_s
                         cg_scriptIconSize->current.value,
                         0,
                         cg_constantSizeHeadIcons->current.enabled);
-                    secondaryHeight = (int)cg_scriptIconSize->current.value + 16;
+                    secondaryHeight = SnapFloatToInt(cg_scriptIconSize->current.value) + 16;
                 }
             }
             if (cent->nextState.number == cgameGlob->clientNum && cgameGlob->inKillCam)
@@ -240,6 +240,8 @@ void __cdecl CG_Player(int32_t localClientNum, centity_s *cent)
         }
     }
 }
+
+// KISAKTODO: function needs casts (dont erase SnapFloatToInt)
 void __cdecl CG_PlayerTurretPositionAndBlend(int32_t localClientNum, centity_s *cent)
 {
     char *AnimDebugName; // eax
@@ -361,7 +363,7 @@ void __cdecl CG_PlayerTurretPositionAndBlend(int32_t localClientNum, centity_s *
                                                 {
                                                     fBlend = 0.0;
                                                 }
-                                                v4 = fBlend;
+                                                v4 = SnapFloatToInt(fBlend);
                                                 iBlend = v4;
                                                 fBlend = fBlend - v4;
                                                 leafAnim1 = XAnimGetChildAt(pXAnims, heightAnim, v4);

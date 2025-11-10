@@ -1681,12 +1681,12 @@ void __cdecl BG_PlayerToEntitySetTrajectory(playerState_s *ps, entityState_s *s,
     s->lerp.u.player.movementDir = ps->movementDir;
     if (snap)
     {
-        s->lerp.pos.trBase[0] = (float)(int)s->lerp.pos.trBase[0];
-        s->lerp.pos.trBase[1] = (float)(int)s->lerp.pos.trBase[1];
-        s->lerp.pos.trBase[2] = (float)(int)s->lerp.pos.trBase[2];
-        s->lerp.apos.trBase[0] = (float)(int)s->lerp.apos.trBase[0];
-        s->lerp.apos.trBase[1] = (float)(int)s->lerp.apos.trBase[1];
-        s->lerp.apos.trBase[2] = (float)(int)s->lerp.apos.trBase[2];
+        s->lerp.pos.trBase[0] = SnapFloat(s->lerp.pos.trBase[0]);
+        s->lerp.pos.trBase[1] = SnapFloat(s->lerp.pos.trBase[1]);
+        s->lerp.pos.trBase[2] = SnapFloat(s->lerp.pos.trBase[2]);
+        s->lerp.apos.trBase[0] = SnapFloat(s->lerp.apos.trBase[0]);
+        s->lerp.apos.trBase[1] = SnapFloat(s->lerp.apos.trBase[1]);
+        s->lerp.apos.trBase[2] = SnapFloat(s->lerp.apos.trBase[2]);
     }
 #endif
 }
@@ -2251,9 +2251,9 @@ int __cdecl BG_GetMaxSprintTime(const playerState_s *ps)
     if ((ps->perks & 0x400) != 0)
         maxSprintTime = maxSprintTime * perk_sprintMultiplier->current.value;
 #endif
-    if ((int)maxSprintTime > 0x3FFF)
+    if ((int)SnapFloatToInt(maxSprintTime) > 0x3FFF)
         return 0x3FFF;
     else
-        return (int)maxSprintTime;
+        return (int)SnapFloatToInt(maxSprintTime);
 }
 

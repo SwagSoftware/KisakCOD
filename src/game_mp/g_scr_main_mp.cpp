@@ -1876,12 +1876,12 @@ void __cdecl ScrCmd_SetNormalHealth(scr_entref_t entref)
         normalHealth = 1.0;
     if (ent->client)
     {
-        newHealth = (int)((float)ent->client->sess.maxHealth * normalHealth);
+        newHealth = SnapFloatToInt((float)ent->client->sess.maxHealth * normalHealth);
         SV_GameSendServerCommand(ent - g_entities, SV_CMD_CAN_IGNORE, va("%c \"%i\"", 74, 0));
     }
     else if (ent->maxHealth)
     {
-        newHealth = (int)((double)ent->maxHealth * normalHealth);
+        newHealth = SnapFloatToInt((double)ent->maxHealth * normalHealth);
     }
     else
     {
@@ -2255,9 +2255,9 @@ void Scr_Objective_Add()
     if (numParam >= 3)
     {
         Scr_GetVector(2u, obj->origin);
-        obj->origin[0] = (float)(int)obj->origin[0];
-        obj->origin[1] = (float)(int)obj->origin[1];
-        obj->origin[2] = (float)(int)obj->origin[2];
+        obj->origin[0] = SnapFloat(obj->origin[0]);
+        obj->origin[1] = SnapFloat(obj->origin[1]);
+        obj->origin[2] = SnapFloat(obj->origin[2]);
         result = obj;
         obj->entNum = ENTITYNUM_NONE;
         if (numParam >= 4)
@@ -2350,7 +2350,6 @@ void Scr_Objective_Icon()
 
 void Scr_Objective_Position()
 {
-    objective_t *result; // eax
     objective_t *obj; // [esp+Ch] [ebp-8h]
     int32_t objNum; // [esp+10h] [ebp-4h]
 
@@ -2362,10 +2361,9 @@ void Scr_Objective_Position()
     obj = &level.objectives[objNum];
     ClearObjective_OnEntity(obj);
     Scr_GetVector(1u, obj->origin);
-    obj->origin[0] = (float)(int)obj->origin[0];
-    obj->origin[1] = (float)(int)obj->origin[1];
-    result = obj;
-    obj->origin[2] = (float)(int)obj->origin[2];
+    obj->origin[0] = SnapFloat(obj->origin[0]);
+    obj->origin[1] = SnapFloat(obj->origin[1]);
+    obj->origin[2] = SnapFloat(obj->origin[2]);
 }
 
 objective_t *Scr_Objective_OnEntity()
@@ -3299,14 +3297,14 @@ void GScr_CastInt()
     Type = Scr_GetType(0);
     switch (Type)
     {
-    case 2:
+    case VAR_STRING:
         Scr_AddInt(atoi(Scr_GetString(0)));
         break;
-    case 5:
+    case VAR_FLOAT:
         Float = Scr_GetFloat(0);
-        Scr_AddInt((int)Float);
+        Scr_AddInt(SnapFloatToInt(Float));
         break;
-    case 6:
+    case VAR_INTEGER:
         v0.intValue = Scr_GetInt(0);
         Scr_AddInt(v0.intValue);
         break;
@@ -3728,7 +3726,7 @@ void Scr_SoundFade()
     if (Scr_GetNumParam() <= 1)
         iFadeTime = 0;
     else
-        iFadeTime = (int)(Scr_GetFloat(1) * 1000.0);
+        iFadeTime = SnapFloatToInt(Scr_GetFloat(1) * 1000.0);
 
     SV_GameSendServerCommand(-1, SV_CMD_RELIABLE, va("%c %f %i\n", 113, fTargetVol, iFadeTime));
 }
@@ -5258,9 +5256,9 @@ void __cdecl GScr_PlaceSpawnPoint(scr_entref_t entref)
             23,
             "WARNING: Spawn point entity %i is in solid at (%i, %i, %i)\n",
             pEnt->s.number,
-            (int)pEnt->r.currentOrigin[0],
-            (int)pEnt->r.currentOrigin[1],
-            (int)pEnt->r.currentOrigin[2]);
+            SnapFloatToInt(pEnt->r.currentOrigin[0]),
+            SnapFloatToInt(pEnt->r.currentOrigin[1]),
+            SnapFloatToInt(pEnt->r.currentOrigin[2]));
     G_SetOrigin(pEnt, vStart);
 }
 

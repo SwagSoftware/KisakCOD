@@ -206,7 +206,7 @@ int __cdecl RB_PixelCost_GetCostForRecordIndex(int recordIndex)
             costDelta = (float)(costHistory[frameIndexa] - avgCost);
             standardDeviationSum = costDelta * costDelta + standardDeviationSum;
         }
-        v5 = (int)(sqrt(standardDeviationSum / (float)validCount) * 1.5f);
+        v5 = SnapFloatToInt(sqrt(standardDeviationSum / (float)validCount) * 1.5f);
         if (v5 > 10)
             v3 = v5;
         else
@@ -290,11 +290,11 @@ void __cdecl R_PixelCost_EndSurface(GfxCmdBufContext context)
         pixelCount = RB_HW_ReadOcclusionQuery(gfxAssets.pixelCountQuery);
         if (pixelCount)
         {
-            v3 = (int)ceil(
+            v3 = SnapFloatToInt(ceil(
                 (float)(context.source->renderTargetHeight * context.source->renderTargetWidth)
                 * pixelCostGlob.msecElapsed
                 / (float)pixelCount
-                * 30.72f);
+                * 30.72f));
             if (v3 > 1)
                 v2 = v3;
             else
@@ -330,7 +330,7 @@ int RB_PixelCost_AccumulateMsec()
     int v2; // [esp+Ch] [ebp-8h]
     int timeQuantized; // [esp+10h] [ebp-4h]
 
-    timeQuantized = (int)ceil(pixelCostGlob.msecElapsed * 3932.1f);
+    timeQuantized = SnapFloatToInt(ceil(pixelCostGlob.msecElapsed * 3932.1f));
     if (timeQuantized < 0xFFFF)
         v2 = timeQuantized;
     else

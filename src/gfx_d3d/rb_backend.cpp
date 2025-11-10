@@ -2279,7 +2279,7 @@ void __cdecl GetDecayingLetterInfo(
     fade = 1.0;
     drawExtraFxChar = 0;
     tickRatio = (double)fxDecayDuration / 1000.0;
-    tickCount = (int)(tickRatio * 30.0);
+    tickCount = SnapFloatToInt(tickRatio * 30.0);
     tickPeriod = fxDecayDuration / tickCount;
     timeLimit = fxDecayDuration / tickCount * ((int)RandWithSeed(randSeed) % tickCount);
     if (decayTimeElapsed < timeLimit)

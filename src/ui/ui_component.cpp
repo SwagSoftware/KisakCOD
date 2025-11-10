@@ -58,7 +58,7 @@ void UI_Component::DrawText(float x, float y, float width, int fontEnum, const f
 
     if (UI_Component::g.charWidth == 0.0)
         MyAssertHandler(".\\ui\\ui_component.cpp", 132, 0, "%s", "g.charWidth");
-    maxChars = (width / UI_Component::g.charWidth);
+    maxChars = SnapFloatToInt(width / UI_Component::g.charWidth);
     v7 = floor(x);
     v8 = UI_Component::g.charHeight + y;
     v6 = floor(v8);
@@ -227,7 +227,7 @@ void Scr_ScriptWatch::Draw(
 
     UI_Component::DrawPic(x, y, width, height, 0, cls.consoleMaterial);
     startLineFrac = compY / UI_Component::g.charHeight;
-    startLine = startLineFrac;
+    startLine = SnapFloatToInt(startLineFrac);
     currentY = -startLineFrac;
     currentY = currentY * UI_Component::g.charHeight;
     currentLine = 0;
@@ -889,13 +889,13 @@ bool Scr_ScriptWatch::LeftMouseEvent(float *point)
 {
     Scr_WatchElement_s *element; // [esp+8h] [ebp-4h]
 
-    this->SetSelectedLineFocus((int)(point[1] / UI_Component::g.charHeight), 1);
+    this->SetSelectedLineFocus(SnapFloatToInt(point[1] / UI_Component::g.charHeight), 1);
     element = Scr_ScriptWatch::GetSelectedElement();
 
     if (!element)
         return 0;
 
-    if (Scr_GetElementDepth(element) != (int)((*point - UI_Component::g.charHeight) / UI_Component::g.charWidth))
+    if (Scr_GetElementDepth(element) != SnapFloatToInt((*point - UI_Component::g.charHeight) / UI_Component::g.charWidth))
         return 0;
 
     Scr_ScriptWatch::ExpandSelectedElement(!element->expand);
@@ -1580,7 +1580,7 @@ void Scr_ScriptCallStack::Draw(
     CL_LookupColor(0, 0x37u, color);
     lastHeight = height - UI_Component::g.charHeight;
     startLineFrac = compY / UI_Component::g.charHeight;
-    startLine = startLineFrac;
+    startLine = SnapFloatToInt(startLineFrac);
     currentY = startLine - startLineFrac;
     if (currentY < 0.0)
     {
@@ -1589,7 +1589,7 @@ void Scr_ScriptCallStack::Draw(
     }
     currentY = currentY * UI_Component::g.charHeight;
     currentLine = startLine;
-    startCol = (compX / UI_Component::g.charWidth);
+    startCol = SnapFloatToInt(compX / UI_Component::g.charWidth);
     selectColor[0] = 0.5;
     selectColor[1] = 0.5;
     selectColor[2] = 0.5;
@@ -2885,7 +2885,7 @@ void Scr_AbstractScriptList::Draw(
     CL_LookupColor(0, 0x37u, color);
     lastHeight = height - UI_Component::g.charHeight;
     startLineFrac = compY / UI_Component::g.charHeight;
-    startLine = startLineFrac;
+    startLine = SnapFloatToInt(startLineFrac);
     currentY = startLine - startLineFrac;
     if (currentY < 0.0)
     {
@@ -2894,7 +2894,7 @@ void Scr_AbstractScriptList::Draw(
     }
     currentY = currentY * UI_Component::g.charHeight;
     currentLine = startLine;
-    startCol = (compX / UI_Component::g.charWidth);
+    startCol = SnapFloatToInt(compX / UI_Component::g.charWidth);
     selectColor[0] = 0.5;
     selectColor[1] = 0.5;
     selectColor[2] = 0.5;
@@ -3081,7 +3081,7 @@ void UI_VerticalDivider::Draw(
         MyAssertHandler(".\\ui\\ui_component.cpp", 983, 0, "%s", "!compY");
     this->size[0] = width;
     this->size[1] = height;
-    this->posY = (this->posY / UI_Component::g.charHeight) * UI_Component::g.charHeight;
+    this->posY = SnapFloat(this->posY / UI_Component::g.charHeight) * UI_Component::g.charHeight;
     if (UI_Component::g.charHeight <= this->posY)
     {
         if (height < this->posY)
@@ -3562,7 +3562,7 @@ void Scr_ScriptWindow::Draw(float x,
         innerWidth = width - UI_Component::g.charHeight;
         lastHeight = height - UI_Component::g.charHeight;
         startLineFrac = compY / UI_Component::g.charHeight;
-        startLine = startLineFrac;
+        startLine = SnapFloatToInt(startLineFrac);
         currentY = startLine - startLineFrac;
         if (currentY < 0.0)
         {
@@ -3574,7 +3574,7 @@ void Scr_ScriptWindow::Draw(float x,
         currentLine = this->currentTopLine;
         s = this->currentBufPos;
         endPos = &sourceBufData->sourceBuf[sourceBufData->len];
-        startCol = (compX / UI_Component::g.charWidth);
+        startCol = SnapFloatToInt(compX / UI_Component::g.charWidth);
         selectColor[0] = 0.5;
         selectColor[1] = 0.5;
         selectColor[2] = 0.5;
@@ -3895,7 +3895,7 @@ int UI_ScrollPane::GetInnerLinesCount()
     float innerSize[2]; // [esp+4h] [ebp-8h] BYREF
 
     UI_ScrollPane::GetInnerSize(innerSize);
-    return (innerSize[1] / UI_Component::g.charHeight);
+    return SnapFloatToInt(innerSize[1] / UI_Component::g.charHeight);
 }
 
 int UI_ScrollPane::GetFirstDisplayedLine()
@@ -3904,7 +3904,7 @@ int UI_ScrollPane::GetFirstDisplayedLine()
     float startY; // [esp+10h] [ebp-4h]
 
     startLineFrac = this->comp->pos[1] / UI_Component::g.charHeight;
-    startY = startLineFrac - startLineFrac;
+    startY = SnapFloat(startLineFrac) - startLineFrac;
     if (startY >= 0.0)
         return startLineFrac;
     else
@@ -3919,7 +3919,7 @@ int UI_ScrollPane::GetLastDisplayedLine()
     if (!this->comp)
         MyAssertHandler(".\\ui\\ui_component.cpp", 548, 0, "%s", "comp");
     UI_ScrollPane::GetInnerSize(innerSize);
-    lastLine = ((this->comp->pos[1] + innerSize[1]) / UI_Component::g.charHeight);
+    lastLine = SnapFloatToInt((this->comp->pos[1] + innerSize[1]) / UI_Component::g.charHeight);
     if (innerSize[1] < (lastLine + 1) * UI_Component::g.charHeight)
         --lastLine;
     if (lastLine >= this->comp->numLines)
@@ -3976,7 +3976,7 @@ bool UI_LinesComponent::KeyEvent(float *point, int key)
 
         if (key == K_MOUSE1)
         {
-            if (this->selectedLine == (point[1] / UI_Component::g.charHeight))
+            if (this->selectedLine == SnapFloatToInt(point[1] / UI_Component::g.charHeight))
                 this->selectedLine = -1;
             return 0;
         }
@@ -4002,7 +4002,7 @@ bool UI_LinesComponent::KeyEvent(float *point, int key)
             result = 1;
             break;
         case K_MOUSE1:
-            this->SetSelectedLineFocus((point[1] / UI_Component::g.charHeight), 1);
+            this->SetSelectedLineFocus(SnapFloatToInt(point[1] / UI_Component::g.charHeight), 1);
             result = 0;
             break;
         default:

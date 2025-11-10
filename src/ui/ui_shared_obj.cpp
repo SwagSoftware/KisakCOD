@@ -3573,12 +3573,12 @@ void __cdecl Eval_PrepareBinaryOpIntegers(Eval *eval)
     }
     if (eval->opStack[4 * eval->valStackPos + 1016] == EVAL_OP_LPAREN)
     {
-        eval->opStack[4 * eval->valStackPos + 1018] = (EvalOperatorType)((int)*(double *)&eval->opStack[4 * eval->valStackPos + 1018]);
+        eval->opStack[4 * eval->valStackPos + 1018] = (EvalOperatorType)(SnapFloatToInt(*(double *)&eval->opStack[4 * eval->valStackPos + 1018]));
         eval->opStack[4 * eval->valStackPos + 1016] = EVAL_OP_RPAREN;
     }
     if (eval->opStack[4 * eval->valStackPos + 1020] == EVAL_OP_LPAREN)
     {
-        eval->opStack[4 * eval->valStackPos + 1022] = (EvalOperatorType)((int)*(double *)&eval->opStack[4 * eval->valStackPos + 1022]);
+        eval->opStack[4 * eval->valStackPos + 1022] = (EvalOperatorType)(SnapFloatToInt(*(double *)&eval->opStack[4 * eval->valStackPos + 1022]));
         eval->opStack[4 * eval->valStackPos + 1020] = EVAL_OP_RPAREN;
     }
 }
@@ -3860,7 +3860,7 @@ bool __cdecl Eval_EvaluationStep(Eval *eval)
         }
         else
         {
-            eval->opStack[4 * eval->valStackPos + 1022] = (EvalOperatorType)((int)*(double *)&eval->opStack[4 * eval->valStackPos + 1022]);
+            eval->opStack[4 * eval->valStackPos + 1022] = (EvalOperatorType)(SnapFloatToInt(*(double *)&eval->opStack[4 * eval->valStackPos + 1022]));
             eval->opStack[4 * eval->valStackPos + 1020] = EVAL_OP_RPAREN;
         }
         eval->opStack[4 * eval->valStackPos + 1022] = (EvalOperatorType)(~eval->opStack[4 * eval->valStackPos + 1022]);

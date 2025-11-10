@@ -310,7 +310,7 @@ void __cdecl CG_PredictPlayerState_Internal(int32_t localClientNum)
                     if (cg_viewZSmoothingTime->current.value * 1000.0 > (double)(cgameGlob->time - cgameGlob->stepViewStart))
                     {
                         timeSinceStart = cg_pmove[localClientNum].viewChangeTime - cgameGlob->stepViewStart;
-                        smoothingDuration = (int)(cg_viewZSmoothingTime->current.value * 1000.0);
+                        smoothingDuration = SnapFloatToInt(cg_viewZSmoothingTime->current.value * 1000.0);
                         if (timeSinceStart >= 0 && timeSinceStart < smoothingDuration)
                         {
                             lerp = (double)timeSinceStart * 1.0 / (double)smoothingDuration;
@@ -444,7 +444,7 @@ void __cdecl CG_InterpolatePlayerState(int32_t localClientNum, int32_t grabAngle
         if (i < prevSnap->ps.bobCycle)
             i += 256;
 
-        out->bobCycle = prevSnap->ps.bobCycle + (int)((double)(i - prevSnap->ps.bobCycle) * f);
+        out->bobCycle = prevSnap->ps.bobCycle + SnapFloatToInt((double)(i - prevSnap->ps.bobCycle) * f);
         out->aimSpreadScale = (nextSnap->ps.aimSpreadScale - prevSnap->ps.aimSpreadScale) * f + prevSnap->ps.aimSpreadScale;
         Vec3Lerp(prevSnap->ps.origin, nextSnap->ps.origin, f, out->origin);
         Vec3Lerp(prevSnap->ps.velocity, nextSnap->ps.velocity, f, out->velocity);

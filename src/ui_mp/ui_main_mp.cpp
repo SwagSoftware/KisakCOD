@@ -492,7 +492,7 @@ int __cdecl UI_TextWidth(const char *text, int maxChars, Font_s *font, float sca
     float actualScale; // [esp+8h] [ebp-4h]
 
     actualScale = R_NormalizedTextScale(font, scale);
-    return (int)((double)R_TextWidth(text, maxChars, font) * actualScale);
+    return SnapFloatToInt((double)R_TextWidth(text, maxChars, font) * actualScale);
 }
 
 int __cdecl UI_TextHeight(Font_s *font, float scale)
@@ -500,7 +500,7 @@ int __cdecl UI_TextHeight(Font_s *font, float scale)
     float actualScale; // [esp+8h] [ebp-4h]
 
     actualScale = R_NormalizedTextScale(font, scale);
-    return (int)((double)R_TextHeight(font) * actualScale);
+    return SnapFloatToInt((double)R_TextHeight(font) * actualScale);
 }
 
 void __cdecl UI_DrawText(
@@ -4618,7 +4618,7 @@ void __cdecl CL_SelectStringTableEntryInDvar_f()
             v1 = Sys_Milliseconds();
             srand(v1);
             rowCount = (double)table->rowCount;
-            row = (int)((double)rand() * rowCount / 32767.0);
+            row = SnapFloatToInt((double)rand() * rowCount / 32767.0);
             v2 = Cmd_Argv(2);
             v3 = atoi(v2);
             ColumnValueForRow = (char *)StringTable_GetColumnValueForRow(table, row, v3);
@@ -5333,7 +5333,7 @@ void __cdecl UI_DisplayDownloadInfo(char *downloadName, float centerPoint, float
         color[1] = 1.0f;
         color[2] = 0.0f;
         color[3] = 0.15000001f;
-        width = (int)((double)downloadCount / (double)downloadSize * 640.0);
+        width = SnapFloatToInt((double)downloadCount / (double)downloadSize * 640.0);
         v17 = (float)(width + 2);
         v39 = yStart + 164.0;
         UI_FillRect(&scrPlaceFull, 0.0, v39, v17, 5.0, 0, 0, color);
@@ -5374,7 +5374,7 @@ void __cdecl UI_DisplayDownloadInfo(char *downloadName, float centerPoint, float
     if (downloadSize <= 0)
         percent = 0;
     else
-        percent = (int)((double)downloadCount * 100.0 / (double)downloadSize);
+        percent = SnapFloatToInt((double)downloadCount * 100.0 / (double)downloadSize);
     if (downloadCount >= 4096 && downloadTime)
     {
         uiInfo = &uiInfoArray;
@@ -6052,8 +6052,8 @@ void __cdecl UI_SetSystemCursorPos(UiContext *dc, float x, float y)
     v8 = y * scrPlaceFull.scaleVirtualToFull[1];
     v5 = v8 + 0.5;
     v4 = floor(v5);
-    X.y = (int)v4;
-    X.x = (int)v6;
+    X.y = SnapFloatToInt(v4)    ;
+    X.x = SnapFloatToInt(v6)    ;
     CL_SetCursorPos(X);
 }
 

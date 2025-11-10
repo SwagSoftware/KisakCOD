@@ -1957,7 +1957,7 @@ void __cdecl CL_RunOncePerClientFrame(int32_t localClientNum, int32_t msec)
             v2 = CL_ControllerIndexFromClientNum(localClientNum);
             Cmd_ExecuteSingleCommand(0, v2, (char*)"screenshot silent\n");
         }
-        msec = (int)(1000.0 / (double)cl_avidemo->current.integer * com_timescaleValue);
+        msec = SnapFloatToInt(1000.0 / (double)cl_avidemo->current.integer * com_timescaleValue);
         if (!msec)
             msec = 1;
     }

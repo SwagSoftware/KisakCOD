@@ -87,7 +87,7 @@ void __cdecl LookAtKiller(gentity_s *self, gentity_s *inflictor, gentity_s *atta
     {
         Vec3Sub(attacker->r.currentOrigin, self->r.currentOrigin, dir);
     LABEL_10:
-        self->client->ps.stats[1] = (int)vectoyaw(dir);
+        self->client->ps.stats[1] = SnapFloatToInt(vectoyaw(dir));
         vectoyaw(dir);
         return;
     }
@@ -98,7 +98,7 @@ void __cdecl LookAtKiller(gentity_s *self, gentity_s *inflictor, gentity_s *atta
     }
     if (!self->client)
         MyAssertHandler(".\\game_mp\\g_combat_mp.cpp", 178, 0, "%s", "self->client");
-    self->client->ps.stats[1] = (int)self->r.currentAngles[1];
+    self->client->ps.stats[1] = SnapFloatToInt(self->r.currentAngles[1]);
 }
 
 int32_t __cdecl G_MeansOfDeathFromScriptParam(uint32_t scrParam)
@@ -321,7 +321,7 @@ void __cdecl G_DamageClient(
         if ((uint32_t)hitLoc > HITLOC_GUN)
             MyAssertHandler(".\\game_mp\\g_combat_mp.cpp", 489, 0, "%s", "(hitLoc >= HITLOC_NONE) && (hitLoc < HITLOC_NUM)");
         if (mod != 7)
-            damage = (int)(G_GetWeaponHitLocationMultiplier(hitLoc, weapon) * (double)damage);
+            damage = SnapFloatToInt(G_GetWeaponHitLocationMultiplier(hitLoc, weapon) * (double)damage);
         if (damage <= 0)
             damage = 1;
         Scr_PlayerDamage(targ, inflictor, attacker, damage, dflags, mod, weapon, point, dir, hitLoc, timeOffset);
@@ -913,7 +913,7 @@ int32_t __cdecl G_RadiusDamage(
                     Vec3Sub(ent->r.currentOrigin, origin, diff);
                     diff[2] = diff[2] + 24.0;
                     v14 = (fInnerDamage - fOuterDamage) * (1.0 - v12 / radius) + fOuterDamage;
-                    G_Damage(ent, inflictor, attacker, diff, origin, (v14 * v23), 5, mod, weapon, HITLOC_NONE, 0, 0, 0);
+                    G_Damage(ent, inflictor, attacker, diff, origin, SnapFloatToInt(v14 * v23), 5, mod, weapon, HITLOC_NONE, 0, 0, 0);
                 }
             }
         }

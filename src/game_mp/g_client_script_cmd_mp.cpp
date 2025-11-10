@@ -1311,7 +1311,7 @@ void __cdecl PlayerCmd_finishPlayerDamage(scr_entref_t entref)
                 {
                     knockbackMod = 0.15000001f;
                 }
-                knockback = (int)((float)damage * knockbackMod);
+                knockback = SnapFloatToInt((float)damage * knockbackMod);
                 if (knockback > 60)
                     knockback = 60;
                 if (knockback)
@@ -1393,14 +1393,14 @@ void __cdecl PlayerCmd_finishPlayerDamage(scr_entref_t entref)
                 time_per_point = player_dmgtimer_timePerPoint->current.value;
                 max_damage_time = player_dmgtimer_maxTime->current.value;
                 damage_time = (double)damage * time_per_point;
-                pSelf->client->ps.damageTimer += (int)damage_time;
+                pSelf->client->ps.damageTimer += SnapFloatToInt(damage_time);
                 if (dir)
                 {
                     flinchYawDir = vectoyaw(dir);
                     player_yaw = pSelf->client->ps.viewangles[1];
                     if (player_yaw < 0.0)
                         player_yaw = player_yaw + 360.0;
-                    flinchYawDir = flinchYawDir - (double)(int)player_yaw;
+                    flinchYawDir = flinchYawDir - SnapFloat(player_yaw);
                     if (flinchYawDir < 0.0)
                         flinchYawDir = flinchYawDir + 360.0;
                 }
@@ -1427,7 +1427,7 @@ void __cdecl PlayerCmd_finishPlayerDamage(scr_entref_t entref)
                     pSelf->client->ps.flinchYawAnim = 0;
                 }
                 if (max_damage_time < (double)pSelf->client->ps.damageTimer)
-                    pSelf->client->ps.damageTimer = (int)max_damage_time;
+                    pSelf->client->ps.damageTimer = SnapFloatToInt(max_damage_time);
                 pSelf->client->ps.damageDuration = pSelf->client->ps.damageTimer;
                 pSelf->health -= damage;
                 Scr_AddEntity(attacker);

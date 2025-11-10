@@ -85,7 +85,7 @@ void __cdecl CG_DrawCenterString(
         centerPrint->time = 0;
     if (centerPrint->time)
     {
-        fadeColor = CG_FadeColor(time, centerPrint->time, (int)(cg_centertime->current.value * 1000.0), 100);
+        fadeColor = CG_FadeColor(time, centerPrint->time, SnapFloatToInt(cg_centertime->current.value * 1000.0), 100);
         if (fadeColor)
         {
             Vec4Mul(color, fadeColor, color);
@@ -257,8 +257,8 @@ void __cdecl CG_DrawChatMessages(int32_t localClientNum)
             v2 = cg_hudChatIntermissionPosition;
         else
             v2 = cg_hudChatPosition;
-        hudChatX = (int)v2->current.value;
-        hudChatY = (int)v2->current.vector[1];
+        hudChatX = SnapFloatToInt(v2->current.vector[0]);
+        hudChatY = SnapFloatToInt(v2->current.vector[1]);
         cgamestaticGlob = CG_GetLocalClientStaticGlobals(localClientNum);
         fontHeight = cgamestaticGlob->viewHeight <= 768 ? 16.0 : 10.0;
         fontWidth = cgamestaticGlob->viewWidth <= 768 ? 12.0 : 8.0;
@@ -694,7 +694,7 @@ void __cdecl CG_DrawSay(int32_t localClientNum)
 {
     if (!cg_hudSayPosition)
         MyAssertHandler(".\\cgame_mp\\cg_draw_mp.cpp", 1092, 0, "%s", "cg_hudSayPosition");
-    Con_DrawSay(localClientNum, (int)cg_hudSayPosition->current.value, (int)cg_hudSayPosition->current.vector[1] + 24);
+    Con_DrawSay(localClientNum, SnapFloatToInt(cg_hudSayPosition->current.value), SnapFloatToInt(cg_hudSayPosition->current.vector[1]) + 24);
 }
 
 void __cdecl CG_DrawVote(int32_t localClientNum)

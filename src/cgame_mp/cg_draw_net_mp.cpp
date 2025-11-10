@@ -184,7 +184,7 @@ void __cdecl CG_DrawSnapshotAnalysis(int32_t localClientNum)
                                 "%s\n\t(field) = %i",
                                 "(field >= 0 && field < ANALYZE_SNAPSHOT_DATATYPE_COUNT)",
                                 fieldb);
-                        v = (int)((float)cgameGlob->bitsSent[arrayFrameb][fieldb] * height / 255.0f);
+                        v = SnapFloatToInt((float)cgameGlob->bitsSent[arrayFrameb][fieldb] * height / 255.0f);
                         if (v)
                         {
                             switch (fieldb)

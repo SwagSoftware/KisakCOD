@@ -383,7 +383,7 @@ void __cdecl MSG_WriteBigString(msg_t *sb, char *s)
 void __cdecl MSG_WriteAngle16(msg_t *sb, float f)
 {
     iassert( !sb->readOnly );
-    MSG_WriteShort(sb, (int)(f * 182.0444488525391));
+    MSG_WriteShort(sb, SnapFloatToInt(f * 182.0444488525391));
 }
 
 int __cdecl MSG_ReadByte(msg_t *msg)
@@ -662,7 +662,7 @@ void __cdecl MSG_SetDefaultUserCmd(playerState_s *ps, usercmd_s *cmd)
     cmd->weapon = ps->weapon;
     cmd->offHandIndex = ps->offHandIndex;
     for (i = 0; i < 2; ++i)
-        cmd->angles[i] = (unsigned __int16)(int)((ps->viewangles[i] - ps->delta_angles[i]) * 182.0444488525391);
+        cmd->angles[i] = (unsigned __int16)SnapFloatToInt((ps->viewangles[i] - ps->delta_angles[i]) * 182.0444488525391);
     if ((ps->otherFlags & 4) != 0)
     {
         if ((ps->eFlags & 8) != 0)
@@ -814,8 +814,8 @@ void __cdecl MSG_WriteDeltaUsercmdKey(msg_t *msg, int key, const usercmd_s *from
             MSG_WriteDeltaKeyShort(
                 msg,
                 keya,
-                (int)(from->meleeChargeYaw * 182.0444488525391),
-                (int)(to->meleeChargeYaw * 182.0444488525391));
+                SnapFloatToInt(from->meleeChargeYaw * 182.0444488525391),
+                SnapFloatToInt(to->meleeChargeYaw * 182.0444488525391));
             MSG_WriteDeltaKey(msg, keya, from->meleeChargeDist, to->meleeChargeDist, 8u);
         }
     }
@@ -865,7 +865,7 @@ void __cdecl MSG_ReadDeltaUsercmdKey(msg_t *msg, int key, const usercmd_s *from,
                 to->meleeChargeYaw = (double)MSG_ReadDeltaKeyShort(
                     msg,
                     keya,
-                    (unsigned __int16)(int)(from->meleeChargeYaw * 182.0444488525391))
+                    (unsigned __int16)SnapFloatToInt(from->meleeChargeYaw * 182.0444488525391))
                     * 0.0054931640625;
                 to->meleeChargeDist = MSG_ReadDeltaKey(msg, keya, from->meleeChargeDist, 8u);
             }
@@ -1010,7 +1010,7 @@ void __cdecl MSG_ReadDeltaField(
                 trunc = MSG_ReadBits(msg, 5u);
                 Byte = MSG_ReadByte(msg);
                 trunc += 32 * Byte;
-                trunc ^= (int)*(float *)fromF + 4096;
+                trunc ^= SnapFloatToInt(*(float *)fromF + 4096);
                 trunc -= 4096;
                 *(float *)toF = (float)trunc;
                 if (print)
@@ -1038,7 +1038,7 @@ void __cdecl MSG_ReadDeltaField(
             trunc = MSG_ReadBits(msg, 5u);
             v10 = MSG_ReadByte(msg);
             trunc += 32 * v10;
-            trunc ^= (int)*(float *)fromF + 4096;
+            trunc ^= SnapFloatToInt(*(float *)fromF + 4096);
             trunc -= 4096;
             *(float *)toF = (float)trunc;
             if (print)
@@ -1068,7 +1068,7 @@ void __cdecl MSG_ReadDeltaField(
                 trunc = MSG_ReadBits(msg, 4u);
                 v13 = MSG_ReadByte(msg);
                 trunc += 16 * v13;
-                trunc ^= (int)*(float *)fromF + 2048;
+                trunc ^= SnapFloatToInt(*(float *)fromF + 2048);
                 trunc -= 2048;
                 *(float *)toF = (float)trunc;
                 if (print)
@@ -1086,7 +1086,7 @@ void __cdecl MSG_ReadDeltaField(
                 1476,
                 0,
                 "*(float *)toF + HUDELEM_COORD_BIAS doesn't index 1 << HUDELEM_COORD_BITS\n\t%i not in [0, %i)",
-                (int)(*(float *)toF + 2048.0),
+                SnapFloatToInt(*(float *)toF + 2048.0),
                 4096);
         return;
     case 0xFFFFFF9E:
@@ -1272,8 +1272,8 @@ double __cdecl MSG_ReadOriginFloat(int bits, msg_t *msg, float oldValue)
             iassert( bits == MSG_FIELD_ORIGINY );
             index = 1;
         }
-        roundedCenter = (int)((*CL_GetMapCenter())[index] + 0.5);
-        return (float)(roundedCenter + (((int)oldValue + 0x8000 - roundedCenter) ^ MSG_ReadBits(msg, 0x10u)) - 0x8000);
+        roundedCenter = SnapFloatToInt((*CL_GetMapCenter())[index] + 0.5);
+        return (float)(roundedCenter + ((SnapFloatToInt(oldValue) + 0x8000 - roundedCenter) ^ MSG_ReadBits(msg, 0x10u)) - 0x8000);
     }
     else
     {
@@ -1287,8 +1287,8 @@ double __cdecl MSG_ReadOriginZFloat(msg_t *msg, float oldValue)
 
     if (MSG_ReadBit(msg))
     {
-        roundedCenter = (int)((*CL_GetMapCenter())[2] + 0.5);
-        return (float)(roundedCenter + (((int)oldValue + 0x8000 - roundedCenter) ^ MSG_ReadBits(msg, 0x10u)) - 0x8000);
+        roundedCenter = SnapFloatToInt((*CL_GetMapCenter())[2] + 0.5);
+        return (float)(roundedCenter + ((SnapFloatToInt(oldValue) + 0x8000 - roundedCenter) ^ MSG_ReadBits(msg, 0x10u)) - 0x8000);
     }
     else
     {

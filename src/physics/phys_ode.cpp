@@ -1494,7 +1494,7 @@ void __cdecl dxPostProcessIslands(PhysWorld worldIndex)
     else
         v1 = 0.0;
     g_phys_msecStep[worldIndex] = g_phys_minMsecStep[worldIndex]
-        + (int)((double)(g_phys_maxMsecStep[worldIndex] - g_phys_minMsecStep[worldIndex]) * v1);
+        + SnapFloatToInt((double)(g_phys_maxMsecStep[worldIndex] - g_phys_minMsecStep[worldIndex]) * v1);
         ODE_ForEachBody(world, Phys_CheckIfAliveTooLong);
 }
 

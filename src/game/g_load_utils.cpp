@@ -146,7 +146,7 @@ char *__cdecl vtos(const float *v)
 
     s = str[index];
     index = ((_BYTE)index + 1) & 7;
-    Com_sprintf(s, 0x20u, "(%i %i %i)", (int)*v, (int)v[1], (int)v[2]);
+    Com_sprintf(s, 0x20u, "(%i %i %i)", SnapFloatToInt(v[0]), SnapFloatToInt(v[1]), SnapFloatToInt(v[2]));
     return s;
 }
 

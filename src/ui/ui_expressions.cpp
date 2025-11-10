@@ -353,7 +353,7 @@ operandInternalDataUnion __cdecl GetSourceInt(Operand *source)
 {
     if (source->dataType == VAL_FLOAT)
     {
-        return (operandInternalDataUnion)(int)source->internals.floatVal;
+        return (operandInternalDataUnion)SnapFloatToInt(source->internals.floatVal);
     }
     else if (source->dataType)
     {
@@ -1641,7 +1641,7 @@ operandInternalDataUnion __cdecl getOperandValueInt(Operand *source)
     }
     else if (source->dataType == VAL_FLOAT)
     {
-        return (operandInternalDataUnion)(int)source->internals.floatVal;
+        return (operandInternalDataUnion)SnapFloatToInt(source->internals.floatVal);
     }
     else
     {
@@ -1939,7 +1939,7 @@ void __cdecl BitwiseNot(int localClientNum, Operand *source, Operand *result)
         {
             if (source->dataType == VAL_FLOAT)
             {
-                val = (int)source->internals.floatVal;
+                val = SnapFloatToInt(source->internals.floatVal);
             }
             else
             {

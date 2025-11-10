@@ -1671,7 +1671,7 @@ void __cdecl Com_AdjustMaxFPS(int* maxFPS)
 
     if (com_timescaleValue < 1.0)
     {
-        maxUserCmdsPerSecond = (int)(com_timescaleValue * 320.0);
+        maxUserCmdsPerSecond = SnapFloatToInt(com_timescaleValue * 320.0f);
         if (maxUserCmdsPerSecond < 1)
             maxUserCmdsPerSecond = 1;
         if (!*maxFPS || *maxFPS > maxUserCmdsPerSecond)

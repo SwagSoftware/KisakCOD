@@ -408,10 +408,10 @@ void __cdecl CG_UpdateScissorViewport(refdef_s *refdef, float *drawPos, float *d
     if (refdef->useScissorViewport)
         MyAssertHandler(".\\cgame\\cg_draw_reticles.cpp", 162, 0, "%s", "!refdef->useScissorViewport");
     refdef->useScissorViewport = 1;
-    refdef->scissorViewport.x = refdef->x + (int32_t)*drawPos;
-    refdef->scissorViewport.y = refdef->y + (int32_t)drawPos[1];
-    refdef->scissorViewport.width = (int32_t)*drawSize;
-    refdef->scissorViewport.height = (int32_t)drawSize[1];
+    refdef->scissorViewport.x = refdef->x + SnapFloatToInt(drawPos[0]);
+    refdef->scissorViewport.y = refdef->y + SnapFloatToInt(drawPos[1]);
+    refdef->scissorViewport.width = SnapFloatToInt(drawSize[0]);
+    refdef->scissorViewport.height = SnapFloatToInt(drawSize[1]);
     x1 = refdef->scissorViewport.width + refdef->scissorViewport.x;
     y1 = refdef->scissorViewport.height + refdef->scissorViewport.y;
     if (refdef->scissorViewport.x < (int32_t)(refdef->width + refdef->x))

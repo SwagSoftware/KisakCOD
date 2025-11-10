@@ -17,7 +17,7 @@ void R_WarnOncePerFrame(GfxWarningType warnType, ...)
     frameRate = R_UpdateFrameRate();
     if (s_warnCount[warnType] < rg.frontEndFrameCount)
     {
-        s_warnCount[warnType] = rg.frontEndFrameCount + (int)(frameRate * r_warningRepeatDelay->current.value);
+        s_warnCount[warnType] = rg.frontEndFrameCount + SnapFloatToInt(frameRate * r_warningRepeatDelay->current.value);
         va_copy(vargs, va);
         _vsnprintf(message, 0x400u, s_warnFormat[warnType], va);
         vargs = 0;

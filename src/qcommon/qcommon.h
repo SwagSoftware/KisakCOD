@@ -1562,3 +1562,47 @@ inline T Buf_Read(unsigned char **pos)
     *pos += sizeof(T);
     return value;
 }
+
+#include <xmmintrin.h>  // SSE
+
+// (https://github.com/SwagSoftware/KisakCOD/issues/52)
+// The default x87 rounding mode for floating point to integer is Round to nearest Even (Banker's rounding)
+// However if you use a modern compiler and regular casts, it will round down.
+// This is because it seems to use the `cvttss2si` instruction (SSE) which is always truncated
+// This probably was not the case back then, but should be emulated because the float rounding *highly* effects the movement amongst other code
+// Anywhere you see "(float)(int)" should be investigated for this
+// You are basically looking for `fistp`, which unloads the FPU into an integer (and does rounding in the process)
+// Also any call to "ftol" or "ftol_sse" will be doing this ^^ and returning the result in eax
+inline float SnapFloat(float x)
+{
+//#if defined(KISAK_PURE) && defined(_WIN32)
+    int i;
+    __asm fld x;
+    __asm fistp i;
+
+    return static_cast<float>(i);
+//#endif
+
+    //// We can use `cvtss2si` instead (1 t). By default this is set to Nearest even and matches the other methods in my testbed
+    //// This is a bit more portable since other platforms dont have __asm or even 32bit support anymore
+    //int i;
+    //i = _mm_cvtss_si32(_mm_set_ss(x));
+    //return  static_cast<float>(i);
+}
+
+// A simpler version of the above that can be used to save a cast afterwards
+// (basically ftol())
+inline int SnapFloatToInt(float x)
+{
+//#if defined(KISAK_PURE) && defined(_WIN32)
+    int i;
+    __asm fld x;
+    __asm fistp i;
+
+    return i;
+//#endif
+
+    //int i;
+    //i = _mm_cvtss_si32(_mm_set_ss(x));
+    //return i;
+}

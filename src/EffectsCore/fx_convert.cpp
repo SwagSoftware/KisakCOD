@@ -155,7 +155,7 @@ char __cdecl FX_ValidateVisuals(const FxEditorEffectDef *editorEffect, const FxE
         Com_PrintError(21, "effect '%s' segment '%s'\nTrail split dist <= 0.\n", editorEffect->name, edElemDef->name);
         return 0;
     }
-    if ((int)((double)edElemDef->trailRepeatDist * 1000.0) > 0)
+    if (SnapFloatToInt((double)edElemDef->trailRepeatDist * 1000.0) > 0)
         return 1;
     Com_PrintError(
         21,
@@ -1267,7 +1267,7 @@ void __cdecl FX_ConvertTrail(FxTrailDef **outTrailDef, const FxEditorElemDef *ed
         if (edElemDef->trailRepeatDist <= 0)
             MyAssertHandler(".\\EffectsCore\\fx_convert.cpp", 969, 0, "%s", "edElemDef->trailRepeatDist > 0");
         (*outTrailDef)->splitDist = edElemDef->trailSplitDist;
-        (*outTrailDef)->scrollTimeMsec = (int)(edElemDef->trailScrollTime * 1000.0);
+        (*outTrailDef)->scrollTimeMsec = SnapFloatToInt(edElemDef->trailScrollTime * 1000.0);
         (*outTrailDef)->repeatDist = edElemDef->trailRepeatDist;
     }
     else
@@ -1400,7 +1400,7 @@ void __cdecl FX_ConvertElemDef(
             "%s\n\t(edElemDef->lightingFrac) = %g",
             "(edElemDef->lightingFrac <= 255.0f)",
             edElemDef->lightingFrac);
-    if ((int)(edElemDef->lightingFrac * 255.0f) >= 256)
+    if (SnapFloatToInt(edElemDef->lightingFrac * 255.0f) >= 256)
         MyAssertHandler(
             ".\\EffectsCore\\fx_convert.cpp",
             1076,

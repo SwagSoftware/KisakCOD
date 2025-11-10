@@ -64,7 +64,7 @@ void __cdecl FX_SetupVisualState(
 
     samplePoint = (double)elemDef->visStateIntervalCount * normTimeUpdateEnd;
     v5 = floor(samplePoint);
-    preVisState->sampleLerp = samplePoint - (double)(int)v5;
+    preVisState->sampleLerp = samplePoint - SnapFloat(v5);
     preVisState->sampleLerpInv = 1.0 - preVisState->sampleLerp;
     preVisState->elemDef = elemDef;
     preVisState->effect = effect;
@@ -530,11 +530,11 @@ void __cdecl FX_GetSpriteTexCoords(const FxDrawState *draw, float *s0, float *ds
         }
         if ((elemDef->atlas.behavior & 4) != 0)
         {
-            atlasIndex += (int)((double)atlasCount * draw->normTimeUpdateEnd);
+            atlasIndex += SnapFloatToInt((double)atlasCount * draw->normTimeUpdateEnd);
         }
         else if (elemDef->atlas.fps)
         {
-            atlasIndex += elemDef->atlas.fps * (int)draw->msecElapsed / 1000;
+            atlasIndex += elemDef->atlas.fps * SnapFloatToInt(draw->msecElapsed) / 1000;
         }
         if ((elemDef->atlas.behavior & 8) != 0 && atlasIndex >= atlasCount * elemDef->atlas.loopCount)
             atlasIndex = atlasCount - 1;
@@ -994,16 +994,16 @@ void __cdecl FX_DrawElement_Setup_1_(
     normTime = msecElapsedFloat / draw->msecLifeSpan;
     if (outRealNormTime)
         *outRealNormTime = normTime;
-    if (msecElapsed < (int)draw->msecLifeSpan)
+    if (msecElapsed < SnapFloatToInt(draw->msecLifeSpan))
     {
-        if (msecElapsed > (int)draw->msecLifeSpan)
+        if (msecElapsed > SnapFloatToInt(draw->msecLifeSpan))
             MyAssertHandler(
                 ".\\EffectsCore\\fx_draw.cpp",
                 972,
                 0,
                 "msecElapsed <= static_cast< int32_t >( draw->msecLifeSpan )\n\t%i, %i",
                 msecElapsed,
-                (int)draw->msecLifeSpan);
+                SnapFloatToInt(draw->msecLifeSpan));
         draw->msecElapsed = msecElapsedFloat;
         draw->normTimeUpdateEnd = normTime;
     }

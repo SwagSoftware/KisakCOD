@@ -1126,7 +1126,7 @@ void __cdecl CenterViewOnClient(int32_t localClientNum)
     v3 = (double)cg_scoreboardItemHeight->current.integer;
     v2 = v4 - CG_BannerScoreboardScaleMultiplier() * v3 - 4.0;
     v1 = (double)cg_scoreboardItemHeight->current.integer;
-    viewmax = (int)(v2 / (CG_BannerScoreboardScaleMultiplier() * v1 + 4.0));
+    viewmax = SnapFloatToInt(v2 / (CG_BannerScoreboardScaleMultiplier() * v1 + 4.0));
     team = cgameGlob->bgs.clientinfo[cgameGlob->clientNum].team;
     clientLine = 1;
     if (team == TEAM_SPECTATOR)

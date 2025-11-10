@@ -90,7 +90,7 @@ void __cdecl CG_FxTest()
             if (Cmd_Argc() == 3)
             {
                 v1 = Cmd_Argv(2);
-                s_testEffect[0].respawnTime = (int)(atof(v1) * 1000.0);
+                s_testEffect[0].respawnTime = SnapFloatToInt(atof(v1) * 1000.0);
             }
             else
             {
@@ -758,7 +758,7 @@ void __cdecl CG_SmoothCameraZ(cg_s *cgameGlob)
     if (cgameGlob->stepViewChange != 0.0 && cgameGlob->time - cgameGlob->stepViewStart >= 0)
     {
         timeSinceStart = cgameGlob->time - cgameGlob->stepViewStart;
-        smoothingDuration = (int)(cg_viewZSmoothingTime->current.value * 1000.0);
+        smoothingDuration = SnapFloatToInt(cg_viewZSmoothingTime->current.value * 1000.0);
         if (timeSinceStart < smoothingDuration)
         {
             if (timeSinceStart >= 0)

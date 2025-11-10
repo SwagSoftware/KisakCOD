@@ -1000,8 +1000,8 @@ void __cdecl SetHudElemPos(const ScreenPlacement *scrPlace, const hudelem_s *ele
             cghe->height,
             &cghe->x,
             &cghe->y);
-        cghe->x = (float)(int)(cghe->x);
-        cghe->y = (float)(int)(cghe->y);
+        cghe->x = SnapFloat(cghe->x);
+        cghe->y = SnapFloat(cghe->y);
     }
     else
     {

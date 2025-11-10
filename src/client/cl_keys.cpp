@@ -313,7 +313,7 @@ void __cdecl Field_DrawTextOverride(
             cursorChar = 124;
     }
     xAdj = (float)x;
-    yAdj = (float)(y + (int)((double)R_TextHeight(font) * yScale));
+    yAdj = (float)(y + SnapFloatToInt((double)R_TextHeight(font) * yScale));
     CL_DrawTextWithCursor(
         scrPlace,
         str,

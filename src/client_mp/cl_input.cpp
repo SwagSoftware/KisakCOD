@@ -511,10 +511,10 @@ void __cdecl CL_KeyMove(int localClientNum, usercmd_s *cmd)
     else
         cmd->buttons = cmd->buttons & 0xFFFFF7FF;
 
-    side = (int)(CL_KeyState(kb + 7) * 127.0f);
-    side -= (int)(CL_KeyState(kb + 6) * 127.0f);
-    forward = (int)(CL_KeyState(kb + 2) * 127.0f);
-    forward -= (int)(CL_KeyState(kb + 3) * 127.0f);
+    side = SnapFloatToInt(CL_KeyState(kb + 7) * 127.0f);
+    side -= SnapFloatToInt(CL_KeyState(kb + 6) * 127.0f);
+    forward = SnapFloatToInt(CL_KeyState(kb + 2) * 127.0f);
+    forward -= SnapFloatToInt(CL_KeyState(kb + 3) * 127.0f);
     if (!kb[3].active)
     {
         if (kb[27].active || kb[27].wasPressed)
@@ -529,8 +529,8 @@ void __cdecl CL_KeyMove(int localClientNum, usercmd_s *cmd)
     }
     if (kb[8].active && (cmd->buttons & 2) == 0)
     {
-        side += (int)(CL_KeyState(kb + 1) * (double)127);
-        side -= (int)(CL_KeyState(kb) * (double)127);
+        side += SnapFloatToInt(CL_KeyState(kb + 1) * 127.0f);
+        side -= SnapFloatToInt(CL_KeyState(kb) * 127.0f);
     }
     cmd->forwardmove = ClampChar(forward);
     cmd->rightmove = ClampChar(side);
@@ -774,14 +774,14 @@ void __cdecl CL_FinishMove(int localClientNum, usercmd_s *cmd)
         serverTime = LocalClientGlobals->serverTime;
     cmd->serverTime = serverTime;
     for (i = 0; i < 3; ++i)
-        cmd->angles[i] = (unsigned __int16)(int)((LocalClientGlobals->viewangles[i] + LocalClientGlobals->cgameKickAngles[i])
+        cmd->angles[i] = (unsigned __int16)SnapFloatToInt((LocalClientGlobals->viewangles[i] + LocalClientGlobals->cgameKickAngles[i])
             * 182.0444488525391);
     cmd->buttons |= LocalClientGlobals->cgameExtraButtons;
     LocalClientGlobals->cgameExtraButtons = 0;
     if (CG_VehLocalClientDriving(localClientNum))
     {
-        cmd->angles[1] = (unsigned __int16)(int)(LocalClientGlobals->vehicleViewYaw * 182.0444488525391);
-        cmd->angles[0] = (unsigned __int16)(int)(LocalClientGlobals->vehicleViewPitch * 182.0444488525391);
+        cmd->angles[1] = (unsigned __int16)SnapFloatToInt(LocalClientGlobals->vehicleViewYaw * 182.0444488525391);
+        cmd->angles[0] = (unsigned __int16)SnapFloatToInt(LocalClientGlobals->vehicleViewPitch * 182.0444488525391);
         cmd->angles[2] = 0;
     }
 }

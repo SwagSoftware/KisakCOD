@@ -1437,11 +1437,11 @@ void __cdecl PM_UpdateHoldBreath(pmove_t *pm, pml_t *pml)
         MyAssertHandler(".\\bgame\\bg_weapons.cpp", 1313, 0, "%s", "ps");
     weapIndex = BG_GetViewmodelWeaponIndex(ps);
     weapDef = BG_GetWeaponDef(weapIndex);
-    breathHoldTime = (int)(player_breath_hold_time->current.value * 1000.0);
-    breathGaspTime = (int)(player_breath_gasp_time->current.value * 1000.0);
+    breathHoldTime = SnapFloatToInt(player_breath_hold_time->current.value * 1000.0);
+    breathGaspTime = SnapFloatToInt(player_breath_gasp_time->current.value * 1000.0);
 #ifdef KISAK_MP
     if ((ps->perks & 0x10) != 0)
-        breathHoldTime += (int)(perk_extraBreath->current.value * 1000.0);
+        breathHoldTime += SnapFloatToInt(perk_extraBreath->current.value * 1000.0);
 #endif
     if (breathHoldTime > 0)
     {
@@ -2613,10 +2613,10 @@ void __cdecl PM_HoldBreathFire(playerState_s *ps)
     weapDef = BG_GetWeaponDef(weapIndex);
     if (ps->fWeaponPosFrac == 1.0 && weapDef->overlayReticle && weapDef->weapClass != WEAPCLASS_ITEM)
     {
-        breathHoldTime = (int)(player_breath_hold_time->current.value * 1000.0);
+        breathHoldTime = SnapFloatToInt(player_breath_hold_time->current.value * 1000.0);
         if (ps->holdBreathTimer < breathHoldTime)
         {
-            ps->holdBreathTimer += (int)(player_breath_fire_delay->current.value * 1000.0);
+            ps->holdBreathTimer += SnapFloatToInt(player_breath_fire_delay->current.value * 1000.0);
             if (ps->holdBreathTimer > breathHoldTime)
                 ps->holdBreathTimer = breathHoldTime;
         }
@@ -2666,7 +2666,7 @@ void __cdecl PM_Weapon_StartFiring(playerState_s *ps, int32_t delayedAction)
         ps->weaponDelay = weapDef->iFireDelay;
         ps->weaponTime = weapDef->iFireTime;
         if (weapDef->adsFireOnly)
-            ps->weaponDelay = (int)((1.0 - ps->fWeaponPosFrac) * (1.0 / weapDef->fOOPosAnimLength[0]));
+            ps->weaponDelay = SnapFloatToInt((1.0 - ps->fWeaponPosFrac) * (1.0 / weapDef->fOOPosAnimLength[0]));
         if (weapDef->bBoltAction)
             Com_BitSetAssert(ps->weaponrechamber, ps->weapon, 16);
         if (ps->weaponstate != 5)
@@ -3802,7 +3802,7 @@ void __cdecl BG_CalculateWeaponPosition_IdleAngles(weaponState_t *ws, float *ang
     fTargScalea = fTargScale * ws->fLastIdleFactor;
     if (weapDef->overlayReticle)
         fTargScalea = (1.0 - ps->fWeaponPosFrac) * fTargScalea;
-    *ws->weapIdleTime += (int)(ws->frametime * 1000.0 * idleSpeed);
+    *ws->weapIdleTime += SnapFloatToInt(ws->frametime * 1000.0 * idleSpeed);
     v7 = (double)*ws->weapIdleTime * 0.0005000000237487257;
     v4 = sin(v7);
     angles[2] = fTargScalea * v4 * 0.009999999776482582 + angles[2];
@@ -4196,7 +4196,7 @@ void __cdecl BG_CalculateView_IdleAngles(viewState_t *vs, float *angles)
         fTargScalea = fTargScale * vs->fLastIdleFactor;
         fTargScaleb = fTargScalea * ps->fWeaponPosFrac;
         fTargScalec = fTargScaleb * ps->holdBreathScale;
-        *vs->weapIdleTime += (int)(ps->holdBreathScale * vs->frametime * 1000.0 * idleSpeed);
+        *vs->weapIdleTime += SnapFloatToInt(ps->holdBreathScale * vs->frametime * 1000.0 * idleSpeed);
         v5 = (double)*vs->weapIdleTime * 0.000699999975040555;
         v3 = sin(v5);
         angles[1] = fTargScalec * v3 * 0.009999999776482582 + angles[1];

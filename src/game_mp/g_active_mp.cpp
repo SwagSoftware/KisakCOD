@@ -121,8 +121,8 @@ void __cdecl P_DamageFeedback(gentity_s *player)
                 AnglesToAxis(client->ps.viewangles, viewaxis);
                 client->v_dmg_roll = Vec3Dot(client->damage_from, viewaxis[1]) * -kick;
                 client->v_dmg_pitch = Vec3Dot(client->damage_from, viewaxis[0]) * kick;
-                client->ps.damagePitch = (int)(angles[0] / 360.0 * 256.0);
-                client->ps.damageYaw = (int)(angles[1] / 360.0 * 256.0);
+                client->ps.damagePitch = SnapFloatToInt(angles[0] / 360.0 * 256.0);
+                client->ps.damageYaw = SnapFloatToInt(angles[1] / 360.0 * 256.0);
             }
             ++client->ps.damageEvent;
             client->damageTime = level.time - 20;
@@ -401,7 +401,7 @@ void __cdecl HandleClientEvent(gclient_s *client, gentity_s *ent, int32_t event,
             if (damage != 0.0)
             {
                 damage = (double)client->ps.stats[2] * damage;
-                G_Damage(ent, 0, 0, 0, 0, (int)damage, 0, 11, 0xFFFFFFFF, HITLOC_NONE, 0, 0, 0);
+                G_Damage(ent, 0, 0, 0, 0, SnapFloatToInt(damage), 0, 11, 0xFFFFFFFF, HITLOC_NONE, 0, 0, 0);
             }
         }
         break;
@@ -1150,7 +1150,7 @@ void __cdecl ClientEndFrame(gentity_s *ent)
         MyAssertHandler(".\\game_mp\\g_active_mp.cpp", 1490, 0, "%s", "client->sess.connected != CON_DISCONNECTED");
     ent->handler = ENT_HANDLER_CLIENT_SPECTATOR;
     client->ps.deltaTime = 0;
-    client->ps.gravity = (int)g_gravity->current.value;
+    client->ps.gravity = SnapFloatToInt(g_gravity->current.value);
     client->ps.moveSpeedScaleMultiplier = ent->client->sess.moveSpeedScaleMultiplier;
     if (client->bFrozen)
         client->ps.pm_flags |= PMF_FROZEN;

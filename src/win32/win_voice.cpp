@@ -471,7 +471,7 @@ int __cdecl Record_QueueAudioDataForEncoding(audioSample_t *sample)
     {
         for (i = 0; i < sample->lengthInSamples; ++i)
         {
-            *(_WORD*)&sample->buffer[2 * i] = (int)(*(__int16*)&sample->buffer[2 * i] * voice_current_scaler);
+            *(_WORD*)&sample->buffer[2 * i] = SnapFloatToInt(*(__int16*)&sample->buffer[2 * i] * voice_current_scaler);
             v1 = *(__int16*)&sample->buffer[2 * i];
             voice_current_voicelevel = ((HIDWORD(v1) ^ v1) - HIDWORD(v1)) + voice_current_voicelevel;
         }

@@ -407,9 +407,9 @@ unsigned __int8 __cdecl R_LightGridLookup(
 
     iassert(lightGrid);
 
-    pos[0] = ((int)floor(samplePos[0]) + 0x20000) >> 5;
-    pos[1] = ((int)floor(samplePos[1]) + 0x20000) >> 5;
-    pos[2] = ((int)floor(samplePos[2]) + 0x20000) >> 6;
+    pos[0] = (SnapFloatToInt(floor(samplePos[0])) + 0x20000) >> 5;
+    pos[1] = (SnapFloatToInt(floor(samplePos[1])) + 0x20000) >> 5;
+    pos[2] = (SnapFloatToInt(floor(samplePos[2])) + 0x20000) >> 6;
 
     iassert((lightGrid->rowAxis == 0 && lightGrid->colAxis == 1) || (lightGrid->rowAxis == 1 && lightGrid->colAxis == 0));
 

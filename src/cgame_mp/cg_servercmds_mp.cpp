@@ -120,7 +120,7 @@ void __cdecl CG_ParseFog(int32_t localClientNum)
     }
     else
     {
-        R_SwitchFog(0, time, (int)start);
+        R_SwitchFog(0, time, SnapFloatToInt(start));
     }
 }
 

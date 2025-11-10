@@ -355,7 +355,7 @@ void __cdecl CG_VehProcessEntity(int32_t localClientNum, centity_s *cent)
             else
             {
                 time = p_currentState->u.vehicle.materialTime
-                    + (int)((double)(ns->lerp.u.vehicle.materialTime - p_currentState->u.vehicle.materialTime)
+                    + SnapFloatToInt((double)(ns->lerp.u.vehicle.materialTime - p_currentState->u.vehicle.materialTime)
                         * cgameGlob->frameInterpolation);
                 materialTime = (double)(cgameGlob->time - time) * EQUAL_EPSILON;
             }
@@ -451,7 +451,7 @@ void __cdecl SetupPoseControllers(int32_t localClientNum, DObj_s *obj, centity_s
     v54 = v37 * frameInterpolation + v55;
     v36 = v54 * 182.0444488525391 + 0.5;
     v35 = floor(v36);
-    cent->pose.vehicle.pitch = (int)v35;
+    cent->pose.vehicle.pitch = SnapFloatToInt(v35);
     v52 = p_currentState->u.vehicle.bodyRoll;
     v34 = ns->lerp.u.vehicle.bodyRoll - v52;
     v53 = v34 * 0.002777777845039964;
@@ -462,7 +462,7 @@ void __cdecl SetupPoseControllers(int32_t localClientNum, DObj_s *obj, centity_s
     v51 = v30 * v32 + v52;
     v29 = v51 * 182.0444488525391 + 0.5;
     v28 = floor(v29);
-    cent->pose.vehicle.roll = (int)v28;
+    cent->pose.vehicle.roll = SnapFloatToInt(v28);
     gunPitch = p_currentState->u.vehicle.gunPitch;
     v27 = ns->lerp.u.vehicle.gunPitch - gunPitch;
     v50 = v27 * 0.002777777845039964;
@@ -473,7 +473,7 @@ void __cdecl SetupPoseControllers(int32_t localClientNum, DObj_s *obj, centity_s
     v48 = v23 * v25 + gunPitch;
     v22 = v48 * 182.0444488525391 + 0.5;
     v21 = floor(v22);
-    cent->pose.vehicle.barrelPitch = (int)v21;
+    cent->pose.vehicle.barrelPitch = SnapFloatToInt(v21);
     gunYaw = p_currentState->u.vehicle.gunYaw;
     v20 = ns->lerp.u.vehicle.gunYaw - gunYaw;
     v47 = v20 * 0.002777777845039964;
@@ -484,7 +484,7 @@ void __cdecl SetupPoseControllers(int32_t localClientNum, DObj_s *obj, centity_s
     v45 = v16 * v18 + gunYaw;
     v15 = v45 * 182.0444488525391 + 0.5;
     v14 = floor(v15);
-    cent->pose.vehicle.yaw = (int)v14;
+    cent->pose.vehicle.yaw = SnapFloatToInt(v14);
     cent->pose.turret.barrelPitch = Veh_GetTurretBarrelRoll(localClientNum, cent);
     v43 = p_currentState->u.vehicle.steerYaw;
     v13 = ns->lerp.u.vehicle.steerYaw - v43;
@@ -496,7 +496,7 @@ void __cdecl SetupPoseControllers(int32_t localClientNum, DObj_s *obj, centity_s
     v42 = v9 * v11 + v43;
     v8 = v42 * 182.0444488525391 + 0.5;
     v7 = floor(v8);
-    cent->pose.vehicle.steerYaw = (int)v7;
+    cent->pose.vehicle.steerYaw = SnapFloatToInt(v7);
     cent->pose.vehicle.time = (double)ns->time2 * EQUAL_EPSILON;
     DObjGetBoneIndex(obj, scr_const.tag_body, &cent->pose.vehicle.tag_body);
     DObjGetBoneIndex(obj, scr_const.tag_turret, &cent->pose.vehicle.tag_turret);
@@ -716,7 +716,7 @@ void __cdecl VehicleFXTest(int32_t localClientNum, const DObj_s *obj, centity_s 
         }
         if (cent->nextState.un1.scale != 3 && vehFx->nextSmokeFx <= (signed int)Sys_Milliseconds())
         {
-            v6.scale = (int)cent->nextState.un1;
+            v6.scale = SnapFloatToInt(cent->nextState.un1);
             switch (v6.scale)
             {
             case 0:

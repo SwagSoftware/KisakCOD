@@ -1101,11 +1101,11 @@ void __cdecl SV_BotUserMove(client_t *cl)
                 nullcmd.rightmove = 127;
             }
             if (random() < 0.3300000131130219)
-                nullcmd.angles[0] = (int)(crandom() * 360.0);
+                nullcmd.angles[0] = SnapFloatToInt(crandom() * 360.0);
             if (random() < 0.3300000131130219)
-                nullcmd.angles[1] = (int)(crandom() * 360.0);
+                nullcmd.angles[1] = SnapFloatToInt(crandom() * 360.0);
             if (random() < 0.3300000131130219)
-                nullcmd.angles[2] = (int)(crandom() * 360.0);
+                nullcmd.angles[2] = SnapFloatToInt(crandom() * 360.0);
         }
         cl->header.deltaMessage = cl->header.netchan.outgoingSequence - 1;
         SV_ClientThink(cl, &nullcmd);

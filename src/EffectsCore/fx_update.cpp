@@ -143,7 +143,7 @@ void __cdecl FX_SpawnTrailLoopingElems(
             effect,
             trail,
             &frameWhenPlayed,
-            msecUpdateBegin + ((msecUpdateEnd - msecUpdateBegin) * lerp),
+            msecUpdateBegin + (int)(SnapFloat(msecUpdateEnd - msecUpdateBegin) * lerp),
             distSpawn);
         normalizedDistanceRemaining = normalizedDistanceRemaining - normalizedDistanceBeforeSpawn;
         normalizedDistanceBeforeSpawn = 1.0;
@@ -1179,6 +1179,7 @@ void __cdecl FX_NextElementPosition_NoExternalForces(
     FX_IntegrateVelocity(update, normUpdateBegin, normUpdateEnd, posLocal, posWorld);
 }
 
+// KISAKTODO: nasty v9 
 void __cdecl FX_IntegrateVelocity(const FxUpdateElem *update, float t0, float t1, float *posLocal, float *posWorld)
 {
     const char *v5; // eax
@@ -1243,11 +1244,11 @@ void __cdecl FX_IntegrateVelocity(const FxUpdateElem *update, float t0, float t1
     {
         startPoint = (double)intervalCount * t0;
         *((float *)&v9 + 1) = floor(startPoint);
-        startIndex = (int)*((float *)&v9 + 1);
+        startIndex = SnapFloatToInt(*((float *)&v9 + 1));
         startLerp = startPoint - (double)startIndex;
         endPoint = (double)intervalCount * t1;
         *(float *)&v9 = ceil(endPoint);
-        endIndex = (int)*(float *)&v9 - 1;
+        endIndex = SnapFloatToInt(*(float *)&v9 - 1);
         endLerp = endPoint - (double)endIndex;
         if (startIndex > endIndex)
         {
@@ -1508,7 +1509,7 @@ int32_t __cdecl FX_CollisionResponse(
     Vec3Lerp(xyzWorldOld, update->posWorld, trace->fraction, update->posWorld);
     v12 = (double)(msecUpdateEnd - msecUpdateBegin) * trace->fraction;
     v11 = floor(v12);
-    msecOnImpact = msecUpdateBegin + (int)v11;
+    msecOnImpact = msecUpdateBegin + SnapFloatToInt(v11);
     if (msecOnImpact >= msecUpdateEnd)
         MyAssertHandler(".\\EffectsCore\\fx_update.cpp", 892, 0, "%s", "msecOnImpact < msecUpdateEnd");
     if ((elemDef->flags & 0x200) != 0 || msecOnImpact == update->msecElemEnd)
@@ -1566,7 +1567,7 @@ int32_t __cdecl FX_CollisionResponse(
             && trace->normal[2] > 0.699999988079071)
         {
             fraction_4 = (float)msecOnImpact;
-            update->atRestFraction = (int)FX_GetAtRestFraction(update, fraction_4);
+            update->atRestFraction = SnapFloatToInt(FX_GetAtRestFraction(update, fraction_4));
             return msecUpdateEnd;
         }
         else
@@ -1861,7 +1862,7 @@ uint8_t __cdecl FX_ProcessEmitting(
         lerp = v8 / distInUpdate;
         v12 = (double)(update->msecUpdateEnd - update->msecUpdateBegin) * lerp;
         v7 = floor(v12);
-        msecAtSpawn = update->msecUpdateBegin + (int)v7;
+        msecAtSpawn = update->msecUpdateBegin + SnapFloatToInt(v7);
         Vec3Lerp(frameBegin->origin, frameEnd->origin, lerp, frameElemNow.origin);
         Vec4Lerp(frameBegin->quat, frameEnd->quat, lerp, frameElemNow.quat);
         Vec4Normalize(frameElemNow.quat);
@@ -2066,11 +2067,11 @@ void __cdecl FX_TrailElem_CompressBasis(const float (*inBasis)[3], char (*outBas
     {
         for (dimIter = 0; dimIter != 3; ++dimIter)
         {
-            v3 = (int)((float)(*inBasis)[3 * basisVecIter + dimIter] * 127.0);
+            v3 = SnapFloatToInt((float)(*inBasis)[3 * basisVecIter + dimIter] * 127.0);
             if (v3 >= -128)
             {
                 if (v3 <= 127)
-                    v2 = (int)((float)(*inBasis)[3 * basisVecIter + dimIter] * 127.0);
+                    v2 = SnapFloatToInt((float)(*inBasis)[3 * basisVecIter + dimIter] * 127.0);
                 else
                     v2 = 127;
             }
@@ -2126,11 +2127,11 @@ FxUpdateResult __cdecl FX_UpdateTrailElement(
                 PROF_SCOPED("FX_UpdateOrigin");
                 updateResult = (FxUpdateResult)FX_UpdateElementPosition(system, &update);
             }
-            v8 = (int)(baseVel[2] / EQUAL_EPSILON);
+            v8 = SnapFloatToInt(baseVel[2] / EQUAL_EPSILON);
             if (v8 >= -32768)
             {
                 if (v8 <= 0x7FFF)
-                    v7 = (int)(baseVel[2] / EQUAL_EPSILON);
+                    v7 = SnapFloatToInt(baseVel[2] / EQUAL_EPSILON);
                 else
                     v7 = 0x7FFF;
             }

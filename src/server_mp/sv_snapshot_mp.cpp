@@ -1350,7 +1350,7 @@ void __cdecl SV_SendMessageToClient(msg_t *msg, client_t *client)
             MyAssertHandler(".\\server_mp\\sv_snapshot_mp.cpp", 1951, 0, "%s", "client->snapshotBackoffCount >= 0");
         //v3 = _Pow_int<double>(2.0, client->snapshotBackoffCount);
         v3 = pow(2.0, (double)client->snapshotBackoffCount);
-        client->nextSnapshotTime = svs.time + irand(0, (int)v3) * client->snapshotMsec;
+        client->nextSnapshotTime = svs.time + irand(0, SnapFloatToInt(v3)) * client->snapshotMsec;
         if (client->snapshotBackoffCount + 1 < 8)
             v2 = client->snapshotBackoffCount + 1;
         else

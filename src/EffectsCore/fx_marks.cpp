@@ -68,19 +68,13 @@ uint16_t __cdecl FX_MarkToHandle(FxMarksSystem *marksSystem, FxMark *mark)
 {
     uint16_t handle; // [esp+0h] [ebp-4h]
 
-    if (!marksSystem)
-        MyAssertHandler("c:\\trees\\cod3\\src\\effectscore\\fx_marks.h", 152, 0, "%s", "marksSystem");
-    if (!mark)
-        MyAssertHandler("c:\\trees\\cod3\\src\\effectscore\\fx_marks.h", 153, 0, "%s", "mark");
+    iassert(marksSystem);
+    iassert(mark);
+
     handle = mark - marksSystem->marks;
-    if (handle >= 0x200u)
-        MyAssertHandler(
-            "c:\\trees\\cod3\\src\\effectscore\\fx_marks.h",
-            156,
-            0,
-            "handle doesn't index FX_MARKS_LIMIT\n\t%i not in [0, %i)",
-            handle,
-            512);
+
+    bcassert(handle, FX_MARKS_LIMIT);
+
     return mark - marksSystem->marks;
 }
 
@@ -661,16 +655,9 @@ void __cdecl FX_AllocAndConstructMark(
 
 FxMark *__cdecl FX_MarkFromHandle(FxMarksSystem *marksSystem, uint16_t handle)
 {
-    if (handle >= 0x200u)
-        MyAssertHandler(
-            "c:\\trees\\cod3\\src\\effectscore\\fx_marks.h",
-            169,
-            0,
-            "handle doesn't index FX_MARKS_LIMIT\n\t%i not in [0, %i)",
-            handle,
-            512);
-    if (!marksSystem)
-        MyAssertHandler("c:\\trees\\cod3\\src\\effectscore\\fx_marks.h", 170, 0, "%s", "marksSystem");
+    bcassert(handle, FX_MARKS_LIMIT);
+    iassert(marksSystem);
+
     return &marksSystem->marks[handle];
 }
 
@@ -1853,14 +1840,7 @@ void __cdecl FX_GenerateMarkVertsForMark_MatrixFromScaledPlacement(
     const float* viewOffset,
     float (*outTransform)[3])
 {
-    if (placement->scale != 1.0)
-        MyAssertHandler(
-            ".\\EffectsCore\\fx_marks.cpp",
-            1434,
-            0,
-            "%s\n\t(placement->scale) = %g",
-            "(placement->scale == 1.0f)",
-            placement->scale);
+    iassert(placement->scale == 1.0f);
     FX_GenerateMarkVertsForMark_MatrixFromPlacement(&placement->base, viewOffset, outTransform);
 }
 

@@ -162,7 +162,7 @@ int __cdecl CM_ForEachBrushPlaneIntersection(
                         CM_GetPlaneVec4Form(sides, axialPlanes, sideIndex[2], expandedPlane[2]);
                         if (IntersectPlanes(plane, xyz))
                         {
-                            SnapPointToIntersectingPlanes(plane, xyz, 0.25f, 0.0099999998f);
+                            SnapPointToIntersectingPlanes(plane, xyz, 0.25f, 0.01f);
                             ptCount = CM_AddSimpleBrushPoint(brush, axialPlanes, sideIndex, xyz, ptCount, brushPts);
                         }
                     }

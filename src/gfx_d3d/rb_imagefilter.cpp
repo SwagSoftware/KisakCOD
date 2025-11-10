@@ -89,10 +89,10 @@ int __cdecl RB_GenerateGaussianFilterChain(
             passRadius = 1.3895605f;
         v18 = radiusX * radiusX - passRadius * passRadius;
         v17 = sqrt(v18);
-        radiusX = v17 * (float)dstWidth / (float)(int)srcWidth;
+        radiusX = v17 * (float)dstWidth / (float)(int)srcWidth; // I dont think this does bankers rounding?
         v16 = radiusY * radiusY - passRadius * passRadius;
         v15 = sqrt(v16);
-        radiusY = v15 * (float)dstHeight / (float)(int)srcHeight;
+        radiusY = v15 * (float)dstHeight / (float)(int)srcHeight; // ^^
         iassert( passCount < passLimit );
         RB_GenerateGaussianFilter2D(passRadius, srcWidth, srcHeight, dstWidth, dstHeight, &filterPass[passCount++]);
     }

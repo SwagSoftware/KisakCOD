@@ -1129,7 +1129,7 @@ void __cdecl VEH_PushEntity_0(
                     damagea = (mph - 10.0) / (50.0 - 10.0);
                     damage = (100.0 - 5.0) * damagea;
                 }
-                InflictDamage(ent, target, pushDir, damage);
+                InflictDamage(ent, target, pushDir, SnapFloatToInt(damage));
             }
         }
         else if (target->takedamage)
@@ -1321,7 +1321,7 @@ void __cdecl G_VehEntHandler_Think(gentity_s *pSelf)
         VEH_UpdateSteering(pSelf);
         VEH_UpdateMaterialTime(pSelf, frameTime);
         VEH_UpdateSounds(pSelf);
-        pSelf->s.time2 = (int)(info->suspensionTravel * 1000.0);
+        pSelf->s.time2 = SnapFloatToInt(info->suspensionTravel * 1000.0);
         pSelf->nextthink = level.time + 50;
     }
     else
@@ -1527,7 +1527,7 @@ void __cdecl VEH_UpdateMaterialTime(gentity_s *ent, float frameTime)
         else
             v2 = veh->speed / 176.0 * frameTime * vehTextureScrollScale->current.value;
         deltaTime = v2;
-        ent->s.lerp.u.vehicle.materialTime += (int)(deltaTime * 1000.0);
+        ent->s.lerp.u.vehicle.materialTime += SnapFloatToInt(deltaTime * 1000.0);
     }
     else
     {
@@ -1730,7 +1730,7 @@ char __cdecl VEH_PlayerRotation(gentity_s *player, vehicle_physic_t *phys)
     if (v3 >= 20.0)
         return 127 * sign;
     if (v3 >= 0.0099999998)
-        return (int)(v3 / 20.0 * 127.0) * sign;
+        return SnapFloatToInt(v3 / 20.0 * 127.0) * sign;
     return 0;
 }
 
@@ -2541,7 +2541,7 @@ void __cdecl G_VehEntHandler_Touch(gentity_s *pSelf, gentity_s *pOther, int32_t 
                                 if (damageScale > 1.0f)
                                     damageScale = 1.0f;
                                 damageScale = (dot - 0.800000011920929f) / 0.199999988079071f * damageScale;
-                                damage = (int)(damageScale * info->collisionDamage);
+                                damage = SnapFloatToInt(damageScale * info->collisionDamage);
                                 if (damage > 0)
                                     InflictDamage(pSelf, pOther, moveDir, damage);
                             }

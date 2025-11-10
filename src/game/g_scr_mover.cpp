@@ -86,7 +86,7 @@ int __cdecl ScriptMover_UpdateMove(
     float vMove[3]; // [esp+40h] [ebp-10h] BYREF
     int trDuration; // [esp+4Ch] [ebp-4h]
 
-    trDuration = (int)(fMidTime * 1000.0);
+    trDuration = SnapFloatToInt(fMidTime * 1000.0);
     if (pTr->trType == TR_ACCELERATE && trDuration > 0)
     {
         pTr->trTime = level.time;
@@ -116,7 +116,7 @@ int __cdecl ScriptMover_UpdateMove(
     if ((pTr->trType == TR_ACCELERATE && trDuration <= 0 || pTr->trType == TR_LINEAR_STOP) && fDecelTime > 0.0)
     {
         pTr->trTime = level.time;
-        pTr->trDuration = (int)(fDecelTime * 1000.0);
+        pTr->trDuration = SnapFloatToInt(fDecelTime * 1000.0);
         pTr->trBase[0] = *vPos2;
         pTr->trBase[1] = vPos2[1];
         pTr->trBase[2] = vPos2[2];
@@ -333,7 +333,7 @@ void __cdecl ScriptMover_SetupMove(
     if (fAccelTime == 0.0 && fDecelTime == 0.0f)
     {
         pTr->trTime = level.time;
-        pTr->trDuration = (int)(fTotalTime * 1000.0f);
+        pTr->trDuration = SnapFloatToInt(fTotalTime * 1000.0f);
         *pfMidTime = fTotalTime;
         *pfDecelTime = 0.0;
         *vPos3 = *vPos;
@@ -378,7 +378,7 @@ void __cdecl ScriptMover_SetupMove(
             if (*pfMidTime == 0.0)
             {
                 pTr->trTime = level.time;
-                pTr->trDuration = (int)(*pfDecelTime * 1000.0f);
+                pTr->trDuration = SnapFloatToInt(*pfDecelTime * 1000.0f);
                 pTr->trBase[0] = *vCurrPos;
                 pTr->trBase[1] = vCurrPos[1];
                 pTr->trBase[2] = vCurrPos[2];
@@ -401,7 +401,7 @@ void __cdecl ScriptMover_SetupMove(
             else
             {
                 pTr->trTime = level.time;
-                pTr->trDuration = (int)(*pfMidTime * 1000.0f);
+                pTr->trDuration = SnapFloatToInt(*pfMidTime * 1000.0f);
                 pTr->trBase[0] = *vCurrPos;
                 pTr->trBase[1] = vCurrPos[1];
                 pTr->trBase[2] = vCurrPos[2];
@@ -427,7 +427,7 @@ void __cdecl ScriptMover_SetupMove(
         else
         {
             pTr->trTime = level.time;
-            pTr->trDuration = (int)(fAccelTime * 1000.0f);
+            pTr->trDuration = SnapFloatToInt(fAccelTime * 1000.0f);
             pTr->trBase[0] = *vCurrPos;
             pTr->trBase[1] = vCurrPos[1];
             pTr->trBase[2] = vCurrPos[2];
@@ -513,7 +513,7 @@ void __cdecl ScriptMover_GravityMove(gentity_s *mover, float *velocity, float to
     }
     trajectory = &mover->s.lerp.pos;
     mover->s.lerp.pos.trTime = level.time;
-    mover->s.lerp.pos.trDuration = (int)(totalTime * 1000.0f);
+    mover->s.lerp.pos.trDuration = SnapFloatToInt(totalTime * 1000.0f);
     mover->s.lerp.pos.trBase[0] = mover->r.currentOrigin[0];
     mover->s.lerp.pos.trBase[1] = mover->r.currentOrigin[1];
     mover->s.lerp.pos.trBase[2] = mover->r.currentOrigin[2];
@@ -828,8 +828,8 @@ void __cdecl ScriptEntCmd_Vibrate(scr_entref_t entref)
         pSelf->mover.apos3[0] = pSelf->r.currentAngles[0];
         pSelf->mover.apos3[1] = pSelf->r.currentAngles[1];
         pSelf->mover.apos3[2] = pSelf->r.currentAngles[2];
-        pSelf->s.lerp.apos.trDuration = (int)(period * 1000.0);
-        pSelf->s.lerp.apos.trTime = level.time + (int)(time * 1000.0);
+        pSelf->s.lerp.apos.trDuration = SnapFloatToInt(period * 1000.0);
+        pSelf->s.lerp.apos.trTime = level.time + SnapFloatToInt(time * 1000.0);
         pSelf->s.lerp.apos.trBase[0] = pSelf->r.currentAngles[0];
         pSelf->s.lerp.apos.trBase[1] = pSelf->r.currentAngles[1];
         pSelf->s.lerp.apos.trBase[2] = pSelf->r.currentAngles[2];
@@ -920,7 +920,7 @@ void __cdecl ScriptMover_SetupMoveSpeed(
     if (fAccelTime == 0.0f && fDecelTime == 0.0f)
     {
         pTr->trTime = level.time;
-        pTr->trDuration = (int)(fTotalTime * 1000.0f);
+        pTr->trDuration = SnapFloatToInt(fTotalTime * 1000.0f);
         *pfMidTime = fTotalTime;
         *pfDecelTime = 0.0f;
         pTr->trBase[0] = *vCurrPos;
@@ -957,7 +957,7 @@ void __cdecl ScriptMover_SetupMoveSpeed(
             if (*pfMidTime == 0.0f)
             {
                 pTr->trTime = level.time;
-                pTr->trDuration = (int)(*pfDecelTime * 1000.0f);
+                pTr->trDuration = SnapFloatToInt(*pfDecelTime * 1000.0f);
                 pTr->trBase[0] = *vCurrPos;
                 pTr->trBase[1] = vCurrPos[1];
                 pTr->trBase[2] = vCurrPos[2];
@@ -980,7 +980,7 @@ void __cdecl ScriptMover_SetupMoveSpeed(
             else
             {
                 pTr->trTime = level.time;
-                pTr->trDuration = (int)(*pfMidTime * 1000.0f);
+                pTr->trDuration = SnapFloatToInt(*pfMidTime * 1000.0f);
                 pTr->trBase[0] = *vCurrPos;
                 pTr->trBase[1] = vCurrPos[1];
                 pTr->trBase[2] = vCurrPos[2];
@@ -1004,7 +1004,7 @@ void __cdecl ScriptMover_SetupMoveSpeed(
         else
         {
             pTr->trTime = level.time;
-            pTr->trDuration = (int)(fAccelTime * 1000.0f);
+            pTr->trDuration = SnapFloatToInt(fAccelTime * 1000.0f);
             pTr->trBase[0] = *vCurrPos;
             pTr->trBase[1] = vCurrPos[1];
             pTr->trBase[2] = vCurrPos[2];
@@ -1036,7 +1036,7 @@ void __cdecl ScriptMover_SetupMoveSpeed(
         {
             tr.trType = TR_DECELERATE;
             tr.trTime = level.time;
-            tr.trDuration = (int)(*pfDecelTime * 1000.0f);
+            tr.trDuration = SnapFloatToInt(*pfDecelTime * 1000.0f);
             tr.trBase[0] = *vPos2;
             tr.trBase[1] = vPos2[1];
             tr.trBase[2] = vPos2[2];

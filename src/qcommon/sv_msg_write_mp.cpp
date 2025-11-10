@@ -1007,7 +1007,7 @@ void __cdecl MSG_WriteOriginFloat(const int clientNum, msg_t *msg, int bits, flo
             indexa = 1;
         }
         iassert( svsHeaderValid );
-        roundedCentera = (svsHeader.mapCenter[indexa] + 0.5);
+        roundedCentera = SnapFloatToInt(svsHeader.mapCenter[indexa] + 0.5);
         roundedValuea = (roundedOldValue + 0x8000 - roundedCentera) ^ (roundedValue - roundedCentera + 0x8000);
         SV_PacketDataIsOrigin(clientNum, msg);
         MinBitCountForNum = GetMinBitCountForNum(roundedValuea);
@@ -1060,7 +1060,7 @@ void __cdecl MSG_WriteOriginFloat(const int clientNum, msg_t *msg, int bits, flo
             index = 1;
         }
         iassert( svsHeaderValid );
-        roundedCenter = (svsHeader.mapCenter[index] + 0.5);
+        roundedCenter = SnapFloatToInt(svsHeader.mapCenter[index] + 0.5);
         if (GetMinBitCountForNum((roundedOldValue + 0x8000 - roundedCenter) ^ (roundedValue - roundedCenter + 0x8000)) > 16)
         {
             if (index)
@@ -1113,7 +1113,7 @@ void __cdecl MSG_WriteOriginZFloat(const int clientNum, msg_t *msg, float value,
     {
         MSG_WriteBit1(msg);
         iassert( svsHeaderValid );
-        roundedCentera = (svsHeader.mapCenter[2] + 0.5);
+        roundedCentera = SnapFloatToInt(svsHeader.mapCenter[2] + 0.5);
         roundedValuea = (roundedOldValue + 0x8000 - roundedCentera) ^ (roundedValue - roundedCentera + 0x8000);
         SV_PacketDataIsOrigin(clientNum, msg);
         if (GetMinBitCountForNum(roundedValuea) > 16)
@@ -1137,7 +1137,7 @@ void __cdecl MSG_WriteOriginZFloat(const int clientNum, msg_t *msg, float value,
         MSG_WriteBit0(msg);
         SV_PacketDataIsOriginDelta(clientNum, msg);
         iassert( svsHeaderValid );
-        roundedCenter = (svsHeader.mapCenter[2] + 0.5);
+        roundedCenter = SnapFloatToInt(svsHeader.mapCenter[2] + 0.5);
         if (GetMinBitCountForNum((roundedOldValue + 0x8000 - roundedCenter) ^ (roundedValue - roundedCenter + 0x8000)) > 16)
             Com_Error(
                 ERR_DROP,
@@ -1166,7 +1166,7 @@ bool __cdecl MSG_ValuesAreEqual(const SnapshotInfo_s *snapInfo, int bits, const 
     {
     case -100:
     case -87:
-        result = (unsigned __int16)(int)(*(float *)fromF * 182.0444488525391) == (unsigned __int16)(int)(*(float *)toF * 182.0444488525391);
+        result = (unsigned __int16)SnapFloatToInt(*(float *)fromF * 182.0444488525391) == (unsigned __int16)SnapFloatToInt(*(float *)toF * 182.0444488525391);
         break;
     case -95:
         result = *fromF / 100 == *toF / 100;
@@ -1174,7 +1174,7 @@ bool __cdecl MSG_ValuesAreEqual(const SnapshotInfo_s *snapInfo, int bits, const 
     case -92:
     case -91:
     case -90:
-        result = (int)(*(float *)fromF) == (int)(*(float *)toF);
+        result = SnapFloatToInt(*(float *)fromF) == SnapFloatToInt(*(float *)toF);
         break;
     default:
         result = 0;
@@ -1624,9 +1624,9 @@ void __cdecl MSG_WriteDeltaField(
         {
         case 0xFFFFFFA7:
             fullFloat = *(float *)toF;
-            trunc = (int)fullFloat;
+            trunc = SnapFloatToInt(fullFloat);
             oldFloat = *(float *)fromF;
-            oldTrunc = (int)oldFloat;
+            oldTrunc = SnapFloatToInt(oldFloat);
             SV_PacketDataIsOverhead(snapInfo->clientNum, msg);
             if (fullFloat != (double)trunc || LODWORD(fullFloat) == 0x80000000 || (unsigned int)(trunc + 4096) >= 0x2000)
             {
@@ -1650,9 +1650,9 @@ void __cdecl MSG_WriteDeltaField(
             goto LABEL_103;
         case 0xFFFFFF9D:
             fullFloat = *(float *)toF;
-            trunc = (int)fullFloat;
+            trunc = SnapFloatToInt(fullFloat);
             oldFloat = *(float *)fromF;
-            oldTrunc = (int)oldFloat;
+            oldTrunc = SnapFloatToInt(oldFloat);
             if (fullFloat != 0.0 || LODWORD(fullFloat) == 0x80000000)
             {
                 SV_PacketDataIsOverhead(snapInfo->clientNum, msg);
@@ -1827,9 +1827,9 @@ void __cdecl MSG_WriteDeltaField(
     else
     {
         fullFloat = *(float *)toF;
-        trunc = (int)fullFloat;
+        trunc = SnapFloatToInt(fullFloat);
         oldFloat = *(float *)fromF;
-        oldTrunc = (int)oldFloat;
+        oldTrunc = SnapFloatToInt(oldFloat);
         if (fullFloat != 0.0)
         {
             SV_PacketDataIsOverhead(snapInfo->clientNum, msg);

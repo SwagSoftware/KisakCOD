@@ -1852,7 +1852,7 @@ void __cdecl BG_SetNewAnimation(
                     cycleLen = XAnimGetLengthMsec(pXAnims, animIndex) + 200;
                 else
                     cycleLen = 1000;
-                fStartTimea = (float)(bgs->time % cycleLen) / (float)cycleLen + (float)ci->clientNum * 0.3600000143051147f;
+                fStartTimea = (float)(bgs->time % cycleLen) / (float)cycleLen + (float)ci->clientNum * 0.36f;
                 fStartTime = fStartTimea - (float)(int)fStartTimea;
             }
         }
@@ -2393,7 +2393,7 @@ void BG_FinalizePlayerAnims()
                 else
                 {
                     
-                    pCurrAnim->duration = (int)(duration * 1000.0);
+                    pCurrAnim->duration = (int)SnapFloatToInt(duration * 1000.0);
                     XAnimGetRelDelta(pXAnims, i, vRot, vDelta, 0.0, 1.0);
                     pCurrAnim->moveSpeed = Vec3Length(vDelta) / duration;
                     if (anim_debugSpeeds->current.enabled)

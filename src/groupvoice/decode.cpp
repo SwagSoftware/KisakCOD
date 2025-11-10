@@ -77,7 +77,7 @@ int32_t __cdecl Decode_Sample(char *buffer, int32_t maxLength, int16_t *out, int
     else
         v5 = 2 * frame_size;
     for (i = 0; i < v5; ++i)
-        out[i] = v6[i];
+        out[i] = SnapFloatToInt(v6[i]);
     return v5;
 }
 

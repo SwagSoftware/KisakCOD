@@ -100,7 +100,7 @@ void __cdecl CG_Laser_Add_Core(
     beam.end[2] = laserEnd[2];
     beam.beginColor.packed = -1;
     endBrightness = 1.0 - traceResults.fraction;
-    v9 = (int)(endBrightness * 255.0);
+    v9 = SnapFloatToInt(endBrightness * 255.0);
     if (v9 >= 0)
     {
         if (v9 <= 255)

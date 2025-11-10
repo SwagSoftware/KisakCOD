@@ -2072,15 +2072,15 @@ void __cdecl R_GetViewport(GfxCmdBufSourceState *source, GfxViewport *outViewpor
     }
     if (source->viewMode != VIEW_MODE_2D && r_scaleViewport->current.value != 1.0)
     {
-        outViewport->x += (int)((double)outViewport->width * (1.0 - r_scaleViewport->current.value) * 0.5);
-        outViewport->y += (int)((double)outViewport->height * (1.0 - r_scaleViewport->current.value) * 0.5);
-        if ((int)(r_scaleViewport->current.value * (double)outViewport->width) > 1)
-            v3 = (int)(r_scaleViewport->current.value * (double)outViewport->width);
+        outViewport->x += SnapFloatToInt((double)outViewport->width * (1.0 - r_scaleViewport->current.value) * 0.5);
+        outViewport->y += SnapFloatToInt((double)outViewport->height * (1.0 - r_scaleViewport->current.value) * 0.5);
+        if (SnapFloatToInt(r_scaleViewport->current.value * (double)outViewport->width) > 1)
+            v3 = SnapFloatToInt(r_scaleViewport->current.value * (double)outViewport->width);
         else
             v3 = 1;
         outViewport->width = v3;
-        if ((int)(r_scaleViewport->current.value * (double)outViewport->height) > 1)
-            v2 = (int)(r_scaleViewport->current.value * (double)outViewport->height);
+        if (SnapFloatToInt(r_scaleViewport->current.value * (double)outViewport->height) > 1)
+            v2 = SnapFloatToInt(r_scaleViewport->current.value * (double)outViewport->height);
         else
             v2 = 1;
         outViewport->height = v2;

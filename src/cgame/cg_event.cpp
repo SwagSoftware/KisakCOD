@@ -192,7 +192,7 @@ void __cdecl CG_EntityEvent(int32_t localClientNum, centity_s *cent, int32_t eve
                     * (bg_fallDamageMaxHeight->current.value - bg_fallDamageMinHeight->current.value)
                     + bg_fallDamageMinHeight->current.value;
                 if (fallHeight > 12.0)
-                    viewDip = (int)((fallHeight - 12.0) / 26.0 * 4.0 + 4.0);
+                    viewDip = SnapFloatToInt((fallHeight - 12.0) / 26.0 * 4.0 + 4.0);
                 else
                     viewDip = 0;
                 if (viewDip > 24)

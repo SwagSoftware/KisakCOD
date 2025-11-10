@@ -247,6 +247,7 @@ void __cdecl FX_GetOrientation(
     }
 };
 
+// KISAKTODO: nasty v10
 void __cdecl FX_GetVelocityAtTime(
     const FxElemDef* elemDef,
     int32_t randomSeed,
@@ -307,7 +308,7 @@ void __cdecl FX_GetVelocityAtTime(
     intervalCount = elemDef->velIntervalCount;
     samplePoint = (double)intervalCount * sampleTime;
     *(float*)&v10 = floor(samplePoint);
-    v8 = (int)*(float*)&v10;
+    v8 = SnapFloatToInt(*(float*)&v10);
     sampleIndex = v8;
     sampleLerp = samplePoint - (double)v8;
     if (v8 < 0 || sampleIndex >= intervalCount)

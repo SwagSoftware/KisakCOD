@@ -767,7 +767,7 @@ void __cdecl CG_CompassDrawPlayerNorthCoord(
         v15 = R_TextHeight(font);
         scale = w / (double)v15;
         smallscale = scale * SMALL_FRAC;
-        integerPortion = (int)coorda;
+        integerPortion = SnapFloatToInt(coorda);
         text = va("%i ", integerPortion / 100);
         v14 = R_TextWidth(text, 10, font);
         textW = (double)v14 * smallscale;
@@ -875,7 +875,7 @@ void __cdecl CG_CompassDrawPlayerEastCoord(
         v12 = R_TextHeight(font);
         scale = h / (double)v12;
         smallscale = scale * SMALL_FRAC;
-        integerPortion = (int)coorda;
+        integerPortion = SnapFloatToInt(coorda);
         text = va("%i ", integerPortion / 100);
         v11 = R_TextWidth(text, 10, font);
         textW = (double)v11 * smallscale;
@@ -972,7 +972,7 @@ void __cdecl CG_CompassDrawPlayerNCoordScroll(
         coordb = coorda / compassCoords->current.vector[2] + compassCoords->current.vector[1];
         coordc = compassMaxRange->current.value * 0.5 / compassCoords->current.vector[2] + coordb;
         pixelPerCoord = compassCoords->current.vector[2] * h / compassMaxRange->current.value;
-        fracPortion = 1.0 - (coordc - (double)(int)coordc);
+        fracPortion = 1.0 - (coordc - SnapFloat(coordc));
         pixelY = y - fracPortion * pixelPerCoord;
         coord = coordc + fracPortion;
         v8 = R_TextWidth("99", 2, font);
@@ -985,7 +985,7 @@ void __cdecl CG_CompassDrawPlayerNCoordScroll(
         }
         while (pixelY < y + h)
         {
-            text = va("%2i", (int)coord % 100);
+            text = va("%2i", SnapFloatToInt(coord) % 100);
             textW = R_TextWidth(text, 10, font);
             scalea = w / (double)textW;
             CL_DrawText(
@@ -1049,9 +1049,9 @@ void __cdecl CG_CompassDrawPlayerECoordScroll(
         coorda = coord / compassCoords->current.vector[2] + compassCoords->current.value;
         coordb = coorda - compassMaxRange->current.value * 0.5 / compassCoords->current.vector[2];
         pixelPerCoord = compassCoords->current.vector[2] * w / compassMaxRange->current.value;
-        fracPortion = coordb - (double)(int)coordb;
+        fracPortion = coordb - SnapFloat(coordb);
         pixelX = x - fracPortion * pixelPerCoord;
-        integerPortion = (int)coordb;
+        integerPortion = SnapFloatToInt(coordb);
         v9 = R_TextHeight(font);
         scale = h / (double)v9;
         textWidth = (double)R_TextWidth("99", 2, font) * scale;
@@ -1816,7 +1816,7 @@ void __cdecl DrawIconDistanceText(
     colorMod[3] = color[3];
     if (compassObjectiveDetailDist->current.value <= (double)distance)
     {
-        Com_sprintf(str, 0x40u, "%im", (int)distance);
+        Com_sprintf(str, 0x40u, "%im", SnapFloatToInt(distance));
     }
     else
     {
@@ -1843,7 +1843,7 @@ void __cdecl DrawIconDistanceText(
 
 double __cdecl CutFloat(float original)
 {
-    return (float)((double)(int)(original * 10.0) * 0.1000000014901161);
+    return (SnapFloat(original * 10.0f) * 0.1f);
 }
 
 double __cdecl CG_GetHudAlphaCompass(int32_t localClientNum)
