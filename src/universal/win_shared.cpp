@@ -3,6 +3,7 @@
 #include <cmath>
 
 #include <Windows.h>
+#include <qcommon/qcommon.h>
 
 int initialized_1 = 0;
 int sys_timeBase;
@@ -24,6 +25,11 @@ unsigned int __cdecl Sys_MillisecondsRaw()
 
 void __cdecl Sys_SnapVector(float *v)
 {
+    v[0] = SnapFloat(v[0]);
+    v[1] = SnapFloat(v[1]);
+    v[2] = SnapFloat(v[2]);
+
+#ifdef _DEBUG
     for (size_t i = 0; i < 3; ++i)
     {
         const float input = *v;
@@ -32,8 +38,10 @@ void __cdecl Sys_SnapVector(float *v)
         __asm fld input
         __asm fistp output
 
-        *v = static_cast<float>(output);
+        iassert(*v == output);
+        //*v = static_cast<float>(output);
         ++v;
     }
+#endif
 }
 

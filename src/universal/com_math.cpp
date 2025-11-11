@@ -7,6 +7,7 @@
 #include <xanim/dobj.h>
 #include <stdlib.h>
 #include "q_shared.h"
+#include <qcommon/qcommon.h>
 
 //Line 51773:  0006 : 0000bc58       float (*)[3] bytedirs        827bbc58     com_math.obj
 //Line 53450 : 0006 : 0291d360       int marker_com_math      850cd360     com_math.obj
@@ -2049,7 +2050,7 @@ void __cdecl SnapPointToIntersectingPlanes(const float **planes, float *xyz, flo
     for (axis = 0; axis < 3; ++axis)
     {
         v13 = xyz[axis] / snapGrid;
-        rounded = (int)(v13) * snapGrid;
+        rounded = SnapFloat(v13) * snapGrid;
         v12 = rounded - xyz[axis];
         v9 = I_fabs(v12);
         if (snapEpsilon <= v9)

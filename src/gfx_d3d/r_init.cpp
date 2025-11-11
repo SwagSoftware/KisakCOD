@@ -3549,9 +3549,6 @@ unsigned int __cdecl R_ChooseAdapter()
     return foundAdapterIndex;
 }
 
-// #TODO: need header or some shit to shove all the includes in
-#define KISAK_EXTENDED 1
-
 char __cdecl R_CreateWindow(GfxWindowParms *wndParms)
 {
     DWORD exStyle; // [esp+0h] [ebp-1Ch]
@@ -3582,7 +3579,7 @@ char __cdecl R_CreateWindow(GfxWindowParms *wndParms)
             wndParms->x,
             wndParms->y);
         exStyle = 0;
-#if KISAK_EXTENDED
+#ifndef KISAK_PURE
         if (r_noborder->current.enabled)
         {
             style = WS_VISIBLE | WS_POPUP;

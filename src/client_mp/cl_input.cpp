@@ -629,7 +629,7 @@ void __cdecl CL_MouseMove(int localClientNum, usercmd_s *cmd)
                 kb = playersKb[localClientNum];
                 if (kb[8].active)
                 {
-                    cmd->rightmove = ClampChar((int)(mx * m_side->current.value) + cmd->rightmove);
+                    cmd->rightmove = ClampChar(SnapFloatToInt(mx * m_side->current.value) + cmd->rightmove);
                 }
                 else
                 {

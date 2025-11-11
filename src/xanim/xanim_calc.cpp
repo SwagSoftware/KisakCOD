@@ -1489,11 +1489,9 @@ void XAnim_GetTimeIndex(
     float *keyFrameLerpFrac)
 {
     unsigned int low; // [esp+20h] [ebp-10h]
-    unsigned int lowa; // [esp+20h] [ebp-10h]
     unsigned int frameIndex; // [esp+24h] [ebp-Ch]
     int index; // [esp+28h] [ebp-8h]
     int high; // [esp+2Ch] [ebp-4h]
-    int higha; // [esp+2Ch] [ebp-4h]
 
     index = (int)((float)tableSize * animTime->time);
     frameIndex = animTime->frameIndex;
@@ -1501,23 +1499,23 @@ void XAnim_GetTimeIndex(
     {
         if (frameIndex >= indices[index + 1])
         {
-            lowa = index + 1;
-            higha = tableSize;
-            while (frameIndex >= indices[++lowa])
+            low = index + 1;
+            high = tableSize;
+            while (frameIndex >= indices[++low])
             {
-                index = (higha + lowa) >> 1;
+                index = (high + low) >> 1;
                 if (frameIndex >= indices[index])
                 {
-                    lowa = index + 1;
+                    low = index + 1;
                     if (frameIndex < indices[index + 1])
                         goto LABEL_16;
                 }
                 else
                 {
-                    higha = (higha + lowa) >> 1;
+                    high = (high + low) >> 1;
                 }
             }
-            index = lowa - 1;
+            index = low - 1;
         }
     }
     else

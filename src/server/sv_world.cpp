@@ -399,7 +399,7 @@ void __cdecl SnapAngles(float *vAngles)
 
     for (i = 0; i < 3; ++i)
     {
-        rounded = (int)(vAngles[i]);
+        rounded = SnapFloatToInt(vAngles[i]);
         delta = (double)rounded - vAngles[i];
         if (delta * delta < 0.000001f)
             vAngles[i] = (float)rounded;
