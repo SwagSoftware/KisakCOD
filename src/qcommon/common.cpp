@@ -2081,7 +2081,11 @@ void __cdecl Com_AssetLoadUI()
 
     if (IsFastFileLoad())
     {
+#ifdef KISAK_MP
         zoneInfo.name = "ui_mp";
+#elif KISAK_SP
+        zoneInfo.name = "ui";
+#endif
         zoneInfo.allocFlags = 8;
         zoneInfo.freeFlags = 104;
         DB_LoadXAssets(&zoneInfo, 1u, 0);

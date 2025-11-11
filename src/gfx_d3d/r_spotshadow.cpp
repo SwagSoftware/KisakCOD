@@ -67,7 +67,7 @@ char __cdecl R_AddSpotShadowsForLight(
     float spotShadowFade)
 {
     float nearPlaneBias; // [esp+4h] [ebp-20h]
-    BOOL v6; // [esp+8h] [ebp-1Ch]
+    BOOL useQualitySpotShadow; // [esp+8h] [ebp-1Ch]
     unsigned int tileCount; // [esp+18h] [ebp-Ch]
     unsigned int spotShadowIndex; // [esp+20h] [ebp-4h]
 
@@ -79,19 +79,14 @@ char __cdecl R_AddSpotShadowsForLight(
 
     ++viewInfo->spotShadowCount;
     light->spotShadowIndex = spotShadowIndex;
-    if (shadowableLightIndex != (unsigned __int8)shadowableLightIndex)
-        MyAssertHandler(
-            "c:\\trees\\cod3\\src\\qcommon\\../universal/assertive.h",
-            281,
-            0,
-            "i == static_cast< Type >( i )\n\t%i, %i",
-            shadowableLightIndex,
-            (unsigned __int8)shadowableLightIndex);
+
+    iassert(shadowableLightIndex == (unsigned __int8)shadowableLightIndex);
+
     viewInfo->spotShadows[spotShadowIndex].shadowableLightIndex = shadowableLightIndex;
     viewInfo->spotShadows[spotShadowIndex].light = light;
     viewInfo->spotShadows[spotShadowIndex].fade = spotShadowFade;
-    v6 = sm_qualitySpotShadow->current.enabled && !Com_BitCheckAssert(frontEndDataOut->shadowableLightHasShadowMap, rgp.world->sunPrimaryLightIndex, 32);
-    if (v6 && spotShadowIndex < 2)
+    useQualitySpotShadow = sm_qualitySpotShadow->current.enabled && !Com_BitCheckAssert(frontEndDataOut->shadowableLightHasShadowMap, rgp.world->sunPrimaryLightIndex, 32);
+    if (useQualitySpotShadow && spotShadowIndex < 2)
     {
         viewInfo->spotShadows[spotShadowIndex].viewport.x = 0;
         viewInfo->spotShadows[spotShadowIndex].viewport.y = spotShadowIndex << 10;
@@ -119,7 +114,7 @@ char __cdecl R_AddSpotShadowsForLight(
         viewInfo->spotShadows[spotShadowIndex].pixelAdjust[1] = (1.0f / 4096.0f);
         viewInfo->spotShadows[spotShadowIndex].pixelAdjust[2] = (1.0f / 1024.0f);
         viewInfo->spotShadows[spotShadowIndex].pixelAdjust[3] = -(1.0f / 8192.0f);
-        if (v6)
+        if (useQualitySpotShadow)
             viewInfo->spotShadows[spotShadowIndex].clearScreen = spotShadowIndex == 2;
         else
             viewInfo->spotShadows[spotShadowIndex].clearScreen = spotShadowIndex == 0;
@@ -427,31 +422,27 @@ void __cdecl R_DrawSpotShadowMapCallback(
 }
 void __cdecl R_DrawSpotShadowMapArray(const GfxViewInfo *viewInfo, GfxCmdBuf *cmdBuf)
 {
-    unsigned int i; // r30
-    const GfxSpotShadow *spotShadow; // r31
     GfxCmdBufSourceState state; // [sp+50h] [-F10h] BYREF
 
     R_InitCmdBufSourceState(&state, &viewInfo->input, 0);
-    R_SetRenderTargetSize(&state, R_RENDERTARGET_SHADOWMAP_SPOT);
-    R_SetViewportValues(&state, 0, 0, 512, 512);
-    i = 0;
-    if (viewInfo->spotShadowCount)
+
+    for (int i = 0; i < viewInfo->spotShadowCount; i++)
     {
-        spotShadow = viewInfo->spotShadows;
-        do
-        {
-            R_DrawCall(
-                R_DrawSpotShadowMapCallback,
-                spotShadow,
-                &state,
-                viewInfo,
-                &spotShadow->info,
-                &spotShadow->shadowViewParms,
-                cmdBuf,
-                0);
-            ++i;
-            ++spotShadow;
-        } while (i < viewInfo->spotShadowCount);
+        const GfxSpotShadow *spotShadow = &viewInfo->spotShadows[i];
+
+        R_SetRenderTargetSize(&state, spotShadow->renderTargetId);
+        R_UpdateCodeConstant(&state, CONST_SRC_CODE_SHADOWMAP_POLYGON_OFFSET, (sm_polygonOffsetBias->current.value * 0.25f), sm_polygonOffsetScale->current.value, 0.0f, 0.0f);
+        R_SetViewportValues(&state, viewInfo->spotShadows[i].viewport.x, viewInfo->spotShadows[i].viewport.y, viewInfo->spotShadows[i].viewport.width, viewInfo->spotShadows[i].viewport.height);
+
+        R_DrawCall(
+            R_DrawSpotShadowMapCallback,
+            spotShadow,
+            &state,
+            viewInfo,
+            &spotShadow->info,
+            &spotShadow->shadowViewParms,
+            cmdBuf,
+            0);
     }
 }
 
