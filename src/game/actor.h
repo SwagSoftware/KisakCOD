@@ -18,6 +18,7 @@
 #include <bgame/bg_actor_prone.h>
 
 #define ACTOR_STOP_TIME 500
+#define MAX_ACTORS 32
 
 enum AISpecies : __int32
 {

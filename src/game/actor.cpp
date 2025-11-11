@@ -213,24 +213,11 @@ void __cdecl G_InitActors()
 
 unsigned int __cdecl G_GetActorIndex(actor_s *actor)
 {
-    actor_s *actors; // r11
-    unsigned int v3; // r11
+    iassert(actor);
+    iassert(actor - level.actors >= 0);
+    iassert(actor - level.actors < MAX_ACTORS);
 
-    if (!actor)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\actor.cpp", 650, 0, "%s", "actor");
-    actors = level.actors;
-    if (actor - level.actors < 0)
-    {
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\actor.cpp", 651, 0, "%s", "actor - level.actors >= 0");
-        actors = level.actors;
-    }
-    if (actor - actors >= 32)
-    {
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\actor.cpp", 652, 0, "%s", "actor - level.actors < MAX_ACTORS");
-        actors = level.actors;
-    }
-    v3 = (int)((unsigned __int64)(2248490037LL * ((char *)actor - (char *)actors)) >> 32) >> 12;
-    return v3 + (v3 >> 31);
+    return (unsigned int)(actor - level.actors);
 }
 
 XAnimTree_s *__cdecl G_GetActorAnimTree(actor_s *actor)
