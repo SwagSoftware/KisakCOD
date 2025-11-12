@@ -852,27 +852,6 @@ unsigned int reservedConfigStrings[77];
 // int constantConfigStringCount 850cc228     com_constantconfigstrings.obj
 int constantConfigStringCount;
 
-unsigned int __cdecl GetHashCode(const char *str, unsigned int len)
-{
-    unsigned int hash; // [esp+4h] [ebp-8h]
-
-    if (len >= 0x100)
-    {
-        hash = len >> 2;
-    }
-    else
-    {
-        hash = 0;
-        while (len)
-        {
-            hash = *str++ + 31 * hash;
-            --len;
-        }
-    }
-
-    return hash % 0x4E1F + 1;
-}
-
 unsigned int __cdecl GetHashCode_0(const char *str, unsigned int len)
 {
     unsigned int hash; // [esp+4h] [ebp-8h]
@@ -899,7 +878,7 @@ unsigned int __cdecl lowercaseHash(const char *str)
     d = tempString;
     while (*s)
         *d++ = tolower(*s++);
-    return GetHashCode(tempString, d - tempString);
+    return GetHashCode_0(tempString, d - tempString);
 }
 
 void __cdecl CCS_InitConstantConfigStrings()

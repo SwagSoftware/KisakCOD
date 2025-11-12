@@ -18,31 +18,7 @@ struct scrMemTreeDebugGlob_t // sizeof=0x20000
 };
 scrMemTreeDebugGlob_t scrMemTreeDebugGlob = { 0 };
 
-void MT_Init()
-{
-	Sys_EnterCriticalSection(CRITSECT_MEMORY_TREE);
-
-    scrMemTreePub.mt_buffer = (char*)&scrMemTreeGlob.nodes;
-    MT_InitBits();
-
-    for (int i = 0; i <= MEMORY_NODE_BITS; ++i)
-        scrMemTreeGlob.head[i] = 0;
-
-    scrMemTreeGlob.nodes[0].prev = 0;
-    scrMemTreeGlob.nodes[0].next = 0;
-
-    for (int i = 0; i < MEMORY_NODE_BITS; ++i)
-        MT_AddMemoryNode(1 << i, i);
-
-    scrMemTreeGlob.totalAlloc = 0;
-    scrMemTreeGlob.totalAllocBuckets = 0;
-    memset(scrMemTreeDebugGlob.mt_usage, 0, sizeof(scrMemTreeDebugGlob.mt_usage));
-    memset(scrMemTreeDebugGlob.mt_usage_size, 0, sizeof(scrMemTreeDebugGlob.mt_usage_size));
-
-	Sys_LeaveCriticalSection(CRITSECT_MEMORY_TREE);
-}
-
-void MT_InitBits(void)
+static void MT_InitBits(void)
 {
     unsigned __int8 bits; // [esp+0h] [ebp-Ch]
     int temp; // [esp+4h] [ebp-8h]
@@ -67,6 +43,30 @@ void MT_InitBits(void)
         }
         scrMemTreeGlob.logBits[i] = bits;
     }
+}
+
+void MT_Init()
+{
+	Sys_EnterCriticalSection(CRITSECT_MEMORY_TREE);
+
+    scrMemTreePub.mt_buffer = (char*)&scrMemTreeGlob.nodes;
+    MT_InitBits();
+
+    for (int i = 0; i <= MEMORY_NODE_BITS; ++i)
+        scrMemTreeGlob.head[i] = 0;
+
+    scrMemTreeGlob.nodes[0].prev = 0;
+    scrMemTreeGlob.nodes[0].next = 0;
+
+    for (int i = 0; i < MEMORY_NODE_BITS; ++i)
+        MT_AddMemoryNode(1 << i, i);
+
+    scrMemTreeGlob.totalAlloc = 0;
+    scrMemTreeGlob.totalAllocBuckets = 0;
+    memset(scrMemTreeDebugGlob.mt_usage, 0, sizeof(scrMemTreeDebugGlob.mt_usage));
+    memset(scrMemTreeDebugGlob.mt_usage_size, 0, sizeof(scrMemTreeDebugGlob.mt_usage_size));
+
+	Sys_LeaveCriticalSection(CRITSECT_MEMORY_TREE);
 }
 
 void* MT_Alloc(int numBytes, int type)
@@ -206,11 +206,8 @@ void MT_FreeIndex(unsigned int nodeNum, int numBytes)
 
     iassert(scrMemTreeDebugGlob.mt_usage[nodeNum]);
 
-    if (scrMemTreeDebugGlob.mt_usage_size[nodeNum] != size)
-    {
-        //v2 = MT_NodeInfoString(nodeNum);
-        iassert((scrMemTreeDebugGlob.mt_usage_size[nodeNum] == size));
-    }
+    iassert((scrMemTreeDebugGlob.mt_usage_size[nodeNum] == size));
+
     scrMemTreeDebugGlob.mt_usage[nodeNum] = 0;
     scrMemTreeDebugGlob.mt_usage_size[nodeNum] = 0;
     while (1)
@@ -403,9 +400,9 @@ void MT_AddMemoryNode(int newNode, int size)
     iassert(size >= 0 && size <= MEMORY_NODE_BITS);
 
     parentNode = &scrMemTreeGlob.head[size];
-    node = scrMemTreeGlob.head[size];
+    node = (unsigned __int16)*parentNode;
 
-    if (scrMemTreeGlob.head[size])
+    if (node)
     {
         newScore = MT_GetScore(newNode);
         nodeNum = 0;

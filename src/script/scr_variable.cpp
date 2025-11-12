@@ -2645,11 +2645,11 @@ void  Scr_EvalEquality(VariableValue* value1, VariableValue* value2)
 	iassert(value1->type == value2->type);
 	switch (value1->type)
 	{
-	case 0:
+	case VAR_UNDEFINED:
 		value1->type = VAR_INTEGER;
 		value1->u.intValue = 1;
 		break;
-	case 1:
+	case VAR_POINTER:
 		if (((scrVarGlob.variableList[value1->u.intValue + VARIABLELIST_CHILD_BEGIN].w.status & 0x1F) == 0x15
 			|| (scrVarGlob.variableList[value2->u.intValue + VARIABLELIST_CHILD_BEGIN].w.status & 0x1F) == 0x15)
 			&& !scrVarPub.evaluate)
@@ -2662,15 +2662,15 @@ void  Scr_EvalEquality(VariableValue* value1, VariableValue* value2)
 		RemoveRefToObject(value2->u.intValue);
 		value1->u.intValue = tempInta;
 		break;
-	case 2:
-	case 3:
+	case VAR_STRING:
+	case VAR_ISTRING:
 		value1->type = VAR_INTEGER;
 		tempInt = value1->u.intValue == value2->u.intValue;
 		SL_RemoveRefToString(value1->u.intValue);
 		SL_RemoveRefToString(value2->u.intValue);
 		value1->u.intValue = tempInt;
 		break;
-	case 4:
+	case VAR_VECTOR:
 		value1->type = VAR_INTEGER;
 		v2 = *(float*)value2->u.intValue == *(float*)value1->u.intValue
 			&& *(float*)(value2->u.intValue + 4) == *(float*)(value1->u.intValue + 4)
@@ -2679,20 +2679,20 @@ void  Scr_EvalEquality(VariableValue* value1, VariableValue* value2)
 		RemoveRefToVector(value2->u.vectorValue);
 		value1->u.intValue = v2;
 		break;
-	case 5:
+	case VAR_FLOAT:
 		value1->type = VAR_INTEGER;
 		v4 = value1->u.floatValue - value2->u.floatValue;
 		v3 = I_fabs(v4);
 		value1->u.intValue = v3 < 0.0000009999999974752427;
 		break;
-	case 6:
+	case VAR_INTEGER:
 		value1->u.intValue = value1->u.intValue == value2->u.intValue;
 		break;
-	case 9:
+	case VAR_FUNCTION:
 		value1->type = VAR_INTEGER;
 		value1->u.intValue = value1->u.intValue == value2->u.intValue;
 		break;
-	case 0xB:
+	case VAR_ANIMATION:
 		value1->type = VAR_INTEGER;
 		value1->u.intValue = value1->u.intValue == value2->u.intValue;
 		break;

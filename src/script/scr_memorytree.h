@@ -8,6 +8,7 @@ struct MemoryNode // sizeof=0xC
     unsigned __int16 next;              // XREF: MT_Init(void)+4E/w
     unsigned int padding[2];            // XREF: MT_RemoveHeadMemoryNode+61/w
 };
+static_assert(sizeof(MemoryNode) == 12);
 
 #define MEMORY_NODE_BITS 16
 #define MEMORY_NODE_COUNT 0x10000
@@ -73,7 +74,6 @@ void* MT_Alloc(int numBytes, int type);
 //unsigned int Scr_GetStringUsage(void);
 
 char const* MT_NodeInfoString(unsigned int nodeNum);
-void MT_InitBits(void);
 int MT_GetScore(int num);
 void MT_AddMemoryNode(int newNode, int size);
 bool MT_RemoveMemoryNode(int oldNode, unsigned int size);

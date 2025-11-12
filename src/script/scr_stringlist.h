@@ -48,7 +48,7 @@ struct __declspec(align(128)) scrStringGlob_t
          {
              unsigned __int32 refCount : 16;
              unsigned __int32 user : 8;
-             unsigned __int32 byteLen : 8;
+             unsigned __int32 byteLen : 8; // includes null terminator
          };
          volatile unsigned int data;
      };
@@ -70,12 +70,13 @@ struct __declspec(align(128)) scrStringGlob_t
      float vec[3];
  };
 
-#define MT_NODE_SIZE 12
+//#define MT_NODE_SIZE 12
+#define MT_NODE_SIZE (sizeof(MemoryNode))
 #define MT_SIZE 0xC0000
 
 struct scrMemTreePub_t
 {                     
-    char *mt_buffer;  
+    char *mt_buffer;  //     scrMemTreePub.mt_buffer = (char*)&scrMemTreeGlob.nodes;
 };
 
 struct scrStringDebugGlob_t
