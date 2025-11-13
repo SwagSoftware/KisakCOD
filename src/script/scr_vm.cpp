@@ -158,7 +158,7 @@ int __cdecl Scr_GetFunctionHandle(const char* filename, const char* name)
     id = FindObject(fileId);
     if (!id)
         MyAssertHandler(".\\script\\scr_main.cpp", 80, 0, "%s", "id");
-    str = SL_FindLowercaseString(name).prev;
+    str = SL_FindLowercaseString(name);
     if (!str)
         return 0;
     nameId = FindVariable(id, str);

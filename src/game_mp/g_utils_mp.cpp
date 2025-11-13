@@ -48,7 +48,7 @@ int __cdecl G_FindConfigstringIndex(char *name, int start, int max, int create, 
     const char *v6; // eax
     unsigned int ConfigstringConst; // eax
     const char *v9; // eax
-    HashEntry_unnamed_type_u v10; // [esp+0h] [ebp-14h]
+    unsigned int v10; // [esp+0h] [ebp-14h]
     unsigned int s; // [esp+Ch] [ebp-8h]
     signed int i; // [esp+10h] [ebp-4h]
     signed int ia; // [esp+10h] [ebp-4h]
@@ -58,16 +58,16 @@ int __cdecl G_FindConfigstringIndex(char *name, int start, int max, int create, 
     if (!name || !*name)
         return 0;
     if (start < 821)
-        v10.prev = SL_FindString(name);
+        v10 = SL_FindString(name);
     else
-        v10.prev = SL_FindLowercaseString(name);
+        v10 = SL_FindLowercaseString(name);
     if (create
         && (i = CCS_GetConstConfigStringIndex(name), i >= 0)
         && (ia = CCS_GetConfigStringNumForConstIndex(i), ia >= start)
         && ia < max + start)
     {
         s = SV_GetConfigstringConst(ia);
-        if (s == v10.prev)
+        if (s == v10)
         {
             return ia - start;
         }
@@ -83,7 +83,7 @@ int __cdecl G_FindConfigstringIndex(char *name, int start, int max, int create, 
     {
         for (ib = 1; ib < max; ++ib)
         {
-            if (SV_GetConfigstringConst(ib + start) == v10.prev)
+            if (SV_GetConfigstringConst(ib + start) == v10)
                 return ib;
         }
         if (create)
@@ -476,7 +476,7 @@ int __cdecl G_EntDetach(gentity_s *ent, const char *modelName, unsigned int tagN
 
     if (!tagName)
         MyAssertHandler(".\\game_mp\\g_utils_mp.cpp", 578, 0, "%s", "tagName");
-    modelNameString = SL_FindLowercaseString(modelName).prev;
+    modelNameString = SL_FindLowercaseString(modelName);
     if (!modelNameString || modelNameString == scr_const._)
         return 0;
     for (i = 0; ; ++i)

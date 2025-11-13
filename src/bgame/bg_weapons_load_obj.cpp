@@ -992,7 +992,6 @@ snd_alias_list_t **__cdecl BG_RegisterSurfaceTypeSounds(const char *surfaceSound
 
 int __cdecl BG_ParseWeaponDefSpecificFieldType(unsigned __int8 *pStruct, const char *pValue, int iFieldType)
 {
-    unsigned __int16 prev; // ax
     unsigned __int16 LowercaseString_DONE; // ax
     unsigned __int16 v5; // ax
     int result; // eax
@@ -1147,9 +1146,8 @@ int __cdecl BG_ParseWeaponDefSpecificFieldType(unsigned __int8 *pStruct, const c
                 break;
             if (numHideTags >= 8)
                 Com_Error(ERR_DROP, "maximum hide tags (%s) exceeded: %i > %i'", token, numHideTags, 8);
-            prev = SL_GetStringOfSize((char *)token, 0, strlen(token) + 1, 10).prev;
-            weapDef->hideTags[numHideTags] = prev;
-            weapDef->hideTags[numHideTags] = SL_ConvertToLowercase(weapDef->hideTags[numHideTags], 0, 10).prev;
+            weapDef->hideTags[numHideTags] = SL_GetStringOfSize((char *)token, 0, strlen(token) + 1, 10);
+            weapDef->hideTags[numHideTags] = SL_ConvertToLowercase(weapDef->hideTags[numHideTags], 0, 10);
             ++numHideTags;
         }
         goto LABEL_86;

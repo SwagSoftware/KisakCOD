@@ -337,7 +337,7 @@ BuiltinMethodDef methods_2[] =
   { "itemweaponsetammo", &ScrCmd_ItemWeaponSetAmmo, 0 }
 }; // idb
 
-HashEntry_unnamed_type_u __cdecl GScr_AllocString(const char *s)
+unsigned int __cdecl GScr_AllocString(const char *s)
 {
     return Scr_AllocString((char*)s, 1);
 }

@@ -496,7 +496,7 @@ void __cdecl XAnimResetAnimMapLeaf(const XModelNameMap* modelMap, unsigned int i
     SL_RemoveRefToStringOfSize(animToModel, (unsigned __int8)animToModel2[16] + 17);
 }
 
-HashEntry_unnamed_type_u __cdecl XAnimGetAnimMap(const XAnimParts* parts, const XModelNameMap* modelMap)
+unsigned int __cdecl XAnimGetAnimMap(const XAnimParts* parts, const XModelNameMap* modelMap)
 {
     unsigned int boneIndex; // [esp+0h] [ebp-BCh]
     unsigned int hash; // [esp+8h] [ebp-B4h]
@@ -3100,7 +3100,7 @@ unsigned int __cdecl XAnimAllocInfoWithParent(
 
 unsigned int XAnimAllocInfoIndex(DObj_s *obj, unsigned int animIndex, int after)
 {
-    unsigned __int16 prev; // [esp-Ch] [ebp-420h]
+    unsigned __int16 animToModel; // [esp-Ch] [ebp-420h]
     XModelNameMap modelMap[256]; // [esp-8h] [ebp-41Ch] BYREF
     unsigned int parentInfoIndex; // [esp+3F8h] [ebp-1Ch]
     unsigned int parentAnimIndex; // [esp+3FCh] [ebp-18h]
@@ -3118,19 +3118,19 @@ unsigned int XAnimAllocInfoIndex(DObj_s *obj, unsigned int animIndex, int after)
         {
             PROF_SCOPED("XAnimSetModel");
             XAnimInitModelMap(obj->models, obj->numModels, modelMap);
-            prev = XAnimGetAnimMap(animEntry->parts, modelMap).prev;
+            animToModel = XAnimGetAnimMap(animEntry->parts, modelMap);
         }
         else
         {
-            prev = 0;
+            animToModel = 0;
         }
     }
     else
     {
         parentInfoIndex = 0;
-        prev = 0;
+        animToModel = 0;
     }
-    return XAnimAllocInfoWithParent(tree, prev, animIndex, parentInfoIndex, after);
+    return XAnimAllocInfoWithParent(tree, animToModel, animIndex, parentInfoIndex, after);
 }
 
 unsigned int __cdecl XAnimEnsureGoalWeightParent(DObj_s* obj, unsigned int animIndex)

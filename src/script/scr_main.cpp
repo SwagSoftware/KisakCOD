@@ -235,16 +235,17 @@ unsigned int __cdecl Scr_LoadScriptInternal(const char *filename, PrecacheEntry 
 
     Hunk_CheckTempMemoryHighClear();
 
-    name = Scr_CreateCanonicalFilename(filename).prev;
+    name = Scr_CreateCanonicalFilename(filename);
 
     if (FindVariable(scrCompilePub.loadedscripts, name))
     {
         SL_RemoveRefToString(name);
         filePtr = FindVariable(scrCompilePub.scripts, name);
+
         if (!filePtr)
             return 0;
-        Object = FindObject(filePtr);
-        return Object.u.intValue;
+
+        return FindObject(filePtr);
     }
     else
     {
@@ -286,7 +287,7 @@ unsigned int __cdecl Scr_LoadScriptInternal(const char *filename, PrecacheEntry 
 
 unsigned int __cdecl Scr_LoadScript(const char *filename)
 {
-    PrecacheEntry entries[1024]; // [esp+0h] [ebp-2000h] BYREF
+    PrecacheEntry entries[MAX_PRECACHE_ENTRIES]; // [esp+0h] [ebp-2000h] BYREF
 
     return Scr_LoadScriptInternal(filename, &entries[0], 0);
 }

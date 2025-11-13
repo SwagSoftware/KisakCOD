@@ -109,7 +109,7 @@ int32_t __cdecl G_SpawnString(const SpawnVar *spawnVar, const char *key, const c
     return 0;
 }
 
-HashEntry_unnamed_type_u __cdecl G_NewString(const char *string)
+unsigned int __cdecl G_NewString(const char *string)
 {
     char str[0x4000]; // [esp+10h] [ebp-4010h] BYREF
     uint32_t v3; // [esp+4014h] [ebp-Ch]
@@ -122,12 +122,12 @@ HashEntry_unnamed_type_u __cdecl G_NewString(const char *string)
     v4 = str;
     for (i = 0; i < v3; ++i)
     {
-        if (string[i] == 92 && i < v3 - 1)
+        if (string[i] == '\\' && i < v3 - 1)
         {
-            if (string[++i] == 110)
-                *v4 = 10;
+            if (string[++i] == 'n')
+                *v4 = '\n';
             else
-                *v4 = 92;
+                *v4 = '\\';
             ++v4;
         }
         else

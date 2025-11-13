@@ -3071,7 +3071,6 @@ void DB_ArchiveAssets()
 
 void DB_FreeUnusedResources()
 {
-    HashEntry_unnamed_type_u v0; // eax
     uint32_t hash; // [esp+0h] [ebp-18h]
     uint32_t hasha; // [esp+0h] [ebp-18h]
     uint16_t *pAssetEntryIndex; // [esp+4h] [ebp-14h]
@@ -3108,8 +3107,7 @@ void DB_FreeUnusedResources()
             else if (assetEntry->entry.inuse)
             {
                 name = (char *)DB_GetXAssetName(&assetEntry->entry.asset);
-                v0.prev = SL_GetString(name, 4u);
-                newName = SL_ConvertToString(v0.prev);
+                newName = SL_ConvertToString(SL_GetString(name, 4));
                 DB_SetXAssetName(&assetEntry->entry.asset, newName);
                 pAssetEntryIndex = &assetEntry->entry.nextHash;
             }

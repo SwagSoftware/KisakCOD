@@ -1226,7 +1226,7 @@ void XAnimResetAnimMap(const DObj_s* obj, unsigned int infoIndex);
 void __cdecl XAnimInitModelMap(XModel* const* models, unsigned int numModels, XModelNameMap* modelMap);
 void __cdecl XAnimResetAnimMap_r(XModelNameMap* modelMap, unsigned int infoIndex);
 void __cdecl XAnimResetAnimMapLeaf(const XModelNameMap* modelMap, unsigned int infoIndex);
-HashEntry_unnamed_type_u __cdecl XAnimGetAnimMap(const XAnimParts* parts, const XModelNameMap* modelMap);
+unsigned int __cdecl XAnimGetAnimMap(const XAnimParts* parts, const XModelNameMap* modelMap);
 double __cdecl XAnimGetLength(const XAnim_s* anims, unsigned int animIndex);
 int __cdecl XAnimGetLengthMsec(const XAnim_s* anims, unsigned int anim);
 double __cdecl XAnimGetTime(const XAnimTree_s* tree, unsigned int animIndex);

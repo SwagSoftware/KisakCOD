@@ -2,6 +2,8 @@
 
 #include "scr_debugger.h"
 
+#define MAX_PRECACHE_ENTRIES 1024
+
 enum : __int32
 {
     SOURCE_TYPE_NONE = 0,

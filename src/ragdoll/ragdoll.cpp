@@ -743,7 +743,7 @@ void __cdecl Ragdoll_PinBone_f()
     unsigned int ragdoll; // [esp+0h] [ebp-10h]
     RagdollDef *def; // [esp+4h] [ebp-Ch]
     const char *name; // [esp+8h] [ebp-8h]
-    HashEntry_unnamed_type_u *bone; // [esp+Ch] [ebp-4h]
+    BaseLerpBoneDef *bone; // [esp+Ch] [ebp-4h]
 
     if (Cmd_Argc() >= 3)
     {
@@ -754,31 +754,31 @@ void __cdecl Ragdoll_PinBone_f()
             def = &ragdollDefs[ragdoll];
             if (def->numBaseLerpBones < 9)
             {
-                bone = (HashEntry_unnamed_type_u *)&def->baseLerpBoneDefs[def->numBaseLerpBones];
+                bone = &def->baseLerpBoneDefs[def->numBaseLerpBones];
                 name = Cmd_Argv(2);
-                bone[5].prev = SL_FindString(name);
-                if (bone[5].prev)
+                bone->animBoneName = SL_FindString(name);
+                if (bone->animBoneName)
                 {
                     v1 = Cmd_Argv(3);
-                    bone[6].prev = atoi(v1);
-                    if (bone[6].prev < def->numBones)
+                    bone->parentBoneIndex = atoi(v1);
+                    if (bone->parentBoneIndex < def->numBones)
                     {
-                        bone[7].prev = 0;
+                        bone->lerpTime = 0;
                         ++def->numBaseLerpBones;
                     }
                     else
                     {
-                        Com_Printf(14, "Ragdoll: Pinned bone has invalid parent index %d\n", bone[6].prev);
+                        Com_Printf(14, (char *)"Ragdoll: Pinned bone has invalid parent index %d\n", bone->parentBoneIndex);
                     }
                 }
                 else
                 {
-                    Com_Printf(14, "Ragdoll: Couldn't find pinned bone named %s\n", name);
+                    Com_Printf(14, (char *)"Ragdoll: Couldn't find pinned bone named %s\n", name);
                 }
             }
             else
             {
-                Com_Printf(14, "Ragdoll: Too many base pose lerping bones, max %d\n", 9);
+                Com_Printf(14, (char *)"Ragdoll: Too many base pose lerping bones, max %d\n", 9);
             }
         }
     }

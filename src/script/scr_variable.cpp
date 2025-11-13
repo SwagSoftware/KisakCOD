@@ -1763,7 +1763,7 @@ bool  Scr_CastString(VariableValue* value)
 void  Scr_CastDebugString(VariableValue* value)
 {
 	const XAnim_s* Anims; // eax
-	HashEntry_unnamed_type_u v2{ 0 }; // eax
+	unsigned int v2; // eax
 	unsigned int intValue; // [esp-4h] [ebp-18h]
 	unsigned int stringValue; // [esp+8h] [ebp-Ch]
 	char* s; // [esp+10h] [ebp-4h]
@@ -1773,7 +1773,7 @@ void  Scr_CastDebugString(VariableValue* value)
 	{
 	case VAR_POINTER:
 		sa = (char*)var_typename[GetObjectType(value->u.intValue)];
-		v2.prev = SL_GetString_(sa, 0, 15);
+		v2 = SL_GetString_(sa, 0, 15);
 		goto LABEL_7;
 	case VAR_STRING:
 	case VAR_VECTOR:
@@ -1788,12 +1788,12 @@ void  Scr_CastDebugString(VariableValue* value)
 		intValue = value->u.intValue;
 		Anims = Scr_GetAnims(HIWORD(value->u.intValue));
 		s = XAnimGetAnimDebugName(Anims, intValue);
-		v2.prev = SL_GetString_(s, 0, 15);
+		v2 = SL_GetString_(s, 0, 15);
 		goto LABEL_7;
 	default:
-		v2.prev = SL_GetString_((char*)var_typename[value->type], 0, 15);
+		v2 = SL_GetString_((char*)var_typename[value->type], 0, 15);
 	LABEL_7:
-		stringValue = v2.prev;
+		stringValue = v2;
 		RemoveRefToValue(value->type, value->u);
 		value->type = VAR_STRING;
 		value->u.intValue = stringValue;
@@ -2046,7 +2046,7 @@ void  Scr_EvalPlus(VariableValue* value1, VariableValue* value2)
 				v3 = *v5;
 				*v4++ = *v5++;
 			} while (v3);
-			v9.stringValue = SL_GetStringOfSize(str, 0, len, 15).prev;
+			v9.stringValue = SL_GetStringOfSize(str, 0, len, 15);
 			SL_RemoveRefToString(value1->u.intValue);
 			SL_RemoveRefToString(value2->u.intValue);
 			value1->u = v9;
@@ -2857,7 +2857,7 @@ void  Scr_EvalArray(VariableValue* value, VariableValue* index)
 			c[0] = s[index->u.intValue];
 			c[1] = 0;
 
-			index->u.stringValue = SL_GetStringOfSize(c, 0, 2, 15).prev;
+			index->u.stringValue = SL_GetStringOfSize(c, 0, 2, 15);
 			SL_RemoveRefToString(value->u.stringValue);
 		}
 		else

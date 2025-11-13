@@ -113,7 +113,7 @@ unsigned int __cdecl Scr_UsingTreeInternal(const char *filename, unsigned int *i
     iassert(scrAnimPub.animtree_loading);
     iassert(Scr_IsIdentifier(filename));
 
-    name = Scr_CreateCanonicalFilename(filename).prev;
+    name = Scr_CreateCanonicalFilename(filename);
     id = FindVariable(scrAnimPub.animtrees, name);
     if (id)
     {
@@ -666,17 +666,17 @@ scr_animtree_t __cdecl Scr_FindAnimTree(const char *filename)
 {
     VariableValue tempValue; // [esp+0h] [ebp-20h]
     unsigned int xanimId; // [esp+Ch] [ebp-14h]
-    HashEntry_unnamed_type_u filenameId; // [esp+10h] [ebp-10h]
+    unsigned int filenameId; // [esp+10h] [ebp-10h]
     unsigned int fileId; // [esp+14h] [ebp-Ch]
     unsigned int fileIda; // [esp+14h] [ebp-Ch]
     scr_animtree_t tree;
 
     iassert(scrAnimPub.animtree_loading);
 
-    filenameId.prev = Scr_CreateCanonicalFilename(filename).prev;
-    fileId = FindVariable(scrAnimPub.animtrees, filenameId.prev);
+    filenameId = Scr_CreateCanonicalFilename(filename);
+    fileId = FindVariable(scrAnimPub.animtrees, filenameId);
 
-    SL_RemoveRefToString(filenameId.prev);
+    SL_RemoveRefToString(filenameId);
 
     if (!fileId)
     {

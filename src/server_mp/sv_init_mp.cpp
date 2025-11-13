@@ -142,15 +142,15 @@ unsigned int __cdecl SV_GetConfigstringConst(unsigned int index)
 
 void __cdecl SV_SetConfigValueForKey(int start, int max, char *key, char *value)
 {
-    HashEntry_unnamed_type_u v5; // [esp+0h] [ebp-14h]
+    unsigned int string; // [esp+0h] [ebp-14h]
     unsigned int name; // [esp+4h] [ebp-10h]
     signed int i; // [esp+10h] [ebp-4h]
     int ia; // [esp+10h] [ebp-4h]
 
     if (start < 821)
-        v5.prev = SL_FindString(key);
+        string = SL_FindString(key);
     else
-        v5.prev = SL_FindLowercaseString(key).prev;
+        string = SL_FindLowercaseString(key);
     i = CCS_GetConstConfigStringIndex(value);
     if (i < 0)
     {
@@ -162,7 +162,7 @@ void __cdecl SV_SetConfigValueForKey(int start, int max, char *key, char *value)
                 SV_SetConfigstring(ia + start, key);
                 break;
             }
-            if (v5.prev == name)
+            if (string == name)
                 break;
         }
     }

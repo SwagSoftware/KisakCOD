@@ -356,7 +356,7 @@ int32_t __cdecl G_GetEntityToken(char *buffer, int32_t bufferSize);
 int32_t __cdecl G_ParseSpawnVars(SpawnVar *spawnVar);
 char *__cdecl G_AddSpawnVarToken(char *string, SpawnVar *spawnVar);
 int32_t __cdecl G_SpawnString(const SpawnVar *spawnVar, const char *key, const char *defaultString, const char **out);
-HashEntry_unnamed_type_u __cdecl G_NewString(const char *string);
+unsigned int __cdecl G_NewString(const char *string);
 char *__cdecl vtos(const float *v);
 
 

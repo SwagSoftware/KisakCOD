@@ -5607,7 +5607,6 @@ void __cdecl ScriptCompile(
 {
 	unsigned int Variable_DONE; // eax
 	VariableValueInternal_u *VariableValueAddress_DONE; // esi
-	PrecacheEntry *v9; // [esp+4h] [ebp-54h]
 	int j; // [esp+10h] [ebp-48h]
 	VariableValue pos; // [esp+14h] [ebp-44h] BYREF
 	unsigned __int16 filename; // [esp+1Ch] [ebp-3Ch]
@@ -5624,21 +5623,23 @@ void __cdecl ScriptCompile(
 	unsigned int includeFileId; // [esp+48h] [ebp-10h]
 	VariableValue value; // [esp+4Ch] [ebp-Ch] BYREF
 	unsigned int threadPtr; // [esp+54h] [ebp-4h]
-	int entriesCounta; // [esp+70h] [ebp+18h]
 
 	scrCompileGlob.fileId = fileId;
 	scrCompileGlob.bConstRefCount = 0;
-	scrAnimPub.animTreeIndex = 0;
-	scrCompilePub.developer_statement = 0;
-	if (scrCompilePub.far_function_count)
-		v9 = &entries[entriesCount];
-	else
-		v9 = 0;
-	precachescriptList = v9;
-	entriesCounta = scrCompilePub.far_function_count + entriesCount;
 
-	if (entriesCounta > 1024)
-		Com_Error(ERR_DROP, "MAX_PRECACHE_ENTRIES exceeded");
+	scrAnimPub.animTreeIndex = 0;
+
+	scrCompilePub.developer_statement = 0;
+
+	if (scrCompilePub.far_function_count)
+		precachescriptList = &entries[entriesCount];
+	else
+		precachescriptList = 0;
+
+	entriesCount += scrCompilePub.far_function_count;
+
+	if (entriesCount > MAX_PRECACHE_ENTRIES)
+		Com_Error(ERR_DROP, "MAX_PRECACHE_ENTRIES exceeded"); // This means that script recursion is too deep
 
 	scrCompileGlob.precachescriptList = precachescriptList;
 	EmitIncludeList(val.node[0]);
@@ -5648,13 +5649,14 @@ void __cdecl ScriptCompile(
 	Hunk_ClearTempMemoryHigh();
 	iassert(scrCompilePub.far_function_count == scrCompileGlob.precachescriptList - precachescriptList);
 	far_function_count = scrCompilePub.far_function_count;
+
 	for (i = 0; i < far_function_count; ++i)
 	{
 		precachescript = &precachescriptList[i];
 		filename = precachescript->filename;
-		ProfLoad_End();
-		includeFileId = Scr_LoadScriptInternal(SL_ConvertToString(filename), entries, entriesCounta);
-		ProfLoad_Begin("ScriptCompile");
+		//ProfLoad_End();
+		includeFileId = Scr_LoadScriptInternal(SL_ConvertToString(filename), entries, entriesCount);
+		//ProfLoad_Begin("ScriptCompile");
 		if (!includeFileId)
 		{
 			CompileError(precachescript->sourcePos, "Could not find script '%s'", SL_ConvertToString(filename));
@@ -5674,8 +5676,12 @@ void __cdecl ScriptCompile(
 					return;
 				}
 			}
+
 			precachescript->include = 0;
-			for (threadPtr = FindFirstSibling(includeFileId); threadPtr; threadPtr = FindNextSibling(threadPtr))
+
+			for (threadPtr = FindFirstSibling(includeFileId); 
+				threadPtr;
+				threadPtr = FindNextSibling(threadPtr))
 			{
 				if (GetValueType(threadPtr) != VAR_POINTER)
 				{
@@ -5692,7 +5698,7 @@ void __cdecl ScriptCompile(
 						continue;
 					}
 					iassert((pos.type == VAR_CODEPOS) || (pos.type == VAR_DEVELOPER_CODEPOS));
-
+				
 					name = GetVariableName(threadPtr);
 					Variable_DONE = GetVariable(fileId, name);
 					toThreadId = GetObject(Variable_DONE);

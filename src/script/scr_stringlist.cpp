@@ -42,7 +42,7 @@ static unsigned int __cdecl GetHashCode(const char *str, unsigned int len)
 	return hash % (STRINGLIST_SIZE-1) + 1;
 }
 
-HashEntry_unnamed_type_u __cdecl Scr_AllocString(char *s, int sys)
+unsigned int __cdecl Scr_AllocString(char *s, int sys)
 {
 	iassert(sys == SCR_SYS_GAME);
 	return SL_GetString(s, 1);
@@ -230,7 +230,7 @@ unsigned int SL_GetString_(const char* str, unsigned int user, int type)
 	return SL_GetStringOfSize(str, user, strlen(str) + 1, type);
 }
 
-HashEntry_unnamed_type_u SL_GetStringOfSize(const char* str, unsigned int user, unsigned int len, int type)
+unsigned int SL_GetStringOfSize(const char* str, unsigned int user, unsigned int len, int type)
 {
 	PROF_SCOPED("SL_GetStringOfSize");
 
@@ -719,7 +719,7 @@ unsigned int SL_ConvertFromString(const char* str)
 	return SL_ConvertFromRefString(refStr);
 }
 
-HashEntry_unnamed_type_u SL_FindLowercaseString(const char* str)
+unsigned int SL_FindLowercaseString(const char* str)
 {
 	char stra[8196]; // [esp+5Ch] [ebp-2010h] BYREF
 	unsigned int len; // [esp+2064h] [ebp-8h]
@@ -796,11 +796,11 @@ void __cdecl Scr_SetString(unsigned __int16 *to, unsigned int from)
 	*to = from;
 }
 
-HashEntry_unnamed_type_u __cdecl SL_ConvertToLowercase(unsigned int stringValue, unsigned int user, int type)
+unsigned int __cdecl SL_ConvertToLowercase(unsigned int stringValue, unsigned int user, int type)
 {
 	const char *v4; // [esp+4Ch] [ebp-2014h]
 	char str[8192]; // [esp+50h] [ebp-2010h] BYREF
-	HashEntry_unnamed_type_u v6; // [esp+2054h] [ebp-Ch]
+	unsigned int stringOfSize; // [esp+2054h] [ebp-Ch]
 	unsigned int len; // [esp+2058h] [ebp-8h]
 	unsigned int i; // [esp+205Ch] [ebp-4h]
 
@@ -812,13 +812,13 @@ HashEntry_unnamed_type_u __cdecl SL_ConvertToLowercase(unsigned int stringValue,
 		v4 = SL_ConvertToString(stringValue);
 		for (i = 0; i < len; ++i)
 			str[i] = tolower(v4[i]);
-		v6.prev = SL_GetStringOfSize(str, user, len, type).prev;
+		stringOfSize = SL_GetStringOfSize(str, user, len, type);
 		SL_RemoveRefToString(stringValue);
-		return v6;
+		return stringOfSize;
 	}
 	else
 	{
-		return (HashEntry_unnamed_type_u)stringValue;
+		return stringValue;
 	}
 }
 
@@ -834,24 +834,24 @@ void __cdecl CreateCanonicalFilename(char *newFilename, const char *filename, in
 		{
 			do
 				c = *filename++;
-			while (c == 92);
-		} while (c == 47);
-		while (c >= 0x20)
+			while (c == '\\');
+		} while (c == '/');
+		while (c >= ' ')
 		{
 			*newFilename++ = tolower(c);
 			if (!--count)
 				Com_Error(ERR_DROP, "Filename %s exceeds maximum length of %d", filename, oldCount);
-			if (c == 47)
+			if (c == '/')
 				break;
 			c = *filename++;
-			if (c == 92)
-				c = 47;
+			if (c == '\\')
+				c = '/';
 		}
 	} while (c);
 	*newFilename = 0;
 }
 
-HashEntry_unnamed_type_u __cdecl Scr_CreateCanonicalFilename(const char *filename)
+unsigned int __cdecl Scr_CreateCanonicalFilename(const char *filename)
 {
 	char newFilename[1028]; // [esp+0h] [ebp-408h] BYREF
 

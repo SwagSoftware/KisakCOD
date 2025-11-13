@@ -1080,7 +1080,7 @@ XAnimParts *__cdecl XAnimLoadFile(char *name, void *(__cdecl *Alloc)(int))
     for (i = 0; i < numBones; ++i)
     {
         count = strlen((const char *)pos) + 1;
-        prev = SL_GetStringOfSize((char *)pos, 0, count, 9).prev;
+        prev = SL_GetStringOfSize((char *)pos, 0, count, 9);
         v68[i] = prev;
         v27 = v69 || XAnimIsHighPrecisionPart((const char *)pos);
         g_highPrecisionPart[i] = v27;

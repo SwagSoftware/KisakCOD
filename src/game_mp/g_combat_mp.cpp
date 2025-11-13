@@ -63,7 +63,7 @@ void __cdecl G_ParseHitLocDmgTable()
         pFieldList[i].szName = g_HitLocNames[i];
         pFieldList[i].iOffset = 4 * i;
         pFieldList[i].iFieldType = 6;
-        prev = Scr_AllocString((char *)g_HitLocNames[i], 1).prev;
+        prev = Scr_AllocString((char *)g_HitLocNames[i], 1);
         g_HitLocConstNames[i] = prev;
     }
     g_fHitLocDamageMult[18] = 0.0;

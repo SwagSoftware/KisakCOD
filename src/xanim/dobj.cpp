@@ -29,7 +29,7 @@ void __cdecl DObjInit()
     int duplicatePartBits[5]; // [esp+0h] [ebp-14h] BYREF
 
     memset(duplicatePartBits, 0, sizeof(duplicatePartBits));
-    g_empty = SL_GetStringOfSize((char *)duplicatePartBits, 0, 0x11u, 12).prev;
+    g_empty = SL_GetStringOfSize((char *)duplicatePartBits, 0, 0x11u, 12);
 }
 
 void __cdecl DObjShutdown()
@@ -349,7 +349,7 @@ void __cdecl DObjCreateDuplicateParts(DObj_s *obj, DObjModel_s *dobjModels, unsi
         size = ++len + 16;
         obj->duplicatePartsSize = len + 16;
         iassert(obj->duplicatePartsSize == size);
-        obj->duplicateParts = SL_GetStringOfSize((char *)duplicatePartBits, 0, obj->duplicatePartsSize, 12).prev;
+        obj->duplicateParts = SL_GetStringOfSize((char *)duplicatePartBits, 0, obj->duplicatePartsSize, 12);
     }
     else
     {

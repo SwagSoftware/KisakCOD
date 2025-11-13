@@ -953,7 +953,7 @@ void __cdecl G_ParseEntityField(const char *key, const char *value, gentity_s *e
         break;
     case F_STRING:
         Scr_SetString((uint16_t *)((char *)ent + f->ofs), 0);
-        *(_WORD *)((char *)ent + f->ofs) = G_NewString(value).prev;
+        *(_WORD *)((char *)ent + f->ofs) = G_NewString(value);
         break;
     case F_VECTOR:
         vec[0] = 0.0;

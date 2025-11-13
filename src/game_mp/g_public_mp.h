@@ -478,7 +478,7 @@ void __cdecl Helicopter_Think(gentity_s *ent);
 
 
 // g_scr_main_mp
-HashEntry_unnamed_type_u __cdecl GScr_AllocString(const char *s);
+unsigned int __cdecl GScr_AllocString(const char *s);
 void __cdecl TRACK_g_scr_main();
 void __cdecl Scr_LoadLevel();
 void __cdecl GScr_LoadGameTypeScript();

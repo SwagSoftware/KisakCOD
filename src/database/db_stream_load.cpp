@@ -73,13 +73,13 @@ void __cdecl Load_XStringCustom(char **str)
 
 void __cdecl Load_TempStringCustom(char **str)
 {
-    HashEntry_unnamed_type_u v1; // [esp+0h] [ebp-4h]
+    const char * string; // [esp+0h] [ebp-4h]
 
     Load_XStringCustom(str);
     if (*str)
-        v1.prev = SL_GetString(*str, 4u);
+        string = (const char*)SL_GetString(*str, 4u); // KISAKTODO: this seems way wrong but it's what the decomp is showing
     else
-        v1.prev = 0;
-    *str = (char *)v1.prev;
+        string= 0;
+    *str = (char *)string;
 }
 

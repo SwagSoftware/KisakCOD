@@ -11,18 +11,6 @@
 
 union HashEntry_unnamed_type_u
 {           
-    HashEntry_unnamed_type_u()
-    {
-        prev = 0;
-    }
-    HashEntry_unnamed_type_u(unsigned int val)
-    {
-        prev = val;
-    }
-    operator unsigned int() const
-    {
-        return prev;
-    }
     unsigned int prev;
     unsigned int str;
 };
@@ -103,7 +91,7 @@ void SL_AddUserInternal(RefString* refStr, unsigned int user);
 void SL_AddRefToString(unsigned int stringValue);
 
 unsigned int SL_GetString_(const char* str, unsigned int user, int type);
-HashEntry_unnamed_type_u SL_GetStringOfSize(const char* str, unsigned int user, unsigned int len, int type);
+unsigned int SL_GetStringOfSize(const char* str, unsigned int user, unsigned int len, int type);
 const char* SL_ConvertToString(unsigned int stringValue);
 const char *SL_ConvertToStringSafe(unsigned int stringValue);
 RefString* GetRefString(unsigned int stringValue);
@@ -123,7 +111,7 @@ void __cdecl SL_TransferRefToUser(unsigned int stringValue, unsigned int user);
 int SL_GetRefStringLen(RefString* refString);
 int SL_GetStringLen(unsigned int stringValue);
 
-HashEntry_unnamed_type_u SL_FindLowercaseString(const char* str);
+unsigned int SL_FindLowercaseString(const char* str);
 
 const char* SL_DebugConvertToString(unsigned int stringValue);
 unsigned int SL_ConvertFromString(const char* str);
@@ -136,11 +124,11 @@ int SL_IsLowercaseString(unsigned int stringValue);
 
 void __cdecl Scr_SetString(unsigned __int16 *to, unsigned int from);
 
-HashEntry_unnamed_type_u __cdecl SL_ConvertToLowercase(unsigned int stringValue, unsigned int user, int type);
+unsigned int __cdecl SL_ConvertToLowercase(unsigned int stringValue, unsigned int user, int type);
 
-HashEntry_unnamed_type_u __cdecl Scr_CreateCanonicalFilename(const char *filename);
+unsigned int __cdecl Scr_CreateCanonicalFilename(const char *filename);
 
 void Scr_SetStringFromCharString(unsigned __int16 *to, const char *from);
 unsigned int SL_GetUser(unsigned int stringValue);
 
-HashEntry_unnamed_type_u __cdecl Scr_AllocString(char *s, int sys);
+unsigned int __cdecl Scr_AllocString(char *s, int sys);

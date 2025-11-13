@@ -1590,7 +1590,7 @@ XModelPartsLoad *__cdecl XModelPartsLoadFile(XModel *model, const char *name, vo
         for (i = 0; i < numBones; ++i)
         {
             len = strlen((const char *)pos) + 1;
-            prev = SL_GetStringOfSize((char *)pos, 0, len, 10).prev;
+            prev = SL_GetStringOfSize((char *)pos, 0, len, 10);
             boneNames[i] = prev;
             pos += len;
         }

@@ -270,7 +270,7 @@ yy_buffer_state *yy_create_buffer()
 
 void __cdecl TextValue(char *str, int len)
 {
-	yylval.val.stringValue = SL_GetStringOfSize(str, 0, len + 1, 14).prev;
+	yylval.val.stringValue = SL_GetStringOfSize(str, 0, len + 1, 14);
 }
 
 void yyrestart()
