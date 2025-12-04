@@ -12,7 +12,11 @@ char buildnumbuf[128];
 
 char *__cdecl getBuildNumber()
 {
-	sprintf_s(buildnumbuf, "%d %s %s", BUILD_NUMBER, __DATE__, __TIME__);
+#ifndef ARRAYSIZE
+#define ARRAYSIZE(x) (sizeof(x) / sizeof(x[0]))
+#endif
+
+	snprintf(buildnumbuf, ARRAYSIZE(buildnumbuf), "%d %s %s", BUILD_NUMBER, __DATE__, __TIME__);
 	return buildnumbuf;
 }
 

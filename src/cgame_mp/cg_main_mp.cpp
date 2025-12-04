@@ -1313,12 +1313,12 @@ void __cdecl CG_RegisterSurfaceTypeSounds(const char *pszType, snd_alias_list_t 
         MyAssertHandler(".\\cgame_mp\\cg_main_mp.cpp", 871, 0, "%s", "pszType");
     if (*pszType)
     {
-        sprintf(szAliasName, "%s_default", pszType);
+        snprintf(szAliasName, ARRAYSIZE(szAliasName), "%s_default", pszType);
         defaultAliasLista = Com_FindSoundAlias(szAliasName);
         for (ia = 0; ia < 29; ++ia)
         {
             v2 = Com_SurfaceTypeToName(ia);
-            sprintf(szAliasName, "%s_%s", pszType, v2);
+            snprintf(szAliasName, ARRAYSIZE(szAliasName), "%s_%s", pszType, v2);
             sound[ia] = Com_FindSoundAliasNoErrors(szAliasName);
             if (!sound[ia])
                 sound[ia] = defaultAliasLista;

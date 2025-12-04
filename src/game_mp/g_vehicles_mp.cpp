@@ -635,7 +635,7 @@ int32_t __cdecl G_LoadVehicle(const char *name)
 
     if (!name)
         MyAssertHandler(".\\game_mp\\g_vehicles_mp.cpp", 434, 0, "%s", "name");
-    sprintf(string, "vehicles/%s", name);
+    snprintf(string, ARRAYSIZE(string), "vehicles/%s", name);
     pszBuffer = Com_LoadInfoString(string, "vehicle file", "VEHICLEFILE", loadBuffer);
     v11 = s_numVehicleInfos;
     dst = (uint8_t *)&s_vehicleInfos[s_numVehicleInfos];

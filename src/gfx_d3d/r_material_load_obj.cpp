@@ -6080,7 +6080,7 @@ void __cdecl Material_PreLoadSingleShaderText(const char *filename, const char *
     iassert( fileSize >= 0 );
     buffer = (char*)Hunk_AllocAlign(strlen(subdir) + fileSize + strlen(filename) + 2, 1, "Material_PreLoadSingleShaderText", 22);
     cached->name = buffer;
-    buffera = &buffer[sprintf(buffer, "%s%s", subdir, filename) + 1];
+    buffera = &buffer[sprintf(buffer, "%s%s", subdir, filename) + 1]; // TODO: wth, change to snprintf with proper calculations
     cached->text = buffera;
     FS_Read((unsigned char*)buffera, fileSize, fileHandle);
     FS_FCloseFile(fileHandle);

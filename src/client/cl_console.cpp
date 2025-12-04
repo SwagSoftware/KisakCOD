@@ -641,7 +641,7 @@ void Con_OneTimeInit()
     for (gameWindowIndex = 0; gameWindowIndex < 4; ++gameWindowIndex)
     {
         dvarDesc = con_gameMsgWindowNMsgTime_Descs[gameWindowIndex];
-        sprintf(con_gameMsgWindowNMsgTime_Names[gameWindowIndex], "con_gameMsgWindow%dMsgTime", gameWindowIndex);
+        snprintf(con_gameMsgWindowNMsgTime_Names[gameWindowIndex], ARRAYSIZE(con_gameMsgWindowNMsgTime_Names[gameWindowIndex]), "con_gameMsgWindow%dMsgTime", gameWindowIndex);
         if (strlen(con_gameMsgWindowNMsgTime_Names[gameWindowIndex]) != 25)
             MyAssertHandler(
                 ".\\client\\cl_console.cpp",
@@ -649,7 +649,7 @@ void Con_OneTimeInit()
                 0,
                 "%s",
                 "strlen( dvarName ) == sizeof( con_gameMsgWindowNMsgTime_Names[gameWindowIndex] ) - 1");
-        sprintf(dvarDesc, "On screen time for game messages in seconds in game message window %d", gameWindowIndex);
+        snprintf(dvarDesc, ARRAYSIZE(con_gameMsgWindowNMsgTime_Descs[gameWindowIndex]), "On screen time for game messages in seconds in game message window %d", gameWindowIndex);
         if (strlen(con_gameMsgWindowNMsgTime_Descs[gameWindowIndex]) != 68)
             MyAssertHandler(
                 ".\\client\\cl_console.cpp",
@@ -666,7 +666,7 @@ void Con_OneTimeInit()
             DVAR_ARCHIVE,
             dvarDesc);
         dvarDesca = con_gameMsgWindowNLineCount_Descs[gameWindowIndex];
-        sprintf(con_gameMsgWindowNLineCount_Names[gameWindowIndex], "con_gameMsgWindow%dLineCount", gameWindowIndex);
+        snprintf(con_gameMsgWindowNLineCount_Names[gameWindowIndex], ARRAYSIZE(con_gameMsgWindowNLineCount_Names[gameWindowIndex]), "con_gameMsgWindow%dLineCount", gameWindowIndex);
         if (strlen(con_gameMsgWindowNLineCount_Names[gameWindowIndex]) != 27)
             MyAssertHandler(
                 ".\\client\\cl_console.cpp",
@@ -674,7 +674,7 @@ void Con_OneTimeInit()
                 0,
                 "%s",
                 "strlen( dvarName ) == sizeof( con_gameMsgWindowNLineCount_Names[gameWindowIndex] ) - 1");
-        sprintf(dvarDesca, "Maximum number of lines of text visible at once in game message window %d", gameWindowIndex);
+        snprintf(dvarDesca, ARRAYSIZE(con_gameMsgWindowNLineCount_Descs[gameWindowIndex]), "Maximum number of lines of text visible at once in game message window %d", gameWindowIndex);
         if (strlen(con_gameMsgWindowNLineCount_Descs[gameWindowIndex]) != 72)
             MyAssertHandler(
                 ".\\client\\cl_console.cpp",
@@ -689,7 +689,7 @@ void Con_OneTimeInit()
             DVAR_ARCHIVE,
             dvarDesca);
         dvarDescb = con_gameMsgWindowNScrollTime_Descs[gameWindowIndex];
-        sprintf(con_gameMsgWindowNScrollTime_Names[gameWindowIndex], "con_gameMsgWindow%dScrollTime", gameWindowIndex);
+        snprintf(con_gameMsgWindowNScrollTime_Names[gameWindowIndex], ARRAYSIZE(con_gameMsgWindowNScrollTime_Names[gameWindowIndex]), "con_gameMsgWindow%dScrollTime", gameWindowIndex);
         if (strlen(con_gameMsgWindowNScrollTime_Names[gameWindowIndex]) != 28)
             MyAssertHandler(
                 ".\\client\\cl_console.cpp",
@@ -697,8 +697,7 @@ void Con_OneTimeInit()
                 0,
                 "%s",
                 "strlen( dvarName ) == sizeof( con_gameMsgWindowNScrollTime_Names[gameWindowIndex] ) - 1");
-        sprintf(
-            dvarDescb,
+        snprintf(dvarDescb, ARRAYSIZE(con_gameMsgWindowNScrollTime_Descs[gameWindowIndex]),
             "Time to scroll messages when the oldest message is removed in game message window %d",
             gameWindowIndex);
         if (strlen(con_gameMsgWindowNScrollTime_Descs[gameWindowIndex]) != 83)
@@ -717,7 +716,7 @@ void Con_OneTimeInit()
             DVAR_ARCHIVE,
             dvarDescb);
         dvarDescc = con_gameMsgWindowNFadeInTime_Descs[gameWindowIndex];
-        sprintf(con_gameMsgWindowNFadeInTime_Names[gameWindowIndex], "con_gameMsgWindow%dFadeInTime", gameWindowIndex);
+        snprintf(con_gameMsgWindowNFadeInTime_Names[gameWindowIndex], ARRAYSIZE(con_gameMsgWindowNFadeInTime_Names[gameWindowIndex]), "con_gameMsgWindow%dFadeInTime", gameWindowIndex);
         if (strlen(con_gameMsgWindowNFadeInTime_Names[gameWindowIndex]) != 28)
             MyAssertHandler(
                 ".\\client\\cl_console.cpp",
@@ -725,7 +724,7 @@ void Con_OneTimeInit()
                 0,
                 "%s",
                 "strlen( dvarName ) == sizeof( con_gameMsgWindowNFadeInTime_Names[gameWindowIndex] ) - 1");
-        sprintf(dvarDescc, "Time to fade in new messages in game message window %d", gameWindowIndex);
+        snprintf(dvarDescc, ARRAYSIZE(con_gameMsgWindowNFadeInTime_Descs[gameWindowIndex]), "Time to fade in new messages in game message window %d", gameWindowIndex);
         if (strlen(con_gameMsgWindowNFadeInTime_Descs[gameWindowIndex]) != 53)
             MyAssertHandler(
                 ".\\client\\cl_console.cpp",
@@ -746,7 +745,7 @@ void Con_OneTimeInit()
             DVAR_ARCHIVE,
             dvarDescc);
         dvarDescd = con_gameMsgWindowNFadeOutTime_Descs[gameWindowIndex];
-        sprintf(con_gameMsgWindowNFadeOutTime_Names[gameWindowIndex], "con_gameMsgWindow%dFadeOutTime", gameWindowIndex);
+        snprintf(con_gameMsgWindowNFadeOutTime_Names[gameWindowIndex], ARRAYSIZE(con_gameMsgWindowNFadeOutTime_Names[gameWindowIndex]), "con_gameMsgWindow%dFadeOutTime", gameWindowIndex);
         if (strlen(con_gameMsgWindowNFadeOutTime_Names[gameWindowIndex]) != 29)
             MyAssertHandler(
                 ".\\client\\cl_console.cpp",
@@ -754,7 +753,7 @@ void Con_OneTimeInit()
                 0,
                 "%s",
                 "strlen( dvarName ) == sizeof( con_gameMsgWindowNFadeOutTime_Names[gameWindowIndex] ) - 1");
-        sprintf(dvarDescd, "Time to fade out old messages in game message window %d", gameWindowIndex);
+        snprintf(dvarDescd, ARRAYSIZE(con_gameMsgWindowNFadeOutTime_Descs[gameWindowIndex]), "Time to fade out old messages in game message window %d", gameWindowIndex);
         if (strlen(con_gameMsgWindowNFadeOutTime_Descs[gameWindowIndex]) != 54)
             MyAssertHandler(
                 ".\\client\\cl_console.cpp",
@@ -775,8 +774,9 @@ void Con_OneTimeInit()
             DVAR_ARCHIVE,
             dvarDescd);
         dvarDesce = con_gameMsgWindowNSplitscreenScale_Descs[gameWindowIndex];
-        sprintf(
+        snprintf(
             con_gameMsgWindowNSplitscreenScale_Names[gameWindowIndex],
+            ARRAYSIZE(con_gameMsgWindowNSplitscreenScale_Names[gameWindowIndex]),
             "con_gameMsgWindow%dSplitscreenScale",
             gameWindowIndex);
         if (strlen(con_gameMsgWindowNSplitscreenScale_Names[gameWindowIndex]) != 34)
@@ -786,7 +786,7 @@ void Con_OneTimeInit()
                 0,
                 "%s",
                 "strlen( dvarName ) == sizeof( con_gameMsgWindowNSplitscreenScale_Names[gameWindowIndex] ) - 1");
-        sprintf(dvarDesce, "Scaling of game message window %d in splitscreen", gameWindowIndex);
+        snprintf(dvarDesce, ARRAYSIZE(con_gameMsgWindowNSplitscreenScale_Descs[gameWindowIndex]), "Scaling of game message window %d in splitscreen", gameWindowIndex);
         if (strlen(con_gameMsgWindowNSplitscreenScale_Descs[gameWindowIndex]) != 47)
             MyAssertHandler(
                 ".\\client\\cl_console.cpp",

@@ -263,7 +263,7 @@ void __cdecl DebugSetThreatString(ThreatDebugStringCategory category, int threat
     if (!g_skipDebugString)
     {
         if (threat)
-            sprintf(g_threatDebugStrings[category], "%s %d", g_threatDebugLabels[category], threat);
+            snprintf(g_threatDebugStrings[category], ARRAYSIZE(g_threatDebugStrings[category]), "%s %d", g_threatDebugLabels[category], threat);
         else
             g_threatDebugStrings[category][0] = 0;
     }
@@ -274,7 +274,7 @@ void __cdecl DebugSetThreatStringFromString(ThreatDebugStringCategory category, 
     if (!g_skipDebugString)
     {
         if (string)
-            sprintf(g_threatDebugStrings[category], "%s %s", g_threatDebugLabels[category], string);
+            snprintf(g_threatDebugStrings[category], ARRAYSIZE(g_threatDebugStrings[category]), "%s %s", g_threatDebugLabels[category], string);
         else
             g_threatDebugStrings[category][0] = 0;
     }
@@ -411,7 +411,7 @@ int __cdecl Actor_ThreatFromScariness(double fScariness)
     if (!g_skipDebugString)
     {
         if (v2)
-            sprintf(g_threatDebugStrings[9], "%s %d", g_threatDebugLabels[9], v2);
+            snprintf(g_threatDebugStrings[9], ARRAYSIZE(g_threatDebugStrings[9]), "%s %d", g_threatDebugLabels[9], v2);
         else
             g_threatDebugStrings[9][0] = 0;
     }
@@ -439,7 +439,7 @@ int __cdecl Actor_ThreatFromDistance(double fDistance)
     if (!g_skipDebugString)
     {
         if (v6)
-            sprintf(g_threatDebugStrings[8], "%s %s", g_threatDebugLabels[8], v6);
+            snprintf(g_threatDebugStrings[8], ARRAYSIZE(g_threatDebugStrings[8]), "%s %s", g_threatDebugLabels[8], v6);
         else
             g_threatDebugStrings[8][0] = 0;
     }
@@ -505,7 +505,7 @@ int __cdecl Actor_ThreatFromVisibilityAndAwareness(int isVisible, int isFullyAwa
         {
             if (v4)
             {
-                sprintf(g_threatDebugStrings[7], "%s %s", g_threatDebugLabels[7], v4);
+                snprintf(g_threatDebugStrings[7], ARRAYSIZE(g_threatDebugStrings[7]), "%s %s", g_threatDebugLabels[7], v4);
                 return v3;
             }
         LABEL_13:
@@ -526,7 +526,7 @@ int __cdecl Actor_ThreatFromVisibilityAndAwareness(int isVisible, int isFullyAwa
         {
             if (v3)
             {
-                sprintf(g_threatDebugStrings[7], "%s %d", g_threatDebugLabels[7], v3);
+                snprintf(g_threatDebugStrings[7], ARRAYSIZE(g_threatDebugStrings[7]), "%s %d", g_threatDebugLabels[7], v3);
                 return v3;
             }
             goto LABEL_13;
@@ -559,7 +559,7 @@ int __cdecl Actor_ThreatFromAttackerCount(actor_s *self, sentient_s *enemy, int 
     {
         if (v7)
         {
-            sprintf(g_threatDebugStrings[5], "%s %d", g_threatDebugLabels[5], v7);
+            snprintf(g_threatDebugStrings[5], ARRAYSIZE(g_threatDebugStrings[5]), "%s %d", g_threatDebugLabels[5], v7);
             return v7;
         }
         g_threatDebugStrings[5][0] = 0;
@@ -594,7 +594,7 @@ int __cdecl Actor_ThreatBonusForCurrentEnemy(
     if (!g_skipDebugString)
     {
         if (v5)
-            sprintf(g_threatDebugStrings[6], "%s %d", g_threatDebugLabels[6], v5);
+            snprintf(g_threatDebugStrings[6], ARRAYSIZE(g_threatDebugStrings[6]), "%s %d", g_threatDebugLabels[6], v5);
         else
             g_threatDebugStrings[6][0] = 0;
     }
@@ -633,7 +633,7 @@ int __cdecl Actor_ThreatCoveringFire(actor_s *self, sentient_s *enemy)
             return 0;
     }
     if (!g_skipDebugString)
-        sprintf(g_threatDebugStrings[2], "%s %d", g_threatDebugLabels[2], -3000);
+        snprintf(g_threatDebugStrings[2], ARRAYSIZE(g_threatDebugStrings[2]), "%s %d", g_threatDebugLabels[2], -3000);
     return -3000;
 }
 
@@ -658,7 +658,7 @@ int __cdecl Actor_ThreatFlashed(sentient_s *enemy)
     if (!flashBanged)
         return 0;
     if (!g_skipDebugString)
-        sprintf(g_threatDebugStrings[1], "%s %d", g_threatDebugLabels[1], 200);
+        snprintf(g_threatDebugStrings[1], ARRAYSIZE(g_threatDebugStrings[1]), "%s %d", g_threatDebugLabels[1], 200);
     return 200;
 }
 
@@ -724,7 +724,7 @@ int Actor_UpdateSingleThreat(actor_s *self, sentient_s *enemy)
     {
         if (bias)
         {
-            sprintf(g_threatDebugStrings[4], "%s %d",
+            snprintf(g_threatDebugStrings[4], ARRAYSIZE(g_threatDebugStrings[4]), "%s %d",
                 g_threatDebugLabels[4], bias);
         }
         else
@@ -734,7 +734,7 @@ int Actor_UpdateSingleThreat(actor_s *self, sentient_s *enemy)
 
         if (enemy->iThreatBias)
         {
-            sprintf(g_threatDebugStrings[3], "%s %d",
+            snprintf(g_threatDebugStrings[3], ARRAYSIZE(g_threatDebugStrings[3]), "%s %d",
                 g_threatDebugLabels[3], enemy->iThreatBias);
         }
         else
@@ -764,7 +764,7 @@ int Actor_UpdateSingleThreat(actor_s *self, sentient_s *enemy)
         char *threatStr = va("%d (%.3f)", threatValue, scaledThreat);
         if (threatStr)
         {
-            sprintf(g_threatDebugStrings[0], "%s %s",
+            snprintf(g_threatDebugStrings[0], ARRAYSIZE(g_threatDebugStrings[0]), "%s %s",
                 g_threatDebugLabels[0], threatStr);
         }
         else

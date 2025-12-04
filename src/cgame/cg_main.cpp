@@ -831,12 +831,12 @@ void __cdecl CG_RegisterSurfaceTypeSounds(const char *pszType, snd_alias_list_t 
         MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\cgame\\cg_main.cpp", 700, 0, "%s", "pszType");
     if (*pszType)
     {
-        sprintf(v11, "%s_default", pszType);
+        snprintf(v11, ARRAYSIZE(v11), "%s_default", pszType);
         SoundAlias = Com_FindSoundAlias(v11);
         for (i = 0; i < 29; ++i)
         {
             v9 = Com_SurfaceTypeToName(i);
-            sprintf(v11, "%s_%s", pszType, v9);
+            snprintf(v11, ARRAYSIZE(v11), "%s_%s", pszType, v9);
             SoundAliasNoErrors = Com_FindSoundAliasNoErrors(v11);
             *sound = SoundAliasNoErrors;
             if (!SoundAliasNoErrors)

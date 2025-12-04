@@ -653,12 +653,12 @@ void __cdecl CG_DrawPlayerAmmoValue(
                     ammoVal = 999;
                 if (drawClip)
                 {
-                    sprintf(clipString, "%2i", clipVal);
+                    snprintf(clipString, ARRAYSIZE(clipString), "%2i", clipVal);
                     lowClip = CG_CheckPlayerForLowClip(cgameGlob);
                 }
                 if (drawAmmo)
                 {
-                    sprintf(ammoString, "%3i", ammoVal);
+                    snprintf(ammoString, ARRAYSIZE(ammoString), "%3i", ammoVal);
                     lowAmmo = CG_CheckPlayerForLowAmmo(cgameGlob);
                 }
                 if (lowClip)

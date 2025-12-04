@@ -212,7 +212,8 @@ void __cdecl BG_RegisterShockVolumeDvars()
             MyAssertHandler(".\\bgame\\bg_misc.cpp", 498, 0, "%s", "channelName");
         if (strlen(channelName->name) > 0x40)
             MyAssertHandler(".\\bgame\\bg_misc.cpp", 499, 0, "%s", "strlen(channelName) <= SND_MAX_ENTCHANNEL_NAMELENGTH");
-        sprintf_s(bgShockChannelNames[i], 80, "bg_shock_volume_%s", channelName->name);        min.value.max = 1.0;
+        sprintf_s(bgShockChannelNames[i], 80, "bg_shock_volume_%s", channelName->name);        
+        min.value.max = 1.0;
         min.value.min = 0.0;
         bg_shock_volume[i] = Dvar_RegisterFloat(bgShockChannelNames[i], 0.5, min, DVAR_CHEAT, "");
     }
