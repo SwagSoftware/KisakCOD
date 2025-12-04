@@ -515,7 +515,7 @@ unsigned int SL_GetStringForVector(const float* v)
 {
 	char tempString[132];
 
-	sprintf(tempString, "(%g, %g, %g)", *v, v[1], v[2]);
+	snprintf(tempString, ARRAYSIZE(tempString), "(%g, %g, %g)", *v, v[1], v[2]);
 	return SL_GetString_(tempString, 0, 15);
 }
 
@@ -523,7 +523,7 @@ unsigned int SL_GetStringForInt(int i)
 {
 	char tempString[132]; // [esp+0h] [ebp-88h] BYREF
 
-	sprintf(tempString, "%i", i);
+	snprintf(tempString, ARRAYSIZE(tempString), "%i", i);
 	return SL_GetString_(tempString, 0, 15);
 }
 
@@ -531,7 +531,7 @@ unsigned int SL_GetStringForFloat(float f)
 {
 	char tempString[132]; // [esp+8h] [ebp-88h] BYREF
 
-	sprintf(tempString, "%g", f);
+	snprintf(tempString, ARRAYSIZE(tempString), "%g", f);
 	return SL_GetString_(tempString, 0, 15);
 }
 

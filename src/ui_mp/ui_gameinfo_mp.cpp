@@ -151,7 +151,7 @@ const char *UI_LoadArenasFromFile_LoadObj()
     while (v8 < (int)v1)
     {
         v9 = strlen(v3);
-        sprintf(string, "%s/%s", "mp", v3);
+        snprintf(string, ARRAYSIZE(string), "%s/%s", "mp", v3);
         len = FS_FOpenFileByMode(string, &f, FS_READ);
         if (f)
         {

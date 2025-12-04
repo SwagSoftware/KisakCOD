@@ -1029,7 +1029,7 @@ void __cdecl Scr_AddFields_LoadObj(const char *path, const char *extension)
 	*scrVarPub.fieldBuffer = 0;
 	for (i = 0; i < numFiles; ++i)
 	{
-		sprintf(filename, "%s/%s", path, files[i]);
+		snprintf(filename, ARRAYSIZE(filename), "%s/%s", path, files[i]);
 		if (strlen(filename) >= 0x40)
 			MyAssertHandler(".\\script\\scr_variable.cpp", 5191, 0, "%s", "strlen( filename ) < MAX_QPATH");
 		Scr_AddFieldsForFile(filename);
@@ -3704,7 +3704,7 @@ void  Scr_AddFields_FastFile(char const* path, char const* extension)
 
 	scrVarPub.fieldBuffer = TempMalloc(0);
 	*scrVarPub.fieldBuffer = 0;
-	sprintf(filename, "%s/%s.%s", path, "keys", extension);
+	snprintf(filename, ARRAYSIZE(filename), "%s/%s.%s", path, "keys", extension);
 	Scr_AddFieldsForFile(filename);
 	targetPos = TempMalloc(1);
 	*targetPos = 0;

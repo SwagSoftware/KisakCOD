@@ -74,7 +74,7 @@ void __cdecl SV_SetConfigstring(int index, const char *val)
             if (SV_Loaded() || sv.restarting)
             {
                 len = strlen(val);
-                sprintf(buf, "%i", index);
+                snprintf(buf, ARRAYSIZE(buf), "%i", index);
                 overhead = &buf[strlen(buf) + 1] - &buf[1] + 4;
                 maxChunk = 1024 - overhead;
                 i = 0;

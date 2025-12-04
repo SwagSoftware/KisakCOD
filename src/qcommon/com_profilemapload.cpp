@@ -414,8 +414,9 @@ void __cdecl ProfLoad_DrawOverlay(rectDef_s *rect)
         fileOpenCount = mapLoadProfile.elementAccessCount[0];
         fileSeekCount = mapLoadProfile.elementAccessCount[1];
         fileReadCount = mapLoadProfile.elementAccessCount[2];
-        sprintf(
+        snprintf(
             line,
+            ARRAYSIZE(line),
             "Total Load Time: %5.4f",
             (double)((double)(mapLoadProfile.ticksFinish - mapLoadProfile.ticksStart)
                 * msecPerRawTimerTick
@@ -432,8 +433,9 @@ void __cdecl ProfLoad_DrawOverlay(rectDef_s *rect)
             0.36000001f,
             PROFLOAD_TEXT_COLOR,
             0);
-        sprintf(
+        snprintf(
             line,
+            ARRAYSIZE(line),
             "File Open Time: %5.4f, Accessed %d times",
             (double)((double)fileOpenElement->ticksTotal * msecPerRawTimerTick * EQUAL_EPSILON),
             fileOpenCount);
@@ -450,8 +452,9 @@ void __cdecl ProfLoad_DrawOverlay(rectDef_s *rect)
             PROFLOAD_TEXT_COLOR,
             0);
         y = (double)15 + y;
-        sprintf(
+        snprintf(
             line,
+            ARRAYSIZE(line),
             "Profiled Time: %5.4f",
             (double)((double)mapLoadProfile.ticksProfiled * msecPerRawTimerTick * EQUAL_EPSILON));
         UI_DrawText(
@@ -466,8 +469,9 @@ void __cdecl ProfLoad_DrawOverlay(rectDef_s *rect)
             0.36000001f,
             PROFLOAD_TEXT_COLOR,
             0);
-        sprintf(
+        snprintf(
             line,
+            ARRAYSIZE(line),
             "File Seek Time: %5.4f, Accessed %d times",
             (double)((double)mapLoadProfile.elements[1].ticksTotal * msecPerRawTimerTick * EQUAL_EPSILON),
             fileSeekCount);
@@ -484,8 +488,9 @@ void __cdecl ProfLoad_DrawOverlay(rectDef_s *rect)
             PROFLOAD_TEXT_COLOR,
             0);
         y = (double)15 + y;
-        sprintf(
+        snprintf(
             line,
+            ARRAYSIZE(line),
             "Unprofiled Time: %5.4f",
             (double)((double)(mapLoadProfile.ticksFinish - mapLoadProfile.ticksStart - mapLoadProfile.ticksProfiled)
                 * msecPerRawTimerTick
@@ -502,8 +507,9 @@ void __cdecl ProfLoad_DrawOverlay(rectDef_s *rect)
             0.36000001f,
             PROFLOAD_TEXT_COLOR,
             0);
-        sprintf(
+        snprintf(
             line,
+            ARRAYSIZE(line),
             "File Read Time: %5.4f, Accessed %d times",
             (double)((double)mapLoadProfile.elements[2].ticksTotal * msecPerRawTimerTick * EQUAL_EPSILON),
             fileReadCount);

@@ -207,7 +207,7 @@ void __cdecl SE_R_ListFiles(
         {
             if (*dirFiles[i] != 46)
             {
-                sprintf(sDirName, "%s/%s", psDir, dirFiles[i]);
+                snprintf(sDirName, ARRAYSIZE(sDirName), "%s/%s", psDir, dirFiles[i]);
                 SE_R_ListFiles(psExtension, sDirName, strResults);
             }
         }
@@ -215,7 +215,7 @@ void __cdecl SE_R_ListFiles(
     sysFiles = FS_ListFiles(psDir, psExtension, FS_LIST_PURE_ONLY, &numSysFiles);
     for (i = 0; i < numSysFiles; ++i)
     {
-        sprintf(sFilename, "%s/%s", psDir, sysFiles[i]);
+        snprintf(sFilename, ARRAYSIZE(sFilename), "%s/%s", psDir, sysFiles[i]);
         strResults->append(sFilename);
         strResults->append(1, ';');
         ++giFilesFound;

@@ -1730,8 +1730,9 @@ gentity_s *__cdecl SV_AddTestClient()
         ++i;
     if (i == sv_maxclients->current.integer)
         return 0;
-    sprintf(
+    snprintf(
         file,
+        ARRAYSIZE(file),
         "connect \"\\cg_predictItems\\1\\cl_punkbuster\\0\\cl_anonymous\\0\\color\\4\\head\\default\\model\\multi\\snaps\\20\\"
         "rate\\5000\\name\\bot%d\\protocol\\%d\\qport\\%d\"",
         botport,

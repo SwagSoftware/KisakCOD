@@ -2145,7 +2145,7 @@ int __cdecl FS_GetModList(char *listbuf, int bufsize)
     nTotal = 0;
     nPotential = 0;
     nMods = 0;
-    sprintf(descPath, "%s/%s", fs_homepath->current.string, "mods");
+    snprintf(descPath, ARRAYSIZE(descPath), "%s/%s", fs_homepath->current.string, "mods");
     pFiles = Sys_ListFiles(descPath, 0, 0, &dummy, 1);
     nPotential = Sys_CountFileList(pFiles);
     for (i = 0; i < nPotential; ++i)

@@ -1769,7 +1769,10 @@ void Com_InitSoundDevGuiGraphs_LoadObj()
     {
         if (*(_DWORD *)&g_sa.volumeFalloffCurveNames[-18][72 * i])
         {
-            sprintf(devguiPath, "Main/Snd:6/Volume Falloff Curves/%s:%d", *(const char**)&g_sa.volumeFalloffCurveNames[-18][72 * i], i);
+#ifndef ARRAYSIZE
+#define ARRAYSIZE(x) (sizeof(x) / sizeof(x[0]))
+#endif
+            snprintf(devguiPath, ARRAYSIZE(devguiPath), "Main/Snd:6/Volume Falloff Curves/%s:%d", *(const char**)&g_sa.volumeFalloffCurveNames[-18][72 * i], i);
             g_sa.curveDevGraphs[i].knotCountMax = 8;
             g_sa.curveDevGraphs[i].knots = g_sa.volumeFalloffCurves[i].knots;
             g_sa.curveDevGraphs[i].knotCount = &g_sa.volumeFalloffCurves[i].knotCount;

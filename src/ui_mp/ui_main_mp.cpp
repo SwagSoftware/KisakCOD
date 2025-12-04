@@ -5892,7 +5892,7 @@ char *__cdecl UI_ReplaceConversionInt(char *sourceString, int replaceInt)
     ConversionArguments convArgs; // [esp+428h] [ebp-28h] BYREF
 
     memset(&convArgs, 0, sizeof(convArgs));
-    sprintf(tempString, "%d", replaceInt);
+    snprintf(tempString, ARRAYSIZE(tempString), "%d", replaceInt);
     convArgs.argCount = 1;
     convArgs.args[0] = tempString;
     UI_ReplaceConversions(sourceString, &convArgs, outputString, 1024);

@@ -1097,7 +1097,7 @@ int __cdecl PC_ExpandBuiltinDefine(
     switch (define->builtin)
     {
     case 1:
-        sprintf(token->string, "%d", deftoken->line);
+        snprintf(token->string, ARRAYSIZE(token->string), "%d", deftoken->line);
         token->intvalue = deftoken->line;
         token->floatvalue = (double)deftoken->line;
         token->type = 3;
@@ -2828,7 +2828,7 @@ int __cdecl PC_Directive_eval(source_s *source)
     token.whitespace_p = source->scriptstack->script_p;
     token.endwhitespace_p = source->scriptstack->script_p;
     token.linescrossed = 0;
-    sprintf(token.string, "%d", abs(value));
+    snprintf(token.string, ARRAYSIZE(token.string), "%d", abs(value));
     token.type = 3;
     token.subtype = 12296;
     PC_UnreadSourceToken(source, &token);
@@ -2852,7 +2852,7 @@ int __cdecl PC_Directive_evalfloat(source_s *source)
     token.linescrossed = 0;
     v3 = value;
     v2 = I_fabs(v3);
-    sprintf(token.string, "%1.2f", v2);
+    snprintf(token.string, ARRAYSIZE(token.string), "%1.2f", v2);
     token.type = 3;
     token.subtype = 10248;
     PC_UnreadSourceToken(source, &token);
@@ -2906,7 +2906,7 @@ int __cdecl PC_DollarDirective_evalint(source_s *source)
     token.whitespace_p = source->scriptstack->script_p;
     token.endwhitespace_p = source->scriptstack->script_p;
     token.linescrossed = 0;
-    sprintf(token.string, "%d", abs(value));
+    snprintf(token.string, ARRAYSIZE(token.string), "%d", abs(value));
     token.type = 3;
     token.subtype = 12296;
     token.intvalue = value;
@@ -2932,7 +2932,7 @@ int __cdecl PC_DollarDirective_evalfloat(source_s *source)
     token.linescrossed = 0;
     v3 = value;
     v2 = I_fabs(v3);
-    sprintf(token.string, "%1.2f", v2);
+    snprintf(token.string, ARRAYSIZE(token.string), "%1.2f", v2);
     token.type = 3;
     token.subtype = 10248;
     token.intvalue = (__int64)value;
