@@ -5,6 +5,12 @@ project(KisakCOD)
 # Set the default C++ standard
 set(CMAKE_CXX_STANDARD 20)
 
+# Set Address Sanitizer
+# NOTE: If you use this you will need to copy to the game's directory
+# clang_rt.asan_dbg_dynamic-i386.dll and clang_rt.asan_dynamic-i386.dll from the MSVC C directory located below (or similar)
+# C:\Program Files\Microsoft Visual Studio\2022\Professional\VC\Tools\MSVC\14.44.35207\bin\Hostx86\x86
+set(USE_ASAN OFF)
+
 # Set the gloabl directory variables
 set(SRC_DIR ${CMAKE_CURRENT_SOURCE_DIR}/src)
 set(DEPS_DIR ${CMAKE_CURRENT_SOURCE_DIR}/deps)
