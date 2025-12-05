@@ -68,5 +68,11 @@ target_compile_options(${PROJECT_NAME} PRIVATE /we4700)
 include(${SCRIPTS_DIR}/pre_build.cmake)
 include(${SCRIPTS_DIR}/post_build.cmake)
 
+if (USE_ASAN)
+    target_compile_options(${PROJECT_NAME} PRIVATE /fsanitize=address)
+    target_link_options(${PROJECT_NAME} PRIVATE /fsanitize=address /LARGEADDRESSAWARE)
+else()
 # Tracy
-include(${SCRIPTS_DIR}/extern/tracy.cmake)
+    include(${SCRIPTS_DIR}/extern/tracy.cmake)
+endif()
+

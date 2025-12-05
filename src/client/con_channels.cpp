@@ -134,7 +134,7 @@ void __cdecl Con_InitGameMsgChannels()
     for (gameWindowIndex = 0; gameWindowIndex < 4; ++gameWindowIndex)
     {
         dvarDesc = con_gameMsgWindowNFilter_Descs[gameWindowIndex];
-        sprintf(con_gameMsgWindowNFilter_Names[gameWindowIndex], "con_gameMsgWindow%dFilter", gameWindowIndex);
+        snprintf(con_gameMsgWindowNFilter_Names[gameWindowIndex], ARRAYSIZE(con_gameMsgWindowNFilter_Names[gameWindowIndex]), "con_gameMsgWindow%dFilter", gameWindowIndex);
         if (strlen(con_gameMsgWindowNFilter_Names[gameWindowIndex]) != 24)
             MyAssertHandler(
                 ".\\client\\con_channels.cpp",
@@ -142,8 +142,9 @@ void __cdecl Con_InitGameMsgChannels()
                 0,
                 "%s",
                 "strlen( dvarName ) == sizeof( con_gameMsgWindowNFilter_Names[gameWindowIndex] ) - 1");
-        sprintf(
+        snprintf(
             dvarDesc,
+            ARRAYSIZE(con_gameMsgWindowNFilter_Descs[gameWindowIndex]),
             "Space-separated list of console channels that should be displayed in game message window %d",
             gameWindowIndex);
         if (strlen(con_gameMsgWindowNFilter_Descs[gameWindowIndex]) != 90)

@@ -848,16 +848,18 @@ void CG_ModPrvDrawBones()
             MatrixMultiply((const mat3x3&)v30, (const mat3x3&)v27, (mat3x3&)v28);
             AxisToAngles((const mat3x3&)v28, v25);
 
-            sprintf(
+            snprintf(
                 angleTxt,
+                ARRAYSIZE(angleTxt),
                 "angles( %.2f, %.2f, %.2f )",
                 v25[0],
                 v25[1],
                 v25[2]
             );
               
-            sprintf(
+            snprintf(
                 posTxt,
+                ARRAYSIZE(posTxt),
                 "pos( %.2f, %.2f, %.2f )",
                 v26[0],
                 v26[1],
@@ -2844,45 +2846,41 @@ void __cdecl CG_ModelPreviewerBuildInfoStr(char *buffer, int bufferSize)
     if (Dvar_FindVar("modPrvLoadModel"))
     {
         I_strncat(buffer, bufferSize, "#DVARS,");
-        sprintf(v18, "modPrvLoadModel %s,", g_mdlprv.system.modelNames[modPrvLoadModel->current.integer]);
+        snprintf(v18, ARRAYSIZE(v18), "modPrvLoadModel %s,", g_mdlprv.system.modelNames[modPrvLoadModel->current.integer]);
         I_strncat(buffer, bufferSize, v18);
-        sprintf(v18, "modPrvLoadFromAnim %s,", g_mdlprv.system.animNames[modPrvLoadFromAnim->current.integer]);
+        snprintf(v18, ARRAYSIZE(v18), "modPrvLoadFromAnim %s,", g_mdlprv.system.animNames[modPrvLoadFromAnim->current.integer]);
         I_strncat(buffer, bufferSize, v18);
-        sprintf(v18, "modPrvLoadToAnim %s,", g_mdlprv.system.animNames[modPrvLoadToAnim->current.integer]);
+        snprintf(v18, ARRAYSIZE(v18), "modPrvLoadToAnim %s,", g_mdlprv.system.animNames[modPrvLoadToAnim->current.integer]);
         I_strncat(buffer, bufferSize, v18);
         v8 = Dvar_EnumToString(modPrvDrawBoneInfo);
-        sprintf(v18, "modPrvDrawBoneInfo %s,", v8);
+        snprintf(v18, ARRAYSIZE(v18), "modPrvDrawBoneInfo %s,", v8);
         I_strncat(buffer, bufferSize, v18);
-        //sprintf(v18, "modPrvDrawAxis %i,", (_cntlzw(modPrvDrawAxis->current.color[0]) & 0x20) == 0);
-        sprintf(v18, "modPrvDrawAxis %i,", modPrvDrawAxis->current.color[0]);
+        //snprintf(v18, ARRAYSIZE(v18), "modPrvDrawAxis %i,", (_cntlzw(modPrvDrawAxis->current.color[0]) & 0x20) == 0);
+        snprintf(v18, ARRAYSIZE(v18), "modPrvDrawAxis %i,", modPrvDrawAxis->current.color[0]);
         I_strncat(buffer, bufferSize, v18);
-        sprintf(
-            v18,
+        snprintf(v18, ARRAYSIZE(v18),
             "modPrvAnimCrossBlendTime %.2f",
             modPrvAnimCrossBlendTime->current.value);
         I_strncat(buffer, bufferSize, v18);
-        sprintf(
-            v18,
+        snprintf(v18, ARRAYSIZE(v18),
             "modPrvAnimCrossBlendDuration %.2f",
             modPrvAnimCrossBlendDuration->current.value
         );
         I_strncat(buffer, bufferSize, v18);
-        sprintf(
-            v18,
+        snprintf(v18, ARRAYSIZE(v18),
             "modPrvAnimRate %.2f",
             modPrvAnimRate->current.value);
         I_strncat(buffer, bufferSize, v18);
-        //sprintf(v18, "modPrvAnimApplyDelta %i,", (_cntlzw(*(unsigned __int8 *)(modPrvAnimApplyDelta + 12)) & 0x20) == 0);
-        sprintf(v18, "modPrvAnimApplyDelta %i,", modPrvAnimApplyDelta->current.integer);
+        //snprintf(v18, ARRAYSIZE(v18), "modPrvAnimApplyDelta %i,", (_cntlzw(*(unsigned __int8 *)(modPrvAnimApplyDelta + 12)) & 0x20) == 0);
+        snprintf(v18, ARRAYSIZE(v18), "modPrvAnimApplyDelta %i,", modPrvAnimApplyDelta->current.integer);
         I_strncat(buffer, bufferSize, v18);
-        //sprintf(v18, "modPrvAnimForceLoop %i,", (_cntlzw(*(unsigned __int8 *)(modPrvAnimForceLoop + 12)) & 0x20) == 0);
-        sprintf(v18, "modPrvAnimForceLoop %i,", modPrvAnimForceLoop->current.integer);
+        //snprintf(v18, ARRAYSIZE(v18), "modPrvAnimForceLoop %i,", (_cntlzw(*(unsigned __int8 *)(modPrvAnimForceLoop + 12)) & 0x20) == 0);
+        snprintf(v18, ARRAYSIZE(v18), "modPrvAnimForceLoop %i,", modPrvAnimForceLoop->current.integer);
         I_strncat(buffer, bufferSize, v18);
         v9 = Dvar_EnumToString((const dvar_s *)modPrvAnimBlendMode);
-        sprintf(v18, "modPrvAnimBlendMode %s,", v9);
+        snprintf(v18, ARRAYSIZE(v18), "modPrvAnimBlendMode %s,", v9);
         I_strncat(buffer, bufferSize, v18); 
-        sprintf(
-            v18,
+        snprintf(v18, ARRAYSIZE(v18),
             "modPrvAnimBlendWeight %.2f",
             modPrvAnimBlendWeight->current.value);
         I_strncat(buffer, bufferSize, v18);
@@ -2890,28 +2888,28 @@ void __cdecl CG_ModelPreviewerBuildInfoStr(char *buffer, int bufferSize)
         if (Var)
         {
             v11 = Dvar_EnumToString(Var);
-            sprintf(v18, "r_forceLod %s,", v11);
+            snprintf(v18, ARRAYSIZE(v18), "r_forceLod %s,", v11);
             I_strncat(buffer, bufferSize, v18);
         }
         v12 = Dvar_FindVar("r_colorMap");
         if (v12)
         {
             v13 = Dvar_EnumToString(v12);
-            sprintf(v18, "r_colorMap %s,", v13);
+            snprintf(v18, ARRAYSIZE(v18), "r_colorMap %s,", v13);
             I_strncat(buffer, bufferSize, v18);
         }
         v14 = Dvar_FindVar("r_specularMap");
         if (v14)
         {
             v15 = Dvar_EnumToString(v14);
-            sprintf(v18, "r_specularMap %s,", v15);
+            snprintf(v18, ARRAYSIZE(v18), "r_specularMap %s,", v15);
             I_strncat(buffer, bufferSize, v18);
         }
         v16 = Dvar_FindVar("r_normalMap");
         if (v16)
         {
             v17 = Dvar_EnumToString(v16);
-            sprintf(v18, "r_normalMap %s,", v17);
+            snprintf(v18, ARRAYSIZE(v18), "r_normalMap %s,", v17);
             I_strncat(buffer, bufferSize, v18);
         }
     }

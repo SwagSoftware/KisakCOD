@@ -1957,12 +1957,12 @@ void __cdecl CG_DrawPlayerAmmoValue(
                             TotalAmmoReserve = 999;
                         if (v18)
                         {
-                            sprintf(v139, "%2i", v29);
+                            snprintf(v139, ARRAYSIZE(v139), "%2i", v29);
                             v20 = CG_CheckPlayerForLowClip(cgArray);
                         }
                         if (v17)
                         {
-                            sprintf(v140, "%3i", TotalAmmoReserve);
+                            snprintf(v140, ARRAYSIZE(v140), "%3i", TotalAmmoReserve);
                             v19 = CG_CheckPlayerForLowAmmo(cgArray);
                         }
                         if (v20)
@@ -2300,12 +2300,12 @@ if (color[3] != 0.0)
             ammoVal = 999;
         if (drawClip)
         {
-            sprintf(clipString, "%2i", clipVal);
+            snprintf(clipString, ARRAYSIZE(clipString), "%2i", clipVal);
             lowClip = CG_CheckPlayerForLowClip(cgameGlob);
         }
         if (drawAmmo)
         {
-            sprintf(ammoString, "%3i", ammoVal);
+            snprintf(ammoString, ARRAYSIZE(ammoString), "%3i", ammoVal);
             lowAmmo = CG_CheckPlayerForLowAmmo(cgameGlob);
         }
         if (lowClip)

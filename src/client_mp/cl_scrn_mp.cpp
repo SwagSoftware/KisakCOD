@@ -273,7 +273,7 @@ void SCR_DrawDemoRecording()
     if (clc->demorecording)
     {
         pos = FS_FTell(clc->demofile);
-        sprintf(string, "RECORDING %s: %ik", clc->demoName, pos / 1024);
+        snprintf(string, ARRAYSIZE(string), "RECORDING %s: %ik", clc->demoName, pos / 1024);
         CL_LookupColor(0, 0x37u, color);
         x = 5.0f;
         y = 479.0f;

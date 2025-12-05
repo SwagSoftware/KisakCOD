@@ -818,7 +818,7 @@ char __cdecl G_ParseWeaponAccurayGraphInternal(
         return 1;
     if (!*graphName)
         return 1;
-    sprintf(string, "accuracy/%s/%s", dirName, graphName);
+    snprintf(string, ARRAYSIZE(string), "accuracy/%s/%s", dirName, graphName);
     v6 = FS_FOpenFileByMode(string, &f, FS_READ);
     if (v6 >= 0)
     {

@@ -3164,7 +3164,7 @@ void __cdecl R_EnumDisplayModes(unsigned int adapterIndex)
     for (resolutionIndex = 0; resolutionIndex < resolutionCount; ++resolutionIndex)
     {
         dx.resolutionNameTable[resolutionIndex] = modeText;
-        v2 = sprintf(modeText, "%ix%i", availableResolutions[resolutionIndex][0], availableResolutions[resolutionIndex][1]);
+        v2 = snprintf(modeText, ARRAYSIZE(dx.modeText), "%ix%i", availableResolutions[resolutionIndex][0], availableResolutions[resolutionIndex][1]);
         modeText += v2 + 1;
         if (availableResolutions[defaultResolutionIndex][0] < 640 || availableResolutions[defaultResolutionIndex][1] < 480)
             defaultResolutionIndex = resolutionIndex;
@@ -3181,7 +3181,7 @@ void __cdecl R_EnumDisplayModes(unsigned int adapterIndex)
     for (refreshRateIndex = 0; refreshRateIndex < refreshRateCount; ++refreshRateIndex)
     {
         dx.refreshRateNameTable[refreshRateIndex] = modeText;
-        v3 = sprintf(modeText, "%i Hz", availableRefreshRates[refreshRateIndex]);
+        v3 = snprintf(modeText, ARRAYSIZE(dx.modeText) - (v2 + 1), "%i Hz", availableRefreshRates[refreshRateIndex]); // TODO: Validate this is what is correct
         modeText += v3 + 1;
         if (availableRefreshRates[defaultRefreshRateIndex] < 60)
             defaultRefreshRateIndex = refreshRateIndex;

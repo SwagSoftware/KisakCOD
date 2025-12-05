@@ -441,12 +441,12 @@ void __cdecl LoadMapFilesForDir(const char* dir)
     if (*dir)
     {
         v1 = Sys_DefaultInstallPath();
-        sprintf(string, "%s\\%s\\*.map", v1, dir);
+        snprintf(string, ARRAYSIZE(string), "%s\\%s\\*.map", v1, dir);
     }
     else
     {
         v2 = Sys_DefaultInstallPath();
-        sprintf(string, "%s\\*.map", v2);
+        snprintf(string, ARRAYSIZE(string), "%s\\*.map", v2);
     }
     hFindFile = FindFirstFileA(string, &FindFileData);
     if (hFindFile != (HANDLE)-1)
@@ -457,7 +457,7 @@ void __cdecl LoadMapFilesForDir(const char* dir)
             if (baseAddress)
             {
                 v3 = Sys_DefaultInstallPath();
-                sprintf(file, "%s\\%s", v3, FindFileData.cFileName);
+                snprintf(file, ARRAYSIZE(file), "%s\\%s", v3, FindFileData.cFileName);
                 fp = fopen(file, "rb");
                 if (fp)
                 {

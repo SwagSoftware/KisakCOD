@@ -1167,7 +1167,7 @@ void __cdecl R_LevelShot()
     unsigned __int8 *buffer; // [esp+0h] [ebp-10Ch]
     char checkname[260]; // [esp+4h] [ebp-108h] BYREF
 
-    sprintf(checkname, "levelshots/%s.tga", rgp.world->baseName);
+    snprintf(checkname, ARRAYSIZE(checkname), "levelshots/%s.tga", rgp.world->baseName);
     buffer = R_TakeResampledScreenshot(128, 128, 3, 18);
     if (buffer)
     {
@@ -1234,7 +1234,7 @@ void __cdecl R_SaveGameShot(const char *saveName)
 
     width = 512;
     height = 512;
-    sprintf(filename, "%s.jpg", saveName);
+    snprintf(filename, ARRAYSIZE(filename), "%s.jpg", saveName);
     pixels = R_TakeResampledScreenshot(width, height, 3, 0);
     if (pixels)
     {

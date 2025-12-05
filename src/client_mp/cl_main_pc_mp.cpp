@@ -414,7 +414,7 @@ bool __cdecl CL_CDKeyValidate(netadr_t addr)
 //                crcAcc >>= 1;
 //        }
 //    }
-//    sprintf(chs, "%04x", crcAcc);
+//    snprintf(chs, ARRAYSIZE(chs), "%04x", crcAcc);
 //    return checksum && !I_strnicmp(chs, checksum, 4) || checksum == 0;
 //}
 
@@ -444,13 +444,13 @@ void __cdecl CL_GlobalServers_f()
         to.type = NA_IP;
         to.port = BigShort(com_masterPort->current.integer);
         v0 = Cmd_Argv(2);
-        sprintf(command, "getservers %s", v0);
-        buffptr = &command[&command[strlen(command) + 1] - &command[1]];
+        snprintf(command, ARRAYSIZE(command), "getservers %s", v0);
+        buffptr = &command[&command[strlen(command) + 1] - &command[1]]; // kiwi: see below what the hell...
         count = Cmd_Argc();
         for (i = 3; i < count; ++i)
         {
             v1 = Cmd_Argv(i);
-            buffptr += sprintf(buffptr, " %s", v1);
+            buffptr += sprintf(buffptr, " %s", v1); // kiwi: uhhhh, what the hell.
         }
         if (Dvar_GetBool("fs_restrict"))
             sprintf(buffptr, " demo");

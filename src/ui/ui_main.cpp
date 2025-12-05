@@ -2040,7 +2040,7 @@ char *__cdecl UI_ReplaceConversionInt(const char *sourceString, int replaceInt)
     *(_QWORD *)&v5.args[3] = v2;
     *(_QWORD *)&v5.args[5] = v2;
     *(_QWORD *)&v5.args[7] = v2;
-    sprintf(v6, "%d", replaceInt);
+    snprintf(v6, ARRAYSIZE(v6), "%d", replaceInt);
     v5.argCount = 1;
     v5.args[0] = v6;
     UI_ReplaceConversions(sourceString, &v5, v7, 0x400u);
@@ -2079,7 +2079,7 @@ char *__cdecl UI_ReplaceConversionInts(
         v11 = numInts;
         do
         {
-            sprintf(v10, "%d", *(const char **)((char *)args + v9));
+            sprintf(v10, "%d", *(const char **)((char *)args + v9)); // TODO: Fix this
             --v11;
             *args = v10;
             v10 += 32;

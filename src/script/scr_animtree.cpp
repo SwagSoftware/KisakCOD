@@ -451,7 +451,7 @@ bool __cdecl Scr_LoadAnimTreeInternal(const char *filename, unsigned int parentN
 
     iassert(strlen(filename) + sizeof("animtrees/.atr") < MAX_QPATH);
 
-    sprintf(extFilename, "animtrees/%s.atr", filename);
+    snprintf(extFilename, ARRAYSIZE(extFilename), "animtrees/%s.atr", filename);
     oldSourceBuf = scrParserPub.sourceBuf;
     sourceBuffer = Scr_AddSourceBuffer(0, extFilename, 0, 1);
 

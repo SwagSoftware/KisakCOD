@@ -135,7 +135,7 @@ void __cdecl Com_VolumeFalloffCurveGraphEventCallback(const DevGraph *graph, Dev
             data);
     if (event == EVENT_ACCEPT)
     {
-        sprintf(string, "Volume Falloff Curve #%02d\nKnot Count: %d\n", data, *graph->knotCount);
+        snprintf(string, ARRAYSIZE(string), "Volume Falloff Curve #%02d\nKnot Count: %d\n", data, *graph->knotCount);
         for (i = 0; i < *graph->knotCount; ++i)
         {
             Com_sprintf(dest, 0x20u, "%.4f %.4f\n", graph->knots[i][0], graph->knots[i][1]);
@@ -167,7 +167,7 @@ void __cdecl Com_GetGraphList(XAssetHeader header, int *data)
         graph = &g_sa.curveDevGraphs[index];
         if (header.xmodelPieces->name)
         {
-            sprintf(devguiPath, "Main:1/Snd:6/Volume Falloff Curves/%s:%d", header.xmodelPieces->name, index);
+            snprintf(devguiPath, ARRAYSIZE(devguiPath), "Main:1/Snd:6/Volume Falloff Curves/%s:%d", header.xmodelPieces->name, index);
             graph->knotCountMax = 8;
             graph->knots = (float (*)[2]) & header.xmodelPieces->pieces;
             graph->knotCount = &header.xmodelPieces->numpieces;

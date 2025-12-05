@@ -1165,7 +1165,7 @@ void __cdecl DevGui_DrawGraph(const DevMenuItem *menu, int32_t localClientNum)
             text,
             256);
     else
-        sprintf(text, "X: %.4f, Y: %.4f", knot[0], knot[1]);
+        snprintf(text, ARRAYSIZE(text), "X: %.4f, Y: %.4f", knot[0], knot[1]);
     DevGui_DrawFont(x, x_4, (const uint8_t *)&devgui_colorText->current, text);
     x_4 += rowHeight + 2;
     DevGui_DrawFont(x, x_4, (const uint8_t *)&devgui_colorText->current, (char *)MYINSTRUCTIONS);

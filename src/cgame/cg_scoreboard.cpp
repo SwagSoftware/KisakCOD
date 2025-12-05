@@ -553,7 +553,7 @@ void __cdecl CG_ParseObjectiveChange(int localClientNum, unsigned int num)
     v11 = v5 + 3;
     do
     {
-        sprintf(v17, "org%d", v10);
+        snprintf(v17, ARRAYSIZE(v17), "org%d", v10);
         v12 = Info_ValueForKey(ConfigString, v17);
         *(v11 - 2) = 0.0;
         *(v11 - 1) = 0.0;

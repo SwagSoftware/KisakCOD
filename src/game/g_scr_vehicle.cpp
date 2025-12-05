@@ -2706,7 +2706,7 @@ int __fastcall G_LoadVehicle(const char *name)
 
     if (!name)
         MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\g_scr_vehicle.cpp", 489, 0, "%s", "name");
-    sprintf(v14, "vehicles/%s", name);
+    snprintf(v14, ARRAYSIZE(v14), "vehicles/%s", name);
     InfoString = Com_LoadInfoString(v14, "vehicle file", "VEHICLEFILE", v15);
     v3 = s_numVehicleInfos;
     v4 = &s_vehicleInfos[s_numVehicleInfos];

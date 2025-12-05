@@ -1386,7 +1386,9 @@ void __cdecl Actor_CommonAccuracyGraphEventCallback(
     unsigned __int8 *v12; // r10
     int v13; // r9
     char v14[32]; // [sp+50h] [-2050h] BYREF
-    _QWORD v15[1030]; // [sp+70h] [-2030h] BYREF
+    //_QWORD v15[1030]; // [sp+70h] [-2030h] BYREF
+    char v15[8240];
+    static_assert(sizeof(_QWORD[1030]) == sizeof(char[8240])); // We changed the type, so this is a check
 
     if (!graph)
         MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\actor_aim.cpp", 1054, 0, "%s", "graph");
@@ -1396,15 +1398,16 @@ void __cdecl Actor_CommonAccuracyGraphEventCallback(
     if (event == EVENT_ACCEPT)
     {
         memset(v15, 0, 0x2000u);
-        sprintf((char *)v15, "Weapon: %s\nKnot Count: %d\n", *data, *graph->knotCount);
+        snprintf((char *)v15, ARRAYSIZE(v15), "Weapon: %s\nKnot Count: %d\n", *data, *graph->knotCount); // This probably needs to be changed type
         v7 = 0;
         if (*graph->knotCount > 0)
         {
             v8 = 0;
             do
             {
-                sprintf(
+                snprintf(
                     v14,
+                    ARRAYSIZE(v14),
                     "%.4f %.4f\n",
                     graph->knots[v8][0],
                     graph->knots[v8][1]
@@ -1455,6 +1458,8 @@ void __cdecl Actor_AccuracyGraphTextCallback(
     char *text,
     const int textLength)
 {
+    // TODO: Check if textLength is set correctly
+    // to change below to snprintf
     sprintf(
         text,
         "Distance: %.2f, Accuracy: %.4f",
@@ -1632,7 +1637,7 @@ void __cdecl Actor_InitWeaponAccuracyGraphForWeapon(unsigned int weaponIndex)
         Actor_AiVsAiAccuracyGraphEventCallback);
     if (inited)
     {
-        sprintf(v5, "AI/AI Vs. AI Accuracy/%s", WeaponDef->szInternalName);
+        snprintf(v5, ARRAYSIZE(v5), "AI/AI Vs. AI Accuracy/%s", WeaponDef->szInternalName);
         DevGui_AddGraph(v5, inited);
     }
     v4 = Actor_InitWeaponAccuracyGraphForWeaponType(
@@ -1641,7 +1646,7 @@ void __cdecl Actor_InitWeaponAccuracyGraphForWeapon(unsigned int weaponIndex)
         Actor_AiVsPlayerAccuracyGraphEventCallback);
     if (v4)
     {
-        sprintf(v5, "AI/AI Vs. Player Accuracy/%s", WeaponDef->szInternalName);
+        snprintf(v5, ARRAYSIZE(v5), "AI/AI Vs. Player Accuracy/%s", WeaponDef->szInternalName);
         DevGui_AddGraph(v5, v4);
     }
 }
@@ -1660,9 +1665,9 @@ void __cdecl Actor_ShutdownWeaponAccuracyGraph()
         do
         {
             v2 = *p_data;
-            sprintf(v3, "AI/AI Vs. AI Accuracy/%s", **p_data);
+            snprintf(v3, ARRAYSIZE(v3), "AI/AI Vs. AI Accuracy/%s", **p_data);
             DevGui_RemoveMenu(v3);
-            sprintf(v3, "AI/AI Vs. Player Accuracy/%s", *v2);
+            snprintf(v3, ARRAYSIZE(v3), "AI/AI Vs. Player Accuracy/%s", *v2);
             DevGui_RemoveMenu(v3);
             ++v0;
             p_data += 8;
