@@ -1622,7 +1622,7 @@ void __cdecl MSG_WriteDeltaField(
     {
         switch (field->bits)
         {
-        case 0xFFFFFFA7:
+        case (int)0xFFFFFFA7:
             fullFloat = *(float *)toF;
             trunc = (int)fullFloat;
             oldFloat = *(float *)fromF;
@@ -1644,11 +1644,11 @@ void __cdecl MSG_WriteDeltaField(
                 MSG_WriteByte(msg, trunc >> 5);
             }
             goto LABEL_103;
-        case 0xFFFFFFA8:
+        case (int)0xFFFFFFA8:
             SV_PacketDataIsLargeFloat(snapInfo->clientNum, msg);
             MSG_WriteLong(msg, *fromF ^ *toF);
             goto LABEL_103;
-        case 0xFFFFFF9D:
+        case (int)0xFFFFFF9D:
             fullFloat = *(float *)toF;
             trunc = (int)fullFloat;
             oldFloat = *(float *)fromF;
@@ -1688,7 +1688,7 @@ void __cdecl MSG_WriteDeltaField(
                     (int)(*(float *)toF + 2048.0),
                     4096);
             goto LABEL_103;
-        case 0xFFFFFF9C:
+        case (int)0xFFFFFF9C:
             if (*toF)
             {
                 SV_PacketDataIsOverhead(snapInfo->clientNum, msg);
@@ -1703,13 +1703,13 @@ void __cdecl MSG_WriteDeltaField(
                 MSG_WriteBit0(msg);
             }
             goto LABEL_103;
-        case 0xFFFFFFA9:
+        case (int)0xFFFFFFA9:
             SV_PacketDataIsOverhead(snapInfo->clientNum, msg);
             fullFloat = *(float *)toF;
             SV_PacketDataIsSmallAngle(snapInfo->clientNum, msg);
             MSG_WriteAngle16(msg, fullFloat);
             goto LABEL_103;
-        case 0xFFFFFFAA:
+        case (int)0xFFFFFFAA:
             fullFloat = *(float *)toF;
             v16 = (fullFloat - 1.399999976158142) * 10.0f;
             trunc = (int)(v16);
@@ -1725,23 +1725,23 @@ void __cdecl MSG_WriteDeltaField(
         {
             switch (field->bits)
             {
-            case 0xFFFFFF9F:
+            case (int)0xFFFFFF9F:
                 MSG_WriteDeltaTime(snapInfo->clientNum, msg, time, *toF);
                 break;
-            case 0xFFFFFF9E:
+            case (int)0xFFFFFF9E:
                 MSG_Write24BitFlag(snapInfo->clientNum, msg, *fromF, *toF);
                 break;
-            case 0xFFFFFFA0:
+            case (int)0xFFFFFFA0:
                 MSG_WriteGroundEntityNum(snapInfo->clientNum, msg, *toF);
                 break;
-            case 0xFFFFFFA2:
+            case (int)0xFFFFFFA2:
                 MSG_WriteEventNum(snapInfo->clientNum, msg, *toF);
                 break;
-            case 0xFFFFFFA3:
+            case (int)0xFFFFFFA3:
                 MSG_WriteEventParam(snapInfo->clientNum, msg, *toF);
                 break;
-            case 0xFFFFFFA4:
-            case 0xFFFFFFA5:
+            case (int)0xFFFFFFA4:
+            case (int)0xFFFFFFA5:
                 fullFloat = *(float *)toF;
                 oldValue = *(float *)fromF;
                 //HIDWORD(v13) = msg;
@@ -1749,7 +1749,7 @@ void __cdecl MSG_WriteDeltaField(
                 //MSG_WriteOriginFloat(v13, field->bits, fullFloat, oldValue);
                 MSG_WriteOriginFloat(snapInfo->clientNum, msg, field->bits, fullFloat, oldValue);
                 break;
-            case 0xFFFFFFA6:
+            case (int)0xFFFFFFA6:
                 fullFloat = *(float *)toF;
                 oldValue = *(float *)fromF;
                 //HIDWORD(v14) = msg;
@@ -1757,7 +1757,7 @@ void __cdecl MSG_WriteDeltaField(
                 //MSG_WriteOriginZFloat(v14, fullFloat, oldValue);
                 MSG_WriteOriginZFloat(snapInfo->clientNum, msg, fullFloat, oldValue);
                 break;
-            case 0xFFFFFFA1:
+            case (int)0xFFFFFFA1:
                 value = *toF;
                 if (sv_debugPacketContents->current.enabled)
                     Com_Printf(16, "Sending %i as playerstate timer value (%ims granularity)\n", value, 100);

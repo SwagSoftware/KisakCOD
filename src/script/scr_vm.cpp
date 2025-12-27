@@ -234,7 +234,7 @@ const dvar_s* Scr_VM_Init()
     const dvar_s* result; // eax
 
     scrVarPub.varUsagePos = "<script init variable>";
-    scrVmPub.maxstack = &scrVmPub.stack[2047];
+    scrVmPub.maxstack = &scrVmPub.stack[4095];
     scrVmPub.top = scrVmPub.stack;
     scrVmPub.function_count = 0;
     scrVmPub.function_frame = scrVmPub.function_frame_start;

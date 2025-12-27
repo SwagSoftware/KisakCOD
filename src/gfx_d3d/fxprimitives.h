@@ -369,11 +369,13 @@ struct FxElemVisualState // sizeof=0x18
     float size[2];                      // ...
     float scale;
 };
-const struct FxElemVisStateSample // sizeof=0x30
+
+struct FxElemVisStateSample // sizeof=0x30
 {
     FxElemVisualState base;
     FxElemVisualState amplitude;
 };
+
 struct FxElemPreVisualState // sizeof=0x1C
 {                                       // ...
     float sampleLerp;                   // ...
@@ -389,11 +391,13 @@ struct FxElemVelStateInFrame // sizeof=0x30
     FxElemVec3Range velocity;
     FxElemVec3Range totalDelta;
 };
-const struct FxElemVelStateSample // sizeof=0x60
+
+struct FxElemVelStateSample // sizeof=0x60
 {
     FxElemVelStateInFrame local;
     FxElemVelStateInFrame world;
 };
+
 union FxEffectDefRef // sizeof=0x4
 {                                       // ...
     const FxEffectDef *handle;
@@ -437,7 +441,8 @@ struct FxTrailDef // sizeof=0x1C
     int indCount;
     unsigned __int16 *inds;
 };
-const struct FxElemDef // sizeof=0xFC
+
+struct FxElemDef // sizeof=0xFC
 {
     int flags;
     FxSpawnDef spawn;

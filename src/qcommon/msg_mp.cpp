@@ -1024,7 +1024,7 @@ void __cdecl MSG_ReadDeltaField(
             iassert( *reinterpret_cast< float * >( toF ) == 0.0f );
         }
         return;
-    case 0xFFFFFFA7:
+    case (int)0xFFFFFFA7:
         if (MSG_ReadBit(msg))
         {
             v11 = MSG_ReadLong(msg);
@@ -1045,14 +1045,14 @@ void __cdecl MSG_ReadDeltaField(
                 Com_Printf(16, "%s:%i ", field->name, trunc);
         }
         return;
-    case 0xFFFFFFA8:
+    case (int)0xFFFFFFA8:
         v12 = MSG_ReadLong(msg);
         *toF = v12;
         *toF ^= *fromF;
         if (print)
             Com_Printf(16, "%s:%f ", field->name, *(float *)toF);
         return;
-    case 0xFFFFFF9D:
+    case (int)0xFFFFFF9D:
         if (MSG_ReadBit(msg))
         {
             if (MSG_ReadBit(msg))
@@ -1089,57 +1089,57 @@ void __cdecl MSG_ReadDeltaField(
                 (int)(*(float *)toF + 2048.0),
                 4096);
         return;
-    case 0xFFFFFF9E:
+    case (int)0xFFFFFF9E:
         v14 = MSG_Read24BitFlag(msg, *fromF);
         *toF = v14;
         return;
-    case 0xFFFFFF9F:
+    case (int)0xFFFFFF9F:
         DeltaTime = MSG_ReadDeltaTime(msg, time);
         *toF = DeltaTime;
         return;
-    case 0xFFFFFFA0:
+    case (int)0xFFFFFFA0:
         DeltaGroundEntity = MSG_ReadDeltaGroundEntity(msg);
         *toF = DeltaGroundEntity;
         return;
-    case 0xFFFFFFA2:
-    case 0xFFFFFFA3:
+    case (int)0xFFFFFFA2:
+    case (int)0xFFFFFFA3:
         DeltaEventParamField = MSG_ReadDeltaEventParamField(msg);
         *toF = DeltaEventParamField;
         return;
-    case 0xFFFFFFA1:
+    case (int)0xFFFFFFA1:
         v18 = MSG_ReadBits(msg, 7u);
         *toF = 100 * v18;
         return;
-    case 0xFFFFFFA4:
-    case 0xFFFFFFA5:
+    case (int)0xFFFFFFA4:
+    case (int)0xFFFFFFA5:
         OriginFloat = MSG_ReadOriginFloat(field->bits, msg, *(float *)fromF);
         *(float *)toF = OriginFloat;
         if (print)
             Com_Printf(16, "%s:%f ", field->name, *(float *)toF);
         return;
-    case 0xFFFFFFA6:
+    case (int)0xFFFFFFA6:
         OriginZFloat = MSG_ReadOriginZFloat(msg, *(float *)fromF);
         *(float *)toF = OriginZFloat;
         if (print)
             Com_Printf(16, "%s:%f ", field->name, *(float *)toF);
         return;
-    case 0xFFFFFF9C:
+    case (int)0xFFFFFF9C:
         if (!MSG_ReadBit(msg))
         {
             *(float *)toF = 0.0;
             return;
         }
         goto LABEL_74;
-    case 0xFFFFFFA9:
+    case (int)0xFFFFFFA9:
     LABEL_74:
         Angle16 = MSG_ReadAngle16(msg);
         *(float *)toF = Angle16;
         return;
-    case 0xFFFFFFAA:
+    case (int)0xFFFFFFAA:
         v22 = (double)MSG_ReadBits(msg, 5u) * 1.0 / 10.0 + 1.399999976158142;
         *(float *)toF = v22;
         break;
-    case 0xFFFFFFAB:
+    case (int)0xFFFFFFAB:
         if (MSG_ReadBit(msg))
         {
             fromColor = (const hudelem_color_t *)fromF;

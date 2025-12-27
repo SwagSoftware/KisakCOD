@@ -484,10 +484,10 @@ const MtlStateMapBitName s_stencilFuncBackBitNames[9] =
     { "Less", 0x20000000 },
     { "Equal", 0x40000000 },
     { "LessEqual", 0x60000000 },
-    { "Greater", 0x80000000 },
-    { "NotEqual", 0x0A0000000 },
-    { "GreaterEqual", 0x0C0000000 },
-    { "Always", 0x0E0000000 },
+    { "Greater", (int)0x80000000 },
+    { "NotEqual", (int)0x0A0000000 },
+    { "GreaterEqual", (int)0x0C0000000 },
+    { "Always", (int)0x0E0000000 },
     {0}
 };
 
@@ -532,7 +532,7 @@ const MtlStateMapBitName s_stencilOpBackZFailBitNames[9] =
 
 const MtlStateMapBitName s_wireframeBitNames[3] =
 {
-    { "Enable", 0x80000000 },
+    { "Enable", (int)0x80000000 },
     { "Disable", 0 },
     {0}
 };
@@ -598,7 +598,7 @@ const MtlStateMapBitGroup s_stateMapDstPolygonOffsetBitGroup[2] =
 }; // idb
 const MtlStateMapBitGroup s_stateMapDstWireframeBitGroup[2] =
 {
-  { "wireframe", s_wireframeBitNames, { 2147483648, 0 } },
+  { "wireframe", s_wireframeBitNames, { (int)2147483648, 0 } },
   { NULL, NULL, { 0, 0 } }
 }; // idb
 const MtlStateMapBitGroup s_stateMapDstStencilBitGroup[10] =

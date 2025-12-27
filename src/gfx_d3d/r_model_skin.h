@@ -44,9 +44,12 @@ void __cdecl R_SkinXSurfaceRigid(
 
 
 // r_model_skin_sse
+// This isn't used anyway currently, causing issues with clang as well
+#if 0
 void __cdecl R_SkinXSurfaceSkinnedSse(
     const XSurface *xsurf,
     const DObjSkelMat *boneMatrix,
     GfxPackedVertexNormal *skinVertNormalIn,
     GfxPackedVertexNormal *skinVertNormalOut,
     GfxPackedVertex *skinVerticesOut);
+#endif

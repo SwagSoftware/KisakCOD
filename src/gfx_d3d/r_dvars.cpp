@@ -439,20 +439,6 @@
          Material_PreventOverrideTechniqueGeneration();
  }
 
- static void __cdecl R_WarnInitDvars()
- {
-     DvarLimits min; // [esp+4h] [ebp-10h]
-
-     min.value.max = 30.0;
-     min.value.min = 0.0;
-     r_warningRepeatDelay = Dvar_RegisterFloat(
-         "r_warningRepeatDelay",
-         5.0,
-         min,
-         DVAR_NOFLAG,
-         "Number of seconds after displaying a \"per-frame\" warning before it will display again");
- }
-
  void __cdecl R_RegisterDvars()
  {
      DvarLimits min; // [esp+Ch] [ebp-10h]

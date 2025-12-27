@@ -4,19 +4,23 @@
 #include <universal/profile.h>
 
 #include <xmmintrin.h>
+#include <emmintrin.h>
 
-__m128 sse_weightScale =
-{ { 0.000015258789f, 0.000015258789f, 0.000015258789f, 0.000015258789f } };
+__m128 sse_weightScale = _mm_set1_ps(0.000015258789f); //{ { 0.000015258789f, 0.000015258789f, 0.000015258789f, 0.000015258789f } };
 
-__m128 sse_one =
-{ { 1.0f, 1.0f, 1.0f, 1.0f } };
+__m128 sse_one = _mm_set1_ps(1.0f); // { { 1.0f, 1.0f, 1.0f, 1.0f } };
 
-__m128 sse_encodeShift =
-{ { 127.0f, 127.0f, 127.0f, -192.0f } };
+__m128 sse_encodeShift = _mm_set_ps(-192.0f, 127.0f, 127.0f, 127.0f); // { { 127.0f, 127.0f, 127.0f, -192.0f } };
 
-__m128 sse_encodeScale =
-{ { 127.0f, 127.0f, 127.0f, 255.0f } };
+__m128 sse_encodeScale = _mm_setr_ps(127.0f, 127.0f, 127.0f, 255.0f); //{ { 127.0f, 127.0f, 127.0f, 255.0f } };
 
+#if SSE_BULLSHIT
+inline uint64_t _mm_extract_epi64_sse(__m128i v, int index)
+{
+    uint64_t tmp[2];
+    _mm_storeu_si128((__m128i*)tmp, v);
+    return tmp[index & 1];
+}
 
 void __cdecl R_SkinXSurfaceWeightSseBlockInOut_3_Sse_SkinVertexSimple_1_(
     const GfxPackedVertex *srcVerts,
@@ -61,7 +65,7 @@ void __cdecl R_SkinXSurfaceWeightSseBlockInOut_3_Sse_SkinVertexSimple_1_(
         _mm_prefetch((const char *)&v20[8], 0);
         _mm_prefetch((const char *)&v19[16], 0);
         normalTangent_4 = *v20;
-        v17 = (__m64)v20[1].m128_u64[0];
+        v17 = (__m64)(uint64_t)_mm_extract_epi64_sse(_mm_castps_si128(v20[1]), 0); // (__m64)v20[1].m128_u64[0];
         v16 = *(__m64 *)v19;
         v14 = _mm_add_ps(
             _mm_add_ps(
@@ -141,7 +145,12 @@ void __cdecl R_SkinXSurfaceWeightSseBlockInOut_1_Sse_SkinVertexSimple_0_(
         _mm_prefetch((const char *)&v14[8], 0);
         _mm_prefetch((const char *)&v13[16], 0);
         normalTangent_4 = *v14;
-        v11 = (__m64)v14[1].m128_u64[0];
+        // v11 = (__m64)v14[1].m128_u64[0];
+        __m128i vi = _mm_castps_si128(*v14);
+        uint64_t tmp[2];
+        _mm_storeu_si128((__m128i*)tmp, vi);
+        v11 = (__m64)tmp[0];
+
         v10 = *(__m64 *)v13;
         v9 = _mm_add_ps(
             _mm_add_ps(
@@ -167,6 +176,8 @@ void __cdecl R_SkinXSurfaceWeightSseBlockInOut_1_Sse_SkinVertexSimple_0_(
     *pVertexIndex = v;
 }
 
+// Not called, causing issues with clang
+#if 0
 void __cdecl R_SkinXSurfaceWeightSseBlockInOut_5_Sse_SkinVertexSimple_2_(
     const GfxPackedVertex *srcVerts,
     const unsigned __int16 *vertexBlend,
@@ -276,7 +287,7 @@ void __cdecl R_SkinXSurfaceWeightSseBlockInOut_5_Sse_SkinVertexSimple_2_(
     *pVertexIndex = (int)v;
 }
 
-
+// Not called anyway, causing issues with clang
 void __cdecl R_SkinXSurfaceWeightSseBlockInOut_7_Sse_SkinVertexSimple_3_(
     const GfxPackedVertex *srcVerts,
     const unsigned __int16 *vertexBlend,
@@ -407,6 +418,7 @@ void __cdecl R_SkinXSurfaceWeightSseBlockInOut_7_Sse_SkinVertexSimple_3_(
     *pVertexIndex = (int)v;
 }
 
+// Not called anyway, causing issues with clang
 void __cdecl R_SkinXSurfaceWeightSseInOut(
     const GfxPackedVertex *inVerts,
     const XSurfaceVertexInfo *vertexInfo,
@@ -474,6 +486,7 @@ void __cdecl R_SkinXSurfaceWeightSseInOut(
             &vertIndex);
 }
 
+// Not called anyway, causing issues with clang
 void __cdecl R_SkinXSurfaceRigidSseInOut(
     const XSurface *surf,
     int totalVertCount,
@@ -545,8 +558,7 @@ void __cdecl R_SkinXSurfaceRigidSseInOut(
     //iassert( vertexNormal - dstVertNormals == totalVertCount );
 }
 
-
-
+// Not called, causing issues with clang
 void __cdecl R_SkinXSurfaceWeightSseBlockOut_1_Sse_SkinVertex_0_(
     const GfxPackedVertex *srcVerts,
     const unsigned __int16 *vertexBlend,
@@ -631,7 +643,6 @@ void __cdecl R_SkinXSurfaceWeightSseBlockOut_1_Sse_SkinVertex_0_(
     }
     *pVertexIndex = (int)v;
 }
-
 
 void __cdecl R_SkinXSurfaceWeightSseBlockOut_3_Sse_SkinVertex_1_(
     const GfxPackedVertex *srcVerts,
@@ -1023,6 +1034,7 @@ void __cdecl R_SkinXSurfaceWeightSseBlockOut_7_Sse_SkinVertex_3_(
     *pVertexIndex = (int)v;
 }
 
+// This isn't called from anywhere, causing issues with clang
 void __cdecl R_SkinXSurfaceWeightSseOut(
     const GfxPackedVertex *inVerts,
     const XSurfaceVertexInfo *vertexInfo,
@@ -1083,6 +1095,8 @@ void __cdecl R_SkinXSurfaceWeightSseOut(
             outVerts,
             &vertIndex);
 }
+
+#endif
 
 void __cdecl R_SkinXSurfaceRigidSseOut(
     const XSurface *surf,
@@ -1794,6 +1808,8 @@ void __cdecl R_SkinXSurfaceRigidSse(
     //iassert( vertex - dstVerts == totalVertCount );
 }
 
+// This code is not called, and is causing issues with clang anyway
+#if 0
 void __cdecl R_SkinXSurfaceSkinnedSse(
     const XSurface *xsurf,
     const DObjSkelMat *boneMatrix,
@@ -1845,3 +1861,6 @@ void __cdecl R_SkinXSurfaceSkinnedSse(
             R_SkinXSurfaceRigidSse(xsurf, xsurf->vertCount, boneMatrix, skinVerticesOut);
     }
 }
+#endif
+
+#endif

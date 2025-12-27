@@ -542,7 +542,8 @@ enum MissileFlightMode : __int32
     MISSILEFLIGHTMODE_DIRECT = 0x1,
 };
 
-enum team_t;
+enum team_t : int32_t;
+
 #ifdef KISAK_MP
 struct corpse_ent_t // sizeof=0x4
 {                                       // ...
