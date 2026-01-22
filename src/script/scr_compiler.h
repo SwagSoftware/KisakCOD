@@ -35,23 +35,30 @@ struct CaseStatementInfo // sizeof=0x10
     unsigned int sourcePos;
     CaseStatementInfo *next;
 };
+static_assert(sizeof(CaseStatementInfo) == 0x10);
+
 struct BreakStatementInfo // sizeof=0xC
 {
     char *codePos;
     const char *nextCodePos;
     BreakStatementInfo *next;
 };
+static_assert(sizeof(BreakStatementInfo) == 0xC);
+
 struct ContinueStatementInfo // sizeof=0xC
 {
     char *codePos;
     const char *nextCodePos;
     ContinueStatementInfo *next;
 };
+static_assert(sizeof(ContinueStatementInfo) == 0xC);
+
 struct VariableCompileValue // sizeof=0xC
 {                                       // ...
     VariableValue value;                // ...
     sval_u sourcePos;
 };
+static_assert(sizeof(VariableCompileValue) == 0xC);
 
 #define VALUE_STACK_SIZE 32
 
@@ -95,6 +102,7 @@ struct scrCompileGlob_t // sizeof=0x1D8
     struct PrecacheEntry *precachescriptList;  // ...
     VariableCompileValue value_start[VALUE_STACK_SIZE]; // ...
 };
+static_assert(sizeof(scrCompileGlob_t) == 0x1D8);
 
 #define SCR_FUNC_TABLE_SIZE 1024
 

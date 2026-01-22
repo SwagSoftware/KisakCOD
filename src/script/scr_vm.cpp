@@ -38,9 +38,9 @@
 
 void Log(char const *format, ...)
 {
-    char buffer[4096];
+    char buffer[4096] = { 0 };
     static bool bFirst = true;
-    FILE *logFile;
+    FILE* logFile = NULL;
 
     if (bFirst) {
         logFile = fopen("F:\\swaglord.txt", "w"); // create new log
@@ -87,14 +87,14 @@ void __cdecl GScr_AddVector(const float* vVec)
 
 Scr_StringNode_s* __cdecl Scr_GetStringList(const char* filename, char** pBuf)
 {
-    Scr_StringNode_s* v3; // eax
-    Scr_StringNode_s* head; // [esp+4h] [ebp-1Ch] BYREF
-    char* buf; // [esp+8h] [ebp-18h]
-    char* end; // [esp+Ch] [ebp-14h]
-    int len; // [esp+10h] [ebp-10h]
-    int f; // [esp+14h] [ebp-Ch] BYREF
-    Scr_StringNode_s** pTail; // [esp+18h] [ebp-8h]
-    char* text; // [esp+1Ch] [ebp-4h]
+    Scr_StringNode_s* v3 = NULL; // eax
+    Scr_StringNode_s* head = NULL; // [esp+4h] [ebp-1Ch] BYREF
+    char* buf = NULL; // [esp+8h] [ebp-18h]
+    char* end = NULL; // [esp+Ch] [ebp-14h]
+    int len = 0; // [esp+10h] [ebp-10h]
+    int f = 0; // [esp+14h] [ebp-Ch] BYREF
+    Scr_StringNode_s** pTail = NULL; // [esp+18h] [ebp-8h]
+    char* text = NULL; // [esp+1Ch] [ebp-4h]
 
     len = FS_FOpenFileByMode((char*)filename, &f, FS_READ);
     if (len >= 0)

@@ -71,6 +71,7 @@ struct scrVarPub_t // sizeof=0x2007C
     int totalObjectRefCount;
     volatile unsigned int totalVectorRefCount;
 };
+static_assert(sizeof(scrVarPub_t) == 0x2007C);
 
 struct PrecacheEntry // sizeof=0x8
 {                                       // ...
@@ -79,6 +80,7 @@ struct PrecacheEntry // sizeof=0x8
     // padding byte
     unsigned int sourcePos;
 };
+static_assert(sizeof(PrecacheEntry) == 0x8);
 
 extern scrVarPub_t scrVarPub;
 extern scrVarDebugPub_t scrVarDebugPubBuf;

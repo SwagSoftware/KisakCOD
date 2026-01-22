@@ -31,6 +31,7 @@ struct __declspec(align(128)) scrMemTreeGlob_t // sizeof=0xC0380
                                         // MT_DumpTree(void)+1FB/r ...
     int totalAllocBuckets;              // XREF: MT_DumpTree(void):loc_59E7AE/r
 };
+static_assert(sizeof(scrMemTreeGlob_t) == 0xC0380);
 
 static const char* mt_type_names[22] =
 {
