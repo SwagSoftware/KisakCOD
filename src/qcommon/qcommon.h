@@ -195,7 +195,7 @@ enum $6ABDC6367E3229B6421BFD1B2626A094 : __int32 // (SP/MP same)
 
 inline bool Con_IsNotifyChannel(int channel)
 {
-    return channel == (CON_CHANNEL_GAMENOTIFY || channel == CON_CHANNEL_BOLDGAME || channel == CON_CHANNEL_SUBTITLE);
+    return (channel == CON_CHANNEL_GAMENOTIFY || channel == CON_CHANNEL_BOLDGAME || channel == CON_CHANNEL_SUBTITLE);
 }
 
 void QDECL Com_Printf(int channel, const char* fmt, ...);

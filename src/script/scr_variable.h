@@ -86,6 +86,8 @@ struct VariableStackBuffer // sizeof=0xC
     unsigned __int8 time;
     char buf[1];
 };
+static_assert(sizeof(VariableStackBuffer) == 0xC);
+
 union VariableUnion // sizeof=0x4
 {                                       // ...
     VariableUnion(float f)
@@ -118,12 +120,15 @@ union VariableUnion // sizeof=0x4
     VariableStackBuffer *stackValue;
     unsigned int entityOffset;
 };
+static_assert(sizeof(VariableUnion) == 0x4);
+
 struct VariableValue // sizeof=0x8
 {   
     // ...
     VariableUnion u;                    // ...
     Vartype_t type;                           // ...
 };
+static_assert(sizeof(VariableValue) == 0x8);
 
 union ObjectInfo_u // sizeof=0x2
 {                                       // ...
@@ -132,24 +137,28 @@ union ObjectInfo_u // sizeof=0x2
     unsigned __int16 nextEntId;
     unsigned __int16 self;
 };
+static_assert(sizeof(ObjectInfo_u) == 0x2);
 
 struct ObjectInfo // sizeof=0x4
 {                                       // ...
     unsigned __int16 refCount;
     ObjectInfo_u u;
 };
+static_assert(sizeof(ObjectInfo) == 0x4);
 
 union Variable_u // sizeof=0x2
 {                                       // ...
     unsigned __int16 prev;
     unsigned __int16 prevSibling;
 };
+static_assert(sizeof(Variable_u) == 0x2);
 
 struct Variable // sizeof=0x4
 {                                       // ...
     unsigned __int16 id;                // ...
     Variable_u u;                       // ...
 };
+static_assert(sizeof(Variable) == 0x4);
 
 union VariableValueInternal_u // sizeof=0x4
 {                                       // ...
@@ -170,6 +179,8 @@ union VariableValueInternal_u // sizeof=0x4
     VariableUnion u;
     ObjectInfo o;
 };
+static_assert(sizeof(VariableValueInternal_u) == 0x4);
+
 union VariableValueInternal_w // sizeof=0x4
 {                                       // ...
     unsigned int status;
@@ -180,11 +191,15 @@ union VariableValueInternal_w // sizeof=0x4
     unsigned int waitTime;
     unsigned int parentLocalId;
 };
+static_assert(sizeof(VariableValueInternal_w) == 0x4);
+
 union VariableValueInternal_v // sizeof=0x2
 {                                       // ...
     unsigned __int16 next;
     unsigned __int16 index;
 };
+static_assert(sizeof(VariableValueInternal_v) == 0x2);
+
 struct VariableValueInternal // sizeof=0x10
 {                                       // ...
     Variable hash;                      // ...
@@ -193,6 +208,7 @@ struct VariableValueInternal // sizeof=0x10
     VariableValueInternal_v v;          // ...
     unsigned __int16 nextSibling;       // ...
 };
+static_assert(sizeof(VariableValueInternal) == 0x10);
 
 struct scrVarDebugPub_t // sizeof=0xE0004
 {                                       // ...
@@ -205,10 +221,13 @@ struct scrVarDebugPub_t // sizeof=0xE0004
     // padding byte
     // padding byte
 };
+static_assert(sizeof(scrVarDebugPub_t) == 0xE0004);
+
 struct scrVarGlob_t // sizeof=0x180000
 {                                       // ...
     VariableValueInternal variableList[0x18000]; // ...
 };
+static_assert(sizeof(scrVarGlob_t) == 0x180000);
 
 struct scr_entref_t // sizeof=0x4
 {                                       // ...
@@ -225,6 +244,7 @@ struct scr_entref_t // sizeof=0x4
     unsigned __int16 entnum;            // ...
     unsigned __int16 classnum;          // ...
 };
+static_assert(sizeof(scr_entref_t) == 0x4);
 
 struct scr_classStruct_t // sizeof=0xC
 {
@@ -243,6 +263,7 @@ struct scr_classStruct_t // sizeof=0xC
     // padding byte
     const char *name;
 };
+static_assert(sizeof(scr_classStruct_t) == 0xC);
 
 struct VariableDebugInfo // sizeof=0x10
 {
@@ -251,6 +272,7 @@ struct VariableDebugInfo // sizeof=0x10
     const char *functionName;
     int varUsage;
 };
+static_assert(sizeof(VariableDebugInfo) == 0x10);
 
 //void  TRACK_scr_variable(void);
 void __cdecl Scr_Cleanup();
@@ -406,6 +428,8 @@ struct ThreadDebugInfo // sizeof=0x8C
     float varUsage;                     // ...
     float endonUsage;                   // ...
 };
+static_assert(sizeof(ThreadDebugInfo) == 0x8C);
+
 void  Scr_DumpScriptThreads(void);
 void  Scr_ShutdownVariables(void);
 void  RemoveRefToObject(unsigned int id);

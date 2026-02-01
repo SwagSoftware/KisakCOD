@@ -190,6 +190,7 @@ struct scr_const_t // sizeof=0x174
     unsigned __int16 back_right;        // ...
     unsigned __int16 tag_gunner_pov;    // ...
 };
+static_assert(sizeof(scr_const_t) == 0x174);
 
 #elif KISAK_SP
 struct scr_const_t
