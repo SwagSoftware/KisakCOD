@@ -34,7 +34,7 @@ char __cdecl FX_ValidateAtlasSettings(const FxEditorEffectDef *editorEffect, con
         return 1;
     if (!FX_ElemUsesMaterial(edElemDef))
         return 1;
-    Material_GetInfo(edElemDef->visualunion.visuals[0].material, &mtlInfoRef);
+    Material_GetInfo(edElemDef->visuals[0].material, &mtlInfoRef);
     if (((mtlInfoRef.textureAtlasRowCount - 1) & mtlInfoRef.textureAtlasRowCount) != 0
         || ((mtlInfoRef.textureAtlasColumnCount - 1) & mtlInfoRef.textureAtlasColumnCount) != 0)
     {
@@ -52,7 +52,7 @@ char __cdecl FX_ValidateAtlasSettings(const FxEditorEffectDef *editorEffect, con
     {
         for (visualIndex = 1; visualIndex < edElemDef->visualCount; ++visualIndex)
         {
-            Material_GetInfo(edElemDef->visualunion.visuals[visualIndex].material, &mtlInfo);
+            Material_GetInfo(edElemDef->visuals[visualIndex].material, &mtlInfo);
             if (mtlInfo.textureAtlasRowCount != mtlInfoRef.textureAtlasRowCount
                 || mtlInfo.textureAtlasColumnCount != mtlInfoRef.textureAtlasColumnCount)
             {
@@ -695,7 +695,7 @@ void __cdecl FX_ConvertAtlas(FxElemDef *elemDef, const FxEditorElemDef *edElemDe
         elemDef->atlas.colIndexBits = edElemDef->atlas.colIndexBits;
         elemDef->atlas.rowIndexBits = edElemDef->atlas.rowIndexBits;
         elemDef->atlas.entryCount = edElemDef->atlas.entryCount;
-        Material_GetInfo(edElemDef->visualunion.visuals[0].material, &mtlInfo);
+        Material_GetInfo(edElemDef->visuals[0].material, &mtlInfo);
         for (elemDef->atlas.rowIndexBits = 0;
             1 << elemDef->atlas.rowIndexBits < mtlInfo.textureAtlasRowCount;
             ++elemDef->atlas.rowIndexBits)
@@ -1079,12 +1079,12 @@ void __cdecl FX_SampleVisualState(FxElemDef *elemDef, const FxEditorElemDef *edE
 
 void __cdecl FX_CopyMarkVisuals(const FxEditorElemDef *edElemDef, FxElemMarkVisuals *markVisualsArray)
 {
-    memcpy((uint8_t *)markVisualsArray, (uint8_t *)&edElemDef->visualunion, 8 * edElemDef->visualCount);
+    memcpy(markVisualsArray, &edElemDef->markVisuals, 8 * edElemDef->visualCount);
 }
 
 void __cdecl FX_CopyVisuals(const FxEditorElemDef *edElemDef, FxElemVisuals *visualsArray)
 {
-    memcpy((uint8_t *)visualsArray, (uint8_t *)&edElemDef->visualunion, 4 * edElemDef->visualCount);
+    memcpy(visualsArray, &edElemDef->markVisuals, 4 * edElemDef->visualCount);
 }
 
 void __cdecl FX_ConvertTrail_CalcNormForSegment(const float *vert0, const float *vert1, float *outNormal)
@@ -1611,7 +1611,7 @@ const FxEffectDef *__cdecl FX_Convert(const FxEditorEffectDef *editorEffect, voi
         {
             for (visualIndex = 0; visualIndex < edElemDef->visualCount; ++visualIndex)
             {
-                elemVisual = &edElemDef->visualunion.visuals[visualIndex];
+                elemVisual = &edElemDef->visuals[visualIndex];
                 if (elemVisual->anonymous)
                 {
                     if (!*((_DWORD *)elemVisual->anonymous + 53))

@@ -136,10 +136,8 @@ void __cdecl R_GenerateReflectionRawData(DiskGfxReflectionProbe *probeRawData)
     float zfar; // [esp+0h] [ebp-40B8h]
     FxCmd cmd; // [esp+4h] [ebp-40B4h] BYREF
     CubemapShot cubemapShot; // [esp+10h] [ebp-40A8h]
-    int v4; // [esp+14h] [ebp-40A4h]
     refdef_s dst; // [esp+18h] [ebp-40A0h] BYREF
 
-    v4 = 256;
     memset(&dst, 0, sizeof(dst));
     dst.vieworg[0] = probeRawData->origin[0];
     dst.vieworg[1] = probeRawData->origin[1];
@@ -148,7 +146,9 @@ void __cdecl R_GenerateReflectionRawData(DiskGfxReflectionProbe *probeRawData)
     dst.time = 0;
     dst.blurRadius = 0.0;
     dst.useScissorViewport = 0;
+
     R_InitPrimaryLights(dst.primaryLights);
+
     for (cubemapShot = CUBEMAPSHOT_RIGHT; cubemapShot < CUBEMAPSHOT_COUNT; ++cubemapShot)
     {
         R_BeginCubemapShot(256, 1);

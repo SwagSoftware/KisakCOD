@@ -296,7 +296,7 @@ char __cdecl R_Cinematic_Advance()
 
     percentageFull = R_Cinematic_GetPercentageFull();
 
-    if (percentageFull < 0x28 && (cinematicGlob.playbackFlags & 1) == 0)
+    if (percentageFull < 40 && (cinematicGlob.playbackFlags & 1) == 0)
     {
         cinematicGlob.underrun = 1;
         targetPaused = CINEMATIC_PAUSED;
@@ -525,13 +525,9 @@ char __cdecl R_Cinematic_StartPlayback_Now(const char *filename, unsigned int pl
     else
     {
         Com_PrintWarning(8, "R_Cinematic_BinkOpen '%s' failed: %s; not playing movie.\n", "default", errText);
-        if (cinematicGlob.activeImageFrame != -1)
-            MyAssertHandler(
-                ".\\r_cinematic.cpp",
-                1662,
-                0,
-                "%s",
-                "cinematicGlob.activeImageFrame == CINEMATIC_INVALID_IMAGE_FRAME");
+
+        iassert(cinematicGlob.activeImageFrame == CINEMATIC_INVALID_IMAGE_FRAME);
+
         CinematicHunk_Reset(&cinematicGlob.binkHunk);
         cinematicGlob.cinematicFinished = 1;
         RB_UnbindAllImages();

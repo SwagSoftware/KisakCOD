@@ -2762,7 +2762,7 @@ void __cdecl R_SetColorMappings()
 
 void __cdecl R_CalcGammaRamp(GfxGammaRamp *gammaRamp)
 {
-    float v1; // [esp+8h] [ebp-30h]
+    float unitScaleValue; // [esp+8h] [ebp-30h]
     float v2; // [esp+Ch] [ebp-2Ch]
     float v3; // [esp+18h] [ebp-20h]
     unsigned __int16 adjustedColorValue; // [esp+28h] [ebp-10h]
@@ -2770,14 +2770,8 @@ void __cdecl R_CalcGammaRamp(GfxGammaRamp *gammaRamp)
     float exponent; // [esp+30h] [ebp-8h]
 
     iassert( gammaRamp );
-    if (r_gamma->current.value <= 0.0)
-        MyAssertHandler(
-            ".\\r_init.cpp",
-            741,
-            0,
-            "%s\n\t(r_gamma->current.value) = %g",
-            "(r_gamma->current.value > 0)",
-            r_gamma->current.value);
+    iassert(r_gamma->current.value > 0);
+
     exponent = 1.0 / r_gamma->current.value;
     for (colorTableIndex = 0; colorTableIndex < 0x100u; ++colorTableIndex)
     {
@@ -2788,16 +2782,9 @@ void __cdecl R_CalcGammaRamp(GfxGammaRamp *gammaRamp)
         else
         {
             v2 = (double)colorTableIndex / 255.0;
-            v1 = pow(v2, exponent);
-            if (v1 < 0.0 || v1 >= 1.000007629394531)
-                MyAssertHandler(
-                    ".\\r_init.cpp",
-                    754,
-                    0,
-                    "%s\n\t(unitScaleValue) = %g",
-                    "(unitScaleValue >= 0 && unitScaleValue < 1 + 0.5f / 65535)",
-                    v1);
-            adjustedColorValue = (int)(v1 * 65535.0f);
+            unitScaleValue = pow(v2, exponent);
+            iassert(unitScaleValue >= 0 && unitScaleValue < 1 + 0.5f / 65535);
+            adjustedColorValue = (int)(unitScaleValue * 65535.0f);
         }
         gammaRamp->entries[colorTableIndex] = adjustedColorValue;
     }

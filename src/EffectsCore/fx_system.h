@@ -1363,7 +1363,7 @@ struct FxEditorElemDef // sizeof=0x858
     {
         FxElemVisuals visuals[32];
         FxElemMarkVisuals markVisuals[16];
-    }visualunion;
+    };
     int32_t trailSplitDist;
     int32_t trailRepeatDist;
     float trailScrollTime;

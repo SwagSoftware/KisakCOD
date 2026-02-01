@@ -56,18 +56,18 @@ char *__cdecl Com_LoadInfoString_LoadObj(char *fileName, const char *fileDesc, c
 char *__cdecl Com_LoadRawTextFile(const char *fullpath)
 {
     if (IsFastFileLoad())
-        return (char *)Com_LoadRawTextFile_FastFile(fullpath);
+        return Com_LoadRawTextFile_FastFile(fullpath);
     else
         return Com_LoadRawTextFile_LoadObj(fullpath);
 }
 
-XModelPiece *__cdecl Com_LoadRawTextFile_FastFile(const char *fullpath)
+char *__cdecl Com_LoadRawTextFile_FastFile(const char *fullpath)
 {
     RawFile *rawfile; // [esp+4h] [ebp-4h]
 
     rawfile = DB_FindXAssetHeader(ASSET_TYPE_RAWFILE, fullpath).rawfile;
     if (rawfile)
-        return (XModelPiece *)rawfile->buffer;
+        return (char*)rawfile->buffer;
     else
         return 0;
 }

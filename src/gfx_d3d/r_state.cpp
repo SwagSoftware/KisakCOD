@@ -524,36 +524,38 @@ void  R_GenerateWorldOutdoorLookupMatrix(
     GfxCmdBufSourceState *source,
     float (*outMatrix)[4])
 {
-    GfxMatrix v3; // [esp-Ch] [ebp-8Ch] BYREF
-    float world_52[4]; // [esp+34h] [ebp-4Ch] BYREF
-    float zInTimesInvViewTimesOutdoorLookup_4[4]; // [esp+44h] [ebp-3Ch] BYREF
-    float zInTimesInvView_4[4]; // [esp+54h] [ebp-2Ch] BYREF
-    //GfxCmdBufSourceState *matrix0; // [esp+64h] [ebp-1Ch]
-    const void *zIn_8; // [esp+68h] [ebp-18h]
-    float zIn_12; // [esp+6Ch] [ebp-14h]
-    float awayBias; // [esp+70h] [ebp-10h]
+    GfxMatrix worldMatrix; // [esp-Ch] [ebp-8Ch] BYREF
+    float worldOffset[4]; // [esp+34h] [ebp-4Ch] BYREF
+    float zInTimesInvViewTimesOutdoorLookup[4]; // [esp+44h] [ebp-3Ch] BYREF
+    float zInTimesInvView[4]; // [esp+54h] [ebp-2Ch] BYREF
     GfxCodeMatrices *activeMatrices; // [esp+74h] [ebp-Ch]
-    float downBias; // [esp+78h] [ebp-8h]
-    float retaddr; // [esp+80h] [ebp+0h]
 
-    //downBias = retaddr;
-    awayBias = r_outdoorAwayBias->current.value;
-    zIn_12 = r_outdoorDownBias->current.value;
-    zIn_8 = source;
-    //matrix0 = R_GetCodeMatrix(source, 63u, 0);
-    zInTimesInvView_4[0] = 0.0;
-    zInTimesInvView_4[1] = 0.0;
-    zInTimesInvView_4[2] = -awayBias;
-    zInTimesInvView_4[3] = 0.0;
-    MatrixTransformVector44(zInTimesInvView_4, *(const mat4x4*)R_GetCodeMatrix(source, 63u, 0), zInTimesInvViewTimesOutdoorLookup_4);
-    zInTimesInvViewTimesOutdoorLookup_4[2] = zInTimesInvViewTimesOutdoorLookup_4[2] + zIn_12;
+    const float awayBias = r_outdoorAwayBias->current.value;
+    const float downBias = r_outdoorDownBias->current.value;
+
+    zInTimesInvView[0] = 0.0;
+    zInTimesInvView[1] = 0.0;
+    zInTimesInvView[2] = -awayBias;
+    zInTimesInvView[3] = 0.0;
+
+    MatrixTransformVector44(zInTimesInvView, *(const mat4x4*)R_GetCodeMatrix(source, 63u, 0), zInTimesInvViewTimesOutdoorLookup);
+
+    zInTimesInvViewTimesOutdoorLookup[2] += downBias;
+
     iassert(rgp.world);
-    MatrixTransformVector44(zInTimesInvViewTimesOutdoorLookup_4, rgp.world->outdoorLookupMatrix, world_52);
+
+    MatrixTransformVector44(zInTimesInvViewTimesOutdoorLookup, rgp.world->outdoorLookupMatrix, worldOffset);
+
     //iassert(R_IsMatrixConstantUpToDate(source, CONST_SRC_CODE_WORLD_MATRIX));
-    qmemcpy(&v3, zIn_8, sizeof(v3));
-    Vec3Add(v3.m[3], source->eyeOffset, v3.m[3]);
-    MatrixMultiply44(v3.m, rgp.world->outdoorLookupMatrix, *(mat4x4*)outMatrix);
-    Vec4Add(&(*outMatrix)[12], world_52, &(*outMatrix)[12]);
+
+    qmemcpy(&worldMatrix, source, sizeof(worldMatrix));
+
+    Vec3Add(worldMatrix.m[3], source->eyeOffset, worldMatrix.m[3]);
+
+    MatrixMultiply44(worldMatrix.m, rgp.world->outdoorLookupMatrix, *(mat4x4*)outMatrix);
+
+    Vec4Add(&(*outMatrix)[12], worldOffset, &(*outMatrix)[12]);
+
     source->constVersions[86] = source->matrixVersions[7];
 }
 

@@ -14,15 +14,6 @@ void __cdecl R_SetLightProperties(
     LightHasShadowMap hasShadowMap,
     float spotShadowFade)
 {
-    float v5; // [esp+14h] [ebp-70h]
-    float v6; // [esp+18h] [ebp-6Ch]
-    float v7; // [esp+24h] [ebp-60h]
-    float v8; // [esp+28h] [ebp-5Ch]
-    float v9; // [esp+34h] [ebp-50h]
-    float v10; // [esp+38h] [ebp-4Ch]
-    float v11; // [esp+44h] [ebp-40h]
-    float v12; // [esp+48h] [ebp-3Ch]
-    float v13; // [esp+4Ch] [ebp-38h]
     float spotDotScale; // [esp+54h] [ebp-30h]
     float lightOrigin[3]; // [esp+58h] [ebp-2Ch] BYREF
     float diffuseColor[3]; // [esp+64h] [ebp-20h] BYREF
@@ -30,74 +21,44 @@ void __cdecl R_SetLightProperties(
     float specularColor[3]; // [esp+74h] [ebp-10h] BYREF
     float spotDotBias; // [esp+80h] [ebp-4h]
 
-    if (source->viewMode != VIEW_MODE_3D)
-        MyAssertHandler(
-            ".\\r_draw_shadowablelight.cpp",
-            55,
-            0,
-            "%s\n\t(source->viewMode) = %i",
-            "(source->viewMode == VIEW_MODE_3D)",
-            source->viewMode);
+    iassert(source->viewMode == VIEW_MODE_3D);
     iassert( light );
-    if (light->type != 3 && light->type != 2)
-        MyAssertHandler(
-            ".\\r_draw_shadowablelight.cpp",
-            57,
-            0,
-            "%s",
-            "light->type == GFX_LIGHT_TYPE_OMNI || light->type == GFX_LIGHT_TYPE_SPOT");
-    if (light->radius <= 0.0)
-        MyAssertHandler(
-            ".\\r_draw_shadowablelight.cpp",
-            58,
-            0,
-            "%s\n\t(light->radius) = %g",
-            "(light->radius > 0.0f)",
-            light->radius);
+    iassert(light->type == GFX_LIGHT_TYPE_OMNI || light->type == GFX_LIGHT_TYPE_SPOT);
+    iassert(light->radius > 0.0f);
+
     R_SetCodeImageTexture(source, TEXTURE_SRC_CODE_LIGHT_ATTENUATION, def->attenuation.image);
     R_SetCodeImageSamplerState(source, TEXTURE_SRC_CODE_LIGHT_ATTENUATION, def->attenuation.samplerState);
     Vec3Sub(light->origin, source->eyeOffset, lightOrigin);
     Vec3Scale(light->color, r_diffuseColorScale->current.value, diffuseColor);
     Vec3Scale(light->color, r_specularColorScale->current.value, specularColor);
-    v11 = lightOrigin[1];
-    v12 = lightOrigin[2];
-    v13 = 1.0 / light->radius;
+
     source->input.consts[0][0] = lightOrigin[0];
-    source->input.consts[0][1] = v11;
-    source->input.consts[0][2] = v12;
-    source->input.consts[0][3] = v13;
+    source->input.consts[0][1] = lightOrigin[1];
+    source->input.consts[0][2] = lightOrigin[2];
+    source->input.consts[0][3] = 1.0 / light->radius;
     R_DirtyCodeConstant(source, CONST_SRC_CODE_LIGHT_POSITION);
-    v9 = diffuseColor[1];
-    v10 = diffuseColor[2];
+
     source->input.consts[1][0] = diffuseColor[0];
-    source->input.consts[1][1] = v9;
-    source->input.consts[1][2] = v10;
+    source->input.consts[1][1] = diffuseColor[1];
+    source->input.consts[1][2] = diffuseColor[2];
     source->input.consts[1][3] = 1.0;
     R_DirtyCodeConstant(source, CONST_SRC_CODE_LIGHT_DIFFUSE);
-    v7 = specularColor[1];
-    v8 = specularColor[2];
+
     source->input.consts[2][0] = specularColor[0];
-    source->input.consts[2][1] = v7;
-    source->input.consts[2][2] = v8;
+    source->input.consts[2][1] = specularColor[1];
+    source->input.consts[2][2] = specularColor[2];
     source->input.consts[2][3] = 1.0;
     R_DirtyCodeConstant(source, CONST_SRC_CODE_LIGHT_SPECULAR);
-    v5 = light->dir[1];
-    v6 = light->dir[2];
+
     source->input.consts[3][0] = light->dir[0];
-    source->input.consts[3][1] = v5;
-    source->input.consts[3][2] = v6;
+    source->input.consts[3][1] = light->dir[1];
+    source->input.consts[3][2] = light->dir[2];
     source->input.consts[3][3] = 0.0;
     R_DirtyCodeConstant(source, CONST_SRC_CODE_LIGHT_SPOTDIR);
+
     if (light->type == 2 || hasShadowMap == LIGHT_HAS_SHADOWMAP)
     {
-        if (light->cosHalfFovOuter >= (double)light->cosHalfFovInner)
-            MyAssertHandler(
-                ".\\r_draw_shadowablelight.cpp",
-                80,
-                0,
-                "light->cosHalfFovInner > light->cosHalfFovOuter\n\t%g, %g",
-                light->cosHalfFovInner,
-                light->cosHalfFovOuter);
+        iassert(light->cosHalfFovInner > light->cosHalfFovOuter);
         spotDotScale = 1.0 / (light->cosHalfFovInner - light->cosHalfFovOuter);
         spotDotBias = -spotDotScale * light->cosHalfFovOuter;
         spotExponent = (float)light->exponent;

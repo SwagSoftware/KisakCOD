@@ -308,7 +308,6 @@ struct cgMedia_t
 };
 
 const rectDef_s *__cdecl Window_GetRect(const windowDef_t *w);
-connstate_t __cdecl CL_GetLocalClientConnectionState(int localClientNum);
 void CG_RegisterDvars();
 void __cdecl TRACK_cg_main();
 void __cdecl CG_GetDObjOrientation(int localClientNum, int dobjHandle, float (*axis)[3], float *origin);

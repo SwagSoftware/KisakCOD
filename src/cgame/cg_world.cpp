@@ -101,19 +101,19 @@ void __cdecl CG_GetEntityBModelBounds(const centity_s *cent, float *mins, float 
     float radius; // [esp+8h] [ebp-Ch]
     int32_t x; // [esp+10h] [ebp-4h]
 
-    if (!cent)
-        MyAssertHandler(".\\cgame\\cg_world.cpp", 63, 0, "%s", "cent");
-    if (!mins)
-        MyAssertHandler(".\\cgame\\cg_world.cpp", 64, 0, "%s", "mins");
-    if (!maxs)
-        MyAssertHandler(".\\cgame\\cg_world.cpp", 65, 0, "%s", "maxs");
-    if (!absMins)
-        MyAssertHandler(".\\cgame\\cg_world.cpp", 66, 0, "%s", "absMins");
-    if (!absMaxs)
-        MyAssertHandler(".\\cgame\\cg_world.cpp", 67, 0, "%s", "absMaxs");
-    if (!cent->nextState.solid)
-        MyAssertHandler(".\\cgame\\cg_world.cpp", 70, 0, "%s", "es->solid");
-    if (cent->nextState.solid == 0xFFFFFF)
+    const entityState_s *es;
+
+    iassert(cent);
+    iassert(mins);
+    iassert(maxs);
+    iassert(absMins);
+    iassert(absMaxs);
+
+    es = &cent->nextState;
+
+    iassert(es->solid);
+
+    if (es->solid == 0xFFFFFF)
     {
         CM_ModelBounds(cent->nextState.index.brushmodel, mins, maxs);
     }
@@ -122,20 +122,25 @@ void __cdecl CG_GetEntityBModelBounds(const centity_s *cent, float *mins, float 
         x = (uint8_t)cent->nextState.solid;
         zd = (uint8_t)BYTE1(cent->nextState.solid) - 1;
         zu = (uint8_t)BYTE2(cent->nextState.solid) - 32;
-        mins[1] = 1.0 - (double)x;
-        *mins = mins[1];
-        maxs[1] = (double)x - 1.0;
-        *maxs = maxs[1];
-        mins[2] = 1.0 - (double)zd;
-        maxs[2] = (double)zu - 1.0;
+
+        mins[1] = 1.0f - (float)x;
+        mins[0] = mins[1];
+
+        maxs[1] = (float)x - 1.0f;
+        maxs[0] = maxs[1];
+        mins[2] = 1.0f - (float)zd;
+        maxs[2] = (float)zu - 1.0f;
     }
     radius = RadiusFromBounds(mins, maxs);
-    *absMins = -radius;
+
+    absMins[0] = -radius;
     absMins[1] = -radius;
     absMins[2] = -radius;
-    *absMaxs = radius;
+
+    absMaxs[0] = radius;
     absMaxs[1] = radius;
     absMaxs[2] = radius;
+
     Vec3Add(cent->pose.origin, absMins, absMins);
     Vec3Add(cent->pose.origin, absMaxs, absMaxs);
 }

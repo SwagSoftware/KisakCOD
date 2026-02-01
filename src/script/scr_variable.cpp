@@ -607,6 +607,7 @@ struct VariableValue  Scr_GetArrayIndexValue(unsigned int name)
 		value.type = VAR_STRING;
 		value.u.intValue = (uint16_t)name;
 	}
+
 	return value;
 }
 

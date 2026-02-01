@@ -129,14 +129,14 @@ void __cdecl R_SetVertexShaderConstantFromCode(GfxCmdBufContext context, const M
     if (!R_IsVertexShaderConstantUpToDate(context, routingData))
     {
         if (routingData->u.codeConst.index < 58)
-            data = (const float *)R_GetCodeConstant(context, routingData->u.codeConst.index);
+            data = R_GetCodeConstant(context, routingData->u.codeConst.index);
         else
             data = (const float *)R_GetCodeMatrix(context.source, routingData->u.codeConst.index, routingData->u.codeConst.firstRow);
         R_HW_SetVertexShaderConstant(context.state->prim.device, routingData->dest, data, routingData->u.codeConst.rowCount);
     }
 }
 
-GfxCmdBufInput *__cdecl R_GetCodeConstant(GfxCmdBufContext context, unsigned int constant)
+float *__cdecl R_GetCodeConstant(GfxCmdBufContext context, unsigned int constant)
 {
     iassert(context.state);
     iassert(context.source);
@@ -154,7 +154,7 @@ GfxCmdBufInput *__cdecl R_GetCodeConstant(GfxCmdBufContext context, unsigned int
         MyAssertHandler(".\\r_shade.cpp", 29, 0, "%s\n\t%s", "context.source->constVersions[constant]", v2);
     }
 
-    return (GfxCmdBufInput *)((char *)&context.source->input + 16 * constant);
+    return (float *)((char *)&context.source->input + 16 * constant);
 }
 
 char __cdecl R_IsVertexShaderConstantUpToDate(GfxCmdBufContext context, const MaterialShaderArgument *routingData)
@@ -188,7 +188,7 @@ char __cdecl R_IsShaderMatrixUpToDate(
     unsigned int rowCount; // [esp+Ch] [ebp-8h]
     unsigned int rowCounta; // [esp+Ch] [ebp-8h]
 
-    newState.fields.codeConst = (MaterialArgumentCodeConst)routingData->u.codeSampler;
+    newState.fields.codeConst = routingData->u.codeConst;
     newState.fields.version = source->matrixVersions[(routingData->u.codeConst.index - 58) >> 2];
     if (constant->packed == newState.packed)
         return 1;
@@ -198,8 +198,7 @@ char __cdecl R_IsShaderMatrixUpToDate(
     for (rowCounta = rowCount - 1; rowCounta; --rowCounta)
     {
         ++constant;
-        constant->fields.codeConst = (MaterialArgumentCodeConst)-1;
-        constant->fields.version = -1;
+        constant->packed = -1LL;
     }
     return 0;
 }
@@ -212,7 +211,7 @@ char __cdecl R_IsShaderConstantUpToDate(
     GfxShaderConstantState newState; // [esp+4h] [ebp-10h]
 
     iassert( source );
-    newState.fields.codeConst = (MaterialArgumentCodeConst)routingData->u.codeSampler;
+    newState.fields.codeConst = routingData->u.codeConst;
     newState.fields.version = source->constVersions[routingData->u.codeConst.index];
     if (constant->packed == newState.packed)
         return 1;
@@ -277,76 +276,33 @@ void __cdecl R_HW_SetPixelShaderConstant(
 
 int __cdecl R_IsPixelShaderConstantUpToDate(GfxCmdBufContext context, const MaterialShaderArgument *routingData)
 {
-    const char *v2; // eax
     GfxShaderConstantState newState; // [esp+4h] [ebp-10h]
 
-    if (routingData->dest >= 0x100u)
-        MyAssertHandler(
-            ".\\r_shade.cpp",
-            123,
-            0,
-            "routingData->dest doesn't index ARRAY_COUNT( context.state->pixelShaderConstState )\n\t%i not in [0, %i)",
-            routingData->dest,
-            256);
-    if (routingData->u.codeConst.rowCount != 1)
-        MyAssertHandler(
-            ".\\r_shade.cpp",
-            124,
-            0,
-            "%s\n\t(routingData->u.codeConst.rowCount) = %i",
-            "(routingData->u.codeConst.rowCount == 1)",
-            routingData->u.codeConst.rowCount);
+    bcassert(routingData->dest, ARRAY_COUNT(context.state->pixelShaderConstState));
+    iassert(routingData->u.codeConst.rowCount == 1);
     iassert( context.source );
-    newState.fields.codeConst = (MaterialArgumentCodeConst)routingData->u.codeSampler;
+
+    newState.fields.codeConst = routingData->u.codeConst;
     newState.fields.version = context.source->constVersions[routingData->u.codeConst.index];
-    if (!context.source->constVersions[routingData->u.codeConst.index])
-    {
-        v2 = va(
-            "constant: %d, material: %s, technique: %s",
-            routingData->u.codeConst.index,
-            context.state->material->info.name,
-            context.state->technique->name);
-        MyAssertHandler(".\\r_shade.cpp", 130, 0, "%s\n\t%s", "newState.fields.version", v2);
-    }
+
+    iassert(newState.fields.version);
+
     if (context.state->pixelShaderConstState[routingData->dest] == newState.packed)
         return 1;
+
     context.state->pixelShaderConstState[routingData->dest] = newState.packed;
     return 0;
 }
 
 void __cdecl R_SetPixelShaderConstantFromCode(GfxCmdBufContext context, const MaterialShaderArgument *routingData)
 {
-    const char *v2; // eax
-    GfxCmdBufInput *data; // [esp+4h] [ebp-4h]
+    iassert(context.source->constVersions[routingData->u.codeConst.index]);
+    bcassert(routingData->u.codeConst.index, CONST_SRC_FIRST_CODE_MATRIX);
 
-    if (!context.source->constVersions[routingData->u.codeConst.index])
-    {
-        v2 = va(
-            "constant: %d, material: %s, technique: %s",
-            routingData->u.codeConst.index,
-            context.state->material->info.name,
-            context.state->technique->name);
-        MyAssertHandler(
-            ".\\r_shade.cpp",
-            147,
-            0,
-            "%s\n\t%s",
-            "context.source->constVersions[routingData->u.codeConst.index]",
-            v2);
-    }
-    if (routingData->u.codeConst.index >= 0x3Au)
-        MyAssertHandler(
-            ".\\r_shade.cpp",
-            150,
-            0,
-            "routingData->u.codeConst.index doesn't index CONST_SRC_FIRST_CODE_MATRIX\n\t%i not in [0, %i)",
-            routingData->u.codeConst.index,
-            58);
-    data = R_GetCodeConstant(context, routingData->u.codeConst.index);
     R_HW_SetPixelShaderConstant(
         context.state->prim.device,
         routingData->dest,
-        (const float *)data,
+        R_GetCodeConstant(context, routingData->u.codeConst.index),
         routingData->u.codeConst.rowCount);
 }
 
@@ -551,7 +507,6 @@ const MaterialTextureDef *__cdecl R_SetPixelSamplerFromMaterial(
     float floatTime; // [esp+4h] [ebp-10h]
     GfxImage *image; // [esp+8h] [ebp-Ch] BYREF
     const Material *material; // [esp+Ch] [ebp-8h]
-    unsigned __int8 samplerState; // [esp+13h] [ebp-1h]
 
     material = context.state->material;
     while (texDef->nameHash != arg->u.codeSampler)
@@ -574,10 +529,11 @@ const MaterialTextureDef *__cdecl R_SetPixelSamplerFromMaterial(
     {
         image = texDef->u.image;
     }
-    samplerState = texDef->samplerState;
+
     if (rg.hasAnyImageOverrides)
         R_OverrideImage(&image, texDef);
-    R_SetSampler(context, arg->dest, samplerState, image);
+
+    R_SetSampler(context, arg->dest, texDef->samplerState, image);
     return texDef;
 }
 
@@ -610,6 +566,7 @@ void __cdecl R_SetPassShaderObjectArguments(
         if (!--argCount)
             return;
     }
+
     while (arg->type == MTL_ARG_CODE_PIXEL_SAMPLER)
     {
         image = R_GetTextureFromCode(context.source, arg->u.codeSampler, &samplerState);
@@ -620,6 +577,7 @@ void __cdecl R_SetPassShaderObjectArguments(
         if (!--argCount)
             return;
     }
+
     if (!alwaysfails)
         MyAssertHandler(".\\r_shade.cpp", 232, 0, "unreachable");
 }

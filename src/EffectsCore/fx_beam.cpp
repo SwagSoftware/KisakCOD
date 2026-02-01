@@ -559,32 +559,24 @@ void __cdecl Float4x4ForViewer(float4x4 *mtx, const vec3r origin3, const mat3x3&
 
 void __cdecl Float4x4InfinitePerspectiveMatrix(float4x4* mtx, float tanHalfFovX, float tanHalfFovY, float zNear)
 {
-    float M1_4; // [esp+4h] [ebp-44h]
-    float M3_8; // [esp+2Ch] [ebp-1Ch]
-    float M0; // [esp+34h] [ebp-14h]
-
-    M3_8 = -zNear * 0.99951172f;
-    M0 = 0.99951172f / tanHalfFovX;
-    M1_4 = 0.99951172f / tanHalfFovY;
-    
-    mtx->x.v[0] = M0;
+    mtx->x.v[0] = MAX_11BIT_FLT / tanHalfFovX;
     mtx->x.v[1] = 0.0f;
     mtx->x.v[2] = 0.0f;
     mtx->x.v[3] = 0.0f;
 
     mtx->y.v[0] = 0.0f;
-    mtx->y.v[1] = M1_4;
+    mtx->y.v[1] = MAX_11BIT_FLT / tanHalfFovY;
     mtx->y.v[2] = 0.0f;
     mtx->y.v[3] = 0.0f;
 
     mtx->z.v[0] = 0.0f;
     mtx->z.v[1] = 0.0f;
-    mtx->z.v[2] = 0.99951172f;
+    mtx->z.v[2] = MAX_11BIT_FLT;
     mtx->z.v[3] = 1.0f;
 
     mtx->w.v[0] = 0.0f;
     mtx->w.v[1] = 0.0f;
-    mtx->w.v[2] = M3_8;
+    mtx->w.v[2] = -zNear * MAX_11BIT_FLT;
     mtx->w.v[3] = 0.0f;
 }
 

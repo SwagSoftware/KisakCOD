@@ -59,10 +59,10 @@ void R_DepthPrepass(
     const GfxViewInfo *viewInfo,
     GfxCmdBuf *cmdBuf)
 {
-    GfxCmdBufSourceState v6; // [sp+50h] [-F00h] BYREF
+    GfxCmdBufSourceState state; // [sp+50h] [-F00h] BYREF
 
-    R_InitCmdBufSourceState(&v6, &viewInfo->input, 1);
-    R_SetRenderTargetSize(&v6, renderTargetId);
-    R_SetViewportStruct(&v6, &viewInfo->sceneViewport);
-    R_DrawCall(R_DepthPrepassCallback, viewInfo, &v6, viewInfo, 0, &viewInfo->viewParms, cmdBuf, 0);
+    R_InitCmdBufSourceState(&state, &viewInfo->input, 1);
+    R_SetRenderTargetSize(&state, renderTargetId);
+    R_SetViewportStruct(&state, &viewInfo->sceneViewport);
+    R_DrawCall(R_DepthPrepassCallback, viewInfo, &state, viewInfo, 0, &viewInfo->viewParms, cmdBuf, 0);
 }

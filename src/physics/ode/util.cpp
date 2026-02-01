@@ -235,7 +235,7 @@ void __cdecl ODE_BreakupIslandIfTooBig(
     dxJoint **joint,
     int *const jointCount)
 {
-    ShouldNotRemoveJoint v4; // [esp+3Ch] [ebp-Ch]
+    ShouldNotRemoveJoint pred; // [esp+3Ch] [ebp-Ch]
     int oldBodyCount; // [esp+44h] [ebp-4h]
 
     iassert(body);
@@ -250,18 +250,27 @@ void __cdecl ODE_BreakupIslandIfTooBig(
         {
             if (oldBodyCount - *bodyCount > 0)
             {
-                v4.body = &body[*bodyCount];
-                v4.bodyCount = oldBodyCount - *bodyCount;
+                pred.body = &body[*bodyCount];
+                pred.bodyCount = oldBodyCount - *bodyCount;
                 //*jointCount = std::_Partition<dxJoint **, ShouldNotRemoveJoint>(joint, &joint[*jointCount], v4) - joint;
-                std::partition(&joint[0], &joint[*jointCount], v4);
+                //std::partition(&joint[0], &joint[*jointCount], v4);
+
+                *jointCount = static_cast<int>(
+                    std::partition(
+                        joint,
+                        joint + *jointCount,
+                        pred
+                    ) - joint);
             }
+
             if (*jointCount < 74)
                 break;
+
             oldBodyCount = (*bodyCount)--;
             body[*bodyCount]->tag = 0;
         }
-        if (*bodyCount <= 0)
-            MyAssertHandler(".\\physics\\ode\\src\\util.cpp", 168, 1, "%s", "*bodyCount > 0");
+
+        iassert(*bodyCount > 0);
     }
 }
 

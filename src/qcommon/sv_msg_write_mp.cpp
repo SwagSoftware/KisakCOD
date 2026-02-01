@@ -933,16 +933,13 @@ void __cdecl MSG_WriteReliableCommandToBuffer(const char *pszCommand, char *pszB
 
 void __cdecl MSG_WriteEntityIndex(SnapshotInfo_s *snapInfo, msg_t *msg, int index, int indexBits)
 {
-    const char *v4; // eax
-
     iassert( !msg->readOnly );
+
     if (msg_printEntityNums->current.enabled && SV_IsPacketDataNetworkData())
         Com_Printf(15, "Writing entity num %i\n", index);
-    if (index - msg->lastEntityRef <= 0)
-    {
-        v4 = va("lastEntityReferenced is %i, index is %i", msg->lastEntityRef, index);
-        MyAssertHandler(".\\qcommon\\sv_msg_write_mp.cpp", 426, 0, "%s\n\t%s", "index - msg->lastEntityRef > 0", v4);
-    }
+
+    iassert(index - msg->lastEntityRef > 0);
+
     if (index - msg->lastEntityRef == 1)
     {
         if (msg_printEntityNums->current.enabled && SV_IsPacketDataNetworkData())
@@ -956,11 +953,9 @@ void __cdecl MSG_WriteEntityIndex(SnapshotInfo_s *snapInfo, msg_t *msg, int inde
         {
             if (msg_printEntityNums->current.enabled && SV_IsPacketDataNetworkData())
                 Com_Printf(16, "Wrote entity num: %i bits (delta)\n", 6);
-            if (index - msg->lastEntityRef <= 0)
-            {
-                const char* someError = va("index was %i, lastEntityRef is %i", index, msg->lastEntityRef);
-                MyAssertHandler(".\\qcommon\\sv_msg_write_mp.cpp", 6969, 0, "%s", someError);
-            }
+            
+            iassert(index - msg->lastEntityRef > 0);
+
             MSG_WriteBit0(msg);
             MSG_WriteBits(msg, index - msg->lastEntityRef, 4u);
         }
@@ -968,8 +963,10 @@ void __cdecl MSG_WriteEntityIndex(SnapshotInfo_s *snapInfo, msg_t *msg, int inde
         {
             if (msg_printEntityNums->current.enabled && SV_IsPacketDataNetworkData())
                 Com_Printf(16, "Wrote entity num: %i bits (full)\n", indexBits + 2);
+
             if (indexBits == 10)
                 MSG_WriteBit1(msg);
+
             MSG_WriteBits(msg, index, indexBits);
         }
     }
@@ -1188,6 +1185,7 @@ void __cdecl MSG_WriteLastChangedField(msg_t *msg, int lastChangedFieldNum, unsi
     unsigned int idealBits; // [esp+0h] [ebp-4h]
 
     iassert( !msg->readOnly );
+    iassert(lastChangedFieldNum <= numFields); // add from blops
     idealBits = GetMinBitCountForNum(numFields);
     MSG_WriteBits(msg, lastChangedFieldNum, idealBits);
 }

@@ -219,17 +219,9 @@ int __cdecl RB_GaussianFilterPoints1D(
     iassert( srcRes >= dstRes );
 
     resolutionRatio = (int)((float)srcRes / (float)dstRes);
-    if ((int)abs(srcRes - dstRes * resolutionRatio) >= resolutionRatio)
-    {
-        v6 = va("%i %i", srcRes, dstRes);
-        MyAssertHandler(
-            (char *)".\\rb_imagefilter.cpp",
-            99,
-            0,
-            "%s\n\t%s",
-            "abs( srcRes - resolutionRatio * dstRes ) < resolutionRatio",
-            v6);
-    }
+
+    iassert(abs(srcRes - resolutionRatio * dstRes) < resolutionRatio);
+
     if ((resolutionRatio & 1) != 0)
         v13 = 0.0f;
     else
@@ -255,22 +247,15 @@ int __cdecl RB_GaussianFilterPoints1D(
         tapOffsets[tapIndex] = v7;
         totalWeight = totalWeight + tapWeights[tapIndex];
     }
-    if (totalWeight > 0.001000000047497451f)
+    if (totalWeight > 0.001f)
     {
-        if (totalWeight <= 0.0)
-            MyAssertHandler(
-                (char *)".\\rb_imagefilter.cpp",
-                131,
-                0,
-                "%s\n\t(totalWeight) = %g",
-                "(totalWeight > 0)",
-                totalWeight);
+        iassert(totalWeight > 0);
         tapHalfCount = tapLimit;
         for (tapIndexa = tapLimit - 1; tapIndexa >= 0; --tapIndexa)
         {
             weightScale = 0.5f / totalWeight;
             tapWeights[tapIndexa] = tapWeights[tapIndexa] * weightScale;
-            if (tapWeights[tapIndexa] < 0.009999999776482582f)
+            if (tapWeights[tapIndexa] < 0.01f)
                 tapHalfCount = tapIndexa + 1;
         }
     }

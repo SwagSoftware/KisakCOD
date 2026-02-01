@@ -1070,12 +1070,12 @@ void __cdecl R_ReleaseLostImages()
 
 _D3DFORMAT __cdecl R_ImagePixelFormat(const GfxImage *image)
 {
-    const char *v2; // eax
     MapType mapType; // [esp+0h] [ebp-40h]
     _D3DSURFACE_DESC surfaceDesc; // [esp+4h] [ebp-3Ch] BYREF
     _D3DVOLUME_DESC volumeDesc; // [esp+24h] [ebp-1Ch] BYREF
 
     mapType = image->mapType;
+
     if (image->mapType == MAPTYPE_2D)
     {
         iassert( image->texture.map );
@@ -1087,23 +1087,21 @@ _D3DFORMAT __cdecl R_ImagePixelFormat(const GfxImage *image)
     if (mapType == MAPTYPE_3D)
     {
         iassert( image->texture.volmap );
-        //image->texture.basemap->__vftable[1].QueryInterface(image->texture.basemap, 0, (void **)&volumeDesc);
         image->texture.volmap->GetLevelDesc(0, &volumeDesc);
         return volumeDesc.Format;
     }
     if (mapType == MAPTYPE_CUBE)
     {
         iassert( image->texture.cubemap );
-        //image->texture.basemap->__vftable[1].QueryInterface(image->texture.basemap, 0, (void **)&surfaceDesc);
         image->texture.cubemap->GetLevelDesc(0, &surfaceDesc);
         return surfaceDesc.Format;
     }
 
     if (!alwaysfails)
     {
-        v2 = va("unhandled case %i for %s", image->mapType, image->name);
-        MyAssertHandler(".\\r_image.cpp", 1403, 1, v2);
+        MyAssertHandler(".\\r_image.cpp", 1403, 1, va("unhandled case %i for %s", image->mapType, image->name));
     }
+
     return (_D3DFORMAT)0;
 }
 

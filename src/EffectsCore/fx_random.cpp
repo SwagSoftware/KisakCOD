@@ -9,7 +9,7 @@ void __cdecl TRACK_fx_random()
 
 void __cdecl FX_RandomDir(int32_t seed, float* dir)
 {
-    const char* v2; // eax
+    const char *v2; // eax
     double v3; // [esp+18h] [ebp-3Ch]
     float v4; // [esp+20h] [ebp-34h]
     float v5; // [esp+24h] [ebp-30h]
@@ -19,28 +19,19 @@ void __cdecl FX_RandomDir(int32_t seed, float* dir)
     float cosYaw; // [esp+4Ch] [ebp-8h]
 
     height = fx_randomTable[seed + 10] + fx_randomTable[seed + 10] - 1.0;
-    if (height < -1.0 || height > 1.0)
-        MyAssertHandler(
-            ".\\EffectsCore\\fx_random.cpp",
-            189,
-            0,
-            "%s\n\t(height) = %g",
-            "(height >= -1.0f && height <= 1.0f)",
-            height);
+    iassert(height >= -1.0f && height <= 1.0f);
+
     v5 = 1.0 - height * height;
     v4 = sqrt(v5);
     yaw = fx_randomTable[seed + 9] * 6.283185482025146;
     cosYaw = cos(yaw);
     sinYaw = sin(yaw);
-    *dir = v4 * cosYaw;
+
+    dir[0] = v4 * cosYaw;
     dir[1] = v4 * sinYaw;
     dir[2] = height;
-    if (!Vec3IsNormalized(dir))
-    {
-        v3 = Vec3Length(dir);
-        v2 = va("(%g %g %g) len %g", *dir, dir[1], dir[2], v3);
-        MyAssertHandler(".\\EffectsCore\\fx_random.cpp", 199, 0, "%s\n\t%s", "Vec3IsNormalized( dir )", v2);
-    }
+
+    iassert(Vec3IsNormalized(dir));
 }
 
 void __cdecl FX_RandomlyRotateAxis(const float (*axisIn)[3], int32_t randomSeed, mat3x3 &axisOut)

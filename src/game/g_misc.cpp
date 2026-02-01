@@ -13,10 +13,7 @@
 
 float __cdecl G_GetEntInfoScale()
 {
-    double v0; // fp1
-
-    v0 = (float)(CG_GetViewZoomScale() * g_entinfo_scale->current.value);
-    return *((float *)&v0 + 1);
+    return CG_GetViewZoomScale() * g_entinfo_scale->current.value;
 }
 
 void __cdecl SP_info_notnull(gentity_s *self)

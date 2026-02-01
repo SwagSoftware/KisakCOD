@@ -67,10 +67,9 @@ int32_t __cdecl Decode_Sample(char *buffer, int32_t maxLength, int16_t *out, int
     float v6[4097]; // [esp+4h] [ebp-4008h]
     int32_t i; // [esp+4008h] [ebp-4h]
 
-    if (maxLength > 4096)
-        MyAssertHandler(".\\groupvoice\\decode.cpp", 100, 0, "%s", "maxLength <= 4096");
-    if (maxLength > frame_size)
-        MyAssertHandler(".\\groupvoice\\decode.cpp", 101, 0, "%s", "maxLength <= frame_size");
+    iassert(maxLength <= 4096);
+    iassert(maxLength <= frame_size);
+
     speex_bits_read_from(&decodeBits, buffer, maxLength);
     if (speex_decode(g_decoder, &decodeBits, v6))
         v5 = 0;

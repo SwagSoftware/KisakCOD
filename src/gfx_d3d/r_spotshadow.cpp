@@ -146,21 +146,19 @@ void __cdecl R_SetViewParmsForLight(const GfxLight *light, GfxViewParms *viewPar
     viewParms->axis[0][0] = -light->dir[0];
     viewParms->axis[0][1] = -light->dir[1];
     viewParms->axis[0][2] = -light->dir[2];
+
     PerpendicularVector(viewParms->axis[0], viewParms->axis[2]);
     Vec3Cross(viewParms->axis[2], viewParms->axis[0], viewParms->axis[1]);
+
     viewParms->origin[0] = light->origin[0];
     viewParms->origin[1] = light->origin[1];
     viewParms->origin[2] = light->origin[2];
     viewParms->origin[3] = 1.0;
+
     MatrixForViewer(viewParms->viewMatrix.m, viewParms->origin, viewParms->axis);
-    if (light->cosHalfFovOuter <= 0.0 || light->cosHalfFovOuter >= 1.0)
-        MyAssertHandler(
-            ".\\r_spotshadow.cpp",
-            25,
-            0,
-            "%s\n\t(light->cosHalfFovOuter) = %g",
-            "(light->cosHalfFovOuter > 0.0f && light->cosHalfFovOuter < 1.0f)",
-            light->cosHalfFovOuter);
+
+    iassert(light->cosHalfFovOuter > 0.0f && light->cosHalfFovOuter < 1.0f);
+
     v5 = 1.0 - light->cosHalfFovOuter * light->cosHalfFovOuter;
     v4 = sqrt(v5);
     tanHalfFov = v4 / light->cosHalfFovOuter;
@@ -432,7 +430,7 @@ void __cdecl R_DrawSpotShadowMapArray(const GfxViewInfo *viewInfo, GfxCmdBuf *cm
 
         R_SetRenderTargetSize(&state, spotShadow->renderTargetId);
         R_UpdateCodeConstant(&state, CONST_SRC_CODE_SHADOWMAP_POLYGON_OFFSET, (sm_polygonOffsetBias->current.value * 0.25f), sm_polygonOffsetScale->current.value, 0.0f, 0.0f);
-        R_SetViewportValues(&state, viewInfo->spotShadows[i].viewport.x, viewInfo->spotShadows[i].viewport.y, viewInfo->spotShadows[i].viewport.width, viewInfo->spotShadows[i].viewport.height);
+        R_SetViewportValues(&state, spotShadow->viewport.x, spotShadow->viewport.y, spotShadow->viewport.width, spotShadow->viewport.height);
 
         R_DrawCall(
             R_DrawSpotShadowMapCallback,

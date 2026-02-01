@@ -682,7 +682,7 @@ bool __cdecl FX_ParseBillboardSprite(const char **parse, FxEditorElemDef *edElem
         parse,
         0,
         edElemDef,
-        (FxElemVisuals(*)[32]) & edElemDef->visualunion,
+        &edElemDef->visuals,
         (bool(__cdecl *)(const char *, FxElemVisuals *))FX_RegisterAsset_Material);
 }
 
@@ -692,7 +692,7 @@ bool __cdecl FX_ParseOrientedSprite(const char **parse, FxEditorElemDef *edElemD
         parse,
         1u,
         edElemDef,
-        (FxElemVisuals(*)[32]) & edElemDef->visualunion,
+        &edElemDef->visuals,
         (bool(__cdecl *)(const char *, FxElemVisuals *))FX_RegisterAsset_Material);
 }
 
@@ -702,7 +702,7 @@ bool __cdecl FX_ParseCloud(const char **parse, FxEditorElemDef *edElemDef)
         parse,
         4u,
         edElemDef,
-        (FxElemVisuals(*)[32]) & edElemDef->visualunion,
+        &edElemDef->visuals,
         (bool(__cdecl *)(const char *, FxElemVisuals *))FX_RegisterAsset_Material);
 }
 
@@ -712,7 +712,7 @@ bool __cdecl FX_ParseTail(const char **parse, FxEditorElemDef *edElemDef)
         parse,
         2u,
         edElemDef,
-        (FxElemVisuals(*)[32]) & edElemDef->visualunion,
+        &edElemDef->visuals,
         (bool(__cdecl *)(const char *, FxElemVisuals *))FX_RegisterAsset_Material);
 }
 
@@ -722,7 +722,7 @@ bool __cdecl FX_ParseTrail(const char **parse, FxEditorElemDef *edElemDef)
         parse,
         3u,
         edElemDef,
-        (FxElemVisuals(*)[32]) & edElemDef->visualunion,
+        &edElemDef->visuals,
         (bool(__cdecl *)(const char *, FxElemVisuals *))FX_RegisterAsset_Material);
 }
 
@@ -792,7 +792,7 @@ bool __cdecl FX_ParseDecal(const char **parse, FxEditorElemDef *edElemDef)
         parse,
         9u,
         edElemDef,
-        (FxElemMarkVisuals(*)[16]) & edElemDef->visualunion,
+        &edElemDef->markVisuals,
         FX_RegisterAsset_DecalMaterials);
 }
 
@@ -808,7 +808,7 @@ bool __cdecl FX_ParseModel(const char **parse, FxEditorElemDef *edElemDef)
         parse,
         5u,
         edElemDef,
-        (FxElemVisuals(*)[32]) & edElemDef->visualunion,
+        &edElemDef->visuals,
         (bool(__cdecl *)(const char *, FxElemVisuals *))FX_RegisterAsset_Model);
 }
 
@@ -835,7 +835,7 @@ bool __cdecl FX_ParseRunner(const char **parse, FxEditorElemDef *edElemDef)
         parse,
         0xAu,
         edElemDef,
-        (FxElemVisuals(*)[32]) & edElemDef->visualunion,
+        &edElemDef->visuals,
         (bool(__cdecl *)(const char *, FxElemVisuals *))FX_RegisterAsset_EffectDef);
 }
 
@@ -851,7 +851,7 @@ bool __cdecl FX_ParseSound(const char **parse, FxEditorElemDef *edElemDef)
         parse,
         8u,
         edElemDef,
-        (FxElemVisuals(*)[32]) & edElemDef->visualunion,
+        &edElemDef->visuals,
         (bool(__cdecl *)(const char *, FxElemVisuals *))FX_RegisterAsset_SoundAliasName);
 }
 

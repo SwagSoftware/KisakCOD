@@ -195,19 +195,6 @@ const rectDef_s *__cdecl Window_GetRect(const windowDef_t *w)
     return &w->rect;
 }
 
-connstate_t __cdecl CL_GetLocalClientConnectionState(int localClientNum)
-{
-    if (localClientNum)
-        MyAssertHandler(
-            "c:\\trees\\cod3\\cod3src\\src\\cgame\\../client/client.h",
-            569,
-            0,
-            "%s\n\t(localClientNum) = %i",
-            "(localClientNum == 0)",
-            localClientNum);
-    return clientUIActives[0].connectionState;
-}
-
 const char *cg_drawFpsNames[5] =
 { "Off", "Simple", "Extra", "Verbose", NULL };
 

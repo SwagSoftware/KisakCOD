@@ -1197,7 +1197,7 @@ void __cdecl PlayNoteMappedSoundAliases(int32_t localClientNum, const char *note
     }
 }
 
-// KISAKTODO: would like to this function more like blops, it's cleaner
+// KISAKTODO: would like to have this function more like blops, it's cleaner
 void __cdecl CG_AddViewWeapon(int32_t localClientNum)
 {
     double v1; // st7

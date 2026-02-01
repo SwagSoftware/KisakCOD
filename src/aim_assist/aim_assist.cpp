@@ -322,6 +322,19 @@ void AimAssist_RegisterDvars()
         "Scale the influence of each input axis so that the major axis has more influence on the control");
 }
 
+static bool __cdecl AimAssist_DoBoundsIntersectCenterBox(
+    const float *clipMins,
+    const float *clipMaxs,
+    float clipHalfWidth,
+    float clipHalfHeight)
+{
+    iassert(clipMins);
+    iassert(clipMaxs);
+
+    return (clipHalfWidth >= (double)*clipMins && *clipMaxs >= -clipHalfWidth) 
+        && (clipHalfHeight >= (double)clipMins[1] && clipMaxs[1] >= -clipHalfHeight);
+}
+
 void __cdecl AimAssist_Setup(int32_t localClientNum)
 {
     AimAssistGlobals *aaGlob; // [esp+0h] [ebp-4h]
@@ -420,20 +433,12 @@ void __cdecl AimAssist_FovScale(AimAssistGlobals *aaGlob, float tanHalfFovY)
     float v3; // [esp+Ch] [ebp-8h]
     float tanHalfBaseFovY; // [esp+10h] [ebp-4h]
 
-    if (!aaGlob)
-        MyAssertHandler(".\\aim_assist\\aim_assist.cpp", 390, 0, "%s", "aaGlob");
+    iassert(aaGlob);
     aaGlob->fovTurnRateScale = tanHalfFovY / (float)0.47780272;
     v3 = cg_fov->current.value * 0.01745329238474369 * 0.5;
     v2 = tan(v3);
     tanHalfBaseFovY = v2 * 0.75;
-    if (tanHalfBaseFovY == 0.0)
-        MyAssertHandler(
-            ".\\aim_assist\\aim_assist.cpp",
-            399,
-            0,
-            "%s\n\t(tanHalfBaseFovY) = %g",
-            "(tanHalfBaseFovY != 0.0f)",
-            tanHalfBaseFovY);
+    iassert(tanHalfBaseFovY != 0.0f);
     aaGlob->fovScaleInv = tanHalfBaseFovY / tanHalfFovY;
 }
 
@@ -443,8 +448,8 @@ void __cdecl AimAssist_CreateScreenMatrix(AimAssistGlobals *aaGlob, float tanHal
     float projMtx[4][4]; // [esp+4Ch] [ebp-80h] BYREF
     float screenMtx[4][4]; // [esp+8Ch] [ebp-40h] BYREF
 
-    if (!aaGlob)
-        MyAssertHandler(".\\aim_assist\\aim_assist.cpp", 413, 0, "%s", "aaGlob");
+    iassert(aaGlob);
+
     MatrixForViewer(viewMtx, aaGlob->viewOrigin, aaGlob->viewAxis);
     InfinitePerspectiveMatrix(projMtx, tanHalfFovX, tanHalfFovY, 1.0);
     MatrixMultiply44(viewMtx, projMtx, screenMtx);
@@ -876,24 +881,6 @@ const AimScreenTarget *__cdecl AimAssist_GetBestTarget(
         }
     }
     return 0;
-}
-
-bool __cdecl AimAssist_DoBoundsIntersectCenterBox(
-    const float *clipMins,
-    const float *clipMaxs,
-    float clipHalfWidth,
-    float clipHalfHeight)
-{
-    bool v6; // [esp+4h] [ebp-Ch]
-    bool v7; // [esp+8h] [ebp-8h]
-
-    if (!clipMins)
-        MyAssertHandler(".\\aim_assist\\aim_assist.cpp", 528, 0, "%s", "clipMins");
-    if (!clipMaxs)
-        MyAssertHandler(".\\aim_assist\\aim_assist.cpp", 529, 0, "%s", "clipMaxs");
-    v7 = clipHalfWidth >= (double)*clipMins && *clipMaxs >= -clipHalfWidth;
-    v6 = clipHalfHeight >= (double)clipMins[1] && clipMaxs[1] >= -clipHalfHeight;
-    return v7 && v6;
 }
 
 const AimScreenTarget *__cdecl AimAssist_GetTargetFromEntity(const AimAssistGlobals *aaGlob, int32_t entIndex)

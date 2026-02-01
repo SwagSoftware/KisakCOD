@@ -222,22 +222,8 @@ void __cdecl R_CmdBufSet2D(GfxCmdBufSourceState* source, GfxViewport* viewport)
 
     //viewParms = v2;
     //invHeight = retaddr;
-    if (viewport->width <= 0)
-        MyAssertHandler(
-            ".\\r_state_utils.cpp",
-            168,
-            0,
-            "%s\n\t(viewport->width) = %i",
-            "(viewport->width > 0)",
-            viewport->width);
-    if (viewport->height <= 0)
-        MyAssertHandler(
-            ".\\r_state_utils.cpp",
-            169,
-            0,
-            "%s\n\t(viewport->height) = %i",
-            "(viewport->height > 0)",
-            viewport->height);
+    iassert(viewport->width > 0);
+    iassert(viewport->height > 0);
     v7 = 1.0 / (double)viewport->width;
     transform_60 = 1.0 / (double)viewport->height;
     transform_56 = &source->viewParms;

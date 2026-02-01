@@ -160,15 +160,9 @@ inline void __cdecl R_ReleaseAndSetNULL(
     const char *filename,
     int line)
 {
-    const char *v4; // eax
     unsigned int useCount; // [esp+0h] [ebp-4h]
 
-    if (!var)
-        MyAssertHandler("c:\\trees\\cod3\\src\\gfx_d3d\\r_types_d3d.h", 198, 0, "%s", "var");
+    iassert(var);
     useCount = var->Release();
-    if (useCount)
-    {
-        v4 = va("%s (%i) %s->Release() failed: %i leak(s)!", filename, line, fn, useCount);
-        MyAssertHandler("c:\\trees\\cod3\\src\\gfx_d3d\\r_types_d3d.h", 209, 0, "%s\n\t%s", "!useCount", v4);
-    }
+    iassert(!useCount);
 }

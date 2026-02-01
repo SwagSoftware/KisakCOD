@@ -32,6 +32,7 @@ void  R_BoxSurfaces(
     iassert(rgp.world->cellBitsCount <= ((1024) >> 3));
 
     Com_Memset(cellBits, 0, rgp.world->cellBitsCount);
+
     for (unsigned int i = 0; i < listCount; ++i)
         surfCounts[i] = 0;
 
@@ -426,30 +427,15 @@ int  R_BoxStaticModels(
     int smodelListSize)
 {
     int smodelCount; // [esp-Ch] [ebp-A0h] BYREF
-    unsigned __int8 v8[128]; // [esp-8h] [ebp-9Ch] BYREF
+    unsigned __int8 cellBits[128]; // [esp-8h] [ebp-9Ch] BYREF
 
-    //v9 = a1;
-    //v10 = retaddr;
     iassert( rgp.world );
-    if (rgp.world->dpvsPlanes.cellCount > 1024)
-        MyAssertHandler(
-            ".\\r_marks.cpp",
-            967,
-            0,
-            "%s\n\t(rgp.world->dpvsPlanes.cellCount) = %i",
-            "(rgp.world->dpvsPlanes.cellCount <= (1024))",
-            rgp.world->dpvsPlanes.cellCount);
-    if (rgp.world->cellBitsCount > 128)
-        MyAssertHandler(
-            ".\\r_marks.cpp",
-            968,
-            0,
-            "%s\n\t(rgp.world->cellBitsCount) = %i",
-            "(rgp.world->cellBitsCount <= ((1024) >> 3))",
-            rgp.world->cellBitsCount);
+    iassert(rgp.world->dpvsPlanes.cellCount <= (1024));
+    iassert(rgp.world->cellBitsCount <= ((1024) >> 3));
 
     PROF_SCOPED("R_BoxStaticModels");
-    Com_Memset(v8, 0, rgp.world->cellBitsCount);
+
+    Com_Memset(cellBits, 0, rgp.world->cellBitsCount);
     smodelCount = 0;
     R_BoxStaticModels_r(
         (mnode_t *)rgp.world->dpvsPlanes.nodes,
@@ -459,7 +445,7 @@ int  R_BoxStaticModels(
         smodelList,
         smodelListSize,
         &smodelCount,
-        v8);
+        cellBits);
     iassert( smodelCount <= smodelListSize );
     return smodelCount;
 }
@@ -2002,18 +1988,14 @@ int __cdecl R_AddMarkFragment_0_(
             &(*clipPoints)[9 * pingPong],
             &(*clipPoints)[9 * (pingPong == 0)],
             &(*planes)[4 * planeIndex]);
-        if (clipPointCount > 9)
-            MyAssertHandler(
-                ".\\r_marks.cpp",
-                1016,
-                0,
-                "%s\n\t(clipPointCount) = %i",
-                "(clipPointCount <= 3 + 6)",
-                clipPointCount);
+
+        iassert(clipPointCount <= 3 + 6);
+
         pingPong ^= 1u;
         if (!clipPointCount)
             return 0;
     }
+
     if (clipPointCount > maxPoints || 3 * (clipPointCount - 2) > maxTris)
         return -1;
 
@@ -2051,6 +2033,7 @@ int __cdecl R_AddMarkFragment_0_(
             + clipPoint->vertWeights[1] * normal[1][2]
             + clipPoint->vertWeights[2] * normal[2][2];
     }
+
     for (pointIndex = 2; pointIndex < clipPointCount; ++pointIndex)
     {
         tris->indices[0] = baseIndex + pointIndex - 1;
@@ -2178,79 +2161,64 @@ char  R_MarkFragments_AnimatedXModel_VertList(
     GfxMarkContext *markContext,
     XSurface *surface)
 {
-    DObjAnimMat *v12; // r10
-    int v13; // ctr
-    double v14; // fp13
-    double radius; // fp0
-    double v16; // fp11
-    double v17; // fp9
-    double v18; // fp10
-    float v20[4]; // [sp+50h] [-2B0h] BYREF
-    float v21[4]; // [sp+60h] [-2A0h] BYREF
-    float v22[4]; // [sp+70h] [-290h] BYREF
-    DObjAnimMat v23; // [sp+80h] [-280h] BYREF
-    void* v24[8]; // [sp+A0h] [-260h] BYREF
-    float v25[4]; // [sp+C0h] [-240h] BYREF
-    float v26[4][3]; // [sp+D0h] [-230h] BYREF
-    DObjSkelMat v27; // [sp+100h] [-200h] BYREF
-    DObjSkelMat v28; // [sp+140h] [-1C0h] BYREF
-    float v29[4][3]; // [sp+180h] [-180h] BYREF
-    float v30[4][3]; // [sp+1B0h] [-150h] BYREF
-    float v31[4][3]; // [sp+1E0h] [-120h] BYREF
-    float v32[4][3]; // [sp+210h] [-F0h] BYREF
-    float v33[4][3]; // [sp+240h] [-C0h] BYREF
-    float v34[9][4]; // [sp+270h] [-90h] BYREF
+    float aabbMaxs[4]; // [sp+50h] [-2B0h] BYREF
+    float aabbMins[4]; // [sp+60h] [-2A0h] BYREF
+    float originalOrigin[4]; // [sp+70h] [-290h] BYREF
+    DObjAnimMat poseBoneWithViewOffset; // [sp+80h] [-280h] BYREF
+    MarkModelCoreContext visitorContext;
+    float markDir[4]; // [sp+C0h] [-240h] BYREF
+    float clipPlanesMatrix[4][3]; // [sp+D0h] [-230h] BYREF
+    DObjSkelMat invBaseBoneSkelMat; // [sp+100h] [-200h] BYREF
+    DObjSkelMat poseBoneSkelMat; // [sp+140h] [-1C0h] BYREF
+    float invBaseBoneMatrix[4][3]; // [sp+180h] [-180h] BYREF
+    float surfaceMatrix[4][3]; // [sp+1B0h] [-150h] BYREF
+    float invPoseBoneMatrix[4][3]; // [sp+1E0h] [-120h] BYREF
+    float baseBoneMatrix[4][3]; // [sp+210h] [-F0h] BYREF
+    float invSurfaceMatrix[4][3]; // [sp+240h] [-C0h] BYREF
+    float clipPlanes[9][4]; // [sp+270h] [-90h] BYREF
 
-    v12 = &v23;
-    v13 = 8;
-    do
-    {
-        v12->quat[0] = poseBone->quat[0];
-        poseBone = (const DObjAnimMat *)((char *)poseBone + 4);
-        v12 = (DObjAnimMat *)((char *)v12 + 4);
-        --v13;
-    } while (v13);
-    v14 = (float)(markInfo->viewOffset[1] + v23.trans[1]);
-    v23.trans[0] = markInfo->viewOffset[0] + v23.trans[0];
-    v23.trans[1] = v14;
-    v23.trans[2] = markInfo->viewOffset[2] + v23.trans[2];
-    ConvertQuatToSkelMat(&v23, &v28);
-    ConvertQuatToInverseSkelMat(baseBone, &v27);
-    DObjSkelMatToMatrix43(&v28, v29);
-    DObjSkelMatToMatrix43(&v27, v30);
-    MatrixMultiply43(v30, v29, v26);
-    R_Mark_TransformClipPlanes(markInfo->planes, v26, v34);
-    MatrixTransposeTransformVector(markInfo->axis[0], *(const mat3x3*)&v26[0][0], v25);
-    ConvertQuatToSkelMat(baseBone, &v28);
-    ConvertQuatToInverseSkelMat(&v23, &v27);
-    DObjSkelMatToMatrix43(&v27, v31);
-    DObjSkelMatToMatrix43(&v28, v32);
-    MatrixMultiply43(v31, v32, v33);
-    v22[0] = markInfo->origin[0];
-    v22[1] = markInfo->origin[1];
-    v22[2] = markInfo->origin[2];
-    MatrixTransformVector43(v22, v33, markInfo->localOrigin);
-    radius = markInfo->radius;
-    v16 = markInfo->localOrigin[1];
-    v17 = markInfo->localOrigin[0];
-    v18 = markInfo->localOrigin[2];
+    memcpy(&poseBoneWithViewOffset, poseBone, sizeof(DObjAnimMat));
 
-    v24[0] = markInfo;
-    v24[1] = markContext;
-    v24[2] = markInfo->localOrigin;
-    v24[3] = v25;
-    v24[4] = v34;
+    poseBoneWithViewOffset.trans[0] = markInfo->viewOffset[0] + poseBoneWithViewOffset.trans[0];
+    poseBoneWithViewOffset.trans[1] = markInfo->viewOffset[1] + poseBoneWithViewOffset.trans[1];
+    poseBoneWithViewOffset.trans[2] = markInfo->viewOffset[2] + poseBoneWithViewOffset.trans[2];
 
-    v21[0] = (float)v17 + (float)-radius;
-    v21[2] = (float)v18 + (float)-radius;
-    v20[0] = (float)v17 + (float)radius;
-    v21[1] = (float)v16 + (float)-radius;
-    v20[1] = (float)v16 + (float)radius;
-    v20[2] = (float)v18 + (float)radius;
-    if (!(unsigned __int8)XSurfaceVisitTrianglesInAabb(surface, vertListIndex, v21, v20, R_MarkModelCoreCallback_0_, v24))
+    ConvertQuatToSkelMat(&poseBoneWithViewOffset, &poseBoneSkelMat);
+    ConvertQuatToInverseSkelMat(baseBone, &invBaseBoneSkelMat);
+
+    DObjSkelMatToMatrix43(&poseBoneSkelMat, invBaseBoneMatrix);
+    DObjSkelMatToMatrix43(&invBaseBoneSkelMat, surfaceMatrix);
+    MatrixMultiply43(surfaceMatrix, invBaseBoneMatrix, clipPlanesMatrix);
+
+    iassert(markInfo->usedPointCount == 0);
+
+    R_Mark_TransformClipPlanes(markInfo->planes, clipPlanesMatrix, clipPlanes);
+
+    MatrixTransposeTransformVector(markInfo->axis[0], *(const mat3x3*)&clipPlanesMatrix[0][0], markDir);
+    ConvertQuatToSkelMat(baseBone, &poseBoneSkelMat);
+    ConvertQuatToInverseSkelMat(&poseBoneWithViewOffset, &invBaseBoneSkelMat);
+    DObjSkelMatToMatrix43(&invBaseBoneSkelMat, invPoseBoneMatrix);
+    DObjSkelMatToMatrix43(&poseBoneSkelMat, baseBoneMatrix);
+    MatrixMultiply43(invPoseBoneMatrix, baseBoneMatrix, invSurfaceMatrix);
+
+    Vec3Copy(markInfo->origin, originalOrigin);
+    MatrixTransformVector43(originalOrigin, invSurfaceMatrix, markInfo->localOrigin);
+
+    visitorContext.markInfo = markInfo;
+    visitorContext.markContext = markContext;
+    visitorContext.markOrigin = markInfo->localOrigin;
+    visitorContext.markDir = markDir;
+    visitorContext.clipPlanes = clipPlanes;
+
+    Vec3AddScalar(markInfo->localOrigin, -markInfo->radius, aabbMins);
+    Vec3AddScalar(markInfo->localOrigin, markInfo->radius, aabbMaxs);
+
+    if (!XSurfaceVisitTrianglesInAabb(surface, vertListIndex, aabbMins, aabbMaxs, R_MarkModelCoreCallback_0_, (void*)&visitorContext))
         return 0;
+
     if (markInfo->usedPointCount)
-        MatrixTransposeTransformVector(markInfo->axis[1], *(const mat3x3*)&v26[0][0], markInfo->localTexCoordAxis);
+        MatrixTransposeTransformVector(markInfo->axis[1], *(const mat3x3*)&clipPlanesMatrix[0][0], markInfo->localTexCoordAxis);
+
     return 1;
 }
 

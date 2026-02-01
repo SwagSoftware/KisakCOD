@@ -588,20 +588,21 @@ int __cdecl MSG_ReadLong(msg_t *msg)
 
 float __cdecl MSG_ReadFloat(msg_t *msg)
 {
-    double v2; // fp1
-    float v4; // [sp+50h] [-20h]
+    float result; // fp1
+    float f; // [sp+50h] [-20h]
 
-    v4 = COERCE_FLOAT(MSG_ReadBits(msg, 0x20u));
-    if (v4 == NAN)
+    f = COERCE_FLOAT(MSG_ReadBits(msg, 0x20u));
+    if (f == NAN)
     {
         msg->overflowed = 1;
-        v2 = -1.0;
+        result = -1.0;
     }
     else
     {
-        v2 = v4;
+        result = f;
     }
-    return *((float *)&v2 + 1);
+
+    return result;
 }
 
 int __cdecl MSG_ReadString(msg_t *msg, char *buffer, int bufsize)

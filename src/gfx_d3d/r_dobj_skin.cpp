@@ -112,7 +112,7 @@ int  R_SkinSceneDObjModels(
 
     PROF_SCOPED("R_SkinXModel");
 
-    unsigned char surfsBuffer[0x20000]{ 0 };
+    unsigned char surfsBuffer[150 * sizeof(GfxModelSkinnedSurface)]{0}; // ~3588
     GfxModelSkinnedSurface *surfPos = (GfxModelSkinnedSurface *)surfsBuffer;
     GfxModelSurfaceInfo targBoneIndexHigh;
 

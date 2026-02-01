@@ -162,11 +162,6 @@ const AimScreenTarget *__cdecl AimAssist_GetBestTarget(
     float range,
     float regionWidth,
     float regionHeight);
-bool __cdecl AimAssist_DoBoundsIntersectCenterBox(
-    const float *clipMins,
-    const float *clipMaxs,
-    float clipHalfWidth,
-    float clipHalfHeight);
 const AimScreenTarget *__cdecl AimAssist_GetTargetFromEntity(const AimAssistGlobals *aaGlob, int32_t entIndex);
 void __cdecl AimAssist_ApplyAutoMelee(const AimInput *input, AimOutput *output);
 void __cdecl AimAssist_ClearAutoMeleeTarget(AimAssistGlobals *aaGlob);

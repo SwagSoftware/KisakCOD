@@ -20,7 +20,7 @@ int __cdecl R_SetIndexData(GfxCmdBufPrimState *state, unsigned __int8 *indices, 
 void __cdecl R_SetupPassPerPrimArgs(GfxCmdBufContext context);
 void __cdecl R_SetVertexShaderConstantFromCode(GfxCmdBufContext context, const MaterialShaderArgument *routingData);
 void __cdecl R_HW_SetVertexShaderConstant(__int64 device, __int64 data);
-GfxCmdBufInput *__cdecl R_GetCodeConstant(GfxCmdBufContext context, unsigned int constant);
+float *__cdecl R_GetCodeConstant(GfxCmdBufContext context, unsigned int constant);
 char __cdecl R_IsVertexShaderConstantUpToDate(GfxCmdBufContext context, const MaterialShaderArgument *routingData);
 char __cdecl R_IsShaderMatrixUpToDate(
     const GfxCmdBufSourceState *source,

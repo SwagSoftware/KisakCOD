@@ -219,10 +219,9 @@ void __cdecl GaussianRandom(float *f0, float *f1)
     float y; // [esp+14h] [ebp-8h]
     float w; // [esp+18h] [ebp-4h]
 
-    if (!f0)
-        MyAssertHandler(".\\universal\\com_math.cpp", 167, 0, "%s", "f0");
-    if (!f1)
-        MyAssertHandler(".\\universal\\com_math.cpp", 168, 0, "%s", "f1");
+    iassert(f0);
+    iassert(f1);
+
     do
     {
         x = crandom();
@@ -486,17 +485,14 @@ int __cdecl VecNCompareCustomEpsilon(const float *v0, const float *v1, float eps
     return 1;
 }
 
-float __cdecl Vec2Length(const vec2r v)
+float __cdecl Vec2Length(const float *v)
 {
-    float v3; // [esp+4h] [ebp-4h]
-
-    v3 = v[1] * v[1] + *v * *v;
-    return sqrtf(v3);
+    return sqrtf(v[1] * v[1] + v[0] * v[0]);
 }
 
-float Vec2LengthSq(const vec2r v)
+float Vec2LengthSq(const float *v)
 {
-    return (v[1] * v[1]) + (v[0] * v[0]);
+    return (v[0] * v[0]) + (v[1] * v[1]);
 }
 
 float __cdecl Vec2Distance(const vec2r v1, const vec2r v2)
@@ -562,23 +558,20 @@ void __cdecl Vec3ProjectionCoords(const float *dir, int *xCoord, int *yCoord)
 
 float __cdecl Vec2Normalize(vec2r v)
 {
-    float v2; // [esp+0h] [ebp-14h]
-    float v3; // [esp+4h] [ebp-10h]
     float ilength; // [esp+Ch] [ebp-8h]
     float length; // [esp+10h] [ebp-4h]
 
-    length = v[0] * v[0] + v[1] * v[1];
-    
-    v3 = sqrt(length);
-    if (-v3 < 0.0)
-        v2 = v3;
+    length = sqrt(v[0] * v[0] + v[1] * v[1]);
+
+    if (length > 0.0f)
+        ilength = 1.0f / length;
     else
-        v2 = 1.0;
+        ilength = 1.0f;
     
-    ilength = 1.0 / v2;
     v[0] = v[0] * ilength;
     v[1] = v[1] * ilength;
-    return v3;
+
+    return length;
 }
 
 void __cdecl Vec3NormalizeFast(float *v)
@@ -667,8 +660,7 @@ void __cdecl RotatePointAroundVector(float* dst, const float* dir, const float* 
     float vup[3]; // [esp+A4h] [ebp-58h] BYREF
     int i; // [esp+B0h] [ebp-4Ch]
 
-    if (*dir == 0.0 && dir[1] == 0.0 && dir[2] == 0.0)
-        MyAssertHandler(".\\universal\\com_math.cpp", 862, 0, "%s", "dir[0] || dir[1] || dir[2]");
+    iassert(dir[0] || dir[1] || dir[2]);
     
     vf[0] = *dir;
     vf[1] = dir[1];
@@ -727,7 +719,7 @@ void __cdecl Vec3Basis_RightHanded(const float *forward, float *left, float *up)
 
 void __cdecl Vec3AddScalar(const float* a, float s, float* sum)
 {
-    *sum = *a + s;
+    sum[0] = a[0] + s;
     sum[1] = a[1] + s;
     sum[2] = a[2] + s;
 }
@@ -774,10 +766,8 @@ float __cdecl vectosignedyaw(const float *vec)
     {
         v2 = atan2(vec[1], *vec);
         yaw = v2 * 180.0 / 3.141592741012573;
-        if (yaw < -180.0)
-            MyAssertHandler(".\\universal\\com_math.cpp", 993, 0, "%s", "yaw >= -180");
-        if (yaw > 180.0)
-            MyAssertHandler(".\\universal\\com_math.cpp", 994, 0, "%s", "yaw <= 180");
+        iassert(yaw >= -180);
+        iassert(yaw <= 180);
     }
     return yaw;
 }
@@ -940,12 +930,8 @@ void __cdecl PerpendicularVector(const float* src, float* dst)
     float d; // [esp+3Ch] [ebp-10h]
     float srcSq[3]; // [esp+40h] [ebp-Ch]
 
-    if (!Vec3IsNormalized(src))
-    {
-        scale = Vec3Length(src);
-        v2 = va("(%g %g %g) len %g", *src, src[1], src[2], scale);
-        MyAssertHandler(".\\universal\\com_math.cpp", 1184, 0, "%s\n\t%s", "Vec3IsNormalized( src )", v2);
-    }
+    iassert(Vec3IsNormalized(src));
+
     srcSq[0] = *src * *src;
     srcSq[1] = src[1] * src[1];
     srcSq[2] = src[2] * src[2];
@@ -1654,8 +1640,7 @@ float __cdecl RotationToYaw(const float *rot)
 
     zz = *rot * *rot;
     r = rot[1] * rot[1] + zz;
-    if (r == 0.0)
-        MyAssertHandler(".\\universal\\com_math.cpp", 2120, 0, "%s", "r");
+    iassert(r);
     ra = 2.0 / r;
     v4 = ra * (rot[1] * *rot);
     v3 = 1.0 - ra * zz;
@@ -1834,9 +1819,9 @@ void __cdecl ShrinkBoundsToHeight(float *mins, float *maxs)
 
 void __cdecl ClearBounds2D(float *mins, float *maxs)
 {
-    *mins = 131072.0;
+    mins[0] = 131072.0;
     mins[1] = 131072.0;
-    *maxs = -131072.0;
+    maxs[0] = -131072.0;
     maxs[1] = -131072.0;
 }
 
@@ -2164,12 +2149,7 @@ void __cdecl ProjectPointOnPlane(const float *const f1, const float *const norma
     double v4; // [esp+18h] [ebp-14h]
     float d; // [esp+28h] [ebp-4h]
 
-    if (!Vec3IsNormalized(normal))
-    {
-        v4 = Vec3Length(normal);
-        v3 = va("(%g %g %g) len %g", *normal, normal[1], normal[2], v4);
-        MyAssertHandler(".\\universal\\com_math.cpp", 3139, 0, "%s\n\t%s", "Vec3IsNormalized( normal )", v3);
-    }
+    iassert(Vec3IsNormalized(normal));
     d = -Vec3Dot(normal, f1);
     Vec3Mad(f1, d, normal, result);
 }
@@ -2869,24 +2849,23 @@ void __cdecl Vec3MadMad(
     result[2] = scale0 * dir0[2] + start[2] + scale1 * dir1[2];
 }
 
-float __cdecl Vec3Normalize(float* v)
+float Vec3Normalize(float* v)
 {
-    float v2; // [esp+0h] [ebp-14h]
-    float v3; // [esp+4h] [ebp-10h]
+    float length; // [esp+4h] [ebp-10h]
     float ilength; // [esp+Ch] [ebp-8h]
-    float length; // [esp+10h] [ebp-4h]
 
-    length = *v * *v + v[1] * v[1] + v[2] * v[2];
-    v3 = sqrt(length);
-    if (-v3 < 0.0)
-        v2 = v3;
+    length = sqrt(v[0] * v[0] + v[1] * v[1] + v[2] * v[2]);
+
+    if (length > 0.0f)
+        ilength = (1.0f / length);
     else
-        v2 = 1.0;
-    ilength = 1.0 / v2;
-    *v = *v * ilength;
+        ilength = 1.0f;
+
+    v[0] = v[0] * ilength;
     v[1] = v[1] * ilength;
     v[2] = v[2] * ilength;
-    return v3;
+
+    return length;
 }
 
 void __cdecl Vec3Mul(const float* a, const float* b, float* product)
@@ -2974,9 +2953,9 @@ void __cdecl Vec4MadMad(
 
 void __cdecl Vec3Mad(const float *start, float scale, const float *dir, float *result)
 {
-    result[0] = scale * dir[0] + start[0];
-    result[1] = scale * dir[1] + start[1];
-    result[2] = scale * dir[2] + start[2];
+    result[0] = start[0] + (scale * dir[0]);
+    result[1] = start[1] + (scale * dir[1]);
+    result[2] = start[2] + (scale * dir[2]);
 }
 
 void __cdecl Vec3Accum(const float *subTotal, const float *weight, const float *added, float *total)
@@ -3000,6 +2979,12 @@ void __cdecl Vec3Copy(const vec3r from, vec3r to)
     to[0] = from[0];
     to[1] = from[1];
     to[2] = from[2];
+}
+
+void Vec2Copy(const vec2r from, vec2r to)
+{
+    to[0] = from[0];
+    to[1] = from[1];
 }
 
 float __cdecl Vec3Length(const vec3r v)
@@ -3032,50 +3017,53 @@ void __cdecl Vec4Mul(const float *a, const float *b, float *product)
 
 void __cdecl MatrixForViewer(mat4x4 &mtx, const vec3r origin, const mat3x3 &axis)
 {
-    if (!mtx)
-        MyAssertHandler(".\\universal\\com_math.cpp", 2302, 0, "%s", "mtx");
-    if (!origin)
-        MyAssertHandler(".\\universal\\com_math.cpp", 2303, 0, "%s", "origin");
-    if (!axis)
-        MyAssertHandler(".\\universal\\com_math.cpp", 2304, 0, "%s", "axis");
+    iassert(mtx);
+    iassert(origin);
+    iassert(axis);
+
     (mtx)[0][0] = -(axis)[1][0];
     (mtx)[1][0] = -(axis)[1][1];
     (mtx)[2][0] = -(axis)[1][2];
     (mtx)[3][0] = -(*origin * (mtx)[0][0] + origin[1] * (mtx)[1][0] + origin[2] * (mtx)[2][0]);
+
     (mtx)[0][1] = (axis)[2][0];
     (mtx)[1][1] = (axis)[2][1];
     (mtx)[2][1] = (axis)[2][2];
     (mtx)[3][1] = -(*origin * (mtx)[0][1] + origin[1] * (mtx)[1][1] + origin[2] * (mtx)[2][1]);
+
     (mtx)[0][2] = (axis)[0][0];
+
     (mtx)[1][2] = (axis)[0][1];
     (mtx)[2][2] = (axis)[0][2];
     (mtx)[3][2] = -(*origin * (mtx)[0][2] + origin[1] * (mtx)[1][2] + origin[2] * (mtx)[2][2]);
-    (mtx)[0][3] = 0.0;
-    (mtx)[1][3] = 0.0;
-    (mtx)[2][3] = 0.0;
-    (mtx)[3][3] = 1.0;
+
+    (mtx)[0][3] = 0.0f;
+    (mtx)[1][3] = 0.0f;
+    (mtx)[2][3] = 0.0f;
+    (mtx)[3][3] = 1.0f;
 }
 
 void __cdecl InfinitePerspectiveMatrix(float (*mtx)[4], float tanHalfFovX, float tanHalfFovY, float zNear)
 {
-    if (!mtx)
-        MyAssertHandler(".\\universal\\com_math.cpp", 2251, 0, "%s", "mtx");
-    if (zNear <= 0.0)
-        MyAssertHandler(".\\universal\\com_math.cpp", 2252, 0, "%s", "zNear > 0");
+    iassert(mtx);
+    iassert(zNear > 0);
+
     memset((unsigned __int8 *)mtx, 0, sizeof(mat4x4));
-    (*mtx)[0] = 0.99951172f / tanHalfFovX;
-    (*mtx)[5] = 0.99951172f / tanHalfFovY;
-    (*mtx)[10] = 0.99951172f;
+
+    (*mtx)[0] = MAX_11BIT_FLT / tanHalfFovX;
+    (*mtx)[5] = MAX_11BIT_FLT / tanHalfFovY;
+    (*mtx)[10] = MAX_11BIT_FLT;
     (*mtx)[11] = 1.0f;
-    (*mtx)[14] = -zNear * 0.99951172f;
+    (*mtx)[14] = -zNear * MAX_11BIT_FLT;
 }
 
 void __cdecl ClearBounds(float *mins, float *maxs)
 {
-    *mins = 131072.0f;
+    mins[0] = 131072.0f;
     mins[1] = 131072.0f;
     mins[2] = 131072.0f;
-    *maxs = -131072.0f;
+
+    maxs[0] = -131072.0f;
     maxs[1] = -131072.0f;
     maxs[2] = -131072.0f;
 }
@@ -3108,9 +3096,9 @@ void __cdecl Vec3Add(const float *a, const float *b, float *sum)
 
 void __cdecl Vec3Avg(const float *a, const float *b, float *sum)
 {
-    *sum = (*a + *b) * 0.5;
-    sum[1] = (a[1] + b[1]) * 0.5;
-    sum[2] = (a[2] + b[2]) * 0.5;
+    sum[0] = (a[0] + b[0]) * 0.5f;
+    sum[1] = (a[1] + b[1]) * 0.5f;
+    sum[2] = (a[2] + b[2]) * 0.5f;
 }
 
 
@@ -3294,13 +3282,12 @@ void __cdecl ConvertQuatToInverseSkelMat(const DObjAnimMat *const mat, DObjSkelM
 
 void __cdecl FinitePerspectiveMatrix(float (*mtx)[4], float tanHalfFovX, float tanHalfFovY, float zNear, float zFar)
 {
-    if (!mtx)
-        MyAssertHandler(".\\universal\\com_math.cpp", 2217, 0, "%s", "mtx");
-    if (zNear <= 0.0)
-        MyAssertHandler(".\\universal\\com_math.cpp", 2218, 0, "zNear > 0.0f\n\t%g, %g", zNear, 0.0);
-    if (zNear >= (double)zFar)
-        MyAssertHandler(".\\universal\\com_math.cpp", 2219, 0, "zFar > zNear\n\t%g, %g", zFar, zNear);
+    iassert(mtx);
+    iassert(zNear > 0.0f);
+    iassert(zFar > zNear);
+
     memset((unsigned __int8 *)mtx, 0, 0x40u);
+
     (*mtx)[0] = 1.0 / tanHalfFovX;
     (*mtx)[5] = 1.0 / tanHalfFovY;
     (*mtx)[10] = -zFar / (zNear - zFar);

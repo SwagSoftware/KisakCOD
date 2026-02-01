@@ -229,36 +229,24 @@ bool __cdecl LerpBool(bool from, bool to, float fraction, visionSetLerpStyle_t s
 double __cdecl LerpFloat(float from, float to, float fraction, visionSetLerpStyle_t style)
 {
     double v5; // st7
-    float v8; // [esp+8h] [ebp-18h]
-    float v9; // [esp+Ch] [ebp-14h]
-    float v11; // [esp+14h] [ebp-Ch]
-    float v12; // [esp+18h] [ebp-8h]
 
-    if (style == VISIONSETLERP_NONE)
-        MyAssertHandler(".\\cgame\\cg_visionsets.cpp", 322, 0, "%s", "style != VISIONSETLERP_NONE");
+    iassert(style != VISIONSETLERP_NONE);
+
     switch (style)
     {
     case VISIONSETLERP_TO_LINEAR:
         return (float)((to - from) * fraction + from);
     case VISIONSETLERP_TO_SMOOTH:
-        v12 = fraction * 3.141592741012573 * 0.5;
-        v11 = sin(v12);
-        fraction = v11;
+        fraction = sin(fraction * 3.141592741012573 * 0.5);
         return (float)((to - from) * fraction + from);
     case VISIONSETLERP_BACKFORTH_SMOOTH:
-        v9 = fraction * 3.141592741012573 * 0.5;
-        v8 = sin(v9);
-        fraction = v8;
+        fraction = sin(fraction * 3.141592741012573 * 0.5);
         break;
     }
-    if (style != VISIONSETLERP_BACKFORTH_SMOOTH && style != VISIONSETLERP_BACKFORTH_LINEAR)
-        MyAssertHandler(
-            ".\\cgame\\cg_visionsets.cpp",
-            336,
-            0,
-            "%s",
-            "(style == VISIONSETLERP_BACKFORTH_SMOOTH) || (style == VISIONSETLERP_BACKFORTH_LINEAR)");
-    if (fraction >= 0.5)
+
+    iassert((style == VISIONSETLERP_BACKFORTH_SMOOTH) || (style == VISIONSETLERP_BACKFORTH_LINEAR));
+
+    if (fraction >= 0.5f)
     {
         return (float)((from - to) * (fraction - 0.5) + (from - to) * (fraction - 0.5) + to);
     }

@@ -1601,12 +1601,12 @@ unsigned int __cdecl R_SetVisData(unsigned int viewIndex)
     unsigned int oldViewIndex; // [esp+4h] [ebp-8h]
     unsigned int drawType; // [esp+8h] [ebp-4h]
 
-    oldViewIndex = g_viewIndex; // *(unsigned int *)(*((unsigned int *)NtCurrentTeb()->ThreadLocalStoragePointer + _tls_index) + 12);
-    //g_viewIndex = oldViewIndex; // *(unsigned int *)(*((unsigned int *)NtCurrentTeb()->ThreadLocalStoragePointer + _tls_index) + 12) = viewIndex; (Fuck you whoever did this typo!)
+    oldViewIndex = g_viewIndex;
+    //g_viewIndex = oldViewIndex; // (Fuck you whoever did this typo!)
     g_viewIndex = viewIndex;
     for (drawType = 0; drawType < 2; ++drawType)
-        g_dynEntVisData[drawType] = rgp.world->dpvsDyn.dynEntVisData[drawType][viewIndex]; // *(unsigned int *)(*((unsigned int *)NtCurrentTeb()->ThreadLocalStoragePointer + _tls_index) + 4 * drawType + 16) =
-    g_dpvsView = &dpvsGlob.views[scene.dpvs.localClientNum][viewIndex]; // *(unsigned int *)(*((unsigned int *)NtCurrentTeb()->ThreadLocalStoragePointer + _tls_index) + 8)
+        g_dynEntVisData[drawType] = rgp.world->dpvsDyn.dynEntVisData[drawType][viewIndex];
+    g_dpvsView = &dpvsGlob.views[scene.dpvs.localClientNum][viewIndex];
     return oldViewIndex;
 }
 

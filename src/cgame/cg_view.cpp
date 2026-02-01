@@ -757,10 +757,7 @@ void __cdecl CG_CalcFov(int localClientNum)
 
 float __cdecl CG_GetViewZoomScale()
 {
-    double v0; // fp1
-
-    v0 = (float)(cgArray[0].refdef.tanHalfFovY * (float)1.5890048);
-    return *((float *)&v0 + 1);
+    return cgArray[0].refdef.tanHalfFovY * 1.5890048f;
 }
 
 void __cdecl CG_CalcCubemapViewValues(cg_s *cgameGlob)

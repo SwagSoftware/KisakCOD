@@ -75,6 +75,11 @@
 #endif
 #endif
 
+// angle indexes
+#define	PITCH				0		// up / down
+#define	YAW					1		// left / right
+#define	ROLL				2		// fall over
+
 #define ID_INLINE __inline 
 
 int __cdecl ShortSwap(__int16 l);

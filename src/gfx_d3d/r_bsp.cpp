@@ -95,7 +95,6 @@ void __cdecl R_UpdateLightsFromDvars()
 
 void __cdecl R_CopyParseParamsFromDvars(SunLightParseParams *sunParse)
 {
-    int v1; // [esp+10h] [ebp-8h]
     float sunLightMin; // [esp+14h] [ebp-4h]
 
     memcpy(sunParse, &rgp.world->sunParse, sizeof(SunLightParseParams));
