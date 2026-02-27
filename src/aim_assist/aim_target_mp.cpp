@@ -84,48 +84,27 @@ void __cdecl AimTarget_ProcessEntity(int32_t localClientNum, const centity_s *en
 char __cdecl AimTarget_IsTargetValid(const cg_s *cgameGlob, const centity_s *targetEnt)
 {
     double v3; // st7
-    float targetDir[3]; // [esp+50h] [ebp-28h] BYREF
-    const clientInfo_t *playerInfo; // [esp+5Ch] [ebp-1Ch]
-    const clientInfo_t *targetInfo; // [esp+60h] [ebp-18h]
+    float targetDir[3] = { 0 }; // [esp+50h] [ebp-28h] BYREF
+
     float radius; // [esp+64h] [ebp-14h]
-    float playerDir[3]; // [esp+68h] [ebp-10h] BYREF
+    float playerDir[3] = { 0 }; // [esp+68h] [ebp-10h] BYREF
     float dot; // [esp+74h] [ebp-4h]
 
     PROF_SCOPED("AimTarget_IsTargetValid");
 
-    if (!targetEnt)
-        MyAssertHandler(".\\aim_assist\\aim_target_mp.cpp", 262, 0, "%s", "targetEnt");
-    if (!targetEnt->nextValid)
-        MyAssertHandler(".\\aim_assist\\aim_target_mp.cpp", 263, 0, "%s", "targetEnt->nextValid");
-    if (targetEnt->nextState.number == cgameGlob->predictedPlayerState.clientNum)
-        MyAssertHandler(
-            ".\\aim_assist\\aim_target_mp.cpp",
-            264,
-            0,
-            "%s",
-            "targetEnt->nextState.number != cgameGlob->predictedPlayerState.clientNum");
+    iassert(targetEnt);
+    iassert(targetEnt->nextValid);
+    iassert(targetEnt->nextState.number != cgameGlob->predictedPlayerState.clientNum);
+
     if (targetEnt->nextState.eType == ET_PLAYER)
     {
-        if ((targetEnt->nextState.lerp.eFlags & 0x20000) != 0)
-            MyAssertHandler(".\\aim_assist\\aim_target_mp.cpp", 268, 0, "%s", "!(targetEnt->nextState.lerp.eFlags & EF_DEAD)");
-        if (targetEnt->nextState.clientNum >= 0x40u)
-            MyAssertHandler(
-                ".\\aim_assist\\aim_target_mp.cpp",
-                270,
-                0,
-                "targetEnt->nextState.clientNum doesn't index MAX_CLIENTS\n\t%i not in [0, %i)",
-                targetEnt->nextState.clientNum,
-                64);
-        targetInfo = &cgameGlob->bgs.clientinfo[targetEnt->nextState.clientNum];
-        if (cgameGlob->predictedPlayerState.clientNum >= 0x40u)
-            MyAssertHandler(
-                ".\\aim_assist\\aim_target_mp.cpp",
-                273,
-                0,
-                "cgameGlob->predictedPlayerState.clientNum doesn't index MAX_CLIENTS\n\t%i not in [0, %i)",
-                cgameGlob->predictedPlayerState.clientNum,
-                64);
-        playerInfo = &cgameGlob->bgs.clientinfo[cgameGlob->predictedPlayerState.clientNum];
+        iassert((targetEnt->nextState.lerp.eFlags & 0x20000) == 0);
+        iassert(targetEnt->nextState.clientNum < 0x40u);
+
+        const clientInfo_t* targetInfo = &cgameGlob->bgs.clientinfo[targetEnt->nextState.clientNum]; // [esp+60h] [ebp-18h]
+        iassert(cgameGlob->predictedPlayerState.clientNum < 0x40u);
+
+        const clientInfo_t* playerInfo = &cgameGlob->bgs.clientinfo[cgameGlob->predictedPlayerState.clientNum]; // [esp+5Ch] [ebp-1Ch]
         if (targetInfo->infoValid && targetInfo->model[0])
         {
             if (!Com_GetClientDObj(targetEnt->nextState.number, targetEnt->pose.localClientNum))
@@ -143,7 +122,7 @@ char __cdecl AimTarget_IsTargetValid(const cg_s *cgameGlob, const centity_s *tar
     }
     if ((targetEnt->nextState.lerp.eFlags & 0x800) == 0 || targetEnt->nextState.solid != 0xFFFFFF)
     {
-        goto LABEL_25;
+        return 0;
     }
 LABEL_26:
     Vec3Sub(targetEnt->pose.origin, cgameGlob->predictedPlayerState.origin, targetDir);
@@ -165,27 +144,27 @@ LABEL_26:
 
 double __cdecl AimTarget_GetTargetRadius(const centity_s *targetEnt)
 {
-    float mins[3]; // [esp+0h] [ebp-1Ch] BYREF
-    float maxs[3]; // [esp+10h] [ebp-Ch] BYREF
+    float mins[3] = { 0 }; // [esp+0h] [ebp-1Ch] BYREF
+    float maxs[3] = { 0 }; // [esp+10h] [ebp-Ch] BYREF
 
-    if (!targetEnt)
-        MyAssertHandler(".\\aim_assist\\aim_target_mp.cpp", 217, 0, "%s", "targetEnt");
+    iassert(targetEnt);
+    
     if (targetEnt->nextState.eType == ET_PLAYER)
         return aim_target_sentient_radius->current.value;
+
     AimTarget_GetTargetBounds(targetEnt, mins, maxs);
-    return (float)RadiusFromBounds(mins, maxs);
+
+    return RadiusFromBounds(mins, maxs);
 }
 
 void __cdecl AimTarget_GetTargetBounds(const centity_s *targetEnt, float *mins, float *maxs)
 {
     float highBonePos[3]; // [esp+0h] [ebp-Ch] BYREF
 
-    if (!targetEnt)
-        MyAssertHandler(".\\aim_assist\\aim_target_mp.cpp", 183, 0, "%s", "targetEnt");
-    if (!mins)
-        MyAssertHandler(".\\aim_assist\\aim_target_mp.cpp", 184, 0, "%s", "mins");
-    if (!maxs)
-        MyAssertHandler(".\\aim_assist\\aim_target_mp.cpp", 185, 0, "%s", "maxs");
+    iassert(targetEnt);
+    iassert(mins);
+    iassert(maxs);
+
     if (targetEnt->nextState.eType == ET_PLAYER)
     {
         AimTarget_GetTagPos(targetEnt, scr_const.aim_highest_bone, highBonePos);
@@ -198,19 +177,17 @@ void __cdecl AimTarget_GetTargetBounds(const centity_s *targetEnt, float *mins, 
     }
     else
     {
-        if (targetEnt->nextState.solid != 0xFFFFFF)
-            MyAssertHandler(".\\aim_assist\\aim_target_mp.cpp", 201, 0, "%s", "targetEnt->nextState.solid == SOLID_BMODEL");
+        iassert(targetEnt->nextState.solid == 0xFFFFFF); // "targetEnt->nextState.solid == SOLID_BMODEL"
+
         CM_ModelBounds(targetEnt->nextState.index.brushmodel, mins, maxs);
     }
 }
 
 void __cdecl AimTarget_GetTagPos(const centity_s *ent, uint32_t tagName, float *pos)
 {
-    DObj_s *dobj; // [esp+0h] [ebp-4h]
+    DObj_s* dobj = Com_GetClientDObj(ent->nextState.number, ent->pose.localClientNum); // [esp+0h] [ebp-4h]
+    iassert(dobj);
 
-    dobj = Com_GetClientDObj(ent->nextState.number, ent->pose.localClientNum);
-    if (!dobj)
-        MyAssertHandler(".\\aim_assist\\aim_target_mp.cpp", 169, 0, "%s", "dobj");
     if (!CG_DObjGetWorldTagPos(&ent->pose, dobj, tagName, pos))
     {
         Com_Error(ERR_DROP, "AimTarget_GetTagPos: Cannot find tag [%s] on entity\n", SL_ConvertToString(tagName));
@@ -221,8 +198,8 @@ char __cdecl AimTarget_IsTargetVisible(int32_t localClientNum, const centity_s *
 {
     float endPos[4]; // [esp+58h] [ebp-58h] BYREF
     trace_t trace; // [esp+68h] [ebp-48h] BYREF
-    float playerEyePos[3]; // [esp+94h] [ebp-1Ch] BYREF
-    float targetEyePos[3]; // [esp+A0h] [ebp-10h] BYREF
+    float playerEyePos[3] = { 0 }; // [esp+94h] [ebp-1Ch] BYREF
+    float targetEyePos[3] = { 0 }; // [esp+A0h] [ebp-10h] BYREF
     float visibility; // [esp+ACh] [ebp-4h]
     const cg_s *cgameGlob;
 
@@ -279,10 +256,9 @@ void __cdecl AimTarget_GetTargetCenter(const centity_s *targetEnt, float *center
     float mins[3]; // [esp+8h] [ebp-18h] BYREF
     float maxs[3]; // [esp+14h] [ebp-Ch] BYREF
 
-    if (!targetEnt)
-        MyAssertHandler(".\\aim_assist\\aim_target_mp.cpp", 237, 0, "%s", "targetEnt");
-    if (!center)
-        MyAssertHandler(".\\aim_assist\\aim_target_mp.cpp", 238, 0, "%s", "center");
+    iassert(targetEnt);
+    iassert(center);
+
     AimTarget_GetTargetBounds(targetEnt, mins, maxs);
     Vec3Add(mins, maxs, center);
     Vec3Scale(center, 0.5, center);
@@ -293,27 +269,26 @@ void __cdecl AimTarget_CreateTarget(int32_t localClientNum, const centity_s *tar
 {
     float scale; // [esp+8h] [ebp-70h]
     float diff[8]; // [esp+30h] [ebp-48h] BYREF
-    const cg_s *cgameGlob; // [esp+50h] [ebp-28h]
-    const snapshot_s *nextSnap; // [esp+54h] [ebp-24h]
-    const snapshot_s *snap; // [esp+58h] [ebp-20h]
     float currentPos[3]; // [esp+5Ch] [ebp-1Ch] BYREF
     float nextPos[3]; // [esp+68h] [ebp-10h] BYREF
-    float deltaTime; // [esp+74h] [ebp-4h]
 
     PROF_SCOPED("AimTarget_CreateTarget");
 
     iassert(targetEnt);
     iassert(target);
 
-    cgameGlob = CG_GetLocalClientGlobals(localClientNum);
+    const cg_s* cgameGlob = CG_GetLocalClientGlobals(localClientNum); // [esp+50h] [ebp-28h]
 
     target->entIndex = targetEnt->nextState.number;
     Vec3Sub(targetEnt->pose.origin, cgameGlob->predictedPlayerState.origin, diff);
+
     target->worldDistSqr = Vec3LengthSq(diff);
     AimTarget_GetTargetBounds(targetEnt, target->mins, target->maxs);
-    snap = cgameGlob->snap;
-    nextSnap = cgameGlob->nextSnap;
-    deltaTime = (double)(nextSnap->serverTime - snap->serverTime) * EQUAL_EPSILON;
+
+    const snapshot_s* snap = cgameGlob->snap; // [esp+58h] [ebp-20h]
+    const snapshot_s* nextSnap = cgameGlob->nextSnap; // [esp+54h] [ebp-24h]
+    float deltaTime = (double)(nextSnap->serverTime - snap->serverTime) * EQUAL_EPSILON; // [esp+74h] [ebp-4h]
+
     if (deltaTime <= 0.0)
     {
         target->velocity[0] = 0.0;
@@ -335,21 +310,14 @@ void __cdecl AimTarget_AddTargetToList(int32_t localClientNum, const AimTarget *
 {
     int32_t targetIndex; // [esp+8h] [ebp-14h]
     int32_t low; // [esp+Ch] [ebp-10h]
-    AimTargetGlob *atGlob; // [esp+14h] [ebp-8h]
     int32_t high; // [esp+18h] [ebp-4h]
 
-    if (!target)
-        MyAssertHandler(".\\aim_assist\\aim_target_mp.cpp", 125, 0, "%s", "target");
-    atGlob = &atGlobArray[localClientNum];
+    iassert(target);
+
+    AimTargetGlob* atGlob = &atGlobArray[localClientNum]; // [esp+14h] [ebp-8h]
     for (targetIndex = 0; targetIndex < atGlob->targetCount; ++targetIndex)
     {
-        if (target->entIndex == atGlob->targets[targetIndex].entIndex)
-            MyAssertHandler(
-                ".\\aim_assist\\aim_target_mp.cpp",
-                132,
-                0,
-                "%s",
-                "target->entIndex != atGlob->targets[targetIndex].entIndex");
+        iassert(target->entIndex != atGlob->targets[targetIndex].entIndex);
     }
     low = 0;
     high = atGlob->targetCount;
@@ -365,8 +333,8 @@ void __cdecl AimTarget_AddTargetToList(int32_t localClientNum, const AimTarget *
         if (atGlob->targetCount == 64)
             --atGlob->targetCount;
         memmove(
-            (unsigned __int8 *)&atGlob->targets[low + 1],
-            (unsigned __int8 *)&atGlob->targets[low],
+            (uint8_t*)&atGlob->targets[low + 1],
+            (uint8_t*)&atGlob->targets[low],
             44 * (atGlob->targetCount - low));
         memcpy(&atGlob->targets[low], target, sizeof(atGlob->targets[low]));
         ++atGlob->targetCount;
@@ -375,10 +343,9 @@ void __cdecl AimTarget_AddTargetToList(int32_t localClientNum, const AimTarget *
 
 int __cdecl AimTarget_CompareTargets(const AimTarget *targetA, const AimTarget *targetB)
 {
-    if (!targetA)
-        MyAssertHandler(".\\aim_assist\\aim_target_mp.cpp", 102, 0, "%s", "targetA");
-    if (!targetB)
-        MyAssertHandler(".\\aim_assist\\aim_target_mp.cpp", 103, 0, "%s", "targetB");
+    iassert(targetA);
+    iassert(targetB);
+
     if (targetB->worldDistSqr > (double)targetA->worldDistSqr)
         return 1;
     if (targetB->worldDistSqr >= (double)targetA->worldDistSqr)
@@ -391,9 +358,11 @@ bool __cdecl AimTarget_PlayerInValidState(const playerState_s *ps)
     bool result; // al
     
     iassert(ps);
+
 #ifdef KISAK_MP
     if ((ps->otherFlags & 2) != 0)
-        return 0;
+        return false;
+
     switch (ps->pm_type)
     {
     case PM_NOCLIP:
@@ -402,13 +371,15 @@ bool __cdecl AimTarget_PlayerInValidState(const playerState_s *ps)
     case PM_INTERMISSION:
     case PM_DEAD:
     case PM_DEAD_LINKED:
-        result = 0;
+        result = false;
         break;
     default:
-        result = 1;
+        result = true;
         break;
     }
+
     return result;
+
 #elif KISAK_SP
     return (ps->pm_type > PM_DEAD_LINKED); // weird
 #endif
@@ -425,10 +396,9 @@ void __cdecl AimTarget_UpdateClientTargets(int32_t localClientNum)
 
 void __cdecl AimTarget_GetClientTargetList(int32_t localClientNum, AimTarget **targetList, int32_t*targetCount)
 {
-    if (!targetList)
-        MyAssertHandler(".\\aim_assist\\aim_target_mp.cpp", 527, 0, "%s", "targetList");
-    if (!targetCount)
-        MyAssertHandler(".\\aim_assist\\aim_target_mp.cpp", 528, 0, "%s", "targetCount");
+    iassert(targetList);
+    iassert(targetCount);
+
     *targetList = atGlobArray[localClientNum].clientTargets;
     *targetCount = atGlobArray[localClientNum].clientTargetCount;
 }

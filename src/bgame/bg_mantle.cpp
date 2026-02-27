@@ -4,14 +4,14 @@
 #include <xanim/xanim.h>
 
 
-const dvar_t *mantle_enable;
-const dvar_t *mantle_debug;
-const dvar_t *mantle_check_range;
-const dvar_t *mantle_check_radius;
-const dvar_t *mantle_check_angle;
-const dvar_t *mantle_view_yawcap;
+const dvar_t *mantle_enable = nullptr;
+const dvar_t *mantle_debug = nullptr;
+const dvar_t *mantle_check_range = nullptr;
+const dvar_t *mantle_check_radius = nullptr;
+const dvar_t *mantle_check_angle = nullptr;
+const dvar_t *mantle_view_yawcap = nullptr;
 
-XAnim_s *s_mantleAnims;
+XAnim_s *s_mantleAnims = nullptr;
 
 #ifdef KISAK_MP
 const char *s_mantleAnimNames[11] =
@@ -269,14 +269,8 @@ char __cdecl Mantle_CheckLedge(pmove_t *pm, pml_t *pml, MantleResults *mresults,
             mresults->ledgePos[1] = end[1];
             mresults->ledgePos[2] = end[2];
             mresults->ledgePos[2] = (end[2] - start[2]) * trace.fraction + start[2];
-            if (mresults->ledgePos[2] - mresults->startPos[2] <= 0.0)
-                MyAssertHandler(
-                    ".\\bgame\\bg_mantle.cpp",
-                    474,
-                    0,
-                    "%s\n\t((mresults->ledgePos[2] - mresults->startPos[2])) = %g",
-                    "(((mresults->ledgePos[2] - mresults->startPos[2]) > 0.0f))",
-                    mresults->ledgePos[2] - mresults->startPos[2]);
+            iassert(mresults->ledgePos[2] - mresults->startPos[2] > 0.0);
+
             maxs[2] = 50.0;
             PM_trace(pm, &trace, mresults->ledgePos, mins, maxs, mresults->ledgePos, ps->clientNum, pm->tracemask);
             if (trace.startsolid)

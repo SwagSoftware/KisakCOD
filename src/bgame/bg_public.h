@@ -1012,3 +1012,10 @@ extern const dvar_t *jump_spreadAdd;
 // bg_weapons
 extern unsigned int bg_lastParsedWeaponIndex;
 extern struct WeaponDef *bg_weaponDefs[128];
+
+// https://github.com/id-Software/RTCW-SP/blob/master/src/game/bg_public.h#L1573
+typedef enum // Kisak: This is a new struct based on idtech
+{
+    ANIM_COND_MOVETYPE = 0x3,
+    NUM_ANIM_CONDITIONS = 0xA
+} scriptAnimConditions_t;

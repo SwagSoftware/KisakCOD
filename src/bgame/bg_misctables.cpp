@@ -3,7 +3,7 @@
 #include <qcommon/mem_track.h>
 
 gitem_s bg_itemlist[2048];
-int itemRegistered[2048];
+int itemRegistered[2048] = { 0 };
 
 void __cdecl TRACK_bg_misctables()
 {

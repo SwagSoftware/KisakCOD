@@ -1,16 +1,16 @@
 #include "bg_public.h"
 #include "bg_local.h"
 
-const dvar_t *perk_parabolicIcon;
-const dvar_t *perk_parabolicRadius;
-const dvar_t *perk_parabolicAngle;
-const dvar_t *perk_bulletPenetrationMultiplier;
-const dvar_t *perk_weapSpreadMultiplier;
-const dvar_t *perk_extraBreath;
-const dvar_t *perk_grenadeDeath;
-const dvar_t *perk_weapReloadMultiplier;
-const dvar_t *perk_weapRateMultiplier;
-const dvar_t *perk_sprintMultiplier;
+const dvar_t *perk_parabolicIcon = nullptr;
+const dvar_t *perk_parabolicRadius = nullptr;
+const dvar_t *perk_parabolicAngle = nullptr;
+const dvar_t *perk_bulletPenetrationMultiplier = nullptr;
+const dvar_t *perk_weapSpreadMultiplier = nullptr;
+const dvar_t *perk_extraBreath = nullptr;
+const dvar_t *perk_grenadeDeath = nullptr;
+const dvar_t *perk_weapReloadMultiplier = nullptr;
+const dvar_t *perk_weapRateMultiplier = nullptr;
+const dvar_t *perk_sprintMultiplier = nullptr;
 
 const char *bg_perkNames[20] =
 {

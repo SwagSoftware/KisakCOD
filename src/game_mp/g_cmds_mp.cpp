@@ -618,7 +618,7 @@ int32_t __cdecl Cmd_FollowCycle_f(gentity_s *ent, int32_t dir)
             clientNum = level.maxclients - 1;
         if (SV_GetArchivedClientInfo(clientNum, &ent->client->sess.archiveTime, &ps, &v5))
         {
-            if ((ps.otherFlags & 4) == 0)
+            if ((ps.otherFlags & POF_PLAYER) == 0)
                 MyAssertHandler(".\\game_mp\\g_cmds_mp.cpp", 823, 0, "%s", "ps.otherFlags & POF_PLAYER");
             if (G_ClientCanSpectateTeam(ent->client, v5.team))
             {

@@ -181,8 +181,8 @@ void __cdecl PM_AddTouchEnt(pmove_t *pm, int32_t entityNum)
 
     if (entityNum != ENTITYNUM_WORLD)
     {
-        if (!pm)
-            MyAssertHandler(".\\bgame\\bg_pmove.cpp", 277, 0, "%s", "pm");
+        iassert(pm);
+
         if (pm->numtouch != 32)
         {
             for (i = 0; i < pm->numtouch; ++i)
@@ -253,8 +253,10 @@ int32_t __cdecl PM_GetEffectiveStance(const playerState_s *ps)
 {
     if (ps->viewHeightTarget == 22)
         return 2;
+
     if (ps->viewHeightTarget == 40)
         return 2;
+
     return ps->viewHeightTarget == 11;
 }
 
@@ -343,13 +345,15 @@ uint32_t __cdecl PM_GroundSurfaceType(pml_t *pml)
 {
     uint32_t iSurfType; // [esp+0h] [ebp-4h]
 
-    if (!pml)
-        MyAssertHandler(".\\bgame\\bg_pmove.cpp", 1115, 0, "%s", "pml");
+    iassert(pml);
+
     if ((pml->groundTrace.surfaceFlags & 0x2000) != 0)
         return 0;
+
     iSurfType = (pml->groundTrace.surfaceFlags & 0x1F00000) >> 20;
-    if (iSurfType >= 0x1D)
-        MyAssertHandler(".\\bgame\\bg_pmove.cpp", 1121, 0, "%s", "iSurfType >= 0 && iSurfType < SURF_TYPECOUNT");
+
+    iassert(iSurfType < SURF_TYPECOUNT);
+
     return iSurfType;
 }
 
@@ -357,26 +361,30 @@ int32_t __cdecl PM_GetViewHeightLerpTime(const playerState_s *ps, int32_t iTarge
 {
     if (iTarget == 11)
         return 400;
+
     if (iTarget != 40)
         return 200;
+
     if (bDown)
         return 200;
+
     return 400;
 }
 
 bool __cdecl PlayerProneAllowed(pmove_t *pm)
 {
-    playerState_s *ps; // [esp+30h] [ebp-4h]
+    iassert(pm);
 
-    if (!pm)
-        MyAssertHandler(".\\bgame\\bg_pmove.cpp", 2457, 0, "%s", "pm");
-    ps = pm->ps;
-    if (!pm->ps)
-        MyAssertHandler(".\\bgame\\bg_pmove.cpp", 2459, 0, "%s", "ps");
-    if (BG_WeaponBlocksProne(pm->ps->weapon))
-        return 0;
+    playerState_s* ps = pm->ps; // [esp+30h] [ebp-4h]
+
+    iassert(ps);
+
+    if (BG_WeaponBlocksProne(ps->weapon))
+        return false;
+
     if ((ps->pm_flags & PMF_PRONE) != 0)
-        return 1;
+        return true;
+
     return ps->groundEntityNum != ENTITYNUM_NONE
         && BG_CheckProne(
             ps->clientNum,
@@ -398,18 +406,19 @@ void __cdecl PM_FootstepEvent(pmove_t *pm, pml_t *pml, char iOldBobCycle, char i
 {
     uint32_t v5; // eax
     uint32_t v6; // [esp+4h] [ebp-70h]
-    float mins[3]; // [esp+14h] [ebp-60h] BYREF
-    float vEnd[3]; // [esp+20h] [ebp-54h] BYREF
+    float mins[3] = { 0 }; // [esp+14h] [ebp-60h] BYREF
+    float vEnd[3] = { 0 }; // [esp+20h] [ebp-54h] BYREF
     int32_t iClipMask; // [esp+2Ch] [ebp-48h]
     float fTraceDist; // [esp+30h] [ebp-44h]
-    float maxs[3]; // [esp+34h] [ebp-40h] BYREF
+    float maxs[3] = { 0 }; // [esp+34h] [ebp-40h] BYREF
     trace_t trace; // [esp+40h] [ebp-34h] BYREF
     int32_t iSurfaceType; // [esp+6Ch] [ebp-8h]
     playerState_s *ps; // [esp+70h] [ebp-4h]
 
     ps = pm->ps;
-    if (!ps)
-        MyAssertHandler(".\\bgame\\bg_pmove.cpp", 2993, 0, "%s", "ps");
+
+    iassert(ps);
+
     if ((((uint8_t)(iNewBobCycle + 64) ^ (uint8_t)(iOldBobCycle + 64)) & 0x80) != 0)
     {
         if (ps->groundEntityNum == ENTITYNUM_NONE)
@@ -457,12 +466,16 @@ int32_t __cdecl PM_FootstepType(playerState_s *ps, pml_t *pml)
 {
     if (!PM_GroundSurfaceType(pml))
         return 0;
+
     if ((ps->pm_flags & PMF_PRONE) != 0)
         return 75;
+
     if ((ps->pm_flags & PMF_WALKING) != 0 || ps->leanf != 0.0)
         return 74;
+
     if (PM_IsSprinting(ps))
         return 72;
+
     return 73;
 }
 
@@ -473,14 +486,18 @@ bool __cdecl PM_ShouldMakeFootsteps(pmove_t *pm)
     playerState_s *ps; // [esp+10h] [ebp-4h]
 
     ps = pm->ps;
-    if (!pm->ps)
-        MyAssertHandler(".\\bgame\\bg_pmove.cpp", 3062, 0, "%s", "ps");
+
+    iassert(ps);
+
     bWalking = ps->pm_flags & PMF_WALKING;
+
     iStance = PM_GetEffectiveStance(ps);
     if (iStance == 1)
-        return 0;
+        return false;
+
     if (iStance == 2)
-        return 0;
+        return false;
+
     if ((ps->pm_flags & PMF_BACKWARDS_RUN) != 0)
     {
         if (!bWalking)
@@ -490,7 +507,8 @@ bool __cdecl PM_ShouldMakeFootsteps(pmove_t *pm)
     {
         return player_footstepsThreshhold->current.value <= (double)pm->xyspeed;
     }
-    return 0;
+
+    return false;
 }
 
 void __cdecl PM_UpdateLean(
@@ -514,6 +532,7 @@ void __cdecl PM_UpdateLean(
 
     leaning = 0;
     leanofs = 0.0;
+
     if ((cmd->buttons & 0xC0) != 0
         && (ps->pm_flags & PMF_FROZEN) == 0
         && ps->pm_type < PM_DEAD
@@ -524,13 +543,17 @@ void __cdecl PM_UpdateLean(
         if ((cmd->buttons & 0x80) != 0)
             ++leaning;
     }
+
     if ((ps->eFlags & 0x300) != 0)
         leaning = 0;
+
     if (PM_GetEffectiveStance(ps) == 1)
         fLeanMax = 0.25;
     else
         fLeanMax = 0.5;
+
     leanofs = ps->leanf;
+
     if (leaning)
     {
         if (leaning <= 0)
@@ -563,7 +586,9 @@ void __cdecl PM_UpdateLean(
         if (leanofs < 0.0)
             leanofs = 0.0;
     }
+
     ps->leanf = leanofs;
+
     if (ps->leanf != 0.0)
     {
         fLeanFrac = ps->leanf < 0.0 ? -1.0 : 1.0;
@@ -638,8 +663,8 @@ void __cdecl PM_UpdateViewAngles(playerState_s *ps, float msec, usercmd_s *cmd, 
         PM_UpdateViewAngles_LadderClamp(ps);
     if ((ps->pm_flags & PMF_PRONE) != 0)
     {
-        if ((ps->eFlags & 0x300) != 0)
-            MyAssertHandler(".\\bgame\\bg_pmove.cpp", 4241, 0, "%s", "!(ps->eFlags & EF_TURRET_ACTIVE)");
+        iassert((ps->eFlags & EF_TURRET_ACTIVE) == 0);
+
         PM_UpdateViewAngles_Prone(ps, msec, cmd, handler, oldViewYaw);
     }
 #ifdef KISAK_MP
@@ -1109,13 +1134,14 @@ void __cdecl PM_UpdatePronePitch(pmove_t *pm, pml_t *pml)
     float fTargPitcha; // [esp+74h] [ebp-Ch]
     float delta; // [esp+78h] [ebp-8h]
     float deltaa; // [esp+78h] [ebp-8h]
-    playerState_s *ps; // [esp+7Ch] [ebp-4h]
+     
 
-    if (!pm)
-        MyAssertHandler(".\\bgame\\bg_pmove.cpp", 4279, 0, "%s", "pm");
-    ps = pm->ps;
-    if (!pm->ps)
-        MyAssertHandler(".\\bgame\\bg_pmove.cpp", 4282, 0, "%s", "ps");
+    iassert(pm);
+
+    playerState_s* ps = pm->ps; // [esp+7Ch] [ebp-4h]
+
+    iassert(ps);
+
     if ((ps->pm_flags & PMF_PRONE) != 0)
     {
         if (ps->groundEntityNum == ENTITYNUM_NONE)
@@ -1233,13 +1259,12 @@ void __cdecl PM_SetProneMovementOverride(playerState_s *ps)
 
 void __cdecl PM_MeleeChargeStart(pmove_t *pm)
 {
-    playerState_s *ps; // [esp+0h] [ebp-4h]
+    iassert(pm);
 
-    if (!pm)
-        MyAssertHandler(".\\bgame\\bg_pmove.cpp", 4737, 0, "%s", "pm");
-    ps = pm->ps;
-    if (!pm->ps)
-        MyAssertHandler(".\\bgame\\bg_pmove.cpp", 4740, 0, "%s", "ps");
+    playerState_s* ps = pm->ps; // [esp+0h] [ebp-4h]
+    
+    iassert(ps);
+
     if (pm->cmd.meleeChargeDist)
     {
         ps->pm_flags |= PMF_MELEE_CHARGE;
@@ -1255,8 +1280,8 @@ void __cdecl PM_MeleeChargeStart(pmove_t *pm)
 
 void __cdecl PM_MeleeChargeClear(playerState_s *ps)
 {
-    if (!ps)
-        MyAssertHandler(".\\bgame\\bg_pmove.cpp", 4724, 0, "%s", "ps");
+    iassert(ps);
+
     ps->pm_flags &= ~PMF_MELEE_CHARGE;
     ps->meleeChargeYaw = 0.0;
     ps->meleeChargeDist = 0;
@@ -1270,8 +1295,8 @@ void __cdecl Pmove(pmove_t *pm)
     playerState_s *ps; // [esp+40h] [ebp-4h]
 
     ps = pm->ps;
-    if (!pm->ps)
-        MyAssertHandler(".\\bgame\\bg_pmove.cpp", 5272, 0, "%s", "ps");
+    iassert(ps);
+
     finalTime = pm->cmd.serverTime;
     if (finalTime >= ps->commandTime)
     {
@@ -1482,8 +1507,8 @@ void __cdecl PmoveSingle(pmove_t *pm)
     PM_MeleeChargeUpdate(pm, &pml);
     switch (ps->pm_type)
     {
-    case 1:
-    case 8:
+    case PM_NORMAL_LINKED:
+    case PM_DEAD_LINKED:
         PM_ClearLadderFlag(ps);
         ps->groundEntityNum = ENTITYNUM_NONE;
         memset(&pml.walking, 0, 12);
@@ -1499,7 +1524,7 @@ void __cdecl PmoveSingle(pmove_t *pm)
         PM_Footsteps(pm, &pml);
         PM_Weapon(pm, &pml);
         break;
-    case 2:
+    case PM_NOCLIP:
         PM_ClearLadderFlag(ps);
         PM_UpdateAimDownSightFlag(pm, &pml);
         PM_UpdateSprint(pm, &pml);
@@ -1508,7 +1533,7 @@ void __cdecl PmoveSingle(pmove_t *pm)
         PM_NoclipMove(pm, &pml);
         PM_UpdateAimDownSightLerp(pm, &pml);
         break;
-    case 3:
+    case PM_UFO:
         PM_ClearLadderFlag(ps);
         PM_UpdateAimDownSightFlag(pm, &pml);
         PM_UpdateSprint(pm, &pml);
@@ -1517,7 +1542,8 @@ void __cdecl PmoveSingle(pmove_t *pm)
         PM_UFOMove(pm, &pml);
         PM_UpdateAimDownSightLerp(pm, &pml);
         break;
-    case 4:
+#if KISAK_MP
+    case PM_SPECTATOR:
         PM_ClearLadderFlag(ps);
         PM_UpdateAimDownSightFlag(pm, &pml);
         PM_UpdateSprint(pm, &pml);
@@ -1527,19 +1553,20 @@ void __cdecl PmoveSingle(pmove_t *pm)
         PM_FlyMove(pm, &pml);
         PM_UpdateAimDownSightLerp(pm, &pml);
         break;
-    case 5:
+    case PM_INTERMISSION:
         PM_ClearLadderFlag(ps);
         PM_UpdateAimDownSightFlag(pm, &pml);
         PM_UpdateSprint(pm, &pml);
         PM_UpdateAimDownSightLerp(pm, &pml);
         break;
-    case 6:
+    case PM_LASTSTAND:
         PM_ClearLadderFlag(ps);
         ps->eFlags &= 0xFFFFFCFF;
         goto LABEL_69;
+#endif
     default:
     LABEL_69:
-        if ((ps->eFlags & 0x300) != 0)
+        if ((ps->eFlags & EF_TURRET_ACTIVE) != 0)
         {
             PM_ClearLadderFlag(ps);
             ps->groundEntityNum = ENTITYNUM_NONE;
@@ -1670,22 +1697,20 @@ void __cdecl PmoveSingle(pmove_t *pm)
 
 void __cdecl PM_UpdateSprint(pmove_t *pm, const pml_t *pml)
 {
-    SprintState *p_sprintState; // [esp+4h] [ebp-10h]
-    int32_t sprintLeft; // [esp+8h] [ebp-Ch]
-    playerState_s *ps; // [esp+Ch] [ebp-8h]
+    playerState_s* ps = pm->ps; // [esp+Ch] [ebp-8h]
+    iassert(ps);
 
-    ps = pm->ps;
-    if (!pm->ps)
-        MyAssertHandler(".\\bgame\\bg_pmove.cpp", 570, 0, "%s", "ps");
-    p_sprintState = &ps->sprintState;
+    SprintState* p_sprintState = &ps->sprintState; // [esp+4h] [ebp-10h]
     if (ps->sprintState.sprintButtonUpRequired && (pm->cmd.buttons & 2) == 0)
         p_sprintState->sprintButtonUpRequired = 0;
+
     if (ps->pm_type >= PM_NOCLIP || BG_GetMaxSprintTime(ps) <= 0)
     {
     LABEL_13:
         PM_EndSprint(ps, pm);
         return;
     }
+
     if ((ps->pm_flags & PMF_SPRINTING) != 0)
     {
         if (pm->cmd.serverTime - ps->sprintState.lastSprintStart >= ps->sprintState.sprintStartMaxLength)
@@ -1694,8 +1719,10 @@ void __cdecl PM_UpdateSprint(pmove_t *pm, const pml_t *pml)
             ps->sprintState.sprintDelay = 1;
             return;
         }
+
         if (PM_SprintEndingButtons(ps, pm->cmd.forwardmove, pm->cmd.buttons))
             goto LABEL_13;
+
         if ((pm->oldcmd.buttons & 2) == 0 && (pm->cmd.buttons & 2) != 0)
         {
             PM_EndSprint(ps, pm);
@@ -1711,7 +1738,7 @@ void __cdecl PM_UpdateSprint(pmove_t *pm, const pml_t *pml)
         && !PM_SprintStartInterferingButtons(ps, pm->cmd.forwardmove, pm->cmd.buttons)
         && PM_CanStand(ps, pm))
     {
-        sprintLeft = PM_GetSprintLeft(ps, pm->cmd.serverTime);
+        int32_t sprintLeft = PM_GetSprintLeft(ps, pm->cmd.serverTime); // [esp+8h] [ebp-Ch]
         if (player_sprintMinTime->current.value * 1000.0 < (double)sprintLeft)
             PM_StartSprint(ps, pm, pml, sprintLeft);
     }
@@ -1746,39 +1773,49 @@ void __cdecl PM_EndSprint(playerState_s *ps, pmove_t *pm)
 bool __cdecl PM_SprintStartInterferingButtons(const playerState_s *ps, int32_t forwardSpeed, int16_t buttons)
 {
     if ((ps->pm_flags & PMF_LADDER) != 0)
-        return 1;
+        return true;
+
     if (forwardSpeed <= player_sprintForwardMinimum->current.integer)
-        return 1;
+        return true;
+
     if ((buttons & 0xC435) != 0)
-        return 1;
+        return true;
+
     if (ps->leanf != 0.0)
-        return 1;
+        return true;
+
     if ((ps->pm_flags & (PMF_MANTLE | PMF_LADDER | PMF_SIGHT_AIMING | PMF_SHELLSHOCKED)) != 0)
-        return 1;
+        return true;
+
     if ((ps->pm_flags & PMF_JUMPING) != 0 && !ps->pm_time)
-        return 0;
-    return ps->weaponstate == 12
-        || ps->weaponstate == 13
-        || ps->weaponstate == 14
-        || ps->weaponstate >= 15 && ps->weaponstate <= 20;
+        return false;
+
+    return ps->weaponstate == WEAPON_MELEE_INIT
+        || ps->weaponstate == WEAPON_MELEE_FIRE
+        || ps->weaponstate == WEAPON_MELEE_END
+        || ps->weaponstate >= WEAPON_OFFHAND_INIT && ps->weaponstate <= WEAPON_OFFHAND_END;
 }
 
 bool __cdecl PM_SprintEndingButtons(const playerState_s *ps, int32_t forwardSpeed, int16_t buttons)
 {
     if ((ps->pm_flags & (PMF_LADDER | PMF_SIGHT_AIMING | PMF_SHELLSHOCKED)) != 0)
-        return 1;
+        return true;
+
     if (forwardSpeed <= player_sprintForwardMinimum->current.integer)
-        return 1;
+        return true;
+
     if ((buttons & 0xC735) != 0)
-        return 1;
+        return true;
+
     if (ps->leanf != 0.0)
-        return 1;
-    return ps->weaponstate == 12
-        || ps->weaponstate == 13
-        || ps->weaponstate == 14
-        || ps->weaponstate >= 15 && ps->weaponstate <= 20
-        || ps->weaponstate == 25
-        || ps->weaponstate == 26;
+        return true;
+
+    return ps->weaponstate == WEAPON_MELEE_INIT
+        || ps->weaponstate == WEAPON_MELEE_FIRE
+        || ps->weaponstate == WEAPON_MELEE_END
+        || ps->weaponstate >= WEAPON_OFFHAND_INIT && ps->weaponstate <= WEAPON_OFFHAND_END
+        || ps->weaponstate == WEAPON_NIGHTVISION_WEAR
+        || ps->weaponstate == WEAPON_NIGHTVISION_REMOVE;
 }
 
 bool __cdecl PM_CanStand(playerState_s *ps, pmove_t *pm)
@@ -1786,7 +1823,8 @@ bool __cdecl PM_CanStand(playerState_s *ps, pmove_t *pm)
     trace_t trace; // [esp+0h] [ebp-2Ch] BYREF
 
     if ((ps->pm_flags & (PMF_PRONE | PMF_DUCKED)) == 0)
-        return 1;
+        return true;
+
     pmoveHandlers[pm->handler].trace(
         &trace,
         ps->origin,
@@ -1795,25 +1833,25 @@ bool __cdecl PM_CanStand(playerState_s *ps, pmove_t *pm)
         ps->origin,
         ps->clientNum,
         pm->tracemask & 0xFDFFFFFF);
+
     return !trace.allsolid;
 }
 
 void __cdecl PM_FlyMove(pmove_t *pm, pml_t *pml)
 {
-    float wishdir[3]; // [esp+20h] [ebp-40h] BYREF
-    float wishvel[3]; // [esp+2Ch] [ebp-34h]
+    float wishdir[3] = { 0 }; // [esp+20h] [ebp-40h] BYREF
+    float wishvel[3] = { 0 }; // [esp+2Ch] [ebp-34h]
     float wishspeed; // [esp+38h] [ebp-28h]
-    float forward[3]; // [esp+3Ch] [ebp-24h] BYREF
-    float up[3]; // [esp+48h] [ebp-18h] BYREF
+    float forward[3] = { 0 }; // [esp+3Ch] [ebp-24h] BYREF
+    float up[3] = { 0 }; // [esp+48h] [ebp-18h] BYREF
     int32_t i; // [esp+54h] [ebp-Ch]
     float scale; // [esp+58h] [ebp-8h]
-    playerState_s *ps; // [esp+5Ch] [ebp-4h]
 
-    if (!pm)
-        MyAssertHandler(".\\bgame\\bg_pmove.cpp", 1148, 0, "%s", "pm");
-    ps = pm->ps;
-    if (!ps)
-        MyAssertHandler(".\\bgame\\bg_pmove.cpp", 1151, 0, "%s", "ps");
+    iassert(pm);
+
+    playerState_s* ps = pm->ps; // [esp+5Ch] [ebp-4h]
+    iassert(ps);
+
     PM_Friction(ps, pml);
     scale = PM_CmdScale(ps, &pm->cmd);
     if (scale == 0.0)
@@ -1849,24 +1887,26 @@ void __cdecl PM_FlyMove(pmove_t *pm, pml_t *pml)
 
 void __cdecl PM_Friction(playerState_s *ps, pml_t *pml)
 {
-    float scale; // [esp+8h] [ebp-2Ch]
-    float value; // [esp+Ch] [ebp-28h]
-    float control; // [esp+14h] [ebp-20h]
-    float *vel; // [esp+18h] [ebp-1Ch]
-    float newspeed; // [esp+1Ch] [ebp-18h]
-    float drop; // [esp+20h] [ebp-14h]
-    float speed; // [esp+24h] [ebp-10h]
-    float vec[3]; // [esp+28h] [ebp-Ch] BYREF
+    float scale = 0; // [esp+8h] [ebp-2Ch]
+    float value = 0; // [esp+Ch] [ebp-28h]
+    float control = 0; // [esp+14h] [ebp-20h]
+     
+    float newspeed = 0; // [esp+1Ch] [ebp-18h]
+    float drop = 0; // [esp+20h] [ebp-14h]
+    float speed = 0; // [esp+24h] [ebp-10h]
+    float vec[3] = { 0 }; // [esp+28h] [ebp-Ch] BYREF
 
-    if (!ps)
-        MyAssertHandler(".\\bgame\\bg_pmove.cpp", 650, 0, "%s", "ps");
-    vel = ps->velocity;
+    iassert(ps);
+
+    float* vel = ps->velocity; // [esp+18h] [ebp-1Ch]
     vec[0] = ps->velocity[0];
     vec[1] = ps->velocity[1];
     vec[2] = ps->velocity[2];
     if (pml->walking)
         vec[2] = 0.0;
+
     speed = Vec3Length(vec);
+
     if (speed >= 1.0)
     {
         drop = 0.0;
@@ -1880,7 +1920,9 @@ void __cdecl PM_Friction(playerState_s *ps, pml_t *pml)
                 value = speed;
             else
                 value = stopspeed->current.value;
+
             control = value;
+
             if ((ps->pm_flags & PMF_TIME_HARDLANDING) != 0)
             {
                 control = value * 0.300000011920929;
@@ -1889,8 +1931,10 @@ void __cdecl PM_Friction(playerState_s *ps, pml_t *pml)
             {
                 control = Jump_ReduceFriction(ps) * value;
             }
+
             drop = control * friction->current.value * pml->frametime + drop;
         }
+
 #ifdef KISAK_MP
         if (ps->pm_type == PM_SPECTATOR)
             drop = speed * 5.0 * pml->frametime + drop;
@@ -1911,16 +1955,16 @@ void __cdecl PM_Friction(playerState_s *ps, pml_t *pml)
 
 void __cdecl PM_Accelerate(playerState_s *ps, const pml_t *pml, const float *wishdir, float wishspeed, float accel)
 {
-    float value; // [esp+Ch] [ebp-44h]
-    float wishVelocity[3]; // [esp+1Ch] [ebp-34h] BYREF
-    float pushDir[3]; // [esp+28h] [ebp-28h] BYREF
-    float pushLen; // [esp+34h] [ebp-1Ch]
-    float canPush; // [esp+38h] [ebp-18h]
-    float inertiaspeed; // [esp+3Ch] [ebp-14h]
-    float control; // [esp+40h] [ebp-10h]
-    float addspeed; // [esp+44h] [ebp-Ch]
-    float currentspeed; // [esp+48h] [ebp-8h]
-    float accelspeed; // [esp+4Ch] [ebp-4h]
+    float value = 0; // [esp+Ch] [ebp-44h]
+    float wishVelocity[3] = { 0 }; // [esp+1Ch] [ebp-34h] BYREF
+    float pushDir[3] = { 0 }; // [esp+28h] [ebp-28h] BYREF
+    float pushLen = 0; // [esp+34h] [ebp-1Ch]
+    float canPush = 0; // [esp+38h] [ebp-18h]
+    float inertiaspeed = 0; // [esp+3Ch] [ebp-14h]
+    float control = 0; // [esp+40h] [ebp-10h]
+    float addspeed = 0; // [esp+44h] [ebp-Ch]
+    float currentspeed = 0; // [esp+48h] [ebp-8h]
+    float accelspeed = 0; // [esp+4Ch] [ebp-4h]
 
     if ((ps->pm_flags & PMF_LADDER) != 0)
     {
@@ -1934,9 +1978,10 @@ void __cdecl PM_Accelerate(playerState_s *ps, const pml_t *pml, const float *wis
     }
     else
     {
-        if (!ps)
-            MyAssertHandler(".\\bgame\\bg_pmove.cpp", 768, 0, "%s", "ps");
+        iassert(ps);
+
         currentspeed = Vec3Dot(ps->velocity, wishdir);
+
         addspeed = wishspeed - currentspeed;
         if (addspeed > 0.0)
         {
@@ -1944,10 +1989,13 @@ void __cdecl PM_Accelerate(playerState_s *ps, const pml_t *pml, const float *wis
                 value = wishspeed;
             else
                 value = stopspeed->current.value;
+
             control = value;
             accelspeed = accel * pml->frametime * value;
+
             if (addspeed < (double)accelspeed)
                 accelspeed = addspeed;
+
             inertiaspeed = PM_PlayerInertia(ps, accelspeed, wishdir);
             Vec3Mad(ps->velocity, inertiaspeed, wishdir, ps->velocity);
         }
@@ -1956,15 +2004,13 @@ void __cdecl PM_Accelerate(playerState_s *ps, const pml_t *pml, const float *wis
 
 double __cdecl PM_PlayerInertia(const playerState_s *ps, float accelspeed, const float *wishdir)
 {
-    float v4; // [esp+8h] [ebp-8h]
-
     if (ps->pm_type == PM_NOCLIP)
         return accelspeed;
 
     if (accelspeed <= (double)inertiaMax->current.value)
         return accelspeed;
 
-    v4 = ps->oldVelocity[1] * ps->oldVelocity[1] + ps->oldVelocity[0] * ps->oldVelocity[0];
+    float v4 = ps->oldVelocity[1] * ps->oldVelocity[1] + ps->oldVelocity[0] * ps->oldVelocity[0]; // [esp+8h] [ebp-8h]
     if (v4 < 0.0001)
         return accelspeed;
 
@@ -1974,7 +2020,7 @@ double __cdecl PM_PlayerInertia(const playerState_s *ps, float accelspeed, const
     return accelspeed;
 }
 
-char __cdecl PM_DoPlayerInertia(const playerState_s *ps, float accelspeed, const float *wishdir)
+bool __cdecl PM_DoPlayerInertia(const playerState_s *ps, float accelspeed, const float *wishdir)
 {
     float v4; // [esp+28h] [ebp-34h]
     float v5; // [esp+2Ch] [ebp-30h]
@@ -1997,8 +2043,10 @@ char __cdecl PM_DoPlayerInertia(const playerState_s *ps, float accelspeed, const
     v5 = sqrt(v6);
     scaledDotAngle = velocity_4 * oldVelocity_4 + velocity * oldVelocity;
     v4 = inertiaAngle->current.value * v5;
+
     if (scaledDotAngle >= (double)v4)
-        return 0;
+        return false;
+
     if (inertiaDebug->current.enabled)
     {
         Com_Printf(
@@ -2011,7 +2059,8 @@ char __cdecl PM_DoPlayerInertia(const playerState_s *ps, float accelspeed, const
             velocity_4);
         Com_Printf(17, "clamping acceleration from %f to %f\n", accelspeed, inertiaMax->current.value);
     }
-    return 1;
+
+    return true;
 }
 
 double __cdecl PM_MoveScale(playerState_s *ps, float fmove, float rmove, float umove)
@@ -2030,24 +2079,31 @@ double __cdecl PM_MoveScale(playerState_s *ps, float fmove, float rmove, float u
     v11 = I_fabs(fmove);
     max = v11;
     v10 = I_fabs(rmove);
+
     if (v11 < (double)v10)
     {
         v9 = I_fabs(rmove);
         max = v9;
     }
+
     v8 = I_fabs(umove);
+
     if (max < (double)v8)
     {
         v7 = I_fabs(umove);
         max = v7;
     }
+
     if (max == 0.0)
         return 0.0;
-    if (!ps)
-        MyAssertHandler(".\\bgame\\bg_pmove.cpp", 827, 0, "%s", "ps");
+
+    iassert(ps);
+
     v6 = umove * umove + rmove * rmove + fmove * fmove;
     v5 = sqrt(v6);
+
     scale = (double)ps->speed * max / (v5 * 127.0);
+
     if ((ps->pm_flags & PMF_WALKING) == 0 && ps->leanf == 0.0)
         scalea = scale * 1.0;
     else
@@ -2075,24 +2131,31 @@ double __cdecl PM_CmdScale(playerState_s *ps, usercmd_s *cmd)
     float scale; // [esp+14h] [ebp-4h]
     float scalea; // [esp+14h] [ebp-4h]
 
-    if (!ps)
-        MyAssertHandler(".\\bgame\\bg_pmove.cpp", 864, 0, "%s", "ps");
+    iassert(ps);
+
     v4 = (float)(cmd->rightmove * cmd->rightmove + cmd->forwardmove * cmd->forwardmove);
     v3 = sqrt(v4);
     max = abs8(cmd->forwardmove);
+
     if (abs8(cmd->rightmove) > max)
         max = abs8(cmd->rightmove);
+
     if (!max)
         return 0.0;
+
     scale = (double)ps->speed * (double)max / (v3 * 127.0);
+
     if ((ps->pm_flags & PMF_WALKING) == 0 && ps->leanf == 0.0)
         scalea = scale * 1.0;
     else
         scalea = scale * 0.4000000059604645;
+
     if (ps->pm_type == PM_NOCLIP)
         scalea = scalea * 3.0;
+
     if (ps->pm_type == PM_UFO)
         scalea = scalea * 6.0;
+
 #ifdef KISAK_MP
     if (ps->pm_type == PM_SPECTATOR)
         return (float)(scalea * player_spectateSpeedScale->current.value);
@@ -2102,41 +2165,44 @@ double __cdecl PM_CmdScale(playerState_s *ps, usercmd_s *cmd)
 
 void __cdecl PM_AirMove(pmove_t *pm, pml_t *pml)
 {
-    float fmove; // [esp+3Ch] [ebp-54h]
-    float wishdir[3]; // [esp+40h] [ebp-50h] BYREF
-    float wishvel[3]; // [esp+4Ch] [ebp-44h]
-    float wishspeed; // [esp+58h] [ebp-38h]
-    float smove; // [esp+5Ch] [ebp-34h]
-    int32_t i; // [esp+60h] [ebp-30h]
-    float scale; // [esp+64h] [ebp-2Ch]
-    playerState_s *ps; // [esp+68h] [ebp-28h]
+    float wishdir[3] = { 0 }; // [esp+40h] [ebp-50h] BYREF
+    float wishvel[3] = { 0 }; // [esp+4Ch] [ebp-44h]
+     
     usercmd_s cmd; // [esp+6Ch] [ebp-24h] BYREF
 
-    if (!pm)
-        MyAssertHandler(".\\bgame\\bg_pmove.cpp", 1223, 0, "%s", "pm");
-    ps = pm->ps;
-    if (!ps)
-        MyAssertHandler(".\\bgame\\bg_pmove.cpp", 1226, 0, "%s", "ps");
+    iassert(pm);
+
+    playerState_s* ps = pm->ps; // [esp+68h] [ebp-28h]
+
+    iassert(ps);
+
     PM_Friction(ps, pml);
-    fmove = (float)pm->cmd.forwardmove;
-    smove = (float)pm->cmd.rightmove;
+
+    float fmove = (float)pm->cmd.forwardmove; // [esp+3Ch] [ebp-54h]
+    float smove = (float)pm->cmd.rightmove; // [esp+5Ch] [ebp-34h]
+
     memcpy(&cmd, &pm->cmd, sizeof(cmd));
-    scale = PM_CmdScale(ps, &cmd);
+
+    float scale = PM_CmdScale(ps, &cmd); // [esp+64h] [ebp-2Ch]
     pml->forward[2] = 0.0;
     pml->right[2] = 0.0;
     Vec3Normalize(pml->forward);
     Vec3Normalize(pml->right);
-    for (i = 0; i < 2; ++i)
+
+    for (int32_t i = 0; i < 2; ++i) // [esp+60h] [ebp-30h]
         wishvel[i] = pml->forward[i] * fmove + pml->right[i] * smove;
+
     wishvel[2] = 0.0;
     wishdir[0] = wishvel[0];
     wishdir[1] = wishvel[1];
     wishdir[2] = 0.0;
-    wishspeed = Vec3Normalize(wishdir);
+    float wishspeed = Vec3Normalize(wishdir); // [esp+58h] [ebp-38h]
     wishspeed = wishspeed * scale;
     PM_Accelerate(ps, pml, wishdir, wishspeed, 1.0);
+
     if (pml->groundPlane)
         PM_ClipVelocity(ps->velocity, pml->groundTrace.normal, ps->velocity);
+
     PM_StepSlideMove(pm, pml, 1);
     PM_SetMovementDir(pm, pml);
 }
@@ -2152,14 +2218,14 @@ void __cdecl PM_SetMovementDir(pmove_t *pm, pml_t *pml)
     int32_t moveyaw; // [esp+2Ch] [ebp-18h]
     float moved[3]; // [esp+30h] [ebp-14h] BYREF
     float speed; // [esp+3Ch] [ebp-8h]
-    playerState_s *ps; // [esp+40h] [ebp-4h]
 
-    if (!pm)
-        MyAssertHandler(".\\bgame\\bg_pmove.cpp", 1036, 0, "%s", "pm");
-    ps = pm->ps;
-    if (!ps)
-        MyAssertHandler(".\\bgame\\bg_pmove.cpp", 1039, 0, "%s", "ps");
-    if ((ps->pm_flags & PMF_PRONE) == 0 || (ps->eFlags & 0x300) != 0)
+    iassert(pm);
+
+    playerState_s* ps = pm->ps; // [esp+40h] [ebp-4h]
+
+    iassert(ps);
+
+    if ((ps->pm_flags & PMF_PRONE) == 0 || (ps->eFlags & EF_TURRET_ACTIVE) != 0)
     {
         if ((ps->pm_flags & PMF_LADDER) != 0)
         {
@@ -2226,25 +2292,27 @@ void __cdecl PM_SetMovementDir(pmove_t *pm, pml_t *pml)
 void __cdecl PM_WalkMove(pmove_t *pm, pml_t *pml)
 {
     float fmove; // [esp+20h] [ebp-58h]
-    float wishdir[3]; // [esp+24h] [ebp-54h] BYREF
-    float wishvel[3]; // [esp+30h] [ebp-48h] BYREF
+    float wishdir[3] = { 0 }; // [esp+24h] [ebp-54h] BYREF
+    float wishvel[3] = { 0 }; // [esp+30h] [ebp-48h] BYREF
     int32_t iStance; // [esp+3Ch] [ebp-3Ch]
     float wishspeed; // [esp+40h] [ebp-38h]
     float acceleration; // [esp+44h] [ebp-34h]
     float smove; // [esp+48h] [ebp-30h]
     float scale; // [esp+4Ch] [ebp-2Ch]
-    playerState_s *ps; // [esp+50h] [ebp-28h]
+     
     usercmd_s cmd; // [esp+54h] [ebp-24h] BYREF
 
-    if (!pm)
-        MyAssertHandler(".\\bgame\\bg_pmove.cpp", 1284, 0, "%s", "pm");
-    ps = pm->ps;
-    if (!ps)
-        MyAssertHandler(".\\bgame\\bg_pmove.cpp", 1287, 0, "%s", "ps");
+    iassert(pm);
+
+    playerState_s* ps = pm->ps; // [esp+50h] [ebp-28h]
+    iassert(ps);
+
     if ((ps->pm_flags & PMF_JUMPING) != 0)
         Jump_ApplySlowdown(ps);
+
     if ((ps->pm_flags & PMF_SPRINTING) != 0)
         pm->cmd.rightmove = (int)((double)pm->cmd.rightmove * player_sprintStrafeSpeedScale->current.value);
+
     if (Jump_Check(pm, pml))
     {
         PM_AirMove(pm, pml);
@@ -2273,6 +2341,7 @@ void __cdecl PM_WalkMove(pmove_t *pm, pml_t *pml)
         wishspeed = wishspeed * scale;
         PM_ProjectVelocity(wishdir, pml->groundTrace.normal, wishdir);
         iStance = PM_GetEffectiveStance(ps);
+
         if ((pml->groundTrace.surfaceFlags & 2) != 0 || (ps->pm_flags & PMF_TIME_KNOCKBACK) != 0)
         {
             acceleration = 1.0;
@@ -2289,14 +2358,20 @@ void __cdecl PM_WalkMove(pmove_t *pm, pml_t *pml)
         {
             acceleration = 9.0;
         }
+
         if ((ps->pm_flags & PMF_TIME_HARDLANDING) != 0)
             acceleration = acceleration * 0.25;
+
         PM_Accelerate(ps, pml, wishdir, wishspeed, acceleration);
+
         if ((pml->groundTrace.surfaceFlags & 2) != 0 || (ps->pm_flags & PMF_TIME_KNOCKBACK) != 0)
             ps->velocity[2] = ps->velocity[2] - (double)ps->gravity * pml->frametime;
+
         PM_ProjectVelocity(ps->velocity, pml->groundTrace.normal, ps->velocity);
+
         if (ps->velocity[0] != 0.0 || ps->velocity[1] != 0.0)
             PM_StepSlideMove(pm, pml, 0);
+
         PM_SetMovementDir(pm, pml);
     }
 }
@@ -2319,16 +2394,16 @@ double __cdecl PM_CmdScale_Walk(pmove_t *pm, usercmd_s *cmd)
     float scale; // [esp+54h] [ebp-8h]
     float scalea; // [esp+54h] [ebp-8h]
     float scaleb; // [esp+54h] [ebp-8h]
-    playerState_s *ps; // [esp+58h] [ebp-4h]
+     
+    iassert(pm);
 
-    if (!pm)
-        MyAssertHandler(".\\bgame\\bg_pmove.cpp", 941, 0, "%s", "pm");
-    ps = pm->ps;
-    if (!pm->ps)
-        MyAssertHandler(".\\bgame\\bg_pmove.cpp", 943, 0, "%s", "ps");
+    playerState_s* ps = pm->ps; // [esp+58h] [ebp-4h]
+    iassert(ps);
+
     v9 = (ps->pm_flags & PMF_PRONE) != 0 && ps->fWeaponPosFrac > 0.0;
     v13 = (float)(cmd->rightmove * cmd->rightmove + cmd->forwardmove * cmd->forwardmove);
     v8 = sqrt(v13);
+
     if (cmd->forwardmove >= 0)
     {
         forwardmove = (float)cmd->forwardmove;
@@ -2341,22 +2416,29 @@ double __cdecl PM_CmdScale_Walk(pmove_t *pm, usercmd_s *cmd)
         v7 = I_fabs(v12);
         fmove = v7;
     }
+
     v10 = player_strafeSpeedScale->current.value * (double)cmd->rightmove;
     v5 = I_fabs(v10);
     v4 = fmove - v5;
+
     if (v4 < 0.0)
         v3 = v5;
     else
         v3 = fmove;
+
     if (v3 == 0.0)
         return 0.0;
+
     scale = (double)ps->speed * v3 / (v8 * 127.0);
+
     if ((ps->pm_flags & PMF_WALKING) != 0 || ps->leanf != 0.0 || v9)
         scalea = scale * 0.4000000059604645;
     else
         scalea = scale * 1.0;
+
     if ((ps->pm_flags & PMF_SPRINTING) != 0)
         scalea = scalea * player_sprintSpeedScale->current.value;
+
     if (ps->pm_type == PM_NOCLIP)
     {
         scaleb = scalea * 3.0;
@@ -2369,7 +2451,9 @@ double __cdecl PM_CmdScale_Walk(pmove_t *pm, usercmd_s *cmd)
     {
         scaleb = PM_CmdScaleForStance(pm) * scalea;
     }
+
     weapon = BG_GetWeaponDef(ps->weapon);
+
     if (!ps->weapon || weapon->moveSpeedScale <= 0.0 || (ps->pm_flags & PMF_WALKING) != 0 || v9)
     {
         if (ps->weapon && weapon->adsMoveSpeedScale > 0.0)
@@ -2379,8 +2463,10 @@ double __cdecl PM_CmdScale_Walk(pmove_t *pm, usercmd_s *cmd)
     {
         scaleb = scaleb * weapon->moveSpeedScale;
     }
+
     if ((ps->pm_flags & PMF_SHELLSHOCKED) != 0 && BG_GetShellshockParms(ps->shellshockIndex)->movement.affect)
         scaleb = scaleb * 0.40000001;
+
     return (float)(scaleb * ps->moveSpeedScaleMultiplier);
 }
 
@@ -2396,8 +2482,8 @@ double __cdecl PM_CmdScaleForStance(const pmove_t *pm)
         lerpFraca = PM_GetViewHeightLerp(pm, 11, 40);
         if (lerpFraca == 0.0)
         {
-            if (!pm->ps)
-                MyAssertHandler(".\\bgame\\bg_pmove.cpp", 908, 0, "%s", "pm->ps");
+            iassert(pm->ps);
+
             stance = PM_GetEffectiveStance(pm->ps);
             if (stance == 1)
             {
@@ -2428,11 +2514,12 @@ void __cdecl PM_DeadMove(playerState_s *ps, pml_t *pml)
     float forwarda; // [esp+1Ch] [ebp-4h]
     float forward; // [esp+1Ch] [ebp-4h]
 
-    if (!ps)
-        MyAssertHandler(".\\bgame\\bg_pmove.cpp", 1379, 0, "%s", "ps");
+    iassert(ps);
+
     if (pml->walking)
     {
         forwarda = Vec3Length(ps->velocity);
+
         forward = forwarda - 20.0;
         if (forward > 0.0)
         {
@@ -2453,25 +2540,25 @@ void __cdecl PM_NoclipMove(pmove_t *pm, pml_t *pml)
     float value; // [esp+14h] [ebp-60h]
     float *velocity; // [esp+24h] [ebp-50h]
     float fmove; // [esp+2Ch] [ebp-48h]
-    float wishdir[4]; // [esp+30h] [ebp-44h] BYREF
-    float wishvel[3]; // [esp+40h] [ebp-34h]
+    float wishdir[4] = { 0 }; // [esp+30h] [ebp-44h] BYREF
+    float wishvel[3] = { 0 }; // [esp+40h] [ebp-34h]
     float wishspeed; // [esp+4Ch] [ebp-28h]
     float curFriction; // [esp+50h] [ebp-24h]
     float newspeed; // [esp+54h] [ebp-20h]
     float drop; // [esp+58h] [ebp-1Ch]
     float speed; // [esp+5Ch] [ebp-18h]
     float smove; // [esp+60h] [ebp-14h]
-    int32_t i; // [esp+64h] [ebp-10h]
     float scale; // [esp+68h] [ebp-Ch]
-    playerState_s *ps; // [esp+6Ch] [ebp-8h]
+     
     float umove; // [esp+70h] [ebp-4h]
 
-    if (!pm)
-        MyAssertHandler(".\\bgame\\bg_pmove.cpp", 1422, 0, "%s", "pm");
-    ps = pm->ps;
-    if (!ps)
-        MyAssertHandler(".\\bgame\\bg_pmove.cpp", 1425, 0, "%s", "ps");
+    iassert(pm);
+
+    playerState_s* ps = pm->ps; // [esp+6Ch] [ebp-8h]
+    iassert(ps);
+
     ps->viewHeightTarget = 60;
+
     speed = Vec3Length(ps->velocity);
     if (speed >= 1.0)
     {
@@ -2504,7 +2591,7 @@ void __cdecl PM_NoclipMove(pmove_t *pm, pml_t *pml)
     if ((pm->cmd.buttons & 0x40) != 0)
         umove = umove - 127.0;
     scale = PM_MoveScale(ps, fmove, smove, umove);
-    for (i = 0; i < 3; ++i)
+    for (int32_t i = 0; i < 3; ++i) // [esp+64h] [ebp-10h]
         wishvel[i] = pml->forward[i] * fmove + pml->right[i] * smove + pml->up[i] * umove;
     wishdir[0] = wishvel[0];
     wishdir[1] = wishvel[1];
@@ -2519,12 +2606,11 @@ void __cdecl PM_UFOMove(pmove_t *pm, pml_t *pml)
 {
     float value; // [esp+Ch] [ebp-80h]
     float *velocity; // [esp+24h] [ebp-68h]
-    float forward[3]; // [esp+2Ch] [ebp-60h] BYREF
-    float up[3]; // [esp+38h] [ebp-54h] BYREF
-    int32_t i; // [esp+44h] [ebp-48h]
+    float forward[3] = { 0 }; // [esp+2Ch] [ebp-60h] BYREF
+    float up[3] = { 0 }; // [esp+38h] [ebp-54h] BYREF
     float fmove; // [esp+48h] [ebp-44h]
-    float wishdir[4]; // [esp+4Ch] [ebp-40h] BYREF
-    float wishvel[3]; // [esp+5Ch] [ebp-30h]
+    float wishdir[4] = { 0 }; // [esp+4Ch] [ebp-40h] BYREF
+    float wishvel[3] = { 0 }; // [esp+5Ch] [ebp-30h]
     float wishspeed; // [esp+68h] [ebp-24h]
     float curFriction; // [esp+6Ch] [ebp-20h]
     float newspeed; // [esp+70h] [ebp-1Ch]
@@ -2532,39 +2618,47 @@ void __cdecl PM_UFOMove(pmove_t *pm, pml_t *pml)
     float speed; // [esp+78h] [ebp-14h]
     float smove; // [esp+7Ch] [ebp-10h]
     float scale; // [esp+80h] [ebp-Ch]
-    playerState_s *ps; // [esp+84h] [ebp-8h]
+     
     float umove; // [esp+88h] [ebp-4h]
 
-    if (!pm)
-        MyAssertHandler(".\\bgame\\bg_pmove.cpp", 1500, 0, "%s", "pm");
-    ps = pm->ps;
-    if (!ps)
-        MyAssertHandler(".\\bgame\\bg_pmove.cpp", 1503, 0, "%s", "ps");
+    iassert(pm);
+
+    playerState_s* ps = pm->ps; // [esp+84h] [ebp-8h]
+    iassert(ps);
+
     ps->viewHeightTarget = 60;
     fmove = (float)pm->cmd.forwardmove;
     smove = (float)pm->cmd.rightmove;
     umove = 0.0;
+
     if ((pm->cmd.buttons & 0x80) != 0)
         umove = umove + 127.0;
+
     if ((pm->cmd.buttons & 0x40) != 0)
         umove = umove - 127.0;
+
     if (fmove == 0.0 && smove == 0.0 && umove == 0.0)
         speed = 0.0;
     else
         speed = Vec3Length(ps->velocity);
+
     if (speed >= 1.0)
     {
         drop = 0.0;
         curFriction = friction->current.value * 1.5;
+
         if (stopspeed->current.value <= (double)speed)
             value = speed;
         else
             value = stopspeed->current.value;
+
         wishdir[3] = value;
         drop = value * curFriction * pml->frametime + drop;
         newspeed = speed - drop;
+
         if (newspeed < 0.0)
             newspeed = 0.0;
+
         newspeed = newspeed / speed;
         Vec3Scale(ps->velocity, newspeed, ps->velocity);
     }
@@ -2580,8 +2674,10 @@ void __cdecl PM_UFOMove(pmove_t *pm, pml_t *pml)
     up[0] = 0.0;
     up[2] = 1.0;
     Vec3Cross(up, pml->right, forward);
-    for (i = 0; i < 3; ++i)
+
+    for (int32_t i = 0; i < 3; ++i) // [esp+44h] [ebp-48h]
         wishvel[i] = forward[i] * fmove + pml->right[i] * smove + up[i] * umove;
+
     wishdir[0] = wishvel[0];
     wishdir[1] = wishvel[1];
     wishdir[2] = wishvel[2];
@@ -2597,19 +2693,20 @@ void __cdecl PM_GroundTrace(pmove_t *pm, pml_t *pml)
     uint16_t EntityHitId; // ax
     float start[3]; // [esp+8h] [ebp-48h] BYREF
     trace_t trace; // [esp+14h] [ebp-3Ch] BYREF
-    playerState_s *ps; // [esp+40h] [ebp-10h]
+     
     float point[3]; // [esp+44h] [ebp-Ch] BYREF
 
-    if (!pm)
-        MyAssertHandler(".\\bgame\\bg_pmove.cpp", 1989, 0, "%s", "pm");
-    ps = pm->ps;
-    if (!ps)
-        MyAssertHandler(".\\bgame\\bg_pmove.cpp", 1992, 0, "%s", "ps");
+    iassert(pm);
+
+    playerState_s* ps = pm->ps; // [esp+40h] [ebp-10h]
+    iassert(ps);
+
     start[0] = ps->origin[0];
     start[1] = ps->origin[1];
     point[0] = ps->origin[0];
     point[1] = ps->origin[1];
-    if ((ps->eFlags & 0x300) != 0)
+
+    if ((ps->eFlags & EF_TURRET_ACTIVE) != 0)
     {
         start[2] = ps->origin[2];
         v2 = ps->origin[2] - 1.0;
@@ -2619,9 +2716,11 @@ void __cdecl PM_GroundTrace(pmove_t *pm, pml_t *pml)
         start[2] = ps->origin[2] + 0.25;
         v2 = ps->origin[2] - 0.25;
     }
+
     point[2] = v2;
     PM_playerTrace(pm, &trace, start, pm->mins, pm->maxs, point, ps->clientNum, pm->tracemask);
     memcpy(&pml->groundTrace, &trace, sizeof(pml->groundTrace));
+
     if (!trace.allsolid || PM_CorrectAllSolid(pm, pml, &trace))
     {
         if (trace.startsolid)
@@ -2708,9 +2807,10 @@ void __cdecl PM_CrashLand(playerState_s *ps, pml_t *pml)
     float den; // [esp+50h] [ebp-8h]
     float fSpeedMult; // [esp+54h] [ebp-4h]
 
-    if (!ps)
-        MyAssertHandler(".\\bgame\\bg_pmove.cpp", 1723, 0, "%s", "ps");
+    iassert(ps);
+
     dist = pml->previous_origin[2] - ps->origin[2];
+
     vel = pml->previous_velocity[2];
     acc = -(float)ps->gravity;
     a = acc * 0.5;
@@ -2721,8 +2821,8 @@ void __cdecl PM_CrashLand(playerState_s *ps, pml_t *pml)
         t = (-vel - v7) / (a * 2.0);
         landVel = (t * acc + vel) * -1.0;
         fallHeight = landVel * landVel / ((float)ps->gravity * 2.0);
-        if (bg_fallDamageMinHeight->current.value <= 0.0)
-            MyAssertHandler(".\\bgame\\bg_pmove.cpp", 1743, 0, "%s", "bg_fallDamageMinHeight->current.value > 0");
+        iassert(bg_fallDamageMinHeight->current.value > 0.0);
+
         if (bg_fallDamageMinHeight->current.value < (float)bg_fallDamageMaxHeight->current.value)
         {
             if (bg_fallDamageMinHeight->current.value >= (float)fallHeight
@@ -2757,6 +2857,7 @@ void __cdecl PM_CrashLand(playerState_s *ps, pml_t *pml)
             Com_Printf(17, "bg_fallDamageMaxHeight must be greater than bg_fallDamageMinHeight\n");
             damage = 0;
         }
+
         if (fallHeight > 12.0f)
         {
             viewDip = (int)((fallHeight - 12.0f) / 26.0f * 4.0f + 4.0f);
@@ -2770,6 +2871,7 @@ void __cdecl PM_CrashLand(playerState_s *ps, pml_t *pml)
         {
             viewDip = 0;
         }
+
         surfaceType = PM_GroundSurfaceType(pml);
         if (damage)
         {
@@ -2782,6 +2884,7 @@ void __cdecl PM_CrashLand(playerState_s *ps, pml_t *pml)
                 stunTime = 35 * damage + 500;
                 if (stunTime > 2000)
                     stunTime = 2000;
+
                 if (stunTime > 500)
                 {
                     if (stunTime < 1500)
@@ -2793,6 +2896,7 @@ void __cdecl PM_CrashLand(playerState_s *ps, pml_t *pml)
                 {
                     fSpeedMult = 0.5f;
                 }
+
                 ps->pm_time = stunTime;
                 ps->pm_flags |= PMF_TIME_HARDLANDING;
                 Vec3Scale(ps->velocity, fSpeedMult, ps->velocity);
@@ -2843,9 +2947,7 @@ int32_t __cdecl PM_MediumLandingForSurface(pml_t *pml)
 
 uint32_t __cdecl PM_HardLandingForSurface(pml_t *pml)
 {
-    uint32_t iSurfType; // [esp+0h] [ebp-4h]
-
-    iSurfType = PM_GroundSurfaceType(pml);
+    uint32_t iSurfType = PM_GroundSurfaceType(pml); // [esp+0h] [ebp-4h]
     if (iSurfType)
         return iSurfType + 77;
     else
@@ -2854,9 +2956,7 @@ uint32_t __cdecl PM_HardLandingForSurface(pml_t *pml)
 
 uint32_t __cdecl PM_DamageLandingForSurface(pml_t *pml)
 {
-    uint32_t iSurfType; // [esp+0h] [ebp-4h]
-
-    iSurfType = PM_GroundSurfaceType(pml);
+    uint32_t iSurfType = PM_GroundSurfaceType(pml); // [esp+0h] [ebp-4h]
     if (iSurfType)
         return iSurfType + 106;
     else
@@ -2865,16 +2965,14 @@ uint32_t __cdecl PM_DamageLandingForSurface(pml_t *pml)
 
 int32_t __cdecl PM_CorrectAllSolid(pmove_t *pm, pml_t *pml, trace_t *trace)
 {
-    uint32_t i; // [esp+14h] [ebp-14h]
-    playerState_s *ps; // [esp+18h] [ebp-10h]
-    float point[3]; // [esp+1Ch] [ebp-Ch] BYREF
+    float point[3] = { 0 }; // [esp+1Ch] [ebp-Ch] BYREF
 
-    if (!pm)
-        MyAssertHandler(".\\bgame\\bg_pmove.cpp", 1875, 0, "%s", "pm");
-    ps = pm->ps;
-    if (!pm->ps)
-        MyAssertHandler(".\\bgame\\bg_pmove.cpp", 1878, 0, "%s", "ps");
-    for (i = 0; i < 0x1A; ++i)
+    iassert(pm);
+
+    playerState_s* ps = pm->ps; // [esp+18h] [ebp-10h]
+    iassert(ps);
+
+    for (uint32_t i = 0; i < 0x1A; ++i) // [esp+14h] [ebp-14h]
     {
         Vec3Add(ps->origin, CorrectSolidDeltas[i], point);
         PM_playerTrace(pm, trace, point, pm->mins, pm->maxs, point, ps->clientNum, pm->tracemask);
@@ -2890,6 +2988,7 @@ int32_t __cdecl PM_CorrectAllSolid(pmove_t *pm, pml_t *pml, trace_t *trace)
             return 1;
         }
     }
+
     ps->groundEntityNum = ENTITYNUM_NONE;
     pml->groundPlane = 0;
     pml->almostGroundPlane = 0;
@@ -2976,23 +3075,23 @@ double __cdecl PM_GetViewHeightLerp(const pmove_t *pm, int32_t iFromHeight, int3
 
 bool __cdecl PM_IsPlayerFrozenByWeapon(const playerState_s *ps)
 {
-    return ps->weaponstate == 5 && ps->weapon && BG_GetWeaponDef(ps->weapon)->freezeMovementWhenFiring != 0;
+    return ps->weaponstate == WEAPON_FIRING && ps->weapon && BG_GetWeaponDef(ps->weapon)->freezeMovementWhenFiring != 0;
 }
 
 void __cdecl PM_CheckDuck(pmove_t *pm, pml_t *pml)
 {
     double v2; // st7
     float delta; // [esp+18h] [ebp-58h]
-    float vPoint[3]; // [esp+1Ch] [ebp-54h] BYREF
-    float vEnd[3]; // [esp+28h] [ebp-48h] BYREF
+    float vPoint[3] = { 0 }; // [esp+1Ch] [ebp-54h] BYREF
+    float vEnd[3] = { 0 }; // [esp+28h] [ebp-48h] BYREF
     int32_t iStance; // [esp+34h] [ebp-3Ch]
     int32_t bWasProne; // [esp+38h] [ebp-38h]
     int32_t bWasStanding; // [esp+3Ch] [ebp-34h]
     trace_t trace; // [esp+40h] [ebp-30h] BYREF
-    playerState_s *ps; // [esp+6Ch] [ebp-4h]
+     
 
     iassert(pm);
-    ps = pm->ps;
+    playerState_s* ps = pm->ps; // [esp+6Ch] [ebp-4h]
     iassert(ps);
 
 #ifdef KISAK_MP
@@ -3362,13 +3461,12 @@ void __cdecl PM_ViewHeightAdjust(pmove_t *pm, pml_t *pml)
     float fNewPosOfs; // [esp+0h] [ebp-10h] BYREF
     int32_t iLerpFrac; // [esp+4h] [ebp-Ch]
     int32_t iLerpTime; // [esp+8h] [ebp-8h]
-    playerState_s *ps; // [esp+Ch] [ebp-4h]
+     
 
-    if (!pm)
-        MyAssertHandler(".\\bgame\\bg_pmove.cpp", 2249, 0, "%s", "pm");
-    ps = pm->ps;
-    if (!ps)
-        MyAssertHandler(".\\bgame\\bg_pmove.cpp", 2252, 0, "%s", "ps");
+    iassert(pm);
+    playerState_s* ps = pm->ps; // [esp+Ch] [ebp-4h]
+    iassert(ps);
+
     if (ps->viewHeightTarget && ps->viewHeightCurrent != 0.0)
     {
         if (ps->viewHeightCurrent != (double)ps->viewHeightTarget || ps->viewHeightLerpTime)
@@ -3555,8 +3653,8 @@ double __cdecl PM_ViewHeightTableLerp(int32_t iFrac, viewLerpWaypoint_s *pTable,
 
     if (iFrac)
     {
-        if (iFrac >= 100)
-            MyAssertHandler(".\\bgame\\bg_pmove.cpp", 2152, 0, "%s", "iFrac < 100");
+        iassert(iFrac < 100);
+
         pCurr = pTable + 1;
         i = 1;
         do
@@ -3596,9 +3694,9 @@ double __cdecl PM_ViewHeightTableLerp(int32_t iFrac, viewLerpWaypoint_s *pTable,
 void __cdecl PM_Footsteps(pmove_t *pm, pml_t *pml)
 {
     scriptAnimMoveTypes_t StanceIdleAnim; // eax
-    int32_t v3; // ecx
+    //int32_t sprinting; // ecx
     bool Footsteps; // eax
-    bool v5; // [esp+10h] [ebp-30h]
+    //bool walking; // [esp+10h] [ebp-30h]
     scriptAnimMoveTypes_t moveAnim; // [esp+18h] [ebp-28h]
     float fMaxSpeed; // [esp+1Ch] [ebp-24h]
     int32_t iStance; // [esp+20h] [ebp-20h]
@@ -3631,12 +3729,13 @@ void __cdecl PM_Footsteps(pmove_t *pm, pml_t *pml)
             iStance = PM_GetEffectiveStance(ps);
             if (ps->groundEntityNum != ENTITYNUM_NONE || ps->pm_type == PM_NORMAL_LINKED)
             {
-                v5 = (ps->pm_flags & PMF_WALKING) != 0 || ps->leanf != 0.0;
-                walking = v5;
-                v3 = ps->pm_flags & PMF_SPRINTING;
-                sprinting = v3 != 0;
-                if (v3 && v5)
-                    MyAssertHandler(".\\bgame\\bg_pmove.cpp", 3569, 0, "%s", "!sprinting || !walking");
+                walking = (ps->pm_flags & PMF_WALKING) != 0 || ps->leanf != 0.0;
+                walking = walking;
+                sprinting = ps->pm_flags & PMF_SPRINTING;
+                sprinting = sprinting != 0;
+
+                iassert(!sprinting || !walking);
+
                 if (player_moveThreshhold->current.value > (double)pm->xyspeed || ps->pm_type == PM_NORMAL_LINKED)
                 {
                     PM_Footsteps_NotMoving(pm, iStance);
@@ -3667,13 +3766,7 @@ void __cdecl PM_Footsteps(pmove_t *pm, pml_t *pml)
             else
             {
                 PM_Footstep_LadderMove(pm, pml);
-                if (iStance != (ps->pm_flags & (PMF_PRONE | PMF_DUCKED)))
-                    MyAssertHandler(
-                        ".\\bgame\\bg_pmove.cpp",
-                        3562,
-                        0,
-                        "%s",
-                        "iStance == (ps->pm_flags & (PMF_DUCKED | PMF_PRONE))");
+                iassert(iStance == (ps->pm_flags & (PMF_PRONE | PMF_DUCKED)));
             }
         }
     }
@@ -3681,8 +3774,8 @@ void __cdecl PM_Footsteps(pmove_t *pm, pml_t *pml)
 
 int32_t __cdecl PM_GetStanceEx(int32_t stance, int32_t backward)
 {
-    if (stance >= 3)
-        MyAssertHandler(".\\bgame\\bg_pmove.cpp", 388, 0, "%s", "stance < PM_STANCE_BACKWARD_FIRST");
+    iassert(stance < PM_STANCE_BACKWARD_FIRST);
+
     if (backward)
         return stance + 3;
     else
@@ -3751,8 +3844,8 @@ void __cdecl PM_Footsteps_NotMoving(pmove_t *pm, int32_t stance)
         animResult = BG_AnimScriptAnimation(ps, AISTATE_COMBAT, anim, 0);
         if (animResult > 0 && !ci->turnAnimEndTime)
         {
-            if (ps->legsAnimDuration <= 0)
-                MyAssertHandler(".\\bgame\\bg_pmove.cpp", 3278, 0, "%s", "ps->legsAnimDuration > 0");
+            iassert(ps->legsAnimDuration > 0);
+
             ci->turnAnimEndTime = ps->legsAnimDuration + bgs->time;
             if (xanim_debug->current.enabled)
                 Com_Printf(17, "[%i] turn anim should end at %i\n", bgs->time, ps->legsAnimDuration + bgs->time);
@@ -3788,14 +3881,8 @@ void __cdecl PM_Footsteps_NotMoving(pmove_t *pm, int32_t stance)
 
 uint32_t __cdecl PM_GetFlinchAnim(uint32_t flinchAnimDir)
 {
-    if (flinchAnimDir >= 4)
-        MyAssertHandler(
-            ".\\bgame\\bg_pmove.cpp",
-            3100,
-            0,
-            "%s\n\t(flinchAnimDir) = %i",
-            "(flinchAnimDir >= 0 && flinchAnimDir <= 3)",
-            flinchAnimDir);
+    iassert(flinchAnimDir <= 3);
+
     return flinchAnimDir + 32;
 }
 
@@ -3870,10 +3957,10 @@ double __cdecl PM_GetMaxSpeed(pmove_t *pm, int32_t walking, int32_t sprinting)
     float fMaxSpeeda; // [esp+0h] [ebp-8h]
     WeaponDef *weapon; // [esp+4h] [ebp-4h]
 
-    if (!pm)
-        MyAssertHandler(".\\bgame\\bg_pmove.cpp", 3321, 0, "%s", "pm");
-    if (!pm->ps)
-        MyAssertHandler(".\\bgame\\bg_pmove.cpp", 3322, 0, "%s", "pm->ps");
+    iassert(pm);
+
+    iassert(pm->ps);
+
     fMaxSpeed = (float)pm->ps->speed;
     if (pm->cmd.forwardmove)
     {
@@ -3935,8 +4022,10 @@ int32_t __cdecl PM_GetStanceIdleAnim(char stanceFlag)
 {
     if ((stanceFlag & 1) != 0)
         return 3;
+
     if ((stanceFlag & 2) != 0)
         return 2;
+
     return 1;
 }
 
@@ -3947,11 +4036,15 @@ int32_t __cdecl PM_GetMoveAnim(playerState_s *ps, PmStanceFrontBack stance, int3
     int32_t stumble_end_time; // [esp+4h] [ebp-8h]
 
     stumble_end_time = ps->damageDuration - player_dmgtimer_stumbleTime->current.integer;
+    
     if (stumble_end_time < 0)
         stumble_end_time = 0;
+
     moveAnim = moveAnimTable[stance][walking][ps->damageTimer > stumble_end_time];
+
     if (stance == PM_STANCE_STAND && sprinting)
         return ps->damageTimer > stumble_end_time ? 42 : 20;
+
     return moveAnim;
 }
 
@@ -3963,6 +4056,7 @@ void __cdecl PM_SetStrafeCondition(pmove_t *pm)
     moveVec[0] = (float)pm->cmd.rightmove;
     moveVec[1] = (float)pm->cmd.forwardmove;
     Vec2Normalize(moveVec);
+
     if (player_strafeAnimCosAngle->current.value >= (double)moveVec[1]
         && moveVec[1] >= -player_strafeAnimCosAngle->current.value)
     {
@@ -3975,18 +4069,19 @@ void __cdecl PM_SetStrafeCondition(pmove_t *pm)
     {
         strafeState = ANIM_STRAFE_NOT;
     }
+
     BG_SetConditionValue(pm->ps->clientNum, 8u, strafeState);
 }
 
 void __cdecl PM_Footstep_NotTryingToMove(pmove_t *pm)
 {
     int32_t animResult; // [esp+0h] [ebp-8h]
-    playerState_s *ps; // [esp+4h] [ebp-4h]
+     
 
     animResult = -1;
-    ps = pm->ps;
-    if (!pm->ps)
-        MyAssertHandler(".\\bgame\\bg_pmove.cpp", 3487, 0, "%s", "ps");
+    playerState_s* ps = pm->ps; // [esp+4h] [ebp-4h]
+    iassert(ps);
+
     if (pm->xyspeed <= 120.0)
     {
         if (ps->viewHeightTarget == 11)
@@ -4018,24 +4113,22 @@ void __cdecl PM_FoliageSounds(pmove_t *pm)
     playerState_s *ps; // [esp+58h] [ebp-4h]
 
     ps = pm->ps;
-    if (!ps)
-        MyAssertHandler(".\\bgame\\bg_pmove.cpp", 3645, 0, "%s", "ps");
+    iassert(ps);
+
     if (bg_foliagesnd_minspeed->current.value <= (double)pm->xyspeed)
     {
-        if (bg_foliagesnd_maxspeed->current.value - bg_foliagesnd_minspeed->current.value <= 0.0)
-            MyAssertHandler(
-                ".\\bgame\\bg_pmove.cpp",
-                3655,
-                1,
-                "%s",
-                "bg_foliagesnd_maxspeed->current.value - bg_foliagesnd_minspeed->current.value > 0");
+        iassert(bg_foliagesnd_maxspeed->current.value - bg_foliagesnd_minspeed->current.value > 0.0);
+
         speedFrac = (pm->xyspeed - bg_foliagesnd_minspeed->current.value)
             / (bg_foliagesnd_maxspeed->current.value - bg_foliagesnd_minspeed->current.value);
+        
         if (speedFrac > 1.0)
             speedFrac = 1.0;
+
         interval = (int)((double)(bg_foliagesnd_fastinterval->current.integer - bg_foliagesnd_slowinterval->current.integer)
             * speedFrac
             + (double)bg_foliagesnd_slowinterval->current.integer);
+
         if (interval + ps->foliageSoundTime < pm->cmd.serverTime)
         {
             Vec3Scale(pm->mins, 0.75, mins);
@@ -4082,8 +4175,8 @@ void __cdecl PM_DropTimers(playerState_s *ps, pml_t *pml)
         }
     }
 #elif KISAK_MP
-    if (!ps)
-        MyAssertHandler(".\\bgame\\bg_pmove.cpp", 3686, 0, "%s", "ps");
+    iassert(ps);
+
     if (ps->pm_time)
     {
         if (pml->msec < ps->pm_time)
@@ -4123,25 +4216,23 @@ void __cdecl PM_DropTimers(playerState_s *ps, pml_t *pml)
 
 void __cdecl PM_UpdatePlayerWalkingFlag(pmove_t *pm)
 {
-    playerState_s *ps; // [esp+0h] [ebp-4h]
+    playerState_s* ps = pm->ps; // [esp+0h] [ebp-4h]
+    iassert(ps);
 
-    ps = pm->ps;
-    if (!pm->ps)
-        MyAssertHandler(".\\bgame\\bg_pmove.cpp", 4379, 0, "%s", "ps");
     ps->pm_flags &= ~PMF_WALKING;
+
     if (ps->pm_type < PM_DEAD
         && (pm->cmd.buttons & 0x800) != 0
         && (ps->pm_flags & PMF_PRONE) == 0
         && (ps->pm_flags & PMF_SIGHT_AIMING) != 0
-        && ps->weaponstate != 7
-        && ps->weaponstate != 9
-        && ps->weaponstate != 11
-        && ps->weaponstate != 10
-        && ps->weaponstate != 8)
+        && ps->weaponstate != WEAPON_RELOADING
+        && ps->weaponstate != WEAPON_RELOAD_START
+        && ps->weaponstate != WEAPON_RELOAD_END
+        && ps->weaponstate != WEAPON_RELOAD_START_INTERUPT
+        && ps->weaponstate != WEAPON_RELOADING_INTERUPT)
     {
         ps->pm_flags |= PMF_WALKING;
-        if ((ps->otherFlags & 4) == 0)
-            MyAssertHandler(".\\bgame\\bg_pmove.cpp", 4404, 0, "%s", "ps->otherFlags & POF_PLAYER");
+        iassert((ps->otherFlags & POF_PLAYER) != 0);
     }
 }
 
@@ -4157,29 +4248,31 @@ void __cdecl PM_ClearLadderFlag(playerState_s *ps)
 void __cdecl PM_CheckLadderMove(pmove_t *pm, pml_t *pml)
 {
     bool v2; // [esp+Ch] [ebp-8Ch]
-    float *vLadderVec; // [esp+14h] [ebp-84h]
-    float vLadderCheckDir[3]; // [esp+30h] [ebp-68h] BYREF
-    float mins[3]; // [esp+3Ch] [ebp-5Ch] BYREF
+    float *vLadderVec = nullptr; // [esp+14h] [ebp-84h]
+    float vLadderCheckDir[3] = { 0 }; // [esp+30h] [ebp-68h] BYREF
+    float mins[3] = { 0 }; // [esp+3Ch] [ebp-5Ch] BYREF
     float tracedist; // [esp+48h] [ebp-50h]
-    float spot[3]; // [esp+4Ch] [ebp-4Ch] BYREF
+    float spot[3] = { 0 }; // [esp+4Ch] [ebp-4Ch] BYREF
     int32_t fellOffLadderInAir; // [esp+58h] [ebp-40h]
-    float maxs[3]; // [esp+5Ch] [ebp-3Ch] BYREF
+    float maxs[3] = { 0 }; // [esp+5Ch] [ebp-3Ch] BYREF
     trace_t trace; // [esp+68h] [ebp-30h] BYREF
-    playerState_s *ps; // [esp+94h] [ebp-4h]
+     
 
-    if (!pm)
-        MyAssertHandler(".\\bgame\\bg_pmove.cpp", 4443, 0, "%s", "pm");
-    ps = pm->ps;
-    if (!ps)
-        MyAssertHandler(".\\bgame\\bg_pmove.cpp", 4446, 0, "%s", "ps");
+    iassert(pm);
+
+    playerState_s* ps = pm->ps; // [esp+94h] [ebp-4h]
+    iassert(ps);
+
     if (pml->walking)
         ps->pm_flags &= ~PMF_LADDER_FALL;
+
     if (!ps->pm_time || (ps->pm_flags & PMF_LADDER) != 0 || (ps->pm_flags & (PMF_TIME_HARDLANDING | PMF_TIME_KNOCKBACK)) == 0)
     {
         if (pml->walking)
             tracedist = 8.0;
         else
             tracedist = 30.0;
+
         v2 = (ps->pm_flags & PMF_LADDER) != 0 && ps->groundEntityNum == ENTITYNUM_NONE;
         fellOffLadderInAir = v2;
         if (v2)
@@ -4195,6 +4288,7 @@ void __cdecl PM_CheckLadderMove(pmove_t *pm, pml_t *pml)
             vLadderCheckDir[2] = 0.0;
             Vec3Normalize(vLadderCheckDir);
         }
+
         if (ps->pm_type < PM_DEAD)
         {
             if ((ps->pm_flags & PMF_LADDER_FALL) != 0 || PM_GetEffectiveStance(ps) == 1 || pm->cmd.serverTime - ps->jumpTime < 300)
@@ -4215,18 +4309,24 @@ void __cdecl PM_CheckLadderMove(pmove_t *pm, pml_t *pml)
                 maxs[1] = maxs[1] - 6.0;
                 if ((float)8.0 > (double)maxs[2])
                     maxs[2] = mins[2];
+
                 if (mins[0] > (double)maxs[0])
                     MyAssertHandler(".\\bgame\\bg_pmove.cpp", 4524, 0, "%s", "maxs[0] >= mins[0]");
+
                 if (mins[1] > (double)maxs[1])
                     MyAssertHandler(".\\bgame\\bg_pmove.cpp", 4525, 0, "%s", "maxs[1] >= mins[1]");
+
                 if (mins[2] > (double)maxs[2])
                     MyAssertHandler(".\\bgame\\bg_pmove.cpp", 4526, 0, "%s", "maxs[2] >= mins[2]");
+
                 Vec3Mad(ps->origin, tracedist, vLadderCheckDir, spot);
                 PM_playerTrace(pm, &trace, ps->origin, mins, maxs, spot, ps->clientNum, pm->tracemask);
                 if (trace.fraction >= 1.0 || (trace.surfaceFlags & 8) == 0 || pml->walking && pm->cmd.forwardmove <= 0)
                     goto LABEL_45;
+
                 if ((ps->pm_flags & PMF_LADDER) != 0)
                     goto LABEL_42;
+
                 vLadderVec = ps->vLadderVec;
                 ps->vLadderVec[0] = trace.normal[0];
                 vLadderVec[1] = trace.normal[1];
@@ -4238,6 +4338,7 @@ void __cdecl PM_CheckLadderMove(pmove_t *pm, pml_t *pml)
                 PM_playerTrace(pm, &trace, ps->origin, mins, maxs, spot, ps->clientNum, pm->tracemask);
                 if (trace.fraction >= 1.0)
                     goto LABEL_45;
+
                 if ((trace.surfaceFlags & 8) != 0)
                 {
                 LABEL_42:
@@ -4291,23 +4392,23 @@ void __cdecl PM_LadderMove(pmove_t *pm, pml_t *pml)
     float *velocity; // [esp+68h] [ebp-68h]
     float v19; // [esp+6Ch] [ebp-64h]
     float *v20; // [esp+70h] [ebp-60h]
-    float wishdir[3]; // [esp+88h] [ebp-48h] BYREF
+    float wishdir[3] = { 0 }; // [esp+88h] [ebp-48h] BYREF
     float fSideSpeed; // [esp+94h] [ebp-3Ch]
-    float wishvel[3]; // [esp+98h] [ebp-38h] BYREF
-    float vTempRight[3]; // [esp+A4h] [ebp-2Ch] BYREF
-    float vSideDir[2]; // [esp+B0h] [ebp-20h] BYREF
+    float wishvel[3] = { 0 }; // [esp+98h] [ebp-38h] BYREF
+    float vTempRight[3] = { 0 }; // [esp+A4h] [ebp-2Ch] BYREF
+    float vSideDir[2] = { 0 }; // [esp+B0h] [ebp-20h] BYREF
     float fSpeedDrop; // [esp+B8h] [ebp-18h]
     float wishspeed; // [esp+BCh] [ebp-14h]
     float upscale; // [esp+C0h] [ebp-10h]
     int32_t moveyaw; // [esp+C4h] [ebp-Ch]
     float scale; // [esp+C8h] [ebp-8h]
-    playerState_s *ps; // [esp+CCh] [ebp-4h]
+     
 
-    if (!pm)
-        MyAssertHandler(".\\bgame\\bg_pmove.cpp", 4582, 0, "%s", "pm");
-    ps = pm->ps;
-    if (!ps)
-        MyAssertHandler(".\\bgame\\bg_pmove.cpp", 4585, 0, "%s", "ps");
+    iassert(pm);
+
+    playerState_s* ps = pm->ps; // [esp+CCh] [ebp-4h]
+    iassert(ps);
+
     if (Jump_Check(pm, pml))
     {
         PM_AirMove(pm, pml);
@@ -4324,6 +4425,7 @@ void __cdecl PM_LadderMove(pmove_t *pm, pml_t *pml)
         {
             upscale = 1.0;
         }
+
         pml->forward[2] = 0.0;
         Vec3Normalize(pml->forward);
         pml->right[2] = 0.0;
@@ -4333,15 +4435,19 @@ void __cdecl PM_LadderMove(pmove_t *pm, pml_t *pml)
         wishvel[0] = 0.0;
         wishvel[1] = 0.0;
         wishvel[2] = 0.0;
+
         if (pm->cmd.forwardmove)
             wishvel[2] = 0.5 * upscale * scale * (double)pm->cmd.forwardmove;
+
         if (pm->cmd.rightmove)
         {
             v7 = scale * 0.2000000029802322 * (double)pm->cmd.rightmove;
             Vec3Mad(wishvel, v7, pml->right, wishvel);
         }
+
         wishspeed = Vec3NormalizeTo(wishvel, wishdir);
         PM_Accelerate(ps, pml, wishdir, wishspeed, 9.0);
+
         if (!pm->cmd.forwardmove)
         {
             if (ps->velocity[2] <= 0.0)
@@ -4357,12 +4463,14 @@ void __cdecl PM_LadderMove(pmove_t *pm, pml_t *pml)
                     ps->velocity[2] = 0.0;
             }
         }
+
         if (!pm->cmd.rightmove)
         {
             vSideDir[0] = pml->right[0];
             vSideDir[1] = pml->right[1];
             Vec2Normalize(vSideDir);
             fSideSpeed = ps->velocity[1] * vSideDir[1] + ps->velocity[0] * vSideDir[0];
+            
             if (fSideSpeed != 0.0)
             {
                 velocity = ps->velocity;
@@ -4382,8 +4490,10 @@ void __cdecl PM_LadderMove(pmove_t *pm, pml_t *pml)
                             v3 = -1.0;
                         else
                             v3 = 1.0;
+
                         fSpeedDrop = v3;
                     }
+
                     fSideSpeed = fSideSpeed - fSpeedDrop;
                     v16 = ps->velocity;
                     v17 = ps->velocity;
@@ -4405,6 +4515,7 @@ void __cdecl PM_LadderMove(pmove_t *pm, pml_t *pml)
             {
                 v11 = ps->velocity[0] * ps->velocity[0] + ps->velocity[1] * ps->velocity[1];
                 v2 = ps->velocity[2] * ps->velocity[2];
+
                 if (v2 >= (double)v11)
                 {
                     fSideSpeed = -50.0;
@@ -4441,17 +4552,17 @@ void __cdecl PM_MeleeChargeUpdate(pmove_t *pm, pml_t *pml)
     float chargeDir[2]; // [esp+24h] [ebp-18h] BYREF
     float chargeVel; // [esp+2Ch] [ebp-10h]
     float chargeTime; // [esp+30h] [ebp-Ch]
-    playerState_s *ps; // [esp+34h] [ebp-8h]
+     
     bool chargeValid; // [esp+3Bh] [ebp-1h]
 
-    if (!pm)
-        MyAssertHandler(".\\bgame\\bg_pmove.cpp", 4760, 0, "%s", "pm");
-    if (!pml)
-        MyAssertHandler(".\\bgame\\bg_pmove.cpp", 4761, 0, "%s", "pml");
-    ps = pm->ps;
-    if (!ps)
-        MyAssertHandler(".\\bgame\\bg_pmove.cpp", 4764, 0, "%s", "ps");
+    iassert(pm);
+    iassert(pml);
+
+    playerState_s* ps = pm->ps; // [esp+34h] [ebp-8h]
+    iassert(ps);
+
     chargeValid = (ps->pm_flags & PMF_MELEE_CHARGE) != 0;
+
     v5 = chargeValid && !ps->pm_type;
     chargeValid = v5;
     v4 = v5 && (ps->eFlags & 0x300) == 0;
@@ -4462,8 +4573,8 @@ void __cdecl PM_MeleeChargeUpdate(pmove_t *pm, pml_t *pml)
     {
         if (!ps->meleeChargeTime)
         {
-            if (player_meleeChargeFriction->current.value <= 0.0)
-                MyAssertHandler(".\\bgame\\bg_pmove.cpp", 4784, 0, "%s", "player_meleeChargeFriction->current.value > 0.0f");
+            iassert(player_meleeChargeFriction->current.value > 0.0);
+
             YawVectors2D(ps->meleeChargeYaw, chargeDir, 0);
             v7 = player_meleeChargeFriction->current.value * ((double)ps->meleeChargeDist + (double)ps->meleeChargeDist);
             v2 = sqrt(v7);
@@ -4474,7 +4585,9 @@ void __cdecl PM_MeleeChargeUpdate(pmove_t *pm, pml_t *pml)
             chargeTime = chargeVel / player_meleeChargeFriction->current.value * 1000.0;
             ps->meleeChargeTime = (int)chargeTime;
         }
+
         ps->meleeChargeTime -= pml->msec;
+
         if (ps->meleeChargeTime <= 0)
             PM_MeleeChargeClear(ps);
     }
@@ -4486,13 +4599,12 @@ void __cdecl PM_MeleeChargeUpdate(pmove_t *pm, pml_t *pml)
 
 void __cdecl TurretNVGTrigger(pmove_t *pm)
 {
-    playerState_s *ps; // [esp+8h] [ebp-4h]
+     
 
-    if (!pm)
-        MyAssertHandler(".\\bgame\\bg_pmove.cpp", 4805, 0, "%s", "pm");
-    ps = pm->ps;
-    if (!pm->ps)
-        MyAssertHandler(".\\bgame\\bg_pmove.cpp", 4807, 0, "%s", "ps");
+    iassert(pm);
+    playerState_s* ps = pm->ps; // [esp+8h] [ebp-4h]
+    iassert(ps);
+
     if ((pm->oldcmd.buttons & 0x40000) == 0 && (pm->cmd.buttons & 0x40000) != 0)
     {
         if ((ps->weapFlags & 0x40) != 0)
@@ -4512,19 +4624,20 @@ float __cdecl BG_GetSpeed(const playerState_s *ps, int32_t time)
 {
     if ((ps->pm_flags & PMF_LADDER) == 0)
         return Vec2Length(ps->velocity);
+
     if (time - ps->jumpTime >= 500)
         return ps->velocity[2];
+
     return 0.0f;
 }
 
 // LWSS: might not be right file for this function
 void __cdecl BG_Player_DoControllers(const CEntPlayerInfo *player, const DObj_s *obj, int32_t *partBits)
 {
-    clientControllers_t *control; // [esp+0h] [ebp-8h]
-    int32_t i; // [esp+4h] [ebp-4h]
+    clientControllers_t* control = player->control; // [esp+0h] [ebp-8h]
 
-    control = player->control;
-    for (i = 0; i < 6; ++i)
+    for (int32_t i = 0; i < 6; ++i) // [esp+4h] [ebp-4h]
         DObjSetControlTagAngles((DObj_s *)obj, partBits, player->tag[i], control->angles[i]);
+
     DObjSetLocalTag((DObj_s *)obj, partBits, 0, control->tag_origin_offset, control->tag_origin_angles);
 }

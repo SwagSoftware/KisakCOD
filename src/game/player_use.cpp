@@ -583,38 +583,24 @@ int __cdecl Player_GetItemCursorHint(const gclient_s *client, const gentity_s *t
 
 void __cdecl Player_SetTurretDropHint(gentity_s *ent)
 {
-    gclient_s *client; // r28
-    gentity_s *v3; // r29
+    iassert(ent);
+    iassert(ent->client);
+    iassert(ent->active);
 
-    if (!ent)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\player_use.cpp", 543, 0, "%s", "ent");
-    if (!ent->client)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\player_use.cpp", 544, 0, "%s", "ent->client");
-    if (!ent->active)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\player_use.cpp", 545, 0, "%s", "ent->active");
-    client = ent->client;
-    if ((client->ps.eFlags & 0x300) == 0)
-        MyAssertHandler(
-            "c:\\trees\\cod3\\cod3src\\src\\game\\player_use.cpp",
-            549,
-            0,
-            "%s",
-            "ps->eFlags & EF_TURRET_ACTIVE");
-    if (client->ps.viewlocked_entNum == ENTITYNUM_NONE)
-        MyAssertHandler(
-            "c:\\trees\\cod3\\cod3src\\src\\game\\player_use.cpp",
-            550,
-            0,
-            "%s",
-            "ps->viewlocked_entNum != ENTITYNUM_NONE");
-    v3 = &level.gentities[client->ps.viewlocked_entNum];
-    if (v3->s.eType != 10)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\player_use.cpp", 553, 0, "%s", "turret->s.eType == ET_MG42");
-    if (*BG_GetWeaponDef(v3->s.weapon)->dropHintString)
+    gclient_s* client = ent->client;
+
+    iassert((client->ps.eFlags & EF_TURRET_ACTIVE) != 0);
+    iassert(client->ps.viewlocked_entNum != ENTITYNUM_NONE);
+
+    gentity_s* turret = &level.gentities[client->ps.viewlocked_entNum];
+
+    iassert(turret->s.eType == ET_MG42);
+
+    if (*BG_GetWeaponDef(turret->s.weapon)->dropHintString)
     {
         client->ps.cursorHintEntIndex = ENTITYNUM_NONE;
-        client->ps.cursorHint = v3->s.weapon + 4;
-        client->ps.cursorHintString = BG_GetWeaponDef(v3->s.weapon)->dropHintStringIndex;
+        client->ps.cursorHint = turret->s.weapon + 4;
+        client->ps.cursorHintString = BG_GetWeaponDef(turret->s.weapon)->dropHintStringIndex;
     }
 }
 
@@ -631,7 +617,7 @@ void __cdecl Player_UpdateCursorHints(gentity_s *ent)
     int v10; // r27
     int v11; // r24
     useList_t *v12; // r28
-    gentity_s *v13; // r31
+    gentity_s *traceEnt; // r31
     unsigned int weapon; // r3
     int ItemCursorHint; // r3
     int classname; // r11
@@ -640,8 +626,8 @@ void __cdecl Player_UpdateCursorHints(gentity_s *ent)
     int v19; // r8
     useList_t v20[142]; // [sp+50h] [-4470h] BYREF
 
-    if (!ent->client)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\player_use.cpp", 579, 0, "%s", "ent->client");
+    iassert(ent->client);
+
     client = ent->client;
     v3 = 0;
     scale = -1;
@@ -649,8 +635,10 @@ void __cdecl Player_UpdateCursorHints(gentity_s *ent)
     client->ps.cursorHint = 0;
     client->ps.cursorHintString = -1;
     client->ps.cursorHintEntIndex = ENTITYNUM_NONE;
+
     if (!BG_ThrowingBackGrenade(&client->ps))
         client->ps.throwBackGrenadeTimeLeft = 0;
+
     if (!g_reloading->current.integer && ent->health > 0)
     {
         G_UpdateFriendlyOverlay(ent);
@@ -680,42 +668,36 @@ void __cdecl Player_UpdateCursorHints(gentity_s *ent)
                                 v12 = v20;
                                 while (2)
                                 {
-                                    v13 = v12->ent;
-                                    if (!v12->ent)
-                                        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\player_use.cpp", 635, 0, "%s", "traceEnt");
-                                    if (!v13->r.inuse)
-                                        MyAssertHandler(
-                                            "c:\\trees\\cod3\\cod3src\\src\\game\\player_use.cpp",
-                                            636,
-                                            0,
-                                            "%s",
-                                            "traceEnt->r.inuse");
-                                    switch (v13->s.eType)
+                                    traceEnt = v12->ent;
+                                    iassert(traceEnt);
+                                    iassert(traceEnt->r.inuse);
+
+                                    switch (traceEnt->s.eType)
                                     {
                                     case 0u:
-                                        classname = v13->classname;
+                                        classname = traceEnt->classname;
                                         if (classname == scr_const.trigger_use || classname == scr_const.trigger_use_touch)
                                         {
-                                            v11 = *(unsigned int *)v13->s.un2;
+                                            v11 = *(unsigned int *)traceEnt->s.un2;
                                             if (v11)
                                             {
-                                                if (v13->s.un1.scale != 255)
-                                                    scale = v13->s.un1.scale;
+                                                if (traceEnt->s.un1.scale != 255)
+                                                    scale = traceEnt->s.un1.scale;
                                             }
                                         }
                                         goto LABEL_47;
                                     case 2u:
-                                        ItemCursorHint = Player_GetItemCursorHint(ent->client, v13);
+                                        ItemCursorHint = Player_GetItemCursorHint(ent->client, traceEnt);
                                         if (!ItemCursorHint)
                                             goto LABEL_30;
                                         v11 = ItemCursorHint;
                                         goto LABEL_47;
                                     case 3u:
-                                        if (!Actor_Grenade_InActorHands(v13))
+                                        if (!Actor_Grenade_InActorHands(traceEnt))
                                         {
-                                            v17 = v13->s.index.item;
-                                            v18 = v13->nextthink == level.time;
-                                            client->ps.throwBackGrenadeTimeLeft = v13->nextthink - level.time;
+                                            v17 = traceEnt->s.index.item;
+                                            v18 = traceEnt->nextthink == level.time;
+                                            client->ps.throwBackGrenadeTimeLeft = traceEnt->nextthink - level.time;
                                             v11 = v17 - (v17 >> 7 << 7) + 4;
                                             if (v18)
                                                 MyAssertHandler(
@@ -727,22 +709,22 @@ void __cdecl Player_UpdateCursorHints(gentity_s *ent)
                                         }
                                         goto LABEL_47;
                                     case 0xAu:
-                                        if (!G_IsTurretUsable(v13, ent))
+                                        if (!G_IsTurretUsable(traceEnt, ent))
                                             goto LABEL_30;
-                                        weapon = v13->s.weapon;
+                                        weapon = traceEnt->s.weapon;
                                         v11 = weapon + 4;
                                         goto LABEL_45;
                                     case 0xBu:
-                                        if (!G_IsVehicleUsable(v13, ent))
+                                        if (!G_IsVehicleUsable(traceEnt, ent))
                                             goto LABEL_30;
-                                        weapon = v13->s.weapon;
+                                        weapon = traceEnt->s.weapon;
                                         v11 = 1;
                                     LABEL_45:
                                         if (*BG_GetWeaponDef(weapon)->szUseHintString)
-                                            scale = BG_GetWeaponDef(v13->s.weapon)->iUseHintStringIndex;
+                                            scale = BG_GetWeaponDef(traceEnt->s.weapon)->iUseHintStringIndex;
                                     LABEL_47:
-                                        client->ps.cursorHintEntIndex = v13->s.number;
-                                        v13->flags |= FL_CURSOR_HINT;
+                                        client->ps.cursorHintEntIndex = traceEnt->s.number;
+                                        traceEnt->flags |= FL_CURSOR_HINT;
                                         client->ps.cursorHint = v11;
                                         client->ps.cursorHintString = scale;
                                         if (!v11)
@@ -759,16 +741,10 @@ void __cdecl Player_UpdateCursorHints(gentity_s *ent)
                                                 v19);
                                         return;
                                     case 0xEu:
-                                        if (!v13->actor)
-                                            MyAssertHandler(
-                                                "c:\\trees\\cod3\\cod3src\\src\\game\\player_use.cpp",
-                                                641,
-                                                0,
-                                                "%s",
-                                                "traceEnt->actor");
+                                        iassert(traceEnt->actor);
                                         v11 = 1;
-                                        if (v13->actor->iUseHintString >= 0)
-                                            scale = v13->actor->iUseHintString;
+                                        if (traceEnt->actor->iUseHintString >= 0)
+                                            scale = traceEnt->actor->iUseHintString;
                                         goto LABEL_47;
                                     default:
                                     LABEL_30:
@@ -804,14 +780,15 @@ gentity_s *__cdecl Player_UpdateLookAtEntityTrace(
     double v19; // fp13
     float v20[24]; // [sp+50h] [-60h] BYREF
 
-    if (!trace)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\player_use.cpp", 726, 0, "%s", "trace");
-    if (!priorityMap)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\player_use.cpp", 727, 0, "%s", "priorityMap");
+    iassert(trace);
+    iassert(priorityMap);
+
+
     G_LocationalTrace(trace, start, end, entNum, contentMask, priorityMap);
     EntityHitId = Trace_GetEntityHitId(trace);
     if (EntityHitId >= 0x87E)
-        return 0;
+        return nullptr;
+
     v16 = forward[2];
     v17 = (float)(trace->fraction * (float)15000.0);
     v18 = start[2];
@@ -819,8 +796,9 @@ gentity_s *__cdecl Player_UpdateLookAtEntityTrace(
     v20[0] = (float)(*forward * (float)(trace->fraction * (float)15000.0)) + *start;
     v20[1] = v19;
     v20[2] = (float)((float)v16 * (float)v17) + (float)v18;
+
     if (SV_FX_GetVisibility(start, v20) < 0.000099999997)
-        return 0;
+        return nullptr;
     else
         return &g_entities[EntityHitId];
 }
@@ -1031,10 +1009,9 @@ void __cdecl Player_UpdateLookAtEntity(gentity_s *ent)
     gclient_s *client; // r21
     unsigned int weapon; // r3
     WeaponDef *weapDef; // r3
-    WeaponDef *v5; // r23
     unsigned __int8 *prioMap; // r27
     int number; // r6
-    gentity_s *updated; // r31
+    gentity_s *traceEnt; // r31
     gclient_s *v12; // r11
     double value; // fp1
     double v14; // fp30
@@ -1066,14 +1043,11 @@ void __cdecl Player_UpdateLookAtEntity(gentity_s *ent)
     float traceEnd[3]; // [sp+78h] [-C8h] BYREF
     trace_t traceresult; // [sp+90h] [-B0h] BYREF
 
-    if (!ent)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\player_use.cpp", 946, 0, "%s", "ent");
-    if (!ent->client)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\player_use.cpp", 947, 0, "%s", "ent->client");
-    if (!g_friendlyNameDist)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\player_use.cpp", 948, 0, "%s", "g_friendlyNameDist");
-    if (!g_friendlyfireDist)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\player_use.cpp", 949, 0, "%s", "g_friendlyfireDist");
+    iassert(ent);
+    iassert(ent->client);
+    iassert(g_friendlyNameDist);
+    iassert(g_friendlyfireDist);
+
     client = ent->client;
     client->ps.weapFlags &= 0xFFFFFDE7;
     ent->client->pLookatEnt.setEnt(NULL);
@@ -1081,13 +1055,7 @@ void __cdecl Player_UpdateLookAtEntity(gentity_s *ent)
     G_GetPlayerViewDirection(ent, forward, 0, 0);
     if ((client->ps.eFlags & 0x20300) != 0)
     {
-        if (client->ps.viewlocked_entNum == ENTITYNUM_NONE)
-            MyAssertHandler(
-                "c:\\trees\\cod3\\cod3src\\src\\game\\player_use.cpp",
-                963,
-                0,
-                "%s",
-                "ps->viewlocked_entNum != ENTITYNUM_NONE");
+        iassert(client->ps.viewlocked_entNum != ENTITYNUM_NONE);
         weapon = g_entities[client->ps.viewlocked_entNum].s.weapon;
     }
     else
@@ -1095,7 +1063,6 @@ void __cdecl Player_UpdateLookAtEntity(gentity_s *ent)
         weapon = ent->client->ps.weapon;
     }
     weapDef = BG_GetWeaponDef(weapon);
-    v5 = weapDef;
     if (ent->client->ps.weapon && weapDef->bRifleBullet)
         prioMap = riflePriorityMap;
     else
@@ -1107,7 +1074,7 @@ void __cdecl Player_UpdateLookAtEntity(gentity_s *ent)
     traceEnd[0] = (float)(forward[0] * (float)15000.0) + start[0];
     traceEnd[1] = (float)(forward[1] * (float)15000.0) + start[1];
     traceEnd[2] = (float)(forward[2] * (float)15000.0) + start[2];
-    updated = Player_UpdateLookAtEntityTrace(&traceresult, start, traceEnd, number, 578873345, prioMap, forward);
+    traceEnt = Player_UpdateLookAtEntityTrace(&traceresult, start, traceEnd, number, 578873345, prioMap, forward);
     if ((unsigned __int8)Player_CheckAlmostStationary(ent, forward))
     {
         // aislop
@@ -1127,26 +1094,26 @@ void __cdecl Player_UpdateLookAtEntity(gentity_s *ent)
             Player_BlockFriendliesInADS(ent, value, start, forward);
     }
     Player_GrenadeThrowBlockFriendlies(ent, ai_playerLOSRange->current.value, start, forward);
-    if (updated)
+    if (traceEnt)
     {
-        if (updated->classname != scr_const.trigger_lookat
-            || (ent->client->pLookatEnt.setEnt(updated),
-                G_Trigger(updated, ent),
-                (updated = Player_UpdateLookAtEntityTrace(&traceresult, start, traceEnd, ent->s.number, 42002433, prioMap, forward)) != 0))
+        if (traceEnt->classname != scr_const.trigger_lookat
+            || (ent->client->pLookatEnt.setEnt(traceEnt),
+                G_Trigger(traceEnt, ent),
+                (traceEnt = Player_UpdateLookAtEntityTrace(&traceresult, start, traceEnd, ent->s.number, 42002433, prioMap, forward)) != 0))
         {
-            if ((updated->r.contents & 0x4000) != 0)
+            if ((traceEnt->r.contents & 0x4000) != 0)
             {
                 if ((traceresult.surfaceFlags & 0x10) == 0)
                 {
-                    if (!updated->sentient)
-                        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\player_use.cpp", 1018, 0, "%s", "traceEnt->sentient");
-                    v14 = (float)(updated->r.currentOrigin[0] - start[0]);
-                    v15 = (float)(updated->r.currentOrigin[1] - start[1]);
-                    v16 = (float)(updated->r.currentOrigin[2] - start[2]);
-                    if (((1 << updated->sentient->eTeam) & ~(1 << Sentient_EnemyTeam(ent->sentient->eTeam))) != 0)
+                    iassert(traceEnt->sentient);
+
+                    v14 = (float)(traceEnt->r.currentOrigin[0] - start[0]);
+                    v15 = (float)(traceEnt->r.currentOrigin[1] - start[1]);
+                    v16 = (float)(traceEnt->r.currentOrigin[2] - start[2]);
+                    if (((1 << traceEnt->sentient->eTeam) & ~(1 << Sentient_EnemyTeam(ent->sentient->eTeam))) != 0)
                     {
                         v17 = g_friendlyNameDist;
-                        if (g_friendlyNameDist->current.value > 15000.0)
+                        if (g_friendlyNameDist->current.value > MAX_FRIENDLY_DIST)
                         {
                             MyAssertHandler(
                                 "c:\\trees\\cod3\\cod3src\\src\\game\\player_use.cpp",
@@ -1161,10 +1128,10 @@ void __cdecl Player_UpdateLookAtEntity(gentity_s *ent)
                         if (v18 < (float)(v17->current.value * v17->current.value)
                             && !ent->client->pLookatEnt.isDefined())
                         {
-                            ent->client->pLookatEnt.setEnt(updated);
+                            ent->client->pLookatEnt.setEnt(traceEnt);
                         }
                         v19 = g_friendlyfireDist;
-                        if (g_friendlyfireDist->current.value > 15000.0)
+                        if (g_friendlyfireDist->current.value > MAX_FRIENDLY_DIST)
                         {
                             MyAssertHandler(
                                 "c:\\trees\\cod3\\cod3src\\src\\game\\player_use.cpp",
@@ -1178,7 +1145,7 @@ void __cdecl Player_UpdateLookAtEntity(gentity_s *ent)
                         {
                             v20 = client->ps.weapFlags | 8;
                             client->ps.weapFlags = v20;
-                            actor = updated->actor;
+                            actor = traceEnt->actor;
                             if (actor)
                             {
                                 if (actor->bDontAvoidPlayer || (actor->Physics.iTraceMask & 0x2000000) == 0)
@@ -1188,7 +1155,7 @@ void __cdecl Player_UpdateLookAtEntity(gentity_s *ent)
                     }
                     else
                     {
-                        if (v5->enemyCrosshairRange > 15000.0)
+                        if (weapDef->enemyCrosshairRange > MAX_FRIENDLY_DIST)
                             MyAssertHandler(
                                 "c:\\trees\\cod3\\cod3src\\src\\game\\player_use.cpp",
                                 1039,
@@ -1196,27 +1163,27 @@ void __cdecl Player_UpdateLookAtEntity(gentity_s *ent)
                                 "%s",
                                 "weapDef->enemyCrosshairRange <= MAX_FRIENDLY_DIST");
                         if ((float)((float)((float)v14 * (float)v14)
-                            + (float)((float)((float)v16 * (float)v16) + (float)((float)v15 * (float)v15))) < (double)(float)(v5->enemyCrosshairRange * v5->enemyCrosshairRange))
+                            + (float)((float)((float)v16 * (float)v16) + (float)((float)v15 * (float)v15))) < (double)(float)(weapDef->enemyCrosshairRange * weapDef->enemyCrosshairRange))
                         {
                             if (!ent->client->pLookatEnt.isDefined())
-                                ent->client->pLookatEnt.setEnt(updated);
+                                ent->client->pLookatEnt.setEnt(traceEnt);
                             client->ps.weapFlags |= 0x10u;
                         }
                     }
                 }
                 return;
             }
-            if (updated->s.eType != 11 || ent->client->pLookatEnt.isDefined())
+            if (traceEnt->s.eType != 11 || ent->client->pLookatEnt.isDefined())
             {
-                if (updated->lookAtText0 && !ent->client->pLookatEnt.isDefined())
+                if (traceEnt->lookAtText0 && !ent->client->pLookatEnt.isDefined())
                 {
                     v29 = g_friendlyNameDist;
-                    v30 = (float)((float)((float)(updated->r.currentOrigin[0] - start[0]) * (float)(updated->r.currentOrigin[0] - start[0]))
-                        + (float)((float)((float)(updated->r.currentOrigin[2] - start[2])
-                            * (float)(updated->r.currentOrigin[2] - start[2]))
-                            + (float)((float)(updated->r.currentOrigin[1] - start[1])
-                                * (float)(updated->r.currentOrigin[1] - start[1]))));
-                    if (g_friendlyNameDist->current.value > 15000.0)
+                    v30 = (float)((float)((float)(traceEnt->r.currentOrigin[0] - start[0]) * (float)(traceEnt->r.currentOrigin[0] - start[0]))
+                        + (float)((float)((float)(traceEnt->r.currentOrigin[2] - start[2])
+                            * (float)(traceEnt->r.currentOrigin[2] - start[2]))
+                            + (float)((float)(traceEnt->r.currentOrigin[1] - start[1])
+                                * (float)(traceEnt->r.currentOrigin[1] - start[1]))));
+                    if (g_friendlyNameDist->current.value > MAX_FRIENDLY_DIST)
                     {
                         MyAssertHandler(
                             "c:\\trees\\cod3\\cod3src\\src\\game\\player_use.cpp",
@@ -1227,11 +1194,11 @@ void __cdecl Player_UpdateLookAtEntity(gentity_s *ent)
                         v29 = g_friendlyNameDist;
                     }
                     if (v30 < (float)(v29->current.value * v29->current.value))
-                        ent->client->pLookatEnt.setEnt(updated);
-                    if (updated->s.eType == 5)
+                        ent->client->pLookatEnt.setEnt(traceEnt);
+                    if (traceEnt->s.eType == 5)
                     {
                         v31 = g_friendlyfireDist;
-                        if (g_friendlyfireDist->current.value > 15000.0)
+                        if (g_friendlyfireDist->current.value > MAX_FRIENDLY_DIST)
                         {
                             MyAssertHandler(
                                 "c:\\trees\\cod3\\cod3src\\src\\game\\player_use.cpp",
@@ -1252,13 +1219,13 @@ void __cdecl Player_UpdateLookAtEntity(gentity_s *ent)
             }
             else
             {
-                if (!updated->scr_vehicle)
-                    MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\player_use.cpp", 1054, 0, "%s", "traceEnt->scr_vehicle");
+                iassert(traceEnt->scr_vehicle);
+
                 v22 = g_friendlyNameDist;
-                v23 = (float)(updated->r.currentOrigin[0] - start[0]);
-                v24 = (float)(updated->r.currentOrigin[1] - start[1]);
-                v25 = (float)(updated->r.currentOrigin[2] - start[2]);
-                if (g_friendlyNameDist->current.value > 15000.0)
+                v23 = (float)(traceEnt->r.currentOrigin[0] - start[0]);
+                v24 = (float)(traceEnt->r.currentOrigin[1] - start[1]);
+                v25 = (float)(traceEnt->r.currentOrigin[2] - start[2]);
+                if (g_friendlyNameDist->current.value > MAX_FRIENDLY_DIST)
                 {
                     MyAssertHandler(
                         "c:\\trees\\cod3\\cod3src\\src\\game\\player_use.cpp",
@@ -1271,19 +1238,14 @@ void __cdecl Player_UpdateLookAtEntity(gentity_s *ent)
                 v26 = (float)((float)((float)v23 * (float)v23)
                     + (float)((float)((float)v25 * (float)v25) + (float)((float)v24 * (float)v24)));
                 if (v26 < (float)(v22->current.value * v22->current.value))
-                    ent->client->pLookatEnt.setEnt(updated);
-                if (v5->enemyCrosshairRange > 15000.0)
-                    MyAssertHandler(
-                        "c:\\trees\\cod3\\cod3src\\src\\game\\player_use.cpp",
-                        1061,
-                        0,
-                        "%s",
-                        "weapDef->enemyCrosshairRange <= MAX_FRIENDLY_DIST");
-                if (v26 < (float)(v5->enemyCrosshairRange * v5->enemyCrosshairRange) && (client->ps.eFlags & 0x20000) != 0)
+                    ent->client->pLookatEnt.setEnt(traceEnt);
+                iassert(weapDef->enemyCrosshairRange <= MAX_FRIENDLY_DIST);
+
+                if (v26 < (float)(weapDef->enemyCrosshairRange * weapDef->enemyCrosshairRange) && (client->ps.eFlags & 0x20000) != 0)
                 {
                     v27 = Sentient_EnemyTeam(ent->sentient->eTeam);
                     weapFlags = client->ps.weapFlags;
-                    if (((1 << v27) & (1 << updated->scr_vehicle->team)) != 0)
+                    if (((1 << v27) & (1 << traceEnt->scr_vehicle->team)) != 0)
                     {
                         client->ps.weapFlags = weapFlags | 0x10;
                         return;
