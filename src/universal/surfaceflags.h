@@ -1,11 +1,12 @@
 #pragma once
+#include <cstdint>
 
 struct infoParm_t // sizeof=0x14
 {
     const char *name;
     int clearSolid;
-    int surfaceFlags;
-    int contents;
+    uint32_t surfaceFlags;
+    uint32_t contents;
     int toolFlags;
 };
 

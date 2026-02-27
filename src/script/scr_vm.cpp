@@ -233,6 +233,8 @@ const dvar_s* Scr_VM_Init()
 {
     const dvar_s* result; // eax
 
+    memset(&scrVarPub, 0, sizeof(scrVarPub));
+
     scrVarPub.varUsagePos = "<script init variable>";
     scrVmPub.maxstack = &scrVmPub.stack[2047];
     scrVmPub.top = scrVmPub.stack;
@@ -4229,7 +4231,7 @@ void __cdecl Scr_AddBool(unsigned int value)
 
 void IncInParam()
 {
-    if ((scrVmPub.top < (VariableValue*)&scrVmGlob - 1 || scrVmPub.top >(VariableValue*) & scrVmGlob)
+    /*if ((scrVmPub.top < (VariableValue*)&scrVmGlob - 1 || scrVmPub.top >(VariableValue*) & scrVmGlob)
         && (scrVmPub.top < scrVmPub.stack || scrVmPub.top > scrVmPub.maxstack))
     {
         MyAssertHandler(
@@ -4255,7 +4257,14 @@ void IncInParam()
             "%s",
             "((scrVmPub.top >= scrVmGlob.eval_stack) && (scrVmPub.top <= scrVmGlob.eval_stack + 1)) || ((scrVmPub.top >= scrVmP"
             "ub.stack) && (scrVmPub.top <= scrVmPub.maxstack))");
+    }*/
+    Scr_ClearOutParams();
+    if (scrVmPub.top == scrVmPub.maxstack)
+    {
+        Sys_Error("Internal script stack overflow");
     }
+    ++scrVmPub.inparamcount;
+    ++scrVmPub.top;
 }
 
 void __cdecl Scr_AddInt(int value)
