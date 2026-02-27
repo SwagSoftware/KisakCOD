@@ -22,6 +22,9 @@ struct snd_alias_list_t;
 struct XAnim_s;
 struct XAnimTree_s;
 
+// https://git.alterware.dev/anomaly/iw6-mod/src/commit/45907301eec9233946222ace7969f31cb5d998c6/src/client/game/game.hpp
+constexpr auto JUMP_LAND_SLOWDOWN_TIME = 1800;
+
 enum animBodyPart_t : __int32
 {                                       // ...
     ANIM_BP_UNUSED = 0x0,
@@ -1557,14 +1560,14 @@ struct pml_t;
 
 void __cdecl Jump_RegisterDvars();
 void __cdecl Jump_ClearState(playerState_s *ps);
-char __cdecl Jump_GetStepHeight(playerState_s *ps, const float *origin, float *stepSize);
+bool __cdecl Jump_GetStepHeight(playerState_s *ps, const float *origin, float *stepSize);
 bool __cdecl Jump_IsPlayerAboveMax(playerState_s *ps);
 void __cdecl Jump_ActivateSlowdown(playerState_s *ps);
 void __cdecl Jump_ApplySlowdown(playerState_s *ps);
 double __cdecl Jump_ReduceFriction(playerState_s *ps);
 double __cdecl Jump_GetSlowdownFriction(playerState_s *ps);
 void __cdecl Jump_ClampVelocity(playerState_s *ps, const float *origin);
-char __cdecl Jump_Check(pmove_t *pm, pml_t *pml);
+bool __cdecl Jump_Check(pmove_t *pm, pml_t *pml);
 void __cdecl Jump_Start(pmove_t *pm, pml_t *pml, float height);
 double __cdecl Jump_GetLandFactor(playerState_s *ps);
 void __cdecl Jump_PushOffLadder(playerState_s *ps, pml_t *pml);
