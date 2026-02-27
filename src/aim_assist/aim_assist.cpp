@@ -19,45 +19,45 @@
 //float const *const vec3_origin        82000d80     aim_assist.obj
 //float const *const vec4_origin        82000d8c     aim_assist.obj
 
-AimAssistGlobals aaGlobArray[1];
-GraphFloat aaInputGraph[4];
+AimAssistGlobals aaGlobArray[1] = { 0 };
+GraphFloat aaInputGraph[4] = { 0 };
 
-const dvar_t *aim_input_graph_enabled;
-const dvar_t *aim_input_graph_debug;
-const dvar_t *aim_input_graph_index;
-const dvar_t *aim_turnrate_pitch;
-const dvar_t *aim_turnrate_pitch_ads;
-const dvar_t *aim_turnrate_yaw;
-const dvar_t *aim_turnrate_yaw_ads;
-const dvar_t *aim_accel_turnrate_enabled;
-const dvar_t *aim_accel_turnrate_debug;
-const dvar_t *aim_accel_turnrate_lerp;
-const dvar_t *aim_slowdown_enabled;
-const dvar_t *aim_slowdown_debug;
-const dvar_t *aim_slowdown_region_width;
-const dvar_t *aim_slowdown_region_height;
-const dvar_t *aim_slowdown_pitch_scale;
-const dvar_t *aim_slowdown_pitch_scale_ads;
-const dvar_t *aim_slowdown_yaw_scale;
-const dvar_t *aim_slowdown_yaw_scale_ads;
-const dvar_t *aim_autoaim_enabled;
-const dvar_t *aim_autoaim_debug;
-const dvar_t *aim_autoaim_lerp;
-const dvar_t *aim_autoaim_region_width;
-const dvar_t *aim_autoaim_region_height;
-const dvar_t *aim_automelee_enabled;
-const dvar_t *aim_automelee_debug;
-const dvar_t *aim_automelee_lerp;
-const dvar_t *aim_automelee_region_width;
-const dvar_t *aim_automelee_region_height;
-const dvar_t *aim_automelee_range;
-const dvar_t *aim_lockon_enabled;
-const dvar_t *aim_lockon_debug;
-const dvar_t *aim_lockon_deflection;
-const dvar_t *aim_lockon_strength;
-const dvar_t *aim_lockon_region_width;
-const dvar_t *aim_lockon_region_height;
-const dvar_t *aim_scale_view_axis;
+const dvar_t* aim_input_graph_enabled = nullptr;
+const dvar_t *aim_input_graph_debug = nullptr;
+const dvar_t *aim_input_graph_index = nullptr;
+const dvar_t *aim_turnrate_pitch = nullptr;
+const dvar_t *aim_turnrate_pitch_ads = nullptr;
+const dvar_t *aim_turnrate_yaw = nullptr;
+const dvar_t *aim_turnrate_yaw_ads = nullptr;
+const dvar_t *aim_accel_turnrate_enabled = nullptr;
+const dvar_t *aim_accel_turnrate_debug = nullptr;
+const dvar_t *aim_accel_turnrate_lerp = nullptr;
+const dvar_t *aim_slowdown_enabled = nullptr;
+const dvar_t *aim_slowdown_debug = nullptr;
+const dvar_t *aim_slowdown_region_width = nullptr;
+const dvar_t *aim_slowdown_region_height = nullptr;
+const dvar_t *aim_slowdown_pitch_scale = nullptr;
+const dvar_t *aim_slowdown_pitch_scale_ads = nullptr;
+const dvar_t *aim_slowdown_yaw_scale = nullptr;
+const dvar_t *aim_slowdown_yaw_scale_ads = nullptr;
+const dvar_t *aim_autoaim_enabled = nullptr;
+const dvar_t *aim_autoaim_debug = nullptr;
+const dvar_t *aim_autoaim_lerp = nullptr;
+const dvar_t *aim_autoaim_region_width = nullptr;
+const dvar_t *aim_autoaim_region_height = nullptr;
+const dvar_t *aim_automelee_enabled = nullptr;
+const dvar_t *aim_automelee_debug = nullptr;
+const dvar_t *aim_automelee_lerp = nullptr;
+const dvar_t *aim_automelee_region_width = nullptr;
+const dvar_t *aim_automelee_region_height = nullptr;
+const dvar_t *aim_automelee_range = nullptr;
+const dvar_t *aim_lockon_enabled = nullptr;
+const dvar_t *aim_lockon_debug = nullptr;
+const dvar_t *aim_lockon_deflection = nullptr;
+const dvar_t *aim_lockon_strength = nullptr;
+const dvar_t *aim_lockon_region_width = nullptr;
+const dvar_t *aim_lockon_region_height = nullptr;
+const dvar_t *aim_scale_view_axis = nullptr;
 
 void __cdecl TRACK_aim_assist()
 {
@@ -67,8 +67,8 @@ void __cdecl TRACK_aim_assist()
 
 void __cdecl AimAssist_Init(int32_t localClientNum)
 {
-    char graphName[128]; // [esp+4h] [ebp-88h] BYREF
-    int graphIndex; // [esp+88h] [ebp-4h]
+    char graphName[128] = { 0 }; // [esp+4h] [ebp-88h] BYREF
+    int graphIndex = 0; // [esp+88h] [ebp-4h]
 
     memset((uint8_t*)&aaGlobArray[localClientNum], 0, sizeof(AimAssistGlobals));
     AimAssist_RegisterDvars();
@@ -337,10 +337,9 @@ static bool __cdecl AimAssist_DoBoundsIntersectCenterBox(
 
 void __cdecl AimAssist_Setup(int32_t localClientNum)
 {
-    AimAssistGlobals *aaGlob; // [esp+0h] [ebp-4h]
-
-    aaGlob = &aaGlobArray[localClientNum];
+    AimAssistGlobals* aaGlob = &aaGlobArray[localClientNum]; // [esp+0h] [ebp-4h]
     memset((uint8_t*)aaGlob, 0, sizeof(AimAssistGlobals));
+
     aaGlob->initialized = 1;
     aaGlob->fovTurnRateScale = 1.0;
     aaGlob->fovScaleInv = 1.0;
@@ -369,11 +368,10 @@ void __cdecl AimAssist_UpdateScreenTargets(
     int targetIndex; // [esp+D0h] [ebp-38h]
     float bounds[2][3]; // [esp+D4h] [ebp-34h] BYREF
     float clipBounds[2][3]; // [esp+ECh] [ebp-1Ch] BYREF
-    AimAssistGlobals *aaGlob; // [esp+104h] [ebp-4h]
 
     PROF_SCOPED("AimAssist_UpdateScreenTargets");
 
-    aaGlob = &aaGlobArray[localClientNum];
+    AimAssistGlobals* aaGlob = &aaGlobArray[localClientNum]; // [esp+104h] [ebp-4h]
     if (aaGlob->initialized)
     {
         viewOrigin = aaGlob->viewOrigin;
@@ -498,12 +496,10 @@ char __cdecl AimAssist_ConvertToClipBounds(
     int ptIndex; // [esp+90h] [ebp-10h]
     float worldCornerRotated[3]; // [esp+94h] [ebp-Ch] BYREF
 
-    if (!bounds)
-        MyAssertHandler(".\\aim_assist\\aim_assist.cpp", 464, 0, "%s", "bounds");
-    if (!mtx)
-        MyAssertHandler(".\\aim_assist\\aim_assist.cpp", 465, 0, "%s", "mtx");
-    if (!clipBounds)
-        MyAssertHandler(".\\aim_assist\\aim_assist.cpp", 466, 0, "%s", "clipBounds");
+    iassert(bounds);
+    iassert(mtx);
+    iassert(clipBounds);
+
     ClearBounds((float *)clipBounds, &(*clipBounds)[3]);
     for (ptIndex = 0; ptIndex < 8; ++ptIndex)
     {
@@ -607,12 +603,10 @@ char __cdecl AimAssist_XfmWorldPointToClipSpace(const AimAssistGlobals *aaGlob, 
     float clip_12; // [esp+Ch] [ebp-14h]
     float xyzw[4]; // [esp+10h] [ebp-10h] BYREF
 
-    if (!aaGlob)
-        MyAssertHandler(".\\aim_assist\\aim_assist.cpp", 431, 0, "%s", "aaGlob");
-    if (!in)
-        MyAssertHandler(".\\aim_assist\\aim_assist.cpp", 432, 0, "%s", "in");
-    if (!out)
-        MyAssertHandler(".\\aim_assist\\aim_assist.cpp", 433, 0, "%s", "out");
+    iassert(aaGlob);
+    iassert(in);
+    iassert(out);
+
     xyzw[0] = *in;
     xyzw[1] = in[1];
     xyzw[2] = in[2];
@@ -636,10 +630,9 @@ double __cdecl AimAssist_GetCrosshairDistSqr(const float *clipMins, const float 
     float center_4; // [esp+8h] [ebp-4h]
     float center_4a; // [esp+8h] [ebp-4h]
 
-    if (!clipMins)
-        MyAssertHandler(".\\aim_assist\\aim_assist.cpp", 508, 0, "%s", "clipMins");
-    if (!clipMaxs)
-        MyAssertHandler(".\\aim_assist\\aim_assist.cpp", 509, 0, "%s", "clipMaxs");
+    iassert(clipMins);
+    iassert(clipMaxs);
+    
     center = *clipMins + *clipMaxs;
     center_4 = clipMins[1] + clipMaxs[1];
     centera = 0.5 * center;
@@ -652,10 +645,9 @@ void __cdecl AimAssist_AddToTargetList(AimAssistGlobals *aaGlob, const AimScreen
     int low; // [esp+8h] [ebp-Ch]
     int high; // [esp+10h] [ebp-4h]
 
-    if (!aaGlob)
-        MyAssertHandler(".\\aim_assist\\aim_assist.cpp", 609, 0, "%s", "aaGlob");
-    if (!screenTarget)
-        MyAssertHandler(".\\aim_assist\\aim_assist.cpp", 610, 0, "%s", "screenTarget");
+    iassert(aaGlob);
+    iassert(screenTarget);
+
     low = 0;
     high = aaGlob->screenTargetCount;
     while (low < high)
@@ -680,10 +672,9 @@ void __cdecl AimAssist_AddToTargetList(AimAssistGlobals *aaGlob, const AimScreen
 
 int32_t __cdecl AimAssist_CompareTargets(const AimScreenTarget *screenTargetA, const AimScreenTarget *screenTargetB)
 {
-    if (!screenTargetA)
-        MyAssertHandler(".\\aim_assist\\aim_assist.cpp", 586, 0, "%s", "screenTargetA");
-    if (!screenTargetB)
-        MyAssertHandler(".\\aim_assist\\aim_assist.cpp", 587, 0, "%s", "screenTargetB");
+    iassert(screenTargetA);
+    iassert(screenTargetB);
+
     if (screenTargetB->crosshairDistSqr > (double)screenTargetA->crosshairDistSqr)
         return 1;
     if (screenTargetB->crosshairDistSqr >= (double)screenTargetA->crosshairDistSqr)
@@ -699,12 +690,10 @@ int32_t __cdecl AimAssist_CalcAimPos(
 {
     float center[3]; // [esp+0h] [ebp-Ch] BYREF
 
-    if (!targetEnt)
-        MyAssertHandler(".\\aim_assist\\aim_assist.cpp", 667, 0, "%s", "targetEnt");
-    if (!target)
-        MyAssertHandler(".\\aim_assist\\aim_assist.cpp", 668, 0, "%s", "target");
-    if (!aimPos)
-        MyAssertHandler(".\\aim_assist\\aim_assist.cpp", 669, 0, "%s", "aimPos");
+    iassert(targetEnt);
+    iassert(target);
+    iassert(aimPos);
+
     if (targetEnt->nextState.eType == ET_PLAYER)
         return AimTarget_GetTagPos(localClientNum, targetEnt, scr_const.aim_bone, aimPos);
     Vec3Avg(target->mins, target->maxs, center);
@@ -714,15 +703,13 @@ int32_t __cdecl AimAssist_CalcAimPos(
 
 int32_t __cdecl AimTarget_GetTagPos(int32_t localClientNum, const centity_s *cent, uint32_t tagName, float *pos)
 {
-    DObj_s *dobj; // [esp+0h] [ebp-4h]
+    iassert(cent);
+    iassert(pos);
 
-    if (!cent)
-        MyAssertHandler(".\\aim_assist\\aim_assist.cpp", 646, 0, "%s", "cent");
-    if (!pos)
-        MyAssertHandler(".\\aim_assist\\aim_assist.cpp", 647, 0, "%s", "pos");
-    dobj = Com_GetClientDObj(cent->nextState.number, localClientNum);
+    DObj_s* dobj = Com_GetClientDObj(cent->nextState.number, localClientNum); // [esp+0h] [ebp-4h]
     if (!dobj)
         return 0;
+
     if (!CG_DObjGetWorldTagPos(&cent->pose, dobj, tagName, pos))
     {
         Com_Error(ERR_DROP, "AimTarget_GetTagPos: Cannot find tag [%s] on entity\n", SL_ConvertToString(tagName));
@@ -737,25 +724,17 @@ int32_t __cdecl AimAssist_GetScreenTargetCount(int32_t localClientNum)
 
 int32_t __cdecl AimAssist_GetScreenTargetEntity(int32_t localClientNum, uint32_t targetIndex)
 {
-    const AimAssistGlobals *aaGlob; // [esp+0h] [ebp-4h]
+    const AimAssistGlobals * aaGlob = &aaGlobArray[localClientNum]; // [esp+0h] [ebp-4h]
 
-    aaGlob = &aaGlobArray[localClientNum];
-    if (targetIndex >= aaGlob->screenTargetCount)
-        MyAssertHandler(
-            ".\\aim_assist\\aim_assist.cpp",
-            784,
-            0,
-            "targetIndex doesn't index aaGlob->screenTargetCount\n\t%i not in [0, %i)",
-            targetIndex,
-            aaGlob->screenTargetCount);
+    iassert(targetIndex < aaGlob->screenTargetCount);
+
     return aaGlob->screenTargets[targetIndex].entIndex;
 }
 
 void __cdecl AimAssist_ClearEntityReference(int32_t localClientNum, int32_t entIndex)
 {
-    AimAssistGlobals *aaGlob; // [esp+0h] [ebp-4h]
+    AimAssistGlobals* aaGlob = &aaGlobArray[localClientNum]; // [esp+0h] [ebp-4h]
 
-    aaGlob = &aaGlobArray[localClientNum];
     if (aaGlob->autoAimTargetEnt == entIndex)
         aaGlob->autoAimTargetEnt = ENTITYNUM_NONE;
     if (aaGlob->autoMeleeTargetEnt == entIndex)
@@ -788,8 +767,8 @@ void __cdecl AimAssist_UpdateTweakables(const AimInput *input)
     int localClientNum; // [esp+4Ch] [ebp-Ch]
     AimAssistGlobals *aaGlob; // [esp+50h] [ebp-8h]
 
-    if (!input)
-        MyAssertHandler(".\\aim_assist\\aim_assist.cpp", 236, 0, "%s", "input");
+    iassert(input);
+
     aaGlob = &aaGlobArray[input->localClientNum];
     localClientNum = input->localClientNum;
     v12 = scrPlaceView[localClientNum].scaleVirtualToReal[0] * aim_slowdown_region_width->current.value;
@@ -825,8 +804,8 @@ void __cdecl AimAssist_UpdateAdsLerp(const AimInput *input)
 {
     AimAssistGlobals *aaGlob; // [esp+0h] [ebp-4h]
 
-    if (!input)
-        MyAssertHandler(".\\aim_assist\\aim_assist.cpp", 262, 0, "%s", "input");
+    iassert(input);
+
     aaGlob = &aaGlobArray[input->localClientNum];
     aaGlob->adsLerp = input->ps->fWeaponPosFrac;
     if ((input->ps->eFlags & 0x300) != 0 && (input->buttons & 0x800) != 0)
@@ -835,8 +814,8 @@ void __cdecl AimAssist_UpdateAdsLerp(const AimInput *input)
 
 uint32_t __cdecl AimAssist_GetWeaponIndex(int32_t localClientNum, const playerState_s *ps)
 {
-    uint32_t NumWeapons; // eax
-    uint32_t weapIndex; // [esp+0h] [ebp-8h]
+    uint32_t NumWeapons = 0; // eax
+    uint32_t weapIndex = 0; // [esp+0h] [ebp-8h]
 
     if ((ps->eFlags & 0x300) != 0)
     {
@@ -863,10 +842,9 @@ const AimScreenTarget *__cdecl AimAssist_GetBestTarget(
     float v5; // [esp+8h] [ebp-Ch]
     int targetIndex; // [esp+10h] [ebp-4h]
 
-    if (!aaGlob)
-        MyAssertHandler(".\\aim_assist\\aim_assist.cpp", 843, 0, "%s", "aaGlob");
-    if (range < 0.0)
-        MyAssertHandler(".\\aim_assist\\aim_assist.cpp", 844, 0, "%s\n\t(range) = %g", "((range >= 0.0f))", range);
+    iassert(aaGlob);
+    iassert(range >= 0.0);
+
     for (targetIndex = 0; targetIndex < aaGlob->screenTargetCount; ++targetIndex)
     {
         v5 = range * range;
@@ -885,14 +863,12 @@ const AimScreenTarget *__cdecl AimAssist_GetBestTarget(
 
 const AimScreenTarget *__cdecl AimAssist_GetTargetFromEntity(const AimAssistGlobals *aaGlob, int32_t entIndex)
 {
-    int32_t targetIndex; // [esp+4h] [ebp-4h]
-
     iassert(aaGlob);
 
     if (entIndex == ENTITYNUM_NONE)
         return 0;
 
-    for (targetIndex = 0; targetIndex < aaGlob->screenTargetCount; ++targetIndex)
+    for (int32_t targetIndex = 0; targetIndex < aaGlob->screenTargetCount; ++targetIndex) // [esp+4h] [ebp-4h]
     {
         if (aaGlob->screenTargets[targetIndex].entIndex == entIndex)
             return &aaGlob->screenTargets[targetIndex];
@@ -908,14 +884,13 @@ void __cdecl AimAssist_ApplyAutoMelee(const AimInput *input, AimOutput *output)
     float yawDelta; // [esp+20h] [ebp-20h]
     float newPitch; // [esp+24h] [ebp-1Ch]
     float pitchDelta; // [esp+28h] [ebp-18h]
-    unsigned int weapIndex; // [esp+2Ch] [ebp-14h]
+    uint32_t weapIndex; // [esp+2Ch] [ebp-14h]
     AimAssistGlobals *aaGlob; // [esp+30h] [ebp-10h]
     float newYaw; // [esp+34h] [ebp-Ch]
 
-    if (!input)
-        MyAssertHandler(".\\aim_assist\\aim_assist.cpp", 1339, 0, "%s", "input");
-    if (!output)
-        MyAssertHandler(".\\aim_assist\\aim_assist.cpp", 1340, 0, "%s", "output");
+    iassert(input);
+    iassert(output);
+
     aaGlob = &aaGlobArray[input->localClientNum];
     meleeing = input->ps->weaponstate == 12;
     weapIndex = AimAssist_GetWeaponIndex(input->localClientNum, input->ps);
@@ -980,30 +955,29 @@ void __cdecl AimAssist_ClearAutoMeleeTarget(AimAssistGlobals *aaGlob)
 
 char __cdecl AimAssist_UpdateAutoMeleeTarget(AimAssistGlobals *aaGlob)
 {
-    float targetDir[3]; // [esp+0h] [ebp-1Ch] BYREF
-    const AimScreenTarget *screenTarget; // [esp+Ch] [ebp-10h]
-    float targetAngles[3]; // [esp+10h] [ebp-Ch] BYREF
+    float targetDir[3] = { 0 }; // [esp+0h] [ebp-1Ch] BYREF
+    float targetAngles[3] = { 0 }; // [esp+10h] [ebp-Ch] BYREF
 
-    if (!aaGlob)
-        MyAssertHandler(".\\aim_assist\\aim_assist.cpp", 1286, 0, "%s", "aaGlob");
-    if (!aaGlob->autoMeleeActive)
-        MyAssertHandler(".\\aim_assist\\aim_assist.cpp", 1287, 0, "%s", "aaGlob->autoMeleeActive");
-    screenTarget = AimAssist_GetTargetFromEntity(aaGlob, aaGlob->autoMeleeTargetEnt);
+    iassert(aaGlob);
+    iassert(aaGlob->autoMeleeActive);
+
+    const AimScreenTarget* screenTarget = AimAssist_GetTargetFromEntity(aaGlob, aaGlob->autoMeleeTargetEnt); // [esp+Ch] [ebp-10h]
     if (!screenTarget)
         return 0;
+
     Vec3Sub(screenTarget->aimPos, aaGlob->viewOrigin, targetDir);
     vectoangles(targetDir, targetAngles);
     aaGlob->autoMeleePitchTarget = targetAngles[0];
     aaGlob->autoMeleeYawTarget = targetAngles[1];
+
     return 1;
 }
 
 void __cdecl AimAssist_SetAutoMeleeTarget(AimAssistGlobals *aaGlob, const AimScreenTarget *screenTarget)
 {
-    if (!aaGlob)
-        MyAssertHandler(".\\aim_assist\\aim_assist.cpp", 1308, 0, "%s", "aaGlob");
-    if (!screenTarget)
-        MyAssertHandler(".\\aim_assist\\aim_assist.cpp", 1309, 0, "%s", "screenTarget");
+    iassert(aaGlob);
+    iassert(screenTarget);
+
     AimAssist_ClearAutoMeleeTarget(aaGlob);
     aaGlob->autoMeleeTargetEnt = screenTarget->entIndex;
     aaGlob->autoMeleeActive = 1;
@@ -1017,22 +991,20 @@ void __cdecl AimAssist_ApplyMeleeCharge(const AimInput *input, AimOutput *output
     float v2; // [esp+18h] [ebp-30h]
     float v3; // [esp+1Ch] [ebp-2Ch]
     float v4; // [esp+20h] [ebp-28h]
-    float targetDir[2]; // [esp+34h] [ebp-14h] BYREF
-    const AimScreenTarget *screenTarget; // [esp+3Ch] [ebp-Ch]
+    float targetDir[2] = { 0 }; // [esp+34h] [ebp-14h] BYREF
     AimAssistGlobals *aaGlob; // [esp+40h] [ebp-8h]
     const AimTweakables *tweaks; // [esp+44h] [ebp-4h]
 
-    if (!input)
-        MyAssertHandler(".\\aim_assist\\aim_assist.cpp", 1479, 0, "%s", "input");
-    if (!output)
-        MyAssertHandler(".\\aim_assist\\aim_assist.cpp", 1480, 0, "%s", "output");
+    iassert(input);
+    iassert(output);
+
     aaGlob = &aaGlobArray[input->localClientNum];
     tweaks = &aaGlob->tweakables;
     output->meleeChargeYaw = 0.0;
     output->meleeChargeDist = 0;
     if ((input->buttons & 4) != 0 && (input->ps->pm_flags & PMF_PRONE) == 0)
     {
-        screenTarget = AimAssist_GetBestTarget(
+        const AimScreenTarget* screenTarget = AimAssist_GetBestTarget( // [esp+3Ch] [ebp-Ch]
             aaGlob,
             aim_automelee_range->current.value,
             tweaks->autoMeleeRegionWidth,
@@ -1077,25 +1049,14 @@ void __cdecl AimAssist_UpdateMouseInput(const AimInput *input, AimOutput *output
 
 void __cdecl AimAssist_DrawDebugOverlay(uint32_t localClientNum)
 {
-    float green[4]; // [esp+Ch] [ebp-2Ch] BYREF
-    float red[4]; // [esp+1Ch] [ebp-1Ch] BYREF
-    const AimAssistGlobals *aaGlob; // [esp+2Ch] [ebp-Ch]
-    const playerState_s *ps; // [esp+30h] [ebp-8h]
-    const AimTweakables *tweaks; // [esp+34h] [ebp-4h]
+    float green[4] = { 0.0, 1.0, 0.0, 0.25 }; // [esp+Ch] [ebp-2Ch] BYREF
+    float red[4] = { 1.0, 0.0, 0.0, 0.25 }; // [esp+1Ch] [ebp-1Ch] BYREF
 
-    red[0] = 1.0;
-    red[1] = 0.0;
-    red[2] = 0.0;
-    red[3] = 0.25;
-    green[0] = 0.0;
-    green[1] = 1.0;
-    green[2] = 0.0;
-    green[3] = 0.25;
-    aaGlob = &aaGlobArray[localClientNum];
+    const AimAssistGlobals* aaGlob = &aaGlobArray[localClientNum]; // [esp+2Ch] [ebp-Ch]
     if (aaGlob->initialized)
     {
-        tweaks = &aaGlob->tweakables;
-        ps = &CG_GetLocalClientGlobals(localClientNum)->predictedPlayerState;
+        const AimTweakables* tweaks = &aaGlob->tweakables; // [esp+34h] [ebp-4h]
+        const playerState_s* ps = &CG_GetLocalClientGlobals(localClientNum)->predictedPlayerState; // [esp+30h] [ebp-8h]
 
         if (aim_slowdown_debug->current.enabled)
         {
@@ -1131,10 +1092,9 @@ void __cdecl AimAssist_DrawCenterBox(
     float x; // [esp+30h] [ebp-8h]
     float y; // [esp+34h] [ebp-4h]
 
-    if (!aaGlob)
-        MyAssertHandler(".\\aim_assist\\aim_assist.cpp", 1597, 0, "%s", "aaGlob");
-    if (!color)
-        MyAssertHandler(".\\aim_assist\\aim_assist.cpp", 1598, 0, "%s", "color");
+    iassert(aaGlob);
+    iassert(color);
+
     width = clipHalfWidth * aaGlob->screenWidth;
     height = clipHalfHeight * aaGlob->screenHeight;
     x = (aaGlob->screenWidth - width) * 0.5;
@@ -1159,8 +1119,6 @@ void __cdecl AimAssist_DrawTargets(int64_t localClientNum, const float *color)
     float width; // [esp+68h] [ebp-2Ch]
     float height; // [esp+6Ch] [ebp-28h]
     char *msg; // [esp+70h] [ebp-24h]
-    int targetIndex; // [esp+74h] [ebp-20h]
-    int weapIndex; // [esp+78h] [ebp-1Ch]
     const AimAssistGlobals *aaGlob; // [esp+7Ch] [ebp-18h]
     const WeaponDef *weapDef; // [esp+80h] [ebp-14h]
     float x; // [esp+84h] [ebp-10h]
@@ -1172,17 +1130,19 @@ void __cdecl AimAssist_DrawTargets(int64_t localClientNum, const float *color)
     float yd; // [esp+8Ch] [ebp-8h]
     float y_4; // [esp+90h] [ebp-4h]
 
-    if (!HIDWORD(localClientNum))
-        MyAssertHandler(".\\aim_assist\\aim_assist.cpp", 1627, 0, "%s", "ps");
-    if (!color)
-        MyAssertHandler(".\\aim_assist\\aim_assist.cpp", 1628, 0, "%s", "color");
-    weapIndex = AimAssist_GetWeaponIndex(localClientNum, (const playerState_s *)HIDWORD(localClientNum));
+    //if (!HIDWORD(localClientNum))
+    //    MyAssertHandler(".\\aim_assist\\aim_assist.cpp", 1627, 0, "%s", "ps");
+    // TODO: Check that these are equivalent
+    iassert(HIDWORD(localClientNum));
+    iassert(color);
+
+    int32_t weapIndex = AimAssist_GetWeaponIndex(localClientNum, (const playerState_s *)HIDWORD(localClientNum)); // [esp+78h] [ebp-1Ch]
     if (weapIndex)
     {
         weapDef = BG_GetWeaponDef(weapIndex);
         aaGlob = &aaGlobArray[localClientNum];
         range = aaGlob->adsLerp * weapDef->aimAssistRangeAds + (1.0 - aaGlob->adsLerp) * weapDef->aimAssistRange;
-        for (targetIndex = 0; targetIndex < aaGlob->screenTargetCount; ++targetIndex)
+        for (int32_t targetIndex = 0; targetIndex < aaGlob->screenTargetCount; ++targetIndex)  // [esp+74h] [ebp-20h]
         {
             if (aim_autoaim_debug->current.enabled)
             {
