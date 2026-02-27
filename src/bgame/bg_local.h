@@ -24,6 +24,27 @@ struct XAnimTree_s;
 
 // https://git.alterware.dev/anomaly/iw6-mod/src/commit/45907301eec9233946222ace7969f31cb5d998c6/src/client/game/game.hpp
 constexpr auto JUMP_LAND_SLOWDOWN_TIME = 1800;
+constexpr auto MAX_FRIENDLY_DIST = 15000.0;
+
+// Kiask: Custom enum
+typedef enum {
+    SND_MAX_ENTCHANNEL_NAMELENGTH = 0x40
+} sndEnumStuff;
+
+// Kisak: Custom Enum
+typedef enum {
+    EVENT_PARM_MAX = 0xFF
+};
+
+// Kisak: Custom Enum
+typedef enum {
+    EF_TURRET_ACTIVE = 0x300
+} playerStateEFlags;
+
+typedef enum {
+    POF_PLAYER = 4
+    
+} playerOtherFlags;
 
 enum animBodyPart_t : __int32
 {                                       // ...
@@ -841,7 +862,7 @@ struct playerState_s // sizeof=0x2F64
     int32_t offHandIndex;
     OffhandSecondaryClass offhandSecondary;
     uint32_t weapon;
-    int32_t weaponstate;
+    weaponstate_t weaponstate;
     uint32_t weaponShotCount;
     float fWeaponPosFrac;
     int32_t adsDelayTime;
@@ -1681,12 +1702,12 @@ const gitem_s *__cdecl G_FindItem(const char *pickupName, int32_t model);
 bool __cdecl BG_PlayerTouchesItem(const playerState_s *ps, const entityState_s *item, int32_t atTime);
 bool __cdecl BG_PlayerCanPickUpWeaponType(const WeaponDef *weapDef, const playerState_s *ps);
 bool __cdecl BG_CanItemBeGrabbed(const entityState_s *ent, const playerState_s *ps, int32_t touched);
-char __cdecl WeaponEntCanBeGrabbed(
+bool __cdecl WeaponEntCanBeGrabbed(
     const entityState_s *weaponEntState,
     const playerState_s *ps,
     int32_t touched,
     uint32_t weapIdx);
-char __cdecl HaveRoomForAmmo(const playerState_s *ps, uint32_t weaponIndex);
+bool __cdecl HaveRoomForAmmo(const playerState_s *ps, uint32_t weaponIndex);
 bool __cdecl BG_PlayerHasRoomForEntAllAmmoTypes(const entityState_s *ent, const playerState_s *ps);
 void __cdecl BG_EvaluateTrajectory(const trajectory_t *tr, int32_t atTime, float *result);
 void __cdecl BG_EvaluateTrajectoryDelta(const trajectory_t *tr, int32_t atTime, float *result);
@@ -1698,7 +1719,7 @@ void __cdecl BG_PlayerToEntitySetFlags(playerState_s *ps, entityState_s *s);
 void __cdecl BG_PlayerToEntitySetPitchAngles(playerState_s *ps, entityState_s *s);
 void __cdecl BG_PlayerToEntitySetMisc(playerState_s *ps, entityState_s *s);
 void __cdecl BG_PlayerToEntitySetTrajectory(playerState_s *ps, entityState_s *s, int32_t snap);
-char __cdecl BG_CheckProneValid(
+bool __cdecl BG_CheckProneValid(
     int32_t passEntityNum,
     const float *vPos,
     float fSize,
@@ -1943,7 +1964,7 @@ void __cdecl PM_FlyMove(pmove_t *pm, pml_t *pml);
 void __cdecl PM_Friction(playerState_s *ps, pml_t *pml);
 void __cdecl PM_Accelerate(playerState_s *ps, const pml_t *pml, const float *wishdir, float wishspeed, float accel);
 double __cdecl PM_PlayerInertia(const playerState_s *ps, float accelspeed, const float *wishdir);
-char __cdecl PM_DoPlayerInertia(const playerState_s *ps, float accelspeed, const float *wishdir);
+bool __cdecl PM_DoPlayerInertia(const playerState_s *ps, float accelspeed, const float *wishdir);
 double __cdecl PM_MoveScale(playerState_s *ps, float fmove, float rmove, float umove);
 double __cdecl PM_CmdScale(playerState_s *ps, usercmd_s *cmd);
 void __cdecl PM_AirMove(pmove_t *pm, pml_t *pml);

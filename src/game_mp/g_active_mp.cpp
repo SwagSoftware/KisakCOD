@@ -958,7 +958,7 @@ void __cdecl SpectatorClientEndFrame(gentity_s *ent)
         pArchiveTime = client->sess.psOffsetTime + client->sess.archiveTime;
         if (SV_GetArchivedClientInfo(clientNum, &pArchiveTime, &ps, &v3))
         {
-            if ((ps.otherFlags & 4) == 0)
+            if ((ps.otherFlags & POF_PLAYER) == 0)
                 MyAssertHandler(".\\game_mp\\g_active_mp.cpp", 1147, 0, "%s", "ps.otherFlags & POF_PLAYER");
             if (G_ClientCanSpectateTeam(client, v3.team))
             {

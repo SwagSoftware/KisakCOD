@@ -1153,7 +1153,7 @@ void __cdecl BG_SetConditionBit(uint32_t client, int32_t condition, int32_t valu
 
     BG_CheckThread();
     iassert(bgs);
-    iassert(animConditionsTable[condition].type != ANIM_CONDTYPE_BITFLAGS);
+    iassert(animConditionsTable[condition].type == ANIM_CONDTYPE_BITFLAGS);
     iassert(client < 0x40u);
     iassert(value < 64);
 

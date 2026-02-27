@@ -1140,7 +1140,7 @@ void __cdecl PlayerCmd_setSpawnWeapon(scr_entref_t entref)
     if (BG_IsWeaponValid(&pSelf->client->ps, iWeaponIndex))
     {
         pSelf->client->ps.weapon = iWeaponIndex;
-        pSelf->client->ps.weaponstate = 0;
+        pSelf->client->ps.weaponstate = WEAPON_READY;
         Com_BitSetAssert(pSelf->client->ps.weaponold, iWeaponIndex, 16);
         G_SelectWeaponIndex(entref.entnum, iWeaponIndex);
     }
