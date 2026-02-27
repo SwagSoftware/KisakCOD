@@ -1009,7 +1009,6 @@ void __cdecl Player_UpdateLookAtEntity(gentity_s *ent)
     gclient_s *client; // r21
     unsigned int weapon; // r3
     WeaponDef *weapDef; // r3
-    WeaponDef *weapDef; // r23
     unsigned __int8 *prioMap; // r27
     int number; // r6
     gentity_s *traceEnt; // r31
@@ -1064,7 +1063,6 @@ void __cdecl Player_UpdateLookAtEntity(gentity_s *ent)
         weapon = ent->client->ps.weapon;
     }
     weapDef = BG_GetWeaponDef(weapon);
-    weapDef = weapDef;
     if (ent->client->ps.weapon && weapDef->bRifleBullet)
         prioMap = riflePriorityMap;
     else

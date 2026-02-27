@@ -995,7 +995,7 @@ struct playerState_s
     int offHandIndex;
     OffhandSecondaryClass offhandSecondary;
     unsigned int weapon;
-    int weaponstate;
+    weaponstate_t weaponstate;
     unsigned int weaponShotCount;
     float fWeaponPosFrac;
     int adsDelayTime;

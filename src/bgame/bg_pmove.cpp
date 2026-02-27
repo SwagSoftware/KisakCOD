@@ -1542,6 +1542,7 @@ void __cdecl PmoveSingle(pmove_t *pm)
         PM_UFOMove(pm, &pml);
         PM_UpdateAimDownSightLerp(pm, &pml);
         break;
+#if KISAK_MP
     case PM_SPECTATOR:
         PM_ClearLadderFlag(ps);
         PM_UpdateAimDownSightFlag(pm, &pml);
@@ -1562,6 +1563,7 @@ void __cdecl PmoveSingle(pmove_t *pm)
         PM_ClearLadderFlag(ps);
         ps->eFlags &= 0xFFFFFCFF;
         goto LABEL_69;
+#endif
     default:
     LABEL_69:
         if ((ps->eFlags & EF_TURRET_ACTIVE) != 0)
