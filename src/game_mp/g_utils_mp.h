@@ -2,6 +2,8 @@
 #include <qcommon/qcommon.h>
 #include "g_public_mp.h"
 
+#define MAX_MODELS 512
+
 void __cdecl G_SafeDObjFree(unsigned int handle, int unusedLocalClientNum);
 void __cdecl TRACK_g_utils();
 int __cdecl G_FindConfigstringIndex(char *name, int start, int max, int create, const char *errormsg);

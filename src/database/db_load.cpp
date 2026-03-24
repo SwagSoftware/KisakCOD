@@ -5697,7 +5697,7 @@ void __cdecl Mark_RawFilePtr()
 
 void __cdecl Load_StringTable(bool atStreamStart)
 {
-    Load_Stream(atStreamStart, (uint8_t *)varStringTable, 16);
+    Load_Stream(atStreamStart, (uint8_t *)varStringTable, sizeof(StringTable));
     varXString = &varStringTable->name;
     Load_XString(0);
     if (varStringTable->values)

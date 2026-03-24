@@ -2143,71 +2143,52 @@ void __cdecl R_SetViewportValues(GfxCmdBufSourceState *source, int x, int y, int
 
 void __cdecl R_UpdateViewport(GfxCmdBufSourceState *source, GfxViewport *viewport)
 {
-    float v2; // [esp+10h] [ebp-4Ch]
-    float renderTargetWidth; // [esp+18h] [ebp-44h]
-    float renderTargetHeight; // [esp+1Ch] [ebp-40h]
-    float v5; // [esp+24h] [ebp-38h]
-    float v6; // [esp+28h] [ebp-34h]
-    float v7; // [esp+2Ch] [ebp-30h]
-    float v8; // [esp+30h] [ebp-2Ch]
-    float lookupScale; // [esp+34h] [ebp-28h]
-    float lookupScale_4; // [esp+38h] [ebp-24h]
+    float lookupScale[2]; // v7, v8 [esp+34h] [ebp-28h]
     float invWidth; // [esp+3Ch] [ebp-20h]
     float invHeight; // [esp+40h] [ebp-1Ch]
-    float lookupOffset; // [esp+54h] [ebp-8h]
-    float lookupOffseta; // [esp+54h] [ebp-8h]
-    float lookupOffset_4; // [esp+58h] [ebp-4h]
-    float lookupOffset_4a; // [esp+58h] [ebp-4h]
+    float lookupOffset[2]; // [esp+54h] [ebp-8h]
 
     iassert( source );
     iassert( source->viewMode != VIEW_MODE_NONE );
+
     source->viewportIsDirty = 0;
-    if (source->renderTargetWidth <= 0)
-        MyAssertHandler(
-            ".\\r_state.cpp",
-            1256,
-            0,
-            "%s\n\t(source->renderTargetWidth) = %i",
-            "(source->renderTargetWidth > 0)",
-            source->renderTargetWidth);
-    if (source->renderTargetHeight <= 0)
-        MyAssertHandler(
-            ".\\r_state.cpp",
-            1257,
-            0,
-            "%s\n\t(source->renderTargetHeight) = %i",
-            "(source->renderTargetHeight > 0)",
-            source->renderTargetHeight);
+
+    iassert(source->renderTargetWidth > 0);
+    iassert(source->renderTargetHeight > 0);
+
     invWidth = 1.0 / (double)source->renderTargetWidth;
     invHeight = 1.0 / (double)source->renderTargetHeight;
-    v7 = invWidth * (double)viewport->width;
-    v8 = invHeight * (double)viewport->height;
-    lookupScale = 0.5 * v7;
-    lookupScale_4 = 0.5 * v8;
-    v5 = invWidth * (double)viewport->x;
-    v6 = invHeight * (double)viewport->y;
-    lookupOffset = 0.5 * v7 + v5;
-    lookupOffset_4 = 0.5 * v8 + v6;
-    lookupOffseta = invWidth * 0.5 + lookupOffset;
-    lookupOffset_4a = invHeight * 0.5 + lookupOffset_4;
-    renderTargetWidth = (float)source->renderTargetWidth;
-    renderTargetHeight = (float)source->renderTargetHeight;
-    source->input.consts[10][0] = renderTargetWidth;
-    source->input.consts[10][1] = renderTargetHeight;
-    source->input.consts[10][2] = invWidth;
-    source->input.consts[10][3] = invHeight;
-    R_DirtyCodeConstant(source, CONST_SRC_CODE_RENDER_TARGET_SIZE);
-    v2 = -lookupScale_4;
-    source->input.consts[51][0] = lookupScale;
-    source->input.consts[51][1] = v2;
-    source->input.consts[51][2] = 0.0;
-    source->input.consts[51][3] = 1.0;
-    R_DirtyCodeConstant(source, CONST_SRC_CODE_CLIP_SPACE_LOOKUP_SCALE);
-    source->input.consts[52][0] = lookupOffseta;
-    source->input.consts[52][1] = lookupOffset_4a;
-    source->input.consts[52][2] = 0.0;
-    source->input.consts[52][3] = 0.0;
-    R_DirtyCodeConstant(source, CONST_SRC_CODE_CLIP_SPACE_LOOKUP_OFFSET);
+
+    lookupScale[0] = 0.5 * invWidth * (double)viewport->width;
+    lookupScale[1] = 0.5 * invHeight * (double)viewport->height;
+
+    lookupOffset[0] = lookupScale[0] + (invWidth * (double)viewport->x);
+    lookupOffset[1] = lookupScale[1] + (invHeight * (double)viewport->y);
+
+    lookupOffset[0] += invWidth * 0.5;
+    lookupOffset[1] += invHeight * 0.5;
+
+    R_SetCodeConstant(source,
+        CONST_SRC_CODE_RENDER_TARGET_SIZE,
+        (float)source->renderTargetWidth,
+        (float)source->renderTargetHeight,
+        invWidth,
+        invHeight
+    );
+    R_SetCodeConstant(source,
+        CONST_SRC_CODE_CLIP_SPACE_LOOKUP_SCALE,
+        lookupScale[0],
+        -lookupScale[1],
+        0.0,
+        1.0
+    );
+    R_SetCodeConstant(source,
+        CONST_SRC_CODE_CLIP_SPACE_LOOKUP_OFFSET,
+        lookupOffset[0],
+        lookupOffset[1],
+        0.0,
+        0.0
+    );
 }
 
 void __cdecl R_DisableSampler(GfxCmdBufState *state, unsigned int samplerIndex)
@@ -2646,21 +2627,13 @@ void R_DrawCall(
 
 void __cdecl R_SetCodeConstant(GfxCmdBufSourceState *source, CodeConstant constant, float x, float y, float z, float w)
 {
-    float *v6; // [esp+0h] [ebp-4h]
+    bcassert(constant, CONST_SRC_CODE_COUNT_FLOAT4);
 
-    if (constant >= 0x3A)
-        MyAssertHandler(
-            "c:\\trees\\cod3\\src\\gfx_d3d\\r_state.h",
-            495,
-            0,
-            "constant doesn't index CONST_SRC_CODE_COUNT_FLOAT4\n\t%i not in [0, %i)",
-            constant,
-            58);
-    v6 = source->input.consts[constant];
-    v6[0] = x;
-    v6[1] = y;
-    v6[2] = z;
-    v6[3] = w;
+    source->input.consts[constant][0] = x;
+    source->input.consts[constant][1] = y;
+    source->input.consts[constant][2] = z;
+    source->input.consts[constant][3] = w;
+
     R_DirtyCodeConstant(source, constant);
 }
 

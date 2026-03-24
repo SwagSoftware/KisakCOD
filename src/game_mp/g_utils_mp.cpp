@@ -198,72 +198,67 @@ int __cdecl G_ModelIndex(const char *name)
     signed int constIndexa; // [esp+74h] [ebp-4h]
 
     PROF_SCOPED("G_ModelIndex");
-    if (!name)
-        MyAssertHandler(".\\game_mp\\g_utils_mp.cpp", 221, 0, "%s", "name");
-    if (!*name)
-    {
+
+    iassert(name);
+
+    if (!name[0])
         return 0;
-    }
+
     nameString = SL_FindLowercaseString(name);
+
     if (!level.initializing
         || (constIndex = CCS_GetConstConfigStringIndex(name), constIndex < 0)
         || (constIndexa = CCS_GetConfigStringNumForConstIndex(constIndex), constIndexa < 830)
         || constIndexa >= 1342)
     {
-        for (i = 1; i < 512; ++i)
+        for (i = 1; i < MAX_MODELS; ++i)
         {
             if (SV_GetConfigstringConst(i + 830) == nameString)
             {
-                if (!cached_models[i])
-                    MyAssertHandler(".\\game_mp\\g_utils_mp.cpp", 262, 0, "%s", "cached_models[i]");
-                goto LABEL_14;
+                iassert(cached_models[i]);
+                return i;
             }
         }
         if (!level.initializing)
         {
-            v2 = va("model '%s' not precached", name);
-            Scr_Error(v2);
+            Scr_Error(va("model '%s' not precached", name));
         }
-        if (level.initializing && i == 512)
+        if (level.initializing && i == MAX_MODELS)
         {
             for (i = 1;
-                i < 512 && (SV_GetConfigstringConst(i + 830) != scr_const._ || CCS_IsConfigStringIndexConstant(i + 830));
+                i < MAX_MODELS && (SV_GetConfigstringConst(i + 830) != scr_const._ || CCS_IsConfigStringIndexConstant(i + 830));
                 ++i)
             {
                 ;
             }
-            if (i == 512)
+            if (i == MAX_MODELS)
             {
                 Com_PrintWarning(14, "Warning: abandoning const config string model slot for string %s\n", name);
-                for (i = 1; i < 512 && SV_GetConfigstringConst(i + 830) != scr_const._; ++i)
+                for (i = 1; i < MAX_MODELS && SV_GetConfigstringConst(i + 830) != scr_const._; ++i)
                     ;
             }
         }
         goto haveIndex;
     }
+
     s = SV_GetConfigstringConst(constIndexa);
     if (s != nameString)
     {
-        if (s != scr_const._)
-            MyAssertHandler(".\\game_mp\\g_utils_mp.cpp", 249, 0, "%s", "s == scr_const._");
+        iassert(s == scr_const._);
         i = constIndexa - 830;
-        if ((unsigned int)(constIndexa - 830) >= 0x200)
-            MyAssertHandler(".\\game_mp\\g_utils_mp.cpp", 251, 0, "i doesn't index MAX_MODELS\n\t%i not in [0, %i)", i, 512);
+        bcassert(i, MAX_MODELS);
     haveIndex:
-        if ((unsigned int)i >= 0x200)
-            MyAssertHandler(".\\game_mp\\g_utils_mp.cpp", 298, 0, "i doesn't index MAX_MODELS\n\t%i not in [0, %i)", i, 512);
-        if (i == 512)
+        bcassert(i, MAX_MODELS);
+        if (i == MAX_MODELS)
             Com_Error(ERR_DROP, "G_ModelIndex: overflow");
         cached_models[i] = SV_XModelGet((char*)name);
         SV_SetConfigstring(i + 830, name);
         return i;
     }
+
     i = constIndexa - 830;
-    if ((unsigned int)(constIndexa - 830) >= 0x200)
-        MyAssertHandler(".\\game_mp\\g_utils_mp.cpp", 243, 0, "i doesn't index MAX_MODELS\n\t%i not in [0, %i)", i, 512);
-    if (!cached_models[i])
-        MyAssertHandler(".\\game_mp\\g_utils_mp.cpp", 244, 0, "%s", "cached_models[i]");
-LABEL_14:
+    bcassert(i, MAX_MODELS);
+    iassert(cached_models[i]);
     return i;
 }
 

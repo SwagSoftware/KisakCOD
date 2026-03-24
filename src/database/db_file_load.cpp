@@ -95,12 +95,10 @@ void __cdecl DB_LoadXFileData(uint8_t *pos, uint32_t size)
     const char *v2; // eax
     uint32_t err; // [esp+0h] [ebp-4h]
 
-    if (!size)
-        MyAssertHandler(".\\database\\db_file_load.cpp", 366, 0, "%s", "size");
-    if (!g_load.f)
-        MyAssertHandler(".\\database\\db_file_load.cpp", 368, 0, "%s", "g_load.f");
-    if (g_load.stream.avail_out)
-        MyAssertHandler(".\\database\\db_file_load.cpp", 369, 0, "%s", "!g_load.stream.avail_out");
+    iassert(size);
+    iassert(g_load.f);
+    iassert(!g_load.stream.avail_out);
+
     g_load.stream.next_out = pos;
     g_load.stream.avail_out = size;
     while (1)

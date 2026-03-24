@@ -230,8 +230,8 @@ int __cdecl mixerGetRecordSource(char *srcName)
     lpmxc = 0;
     lpListText = 0;
     lpListBool = 0;
-    mixerline.cbStruct = 168;
-    mixerline.dwComponentType = 7;
+    mixerline.cbStruct = sizeof(mixerline);
+    mixerline.dwComponentType = MIXERLINE_COMPONENTTYPE_DST_WAVEIN;
     if (mixerGetLineInfoA(phmx, &mixerline, 3u) != MMSYSERR_NOERROR)
     {
         mixerClose(mixerHandle); // KISAKTODO: this fails always for some reason.

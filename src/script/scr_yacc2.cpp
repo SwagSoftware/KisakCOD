@@ -1055,7 +1055,6 @@ int yyparse()
 	stype_t *yyvs1;
 
 	sval_u valstack[6];
-	unsigned int s;
 
 	/* The number of symbols on the RHS of the reduced rule.
 	Keep to zero when no symbol should be popped.  */
@@ -1135,19 +1134,17 @@ yynewstate:
 			//needs_free = true;
 
 			// YYSTACK_RELOCATE (yyss_alloc, yyss);
-			s = sizeof(short) * yystacksize;
-			yyss = (short *)alloca(s);
-			//yyss = (short *)malloc(s);
+			yyss = (short *)alloca(sizeof(short) * yystacksize);
+			//yyss = (short *)malloc(sizeof(short) * yystacksize);
 			free1addr = yyss;
-			//memcpy(yyss, yyss1, s);
+			//memcpy(yyss, yyss1, sizeof(short) * yystacksize);
 			memcpy(yyss, yyss1, sizeof(short) * yysize); // LWSS CHANGE
 
 			// YYSTACK_RELOCATE (yyvs_alloc, yyvs);
-			s = sizeof(stype_t) * yystacksize;
-			yyvs = (stype_t *)alloca(s);
-			//yyvs = (stype_t *)malloc(s);
+			yyvs = (stype_t *)alloca(sizeof(stype_t) * yystacksize);
+			//yyvs = (stype_t *)malloc(sizeof(stype_t) * yystacksize);
 			free2addr = yyvs;
-			//memcpy(yyss, yyvs1, s);
+			//memcpy(yyss, yyvs1, sizeof(stype_t) * yystacksize);
 			memcpy(yyvs, yyvs1, sizeof(stype_t) * yysize); // LWSS CHANGE
 
 			yyvsp = &yyvs[yysize - 1];
@@ -1955,7 +1952,9 @@ yynewstate:
 
 #define YYNTOKENS 91
 			//yystate = *yyssp + yypgoto[yyn - YYNTOKENS]; // yystate = yypgoto[yyn - YYNTOKENS] + *yyssp; ?
-			yystate = *yyssp + yypact[yyn + 171]; // LWSS CHANGE
+			//yystate = *yyssp + yypact[yyn + 171]; // LWSS CHANGE
+			yystate = *yyssp + yypgoto[yyn - YYNTOKENS];
+
 
 			// LWSS CHANGE
 			//if (yystate < 0x544 && yycheck[yystate] == *yyssp)
@@ -1966,13 +1965,13 @@ yynewstate:
 			//{
 			//	yystate = yydefact[yyn + 171];
 			//}
-			if (yystate >= 0 && yystate <= 0x543 && yycheck[yystate] == *yyssp) // 0x59B on t5  YYLAST
+			if ((unsigned int)yystate < YYTABLESIZE && yycheck[yystate] == *yyssp)
 			{
 				yystate = yytable[yystate];
 			}
 			else
 			{
-				yystate = yydefgoto[yyn - YYNTOKENS]; // yystate = yydefgoto[yyn - YYNTOKENS]; ?
+				yystate = yydefgoto[yyn - YYNTOKENS];
 			}
 
 			int stop = yydefgoto[0]; // LWSS HACK: just to keep the array from being optimized out (dumb)

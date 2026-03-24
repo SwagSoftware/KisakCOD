@@ -2,6 +2,7 @@
 #include <xanim/dobj_utils.h>
 #include "r_dobj_skin.h"
 #include <universal/profile.h>
+#include "r_dpvs.h"
 
 #ifdef KISAK_MP
 #include <cgame_mp/cg_local_mp.h>
@@ -259,14 +260,9 @@ DObjAnimMat *R_UpdateSceneEntBounds(
                 localSceneEnt->cull.maxs[0] = bounds.v[1];
                 maxs[1] = bounds.v[2];
                 maxs[2] = bounds.v[3];
-                if (localSceneEnt->cull.state != 1)
-                    MyAssertHandler(
-                        ".\\r_model_pose.cpp",
-                        339,
-                        0,
-                        "%s\n\t(localSceneEnt->cull.state) = %i",
-                        "(localSceneEnt->cull.state == CULL_STATE_BOUNDED_PENDING)",
-                        localSceneEnt->cull.state);
+
+                iassert(localSceneEnt->cull.state == CULL_STATE_BOUNDED_PENDING);
+
                 localSceneEnt->cull.state = 2;
                 return partBits_4;
             }

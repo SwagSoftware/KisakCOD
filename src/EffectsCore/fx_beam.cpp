@@ -454,10 +454,12 @@ void __cdecl Float4x4ForViewer(float4x4 *mtx, const vec3r origin3, const mat3x3&
     tAxis.w.v[1] = 0.0;
     tAxis.w.v[2] = 0.0;
     tAxis.w.v[3] = 1.0;
+
     tAxis.y.v[0] = -tAxis.y.v[0];
     tAxis.y.v[1] = -tAxis.y.v[1];
     tAxis.y.v[2] = -tAxis.y.v[2];
     tAxis.y.v[3] = -(float)0.0;
+
     v16[0] = tAxis.x.v[0];
     v16[1] = tAxis.y.v[0];
     v16[2] = tAxis.z.v[0];

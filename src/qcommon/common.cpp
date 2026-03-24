@@ -1800,7 +1800,6 @@ static void Com_AttractMode(int localClientNum)
 void __cdecl Com_Frame_Try_Block_Function()
 {
     float deltaTime; // [esp+4h] [ebp-78h]
-    int v4; // [esp+8h] [ebp-74h]
     int lastFrameIndex; // [esp+68h] [ebp-14h]
     int msec; // [esp+6Ch] [ebp-10h]
     int localClientNum; // [esp+70h] [ebp-Ch]
@@ -1872,6 +1871,7 @@ void __cdecl Com_Frame_Try_Block_Function()
             NET_Sleep(1);
         }
 
+        int v4;
         if (com_frameTime - com_lastFrameTime[lastFrameIndex] < minMsec)
             v4 = minMsec;
         else

@@ -195,6 +195,11 @@ void __cdecl Com_Memcpy(void *dest_p, const void *src_p, const size_t count)
     char *dest = (char *)dest_p;
     const char *src = (const char *)src_p;
 
+    iassert(src || !count);
+    iassert(dest || !count);
+
+#if 0
+
     int v3; // ecx
     char *v4; // edx
     const char *v5; // ebx
@@ -206,12 +211,6 @@ void __cdecl Com_Memcpy(void *dest_p, const void *src_p, const size_t count)
     bool v11; // cc
     int v12; // eax
 
-    if (!src && count)
-        MyAssertHandler(".\\universal\\com_shared.cpp", 307, 0, "%s", "src || !count");
-    if (!dest && count)
-        MyAssertHandler(".\\universal\\com_shared.cpp", 308, 0, "%s", "dest || !count");
-
-#if 0
     Com_Prefetch(src, count);
     v3 = count;
     if (count)

@@ -5,6 +5,12 @@
 template <int BIT_COUNT>
 struct bitarray // sizeof=0x10
 {                                       // ...
+    bitarray() // LWSS: this was added in later COD's but seems like a decent idea
+    {
+        for (int j = 0; j < ((BIT_COUNT + 31) / 32); ++j)
+            this->array[j] = 0;
+    }
+
     void setBit(unsigned int pos)
     {
         iassert(pos < BIT_COUNT);

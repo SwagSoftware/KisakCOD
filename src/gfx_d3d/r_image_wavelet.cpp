@@ -14443,12 +14443,6 @@ void __cdecl Image_LoadWavelet(GfxImage *image, const GfxImageFileHeader *fileHe
 
 void __cdecl Wavelet_DecompressLevel(unsigned __int8 *src, unsigned __int8 *dst, WaveletDecode *decode)
 {
-    int v3; // eax
-    int v4; // eax
-    int v5; // eax
-    int v6; // eax
-    int v7; // eax
-    int v8; // eax
     bool needsMipDelta;
     int dstChanOffset[4]; // [esp+8h] [ebp-6Ch] BYREF
     unsigned __int8 *dstChan; // [esp+18h] [ebp-5Ch]
@@ -14488,8 +14482,10 @@ void __cdecl Wavelet_DecompressLevel(unsigned __int8 *src, unsigned __int8 *dst,
     default:
         break;
     }
+
     w = decode->width >> decode->mipLevel;
     h = decode->height >> decode->mipLevel;
+
     if (w > 1 && h > 1)
     {
         if (!decode->dataInitialized)
@@ -14499,11 +14495,13 @@ void __cdecl Wavelet_DecompressLevel(unsigned __int8 *src, unsigned __int8 *dst,
             decode->data += 2;
             decode->dataInitialized = 1;
         }
+
         needsMipDelta = (decode->value & 1) != 0;
-        Wavelet_ConsumeBits(1u, decode);
+        Wavelet_ConsumeBits(1, decode);
         if (needsMipDelta)
             Wavelet_AddDeltaToMipmap(src, h * w / 4, decode, dstChanOffset);
         stride = dstBpp * w;
+
         for (y = 0; y < h; y += 2)
         {
             for (x = 0; x < w; x += 2)
@@ -14526,29 +14524,25 @@ void __cdecl Wavelet_DecompressLevel(unsigned __int8 *src, unsigned __int8 *dst,
                     {
                         evenOddParity = decode->value & 1;
                         Wavelet_ConsumeBits(1u, decode);
-                        v3 = Wavelet_DecodeValue(waveletDecodeRedGreen, 10, 510, decode);
-                        coeff[1][0] = coeff[0][0] + v3;
-                        v4 = Wavelet_DecodeValue(waveletDecodeRedGreen, 10, 510, decode);
-                        coeff[1][1] = coeff[0][1] + v4;
-                        v5 = Wavelet_DecodeValue(waveletDecodeRedGreen, 10, 510, decode);
-                        coeff[1][2] = coeff[0][2] + v5;
+                        coeff[1][0] = coeff[0][0] + Wavelet_DecodeValue(waveletDecodeRedGreen, 10, 510, decode);
+                        coeff[1][1] = coeff[0][1] + Wavelet_DecodeValue(waveletDecodeRedGreen, 10, 510, decode);
+                        coeff[1][2] = coeff[0][2] + Wavelet_DecodeValue(waveletDecodeRedGreen, 10, 510, decode);
                         base = 2 * src[dstChanOffset[1]];
                         dstChan = &dst[dstChanOffset[1]];
-                        dst[dstChanOffset[1]] = evenOddParity + ((coeff[0][2] + v5 + coeff[1][1] + coeff[1][0] + base) >> 1);
+
+                        dst[dstChanOffset[1]] = evenOddParity + ((coeff[1][2] + coeff[1][1] + coeff[1][0] + base) >> 1);
+
                         dstChan[dstBpp] = (coeff[1][0] + base - (coeff[1][2] + coeff[1][1])) >> 1;
                         dstChan[stride] = (coeff[1][1] - coeff[1][2] + base - coeff[1][0]) >> 1;
                         dstChan[dstBpp + stride] = (base - coeff[1][0] - (coeff[1][1] - coeff[1][2])) >> 1;
                         evenOddParity = decode->value & 1;
                         Wavelet_ConsumeBits(1u, decode);
-                        v6 = Wavelet_DecodeValue(waveletDecodeRedGreen, 10, 510, decode);
-                        coeff[2][0] = coeff[0][0] + v6;
-                        v7 = Wavelet_DecodeValue(waveletDecodeRedGreen, 10, 510, decode);
-                        coeff[2][1] = coeff[0][1] + v7;
-                        v8 = Wavelet_DecodeValue(waveletDecodeRedGreen, 10, 510, decode);
-                        coeff[2][2] = coeff[0][2] + v8;
+                        coeff[2][0] = coeff[0][0] + Wavelet_DecodeValue(waveletDecodeRedGreen, 10, 510, decode);
+                        coeff[2][1] = coeff[0][1] + Wavelet_DecodeValue(waveletDecodeRedGreen, 10, 510, decode);
+                        coeff[2][2] = coeff[0][2] + Wavelet_DecodeValue(waveletDecodeRedGreen, 10, 510, decode);
                         base = 2 * src[dstChanOffset[2]];
                         dstChan = &dst[dstChanOffset[2]];
-                        dst[dstChanOffset[2]] = evenOddParity + ((coeff[0][2] + v8 + coeff[2][1] + coeff[2][0] + base) >> 1);
+                        dst[dstChanOffset[2]] = evenOddParity + ((coeff[2][2] + coeff[2][1] + coeff[2][0] + base) >> 1);
                         dstChan[dstBpp] = (coeff[2][0] + base - (coeff[2][2] + coeff[2][1])) >> 1;
                         dstChan[stride] = (coeff[2][1] - coeff[2][2] + base - coeff[2][0]) >> 1;
                         dstChan[dstBpp + stride] = (base - coeff[2][0] - (coeff[2][1] - coeff[2][2])) >> 1;

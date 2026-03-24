@@ -1,5 +1,6 @@
 #include "r_material.h"
 #include "r_init.h"
+#include "r_state.h"
 #include <universal/com_memory.h>
 #include <qcommon/mem_track.h>
 #include <qcommon/cmd.h>
@@ -16,7 +17,7 @@
 
 //MaterialGlobals materialGlobals; // LWSS: moved to db_registry for DEDICATED
 
-const stream_source_info_t s_streamSourceInfo[16][9] =
+const stream_source_info_t s_streamSourceInfo[16][STREAM_SRC_COUNT] =
 {
   {
     { 0u, 0u, 3u },
@@ -374,83 +375,80 @@ IDirect3DVertexDeclaration9 *__cdecl Material_BuildVertexDecl(
     int streamCount,
     const stream_source_info_t *sourceTable)
 {
-    int v4; // ecx
-    int v5; // ecx
-    const char *v6; // eax
     int hr; // [esp+0h] [ebp-824h]
     int elemIndexInsert; // [esp+4h] [ebp-820h]
     const stream_source_info_t *sourceInfo; // [esp+8h] [ebp-81Ch]
-    _D3DVERTEXELEMENT9 declEnd[257]; // [esp+Ch] [ebp-818h] BYREF
+    _D3DVERTEXELEMENT9 elemTable[256]; // [esp+14h] [ebp-810h] BYREF
     IDirect3DVertexDeclaration9 *decl; // [esp+818h] [ebp-Ch] BYREF
     const stream_dest_info_t *destInfo; // [esp+81Ch] [ebp-8h]
     int elemIndex; // [esp+820h] [ebp-4h]
 
-    decl = 0;
-    declEnd[0].Stream = 255;
-    declEnd[0].Offset = 0;
-    declEnd[0].Type = 17;
-    declEnd[0].Method = 0;
-    declEnd[0].Usage = 0;
-    declEnd[0].UsageIndex = 0;
+    decl = NULL;
+
+    _D3DVERTEXELEMENT9 declEnd; // [esp+Ch] [ebp-818h]
+    declEnd.Stream = 255;
+    declEnd.Offset = 0;
+    declEnd.Type = 17;
+    declEnd.Method = 0;
+    declEnd.Usage = 0;
+    declEnd.UsageIndex = 0;
+
     AssertValidVertexDeclOffsets(sourceTable);
+
     elemIndex = 0;
+
     while (streamCount)
     {
-        if (routingData->source >= 9u)
-            MyAssertHandler(
-                ".\\r_material.cpp",
-                712,
-                0,
-                "routingData->source doesn't index STREAM_SRC_COUNT\n\t%i not in [0, %i)",
-                routingData->source,
-                9);
+        bcassert(routingData->source, STREAM_SRC_COUNT);
         sourceInfo = &sourceTable[routingData->source];
+
         if (sourceInfo->Stream == 255)
-            return 0;
-        destInfo = &s_streamDestInfo[routingData->dest];
-        for (elemIndexInsert = elemIndex;
-            elemIndexInsert > 0 && declEnd[elemIndexInsert].Stream > sourceInfo->Stream;
+            return NULL;
+
+        bcassert(routingData->dest, ARRAY_COUNT(s_streamDestInfo)); // LWSS ADD
+        const stream_dest_info_t *destInfo = &s_streamDestInfo[routingData->dest];
+
+        for (elemIndexInsert = elemIndex; 
+            elemIndexInsert > 0 && elemTable[elemIndexInsert - 1].Stream > sourceInfo->Stream;
             --elemIndexInsert)
         {
-            //v4 = *&declEnd[elemIndexInsert].Type;
-            //*&declEnd[elemIndexInsert + 1].Stream = *&declEnd[elemIndexInsert].Stream;
-            //*&declEnd[elemIndexInsert + 1].Type = v4;
-            declEnd[elemIndexInsert + 1] = declEnd[elemIndexInsert];
+            elemTable[elemIndexInsert] = elemTable[elemIndexInsert - 1];
         }
-        declEnd[elemIndexInsert + 1].Stream = sourceInfo->Stream;
-        declEnd[elemIndexInsert + 1].Offset = sourceInfo->Offset;
-        declEnd[elemIndexInsert + 1].Type = sourceInfo->Type;
-        declEnd[elemIndexInsert + 1].Method = 0;
-        declEnd[elemIndexInsert + 1].Usage = destInfo->Usage;
-        declEnd[elemIndexInsert + 1].UsageIndex = destInfo->UsageIndex;
-        ++elemIndex;
-        ++routingData;
-        --streamCount;
+
+        elemTable[elemIndexInsert].Stream = sourceInfo->Stream;
+        elemTable[elemIndexInsert].Offset = sourceInfo->Offset;
+        elemTable[elemIndexInsert].Type = sourceInfo->Type;
+        elemTable[elemIndexInsert].Method = 0;
+        elemTable[elemIndexInsert].Usage = destInfo->Usage;
+        elemTable[elemIndexInsert].UsageIndex = destInfo->UsageIndex;
+
+        elemIndex++;
+        routingData++;
+        streamCount--;
     }
-    v5 = elemIndex;
-    declEnd[elemIndex + 1] = declEnd[0];
-    //*&declEnd[elemIndex + 1].Stream = *&declEnd[0].Stream;
-    //*&declEnd[v5 + 1].Type = *&declEnd[0].Type;
+
+    elemTable[elemIndex] = declEnd;
+
     do
     {
         if (r_logFile && r_logFile->current.integer)
             RB_LogPrint("dx.device->CreateVertexDeclaration( elemTable, &decl )\n");
-        hr = dx.device->CreateVertexDeclaration(&declEnd[1], &decl);
+        hr = dx.device->CreateVertexDeclaration(elemTable, &decl);
         if (hr < 0)
         {
             do
             {
                 ++g_disableRendering;
-                v6 = R_ErrorDescription(hr);
                 Com_Error(
                     ERR_FATAL,
                     ".\\r_material.cpp (%i) dx.device->CreateVertexDeclaration( elemTable, &decl ) failed: %s\n",
                     734,
-                    v6);
+                    R_ErrorDescription(hr));
             } while (alwaysfails);
         }
     } while (alwaysfails);
-    iassert( decl );
+
+    iassert(decl);
     return decl;
 }
 

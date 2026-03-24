@@ -430,7 +430,7 @@ void __cdecl Scr_CompilePrimitiveExpression(sval_u *expr)
     sval_u tempVariableId; // [esp+2Ch] [ebp-8h]
     sval_u tempVariableIda; // [esp+2Ch] [ebp-8h]
 
-    switch (expr->node[0].idValue)
+    switch (expr->node[0].type)
     {
     case ENUM_integer:
     case ENUM_float:

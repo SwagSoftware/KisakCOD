@@ -518,9 +518,6 @@ void __cdecl R_AddXModelSurfacesCamera(
 {
     const XSurface *xSurf; // eax
     const XSurface *v12; // eax
-    char *v13; // eax
-    char *v14; // eax
-    char *v15; // eax
     unsigned int surfId; // [esp+8h] [ebp-38h]
     int totalVertCount; // [esp+Ch] [ebp-34h]
     //__int64 drawSurf; // [esp+10h] [ebp-30h]
@@ -544,22 +541,10 @@ void __cdecl R_AddXModelSurfacesCamera(
     numsurfs = XModelGetSurfCount(model, lod);
     material = XModelGetSkins(model, lod);
     iassert( material );
-    if (reflectionProbeIndex >= 0x100)
-        MyAssertHandler(
-            ".\\r_scene.cpp",
-            693,
-            0,
-            "reflectionProbeIndex doesn't index 1 << MTL_SORT_ENVMAP_BITS\n\t%i not in [0, %i)",
-            reflectionProbeIndex,
-            256);
-    if (gfxDrawMethod.emissiveTechType >= TECHNIQUE_COUNT)
-        MyAssertHandler(
-            ".\\r_scene.cpp",
-            695,
-            0,
-            "gfxDrawMethod.emissiveTechType doesn't index TECHNIQUE_COUNT\n\t%i not in [0, %i)",
-            gfxDrawMethod.emissiveTechType,
-            34);
+
+    bcassert(reflectionProbeIndex, 1 << MTL_SORT_ENVMAP_BITS);
+    bcassert(gfxDrawMethod.emissiveTechType, TECHNIQUE_COUNT);
+
     for (subMatIndex = 0; subMatIndex < numsurfs; ++subMatIndex)
     {
         skinnedCachedOffset = modelSurf->surf.skinnedCachedOffset;
@@ -655,18 +640,15 @@ void __cdecl R_AddXModelSurfacesCamera(
     }
     if (r_showTriCounts->current.enabled)
     {
-        v13 = va("%i", totalTriCount);
-        R_AddXModelDebugString(origin, v13);
+        R_AddXModelDebugString(origin, va("%i", totalTriCount));
     }
     else if (r_showVertCounts->current.enabled)
     {
-        v14 = va("%i", totalVertCount);
-        R_AddXModelDebugString(origin, v14);
+        R_AddXModelDebugString(origin, va("%i", totalVertCount));
     }
     else if (r_showSurfCounts->current.enabled)
     {
-        v15 = va("%i", numsurfs);
-        R_AddXModelDebugString(origin, v15);
+        R_AddXModelDebugString(origin, va("%i", numsurfs));
     }
 }
 
@@ -2203,7 +2185,7 @@ void __cdecl R_SetSceneParms(const refdef_s *refdef, GfxSceneParms *sceneParms)
     iassert( refdef );
     iassert( sceneParms );
     iassert(refdef->blurRadius >= 0.0f);
-\
+
     sceneParms->localClientNum = refdef->localClientNum;
     sceneParms->blurRadius = refdef->blurRadius;
     memcpy(&sceneParms->dof, &refdef->dof, sizeof(sceneParms->dof));

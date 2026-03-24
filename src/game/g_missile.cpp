@@ -1500,53 +1500,49 @@ void __cdecl MissileLandAngles(gentity_s *ent, trace_t *trace, float *vAngles, i
 
 void __cdecl MissileLandAnglesFlat(gentity_s *ent, trace_t *trace, float *angles)
 {
-    float v3; // [esp+0h] [ebp-2Ch]
     float normalUpComponent; // [esp+Ch] [ebp-20h]
     float right[3]; // [esp+10h] [ebp-1Ch] BYREF
     float normalRightComponent; // [esp+1Ch] [ebp-10h]
     float up[3]; // [esp+20h] [ebp-Ch] BYREF
 
-    if (!ent)
-        MyAssertHandler(".\\game\\g_missile.cpp", 181, 0, "%s", "ent");
-    if (!trace)
-        MyAssertHandler(".\\game\\g_missile.cpp", 182, 0, "%s", "trace");
+    iassert(ent);
+    iassert(trace);
+
     BG_EvaluateTrajectory(
         &ent->s.lerp.apos,
         level.previousTime + (int)((double)(level.time - level.previousTime) * trace->fraction),
         angles);
+
     NearestPitchAndYawOnPlane(angles, trace->normal, angles);
-    if (angles[2] != 0.0f)
-        MyAssertHandler(".\\game\\g_missile.cpp", 191, 0, "%s", "angles[ROLL] == 0.f");
+
+    iassert(angles[ROLL] == 0.f);
+
     AngleVectors(angles, 0, right, up);
     normalRightComponent = Vec3Dot(right, trace->normal);
     normalUpComponent = Vec3Dot(up, trace->normal);
-    v3 = atan2(normalRightComponent, normalUpComponent);
-    angles[2] = v3 * 180.0f / 3.141592741012573f;
+    angles[2] = atan2(normalRightComponent, normalUpComponent) * 180.0f / 3.141592741012573f;
 }
 
 void __cdecl MissileLandAnglesFlatMaintainingDirection(gentity_s *ent, trace_t *trace, float *angles)
 {
-    float v3; // [esp+8h] [ebp-2Ch]
     float normalUpComponent; // [esp+14h] [ebp-20h]
     float right[3]; // [esp+18h] [ebp-1Ch] BYREF
     float normalRightComponent; // [esp+24h] [ebp-10h]
     float up[3]; // [esp+28h] [ebp-Ch] BYREF
 
-    if (!ent)
-        MyAssertHandler(".\\game\\g_missile.cpp", 207, 0, "%s", "ent");
-    if (!trace)
-        MyAssertHandler(".\\game\\g_missile.cpp", 208, 0, "%s", "trace");
+    iassert(ent);
+    iassert(trace);
+
     BG_EvaluateTrajectory(
         &ent->s.lerp.apos,
         level.previousTime + (int)((double)(level.time - level.previousTime) * trace->fraction),
         angles);
-    *angles = PitchForYawOnNormal(angles[1], trace->normal);
+    angles[0] = PitchForYawOnNormal(angles[1], trace->normal);
     angles[2] = 0.0f;
     AngleVectors(angles, 0, right, up);
     normalRightComponent = Vec3Dot(right, trace->normal);
     normalUpComponent = Vec3Dot(up, trace->normal);
-    v3 = atan2(normalRightComponent, normalUpComponent);
-    angles[2] = v3 * 180.0f / 3.141592741012573f;
+    angles[2] = atan2(normalRightComponent, normalUpComponent) * 180.0f / 3.141592741012573f;
 }
 
 void __cdecl CheckGrenadeDanger(gentity_s *grenadeEnt)

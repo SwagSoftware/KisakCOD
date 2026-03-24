@@ -290,8 +290,10 @@ void __cdecl G_InitGame(int32_t levelTime, int32_t randomSeed, int32_t restart, 
         v4->backup_text = 0;
     }
     Mantle_CreateAnims((void *(__cdecl *)(int))Hunk_AllocXAnimServer);
+
     iassert(bgs == NULL);
     bgs = &level_bgs;
+
     if (!restart)
     {
         memset(&bgs->animScriptData, 0, sizeof(animScriptData_t));
@@ -301,9 +303,11 @@ void __cdecl G_InitGame(int32_t levelTime, int32_t randomSeed, int32_t restart, 
         BG_LoadAnim();
         G_LoadAnimTreeInstances();
     }
+
     SV_GetConfigstring(0x13u, buffer, 1024);
     Info_SetValueForKey(buffer, "winner", "0");
     SV_SetConfigstring(19, buffer);
+
     memset(g_entities, 0, sizeof(g_entities));
     level.gentities = g_entities;
     level.maxclients = g_maxclients->current.integer;
@@ -311,10 +315,12 @@ void __cdecl G_InitGame(int32_t levelTime, int32_t randomSeed, int32_t restart, 
     level.clients = g_clients;
     for (i = 0; i < level.maxclients; ++i)
         g_entities[i].client = &level.clients[i];
+
     level.num_entities = 72;
     level.firstFreeEnt = 0;
     level.lastFreeEnt = 0;
-    SV_LocateGameData(level.gentities, 72, 628, &level.clients->ps, 12676);
+    SV_LocateGameData(level.gentities, level.num_entities, 628, &level.clients->ps, 12676);
+
     G_ParseHitLocDmgTable();
     BG_LoadPenetrationDepthTable();
     G_VehiclesInit(restart);

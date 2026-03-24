@@ -377,8 +377,9 @@ void __cdecl DevGui_AddGraph(const char *path, DevGraph *graph)
     {
         handle = DevGui_ConstructPath_r(0, path);
         menu = DevGui_GetMenu(handle);
-        if (!menu)
-            MyAssertHandler(".\\devgui\\devgui.cpp", 503, 0, "%s", "menu");
+
+        iassert(menu);
+
         if (!menu->menus[0].childType && !menu->menus[0].child.menu
             || menu->menus[0].childType == 3 && menu->menus[0].child.graph == graph)
         {

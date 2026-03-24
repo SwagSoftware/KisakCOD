@@ -2173,21 +2173,22 @@ void __cdecl DB_LoadXAssets(XZoneInfo *zoneInfo, uint32_t zoneCount, int32_t syn
     int32_t i; // [esp+10h] [ebp-8h]
     int32_t zoneFreeFlags; // [esp+14h] [ebp-4h]
 
-    if (!Sys_IsMainThread())
-        MyAssertHandler(".\\database\\db_registry.cpp", 3411, 0, "%s", "Sys_IsMainThread()");
-    if (!zoneCount)
-        MyAssertHandler(".\\database\\db_registry.cpp", 3412, 0, "%s", "zoneCount");
+    iassert(Sys_IsMainThread());
+    iassert(zoneCount);
+
     if (!g_zoneInited)
     {
         g_zoneInited = 1;
         DB_Init();
         Cmd_AddCommandInternal("loadzone", DB_LoadZone_f, &DB_LoadZone_f_VAR);
     }
+
     unloadedZone = 0;
     Material_ClearShaderUploadList();
     DB_SyncXAssets();
-    if (g_archiveBuf)
-        MyAssertHandler(".\\database\\db_registry.cpp", 3439, 0, "%s", "!g_archiveBuf");
+    
+    iassert(!g_archiveBuf);
+
     for (j = 0; j < zoneCount; ++j)
     {
         zoneFreeFlags = zoneInfo[j].freeFlags;

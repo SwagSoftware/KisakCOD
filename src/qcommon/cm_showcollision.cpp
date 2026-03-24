@@ -240,6 +240,7 @@ char __cdecl CM_BuildBrushWindingForSide(
     iassert( winding );
     iassert( planeNormal );
     iassert( pts );
+
     XyzList = CM_GetXyzList(sideIndex, pts, ptCount, (float (*)[3])xyz, 1024);
     if (XyzList < 3)
         return 0;

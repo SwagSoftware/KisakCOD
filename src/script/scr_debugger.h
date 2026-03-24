@@ -55,7 +55,7 @@ union sval_u // sizeof=0x4
     }
     sval_u(int i)
     {
-        type = (Enum_t)i;
+        intValue = i;
     }
     Enum_t type;
     unsigned int stringValue;

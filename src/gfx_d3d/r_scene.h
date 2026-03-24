@@ -6,6 +6,7 @@
 #include "r_rendercmds.h"
 
 #define GFX_MAX_CLIENT_VIEWS 4
+#define MTL_SORT_ENVMAP_BITS 8
 
 struct GfxSceneParms // sizeof=0xA0
 {                                       // ...

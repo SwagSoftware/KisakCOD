@@ -2,7 +2,6 @@
 #include <xanim/dobj.h>
 #include "r_scene.h"
 
-
 DObjAnimMat * R_UpdateSceneEntBounds(
     GfxSceneEntity *sceneEnt,
     GfxSceneEntity **pLocalSceneEnt,

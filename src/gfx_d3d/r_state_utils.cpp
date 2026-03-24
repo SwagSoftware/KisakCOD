@@ -10,69 +10,39 @@
 
 void __cdecl R_DeriveNearPlaneConstantsForView(GfxCmdBufSourceState *source)
 {
-    float v1; // [esp+8h] [ebp-60h]
-    float v2; // [esp+Ch] [ebp-5Ch]
-    float v3; // [esp+10h] [ebp-58h]
-    float v4; // [esp+14h] [ebp-54h]
-    float v5; // [esp+18h] [ebp-50h]
-    float v6; // [esp+1Ch] [ebp-4Ch]
-    float v7; // [esp+20h] [ebp-48h]
-    float v8; // [esp+28h] [ebp-40h]
-    float v9; // [esp+2Ch] [ebp-3Ch]
-    float v10; // [esp+30h] [ebp-38h]
-    float v11; // [esp+38h] [ebp-30h]
-    float v12; // [esp+3Ch] [ebp-2Ch]
-    float v13; // [esp+40h] [ebp-28h]
-    float scale; // [esp+64h] [ebp-4h]
-    float scalea; // [esp+64h] [ebp-4h]
+    const GfxViewParms *viewParms = &source->viewParms;
+    const GfxMatrix *mtx = &viewParms->inverseViewProjectionMatrix;
 
-    v4 = I_fabs(source->viewParms.inverseViewProjectionMatrix.m[0][3]);
-    v3 = source->viewParms.inverseViewProjectionMatrix.m[3][3] * 0.000009999999747378752;
-    if (v4 >= (double)v3)
-        MyAssertHandler(
-            ".\\r_state_utils.cpp",
-            286,
-            0,
-            "%s\n\t(mtx->m[0][3]) = %g",
-            "(I_I_fabs( mtx->m[0][3] ) < 1.0e-5f * mtx->m[3][3])",
-            source->viewParms.inverseViewProjectionMatrix.m[0][3]);
-    v2 = I_fabs(source->viewParms.inverseViewProjectionMatrix.m[1][3]);
-    v1 = source->viewParms.inverseViewProjectionMatrix.m[3][3] * 0.000009999999747378752;
-    if (v2 >= (double)v1)
-        MyAssertHandler(
-            ".\\r_state_utils.cpp",
-            287,
-            0,
-            "%s\n\t(mtx->m[1][3]) = %g",
-            "(I_I_fabs( mtx->m[1][3] ) < 1.0e-5f * mtx->m[3][3])",
-            source->viewParms.inverseViewProjectionMatrix.m[1][3]);
-    //iassert( mtx->m[3][3] != 0 );
-    scale = 1.0 / source->viewParms.inverseViewProjectionMatrix.m[3][3];
-    v11 = source->viewParms.inverseViewProjectionMatrix.m[3][0] * scale - source->viewParms.origin[0];
-    v12 = source->viewParms.inverseViewProjectionMatrix.m[3][1] * scale - source->viewParms.origin[1];
-    v13 = source->viewParms.inverseViewProjectionMatrix.m[3][2] * scale - source->viewParms.origin[2];
-    source->input.consts[5][0] = v11;
-    source->input.consts[5][1] = v12;
-    source->input.consts[5][2] = v13;
-    source->input.consts[5][3] = 0.0;
-    R_DirtyCodeConstant(source, CONST_SRC_CODE_NEARPLANE_ORG);
-    scalea = scale + scale;
-    v8 = source->viewParms.inverseViewProjectionMatrix.m[0][0] * scalea;
-    v9 = source->viewParms.inverseViewProjectionMatrix.m[0][1] * scalea;
-    v10 = source->viewParms.inverseViewProjectionMatrix.m[0][2] * scalea;
-    source->input.consts[6][0] = v8;
-    source->input.consts[6][1] = v9;
-    source->input.consts[6][2] = v10;
-    source->input.consts[6][3] = 0.0;
-    R_DirtyCodeConstant(source, CONST_SRC_CODE_NEARPLANE_DX);
-    v5 = source->viewParms.inverseViewProjectionMatrix.m[1][0] * -scalea;
-    v6 = source->viewParms.inverseViewProjectionMatrix.m[1][1] * -scalea;
-    v7 = source->viewParms.inverseViewProjectionMatrix.m[1][2] * -scalea;
-    source->input.consts[7][0] = v5;
-    source->input.consts[7][1] = v6;
-    source->input.consts[7][2] = v7;
-    source->input.consts[7][3] = 0.0;
-    R_DirtyCodeConstant(source, CONST_SRC_CODE_NEARPLANE_DY);
+    iassert(fabs(mtx->m[0][3]) < 1.0e-5f * mtx->m[3][3]);
+    iassert(fabs(mtx->m[1][3]) < 1.0e-5f * mtx->m[3][3]);
+    iassert( mtx->m[3][3] != 0 );
+
+    float scale = 1.0 / mtx->m[3][3];
+
+    R_SetCodeConstant(source,
+        CONST_SRC_CODE_NEARPLANE_ORG,
+        mtx->m[3][0] * scale - source->viewParms.origin[0],
+        mtx->m[3][1] * scale - source->viewParms.origin[1],
+        mtx->m[3][2] * scale - source->viewParms.origin[2],
+        0.0
+        );
+
+    float scale2 = scale + scale;
+
+    R_SetCodeConstant(source, 
+        CONST_SRC_CODE_NEARPLANE_DX,
+        mtx->m[0][0] * scale2,
+        mtx->m[0][1] * scale2,
+        mtx->m[0][2] * scale2,
+        0.0
+    );
+    R_SetCodeConstant(source, 
+        CONST_SRC_CODE_NEARPLANE_DY,
+        mtx->m[1][0] * -scale2,
+        mtx->m[1][1] * -scale2,
+        mtx->m[1][2] * -scale2,
+        0.0
+    );
 }
 
 void __cdecl R_SetGameTime(GfxCmdBufSourceState *source, float gameTime)

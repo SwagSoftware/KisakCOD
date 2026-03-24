@@ -26,18 +26,9 @@ void __cdecl DB_InitStreams(XZoneMemory *zoneMem)
 
 void __cdecl DB_PushStreamPos(uint32_t index)
 {
-    if (index >= 9)
-        MyAssertHandler(".\\database\\db_stream.cpp", 82, 0, "%s", "index < ARRAY_COUNT( g_streamPosArray )");
-    if (g_streamPosIndex >= 9)
-        MyAssertHandler(".\\database\\db_stream.cpp", 83, 0, "%s", "g_streamPosIndex < ARRAY_COUNT( g_streamPosArray )");
-    if (g_streamPosStackIndex >= 0x40)
-        MyAssertHandler(
-            ".\\database\\db_stream.cpp",
-            84,
-            0,
-            "%s",
-            "g_streamPosStackIndex < ARRAY_COUNT( g_streamPosStack )");
-
+    iassert(index < ARRAY_COUNT(g_streamPosArray));
+    iassert(g_streamPosIndex < ARRAY_COUNT(g_streamPosArray));
+    iassert(g_streamPosStackIndex < ARRAY_COUNT(g_streamPosStack));
 
     g_streamPosStack[g_streamPosStackIndex].index = g_streamPosIndex;
     DB_SetStreamIndex(index);
@@ -97,13 +88,8 @@ uint8_t *__cdecl DB_AllocStreamPos(int32_t alignment)
 void __cdecl DB_IncStreamPos(int32_t size)
 {
     iassert(g_streamPos);
-    if (&g_streamPos[size] > &g_streamZoneMem->blocks[g_streamPosIndex].data[g_streamZoneMem->blocks[g_streamPosIndex].size])
-        MyAssertHandler(
-            ".\\database\\db_stream.cpp",
-            135,
-            0,
-            "%s",
-            "g_streamPos + size <= g_streamZoneMem->blocks[g_streamPosIndex].data + g_streamZoneMem->blocks[g_streamPosIndex].size");
+    iassert(g_streamPos + size <= g_streamZoneMem->blocks[g_streamPosIndex].data + g_streamZoneMem->blocks[g_streamPosIndex].size);
+
     g_streamPos += size;
 }
 

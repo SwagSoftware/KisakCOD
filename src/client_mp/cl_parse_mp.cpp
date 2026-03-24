@@ -333,7 +333,7 @@ void __cdecl CL_NextDownload(int localClientNum)
     if (com_sv_running->current.enabled)
         MyAssertHandler(".\\client_mp\\cl_main_mp.cpp", 2721, 0, "%s", "!com_sv_running->current.enabled");
     s = cls.downloadList;
-    if (cls.downloadList[0] == 64)
+    if (cls.downloadList[0] == '@')
         s = &cls.downloadList[1];
     remoteName = s;
     sa = strchr(s, '@');

@@ -2589,14 +2589,7 @@ GfxIndexBufferState *RB_SwapBuffers()
     GfxIndexBufferState *result;
     int hr;
 
-    if (dx.targetWindowIndex < 0 || dx.targetWindowIndex >= dx.windowCount)
-        MyAssertHandler(
-            ".\\rb_backend.cpp",
-            2794,
-            0,
-            "%s\n\t(dx.targetWindowIndex) = %i",
-            "(dx.targetWindowIndex >= 0 && dx.targetWindowIndex < dx.windowCount)",
-            dx.targetWindowIndex);
+    iassert(dx.targetWindowIndex >= 0 && dx.targetWindowIndex < dx.windowCount);
 
     {
         PROF_SCOPED("Present");
