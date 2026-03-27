@@ -11,6 +11,7 @@
 #define MAX_11BIT_FLT 0.99951172f // not a real name
 
 #define CLAMP(x, low, high) ((x) < (low) ? (low) : ((x) > (high) ? (high) : (x)))
+#define IS_NAN(x) _isnan(x)
 
 struct cplane_s // sizeof=0x14
 {                                       // ...
@@ -476,7 +477,7 @@ __forceinline static int COERCE_INT(float val) {
     return lol.v;
 }
 
-#define IS_NAN(x) (isnan(x))
+
 
 // LWSS: There appear to be a lot more functions on XBox.
 //__Eg_fltMin@@YAXXZ       8278c5f0 f   com_math_anglevectors.obj

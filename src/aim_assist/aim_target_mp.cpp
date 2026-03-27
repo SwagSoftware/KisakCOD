@@ -107,13 +107,9 @@ char __cdecl AimTarget_IsTargetValid(const cg_s *cgameGlob, const centity_s *tar
         const clientInfo_t* playerInfo = &cgameGlob->bgs.clientinfo[cgameGlob->predictedPlayerState.clientNum]; // [esp+5Ch] [ebp-1Ch]
         if (targetInfo->infoValid && targetInfo->model[0])
         {
-            if (!Com_GetClientDObj(targetEnt->nextState.number, targetEnt->pose.localClientNum))
-                MyAssertHandler(
-                    ".\\aim_assist\\aim_target_mp.cpp",
-                    282,
-                    0,
-                    "%s",
-                    "Com_GetClientDObj( targetEnt->nextState.number, targetEnt->pose.localClientNum )");
+            DObj_s* ret = Com_GetClientDObj(targetEnt->nextState.number, targetEnt->pose.localClientNum);
+            iassert(ret);
+
             if (targetInfo->team != playerInfo->team || playerInfo->team == TEAM_FREE)
                 goto LABEL_26;
         }

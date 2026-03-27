@@ -525,11 +525,11 @@ void __cdecl CG_RelativeTeamColor(int32_t clientNum, const char *prefix, float *
 {
     char dvarName[32]; // [esp+Ch] [ebp-28h] BYREF
     float savedAlpha; // [esp+30h] [ebp-4h]
-    cg_s *cgameGlob;
 
-    cgameGlob = CG_GetLocalClientGlobals(localClientNum);
+    cg_s *cgameGlob = CG_GetLocalClientGlobals(localClientNum);
 
     bcassert(cgameGlob->clientNum, MAX_CLIENTS);
+
     savedAlpha = color[3];
     if (cgameGlob->bgs.clientinfo[clientNum].team == TEAM_SPECTATOR)
     {

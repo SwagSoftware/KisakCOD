@@ -48,10 +48,9 @@ int __cdecl AimTarget_CompareTargets(const AimTarget *targetA, const AimTarget *
     double v5; // fp13
     int result; // r3
 
-    if (!targetA)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\aim_assist\\aim_target.cpp", 97, 0, "%s", "targetA");
-    if (!targetB)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\aim_assist\\aim_target.cpp", 98, 0, "%s", "targetB");
+    iassert(targetA);
+    iassert(targetB);
+
     worldDistSqr = targetA->worldDistSqr;
     v5 = targetB->worldDistSqr;
     if (worldDistSqr < v5)
@@ -72,8 +71,8 @@ void __cdecl AimTarget_AddTargetToList(const AimTarget *target)
     int v7; // r31
     float *p_entIndex; // r28
 
-    if (!target)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\aim_assist\\aim_target.cpp", 119, 0, "%s", "target");
+    iassert(target);
+
     v2 = 0;
     targetCount = atGlob.targetCount;
     if (atGlob.targetCount > 0)
@@ -133,13 +132,11 @@ void __cdecl AimTarget_GetTargetBounds(const gentity_s *targetEnt, float *mins, 
     double v7; // fp13
     float v8[16]; // [sp+50h] [-40h] BYREF
 
-    if (!targetEnt)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\aim_assist\\aim_target.cpp", 160, 0, "%s", "targetEnt");
-    if (!mins)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\aim_assist\\aim_target.cpp", 161, 0, "%s", "mins");
-    if (!maxs)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\aim_assist\\aim_target.cpp", 162, 0, "%s", "maxs");
-    if (targetEnt->s.eType == 14)
+    iassert(targetEnt);
+    iassert(mins);
+    iassert(maxs);
+
+    if (targetEnt->s.eType == ET_ACTOR)
     {
         G_DObjGetWorldTagPos_CheckTagExists(targetEnt, scr_const.aim_highest_bone, v8);
         v6 = aim_target_sentient_radius;
@@ -153,13 +150,8 @@ void __cdecl AimTarget_GetTargetBounds(const gentity_s *targetEnt, float *mins, 
     }
     else
     {
-        if (targetEnt->s.solid != 0xFFFFFF)
-            MyAssertHandler(
-                "c:\\trees\\cod3\\cod3src\\src\\aim_assist\\aim_target.cpp",
-                178,
-                0,
-                "%s",
-                "targetEnt->s.solid == SOLID_BMODEL");
+        iassert(targetEnt->s.solid == SOLID_BMODEL);
+
         CM_ModelBounds(targetEnt->s.index.item, mins, maxs);
     }
 }
@@ -170,9 +162,9 @@ float __cdecl AimTarget_GetTargetRadius(const gentity_s *targetEnt)
     float v4[4]; // [sp+50h] [-30h] BYREF
     float v5[4]; // [sp+60h] [-20h] BYREF
 
-    if (!targetEnt)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\aim_assist\\aim_target.cpp", 194, 0, "%s", "targetEnt");
-    if (targetEnt->s.eType == 14)
+    iassert(targetEnt);
+
+    if (targetEnt->s.eType == ET_ACTOR)
     {
         value = aim_target_sentient_radius->current.value;
     }
@@ -193,10 +185,9 @@ void __cdecl AimTarget_GetTargetCenter(const gentity_s *targetEnt, float *center
     float v8[4]; // [sp+50h] [-50h] BYREF
     float v9[16]; // [sp+60h] [-40h] BYREF
 
-    if (!targetEnt)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\aim_assist\\aim_target.cpp", 214, 0, "%s", "targetEnt");
-    if (!center)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\aim_assist\\aim_target.cpp", 215, 0, "%s", "center");
+    iassert(targetEnt);
+    iassert(center);
+
     AimTarget_GetTargetBounds(targetEnt, v9, v8);
     v4 = (float)(v8[1] + v9[1]);
     v5 = (float)(v8[2] + v9[2]);
@@ -212,7 +203,7 @@ void __cdecl AimTarget_GetTargetCenter(const gentity_s *targetEnt, float *center
 
 int __cdecl AimTarget_IsTargetValid(const gentity_s *targetEnt)
 {
-    gentity_s *Player; // r28
+    gentity_s *playerEnt; // r28
     double v4; // fp31
     double v5; // fp30
     double v6; // fp29
@@ -220,21 +211,15 @@ int __cdecl AimTarget_IsTargetValid(const gentity_s *targetEnt)
     float v8[4]; // [sp+50h] [-50h] BYREF
 
     //Profile_Begin(59);
-    if (!targetEnt)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\aim_assist\\aim_target.cpp", 238, 0, "%s", "targetEnt");
-    Player = G_GetPlayer();
-    if (!Player)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\aim_assist\\aim_target.cpp", 241, 0, "%s", "playerEnt");
-    if (Player->s.number == targetEnt->s.number)
-        MyAssertHandler(
-            "c:\\trees\\cod3\\cod3src\\src\\aim_assist\\aim_target.cpp",
-            242,
-            0,
-            "%s",
-            "playerEnt->s.number != targetEnt->s.number");
+    iassert(targetEnt);
+
+    playerEnt = G_GetPlayer();
+    iassert(playerEnt);
+    iassert(playerEnt->s.number != targetEnt->s.number);
+
     if (!targetEnt->r.inuse || !targetEnt->r.linked)
         goto LABEL_16;
-    if (targetEnt->s.eType == 14)
+    if (targetEnt->s.eType == ET_ACTOR)
     {
         iassert(targetEnt->actor);
         iassert(targetEnt->actor->sentient);
@@ -246,10 +231,10 @@ int __cdecl AimTarget_IsTargetValid(const gentity_s *targetEnt)
     {
         goto LABEL_16;
     }
-    v4 = (float)(targetEnt->r.currentOrigin[0] - Player->r.currentOrigin[0]);
-    v5 = (float)(targetEnt->r.currentOrigin[1] - Player->r.currentOrigin[1]);
-    v6 = (float)(targetEnt->r.currentOrigin[2] - Player->r.currentOrigin[2]);
-    G_GetPlayerViewDirection(Player, v8, 0, 0);
+    v4 = (float)(targetEnt->r.currentOrigin[0] - playerEnt->r.currentOrigin[0]);
+    v5 = (float)(targetEnt->r.currentOrigin[1] - playerEnt->r.currentOrigin[1]);
+    v6 = (float)(targetEnt->r.currentOrigin[2] - playerEnt->r.currentOrigin[2]);
+    G_GetPlayerViewDirection(playerEnt, v8, 0, 0);
     TargetRadius = AimTarget_GetTargetRadius(targetEnt);
     if ((float)((float)((float)(v8[1] * (float)v5) + (float)((float)(v8[2] * (float)v6) + (float)(v8[0] * (float)v4)))
         + (float)TargetRadius) < 0.0)
@@ -315,7 +300,6 @@ int __cdecl AimTarget_IsTargetVisible(const gentity_s *targetEnt, unsigned int v
 
 void __cdecl AimTarget_CreateTarget(const gentity_s *targetEnt, AimTarget *target)
 {
-    gentity_s *Player; // r27
     double v5; // fp0
     double v6; // fp13
     double v7; // fp12
@@ -327,24 +311,23 @@ void __cdecl AimTarget_CreateTarget(const gentity_s *targetEnt, AimTarget *targe
     float v13[16]; // [sp+60h] [-40h] BYREF
 
     //Profile_Begin(61);
-    if (!targetEnt)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\aim_assist\\aim_target.cpp", 372, 0, "%s", "targetEnt");
-    if (!target)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\aim_assist\\aim_target.cpp", 373, 0, "%s", "target");
-    Player = G_GetPlayer();
-    if (!Player)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\aim_assist\\aim_target.cpp", 376, 0, "%s", "playerEnt");
+    iassert(targetEnt);
+    iassert(target);
+
+    gentity_s* playerEnt = G_GetPlayer();
+    iassert(playerEnt);
+
     target->entIndex = targetEnt->s.number;
-    v5 = (float)(targetEnt->r.currentOrigin[1] - Player->r.currentOrigin[1]);
-    v6 = (float)(targetEnt->r.currentOrigin[2] - Player->r.currentOrigin[2]);
-    v7 = (float)(targetEnt->r.currentOrigin[0] - Player->r.currentOrigin[0]);
+    v5 = (float)(targetEnt->r.currentOrigin[1] - playerEnt->r.currentOrigin[1]);
+    v6 = (float)(targetEnt->r.currentOrigin[2] - playerEnt->r.currentOrigin[2]);
+    v7 = (float)(targetEnt->r.currentOrigin[0] - playerEnt->r.currentOrigin[0]);
     target->worldDistSqr = (float)((float)v7 * (float)v7)
         + (float)((float)((float)v6 * (float)v6) + (float)((float)v5 * (float)v5));
     AimTarget_GetTargetBounds(targetEnt, target->mins, target->maxs);
-    if (targetEnt->s.eType == 14)
+    if (targetEnt->s.eType == ET_ACTOR)
     {
-        if (!targetEnt->actor)
-            MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\aim_assist\\aim_target.cpp", 385, 0, "%s", "targetEnt->actor");
+        iassert(targetEnt->actor);
+
         actor = targetEnt->actor;
         target->velocity[0] = actor->Physics.vVelocity[0];
         target->velocity[1] = actor->Physics.vVelocity[1];
@@ -370,8 +353,8 @@ void __cdecl AimTarget_CreateTarget(const gentity_s *targetEnt, AimTarget *targe
 
 bool __cdecl AimTarget_PlayerInValidState(const playerState_s *ps)
 {
-    if (!ps)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\aim_assist\\aim_target.cpp", 410, 0, "%s", "ps");
+    iassert(ps);
+
     return (unsigned int)(ps->pm_type - 2) > 4;
 }
 
@@ -476,10 +459,9 @@ int __cdecl AimTarget_GetBestTarget(const float *start, const float *viewDir)
     double v10; // fp12
     double v13; // fp11
 
-    if (!start)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\aim_assist\\aim_target.cpp", 546, 0, "%s", "start");
-    if (!viewDir)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\aim_assist\\aim_target.cpp", 547, 0, "%s", "viewDir");
+    iassert(start);
+    iassert(viewDir);
+
     if (fabs((float)((float)((float)(viewDir[2] * viewDir[2])
         + (float)((float)(*viewDir * *viewDir) + (float)(viewDir[1] * viewDir[1])))
         - (float)1.0)) >= 0.0020000001)
@@ -535,8 +517,8 @@ void __cdecl AimTarget_WriteSaveGame(SaveGame *save)
     int v2; // r31
     AimTargetGlob *v3; // r30
 
-    if (!save)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\aim_assist\\aim_target.cpp", 581, 0, "%s", "save");
+    iassert(save);
+
     SaveMemory_SaveWrite(&atGlob.targetCount, 4, save);
     v2 = 0;
     if (atGlob.targetCount > 0)
@@ -556,8 +538,8 @@ void __cdecl AimTarget_ReadSaveGame(SaveGame *save)
     int v2; // r31
     AimTargetGlob *v3; // r30
 
-    if (!save)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\aim_assist\\aim_target.cpp", 597, 0, "%s", "save");
+    iassert(save);
+
     SaveMemory_LoadRead(&atGlob.targetCount, 4, save);
     v2 = 0;
     if (atGlob.targetCount > 0)

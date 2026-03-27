@@ -174,8 +174,8 @@ void __cdecl Mantle_Check(pmove_t *pm, pml_t *pml)
     if (mantle_enable->current.enabled)
     {
         ps = pm->ps;
-        if (!ps)
-            MyAssertHandler(".\\bgame\\bg_mantle.cpp", 682, 0, "%s", "ps");
+        iassert(ps);
+
         Mantle_ClearHint(ps);
         if (ps->pm_type < PM_DEAD)
         {
@@ -524,11 +524,12 @@ char __cdecl Mantle_FindMantleSurface(pmove_t *pm, pml_t *pml, trace_t *trace, f
     maxs[1] = maxs[0];
     maxs[2] = 70.0;
     v8 = 70.0 - 0.0;
-    if (v8 < maxs[0] - v9)
-        MyAssertHandler(".\\bgame\\bg_mantle.cpp", 604, 0, "%s", "(maxs[0] - mins[0]) <= (playerMaxs[2] - playerMins[2])");
+    iassert((maxs[0] - mins[0]) <= (playerMaxs[2] - playerMins[2]));
+
     v7 = 70.0 - 0.0;
-    if (v7 < maxs[1] - mins[1])
-        MyAssertHandler(".\\bgame\\bg_mantle.cpp", 605, 0, "%s", "(maxs[1] - mins[1]) <= (playerMaxs[2] - playerMins[2])");
+
+    iassert((maxs[1] - mins[1]) <= (playerMaxs[2] - playerMins[2]));
+
     innerDist = playerRadius - mantle_check_radius->current.value;
     traceDist = mantle_check_range->current.value + innerDist;
     traceDir[0] = pml->forward[0];

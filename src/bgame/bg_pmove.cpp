@@ -309,8 +309,9 @@ int32_t __cdecl PM_GetSprintLeftLastTime(const playerState_s *ps)
     int32_t v3; // [esp+4h] [ebp-10h]
     int32_t maxSprintTime; // [esp+10h] [ebp-4h]
 
-    if (PM_IsSprinting(ps))
-        MyAssertHandler(".\\bgame\\bg_pmove.cpp", 441, 0, "%s", "!PM_IsSprinting( ps )");
+    bool isSprinting = PM_IsSprinting(ps);
+    iassert(!isSprinting);
+
     maxSprintTime = BG_GetMaxSprintTime(ps);
     if (ps->sprintState.sprintStartMaxLength - (ps->sprintState.lastSprintEnd - ps->sprintState.lastSprintStart) < 0)
         v3 = 0;
@@ -437,12 +438,11 @@ void __cdecl PM_FootstepEvent(pmove_t *pm, pml_t *pml, char iOldBobCycle, char i
                 maxs[1] = maxs[1] - 6.0;
                 if ((float)8.0 > (double)maxs[2])
                     maxs[2] = mins[2];
-                if (mins[0] > (double)maxs[0])
-                    MyAssertHandler(".\\bgame\\bg_pmove.cpp", 3021, 0, "%s", "maxs[0] >= mins[0]");
-                if (mins[1] > (double)maxs[1])
-                    MyAssertHandler(".\\bgame\\bg_pmove.cpp", 3022, 0, "%s", "maxs[1] >= mins[1]");
-                if (mins[2] > (double)maxs[2])
-                    MyAssertHandler(".\\bgame\\bg_pmove.cpp", 3023, 0, "%s", "maxs[2] >= mins[2]");
+
+                iassert(maxs[0] >= mins[0]);
+                iassert(maxs[1] >= mins[1]);
+                iassert(maxs[2] >= mins[2]);
+
                 iClipMask = pm->tracemask & 0xFDFEFFFF;
                 fTraceDist = -31.0;
                 Vec3Mad(ps->origin, -31.0, ps->vLadderVec, vEnd);
@@ -1753,13 +1753,9 @@ void __cdecl PM_UpdateSprint(pmove_t *pm, const pml_t *pml)
 
 void __cdecl PM_StartSprint(playerState_s *ps, pmove_t *pm, const pml_t *pml, int32_t sprintLeft)
 {
-    if (ps->sprintState.lastSprintEnd && ps->sprintState.lastSprintEnd < ps->sprintState.lastSprintStart)
-        MyAssertHandler(
-            ".\\bgame\\bg_pmove.cpp",
-            477,
-            0,
-            "%s",
-            "ss->lastSprintEnd == 0 || ss->lastSprintEnd >= ss->lastSprintStart");
+    SprintState* ss = &ps->sprintState;
+    iassert(ss->lastSprintEnd == 0 || ss->lastSprintEnd >= ss->lastSprintStart);
+
     ps->sprintState.sprintStartMaxLength = sprintLeft;
     ps->sprintState.lastSprintStart = pm->cmd.serverTime;
     ps->pm_flags |= PMF_SPRINTING;
@@ -3432,13 +3428,8 @@ void __cdecl PM_CheckDuck(pmove_t *pm, pml_t *pml)
                 }
                 else
                 {
-                    if (trace.normal[0] == 0.0 && trace.normal[1] == 0.0 && trace.normal[2] == 0.0)
-                        MyAssertHandler(
-                            ".\\bgame\\bg_pmove.cpp",
-                            2960,
-                            0,
-                            "%s",
-                            "trace.normal[0] || trace.normal[1] || trace.normal[2]");
+                    iassert(trace.normal[0] || trace.normal[1] || trace.normal[2]);
+
                     v2 = PitchForYawOnNormal(ps->proneDirection, trace.normal);
                     ps->proneDirectionPitch = v2;
                 }
@@ -4317,14 +4308,9 @@ void __cdecl PM_CheckLadderMove(pmove_t *pm, pml_t *pml)
                 if ((float)8.0 > (double)maxs[2])
                     maxs[2] = mins[2];
 
-                if (mins[0] > (double)maxs[0])
-                    MyAssertHandler(".\\bgame\\bg_pmove.cpp", 4524, 0, "%s", "maxs[0] >= mins[0]");
-
-                if (mins[1] > (double)maxs[1])
-                    MyAssertHandler(".\\bgame\\bg_pmove.cpp", 4525, 0, "%s", "maxs[1] >= mins[1]");
-
-                if (mins[2] > (double)maxs[2])
-                    MyAssertHandler(".\\bgame\\bg_pmove.cpp", 4526, 0, "%s", "maxs[2] >= mins[2]");
+                iassert(maxs[0] >= mins[0]);
+                iassert(maxs[1] >= mins[1]);
+                iassert(maxs[2] >= mins[2]);
 
                 Vec3Mad(ps->origin, tracedist, vLadderCheckDir, spot);
                 PM_playerTrace(pm, &trace, ps->origin, mins, maxs, spot, ps->clientNum, pm->tracemask);
