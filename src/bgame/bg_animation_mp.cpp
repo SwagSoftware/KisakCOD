@@ -701,21 +701,11 @@ int32_t __cdecl BG_AnimScriptAnimation(playerState_s *ps, aistateEnum_t state, s
     iassert(movetype < NUM_ANIM_MOVETYPES);
     iassert(ps->clientNum < 0x40u);
 
-    if ((BG_GetConditionBit(&bgs->clientinfo[ps->clientNum], 3u) & 0x80000000) != 0)
-        MyAssertHandler(
-            ".\\bgame\\bg_animation_mp.cpp",
-            2054,
-            0,
-            "%s",
-            "BG_GetConditionBit( &bgs->clientinfo[ps->clientNum], ANIM_COND_MOVETYPE ) >= ANIM_MT_UNUSED");
+    uint32_t ret = BG_GetConditionBit(&bgs->clientinfo[ps->clientNum], ANIM_COND_MOVETYPE);
+    iassert(ret >= ANIM_MT_UNUSED);
 
-    if ((int32_t)BG_GetConditionBit(&bgs->clientinfo[ps->clientNum], 3u) >= 43)
-        MyAssertHandler(
-            ".\\bgame\\bg_animation_mp.cpp",
-            2055,
-            0,
-            "%s",
-            "BG_GetConditionBit( &bgs->clientinfo[ps->clientNum], ANIM_COND_MOVETYPE ) < NUM_ANIM_MOVETYPES");
+    ret = BG_GetConditionBit(&bgs->clientinfo[ps->clientNum], ANIM_COND_MOVETYPE);
+    iassert(ret < NUM_ANIM_MOVETYPES);
 
     if (ps->pm_type >= PM_DEAD)
         return -1;
@@ -738,30 +728,17 @@ int32_t __cdecl BG_AnimScriptAnimation(playerState_s *ps, aistateEnum_t state, s
         if (scriptItem->numCommands)
         {
             BG_SetConditionBit(ps->clientNum, 3, movetype);
-            if (ps->clientNum >= 0x40u)
-                MyAssertHandler(
-                    ".\\bgame\\bg_animation_mp.cpp",
-                    2100,
-                    0,
-                    "ps->clientNum doesn't index MAX_CLIENTS\n\t%i not in [0, %i)",
-                    ps->clientNum,
-                    64);
-            if ((BG_GetConditionBit(&bgs->clientinfo[ps->clientNum], 3u) & 0x80000000) != 0)
-                MyAssertHandler(
-                    ".\\bgame\\bg_animation_mp.cpp",
-                    2101,
-                    0,
-                    "%s",
-                    "BG_GetConditionBit( &bgs->clientinfo[ps->clientNum], ANIM_COND_MOVETYPE ) >= ANIM_MT_UNUSED");
-            if ((int)BG_GetConditionBit(&bgs->clientinfo[ps->clientNum], 3u) >= 43)
-                MyAssertHandler(
-                    ".\\bgame\\bg_animation_mp.cpp",
-                    2102,
-                    0,
-                    "%s",
-                    "BG_GetConditionBit( &bgs->clientinfo[ps->clientNum], ANIM_COND_MOVETYPE ) < NUM_ANIM_MOVETYPES");
-            if (!scriptItem->numCommands)
-                MyAssertHandler(".\\bgame\\bg_animation_mp.cpp", 2105, 0, "%s", "scriptItem->numCommands");
+
+            iassert(ps->clientNum <= MAX_CLIENTS);
+
+            uint32_t ret = BG_GetConditionBit(&bgs->clientinfo[ps->clientNum], ANIM_COND_MOVETYPE);
+            iassert(ret >= ANIM_MT_UNUSED);
+
+            ret = BG_GetConditionBit(&bgs->clientinfo[ps->clientNum], ANIM_COND_MOVETYPE);
+            iassert(ret < NUM_ANIM_MOVETYPES);
+
+            iassert(scriptItem->numCommands);
+
             return BG_ExecuteCommand(ps, &scriptItem->commands[ps->clientNum % scriptItem->numCommands], 0, 1, force) != -1;
         }
         else
@@ -808,14 +785,9 @@ animScriptItem_t *__cdecl BG_FirstValidItem(uint32_t client, animScript_t *scrip
             }
             Com_Printf(19, "\n");
         }
-        if (client >= 0x40)
-            MyAssertHandler(
-                ".\\bgame\\bg_animation_mp.cpp",
-                1859,
-                0,
-                "client doesn't index MAX_CLIENTS\n\t%i not in [0, %i)",
-                client,
-                64);
+        
+        bcassert(client, MAX_CLIENTS);
+
         if (BG_EvaluateConditions(&bgs->clientinfo[client], *ppScriptItem))
             return *ppScriptItem;
         ++i;
@@ -835,20 +807,12 @@ int32_t __cdecl BG_EvaluateConditions(clientInfo_t *ci, animScriptItem_t *script
     int32_t index; // [esp+Ch] [ebp-8h]
     int32_t i; // [esp+10h] [ebp-4h]
 
-    if ((BG_GetConditionBit(ci, 3u) & 0x80000000) != 0)
-        MyAssertHandler(
-            ".\\bgame\\bg_animation_mp.cpp",
-            1720,
-            0,
-            "%s",
-            "BG_GetConditionBit( ci, ANIM_COND_MOVETYPE ) >= ANIM_MT_UNUSED");
-    if ((int)BG_GetConditionBit(ci, 3u) >= 43)
-        MyAssertHandler(
-            ".\\bgame\\bg_animation_mp.cpp",
-            1721,
-            0,
-            "%s",
-            "BG_GetConditionBit( ci, ANIM_COND_MOVETYPE ) < NUM_ANIM_MOVETYPES");
+    uint32_t ret = BG_GetConditionBit(ci, ANIM_COND_MOVETYPE);
+    iassert(ret >= ANIM_MT_UNUSED);
+
+    ret = BG_GetConditionBit(ci, ANIM_COND_MOVETYPE);
+    iassert(ret < NUM_ANIM_MOVETYPES);
+
     i = 0;
     cond = scriptItem->conditions;
     while (i < scriptItem->numConditions)
@@ -1336,20 +1300,13 @@ void __cdecl BG_Player_DoControllersInternal(const entityState_s *es, const clie
         vHeadAngles[2] = ci->playerAngles[2];
         tag_origin_angles[1] = ci->legs.yawAngle;
         vTorsoAngles[1] = ci->torso.yawAngle;
-        if ((BG_GetConditionBit(ci, ANIM_COND_MOVETYPE) & 0x80000000) != ANIM_MT_UNUSED)
-            MyAssertHandler(
-                ".\\bgame\\bg_animation_mp.cpp",
-                3250,
-                0,
-                "%s",
-                "BG_GetConditionBit( ci, ANIM_COND_MOVETYPE ) >= ANIM_MT_UNUSED");
-        if ((int)BG_GetConditionBit(ci, ANIM_COND_MOVETYPE) >= NUM_ANIM_MOVETYPES)
-            MyAssertHandler(
-                ".\\bgame\\bg_animation_mp.cpp",
-                3251,
-                0,
-                "%s",
-                "BG_GetConditionBit( ci, ANIM_COND_MOVETYPE ) < NUM_ANIM_MOVETYPES");
+
+        uint32_t ret = BG_GetConditionBit(ci, ANIM_COND_MOVETYPE);
+        iassert(ret >= ANIM_MT_UNUSED);
+
+        ret = BG_GetConditionBit(ci, ANIM_COND_MOVETYPE);
+        iassert(ret < NUM_ANIM_MOVETYPES);
+
         if ((BG_GetConditionValue(ci, ANIM_COND_MOVETYPE) & 0xC0000) == 0)
         {
             vTorsoAngles[0] = ci->torso.pitchAngle;
@@ -1866,20 +1823,13 @@ void __cdecl BG_PlayerAngles(const entityState_s *es, clientInfo_t *ci)
     moveDir = ci->lerpMoveDir;
     vHeadAngles = ci->playerAngles[0];
     vHeadAngles_4 = AngleNormalize360(ci->playerAngles[1]);
-    if ((BG_GetConditionBit(ci, ANIM_COND_MOVETYPE) & 0x80000000) != ANIM_MT_UNUSED)
-        MyAssertHandler(
-            ".\\bgame\\bg_animation_mp.cpp",
-            2971,
-            0,
-            "%s",
-            "BG_GetConditionBit( ci, ANIM_COND_MOVETYPE ) >= ANIM_MT_UNUSED");
-    if ((int)BG_GetConditionBit(ci, ANIM_COND_MOVETYPE) >= NUM_ANIM_MOVETYPES)
-        MyAssertHandler(
-            ".\\bgame\\bg_animation_mp.cpp",
-            2972,
-            0,
-            "%s",
-            "BG_GetConditionBit( ci, ANIM_COND_MOVETYPE ) < NUM_ANIM_MOVETYPES");
+
+    uint32_t ret = BG_GetConditionBit(ci, ANIM_COND_MOVETYPE);
+    iassert(ret >= ANIM_MT_UNUSED);
+
+    ret = BG_GetConditionBit(ci, ANIM_COND_MOVETYPE);
+    iassert(ret < NUM_ANIM_MOVETYPES);
+
     if ((es->lerp.eFlags & 0x300) != 0)
         goto LABEL_8;
     if ((BG_GetConditionValue(ci, ANIM_COND_MOVETYPE) & 0xC0000) != 0)
@@ -2107,21 +2057,11 @@ void __cdecl BG_AnimPlayerConditions(const entityState_s *es, clientInfo_t *ci)
     WeaponDef* weaponDef = BG_GetWeaponDef(es->weapon); // [esp+24h] [ebp-8h]
 
     iassert(weaponDef);
+    uint32_t ret = BG_GetConditionBit(ci, ANIM_COND_MOVETYPE);
+    iassert(ret >= ANIM_MT_UNUSED);
 
-    if ((BG_GetConditionBit(ci, ANIM_COND_MOVETYPE) & 0x80000000) != ANIM_MT_UNUSED)
-        MyAssertHandler(
-            ".\\bgame\\bg_animation_mp.cpp",
-            3148,
-            0,
-            "%s",
-            "BG_GetConditionBit( ci, ANIM_COND_MOVETYPE ) >= ANIM_MT_UNUSED");
-    if ((int)BG_GetConditionBit(ci, ANIM_COND_MOVETYPE) >= NUM_ANIM_MOVETYPES)
-        MyAssertHandler(
-            ".\\bgame\\bg_animation_mp.cpp",
-            3149,
-            0,
-            "%s",
-            "BG_GetConditionBit( ci, ANIM_COND_MOVETYPE ) < NUM_ANIM_MOVETYPES");
+    ret = BG_GetConditionBit(ci, ANIM_COND_MOVETYPE);
+    iassert(ret < NUM_ANIM_MOVETYPES);
 
     BG_SetConditionBit(es->clientNum, 0, weaponDef->playerAnimType);
     BG_SetConditionBit(es->clientNum, 1, weaponDef->weapClass);
@@ -2154,21 +2094,11 @@ void __cdecl BG_AnimPlayerConditions(const entityState_s *es, clientInfo_t *ci)
         && BG_GetConditionValue(ci, 3u) != bgs->animScriptData.animations[legsAnim].movetype)
     {
         BG_SetConditionValue(es->clientNum, 3u, bgs->animScriptData.animations[legsAnim].movetype);
-        if ((BG_GetConditionBit(ci, ANIM_COND_MOVETYPE) & 0x80000000) != ANIM_MT_UNUSED)
-            MyAssertHandler(
-                ".\\bgame\\bg_animation_mp.cpp",
-                3188,
-                0,
-                "%s",
-                "BG_GetConditionBit( ci, ANIM_COND_MOVETYPE ) >= ANIM_MT_UNUSED");
+        uint32_t ret = BG_GetConditionBit(ci, ANIM_COND_MOVETYPE);
+        iassert(ret >= ANIM_MT_UNUSED);
 
-        if ((int)BG_GetConditionBit(ci, ANIM_COND_MOVETYPE) >= NUM_ANIM_MOVETYPES)
-            MyAssertHandler(
-                ".\\bgame\\bg_animation_mp.cpp",
-                3189,
-                0,
-                "%s",
-                "BG_GetConditionBit( ci, ANIM_COND_MOVETYPE ) < NUM_ANIM_MOVETYPES");
+        ret = BG_GetConditionBit(ci, ANIM_COND_MOVETYPE);
+        iassert(ret < NUM_ANIM_MOVETYPES);
     }
     if ((bgs->animScriptData.animations[legsAnim].flags & 0x10) != 0)
     {

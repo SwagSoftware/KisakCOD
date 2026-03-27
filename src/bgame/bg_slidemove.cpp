@@ -51,8 +51,8 @@ void __cdecl PM_StepSlideMove(pmove_t *pm, pml_t *pml, int32_t gravity)
 
     fStepAmount = 0.0;
     ps = pm->ps;
-    if (!ps)
-        MyAssertHandler(".\\bgame\\bg_slidemove.cpp", 310, 0, "%s", "ps");
+    iassert(ps);
+
     jumping = 0;
     if ((ps->pm_flags & PMF_LADDER) != 0)
     {
@@ -251,13 +251,13 @@ void __cdecl PM_StepSlideMove(pmove_t *pm, pml_t *pml, int32_t gravity)
 int __cdecl PM_VerifyPronePosition(pmove_t *pm, float *vFallbackOrg, float *vFallbackVel)
 {
     int result; // eax
-    playerState_s *ps; // [esp+38h] [ebp-4h]
 
-    ps = pm->ps;
-    if (!pm->ps)
-        MyAssertHandler(".\\bgame\\bg_slidemove.cpp", 30, 0, "%s", "ps");
+    playerState_s* ps = pm->ps;
+    iassert(ps);
+
     if ((ps->pm_flags & PMF_PRONE) == 0)
         return 1;
+
     result = BG_CheckProne(
         ps->clientNum,
         ps->origin,
@@ -272,6 +272,7 @@ int __cdecl PM_VerifyPronePosition(pmove_t *pm, float *vFallbackOrg, float *vFal
         pm->handler,
         PCT_CLIENT,
         50.0);
+
     if (!(_BYTE)result)
     {
         ps->origin[0] = *vFallbackOrg;
@@ -281,6 +282,7 @@ int __cdecl PM_VerifyPronePosition(pmove_t *pm, float *vFallbackOrg, float *vFal
         ps->velocity[1] = vFallbackVel[1];
         ps->velocity[2] = vFallbackVel[2];
     }
+
     return (unsigned __int8)result;
 }
 
@@ -314,8 +316,8 @@ bool __cdecl PM_SlideMove(pmove_t *pm, pml_t *pml, int32_t gravity)
     float into; // [esp+158h] [ebp-4h]
 
     ps = pm->ps;
-    if (!ps)
-        MyAssertHandler(".\\bgame\\bg_slidemove.cpp", 112, 0, "%s", "ps");
+    iassert(ps);
+
     numbumps = 4;
     primal_velocity[0] = ps->velocity[0];
     primal_velocity[1] = ps->velocity[1];
@@ -456,20 +458,11 @@ double __cdecl PM_PermuteRestrictiveClipPlanes(
     float parallel[8]; // [esp+8h] [ebp-24h]
     int32_t planeIndex; // [esp+28h] [ebp-4h]
 
-    if (!velocity)
-        MyAssertHandler(".\\bgame\\bg_slidemove.cpp", 57, 0, "%s", "velocity");
-    if (planeCount <= 0 || planeCount > 8)
-        MyAssertHandler(
-            ".\\bgame\\bg_slidemove.cpp",
-            58,
-            0,
-            "%s\n\t(planeCount) = %i",
-            "(planeCount > 0 && planeCount <= 8)",
-            planeCount);
-    if (!planes)
-        MyAssertHandler(".\\bgame\\bg_slidemove.cpp", 59, 0, "%s", "planes");
-    if (!permutation)
-        MyAssertHandler(".\\bgame\\bg_slidemove.cpp", 60, 0, "%s", "permutation");
+    iassert(velocity);
+    iassert(planeCount > 0 && planeCount <= 8);
+    iassert(planes);
+    iassert(permutation);
+
     for (planeIndex = 0; planeIndex < planeCount; ++planeIndex)
     {
         v4 = Vec3Dot(velocity, &(*planes)[3 * planeIndex]);
