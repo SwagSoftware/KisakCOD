@@ -3,6 +3,11 @@
 
 #define WP_NONE 0
 
+enum playerWeaponFlags_t : __int32
+{
+    PWF_USING_OFFHAND = 0x2,
+};
+
 enum weapType_t : __int32
 {                                       // ...
     WEAPTYPE_BULLET = 0x0,

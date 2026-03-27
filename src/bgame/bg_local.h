@@ -27,6 +27,8 @@ constexpr auto JUMP_LAND_SLOWDOWN_TIME = 1800;
 constexpr auto MAX_FRIENDLY_DIST = 15000.0;
 
 #define MAX_CLIENTS 64
+#define WEAPONSTATE_RAISING(x) (x == WEAPON_RAISING || x == WEAPON_RAISING_ALTSWITCH)
+#define WEAPONSTATE_DROPPING(x) (x == WEAPON_DROPPING || x == WEAPON_DROPPING_QUICK)
 
 // Kiask: Custom enum
 typedef enum {

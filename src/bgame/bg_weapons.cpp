@@ -78,12 +78,10 @@ void __cdecl BG_ParsePenetrationDepthTable(const char *penetrateType, float *dep
     char dest[7428]; // [esp+4h] [ebp-1E68h] BYREF
     cspField_t pFieldList[29]; // [esp+1D0Ch] [ebp-160h] BYREF
 
-    if (!penetrateType)
-        MyAssertHandler(".\\bgame\\bg_weapons.cpp", 90, 0, "%s", "penetrateType");
-    if (!depthTable)
-        MyAssertHandler(".\\bgame\\bg_weapons.cpp", 91, 0, "%s", "depthTable");
-    if (!buffer)
-        MyAssertHandler(".\\bgame\\bg_weapons.cpp", 92, 0, "%s", "buffer");
+    iassert(penetrateType);
+    iassert(depthTable);
+    iassert(buffer);
+
     for (iTypeIndex = 0; iTypeIndex < 29; ++iTypeIndex)
     {
         v3 = Com_SurfaceTypeToName(iTypeIndex);
@@ -106,12 +104,10 @@ char __cdecl BG_AdvanceTrace(BulletFireParams *bp, BulletTraceResults *br, float
     float offseta; // [esp+14h] [ebp-8h]
     float dot; // [esp+18h] [ebp-4h]
 
-    if (!bp)
-        MyAssertHandler(".\\bgame\\bg_weapons.cpp", 134, 0, "%s", "bp");
-    if (!br)
-        MyAssertHandler(".\\bgame\\bg_weapons.cpp", 135, 0, "%s", "br");
-    if (br->trace.hitType == TRACE_HITTYPE_NONE)
-        MyAssertHandler(".\\bgame\\bg_weapons.cpp", 136, 0, "%s", "br->trace.hitType != TRACE_HITTYPE_NONE");
+    iassert(bp);
+    iassert(br);
+    iassert(br->trace.hitType != TRACE_HITTYPE_NONE);
+
     bp->ignoreEntIndex = Trace_GetEntityHitId(&br->trace);
     if (bp->ignoreEntIndex == ENTITYNUM_WORLD && dist > 0.0)
     {
@@ -136,26 +132,11 @@ char __cdecl BG_AdvanceTrace(BulletFireParams *bp, BulletTraceResults *br, float
 
 double __cdecl BG_GetSurfacePenetrationDepth(const WeaponDef *weapDef, uint32_t surfaceType)
 {
-    if (!weapDef)
-        MyAssertHandler(".\\bgame\\bg_weapons.cpp", 166, 0, "%s", "weapDef");
-    if (weapDef->penetrateType == PENETRATE_TYPE_NONE)
-        MyAssertHandler(".\\bgame\\bg_weapons.cpp", 167, 0, "%s", "weapDef->penetrateType != PENETRATE_TYPE_NONE");
-    if (weapDef->penetrateType >= (uint32_t)PENETRATE_TYPE_COUNT)
-        MyAssertHandler(
-            ".\\bgame\\bg_weapons.cpp",
-            168,
-            0,
-            "weapDef->penetrateType doesn't index PENETRATE_TYPE_COUNT\n\t%i not in [0, %i)",
-            weapDef->penetrateType,
-            4);
-    if (surfaceType >= 0x1D)
-        MyAssertHandler(
-            ".\\bgame\\bg_weapons.cpp",
-            169,
-            0,
-            "surfaceType doesn't index SURF_TYPECOUNT\n\t%i not in [0, %i)",
-            surfaceType,
-            29);
+    iassert(weapDef);
+    iassert(weapDef->penetrateType != PENETRATE_TYPE_NONE);
+    bcassert(weapDef->penetrateType, PENETRATE_TYPE_COUNT);
+    bcassert(surfaceType, SURF_TYPECOUNT);
+
     if (surfaceType)
         return penetrationDepthTable[weapDef->penetrateType][surfaceType];
     else
@@ -177,8 +158,8 @@ void __cdecl BG_FreeWeaponDefStrings()
     for (i = 1; i <= bg_lastParsedWeaponIndex; ++i)
     {
         weapDef = bg_weaponDefs[i];
-        if (!weapDef)
-            MyAssertHandler(".\\bgame\\bg_weapons.cpp", 188, 0, "%s", "weapDef");
+        iassert(weapDef);
+
         for (j = 0; j < 8; ++j)
         {
             if (weapDef->hideTags[j])
@@ -346,15 +327,8 @@ void __cdecl PM_StartWeaponAnim(playerState_s *ps, int32_t anim)
 
 WeaponDef *__cdecl BG_GetWeaponDef(uint32_t weaponIndex)
 {
-    if (weaponIndex > bg_lastParsedWeaponIndex)
-        MyAssertHandler(
-            ".\\bgame\\bg_weapons.cpp",
-            479,
-            0,
-            "weaponIndex not in [0, bg_lastParsedWeaponIndex]\n\t%i not in [%i, %i]",
-            weaponIndex,
-            0,
-            bg_lastParsedWeaponIndex);
+    bcassert(weaponIndex, bg_lastParsedWeaponIndex);
+
     return bg_weaponDefs[weaponIndex];
 }
 
@@ -362,8 +336,8 @@ unsigned int __cdecl BG_GetWeaponIndex(const WeaponDef *weapDef)
 {
     unsigned int weapIndex; // [esp+0h] [ebp-4h]
 
-    if (!weapDef)
-        MyAssertHandler(".\\bgame\\bg_weapons.cpp", 490, 0, "%s", "weapDef");
+    iassert(weapDef);
+
     for (weapIndex = 0; weapIndex <= bg_lastParsedWeaponIndex; ++weapIndex)
     {
         if (weapDef == bg_weaponDefs[weapIndex])
@@ -379,14 +353,8 @@ unsigned int __cdecl BG_GetNumWeapons()
 
 int32_t __cdecl BG_GetSharedAmmoCapSize(uint32_t capIndex)
 {
-    if (capIndex >= bg_numSharedAmmoCaps)
-        MyAssertHandler(
-            ".\\bgame\\bg_weapons.cpp",
-            523,
-            0,
-            "capIndex doesn't index bg_numSharedAmmoCaps\n\t%i not in [0, %i)",
-            capIndex,
-            bg_numSharedAmmoCaps);
+    bcassert(capIndex, bg_numSharedAmmoCaps);
+
     return bg_sharedAmmoCaps[capIndex]->iSharedAmmoCap;
 }
 
@@ -437,20 +405,16 @@ uint32_t __cdecl BG_SetupWeaponDef(WeaponDef *weapDef, void(__cdecl *regWeap)(ui
 {
     uint32_t weapIndex; // [esp+0h] [ebp-4h]
 
-    if (++bg_lastParsedWeaponIndex >= 0x80)
-        MyAssertHandler(
-            ".\\bgame\\bg_weapons.cpp",
-            419,
-            0,
-            "bg_lastParsedWeaponIndex doesn't index ARRAY_COUNT( bg_weaponDefs )\n\t%i not in [0, %i)",
-            bg_lastParsedWeaponIndex,
-            128);
+    bcassert(bg_lastParsedWeaponIndex, ARRAY_COUNT(bg_weaponDefs));
+
     weapIndex = bg_lastParsedWeaponIndex;
     bg_weaponDefs[bg_lastParsedWeaponIndex] = weapDef;
     BG_SetupWeaponIndex(weapIndex);
     BG_SetupWeaponAlts(weapIndex, regWeap);
+
     if (regWeap)
         regWeap(weapIndex);
+
     return weapIndex;
 }
 
@@ -488,15 +452,15 @@ int32_t __cdecl BG_GetFirstAvailableOffhand(const playerState_s *ps, int32_t off
     int32_t weapCount; // [esp+0h] [ebp-Ch]
     int32_t weapIndex; // [esp+4h] [ebp-8h]
 
-    if (!ps)
-        MyAssertHandler(".\\bgame\\bg_weapons.cpp", 670, 0, "%s", "ps");
+    iassert(ps);
+
     weapCount = BG_GetNumWeapons();
     for (weapIndex = 1; weapIndex < weapCount; ++weapIndex)
     {
         if (BG_GetWeaponDef(weapIndex)->offhandClass == offhandClass)
         {
-            if (!ps)
-                MyAssertHandler("c:\\trees\\cod3\\src\\bgame\\../bgame/bg_weapons.h", 229, 0, "%s", "ps");
+            iassert(ps);
+
             if (Com_BitCheckAssert(ps->weapons, weapIndex, 16)
                 && (ps->throwBackGrenadeTimeLeft > 0 || BG_WeaponAmmo(ps, weapIndex) > 0))
             {
@@ -518,8 +482,8 @@ int32_t __cdecl BG_GetFirstEquippedOffhand(const playerState_s *ps, int32_t offh
     {
         if (BG_GetWeaponDef(weapIndex)->offhandClass == offhandClass)
         {
-            if (!ps)
-                MyAssertHandler("c:\\trees\\cod3\\src\\bgame\\../bgame/bg_weapons.h", 229, 0, "%s", "ps");
+            iassert(ps);
+
             if (Com_BitCheckAssert(ps->weapons, weapIndex, 16))
                 return weapIndex;
         }
@@ -546,8 +510,9 @@ bool __cdecl BG_IsWeaponValid(const playerState_s *ps, uint32_t weaponIndex)
 {
     if (!BG_ValidateWeaponNumber(weaponIndex))
         return 0;
-    if (!ps)
-        MyAssertHandler("c:\\trees\\cod3\\src\\bgame\\../bgame/bg_weapons.h", 229, 0, "%s", "ps");
+    
+    iassert(ps);
+
     return Com_BitCheckAssert(ps->weapons, weaponIndex, 16);
 }
 
@@ -562,12 +527,14 @@ int32_t __cdecl BG_TakePlayerWeapon(playerState_s *ps, uint32_t weaponIndex, int
     uint32_t curWeaponIndex; // [esp+4h] [ebp-8h]
     WeaponDef *weapDef; // [esp+8h] [ebp-4h]
 
-    if (!ps)
-        MyAssertHandler("c:\\trees\\cod3\\src\\bgame\\../bgame/bg_weapons.h", 229, 0, "%s", "ps");
+    iassert(ps);
+
     if (!Com_BitCheckAssert(ps->weapons, weaponIndex, 16))
         return 0;
+
     weapDef = BG_GetWeaponDef(weaponIndex);
     Com_BitClearAssert(ps->weapons, weaponIndex, 16);
+
     if (takeAwayAmmo)
     {
         v4 = AmmoAfterWeaponRemoved(ps, weaponIndex);
@@ -578,19 +545,23 @@ int32_t __cdecl BG_TakePlayerWeapon(playerState_s *ps, uint32_t weaponIndex, int
         curWeaponIndex;
         curWeaponIndex = BG_GetWeaponDef(curWeaponIndex)->altWeaponIndex)
     {
-        if (!ps)
-            MyAssertHandler("c:\\trees\\cod3\\src\\bgame\\../bgame/bg_weapons.h", 229, 0, "%s", "ps");
+        iassert(ps);
+
         if (!Com_BitCheckAssert(ps->weapons, curWeaponIndex, 16))
             break;
+
         if (takeAwayAmmo)
         {
             ps->ammo[BG_AmmoForWeapon(curWeaponIndex)] = 0;
             ps->ammoclip[BG_ClipForWeapon(curWeaponIndex)] = 0;
         }
+
         Com_BitClearAssert(ps->weapons, curWeaponIndex, 16);
     }
+
     if (weaponIndex == ps->weapon)
         ps->weapon = 0;
+
     return 1;
 }
 
@@ -625,8 +596,8 @@ int32_t __cdecl BG_GetAmmoPlayerMax(const playerState_s *ps, uint32_t weaponInde
     {
         if (thisWeapIdx != weaponIndexToSkip)
         {
-            if (!ps)
-                MyAssertHandler("c:\\trees\\cod3\\src\\bgame\\../bgame/bg_weapons.h", 229, 0, "%s", "ps");
+            iassert(ps);
+
             if (Com_BitCheckAssert(ps->weapons, thisWeapIdx, 16))
             {
                 thisWeapDef = BG_GetWeaponDef(thisWeapIdx);
@@ -663,8 +634,8 @@ int32_t __cdecl BG_GetMaxPickupableAmmo(const playerState_s *ps, uint32_t weapon
         ammo = BG_GetSharedAmmoCapSize(weapDef->iSharedAmmoCapIndex);
         for (currWeap = 1; currWeap <= bg_lastParsedWeaponIndex; ++currWeap)
         {
-            if (!ps)
-                MyAssertHandler("c:\\trees\\cod3\\src\\bgame\\../bgame/bg_weapons.h", 229, 0, "%s", "ps");
+            iassert(ps);
+
             if (Com_BitCheckAssert(ps->weapons, currWeap, 16))
             {
                 curWeapDef = BG_GetWeaponDef(currWeap);
@@ -726,8 +697,8 @@ int32_t __cdecl BG_GetTotalAmmoReserve(const playerState_s *ps, uint32_t weaponI
     {
         for (currWeap = 1; currWeap <= bg_lastParsedWeaponIndex; ++currWeap)
         {
-            if (!ps)
-                MyAssertHandler("c:\\trees\\cod3\\src\\bgame\\../bgame/bg_weapons.h", 229, 0, "%s", "ps");
+            iassert(ps);
+
             if (Com_BitCheckAssert(ps->weapons, currWeap, 16))
             {
                 curWeapDef = BG_GetWeaponDef(currWeap);
@@ -801,12 +772,11 @@ void __cdecl PM_UpdateAimDownSightFlag(pmove_t *pm, pml_t *pml)
     bool adsRequested; // [esp+2h] [ebp-Eh]
     bool adsAllowed; // [esp+3h] [ebp-Dh]
     int weapIndex; // [esp+4h] [ebp-Ch]
-    playerState_s *ps; // [esp+8h] [ebp-8h]
     WeaponDef *weapDef; // [esp+Ch] [ebp-4h]
 
-    ps = pm->ps;
-    if (!pm->ps)
-        MyAssertHandler(".\\bgame\\bg_weapons.cpp", 1126, 0, "%s", "ps");
+    playerState_s* ps = pm->ps; // [esp+8h] [ebp-8h]
+    iassert(ps);
+
     weapIndex = BG_GetViewmodelWeaponIndex(ps);
     weapDef = BG_GetWeaponDef(weapIndex);
     ps->pm_flags &= ~PMF_SIGHT_AIMING;
@@ -823,15 +793,13 @@ void __cdecl PM_UpdateAimDownSightFlag(pmove_t *pm, pml_t *pml)
         if ((ps->pm_flags & PMF_PRONE) == 0 || BG_UsingSniperScope(ps))
         {
             ps->pm_flags |= PMF_SIGHT_AIMING;
-            if ((ps->otherFlags & POF_PLAYER) == 0)
-                MyAssertHandler(".\\bgame\\bg_weapons.cpp", 1161, 0, "%s", "ps->otherFlags & POF_PLAYER");
+            iassert(ps->otherFlags & POF_PLAYER);
         }
         else if ((pm->oldcmd.buttons & 0x800) == 0 || !pm->cmd.forwardmove && !pm->cmd.rightmove)
         {
             ps->pm_flags |= PMF_SIGHT_AIMING;
             ps->pm_flags |= PMF_PRONEMOVE_OVERRIDDEN;
-            if ((ps->otherFlags & POF_PLAYER) == 0)
-                MyAssertHandler(".\\bgame\\bg_weapons.cpp", 1153, 0, "%s", "ps->otherFlags & POF_PLAYER");
+            iassert(ps->otherFlags & POF_PLAYER);
         }
     }
 #ifdef KISAK_MP
@@ -848,10 +816,9 @@ bool __cdecl PM_IsAdsAllowed(playerState_s *ps, pml_t *pml)
     int weapIndex; // [esp+8h] [ebp-8h]
     WeaponDef *weapDef; // [esp+Ch] [ebp-4h]
 
-    if (!ps)
-        MyAssertHandler(".\\bgame\\bg_weapons.cpp", 1046, 0, "%s", "ps");
-    if (!pml)
-        MyAssertHandler(".\\bgame\\bg_weapons.cpp", 1047, 0, "%s", "pml");
+    iassert(ps);
+    iassert(pml);
+
     switch (ps->pm_type)
     {
     case 1:
@@ -940,8 +907,8 @@ void __cdecl PM_UpdateAimDownSightLerp(pmove_t *pm, pml_t *pml)
     playerState_s *ps; // [esp+24h] [ebp-8h]
 
     ps = pm->ps;
-    if (!pm->ps)
-        MyAssertHandler(".\\bgame\\bg_weapons.cpp", 1191, 0, "%s", "ps");
+    iassert(ps);
+
     weapIndex = BG_GetViewmodelWeaponIndex(ps);
     weapDef = BG_GetWeaponDef(weapIndex);
     if (player_scopeExitOnDamage->current.enabled && ps->damageCount && weapDef->overlayReticle)
@@ -1091,8 +1058,8 @@ void __cdecl PM_AdjustAimSpreadScale(pmove_t *pm, pml_t *pml)
     float viewchange; // [esp+5Ch] [ebp-4h]
 
     ps = pm->ps;
-    if (!pm->ps)
-        MyAssertHandler(".\\bgame\\bg_weapons.cpp", 2363, 0, "%s", "ps");
+    iassert(ps);
+
     weapDef = BG_GetWeaponDef(ps->weapon);
     spreadOverrideScale = 1.0;
     wpnScale = weapDef->fHipSpreadDecayRate;
@@ -1194,10 +1161,9 @@ bool __cdecl ShotLimitReached(playerState_s *ps, WeaponDef *weapDef)
 {
     bool result; // al
 
-    if (!ps)
-        MyAssertHandler(".\\bgame\\bg_weapons.cpp", 2468, 0, "%s", "ps");
-    if (!weapDef)
-        MyAssertHandler(".\\bgame\\bg_weapons.cpp", 2469, 0, "%s", "weapDef");
+    iassert(ps);
+    iassert(weapDef);
+
     switch (weapDef->fireType)
     {
     case WEAPON_FIRETYPE_SINGLESHOT:
@@ -1230,11 +1196,9 @@ bool __cdecl ShotLimitReached(playerState_s *ps, WeaponDef *weapDef)
 
 int32_t __cdecl PM_GetWeaponFireButton(uint32_t weapon)
 {
-    WeaponDef *weapDef; // [esp+0h] [ebp-4h]
+    WeaponDef* weapDef = BG_GetWeaponDef(weapon); // [esp+0h] [ebp-4h]
+    iassert(weapDef);
 
-    weapDef = BG_GetWeaponDef(weapon);
-    if (!weapDef)
-        MyAssertHandler(".\\bgame\\bg_weapons.cpp", 2752, 0, "%s", "weapDef");
     if (weapDef->weapType == WEAPTYPE_GRENADE && weapDef->hasDetonator)
         return 0x80000;
     else
@@ -1272,13 +1236,12 @@ void __cdecl PM_Weapon_Idle(playerState_s *ps)
 
 void __cdecl PM_Weapon(pmove_t *pm, pml_t *pml)
 {
-    const char *v2; // eax
-    int delayedAction; // [esp+4h] [ebp-8h]
-    playerState_s *ps; // [esp+8h] [ebp-4h]
+    const char *v2 = NULL; // eax
+    int delayedAction = 0; // [esp+4h] [ebp-8h]
 
-    ps = pm->ps;
-    if (!pm->ps)
-        MyAssertHandler(".\\bgame\\bg_weapons.cpp", 3954, 0, "%s", "ps");
+    playerState_s* ps = pm->ps; // [esp+8h] [ebp-4h]
+    iassert(ps);
+
     if (ps->weaponstate != 16
         && ps->weaponstate != 18
         && ps->weaponstate != 19
@@ -1319,13 +1282,9 @@ void __cdecl PM_Weapon(pmove_t *pm, pml_t *pml)
                     {
                         ps->aimSpreadScale = 255.0;
                     }
-                    if (ps->weaponTime < 0 || ps->weaponDelay < 0)
-                        MyAssertHandler(
-                            ".\\bgame\\bg_weapons.cpp",
-                            4018,
-                            0,
-                            "%s",
-                            "(ps->weaponTime >= 0) && (ps->weaponDelay >= 0)");
+
+                    iassert((ps->weaponTime >= 0) && (ps->weaponDelay >= 0));
+
                     if (delayedAction || !ps->weaponTime && !ps->weaponDelay)
                     {
                         switch (ps->weaponstate)
@@ -1397,13 +1356,9 @@ void __cdecl PM_Weapon(pmove_t *pm, pml_t *pml)
                                     if (!PM_Weapon_CheckGrenadeHold(pm, delayedAction) && (ps->pm_flags & PMF_FROZEN) == 0)
                                     {
                                         PM_Weapon_FireWeapon(ps, delayedAction);
-                                        if (ps->weaponTime < 0 || ps->weaponDelay < 0)
-                                            MyAssertHandler(
-                                                ".\\bgame\\bg_weapons.cpp",
-                                                4131,
-                                                0,
-                                                "%s",
-                                                "(ps->weaponTime >= 0) && (ps->weaponDelay >= 0)");
+
+                                        iassert((ps->weaponTime >= 0) && (ps->weaponDelay >= 0));
+
                                     }
                                 }
                             }
@@ -1430,11 +1385,10 @@ void __cdecl PM_UpdateHoldBreath(pmove_t *pm, pml_t *pml)
     float targetScalea; // [esp+24h] [ebp-10h]
     int breathHoldTime; // [esp+28h] [ebp-Ch]
     WeaponDef *weapDef; // [esp+2Ch] [ebp-8h]
-    playerState_s *ps; // [esp+30h] [ebp-4h]
 
-    ps = pm->ps;
-    if (!pm->ps)
-        MyAssertHandler(".\\bgame\\bg_weapons.cpp", 1313, 0, "%s", "ps");
+    playerState_s* ps = pm->ps; // [esp+30h] [ebp-4h]
+    iassert(ps);
+
     weapIndex = BG_GetViewmodelWeaponIndex(ps);
     weapDef = BG_GetWeaponDef(weapIndex);
     breathHoldTime = (int)(player_breath_hold_time->current.value * 1000.0);
@@ -1511,8 +1465,8 @@ int32_t __cdecl PM_Weapon_CheckForRechamber(playerState_s *ps, int32_t delayedAc
     if (weapDef->bBoltAction)
     {
         bitNum = ps->weapon;
-        if (!ps)
-            MyAssertHandler("c:\\trees\\cod3\\src\\bgame\\../bgame/bg_weapons.h", 243, 0, "%s", "ps");
+        iassert(ps);
+
         if (Com_BitCheckAssert(ps->weaponrechamber, bitNum, 16))
         {
             if (ps->weaponstate == 6)
@@ -1585,10 +1539,9 @@ void __cdecl PM_Weapon_FinishWeaponChange(pmove_t *pm, bool quick)
     unsigned int newweapon; // [esp+38h] [ebp-4h]
 
     ps = pm->ps;
-    if (!pm->ps)
-        MyAssertHandler(".\\bgame\\bg_weapons.cpp", 1928, 0, "%s", "ps");
-    if (ps->weaponstate != 3 && ps->weaponstate != 4)
-        MyAssertHandler(".\\bgame\\bg_weapons.cpp", 1930, 0, "%s", "WEAPONSTATE_DROPPING( ps->weaponstate )");
+    iassert(ps);
+    iassert(WEAPONSTATE_DROPPING(ps->weaponstate));
+
     BG_GetWeaponDef(ps->weapon);
     if (Mantle_IsWeaponInactive(ps))
     {
@@ -1599,8 +1552,9 @@ void __cdecl PM_Weapon_FinishWeaponChange(pmove_t *pm, bool quick)
         if ((ps->pm_flags & PMF_LADDER) != 0)
             goto LABEL_13;
         bitNum = pm->cmd.weapon;
-        if (!ps)
-            MyAssertHandler("c:\\trees\\cod3\\src\\bgame\\../bgame/bg_weapons.h", 229, 0, "%s", "ps");
+
+        iassert(ps);
+
         if (Com_BitCheckAssert(ps->weapons, bitNum, 16))
         {
             if ((ps->weapFlags & 0x80) != 0)
@@ -1620,14 +1574,15 @@ void __cdecl PM_Weapon_FinishWeaponChange(pmove_t *pm, bool quick)
             newweapon = 0;
         }
     }
-    if (!ps)
-        MyAssertHandler("c:\\trees\\cod3\\src\\bgame\\../bgame/bg_weapons.h", 229, 0, "%s", "ps");
+    iassert(ps);
+
     if (!Com_BitCheckAssert(ps->weapons, newweapon, 16))
         newweapon = 0;
     oldweapon = ps->weapon;
     ps->weapon = (unsigned __int8)newweapon;
-    if (ps->weapon != newweapon)
-        MyAssertHandler(".\\bgame\\bg_weapons.cpp", 1957, 0, "%s", "ps->weapon == newweapon");
+
+    iassert(ps->weapon == newweapon);
+
     weapDef = (int *)BG_GetWeaponDef(ps->weapon);
     if (oldweapon == newweapon)
     {
@@ -1637,8 +1592,8 @@ void __cdecl PM_Weapon_FinishWeaponChange(pmove_t *pm, bool quick)
     else
     {
         weapon = ps->weapon;
-        if (!ps)
-            MyAssertHandler("c:\\trees\\cod3\\src\\bgame\\../bgame/bg_weapons.h", 236, 0, "%s", "ps");
+        iassert(ps);
+
         firstequip = !Com_BitCheckAssert(ps->weaponold, weapon, 16);
         Com_BitSetAssert(ps->weaponold, ps->weapon, 16);
         if ((ps->pm_flags & PMF_SPRINTING) == 0 && oldweapon)
@@ -1715,10 +1670,9 @@ void __cdecl PM_Weapon_BeginWeaponRaise(
     float aim,
     int32_t altSwitch)
 {
-    if (!ps)
-        MyAssertHandler(".\\bgame\\bg_weapons.cpp", 1869, 0, "%s", "ps");
-    if (aim < 0.0)
-        MyAssertHandler(".\\bgame\\bg_weapons.cpp", 1870, 0, "%s", "aim >= 0");
+    iassert(ps);
+    iassert(aim >= 0);
+
     ps->weaponstate = (weaponstate_t)((altSwitch != 0) + 1);
     ps->weaponTime = time;
     ps->aimSpreadScale = aim;
@@ -1730,8 +1684,8 @@ void __cdecl BG_TakeClipOnlyWeaponIfEmpty(playerState_s *ps, int32_t weaponIndex
 {
     if (weaponIndex)
     {
-        if (!ps)
-            MyAssertHandler("c:\\trees\\cod3\\src\\bgame\\../bgame/bg_weapons.h", 229, 0, "%s", "ps");
+        iassert(ps);
+
         if (Com_BitCheckAssert(ps->weapons, weaponIndex, 16)
             && BG_WeaponIsClipOnly(weaponIndex)
             && !ps->ammoclip[BG_ClipForWeapon(weaponIndex)]
@@ -1745,8 +1699,8 @@ void __cdecl BG_TakeClipOnlyWeaponIfEmpty(playerState_s *ps, int32_t weaponIndex
 
 void __cdecl PM_Weapon_FinishWeaponRaise(playerState_s *ps)
 {
-    if (ps->weaponstate != 1 && ps->weaponstate != 2)
-        MyAssertHandler(".\\bgame\\bg_weapons.cpp", 2041, 0, "%s", "WEAPONSTATE_RAISING( ps->weaponstate )");
+    iassert(WEAPONSTATE_RAISING(ps->weaponstate));
+
     ps->weaponstate = WEAPON_READY;
     PM_StartWeaponAnim(ps, 0);
 }
@@ -1757,16 +1711,12 @@ void __cdecl PM_Weapon_FinishReloadStart(pmove_t *pm, int32_t delayedAction)
     playerState_s *ps; // [esp+4h] [ebp-4h]
 
     ps = pm->ps;
-    if (!pm->ps)
-        MyAssertHandler(".\\bgame\\bg_weapons.cpp", 2158, 0, "%s", "ps");
+    iassert(ps);
+
     weapDef = BG_GetWeaponDef(ps->weapon);
-    if (ps->weaponstate != WEAPON_RELOAD_START && ps->weaponstate != WEAPON_RELOAD_START_INTERUPT)
-        MyAssertHandler(
-            ".\\bgame\\bg_weapons.cpp",
-            2161,
-            0,
-            "%s",
-            "(ps->weaponstate == WEAPON_RELOAD_START) || (ps->weaponstate == WEAPON_RELOAD_START_INTERUPT)");
+
+    iassert((ps->weaponstate == WEAPON_RELOAD_START) || (ps->weaponstate == WEAPON_RELOAD_START_INTERUPT));
+
     if (delayedAction)
         PM_Weapon_ReloadDelayedAction(ps);
     if (!ps->weaponTime)
@@ -1854,8 +1804,9 @@ void __cdecl PM_SetWeaponReloadAddAmmoDelay(playerState_s *ps)
     if (!weapDef->bBoltAction)
         goto LABEL_26;
     bitNum = ps->weapon;
-    if (!ps)
-        MyAssertHandler("c:\\trees\\cod3\\src\\bgame\\../bgame/bg_weapons.h", 243, 0, "%s", "ps");
+    
+    iassert(ps);
+
     if (Com_BitCheckAssert(ps->weaponrechamber, bitNum, 16))
     {
         if (!reloadTime)
@@ -1909,9 +1860,11 @@ void __cdecl PM_Weapon_ReloadDelayedAction(playerState_s *ps)
     weapDef = BG_GetWeaponDef(ps->weapon);
     if (!weapDef->bBoltAction)
         goto LABEL_28;
+
     bitNum = ps->weapon;
-    if (!ps)
-        MyAssertHandler("c:\\trees\\cod3\\src\\bgame\\../bgame/bg_weapons.h", 243, 0, "%s", "ps");
+    
+    iassert(ps);
+
     if (!Com_BitCheckAssert(ps->weaponrechamber, bitNum, 16))
     {
     LABEL_28:
@@ -1926,8 +1879,8 @@ void __cdecl PM_Weapon_ReloadDelayedAction(playerState_s *ps)
         {
             if (ps->weaponstate == 9 || ps->weaponstate == 10)
             {
-                if (!weapDef->iReloadStartAddTime)
-                    MyAssertHandler(".\\bgame\\bg_weapons.cpp", 2107, 0, "%s", "weapDef->iReloadStartAddTime");
+                iassert(weapDef->iReloadStartAddTime);
+
                 reloadTime = weapDef->iReloadStartAddTime >= weapDef->iReloadStartTime
                     ? weapDef->iReloadStartTime
                     : weapDef->iReloadStartAddTime;
@@ -1994,15 +1947,10 @@ void __cdecl PM_Weapon_FinishReload(pmove_t *pm, int32_t delayedAction)
     playerState_s *ps; // [esp+4h] [ebp-4h]
 
     ps = pm->ps;
-    if (!pm->ps)
-        MyAssertHandler(".\\bgame\\bg_weapons.cpp", 2204, 0, "%s", "ps");
-    if (ps->weaponstate != 7 && ps->weaponstate != 8)
-        MyAssertHandler(
-            ".\\bgame\\bg_weapons.cpp",
-            2206,
-            0,
-            "%s",
-            "(ps->weaponstate == WEAPON_RELOADING) || (ps->weaponstate == WEAPON_RELOADING_INTERUPT)");
+    iassert(ps);
+    iassert((ps->weaponstate == WEAPON_RELOADING) || (ps->weaponstate == WEAPON_RELOADING_INTERUPT));
+
+
     weapDef = BG_GetWeaponDef(ps->weapon);
     if (!delayedAction || (PM_Weapon_ReloadDelayedAction(ps), !ps->weaponTime))
     {
@@ -2037,8 +1985,8 @@ void __cdecl PM_Weapon_FinishReload(pmove_t *pm, int32_t delayedAction)
 
 void __cdecl PM_Weapon_FinishReloadEnd(playerState_s *ps)
 {
-    if (ps->weaponstate != 11)
-        MyAssertHandler(".\\bgame\\bg_weapons.cpp", 2257, 0, "%s", "ps->weaponstate == WEAPON_RELOAD_END");
+    iassert(ps->weaponstate == WEAPON_RELOAD_END);
+
     ps->weaponstate = WEAPON_READY;
     PM_StartWeaponAnim(ps, 0);
 }
@@ -2159,27 +2107,27 @@ void __cdecl PM_BeginWeaponReload(playerState_s *ps)
 
 bool __cdecl BurstFirePending(playerState_s *ps)
 {
-    WeaponDef *weapDef; // [esp+0h] [ebp-4h]
+    iassert(ps);
 
-    if (!ps)
-        MyAssertHandler(".\\bgame\\bg_weapons.cpp", 2501, 0, "%s", "ps");
     if (!ps->weapon)
         return 0;
-    weapDef = BG_GetWeaponDef(ps->weapon);
+
+    WeaponDef* weapDef = BG_GetWeaponDef(ps->weapon); // [esp+0h] [ebp-4h]
+
     if (weapDef->fireType == WEAPON_FIRETYPE_FULLAUTO)
         return 0;
+
     if (ps->weaponShotCount)
         return !ShotLimitReached(ps, weapDef);
+
     return 0;
 }
 
 void __cdecl UpdatePendingTriggerPull(pmove_t *pm)
 {
-    playerState_s *ps; // [esp+4h] [ebp-4h]
+    playerState_s* ps = pm->ps; // [esp+4h] [ebp-4h]
+    iassert(ps);
 
-    ps = pm->ps;
-    if (!pm->ps)
-        MyAssertHandler(".\\bgame\\bg_weapons.cpp", 2546, 0, "%s", "ps");
     if (BG_GetWeaponDef(ps->weapon)->fireType >= (unsigned int)WEAPON_FIRETYPE_BURSTFIRE2
         && (pm->cmd.buttons & 1) != 0
         && (pm->oldcmd.buttons & 1) == 0)
@@ -2203,8 +2151,8 @@ int __cdecl PM_Weapon_WeaponTimeAdjust(pmove_t *pm, pml_t *pml)
     playerState_s *ps; // [esp+70h] [ebp-4h]
 
     ps = pm->ps;
-    if (!pm->ps)
-        MyAssertHandler(".\\bgame\\bg_weapons.cpp", 2575, 0, "%s", "ps");
+    iassert(ps);
+
     weapDef = BG_GetWeaponDef(ps->weapon);
     if (ps->weaponRestrictKickTime > 0)
     {
@@ -2215,11 +2163,11 @@ int __cdecl PM_Weapon_WeaponTimeAdjust(pmove_t *pm, pml_t *pml)
             weaponRestrictKickTime = ps->weaponRestrictKickTime;
         ps->weaponRestrictKickTime = weaponRestrictKickTime;
     }
-    if ((ps->weaponstate == 7
-        || ps->weaponstate == 9
-        || ps->weaponstate == 11
-        || ps->weaponstate == 10
-        || ps->weaponstate == 8)
+    if ((ps->weaponstate == WEAPON_RELOADING
+        || ps->weaponstate == WEAPON_RELOAD_START
+        || ps->weaponstate == WEAPON_RELOAD_END
+        || ps->weaponstate == WEAPON_RELOAD_START_INTERUPT
+        || ps->weaponstate == WEAPON_RELOADING_INTERUPT)
 #ifdef KISAK_MP
         && (ps->perks & 4) != 0)
 #elif KISAK_SP
@@ -2239,14 +2187,14 @@ int __cdecl PM_Weapon_WeaponTimeAdjust(pmove_t *pm, pml_t *pml)
             msec = (int)(pml->msec / perk_weapReloadMultiplier->current.value);
         }
     }
-    else if ((ps->weaponstate == 5
-        || ps->weaponstate == 6
-        || ps->weaponstate == 12
-        || ps->weaponstate == 13
-        || ps->weaponstate == 14)
-        && ps->weaponstate != 12
-        && ps->weaponstate != 13
-        && ps->weaponstate != 14
+    else if ((ps->weaponstate == WEAPON_FIRING
+        || ps->weaponstate == WEAPON_RECHAMBERING
+        || ps->weaponstate == WEAPON_MELEE_INIT
+        || ps->weaponstate == WEAPON_MELEE_FIRE
+        || ps->weaponstate == WEAPON_MELEE_END)
+        && ps->weaponstate != WEAPON_MELEE_INIT
+        && ps->weaponstate != WEAPON_MELEE_FIRE
+        && ps->weaponstate != WEAPON_MELEE_END
 #ifdef KISAK_MP
         && (ps->perks & 8) != 0)
 #elif KISAK_SP
@@ -2362,26 +2310,26 @@ void __cdecl PM_Weapon_CheckForChangeWeapon(pmove_t *pm)
     playerState_s *ps; // [esp+4h] [ebp-4h]
 
     ps = pm->ps;
-    if (!pm->ps)
-        MyAssertHandler(".\\bgame\\bg_weapons.cpp", 2698, 0, "%s", "ps");
-    if (ps->weaponstate != 12
-        && ps->weaponstate != 13
-        && ps->weaponstate != 14
-        && (ps->weaponstate < 15 || ps->weaponstate > 20)
-        && ps->weaponstate != 25
-        && ps->weaponstate != 26
+    iassert(ps);
+
+    if (ps->weaponstate != WEAPON_MELEE_INIT
+        && ps->weaponstate != WEAPON_MELEE_FIRE
+        && ps->weaponstate != WEAPON_MELEE_END
+        && (ps->weaponstate < WEAPON_OFFHAND_INIT || ps->weaponstate > WEAPON_OFFHAND_END)
+        && ps->weaponstate != WEAPON_NIGHTVISION_WEAR
+        && ps->weaponstate != WEAPON_NIGHTVISION_REMOVE
         && (!ps->weaponTime
-            || ps->weaponstate == 7
-            || ps->weaponstate == 9
-            || ps->weaponstate == 11
-            || ps->weaponstate == 10
-            || ps->weaponstate == 8
-            || ps->weaponstate == 6
-            || ps->weaponstate != 5
-            && ps->weaponstate != 6
-            && ps->weaponstate != 12
-            && ps->weaponstate != 13
-            && ps->weaponstate != 14
+            || ps->weaponstate == WEAPON_RELOADING
+            || ps->weaponstate == WEAPON_RELOAD_START
+            || ps->weaponstate == WEAPON_RELOAD_END
+            || ps->weaponstate == WEAPON_RELOAD_START_INTERUPT
+            || ps->weaponstate == WEAPON_RELOADING_INTERUPT
+            || ps->weaponstate == WEAPON_RECHAMBERING
+            || ps->weaponstate != WEAPON_FIRING
+            && ps->weaponstate != WEAPON_RECHAMBERING
+            && ps->weaponstate != WEAPON_MELEE_INIT
+            && ps->weaponstate != WEAPON_MELEE_FIRE
+            && ps->weaponstate != WEAPON_MELEE_END
             && !ps->weaponDelay))
     {
         if (Mantle_IsWeaponInactive(ps))
@@ -2411,8 +2359,8 @@ void __cdecl PM_Weapon_CheckForChangeWeapon(pmove_t *pm)
             else if (ps->weapon)
             {
                 bitNum = ps->weapon;
-                if (!ps)
-                    MyAssertHandler("c:\\trees\\cod3\\src\\bgame\\../bgame/bg_weapons.h", 229, 0, "%s", "ps");
+                iassert(ps);
+
                 if (!Com_BitCheckAssert(ps->weapons, bitNum, 16))
                     PM_BeginWeaponChange(ps, 0, 0);
             }
@@ -2426,7 +2374,6 @@ void __cdecl PM_Weapon_CheckForChangeWeapon(pmove_t *pm)
 
 void __cdecl PM_BeginWeaponChange(playerState_s *ps, uint32_t newweapon, bool quick)
 {
-    uint32_t NumWeapons; // eax
     int32_t quickDropTime; // edx
     bool v5; // [esp+0h] [ebp-14h]
     bool noammo; // [esp+4h] [ebp-10h]
@@ -2434,21 +2381,13 @@ void __cdecl PM_BeginWeaponChange(playerState_s *ps, uint32_t newweapon, bool qu
     uint32_t oldweapon; // [esp+Ch] [ebp-8h]
     WeaponDef *weapDefOld; // [esp+10h] [ebp-4h]
 
-    if (newweapon >= BG_GetNumWeapons())
-    {
-        NumWeapons = BG_GetNumWeapons();
-        MyAssertHandler(
-            ".\\bgame\\bg_weapons.cpp",
-            1783,
-            0,
-            "newweapon doesn't index BG_GetNumWeapons()\n\t%i not in [0, %i)",
-            newweapon,
-            NumWeapons);
-    }
+    bcassert(newweapon, BG_GetNumWeapons());
+
     if (!newweapon)
         goto LABEL_8;
-    if (!ps)
-        MyAssertHandler("c:\\trees\\cod3\\src\\bgame\\../bgame/bg_weapons.h", 229, 0, "%s", "ps");
+
+    iassert(ps);
+
     if (Com_BitCheckAssert(ps->weapons, newweapon, 16))
     {
     LABEL_8:
@@ -2456,11 +2395,11 @@ void __cdecl PM_BeginWeaponChange(playerState_s *ps, uint32_t newweapon, bool qu
         {
             if (newweapon && BG_GetWeaponDef(newweapon)->weapClass == WEAPCLASS_PISTOL)
                 quick = 1;
-            if (ps->weaponstate == 7
-                || ps->weaponstate == 9
-                || ps->weaponstate == 11
-                || ps->weaponstate == 10
-                || ps->weaponstate == 8)
+            if (ps->weaponstate == WEAPON_RELOADING
+                || ps->weaponstate == WEAPON_RELOAD_START
+                || ps->weaponstate == WEAPON_RELOAD_END
+                || ps->weaponstate == WEAPON_RELOAD_START_INTERUPT
+                || ps->weaponstate == WEAPON_RELOADING_INTERUPT)
             {
                 BG_AddPredictableEventToPlayerstate(2u, ps->weaponstate, ps);
             }
@@ -2468,8 +2407,9 @@ void __cdecl PM_BeginWeaponChange(playerState_s *ps, uint32_t newweapon, bool qu
             oldweapon = ps->weapon;
             if (!oldweapon)
                 goto LABEL_55;
-            if (!ps)
-                MyAssertHandler("c:\\trees\\cod3\\src\\bgame\\../bgame/bg_weapons.h", 229, 0, "%s", "ps");
+
+            iassert(ps);
+
             if (Com_BitCheckAssert(ps->weapons, oldweapon, 16) && ps->grenadeTimeLeft <= 0)
             {
                 weapDefOld = BG_GetWeaponDef(oldweapon);
@@ -2555,18 +2495,23 @@ int32_t __cdecl PM_Weapon_ShouldBeFiring(pmove_t *pm, int32_t delayedAction)
     WeaponDef *weapDef; // [esp+Ch] [ebp-4h]
 
     ps = pm->ps;
-    if (!pm->ps)
-        MyAssertHandler(".\\bgame\\bg_weapons.cpp", 2768, 0, "%s", "ps");
+    iassert(ps);
+
     weapDef = BG_GetWeaponDef(ps->weapon);
     shouldStartFiring = (pm->cmd.buttons & PM_GetWeaponFireButton(ps->weapon)) != 0;
     if (weapDef->freezeMovementWhenFiring && ps->groundEntityNum == ENTITYNUM_NONE)
         shouldStartFiring = 0;
+
     v3 = delayedAction || BurstFirePending(ps);
+
     if (shouldStartFiring || v3)
         return 1;
+
     if (ps->weaponstate == WEAPON_FIRING)
         PM_ContinueWeaponAnim(ps, 0);
+
     ps->weaponstate = WEAPON_READY;
+
     return 0;
 }
 
@@ -2657,11 +2602,9 @@ void __cdecl BG_SwitchWeaponsIfEmpty(playerState_s *ps)
 
 void __cdecl PM_Weapon_StartFiring(playerState_s *ps, int32_t delayedAction)
 {
-    WeaponDef *weapDef; // [esp+0h] [ebp-4h]
+    iassert(ps->weapon != WP_NONE);
 
-    if (!ps->weapon)
-        MyAssertHandler(".\\bgame\\bg_weapons.cpp", 2802, 0, "%s", "ps->weapon != WP_NONE");
-    weapDef = BG_GetWeaponDef(ps->weapon);
+    WeaponDef* weapDef = BG_GetWeaponDef(ps->weapon); // [esp+0h] [ebp-4h]
     if (weapDef->weapType != WEAPTYPE_GRENADE)
     {
         ps->weaponDelay = weapDef->iFireDelay;
@@ -2785,11 +2728,9 @@ void __cdecl PM_Weapon_AddFiringAimSpreadScale(playerState_s *ps)
 
 void __cdecl PM_Weapon_MeleeEnd(playerState_s *ps)
 {
-    WeaponDef *weapDef; // [esp+0h] [ebp-4h]
+    iassert(ps);
 
-    if (!ps)
-        MyAssertHandler(".\\bgame\\bg_weapons.cpp", 3067, 0, "%s", "ps");
-    weapDef = BG_GetWeaponDef(ps->weapon);
+    WeaponDef* weapDef = BG_GetWeaponDef(ps->weapon); // [esp+0h] [ebp-4h]
     if (weapDef->knifeModel)
     {
         ps->weaponstate = WEAPON_MELEE_END;
@@ -2806,8 +2747,8 @@ void __cdecl PM_Weapon_MeleeEnd(playerState_s *ps)
 
 void __cdecl PM_Weapon_MeleeFire(playerState_s *ps)
 {
-    if (!ps)
-        MyAssertHandler(".\\bgame\\bg_weapons.cpp", 3091, 0, "%s", "ps");
+    iassert(ps);
+
     BG_GetWeaponDef(ps->weapon);
     ps->weaponstate = WEAPON_MELEE_FIRE;
     PM_AddEvent(ps, 0x1Fu);
@@ -2820,12 +2761,13 @@ void __cdecl PM_Weapon_CheckForMelee(pmove_t *pm, int32_t delayedAction)
     WeaponDef *weapDef; // [esp+4h] [ebp-8h]
     playerState_s *ps; // [esp+8h] [ebp-4h]
 
-    if (!pm)
-        MyAssertHandler(".\\bgame\\bg_weapons.cpp", 3148, 0, "%s", "pm");
+    iassert(pm);
+
     ps = pm->ps;
-    if (!pm->ps)
-        MyAssertHandler(".\\bgame\\bg_weapons.cpp", 3151, 0, "%s", "ps");
+    iassert(ps);
+
     weapDef = BG_GetWeaponDef(ps->weapon);
+
     if (ps->weaponstate != WEAPON_MELEE_INIT
         && ps->weaponstate != WEAPON_MELEE_FIRE
         && ps->weaponstate != WEAPON_MELEE_END
@@ -2858,8 +2800,8 @@ void __cdecl PM_Weapon_MeleeInit(playerState_s *ps)
     bool v1; // [esp+0h] [ebp-Ch]
     WeaponDef *weapDef; // [esp+4h] [ebp-8h]
 
-    if (!ps)
-        MyAssertHandler(".\\bgame\\bg_weapons.cpp", 3107, 0, "%s", "ps");
+    iassert(ps);
+
     weapDef = BG_GetWeaponDef(ps->weapon);
     v1 = (ps->pm_flags & PMF_MELEE_CHARGE) != 0 && PM_WeaponHasChargeMelee(ps);
     if (v1)
@@ -2895,23 +2837,18 @@ void __cdecl PM_Weapon_MeleeInit(playerState_s *ps)
 
 bool __cdecl PM_WeaponHasChargeMelee(playerState_s *ps)
 {
-    WeaponDef *weapDef; // [esp+4h] [ebp-4h]
+    iassert(ps);
 
-    if (!ps)
-        MyAssertHandler(".\\bgame\\bg_weapons.cpp", 3055, 0, "%s", "ps");
-    weapDef = BG_GetWeaponDef(ps->weapon);
+    WeaponDef* weapDef = BG_GetWeaponDef(ps->weapon); // [esp+4h] [ebp-4h]
     return weapDef->szXAnims[8] && *weapDef->szXAnims[8] && weapDef->meleeChargeTime > 0;
 }
 
 void __cdecl PM_Weapon_OffHandPrepare(playerState_s *ps)
 {
-    WeaponDef *WeaponDef; // eax
+    iassert(ps);
+    iassert(ps->offHandIndex != WP_NONE);
 
-    if (!ps)
-        MyAssertHandler(".\\bgame\\bg_weapons.cpp", 3261, 0, "%s", "ps");
-    if (!ps->offHandIndex)
-        MyAssertHandler(".\\bgame\\bg_weapons.cpp", 3262, 0, "%s", "ps->offHandIndex != WP_NONE");
-    WeaponDef = BG_GetWeaponDef(ps->offHandIndex);
+    WeaponDef* WeaponDef = BG_GetWeaponDef(ps->offHandIndex); // eax
     ps->weaponstate = WEAPON_OFFHAND_PREPARE;
     ps->weaponTime = WeaponDef->iHoldFireTime;
     ps->weaponDelay = 0;
@@ -2930,16 +2867,17 @@ void __cdecl PM_Weapon_OffHandPrepare(playerState_s *ps)
 
 void __cdecl PM_Weapon_OffHandHold(playerState_s *ps)
 {
-    if (!ps)
-        MyAssertHandler(".\\bgame\\bg_weapons.cpp", 3289, 0, "%s", "ps");
-    if (!ps->offHandIndex)
-        MyAssertHandler(".\\bgame\\bg_weapons.cpp", 3290, 0, "%s", "ps->offHandIndex != WP_NONE");
+    iassert(ps);
+    iassert(ps->offHandIndex != WP_NONE);
+
     ps->weaponstate = WEAPON_OFFHAND_START;
     ps->weaponTime = 0;
     ps->weaponDelay = 0;
     ps->weapFlags |= 2u;
+
     if (!BG_ThrowingBackGrenade(ps))
         ps->grenadeTimeLeft = BG_GetWeaponDef(ps->offHandIndex)->fuseTime;
+
 #ifdef KISAK_MP
     if (G_IsServerGameSystem(ps->clientNum))
         Com_Printf(19, "end weapon (offhand hold)\n");
@@ -2977,13 +2915,12 @@ void __cdecl PM_Weapon_OffHand(pmove_t *pm)
 {
     playerState_s *ps; // [esp+4h] [ebp-4h]
 
-    if (!pm)
-        MyAssertHandler(".\\bgame\\bg_weapons.cpp", 3348, 0, "%s", "pm");
+    iassert(pm);
+
     ps = pm->ps;
-    if (!pm->ps)
-        MyAssertHandler(".\\bgame\\bg_weapons.cpp", 3352, 0, "%s", "ps");
-    if (!ps->offHandIndex)
-        MyAssertHandler(".\\bgame\\bg_weapons.cpp", 3353, 0, "%s", "ps->offHandIndex != WP_NONE");
+    iassert(ps);
+    iassert(ps->offHandIndex != WP_NONE);
+
     BG_GetWeaponDef(ps->offHandIndex);
     BG_AddPredictableEventToPlayerstate(0x21u, ps->offHandIndex, ps);
     if (!BG_ThrowingBackGrenade(ps))
@@ -2999,8 +2936,8 @@ void __cdecl PM_Weapon_OffHand(pmove_t *pm)
 
 void __cdecl PM_Weapon_OffHandEnd(playerState_s *ps)
 {
-    if (!ps)
-        MyAssertHandler(".\\bgame\\bg_weapons.cpp", 3376, 0, "%s", "ps");
+    iassert(ps);
+
     if (ps->weapon)
     {
         ps->weaponTime = BG_GetWeaponDef(ps->weapon)->quickRaiseTime;
@@ -3028,8 +2965,6 @@ void __cdecl PM_Weapon_CheckForOffHand(pmove_t *pm)
     WeaponDef *pWeapDef; // eax
     const char *v2; // eax
     unsigned int FirstAvailableOffhand; // eax
-    WeaponDef *pWeapDef2; // eax
-    const char *v5; // eax
     WeaponDef *pWeapDef3; // eax
     int bitNum; // [esp+0h] [ebp-14h]
     WeaponDef *pWeapDef4; // [esp+4h] [ebp-10h]
@@ -3038,8 +2973,8 @@ void __cdecl PM_Weapon_CheckForOffHand(pmove_t *pm)
     OffhandClass offhandClass; // [esp+10h] [ebp-4h]
 
     ps = pm->ps;
-    if (!pm->ps)
-        MyAssertHandler(".\\bgame\\bg_weapons.cpp", 3458, 0, "%s", "ps");
+    iassert(ps);
+
     if ((ps->eFlags & 0x300) == 0
         && (ps->weapFlags & 0x80) == 0
         && (ps->pm_flags & PMF_SPRINTING) == 0
@@ -3048,14 +2983,18 @@ void __cdecl PM_Weapon_CheckForOffHand(pmove_t *pm)
         && ps->weaponstate != 25
         && ps->weaponstate != 26)
     {
-        if ((ps->weapFlags & 2) != 0)
-            MyAssertHandler(".\\bgame\\bg_weapons.cpp", 3481, 0, "%s", "!(ps->weapFlags & PWF_USING_OFFHAND)");
+        iassert(!(ps->weapFlags & PWF_USING_OFFHAND));
+
         bitNum = pm->cmd.offHandIndex;
-        if (!ps)
-            MyAssertHandler("c:\\trees\\cod3\\src\\bgame\\../bgame/bg_weapons.h", 229, 0, "%s", "ps");
+
+        iassert(ps);
+
         if (Com_BitCheckAssert(ps->weapons, bitNum, 16))
         {
             ps->offHandIndex = pm->cmd.offHandIndex;
+
+            iassert(ps->offHandIndex == WP_NONE || BG_GetWeaponDef(ps->offHandIndex)->offhandClass != OFFHAND_CLASS_NONE);
+
             if (ps->offHandIndex)
             {
                 if (BG_GetWeaponDef(ps->offHandIndex)->offhandClass == OFFHAND_CLASS_NONE)
@@ -3083,13 +3022,8 @@ void __cdecl PM_Weapon_CheckForOffHand(pmove_t *pm)
                 return;
             if (ps->offhandSecondary)
             {
-                if (ps->offhandSecondary != PLAYER_OFFHAND_SECONDARY_FLASH)
-                    MyAssertHandler(
-                        ".\\bgame\\bg_weapons.cpp",
-                        3501,
-                        0,
-                        "%s",
-                        "ps->offhandSecondary == PLAYER_OFFHAND_SECONDARY_FLASH");
+                iassert(ps->offhandSecondary == PLAYER_OFFHAND_SECONDARY_FLASH);
+
                 offhandClass = OFFHAND_CLASS_FLASH_GRENADE;
                 FirstAvailableOffhand = BG_GetFirstAvailableOffhand(ps, 3);
             }
@@ -3100,18 +3034,9 @@ void __cdecl PM_Weapon_CheckForOffHand(pmove_t *pm)
             }
         }
         offHandIndex = FirstAvailableOffhand;
-        if (FirstAvailableOffhand && BG_GetWeaponDef(FirstAvailableOffhand)->offhandClass == OFFHAND_CLASS_NONE)
-        {
-            pWeapDef2 = BG_GetWeaponDef(offHandIndex);
-            v5 = va("offHandIndex = %d (%s)\n", offHandIndex, pWeapDef2->szInternalName);
-            MyAssertHandler(
-                ".\\bgame\\bg_weapons.cpp",
-                3512,
-                0,
-                "%s\n\t%s",
-                "offHandIndex == WP_NONE || BG_GetWeaponDef( offHandIndex )->offhandClass != OFFHAND_CLASS_NONE",
-                v5);
-        }
+
+        iassert(offHandIndex == WP_NONE || BG_GetWeaponDef(offHandIndex)->offhandClass != OFFHAND_CLASS_NONE);
+
         if (offHandIndex)
         {
             BG_AddPredictableEventToPlayerstate(0x22u, offHandIndex, ps);
@@ -3136,15 +3061,16 @@ void __cdecl PM_Weapon_CheckForOffHand(pmove_t *pm)
 
 void __cdecl PM_Weapon_OffHandInit(playerState_s *ps)
 {
-    if (!ps)
-        MyAssertHandler(".\\bgame\\bg_weapons.cpp", 3233, 0, "%s", "ps");
-    if (!ps->offHandIndex)
-        MyAssertHandler(".\\bgame\\bg_weapons.cpp", 3234, 0, "%s", "ps->offHandIndex != WP_NONE");
+    iassert(ps);
+    iassert(ps->offHandIndex != WP_NONE);
+
     ps->weaponstate = WEAPON_OFFHAND_INIT;
     ps->weaponDelay = 0;
     ps->weapFlags &= ~2u;
     ps->throwBackGrenadeOwner = ENTITYNUM_NONE;
+
     PM_ExitAimDownSight(ps);
+
     if (ps->weapon)
     {
         ps->weaponTime = BG_GetWeaponDef(ps->weapon)->quickDropTime;
@@ -3158,9 +3084,10 @@ void __cdecl PM_Weapon_OffHandInit(playerState_s *ps)
 
 void __cdecl PM_SendEmtpyOffhandEvent(playerState_s *ps, OffhandClass offhandClass)
 {
-    if (!ps)
-        MyAssertHandler(".\\bgame\\bg_weapons.cpp", 3409, 0, "%s", "ps");
+    iassert(ps);
+
     PM_AddEvent(ps, 0xDu);
+    
     if (BG_GetFirstEquippedOffhand(ps, offhandClass))
     {
         if (offhandClass == OFFHAND_CLASS_FRAG_GRENADE)
@@ -3172,32 +3099,30 @@ void __cdecl PM_SendEmtpyOffhandEvent(playerState_s *ps, OffhandClass offhandCla
 
 bool __cdecl PM_Weapon_IsHoldingGrenade(pmove_t *pm)
 {
-    playerState_s *ps; // [esp+0h] [ebp-8h]
-    WeaponDef *weapDef; // [esp+4h] [ebp-4h]
+    iassert(pm);
 
-    if (!pm)
-        MyAssertHandler(".\\bgame\\bg_weapons.cpp", 3429, 0, "%s", "pm");
-    ps = pm->ps;
+    playerState_s* ps = pm->ps; // [esp+0h] [ebp-8h]
+
     if (!pm->ps->weapon)
         return 0;
-    weapDef = BG_GetWeaponDef(ps->weapon);
-    if (!weapDef)
-        MyAssertHandler(".\\bgame\\bg_weapons.cpp", 3437, 0, "%s", "weapDef");
+
+    WeaponDef* weapDef = BG_GetWeaponDef(ps->weapon); // [esp+4h] [ebp-4h]
+    iassert(weapDef);
+
     if (weapDef->weapType != WEAPTYPE_GRENADE)
         return 0;
+
     return !weapDef->holdButtonToThrow && (pm->cmd.buttons & PM_GetWeaponFireButton(ps->weapon)) != 0;
 }
 
 char __cdecl PM_UpdateGrenadeThrow(playerState_s *ps, pml_t *pml)
 {
-    int weapIndex; // [esp+4h] [ebp-8h]
-    WeaponDef *weapDef; // [esp+8h] [ebp-4h]
+    int weapIndex = 0; // [esp+4h] [ebp-8h]
 
     if ((ps->weapFlags & 2) != 0)
     {
         weapIndex = ps->offHandIndex;
-        if (!weapIndex)
-            MyAssertHandler(".\\bgame\\bg_weapons.cpp", 3548, 0, "%s", "weapIndex != WP_NONE");
+        iassert(weapIndex != WP_NONE);
     }
     else
     {
@@ -3205,52 +3130,56 @@ char __cdecl PM_UpdateGrenadeThrow(playerState_s *ps, pml_t *pml)
         if (!weapIndex)
             return 0;
     }
-    weapDef = BG_GetWeaponDef(weapIndex);
+
+    WeaponDef* weapDef = BG_GetWeaponDef(weapIndex); // [esp+8h] [ebp-4h]
     if (weapDef->weapType != WEAPTYPE_GRENADE)
         return 0;
+
     if (ps->grenadeTimeLeft <= 0)
         return 0;
+
     if (weapDef->bCookOffHold)
         ps->grenadeTimeLeft -= pml->msec;
+
     if (ps->grenadeTimeLeft > 0)
         return 0;
+
     ps->grenadeTimeLeft = -1;
     BG_AddPredictableEventToPlayerstate(0x3Eu, ps->offHandIndex, ps);
+
     if (!BG_ThrowingBackGrenade(ps))
         PM_WeaponUseAmmo(ps, weapIndex, 1);
+
     return 1;
 }
 
 char __cdecl PM_Weapon_CheckGrenadeHold(pmove_t *pm, int32_t delayedAction)
 {
-    playerState_s *ps; // [esp+0h] [ebp-4h]
+    iassert(pm);
 
-    if (!pm)
-        MyAssertHandler(".\\bgame\\bg_weapons.cpp", 3590, 0, "%s", "pm");
     if (!delayedAction)
         return 0;
-    ps = pm->ps;
-    if (!pm->ps->weapon)
-        MyAssertHandler(".\\bgame\\bg_weapons.cpp", 3597, 0, "%s", "ps->weapon != WP_NONE");
+
+    playerState_s* ps = pm->ps; // [esp+0h] [ebp-4h]
+    iassert(ps->weapon != WP_NONE);
+
     if (!PM_Weapon_IsHoldingGrenade(pm))
         return 0;
+
     ps->weaponDelay = 1;
+
     return 1;
 }
 
 void __cdecl PM_Weapon_CheckForDetonation(pmove_t *pm)
 {
-    playerState_s *ps; // [esp+0h] [ebp-8h]
-    WeaponDef *weapDef; // [esp+4h] [ebp-4h]
+    iassert(pm);
 
-    if (!pm)
-        MyAssertHandler(".\\bgame\\bg_weapons.cpp", 3616, 0, "%s", "pm");
-    ps = pm->ps;
+    playerState_s* ps = pm->ps; // [esp+0h] [ebp-8h]
     if (pm->ps->weapon)
     {
-        weapDef = BG_GetWeaponDef(ps->weapon);
-        if (!weapDef)
-            MyAssertHandler(".\\bgame\\bg_weapons.cpp", 3623, 0, "%s", "weapDef");
+        WeaponDef* weapDef = BG_GetWeaponDef(ps->weapon); // [esp+4h] [ebp-4h]
+        iassert(weapDef);
         if (weapDef->weapType == WEAPTYPE_GRENADE
             && weapDef->hasDetonator
             && ps->weaponstate != WEAPON_DETONATING
@@ -3286,18 +3215,14 @@ void __cdecl PM_Weapon_CheckForDetonation(pmove_t *pm)
 
 void __cdecl PM_Weapon_CheckForGrenadeThrowCancel(pmove_t *pm)
 {
-    playerState_s *ps; // [esp+0h] [ebp-8h]
-    WeaponDef *weapDef; // [esp+4h] [ebp-4h]
-    WeaponDef *weapDefa; // [esp+4h] [ebp-4h]
+    iassert(pm);
 
-    if (!pm)
-        MyAssertHandler(".\\bgame\\bg_weapons.cpp", 3662, 0, "%s", "pm");
-    ps = pm->ps;
+    playerState_s* ps = pm->ps; // [esp+0h] [ebp-8h]
     if (pm->ps->weaponstate == 16)
     {
-        weapDef = BG_GetWeaponDef(ps->offHandIndex);
-        if (!weapDef)
-            MyAssertHandler(".\\bgame\\bg_weapons.cpp", 3668, 0, "%s", "weapDef");
+        WeaponDef* weapDef = BG_GetWeaponDef(ps->offHandIndex); // [esp+4h] [ebp-4h]
+        iassert(weapDef);
+
         if (weapDef->holdButtonToThrow)
         {
             if ((pm->cmd.buttons & 0xC000) == 0)
@@ -3306,9 +3231,9 @@ void __cdecl PM_Weapon_CheckForGrenadeThrowCancel(pmove_t *pm)
     }
     else if (ps->weapon)
     {
-        weapDefa = BG_GetWeaponDef(ps->weapon);
-        if (!weapDefa)
-            MyAssertHandler(".\\bgame\\bg_weapons.cpp", 3685, 0, "%s", "weapDef");
+        WeaponDef* weapDefa = BG_GetWeaponDef(ps->weapon); // [esp+4h] [ebp-4h]
+        iassert(weapDefa);
+
         if (weapDefa->weapType == WEAPTYPE_GRENADE
             && ps->weaponstate == 5
             && weapDefa->holdButtonToThrow
@@ -3322,8 +3247,8 @@ void __cdecl PM_Weapon_CheckForGrenadeThrowCancel(pmove_t *pm)
 
 void __cdecl PM_Detonate(playerState_s *ps, int32_t delayedAction)
 {
-    if (!ps)
-        MyAssertHandler(".\\bgame\\bg_weapons.cpp", 3708, 0, "%s", "ps");
+    iassert(ps);
+
     if (delayedAction && ps->weapon)
         PM_AddEvent(ps, 0x3Fu);
     else
@@ -3334,11 +3259,11 @@ void __cdecl PM_Weapon_CheckForNightVision(pmove_t *pm)
 {
     playerState_s *ps; // [esp+8h] [ebp-8h]
 
-    if (!pm)
-        MyAssertHandler(".\\bgame\\bg_weapons.cpp", 3726, 0, "%s", "pm");
+    iassert(pm);
+
     ps = pm->ps;
-    if (!pm->ps)
-        MyAssertHandler(".\\bgame\\bg_weapons.cpp", 3728, 0, "%s", "ps");
+    iassert(ps);
+
     BG_GetWeaponDef(ps->weapon);
     if ((pm->oldcmd.buttons & 0x40000) == 0 && (pm->cmd.buttons & 0x40000) != 0)
     {
@@ -3357,10 +3282,9 @@ void __cdecl PM_Weapon_CheckForNightVision(pmove_t *pm)
 
 void __cdecl PM_Weapon_FinishNightVisionWear(playerState_s *ps)
 {
-    if (!ps)
-        MyAssertHandler(".\\bgame\\bg_weapons.cpp", 3781, 0, "%s", "ps");
-    if (ps->weaponstate != 25)
-        MyAssertHandler(".\\bgame\\bg_weapons.cpp", 3782, 0, "%s", "ps->weaponstate == WEAPON_NIGHTVISION_WEAR");
+    iassert(ps);
+    iassert(ps->weaponstate == WEAPON_NIGHTVISION_WEAR);
+
     if (!ps->weaponTime)
     {
         ps->weaponstate = WEAPON_READY;
@@ -3370,10 +3294,9 @@ void __cdecl PM_Weapon_FinishNightVisionWear(playerState_s *ps)
 
 void __cdecl PM_Weapon_FinishNightVisionRemove(playerState_s *ps)
 {
-    if (!ps)
-        MyAssertHandler(".\\bgame\\bg_weapons.cpp", 3793, 0, "%s", "ps");
-    if (ps->weaponstate != 26)
-        MyAssertHandler(".\\bgame\\bg_weapons.cpp", 3794, 0, "%s", "ps->weaponstate == WEAPON_NIGHTVISION_REMOVE");
+    iassert(ps);
+    iassert(ps->weaponstate == WEAPON_NIGHTVISION_REMOVE);
+
     if (!ps->weaponTime)
     {
         ps->weaponstate = WEAPON_READY;
@@ -3383,8 +3306,8 @@ void __cdecl PM_Weapon_FinishNightVisionRemove(playerState_s *ps)
 
 void __cdecl Sprint_State_Loop(playerState_s *ps)
 {
-    if (!ps)
-        MyAssertHandler(".\\bgame\\bg_weapons.cpp", 3821, 0, "%s", "ps");
+    iassert(ps);
+
     ps->weaponstate = WEAPON_SPRINT_LOOP;
     ps->weaponTime = 0;
     ps->weaponDelay = 0;
@@ -3395,27 +3318,26 @@ void __cdecl PM_Weapon_CheckForSprint(pmove_t *pm)
 {
     playerState_s *ps; // [esp+0h] [ebp-4h]
 
-    if (!pm)
-        MyAssertHandler(".\\bgame\\bg_weapons.cpp", 3851, 0, "%s", "pm");
+    iassert(pm);
     ps = pm->ps;
-    if (!pm->ps)
-        MyAssertHandler(".\\bgame\\bg_weapons.cpp", 3853, 0, "%s", "ps");
+    iassert(ps);
+
     if (pm->cmd.weapon
-        && ps->weaponstate != 5
-        && ps->weaponstate != 6
-        && ps->weaponstate != 12
-        && ps->weaponstate != 13
-        && ps->weaponstate != 14
-        && ps->weaponstate != 12
-        && ps->weaponstate != 13
-        && ps->weaponstate != 14
-        && ps->weaponstate != 1
-        && ps->weaponstate != 2
-        && ps->weaponstate != 3
-        && ps->weaponstate != 4
-        && (ps->weaponstate < 15 || ps->weaponstate > 20)
-        && ps->weaponstate != 25
-        && ps->weaponstate != 26)
+        && ps->weaponstate != WEAPON_FIRING
+        && ps->weaponstate != WEAPON_RECHAMBERING
+        && ps->weaponstate != WEAPON_MELEE_INIT
+        && ps->weaponstate != WEAPON_MELEE_FIRE
+        && ps->weaponstate != WEAPON_MELEE_END
+        && ps->weaponstate != WEAPON_MELEE_INIT
+        && ps->weaponstate != WEAPON_MELEE_FIRE
+        && ps->weaponstate != WEAPON_MELEE_END
+        && ps->weaponstate != WEAPON_RAISING
+        && ps->weaponstate != WEAPON_RAISING_ALTSWITCH
+        && ps->weaponstate != WEAPON_DROPPING
+        && ps->weaponstate != WEAPON_DROPPING_QUICK
+        && (ps->weaponstate < WEAPON_OFFHAND_INIT || ps->weaponstate > WEAPON_OFFHAND_END)
+        && ps->weaponstate != WEAPON_NIGHTVISION_WEAR
+        && ps->weaponstate != WEAPON_NIGHTVISION_REMOVE)
     {
         if ((ps->pm_flags & PMF_SPRINTING) != 0 && (ps->weaponstate < 22 || ps->weaponstate > 24))
         {
@@ -3432,8 +3354,8 @@ void __cdecl Sprint_State_Raise(playerState_s *ps)
 {
     WeaponDef *WeaponDef; // eax
 
-    if (!ps)
-        MyAssertHandler(".\\bgame\\bg_weapons.cpp", 3807, 0, "%s", "ps");
+    iassert(ps);
+
     WeaponDef = BG_GetWeaponDef(ps->weapon);
     ps->weaponstate = WEAPON_SPRINT_RAISE;
     ps->weaponTime = WeaponDef->sprintInTime;
@@ -3445,8 +3367,8 @@ void __cdecl Sprint_State_Drop(playerState_s *ps)
 {
     WeaponDef *WeaponDef; // eax
 
-    if (!ps)
-        MyAssertHandler(".\\bgame\\bg_weapons.cpp", 3835, 0, "%s", "ps");
+    iassert(ps);
+
     WeaponDef = BG_GetWeaponDef(ps->weapon);
     ps->weaponstate = WEAPON_SPRINT_DROP;
     ps->weaponTime = WeaponDef->sprintOutTime;
@@ -3833,8 +3755,8 @@ void __cdecl BG_CalculateWeaponPosition_BobOffset(weaponState_t *ws, float *angl
     ps = ws->ps;
     weapIndex = BG_GetViewmodelWeaponIndex(ps);
     weapDef = BG_GetWeaponDef(weapIndex);
-    fBobCycle = (double)(unsigned __int8)ps->bobCycle / 255.0 * 3.141592741012573
-        + (double)(unsigned __int8)ps->bobCycle / 255.0 * 3.141592741012573
+    fBobCycle = (double)(unsigned __int8)ps->bobCycle / 255.0 * M_PI
+        + (double)(unsigned __int8)ps->bobCycle / 255.0 * M_PI
         + 6.283185482025146;
     cycle = fBobCycle + 0.7853981852531433 + 6.283185482025146;
     speed = ws->xyspeed * 0.1599999964237213;
@@ -4350,8 +4272,9 @@ void __cdecl BG_CalculateWeaponPosition_Sway(
         swayHorizScalea = swayHorizScale * ssSwayScale;
         swayVertScalea = swayVertScale * ssSwayScale;
         AnglesSubtract((float*)ps->viewangles, swayViewAngles, deltaAngles);
-        if (dt == 0.0)
-            MyAssertHandler(".\\bgame\\bg_weapons.cpp", 4978, 0, "%s", "dt");
+
+        iassert(dt);
+
         scale = 1.0 / (dt * 60.0);
         Vec3Scale(deltaAngles, scale, deltaAngles);
         v11 = deltaAngles[0] - swayMaxAngle;
@@ -4398,19 +4321,16 @@ int __cdecl BG_PlayerWeaponCountPrimaryTypes(const playerState_s *ps)
     int weapIndex; // [esp+4h] [ebp-Ch]
     int resultCount; // [esp+Ch] [ebp-4h]
 
-    if (!ps)
-    {
-        MyAssertHandler(".\\bgame\\bg_weapons.cpp", 5005, 0, "%s", "ps");
-        MyAssertHandler(".\\bgame\\bg_weapons.cpp", 5012, 0, "%s", "ps");
-    }
+    iassert(ps);
+
     weapCount = BG_GetNumWeapons();
     resultCount = 0;
     for (weapIndex = 1; weapIndex < weapCount; ++weapIndex)
     {
         if (BG_GetWeaponDef(weapIndex)->inventoryType == WEAPINVENTORY_PRIMARY)
         {
-            if (!ps)
-                MyAssertHandler("c:\\trees\\cod3\\src\\bgame\\../bgame/bg_weapons.h", 229, 0, "%s", "ps");
+            iassert(ps);
+
             if (Com_BitCheckAssert(ps->weapons, weapIndex, 16))
                 ++resultCount;
         }
@@ -4420,8 +4340,8 @@ int __cdecl BG_PlayerWeaponCountPrimaryTypes(const playerState_s *ps)
 
 bool __cdecl BG_PlayerWeaponsFull_Primaries(const playerState_s *ps)
 {
-    if (!ps)
-        MyAssertHandler(".\\bgame\\bg_weapons.cpp", 5036, 0, "%s", "ps");
+    iassert(ps);
+
     return BG_PlayerWeaponCountPrimaryTypes(ps) >= 2;
 }
 
@@ -4431,16 +4351,16 @@ char __cdecl BG_PlayerHasCompatibleWeapon(const playerState_s *ps, uint32_t weap
     int32_t weapCount; // [esp+8h] [ebp-8h]
     int32_t idx; // [esp+Ch] [ebp-4h]
 
-    if (!ps)
-        MyAssertHandler(".\\bgame\\bg_weapons.cpp", 5049, 0, "%s", "ps");
+    iassert(ps);
+
     ammoIndex = BG_GetWeaponDef(weaponIndex)->iAmmoIndex;
     weapCount = BG_GetNumWeapons();
     for (idx = 1; idx < weapCount; ++idx)
     {
         if (BG_GetWeaponDef(idx)->iAmmoIndex == ammoIndex)
         {
-            if (!ps)
-                MyAssertHandler("c:\\trees\\cod3\\src\\bgame\\../bgame/bg_weapons.h", 229, 0, "%s", "ps");
+            iassert(ps);
+
             if (Com_BitCheckAssert(ps->weapons, idx, 16))
                 return 1;
         }
@@ -4450,8 +4370,8 @@ char __cdecl BG_PlayerHasCompatibleWeapon(const playerState_s *ps, uint32_t weap
 
 bool __cdecl BG_ThrowingBackGrenade(const playerState_s *ps)
 {
-    if (!ps)
-        MyAssertHandler(".\\bgame\\bg_weapons.cpp", 5068, 0, "%s", "ps");
+    iassert(ps);
+
     return ps->throwBackGrenadeOwner != ENTITYNUM_NONE;
 }
 
@@ -4508,13 +4428,18 @@ int BG_ValidateWeaponNumberOffhand(unsigned int weaponIndex)
 
     if (weaponIndex >= bg_lastParsedWeaponIndex + 1)
         return 0;
+
     if (!weaponIndex)
         return 1;
+
     if (BG_GetWeaponDef(weaponIndex)->offhandClass == OFFHAND_CLASS_NONE)
         return 0;
+
     offhandClass = BG_GetWeaponDef(weaponIndex)->offhandClass;
     result = 0;
+
     if (offhandClass < OFFHAND_CLASS_COUNT)
         return 1;
+
     return result;
 }
