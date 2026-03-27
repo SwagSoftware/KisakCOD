@@ -1102,13 +1102,12 @@ double __cdecl UnGetLeanFraction(float fFrac)
     float v3; // [esp+4h] [ebp-8h]
     float v4; // [esp+8h] [ebp-4h]
 
-    if (fFrac < 0.0)
-        MyAssertHandler(".\\universal\\q_shared.cpp", 1543, 0, "%s", "fFrac >= 0");
-    if (fFrac > 1.0)
-        MyAssertHandler(".\\universal\\q_shared.cpp", 1544, 0, "%s", "fFrac <= 1.f");
+    iassert(fFrac >= 0);
+    iassert(fFrac <= 1.f);
+
     v4 = 1.0 - fFrac;
     v3 = sqrt(v4);
-    return (float)(1.0 - v3);
+    return (1.0f - v3);
 }
 
 void __cdecl AddLeanToPosition(float *position, float fViewYaw, float fLeanFrac, float fViewRoll, float fLeanDist)
