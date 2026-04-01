@@ -256,8 +256,6 @@ Never called by the game logic, just the system event queing
 */
 int __cdecl Sys_GetPacket(netadr_t *net_from, msg_t *net_message)
 {
-	const char *v2; // eax
-	const char *v3; // eax
 	sockaddr from; // [esp+8h] [ebp-28h] BYREF
 	int err; // [esp+1Ch] [ebp-14h]
 	int ret; // [esp+20h] [ebp-10h]
@@ -280,8 +278,7 @@ int __cdecl Sys_GetPacket(netadr_t *net_from, msg_t *net_message)
 				err = WSAGetLastError();
 				if (err != 10035 && err != 10054)
 				{
-					v2 = NET_ErrorString();
-					Com_PrintError(16, "NET_GetPacket: %s\n", v2);
+					Com_PrintError(16, "NET_GetPacket: %s\n", NET_ErrorString());
 				}
 			}
 			else
@@ -316,8 +313,7 @@ int __cdecl Sys_GetPacket(netadr_t *net_from, msg_t *net_message)
 					net_message->cursize = ret;
 					return 1;
 				}
-				v3 = NET_AdrToString(*net_from);
-				Com_Printf(16, "Oversize packet from %s\n", v3);
+				Com_Printf(16, "Oversize packet from %s\n", NET_AdrToString(*net_from));
 			}
 		}
 	}

@@ -538,15 +538,14 @@ void __cdecl Con_InitMessageWindow(
 
 void __cdecl CL_ConsolePrint(int32_t localClientNum, int32_t channel, const char *txt, int32_t duration, int32_t pixelWidth, int32_t flags)
 {
-    if (!txt)
-        MyAssertHandler(".\\client\\cl_console.cpp", 1323, 0, "%s", "txt");
+    iassert(txt);
+
     if (cl_noprint && !cl_noprint->current.enabled && channel != 6)
     {
         if (!con.initialized)
         {
             Con_OneTimeInit();
-            if (!con.initialized)
-                MyAssertHandler(".\\client\\cl_console.cpp", 1334, 0, "%s", "con.initialized");
+            iassert(con.initialized);
         }
         Sys_EnterCriticalSection(CRITSECT_CONSOLE);
         CL_ConsolePrint_AddLine(localClientNum, channel, txt, duration, pixelWidth, 55, flags);
@@ -941,8 +940,7 @@ char __cdecl CL_ConsolePrint_AddLine(
     float fontScale; // [esp+54h] [ebp-8h]
     const char *text; // [esp+58h] [ebp-4h] BYREF
 
-    if (!txt)
-        MyAssertHandler(".\\client\\cl_console.cpp", 1163, 0, "%s", "txt");
+    iassert(txt);
     if (color < 48 || color > 57)
         MyAssertHandler(
             ".\\client\\cl_console.cpp",

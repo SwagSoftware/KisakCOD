@@ -885,7 +885,7 @@ unsigned int* __cdecl Com_AllocEvent(int size)
 }
 
 #ifdef KISAK_MP
-unsigned __int8 clientCommonMsgBuf[131072];
+unsigned __int8 clientCommonMsgBuf[0x20000];
 void __cdecl Com_ClientPacketEvent()
 {
     msg_t netmsg; // [esp+4Ch] [ebp-40h] BYREF
@@ -895,7 +895,7 @@ void __cdecl Com_ClientPacketEvent()
 
     PROF_SCOPED("Com_ClientPacketEvent");
 
-    MSG_Init(&netmsg, clientCommonMsgBuf, 0x20000);
+    MSG_Init(&netmsg, clientCommonMsgBuf, sizeof(clientCommonMsgBuf));
     Com_PacketEventLoop(NS_CLIENT1, &netmsg);
 
     if (!com_sv_running->current.enabled)

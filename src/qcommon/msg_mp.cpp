@@ -44,21 +44,11 @@ void __cdecl MSG_Init(msg_t *buf, unsigned __int8 *data, int length)
 {
     if (!msgInit)
         MSG_InitHuffman();
-    buf->overflowed = 0;
-    buf->readOnly = 0;
-    buf->data = 0;
-    buf->splitData = 0;
-    buf->maxsize = 0;
-    buf->cursize = 0;
-    buf->splitSize = 0;
-    buf->readcount = 0;
-    buf->bit = 0;
-    buf->lastEntityRef = 0;
+
+    memset(buf, 0, sizeof(msg_t));
+
     buf->data = data;
     buf->maxsize = length;
-    buf->readOnly = 0;
-    buf->splitData = 0;
-    buf->splitSize = 0;
 }
 
 void __cdecl MSG_InitReadOnly(msg_t *buf, unsigned __int8 *data, int length)
@@ -398,14 +388,8 @@ int __cdecl MSG_ReadByte(msg_t *msg)
     else
     {
         c = MSG_GetByte(msg, msg->readcount);
-        if (c != (unsigned __int8)c)
-            MyAssertHandler(
-                ".\\qcommon\\msg_mp.cpp",
-                509,
-                0,
-                "c == static_cast< byte >( c )\n\t%i, %i",
-                c,
-                (unsigned __int8)c);
+
+        iassert(c == static_cast<byte>(c));
         ++msg->readcount;
         return c;
     }

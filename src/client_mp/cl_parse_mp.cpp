@@ -476,26 +476,36 @@ void __cdecl CL_ParseServerMessage(netsrc_t localClientNum, msg_t *msg)
     {
         Com_Printf(14, "------------------\n");
     }
+
     MSG_Init(&msgCompressed, msgCompressed_buf, sizeof(msgCompressed_buf));
+
     if ((unsigned int)(msg->cursize - msg->readcount) > sizeof(msgCompressed_buf))
         Com_Error(ERR_DROP, "Compressed msg overflow in CL_ParseServerMessage");
+
     msgCompressed.cursize = MSG_ReadBitsCompress(
         &msg->data[msg->readcount],
         msgCompressed_buf,
         msg->cursize - msg->readcount);
+
     while (2)
     {
         if (msgCompressed.overflowed)
-            goto LABEL_23;
+        {
+            MSG_Discard(msg);
+            return;
+        }
+
         cmd = MSG_ReadByte(&msgCompressed);
-        if (cmd == 7)
+
+        //if (cmd == svc_EOF)
+        if (cmd == svc_EOF || msgCompressed.overflowed) // LWSS ADD from later cod
         {
             SHOWNET(&msgCompressed, (char*)"END OF MESSAGE");
-        LABEL_23:
             if (msgCompressed.overflowed)
                 MSG_Discard(msg);
             return;
         }
+
         if (cl_shownet->current.integer >= 2)
         {
             if (svc_strings[cmd])
@@ -503,20 +513,21 @@ void __cdecl CL_ParseServerMessage(netsrc_t localClientNum, msg_t *msg)
             else
                 Com_Printf(14, "%3i:BAD CMD %i\n", msgCompressed.readcount - 1, cmd);
         }
+
         switch (cmd)
         {
-        case 0:
+        case svc_nop:
             continue;
-        case 1:
+        case svc_gamestate:
             CL_ParseGamestate(localClientNum, &msgCompressed);
             continue;
-        case 4:
+        case svc_serverCommand:
             CL_ParseCommandString(localClientNum, &msgCompressed);
             continue;
-        case 5:
+        case svc_download:
             CL_ParseDownload(localClientNum, &msgCompressed);
             continue;
-        case 6:
+        case svc_snapshot:
             CL_ParseSnapshot(localClientNum, &msgCompressed);
             continue;
         default:
@@ -995,8 +1006,6 @@ void __cdecl CL_InitDownloads(int localClientNum)
 
 void __cdecl CL_ParseGamestate(netsrc_t localClientNum, msg_t *msg)
 {
-    int Long; // eax
-    int v3; // eax
     int v4; // eax
     unsigned int v5; // [esp+0h] [ebp-164h]
     unsigned int v6; // [esp+10h] [ebp-154h]
@@ -1027,13 +1036,16 @@ void __cdecl CL_ParseGamestate(netsrc_t localClientNum, msg_t *msg)
     clc->serverCommandSequence = MSG_ReadLong(msg);
     LocalClientGlobals = CL_GetLocalClientGlobals(localClientNum);
     LocalClientGlobals->gameState.dataCount = 1;
+
     while (1)
     {
         cmd = MSG_ReadByte(msg);
-        if (cmd == 7)
-            break;
-        if (cmd == 2)
+
+        switch (cmd)
         {
+        case svc_EOF:
+            break;
+        case svc_configstring:
             currentConstConfigString = 0;
             lastStringIndex = -1;
             for (numConfigStrings = MSG_ReadShort(msg); numConfigStrings; --numConfigStrings)
@@ -1086,41 +1098,53 @@ void __cdecl CL_ParseGamestate(netsrc_t localClientNum, msg_t *msg)
                 ++currentConstConfigString;
             }
             CL_ParseMapCenter(localClientNum);
-        }
-        else
-        {
-            if (cmd != 3)
-            {
-                file = FS_FOpenFileWrite((char*)"badpacket.dat");
-                if (file)
-                {
-                    FS_Write((char *)msg->data, msg->cursize, file);
-                    FS_FCloseFile(file);
-                }
-                Com_PrintError(1, "CL_ParseGamestate: bad command byte %d\n", cmd);
-                MSG_Discard(msg);
-                return;
-            }
+            break;
+        case svc_baseline:
             newnum = MSG_ReadEntityIndex(msg, 0xAu);
             if (newnum >= 0x400)
                 Com_Error(ERR_DROP, "Baseline number out of range: %i", newnum);
             memset((unsigned __int8 *)&nullstate, 0, sizeof(nullstate));
             to = &LocalClientGlobals->entityBaselines[newnum];
             MSG_ReadDeltaEntity(msg, 0, &nullstate, to, newnum);
+            break;
+        default:
+            file = FS_FOpenFileWrite((char *)"badpacket.dat");
+            if (file)
+            {
+                FS_Write((char *)msg->data, msg->cursize, file);
+                FS_FCloseFile(file);
+            }
+            Com_PrintError(1, "CL_ParseGamestate: bad command byte %d\n", cmd);
+            MSG_Discard(msg);
+            return;
         }
     }
-    Long = MSG_ReadLong(msg);
-    clc->clientNum = Long;
-    v3 = MSG_ReadLong(msg);
-    clc->checksumFeed = v3;
+
+    clc->clientNum = MSG_ReadLong(msg);
+    
+    // LWSS ADD: This is some sort of exploit fix they added in later COD
+    if (clc->clientNum >= 64)// KISAKTODO: should probably be com_maxclients instead?
+    {
+        Com_PrintError(1, "CL_ParseGamestate: bad clientNum %i\n", clc->clientNum);
+        clc->clientNum = 0;
+        MSG_Discard(msg);
+    }
+    // LWSS END
+
+    clc->checksumFeed = MSG_ReadLong(msg);
+
     if (IsFastFileLoad())
         DB_SyncXAssets();
+
     CL_SystemInfoChanged(localClientNum);
     cls.gameDirChanged = fs_gameDirVar->modified;
+
     if (FS_NeedRestart(clc->checksumFeed))
         FS_Restart(localClientNum, clc->checksumFeed);
+
     if (net_lanauthorize->current.enabled || !Sys_IsLANAddress(clc->serverAddress))
         CL_RequestAuthorization(localClientNum);
+
     CL_InitDownloads(localClientNum);
     Dvar_SetInt(cl_paused, 0);
 }

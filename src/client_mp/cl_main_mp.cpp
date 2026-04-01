@@ -1826,10 +1826,6 @@ void __cdecl CL_WriteDemoMessage(int32_t localClientNum, msg_t *msg, int32_t hea
 
 char __cdecl CL_PacketEvent(netsrc_t localClientNum, netadr_t from, msg_t *msg, int32_t time)
 {
-    const char *v5; // eax
-    const char *v6; // eax
-    const char *v7; // eax
-    int32_t v8; // [esp-8h] [ebp-24h]
     connstate_t connstate; // [esp+4h] [ebp-18h]
     int32_t savedServerMessageSequence; // [esp+8h] [ebp-14h]
     clientConnection_t *clc; // [esp+Ch] [ebp-10h]
@@ -1899,23 +1895,19 @@ char __cdecl CL_PacketEvent(netsrc_t localClientNum, netadr_t from, msg_t *msg, 
             }
             else
             {
-                v7 = NET_AdrToString(from);
-                Com_DPrintf(14, "%s:sequenced packet without connection\n", v7);
+                Com_DPrintf(14, "%s:sequenced packet without connection\n", NET_AdrToString(from));
                 return 0;
             }
         }
         else
         {
-            v6 = NET_AdrToString(from);
-            Com_Printf(14, "%s: Runt packet\n", v6);
+            Com_Printf(14, "%s: Runt packet\n", NET_AdrToString(from));
             return 1;
         }
     }
     else
     {
-        v8 = *(uint32_t *)msg->data;
-        v5 = NET_AdrToString(from);
-        Com_DPrintf(14, "%s: Got msg sequence %i but connstate (%i) is < CA_CONNECTED\n", v5, v8, connstate);
+        Com_DPrintf(14, "%s: Got msg sequence %i but connstate (%i) is < CA_CONNECTED\n", NET_AdrToString(from), *(uint32_t *)msg->data, connstate);
         return 0;
     }
 }

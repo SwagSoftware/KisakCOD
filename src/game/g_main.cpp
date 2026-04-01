@@ -863,7 +863,7 @@ void *__cdecl Hunk_AllocActorXAnimServer(int size)
     return Hunk_AllocLow(size, "Hunk_AllocActorXAnimServer", 5);
 }
 
-void *G_LoadAnimTreeInstances()
+void G_LoadAnimTreeInstances()
 {
     int v0; // r31
     XAnimTree_s **actorXAnimTrees; // r30
@@ -901,7 +901,7 @@ void *G_LoadAnimTreeInstances()
     } while (v5);
     result = memset(g_scr_data.actorXAnimClientTreesInuse, 0, sizeof(g_scr_data.actorXAnimClientTreesInuse));
     g_scr_data.actorFreeClientTree = 0;
-    return result;
+    //return result;
 }
 
 void G_FreeAnimTreeInstances()
@@ -985,7 +985,7 @@ bool __cdecl G_ExitAfterConnectPaths()
     return false;
 }
 
-void *GScr_LoadScriptsAndAnims()
+void GScr_LoadScriptsAndAnims()
 {
     const char *mapname; // r3
     ScriptFunctions functions; // [sp+50h] [-220h] BYREF
@@ -1003,7 +1003,7 @@ void *GScr_LoadScriptsAndAnims()
     if (functions.maxSize != functions.count)
         Com_Error(ERR_DROP, "Script function count mismatch");
 
-    return G_LoadAnimTreeInstances();
+    G_LoadAnimTreeInstances();
 }
 
 void ScriptIOFilesInit()

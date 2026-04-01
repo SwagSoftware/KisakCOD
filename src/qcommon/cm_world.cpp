@@ -143,10 +143,8 @@ void __cdecl CM_UnlinkEntity(svEntity_s *ent)
         while (1)
         {
         LABEL_28:
-            contents = cm_world.sectors[node->tree.child[1]].contents.contentsEntities
-                | cm_world.sectors[node->tree.child[0]].contents.contentsEntities;
-            linkcontents = cm_world.sectors[node->tree.child[1]].contents.linkcontentsEntities
-                | cm_world.sectors[node->tree.child[0]].contents.linkcontentsEntities;
+            contents = cm_world.sectors[node->tree.child[1]].contents.contentsEntities | cm_world.sectors[node->tree.child[0]].contents.contentsEntities;
+            linkcontents = cm_world.sectors[node->tree.child[1]].contents.linkcontentsEntities | cm_world.sectors[node->tree.child[0]].contents.linkcontentsEntities;
             if (node->contents.entities)
             {
                 scana = &sv.svEntities[node->contents.entities - 1];

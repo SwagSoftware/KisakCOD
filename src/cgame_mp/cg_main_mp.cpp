@@ -2056,21 +2056,19 @@ DObj_s *__cdecl CG_GetDObj(uint32_t handle, int32_t localClientNum)
 void __cdecl CG_LoadAnimTreeInstances(int32_t localClientNum)
 {
     XAnim_s *generic_human; // [esp+0h] [ebp-10h]
-    int32_t i; // [esp+Ch] [ebp-4h]
-    int32_t ia; // [esp+Ch] [ebp-4h]
     cg_s *cgameGlob;
     cgs_t *cgs;
 
     cgameGlob = CG_GetLocalClientGlobals(localClientNum);
     generic_human = cgameGlob->bgs.generic_human.tree.anims;
 
-    for (i = 0; i < 64; ++i)
+    for (int i = 0; i < 64; ++i)
         cgameGlob->bgs.clientinfo[i].pXAnimTree = XAnimCreateTree(generic_human, Hunk_AllocXAnimClient);
 
     cgs = CG_GetLocalClientStaticGlobals(localClientNum);
     
-    for (ia = 0; ia < 8; ++ia)
-        cgs->corpseinfo[ia].pXAnimTree = XAnimCreateTree(generic_human, Hunk_AllocXAnimClient);
+    for (int i = 0; i < 8; ++i)
+        cgs->corpseinfo[i].pXAnimTree = XAnimCreateTree(generic_human, Hunk_AllocXAnimClient);
 }
 
 void __cdecl CG_InitEntities(int32_t localClientNum)

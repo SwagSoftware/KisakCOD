@@ -1811,7 +1811,7 @@ unsigned int VM_ExecuteInternal()
     profileEnablePos = &profileEnable[0];
 
     ++g_script_error_level;
-    iassert(g_script_error_level <= 32);
+    bcassert(g_script_error_level, ARRAY_COUNT(g_script_error));
 
     //gParamCount = 0;
 #pragma region ERROR_CHECKER
@@ -1824,6 +1824,7 @@ unsigned int VM_ExecuteInternal()
         case OP_EvalArrayRef:
         case OP_ClearArray:
         case OP_EvalLocalVariableRef:
+            iassert(scrVarPub.error_index >= -1);
             if (scrVarPub.error_index < 0)
                 scrVarPub.error_index = 1;
             break;
@@ -1845,6 +1846,7 @@ unsigned int VM_ExecuteInternal()
         case OP_CallBuiltin4:
         case OP_CallBuiltin5:
         case OP_CallBuiltin:
+            iassert(scrVarPub.error_index >= 0);
             if (scrVarPub.error_index > 0)
                 scrVarPub.error_index = scrVmPub.outparamcount - scrVarPub.error_index + 1;
             break;
@@ -1856,6 +1858,7 @@ unsigned int VM_ExecuteInternal()
         case OP_CallBuiltinMethod4:
         case OP_CallBuiltinMethod5:
         case OP_CallBuiltinMethod:
+            iassert(scrVarPub.error_index >= -1);
             if (scrVarPub.error_index <= 0)
             {
                 if (scrVarPub.error_index < 0)

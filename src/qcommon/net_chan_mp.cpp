@@ -882,8 +882,10 @@ int __cdecl Netchan_Process(netchan_t *chan, msg_t *msg)
     {
         fragmented = 0;
     }
+
     if (chan->sock == NS_SERVER)
-        MSG_ReadShort(msg);
+        MSG_ReadShort(msg); // qport (unused, but in protocol)
+
     if (fragmented)
     {
         fragmentStart = MSG_ReadLong(msg);

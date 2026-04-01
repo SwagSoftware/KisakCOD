@@ -130,7 +130,7 @@ void __cdecl G_CreateDObj(
     uint32_t handle,
     int32_t unusedLocalClientNum);
 DObj_s *__cdecl G_GetDObj(uint32_t handle, int32_t unusedLocalClientNum);
-XAnimTree_s *G_LoadAnimTreeInstances();
+void G_LoadAnimTreeInstances();
 void G_PrintAllFastFileErrors();
 void __cdecl G_PrintFastFileErrors(const char *fastfile);
 void __cdecl G_ShutdownGame(int32_t freeScripts);

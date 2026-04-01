@@ -335,13 +335,13 @@ char __cdecl G_MoverPush(gentity_s *pusher, float *move, float *amove, gentity_s
     int v10; // [esp+34h] [ebp-2060h]
     int j; // [esp+38h] [ebp-205Ch]
     float maxs[3]; // [esp+3Ch] [ebp-2058h] BYREF
-    float v13[3]; // [esp+48h] [ebp-204Ch] BYREF
-    float v14[3]; // [esp+54h] [ebp-2040h] BYREF
-    float v15[3]; // [esp+60h] [ebp-2034h]
+    float maxPos[3]; // [esp+48h] [ebp-204Ch] BYREF
+    float minPos[3]; // [esp+54h] [ebp-2040h] BYREF
+    float minBound[3]; // [esp+60h] [ebp-2034h]
     float mins[3]; // [esp+6Ch] [ebp-2028h] BYREF
     float v17; // [esp+78h] [ebp-201Ch]
     char v18; // [esp+7Fh] [ebp-2015h]
-    float v19[3]; // [esp+80h] [ebp-2014h]
+    float maxBound[3]; // [esp+80h] [ebp-2014h]
     int entityList[1024]; // [esp+8Ch] [ebp-2008h] BYREF
     int i; // [esp+108Ch] [ebp-1008h]
     gentity_s *ent; // [esp+1090h] [ebp-1004h]
@@ -349,9 +349,11 @@ char __cdecl G_MoverPush(gentity_s *pusher, float *move, float *amove, gentity_s
 
     *obstacle = 0;
     v18 = 1;
+
     mins[0] = pusher->r.mins[0];
     mins[1] = pusher->r.mins[1];
     mins[2] = pusher->r.mins[2];
+
     maxs[0] = pusher->r.maxs[0];
     maxs[1] = pusher->r.maxs[1];
     maxs[2] = pusher->r.maxs[2];
@@ -374,8 +376,8 @@ char __cdecl G_MoverPush(gentity_s *pusher, float *move, float *amove, gentity_s
     {
         for (i = 0; i < 3; ++i)
         {
-            v14[i] = pusher->r.currentOrigin[i] + mins[i] - 1.0;
-            v13[i] = pusher->r.currentOrigin[i] + maxs[i] + 1.0;
+            minPos[i] = pusher->r.currentOrigin[i] + mins[i] - 1.0;
+            maxPos[i] = pusher->r.currentOrigin[i] + maxs[i] + 1.0;
         }
     }
     else
@@ -383,21 +385,23 @@ char __cdecl G_MoverPush(gentity_s *pusher, float *move, float *amove, gentity_s
         v17 = RadiusFromBounds(mins, maxs);
         for (i = 0; i < 3; ++i)
         {
-            v14[i] = pusher->r.currentOrigin[i] - v17;
-            v13[i] = pusher->r.currentOrigin[i] + v17;
+            minPos[i] = pusher->r.currentOrigin[i] - v17;
+            maxPos[i] = pusher->r.currentOrigin[i] + v17;
         }
     }
+
     for (i = 0; i < 3; ++i)
     {
-        v15[i] = v14[i] + move[i];
-        v19[i] = v13[i] + move[i];
+        minBound[i] = minPos[i] + move[i];
+        maxBound[i] = maxPos[i] + move[i];
         if (move[i] <= 0.0)
-            v14[i] = v14[i] + move[i];
+            minPos[i] = minPos[i] + move[i];
         else
-            v13[i] = v13[i] + move[i];
+            maxPos[i] = maxPos[i] + move[i];
     }
+
     SV_UnlinkEntity(pusher);
-    v9 = CM_AreaEntities(v14, v13, entityList, 1024, 0x6000180);
+    v9 = CM_AreaEntities(minPos, maxPos, entityList, 1024, 0x6000180);
     Vec3Add(pusher->r.currentOrigin, move, pusher->r.currentOrigin);
     Vec3Add(pusher->r.currentAngles, amove, pusher->r.currentAngles);
     SV_LinkEntity(pusher);
@@ -407,12 +411,12 @@ char __cdecl G_MoverPush(gentity_s *pusher, float *move, float *amove, gentity_s
         ent = &g_entities[entityList[j]];
         if ((ent->s.eType == ET_MISSILE || ent->s.eType == ET_ITEM || ent->s.eType == ET_PLAYER || ent->physicsObject)
             && (ent->s.groundEntityNum == pusher->s.number
-                || v19[0] > (double)ent->r.absmin[0]
-                && v19[1] > (double)ent->r.absmin[1]
-                && v19[2] > (double)ent->r.absmin[2]
-                && v15[0] < (double)ent->r.absmax[0]
-                && v15[1] < (double)ent->r.absmax[1]
-                && v15[2] < (double)ent->r.absmax[2]
+                || maxBound[0] > (double)ent->r.absmin[0]
+                && maxBound[1] > (double)ent->r.absmin[1]
+                && maxBound[2] > (double)ent->r.absmin[2]
+                && minBound[0] < (double)ent->r.absmax[0]
+                && minBound[1] < (double)ent->r.absmax[1]
+                && minBound[2] < (double)ent->r.absmax[2]
                 && G_TestEntityPosition(ent, ent->r.currentOrigin) == pusher))
         {
             v23[v10++] = entityList[j];

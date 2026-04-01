@@ -780,26 +780,12 @@ DObj_s *__cdecl G_GetDObj(uint32_t handle, int32_t unusedLocalClientNum)
     return Com_GetServerDObj(handle);
 }
 
-XAnimTree_s *G_LoadAnimTreeInstances()
+void G_LoadAnimTreeInstances()
 {
-    XAnimTree_s *result; // eax
-    XAnim_s *generic_human; // [esp+0h] [ebp-8h]
-    int32_t i; // [esp+4h] [ebp-4h]
-    int32_t ia; // [esp+4h] [ebp-4h]
-
-    result = (XAnimTree_s *)level_bgs.generic_human.tree.anims;
-    generic_human = level_bgs.generic_human.tree.anims;
-    for (i = 0; i < 64; ++i)
-    {
-        result = XAnimCreateTree(generic_human, (void *(__cdecl *)(int))Hunk_AllocXAnimServer);
-        level_bgs.clientinfo[i].pXAnimTree = result;
-    }
-    for (ia = 0; ia < 8; ++ia)
-    {
-        result = XAnimCreateTree(generic_human, (void *(__cdecl *)(int))Hunk_AllocXAnimServer);
-        g_scr_data.playerCorpseInfo[ia].tree = result;
-    }
-    return result;
+    for (int i = 0; i < 64; ++i)
+        level_bgs.clientinfo[i].pXAnimTree = XAnimCreateTree(level_bgs.generic_human.tree.anims, (void *(__cdecl *)(int))Hunk_AllocXAnimServer);
+    for (int i = 0; i < 8; ++i)
+        g_scr_data.playerCorpseInfo[i].tree = XAnimCreateTree(level_bgs.generic_human.tree.anims, (void *(__cdecl *)(int))Hunk_AllocXAnimServer);
 }
 
 void G_PrintAllFastFileErrors()

@@ -322,11 +322,6 @@ void __cdecl BG_ParseCommands(const char **input, animScriptItem_t *scriptItem, 
     parseInfo_t *v5; // [esp+24h] [ebp-18h]
     int32_t partIndex; // [esp+28h] [ebp-14h]
     parseInfo_t *token; // [esp+2Ch] [ebp-10h]
-    parseInfo_t *tokena; // [esp+2Ch] [ebp-10h]
-    parseInfo_t *tokenb; // [esp+2Ch] [ebp-10h]
-    parseInfo_t *tokenc; // [esp+2Ch] [ebp-10h]
-    parseInfo_t *tokend; // [esp+2Ch] [ebp-10h]
-    parseInfo_t *tokene; // [esp+2Ch] [ebp-10h]
     animScriptCommand_t *command; // [esp+30h] [ebp-Ch]
     int32_t i; // [esp+34h] [ebp-8h]
     int32_t bCommandFound; // [esp+38h] [ebp-4h]
@@ -416,25 +411,25 @@ void __cdecl BG_ParseCommands(const char **input, animScriptItem_t *scriptItem, 
         {
         LABEL_46:
             bCommandFound = 0;
-            tokena = Com_ParseOnLine(input);
-            if (!tokena || !tokena->token[0])
+            token = Com_ParseOnLine(input);
+            if (!token || !token->token[0])
             {
             LABEL_66:
                 Com_UngetToken();
                 continue;
             }
-            if (I_stricmp(tokena->token, "duration"))
+            if (I_stricmp(token->token, "duration"))
             {
-                if (I_stricmp(tokena->token, "turretanim"))
+                if (I_stricmp(token->token, "turretanim"))
                 {
-                    if (I_stricmp(tokena->token, "blendtime"))
+                    if (I_stricmp(token->token, "blendtime"))
                         goto LABEL_66;
                     bCommandFound = 1;
-                    tokenc = Com_ParseOnLine(input);
-                    if (!tokenc || !tokenc->token[0])
+                    token = Com_ParseOnLine(input);
+                    if (!token || !token->token[0])
                         BG_AnimParseError("BG_ParseCommands: expected blendtime value");
                     if (!g_pLoadAnims)
-                        scriptData->animations[command->animIndex[partIndex]].initialLerp = atoi(tokenc->token);
+                        scriptData->animations[command->animIndex[partIndex]].initialLerp = atoi(token->token);
                 }
                 else
                 {
@@ -448,10 +443,10 @@ void __cdecl BG_ParseCommands(const char **input, animScriptItem_t *scriptItem, 
             else
             {
                 bCommandFound = 1;
-                tokenb = Com_ParseOnLine(input);
-                if (!tokenb || !tokenb->token[0])
+                token = Com_ParseOnLine(input);
+                if (!token || !token->token[0])
                     BG_AnimParseError("BG_ParseCommands: expected duration value");
-                command->animDuration[partIndex] = atoi(tokenb->token);
+                command->animDuration[partIndex] = atoi(token->token);
             }
         } while (bCommandFound);
         if (command->bodyPart[partIndex] != 3)
@@ -463,21 +458,21 @@ void __cdecl BG_ParseCommands(const char **input, animScriptItem_t *scriptItem, 
     LABEL_72:
         while (1)
         {
-            tokend = Com_ParseOnLine(input);
-            if (!tokend || !tokend->token[0])
+            token = Com_ParseOnLine(input);
+            if (!token || !token->token[0])
                 break;
-            if (I_stricmp(tokend->token, "sound"))
+            if (I_stricmp(token->token, "sound"))
             {
-                BG_AnimParseError("BG_ParseCommands: unknown parameter '%s'", tokend->token);
+                BG_AnimParseError("BG_ParseCommands: unknown parameter '%s'", token->token);
             }
             else
             {
-                tokene = Com_ParseOnLine(input);
-                if (!tokene || !tokene->token[0])
+                token = Com_ParseOnLine(input);
+                if (!token || !token->token[0])
                     BG_AnimParseError("BG_ParseCommands: expected sound");
-                if (strstr((const char*)tokene, ".wav"))
+                if (strstr((const char*)token, ".wav"))
                     BG_AnimParseError("BG_ParseCommands: wav files not supported, only sound scripts");
-                command->soundAlias = globalScriptData->soundAlias((const char*)tokene);
+                command->soundAlias = globalScriptData->soundAlias((const char*)token);
             }
         }
         partIndex = 0;

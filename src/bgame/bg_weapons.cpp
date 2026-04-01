@@ -327,7 +327,7 @@ void __cdecl PM_StartWeaponAnim(playerState_s *ps, int32_t anim)
 
 WeaponDef *__cdecl BG_GetWeaponDef(uint32_t weaponIndex)
 {
-    bcassert(weaponIndex, bg_lastParsedWeaponIndex);
+    bcassert2(weaponIndex, bg_lastParsedWeaponIndex);
 
     return bg_weaponDefs[weaponIndex];
 }
@@ -404,6 +404,8 @@ uint32_t __cdecl BG_GetWeaponIndexForName(const char *name, void(__cdecl *regWea
 uint32_t __cdecl BG_SetupWeaponDef(WeaponDef *weapDef, void(__cdecl *regWeap)(uint32_t))
 {
     uint32_t weapIndex; // [esp+0h] [ebp-4h]
+
+    bg_lastParsedWeaponIndex++;
 
     bcassert(bg_lastParsedWeaponIndex, ARRAY_COUNT(bg_weaponDefs));
 
