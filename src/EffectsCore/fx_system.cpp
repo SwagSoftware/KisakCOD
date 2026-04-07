@@ -770,10 +770,17 @@ bool __cdecl FX_CullElemForSpawn(const FxCamera *camera, const FxElemDef *elemDe
 void __cdecl FX_SetEffectRandomSeed(FxEffect *effect, const FxEffectDef *remoteDef)
 {
     if (FX_EffectAffectsGameplay(remoteDef))
-        effect->randomSeed = (479 * ((0x343FD * effect->msecBegin + 0x269EC3) >> 17)) >> 15;
-        //effect->randomSeed = (479 * ((uint32_t)(214013 * effect->msecBegin + 2531011) >> 17)) >> 15;
+        effect->randomSeed = (479 * ((unsigned int)(214013 * effect->msecBegin + 2531011) >> 17)) >> 15; // has to be unsigned
     else
         effect->randomSeed = 479 * rand() / 0x8000;
+
+    // LWSS ADD - bounds check
+    iassert(effect->randomSeed < ARRAY_COUNT(fx_randomTable));
+    //if (effect->randomSeed >= ARRAY_COUNT(fx_randomTable))
+    //{
+    //    effect->randomSeed = rand() % ARRAY_COUNT(fx_randomTable);
+    //}
+    // LWSS END
 }
 
 char __cdecl FX_EffectAffectsGameplay(const FxEffectDef *remoteEffectDef)

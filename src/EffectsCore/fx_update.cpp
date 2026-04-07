@@ -513,11 +513,13 @@ void __cdecl FX_SpawnOneShotElems(
     int32_t spawnCount; // [esp+14h] [ebp-8h]
     int32_t spawnIndex; // [esp+18h] [ebp-4h]
 
-    if (!effect)
-        MyAssertHandler(".\\EffectsCore\\fx_update.cpp", 405, 0, "%s", "effect");
-    if (!effect->def)
-        MyAssertHandler(".\\EffectsCore\\fx_update.cpp", 408, 0, "%s", "effectDef");
-    elemDef = &effect->def->elemDefs[elemDefIndex];
+    iassert(effect);
+
+    const FxEffectDef *effectDef = effect->def;
+
+    iassert(effectDef);
+
+    elemDef = &effectDef->elemDefs[elemDefIndex];
     if (elemDef->elemType != 3)
     {
         spawnCount = elemDef->spawn.looping.intervalMsec;

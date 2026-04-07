@@ -867,5 +867,15 @@ inline bool IsFastFileLoad()
 	return useFastFile->current.enabled;
 }
 
+template <typename T, typename U>
+inline constexpr T truncate_cast(U value)
+{
+	//static_assert(std::is_integral_v<T>, "truncate_cast target must be integral");
+	//static_assert(std::is_integral_v<U>, "truncate_cast source must be integral");
+
+	iassert(value == (T)value);
+
+	return static_cast<T>(value);
+}
 
 extern unsigned __int64(__cdecl *LittleLong64)(unsigned __int64);

@@ -1468,8 +1468,7 @@ void __cdecl QuatToAxis(const float *quat, mat3x3 &axis)
     zz = quat[2] * quat[2];
     ww = quat[3] * quat[3];
     magSqr = xx + yy + zz + ww;
-    if (magSqr <= 0.0)
-        MyAssertHandler(".\\universal\\com_math.cpp", 1910, 0, "%s", "magSqr > 0.0f");
+    iassert(magSqr > 0.0f);
     scale = 2.0 / magSqr;
     xxa = xx * scale;
     yya = yy * scale;

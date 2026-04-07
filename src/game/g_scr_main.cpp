@@ -11173,22 +11173,20 @@ void __cdecl GScr_SetLightRadius(scr_entref_t entref)
 
 void __cdecl GScr_GetLightFovInner(scr_entref_t entref)
 {
-    long double v1; // fp2
-    long double v2; // fp2
+    gentity_s *ent = GScr_SetupLightEntity(entref);
+    float innerCos = ent->s.lerp.u.primaryLight.cosHalfFovInner;
+    float fov = acosf(innerCos) * 2.0f;
 
-    *(double *)&v1 = GScr_SetupLightEntity(entref)->s.lerp.u.primaryLight.cosHalfFovInner;
-    v2 = acos(v1);
-    Scr_AddFloat((float)((float)*(double *)&v2 * (float)2.0));
+    Scr_AddFloat(fov);
 }
 
 void __cdecl GScr_GetLightFovOuter(scr_entref_t entref)
 {
-    long double v1; // fp2
-    long double v2; // fp2
+    gentity_s *ent = GScr_SetupLightEntity(entref);
+    float outerCos = ent->s.lerp.u.primaryLight.cosHalfFovOuter;
+    float fov = acosf(outerCos) * 2.0f;
 
-    *(double *)&v1 = GScr_SetupLightEntity(entref)->s.lerp.u.primaryLight.cosHalfFovOuter;
-    v2 = acos(v1);
-    Scr_AddFloat((float)((float)*(double *)&v2 * (float)2.0));
+    Scr_AddFloat(fov);
 }
 
 // aislop

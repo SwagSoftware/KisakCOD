@@ -964,7 +964,7 @@ void __cdecl SpectatorClientEndFrame(gentity_s *ent)
             {
             doFollow:
                 v4 = client->ps.eFlags & 0x100000 | ps.eFlags & 0xFFEFFFFF;
-                memcpy((uint8_t *)client, (uint8_t *)&ps, 0x2F64u);
+                memcpy(&client->ps, &ps, sizeof(playerState_s));
                 HudElem_UpdateClient(client, ent->s.number, HUDELEM_UPDATE_CURRENT);
                 client->ps.eFlags = v4;
                 client->ps.otherFlags &= ~4u;

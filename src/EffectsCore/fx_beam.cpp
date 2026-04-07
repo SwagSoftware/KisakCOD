@@ -47,15 +47,7 @@ void __cdecl FX_Beam_GenerateVerts(FxGenerateVertsCmd *cmd)
     float4 *v10; // [esp+4Ch] [ebp-26Ch]
     float4 *v11; // [esp+50h] [ebp-268h]
     float4 *v12; // [esp+54h] [ebp-264h]
-    float4 v13[2]; // [esp+58h] [ebp-260h]
-    float4 v14; // [esp+78h] [ebp-240h]
-    float4 *v15; // [esp+8Ch] [ebp-22Ch]
-    float v16; // [esp+90h] [ebp-228h]
-    float *end; // [esp+94h] [ebp-224h]
-    float *v18; // [esp+98h] [ebp-220h]
-    float4 v19; // [esp+9Ch] [ebp-21Ch]
     float4 v20; // [esp+ACh] [ebp-20Ch]
-    float4 v21; // [esp+BCh] [ebp-1FCh]
     float4 wiggleVec; // [esp+CCh] [ebp-1ECh]
     float4 scaledWiggle; // [esp+DCh] [ebp-1DCh]
     int dim; // [esp+ECh] [ebp-1CCh]
@@ -102,35 +94,35 @@ void __cdecl FX_Beam_GenerateVerts(FxGenerateVertsCmd *cmd)
     float4x4 invClipMtx; // [esp+270h] [ebp-48h] BYREF
     int savedregs; // [esp+2B8h] [ebp+0h] BYREF
 
-    if (!cmd)
-        MyAssertHandler(".\\EffectsCore\\fx_beam.cpp", 287, 0, "%s", "cmd");
-    if (!cmd->beamInfo)
-        MyAssertHandler(".\\EffectsCore\\fx_beam.cpp", 288, 0, "%s", "cmd->beamInfo");
+    iassert(cmd);
+    iassert(cmd->beamInfo);
+
     beamInfo = cmd->beamInfo;
     CreateClipMatrix(&clipMtx, cmd->vieworg, cmd->viewaxis);
     MatrixInverse44(clipMtx.mat, invClipMtx.mat);
-    v18 = cmd->viewaxis[0];
     viewAxis.v[0] = cmd->viewaxis[0][0];
     viewAxis.v[1] = cmd->viewaxis[0][1];
     viewAxis.v[2] = cmd->viewaxis[0][2];
     viewAxis.v[3] = 0.0;
+
     for (beamIter = 0; beamIter != beamInfo->beamCount; ++beamIter)
     {
         beam = &beamInfo->beams[beamIter];
         beginRadius = beam->beginRadius;
         endRadius = beam->endRadius;
         segCount = beam->segmentCount;
-        v21 = g_zero;
         flatDelta = g_zero;
+
         beamWorldBegin.v[0] = beam->begin[0];
         beamWorldBegin.v[1] = beam->begin[1];
         beamWorldBegin.v[2] = beam->begin[2];
         beamWorldBegin.v[3] = 0.0;
-        end = beam->end;
+
         beamWorldEnd.v[0] = beam->end[0];
         beamWorldEnd.v[1] = beam->end[1];
         beamWorldEnd.v[2] = beam->end[2];
         beamWorldEnd.v[3] = 0.0;
+
         v1.v[0] = beamWorldBegin.v[0];
         v1.v[1] = beamWorldBegin.v[1];
         v1.v[2] = beamWorldBegin.v[2];
@@ -181,41 +173,39 @@ void __cdecl FX_Beam_GenerateVerts(FxGenerateVertsCmd *cmd)
             normDelta.v[2] = beamWorldEnd.v[2] - beamWorldBegin.v[2];
             normDelta.v[3] = beamWorldEnd.v[3] - beamWorldBegin.v[3];
             Vec3NormalizeTo(normDelta.v, normDelta.v);
-            v16 = beamWorldBegin.v[0] * normDelta.v[0]
-                + beamWorldBegin.v[1] * normDelta.v[1]
-                + beamWorldBegin.v[2] * normDelta.v[2];
-            beamDot.v[0] = -v16;
-            beamDot.v[1] = beamDot.v[0];
-            beamDot.v[2] = beamDot.v[0];
-            beamDot.v[3] = beamDot.v[0];
+            normDelta.u[3] = 0;
+
+            beamDot.v[0] = -Vec3Length(beamWorldBegin.v);
+            beamDot.v[1] = -Vec3Length(beamWorldBegin.v);
+            beamDot.v[2] = -Vec3Length(beamWorldBegin.v);
+            beamDot.v[3] = -Vec3Length(beamWorldBegin.v);
+
             args = baseArgs;
-            v20 = g_swizzleXYZA;
-            v13[0] = normDelta;
-            v13[1] = beamDot;
-            v14 = g_swizzleXYZA;
-            v15 = baseArgs;
-            baseArgs->unitVec[0].array[0] = v13[0].unitVec[0].array[g_swizzleXYZA.unitVec[0].array[3]];
-            v15->unitVec[0].array[1] = v13[0].unitVec[0].array[v14.unitVec[0].array[2]];
-            v15->unitVec[0].array[2] = v13[0].unitVec[0].array[v14.unitVec[0].array[1]];
-            v15->unitVec[0].array[3] = v13[0].unitVec[0].array[v14.unitVec[0].array[0]];
-            v15->unitVec[1].array[0] = v13[0].unitVec[0].array[v14.unitVec[1].array[3]];
-            v15->unitVec[1].array[1] = v13[0].unitVec[0].array[v14.unitVec[1].array[2]];
-            v15->unitVec[1].array[2] = v13[0].unitVec[0].array[v14.unitVec[1].array[1]];
-            v15->unitVec[1].array[3] = v13[0].unitVec[0].array[v14.unitVec[1].array[0]];
-            v15->unitVec[2].array[0] = v13[0].unitVec[0].array[v14.unitVec[2].array[3]];
-            v15->unitVec[2].array[1] = v13[0].unitVec[0].array[v14.unitVec[2].array[2]];
-            v15->unitVec[2].array[2] = v13[0].unitVec[0].array[v14.unitVec[2].array[1]];
-            v15->unitVec[2].array[3] = v13[0].unitVec[0].array[v14.unitVec[2].array[0]];
-            v15->unitVec[3].array[0] = v13[0].unitVec[0].array[v14.unitVec[3].array[3]];
-            v15->unitVec[3].array[1] = v13[0].unitVec[0].array[v14.unitVec[3].array[2]];
-            v15->unitVec[3].array[2] = v13[0].unitVec[0].array[v14.unitVec[3].array[1]];
-            v15->unitVec[3].array[3] = v13[0].unitVec[0].array[v14.unitVec[3].array[0]];
-            v19 = g_unit;
+
+            baseArgs->unitVec[0].array[0] = normDelta.unitVec[0].array[g_swizzleXYZA.unitVec[0].array[3]];
+            baseArgs->unitVec[0].array[1] = normDelta.unitVec[0].array[g_swizzleXYZA.unitVec[0].array[2]];
+            baseArgs->unitVec[0].array[2] = normDelta.unitVec[0].array[g_swizzleXYZA.unitVec[0].array[1]];
+            baseArgs->unitVec[0].array[3] = normDelta.unitVec[0].array[g_swizzleXYZA.unitVec[0].array[0]];
+            baseArgs->unitVec[1].array[0] = normDelta.unitVec[0].array[g_swizzleXYZA.unitVec[1].array[3]];
+            baseArgs->unitVec[1].array[1] = normDelta.unitVec[0].array[g_swizzleXYZA.unitVec[1].array[2]];
+            baseArgs->unitVec[1].array[2] = normDelta.unitVec[0].array[g_swizzleXYZA.unitVec[1].array[1]];
+            baseArgs->unitVec[1].array[3] = normDelta.unitVec[0].array[g_swizzleXYZA.unitVec[1].array[0]];
+            baseArgs->unitVec[2].array[0] = normDelta.unitVec[0].array[g_swizzleXYZA.unitVec[2].array[3]];
+            baseArgs->unitVec[2].array[1] = normDelta.unitVec[0].array[g_swizzleXYZA.unitVec[2].array[2]];
+            baseArgs->unitVec[2].array[2] = normDelta.unitVec[0].array[g_swizzleXYZA.unitVec[2].array[1]];
+            baseArgs->unitVec[2].array[3] = normDelta.unitVec[0].array[g_swizzleXYZA.unitVec[2].array[0]];
+            // At this point, the swizzle goes over 16 (float vec4x4) and goes oob into "beamDot". these were an array in the decomp
+            baseArgs->unitVec[3].array[0] = beamDot.unitVec[0].array[g_swizzleXYZA.unitVec[3].array[3] - 16];
+            baseArgs->unitVec[3].array[1] = beamDot.unitVec[0].array[g_swizzleXYZA.unitVec[3].array[2] - 16];
+            baseArgs->unitVec[3].array[2] = beamDot.unitVec[0].array[g_swizzleXYZA.unitVec[3].array[1] - 16];
+            baseArgs->unitVec[3].array[3] = beamDot.unitVec[0].array[g_swizzleXYZA.unitVec[3].array[0] - 16];
+
             v12 = args + 1;
             args[1].v[0] = 0.0;
-            v12->v[1] = v19.v[1];
-            v12->v[2] = v19.v[2];
-            v12->v[3] = v19.v[3];
+            v12->v[1] = g_unit.v[1];
+            v12->v[2] = g_unit.v[2];
+            v12->v[3] = g_unit.v[3];
+
             v10 = args + 1;
             v11 = args + 1;
             args[1].v[0] = args[1].v[0] + beamWorldBegin.v[0];
@@ -230,7 +220,7 @@ void __cdecl FX_Beam_GenerateVerts(FxGenerateVertsCmd *cmd)
             vertPos.v[1] = v9 * flatDelta.v[1] + beamWorldBegin.v[1];
             vertPos.v[2] = v9 * flatDelta.v[2] + beamWorldBegin.v[2];
             vertPos.v[3] = v9 * flatDelta.v[3] + beamWorldBegin.v[3];
-            baseVerts->xyz[0] = vertPos.v[0];
+            verts->xyz[0] = vertPos.v[0];
             verts->xyz[1] = vertPos.v[1];
             verts->xyz[2] = vertPos.v[2];
             verts->color = beginColor;
@@ -238,6 +228,7 @@ void __cdecl FX_Beam_GenerateVerts(FxGenerateVertsCmd *cmd)
             verts->normal.packed = 1073643391;
             verts->tangent.packed = 1065320446;
             verts->texCoord.packed = 0;
+            // beamflags would go here
             ++verts;
             wiggleDist = beam->wiggleDist;
             lerpedColor.packed = -1;
@@ -412,23 +403,6 @@ void __cdecl CreateClipMatrix(float4x4* clipMtx, const float* vieworg, const mat
 
 void __cdecl Float4x4ForViewer(float4x4 *mtx, const vec3r origin3, const mat3x3& axis3)
 {
-    float v3; // [esp+8h] [ebp-1E4h]
-    float v4; // [esp+Ch] [ebp-1E0h]
-    float v5; // [esp+10h] [ebp-1DCh]
-    float v6; // [esp+14h] [ebp-1D8h]
-    float4 v7[2]; // [esp+1Ch] [ebp-1D0h]
-    float4 v8; // [esp+3Ch] [ebp-1B0h]
-    float4 *p_z; // [esp+50h] [ebp-19Ch]
-    float4 v10[2]; // [esp+54h] [ebp-198h]
-    float4 v11; // [esp+74h] [ebp-178h]
-    float4 *p_y; // [esp+88h] [ebp-164h]
-    _QWORD v13[4]; // [esp+8Ch] [ebp-160h]
-    float4 v14; // [esp+ACh] [ebp-140h]
-    float4x4 *v15; // [esp+C0h] [ebp-12Ch]
-    float v16[16]; // [esp+C4h] [ebp-128h] BYREF
-    float4 v17; // [esp+114h] [ebp-D8h]
-    float4 v18; // [esp+124h] [ebp-C8h]
-    float4 v19; // [esp+134h] [ebp-B8h]
     float4 origin; // [esp+144h] [ebp-A8h]
     float4x4 tAxis; // [esp+154h] [ebp-98h] BYREF
     float4 transRow; // [esp+194h] [ebp-58h]
@@ -438,18 +412,22 @@ void __cdecl Float4x4ForViewer(float4x4 *mtx, const vec3r origin3, const mat3x3&
     origin.v[1] = origin3[1];
     origin.v[2] = origin3[2];
     origin.v[3] = 0.0;
+
     tAxis.x.v[0] = (axis3)[0][0];
     tAxis.x.v[1] = (axis3)[0][1];
     tAxis.x.v[2] = (axis3)[0][2];
     tAxis.x.v[3] = 0.0;
+
     tAxis.y.v[0] = (axis3)[1][0];
     tAxis.y.v[1] = (axis3)[1][1];
     tAxis.y.v[2] = (axis3)[1][2];
     tAxis.y.v[3] = 0.0;
+
     tAxis.z.v[0] = (axis3)[2][0];
     tAxis.z.v[1] = (axis3)[2][1];
     tAxis.z.v[2] = (axis3)[2][2];
     tAxis.z.v[3] = 0.0;
+
     tAxis.w.v[0] = 0.0;
     tAxis.w.v[1] = 0.0;
     tAxis.w.v[2] = 0.0;
@@ -460,102 +438,71 @@ void __cdecl Float4x4ForViewer(float4x4 *mtx, const vec3r origin3, const mat3x3&
     tAxis.y.v[2] = -tAxis.y.v[2];
     tAxis.y.v[3] = -(float)0.0;
 
-    v16[0] = tAxis.x.v[0];
-    v16[1] = tAxis.y.v[0];
-    v16[2] = tAxis.z.v[0];
-    v16[3] = 0.0;
-    v16[4] = tAxis.x.v[1];
-    v16[5] = tAxis.y.v[1];
-    v16[6] = tAxis.z.v[1];
-    v16[7] = 0.0;
-    v16[8] = tAxis.x.v[2];
-    v16[9] = tAxis.y.v[2];
-    v16[10] = tAxis.z.v[2];
-    v16[11] = 0.0;
-    v16[12] = 0.0;
-    v16[13] = tAxis.y.v[3];
-    v16[14] = 0.0;
-    v16[15] = 1.0;
-    static_assert(sizeof(v16) == sizeof(axis), "");
-    memcpy(&axis, v16, sizeof(axis));
-    v19 = g_swizzleYZXW;
-    v13[0] = *(_QWORD *)axis.x.v;
-    v13[1] = *(_QWORD *)&axis.x.unitVec[2].packed;
-    v13[2] = *(_QWORD *)axis.x.v;
-    v13[3] = *(_QWORD *)&axis.x.unitVec[2].packed;
-    v14 = g_swizzleYZXW;
-    v15 = mtx;
-    mtx->x.unitVec[0].array[0] = *((_BYTE *)v13 + g_swizzleYZXW.unitVec[0].array[3]);
-    v15->x.unitVec[0].array[1] = *((_BYTE *)v13 + v14.unitVec[0].array[2]);
-    v15->x.unitVec[0].array[2] = *((_BYTE *)v13 + v14.unitVec[0].array[1]);
-    v15->x.unitVec[0].array[3] = *((_BYTE *)v13 + v14.unitVec[0].array[0]);
-    v15->x.unitVec[1].array[0] = *((_BYTE *)v13 + v14.unitVec[1].array[3]);
-    v15->x.unitVec[1].array[1] = *((_BYTE *)v13 + v14.unitVec[1].array[2]);
-    v15->x.unitVec[1].array[2] = *((_BYTE *)v13 + v14.unitVec[1].array[1]);
-    v15->x.unitVec[1].array[3] = *((_BYTE *)v13 + v14.unitVec[1].array[0]);
-    v15->x.unitVec[2].array[0] = *((_BYTE *)v13 + v14.unitVec[2].array[3]);
-    v15->x.unitVec[2].array[1] = *((_BYTE *)v13 + v14.unitVec[2].array[2]);
-    v15->x.unitVec[2].array[2] = *((_BYTE *)v13 + v14.unitVec[2].array[1]);
-    v15->x.unitVec[2].array[3] = *((_BYTE *)v13 + v14.unitVec[2].array[0]);
-    v15->x.unitVec[3].array[0] = *((_BYTE *)v13 + v14.unitVec[3].array[3]);
-    v15->x.unitVec[3].array[1] = *((_BYTE *)v13 + v14.unitVec[3].array[2]);
-    v15->x.unitVec[3].array[2] = *((_BYTE *)v13 + v14.unitVec[3].array[1]);
-    v15->x.unitVec[3].array[3] = *((_BYTE *)v13 + v14.unitVec[3].array[0]);
-    v18 = g_swizzleYZXW;
-    v10[0] = axis.y;
-    v10[1] = axis.y;
-    v11 = g_swizzleYZXW;
-    p_y = &mtx->y;
-    mtx->y.unitVec[0].array[0] = v10[0].unitVec[0].array[g_swizzleYZXW.unitVec[0].array[3]];
-    p_y->unitVec[0].array[1] = v10[0].unitVec[0].array[v11.unitVec[0].array[2]];
-    p_y->unitVec[0].array[2] = v10[0].unitVec[0].array[v11.unitVec[0].array[1]];
-    p_y->unitVec[0].array[3] = v10[0].unitVec[0].array[v11.unitVec[0].array[0]];
-    p_y->unitVec[1].array[0] = v10[0].unitVec[0].array[v11.unitVec[1].array[3]];
-    p_y->unitVec[1].array[1] = v10[0].unitVec[0].array[v11.unitVec[1].array[2]];
-    p_y->unitVec[1].array[2] = v10[0].unitVec[0].array[v11.unitVec[1].array[1]];
-    p_y->unitVec[1].array[3] = v10[0].unitVec[0].array[v11.unitVec[1].array[0]];
-    p_y->unitVec[2].array[0] = v10[0].unitVec[0].array[v11.unitVec[2].array[3]];
-    p_y->unitVec[2].array[1] = v10[0].unitVec[0].array[v11.unitVec[2].array[2]];
-    p_y->unitVec[2].array[2] = v10[0].unitVec[0].array[v11.unitVec[2].array[1]];
-    p_y->unitVec[2].array[3] = v10[0].unitVec[0].array[v11.unitVec[2].array[0]];
-    p_y->unitVec[3].array[0] = v10[0].unitVec[0].array[v11.unitVec[3].array[3]];
-    p_y->unitVec[3].array[1] = v10[0].unitVec[0].array[v11.unitVec[3].array[2]];
-    p_y->unitVec[3].array[2] = v10[0].unitVec[0].array[v11.unitVec[3].array[1]];
-    p_y->unitVec[3].array[3] = v10[0].unitVec[0].array[v11.unitVec[3].array[0]];
-    v17 = g_swizzleYZXW;
-    v7[0] = axis.z;
-    v7[1] = axis.z;
-    v8 = g_swizzleYZXW;
-    p_z = &mtx->z;
-    mtx->z.unitVec[0].array[0] = v7[0].unitVec[0].array[g_swizzleYZXW.unitVec[0].array[3]];
-    p_z->unitVec[0].array[1] = v7[0].unitVec[0].array[v8.unitVec[0].array[2]];
-    p_z->unitVec[0].array[2] = v7[0].unitVec[0].array[v8.unitVec[0].array[1]];
-    p_z->unitVec[0].array[3] = v7[0].unitVec[0].array[v8.unitVec[0].array[0]];
-    p_z->unitVec[1].array[0] = v7[0].unitVec[0].array[v8.unitVec[1].array[3]];
-    p_z->unitVec[1].array[1] = v7[0].unitVec[0].array[v8.unitVec[1].array[2]];
-    p_z->unitVec[1].array[2] = v7[0].unitVec[0].array[v8.unitVec[1].array[1]];
-    p_z->unitVec[1].array[3] = v7[0].unitVec[0].array[v8.unitVec[1].array[0]];
-    p_z->unitVec[2].array[0] = v7[0].unitVec[0].array[v8.unitVec[2].array[3]];
-    p_z->unitVec[2].array[1] = v7[0].unitVec[0].array[v8.unitVec[2].array[2]];
-    p_z->unitVec[2].array[2] = v7[0].unitVec[0].array[v8.unitVec[2].array[1]];
-    p_z->unitVec[2].array[3] = v7[0].unitVec[0].array[v8.unitVec[2].array[0]];
-    p_z->unitVec[3].array[0] = v7[0].unitVec[0].array[v8.unitVec[3].array[3]];
-    p_z->unitVec[3].array[1] = v7[0].unitVec[0].array[v8.unitVec[3].array[2]];
-    p_z->unitVec[3].array[2] = v7[0].unitVec[0].array[v8.unitVec[3].array[1]];
-    p_z->unitVec[3].array[3] = v7[0].unitVec[0].array[v8.unitVec[3].array[0]];
+    axis.x = { tAxis.x.v[0], tAxis.y.v[0], tAxis.z.v[0], 0.0f };
+    axis.y = { tAxis.x.v[1], tAxis.y.v[1], tAxis.z.v[1], 0.0f };
+    axis.z = { tAxis.x.v[2], tAxis.y.v[2], tAxis.z.v[2], 0.0f };
+    axis.w = { 0.0f,         tAxis.y.v[3], 0.0f,         1.0f };
+
+    mtx->x.unitVec[0].array[0] = axis.x.unitVec[0].array[g_swizzleYZXW.unitVec[0].array[3]];
+    mtx->x.unitVec[0].array[1] = axis.x.unitVec[0].array[g_swizzleYZXW.unitVec[0].array[2]];
+    mtx->x.unitVec[0].array[2] = axis.x.unitVec[0].array[g_swizzleYZXW.unitVec[0].array[1]];
+    mtx->x.unitVec[0].array[3] = axis.x.unitVec[0].array[g_swizzleYZXW.unitVec[0].array[0]];
+    mtx->x.unitVec[1].array[0] = axis.x.unitVec[0].array[g_swizzleYZXW.unitVec[1].array[3]];
+    mtx->x.unitVec[1].array[1] = axis.x.unitVec[0].array[g_swizzleYZXW.unitVec[1].array[2]];
+    mtx->x.unitVec[1].array[2] = axis.x.unitVec[0].array[g_swizzleYZXW.unitVec[1].array[1]];
+    mtx->x.unitVec[1].array[3] = axis.x.unitVec[0].array[g_swizzleYZXW.unitVec[1].array[0]];
+    mtx->x.unitVec[2].array[0] = axis.x.unitVec[0].array[g_swizzleYZXW.unitVec[2].array[3]];
+    mtx->x.unitVec[2].array[1] = axis.x.unitVec[0].array[g_swizzleYZXW.unitVec[2].array[2]];
+    mtx->x.unitVec[2].array[2] = axis.x.unitVec[0].array[g_swizzleYZXW.unitVec[2].array[1]];
+    mtx->x.unitVec[2].array[3] = axis.x.unitVec[0].array[g_swizzleYZXW.unitVec[2].array[0]];
+    mtx->x.unitVec[3].array[0] = axis.x.unitVec[0].array[g_swizzleYZXW.unitVec[3].array[3]];
+    mtx->x.unitVec[3].array[1] = axis.x.unitVec[0].array[g_swizzleYZXW.unitVec[3].array[2]];
+    mtx->x.unitVec[3].array[2] = axis.x.unitVec[0].array[g_swizzleYZXW.unitVec[3].array[1]];
+    mtx->x.unitVec[3].array[3] = axis.x.unitVec[0].array[g_swizzleYZXW.unitVec[3].array[0]];
+
+    mtx->y.unitVec[0].array[0] = axis.y.unitVec[0].array[g_swizzleYZXW.unitVec[0].array[3]];
+    mtx->y.unitVec[0].array[1] = axis.y.unitVec[0].array[g_swizzleYZXW.unitVec[0].array[2]];
+    mtx->y.unitVec[0].array[2] = axis.y.unitVec[0].array[g_swizzleYZXW.unitVec[0].array[1]];
+    mtx->y.unitVec[0].array[3] = axis.y.unitVec[0].array[g_swizzleYZXW.unitVec[0].array[0]];
+    mtx->y.unitVec[1].array[0] = axis.y.unitVec[0].array[g_swizzleYZXW.unitVec[1].array[3]];
+    mtx->y.unitVec[1].array[1] = axis.y.unitVec[0].array[g_swizzleYZXW.unitVec[1].array[2]];
+    mtx->y.unitVec[1].array[2] = axis.y.unitVec[0].array[g_swizzleYZXW.unitVec[1].array[1]];
+    mtx->y.unitVec[1].array[3] = axis.y.unitVec[0].array[g_swizzleYZXW.unitVec[1].array[0]];
+    mtx->y.unitVec[2].array[0] = axis.y.unitVec[0].array[g_swizzleYZXW.unitVec[2].array[3]];
+    mtx->y.unitVec[2].array[1] = axis.y.unitVec[0].array[g_swizzleYZXW.unitVec[2].array[2]];
+    mtx->y.unitVec[2].array[2] = axis.y.unitVec[0].array[g_swizzleYZXW.unitVec[2].array[1]];
+    mtx->y.unitVec[2].array[3] = axis.y.unitVec[0].array[g_swizzleYZXW.unitVec[2].array[0]];
+    mtx->y.unitVec[3].array[0] = axis.y.unitVec[0].array[g_swizzleYZXW.unitVec[3].array[3]];
+    mtx->y.unitVec[3].array[1] = axis.y.unitVec[0].array[g_swizzleYZXW.unitVec[3].array[2]];
+    mtx->y.unitVec[3].array[2] = axis.y.unitVec[0].array[g_swizzleYZXW.unitVec[3].array[1]];
+    mtx->y.unitVec[3].array[3] = axis.y.unitVec[0].array[g_swizzleYZXW.unitVec[3].array[0]];
+
+    mtx->z.unitVec[0].array[0] = axis.z.unitVec[0].array[g_swizzleYZXW.unitVec[0].array[3]];
+    mtx->z.unitVec[0].array[1] = axis.z.unitVec[0].array[g_swizzleYZXW.unitVec[0].array[2]];
+    mtx->z.unitVec[0].array[2] = axis.z.unitVec[0].array[g_swizzleYZXW.unitVec[0].array[1]];
+    mtx->z.unitVec[0].array[3] = axis.z.unitVec[0].array[g_swizzleYZXW.unitVec[0].array[0]];
+    mtx->z.unitVec[1].array[0] = axis.z.unitVec[0].array[g_swizzleYZXW.unitVec[1].array[3]];
+    mtx->z.unitVec[1].array[1] = axis.z.unitVec[0].array[g_swizzleYZXW.unitVec[1].array[2]];
+    mtx->z.unitVec[1].array[2] = axis.z.unitVec[0].array[g_swizzleYZXW.unitVec[1].array[1]];
+    mtx->z.unitVec[1].array[3] = axis.z.unitVec[0].array[g_swizzleYZXW.unitVec[1].array[0]];
+    mtx->z.unitVec[2].array[0] = axis.z.unitVec[0].array[g_swizzleYZXW.unitVec[2].array[3]];
+    mtx->z.unitVec[2].array[1] = axis.z.unitVec[0].array[g_swizzleYZXW.unitVec[2].array[2]];
+    mtx->z.unitVec[2].array[2] = axis.z.unitVec[0].array[g_swizzleYZXW.unitVec[2].array[1]];
+    mtx->z.unitVec[2].array[3] = axis.z.unitVec[0].array[g_swizzleYZXW.unitVec[2].array[0]];
+    mtx->z.unitVec[3].array[0] = axis.z.unitVec[0].array[g_swizzleYZXW.unitVec[3].array[3]];
+    mtx->z.unitVec[3].array[1] = axis.z.unitVec[0].array[g_swizzleYZXW.unitVec[3].array[2]];
+    mtx->z.unitVec[3].array[2] = axis.z.unitVec[0].array[g_swizzleYZXW.unitVec[3].array[1]];
+    mtx->z.unitVec[3].array[3] = axis.z.unitVec[0].array[g_swizzleYZXW.unitVec[3].array[0]];
+
     mtx->w = g_unit;
-    v3 = origin.v[0] * mtx->x.v[0] + origin.v[1] * mtx->y.v[0] + origin.v[2] * mtx->z.v[0] + mtx->w.v[0];
-    v4 = origin.v[0] * mtx->x.v[1] + origin.v[1] * mtx->y.v[1] + origin.v[2] * mtx->z.v[1] + mtx->w.v[1];
-    v5 = origin.v[0] * mtx->x.v[2] + origin.v[1] * mtx->y.v[2] + origin.v[2] * mtx->z.v[2] + mtx->w.v[2];
-    v6 = origin.v[0] * mtx->x.v[3] + origin.v[1] * mtx->y.v[3] + origin.v[2] * mtx->z.v[3] + mtx->w.v[3];
-    transRow.v[0] = -v3;
-    transRow.v[1] = -v4;
-    transRow.v[2] = -v5;
-    transRow.v[3] = -v6;
-    transRow.v[0] = transRow.v[0] + 0.0;
-    transRow.v[1] = transRow.v[1] + 0.0;
-    transRow.v[2] = transRow.v[2] + 0.0;
-    transRow.v[3] = transRow.v[3] + 2.0;
+    transRow.v[0] = -(origin.v[0] * mtx->x.v[0] + origin.v[1] * mtx->y.v[0] + origin.v[2] * mtx->z.v[0] + mtx->w.v[0]);
+    transRow.v[1] = -(origin.v[0] * mtx->x.v[1] + origin.v[1] * mtx->y.v[1] + origin.v[2] * mtx->z.v[1] + mtx->w.v[1]);
+    transRow.v[2] = -(origin.v[0] * mtx->x.v[2] + origin.v[1] * mtx->y.v[2] + origin.v[2] * mtx->z.v[2] + mtx->w.v[2]);
+    transRow.v[3] = -(origin.v[0] * mtx->x.v[3] + origin.v[1] * mtx->y.v[3] + origin.v[2] * mtx->z.v[3] + mtx->w.v[3]);
+    transRow.v[0] += 0.0;
+    transRow.v[1] += 0.0;
+    transRow.v[2] += 0.0;
+    transRow.v[3] += 2.0;
     mtx->w = transRow;
 }
 
@@ -613,7 +560,7 @@ char  FX_GenerateBeam_GetFlatDelta(
     float v28; // [esp-B0h] [ebp-BCh]
     float v29; // [esp-ACh] [ebp-B8h]
     float v30; // [esp-A8h] [ebp-B4h]
-    float4 v31; // [esp-A4h] [ebp-B0h] BYREF
+    float4 in; // [esp-A4h] [ebp-B0h] BYREF
     float4 v32; // [esp-94h] [ebp-A0h]
     float v33; // [esp-84h] [ebp-90h]
     float v34; // [esp-80h] [ebp-8Ch]
@@ -664,8 +611,8 @@ char  FX_GenerateBeam_GetFlatDelta(
     v32.v[1] = v43 * clipMtx->x.v[1] + v44 * clipMtx->y.v[1] + v45 * clipMtx->z.v[1] + v46 * clipMtx->w.v[1];
     v32.v[2] = v43 * clipMtx->x.v[2] + v44 * clipMtx->y.v[2] + v45 * clipMtx->z.v[2] + v46 * clipMtx->w.v[2];
     v32.v[3] = v43 * clipMtx->x.v[3] + v44 * clipMtx->y.v[3] + v45 * clipMtx->z.v[3] + v46 * clipMtx->w.v[3];
-    v31 = v32;
-    if (!Vec4HomogenousClipBothZ(&v37, &v31))
+    in = v32;
+    if (!Vec4HomogenousClipBothZ(&v37, &in))
         return 0;
     if (v37.v[3] == 0.0)
         MyAssertHandler("c:\\trees\\cod3\\src\\universal\\com_vector4_novec.h", 599, 0, "%s", "in.v[3]");
@@ -674,12 +621,12 @@ char  FX_GenerateBeam_GetFlatDelta(
     v27 = v37.v[1] * v30;
     v28 = v37.v[2] * v30;
     v29 = 1.0;
-    if (v31.v[3] == 0.0)
+    if (in.v[3] == 0.0)
         MyAssertHandler("c:\\trees\\cod3\\src\\universal\\com_vector4_novec.h", 599, 0, "%s", "in.v[3]");
-    v25 = 1.0 / v31.v[3];
-    v21 = v31.v[0] * v25;
-    v22 = v31.v[1] * v25;
-    v23 = v31.v[2] * v25;
+    v25 = 1.0 / in.v[3];
+    v21 = in.v[0] * v25;
+    v22 = in.v[1] * v25;
+    v23 = in.v[2] * v25;
     v24 = 1.0;
     v20.v[0] = v21 - v26;
     v20.v[1] = v22 - v27;
@@ -732,22 +679,20 @@ char  FX_GenerateBeam_GetFlatDelta(
 
 bool __cdecl Vec4HomogenousClipBothZ(float4 *pt0, float4 *pt1)
 {
-    float4 v3; // [esp-10h] [ebp-178h]
-    float4 coeffZGtW; // [esp+144h] [ebp-24h]
-    __int64 coeffZLt0_4; // [esp+158h] [ebp-10h]
+    float4 coeffZGtW; // [esp+140h] [ebp-24h] BYREF
+    float4 coeffZLt0; // [esp+150h] [ebp-14h] BYREF
 
-    *(float *)&coeffZLt0_4 = 0.0;
-    *((float *)&coeffZLt0_4 + 1) = 1.0;
-    v3.v[0] = 0.0;
-    *(_QWORD *)&v3.unitVec[1].packed = coeffZLt0_4;
-    v3.v[3] = 0.0;
-    if (!Vec4HomogenousClipZW(pt0, pt1, v3))
-        return 0;
+    coeffZLt0.u[0] = 0;
+    coeffZLt0.v[1] = 0.0f;
+    coeffZLt0.v[2] = 1.0f;
+    coeffZLt0.u[3] = 0;
+
+    coeffZGtW.u[0] = 0;
     coeffZGtW.v[1] = 0.0;
-    coeffZGtW.v[0] = 0.0;
-    coeffZGtW.v[3] = 1.0;
-    coeffZGtW.v[2] = -1.0;
-    return Vec4HomogenousClipZW(pt0, pt1, coeffZGtW);
+    coeffZGtW.v[2] = -1.0f;
+    coeffZGtW.v[3] = 1.0f;
+
+    return Vec4HomogenousClipZW(pt0, pt1, coeffZLt0) && Vec4HomogenousClipZW(pt0, pt1, coeffZGtW);
 }
 
 bool __cdecl Vec4HomogenousClipZW(float4 *pt0, float4 *pt1, float4 coeffZW)

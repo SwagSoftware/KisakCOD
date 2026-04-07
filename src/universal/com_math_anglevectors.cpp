@@ -61,9 +61,10 @@ void __cdecl AnglesToAxis(const float *angles, float axis[3][3])
     angle = angles[1] * 0.01745329238474369;
     cy = cos(angle);
     sy = sin(angle);
-    anglea = *angles * 0.01745329238474369;
+    anglea = angles[0] * 0.01745329238474369;
     cp = cos(anglea);
     v7 = sin(anglea);
+
     axis[0][0] = cp * cy;
     axis[0][1] = cp * sy;
     axis[0][2] = -v7;

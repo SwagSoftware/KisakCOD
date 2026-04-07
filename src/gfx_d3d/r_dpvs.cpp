@@ -1392,12 +1392,15 @@ void __cdecl R_FilterDynEntIntoCells_r(
     int planeIndex; // [esp+4Ch] [ebp-4h]
 
     cellCount = rgp.world->dpvsPlanes.cellCount + 1;
-    mins2[0] = *mins;
+
+    mins2[0] = mins[0];
     mins2[1] = mins[1];
     mins2[2] = mins[2];
-    maxs2[0] = *maxs;
+
+    maxs2[0] = maxs[0];
     maxs2[1] = maxs[1];
     maxs2[2] = maxs[2];
+
     while (1)
     {
         cellIndex = node->cellIndex;
@@ -1417,16 +1420,19 @@ void __cdecl R_FilterDynEntIntoCells_r(
             else
             {
                 dist = plane->dist;
+
                 localmins[0] = mins2[0];
                 localmins[1] = mins2[1];
                 localmins[2] = mins2[2];
                 localmins[type] = dist;
+
                 localmaxs[0] = maxs2[0];
                 localmaxs[1] = maxs2[1];
                 localmaxs[2] = maxs2[2];
                 localmaxs[type] = dist;
-                if (BoxOnPlaneSide(localmins, maxs2, plane) != 1)
-                    MyAssertHandler(".\\r_dpvs.cpp", 2018, 0, "%s", "BoxOnPlaneSide( localmins, maxs2, plane ) == BOXSIDE_FRONT");
+
+                iassert(BoxOnPlaneSide(localmins, maxs2, plane) == BOXSIDE_FRONT);
+
                 if (maxs2[type] > (double)dist)
                     R_FilterDynEntIntoCells_r(node + 1, dynEntIndex, drawType, localmins, maxs2);
                 maxs2[0] = localmaxs[0];
@@ -3095,94 +3101,79 @@ void __cdecl R_ProjectPortal(
     float *maxs,
     DpvsClipChildren *clipChildren)
 {
-    char *v5; // eax
-    const char *v6; // eax
-    char *v7; // eax
-    const char *v8; // eax
     int windingVertIndex; // [esp+40h] [ebp-440h]
     int windingVertIndexa; // [esp+40h] [ebp-440h]
     float area; // [esp+44h] [ebp-43Ch]
-    float areaa; // [esp+44h] [ebp-43Ch]
-    float areab; // [esp+44h] [ebp-43Ch]
     const float *xyz; // [esp+48h] [ebp-438h]
-    float invW; // [esp+4Ch] [ebp-434h]
     float x; // [esp+50h] [ebp-430h]
     float y; // [esp+54h] [ebp-42Ch]
-    float screenSpaceWinding[265]; // [esp+58h] [ebp-428h] BYREF
-    float w; // [esp+47Ch] [ebp-4h]
+    float screenSpaceWinding[132][2]; // [esp+58h] [ebp-428h] BYREF
 
-    iassert( (vertexCount >= 3) );
-    *mins = 1.0;
-    mins[1] = 1.0;
-    *maxs = -1.0;
-    maxs[1] = -1.0;
+    iassert(vertexCount >= 3);
+
+    mins[0] = 1.0f;
+    mins[1] = 1.0f;
+    maxs[0] = -1.0f;
+    maxs[1] = -1.0f;
+
     for (windingVertIndex = 0; windingVertIndex < vertexCount; ++windingVertIndex)
     {
         xyz = &(*winding)[3 * windingVertIndex];
-        w = *xyz * dpvsGlob.viewProjMtx->m[0][3]
+
+        float w = xyz[0] * dpvsGlob.viewProjMtx->m[0][3]
             + xyz[1] * dpvsGlob.viewProjMtx->m[1][3]
             + xyz[2] * dpvsGlob.viewProjMtx->m[2][3]
             + dpvsGlob.viewProjMtx->m[3][3];
+
         if (w < 0.125)
         {
-            *mins = -1.0;
-            mins[1] = -1.0;
-            *maxs = 1.0;
-            maxs[1] = 1.0;
+            mins[0] = -1.0f;
+            mins[1] = -1.0f;
+            maxs[0] = 1.0f;
+            maxs[1] = 1.0f;
             *clipChildren = DPVS_CLIP_CHILDREN;
             return;
         }
-        x = *xyz * dpvsGlob.viewProjMtx->m[0][0]
-            + xyz[1] * dpvsGlob.viewProjMtx->m[1][0]
-            + xyz[2] * dpvsGlob.viewProjMtx->m[2][0]
-            + dpvsGlob.viewProjMtx->m[3][0];
-        y = *xyz * dpvsGlob.viewProjMtx->m[0][1]
-            + xyz[1] * dpvsGlob.viewProjMtx->m[1][1]
-            + xyz[2] * dpvsGlob.viewProjMtx->m[2][1]
-            + dpvsGlob.viewProjMtx->m[3][1];
-        invW = 1.0 / w;
-        screenSpaceWinding[2 * windingVertIndex] = invW * x;
-        screenSpaceWinding[2 * windingVertIndex + 1] = invW * y;
-        if (screenSpaceWinding[2 * windingVertIndex] < (double)*mins)
-            *mins = screenSpaceWinding[2 * windingVertIndex];
-        if (screenSpaceWinding[2 * windingVertIndex] > (double)*maxs)
-            *maxs = screenSpaceWinding[2 * windingVertIndex];
-        if (screenSpaceWinding[2 * windingVertIndex + 1] < (double)mins[1])
-            mins[1] = screenSpaceWinding[2 * windingVertIndex + 1];
-        if (screenSpaceWinding[2 * windingVertIndex + 1] > (double)maxs[1])
-            maxs[1] = screenSpaceWinding[2 * windingVertIndex + 1];
+        x = (((*xyz * dpvsGlob.viewProjMtx->m[0][0]) + (xyz[1] * dpvsGlob.viewProjMtx->m[1][0])) + (xyz[2] * dpvsGlob.viewProjMtx->m[2][0])) + dpvsGlob.viewProjMtx->m[3][0];
+        y = (((*xyz * dpvsGlob.viewProjMtx->m[0][1]) + (xyz[1] * dpvsGlob.viewProjMtx->m[1][1])) + (xyz[2] * dpvsGlob.viewProjMtx->m[2][1])) + dpvsGlob.viewProjMtx->m[3][1];
+
+        float invW = 1.0 / w;
+        screenSpaceWinding[windingVertIndex][0] = x * (1.0 / w);
+        screenSpaceWinding[windingVertIndex][1] = y * invW;
+
+        // Update min/max values
+        if (mins[0] > screenSpaceWinding[windingVertIndex][0]) { mins[0] = screenSpaceWinding[windingVertIndex][0]; }
+        if (maxs[0] < screenSpaceWinding[windingVertIndex][0]) { maxs[0] = screenSpaceWinding[windingVertIndex][0]; }
+        if (mins[1] > screenSpaceWinding[windingVertIndex][1]) { mins[1] = screenSpaceWinding[windingVertIndex][1]; }
+        if (maxs[1] < screenSpaceWinding[windingVertIndex][1]) { maxs[1] = screenSpaceWinding[windingVertIndex][1]; }
     }
-    area = (*maxs - *mins) * (maxs[1] - mins[1]) * 0.25;
-    if (area < 0.0)
-    {
-        v5 = R_PortalAssertMsg();
-        v6 = va("area %g bounds [%g,%g]-[%g,%g]\n%s", area, *mins, mins[1], *maxs, maxs[1], v5);
-        MyAssertHandler(".\\r_dpvs.cpp", 366, 0, "%s\n\t%s", "area >= 0", v6);
-    }
-    if (r_portalMinClipArea->current.value <= (double)area)
-    {
-        screenSpaceWinding[2 * vertexCount] = screenSpaceWinding[0];
-        screenSpaceWinding[2 * vertexCount + 1] = screenSpaceWinding[1];
-        screenSpaceWinding[2 * vertexCount + 2] = screenSpaceWinding[2];
-        screenSpaceWinding[2 * vertexCount + 3] = screenSpaceWinding[3];
-        areaa = 0.0;
-        for (windingVertIndexa = 1; windingVertIndexa <= vertexCount; ++windingVertIndexa)
-            areaa = (screenSpaceWinding[2 * windingVertIndexa + 3] - screenSpaceWinding[2 * windingVertIndexa - 1])
-            * screenSpaceWinding[2 * windingVertIndexa]
-            + areaa;
-        areab = areaa * 0.125;
-        if (areab < 0.0)
-        {
-            v7 = R_PortalAssertMsg();
-            v8 = va("area %g bounds [%g,%g]-[%g,%g]\n%s", areab, *mins, mins[1], *maxs, maxs[1], v7);
-            MyAssertHandler(".\\r_dpvs.cpp", 379, 0, "%s\n\t%s", "area >= 0", v8);
-        }
-        *clipChildren = (DpvsClipChildren)(r_portalMinClipArea->current.value <= (double)areab);
-    }
-    else
+
+    area = ((maxs[0] - mins[0]) * (maxs[1] - mins[1])) * 0.25;
+    iassert(area >= 0);
+
+    // Portal is too small, who cares
+    if (area < r_portalMinClipArea->current.value)
     {
         *clipChildren = DPVS_DONT_CLIP_CHILDREN;
+        return;
     }
+
+    screenSpaceWinding[vertexCount][0] = screenSpaceWinding[0][0];
+    screenSpaceWinding[vertexCount][1] = screenSpaceWinding[0][1];
+    screenSpaceWinding[vertexCount + 1][0] = screenSpaceWinding[1][0];
+    screenSpaceWinding[vertexCount + 1][1] = screenSpaceWinding[1][1];
+
+    area = 0.0f;
+    for (int i = 1; i <= vertexCount; ++i)
+        area += (screenSpaceWinding[i + 1][1] - screenSpaceWinding[i - 1][1]) * screenSpaceWinding[i][0];
+
+    //for ( windingVertIndexa = 1; windingVertIndexa <= vertexCount; ++windingVertIndexa )
+    //    area = ((screenSpaceWinding[windingVertIndexa + 1][1] - *(&y + 2 * windingVertIndexa)) * screenSpaceWinding[windingVertIndexa][0]) + area;
+
+    area *= 0.125;
+    iassert(area >= 0);
+
+    *clipChildren = (DpvsClipChildren)(r_portalMinClipArea->current.value <= area);
 }
 
 unsigned int __cdecl R_AddBevelPlanes(

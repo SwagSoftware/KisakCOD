@@ -1652,6 +1652,13 @@ uintptr_t Scr_ReadUnsigned(const char **pos)
     return value;
 }
 
+int Scr_ReadInt(const char **pos)
+{
+    int value = *(int *)*pos;
+    *pos += sizeof(int);
+    return value;
+}
+
 unsigned short Scr_ReadUnsignedShort(const char **pos)
 {
     unsigned short value = *(reinterpret_cast<const unsigned short *>(*pos));
@@ -2230,7 +2237,7 @@ thread_return:
         case OP_GetInteger:
             INC_TOP();
             fs.top->type = VAR_INTEGER;
-            fs.top->u.intValue = Scr_ReadUnsigned(&fs.pos);
+            fs.top->u.intValue = Scr_ReadInt(&fs.pos);
             continue;
 
         case OP_GetFloat:
@@ -2296,7 +2303,7 @@ thread_return:
         case OP_GetAnimation:
             INC_TOP();
             fs.top->type = VAR_ANIMATION;
-            fs.top->u.pointerValue = Scr_ReadUnsigned(&fs.pos);
+            fs.top->u.intValue = Scr_ReadInt(&fs.pos);
             continue;
 
         case OP_GetGameRef:
@@ -3013,7 +3020,7 @@ function_call:
             continue;
 
         case OP_jump:
-            jumpOffset = Scr_ReadUnsigned(&fs.pos);
+            jumpOffset = Scr_ReadInt(&fs.pos);
             fs.pos += jumpOffset;
             continue;
 

@@ -4,6 +4,7 @@
 #include "r_scene.h"
 #include "r_pretess.h"
 #include "r_buffers.h"
+#include "r_add_staticmodel.h"
 #include <universal/profile.h>
 
 void __cdecl R_InitBspDrawSurf(GfxBspDrawSurfData* surfData)
@@ -46,6 +47,7 @@ char __cdecl R_PreTessBspDrawSurfs(
 
     {
         PROF_SCOPED("R_memcpy");
+
         copyIndex = 0;
         simplifiedCount = 0;
         baseVertex = 0x7FFFFFFF;
@@ -66,40 +68,23 @@ char __cdecl R_PreTessBspDrawSurfs(
                 simplifiedList[simplifiedCount].baseSurfIndex = surfIndex;
                 simplifiedList[simplifiedCount++].totalTriCount = 0;
             }
-            Com_Memcpy(
-                (char *)&preTessIndices[copyIndex],
-                (char *)&rgp.world->indices[tris->tris.baseIndex],
-                6 * tris->tris.triCount);
+            Com_Memcpy(&preTessIndices[copyIndex], &rgp.world->indices[tris->tris.baseIndex], 6 * tris->tris.triCount);
             copyIndex += 3 * tris->tris.triCount;
             //v5 = tris->tris.triCount + *((unsigned __int16*)&copyIndex + 2 * simplifiedCount + 1);
             // TODO(mrsteyk): @Correctness
             iassert(simplifiedCount);
-            v5 = tris->tris.triCount + simplifiedList[simplifiedCount - 1].totalTriCount;
-            if (v5 != (unsigned __int16)v5)
-                MyAssertHandler(
-                    "c:\\trees\\cod3\\src\\qcommon\\../universal/assertive.h",
-                    281,
-                    0,
-                    "i == static_cast< Type >( i )\n\t%i, %i",
-                    v5,
-                    (unsigned __int16)v5);
-            simplifiedList[simplifiedCount - 1].totalTriCount = v5;
+            simplifiedList[simplifiedCount - 1].totalTriCount = truncate_cast<unsigned short>(tris->tris.triCount + simplifiedList[simplifiedCount - 1].totalTriCount);
         }
     }
 
     //HIDWORD(drawSurf.packed) = HIDWORD(drawSurf.packed) & 0xFFC3FFFF | 0x40000; // (0xFFc3FFFF without surfType) (Set b(1))
     drawSurf.fields.surfType = SF_TRIANGLES_PRETESS;
+
     if (R_AllocDrawSurf(&surfData->delayedCmdBuf, drawSurf, &surfData->drawSurfList, simplifiedCount + 2))
     {
         firstIndex = preTessIndices - gfxBuf.preTessIndexBuffer->indices;
-        if (firstIndex >= 0x100000)
-            MyAssertHandler(
-                ".\\r_add_bsp.cpp",
-                148,
-                0,
-                "firstIndex doesn't index R_MAX_PRETESS_INDICES\n\t%i not in [0, %i)",
-                firstIndex,
-                0x100000);
+        bcassert(firstIndex, R_MAX_PRETESS_INDICES);
+
         R_WritePrimDrawSurfInt(&surfData->delayedCmdBuf, simplifiedCount);
         R_WritePrimDrawSurfInt(&surfData->delayedCmdBuf, firstIndex);
         R_WritePrimDrawSurfData(&surfData->delayedCmdBuf, (unsigned __int8 *)simplifiedList, simplifiedCount);

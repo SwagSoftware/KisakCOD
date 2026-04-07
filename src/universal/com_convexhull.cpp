@@ -98,7 +98,6 @@ unsigned int __cdecl Com_RecursivelyGrowHull(
 {
     float *v7; // edx
     float *v8; // ecx
-    unsigned int v10; // eax
     float v11; // [esp+0h] [ebp-34h]
     float v12; // [esp+4h] [ebp-30h]
     float *v13; // [esp+10h] [ebp-24h]
@@ -108,17 +107,10 @@ unsigned int __cdecl Com_RecursivelyGrowHull(
     int botIndex; // [esp+28h] [ebp-Ch]
     int frontIndex; // [esp+2Ch] [ebp-8h]
     float frontDist; // [esp+30h] [ebp-4h]
-    unsigned int hullPointCounta; // [esp+54h] [ebp+20h]
+    
+    iassert(pointCount > 0);
+    iassert(secondIndex == firstIndex + 1 || (firstIndex == hullPointCount - 1 && secondIndex == 0));
 
-    if (!pointCount)
-        MyAssertHandler((char *)".\\universal\\com_convexhull.cpp", 77, 0, "%s", "pointCount > 0");
-    if (secondIndex != firstIndex + 1 && (firstIndex != hullPointCount - 1 || secondIndex))
-        MyAssertHandler(
-            (char *)".\\universal\\com_convexhull.cpp",
-            78,
-            0,
-            "%s",
-            "secondIndex == firstIndex + 1 || (firstIndex == hullPointCount - 1 && secondIndex == 0)");
     edgeEq[0] = (float)(*points)[hullOrder[firstIndex]][1] - (float)(*points)[hullOrder[secondIndex]][1];
     edgeEq[1] = (float)(*points)[hullOrder[secondIndex]][0] - (float)(*points)[hullOrder[firstIndex]][0];
     Vec2Normalize(edgeEq);
@@ -145,8 +137,8 @@ unsigned int __cdecl Com_RecursivelyGrowHull(
             if (++botIndex > topIndex)
                 goto done_splitting_0;
         }
-        if (botIndex > topIndex)
-            MyAssertHandler((char *)".\\universal\\com_convexhull.cpp", 104, 1, "%s", "botIndex <= topIndex");
+        iassert(botIndex <= topIndex);
+
         while (1)
         {
             v8 = (float *)(*points)[pointOrder[topIndex]];
@@ -162,25 +154,34 @@ unsigned int __cdecl Com_RecursivelyGrowHull(
             frontDist = dist;
             frontIndex = botIndex;
         }
-        if (botIndex >= topIndex)
-            MyAssertHandler((char *)".\\universal\\com_convexhull.cpp", 122, 1, "%s", "botIndex < topIndex");
+        iassert(botIndex < topIndex);
         Com_SwapHullPoints(pointOrder, botIndex++, topIndex--);
     }
 done_splitting_0:
-    if (topIndex != botIndex - 1)
-        MyAssertHandler((char *)".\\universal\\com_convexhull.cpp", 130, 1, "%s", "topIndex == botIndex - 1");
-    if (frontIndex > topIndex)
-        MyAssertHandler((char *)".\\universal\\com_convexhull.cpp", 131, 1, "%s", "frontIndex <= topIndex");
+    iassert(topIndex == botIndex - 1);
+    iassert(frontIndex <= topIndex);
+
     if (frontIndex < 0)
         return hullPointCount;
+
     Com_SwapHullPoints(pointOrder, frontIndex, topIndex);
-    hullPointCounta = Com_AddPointToHull(pointOrder[topIndex], firstIndex + 1, hullOrder, hullPointCount);
+    hullPointCount = Com_AddPointToHull(pointOrder[topIndex], firstIndex + 1, hullOrder, hullPointCount);
+
     if (!topIndex)
-        return hullPointCounta;
+        return hullPointCount;
+
     if (secondIndex)
         secondIndex = firstIndex + 2;
-    v10 = Com_RecursivelyGrowHull(points, pointOrder, topIndex, firstIndex + 1, secondIndex, hullOrder, hullPointCounta);
-    return Com_RecursivelyGrowHull(points, pointOrder, topIndex, firstIndex, firstIndex + 1, hullOrder, v10);
+
+    return Com_RecursivelyGrowHull(
+        points, 
+        pointOrder, 
+        topIndex, 
+        firstIndex, 
+        firstIndex + 1, 
+        hullOrder, 
+        Com_RecursivelyGrowHull(points, pointOrder, topIndex, firstIndex + 1, secondIndex, hullOrder, hullPointCount)
+    );
 }
 
 static unsigned int __cdecl Com_GrowInitialHull(

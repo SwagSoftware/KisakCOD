@@ -437,23 +437,24 @@ void __cdecl CG_UpdateHelicopterKillCam(int32_t localClientNum)
 
 void __cdecl CG_UpdateFov(int32_t localClientNum, float fov_x)
 {
-    float v2; // [esp+0h] [ebp-1Ch]
-    float v3; // [esp+4h] [ebp-18h]
+    float dxDzAtDefaultAspectRatio; // [esp+0h] [ebp-1Ch]
     float dxDz; // [esp+8h] [ebp-14h]
     float dyDz; // [esp+18h] [ebp-4h]
+
     cg_s *cgameGlob;
     cgs_t *cgs;
 
     cgameGlob = CG_GetLocalClientGlobals(localClientNum);
     cgs = CG_GetLocalClientStaticGlobals(localClientNum);
 
-    v3 = fov_x * 0.01745329238474369 * 0.5;
-    v2 = tan(v3);
-    dyDz = v2 * 0.75;
+    dxDzAtDefaultAspectRatio = tan(DEG2RAD(fov_x) * 0.5);
+    dyDz = dxDzAtDefaultAspectRatio * 0.75;
     dxDz = dyDz * cgs->viewAspect;
     cgameGlob->refdef.tanHalfFovX = dxDz;
     cgameGlob->refdef.tanHalfFovY = dyDz;
-    cgameGlob->zoomSensitivity = v2 / 0.6370702385902405;
+    //cgameGlob->zoomSensitivity = dxDzAtDefaultAspectRatio / 0.6370702385902405;
+    // LWSS: this was pre-computed for 65, but i'm changing it to match SP and other versions
+    cgameGlob->zoomSensitivity = dxDzAtDefaultAspectRatio / tan(DEG2RAD(cg_fov->current.value) * 0.5f);
 }
 
 void __cdecl CG_UpdateHelicopterKillCamDof(float distance, GfxDepthOfField *dof)

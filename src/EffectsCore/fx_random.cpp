@@ -70,7 +70,7 @@ void __cdecl FX_RandomlyRotateAxis(const float (*axisIn)[3], int32_t randomSeed,
     }
 }
 
-const float fx_randomTable[] = { // idb
+const float fx_randomTable[507] = { // idb
   0.4300513f, 0.58586591f, 0.14015682f, 0.3638894f, 0.87767053f
 , 0.67589945f, 0.18348631f, 0.28799689f, 0.68363762f, 0.071270868f
 , 0.94988143f, 0.45510319f, 0.87240946f, 0.84151697f, 0.37590459f

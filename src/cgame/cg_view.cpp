@@ -723,36 +723,50 @@ float __cdecl CG_GetViewFov(int localClientNum)
 
 void __cdecl CG_CalcFov(int localClientNum)
 {
-    long double v2; // fp2
-    long double v3; // fp2
-    double v4; // fp29
-    long double v5; // fp2
+    //long double v2; // fp2
+    //long double v3; // fp2
+    //double v4; // fp29
+    //long double v5; // fp2
+    //
+    //if (localClientNum)
+    //{
+    //    MyAssertHandler(
+    //        "c:\\trees\\cod3\\cod3src\\src\\cgame\\cg_local.h",
+    //        910,
+    //        0,
+    //        "%s\n\t(localClientNum) = %i",
+    //        "(localClientNum == 0)",
+    //        localClientNum);
+    //    MyAssertHandler(
+    //        "c:\\trees\\cod3\\cod3src\\src\\cgame\\cg_local.h",
+    //        917,
+    //        0,
+    //        "%s\n\t(localClientNum) = %i",
+    //        "(localClientNum == 0)",
+    //        localClientNum);
+    //}
+    //*(double *)&v2 = (float)((float)(CG_GetViewFov(localClientNum) * (float)0.017453292) * (float)0.5);
+    //v3 = tan(v2);
+    //v4 = (float)*(double *)&v3;
+    //cgArray[0].refdef.tanHalfFovX = cgsArray[0].viewAspect * (float)((float)*(double *)&v3 * (float)0.75);
+    //cgArray[0].refdef.tanHalfFovY = (float)*(double *)&v3 * (float)0.75;
+    //*(double *)&v3 = (float)((float)(cg_fov->current.value * (float)0.017453292) * (float)0.5);
+    //v5 = tan(v3);
+    //cgArray[0].zoomSensitivity = (float)v4 / (float)*(double *)&v5;
 
-    if (localClientNum)
-    {
-        MyAssertHandler(
-            "c:\\trees\\cod3\\cod3src\\src\\cgame\\cg_local.h",
-            910,
-            0,
-            "%s\n\t(localClientNum) = %i",
-            "(localClientNum == 0)",
-            localClientNum);
-        MyAssertHandler(
-            "c:\\trees\\cod3\\cod3src\\src\\cgame\\cg_local.h",
-            917,
-            0,
-            "%s\n\t(localClientNum) = %i",
-            "(localClientNum == 0)",
-            localClientNum);
-    }
-    *(double *)&v2 = (float)((float)(CG_GetViewFov(localClientNum) * (float)0.017453292) * (float)0.5);
-    v3 = tan(v2);
-    v4 = (float)*(double *)&v3;
-    cgArray[0].refdef.tanHalfFovX = cgsArray[0].viewAspect * (float)((float)*(double *)&v3 * (float)0.75);
-    cgArray[0].refdef.tanHalfFovY = (float)*(double *)&v3 * (float)0.75;
-    *(double *)&v3 = (float)((float)(cg_fov->current.value * (float)0.017453292) * (float)0.5);
-    v5 = tan(v3);
-    cgArray[0].zoomSensitivity = (float)v4 / (float)*(double *)&v5;
+    cg_s *cgameGlob; // [esp+Ch] [ebp-10h]
+    float dxDzAtDefaultAspectRatio; // [esp+10h] [ebp-Ch]
+    const cgs_t *cgs; // [esp+14h] [ebp-8h]
+
+    cgameGlob = CG_GetLocalClientGlobals(localClientNum);
+    cgs = CG_GetLocalClientStaticGlobals(localClientNum);
+
+    float fov_x = CG_GetViewFov(localClientNum);
+
+    float tanHalfFov = tanf(DEG2RAD(fov_x) * 0.5f);
+    cgameGlob->refdef.tanHalfFovX = tanHalfFov * 0.75f * cgs->viewAspect;
+    cgameGlob->refdef.tanHalfFovY = tanHalfFov * 0.75f;
+    cgameGlob->zoomSensitivity= tanHalfFov / tanf(DEG2RAD(cg_fov->current.value) * 0.5f);
 }
 
 float __cdecl CG_GetViewZoomScale()

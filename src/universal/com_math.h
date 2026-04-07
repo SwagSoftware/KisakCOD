@@ -110,10 +110,10 @@ constexpr float4 g_swizzleXYZA = {
         0x00010203,
         0x04050607,
         0x08090A0B,
-        0x10111213
+        0x10111213 // this row goes over 16
     }
 };
-
+// each individual member never goes over 16
 constexpr float4 g_swizzleYZXW = {
     .u = {
         0x04050607,

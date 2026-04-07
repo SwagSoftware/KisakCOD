@@ -1044,7 +1044,7 @@ void __cdecl CL_ParseGamestate(netsrc_t localClientNum, msg_t *msg)
         switch (cmd)
         {
         case svc_EOF:
-            break;
+            goto END_LOOP;
         case svc_configstring:
             currentConstConfigString = 0;
             lastStringIndex = -1;
@@ -1119,6 +1119,8 @@ void __cdecl CL_ParseGamestate(netsrc_t localClientNum, msg_t *msg)
             return;
         }
     }
+
+END_LOOP:
 
     clc->clientNum = MSG_ReadLong(msg);
     
