@@ -1695,33 +1695,8 @@ void __cdecl FX_ExpandMarkVerts_Transform_GfxWorldVertex_(
 
 void __cdecl setTexCoordAndLMap_GfxPackedVertex_(GfxPackedVertex *outVert, const float *texCoord)
 {
-    __int16 v2; // [esp+0h] [ebp-40h]
-    __int16 v3; // [esp+4h] [ebp-3Ch]
-    int32_t v4; // [esp+Ch] [ebp-34h]
-    float v5; // [esp+18h] [ebp-28h]
-    int32_t v6; // [esp+20h] [ebp-20h]
-
-    if (((uint32_t)(2 * texCoord[0]) ^ 0x80000000) >> 14 < 0x3FFF)
-        v6 = ((uint32_t)(2 * texCoord[0]) ^ 0x80000000) >> 14;
-    else
-        v6 = 0x3FFF;
-    if (v6 > -16384)
-        v3 = v6;
-    else
-        v3 = -16384;
-    v5 = texCoord[1];
-    if (((2 * LODWORD(v5)) ^ 0x80000000) >> 14 < 0x3FFF)
-        v4 = ((2 * LODWORD(v5)) ^ 0x80000000) >> 14;
-    else
-        v4 = 0x3FFF;
-    if (v4 > -16384)
-        v2 = v4;
-    else
-        v2 = -16384;
-    outVert->texCoord.packed = (v2 & 0x3FFF | (SLODWORD(v5) >> 16) & 0xC000)
-        + ((v3 & 0x3FFF | (COERCE_INT(*texCoord) >> 16) & 0xC000) << 16);
+    outVert->texCoord = Vec2PackTexCoords(texCoord);
 }
-
 
 void __cdecl FX_ExpandMarkVerts_Transform_GfxPackedVertex_(
     FxMarksSystem *marksSystem,

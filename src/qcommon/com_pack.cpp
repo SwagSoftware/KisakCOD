@@ -58,32 +58,20 @@ PackedUnitVec __cdecl Vec3PackUnitVec(const float *unitVec)
     return out;
 }
 
+// 16-bit pack: low 14 bits = clamped fixed-point magnitude, high 2 bits = float exponent bits 30-31.
+static uint16_t PackTexCoordHalf(float coord)
+{
+    unsigned int bits = LODWORD(coord);
+    int low14 = (int)((2 * bits) ^ 0x80000000) >> 14;
+    low14 = CLAMP(low14, -16384, 0x3FFF);
+    return (uint16_t)((low14 & 0x3FFF) | ((bits >> 16) & 0xC000));
+}
+
 PackedTexCoords __cdecl Vec2PackTexCoords(const float *in)
 {
-    __int16 v2; // [esp+0h] [ebp-3Ch]
-    __int16 v3; // [esp+4h] [ebp-38h]
-    int v4; // [esp+Ch] [ebp-30h]
-    float v5; // [esp+18h] [ebp-24h]
-    int v6; // [esp+20h] [ebp-1Ch]
-
-    if (((uintptr_t)(2 * *in) ^ 0x80000000) >> 14 < 0x3FFF)
-        v6 = ((uintptr_t)(2 * *in) ^ 0x80000000) >> 14;
-    else
-        v6 = 0x3FFF;
-    if (v6 > -16384)
-        v3 = v6;
-    else
-        v3 = -16384;
-    v5 = in[1];
-    if (((2 * LODWORD(v5)) ^ 0x80000000) >> 14 < 0x3FFF)
-        v4 = ((2 * LODWORD(v5)) ^ 0x80000000) >> 14;
-    else
-        v4 = 0x3FFF;
-    if (v4 > -16384)
-        v2 = v4;
-    else
-        v2 = -16384;
-    return ((v2 & 0x3FFF | (SLODWORD(v5) >> 16) & 0xC000) + ((v3 & 0x3FFF | (COERCE_INT(*in) >> 16) & 0xC000) << 16));
+    uint16_t u = PackTexCoordHalf(in[0]);
+    uint16_t v = PackTexCoordHalf(in[1]);
+    return v | (u << 16);
 }
 
 void __cdecl Byte4PackVertexColor(const float *from, unsigned __int8 *to)
