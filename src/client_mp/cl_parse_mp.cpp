@@ -1012,7 +1012,7 @@ void __cdecl CL_ParseGamestate(netsrc_t localClientNum, msg_t *msg)
     unsigned int v7; // [esp+20h] [ebp-144h]
     int constConfigStringIndex; // [esp+34h] [ebp-130h]
     int constConfigStringIndexa; // [esp+34h] [ebp-130h]
-    int lastStringIndex; // [esp+3Ch] [ebp-128h]
+    int lastStringIndex; // [esp+3Ch] [ebp-128h]pac
     int numConfigStrings; // [esp+40h] [ebp-124h]
     int currentConstConfigString; // [esp+44h] [ebp-120h]
     clientActive_t *LocalClientGlobals; // [esp+48h] [ebp-11Ch]

@@ -341,17 +341,6 @@ gentity_s *__cdecl Weapon_Throw_Grenade(
     return m;
 }
 
-void __cdecl Vec2NormalizeFast(float *v)
-{
-    int number; // [esp+18h] [ebp-8h]
-    float invLength; // [esp+1Ch] [ebp-4h]
-
-    *(float *)&number = *v * *v + v[1] * v[1];
-    invLength = I_rsqrt(number);
-    *v = *v * invLength;
-    v[1] = v[1] * invLength;
-}
-
 gentity_s *__cdecl Weapon_GrenadeLauncher_Fire(
     gentity_s *ent,
     unsigned int grenType,

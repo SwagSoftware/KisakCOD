@@ -130,7 +130,6 @@ int __cdecl SV_IsTempBannedGuid(const char *cdkeyHash)
 void __cdecl SV_GetChallenge(netadr_t from)
 {
     int v1; // esi
-    const char *v2; // eax
     __int16 v3; // ax
     const char *v4; // eax
     netadr_t v5; // [esp-14h] [ebp-30h]
@@ -184,15 +183,12 @@ void __cdecl SV_GetChallenge(netadr_t from)
 
     uint32 decodedLen = b64_decode((unsigned char*)clientSteamTicketBase64, strlen(clientSteamTicketBase64), decodedSteamTicket);
 
-
-
-
     //if (SV_IsBannedGuid(cdkeyHash))
     if (SV_IsBannedGuid(clientSteamID64))
     {
         Com_Printf(15, "rejected connection from permanently banned GUID \"%s\"\n", clientSteamID64);
         NET_OutOfBandPrint(NS_SERVER, svs.challenges[i].adr, "error\xA\x15You are permanently banned from this server");
-        memset((unsigned __int8 *)&svs.challenges[i], 0, sizeof(svs.challenges[i]));
+        memset(&svs.challenges[i], 0, sizeof(svs.challenges[i]));
         return;
     }
     //if (SV_IsTempBannedGuid(cdkeyHash))
@@ -200,7 +196,7 @@ void __cdecl SV_GetChallenge(netadr_t from)
     {
         Com_Printf(15, "rejected connection from temporarily banned GUID \"%s\"\n", clientSteamID64);
         NET_OutOfBandPrint(NS_SERVER, svs.challenges[i].adr, "error\xA\x15You are temporarily banned from this server");
-        memset((unsigned __int8 *)&svs.challenges[i], 0, sizeof(svs.challenges[i]));
+        memset(&svs.challenges[i], 0, sizeof(svs.challenges[i]));
         return;
     }
 
@@ -214,8 +210,14 @@ void __cdecl SV_GetChallenge(netadr_t from)
     if (Steam_CheckClientTicket(decodedSteamTicket, decodedLen, steamID64))
     {
         challenge->pingTime = svs.time;
-        v2 = va("challengeResponse %i", challenge->challenge);
-        NET_OutOfBandPrint(NS_SERVER, from, v2);
+        NET_OutOfBandPrint(NS_SERVER, from, va("challengeResponse %i", challenge->challenge));
+        return;
+    }
+    else
+    {
+        Com_Printf(15, "rejected connection from invalid Steam GUID \"%s\"\n", clientSteamID64);
+        NET_OutOfBandPrint(NS_SERVER, svs.challenges[i].adr, "error\xA\x15Your Steam Client Ticket was Invalid");
+        memset(&svs.challenges[i], 0, sizeof(svs.challenges[i]));
         return;
     }
 
@@ -575,13 +577,7 @@ void __cdecl SV_FreeClients()
 
 void __cdecl SV_DirectConnect(netadr_t from)
 {
-    const char *v1; // eax
-    const char *v2; // eax
-    const char *v3; // eax
-    const char *v4; // eax
-    const char *v5; // eax
     const char *v6; // eax
-    const char *v7; // eax
     const char *v8; // eax
     const char *v9; // eax
     const char *v10; // eax
@@ -612,21 +608,16 @@ void __cdecl SV_DirectConnect(netadr_t from)
     int qport; // [esp+480h] [ebp-8h]
 
     Com_DPrintf(15, "SV_DirectConnect()\n");
-    v1 = (char *)SV_Cmd_Argv(1);
-    I_strncpyz(userinfo, v1, 1024);
-    v2 = Info_ValueForKey(userinfo, "protocol");
-    version = atoi(v2);
+    I_strncpyz(userinfo, SV_Cmd_Argv(1), 1024);
+    version = atoi(Info_ValueForKey(userinfo, "protocol"));
     if (version != 1)
     {
-        v3 = va("EXE_SERVER_IS_DIFFERENT_VER %s", "1.0");
-        NET_OutOfBandPrint(NS_SERVER, from, v3);
+        NET_OutOfBandPrint(NS_SERVER, from, va("EXE_SERVER_IS_DIFFERENT_VER %s", "1.0"));
         Com_DPrintf(15, "    rejected connect from protocol version %i (should be %i)\n", version, 1);
         return;
     }
-    v4 = Info_ValueForKey(userinfo, "challenge");
-    challenge = atoi(v4);
-    v5 = Info_ValueForKey(userinfo, "qport");
-    qport = atoi(v5);
+    challenge = atoi(Info_ValueForKey(userinfo, "challenge"));
+    qport = atoi(Info_ValueForKey(userinfo, "qport"));
     i = 0;
     clients = svs.clients;
     while (i < sv_maxclients->current.integer)
@@ -646,197 +637,201 @@ void __cdecl SV_DirectConnect(netadr_t from)
         ++clients;
     }
     cdkeyHash[0] = 0;
-    if (NET_IsLocalAddress(from))
-        goto LABEL_31;
-    for (i = 0; i < 1024; ++i)
+
+    if (!NET_IsLocalAddress(from))
     {
-        if (NET_CompareAdr(from, svs.challenges[i].adr) && challenge == svs.challenges[i].challenge)
+        for (i = 0; i < 1024; ++i)
         {
-            memcpy(cdkeyHash, svs.challenges[i].cdkeyHash, 0x21u);
-            break;
+            if (NET_CompareAdr(from, svs.challenges[i].adr) && challenge == svs.challenges[i].challenge)
+            {
+                memcpy(cdkeyHash, svs.challenges[i].cdkeyHash, 0x21u);
+                break;
+            }
+        }
+        if (i == 1024)
+        {
+            NET_OutOfBandPrint(NS_SERVER, from, "error\nEXE_BAD_CHALLENGE");
+            return;
+        }
+        if (svs.challenges[i].firstPing)
+        {
+            ping = svs.challenges[i].firstPing;
+        }
+        else
+        {
+            ping = svs.time - svs.challenges[i].pingTime;
+            svs.challenges[i].firstPing = ping;
+        }
+
+        Com_Printf(15, "Client %i connecting with %i challenge ping from %s\n", i, ping, NET_AdrToString(from));
+        svs.challenges[i].connected = 1;
+
+        if (!Sys_IsLANAddress(from))
+        {
+            if (sv_minPing->current.integer && ping < sv_minPing->current.integer)
+            {
+                NET_OutOfBandPrint(NS_SERVER, from, "error\nEXE_ERR_HIGH_PING_ONLY");
+                Com_DPrintf(15, "Client %i rejected on a too low ping\n", i);
+                return;
+            }
+
+            if (sv_maxPing->current.integer && ping > sv_maxPing->current.integer)
+            {
+                NET_OutOfBandPrint(NS_SERVER, from, "error\nEXE_ERR_LOW_PING_ONLY");
+                Com_DPrintf(15, "Client %i rejected on a too high ping: %i\n", i, ping);
+                return;
+            }
         }
     }
-    if (i == 1024)
+
+
+    // LWSS: Remove punkbuster crap
+    //v8 = Info_ValueForKey(userinfo, "cl_punkbuster");
+    //cl_pb = atoi(v8);
+    //if (NET_IsLocalAddress(from))
+    //{
+    //    v9 = PbAuthClient("localhost", cl_pb, cdkeyHash);
+    //}
+    //else
+    //{
+    //    fromAddr = NET_AdrToString(from);
+    //    v9 = PbAuthClient(fromAddr, cl_pb, cdkeyHash);
+    //}
+    //pb_authmsg = v9;
+    //if (v9)
+    //{
+    //    if (!I_strnicmp(pb_authmsg, "error\n", 6))
+    //        NET_OutOfBandPrint(NS_SERVER, from, pb_authmsg);
+    //}
+    //else
     {
-        NET_OutOfBandPrint(NS_SERVER, from, "error\nEXE_BAD_CHALLENGE");
-        return;
-    }
-    if (svs.challenges[i].firstPing)
-    {
-        ping = svs.challenges[i].firstPing;
-    }
-    else
-    {
-        ping = svs.time - svs.challenges[i].pingTime;
-        svs.challenges[i].firstPing = ping;
-    }
-    v7 = NET_AdrToString(from);
-    Com_Printf(15, "Client %i connecting with %i challenge ping from %s\n", i, ping, v7);
-    svs.challenges[i].connected = 1;
-    if (Sys_IsLANAddress(from))
-        goto LABEL_31;
-    if (sv_minPing->current.integer && ping < sv_minPing->current.integer)
-    {
-        NET_OutOfBandPrint(NS_SERVER, from, "error\nEXE_ERR_HIGH_PING_ONLY");
-        Com_DPrintf(15, "Client %i rejected on a too low ping\n", i);
-        return;
-    }
-    if (!sv_maxPing->current.integer || ping <= sv_maxPing->current.integer)
-    {
-    LABEL_31:
-        // LWSS: Remove punkbuster crap
-        //v8 = Info_ValueForKey(userinfo, "cl_punkbuster");
-        //cl_pb = atoi(v8);
-        //if (NET_IsLocalAddress(from))
-        //{
-        //    v9 = PbAuthClient("localhost", cl_pb, cdkeyHash);
-        //}
-        //else
-        //{
-        //    fromAddr = NET_AdrToString(from);
-        //    v9 = PbAuthClient(fromAddr, cl_pb, cdkeyHash);
-        //}
-        //pb_authmsg = v9;
-        //if (v9)
-        //{
-        //    if (!I_strnicmp(pb_authmsg, "error\n", 6))
-        //        NET_OutOfBandPrint(NS_SERVER, from, pb_authmsg);
-        //}
-        //else
+        i = 0;
+        clients = svs.clients;
+        while (i < sv_maxclients->current.integer)
         {
+            if (clients->header.state
+                && NET_CompareBaseAdr(from, clients->header.netchan.remoteAddress)
+                && (clients->header.netchan.qport == qport || from.port == clients->header.netchan.remoteAddress.port))
+            {
+                v16 = from.port == clients->header.netchan.remoteAddress.port;
+                v15 = clients->header.netchan.qport == qport;
+                v10 = NET_AdrToString(from);
+                Com_Printf(15, "%s:reconnect. same qport: %i, same port: %i\n", v10, v15, v16);
+                if (clients->header.state >= CS_CONNECTED)
+                {
+                    if (!cdkeyHash[0] && clients->cdkeyHash[0] && !alwaysfails)
+                        MyAssertHandler(
+                            ".\\server_mp\\sv_client_mp.cpp",
+                            954,
+                            0,
+                            "Going from a known GUID to an unknown GUID due to reconnect\n");
+                    SV_FreeClient(clients);
+                }
+                newcl = clients;
+                goto gotnewcl;
+            }
+            ++i;
+            ++clients;
+        }
+        password = Info_ValueForKey(userinfo, "password");
+        if (!strcmp(password, sv_privatePassword->current.string))
+            startIndex = 0;
+        else
+            startIndex = sv_privateClients->current.integer;
+        newcl = 0;
+        for (i = startIndex; i < sv_maxclients->current.integer; ++i)
+        {
+            clients = &svs.clients[i];
+            if (!clients->header.state)
+            {
+                newcl = clients;
+                break;
+            }
+        }
+        if (!newcl)
+        {
+            NET_OutOfBandPrint(NS_SERVER, from, "error\nEXE_SERVERISFULL");
+            Com_DPrintf(15, "Rejected a connection.\n");
+            return;
+        }
+        clients->reliableAcknowledge = 0;
+        clients->reliableSequence = 0;
+    gotnewcl:
+        memset((unsigned __int8 *)newcl, 0, sizeof(client_t));
+        clientNum = newcl - svs.clients;
+        ent = SV_GentityNum(clientNum);
+        newcl->gentity = ent;
+        if (newcl->scriptId)
+            MyAssertHandler(".\\server_mp\\sv_client_mp.cpp", 1074, 0, "%s", "!newcl->scriptId");
+        scriptId = Scr_AllocArray();
+        if (scriptId != (unsigned __int16)scriptId)
+            MyAssertHandler(
+                ".\\server_mp\\sv_client_mp.cpp",
+                1077,
+                0,
+                "%s",
+                "scriptId == static_cast<unsigned short>( scriptId )");
+        newcl->scriptId = scriptId;
+        Com_Printf(15, "SV_DirectConnect: %d, 0 -> %d\n", newcl - svs.clients, newcl->scriptId);
+        newcl->challenge = challenge;
+        if (!cdkeyHash[0])
+            Com_Printf(15, "Connecting player #%i has an unknown GUID\n", clientNum);
+        v11 = newcl->cdkeyHash;
+        memcpy(newcl->cdkeyHash, cdkeyHash, 0x20u);
+        v11[32] = cdkeyHash[32];
+        Netchan_Setup(
+            NS_SERVER,
+            &newcl->header.netchan,
+            from,
+            qport,
+            newcl->netchanOutgoingBuffer,
+            0x20000,
+            newcl->netchanIncomingBuffer,
+            2048);
+        newcl->voicePacketCount = 0;
+        newcl->sendVoice = 1;
+        I_strncpyz(newcl->userinfo, userinfo, 1024);
+        denied = ClientConnect(clientNum, newcl->scriptId);
+        if (denied)
+        {
+            v12 = va("error\n%s", denied);
+            NET_OutOfBandPrint(NS_SERVER, from, v12);
+            Com_DPrintf(15, "Game rejected a connection: %s.\n", denied);
+            SV_FreeClientScriptId(newcl);
+        }
+        else
+        {
+            Com_Printf(
+                15,
+                "Going from CS_FREE to CS_CONNECTED for %s (num %i guid \"%s\")\n",
+                newcl->name,
+                clientNum,
+                newcl->cdkeyHash);
+            newcl->header.state = 2;
+            newcl->nextSnapshotTime = svs.time;
+            newcl->lastPacketTime = svs.time;
+            newcl->lastConnectTime = svs.time;
+            v13 = newcl->cdkeyHash;
+            memcpy(newcl->cdkeyHash, cdkeyHash, 0x20u);
+            v13[32] = cdkeyHash[32];
+            SV_UserinfoChanged(newcl);
+            svs.challenges[i].firstPing = 0;
+            v14 = va("connectResponse %s", fs_gameDirVar->current.string);
+            NET_OutOfBandPrint(NS_SERVER, from, v14);
+            newcl->gamestateMessageNum = -1;
+            count = 0;
             i = 0;
             clients = svs.clients;
             while (i < sv_maxclients->current.integer)
             {
-                if (clients->header.state
-                    && NET_CompareBaseAdr(from, clients->header.netchan.remoteAddress)
-                    && (clients->header.netchan.qport == qport || from.port == clients->header.netchan.remoteAddress.port))
-                {
-                    v16 = from.port == clients->header.netchan.remoteAddress.port;
-                    v15 = clients->header.netchan.qport == qport;
-                    v10 = NET_AdrToString(from);
-                    Com_Printf(15, "%s:reconnect. same qport: %i, same port: %i\n", v10, v15, v16);
-                    if (clients->header.state >= 2)
-                    {
-                        if (!cdkeyHash[0] && clients->cdkeyHash[0] && !alwaysfails)
-                            MyAssertHandler(
-                                ".\\server_mp\\sv_client_mp.cpp",
-                                954,
-                                0,
-                                "Going from a known GUID to an unknown GUID due to reconnect\n");
-                        SV_FreeClient(clients);
-                    }
-                    newcl = clients;
-                    goto gotnewcl;
-                }
+                if (svs.clients[i].header.state >= 2)
+                    ++count;
                 ++i;
                 ++clients;
             }
-            password = Info_ValueForKey(userinfo, "password");
-            if (!strcmp(password, sv_privatePassword->current.string))
-                startIndex = 0;
-            else
-                startIndex = sv_privateClients->current.integer;
-            newcl = 0;
-            for (i = startIndex; i < sv_maxclients->current.integer; ++i)
-            {
-                clients = &svs.clients[i];
-                if (!clients->header.state)
-                {
-                    newcl = clients;
-                    break;
-                }
-            }
-            if (!newcl)
-            {
-                NET_OutOfBandPrint(NS_SERVER, from, "error\nEXE_SERVERISFULL");
-                Com_DPrintf(15, "Rejected a connection.\n");
-                return;
-            }
-            clients->reliableAcknowledge = 0;
-            clients->reliableSequence = 0;
-        gotnewcl:
-            memset((unsigned __int8 *)newcl, 0, sizeof(client_t));
-            clientNum = newcl - svs.clients;
-            ent = SV_GentityNum(clientNum);
-            newcl->gentity = ent;
-            if (newcl->scriptId)
-                MyAssertHandler(".\\server_mp\\sv_client_mp.cpp", 1074, 0, "%s", "!newcl->scriptId");
-            scriptId = Scr_AllocArray();
-            if (scriptId != (unsigned __int16)scriptId)
-                MyAssertHandler(
-                    ".\\server_mp\\sv_client_mp.cpp",
-                    1077,
-                    0,
-                    "%s",
-                    "scriptId == static_cast<unsigned short>( scriptId )");
-            newcl->scriptId = scriptId;
-            Com_Printf(15, "SV_DirectConnect: %d, 0 -> %d\n", newcl - svs.clients, newcl->scriptId);
-            newcl->challenge = challenge;
-            if (!cdkeyHash[0])
-                Com_Printf(15, "Connecting player #%i has an unknown GUID\n", clientNum);
-            v11 = newcl->cdkeyHash;
-            memcpy(newcl->cdkeyHash, cdkeyHash, 0x20u);
-            v11[32] = cdkeyHash[32];
-            Netchan_Setup(
-                NS_SERVER,
-                &newcl->header.netchan,
-                from,
-                qport,
-                newcl->netchanOutgoingBuffer,
-                0x20000,
-                newcl->netchanIncomingBuffer,
-                2048);
-            newcl->voicePacketCount = 0;
-            newcl->sendVoice = 1;
-            I_strncpyz(newcl->userinfo, userinfo, 1024);
-            denied = ClientConnect(clientNum, newcl->scriptId);
-            if (denied)
-            {
-                v12 = va("error\n%s", denied);
-                NET_OutOfBandPrint(NS_SERVER, from, v12);
-                Com_DPrintf(15, "Game rejected a connection: %s.\n", denied);
-                SV_FreeClientScriptId(newcl);
-            }
-            else
-            {
-                Com_Printf(
-                    15,
-                    "Going from CS_FREE to CS_CONNECTED for %s (num %i guid \"%s\")\n",
-                    newcl->name,
-                    clientNum,
-                    newcl->cdkeyHash);
-                newcl->header.state = 2;
-                newcl->nextSnapshotTime = svs.time;
-                newcl->lastPacketTime = svs.time;
-                newcl->lastConnectTime = svs.time;
-                v13 = newcl->cdkeyHash;
-                memcpy(newcl->cdkeyHash, cdkeyHash, 0x20u);
-                v13[32] = cdkeyHash[32];
-                SV_UserinfoChanged(newcl);
-                svs.challenges[i].firstPing = 0;
-                v14 = va("connectResponse %s", fs_gameDirVar->current.string);
-                NET_OutOfBandPrint(NS_SERVER, from, v14);
-                newcl->gamestateMessageNum = -1;
-                count = 0;
-                i = 0;
-                clients = svs.clients;
-                while (i < sv_maxclients->current.integer)
-                {
-                    if (svs.clients[i].header.state >= 2)
-                        ++count;
-                    ++i;
-                    ++clients;
-                }
-                if (count == 1 || count == sv_maxclients->current.integer)
-                    SV_Heartbeat_f();
-            }
+            if (count == 1 || count == sv_maxclients->current.integer)
+                SV_Heartbeat_f();
         }
-    }
-    else
-    {
-        NET_OutOfBandPrint(NS_SERVER, from, "error\nEXE_ERR_LOW_PING_ONLY");
-        Com_DPrintf(15, "Client %i rejected on a too high ping: %i\n", i, ping);
     }
 }
 

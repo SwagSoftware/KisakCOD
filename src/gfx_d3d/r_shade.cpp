@@ -154,20 +154,14 @@ float *__cdecl R_GetCodeConstant(GfxCmdBufContext context, unsigned int constant
         MyAssertHandler(".\\r_shade.cpp", 29, 0, "%s\n\t%s", "context.source->constVersions[constant]", v2);
     }
 
-    return (float *)((char *)&context.source->input + 16 * constant);
+    return context.source->input.consts[constant];
 }
 
 char __cdecl R_IsVertexShaderConstantUpToDate(GfxCmdBufContext context, const MaterialShaderArgument *routingData)
 {
-    if (routingData->dest >= 0x20u)
-        MyAssertHandler(
-            ".\\r_shade.cpp",
-            89,
-            0,
-            "routingData->dest doesn't index ARRAY_COUNT( context.state->vertexShaderConstState )\n\t%i not in [0, %i)",
-            routingData->dest,
-            32);
-    if (routingData->u.codeConst.index < 0x3Au)
+    bcassert(routingData->dest, ARRAY_COUNT(context.state->vertexShaderConstState));
+
+    if (routingData->u.codeConst.index < CONST_SRC_FIRST_CODE_MATRIX)
         return R_IsShaderConstantUpToDate(
             context.source,
             (GfxShaderConstantState *)&context.state->vertexShaderConstState[routingData->dest],

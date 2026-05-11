@@ -9,6 +9,15 @@
 
 #include <client_mp/client_mp.h>
 
+enum //$C3A80A4928DD55B480B15DEB8BFE1B34 : __int32
+{
+    CS_FREE          = 0x0,
+    CS_ZOMBIE        = 0x1,
+    CS_CONNECTED     = 0x2,
+    CS_CLIENTLOADING = 0x3,
+    CS_ACTIVE        = 0x4,
+};
+
 enum svscmd_type : __int32
 {                                       // ...
     SV_CMD_CAN_IGNORE = 0x0,

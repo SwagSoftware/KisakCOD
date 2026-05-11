@@ -2527,14 +2527,15 @@ void __cdecl FireBulletPenetrate(
                     break;
                 traceHit = BulletTrace(localClientNum, bp, weapDef, attacker, &br, br.depthSurfaceType);
                 revBp = *bp; // Com_Memcpy((char *)&revBp, (char *)bp, 64);
-                //LODWORD(diff[4]) = bp->dir;
+
                 revBp.dir[0] = -bp->dir[0];
                 revBp.dir[1] = -bp->dir[1];
                 revBp.dir[2] = -bp->dir[2];
-                // LODWORD(diff[3]) = bp->end;
+
                 revBp.start[0] = bp->end[0];
                 revBp.start[1] = bp->end[1];
                 revBp.start[2] = bp->end[2];
+
                 Vec3Mad(lastHitPos, 0.0099999998f, revBp.dir, revBp.end);
                 revBr = br; // Com_Memcpy((char *)&revBr, (char *)&br, 68);
                 revBr.trace.normal[0] = -revBr.trace.normal[0];

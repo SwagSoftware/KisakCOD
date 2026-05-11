@@ -234,8 +234,8 @@ void __cdecl RB_DrawSunQuerySprite(SunFlareDynamic *sunFlare)
 
 void __cdecl RB_HW_BeginOcclusionQuery(IDirect3DQuery9 *query)
 {
-    iassert( query );
-    query->Issue(2);
+    iassert(query);
+    query->Issue(D3DISSUE_BEGIN);
 }
 
 unsigned int __cdecl RB_HW_ReadOcclusionQuery(IDirect3DQuery9 *query)

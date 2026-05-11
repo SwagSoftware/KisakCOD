@@ -135,11 +135,6 @@ void __cdecl CM_Trace(
 {
     const char *v7; // eax
     const char *v8; // eax
-    double v9; // st7
-    double v10; // st7
-    float v12; // [esp+1Ch] [ebp-148h]
-    float v13; // [esp+20h] [ebp-144h]
-    float v14; // [esp+24h] [ebp-140h]
     cmodel_t *cmod; // [esp+78h] [ebp-ECh]
     traceWork_t tw; // [esp+7Ch] [ebp-E8h] BYREF
     float offset[3]; // [esp+12Ch] [ebp-38h]
@@ -164,72 +159,49 @@ void __cdecl CM_Trace(
         offset[i] = (mins[i] + maxs[i]) * 0.5;
         tw.size[i] = maxs[i] - offset[i];
         tw.extents.start[i] = start[i] + offset[i];
-        tw.delta[i - 6] = end[i] + offset[i];
-        tw.midpoint[i] = (tw.extents.start[i] + tw.delta[i - 6]) * 0.5;
-        tw.delta[i] = tw.delta[i - 6] - tw.extents.start[i];
+        tw.extents.end[i] = end[i] + offset[i];
+        tw.midpoint[i] = (tw.extents.start[i] + tw.extents.end[i]) * 0.5;
+        tw.delta[i] = tw.extents.end[i] - tw.extents.start[i];
         tw.halfDelta[i] = tw.delta[i] * 0.5;
-        v14 = I_fabs(tw.halfDelta[i]);
-        tw.halfDeltaAbs[i] = v14;
+        tw.halfDeltaAbs[i] = I_fabs(tw.halfDelta[i]);
     }
     CM_CalcTraceExtents(&tw.extents);
     tw.deltaLenSq = Vec3LengthSq(tw.delta);
-    v13 = sqrt(tw.deltaLenSq);
-    tw.deltaLen = v13;
-    if (tw.size[0] - tw.size[2] >= 0.009999999776482582)
-    {
-        v7 = va("tw.size[0]: %f, tw.size[2]: %f", tw.size[0], tw.size[2]);
-        MyAssertHandler(
-            ".\\qcommon\\cm_trace.cpp",
-            1349,
-            0,
-            "%s\n\t%s",
-            "(tw.size[0] - tw.size[2]) < CAPSULE_SIZE_EPSILON",
-            v7);
-    }
-    if (tw.size[1] - tw.size[2] >= 0.009999999776482582)
-    {
-        v8 = va("tw.size[1]: %f, tw.size[2]: %f", tw.size[1], tw.size[2]);
-        MyAssertHandler(
-            ".\\qcommon\\cm_trace.cpp",
-            1350,
-            0,
-            "%s\n\t%s",
-            "(tw.size[1] - tw.size[2]) < CAPSULE_SIZE_EPSILON",
-            v8);
-    }
+    tw.deltaLen = sqrt(tw.deltaLenSq);
+    iassert((tw.size[0] - tw.size[2]) < CAPSULE_SIZE_EPSILON);
+    iassert((tw.size[1] - tw.size[2]) < CAPSULE_SIZE_EPSILON);
+
     if (tw.size[2] >= (double)tw.size[0])
-        v12 = tw.size[0];
+        tw.radius = tw.size[0];
     else
-        v12 = tw.size[2];
-    tw.radius = v12;
+        tw.radius = tw.size[2];
+
     tw.boundingRadius = Vec3Length(tw.size);
     tw.offsetZ = tw.size[2] - tw.radius;
     for (i = 0; i < 2; ++i)
     {
-        if (tw.delta[i - 6] <= (double)tw.extents.start[i])
+        if (tw.extents.end[i] <= tw.extents.start[i])
         {
-            tw.bounds[0][i] = tw.delta[i - 6] - tw.radius;
-            v9 = tw.extents.start[i] + tw.radius;
+            tw.bounds[0][i] = tw.extents.end[i] - tw.radius;
+            tw.bounds[1][i] = tw.extents.start[i] + tw.radius;
         }
         else
         {
             tw.bounds[0][i] = tw.extents.start[i] - tw.radius;
-            v9 = tw.delta[i - 6] + tw.radius;
+            tw.bounds[1][i] = tw.extents.end[i] + tw.radius;
         }
-        tw.bounds[1][i] = v9;
     }
     iassert( tw.offsetZ >= 0 );
-    if (tw.extents.end[2] <= (double)tw.extents.start[2])
+    if (tw.extents.end[2] <= tw.extents.start[2])
     {
         tw.bounds[0][2] = tw.extents.end[2] - tw.offsetZ - tw.radius;
-        v10 = tw.extents.start[2] + tw.offsetZ + tw.radius;
+        tw.bounds[1][2] = tw.extents.start[2] + tw.offsetZ + tw.radius;
     }
     else
     {
         tw.bounds[0][2] = tw.extents.start[2] - tw.offsetZ - tw.radius;
-        v10 = tw.extents.end[2] + tw.offsetZ + tw.radius;
+        tw.bounds[1][2] = tw.extents.end[2] + tw.offsetZ + tw.radius;
     }
-    tw.bounds[1][2] = v10;
     CM_SetAxialCullOnly(&tw);
     CM_GetTraceThreadInfo(&tw.threadInfo);
     iassert( results->surfaceFlags != SURF_INVALID );

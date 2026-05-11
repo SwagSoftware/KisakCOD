@@ -175,10 +175,11 @@ void __cdecl FX_Beam_GenerateVerts(FxGenerateVertsCmd *cmd)
             Vec3NormalizeTo(normDelta.v, normDelta.v);
             normDelta.u[3] = 0;
 
-            beamDot.v[0] = -Vec3Length(beamWorldBegin.v);
-            beamDot.v[1] = -Vec3Length(beamWorldBegin.v);
-            beamDot.v[2] = -Vec3Length(beamWorldBegin.v);
-            beamDot.v[3] = -Vec3Length(beamWorldBegin.v);
+            float negdot = -Vec3Dot(beamWorldBegin.v, normDelta.v);
+            beamDot.v[0] = negdot;
+            beamDot.v[1] = negdot;
+            beamDot.v[2] = negdot;
+            beamDot.v[3] = negdot;
 
             args = baseArgs;
 
@@ -236,18 +237,22 @@ void __cdecl FX_Beam_GenerateVerts(FxGenerateVertsCmd *cmd)
             {
                 alpha = (double)segIter / (double)segCount;
                 wiggleVec = wiggle[segIter % 8u];
+
                 scaledWiggle.v[0] = wiggleDist * wiggleVec.v[0];
                 scaledWiggle.v[1] = wiggleDist * wiggleVec.v[1];
                 scaledWiggle.v[2] = wiggleDist * wiggleVec.v[2];
                 scaledWiggle.v[3] = wiggleDist * wiggleVec.v[3];
+
                 wiggleXs.v[0] = scaledWiggle.v[0];
                 wiggleXs.v[1] = scaledWiggle.v[0];
                 wiggleXs.v[2] = scaledWiggle.v[0];
                 wiggleXs.v[3] = scaledWiggle.v[0];
+
                 wiggleYs.v[0] = scaledWiggle.v[1];
                 wiggleYs.v[1] = scaledWiggle.v[1];
                 wiggleYs.v[2] = scaledWiggle.v[1];
                 wiggleYs.v[3] = scaledWiggle.v[1];
+
                 for (dim = 0; dim != 4; ++dim)
                 {
                     v8 = (int)((double)(endColor.array[dim] - beginColor.array[dim]) * alpha + (double)beginColor.array[dim]);
@@ -819,7 +824,9 @@ void __cdecl FX_Beam_Begin()
 void __cdecl FX_Beam_Add(FxBeam *beam)
 {
     if (g_beamInfo.beamCount != 96)
-        memcpy(&g_beamInfo.beams[g_beamInfo.beamCount++], beam, sizeof(g_beamInfo.beams[g_beamInfo.beamCount++]));
+    {
+        g_beamInfo.beams[g_beamInfo.beamCount++] = *beam;
+    }
 }
 
 FxBeamInfo *__cdecl FX_Beam_GetInfo()

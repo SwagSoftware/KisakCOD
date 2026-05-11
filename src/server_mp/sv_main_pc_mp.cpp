@@ -47,11 +47,13 @@ const netadr_t *__cdecl SV_MasterAddress()
 
 void __cdecl SV_UpdateLastTimeMasterServerCommunicated(netadr_t from)
 {
+#if 0 // LWSS: I am pretty sure the master server is already dead
     netadr_t v1; // [esp-14h] [ebp-18h]
 
     v1 = *SV_MasterAddress();
     if (NET_CompareBaseAdr(from, v1))
         svs.sv_lastTimeMasterServerCommunicated = svs.time;
+#endif
 }
 
 

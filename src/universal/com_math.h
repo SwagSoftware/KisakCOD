@@ -233,12 +233,14 @@ float __cdecl Vec2Length(const vec2r v);
 float Vec2LengthSq(const vec2r v);
 void __cdecl YawVectors2D(float yaw, vec2r forward, vec2r right);
 
+void __cdecl Vec2NormalizeFast(float *v);
+
 void __cdecl Vec3Add(const vec3r a, const vec3r b, vec3r sum);
 void __cdecl Vec3Sub(const vec3r a, const vec3r b, vec3r diff);
 void __cdecl Vec3Mul(const vec3r a, const vec3r b, vec3r product);
 
 void __cdecl Vec3Negate(const vec3r from, vec3r to);
-
+void Vec3Clear(vec3r v);
 void __cdecl Vec3Avg(const vec3r a, const vec3r b, vec3r result);
 
 float __cdecl Vec3Dot(const vec3r a, const vec3r b);
@@ -249,7 +251,7 @@ void __cdecl Vec3Scale(const vec3r v, float scale, vec3r result);
 inline float __cdecl I_fres(float val)
 {
     iassert(val != 0.0);
-    return (float)(1.0 / val);
+    return (1.0f / val);
 }
 
 void __cdecl Vec3ScaleMad(float scale0, const vec3r dir0, float scale1, const vec3r dir1, vec3r result);

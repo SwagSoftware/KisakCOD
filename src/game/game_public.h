@@ -730,7 +730,6 @@ gentity_s *__cdecl Weapon_Throw_Grenade(
     uint32_t grenType,
     uint8_t grenModel,
     weaponParms *wp);
-void __cdecl Vec2NormalizeFast(float *v);
 gentity_s *__cdecl Weapon_GrenadeLauncher_Fire(
     gentity_s *ent,
     uint32_t grenType,

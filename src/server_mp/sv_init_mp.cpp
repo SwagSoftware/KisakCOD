@@ -584,13 +584,13 @@ void __cdecl SV_SpawnServer(char *mapname)
     SV_CreateBaseline();
     for (i = 0; i < sv_maxclients->current.integer; ++i)
     {
-        if (svs.clients[i].header.state >= 2)
+        if (svs.clients[i].header.state >= CS_CONNECTED)
         {
             denied = ClientConnect(i, svs.clients[i].scriptId);
             if (denied)
                 SV_DropClient(&svs.clients[i], denied, 1);
             else
-                svs.clients[i].header.state = 2;
+                svs.clients[i].header.state = CS_CONNECTED;
         }
     }
     if (com_sv_running->current.enabled)

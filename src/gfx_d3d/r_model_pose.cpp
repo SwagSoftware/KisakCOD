@@ -51,45 +51,36 @@ DObjAnimMat *R_UpdateSceneEntBounds(
     float v37; // [esp+5Ch] [ebp-2F8h]
     float v38; // [esp+60h] [ebp-2F4h]
     DObjSkelMat boneAxis; // [esp+64h] [ebp-2F0h] BYREF
-    float v40; // [esp+A4h] [ebp-2B0h]
-    float v41; // [esp+A8h] [ebp-2ACh]
-    float v42; // [esp+ACh] [ebp-2A8h]
-    float v43; // [esp+B0h] [ebp-2A4h]
-    float v44; // [esp+B4h] [ebp-2A0h]
-    float v45; // [esp+B8h] [ebp-29Ch]
-    float v46; // [esp+BCh] [ebp-298h]
-    float v47; // [esp+C0h] [ebp-294h]
-    float v48; // [esp+C4h] [ebp-290h]
+    float zw; // [esp+A4h] [ebp-2B0h]
+    float zz; // [esp+A8h] [ebp-2ACh]
+    float yw; // [esp+ACh] [ebp-2A8h]
+    float yz; // [esp+B0h] [ebp-2A4h]
+    float yy; // [esp+B4h] [ebp-2A0h]
+    float xw; // [esp+B8h] [ebp-29Ch]
+    float xz; // [esp+BCh] [ebp-298h]
+    float xy; // [esp+C0h] [ebp-294h]
+    float xx; // [esp+C4h] [ebp-290h]
     float v49[3]; // [esp+C8h] [ebp-28Ch] BYREF
     float transWeight; // [esp+D4h] [ebp-280h]
     float v51; // [esp+D8h] [ebp-27Ch]
     float v52; // [esp+DCh] [ebp-278h]
     float v53; // [esp+E0h] [ebp-274h]
     float v54; // [esp+E4h] [ebp-270h]
-    DObjAnimMat *bone; // [esp+E8h] [ebp-26Ch]
+    DObjAnimMat *mat; // [esp+E8h] [ebp-26Ch]
     int boneIndex; // [esp+ECh] [ebp-268h]
     unsigned int animPartBit; // [esp+F0h] [ebp-264h]
     int boneCount; // [esp+F4h] [ebp-260h]
     XBoneInfo *boneInfoArray[128]; // [esp+F8h] [ebp-25Ch] BYREF
-    unsigned int *v60; // [esp+2FCh] [ebp-58h]
-    float boneInfoArray_508; // [esp+300h] [ebp-54h]
-    float bounds_4; // [esp+304h] [ebp-50h]
-    float bounds_8; // [esp+308h] [ebp-4Ch]
-    float4 bounds; // [esp+30Ch] [ebp-48h] BYREF
-    float partBits; // [esp+31Ch] [ebp-38h]
-    DObjAnimMat *partBits_4; // [esp+320h] [ebp-34h]
-    int partBits_8; // [esp+324h] [ebp-30h]
-    int partBits_12[4]; // [esp+328h] [ebp-2Ch] BYREF
+    float4 minWorld; // [esp+300h] [ebp-54h]
+    float4 maxWorld; // [esp+310h] [ebp-44h] BYREF
+    DObjAnimMat *boneMatrix; // [esp+320h] [ebp-34h]
+    int surfCount; // [esp+324h] [ebp-30h]
+    int partBits[4]; // [esp+328h] [ebp-2Ch] BYREF
     const DObj_s *obj; // [esp+338h] [ebp-1Ch]
     GfxSceneEntity *localSceneEnt; // [esp+33Ch] [ebp-18h]
     unsigned int state; // [esp+340h] [ebp-14h]
-    //_UNKNOWN *cuck; // [esp+348h] [ebp-Ch]
-    GfxSceneEntity *sceneEnta; // [esp+34Ch] [ebp-8h]
-    const DObj_s **pObja; // [esp+354h] [ebp+0h]
 
-    //cuck = a1;
-    //sceneEnta = pObja;
-    if (InterlockedCompareExchange(&sceneEnt->cull.state, 1, 0))
+    if (InterlockedCompareExchange((volatile LONG *)&sceneEnt->cull, 1, 0))
     {
         *pLocalSceneEnt = 0;
         if (waitForCullState)
@@ -97,16 +88,9 @@ DObjAnimMat *R_UpdateSceneEntBounds(
             do
             {
                 state = sceneEnt->cull.state;
-                if (!state)
-                    MyAssertHandler(
-                        ".\\r_model_pose.cpp",
-                        258,
-                        0,
-                        "%s\n\t(state) = %i",
-                        "(state >= CULL_STATE_BOUNDED_PENDING)",
-                        0);
-            } while (state == 1);
-            if (state == 4)
+                iassert(state >= CULL_STATE_BOUNDED_PENDING);
+            } while (state == CULL_STATE_BOUNDED_PENDING);
+            if (state == CULL_STATE_DONE)
             {
                 return 0;
             }
@@ -116,7 +100,7 @@ DObjAnimMat *R_UpdateSceneEntBounds(
                 *pLocalSceneEnt = sceneEnt;
                 obj = localSceneEnt->obj;
                 *pObj = obj;
-                iassert( obj );
+                iassert(obj);
                 return I_dmaGetDObjSkel(obj);
             }
         }
@@ -129,142 +113,131 @@ DObjAnimMat *R_UpdateSceneEntBounds(
     {
         localSceneEnt = sceneEnt;
         *pLocalSceneEnt = sceneEnt;
-        iassert( localSceneEnt->obj );
+        iassert(localSceneEnt->obj);
         obj = localSceneEnt->obj;
         *pObj = obj;
-        iassert( obj );
+        iassert(obj);
         DObjGetSurfaceData(
             obj,
             localSceneEnt->placement.base.origin,
             localSceneEnt->placement.scale,
             localSceneEnt->cull.lods);
-        if (IsFastFileLoad() || !DObjBad(obj))
+        if (useFastFile->current.enabled || !DObjBad(obj))
         {
-            partBits_8 = DObjGetSurfaces(obj, partBits_12, localSceneEnt->cull.lods);
-            if (partBits_8 && (partBits_4 = R_DObjCalcPose(localSceneEnt, obj, partBits_12)) != 0)
+            surfCount = DObjGetSurfaces(obj, partBits, localSceneEnt->cull.lods);
+            if (surfCount && (boneMatrix = R_DObjCalcPose(localSceneEnt, obj, partBits)) != 0)
             {
-                if (!DObjSkelAreBonesUpToDate(obj, partBits_12))
-                    MyAssertHandler(".\\r_model_pose.cpp", 315, 0, "%s", "DObjSkelAreBonesUpToDate( obj, partBits )");
-                boneInfoArray_508 = 131072.0;
-                bounds_4 = 131072.0;
-                bounds_8 = 131072.0;
-                bounds.v[0] = 0.0;
-                v60 = &bounds.u[1];
-                bounds.v[1] = -131072.0;
-                bounds.v[2] = -131072.0;
-                bounds.v[3] = -131072.0;
-                partBits = 0.0;
+                iassert(DObjSkelAreBonesUpToDate(obj, partBits));
+
+                minWorld.v[0] = 131072.0;
+                minWorld.v[1] = 131072.0;
+                minWorld.v[2] = 131072.0;
+                minWorld.v[3] = 0.0;
+
+                maxWorld.v[0] = -131072.0;
+                maxWorld.v[1] = -131072.0;
+                maxWorld.v[2] = -131072.0;
+                maxWorld.v[3] = 0.0;
+
                 DObjGetBoneInfo(obj, boneInfoArray);
                 boneCount = DObjNumBones(obj);
                 animPartBit = 0x80000000;
                 boneIndex = 0;
+
                 while (boneIndex < boneCount)
                 {
-                    if ((animPartBit & partBits_12[boneIndex >> 5]) != 0)
+                    if ((animPartBit & partBits[boneIndex >> 5]) != 0)
                     {
-                        bone = &partBits_4[boneIndex];
-                        v54 = bone->quat[0];
-                        if ((LODWORD(v54) & 0x7F800000) == 0x7F800000
-                            || (v53 = bone->quat[1], (LODWORD(v53) & 0x7F800000) == 0x7F800000)
-                            || (v52 = bone->quat[2], (LODWORD(v52) & 0x7F800000) == 0x7F800000)
-                            || (v51 = bone->quat[3], (LODWORD(v51) & 0x7F800000) == 0x7F800000))
-                        {
-                            MyAssertHandler(
-                                "c:\\trees\\cod3\\src\\renderer\\../xanim/xanim_public.h",
-                                473,
-                                0,
-                                "%s",
-                                "!IS_NAN((mat->quat)[0]) && !IS_NAN((mat->quat)[1]) && !IS_NAN((mat->quat)[2]) && !IS_NAN((mat->quat)[3])");
-                        }
-                        transWeight = bone->transWeight;
-                        if ((LODWORD(transWeight) & 0x7F800000) == 0x7F800000)
-                            MyAssertHandler(
-                                "c:\\trees\\cod3\\src\\renderer\\../xanim/xanim_public.h",
-                                474,
-                                0,
-                                "%s",
-                                "!IS_NAN(mat->transWeight)");
-                        Vec3Scale(bone->quat, bone->transWeight, v49);
-                        v48 = v49[0] * bone->quat[0];
-                        v47 = v49[0] * bone->quat[1];
-                        v46 = v49[0] * bone->quat[2];
-                        v45 = v49[0] * bone->quat[3];
-                        v44 = v49[1] * bone->quat[1];
-                        v43 = v49[1] * bone->quat[2];
-                        v42 = v49[1] * bone->quat[3];
-                        v41 = v49[2] * bone->quat[2];
-                        v40 = v49[2] * bone->quat[3];
-                        boneInfo = 1.0 - (v44 + v41);
-                        v37 = v47 + v40;
-                        v38 = v46 - v42;
-                        boneAxis.axis[0][1] = v47 - v40;
-                        boneAxis.axis[0][2] = 1.0 - (v48 + v41);
-                        boneAxis.axis[0][3] = v43 + v45;
-                        boneAxis.axis[1][1] = v46 + v42;
-                        boneAxis.axis[1][2] = v43 - v45;
-                        boneAxis.axis[1][3] = 1.0 - (v48 + v44);
-                        boneAxis.axis[2][1] = bone->trans[0];
-                        boneAxis.axis[2][2] = bone->trans[1];
-                        boneAxis.axis[2][3] = bone->trans[2];
+                        mat = &boneMatrix[boneIndex];
+
+                        iassert(!IS_NAN((mat->quat)[0]) && !IS_NAN((mat->quat)[1]) && !IS_NAN((mat->quat)[2]) && !IS_NAN((mat->quat)[3]));
+                        iassert(!IS_NAN(mat->transWeight));
+
+                        Vec3Scale(mat->quat, mat->transWeight, v49);
+                        xx = v49[0] * mat->quat[0];
+                        xy = v49[0] * mat->quat[1];
+                        xz = v49[0] * mat->quat[2];
+                        xw = v49[0] * mat->quat[3];
+                        yy = v49[1] * mat->quat[1];
+                        yz = v49[1] * mat->quat[2];
+                        yw = v49[1] * mat->quat[3];
+                        zz = v49[2] * mat->quat[2];
+                        zw = v49[2] * mat->quat[3];
+                        boneInfo = 1.0 - (yy + zz);
+                        v37 = xy + zw;
+                        v38 = xz - yw;
+                        boneAxis.axis[0][1] = xy - zw;
+                        boneAxis.axis[0][2] = 1.0 - (xx + zz);
+                        boneAxis.axis[0][3] = yz + xw;
+                        boneAxis.axis[1][1] = xz + yw;
+                        boneAxis.axis[1][2] = yz - xw;
+                        boneAxis.axis[1][3] = 1.0 - (xx + yy);
+                        boneAxis.axis[2][1] = mat->trans[0];
+                        boneAxis.axis[2][2] = mat->trans[1];
+                        boneAxis.axis[2][3] = mat->trans[2];
                         boneAxis.origin[0] = 1.0;
-                        Vec3Add(&boneAxis.axis[2][1], scene.def.viewOffset, &boneAxis.axis[2][1]);
+
+                        Vec3Add(
+                            &boneAxis.axis[2][1],
+                            scene.def.viewOffset,
+                            &boneAxis.axis[2][1]);
                         v35 = boneInfoArray[boneIndex];
-                        v8 = boneInfo >= 0.0 ? 0 : 0xC;
-                        v26 = *(v35->bounds[0] + v8) * boneInfo + boneAxis.axis[2][1];
-                        v17 = *(v35->bounds[1] - v8) * boneInfo + boneAxis.axis[2][1];
-                        v9 = boneAxis.axis[0][1] >= 0.0 ? 0 : 0xC;
-                        v27 = *(&v35->bounds[0][1] + v9) * boneAxis.axis[0][1] + v26;
-                        v18 = *(&v35->bounds[1][1] - v9) * boneAxis.axis[0][1] + v17;
-                        v10 = boneAxis.axis[1][1] >= 0.0 ? 0 : 0xC;
-                        v28 = *(&v35->bounds[0][2] + v10) * boneAxis.axis[1][1] + v27;
-                        v19 = *(&v35->bounds[1][2] - v10) * boneAxis.axis[1][1] + v18;
-                        if (v28 < boneInfoArray_508)
-                            boneInfoArray_508 = v28;
-                        if (v19 > bounds.v[1])
-                            bounds.v[1] = v19;
-                        v11 = v37 >= 0.0 ? 0 : 0xC;
-                        v29 = *(v35->bounds[0] + v11) * v37 + boneAxis.axis[2][2];
-                        v20 = *(v35->bounds[1] - v11) * v37 + boneAxis.axis[2][2];
-                        v12 = boneAxis.axis[0][2] >= 0.0 ? 0 : 0xC;
-                        v30 = *(&v35->bounds[0][1] + v12) * boneAxis.axis[0][2] + v29;
-                        v21 = *(&v35->bounds[1][1] - v12) * boneAxis.axis[0][2] + v20;
-                        v13 = boneAxis.axis[1][2] >= 0.0 ? 0 : 0xC;
-                        v31 = *(&v35->bounds[0][2] + v13) * boneAxis.axis[1][2] + v30;
-                        v22 = *(&v35->bounds[1][2] - v13) * boneAxis.axis[1][2] + v21;
-                        if (v31 < bounds_4)
-                            bounds_4 = v31;
-                        if (v22 > bounds.v[2])
-                            bounds.v[2] = v22;
-                        v14 = v38 >= 0.0 ? 0 : 0xC;
-                        v32 = *(v35->bounds[0] + v14) * v38 + boneAxis.axis[2][3];
-                        v23 = *(v35->bounds[1] - v14) * v38 + boneAxis.axis[2][3];
+                        v8 = boneInfo >= 0.0 ? 0 : 12;
+                        v26 = *(float *)((char *)v35->bounds[0] + v8) * boneInfo + boneAxis.axis[2][1];
+                        v17 = *(float *)((char *)v35->bounds[1] - v8) * boneInfo + boneAxis.axis[2][1];
+                        v9 = boneAxis.axis[0][1] >= 0.0 ? 0 : 12;
+                        v27 = *(float *)((char *)&v35->bounds[0][1] + v9) * boneAxis.axis[0][1] + v26;
+                        v18 = *(float *)((char *)&v35->bounds[1][1] - v9) * boneAxis.axis[0][1] + v17;
+                        v10 = boneAxis.axis[1][1] >= 0.0 ? 0 : 12;
+                        v28 = *(float *)((char *)&v35->bounds[0][2] + v10) * boneAxis.axis[1][1] + v27;
+                        v19 = *(float *)((char *)&v35->bounds[1][2] - v10) * boneAxis.axis[1][1] + v18;
+                        if (v28 < (double)minWorld.v[0])
+                            minWorld.v[0] = v28;
+                        if (v19 > (double)maxWorld.v[0])
+                            maxWorld.v[0] = v19;
+                        v11 = v37 >= 0.0 ? 0 : 12;
+                        v29 = *(float *)((char *)v35->bounds[0] + v11) * v37 + boneAxis.axis[2][2];
+                        v20 = *(float *)((char *)v35->bounds[1] - v11) * v37 + boneAxis.axis[2][2];
+                        v12 = boneAxis.axis[0][2] >= 0.0 ? 0 : 12;
+                        v30 = *(float *)((char *)&v35->bounds[0][1] + v12) * boneAxis.axis[0][2] + v29;
+                        v21 = *(float *)((char *)&v35->bounds[1][1] - v12) * boneAxis.axis[0][2] + v20;
+                        v13 = boneAxis.axis[1][2] >= 0.0 ? 0 : 12;
+                        v31 = *(float *)((char *)&v35->bounds[0][2] + v13) * boneAxis.axis[1][2] + v30;
+                        v22 = *(float *)((char *)&v35->bounds[1][2] - v13) * boneAxis.axis[1][2] + v21;
+                        if (v31 < (double)minWorld.v[1])
+                            minWorld.v[1] = v31;
+                        if (v22 > (double)maxWorld.v[1])
+                            maxWorld.v[1] = v22;
+                        v14 = v38 >= 0.0 ? 0 : 12;
+                        v32 = *(float *)((char *)v35->bounds[0] + v14) * v38 + boneAxis.axis[2][3];
+                        v23 = *(float *)((char *)v35->bounds[1] - v14) * v38 + boneAxis.axis[2][3];
                         v15 = boneAxis.axis[0][3] >= 0.0 ? 0 : 0xC;
-                        v33 = *(&v35->bounds[0][1] + v15) * boneAxis.axis[0][3] + v32;
-                        v24 = *(&v35->bounds[1][1] - v15) * boneAxis.axis[0][3] + v23;
+                        v33 = *(float *)((char *)&v35->bounds[0][1] + v15) * boneAxis.axis[0][3] + v32;
+                        v24 = *(float *)((char *)&v35->bounds[1][1] - v15) * boneAxis.axis[0][3] + v23;
                         v16 = boneAxis.axis[1][3] >= 0.0 ? 0 : 0xC;
-                        v34 = *(&v35->bounds[0][2] + v16) * boneAxis.axis[1][3] + v33;
-                        v25 = *(&v35->bounds[1][2] - v16) * boneAxis.axis[1][3] + v24;
-                        if (v34 < bounds_8)
-                            bounds_8 = v34;
-                        if (v25 > bounds.v[3])
-                            bounds.v[3] = v25;
+                        v34 = *(float *)((char *)&v35->bounds[0][2] + v16) * boneAxis.axis[1][3] + v33;
+                        v25 = *(float *)((char *)&v35->bounds[1][2] - v16) * boneAxis.axis[1][3] + v24;
+                        if (v34 < (double)minWorld.v[2])
+                            minWorld.v[2] = v34;
+                        if (v25 > (double)maxWorld.v[2])
+                            maxWorld.v[2] = v25;
                     }
                     ++boneIndex;
                     animPartBit = (animPartBit << 31) | (animPartBit >> 1);
                 }
-                mins = localSceneEnt->cull.mins;
-                localSceneEnt->cull.mins[0] = boneInfoArray_508;
-                mins[1] = bounds_4;
-                mins[2] = bounds_8;
-                maxs = localSceneEnt->cull.maxs;
-                localSceneEnt->cull.maxs[0] = bounds.v[1];
-                maxs[1] = bounds.v[2];
-                maxs[2] = bounds.v[3];
+
+                localSceneEnt->cull.mins[0] = minWorld.v[0];
+                localSceneEnt->cull.mins[1] = minWorld.v[1];
+                localSceneEnt->cull.mins[2] = minWorld.v[2];
+
+                localSceneEnt->cull.maxs[0] = maxWorld.v[0];
+                localSceneEnt->cull.maxs[1] = maxWorld.v[1];
+                localSceneEnt->cull.maxs[2] = maxWorld.v[2];
 
                 iassert(localSceneEnt->cull.state == CULL_STATE_BOUNDED_PENDING);
 
-                localSceneEnt->cull.state = 2;
-                return partBits_4;
+                localSceneEnt->cull.state = CULL_STATE_BOUNDED;
+                return boneMatrix;
             }
             else
             {

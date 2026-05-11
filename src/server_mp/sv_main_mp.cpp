@@ -634,8 +634,6 @@ void __cdecl SVC_Info(netadr_t from)
 
 void __cdecl SV_ConnectionlessPacket(netadr_t from, msg_t *msg)
 {
-    const char *v2; // eax
-    const char *v3; // eax
     char *fromAddr; // [esp+0h] [ebp-1Ch]
     client_t *clients; // [esp+4h] [ebp-18h]
     const char *c; // [esp+8h] [ebp-14h]
@@ -647,124 +645,101 @@ void __cdecl SV_ConnectionlessPacket(netadr_t from, msg_t *msg)
     MSG_BeginReading(msg);
     MSG_ReadLong(msg);
     SV_Netchan_AddOOBProfilePacket(msg->cursize);
-    if (I_strnicmp((const char *)msg->data + 4, "pb_", 3))
+
+    // LWSS: Remove punkbuster crap
+    //if (!I_strnicmp((const char *)msg->data + 4, "pb_", 3))
+    //{
+    //    i = 0;
+    //    clients = svs.clients;
+    //    while (i < sv_maxclients->current.integer)
+    //    {
+    //        if (clients->header.state
+    //            && NET_CompareBaseAdr(from, clients->header.netchan.remoteAddress)
+    //            && clients->header.netchan.remoteAddress.port == from.port)
+    //        {
+    //            clientIndex = i;
+    //            break;
+    //        }
+    //        ++i;
+    //        ++clients;
+    //    }
+    //    if (msg->data[7] != 67 && msg->data[7] != 49 && msg->data[7] != 74)
+    //        PbSvAddEvent(13, clientIndex, msg->cursize - 4, (char *)msg->data + 4);
+    //    if (msg->data[7] != 83
+    //        && msg->data[7] != 50
+    //        && msg->data[7] != 71
+    //        && msg->data[7] != 73
+    //        && msg->data[7] != 89
+    //        && msg->data[7] != 66
+    //        && msg->data[7] != 76
+    //        && (!com_dedicated || !com_dedicated->current.integer))
+    //    {
+    //        PbClAddEvent(13, msg->cursize - 4, (char *)msg->data + 4);
+    //    }
+    //    return;
+    //}
+
+    s = MSG_ReadStringLine(msg);
+    SV_Cmd_TokenizeString(s);
+    c = SV_Cmd_Argv(0);
+
+    if (sv_packet_info->current.enabled)
     {
-        s = MSG_ReadStringLine(msg);
-        SV_Cmd_TokenizeString(s);
-        c = SV_Cmd_Argv(0);
-        if (sv_packet_info->current.enabled)
-        {
-            v2 = NET_AdrToString(from);
-            Com_Printf(15, "SV packet %s : %s\n", v2, c);
-        }
-        if (I_stricmp(c, "getstatus"))
-        {
-            if (I_stricmp(c, "v"))
-            {
-                if (I_stricmp(c, "getinfo"))
-                {
-                    if (I_stricmp(c, "getchallenge"))
-                    {
-                        if (I_stricmp(c, "connect"))
-                        {
-                            if (I_stricmp(c, "stats"))
-                            {
-                                if (I_stricmp(c, "ipAuthorize"))
-                                {
-                                    if (I_stricmp(c, "rcon"))
-                                    {
-                                        if (I_stricmp(c, "disconnect"))
-                                        {
-                                            v3 = NET_AdrToString(from);
-                                            Com_DPrintf(15, "bad connectionless packet from %s\n", v3);
-                                        }
-                                    }
-                                    else
-                                    {
-                                        SVC_RemoteCommand(from);
-                                    }
-                                }
-                                else
-                                {
-                                    SV_UpdateLastTimeMasterServerCommunicated(from);
-                                    SV_AuthorizeIpPacket(from);
-                                }
-                            }
-                            else
-                            {
-                                SV_ReceiveStats(from, msg);
-                            }
-                        }
-                        else
-                        {
-                            // LWSS: Remove punkbuster junk
-                            //if (NET_IsLocalAddress(from))
-                            //{
-                            //    PbPassConnectString("localhost", (char *)msg->data);
-                            //}
-                            //else
-                            //{
-                            //    fromAddr = NET_AdrToString(from);
-                            //    PbPassConnectString(fromAddr, (char *)msg->data);
-                            //}
-                            SV_DirectConnect(from);
-                        }
-                    }
-                    else
-                    {
-                        SV_UpdateLastTimeMasterServerCommunicated(from);
-                        SV_GetChallenge(from);
-                    }
-                }
-                else
-                {
-                    SVC_Info(from);
-                    SV_UpdateLastTimeMasterServerCommunicated(from);
-                }
-            }
-            else
-            {
-                SV_VoicePacket(from, msg);
-            }
-        }
-        else
-        {
-            SV_UpdateLastTimeMasterServerCommunicated(from);
-            SVC_Status(from);
-        }
-        SV_Cmd_EndTokenizedString();
+        Com_Printf(15, "SV packet %s : %s\n", NET_AdrToString(from), c);
     }
-    else
+
+    if (!I_stricmp(c, "getstatus"))
     {
-        i = 0;
-        clients = svs.clients;
-        while (i < sv_maxclients->current.integer)
-        {
-            if (clients->header.state
-                && NET_CompareBaseAdr(from, clients->header.netchan.remoteAddress)
-                && clients->header.netchan.remoteAddress.port == from.port)
-            {
-                clientIndex = i;
-                break;
-            }
-            ++i;
-            ++clients;
-        }
-        // LWSS: Remove punkbuster crap
-        //if (msg->data[7] != 67 && msg->data[7] != 49 && msg->data[7] != 74)
-        //    PbSvAddEvent(13, clientIndex, msg->cursize - 4, (char *)msg->data + 4);
-        //if (msg->data[7] != 83
-        //    && msg->data[7] != 50
-        //    && msg->data[7] != 71
-        //    && msg->data[7] != 73
-        //    && msg->data[7] != 89
-        //    && msg->data[7] != 66
-        //    && msg->data[7] != 76
-        //    && (!com_dedicated || !com_dedicated->current.integer))
+        SV_UpdateLastTimeMasterServerCommunicated(from);
+        SVC_Status(from);
+    }
+    else if (!I_stricmp(c, "v"))
+    {
+        SV_VoicePacket(from, msg);
+    }
+    else if (!I_stricmp(c, "getinfo"))
+    {
+        SVC_Info(from);
+        SV_UpdateLastTimeMasterServerCommunicated(from);
+    }
+    else if (!I_stricmp(c, "getchallenge"))
+    {
+        SV_UpdateLastTimeMasterServerCommunicated(from);
+        SV_GetChallenge(from);
+    }
+    else if (!I_stricmp(c, "connect"))
+    {
+        // LWSS: Remove punkbuster junk
+        //if (NET_IsLocalAddress(from))
         //{
-        //    PbClAddEvent(13, msg->cursize - 4, (char *)msg->data + 4);
+        //    PbPassConnectString("localhost", (char *)msg->data);
         //}
+        //else
+        //{
+        //    fromAddr = NET_AdrToString(from);
+        //    PbPassConnectString(fromAddr, (char *)msg->data);
+        //}
+        SV_DirectConnect(from);
     }
+    else if (!I_stricmp(c, "stats"))
+    {
+        SV_ReceiveStats(from, msg);
+    }
+    else if (!I_stricmp(c, "ipAuthorize"))
+    {
+        SV_UpdateLastTimeMasterServerCommunicated(from);
+        SV_AuthorizeIpPacket(from);
+    }
+    else if (!I_stricmp(c, "rcon"))
+    {
+        SVC_RemoteCommand(from);
+    }
+    else if (!I_stricmp(c, "disconnect"))
+    {
+        Com_DPrintf(15, "bad connectionless packet from %s\n", NET_AdrToString(from));
+    }
+
+    SV_Cmd_EndTokenizedString();
 }
 
 void __cdecl SV_PacketEvent(netadr_t from, msg_t *msg)

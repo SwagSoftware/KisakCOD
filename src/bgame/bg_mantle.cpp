@@ -496,11 +496,6 @@ int __cdecl Mantle_FindTransition(float curHeight, float goalHeight)
 
 char __cdecl Mantle_FindMantleSurface(pmove_t *pm, pml_t *pml, trace_t *trace, float *mantleDir)
 {
-    float scale; // [esp+0h] [ebp-A4h]
-    float v6; // [esp+Ch] [ebp-98h]
-    float v7; // [esp+10h] [ebp-94h]
-    float v8; // [esp+14h] [ebp-90h]
-    float v9; // [esp+44h] [ebp-60h]
     float traceDir[3]; // [esp+50h] [ebp-54h] BYREF
     float playerRadius; // [esp+5Ch] [ebp-48h]
     float mins[3]; // [esp+60h] [ebp-44h] BYREF
@@ -515,19 +510,18 @@ char __cdecl Mantle_FindMantleSurface(pmove_t *pm, pml_t *pml, trace_t *trace, f
 
     ps = pm->ps;
     iassert(ps);
+
     playerRadius = 15.0;
-    v9 = -mantle_check_radius->current.value;
-    mins[0] = v9;
-    mins[1] = v9;
+
+    mins[0] = -mantle_check_radius->current.value;
+    mins[1] = -mantle_check_radius->current.value;
     mins[2] = 0.0;
+
     maxs[0] = mantle_check_radius->current.value;
     maxs[1] = maxs[0];
     maxs[2] = 70.0;
-    v8 = 70.0 - 0.0;
+
     iassert((maxs[0] - mins[0]) <= (playerMaxs[2] - playerMins[2]));
-
-    v7 = 70.0 - 0.0;
-
     iassert((maxs[1] - mins[1]) <= (playerMaxs[2] - playerMins[2]));
 
     innerDist = playerRadius - mantle_check_radius->current.value;
@@ -536,8 +530,7 @@ char __cdecl Mantle_FindMantleSurface(pmove_t *pm, pml_t *pml, trace_t *trace, f
     traceDir[1] = pml->forward[1];
     traceDir[2] = 0.0;
     Vec3Normalize(traceDir);
-    scale = -innerDist;
-    Vec3Mad(ps->origin, scale, traceDir, start);
+    Vec3Mad(ps->origin, -innerDist, traceDir, start);
     Vec3Mad(ps->origin, traceDist, traceDir, end);
     PM_trace(pm, trace, start, mins, maxs, end, ps->clientNum, 0x1000000);
     if (trace->startsolid || trace->allsolid)
@@ -552,7 +545,7 @@ char __cdecl Mantle_FindMantleSurface(pmove_t *pm, pml_t *pml, trace_t *trace, f
     }
     else if ((trace->surfaceFlags & 0x6000000) != 0)
     {
-        *mantleDir = -trace->normal[0];
+        mantleDir[0] = -trace->normal[0];
         mantleDir[1] = -trace->normal[1];
         mantleDir[2] = -trace->normal[2];
         mantleDir[2] = 0.0;
@@ -560,8 +553,7 @@ char __cdecl Mantle_FindMantleSurface(pmove_t *pm, pml_t *pml, trace_t *trace, f
         if (len >= 0.00009999999747378752)
         {
             dot = Vec3Dot(traceDir, mantleDir);
-            v6 = acos(dot);
-            if (mantle_check_angle->current.value >= v6 * 57.2957763671875)
+            if (mantle_check_angle->current.value >= acos(dot) * 57.2957763671875)
             {
                 return 1;
             }

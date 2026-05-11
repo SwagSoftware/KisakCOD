@@ -1,4 +1,4 @@
-// LWSS: this is a Rudimentary Steam Authentication for the COD4 Client -> Dedicated Server
+// LWSS: this is a Rudimentary Steam Authentication for the Client -> Dedicated Server
 // The Client Generates a Steam ticket and sends it to the Server (in lieu of a CD Key)
 // The Server checks this Ticket and then puts in a delayed networked check to Steam.
 
@@ -25,6 +25,11 @@
 #endif
 
 #include <functional>
+
+// 7940 = COD4 APPID
+#define APPID 7940
+#define APPID_STR "7940"
+
 
 bool g_steamInitialized = false;
 uint64_t g_steamID = 0;
@@ -145,7 +150,6 @@ extern "C" void __cdecl SteamAPIDebugTextHook(int nSeverity, const char *pchDebu
 }
 
 // This Creates a "steam_appid.txt" next to the executable for the Steam API to read
-// 7940 = COD4 APPID
 static void CreateAppIdFile()
 {
 	// Check if File Exists Already
@@ -162,16 +166,16 @@ static void CreateAppIdFile()
 		return;
 	}
 
-	fprintf(fp, "%d", 7940);
+	fprintf(fp, "%d", APPID);
 	fclose(fp);
 }
 
 void Steam_Init()
 {
 	CreateAppIdFile();
-	SetEnvironmentVariableA("SteamAppId", "7940");
-	SetEnvironmentVariableA("SteamGameId", "7940");
-	SetEnvironmentVariableA("SteamOverlayGameId", "7940");
+	SetEnvironmentVariableA("SteamAppId", APPID_STR);
+	SetEnvironmentVariableA("SteamGameId", APPID_STR);
+	SetEnvironmentVariableA("SteamOverlayGameId", APPID_STR);
 
 	if (!SteamAPI_Init())
 	{
@@ -195,6 +199,7 @@ void Steam_Init()
 	callbackHandler = new SteamCallbackHandler();
 }
 
+// (Currently Unused)
 void Steam_Shutdown()
 {
 	SteamAPI_Shutdown();

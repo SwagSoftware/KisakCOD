@@ -462,19 +462,11 @@ GfxWorldVertex *__cdecl R_GetMarkMeshVerts(unsigned __int16 baseVertex)
 
 GfxDrawSurf __cdecl R_GetWorldDrawSurf(GfxSurface *worldSurf)
 {
-    GfxDrawSurf drawSurf; // [esp+1Ch] [ebp-8h]
-
-    drawSurf.fields = worldSurf->material->info.drawSurf.fields;
+    GfxDrawSurf drawSurf = worldSurf->material->info.drawSurf;
     iassert( drawSurf.fields.primaryLightIndex == 0 );
     drawSurf.fields.primaryLightIndex = worldSurf->primaryLightIndex;
-    if (drawSurf.fields.primaryLightIndex != worldSurf->primaryLightIndex)
-        MyAssertHandler(
-            ".\\r_drawsurf.cpp",
-            323,
-            1,
-            "drawSurf.fields.primaryLightIndex == worldSurf->primaryLightIndex\n\t%i, %i",
-            drawSurf.fields.primaryLightIndex,
-            worldSurf->primaryLightIndex);
+    iassert(drawSurf.fields.primaryLightIndex == worldSurf->primaryLightIndex);
+
     return drawSurf;
 }
 

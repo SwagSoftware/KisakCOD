@@ -576,10 +576,10 @@ float __cdecl Vec2Normalize(vec2r v)
 
 void __cdecl Vec3NormalizeFast(float *v)
 {
-    int32_t number; // [esp+0h] [ebp-1Ch]
+    float number; // [esp+0h] [ebp-1Ch]
     float invLength; // [esp+18h] [ebp-4h]
 
-    *(float *)&number = Vec3LengthSq(v);
+    number = Vec3LengthSq(v);
     invLength = I_rsqrt(number);
     v[0] = v[0] * invLength;
     v[1] = v[1] * invLength;
@@ -920,6 +920,17 @@ void __cdecl YawVectors2D(float yaw, float *forward, float *right)
         *right = sy;
         right[1] = -cy;
     }
+}
+
+void __cdecl Vec2NormalizeFast(float *v)
+{
+    float number; // [esp+18h] [ebp-8h]
+    float invLength; // [esp+1Ch] [ebp-4h]
+
+    number = *v * *v + v[1] * v[1];
+    invLength = I_rsqrt(number);
+    *v = *v * invLength;
+    v[1] = v[1] * invLength;
 }
 
 void __cdecl PerpendicularVector(const float* src, float* dst)
@@ -2872,6 +2883,13 @@ void __cdecl Vec3Mul(const float* a, const float* b, float* product)
     *product = *a * *b;
     product[1] = a[1] * b[1];
     product[2] = a[2] * b[2];
+}
+
+void Vec3Clear(vec3r v)
+{
+    v[0] = 0.0f;
+    v[1] = 0.0f;
+    v[2] = 0.0f;
 }
 
 void __cdecl Vec3Negate(const float *from, float *to)

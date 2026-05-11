@@ -204,7 +204,7 @@ void __cdecl R_AddAllStaticModelSurfacesCamera()
     PROF_SCOPED("SModelSurfaces");
     smodelCount = rgp.world->dpvs.smodelCount;
     lodData = rgp.world->dpvs.lodData;
-    Com_Memset(lodData, 0, 32 * ((smodelCount + 127) >> 7));
+    Com_Memset(lodData, 0, 32 * ((smodelCount + 127) / 128));
 
     visData = rgp.world->dpvs.smodelVisData[0];
     smodelDrawInsts = rgp.world->dpvs.smodelDrawInsts;
@@ -607,7 +607,7 @@ void __cdecl R_AddAllStaticModelSurfacesRangeSunShadow(unsigned int partitionInd
     float bias; // [esp+5Ch] [ebp-108Ch]
     GfxStaticModelDrawInst* smodelDrawInsts; // [esp+1064h] [ebp-84h]
     float originDist; // [esp+1068h] [ebp-80h]
-    XModel* model; // [esp+106Ch] [ebp-7Ch]
+    XModel* nextModel; // [esp+106Ch] [ebp-7Ch]
     XModel* currentModel; // [esp+1070h] [ebp-78h]
     unsigned int stage; // [esp+1078h] [ebp-70h]
     unsigned __int16* list; // [esp+107Ch] [ebp-6Ch]
@@ -662,14 +662,14 @@ void __cdecl R_AddAllStaticModelSurfacesRangeSunShadow(unsigned int partitionInd
 
         originDist = Vec3Distance(inst->placement.origin, origin) * scale + bias;
 
-        if (inst->cullDist <= originDist)
+        if (originDist >= inst->cullDist)
         {
             visData[i] = 0;
             continue;
         }
 
-        model = inst->model;
-        if (model != currentModel)
+        nextModel = inst->model;
+        if (nextModel != currentModel)
         {
             if (allocatedLighting)
             {
@@ -682,12 +682,11 @@ void __cdecl R_AddAllStaticModelSurfacesRangeSunShadow(unsigned int partitionInd
                 memset(staticModelLodCount, 0, sizeof(staticModelLodCount));
                 allocatedLighting = 0;
             }
-            currentModel = model;
+            currentModel = nextModel;
         }
 
-        iassert(inst->placement.scale);
-        dist = originDist * (1.0f / inst->placement.scale);
-        lod = XModelGetLodForDist(model, dist);
+        dist = originDist * I_fres(inst->placement.scale);
+        lod = XModelGetLodForDist(nextModel, dist);
 
         if (lod < 0)
         {
@@ -709,7 +708,7 @@ void __cdecl R_AddAllStaticModelSurfacesRangeSunShadow(unsigned int partitionInd
             if (entryCount >= 128)
             {
                 R_SkinStaticModelsShadowForLod(
-                    model,
+                    nextModel,
                     (unsigned __int8*)list,
                     entryCount,
                     StaticModelId.surfType,
@@ -895,6 +894,7 @@ void __cdecl R_AddAllStaticModelSurfacesSpotShadow(unsigned int spotShadowIndex,
     surfData.drawSurfList.end = &scene.drawSurfs[v18][scene.maxDrawSurfCount[v18]];
     v16 = 0;
     v15 = &rgp.world->shadowGeom[primaryLightIndex];
+
     for (i = 0; i < v15->smodelCount; ++i)
     {
         v28 = v15->smodelIndex[i];

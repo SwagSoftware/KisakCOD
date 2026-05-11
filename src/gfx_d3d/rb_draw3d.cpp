@@ -32,7 +32,7 @@ void __cdecl R_HW_InsertFence(IDirect3DQuery9 **fence)
     {
         if (r_logFile && r_logFile->current.integer)
             RB_LogPrint("(*fence)->Issue( (1 << 0) )\n");
-        hr = (*fence)->Issue(1);
+        hr = (*fence)->Issue(D3DISSUE_END);
         if (hr < 0)
         {
             do
@@ -114,14 +114,8 @@ void __cdecl RB_FullbrightDrawCommands(const GfxViewInfo *viewInfo)
     R_DrawFullbright(viewInfo, &gfxCmdBufContext.source->input, &cmdBuf);
     R_InitCmdBufSourceState(gfxCmdBufContext.source, &viewInfo->input, 0);
     memcpy(gfxCmdBufContext.state, &gfxCmdBufState, sizeof(GfxCmdBufState));
-    memset(
-        (unsigned __int8 *)gfxCmdBufContext.state->vertexShaderConstState,
-        0,
-        sizeof(gfxCmdBufContext.state->vertexShaderConstState));
-    memset(
-        (unsigned __int8 *)gfxCmdBufContext.state->pixelShaderConstState,
-        0,
-        sizeof(gfxCmdBufContext.state->pixelShaderConstState));
+    memset(gfxCmdBufContext.state->vertexShaderConstState, 0, sizeof(gfxCmdBufContext.state->vertexShaderConstState));
+    memset(gfxCmdBufContext.state->pixelShaderConstState, 0, sizeof(gfxCmdBufContext.state->pixelShaderConstState));
     R_SetRenderTargetSize(gfxCmdBufContext.source, R_RENDERTARGET_SCENE);
     R_SetRenderTarget(gfxCmdBufContext, R_RENDERTARGET_SCENE);
     R_BeginView(gfxCmdBufContext.source, &viewInfo->sceneDef, &viewInfo->viewParms);

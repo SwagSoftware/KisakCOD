@@ -281,11 +281,8 @@ void __cdecl R_PixelCost_EndSurface(GfxCmdBufContext context)
 
     if (pixelCostMode == GFX_PIXEL_COST_MODE_MEASURE_COST)
     {
-        gfxAssets.pixelCountQuery->Issue(1);
-        //((void(__thiscall *)(IDirect3DQuery9 *, IDirect3DQuery9 *, int))gfxAssets.pixelCountQuery->Issue)(
-        //    gfxAssets.pixelCountQuery,
-        //    gfxAssets.pixelCountQuery,
-        //    1);
+        gfxAssets.pixelCountQuery->Issue(D3DISSUE_END);
+
         RB_PixelCost_EndTiming();
         pixelCount = RB_HW_ReadOcclusionQuery(gfxAssets.pixelCountQuery);
         if (pixelCount)
@@ -357,8 +354,10 @@ GfxRenderTargetId __cdecl RB_PixelCost_OverrideRenderTarget(GfxRenderTargetId ta
 {
     if (targetId < R_RENDERTARGET_SCENE)
         return R_RENDERTARGET_FRAME_BUFFER;
+
     if (targetId >= R_RENDERTARGET_SHADOWCOOKIE)
         return targetId;
+
     return R_RENDERTARGET_SCENE;
 }
 

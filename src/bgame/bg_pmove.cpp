@@ -198,24 +198,16 @@ void __cdecl PM_AddTouchEnt(pmove_t *pm, int32_t entityNum)
 void __cdecl PM_ClipVelocity(const float *in, const float *normal, float *out)
 {
     float scale; // [esp+0h] [ebp-14h]
-    float v4; // [esp+Ch] [ebp-8h]
     float parallel; // [esp+10h] [ebp-4h]
-    float parallela; // [esp+10h] [ebp-4h]
 
     parallel = Vec3Dot(in, normal);
-    v4 = I_fabs(parallel);
-    parallela = parallel - v4 * EQUAL_EPSILON;
-    scale = -parallela;
+    parallel = parallel - I_fabs(parallel) * EQUAL_EPSILON;
+    scale = -parallel;
     Vec3Mad(in, scale, normal, out);
 }
 
 void __cdecl PM_ProjectVelocity(const float *velIn, const float *normal, float *velOut)
 {
-    float v3; // [esp+8h] [ebp-3Ch]
-    float v4; // [esp+Ch] [ebp-38h]
-    float v5; // [esp+10h] [ebp-34h]
-    float v6; // [esp+14h] [ebp-30h]
-    float v7; // [esp+1Ch] [ebp-28h]
     float lengthSq2D; // [esp+24h] [ebp-20h]
     float adjusted[3]; // [esp+28h] [ebp-1Ch] BYREF
     float adjustedLengthSq; // [esp+34h] [ebp-10h]
@@ -223,29 +215,29 @@ void __cdecl PM_ProjectVelocity(const float *velIn, const float *normal, float *
     float lengthScale; // [esp+3Ch] [ebp-8h]
     float originalLengthSq; // [esp+40h] [ebp-4h]
 
-    lengthSq2D = velIn[1] * velIn[1] + *velIn * *velIn;
-    v6 = I_fabs(normal[2]);
-    if (v6 < EQUAL_EPSILON || lengthSq2D == 0.0)
+    lengthSq2D = Vec2LengthSq(velIn);
+    
+    if (I_fabs(normal[2]) < EQUAL_EPSILON || lengthSq2D == 0.0)
     {
-        *velOut = *velIn;
+        velOut[0] = velIn[0];
         velOut[1] = velIn[1];
         velOut[2] = velIn[2];
     }
     else
     {
-        v5 = normal[1] * velIn[1] + *normal * *velIn;
-        newZ = -v5 / normal[2];
-        v7 = velIn[1];
-        adjusted[0] = *velIn;
-        adjusted[1] = v7;
+        newZ = -(normal[1] * velIn[1] + normal[0] * velIn[0]) / normal[2];
+
+        adjusted[0] = velIn[0];
+        adjusted[1] = velIn[1];
         adjusted[2] = newZ;
+
         originalLengthSq = velIn[2] * velIn[2] + lengthSq2D;
         adjustedLengthSq = newZ * newZ + lengthSq2D;
-        v4 = originalLengthSq / adjustedLengthSq;
-        v3 = sqrt(v4);
-        lengthScale = v3;
-        if (v3 < 1.0 || newZ < 0.0 || velIn[2] > 0.0)
+        lengthScale = sqrt(originalLengthSq / adjustedLengthSq);
+        if (lengthScale < 1.0 || newZ < 0.0 || velIn[2] > 0.0)
+        {
             Vec3Scale(adjusted, lengthScale, velOut);
+        }
     }
 }
 
