@@ -253,6 +253,7 @@ void __cdecl MSS_ApplyEqFilter(_SAMPLE *s, int entchannel)
         for (band = 0; band < 3; ++band)
         {
             params = &milesGlob.eq[eqIndex].params[band][entchannel];
+            enabled = params->enabled;
             AIL_sample_stage_property(s, stage, MSS_EQ_ENABLED[band], -1, 0, &enabled, 0);
             if (enabled)
             {

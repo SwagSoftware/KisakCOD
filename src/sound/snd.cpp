@@ -2165,7 +2165,7 @@ void __cdecl SND_ContinueLoopingSound_Internal(
     g_snd.chaninfo[chanIndex].pitch = v6;
     if (g_snd.chaninfo[chanIndex].timescale)
     {
-        setPlaybackRateFunc(chanIndex, (int)g_snd.timescale * ((float)g_snd.chaninfo[chanIndex].soundFileInfo.baserate * g_snd.chaninfo[chanIndex].pitch));
+        setPlaybackRateFunc(chanIndex, (int)(g_snd.timescale * (float)g_snd.chaninfo[chanIndex].soundFileInfo.baserate * g_snd.chaninfo[chanIndex].pitch));
     }
     else
     {
