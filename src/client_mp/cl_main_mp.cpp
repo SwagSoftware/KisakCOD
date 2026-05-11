@@ -1018,6 +1018,7 @@ void __cdecl CL_CheckForResend(netsrc_t localClientNum)
     uint32 steamClientTicketSize = 0;
     char steamIDbuf[25];
     unsigned char steamTicketBase64[2048]{ 0 };
+    bool got;
 
 #ifdef _DEBUG
     unsigned char steamTicketDecodeBuf[1024]{ 0 };
@@ -1054,7 +1055,7 @@ void __cdecl CL_CheckForResend(netsrc_t localClientNum)
                 //CL_BuildMd5StrFromCDKey(md5Str);
                 //v2 = va("getchallenge 0 \"%s\"", md5Str);
 
-                bool got = Steam_GetRawClientTicket(&pSteamClientTicket, &steamClientTicketSize);
+                got = Steam_GetRawClientTicket(&pSteamClientTicket, &steamClientTicketSize);
                 iassert(got);
                 b64_encode(pSteamClientTicket, steamClientTicketSize, steamTicketBase64);
                 iassert(b64_decode(steamTicketBase64, strlen((char *)steamTicketBase64), steamTicketDecodeBuf) == steamClientTicketSize);
