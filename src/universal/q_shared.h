@@ -266,6 +266,9 @@ int __cdecl I_DrawStrlen(const char *str);
 char *__cdecl I_CleanStr(char *string);
 unsigned __int8 __cdecl I_CleanChar(unsigned __int8 character);
 
+inline float I_fmin(float a, float b) { return a < b ? a : b; }
+inline float I_fmax(float a, float b) { return a > b ? a : b; }
+
 // lwss: fcking winblows!
 #undef MAKEWORD
 #undef MAKELONG

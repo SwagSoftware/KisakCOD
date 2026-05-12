@@ -50,23 +50,22 @@ void __cdecl CG_DrawCenterString(
     float *color,
     int textStyle)
 {
-    float v6; // [esp+24h] [ebp-20h]
-    CenterPrint *centerPrint; // [esp+34h] [ebp-10h]
-    float *fadeColor; // [esp+38h] [ebp-Ch]
-    int32_t time; // [esp+3Ch] [ebp-8h]
-    float x; // [esp+40h] [ebp-4h]
+    CenterPrint *centerPrint;
+    int time;
+    float *fadeColor;
+    float x;
+    cg_s *cgameGlob;
 
-    const cg_s *cgameGlob;
-
-    cgameGlob = CG_GetLocalClientGlobals(0);
-
-    time = cgameGlob->time;
+    cgameGlob = CG_GetLocalClientGlobals(localClientNum);
     centerPrint = &s_centerPrint[localClientNum];
-    if (centerPrint->time > cgameGlob->time)
-        centerPrint->time = 0;
-    if (centerPrint->time)
+    time = centerPrint->time;
+    if (time && !cg_paused->current.integer)
     {
-        fadeColor = CG_FadeColor(time, centerPrint->time, SnapFloatToInt(cg_centertime->current.value * 1000.0), 100);
+        fadeColor = CG_FadeColor(
+            cgameGlob->time,
+            time,
+            (int)(cg_centertime->current.value * 1000.0f),
+            100);
         if (fadeColor)
         {
             Vec4Mul(color, fadeColor, color);
@@ -136,19 +135,19 @@ int __cdecl CG_DrawFriendlyFire(const cg_s *cgameGlob)
     return 1;
 }
 
-// local variable allocation has failed, the output may be wrong!
 static int lastTime;
 void __cdecl CG_DrawFlashFade(int localClientNum)
 {
-    ScreenFade *fade; // r31
-    double alpha; // fp0
-    int deltaMS; // r11 OVERLAPPED
-    double alphaCurrent; // fp13
-    double a; // fp0
-    int height; // [sp+50h] [-50h] BYREF
-    int width; // [sp+54h] [-4Ch] BYREF
-    float aspect; // [sp+58h] [-48h] BYREF
-    float color[4]; // [sp+70h] [-30h] // v18[4] 
+    ScreenFade *fade;
+    float alpha;
+    float alphaCurrent;
+    float a;
+    int height;
+    int width;
+    float aspect;
+    float color[4];
+
+    iassert(localClientNum == 0);
 
     fade = &s_screenFade[localClientNum];
     if (fade->startTime + fade->duration >= cgArray[0].time)
@@ -157,23 +156,23 @@ void __cdecl CG_DrawFlashFade(int localClientNum)
             goto LABEL_12;
 
         int now = Sys_Milliseconds();
-        deltaMS = now - lastTime;
-        int deltaMinus1 = deltaMS - 1;
+        int deltaMS = now - lastTime;
         lastTime = now;
-        if (deltaMinus1 > 498)
+        if ((unsigned int)(deltaMS - 1) > 498u)
             goto LABEL_12;
-        deltaMS = fade->duration;
+
         alphaCurrent = fade->alphaCurrent;
         alpha = fade->alpha;
+        const float fadeStep = (float)deltaMS / (float)fade->duration;
         if (alphaCurrent <= alpha)
         {
-            fade->alphaCurrent = ((alpha - alphaCurrent) / deltaMS) + fade->alphaCurrent; // KISAKTODO: logic check these
+            fade->alphaCurrent = fadeStep + alphaCurrent;
             if (fade->alphaCurrent <= alpha)
                 goto LABEL_12;
         }
         else
         {
-            fade->alphaCurrent = alphaCurrent - (alpha / deltaMS); // KISAKTODO: logic check these
+            fade->alphaCurrent = alphaCurrent - fadeStep;
             if (fade->alphaCurrent >= alpha)
                 goto LABEL_12;
         }
@@ -740,116 +739,47 @@ float __cdecl CG_GetBlurRadius(int localClientNum)
 
 void __cdecl CG_ScreenBlur(int localClientNum)
 {
-    ScreenBlur *v2; // r31
-    int time; // r28
-    int timeStart; // r11
-    int timeEnd; // r11
-    __int64 v6; // r11
-    int v7; // r11
-    int v8[4]; // r11
-    double v9; // fp31
-    double end; // fp0
-    double v11; // fp31
-    double _FP12; // fp12
-    double _FP0; // fp0
+    ScreenBlur *scrBlur;
+    int time;
+    int timeStart;
+    int timeEnd;
+    float t;
+    float end;
+    float blur;
+    cg_s *cgameGlob;
 
-    if (localClientNum)
-        MyAssertHandler(
-            "c:\\trees\\cod3\\cod3src\\src\\cgame\\cg_local.h",
-            910,
-            0,
-            "%s\n\t(localClientNum) = %i",
-            "(localClientNum == 0)",
-            localClientNum);
-    v2 = &s_screenBlur[localClientNum];
-    if (v2->time == BLUR_TIME_ABSOLUTE)
+    cgameGlob = CG_GetLocalClientGlobals(localClientNum);
+    scrBlur = &s_screenBlur[localClientNum];
+    if (scrBlur->time == BLUR_TIME_ABSOLUTE)
         time = Sys_Milliseconds();
     else
-        time = cgArray[0].time;
-    timeStart = v2->timeStart;
+        time = cgameGlob->time;
+    timeStart = scrBlur->timeStart;
     if (timeStart)
     {
-        if (timeStart > time)
-            MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\cgame\\cg_draw.cpp", 649, 0, "%s", "scrBlur->timeStart <= time");
-        if (v2->timeStart > v2->timeEnd)
-            MyAssertHandler(
-                "c:\\trees\\cod3\\cod3src\\src\\cgame\\cg_draw.cpp",
-                650,
-                0,
-                "%s",
-                "scrBlur->timeStart <= scrBlur->timeEnd");
-        timeEnd = v2->timeEnd;
+        iassert(scrBlur->timeStart <= time);
+        iassert(scrBlur->timeStart <= scrBlur->timeEnd);
+        timeEnd = scrBlur->timeEnd;
         if (time >= timeEnd)
         {
-            end = v2->end;
-            v11 = end;
-            v2->timeStart = 0;
-            v2->timeEnd = 0;
-            v2->priority = BLUR_PRIORITY_NONE;
+            end = scrBlur->end;
+            blur = end;
+            scrBlur->timeStart = 0;
+            scrBlur->timeEnd = 0;
+            scrBlur->priority = BLUR_PRIORITY_NONE;
         }
         else
         {
-            HIDWORD(v6) = v2->timeStart;
-            LODWORD(v6) = timeEnd - HIDWORD(v6);
-            if ((float)v6 <= 0.0)
-                MyAssertHandler(
-                    "c:\\trees\\cod3\\cod3src\\src\\cgame\\cg_draw.cpp",
-                    654,
-                    0,
-                    "%s",
-                    "scrBlur->timeEnd - scrBlur->timeStart > 0.0f");
-            v7 = v2->timeStart;
-            v8[1] = time - v7;
-            v8[2] = time - v7;
-            v8[3] = v2->timeEnd - v7;
-            v9 = (float)((float)*(__int64 *)&v8[1] / (float)*(__int64 *)&v8[2]);
-            if (v9 < 0.0 || v9 >= 1.0)
-                MyAssertHandler(
-                    "c:\\trees\\cod3\\cod3src\\src\\cgame\\cg_draw.cpp",
-                    656,
-                    0,
-                    "%s\n\t(t) = %g",
-                    HIDWORD(v9),
-                    LODWORD(v9));
-            end = v2->end;
-            v11 = (float)((float)((float)((float)1.0 - (float)v9) * v2->start) + (float)(v2->end * (float)v9));
+            iassert(scrBlur->timeEnd - scrBlur->timeStart > 0.0f);
+            t = (float)(time - scrBlur->timeStart) / (float)(scrBlur->timeEnd - scrBlur->timeStart);
+            iassert(t);
+            end = scrBlur->end;
+            blur = ((1.0f - t) * scrBlur->start) + (scrBlur->end * t);
         }
 
-        // fsel f0, f1, f2, f3  --------  f0 = ( f1 >= 0 ? f2 : f3 )
+        iassert(blur >= I_fmin(scrBlur->start, scrBlur->end) && blur <= I_fmax(scrBlur->start, scrBlur->end));
 
-        //_FP12 = (float)((float)end - v2->start);
-        //__asm { fsel      f12, f12, f13, f0 }
-        //
-        //if (v11 < _FP12)
-        //    goto LABEL_21;
-        //
-        //_FP12 = (float)(v2->start - (float)end);
-        //__asm { fsel      f0, f12, f13, f0 }
-        //
-        //if (v11 > _FP0)
-        //    LABEL_21:
-
-        float _FP12 = ((float)end - v2->start);
-        _FP12 = (_FP12 >= 0.0f) ? v2->start : end;
-
-        //if (v11 < _FP12)
-        //    goto LABEL_21;
-
-        float _FP0 = (v2->start - (float)end);
-        _FP0 = (_FP0 >= 0.0f) ? v2->start : end;
-
-        //if (v11 > _FP0)
-        //    LABEL_21:
-
-
-        //MyAssertHandler(
-        //    "c:\\trees\\cod3\\cod3src\\src\\cgame\\cg_draw.cpp",
-        //    668,
-        //    0,
-        //    "%s\n\t(blur) = %g",
-        //    HIDWORD(v11),
-        //    LODWORD(v11));
-        v2->radius = v11;
+        scrBlur->radius = blur;
     }
 }
 
