@@ -1104,6 +1104,7 @@ struct CEntTurretInfo // sizeof=0x10
 };
 static_assert(sizeof(CEntTurretInfo) == 0x10);
 
+#ifdef KISAK_MP
 struct CEntVehicleInfo // sizeof=0x24
 {                                       // ...
     int16_t pitch;
@@ -1123,6 +1124,25 @@ struct CEntVehicleInfo // sizeof=0x24
     // padding byte
 };
 static_assert(sizeof(CEntVehicleInfo) == 0x24);
+#elif KISAK_SP
+struct CEntVehicleInfo // sizeof=0x28
+{
+    int16_t pitch;          // 0x00
+    int16_t yaw;            // 0x02
+    int16_t roll;           // 0x04
+    int16_t barrelPitch;    // 0x06
+    int16_t steerYaw;       // 0x08
+    // pad                  // 0x0A
+    float time;             // 0x0C  (also reached via the actor union as pose->actor.height)
+    uint16_t wheelFraction[6]; // 0x10
+    uint8_t wheelBoneIndex[6]; // 0x1C
+    uint8_t tag_body;       // 0x22
+    uint8_t tag_turret;     // 0x23
+    uint8_t tag_barrel;     // 0x24
+    // pad[3]               // 0x25
+};
+static_assert(sizeof(CEntVehicleInfo) == 0x28);
+#endif
 
 struct CEntFx // sizeof=0x8  (SP/MP Same)
 {                                       // ...

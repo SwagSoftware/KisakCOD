@@ -1571,10 +1571,14 @@ void __cdecl CG_CompassDrawBorder(
 void __cdecl CG_CompassUpYawVector(const cg_s *cgameGlob, float *result)
 {
     if (compassRotation->current.enabled)
+    {
         YawVectors2D(cgameGlob->refdefViewAngles[1], result, 0);
+    }
     else
+    {
         result[0] = cgameGlob->compassNorth[0];
         result[1] = cgameGlob->compassNorth[1];
+    }
 }
 
 void __cdecl CG_CompassDrawTickertape(
