@@ -2005,10 +2005,10 @@ void __cdecl BG_SetShellShockParmsFromDvars(shellshock_parms_t *parms)
 
     iassert(parms);
 
-    parms->screenBlend.blurredEffectTime = (int)(bg_shock_screenBlurBlendTime->current.value * 1000.0f);
-    parms->screenBlend.blurredFadeTime = (int)(bg_shock_screenBlurBlendFadeTime->current.value * 1000.0f);
-    parms->screenBlend.flashShotFadeTime = (int)(bg_shock_screenFlashShotFadeTime->current.value * 1000.0f);
-    parms->screenBlend.flashWhiteFadeTime = (int)(bg_shock_screenFlashWhiteFadeTime->current.value * 1000.0f);
+    parms->screenBlend.blurredEffectTime = SnapFloatToInt(bg_shock_screenBlurBlendTime->current.value * 1000.0f);
+    parms->screenBlend.blurredFadeTime = SnapFloatToInt(bg_shock_screenBlurBlendFadeTime->current.value * 1000.0f);
+    parms->screenBlend.flashShotFadeTime = SnapFloatToInt(bg_shock_screenFlashShotFadeTime->current.value * 1000.0f);
+    parms->screenBlend.flashWhiteFadeTime = SnapFloatToInt(bg_shock_screenFlashWhiteFadeTime->current.value * 1000.0f);
 
     iassert(parms->screenBlend.blurredFadeTime > 0);
     iassert(parms->screenBlend.blurredEffectTime > 0);
@@ -2028,15 +2028,15 @@ void __cdecl BG_SetShellShockParmsFromDvars(shellshock_parms_t *parms)
     I_strncpyz(parms->sound.loopSilent, bg_shock_soundLoopSilent->current.string, sizeof(parms->sound.loopSilent));
     I_strncpyz(parms->sound.end, bg_shock_soundEnd->current.string, sizeof(parms->sound.end));
     I_strncpyz(parms->sound.endAbort, bg_shock_soundEndAbort->current.string, sizeof(parms->sound.endAbort));
-    parms->sound.fadeInTime = (int)(bg_shock_soundFadeInTime->current.value * 1000.0f);
-    parms->sound.fadeOutTime = (int)(bg_shock_soundFadeOutTime->current.value * 1000.0f);
-    parms->sound.loopFadeTime = (int)(bg_shock_soundLoopFadeTime->current.value * 1000.0f);
-    parms->sound.loopEndDelay = (int)(bg_shock_soundLoopEndDelay->current.value * 1000.0f);
+    parms->sound.fadeInTime = SnapFloatToInt(bg_shock_soundFadeInTime->current.value * 1000.0f);
+    parms->sound.fadeOutTime = SnapFloatToInt(bg_shock_soundFadeOutTime->current.value * 1000.0f);
+    parms->sound.loopFadeTime = SnapFloatToInt(bg_shock_soundLoopFadeTime->current.value * 1000.0f);
+    parms->sound.loopEndDelay = SnapFloatToInt(bg_shock_soundLoopEndDelay->current.value * 1000.0f);
     v1 = Dvar_EnumToString(bg_shock_soundRoomType);
     I_strncpyz(parms->sound.roomtype, v1, sizeof(parms->sound.roomtype));
     parms->sound.drylevel = bg_shock_soundDryLevel->current.value;
     parms->sound.wetlevel = bg_shock_soundWetLevel->current.value;
-    parms->sound.modEndDelay = (int)(bg_shock_soundModEndDelay->current.value * 1000.0f);
+    parms->sound.modEndDelay = SnapFloatToInt(bg_shock_soundModEndDelay->current.value * 1000.0f);
     for (i = 0; i < SND_GetEntChannelCount(); ++i)
     {
         v9 = bg_shock_volume[i]->current.value;
@@ -2061,7 +2061,7 @@ void __cdecl BG_SetShellShockParmsFromDvars(shellshock_parms_t *parms)
     iassert(parms->sound.wetlevel >= 0 && parms->sound.wetlevel <= 1);
 
     parms->lookControl.affect = bg_shock_lookControl->current.enabled;
-    parms->lookControl.fadeTime = (int)(bg_shock_lookControl_fadeTime->current.value * 1000.0f);
+    parms->lookControl.fadeTime = SnapFloatToInt(bg_shock_lookControl_fadeTime->current.value * 1000.0f);
 
     iassert(parms->lookControl.fadeTime > 0);
 

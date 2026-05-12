@@ -601,8 +601,7 @@ void __cdecl GetHudElemInfo(int32_t localClientNum, const hudelem_s *elem, cg_hu
         Com_sprintf(cghe->hudElemText, 0x100u, "%g", elem->value);
         break;
     case HE_TYPE_PLAYERNAME:
-        namedClientIndex = (int)(elem->value);
-        if (namedClientIndex < 0x40)
+        namedClientIndex = SnapFloatToInt(elem->value);        if (namedClientIndex < 0x40)
         {
             I_strncpyz(cghe->hudElemText, CG_GetLocalClientGlobals(localClientNum)->bgs.clientinfo[namedClientIndex].name, 256);
         }
@@ -1000,8 +999,8 @@ void __cdecl SetHudElemPos(const ScreenPlacement *scrPlace, const hudelem_s *ele
             cghe->height,
             &cghe->x,
             &cghe->y);
-        cghe->x = (float)(int)(cghe->x);
-        cghe->y = (float)(int)(cghe->y);
+        cghe->x = SnapFloat(cghe->x);
+        cghe->y = SnapFloat(cghe->y);
     }
     else
     {

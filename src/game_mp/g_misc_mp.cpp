@@ -22,7 +22,7 @@ void __cdecl SP_light(gentity_s *self)
     const ComPrimaryLight *light; // [esp+A4h] [ebp-28h]
     float facingDir[3]; // [esp+A8h] [ebp-24h] BYREF
     float facingAngles[3]; // [esp+B4h] [ebp-18h] BYREF
-    float normalizedColor[3]; // [esp+C0h] [ebp-Ch] BYREF
+    float normalizedColor[4]; // [esp+C0h] [ebp-Ch] BYREF
 
     iassert(level.spawnVar.spawnVarsValid);
 
@@ -35,7 +35,7 @@ void __cdecl SP_light(gentity_s *self)
         iassert(self->s.index.primaryLight == primaryLightIndex);
 
         self->s.lerp.u.primaryLight.intensity = ColorNormalize(&light->color[0], normalizedColor);
-        Byte4PackRgba(normalizedColor, &self->s.lerp.u.primaryLight.colorAndExp[0]);
+        Byte4PackRgba(normalizedColor, &self->s.lerp.u.primaryLight.colorAndExp[0]); // LWSS: this writes garbage to colorAndExp[3], but doesn't matter since it's written below
         self->s.lerp.u.primaryLight.colorAndExp[3] = light->exponent;
         self->s.lerp.u.primaryLight.radius = light->radius;
         self->s.lerp.u.primaryLight.cosHalfFovOuter = light->cosHalfFovOuter;

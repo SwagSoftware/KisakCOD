@@ -472,9 +472,9 @@ void __cdecl Con_InitMessageBuffer()
                 con_gameMsgWindowNLineCount[gameWindowIndex]->current.integer + 3,
                 3,
                 2048,
-                (int)((con_gameMsgWindowNScrollTime[gameWindowIndex]->current.value * 1000.0f)),
-                (int)((con_gameMsgWindowNFadeInTime[gameWindowIndex]->current.value * 1000.0f)),
-                (int)((con_gameMsgWindowNFadeOutTime[gameWindowIndex]->current.value * 1000.0f)));
+                SnapFloatToInt(con_gameMsgWindowNScrollTime[gameWindowIndex]->current.value * 1000.0f),
+                SnapFloatToInt(con_gameMsgWindowNFadeInTime[gameWindowIndex]->current.value * 1000.0f),
+                SnapFloatToInt(con_gameMsgWindowNFadeOutTime[gameWindowIndex]->current.value * 1000.0f));
         }
         Con_InitMessageWindow(
             &msgBuf->miniconWindow,
@@ -1225,11 +1225,11 @@ int32_t __cdecl Con_GetDefaultMsgDuration(print_msg_dest_t dest)
 
     if (dest == CON_DEST_MINICON)
     {
-        return (int)(con_minicontime->current.value * 1000.0f);
+        return SnapFloatToInt(con_minicontime->current.value * 1000.0f);
     }
     else if (dest == CON_DEST_ERROR)
     {
-        return (int)(con_errormessagetime->current.value * 1000.0f);
+        return SnapFloatToInt(con_errormessagetime->current.value * 1000.0f);
     }
     else
     {
@@ -1240,7 +1240,7 @@ int32_t __cdecl Con_GetDefaultMsgDuration(print_msg_dest_t dest)
                 0,
                 "%s",
                 "dest >= CON_DEST_GAME_FIRST && dest <= CON_DEST_GAME_LAST");
-        return (int)(con_gameMsgWindowNLineCount[dest - CON_DEST_GAME_FIRST]->current.value * 1000.0f);
+        return SnapFloatToInt(con_gameMsgWindowNLineCount[dest - CON_DEST_GAME_FIRST]->current.value * 1000.0f);
     }
 }
 
@@ -1795,8 +1795,8 @@ int32_t __cdecl CL_DeathMessageIconDimension(float size)
     int32_t v3; // [esp+4h] [ebp-18h]
     float v4; // [esp+Ch] [ebp-10h]
 
-    if ((int)(size * 32.0f) < 127)
-        v3 = (int)(size * 32.0f);
+    if (SnapFloatToInt(size * 32.0f) < 127)
+        v3 = SnapFloatToInt(size * 32.0f);
     else
         v3 = 127;
     if (v3 > 16)
@@ -2030,8 +2030,7 @@ void __cdecl Con_DrawGameMessageWindow(
             (MessageWindow *)&con.color[4630 * localClientNum - 2582 + 13 * windowIndex],
             xPos,
             yPos,
-            (int)(fontScale * 48.0f),
-            horzAlign,
+            SnapFloatToInt(fontScale * 48.0f),            horzAlign,
             vertAlign,
             font,
             color,
@@ -2192,11 +2191,11 @@ void __cdecl Con_DrawMessageWindowNewToOld(
             lerpFactor = v13;
             if (up)
             {
-                y += (int)(charHeight * lerpFactor);
+                y += SnapFloatToInt(charHeight * lerpFactor);
             }
             else
             {
-                y -= (int)(charHeight * lerpFactor);
+                y -= SnapFloatToInt(charHeight * lerpFactor);
             }
         }
     }
@@ -2594,11 +2593,11 @@ void __cdecl Con_DrawMessageWindowOldToNew(
                             msgwnd->scrollTime);
                     if (up)
                     {
-                        v += (int)(charHeight * (time / msgwnd->scrollTime));
+                        v += SnapFloatToInt((float)charHeight * ((float)time / (float)msgwnd->scrollTime));
                     }
                     else
                     {
-                        v -= (int)(charHeight * (time / msgwnd->scrollTime));
+                        v -= SnapFloatToInt((float)charHeight * ((float)time / (float)msgwnd->scrollTime));
                     }
                 }
             }

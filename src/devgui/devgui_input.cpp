@@ -255,12 +255,12 @@ int32_t __cdecl DevGui_UpdateIntScroll(float deltaTime, int32_t value, int32_t m
             stepTime < (double)s_input.digitalSliderTime;
             s_input.digitalSliderTime = s_input.digitalSliderTime - stepTime)
         {
-            scroll += (int)(s_input.digitalAxis[axis]);
+            scroll += SnapFloatToInt(s_input.digitalAxis[axis]);
         }
     }
     else if (s_input.digitalStates[axis] == SCROLL_PRESSED)
     {
-        scroll = (int)(s_input.digitalAxis[axis]);
+        scroll = SnapFloatToInt(s_input.digitalAxis[axis]);
     }
     else
     {

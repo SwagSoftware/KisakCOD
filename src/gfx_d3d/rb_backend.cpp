@@ -960,7 +960,7 @@ void __cdecl RB_BlendSavedScreenBlurredCmd(GfxRenderCommandExecState *execState)
             cmd->t0,
             s1,
             t1,
-            ((unsigned __int8)(int)(alpha * 255.0f) << 24) | 0xFFFFFF,
+            ((unsigned __int8)SnapFloatToInt(alpha * 255.0f) << 24) | 0xFFFFFF,
             GFX_PRIM_STATS_CODE);
     }
     execState->cmd = (char *)execState->cmd + cmd->header.byteCount;
@@ -1003,10 +1003,10 @@ void __cdecl RB_BlendSavedScreenFlashedCmd(GfxRenderCommandExecState *execState)
         cmd->t0,
         s1,
         t1,
-        ((unsigned __int8)(int)(cmd->intensityScreengrab * 255.0f) << 24)
-        | (unsigned __int8)(int)(cmd->intensityWhiteout * 255.0f)
-        | ((unsigned __int8)(int)(cmd->intensityWhiteout * 255.0f) << 8)
-        | ((unsigned __int8)(int)(cmd->intensityWhiteout * 255.0f) << 16),
+        ((unsigned __int8)SnapFloatToInt(cmd->intensityScreengrab * 255.0f) << 24)
+        | (unsigned __int8)SnapFloatToInt(cmd->intensityWhiteout * 255.0f)
+        | ((unsigned __int8)SnapFloatToInt(cmd->intensityWhiteout * 255.0f) << 8)
+        | ((unsigned __int8)SnapFloatToInt(cmd->intensityWhiteout * 255.0f) << 16),
         GFX_PRIM_STATS_CODE);
     execState->cmd = (char *)execState->cmd + cmd->header.byteCount;
 }
@@ -2281,8 +2281,7 @@ void __cdecl GetDecayingLetterInfo(
     }
     *resultSkipDrawing = skipDrawing;
     *resultLetter = letter;
-    *resultAlpha = CLAMP((int)(fade * 255.0f), 0, 255);
-    *resultDrawExtraFxChar = drawExtraFxChar;
+    *resultAlpha = CLAMP(SnapFloatToInt(fade * 255.0f), 0, 255);    *resultDrawExtraFxChar = drawExtraFxChar;
 }
 
 void __cdecl DrawTextFxExtraCharacter(

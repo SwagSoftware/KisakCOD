@@ -741,8 +741,8 @@ void CG_ReverbCmd()
         fadetime = atof(Cmd_Argv(5));
         roomstring = Cmd_Argv(2);
 
-        if ((int)(fadetime * 1000.0f) > 0)
-            fademsec = (int)(fadetime * 1000.0f);
+        if (SnapFloatToInt(fadetime * 1000.0f) > 0)
+            fademsec = SnapFloatToInt(fadetime * 1000.0f);
         else
             fademsec = 0;
 

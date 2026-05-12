@@ -227,18 +227,18 @@ void __cdecl R_SetSunFromDvars(sunflare_t *sun)
     sun->flareMaxSize = r_sunflare_max_size->current.value * 0.5f;
     sun->flareMaxDot = cos(r_sunflare_max_angle->current.value * 0.01745329238474369);
     sun->flareMaxAlpha = r_sunflare_max_alpha->current.value;
-    sun->flareFadeInTime = (int)(r_sunflare_fadein->current.value * 1000.0f);
-    sun->flareFadeOutTime = (int)(r_sunflare_fadeout->current.value * 1000.0f);
+    sun->flareFadeInTime = SnapFloatToInt(r_sunflare_fadein->current.value * 1000.0f);
+    sun->flareFadeOutTime = SnapFloatToInt(r_sunflare_fadeout->current.value * 1000.0f);
     sun->blindMinDot = cos(r_sunblind_min_angle->current.value * 0.01745329238474369);
     sun->blindMaxDot = cos(r_sunblind_max_angle->current.value * 0.01745329238474369);
     sun->blindMaxDarken = r_sunblind_max_darken->current.value;
-    sun->blindFadeInTime = (int)(r_sunblind_fadein->current.value * 1000.0f);
-    sun->blindFadeOutTime = (int)(r_sunblind_fadeout->current.value * 1000.0f);
+    sun->blindFadeInTime = SnapFloatToInt(r_sunblind_fadein->current.value * 1000.0f);
+    sun->blindFadeOutTime = SnapFloatToInt(r_sunblind_fadeout->current.value * 1000.0f);
     sun->glareMinDot = cos(r_sunglare_min_angle->current.value * 0.01745329238474369);
     sun->glareMaxDot = cos(r_sunglare_max_angle->current.value * 0.01745329238474369);
     sun->glareMaxLighten = r_sunglare_max_lighten->current.value;
-    sun->glareFadeInTime = (int)(r_sunglare_fadein->current.value * 1000.0f);
-    sun->glareFadeOutTime = (int)(r_sunglare_fadeout->current.value * 1000.0f);
+    sun->glareFadeInTime = SnapFloatToInt(r_sunglare_fadein->current.value * 1000.0f);
+    sun->glareFadeOutTime = SnapFloatToInt(r_sunglare_fadeout->current.value * 1000.0f);
     AngleVectors(&r_sun_fx_position->current.value, sun->sunFxPosition, 0, 0);
     sun->hasValidData = 1;
 }

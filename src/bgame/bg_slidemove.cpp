@@ -187,8 +187,7 @@ void __cdecl PM_StepSlideMove(pmove_t *pm, pml_t *pml, int32_t gravity)
                     v4 = I_fabs(v8);
                     if (v4 > 0.5)
                     {
-                        iDelta = (int)(ps->origin[2] - down_o[2]);
-                        if (iDelta)
+                        iDelta = SnapFloatToInt(ps->origin[2] - down_o[2]);                        if (iDelta)
                         {
                             if (pm->viewChangeTime < ps->commandTime)
                             {

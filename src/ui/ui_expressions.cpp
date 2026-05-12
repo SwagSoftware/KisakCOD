@@ -2055,8 +2055,7 @@ void __cdecl SecondsToTimeDisplay(int localClientNum, Operand *source, Operand *
     static char resultString_0[128];
     int v3; // [esp+4h] [ebp-14h]
 
-    v3 = (int)((float)GetSourceInt(source).intVal / 60.0f);
-    _snprintf(
+    v3 = SnapFloatToInt((float)GetSourceInt(source).intVal / 60.0f);    _snprintf(
         resultString_0,
         0x80u,
         "%id %ih %im",

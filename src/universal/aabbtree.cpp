@@ -162,7 +162,7 @@ static bool PickAabbSplitPlane(
                 if (!sideOnCount && !sideSplitCount && !prevMinCount)
                 {
                     v9 = nextDist - dist;
-                    heuristic += (v9);
+                    heuristic += SnapFloatToInt(v9);
                 }
                 if (heuristic > bestHeuristic)
                 {

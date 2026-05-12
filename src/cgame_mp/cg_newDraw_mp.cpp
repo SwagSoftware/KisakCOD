@@ -556,7 +556,7 @@ void __cdecl CG_DrawPlayerAmmoBackdrop(
             localClientNum,
             hud_fade_ammodisplay,
             cgameGlob->ammoFadeTime,
-            (int)(hud_fade_ammodisplay->current.value * 1000.0f));
+            SnapFloatToInt(hud_fade_ammodisplay->current.value * 1000.0f));
         if (drawColor[3] != 0.0)
         {
             if (CG_CheckPlayerForLowAmmo(cgameGlob))
@@ -622,7 +622,7 @@ void __cdecl CG_DrawPlayerAmmoValue(
             localClientNum,
             hud_fade_ammodisplay,
             cgameGlob->ammoFadeTime,
-            (int)(hud_fade_ammodisplay->current.value * 1000.0f));
+            SnapFloatToInt(hud_fade_ammodisplay->current.value * 1000.0f));
         if (color[3] != 0.0)
         {
             iassert(cgameGlob->nextSnap);
@@ -934,7 +934,7 @@ void __cdecl CG_DrawPlayerStance(
 
     cgameGlob = CG_GetLocalClientGlobals(localClientNum);
     cgs = CG_GetLocalClientStaticGlobals(localClientNum);
-    fadeAlpha = CG_FadeHudMenu(localClientNum, hud_fade_stance, cgameGlob->stanceFadeTime, (int)(hud_fade_stance->current.value * 1000.0f));
+    fadeAlpha = CG_FadeHudMenu(localClientNum, hud_fade_stance, cgameGlob->stanceFadeTime, SnapFloatToInt(hud_fade_stance->current.value * 1000.0f));
     if (fadeAlpha != 0.0)
     {
         if (cg_hudStanceHintPrints->current.enabled)
@@ -1231,7 +1231,7 @@ void __cdecl CG_DrawPlayerSprintBack(int32_t localClientNum, const rectDef_s *re
     cg_s *cgameGlob;
 
     cgameGlob = CG_GetLocalClientGlobals(localClientNum);
-    fadeAlpha = CG_FadeHudMenu(localClientNum, hud_fade_sprint, cgameGlob->sprintFadeTime, (int)(hud_fade_sprint->current.value * 1000.0f));
+    fadeAlpha = CG_FadeHudMenu(localClientNum, hud_fade_sprint, cgameGlob->sprintFadeTime, SnapFloatToInt(hud_fade_sprint->current.value * 1000.0f));
     if (fadeAlpha != 0.0)
     {
         drawColor[0] = *color;
@@ -1272,7 +1272,7 @@ void __cdecl CG_DrawPlayerSprintMeter(int32_t localClientNum, const rectDef_s *r
 
     cgameGlob = CG_GetLocalClientGlobals(localClientNum);
     ps = &cgameGlob->predictedPlayerState;
-    fadeAlpha = CG_FadeHudMenu(localClientNum, hud_fade_sprint, cgameGlob->sprintFadeTime, (int)(hud_fade_sprint->current.value * 1000.0f));
+    fadeAlpha = CG_FadeHudMenu(localClientNum, hud_fade_sprint, cgameGlob->sprintFadeTime, SnapFloatToInt(hud_fade_sprint->current.value * 1000.0f));
     if (fadeAlpha != 0.0)
     {
         sprintLeft = PM_GetSprintLeft(ps, cgameGlob->time);
@@ -1372,7 +1372,7 @@ void __cdecl CG_DrawPlayerBarHealth(int32_t localClientNum, const rectDef_s *rec
             localClientNum,
             hud_fade_healthbar,
             cgameGlob->healthFadeTime,
-            (int)(hud_fade_healthbar->current.value * 1000.0f));
+            SnapFloatToInt(hud_fade_healthbar->current.value * 1000.0f));
         if (color[3] != 0.0)
         {
             ps = &cgameGlob->nextSnap->ps;
@@ -1526,12 +1526,12 @@ void __cdecl CG_DrawPlayerBarHealthBack(int32_t localClientNum, const rectDef_s 
                     }
                     else
                     {
-                        flashTime = (hud_health_pulserate_injured->current.value * 1000.0f);
+                        flashTime = SnapFloatToInt(hud_health_pulserate_injured->current.value * 1000.0f);
                     }
                 }
                 else
                 {
-                    flashTime = (hud_health_pulserate_critical->current.value * 1000.0f);
+                    flashTime = SnapFloatToInt(hud_health_pulserate_critical->current.value * 1000.0f);
                 }
                 if (flashTime)
                 {
@@ -2144,7 +2144,7 @@ void __cdecl CG_DrawHoldBreathHint(
                     }
                     v6 = UI_SafeTranslateString("PLATFORM_HOLD_BREATH");
                     string = UI_ReplaceConversionString(v6, binding);
-                    x = rect->x - (UI_TextWidth(string, 0, font, fontscale) * 0.5f);
+                    x = rect->x - SnapFloat(UI_TextWidth(string, 0, font, fontscale) * 0.5f);
                     UI_DrawText(
                         &scrPlaceView[localClientNum],
                         string,
@@ -2276,7 +2276,7 @@ void __cdecl CG_DrawInvalidCmdHint(
         if (blinkInterval <= 0)
             MyAssertHandler(".\\cgame_mp\\cg_newDraw_mp.cpp", 1667, 0, "%s", "blinkInterval > 0");
         color[3] = ((cgameGlob->time - cgameGlob->invalidCmdHintTime) % blinkInterval) / blinkInterval;
-        x = rect->x - (UI_TextWidth(string, 0, font, fontscale) * 0.5f);
+        x = rect->x - SnapFloat(UI_TextWidth(string, 0, font, fontscale) * 0.5f);
         UI_DrawText(
             &scrPlaceView[localClientNum],
             string,

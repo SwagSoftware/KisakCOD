@@ -206,8 +206,7 @@ void __cdecl CG_ShellShock_f()
             ShellshockParms = BG_GetShellshockParms(0);
             BG_SetShellShockParmsFromDvars(ShellshockParms);
             cgameGlob->testShock.time = cgameGlob->time;
-            cgameGlob->testShock.duration = (int)(v3 * 1000.0f);
-            return;
+            cgameGlob->testShock.duration = SnapFloatToInt(v3 * 1000.0f);            return;
         }
         if (v4 == 3)
         {

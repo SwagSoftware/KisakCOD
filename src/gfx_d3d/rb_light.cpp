@@ -58,9 +58,9 @@ void __cdecl R_ShowLightVisCachePoints(const float *viewOrigin, const DpvsPlane 
         spread = r_vc_showlog->current.integer;
         if (spread > 0)
         {
-            x = (int)(viewOrigin[0] - -131072.0f) >> 5;
-            y = (int)(viewOrigin[1] - -131072.0f) >> 5;
-            z = (int)(viewOrigin[2] - -131072.0f) >> 6;
+            x = SnapFloatToInt(viewOrigin[0] - -131072.0f) >> 5;
+            y = SnapFloatToInt(viewOrigin[1] - -131072.0f) >> 5;
+            z = SnapFloatToInt(viewOrigin[2] - -131072.0f) >> 6;
             origin[0] = (double)x * 32.0 + -131072.0;
             origin[1] = (double)y * 32.0 + -131072.0;
             origin[2] = (double)z * 64.0 + -131072.0;

@@ -900,19 +900,19 @@ void __cdecl CL_KeyMove(usercmd_s *cmd)
     v7 = 0;
     if (kb[8].active)
     {
-        v13 = (int)(float)(CL_KeyState(&kb[1]) * (float)127.0);
-        v7 = v13 - (int)(float)(CL_KeyState(kb) * (float)127.0);
+        v13 = (int)(CL_KeyState(&kb[1]) * (float)127.0);
+        v7 = v13 - (int)(CL_KeyState(kb) * (float)127.0);
     }
-    v8 = v7 - (int)(float)(CL_KeyState(&kb[7]) * (float)-127.0);
-    side = v8 - (int)(float)(CL_KeyState(&kb[6]) * (float)127.0);
-    v14 = (int)(float)(CL_KeyState(&kb[2]) * (float)127.0);
-    forward = v14 - (int)(float)(CL_KeyState(&kb[3]) * (float)127.0);
-    v15 = (int)(float)(CL_KeyState(&kb[23]) * (float)127.0);
-    up = v15 - (int)(float)(CL_KeyState(&kb[22]) * (float)127.0);
+    v8 = v7 - (int)(CL_KeyState(&kb[7]) * (float)-127.0);
+    side = v8 - (int)(CL_KeyState(&kb[6]) * (float)127.0);
+    v14 = (int)(CL_KeyState(&kb[2]) * (float)127.0);
+    forward = v14 - (int)(CL_KeyState(&kb[3]) * (float)127.0);
+    v15 = (int)(CL_KeyState(&kb[23]) * (float)127.0);
+    up = v15 - (int)(CL_KeyState(&kb[22]) * (float)127.0);
     if (kb[8].active && (cmd->buttons & 2) == 0)
     {
-        v12 = side - (int)(float)(CL_KeyState(&kb[1]) * (float)-127.0);
-        side = v12 - (int)(float)(CL_KeyState(kb) * (float)127.0);
+        v12 = side - (int)(CL_KeyState(&kb[1]) * (float)-127.0);
+        side = v12 - (int)(CL_KeyState(kb) * (float)127.0);
     }
     cmd->forwardmove = ClampChar(forward);
     cmd->rightmove = ClampChar(side);
@@ -1220,7 +1220,7 @@ void __cdecl CL_MouseMove(usercmd_s *cmd)
             {
                 if (kb[8].active)
                 {
-                    cmd->rightmove = ClampChar((int)(mx * m_side->current.value) + cmd->rightmove);
+                    cmd->rightmove = ClampChar(SnapFloatToInt(mx * m_side->current.value) + cmd->rightmove);
                 }
                 else
                 {
@@ -1266,7 +1266,7 @@ void __cdecl CL_MouseMove(usercmd_s *cmd)
                 }
                 else
                 {
-                    cmd->forwardmove = ClampChar(cmd->forwardmove - (int)(my * m_forward->current.value));
+                    cmd->forwardmove = ClampChar(cmd->forwardmove - SnapFloatToInt(my * m_forward->current.value));
                 }
             }
             aimInput.deltaTime = (double)cls.frametime * EQUAL_EPSILON;
@@ -1361,9 +1361,9 @@ void __cdecl CL_FinishMove(usercmd_s *cmd)
     cmd->weapon = clients[0].cgameUserCmdWeapon;
     cmd->offHandIndex = clients[0].cgameUserCmdOffHandIndex;
     cmd->serverTime = clients[0].serverTime;
-    cmd->angles[0] = (unsigned __int16)(int)(float)(clients[0].viewangles[0] * (float)182.04445);
-    cmd->angles[1] = (unsigned __int16)(int)(float)(clients[0].viewangles[1] * (float)182.04445);
-    cmd->angles[2] = (unsigned __int16)(int)(float)(clients[0].viewangles[2] * (float)182.04445);
+    cmd->angles[0] = (unsigned __int16)(int)(clients[0].viewangles[0] * (float)182.04445);
+    cmd->angles[1] = (unsigned __int16)(int)(clients[0].viewangles[1] * (float)182.04445);
+    cmd->angles[2] = (unsigned __int16)(int)(clients[0].viewangles[2] * (float)182.04445);
     buttons = cmd->buttons;
     cmd->gunPitch = clients[0].cgameUserCmdGunPitch;
     cmd->gunYaw = clients[0].cgameUserCmdGunYaw;
@@ -1527,8 +1527,8 @@ int __cdecl CG_HandleLocationSelectionInput(int localClientNum, usercmd_s *cmd)
         if (locSelInputState == LOC_SEL_INPUT_CONFIRM)
         {
             cmd->buttons |= 0x10000u;
-            cmd->selectedLocation[0] = (int)(cgameGlob->selectedLocation[0] * 255.0f) + 0x80;
-            cmd->selectedLocation[1] = (int)(cgameGlob->selectedLocation[1] * 255.0f) + 0x80;
+            cmd->selectedLocation[0] = SnapFloatToInt(cgameGlob->selectedLocation[0] * 255.0f) + 0x80;
+            cmd->selectedLocation[1] = SnapFloatToInt(cgameGlob->selectedLocation[1] * 255.0f) + 0x80;
         }
         else if (locSelInputState == LOC_SEL_INPUT_CANCEL)
         {

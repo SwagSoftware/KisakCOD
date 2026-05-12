@@ -675,7 +675,7 @@ void __cdecl CL_MouseMove(int localClientNum, usercmd_s *cmd)
                 }
                 else
                 {
-                    cmd->forwardmove = ClampChar(cmd->forwardmove - (int)(my * m_forward->current.value));
+                    cmd->forwardmove = ClampChar(cmd->forwardmove - SnapFloatToInt(my * m_forward->current.value));
                 }
             }
             aimInput.deltaTime = (double)cls.frametime * EQUAL_EPSILON;
@@ -853,8 +853,8 @@ char __cdecl CG_HandleLocationSelectionInput(int localClientNum, usercmd_s *cmd)
         if (locSelInputState == LOC_SEL_INPUT_CONFIRM)
         {
             cmd->buttons |= 0x10000u;
-            cmd->selectedLocation[0] = (int)(cgameGlob->selectedLocation[0] * 255.0f) + 0x80;
-            cmd->selectedLocation[1] = (int)(cgameGlob->selectedLocation[1] * 255.0f) + 0x80;
+            cmd->selectedLocation[0] = SnapFloatToInt(cgameGlob->selectedLocation[0] * 255.0f) + 0x80;
+            cmd->selectedLocation[1] = SnapFloatToInt(cgameGlob->selectedLocation[1] * 255.0f) + 0x80;
         }
         else if (locSelInputState == LOC_SEL_INPUT_CANCEL)
         {

@@ -987,8 +987,7 @@ void __cdecl MSG_WriteOriginFloat(const int clientNum, msg_t *msg, int bits, flo
     int indexa; // [esp+70h] [ebp-8h]
 
     iassert( !msg->readOnly );
-    roundedValue = (int)value;
-    roundedOldValue = (int)oldValue;
+    roundedValue = SnapFloatToInt(value);    roundedOldValue = SnapFloatToInt(oldValue);
     truncDelta = roundedValue - roundedOldValue;
     SV_PacketDataIsOverhead(clientNum, msg);
     if ((unsigned int)(roundedValue - roundedOldValue + 64) >= 0x80)
@@ -1102,8 +1101,7 @@ void __cdecl MSG_WriteOriginZFloat(const int clientNum, msg_t *msg, float value,
     int roundedCentera; // [esp+64h] [ebp-8h]
 
     iassert( !msg->readOnly );
-    roundedValue = (int)value;
-    roundedOldValue = (int)oldValue;
+    roundedValue = SnapFloatToInt(value);    roundedOldValue = SnapFloatToInt(oldValue);
     truncDelta = roundedValue - roundedOldValue;
     SV_PacketDataIsOverhead(clientNum, msg);
     if ((unsigned int)(roundedValue - roundedOldValue + 64) >= 0x80)
@@ -1171,8 +1169,7 @@ bool __cdecl MSG_ValuesAreEqual(const SnapshotInfo_s *snapInfo, int bits, const 
     case -92:
     case -91:
     case -90:
-        result = (int)(*(float *)fromF) == (int)(*(float *)toF);
-        break;
+        result = SnapFloatToInt(*(float *)fromF) == SnapFloatToInt(*(float *)toF);        break;
     default:
         result = 0;
         break;
@@ -1710,8 +1707,7 @@ void __cdecl MSG_WriteDeltaField(
         case 0xFFFFFFAA:
             fullFloat = *(float *)toF;
             v16 = (fullFloat - 1.399999976158142) * 10.0f;
-            trunc = (int)(v16);
-            if (!MSG_CheckWritingEnoughBits(trunc, 5u))
+            trunc = SnapFloatToInt(v16);            if (!MSG_CheckWritingEnoughBits(trunc, 5u))
             {
                 LODWORD(f) = *toF;
                 Com_PrintError(15, "Not enough bits written for fontScale %f\n", f);

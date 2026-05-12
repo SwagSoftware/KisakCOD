@@ -1135,10 +1135,10 @@ void __cdecl Dvar_StringToColor(const char *string, unsigned __int8 *color)
 
     sscanf(string, "%g %g %g %g", &colorVec[0], &colorVec[1], &colorVec[2], &colorVec[3]);
 
-    color[0] = CLAMP((int)(colorVec[0] * 255.0f), 0, 255);
-    color[1] = CLAMP((int)(colorVec[1] * 255.0f), 0, 255);
-    color[2] = CLAMP((int)(colorVec[2] * 255.0f), 0, 255);
-    color[3] = CLAMP((int)(colorVec[3] * 255.0f), 0, 255);
+    color[0] = CLAMP(SnapFloatToInt(colorVec[0] * 255.0f), 0, 255);
+    color[1] = CLAMP(SnapFloatToInt(colorVec[1] * 255.0f), 0, 255);
+    color[2] = CLAMP(SnapFloatToInt(colorVec[2] * 255.0f), 0, 255);
+    color[3] = CLAMP(SnapFloatToInt(colorVec[3] * 255.0f), 0, 255);
 }
 
 void __cdecl Dvar_GetUnpackedColorByName(const char *dvarName, float *expandedColor)
@@ -2324,14 +2324,10 @@ const dvar_s *__cdecl Dvar_RegisterColor(
         v8 = v21;
     else
         v8 = 0.0;
-    v20 = v8 * 255.0f + EQUAL_EPSILON;
-    dvarValue.color[3] = (int)(v20);
-    v26 = v17 * 255.0f + EQUAL_EPSILON;
-    dvarValue.enabled = (int)(v26);
-    v24 = v14 * 255.0f + EQUAL_EPSILON;
-    dvarValue.color[1] = (int)(v24);
-    v22 = v11 * 255.0f + EQUAL_EPSILON;
-    dvarValue.color[2] = (int)(v22);
+    dvarValue.color[3] = SnapFloatToInt(v8 * 255.0f);
+    dvarValue.enabled = SnapFloatToInt(v17 * 255.0f);
+    dvarValue.color[1] = SnapFloatToInt(v14 * 255.0f);
+    dvarValue.color[2] = SnapFloatToInt(v11 * 255.0f);
     return Dvar_RegisterVariant(dvarName, DVAR_TYPE_COLOR, flags, dvarValue, 0, description);
 }
 
@@ -2550,16 +2546,16 @@ void __cdecl Dvar_SetColorFromSource(dvar_s *dvar, float r, float g, float b, fl
     if (dvar->type == DVAR_TYPE_COLOR)
     {
         float clampedR = CLAMP(r, 0.0f, 1.0f);
-        newValue.color[0] = (byte)(clampedR * 255.0f);
+        newValue.color[0] = (byte)SnapFloatToInt(clampedR * 255.0f);
 
         float clampedG = CLAMP(g, 0.0f, 1.0f);
-        newValue.color[1] = (byte)(clampedG * 255.0f);
+        newValue.color[1] = (byte)SnapFloatToInt(clampedG * 255.0f);
 
         float clampedB = CLAMP(b, 0.0f, 1.0f);
-        newValue.color[2] = (byte)(clampedB * 255.0f);
+        newValue.color[2] = (byte)SnapFloatToInt(clampedB * 255.0f);
 
         float clampedA = CLAMP(a, 0.0f, 1.0f);
-        newValue.color[3] = (byte)(clampedA * 255.0f);
+        newValue.color[3] = (byte)SnapFloatToInt(clampedA * 255.0f);
     }
     else
     {

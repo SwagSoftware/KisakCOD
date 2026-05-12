@@ -1896,8 +1896,7 @@ uint8_t __cdecl FX_ProcessEmitting(
             "residual >= -0.001f && residual <= maxDistPerEmit + 0.001f",
             v6);
     }
-    return (int)(residual * 256.0f / maxDistPerEmit);
-}
+    return SnapFloatToInt(residual * 256.0f / maxDistPerEmit);}
 
 void __cdecl FX_GetQuatForOrientation(
     const FxEffect *effect,

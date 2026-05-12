@@ -193,7 +193,7 @@ int32_t __cdecl CG_DrawShellShockSavedScreenBlendBlurred(
             screenBlendTime = parms->screenBlend.blurredEffectTime;
             if (dt < parms->screenBlend.blurredFadeTime)
             {
-                screenBlendTime = (int)(dt / parms->screenBlend.blurredFadeTime * screenBlendTime);
+                screenBlendTime = SnapFloatToInt((float)dt / (float)parms->screenBlend.blurredFadeTime * (float)screenBlendTime);
             }
             if (cgameGlob->shellshock.hasSavedScreen)
             {

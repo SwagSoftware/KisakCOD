@@ -403,11 +403,10 @@ double __cdecl RB_GetSunSampleRectRelativeArea(int widthInPixels, int heightInPi
     v5 = ((double)(int)vidConfig.displayWidth * (sunTransformedPosition / sunTransformedPosition_12 + 1.0)
         - (double)widthInPixels)
         * 0.5f;
-    left = (int)(v5);
-    v4 = ((double)(int)vidConfig.displayHeight * (sunTransformedPosition_4 / sunTransformedPosition_12 + 1.0)
+    left = SnapFloatToInt(v5);    v4 = ((double)(int)vidConfig.displayHeight * (sunTransformedPosition_4 / sunTransformedPosition_12 + 1.0)
         - (double)heightInPixels)
         * 0.5f;
-    top = (int)(v4);
+    top = SnapFloatToInt(v4);
     right = widthInPixels + left;
     bottom = heightInPixels + top;
     if (left < 0)
@@ -648,9 +647,9 @@ void __cdecl RB_DrawSunFlareCore(float alpha, float sizeIn640x480)
     RB_TessSunBillboard(
         widthInClipSpace,
         heightInClipSpace,
-        (GfxColor)((unsigned __int8)(int)(alpha * 255.0f)
-            | ((unsigned __int8)(int)(alpha * 255.0f) << 8)
-            | ((unsigned __int8)(int)(alpha * 255.0f) << 16)
+        (GfxColor)((unsigned __int8)SnapFloatToInt(alpha * 255.0f)
+            | ((unsigned __int8)SnapFloatToInt(alpha * 255.0f) << 8)
+            | ((unsigned __int8)SnapFloatToInt(alpha * 255.0f) << 16)
             | 0xFF000000));
 }
 

@@ -106,13 +106,13 @@ void __cdecl CG_ParseFog(int32_t localClientNum)
         density = atof(token);
         v1 = Com_Parse(&info);
         v7 = atof(v1->token);
-        r = (int)(v7 * 255.0f);
+        r = SnapFloatToInt(v7 * 255.0f);
         v2 = Com_Parse(&info);
         v6 = atof(v2->token);
-        g = (int)(v6 * 255.0f);
+        g = SnapFloatToInt(v6 * 255.0f);
         v3 = Com_Parse(&info);
         v5 = atof(v3->token);
-        b = (int)(v5 * 255.0f);
+        b = SnapFloatToInt(v5 * 255.0f);
         v4 = Com_Parse(&info);
         transitionTime = atoi(v4->token);
         R_SetFogFromServer(start, r, g, b, density);
@@ -1182,8 +1182,8 @@ void CG_ReverbCmd()
         fadetime = atof(Cmd_Argv(5));
         roomstring = Cmd_Argv(2);
 
-        if ((int)(fadetime * 1000.0f) > 0)
-            fademsec = (int)(fadetime * 1000.0f);
+        if (SnapFloatToInt(fadetime * 1000.0f) > 0)
+            fademsec = SnapFloatToInt(fadetime * 1000.0f);
         else
             fademsec = 0;
 
@@ -1212,7 +1212,7 @@ void CG_DeactivateReverbCmd()
         prio = atoi(v0);
         v1 = Cmd_Argv(2);
         fadetime = atof(v1);
-        v2 = (int)(fadetime * 1000.0f);
+        v2 = SnapFloatToInt(fadetime * 1000.0f);
         if (v2 > 0)
             SND_DeactivateEnvironmentEffects(prio, v2);
         else
@@ -1254,8 +1254,8 @@ void __cdecl CG_SetChannelVolCmd(int32_t localClientNum)
                 "%s\n\t(localClientNum) = %i",
                 "(localClientNum == 0)",
                 localClientNum);
-        if ((int)(fadetime * 1000.0f) > 0)
-            fademsec = (int)(fadetime * 1000.0f);
+        if (SnapFloatToInt(fadetime * 1000.0f) > 0)
+            fademsec = SnapFloatToInt(fadetime * 1000.0f);
         else
             fademsec = 0;
         ShellshockParms = BG_GetShellshockParms(shockIndex);
@@ -1284,7 +1284,7 @@ void CG_DeactivateChannelVolCmd()
         prio = atoi(v0);
         v1 = Cmd_Argv(2);
         fadetime = atof(v1);
-        v2 = (int)(fadetime * 1000.0f);
+        v2 = SnapFloatToInt(fadetime * 1000.0f);
         if (v2 > 0)
             SND_DeactivateChannelVolumes(prio, v2);
         else

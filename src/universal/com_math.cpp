@@ -2207,12 +2207,13 @@ bool __cdecl BoxDistSqrdExceeds(const float *absmin, const float *absmax, const 
     return fogOpaqueDistSqrd < total;
 }
 
+// https://github.com/id-Software/Quake-III-Arena/blob/dbe4ddb10315479fc00086f08e25d968b4b43c49/q3radiant/MATHLIB.CPP#L55
 float __cdecl Q_rint(float in)
 {
-    float v3; // [esp+Ch] [ebp-4h]
-
-    v3 = in + 0.5;
-    return floor(v3);
+    //if (g_PrefsDlg.m_bNoClamp)
+    //    return in;
+    //else
+        return (float)floor(in + 0.5);
 }
 
 float __cdecl ColorNormalize(const float* in, float *out)

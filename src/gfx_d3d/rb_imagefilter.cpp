@@ -218,8 +218,7 @@ int __cdecl RB_GaussianFilterPoints1D(
     iassert( (dstRes > 0) );
     iassert( srcRes >= dstRes );
 
-    resolutionRatio = (int)((float)srcRes / (float)dstRes);
-
+    resolutionRatio = SnapFloatToInt((float)srcRes / (float)dstRes);
     iassert(abs(srcRes - resolutionRatio * dstRes) < resolutionRatio);
 
     if ((resolutionRatio & 1) != 0)

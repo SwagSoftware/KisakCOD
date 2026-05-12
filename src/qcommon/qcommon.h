@@ -1564,45 +1564,72 @@ inline T Buf_Read(unsigned char **pos)
 }
 
 #include <xmmintrin.h>  // SSE
+#include <intrin.h>
 
 // (https://github.com/SwagSoftware/KisakCOD/issues/52)
-// The default x87 rounding mode for floating point to integer is Round to nearest Even (Banker's rounding)
-// However if you use a modern compiler and regular casts, it will round down.
-// This is because it seems to use the `cvttss2si` instruction (SSE) which is always truncated
-// This probably was not the case back then, but should be emulated because the float rounding *highly* effects the movement amongst other code
-// Anywhere you see "(float)(int)" should be investigated for this
-// You are basically looking for `fistp`, which unloads the FPU into an integer (and does rounding in the process)
-// Also any call to "ftol" or "ftol_sse" will be doing this ^^ and returning the result in eax
-inline float SnapFloat(float x)
+// 
+// IDA SIG: `DD 05 08 CA 85 00` - (227 hits)
+//
+// The SnapFloat Functions mimic Banker's rounding(nearest)  for float→int (`fistp`(x87 fpu) or `cvtss_s132` (SSE))
+//
+// IMPORTANT: most `(int)cast` sites in the original binary compile to a call
+// to `_ftol2_sse` → `cvttsd2si`, which TRUNCATES toward zero — same as a
+// modern MSVC `(int)cast`. Do NOT replace plain `(int)cast`;
+// that would round where the original truncated. Only use at sites where
+// IDA shows inline `fistp` with no nearby `_ftol2_sse` call.
+inline int SnapFloatToInt(float x)
 {
 #if defined(KISAK_PURE) && defined(_WIN32)
     int i;
     __asm fld x;
     __asm fistp i;
-
-    return static_cast<float>(i);
+    return i;
 #endif
 
-    // We can use `cvtss2si` instead (1 t). By default this is set to Nearest even and matches the other methods in my testbed
-    // This is a bit more portable since other platforms dont have __asm or even 32bit support anymore
-    int i;
-    i = _mm_cvtss_si32(_mm_set_ss(x));
-    return  static_cast<float>(i);
+    int retval = _mm_cvtss_si32(_mm_set_ss(x));
+
+#if defined(_DEBUG) && defined(_WIN32)
+    const float input = x;
+    int32_t output{};
+
+    __asm fld input
+    __asm fistp output
+
+    iassert(retval == output);
+#endif
+
+    return retval;
 }
 
-// A simpler version of the above that can be used to save a cast afterwards
-// (basically ftol())
-inline int SnapFloatToInt(float x)
+// `double` overload — where the binary computes the rounding expression as a double (hex-rays shows `(int)(double_expr + 9.313e-10)`).
+inline int SnapFloatToInt(double x)
 {
-    #if defined(KISAK_PURE) && defined(_WIN32)
+#if defined(KISAK_PURE) && defined(_WIN32)
     int i;
     __asm fld x;
     __asm fistp i;
-
     return i;
-    #endif
+#endif
 
-    int i;
-    i = _mm_cvtss_si32(_mm_set_ss(x));
-    return i;
+    int retval = _mm_cvtsd_si32(_mm_set_sd(x));
+
+#if defined(_DEBUG) && defined(_WIN32)
+    const float input = x;
+    int32_t output{};
+
+    __asm fld input
+    __asm fistp output
+
+    iassert(retval == output);
+#endif
+
+
+    return retval;
+}
+
+// Float-returning snap-to-grid (Sys_SnapVector, SnapPointToIntersectingPlanes).
+// same as above, just returns the result as a float
+inline float SnapFloat(float x)
+{
+    return static_cast<float>(SnapFloatToInt(x));
 }

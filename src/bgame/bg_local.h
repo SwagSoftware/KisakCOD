@@ -1933,7 +1933,7 @@ void __cdecl PM_UpdateLean(
     playerState_s *ps,
     float msec,
     usercmd_s *cmd,
-    void(__cdecl *capsuleTrace)(trace_t *, float *, float *, float *, float *, int32_t));
+    void(__cdecl *capsuleTrace)(trace_t *, const float *, const float *, const float *, const float *, int32_t, int32_t));
 void __cdecl PM_UpdateViewAngles(playerState_s *ps, float msec, usercmd_s *cmd, uint8_t handler);
 void __cdecl PM_UpdateViewAngles_Clamp(playerState_s *ps, usercmd_s *cmd);
 void __cdecl PM_UpdateViewAngles_RangeLimited(playerState_s *ps, float oldYaw);

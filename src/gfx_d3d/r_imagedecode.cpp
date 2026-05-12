@@ -149,36 +149,36 @@ void __cdecl Image_DecompressDxt1_Internal(
     b_4 = (dxt1->color1.rgb & 0x1F) * 0.03125f;
     if (nonTransparent || dxt1->color0.rgb > dxt1->color1.rgb)
     {
-        pixel[0].r = (r * 255.0f);
-        pixel[0].g = (g * 255.0f);
-        pixel[0].b = (b * 255.0f);
+        pixel[0].r = SnapFloatToInt(r * 255.0f);
+        pixel[0].g = SnapFloatToInt(g * 255.0f);
+        pixel[0].b = SnapFloatToInt(b * 255.0f);
         pixel[0].a = -1;
-        pixel[1].r = (r_4 * 255.0f);
-        pixel[1].g = (g_4 * 255.0f);
-        pixel[1].b = (b_4 * 255.0f);
+        pixel[1].r = SnapFloatToInt(r_4 * 255.0f);
+        pixel[1].g = SnapFloatToInt(g_4 * 255.0f);
+        pixel[1].b = SnapFloatToInt(b_4 * 255.0f);
         pixel[1].a = -1;
-        pixel[2].r = (r_4 * 85.0f + r * 170.0f);
-        pixel[2].g = (g_4 * 85.0f + g * 170.0f);
-        pixel[2].b = (b_4 * 85.0f + b * 170.0f);
+        pixel[2].r = SnapFloatToInt(r_4 * 85.0f + r * 170.0f);
+        pixel[2].g = SnapFloatToInt(g_4 * 85.0f + g * 170.0f);
+        pixel[2].b = SnapFloatToInt(b_4 * 85.0f + b * 170.0f);
         pixel[2].a = -1;
-        pixel[3].r = (r_4 * 170.0f + r * 85.0f);
-        pixel[3].g = (g_4 * 170.0f + g * 85.0f);
-        pixel[3].b = (b_4 * 170.0f + b * 85.0f);
+        pixel[3].r = SnapFloatToInt(r_4 * 170.0f + r * 85.0f);
+        pixel[3].g = SnapFloatToInt(g_4 * 170.0f + g * 85.0f);
+        pixel[3].b = SnapFloatToInt(b_4 * 170.0f + b * 85.0f);
         pixel[3].a = -1;
     }
     else
     {
-        pixel[0].r = (r * 255.0f);
-        pixel[0].g = (g * 255.0f);
-        pixel[0].b = (b * 255.0f);
+        pixel[0].r = SnapFloatToInt(r * 255.0f);
+        pixel[0].g = SnapFloatToInt(g * 255.0f);
+        pixel[0].b = SnapFloatToInt(b * 255.0f);
         pixel[0].a = -1;
-        pixel[1].r = (r_4 * 255.0f);
-        pixel[1].g = (g_4 * 255.0f);
-        pixel[1].b = (b_4 * 255.0f);
+        pixel[1].r = SnapFloatToInt(r_4 * 255.0f);
+        pixel[1].g = SnapFloatToInt(g_4 * 255.0f);
+        pixel[1].b = SnapFloatToInt(b_4 * 255.0f);
         pixel[1].a = -1;
-        pixel[2].r = (r_4 * 127.5f + r * 127.5f);
-        pixel[2].g = (g_4 * 127.5f + g * 127.5f);
-        pixel[2].b = (b_4 * 127.5f + b * 127.5f);
+        pixel[2].r = SnapFloatToInt(r_4 * 127.5f + r * 127.5f);
+        pixel[2].g = SnapFloatToInt(g_4 * 127.5f + g * 127.5f);
+        pixel[2].b = SnapFloatToInt(b_4 * 127.5f + b * 127.5f);
         pixel[2].a = -1;
         pixel[3].r = 0;
         pixel[3].g = 0;
@@ -229,21 +229,21 @@ void __cdecl Image_DecompressDxt5(unsigned __int8 *block, GfxRawImage *image, in
 
     if (block[0] <= block[1])
     {
-        a[2] = (unsigned char)((block[1] + 4 * block[0]) * 0.2f);
-        a[3] = (unsigned char)((3 * block[0] + 2 * block[1]) * 0.2f);
-        a[4] = (unsigned char)((3 * block[1] + 2 * *block) * 0.2f);
-        a[5] = (unsigned char)((block[0] + 4 * block[1]) * 0.2f);
+        a[2] = (unsigned char)SnapFloatToInt((block[1] + 4 * block[0]) * 0.2f);
+        a[3] = (unsigned char)SnapFloatToInt((3 * block[0] + 2 * block[1]) * 0.2f);
+        a[4] = (unsigned char)SnapFloatToInt((3 * block[1] + 2 * block[0]) * 0.2f);
+        a[5] = (unsigned char)SnapFloatToInt((block[0] + 4 * block[1]) * 0.2f);
         a[6] = 0;
         a[7] = -1;
     }
     else
     {
-        a[2] = (unsigned char)((block[1] + 6 * block[0]) * 0.1428571492433548);
-        a[3] = (unsigned char)((5 * block[0] + 2 * block[1]) * 0.1428571492433548);
-        a[4] = (unsigned char)((3 * block[1] + 4 * block[0]) * 0.1428571492433548);
-        a[5] = (unsigned char)((3 * block[0] + 4 * block[1]) * 0.1428571492433548);
-        a[6] = (unsigned char)((5 * block[1] + 2 * block[0]) * 0.1428571492433548);
-        a[7] = (unsigned char)((6 * block[1] + block[0]) * 0.1428571492433548);
+        a[2] = (unsigned char)SnapFloatToInt((block[1] + 6 * block[0]) * 0.1428571492433548);
+        a[3] = (unsigned char)SnapFloatToInt((5 * block[0] + 2 * block[1]) * 0.1428571492433548);
+        a[4] = (unsigned char)SnapFloatToInt((3 * block[1] + 4 * block[0]) * 0.1428571492433548);
+        a[5] = (unsigned char)SnapFloatToInt((3 * block[0] + 4 * block[1]) * 0.1428571492433548);
+        a[6] = (unsigned char)SnapFloatToInt((5 * block[1] + 2 * block[0]) * 0.1428571492433548);
+        a[7] = (unsigned char)SnapFloatToInt((6 * block[1] + block[0]) * 0.1428571492433548);
     }
     sample = *(block + 1);
     bit = 0;

@@ -85,11 +85,11 @@ void __cdecl CG_DrawCenterString(
         centerPrint->time = 0;
     if (centerPrint->time)
     {
-        fadeColor = CG_FadeColor(time, centerPrint->time, (int)(cg_centertime->current.value * 1000.0), 100);
+        fadeColor = CG_FadeColor(time, centerPrint->time, SnapFloatToInt(cg_centertime->current.value * 1000.0), 100);
         if (fadeColor)
         {
             Vec4Mul(color, fadeColor, color);
-            x = rect->x - (double)(int)(UI_TextWidth(centerPrint->text, 0, font, fontscale) * 0.5f);
+            x = rect->x - (double)SnapFloatToInt(UI_TextWidth(centerPrint->text, 0, font, fontscale) * 0.5f);
             UI_DrawText(
                 &scrPlaceView[localClientNum],
                 centerPrint->text,

@@ -1360,7 +1360,7 @@ void __cdecl CG_DrawHoldBreathHint(
                     }
                     v6 = UI_SafeTranslateString("PLATFORM_HOLD_BREATH");
                     string = UI_ReplaceConversionString(v6, binding);
-                    x = rect->x - (UI_TextWidth(string, 0, font, fontscale) * 0.5f);
+                    x = rect->x - SnapFloat(UI_TextWidth(string, 0, font, fontscale) * 0.5f);
                     UI_DrawText(
                         &scrPlaceView[localClientNum],
                         string,
@@ -1661,7 +1661,7 @@ void __cdecl CG_DrawInvalidCmdHint(
         if (blinkInterval <= 0)
             MyAssertHandler(".\\cgame_mp\\cg_newDraw_mp.cpp", 1667, 0, "%s", "blinkInterval > 0");
         color[3] = ((cgameGlob->time - cgameGlob->invalidCmdHintTime) % blinkInterval) / blinkInterval;
-        x = rect->x - (UI_TextWidth(string, 0, font, fontscale) * 0.5f);
+        x = rect->x - SnapFloat(UI_TextWidth(string, 0, font, fontscale) * 0.5f);
         UI_DrawText(
             &scrPlaceView[localClientNum],
             string,
@@ -2269,7 +2269,7 @@ color[3] = CG_FadeHudMenu(
     localClientNum,
     hud_fade_ammodisplay,
     cgameGlob->ammoFadeTime,
-    (int)(hud_fade_ammodisplay->current.value * 1000.0f));
+    SnapFloatToInt(hud_fade_ammodisplay->current.value * 1000.0f));
 if (color[3] != 0.0)
 {
     iassert(cgameGlob->nextSnap);
@@ -2731,7 +2731,7 @@ const cgs_t *cgs;
 
 cgameGlob = CG_GetLocalClientGlobals(localClientNum);
 cgs = CG_GetLocalClientStaticGlobals(localClientNum);
-fadeAlpha = CG_FadeHudMenu(localClientNum, hud_fade_stance, cgameGlob->stanceFadeTime, (int)(hud_fade_stance->current.value * 1000.0f));
+fadeAlpha = CG_FadeHudMenu(localClientNum, hud_fade_stance, cgameGlob->stanceFadeTime, SnapFloatToInt(hud_fade_stance->current.value * 1000.0f));
 if (fadeAlpha != 0.0)
 {
     if (cg_hudStanceHintPrints->current.enabled)
@@ -2799,7 +2799,7 @@ void __cdecl CG_DrawPlayerSprintBack(
 
     if ((cgameGlob->predictedPlayerState.eFlags & 0x20000) == 0 || (cgameGlob->predictedPlayerState.eFlags & 0x80000) != 0)
     {
-        fadeAlpha = CG_FadeHudMenu(localClientNum, hud_fade_sprint, cgameGlob->sprintFadeTime, (int)(hud_fade_sprint->current.value * 1000.0f));
+        fadeAlpha = CG_FadeHudMenu(localClientNum, hud_fade_sprint, cgameGlob->sprintFadeTime, SnapFloatToInt(hud_fade_sprint->current.value * 1000.0f));
         if (fadeAlpha != 0.0)
         {
             drawColor[0] = color[0];
@@ -2843,7 +2843,7 @@ void __cdecl CG_DrawPlayerSprintMeter(
 
     if ((cgameGlob->predictedPlayerState.eFlags & 0x20000) == 0 || (cgameGlob->predictedPlayerState.eFlags & 0x80000) != 0)
     {
-        fadeAlpha = CG_FadeHudMenu(localClientNum, hud_fade_sprint, cgameGlob->sprintFadeTime, (int)(hud_fade_sprint->current.value * 1000.0f));
+        fadeAlpha = CG_FadeHudMenu(localClientNum, hud_fade_sprint, cgameGlob->sprintFadeTime, SnapFloatToInt(hud_fade_sprint->current.value * 1000.0f));
         if (fadeAlpha != 0.0f)
         {
             int32_t sprintLeft = PM_GetSprintLeft(&cgameGlob->predictedPlayerState, cgameGlob->time);
@@ -2909,7 +2909,7 @@ void __cdecl CG_DrawPlayerBarHealth(int localClientNum, const rectDef_s *rect, M
             localClientNum,
             hud_fade_healthbar,
             cgameGlob->healthFadeTime,
-            (int)(hud_fade_healthbar->current.value * 1000.0f));
+            SnapFloatToInt(hud_fade_healthbar->current.value * 1000.0f));
         if (color[3] != 0.0)
         {
             ps = &cgameGlob->nextSnap->ps;
@@ -3067,12 +3067,12 @@ void __cdecl CG_DrawPlayerBarHealthBack(
                     }
                     else
                     {
-                        flashTime = (hud_health_pulserate_injured->current.value * 1000.0f);
+                        flashTime = SnapFloatToInt(hud_health_pulserate_injured->current.value * 1000.0f);
                     }
                 }
                 else
                 {
-                    flashTime = (hud_health_pulserate_critical->current.value * 1000.0f);
+                    flashTime = SnapFloatToInt(hud_health_pulserate_critical->current.value * 1000.0f);
                 }
                 if (flashTime)
                 {

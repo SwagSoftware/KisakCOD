@@ -49,7 +49,7 @@ uint8_t __cdecl FX_InterpolateColor(
     valueTo = (double)refState[1].base.color[channel] * valueLerpInv
         + (double)refState[1].amplitude.color[channel] * valueLerp;
 
-    return (int)(sampleLerp * valueTo + sampleLerpInv * valueFrom);
+    return SnapFloatToInt(sampleLerp * valueTo + sampleLerpInv * valueFrom);
 }
 
 void __cdecl FX_SetupVisualState(

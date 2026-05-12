@@ -1,5 +1,6 @@
 #include "com_pack.h"
 #include <universal/q_shared.h>
+#include <qcommon/qcommon.h>
 
 // KISAKTODO: Move more stuff into here. The Bgra/4byte stuff probably belongs in here.
 
@@ -76,18 +77,18 @@ PackedTexCoords __cdecl Vec2PackTexCoords(const float *in)
 
 void __cdecl Byte4PackVertexColor(const float *from, unsigned __int8 *to)
 {
-    to[2] = CLAMP((int)(from[0] * 255.0f), 0, 255);
-    to[1] = CLAMP((int)(from[1] * 255.0f), 0, 255);
-    to[0] = CLAMP((int)(from[2] * 255.0f), 0, 255);
-    to[3] = CLAMP((int)(from[3] * 255.0f), 0, 255);
+    to[2] = CLAMP(SnapFloatToInt(from[0] * 255.0f), 0, 255);
+    to[1] = CLAMP(SnapFloatToInt(from[1] * 255.0f), 0, 255);
+    to[0] = CLAMP(SnapFloatToInt(from[2] * 255.0f), 0, 255);
+    to[3] = CLAMP(SnapFloatToInt(from[3] * 255.0f), 0, 255);
 }
 
 void __cdecl Byte4PackRgba(const float *from, unsigned __int8 *to)
 {
-    to[0] = CLAMP((int)(from[0] * 255.0f), 0, 255);
-    to[1] = CLAMP((int)(from[1] * 255.0f), 0, 255);
-    to[2] = CLAMP((int)(from[2] * 255.0f), 0, 255);
-    to[3] = CLAMP((int)(from[3] * 255.0f), 0, 255);
+    to[0] = CLAMP(SnapFloatToInt(from[0] * 255.0f), 0, 255);
+    to[1] = CLAMP(SnapFloatToInt(from[1] * 255.0f), 0, 255);
+    to[2] = CLAMP(SnapFloatToInt(from[2] * 255.0f), 0, 255);
+    to[3] = CLAMP(SnapFloatToInt(from[3] * 255.0f), 0, 255);
 }
 
 void __cdecl Byte4UnpackRgba(const unsigned __int8 *from, float *to)

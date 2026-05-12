@@ -256,7 +256,7 @@ double __cdecl AmmoCounterFadeAlpha(int32_t localClientNum, cg_s *cgameGlob)
         localClientNum,
         hud_fade_ammodisplay,
         cgameGlob->ammoFadeTime,
-        (int)(hud_fade_ammodisplay->current.value * 1000.0f));
+        SnapFloatToInt(hud_fade_ammodisplay->current.value * 1000.0f));
 }
 
 double __cdecl CG_GetHudAlphaDPad(int32_t localClientNum)

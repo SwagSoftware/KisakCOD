@@ -1401,8 +1401,7 @@ void Cmd_VisionSetNaked_f()
     {
         v0 = SV_Cmd_Argv(2);
         v3 = atof(v0);
-        duration = (int)(v3 * 1000.0f);
-    LABEL_4:
+        duration = SnapFloatToInt(v3 * 1000.0f);    LABEL_4:
         v1 = SV_Cmd_Argv(1);
         v2 = va("\"%s\" %i", v1, duration);
         SV_SetConfigstring(824, v2);
@@ -1429,8 +1428,7 @@ void Cmd_VisionSetNight_f()
     {
         v0 = SV_Cmd_Argv(2);
         v3 = atof(v0);
-        duration = (int)(v3 * 1000.0f);
-    LABEL_4:
+        duration = SnapFloatToInt(v3 * 1000.0f);    LABEL_4:
         v1 = SV_Cmd_Argv(1);
         v2 = va("\"%s\" %i", v1, duration);
         SV_SetConfigstring(825, v2);
