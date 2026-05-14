@@ -1169,7 +1169,8 @@ bool __cdecl MSG_ValuesAreEqual(const SnapshotInfo_s *snapInfo, int bits, const 
     case -92:
     case -91:
     case -90:
-        result = SnapFloatToInt(*(float *)fromF) == SnapFloatToInt(*(float *)toF);        break;
+        result = SnapFloatToInt(*(float *)fromF) == SnapFloatToInt(*(float *)toF);       
+        break;
     default:
         result = 0;
         break;
@@ -1707,7 +1708,8 @@ void __cdecl MSG_WriteDeltaField(
         case 0xFFFFFFAA:
             fullFloat = *(float *)toF;
             v16 = (fullFloat - 1.399999976158142) * 10.0f;
-            trunc = SnapFloatToInt(v16);            if (!MSG_CheckWritingEnoughBits(trunc, 5u))
+            trunc = SnapFloatToInt(v16);            
+            if (!MSG_CheckWritingEnoughBits(trunc, 5u))
             {
                 LODWORD(f) = *toF;
                 Com_PrintError(15, "Not enough bits written for fontScale %f\n", f);

@@ -315,7 +315,8 @@ void __cdecl RB_DrawProfileHistoryLabel(int profEnum, float x, float y)
     const char *name; // [esp+A0h] [ebp-4h]
 
     name = prof_enumNames[profEnum];
-    charLimit = SnapFloatToInt(120.0f / drawProfGlob.fontWidth) + 1;    iassert(charLimit <= ARRAY_COUNT(label));
+    charLimit = SnapFloatToInt(120.0f / drawProfGlob.fontWidth) + 1;    
+    iassert(charLimit <= ARRAY_COUNT(label));
     I_strncpyz(label, (char *)name, charLimit);
     RB_DrawText(label, drawProfGlob.font, x, y, drawProfGlob.textColor);
 #endif

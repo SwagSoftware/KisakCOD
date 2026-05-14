@@ -1021,7 +1021,8 @@ void __cdecl HECmd_ScaleOverTime(scr_entref_t entref)
     width = Scr_GetInt(1);
     height = Scr_GetInt(2);
     hud->elem.scaleStartTime = level.time;
-    hud->elem.scaleTime = SnapFloatToInt(scaleTime * 1000.0f);    hud->elem.fromWidth = hud->elem.width;
+    hud->elem.scaleTime = SnapFloatToInt(scaleTime * 1000.0f);    
+    hud->elem.fromWidth = hud->elem.width;
     hud->elem.fromHeight = hud->elem.height;
     hud->elem.width = width;
     hud->elem.height = height;
@@ -1051,7 +1052,8 @@ void __cdecl HECmd_MoveOverTime(scr_entref_t entref)
         Scr_ParamError(0, v1);
     }
     hud->elem.moveStartTime = level.time;
-    hud->elem.moveTime = SnapFloatToInt(moveTime * 1000.0f);    hud->elem.fromX = hud->elem.x;
+    hud->elem.moveTime = SnapFloatToInt(moveTime * 1000.0f);    
+    hud->elem.fromX = hud->elem.x;
     hud->elem.fromY = hud->elem.y;
     hud->elem.fromAlignOrg = hud->elem.alignOrg;
     hud->elem.fromAlignScreen = hud->elem.alignScreen;

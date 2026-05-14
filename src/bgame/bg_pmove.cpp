@@ -509,30 +509,30 @@ void __cdecl PM_UpdateLean(
     usercmd_s *cmd,
     void(__cdecl *capsuleTrace)(trace_t *, const float *, const float *, const float *, const float *, int32_t, int32_t))
 {
-    float v4; // [esp+10h] [ebp-84h]
-    float v5; // [esp+14h] [ebp-80h]
-    float fLeanFrac; // [esp+18h] [ebp-7Ch]
-    float fLean; // [esp+24h] [ebp-70h]
-    float fLeanMax; // [esp+2Ch] [ebp-68h]
-    float start[3]; // [esp+30h] [ebp-64h] BYREF
-    float end[3]; // [esp+3Ch] [ebp-58h] BYREF
-    trace_t trace; // [esp+4Ch] [ebp-48h] BYREF
-    float tmins[3]; // [esp+78h] [ebp-1Ch] BYREF
-    float tmaxs[3]; // [esp+84h] [ebp-10h] BYREF
-
+    // Zero initialization required for working leaning
+    float v4 = 0.f; // [esp+10h] [ebp-84h]
+    float v5 = 0.f; // [esp+14h] [ebp-80h]
+    float fLeanFrac = 0.f; // [esp+18h] [ebp-7Ch]
+    float fLean = 0.f; // [esp+24h] [ebp-70h]
+    float fLeanMax = 0.f; // [esp+2Ch] [ebp-68h]
+    float start[3] = { 0.f, 0.f, 0.f }; // [esp+30h] [ebp-64h] BYREF
+    float end[3] = { 0.f, 0.f, 0.f }; // [esp+3Ch] [ebp-58h] BYREF
+    float leanofs = 0.f; // [esp+48h] [ebp-4Ch]
+    trace_t trace = trace_t(); // [esp+4Ch] [ebp-48h] BYREF
+    float tmins[3] = { 0.f, 0.f, 0.f }; // [esp+78h] [ebp-1Ch] BYREF
+    float tmaxs[3] = { 0.f, 0.f, 0.f }; // [esp+84h] [ebp-10h] BYREF
     int32_t leaning = 0; // [esp+90h] [ebp-4h]
-    float leanofs = 0.0f; // [esp+48h] [ebp-4Ch]
 
-
-    if ((cmd->buttons & 0xC0) != 0
-        && (ps->pm_flags & PMF_FROZEN) == 0
-        && ps->pm_type < PM_DEAD
-        && (ps->groundEntityNum != ENTITYNUM_NONE || ps->pm_type == PM_NORMAL_LINKED))
+    // Patched from 1.7
+    if ((cmd->buttons & 0xC0) != 0 && (ps->pm_flags & PMF_FROZEN) == 0)
     {
-        if ((cmd->buttons & 0x40) != 0)
-            --leaning;
-        if ((cmd->buttons & 0x80) != 0)
-            ++leaning;
+        if (ps->pm_type < PM_DEAD && (ps->groundEntityNum != ENTITYNUM_NONE || ps->pm_type == PM_NORMAL_LINKED))
+        {
+            if ((cmd->buttons & 0x40) != 0)
+                leaning = -1;
+            if ((cmd->buttons & 0x80) != 0)
+                ++leaning;
+        }
     }
 
     if ((ps->eFlags & 0x300) != 0)

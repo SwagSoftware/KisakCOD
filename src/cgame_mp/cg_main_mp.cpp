@@ -1517,7 +1517,10 @@ void __cdecl CG_SubtitlePrint(int32_t msec, const snd_alias_t *alias)
             integer = cg_subtitleWidthStandard->current.integer;
         else
             integer = cg_subtitleWidthWidescreen->current.integer;
-        v3 = SnapFloatToInt(cg_subtitleMinTime->current.value * 1000.0f);        if (v3 < msec)
+
+        v3 = SnapFloatToInt(cg_subtitleMinTime->current.value * 1000.0f); 
+
+        if (v3 < msec)
             CL_SubtitlePrint(0, alias->subtitle, msec, integer);
         else
             CL_SubtitlePrint(0, alias->subtitle, v3, integer);
