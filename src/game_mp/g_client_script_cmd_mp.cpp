@@ -2999,7 +2999,9 @@ void __cdecl PlayerCmd_BeginLocationSelection(scr_entref_t entref)
             radiusa = 0.0f;
         }
     }
-    radiusBits = SnapFloatToInt(radiusa * 63.0f);    if (radiusBits >= 0x40)
+    radiusBits = SnapFloatToInt(radiusa * 63.0f);
+
+    if (radiusBits >= 0x40)
         MyAssertHandler(
             ".\\game_mp\\g_client_script_cmd_mp.cpp",
             2173,

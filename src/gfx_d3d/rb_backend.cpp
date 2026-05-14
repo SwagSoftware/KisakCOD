@@ -2281,7 +2281,8 @@ void __cdecl GetDecayingLetterInfo(
     }
     *resultSkipDrawing = skipDrawing;
     *resultLetter = letter;
-    *resultAlpha = CLAMP(SnapFloatToInt(fade * 255.0f), 0, 255);    *resultDrawExtraFxChar = drawExtraFxChar;
+    *resultAlpha = CLAMP(SnapFloatToInt(fade * 255.0f), 0, 255);    
+    *resultDrawExtraFxChar = drawExtraFxChar;
 }
 
 void __cdecl DrawTextFxExtraCharacter(

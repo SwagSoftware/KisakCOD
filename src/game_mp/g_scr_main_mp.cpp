@@ -1876,7 +1876,8 @@ void __cdecl ScrCmd_SetNormalHealth(scr_entref_t entref)
         normalHealth = 1.0;
     if (ent->client)
     {
-        newHealth = SnapFloatToInt((float)ent->client->sess.maxHealth * normalHealth);        SV_GameSendServerCommand(ent - g_entities, SV_CMD_CAN_IGNORE, va("%c \"%i\"", 74, 0));
+        newHealth = SnapFloatToInt((float)ent->client->sess.maxHealth * normalHealth);        
+        SV_GameSendServerCommand(ent - g_entities, SV_CMD_CAN_IGNORE, va("%c \"%i\"", 74, 0));
     }
     else if (ent->maxHealth)
     {

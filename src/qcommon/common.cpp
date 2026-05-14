@@ -1996,7 +1996,8 @@ int __cdecl Com_ModifyMsec(int msec)
     }
     else
     {
-        msec = SnapFloatToInt(dev_timescale->current.value * (com_codeTimeScale * (com_timescale->current.value * (double)msec)));        useTimescale = 1;
+        msec = SnapFloatToInt(dev_timescale->current.value * (com_codeTimeScale * (com_timescale->current.value * (double)msec)));        
+        useTimescale = 1;
     }
 
     if (msec < 1)
