@@ -43,6 +43,10 @@ However, there is a non-zero chance of some type of binary exploitation when pla
  - ***DLL Error upon launch*** :
    - You didn't copy over the necessary runtime DLL's
 
+## FAQ
+- Can we use AI in this project?
+  - Yes you can, but you're still responsible for whatever you commit. In general, you should have the AI be assisting you, and not carrying you. We have started using AI to help de-bug, and it's been extremely helpful.
+
 ## Credits and Special Thanks
 - ***All Original COD4 Developers (for creating one of the best games of all time)***
 - https://github.com/PJayB/jk3src (Jedi Academy fork with .sln)
